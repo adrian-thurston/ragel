@@ -150,7 +150,7 @@ void Compiler::generateExports()
 		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
 			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
-				ObjField *field = ofi->value;
+				ObjectField *field = ofi->value;
 				if ( field->useOffset && field->typeRef != 0  ) {
 					UniqueType *ut = field->typeRef->lookupType( this );
 
@@ -186,7 +186,7 @@ void Compiler::generateExports()
 	}
 
 	for ( ObjFieldList::Iter of = *globalObjectDef->objFieldList; of.lte(); of++ ) {
-		ObjField *field = of->value;
+		ObjectField *field = of->value;
 		if ( field->isExport ) {
 			UniqueType *ut = field->typeRef->lookupType(this);
 			if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
@@ -211,7 +211,7 @@ void Compiler::generateExportsImpl()
 		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
 			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
-				ObjField *field = ofi->value;
+				ObjectField *field = ofi->value;
 				if ( field->useOffset && field->typeRef != 0  ) {
 					UniqueType *ut = field->typeRef->lookupType( this );
 
@@ -268,7 +268,7 @@ void Compiler::generateExportsImpl()
 	out << "\n";
 
 	for ( ObjFieldList::Iter of = *globalObjectDef->objFieldList; of.lte(); of++ ) {
-		ObjField *field = of->value;
+		ObjectField *field = of->value;
 		if ( field->isExport ) {
 			UniqueType *ut = field->typeRef->lookupType(this);
 			if ( ut != 0 && ut->typeId == TYPE_TREE  ) {

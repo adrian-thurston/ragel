@@ -56,7 +56,7 @@ struct _FsmRun;
 struct ObjectDef;
 struct ElementOf;
 struct UniqueType;
-struct ObjField;
+struct ObjectField;
 struct TransBlock;
 struct CodeBlock;
 struct PdaLiteral;
@@ -209,12 +209,12 @@ struct EpsilonLink
 
 struct Label
 {
-	Label( const InputLoc &loc, const String &data, ObjField *objField )
+	Label( const InputLoc &loc, const String &data, ObjectField *objField )
 		: loc(loc), data(data), objField(objField) { }
 
 	InputLoc loc;
 	String data;
-	ObjField *objField;
+	ObjectField *objField;
 };
 
 /* Structure represents an action assigned to some LexFactorAug node. The
@@ -308,12 +308,12 @@ struct NamespaceQual
 
 struct ReCapture
 {
-	ReCapture( Action *markEnter, Action *markLeave, ObjField *objField )
+	ReCapture( Action *markEnter, Action *markLeave, ObjectField *objField )
 		: markEnter(markEnter), markLeave(markLeave), objField(objField)  {}
 
 	Action *markEnter;
 	Action *markLeave;
-	ObjField *objField;
+	ObjectField *objField;
 };
 
 typedef Vector<Context*> ContextVect;
@@ -1357,7 +1357,7 @@ struct InlineList
 
 struct ProdEl;
 struct LangVarRef;
-struct ObjField;
+struct ObjectField;
 
 struct PatternItem
 {
@@ -1947,7 +1947,7 @@ struct TypeRef
 	GenericType *generic;
 };
 
-typedef DList<ObjField> ParameterList; 
+typedef DList<ObjectField> ParameterList; 
 
 struct ObjMethod
 {
@@ -2004,9 +2004,9 @@ struct RhsVal
 	ProdEl *prodEl;
 };
 
-struct ObjField
+struct ObjectField
 {
-	ObjField()
+	ObjectField()
 	: 
 		typeRef(0),
 		context(0),
@@ -2030,9 +2030,9 @@ struct ObjField
 		inSetWV( IN_HALT )
 	{}
 
-	static ObjField *cons( const InputLoc &loc, TypeRef *typeRef, const String &name )
+	static ObjectField *cons( const InputLoc &loc, TypeRef *typeRef, const String &name )
 	{
-		ObjField *c = new ObjField;
+		ObjectField *c = new ObjectField;
 		c->loc = loc;
 		c->typeRef = typeRef;
 		c->name = name;
@@ -2072,15 +2072,15 @@ struct ObjField
 	Code inSetWC;
 	Code inSetWV;
 
-	ObjField *prev, *next;
+	ObjectField *prev, *next;
 };
 
-typedef AvlMap<String, ObjField*, CmpStr> ObjFieldMap;
-typedef AvlMapEl<String, ObjField*> ObjFieldMapEl;
+typedef AvlMap<String, ObjectField*, CmpStr> ObjFieldMap;
+typedef AvlMapEl<String, ObjectField*> ObjFieldMapEl;
 
-typedef DListVal<ObjField*> ObjFieldList;
+typedef DListVal<ObjectField*> ObjFieldList;
 
-typedef DList<ObjField> ParameterList; 
+typedef DList<ObjectField> ParameterList; 
 
 struct TemplateType;
 
@@ -2152,16 +2152,16 @@ struct ObjectDef
 	long nextOffset;
 	long firstNonTree;
 
-	void referenceField( Compiler *pd, ObjField *field );
-	void initField( Compiler *pd, ObjField *field );
+	void referenceField( Compiler *pd, ObjectField *field );
+	void initField( Compiler *pd, ObjectField *field );
 	void createCode( Compiler *pd, CodeVect &code );
-	ObjField *checkRedecl( const String &name );
+	ObjectField *checkRedecl( const String &name );
 	ObjMethod *findMethod( const String &name );
-	ObjField *findFieldInScope( const String &name, ObjNameScope *inScope );
-	ObjField *findField( const String &name );
-	void insertField( const String &name, ObjField *value );
+	ObjectField *findFieldInScope( const String &name, ObjNameScope *inScope );
+	ObjectField *findField( const String &name );
+	void insertField( const String &name, ObjectField *value );
 	void resolve( Compiler *pd );
-	ObjField *findFieldNum( long offset );
+	ObjectField *findFieldNum( long offset );
 
 	long size() { return nextOffset; }
 	long sizeTrees() { return firstNonTree; }
@@ -2199,7 +2199,7 @@ struct VarRefLookup
 	int lastPtrInQual;
 	int firstConstPart;
 	ObjectDef *inObject;
-	ObjField *objField;
+	ObjectField *objField;
 	ObjMethod *objMethod;
 	UniqueType *uniqueType;
 	UniqueType *iterSearchUT;
@@ -2247,9 +2247,9 @@ struct LangVarRef
 	void resolve( Compiler *pd ) const;
 
 	UniqueType *loadFieldInstr( Compiler *pd, CodeVect &code, ObjectDef *inObject,
-			ObjField *el, bool forWriting, bool revert ) const;
+			ObjectField *el, bool forWriting, bool revert ) const;
 	void setFieldInstr( Compiler *pd, CodeVect &code, ObjectDef *inObject, 
-			ObjField *el, UniqueType *exprUT, bool revert ) const;
+			ObjectField *el, UniqueType *exprUT, bool revert ) const;
 
 	VarRefLookup lookupMethod( Compiler *pd ) ;
 	VarRefLookup lookupField( Compiler *pd ) const;
@@ -2280,14 +2280,14 @@ struct LangVarRef
 			ObjectDef *inObject, UniqueType *type, bool revert ) const;
 
 	void assignValue( Compiler *pd, CodeVect &code, UniqueType *exprUT ) const;
-	ObjField **evaluateArgs( Compiler *pd, CodeVect &code, 
+	ObjectField **evaluateArgs( Compiler *pd, CodeVect &code, 
 			VarRefLookup &lookup, ExprVect *args ) const;
 	void callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const;
 	UniqueType *evaluateCall( Compiler *pd, CodeVect &code, ExprVect *args );
 	UniqueType *evaluate( Compiler *pd, CodeVect &code, bool forWriting = false ) const;
-	ObjField *evaluateRef( Compiler *pd, CodeVect &code, long pushCount ) const;
-	ObjField *preEvaluateRef( Compiler *pd, CodeVect &code ) const;
-	void resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjField **paramRefs ) const;
+	ObjectField *evaluateRef( Compiler *pd, CodeVect &code, long pushCount ) const;
+	ObjectField *preEvaluateRef( Compiler *pd, CodeVect &code ) const;
+	void resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjectField **paramRefs ) const;
 	long loadQualificationRefs( Compiler *pd, CodeVect &code ) const;
 	void popRefQuals( Compiler *pd, CodeVect &code, 
 			VarRefLookup &lookup, ExprVect *args ) const;
@@ -2404,7 +2404,7 @@ struct LangTerm
 		return t;
 	}
 
-	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ObjField *objField,
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ObjectField *objField,
 			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Constructor *constructor )
 	{
 		LangTerm *t = new LangTerm;
@@ -2418,7 +2418,7 @@ struct LangTerm
 		return t;
 	}
 
-	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ObjField *objField,
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ObjectField *objField,
 			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Constructor *constructor, 
 			ParserText *parserText )
 	{
@@ -2482,7 +2482,7 @@ struct LangTerm
 	ExprVect *args;
 	NamespaceQual *nspaceQual;
 	String data;
-	ObjField *objField;
+	ObjectField *objField;
 	TypeRef *typeRef;
 	Pattern *pattern;
 	FieldInitVect *fieldInitArgs;
@@ -2623,7 +2623,7 @@ struct LangStmt
 		return s;
 	}
 
-	static LangStmt *cons( const InputLoc &loc, Type type, ObjField *objField )
+	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField )
 	{
 		LangStmt *s = new LangStmt;
 		s->loc = loc;
@@ -2686,7 +2686,7 @@ struct LangStmt
 		return s;
 	}
 
-	static LangStmt *cons( const InputLoc &loc, Type type, ObjField *objField, 
+	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField, 
 			TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList )
 	{
 		LangStmt *s = new LangStmt;
@@ -2719,7 +2719,7 @@ struct LangStmt
 	Type type;
 	LangVarRef *varRef;
 	LangTerm *langTerm;
-	ObjField *objField;
+	ObjectField *objField;
 	TypeRef *typeRef;
 	LangExpr *expr;
 	Constructor *constructor;

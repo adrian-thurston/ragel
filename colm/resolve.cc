@@ -503,7 +503,7 @@ void LangStmt::resolve( Compiler *pd ) const
 void ObjectDef::resolve( Compiler *pd )
 {
 	for ( ObjFieldList::Iter fli = *objFieldList; fli.lte(); fli++ ) {
-		ObjField *field = fli->value;
+		ObjectField *field = fli->value;
 
 		if ( field->typeRef != 0 ) {
 			field->typeRef->lookupType( pd );

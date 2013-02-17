@@ -258,14 +258,14 @@ void ObjectDef::popScope()
 	scope = scope->parentScope;
 }
 
-void ObjectDef::insertField( const String &name, ObjField *value )
+void ObjectDef::insertField( const String &name, ObjectField *value )
 {
 	scope->objFieldMap->insert( name, value );
 	objFieldList->append( value );
 }
 
 /* Recurisve find through a single object def's scope. */
-ObjField *ObjectDef::findFieldInScope( const String &name, ObjNameScope *inScope )
+ObjectField *ObjectDef::findFieldInScope( const String &name, ObjNameScope *inScope )
 {
 	ObjFieldMapEl *objDefMapEl = inScope->objFieldMap->find( name );
 	if ( objDefMapEl != 0 )
@@ -275,7 +275,7 @@ ObjField *ObjectDef::findFieldInScope( const String &name, ObjNameScope *inScope
 	return 0;
 }
 
-ObjField *ObjectDef::checkRedecl( const String &name )
+ObjectField *ObjectDef::checkRedecl( const String &name )
 {
 	//cout << "looking for " << name << endl;
 	ObjFieldMapEl *objDefMapEl = scope->objFieldMap->find( name );
@@ -286,7 +286,7 @@ ObjField *ObjectDef::checkRedecl( const String &name )
 }
 
 /* 0-based. */
-ObjField *ObjectDef::findFieldNum( long offset )
+ObjectField *ObjectDef::findFieldNum( long offset )
 {
 	int fn = 0;
 	ObjFieldList::Iter field = *objFieldList; 
@@ -297,10 +297,10 @@ ObjField *ObjectDef::findFieldNum( long offset )
 	return field->value;
 }
 
-ObjField *ObjectDef::findField( const String &name )
+ObjectField *ObjectDef::findField( const String &name )
 {
 	//cout << "looking for " << name << endl;
-	ObjField *objField = findFieldInScope( name, scope );
+	ObjectField *objField = findFieldInScope( name, scope );
 	if ( objField != 0 )
 		return objField;
 	return 0;
@@ -347,13 +347,13 @@ long sizeOfField( UniqueType *fieldUT )
 	return size;
 }
 
-void ObjectDef::referenceField( Compiler *pd, ObjField *field )
+void ObjectDef::referenceField( Compiler *pd, ObjectField *field )
 {
 	field->beenReferenced = true;
 	initField( pd, field );
 }
 
-void ObjectDef::initField( Compiler *pd, ObjField *field )
+void ObjectDef::initField( Compiler *pd, ObjectField *field )
 {
 	if ( !field->beenInitialized ) {
 		field->beenInitialized = true;
@@ -384,7 +384,7 @@ void ObjectDef::initField( Compiler *pd, ObjField *field )
 }
 
 UniqueType *LangVarRef::loadFieldInstr( Compiler *pd, CodeVect &code, 
-		ObjectDef *inObject, ObjField *el, bool forWriting, bool revert ) const
+		ObjectDef *inObject, ObjectField *el, bool forWriting, bool revert ) const
 {
 	/* Ensure that the field is referenced. */
 	inObject->referenceField( pd, el );
@@ -453,7 +453,7 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code ) const
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field in the current qualification. */
-		ObjField *el = searchObjDef->findField( qi->data );
+		ObjectField *el = searchObjDef->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -495,7 +495,7 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
-		ObjField *el = searchObjDef->findField( qi->data );
+		ObjectField *el = searchObjDef->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -650,12 +650,12 @@ bool LangVarRef::isContextRef( Compiler *pd ) const
 bool LangVarRef::isCustom( Compiler *pd ) const
 {
 	if ( qual->length() > 0 ) {
-		ObjField *field = pd->curLocalFrame->findField( qual->data[0].data );
+		ObjectField *field = pd->curLocalFrame->findField( qual->data[0].data );
 		if ( field != 0 && field->isCustom )
 			return true;
 	}
 	else {
-		ObjField *field = pd->curLocalFrame->findField( name );
+		ObjectField *field = pd->curLocalFrame->findField( name );
 		if ( field != 0 ) {
 			if ( field->isCustom )
 				return true;
@@ -691,7 +691,7 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjectDef *rootDef )
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
-		ObjField *el = searchObjDef->findField( qi->data );
+		ObjectField *el = searchObjDef->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -749,7 +749,7 @@ VarRefLookup LangVarRef::lookupField( Compiler *pd ) const
 	VarRefLookup lookup = lookupObj( pd );
 
 	/* Lookup the field. */
-	ObjField *field = lookup.inObject->findField( name );
+	ObjectField *field = lookup.inObject->findField( name );
 	if ( field == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
@@ -793,7 +793,7 @@ VarRefLookup LangVarRef::lookupMethod( Compiler *pd )
 }
 
 void LangVarRef::setFieldInstr( Compiler *pd, CodeVect &code, 
-		ObjectDef *inObject, ObjField *el, UniqueType *exprUT, bool revert ) const
+		ObjectDef *inObject, ObjectField *el, UniqueType *exprUT, bool revert ) const
 {
 	/* Ensure that the field is referenced. */
 	inObject->referenceField( pd, el );
@@ -848,7 +848,7 @@ bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT,
 void LangVarRef::setField( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, UniqueType *exprUT, bool revert ) const
 {
-	ObjField *el = inObject->findField( name );
+	ObjectField *el = inObject->findField( name );
 	if ( el == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
@@ -858,7 +858,7 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 void LangVarRef::setFieldIter( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert ) const
 {
-	ObjField *el = inObject->findField( name );
+	ObjectField *el = inObject->findField( name );
 	if ( el == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
@@ -902,7 +902,7 @@ void LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
 }
 
 /* Return the field referenced. */
-ObjField *LangVarRef::preEvaluateRef( Compiler *pd, CodeVect &code ) const
+ObjectField *LangVarRef::preEvaluateRef( Compiler *pd, CodeVect &code ) const
 {
 	VarRefLookup lookup = lookupField( pd );
 
@@ -914,7 +914,7 @@ ObjField *LangVarRef::preEvaluateRef( Compiler *pd, CodeVect &code ) const
 }
 
 /* Return the field referenced. */
-ObjField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCount ) const
+ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCount ) const
 {
 	VarRefLookup lookup = lookupField( pd );
 
@@ -952,7 +952,7 @@ ObjField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCount 
 	return lookup.objField;
 }
 
-ObjField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
+ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
 		VarRefLookup &lookup, ExprVect *args ) const
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
@@ -965,8 +965,8 @@ ObjField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 		error(loc) << "wrong number of arguments" << endp;
 
 	/* This is for storing the object fields used by references. */
-	ObjField **paramRefs = new ObjField*[numArgs];
-	memset( paramRefs, 0, sizeof(ObjField*) * numArgs );
+	ObjectField **paramRefs = new ObjectField*[numArgs];
+	memset( paramRefs, 0, sizeof(ObjectField*) * numArgs );
 
 	/* Evaluate and push the args. */
 	if ( args != 0 ) {
@@ -991,7 +991,7 @@ ObjField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 				/* Lookup the field. */
 				LangVarRef *varRef = expression->term->varRef;
 
-				ObjField *refOf = varRef->preEvaluateRef( pd, code );
+				ObjectField *refOf = varRef->preEvaluateRef( pd, code );
 				paramRefs[pe.pos()] = refOf;
 
 				pushCount += varRef->qual->length() * 2;
@@ -1020,7 +1020,7 @@ ObjField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 
 				pushCount -= varRef->qual->length() * 2;
 
-				ObjField *refOf = varRef->evaluateRef( pd, code, pushCount );
+				ObjectField *refOf = varRef->evaluateRef( pd, code, pushCount );
 				paramRefs[pe.pos()] = refOf;
 
 				pushCount += 2;
@@ -1042,7 +1042,7 @@ ObjField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 	return paramRefs;
 }
 
-void LangVarRef::resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjField **paramRefs ) const
+void LangVarRef::resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjectField **paramRefs ) const
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
 	 * will be null. */
@@ -1165,7 +1165,7 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *ar
 	}
 
 	/* Evaluate and push the arguments. */
-	ObjField **paramRefs = evaluateArgs( pd, code, lookup, args );
+	ObjectField **paramRefs = evaluateArgs( pd, code, lookup, args );
 
 	/* Write the call opcode. */
 	callOperation( pd, code, lookup );
@@ -1237,7 +1237,7 @@ void LangTerm::assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT
 		/* Note the reverse traversal. */
 		for ( FieldInitVect::Iter pi = fieldInitArgs->last(); pi.gtb(); pi-- ) {
 			FieldInit *fieldInit = *pi;
-			ObjField *field = objDef->findFieldNum( pi.pos() );
+			ObjectField *field = objDef->findFieldNum( pi.pos() );
 			if ( field == 0 ) {
 				error(fieldInit->loc) << "failed to find init pos " << 
 					pi.pos() << " in object" << endp;
@@ -2155,7 +2155,7 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	UniqueType *iterUT = objField->typeRef->uniqueType;
 
 	/* Evaluate and push the arguments. */
-	ObjField **paramRefs = iterCallTerm->varRef->evaluateArgs( 
+	ObjectField **paramRefs = iterCallTerm->varRef->evaluateArgs( 
 			pd, code, lookup, iterCallTerm->args );
 
 	if ( pd->revertOn )
@@ -2373,7 +2373,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 		case YieldType: {
 			/* take a reference and yield it. Immediately reset the referece. */
 			varRef->preEvaluateRef( pd, code );
-			ObjField *objField = varRef->evaluateRef( pd, code, 0 );
+			ObjectField *objField = varRef->evaluateRef( pd, code, 0 );
 			code.append( IN_YIELD );
 
 			if ( varRef->qual->length() > 0 ) {
@@ -2399,7 +2399,7 @@ void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = ObjField::cons( InputLoc(), typeRef, "match_length" );
+	ObjectField *el = ObjectField::cons( InputLoc(), typeRef, "match_length" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -2414,7 +2414,7 @@ void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = ObjField::cons( internal, typeRef, "match_text" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "match_text" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -2429,7 +2429,7 @@ void Compiler::addInput( ObjectDef *frame )
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = ObjField::cons( internal, typeRef, "input" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "input" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst   = false;
@@ -2447,7 +2447,7 @@ void Compiler::addCtx( ObjectDef *frame )
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = ObjField::cons( internal, typeRef, "ctx" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "ctx" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst   = false;
@@ -2459,7 +2459,7 @@ void Compiler::addCtx( ObjectDef *frame )
 	frame->insertField( el->name, el );
 }
 
-void Compiler::initFieldInstructions( ObjField *el )
+void Compiler::initFieldInstructions( ObjectField *el )
 {
 	el->inGetR =   IN_GET_FIELD_R;
 	el->inGetWC =  IN_GET_FIELD_WC;
@@ -2468,14 +2468,14 @@ void Compiler::initFieldInstructions( ObjField *el )
 	el->inSetWV =  IN_SET_FIELD_WV;
 }
 
-void Compiler::initLocalInstructions( ObjField *el )
+void Compiler::initLocalInstructions( ObjectField *el )
 {
 	el->inGetR =   IN_GET_LOCAL_R;
 	el->inGetWC =  IN_GET_LOCAL_WC;
 	el->inSetWC =  IN_SET_LOCAL_WC;
 }
 
-void Compiler::initLocalRefInstructions( ObjField *el )
+void Compiler::initLocalRefInstructions( ObjectField *el )
 {
 	el->inGetR =   IN_GET_LOCAL_REF_R;
 	el->inGetWC =  IN_GET_LOCAL_REF_WC;
@@ -2496,7 +2496,7 @@ void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
 {
 	/* Create the "length" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
-	ObjField *el = ObjField::cons( internal, typeRef, "length" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "length" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -2538,11 +2538,11 @@ void Compiler::initStreamObject( )
 			IN_INPUT_PUSH_IGNORE_WV, IN_INPUT_PUSH_IGNORE_WV, uniqueTypeAny, false );
 }
 
-ObjField *Compiler::makeDataEl()
+ObjectField *Compiler::makeDataEl()
 {
 	/* Create the "data" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
-	ObjField *el = ObjField::cons( internal, typeRef, "data" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "data" );
 
 	/* Setting beenReferenced to true prevents us from assigning instructions
 	 * and an offset to the field. */
@@ -2556,11 +2556,11 @@ ObjField *Compiler::makeDataEl()
 	return el;
 }
 
-ObjField *Compiler::makePosEl()
+ObjectField *Compiler::makePosEl()
 {
 	/* Create the "data" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
-	ObjField *el = ObjField::cons( internal, typeRef, "pos" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "pos" );
 
 	/* Setting beenReferenced to true prevents us from assigning instructions
 	 * and an offset to the field. */
@@ -2573,11 +2573,11 @@ ObjField *Compiler::makePosEl()
 	return el;
 }
 
-ObjField *Compiler::makeLineEl()
+ObjectField *Compiler::makeLineEl()
 {
 	/* Create the "data" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
-	ObjField *el = ObjField::cons( internal, typeRef, "line" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "line" );
 
 	/* Setting beenReferenced to true prevents us from assigning instructions
 	 * and an offset to the field. */
@@ -2595,13 +2595,13 @@ void Compiler::initTokenObjects( )
 	/* Make a default object Production. */
 	tokenObj = ObjectDef::cons( ObjectDef::BuiltinType, "token", nextObjectId++ );
 
-	ObjField *dataEl = makeDataEl();
+	ObjectField *dataEl = makeDataEl();
 	tokenObj->insertField( dataEl->name, dataEl );
 
-	ObjField *posEl = makePosEl();
+	ObjectField *posEl = makePosEl();
 	tokenObj->insertField( posEl->name, posEl );
 
-	ObjField *lineEl = makeLineEl();
+	ObjectField *lineEl = makeLineEl();
 	tokenObj->insertField( lineEl->name, lineEl );
 
 	/* Give all user terminals the token object type. */
@@ -2611,15 +2611,15 @@ void Compiler::initTokenObjects( )
 				lel->objectDef = tokenObj;
 			else {
 				/* Create the "data" field. */
-				ObjField *dataEl = makeDataEl();
+				ObjectField *dataEl = makeDataEl();
 				lel->objectDef->insertField( dataEl->name, dataEl );
 
 				/* Create the "pos" field. */
-				ObjField *posEl = makePosEl();
+				ObjectField *posEl = makePosEl();
 				lel->objectDef->insertField( posEl->name, posEl );
 
 				/* Create the "line" field. */
-				ObjField *lineEl = makeLineEl();
+				ObjectField *lineEl = makeLineEl();
 				lel->objectDef->insertField( lineEl->name, lineEl );
 			}
 		}
@@ -2631,7 +2631,7 @@ void Compiler::findLocalTrees( CharSet &trees )
 	/* We exlcude "lhs" from being downrefed because we need to use if after
 	 * the frame is is cleaned and so it must survive. */
 	for ( ObjFieldList::Iter ol = *curLocalFrame->objFieldList; ol.lte(); ol++ ) {
-		ObjField *el = ol->value;
+		ObjectField *el = ol->value;
 		/* FIXME: This test needs to be improved. Match_text was getting
 		 * through before useOffset was tested. What will? */
 		if ( el->useOffset && !el->isLhsEl && ( el->beenReferenced || el->isParam ) ) {
@@ -2858,7 +2858,7 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
-	ObjField *el = ObjField::cons( internal, typeRef, name );
+	ObjectField *el = ObjectField::cons( internal, typeRef, name );
 
 	el->inGetR =  IN_GET_LIST_MEM_R;
 	el->inGetWC = IN_GET_LIST_MEM_WC;
@@ -2904,7 +2904,7 @@ void Compiler::initParserFunctions( GenericType *gen )
 void Compiler::initParserField( GenericType *gen, const char *name, int offset, TypeRef *typeRef )
 {
 	/* Make the type ref and create the field. */
-	ObjField *el = ObjField::cons( internal, typeRef, name );
+	ObjectField *el = ObjectField::cons( internal, typeRef, name );
 
 	el->inGetR =  IN_GET_PARSER_MEM_R;
 	el->inGetWC = IN_GET_PARSER_MEM_WC;
@@ -2930,7 +2930,7 @@ void Compiler::initCtxField( GenericType *gen )
 	/* Make the type ref and create the field. */
 	UniqueType *ctxUT = findUniqueType( TYPE_TREE, context->lel );
 	TypeRef *typeRef = TypeRef::cons( internal, ctxUT );
-	ObjField *el = ObjField::cons( internal, typeRef, "ctx" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "ctx" );
 
 	el->inGetR =  IN_GET_PARSER_CTX_R;
 	el->inGetWC = IN_GET_PARSER_CTX_WC;
@@ -3242,7 +3242,7 @@ void Compiler::addStdin()
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = ObjField::cons( internal, typeRef, "stdin" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "stdin" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -3259,7 +3259,7 @@ void Compiler::addStdout()
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = ObjField::cons( internal, typeRef, "stdout" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "stdout" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -3276,7 +3276,7 @@ void Compiler::addStderr()
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 
 	/* Create the field and insert it into the map. */
-	ObjField *el = ObjField::cons( internal, typeRef, "stderr" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "stderr" );
 	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
@@ -3290,7 +3290,7 @@ void Compiler::addStderr()
 void Compiler::addArgv()
 {
 	/* Create the field and insert it into the map. */
-	ObjField *el = ObjField::cons( internal, argvTypeRef, "argv" );
+	ObjectField *el = ObjectField::cons( internal, argvTypeRef, "argv" );
 	el->isArgv = true;
 	el->isConst = true;
 	globalObjectDef->insertField( el->name, el );

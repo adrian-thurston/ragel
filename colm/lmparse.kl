@@ -97,7 +97,7 @@ block_open: '{'
 		/* Make local variables corresponding to the local capture vector. */
 		for ( ReCaptureVect::Iter c = reCaptureVect; c.lte(); c++ )
 		{
-			ObjField *objField = ObjField::cons( c->objField->loc,
+			ObjectField *objField = ObjectField::cons( c->objField->loc,
 					c->objField->typeRef, c->objField->name );
 
 			/* Insert it into the field map. */
@@ -167,12 +167,12 @@ nonterm param_var_def uses var_def;
 
 param_var_def: TK_Word ':' type_ref
 	final {
-		$$->objField = ObjField::cons( $1->loc, $3->typeRef, $1->data );
+		$$->objField = ObjectField::cons( $1->loc, $3->typeRef, $1->data );
 		$$->objField->isParam = true;
 	};
 param_var_def: TK_Word ':' reference_type_ref
 	final {
-		$$->objField = ObjField::cons( $1->loc, $3->typeRef, $1->data );
+		$$->objField = ObjectField::cons( $1->loc, $3->typeRef, $1->data );
 		$$->objField->isParam = true;
 	};
 
@@ -454,14 +454,14 @@ basic_type_ref: KW_Ptr region_qual TK_Word opt_repeat
 nonterm var_def
 {
 	InputLoc loc;
-	ObjField *objField;
+	ObjectField *objField;
 };
 
 var_def: TK_Word ':' type_ref
 	final {
 		/* Return an object field object. The user of this nonterminal must
 		 * load it into the approrpriate map and do error checking. */
-		$$->objField = ObjField::cons( $1->loc, $3->typeRef, $1->data );
+		$$->objField = ObjectField::cons( $1->loc, $3->typeRef, $1->data );
 	};
 
 region_def: 
@@ -653,7 +653,7 @@ pattern_el:
 			}
 
 			TypeRef *typeRef = $2->list->head->factor->typeRef;
-			ObjField *objField = ObjField::cons( InputLoc(), typeRef, $1->varRef->name );
+			ObjectField *objField = ObjectField::cons( InputLoc(), typeRef, $1->varRef->name );
 
 			/* Insert it into the field map. */
 			pd->curLocalFrame->insertField( $1->varRef->name, objField );
@@ -1047,7 +1047,7 @@ prod_el:
 		/* If there is a capture, create the field. */
 		if ( $1->objField != 0 ) {
 			/* Might already exist. */
-			ObjField *objField = curObjectDef->checkRedecl( $1->objField->name );
+			ObjectField *objField = curObjectDef->checkRedecl( $1->objField->name );
 			if ( objField == 0 ) {
 				objField = $1->objField;
 				objField->typeRef = typeRef;
@@ -1523,7 +1523,7 @@ for_scope: TK_Word ':' type_ref KW_In iter_call block_or_single
 		/* Note that we pass in a null type reference. This type is dependent
 		 * on the result of the iter_call lookup since it must contain a reference
 		 * to the iterator that is called. This lookup is done at compile time. */
-		ObjField *iterField = ObjField::cons( $1->loc, (TypeRef*)0, $1->data );
+		ObjectField *iterField = ObjectField::cons( $1->loc, (TypeRef*)0, $1->data );
 		pd->curLocalFrame->insertField( $1->data, iterField );
 
 		$$->stmt = LangStmt::cons( $1->loc, LangStmt::ForIterType, 
@@ -1878,7 +1878,7 @@ nonterm opt_capture uses var_def;
 
 opt_capture: TK_Word ':'
 	final {
-		$$->objField = ObjField::cons( $1->loc, 0, $1->data );
+		$$->objField = ObjectField::cons( $1->loc, 0, $1->data );
 	};
 opt_capture:
 	final {
@@ -2274,7 +2274,7 @@ lex_factor_label:
 		/* Create the object field. */
 		NamespaceQual *qual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
 		TypeRef *typeRef = TypeRef::cons( $1->loc, qual, "str" );
-		ObjField *objField = ObjField::cons( $1->loc, typeRef, $1->data );
+		ObjectField *objField = ObjectField::cons( $1->loc, typeRef, $1->data );
 
 		/* Insert it into the map. */
 		curObjectDef->insertField( $1->data, objField );

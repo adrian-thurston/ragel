@@ -109,7 +109,7 @@ void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 {
 	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, nonTerm );
 	TypeRef *typeRef = TypeRef::cons( internal, prodNameUT );
-	ObjField *el = ObjField::cons( internal, typeRef, "lhs" );
+	ObjectField *el = ObjectField::cons( internal, typeRef, "lhs" );
 
 	el->isLhsEl = true;
 
@@ -120,7 +120,7 @@ void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 
 void Compiler::addProdLHSLoad( Production *prod, CodeVect &code, long &insertPos )
 {
-	ObjField *lhsField = prod->redBlock->localFrame->findField("lhs");
+	ObjectField *lhsField = prod->redBlock->localFrame->findField("lhs");
 	assert( lhsField != 0 );
 
 	CodeVect loads;
@@ -141,7 +141,7 @@ void Compiler::addPushBackLHS( Production *prod, CodeVect &code, long &insertPos
 	 * before it gets modified. We want to avoid this for attribute
 	 * modifications. The computation of dirtyTree should deal with this for
 	 * us. */
-	ObjField *lhsField = block->localFrame->findField("lhs");
+	ObjectField *lhsField = block->localFrame->findField("lhs");
 	assert( lhsField != 0 );
 
 	if ( lhsField->beenReferenced ) {
@@ -158,7 +158,7 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 			/* Use an offset of zero. For frame objects we compute the offset on
 			 * demand. */
 			String name( 8, "r%d", position );
-			ObjField *el = ObjField::cons( InputLoc(), rhsEl->typeRef, name );
+			ObjectField *el = ObjectField::cons( InputLoc(), rhsEl->typeRef, name );
 			rhsEl->objField = el;
 
 			/* Right hand side elements are constant. */

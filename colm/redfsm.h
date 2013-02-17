@@ -50,7 +50,7 @@ using std::string;
 struct RedState;
 struct InlineList;
 struct Compiler;
-struct ObjField;
+struct ObjectField;
 
 /* Element in list of actions. Contains the string for the code to exectute. */
 struct GenAction 
@@ -61,7 +61,7 @@ struct GenAction
 	InlineList *inlineList;
 	int actionId;
 	MarkType markType;
-	ObjField *objField;
+	ObjectField *objField;
 	long markId;
 
 	int numTransRefs;

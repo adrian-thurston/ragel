@@ -157,7 +157,7 @@ struct Production
 	bool isLeftRec;
 
 	ObjectDef *localFrame;
-	ObjField *lhsField;
+	ObjectField *lhsField;
 
 	LangEl *predOf;
 
@@ -297,7 +297,7 @@ struct ProdEl
 	}; 
 
 	/* Construct with a reference to a var def. */
-	ProdEl( Type type, const InputLoc &loc, ObjField *captureField, bool commit, TypeRef *typeRef, int priorVal )
+	ProdEl( Type type, const InputLoc &loc, ObjectField *captureField, bool commit, TypeRef *typeRef, int priorVal )
 	:
 		production(0),
 		captureField(captureField),
@@ -323,7 +323,7 @@ struct ProdEl
 
 	Production *production;
 	int pos;
-	ObjField *captureField;
+	ObjectField *captureField;
 	bool commit;
 
 	TypeRef *typeRef;
@@ -331,7 +331,7 @@ struct ProdEl
 	LangEl *langEl;
 	int priorVal;
 	Type type;
-	ObjField *objField;
+	ObjectField *objField;
 	ProdEl *prev, *next;
 };
 
@@ -409,7 +409,7 @@ public:
 	String name;
 	
 	MarkType markType;
-	ObjField *objField;
+	ObjectField *objField;
 	long markId;
 
 	InlineList *inlineList;
@@ -745,9 +745,9 @@ struct Compiler
 	void verifyParseStopGrammar( LangEl *langEl, PdaGraph *pdaGraph );
 	void computeAdvanceReductions( LangEl *langEl, PdaGraph *pdaGraph );
 
-	void initFieldInstructions( ObjField *el );
-	void initLocalInstructions( ObjField *el );
-	void initLocalRefInstructions( ObjField *el );
+	void initFieldInstructions( ObjectField *el );
+	void initLocalInstructions( ObjectField *el );
+	void initLocalRefInstructions( ObjectField *el );
 
 	void initMapFunctions( GenericType *gen );
 	void initListField( GenericType *gen, const char *name, int offset );
@@ -937,9 +937,9 @@ struct Compiler
 	/* Loops fill this in for return statements to use. */
 	CodeVect *loopCleanup;
 
-	ObjField *makeDataEl();
-	ObjField *makePosEl();
-	ObjField *makeLineEl();
+	ObjectField *makeDataEl();
+	ObjectField *makePosEl();
+	ObjectField *makeLineEl();
 
 	IterDef *findIterDef( IterDef::Type type, GenericType *generic );
 	IterDef *findIterDef( IterDef::Type type, Function *func );
