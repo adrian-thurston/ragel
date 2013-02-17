@@ -467,31 +467,11 @@ typedef BstSet<NameInst*> NameSet;
 /* Node in the tree of instantiated names. */
 struct NameInst
 {
-	NameInst( const InputLoc &loc, NameInst *parent, const String &name, 
-				int id, bool isLabel ) : 
-		loc(loc), parent(parent), name(name), id(id), isLabel(isLabel),
-		isLongestMatch(false), start(0), final(0) {}
-
-	InputLoc loc;
-
-	/* Keep parent pointers in the name tree to retrieve 
-	 * fully qulified names. */
-	NameInst *parent;
+	NameInst( const String &name, int id ) : 
+		name(name), id(id) {}
 
 	String name;
 	int id;
-	bool isLabel;
-	bool isLongestMatch;
-
-	/* LexJoin scopes need an implicit "final" target. */
-	NameInst *start, *final;
-
-	/* During a fsm generation walk, lists the names that are referenced by
-	 * epsilon operations in the current scope. After the link is made by the
-	 * epsilon reference and the join operation is complete, the label can
-	 * have its refcount decremented. Once there are no more references the
-	 * entry point can be removed from the fsm returned. */
-	NameVect referencedNames;
 
 	/* Pointers for the name search queue. */
 	NameInst *prev, *next;
@@ -531,7 +511,7 @@ struct Compiler
 
 	/* Make a name id in the current name instantiation scope if it is not
 	 * already there. */
-	NameInst *addNameInst( const InputLoc &loc, char *data, bool isLabel );
+	NameInst *addNameInst( const InputLoc &loc, char *data );
 	NameInst *makeJoinNameTree( LexJoin *join );
 	NameInst *makeNameTree();
 	NameInst **makeNameIndex();

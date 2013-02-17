@@ -400,12 +400,10 @@ Compiler::~Compiler()
 	actionList.empty();
 }
 
-/* Make a name id in the current name instantiation scope if it is not
- * already there. */
-NameInst *Compiler::addNameInst( const InputLoc &loc, char *data, bool isLabel )
+NameInst *Compiler::addNameInst( const InputLoc &loc, char *data )
 {
 	/* Create the name instantitaion object and insert it. */
-	NameInst *newNameInst = new NameInst( loc, 0, data, nextNameId++, isLabel );
+	NameInst *newNameInst = new NameInst( data, nextNameId++ );
 	nameInstList.append( newNameInst );
 	return newNameInst;
 }
@@ -429,58 +427,6 @@ ostream &operator<<( ostream &out, const NameRef &nameRef )
 	for ( ; pos < nameRef.length(); pos++ )
 		out << "::" << nameRef[pos];
 	return out;
-}
-
-ostream &operator<<( ostream &out, const NameInst &nameInst )
-{
-	/* Count the number fully qualified name parts. */
-	int numParents = 0;
-	NameInst *curParent = nameInst.parent;
-	while ( curParent != 0 ) {
-		numParents += 1;
-		curParent = curParent->parent;
-	}
-
-	/* Make an array and fill it in. */
-	curParent = nameInst.parent;
-	NameInst **parents = new NameInst*[numParents];
-	for ( int p = numParents-1; p >= 0; p-- ) {
-		parents[p] = curParent;
-		curParent = curParent->parent;
-	}
-		
-	/* Write the parents out, skip the root. */
-	for ( int p = 1; p < numParents; p++ )
-		out << "::" << ( parents[p]->name != 0 ? parents[p]->name : "<ANON>" );
-
-	/* Write the name and cleanup. */
-	out << "::" << ( nameInst.name != 0 ? nameInst.name : "<ANON>" );
-	delete[] parents;
-	return out;
-}
-
-struct CmpNameInstLoc
-{
-	static int compare( const NameInst *ni1, const NameInst *ni2 )
-	{
-		if ( ni1->loc.line < ni2->loc.line )
-			return -1;
-		else if ( ni1->loc.line > ni2->loc.line )
-			return 1;
-		else if ( ni1->loc.col < ni2->loc.col )
-			return -1;
-		else if ( ni1->loc.col > ni2->loc.col )
-			return 1;
-		return 0;
-	}
-};
-
-void errorStateLabels( const NameSet &resolved )
-{
-	MergeSort<NameInst*, CmpNameInstLoc> mergeSort;
-	mergeSort.sort( resolved.data, resolved.length() );
-	for ( NameSet::Iter res = resolved; res.lte(); res++ )
-		error((*res)->loc) << "  -> " << **res << endl;
 }
 
 NameInst **Compiler::makeNameIndex()
