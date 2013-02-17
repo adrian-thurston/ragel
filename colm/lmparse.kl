@@ -474,15 +474,12 @@ namespace_def:
 		namespaceStack.pop();
 	};
 
+
 namespace_head: 
 	KW_Namespace TK_Word 
 	final {
 		/* Make the new namespace. */
-		Namespace *nspace = new Namespace( $1->loc, $2->data,
-				pd->namespaceList.length(), namespaceStack.top() );
-		namespaceStack.top()->childNamespaces.append( nspace );
-		pd->namespaceList.append( nspace );
-		namespaceStack.push( nspace );
+		createNamespace( $1->loc, $2->data );
 	};
 
 context_var_def: 
@@ -532,11 +529,7 @@ context_head:
 	KW_Context TK_Word
 	final {
 		/* Make the new namespace. */
-		Namespace *nspace = new Namespace( $1->loc, $2->data,
-				pd->namespaceList.length(), namespaceStack.top() );
-		namespaceStack.top()->childNamespaces.append( nspace );
-		pd->namespaceList.append( nspace );
-		namespaceStack.push( nspace );
+		Namespace *nspace = createNamespace( $1->loc, $2->data );
 
 		Context *context = new Context( $1->loc, 0 );
 		contextStack.push( context );
@@ -2579,11 +2572,8 @@ opt_commit: KW_Commit final { $$->commit = true; };
 void ColmParser::init()
 {
 	/* Set up the root namespace. */
-	const char *rootNamespaceName = "___ROOT_NAMESPACE";
-	Namespace *rootNamespace = new Namespace( InputLoc(), 
-			rootNamespaceName, pd->namespaceList.length(), 0 );
-	pd->namespaceList.append( rootNamespace );
-	namespaceStack.push( rootNamespace );
+	Namespace *rootNamespace = createNamespace(
+			internal, String("___ROOT_NAMESPACE") );
 	pd->rootNamespace = rootNamespace;
 
 	TokenRegion *rootRegion = createRegion( internal );
@@ -2703,9 +2693,22 @@ void ColmParser::popRegionSet()
 	regionPackStack.pop();
 }
 
-void ColmParser::addRegionDef( const InputLoc &loc, Namespace *nspace,
-		TokenRegion *tokenRegion )
+Namespace *ColmParser::createNamespace( const InputLoc &loc, const String &name )
 {
+	Namespace *parentNamespace = namespaceStack.length() > 0 ?
+			namespaceStack.top() : 0;
+
+	/* Make the new namespace. */
+	Namespace *nspace = new Namespace( loc, name,
+			pd->namespaceList.length(), parentNamespace );
+
+	if ( parentNamespace != 0 )
+		parentNamespace->childNamespaces.append( nspace );
+
+	pd->namespaceList.append( nspace );
+	namespaceStack.push( nspace );
+
+	return nspace;
 }
 
 ostream &ColmParser::parse_error( int tokId, Token &token )
