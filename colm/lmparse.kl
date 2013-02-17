@@ -409,32 +409,24 @@ type_ref: basic_type_ref
 
 type_ref: KW_Map '<' type_ref type_ref '>'
 	final {
-		NamespaceQual *nspaceQual = new NamespaceQual( 
-				namespaceStack.top(), regionStack.top() );
 		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Map, 
-				nspaceQual, $3->typeRef, $4->typeRef );
+				0, $3->typeRef, $4->typeRef );
 	};
 
 type_ref: KW_List '<' type_ref '>'
 	final {
-		NamespaceQual *nspaceQual = new NamespaceQual( 
-				namespaceStack.top(), regionStack.top() );
 		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::List,
-				nspaceQual, $3->typeRef, 0 );
+				0, $3->typeRef, 0 );
 	};
 type_ref: KW_Vector '<' type_ref '>'
 	final {
-		NamespaceQual *nspaceQual = new NamespaceQual( 
-				namespaceStack.top(), regionStack.top() );
 		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Vector,
-				nspaceQual, $3->typeRef, 0 );
+				0, $3->typeRef, 0 );
 	};
 type_ref: KW_Parser '<' type_ref '>'
 	final {
-		NamespaceQual *nspaceQual = new NamespaceQual( 
-				namespaceStack.top(), regionStack.top() );
 		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Parser,
-				nspaceQual, $3->typeRef, 0 );
+				0, $3->typeRef, 0 );
 	};
 
 nonterm basic_type_ref uses type_ref;
@@ -1987,10 +1979,8 @@ code_factor:
 			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
 
 		/* The typeref for the parser. */
-		NamespaceQual *nspaceQual = new NamespaceQual( 
-				namespaceStack.top(), regionStack.top() );
 		TypeRef *parserTypeRef = TypeRef::cons( $1->loc,
-				TypeRef::Parser, nspaceQual, $3->typeRef, 0 );
+				TypeRef::Parser, 0, $3->typeRef, 0 );
 
 		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, $5->list );
 		pd->parserTextList.append( parserText );
@@ -2628,12 +2618,7 @@ void ColmParser::init()
 void ColmParser::addArgvList()
 {
 	TypeRef *typeRef = TypeRef::cons( internal, pd->uniqueTypeStr );
-
-	NamespaceQual *nspaceQual2 = new NamespaceQual( 
-			namespaceStack.top(), regionStack.top() );
-
-	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List,
-			nspaceQual2, typeRef, 0 );
+	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List, 0, typeRef, 0 );
 }
 
 int ColmParser::parseLangEl( int type, const Token *token )

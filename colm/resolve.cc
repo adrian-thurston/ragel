@@ -87,8 +87,7 @@ UniqueType *TypeRef::lookupTypeLiteral( Compiler *pd )
 
 UniqueType *TypeRef::lookupTypeMap( Compiler *pd )
 {
-	/* Lookup up the qualifiction and then the name. */
-	nspace = nspaceQual->getQual( pd );
+	nspace = pd->rootNamespace;
 
 	UniqueType *utKey = typeRef1->lookupType( pd );	
 	UniqueType *utValue = typeRef2->lookupType( pd );	
@@ -120,8 +119,7 @@ UniqueType *TypeRef::lookupTypeMap( Compiler *pd )
 
 UniqueType *TypeRef::lookupTypeList( Compiler *pd )
 {
-	/* Lookup up the qualifiction and then the name. */
-	nspace = nspaceQual->getQual( pd );
+	nspace = pd->rootNamespace;
 
 	UniqueType *utValue = typeRef1->lookupType( pd );	
 
@@ -151,8 +149,7 @@ UniqueType *TypeRef::lookupTypeList( Compiler *pd )
 
 UniqueType *TypeRef::lookupTypeVector( Compiler *pd )
 {
-	/* Lookup up the qualifiction and then the name. */
-	nspace = nspaceQual->getQual( pd );
+	nspace = pd->rootNamespace;
 
 	UniqueType *utValue = typeRef1->lookupType( pd );	
 
@@ -182,8 +179,7 @@ UniqueType *TypeRef::lookupTypeVector( Compiler *pd )
 
 UniqueType *TypeRef::lookupTypeParser( Compiler *pd )
 {
-	/* Lookup up the qualifiction and then the name. */
-	nspace = nspaceQual->getQual( pd );
+	nspace = pd->rootNamespace;
 
 	UniqueType *utParse = typeRef1->lookupType( pd );	
 
