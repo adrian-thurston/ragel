@@ -2767,12 +2767,19 @@ struct LangStmt
 
 struct CodeBlock
 {
-	CodeBlock( StmtList *stmtList, ObjectDef *localFrame ) 
+	CodeBlock() 
 	:
 		frameId(-1),
-		stmtList(stmtList),
-		localFrame(localFrame),
-		context(0) {}
+		context(0)
+	{}
+
+	static CodeBlock *cons( StmtList *stmtList, ObjectDef *localFrame ) 
+	{
+		CodeBlock *c = new CodeBlock;
+		c->stmtList = stmtList;
+		c->localFrame = localFrame;
+		return c;
+	}
 
 	void compile( Compiler *pd, CodeVect &code ) const;
 	void resolve( Compiler *pd ) const;
