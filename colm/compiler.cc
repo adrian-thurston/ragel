@@ -455,7 +455,7 @@ NameInst **Compiler::makeNameIndex()
 void Compiler::createBuiltin( const char *name, BuiltinMachine builtin )
 {
 	LexExpression *expression = LexExpression::cons( builtin );
-	LexJoin *join = new LexJoin( expression );
+	LexJoin *join = LexJoin::cons( expression );
 	LexDefinition *varDef = new LexDefinition( name, join );
 	GraphDictEl *graphDictEl = new GraphDictEl( name, varDef );
 	rootNamespace->rlMap.insert( graphDictEl );
@@ -769,7 +769,7 @@ void Compiler::createDefaultScanner()
 	RegionDef *rdel = new RegionDef( defaultRegion, loc );
 	regionDefList.append( rdel );
 
-	LexJoin *join = new LexJoin( LexExpression::cons( BT_Any ) );
+	LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
 		
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, 
 			join, 0, loc, nextTokenId++, 
@@ -978,7 +978,7 @@ void Compiler::initEmptyScanners()
 			static int def = 1;
 			String name( 64, "__%p_DEF_PAT_%d", reg, def++ );
 
-			LexJoin *join = new LexJoin( LexExpression::cons( BT_Any ) );
+			LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
 				
 			TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, join, 
 					0, internal, nextTokenId++, rootNamespace, reg, 0, 0, 0 );

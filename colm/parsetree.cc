@@ -548,14 +548,6 @@ FsmGraph *TokenRegion::walk( Compiler *pd )
 	return retFsm;
 }
 
-/* Construct with a location and the first expression. */
-LexJoin::LexJoin( LexExpression *expr )
-:
-	expr(expr),
-	context(0),
-	mark(0)
-{}
-
 /* Walk an expression node. */
 FsmGraph *LexJoin::walk( Compiler *pd )
 {

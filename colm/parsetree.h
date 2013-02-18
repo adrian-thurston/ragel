@@ -724,8 +724,19 @@ typedef BstSet< Namespace*, CmpOrd<Namespace*> > NamespaceSet;
  */
 struct LexJoin
 {
-	/* Construct with the first expression. */
-	LexJoin( LexExpression *expr );
+	LexJoin()
+	:
+		expr(0),
+		context(0),
+		mark(0)
+	{}
+
+	static LexJoin *cons( LexExpression *expr )
+	{
+		LexJoin *j = new LexJoin;
+		j->expr = expr;
+		return j;
+	}
 
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );

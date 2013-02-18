@@ -1120,10 +1120,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		if ( ldel != 0 )
 			error( $2->loc ) << "literal already defined in this namespace" << endp;
 		else {
-			LexJoin *join = new LexJoin( LexExpression::cons( LexTerm::cons( LexFactorAug::cons(
-				LexFactorRep::cons( $2->loc, LexFactorNeg::cons( $2->loc, LexFactor::cons(
-				Literal::cons( $2->loc, $2->data, 
-					Literal::LitString ) ) ) ) ) ) ) );
+			LexJoin *join = literalJoin( $2->loc, $2->data );
 
 			if ( strcmp( interp.data, "" ) == 0 ) {
 				TokenDef *tokenDef = TokenDef::cons( name, $2->data, true, false, join, 
@@ -2151,7 +2148,7 @@ nonterm lex_join
 lex_join: 
 	lex_expr 
 	final {
-		$$->join = new LexJoin( $1->expression );
+		$$->join = LexJoin::cons( $1->expression );
 	};
 
 nonterm opt_context
@@ -2741,4 +2738,17 @@ int ColmParser::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
 		exit(1);
 	}
 	return res;
+}
+
+LexJoin *ColmParser::literalJoin( const InputLoc &loc, const String &data )
+{
+	Literal *literal = Literal::cons( loc, data, Literal::LitString );
+	LexFactor *factor = LexFactor::cons( literal );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( loc, factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( loc, factorNeg );
+	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
+	LexTerm *term = LexTerm::cons( factorAug );
+	LexExpression *expr = LexExpression::cons( term );
+	LexJoin *join = LexJoin::cons( expr );
+	return join;
 }

@@ -72,24 +72,6 @@ struct ColmParser
 
 	%% write instance_data;
 
-
-	void init();
-	int parseLangEl( int type, const Token *token );
-
-	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
-	void addRegularDef( const InputLoc &loc, Namespace *nspace, 
-		const String &name, LexJoin *join );
-	TokenRegion *createRegion( const InputLoc &loc );
-	Namespace *createNamespace( const InputLoc &loc, const String &name );
-	void pushRegionSet( const InputLoc &loc );
-	void popRegionSet();
-	void addProduction( const InputLoc &loc, const String &name, 
-		ProdElList *prodElList, bool commit, CodeBlock *redBlock, LangEl *predOf );
-	void addArgvList();
-
-	/* Report an error encountered by the parser. */
-	ostream &parse_error( int tokId, Token &token );
-
 	Compiler *pd;
 
 	/* The name of the root section, this does not change during an include. */
@@ -112,6 +94,23 @@ struct ColmParser
 	ReCaptureVect reCaptureVect;
 
 	bool enterRl;
+
+	void init();
+	int parseLangEl( int type, const Token *token );
+	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
+	void addRegularDef( const InputLoc &loc, Namespace *nspace, 
+			const String &name, LexJoin *join );
+	TokenRegion *createRegion( const InputLoc &loc );
+	Namespace *createNamespace( const InputLoc &loc, const String &name );
+	void pushRegionSet( const InputLoc &loc );
+	void popRegionSet();
+	void addProduction( const InputLoc &loc, const String &name, 
+			ProdElList *prodElList, bool commit, CodeBlock *redBlock, LangEl *predOf );
+	void addArgvList();
+	LexJoin *literalJoin( const InputLoc &loc, const String &data );
+
+	/* Report an error encountered by the parser. */
+	ostream &parse_error( int tokId, Token &token );
 };
 
 %% write token_defs;
