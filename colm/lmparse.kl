@@ -1091,7 +1091,7 @@ region_qual: region_qual TK_Word TK_DoubleColon
 
 region_qual: 
 	final {
-		$$->nspaceQual = new NamespaceQual( namespaceStack.top(), regionStack.top() );
+		$$->nspaceQual = new NamespaceQual( namespaceStack.top() );
 	};
 
 literal_def: KW_Literal literal_list;
@@ -1126,7 +1126,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 					Literal::LitString ) ) ) ) ) ) ) );
 
 			if ( strcmp( interp.data, "" ) == 0 ) {
-				TokenDef *tokenDef = new TokenDef( name, $2->data, true, false, join, 
+				TokenDef *tokenDef = TokenDef::cons( name, $2->data, true, false, join, 
 						0, $2->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
 
 				//region->tokenDefList.append( tokenDef );
@@ -1137,7 +1137,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 				tokenDef->isZero = true;
 			}
 			else {
-				TokenDef *tokenDef = new TokenDef( name, $2->data, true, false, join, 
+				TokenDef *tokenDef = TokenDef::cons( name, $2->data, true, false, join, 
 						0, $2->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
 				region->tokenDefList.append( tokenDef );
 				ldel = nspace->literalDict.insert( interp, tokenDef );
@@ -1148,7 +1148,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 				if ( $3->value )
 					tokenDef->noPostIgnore = true;
 
-				TokenDef *tokenDefTok = new TokenDef( name + "_tok", $2->data, true, false, join, 
+				TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", $2->data, true, false, join, 
 						0, $2->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion, 0, 0, 0 );
 				tokenDefTok->dupOf = tokenDef;
 				region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
@@ -1204,7 +1204,7 @@ token_def:
 		Namespace *nspace = namespaceStack.top();
 		TokenRegion *region = regionStack.top();
 
-		TokenDef *tokenDef = new TokenDef( name, String(), false, ignore, join, 
+		TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
 				transBlock, $1->loc, pd->nextTokenId++, nspace, region,
 				&reCaptureVect, curObjectDef,
 				contextStack.length() > 0 ? contextStack.top() : 0 );
@@ -1219,7 +1219,7 @@ token_def:
 
 		/* All again for the ignore. */
 		if ( ignore ) {
-			TokenDef *tokenDefIgn = new TokenDef( name + "_ign", String(), false, ignore, join, 
+			TokenDef *tokenDefIgn = TokenDef::cons( name + "_ign", String(), false, ignore, join, 
 					0, $1->loc, pd->nextTokenId++, nspace, region->ignoreOnlyRegion,
 					&reCaptureVect, curObjectDef,
 					contextStack.length() > 0 ? contextStack.top() : 0 );
@@ -1230,7 +1230,7 @@ token_def:
 			nspace->tokenDefList.append( tokenDefIgn );
 		}
 		else {
-			TokenDef *tokenDefTok = new TokenDef( name + "_tok", String(), false, ignore, join, 
+			TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", String(), false, ignore, join, 
 					0, $1->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion,
 					&reCaptureVect, curObjectDef,
 					contextStack.length() > 0 ? contextStack.top() : 0 );

@@ -294,7 +294,7 @@ typedef CmpTable<String, CmpStr> CmpStrVect;
 
 struct NamespaceQual
 {
-	NamespaceQual( Namespace *declInNspace, TokenRegion *declInRegion ) : 
+	NamespaceQual( Namespace *declInNspace ) : 
 		cachedNspaceQual(0), declInNspace(declInNspace) {}
 
 	Namespace *cachedNspaceQual;
@@ -349,20 +349,43 @@ struct TokenDef
 	public TokenDefPtr1, 
 	public TokenDefPtr2
 {
-	TokenDef( const String &name, const String &literal, bool isLiteral, bool ignore,
+	TokenDef()
+	: 
+		action(0), tdLangEl(0), inLmSelect(false), dupOf(0),
+		noPostIgnore(false), noPreIgnore(false), isZero(false)
+	{}
+
+	static TokenDef *cons( const String &name, const String &literal, bool isLiteral, bool ignore,
 		LexJoin *join, CodeBlock *codeBlock, InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
-	: 
-		name(name), literal(literal), isLiteral(isLiteral), ignore(ignore), join(join), action(0),
-		codeBlock(codeBlock), tdLangEl(0), semiLoc(semiLoc), 
-		longestMatchId(longestMatchId), inLmSelect(false), 
-		nspace(nspace), tokenRegion(tokenRegion), objectDef(objectDef),
-		contextIn(contextIn),
-		dupOf(0), noPostIgnore(false), noPreIgnore(false), isZero(false)
-	{
+	{ 
+		TokenDef *t = new TokenDef;
+
+		t->name = name;
+		t->literal = literal;
+		t->isLiteral = isLiteral;
+		t->ignore = ignore;
+		t->join = join;
+		t->action = 0;
+		t->codeBlock = codeBlock;
+		t->tdLangEl = 0;
+		t->semiLoc = semiLoc;
+		t->longestMatchId = longestMatchId;
+		t->inLmSelect = false;
+		t->nspace = nspace;
+		t->tokenRegion = tokenRegion;
+		t->objectDef = objectDef;
+		t->contextIn = contextIn;
+		t->dupOf = 0;
+		t->noPostIgnore = false;
+		t->noPreIgnore = false;
+		t->isZero = false;
+
 		if ( pReCaptureVect != 0 )
-			reCaptureVect = *pReCaptureVect;
+			t->reCaptureVect = *pReCaptureVect;
+
+		return t;
 	}
 
 	InputLoc getLoc();

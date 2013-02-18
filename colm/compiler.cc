@@ -771,7 +771,7 @@ void Compiler::createDefaultScanner()
 
 	LexJoin *join = new LexJoin( LexExpression::cons( BT_Any ) );
 		
-	TokenDef *tokenDef = new TokenDef( name, String(), false, false, 
+	TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, 
 			join, 0, loc, nextTokenId++, 
 			rootNamespace, defaultRegion, 0, 0, 0 );
 
@@ -980,7 +980,7 @@ void Compiler::initEmptyScanners()
 
 			LexJoin *join = new LexJoin( LexExpression::cons( BT_Any ) );
 				
-			TokenDef *tokenDef = new TokenDef( name, String(), false, false, join, 
+			TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, join, 
 					0, internal, nextTokenId++, rootNamespace, reg, 0, 0, 0 );
 			reg->tokenDefList.append( tokenDef );
 
