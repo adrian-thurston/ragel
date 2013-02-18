@@ -356,7 +356,7 @@ struct TokenDef
 	{}
 
 	static TokenDef *cons( const String &name, const String &literal, bool isLiteral, bool isIgnore,
-		LexJoin *join, CodeBlock *codeBlock, InputLoc &semiLoc, 
+		LexJoin *join, CodeBlock *codeBlock, const InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
 	{ 

@@ -110,6 +110,12 @@ struct ColmParser
 
 	/* Report an error encountered by the parser. */
 	ostream &parse_error( int tokId, Token &token );
+
+	void tokenDef( const InputLoc &loc, String name, LexJoin *join,
+			CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore );
+
+	void literalDef( const InputLoc &loc, const String &data,
+			bool noPreIgnore, bool noPostIgnore );
 };
 
 %% write token_defs;

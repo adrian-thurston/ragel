@@ -1101,56 +1101,12 @@ literal_list: literal_item;
 
 literal_item: opt_no_ignore TK_Literal opt_no_ignore
 	final {
-		/* Create a name for the literal. */
-		String name( 32, "_literal_%.4x", pd->nextTokenId );
+		const InputLoc &loc = $2->loc;
+		const String &data = $2->data;
+		bool noPreIgnore = $1->noIgnore;
+		bool noPostIgnore = $3->noIgnore;
 
-		bool insideRegion = regionStack.length() > 1;
-		if ( !insideRegion )
-			pushRegionSet( $2->loc );
-
-		bool unusedCI;
-		String interp;
-		prepareLitString( interp, unusedCI, $2->data, $2->loc );
-
-		/* Look for the production's associated region. */
-		Namespace *nspace = namespaceStack.top();
-		RegionSet *regionSet = regionStack.top();
-
-		LiteralDictEl *ldel = nspace->literalDict.find( interp );
-		if ( ldel != 0 )
-			error( $2->loc ) << "literal already defined in this namespace" << endp;
-
-		LexJoin *join = literalJoin( $2->loc, $2->data );
-
-		TokenDef *tokenDef = TokenDef::cons( name, $2->data, true, false, join, 
-				0, $2->loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0, 0, 0 );
-
-		bool isZero = strcmp( interp.data, "" ) == 0;
-		tokenDef->isZero = isZero;
-
-		if ( !isZero )
-			regionSet->tokenIgnore->tokenDefList.append( tokenDef );
-
-		ldel = nspace->literalDict.insert( interp, tokenDef );
-		nspace->tokenDefList.append( tokenDef );
-
-		if ( !isZero ) {
-			/* Make the duplicate for the token-only region. */
-			tokenDef->noPreIgnore = $1->noIgnore;
-			tokenDef->noPostIgnore = $3->noIgnore;
-
-			TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", $2->data, true, false, join, 
-					0, $2->loc, pd->nextTokenId++, nspace, regionSet->tokenOnly, 0, 0, 0 );
-
-			tokenDefTok->dupOf = tokenDef;
-
-			regionSet->tokenOnly->tokenDefList.append( tokenDefTok );
-
-			nspace->tokenDefList.append( tokenDefTok );
-		}
-
-		if ( !insideRegion )
-			popRegionSet();
+		literalDef( loc, data, noPreIgnore, noPostIgnore );
 	};
 
 
@@ -1176,73 +1132,16 @@ token_def:
 	enter_rl opt_no_ignore '/' opt_lex_join leave_rl '/' opt_no_ignore  
 	opt_translate
 	final {
-		bool ignore = $1->ignore;
+		const InputLoc &loc = $1->loc;
 		String name = $2->name;
 		LexJoin *join = $7->join;
 		CodeBlock *transBlock = $11->transBlock;
+		bool ignore = $1->ignore;
+		bool noPreIgnore = $5->noIgnore;
+		bool noPostIgnore = $10->noIgnore;
 
-		/* Check the region if this is for an ignore. */
-		if ( ignore && !pd->insideRegion )
-			error($1->loc) << "ignore tokens can only appear inside scanners" << endp;
-
-		/* Check the name if this is a token. */
-		if ( !ignore && name == 0 )
-			error($1->loc) << "tokens must have a name" << endp;
-
-		/* Give a default name to ignores. */ 
-		if ( name == 0 )
-			name.setAs( 32, "_ignore_%.4x", pd->nextTokenId );
-
-		Namespace *nspace = namespaceStack.top();
-		RegionSet *regionSet = regionStack.top();
-
-		TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
-				transBlock, $1->loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore,
-				&reCaptureVect, curObjectDef,
-				contextStack.length() > 0 ? contextStack.top() : 0 );
-
-		regionSet->tokenIgnore->tokenDefList.append( tokenDef );
-		nspace->tokenDefList.append( tokenDef );
-
-		tokenDef->noPreIgnore = $5->noIgnore;
-		tokenDef->noPostIgnore = $10->noIgnore;
-
-		/* All again for the ignore. */
-		if ( ignore ) {
-			TokenDef *tokenDefIgn = TokenDef::cons( name + "_ign", String(), false, ignore, join, 
-					0, $1->loc, pd->nextTokenId++, nspace, regionSet->ignoreOnly,
-					&reCaptureVect, curObjectDef,
-					contextStack.length() > 0 ? contextStack.top() : 0 );
-
-			tokenDefIgn->dupOf = tokenDef;
-
-			regionSet->ignoreOnly->tokenDefList.append( tokenDefIgn );
-			nspace->tokenDefList.append( tokenDefIgn );
-		}
-		else {
-			TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", String(), false, ignore, join, 
-					0, $1->loc, pd->nextTokenId++, nspace, regionSet->tokenOnly,
-					&reCaptureVect, curObjectDef,
-					contextStack.length() > 0 ? contextStack.top() : 0 );
-
-			tokenDefTok->dupOf = tokenDef;
-
-			regionSet->tokenOnly->tokenDefList.append( tokenDefTok );
-			nspace->tokenDefList.append( tokenDefTok );
-		}
-
-		/* This is created and pushed in the name. */
-		if ( !pd->insideRegion )
-			popRegionSet();
-
-		if ( join != 0 ) {
-			/* Create a regular language definition so the token can be used to
-			 * make other tokens */
-			addRegularDef( $1->loc, namespaceStack.top(), name, join );
-		}
-
-
-		reCaptureVect.empty();
+		tokenDef( loc, name, join, transBlock, ignore,
+				noPreIgnore, noPostIgnore );
 	};
 
 nonterm token_or_ignore
@@ -1991,7 +1890,8 @@ code_factor:
 		ParserText *parserText = ParserText::cons( $2->loc, nspace, $3->list );
 		pd->parserTextList.append( parserText );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::SendType, $1->varRef, parserText ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(),
+				LangTerm::SendType, $1->varRef, parserText ) );
 	};
 code_factor: 
 	KW_Send var_ref accumulate
@@ -2000,7 +1900,8 @@ code_factor:
 		ParserText *parserText = ParserText::cons( $1->loc, nspace, $3->list );
 		pd->parserTextList.append( parserText );
 
-		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::SendType, $2->varRef, parserText ) );
+		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(),
+				LangTerm::SendType, $2->varRef, parserText ) );
 	};
 code_factor: KW_TypeId '<' type_ref '>'
 	final {
@@ -2731,4 +2632,125 @@ LexJoin *ColmParser::literalJoin( const InputLoc &loc, const String &data )
 	LexExpression *expr = LexExpression::cons( term );
 	LexJoin *join = LexJoin::cons( expr );
 	return join;
+}
+
+void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join,
+		CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore )
+{
+	/* Check the region if this is for an ignore. */
+	if ( ignore && !pd->insideRegion )
+		error(loc) << "ignore tokens can only appear inside scanners" << endp;
+
+	/* Check the name if this is a token. */
+	if ( !ignore && name == 0 )
+		error(loc) << "tokens must have a name" << endp;
+
+	/* Give a default name to ignores. */ 
+	if ( name == 0 )
+		name.setAs( 32, "_ignore_%.4x", pd->nextTokenId );
+
+	Namespace *nspace = namespaceStack.top();
+	RegionSet *regionSet = regionStack.top();
+
+	TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
+			transBlock, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore,
+			&reCaptureVect, curObjectDef,
+			contextStack.length() > 0 ? contextStack.top() : 0 );
+
+	regionSet->tokenIgnore->tokenDefList.append( tokenDef );
+	nspace->tokenDefList.append( tokenDef );
+
+	tokenDef->noPreIgnore = noPreIgnore;
+	tokenDef->noPostIgnore = noPostIgnore;
+
+	/* All again for the ignore. */
+	if ( ignore ) {
+		TokenDef *tokenDefIgn = TokenDef::cons( name + "_ign", String(), false, ignore, join, 
+				0, loc, pd->nextTokenId++, nspace, regionSet->ignoreOnly,
+				&reCaptureVect, curObjectDef,
+				contextStack.length() > 0 ? contextStack.top() : 0 );
+
+		tokenDefIgn->dupOf = tokenDef;
+
+		regionSet->ignoreOnly->tokenDefList.append( tokenDefIgn );
+		nspace->tokenDefList.append( tokenDefIgn );
+	}
+	else {
+		TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", String(), false, ignore, join, 
+				0, loc, pd->nextTokenId++, nspace, regionSet->tokenOnly,
+				&reCaptureVect, curObjectDef,
+				contextStack.length() > 0 ? contextStack.top() : 0 );
+
+		tokenDefTok->dupOf = tokenDef;
+
+		regionSet->tokenOnly->tokenDefList.append( tokenDefTok );
+		nspace->tokenDefList.append( tokenDefTok );
+	}
+
+	/* This is created and pushed in the name. */
+	if ( !pd->insideRegion )
+		popRegionSet();
+
+	if ( join != 0 ) {
+		/* Create a regular language definition so the token can be used to
+		 * make other tokens */
+		addRegularDef( loc, namespaceStack.top(), name, join );
+	}
+
+	reCaptureVect.empty();
+}
+
+void ColmParser::literalDef( const InputLoc &loc, const String &data,
+		bool noPreIgnore, bool noPostIgnore )
+{
+	/* Create a name for the literal. */
+	String name( 32, "_literal_%.4x", pd->nextTokenId );
+
+	bool insideRegion = regionStack.length() > 1;
+	if ( !insideRegion )
+		pushRegionSet( loc );
+
+	bool unusedCI;
+	String interp;
+	prepareLitString( interp, unusedCI, data, loc );
+
+	/* Look for the production's associated region. */
+	Namespace *nspace = namespaceStack.top();
+	RegionSet *regionSet = regionStack.top();
+
+	LiteralDictEl *ldel = nspace->literalDict.find( interp );
+	if ( ldel != 0 )
+		error( loc ) << "literal already defined in this namespace" << endp;
+
+	LexJoin *join = literalJoin( loc, data );
+
+	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
+			0, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0, 0, 0 );
+
+	bool isZero = strcmp( interp.data, "" ) == 0;
+	tokenDef->isZero = isZero;
+
+	if ( !isZero )
+		regionSet->tokenIgnore->tokenDefList.append( tokenDef );
+
+	ldel = nspace->literalDict.insert( interp, tokenDef );
+	nspace->tokenDefList.append( tokenDef );
+
+	if ( !isZero ) {
+		/* Make the duplicate for the token-only region. */
+		tokenDef->noPreIgnore = noPreIgnore;
+		tokenDef->noPostIgnore = noPostIgnore;
+
+		TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", data, true, false, join, 
+				0, loc, pd->nextTokenId++, nspace, regionSet->tokenOnly, 0, 0, 0 );
+
+		tokenDefTok->dupOf = tokenDef;
+
+		regionSet->tokenOnly->tokenDefList.append( tokenDefTok );
+
+		nspace->tokenDefList.append( tokenDefTok );
+	}
+
+	if ( !insideRegion )
+		popRegionSet();
 }
