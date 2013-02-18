@@ -1553,13 +1553,12 @@ typedef DList<Constructor> ConsList;
 
 struct ParserText
 {
-	static ParserText *cons( const InputLoc &loc, Namespace *nspace, 
-			TokenRegion *region, ConsItemList *list )
+	static ParserText *cons( const InputLoc &loc,
+			Namespace *nspace, ConsItemList *list )
 	{
 		ParserText *p = new ParserText;
 		p->loc = loc;
 		p->nspace = nspace;
-		p->region = region;
 		p->list = list;
 		p->langEl = 0;
 		p->pdaRun = 0;
@@ -1570,7 +1569,6 @@ struct ParserText
 
 	InputLoc loc;
 	Namespace *nspace;
-	TokenRegion *region;
 	ConsItemList *list;
 	LangEl *langEl;
 	PdaRun *pdaRun;

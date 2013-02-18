@@ -1945,7 +1945,6 @@ code_factor:
 	parse_cmd opt_capture type_ref opt_field_init accumulate
 	final {
 		Namespace *nspace = namespaceStack.top();
-		TokenRegion *region = regionStack.top();
 
 		/* We are constructing a parser, sending it items, then returning it.
 		 * Thisis the constructor for the parser. */
@@ -1964,7 +1963,7 @@ code_factor:
 		TypeRef *parserTypeRef = TypeRef::cons( $1->loc,
 				TypeRef::Parser, 0, $3->typeRef, 0 );
 
-		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, $5->list );
+		ParserText *parserText = ParserText::cons( $2->loc, nspace, $5->list );
 		pd->parserTextList.append( parserText );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, 
@@ -1989,8 +1988,7 @@ code_factor:
 	var_ref TK_LtLt accumulate
 	final {
 		Namespace *nspace = namespaceStack.top();
-		TokenRegion *region = regionStack.top();
-		ParserText *parserText = ParserText::cons( $2->loc, nspace, region, $3->list );
+		ParserText *parserText = ParserText::cons( $2->loc, nspace, $3->list );
 		pd->parserTextList.append( parserText );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::SendType, $1->varRef, parserText ) );
@@ -1999,8 +1997,7 @@ code_factor:
 	KW_Send var_ref accumulate
 	final {
 		Namespace *nspace = namespaceStack.top();
-		TokenRegion *region = regionStack.top();
-		ParserText *parserText = ParserText::cons( $1->loc, nspace, region, $3->list );
+		ParserText *parserText = ParserText::cons( $1->loc, nspace, $3->list );
 		pd->parserTextList.append( parserText );
 
 		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(), LangTerm::SendType, $2->varRef, parserText ) );
