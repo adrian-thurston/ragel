@@ -1104,7 +1104,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		/* Create a name for the literal. */
 		String name( 32, "_literal_%.4x", pd->nextTokenId );
 
-		bool insideRegion = regionStack.top() != pd->rootRegion;
+		bool insideRegion = regionPackStack.length() > 1;
 		if ( !insideRegion )
 			pushRegionSet( $2->loc );
 
@@ -1268,7 +1268,7 @@ token_def_name:
 		String name = $1->name;
 
 		$$->name = name;
-		pd->insideRegion = regionStack.top() != pd->rootRegion;
+		pd->insideRegion = regionPackStack.length() > 1;
 		curDefineId = name;
 
 		if ( !pd->insideRegion )
@@ -1303,7 +1303,7 @@ opt_translate:
 pre_eof: 
 	KW_Preeof block_open lang_stmt_list block_close
 	final {
-		bool insideRegion = regionStack.top() != pd->rootRegion;
+		bool insideRegion = regionPackStack.length() > 1;
 		if ( !insideRegion )
 			error($1->loc) << "preeof must be used inside an existing region" << endl;
 
@@ -2561,7 +2561,6 @@ void ColmParser::init()
 	pd->rootNamespace = rootNamespace;
 
 	TokenRegion *rootRegion = createRegion( internal );
-	regionStack.push( rootRegion );
 
 	RegionSet *rootRegionSet = new RegionSet( rootRegion, 0, 0, 0 );
 	regionPackStack.push( rootRegionSet );
@@ -2661,13 +2660,11 @@ void ColmParser::pushRegionSet( const InputLoc &loc )
 	tokenRegionCi->derivedFrom = tokenRegion;
 	tokenRegionTok->derivedFrom = tokenRegion;
 
-	regionStack.push( tokenRegion );
 	regionPackStack.push( regionPack );
 }
 
 void ColmParser::popRegionSet()
 {
-	regionStack.pop();
 	regionPackStack.pop();
 }
 
