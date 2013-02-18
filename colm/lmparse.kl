@@ -2116,7 +2116,11 @@ field_init: code_expr
 # Regular Expressions
 #
 
-nonterm opt_lex_join uses lex_join;
+nonterm opt_lex_join
+{
+	LexJoin *join;
+	LexJoin *context;
+};
 
 opt_lex_join: lex_join opt_context
 	final {
@@ -2142,24 +2146,18 @@ opt_lex_join:
 nonterm lex_join
 {
 	LexJoin *join;
-	LexJoin *context;
 };
 
-lex_join: 
-	lex_join ',' lex_expr
-	final {
-		/* Append the expression to the list and return it. */
-		$1->join->exprList.append( $3->expression );
-		$$->join = $1->join;
-	};
 lex_join: 
 	lex_expr 
 	final {
 		$$->join = new LexJoin( $1->expression );
 	};
 
-# Context at the end of a pattern that is not included in the match
-nonterm opt_context uses lex_join;
+nonterm opt_context
+{
+	LexJoin *context;
+};
 
 opt_context: '@' lex_join final { $$->context = $2->join; };
 opt_context: final { $$->context = 0; };

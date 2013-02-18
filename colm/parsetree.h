@@ -719,9 +719,6 @@ struct Namespace
 typedef DList<Namespace> NamespaceList;
 typedef BstSet< Namespace*, CmpOrd<Namespace*> > NamespaceSet;
 
-/* List of Expressions. */
-typedef DList<LexExpression> LexExprList;
-
 /*
  * LexJoin
  */
@@ -735,8 +732,7 @@ struct LexJoin
 	void makeNameTree( Compiler *pd );
 
 	/* Data. */
-	LexExprList exprList;
-
+	LexExpression *expr;
 	LexJoin *context;
 	Action *mark;
 };

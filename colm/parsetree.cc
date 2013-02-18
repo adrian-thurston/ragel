@@ -187,7 +187,7 @@ FsmGraph *LexDefinition::walk( Compiler *pd )
 	/* If the expression below is a join operation with multiple expressions
 	 * then it just had epsilon transisions resolved. If it is a join
 	 * with only a single expression then run the epsilon op now. */
-	if ( join->exprList.length() == 1 )
+	if ( join->expr != 0 )
 		rtnVal->epsilonOp();
 
 	return rtnVal;
@@ -551,18 +551,15 @@ FsmGraph *TokenRegion::walk( Compiler *pd )
 /* Construct with a location and the first expression. */
 LexJoin::LexJoin( LexExpression *expr )
 :
+	expr(expr),
 	context(0),
 	mark(0)
-{
-	exprList.append( expr );
-}
+{}
 
 /* Walk an expression node. */
 FsmGraph *LexJoin::walk( Compiler *pd )
 {
-	assert( exprList.length() == 1 );
-
-	FsmGraph *retFsm = exprList.head->walk( pd );
+	FsmGraph *retFsm = expr->walk( pd );
 
 	/* Maybe the the context. */
 	if ( context != 0 ) {
