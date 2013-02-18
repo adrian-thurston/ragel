@@ -224,31 +224,33 @@ void Namespace::declare( Compiler *pd )
 	for ( GenericList::Iter g = genericList; g.lte(); g++ )
 		g->declare( pd, this );
 
-	for ( LiteralDict::Iter l = literalDict; l.lte(); l++  ) {
-		if ( l->value->dupOf != 0 ) {
-			/* Duplicate of another. Use the lang el of that token. */
-			assert( l->value->dupOf->tdLangEl != 0 );
-			l->value->tdLangEl = l->value->dupOf->tdLangEl;
-		}
-		else {
-			if ( l->value->isZero ) {
-				l->value->tdLangEl = l->value->tokenRegion->ciLel;
-				assert( l->value->tokenRegion->ciLel != 0 );
+	for ( TokenDefListNs::Iter l = tokenDefList; l.lte(); l++ ) {
+		if ( l->isLiteral ) {
+			if ( l->dupOf != 0 ) {
+				/* Duplicate of another. Use the lang el of that token. */
+				assert( l->dupOf->tdLangEl != 0 );
+				l->tdLangEl = l->dupOf->tdLangEl;
 			}
 			else {
-				/* Original. Create a token for the literal. */
-				LangEl *newLangEl = declareLangEl( pd, this, l->value->name, LangEl::Term );
+				if ( l->isZero ) {
+					l->tdLangEl = l->tokenRegion->ciLel;
+					assert( l->tokenRegion->ciLel != 0 );
+				}
+				else {
+					/* Original. Create a token for the literal. */
+					LangEl *newLangEl = declareLangEl( pd, this, l->name, LangEl::Term );
 
-				newLangEl->lit = l->value->literal;
-				newLangEl->isLiteral = true;
-				newLangEl->tokenDef = l->value;
+					newLangEl->lit = l->literal;
+					newLangEl->isLiteral = true;
+					newLangEl->tokenDef = l;
 
-				l->value->tdLangEl = newLangEl;
+					l->tdLangEl = newLangEl;
 
-				if ( l->value->noPreIgnore )
-					newLangEl->noPreIgnore = true;
-				if ( l->value->noPostIgnore )
-					newLangEl->noPostIgnore = true;
+					if ( l->noPreIgnore )
+						newLangEl->noPreIgnore = true;
+					if ( l->noPostIgnore )
+						newLangEl->noPostIgnore = true;
+				}
 			}
 		}
 	}

@@ -1135,6 +1135,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		nspace->tokenDefList.append( tokenDef );
 
 		if ( !isZero ) {
+			/* Make the duplicate for the token-only region. */
 			tokenDef->noPreIgnore = $1->noIgnore;
 			tokenDef->noPostIgnore = $3->noIgnore;
 
@@ -1145,7 +1146,6 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 
 			region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
 
-			ldel = nspace->literalDict.insert( "|" + interp + "_tok", tokenDefTok );
 			nspace->tokenDefList.append( tokenDefTok );
 		}
 
