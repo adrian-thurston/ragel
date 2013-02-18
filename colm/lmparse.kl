@@ -1013,10 +1013,10 @@ prod_el_list:
 		$$->list = new ProdElList;
 	};
 
-nonterm opt_no_ignore { bool value; };
+nonterm opt_no_ignore { bool noIgnore; };
 
-opt_no_ignore: KW_Ni final { $$->value = true; };
-opt_no_ignore:       final { $$->value = false; };
+opt_no_ignore: KW_Ni final { $$->noIgnore = true; };
+opt_no_ignore:       final { $$->noIgnore = false; };
 
 nonterm prod_el
 {
@@ -1119,39 +1119,34 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		LiteralDictEl *ldel = nspace->literalDict.find( interp );
 		if ( ldel != 0 )
 			error( $2->loc ) << "literal already defined in this namespace" << endp;
-		else {
-			LexJoin *join = literalJoin( $2->loc, $2->data );
 
-			if ( strcmp( interp.data, "" ) == 0 ) {
-				TokenDef *tokenDef = TokenDef::cons( name, $2->data, true, false, join, 
-						0, $2->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
+		LexJoin *join = literalJoin( $2->loc, $2->data );
 
-				//region->tokenDefList.append( tokenDef );
+		TokenDef *tokenDef = TokenDef::cons( name, $2->data, true, false, join, 
+				0, $2->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
 
-				ldel = nspace->literalDict.insert( interp, tokenDef );
-				nspace->tokenDefList.append( tokenDef );
-				
-				tokenDef->isZero = true;
-			}
-			else {
-				TokenDef *tokenDef = TokenDef::cons( name, $2->data, true, false, join, 
-						0, $2->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
-				region->tokenDefList.append( tokenDef );
-				ldel = nspace->literalDict.insert( interp, tokenDef );
-				nspace->tokenDefList.append( tokenDef );
+		bool isZero = strcmp( interp.data, "" ) == 0;
+		tokenDef->isZero = isZero;
 
-				if ( $1->value )
-					tokenDef->noPreIgnore = true;
-				if ( $3->value )
-					tokenDef->noPostIgnore = true;
+		if ( !isZero )
+			region->tokenDefList.append( tokenDef );
 
-				TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", $2->data, true, false, join, 
-						0, $2->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion, 0, 0, 0 );
-				tokenDefTok->dupOf = tokenDef;
-				region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
-				ldel = nspace->literalDict.insert( "|" + interp + "_tok", tokenDefTok );
-				nspace->tokenDefList.append( tokenDefTok );
-			}
+		ldel = nspace->literalDict.insert( interp, tokenDef );
+		nspace->tokenDefList.append( tokenDef );
+
+		if ( !isZero ) {
+			tokenDef->noPreIgnore = $1->noIgnore;
+			tokenDef->noPostIgnore = $3->noIgnore;
+
+			TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", $2->data, true, false, join, 
+					0, $2->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion, 0, 0, 0 );
+
+			tokenDefTok->dupOf = tokenDef;
+
+			region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
+
+			ldel = nspace->literalDict.insert( "|" + interp + "_tok", tokenDefTok );
+			nspace->tokenDefList.append( tokenDefTok );
 		}
 
 		if ( !insideRegion )
@@ -1209,10 +1204,8 @@ token_def:
 		region->tokenDefList.append( tokenDef );
 		nspace->tokenDefList.append( tokenDef );
 
-		if ( $5->value )
-			tokenDef->noPreIgnore = true;
-		if ( $10->value )
-			tokenDef->noPostIgnore = true;
+		tokenDef->noPreIgnore = $5->noIgnore;
+		tokenDef->noPostIgnore = $10->noIgnore;
 
 		/* All again for the ignore. */
 		if ( ignore ) {
