@@ -2619,14 +2619,8 @@ void ColmParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 
 TokenRegion *ColmParser::createRegion( const InputLoc &loc )
 {
-	TokenRegion *parentRegion = regionStack.length() > 0 ?
-			regionStack.top() : 0;
-
 	TokenRegion *tokenRegion = new TokenRegion( loc,
-			pd->regionList.length(), parentRegion );
-
-	if ( parentRegion != 0 )
-		parentRegion->childRegions.append( tokenRegion );
+			pd->regionList.length() );
 
 	pd->regionList.append( tokenRegion );
 

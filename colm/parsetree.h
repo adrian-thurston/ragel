@@ -497,14 +497,17 @@ typedef Vector<TokenRegion*> RegionVect;
 struct TokenRegion
 {
 	/* Construct with a list of joins */
-	TokenRegion( const InputLoc &loc, int id, TokenRegion *parentRegion )
+	TokenRegion( const InputLoc &loc, int id )
 	: 
 		loc(loc),
 		id(id),
-		lmSwitchHandlesError(false), regionNameInst(0),
-		parentRegion(parentRegion), defaultTokenDef(0),
+		lmSwitchHandlesError(false),
+		regionNameInst(0),
+		defaultTokenDef(0),
 		preEofBlock(0), 
-		ignoreOnlyRegion(0), tokenOnlyRegion(0), ciRegion(0),
+		ignoreOnlyRegion(0),
+		tokenOnlyRegion(0),
+		ciRegion(0),
 		wasEmpty(false), 
 		isFullRegion(false),
 		isIgnoreOnly(false), 
@@ -535,9 +538,6 @@ struct TokenRegion
 	/* This gets saved off during the name walk. Can save it off because token
 	 * regions are referenced once only. */
 	NameInst *regionNameInst;
-
-	TokenRegion *parentRegion;
-	RegionVect childRegions;
 
 	TokenDef *defaultTokenDef;
 

@@ -762,7 +762,7 @@ void Compiler::createDefaultScanner()
 	/* Create a scanner which will be used when no other scanner can be
 	 * figured out. It returns single characters. */
 	defaultRegion = new TokenRegion( InputLoc(),
-			regionList.length(), 0 );
+			regionList.length() );
 	regionList.append( defaultRegion );
 
 	/* Insert the machine definition into the graph dictionary. */
