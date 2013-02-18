@@ -95,6 +95,7 @@ struct ColmParser
 	bool enterRl;
 
 	void init();
+	void initPda();
 	int parseLangEl( int type, const Token *token );
 	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
 	void addRegularDef( const InputLoc &loc, Namespace *nspace, 
