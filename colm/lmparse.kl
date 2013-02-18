@@ -1104,7 +1104,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		/* Create a name for the literal. */
 		String name( 32, "_literal_%.4x", pd->nextTokenId );
 
-		bool insideRegion = regionPackStack.length() > 1;
+		bool insideRegion = regionStack.length() > 1;
 		if ( !insideRegion )
 			pushRegionSet( $2->loc );
 
@@ -1114,7 +1114,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 
 		/* Look for the production's associated region. */
 		Namespace *nspace = namespaceStack.top();
-		RegionSet *regionSet = regionPackStack.top();
+		RegionSet *regionSet = regionStack.top();
 
 		LiteralDictEl *ldel = nspace->literalDict.find( interp );
 		if ( ldel != 0 )
@@ -1194,7 +1194,7 @@ token_def:
 			name.setAs( 32, "_ignore_%.4x", pd->nextTokenId );
 
 		Namespace *nspace = namespaceStack.top();
-		RegionSet *regionSet = regionPackStack.top();
+		RegionSet *regionSet = regionStack.top();
 
 		TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
 				transBlock, $1->loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore,
@@ -1268,7 +1268,7 @@ token_def_name:
 		String name = $1->name;
 
 		$$->name = name;
-		pd->insideRegion = regionPackStack.length() > 1;
+		pd->insideRegion = regionStack.length() > 1;
 		curDefineId = name;
 
 		if ( !pd->insideRegion )
@@ -1303,14 +1303,14 @@ opt_translate:
 pre_eof: 
 	KW_Preeof block_open lang_stmt_list block_close
 	final {
-		bool insideRegion = regionPackStack.length() > 1;
+		bool insideRegion = regionStack.length() > 1;
 		if ( !insideRegion )
 			error($1->loc) << "preeof must be used inside an existing region" << endl;
 
 		CodeBlock *codeBlock = new CodeBlock( $3->stmtList, $2->localFrame );
 		codeBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
 
-		RegionSet *regionSet = regionPackStack.top();
+		RegionSet *regionSet = regionStack.top();
 		regionSet->tokenIgnore->preEofBlock = codeBlock;
 	};
 
@@ -2563,7 +2563,7 @@ void ColmParser::init()
 	TokenRegion *rootRegion = createRegion( internal );
 
 	RegionSet *rootRegionSet = new RegionSet( rootRegion, 0, 0, 0 );
-	regionPackStack.push( rootRegionSet );
+	regionStack.push( rootRegionSet );
 
 	pd->rootRegion = rootRegion;
 
@@ -2660,12 +2660,12 @@ void ColmParser::pushRegionSet( const InputLoc &loc )
 	tokenRegionCi->derivedFrom = tokenRegion;
 	tokenRegionTok->derivedFrom = tokenRegion;
 
-	regionPackStack.push( regionPack );
+	regionStack.push( regionPack );
 }
 
 void ColmParser::popRegionSet()
 {
-	regionPackStack.pop();
+	regionStack.pop();
 }
 
 Namespace *ColmParser::createNamespace( const InputLoc &loc, const String &name )

@@ -82,7 +82,7 @@ struct ColmParser
 
 	LangElVect langElVect;
 
-	RegionSetVect regionPackStack;
+	RegionSetVect regionStack;
 	NamespaceVect namespaceStack;
 	ContextVect contextStack;
 
