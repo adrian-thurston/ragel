@@ -87,7 +87,7 @@ void Compiler::declareBaseLangEls()
 	 * always associate reverse code with the first language element produced
 	 * after a generation action. */
 	noTokenLangEl = declareLangEl( this, rootNamespace, "_notoken", LangEl::Term );
-	noTokenLangEl->ignore = true;
+	noTokenLangEl->isIgnore = true;
 	
 	/* Make the "stream" language element */
 	ptrLangEl = declareLangEl( this, rootNamespace, "ptr", LangEl::Term );
@@ -296,7 +296,7 @@ void Namespace::declare( Compiler *pd )
 			else {
 				/* Create the token. */
 				LangEl *tokEl = declareLangEl( pd, this, t->name, LangEl::Term );
-				tokEl->ignore = t->ignore;
+				tokEl->isIgnore = t->isIgnore;
 				tokEl->transBlock = t->codeBlock;
 				tokEl->objectDef = t->objectDef;
 				tokEl->contextIn = t->contextIn;

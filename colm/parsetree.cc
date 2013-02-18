@@ -518,7 +518,7 @@ FsmGraph *TokenRegion::walk( Compiler *pd )
 	}
 	FsmGraph *retFsm = parts[0];
 
-	if ( defaultTokenDef != 0 && defaultTokenDef->tdLangEl->ignore )
+	if ( defaultTokenDef != 0 && defaultTokenDef->tdLangEl->isIgnore )
 		error() << "ignore token cannot be a scanner's zero-length token" << endp;
 
 	/* The region is empty. Return the empty set. */

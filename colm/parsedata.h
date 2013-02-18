@@ -240,7 +240,7 @@ struct LangEl : public DListEl<LangEl>
 	String displayString;
 	long numAppearances;
 	bool commit;
-	bool ignore;
+	bool isIgnore;
 	bool reduceFirst;
 	bool isLiteral;
 	bool isRepeat;

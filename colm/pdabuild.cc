@@ -66,7 +66,7 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	displayString(0),
 	numAppearances(0),
 	commit(false),
-	ignore(false),
+	isIgnore(false),
 	reduceFirst(false),
 	isLiteral(false),
 	isRepeat(false),
@@ -1402,7 +1402,7 @@ void Compiler::makeRuntimeData()
 			runtimeData->lelInfo[i].repeat = lel->isRepeat;
 			runtimeData->lelInfo[i].list = lel->isList;
 			runtimeData->lelInfo[i].literal = lel->isLiteral;
-			runtimeData->lelInfo[i].ignore = lel->ignore;
+			runtimeData->lelInfo[i].ignore = lel->isIgnore;
 			runtimeData->lelInfo[i].frameId = -1;
 
 			CodeBlock *block = lel->transBlock;

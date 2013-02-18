@@ -355,7 +355,7 @@ struct TokenDef
 		noPostIgnore(false), noPreIgnore(false), isZero(false)
 	{}
 
-	static TokenDef *cons( const String &name, const String &literal, bool isLiteral, bool ignore,
+	static TokenDef *cons( const String &name, const String &literal, bool isLiteral, bool isIgnore,
 		LexJoin *join, CodeBlock *codeBlock, InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
@@ -365,7 +365,7 @@ struct TokenDef
 		t->name = name;
 		t->literal = literal;
 		t->isLiteral = isLiteral;
-		t->ignore = ignore;
+		t->isIgnore = isIgnore;
 		t->join = join;
 		t->action = 0;
 		t->codeBlock = codeBlock;
@@ -393,7 +393,7 @@ struct TokenDef
 	String name;
 	String literal;
 	bool isLiteral;
-	bool ignore;
+	bool isIgnore;
 	LexJoin *join;
 	Action *action;
 	CodeBlock *codeBlock;
