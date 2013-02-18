@@ -1523,7 +1523,7 @@ typedef DList<Pattern> PatList;
 struct Constructor
 {
 	static Constructor *cons( const InputLoc &loc, Namespace *nspace, 
-			TokenRegion *region, ConsItemList *list, int patRepId )
+			ConsItemList *list, int patRepId )
 	{
 		Constructor *r = new Constructor;
 		r->loc = loc;

@@ -1114,7 +1114,7 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 
 		/* Look for the production's associated region. */
 		Namespace *nspace = namespaceStack.top();
-		TokenRegion *region = regionStack.top();
+		RegionSet *regionSet = regionPackStack.top();
 
 		LiteralDictEl *ldel = nspace->literalDict.find( interp );
 		if ( ldel != 0 )
@@ -1123,13 +1123,13 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 		LexJoin *join = literalJoin( $2->loc, $2->data );
 
 		TokenDef *tokenDef = TokenDef::cons( name, $2->data, true, false, join, 
-				0, $2->loc, pd->nextTokenId++, nspace, region, 0, 0, 0 );
+				0, $2->loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0, 0, 0 );
 
 		bool isZero = strcmp( interp.data, "" ) == 0;
 		tokenDef->isZero = isZero;
 
 		if ( !isZero )
-			region->tokenDefList.append( tokenDef );
+			regionSet->tokenIgnore->tokenDefList.append( tokenDef );
 
 		ldel = nspace->literalDict.insert( interp, tokenDef );
 		nspace->tokenDefList.append( tokenDef );
@@ -1140,11 +1140,11 @@ literal_item: opt_no_ignore TK_Literal opt_no_ignore
 			tokenDef->noPostIgnore = $3->noIgnore;
 
 			TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", $2->data, true, false, join, 
-					0, $2->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion, 0, 0, 0 );
+					0, $2->loc, pd->nextTokenId++, nspace, regionSet->tokenOnly, 0, 0, 0 );
 
 			tokenDefTok->dupOf = tokenDef;
 
-			region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
+			regionSet->tokenOnly->tokenDefList.append( tokenDefTok );
 
 			nspace->tokenDefList.append( tokenDefTok );
 		}
@@ -1194,14 +1194,14 @@ token_def:
 			name.setAs( 32, "_ignore_%.4x", pd->nextTokenId );
 
 		Namespace *nspace = namespaceStack.top();
-		TokenRegion *region = regionStack.top();
+		RegionSet *regionSet = regionPackStack.top();
 
 		TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
-				transBlock, $1->loc, pd->nextTokenId++, nspace, region,
+				transBlock, $1->loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore,
 				&reCaptureVect, curObjectDef,
 				contextStack.length() > 0 ? contextStack.top() : 0 );
 
-		region->tokenDefList.append( tokenDef );
+		regionSet->tokenIgnore->tokenDefList.append( tokenDef );
 		nspace->tokenDefList.append( tokenDef );
 
 		tokenDef->noPreIgnore = $5->noIgnore;
@@ -1210,24 +1210,24 @@ token_def:
 		/* All again for the ignore. */
 		if ( ignore ) {
 			TokenDef *tokenDefIgn = TokenDef::cons( name + "_ign", String(), false, ignore, join, 
-					0, $1->loc, pd->nextTokenId++, nspace, region->ignoreOnlyRegion,
+					0, $1->loc, pd->nextTokenId++, nspace, regionSet->ignoreOnly,
 					&reCaptureVect, curObjectDef,
 					contextStack.length() > 0 ? contextStack.top() : 0 );
 
 			tokenDefIgn->dupOf = tokenDef;
 
-			region->ignoreOnlyRegion->tokenDefList.append( tokenDefIgn );
+			regionSet->ignoreOnly->tokenDefList.append( tokenDefIgn );
 			nspace->tokenDefList.append( tokenDefIgn );
 		}
 		else {
 			TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", String(), false, ignore, join, 
-					0, $1->loc, pd->nextTokenId++, nspace, region->tokenOnlyRegion,
+					0, $1->loc, pd->nextTokenId++, nspace, regionSet->tokenOnly,
 					&reCaptureVect, curObjectDef,
 					contextStack.length() > 0 ? contextStack.top() : 0 );
 
 			tokenDefTok->dupOf = tokenDef;
 
-			region->tokenOnlyRegion->tokenDefList.append( tokenDefTok );
+			regionSet->tokenOnly->tokenDefList.append( tokenDefTok );
 			nspace->tokenDefList.append( tokenDefTok );
 		}
 
@@ -1310,8 +1310,8 @@ pre_eof:
 		CodeBlock *codeBlock = new CodeBlock( $3->stmtList, $2->localFrame );
 		codeBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
 
-		TokenRegion *region = regionStack.top();
-		region->preEofBlock = codeBlock;
+		RegionSet *regionSet = regionPackStack.top();
+		regionSet->tokenIgnore->preEofBlock = codeBlock;
 	};
 
 rl_def:
@@ -1917,8 +1917,7 @@ code_factor:
 	KW_Construct opt_capture type_ref opt_field_init constructor
 	final {
 		Namespace *nspace = namespaceStack.top();
-		TokenRegion *region = regionStack.top();
-		Constructor *constructor = Constructor::cons( $1->loc, nspace, region,
+		Constructor *constructor = Constructor::cons( $1->loc, nspace,
 				$5->list, pd->nextPatConsId++ );
 		pd->replList.append( constructor );
 		
@@ -1952,7 +1951,7 @@ code_factor:
 		 * Thisis the constructor for the parser. */
 		ConsItemList *emptyConsItemList = new ConsItemList;
 
-		Constructor *constructor = Constructor::cons( $1->loc, nspace, region,
+		Constructor *constructor = Constructor::cons( $1->loc, nspace,
 				emptyConsItemList, pd->nextPatConsId++ );
 		pd->replList.append( constructor );
 		
