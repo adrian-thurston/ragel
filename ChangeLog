@@ -1,11 +1,21 @@
-Colm 0.8 - Dec 29, 2012
+colm 0.9 - Feb 19, 2012
 -----------------------
+	* The parse loop now scans data that is owned by the input stream. It
+	  is copied into a contiguous block in the scanner when the token is
+	  consumed.
+	* The syntax of lexical regions was altered to omit the name. The
+	  curlies were replaced with lex ... end syntax.
+	* The syntax of namespaces were altered. Curlies were replaced with 
+	  namespace <ID> ... end.
 
- * The parse statement now includes a call to the finish operation. It returns
-   a value of type parser<Type>. The result tree and any error message can be
-   retrieved from this object using 'tree' and 'error' members.
- * Dropped curly brackets and the name from the syntax of lexical region
-   defintition. Using "lex ... end"
- * Dropped curly brackets from the syntax of namespaces and context blocks.
-   Using "namespace N ... end N" and "context N ... end N"
- * Now have a growable stack instead of a large, fixed, pre-allocated stack.
+colm 0.8 - Dec 29, 2012
+-----------------------
+	* The parse statement now includes a call to the finish operation. It
+	  returns a value of type parser<Type>. The result tree and any error
+	  message can be retrieved from this object using 'tree' and 'error'
+	  members.
+	* Dropped curly brackets and the name from the syntax of lexical region
+	  defintition. Using "lex ... end"
+	* Dropped curly brackets from the syntax of namespaces and context blocks.
+	  Using "namespace N ... end N" and "context N ... end N"
+	* Now have a growable stack instead of a large, fixed, pre-allocated stack.
