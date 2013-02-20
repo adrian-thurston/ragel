@@ -2797,20 +2797,28 @@ struct CodeBlock
 
 struct Function
 {
-	Function( TypeRef *typeRef, const String &name, 
-			ParameterList *paramList, CodeBlock *codeBlock, 
-			int funcId, bool isUserIter )
+	Function()
 	:
-		typeRef(typeRef),
-		name(name),
-		paramList(paramList),
-		codeBlock(codeBlock),
-		funcId(funcId),
-		isUserIter(isUserIter),
 		paramListSize(0),
 		paramUTs(0),
 		inContext(0)
 	{}
+
+	static Function *cons( TypeRef *typeRef, const String &name, 
+			ParameterList *paramList, CodeBlock *codeBlock, 
+			int funcId, bool isUserIter )
+	{
+		Function *f = new Function;
+
+		f->typeRef = typeRef;
+		f->name = name;
+		f->paramList = paramList;
+		f->codeBlock = codeBlock;
+		f->funcId = funcId;
+		f->isUserIter = isUserIter;
+
+		return f;
+	}
 
 	TransBlock *transBlock;
 	TypeRef *typeRef;

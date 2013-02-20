@@ -339,6 +339,57 @@ void ColmParser::blockClose()
 	pd->curLocalFrame = pd->rootLocalFrame;
 }
 
+void ColmParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
+	ParameterList *paramList, TypeRef *typeRef, const String &name )
+{
+	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
+	Function *newFunction = Function::cons( typeRef, name, 
+			paramList, codeBlock, pd->nextFuncId++, false );
+	pd->functionList.append( newFunction );
+
+	if ( contextStack.length() > 0 )
+		newFunction->inContext = contextStack.top();
+}
+
+void ColmParser::iterDef( StmtList *stmtList, ObjectDef *localFrame,
+	ParameterList *paramList, const String &name )
+{
+	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
+	Function *newFunction = Function::cons( 0, name, 
+			paramList, codeBlock, pd->nextFuncId++, true );
+	pd->functionList.append( newFunction );
+}
+
+LangStmt *ColmParser::globalDef( ObjectField *objField, LangExpr *expr, 
+		LangStmt::Type assignType )
+{
+	LangStmt *stmt = 0;
+
+	ObjectDef *object;
+	if ( contextStack.length() == 0 )
+		object = pd->globalObjectDef;
+	else {
+		Context *context = contextStack.top();
+		objField->context = context;
+		object = context->contextObjDef;
+	}
+
+	if ( object->checkRedecl( objField->name ) != 0 )
+		error(objField->loc) << "object field renamed" << endp;
+
+	object->insertField( objField->name, objField );
+
+	if ( expr != 0 ) {
+		LangVarRef *varRef = LangVarRef::cons( objField->loc, objField->name );
+
+		stmt = LangStmt::cons( objField->loc, 
+				assignType, varRef, expr );
+	}
+
+	return stmt;
+}
+
+
 %%{
 
 parser ColmParser;
@@ -403,22 +454,13 @@ block_close: '}'
 iter_def: 
 	KW_Iter TK_Word '(' opt_param_list ')' block_open lang_stmt_list block_close
 	final {
-		CodeBlock *codeBlock = CodeBlock::cons( $7->stmtList, $6->localFrame );
-		Function *newFunction = new Function( 0, $2->data, 
-				$4->paramList, codeBlock, pd->nextFuncId++, true );
-		pd->functionList.append( newFunction );
+		iterDef( $7->stmtList, $6->localFrame, $4->paramList, $2->data );
 	};
 
 function_def: 
 	type_ref TK_Word '(' opt_param_list ')' block_open lang_stmt_list block_close
 	final {
-		CodeBlock *codeBlock = CodeBlock::cons( $7->stmtList, $6->localFrame );
-		Function *newFunction = new Function( $1->typeRef, $2->data, 
-				$4->paramList, codeBlock, pd->nextFuncId++, false );
-		pd->functionList.append( newFunction );
-
-		if ( contextStack.length() > 0 )
-			newFunction->inContext = contextStack.top();
+		functionDef( $7->stmtList, $6->localFrame, $4->paramList, $1->typeRef, $2->data );
 	};
 
 nonterm opt_param_list uses param_list;
@@ -475,31 +517,8 @@ nonterm global_def uses statement;
 
 global_def: KW_Global var_def opt_def_init
 	final {
-		$$->stmt = 0;
-
-		ObjectDef *object;
-		if ( contextStack.length() == 0 )
-			object = pd->globalObjectDef;
-		else {
-			Context *context = contextStack.top();
-			$2->objField->context = context;
-			object = context->contextObjDef;
-		}
-
-		if ( object->checkRedecl( $2->objField->name ) != 0 )
-			error($2->objField->loc) << "object field renamed" << endp;
-
-		object->insertField( $2->objField->name, $2->objField );
-
-		if ( $3->expr != 0 ) {
-			LangVarRef *varRef = LangVarRef::cons( $2->objField->loc, 
-					$2->objField->name );
-
-			$$->stmt = LangStmt::cons( $2->objField->loc, 
-					$3->assignType, varRef, $3->expr );
-		}
+		$$->stmt = globalDef( $2->objField, $3->expr, $3->assignType );
 	};
-
 
 nonterm export_def uses statement;
 
