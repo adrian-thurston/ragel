@@ -117,6 +117,9 @@ struct ColmParser
 
 	void literalDef( const InputLoc &loc, const String &data,
 			bool noPreIgnore, bool noPostIgnore );
+
+	ObjectDef *blockOpen();
+	void blockClose();
 };
 
 %% write token_defs;

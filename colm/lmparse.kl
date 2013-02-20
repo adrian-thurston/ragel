@@ -310,6 +310,35 @@ void ColmParser::addArgvList()
 	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List, 0, typeRef, 0 );
 }
 
+ObjectDef *ColmParser::blockOpen()
+{
+	/* Init the object representing the local frame. */
+	ObjectDef *frame = ObjectDef::cons( ObjectDef::FrameType, 
+			"local", pd->nextObjectId++ );
+
+	pd->curLocalFrame = frame;
+
+	/* Add captures to the local frame. We Depend on these becoming the
+	 * first local variables so we can compute their location. */
+
+	/* Make local variables corresponding to the local capture vector. */
+	for ( ReCaptureVect::Iter c = reCaptureVect; c.lte(); c++ )
+	{
+		ObjectField *objField = ObjectField::cons( c->objField->loc,
+				c->objField->typeRef, c->objField->name );
+
+		/* Insert it into the field map. */
+		pd->curLocalFrame->insertField( objField->name, objField );
+	}
+
+	return frame;
+}
+
+void ColmParser::blockClose()
+{
+	pd->curLocalFrame = pd->rootLocalFrame;
+}
+
 %%{
 
 parser ColmParser;
@@ -362,30 +391,12 @@ nonterm block_open
 
 block_open: '{' 
 	final {
-		/* Init the object representing the local frame. */
-		$$->localFrame = ObjectDef::cons( ObjectDef::FrameType, 
-				"local", pd->nextObjectId++ );
-
-		pd->curLocalFrame = $$->localFrame;
-
-		/* Add captures to the local frame. We Depend on these becoming the
-		 * first local variables so we can compute their location. */
-
-		/* Make local variables corresponding to the local capture vector. */
-		for ( ReCaptureVect::Iter c = reCaptureVect; c.lte(); c++ )
-		{
-			ObjectField *objField = ObjectField::cons( c->objField->loc,
-					c->objField->typeRef, c->objField->name );
-
-			/* Insert it into the field map. */
-			pd->curLocalFrame->insertField( objField->name, objField );
-		}
+		$$->localFrame = blockOpen();
 	};
 
 block_close: '}' 
 	final {
-		/* Pop the cur local frame, back to the root. */
-		pd->curLocalFrame = pd->rootLocalFrame;
+		blockClose();
 	};
 
 
