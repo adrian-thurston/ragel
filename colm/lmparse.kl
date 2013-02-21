@@ -389,6 +389,189 @@ LangStmt *ColmParser::globalDef( ObjectField *objField, LangExpr *expr,
 	return stmt;
 }
 
+void ColmParser::cflDef( LelDefList *defList, bool reduceFirst )
+{
+	Namespace *nspace = namespaceStack.top();
+
+	NtDef *ntDef = NtDef::cons( 
+			curDefineId,
+			nspace, 
+			defList, 
+			curObjectDef,
+			contextStack.length() > 0 ? contextStack.top() : 0,
+			reduceFirst );
+
+	nspace->ntDefList.append( ntDef );
+}
+
+ReOrBlock *ColmParser::lexRegularExprData( ReOrBlock *reOrBlock, ReOrItem *reOrItem )
+{
+	ReOrBlock *ret;
+
+	/* An optimization to lessen the tree size. If an or char is directly under
+	 * the left side on the right and the right side is another or char then
+	 * paste them together and return the left side. Otherwise just put the two
+	 * under a new or data node. */
+	if ( reOrItem->type == ReOrItem::Data &&
+			reOrBlock->type == ReOrBlock::RecurseItem &&
+			reOrBlock->item->type == ReOrItem::Data )
+	{
+		/* Append the right side to right side of the left and toss the
+		 * right side. */
+		reOrBlock->item->data += reOrItem->data;
+		delete reOrItem;
+		ret = reOrBlock;
+	}
+	else {
+		/* Can't optimize, put the left and right under a new node. */
+		ret = ReOrBlock::cons( reOrBlock, reOrItem );
+	}
+	return ret;
+}
+
+LexFactor *ColmParser::lexRlFactorName( const String &data, const InputLoc &loc )
+{
+	LexFactor *factor = 0;
+	/* Find the named graph. */
+	Namespace *nspace = namespaceStack.top();
+
+	while ( nspace != 0 ) {
+		GraphDictEl *gdNode = nspace->rlMap.find( data );
+		if ( gdNode != 0 ) {
+			if ( gdNode->isInstance ) {
+				/* Recover by retuning null as the factor node. */
+				error(loc) << "references to graph instantiations not allowed "
+						"in expressions" << endl;
+				factor = 0;
+			}
+			else {
+				/* Create a factor node that is a lookup of an expression. */
+				factor = LexFactor::cons( loc, gdNode->value );
+			}
+			break;
+		}
+
+		nspace = nspace->parentNamespace;
+	}
+
+	if ( nspace == 0 ) {
+		/* Recover by returning null as the factor node. */
+		error(loc) << "graph lookup of \"" << data << "\" failed" << endl;
+		factor = 0;
+	}
+
+	return factor;
+}
+
+int ColmParser::lexFactorRepNum( const InputLoc &loc, const String &data )
+{
+	/* Convert the priority number to a long. Check for overflow. */
+	errno = 0;
+	int rep = strtol( data, 0, 10 );
+	if ( errno == ERANGE && rep == LONG_MAX ) {
+		/* Repetition too large. Recover by returing repetition 1. */
+		error(loc) << "repetition number " << data << " overflows" << endl;
+		rep = 1;
+	}
+	return rep;
+}
+
+LexFactorAug *ColmParser::lexFactorLabel( const InputLoc &loc, const String &data, LexFactorAug *factorAug )
+{
+	if ( curObjectDef->checkRedecl( data ) != 0 )
+		error(loc) << "label name \"" << data << "\" already in use" << endp;
+
+	/* Create the object field. */
+	TypeRef *typeRef = TypeRef::cons( loc, pd->uniqueTypeStr );
+	ObjectField *objField = ObjectField::cons( loc, typeRef, data );
+
+	/* Insert it into the map. */
+	curObjectDef->insertField( data, objField );
+
+	/* Create the enter and leaving actions that will mark the substring. */
+	Action *enter = Action::cons( MarkMark, pd->nextMatchEndNum++ );
+	Action *leave = Action::cons( MarkMark, pd->nextMatchEndNum++ );
+	pd->actionList.append( enter );
+	pd->actionList.append( leave );
+	
+	/* Add entering and leaving actions. */
+	factorAug->actions.append( ParserAction( loc, at_start, 0, enter ) );
+	factorAug->actions.append( ParserAction( loc, at_leave, 0, leave ) );
+
+	reCaptureVect.append( ReCapture( enter, leave, objField ) );
+
+	return factorAug;
+}
+
+LexJoin *ColmParser::lexOptJoin( LexJoin *join, LexJoin *context )
+{
+	if ( context != 0 ) {
+		/* Create the enter and leaving actions that will mark the substring. */
+		Action *mark = Action::cons( MarkMark, pd->nextMatchEndNum++ );
+		pd->actionList.append( mark );
+
+		join->context = context;
+		join->mark = mark;
+	}
+
+	return join;
+}
+
+LangExpr *ColmParser::send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list )
+{
+	Namespace *nspace = namespaceStack.top();
+	ParserText *parserText = ParserText::cons( loc, nspace, list );
+	pd->parserTextList.append( parserText );
+
+	return LangExpr::cons( LangTerm::cons( InputLoc(),
+			LangTerm::SendType, varRef, parserText ) );
+}
+
+LangExpr *ColmParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *objField,
+		TypeRef *typeRef, FieldInitVect *fieldInitVect, ConsItemList *list )
+{
+	LangExpr *expr = 0;
+
+	Namespace *nspace = namespaceStack.top();
+
+	/* We are constructing a parser, sending it items, then returning it.
+	 * Thisis the constructor for the parser. */
+	ConsItemList *emptyConsItemList = new ConsItemList;
+
+	Constructor *constructor = Constructor::cons( loc, nspace,
+			emptyConsItemList, pd->nextPatConsId++ );
+	pd->replList.append( constructor );
+	
+	/* The parser may be referenced. */
+	LangVarRef *varRef = 0;
+	if ( objField != 0 )
+		varRef = LangVarRef::cons( objField->loc, objField->name );
+
+	/* The typeref for the parser. */
+	TypeRef *parserTypeRef = TypeRef::cons( loc,
+			TypeRef::Parser, 0, typeRef, 0 );
+
+	ParserText *parserText = ParserText::cons( loc, nspace, list );
+	pd->parserTextList.append( parserText );
+
+	expr = LangExpr::cons( LangTerm::cons( loc, 
+			stop ? LangTerm::ParseStopType : LangTerm::ParseType,
+			varRef, objField, parserTypeRef, fieldInitVect, constructor, parserText ) );
+
+	/* Check for redeclaration. */
+	if ( objField != 0 ) {
+		if ( pd->curLocalFrame->checkRedecl( objField->name ) != 0 ) {
+			error( objField->loc ) << "variable " << objField->name <<
+					" redeclared" << endp;
+		}
+
+		/* Insert it into the field map. */
+		objField->typeRef = parserTypeRef;
+		pd->curLocalFrame->insertField( objField->name, objField );
+	}
+
+	return expr;
+}
 
 %%{
 
@@ -592,18 +775,11 @@ typedef:
 		nspace->typeAliasList.append( typeAlias );
 	};
 
-cfl_def: cfl_def_head obj_var_list properties_list cfl_prod_list
+cfl_def:
+	cfl_def_head obj_var_list properties_list cfl_prod_list
 	final {
-		Namespace *nspace = namespaceStack.top();
-		NtDef *ntDef = new NtDef( 
-				curDefineId,
-				nspace, 
-				$4->defList, 
-				curObjectDef,
-				contextStack.length() > 0 ? contextStack.top() : 0,
-				$3->property & PROPERTY_REDUCE_FIRST );
-
-		nspace->ntDefList.append( ntDef );
+		bool reduceFirst = $3->property & PROPERTY_REDUCE_FIRST;
+		cflDef( $4->defList, reduceFirst );
 	};
 
 cfl_def_head: KW_Def TK_Word
@@ -1398,7 +1574,7 @@ region_qual: region_qual TK_Word TK_DoubleColon
 
 region_qual: 
 	final {
-		$$->nspaceQual = new NamespaceQual( namespaceStack.top() );
+		$$->nspaceQual = NamespaceQual::cons( namespaceStack.top() );
 	};
 
 literal_def: KW_Literal literal_list;
@@ -1408,12 +1584,7 @@ literal_list: literal_item;
 
 literal_item: opt_no_ignore TK_Literal opt_no_ignore
 	final {
-		const InputLoc &loc = $2->loc;
-		const String &data = $2->data;
-		bool noPreIgnore = $1->noIgnore;
-		bool noPostIgnore = $3->noIgnore;
-
-		literalDef( loc, data, noPreIgnore, noPostIgnore );
+		literalDef( $2->loc, $2->data, $1->noIgnore, $3->noIgnore );
 	};
 
 
@@ -1439,16 +1610,8 @@ token_def:
 	enter_rl opt_no_ignore '/' opt_lex_join leave_rl '/' opt_no_ignore  
 	opt_translate
 	final {
-		const InputLoc &loc = $1->loc;
-		String name = $2->name;
-		LexJoin *join = $7->join;
-		CodeBlock *transBlock = $11->transBlock;
-		bool ignore = $1->ignore;
-		bool noPreIgnore = $5->noIgnore;
-		bool noPostIgnore = $10->noIgnore;
-
-		tokenDef( loc, name, join, transBlock, ignore,
-				noPreIgnore, noPostIgnore );
+		tokenDef( $1->loc, $2->name, $7->join, $11->transBlock, $1->ignore,
+				$5->noIgnore, $10->noIgnore );
 	};
 
 nonterm token_or_ignore
@@ -2150,65 +2313,18 @@ code_factor:
 code_factor: 
 	parse_cmd opt_capture type_ref opt_field_init accumulate
 	final {
-		Namespace *nspace = namespaceStack.top();
-
-		/* We are constructing a parser, sending it items, then returning it.
-		 * Thisis the constructor for the parser. */
-		ConsItemList *emptyConsItemList = new ConsItemList;
-
-		Constructor *constructor = Constructor::cons( $1->loc, nspace,
-				emptyConsItemList, pd->nextPatConsId++ );
-		pd->replList.append( constructor );
-		
-		/* The parser may be referenced. */
-		LangVarRef *varRef = 0;
-		if ( $2->objField != 0 )
-			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
-
-		/* The typeref for the parser. */
-		TypeRef *parserTypeRef = TypeRef::cons( $1->loc,
-				TypeRef::Parser, 0, $3->typeRef, 0 );
-
-		ParserText *parserText = ParserText::cons( $2->loc, nspace, $5->list );
-		pd->parserTextList.append( parserText );
-
-		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, 
-				$1->stop ? LangTerm::ParseStopType : LangTerm::ParseType,
-				varRef, $2->objField, parserTypeRef, $4->fieldInitVect, constructor, parserText ) );
-
-		/* Check for redeclaration. */
-		if ( $2->objField != 0 ) {
-			if ( pd->curLocalFrame->checkRedecl( $2->objField->name ) != 0 ) {
-				error( $2->objField->loc ) << "variable " << $2->objField->name <<
-						" redeclared" << endp;
-			}
-
-			/* Insert it into the field map. */
-			$2->objField->typeRef = parserTypeRef;
-			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
-		}
+		$$->expr = parseCmd( $1->loc, $1->stop, $2->objField,
+				$3->typeRef, $4->fieldInitVect, $5->list );
 	};
-
-
 code_factor: 
 	var_ref TK_LtLt accumulate
 	final {
-		Namespace *nspace = namespaceStack.top();
-		ParserText *parserText = ParserText::cons( $2->loc, nspace, $3->list );
-		pd->parserTextList.append( parserText );
-
-		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(),
-				LangTerm::SendType, $1->varRef, parserText ) );
+		$$->expr = send( $2->loc, $1->varRef, $3->list );
 	};
 code_factor: 
 	KW_Send var_ref accumulate
 	final {
-		Namespace *nspace = namespaceStack.top();
-		ParserText *parserText = ParserText::cons( $1->loc, nspace, $3->list );
-		pd->parserTextList.append( parserText );
-
-		$$->expr = LangExpr::cons( LangTerm::cons( InputLoc(),
-				LangTerm::SendType, $2->varRef, parserText ) );
+		$$->expr = send( $1->loc, $2->varRef, $3->list );
 	};
 code_factor: KW_TypeId '<' type_ref '>'
 	final {
@@ -2303,7 +2419,7 @@ nonterm field_init
 
 field_init: code_expr
 	final {
-		$$->fieldInit = new FieldInit( InputLoc(), "_name", $1->expr );
+		$$->fieldInit = FieldInit::cons( InputLoc(), "_name", $1->expr );
 	};
 
 #
@@ -2313,28 +2429,17 @@ field_init: code_expr
 nonterm opt_lex_join
 {
 	LexJoin *join;
-	LexJoin *context;
 };
 
-opt_lex_join: lex_join opt_context
+opt_lex_join:
+	lex_join opt_context
 	final {
-		$$->join = $1->join;
-		$$->context = $2->context;
-
-		if ( $2->context != 0 ) {
-			/* Create the enter and leaving actions that will mark the substring. */
-			Action *mark = Action::cons( MarkMark, pd->nextMatchEndNum++ );
-			pd->actionList.append( mark );
-
-			$$->join->context = $2->context;
-			$$->join->mark = mark;
-		}
+		$$->join = lexOptJoin( $1->join, $2->context );
 	};
 
 opt_lex_join:
 	final {
 		$$->join = 0;
-		$$->context = 0;
 	};
 
 nonterm lex_join
@@ -2353,8 +2458,17 @@ nonterm opt_context
 	LexJoin *context;
 };
 
-opt_context: '@' lex_join final { $$->context = $2->join; };
-opt_context: final { $$->context = 0; };
+opt_context:
+	'@' lex_join
+	final
+	{
+		$$->context = $2->join;
+	};
+
+opt_context:
+	final {
+		$$->context = 0;
+	};
 
 nonterm lex_expr
 {
@@ -2362,29 +2476,34 @@ nonterm lex_expr
 };
 
 lex_expr: 
-	lex_expr '|' lex_term_short final {
+	lex_expr '|' lex_term_short
+	final {
 		$$->expression = LexExpression::cons( $1->expression, 
 				$3->term, LexExpression::OrType );
 	};
 lex_expr: 
-	lex_expr '&' lex_term_short final {
+	lex_expr '&' lex_term_short
+	final {
 		$$->expression = LexExpression::cons( $1->expression, 
 				$3->term, LexExpression::IntersectType );
 	};
 # This priority specification overrides the innermost parsing strategy which
 # results ordered choice interpretation of the grammar.
 lex_expr: 
-	lex_expr '-' lex_term_short final {
+	lex_expr '-' lex_term_short
+	final {
 		$$->expression = LexExpression::cons( $1->expression, 
 				$3->term, LexExpression::SubtractType );
 	};
 lex_expr: 
-	lex_expr TK_DashDash lex_term_short final {
+	lex_expr TK_DashDash lex_term_short
+	final {
 		$$->expression = LexExpression::cons( $1->expression, 
 				$3->term, LexExpression::StrongSubtractType );
 	};
 lex_expr: 
-	lex_term_short final {
+	lex_term_short
+	final {
 		$$->expression = LexExpression::cons( $1->term );
 	};
 
@@ -2404,28 +2523,34 @@ nonterm lex_term
 };
 
 lex_term:
-	lex_term lex_factor_label final {
+	lex_term lex_factor_label
+	final {
 		$$->term = LexTerm::cons( $1->term, $2->factorAug );
 	};
 lex_term:
-	lex_term '.' lex_factor_label final {
+	lex_term '.' lex_factor_label
+	final {
 		$$->term = LexTerm::cons( $1->term, $3->factorAug );
 	};
 lex_term:
-	lex_term TK_ColonGt lex_factor_label final {
+	lex_term TK_ColonGt lex_factor_label
+	final {
 		$$->term = LexTerm::cons( $1->term, $3->factorAug, LexTerm::RightStartType );
 	};
 lex_term:
-	lex_term TK_ColonGtGt lex_factor_label final {
+	lex_term TK_ColonGtGt lex_factor_label
+	final {
 		$$->term = LexTerm::cons( $1->term, $3->factorAug, LexTerm::RightFinishType );
 	};
 lex_term:
-	lex_term TK_LtColon lex_factor_label final {
+	lex_term TK_LtColon lex_factor_label
+	final {
 		$$->term = LexTerm::cons( $1->term,
 				$3->factorAug, LexTerm::LeftType );
 	};
 lex_term:
-	lex_factor_label final {
+	lex_factor_label
+	final {
 		$$->term = LexTerm::cons( $1->factorAug );
 	};
 
@@ -2435,35 +2560,15 @@ nonterm lex_factor_label
 };
 
 lex_factor_label: 
-	factor_ep final {
+	factor_ep
+	final {
 		$$->factorAug = $1->factorAug;
 	};
 
 lex_factor_label: 
-	TK_Word ':' lex_factor_label final {
-		$$->factorAug = $3->factorAug;
-
-		if ( curObjectDef->checkRedecl( $1->data ) != 0 )
-			error($1->loc) << "label name \"" << $1->data << "\" already in use" << endp;
-
-		/* Create the object field. */
-		TypeRef *typeRef = TypeRef::cons( $1->loc, pd->uniqueTypeStr );
-		ObjectField *objField = ObjectField::cons( $1->loc, typeRef, $1->data );
-
-		/* Insert it into the map. */
-		curObjectDef->insertField( $1->data, objField );
-
-		/* Create the enter and leaving actions that will mark the substring. */
-		Action *enter = Action::cons( MarkMark, pd->nextMatchEndNum++ );
-		Action *leave = Action::cons( MarkMark, pd->nextMatchEndNum++ );
-		pd->actionList.append( enter );
-		pd->actionList.append( leave );
-		
-		/* Add entering and leaving actions. */
-		$$->factorAug->actions.append( ParserAction( $1->loc, at_start, 0, enter ) );
-		$$->factorAug->actions.append( ParserAction( $1->loc, at_leave, 0, leave ) );
-
-		reCaptureVect.append( ReCapture( enter, leave, objField ) );
+	TK_Word ':' lex_factor_label
+	final {
+		$$->factorAug = lexFactorLabel( $1->loc, $1->data, $3->factorAug );
 	};
 
 nonterm factor_ep
@@ -2472,7 +2577,8 @@ nonterm factor_ep
 };
 
 factor_ep: 
-	factor_aug final {
+	factor_aug
+	final {
 		$$->factorAug = $1->factorAug;
 	};
 
@@ -2482,7 +2588,8 @@ nonterm factor_aug
 };
 
 factor_aug:
-	lex_factor_rep final {
+	lex_factor_rep
+	final {
 		$$->factorAug = LexFactorAug::cons( $1->factorRep );
 	};
 
@@ -2496,47 +2603,56 @@ nonterm lex_factor_rep
 };
 
 lex_factor_rep:
-	lex_factor_rep '*' final {
+	lex_factor_rep '*'
+	final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				0, 0, LexFactorRep::StarType );
 	};
 lex_factor_rep:
-	lex_factor_rep TK_StarStar final {
+	lex_factor_rep TK_StarStar
+	final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				0, 0, LexFactorRep::StarStarType );
 	};
 lex_factor_rep:
-	lex_factor_rep '?' final {
+	lex_factor_rep '?'
+	final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				0, 0, LexFactorRep::OptionalType );
 	};
 lex_factor_rep:
-	lex_factor_rep '+' final {
+	lex_factor_rep '+'
+	final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				0, 0, LexFactorRep::PlusType );
 	};
 lex_factor_rep:
-	lex_factor_rep '{' lex_factor_rep_num '}' final {
+	lex_factor_rep '{' lex_factor_rep_num '}'
+	final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				$3->rep, 0, LexFactorRep::ExactType );
 	};
 lex_factor_rep:
-	lex_factor_rep '{' ',' lex_factor_rep_num '}' final {
+	lex_factor_rep '{' ',' lex_factor_rep_num '}'
+	final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				0, $4->rep, LexFactorRep::MaxType );
 	};
 lex_factor_rep:
-	lex_factor_rep '{' lex_factor_rep_num ',' '}' final {
+	lex_factor_rep '{' lex_factor_rep_num ',' '}'
+	final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep,
 				$3->rep, 0, LexFactorRep::MinType );
 	};
 lex_factor_rep:
-	lex_factor_rep '{' lex_factor_rep_num ',' lex_factor_rep_num '}' final {
+	lex_factor_rep '{' lex_factor_rep_num ',' lex_factor_rep_num '}'
+	final {
 		$$->factorRep = LexFactorRep::cons( $2->loc, $1->factorRep, 
 				$3->rep, $5->rep, LexFactorRep::RangeType );
 	};
 lex_factor_rep:
-	lex_factor_neg final {
+	lex_factor_neg
+	final {
 		$$->factorRep = LexFactorRep::cons( 
 				$1->factorNeg->loc, $1->factorNeg );
 	};
@@ -2547,19 +2663,9 @@ nonterm lex_factor_rep_num
 };
 
 lex_factor_rep_num:
-	TK_UInt final {
-		// Convert the priority number to a long. Check for overflow.
-		errno = 0;
-		int rep = strtol( $1->data, 0, 10 );
-		if ( errno == ERANGE && rep == LONG_MAX ) {
-			// Repetition too large. Recover by returing repetition 1. */
-			error($1->loc) << "repetition number " << $1->data << " overflows" << endl;
-			$$->rep = 1;
-		}
-		else {
-			// Cannot be negative, so no overflow.
-			$$->rep = rep;
- 		}
+	TK_UInt
+	final {
+		$$->rep = lexFactorRepNum( $1->loc, $1->data );
 	};
 
 
@@ -2573,17 +2679,20 @@ nonterm lex_factor_neg
 };
 
 lex_factor_neg:
-	'!' lex_factor_neg final {
+	'!' lex_factor_neg
+	final {
 		$$->factorNeg = LexFactorNeg::cons( $1->loc,
 				$2->factorNeg, LexFactorNeg::NegateType );
 	};
 lex_factor_neg:
-	'^' lex_factor_neg final {
+	'^' lex_factor_neg
+	final {
 		$$->factorNeg = LexFactorNeg::cons( $1->loc,
 				$2->factorNeg, LexFactorNeg::CharNegateType );
 	};
 lex_factor_neg:
-	lex_rl_factor final {
+	lex_rl_factor
+	final {
 		$$->factorNeg = LexFactorNeg::cons( $1->factor->loc, $1->factor );
 	};
 
@@ -2593,63 +2702,45 @@ nonterm lex_rl_factor
 };
 
 lex_rl_factor: 
-	TK_Literal final {
+	TK_Literal
+	final {
 		/* Create a new factor node going to a concat literal. */
-		$$->factor = LexFactor::cons( Literal::cons( $1->loc, $1->data, Literal::LitString ) );
+		$$->factor = LexFactor::cons( Literal::cons( $1->loc,
+				$1->data, Literal::LitString ) );
 	};
 lex_rl_factor: 
-	lex_alphabet_num final {
+	lex_alphabet_num
+	final {
 		/* Create a new factor node going to a literal number. */
 		$$->factor = LexFactor::cons( Literal::cons( $1->loc, 
 				$1->data, Literal::Number ) );
 	};
 lex_rl_factor:
-	TK_Word final {
-		/* Find the named graph. */
-		Namespace *nspace = namespaceStack.top();
-
-		while ( nspace != 0 ) {
-			GraphDictEl *gdNode = nspace->rlMap.find( $1->data );
-			if ( gdNode != 0 ) {
-				if ( gdNode->isInstance ) {
-					/* Recover by retuning null as the factor node. */
-					error($1->loc) << "references to graph instantiations not allowed "
-							"in expressions" << endl;
-					$$->factor = 0;
-				}
-				else {
-					/* Create a factor node that is a lookup of an expression. */
-					$$->factor = LexFactor::cons( $1->loc, gdNode->value );
-				}
-				break;
-			}
-
-			nspace = nspace->parentNamespace;
-		}
-
-		if ( nspace == 0 ) {
-			/* Recover by returning null as the factor node. */
-			error($1->loc) << "graph lookup of \"" << $1->data << "\" failed" << endl;
-			$$->factor = 0;
-		}
+	TK_Word
+	final {
+		$$->factor = lexRlFactorName( $1->data, $1->loc );
 	};
 lex_rl_factor:
-	TK_SqOpen lex_regular_expr_or_data TK_SqClose final {
+	TK_SqOpen lex_regular_expr_or_data TK_SqClose
+	final {
 		/* Create a new factor node going to an OR expression. */
 		$$->factor = LexFactor::cons( ReItem::cons( $1->loc, $2->reOrBlock, ReItem::OrBlock ) );
 	};
 lex_rl_factor:
-	TK_SqOpenNeg lex_regular_expr_or_data TK_SqClose final {
+	TK_SqOpenNeg lex_regular_expr_or_data TK_SqClose
+	final {
 		/* Create a new factor node going to a negated OR expression. */
 		$$->factor = LexFactor::cons( ReItem::cons( $1->loc, $2->reOrBlock, ReItem::NegOrBlock ) );
 	};
 lex_rl_factor:
-	lex_range_lit TK_DotDot lex_range_lit final {
+	lex_range_lit TK_DotDot lex_range_lit
+	final {
 		/* Create a new factor node going to a range. */
 		$$->factor = LexFactor::cons( Range::cons( $1->literal, $3->literal ) );
 	};
 lex_rl_factor:
-	'(' lex_join ')' final {
+	'(' lex_join ')'
+	final {
 		/* Create a new factor going to a parenthesized join. */
 		$$->factor = LexFactor::cons( $2->join );
 	};
@@ -2661,12 +2752,14 @@ nonterm lex_range_lit
 
 # Literals which can be the end points of ranges.
 lex_range_lit:
-	TK_Literal final {
+	TK_Literal
+	final {
 		/* Range literas must have only one char. We restrict this in the parse tree. */
 		$$->literal = Literal::cons( $1->loc, $1->data, Literal::LitString );
 	};
 lex_range_lit:
-	lex_alphabet_num final {
+	lex_alphabet_num
+	final {
 		/* Create a new literal number. */
 		$$->literal = Literal::cons( $1->loc, $1->data, Literal::Number );
 	};
@@ -2675,18 +2768,21 @@ nonterm lex_alphabet_num uses token_data;
 
 # Any form of a number that can be used as a basic machine. */
 lex_alphabet_num:
-	TK_UInt final { 
+	TK_UInt
+	final { 
 		$$->loc = $1->loc;
 		$$->data = $1->data;
 	};
 lex_alphabet_num: 
-	'-' TK_UInt final { 
+	'-' TK_UInt
+	final { 
 		$$->loc = $1->loc;
 		$$->data = '+';
 		$$->data += $2->data;
 	};
 lex_alphabet_num: 
-	TK_Hex final { 
+	TK_Hex
+	final { 
 		$$->loc = $1->loc;
 		$$->data = $1->data;
 	};
@@ -2704,25 +2800,9 @@ nonterm lex_regular_expr_or_data
 };
 
 lex_regular_expr_or_data:
-	lex_regular_expr_or_data lex_regular_expr_or_char final {
-		/* An optimization to lessen the tree size. If an or char is directly
-		 * under the left side on the right and the right side is another or
-		 * char then paste them together and return the left side. Otherwise
-		 * just put the two under a new or data node. */
-		if ( $2->reOrItem->type == ReOrItem::Data &&
-				$1->reOrBlock->type == ReOrBlock::RecurseItem &&
-				$1->reOrBlock->item->type == ReOrItem::Data )
-		{
-			/* Append the right side to right side of the left and toss the
-			 * right side. */
-			$1->reOrBlock->item->data += $2->reOrItem->data;
-			delete $2->reOrItem;
-			$$->reOrBlock = $1->reOrBlock;
-		}
-		else {
-			/* Can't optimize, put the left and right under a new node. */
-			$$->reOrBlock = ReOrBlock::cons( $1->reOrBlock, $2->reOrItem );
-		}
+	lex_regular_expr_or_data lex_regular_expr_or_char
+	final {
+		$$->reOrBlock = lexRegularExprData( $1->reOrBlock, $2->reOrItem );
 	};
 lex_regular_expr_or_data:
 	final {
@@ -2737,11 +2817,14 @@ nonterm lex_regular_expr_or_char
 };
 
 lex_regular_expr_or_char:
-	TK_ReChar final {
+	TK_ReChar
+	final {
 		$$->reOrItem = ReOrItem::cons( $1->loc, $1->data );
 	};
+
 lex_regular_expr_or_char:
-	TK_ReChar TK_Dash TK_ReChar final {
+	TK_ReChar TK_Dash TK_ReChar
+	final {
 		$$->reOrItem = ReOrItem::cons( $2->loc, $1->data[0], $3->data[0] );
 	};
 
@@ -2750,8 +2833,16 @@ nonterm opt_commit
 	bool commit;
 };
 
-opt_commit: final { $$->commit = false; };
-opt_commit: KW_Commit final { $$->commit = true; };
+opt_commit:
+	final {
+		$$->commit = false;
+	};
+
+opt_commit:
+	KW_Commit
+	final {
+		$$->commit = true;
+	};
 
 #
 # Grammar Finished

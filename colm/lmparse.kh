@@ -124,8 +124,17 @@ struct ColmParser
 			ParameterList *paramList, TypeRef *typeRef, const String &name );
 	void iterDef( StmtList *stmtList, ObjectDef *localFrame,
 			ParameterList *paramList, const String &name );
-	LangStmt *globalDef( ObjectField *objField, LangExpr *expr, 
-			LangStmt::Type assignType );
+	LangStmt *globalDef( ObjectField *objField, LangExpr *expr, LangStmt::Type assignType );
+	void cflDef( LelDefList *defList, bool reduceFirst );
+	ReOrBlock *lexRegularExprData( ReOrBlock *reOrBlock, ReOrItem *reOrItem );
+
+	int lexFactorRepNum( const InputLoc &loc, const String &data );
+	LexFactor *lexRlFactorName( const String &data, const InputLoc &loc );
+	LexFactorAug *lexFactorLabel( const InputLoc &loc, const String &data, LexFactorAug *factorAug );
+	LexJoin *lexOptJoin( LexJoin *join, LexJoin *context );
+	LangExpr *send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list );
+	LangExpr *parseCmd( const InputLoc &loc, bool stop, ObjectField *objField,
+		TypeRef *typeRef, FieldInitVect *fieldInitVect, ConsItemList *list );
 };
 
 %% write token_defs;

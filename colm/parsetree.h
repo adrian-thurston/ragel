@@ -294,8 +294,18 @@ typedef CmpTable<String, CmpStr> CmpStrVect;
 
 struct NamespaceQual
 {
-	NamespaceQual( Namespace *declInNspace ) : 
-		cachedNspaceQual(0), declInNspace(declInNspace) {}
+	NamespaceQual()
+	:
+		cachedNspaceQual(0),
+		declInNspace(0)
+	{}
+
+	static NamespaceQual *cons( Namespace *declInNspace )
+	{
+		NamespaceQual *nsq = new NamespaceQual;
+		nsq->declInNspace = declInNspace;
+		return nsq;
+	}
 
 	Namespace *cachedNspaceQual;
 	Namespace *declInNspace;
@@ -422,17 +432,21 @@ struct LelDefList;
 
 struct NtDef
 {
-	NtDef( const String &name, Namespace *nspace,
+	static NtDef *cons( const String &name, Namespace *nspace,
 		LelDefList *defList, ObjectDef *objectDef,
 		Context *contextIn, bool reduceFirst )
-	: 
-		name(name), 
-		nspace(nspace),
-		defList(defList),
-		objectDef(objectDef),
-		contextIn(contextIn),
-		reduceFirst(reduceFirst)
-	{}
+	{ 
+		NtDef *nt = new NtDef;
+
+		nt->name = name;
+		nt->nspace = nspace;
+		nt->defList = defList;
+		nt->objectDef = objectDef;
+		nt->contextIn = contextIn;
+		nt->reduceFirst = reduceFirst;
+
+		return nt;
+	}
 
 	String name;
 	Namespace *nspace;
@@ -2200,8 +2214,14 @@ typedef Vector<String> StringVect;
 
 struct FieldInit
 {
-	FieldInit( const InputLoc &loc, String name, LangExpr *expr )
-		: loc(loc), name(name), expr(expr) {}
+	static FieldInit *cons( const InputLoc &loc, String name, LangExpr *expr )
+	{
+		FieldInit *fi = new FieldInit;
+		fi->loc = loc;
+		fi->name = name;
+		fi->expr = expr;
+		return fi;
+	}
 
 	InputLoc loc;
 	String name;
