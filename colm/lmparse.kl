@@ -573,6 +573,258 @@ LangExpr *ColmParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	return expr;
 }
 
+PatternItemList *ColmParser::patternEl( LangVarRef *varRef, PatternItemList *list )
+{
+	/* Store the variable reference in the pattern itemm. */
+	list->head->varRef = varRef;
+
+	if ( varRef != 0 ) {
+		if ( pd->curLocalFrame->checkRedecl( varRef->name ) != 0 ) {
+			error( varRef->loc ) << "variable " << varRef->name << 
+					" redeclared" << endp;
+		}
+
+		TypeRef *typeRef = list->head->factor->typeRef;
+		ObjectField *objField = ObjectField::cons( InputLoc(), typeRef, varRef->name );
+
+		/* Insert it into the field map. */
+		pd->curLocalFrame->insertField( varRef->name, objField );
+	}
+
+	return list;
+}
+
+PatternItemList *ColmParser::patternElNamed( const InputLoc &loc,
+		NamespaceQual *nspaceQual, const String &data, RepeatType repeatType )
+{
+	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, data, repeatType );
+	ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef, 0 );
+	PatternItem *patternItem = PatternItem::cons( loc, prodEl, PatternItem::FactorType );
+	return PatternItemList::cons( patternItem );
+}
+
+PatternItemList *ColmParser::patternElType( const InputLoc &loc,
+		NamespaceQual *nspaceQual, const String &data, RepeatType repeatType )
+{
+	PdaLiteral *literal = new PdaLiteral( loc, data );
+	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, literal, repeatType );
+
+	ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef, 0 );
+	PatternItem *patternItem = PatternItem::cons( loc, prodEl, PatternItem::FactorType );
+	return PatternItemList::cons( patternItem );
+}
+
+PatternItemList *ColmParser::patListConcat( PatternItemList *list1,
+		PatternItemList *list2 )
+{
+	list1->append( *list2 );
+	delete list2;
+	return list1;
+}
+
+ConsItemList *ColmParser::consListConcat( ConsItemList *list1,
+		ConsItemList *list2 )
+{
+	list1->append( *list2 );
+	delete list2;
+	return list1;
+}
+
+LangStmt *ColmParser::forScope( const InputLoc &loc, const String &data,
+		TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList )
+{
+	/* Check for redeclaration. */
+	if ( pd->curLocalFrame->checkRedecl( data ) != 0 )
+		error( loc ) << "variable " << data << " redeclared" << endp;
+
+	/* Note that we pass in a null type reference. This type is dependent
+	 * on the result of the iter_call lookup since it must contain a reference
+	 * to the iterator that is called. This lookup is done at compile time. */
+	ObjectField *iterField = ObjectField::cons( loc, (TypeRef*)0, data );
+	pd->curLocalFrame->insertField( data, iterField );
+
+	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
+			iterField, typeRef, langTerm, stmtList );
+
+	return stmt;
+}
+
+void ColmParser::preEof( const InputLoc &loc, StmtList *stmtList, ObjectDef *localFrame )
+{
+	bool insideRegion = regionStack.length() > 1;
+	if ( !insideRegion )
+		error(loc) << "preeof must be used inside an existing region" << endl;
+
+	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
+	codeBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
+
+	RegionSet *regionSet = regionStack.top();
+	regionSet->tokenIgnore->preEofBlock = codeBlock;
+}
+
+ProdEl *ColmParser::prodElName( const InputLoc &loc, const String &data,
+		NamespaceQual *nspaceQual, ObjectField *objField,
+		RepeatType repeatType, bool commit )
+{
+	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, data, repeatType );
+	ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, loc, objField, commit, typeRef, 0 );
+
+	/* If there is a capture, create the field. */
+	if ( objField != 0 ) {
+		/* Might already exist. */
+		ObjectField *newOf = curObjectDef->checkRedecl( objField->name );
+		if ( newOf == 0 ) {
+			newOf = objField;
+			newOf->typeRef = typeRef;
+			curObjectDef->insertField( newOf->name, newOf );
+		}
+		else {
+			/* FIXME: check the types are the same. */
+			//error() << "object field renamed" << endp;
+		}
+
+		newOf->isRhsGet = true;
+		newOf->rhsVal.append( RhsVal( prodEl ) );
+	}
+
+	return prodEl;
+}
+
+ProdEl *ColmParser::prodElLiteral( const InputLoc &loc, const String &data,
+		NamespaceQual *nspaceQual, ObjectField *objField, RepeatType repeatType,
+		bool commit )
+{
+	/* Create a new prodEl node going to a concat literal. */
+	PdaLiteral *literal = new PdaLiteral( loc, data );
+	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, literal, repeatType );
+	ProdEl *prodEl = new ProdEl( ProdEl::LiteralType, loc, objField, commit, typeRef, 0 );
+
+	/* If there is a capture, create the field. */
+	if ( objField != 0 ) {
+		objField->typeRef = typeRef;
+		if ( curObjectDef->checkRedecl( objField->name ) != 0 )
+			error() << "object field renamed" << endp;
+
+		curObjectDef->insertField( objField->name, objField );
+	}
+
+	return prodEl;
+}
+
+ConsItemList *ColmParser::consElLiteral( const InputLoc &loc,
+		const String &data, NamespaceQual *nspaceQual )
+{
+	PdaLiteral *literal = new PdaLiteral( loc, data );
+	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, literal );
+	ProdEl *prodEl = new ProdEl( ProdEl::LiteralType, loc, 0, false, typeRef, 0 );
+	ConsItem *consItem = ConsItem::cons( loc, ConsItem::FactorType, prodEl );
+	ConsItemList *list = ConsItemList::cons( consItem );
+	return list;
+}
+
+Production *ColmParser::production( const InputLoc &loc, ProdElList *prodElList,
+		bool commit, CodeBlock *codeBlock, LangEl *predOf )
+{
+	Production *prod = Production::cons( loc, 0, prodElList,
+			commit, codeBlock, pd->prodList.length(), 0 );
+	prod->predOf = predOf;
+
+	/* Link the production elements back to the production. */
+	for ( ProdEl *prodEl = prodElList->head; prodEl != 0; prodEl = prodEl->next )
+		prodEl->production = prod;
+
+	pd->prodList.append( prod );
+
+	return prod;
+}
+
+void ColmParser::objVarDef( ObjectField *objField )
+{
+	if ( curObjectDef->checkRedecl( objField->name ) != 0 )
+		error() << "object field renamed" << endp;
+
+	curObjectDef->insertField( objField->name, objField );
+}
+
+LelDefList *ColmParser::prodAppend( LelDefList *defList, Production *definition )
+{
+	definition->prodNum = defList->length();
+	defList->append( definition );
+	return defList;
+}
+
+LangExpr *ColmParser::construct( const InputLoc &loc, ObjectField *objField,
+		ConsItemList *list, TypeRef *typeRef, FieldInitVect *fieldInitVect )
+{
+	Namespace *nspace = namespaceStack.top();
+	Constructor *constructor = Constructor::cons( loc, nspace,
+			list, pd->nextPatConsId++ );
+	pd->replList.append( constructor );
+	
+	LangVarRef *varRef = 0;
+	if ( objField != 0 )
+		varRef = LangVarRef::cons( objField->loc, objField->name );
+
+	LangExpr *expr = LangExpr::cons( LangTerm::cons( loc, LangTerm::ConstructType,
+			varRef, objField, typeRef, fieldInitVect, constructor ) );
+
+	/* Check for redeclaration. */
+	if ( objField != 0 ) {
+		if ( pd->curLocalFrame->checkRedecl( objField->name ) != 0 ) {
+			error( objField->loc ) << "variable " << objField->name <<
+					" redeclared" << endp;
+		}
+
+		/* Insert it into the field map. */
+		objField->typeRef = typeRef;
+		pd->curLocalFrame->insertField( objField->name, objField );
+	}
+
+	return expr;
+}
+
+LangExpr *ColmParser::match( const InputLoc &loc, LangVarRef *varRef,
+		PatternItemList *list )
+{
+	Namespace *nspace = namespaceStack.top();
+
+	Pattern *pattern = Pattern::cons( loc, nspace,
+			list, pd->nextPatConsId++ );
+	pd->patternList.append( pattern );
+
+	LangExpr *expr = LangExpr::cons( LangTerm::cons( 
+			InputLoc(), LangTerm::MatchType, varRef, pattern ) );
+
+	return expr;
+}
+
+LangStmt *ColmParser::varDef( ObjectField *objField,
+		LangExpr *expr, LangStmt::Type assignType )
+{
+	LangStmt *stmt = 0;
+
+	/* Check for redeclaration. */
+	if ( pd->curLocalFrame->checkRedecl( objField->name ) != 0 ) {
+		error( objField->loc ) << "variable " << objField->name <<
+				" redeclared" << endp;
+	}
+
+	/* Insert it into the field map. */
+	pd->curLocalFrame->insertField( objField->name, objField );
+
+	//cout << "var def " << $1->objField->name << endl;
+
+	if ( expr != 0 ) {
+		LangVarRef *varRef = LangVarRef::cons( objField->loc, 
+				objField->name );
+
+		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
+	}
+
+	return stmt;
+}
+
+
 %%{
 
 parser ColmParser;
@@ -794,15 +1046,12 @@ nonterm cfl_prod_list
 
 cfl_prod_list: cfl_prod_list '|' define_prod
 	final {
-		$$->defList = $1->defList;
-		$3->definition->prodNum = $$->defList->length();
-		$$->defList->append( $3->definition );
+		$$->defList = prodAppend( $1->defList, $3->definition );
 	};
 cfl_prod_list: define_prod
 	final {
-		$$->defList = new LelDefList;
-		$1->definition->prodNum = $$->defList->length();
-		$$->defList->append( $1->definition );
+		LelDefList *defList = new LelDefList;
+		$$->defList = prodAppend( defList, $1->definition );
 	};
 
 nonterm property
@@ -850,27 +1099,13 @@ nonterm define_prod
 
 define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 	final {
-		ProdElList *prodElList = $2->list;
-
-		Production *prod = Production::cons( $1->loc, 0, 
-				prodElList, $4->commit, $5->codeBlock,
-				pd->prodList.length(), 0 );
-		prod->predOf = $6->predOf;
-
-		/* Link the production elements back to the production. */
-		for ( ProdEl *prodEl = prodElList->head; prodEl != 0; prodEl = prodEl->next )
-			prodEl->production = prod;
-		
-		pd->prodList.append( prod );
-		$$->definition = prod;
+		$$->definition = production( $1->loc, $2->list, $4->commit,
+				$5->codeBlock, $6->predOf );
 	};
 
 obj_var_list: obj_var_list var_def
 	final {
-		if ( curObjectDef->checkRedecl( $2->objField->name ) != 0 )
-			error() << "object field renamed" << endp;
-
-		curObjectDef->insertField( $2->objField->name, $2->objField );
+		objVarDef( $2->objField );
 	};
 
 obj_var_list:
@@ -1044,9 +1279,7 @@ nonterm pattern_list uses pattern;
 
 pattern_list: pattern_list pattern_top_el
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = patListConcat( $1->list, $2->list );
 	};
 pattern_list: pattern_top_el
 	final {
@@ -1068,9 +1301,7 @@ nonterm litpat_el_list uses pattern;
 
 litpat_el_list: litpat_el_list litpat_el
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = patListConcat( $1->list, $2->list );
 	};
 litpat_el_list: 
 	final {
@@ -1082,9 +1313,8 @@ nonterm litpat_el uses pattern;
 litpat_el: TK_LitPat
 	final {
 		PatternItem *patternItem = PatternItem::cons( $1->loc, $1->data,
-			PatternItem::InputText );
-		$$->list = new PatternItemList;
-		$$->list->append( patternItem );
+				PatternItem::InputText );
+		$$->list = PatternItemList::cons( patternItem );
 	};
 
 litpat_el: '[' pattern_el_list ']'
@@ -1097,9 +1327,7 @@ nonterm pattern_el_list uses pattern;
 pattern_el_list: 
 	pattern_el_list pattern_el
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = patListConcat( $1->list, $2->list );
 	};
 pattern_el_list: 
 	final {
@@ -1111,23 +1339,7 @@ nonterm pattern_el uses pattern;
 pattern_el: 
 	opt_label pattern_el_type_or_lit
 	final {
-		/* Store the variable reference in the pattern itemm. */
-		$2->list->head->varRef = $1->varRef;
-
-		if ( $1->varRef != 0 ) {
-			if ( pd->curLocalFrame->checkRedecl( $1->varRef->name ) != 0 ) {
-				error( $1->varRef->loc ) << "variable " << $1->varRef->name << 
-						" redeclared" << endp;
-			}
-
-			TypeRef *typeRef = $2->list->head->factor->typeRef;
-			ObjectField *objField = ObjectField::cons( InputLoc(), typeRef, $1->varRef->name );
-
-			/* Insert it into the field map. */
-			pd->curLocalFrame->insertField( $1->varRef->name, objField );
-		}
-
-		$$->list = $2->list;
+		$$->list = patternEl( $1->varRef, $2->list );
 	};
 
 nonterm pattern_el uses pattern;
@@ -1147,23 +1359,13 @@ nonterm pattern_el_type_or_lit uses pattern;
 pattern_el_type_or_lit: 
 	region_qual TK_Word opt_repeat
 	final {
-		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data, $3->repeatType );
-		ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
-		PatternItem *patternItem = PatternItem::cons( $2->loc, prodEl, PatternItem::FactorType );
-		$$->list = new PatternItemList;
-		$$->list->append( patternItem );
+		$$->list = patternElNamed( $2->loc, $1->nspaceQual, $2->data, $3->repeatType );
 	};
 
 pattern_el_type_or_lit: 
 	region_qual TK_Literal opt_repeat
 	final {
-		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
-		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal, $3->repeatType );
-
-		ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, $2->loc, 0, false, typeRef, 0 );
-		PatternItem *patternItem = PatternItem::cons( $2->loc, prodEl, PatternItem::FactorType );
-		$$->list = new PatternItemList;
-		$$->list->append( patternItem );
+		$$->list = patternElType( $2->loc, $1->nspaceQual, $2->data, $3->repeatType );
 	};
 
 nonterm opt_label
@@ -1199,9 +1401,7 @@ nonterm cons_list uses constructor;
 
 cons_list: cons_top_el cons_list
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = consListConcat( $1->list, $2->list );
 	};
 cons_list: cons_top_el
 	final {
@@ -1223,9 +1423,7 @@ nonterm lit_cons_el_list uses constructor;
 
 lit_cons_el_list: lit_cons_el_list lit_cons_el
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = consListConcat( $1->list, $2->list );
 	};
 lit_cons_el_list: 
 	final {
@@ -1237,8 +1435,7 @@ nonterm lit_cons_el uses constructor;
 lit_cons_el: TK_LitPat
 	final {
 		ConsItem *consItem = ConsItem::cons( $1->loc, ConsItem::InputText, $1->data );
-		$$->list = new ConsItemList;
-		$$->list->append( consItem );
+		$$->list = ConsItemList::cons( consItem );
 	};
 
 lit_cons_el: '[' cons_el_list ']'
@@ -1250,9 +1447,7 @@ nonterm cons_el_list uses constructor;
 
 cons_el_list: cons_el_list cons_el
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = consListConcat( $1->list, $2->list );
 	};
 cons_el_list: 
 	final {
@@ -1263,12 +1458,7 @@ nonterm cons_el uses constructor;
 
 cons_el: region_qual TK_Literal
 	final {
-		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
-		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
-		ProdEl *prodEl = new ProdEl( ProdEl::LiteralType, $2->loc, 0, false, typeRef, 0 );
-		ConsItem *consItem = ConsItem::cons( $2->loc, ConsItem::FactorType, prodEl );
-		$$->list = new ConsItemList;
-		$$->list->append( consItem );
+		$$->list = consElLiteral( $2->loc, $2->data, $1->nspaceQual );
 	};
 
 cons_el: '"' lit_cons_el_list '"'
@@ -1279,8 +1469,7 @@ cons_el: '"' lit_cons_el_list '"'
 cons_el: code_expr
 	final {
 		ConsItem *consItem = ConsItem::cons( $1->expr->loc, ConsItem::ExprType, $1->expr );
-		$$->list = new ConsItemList;
-		$$->list->append( consItem );
+		$$->list = ConsItemList::cons( consItem );
 	};
 
 #
@@ -1302,9 +1491,7 @@ nonterm accum_list uses accumulate;
 
 accum_list: accum_top_el accum_list
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = consListConcat( $1->list, $2->list );
 	};
 
 accum_list: accum_top_el
@@ -1329,9 +1516,7 @@ nonterm lit_accum_el_list uses accumulate;
 lit_accum_el_list:
 	lit_accum_el_list lit_accum_el
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = consListConcat( $1->list, $2->list );
 	};
 
 lit_accum_el_list: 
@@ -1344,8 +1529,7 @@ nonterm lit_accum_el uses accumulate;
 lit_accum_el: TK_LitPat
 	final {
 		ConsItem *consItem = ConsItem::cons( $1->loc, ConsItem::InputText, $1->data );
-		$$->list = new ConsItemList;
-		$$->list->append( consItem );
+		$$->list = ConsItemList::cons( consItem );
 	};
 
 lit_accum_el: '[' accum_el_list ']'
@@ -1357,9 +1541,7 @@ nonterm accum_el_list uses accumulate;
 
 accum_el_list: accum_el_list accum_el
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = consListConcat( $1->list, $2->list );
 	};
 		
 accum_el_list:
@@ -1372,8 +1554,7 @@ nonterm accum_el uses accumulate;
 accum_el: code_expr
 	final {
 		ConsItem *consItem = ConsItem::cons( $1->expr->loc, ConsItem::ExprType, $1->expr );
-		$$->list = new ConsItemList;
-		$$->list->append( consItem );
+		$$->list = ConsItemList::cons( consItem );
 	};
 
 accum_el: '"' lit_accum_el_list '"'
@@ -1400,9 +1581,7 @@ nonterm string_list uses string;
 
 string_list: string_top_el string_list
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = consListConcat( $1->list, $2->list );
 	};
 string_list: string_top_el
 	final {
@@ -1424,9 +1603,7 @@ nonterm lit_string_el_list uses string;
 
 lit_string_el_list: lit_string_el_list lit_string_el
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = consListConcat( $1->list, $2->list );
 	};
 lit_string_el_list: 
 	final {
@@ -1438,8 +1615,7 @@ nonterm lit_string_el uses string;
 lit_string_el: TK_LitPat
 	final {
 		ConsItem *consItem = ConsItem::cons( $1->loc, ConsItem::InputText, $1->data );
-		$$->list = new ConsItemList;
-		$$->list->append( consItem );
+		$$->list = ConsItemList::cons( consItem );
 	};
 
 lit_string_el: '[' string_el_list ']'
@@ -1451,9 +1627,7 @@ nonterm string_el_list uses string;
 
 string_el_list: string_el_list string_el
 	final {
-		$$->list = $1->list;
-		$$->list->append( *$2->list );
-		delete $2->list;
+		$$->list = consListConcat( $1->list, $2->list );
 	};
 string_el_list: 
 	final {
@@ -1465,8 +1639,7 @@ nonterm string_el uses string;
 string_el: code_expr
 	final {
 		ConsItem *consItem = ConsItem::cons( $1->expr->loc, ConsItem::ExprType, $1->expr );
-		$$->list = new ConsItemList;
-		$$->list->append( consItem );
+		$$->list = ConsItemList::cons( consItem );
 	};
 
 string_el: '"' lit_string_el_list '"'
@@ -1509,44 +1682,15 @@ nonterm prod_el
 prod_el: 
 	opt_capture opt_commit region_qual TK_Word opt_repeat
 	final {
-		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, $4->data, $5->repeatType );
-		$$->prodEl = new ProdEl( ProdEl::ReferenceType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
-
-		/* If there is a capture, create the field. */
-		if ( $1->objField != 0 ) {
-			/* Might already exist. */
-			ObjectField *objField = curObjectDef->checkRedecl( $1->objField->name );
-			if ( objField == 0 ) {
-				objField = $1->objField;
-				objField->typeRef = typeRef;
-				curObjectDef->insertField( objField->name, objField );
-			}
-			else {
-				/* FIXME: check the types are the same. */
-				//error() << "object field renamed" << endp;
-			}
-
-			objField->isRhsGet = true;
-			objField->rhsVal.append( RhsVal( $$->prodEl ) );
-		}
+		$$->prodEl = prodElName( $4->loc, $4->data, $3->nspaceQual,
+				$1->objField, $5->repeatType, $2->commit );
 	};
 
 prod_el: 
 	opt_capture opt_commit region_qual TK_Literal opt_repeat
 	final {
-		/* Create a new prodEl node going to a concat literal. */
-		PdaLiteral *literal = new PdaLiteral( $4->loc, $4->data );
-		TypeRef *typeRef = TypeRef::cons( $4->loc, $3->nspaceQual, literal, $5->repeatType );
-		$$->prodEl = new ProdEl( ProdEl::LiteralType, $4->loc, $1->objField, $2->commit, typeRef, 0 );
-
-		/* If there is a capture, create the field. */
-		if ( $1->objField != 0 ) {
-			$1->objField->typeRef = typeRef;
-			if ( curObjectDef->checkRedecl( $1->objField->name ) != 0 )
-				error() << "object field renamed" << endp;
-
-			curObjectDef->insertField( $1->objField->name, $1->objField );
-		}
+		$$->prodEl = prodElLiteral( $4->loc, $4->data, $3->nspaceQual,
+				$1->objField, $5->repeatType, $2->commit );
 	};
 
 nonterm opt_repeat
@@ -1672,15 +1816,7 @@ opt_translate:
 pre_eof: 
 	KW_Preeof block_open lang_stmt_list block_close
 	final {
-		bool insideRegion = regionStack.length() > 1;
-		if ( !insideRegion )
-			error($1->loc) << "preeof must be used inside an existing region" << endl;
-
-		CodeBlock *codeBlock = CodeBlock::cons( $3->stmtList, $2->localFrame );
-		codeBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
-
-		RegionSet *regionSet = regionStack.top();
-		regionSet->tokenIgnore->preEofBlock = codeBlock;
+		preEof( $1->loc, $3->stmtList, $2->localFrame );
 	};
 
 rl_def:
@@ -1799,27 +1935,7 @@ nonterm for_scope uses statement;
 
 statement: var_def opt_def_init 
 	final {
-		/* By default no statement here. Maybe will add an initialization. */
-		$$->stmt = 0;
-
-		/* Check for redeclaration. */
-		if ( pd->curLocalFrame->checkRedecl( $1->objField->name ) != 0 ) {
-			error( $1->objField->loc ) << "variable " << $1->objField->name <<
-					" redeclared" << endp;
-		}
-
-		/* Insert it into the field map. */
-		pd->curLocalFrame->insertField( $1->objField->name, $1->objField );
-
-		//cout << "var def " << $1->objField->name << endl;
-
-		if ( $2->expr != 0 ) {
-			LangVarRef *varRef = LangVarRef::cons( $1->objField->loc, 
-					$1->objField->name );
-
-			$$->stmt = LangStmt::cons( $1->objField->loc, 
-					$2->assignType, varRef, $2->expr );
-		}
+		varDef( $1->objField, $2->expr, $2->assignType );
 	};
 statement: var_ref '=' code_expr
 	final {
@@ -1860,18 +1976,7 @@ statement: KW_While scope_push code_expr block_or_single scope_pop
 
 for_scope: TK_Word ':' type_ref KW_In iter_call block_or_single
 	final {
-		/* Check for redeclaration. */
-		if ( pd->curLocalFrame->checkRedecl( $1->data ) != 0 )
-			error( $1->loc ) << "variable " << $1->data << " redeclared" << endp;
-
-		/* Note that we pass in a null type reference. This type is dependent
-		 * on the result of the iter_call lookup since it must contain a reference
-		 * to the iterator that is called. This lookup is done at compile time. */
-		ObjectField *iterField = ObjectField::cons( $1->loc, (TypeRef*)0, $1->data );
-		pd->curLocalFrame->insertField( $1->data, iterField );
-
-		$$->stmt = LangStmt::cons( $1->loc, LangStmt::ForIterType, 
-				iterField, $3->typeRef, $5->langTerm, $6->stmtList );
+		$$->stmt = forScope( $1->loc, $1->data, $3->typeRef, $5->langTerm, $6->stmtList );
 	};
 
 statement: KW_For scope_push for_scope scope_pop
@@ -2269,14 +2374,7 @@ code_factor: var_ref
 	};
 code_factor: KW_Match var_ref pattern
 	final {
-		Namespace *nspace = namespaceStack.top();
-
-		Pattern *pattern = Pattern::cons( $1->loc, nspace,
-				$3->list, pd->nextPatConsId++ );
-		pd->patternList.append( pattern );
-
-		$$->expr = LangExpr::cons( LangTerm::cons( 
-				InputLoc(), LangTerm::MatchType, $2->varRef, pattern ) );
+		$$->expr = match( $1->loc, $2->varRef, $3->list );
 	};
 code_factor: KW_New code_factor
 	final {
@@ -2285,29 +2383,8 @@ code_factor: KW_New code_factor
 code_factor: 
 	KW_Construct opt_capture type_ref opt_field_init constructor
 	final {
-		Namespace *nspace = namespaceStack.top();
-		Constructor *constructor = Constructor::cons( $1->loc, nspace,
-				$5->list, pd->nextPatConsId++ );
-		pd->replList.append( constructor );
-		
-		LangVarRef *varRef = 0;
-		if ( $2->objField != 0 )
-			varRef = LangVarRef::cons( $2->objField->loc, $2->objField->name );
-
-		$$->expr = LangExpr::cons( LangTerm::cons( $1->loc, LangTerm::ConstructType,
-				varRef, $2->objField, $3->typeRef, $4->fieldInitVect, constructor ) );
-
-		/* Check for redeclaration. */
-		if ( $2->objField != 0 ) {
-			if ( pd->curLocalFrame->checkRedecl( $2->objField->name ) != 0 ) {
-				error( $2->objField->loc ) << "variable " << $2->objField->name <<
-						" redeclared" << endp;
-			}
-
-			/* Insert it into the field map. */
-			$2->objField->typeRef = $3->typeRef;
-			pd->curLocalFrame->insertField( $2->objField->name, $2->objField );
-		}
+		$$->expr = construct( $1->loc, $2->objField, $5->list,
+				$3->typeRef, $4->fieldInitVect );
 	};
 
 code_factor: 

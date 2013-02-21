@@ -1446,7 +1446,17 @@ struct PatternItem
 };
 
 struct LangExpr;
-typedef DList<PatternItem> PatternItemList;
+
+struct PatternItemList
+	: public DList<PatternItem>
+{
+	static PatternItemList *cons( PatternItem *patternItem )
+	{
+		PatternItemList *list = new PatternItemList;
+		list->append( patternItem );
+		return list;
+	}
+};
 
 struct ConsItem
 {
@@ -1504,7 +1514,17 @@ struct ConsItem
 	ConsItem *prev, *next;
 };
 
-typedef DList<ConsItem> ConsItemList;
+struct ConsItemList
+:
+	public DList<ConsItem>
+{
+	static ConsItemList *cons( ConsItem *ci )
+	{
+		ConsItemList *cil = new ConsItemList;
+		cil->append( ci );
+		return cil;
+	}
+};
 
 struct Pattern
 {
