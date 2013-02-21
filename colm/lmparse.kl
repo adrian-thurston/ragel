@@ -1935,7 +1935,7 @@ nonterm for_scope uses statement;
 
 statement: var_def opt_def_init 
 	final {
-		varDef( $1->objField, $2->expr, $2->assignType );
+		$$->stmt = varDef( $1->objField, $2->expr, $2->assignType );
 	};
 statement: var_ref '=' code_expr
 	final {
