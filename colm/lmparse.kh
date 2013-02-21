@@ -163,6 +163,7 @@ struct ColmParser
 			PatternItemList *list );
 	LangStmt *varDef( ObjectField *objField,
 			LangExpr *expr, LangStmt::Type assignType );
+	LangStmt *exportStmt( ObjectField *objField, LangStmt::Type assignType, LangExpr *expr );
 };
 
 %% write token_defs;

@@ -824,6 +824,30 @@ LangStmt *ColmParser::varDef( ObjectField *objField,
 	return stmt;
 }
 
+LangStmt *ColmParser::exportStmt( ObjectField *objField, LangStmt::Type assignType, LangExpr *expr )
+{
+	LangStmt *stmt = 0;
+
+	if ( contextStack.length() != 0 )
+		error(objField->loc) << "cannot export parser context variables" << endp;
+
+	ObjectDef *object = pd->globalObjectDef;
+
+	if ( object->checkRedecl( objField->name ) != 0 )
+		error(objField->loc) << "object field renamed" << endp;
+
+	object->insertField( objField->name, objField );
+	objField->isExport = true;
+
+	if ( expr != 0 ) {
+		LangVarRef *varRef = LangVarRef::cons( objField->loc, 
+				objField->name );
+
+		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
+	}
+
+	return stmt;
+}
 
 %%{
 
@@ -959,26 +983,7 @@ nonterm export_def uses statement;
 
 export_def: KW_Export var_def opt_def_init
 	final {
-		$$->stmt = 0;
-
-		if ( contextStack.length() != 0 )
-			error($2->objField->loc) << "cannot export parser context variables" << endp;
-
-		ObjectDef *object = pd->globalObjectDef;
-
-		if ( object->checkRedecl( $2->objField->name ) != 0 )
-			error($2->objField->loc) << "object field renamed" << endp;
-
-		object->insertField( $2->objField->name, $2->objField );
-		$2->objField->isExport = true;
-
-		if ( $3->expr != 0 ) {
-			LangVarRef *varRef = LangVarRef::cons( $2->objField->loc, 
-					$2->objField->name );
-
-			$$->stmt = LangStmt::cons( $2->objField->loc, 
-					$3->assignType, varRef, $3->expr );
-		}
+		$$->stmt = exportStmt( $2->objField, $3->assignType, $3->expr );
 	};
 
 precedence: pred_type pred_token_list final { pd->predValue++; };
@@ -987,10 +992,7 @@ pred_type: KW_Left final { predType = PredLeft; };
 pred_type: KW_Right final { predType = PredRight; };
 pred_type: KW_Nonassoc final { predType = PredNonassoc; };
 
-pred_token_list: pred_token_list ',' pred_token 
-	final {
-	};
-
+pred_token_list: pred_token_list ',' pred_token;
 pred_token_list: pred_token;
 
 nonterm pred_token
@@ -1003,7 +1005,6 @@ pred_token:
 	region_qual TK_Word 
 	final {
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data );
-
 		PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
 		pd->predDeclList.append( predDecl );
 	};
@@ -1013,7 +1014,6 @@ pred_token:
 	final {
 		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
 		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
-
 		PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
 		pd->predDeclList.append( predDecl );
 	};
@@ -2115,12 +2115,14 @@ nonterm code_expr_list
 	ExprVect *exprVect;
 };
 
-code_expr_list: code_expr_list code_expr
+code_expr_list:
+	code_expr_list code_expr
 	final {
 		$$->exprVect = $1->exprVect;
 		$$->exprVect->append( $2->expr );
 	};
-code_expr_list: code_expr
+code_expr_list:
+	code_expr
 	final {
 		$$->exprVect = new ExprVect;
 		$$->exprVect->append( $1->expr );
@@ -2128,7 +2130,8 @@ code_expr_list: code_expr
 
 nonterm opt_code_expr_list uses code_expr_list;
 
-opt_code_expr_list: code_expr_list
+opt_code_expr_list:
+	code_expr_list
 	final {
 		$$->exprVect = $1->exprVect;
 	};
