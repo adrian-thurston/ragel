@@ -849,6 +849,60 @@ LangStmt *ColmParser::exportStmt( ObjectField *objField, LangStmt::Type assignTy
 	return stmt;
 }
 
+LangExpr *ColmParser::require( const InputLoc &loc,
+		LangVarRef *varRef, PatternItemList *list )
+{
+	Namespace *nspace = namespaceStack.top();
+
+	Pattern *pattern = Pattern::cons( loc, nspace,
+			list, pd->nextPatConsId++ );
+	pd->patternList.append( pattern );
+
+	LangExpr *expr = LangExpr::cons( LangTerm::cons(
+			InputLoc(), LangTerm::MatchType, varRef, pattern ) );
+	return expr;
+}
+
+void ColmParser::contextVarDef( const InputLoc &loc, ObjectField *objField )
+{
+	ObjectDef *object;
+	if ( contextStack.length() == 0 )
+		error(loc) << "internal error: no context stack items found" << endp;
+
+	Context *context = contextStack.top();
+	objField->context = context;
+	object = context->contextObjDef;
+
+	if ( object->checkRedecl( objField->name ) != 0 )
+		error(objField->loc) << "object field renamed" << endp;
+
+	object->insertField( objField->name, objField );
+}
+
+void ColmParser::contextHead( const InputLoc &loc, const String &data )
+{
+	/* Make the new namespace. */
+	Namespace *nspace = createNamespace( loc, data );
+
+	Context *context = new Context( loc, 0 );
+	contextStack.push( context );
+
+	ContextDef *contextDef = new ContextDef( data, context, nspace );
+	nspace->contextDefList.append( contextDef );
+
+	context->contextObjDef = ObjectDef::cons( ObjectDef::UserType,
+			data, pd->nextObjectId++ ); 
+}
+
+void ColmParser::tokenDefName( const String &name )
+{
+	pd->insideRegion = regionStack.length() > 1;
+	curDefineId = name;
+
+	if ( !pd->insideRegion )
+		pushRegionSet( internal );
+}
+
 %%{
 
 parser ColmParser;
@@ -1156,8 +1210,8 @@ basic_type_ref: region_qual TK_Word opt_repeat
 
 basic_type_ref: KW_Ptr region_qual TK_Word opt_repeat
 	final {
-		$$->typeRef = TypeRef::cons( $1->loc, $2->nspaceQual, $3->data, $4->repeatType );
-		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Ptr, $$->typeRef );
+		TypeRef *inner = TypeRef::cons( $1->loc, $2->nspaceQual, $3->data, $4->repeatType );
+		$$->typeRef = TypeRef::cons( $1->loc, TypeRef::Ptr, inner );
 	};
 
 
@@ -1203,18 +1257,7 @@ namespace_head:
 context_var_def: 
 	var_def 
 	final {
-		ObjectDef *object;
-		if ( contextStack.length() == 0 )
-			error($1->loc) << "internal error: no context stack items found" << endp;
-
-		Context *context = contextStack.top();
-		$1->objField->context = context;
-		object = context->contextObjDef;
-
-		if ( object->checkRedecl( $1->objField->name ) != 0 )
-			error($1->objField->loc) << "object field renamed" << endp;
-
-		object->insertField( $1->objField->name, $1->objField );
+		contextVarDef( $1->loc, $1->objField );
 	};
 
 
@@ -1246,17 +1289,7 @@ context_def:
 context_head:
 	KW_Context TK_Word
 	final {
-		/* Make the new namespace. */
-		Namespace *nspace = createNamespace( $1->loc, $2->data );
-
-		Context *context = new Context( $1->loc, 0 );
-		contextStack.push( context );
-
-		ContextDef *contextDef = new ContextDef( $2->data, context, nspace );
-		nspace->contextDefList.append( contextDef );
-
-		context->contextObjDef = ObjectDef::cons( ObjectDef::UserType,
-				$2->data, pd->nextObjectId++ ); 
+		contextHead( $1->loc, $2->data );
 	};
 
 #
@@ -1778,14 +1811,8 @@ nonterm class token_def_name
 token_def_name:
 	opt_name
 	final {
-		String name = $1->name;
-
-		$$->name = name;
-		pd->insideRegion = regionStack.length() > 1;
-		curDefineId = name;
-
-		if ( !pd->insideRegion )
-			pushRegionSet( internal );
+		tokenDefName( $1->name );
+		$$->name = $1->name;
 	};
 
 nonterm class opt_name
@@ -2014,14 +2041,7 @@ nonterm require_pattern uses code_expr;
 require_pattern: 
 	KW_Require var_ref pattern 
 	final {
-		Namespace *nspace = namespaceStack.top();
-
-		Pattern *pattern = Pattern::cons( $1->loc, nspace,
-				$3->list, pd->nextPatConsId++ );
-		pd->patternList.append( pattern );
-
-		$$->expr = LangExpr::cons( LangTerm::cons(
-				InputLoc(), LangTerm::MatchType, $2->varRef, pattern ) );
+		$$->expr = require( $1->loc, $2->varRef, $3->list );
 	};
 
 nonterm block_or_single uses lang_stmt_list;

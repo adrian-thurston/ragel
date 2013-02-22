@@ -330,7 +330,7 @@ typedef Vector<Context*> ContextVect;
 
 struct Context
 {
-	Context( InputLoc &loc, LangEl *lel )
+	Context( const InputLoc &loc, LangEl *lel )
 	:
 		loc(loc),
 		lel(lel)

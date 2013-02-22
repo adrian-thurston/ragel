@@ -164,6 +164,11 @@ struct ColmParser
 	LangStmt *varDef( ObjectField *objField,
 			LangExpr *expr, LangStmt::Type assignType );
 	LangStmt *exportStmt( ObjectField *objField, LangStmt::Type assignType, LangExpr *expr );
+
+	LangExpr *require( const InputLoc &loc, LangVarRef *varRef, PatternItemList *list );
+	void contextVarDef( const InputLoc &loc, ObjectField *objField );
+	void contextHead( const InputLoc &loc, const String &data );
+	void tokenDefName( const String &name );
 };
 
 %% write token_defs;
