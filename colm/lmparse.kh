@@ -169,6 +169,8 @@ struct ColmParser
 	void contextVarDef( const InputLoc &loc, ObjectField *objField );
 	void contextHead( const InputLoc &loc, const String &data );
 	void tokenDefName( const String &name );
+
+	void go();
 };
 
 %% write token_defs;

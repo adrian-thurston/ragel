@@ -2981,3 +2981,23 @@ ostream &ColmParser::parse_error( int tokId, Token &token )
 	return cerr;
 }
 
+void ColmParser::go()
+{
+	pd->rootCodeBlock = CodeBlock::cons( new StmtList, 0 );
+
+	curDefineId = String( "start" );
+	LelDefList *defList = new LelDefList;
+		
+	ProdElList *prodElList = new ProdElList;
+
+	ProdEl *prodEl = prodElName( internal, String( "foo"), 
+		NamespaceQual::cons(namespaceStack.top()), 0, RepeatNone, false );
+
+	prodElList->append( prodEl );
+
+	Production *def = production( internal, prodElList, false, 0, 0 );
+
+	prodAppend( defList, def );
+
+	cflDef( defList, false );
+}
