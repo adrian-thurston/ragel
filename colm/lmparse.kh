@@ -84,7 +84,7 @@ struct ColmParser
 
 	RegionSetVect regionStack;
 	NamespaceVect namespaceStack;
-	ContextVect contextStack;
+	ContextStack contextStack;
 
 	String curDefineId;
 	ObjectDef *curObjectDef;

@@ -204,7 +204,7 @@ void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join,
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
 			transBlock, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore,
 			&reCaptureVect, curObjectDef,
-			contextStack.length() > 0 ? contextStack.top() : 0 );
+			contextStack.top() );
 
 	regionSet->tokenIgnore->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
@@ -217,7 +217,7 @@ void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join,
 		TokenDef *tokenDefIgn = TokenDef::cons( name + "_ign", String(), false, ignore, join, 
 				0, loc, pd->nextTokenId++, nspace, regionSet->ignoreOnly,
 				&reCaptureVect, curObjectDef,
-				contextStack.length() > 0 ? contextStack.top() : 0 );
+				contextStack.top() );
 
 		tokenDefIgn->dupOf = tokenDef;
 
@@ -228,7 +228,7 @@ void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join,
 		TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", String(), false, ignore, join, 
 				0, loc, pd->nextTokenId++, nspace, regionSet->tokenOnly,
 				&reCaptureVect, curObjectDef,
-				contextStack.length() > 0 ? contextStack.top() : 0 );
+				contextStack.top() );
 
 		tokenDefTok->dupOf = tokenDef;
 
@@ -346,9 +346,7 @@ void ColmParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
 	Function *newFunction = Function::cons( typeRef, name, 
 			paramList, codeBlock, pd->nextFuncId++, false );
 	pd->functionList.append( newFunction );
-
-	if ( contextStack.length() > 0 )
-		newFunction->inContext = contextStack.top();
+	newFunction->inContext = contextStack.top();
 }
 
 void ColmParser::iterDef( StmtList *stmtList, ObjectDef *localFrame,
@@ -398,7 +396,7 @@ void ColmParser::cflDef( const String &name, LelDefList *defList, bool reduceFir
 			nspace, 
 			defList, 
 			curObjectDef,
-			contextStack.length() > 0 ? contextStack.top() : 0,
+			contextStack.top(),
 			reduceFirst );
 
 	nspace->ntDefList.append( ntDef );
@@ -1857,7 +1855,7 @@ opt_translate:
 	block_open lang_stmt_list block_close
 	final { 
 		$$->transBlock = CodeBlock::cons( $2->stmtList, $1->localFrame );
-		$$->transBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
+		$$->transBlock->context = contextStack.top();
 	};
 
 opt_translate: 
@@ -1912,7 +1910,7 @@ opt_reduce_code:
 	start_reduce lang_stmt_list block_close
 	final { 
 		$$->codeBlock = CodeBlock::cons( $2->stmtList, $1->localFrame );
-		$$->codeBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
+		$$->codeBlock->context = contextStack.top();
 	};
 
 nonterm start_reduce uses block_open;

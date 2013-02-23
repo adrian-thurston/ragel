@@ -326,7 +326,13 @@ struct ReCapture
 	ObjectField *objField;
 };
 
-typedef Vector<Context*> ContextVect;
+struct ContextStack
+	: public Vector<Context*>
+{
+	Context *top()
+		{ return length() > 0 ? Vector<Context*>::top() : 0; }
+};
+
 
 struct Context
 {
