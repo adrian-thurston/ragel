@@ -389,12 +389,12 @@ LangStmt *ColmParser::globalDef( ObjectField *objField, LangExpr *expr,
 	return stmt;
 }
 
-void ColmParser::cflDef( LelDefList *defList, bool reduceFirst )
+void ColmParser::cflDef( const String &name, LelDefList *defList, bool reduceFirst )
 {
 	Namespace *nspace = namespaceStack.top();
 
 	NtDef *ntDef = NtDef::cons( 
-			curDefineId,
+			name,
 			nspace, 
 			defList, 
 			curObjectDef,
@@ -1112,12 +1112,18 @@ typedef:
 cfl_def:
 	cfl_def_head obj_var_list opt_reduce_first cfl_prod_list
 	final {
-		cflDef( $4->defList, $3->reduceFirst );
+		cflDef( $1->name, $4->defList, $3->reduceFirst );
 	};
+
+nonterm class cfl_def_head
+{
+	String name;
+};
 
 cfl_def_head: KW_Def TK_Word
 	final {
 		curDefineId = $2->data;
+		$$->name = $2->data;
 	};
 
 nonterm cfl_prod_list
@@ -3068,7 +3074,7 @@ void ColmParser::go()
 	prodAppend( defList, def );
 
 	/* Make. */
-	cflDef( defList, false );
+	cflDef( curDefineId, defList, false );
 
 	parseInput( stmtList );
 
