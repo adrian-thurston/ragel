@@ -395,6 +395,28 @@ void ColmParser::cflDef( NtDef *ntDef, ObjectDef *objectDef, LelDefList *defList
 	ntDef->defList = defList;
 
 	nspace->ntDefList.append( ntDef );
+
+	/* Declare the captures in the object. */
+	for ( LelDefList::Iter prod = *defList; prod.lte(); prod++ ) {
+		for ( ProdElList::Iter pel = *prod->prodElList; pel.lte(); pel++ ) {
+			/* If there is a capture, create the field. */
+			if ( pel->captureField != 0 ) {
+				/* Might already exist. */
+				ObjectField *newOf = objectDef->checkRedecl( pel->captureField->name );
+				if ( newOf != 0 ) {
+					/* FIXME: check the types are the same. */
+				}
+				else {
+					newOf = pel->captureField;
+					newOf->typeRef = pel->typeRef;
+					objectDef->insertField( newOf->name, newOf );
+				}
+
+				newOf->isRhsGet = true;
+				newOf->rhsVal.append( RhsVal( pel ) );
+			}
+		}
+	}
 }
 
 ReOrBlock *ColmParser::lexRegularExprData( ReOrBlock *reOrBlock, ReOrItem *reOrItem )
@@ -661,25 +683,6 @@ ProdEl *ColmParser::prodElName( const InputLoc &loc, const String &data,
 {
 	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, data, repeatType );
 	ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, loc, objField, commit, typeRef, 0 );
-
-	/* If there is a capture, create the field. */
-	if ( objField != 0 ) {
-		/* Might already exist. */
-		ObjectField *newOf = curObjectDef->checkRedecl( objField->name );
-		if ( newOf == 0 ) {
-			newOf = objField;
-			newOf->typeRef = typeRef;
-			curObjectDef->insertField( newOf->name, newOf );
-		}
-		else {
-			/* FIXME: check the types are the same. */
-			//error() << "object field renamed" << endp;
-		}
-
-		newOf->isRhsGet = true;
-		newOf->rhsVal.append( RhsVal( prodEl ) );
-	}
-
 	return prodEl;
 }
 
