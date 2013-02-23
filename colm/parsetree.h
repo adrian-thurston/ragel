@@ -454,6 +454,21 @@ struct NtDef
 		return nt;
 	}
 
+	static NtDef *cons( const String &name, Namespace *nspace,
+		Context *contextIn, bool reduceFirst )
+	{ 
+		NtDef *nt = new NtDef;
+
+		nt->name = name;
+		nt->nspace = nspace;
+		nt->defList = 0;
+		nt->objectDef = 0;
+		nt->contextIn = contextIn;
+		nt->reduceFirst = reduceFirst;
+
+		return nt;
+	}
+
 	String name;
 	Namespace *nspace;
 	LelDefList *defList;

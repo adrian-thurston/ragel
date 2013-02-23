@@ -125,7 +125,7 @@ struct ColmParser
 	void iterDef( StmtList *stmtList, ObjectDef *localFrame,
 			ParameterList *paramList, const String &name );
 	LangStmt *globalDef( ObjectField *objField, LangExpr *expr, LangStmt::Type assignType );
-	void cflDef( const String &name, LelDefList *defList, bool reduceFirst );
+	void cflDef( NtDef *ntDef, ObjectDef *objectDef, LelDefList *defList );
 	ReOrBlock *lexRegularExprData( ReOrBlock *reOrBlock, ReOrItem *reOrItem );
 
 	int lexFactorRepNum( const InputLoc &loc, const String &data );

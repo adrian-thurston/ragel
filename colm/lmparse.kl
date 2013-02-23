@@ -387,17 +387,12 @@ LangStmt *ColmParser::globalDef( ObjectField *objField, LangExpr *expr,
 	return stmt;
 }
 
-void ColmParser::cflDef( const String &name, LelDefList *defList, bool reduceFirst )
+void ColmParser::cflDef( NtDef *ntDef, ObjectDef *objectDef, LelDefList *defList )
 {
 	Namespace *nspace = namespaceStack.top();
 
-	NtDef *ntDef = NtDef::cons( 
-			name,
-			nspace, 
-			defList, 
-			curObjectDef,
-			contextStack.top(),
-			reduceFirst );
+	ntDef->objectDef = objectDef;
+	ntDef->defList = defList;
 
 	nspace->ntDefList.append( ntDef );
 }
@@ -1110,7 +1105,10 @@ typedef:
 cfl_def:
 	cfl_def_head obj_var_list opt_reduce_first cfl_prod_list
 	final {
-		cflDef( $1->name, $4->defList, $3->reduceFirst );
+		NtDef *ntDef = NtDef::cons( $1->name, namespaceStack.top(),
+				contextStack.top(), $3->reduceFirst );
+
+		cflDef( ntDef, curObjectDef, $4->defList );
 	};
 
 nonterm class cfl_def_head
@@ -3059,6 +3057,9 @@ void ColmParser::go()
 
 	/* Grammar. */
 	curDefineId = String( "start" );
+	NtDef *ntDef = NtDef::cons( curDefineId, namespaceStack.top(),
+				contextStack.top(), false );
+
 	LelDefList *defList = new LelDefList;
 		
 	/* Production 1. */
@@ -3072,7 +3073,7 @@ void ColmParser::go()
 	prodAppend( defList, def );
 
 	/* Make. */
-	cflDef( curDefineId, defList, false );
+	cflDef( ntDef, curObjectDef, defList );
 
 	parseInput( stmtList );
 
