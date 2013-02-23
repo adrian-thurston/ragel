@@ -903,6 +903,51 @@ void ColmParser::tokenDefName( const String &name )
 		pushRegionSet( internal );
 }
 
+StmtList *ColmParser::appendStatement( StmtList *stmtList, LangStmt *stmt )
+{
+	if ( stmt != 0 )
+		stmtList->append( stmt );
+	return stmtList;
+}
+
+ParameterList *ColmParser::appendParam( ParameterList *paramList, ObjectField *objField )
+{
+	paramList->append( objField );
+	return paramList;
+}
+
+ObjectField *ColmParser::addParam( const InputLoc &loc, TypeRef *typeRef,
+		const String &name )
+{
+	ObjectField *objField = ObjectField::cons( loc, typeRef, name );
+	objField->isParam = true;
+	return objField;
+}
+
+void ColmParser::predTokenName( const InputLoc &loc, NamespaceQual *qual,
+		const String &data )
+{
+	TypeRef *typeRef = TypeRef::cons( loc, qual, data );
+	PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
+	pd->predDeclList.append( predDecl );
+}
+
+void ColmParser::predTokenLit( const InputLoc &loc, const String &data,
+		NamespaceQual *nspaceQual )
+{
+	PdaLiteral *literal = new PdaLiteral( loc, data );
+	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, literal );
+	PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
+	pd->predDeclList.append( predDecl );
+}
+
+void ColmParser::alias( const InputLoc &loc, const String &data, TypeRef *typeRef )
+{
+	Namespace *nspace = namespaceStack.top();
+	TypeAlias *typeAlias = new TypeAlias( loc, nspace, data, typeRef );
+	nspace->typeAliasList.append( typeAlias );
+}
+
 %%{
 
 parser ColmParser;
@@ -918,11 +963,7 @@ nonterm root_item_list uses lang_stmt_list;
 
 root_item_list: root_item_list root_item
 	final {
-		$$->stmtList = $1->stmtList;
-
-		/* Maybe a statement. */
-		if ( $2->stmt != 0 )
-			$$->stmtList->append( $2->stmt );
+		$$->stmtList = appendStatement( $1->stmtList, $2->stmt );
 	};
 
 root_item_list: 
@@ -995,28 +1036,23 @@ nonterm param_list
 
 param_list: param_list param_var_def
 	final {
-		$$->paramList = $1->paramList;
-		$$->paramList->append( $2->objField );
+		$$->paramList = appendParam( $1->paramList, $2->objField );
 	};
 
 param_list: param_var_def
 	final {
-		/* Create the map and insert the first item. */
-		$$->paramList = new ParameterList;
-		$$->paramList->append( $1->objField );
+		$$->paramList = appendParam( new ParameterList, $1->objField );
 	};
 
 nonterm param_var_def uses var_def;
 
 param_var_def: TK_Word ':' type_ref
 	final {
-		$$->objField = ObjectField::cons( $1->loc, $3->typeRef, $1->data );
-		$$->objField->isParam = true;
+		$$->objField = addParam( $1->loc, $3->typeRef, $1->data );
 	};
 param_var_def: TK_Word ':' reference_type_ref
 	final {
-		$$->objField = ObjectField::cons( $1->loc, $3->typeRef, $1->data );
-		$$->objField->isParam = true;
+		$$->objField = addParam( $1->loc, $3->typeRef, $1->data );
 	};
 
 nonterm reference_type_ref uses type_ref;
@@ -1058,34 +1094,25 @@ nonterm pred_token
 pred_token: 
 	region_qual TK_Word 
 	final {
-		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, $2->data );
-		PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
-		pd->predDeclList.append( predDecl );
+		predTokenName( $2->loc, $1->nspaceQual, $2->data );
 	};
 
 pred_token: 
 	region_qual TK_Literal 
 	final {
-		PdaLiteral *literal = new PdaLiteral( $2->loc, $2->data );
-		TypeRef *typeRef = TypeRef::cons( $2->loc, $1->nspaceQual, literal );
-		PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
-		pd->predDeclList.append( predDecl );
+		predTokenLit( $2->loc, $2->data, $1->nspaceQual );
 	};
 
 typedef:
 	KW_Alias TK_Word type_ref
 	final {
-		Namespace *nspace = namespaceStack.top();
-		TypeAlias *typeAlias = new TypeAlias(
-				$1->loc, nspace, $2->data, $3->typeRef );
-		nspace->typeAliasList.append( typeAlias );
+		alias( $1->loc, $2->data, $3->typeRef );
 	};
 
 cfl_def:
-	cfl_def_head obj_var_list properties_list cfl_prod_list
+	cfl_def_head obj_var_list opt_reduce_first cfl_prod_list
 	final {
-		bool reduceFirst = $3->property & PROPERTY_REDUCE_FIRST;
-		cflDef( $4->defList, reduceFirst );
+		cflDef( $4->defList, $3->reduceFirst );
 	};
 
 cfl_def_head: KW_Def TK_Word
@@ -1104,30 +1131,22 @@ cfl_prod_list: cfl_prod_list '|' define_prod
 	};
 cfl_prod_list: define_prod
 	final {
-		LelDefList *defList = new LelDefList;
-		$$->defList = prodAppend( defList, $1->definition );
+		$$->defList = prodAppend( new LelDefList, $1->definition );
 	};
 
-nonterm property
+nonterm opt_reduce_first
 {
-	long property;
+	bool reduceFirst;
 };
 
-nonterm properties_list uses property;
-
-properties_list: properties_list property
-	final {
-		$$->property = $1->property | $2->property;
-	};
-properties_list: 
-	final {
-		$$->property = 0;
-	};
-
-property: 
+opt_reduce_first:
 	KW_ReduceFirst
 	final {
-		$$->property = PROPERTY_REDUCE_FIRST;
+		$$->reduceFirst = true;
+	};
+opt_reduce_first: 
+	final {
+		$$->reduceFirst = false;
 	};
 
 nonterm opt_prec
@@ -1945,13 +1964,11 @@ opt_def_init:
 scope_push:
 	final {
 		pd->curLocalFrame->pushScope();
-		//cout << "push scope" << endl;
 	};
 
 scope_pop: 
 	final {
 		pd->curLocalFrame->popScope();
-		//cout << "pop scope" << endl;
 	};
 
 nonterm statement

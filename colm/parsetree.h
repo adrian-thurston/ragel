@@ -1886,7 +1886,7 @@ struct TypeRef
 
 	/* Qualification and a type name. These require lookup. */
 	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual, 
-			String typeName )
+			const String &typeName )
 	{
 		TypeRef *t = new TypeRef;
 		t->type = Name;

@@ -169,6 +169,12 @@ struct ColmParser
 	void contextVarDef( const InputLoc &loc, ObjectField *objField );
 	void contextHead( const InputLoc &loc, const String &data );
 	void tokenDefName( const String &name );
+	StmtList *appendStatement( StmtList *stmtList, LangStmt *stmt );
+	ParameterList *appendParam( ParameterList *paramList, ObjectField *objField );
+	ObjectField *addParam( const InputLoc &loc, TypeRef *typeRef, const String &name );
+	void predTokenName( const InputLoc &loc, NamespaceQual *qual, const String &data );
+	void predTokenLit( const InputLoc &loc, const String &data, NamespaceQual *nspaceQual );
+	void alias( const InputLoc &loc, const String &data, TypeRef *typeRef );
 
 	void go();
 };
