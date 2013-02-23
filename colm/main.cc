@@ -578,6 +578,8 @@ int main(int argc, const char **argv)
 	scanner->scan();
 	scanner->eof();
 
+	//parser->go();
+
 	/* Parsing complete, check for errors.. */
 	if ( gblErrorCount > 0 )
 		return 1;

@@ -176,6 +176,9 @@ struct ColmParser
 	void predTokenLit( const InputLoc &loc, const String &data, NamespaceQual *nspaceQual );
 	void alias( const InputLoc &loc, const String &data, TypeRef *typeRef );
 
+	void parseInput( StmtList *stmtList );
+	void printParseTree( StmtList *stmtList );
+	void printParseTree();
 	void go();
 };
 
