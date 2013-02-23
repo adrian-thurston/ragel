@@ -694,16 +694,6 @@ ProdEl *ColmParser::prodElLiteral( const InputLoc &loc, const String &data,
 	PdaLiteral *literal = new PdaLiteral( loc, data );
 	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, literal, repeatType );
 	ProdEl *prodEl = new ProdEl( ProdEl::LiteralType, loc, objField, commit, typeRef, 0 );
-
-	/* If there is a capture, create the field. */
-	if ( objField != 0 ) {
-		objField->typeRef = typeRef;
-		if ( curObjectDef->checkRedecl( objField->name ) != 0 )
-			error() << "object field renamed" << endp;
-
-		curObjectDef->insertField( objField->name, objField );
-	}
-
 	return prodEl;
 }
 
