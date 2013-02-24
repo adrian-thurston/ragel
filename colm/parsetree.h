@@ -170,9 +170,9 @@ struct RegionJoinOrLm;
 struct TokenRegion;
 struct Namespace;
 struct Context;
-struct TokenDef;
-struct TokenDefListReg;
-struct TokenDefListNs;
+struct TokenInstance;
+struct TokenInstanceListReg;
+struct TokenInstanceListNs;
 struct Range;
 struct LangEl;
 
@@ -241,8 +241,8 @@ void prepareLitString( String &result, bool &caseInsensitive,
 
 std::ostream &operator<<(std::ostream &out, const Token &token );
 
-typedef AvlMap< String, TokenDef*, CmpStr > LiteralDict;
-typedef AvlMapEl< String, TokenDef* > LiteralDictEl;
+typedef AvlMap< String, TokenInstance*, CmpStr > LiteralDict;
+typedef AvlMapEl< String, TokenInstance* > LiteralDictEl;
 
 /* Store the value and type of a priority augmentation. */
 struct PriorityAug
@@ -350,33 +350,33 @@ struct Context
 
 typedef Vector<ReCapture> ReCaptureVect;
 
-struct TokenDefPtr1
+struct TokenInstancePtr1
 {
-	TokenDef *prev, *next;
+	TokenInstance *prev, *next;
 };
 
-struct TokenDefPtr2
+struct TokenInstancePtr2
 {
-	TokenDef *prev, *next;
+	TokenInstance *prev, *next;
 };
 
-struct TokenDef
+struct TokenInstance
 :
-	public TokenDefPtr1, 
-	public TokenDefPtr2
+	public TokenInstancePtr1, 
+	public TokenInstancePtr2
 {
-	TokenDef()
+	TokenInstance()
 	: 
 		action(0), tdLangEl(0), inLmSelect(false), dupOf(0),
 		noPostIgnore(false), noPreIgnore(false), isZero(false)
 	{}
 
-	static TokenDef *cons( const String &name, const String &literal, bool isLiteral, bool isIgnore,
+	static TokenInstance *cons( const String &name, const String &literal, bool isLiteral, bool isIgnore,
 		LexJoin *join, CodeBlock *codeBlock, const InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
 	{ 
-		TokenDef *t = new TokenDef;
+		TokenInstance *t = new TokenInstance;
 
 		t->name = name;
 		t->literal = literal;
@@ -428,7 +428,7 @@ struct TokenDef
 	ObjectDef *objectDef;
 	Context *contextIn;
 
-	TokenDef *dupOf;
+	TokenInstance *dupOf;
 	bool noPostIgnore;
 	bool noPreIgnore;
 	bool isZero;
@@ -482,8 +482,8 @@ struct NtDef
 struct NtDefList : DList<NtDef> {};
 
 /* Declare a new type so that ptreetypes.h need not include dlist.h. */
-struct TokenDefListReg : DListMel<TokenDef, TokenDefPtr1> {};
-struct TokenDefListNs : DListMel<TokenDef, TokenDefPtr2> {};
+struct TokenInstanceListReg : DListMel<TokenInstance, TokenInstancePtr1> {};
+struct TokenInstanceListNs : DListMel<TokenInstance, TokenInstancePtr2> {};
 
 struct ContextDef
 {
@@ -538,7 +538,7 @@ struct TokenRegion
 		id(id),
 		lmSwitchHandlesError(false),
 		regionNameInst(0),
-		defaultTokenDef(0),
+		defaultTokenInstance(0),
 		preEofBlock(0), 
 		ignoreOnlyRegion(0),
 		tokenOnlyRegion(0),
@@ -564,7 +564,7 @@ struct TokenRegion
 	void restart( FsmGraph *graph, FsmTrans *trans );
 
 	InputLoc loc;
-	TokenDefListReg tokenDefList;
+	TokenInstanceListReg tokenInstanceList;
 	int id;
 
 	Action *lmActSelect;
@@ -574,7 +574,7 @@ struct TokenRegion
 	 * regions are referenced once only. */
 	NameInst *regionNameInst;
 
-	TokenDef *defaultTokenDef;
+	TokenInstance *defaultTokenInstance;
 
 	CodeBlock *preEofBlock;
 
@@ -726,7 +726,7 @@ struct Namespace
 	LiteralDict literalDict;
 
 	/* List of tokens defs in the namespace. */
-	TokenDefListNs tokenDefList;
+	TokenInstanceListNs tokenInstanceList;
 
 	/* List of nonterminal defs in the namespace. */
 	NtDefList ntDefList;
@@ -1367,7 +1367,7 @@ struct InlineItem
 	}
 
 	static InlineItem *cons( const InputLoc &loc, TokenRegion *tokenRegion, 
-		TokenDef *longestMatchPart, Type type ) 
+		TokenInstance *longestMatchPart, Type type ) 
 	{
 		InlineItem *i = new InlineItem;
 		i->loc = loc;
@@ -1406,7 +1406,7 @@ struct InlineItem
 	NameInst *nameTarg;
 	InlineList *children;
 	TokenRegion *tokenRegion;
-	TokenDef *longestMatchPart;
+	TokenInstance *longestMatchPart;
 	Type type;
 
 	InlineItem *prev, *next;

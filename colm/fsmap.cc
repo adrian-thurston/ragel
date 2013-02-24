@@ -60,7 +60,7 @@ bool ActionTable::hasAction( Action *action )
 }
 
 /* Insert an action into an action table. */
-void LmActionTable::setAction( int ordering, TokenDef *action )
+void LmActionTable::setAction( int ordering, TokenInstance *action )
 {
 	/* Multi-insert in case specific instances of an action appear in a
 	 * transition more than once. */
@@ -222,7 +222,7 @@ void FsmGraph::leaveFsmAction( int ordering, Action *action )
 }
 
 /* Add functions to the longest match action table for constructing scanners. */
-void FsmGraph::longMatchAction( int ordering, TokenDef *lmPart )
+void FsmGraph::longMatchAction( int ordering, TokenInstance *lmPart )
 {
 	/* Walk all final states. */
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {

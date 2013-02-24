@@ -112,7 +112,7 @@ struct ColmParser
 	/* Report an error encountered by the parser. */
 	ostream &parse_error( int tokId, Token &token );
 
-	void tokenDef( const InputLoc &loc, String name, LexJoin *join,
+	void tokenInstance( const InputLoc &loc, String name, LexJoin *join,
 			CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore );
 
 	void literalDef( const InputLoc &loc, const String &data,
@@ -168,7 +168,7 @@ struct ColmParser
 	LangExpr *require( const InputLoc &loc, LangVarRef *varRef, PatternItemList *list );
 	void contextVarDef( const InputLoc &loc, ObjectField *objField );
 	void contextHead( const InputLoc &loc, const String &data );
-	void tokenDefName( const String &name );
+	void tokenInstanceName( const String &name );
 	StmtList *appendStatement( StmtList *stmtList, LangStmt *stmt );
 	ParameterList *appendParam( ParameterList *paramList, ObjectField *objField );
 	ObjectField *addParam( const InputLoc &loc, TypeRef *typeRef, const String &name );

@@ -183,7 +183,7 @@ LexJoin *ColmParser::literalJoin( const InputLoc &loc, const String &data )
 	return join;
 }
 
-void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join,
+void ColmParser::tokenInstance( const InputLoc &loc, String name, LexJoin *join,
 		CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore )
 {
 	/* Check the region if this is for an ignore. */
@@ -201,39 +201,39 @@ void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join,
 	Namespace *nspace = namespaceStack.top();
 	RegionSet *regionSet = regionStack.top();
 
-	TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
+	TokenInstance *tokenInstance = TokenInstance::cons( name, String(), false, ignore, join, 
 			transBlock, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore,
 			&reCaptureVect, curObjectDef,
 			contextStack.top() );
 
-	regionSet->tokenIgnore->tokenDefList.append( tokenDef );
-	nspace->tokenDefList.append( tokenDef );
+	regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
+	nspace->tokenInstanceList.append( tokenInstance );
 
-	tokenDef->noPreIgnore = noPreIgnore;
-	tokenDef->noPostIgnore = noPostIgnore;
+	tokenInstance->noPreIgnore = noPreIgnore;
+	tokenInstance->noPostIgnore = noPostIgnore;
 
 	/* All again for the ignore. */
 	if ( ignore ) {
-		TokenDef *tokenDefIgn = TokenDef::cons( name + "_ign", String(), false, ignore, join, 
+		TokenInstance *tokenInstanceIgn = TokenInstance::cons( name + "_ign", String(), false, ignore, join, 
 				0, loc, pd->nextTokenId++, nspace, regionSet->ignoreOnly,
 				&reCaptureVect, curObjectDef,
 				contextStack.top() );
 
-		tokenDefIgn->dupOf = tokenDef;
+		tokenInstanceIgn->dupOf = tokenInstance;
 
-		regionSet->ignoreOnly->tokenDefList.append( tokenDefIgn );
-		nspace->tokenDefList.append( tokenDefIgn );
+		regionSet->ignoreOnly->tokenInstanceList.append( tokenInstanceIgn );
+		nspace->tokenInstanceList.append( tokenInstanceIgn );
 	}
 	else {
-		TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", String(), false, ignore, join, 
+		TokenInstance *tokenInstanceTok = TokenInstance::cons( name + "_tok", String(), false, ignore, join, 
 				0, loc, pd->nextTokenId++, nspace, regionSet->tokenOnly,
 				&reCaptureVect, curObjectDef,
 				contextStack.top() );
 
-		tokenDefTok->dupOf = tokenDef;
+		tokenInstanceTok->dupOf = tokenInstance;
 
-		regionSet->tokenOnly->tokenDefList.append( tokenDefTok );
-		nspace->tokenDefList.append( tokenDefTok );
+		regionSet->tokenOnly->tokenInstanceList.append( tokenInstanceTok );
+		nspace->tokenInstanceList.append( tokenInstanceTok );
 	}
 
 	/* This is created and pushed in the name. */
@@ -273,31 +273,31 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 
 	LexJoin *join = literalJoin( loc, data );
 
-	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
+	TokenInstance *tokenInstance = TokenInstance::cons( name, data, true, false, join, 
 			0, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0, 0, 0 );
 
 	bool isZero = strcmp( interp.data, "" ) == 0;
-	tokenDef->isZero = isZero;
+	tokenInstance->isZero = isZero;
 
 	if ( !isZero )
-		regionSet->tokenIgnore->tokenDefList.append( tokenDef );
+		regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
 
-	ldel = nspace->literalDict.insert( interp, tokenDef );
-	nspace->tokenDefList.append( tokenDef );
+	ldel = nspace->literalDict.insert( interp, tokenInstance );
+	nspace->tokenInstanceList.append( tokenInstance );
 
 	if ( !isZero ) {
 		/* Make the duplicate for the token-only region. */
-		tokenDef->noPreIgnore = noPreIgnore;
-		tokenDef->noPostIgnore = noPostIgnore;
+		tokenInstance->noPreIgnore = noPreIgnore;
+		tokenInstance->noPostIgnore = noPostIgnore;
 
-		TokenDef *tokenDefTok = TokenDef::cons( name + "_tok", data, true, false, join, 
+		TokenInstance *tokenInstanceTok = TokenInstance::cons( name + "_tok", data, true, false, join, 
 				0, loc, pd->nextTokenId++, nspace, regionSet->tokenOnly, 0, 0, 0 );
 
-		tokenDefTok->dupOf = tokenDef;
+		tokenInstanceTok->dupOf = tokenInstance;
 
-		regionSet->tokenOnly->tokenDefList.append( tokenDefTok );
+		regionSet->tokenOnly->tokenInstanceList.append( tokenInstanceTok );
 
-		nspace->tokenDefList.append( tokenDefTok );
+		nspace->tokenInstanceList.append( tokenInstanceTok );
 	}
 
 	if ( !insideRegion )
@@ -881,7 +881,7 @@ void ColmParser::contextHead( const InputLoc &loc, const String &data )
 			data, pd->nextObjectId++ ); 
 }
 
-void ColmParser::tokenDefName( const String &name )
+void ColmParser::tokenInstanceName( const String &name )
 {
 	pd->insideRegion = regionStack.length() > 1;
 	curDefineId = name;
@@ -1802,7 +1802,7 @@ token_def:
 	enter_rl opt_no_ignore '/' opt_lex_join leave_rl '/' opt_no_ignore  
 	opt_translate
 	final {
-		tokenDef( $1->loc, $2->name, $7->join, $11->transBlock, $1->ignore,
+		tokenInstance( $1->loc, $2->name, $7->join, $11->transBlock, $1->ignore,
 				$5->noIgnore, $10->noIgnore );
 	};
 
@@ -1826,7 +1826,7 @@ nonterm class token_def_name
 token_def_name:
 	opt_name
 	final {
-		tokenDefName( $1->name );
+		tokenInstanceName( $1->name );
 		$$->name = $1->name;
 	};
 
@@ -3032,7 +3032,7 @@ void ColmParser::go()
 	/* The token region */
 	pushRegionSet( internal );
 
-	tokenDefName( String( "hello" ) );
+	tokenInstanceName( String( "hello" ) );
 
 	curObjectDef = ObjectDef::cons( ObjectDef::UserType, curDefineId, pd->nextObjectId++ ); 
 
@@ -3045,7 +3045,7 @@ void ColmParser::go()
 	LexExpression *lexExpr = LexExpression::cons( term );
 	LexJoin *join = LexJoin::cons( lexExpr );
 
-	tokenDef( internal, "hello", join, 0, false, false, false );
+	tokenInstance( internal, "hello", join, 0, false, false, false );
 
 	popRegionSet();
 

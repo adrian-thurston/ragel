@@ -221,7 +221,7 @@ void RegionDef::makeNameTree( const InputLoc &loc, Compiler *pd )
 	tokenRegion->regionNameInst = nameInst;
 }
 
-InputLoc TokenDef::getLoc()
+InputLoc TokenInstance::getLoc()
 { 
 	return action != 0 ? action->loc : semiLoc;
 }
@@ -248,7 +248,7 @@ Action *TokenRegion::newAction( Compiler *pd, const InputLoc &loc,
 void TokenRegion::makeActions( Compiler *pd )
 {
 	/* Make actions that set the action id. */
-	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenInstanceListReg::Iter lmi = tokenInstanceList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = InlineList::cons();
@@ -260,7 +260,7 @@ void TokenRegion::makeActions( Compiler *pd )
 	}
 
 	/* Make actions that execute the user action and restart on the last character. */
-	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenInstanceListReg::Iter lmi = tokenInstanceList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = InlineList::cons();
@@ -274,7 +274,7 @@ void TokenRegion::makeActions( Compiler *pd )
 	/* Make actions that execute the user action and restart on the next
 	 * character.  These actions will set tokend themselves (it is the current
 	 * char). */
-	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenInstanceListReg::Iter lmi = tokenInstanceList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = InlineList::cons();
@@ -287,7 +287,7 @@ void TokenRegion::makeActions( Compiler *pd )
 
 	/* Make actions that execute the user action and restart at tokend. These
 	 * actions execute some time after matching the last char. */
-	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	for ( TokenInstanceListReg::Iter lmi = tokenInstanceList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = InlineList::cons();
@@ -500,8 +500,8 @@ FsmGraph *TokenRegion::walk( Compiler *pd )
 {
 	/* Make each part of the longest match. */
 	int numParts = 0;
-	FsmGraph **parts = new FsmGraph*[tokenDefList.length()];
-	for ( TokenDefListReg::Iter lmi = tokenDefList; lmi.lte(); lmi++ ) {
+	FsmGraph **parts = new FsmGraph*[tokenInstanceList.length()];
+	for ( TokenInstanceListReg::Iter lmi = tokenInstanceList; lmi.lte(); lmi++ ) {
 		/* Watch out for patternless tokens. */
 		if ( lmi->join != 0 ) {
 			/* Create the machine and embed the setting of the longest match id. */
@@ -510,15 +510,15 @@ FsmGraph *TokenRegion::walk( Compiler *pd )
 
 			/* Look for tokens that accept the zero length-word. The first one found
 			 * will be used as the default token. */
-			if ( defaultTokenDef == 0 && parts[numParts]->startState->isFinState() )
-				defaultTokenDef = lmi;
+			if ( defaultTokenInstance == 0 && parts[numParts]->startState->isFinState() )
+				defaultTokenInstance = lmi;
 
 			numParts += 1;
 		}
 	}
 	FsmGraph *retFsm = parts[0];
 
-	if ( defaultTokenDef != 0 && defaultTokenDef->tdLangEl->isIgnore )
+	if ( defaultTokenInstance != 0 && defaultTokenInstance->tdLangEl->isIgnore )
 		error() << "ignore token cannot be a scanner's zero-length token" << endp;
 
 	/* The region is empty. Return the empty set. */

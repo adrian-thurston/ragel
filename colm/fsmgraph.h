@@ -48,7 +48,7 @@ struct FsmTrans;
 struct FsmState;
 struct FsmGraph;
 struct Action;
-struct TokenDef;
+struct TokenInstance;
 struct NameInst;
 
 /* State list element for unambiguous access to list element. */
@@ -92,13 +92,13 @@ typedef SBstSet< Action*, CmpOrd<Action*> > ActionSet;
 typedef CmpSTable< Action*, CmpOrd<Action*> > CmpActionSet;
 
 /* Transistion Action Element. */
-typedef SBstMapEl< int, TokenDef* > LmActionTableEl;
+typedef SBstMapEl< int, TokenInstance* > LmActionTableEl;
 
 /* Transition Action Table.  */
 struct LmActionTable 
-	: public SBstMap< int, TokenDef*, CmpOrd<int> >
+	: public SBstMap< int, TokenInstance*, CmpOrd<int> >
 {
-	void setAction( int ordering, TokenDef *action );
+	void setAction( int ordering, TokenInstance *action );
 	void setActions( const LmActionTable &other );
 };
 
@@ -440,7 +440,7 @@ typedef Vector<EptVectEl> EptVect;
 typedef BstSet<int> EntryIdSet;
 
 /* Set of longest match items that may be active in a given state. */
-typedef BstSet<TokenDef*> LmItemSet;
+typedef BstSet<TokenInstance*> LmItemSet;
 
 /* Conditions. */
 typedef BstSet< Action*, CmpOrd<Action*> > CondSet;
@@ -961,7 +961,7 @@ struct FsmGraph
 	void allTransAction( int ordering, Action *action );
 	void finishFsmAction( int ordering, Action *action );
 	void leaveFsmAction( int ordering, Action *action );
-	void longMatchAction( int ordering, TokenDef *lmPart );
+	void longMatchAction( int ordering, TokenInstance *lmPart );
 
 	/* Set error actions to execute. */
 	void startErrorAction( int ordering, Action *action, int transferPoint );

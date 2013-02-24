@@ -47,7 +47,7 @@
 struct PdaTrans;
 struct PdaState;
 struct PdaGraph;
-struct TokenDef;
+struct TokenInstance;
 struct Production;
 struct LangEl;
 struct TokenRegion;

@@ -673,7 +673,7 @@ void Compiler::analyzeAction( Action *action, InlineList *inlineList )
 		/* Need to recurse into longest match items. */
 		if ( item->type == InlineItem::LmSwitch ) {
 			TokenRegion *lm = item->tokenRegion;
-			for ( TokenDefListReg::Iter lmi = lm->tokenDefList; lmi.lte(); lmi++ ) {
+			for ( TokenInstanceListReg::Iter lmi = lm->tokenInstanceList; lmi.lte(); lmi++ ) {
 				if ( lmi->action != 0 )
 					analyzeAction( action, lmi->action->inlineList );
 			}
@@ -683,7 +683,7 @@ void Compiler::analyzeAction( Action *action, InlineList *inlineList )
 				item->type == InlineItem::LmOnNext ||
 				item->type == InlineItem::LmOnLagBehind )
 		{
-			TokenDef *lmi = item->longestMatchPart;
+			TokenInstance *lmi = item->longestMatchPart;
 			if ( lmi->action != 0 )
 				analyzeAction( action, lmi->action->inlineList );
 		}
@@ -771,18 +771,18 @@ void Compiler::createDefaultScanner()
 
 	LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
 		
-	TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, 
+	TokenInstance *tokenInstance = TokenInstance::cons( name, String(), false, false, 
 			join, 0, loc, nextTokenId++, 
 			rootNamespace, defaultRegion, 0, 0, 0 );
 
-	defaultRegion->tokenDefList.append( tokenDef );
+	defaultRegion->tokenInstanceList.append( tokenInstance );
 
 	/* Now create the one and only token -> "<chr>" / any /  */
 	name = "___DEFAULT_SCANNER_CHR";
 	defaultCharLangEl = addLangEl( this, defaultNamespace, name, LangEl::Term );
 
-	tokenDef->tdLangEl = defaultCharLangEl;
-	defaultCharLangEl->tokenDef = tokenDef;
+	tokenInstance->tdLangEl = defaultCharLangEl;
+	defaultCharLangEl->tokenInstance = tokenInstance;
 }
 
 LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
@@ -972,7 +972,7 @@ Namespace *NamespaceQual::getQual( Compiler *pd )
 void Compiler::initEmptyScanners()
 {
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
-		if ( reg->tokenDefList.length() == 0 ) {
+		if ( reg->tokenInstanceList.length() == 0 ) {
 			reg->wasEmpty = true;
 
 			static int def = 1;
@@ -980,16 +980,16 @@ void Compiler::initEmptyScanners()
 
 			LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
 				
-			TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, join, 
+			TokenInstance *tokenInstance = TokenInstance::cons( name, String(), false, false, join, 
 					0, internal, nextTokenId++, rootNamespace, reg, 0, 0, 0 );
-			reg->tokenDefList.append( tokenDef );
+			reg->tokenInstanceList.append( tokenInstance );
 
 			/* These do not go in the namespace so so they cannot get declared
 			 * in the declare pass. */
 			LangEl *lel = addLangEl( this, rootNamespace, name, LangEl::Term );
 
-			tokenDef->tdLangEl = lel;
-			lel->tokenDef = tokenDef;
+			tokenInstance->tdLangEl = lel;
+			lel->tokenInstance = tokenInstance;
 		}
 	}
 }

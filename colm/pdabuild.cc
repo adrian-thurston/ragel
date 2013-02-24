@@ -75,7 +75,7 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	parseStop(false),
 	isEOF(false),
 	repeatOf(0),
-	tokenDef(0),
+	tokenInstance(0),
 	rootDef(0),
 	termDup(0),
 	eofLel(0),
@@ -498,8 +498,8 @@ void Compiler::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 			//cerr << "isCI" << endl;
 			region = langEl->ciRegion->ciRegion;
 		}
-		else if ( !langEl->isEOF && langEl->tokenDef != 0 ) {
-			region = langEl->tokenDef->tokenRegion;
+		else if ( !langEl->isEOF && langEl->tokenInstance != 0 ) {
+			region = langEl->tokenInstance->tokenRegion;
 		}
 
 		if ( region != 0 ) {
@@ -1365,7 +1365,7 @@ void Compiler::makeRuntimeData()
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
 		long regId = reg->id+1;
 		runtimeData->regionInfo[regId].defaultToken =
-			reg->defaultTokenDef == 0 ? -1 : reg->defaultTokenDef->tdLangEl->id;
+			reg->defaultTokenInstance == 0 ? -1 : reg->defaultTokenInstance->tdLangEl->id;
 		runtimeData->regionInfo[regId].eofFrameId = -1;
 		runtimeData->regionInfo[regId].isIgnoreOnly = reg->isIgnoreOnly;
 		runtimeData->regionInfo[regId].isCiOnly = reg->isCiOnly;
@@ -1438,9 +1438,9 @@ void Compiler::makeRuntimeData()
 			runtimeData->lelInfo[i].termDupId = lel->termDup == 0 ? 0 : lel->termDup->id;
 			runtimeData->lelInfo[i].genericId = lel->generic == 0 ? 0 : lel->generic->id;
 
-			if ( lel->tokenDef != 0 && lel->tokenDef->join != 0 && 
-					lel->tokenDef->join->context != 0 )
-				runtimeData->lelInfo[i].markId = lel->tokenDef->join->mark->markId;
+			if ( lel->tokenInstance != 0 && lel->tokenInstance->join != 0 && 
+					lel->tokenInstance->join->context != 0 )
+				runtimeData->lelInfo[i].markId = lel->tokenInstance->join->mark->markId;
 			else
 				runtimeData->lelInfo[i].markId = -1;
 
@@ -1545,7 +1545,7 @@ void Compiler::makeRuntimeData()
 	/* Captured attributes. Loop over tokens and count first. */
 	long numCapturedAttr = 0;
 //	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
-//		for ( TokenDefListReg::Iter td = reg->tokenDefList; td.lte(); td++ )
+//		for ( TokenInstanceListReg::Iter td = reg->tokenInstanceList; td.lte(); td++ )
 //			numCapturedAttr += td->reCaptureVect.length();
 //	}
 	runtimeData->captureAttr = new CaptureAttr[numCapturedAttr];
@@ -1554,7 +1554,7 @@ void Compiler::makeRuntimeData()
 
 	count = 0;
 //	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
-//		for ( TokenDefListReg::Iter td = reg->tokenDefList; td.lte(); td++ ) {
+//		for ( TokenInstanceListReg::Iter td = reg->tokenInstanceList; td.lte(); td++ ) {
 //			runtimeData->lelInfo[td->token->id].captureAttr = count;
 //			runtimeData->lelInfo[td->token->id].numCaptureAttr = td->reCaptureVect.length();
 //			for ( ReCaptureVect::Iter c = td->reCaptureVect; c.lte(); c++ ) {

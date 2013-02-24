@@ -42,7 +42,7 @@ struct GenAction;
 struct NameInst;
 struct RedAction;
 struct LongestMatch;
-struct TokenDef;
+struct TokenInstance;
 struct InlineList;
 struct InlineItem;
 struct NameInst;

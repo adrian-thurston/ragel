@@ -746,7 +746,7 @@ void Compiler::makeEofElements()
 				lel != eofLangEl &&
 				lel != errorLangEl &&
 				lel != noTokenLangEl &&
-				!( lel->tokenDef != 0 && lel->tokenDef->dupOf != 0 ) )
+				!( lel->tokenInstance != 0 && lel->tokenInstance->dupOf != 0 ) )
 		{
 			String name( lel->name.length() + 5, "_eof_%s", lel->name.data );
 			LangEl *eofLel = new LangEl( lel->nspace, name, LangEl::Term );

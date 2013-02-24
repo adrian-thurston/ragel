@@ -75,7 +75,7 @@ void LexFactorAug::varDecl( Compiler *pd, ObjectDef *objectDef )
 void Compiler::varDeclaration()
 {
 	for ( NamespaceList::Iter n = namespaceList; n.lte(); n++ ) {
-		for ( TokenDefListNs::Iter tok = n->tokenDefList; tok.lte(); tok++ ) {
+		for ( TokenInstanceListNs::Iter tok = n->tokenInstanceList; tok.lte(); tok++ ) {
 			if ( tok->join != 0 )
 				tok->join->varDecl( this, tok->objectDef );
 		}
@@ -282,7 +282,7 @@ void Namespace::declare( Compiler *pd )
 	for ( GenericList::Iter g = genericList; g.lte(); g++ )
 		g->declare( pd, this );
 
-	for ( TokenDefListNs::Iter l = tokenDefList; l.lte(); l++ ) {
+	for ( TokenInstanceListNs::Iter l = tokenInstanceList; l.lte(); l++ ) {
 		if ( l->isLiteral ) {
 			if ( l->dupOf != 0 ) {
 				/* Duplicate of another. Use the lang el of that token. */
@@ -300,7 +300,7 @@ void Namespace::declare( Compiler *pd )
 
 					newLangEl->lit = l->literal;
 					newLangEl->isLiteral = true;
-					newLangEl->tokenDef = l;
+					newLangEl->tokenInstance = l;
 
 					l->tdLangEl = newLangEl;
 
@@ -345,7 +345,7 @@ void Namespace::declare( Compiler *pd )
 		lel->objectDef = c->context->contextObjDef;
 	}
 
-	for ( TokenDefListNs::Iter t = tokenDefList; t.lte(); t++ ) {
+	for ( TokenInstanceListNs::Iter t = tokenInstanceList; t.lte(); t++ ) {
 		/* Literals already taken care of. */
 		if ( ! t->isLiteral ) {
 			if ( t->dupOf != 0 ) {
@@ -360,7 +360,7 @@ void Namespace::declare( Compiler *pd )
 				tokEl->transBlock = t->codeBlock;
 				tokEl->objectDef = t->objectDef;
 				tokEl->contextIn = t->contextIn;
-				tokEl->tokenDef = t;
+				tokEl->tokenInstance = t;
 
 				if ( t->noPreIgnore )
 					tokEl->noPreIgnore = true;

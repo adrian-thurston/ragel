@@ -60,7 +60,7 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 				fsmRun->cs = fsmRun->tables->errorState;
 			}
 			else {
-				for ( TokenDefListReg::Iter lmi = item->tokenRegion->tokenDefList; 
+				for ( TokenInstanceListReg::Iter lmi = item->tokenRegion->tokenInstanceList; 
 						lmi.lte(); lmi++ )
 				{
 					if ( lmi->inLmSelect && fsmRun->act == lmi->longestMatchId )

@@ -201,7 +201,7 @@ typedef Vector< PdaGraph* > Machines;
 /* List of language elements. */
 typedef DList<LangEl> LelList;
 
-typedef Vector< TokenDef* > TokenDefVect;
+typedef Vector< TokenInstance* > TokenInstanceVect;
 
 struct UniqueType;
 
@@ -254,7 +254,7 @@ struct LangEl : public DListEl<LangEl>
 	/* Productions from the language element if it is a non-terminal. */
 	LelDefList defList;
 
-	TokenDef *tokenDef;
+	TokenInstance *tokenInstance;
 	Production *rootDef;
 	LangEl *termDup;
 	LangEl *eofLel;
