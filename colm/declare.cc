@@ -24,6 +24,64 @@
 #include <iostream>
 #include <assert.h>
 
+void LexJoin::varDecl( Compiler *pd, ObjectDef *objectDef )
+{
+	expr->varDecl( pd, objectDef );
+}
+
+void LexExpression::varDecl( Compiler *pd, ObjectDef *objectDef )
+{
+	switch ( type ) {
+		case OrType: case IntersectType: case SubtractType:
+		case StrongSubtractType:
+			expression->varDecl( pd, objectDef );
+			term->varDecl( pd, objectDef );
+			break;
+		case TermType:
+			term->varDecl( pd, objectDef );
+			break;
+		case BuiltinType:
+			break;
+	}
+}
+
+void LexTerm::varDecl( Compiler *pd, ObjectDef *objectDef )
+{
+	switch ( type ) {
+		case ConcatType:
+		case RightStartType:
+		case RightFinishType:
+		case LeftType:
+			term->varDecl( pd, objectDef );
+			factorAug->varDecl( pd, objectDef );
+			break;
+		case FactorAugType:
+			factorAug->varDecl( pd, objectDef );
+			break;
+	}
+}
+
+void LexFactorAug::varDecl( Compiler *pd, ObjectDef *objectDef )
+{
+	for ( ReCaptureVect::Iter re = reCaptureVect; re.lte(); re++ ) {
+		if ( objectDef->checkRedecl( re->objField->name ) != 0 )
+			error(re->objField->loc) << "label name \"" << re->objField->name << "\" already in use" << endp;
+
+		/* Insert it into the map. */
+		objectDef->insertField( re->objField->name, re->objField );
+	}
+}
+
+void Compiler::varDeclaration()
+{
+	for ( NamespaceList::Iter n = namespaceList; n.lte(); n++ ) {
+		for ( TokenDefListNs::Iter tok = n->tokenDefList; tok.lte(); tok++ ) {
+			if ( tok->join != 0 )
+				tok->join->varDecl( this, tok->objectDef );
+		}
+	}
+}
+
 LangEl *declareLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::Type type )
 {
     /* If the id is already in the dict, it will be placed in last found. If

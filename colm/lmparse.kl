@@ -514,6 +514,7 @@ LexFactorAug *ColmParser::lexFactorLabel( const InputLoc &loc, const String &dat
 	factorAug->actions.append( ParserAction( loc, at_leave, 0, leave ) );
 
 	reCaptureVect.append( ReCapture( enter, leave, objField ) );
+	factorAug->reCaptureVect.append( ReCapture( enter, leave, objField ) );
 
 	return factorAug;
 }

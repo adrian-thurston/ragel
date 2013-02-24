@@ -1137,6 +1137,8 @@ void Compiler::compile()
 	beginProcessing();
 	initKeyOps();
 
+	varDeclaration();
+
 	/* Type declaration. */
 	typeDeclaration();
 

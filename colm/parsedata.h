@@ -980,6 +980,8 @@ struct Compiler
 
 	bool beginContiguous( CodeVect &code, int stretch );
 	void endContiguous( CodeVect &code, bool resetContiguous );
+
+	void varDeclaration();
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );
