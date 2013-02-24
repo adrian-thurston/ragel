@@ -348,8 +348,8 @@ void Namespace::declare( Compiler *pd )
 				LangEl *tokEl = declareLangEl( pd, this, t->name, LangEl::Term );
 				tokEl->isIgnore = t->tokenDef->isIgnore;
 				tokEl->transBlock = t->tokenDef->codeBlock;
-				tokEl->objectDef = t->objectDef;
-				tokEl->contextIn = t->contextIn;
+				tokEl->objectDef = t->tokenDef->objectDef;
+				tokEl->contextIn = t->tokenDef->contextIn;
 				tokEl->tokenInstance = t;
 
 				if ( t->tokenDef->noPreIgnore )
