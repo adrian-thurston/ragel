@@ -101,33 +101,26 @@ TokenRegion *ColmParser::createRegion( const InputLoc &loc )
 
 void ColmParser::pushRegionSet( const InputLoc &loc )
 {
-	/* Just for ignores. */
-	TokenRegion *tokenRegionIgn = createRegion( loc );
+	TokenRegion *tokenIgnore = createRegion( loc );
+	TokenRegion *tokenOnly = createRegion( loc );
+	TokenRegion *ignoreOnly = createRegion( loc );
+	TokenRegion *collectIgnore = createRegion( loc );
 
-	/* Just for collect ignores. Will use the ignore-only start state. */
-	TokenRegion *tokenRegionCi = createRegion( loc );
+	RegionSet *regionSet = new RegionSet( tokenIgnore,
+			tokenOnly, ignoreOnly, collectIgnore );
 
-	/* Just for tokens. */
-	TokenRegion *tokenRegionTok = createRegion( loc );
+	tokenIgnore->ignoreOnlyRegion = ignoreOnly;
+	tokenIgnore->tokenOnlyRegion = tokenOnly;
+	tokenIgnore->ciRegion = collectIgnore;
 
-	/* Make the new token region. */
-	TokenRegion *tokenRegion = createRegion( loc );
+	tokenIgnore->isFullRegion = true;
+	ignoreOnly->isIgnoreOnly = true;
+	collectIgnore->isCiOnly = true;
+	tokenOnly->isTokenOnly = true;
 
-	RegionSet *regionSet = new RegionSet( tokenRegion,
-			tokenRegionTok, tokenRegionIgn, tokenRegionCi );
-
-	tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
-	tokenRegion->tokenOnlyRegion = tokenRegionTok;
-	tokenRegion->ciRegion = tokenRegionCi;
-
-	tokenRegion->isFullRegion = true;
-	tokenRegionIgn->isIgnoreOnly = true;
-	tokenRegionCi->isCiOnly = true;
-	tokenRegionTok->isTokenOnly = true;
-
-	tokenRegionIgn->derivedFrom = tokenRegion;
-	tokenRegionCi->derivedFrom = tokenRegion;
-	tokenRegionTok->derivedFrom = tokenRegion;
+	ignoreOnly->derivedFrom = tokenIgnore;
+	collectIgnore->derivedFrom = tokenIgnore;
+	tokenOnly->derivedFrom = tokenIgnore;
 
 	pd->regionSetList.append( regionSet );
 	regionStack.push( regionSet );

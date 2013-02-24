@@ -695,18 +695,18 @@ struct TokenRegion
 struct RegionSet
 {
 	RegionSet( TokenRegion *tokenIgnore, TokenRegion *tokenOnly, 
-			TokenRegion *ignoreOnly, TokenRegion *ci )
+			TokenRegion *ignoreOnly, TokenRegion *collectIgnore )
 	:
 		tokenIgnore(tokenIgnore),
 		tokenOnly(tokenOnly),
 		ignoreOnly(ignoreOnly),
-		ci(ci)
+		collectIgnore(collectIgnore)
 	{}
 
 	TokenRegion *tokenIgnore;
 	TokenRegion *tokenOnly;
 	TokenRegion *ignoreOnly;
-	TokenRegion *ci;
+	TokenRegion *collectIgnore;
 
 	TokenDefListReg tokenDefList;
 
