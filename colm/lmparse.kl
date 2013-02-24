@@ -43,6 +43,7 @@ void ColmParser::init()
 	TokenRegion *rootRegion = createRegion( internal );
 
 	RegionSet *rootRegionSet = new RegionSet( rootRegion, 0, 0, 0 );
+	pd->regionSetList.append( rootRegionSet );
 	regionStack.push( rootRegionSet );
 
 	pd->rootRegion = rootRegion;
@@ -112,7 +113,7 @@ void ColmParser::pushRegionSet( const InputLoc &loc )
 	/* Make the new token region. */
 	TokenRegion *tokenRegion = createRegion( loc );
 
-	RegionSet *regionPack = new RegionSet( tokenRegion,
+	RegionSet *regionSet = new RegionSet( tokenRegion,
 			tokenRegionTok, tokenRegionIgn, tokenRegionCi );
 
 	tokenRegion->ignoreOnlyRegion = tokenRegionIgn;
@@ -128,7 +129,8 @@ void ColmParser::pushRegionSet( const InputLoc &loc )
 	tokenRegionCi->derivedFrom = tokenRegion;
 	tokenRegionTok->derivedFrom = tokenRegion;
 
-	regionStack.push( regionPack );
+	pd->regionSetList.append( regionSet );
+	regionStack.push( regionSet );
 }
 
 void ColmParser::popRegionSet()

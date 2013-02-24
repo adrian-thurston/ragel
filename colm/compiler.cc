@@ -765,9 +765,11 @@ void Compiler::createDefaultScanner()
 			regionList.length() );
 	regionList.append( defaultRegion );
 
-	/* Insert the machine definition into the graph dictionary. */
 	RegionDef *rdel = new RegionDef( defaultRegion, loc );
 	regionDefList.append( rdel );
+
+	RegionSet *regionSet = new RegionSet( defaultRegion, 0, 0, 0 );
+	regionSetList.append( regionSet );
 
 	LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
 

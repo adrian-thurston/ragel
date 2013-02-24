@@ -715,6 +715,7 @@ struct RegionSet
 
 typedef Vector<RegionSet*> RegionSetVect;
 
+typedef DList<RegionSet> RegionSetList;
 typedef DList<TokenRegion> RegionList;
 
 typedef Vector<Namespace*> NamespaceVect;

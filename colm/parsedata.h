@@ -606,8 +606,8 @@ struct Compiler
 	/* Counter for assigning ids to longest match items. */
 	int nextTokenId;
 
-	/* List of all longest match parse tree items. */
 	RegionList regionList;
+	RegionSetList regionSetList;
 
 	NamespaceList namespaceList;
 
