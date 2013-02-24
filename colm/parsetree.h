@@ -454,8 +454,9 @@ struct TokenInstance
 {
 	TokenInstance()
 	: 
-		action(0), tdLangEl(0), inLmSelect(false), dupOf(0),
-		noPostIgnore(false), noPreIgnore(false), isZero(false)
+		action(0), tdLangEl(0), inLmSelect(false),
+		dupOf(0),
+		isZero(false)
 	{}
 
 	static TokenInstance *cons( TokenDef *tokenDef, const String &name,
@@ -483,8 +484,6 @@ struct TokenInstance
 		t->objectDef = objectDef;
 		t->contextIn = contextIn;
 		t->dupOf = 0;
-		t->noPostIgnore = false;
-		t->noPreIgnore = false;
 		t->isZero = false;
 
 		if ( pReCaptureVect != 0 )
@@ -519,8 +518,6 @@ struct TokenInstance
 	Context *contextIn;
 
 	TokenInstance *dupOf;
-	bool noPostIgnore;
-	bool noPreIgnore;
 	bool isZero;
 };
 

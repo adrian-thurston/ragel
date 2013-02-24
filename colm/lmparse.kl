@@ -214,11 +214,11 @@ void ColmParser::tokenInstance( const InputLoc &loc, String name, LexJoin *join,
 	regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
 	nspace->tokenInstanceList.append( tokenInstance );
 
-	tokenInstance->noPreIgnore = noPreIgnore;
-	tokenInstance->noPostIgnore = noPostIgnore;
+	tokenDef->noPreIgnore = noPreIgnore;
+	tokenDef->noPostIgnore = noPostIgnore;
 
-	/* All again for the ignore. */
 	if ( ignore ) {
+		/* The instance for the ignore-only. */
 		TokenInstance *tokenInstanceIgn = TokenInstance::cons( tokenDef, name + "_ign",
 				String(), false, ignore, join, 
 				0, loc, pd->nextTokenId++, nspace, regionSet->ignoreOnly,
@@ -231,6 +231,7 @@ void ColmParser::tokenInstance( const InputLoc &loc, String name, LexJoin *join,
 		nspace->tokenInstanceList.append( tokenInstanceIgn );
 	}
 	else {
+		/* The instance for the token-only. */
 		TokenInstance *tokenInstanceTok = TokenInstance::cons( tokenDef, name + "_tok", 
 				String(), false, ignore, join, 
 				0, loc, pd->nextTokenId++, nspace, regionSet->tokenOnly,
@@ -319,12 +320,14 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 
 	LexJoin *join = literalJoin( loc, data );
 
+	/* The token definition. */
 	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
 			0, loc, 0, nspace, regionSet->tokenIgnore, 0, 0, 0 );
 
 	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
 
+	/* The instance for the token/ignore region. */
 	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef, name, data, true, false, join, 
 			0, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0, 0, 0 );
 
@@ -334,9 +337,10 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 	nspace->tokenInstanceList.append( tokenInstance );
 
 	/* Make the duplicate for the token-only region. */
-	tokenInstance->noPreIgnore = noPreIgnore;
-	tokenInstance->noPostIgnore = noPostIgnore;
+	tokenDef->noPreIgnore = noPreIgnore;
+	tokenDef->noPostIgnore = noPostIgnore;
 
+	/* The instance for the token-only region. */
 	TokenInstance *tokenInstanceTok = TokenInstance::cons( tokenDef, name + "_tok",
 			data, true, false, join, 0, loc, pd->nextTokenId++, nspace,
 			regionSet->tokenOnly, 0, 0, 0 );
@@ -344,7 +348,6 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 	tokenInstanceTok->dupOf = tokenInstance;
 
 	regionSet->tokenOnly->tokenInstanceList.append( tokenInstanceTok );
-
 	nspace->tokenInstanceList.append( tokenInstanceTok );
 
 	if ( !insideRegion )

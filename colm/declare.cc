@@ -304,9 +304,9 @@ void Namespace::declare( Compiler *pd )
 
 					l->tdLangEl = newLangEl;
 
-					if ( l->noPreIgnore )
+					if ( l->tokenDef->noPreIgnore )
 						newLangEl->noPreIgnore = true;
-					if ( l->noPostIgnore )
+					if ( l->tokenDef->noPostIgnore )
 						newLangEl->noPostIgnore = true;
 				}
 			}
@@ -362,9 +362,9 @@ void Namespace::declare( Compiler *pd )
 				tokEl->contextIn = t->contextIn;
 				tokEl->tokenInstance = t;
 
-				if ( t->noPreIgnore )
+				if ( t->tokenDef->noPreIgnore )
 					tokEl->noPreIgnore = true;
-				if ( t->noPostIgnore )
+				if ( t->tokenDef->noPostIgnore )
 					tokEl->noPostIgnore = true;
 
 				t->tdLangEl = tokEl;
