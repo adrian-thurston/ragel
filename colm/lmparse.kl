@@ -282,13 +282,13 @@ void ColmParser::zeroDef( const InputLoc &loc, const String &data,
 	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
 			0, loc, 0, nspace, regionSet->tokenIgnore, 0, 0, 0 );
 
+	tokenDef->isZero = true;
+
 	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
 
 	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef, name, data, join, 
 			0, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0, 0, 0 );
-
-	tokenInstance->isZero = true;
 
 	/* Doesn't go into instance list. */
 

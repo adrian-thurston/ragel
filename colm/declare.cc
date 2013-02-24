@@ -285,7 +285,7 @@ void Namespace::declare( Compiler *pd )
 	for ( TokenInstanceListNs::Iter l = tokenInstanceList; l.lte(); l++ ) {
 		if ( l->dupOf == 0 ) {
 			if ( l->tokenDef->isLiteral ) {
-				if ( l->isZero ) {
+				if ( l->tokenDef->isZero ) {
 					l->tokenDef->tdLangEl = l->tokenRegion->ciLel;
 					assert( l->tokenRegion->ciLel != 0 );
 				}

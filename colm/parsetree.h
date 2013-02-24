@@ -454,9 +454,9 @@ struct TokenInstance
 {
 	TokenInstance()
 	: 
-		action(0), inLmSelect(false),
-		dupOf(0),
-		isZero(false)
+		action(0),
+		inLmSelect(false),
+		dupOf(0)
 	{}
 
 	static TokenInstance *cons( TokenDef *tokenDef, const String &name,
@@ -481,7 +481,6 @@ struct TokenInstance
 		t->objectDef = objectDef;
 		t->contextIn = contextIn;
 		t->dupOf = 0;
-		t->isZero = false;
 
 		if ( pReCaptureVect != 0 )
 			t->reCaptureVect = *pReCaptureVect;
@@ -512,7 +511,6 @@ struct TokenInstance
 	Context *contextIn;
 
 	TokenInstance *dupOf;
-	bool isZero;
 };
 
 struct LelDefList;
