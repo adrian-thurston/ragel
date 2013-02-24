@@ -460,7 +460,7 @@ struct TokenInstance
 	{}
 
 	static TokenInstance *cons( TokenDef *tokenDef, const String &name,
-		const String &literal, bool isLiteral, bool isIgnore,
+		const String &literal, 
 		LexJoin *join, CodeBlock *codeBlock, const InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
@@ -470,8 +470,6 @@ struct TokenInstance
 		t->tokenDef = tokenDef;
 		t->name = name;
 		t->literal = literal;
-		t->isLiteral = isLiteral;
-		t->isIgnore = isIgnore;
 		t->join = join;
 		t->action = 0;
 		t->codeBlock = codeBlock;
@@ -497,8 +495,6 @@ struct TokenInstance
 	TokenDef *tokenDef;
 	String name;
 	String literal;
-	bool isLiteral;
-	bool isIgnore;
 	LexJoin *join;
 	Action *action;
 	CodeBlock *codeBlock;

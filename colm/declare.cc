@@ -283,7 +283,7 @@ void Namespace::declare( Compiler *pd )
 		g->declare( pd, this );
 
 	for ( TokenInstanceListNs::Iter l = tokenInstanceList; l.lte(); l++ ) {
-		if ( l->isLiteral ) {
+		if ( l->tokenDef->isLiteral ) {
 			if ( l->dupOf != 0 ) {
 				/* Duplicate of another. Use the lang el of that token. */
 				assert( l->dupOf->tdLangEl != 0 );
@@ -347,7 +347,7 @@ void Namespace::declare( Compiler *pd )
 
 	for ( TokenInstanceListNs::Iter t = tokenInstanceList; t.lte(); t++ ) {
 		/* Literals already taken care of. */
-		if ( ! t->isLiteral ) {
+		if ( ! t->tokenDef->isLiteral ) {
 			if ( t->dupOf != 0 ) {
 				/* Duplicate of another. Use the lang el of that token. */
 				assert( t->dupOf->tdLangEl != 0 );
@@ -356,7 +356,7 @@ void Namespace::declare( Compiler *pd )
 			else {
 				/* Create the token. */
 				LangEl *tokEl = declareLangEl( pd, this, t->name, LangEl::Term );
-				tokEl->isIgnore = t->isIgnore;
+				tokEl->isIgnore = t->tokenDef->isIgnore;
 				tokEl->transBlock = t->codeBlock;
 				tokEl->objectDef = t->objectDef;
 				tokEl->contextIn = t->contextIn;
