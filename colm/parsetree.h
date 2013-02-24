@@ -461,7 +461,7 @@ struct TokenInstance
 
 	static TokenInstance *cons( TokenDef *tokenDef, const String &name,
 		const String &literal, 
-		LexJoin *join, CodeBlock *codeBlock, const InputLoc &semiLoc, 
+		LexJoin *join, const InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
 	{ 
@@ -472,7 +472,6 @@ struct TokenInstance
 		t->literal = literal;
 		t->join = join;
 		t->action = 0;
-		t->codeBlock = codeBlock;
 		t->semiLoc = semiLoc;
 		t->longestMatchId = longestMatchId;
 		t->inLmSelect = false;
@@ -495,7 +494,6 @@ struct TokenInstance
 	String literal;
 	LexJoin *join;
 	Action *action;
-	CodeBlock *codeBlock;
 	InputLoc semiLoc;
 
 	Action *setActId;

@@ -347,7 +347,7 @@ void Namespace::declare( Compiler *pd )
 				/* Create the token. */
 				LangEl *tokEl = declareLangEl( pd, this, t->name, LangEl::Term );
 				tokEl->isIgnore = t->tokenDef->isIgnore;
-				tokEl->transBlock = t->codeBlock;
+				tokEl->transBlock = t->tokenDef->codeBlock;
 				tokEl->objectDef = t->objectDef;
 				tokEl->contextIn = t->contextIn;
 				tokEl->tokenInstance = t;
