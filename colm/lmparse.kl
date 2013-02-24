@@ -256,7 +256,7 @@ void ColmParser::tokenInstance( const InputLoc &loc, String name, LexJoin *join,
 	reCaptureVect.empty();
 }
 
-void ColmParser::literalDef( const InputLoc &loc, const String &data,
+void ColmParser::zeroDef( const InputLoc &loc, const String &data,
 		bool noPreIgnore, bool noPostIgnore )
 {
 	/* Create a name for the literal. */
@@ -264,12 +264,9 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 
 	bool insideRegion = regionStack.length() > 1;
 	if ( !insideRegion )
-		pushRegionSet( loc );
+		error(loc) << "zero token should be inside token" << endp;
 
-	bool unusedCI;
-	String interp;
-	prepareLitString( interp, unusedCI, data, loc );
-	bool isZero = strcmp( interp.data, "" ) == 0;
+	String interp("");;
 
 	/* Look for the production's associated region. */
 	Namespace *nspace = namespaceStack.top();
@@ -290,29 +287,65 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef, name, data, true, false, join, 
 			0, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0, 0, 0 );
 
-	tokenInstance->isZero = isZero;
+	tokenInstance->isZero = true;
 
-	if ( !isZero )
-		regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
+	/* Doesn't go into instance list. */
+
+	ldel = nspace->literalDict.insert( interp, tokenInstance );
+	nspace->tokenInstanceList.append( tokenInstance );
+}
+
+void ColmParser::literalDef( const InputLoc &loc, const String &data,
+		bool noPreIgnore, bool noPostIgnore )
+{
+	/* Create a name for the literal. */
+	String name( 32, "_literal_%.4x", pd->nextTokenId );
+
+	bool insideRegion = regionStack.length() > 1;
+	if ( !insideRegion )
+		pushRegionSet( loc );
+
+	bool unusedCI;
+	String interp;
+	prepareLitString( interp, unusedCI, data, loc );
+
+	/* Look for the production's associated region. */
+	Namespace *nspace = namespaceStack.top();
+	RegionSet *regionSet = regionStack.top();
+
+	LiteralDictEl *ldel = nspace->literalDict.find( interp );
+	if ( ldel != 0 )
+		error( loc ) << "literal already defined in this namespace" << endp;
+
+	LexJoin *join = literalJoin( loc, data );
+
+	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
+			0, loc, 0, nspace, regionSet->tokenIgnore, 0, 0, 0 );
+
+	regionSet->tokenDefList.append( tokenDef );
+	nspace->tokenDefList.append( tokenDef );
+
+	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef, name, data, true, false, join, 
+			0, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0, 0, 0 );
+
+	regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
 
 	ldel = nspace->literalDict.insert( interp, tokenInstance );
 	nspace->tokenInstanceList.append( tokenInstance );
 
-	if ( !isZero ) {
-		/* Make the duplicate for the token-only region. */
-		tokenInstance->noPreIgnore = noPreIgnore;
-		tokenInstance->noPostIgnore = noPostIgnore;
+	/* Make the duplicate for the token-only region. */
+	tokenInstance->noPreIgnore = noPreIgnore;
+	tokenInstance->noPostIgnore = noPostIgnore;
 
-		TokenInstance *tokenInstanceTok = TokenInstance::cons( tokenDef, name + "_tok",
-				data, true, false, join, 0, loc, pd->nextTokenId++, nspace,
-				regionSet->tokenOnly, 0, 0, 0 );
+	TokenInstance *tokenInstanceTok = TokenInstance::cons( tokenDef, name + "_tok",
+			data, true, false, join, 0, loc, pd->nextTokenId++, nspace,
+			regionSet->tokenOnly, 0, 0, 0 );
 
-		tokenInstanceTok->dupOf = tokenInstance;
+	tokenInstanceTok->dupOf = tokenInstance;
 
-		regionSet->tokenOnly->tokenInstanceList.append( tokenInstanceTok );
+	regionSet->tokenOnly->tokenInstanceList.append( tokenInstanceTok );
 
-		nspace->tokenInstanceList.append( tokenInstanceTok );
-	}
+	nspace->tokenInstanceList.append( tokenInstanceTok );
 
 	if ( !insideRegion )
 		popRegionSet();
@@ -1784,7 +1817,10 @@ literal_list: literal_item;
 
 literal_item: opt_no_ignore TK_Literal opt_no_ignore
 	final {
-		literalDef( $2->loc, $2->data, $1->noIgnore, $3->noIgnore );
+		if ( strcmp( $2->data, "''" ) == 0 )
+			zeroDef( $2->loc, $2->data, $1->noIgnore, $3->noIgnore );
+		else
+			literalDef( $2->loc, $2->data, $1->noIgnore, $3->noIgnore );
 	};
 
 
