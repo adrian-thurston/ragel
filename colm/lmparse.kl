@@ -510,15 +510,9 @@ int ColmParser::lexFactorRepNum( const InputLoc &loc, const String &data )
 
 LexFactorAug *ColmParser::lexFactorLabel( const InputLoc &loc, const String &data, LexFactorAug *factorAug )
 {
-	if ( curObjectDef->checkRedecl( data ) != 0 )
-		error(loc) << "label name \"" << data << "\" already in use" << endp;
-
 	/* Create the object field. */
 	TypeRef *typeRef = TypeRef::cons( loc, pd->uniqueTypeStr );
 	ObjectField *objField = ObjectField::cons( loc, typeRef, data );
-
-	/* Insert it into the map. */
-	curObjectDef->insertField( data, objField );
 
 	/* Create the enter and leaving actions that will mark the substring. */
 	Action *enter = Action::cons( MarkMark, pd->nextMatchEndNum++ );

@@ -75,7 +75,7 @@ void LexFactorAug::varDecl( Compiler *pd, ObjectDef *objectDef )
 void Compiler::varDeclaration()
 {
 	for ( NamespaceList::Iter n = namespaceList; n.lte(); n++ ) {
-		for ( TokenInstanceListNs::Iter tok = n->tokenInstanceList; tok.lte(); tok++ ) {
+		for ( TokenDefListNs::Iter tok = n->tokenDefList; tok.lte(); tok++ ) {
 			if ( tok->join != 0 )
 				tok->join->varDecl( this, tok->objectDef );
 		}
