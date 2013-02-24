@@ -786,7 +786,7 @@ void Compiler::createDefaultScanner()
 	name = "___DEFAULT_SCANNER_CHR";
 	defaultCharLangEl = addLangEl( this, defaultNamespace, name, LangEl::Term );
 
-	tokenInstance->tdLangEl = defaultCharLangEl;
+	tokenInstance->tokenDef->tdLangEl = defaultCharLangEl;
 	defaultCharLangEl->tokenInstance = tokenInstance;
 }
 
@@ -998,7 +998,7 @@ void Compiler::initEmptyScanners()
 			 * in the declare pass. */
 			LangEl *lel = addLangEl( this, rootNamespace, name, LangEl::Term );
 
-			tokenInstance->tdLangEl = lel;
+			tokenInstance->tokenDef->tdLangEl = lel;
 			lel->tokenInstance = tokenInstance;
 		}
 	}

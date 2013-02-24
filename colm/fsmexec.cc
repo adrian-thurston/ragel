@@ -64,7 +64,7 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 						lmi.lte(); lmi++ )
 				{
 					if ( lmi->inLmSelect && fsmRun->act == lmi->longestMatchId )
-						fsmRun->matchedToken = lmi->tdLangEl->id;
+						fsmRun->matchedToken = lmi->tokenDef->tdLangEl->id;
 				}
 			}
 			fsmRun->returnResult = true;
@@ -72,16 +72,16 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 			break;
 		case InlineItem::LmOnLast:
 			fsmRun->p += 1;
-			fsmRun->matchedToken = item->longestMatchPart->tdLangEl->id;
+			fsmRun->matchedToken = item->longestMatchPart->tokenDef->tdLangEl->id;
 			fsmRun->returnResult = true;
 			break;
 		case InlineItem::LmOnNext:
-			fsmRun->matchedToken = item->longestMatchPart->tdLangEl->id;
+			fsmRun->matchedToken = item->longestMatchPart->tokenDef->tdLangEl->id;
 			fsmRun->returnResult = true;
 			break;
 		case InlineItem::LmOnLagBehind:
 			fsmRun->toklen = fsmRun->tokend;
-			fsmRun->matchedToken = item->longestMatchPart->tdLangEl->id;
+			fsmRun->matchedToken = item->longestMatchPart->tokenDef->tdLangEl->id;
 			fsmRun->returnResult = true;
 			fsmRun->skipToklen = true;
 			break;

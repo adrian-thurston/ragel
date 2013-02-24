@@ -184,9 +184,9 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 
 	for ( TokenInstanceListReg::Iter lmi = item->tokenRegion->tokenInstanceList; lmi.lte(); lmi++ ) {
 		if ( lmi->inLmSelect ) {
-			assert( lmi->tdLangEl != 0 );
+			assert( lmi->tokenDef->tdLangEl != 0 );
 			ret << "	case " << lmi->longestMatchId << ":\n";
-			EMIT_TOKEN( ret, lmi->tdLangEl );
+			EMIT_TOKEN( ret, lmi->tokenDef->tdLangEl );
 			ret << "	break;\n";
 		}
 	}
@@ -201,27 +201,27 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 
 void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
 {
-	assert( item->longestMatchPart->tdLangEl != 0 );
+	assert( item->longestMatchPart->tokenDef->tdLangEl != 0 );
 
 	ret << "	" << P() << " += 1;\n";
-	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
+	EMIT_TOKEN( ret, item->longestMatchPart->tokenDef->tdLangEl );
 	ret << "	goto out;\n";
 }
 
 void FsmCodeGen::LM_ON_NEXT( ostream &ret, InlineItem *item )
 {
-	assert( item->longestMatchPart->tdLangEl != 0 );
+	assert( item->longestMatchPart->tokenDef->tdLangEl != 0 );
 
-	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
+	EMIT_TOKEN( ret, item->longestMatchPart->tokenDef->tdLangEl );
 	ret << "	goto out;\n";
 }
 
 void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
 {
-	assert( item->longestMatchPart->tdLangEl != 0 );
+	assert( item->longestMatchPart->tokenDef->tdLangEl != 0 );
 
 	ret << "	" << TOKLEN() << " = " << TOKEND() << ";\n";
-	EMIT_TOKEN( ret, item->longestMatchPart->tdLangEl );
+	EMIT_TOKEN( ret, item->longestMatchPart->tokenDef->tdLangEl );
 	ret << "	goto skip_toklen;\n";
 
 	skipTokenLabelNeeded = true;

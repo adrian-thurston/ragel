@@ -454,7 +454,7 @@ struct TokenInstance
 {
 	TokenInstance()
 	: 
-		action(0), tdLangEl(0), inLmSelect(false),
+		action(0), inLmSelect(false),
 		dupOf(0),
 		isZero(false)
 	{}
@@ -473,7 +473,6 @@ struct TokenInstance
 		t->join = join;
 		t->action = 0;
 		t->codeBlock = codeBlock;
-		t->tdLangEl = 0;
 		t->semiLoc = semiLoc;
 		t->longestMatchId = longestMatchId;
 		t->inLmSelect = false;
@@ -498,7 +497,6 @@ struct TokenInstance
 	LexJoin *join;
 	Action *action;
 	CodeBlock *codeBlock;
-	LangEl *tdLangEl;
 	InputLoc semiLoc;
 
 	Action *setActId;

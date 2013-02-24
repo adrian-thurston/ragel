@@ -283,15 +283,10 @@ void Namespace::declare( Compiler *pd )
 		g->declare( pd, this );
 
 	for ( TokenInstanceListNs::Iter l = tokenInstanceList; l.lte(); l++ ) {
-		if ( l->tokenDef->isLiteral ) {
-			if ( l->dupOf != 0 ) {
-				/* Duplicate of another. Use the lang el of that token. */
-				assert( l->dupOf->tdLangEl != 0 );
-				l->tdLangEl = l->dupOf->tdLangEl;
-			}
-			else {
+		if ( l->dupOf == 0 ) {
+			if ( l->tokenDef->isLiteral ) {
 				if ( l->isZero ) {
-					l->tdLangEl = l->tokenRegion->ciLel;
+					l->tokenDef->tdLangEl = l->tokenRegion->ciLel;
 					assert( l->tokenRegion->ciLel != 0 );
 				}
 				else {
@@ -302,7 +297,7 @@ void Namespace::declare( Compiler *pd )
 					newLangEl->isLiteral = true;
 					newLangEl->tokenInstance = l;
 
-					l->tdLangEl = newLangEl;
+					l->tokenDef->tdLangEl = newLangEl;
 
 					if ( l->tokenDef->noPreIgnore )
 						newLangEl->noPreIgnore = true;
@@ -346,14 +341,9 @@ void Namespace::declare( Compiler *pd )
 	}
 
 	for ( TokenInstanceListNs::Iter t = tokenInstanceList; t.lte(); t++ ) {
-		/* Literals already taken care of. */
-		if ( ! t->tokenDef->isLiteral ) {
-			if ( t->dupOf != 0 ) {
-				/* Duplicate of another. Use the lang el of that token. */
-				assert( t->dupOf->tdLangEl != 0 );
-				t->tdLangEl = t->dupOf->tdLangEl;
-			}
-			else {
+		if ( t->dupOf == 0 ) {
+			/* Literals already taken care of. */
+			if ( ! t->tokenDef->isLiteral ) {
 				/* Create the token. */
 				LangEl *tokEl = declareLangEl( pd, this, t->name, LangEl::Term );
 				tokEl->isIgnore = t->tokenDef->isIgnore;
@@ -367,7 +357,7 @@ void Namespace::declare( Compiler *pd )
 				if ( t->tokenDef->noPostIgnore )
 					tokEl->noPostIgnore = true;
 
-				t->tdLangEl = tokEl;
+				t->tokenDef->tdLangEl = tokEl;
 			}
 		}
 	}
