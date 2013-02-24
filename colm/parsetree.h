@@ -170,6 +170,9 @@ struct RegionJoinOrLm;
 struct TokenRegion;
 struct Namespace;
 struct Context;
+struct TokenDef;
+struct TokenDefListReg;
+struct TokenDefListNs;
 struct TokenInstance;
 struct TokenInstanceListReg;
 struct TokenInstanceListNs;
@@ -350,6 +353,90 @@ struct Context
 
 typedef Vector<ReCapture> ReCaptureVect;
 
+struct TokenDefPtr1
+{
+	TokenDef *prev, *next;
+};
+
+struct TokenDefPtr2
+{
+	TokenDef *prev, *next;
+};
+
+struct TokenDef
+:
+	public TokenDefPtr1, 
+	public TokenDefPtr2
+{
+	TokenDef()
+	: 
+		action(0), tdLangEl(0), inLmSelect(false), dupOf(0),
+		noPostIgnore(false), noPreIgnore(false), isZero(false)
+	{}
+
+	static TokenDef *cons( const String &name, const String &literal, bool isLiteral, bool isIgnore,
+		LexJoin *join, CodeBlock *codeBlock, const InputLoc &semiLoc, 
+		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
+		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
+	{ 
+		TokenDef *t = new TokenDef;
+
+		t->name = name;
+		t->literal = literal;
+		t->isLiteral = isLiteral;
+		t->isIgnore = isIgnore;
+		t->join = join;
+		t->action = 0;
+		t->codeBlock = codeBlock;
+		t->tdLangEl = 0;
+		t->semiLoc = semiLoc;
+		t->longestMatchId = longestMatchId;
+		t->inLmSelect = false;
+		t->nspace = nspace;
+		t->tokenRegion = tokenRegion;
+		t->objectDef = objectDef;
+		t->contextIn = contextIn;
+		t->dupOf = 0;
+		t->noPostIgnore = false;
+		t->noPreIgnore = false;
+		t->isZero = false;
+
+		if ( pReCaptureVect != 0 )
+			t->reCaptureVect = *pReCaptureVect;
+
+		return t;
+	}
+
+	InputLoc getLoc();
+	
+	String name;
+	String literal;
+	bool isLiteral;
+	bool isIgnore;
+	LexJoin *join;
+	Action *action;
+	CodeBlock *codeBlock;
+	LangEl *tdLangEl;
+	InputLoc semiLoc;
+
+	Action *setActId;
+	Action *actOnLast;
+	Action *actOnNext;
+	Action *actLagBehind;
+	int longestMatchId;
+	bool inLmSelect;
+	Namespace *nspace;
+	TokenRegion *tokenRegion;
+	ReCaptureVect reCaptureVect;
+	ObjectDef *objectDef;
+	Context *contextIn;
+
+	TokenDef *dupOf;
+	bool noPostIgnore;
+	bool noPreIgnore;
+	bool isZero;
+};
+
 struct TokenInstancePtr1
 {
 	TokenInstance *prev, *next;
@@ -485,6 +572,10 @@ struct NtDefList : DList<NtDef> {};
 struct TokenInstanceListReg : DListMel<TokenInstance, TokenInstancePtr1> {};
 struct TokenInstanceListNs : DListMel<TokenInstance, TokenInstancePtr2> {};
 
+/* Declare a new type so that ptreetypes.h need not include dlist.h. */
+struct TokenDefListReg : DListMel<TokenDef, TokenDefPtr1> {};
+struct TokenDefListNs : DListMel<TokenDef, TokenDefPtr2> {};
+
 struct ContextDef
 {
 	ContextDef( const String &name, Context *context, Namespace *nspace )
@@ -614,6 +705,8 @@ struct RegionSet
 	TokenRegion *ignoreOnly;
 	TokenRegion *ci;
 
+	TokenDefListReg tokenDefList;
+
 	RegionSet *next, *prev;
 };
 
@@ -727,6 +820,7 @@ struct Namespace
 
 	/* List of tokens defs in the namespace. */
 	TokenInstanceListNs tokenInstanceList;
+	TokenDefListNs tokenDefList;
 
 	/* List of nonterminal defs in the namespace. */
 	NtDefList ntDefList;

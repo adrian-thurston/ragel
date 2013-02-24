@@ -770,6 +770,10 @@ void Compiler::createDefaultScanner()
 	regionDefList.append( rdel );
 
 	LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
+
+	TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, 
+			join, 0, loc, 0, 
+			rootNamespace, defaultRegion, 0, 0, 0 );
 		
 	TokenInstance *tokenInstance = TokenInstance::cons( name, String(), false, false, 
 			join, 0, loc, nextTokenId++, 

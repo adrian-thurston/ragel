@@ -201,6 +201,17 @@ void ColmParser::tokenInstance( const InputLoc &loc, String name, LexJoin *join,
 	Namespace *nspace = namespaceStack.top();
 	RegionSet *regionSet = regionStack.top();
 
+	TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
+			transBlock, loc, 0, nspace, regionSet->tokenIgnore,
+			&reCaptureVect, curObjectDef,
+			contextStack.top() );
+
+	regionSet->tokenDefList.append( tokenDef );
+	nspace->tokenDefList.append( tokenDef );
+
+	tokenDef->noPreIgnore = noPreIgnore;
+	tokenDef->noPostIgnore = noPostIgnore;
+
 	TokenInstance *tokenInstance = TokenInstance::cons( name, String(), false, ignore, join, 
 			transBlock, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore,
 			&reCaptureVect, curObjectDef,
@@ -262,6 +273,7 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 	bool unusedCI;
 	String interp;
 	prepareLitString( interp, unusedCI, data, loc );
+	bool isZero = strcmp( interp.data, "" ) == 0;
 
 	/* Look for the production's associated region. */
 	Namespace *nspace = namespaceStack.top();
@@ -273,10 +285,15 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 
 	LexJoin *join = literalJoin( loc, data );
 
+	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
+			0, loc, 0, nspace, regionSet->tokenIgnore, 0, 0, 0 );
+
+	regionSet->tokenDefList.append( tokenDef );
+	nspace->tokenDefList.append( tokenDef );
+
 	TokenInstance *tokenInstance = TokenInstance::cons( name, data, true, false, join, 
 			0, loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0, 0, 0 );
 
-	bool isZero = strcmp( interp.data, "" ) == 0;
 	tokenInstance->isZero = isZero;
 
 	if ( !isZero )
