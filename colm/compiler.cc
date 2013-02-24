@@ -772,11 +772,10 @@ void Compiler::createDefaultScanner()
 	LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
 
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, 
-			join, 0, loc, 0, 
-			rootNamespace, defaultRegion, 0, 0, 0 );
+			join, 0, loc, 0, rootNamespace, defaultRegion, 0, 0, 0 );
 		
-	TokenInstance *tokenInstance = TokenInstance::cons( name, String(), false, false, 
-			join, 0, loc, nextTokenId++, 
+	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef, name,
+			String(), false, false, join, 0, loc, nextTokenId++,
 			rootNamespace, defaultRegion, 0, 0, 0 );
 
 	defaultRegion->tokenInstanceList.append( tokenInstance );
@@ -983,9 +982,14 @@ void Compiler::initEmptyScanners()
 			String name( 64, "__%p_DEF_PAT_%d", reg.ptr, def++ );
 
 			LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
+
+			TokenDef *tokenDef = TokenDef::cons( name, String(), false, false,
+					join, 0, internal, nextTokenId++, rootNamespace, reg, 0, 0, 0 );
 				
-			TokenInstance *tokenInstance = TokenInstance::cons( name, String(), false, false, join, 
-					0, internal, nextTokenId++, rootNamespace, reg, 0, 0, 0 );
+			TokenInstance *tokenInstance = TokenInstance::cons( tokenDef, name,
+					String(), false, false, join, 0, internal, nextTokenId++,
+					rootNamespace, reg, 0, 0, 0 );
+
 			reg->tokenInstanceList.append( tokenInstance );
 
 			/* These do not go in the namespace so so they cannot get declared
