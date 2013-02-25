@@ -291,9 +291,9 @@ void Namespace::declare( Compiler *pd )
 				}
 				else {
 					/* Original. Create a token for the literal. */
-					LangEl *newLangEl = declareLangEl( pd, this, l->name, LangEl::Term );
+					LangEl *newLangEl = declareLangEl( pd, this, l->tokenDef->name, LangEl::Term );
 
-					newLangEl->lit = l->literal;
+					newLangEl->lit = l->tokenDef->literal;
 					newLangEl->isLiteral = true;
 					newLangEl->tokenInstance = l;
 
@@ -345,7 +345,7 @@ void Namespace::declare( Compiler *pd )
 			/* Literals already taken care of. */
 			if ( ! t->tokenDef->isLiteral ) {
 				/* Create the token. */
-				LangEl *tokEl = declareLangEl( pd, this, t->name, LangEl::Term );
+				LangEl *tokEl = declareLangEl( pd, this, t->tokenDef->name, LangEl::Term );
 				tokEl->isIgnore = t->tokenDef->isIgnore;
 				tokEl->transBlock = t->tokenDef->codeBlock;
 				tokEl->objectDef = t->tokenDef->objectDef;

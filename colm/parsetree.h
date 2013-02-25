@@ -459,8 +459,7 @@ struct TokenInstance
 		dupOf(0)
 	{}
 
-	static TokenInstance *cons( TokenDef *tokenDef, const String &name,
-		const String &literal, 
+	static TokenInstance *cons( TokenDef *tokenDef,
 		LexJoin *join, const InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
 		ReCaptureVect *pReCaptureVect )
@@ -468,8 +467,6 @@ struct TokenInstance
 		TokenInstance *t = new TokenInstance;
 
 		t->tokenDef = tokenDef;
-		t->name = name;
-		t->literal = literal;
 		t->join = join;
 		t->action = 0;
 		t->semiLoc = semiLoc;
@@ -488,8 +485,6 @@ struct TokenInstance
 	InputLoc getLoc();
 	
 	TokenDef *tokenDef;
-	String name;
-	String literal;
 	LexJoin *join;
 	Action *action;
 	InputLoc semiLoc;
