@@ -282,28 +282,26 @@ void Namespace::declare( Compiler *pd )
 	for ( GenericList::Iter g = genericList; g.lte(); g++ )
 		g->declare( pd, this );
 
-	for ( TokenInstanceListNs::Iter l = tokenInstanceList; l.lte(); l++ ) {
-		if ( l->dupOf == 0 ) {
-			if ( l->tokenDef->isLiteral ) {
-				if ( l->tokenDef->isZero ) {
-					assert( l->tokenDef->tokenRegion->ciLel != 0 );
-					l->tokenDef->tdLangEl = l->tokenDef->tokenRegion->ciLel;
-				}
-				else {
-					/* Original. Create a token for the literal. */
-					LangEl *newLangEl = declareLangEl( pd, this, l->tokenDef->name, LangEl::Term );
+	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {
+		if ( tokenDef->isLiteral ) {
+			if ( tokenDef->isZero ) {
+				assert( tokenDef->tokenRegion->ciLel != 0 );
+				tokenDef->tdLangEl = tokenDef->tokenRegion->ciLel;
+			}
+			else {
+				/* Original. Create a token for the literal. */
+				LangEl *newLangEl = declareLangEl( pd, this, tokenDef->name, LangEl::Term );
 
-					newLangEl->lit = l->tokenDef->literal;
-					newLangEl->isLiteral = true;
-					newLangEl->tokenDef = l->tokenDef;
+				newLangEl->lit = tokenDef->literal;
+				newLangEl->isLiteral = true;
+				newLangEl->tokenDef = tokenDef;
 
-					l->tokenDef->tdLangEl = newLangEl;
+				tokenDef->tdLangEl = newLangEl;
 
-					if ( l->tokenDef->noPreIgnore )
-						newLangEl->noPreIgnore = true;
-					if ( l->tokenDef->noPostIgnore )
-						newLangEl->noPostIgnore = true;
-				}
+				if ( tokenDef->noPreIgnore )
+					newLangEl->noPreIgnore = true;
+				if ( tokenDef->noPostIgnore )
+					newLangEl->noPostIgnore = true;
 			}
 		}
 	}
@@ -340,25 +338,23 @@ void Namespace::declare( Compiler *pd )
 		lel->objectDef = c->context->contextObjDef;
 	}
 
-	for ( TokenInstanceListNs::Iter t = tokenInstanceList; t.lte(); t++ ) {
-		if ( t->dupOf == 0 ) {
-			/* Literals already taken care of. */
-			if ( ! t->tokenDef->isLiteral ) {
-				/* Create the token. */
-				LangEl *tokEl = declareLangEl( pd, this, t->tokenDef->name, LangEl::Term );
-				tokEl->isIgnore = t->tokenDef->isIgnore;
-				tokEl->transBlock = t->tokenDef->codeBlock;
-				tokEl->objectDef = t->tokenDef->objectDef;
-				tokEl->contextIn = t->tokenDef->contextIn;
-				tokEl->tokenDef = t->tokenDef;
+	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {
+		/* Literals already taken care of. */
+		if ( ! tokenDef->isLiteral ) {
+			/* Create the token. */
+			LangEl *tokEl = declareLangEl( pd, this, tokenDef->name, LangEl::Term );
+			tokEl->isIgnore = tokenDef->isIgnore;
+			tokEl->transBlock = tokenDef->codeBlock;
+			tokEl->objectDef = tokenDef->objectDef;
+			tokEl->contextIn = tokenDef->contextIn;
+			tokEl->tokenDef = tokenDef;
 
-				if ( t->tokenDef->noPreIgnore )
-					tokEl->noPreIgnore = true;
-				if ( t->tokenDef->noPostIgnore )
-					tokEl->noPostIgnore = true;
+			if ( tokenDef->noPreIgnore )
+				tokEl->noPreIgnore = true;
+			if ( tokenDef->noPostIgnore )
+				tokEl->noPostIgnore = true;
 
-				t->tokenDef->tdLangEl = tokEl;
-			}
+			tokenDef->tdLangEl = tokEl;
 		}
 	}
 
