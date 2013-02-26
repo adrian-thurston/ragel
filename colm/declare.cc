@@ -286,8 +286,8 @@ void Namespace::declare( Compiler *pd )
 		if ( l->dupOf == 0 ) {
 			if ( l->tokenDef->isLiteral ) {
 				if ( l->tokenDef->isZero ) {
-					l->tokenDef->tdLangEl = l->tokenRegion->ciLel;
-					assert( l->tokenRegion->ciLel != 0 );
+					assert( l->tokenDef->tokenRegion->ciLel != 0 );
+					l->tokenDef->tdLangEl = l->tokenDef->tokenRegion->ciLel;
 				}
 				else {
 					/* Original. Create a token for the literal. */
