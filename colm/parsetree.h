@@ -175,7 +175,6 @@ struct TokenDefListReg;
 struct TokenDefListNs;
 struct TokenInstance;
 struct TokenInstanceListReg;
-struct TokenInstanceListNs;
 struct Range;
 struct LangEl;
 
@@ -437,20 +436,14 @@ struct TokenDef
 	bool isZero;
 };
 
-struct TokenInstancePtr1
-{
-	TokenInstance *prev, *next;
-};
-
-struct TokenInstancePtr2
+struct TokenInstancePtr
 {
 	TokenInstance *prev, *next;
 };
 
 struct TokenInstance
 :
-	public TokenInstancePtr1, 
-	public TokenInstancePtr2
+	public TokenInstancePtr
 {
 	TokenInstance()
 	: 
@@ -550,8 +543,7 @@ struct NtDef
 struct NtDefList : DList<NtDef> {};
 
 /* Declare a new type so that ptreetypes.h need not include dlist.h. */
-struct TokenInstanceListReg : DListMel<TokenInstance, TokenInstancePtr1> {};
-struct TokenInstanceListNs : DListMel<TokenInstance, TokenInstancePtr2> {};
+struct TokenInstanceListReg : DListMel<TokenInstance, TokenInstancePtr> {};
 
 /* Declare a new type so that ptreetypes.h need not include dlist.h. */
 struct TokenDefListReg : DListMel<TokenDef, TokenDefPtr1> {};
@@ -801,7 +793,6 @@ struct Namespace
 	LiteralDict literalDict;
 
 	/* List of tokens defs in the namespace. */
-	TokenInstanceListNs tokenInstanceList;
 	TokenDefListNs tokenDefList;
 
 	/* List of nonterminal defs in the namespace. */

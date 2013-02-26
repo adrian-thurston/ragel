@@ -212,7 +212,6 @@ void ColmParser::tokenInstance( const InputLoc &loc, String name, LexJoin *join,
 			regionSet->tokenIgnore, &reCaptureVect );
 
 	regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
-	nspace->tokenInstanceList.append( tokenInstance );
 
 	tokenDef->noPreIgnore = noPreIgnore;
 	tokenDef->noPostIgnore = noPostIgnore;
@@ -226,7 +225,6 @@ void ColmParser::tokenInstance( const InputLoc &loc, String name, LexJoin *join,
 		tokenInstanceIgn->dupOf = tokenInstance;
 
 		regionSet->ignoreOnly->tokenInstanceList.append( tokenInstanceIgn );
-		nspace->tokenInstanceList.append( tokenInstanceIgn );
 	}
 	else {
 		/* The instance for the token-only. */
@@ -237,7 +235,6 @@ void ColmParser::tokenInstance( const InputLoc &loc, String name, LexJoin *join,
 		tokenInstanceTok->dupOf = tokenInstance;
 
 		regionSet->tokenOnly->tokenInstanceList.append( tokenInstanceTok );
-		nspace->tokenInstanceList.append( tokenInstanceTok );
 	}
 
 	/* This is created and pushed in the name. */
@@ -289,7 +286,6 @@ void ColmParser::zeroDef( const InputLoc &loc, const String &data,
 	/* Doesn't go into instance list. */
 
 	ldel = nspace->literalDict.insert( interp, tokenInstance );
-	nspace->tokenInstanceList.append( tokenInstance );
 }
 
 void ColmParser::literalDef( const InputLoc &loc, const String &data,
@@ -330,7 +326,6 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 	regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
 
 	ldel = nspace->literalDict.insert( interp, tokenInstance );
-	nspace->tokenInstanceList.append( tokenInstance );
 
 	/* Make the duplicate for the token-only region. */
 	tokenDef->noPreIgnore = noPreIgnore;
@@ -344,7 +339,6 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 	tokenInstanceTok->dupOf = tokenInstance;
 
 	regionSet->tokenOnly->tokenInstanceList.append( tokenInstanceTok );
-	nspace->tokenInstanceList.append( tokenInstanceTok );
 
 	if ( !insideRegion )
 		popRegionSet();
