@@ -254,7 +254,7 @@ struct LangEl : public DListEl<LangEl>
 	/* Productions from the language element if it is a non-terminal. */
 	LelDefList defList;
 
-	TokenInstance *tokenInstance;
+	TokenDef *tokenDef;
 	Production *rootDef;
 	LangEl *termDup;
 	LangEl *eofLel;

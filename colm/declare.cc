@@ -295,7 +295,7 @@ void Namespace::declare( Compiler *pd )
 
 					newLangEl->lit = l->tokenDef->literal;
 					newLangEl->isLiteral = true;
-					newLangEl->tokenInstance = l;
+					newLangEl->tokenDef = l->tokenDef;
 
 					l->tokenDef->tdLangEl = newLangEl;
 
@@ -350,7 +350,7 @@ void Namespace::declare( Compiler *pd )
 				tokEl->transBlock = t->tokenDef->codeBlock;
 				tokEl->objectDef = t->tokenDef->objectDef;
 				tokEl->contextIn = t->tokenDef->contextIn;
-				tokEl->tokenInstance = t;
+				tokEl->tokenDef = t->tokenDef;
 
 				if ( t->tokenDef->noPreIgnore )
 					tokEl->noPreIgnore = true;

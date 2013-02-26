@@ -2714,12 +2714,12 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 	code.append( IN_INIT_LOCALS );
 	code.appendHalf( 0 );
 
-	if ( langEl->tokenInstance->reCaptureVect.length() > 0 ) {
+	if ( langEl->tokenDef->reCaptureVect.length() > 0 ) {
 		code.append( IN_INIT_CAPTURES );
-		code.append( langEl->tokenInstance->reCaptureVect.length() );
+		code.append( langEl->tokenDef->reCaptureVect.length() );
 
 		ObjFieldList::Iter f = *curLocalFrame->objFieldList;
-		for ( int i = 0; i < langEl->tokenInstance->reCaptureVect.length(); i++, f++ )
+		for ( int i = 0; i < langEl->tokenDef->reCaptureVect.length(); i++, f++ )
 			curLocalFrame->referenceField( this, f->value );
 	}
 

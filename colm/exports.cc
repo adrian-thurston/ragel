@@ -88,15 +88,21 @@ void Compiler::generateExports()
 			out << "// isEOF\n";
 			continue;
 		}
-		if ( lel->tokenInstance != 0 && lel->tokenInstance->tokenRegion != 0 && lel->tokenInstance->tokenRegion->isTokenOnly ) {
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
+				lel->tokenDef->tokenRegion->isTokenOnly )
+		{
 			out << "// isTokenOnly\n";
 			continue;
 		}
-		if ( lel->tokenInstance != 0 && lel->tokenInstance->tokenRegion != 0 && lel->tokenInstance->tokenRegion->isIgnoreOnly ) {
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
+				lel->tokenDef->tokenRegion->isIgnoreOnly )
+		{
 			out << "// isIgnoreOnly\n";
 			continue;
 		}
-		if ( lel->tokenInstance != 0 && lel->tokenInstance->tokenRegion != 0 && lel->tokenInstance->tokenRegion->isCiOnly )  {
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
+				lel->tokenDef->tokenRegion->isCiOnly )
+		{
 			out << "// isCiOnly\n";
 			continue;
 		}
@@ -116,15 +122,21 @@ void Compiler::generateExports()
 			out << "// isTokenOnly\n";
 			continue;
 		}
-		if ( lel->tokenInstance != 0 && lel->tokenInstance->tokenRegion != 0 && lel->tokenInstance->tokenRegion->isTokenOnly ) {
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
+				lel->tokenDef->tokenRegion->isTokenOnly )
+		{
 			out << "// isTokenOnly\n";
 			continue;
 		}
-		if ( lel->tokenInstance != 0 && lel->tokenInstance->tokenRegion != 0 && lel->tokenInstance->tokenRegion->isIgnoreOnly ) {
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
+				lel->tokenDef->tokenRegion->isIgnoreOnly )
+		{
 			out << "// isIgnoreOnly\n";
 			continue;
 		}
-		if ( lel->tokenInstance != 0 && lel->tokenInstance->tokenRegion != 0 && lel->tokenInstance->tokenRegion->isCiOnly )  {
+		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
+				lel->tokenDef->tokenRegion->isCiOnly )
+		{
 			out << "// isCiOnly\n";
 			continue;
 		}

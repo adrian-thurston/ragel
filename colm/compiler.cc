@@ -787,7 +787,7 @@ void Compiler::createDefaultScanner()
 	defaultCharLangEl = addLangEl( this, defaultNamespace, name, LangEl::Term );
 
 	tokenInstance->tokenDef->tdLangEl = defaultCharLangEl;
-	defaultCharLangEl->tokenInstance = tokenInstance;
+	defaultCharLangEl->tokenDef = tokenDef;
 }
 
 LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
@@ -999,7 +999,7 @@ void Compiler::initEmptyScanners()
 			LangEl *lel = addLangEl( this, rootNamespace, name, LangEl::Term );
 
 			tokenInstance->tokenDef->tdLangEl = lel;
-			lel->tokenInstance = tokenInstance;
+			lel->tokenDef = tokenDef;
 		}
 	}
 }

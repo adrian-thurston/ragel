@@ -75,7 +75,7 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	parseStop(false),
 	isEOF(false),
 	repeatOf(0),
-	tokenInstance(0),
+	tokenDef(0),
 	rootDef(0),
 	termDup(0),
 	eofLel(0),
@@ -498,8 +498,8 @@ void Compiler::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 			//cerr << "isCI" << endl;
 			region = langEl->ciRegion->ciRegion;
 		}
-		else if ( !langEl->isEOF && langEl->tokenInstance != 0 ) {
-			region = langEl->tokenInstance->tokenRegion;
+		else if ( !langEl->isEOF && langEl->tokenDef != 0 ) {
+			region = langEl->tokenDef->tokenRegion;
 		}
 
 		if ( region != 0 ) {
@@ -1438,9 +1438,9 @@ void Compiler::makeRuntimeData()
 			runtimeData->lelInfo[i].termDupId = lel->termDup == 0 ? 0 : lel->termDup->id;
 			runtimeData->lelInfo[i].genericId = lel->generic == 0 ? 0 : lel->generic->id;
 
-			if ( lel->tokenInstance != 0 && lel->tokenInstance->join != 0 && 
-					lel->tokenInstance->join->context != 0 )
-				runtimeData->lelInfo[i].markId = lel->tokenInstance->join->mark->markId;
+			if ( lel->tokenDef != 0 && lel->tokenDef->join != 0 && 
+					lel->tokenDef->join->context != 0 )
+				runtimeData->lelInfo[i].markId = lel->tokenDef->join->mark->markId;
 			else
 				runtimeData->lelInfo[i].markId = -1;
 
