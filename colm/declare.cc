@@ -285,8 +285,8 @@ void Namespace::declare( Compiler *pd )
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {
 		if ( tokenDef->isLiteral ) {
 			if ( tokenDef->isZero ) {
-				assert( tokenDef->regionSet->tokenIgnore->ciLel != 0 );
-				tokenDef->tdLangEl = tokenDef->regionSet->tokenIgnore->ciLel;
+				assert( tokenDef->regionSet->collectIgnore->ciLel != 0 );
+				tokenDef->tdLangEl = tokenDef->regionSet->collectIgnore->ciLel;
 			}
 			else {
 				/* Original. Create a token for the literal. */
@@ -410,7 +410,7 @@ void Compiler::makeIgnoreCollectors()
 			ignLel->isCI = true;
 			ignLel->regionSet = regionSet;
 
-			regionSet->tokenIgnore->ciLel = ignLel;
+			regionSet->collectIgnore->ciLel = ignLel;
 		}
 	}
 }

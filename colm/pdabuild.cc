@@ -1350,7 +1350,7 @@ void Compiler::makeRuntimeData()
 		runtimeData->regionInfo[regId].defaultToken =
 			reg->defaultTokenInstance == 0 ? -1 : reg->defaultTokenInstance->tokenDef->tdLangEl->id;
 		runtimeData->regionInfo[regId].eofFrameId = -1;
-		runtimeData->regionInfo[regId].ciLelId = reg->isCiOnly ? reg->derivedFrom->ciLel->id : 0;
+		runtimeData->regionInfo[regId].ciLelId = reg->ciLel != 0 ? reg->ciLel->id : 0;
 
 		CodeBlock *block = reg->preEofBlock;
 		if ( block != 0 ) {
