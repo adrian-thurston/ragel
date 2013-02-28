@@ -88,24 +88,6 @@ void Compiler::generateExports()
 			out << "// isEOF\n";
 			continue;
 		}
-		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
-				lel->tokenDef->tokenRegion->isTokenOnly )
-		{
-			out << "// isTokenOnly\n";
-			continue;
-		}
-		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
-				lel->tokenDef->tokenRegion->isIgnoreOnly )
-		{
-			out << "// isIgnoreOnly\n";
-			continue;
-		}
-		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
-				lel->tokenDef->tokenRegion->isCiOnly )
-		{
-			out << "// isCiOnly\n";
-			continue;
-		}
 		if ( lel->isCI != 0 ) {
 			out << "// isCI != 0\n";
 			continue;
@@ -120,24 +102,6 @@ void Compiler::generateExports()
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->isEOF ) {
 			out << "// isTokenOnly\n";
-			continue;
-		}
-		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
-				lel->tokenDef->tokenRegion->isTokenOnly )
-		{
-			out << "// isTokenOnly\n";
-			continue;
-		}
-		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
-				lel->tokenDef->tokenRegion->isIgnoreOnly )
-		{
-			out << "// isIgnoreOnly\n";
-			continue;
-		}
-		if ( lel->tokenDef != 0 && lel->tokenDef->tokenRegion != 0 &&
-				lel->tokenDef->tokenRegion->isCiOnly )
-		{
-			out << "// isCiOnly\n";
 			continue;
 		}
 		if ( lel->isCI != 0 ) {
