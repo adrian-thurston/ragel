@@ -376,7 +376,7 @@ struct TokenDef
 
 	static TokenDef *cons( const String &name, const String &literal, bool isLiteral, bool isIgnore,
 		LexJoin *join, CodeBlock *codeBlock, const InputLoc &semiLoc, 
-		int longestMatchId, Namespace *nspace, RegionSet *regionSet, TokenRegion *tokenRegion,
+		int longestMatchId, Namespace *nspace, RegionSet *regionSet,
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
 	{ 
 		TokenDef *t = new TokenDef;
@@ -394,7 +394,6 @@ struct TokenDef
 		t->inLmSelect = false;
 		t->nspace = nspace;
 		t->regionSet = regionSet;
-		t->tokenRegion = tokenRegion;
 		t->objectDef = objectDef;
 		t->contextIn = contextIn;
 		t->dupOf = 0;
@@ -428,7 +427,6 @@ struct TokenDef
 	bool inLmSelect;
 	Namespace *nspace;
 	RegionSet *regionSet;
-	TokenRegion *tokenRegion;
 	ReCaptureVect reCaptureVect;
 	ObjectDef *objectDef;
 	Context *contextIn;
