@@ -61,6 +61,7 @@ struct TransBlock;
 struct CodeBlock;
 struct PdaLiteral;
 struct TypeAlias;
+struct RegionSet;
 typedef struct _PdaRun PdaRun;
 
 /* 
@@ -375,7 +376,7 @@ struct TokenDef
 
 	static TokenDef *cons( const String &name, const String &literal, bool isLiteral, bool isIgnore,
 		LexJoin *join, CodeBlock *codeBlock, const InputLoc &semiLoc, 
-		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
+		int longestMatchId, Namespace *nspace, RegionSet *regionSet, TokenRegion *tokenRegion,
 		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
 	{ 
 		TokenDef *t = new TokenDef;
@@ -392,6 +393,7 @@ struct TokenDef
 		t->longestMatchId = longestMatchId;
 		t->inLmSelect = false;
 		t->nspace = nspace;
+		t->regionSet = regionSet;
 		t->tokenRegion = tokenRegion;
 		t->objectDef = objectDef;
 		t->contextIn = contextIn;
@@ -425,6 +427,7 @@ struct TokenDef
 	int longestMatchId;
 	bool inLmSelect;
 	Namespace *nspace;
+	RegionSet *regionSet;
 	TokenRegion *tokenRegion;
 	ReCaptureVect reCaptureVect;
 	ObjectDef *objectDef;

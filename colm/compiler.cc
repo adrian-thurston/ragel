@@ -774,7 +774,7 @@ void Compiler::createDefaultScanner()
 	LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
 
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, 
-			join, 0, loc, 0, rootNamespace, defaultRegion, 0, 0, 0 );
+			join, 0, loc, 0, rootNamespace, regionSet, defaultRegion, 0, 0, 0 );
 		
 	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef,
 			join, loc, nextTokenId++,
@@ -974,33 +974,42 @@ Namespace *NamespaceQual::getQual( Compiler *pd )
 	return cachedNspaceQual;
 }
 
+void Compiler::initEmptyScanner( RegionSet *regionSet, TokenRegion *reg )
+{
+	if ( reg != 0 && reg->tokenInstanceList.length() == 0 ) {
+		reg->wasEmpty = true;
+
+		static int def = 1;
+		String name( 64, "__%p_DEF_PAT_%d", reg, def++ );
+
+		LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
+
+		TokenDef *tokenDef = TokenDef::cons( name, String(), false, false,
+				join, 0, internal, nextTokenId++, rootNamespace, 
+				regionSet, reg, 0, 0, 0 );
+			
+		TokenInstance *tokenInstance = TokenInstance::cons( tokenDef,
+				join, internal, nextTokenId++,
+				rootNamespace, reg, 0 );
+
+		reg->tokenInstanceList.append( tokenInstance );
+
+		/* These do not go in the namespace so so they cannot get declared
+		 * in the declare pass. */
+		LangEl *lel = addLangEl( this, rootNamespace, name, LangEl::Term );
+
+		tokenInstance->tokenDef->tdLangEl = lel;
+		lel->tokenDef = tokenDef;
+	}
+}
+
 void Compiler::initEmptyScanners()
 {
-	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
-		if ( reg->tokenInstanceList.length() == 0 ) {
-			reg->wasEmpty = true;
-
-			static int def = 1;
-			String name( 64, "__%p_DEF_PAT_%d", reg.ptr, def++ );
-
-			LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
-
-			TokenDef *tokenDef = TokenDef::cons( name, String(), false, false,
-					join, 0, internal, nextTokenId++, rootNamespace, reg, 0, 0, 0 );
-				
-			TokenInstance *tokenInstance = TokenInstance::cons( tokenDef,
-					join, internal, nextTokenId++,
-					rootNamespace, reg, 0 );
-
-			reg->tokenInstanceList.append( tokenInstance );
-
-			/* These do not go in the namespace so so they cannot get declared
-			 * in the declare pass. */
-			LangEl *lel = addLangEl( this, rootNamespace, name, LangEl::Term );
-
-			tokenInstance->tokenDef->tdLangEl = lel;
-			lel->tokenDef = tokenDef;
-		}
+	for ( RegionSetList::Iter regionSet = regionSetList; regionSet.lte(); regionSet++ ) {
+		initEmptyScanner( regionSet, regionSet->tokenIgnore );
+		initEmptyScanner( regionSet, regionSet->tokenOnly );
+		initEmptyScanner( regionSet, regionSet->ignoreOnly );
+		initEmptyScanner( regionSet, regionSet->collectIgnore );
 	}
 }
 

@@ -502,6 +502,7 @@ struct Compiler
 
 	void compileLiteralTokens();
 	void initEmptyScanners();
+	void initEmptyScanner( RegionSet *regionSet, TokenRegion *reg );
 	void initUniqueTypes();
 
 	/* Initialize a graph dict with the basic fsms. */
