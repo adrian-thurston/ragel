@@ -113,10 +113,7 @@ void ColmParser::pushRegionSet( const InputLoc &loc )
 	tokenIgnore->tokenOnlyRegion = tokenOnly;
 	tokenIgnore->ciRegion = collectIgnore;
 
-	tokenIgnore->isFullRegion = true;
-	ignoreOnly->isIgnoreOnly = true;
 	collectIgnore->isCiOnly = true;
-	tokenOnly->isTokenOnly = true;
 
 	ignoreOnly->derivedFrom = tokenIgnore;
 	collectIgnore->derivedFrom = tokenIgnore;

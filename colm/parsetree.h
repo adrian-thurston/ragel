@@ -611,9 +611,6 @@ struct TokenRegion
 		tokenOnlyRegion(0),
 		ciRegion(0),
 		wasEmpty(false), 
-		isFullRegion(false),
-		isIgnoreOnly(false), 
-		isTokenOnly(false), 
 		isCiOnly(false),
 		ciLel(0),
 		derivedFrom(0)
@@ -654,9 +651,6 @@ struct TokenRegion
 	 * then wasEmpty is true. */
 	bool wasEmpty;
 
-	bool isFullRegion;
-	bool isIgnoreOnly;
-	bool isTokenOnly;
 	bool isCiOnly;
 
 	LangEl *ciLel;

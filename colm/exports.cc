@@ -101,7 +101,7 @@ void Compiler::generateExports()
 	/* Class definitions. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->isEOF ) {
-			out << "// isTokenOnly\n";
+			out << "// isEOF\n";
 			continue;
 		}
 		if ( lel->isCI != 0 ) {
