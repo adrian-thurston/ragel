@@ -109,14 +109,8 @@ void ColmParser::pushRegionSet( const InputLoc &loc )
 	RegionSet *regionSet = new RegionSet( tokenIgnore,
 			tokenOnly, ignoreOnly, collectIgnore );
 
-	tokenIgnore->ignoreOnlyRegion = ignoreOnly;
-	tokenIgnore->tokenOnlyRegion = tokenOnly;
-
 	collectIgnore->isCiOnly = true;
-
-	ignoreOnly->derivedFrom = tokenIgnore;
-	collectIgnore->derivedFrom = tokenIgnore;
-	tokenOnly->derivedFrom = tokenIgnore;
+	collectIgnore->ignoreOnly = ignoreOnly;
 
 	pd->regionSetList.append( regionSet );
 	regionStack.push( regionSet );

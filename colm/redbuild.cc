@@ -493,7 +493,7 @@ void RedFsmBuild::makeEntryPoints()
 		TokenRegion *use = reg;
 
 		if ( use->ciLel != 0 )
-			use = use->derivedFrom->ignoreOnlyRegion;
+			use = use->ignoreOnly;
 
 		NameInst *regionName = use->regionNameInst;
 		addRegionToEntry( reg->id, regionName->id );

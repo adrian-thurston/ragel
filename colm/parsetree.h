@@ -607,12 +607,10 @@ struct TokenRegion
 		regionNameInst(0),
 		defaultTokenInstance(0),
 		preEofBlock(0), 
-		ignoreOnlyRegion(0),
-		tokenOnlyRegion(0),
 		wasEmpty(false), 
 		isCiOnly(false),
 		ciLel(0),
-		derivedFrom(0)
+		ignoreOnly(0)
 	{ }
 
 	/* Tree traversal. */
@@ -641,10 +639,6 @@ struct TokenRegion
 
 	CodeBlock *preEofBlock;
 
-	/* Dupe of the region, containing only the ignore tokens. */
-	TokenRegion *ignoreOnlyRegion;
-	TokenRegion *tokenOnlyRegion;
-
 	/* We alway init empty scanners with a single token. If we had to do this
 	 * then wasEmpty is true. */
 	bool wasEmpty;
@@ -652,7 +646,7 @@ struct TokenRegion
 	bool isCiOnly;
 
 	LangEl *ciLel;
-	TokenRegion *derivedFrom;
+	TokenRegion *ignoreOnly;
 
 	TokenRegion *next, *prev;
 };

@@ -475,14 +475,17 @@ void Compiler::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 	LangEl *langEl = langElIndex[pdaKey];
 	if ( langEl != 0 && langEl->type == LangEl::Term ) {
 		TokenRegion *region = 0;
+		RegionSet *regionSet = 0;
 
 		/* If it is not the eof, then use the region associated 
 		 * with the token definition. */
 		if ( langEl->isCI ) {
 			region = langEl->regionSet->collectIgnore;
+			regionSet = langEl->regionSet;
 		}
 		else if ( !langEl->isEOF && langEl->tokenDef != 0 ) {
 			region = langEl->tokenDef->regionSet->tokenIgnore;
+			regionSet = langEl->tokenDef->regionSet;
 		}
 
 		if ( region != 0 ) {
@@ -490,19 +493,18 @@ void Compiler::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 			TokenRegion *scanRegion = region;
 
 			if ( langEl->noPreIgnore )
-				scanRegion = region->tokenOnlyRegion;
+				scanRegion = regionSet->tokenOnly;
 
-			if ( !regionVectHas( tabState->regions, scanRegion ) ) {
+			if ( !regionVectHas( tabState->regions, scanRegion ) )
 				tabState->regions.append( scanRegion );
-			}
 
 			/* Pre-region of to state */
 			PdaState *toState = tabTrans->toState;
 			if ( !langEl->noPostIgnore && 
-					region->ignoreOnlyRegion != 0 && 
-					!regionVectHas( toState->preRegions, region->ignoreOnlyRegion ) )
+					regionSet->ignoreOnly != 0 && 
+					!regionVectHas( toState->preRegions, regionSet->ignoreOnly ) )
 			{
-				toState->preRegions.append( region->ignoreOnlyRegion );
+				toState->preRegions.append( regionSet->ignoreOnly );
 			}
 		}
 	}
