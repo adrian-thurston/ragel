@@ -106,8 +106,8 @@ void Compiler::generateExports()
 			out << "// isCiOnly\n";
 			continue;
 		}
-		if ( lel->ciRegion != 0 ) {
-			out << "// ciRegion != 0\n";
+		if ( lel->isCI != 0 ) {
+			out << "// isCI != 0\n";
 			continue;
 		}	
 		openNameSpace( out, lel->nspace );
@@ -140,8 +140,8 @@ void Compiler::generateExports()
 			out << "// isCiOnly\n";
 			continue;
 		}
-		if ( lel->ciRegion != 0 ) {
-			out << "// ciRegion != 0\n";
+		if ( lel->isCI != 0 ) {
+			out << "// isCI != 0\n";
 			continue;
 		}	
 

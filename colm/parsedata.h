@@ -285,7 +285,6 @@ struct LangEl : public DListEl<LangEl>
 	bool noPreIgnore;
 	bool noPostIgnore;
 	bool isCI;
-	TokenRegion *ciRegion;
 	RegionSet *regionSet;
 };
 

@@ -408,7 +408,6 @@ void Compiler::makeIgnoreCollectors()
 			LangEl *ignLel = new LangEl( rootNamespace, name, LangEl::Term );
 			langEls.append( ignLel );
 			ignLel->isCI = true;
-			ignLel->ciRegion = regionSet->tokenIgnore;
 			ignLel->regionSet = regionSet;
 
 			regionSet->tokenIgnore->ciLel = ignLel;

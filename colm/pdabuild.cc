@@ -93,8 +93,7 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	contextIn(0), 
 	noPreIgnore(false),
 	noPostIgnore(false),
-	isCI(false),
-	ciRegion(0)
+	isCI(false)
 {
 }
  
@@ -495,8 +494,7 @@ void Compiler::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 		/* If it is not the eof, then use the region associated 
 		 * with the token definition. */
 		if ( langEl->isCI ) {
-			//cerr << "isCI" << endl;
-			region = langEl->ciRegion->ciRegion;
+			region = langEl->regionSet->collectIgnore;
 		}
 		else if ( !langEl->isEOF && langEl->tokenDef != 0 ) {
 			region = langEl->tokenDef->tokenRegion;
