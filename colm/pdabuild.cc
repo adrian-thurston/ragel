@@ -497,7 +497,7 @@ void Compiler::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 			region = langEl->regionSet->collectIgnore;
 		}
 		else if ( !langEl->isEOF && langEl->tokenDef != 0 ) {
-			region = langEl->tokenDef->tokenRegion;
+			region = langEl->tokenDef->regionSet->tokenIgnore;
 		}
 
 		if ( region != 0 ) {
