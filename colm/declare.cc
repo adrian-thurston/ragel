@@ -285,8 +285,8 @@ void Namespace::declare( Compiler *pd )
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {
 		if ( tokenDef->isLiteral ) {
 			if ( tokenDef->isZero ) {
-				assert( tokenDef->tokenRegion->ciLel != 0 );
-				tokenDef->tdLangEl = tokenDef->tokenRegion->ciLel;
+				assert( tokenDef->regionSet->tokenIgnore->ciLel != 0 );
+				tokenDef->tdLangEl = tokenDef->regionSet->tokenIgnore->ciLel;
 			}
 			else {
 				/* Original. Create a token for the literal. */
