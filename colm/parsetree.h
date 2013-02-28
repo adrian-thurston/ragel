@@ -609,7 +609,6 @@ struct TokenRegion
 		preEofBlock(0), 
 		ignoreOnlyRegion(0),
 		tokenOnlyRegion(0),
-		ciRegion(0),
 		wasEmpty(false), 
 		isCiOnly(false),
 		ciLel(0),
@@ -645,7 +644,6 @@ struct TokenRegion
 	/* Dupe of the region, containing only the ignore tokens. */
 	TokenRegion *ignoreOnlyRegion;
 	TokenRegion *tokenOnlyRegion;
-	TokenRegion *ciRegion;
 
 	/* We alway init empty scanners with a single token. If we had to do this
 	 * then wasEmpty is true. */
