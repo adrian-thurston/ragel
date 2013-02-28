@@ -103,21 +103,6 @@ PdaGraph *ProdElList::walk( Compiler *pd, Production *prod )
 	PdaState *last = prodFsm->addState();
 	prodFsm->setStartState( last );
 
-	if ( prod->collectIgnoreRegion != 0 ) {
-//		cerr << "production " << prod->data << " has collect ignore region " << 
-//				prod->collectIgnoreRegion->name << endl;
-
-		/* Use the IGNORE TOKEN lang el for the region. */
-		long value = prod->collectIgnoreRegion->ciLel->id;
-
-		PdaState *newState = prodFsm->addState();
-		PdaTrans *newTrans = prodFsm->appendNewTrans( last, newState, value, value );
-
-		newTrans->isShift = true;
-		newTrans->shiftPrior = 0; // WAT
-		last = newState;
-	}
-
 	int prodLength = 0;
 	for ( Iter prodEl = first(); prodEl.lte(); prodEl++, prodLength++ ) {
 		//PdaGraph *itemFsm = prodEl->walk( pd );
