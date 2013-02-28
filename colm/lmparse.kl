@@ -168,7 +168,7 @@ LexJoin *ColmParser::literalJoin( const InputLoc &loc, const String &data )
 	return join;
 }
 
-void ColmParser::tokenInstance( const InputLoc &loc, String name, LexJoin *join,
+void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join, ObjectDef *objectDef,
 		CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore )
 {
 	/* Check the region if this is for an ignore. */
@@ -188,7 +188,7 @@ void ColmParser::tokenInstance( const InputLoc &loc, String name, LexJoin *join,
 
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
 			transBlock, loc, 0, nspace, regionSet,
-			&reCaptureVect, curObjectDef,
+			&reCaptureVect, objectDef,
 			contextStack.top() );
 
 	regionSet->tokenDefList.append( tokenDef );
@@ -749,12 +749,12 @@ Production *ColmParser::production( const InputLoc &loc, ProdElList *prodElList,
 	return prod;
 }
 
-void ColmParser::objVarDef( ObjectField *objField )
+void ColmParser::objVarDef( ObjectDef *objectDef, ObjectField *objField )
 {
-	if ( curObjectDef->checkRedecl( objField->name ) != 0 )
+	if ( objectDef->checkRedecl( objField->name ) != 0 )
 		error() << "object field renamed" << endp;
 
-	curObjectDef->insertField( objField->name, objField );
+	objectDef->insertField( objField->name, objField );
 }
 
 LelDefList *ColmParser::prodAppend( LelDefList *defList, Production *definition )
@@ -1126,7 +1126,7 @@ cfl_def:
 		NtDef *ntDef = NtDef::cons( $1->name, namespaceStack.top(),
 				contextStack.top(), $3->reduceFirst );
 
-		cflDef( ntDef, curObjectDef, $4->defList );
+		cflDef( ntDef, $2->objectDef, $4->defList );
 	};
 
 nonterm class cfl_def_head
@@ -1196,14 +1196,20 @@ define_prod: '[' prod_el_list ']' opt_commit opt_reduce_code opt_prec
 				$5->codeBlock, $6->predOf );
 	};
 
+nonterm obj_var_list
+{
+	ObjectDef *objectDef;
+};
+
 obj_var_list: obj_var_list var_def
 	final {
-		objVarDef( $2->objField );
+		objVarDef( $1->objectDef, $2->objField );
+		$$->objectDef = $1->objectDef;
 	};
 
 obj_var_list:
 	final {
-		curObjectDef = ObjectDef::cons( ObjectDef::UserType,
+		$$->objectDef = ObjectDef::cons( ObjectDef::UserType,
 				curDefineId, pd->nextObjectId++ ); 
 	};
 
@@ -1829,8 +1835,8 @@ token_def:
 	enter_rl opt_no_ignore '/' opt_lex_join leave_rl '/' opt_no_ignore  
 	opt_translate
 	final {
-		tokenInstance( $1->loc, $2->name, $7->join, $11->transBlock, $1->ignore,
-				$5->noIgnore, $10->noIgnore );
+		tokenDef( $1->loc, $2->name, $7->join, $3->objectDef,
+				$11->transBlock, $1->ignore, $5->noIgnore, $10->noIgnore );
 	};
 
 nonterm token_or_ignore
@@ -3061,7 +3067,7 @@ void ColmParser::go()
 
 	tokenInstanceName( String( "hello" ) );
 
-	curObjectDef = ObjectDef::cons( ObjectDef::UserType, curDefineId, pd->nextObjectId++ ); 
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, curDefineId, pd->nextObjectId++ ); 
 
 	Literal *literal = Literal::cons( internal, String( "'hello\n'" ), Literal::LitString );
 	LexFactor *factor = LexFactor::cons( literal );
@@ -3072,7 +3078,7 @@ void ColmParser::go()
 	LexExpression *lexExpr = LexExpression::cons( term );
 	LexJoin *join = LexJoin::cons( lexExpr );
 
-	tokenInstance( internal, "hello", join, 0, false, false, false );
+	tokenDef( internal, "hello", join, objectDef, 0, false, false, false );
 
 	popRegionSet();
 
@@ -3094,7 +3100,7 @@ void ColmParser::go()
 	prodAppend( defList, def );
 
 	/* Make. */
-	cflDef( ntDef, curObjectDef, defList );
+	cflDef( ntDef, objectDef, defList );
 
 	parseInput( stmtList );
 

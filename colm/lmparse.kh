@@ -87,7 +87,6 @@ struct ColmParser
 	ContextStack contextStack;
 
 	String curDefineId;
-	ObjectDef *curObjectDef;
 
 	PredType predType;
 	ReCaptureVect reCaptureVect;
@@ -112,7 +111,7 @@ struct ColmParser
 	/* Report an error encountered by the parser. */
 	ostream &parse_error( int tokId, Token &token );
 
-	void tokenInstance( const InputLoc &loc, String name, LexJoin *join,
+	void tokenDef( const InputLoc &loc, String name, LexJoin *join, ObjectDef *objectDef,
 			CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore );
 
 	void zeroDef( const InputLoc &loc, const String &data,
@@ -156,7 +155,7 @@ struct ColmParser
 			const String &data, NamespaceQual *nspaceQual );
 	Production *production( const InputLoc &loc, ProdElList *prodElList,
 			bool commit, CodeBlock *codeBlock, LangEl *predOf );
-	void objVarDef( ObjectField *objField );
+	void objVarDef( ObjectDef *objectDef, ObjectField *objField );
 	LelDefList *prodAppend( LelDefList *defList, Production *definition );
 
 	LangExpr *construct( const InputLoc &loc, ObjectField *objField,
