@@ -286,6 +286,7 @@ struct LangEl : public DListEl<LangEl>
 	bool noPostIgnore;
 	bool isCI;
 	TokenRegion *ciRegion;
+	RegionSet *regionSet;
 };
 
 struct ProdEl

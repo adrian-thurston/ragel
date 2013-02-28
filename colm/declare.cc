@@ -400,6 +400,22 @@ void Compiler::setPrecedence()
 	}
 }
 
+void Compiler::makeIgnoreCollectors()
+{
+	for ( RegionSetList::Iter regionSet = regionSetList; regionSet.lte(); regionSet++ ) {
+		if ( regionSet->tokenIgnore != rootRegion && regionSet->tokenIgnore != defaultRegion ) {
+			String name( 128, "_ign_%p", regionSet->tokenIgnore );
+			LangEl *ignLel = new LangEl( rootNamespace, name, LangEl::Term );
+			langEls.append( ignLel );
+			ignLel->isCI = true;
+			ignLel->ciRegion = regionSet->tokenIgnore;
+			ignLel->regionSet = regionSet;
+
+			regionSet->tokenIgnore->ciLel = ignLel;
+		}
+	}
+}
+
 /*
  * Type Declaration Root.
  */

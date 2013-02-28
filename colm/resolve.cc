@@ -759,21 +759,6 @@ void Compiler::makeEofElements()
 	}
 }
 
-void Compiler::makeIgnoreCollectors()
-{
-	for ( RegionList::Iter region = regionList; region.lte(); region++ ) {
-		if ( region->isFullRegion ) {
-			String name( 128, "_ign_%p", region.ptr );
-			LangEl *ignLel = new LangEl( rootNamespace, name, LangEl::Term );
-			langEls.append( ignLel );
-			ignLel->isCI = true;
-			ignLel->ciRegion = region;
-
-			region->ciLel = ignLel;
-		}
-	}
-}
-
 void Compiler::typeResolve()
 {
 	/*
