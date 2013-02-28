@@ -218,8 +218,6 @@ typedef struct _RegionInfo
 {
 	long defaultToken;
 	long eofFrameId;
-	int isIgnoreOnly;
-	int isCiOnly;
 	int ciLelId;
 } RegionInfo;
 
