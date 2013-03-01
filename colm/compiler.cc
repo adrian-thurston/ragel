@@ -778,7 +778,7 @@ void Compiler::createDefaultScanner()
 		
 	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef,
 			join, loc, nextTokenId++,
-			rootNamespace, defaultRegion, 0 );
+			rootNamespace, defaultRegion );
 
 	defaultRegion->tokenInstanceList.append( tokenInstance );
 
@@ -990,7 +990,7 @@ void Compiler::initEmptyScanner( RegionSet *regionSet, TokenRegion *reg )
 			
 		TokenInstance *tokenInstance = TokenInstance::cons( tokenDef,
 				join, internal, nextTokenId++,
-				rootNamespace, reg, 0 );
+				rootNamespace, reg );
 
 		reg->tokenInstanceList.append( tokenInstance );
 

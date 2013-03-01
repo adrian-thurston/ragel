@@ -199,7 +199,7 @@ void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join, Obje
 
 	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef,
 			join, loc, pd->nextTokenId++, nspace, 
-			regionSet->tokenIgnore, &reCaptureVect );
+			regionSet->tokenIgnore );
 
 	regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
 
@@ -209,8 +209,7 @@ void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join, Obje
 	if ( ignore ) {
 		/* The instance for the ignore-only. */
 		TokenInstance *tokenInstanceIgn = TokenInstance::cons( tokenDef,
-				join, loc, pd->nextTokenId++, nspace, regionSet->ignoreOnly,
-				&reCaptureVect );
+				join, loc, pd->nextTokenId++, nspace, regionSet->ignoreOnly );
 
 		tokenInstanceIgn->dupOf = tokenInstance;
 
@@ -219,8 +218,7 @@ void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join, Obje
 	else {
 		/* The instance for the token-only. */
 		TokenInstance *tokenInstanceTok = TokenInstance::cons( tokenDef,
-				join, loc, pd->nextTokenId++, nspace, regionSet->tokenOnly,
-				&reCaptureVect );
+				join, loc, pd->nextTokenId++, nspace, regionSet->tokenOnly );
 
 		tokenInstanceTok->dupOf = tokenInstance;
 
@@ -271,7 +269,7 @@ void ColmParser::zeroDef( const InputLoc &loc, const String &data,
 	nspace->tokenDefList.append( tokenDef );
 
 	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef, join, 
-			loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0 );
+			loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore );
 
 	/* Doesn't go into instance list. */
 
@@ -311,7 +309,7 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 
 	/* The instance for the token/ignore region. */
 	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef, join, 
-			loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore, 0 );
+			loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore );
 
 	regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
 
@@ -324,7 +322,7 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 	/* The instance for the token-only region. */
 	TokenInstance *tokenInstanceTok = TokenInstance::cons( tokenDef,
 			join, loc, pd->nextTokenId++, nspace,
-			regionSet->tokenOnly, 0 );
+			regionSet->tokenOnly );
 
 	tokenInstanceTok->dupOf = tokenInstance;
 

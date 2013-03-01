@@ -455,8 +455,7 @@ struct TokenInstance
 
 	static TokenInstance *cons( TokenDef *tokenDef,
 		LexJoin *join, const InputLoc &semiLoc, 
-		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion,
-		ReCaptureVect *pReCaptureVect )
+		int longestMatchId, Namespace *nspace, TokenRegion *tokenRegion )
 	{ 
 		TokenInstance *t = new TokenInstance;
 
@@ -469,9 +468,6 @@ struct TokenInstance
 		t->nspace = nspace;
 		t->tokenRegion = tokenRegion;
 		t->dupOf = 0;
-
-		if ( pReCaptureVect != 0 )
-			t->reCaptureVect = *pReCaptureVect;
 
 		return t;
 	}
@@ -491,7 +487,6 @@ struct TokenInstance
 	bool inLmSelect;
 	Namespace *nspace;
 	TokenRegion *tokenRegion;
-	ReCaptureVect reCaptureVect;
 
 	TokenInstance *dupOf;
 };
