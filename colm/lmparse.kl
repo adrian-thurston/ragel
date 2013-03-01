@@ -884,7 +884,7 @@ void ColmParser::contextHead( const InputLoc &loc, const String &data )
 			data, pd->nextObjectId++ ); 
 }
 
-void ColmParser::tokenInstanceName( const String &name )
+void ColmParser::guaranteeRegion()
 {
 	pd->insideRegion = regionStack.length() > 1;
 
@@ -1873,7 +1873,7 @@ nonterm class token_def_name
 token_def_name:
 	opt_name
 	final {
-		tokenInstanceName( $1->name );
+		guaranteeRegion();
 		$$->name = $1->name;
 	};
 
@@ -3077,7 +3077,6 @@ void ColmParser::go()
 	pushRegionSet( internal );
 
 	String hello( "hello" );
-	tokenInstanceName( hello );
 
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, hello, pd->nextObjectId++ ); 
 
