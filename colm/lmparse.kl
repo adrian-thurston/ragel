@@ -908,7 +908,6 @@ void ColmParser::contextHead( const InputLoc &loc, const String &data )
 void ColmParser::tokenInstanceName( const String &name )
 {
 	pd->insideRegion = regionStack.length() > 1;
-	curDefineId = name;
 
 	if ( !pd->insideRegion )
 		pushRegionSet( internal );
@@ -1123,6 +1122,7 @@ typedef:
 cfl_def:
 	cfl_def_head obj_var_list opt_reduce_first cfl_prod_list
 	final {
+		$2->objectDef->name = $1->name;
 		NtDef *ntDef = NtDef::cons( $1->name, namespaceStack.top(),
 				contextStack.top(), $3->reduceFirst );
 
@@ -1136,7 +1136,6 @@ nonterm class cfl_def_head
 
 cfl_def_head: KW_Def TK_Word
 	final {
-		curDefineId = $2->data;
 		$$->name = $2->data;
 	};
 
@@ -1210,7 +1209,7 @@ obj_var_list: obj_var_list var_def
 obj_var_list:
 	final {
 		$$->objectDef = ObjectDef::cons( ObjectDef::UserType,
-				curDefineId, pd->nextObjectId++ ); 
+				String(), pd->nextObjectId++ ); 
 	};
 
 
@@ -1835,6 +1834,7 @@ token_def:
 	enter_rl opt_no_ignore '/' opt_lex_join leave_rl '/' opt_no_ignore  
 	opt_translate
 	final {
+		$3->objectDef->name = $2->name;
 		tokenDef( $1->loc, $2->name, $7->join, $3->objectDef,
 				$11->transBlock, $1->ignore, $5->noIgnore, $10->noIgnore );
 	};
@@ -3065,9 +3065,10 @@ void ColmParser::go()
 	/* The token region */
 	pushRegionSet( internal );
 
-	tokenInstanceName( String( "hello" ) );
+	String hello( "hello" );
+	tokenInstanceName( hello );
 
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, curDefineId, pd->nextObjectId++ ); 
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, hello, pd->nextObjectId++ ); 
 
 	Literal *literal = Literal::cons( internal, String( "'hello\n'" ), Literal::LitString );
 	LexFactor *factor = LexFactor::cons( literal );
@@ -3083,8 +3084,8 @@ void ColmParser::go()
 	popRegionSet();
 
 	/* Grammar. */
-	curDefineId = String( "start" );
-	NtDef *ntDef = NtDef::cons( curDefineId, namespaceStack.top(),
+	String start( "start" );
+	NtDef *ntDef = NtDef::cons( start, namespaceStack.top(),
 				contextStack.top(), false );
 
 	LelDefList *defList = new LelDefList;

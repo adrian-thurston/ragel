@@ -77,20 +77,14 @@ struct ColmParser
 	/* The name of the root section, this does not change during an include. */
 	const char *sectionName;
 
-	NameRef nameRef;
-	NameRefList nameRefList;
-
-	LangElVect langElVect;
-
 	RegionSetVect regionStack;
 	NamespaceVect namespaceStack;
 	ContextStack contextStack;
 
-	String curDefineId;
-
 	PredType predType;
 	ReCaptureVect reCaptureVect;
 
+	/* Lexical feedback. */
 	bool enterRl;
 
 	void init();
