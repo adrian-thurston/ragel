@@ -24,51 +24,56 @@
 #include <iostream>
 #include <assert.h>
 
-void LexJoin::varDecl( Compiler *pd, ObjectDef *objectDef )
+void LexJoin::varDecl( Compiler *pd, TokenDef *tokenDef )
 {
-	expr->varDecl( pd, objectDef );
+	expr->varDecl( pd, tokenDef );
 }
 
-void LexExpression::varDecl( Compiler *pd, ObjectDef *objectDef )
+void LexExpression::varDecl( Compiler *pd, TokenDef *tokenDef )
 {
 	switch ( type ) {
 		case OrType: case IntersectType: case SubtractType:
 		case StrongSubtractType:
-			expression->varDecl( pd, objectDef );
-			term->varDecl( pd, objectDef );
+			expression->varDecl( pd, tokenDef );
+			term->varDecl( pd, tokenDef );
 			break;
 		case TermType:
-			term->varDecl( pd, objectDef );
+			term->varDecl( pd, tokenDef );
 			break;
 		case BuiltinType:
 			break;
 	}
 }
 
-void LexTerm::varDecl( Compiler *pd, ObjectDef *objectDef )
+void LexTerm::varDecl( Compiler *pd, TokenDef *tokenDef )
 {
 	switch ( type ) {
 		case ConcatType:
 		case RightStartType:
 		case RightFinishType:
 		case LeftType:
-			term->varDecl( pd, objectDef );
-			factorAug->varDecl( pd, objectDef );
+			term->varDecl( pd, tokenDef );
+			factorAug->varDecl( pd, tokenDef );
 			break;
 		case FactorAugType:
-			factorAug->varDecl( pd, objectDef );
+			factorAug->varDecl( pd, tokenDef );
 			break;
 	}
 }
 
-void LexFactorAug::varDecl( Compiler *pd, ObjectDef *objectDef )
+void LexFactorAug::varDecl( Compiler *pd, TokenDef *tokenDef )
 {
 	for ( ReCaptureVect::Iter re = reCaptureVect; re.lte(); re++ ) {
-		if ( objectDef->checkRedecl( re->objField->name ) != 0 )
-			error(re->objField->loc) << "label name \"" << re->objField->name << "\" already in use" << endp;
+		if ( tokenDef->objectDef->checkRedecl( re->objField->name ) != 0 ) {
+			error(re->objField->loc) << "label name \"" <<
+					re->objField->name << "\" already in use" << endp;
+		}
 
 		/* Insert it into the map. */
-		objectDef->insertField( re->objField->name, re->objField );
+		tokenDef->objectDef->insertField( re->objField->name, re->objField );
+
+		/* Store it in the TokenDef. */
+		tokenDef->reCaptureVect.append( *re );
 	}
 }
 
@@ -77,9 +82,25 @@ void Compiler::varDeclaration()
 	for ( NamespaceList::Iter n = namespaceList; n.lte(); n++ ) {
 		for ( TokenDefListNs::Iter tok = n->tokenDefList; tok.lte(); tok++ ) {
 			if ( tok->join != 0 )
-				tok->join->varDecl( this, tok->objectDef );
+				tok->join->varDecl( this, tok );
 		}
 	}
+
+	/* FIXME: declare RE captures in token generation actions. */
+#if 0
+	/* Add captures to the local frame. We Depend on these becoming the
+	 * first local variables so we can compute their location. */
+
+	/* Make local variables corresponding to the local capture vector. */
+	for ( ReCaptureVect::Iter c = reCaptureVect; c.lte(); c++ )
+	{
+		ObjectField *objField = ObjectField::cons( c->objField->loc,
+				c->objField->typeRef, c->objField->name );
+
+		/* Insert it into the field map. */
+		pd->curLocalFrame->insertField( objField->name, objField );
+	}
+#endif
 }
 
 LangEl *declareLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::Type type )

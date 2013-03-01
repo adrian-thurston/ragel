@@ -81,8 +81,6 @@ struct ColmParser
 	NamespaceVect namespaceStack;
 	ContextStack contextStack;
 
-	ReCaptureVect reCaptureVect;
-
 	/* Lexical feedback. */
 	bool enterRl;
 

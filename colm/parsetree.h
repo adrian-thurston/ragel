@@ -822,7 +822,7 @@ struct LexJoin
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
-	void varDecl( Compiler *pd, ObjectDef *objectDef );
+	void varDecl( Compiler *pd, TokenDef *tokenDef );
 
 	/* Data. */
 	LexExpression *expr;
@@ -881,7 +881,7 @@ struct LexExpression
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd, bool lastInSeq = true );
 	void makeNameTree( Compiler *pd );
-	void varDecl( Compiler *pd, ObjectDef *objectDef );
+	void varDecl( Compiler *pd, TokenDef *tokenDef );
 
 	/* Node data. */
 	LexExpression *expression;
@@ -938,7 +938,7 @@ struct LexTerm
 
 	FsmGraph *walk( Compiler *pd, bool lastInSeq = true );
 	void makeNameTree( Compiler *pd );
-	void varDecl( Compiler *pd, ObjectDef *objectDef );
+	void varDecl( Compiler *pd, TokenDef *tokenDef );
 
 	LexTerm *term;
 	LexFactorAug *factorAug;
@@ -967,7 +967,7 @@ struct LexFactorAug
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
-	void varDecl( Compiler *pd, ObjectDef *objectDef );
+	void varDecl( Compiler *pd, TokenDef *tokenDef );
 
 	void assignActions( Compiler *pd, FsmGraph *graph, int *actionOrd );
 

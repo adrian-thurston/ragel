@@ -232,8 +232,6 @@ void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join, Obje
 		 * make other tokens */
 		addRegularDef( loc, namespaceStack.top(), name, join );
 	}
-
-	reCaptureVect.empty();
 }
 
 void ColmParser::zeroDef( const InputLoc &loc, const String &data,
@@ -343,20 +341,6 @@ ObjectDef *ColmParser::blockOpen()
 			"local", pd->nextObjectId++ );
 
 	pd->curLocalFrame = frame;
-
-	/* Add captures to the local frame. We Depend on these becoming the
-	 * first local variables so we can compute their location. */
-
-	/* Make local variables corresponding to the local capture vector. */
-	for ( ReCaptureVect::Iter c = reCaptureVect; c.lte(); c++ )
-	{
-		ObjectField *objField = ObjectField::cons( c->objField->loc,
-				c->objField->typeRef, c->objField->name );
-
-		/* Insert it into the field map. */
-		pd->curLocalFrame->insertField( objField->name, objField );
-	}
-
 	return frame;
 }
 
@@ -533,7 +517,6 @@ LexFactorAug *ColmParser::lexFactorLabel( const InputLoc &loc, const String &dat
 	factorAug->actions.append( ParserAction( loc, at_start, 0, enter ) );
 	factorAug->actions.append( ParserAction( loc, at_leave, 0, leave ) );
 
-	reCaptureVect.append( ReCapture( enter, leave, objField ) );
 	factorAug->reCaptureVect.append( ReCapture( enter, leave, objField ) );
 
 	return factorAug;
@@ -1930,9 +1913,6 @@ rl_def:
 	final {
 		/* Generic creation of machine for instantiation and assignment. */
 		addRegularDef( $2->loc, namespaceStack.top(), $2->data, $5->join );
-
-		if ( reCaptureVect.length() > 0 )
-			error($1->loc) << "rl definitions cannot capture vars" << endl;
 	};
 
 type class token_data
