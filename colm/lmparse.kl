@@ -187,9 +187,7 @@ void ColmParser::tokenDef( const InputLoc &loc, String name, LexJoin *join, Obje
 	RegionSet *regionSet = regionStack.top();
 
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
-			transBlock, loc, 0, nspace, regionSet,
-			&reCaptureVect, objectDef,
-			contextStack.top() );
+			transBlock, loc, 0, nspace, regionSet, objectDef, contextStack.top() );
 
 	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
@@ -261,7 +259,7 @@ void ColmParser::zeroDef( const InputLoc &loc, const String &data,
 	LexJoin *join = literalJoin( loc, data );
 
 	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
-			0, loc, 0, nspace, regionSet, 0, 0, 0 );
+			0, loc, 0, nspace, regionSet, 0, 0 );
 
 	tokenDef->isZero = true;
 
@@ -302,7 +300,7 @@ void ColmParser::literalDef( const InputLoc &loc, const String &data,
 
 	/* The token definition. */
 	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
-			0, loc, 0, nspace, regionSet, 0, 0, 0 );
+			0, loc, 0, nspace, regionSet, 0, 0 );
 
 	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );

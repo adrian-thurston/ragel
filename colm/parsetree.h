@@ -377,7 +377,7 @@ struct TokenDef
 	static TokenDef *cons( const String &name, const String &literal, bool isLiteral, bool isIgnore,
 		LexJoin *join, CodeBlock *codeBlock, const InputLoc &semiLoc, 
 		int longestMatchId, Namespace *nspace, RegionSet *regionSet,
-		ReCaptureVect *pReCaptureVect, ObjectDef *objectDef, Context *contextIn )
+		ObjectDef *objectDef, Context *contextIn )
 	{ 
 		TokenDef *t = new TokenDef;
 
@@ -400,9 +400,6 @@ struct TokenDef
 		t->noPostIgnore = false;
 		t->noPreIgnore = false;
 		t->isZero = false;
-
-		if ( pReCaptureVect != 0 )
-			t->reCaptureVect = *pReCaptureVect;
 
 		return t;
 	}

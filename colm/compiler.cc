@@ -774,7 +774,7 @@ void Compiler::createDefaultScanner()
 	LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
 
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, 
-			join, 0, loc, 0, rootNamespace, regionSet, 0, 0, 0 );
+			join, 0, loc, 0, rootNamespace, regionSet, 0, 0 );
 		
 	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef,
 			join, loc, nextTokenId++,
@@ -986,7 +986,7 @@ void Compiler::initEmptyScanner( RegionSet *regionSet, TokenRegion *reg )
 
 		TokenDef *tokenDef = TokenDef::cons( name, String(), false, false,
 				join, 0, internal, nextTokenId++, rootNamespace, 
-				regionSet, 0, 0, 0 );
+				regionSet, 0, 0 );
 			
 		TokenInstance *tokenInstance = TokenInstance::cons( tokenDef,
 				join, internal, nextTokenId++,
