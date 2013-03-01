@@ -96,8 +96,8 @@ enum PredType {
 
 struct PredDecl
 {
-	PredDecl( TypeRef *typeRef, PredType predType, long predValue )
-		: typeRef(typeRef), predType(predType), predValue(predValue)
+	PredDecl( TypeRef *typeRef, long predValue )
+		: typeRef(typeRef), predValue(predValue)
 	{}
 
 	TypeRef *typeRef;

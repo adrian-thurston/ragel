@@ -81,7 +81,6 @@ struct ColmParser
 	NamespaceVect namespaceStack;
 	ContextStack contextStack;
 
-	PredType predType;
 	ReCaptureVect reCaptureVect;
 
 	/* Lexical feedback. */
@@ -167,9 +166,10 @@ struct ColmParser
 	StmtList *appendStatement( StmtList *stmtList, LangStmt *stmt );
 	ParameterList *appendParam( ParameterList *paramList, ObjectField *objField );
 	ObjectField *addParam( const InputLoc &loc, TypeRef *typeRef, const String &name );
-	void predTokenName( const InputLoc &loc, NamespaceQual *qual, const String &data );
-	void predTokenLit( const InputLoc &loc, const String &data, NamespaceQual *nspaceQual );
+	PredDecl *predTokenName( const InputLoc &loc, NamespaceQual *qual, const String &data );
+	PredDecl *predTokenLit( const InputLoc &loc, const String &data, NamespaceQual *nspaceQual );
 	void alias( const InputLoc &loc, const String &data, TypeRef *typeRef );
+	void precedenceStmt( PredType predType, PredDeclList *predDeclList );
 
 	void parseInput( StmtList *stmtList );
 	void printParseTree( StmtList *stmtList );

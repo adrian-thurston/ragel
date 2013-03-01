@@ -934,21 +934,21 @@ ObjectField *ColmParser::addParam( const InputLoc &loc, TypeRef *typeRef,
 	return objField;
 }
 
-void ColmParser::predTokenName( const InputLoc &loc, NamespaceQual *qual,
+PredDecl *ColmParser::predTokenName( const InputLoc &loc, NamespaceQual *qual,
 		const String &data )
 {
 	TypeRef *typeRef = TypeRef::cons( loc, qual, data );
-	PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
-	pd->predDeclList.append( predDecl );
+	PredDecl *predDecl = new PredDecl( typeRef, pd->predValue );
+	return predDecl;
 }
 
-void ColmParser::predTokenLit( const InputLoc &loc, const String &data,
+PredDecl *ColmParser::predTokenLit( const InputLoc &loc, const String &data,
 		NamespaceQual *nspaceQual )
 {
 	PdaLiteral *literal = new PdaLiteral( loc, data );
 	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, literal );
-	PredDecl *predDecl = new PredDecl( typeRef, predType, pd->predValue );
-	pd->predDeclList.append( predDecl );
+	PredDecl *predDecl = new PredDecl( typeRef, pd->predValue );
+	return predDecl;
 }
 
 void ColmParser::alias( const InputLoc &loc, const String &data, TypeRef *typeRef )
@@ -956,6 +956,16 @@ void ColmParser::alias( const InputLoc &loc, const String &data, TypeRef *typeRe
 	Namespace *nspace = namespaceStack.top();
 	TypeAlias *typeAlias = new TypeAlias( loc, nspace, data, typeRef );
 	nspace->typeAliasList.append( typeAlias );
+}
+
+void ColmParser::precedenceStmt( PredType predType, PredDeclList *predDeclList )
+{
+	while ( predDeclList->length() > 0 ) {
+		PredDecl *predDecl = predDeclList->detachFirst();
+		predDecl->predType = predType;
+		pd->predDeclList.append( predDecl );
+	}
+	pd->predValue++;
 }
 
 %%{
@@ -1086,31 +1096,55 @@ export_def: KW_Export var_def opt_def_init
 		$$->stmt = exportStmt( $2->objField, $3->assignType, $3->expr );
 	};
 
-precedence: pred_type pred_token_list final { pd->predValue++; };
+precedence:
+	pred_type pred_token_list
+	final {
+		precedenceStmt( $1->predType, $2->predDeclList );
+	};
 
-pred_type: KW_Left final { predType = PredLeft; };
-pred_type: KW_Right final { predType = PredRight; };
-pred_type: KW_Nonassoc final { predType = PredNonassoc; };
+nonterm pred_type
+{
+	PredType predType;
+};
 
-pred_token_list: pred_token_list ',' pred_token;
-pred_token_list: pred_token;
+pred_type: KW_Left final { $$->predType = PredLeft; };
+pred_type: KW_Right final { $$->predType = PredRight; };
+pred_type: KW_Nonassoc final { $$->predType = PredNonassoc; };
+
+nonterm pred_token_list
+{
+	PredDeclList *predDeclList;
+};
+
+pred_token_list:
+	pred_token_list ',' pred_token
+	final {
+		$$->predDeclList = $1->predDeclList;
+		$$->predDeclList->append( $3->predDecl );
+	};
+
+pred_token_list:
+	pred_token
+	final {
+		$$->predDeclList = new PredDeclList;
+		$$->predDeclList->append( $1->predDecl );
+	};
 
 nonterm pred_token
 {
-	ProdEl *factor;
-	TypeRef *typeRef;
+	PredDecl *predDecl;
 };
 
 pred_token: 
 	region_qual TK_Word 
 	final {
-		predTokenName( $2->loc, $1->nspaceQual, $2->data );
+		$$->predDecl = predTokenName( $2->loc, $1->nspaceQual, $2->data );
 	};
 
 pred_token: 
 	region_qual TK_Literal 
 	final {
-		predTokenLit( $2->loc, $2->data, $1->nspaceQual );
+		$$->predDecl = predTokenLit( $2->loc, $2->data, $1->nspaceQual );
 	};
 
 typedef:
@@ -1181,7 +1215,8 @@ opt_prec:
 opt_prec: 
 	KW_Prec pred_token
 	final {
-		$$->predOf = $2->factor->langEl;
+		//$$->predOf = $2->factor->langEl;
+		assert(false);
 	};
 
 nonterm define_prod
