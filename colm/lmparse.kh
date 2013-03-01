@@ -172,6 +172,10 @@ struct ColmParser
 	void parseInput( StmtList *stmtList );
 	void printParseTree( StmtList *stmtList );
 	void printParseTree();
+
+	void wsIgnore();
+	void idToken();
+	void startProd();
 	void go();
 };
 
