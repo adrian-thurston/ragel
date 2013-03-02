@@ -70,6 +70,8 @@ struct BaseParser
 			bool noPreIgnore, bool noPostIgnore );
 	void literalDef( const InputLoc &loc, const String &data,
 			bool noPreIgnore, bool noPostIgnore );
+	void keyword( const String &kw );
+	void symbol( const String &kw );
 
 	ObjectDef *blockOpen();
 	void blockClose();
@@ -83,7 +85,8 @@ struct BaseParser
 
 	int lexFactorRepNum( const InputLoc &loc, const String &data );
 	LexFactor *lexRlFactorName( const String &data, const InputLoc &loc );
-	LexFactorAug *lexFactorLabel( const InputLoc &loc, const String &data, LexFactorAug *factorAug );
+	LexFactorAug *lexFactorLabel( const InputLoc &loc, const String &data,
+			LexFactorAug *factorAug );
 	LexJoin *lexOptJoin( LexJoin *join, LexJoin *context );
 	LangExpr *send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list );
 	LangExpr *parseCmd( const InputLoc &loc, bool stop, ObjectField *objField,
@@ -99,10 +102,12 @@ struct BaseParser
 			TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList );
 	void preEof( const InputLoc &loc, StmtList *stmtList, ObjectDef *localFrame );
 
-	ProdEl *prodElName( const InputLoc &loc, const String &data, NamespaceQual *nspaceQual,
-			ObjectField *objField, RepeatType repeatType, bool commit );
-	ProdEl *prodElLiteral( const InputLoc &loc, const String &data, NamespaceQual *nspaceQual,
-			ObjectField *objField, RepeatType repeatType, bool commit );
+	ProdEl *prodElName( const InputLoc &loc, const String &data,
+			NamespaceQual *nspaceQual, ObjectField *objField, RepeatType repeatType,
+			bool commit );
+	ProdEl *prodElLiteral( const InputLoc &loc, const String &data,
+			NamespaceQual *nspaceQual, ObjectField *objField, RepeatType repeatType,
+			bool commit );
 	ConsItemList *consElLiteral( const InputLoc &loc,
 			const String &data, NamespaceQual *nspaceQual );
 	Production *production( const InputLoc &loc, ProdElList *prodElList,
@@ -125,9 +130,22 @@ struct BaseParser
 	ParameterList *appendParam( ParameterList *paramList, ObjectField *objField );
 	ObjectField *addParam( const InputLoc &loc, TypeRef *typeRef, const String &name );
 	PredDecl *predTokenName( const InputLoc &loc, NamespaceQual *qual, const String &data );
-	PredDecl *predTokenLit( const InputLoc &loc, const String &data, NamespaceQual *nspaceQual );
+	PredDecl *predTokenLit( const InputLoc &loc, const String &data,
+			NamespaceQual *nspaceQual );
 	void alias( const InputLoc &loc, const String &data, TypeRef *typeRef );
 	void precedenceStmt( PredType predType, PredDeclList *predDeclList );
+
+	ProdEl *prodRefName( const String &name );
+	ProdEl *prodRefNameRepeat( const String &name );
+	ProdEl *prodRefLit( const String &lit );
+
+	Production *production( ProdEl *prodEl1 );
+	Production *production( ProdEl *prodEl1, ProdEl *prodEl2 );
+	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
+			ProdEl *prodEl3 );
+	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
+			ProdEl *prodEl3, ProdEl *prodEl4 );
+	void definition( const String &name, Production *prod );
 
 	void parseInput( StmtList *stmtList );
 	void printParseTree( StmtList *stmtList );
@@ -135,6 +153,8 @@ struct BaseParser
 
 	void wsIgnore();
 	void idToken();
+
+	void itemProd();
 	void startProd();
 	void go();
 };

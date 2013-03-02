@@ -139,6 +139,26 @@ LexFactorAug *parensFactorAug( LexTerm *term )
 	return factorAug;
 }
 
+void BaseParser::wsIgnore()
+{
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, String(), pd->nextObjectId++ ); 
+
+	LexTerm *r1 = litTerm( "' '" );
+	LexTerm *r2 = litTerm( "'\t'" );
+	LexTerm *r3 = litTerm( "'\v'" );
+	LexTerm *r4 = litTerm( "'\n'" );
+	LexTerm *r5 = litTerm( "'\r'" );
+	LexTerm *r6 = litTerm( "'\f'" );
+
+	LexExpression *whitespace = orExpr( r1, r2, r3, r4, r5, r6 );
+	LexFactorAug *whitespaceRep = plusFactorAug( whitespace );
+
+	LexTerm *term = LexTerm::cons( whitespaceRep );
+	LexExpression *expr = LexExpression::cons( term );
+	LexJoin *join = LexJoin::cons( expr );
+
+	tokenDef( internal, String(), join, objectDef, 0, true, false, false );
+}
 
 void BaseParser::idToken()
 {
@@ -166,49 +186,106 @@ void BaseParser::idToken()
 	tokenDef( internal, hello, join, objectDef, 0, false, false, false );
 }
 
-void BaseParser::wsIgnore()
+void BaseParser::keyword( const String &kw )
 {
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, String(), pd->nextObjectId++ ); 
+	literalDef( internal, kw, false, false );
+}
 
-	LexTerm *r1 = litTerm( "' '" );
-	LexTerm *r2 = litTerm( "'\t'" );
-	LexTerm *r3 = litTerm( "'\v'" );
-	LexTerm *r4 = litTerm( "'\n'" );
-	LexTerm *r5 = litTerm( "'\r'" );
-	LexTerm *r6 = litTerm( "'\f'" );
+void BaseParser::symbol( const String &kw )
+{
+	literalDef( internal, kw, false, false );
+}
 
-	LexExpression *whitespace = orExpr( r1, r2, r3, r4, r5, r6 );
-	LexFactorAug *whitespaceRep = plusFactorAug( whitespace );
+ProdEl *BaseParser::prodRefName( const String &name )
+{
+	ProdEl *prodEl = prodElName( internal, name,
+			NamespaceQual::cons(namespaceStack.top()), 0,
+			RepeatNone, false );
+	return prodEl;
+}
 
-	LexTerm *term = LexTerm::cons( whitespaceRep );
-	LexExpression *expr = LexExpression::cons( term );
-	LexJoin *join = LexJoin::cons( expr );
+ProdEl *BaseParser::prodRefNameRepeat( const String &name )
+{
+	ProdEl *prodEl = prodElName( internal, name,
+			NamespaceQual::cons(namespaceStack.top()), 0,
+			RepeatRepeat, false );
+	return prodEl;
+}
 
-	tokenDef( internal, String(), join, objectDef, 0, true, false, false );
+ProdEl *BaseParser::prodRefLit( const String &lit )
+{
+	ProdEl *prodEl = prodElLiteral( internal, lit, 
+			NamespaceQual::cons(namespaceStack.top()), 0,
+			RepeatNone, false );
+	return prodEl;
+}
+
+Production *BaseParser::production( ProdEl *prodEl1 )
+{
+	ProdElList *prodElList = new ProdElList;
+	prodElList->append( prodEl1 );
+	return production( internal, prodElList, false, 0, 0 );
+}
+
+Production *BaseParser::production( ProdEl *prodEl1, ProdEl *prodEl2 )
+{
+	ProdElList *prodElList = new ProdElList;
+	prodElList->append( prodEl1 );
+	prodElList->append( prodEl2 );
+	return production( internal, prodElList, false, 0, 0 );
+}
+
+Production *BaseParser::production( ProdEl *prodEl1, ProdEl *prodEl2,
+		ProdEl *prodEl3 )
+{
+	ProdElList *prodElList = new ProdElList;
+	prodElList->append( prodEl1 );
+	prodElList->append( prodEl2 );
+	prodElList->append( prodEl3 );
+	return production( internal, prodElList, false, 0, 0 );
+}
+
+Production *BaseParser::production( ProdEl *prodEl1, ProdEl *prodEl2,
+		ProdEl *prodEl3, ProdEl *prodEl4 )
+{
+	ProdElList *prodElList = new ProdElList;
+
+	prodElList->append( prodEl1 );
+	prodElList->append( prodEl2 );
+	prodElList->append( prodEl3 );
+	prodElList->append( prodEl4 );
+
+	return production( internal, prodElList, false, 0, 0 );
+}
+
+void BaseParser::definition( const String &name, Production *prod )
+{
+	LelDefList *defList = new LelDefList;
+	prodAppend( defList, prod );
+
+	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	cflDef( ntDef, objectDef, defList );
+}
+
+void BaseParser::itemProd()
+{
+	ProdEl *prodEl1 = prodRefLit( "'def'" );
+	ProdEl *prodEl2 = prodRefName( "id" );
+	ProdEl *prodEl3 = prodRefLit( "'['" );
+	ProdEl *prodEl4 = prodRefLit( "']'" );
+
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4 );
+
+	definition( "item",  prod1 );
 }
 
 void BaseParser::startProd()
 {
-	String start( "start" );
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, start, pd->nextObjectId++ ); 
+	ProdEl *prodEl1 = prodRefNameRepeat( "item" );
+	Production *prod1 = production( prodEl1 );
 
-	NtDef *ntDef = NtDef::cons( start, namespaceStack.top(),
-				contextStack.top(), false );
-
-	LelDefList *defList = new LelDefList;
-		
-	/* Production 1. */
-	ProdElList *prodElList = new ProdElList;
-
-	ProdEl *prodEl = prodElName( internal, String( "id" ),
-			NamespaceQual::cons(namespaceStack.top()), 0, RepeatNone, false );
-	prodElList->append( prodEl );
-
-	Production *def = production( internal, prodElList, false, 0, 0 );
-	prodAppend( defList, def );
-
-	/* Make. */
-	cflDef( ntDef, objectDef, defList );
+	definition( "start",  prod1 );
 }
 
 void BaseParser::parseInput( StmtList *stmtList )
@@ -229,6 +306,19 @@ void BaseParser::parseInput( StmtList *stmtList )
 	stmtList->append( stmt );
 }
 
+void BaseParser::printParseTree( StmtList *stmtList )
+{
+	QualItemVect *qual = new QualItemVect;
+	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
+	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("tree") );
+	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+
+	ExprVect *exprVect = new ExprVect;
+	exprVect->append( expr );
+	LangStmt *stmt = LangStmt::cons( internal, LangStmt::PrintType, exprVect );
+	stmtList->append( stmt );
+}
+
 void BaseParser::go()
 {
 	StmtList *stmtList = new StmtList;
@@ -236,11 +326,15 @@ void BaseParser::go()
 	/* The token region */
 	pushRegionSet( internal );
 
-	idToken();
 	wsIgnore();
+	keyword( "'def'" );
+	idToken();
+	symbol( "'['" );
+	symbol( "']'" );
 
 	popRegionSet();
 
+	itemProd();
 	startProd();
 
 	parseInput( stmtList );

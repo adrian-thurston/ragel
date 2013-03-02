@@ -926,16 +926,4 @@ void BaseParser::precedenceStmt( PredType predType, PredDeclList *predDeclList )
 }
 
 
-void BaseParser::printParseTree( StmtList *stmtList )
-{
-	QualItemVect *qual = new QualItemVect;
-	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
-	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("tree") );
-	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
-
-	ExprVect *exprVect = new ExprVect;
-	exprVect->append( expr );
-	LangStmt *stmt = LangStmt::cons( internal, LangStmt::PrintType, exprVect );
-	stmtList->append( stmt );
-}
 
