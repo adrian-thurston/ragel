@@ -51,14 +51,14 @@ colm_SOURCES = \
 	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
 	input.h keyops.h lmparse.h lmscan.h map.h parsedata.h \
 	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
-	redfsm.h rtvector.h tree.h version.h global.h colm.h \
+	redfsm.h rtvector.h tree.h version.h global.h colm.h parser.h \
 	\
 	resolve.cc synthesis.cc lmparse.cc lmscan.cc parsetree.cc \
 	fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc \
 	fsmgraph.cc pdagraph.cc pdabuild.cc pdacodegen.cc fsmcodegen.cc \
 	redfsm.cc fsmexec.cc main.cc redbuild.cc closure.cc fsmap.cc \
 	dotgen.cc pcheck.cc ctinput.cc declare.cc codegen.cc \
-	exports.cc compiler.cc parser.cc
+	exports.cc compiler.cc parser.cc bootstrap.cc
 
 colmincdir = $(includedir)/colm
 

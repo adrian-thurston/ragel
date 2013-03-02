@@ -81,6 +81,7 @@ bool logging = false;
 bool branchPointInfo = false;
 bool addUniqueEmptyProductions = false;
 bool gblLibrary = false;
+bool bootStrap = false;
 
 ArgsVector includePaths;
 
@@ -412,12 +413,15 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "D:e:c:LI:vdlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "BD:e:c:LI:vdlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
 		case ParamCheck::match:
 			switch ( pc.parameter ) {
+			case 'B':
+				bootStrap = true;
+				break;
 			case 'I':
 				includePaths.append( pc.parameterArg );
 				break;
@@ -575,10 +579,13 @@ int main(int argc, const char **argv)
 
 	parser->addArgvList();
 
-	scanner->scan();
-	scanner->eof();
-
-	//parser->go();
+	if ( bootStrap ) {
+		parser->go();
+	}
+	else {
+		scanner->scan();
+		scanner->eof();
+	}
 
 	/* Parsing complete, check for errors.. */
 	if ( gblErrorCount > 0 )
