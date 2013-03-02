@@ -167,6 +167,7 @@ void usage()
 "   -i                   show conflict information\n"
 "   -d                   make colm verbose\n"
 "   -l                   compile logging into the output executable\n"
+"   -B                   compile a boot strapping colm, replaces source file\n"
 	;	
 }
 
@@ -249,7 +250,9 @@ void openOutput( )
 	debug( REALM_PARSE, "opening output file: %s\n", outputFileName );
 
 	/* Make sure we are not writing to the same file as the input file. */
-	if ( outputFileName != 0 && strcmp( inputFileName, outputFileName  ) == 0 ) {
+	if ( outputFileName != 0 && inputFileName != 0 &&
+			strcmp( inputFileName, outputFileName  ) == 0 )
+	{
 		error() << "output file \"" << outputFileName  << 
 				"\" is the same as the input file" << endl;
 	}
@@ -551,16 +554,24 @@ int main(int argc, const char **argv)
 
 	/* Open the input file for reading. */
 	istream *inStream;
-	if ( inputFileName != 0 ) {
-		/* Open the input file for reading. */
-		ifstream *inFile = new ifstream( inputFileName );
-		inStream = inFile;
-		if ( ! inFile->is_open() )
-			error() << "could not open " << inputFileName << " for reading" << endl;
+	if ( bootStrap ) {
+		inStream = &cin;
+		if ( outputFileName == 0 ) {
+			error() << "colm: an output file name is required when "
+					"compiling bootstrap grammar" << endl;
+		}
 	}
 	else {
-		inputFileName = "<stdin>";
-		inStream = &cin;
+		if ( inputFileName == 0 ) {
+			error() << "colm: no input file given" << endl;
+		}
+		else {
+			/* Open the input file for reading. */
+			ifstream *inFile = new ifstream( inputFileName );
+			inStream = inFile;
+			if ( ! inFile->is_open() )
+				error() << "could not open " << inputFileName << " for reading" << endl;
+		}
 	}
 
 	/* Bail on above errors. */
