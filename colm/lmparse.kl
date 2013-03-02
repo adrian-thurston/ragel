@@ -957,7 +957,6 @@ nonterm class token_def_name
 token_def_name:
 	opt_name
 	final {
-		guaranteeRegion();
 		$$->name = $1->name;
 	};
 

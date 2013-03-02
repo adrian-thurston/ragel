@@ -152,9 +152,14 @@ LexJoin *BaseParser::literalJoin( const InputLoc &loc, const String &data )
 void BaseParser::tokenDef( const InputLoc &loc, String name, LexJoin *join, ObjectDef *objectDef,
 		CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore )
 {
-	/* Check the region if this is for an ignore. */
-	if ( ignore && !pd->insideRegion )
-		error(loc) << "ignore tokens can only appear inside scanners" << endp;
+	bool pushedRegion = false;
+	if ( !insideRegion() ) {
+		if ( ignore )
+			error(loc) << "ignore tokens can only appear inside scanners" << endp;
+	
+		pushedRegion = true;
+		pushRegionSet( internal );
+	}
 
 	/* Check the name if this is a token. */
 	if ( !ignore && name == 0 )
@@ -205,7 +210,7 @@ void BaseParser::tokenDef( const InputLoc &loc, String name, LexJoin *join, Obje
 	}
 
 	/* This is created and pushed in the name. */
-	if ( !pd->insideRegion )
+	if ( pushedRegion )
 		popRegionSet();
 
 	if ( join != 0 ) {
@@ -221,8 +226,7 @@ void BaseParser::zeroDef( const InputLoc &loc, const String &data,
 	/* Create a name for the literal. */
 	String name( 32, "_literal_%.4x", pd->nextTokenId );
 
-	bool insideRegion = regionStack.length() > 1;
-	if ( !insideRegion )
+	if ( !insideRegion() )
 		error(loc) << "zero token should be inside token" << endp;
 
 	String interp("");;
@@ -259,9 +263,11 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 	/* Create a name for the literal. */
 	String name( 32, "_literal_%.4x", pd->nextTokenId );
 
-	bool insideRegion = regionStack.length() > 1;
-	if ( !insideRegion )
+	bool pushedRegion = false;
+	if ( !insideRegion() ) {
 		pushRegionSet( loc );
+		pushedRegion = true;
+	}
 
 	bool unusedCI;
 	String interp;
@@ -305,7 +311,7 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 
 	regionSet->tokenOnly->tokenInstanceList.append( tokenInstanceTok );
 
-	if ( !insideRegion )
+	if ( pushedRegion )
 		popRegionSet();
 }
 
@@ -651,8 +657,7 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 
 void BaseParser::preEof( const InputLoc &loc, StmtList *stmtList, ObjectDef *localFrame )
 {
-	bool insideRegion = regionStack.length() > 1;
-	if ( !insideRegion )
+	if ( !insideRegion() )
 		error(loc) << "preeof must be used inside an existing region" << endl;
 
 	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
@@ -863,14 +868,6 @@ void BaseParser::contextHead( const InputLoc &loc, const String &data )
 
 	context->contextObjDef = ObjectDef::cons( ObjectDef::UserType,
 			data, pd->nextObjectId++ ); 
-}
-
-void BaseParser::guaranteeRegion()
-{
-	pd->insideRegion = regionStack.length() > 1;
-
-	if ( !pd->insideRegion )
-		pushRegionSet( internal );
 }
 
 StmtList *BaseParser::appendStatement( StmtList *stmtList, LangStmt *stmt )

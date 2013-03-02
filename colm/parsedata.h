@@ -949,7 +949,6 @@ struct Compiler
 	int nextObjectId;
 	GeneratesType generatesType;
 	bool generatesIgnore;
-	bool insideRegion;
 
 	StringMap literalStrings;
 

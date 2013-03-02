@@ -235,12 +235,10 @@ void BaseParser::go()
 
 	/* The token region */
 	pushRegionSet( internal );
-	pd->insideRegion = true;
 
 	idToken();
 	wsIgnore();
 
-	pd->insideRegion = false;
 	popRegionSet();
 
 	startProd();

@@ -44,8 +44,12 @@ struct BaseParser
 	NamespaceVect namespaceStack;
 	ContextStack contextStack;
 
-	/* Lexical feedback. */
 	bool enterRl;
+
+	bool insideRegion()
+		{ return regionStack.length() > 1; }
+
+	/* Lexical feedback. */
 
 	void init();
 	void addRegularDef( const InputLoc &loc, Namespace *nspace, 
@@ -117,7 +121,6 @@ struct BaseParser
 	LangExpr *require( const InputLoc &loc, LangVarRef *varRef, PatternItemList *list );
 	void contextVarDef( const InputLoc &loc, ObjectField *objField );
 	void contextHead( const InputLoc &loc, const String &data );
-	void guaranteeRegion();
 	StmtList *appendStatement( StmtList *stmtList, LangStmt *stmt );
 	ParameterList *appendParam( ParameterList *paramList, ObjectField *objField );
 	ObjectField *addParam( const InputLoc &loc, TypeRef *typeRef, const String &name );
