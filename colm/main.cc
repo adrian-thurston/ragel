@@ -32,7 +32,6 @@
 
 #include "global.h"
 #include "debug.h"
-#include "lmscan.h"
 #include "pcheck.h"
 #include "vector.h"
 #include "version.h"
@@ -41,6 +40,15 @@
 #include "vector.h"
 #include "version.h"
 #include "fsmcodegen.h"
+
+#if defined(BOOTSTRAP0)
+#include "bootstrap.h"
+#elif defined(BOOTSTRAP1)
+#include "parser.h"
+#else
+#include "lmscan.h"
+#include "lmparse.h"
+#endif
 
 using std::istream;
 using std::ifstream;
@@ -81,7 +89,6 @@ bool logging = false;
 bool branchPointInfo = false;
 bool addUniqueEmptyProductions = false;
 bool gblLibrary = false;
-bool bootStrap = false;
 
 ArgsVector includePaths;
 
@@ -167,7 +174,6 @@ void usage()
 "   -i                   show conflict information\n"
 "   -d                   make colm verbose\n"
 "   -l                   compile logging into the output executable\n"
-"   -B                   compile a boot strapping colm, replaces source file\n"
 	;	
 }
 
@@ -416,15 +422,12 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "BD:e:c:LI:vdlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "D:e:c:LI:vdlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
 		case ParamCheck::match:
 			switch ( pc.parameter ) {
-			case 'B':
-				bootStrap = true;
-				break;
 			case 'I':
 				includePaths.append( pc.parameterArg );
 				break;
@@ -551,48 +554,48 @@ int main(int argc, const char **argv)
 				"\" is the same as the input file" << endl;
 	}
 
+
+#if defined(BOOTSTRAP0)
+	outStream = &cout;
+#elif defined(BOOTSTRAP1)
+#else
 	/* Open the input file for reading. */
-	istream *inStream;
-	if ( bootStrap ) {
-		inStream = &cin;
-		outStream = &cout;
+	istream *inStream = &cin;
+	if ( inputFileName == 0 ) {
+		error() << "colm: no input file given" << endl;
 	}
 	else {
-		if ( inputFileName == 0 ) {
-			error() << "colm: no input file given" << endl;
-		}
-		else {
-			/* Open the input file for reading. */
-			ifstream *inFile = new ifstream( inputFileName );
-			inStream = inFile;
-			if ( ! inFile->is_open() )
-				error() << "could not open " << inputFileName << " for reading" << endl;
-		}
+		/* Open the input file for reading. */
+		ifstream *inFile = new ifstream( inputFileName );
+		inStream = inFile;
+		if ( ! inFile->is_open() )
+			error() << "could not open " << inputFileName << " for reading" << endl;
 	}
+#endif
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )
 		exit(1);
 
 	Compiler *pd = new Compiler;
-	ColmParser *parser = 0;
-	ColmScanner *scanner = 0;
 
-	if ( bootStrap ) {
-#ifdef BOOTSTRAP0
-		parser = new ColmParser( pd );
-		parser->init();
-		parser->go();
+#if defined(BOOTSTRAP0)
+	Bootstrap *parser = new Bootstrap( pd );
+	parser->init();
+	parser->go();
+#elif defined(BOOTSTRAP1)
+	BaseParser *parser = new BaseParser( pd );
+	parser->init();
+	StmtList *stmtList = new StmtList;
+	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
+#else
+	ColmParser *parser = new ColmParser( pd );
+	ColmScanner *scanner = new ColmScanner( inputFileName, *inStream, parser, 0 );
+
+	parser->init();
+	scanner->scan();
+	scanner->eof();
 #endif
-	}
-	else {
-		parser = new ColmParser( pd );
-		scanner = new ColmScanner( inputFileName, *inStream, parser, 0 );
-
-		parser->init();
-		scanner->scan();
-		scanner->eof();
-	}
 
 	/* Parsing complete, check for errors.. */
 	if ( gblErrorCount > 0 )
@@ -634,11 +637,18 @@ int main(int argc, const char **argv)
 		}
 	}
 
-	if ( scanner )
-		delete scanner;
-	if ( parser )
-		delete parser;
+#if defined(BOOTSTRAP0)
+	delete parser;
 	delete pd;
+#elif defined(BOOTSTRAP1)
+	delete parser;
+	delete pd;
+#else
+	delete scanner;
+	delete parser;
+	delete pd;
+#endif
+
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )

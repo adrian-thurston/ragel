@@ -67,8 +67,6 @@ struct BaseParser
 			bool noPreIgnore, bool noPostIgnore );
 	void literalDef( const InputLoc &loc, const String &data,
 			bool noPreIgnore, bool noPostIgnore );
-	void keyword( const String &kw );
-	void symbol( const String &kw );
 
 	ObjectDef *blockOpen();
 	void blockClose();
@@ -131,29 +129,6 @@ struct BaseParser
 			NamespaceQual *nspaceQual );
 	void alias( const InputLoc &loc, const String &data, TypeRef *typeRef );
 	void precedenceStmt( PredType predType, PredDeclList *predDeclList );
-
-	ProdEl *prodRefName( const String &name );
-	ProdEl *prodRefNameRepeat( const String &name );
-	ProdEl *prodRefLit( const String &lit );
-
-	Production *production( ProdEl *prodEl1 );
-	Production *production( ProdEl *prodEl1, ProdEl *prodEl2 );
-	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
-			ProdEl *prodEl3 );
-	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
-			ProdEl *prodEl3, ProdEl *prodEl4 );
-	void definition( const String &name, Production *prod );
-
-	void parseInput( StmtList *stmtList );
-	void printParseTree( StmtList *stmtList );
-	void printParseTree();
-
-	void wsIgnore();
-	void idToken();
-
-	void itemProd();
-	void startProd();
-	void go();
 };
 
 #endif

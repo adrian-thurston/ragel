@@ -45,11 +45,11 @@ common_CFLAGS = \
 
 libprog_a_SOURCES = \
 	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
-	input.h keyops.h lmparse.h lmscan.h map.h parsedata.h \
+	input.h keyops.h map.h parsedata.h \
 	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
 	redfsm.h rtvector.h tree.h version.h global.h colm.h parser.h \
 	\
-	resolve.cc synthesis.cc lmparse.cc lmscan.cc parsetree.cc \
+	resolve.cc synthesis.cc  parsetree.cc \
 	fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc \
 	fsmgraph.cc pdagraph.cc pdabuild.cc pdacodegen.cc fsmcodegen.cc \
 	redfsm.cc fsmexec.cc redbuild.cc closure.cc fsmap.cc \
@@ -62,14 +62,15 @@ bootstrap0_CXXFLAGS = $(common_CFLAGS) -DBOOTSTRAP0
 bootstrap0_SOURCES = bootstrap.cc main.cc
 bootstrap0_LDADD = libprog.a libcolm.a
 
-bootstrap1_CXXFLAGS = $(common_CFLAGS)
-bootstrap1_CFLAGS = $(common_CFLAGS)
+bootstrap1_CXXFLAGS = $(common_CFLAGS) -DBOOTSTRAP1
+bootstrap1_CFLAGS = $(common_CFLAGS) -DBOOTSTRAP1
 bootstrap1_SOURCES = exports1.h exports1.cc parse1.c main.cc
 bootstrap1_LDADD = libprog.a libcolm.a
 
 colm_CXXFLAGS = $(common_CFLAGS) 
 colm_CFLAGS = $(common_CFLAGS)
-colm_SOURCES = exports2.h exports2.cc parse2.c main.cc
+colm_SOURCES = lmparse.h lmscan.h lmparse.cc lmscan.cc \
+		exports2.h exports2.cc parse2.c main.cc
 colm_LDADD = libprog.a libcolm.a
 
 colmincdir = $(includedir)/colm
@@ -80,7 +81,7 @@ exports1.h: bootstrap0 parse1.c
 exports1.cc: bootstrap0 parse1.c
 
 parse1.c: bootstrap0
-	$(builddir)/bootstrap0 -L -o parse1.c -e exports1.h -c exports1.cc -B
+	$(builddir)/bootstrap0 -L -o parse1.c -e exports1.h -c exports1.cc
 
 exports2.h: bootstrap1 parse2.c
 exports2.cc: bootstrap1 parse2.c

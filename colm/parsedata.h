@@ -61,6 +61,21 @@ struct FsmCodeGen;
 #define REDUCE_CODE 0x2
 #define SHIFT_REDUCE_CODE 0x3
 
+/* This is used for tracking the current stack of include file/machine pairs. It is
+ * is used to detect and recursive include structure. */
+struct IncludeStackItem
+{
+	IncludeStackItem( const char *fileName )
+		: fileName(fileName) {}
+
+	const char *fileName;
+};
+
+typedef Vector<IncludeStackItem> IncludeStack;
+typedef Vector<const char *> ArgsVector;
+
+extern ArgsVector includePaths;
+
 inline long makeReduceCode( long reduction, bool isShiftReduce )
 {
 	return ( isShiftReduce ? SHIFT_REDUCE_CODE : REDUCE_CODE ) | 
