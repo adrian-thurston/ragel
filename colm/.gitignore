@@ -24,3 +24,10 @@
 /.libs
 /stamp-h1
 /stamp-h2
+
+/acolm
+/aiface.h
+/aiface.cc
+/aparse.c
+
+/libprog.a

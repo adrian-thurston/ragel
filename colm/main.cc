@@ -277,7 +277,7 @@ void openOutput( )
 void openExports( )
 {
 	/* Make sure we are not writing to the same file as the input file. */
-	if ( gblExportTo != 0 && strcmp( inputFileName, gblExportTo  ) == 0 ) {
+	if ( inputFileName != 0 && gblExportTo != 0 && strcmp( inputFileName, gblExportTo  ) == 0 ) {
 		error() << "output file \"" << gblExportTo  << 
 				"\" is the same as the input file" << endl;
 	}
@@ -302,7 +302,7 @@ void openExports( )
 void openExportsImpl( )
 {
 	/* Make sure we are not writing to the same file as the input file. */
-	if ( gblExpImplTo != 0 && strcmp( inputFileName, gblExpImplTo  ) == 0 ) {
+	if ( inputFileName != 0 && gblExpImplTo != 0 && strcmp( inputFileName, gblExpImplTo  ) == 0 ) {
 		error() << "output file \"" << gblExpImplTo  << 
 				"\" is the same as the input file" << endl;
 	}
@@ -555,10 +555,7 @@ int main(int argc, const char **argv)
 	istream *inStream;
 	if ( bootStrap ) {
 		inStream = &cin;
-		if ( outputFileName == 0 ) {
-			error() << "colm: an output file name is required when "
-					"compiling bootstrap grammar" << endl;
-		}
+		outStream = &cout;
 	}
 	else {
 		if ( inputFileName == 0 ) {
@@ -590,7 +587,9 @@ int main(int argc, const char **argv)
 	parser->addArgvList();
 
 	if ( bootStrap ) {
+#ifdef BOOTSTRAP
 		parser->go();
+#endif
 	}
 	else {
 		scanner->scan();

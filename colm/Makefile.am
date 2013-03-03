@@ -20,7 +20,7 @@
 
 INCLUDES = -I$(top_srcdir)/aapl
 
-bin_PROGRAMS = colm
+bin_PROGRAMS = acolm colm
 
 RUNTIME_SRC = \
 	map.c pdarun.c list.c input.c debug.c \
@@ -32,19 +32,17 @@ RUNTIME_HDR = \
 
 lib_LIBRARIES = libcolm.a
 
+noinst_LIBRARIES = libprog.a
+
 libcolm_a_SOURCES = $(RUNTIME_SRC)
 libcolm_a_CFLAGS = -I..
 
-colm_CXXFLAGS = \
+common_CFLAGS = \
 	-Wall \
 	-DPREFIX='"$(prefix)"' \
 	-I..
 
-colm_LDADD = libcolm.a
-
-# ADT DEFS_COLM += -DPREFIX='"$(prefix)"'
-
-colm_SOURCES = \
+libprog_a_SOURCES = \
 	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
 	input.h keyops.h lmparse.h lmscan.h map.h parsedata.h \
 	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
@@ -53,16 +51,32 @@ colm_SOURCES = \
 	resolve.cc synthesis.cc lmparse.cc lmscan.cc parsetree.cc \
 	fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc \
 	fsmgraph.cc pdagraph.cc pdabuild.cc pdacodegen.cc fsmcodegen.cc \
-	redfsm.cc fsmexec.cc main.cc redbuild.cc closure.cc fsmap.cc \
+	redfsm.cc fsmexec.cc redbuild.cc closure.cc fsmap.cc \
 	dotgen.cc pcheck.cc ctinput.cc declare.cc codegen.cc \
-	exports.cc compiler.cc parser.cc bootstrap.cc
+	exports.cc compiler.cc parser.cc
+
+libprog_a_CXXFLAGS = $(common_CFLAGS)
+
+acolm_CXXFLAGS = $(common_CFLAGS) -DBOOTSTRAP
+acolm_SOURCES = bootstrap.cc main.cc
+acolm_LDADD = libprog.a libcolm.a
+
+colm_CXXFLAGS = $(common_CFLAGS) 
+colm_CFLAGS = $(common_CFLAGS)
+colm_SOURCES = aiface.h aiface.cc aparse.c main.cc
+colm_LDADD = libprog.a libcolm.a
 
 colmincdir = $(includedir)/colm
 
 colminc_HEADERS = $(RUNTIME_HDR)
 
+aiface.h: acolm
+aiface.cc: acolm
+aparse.c: acolm
+	./acolm -L -B -o aparse.c -e aiface.h -c aiface.cc
+
 BUILT_SOURCES = \
-	version.h lmscan.cc lmparse.h lmparse.cc 
+	version.h lmscan.cc lmparse.h lmparse.cc aiface.h aiface.cc aparse.c
 
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
