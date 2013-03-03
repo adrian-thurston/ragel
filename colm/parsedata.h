@@ -489,8 +489,7 @@ struct Compiler
 {
 	/* Create a new parse data object. This is done at the beginning of every
 	 * fsm specification. */
-	Compiler( const String &fileName, const String &sectionName, 
-			const InputLoc &sectionLoc, ostream &out );
+	Compiler();
 	~Compiler();
 
 	/*
@@ -571,11 +570,6 @@ struct Compiler
 	char *lowerNum, *upperNum;
 	Key lowKey, highKey;
 	InputLoc rangeLowLoc, rangeHighLoc;
-
-	/* The name of the file the fsm is from, and the spec name. */
-	String fileName;
-	String sectionName;
-	InputLoc sectionLoc;
 
 	/* Number of errors encountered parsing the fsm spec. */
 	int errorCount;
@@ -829,7 +823,6 @@ struct Compiler
 	/* The name of the file the fsm is from, and the spec name. */
 	// EXISTS IN RL: char *fileName; 
 	String parserName;
-	ostream &out;
 	// EXISTS IN RL: InputLoc sectionLoc;
 
 	/* How to access the instance data. */

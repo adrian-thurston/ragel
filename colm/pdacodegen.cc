@@ -63,18 +63,6 @@ void escapeLiteralString( std::ostream &out, const char *path )
 	escapeLiteralString( out, path, strlen(path) );
 }
 
-void PdaCodeGen::writeTokenIds()
-{
-	out << "/*\n";
-	for ( LelList::Iter lel = pd->langEls; lel.lte(); lel++ ) {
-		if ( lel->name != 0 )
-			out << "	" << lel->name << " " << lel->id << endl;
-		else
-			out << "	" << lel->id << endl;
-	}
-	out << "*/\n\n";
-}
-
 void PdaCodeGen::defineRuntime()
 {
 	out << 

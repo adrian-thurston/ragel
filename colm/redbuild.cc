@@ -29,9 +29,8 @@
 
 using namespace std;
 
-RedFsmBuild::RedFsmBuild( char *fsmName, Compiler *pd, FsmGraph *fsm )
+RedFsmBuild::RedFsmBuild( Compiler *pd, FsmGraph *fsm )
 :
-	fsmName(fsmName),
 	pd(pd),
 	fsm(fsm),
 	nextActionTableId(0),

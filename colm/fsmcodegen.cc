@@ -36,11 +36,9 @@ using std::endl;
 
 
 /* Init code gen with in parameters. */
-FsmCodeGen::FsmCodeGen( const char *sourceFileName, const char *fsmName, ostream &out, 
+FsmCodeGen::FsmCodeGen( ostream &out, 
 		RedFsm *redFsm, FsmTables *fsmTables )
 :
-	sourceFileName(sourceFileName),
-	fsmName(fsmName), 
 	out(out),
 	redFsm(redFsm), 
 	fsmTables(fsmTables),
@@ -55,7 +53,7 @@ FsmCodeGen::FsmCodeGen( const char *sourceFileName, const char *fsmName, ostream
 /* Write out the fsm name. */
 string FsmCodeGen::FSM_NAME()
 {
-	return fsmName;
+	return "parser";
 }
 
 /* Emit the offset of the start state as a decimal integer. */
@@ -928,20 +926,6 @@ void FsmCodeGen::writeCode()
 		"static void popBinding( PdaRun *pdaRun, ParseTree *tree ) {}\n"
 		"\n"
 		"\n";
-}
-
-ostream &FsmCodeGen::source_warning( const InputLoc &loc )
-{
-	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
-	return cerr;
-}
-
-ostream &FsmCodeGen::source_error( const InputLoc &loc )
-{
-	codeGenErrCount += 1;
-	assert( sourceFileName != 0 );
-	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
-	return cerr;
 }
 
 

@@ -574,8 +574,8 @@ int main(int argc, const char **argv)
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	Compiler *pd = new Compiler( inputFileName, "machine", InputLoc(), std::cout );
-	ColmParser *parser = new ColmParser( pd, inputFileName, "machine", InputLoc() );
+	Compiler *pd = new Compiler;
+	ColmParser *parser = new ColmParser( pd );
 	ColmScanner *scanner = new ColmScanner( inputFileName, *inStream, parser, 0 );
 
 	parser->init();

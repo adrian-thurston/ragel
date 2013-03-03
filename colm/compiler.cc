@@ -341,8 +341,7 @@ FsmGraph *makeBuiltin( BuiltinMachine builtin, Compiler *pd )
 
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
-Compiler::Compiler( const String &fileName, const String &sectionName, 
-			const InputLoc &sectionLoc, ostream &out )
+Compiler::Compiler( )
 :	
 	nextPriorKey(0),
 	nextNameId(0),
@@ -352,9 +351,6 @@ Compiler::Compiler( const String &fileName, const String &sectionName,
 	curStateExpr(0),
 	lowerNum(0),
 	upperNum(0),
-	fileName(fileName),
-	sectionName(sectionName),
-	sectionLoc(sectionLoc),
 	errorCount(0),
 	curActionOrd(0),
 	curPriorOrd(0),
@@ -362,8 +358,6 @@ Compiler::Compiler( const String &fileName, const String &sectionName,
 	nextTokenId(1),
 	rootCodeBlock(0),
 	mainReturnUT(0),
-	parserName(sectionName),
-	out(out),
 	access(0),
 	tokenStruct(0),
 
@@ -1105,10 +1099,9 @@ void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
 
 void Compiler::generateOutput()
 {
-	FsmCodeGen *fsmGen = new FsmCodeGen("<INPUT>", sectionName,
-			*outStream, redFsm, fsmTables );
+	FsmCodeGen *fsmGen = new FsmCodeGen( *outStream, redFsm, fsmTables );
 
-	PdaCodeGen *pdaGen = new PdaCodeGen( outputFileName, "parser", this, *outStream );
+	PdaCodeGen *pdaGen = new PdaCodeGen( *outStream );
 
 	fsmGen->writeIncludes();
 	pdaGen->defineRuntime();
@@ -1181,7 +1174,7 @@ void Compiler::compile()
 	compileByteCode();
 
 	/* Make the reduced fsm. */
-	RedFsmBuild reduce( sectionName, this, fsmGraph );
+	RedFsmBuild reduce( this, fsmGraph );
 	redFsm = reduce.reduceMachine();
 
 	BstSet<LangEl*> parserEls;

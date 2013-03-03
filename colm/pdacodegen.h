@@ -27,11 +27,8 @@ struct Compiler;
 
 struct PdaCodeGen
 {
-	PdaCodeGen( const char *fileName, const char *parserName, Compiler *pd, ostream &out )
+	PdaCodeGen( ostream &out )
 	:
-		fileName(fileName),
-		parserName(parserName),
-		pd(pd),
 		out(out)
 	{}
 
@@ -40,9 +37,6 @@ struct PdaCodeGen
 	 */
 	void startCodeGen();
 	void endCodeGen( int endLine );
-
-	void writeTokenIds();
-	void writeLangEls();
 
 	void writeReference( Production *prod, char *data );
 	void writeUndoReference( Production *prod, char *data );
@@ -95,18 +89,17 @@ struct PdaCodeGen
 	void writeTransList( PdaState *state );
 	void writeDotFile( PdaGraph *graph );
 	void writeDotFile( );
-	
 
-	const char *fileName;
-	const char *parserName;
-	Compiler *pd;
 	ostream &out;
 };
 
-extern "C" void internalFsmExecute( FsmRun *fsmRun, StreamImpl *inputStream );
-extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun,
+extern "C"
+{
+	void internalFsmExecute( FsmRun *fsmRun, StreamImpl *inputStream );
+	void internalSendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun,
 		FsmRun *fsmRun, StreamImpl *is );
-extern "C" void internalInitBindings( PdaRun *pdaRun );
-extern "C" void internalPopBinding( PdaRun *pdaRun, ParseTree *parseTree );
+	void internalInitBindings( PdaRun *pdaRun );
+	void internalPopBinding( PdaRun *pdaRun, ParseTree *parseTree );
+}
 
 #endif

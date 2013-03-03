@@ -28,6 +28,7 @@ using namespace std;
 
 void Compiler::writeTransList( PdaState *state )
 {
+	ostream &out = *outStream;
 	for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
 		/* Write out the from and to states. */
 		out << "\t" << state->stateNum << " -> " << trans->value->toState->stateNum;
@@ -69,6 +70,7 @@ void Compiler::writeTransList( PdaState *state )
 
 void Compiler::writeDotFile( PdaGraph *graph )
 {
+	ostream &out = *outStream;
 	out << 
 		"digraph " << parserName << " {\n"
 		"	rankdir=LR;\n"

@@ -71,8 +71,7 @@ inline string itoa( int i )
 class FsmCodeGen
 {
 public:
-	FsmCodeGen( const char *sourceFileName, const char *fsmName, ostream &out, 
-			RedFsm *redFsm, FsmTables *fsmTables );
+	FsmCodeGen( ostream &out, RedFsm *redFsm, FsmTables *fsmTables );
 
 protected:
 
@@ -147,16 +146,9 @@ protected:
 
 	string CTRL_FLOW();
 
-	ostream &source_warning(const InputLoc &loc);
-	ostream &source_error(const InputLoc &loc);
-
 	unsigned int arrayTypeSize( unsigned long maxVal );
 
-/* subclass */
-
 public:
-	const char *sourceFileName;
-	const char *fsmName;
 	ostream &out;
 	RedFsm *redFsm;
 	FsmTables *fsmTables;

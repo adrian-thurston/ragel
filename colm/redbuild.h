@@ -83,7 +83,7 @@ struct NextRedTrans
 class RedFsmBuild
 {
 public:
-	RedFsmBuild( char *fsmName, Compiler *pd, FsmGraph *fsm );
+	RedFsmBuild( Compiler *pd, FsmGraph *fsm );
 	RedFsm *reduceMachine( );
 
 private:
@@ -116,7 +116,6 @@ private:
 	void closeMachine();
 	Key findMaxKey();
 
-
 	void makeEntryPoints();
 	void makeGetKeyExpr();
 	void makeAccessExpr();
@@ -135,7 +134,6 @@ private:
 	void makeActionExec( InlineItem *item );
 	void makeActionExecTE( InlineItem *item );
 
-	char *fsmName;
 	Compiler *pd;
 	FsmGraph *fsm;
 	ActionTableMap actionTableMap;

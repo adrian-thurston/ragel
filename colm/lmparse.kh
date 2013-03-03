@@ -31,8 +31,8 @@ struct ColmParser
 :
 	public BaseParser
 {
-	ColmParser( Compiler *pd, const char *fileName, const char *sectionName, const InputLoc &sectionLoc )
-		: BaseParser( pd, fileName, sectionName, sectionLoc )
+	ColmParser( Compiler *pd )
+		: BaseParser( pd )
 	{}
 
 	%%{

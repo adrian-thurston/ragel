@@ -31,14 +31,11 @@
 
 struct BaseParser
 {
-	BaseParser( Compiler *pd, const char *fileName, const char *sectionName, const InputLoc &sectionLoc )
-		: pd(pd), sectionName(sectionName), enterRl(false)
+	BaseParser( Compiler *pd )
+		: pd(pd), enterRl(false)
 	{}
 
 	Compiler *pd;
-
-	/* The name of the root section, this does not change during an include. */
-	const char *sectionName;
 
 	RegionSetVect regionStack;
 	NamespaceVect namespaceStack;
