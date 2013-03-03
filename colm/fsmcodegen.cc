@@ -778,7 +778,7 @@ void FsmCodeGen::writeData()
 	out << "#define true 1\n";
 	out << "\n";
 
-	out << "long " << ENTRY_BY_REGION() << "[] = {\n\t";
+	out << "static long " << ENTRY_BY_REGION() << "[] = {\n\t";
 	for ( int i = 0; i < fsmTables->numRegions; i++ ) {
 		out << fsmTables->entryByRegion[i];
 
@@ -791,7 +791,7 @@ void FsmCodeGen::writeData()
 	out << "\n};\n\n";
 
 	out <<
-		"FsmTables fsmTables_start =\n"
+		"static FsmTables fsmTables_start =\n"
 		"{\n"
 		"	0, "       /* actions */
 		" 0, "         /* keyOffsets */

@@ -90,7 +90,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	for ( int i = 0; i < runtimeData->numFrames; i++ ) {
 		/* FIXME: horrible code cloning going on here. */
 		if ( runtimeData->frameInfo[i].codeLenWV > 0 ) {
-			out << "Code code_" << i << "_wv[] = {\n\t";
+			out << "static Code code_" << i << "_wv[] = {\n\t";
 
 			Code *block = runtimeData->frameInfo[i].codeWV;
 			for ( int j = 0; j < runtimeData->frameInfo[i].codeLenWV; j++ ) {
@@ -106,7 +106,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		}
 
 		if ( runtimeData->frameInfo[i].codeLenWC > 0 ) {
-			out << "Code code_" << i << "_wc[] = {\n\t";
+			out << "static Code code_" << i << "_wc[] = {\n\t";
 
 			Code *block = runtimeData->frameInfo[i].codeWC;
 			for ( int j = 0; j < runtimeData->frameInfo[i].codeLenWC; j++ ) {
@@ -122,7 +122,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		}
 
 		if ( runtimeData->frameInfo[i].treesLen > 0 ) {
-			out << "char trees_" << i << "[] = {\n\t";
+			out << "static char trees_" << i << "[] = {\n\t";
 
 			char *block = runtimeData->frameInfo[i].trees;
 			for ( int j = 0; j < runtimeData->frameInfo[i].treesLen; j++ ) {
@@ -143,7 +143,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	 */
 	for ( int i = 0; i < runtimeData->numProds; i++ ) {
 		if ( runtimeData->prodInfo[i].copyLen > 0 ) {
-			out << "unsigned char copy_" << i << "[] = {\n\t";
+			out << "static unsigned char copy_" << i << "[] = {\n\t";
 
 			unsigned char *block = runtimeData->prodInfo[i].copy;
 			for ( int j = 0; j < runtimeData->prodInfo[i].copyLen; j++ ) {
@@ -162,7 +162,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/* 
 	 * Init code.
 	 */
-	out << "Code " << rootCode() << "[] = {\n\t";
+	out << "static Code " << rootCode() << "[] = {\n\t";
 	Code *block = runtimeData->rootCode ;
 	for ( int j = 0; j < runtimeData->rootCodeLen; j++ ) {
 		out << (unsigned int) block[j];
@@ -178,7 +178,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/*
 	 * lelInfo
 	 */
-	out << "LangElInfo " << lelInfo() << "[] = {\n";
+	out << "static LangElInfo " << lelInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numLangEls; i++ ) {
 		out << "\t{";
 		
@@ -229,7 +229,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/*
 	 * frameInfo
 	 */
-	out << "FrameInfo " << frameInfo() << "[] = {\n";
+	out << "static FrameInfo " << frameInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numFrames; i++ ) {
 		out << "\t{ ";
 
@@ -266,7 +266,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/*
 	 * prodInfo
 	 */
-	out << "ProdInfo " << prodInfo() << "[] = {\n";
+	out << "static ProdInfo " << prodInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numProds; i++ ) {
 		out << "\t{ ";
 
@@ -297,7 +297,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/*
 	 * patReplInfo
 	 */
-	out << "PatConsInfo " << patReplInfo() << "[] = {\n";
+	out << "static PatConsInfo " << patReplInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numPatterns; i++ ) {
 		out << "	{ " << runtimeData->patReplInfo[i].offset << ", " <<
 				runtimeData->patReplInfo[i].numBindings << " },\n";
@@ -307,7 +307,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/*
 	 * patReplNodes
 	 */
-	out << "PatConsNode " << patReplNodes() << "[] = {\n";
+	out << "static PatConsNode " << patReplNodes() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numPatternNodes; i++ ) {
 		PatConsNode &node = runtimeData->patReplNodes[i];
 		out << "	{ " << node.id << ", " << 
@@ -332,7 +332,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/*
 	 * functionInfo
 	 */
-	out << "FunctionInfo " << functionInfo() << "[] = {\n";
+	out << "static FunctionInfo " << functionInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numFunctions; i++ ) {
 		out << "\t{ " <<
 				"\"" << runtimeData->functionInfo[i].name << "\", " <<
@@ -349,7 +349,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/*
 	 * regionInfo
 	 */
-	out << "RegionInfo " << regionInfo() << "[] = {\n";
+	out << "static RegionInfo " << regionInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numRegions; i++ ) {
 		out << "\t{ " << runtimeData->regionInfo[i].defaultToken <<
 			", " << runtimeData->regionInfo[i].eofFrameId <<
@@ -364,7 +364,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/* 
 	 * genericInfo
 	 */
-	out << "GenericInfo " << genericInfo() << "[] = {\n";
+	out << "static GenericInfo " << genericInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numGenerics; i++ ) {
 		out << "\t{ " << 
 				runtimeData->genericInfo[i].type << ", " <<
@@ -379,7 +379,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	/* 
 	 * literals
 	 */
-	out << "const char *" << litdata() << "[] = {\n";
+	out << "static const char *" << litdata() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numLiterals; i++ ) {
 		out << "\t\"";
 		escapeLiteralString( out, runtimeData->litdata[i] );
@@ -387,35 +387,35 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	}
 	out << "};\n\n";
 
-	out << "long " << litlen() << "[] = {\n\t";
+	out << "static long " << litlen() << "[] = {\n\t";
 	for ( int i = 0; i < runtimeData->numLiterals; i++ )
 		out << runtimeData->litlen[i] << ", ";
 	out << "};\n\n";
 
-	out << "Head *" << literals() << "[] = {\n\t";
+	out << "static Head *" << literals() << "[] = {\n\t";
 	for ( int i = 0; i < runtimeData->numLiterals; i++ )
 		out << "0, ";
 	out << "};\n\n";
 
-	out << "int startStates[] = {\n\t";
+	out << "static int startStates[] = {\n\t";
 	for ( long i = 0; i < runtimeData->numParsers; i++ ) {
 		out << runtimeData->startStates[i] << ", ";
 	}
 	out << "};\n\n";
 
-	out << "int eofLelIds[] = {\n\t";
+	out << "static int eofLelIds[] = {\n\t";
 	for ( long i = 0; i < runtimeData->numParsers; i++ ) {
 		out << runtimeData->eofLelIds[i] << ", ";
 	}
 	out << "};\n\n";
 
-	out << "int parserLelIds[] = {\n\t";
+	out << "static int parserLelIds[] = {\n\t";
 	for ( long i = 0; i < runtimeData->numParsers; i++ ) {
 		out << runtimeData->parserLelIds[i] << ", ";
 	}
 	out << "};\n\n";
 
-	out << "CaptureAttr captureAttr[] = {\n";
+	out << "static CaptureAttr captureAttr[] = {\n";
 	for ( long i = 0; i < runtimeData->numCapturedAttr; i++ ) {
 		out << "\t{ " << 
 			runtimeData->captureAttr[i].mark_enter << ", " <<
@@ -489,7 +489,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 {
 	String prefix = "pid_" + String(0, "%ld", id) + "_";
 
-	out << "int " << prefix << indicies() << "[] = {\n\t";
+	out << "static int " << prefix << indicies() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numIndicies; i++ ) {
 		out << tables->indicies[i];
 
@@ -501,7 +501,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
-	out << "int " << prefix << owners() << "[] = {\n\t";
+	out << "static int " << prefix << owners() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numIndicies; i++ ) {
 		out << tables->owners[i];
 
@@ -513,7 +513,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
-	out << "int " << prefix << keys() << "[] = {\n\t";
+	out << "static int " << prefix << keys() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numKeys; i++ ) {
 		out << tables->keys[i];
 
@@ -525,7 +525,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
-	out << "unsigned int " << prefix << offsets() << "[] = {\n\t";
+	out << "static unsigned int " << prefix << offsets() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numStates; i++ ) {
 		out << tables->offsets[i];
 
@@ -537,7 +537,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
-	out << "unsigned int " << prefix << targs() << "[] = {\n\t";
+	out << "static unsigned int " << prefix << targs() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numTargs; i++ ) {
 		out << tables->targs[i];
 
@@ -549,7 +549,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
-	out << "unsigned int " << prefix << actInds() << "[] = {\n\t";
+	out << "static unsigned int " << prefix << actInds() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numActInds; i++ ) {
 		out << tables->actInds[i];
 
@@ -561,7 +561,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
-	out << "unsigned int " << prefix << actions() << "[] = {\n\t";
+	out << "static unsigned int " << prefix << actions() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numActions; i++ ) {
 		out << tables->actions[i];
 
@@ -573,7 +573,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
-	out << "int " << prefix << commitLen() << "[] = {\n\t";
+	out << "static int " << prefix << commitLen() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numCommitLen; i++ ) {
 		out << tables->commitLen[i];
 
@@ -585,7 +585,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
-	out << "int " << prefix << tokenRegionInds() << "[] = {\n\t";
+	out << "static int " << prefix << tokenRegionInds() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numStates; i++ ) {
 		out << tables->tokenRegionInds[i];
 
@@ -597,7 +597,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
-	out << "int " << prefix << tokenRegions() << "[] = {\n\t";
+	out << "static int " << prefix << tokenRegions() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numRegionItems; i++ ) {
 		out << tables->tokenRegions[i];
 
@@ -609,7 +609,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	}
 	out << "\n};\n\n";
 
-	out << "int " << prefix << tokenPreRegions() << "[] = {\n\t";
+	out << "static int " << prefix << tokenPreRegions() << "[] = {\n\t";
 	for ( int i = 0; i < tables->numPreRegionItems; i++ ) {
 		out << tables->tokenPreRegions[i];
 
@@ -622,7 +622,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	out << "\n};\n\n";
 
 	out << 
-		"PdaTables " << prefix << "pdaTables =\n"
+		"static PdaTables " << prefix << "pdaTables =\n"
 		"{\n"
 		"	" << prefix << indicies() << ",\n"
 		"	" << prefix << owners() << ",\n"
