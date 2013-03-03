@@ -575,17 +575,21 @@ int main(int argc, const char **argv)
 		exit(1);
 
 	Compiler *pd = new Compiler;
-	ColmParser *parser = new ColmParser( pd );
-	ColmScanner *scanner = new ColmScanner( inputFileName, *inStream, parser, 0 );
-
-	parser->init();
+	ColmParser *parser = 0;
+	ColmScanner *scanner = 0;
 
 	if ( bootStrap ) {
 #ifdef BOOTSTRAP0
+		parser = new ColmParser( pd );
+		parser->init();
 		parser->go();
 #endif
 	}
 	else {
+		parser = new ColmParser( pd );
+		scanner = new ColmScanner( inputFileName, *inStream, parser, 0 );
+
+		parser->init();
 		scanner->scan();
 		scanner->eof();
 	}
@@ -630,8 +634,10 @@ int main(int argc, const char **argv)
 		}
 	}
 
-	delete scanner;
-	delete parser;
+	if ( scanner )
+		delete scanner;
+	if ( parser )
+		delete parser;
 	delete pd;
 
 	/* Bail on above errors. */
