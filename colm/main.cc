@@ -580,12 +580,6 @@ int main(int argc, const char **argv)
 
 	parser->init();
 
-	/* These must be declared first, since the runtime assumes their identifiers. */
-	pd->declareBaseLangEls();
-	pd->initUniqueTypes();
-
-	parser->addArgvList();
-
 	if ( bootStrap ) {
 #ifdef BOOTSTRAP0
 		parser->go();
@@ -631,7 +625,7 @@ int main(int argc, const char **argv)
 		}
 		if ( gblExpImplTo != 0 )  {
 			openExportsImpl();
-			scanner->parser->pd->generateExportsImpl();
+			pd->generateExportsImpl();
 			delete outStream;
 		}
 	}

@@ -64,6 +64,14 @@ void BaseParser::init()
 	pd->rootLocalFrame = ObjectDef::cons( ObjectDef::FrameType, 
 				"local", pd->nextObjectId++ );
 	pd->curLocalFrame = pd->rootLocalFrame;
+
+	/* Declarations of internal types. They must be declared now because we use
+	 * them directly, rather than via type lookup. */
+	pd->declareBaseLangEls();
+	pd->initUniqueTypes();
+
+	/* Internal variables. */
+	addArgvList();
 }
 
 void BaseParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
