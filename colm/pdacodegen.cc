@@ -476,7 +476,11 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		"	" << runtimeData->stringId << ",\n"
 		"	" << runtimeData->anyId << ",\n"
 		"	" << runtimeData->eofId << ",\n"
-		"	" << runtimeData->noTokenId << "\n"
+		"	" << runtimeData->noTokenId << ",\n"
+		"	&fsmExecute,\n"
+		"	&sendNamedLangEl,\n"
+		"	&initBindings,\n"
+		"	&popBinding,\n"
 		"};\n"
 		"\n";
 }

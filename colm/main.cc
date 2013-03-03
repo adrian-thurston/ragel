@@ -329,7 +329,7 @@ void compileOutputCommand( const char *command )
 	//cout << "compiling with: " << command << endl;
 	int res = system( command );
 	if ( res != 0 )
-		cout << "there was a problem compiling the output" << endl;
+		error() << "there was a problem compiling the output" << endl;
 }
 
 void compileOutputInstalled( const char *argv0 )
@@ -538,7 +538,6 @@ int main(int argc, const char **argv)
 
 	if ( verbose )
 		colmActiveRealm = 0xffffffff;
-	initInputFuncs();
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )
@@ -641,6 +640,10 @@ int main(int argc, const char **argv)
 	delete scanner;
 	delete parser;
 	delete pd;
+
+	/* Bail on above errors. */
+	if ( gblErrorCount > 0 )
+		exit(1);
 
 	return 0;
 }

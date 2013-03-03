@@ -92,7 +92,7 @@ void execAction( FsmRun *fsmRun, GenAction *genAction )
 		fsmRun->mark[genAction->markId-1] = fsmRun->p;
 }
 
-void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )
+extern "C" void internalFsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )
 {
 	int _klen;
 	unsigned int _trans;

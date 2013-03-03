@@ -103,4 +103,10 @@ struct PdaCodeGen
 	ostream &out;
 };
 
+extern "C" void internalFsmExecute( FsmRun *fsmRun, StreamImpl *inputStream );
+extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun,
+		FsmRun *fsmRun, StreamImpl *is );
+extern "C" void internalInitBindings( PdaRun *pdaRun );
+extern "C" void internalPopBinding( PdaRun *pdaRun, ParseTree *parseTree );
+
 #endif

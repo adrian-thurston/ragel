@@ -441,7 +441,6 @@ Kid *makeTokenWithData( struct ColmProgram *prg, PdaRun *pdaRun, FsmRun *fsmRun,
 		StreamImpl *inputStream, int id, Head *tokdata );
 
 void pushBinding( PdaRun *pdaRun, ParseTree *parseTree );
-void popBinding( PdaRun *pdaRun, ParseTree *parseTree );
 
 void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
 		StreamImpl *inputStream, int frameId, Code *code, long id, Head *tokdata );
@@ -451,11 +450,8 @@ long sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, StreamImpl *input
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
-void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream );
-void sendNamedLangEl( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *inputStream );
 long parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
 		StreamImpl *inputStream, long entry );
-void initBindings( PdaRun *pdaRun );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 void undoParseStream( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream, FsmRun *fsmRun, 
 		PdaRun *pdaRun, long steps );

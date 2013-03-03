@@ -30,8 +30,8 @@
 using std::cerr;
 using std::endl;
 
-StreamFuncs patternFuncs;
-StreamFuncs replFuncs;
+extern StreamFuncs patternFuncs;
+extern StreamFuncs replFuncs;
 
 /*
  * Pattern
@@ -218,18 +218,17 @@ int inputStreamPatternUndoConsumeData( StreamImpl *ss, const char *data, int len
 	return length;
 }
 
-extern "C" void initPatFuncs()
+StreamFuncs patternFuncs = 
 {
-	memset( &patternFuncs, 0, sizeof(StreamFuncs) );
-
-	patternFuncs.getData = &inputStreamPatternGetData;
-	patternFuncs.getParseBlock = &inputStreamPatternGetParseBlock;
-	patternFuncs.consumeData = &inputStreamPatternConsumeData;
-	patternFuncs.undoConsumeData = &inputStreamPatternUndoConsumeData;
-
-	patternFuncs.consumeLangEl = &inputStreamPatternGetLangEl;
-	patternFuncs.undoConsumeLangEl = &inputStreamPatternUndoConsumeLangEl;
-}
+	&inputStreamPatternGetParseBlock,
+	&inputStreamPatternGetData,
+	&inputStreamPatternConsumeData,
+	&inputStreamPatternUndoConsumeData,
+	0,
+	0,
+	&inputStreamPatternGetLangEl,
+	&inputStreamPatternUndoConsumeLangEl,
+};
 
 
 /*
@@ -434,20 +433,19 @@ int inputStreamConsUndoConsumeData( StreamImpl *ss, const char *data, int length
 	return length;
 }
 
-extern "C" void initConsFuncs()
+StreamFuncs replFuncs =
 {
-	memset( &replFuncs, 0, sizeof(StreamFuncs) );
+	&inputStreamConsGetParseBlock,
+	&inputStreamConsGetData,
+	&inputStreamConsConsumeData,
+	&inputStreamConsUndoConsumeData,
+	0,
+	0,
+	&inputStreamConsGetLangEl,
+	&inputStreamConsUndoConsumeLangEl,
+};
 
-	replFuncs.getData = &inputStreamConsGetData;
-	replFuncs.getParseBlock = &inputStreamConsGetParseBlock;
-	replFuncs.consumeData = &inputStreamConsConsumeData;
-	replFuncs.undoConsumeData = &inputStreamConsUndoConsumeData;
-
-	replFuncs.consumeLangEl = &inputStreamConsGetLangEl;
-	replFuncs.undoConsumeLangEl = &inputStreamConsUndoConsumeLangEl;
-}
-
-void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
+extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 {
 	/* All three set by consumeLangEl. */
 	long bindId;
@@ -478,7 +476,7 @@ void sendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, S
 	pdaRun->parseInput = parseTree;
 }
 
-void initBindings( PdaRun *pdaRun )
+extern "C" void internalInitBindings( PdaRun *pdaRun )
 {
 	/* Bindings are indexed at 1. Need a no-binding. */
 	pdaRun->bindings = new Bindings;
@@ -491,7 +489,7 @@ void pushBinding( PdaRun *pdaRun, ParseTree *parseTree )
 	pdaRun->bindings->push( parseTree );
 }
 
-void popBinding( PdaRun *pdaRun, ParseTree *parseTree )
+extern "C" void internalPopBinding( PdaRun *pdaRun, ParseTree *parseTree )
 {
 	ParseTree *lastBound = pdaRun->bindings->top();
 	if ( lastBound == parseTree )

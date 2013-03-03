@@ -405,7 +405,7 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 			is->eofSent = false;
 
 		/* If the item is bound then store remove it from the bindings array. */
-		popBinding( pdaRun, parseTree );
+		prg->rtd->popBinding( pdaRun, parseTree );
 	}
 
 	if ( pdaRun->steps == pdaRun->targetSteps ) {
@@ -1066,7 +1066,7 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 				break;
 		}
 
-		fsmExecute( fsmRun, is );
+		prg->rtd->fsmExecute( fsmRun, is );
 
 		/* First check if scanning stopped because we have a token. */
 		if ( fsmRun->matchedToken > 0 ) {
@@ -1211,7 +1211,7 @@ case PcrPreEof:
 			debug( REALM_PARSE, "sending an named lang el\n" );
 
 			/* A named language element (parsing colm program). */
-			sendNamedLangEl( prg, sp, pdaRun, fsmRun, is );
+			prg->rtd->sendNamedLangEl( prg, sp, pdaRun, fsmRun, is );
 		}
 		else if ( pdaRun->tokenId == SCAN_TREE ) {
 			debug( REALM_PARSE, "sending a tree\n" );
@@ -1488,7 +1488,7 @@ void initPdaRun( Program *prg, PdaRun *pdaRun, PdaTables *tables,
 	pdaRun->checkNext = false;
 	pdaRun->checkStop = false;
 
-	initBindings( pdaRun );
+	prg->rtd->initBindings( pdaRun );
 
 	initRtCodeVect( &pdaRun->reverseCode );
 	initRtCodeVect( &pdaRun->rcodeCollect );

@@ -850,7 +850,7 @@ void FsmCodeGen::writeExec()
 	setLabelsNeeded();
 
 	out <<
-		"void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )\n"
+		"static void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )\n"
 		"{\n"
 		"	" << BLOCK_START() << " = fsmRun->p;\n"
 		"/*_resume:*/\n";
@@ -916,22 +916,16 @@ void FsmCodeGen::writeCode()
 {
 	redFsm->depthFirstOrdering();
 
-
 	writeData();
 	writeExec();
 
 	/* Referenced in the runtime lib, but used only in the compiler. Probably
 	 * should use the preprocessor to make these go away. */
 	out <<
-		"void sendNamedLangEl( Program *prg, Tree **tree, PdaRun *pdaRun,\n"
+		"static void sendNamedLangEl( Program *prg, Tree **tree, PdaRun *pdaRun,\n"
 		"		FsmRun *fsmRun, StreamImpl *inputStream ) { }\n"
-		"void initBindings( PdaRun *pdaRun ) {}\n"
-		"void pushBinding( PdaRun *pdaRun, ParseTree *parseTree ) {}\n"
-		"void popBinding( PdaRun *pdaRun, ParseTree *tree ) {}\n"
-		"void initStaticFuncs() {}\n"
-		"void initPatFuncs() {}\n"
-		"void initConsFuncs() {}\n"
-		"void initInputFuncs();\n"
+		"static void initBindings( PdaRun *pdaRun ) {}\n"
+		"static void popBinding( PdaRun *pdaRun, ParseTree *tree ) {}\n"
 		"\n"
 		"\n";
 }

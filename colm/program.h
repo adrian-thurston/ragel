@@ -88,6 +88,13 @@ typedef struct ColmRuntimeData
 	long anyId;
 	long eofId;
 	long noTokenId;
+
+	void (*fsmExecute)( struct _FsmRun *fsmRun, struct _StreamImpl *inputStream );
+	void (*sendNamedLangEl)( struct ColmProgram *prg, Tree **tree, struct _PdaRun *pdaRun,
+			struct _FsmRun *fsmRun, struct _StreamImpl *inputStream );
+	void (*initBindings)( struct _PdaRun *pdaRun );
+	void (*popBinding)( struct _PdaRun *pdaRun, ParseTree *tree );
+
 } RuntimeData;
 
 

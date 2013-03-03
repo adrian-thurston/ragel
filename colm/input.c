@@ -22,6 +22,7 @@
 #include <colm/input.h>
 #include <colm/pdarun.h>
 #include <colm/debug.h>
+#include <colm/program.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,16 +40,14 @@ RunBuf *newRunBuf()
 	return rb;
 }
 
-void initStreamFuncs();
 void initFdFuncs();
 void initFileFuncs();
 void initPatFuncs();
 void initConsFuncs();
 
-struct StreamFuncs dynamicFuncs;
-struct StreamFuncs fileFuncs;
-struct StreamFuncs fdFuncs;
-struct StreamFuncs streamFuncs;
+extern struct StreamFuncs fileFuncs;
+extern struct StreamFuncs fdFuncs;
+extern struct StreamFuncs streamFuncs;
 
 void initSourceStream( StreamImpl *inputStream )
 {
@@ -132,15 +131,6 @@ static void sourceStreamPrepend( StreamImpl *ss, RunBuf *runBuf )
 		runBuf->next = ss->queue;
 		ss->queue = runBuf;
 	}
-}
-
-void initInputFuncs()
-{
-	initStreamFuncs();
-	initFdFuncs();
-	initFileFuncs();
-	initPatFuncs();
-	initConsFuncs();
 }
 
 /* 
@@ -315,11 +305,6 @@ int fileGetDataSource( StreamImpl *ss, char *dest, int length )
 void initFileFuncs()
 {
 	memset( &fileFuncs, 0, sizeof(struct StreamFuncs) );
-	fileFuncs.getData = &fdGetData;
-	fileFuncs.getParseBlock = &fdGetParseBlock;
-	fileFuncs.consumeData = &fdConsumeData;
-	fileFuncs.undoConsumeData = &fdUndoConsumeData;
-	fileFuncs.getDataSource = &fileGetDataSource;
 }
 
 /*
@@ -336,16 +321,6 @@ int fdGetDataSource( StreamImpl *ss, char *dest, int length )
 			ss->eof = true;
 		return got;
 	}
-}
-
-void initFdFuncs()
-{
-	memset( &fdFuncs, 0, sizeof(struct StreamFuncs) );
-	fdFuncs.getData = &fdGetData;
-	fdFuncs.getParseBlock = &fdGetParseBlock;
-	fdFuncs.consumeData = &fdConsumeData;
-	fdFuncs.undoConsumeData = &fdUndoConsumeData;
-	fdFuncs.getDataSource = &fdGetDataSource;
 }
 
 /*
@@ -937,33 +912,47 @@ static Tree *_undoAppendStream( StreamImpl *is )
 	return tree;
 }
 
-void initStreamFuncs()
+struct StreamFuncs streamFuncs = 
 {
-	memset( &streamFuncs, 0, sizeof(struct StreamFuncs) );
-	streamFuncs.getData = &_getData;
-	streamFuncs.getParseBlock = &_getParseBlock;
-	streamFuncs.consumeData = &_consumeData;
-	streamFuncs.undoConsumeData = &_undoConsumeData;
-	streamFuncs.consumeTree = &_consumeTree;
-	streamFuncs.undoConsumeTree = &_undoConsumeTree;
-	streamFuncs.consumeLangEl = &_consumeLangEl;
-	streamFuncs.undoConsumeLangEl = &_undoConsumeLangEl;
+	&_getParseBlock,
+	&_getData,
+	&_consumeData,
+	&_undoConsumeData,
+	&_consumeTree,
+	&_undoConsumeTree,
+	&_consumeLangEl,
+	&_undoConsumeLangEl,
+	0, // source data get, not needed.
+	&_setEof,
+	&_unsetEof,
+	&_prependData,
+	&_prependTree,
+	&_prependStream,
+	&_undoPrependData,
+	&_undoPrependTree,
+	0, // FIXME: Add this.
+	&_appendData,
+	&_appendTree,
+	&_appendStream,
+	&_undoAppendData,
+	&_undoAppendTree,
+	&_undoAppendStream,
+};
 
-	streamFuncs.setEof = &_setEof;
-	streamFuncs.unsetEof = &_unsetEof;
+struct StreamFuncs fdFuncs = 
+{
+	.getData = &fdGetData,
+	.getParseBlock = &fdGetParseBlock,
+	.consumeData = &fdConsumeData,
+	.undoConsumeData = &fdUndoConsumeData,
+	.getDataSource = &fdGetDataSource,
+};
 
-	streamFuncs.prependData = &_prependData;
-	streamFuncs.prependTree = &_prependTree;
-	streamFuncs.prependStream = &_prependStream;
-	streamFuncs.undoPrependData = &_undoPrependData;
-	streamFuncs.undoPrependTree = &_undoPrependTree;
-
-	streamFuncs.appendData = &_appendData;
-	streamFuncs.appendTree = &_appendTree;
-	streamFuncs.appendStream = &_appendStream;
-	streamFuncs.undoAppendData = &_undoAppendData;
-	streamFuncs.undoAppendTree = &_undoAppendTree;
-	streamFuncs.undoAppendStream = &_undoAppendStream;
-}
-
-
+struct StreamFuncs fileFuncs = 
+{
+	.getData = &fdGetData,
+	.getParseBlock = &fdGetParseBlock,
+	.consumeData = &fdConsumeData,
+	.undoConsumeData = &fdUndoConsumeData,
+	.getDataSource = &fileGetDataSource,
+};

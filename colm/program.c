@@ -39,7 +39,6 @@ void colmInit( long debugRealm )
 	/* Always on because because logging is controlled with ifdefs in\n" the
 	 * runtime lib. */
 	colmActiveRealm = debugRealm;
-	initInputFuncs();
 
 	assert( sizeof(Int)      <= sizeof(Tree) );
 	assert( sizeof(Str)      <= sizeof(Tree) );

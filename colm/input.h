@@ -64,6 +64,7 @@ struct Constructor;
 struct ConsItem;
 struct _FsmRun;
 struct ColmTree;
+struct ColmProgram;
 
 enum RunBufType {
 	RunBufDataType = 0,
@@ -158,11 +159,6 @@ StreamImpl *newSourceStreamPat( struct Pattern *pattern );
 StreamImpl *newSourceStreamCons( struct Constructor *constructor );
 StreamImpl *newSourceStreamFile( FILE *file );
 StreamImpl *newSourceStreamFd( long fd );
-
-void initInputFuncs();
-void initStaticFuncs();
-void initPatFuncs();
-void initConsFuncs();
 
 #ifdef __cplusplus
 }
