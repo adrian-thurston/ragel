@@ -39,14 +39,6 @@ void colmInit( long debugRealm )
 	/* Always on because because logging is controlled with ifdefs in\n" the
 	 * runtime lib. */
 	colmActiveRealm = debugRealm;
-
-	assert( sizeof(Int)      <= sizeof(Tree) );
-	assert( sizeof(Str)      <= sizeof(Tree) );
-	assert( sizeof(Pointer)  <= sizeof(Tree) );
-	assert( sizeof(Map)      <= sizeof(MapEl) );
-	assert( sizeof(List)     <= sizeof(MapEl) );
-	assert( sizeof(Stream)   <= sizeof(MapEl) );
-	assert( sizeof(Parser)   <= sizeof(MapEl) );
 }
 
 void clearGlobal( Program *prg, Tree **sp )
@@ -198,6 +190,14 @@ Program *colmNewProgram( RuntimeData *rtd )
 {
 	Program *prg = malloc(sizeof(Program));
 	memset( prg, 0, sizeof(Program) );
+
+	assert( sizeof(Int)      <= sizeof(Tree) );
+	assert( sizeof(Str)      <= sizeof(Tree) );
+	assert( sizeof(Pointer)  <= sizeof(Tree) );
+	assert( sizeof(Map)      <= sizeof(MapEl) );
+	assert( sizeof(List)     <= sizeof(MapEl) );
+	assert( sizeof(Stream)   <= sizeof(MapEl) );
+	assert( sizeof(Parser)   <= sizeof(MapEl) );
 
 	prg->rtd = rtd;
 	prg->ctxDepParsing = 1;
