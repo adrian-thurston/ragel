@@ -361,8 +361,8 @@ void compileOutputInstalled( const char *argv0 )
 		" -o %s"
 		" %s"
 		" -L" PREFIX "/lib"
-		" -lcolm%c",
-		exec, outputFileName, logging ? 'd' : 'p' );
+		" -lcolm",
+		exec, outputFileName );
 
 	compileOutputCommand( command );
 }
@@ -387,9 +387,9 @@ void compileOutputInSource( const char *argv0 )
 		" -o %s"
 		" %s"
 		" -L%s"
-		" -lcolm%c",
+		" -lcolm",
 		location, location,
-		exec, outputFileName, location, logging ? 'd' : 'p' );
+		exec, outputFileName, location );
 	
 	compileOutputCommand( command );
 }
