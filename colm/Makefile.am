@@ -20,7 +20,8 @@
 
 INCLUDES = -I$(top_srcdir)/aapl
 
-bin_PROGRAMS = acolm colm
+bin_PROGRAMS = colm
+noinst_PROGRAMS = bootstrap0 bootstrap1
 
 RUNTIME_SRC = \
 	map.c pdarun.c list.c input.c debug.c \
@@ -57,26 +58,40 @@ libprog_a_SOURCES = \
 
 libprog_a_CXXFLAGS = $(common_CFLAGS)
 
-acolm_CXXFLAGS = $(common_CFLAGS) -DBOOTSTRAP
-acolm_SOURCES = bootstrap.cc main.cc
-acolm_LDADD = libprog.a libcolm.a
+bootstrap0_CXXFLAGS = $(common_CFLAGS) -DBOOTSTRAP0
+bootstrap0_SOURCES = bootstrap.cc main.cc
+bootstrap0_LDADD = libprog.a libcolm.a
+
+bootstrap1_CXXFLAGS = $(common_CFLAGS)
+bootstrap1_CFLAGS = $(common_CFLAGS)
+bootstrap1_SOURCES = exports1.h exports1.cc parse1.c main.cc
+bootstrap1_LDADD = libprog.a libcolm.a
 
 colm_CXXFLAGS = $(common_CFLAGS) 
 colm_CFLAGS = $(common_CFLAGS)
-colm_SOURCES = aiface.h aiface.cc aparse.c main.cc
+colm_SOURCES = exports2.h exports2.cc parse2.c main.cc
 colm_LDADD = libprog.a libcolm.a
 
 colmincdir = $(includedir)/colm
 
 colminc_HEADERS = $(RUNTIME_HDR)
 
-aiface.h: acolm
-aiface.cc: acolm
-aparse.c: acolm
-	./acolm -L -B -o aparse.c -e aiface.h -c aiface.cc
+exports1.h: bootstrap0 parse1.c
+exports1.cc: bootstrap0 parse1.c
+
+parse1.c: bootstrap0
+	$(builddir)/bootstrap0 -L -o parse1.c -e exports1.h -c exports1.cc -B
+
+exports2.h: bootstrap1 parse2.c
+exports2.cc: bootstrap1 parse2.c
+
+parse2.c: bootstrap1
+	$(builddir)/bootstrap1 -L -o parse2.c -e exports2.h -c exports2.cc colm.lm
 
 BUILT_SOURCES = \
-	version.h lmscan.cc lmparse.h lmparse.cc aiface.h aiface.cc aparse.c
+	version.h lmscan.cc lmparse.h lmparse.cc \
+	exports1.h exports1.cc parse1.c \
+	exports2.h exports2.cc parse2.c
 
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h

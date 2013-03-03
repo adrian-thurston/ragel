@@ -25,9 +25,15 @@
 /stamp-h1
 /stamp-h2
 
-/acolm
-/aiface.h
-/aiface.cc
-/aparse.c
+/bootstrap0
+
+/bootstrap1
+/exports1.h
+/exports1.cc
+/parse1.c
+
+/exports2.h
+/exports2.cc
+/parse2.c
 
 /libprog.a

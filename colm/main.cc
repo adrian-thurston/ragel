@@ -587,7 +587,7 @@ int main(int argc, const char **argv)
 	parser->addArgvList();
 
 	if ( bootStrap ) {
-#ifdef BOOTSTRAP
+#ifdef BOOTSTRAP0
 		parser->go();
 #endif
 	}
