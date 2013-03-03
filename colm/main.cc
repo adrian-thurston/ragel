@@ -576,7 +576,7 @@ int main(int argc, const char **argv)
 
 	Compiler *pd = new Compiler( inputFileName, "machine", InputLoc(), std::cout );
 	ColmParser *parser = new ColmParser( pd, inputFileName, "machine", InputLoc() );
-	ColmScanner *scanner = new ColmScanner( inputFileName, *inStream, cout, parser, 0 );
+	ColmScanner *scanner = new ColmScanner( inputFileName, *inStream, parser, 0 );
 
 	parser->init();
 

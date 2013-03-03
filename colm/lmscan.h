@@ -60,9 +60,9 @@ extern ArgsVector includePaths;
 struct ColmScanner
 {
 	ColmScanner( const char *fileName, istream &input, 
-			ostream &output, ColmParser *parser, int includeDepth )
+			ColmParser *parser, int includeDepth )
 	: 
-		fileName(fileName), input(input), output(output),
+		fileName(fileName), input(input),
 		includeDepth(includeDepth),
 		line(1), column(1), lastnl(0), 
 		parser(parser),
@@ -87,7 +87,6 @@ struct ColmScanner
 
 	const char *fileName;
 	istream &input;
-	ostream &output;
 	int includeDepth;
 
 	int cs;

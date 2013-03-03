@@ -199,7 +199,7 @@ char **ColmScanner::makeIncludePathChecks( const char *thisFileName, const char 
 			 * name then check if what we are including is already in the stack. */
 			includeStack.append( IncludeStackItem( checks[found] ) );
 
-			ColmScanner *scanner = new ColmScanner( fileName, *inFile, output, parser, includeDepth+1 );
+			ColmScanner *scanner = new ColmScanner( fileName, *inFile, parser, includeDepth+1 );
 			scanner->scan();
 			delete inFile;
 
