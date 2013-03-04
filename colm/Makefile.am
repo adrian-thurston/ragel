@@ -59,12 +59,12 @@ libprog_a_SOURCES = \
 libprog_a_CXXFLAGS = $(common_CFLAGS)
 
 bootstrap0_CXXFLAGS = $(common_CFLAGS) -DBOOTSTRAP0
-bootstrap0_SOURCES = bootstrap.cc main.cc
+bootstrap0_SOURCES = bootstrap0.cc bootstrap0.h main.cc
 bootstrap0_LDADD = libprog.a libcolm.a
 
 bootstrap1_CXXFLAGS = $(common_CFLAGS) -DBOOTSTRAP1
 bootstrap1_CFLAGS = $(common_CFLAGS) -DBOOTSTRAP1
-bootstrap1_SOURCES = exports1.h exports1.cc parse1.c main.cc
+bootstrap1_SOURCES = exports1.h exports1.cc parse1.c main.cc bootstrap1.cc bootstrap1.h
 bootstrap1_LDADD = libprog.a libcolm.a
 
 colm_CXXFLAGS = $(common_CFLAGS) 
@@ -87,7 +87,7 @@ exports2.h: bootstrap1 parse2.c
 exports2.cc: bootstrap1 parse2.c
 
 parse2.c: bootstrap1
-	$(builddir)/bootstrap1 -L -o parse2.c -e exports2.h -c exports2.cc colm.lm
+	$(builddir)/bootstrap1 -L -o parse2.c -e exports2.h -c exports2.cc < colm.lm
 
 BUILT_SOURCES = \
 	version.h lmscan.cc lmparse.h lmparse.cc \

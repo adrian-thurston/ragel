@@ -24,41 +24,19 @@
 #include "parsedata.h"
 #include "parser.h"
 
-struct Bootstrap
+struct Bootstrap1
 :
 	public BaseParser
 {
-	Bootstrap( Compiler *pd )
+	Bootstrap1( Compiler *pd )
 	:
 		BaseParser(pd)
 	{
 	}
 
-	ProdEl *prodRefName( const String &name );
-	ProdEl *prodRefNameRepeat( const String &name );
-	ProdEl *prodRefLit( const String &lit );
-
-	Production *production( ProdEl *prodEl1 );
-	Production *production( ProdEl *prodEl1, ProdEl *prodEl2 );
-	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
-			ProdEl *prodEl3 );
-	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
-			ProdEl *prodEl3, ProdEl *prodEl4 );
-	void definition( const String &name, Production *prod );
-
-	void keyword( const String &kw );
-	void symbol( const String &kw );
-
-	void parseInput( StmtList *stmtList );
-	void printParseTree( StmtList *stmtList );
-	void printParseTree();
-
-	void wsIgnore();
-	void idToken();
-
-	void itemProd();
-	void startProd();
 	void go();
 };
+
+
 
 

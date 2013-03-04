@@ -42,9 +42,9 @@
 #include "fsmcodegen.h"
 
 #if defined(BOOTSTRAP0)
-#include "bootstrap.h"
+#include "bootstrap0.h"
 #elif defined(BOOTSTRAP1)
-#include "parser.h"
+#include "bootstrap1.h"
 #else
 #include "lmscan.h"
 #include "lmparse.h"
@@ -580,14 +580,13 @@ int main(int argc, const char **argv)
 	Compiler *pd = new Compiler;
 
 #if defined(BOOTSTRAP0)
-	Bootstrap *parser = new Bootstrap( pd );
+	Bootstrap0 *parser = new Bootstrap0( pd );
 	parser->init();
 	parser->go();
 #elif defined(BOOTSTRAP1)
-	BaseParser *parser = new BaseParser( pd );
+	Bootstrap1 *parser = new Bootstrap1( pd );
 	parser->init();
-	StmtList *stmtList = new StmtList;
-	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
+	parser->go();
 #else
 	ColmParser *parser = new ColmParser( pd );
 	ColmScanner *scanner = new ColmScanner( inputFileName, *inStream, parser, 0 );

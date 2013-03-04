@@ -27,7 +27,7 @@
 #include "lmparse.h"
 #include "global.h"
 #include "input.h"
-#include "bootstrap.h"
+#include "bootstrap0.h"
 
 using std::cout;
 using std::cerr;
@@ -140,7 +140,7 @@ LexFactorAug *parensFactorAug( LexTerm *term )
 	return factorAug;
 }
 
-void Bootstrap::wsIgnore()
+void Bootstrap0::wsIgnore()
 {
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, String(), pd->nextObjectId++ ); 
 
@@ -161,7 +161,7 @@ void Bootstrap::wsIgnore()
 	tokenDef( internal, String(), join, objectDef, 0, true, false, false );
 }
 
-void Bootstrap::idToken()
+void Bootstrap0::idToken()
 {
 	String hello( "id" );
 
@@ -187,17 +187,17 @@ void Bootstrap::idToken()
 	tokenDef( internal, hello, join, objectDef, 0, false, false, false );
 }
 
-void Bootstrap::keyword( const String &kw )
+void Bootstrap0::keyword( const String &kw )
 {
 	literalDef( internal, kw, false, false );
 }
 
-void Bootstrap::symbol( const String &kw )
+void Bootstrap0::symbol( const String &kw )
 {
 	literalDef( internal, kw, false, false );
 }
 
-ProdEl *Bootstrap::prodRefName( const String &name )
+ProdEl *Bootstrap0::prodRefName( const String &name )
 {
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons(namespaceStack.top()), 0,
@@ -205,7 +205,7 @@ ProdEl *Bootstrap::prodRefName( const String &name )
 	return prodEl;
 }
 
-ProdEl *Bootstrap::prodRefNameRepeat( const String &name )
+ProdEl *Bootstrap0::prodRefNameRepeat( const String &name )
 {
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons(namespaceStack.top()), 0,
@@ -213,7 +213,7 @@ ProdEl *Bootstrap::prodRefNameRepeat( const String &name )
 	return prodEl;
 }
 
-ProdEl *Bootstrap::prodRefLit( const String &lit )
+ProdEl *Bootstrap0::prodRefLit( const String &lit )
 {
 	ProdEl *prodEl = prodElLiteral( internal, lit, 
 			NamespaceQual::cons(namespaceStack.top()), 0,
@@ -221,14 +221,14 @@ ProdEl *Bootstrap::prodRefLit( const String &lit )
 	return prodEl;
 }
 
-Production *Bootstrap::production( ProdEl *prodEl1 )
+Production *Bootstrap0::production( ProdEl *prodEl1 )
 {
 	ProdElList *prodElList = new ProdElList;
 	prodElList->append( prodEl1 );
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
-Production *Bootstrap::production( ProdEl *prodEl1, ProdEl *prodEl2 )
+Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2 )
 {
 	ProdElList *prodElList = new ProdElList;
 	prodElList->append( prodEl1 );
@@ -236,7 +236,7 @@ Production *Bootstrap::production( ProdEl *prodEl1, ProdEl *prodEl2 )
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
-Production *Bootstrap::production( ProdEl *prodEl1, ProdEl *prodEl2,
+Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
 		ProdEl *prodEl3 )
 {
 	ProdElList *prodElList = new ProdElList;
@@ -246,7 +246,7 @@ Production *Bootstrap::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
-Production *Bootstrap::production( ProdEl *prodEl1, ProdEl *prodEl2,
+Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
 		ProdEl *prodEl3, ProdEl *prodEl4 )
 {
 	ProdElList *prodElList = new ProdElList;
@@ -259,7 +259,7 @@ Production *Bootstrap::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
-void Bootstrap::definition( const String &name, Production *prod )
+void Bootstrap0::definition( const String &name, Production *prod )
 {
 	LelDefList *defList = new LelDefList;
 	prodAppend( defList, prod );
@@ -269,7 +269,7 @@ void Bootstrap::definition( const String &name, Production *prod )
 	cflDef( ntDef, objectDef, defList );
 }
 
-void Bootstrap::itemProd()
+void Bootstrap0::itemProd()
 {
 	ProdEl *prodEl1 = prodRefLit( "'def'" );
 	ProdEl *prodEl2 = prodRefName( "id" );
@@ -281,7 +281,7 @@ void Bootstrap::itemProd()
 	definition( "item",  prod1 );
 }
 
-void Bootstrap::startProd()
+void Bootstrap0::startProd()
 {
 	ProdEl *prodEl1 = prodRefNameRepeat( "item" );
 	Production *prod1 = production( prodEl1 );
@@ -289,7 +289,7 @@ void Bootstrap::startProd()
 	definition( "start",  prod1 );
 }
 
-void Bootstrap::parseInput( StmtList *stmtList )
+void Bootstrap0::parseInput( StmtList *stmtList )
 {
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
@@ -307,7 +307,7 @@ void Bootstrap::parseInput( StmtList *stmtList )
 	stmtList->append( stmt );
 }
 
-void Bootstrap::printParseTree( StmtList *stmtList )
+void Bootstrap0::printParseTree( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
 	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
@@ -320,7 +320,7 @@ void Bootstrap::printParseTree( StmtList *stmtList )
 	stmtList->append( stmt );
 }
 
-void Bootstrap::go()
+void Bootstrap0::go()
 {
 	StmtList *stmtList = new StmtList;
 
