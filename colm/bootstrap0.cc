@@ -205,10 +205,28 @@ ProdEl *Bootstrap0::prodRefName( const String &name )
 	return prodEl;
 }
 
+ProdEl *Bootstrap0::prodRefName( const String &capture, const String &name )
+{
+	ObjectField *captureField = ObjectField::cons( internal, 0, capture );
+	ProdEl *prodEl = prodElName( internal, name,
+			NamespaceQual::cons(namespaceStack.top()), captureField,
+			RepeatNone, false );
+	return prodEl;
+}
+
 ProdEl *Bootstrap0::prodRefNameRepeat( const String &name )
 {
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons(namespaceStack.top()), 0,
+			RepeatRepeat, false );
+	return prodEl;
+}
+
+ProdEl *Bootstrap0::prodRefNameRepeat( const String &capture, const String &name )
+{
+	ObjectField *captureField = ObjectField::cons( internal, 0, capture );
+	ProdEl *prodEl = prodElName( internal, name,
+			NamespaceQual::cons(namespaceStack.top()), captureField,
 			RepeatRepeat, false );
 	return prodEl;
 }
@@ -259,6 +277,17 @@ Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
+void Bootstrap0::definition( const String &name, Production *prod1, Production *prod2 )
+{
+	LelDefList *defList = new LelDefList;
+	prodAppend( defList, prod1 );
+	prodAppend( defList, prod2 );
+
+	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	cflDef( ntDef, objectDef, defList );
+}
+
 void Bootstrap0::definition( const String &name, Production *prod )
 {
 	LelDefList *defList = new LelDefList;
@@ -269,21 +298,27 @@ void Bootstrap0::definition( const String &name, Production *prod )
 	cflDef( ntDef, objectDef, defList );
 }
 
-void Bootstrap0::itemProd()
+Production *Bootstrap0::prodLex()
+{
+	ProdEl *prodEl1 = prodRefLit( "'lex'" );
+	ProdEl *prodEl2 = prodRefLit( "'end'" );
+
+	return production( prodEl1, prodEl2 );
+}
+
+Production *Bootstrap0::prodProd()
 {
 	ProdEl *prodEl1 = prodRefLit( "'def'" );
-	ProdEl *prodEl2 = prodRefName( "id" );
+	ProdEl *prodEl2 = prodRefName( "DefId", "id" );
 	ProdEl *prodEl3 = prodRefLit( "'['" );
 	ProdEl *prodEl4 = prodRefLit( "']'" );
 
-	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4 );
-
-	definition( "item",  prod1 );
+	return production( prodEl1, prodEl2, prodEl3, prodEl4 );
 }
 
 void Bootstrap0::startProd()
 {
-	ProdEl *prodEl1 = prodRefNameRepeat( "item" );
+	ProdEl *prodEl1 = prodRefNameRepeat( "ItemList", "item" );
 	Production *prod1 = production( prodEl1 );
 
 	definition( "start",  prod1 );
@@ -307,17 +342,18 @@ void Bootstrap0::parseInput( StmtList *stmtList )
 	stmtList->append( stmt );
 }
 
-void Bootstrap0::printParseTree( StmtList *stmtList )
+void Bootstrap0::exportTree( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
 	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
 	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("tree") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
 
-	ExprVect *exprVect = new ExprVect;
-	exprVect->append( expr );
-	LangStmt *stmt = LangStmt::cons( internal, LangStmt::PrintType, exprVect );
-	stmtList->append( stmt );
+	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
+	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
+	ObjectField *program = ObjectField::cons( internal, typeRef, String("Colm0Tree") );
+	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
+	stmtList->append( programExport );
 }
 
 void Bootstrap0::go()
@@ -329,19 +365,22 @@ void Bootstrap0::go()
 
 	wsIgnore();
 	keyword( "'def'" );
+	keyword( "'lex'" );
+	keyword( "'end'" );
 	idToken();
 	symbol( "'['" );
 	symbol( "']'" );
 
 	popRegionSet();
 
-	itemProd();
+	Production *prod1 = prodLex();
+	Production *prod2 = prodProd();
+	definition( "item",  prod1, prod2 );
+
 	startProd();
 
 	parseInput( stmtList );
-
-	printParseTree( stmtList );
+	exportTree( stmtList );
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }
-

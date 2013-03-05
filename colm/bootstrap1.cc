@@ -43,6 +43,23 @@ void Bootstrap1::go()
 	ColmProgram *program = colmNewProgram( &main_runtimeData );
 	colmRunProgram( program, 0, 0 );
 
+	/* Extract the parse tree. */
+	start Start = Colm0Tree( program );
+
+	/* Walk the list of items. */
+	_repeat_item ItemList = Start.ItemList();
+	while ( !ItemList.end() ) {
+
+		item Item = ItemList.value();
+		if ( Item.DefId() != 0 ) {
+			std::cout << "define: " << Item.text() << std::endl;
+		}
+		else {
+			std::cout << "other:  " << Item.text() << std::endl;
+		}
+		ItemList = ItemList.next();
+	}
+
 	colmDeleteProgram( program );
 }
 

@@ -35,7 +35,9 @@ struct Bootstrap0
 	}
 
 	ProdEl *prodRefName( const String &name );
+	ProdEl *prodRefName( const String &capture, const String &name );
 	ProdEl *prodRefNameRepeat( const String &name );
+	ProdEl *prodRefNameRepeat( const String &capture, const String &name );
 	ProdEl *prodRefLit( const String &lit );
 
 	Production *production( ProdEl *prodEl1 );
@@ -44,19 +46,24 @@ struct Bootstrap0
 			ProdEl *prodEl3 );
 	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
 			ProdEl *prodEl3, ProdEl *prodEl4 );
+
 	void definition( const String &name, Production *prod );
+	void definition( const String &name, Production *prod1, Production *prod2 );
 
 	void keyword( const String &kw );
 	void symbol( const String &kw );
 
 	void parseInput( StmtList *stmtList );
 	void printParseTree( StmtList *stmtList );
+	void exportTree( StmtList *stmtList );
 	void printParseTree();
 
 	void wsIgnore();
 	void idToken();
 
-	void itemProd();
+	Production *prodProd();
+	Production *prodLex();
+
 	void startProd();
 	void go();
 };

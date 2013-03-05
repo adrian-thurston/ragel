@@ -86,8 +86,11 @@ parse1.c: bootstrap0
 exports2.h: bootstrap1 parse2.c
 exports2.cc: bootstrap1 parse2.c
 
-parse2.c: bootstrap1
+parse2.c: bootstrap1 colm.lm
 	$(builddir)/bootstrap1 -L -o parse2.c -e exports2.h -c exports2.cc < colm.lm
+
+bootstrap1.cc: exports1.h
+bootstrap1.cc: exports1.cc
 
 BUILT_SOURCES = \
 	version.h lmscan.cc lmparse.h lmparse.cc \

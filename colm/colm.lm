@@ -1,3 +1,6 @@
+lex
+end
+
 def prod []
 def item []
 def start []
