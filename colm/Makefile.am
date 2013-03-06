@@ -70,7 +70,7 @@ bootstrap1_LDADD = libprog.a libcolm.a
 colm_CXXFLAGS = $(common_CFLAGS) 
 colm_CFLAGS = $(common_CFLAGS)
 colm_SOURCES = lmparse.h lmscan.h lmparse.cc lmscan.cc \
-		exports2.h exports2.cc parse2.c main.cc
+		bootstrap2.cc exports2.h exports2.cc parse2.c main.cc
 colm_LDADD = libprog.a libcolm.a
 
 colmincdir = $(includedir)/colm
@@ -90,12 +90,10 @@ parse2.c: bootstrap1 colm.lm
 	$(builddir)/bootstrap1 -L -o parse2.c -e exports2.h -c exports2.cc < colm.lm
 
 bootstrap1.cc: exports1.h
-bootstrap1.cc: exports1.cc
+bootstrap2.cc: exports2.h
 
 BUILT_SOURCES = \
-	version.h lmscan.cc lmparse.h lmparse.cc \
-	exports1.h exports1.cc parse1.c \
-	exports2.h exports2.cc parse2.c
+	version.h lmscan.cc lmparse.h lmparse.cc
 
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h

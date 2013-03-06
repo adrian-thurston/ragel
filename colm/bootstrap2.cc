@@ -27,38 +27,20 @@
 #include "lmparse.h"
 #include "global.h"
 #include "input.h"
-#include "bootstrap1.h"
-#include "exports1.h"
+#include "bootstrap2.h"
+#include "exports2.h"
 
 #include "colm/colm.h"
 
 extern RuntimeData main_runtimeData;
 
-void Bootstrap1::go()
+void Bootstrap2::go()
 {
 	StmtList *stmtList = new StmtList;
 
 	colmInit( 0 );
 	ColmProgram *program = colmNewProgram( &main_runtimeData );
 	colmRunProgram( program, 0, 0 );
-
-	/* Extract the parse tree. */
-	start Start = Colm0Tree( program );
-
-	/* Walk the list of items. */
-	_repeat_item ItemList = Start.ItemList();
-	while ( !ItemList.end() ) {
-
-		item Item = ItemList.value();
-		if ( Item.DefId() != 0 ) {
-			std::cout << "define: " << Item.text() << std::endl;
-		}
-		else {
-			std::cout << "other:  " << Item.text() << std::endl;
-		}
-		ItemList = ItemList.next();
-	}
-
 	colmDeleteProgram( program );
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );

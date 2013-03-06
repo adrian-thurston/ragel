@@ -48,6 +48,7 @@
 #else
 #include "lmscan.h"
 #include "lmparse.h"
+#include "bootstrap2.h"
 #endif
 
 using std::istream;
@@ -61,6 +62,7 @@ using std::endl;
 
 /* Graphviz dot file generation. */
 bool genGraphviz = false;
+bool useBootstrap = false;
 
 using std::ostream;
 using std::istream;
@@ -422,12 +424,15 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "D:e:c:LI:vdlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "BD:e:c:LI:vdlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
 		case ParamCheck::match:
 			switch ( pc.parameter ) {
+			case 'B':
+				useBootstrap = true;
+				break;
 			case 'I':
 				includePaths.append( pc.parameterArg );
 				break;
@@ -588,12 +593,22 @@ int main(int argc, const char **argv)
 	parser->init();
 	parser->go();
 #else
-	ColmParser *parser = new ColmParser( pd );
-	ColmScanner *scanner = new ColmScanner( inputFileName, *inStream, parser, 0 );
+	Bootstrap2 *bootstrapParser = 0;
+	ColmScanner *scanner = 0;
+	ColmParser *parser = 0;
+	if ( useBootstrap ) {
+		bootstrapParser = new Bootstrap2( pd );
+		bootstrapParser->init();
+		bootstrapParser->go();
+	}
+	else {
+		parser = new ColmParser( pd );
+		scanner = new ColmScanner( inputFileName, *inStream, parser, 0 );
 
-	parser->init();
-	scanner->scan();
-	scanner->eof();
+		parser->init();
+		scanner->scan();
+		scanner->eof();
+	}
 #endif
 
 	/* Parsing complete, check for errors.. */
@@ -638,15 +653,17 @@ int main(int argc, const char **argv)
 
 #if defined(BOOTSTRAP0)
 	delete parser;
-	delete pd;
 #elif defined(BOOTSTRAP1)
 	delete parser;
-	delete pd;
 #else
-	delete scanner;
-	delete parser;
-	delete pd;
+	if ( bootstrapParser )
+		delete bootstrapParser;
+	if ( scanner != 0 )
+		delete scanner;
+	if ( parser != 0 )
+		delete parser;
 #endif
+	delete pd;
 
 
 	/* Bail on above errors. */
