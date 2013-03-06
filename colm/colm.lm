@@ -1,6 +1,12 @@
 lex
 end
 
-def prod []
-def item []
-def start []
+def prod_list
+	[prod_list prod]
+|	[prod]
+
+def item
+	[prod_list]
+
+def start
+	[item]

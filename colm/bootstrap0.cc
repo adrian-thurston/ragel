@@ -310,10 +310,58 @@ Production *Bootstrap0::prodProd()
 {
 	ProdEl *prodEl1 = prodRefLit( "'def'" );
 	ProdEl *prodEl2 = prodRefName( "DefId", "id" );
-	ProdEl *prodEl3 = prodRefLit( "'['" );
-	ProdEl *prodEl4 = prodRefLit( "']'" );
+	ProdEl *prodEl3 = prodRefName( "ProdList", "prod_list" );
 
-	return production( prodEl1, prodEl2, prodEl3, prodEl4 );
+	return production( prodEl1, prodEl2, prodEl3 );
+}
+
+void Bootstrap0::prodEl()
+{
+	ProdEl *prodEl1 = prodRefName( "Id", "id" );
+	Production *prod1 = production( prodEl1 );
+	definition( "prod_el",  prod1 );
+}
+
+void Bootstrap0::prodElList()
+{
+	ProdEl *prodEl1 = prodRefName( "ProdElList", "prod_el_list" );
+	ProdEl *prodEl2 = prodRefName( "ProdEl", "prod_el" );
+	Production *prod1 = production( prodEl1, prodEl2 );
+
+	ProdEl *prodEl3 = prodRefName( "ProdEl", "prod_el" );
+	Production *prod2 = production( prodEl3 );
+
+	definition( "prod_el_list",  prod1, prod2 );
+}
+
+void Bootstrap0::prod()
+{
+	ProdEl *prodEl1 = prodRefLit( "'['" );
+	ProdEl *prodEl2 = prodRefName( "prod_el_list" );
+	ProdEl *prodEl3 = prodRefLit( "']'" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
+
+	definition( "prod",  prod1 );
+}
+
+void Bootstrap0::prodList()
+{
+	ProdEl *prodEl1 = prodRefName( "ProdList", "prod_list" );
+	ProdEl *prodEl2 = prodRefLit( "'|'" );
+	ProdEl *prodEl3 = prodRefName( "Prod", "prod" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
+
+	ProdEl *prodEl4 = prodRefName( "Prod", "prod" );
+	Production *prod2 = production( prodEl4 );
+
+	definition( "prod_list",  prod1, prod2 );
+}
+
+void Bootstrap0::item()
+{
+	Production *prod1 = prodLex();
+	Production *prod2 = prodProd();
+	definition( "item",  prod1, prod2 );
 }
 
 void Bootstrap0::startProd()
@@ -370,13 +418,15 @@ void Bootstrap0::go()
 	idToken();
 	symbol( "'['" );
 	symbol( "']'" );
+	symbol( "'|'" );
 
 	popRegionSet();
 
-	Production *prod1 = prodLex();
-	Production *prod2 = prodProd();
-	definition( "item",  prod1, prod2 );
-
+	prodEl();
+	prodElList();
+	prod();
+	prodList();
+	item();
 	startProd();
 
 	parseInput( stmtList );

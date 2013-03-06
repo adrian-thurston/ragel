@@ -64,6 +64,11 @@ struct Bootstrap0
 	Production *prodProd();
 	Production *prodLex();
 
+	void prodEl();
+	void prodElList();
+	void item();
+	void prodList();
+	void prod();
 	void startProd();
 	void go();
 };
