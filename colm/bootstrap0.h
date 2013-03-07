@@ -23,16 +23,16 @@
 #include "avltree.h"
 #include "parsedata.h"
 #include "parser.h"
+#include "bootstrap.h"
 
 struct Bootstrap0
 :
-	public BaseParser
+	public BootstrapBase
 {
 	Bootstrap0( Compiler *pd )
 	:
-		BaseParser(pd)
-	{
-	}
+		BootstrapBase(pd)
+	{}
 
 	ProdEl *prodRefName( const String &name );
 	ProdEl *prodRefName( const String &capture, const String &name );
@@ -53,9 +53,7 @@ struct Bootstrap0
 	void keyword( const String &kw );
 	void symbol( const String &kw );
 
-	void parseInput( StmtList *stmtList );
 	void printParseTree( StmtList *stmtList );
-	void exportTree( StmtList *stmtList );
 	void printParseTree();
 
 	void wsIgnore();

@@ -306,15 +306,6 @@ Production *Bootstrap0::prodLex()
 	return production( prodEl1, prodEl2 );
 }
 
-Production *Bootstrap0::prodProd()
-{
-	ProdEl *prodEl1 = prodRefLit( "'def'" );
-	ProdEl *prodEl2 = prodRefName( "DefId", "id" );
-	ProdEl *prodEl3 = prodRefName( "ProdList", "prod_list" );
-
-	return production( prodEl1, prodEl2, prodEl3 );
-}
-
 void Bootstrap0::prodEl()
 {
 	ProdEl *prodEl1 = prodRefName( "Id", "id" );
@@ -357,6 +348,15 @@ void Bootstrap0::prodList()
 	definition( "prod_list",  prod1, prod2 );
 }
 
+Production *Bootstrap0::prodProd()
+{
+	ProdEl *prodEl1 = prodRefLit( "'def'" );
+	ProdEl *prodEl2 = prodRefName( "DefId", "id" );
+	ProdEl *prodEl3 = prodRefName( "ProdList", "prod_list" );
+
+	return production( prodEl1, prodEl2, prodEl3 );
+}
+
 void Bootstrap0::item()
 {
 	Production *prod1 = prodLex();
@@ -370,38 +370,6 @@ void Bootstrap0::startProd()
 	Production *prod1 = production( prodEl1 );
 
 	definition( "start",  prod1 );
-}
-
-void Bootstrap0::parseInput( StmtList *stmtList )
-{
-	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
-	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
-
-	LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, String("stdin") );
-	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
-
-	ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, expr );
-	ConsItemList *list = ConsItemList::cons( consItem );
-
-	ObjectField *objField = ObjectField::cons( internal, 0, String("P") );
-
-	expr = parseCmd( internal, false, objField, typeRef, 0, list );
-	LangStmt *stmt = LangStmt::cons( internal, LangStmt::ExprType, expr );
-	stmtList->append( stmt );
-}
-
-void Bootstrap0::exportTree( StmtList *stmtList )
-{
-	QualItemVect *qual = new QualItemVect;
-	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
-	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("tree") );
-	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
-
-	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
-	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
-	ObjectField *program = ObjectField::cons( internal, typeRef, String("Colm0Tree") );
-	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
-	stmtList->append( programExport );
 }
 
 void Bootstrap0::go()

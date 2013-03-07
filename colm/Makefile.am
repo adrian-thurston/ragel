@@ -59,12 +59,13 @@ libprog_a_SOURCES = \
 libprog_a_CXXFLAGS = $(common_CFLAGS)
 
 bootstrap0_CXXFLAGS = $(common_CFLAGS) -DBOOTSTRAP0
-bootstrap0_SOURCES = bootstrap0.cc bootstrap0.h main.cc
+bootstrap0_SOURCES = bootstrap.cc bootstrap0.cc bootstrap0.h main.cc
 bootstrap0_LDADD = libprog.a libcolm.a
 
 bootstrap1_CXXFLAGS = $(common_CFLAGS) -DBOOTSTRAP1
 bootstrap1_CFLAGS = $(common_CFLAGS) -DBOOTSTRAP1
-bootstrap1_SOURCES = exports1.h exports1.cc parse1.c main.cc bootstrap1.cc bootstrap1.h
+bootstrap1_SOURCES = exports1.h exports1.cc parse1.c bootstrap.cc \
+	bootstrap1.cc bootstrap1.h main.cc
 bootstrap1_LDADD = libprog.a libcolm.a
 
 colm_CXXFLAGS = $(common_CFLAGS) 

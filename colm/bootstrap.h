@@ -23,23 +23,18 @@
 #include "avltree.h"
 #include "parsedata.h"
 #include "parser.h"
-#include "bootstrap.h"
-#include "exports1.h"
 
-struct Bootstrap1
+struct BootstrapBase
 :
-	public BootstrapBase
+	public BaseParser
 {
-	Bootstrap1( Compiler *pd )
+	BootstrapBase( Compiler *pd )
 	:
-		BootstrapBase(pd)
-	{
-	}
+		BaseParser(pd)
+	{}
 
-	void defineProd( item &Prod );
-	void go();
+	void parseInput( StmtList *stmtList );
+	void exportTree( StmtList *stmtList );
 };
-
-
 
 

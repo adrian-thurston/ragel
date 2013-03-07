@@ -20,6 +20,7 @@
  */
 
 #include <iostream>
+#include <string>
 #include <errno.h>
 
 #include "parser.h"
@@ -29,10 +30,23 @@
 #include "input.h"
 #include "bootstrap1.h"
 #include "exports1.h"
-
 #include "colm/colm.h"
 
+using std::string;
+
 extern RuntimeData main_runtimeData;
+
+void Bootstrap1::defineProd( item &Prod )
+{
+	String name = Prod.DefId().text().c_str();
+	ProdElList *prodElList = new ProdElList;
+	Production *prod = BaseParser::production( internal, prodElList, false, 0, 0 );
+	LelDefList *defList = new LelDefList;
+	prodAppend( defList, prod );
+	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	cflDef( ntDef, objectDef, defList );
+}
 
 void Bootstrap1::go()
 {
@@ -51,6 +65,7 @@ void Bootstrap1::go()
 
 		item Item = ItemList.value();
 		if ( Item.DefId() != 0 ) {
+
 			std::cout << "define: " << Item.text() << std::endl;
 		}
 		else {
@@ -60,6 +75,9 @@ void Bootstrap1::go()
 	}
 
 	colmDeleteProgram( program );
+
+	//parseInput( stmtList );
+	//exportTree( stmtList );
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }
