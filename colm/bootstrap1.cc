@@ -36,13 +36,50 @@ using std::string;
 
 extern RuntimeData main_runtimeData;
 
-void Bootstrap1::defineProd( string defineId )
+void Bootstrap1::prodElList( ProdElList *list, prod_el_list &ProdElList )
 {
-	String name = defineId.c_str();
-	ProdElList *prodElList = new ProdElList;
-	Production *prod = BaseParser::production( internal, prodElList, false, 0, 0 );
+	if ( ProdElList.ProdElList() != 0 ) {
+		prod_el_list RightProdElList = ProdElList.ProdElList();
+		prodElList( list, RightProdElList );
+	}
+	
+	if ( ProdElList.ProdEl() != 0 ) {
+		std::cout << "prod el: " << ProdElList.ProdEl().text() << std::endl;
+		String name = ProdElList.ProdEl().text().c_str();
+
+		ProdEl *prodEl = prodElName( internal, name,
+				NamespaceQual::cons(namespaceStack.top()), 0,
+				RepeatNone, false );
+
+		appendProdEl( list, prodEl );
+	}
+}
+
+void Bootstrap1::prodList( LelDefList *lelDefList, prod_list &ProdList )
+{
+	if ( ProdList.ProdList() != 0 ) {
+		prod_list RightProdList = ProdList.ProdList();
+		prodList( lelDefList, RightProdList );
+	}
+
+	ProdElList *list = new ProdElList;
+	
+	std::cout << "prod: " << ProdList.Prod().text() << std::endl;
+	prod_el_list ProdElList = ProdList.Prod().ProdElList();
+	prodElList( list, ProdElList );
+
+	Production *prod = BaseParser::production( internal, list, false, 0, 0 );
+	prodAppend( lelDefList, prod );
+}
+
+void Bootstrap1::defineProd( item &Define )
+{
+	prod_list ProdList = Define.ProdList();
+
 	LelDefList *defList = new LelDefList;
-	prodAppend( defList, prod );
+	prodList( defList, ProdList );
+
+	String name = Define.DefId().text().c_str();
 	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
@@ -59,6 +96,11 @@ void Bootstrap1::go()
 	/* Extract the parse tree. */
 	start Start = Colm0Tree( program );
 
+	if ( Start == 0 ) {
+		std::cerr << "error parsing input" << std::endl;
+		return;
+	}
+
 	/* Walk the list of items. */
 	_repeat_item ItemList = Start.ItemList();
 	while ( !ItemList.end() ) {
@@ -67,7 +109,7 @@ void Bootstrap1::go()
 		if ( Item.DefId() != 0 ) {
 			// std::cout << "define: " << Item.text() << std::endl;
 			std::cout << "define-id: " << Item.DefId().text() << std::endl;
-			defineProd( Item.DefId().text() );
+			defineProd( Item );
 		}
 		else {
 			//std::cout << "other:  " << Item.text() << std::endl;

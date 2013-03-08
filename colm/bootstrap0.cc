@@ -239,6 +239,12 @@ ProdEl *Bootstrap0::prodRefLit( const String &lit )
 	return prodEl;
 }
 
+Production *Bootstrap0::production()
+{
+	ProdElList *prodElList = new ProdElList;
+	return BaseParser::production( internal, prodElList, false, 0, 0 );
+}
+
 Production *Bootstrap0::production( ProdEl *prodEl1 )
 {
 	ProdElList *prodElList = new ProdElList;
@@ -317,8 +323,7 @@ void Bootstrap0::prodElList()
 	ProdEl *prodEl2 = prodRefName( "ProdEl", "prod_el" );
 	Production *prod1 = production( prodEl1, prodEl2 );
 
-	ProdEl *prodEl3 = prodRefName( "ProdEl", "prod_el" );
-	Production *prod2 = production( prodEl3 );
+	Production *prod2 = production();
 
 	definition( "prod_el_list",  prod1, prod2 );
 }
@@ -326,7 +331,7 @@ void Bootstrap0::prodElList()
 void Bootstrap0::prod()
 {
 	ProdEl *prodEl1 = prodRefLit( "'['" );
-	ProdEl *prodEl2 = prodRefName( "prod_el_list" );
+	ProdEl *prodEl2 = prodRefName( "ProdElList", "prod_el_list" );
 	ProdEl *prodEl3 = prodRefLit( "']'" );
 	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
 

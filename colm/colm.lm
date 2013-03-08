@@ -1,6 +1,9 @@
 lex
 end
 
+def prod
+	[]
+
 def prod_list
 	[prod_list prod]
 |	[prod]

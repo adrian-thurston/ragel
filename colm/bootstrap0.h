@@ -40,6 +40,7 @@ struct Bootstrap0
 	ProdEl *prodRefNameRepeat( const String &capture, const String &name );
 	ProdEl *prodRefLit( const String &lit );
 
+	Production *production();
 	Production *production( ProdEl *prodEl1 );
 	Production *production( ProdEl *prodEl1, ProdEl *prodEl2 );
 	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,

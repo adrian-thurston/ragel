@@ -25,6 +25,10 @@
 #include "parser.h"
 #include "bootstrap.h"
 
+struct prod_el_list;
+struct prod_list;
+struct item;
+
 struct Bootstrap1
 :
 	public BootstrapBase
@@ -35,6 +39,8 @@ struct Bootstrap1
 	{
 	}
 
-	void defineProd( std::string defineId );
+	void prodElList( ProdElList *list, prod_el_list &ProdElList );
+	void prodList( LelDefList *lelDefList, prod_list &ProdList );
+	void defineProd( item &Define );
 	void go();
 };
