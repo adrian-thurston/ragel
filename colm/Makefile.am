@@ -88,11 +88,11 @@ parse2.c: bootstrap1 colm.lm
 exports2.h: parse2.c
 exports2.cc: parse2.c
 
-bootstrap1-exports1.o: exports1.h exports1.cc parse1.c
-bootstrap1-bootstrap1.o: exports1.h exports1.cc parse1.c
+bootstrap1-exports1.$(OBJEXT): exports1.h exports1.cc parse1.c
+bootstrap1-bootstrap1.$(OBJEXT): exports1.h exports1.cc parse1.c
 
-colm-exports2.o: exports2.h exports2.cc parse2.c
-colm-bootstrap2.o: exports2.h exports2.cc parse2.c
+colm-exports2.$(OBJEXT): exports2.h exports2.cc parse2.c
+colm-bootstrap2.$(OBJEXT): exports2.h exports2.cc parse2.c
 
 BUILT_SOURCES = \
 	version.h lmscan.cc lmparse.h lmparse.cc
