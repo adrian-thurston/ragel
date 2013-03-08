@@ -78,20 +78,21 @@ colmincdir = $(includedir)/colm
 
 colminc_HEADERS = $(RUNTIME_HDR)
 
-exports1.h: bootstrap0 parse1.c
-exports1.cc: bootstrap0 parse1.c
-
 parse1.c: bootstrap0
 	$(builddir)/bootstrap0 -L -o parse1.c -e exports1.h -c exports1.cc
-
-exports2.h: bootstrap1 parse2.c
-exports2.cc: bootstrap1 parse2.c
+exports1.h: parse1.c
+exports1.cc: parse1.c
 
 parse2.c: bootstrap1 colm.lm
 	$(builddir)/bootstrap1 -L -o parse2.c -e exports2.h -c exports2.cc < colm.lm
+exports2.h: parse2.c
+exports2.cc: parse2.c
 
-bootstrap1.cc: exports1.h
-bootstrap2.cc: exports2.h
+bootstrap1-exports1.o: exports1.h exports1.cc parse1.c
+bootstrap1-bootstrap1.o: exports1.h exports1.cc parse1.c
+
+colm-exports2.o: exports2.h exports2.cc parse2.c
+colm-bootstrap2.o: exports2.h exports2.cc parse2.c
 
 BUILT_SOURCES = \
 	version.h lmscan.cc lmparse.h lmparse.cc
