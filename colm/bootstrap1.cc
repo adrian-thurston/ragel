@@ -36,9 +36,9 @@ using std::string;
 
 extern RuntimeData main_runtimeData;
 
-void Bootstrap1::defineProd( item &Prod )
+void Bootstrap1::defineProd( string defineId )
 {
-	String name = Prod.DefId().text().c_str();
+	String name = defineId.c_str();
 	ProdElList *prodElList = new ProdElList;
 	Production *prod = BaseParser::production( internal, prodElList, false, 0, 0 );
 	LelDefList *defList = new LelDefList;
@@ -65,11 +65,12 @@ void Bootstrap1::go()
 
 		item Item = ItemList.value();
 		if ( Item.DefId() != 0 ) {
-
-			std::cout << "define: " << Item.text() << std::endl;
+			// std::cout << "define: " << Item.text() << std::endl;
+			std::cout << "define-id: " << Item.DefId().text() << std::endl;
+			defineProd( Item.DefId().text() );
 		}
 		else {
-			std::cout << "other:  " << Item.text() << std::endl;
+			//std::cout << "other:  " << Item.text() << std::endl;
 		}
 		ItemList = ItemList.next();
 	}

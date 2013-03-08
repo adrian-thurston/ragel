@@ -24,7 +24,6 @@
 #include "parsedata.h"
 #include "parser.h"
 #include "bootstrap.h"
-#include "exports1.h"
 
 struct Bootstrap1
 :
@@ -36,10 +35,6 @@ struct Bootstrap1
 	{
 	}
 
-	void defineProd( item &Prod );
+	void defineProd( std::string defineId );
 	void go();
 };
-
-
-
-

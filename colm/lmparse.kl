@@ -834,9 +834,7 @@ nonterm prod_el_list
 prod_el_list: 
 	prod_el_list prod_el 
 	final {
-		$2->prodEl->pos = $1->list->length();
-		$$->list = $1->list;
-		$$->list->append( $2->prodEl );
+		$$->list = appendProdEl( $1->list, $2->prodEl );
 	};
 
 prod_el_list: 

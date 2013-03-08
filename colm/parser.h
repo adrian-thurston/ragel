@@ -129,6 +129,7 @@ struct BaseParser
 			NamespaceQual *nspaceQual );
 	void alias( const InputLoc &loc, const String &data, TypeRef *typeRef );
 	void precedenceStmt( PredType predType, PredDeclList *predDeclList );
+	ProdElList *appendProdEl( ProdElList *prodElList, ProdEl *prodEl );
 };
 
 #endif

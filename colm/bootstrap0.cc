@@ -242,15 +242,15 @@ ProdEl *Bootstrap0::prodRefLit( const String &lit )
 Production *Bootstrap0::production( ProdEl *prodEl1 )
 {
 	ProdElList *prodElList = new ProdElList;
-	prodElList->append( prodEl1 );
+	appendProdEl( prodElList, prodEl1 );
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
 Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2 )
 {
 	ProdElList *prodElList = new ProdElList;
-	prodElList->append( prodEl1 );
-	prodElList->append( prodEl2 );
+	appendProdEl( prodElList, prodEl1 );
+	appendProdEl( prodElList, prodEl2 );
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
@@ -258,9 +258,9 @@ Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
 		ProdEl *prodEl3 )
 {
 	ProdElList *prodElList = new ProdElList;
-	prodElList->append( prodEl1 );
-	prodElList->append( prodEl2 );
-	prodElList->append( prodEl3 );
+	appendProdEl( prodElList, prodEl1 );
+	appendProdEl( prodElList, prodEl2 );
+	appendProdEl( prodElList, prodEl3 );
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
@@ -268,12 +268,10 @@ Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
 		ProdEl *prodEl3, ProdEl *prodEl4 )
 {
 	ProdElList *prodElList = new ProdElList;
-
-	prodElList->append( prodEl1 );
-	prodElList->append( prodEl2 );
-	prodElList->append( prodEl3 );
-	prodElList->append( prodEl4 );
-
+	appendProdEl( prodElList, prodEl1 );
+	appendProdEl( prodElList, prodEl2 );
+	appendProdEl( prodElList, prodEl3 );
+	appendProdEl( prodElList, prodEl4 );
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 

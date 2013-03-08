@@ -628,6 +628,13 @@ PatternItemList *BaseParser::patternElType( const InputLoc &loc,
 	return PatternItemList::cons( patternItem );
 }
 
+ProdElList *BaseParser::appendProdEl( ProdElList *prodElList, ProdEl *prodEl )
+{
+	prodEl->pos = prodElList->length();
+	prodElList->append( prodEl );
+	return prodElList;
+}
+
 PatternItemList *BaseParser::patListConcat( PatternItemList *list1,
 		PatternItemList *list2 )
 {
