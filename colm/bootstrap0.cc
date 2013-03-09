@@ -187,6 +187,20 @@ void Bootstrap0::idToken()
 	tokenDef( internal, hello, join, objectDef, 0, false, false, false );
 }
 
+void Bootstrap0::starToken()
+{
+	String hello( "star" );
+
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, hello, pd->nextObjectId++ ); 
+
+	LexTerm *term = litTerm( "'*'" );
+	LexExpression *expr = LexExpression::cons( term );
+	LexJoin *join = LexJoin::cons( expr );
+
+	tokenDef( internal, hello, join, objectDef, 0, false, false, false );
+}
+
+
 void Bootstrap0::keyword( const String &kw )
 {
 	literalDef( internal, kw, false, false );
@@ -332,10 +346,34 @@ Production *Bootstrap0::prodLex()
 	return production( prodEl1, prodEl2, prodEl3 );
 }
 
+void Bootstrap0::optProdName()
+{
+	ProdEl *prodEl1 = prodRefName( "Name", "id" );
+	ProdEl *prodEl2 = prodRefLit( "':'" );
+	Production *prod1 = production( prodEl1, prodEl2 );
+	
+	Production *prod2 = production();
+
+	definition( "opt_prod_name",  prod1, prod2 );
+}
+
+void Bootstrap0::optRepeat()
+{
+	ProdEl *prodEl1 = prodRefName( "Star", "star" );
+	Production *prod1 = production( prodEl1 );
+
+	Production *prod2 = production();
+
+	definition( "opt_prod_repeat",  prod1, prod2 );
+}
+
 void Bootstrap0::prodEl()
 {
-	ProdEl *prodEl1 = prodRefName( "Id", "id" );
-	Production *prod1 = production( prodEl1 );
+	ProdEl *prodEl1 = prodRefName( "OptName", "opt_prod_name" );
+	ProdEl *prodEl2 = prodRefName( "Id", "id" );
+	ProdEl *prodEl3 = prodRefName( "OptRepeat", "opt_prod_repeat" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
+
 	definition( "prod_el",  prod1 );
 }
 
@@ -410,13 +448,17 @@ void Bootstrap0::go()
 	keyword( "'end'" );
 	keyword( "'token'" );
 	idToken();
+	starToken();
 	symbol( "'['" );
 	symbol( "']'" );
 	symbol( "'|'" );
 	symbol( "'/'" );
+	symbol( "':'" );
 
 	popRegionSet();
 
+	optRepeat();
+	optProdName();
 	prodEl();
 	prodElList();
 	prod();

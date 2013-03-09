@@ -44,11 +44,23 @@ void Bootstrap1::prodElList( ProdElList *list, prod_el_list &ProdElList )
 	}
 	
 	if ( ProdElList.ProdEl() != 0 ) {
-		String name = ProdElList.ProdEl().text().c_str();
+		prod_el El = ProdElList.ProdEl();
+		String typeName = El.Id().text().c_str();
 
-		ProdEl *prodEl = prodElName( internal, name,
-				NamespaceQual::cons(namespaceStack.top()), 0,
-				RepeatNone, false );
+		ObjectField *captureField = 0;
+		if ( El.OptName().Name() != 0 ) {
+			String fieldName = El.OptName().Name().text().c_str();
+			std::cout << "field name: " << fieldName << std::endl;
+			captureField = ObjectField::cons( internal, 0, fieldName );
+		}
+
+		RepeatType repeatType = RepeatNone;
+		if ( El.OptRepeat().Star() != 0 )
+			repeatType = RepeatRepeat;
+
+		ProdEl *prodEl = prodElName( internal, typeName,
+				NamespaceQual::cons(namespaceStack.top()),
+				captureField, repeatType, false );
 
 		appendProdEl( list, prodEl );
 	}
@@ -131,7 +143,7 @@ void Bootstrap1::go()
 	colmRunProgram( program, 0, 0 );
 
 	/* Extract the parse tree. */
-	start Start = Colm0Tree( program );
+	start Start = ColmTree( program );
 
 	if ( Start == 0 ) {
 		std::cerr << "error parsing input" << std::endl;
@@ -152,8 +164,8 @@ void Bootstrap1::go()
 
 	colmDeleteProgram( program );
 
-	//parseInput( stmtList );
-	//exportTree( stmtList );
+	parseInput( stmtList );
+	exportTree( stmtList );
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }

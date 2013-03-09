@@ -13,4 +13,4 @@ def item
 	[prod_list]
 
 def start
-	[item]
+	[item*]

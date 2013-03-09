@@ -58,6 +58,7 @@ struct Bootstrap0
 	void printParseTree();
 
 	void wsIgnore();
+	void starToken();
 	void idToken();
 
 	void token();
@@ -65,6 +66,9 @@ struct Bootstrap0
 
 	Production *prodProd();
 	Production *prodLex();
+
+	void optRepeat();
+	void optProdName();
 
 	void prodEl();
 	void prodElList();

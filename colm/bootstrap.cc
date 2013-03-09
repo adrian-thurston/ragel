@@ -58,7 +58,7 @@ void BootstrapBase::exportTree( StmtList *stmtList )
 
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
-	ObjectField *program = ObjectField::cons( internal, typeRef, String("Colm0Tree") );
+	ObjectField *program = ObjectField::cons( internal, typeRef, String("ColmTree") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
 	stmtList->append( programExport );
 }

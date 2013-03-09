@@ -43,6 +43,14 @@ void Bootstrap2::go()
 	colmRunProgram( program, 0, 0 );
 	colmDeleteProgram( program );
 
+	/* Extract the parse tree. */
+	start Start = ColmTree( program );
+
+	if ( Start == 0 ) {
+		std::cerr << "error parsing input" << std::endl;
+		return;
+	}
+
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }
 
