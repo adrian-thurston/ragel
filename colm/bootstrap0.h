@@ -60,6 +60,9 @@ struct Bootstrap0
 	void wsIgnore();
 	void idToken();
 
+	void token();
+	void tokenList();
+
 	Production *prodProd();
 	Production *prodLex();
 

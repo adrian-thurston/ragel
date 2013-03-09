@@ -1,8 +1,9 @@
 lex
+	token id //
 end
 
 def prod
-	[]
+	[id]
 
 def prod_list
 	[prod_list prod]

@@ -25,6 +25,7 @@
 #include "parser.h"
 #include "bootstrap.h"
 
+struct token_list;
 struct prod_el_list;
 struct prod_list;
 struct item;
@@ -39,6 +40,8 @@ struct Bootstrap1
 	{
 	}
 
+	void tokenList( token_list &TokenList );
+	void lexRegion( item &LexRegion );
 	void prodElList( ProdElList *list, prod_el_list &ProdElList );
 	void prodList( LelDefList *lelDefList, prod_list &ProdList );
 	void defineProd( item &Define );

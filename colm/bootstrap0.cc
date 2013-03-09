@@ -302,12 +302,34 @@ void Bootstrap0::definition( const String &name, Production *prod )
 	cflDef( ntDef, objectDef, defList );
 }
 
+void Bootstrap0::token()
+{
+	ProdEl *prodEl1 = prodRefLit( "'token'" );
+	ProdEl *prodEl2 = prodRefName( "Id", "id" );
+	ProdEl *prodEl3 = prodRefLit( "'/'" );
+	ProdEl *prodEl4 = prodRefLit( "'/'" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4 );
+	definition( "token", prod1 );
+}
+
+void Bootstrap0::tokenList()
+{
+	ProdEl *prodEl1 = prodRefName( "TokenList", "token_list" );
+	ProdEl *prodEl2 = prodRefName( "TokenDef", "token" );
+	Production *prod1 = production( prodEl1, prodEl2 );
+
+	Production *prod2 = production();
+
+	definition( "token_list",  prod1, prod2 );
+}
+
 Production *Bootstrap0::prodLex()
 {
 	ProdEl *prodEl1 = prodRefLit( "'lex'" );
-	ProdEl *prodEl2 = prodRefLit( "'end'" );
+	ProdEl *prodEl2 = prodRefName( "TokenList", "token_list" );
+	ProdEl *prodEl3 = prodRefLit( "'end'" );
 
-	return production( prodEl1, prodEl2 );
+	return production( prodEl1, prodEl2, prodEl3 );
 }
 
 void Bootstrap0::prodEl()
@@ -386,10 +408,12 @@ void Bootstrap0::go()
 	keyword( "'def'" );
 	keyword( "'lex'" );
 	keyword( "'end'" );
+	keyword( "'token'" );
 	idToken();
 	symbol( "'['" );
 	symbol( "']'" );
 	symbol( "'|'" );
+	symbol( "'/'" );
 
 	popRegionSet();
 
@@ -397,6 +421,8 @@ void Bootstrap0::go()
 	prodElList();
 	prod();
 	prodList();
+	token();
+	tokenList();
 	item();
 	startProd();
 

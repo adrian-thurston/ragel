@@ -44,7 +44,6 @@ void Bootstrap1::prodElList( ProdElList *list, prod_el_list &ProdElList )
 	}
 	
 	if ( ProdElList.ProdEl() != 0 ) {
-		std::cout << "prod el: " << ProdElList.ProdEl().text() << std::endl;
 		String name = ProdElList.ProdEl().text().c_str();
 
 		ProdEl *prodEl = prodElName( internal, name,
@@ -64,12 +63,50 @@ void Bootstrap1::prodList( LelDefList *lelDefList, prod_list &ProdList )
 
 	ProdElList *list = new ProdElList;
 	
-	std::cout << "prod: " << ProdList.Prod().text() << std::endl;
 	prod_el_list ProdElList = ProdList.Prod().ProdElList();
 	prodElList( list, ProdElList );
 
 	Production *prod = BaseParser::production( internal, list, false, 0, 0 );
 	prodAppend( lelDefList, prod );
+}
+
+LexTerm *litTerm( const char *str )
+{
+	Literal *lit = Literal::cons( internal, String( str ), Literal::LitString );
+	LexFactor *factor = LexFactor::cons( lit );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
+	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
+	LexTerm *term = LexTerm::cons( factorAug );
+	return term;
+}
+
+void Bootstrap1::tokenList( token_list &TokenList )
+{
+	if ( TokenList.TokenList() != 0 ) {
+		token_list RightTokenList = TokenList.TokenList();
+		tokenList( RightTokenList );
+	}
+	
+	if ( TokenList.TokenDef() != 0 ) {
+		String name = TokenList.TokenDef().Id().text().c_str();
+
+		String hello( "id" );
+
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+
+		LexTerm *lexTerm = litTerm( "'a'" );
+		LexExpression *expr = LexExpression::cons( lexTerm );
+		LexJoin *join = LexJoin::cons( expr );
+
+		tokenDef( internal, name, join, objectDef, 0, false, false, false );
+	}
+}
+
+void Bootstrap1::lexRegion( item &LexRegion )
+{
+	token_list TokenList = LexRegion.TokenList();
+	tokenList( TokenList );
 }
 
 void Bootstrap1::defineProd( item &Define )
@@ -106,14 +143,10 @@ void Bootstrap1::go()
 	while ( !ItemList.end() ) {
 
 		item Item = ItemList.value();
-		if ( Item.DefId() != 0 ) {
-			// std::cout << "define: " << Item.text() << std::endl;
-			std::cout << "define-id: " << Item.DefId().text() << std::endl;
+		if ( Item.DefId() != 0 )
 			defineProd( Item );
-		}
-		else {
-			//std::cout << "other:  " << Item.text() << std::endl;
-		}
+		else if ( Item.TokenList() != 0 )
+			lexRegion( Item );
 		ItemList = ItemList.next();
 	}
 
