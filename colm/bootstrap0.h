@@ -47,6 +47,8 @@ struct Bootstrap0
 			ProdEl *prodEl3 );
 	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
 			ProdEl *prodEl3, ProdEl *prodEl4 );
+	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
+			ProdEl *prodEl3, ProdEl *prodEl4, ProdEl *prodEl5 );
 
 	void definition( const String &name, Production *prod );
 	void definition( const String &name, Production *prod1, Production *prod2 );
@@ -57,6 +59,7 @@ struct Bootstrap0
 	void printParseTree( StmtList *stmtList );
 	void printParseTree();
 
+	void literalToken();
 	void wsIgnore();
 	void starToken();
 	void idToken();
@@ -64,12 +67,16 @@ struct Bootstrap0
 	void token();
 	void tokenList();
 
+	void lexFactor();
+	void lexFactorRep();
+	void lexExpr();
+	void lexTerm();
+
 	Production *prodProd();
 	Production *prodLex();
 
 	void optRepeat();
 	void optProdName();
-
 	void prodEl();
 	void prodElList();
 	void item();

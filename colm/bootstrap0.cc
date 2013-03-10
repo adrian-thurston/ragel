@@ -57,6 +57,17 @@ LexTerm *litTerm( const char *str )
 	return term;
 }
 
+LexFactorAug *litFactorAug( const char *str )
+{
+	Literal *lit = Literal::cons( internal, String( str ), Literal::LitString );
+	LexFactor *factor = LexFactor::cons( lit );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
+	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
+	return factorAug;
+}
+
+
 LexExpression *orExpr( LexTerm *term1, LexTerm *term2 )
 {
 	LexExpression *expr1 = LexExpression::cons( term1 );
@@ -187,6 +198,22 @@ void Bootstrap0::idToken()
 	tokenDef( internal, hello, join, objectDef, 0, false, false, false );
 }
 
+void Bootstrap0::literalToken()
+{
+	String hello( "literal" );
+
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, hello, pd->nextObjectId++ ); 
+
+	LexFactorAug *r1 = litFactorAug( "'\''" );
+	LexFactorAug *r2 = litFactorAug( "'\''" );
+
+	LexTerm *concat = concatTerm( r1, r2 );
+	LexExpression *expr = LexExpression::cons( concat );
+	LexJoin *join = LexJoin::cons( expr );
+
+	tokenDef( internal, hello, join, objectDef, 0, false, false, false );
+}
+
 void Bootstrap0::starToken()
 {
 	String hello( "star" );
@@ -295,6 +322,18 @@ Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
+Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
+		ProdEl *prodEl3, ProdEl *prodEl4, ProdEl *prodEl5 )
+{
+	ProdElList *prodElList = new ProdElList;
+	appendProdEl( prodElList, prodEl1 );
+	appendProdEl( prodElList, prodEl2 );
+	appendProdEl( prodElList, prodEl3 );
+	appendProdEl( prodElList, prodEl4 );
+	appendProdEl( prodElList, prodEl5 );
+	return BaseParser::production( internal, prodElList, false, 0, 0 );
+}
+
 void Bootstrap0::definition( const String &name, Production *prod1, Production *prod2 )
 {
 	LelDefList *defList = new LelDefList;
@@ -316,13 +355,65 @@ void Bootstrap0::definition( const String &name, Production *prod )
 	cflDef( ntDef, objectDef, defList );
 }
 
+void Bootstrap0::lexFactor()
+{
+	ProdEl *prodEl1 = prodRefName( "literal" );
+	Production *prod1 = production( prodEl1 );
+	
+	ProdEl *prodEl2 = prodRefLit( "'('" );
+	ProdEl *prodEl3 = prodRefName( "lex_expr" );
+	ProdEl *prodEl4 = prodRefLit( "')'" );
+	Production *prod2 = production( prodEl2, prodEl3, prodEl4 );
+
+	definition( "lex_factor", prod1, prod2 );
+}
+
+void Bootstrap0::lexFactorRep()
+{
+	ProdEl *prodEl1 = prodRefName( "lex_factor_rep" );
+	ProdEl *prodEl2 = prodRefName( "star" );
+	Production *prod1 = production( prodEl1, prodEl2 );
+	
+	ProdEl *prodEl3 = prodRefName( "lex_factor" );
+	Production *prod2 = production( prodEl3 );
+
+	definition( "lex_factor_rep", prod1, prod2 );
+}
+
+void Bootstrap0::lexTerm()
+{
+	ProdEl *prodEl1 = prodRefName( "lex_term" );
+	ProdEl *prodEl2 = prodRefLit( "'.'" );
+	ProdEl *prodEl3 = prodRefName( "lex_factor_rep" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
+	
+	ProdEl *prodEl4 = prodRefName( "lex_factor_rep" );
+	Production *prod2 = production( prodEl4 );
+
+	definition( "lex_term", prod1, prod2 );
+}
+
+void Bootstrap0::lexExpr()
+{
+	ProdEl *prodEl1 = prodRefName( "lex_expr" );
+	ProdEl *prodEl2 = prodRefLit( "'|'" );
+	ProdEl *prodEl3 = prodRefName( "lex_term" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
+	
+	ProdEl *prodEl4 = prodRefName( "lex_term" );
+	Production *prod2 = production( prodEl4 );
+
+	definition( "lex_expr", prod1, prod2 );
+}
+
 void Bootstrap0::token()
 {
 	ProdEl *prodEl1 = prodRefLit( "'token'" );
 	ProdEl *prodEl2 = prodRefName( "Id", "id" );
 	ProdEl *prodEl3 = prodRefLit( "'/'" );
-	ProdEl *prodEl4 = prodRefLit( "'/'" );
-	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4 );
+	ProdEl *prodEl4 = prodRefName( "LexExpr", "lex_expr" );
+	ProdEl *prodEl5 = prodRefLit( "'/'" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4, prodEl5 );
 	definition( "token", prod1 );
 }
 
@@ -449,13 +540,22 @@ void Bootstrap0::go()
 	keyword( "'token'" );
 	idToken();
 	starToken();
+	literalToken();
 	symbol( "'['" );
 	symbol( "']'" );
 	symbol( "'|'" );
 	symbol( "'/'" );
 	symbol( "':'" );
+	symbol( "'.'" );
+	symbol( "'('" );
+	symbol( "')'" );
 
 	popRegionSet();
+
+	lexFactor();
+	lexFactorRep();
+	lexTerm();
+	lexExpr();
 
 	optRepeat();
 	optProdName();

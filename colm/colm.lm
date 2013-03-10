@@ -1,5 +1,5 @@
 lex
-	token id //
+	token id /''/
 end
 
 def prod
