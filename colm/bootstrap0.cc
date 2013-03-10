@@ -67,6 +67,13 @@ LexFactorAug *litFactorAug( const char *str )
 	return factorAug;
 }
 
+LexFactorNeg *litFactorNeg( const char *str )
+{
+	Literal *lit = Literal::cons( internal, String( str ), Literal::LitString );
+	LexFactor *factor = LexFactor::cons( lit );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
+	return factorNeg;
+}
 
 LexExpression *orExpr( LexTerm *term1, LexTerm *term2 )
 {
@@ -112,6 +119,12 @@ LexFactorAug *starFactorAug( LexExpression *expr )
 	return factorAug;
 }
 
+LexFactorAug *starFactorAug( LexTerm *term )
+{
+	LexExpression *expr = LexExpression::cons( term );
+	return starFactorAug( expr );
+}
+
 LexFactorAug *plusFactorAug( LexExpression *expr )
 {
 	LexJoin *join = LexJoin::cons( expr );
@@ -130,6 +143,14 @@ LexTerm *concatTerm( LexFactorAug *fa1, LexFactorAug *fa2 )
 	return term2;
 }
 
+LexTerm *concatTerm( LexFactorAug *fa1, LexFactorAug *fa2, LexFactorAug *fa3 )
+{
+	LexTerm *term1 = LexTerm::cons( fa1 );
+	LexTerm *term2 = LexTerm::cons( term1, fa2, LexTerm::ConcatType );
+	LexTerm *term3 = LexTerm::cons( term2, fa3, LexTerm::ConcatType );
+	return term3;
+}
+
 LexFactorAug *parensFactorAug( LexExpression *expr )
 {
 	LexJoin *join = LexJoin::cons( expr );
@@ -138,6 +159,14 @@ LexFactorAug *parensFactorAug( LexExpression *expr )
 	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
 	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
 	return factorAug;
+}
+
+LexFactorNeg *parensFactorNeg( LexExpression *expr )
+{
+	LexJoin *join = LexJoin::cons( expr );
+	LexFactor *factor = LexFactor::cons( join );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
+	return factorNeg;
 }
 
 LexFactorAug *parensFactorAug( LexTerm *term )
@@ -149,6 +178,12 @@ LexFactorAug *parensFactorAug( LexTerm *term )
 	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
 	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
 	return factorAug;
+}
+
+LexTerm *parensTerm( LexExpression *expr )
+{
+	LexFactorAug *factorAug = parensFactorAug( expr );
+	return LexTerm::cons( factorAug );
 }
 
 void Bootstrap0::wsIgnore()
@@ -198,16 +233,43 @@ void Bootstrap0::idToken()
 	tokenDef( internal, hello, join, objectDef, 0, false, false, false );
 }
 
+LexTerm *charNegTerm( LexExpression *expr )
+{
+	LexFactorNeg *factorNeg = parensFactorNeg( expr );
+	LexFactorNeg *charNeg = LexFactorNeg::cons( internal, factorNeg, LexFactorNeg::CharNegateType );
+	LexFactorRep *factorRep = LexFactorRep::cons( internal, charNeg );
+	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
+	LexTerm *charNegTerm = LexTerm::cons( factorAug );
+	return charNegTerm;
+}
+
 void Bootstrap0::literalToken()
 {
 	String hello( "literal" );
 
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, hello, pd->nextObjectId++ ); 
 
-	LexFactorAug *r1 = litFactorAug( "'\''" );
-	LexFactorAug *r2 = litFactorAug( "'\''" );
+	LexFactorAug *r1 = litFactorAug( "'\\''" );
 
-	LexTerm *concat = concatTerm( r1, r2 );
+	/* [^'\\] */
+	LexExpression *ore = orExpr( 
+		litTerm( "'\\''" ),
+		litTerm( "'\\\\'" ) );
+
+	LexTerm *freeChars = charNegTerm( ore );
+
+	/* '\\' any */
+	LexFactorAug *backSlash = litFactorAug( "'\\\\'" );
+	LexExpression *any = LexExpression::cons( BT_Any );
+	LexTerm *escape = concatTerm( backSlash, parensFactorAug( any ) );
+
+	/* Union and repeat. */
+	LexExpression *charOrEscape = orExpr( freeChars, escape );
+	LexFactorAug *r2 = starFactorAug( charOrEscape );
+
+	LexFactorAug *r3 = litFactorAug( "'\''" );
+
+	LexTerm *concat = concatTerm( r1, r2, r3 );
 	LexExpression *expr = LexExpression::cons( concat );
 	LexJoin *join = LexJoin::cons( expr );
 
