@@ -25,6 +25,10 @@
 #include "parser.h"
 #include "bootstrap.h"
 
+struct lex_factor;
+struct lex_factor_rep;
+struct lex_term;
+struct lex_expr;
 struct token_list;
 struct prod_el_list;
 struct prod_list;
@@ -40,6 +44,14 @@ struct Bootstrap1
 	{
 	}
 
+
+	LexFactor *lexFactor( lex_factor &LexFactorTree );
+	LexFactorNeg *lexFactorNeg( lex_factor &LexFactorTree );
+	LexFactorNeg *lexFactorNeg( lex_factor_rep &LexFactorRepTree );
+	LexFactorRep *lexFactorRep( lex_factor_rep &LexFactorRepTree );
+	LexFactorAug *lexFactorAug( lex_factor_rep &LexFactorRepTree );
+	LexTerm *lexTerm( lex_term &LexTerm );
+	LexExpression *lexExpr( lex_expr &LexExpr );
 	void tokenList( token_list &TokenList );
 	void lexRegion( item &LexRegion );
 	void prodElList( ProdElList *list, prod_el_list &ProdElList );

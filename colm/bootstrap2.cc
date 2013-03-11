@@ -41,7 +41,6 @@ void Bootstrap2::go()
 	colmInit( 0 );
 	ColmProgram *program = colmNewProgram( &main_runtimeData );
 	colmRunProgram( program, 0, 0 );
-	colmDeleteProgram( program );
 
 	/* Extract the parse tree. */
 	start Start = ColmTree( program );
@@ -51,6 +50,9 @@ void Bootstrap2::go()
 		return;
 	}
 
-	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
-}
+	std::cout << Start.text() << std::endl;
 
+	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
+
+	colmDeleteProgram( program );
+}

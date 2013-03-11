@@ -52,6 +52,7 @@ struct Bootstrap0
 
 	void definition( const String &name, Production *prod );
 	void definition( const String &name, Production *prod1, Production *prod2 );
+	void definition( const String &name, Production *prod1, Production *prod2, Production *prod3 );
 
 	void keyword( const String &kw );
 	void symbol( const String &kw );
@@ -65,6 +66,7 @@ struct Bootstrap0
 	void idToken();
 
 	void token();
+	void ignore();
 	void tokenList();
 
 	void lexFactor();

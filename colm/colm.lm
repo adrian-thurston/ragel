@@ -1,5 +1,13 @@
 lex
-	token id / '\'hello\'' /
+	token id / 
+		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
+		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
+	/
+
+	ignore / 
+		( '\n' | '\t' | ' ' ) .
+		( '\n' | '\t' | ' ' )* 
+	/
 end
 
 def prod

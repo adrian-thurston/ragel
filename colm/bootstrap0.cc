@@ -396,6 +396,18 @@ Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
+void Bootstrap0::definition( const String &name, Production *prod1, Production *prod2, Production *prod3 )
+{
+	LelDefList *defList = new LelDefList;
+	prodAppend( defList, prod1 );
+	prodAppend( defList, prod2 );
+	prodAppend( defList, prod3 );
+
+	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	cflDef( ntDef, objectDef, defList );
+}
+
 void Bootstrap0::definition( const String &name, Production *prod1, Production *prod2 )
 {
 	LelDefList *defList = new LelDefList;
@@ -419,24 +431,30 @@ void Bootstrap0::definition( const String &name, Production *prod )
 
 void Bootstrap0::lexFactor()
 {
-	ProdEl *prodEl1 = prodRefName( "literal" );
+	ProdEl *prodEl1 = prodRefName( "Literal", "literal" );
 	Production *prod1 = production( prodEl1 );
 	
 	ProdEl *prodEl2 = prodRefLit( "'('" );
-	ProdEl *prodEl3 = prodRefName( "lex_expr" );
+	ProdEl *prodEl3 = prodRefName( "Expr", "lex_expr" );
 	ProdEl *prodEl4 = prodRefLit( "')'" );
 	Production *prod2 = production( prodEl2, prodEl3, prodEl4 );
 
-	definition( "lex_factor", prod1, prod2 );
+	ProdEl *prodEl5 = prodRefName( "Low", "literal" );
+	ProdEl *prodEl6 = prodRefLit( "'..'" );
+	ProdEl *prodEl7 = prodRefName( "High", "literal" );
+
+	Production *prod3 = production( prodEl5, prodEl6, prodEl7 );
+
+	definition( "lex_factor", prod1, prod2, prod3 );
 }
 
 void Bootstrap0::lexFactorRep()
 {
-	ProdEl *prodEl1 = prodRefName( "lex_factor_rep" );
-	ProdEl *prodEl2 = prodRefName( "star" );
+	ProdEl *prodEl1 = prodRefName( "FactorRep", "lex_factor_rep" );
+	ProdEl *prodEl2 = prodRefName( "Star", "star" );
 	Production *prod1 = production( prodEl1, prodEl2 );
 	
-	ProdEl *prodEl3 = prodRefName( "lex_factor" );
+	ProdEl *prodEl3 = prodRefName( "Factor", "lex_factor" );
 	Production *prod2 = production( prodEl3 );
 
 	definition( "lex_factor_rep", prod1, prod2 );
@@ -444,12 +462,12 @@ void Bootstrap0::lexFactorRep()
 
 void Bootstrap0::lexTerm()
 {
-	ProdEl *prodEl1 = prodRefName( "lex_term" );
+	ProdEl *prodEl1 = prodRefName( "Term", "lex_term" );
 	ProdEl *prodEl2 = prodRefLit( "'.'" );
-	ProdEl *prodEl3 = prodRefName( "lex_factor_rep" );
+	ProdEl *prodEl3 = prodRefName( "FactorRep", "lex_factor_rep" );
 	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
 	
-	ProdEl *prodEl4 = prodRefName( "lex_factor_rep" );
+	ProdEl *prodEl4 = prodRefName( "FactorRep", "lex_factor_rep" );
 	Production *prod2 = production( prodEl4 );
 
 	definition( "lex_term", prod1, prod2 );
@@ -457,12 +475,12 @@ void Bootstrap0::lexTerm()
 
 void Bootstrap0::lexExpr()
 {
-	ProdEl *prodEl1 = prodRefName( "lex_expr" );
+	ProdEl *prodEl1 = prodRefName( "Expr", "lex_expr" );
 	ProdEl *prodEl2 = prodRefLit( "'|'" );
-	ProdEl *prodEl3 = prodRefName( "lex_term" );
+	ProdEl *prodEl3 = prodRefName( "Term", "lex_term" );
 	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
 	
-	ProdEl *prodEl4 = prodRefName( "lex_term" );
+	ProdEl *prodEl4 = prodRefName( "Term", "lex_term" );
 	Production *prod2 = production( prodEl4 );
 
 	definition( "lex_expr", prod1, prod2 );
@@ -473,21 +491,35 @@ void Bootstrap0::token()
 	ProdEl *prodEl1 = prodRefLit( "'token'" );
 	ProdEl *prodEl2 = prodRefName( "Id", "id" );
 	ProdEl *prodEl3 = prodRefLit( "'/'" );
-	ProdEl *prodEl4 = prodRefName( "LexExpr", "lex_expr" );
+	ProdEl *prodEl4 = prodRefName( "Expr", "lex_expr" );
 	ProdEl *prodEl5 = prodRefLit( "'/'" );
 	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4, prodEl5 );
-	definition( "token", prod1 );
+	definition( "token_def", prod1 );
+}
+
+void Bootstrap0::ignore()
+{
+	ProdEl *prodEl1 = prodRefLit( "'ignore'" );
+	ProdEl *prodEl2 = prodRefLit( "'/'" );
+	ProdEl *prodEl3 = prodRefName( "Expr", "lex_expr" );
+	ProdEl *prodEl4 = prodRefLit( "'/'" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4 );
+	definition( "ignore_def", prod1 );
 }
 
 void Bootstrap0::tokenList()
 {
 	ProdEl *prodEl1 = prodRefName( "TokenList", "token_list" );
-	ProdEl *prodEl2 = prodRefName( "TokenDef", "token" );
+	ProdEl *prodEl2 = prodRefName( "TokenDef", "token_def" );
 	Production *prod1 = production( prodEl1, prodEl2 );
 
-	Production *prod2 = production();
+	ProdEl *prodEl3 = prodRefName( "TokenList", "token_list" );
+	ProdEl *prodEl4 = prodRefName( "IgnoreDef", "ignore_def" );
+	Production *prod2 = production( prodEl3, prodEl4 );
 
-	definition( "token_list",  prod1, prod2 );
+	Production *prod3 = production();
+
+	definition( "token_list",  prod1, prod2, prod3 );
 }
 
 Production *Bootstrap0::prodLex()
@@ -600,6 +632,7 @@ void Bootstrap0::go()
 	keyword( "'lex'" );
 	keyword( "'end'" );
 	keyword( "'token'" );
+	keyword( "'ignore'" );
 	idToken();
 	starToken();
 	literalToken();
@@ -611,6 +644,7 @@ void Bootstrap0::go()
 	symbol( "'.'" );
 	symbol( "'('" );
 	symbol( "')'" );
+	symbol( "'..'" );
 
 	popRegionSet();
 
@@ -625,6 +659,7 @@ void Bootstrap0::go()
 	prodElList();
 	prod();
 	prodList();
+	ignore();
 	token();
 	tokenList();
 	item();

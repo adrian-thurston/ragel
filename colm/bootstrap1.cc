@@ -93,6 +93,102 @@ LexTerm *litTerm( const char *str )
 	return term;
 }
 
+LexFactor *Bootstrap1::lexFactor( lex_factor &LexFactorTree )
+{
+	if ( LexFactorTree.Literal() != 0 ) {
+		String litString = LexFactorTree.Literal().text().c_str();
+		Literal *literal = Literal::cons( internal, litString, Literal::LitString );
+		LexFactor *factor = LexFactor::cons( literal );
+		return factor;
+	}
+	else if ( LexFactorTree.Expr() != 0 ) {
+		lex_expr LexExpr = LexFactorTree.Expr();
+		LexExpression *expr = lexExpr( LexExpr );
+		LexJoin *join = LexJoin::cons( expr );
+		LexFactor *factor = LexFactor::cons( join );
+		return factor;
+	}
+	else {
+		String low = LexFactorTree.Low().text().c_str();
+		Literal *lowLit = Literal::cons( internal, low, Literal::LitString );
+
+		String high = LexFactorTree.High().text().c_str();
+		Literal *highLit = Literal::cons( internal, high, Literal::LitString );
+
+		Range *range = Range::cons( lowLit, highLit );
+		LexFactor *factor = LexFactor::cons( range );
+		return factor;
+	}
+}
+
+LexFactorNeg *Bootstrap1::lexFactorNeg( lex_factor &LexFactorTree )
+{
+	LexFactor *factor = lexFactor( LexFactorTree );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
+	return factorNeg;
+}
+
+LexFactorRep *Bootstrap1::lexFactorRep( lex_factor_rep &LexFactorRepTree )
+{
+	if ( LexFactorRepTree.Star() != 0 ) {
+		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
+		LexFactorRep *recRep = lexFactorRep( Rec );
+		LexFactorRep *factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
+		return factorRep;
+	}
+	else {
+		lex_factor LexFactorTree = LexFactorRepTree.Factor();
+		LexFactorNeg *factorNeg = lexFactorNeg( LexFactorTree );
+		LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
+		return factorRep;
+	}
+}
+
+LexFactorAug *Bootstrap1::lexFactorAug( lex_factor_rep &LexFactorRepTree )
+{
+	LexFactorRep *factorRep = lexFactorRep( LexFactorRepTree );
+	return LexFactorAug::cons( factorRep );
+}
+
+LexTerm *Bootstrap1::lexTerm( lex_term &LexTermTree )
+{
+	if ( LexTermTree.Term() != 0 ) {
+		lex_term Rec = LexTermTree.Term();
+		LexTerm *leftTerm = lexTerm( Rec );
+
+		lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
+		LexFactorAug *factorAug = lexFactorAug( LexFactorRepTree );
+		LexTerm *term = LexTerm::cons( leftTerm, factorAug, LexTerm::ConcatType );
+		return term;
+	}
+	else {
+		lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
+		LexFactorAug *factorAug = lexFactorAug( LexFactorRepTree );
+		LexTerm *term = LexTerm::cons( factorAug );
+		return term;
+	}
+}
+
+LexExpression *Bootstrap1::lexExpr( lex_expr &LexExprTree )
+{
+	if ( LexExprTree.Expr() != 0 ) {
+		lex_expr Rec = LexExprTree.Expr();
+		LexExpression *leftExpr = lexExpr( Rec );
+
+		lex_term LexTermTree = LexExprTree.Term();
+		LexTerm *term = lexTerm( LexTermTree );
+		LexExpression *expr = LexExpression::cons( leftExpr, term, LexExpression::OrType );
+
+		return expr;
+	}
+	else {
+		lex_term LexTermTree = LexExprTree.Term();
+		LexTerm *term = lexTerm( LexTermTree );
+		LexExpression *expr = LexExpression::cons( term );
+		return expr;
+	}
+}
+
 void Bootstrap1::tokenList( token_list &TokenList )
 {
 	if ( TokenList.TokenList() != 0 ) {
@@ -101,24 +197,39 @@ void Bootstrap1::tokenList( token_list &TokenList )
 	}
 	
 	if ( TokenList.TokenDef() != 0 ) {
-		String name = TokenList.TokenDef().Id().text().c_str();
-
-		String hello( "id" );
+		token_def TokenDef = TokenList.TokenDef();
+		String name = TokenDef.Id().text().c_str();
 
 		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 
-		LexTerm *lexTerm = litTerm( "'a'" );
-		LexExpression *expr = LexExpression::cons( lexTerm );
+		lex_expr LexExpr = TokenDef.Expr();
+		LexExpression *expr = lexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
 		tokenDef( internal, name, join, objectDef, 0, false, false, false );
+	}
+
+	if ( TokenList.IgnoreDef() != 0 ) {
+		ignore_def IgnoreDef = TokenList.IgnoreDef();
+
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, 0, pd->nextObjectId++ ); 
+
+		lex_expr LexExpr = IgnoreDef.Expr();
+		LexExpression *expr = lexExpr( LexExpr );
+		LexJoin *join = LexJoin::cons( expr );
+
+		tokenDef( internal, 0, join, objectDef, 0, true, false, false );
 	}
 }
 
 void Bootstrap1::lexRegion( item &LexRegion )
 {
+	pushRegionSet( internal );
+
 	token_list TokenList = LexRegion.TokenList();
 	tokenList( TokenList );
+
+	popRegionSet();
 }
 
 void Bootstrap1::defineProd( item &Define )
