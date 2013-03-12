@@ -931,7 +931,7 @@ token_def:
 	opt_translate
 	final {
 		$3->objectDef->name = $2->name;
-		tokenDef( $1->loc, $2->name, $7->join, $3->objectDef,
+		defineToken( $1->loc, $2->name, $7->join, $3->objectDef,
 				$11->transBlock, $1->ignore, $5->noIgnore, $10->noIgnore );
 	};
 

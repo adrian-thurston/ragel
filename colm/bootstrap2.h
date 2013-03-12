@@ -23,7 +23,6 @@
 #include "avltree.h"
 #include "parsedata.h"
 #include "parser.h"
-#include "bootstrap.h"
 
 struct lex_factor;
 struct lex_factor_neg;
@@ -37,14 +36,12 @@ struct item;
 
 struct Bootstrap2
 :
-	public BootstrapBase
+	public BaseParser
 {
 	Bootstrap2( Compiler *pd )
 	:
-		BootstrapBase( pd )
-	{
-	}
-
+		BaseParser( pd )
+	{}
 
 	LexFactor *lexFactor( lex_factor &LexFactorTree );
 	LexFactorNeg *lexFactorNeg( lex_factor_neg &LexFactorNegTree );

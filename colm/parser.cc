@@ -157,7 +157,7 @@ LexJoin *BaseParser::literalJoin( const InputLoc &loc, const String &data )
 	return join;
 }
 
-void BaseParser::tokenDef( const InputLoc &loc, String name, LexJoin *join, ObjectDef *objectDef,
+void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join, ObjectDef *objectDef,
 		CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore )
 {
 	bool pushedRegion = false;

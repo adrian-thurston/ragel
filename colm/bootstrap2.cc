@@ -47,7 +47,6 @@ void Bootstrap2::prodElList( ProdElList *list, prod_el_list &ProdElList )
 		ObjectField *captureField = 0;
 		if ( El.OptName().Name() != 0 ) {
 			String fieldName = El.OptName().Name().text().c_str();
-			std::cout << "field name: " << fieldName << std::endl;
 			captureField = ObjectField::cons( internal, 0, fieldName );
 		}
 
@@ -212,7 +211,7 @@ void Bootstrap2::tokenList( token_list &TokenList )
 		LexExpression *expr = lexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
-		tokenDef( internal, name, join, objectDef, 0, false, false, false );
+		defineToken( internal, name, join, objectDef, 0, false, false, false );
 	}
 
 	if ( TokenList.IgnoreDef() != 0 ) {
@@ -224,7 +223,7 @@ void Bootstrap2::tokenList( token_list &TokenList )
 		LexExpression *expr = lexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
-		tokenDef( internal, 0, join, objectDef, 0, true, false, false );
+		defineToken( internal, 0, join, objectDef, 0, true, false, false );
 	}
 }
 
@@ -280,9 +279,6 @@ void Bootstrap2::go()
 	}
 
 	colmDeleteProgram( program );
-
-	parseInput( stmtList );
-	exportTree( stmtList );
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }

@@ -23,7 +23,6 @@
 #include "avltree.h"
 #include "parsedata.h"
 #include "parser.h"
-#include "bootstrap.h"
 
 struct lex_factor;
 struct lex_factor_neg;
@@ -37,24 +36,29 @@ struct item;
 
 struct Bootstrap1
 :
-	public BootstrapBase
+	public BaseParser
 {
 	Bootstrap1( Compiler *pd )
 	:
-		BootstrapBase(pd)
-	{
-	}
+		BaseParser(pd)
+	{}
 
-	LexFactor *lexFactor( lex_factor &LexFactorTree );
-	LexFactorNeg *lexFactorNeg( lex_factor_neg &LexFactorNegTree );
-	LexFactorRep *lexFactorRep( lex_factor_rep &LexFactorRepTree );
-	LexFactorAug *lexFactorAug( lex_factor_rep &LexFactorRepTree );
-	LexTerm *lexTerm( lex_term &LexTerm );
-	LexExpression *lexExpr( lex_expr &LexExpr );
-	void tokenList( token_list &TokenList );
-	void lexRegion( item &LexRegion );
-	void prodElList( ProdElList *list, prod_el_list &ProdElList );
-	void prodList( LelDefList *lelDefList, prod_list &ProdList );
-	void defineProd( item &Define );
+	/* Constructing the colm language data structures from the the parse tree. */
+	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
+	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
+	LexFactorRep *walkLexFactorRep( lex_factor_rep &LexFactorRepTree );
+	LexFactorAug *walkLexFactorAug( lex_factor_rep &LexFactorRepTree );
+	LexTerm *walkLexTerm( lex_term &LexTerm );
+	LexExpression *walkLexExpr( lex_expr &LexExpr );
+	void walkTokenList( token_list &TokenList );
+	void walkLexRegion( item &LexRegion );
+	void walkProdElList( ProdElList *list, prod_el_list &prodElList );
+	void walkProdList( LelDefList *list, prod_list &prodList );
+	void walkDefinition( item &define );
+
+	/* Constructing statements needed to parse and export the input. */
+	void consParseStmt( StmtList *stmtList );
+	void consExportStmt( StmtList *stmtList );
+
 	void go();
 };

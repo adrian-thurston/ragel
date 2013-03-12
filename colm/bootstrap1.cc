@@ -36,21 +36,20 @@ using std::string;
 
 extern RuntimeData main_runtimeData;
 
-void Bootstrap1::prodElList( ProdElList *list, prod_el_list &ProdElList )
+void Bootstrap1::walkProdElList( ProdElList *list, prod_el_list &prodElList )
 {
-	if ( ProdElList.ProdElList() != 0 ) {
-		prod_el_list RightProdElList = ProdElList.ProdElList();
-		prodElList( list, RightProdElList );
+	if ( prodElList.ProdElList() != 0 ) {
+		prod_el_list RightProdElList = prodElList.ProdElList();
+		walkProdElList( list, RightProdElList );
 	}
 	
-	if ( ProdElList.ProdEl() != 0 ) {
-		prod_el El = ProdElList.ProdEl();
+	if ( prodElList.ProdEl() != 0 ) {
+		prod_el El = prodElList.ProdEl();
 		String typeName = El.Id().text().c_str();
 
 		ObjectField *captureField = 0;
 		if ( El.OptName().Name() != 0 ) {
 			String fieldName = El.OptName().Name().text().c_str();
-			std::cout << "field name: " << fieldName << std::endl;
 			captureField = ObjectField::cons( internal, 0, fieldName );
 		}
 
@@ -66,53 +65,41 @@ void Bootstrap1::prodElList( ProdElList *list, prod_el_list &ProdElList )
 	}
 }
 
-void Bootstrap1::prodList( LelDefList *lelDefList, prod_list &ProdList )
+void Bootstrap1::walkProdList( LelDefList *outProdList, prod_list &prodList )
 {
-	if ( ProdList.ProdList() != 0 ) {
-		prod_list RightProdList = ProdList.ProdList();
-		prodList( lelDefList, RightProdList );
+	if ( prodList.ProdList() != 0 ) {
+		prod_list RightProdList = prodList.ProdList();
+		walkProdList( outProdList, RightProdList );
 	}
 
-	ProdElList *list = new ProdElList;
-	
-	prod_el_list ProdElList = ProdList.Prod().ProdElList();
-	prodElList( list, ProdElList );
+	ProdElList *outElList = new ProdElList;
+	prod_el_list prodElList = prodList.Prod().ProdElList();
+	walkProdElList( outElList, prodElList );
 
-	Production *prod = BaseParser::production( internal, list, false, 0, 0 );
-	prodAppend( lelDefList, prod );
+	Production *prod = BaseParser::production( internal, outElList, false, 0, 0 );
+	prodAppend( outProdList, prod );
 }
 
-LexTerm *litTerm( const char *str )
+LexFactor *Bootstrap1::walkLexFactor( lex_factor &lexFactor )
 {
-	Literal *lit = Literal::cons( internal, String( str ), Literal::LitString );
-	LexFactor *factor = LexFactor::cons( lit );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
-	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
-	LexTerm *term = LexTerm::cons( factorAug );
-	return term;
-}
-
-LexFactor *Bootstrap1::lexFactor( lex_factor &LexFactorTree )
-{
-	if ( LexFactorTree.Literal() != 0 ) {
-		String litString = LexFactorTree.Literal().text().c_str();
+	if ( lexFactor.Literal() != 0 ) {
+		String litString = lexFactor.Literal().text().c_str();
 		Literal *literal = Literal::cons( internal, litString, Literal::LitString );
 		LexFactor *factor = LexFactor::cons( literal );
 		return factor;
 	}
-	else if ( LexFactorTree.Expr() != 0 ) {
-		lex_expr LexExpr = LexFactorTree.Expr();
-		LexExpression *expr = lexExpr( LexExpr );
+	else if ( lexFactor.Expr() != 0 ) {
+		lex_expr LexExpr = lexFactor.Expr();
+		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 		LexFactor *factor = LexFactor::cons( join );
 		return factor;
 	}
 	else {
-		String low = LexFactorTree.Low().text().c_str();
+		String low = lexFactor.Low().text().c_str();
 		Literal *lowLit = Literal::cons( internal, low, Literal::LitString );
 
-		String high = LexFactorTree.High().text().c_str();
+		String high = lexFactor.High().text().c_str();
 		Literal *highLit = Literal::cons( internal, high, Literal::LitString );
 
 		Range *range = Range::cons( lowLit, highLit );
@@ -121,137 +108,169 @@ LexFactor *Bootstrap1::lexFactor( lex_factor &LexFactorTree )
 	}
 }
 
-LexFactorNeg *Bootstrap1::lexFactorNeg( lex_factor_neg &LexFactorNegTree )
+LexFactorNeg *Bootstrap1::walkLexFactorNeg( lex_factor_neg &lexFactorNeg )
 {
-	if ( LexFactorNegTree.FactorNeg() != 0 ) {
-		lex_factor_neg Rec = LexFactorNegTree.FactorNeg();
-		LexFactorNeg *recNeg = lexFactorNeg( Rec );
+	if ( lexFactorNeg.FactorNeg() != 0 ) {
+		lex_factor_neg Rec = lexFactorNeg.FactorNeg();
+		LexFactorNeg *recNeg = walkLexFactorNeg( Rec );
 		LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, recNeg, LexFactorNeg::CharNegateType );
 		return factorNeg;
 	}
 	else {
-		lex_factor LexFactorTree = LexFactorNegTree.Factor();
-		LexFactor *factor = lexFactor( LexFactorTree );
+		lex_factor LexFactorTree = lexFactorNeg.Factor();
+		LexFactor *factor = walkLexFactor( LexFactorTree );
 		LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
 		return factorNeg;
 	}
 }
 
-LexFactorRep *Bootstrap1::lexFactorRep( lex_factor_rep &LexFactorRepTree )
+LexFactorRep *Bootstrap1::walkLexFactorRep( lex_factor_rep &lexFactorRep )
 {
-	if ( LexFactorRepTree.FactorRep() != 0 ) {
-		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
-		LexFactorRep *recRep = lexFactorRep( Rec );
+	if ( lexFactorRep.FactorRep() != 0 ) {
+		lex_factor_rep Rec = lexFactorRep.FactorRep();
+		LexFactorRep *recRep = walkLexFactorRep( Rec );
 		LexFactorRep *factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
 		return factorRep;
 	}
 	else {
-		lex_factor_neg LexFactorNegTree = LexFactorRepTree.FactorNeg();
-		LexFactorNeg *factorNeg = lexFactorNeg( LexFactorNegTree );
+		lex_factor_neg LexFactorNegTree = lexFactorRep.FactorNeg();
+		LexFactorNeg *factorNeg = walkLexFactorNeg( LexFactorNegTree );
 		LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
 		return factorRep;
 	}
 }
 
-LexFactorAug *Bootstrap1::lexFactorAug( lex_factor_rep &LexFactorRepTree )
+LexFactorAug *Bootstrap1::walkLexFactorAug( lex_factor_rep &lexFactorRep )
 {
-	LexFactorRep *factorRep = lexFactorRep( LexFactorRepTree );
+	LexFactorRep *factorRep = walkLexFactorRep( lexFactorRep );
 	return LexFactorAug::cons( factorRep );
 }
 
-LexTerm *Bootstrap1::lexTerm( lex_term &LexTermTree )
+LexTerm *Bootstrap1::walkLexTerm( lex_term &lexTerm )
 {
-	if ( LexTermTree.Term() != 0 ) {
-		lex_term Rec = LexTermTree.Term();
-		LexTerm *leftTerm = lexTerm( Rec );
+	if ( lexTerm.Term() != 0 ) {
+		lex_term Rec = lexTerm.Term();
+		LexTerm *leftTerm = walkLexTerm( Rec );
 
-		lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
-		LexFactorAug *factorAug = lexFactorAug( LexFactorRepTree );
+		lex_factor_rep LexFactorRepTree = lexTerm.FactorRep();
+		LexFactorAug *factorAug = walkLexFactorAug( LexFactorRepTree );
 		LexTerm *term = LexTerm::cons( leftTerm, factorAug, LexTerm::ConcatType );
 		return term;
 	}
 	else {
-		lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
-		LexFactorAug *factorAug = lexFactorAug( LexFactorRepTree );
+		lex_factor_rep LexFactorRepTree = lexTerm.FactorRep();
+		LexFactorAug *factorAug = walkLexFactorAug( LexFactorRepTree );
 		LexTerm *term = LexTerm::cons( factorAug );
 		return term;
 	}
 }
 
-LexExpression *Bootstrap1::lexExpr( lex_expr &LexExprTree )
+LexExpression *Bootstrap1::walkLexExpr( lex_expr &LexExprTree )
 {
 	if ( LexExprTree.Expr() != 0 ) {
 		lex_expr Rec = LexExprTree.Expr();
-		LexExpression *leftExpr = lexExpr( Rec );
+		LexExpression *leftExpr = walkLexExpr( Rec );
 
-		lex_term LexTermTree = LexExprTree.Term();
-		LexTerm *term = lexTerm( LexTermTree );
+		lex_term lexTerm = LexExprTree.Term();
+		LexTerm *term = walkLexTerm( lexTerm );
 		LexExpression *expr = LexExpression::cons( leftExpr, term, LexExpression::OrType );
 
 		return expr;
 	}
 	else {
-		lex_term LexTermTree = LexExprTree.Term();
-		LexTerm *term = lexTerm( LexTermTree );
+		lex_term lexTerm = LexExprTree.Term();
+		LexTerm *term = walkLexTerm( lexTerm );
 		LexExpression *expr = LexExpression::cons( term );
 		return expr;
 	}
 }
 
-void Bootstrap1::tokenList( token_list &TokenList )
+void Bootstrap1::walkTokenList( token_list &tokenList )
 {
-	if ( TokenList.TokenList() != 0 ) {
-		token_list RightTokenList = TokenList.TokenList();
-		tokenList( RightTokenList );
+	if ( tokenList.TokenList() != 0 ) {
+		token_list RightTokenList = tokenList.TokenList();
+		walkTokenList( RightTokenList );
 	}
 	
-	if ( TokenList.TokenDef() != 0 ) {
-		token_def TokenDef = TokenList.TokenDef();
-		String name = TokenDef.Id().text().c_str();
+	if ( tokenList.TokenDef() != 0 ) {
+		token_def tokenDef = tokenList.TokenDef();
+		String name = tokenDef.Id().text().c_str();
 
 		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 
-		lex_expr LexExpr = TokenDef.Expr();
-		LexExpression *expr = lexExpr( LexExpr );
+		lex_expr LexExpr = tokenDef.Expr();
+		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
-		tokenDef( internal, name, join, objectDef, 0, false, false, false );
+		defineToken( internal, name, join, objectDef, 0, false, false, false );
 	}
 
-	if ( TokenList.IgnoreDef() != 0 ) {
-		ignore_def IgnoreDef = TokenList.IgnoreDef();
+	if ( tokenList.IgnoreDef() != 0 ) {
+		ignore_def IgnoreDef = tokenList.IgnoreDef();
 
 		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, 0, pd->nextObjectId++ ); 
 
 		lex_expr LexExpr = IgnoreDef.Expr();
-		LexExpression *expr = lexExpr( LexExpr );
+		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
-		tokenDef( internal, 0, join, objectDef, 0, true, false, false );
+		defineToken( internal, 0, join, objectDef, 0, true, false, false );
 	}
 }
 
-void Bootstrap1::lexRegion( item &LexRegion )
+void Bootstrap1::walkLexRegion( item &LexRegion )
 {
 	pushRegionSet( internal );
 
-	token_list TokenList = LexRegion.TokenList();
-	tokenList( TokenList );
+	token_list tokenList = LexRegion.TokenList();
+	walkTokenList( tokenList );
 
 	popRegionSet();
 }
 
-void Bootstrap1::defineProd( item &Define )
+void Bootstrap1::walkDefinition( item &define )
 {
-	prod_list ProdList = Define.ProdList();
+	prod_list ProdList = define.ProdList();
 
 	LelDefList *defList = new LelDefList;
-	prodList( defList, ProdList );
+	walkProdList( defList, ProdList );
 
-	String name = Define.DefId().text().c_str();
+	String name = define.DefId().text().c_str();
 	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
+}
+
+void Bootstrap1::consParseStmt( StmtList *stmtList )
+{
+	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
+	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
+
+	LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, String("stdin") );
+	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+
+	ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, expr );
+	ConsItemList *list = ConsItemList::cons( consItem );
+
+	ObjectField *objField = ObjectField::cons( internal, 0, String("P") );
+
+	expr = parseCmd( internal, false, objField, typeRef, 0, list );
+	LangStmt *stmt = LangStmt::cons( internal, LangStmt::ExprType, expr );
+	stmtList->append( stmt );
+}
+
+void Bootstrap1::consExportStmt( StmtList *stmtList )
+{
+	QualItemVect *qual = new QualItemVect;
+	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
+	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("tree") );
+	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+
+	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
+	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
+	ObjectField *program = ObjectField::cons( internal, typeRef, String("ColmTree") );
+	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
+	stmtList->append( programExport );
 }
 
 void Bootstrap1::go()
@@ -276,16 +295,16 @@ void Bootstrap1::go()
 
 		item Item = ItemList.value();
 		if ( Item.DefId() != 0 )
-			defineProd( Item );
+			walkDefinition( Item );
 		else if ( Item.TokenList() != 0 )
-			lexRegion( Item );
+			walkLexRegion( Item );
 		ItemList = ItemList.next();
 	}
 
 	colmDeleteProgram( program );
 
-	parseInput( stmtList );
-	exportTree( stmtList );
+	consParseStmt( stmtList );
+	consExportStmt( stmtList );
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }

@@ -60,7 +60,7 @@ struct BaseParser
 	void addArgvList();
 	LexJoin *literalJoin( const InputLoc &loc, const String &data );
 
-	void tokenDef( const InputLoc &loc, String name, LexJoin *join, ObjectDef *objectDef,
+	void defineToken( const InputLoc &loc, String name, LexJoin *join, ObjectDef *objectDef,
 			CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore );
 
 	void zeroDef( const InputLoc &loc, const String &data,
