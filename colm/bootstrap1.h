@@ -26,6 +26,7 @@
 #include "bootstrap.h"
 
 struct lex_factor;
+struct lex_factor_neg;
 struct lex_factor_rep;
 struct lex_term;
 struct lex_expr;
@@ -44,10 +45,8 @@ struct Bootstrap1
 	{
 	}
 
-
 	LexFactor *lexFactor( lex_factor &LexFactorTree );
-	LexFactorNeg *lexFactorNeg( lex_factor &LexFactorTree );
-	LexFactorNeg *lexFactorNeg( lex_factor_rep &LexFactorRepTree );
+	LexFactorNeg *lexFactorNeg( lex_factor_neg &LexFactorNegTree );
 	LexFactorRep *lexFactorRep( lex_factor_rep &LexFactorRepTree );
 	LexFactorAug *lexFactorAug( lex_factor_rep &LexFactorRepTree );
 	LexTerm *lexTerm( lex_term &LexTerm );

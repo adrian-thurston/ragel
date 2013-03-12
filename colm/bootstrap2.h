@@ -23,21 +23,39 @@
 #include "avltree.h"
 #include "parsedata.h"
 #include "parser.h"
+#include "bootstrap.h"
+
+struct lex_factor;
+struct lex_factor_neg;
+struct lex_factor_rep;
+struct lex_term;
+struct lex_expr;
+struct token_list;
+struct prod_el_list;
+struct prod_list;
+struct item;
 
 struct Bootstrap2
 :
-	public BaseParser
+	public BootstrapBase
 {
 	Bootstrap2( Compiler *pd )
 	:
-		BaseParser(pd)
+		BootstrapBase( pd )
 	{
 	}
 
+
+	LexFactor *lexFactor( lex_factor &LexFactorTree );
+	LexFactorNeg *lexFactorNeg( lex_factor_neg &LexFactorNegTree );
+	LexFactorRep *lexFactorRep( lex_factor_rep &LexFactorRepTree );
+	LexFactorAug *lexFactorAug( lex_factor_rep &LexFactorRepTree );
+	LexTerm *lexTerm( lex_term &LexTerm );
+	LexExpression *lexExpr( lex_expr &LexExpr );
+	void tokenList( token_list &TokenList );
+	void lexRegion( item &LexRegion );
+	void prodElList( ProdElList *list, prod_el_list &ProdElList );
+	void prodList( LelDefList *lelDefList, prod_list &ProdList );
+	void defineProd( item &Define );
 	void go();
 };
-
-
-
-
-

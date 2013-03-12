@@ -121,24 +121,33 @@ LexFactor *Bootstrap1::lexFactor( lex_factor &LexFactorTree )
 	}
 }
 
-LexFactorNeg *Bootstrap1::lexFactorNeg( lex_factor &LexFactorTree )
+LexFactorNeg *Bootstrap1::lexFactorNeg( lex_factor_neg &LexFactorNegTree )
 {
-	LexFactor *factor = lexFactor( LexFactorTree );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-	return factorNeg;
+	if ( LexFactorNegTree.FactorNeg() != 0 ) {
+		lex_factor_neg Rec = LexFactorNegTree.FactorNeg();
+		LexFactorNeg *recNeg = lexFactorNeg( Rec );
+		LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, recNeg, LexFactorNeg::CharNegateType );
+		return factorNeg;
+	}
+	else {
+		lex_factor LexFactorTree = LexFactorNegTree.Factor();
+		LexFactor *factor = lexFactor( LexFactorTree );
+		LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
+		return factorNeg;
+	}
 }
 
 LexFactorRep *Bootstrap1::lexFactorRep( lex_factor_rep &LexFactorRepTree )
 {
-	if ( LexFactorRepTree.Star() != 0 ) {
+	if ( LexFactorRepTree.FactorRep() != 0 ) {
 		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
 		LexFactorRep *recRep = lexFactorRep( Rec );
 		LexFactorRep *factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
 		return factorRep;
 	}
 	else {
-		lex_factor LexFactorTree = LexFactorRepTree.Factor();
-		LexFactorNeg *factorNeg = lexFactorNeg( LexFactorTree );
+		lex_factor_neg LexFactorNegTree = LexFactorRepTree.FactorNeg();
+		LexFactorNeg *factorNeg = lexFactorNeg( LexFactorNegTree );
 		LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
 		return factorRep;
 	}

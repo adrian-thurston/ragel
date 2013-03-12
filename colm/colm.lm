@@ -1,8 +1,30 @@
 lex
+	token DEF / 'def' /
+	token LEX / 'lex' /
+	token END / 'end' /
+	token TOKEN / 'token' /
+	token IGNORE / 'ignore' /
+
 	token id / 
 		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
 		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
 	/
+
+	token lit /
+		'\'' . ( ^( '\'' | '\\' ) | '\\' . ( 'a' .. 'z' | '\'' | '\\' ) )* .  '\''
+	/
+
+	token SQOPEN /'['/
+	token SQCLOSE /']'/
+	token BAR /'|'/
+	token FSLASH /'/'/
+	token COLON /':'/
+	token DOT /'.'/
+	token POPEN /'('/
+	token PCLOSE /')'/
+	token DOTDOT /'..'/
+	token STAR /'*'/
+	token CARET /'^'/
 
 	ignore / 
 		( '\n' | '\t' | ' ' ) .
@@ -10,15 +32,63 @@ lex
 	/
 end
 
+def lex_factor
+	[Literal: lit]
+|	[POPEN Expr: lex_expr PCLOSE]
+|	[Low: lit DOTDOT High: lit]
+
+def lex_factor_neg
+	[CARET FactorNeg: lex_factor_neg]
+|	[Factor: lex_factor]
+
+def lex_factor_rep
+	[FactorRep: lex_factor_rep STAR]
+|	[FactorNeg: lex_factor_neg]
+
+def lex_term
+	[Term: lex_term DOT FactorRep: lex_factor_rep]
+|	[FactorRep: lex_factor_rep]
+
+def lex_expr
+	[Expr: lex_expr BAR Term: lex_term]
+|	[Term: lex_term]
+
+def token_def
+	[TOKEN Id: id FSLASH Expr: lex_expr FSLASH]
+
+def ignore_def
+	[IGNORE FSLASH Expr: lex_expr FSLASH]
+
+def token_list
+	[TokenList: token_list TokenDef: token_def]
+|	[TokenList: token_list IgnoreDef: ignore_def]
+|	[]
+
+def opt_prod_name
+	[Name: id COLON]
+|	[]
+
+def opt_prod_repeat
+	[Star: STAR]
+|	[]
+
+def prod_el
+	[OptName: opt_prod_name Id: id OptRepeat: opt_prod_repeat]
+
+def prod_el_list
+	[ProdElList: prod_el_list ProdEl: prod_el]
+|	[]
+
 def prod
-	[id]
+	[SQOPEN ProdElList: prod_el_list SQCLOSE]
 
 def prod_list
-	[prod_list prod]
-|	[prod]
+	[ProdList: prod_list BAR Prod: prod]
+|	[Prod: prod]
 
 def item
-	[prod_list]
+	[LEX TokenList: token_list END]
+|	[DEF DefId: id ProdList: prod_list]
 
 def start
-	[item*]
+	[ItemList: item*]

@@ -71,7 +71,7 @@ bootstrap1_LDADD = libprog.a libcolm.a
 colm_CXXFLAGS = $(common_CFLAGS) 
 colm_CFLAGS = $(common_CFLAGS)
 colm_SOURCES = lmparse.h lmscan.h lmparse.cc lmscan.cc \
-		bootstrap2.cc exports2.h exports2.cc parse2.c main.cc
+		bootstrap.cc bootstrap2.cc exports2.h exports2.cc parse2.c main.cc
 colm_LDADD = libprog.a libcolm.a
 
 colmincdir = $(includedir)/colm

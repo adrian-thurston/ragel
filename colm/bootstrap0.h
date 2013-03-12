@@ -61,6 +61,7 @@ struct Bootstrap0
 	void printParseTree();
 
 	void literalToken();
+	void commentIgnore();
 	void wsIgnore();
 	void starToken();
 	void idToken();
@@ -70,6 +71,7 @@ struct Bootstrap0
 	void tokenList();
 
 	void lexFactor();
+	void lexFactorNeg();
 	void lexFactorRep();
 	void lexExpr();
 	void lexTerm();
