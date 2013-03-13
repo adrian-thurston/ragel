@@ -97,8 +97,14 @@ def prod_list
 |	[Prod: prod]
 
 def statement
-	[PRINT POPEN code_expr* PCLOSE]
-|	[code_expr]
+	[Print: print_stmt]
+|	[Expr: expr_stmt]
+
+def print_stmt
+	[PRINT POPEN CodeExprList: code_expr* PCLOSE]
+
+def expr_stmt
+	[CodeExpr: code_expr]
 
 def code_expr
 	[var_ref]

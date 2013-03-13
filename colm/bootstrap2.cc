@@ -33,11 +33,11 @@
 
 extern RuntimeData main_runtimeData;
 
-void Bootstrap2::prodElList( ProdElList *list, prod_el_list &ProdElList )
+void Bootstrap2::walkProdElList( ProdElList *list, prod_el_list &ProdElList )
 {
 	if ( ProdElList.ProdElList() != 0 ) {
 		prod_el_list RightProdElList = ProdElList.ProdElList();
-		prodElList( list, RightProdElList );
+		walkProdElList( list, RightProdElList );
 	}
 	
 	if ( ProdElList.ProdEl() != 0 ) {
@@ -72,24 +72,13 @@ void Bootstrap2::walkProdList( LelDefList *lelDefList, prod_list &ProdList )
 	ProdElList *list = new ProdElList;
 	
 	prod_el_list ProdElList = ProdList.Prod().ProdElList();
-	prodElList( list, ProdElList );
+	walkProdElList( list, ProdElList );
 
 	Production *prod = BaseParser::production( internal, list, false, 0, 0 );
 	prodAppend( lelDefList, prod );
 }
 
-LexTerm *litTerm( const char *str )
-{
-	Literal *lit = Literal::cons( internal, String( str ), Literal::LitString );
-	LexFactor *factor = LexFactor::cons( lit );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
-	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
-	LexTerm *term = LexTerm::cons( factorAug );
-	return term;
-}
-
-LexFactor *Bootstrap2::lexFactor( lex_factor &LexFactorTree )
+LexFactor *Bootstrap2::walkLexFactor( lex_factor &LexFactorTree )
 {
 	if ( LexFactorTree.Literal() != 0 ) {
 		String litString = LexFactorTree.Literal().text().c_str();
@@ -99,7 +88,7 @@ LexFactor *Bootstrap2::lexFactor( lex_factor &LexFactorTree )
 	}
 	else if ( LexFactorTree.Expr() != 0 ) {
 		lex_expr LexExpr = LexFactorTree.Expr();
-		LexExpression *expr = lexExpr( LexExpr );
+		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 		LexFactor *factor = LexFactor::cons( join );
 		return factor;
@@ -117,88 +106,88 @@ LexFactor *Bootstrap2::lexFactor( lex_factor &LexFactorTree )
 	}
 }
 
-LexFactorNeg *Bootstrap2::lexFactorNeg( lex_factor_neg &LexFactorNegTree )
+LexFactorNeg *Bootstrap2::walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
 {
 	if ( LexFactorNegTree.FactorNeg() != 0 ) {
 		lex_factor_neg Rec = LexFactorNegTree.FactorNeg();
-		LexFactorNeg *recNeg = lexFactorNeg( Rec );
+		LexFactorNeg *recNeg = walkLexFactorNeg( Rec );
 		LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, recNeg, LexFactorNeg::CharNegateType );
 		return factorNeg;
 	}
 	else {
 		lex_factor LexFactorTree = LexFactorNegTree.Factor();
-		LexFactor *factor = lexFactor( LexFactorTree );
+		LexFactor *factor = walkLexFactor( LexFactorTree );
 		LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
 		return factorNeg;
 	}
 }
 
-LexFactorRep *Bootstrap2::lexFactorRep( lex_factor_rep &LexFactorRepTree )
+LexFactorRep *Bootstrap2::walkLexFactorRep( lex_factor_rep &LexFactorRepTree )
 {
 	if ( LexFactorRepTree.FactorRep() != 0 ) {
 		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
-		LexFactorRep *recRep = lexFactorRep( Rec );
+		LexFactorRep *recRep = walkLexFactorRep( Rec );
 		LexFactorRep *factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
 		return factorRep;
 	}
 	else {
 		lex_factor_neg LexFactorNegTree = LexFactorRepTree.FactorNeg();
-		LexFactorNeg *factorNeg = lexFactorNeg( LexFactorNegTree );
+		LexFactorNeg *factorNeg = walkLexFactorNeg( LexFactorNegTree );
 		LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
 		return factorRep;
 	}
 }
 
-LexFactorAug *Bootstrap2::lexFactorAug( lex_factor_rep &LexFactorRepTree )
+LexFactorAug *Bootstrap2::walkLexFactorAug( lex_factor_rep &LexFactorRepTree )
 {
-	LexFactorRep *factorRep = lexFactorRep( LexFactorRepTree );
+	LexFactorRep *factorRep = walkLexFactorRep( LexFactorRepTree );
 	return LexFactorAug::cons( factorRep );
 }
 
-LexTerm *Bootstrap2::lexTerm( lex_term &LexTermTree )
+LexTerm *Bootstrap2::walkLexTerm( lex_term &LexTermTree )
 {
 	if ( LexTermTree.Term() != 0 ) {
 		lex_term Rec = LexTermTree.Term();
-		LexTerm *leftTerm = lexTerm( Rec );
+		LexTerm *leftTerm = walkLexTerm( Rec );
 
 		lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
-		LexFactorAug *factorAug = lexFactorAug( LexFactorRepTree );
+		LexFactorAug *factorAug = walkLexFactorAug( LexFactorRepTree );
 		LexTerm *term = LexTerm::cons( leftTerm, factorAug, LexTerm::ConcatType );
 		return term;
 	}
 	else {
 		lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
-		LexFactorAug *factorAug = lexFactorAug( LexFactorRepTree );
+		LexFactorAug *factorAug = walkLexFactorAug( LexFactorRepTree );
 		LexTerm *term = LexTerm::cons( factorAug );
 		return term;
 	}
 }
 
-LexExpression *Bootstrap2::lexExpr( lex_expr &LexExprTree )
+LexExpression *Bootstrap2::walkLexExpr( lex_expr &LexExprTree )
 {
 	if ( LexExprTree.Expr() != 0 ) {
 		lex_expr Rec = LexExprTree.Expr();
-		LexExpression *leftExpr = lexExpr( Rec );
+		LexExpression *leftExpr = walkLexExpr( Rec );
 
 		lex_term LexTermTree = LexExprTree.Term();
-		LexTerm *term = lexTerm( LexTermTree );
+		LexTerm *term = walkLexTerm( LexTermTree );
 		LexExpression *expr = LexExpression::cons( leftExpr, term, LexExpression::OrType );
 
 		return expr;
 	}
 	else {
 		lex_term LexTermTree = LexExprTree.Term();
-		LexTerm *term = lexTerm( LexTermTree );
+		LexTerm *term = walkLexTerm( LexTermTree );
 		LexExpression *expr = LexExpression::cons( term );
 		return expr;
 	}
 }
 
-void Bootstrap2::tokenList( token_list &TokenList )
+void Bootstrap2::walkTokenList( token_list &TokenList )
 {
 	if ( TokenList.TokenList() != 0 ) {
 		token_list RightTokenList = TokenList.TokenList();
-		tokenList( RightTokenList );
+		walkTokenList( RightTokenList );
 	}
 	
 	if ( TokenList.TokenDef() != 0 ) {
@@ -208,7 +197,7 @@ void Bootstrap2::tokenList( token_list &TokenList )
 		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 
 		lex_expr LexExpr = TokenDef.Expr();
-		LexExpression *expr = lexExpr( LexExpr );
+		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
 		defineToken( internal, name, join, objectDef, 0, false, false, false );
@@ -220,24 +209,24 @@ void Bootstrap2::tokenList( token_list &TokenList )
 		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, 0, pd->nextObjectId++ ); 
 
 		lex_expr LexExpr = IgnoreDef.Expr();
-		LexExpression *expr = lexExpr( LexExpr );
+		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
 		defineToken( internal, 0, join, objectDef, 0, true, false, false );
 	}
 }
 
-void Bootstrap2::lexRegion( region_def &regionDef )
+void Bootstrap2::walkLexRegion( region_def &regionDef )
 {
 	pushRegionSet( internal );
 
 	token_list TokenList = regionDef.TokenList();
-	tokenList( TokenList );
+	walkTokenList( TokenList );
 
 	popRegionSet();
 }
 
-void Bootstrap2::defineProd( cfl_def &cflDef )
+void Bootstrap2::walkCflDef( cfl_def &cflDef )
 {
 	prod_list prodList = cflDef.ProdList();
 
@@ -248,6 +237,28 @@ void Bootstrap2::defineProd( cfl_def &cflDef )
 	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 	BaseParser::cflDef( ntDef, objectDef, defList );
+}
+
+void Bootstrap2::walkPrintStmt( print_stmt &printStmt )
+{
+	std::cerr << "print statement: " << printStmt.text() << std::endl;
+}
+
+void Bootstrap2::walkExprStmt( expr_stmt &exprStmt )
+{
+	std::cerr << "expr statement: " << exprStmt.text() << std::endl;
+}
+
+void Bootstrap2::walkStatement( statement &Statement )
+{
+	if ( Statement.Print() != 0 ) {
+		print_stmt printStmt = Statement.Print();
+		walkPrintStmt( printStmt );
+	}
+	else if ( Statement.Expr() != 0 ) {
+		expr_stmt exprStmt = Statement.Expr();
+		walkExprStmt( exprStmt );
+	}
 }
 
 void Bootstrap2::go()
@@ -274,11 +285,15 @@ void Bootstrap2::go()
 
 		if ( rootItem.CflDef() != 0 ) {
 			cfl_def cflDef = rootItem.CflDef();
-			defineProd( cflDef );
+			walkCflDef( cflDef );
 		}
 		else if ( rootItem.RegionDef() != 0 ) {
 			region_def regionDef = rootItem.RegionDef();
-			lexRegion( regionDef );
+			walkLexRegion( regionDef );
+		}
+		else if ( rootItem.Statement() != 0 ) {
+			statement Statement = rootItem.Statement();
+			walkStatement( Statement );
 		}
 
 		rootItemList = rootItemList.next();

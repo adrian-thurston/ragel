@@ -35,6 +35,9 @@ struct prod_list;
 struct root_item;
 struct region_def;
 struct cfl_def;
+struct statement;
+struct print_stmt;
+struct expr_stmt;
 
 struct Bootstrap2
 :
@@ -45,16 +48,20 @@ struct Bootstrap2
 		BaseParser( pd )
 	{}
 
-	LexFactor *lexFactor( lex_factor &LexFactorTree );
-	LexFactorNeg *lexFactorNeg( lex_factor_neg &LexFactorNegTree );
-	LexFactorRep *lexFactorRep( lex_factor_rep &LexFactorRepTree );
-	LexFactorAug *lexFactorAug( lex_factor_rep &LexFactorRepTree );
-	LexTerm *lexTerm( lex_term &LexTerm );
-	LexExpression *lexExpr( lex_expr &LexExpr );
-	void tokenList( token_list &TokenList );
-	void lexRegion( region_def &regionDef );
-	void prodElList( ProdElList *list, prod_el_list &ProdElList );
+
+	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
+	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
+	LexFactorRep *walkLexFactorRep( lex_factor_rep &LexFactorRepTree );
+	LexFactorAug *walkLexFactorAug( lex_factor_rep &LexFactorRepTree );
+	LexTerm *walkLexTerm( lex_term &LexTerm );
+	LexExpression *walkLexExpr( lex_expr &LexExpr );
+	void walkTokenList( token_list &TokenList );
+	void walkLexRegion( region_def &regionDef );
+	void walkProdElList( ProdElList *list, prod_el_list &ProdElList );
 	void walkProdList( LelDefList *lelDefList, prod_list &ProdList );
-	void defineProd( cfl_def &cflDef );
+	void walkCflDef( cfl_def &cflDef );
+	void walkStatement( statement &Statement );
+	void walkPrintStmt( print_stmt &PrintStmt );
+	void walkExprStmt( expr_stmt &ExprStmt );
 	void go();
 };
