@@ -32,7 +32,9 @@ struct lex_expr;
 struct token_list;
 struct prod_el_list;
 struct prod_list;
-struct item;
+struct root_item;
+struct region_def;
+struct cfl_def;
 
 struct Bootstrap2
 :
@@ -50,9 +52,9 @@ struct Bootstrap2
 	LexTerm *lexTerm( lex_term &LexTerm );
 	LexExpression *lexExpr( lex_expr &LexExpr );
 	void tokenList( token_list &TokenList );
-	void lexRegion( item &LexRegion );
+	void lexRegion( region_def &regionDef );
 	void prodElList( ProdElList *list, prod_el_list &ProdElList );
-	void prodList( LelDefList *lelDefList, prod_list &ProdList );
-	void defineProd( item &Define );
+	void walkProdList( LelDefList *lelDefList, prod_list &ProdList );
+	void defineProd( cfl_def &cflDef );
 	void go();
 };

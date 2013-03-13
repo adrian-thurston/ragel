@@ -62,11 +62,11 @@ void Bootstrap2::prodElList( ProdElList *list, prod_el_list &ProdElList )
 	}
 }
 
-void Bootstrap2::prodList( LelDefList *lelDefList, prod_list &ProdList )
+void Bootstrap2::walkProdList( LelDefList *lelDefList, prod_list &ProdList )
 {
 	if ( ProdList.ProdList() != 0 ) {
 		prod_list RightProdList = ProdList.ProdList();
-		prodList( lelDefList, RightProdList );
+		walkProdList( lelDefList, RightProdList );
 	}
 
 	ProdElList *list = new ProdElList;
@@ -227,27 +227,27 @@ void Bootstrap2::tokenList( token_list &TokenList )
 	}
 }
 
-void Bootstrap2::lexRegion( item &LexRegion )
+void Bootstrap2::lexRegion( region_def &regionDef )
 {
 	pushRegionSet( internal );
 
-	token_list TokenList = LexRegion.TokenList();
+	token_list TokenList = regionDef.TokenList();
 	tokenList( TokenList );
 
 	popRegionSet();
 }
 
-void Bootstrap2::defineProd( item &Define )
+void Bootstrap2::defineProd( cfl_def &cflDef )
 {
-	prod_list ProdList = Define.ProdList();
+	prod_list prodList = cflDef.ProdList();
 
 	LelDefList *defList = new LelDefList;
-	prodList( defList, ProdList );
+	walkProdList( defList, prodList );
 
-	String name = Define.DefId().text().c_str();
+	String name = cflDef.DefId().text().c_str();
 	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
-	cflDef( ntDef, objectDef, defList );
+	BaseParser::cflDef( ntDef, objectDef, defList );
 }
 
 void Bootstrap2::go()
@@ -267,15 +267,21 @@ void Bootstrap2::go()
 	}
 
 	/* Walk the list of items. */
-	_repeat_item ItemList = Start.ItemList();
-	while ( !ItemList.end() ) {
+	_repeat_root_item rootItemList = Start.RootItemList();
+	while ( !rootItemList.end() ) {
 
-		item Item = ItemList.value();
-		if ( Item.DefId() != 0 )
-			defineProd( Item );
-		else if ( Item.TokenList() != 0 )
-			lexRegion( Item );
-		ItemList = ItemList.next();
+		root_item rootItem = rootItemList.value();
+
+		if ( rootItem.CflDef() != 0 ) {
+			cfl_def cflDef = rootItem.CflDef();
+			defineProd( cflDef );
+		}
+		else if ( rootItem.RegionDef() != 0 ) {
+			region_def regionDef = rootItem.RegionDef();
+			lexRegion( regionDef );
+		}
+
+		rootItemList = rootItemList.next();
 	}
 
 	colmDeleteProgram( program );

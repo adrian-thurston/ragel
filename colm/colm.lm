@@ -4,12 +4,14 @@ lex
 	token END / 'end' /
 	token TOKEN / 'token' /
 	token IGNORE / 'ignore' /
+	token PRINT / 'print' /
 
 	token id / 
 		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
 		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
 	/
 
+	# FIXME: need the 'any' builtin.
 	token lit /
 		'\'' . ( ^( '\'' | '\\' ) | '\\' . ( 'a' .. 'z' | '\'' | '\\' ) )* .  '\''
 	/
@@ -30,28 +32,41 @@ lex
 		( '\n' | '\t' | ' ' ) .
 		( '\n' | '\t' | ' ' )* 
 	/
+
+	ignore / '#' . ( ^'\n' )* . '\n' /
 end
 
-def lex_factor
-	[Literal: lit]
-|	[POPEN Expr: lex_expr PCLOSE]
-|	[Low: lit DOTDOT High: lit]
 
-def lex_factor_neg
-	[CARET FactorNeg: lex_factor_neg]
-|	[Factor: lex_factor]
+def start
+	[RootItemList: root_item*]
 
-def lex_factor_rep
-	[FactorRep: lex_factor_rep STAR]
-|	[FactorNeg: lex_factor_neg]
+def root_item
+#	[literal_def]
+#|	[rl_def]
+#|	[token_def]
+	[CflDef: cfl_def]
+|	[RegionDef: region_def]
+#|	[context_def]
+#|	[namespace_def]
+#|	[function_def]
+#|	[iter_def]
+#|	[global_def]
+#|	[export_def]
+|	[Statement: statement]
+#|	[pre_eof]
+#|	[precedence]
+#|	[typedef]
 
-def lex_term
-	[Term: lex_term DOT FactorRep: lex_factor_rep]
-|	[FactorRep: lex_factor_rep]
+def cfl_def
+	[DEF DefId: id ProdList: prod_list]
 
-def lex_expr
-	[Expr: lex_expr BAR Term: lex_term]
-|	[Term: lex_term]
+def region_def
+	[LEX TokenList: token_list END]
+
+def token_list
+	[TokenList: token_list TokenDef: token_def]
+|	[TokenList: token_list IgnoreDef: ignore_def]
+|	[]
 
 def token_def
 	[TOKEN Id: id FSLASH Expr: lex_expr FSLASH]
@@ -59,10 +74,8 @@ def token_def
 def ignore_def
 	[IGNORE FSLASH Expr: lex_expr FSLASH]
 
-def token_list
-	[TokenList: token_list TokenDef: token_def]
-|	[TokenList: token_list IgnoreDef: ignore_def]
-|	[]
+def prod_el
+	[OptName: opt_prod_name Id: id OptRepeat: opt_prod_repeat]
 
 def opt_prod_name
 	[Name: id COLON]
@@ -71,9 +84,6 @@ def opt_prod_name
 def opt_prod_repeat
 	[Star: STAR]
 |	[]
-
-def prod_el
-	[OptName: opt_prod_name Id: id OptRepeat: opt_prod_repeat]
 
 def prod_el_list
 	[ProdElList: prod_el_list ProdEl: prod_el]
@@ -86,9 +96,34 @@ def prod_list
 	[ProdList: prod_list BAR Prod: prod]
 |	[Prod: prod]
 
-def item
-	[LEX TokenList: token_list END]
-|	[DEF DefId: id ProdList: prod_list]
+def statement
+	[PRINT POPEN code_expr* PCLOSE]
+|	[code_expr]
 
-def start
-	[ItemList: item*]
+def code_expr
+	[var_ref]
+
+def var_ref
+	[id]
+
+def lex_expr
+	[Expr: lex_expr BAR Term: lex_term]
+|	[Term: lex_term]
+
+def lex_term
+	[Term: lex_term DOT FactorRep: lex_factor_rep]
+|	[FactorRep: lex_factor_rep]
+
+def lex_factor_rep
+	[FactorRep: lex_factor_rep STAR]
+|	[FactorNeg: lex_factor_neg]
+
+def lex_factor_neg
+	[CARET FactorNeg: lex_factor_neg]
+|	[Factor: lex_factor]
+
+def lex_factor
+	[Literal: lit]
+|	[POPEN Expr: lex_expr PCLOSE]
+|	[Low: lit DOTDOT High: lit]
+
