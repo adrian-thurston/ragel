@@ -41,6 +41,7 @@ struct expr_stmt;
 struct var_ref;
 struct code_expr;
 struct _repeat_code_expr;
+struct qual;
 
 struct Bootstrap2
 :
@@ -50,7 +51,6 @@ struct Bootstrap2
 	:
 		BaseParser( pd )
 	{}
-
 
 	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
@@ -68,6 +68,7 @@ struct Bootstrap2
 	LangStmt *walkStatement( statement &Statement );
 	LangStmt *walkPrintStmt( print_stmt &PrintStmt );
 	LangStmt *walkExprStmt( expr_stmt &ExprStmt );
+	QualItemVect *walkQual( qual &Qual );
 	LangVarRef *walkVarRef( var_ref &varRef );
 	void go();
 };

@@ -5,6 +5,7 @@ lex
 	token TOKEN / 'token' /
 	token IGNORE / 'ignore' /
 	token PRINT / 'print' /
+	token PARSE / 'parse' /
 
 	token id / 
 		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
@@ -22,6 +23,7 @@ lex
 	token FSLASH /'/'/
 	token COLON /':'/
 	token DOT /'.'/
+	token ARROW /'->'/
 	token POPEN /'('/
 	token PCLOSE /')'/
 	token DOTDOT /'..'/
@@ -109,9 +111,28 @@ def expr_stmt
 def code_expr
 	[VarRef: var_ref]
 |	[Lit: lit]
+|	[PARSE opt_capture type_ref opt_field_init accumulate]
+
+def opt_capture
+	[id COLON]
+|	[]
+
+def type_ref
+	[id]
+
+def opt_field_init
+	[]
+
+def accumulate 
+	[SQOPEN id SQCLOSE]
 
 def var_ref
-	[Id: id]
+	[Qual: qual Id: id]
+
+def qual
+	[Qual: qual Id: id Dot: DOT]
+|	[Qual: qual Id: id Arrow: ARROW]
+|	[]
 
 def lex_expr
 	[Expr: lex_expr BAR Term: lex_term]

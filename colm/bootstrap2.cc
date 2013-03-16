@@ -260,11 +260,28 @@ LangStmt *Bootstrap2::walkPrintStmt( print_stmt &printStmt )
 	return LangStmt::cons( internal, LangStmt::PrintType, exprVect );
 }
 
+QualItemVect *Bootstrap2::walkQual( qual &Qual )
+{
+	QualItemVect *qualItemVect;
+	qual RecQual = Qual.Qual();
+	if ( RecQual != 0 ) {
+		qualItemVect = walkQual( RecQual );
+		String id = Qual.Id().text().c_str();
+		QualItem::Type type = Qual.Dot() != 0 ? QualItem::Dot : QualItem::Arrow;
+		qualItemVect->append( QualItem( internal, id, type ) );
+	}
+	else {
+		qualItemVect = new QualItemVect;
+	}
+	return qualItemVect;
+}
+
 LangVarRef *Bootstrap2::walkVarRef( var_ref &varRef )
 {
-	QualItemVect *qual = new QualItemVect;
+	qual Qual = varRef.Qual();
+	QualItemVect *qualItemVect = walkQual( Qual );
 	String id = varRef.Id().text().c_str();
-	LangVarRef *langVarRef = LangVarRef::cons( internal, qual, id );
+	LangVarRef *langVarRef = LangVarRef::cons( internal, qualItemVect, id );
 	return langVarRef;
 }
 
@@ -281,6 +298,20 @@ LangExpr *Bootstrap2::walkCodeExpr( code_expr &codeExpr )
 		String lit = codeExpr.Lit().text().c_str();
 		LangTerm *term = LangTerm::cons( internal, LangTerm::StringType, lit );
 		expr = LangExpr::cons( term );
+	}
+	else {
+		NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
+		TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
+
+		LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, String("stdin") );
+		LangExpr *accumExpr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
+		ConsItemList *list = ConsItemList::cons( consItem );
+
+		ObjectField *objField = ObjectField::cons( internal, 0, String("P") );
+
+		expr = parseCmd( internal, false, objField, typeRef, 0, list );
 	}
 	return expr;
 }
