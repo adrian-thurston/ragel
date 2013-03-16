@@ -47,10 +47,13 @@ struct Bootstrap2
 :
 	public BaseParser
 {
-	Bootstrap2( Compiler *pd )
+	Bootstrap2( Compiler *pd, const char *inputFileName )
 	:
-		BaseParser( pd )
+		BaseParser( pd ),
+		inputFileName( inputFileName )
 	{}
+
+	const char *inputFileName;
 
 	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );

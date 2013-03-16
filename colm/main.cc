@@ -597,7 +597,7 @@ int main(int argc, const char **argv)
 	ColmScanner *scanner = 0;
 	ColmParser *parser = 0;
 	if ( useBootstrap ) {
-		bootstrapParser = new Bootstrap2( pd );
+		bootstrapParser = new Bootstrap2( pd, inputFileName );
 		bootstrapParser->init();
 		bootstrapParser->go();
 	}

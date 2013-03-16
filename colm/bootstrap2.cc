@@ -253,7 +253,7 @@ ExprVect *Bootstrap2::walkCodeExprList( _repeat_code_expr &codeExprList )
 
 LangStmt *Bootstrap2::walkPrintStmt( print_stmt &printStmt )
 {
-	std::cerr << "print statement: " << printStmt.text() << std::endl;
+	//std::cerr << "print statement: " << printStmt.text() << std::endl;
 
 	_repeat_code_expr codeExprList = printStmt.CodeExprList();
 	ExprVect *exprVect = walkCodeExprList( codeExprList );
@@ -345,9 +345,13 @@ void Bootstrap2::go()
 {
 	StmtList *stmtList = new StmtList;
 
+	const char *argv[2];
+	argv[0] = inputFileName;
+	argv[1] = 0;
+
 	colmInit( 0 );
 	ColmProgram *program = colmNewProgram( &main_runtimeData );
-	colmRunProgram( program, 0, 0 );
+	colmRunProgram( program, 1, argv );
 
 	/* Extract the parse tree. */
 	start Start = ColmTree( program );
