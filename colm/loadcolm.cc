@@ -28,7 +28,7 @@
 #include "lmparse.h"
 #include "global.h"
 #include "input.h"
-#include "bootstrap1.h"
+#include "loadcolm.h"
 #include "exports1.h"
 #include "colm/colm.h"
 
@@ -36,7 +36,7 @@ using std::string;
 
 extern RuntimeData main_runtimeData;
 
-void Bootstrap1::walkProdElList( ProdElList *list, prod_el_list &prodElList )
+void LoadColm::walkProdElList( ProdElList *list, prod_el_list &prodElList )
 {
 	if ( prodElList.ProdElList() != 0 ) {
 		prod_el_list RightProdElList = prodElList.ProdElList();
@@ -65,7 +65,7 @@ void Bootstrap1::walkProdElList( ProdElList *list, prod_el_list &prodElList )
 	}
 }
 
-void Bootstrap1::walkProdList( LelDefList *outProdList, prod_list &prodList )
+void LoadColm::walkProdList( LelDefList *outProdList, prod_list &prodList )
 {
 	if ( prodList.ProdList() != 0 ) {
 		prod_list RightProdList = prodList.ProdList();
@@ -80,7 +80,7 @@ void Bootstrap1::walkProdList( LelDefList *outProdList, prod_list &prodList )
 	prodAppend( outProdList, prod );
 }
 
-LexFactor *Bootstrap1::walkLexFactor( lex_factor &lexFactor )
+LexFactor *LoadColm::walkLexFactor( lex_factor &lexFactor )
 {
 	if ( lexFactor.Literal() != 0 ) {
 		String litString = lexFactor.Literal().text().c_str();
@@ -108,7 +108,7 @@ LexFactor *Bootstrap1::walkLexFactor( lex_factor &lexFactor )
 	}
 }
 
-LexFactorNeg *Bootstrap1::walkLexFactorNeg( lex_factor_neg &lexFactorNeg )
+LexFactorNeg *LoadColm::walkLexFactorNeg( lex_factor_neg &lexFactorNeg )
 {
 	if ( lexFactorNeg.FactorNeg() != 0 ) {
 		lex_factor_neg Rec = lexFactorNeg.FactorNeg();
@@ -124,7 +124,7 @@ LexFactorNeg *Bootstrap1::walkLexFactorNeg( lex_factor_neg &lexFactorNeg )
 	}
 }
 
-LexFactorRep *Bootstrap1::walkLexFactorRep( lex_factor_rep &lexFactorRep )
+LexFactorRep *LoadColm::walkLexFactorRep( lex_factor_rep &lexFactorRep )
 {
 	if ( lexFactorRep.FactorRep() != 0 ) {
 		lex_factor_rep Rec = lexFactorRep.FactorRep();
@@ -140,13 +140,13 @@ LexFactorRep *Bootstrap1::walkLexFactorRep( lex_factor_rep &lexFactorRep )
 	}
 }
 
-LexFactorAug *Bootstrap1::walkLexFactorAug( lex_factor_rep &lexFactorRep )
+LexFactorAug *LoadColm::walkLexFactorAug( lex_factor_rep &lexFactorRep )
 {
 	LexFactorRep *factorRep = walkLexFactorRep( lexFactorRep );
 	return LexFactorAug::cons( factorRep );
 }
 
-LexTerm *Bootstrap1::walkLexTerm( lex_term &lexTerm )
+LexTerm *LoadColm::walkLexTerm( lex_term &lexTerm )
 {
 	if ( lexTerm.Term() != 0 ) {
 		lex_term Rec = lexTerm.Term();
@@ -165,7 +165,7 @@ LexTerm *Bootstrap1::walkLexTerm( lex_term &lexTerm )
 	}
 }
 
-LexExpression *Bootstrap1::walkLexExpr( lex_expr &LexExprTree )
+LexExpression *LoadColm::walkLexExpr( lex_expr &LexExprTree )
 {
 	if ( LexExprTree.Expr() != 0 ) {
 		lex_expr Rec = LexExprTree.Expr();
@@ -185,7 +185,7 @@ LexExpression *Bootstrap1::walkLexExpr( lex_expr &LexExprTree )
 	}
 }
 
-void Bootstrap1::walkTokenList( token_list &tokenList )
+void LoadColm::walkTokenList( token_list &tokenList )
 {
 	if ( tokenList.TokenList() != 0 ) {
 		token_list RightTokenList = tokenList.TokenList();
@@ -218,7 +218,7 @@ void Bootstrap1::walkTokenList( token_list &tokenList )
 	}
 }
 
-void Bootstrap1::walkLexRegion( item &LexRegion )
+void LoadColm::walkLexRegion( item &LexRegion )
 {
 	pushRegionSet( internal );
 
@@ -228,7 +228,7 @@ void Bootstrap1::walkLexRegion( item &LexRegion )
 	popRegionSet();
 }
 
-void Bootstrap1::walkDefinition( item &define )
+void LoadColm::walkDefinition( item &define )
 {
 	prod_list ProdList = define.ProdList();
 
@@ -241,7 +241,7 @@ void Bootstrap1::walkDefinition( item &define )
 	cflDef( ntDef, objectDef, defList );
 }
 
-void Bootstrap1::consParseStmt( StmtList *stmtList )
+void LoadColm::consParseStmt( StmtList *stmtList )
 {
 	/* Parse the "start" def. */
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
@@ -282,7 +282,7 @@ void Bootstrap1::consParseStmt( StmtList *stmtList )
 	stmtList->append( parseStmt );
 }
 
-void Bootstrap1::consExportStmt( StmtList *stmtList )
+void LoadColm::consExportStmt( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
 	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
@@ -296,7 +296,7 @@ void Bootstrap1::consExportStmt( StmtList *stmtList )
 	stmtList->append( programExport );
 }
 
-void Bootstrap1::go()
+void LoadColm::go()
 {
 	StmtList *stmtList = new StmtList;
 

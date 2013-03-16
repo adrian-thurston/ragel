@@ -41,12 +41,12 @@
 #include "version.h"
 #include "fsmcodegen.h"
 
-#if defined(BOOTSTRAP0)
-#include "bootstrap0.h"
-#elif defined(BOOTSTRAP1)
-#include "bootstrap1.h"
+#if defined(CONS_INIT)
+#include "consinit.h"
+#elif defined(LOAD_COLM)
+#include "loadcolm.h"
 #else
-#include "bootstrap2.h"
+#include "loadsrc.h"
 #endif
 
 using std::istream;
@@ -554,9 +554,8 @@ int main(int argc, const char **argv)
 	}
 
 
-#if defined(BOOTSTRAP0)
-	outStream = &cout;
-#elif defined(BOOTSTRAP1)
+#if defined(CONS_INIT)
+#elif defined(LOAD_COLM)
 #else
 	/* Open the input file for reading. */
 	if ( inputFileName == 0 ) {
@@ -577,12 +576,12 @@ int main(int argc, const char **argv)
 
 	Compiler *pd = new Compiler;
 
-#if defined(BOOTSTRAP0)
-	Bootstrap0 *parser = new Bootstrap0( pd );
-#elif defined(BOOTSTRAP1)
-	Bootstrap1 *parser = new Bootstrap1( pd );
+#if defined(CONS_INIT)
+	ConsInit *parser = new ConsInit( pd );
+#elif defined(LOAD_COLM)
+	LoadColm *parser = new LoadColm( pd );
 #else
-	Bootstrap2 *parser = new Bootstrap2( pd, inputFileName );
+	LoadSource *parser = new LoadSource( pd, inputFileName );
 #endif
 
 	parser->init();
@@ -605,7 +604,6 @@ int main(int argc, const char **argv)
 	else {
 		openOutput();
 		pd->generateOutput();
-	
 		if ( outStream != 0 )
 			delete outStream;
 

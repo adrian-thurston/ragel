@@ -32,46 +32,33 @@ struct lex_expr;
 struct token_list;
 struct prod_el_list;
 struct prod_list;
-struct root_item;
-struct region_def;
-struct cfl_def;
-struct statement;
-struct print_stmt;
-struct expr_stmt;
-struct var_ref;
-struct code_expr;
-struct _repeat_code_expr;
-struct qual;
+struct item;
 
-struct Bootstrap2
+struct LoadColm
 :
 	public BaseParser
 {
-	Bootstrap2( Compiler *pd, const char *inputFileName )
+	LoadColm( Compiler *pd )
 	:
-		BaseParser( pd ),
-		inputFileName( inputFileName )
+		BaseParser(pd)
 	{}
 
-	const char *inputFileName;
-
+	/* Constructing the colm language data structures from the the parse tree. */
 	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
 	LexFactorRep *walkLexFactorRep( lex_factor_rep &LexFactorRepTree );
 	LexFactorAug *walkLexFactorAug( lex_factor_rep &LexFactorRepTree );
 	LexTerm *walkLexTerm( lex_term &LexTerm );
 	LexExpression *walkLexExpr( lex_expr &LexExpr );
-	ExprVect *walkCodeExprList( _repeat_code_expr &codeExprList );
-	LangExpr *walkCodeExpr( code_expr &codeExpr );
 	void walkTokenList( token_list &TokenList );
-	void walkLexRegion( region_def &regionDef );
-	void walkProdElList( ProdElList *list, prod_el_list &ProdElList );
-	void walkProdList( LelDefList *lelDefList, prod_list &ProdList );
-	void walkCflDef( cfl_def &cflDef );
-	LangStmt *walkStatement( statement &Statement );
-	LangStmt *walkPrintStmt( print_stmt &PrintStmt );
-	LangStmt *walkExprStmt( expr_stmt &ExprStmt );
-	QualItemVect *walkQual( qual &Qual );
-	LangVarRef *walkVarRef( var_ref &varRef );
+	void walkLexRegion( item &LexRegion );
+	void walkProdElList( ProdElList *list, prod_el_list &prodElList );
+	void walkProdList( LelDefList *list, prod_list &prodList );
+	void walkDefinition( item &define );
+
+	/* Constructing statements needed to parse and export the input. */
+	void consParseStmt( StmtList *stmtList );
+	void consExportStmt( StmtList *stmtList );
+
 	void go();
 };

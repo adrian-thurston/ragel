@@ -27,13 +27,13 @@
 #include "lmparse.h"
 #include "global.h"
 #include "input.h"
-#include "bootstrap2.h"
+#include "loadsrc.h"
 #include "exports2.h"
 #include "colm/colm.h"
 
 extern RuntimeData main_runtimeData;
 
-void Bootstrap2::walkProdElList( ProdElList *list, prod_el_list &ProdElList )
+void LoadSource::walkProdElList( ProdElList *list, prod_el_list &ProdElList )
 {
 	if ( ProdElList.ProdElList() != 0 ) {
 		prod_el_list RightProdElList = ProdElList.ProdElList();
@@ -62,7 +62,7 @@ void Bootstrap2::walkProdElList( ProdElList *list, prod_el_list &ProdElList )
 	}
 }
 
-void Bootstrap2::walkProdList( LelDefList *lelDefList, prod_list &ProdList )
+void LoadSource::walkProdList( LelDefList *lelDefList, prod_list &ProdList )
 {
 	if ( ProdList.ProdList() != 0 ) {
 		prod_list RightProdList = ProdList.ProdList();
@@ -78,7 +78,7 @@ void Bootstrap2::walkProdList( LelDefList *lelDefList, prod_list &ProdList )
 	prodAppend( lelDefList, prod );
 }
 
-LexFactor *Bootstrap2::walkLexFactor( lex_factor &LexFactorTree )
+LexFactor *LoadSource::walkLexFactor( lex_factor &LexFactorTree )
 {
 	if ( LexFactorTree.Literal() != 0 ) {
 		String litString = LexFactorTree.Literal().text().c_str();
@@ -106,7 +106,7 @@ LexFactor *Bootstrap2::walkLexFactor( lex_factor &LexFactorTree )
 	}
 }
 
-LexFactorNeg *Bootstrap2::walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
+LexFactorNeg *LoadSource::walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
 {
 	if ( LexFactorNegTree.FactorNeg() != 0 ) {
 		lex_factor_neg Rec = LexFactorNegTree.FactorNeg();
@@ -122,7 +122,7 @@ LexFactorNeg *Bootstrap2::walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
 	}
 }
 
-LexFactorRep *Bootstrap2::walkLexFactorRep( lex_factor_rep &LexFactorRepTree )
+LexFactorRep *LoadSource::walkLexFactorRep( lex_factor_rep &LexFactorRepTree )
 {
 	if ( LexFactorRepTree.FactorRep() != 0 ) {
 		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
@@ -138,13 +138,13 @@ LexFactorRep *Bootstrap2::walkLexFactorRep( lex_factor_rep &LexFactorRepTree )
 	}
 }
 
-LexFactorAug *Bootstrap2::walkLexFactorAug( lex_factor_rep &LexFactorRepTree )
+LexFactorAug *LoadSource::walkLexFactorAug( lex_factor_rep &LexFactorRepTree )
 {
 	LexFactorRep *factorRep = walkLexFactorRep( LexFactorRepTree );
 	return LexFactorAug::cons( factorRep );
 }
 
-LexTerm *Bootstrap2::walkLexTerm( lex_term &LexTermTree )
+LexTerm *LoadSource::walkLexTerm( lex_term &LexTermTree )
 {
 	if ( LexTermTree.Term() != 0 ) {
 		lex_term Rec = LexTermTree.Term();
@@ -163,7 +163,7 @@ LexTerm *Bootstrap2::walkLexTerm( lex_term &LexTermTree )
 	}
 }
 
-LexExpression *Bootstrap2::walkLexExpr( lex_expr &LexExprTree )
+LexExpression *LoadSource::walkLexExpr( lex_expr &LexExprTree )
 {
 	if ( LexExprTree.Expr() != 0 ) {
 		lex_expr Rec = LexExprTree.Expr();
@@ -183,7 +183,7 @@ LexExpression *Bootstrap2::walkLexExpr( lex_expr &LexExprTree )
 	}
 }
 
-void Bootstrap2::walkTokenList( token_list &TokenList )
+void LoadSource::walkTokenList( token_list &TokenList )
 {
 	if ( TokenList.TokenList() != 0 ) {
 		token_list RightTokenList = TokenList.TokenList();
@@ -216,7 +216,7 @@ void Bootstrap2::walkTokenList( token_list &TokenList )
 	}
 }
 
-void Bootstrap2::walkLexRegion( region_def &regionDef )
+void LoadSource::walkLexRegion( region_def &regionDef )
 {
 	pushRegionSet( internal );
 
@@ -226,7 +226,7 @@ void Bootstrap2::walkLexRegion( region_def &regionDef )
 	popRegionSet();
 }
 
-void Bootstrap2::walkCflDef( cfl_def &cflDef )
+void LoadSource::walkCflDef( cfl_def &cflDef )
 {
 	prod_list prodList = cflDef.ProdList();
 
@@ -239,7 +239,7 @@ void Bootstrap2::walkCflDef( cfl_def &cflDef )
 	BaseParser::cflDef( ntDef, objectDef, defList );
 }
 
-ExprVect *Bootstrap2::walkCodeExprList( _repeat_code_expr &codeExprList )
+ExprVect *LoadSource::walkCodeExprList( _repeat_code_expr &codeExprList )
 {
 	ExprVect *exprVect = new ExprVect;
 	while ( !codeExprList.end() ) {
@@ -251,7 +251,7 @@ ExprVect *Bootstrap2::walkCodeExprList( _repeat_code_expr &codeExprList )
 	return exprVect;
 }
 
-LangStmt *Bootstrap2::walkPrintStmt( print_stmt &printStmt )
+LangStmt *LoadSource::walkPrintStmt( print_stmt &printStmt )
 {
 	//std::cerr << "print statement: " << printStmt.text() << std::endl;
 
@@ -260,7 +260,7 @@ LangStmt *Bootstrap2::walkPrintStmt( print_stmt &printStmt )
 	return LangStmt::cons( internal, LangStmt::PrintType, exprVect );
 }
 
-QualItemVect *Bootstrap2::walkQual( qual &Qual )
+QualItemVect *LoadSource::walkQual( qual &Qual )
 {
 	QualItemVect *qualItemVect;
 	qual RecQual = Qual.Qual();
@@ -276,7 +276,7 @@ QualItemVect *Bootstrap2::walkQual( qual &Qual )
 	return qualItemVect;
 }
 
-LangVarRef *Bootstrap2::walkVarRef( var_ref &varRef )
+LangVarRef *LoadSource::walkVarRef( var_ref &varRef )
 {
 	qual Qual = varRef.Qual();
 	QualItemVect *qualItemVect = walkQual( Qual );
@@ -285,7 +285,7 @@ LangVarRef *Bootstrap2::walkVarRef( var_ref &varRef )
 	return langVarRef;
 }
 
-LangExpr *Bootstrap2::walkCodeExpr( code_expr &codeExpr )
+LangExpr *LoadSource::walkCodeExpr( code_expr &codeExpr )
 {
 	LangExpr *expr = 0;
 	if ( codeExpr.VarRef() != 0 ) {
@@ -316,7 +316,7 @@ LangExpr *Bootstrap2::walkCodeExpr( code_expr &codeExpr )
 	return expr;
 }
 
-LangStmt *Bootstrap2::walkExprStmt( expr_stmt &exprStmt )
+LangStmt *LoadSource::walkExprStmt( expr_stmt &exprStmt )
 {
 	LangStmt *stmt;
 	if ( exprStmt.CodeExpr() != 0 ) {
@@ -327,7 +327,7 @@ LangStmt *Bootstrap2::walkExprStmt( expr_stmt &exprStmt )
 	return stmt;
 }
 
-LangStmt *Bootstrap2::walkStatement( statement &Statement )
+LangStmt *LoadSource::walkStatement( statement &Statement )
 {
 	LangStmt *stmt;
 	if ( Statement.Print() != 0 ) {
@@ -341,7 +341,7 @@ LangStmt *Bootstrap2::walkStatement( statement &Statement )
 	return stmt;
 }
 
-void Bootstrap2::go()
+void LoadSource::go()
 {
 	StmtList *stmtList = new StmtList;
 

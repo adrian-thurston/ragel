@@ -27,7 +27,7 @@
 #include "lmparse.h"
 #include "global.h"
 #include "input.h"
-#include "bootstrap0.h"
+#include "consinit.h"
 
 using std::cout;
 using std::cerr;
@@ -215,7 +215,7 @@ LexTerm *parensTerm( LexExpression *expr )
 	return LexTerm::cons( factorAug );
 }
 
-void Bootstrap0::wsIgnore()
+void ConsInit::wsIgnore()
 {
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, String(), pd->nextObjectId++ ); 
 
@@ -236,7 +236,7 @@ void Bootstrap0::wsIgnore()
 	defineToken( internal, String(), join, objectDef, 0, true, false, false );
 }
 
-void Bootstrap0::commentIgnore()
+void ConsInit::commentIgnore()
 {
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, String(), pd->nextObjectId++ ); 
 
@@ -256,7 +256,7 @@ void Bootstrap0::commentIgnore()
 	defineToken( internal, String(), join, objectDef, 0, true, false, false );
 }
 
-void Bootstrap0::idToken()
+void ConsInit::idToken()
 {
 	String hello( "id" );
 
@@ -282,7 +282,7 @@ void Bootstrap0::idToken()
 	defineToken( internal, hello, join, objectDef, 0, false, false, false );
 }
 
-void Bootstrap0::literalToken()
+void ConsInit::literalToken()
 {
 	String hello( "literal" );
 
@@ -315,7 +315,7 @@ void Bootstrap0::literalToken()
 	defineToken( internal, hello, join, objectDef, 0, false, false, false );
 }
 
-void Bootstrap0::starToken()
+void ConsInit::starToken()
 {
 	String hello( "star" );
 
@@ -329,17 +329,17 @@ void Bootstrap0::starToken()
 }
 
 
-void Bootstrap0::keyword( const String &kw )
+void ConsInit::keyword( const String &kw )
 {
 	literalDef( internal, kw, false, false );
 }
 
-void Bootstrap0::symbol( const String &kw )
+void ConsInit::symbol( const String &kw )
 {
 	literalDef( internal, kw, false, false );
 }
 
-ProdEl *Bootstrap0::prodRefName( const String &name )
+ProdEl *ConsInit::prodRefName( const String &name )
 {
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons(namespaceStack.top()), 0,
@@ -347,7 +347,7 @@ ProdEl *Bootstrap0::prodRefName( const String &name )
 	return prodEl;
 }
 
-ProdEl *Bootstrap0::prodRefName( const String &capture, const String &name )
+ProdEl *ConsInit::prodRefName( const String &capture, const String &name )
 {
 	ObjectField *captureField = ObjectField::cons( internal, 0, capture );
 	ProdEl *prodEl = prodElName( internal, name,
@@ -356,7 +356,7 @@ ProdEl *Bootstrap0::prodRefName( const String &capture, const String &name )
 	return prodEl;
 }
 
-ProdEl *Bootstrap0::prodRefNameRepeat( const String &name )
+ProdEl *ConsInit::prodRefNameRepeat( const String &name )
 {
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons(namespaceStack.top()), 0,
@@ -364,7 +364,7 @@ ProdEl *Bootstrap0::prodRefNameRepeat( const String &name )
 	return prodEl;
 }
 
-ProdEl *Bootstrap0::prodRefNameRepeat( const String &capture, const String &name )
+ProdEl *ConsInit::prodRefNameRepeat( const String &capture, const String &name )
 {
 	ObjectField *captureField = ObjectField::cons( internal, 0, capture );
 	ProdEl *prodEl = prodElName( internal, name,
@@ -373,7 +373,7 @@ ProdEl *Bootstrap0::prodRefNameRepeat( const String &capture, const String &name
 	return prodEl;
 }
 
-ProdEl *Bootstrap0::prodRefLit( const String &lit )
+ProdEl *ConsInit::prodRefLit( const String &lit )
 {
 	ProdEl *prodEl = prodElLiteral( internal, lit, 
 			NamespaceQual::cons(namespaceStack.top()), 0,
@@ -381,20 +381,20 @@ ProdEl *Bootstrap0::prodRefLit( const String &lit )
 	return prodEl;
 }
 
-Production *Bootstrap0::production()
+Production *ConsInit::production()
 {
 	ProdElList *prodElList = new ProdElList;
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
-Production *Bootstrap0::production( ProdEl *prodEl1 )
+Production *ConsInit::production( ProdEl *prodEl1 )
 {
 	ProdElList *prodElList = new ProdElList;
 	appendProdEl( prodElList, prodEl1 );
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
-Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2 )
+Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2 )
 {
 	ProdElList *prodElList = new ProdElList;
 	appendProdEl( prodElList, prodEl1 );
@@ -402,7 +402,7 @@ Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2 )
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
-Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
+Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
 		ProdEl *prodEl3 )
 {
 	ProdElList *prodElList = new ProdElList;
@@ -412,7 +412,7 @@ Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
-Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
+Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
 		ProdEl *prodEl3, ProdEl *prodEl4 )
 {
 	ProdElList *prodElList = new ProdElList;
@@ -423,7 +423,7 @@ Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
-Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
+Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
 		ProdEl *prodEl3, ProdEl *prodEl4, ProdEl *prodEl5 )
 {
 	ProdElList *prodElList = new ProdElList;
@@ -435,7 +435,7 @@ Production *Bootstrap0::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
-void Bootstrap0::definition( const String &name, Production *prod1, Production *prod2, Production *prod3 )
+void ConsInit::definition( const String &name, Production *prod1, Production *prod2, Production *prod3 )
 {
 	LelDefList *defList = new LelDefList;
 	prodAppend( defList, prod1 );
@@ -447,7 +447,7 @@ void Bootstrap0::definition( const String &name, Production *prod1, Production *
 	cflDef( ntDef, objectDef, defList );
 }
 
-void Bootstrap0::definition( const String &name, Production *prod1, Production *prod2 )
+void ConsInit::definition( const String &name, Production *prod1, Production *prod2 )
 {
 	LelDefList *defList = new LelDefList;
 	prodAppend( defList, prod1 );
@@ -458,7 +458,7 @@ void Bootstrap0::definition( const String &name, Production *prod1, Production *
 	cflDef( ntDef, objectDef, defList );
 }
 
-void Bootstrap0::definition( const String &name, Production *prod )
+void ConsInit::definition( const String &name, Production *prod )
 {
 	LelDefList *defList = new LelDefList;
 	prodAppend( defList, prod );
@@ -468,7 +468,7 @@ void Bootstrap0::definition( const String &name, Production *prod )
 	cflDef( ntDef, objectDef, defList );
 }
 
-void Bootstrap0::lexFactor()
+void ConsInit::lexFactor()
 {
 	ProdEl *prodEl1 = prodRefName( "Literal", "literal" );
 	Production *prod1 = production( prodEl1 );
@@ -487,7 +487,7 @@ void Bootstrap0::lexFactor()
 	definition( "lex_factor", prod1, prod2, prod3 );
 }
 
-void Bootstrap0::lexFactorNeg()
+void ConsInit::lexFactorNeg()
 {
 	ProdEl *prodEl1 = prodRefLit( "'^'" );
 	ProdEl *prodEl2 = prodRefName( "FactorNeg", "lex_factor_neg" );
@@ -499,7 +499,7 @@ void Bootstrap0::lexFactorNeg()
 	definition( "lex_factor_neg", prod1, prod2 );
 }
 
-void Bootstrap0::lexFactorRep()
+void ConsInit::lexFactorRep()
 {
 	ProdEl *prodEl1 = prodRefName( "FactorRep", "lex_factor_rep" );
 	ProdEl *prodEl2 = prodRefName( "star" );
@@ -511,7 +511,7 @@ void Bootstrap0::lexFactorRep()
 	definition( "lex_factor_rep", prod1, prod2 );
 }
 
-void Bootstrap0::lexTerm()
+void ConsInit::lexTerm()
 {
 	ProdEl *prodEl1 = prodRefName( "Term", "lex_term" );
 	ProdEl *prodEl2 = prodRefLit( "'.'" );
@@ -524,7 +524,7 @@ void Bootstrap0::lexTerm()
 	definition( "lex_term", prod1, prod2 );
 }
 
-void Bootstrap0::lexExpr()
+void ConsInit::lexExpr()
 {
 	ProdEl *prodEl1 = prodRefName( "Expr", "lex_expr" );
 	ProdEl *prodEl2 = prodRefLit( "'|'" );
@@ -537,7 +537,7 @@ void Bootstrap0::lexExpr()
 	definition( "lex_expr", prod1, prod2 );
 }
 
-void Bootstrap0::token()
+void ConsInit::token()
 {
 	ProdEl *prodEl1 = prodRefLit( "'token'" );
 	ProdEl *prodEl2 = prodRefName( "Id", "id" );
@@ -548,7 +548,7 @@ void Bootstrap0::token()
 	definition( "token_def", prod1 );
 }
 
-void Bootstrap0::ignore()
+void ConsInit::ignore()
 {
 	ProdEl *prodEl1 = prodRefLit( "'ignore'" );
 	ProdEl *prodEl2 = prodRefLit( "'/'" );
@@ -558,7 +558,7 @@ void Bootstrap0::ignore()
 	definition( "ignore_def", prod1 );
 }
 
-void Bootstrap0::tokenList()
+void ConsInit::tokenList()
 {
 	ProdEl *prodEl1 = prodRefName( "TokenList", "token_list" );
 	ProdEl *prodEl2 = prodRefName( "TokenDef", "token_def" );
@@ -573,7 +573,7 @@ void Bootstrap0::tokenList()
 	definition( "token_list",  prod1, prod2, prod3 );
 }
 
-Production *Bootstrap0::prodLex()
+Production *ConsInit::prodLex()
 {
 	ProdEl *prodEl1 = prodRefLit( "'lex'" );
 	ProdEl *prodEl2 = prodRefName( "TokenList", "token_list" );
@@ -582,7 +582,7 @@ Production *Bootstrap0::prodLex()
 	return production( prodEl1, prodEl2, prodEl3 );
 }
 
-void Bootstrap0::optProdName()
+void ConsInit::optProdName()
 {
 	ProdEl *prodEl1 = prodRefName( "Name", "id" );
 	ProdEl *prodEl2 = prodRefLit( "':'" );
@@ -593,7 +593,7 @@ void Bootstrap0::optProdName()
 	definition( "opt_prod_name",  prod1, prod2 );
 }
 
-void Bootstrap0::optRepeat()
+void ConsInit::optRepeat()
 {
 	ProdEl *prodEl1 = prodRefName( "Star", "star" );
 	Production *prod1 = production( prodEl1 );
@@ -603,7 +603,7 @@ void Bootstrap0::optRepeat()
 	definition( "opt_prod_repeat",  prod1, prod2 );
 }
 
-void Bootstrap0::prodEl()
+void ConsInit::prodEl()
 {
 	ProdEl *prodEl1 = prodRefName( "OptName", "opt_prod_name" );
 	ProdEl *prodEl2 = prodRefName( "Id", "id" );
@@ -613,7 +613,7 @@ void Bootstrap0::prodEl()
 	definition( "prod_el",  prod1 );
 }
 
-void Bootstrap0::prodElList()
+void ConsInit::prodElList()
 {
 	ProdEl *prodEl1 = prodRefName( "ProdElList", "prod_el_list" );
 	ProdEl *prodEl2 = prodRefName( "ProdEl", "prod_el" );
@@ -624,7 +624,7 @@ void Bootstrap0::prodElList()
 	definition( "prod_el_list",  prod1, prod2 );
 }
 
-void Bootstrap0::prod()
+void ConsInit::prod()
 {
 	ProdEl *prodEl1 = prodRefLit( "'['" );
 	ProdEl *prodEl2 = prodRefName( "ProdElList", "prod_el_list" );
@@ -634,7 +634,7 @@ void Bootstrap0::prod()
 	definition( "prod",  prod1 );
 }
 
-void Bootstrap0::prodList()
+void ConsInit::prodList()
 {
 	ProdEl *prodEl1 = prodRefName( "ProdList", "prod_list" );
 	ProdEl *prodEl2 = prodRefLit( "'|'" );
@@ -647,7 +647,7 @@ void Bootstrap0::prodList()
 	definition( "prod_list",  prod1, prod2 );
 }
 
-Production *Bootstrap0::prodProd()
+Production *ConsInit::prodProd()
 {
 	ProdEl *prodEl1 = prodRefLit( "'def'" );
 	ProdEl *prodEl2 = prodRefName( "DefId", "id" );
@@ -656,14 +656,14 @@ Production *Bootstrap0::prodProd()
 	return production( prodEl1, prodEl2, prodEl3 );
 }
 
-void Bootstrap0::item()
+void ConsInit::item()
 {
 	Production *prod1 = prodLex();
 	Production *prod2 = prodProd();
 	definition( "item",  prod1, prod2 );
 }
 
-void Bootstrap0::startProd()
+void ConsInit::startProd()
 {
 	ProdEl *prodEl1 = prodRefNameRepeat( "ItemList", "item" );
 	Production *prod1 = production( prodEl1 );
@@ -671,7 +671,7 @@ void Bootstrap0::startProd()
 	definition( "start",  prod1 );
 }
 
-void Bootstrap0::parseInput( StmtList *stmtList )
+void ConsInit::parseInput( StmtList *stmtList )
 {
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
@@ -689,7 +689,7 @@ void Bootstrap0::parseInput( StmtList *stmtList )
 	stmtList->append( stmt );
 }
 
-void Bootstrap0::exportTree( StmtList *stmtList )
+void ConsInit::exportTree( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
 	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
@@ -703,7 +703,7 @@ void Bootstrap0::exportTree( StmtList *stmtList )
 	stmtList->append( programExport );
 }
 
-void Bootstrap0::go()
+void ConsInit::go()
 {
 	StmtList *stmtList = new StmtList;
 

@@ -24,11 +24,11 @@
 #include "parsedata.h"
 #include "parser.h"
 
-struct Bootstrap0
+struct ConsInit
 :
 	public BaseParser
 {
-	Bootstrap0( Compiler *pd )
+	ConsInit( Compiler *pd )
 	:
 		BaseParser(pd)
 	{}
