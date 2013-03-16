@@ -46,8 +46,6 @@
 #elif defined(BOOTSTRAP1)
 #include "bootstrap1.h"
 #else
-#include "lmscan.h"
-#include "lmparse.h"
 #include "bootstrap2.h"
 #endif
 
@@ -62,7 +60,6 @@ using std::endl;
 
 /* Graphviz dot file generation. */
 bool genGraphviz = false;
-bool useBootstrap = false;
 
 using std::ostream;
 using std::istream;
@@ -424,15 +421,12 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "BD:e:c:LI:vdlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "D:e:c:LI:vdlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
 		case ParamCheck::match:
 			switch ( pc.parameter ) {
-			case 'B':
-				useBootstrap = true;
-				break;
 			case 'I':
 				includePaths.append( pc.parameterArg );
 				break;
@@ -565,16 +559,15 @@ int main(int argc, const char **argv)
 #elif defined(BOOTSTRAP1)
 #else
 	/* Open the input file for reading. */
-	istream *inStream = &cin;
 	if ( inputFileName == 0 ) {
 		error() << "colm: no input file given" << endl;
 	}
 	else {
 		/* Open the input file for reading. */
 		ifstream *inFile = new ifstream( inputFileName );
-		inStream = inFile;
 		if ( ! inFile->is_open() )
 			error() << "could not open " << inputFileName << " for reading" << endl;
+		delete inFile;
 	}
 #endif
 
@@ -586,30 +579,14 @@ int main(int argc, const char **argv)
 
 #if defined(BOOTSTRAP0)
 	Bootstrap0 *parser = new Bootstrap0( pd );
-	parser->init();
-	parser->go();
 #elif defined(BOOTSTRAP1)
 	Bootstrap1 *parser = new Bootstrap1( pd );
+#else
+	Bootstrap2 *parser = new Bootstrap2( pd, inputFileName );
+#endif
+
 	parser->init();
 	parser->go();
-#else
-	Bootstrap2 *bootstrapParser = 0;
-	ColmScanner *scanner = 0;
-	ColmParser *parser = 0;
-	if ( useBootstrap ) {
-		bootstrapParser = new Bootstrap2( pd, inputFileName );
-		bootstrapParser->init();
-		bootstrapParser->go();
-	}
-	else {
-		parser = new ColmParser( pd );
-		scanner = new ColmScanner( inputFileName, *inStream, parser, 0 );
-
-		parser->init();
-		scanner->scan();
-		scanner->eof();
-	}
-#endif
 
 	/* Parsing complete, check for errors.. */
 	if ( gblErrorCount > 0 )
@@ -651,20 +628,8 @@ int main(int argc, const char **argv)
 		}
 	}
 
-#if defined(BOOTSTRAP0)
 	delete parser;
-#elif defined(BOOTSTRAP1)
-	delete parser;
-#else
-	if ( bootstrapParser )
-		delete bootstrapParser;
-	if ( scanner != 0 )
-		delete scanner;
-	if ( parser != 0 )
-		delete parser;
-#endif
 	delete pd;
-
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )
