@@ -107,10 +107,11 @@ def expr_stmt
 	[CodeExpr: code_expr]
 
 def code_expr
-	[var_ref]
+	[VarRef: var_ref]
+|	[Lit: lit]
 
 def var_ref
-	[id]
+	[Id: id]
 
 def lex_expr
 	[Expr: lex_expr BAR Term: lex_term]

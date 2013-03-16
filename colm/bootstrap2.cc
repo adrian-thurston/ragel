@@ -239,26 +239,75 @@ void Bootstrap2::walkCflDef( cfl_def &cflDef )
 	BaseParser::cflDef( ntDef, objectDef, defList );
 }
 
-void Bootstrap2::walkPrintStmt( print_stmt &printStmt )
+ExprVect *Bootstrap2::walkCodeExprList( _repeat_code_expr &codeExprList )
+{
+	ExprVect *exprVect = new ExprVect;
+	while ( !codeExprList.end() ) {
+		code_expr codeExpr = codeExprList.value();
+		LangExpr *expr = walkCodeExpr( codeExpr );
+		exprVect->append( expr );
+		codeExprList = codeExprList.next();
+	}
+	return exprVect;
+}
+
+LangStmt *Bootstrap2::walkPrintStmt( print_stmt &printStmt )
 {
 	std::cerr << "print statement: " << printStmt.text() << std::endl;
+
+	_repeat_code_expr codeExprList = printStmt.CodeExprList();
+	ExprVect *exprVect = walkCodeExprList( codeExprList );
+	return LangStmt::cons( internal, LangStmt::PrintType, exprVect );
 }
 
-void Bootstrap2::walkExprStmt( expr_stmt &exprStmt )
+LangVarRef *Bootstrap2::walkVarRef( var_ref &varRef )
 {
-	std::cerr << "expr statement: " << exprStmt.text() << std::endl;
+	QualItemVect *qual = new QualItemVect;
+	String id = varRef.Id().text().c_str();
+	LangVarRef *langVarRef = LangVarRef::cons( internal, qual, id );
+	return langVarRef;
 }
 
-void Bootstrap2::walkStatement( statement &Statement )
+LangExpr *Bootstrap2::walkCodeExpr( code_expr &codeExpr )
 {
+	LangExpr *expr = 0;
+	if ( codeExpr.VarRef() != 0 ) {
+		var_ref varRef = codeExpr.VarRef();
+		LangVarRef *langVarRef = walkVarRef( varRef );
+		LangTerm *term = LangTerm::cons( internal, LangTerm::VarRefType, langVarRef );
+		expr = LangExpr::cons( term );
+	}
+	else if ( codeExpr.Lit() != 0 ) {
+		String lit = codeExpr.Lit().text().c_str();
+		LangTerm *term = LangTerm::cons( internal, LangTerm::StringType, lit );
+		expr = LangExpr::cons( term );
+	}
+	return expr;
+}
+
+LangStmt *Bootstrap2::walkExprStmt( expr_stmt &exprStmt )
+{
+	LangStmt *stmt;
+	if ( exprStmt.CodeExpr() != 0 ) {
+		code_expr codeExpr = exprStmt.CodeExpr();
+		LangExpr *expr = walkCodeExpr( codeExpr );
+		stmt = LangStmt::cons( internal, LangStmt::ExprType, expr );
+	}
+	return stmt;
+}
+
+LangStmt *Bootstrap2::walkStatement( statement &Statement )
+{
+	LangStmt *stmt;
 	if ( Statement.Print() != 0 ) {
 		print_stmt printStmt = Statement.Print();
-		walkPrintStmt( printStmt );
+		stmt = walkPrintStmt( printStmt );
 	}
 	else if ( Statement.Expr() != 0 ) {
 		expr_stmt exprStmt = Statement.Expr();
-		walkExprStmt( exprStmt );
+		stmt = walkExprStmt( exprStmt );
 	}
+	return stmt;
 }
 
 void Bootstrap2::go()
@@ -293,7 +342,8 @@ void Bootstrap2::go()
 		}
 		else if ( rootItem.Statement() != 0 ) {
 			statement Statement = rootItem.Statement();
-			walkStatement( Statement );
+			LangStmt *stmt = walkStatement( Statement );
+			stmtList->append( stmt );
 		}
 
 		rootItemList = rootItemList.next();

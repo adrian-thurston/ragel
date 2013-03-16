@@ -38,6 +38,9 @@ struct cfl_def;
 struct statement;
 struct print_stmt;
 struct expr_stmt;
+struct var_ref;
+struct code_expr;
+struct _repeat_code_expr;
 
 struct Bootstrap2
 :
@@ -55,13 +58,16 @@ struct Bootstrap2
 	LexFactorAug *walkLexFactorAug( lex_factor_rep &LexFactorRepTree );
 	LexTerm *walkLexTerm( lex_term &LexTerm );
 	LexExpression *walkLexExpr( lex_expr &LexExpr );
+	ExprVect *walkCodeExprList( _repeat_code_expr &codeExprList );
+	LangExpr *walkCodeExpr( code_expr &codeExpr );
 	void walkTokenList( token_list &TokenList );
 	void walkLexRegion( region_def &regionDef );
 	void walkProdElList( ProdElList *list, prod_el_list &ProdElList );
 	void walkProdList( LelDefList *lelDefList, prod_list &ProdList );
 	void walkCflDef( cfl_def &cflDef );
-	void walkStatement( statement &Statement );
-	void walkPrintStmt( print_stmt &PrintStmt );
-	void walkExprStmt( expr_stmt &ExprStmt );
+	LangStmt *walkStatement( statement &Statement );
+	LangStmt *walkPrintStmt( print_stmt &PrintStmt );
+	LangStmt *walkExprStmt( expr_stmt &ExprStmt );
+	LangVarRef *walkVarRef( var_ref &varRef );
 	void go();
 };
