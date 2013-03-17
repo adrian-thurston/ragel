@@ -48,6 +48,7 @@ struct type_ref;
 struct root_item;
 struct _repeat_root_item;
 struct namespace_def;
+struct var_def;
 
 struct LoadSource
 :
@@ -61,9 +62,10 @@ struct LoadSource
 
 	const char *inputFileName;
 
+	ObjectField *walkVarDef( var_def varDef );
 	NamespaceQual *walkRegionQual( region_qual regionQual );
 	RepeatType walkOptRepeat( opt_repeat OptRepeat );
-	TypeRef *walkTypeRef( type_ref &typeRef );
+	TypeRef *walkTypeRef( type_ref typeRef );
 	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
 	LexFactorRep *walkLexFactorRep( lex_factor_rep &LexFactorRepTree );
@@ -71,7 +73,7 @@ struct LoadSource
 	LexTerm *walkLexTerm( lex_term &LexTerm );
 	LexExpression *walkLexExpr( lex_expr &LexExpr );
 	ExprVect *walkCodeExprList( _repeat_code_expr &codeExprList );
-	LangExpr *walkCodeExpr( code_expr &codeExpr );
+	LangExpr *walkCodeExpr( code_expr codeExpr );
 	void walkTokenList( token_list &TokenList );
 	void walkLexRegion( region_def &regionDef );
 	void walkProdElList( ProdElList *list, prod_el_list &ProdElList );

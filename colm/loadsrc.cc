@@ -60,7 +60,7 @@ RepeatType LoadSource::walkOptRepeat( opt_repeat OptRepeat )
 	return repeatType;
 }
 
-TypeRef *LoadSource::walkTypeRef( type_ref &typeRefTree )
+TypeRef *LoadSource::walkTypeRef( type_ref typeRefTree )
 {
 	NamespaceQual *nspaceQual = walkRegionQual( typeRefTree.RegionQual() );
 	String id = typeRefTree.Id().text().c_str();
@@ -321,7 +321,7 @@ LangVarRef *LoadSource::walkVarRef( var_ref &varRef )
 	return langVarRef;
 }
 
-LangExpr *LoadSource::walkCodeExpr( code_expr &codeExpr )
+LangExpr *LoadSource::walkCodeExpr( code_expr codeExpr )
 {
 	LangExpr *expr = 0;
 	if ( codeExpr.VarRef() != 0 ) {
@@ -341,7 +341,8 @@ LangExpr *LoadSource::walkCodeExpr( code_expr &codeExpr )
 	}
 	else if ( codeExpr.Number() != 0 ) {
 		String number = codeExpr.Lit().text().c_str();
-		LangTerm *term =LangTerm::cons( InputLoc(), LangTerm::NumberType, number );
+		std::cout << "number: " << number << std::endl;
+		LangTerm *term = LangTerm::cons( InputLoc(), LangTerm::NumberType, number );
 		expr = LangExpr::cons( term );
 	}
 	else if ( codeExpr.Lit() != 0 ) {
@@ -378,6 +379,13 @@ LangStmt *LoadSource::walkExprStmt( expr_stmt &exprStmt )
 	return stmt;
 }
 
+ObjectField *LoadSource::walkVarDef( var_def varDef )
+{
+	TypeRef *typeRef = walkTypeRef( varDef.TypeRef() );
+	String id = varDef.Id().text().c_str();
+	return ObjectField::cons( internal, typeRef, id );
+}
+
 LangStmt *LoadSource::walkStatement( statement &Statement )
 {
 	LangStmt *stmt;
@@ -388,6 +396,13 @@ LangStmt *LoadSource::walkStatement( statement &Statement )
 	else if ( Statement.Expr() != 0 ) {
 		expr_stmt exprStmt = Statement.Expr();
 		stmt = walkExprStmt( exprStmt );
+	}
+	else if ( Statement.VarDef() != 0 ) {
+		ObjectField *objField = walkVarDef( Statement.VarDef() );
+		LangExpr *expr = 0;
+		if ( Statement.OptDefInit().CodeExpr() != 0 )
+			expr = walkCodeExpr( Statement.OptDefInit().CodeExpr() );
+		stmt = varDef( objField, expr, LangStmt::AssignType );
 	}
 	return stmt;
 }

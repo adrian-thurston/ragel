@@ -38,6 +38,7 @@ lex
 	token PLUS /'+'/
 	token QUESTION /'?'/
 	token CARET /'^'/
+	token EQUALS /'='/
 
 	ignore / 
 		( '\n' | '\t' | ' ' ) .
@@ -113,6 +114,14 @@ def prod_list
 def statement
 	[Print: print_stmt]
 |	[Expr: expr_stmt]
+|	[VarDef: var_def OptDefInit: opt_def_init]
+
+def opt_def_init
+	[EQUALS CodeExpr: code_expr]
+|	[]
+
+def var_def
+	[Id: id COLON TypeRef: type_ref]
 
 def print_stmt
 	[PRINT POPEN CodeExprList: code_expr* PCLOSE]
