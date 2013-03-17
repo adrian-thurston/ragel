@@ -554,9 +554,7 @@ int main(int argc, const char **argv)
 	}
 
 
-#if defined(CONS_INIT)
-#elif defined(LOAD_COLM)
-#else
+#if defined(CONS_COLM) || defined(LOAD_SRC)
 	/* Open the input file for reading. */
 	if ( inputFileName == 0 ) {
 		error() << "colm: no input file given" << endl;
@@ -579,7 +577,7 @@ int main(int argc, const char **argv)
 #if defined(CONS_INIT)
 	ConsInit *parser = new ConsInit( pd );
 #elif defined(LOAD_COLM)
-	LoadColm *parser = new LoadColm( pd );
+	LoadColm *parser = new LoadColm( pd, inputFileName );
 #else
 	LoadSource *parser = new LoadSource( pd, inputFileName );
 #endif

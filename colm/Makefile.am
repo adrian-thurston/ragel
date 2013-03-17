@@ -70,7 +70,7 @@ bootstrap1_SOURCES = \
 	main.cc
 bootstrap1_LDADD = libprog.a libcolm.a
 
-colm_CXXFLAGS = $(common_CFLAGS) 
+colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_SRC
 colm_CFLAGS = $(common_CFLAGS)
 colm_SOURCES = \
 	loadsrc.h loadsrc.cc \
@@ -88,7 +88,7 @@ exports1.h: parse1.c
 exports1.cc: parse1.c
 
 parse2.c: bootstrap1 colm.lm
-	$(builddir)/bootstrap1 -L -o parse2.c -e exports2.h -c exports2.cc < colm.lm
+	$(builddir)/bootstrap1 -L -o parse2.c -e exports2.h -c exports2.cc colm.lm
 exports2.h: parse2.c
 exports2.cc: parse2.c
 

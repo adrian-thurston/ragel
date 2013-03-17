@@ -673,20 +673,43 @@ void ConsInit::startProd()
 
 void ConsInit::parseInput( StmtList *stmtList )
 {
+	/* Parse the "start" def. */
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
 
-	LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, String("stdin") );
-	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+	/* Pop argv, this yields the file name . */
+	ExprVect *popArgs = new ExprVect;
+	QualItemVect *popQual = new QualItemVect;
+	popQual->append( QualItem( internal, String( "argv" ), QualItem::Dot ) );
 
-	ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, expr );
+	LangVarRef *popRef = LangVarRef::cons( internal, popQual, String("pop") );
+	LangExpr *pop = LangExpr::cons( LangTerm::cons( InputLoc(), popRef, popArgs ) );
+
+	/* Construct a literal string 'r', for second arg to open. */
+	ConsItem *modeConsItem = ConsItem::cons( internal, ConsItem::InputText, String("r") );
+	ConsItemList *modeCons = new ConsItemList;
+	modeCons->append( modeConsItem );
+	LangExpr *modeExpr = LangExpr::cons( LangTerm::cons( internal, modeCons ) );
+	
+	/* Call open. */
+	QualItemVect *openQual = new QualItemVect;
+	LangVarRef *openRef = LangVarRef::cons( internal, openQual, String("open") );
+	ExprVect *openArgs = new ExprVect;
+	openArgs->append( pop );
+	openArgs->append( modeExpr );
+	LangExpr *open = LangExpr::cons( LangTerm::cons( InputLoc(), openRef, openArgs ) );
+
+	/* Construct a list containing the open stream. */
+	ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, open );
 	ConsItemList *list = ConsItemList::cons( consItem );
 
+	/* Will capture the parser to "P" */
 	ObjectField *objField = ObjectField::cons( internal, 0, String("P") );
 
-	expr = parseCmd( internal, false, objField, typeRef, 0, list );
-	LangStmt *stmt = LangStmt::cons( internal, LangStmt::ExprType, expr );
-	stmtList->append( stmt );
+	/* Parse the above list. */
+	LangExpr *parseExpr = parseCmd( internal, false, objField, typeRef, 0, list );
+	LangStmt *parseStmt = LangStmt::cons( internal, LangStmt::ExprType, parseExpr );
+	stmtList->append( parseStmt );
 }
 
 void ConsInit::exportTree( StmtList *stmtList )

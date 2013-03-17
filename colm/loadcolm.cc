@@ -300,9 +300,13 @@ void LoadColm::go()
 {
 	StmtList *stmtList = new StmtList;
 
+	const char *argv[2];
+	argv[0] = inputFileName;
+	argv[1] = 0;
+
 	colmInit( 0 );
 	ColmProgram *program = colmNewProgram( &main_runtimeData );
-	colmRunProgram( program, 0, 0 );
+	colmRunProgram( program, 1, argv );
 
 	/* Extract the parse tree. */
 	start Start = ColmTree( program );

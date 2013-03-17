@@ -38,10 +38,13 @@ struct LoadColm
 :
 	public BaseParser
 {
-	LoadColm( Compiler *pd )
+	LoadColm( Compiler *pd, const char *inputFileName )
 	:
-		BaseParser(pd)
+		BaseParser(pd),
+		inputFileName(inputFileName)
 	{}
+
+	const char *inputFileName;
 
 	/* Constructing the colm language data structures from the the parse tree. */
 	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
