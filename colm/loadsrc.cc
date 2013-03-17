@@ -46,20 +46,25 @@ NamespaceQual *LoadSource::walkRegionQual( region_qual regionQual )
 	return qual;
 }
 
-RepeatType LoadSource::walkRepeat( opt_repeat &OptRepeat )
+RepeatType LoadSource::walkOptRepeat( opt_repeat OptRepeat )
 {
-	return RepeatNone;
+	RepeatType repeatType = RepeatNone;
+	if ( OptRepeat.Star() != 0 )
+		repeatType = RepeatRepeat;
+	else if ( OptRepeat.Plus() != 0 )
+		repeatType = RepeatList;
+	else if ( OptRepeat.Question() != 0 )
+		repeatType = RepeatOpt;
+	return repeatType;
 }
 
 TypeRef *LoadSource::walkTypeRef( type_ref &typeRefTree )
 {
 	NamespaceQual *nspaceQual = walkRegionQual( typeRefTree.RegionQual() );
-
 	String id = typeRefTree.Id().text().c_str();
-	opt_repeat optRepeat = typeRefTree.OptRepeat();
-	RepeatType repeatType = walkRepeat( optRepeat );
-	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, id, repeatType );
-	return typeRef;
+	RepeatType repeatType = walkOptRepeat( typeRefTree.OptRepeat() );
+
+	return TypeRef::cons( internal, nspaceQual, id, repeatType );
 }
 
 void LoadSource::walkProdElList( ProdElList *list, prod_el_list &ProdElList )

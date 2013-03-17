@@ -62,7 +62,7 @@ struct LoadSource
 	const char *inputFileName;
 
 	NamespaceQual *walkRegionQual( region_qual regionQual );
-	RepeatType walkRepeat( opt_repeat &OptRepeat );
+	RepeatType walkOptRepeat( opt_repeat OptRepeat );
 	TypeRef *walkTypeRef( type_ref &typeRef );
 	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );

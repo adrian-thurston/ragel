@@ -35,6 +35,8 @@ lex
 	token PCLOSE /')'/
 	token DOTDOT /'..'/
 	token STAR /'*'/
+	token PLUS /'+'/
+	token QUESTION /'?'/
 	token CARET /'^'/
 
 	ignore / 
@@ -132,8 +134,11 @@ def region_qual
 	[RegionQual: region_qual Id: id DOUBLE_COLON]
 |	[]
 
-
-def opt_repeat []
+def opt_repeat
+	[Star: STAR]
+|	[Plus: PLUS]
+|	[Question: QUESTION]
+|	[]
 
 def opt_capture
 	[id COLON]
