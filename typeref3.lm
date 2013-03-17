@@ -1,3 +1,4 @@
+##### LM #####
 namespace n1
 
 	namespace n2
@@ -13,3 +14,13 @@ end
 
 parse P: n1::n2::id+[stdin]
 print( P.tree '\n' )
+##### IN #####
+a
+  b
+  c
+d
+##### EXP #####
+a
+  b
+  c
+d

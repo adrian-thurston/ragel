@@ -1,3 +1,4 @@
+##### LM #####
 namespace n1
 
 	lex
@@ -11,3 +12,13 @@ end
 
 parse P: n1::start[stdin]
 print( P.tree '\n' )
+##### IN #####
+a
+  b
+  c
+d
+##### EXP #####
+a
+  b
+  c
+d
