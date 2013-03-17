@@ -110,7 +110,7 @@ function runtests()
 		LOG=$WORKING/$ROOT.log
 
 		if [ '!' -f $LM ]; then
-			echo "FAILED: no colm program"
+			echo "ERROR: $TST cannot be run: no LM section"
 			ERRORS=$(( ERRORS + 1 ))
 			continue
 		fi
@@ -118,7 +118,7 @@ function runtests()
 		# Compilation.
 		$COLM $LM &> $LOG 
 		if [ $? != 0 ]; then
-			echo "FAILED: compilation error"
+			echo "ERROR: $TST cannot be run: compilation error"
 			ERRORS=$(( ERRORS + 1 ))
 			continue
 		fi
@@ -164,6 +164,7 @@ function runtests()
 			if [ $? != 0 ]; then
 				echo "FAILED: execution error"
 				ERRORS=$(( ERRORS + 1 ))
+				Nth=$((Nth + 1))
 				continue
 			fi
 
@@ -172,6 +173,7 @@ function runtests()
 			if [ $? != 0 ]; then
 				echo "FAILED: output differs from expected output"
 				ERRORS=$(( ERRORS + 1 ))
+				Nth=$((Nth + 1))
 				continue
 			fi
 
