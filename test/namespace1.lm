@@ -1,15 +1,8 @@
 namespace n1
 
 	lex
-		token id / 
-			( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
-			( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
-		/
-
-		ignore / 
-			( '\n' | '\t' | ' ' ) .
-			( '\n' | '\t' | ' ' )* 
-		/
+		token id / 'a' .. 'z' /
+		ignore / '\n' | '\t' | ' ' /
 	end
 
 	def start
