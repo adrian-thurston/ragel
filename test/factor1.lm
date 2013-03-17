@@ -1,3 +1,4 @@
 ##### LM #####
-'hello\n'
+print( 'hello\n')
 ##### EXP #####
+hello
