@@ -19,7 +19,9 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include "lmparse.h"
+#include "avltree.h"
+#include "parsedata.h"
+#include "parser.h"
 #include "parsetree.h"
 #include "input.h"
 

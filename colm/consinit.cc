@@ -24,7 +24,9 @@
 
 #include "parser.h"
 #include "config.h"
-#include "lmparse.h"
+#include "avltree.h"
+#include "parsedata.h"
+#include "parser.h"
 #include "global.h"
 #include "input.h"
 #include "consinit.h"

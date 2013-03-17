@@ -27,7 +27,9 @@
 #include <sstream>
 
 #include "global.h"
-#include "lmparse.h"
+#include "avltree.h"
+#include "parsedata.h"
+#include "parser.h"
 #include "parsedata.h"
 #include "parsetree.h"
 #include "mergesort.h"
