@@ -15,6 +15,14 @@ end
 parse P: n1::n2::id*[stdin]
 print( P.tree '\n' )
 ##### IN #####
+
+##### EXP #####
+
+##### IN #####
+a
+##### EXP #####
+a
+##### IN #####
 a
   b
   c
