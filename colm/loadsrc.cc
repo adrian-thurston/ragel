@@ -291,7 +291,21 @@ LangExpr *LoadSource::walkCodeExpr( code_expr &codeExpr )
 	if ( codeExpr.VarRef() != 0 ) {
 		var_ref varRef = codeExpr.VarRef();
 		LangVarRef *langVarRef = walkVarRef( varRef );
-		LangTerm *term = LangTerm::cons( internal, LangTerm::VarRefType, langVarRef );
+		LangTerm *term;
+		if ( codeExpr.CodeExprList() == 0 ) {
+			term = LangTerm::cons( internal, LangTerm::VarRefType, langVarRef );
+		}
+		else {
+			_repeat_code_expr codeExprList = codeExpr.CodeExprList();
+			ExprVect *exprVect = walkCodeExprList( codeExprList );
+			term = LangTerm::cons( internal, langVarRef, exprVect );
+		}
+
+		expr = LangExpr::cons( term );
+	}
+	else if ( codeExpr.Number() != 0 ) {
+		String number = codeExpr.Lit().text().c_str();
+		LangTerm *term =LangTerm::cons( InputLoc(), LangTerm::NumberType, number );
 		expr = LangExpr::cons( term );
 	}
 	else if ( codeExpr.Lit() != 0 ) {

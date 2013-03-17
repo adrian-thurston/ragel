@@ -12,6 +12,11 @@ lex
 		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
 	/
 
+	token number / 
+		( '0' .. '9' ) .
+		( '0' .. '9' ) *
+	/
+
 	# FIXME: need the 'any' builtin.
 	token lit /
 		'\'' . ( ^( '\'' | '\\' ) | '\\' . ( 'a' .. 'z' | '\'' | '\\' ) )* .  '\''
@@ -109,8 +114,10 @@ def expr_stmt
 	[CodeExpr: code_expr]
 
 def code_expr
-	[VarRef: var_ref]
+	[Number: number]
 |	[Lit: lit]
+|	[VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE]
+|	[VarRef: var_ref]
 |	[PARSE opt_capture type_ref opt_field_init accumulate]
 
 def opt_capture
