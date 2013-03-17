@@ -1,7 +1,3 @@
-/*.diff
-/*.c
-/*.bin
-/*.out
-/*.log
 /Makefile.in
 /Makefile
+/working

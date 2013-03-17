@@ -1,23 +1,25 @@
 #!/bin/bash
 #
 
-# Test files have the extention 'tst'. They contain sections giving config
-# data, function names, SQL code and expected output.
+# Test cases contain sections giving the program, input and expected output.
 
-#   ##### FNC #####
-#   Function name.
-#   ##### CNF #####
-#   Configuration data.
-#   ##### SQL #####
-#   SQL code to run ahead of the test.
-#   ##### PCY #####
-#   Policy to use for the test.
-#   ##### EXP #####
-#   Expected Output.
+###### COLM #####
+#   colm program
+###### ARGS #####
+#   program arguments
+###### IN #####
+#   program input
+###### EXP #####
+#   expected output
+
 #######################################
 
-cd `dirname $0`
+WORKING=working
+COLM=../colm/colm
+ERRORS=0
 
+cd `dirname $0`
+test -d $WORKING || mkdir $WORKING
 
 function die()
 {
@@ -32,15 +34,6 @@ function sig_exit()
 	echo
 	exit 1;
 }
-
-errors=0
-
-#trap sig_exit SIGINT
-#trap sig_exit SIGQUIT
-
-COLM=../colm/colm
-
-[ -d $DATA ] || die "error: data directory not found"
 
 # Parse args.
 while getopts vdm opt; do
@@ -65,17 +58,48 @@ else
 	TEST_PAT='*.lm'
 fi 
 
+function section
+{
+	local section=$1
+	local in=$2
+	local out=$3
+
+	awk -vsection=$section '
+		/#+ *[a-zA-Z]+ *#+/ {
+			gsub( "[ #\n]", "", $0 );
+			if ( $0 == section ) 
+				in_section = 1
+			else
+				in_section = 0
+			next;
+		}
+
+		in_section {
+			print $0
+		}
+	' $in > $out
+
+	[ -s $out ] || rm $out
+}
+
 function runtests()
 {
 	for TST in $TEST_PAT; do
-		INP=${TST/.lm}.in
-		EXP=${TST/.lm}.exp
-		ARGS=${TST/.lm}.args
+		ROOT=${TST/.lm}
+		LM=$WORKING/$ROOT.lm
+		ARGS=$WORKING/$ROOT.args
+		IN=$WORKING/$ROOT.in
+		EXP=$WORKING/$ROOT.exp
 
-		BIN=${TST/.lm}.bin
-		OUT=${TST/.lm}.out
-		DIFF=${TST/.lm}.diff
-		LOG=${TST/.lm}.log
+		section LM $TST $LM
+		section ARGS $TST $ARGS
+		section IN $TST $IN
+		section EXP $TST $EXP
+
+		BIN=$WORKING/$ROOT.bin
+		OUT=$WORKING/$ROOT.out
+		DIFF=$WORKING/$ROOT.diff
+		LOG=$WORKING/$ROOT.log
 
 		cmdargs=""
 		if [ -f $ARGS ]; then
@@ -84,12 +108,17 @@ function runtests()
 
 		echo -n "running test $TST ... "
 
+		if [ '!' -f $LM ]; then
+			echo "FAILED: no colm program"
+			ERRORS=$(( ERRORS + 1 ))
+			continue
+		fi
+
 		# Check for expected output.
 		if [ '!' -f $EXP ]; then
-			echo "FAILED no expected output"
-			errors=$(( errors + 1 ))
+			echo "FAILED: no expected output"
+			ERRORS=$(( ERRORS + 1 ))
 			continue
-		
 		fi
 
 		if [ "$verbose" = true ]; then
@@ -98,48 +127,48 @@ function runtests()
 		fi
 
 		# Compilation.
-		$COLM $TST &> $LOG 
+		$COLM $LM &> $LOG 
 		if [ $? != 0 ]; then
-			echo "FAILED compilation"
-			errors=$(( errors + 1 ))
+			echo "FAILED: compilation error"
+			ERRORS=$(( ERRORS + 1 ))
 			continue
 		fi
 
 		if [ "$verbose" = true ]; then
-			if [ -f $INP ]; then
-				echo "${VALGRIND}./$BIN $cmdargs < $INP > $OUT 2>> $LOG"
+			if [ -f $IN ]; then
+				echo "${VALGRIND}./$BIN $cmdargs < $IN > $OUT 2>> $LOG"
 			else
 				echo "${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG"
 			fi
 		fi
 
 		# Execution
-		if [ -f $INP ]; then
-			${VALGRIND}./$BIN $cmdargs < $INP > $OUT 2>> $LOG
+		if [ -f $IN ]; then
+			${VALGRIND}./$BIN $cmdargs < $IN > $OUT 2>> $LOG
 		else
 			${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG
 		fi
 		if [ $? != 0 ]; then
-			echo "FAILED execution"
-			errors=$(( errors + 1 ))
+			echo "FAILED: execution error"
+			ERRORS=$(( ERRORS + 1 ))
 			continue
 		fi
 
 		# Diff of output
 		diff -u $EXP $OUT > $DIFF
 		if [ $? != 0 ]; then
-			echo "FAILED output diff"
-			errors=$(( errors + 1 ))
+			echo "FAILED: output differs from expected output"
+			ERRORS=$(( ERRORS + 1 ))
 			continue
 		fi
 
 		echo ok
 	done
 
-	if [ $errors != 0 ]; then
-		[ $errors != 1 ] && plural="s";
+	if [ $ERRORS != 0 ]; then
+		[ $ERRORS != 1 ] && plural="s";
 		echo
-		echo "TESTING FAILED: $errors failure$plural"
+		echo "TESTING FAILED: $ERRORS failure$plural"
 		echo
 		EXIT=1
 	fi
