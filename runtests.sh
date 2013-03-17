@@ -61,16 +61,19 @@ fi
 function section
 {
 	local section=$1
-	local in=$2
-	local out=$3
+	local nth=$2
+	local in=$3
+	local out=$4
 
-	awk -vsection=$section '
+	awk -vsection=$section -vnth=$nth '
 		/#+ *[a-zA-Z]+ *#+/ {
 			gsub( "[ #\n]", "", $0 );
-			if ( $0 == section ) 
-				in_section = 1
-			else
-				in_section = 0
+			in_section = 0
+			if ( $0 == section ) {
+				if ( n == nth )
+					in_section = 1
+				n += 1
+			}
 			next;
 		}
 
@@ -91,39 +94,17 @@ function runtests()
 		IN=$WORKING/$ROOT.in
 		EXP=$WORKING/$ROOT.exp
 
-		section LM $TST $LM
-		section ARGS $TST $ARGS
-		section IN $TST $IN
-		section EXP $TST $EXP
+		section LM 0 $TST $LM
 
 		BIN=$WORKING/$ROOT.bin
 		OUT=$WORKING/$ROOT.out
 		DIFF=$WORKING/$ROOT.diff
 		LOG=$WORKING/$ROOT.log
 
-		cmdargs=""
-		if [ -f $ARGS ]; then
-			cmdargs=`cat $ARGS`
-		fi
-
-		echo -n "running test $TST ... "
-
 		if [ '!' -f $LM ]; then
 			echo "FAILED: no colm program"
 			ERRORS=$(( ERRORS + 1 ))
 			continue
-		fi
-
-		# Check for expected output.
-		if [ '!' -f $EXP ]; then
-			echo "FAILED: no expected output"
-			ERRORS=$(( ERRORS + 1 ))
-			continue
-		fi
-
-		if [ "$verbose" = true ]; then
-			echo
-			echo $COLM $TST
 		fi
 
 		# Compilation.
@@ -134,35 +115,61 @@ function runtests()
 			continue
 		fi
 
-		if [ "$verbose" = true ]; then
-			if [ -f $IN ]; then
-				echo "${VALGRIND}./$BIN $cmdargs < $IN > $OUT 2>> $LOG"
-			else
-				echo "${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG"
+		Nth=0
+		while true; do
+			section EXP $Nth $TST $EXP
+
+			# Stop when we have no Nth expected output.
+			if [ '!' -f $EXP ]; then
+				break;
 			fi
-		fi
 
-		# Execution
-		if [ -f $IN ]; then
-			${VALGRIND}./$BIN $cmdargs < $IN > $OUT 2>> $LOG
-		else
-			${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG
-		fi
-		if [ $? != 0 ]; then
-			echo "FAILED: execution error"
-			ERRORS=$(( ERRORS + 1 ))
-			continue
-		fi
+			section ARGS $Nth $TST $ARGS
+			section IN $Nth $TST $IN
 
-		# Diff of output
-		diff -u $EXP $OUT > $DIFF
-		if [ $? != 0 ]; then
-			echo "FAILED: output differs from expected output"
-			ERRORS=$(( ERRORS + 1 ))
-			continue
-		fi
+			cmdargs=""
+			if [ -f $ARGS ]; then
+				cmdargs=`cat $ARGS`
+			fi
 
-		echo ok
+			echo -n "running test $TST ($Nth)... "
+
+			if [ "$verbose" = true ]; then
+				echo
+				echo $COLM $TST
+			fi
+
+			if [ "$verbose" = true ]; then
+				if [ -f $IN ]; then
+					echo "${VALGRIND}./$BIN $cmdargs < $IN > $OUT 2>> $LOG"
+				else
+					echo "${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG"
+				fi
+			fi
+
+			# Execution
+			if [ -f $IN ]; then
+				${VALGRIND}./$BIN $cmdargs < $IN > $OUT 2>> $LOG
+			else
+				${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG
+			fi
+			if [ $? != 0 ]; then
+				echo "FAILED: execution error"
+				ERRORS=$(( ERRORS + 1 ))
+				continue
+			fi
+
+			# Diff of output
+			diff -u $EXP $OUT > $DIFF
+			if [ $? != 0 ]; then
+				echo "FAILED: output differs from expected output"
+				ERRORS=$(( ERRORS + 1 ))
+				continue
+			fi
+
+			echo ok
+			Nth=$((Nth + 1))
+		done
 	done
 
 	if [ $ERRORS != 0 ]; then

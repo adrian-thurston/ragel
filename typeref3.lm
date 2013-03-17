@@ -12,15 +12,17 @@ namespace n1
 	end
 end
 
-parse P: n1::n2::id+[stdin]
+parse P: n1::n2::id?[stdin]
 print( P.tree '\n' )
 ##### IN #####
+
+##### EXP #####
+
+##### IN #####
 a
-  b
-  c
-d
 ##### EXP #####
 a
-  b
-  c
-d
+##### IN #####
+a b
+##### EXP #####
+NIL
