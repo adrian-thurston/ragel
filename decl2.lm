@@ -1,4 +1,5 @@
 ##### LM #####
-print( 77 '\n' )
+Str: str = '77'
+print( Str '\n' )
 ##### EXP #####
 77
