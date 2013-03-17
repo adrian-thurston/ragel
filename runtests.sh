@@ -65,24 +65,32 @@ function section
 	local in=$3
 	local out=$4
 
+	# Print Nth instance of the section
 	awk -vsection=$section -vnth=$nth '
 		/#+ *[a-zA-Z]+ *#+/ {
 			gsub( "[ #\n]", "", $0 );
 			in_section = 0
 			if ( $0 == section ) {
-				if ( n == nth )
-					in_section = 1
+				if ( n == nth ) {
+					in_section = 1;
+					found = 1;
+				}
 				n += 1
 			}
 			next;
 		}
 
 		in_section {
-			print $0
+			print $0;
+		}
+
+		END {
+			exit( found ? 0 : 1 )
 		}
 	' $in > $out
 
-	[ -s $out ] || rm $out
+	# Remove the file if no section was found
+	[ $? = 0 ] || rm $out
 }
 
 function runtests()
