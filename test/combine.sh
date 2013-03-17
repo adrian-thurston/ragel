@@ -10,16 +10,19 @@ for fn in $@; do
 		if [ -f ${fn%.lm}.args ]; then
 			echo '##### ARGS #####';
 			cat ${fn%.lm}.args
+			rm ${fn%.lm}.args
 		fi
 
 		if [ -f ${fn%.lm}.in ]; then
 			echo '##### IN #####';
 			cat ${fn%.lm}.in
+			rm ${fn%.lm}.in
 		fi
 
 		if [ -f ${fn%.lm}.exp ]; then
 			echo '##### EXP #####';
 			cat ${fn%.lm}.exp
+			rm ${fn%.lm}.exp
 		fi
 
 	) \
