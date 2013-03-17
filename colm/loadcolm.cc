@@ -312,7 +312,8 @@ void LoadColm::go()
 	start Start = ColmTree( program );
 
 	if ( Start == 0 ) {
-		std::cerr << "error parsing input" << std::endl;
+		gblErrorCount += 1;
+		std::cerr << inputFileName << ": parse error" << std::endl;
 		return;
 	}
 
