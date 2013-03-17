@@ -45,6 +45,9 @@ struct qual;
 struct region_qual;
 struct opt_repeat;
 struct type_ref;
+struct root_item;
+struct _repeat_root_item;
+struct namespace_def;
 
 struct LoadSource
 :
@@ -58,7 +61,7 @@ struct LoadSource
 
 	const char *inputFileName;
 
-	NamespaceQual *walkRegionQual( region_qual &regionQual );
+	NamespaceQual *walkRegionQual( region_qual regionQual );
 	RepeatType walkRepeat( opt_repeat &OptRepeat );
 	TypeRef *walkTypeRef( type_ref &typeRef );
 	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
@@ -79,5 +82,8 @@ struct LoadSource
 	LangStmt *walkExprStmt( expr_stmt &ExprStmt );
 	QualItemVect *walkQual( qual &Qual );
 	LangVarRef *walkVarRef( var_ref &varRef );
+	void walkRootItem( root_item &rootItem, StmtList *stmtList );
+	StmtList *walkRootItemList( _repeat_root_item rootItemList );
+	void walkNamespaceDef( namespace_def NamespaceDef );
 	void go();
 };

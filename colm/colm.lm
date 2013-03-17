@@ -6,6 +6,7 @@ lex
 	token IGNORE / 'ignore' /
 	token PRINT / 'print' /
 	token PARSE / 'parse' /
+	token NAMESPACE / 'namespace' /
 
 	token id / 
 		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
@@ -27,6 +28,7 @@ lex
 	token BAR /'|'/
 	token FSLASH /'/'/
 	token COLON /':'/
+	token DOUBLE_COLON /'::'/
 	token DOT /'.'/
 	token ARROW /'->'/
 	token POPEN /'('/
@@ -54,7 +56,7 @@ def root_item
 	[CflDef: cfl_def]
 |	[RegionDef: region_def]
 #|	[context_def]
-#|	[namespace_def]
+|	[NamespaceDef: namespace_def]
 #|	[function_def]
 #|	[iter_def]
 #|	[global_def]
@@ -63,6 +65,9 @@ def root_item
 #|	[pre_eof]
 #|	[precedence]
 #|	[typedef]
+
+def namespace_def
+	[NAMESPACE Name: id RootItemList: root_item* END]
 
 def cfl_def
 	[DEF DefId: id ProdList: prod_list]
@@ -123,7 +128,11 @@ def code_expr
 def type_ref
 	[RegionQual: region_qual Id: id OptRepeat: opt_repeat]
 
-def region_qual []
+def region_qual
+	[RegionQual: region_qual Id: id DOUBLE_COLON]
+|	[]
+
+
 def opt_repeat []
 
 def opt_capture

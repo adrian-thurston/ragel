@@ -33,9 +33,17 @@
 
 extern RuntimeData main_runtimeData;
 
-NamespaceQual *LoadSource::walkRegionQual( region_qual &regionQual )
+NamespaceQual *LoadSource::walkRegionQual( region_qual regionQual )
 {
-	return NamespaceQual::cons( namespaceStack.top() );
+	NamespaceQual *qual;
+	if ( regionQual.RegionQual() != 0 ) {
+		qual = walkRegionQual( regionQual.RegionQual() );
+		qual->qualNames.append( String( regionQual.Id().text().c_str() ) );
+	}
+	else {
+		qual = NamespaceQual::cons( namespaceStack.top() );
+	}
+	return qual;
 }
 
 RepeatType LoadSource::walkRepeat( opt_repeat &OptRepeat )
@@ -45,8 +53,8 @@ RepeatType LoadSource::walkRepeat( opt_repeat &OptRepeat )
 
 TypeRef *LoadSource::walkTypeRef( type_ref &typeRefTree )
 {
-	region_qual regionQual = typeRefTree.RegionQual();
-	NamespaceQual *nspaceQual = walkRegionQual( regionQual );
+	NamespaceQual *nspaceQual = walkRegionQual( typeRefTree.RegionQual() );
+
 	String id = typeRefTree.Id().text().c_str();
 	opt_repeat optRepeat = typeRefTree.OptRepeat();
 	RepeatType repeatType = walkRepeat( optRepeat );
@@ -377,10 +385,49 @@ LangStmt *LoadSource::walkStatement( statement &Statement )
 	return stmt;
 }
 
-void LoadSource::go()
+void LoadSource::walkNamespaceDef( namespace_def NamespaceDef )
+{
+	String name = NamespaceDef.Name().text().c_str();
+	createNamespace( internal, name );
+	walkRootItemList( NamespaceDef.RootItemList() );
+	namespaceStack.pop();
+}
+
+void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
+{
+	if ( rootItem.CflDef() != 0 ) {
+		cfl_def cflDef = rootItem.CflDef();
+		walkCflDef( cflDef );
+	}
+	else if ( rootItem.RegionDef() != 0 ) {
+		region_def regionDef = rootItem.RegionDef();
+		walkLexRegion( regionDef );
+	}
+	else if ( rootItem.Statement() != 0 ) {
+		statement Statement = rootItem.Statement();
+		LangStmt *stmt = walkStatement( Statement );
+		stmtList->append( stmt );
+	}
+	else if ( rootItem.NamespaceDef() != 0 ) {
+		walkNamespaceDef( rootItem.NamespaceDef() );
+	}
+}
+
+StmtList *LoadSource::walkRootItemList( _repeat_root_item rootItemList )
 {
 	StmtList *stmtList = new StmtList;
 
+	/* Walk the list of items. */
+	while ( !rootItemList.end() ) {
+		root_item rootItem = rootItemList.value();
+		walkRootItem( rootItem, stmtList );
+		rootItemList = rootItemList.next();
+	}
+	return stmtList;
+}
+
+void LoadSource::go()
+{
 	const char *argv[2];
 	argv[0] = inputFileName;
 	argv[1] = 0;
@@ -398,29 +445,7 @@ void LoadSource::go()
 		return;
 	}
 
-	/* Walk the list of items. */
-	_repeat_root_item rootItemList = Start.RootItemList();
-	while ( !rootItemList.end() ) {
-
-		root_item rootItem = rootItemList.value();
-
-		if ( rootItem.CflDef() != 0 ) {
-			cfl_def cflDef = rootItem.CflDef();
-			walkCflDef( cflDef );
-		}
-		else if ( rootItem.RegionDef() != 0 ) {
-			region_def regionDef = rootItem.RegionDef();
-			walkLexRegion( regionDef );
-		}
-		else if ( rootItem.Statement() != 0 ) {
-			statement Statement = rootItem.Statement();
-			LangStmt *stmt = walkStatement( Statement );
-			stmtList->append( stmt );
-		}
-
-		rootItemList = rootItemList.next();
-	}
-
+	StmtList *stmtList = walkRootItemList( Start.RootItemList() );
 	colmDeleteProgram( program );
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
