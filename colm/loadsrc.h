@@ -42,6 +42,9 @@ struct var_ref;
 struct code_expr;
 struct _repeat_code_expr;
 struct qual;
+struct region_qual;
+struct opt_repeat;
+struct type_ref;
 
 struct LoadSource
 :
@@ -55,6 +58,9 @@ struct LoadSource
 
 	const char *inputFileName;
 
+	NamespaceQual *walkRegionQual( region_qual &regionQual );
+	RepeatType walkRepeat( opt_repeat &OptRepeat );
+	TypeRef *walkTypeRef( type_ref &typeRef );
 	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
 	LexFactorRep *walkLexFactorRep( lex_factor_rep &LexFactorRepTree );

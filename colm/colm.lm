@@ -118,14 +118,17 @@ def code_expr
 |	[Lit: lit]
 |	[VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE]
 |	[VarRef: var_ref]
-|	[PARSE opt_capture type_ref opt_field_init accumulate]
+|	[PARSE opt_capture TypeRef: type_ref opt_field_init accumulate]
+
+def type_ref
+	[RegionQual: region_qual Id: id OptRepeat: opt_repeat]
+
+def region_qual []
+def opt_repeat []
 
 def opt_capture
 	[id COLON]
 |	[]
-
-def type_ref
-	[id]
 
 def opt_field_init
 	[]

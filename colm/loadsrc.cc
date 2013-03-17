@@ -33,6 +33,27 @@
 
 extern RuntimeData main_runtimeData;
 
+NamespaceQual *LoadSource::walkRegionQual( region_qual &regionQual )
+{
+	return NamespaceQual::cons( namespaceStack.top() );
+}
+
+RepeatType LoadSource::walkRepeat( opt_repeat &OptRepeat )
+{
+	return RepeatNone;
+}
+
+TypeRef *LoadSource::walkTypeRef( type_ref &typeRefTree )
+{
+	region_qual regionQual = typeRefTree.RegionQual();
+	NamespaceQual *nspaceQual = walkRegionQual( regionQual );
+	String id = typeRefTree.Id().text().c_str();
+	opt_repeat optRepeat = typeRefTree.OptRepeat();
+	RepeatType repeatType = walkRepeat( optRepeat );
+	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, id, repeatType );
+	return typeRef;
+}
+
 void LoadSource::walkProdElList( ProdElList *list, prod_el_list &ProdElList )
 {
 	if ( ProdElList.ProdElList() != 0 ) {
@@ -314,8 +335,9 @@ LangExpr *LoadSource::walkCodeExpr( code_expr &codeExpr )
 		expr = LangExpr::cons( term );
 	}
 	else {
-		NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
-		TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
+		/* The type we are parsing. */
+		type_ref typeRefTree = codeExpr.TypeRef();
+		TypeRef *typeRef = walkTypeRef( typeRefTree );
 
 		LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, String("stdin") );
 		LangExpr *accumExpr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
