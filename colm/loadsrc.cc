@@ -385,7 +385,7 @@ ObjectField *LoadSource::walkVarDef( var_def varDef )
 
 LangStmt *LoadSource::walkStatement( statement &Statement )
 {
-	LangStmt *stmt;
+	LangStmt *stmt = 0;
 	if ( Statement.Print() != 0 ) {
 		print_stmt printStmt = Statement.Print();
 		stmt = walkPrintStmt( printStmt );
@@ -425,7 +425,8 @@ void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
 	else if ( rootItem.Statement() != 0 ) {
 		statement Statement = rootItem.Statement();
 		LangStmt *stmt = walkStatement( Statement );
-		stmtList->append( stmt );
+		if ( stmt != 0 )
+			stmtList->append( stmt );
 	}
 	else if ( rootItem.NamespaceDef() != 0 ) {
 		walkNamespaceDef( rootItem.NamespaceDef() );
