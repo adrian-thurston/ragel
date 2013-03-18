@@ -93,10 +93,10 @@ exports2.h: parse2.c
 exports2.cc: parse2.c
 
 bootstrap1-exports1.$(OBJEXT): exports1.h exports1.cc parse1.c
-bootstrap1-bootstrap1.$(OBJEXT): exports1.h exports1.cc parse1.c
+bootstrap1-loadcolm.$(OBJEXT): exports1.h exports1.cc parse1.c
 
 colm-exports2.$(OBJEXT): exports2.h exports2.cc parse2.c
-colm-bootstrap2.$(OBJEXT): exports2.h exports2.cc parse2.c
+colm-loadsrc.$(OBJEXT): exports2.h exports2.cc parse2.c
 
 BUILT_SOURCES = version.h 
 
