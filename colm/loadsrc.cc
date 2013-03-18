@@ -289,8 +289,6 @@ ExprVect *LoadSource::walkCodeExprList( _repeat_code_expr &codeExprList )
 
 LangStmt *LoadSource::walkPrintStmt( print_stmt &printStmt )
 {
-	//std::cerr << "print statement: " << printStmt.text() << std::endl;
-
 	_repeat_code_expr codeExprList = printStmt.CodeExprList();
 	ExprVect *exprVect = walkCodeExprList( codeExprList );
 	return LangStmt::cons( internal, LangStmt::PrintType, exprVect );
@@ -340,8 +338,7 @@ LangExpr *LoadSource::walkCodeExpr( code_expr codeExpr )
 		expr = LangExpr::cons( term );
 	}
 	else if ( codeExpr.Number() != 0 ) {
-		String number = codeExpr.Lit().text().c_str();
-		std::cout << "number: " << number << std::endl;
+		String number = codeExpr.Number().text().c_str();
 		LangTerm *term = LangTerm::cons( InputLoc(), LangTerm::NumberType, number );
 		expr = LangExpr::cons( term );
 	}
