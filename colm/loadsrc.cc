@@ -69,6 +69,14 @@ TypeRef *LoadSource::walkTypeRef( type_ref typeRefTree )
 	return TypeRef::cons( internal, nspaceQual, id, repeatType );
 }
 
+StmtList *LoadSource::walkBlockOrSingle( block_or_single blockOrSingle )
+{
+	LangStmt *stmt = walkStatement( blockOrSingle.Statement() );
+	StmtList *stmtList = new StmtList;
+	stmtList->append( stmt );
+	return stmtList;
+}
+
 void LoadSource::walkProdElList( ProdElList *list, prod_el_list &ProdElList )
 {
 	if ( ProdElList.ProdElList() != 0 ) {
@@ -383,7 +391,7 @@ ObjectField *LoadSource::walkVarDef( var_def varDef )
 	return ObjectField::cons( internal, typeRef, id );
 }
 
-LangStmt *LoadSource::walkStatement( statement &Statement )
+LangStmt *LoadSource::walkStatement( statement Statement )
 {
 	LangStmt *stmt = 0;
 	if ( Statement.Print() != 0 ) {
@@ -400,6 +408,22 @@ LangStmt *LoadSource::walkStatement( statement &Statement )
 		if ( Statement.OptDefInit().CodeExpr() != 0 )
 			expr = walkCodeExpr( Statement.OptDefInit().CodeExpr() );
 		stmt = varDef( objField, expr, LangStmt::AssignType );
+	}
+	else if ( Statement.ForDecl() != 0 ) {
+		std::cerr << "local: " << pd->curLocalFrame << std::endl;
+		pd->curLocalFrame->pushScope();
+
+		String forDecl = Statement.ForDecl().text().c_str();
+		TypeRef *typeRef = walkTypeRef( Statement.TypeRef() );
+		StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
+
+		String tree = Statement.IterCall().text().c_str();
+		LangTerm *langTerm = LangTerm::cons( internal, LangTerm::VarRefType,
+				LangVarRef::cons( internal, tree ) );
+
+		stmt = forScope( internal, forDecl, typeRef, langTerm, stmtList );
+
+		pd->curLocalFrame->popScope();
 	}
 	return stmt;
 }

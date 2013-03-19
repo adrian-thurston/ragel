@@ -49,6 +49,7 @@ struct root_item;
 struct _repeat_root_item;
 struct namespace_def;
 struct var_def;
+struct block_or_single;
 
 struct LoadSource
 :
@@ -79,7 +80,7 @@ struct LoadSource
 	void walkProdElList( ProdElList *list, prod_el_list &ProdElList );
 	void walkProdList( LelDefList *lelDefList, prod_list &ProdList );
 	void walkCflDef( cfl_def &cflDef );
-	LangStmt *walkStatement( statement &Statement );
+	LangStmt *walkStatement( statement Statement );
 	LangStmt *walkPrintStmt( print_stmt &PrintStmt );
 	LangStmt *walkExprStmt( expr_stmt &ExprStmt );
 	QualItemVect *walkQual( qual &Qual );
@@ -87,5 +88,6 @@ struct LoadSource
 	void walkRootItem( root_item &rootItem, StmtList *stmtList );
 	StmtList *walkRootItemList( _repeat_root_item rootItemList );
 	void walkNamespaceDef( namespace_def NamespaceDef );
+	StmtList *walkBlockOrSingle( block_or_single blockOrSingle );
 	void go();
 };

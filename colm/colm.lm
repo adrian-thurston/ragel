@@ -7,6 +7,8 @@ lex
 	token PRINT / 'print' /
 	token PARSE / 'parse' /
 	token NAMESPACE / 'namespace' /
+	token FOR / 'for' /
+	token IN / 'in' /
 
 	token id / 
 		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
@@ -33,6 +35,8 @@ lex
 	token ARROW /'->'/
 	token POPEN /'('/
 	token PCLOSE /')'/
+	token COPEN /'{'/
+	token CCLOSE /'}'/
 	token DOTDOT /'..'/
 	token STAR /'*'/
 	token PLUS /'+'/
@@ -115,6 +119,18 @@ def statement
 	[Print: print_stmt]
 |	[Expr: expr_stmt]
 |	[VarDef: var_def OptDefInit: opt_def_init]
+|	[FOR ForDecl: id COLON TypeRef: type_ref IN IterCall: id BlockOrSingle: block_or_single]
+
+def iter_call
+#	[VarRef: var_ref POPEN CodeExpr: code_expr* PCLOSE]
+	[Id: id]
+
+def block_or_single
+#	[COPEN lang_stmt_list CCLOSE]
+	[Statement: statement]
+
+def lang_stmt_list
+	[statement*]
 
 def opt_def_init
 	[EQUALS CodeExpr: code_expr]
