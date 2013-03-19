@@ -50,6 +50,8 @@ struct _repeat_root_item;
 struct namespace_def;
 struct var_def;
 struct block_or_single;
+struct iter_call;
+struct lang_stmt_list;
 
 struct LoadSource
 :
@@ -73,21 +75,23 @@ struct LoadSource
 	LexFactorAug *walkLexFactorAug( lex_factor_rep &LexFactorRepTree );
 	LexTerm *walkLexTerm( lex_term &LexTerm );
 	LexExpression *walkLexExpr( lex_expr &LexExpr );
-	ExprVect *walkCodeExprList( _repeat_code_expr &codeExprList );
+	ExprVect *walkCodeExprList( _repeat_code_expr codeExprList );
 	LangExpr *walkCodeExpr( code_expr codeExpr );
 	void walkTokenList( token_list &TokenList );
 	void walkLexRegion( region_def &regionDef );
 	void walkProdElList( ProdElList *list, prod_el_list &ProdElList );
 	void walkProdList( LelDefList *lelDefList, prod_list &ProdList );
 	void walkCflDef( cfl_def &cflDef );
+	LangTerm *walkIterCall( iter_call IterCall );
 	LangStmt *walkStatement( statement Statement );
 	LangStmt *walkPrintStmt( print_stmt &PrintStmt );
 	LangStmt *walkExprStmt( expr_stmt &ExprStmt );
 	QualItemVect *walkQual( qual &Qual );
-	LangVarRef *walkVarRef( var_ref &varRef );
+	LangVarRef *walkVarRef( var_ref varRef );
 	void walkRootItem( root_item &rootItem, StmtList *stmtList );
 	StmtList *walkRootItemList( _repeat_root_item rootItemList );
 	void walkNamespaceDef( namespace_def NamespaceDef );
+	StmtList *walkLangStmtList( lang_stmt_list LangStmtList );
 	StmtList *walkBlockOrSingle( block_or_single blockOrSingle );
 	void go();
 };

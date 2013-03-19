@@ -69,11 +69,34 @@ TypeRef *LoadSource::walkTypeRef( type_ref typeRefTree )
 	return TypeRef::cons( internal, nspaceQual, id, repeatType );
 }
 
+StmtList *LoadSource::walkLangStmtList( lang_stmt_list langStmtList )
+{
+	StmtList *retList = new StmtList;
+	_repeat_statement stmtList = langStmtList.StmtList();
+
+	/* Walk the list of items. */
+	while ( !stmtList.end() ) {
+		statement Statement = stmtList.value();
+		LangStmt *stmt = walkStatement( Statement );
+		retList->append( stmt );
+		stmtList = stmtList.next();
+	}
+
+	return retList;
+}
+
 StmtList *LoadSource::walkBlockOrSingle( block_or_single blockOrSingle )
 {
-	LangStmt *stmt = walkStatement( blockOrSingle.Statement() );
-	StmtList *stmtList = new StmtList;
-	stmtList->append( stmt );
+	StmtList *stmtList = 0;
+	if ( blockOrSingle.Statement() != 0 ) {
+		stmtList = new StmtList;
+		LangStmt *stmt = walkStatement( blockOrSingle.Statement() );
+		stmtList->append( stmt );
+	}
+	else if ( blockOrSingle.LangStmtList() != 0 ) {
+		stmtList = walkLangStmtList( blockOrSingle.LangStmtList() );
+	}
+
 	return stmtList;
 }
 
@@ -283,7 +306,7 @@ void LoadSource::walkCflDef( cfl_def &cflDef )
 	BaseParser::cflDef( ntDef, objectDef, defList );
 }
 
-ExprVect *LoadSource::walkCodeExprList( _repeat_code_expr &codeExprList )
+ExprVect *LoadSource::walkCodeExprList( _repeat_code_expr codeExprList )
 {
 	ExprVect *exprVect = new ExprVect;
 	while ( !codeExprList.end() ) {
@@ -318,7 +341,7 @@ QualItemVect *LoadSource::walkQual( qual &Qual )
 	return qualItemVect;
 }
 
-LangVarRef *LoadSource::walkVarRef( var_ref &varRef )
+LangVarRef *LoadSource::walkVarRef( var_ref varRef )
 {
 	qual Qual = varRef.Qual();
 	QualItemVect *qualItemVect = walkQual( Qual );
@@ -338,8 +361,7 @@ LangExpr *LoadSource::walkCodeExpr( code_expr codeExpr )
 			term = LangTerm::cons( internal, LangTerm::VarRefType, langVarRef );
 		}
 		else {
-			_repeat_code_expr codeExprList = codeExpr.CodeExprList();
-			ExprVect *exprVect = walkCodeExprList( codeExprList );
+			ExprVect *exprVect = walkCodeExprList( codeExpr.CodeExprList() );
 			term = LangTerm::cons( internal, langVarRef, exprVect );
 		}
 
@@ -391,6 +413,23 @@ ObjectField *LoadSource::walkVarDef( var_def varDef )
 	return ObjectField::cons( internal, typeRef, id );
 }
 
+LangTerm *LoadSource::walkIterCall( iter_call IterCall )
+{
+	LangTerm *langTerm = 0;
+	if ( IterCall.Id() != 0 ) {
+		String tree = IterCall.Id().text().c_str();
+		langTerm = LangTerm::cons( internal,
+				LangTerm::VarRefType, LangVarRef::cons( internal, tree ) );
+	}
+	else {
+		LangVarRef *varRef = walkVarRef( IterCall.VarRef() );
+		ExprVect *exprVect = walkCodeExprList( IterCall.CodeExprList() );
+		langTerm = LangTerm::cons( internal, varRef, exprVect );
+	}
+	
+	return langTerm;
+}
+
 LangStmt *LoadSource::walkStatement( statement Statement )
 {
 	LangStmt *stmt = 0;
@@ -410,16 +449,13 @@ LangStmt *LoadSource::walkStatement( statement Statement )
 		stmt = varDef( objField, expr, LangStmt::AssignType );
 	}
 	else if ( Statement.ForDecl() != 0 ) {
-		std::cerr << "local: " << pd->curLocalFrame << std::endl;
 		pd->curLocalFrame->pushScope();
 
 		String forDecl = Statement.ForDecl().text().c_str();
 		TypeRef *typeRef = walkTypeRef( Statement.TypeRef() );
 		StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
 
-		String tree = Statement.IterCall().text().c_str();
-		LangTerm *langTerm = LangTerm::cons( internal, LangTerm::VarRefType,
-				LangVarRef::cons( internal, tree ) );
+		LangTerm *langTerm = walkIterCall( Statement.IterCall() );
 
 		stmt = forScope( internal, forDecl, typeRef, langTerm, stmtList );
 
