@@ -1,0 +1,19 @@
+##### LM #####
+lex
+	token id / 'a' .. 'z' /
+	ignore / '\n' | '\t' | ' ' /
+end
+
+def start
+	[id*]
+
+parse P: start[stdin]
+Start: start = P.tree
+for Id: id in triter(Start)
+	print( Id '\n' )
+##### IN #####
+d e f
+##### EXP #####
+d
+e
+f
