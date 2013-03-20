@@ -52,6 +52,9 @@ struct var_def;
 struct block_or_single;
 struct iter_call;
 struct lang_stmt_list;
+struct elsif_list;
+struct elsif_clause;
+struct optional_else;
 
 struct LoadSource
 :
@@ -83,6 +86,9 @@ struct LoadSource
 	void walkProdList( LelDefList *lelDefList, prod_list &ProdList );
 	void walkCflDef( cfl_def &cflDef );
 	LangTerm *walkIterCall( iter_call IterCall );
+	LangStmt *walkOptionalElse( optional_else optionalElse );
+	LangStmt *walkElsifClause( elsif_clause elsifClause );
+	LangStmt *walkElsifList( elsif_list elsifList );
 	LangStmt *walkStatement( statement Statement );
 	LangStmt *walkPrintStmt( print_stmt &PrintStmt );
 	LangStmt *walkExprStmt( expr_stmt &ExprStmt );
@@ -93,5 +99,6 @@ struct LoadSource
 	void walkNamespaceDef( namespace_def NamespaceDef );
 	StmtList *walkLangStmtList( lang_stmt_list LangStmtList );
 	StmtList *walkBlockOrSingle( block_or_single blockOrSingle );
+
 	void go();
 };

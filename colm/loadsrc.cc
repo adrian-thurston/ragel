@@ -430,6 +430,42 @@ LangTerm *LoadSource::walkIterCall( iter_call IterCall )
 	return langTerm;
 }
 
+
+LangStmt *LoadSource::walkElsifClause( elsif_clause elsifClause )
+{
+	pushScope();
+	LangExpr *expr = walkCodeExpr( elsifClause.ElsifExpr() );
+	StmtList *stmtList = walkBlockOrSingle( elsifClause.BlockOrSingle() );
+	LangStmt *stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, 0 );
+	popScope();
+	return stmt;
+}
+
+LangStmt *LoadSource::walkOptionalElse( optional_else optionalElse )
+{
+	LangStmt *stmt = 0;
+	if ( optionalElse.BlockOrSingle() != 0 ) {
+		pushScope();
+		StmtList *stmtList = walkBlockOrSingle( optionalElse.BlockOrSingle() );
+		stmt = LangStmt::cons( LangStmt::ElseType, stmtList );
+		popScope();
+	}
+	return stmt;
+}
+
+LangStmt *LoadSource::walkElsifList( elsif_list elsifList )
+{
+	LangStmt *stmt = 0;
+	if ( elsifList.ElsifList() != 0 ) {
+		stmt = walkElsifClause( elsifList.ElsifClause() );
+		stmt->elsePart = walkElsifList( elsifList.ElsifList() );
+	}
+	else {
+		stmt = walkOptionalElse( elsifList.OptionalElse() );
+	}
+	return stmt;
+}
+
 LangStmt *LoadSource::walkStatement( statement Statement )
 {
 	LangStmt *stmt = 0;
@@ -449,7 +485,7 @@ LangStmt *LoadSource::walkStatement( statement Statement )
 		stmt = varDef( objField, expr, LangStmt::AssignType );
 	}
 	else if ( Statement.ForDecl() != 0 ) {
-		pd->curLocalFrame->pushScope();
+		pushScope();
 
 		String forDecl = Statement.ForDecl().text().c_str();
 		TypeRef *typeRef = walkTypeRef( Statement.TypeRef() );
@@ -459,7 +495,17 @@ LangStmt *LoadSource::walkStatement( statement Statement )
 
 		stmt = forScope( internal, forDecl, typeRef, langTerm, stmtList );
 
-		pd->curLocalFrame->popScope();
+		popScope();
+	}
+	else if ( Statement.IfExpr() != 0 ) {
+		pushScope();
+
+		LangExpr *expr = walkCodeExpr( Statement.IfExpr() );
+		StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
+		LangStmt *elsifList = walkElsifList( Statement.ElsifList() );
+		stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, elsifList );
+
+		popScope();
 	}
 	return stmt;
 }

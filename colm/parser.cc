@@ -942,5 +942,14 @@ void BaseParser::precedenceStmt( PredType predType, PredDeclList *predDeclList )
 	pd->predValue++;
 }
 
+void BaseParser::pushScope()
+{
+	pd->curLocalFrame->pushScope();
+}
+
+void BaseParser::popScope()
+{
+	pd->curLocalFrame->popScope();
+}
 
 

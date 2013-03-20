@@ -8,6 +8,9 @@ lex
 	token PARSE / 'parse' /
 	token NAMESPACE / 'namespace' /
 	token FOR / 'for' /
+	token IF / 'if' /
+	token ELSIF / 'elsif' /
+	token ELSE / 'else' /
 	token IN / 'in' /
 
 	token id / 
@@ -120,6 +123,18 @@ def statement
 |	[Expr: expr_stmt]
 |	[VarDef: var_def OptDefInit: opt_def_init]
 |	[FOR ForDecl: id COLON TypeRef: type_ref IN IterCall: iter_call BlockOrSingle: block_or_single]
+|	[IF IfExpr: code_expr BlockOrSingle: block_or_single ElsifList: elsif_list]
+
+def elsif_list
+	[ElsifClause: elsif_clause ElsifList: elsif_list]
+|	[OptionalElse: optional_else]
+
+def elsif_clause
+	[ELSIF ElsifExpr: code_expr BlockOrSingle: block_or_single]
+
+def optional_else
+	[ELSE BlockOrSingle: block_or_single]
+|	[]
 
 def iter_call
 	[VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE]

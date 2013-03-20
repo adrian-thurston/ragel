@@ -130,6 +130,9 @@ struct BaseParser
 	void alias( const InputLoc &loc, const String &data, TypeRef *typeRef );
 	void precedenceStmt( PredType predType, PredDeclList *predDeclList );
 	ProdElList *appendProdEl( ProdElList *prodElList, ProdEl *prodEl );
+
+	void pushScope();
+	void popScope();
 };
 
 #endif
