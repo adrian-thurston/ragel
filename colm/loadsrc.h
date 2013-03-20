@@ -55,6 +55,7 @@ struct lang_stmt_list;
 struct elsif_list;
 struct elsif_clause;
 struct optional_else;
+struct code_factor;
 
 struct LoadSource
 :
@@ -91,6 +92,7 @@ struct LoadSource
 	LangStmt *walkElsifList( elsif_list elsifList );
 	LangStmt *walkStatement( statement Statement );
 	LangStmt *walkPrintStmt( print_stmt &PrintStmt );
+	LangExpr *walkCodeFactor( code_factor codeFactor );
 	LangStmt *walkExprStmt( expr_stmt &ExprStmt );
 	QualItemVect *walkQual( qual &Qual );
 	LangVarRef *walkVarRef( var_ref varRef );

@@ -350,36 +350,36 @@ LangVarRef *LoadSource::walkVarRef( var_ref varRef )
 	return langVarRef;
 }
 
-LangExpr *LoadSource::walkCodeExpr( code_expr codeExpr )
+LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 {
 	LangExpr *expr = 0;
-	if ( codeExpr.VarRef() != 0 ) {
-		var_ref varRef = codeExpr.VarRef();
+	if ( codeFactor.VarRef() != 0 ) {
+		var_ref varRef = codeFactor.VarRef();
 		LangVarRef *langVarRef = walkVarRef( varRef );
 		LangTerm *term;
-		if ( codeExpr.CodeExprList() == 0 ) {
+		if ( codeFactor.CodeExprList() == 0 ) {
 			term = LangTerm::cons( internal, LangTerm::VarRefType, langVarRef );
 		}
 		else {
-			ExprVect *exprVect = walkCodeExprList( codeExpr.CodeExprList() );
+			ExprVect *exprVect = walkCodeExprList( codeFactor.CodeExprList() );
 			term = LangTerm::cons( internal, langVarRef, exprVect );
 		}
 
 		expr = LangExpr::cons( term );
 	}
-	else if ( codeExpr.Number() != 0 ) {
-		String number = codeExpr.Number().text().c_str();
+	else if ( codeFactor.Number() != 0 ) {
+		String number = codeFactor.Number().text().c_str();
 		LangTerm *term = LangTerm::cons( InputLoc(), LangTerm::NumberType, number );
 		expr = LangExpr::cons( term );
 	}
-	else if ( codeExpr.Lit() != 0 ) {
-		String lit = codeExpr.Lit().text().c_str();
+	else if ( codeFactor.Lit() != 0 ) {
+		String lit = codeFactor.Lit().text().c_str();
 		LangTerm *term = LangTerm::cons( internal, LangTerm::StringType, lit );
 		expr = LangExpr::cons( term );
 	}
-	else {
+	else if ( codeFactor.Parse() != 0 ) {
 		/* The type we are parsing. */
-		type_ref typeRefTree = codeExpr.TypeRef();
+		type_ref typeRefTree = codeFactor.TypeRef();
 		TypeRef *typeRef = walkTypeRef( typeRefTree );
 
 		LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, String("stdin") );
@@ -392,7 +392,24 @@ LangExpr *LoadSource::walkCodeExpr( code_expr codeExpr )
 
 		expr = parseCmd( internal, false, objField, typeRef, 0, list );
 	}
+	else if ( codeFactor.Nil() != 0 ) {
+		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::NilType ) );
+	}
+	else if ( codeFactor.True() != 0 ) {
+		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::TrueType ) );
+	}
+	else if ( codeFactor.False() != 0 ) {
+		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::FalseType ) );
+	}
+	else if ( codeFactor.ParenCodeExpr() != 0 ) {
+		expr = walkCodeExpr( codeFactor.ParenCodeExpr() );
+	}
 	return expr;
+}
+
+LangExpr *LoadSource::walkCodeExpr( code_expr codeExpr )
+{
+	return walkCodeFactor( codeExpr.CodeFactor() );
 }
 
 LangStmt *LoadSource::walkExprStmt( expr_stmt &exprStmt )

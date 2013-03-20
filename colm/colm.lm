@@ -13,6 +13,10 @@ lex
 	token ELSE / 'else' /
 	token IN / 'in' /
 
+	token NIL / 'nil' /
+	token TRUE / 'true' /
+	token FALSE / 'false' /
+
 	token id / 
 		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
 		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
@@ -161,11 +165,18 @@ def expr_stmt
 	[CodeExpr: code_expr]
 
 def code_expr
+	[CodeFactor: code_factor]
+
+def code_factor
 	[Number: number]
 |	[Lit: lit]
 |	[VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE]
 |	[VarRef: var_ref]
-|	[PARSE opt_capture TypeRef: type_ref opt_field_init accumulate]
+|	[Parse: PARSE opt_capture TypeRef: type_ref opt_field_init accumulate]
+|	[Nil: NIL]
+|	[True: TRUE]
+|	[False: FALSE]
+|	[POPEN ParenCodeExpr: code_expr PCLOSE]
 
 def type_ref
 	[RegionQual: region_qual Id: id OptRepeat: opt_repeat]
