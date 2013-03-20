@@ -56,6 +56,8 @@ struct elsif_list;
 struct elsif_clause;
 struct optional_else;
 struct code_factor;
+struct reg_or_char;
+struct reg_or_data;
 
 struct LoadSource
 :
@@ -73,6 +75,10 @@ struct LoadSource
 	NamespaceQual *walkRegionQual( region_qual regionQual );
 	RepeatType walkOptRepeat( opt_repeat OptRepeat );
 	TypeRef *walkTypeRef( type_ref typeRef );
+
+	ReOrItem *walkRegOrChar( reg_or_char regOrChar );
+	ReOrBlock *walkRegOrData( reg_or_data regOrData );
+
 	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
 	LexFactorRep *walkLexFactorRep( lex_factor_rep &LexFactorRepTree );

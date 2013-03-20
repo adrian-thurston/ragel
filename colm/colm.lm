@@ -1,3 +1,4 @@
+# Main region.
 lex
 	token DEF / 'def' /
 	token LEX / 'lex' /
@@ -27,9 +28,8 @@ lex
 		( '0' .. '9' ) *
 	/
 
-	# FIXME: need the 'any' builtin.
 	token lit /
-		'\'' . ( ^( '\'' | '\\' ) | '\\' . ( 'a' .. 'z' | '\'' | '\\' ) )* .  '\''
+		'\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\''
 	/
 
 	token SQOPEN /'['/
@@ -44,11 +44,9 @@ lex
 	token PCLOSE /')'/
 	token COPEN /'{'/
 	token CCLOSE /'}'/
-	token DOTDOT /'..'/
 	token STAR /'*'/
 	token PLUS /'+'/
 	token QUESTION /'?'/
-	token CARET /'^'/
 	token EQUALS /'='/
 
 	ignore / 
@@ -59,6 +57,38 @@ lex
 	ignore / '#' . ( ^'\n' )* . '\n' /
 end
 
+lex
+	token lex_id / 
+		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
+		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
+	/
+
+	token lex_number / ( '0' .. '9' ) . ( '0' .. '9' ) * /
+	token lex_lit / '\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\'' /
+
+	token LEX_DOT /'.'/
+	token LEX_BAR /'|'/
+	token LEX_POPEN /'('/
+	token LEX_PCLOSE /')'/
+	token LEX_STAR /'*'/
+	token LEX_CARET /'^'/
+	token LEX_DOTDOT /'..'/
+	token LEX_SQOPEN_POS /'['/
+	token LEX_SQOPEN_NEG /'[^'/
+
+	ignore / 
+		( '\n' | '\t' | ' ' ) .
+		( '\n' | '\t' | ' ' )* 
+	/
+
+	ignore / '#' . ( ^'\n' )* . '\n' /
+end
+
+lex
+	token RE_DASH / '-' /
+	token RE_CHAR / ^( '\\' | '-' | ']' ) | '\\' . any /
+	token RE_SQCLOSE / ']' /
+end
 
 def start
 	[RootItemList: root_item*]
@@ -210,23 +240,32 @@ def qual
 |	[]
 
 def lex_expr
-	[Expr: lex_expr BAR Term: lex_term]
+	[Expr: lex_expr LEX_BAR Term: lex_term]
 |	[Term: lex_term]
 
 def lex_term
-	[Term: lex_term DOT FactorRep: lex_factor_rep]
+	[Term: lex_term LEX_DOT FactorRep: lex_factor_rep]
 |	[FactorRep: lex_factor_rep]
 
 def lex_factor_rep
-	[FactorRep: lex_factor_rep STAR]
+	[FactorRep: lex_factor_rep LEX_STAR]
 |	[FactorNeg: lex_factor_neg]
 
 def lex_factor_neg
-	[CARET FactorNeg: lex_factor_neg]
+	[LEX_CARET FactorNeg: lex_factor_neg]
 |	[Factor: lex_factor]
 
 def lex_factor
-	[Literal: lit]
-|	[POPEN Expr: lex_expr PCLOSE]
-|	[Low: lit DOTDOT High: lit]
+	[Literal: lex_lit]
+|	[LEX_POPEN Expr: lex_expr LEX_PCLOSE]
+|	[Low: lex_lit LEX_DOTDOT High: lex_lit]
+|	[LEX_SQOPEN_POS PosData: reg_or_data RE_SQCLOSE]
+|	[LEX_SQOPEN_NEG NegData: reg_or_data RE_SQCLOSE]
 
+def reg_or_data
+	[Data: reg_or_data Char: reg_or_char]
+|	[]
+
+def reg_or_char
+	[Char: RE_CHAR]
+|	[Low: RE_CHAR RE_DASH High: RE_CHAR]

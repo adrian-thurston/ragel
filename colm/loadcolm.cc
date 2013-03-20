@@ -84,20 +84,23 @@ void LoadColm::walkProdList( LelDefList *outProdList, prod_list &prodList )
 
 LexFactor *LoadColm::walkLexFactor( lex_factor &lexFactor )
 {
+	LexFactor *factor = 0;
 	if ( lexFactor.Literal() != 0 ) {
 		String litString = lexFactor.Literal().text().c_str();
 		Literal *literal = Literal::cons( internal, litString, Literal::LitString );
-		LexFactor *factor = LexFactor::cons( literal );
-		return factor;
+		factor = LexFactor::cons( literal );
+	}
+	if ( lexFactor.Id() != 0 ) {
+		String id = lexFactor.Id().text().c_str();
+		factor = lexRlFactorName( id, internal );
 	}
 	else if ( lexFactor.Expr() != 0 ) {
 		lex_expr LexExpr = lexFactor.Expr();
 		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
-		LexFactor *factor = LexFactor::cons( join );
-		return factor;
+		factor = LexFactor::cons( join );
 	}
-	else {
+	else if ( lexFactor.Low() != 0 ) {
 		String low = lexFactor.Low().text().c_str();
 		Literal *lowLit = Literal::cons( internal, low, Literal::LitString );
 
@@ -105,9 +108,9 @@ LexFactor *LoadColm::walkLexFactor( lex_factor &lexFactor )
 		Literal *highLit = Literal::cons( internal, high, Literal::LitString );
 
 		Range *range = Range::cons( lowLit, highLit );
-		LexFactor *factor = LexFactor::cons( range );
-		return factor;
+		factor = LexFactor::cons( range );
 	}
+	return factor;
 }
 
 LexFactorNeg *LoadColm::walkLexFactorNeg( lex_factor_neg &lexFactorNeg )
@@ -338,4 +341,3 @@ void LoadColm::go()
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }
-

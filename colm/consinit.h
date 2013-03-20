@@ -52,9 +52,11 @@ struct ConsInit
 	void definition( const String &name, Production *prod );
 	void definition( const String &name, Production *prod1, Production *prod2 );
 	void definition( const String &name, Production *prod1, Production *prod2, Production *prod3 );
+	void definition( const String &name, Production *prod1, Production *prod2,
+			Production *prod3, Production *prod4 );
 
+	void keyword( const String &name, const String &lit );
 	void keyword( const String &kw );
-	void symbol( const String &kw );
 
 	void printParseTree( StmtList *stmtList );
 	void printParseTree();
@@ -62,7 +64,6 @@ struct ConsInit
 	void literalToken();
 	void commentIgnore();
 	void wsIgnore();
-	void starToken();
 	void idToken();
 
 	void token();

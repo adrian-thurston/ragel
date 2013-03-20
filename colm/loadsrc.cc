@@ -145,22 +145,78 @@ void LoadSource::walkProdList( LelDefList *lelDefList, prod_list &ProdList )
 	prodAppend( lelDefList, prod );
 }
 
+String transReChars( const String &s )
+{
+	String out( String::Fresh(), s.length() );
+	char *d = out.data;
+
+	for ( int i = 0; i < s.length(); ) {
+		if ( s[i] == '\\' ) {
+			switch ( s[i+1] ) {
+				case '0': *d++ = '\0'; break;
+				case 'a': *d++ = '\a'; break;
+				case 'b': *d++ = '\b'; break;
+				case 't': *d++ = '\t'; break;
+				case 'n': *d++ = '\n'; break;
+				case 'v': *d++ = '\v'; break;
+				case 'f': *d++ = '\f'; break;
+				case 'r': *d++ = '\r'; break;
+				default: *d++ = s[i+1]; break;
+			}
+			i+= 2;
+		}
+		else {
+			*d++ = s[i];
+			i += 1;
+		}
+	}
+	return out;
+}
+
+ReOrItem *LoadSource::walkRegOrChar( reg_or_char regOrChar )
+{
+	ReOrItem *orItem = 0;
+	if ( regOrChar.Char() != 0 ) {
+		String c = transReChars( regOrChar.Char().text().c_str() );
+		orItem = ReOrItem::cons( internal, c );
+	}
+	else {
+		String low = transReChars( regOrChar.Low().text().c_str() );
+		String high = transReChars( regOrChar.High().text().c_str() );
+		orItem = ReOrItem::cons( internal, low[0], high[0] );
+	}
+	return orItem;
+}
+
+ReOrBlock *LoadSource::walkRegOrData( reg_or_data regOrData )
+{
+	ReOrBlock *block = 0;
+	if ( regOrData.Data() != 0 ) {
+		ReOrBlock *left = walkRegOrData( regOrData.Data() );
+		ReOrItem *right = walkRegOrChar( regOrData.Char() );
+		block = lexRegularExprData( left, right );
+	}
+	else {
+		block = ReOrBlock::cons();
+	}
+	return block;
+}
+
 LexFactor *LoadSource::walkLexFactor( lex_factor &LexFactorTree )
 {
+	LexFactor *factor = 0;
 	if ( LexFactorTree.Literal() != 0 ) {
 		String litString = LexFactorTree.Literal().text().c_str();
 		Literal *literal = Literal::cons( internal, litString, Literal::LitString );
-		LexFactor *factor = LexFactor::cons( literal );
-		return factor;
+		factor = LexFactor::cons( literal );
 	}
 	else if ( LexFactorTree.Expr() != 0 ) {
 		lex_expr LexExpr = LexFactorTree.Expr();
 		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
-		LexFactor *factor = LexFactor::cons( join );
-		return factor;
+		factor = LexFactor::cons( join );
 	}
-	else {
+	else if ( LexFactorTree.Low() != 0 ) {
 		String low = LexFactorTree.Low().text().c_str();
 		Literal *lowLit = Literal::cons( internal, low, Literal::LitString );
 
@@ -168,9 +224,17 @@ LexFactor *LoadSource::walkLexFactor( lex_factor &LexFactorTree )
 		Literal *highLit = Literal::cons( internal, high, Literal::LitString );
 
 		Range *range = Range::cons( lowLit, highLit );
-		LexFactor *factor = LexFactor::cons( range );
-		return factor;
+		factor = LexFactor::cons( range );
 	}
+	else if ( LexFactorTree.PosData() != 0 ) {
+		ReOrBlock *block = walkRegOrData( LexFactorTree.PosData() );
+		factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::OrBlock ) );
+	}
+	else if ( LexFactorTree.NegData() != 0 ) {
+		ReOrBlock *block = walkRegOrData( LexFactorTree.PosData() );
+		factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::NegOrBlock ) );
+	}
+	return factor;
 }
 
 LexFactorNeg *LoadSource::walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )

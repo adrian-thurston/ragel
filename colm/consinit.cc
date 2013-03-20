@@ -317,26 +317,16 @@ void ConsInit::literalToken()
 	defineToken( internal, hello, join, objectDef, 0, false, false, false );
 }
 
-void ConsInit::starToken()
+void ConsInit::keyword( const String &name, const String &lit )
 {
-	String hello( "star" );
-
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, hello, pd->nextObjectId++ ); 
-
-	LexTerm *term = litTerm( "'*'" );
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	LexTerm *term = litTerm( lit );
 	LexExpression *expr = LexExpression::cons( term );
 	LexJoin *join = LexJoin::cons( expr );
-
-	defineToken( internal, hello, join, objectDef, 0, false, false, false );
+	defineToken( internal, name, join, objectDef, 0, false, false, false );
 }
-
 
 void ConsInit::keyword( const String &kw )
-{
-	literalDef( internal, kw, false, false );
-}
-
-void ConsInit::symbol( const String &kw )
 {
 	literalDef( internal, kw, false, false );
 }
@@ -437,6 +427,20 @@ Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
+void ConsInit::definition( const String &name, Production *prod1, Production *prod2,
+		Production *prod3, Production *prod4 )
+{
+	LelDefList *defList = new LelDefList;
+	prodAppend( defList, prod1 );
+	prodAppend( defList, prod2 );
+	prodAppend( defList, prod3 );
+	prodAppend( defList, prod4 );
+
+	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	cflDef( ntDef, objectDef, defList );
+}
+
 void ConsInit::definition( const String &name, Production *prod1, Production *prod2, Production *prod3 )
 {
 	LelDefList *defList = new LelDefList;
@@ -474,7 +478,10 @@ void ConsInit::lexFactor()
 {
 	ProdEl *prodEl1 = prodRefName( "Literal", "literal" );
 	Production *prod1 = production( prodEl1 );
-	
+
+	ProdEl *prodEl8 = prodRefName( "Id", "id" );
+	Production *prod4 = production( prodEl8 );
+
 	ProdEl *prodEl2 = prodRefLit( "'('" );
 	ProdEl *prodEl3 = prodRefName( "Expr", "lex_expr" );
 	ProdEl *prodEl4 = prodRefLit( "')'" );
@@ -483,10 +490,9 @@ void ConsInit::lexFactor()
 	ProdEl *prodEl5 = prodRefName( "Low", "literal" );
 	ProdEl *prodEl6 = prodRefLit( "'..'" );
 	ProdEl *prodEl7 = prodRefName( "High", "literal" );
-
 	Production *prod3 = production( prodEl5, prodEl6, prodEl7 );
 
-	definition( "lex_factor", prod1, prod2, prod3 );
+	definition( "lex_factor", prod1, prod2, prod3, prod4 );
 }
 
 void ConsInit::lexFactorNeg()
@@ -504,7 +510,7 @@ void ConsInit::lexFactorNeg()
 void ConsInit::lexFactorRep()
 {
 	ProdEl *prodEl1 = prodRefName( "FactorRep", "lex_factor_rep" );
-	ProdEl *prodEl2 = prodRefName( "star" );
+	ProdEl *prodEl2 = prodRefName( "STAR" );
 	Production *prod1 = production( prodEl1, prodEl2 );
 	
 	ProdEl *prodEl3 = prodRefName( "FactorNeg", "lex_factor_neg" );
@@ -597,7 +603,7 @@ void ConsInit::optProdName()
 
 void ConsInit::optRepeat()
 {
-	ProdEl *prodEl1 = prodRefName( "Star", "star" );
+	ProdEl *prodEl1 = prodRefName( "Star", "STAR" );
 	Production *prod1 = production( prodEl1 );
 
 	Production *prod2 = production();
@@ -737,24 +743,27 @@ void ConsInit::go()
 
 	wsIgnore();
 	commentIgnore();
+
 	keyword( "'def'" );
 	keyword( "'lex'" );
 	keyword( "'end'" );
 	keyword( "'token'" );
 	keyword( "'ignore'" );
+
 	idToken();
-	starToken();
 	literalToken();
-	symbol( "'['" );
-	symbol( "']'" );
-	symbol( "'|'" );
-	symbol( "'/'" );
-	symbol( "':'" );
-	symbol( "'.'" );
-	symbol( "'('" );
-	symbol( "')'" );
-	symbol( "'..'" );
-	symbol( "'^'" );
+
+	keyword( "STAR", "'*'");
+	keyword( "'['" );
+	keyword( "']'" );
+	keyword( "'|'" );
+	keyword( "'/'" );
+	keyword( "':'" );
+	keyword( "'.'" );
+	keyword( "'('" );
+	keyword( "')'" );
+	keyword( "'..'" );
+	keyword( "'^'" );
 
 	popRegionSet();
 
