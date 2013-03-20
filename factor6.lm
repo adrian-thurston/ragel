@@ -1,0 +1,12 @@
+##### LM #####
+if ( 1 )
+	print( 'a\n' )
+if ( nil )
+	print( 'b\n' )
+if ( true )
+	print( 'c\n' )
+if ( false )
+	print( 'd\n' )
+##### EXP #####
+a
+c
