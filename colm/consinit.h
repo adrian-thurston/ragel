@@ -48,6 +48,9 @@ struct ConsInit
 			ProdEl *prodEl3, ProdEl *prodEl4 );
 	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
 			ProdEl *prodEl3, ProdEl *prodEl4, ProdEl *prodEl5 );
+	Production *production( ProdEl *prodEl1, ProdEl *prodEl2,
+			ProdEl *prodEl3, ProdEl *prodEl4, ProdEl *prodEl5,
+			ProdEl *prodEl6, ProdEl *prodEl7 );
 
 	void definition( const String &name, Production *prod );
 	void definition( const String &name, Production *prod1, Production *prod2 );
@@ -79,6 +82,7 @@ struct ConsInit
 	Production *prodProd();
 	Production *prodLex();
 
+	void optNi();
 	void optRepeat();
 	void optProdName();
 	void prodEl();

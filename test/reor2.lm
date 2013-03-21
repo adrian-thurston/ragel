@@ -1,0 +1,24 @@
+##### LM #####
+context undo
+
+	lex
+		ignore /[ ]+/
+		literal ';', '\n'
+		token id /[a-zA-Z_]+/
+	end
+
+	def item 
+		[id]
+
+	def start 
+		[item* ';' '\n']
+
+end
+
+cons Undo: undo[]
+parse Input: undo::start( Undo )[ stdin ]
+print( Input.tree )
+##### IN #####
+a b;
+##### EXP #####
+a b;

@@ -1,7 +1,8 @@
+##### LM #####
 context undo
 
 	lex
-		ignore /[ \t]+/
+		ignore /( ' ' | '\t')+/
 		literal '*', '(', ')', '^', ';', '\n'
 		token id /[a-zA-Z_]+/
 	end
@@ -43,3 +44,7 @@ Undo.Out = construct parser<undo::out> []
 parse InputP: undo::start(Undo)[ stdin ]
 Input: undo::start = InputP.tree
 print( Input )
+##### IN #####
+a b c;
+##### EXP #####
+a b c;

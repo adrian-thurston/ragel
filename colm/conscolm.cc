@@ -195,6 +195,11 @@ LexExpression *LoadColm::walkLexExpr( lex_expr &LexExprTree )
 	}
 }
 
+bool walkNoIgnore( opt_ni OptNi )
+{
+	return OptNi.Ni() != 0;
+}
+
 void LoadColm::walkTokenList( token_list &tokenList )
 {
 	if ( tokenList.TokenList() != 0 ) {
@@ -212,7 +217,10 @@ void LoadColm::walkTokenList( token_list &tokenList )
 		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
-		defineToken( internal, name, join, objectDef, 0, false, false, false );
+		bool leftNi = walkNoIgnore( tokenDef.LeftNi() );
+		bool rightNi = walkNoIgnore( tokenDef.RightNi() );
+
+		defineToken( internal, name, join, objectDef, 0, false, leftNi, rightNi );
 	}
 
 	if ( tokenList.IgnoreDef() != 0 ) {

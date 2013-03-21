@@ -69,6 +69,13 @@ struct context_var_def;
 struct opt_reduce;
 struct field_init;
 struct opt_field_init;
+struct lit_accum_el;
+struct _repeat_lit_accum_el;
+struct accum_top_el;
+struct accum_list;
+struct accumulate;
+struct accum_el;
+struct _repeat_accum_el;
 
 struct LoadSource
 :
@@ -81,6 +88,8 @@ struct LoadSource
 	{}
 
 	const char *inputFileName;
+
+	void go();
 
 	ObjectField *walkVarDef( var_def varDef );
 	NamespaceQual *walkRegionQual( region_qual regionQual );
@@ -132,5 +141,12 @@ struct LoadSource
 
 	void walkFieldInit( FieldInitVect *list, field_init fieldInit );
 	FieldInitVect *walkOptFieldInit( opt_field_init optFieldInit );
-	void go();
+
+	ConsItemList *walkLitAccumEl( lit_accum_el litAccumEl );
+	ConsItemList *walkLitAccumElList( _repeat_lit_accum_el litAccumElList );
+	ConsItemList *walkAccumTopEl( accum_top_el accumTopEl );
+	ConsItemList *walkAccumList( accum_list accumList );
+	ConsItemList *walkAccumulate( accumulate Accumulate );
+	ConsItemList *walkAccumEl( accum_el accumEl );
+	ConsItemList *walkAccumElList( _repeat_accum_el accumElList );
 };

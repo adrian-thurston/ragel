@@ -427,6 +427,21 @@ Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	return BaseParser::production( internal, prodElList, false, 0, 0 );
 }
 
+Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
+		ProdEl *prodEl3, ProdEl *prodEl4, ProdEl *prodEl5,
+		ProdEl *prodEl6, ProdEl *prodEl7 )
+{
+	ProdElList *prodElList = new ProdElList;
+	appendProdEl( prodElList, prodEl1 );
+	appendProdEl( prodElList, prodEl2 );
+	appendProdEl( prodElList, prodEl3 );
+	appendProdEl( prodElList, prodEl4 );
+	appendProdEl( prodElList, prodEl5 );
+	appendProdEl( prodElList, prodEl6 );
+	appendProdEl( prodElList, prodEl7 );
+	return BaseParser::production( internal, prodElList, false, 0, 0 );
+}
+
 void ConsInit::definition( const String &name, Production *prod1, Production *prod2,
 		Production *prod3, Production *prod4 )
 {
@@ -553,10 +568,13 @@ void ConsInit::token()
 {
 	ProdEl *prodEl1 = prodRefLit( "'token'" );
 	ProdEl *prodEl2 = prodRefName( "Id", "id" );
-	ProdEl *prodEl3 = prodRefLit( "'/'" );
-	ProdEl *prodEl4 = prodRefName( "Expr", "lex_expr" );
-	ProdEl *prodEl5 = prodRefLit( "'/'" );
-	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4, prodEl5 );
+	ProdEl *prodEl3 = prodRefName( "LeftNi", "opt_ni" );
+	ProdEl *prodEl4 = prodRefLit( "'/'" );
+	ProdEl *prodEl5 = prodRefName( "Expr", "lex_expr" );
+	ProdEl *prodEl6 = prodRefLit( "'/'" );
+	ProdEl *prodEl7 = prodRefName( "RightNi", "opt_ni" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3,
+			prodEl4, prodEl5, prodEl6, prodEl7 );
 	definition( "token_def", prod1 );
 }
 
@@ -603,6 +621,16 @@ void ConsInit::optProdName()
 	Production *prod2 = production();
 
 	definition( "opt_prod_name",  prod1, prod2 );
+}
+
+void ConsInit::optNi()
+{
+	ProdEl *prodEl1 = prodRefName( "Ni", "NI" );
+	Production *prod1 = production( prodEl1 );
+
+	Production *prod2 = production();
+
+	definition( "opt_ni",  prod1, prod2 );
 }
 
 void ConsInit::optRepeat()
@@ -753,6 +781,7 @@ void ConsInit::go()
 	keyword( "'end'" );
 	keyword( "'token'" );
 	keyword( "'ignore'" );
+	keyword( "NI", "'ni'" );
 
 	idToken();
 	literalToken();
@@ -778,6 +807,7 @@ void ConsInit::go()
 	lexTerm();
 	lexExpr();
 
+	optNi();
 	optRepeat();
 	optProdName();
 	prodEl();

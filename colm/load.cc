@@ -217,13 +217,14 @@ String transReChars( const String &s )
 				case 'r': *d++ = '\r'; break;
 				default: *d++ = s[i+1]; break;
 			}
-			i+= 2;
+			i += 2;
 		}
 		else {
 			*d++ = s[i];
 			i += 1;
 		}
 	}
+	*d = 0;
 	return out;
 }
 
@@ -289,7 +290,7 @@ LexFactor *LoadSource::walkLexFactor( lex_factor &LexFactorTree )
 		factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::OrBlock ) );
 	}
 	else if ( LexFactorTree.NegData() != 0 ) {
-		ReOrBlock *block = walkRegOrData( LexFactorTree.PosData() );
+		ReOrBlock *block = walkRegOrData( LexFactorTree.NegData() );
 		factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::NegOrBlock ) );
 	}
 	return factor;
@@ -447,7 +448,16 @@ LangStmt *LoadSource::walkPrintStmt( print_stmt &printStmt )
 {
 	_repeat_code_expr codeExprList = printStmt.CodeExprList();
 	ExprVect *exprVect = walkCodeExprList( codeExprList );
-	return LangStmt::cons( internal, LangStmt::PrintType, exprVect );
+
+	LangStmt::Type type;
+	if ( printStmt.Tree() != 0 )
+		type = LangStmt::PrintType;
+	else if ( printStmt.Xml() != 0 )
+		type = LangStmt::PrintXMLType;
+	else if ( printStmt.XmlAc() != 0 )
+		type = LangStmt::PrintXMLACType;
+		
+	return LangStmt::cons( internal, type, exprVect );
 }
 
 QualItemVect *LoadSource::walkQual( qual &Qual )
@@ -485,25 +495,88 @@ ObjectField *walkOptCapture( opt_capture optCapture )
 	return objField;
 }
 
-ConsItemList *walkAccumulate( accumulate Accumulate )
+
+//def lit_accum_el
+//	[DLit: dlit]
+//#|	['[' accum_el_list ']']
+
+//def accum_top_el
+//	[DQ LitAccumElList: lit_accum_el* TDQ]
+//#|	[ accum_el_list ']']
+
+//	[AccumTopEl: accum_top_el AccumList: accum_list]
+//|	[AccumTopEl: accum_top_el]
+
+ConsItemList *LoadSource::walkLitAccumEl( lit_accum_el litAccumEl )
 {
 	ConsItemList *list = 0;
-	if ( Accumulate.Id() != 0 ) {
-		String id = Accumulate.Id().text().c_str();
-		LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, id );
-		LangExpr *accumExpr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
-
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
-		list = ConsItemList::cons( consItem );
-	}
-	else if ( Accumulate.DLit() != 0 ) {
-		String dlit = Accumulate.DLit().text().c_str();
+	if ( litAccumEl.DLit() != 0 ) {
+		String dlit = litAccumEl.DLit().text().c_str();
 		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, dlit );
 		list = ConsItemList::cons( consItem );
 	}
-	else {
-		list = new ConsItemList;
+	return list;
+}
+
+ConsItemList *LoadSource::walkLitAccumElList( _repeat_lit_accum_el litAccumElList )
+{
+	ConsItemList *list = new ConsItemList;
+	while ( !litAccumElList.end() ) {
+		ConsItemList *extension = walkLitAccumEl( litAccumElList.value() );
+		list = consListConcat( list, extension );
+		litAccumElList = litAccumElList.next();
 	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkAccumEl( accum_el accumEl )
+{
+	ConsItemList *list = 0;
+	if ( accumEl.CodeExpr() != 0 ) {
+		LangExpr *accumExpr = walkCodeExpr( accumEl.CodeExpr() );
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
+		list = ConsItemList::cons( consItem );
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkAccumElList( _repeat_accum_el accumElList )
+{
+	ConsItemList *list = new ConsItemList;
+	while ( !accumElList.end() ) {
+		ConsItemList *extension = walkAccumEl( accumElList.value() );
+		list = consListConcat( list, extension );
+		accumElList = accumElList.next();
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkAccumTopEl( accum_top_el accumTopEl )
+{
+	ConsItemList *list = 0;
+	if ( accumTopEl.LitAccumElList() != 0 )
+		list = walkLitAccumElList( accumTopEl.LitAccumElList() );
+	else if ( accumTopEl.AccumElList() != 0 ) {
+		list = walkAccumElList( accumTopEl.AccumElList() );
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkAccumList( accum_list accumList )
+{
+	ConsItemList *list = walkAccumTopEl( accumList.AccumTopEl() );
+
+	if ( accumList.AccumList() != 0 ) {
+		ConsItemList *extension = walkAccumList( accumList.AccumList() );
+		consListConcat( list, extension );
+	}
+
+	return list;
+}
+
+ConsItemList *LoadSource::walkAccumulate( accumulate Accumulate )
+{
+	ConsItemList *list = walkAccumList( Accumulate.AccumList() );
 	return list;
 }
 

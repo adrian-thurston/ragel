@@ -6,6 +6,8 @@ lex
 	token TOKEN / 'token' /
 	token IGNORE / 'ignore' /
 	token PRINT / 'print' /
+	token PRINT_XML / 'print_xml' /
+	token PRINT_XML_AC / 'print_xml_ac' /
 	token PARSE / 'parse' /
 	token CONS / 'construct' | 'cons' /
 	token SEND / 'send' /
@@ -34,10 +36,7 @@ lex
 		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
 	/
 
-	token number / 
-		( '0' .. '9' ) .
-		( '0' .. '9' ) *
-	/
+	token number / ( '0' .. '9' ) + /
 
 	token lit /
 		'\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\''
@@ -48,7 +47,7 @@ lex
 	token SQOPEN /'['/
 	token SQCLOSE /']'/
 	token BAR /'|'/
-	token FSLASH /'/'/
+	token FSLASH /'/'/ ni
 	token COLON /':'/
 	token DOUBLE_COLON /'::'/
 	token DOT /'.'/
@@ -93,8 +92,9 @@ lex
 	token LEX_PLUS /'+'/
 	token LEX_CARET /'^'/
 	token LEX_DOTDOT /'..'/
-	token LEX_SQOPEN_POS /'['/
-	token LEX_SQOPEN_NEG /'[^'/
+	token LEX_SQOPEN_POS /'['/ ni
+	token LEX_SQOPEN_NEG /'[^'/ ni
+	token LEX_FSLASH ni /'/'/
 
 	ignore / 
 		( '\n' | '\t' | ' ' ) .
@@ -176,10 +176,10 @@ def region_def
 	[LEX RootItemList: root_item* END]
 
 def token_def
-	[TOKEN Id: id FSLASH Expr: lex_expr FSLASH]
+	[TOKEN Id: id FSLASH Expr: lex_expr LEX_FSLASH]
 
 def ignore_def
-	[IGNORE FSLASH Expr: lex_expr FSLASH]
+	[IGNORE FSLASH Expr: lex_expr LEX_FSLASH]
 
 def prod_el
 	[OptName: opt_prod_name Id: id OptRepeat: opt_prod_repeat]
@@ -246,7 +246,9 @@ def var_def
 	[Id: id COLON TypeRef: type_ref]
 
 def print_stmt
-	[PRINT POPEN CodeExprList: code_expr* PCLOSE]
+	[Tree: PRINT POPEN CodeExprList: code_expr* PCLOSE]
+|	[Xml: PRINT_XML POPEN CodeExprList: code_expr* PCLOSE]
+|	[XmlAc: PRINT_XML_AC POPEN CodeExprList: code_expr* PCLOSE]
 
 def expr_stmt
 	[CodeExpr: code_expr]
@@ -296,10 +298,34 @@ def opt_field_init
 def field_init
 	[CodeExpr: code_expr]
 
-def accumulate 
-	[SQOPEN Id: id SQCLOSE]
-|	[DQ DLit: dlit TDQ]
-|	[DQ TDQ]
+#def accumulate 
+#	[SQOPEN Id: id SQCLOSE]
+#|	[DQ DLit: dlit TDQ]
+#|	[DQ TDQ]
+
+#
+# Accumulate
+#
+
+def accum_el
+	[CodeExpr: code_expr]
+#|	['"' lit_accum_el* '"']
+
+def lit_accum_el
+	[DLit: dlit]
+#|	['[' accum_el_list ']']
+
+def accum_top_el
+	[DQ LitAccumElList: lit_accum_el* TDQ]
+|	[SQOPEN AccumElList: accum_el* SQCLOSE]
+
+def accum_list
+	[AccumTopEl: accum_top_el AccumList: accum_list]
+|	[AccumTopEl: accum_top_el]
+
+def accumulate
+	[AccumList: accum_list]
+
 
 def var_ref
 	[Qual: qual Id: id]
