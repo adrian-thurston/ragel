@@ -60,13 +60,41 @@ RepeatType LoadSource::walkOptRepeat( opt_repeat OptRepeat )
 	return repeatType;
 }
 
-TypeRef *LoadSource::walkTypeRef( type_ref typeRefTree )
+TypeRef *LoadSource::walkTypeRef( type_ref typeRef )
 {
-	NamespaceQual *nspaceQual = walkRegionQual( typeRefTree.RegionQual() );
-	String id = typeRefTree.Id().text().c_str();
-	RepeatType repeatType = walkOptRepeat( typeRefTree.OptRepeat() );
+	TypeRef *tr = 0;
 
-	return TypeRef::cons( internal, nspaceQual, id, repeatType );
+	if ( typeRef.DirectId() != 0 ) {
+		NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
+		String id = typeRef.DirectId().text().c_str();
+		RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
+		tr = TypeRef::cons( internal, nspaceQual, id, repeatType );
+	}
+	else if ( typeRef.PtrId() != 0 ) {
+		NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
+		String id = typeRef.PtrId().text().c_str();
+		RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
+		TypeRef *inner = TypeRef::cons( internal, nspaceQual, id, repeatType );
+		tr = TypeRef::cons( internal, TypeRef::Ptr, inner );
+	}
+	else if ( typeRef.MapKeyType() != 0 ) {
+		TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
+		TypeRef *value = walkTypeRef( typeRef.MapValueType() );
+		tr = TypeRef::cons( internal, TypeRef::Map, 0, key, value );
+	}
+	else if ( typeRef.ListType() != 0 ) {
+		TypeRef *type = walkTypeRef( typeRef.ListType() );
+		tr = TypeRef::cons( internal, TypeRef::List, 0, type, 0 );
+	}
+	else if ( typeRef.VectorType() != 0 ) {
+		TypeRef *type = walkTypeRef( typeRef.VectorType() );
+		tr = TypeRef::cons( internal, TypeRef::Vector, 0, type, 0 );
+	}
+	else if ( typeRef.ParserType() != 0 ) {
+		TypeRef *type = walkTypeRef( typeRef.ParserType() );
+		tr = TypeRef::cons( internal, TypeRef::Parser, 0, type, 0 );
+	}
+	return tr;
 }
 
 StmtList *LoadSource::walkLangStmtList( lang_stmt_list langStmtList )

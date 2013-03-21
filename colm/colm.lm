@@ -13,6 +13,11 @@ lex
 	token ELSIF / 'elsif' /
 	token ELSE / 'else' /
 	token IN / 'in' /
+	token PARSER / 'parser' /
+	token LIST / 'list' /
+	token VECTOR / 'vector' /
+	token MAP / 'map' /
+	token PTR / 'ptr' /
 
 	token LITERAL /'literal'/
 	token CONTEXT /'context'/
@@ -53,6 +58,8 @@ lex
 	token QUESTION /'?'/
 	token EQUALS /'='/
 	token COMMA /','/
+	token LT /'<'/
+	token GT /'>'/
 
 	ignore / 
 		( '\n' | '\t' | ' ' ) .
@@ -246,7 +253,12 @@ def code_factor
 |	[POPEN ParenCodeExpr: code_expr PCLOSE]
 
 def type_ref
-	[RegionQual: region_qual Id: id OptRepeat: opt_repeat]
+	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat]
+|	[PTR RegionQual: region_qual PtrId: id OptRepeat: opt_repeat]
+|	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT]
+|	[LIST LT ListType: type_ref GT]
+|	[VECTOR LT VectorType: type_ref GT]
+|	[PARSER LT ParserType: type_ref GT]
 
 def region_qual
 	[RegionQual: region_qual Id: id DOUBLE_COLON]
