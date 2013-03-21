@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	ignore /space+/
 	literal '#', '{', '}'
@@ -55,3 +56,10 @@ send CTX.SP "{e}f g"
 
 print( Input )
 print( CTX.SP() '\n' )
+##### IN #####
+a b c ( d ) e f g ;
+##### EXP #####
+A
+B
+a b c ( d ) e f g ;
+a b{c}{ B{d} }{e}f g
