@@ -127,8 +127,8 @@ def root_item
 #|	[typedef]
 
 def context_item
-#	[context_var_def]
-	[LiteralDef: literal_def]
+	[ContextVarDef: context_var_def]
+|	[LiteralDef: literal_def]
 #|	[rl_def]
 |	[TokenDef: token_def]
 |	[IgnoreDef: ignore_def]
@@ -140,6 +140,9 @@ def context_item
 #|	[export_def]
 #|	[pre_eof]
 #|	[precedence]
+
+def context_var_def
+	[VarDef: var_def]
 
 def context_def
 	[CONTEXT Name: id ContextItemList: context_item* END]

@@ -65,6 +65,7 @@ struct token_def;
 struct ignore_def;
 struct context_def;
 struct context_item;
+struct context_var_def;
 
 struct LoadSource
 :
@@ -123,6 +124,7 @@ struct LoadSource
 	void walkIgnoreDef( ignore_def IgnoreDef );
 	void walkContextDef( context_def contextDef );
 	void walkContextItem( context_item contextItem );
+	void walkContextVarDef( context_var_def contextVarDef );
 
 	void go();
 };

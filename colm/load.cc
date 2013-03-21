@@ -650,9 +650,18 @@ LangStmt *LoadSource::walkStatement( statement Statement )
 	return stmt;
 }
 
+void LoadSource::walkContextVarDef( context_var_def ContextVarDef )
+{
+	ObjectField *objField = walkVarDef( ContextVarDef.VarDef() );
+	contextVarDef( internal, objField );
+}
+
 void LoadSource::walkContextItem( context_item contextItem )
 {
-	if ( contextItem.TokenDef() != 0 ) {
+	if ( contextItem.ContextVarDef() != 0 ) {
+		walkContextVarDef( contextItem.ContextVarDef() );
+	}
+	else if ( contextItem.TokenDef() != 0 ) {
 		walkTokenDef( contextItem.TokenDef() );
 	}
 	else if ( contextItem.IgnoreDef() != 0 ) {
