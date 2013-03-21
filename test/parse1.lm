@@ -1,0 +1,14 @@
+##### LM #####
+lex 
+	token id / [a-z] /
+	ignore / [\n\t ] /
+end
+
+def start [id*]
+
+parse S: start[stdin]
+print( S.tree '\n' )
+##### IN #####
+ab cd ef
+##### EXP #####
+ab cd ef

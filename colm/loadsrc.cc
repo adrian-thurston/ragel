@@ -414,6 +414,27 @@ LangVarRef *LoadSource::walkVarRef( var_ref varRef )
 	return langVarRef;
 }
 
+ObjectField *walkOptCapture( opt_capture optCapture )
+{
+	ObjectField *objField = 0;
+	if ( optCapture.Id() != 0 ) {
+		String id = optCapture.Id().text().c_str();
+		objField = ObjectField::cons( internal, 0, id );
+	}
+	return objField;
+}
+
+ConsItemList *walkAccumulate( accumulate Accumulate )
+{
+	String id = Accumulate.Id().text().c_str();
+	LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, id );
+	LangExpr *accumExpr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+
+	ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
+	ConsItemList *list = ConsItemList::cons( consItem );
+	return list;
+}
+
 LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 {
 	LangExpr *expr = 0;
@@ -445,14 +466,8 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 		/* The type we are parsing. */
 		type_ref typeRefTree = codeFactor.TypeRef();
 		TypeRef *typeRef = walkTypeRef( typeRefTree );
-
-		LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, String("stdin") );
-		LangExpr *accumExpr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
-
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
-		ConsItemList *list = ConsItemList::cons( consItem );
-
-		ObjectField *objField = ObjectField::cons( internal, 0, String("P") );
+		ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
+		ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
 
 		expr = parseCmd( internal, false, objField, typeRef, 0, list );
 	}

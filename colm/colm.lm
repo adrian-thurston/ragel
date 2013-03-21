@@ -202,7 +202,7 @@ def code_factor
 |	[Lit: lit]
 |	[VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE]
 |	[VarRef: var_ref]
-|	[Parse: PARSE opt_capture TypeRef: type_ref opt_field_init accumulate]
+|	[Parse: PARSE OptCapture: opt_capture TypeRef: type_ref opt_field_init Accumulate: accumulate]
 |	[Nil: NIL]
 |	[True: TRUE]
 |	[False: FALSE]
@@ -222,14 +222,14 @@ def opt_repeat
 |	[]
 
 def opt_capture
-	[id COLON]
+	[Id: id COLON]
 |	[]
 
 def opt_field_init
 	[]
 
 def accumulate 
-	[SQOPEN id SQCLOSE]
+	[SQOPEN Id: id SQCLOSE]
 
 def var_ref
 	[Qual: qual Id: id]
