@@ -29,7 +29,7 @@
 #include "parser.h"
 #include "global.h"
 #include "input.h"
-#include "loadsrc.h"
+#include "load.h"
 #include "exports2.h"
 #include "colm/colm.h"
 

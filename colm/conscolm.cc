@@ -30,7 +30,7 @@
 #include "parser.h"
 #include "global.h"
 #include "input.h"
-#include "loadcolm.h"
+#include "conscolm.h"
 #include "exports1.h"
 #include "colm/colm.h"
 

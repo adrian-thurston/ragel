@@ -44,9 +44,9 @@
 #if defined(CONS_INIT)
 #include "consinit.h"
 #elif defined(LOAD_COLM)
-#include "loadcolm.h"
+#include "conscolm.h"
 #else
-#include "loadsrc.h"
+#include "load.h"
 #endif
 
 using std::istream;

@@ -1,5 +1,5 @@
 #
-#   Copyright 2007-2012 Adrian Thurston <thurston@complang.org>
+#   Copyright 2007-2013 Adrian Thurston <thurston@complang.org>
 #
 
 #   This file is part of Colm.
@@ -65,7 +65,7 @@ bootstrap0_LDADD = libprog.a libcolm.a
 bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 bootstrap1_CFLAGS = $(common_CFLAGS)
 bootstrap1_SOURCES = \
-	loadcolm.h loadcolm.cc \
+	conscolm.h conscolm.cc \
 	exports1.h exports1.cc parse1.c \
 	main.cc
 bootstrap1_LDADD = libprog.a libcolm.a
@@ -73,7 +73,7 @@ bootstrap1_LDADD = libprog.a libcolm.a
 colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_SRC
 colm_CFLAGS = $(common_CFLAGS)
 colm_SOURCES = \
-	loadsrc.h loadsrc.cc \
+	load.h load.cc \
 	exports2.h exports2.cc parse2.c \
 	main.cc
 colm_LDADD = libprog.a libcolm.a
