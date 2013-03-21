@@ -109,7 +109,6 @@ void LoadSource::walkProdElList( ProdElList *list, prod_el_list &ProdElList )
 	
 	if ( ProdElList.ProdEl() != 0 ) {
 		prod_el El = ProdElList.ProdEl();
-		String typeName = El.Id().text().c_str();
 
 		ObjectField *captureField = 0;
 		if ( El.OptName().Name() != 0 ) {
@@ -121,11 +120,21 @@ void LoadSource::walkProdElList( ProdElList *list, prod_el_list &ProdElList )
 		if ( El.OptRepeat().Star() != 0 )
 			repeatType = RepeatRepeat;
 
-		ProdEl *prodEl = prodElName( internal, typeName,
-				NamespaceQual::cons(namespaceStack.top()),
-				captureField, repeatType, false );
+		if ( El.Id() != 0 ) {
+			String typeName = El.Id().text().c_str();
+			ProdEl *prodEl = prodElName( internal, typeName,
+					NamespaceQual::cons(namespaceStack.top()),
+					captureField, repeatType, false );
+			appendProdEl( list, prodEl );
+		}
+		else if ( El.Lit() != 0 ) {
+			String lit = El.Lit().text().c_str();
+			ProdEl *prodEl = prodElLiteral( internal, lit,
+					NamespaceQual::cons(namespaceStack.top()),
+					captureField, repeatType, false );
+			appendProdEl( list, prodEl );
 
-		appendProdEl( list, prodEl );
+		}
 	}
 }
 
@@ -210,6 +219,10 @@ LexFactor *LoadSource::walkLexFactor( lex_factor &LexFactorTree )
 		Literal *literal = Literal::cons( internal, litString, Literal::LitString );
 		factor = LexFactor::cons( literal );
 	}
+	else if ( LexFactorTree.Id() != 0 ) {
+		String id = LexFactorTree.Id().text().c_str();
+		factor = lexRlFactorName( id, internal );
+	}
 	else if ( LexFactorTree.Expr() != 0 ) {
 		lex_expr LexExpr = LexFactorTree.Expr();
 		LexExpression *expr = walkLexExpr( LexExpr );
@@ -255,18 +268,33 @@ LexFactorNeg *LoadSource::walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
 
 LexFactorRep *LoadSource::walkLexFactorRep( lex_factor_rep &LexFactorRepTree )
 {
-	if ( LexFactorRepTree.FactorRep() != 0 ) {
+	LexFactorRep *factorRep = 0;
+	if ( LexFactorRepTree.Star() != 0 ) {
 		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
 		LexFactorRep *recRep = walkLexFactorRep( Rec );
-		LexFactorRep *factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
-		return factorRep;
+		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
+	}
+	else if ( LexFactorRepTree.StarStar() != 0 ) {
+		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
+		LexFactorRep *recRep = walkLexFactorRep( Rec );
+		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarStarType );
+	}
+	else if ( LexFactorRepTree.Plus() != 0 ) {
+		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
+		LexFactorRep *recRep = walkLexFactorRep( Rec );
+		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::PlusType );
+	}
+	else if ( LexFactorRepTree.Question() != 0 ) {
+		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
+		LexFactorRep *recRep = walkLexFactorRep( Rec );
+		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::OptionalType );
 	}
 	else {
 		lex_factor_neg LexFactorNegTree = LexFactorRepTree.FactorNeg();
 		LexFactorNeg *factorNeg = walkLexFactorNeg( LexFactorNegTree );
-		LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
-		return factorRep;
+		factorRep = LexFactorRep::cons( internal, factorNeg );
 	}
+	return factorRep;
 }
 
 LexFactorAug *LoadSource::walkLexFactorAug( lex_factor_rep &LexFactorRepTree )
@@ -314,46 +342,34 @@ LexExpression *LoadSource::walkLexExpr( lex_expr &LexExprTree )
 	}
 }
 
-void LoadSource::walkTokenList( token_list &TokenList )
+void LoadSource::walkTokenDef( token_def TokenDef )
 {
-	if ( TokenList.TokenList() != 0 ) {
-		token_list RightTokenList = TokenList.TokenList();
-		walkTokenList( RightTokenList );
-	}
-	
-	if ( TokenList.TokenDef() != 0 ) {
-		token_def TokenDef = TokenList.TokenDef();
-		String name = TokenDef.Id().text().c_str();
+	String name = TokenDef.Id().text().c_str();
 
-		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 
-		lex_expr LexExpr = TokenDef.Expr();
-		LexExpression *expr = walkLexExpr( LexExpr );
-		LexJoin *join = LexJoin::cons( expr );
+	lex_expr LexExpr = TokenDef.Expr();
+	LexExpression *expr = walkLexExpr( LexExpr );
+	LexJoin *join = LexJoin::cons( expr );
 
-		defineToken( internal, name, join, objectDef, 0, false, false, false );
-	}
+	defineToken( internal, name, join, objectDef, 0, false, false, false );
+}
 
-	if ( TokenList.IgnoreDef() != 0 ) {
-		ignore_def IgnoreDef = TokenList.IgnoreDef();
+void LoadSource::walkIgnoreDef( ignore_def IgnoreDef )
+{
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, 0, pd->nextObjectId++ ); 
 
-		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, 0, pd->nextObjectId++ ); 
+	lex_expr LexExpr = IgnoreDef.Expr();
+	LexExpression *expr = walkLexExpr( LexExpr );
+	LexJoin *join = LexJoin::cons( expr );
 
-		lex_expr LexExpr = IgnoreDef.Expr();
-		LexExpression *expr = walkLexExpr( LexExpr );
-		LexJoin *join = LexJoin::cons( expr );
-
-		defineToken( internal, 0, join, objectDef, 0, true, false, false );
-	}
+	defineToken( internal, 0, join, objectDef, 0, true, false, false );
 }
 
 void LoadSource::walkLexRegion( region_def &regionDef )
 {
 	pushRegionSet( internal );
-
-	token_list TokenList = regionDef.TokenList();
-	walkTokenList( TokenList );
-
+	walkRootItemList( regionDef.RootItemList() );
 	popRegionSet();
 }
 
@@ -616,7 +632,16 @@ void LoadSource::walkNamespaceDef( namespace_def NamespaceDef )
 
 void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
 {
-	if ( rootItem.CflDef() != 0 ) {
+	if ( rootItem.TokenDef() != 0 ) {
+		walkTokenDef( rootItem.TokenDef() );
+	}
+	else if ( rootItem.IgnoreDef() != 0 ) {
+		walkIgnoreDef( rootItem.IgnoreDef() );
+	}
+	else if ( rootItem.LiteralDef() != 0 ) {
+		walkLiteralDef( rootItem.LiteralDef() );
+	}
+	else if ( rootItem.CflDef() != 0 ) {
 		cfl_def cflDef = rootItem.CflDef();
 		walkCflDef( cflDef );
 	}
@@ -633,6 +658,35 @@ void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
 	else if ( rootItem.NamespaceDef() != 0 ) {
 		walkNamespaceDef( rootItem.NamespaceDef() );
 	}
+}
+
+bool walkOptNoIgnore( opt_no_ignore OptNoIngore )
+{
+	return OptNoIngore.Ni() != 0;
+}
+
+void LoadSource::walkLiteralItem( literal_item literalItem )
+{
+	bool niLeft = walkOptNoIgnore( literalItem.NiLeft() );
+	bool niRight = walkOptNoIgnore( literalItem.NiRight() );
+
+	String lit = literalItem.Lit().text().c_str();
+	if ( strcmp( lit, "''" ) == 0 )
+		zeroDef( internal, lit, niLeft, niRight );
+	else
+		literalDef( internal, lit, niLeft, niRight );
+}
+
+void LoadSource::walkLiteralList( literal_list literalList )
+{
+	if ( literalList.LiteralList() != 0 )
+		walkLiteralList( literalList.LiteralList() );
+	walkLiteralItem( literalList.LiteralItem() );
+}
+
+void LoadSource::walkLiteralDef( literal_def literalDef )
+{
+	walkLiteralList( literalDef.LiteralList() );
 }
 
 StmtList *LoadSource::walkRootItemList( _repeat_root_item rootItemList )

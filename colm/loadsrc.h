@@ -58,6 +58,11 @@ struct optional_else;
 struct code_factor;
 struct reg_or_char;
 struct reg_or_data;
+struct literal_item;
+struct literal_list;
+struct literal_def;
+struct token_def;
+struct ignore_def;
 
 struct LoadSource
 :
@@ -107,6 +112,13 @@ struct LoadSource
 	void walkNamespaceDef( namespace_def NamespaceDef );
 	StmtList *walkLangStmtList( lang_stmt_list LangStmtList );
 	StmtList *walkBlockOrSingle( block_or_single blockOrSingle );
+
+	void walkLiteralItem( literal_item literalItem );
+	void walkLiteralList( literal_list literalList );
+	void walkLiteralDef( literal_def literalDef );
+
+	void walkTokenDef( token_def TokenDef );
+	void walkIgnoreDef( ignore_def IgnoreDef );
 
 	void go();
 };

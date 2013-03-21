@@ -14,6 +14,9 @@ lex
 	token ELSE / 'else' /
 	token IN / 'in' /
 
+	token LITERAL /'literal'/
+	token NI /'ni'/
+
 	token NIL / 'nil' /
 	token TRUE / 'true' /
 	token FALSE / 'false' /
@@ -48,6 +51,7 @@ lex
 	token PLUS /'+'/
 	token QUESTION /'?'/
 	token EQUALS /'='/
+	token COMMA /','/
 
 	ignore / 
 		( '\n' | '\t' | ' ' ) .
@@ -71,6 +75,9 @@ lex
 	token LEX_POPEN /'('/
 	token LEX_PCLOSE /')'/
 	token LEX_STAR /'*'/
+	token LEX_STARSTAR /'**'/
+	token LEX_QUESTION /'?'/
+	token LEX_PLUS /'+'/
 	token LEX_CARET /'^'/
 	token LEX_DOTDOT /'..'/
 	token LEX_SQOPEN_POS /'['/
@@ -94,10 +101,11 @@ def start
 	[RootItemList: root_item*]
 
 def root_item
-#	[literal_def]
-#|	[rl_def]
-#|	[token_def]
-	[CflDef: cfl_def]
+#	[rl_def]
+	[LiteralDef: literal_def]
+|	[TokenDef: token_def]
+|	[IgnoreDef: ignore_def]
+|	[CflDef: cfl_def]
 |	[RegionDef: region_def]
 #|	[context_def]
 |	[NamespaceDef: namespace_def]
@@ -110,6 +118,20 @@ def root_item
 #|	[precedence]
 #|	[typedef]
 
+def literal_def
+	[LITERAL LiteralList: literal_list]
+
+def literal_list
+	[LiteralList: literal_list COMMA LiteralItem: literal_item]
+|	[LiteralItem: literal_item]
+
+def literal_item
+	[NiLeft: opt_no_ignore Lit: lit NiRight: opt_no_ignore]
+
+def opt_no_ignore
+	[Ni: NI]
+|	[]
+
 def namespace_def
 	[NAMESPACE Name: id RootItemList: root_item* END]
 
@@ -117,12 +139,7 @@ def cfl_def
 	[DEF DefId: id ProdList: prod_list]
 
 def region_def
-	[LEX TokenList: token_list END]
-
-def token_list
-	[TokenList: token_list TokenDef: token_def]
-|	[TokenList: token_list IgnoreDef: ignore_def]
-|	[]
+	[LEX RootItemList: root_item* END]
 
 def token_def
 	[TOKEN Id: id FSLASH Expr: lex_expr FSLASH]
@@ -132,6 +149,7 @@ def ignore_def
 
 def prod_el
 	[OptName: opt_prod_name Id: id OptRepeat: opt_prod_repeat]
+|	[OptName: opt_prod_name Lit: lit OptRepeat: opt_prod_repeat]
 
 def opt_prod_name
 	[Name: id COLON]
@@ -248,7 +266,10 @@ def lex_term
 |	[FactorRep: lex_factor_rep]
 
 def lex_factor_rep
-	[FactorRep: lex_factor_rep LEX_STAR]
+	[FactorRep: lex_factor_rep Star: LEX_STAR]
+|	[FactorRep: lex_factor_rep StarStar: LEX_STARSTAR]
+|	[FactorRep: lex_factor_rep Plus: LEX_PLUS]
+|	[FactorRep: lex_factor_rep Question: LEX_QUESTION]
 |	[FactorNeg: lex_factor_neg]
 
 def lex_factor_neg
@@ -257,6 +278,7 @@ def lex_factor_neg
 
 def lex_factor
 	[Literal: lex_lit]
+|	[Id: lex_id]
 |	[LEX_POPEN Expr: lex_expr LEX_PCLOSE]
 |	[Low: lex_lit LEX_DOTDOT High: lex_lit]
 |	[LEX_SQOPEN_POS PosData: reg_or_data RE_SQCLOSE]
