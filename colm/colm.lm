@@ -15,6 +15,7 @@ lex
 	token IN / 'in' /
 
 	token LITERAL /'literal'/
+	token CONTEXT /'context'/
 	token NI /'ni'/
 
 	token NIL / 'nil' /
@@ -107,7 +108,7 @@ def root_item
 |	[IgnoreDef: ignore_def]
 |	[CflDef: cfl_def]
 |	[RegionDef: region_def]
-#|	[context_def]
+|	[ContextDef: context_def]
 |	[NamespaceDef: namespace_def]
 #|	[function_def]
 #|	[iter_def]
@@ -117,6 +118,24 @@ def root_item
 #|	[pre_eof]
 #|	[precedence]
 #|	[typedef]
+
+def context_item
+#	[context_var_def]
+	[LiteralDef: literal_def]
+#|	[rl_def]
+|	[TokenDef: token_def]
+|	[IgnoreDef: ignore_def]
+|	[CflDef: cfl_def]
+|	[RegionDef: region_def]
+|	[ContextDef: context_def]
+#|	[function_def]
+#|	[iter_def]
+#|	[export_def]
+#|	[pre_eof]
+#|	[precedence]
+
+def context_def
+	[CONTEXT Name: id ContextItemList: context_item* END]
 
 def literal_def
 	[LITERAL LiteralList: literal_list]

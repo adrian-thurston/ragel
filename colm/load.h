@@ -63,6 +63,8 @@ struct literal_list;
 struct literal_def;
 struct token_def;
 struct ignore_def;
+struct context_def;
+struct context_item;
 
 struct LoadSource
 :
@@ -93,10 +95,10 @@ struct LoadSource
 	ExprVect *walkCodeExprList( _repeat_code_expr codeExprList );
 	LangExpr *walkCodeExpr( code_expr codeExpr );
 	void walkTokenList( token_list &TokenList );
-	void walkLexRegion( region_def &regionDef );
+	void walkLexRegion( region_def regionDef );
 	void walkProdElList( ProdElList *list, prod_el_list &ProdElList );
 	void walkProdList( LelDefList *lelDefList, prod_list &ProdList );
-	void walkCflDef( cfl_def &cflDef );
+	void walkCflDef( cfl_def cflDef );
 	LangTerm *walkIterCall( iter_call IterCall );
 	LangStmt *walkOptionalElse( optional_else optionalElse );
 	LangStmt *walkElsifClause( elsif_clause elsifClause );
@@ -119,6 +121,8 @@ struct LoadSource
 
 	void walkTokenDef( token_def TokenDef );
 	void walkIgnoreDef( ignore_def IgnoreDef );
+	void walkContextDef( context_def contextDef );
+	void walkContextItem( context_item contextItem );
 
 	void go();
 };

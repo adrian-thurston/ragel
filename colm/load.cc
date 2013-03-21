@@ -366,14 +366,14 @@ void LoadSource::walkIgnoreDef( ignore_def IgnoreDef )
 	defineToken( internal, 0, join, objectDef, 0, true, false, false );
 }
 
-void LoadSource::walkLexRegion( region_def &regionDef )
+void LoadSource::walkLexRegion( region_def regionDef )
 {
 	pushRegionSet( internal );
 	walkRootItemList( regionDef.RootItemList() );
 	popRegionSet();
 }
 
-void LoadSource::walkCflDef( cfl_def &cflDef )
+void LoadSource::walkCflDef( cfl_def cflDef )
 {
 	prod_list prodList = cflDef.ProdList();
 
@@ -622,6 +622,43 @@ LangStmt *LoadSource::walkStatement( statement Statement )
 	return stmt;
 }
 
+void LoadSource::walkContextItem( context_item contextItem )
+{
+	if ( contextItem.TokenDef() != 0 ) {
+		walkTokenDef( contextItem.TokenDef() );
+	}
+	else if ( contextItem.IgnoreDef() != 0 ) {
+		walkIgnoreDef( contextItem.IgnoreDef() );
+	}
+	else if ( contextItem.LiteralDef() != 0 ) {
+		walkLiteralDef( contextItem.LiteralDef() );
+	}
+	else if ( contextItem.CflDef() != 0 ) {
+		walkCflDef( contextItem.CflDef() );
+	}
+	else if ( contextItem.RegionDef() != 0 ) {
+		walkLexRegion( contextItem.RegionDef() );
+	}
+	else if ( contextItem.ContextDef() != 0 ) {
+		walkContextDef( contextItem.ContextDef() );
+	}
+}
+
+void LoadSource::walkContextDef( context_def contextDef )
+{
+	String name = contextDef.Name().text().c_str();
+	contextHead( internal, name );
+
+	_repeat_context_item contextItemList = contextDef.ContextItemList();
+	while ( !contextItemList.end() ) {
+		walkContextItem( contextItemList.value() );
+		contextItemList = contextItemList.next();
+	}
+
+	contextStack.pop();
+	namespaceStack.pop();
+}
+
 void LoadSource::walkNamespaceDef( namespace_def NamespaceDef )
 {
 	String name = NamespaceDef.Name().text().c_str();
@@ -642,18 +679,18 @@ void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
 		walkLiteralDef( rootItem.LiteralDef() );
 	}
 	else if ( rootItem.CflDef() != 0 ) {
-		cfl_def cflDef = rootItem.CflDef();
-		walkCflDef( cflDef );
+		walkCflDef( rootItem.CflDef() );
 	}
 	else if ( rootItem.RegionDef() != 0 ) {
-		region_def regionDef = rootItem.RegionDef();
-		walkLexRegion( regionDef );
+		walkLexRegion( rootItem.RegionDef() );
 	}
 	else if ( rootItem.Statement() != 0 ) {
-		statement Statement = rootItem.Statement();
-		LangStmt *stmt = walkStatement( Statement );
+		LangStmt *stmt = walkStatement( rootItem.Statement() );
 		if ( stmt != 0 )
 			stmtList->append( stmt );
+	}
+	else if ( rootItem.ContextDef() != 0 ) {
+		walkContextDef( rootItem.ContextDef() );
 	}
 	else if ( rootItem.NamespaceDef() != 0 ) {
 		walkNamespaceDef( rootItem.NamespaceDef() );
