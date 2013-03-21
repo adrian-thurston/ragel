@@ -66,6 +66,9 @@ struct ignore_def;
 struct context_def;
 struct context_item;
 struct context_var_def;
+struct opt_reduce;
+struct field_init;
+struct opt_field_init;
 
 struct LoadSource
 :
@@ -97,7 +100,7 @@ struct LoadSource
 	LangExpr *walkCodeExpr( code_expr codeExpr );
 	void walkTokenList( token_list &TokenList );
 	void walkLexRegion( region_def regionDef );
-	void walkProdElList( ProdElList *list, prod_el_list &ProdElList );
+	void walkProdElList( ProdElList *list, prod_el_list ProdElList );
 	void walkProdList( LelDefList *lelDefList, prod_list &ProdList );
 	void walkCflDef( cfl_def cflDef );
 	LangTerm *walkIterCall( iter_call IterCall );
@@ -125,6 +128,9 @@ struct LoadSource
 	void walkContextDef( context_def contextDef );
 	void walkContextItem( context_item contextItem );
 	void walkContextVarDef( context_var_def contextVarDef );
+	CodeBlock *walkOptReduce( opt_reduce optReduce );
 
+	void walkFieldInit( FieldInitVect *list, field_init fieldInit );
+	FieldInitVect *walkOptFieldInit( opt_field_init optFieldInit );
 	void go();
 };

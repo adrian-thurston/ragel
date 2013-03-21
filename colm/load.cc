@@ -128,7 +128,7 @@ StmtList *LoadSource::walkBlockOrSingle( block_or_single blockOrSingle )
 	return stmtList;
 }
 
-void LoadSource::walkProdElList( ProdElList *list, prod_el_list &ProdElList )
+void LoadSource::walkProdElList( ProdElList *list, prod_el_list ProdElList )
 {
 	if ( ProdElList.ProdElList() != 0 ) {
 		prod_el_list RightProdElList = ProdElList.ProdElList();
@@ -166,6 +166,21 @@ void LoadSource::walkProdElList( ProdElList *list, prod_el_list &ProdElList )
 	}
 }
 
+CodeBlock *LoadSource::walkOptReduce( opt_reduce optReduce )
+{
+	CodeBlock *block = 0;
+	if ( optReduce.LangStmtList() != 0 ) {
+		ObjectDef *localFrame = blockOpen();
+		StmtList *stmtList = walkLangStmtList( optReduce.LangStmtList() );
+
+		block = CodeBlock::cons( stmtList, localFrame );
+		block->context = contextStack.top();
+
+		blockClose();
+	}
+	return block;
+}
+
 void LoadSource::walkProdList( LelDefList *lelDefList, prod_list &ProdList )
 {
 	if ( ProdList.ProdList() != 0 ) {
@@ -174,11 +189,13 @@ void LoadSource::walkProdList( LelDefList *lelDefList, prod_list &ProdList )
 	}
 
 	ProdElList *list = new ProdElList;
-	
-	prod_el_list ProdElList = ProdList.Prod().ProdElList();
-	walkProdElList( list, ProdElList );
 
-	Production *prod = BaseParser::production( internal, list, false, 0, 0 );
+	prod Prod = ProdList.Prod();
+
+	walkProdElList( list, Prod.ProdElList() );
+	CodeBlock *codeBlock = walkOptReduce( Prod.OptReduce() );
+
+	Production *prod = BaseParser::production( internal, list, false, codeBlock, 0 );
 	prodAppend( lelDefList, prod );
 }
 
@@ -470,12 +487,44 @@ ObjectField *walkOptCapture( opt_capture optCapture )
 
 ConsItemList *walkAccumulate( accumulate Accumulate )
 {
-	String id = Accumulate.Id().text().c_str();
-	LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, id );
-	LangExpr *accumExpr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+	ConsItemList *list = 0;
+	if ( Accumulate.Id() != 0 ) {
+		String id = Accumulate.Id().text().c_str();
+		LangVarRef *varRef = LangVarRef::cons( internal, new QualItemVect, id );
+		LangExpr *accumExpr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
 
-	ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
-	ConsItemList *list = ConsItemList::cons( consItem );
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
+		list = ConsItemList::cons( consItem );
+	}
+	else if ( Accumulate.DLit() != 0 ) {
+		String dlit = Accumulate.DLit().text().c_str();
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, dlit );
+		list = ConsItemList::cons( consItem );
+	}
+	else {
+		list = new ConsItemList;
+	}
+	return list;
+}
+
+void LoadSource::walkFieldInit( FieldInitVect *list, field_init fieldInit )
+{
+	LangExpr *expr = walkCodeExpr( fieldInit.CodeExpr() );
+	FieldInit *init = FieldInit::cons( internal, "_name", expr );
+	list->append( init );
+}
+
+FieldInitVect *LoadSource::walkOptFieldInit( opt_field_init optFieldInit )
+{
+	FieldInitVect *list = 0;
+	if ( optFieldInit.FieldInitList() != 0 ) {
+		list = new FieldInitVect;
+		_repeat_field_init fieldInitList = optFieldInit.FieldInitList();
+		while ( !fieldInitList.end() ) {
+			walkFieldInit( list, fieldInitList.value() );
+			fieldInitList = fieldInitList.next();
+		}
+	}
 	return list;
 }
 
@@ -485,7 +534,8 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 	if ( codeFactor.VarRef() != 0 ) {
 		var_ref varRef = codeFactor.VarRef();
 		LangVarRef *langVarRef = walkVarRef( varRef );
-		LangTerm *term;
+
+		LangTerm *term = 0;
 		if ( codeFactor.CodeExprList() == 0 ) {
 			term = LangTerm::cons( internal, LangTerm::VarRefType, langVarRef );
 		}
@@ -511,9 +561,24 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 		type_ref typeRefTree = codeFactor.TypeRef();
 		TypeRef *typeRef = walkTypeRef( typeRefTree );
 		ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
+		FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
 		ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
 
-		expr = parseCmd( internal, false, objField, typeRef, 0, list );
+		expr = parseCmd( internal, false, objField, typeRef, init, list );
+	}
+	else if ( codeFactor.Cons() != 0 ) {
+		/* The type we are parsing. */
+		type_ref typeRefTree = codeFactor.TypeRef();
+		TypeRef *typeRef = walkTypeRef( typeRefTree );
+		ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
+		ConsItemList *list = new ConsItemList;
+
+		expr = construct( internal, objField, list, typeRef, 0 );
+	}
+	else if ( codeFactor.Send() != 0 ) {
+		LangVarRef *varRef = walkVarRef( codeFactor.ToVarRef() );
+		ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
+		expr = send( internal, varRef, list );
 	}
 	else if ( codeFactor.Nil() != 0 ) {
 		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::NilType ) );
@@ -646,6 +711,11 @@ LangStmt *LoadSource::walkStatement( statement Statement )
 		stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, elsifList );
 
 		popScope();
+	}
+	else if ( Statement.LhsVarRef() != 0 ) {
+		LangVarRef *varRef = walkVarRef( Statement.LhsVarRef() );
+		LangExpr *expr = walkCodeExpr( Statement.CodeExpr() );
+		stmt = LangStmt::cons( internal, LangStmt::AssignType, varRef, expr );
 	}
 	return stmt;
 }

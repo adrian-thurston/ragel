@@ -510,13 +510,17 @@ void ConsInit::lexFactorNeg()
 void ConsInit::lexFactorRep()
 {
 	ProdEl *prodEl1 = prodRefName( "FactorRep", "lex_factor_rep" );
-	ProdEl *prodEl2 = prodRefName( "STAR" );
+	ProdEl *prodEl2 = prodRefName( "Star", "STAR" );
 	Production *prod1 = production( prodEl1, prodEl2 );
-	
-	ProdEl *prodEl3 = prodRefName( "FactorNeg", "lex_factor_neg" );
-	Production *prod2 = production( prodEl3 );
 
-	definition( "lex_factor_rep", prod1, prod2 );
+	ProdEl *prodEl3 = prodRefName( "FactorRep", "lex_factor_rep" );
+	ProdEl *prodEl4 = prodRefName( "Plus", "PLUS" );
+	Production *prod2 = production( prodEl3, prodEl4 );
+	
+	ProdEl *prodEl5 = prodRefName( "FactorNeg", "lex_factor_neg" );
+	Production *prod3 = production( prodEl5 );
+
+	definition( "lex_factor_rep", prod1, prod2, prod3 );
 }
 
 void ConsInit::lexTerm()
@@ -754,6 +758,7 @@ void ConsInit::go()
 	literalToken();
 
 	keyword( "STAR", "'*'");
+	keyword( "PLUS", "'+'");
 	keyword( "'['" );
 	keyword( "']'" );
 	keyword( "'|'" );

@@ -7,6 +7,8 @@ lex
 	token IGNORE / 'ignore' /
 	token PRINT / 'print' /
 	token PARSE / 'parse' /
+	token CONS / 'construct' | 'cons' /
+	token SEND / 'send' /
 	token NAMESPACE / 'namespace' /
 	token FOR / 'for' /
 	token IF / 'if' /
@@ -41,6 +43,8 @@ lex
 		'\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\''
 	/
 
+	token DQ / '\"' /
+
 	token SQOPEN /'['/
 	token SQCLOSE /']'/
 	token BAR /'|'/
@@ -61,12 +65,13 @@ lex
 	token LT /'<'/
 	token GT /'>'/
 
-	ignore / 
-		( '\n' | '\t' | ' ' ) .
-		( '\n' | '\t' | ' ' )* 
-	/
-
+	ignore / ( '\n' | '\t' | ' ' )+ /
 	ignore / '#' . ( ^'\n' )* . '\n' /
+end
+
+lex
+	token dlit / ( ^( '\"' | '\\' ) | '\\' . any )+ /
+	token TDQ / '\"' /
 end
 
 lex
@@ -75,7 +80,7 @@ lex
 		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
 	/
 
-	token lex_number / ( '0' .. '9' ) . ( '0' .. '9' ) * /
+	token lex_number / ( '0' .. '9' )+ /
 	token lex_lit / '\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\'' /
 
 	token LEX_DOT /'.'/
@@ -193,7 +198,11 @@ def prod_el_list
 |	[]
 
 def prod
-	[SQOPEN ProdElList: prod_el_list SQCLOSE]
+	[SQOPEN ProdElList: prod_el_list SQCLOSE OptReduce: opt_reduce]
+
+def opt_reduce
+	[COPEN LangStmtList: lang_stmt_list CCLOSE]
+|	[]
 
 def prod_list
 	[ProdList: prod_list BAR Prod: prod]
@@ -205,6 +214,7 @@ def statement
 |	[VarDef: var_def OptDefInit: opt_def_init]
 |	[FOR ForDecl: id COLON TypeRef: type_ref IN IterCall: iter_call BlockOrSingle: block_or_single]
 |	[IF IfExpr: code_expr BlockOrSingle: block_or_single ElsifList: elsif_list]
+|	[LhsVarRef: var_ref EQUALS CodeExpr: code_expr]
 
 def elsif_list
 	[ElsifClause: elsif_clause ElsifList: elsif_list]
@@ -249,11 +259,13 @@ def code_factor
 |	[Lit: lit]
 |	[VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE]
 |	[VarRef: var_ref]
-|	[Parse: PARSE OptCapture: opt_capture TypeRef: type_ref opt_field_init Accumulate: accumulate]
+|	[Parse: PARSE OptCapture: opt_capture TypeRef: type_ref OptFieldInit: opt_field_init Accumulate: accumulate]
 |	[Nil: NIL]
 |	[True: TRUE]
 |	[False: FALSE]
 |	[POPEN ParenCodeExpr: code_expr PCLOSE]
+|	[Cons: CONS OptCapture: opt_capture TypeRef: type_ref OptFieldInit: opt_field_init SQOPEN SQCLOSE]
+|	[Send: SEND ToVarRef: var_ref Accumulate: accumulate]
 
 def type_ref
 	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat]
@@ -278,10 +290,16 @@ def opt_capture
 |	[]
 
 def opt_field_init
-	[]
+	[POPEN FieldInitList: field_init* PCLOSE]
+|	[]
+
+def field_init
+	[CodeExpr: code_expr]
 
 def accumulate 
 	[SQOPEN Id: id SQCLOSE]
+|	[DQ DLit: dlit TDQ]
+|	[DQ TDQ]
 
 def var_ref
 	[Qual: qual Id: id]

@@ -131,18 +131,23 @@ LexFactorNeg *LoadColm::walkLexFactorNeg( lex_factor_neg &lexFactorNeg )
 
 LexFactorRep *LoadColm::walkLexFactorRep( lex_factor_rep &lexFactorRep )
 {
-	if ( lexFactorRep.FactorRep() != 0 ) {
+	LexFactorRep *factorRep = 0;
+	if ( lexFactorRep.Star() != 0 ) {
 		lex_factor_rep Rec = lexFactorRep.FactorRep();
 		LexFactorRep *recRep = walkLexFactorRep( Rec );
-		LexFactorRep *factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
-		return factorRep;
+		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
+	}
+	else if ( lexFactorRep.Plus() != 0 ) {
+		lex_factor_rep Rec = lexFactorRep.FactorRep();
+		LexFactorRep *recRep = walkLexFactorRep( Rec );
+		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::PlusType );
 	}
 	else {
 		lex_factor_neg LexFactorNegTree = lexFactorRep.FactorNeg();
 		LexFactorNeg *factorNeg = walkLexFactorNeg( LexFactorNegTree );
-		LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
-		return factorRep;
+		factorRep = LexFactorRep::cons( internal, factorNeg );
 	}
+	return factorRep;
 }
 
 LexFactorAug *LoadColm::walkLexFactorAug( lex_factor_rep &lexFactorRep )
