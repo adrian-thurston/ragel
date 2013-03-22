@@ -316,6 +316,8 @@ void LoadColm::consExportStmt( StmtList *stmtList )
 
 void LoadColm::go()
 {
+	LoadColm::init();
+
 	StmtList *stmtList = new StmtList;
 
 	const char *argv[2];

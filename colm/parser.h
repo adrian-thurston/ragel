@@ -35,6 +35,8 @@ struct BaseParser
 		: pd(pd), enterRl(false)
 	{}
 
+	virtual ~BaseParser() {}
+
 	Compiler *pd;
 
 	RegionSetVect regionStack;
@@ -133,6 +135,8 @@ struct BaseParser
 
 	void pushScope();
 	void popScope();
+
+	virtual void go() = 0;
 };
 
 #endif

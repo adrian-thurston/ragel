@@ -768,6 +768,8 @@ void ConsInit::exportTree( StmtList *stmtList )
 
 void ConsInit::go()
 {
+	ConsInit::init();
+
 	StmtList *stmtList = new StmtList;
 
 	/* The token region */

@@ -575,14 +575,13 @@ int main(int argc, const char **argv)
 	Compiler *pd = new Compiler;
 
 #if defined(CONS_INIT)
-	ConsInit *parser = new ConsInit( pd );
+	BaseParser *parser = new ConsInit( pd );
 #elif defined(LOAD_COLM)
-	LoadColm *parser = new LoadColm( pd, inputFileName );
+	BaseParser *parser = new LoadColm( pd, inputFileName );
 #else
-	LoadSource *parser = new LoadSource( pd, inputFileName );
+	BaseParser *parser = consLoadSource( pd, inputFileName );
 #endif
 
-	parser->init();
 	parser->go();
 
 	/* Parsing complete, check for errors.. */
