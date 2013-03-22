@@ -60,7 +60,7 @@ String unescape( const String &s )
 			i += 1;
 		}
 	}
-	*d = 0;
+	out.chop( d - out.data );
 	return out;
 }
 
@@ -514,10 +514,13 @@ ObjectField *walkOptCapture( opt_capture optCapture )
 ConsItemList *LoadSource::walkLitStringEl( lit_string_el litStringEl )
 {
 	ConsItemList *list = 0;
-	if ( litStringEl.DLit() != 0 ) {
-		String dlit = unescape( litStringEl.DLit().text().c_str() );
-		ConsItem *stringItem = ConsItem::cons( internal, ConsItem::InputText, dlit );
+	if ( litStringEl.ConsData() != 0 ) {
+		String consData = unescape( litStringEl.ConsData().text().c_str() );
+		ConsItem *stringItem = ConsItem::cons( internal, ConsItem::InputText, consData );
 		list = ConsItemList::cons( stringItem );
+	}
+	else if ( litStringEl.StringElList() != 0 ) {
+		list = walkStringElList( litStringEl.StringElList() );
 	}
 	return list;
 }
@@ -591,9 +594,9 @@ ConsItemList *LoadSource::walkString( cstring String )
 ConsItemList *LoadSource::walkLitConsEl( lit_cons_el litConsEl )
 {
 	ConsItemList *list = 0;
-	if ( litConsEl.DLit() != 0 ) {
-		String dlit = unescape( litConsEl.DLit().text().c_str() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, dlit );
+	if ( litConsEl.ConsData() != 0 ) {
+		String consData = unescape( litConsEl.ConsData().text().c_str() );
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
 		list = ConsItemList::cons( consItem );
 	}
 	return list;
@@ -668,9 +671,9 @@ ConsItemList *LoadSource::walkConstructor( constructor Constructor )
 ConsItemList *LoadSource::walkLitAccumEl( lit_accum_el litAccumEl )
 {
 	ConsItemList *list = 0;
-	if ( litAccumEl.DLit() != 0 ) {
-		String dlit = unescape( litAccumEl.DLit().text().c_str() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, dlit );
+	if ( litAccumEl.ConsData() != 0 ) {
+		String consData = unescape( litAccumEl.ConsData().text().c_str() );
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
 		list = ConsItemList::cons( consItem );
 	}
 	return list;
@@ -830,10 +833,51 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 	return expr;
 }
 
-LangExpr *LoadSource::walkCodeAdditive( code_additive codeAdditive )
+LangExpr *LoadSource::walkCodeAdditive( code_additive additive )
 {
-	return walkCodeFactor( codeAdditive.Factor() );
+	LangExpr *expr = 0;
+	if ( additive.Plus() != 0 ) {
+		LangExpr *left = walkCodeAdditive( additive.Additive() );
+		LangExpr *right = walkCodeMultiplicitive( additive.Multiplicitive() );
+		expr = LangExpr::cons( internal, left, '+', right );
+	}
+	else if ( additive.Minus() != 0 ) {
+		LangExpr *left = walkCodeAdditive( additive.Additive() );
+		LangExpr *right = walkCodeMultiplicitive( additive.Multiplicitive() );
+		expr = LangExpr::cons( internal, left, '-', right );
+	}
+	else {
+		expr = walkCodeMultiplicitive( additive.Multiplicitive() );
+	}
+	return expr;
 }
+
+LangExpr *LoadSource::walkCodeMultiplicitive( code_multiplicitive codeMultiplicitive )
+{
+	return walkCodeUnary( codeMultiplicitive.Unary() );
+}
+
+
+LangExpr *LoadSource::walkCodeUnary( code_unary unary )
+{
+	LangExpr *expr = walkCodeFactor( unary.Factor() );
+
+	if ( unary.Bang() != 0 ) {
+		expr = LangExpr::cons( internal, '!', expr );
+	}
+	else if ( unary.Dollar() != 0 ) {
+		expr = LangExpr::cons( internal, '$', expr );
+	}
+	else if ( unary.Caret() != 0 ) {
+		expr = LangExpr::cons( internal, '^', expr );
+	}
+	else if ( unary.Percent() != 0 ) {
+		expr = LangExpr::cons( internal, '%', expr );
+	}
+
+	return expr;
+}
+
 
 LangExpr *LoadSource::walkCodeRelational( code_relational codeRelational )
 {
@@ -842,7 +886,15 @@ LangExpr *LoadSource::walkCodeRelational( code_relational codeRelational )
 		LangExpr *left = walkCodeRelational( codeRelational.Relational() );
 		LangExpr *right = walkCodeAdditive( codeRelational.Additive() );
 
-		expr = LangExpr::cons( internal, left, OP_DoubleEql, right );
+		if ( codeRelational.EqEq() != 0 ) {
+			expr = LangExpr::cons( internal, left, OP_DoubleEql, right );
+		}
+		else if ( codeRelational.Lt() != 0 ) {
+			expr = LangExpr::cons( internal, left, '<', right );
+		}
+		else if ( codeRelational.Gt() != 0 ) {
+			expr = LangExpr::cons( internal, left, '>', right );
+		}
 	}
 	else {
 		expr = walkCodeAdditive( codeRelational.Additive() );
@@ -981,6 +1033,10 @@ LangStmt *LoadSource::walkStatement( statement Statement )
 		LangExpr *expr = walkCodeExpr( Statement.CodeExpr() );
 		stmt = LangStmt::cons( internal, LangStmt::AssignType, varRef, expr );
 	}
+	else if ( Statement.YieldVarRef() != 0 ) {
+		LangVarRef *varRef = walkVarRef( Statement.YieldVarRef() );
+		stmt = LangStmt::cons( LangStmt::YieldType, varRef );
+	}
 	return stmt;
 }
 
@@ -988,6 +1044,75 @@ void LoadSource::walkContextVarDef( context_var_def ContextVarDef )
 {
 	ObjectField *objField = walkVarDef( ContextVarDef.VarDef() );
 	contextVarDef( internal, objField );
+}
+
+//def reference_type_ref
+//	[REF type_ref]
+//
+//def param_var_def
+//	[id COLON type_ref]
+//|	[id COLON reference_type_ref]
+//
+//def param_list
+//	[param_list param_var_def]
+//|	[param_var_def]
+//
+//def opt_param_list
+//	[param_list]
+//|	[]
+
+TypeRef *LoadSource::walkReferenceTypeRef( reference_type_ref ReferenceTypeRef )
+{
+	return walkTypeRef( ReferenceTypeRef.TypeRef() );
+}
+
+ObjectField *LoadSource::walkParamVarDef( param_var_def paramVarDef )
+{
+	String id = paramVarDef.Id().text().c_str();
+	TypeRef *typeRef = 0;
+
+	if ( paramVarDef.TypeRef() != 0 )
+		typeRef = walkTypeRef( paramVarDef.TypeRef() );
+	else
+		typeRef = walkReferenceTypeRef( paramVarDef.RefTypeRef() );
+	
+	return addParam( internal, typeRef, id );
+}
+
+ParameterList *LoadSource::walkParamVarDefList( _repeat_param_var_def paramVarDefList )
+{
+	ParameterList *paramList = new ParameterList;
+	while ( !paramVarDefList.end() ) {
+		ObjectField *param = walkParamVarDef( paramVarDefList.value() );
+		appendParam( paramList, param );
+		paramVarDefList = paramVarDefList.next();
+	}
+	return paramList;
+}
+
+void LoadSource::walkFunctionDef( function_def FunctionDef )
+{
+	ObjectDef *localFrame = blockOpen();
+
+	TypeRef *typeRef = walkTypeRef( FunctionDef.TypeRef() );
+	String id = FunctionDef.Id().text().c_str();
+	ParameterList *paramList = walkParamVarDefList( FunctionDef.ParamVarDefList() );
+	StmtList *stmtList = walkLangStmtList( FunctionDef.LangStmtList() );
+	functionDef( stmtList, localFrame, paramList, typeRef, id );
+
+	blockClose();
+}
+
+void LoadSource::walkIterDef( iter_def IterDef )
+{
+	ObjectDef *localFrame = blockOpen();
+
+	String id = IterDef.Id().text().c_str();
+	ParameterList *paramList = walkParamVarDefList( IterDef.ParamVarDefList() );
+	StmtList *stmtList = walkLangStmtList( IterDef.LangStmtList() );
+	iterDef( stmtList, localFrame, paramList, id );
+
+	blockClose();
 }
 
 void LoadSource::walkContextItem( context_item contextItem )
@@ -1015,6 +1140,12 @@ void LoadSource::walkContextItem( context_item contextItem )
 	}
 	else if ( contextItem.ContextDef() != 0 ) {
 		walkContextDef( contextItem.ContextDef() );
+	}
+	else if ( contextItem.FunctionDef() != 0 ) {
+		walkFunctionDef( contextItem.FunctionDef() );
+	}
+	else if ( contextItem.IterDef() != 0 ) {
+		walkIterDef( contextItem.IterDef() );
 	}
 }
 
@@ -1071,6 +1202,15 @@ void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
 	}
 	else if ( rootItem.NamespaceDef() != 0 ) {
 		walkNamespaceDef( rootItem.NamespaceDef() );
+	}
+	else if ( rootItem.FunctionDef() != 0 ) {
+		walkFunctionDef( rootItem.FunctionDef() );
+	}
+	else if ( rootItem.IterDef() != 0 ) {
+		walkIterDef( rootItem.IterDef() );
+	}
+	else if ( rootItem.IterDef() != 0 ) {
+		walkIterDef( rootItem.IterDef() );
 	}
 }
 

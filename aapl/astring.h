@@ -546,7 +546,6 @@ template<class T> void StrTmpl<T>::setAs( const char *s, long length )
 
 template<class T> void StrTmpl<T>::chop( long length )
 {
-	/* Detach from the existing string. */
 	Head *head = ((Head*)data) - 1;
 	assert( head->refCount == 1 );
 	assert( length <= head->length );

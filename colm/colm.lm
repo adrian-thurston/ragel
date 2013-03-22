@@ -15,6 +15,7 @@ lex
 	token NAMESPACE / 'namespace' /
 	token FOR / 'for' /
 	token IF / 'if' /
+	token YIELD / 'yield' /
 	token WHILE / 'while' /
 	token ELSIF / 'elsif' /
 	token ELSE / 'else' /
@@ -24,6 +25,8 @@ lex
 	token VECTOR / 'vector' /
 	token MAP / 'map' /
 	token PTR / 'ptr' /
+	token ITER / 'iter' /
+	token REF / 'ref' /
 
 	token LITERAL /'literal'/
 	token CONTEXT /'context'/
@@ -59,21 +62,30 @@ lex
 	token COPEN /'{'/
 	token CCLOSE /'}'/
 	token STAR /'*'/
-	token PLUS /'+'/
 	token QUESTION /'?'/
 	token EQUALS /'='/
 	token EQEQ /'=='/
 	token COMMA /','/
 	token LT /'<'/
 	token GT /'>'/
+	token BANG /'!'/
+	token DOLLAR /'$'/
+	token CARET /'^'/
+	token PERCENT /'!'/
+	token PLUS /'+'/
+	token MINUS /'-'/
 
 	ignore / ( '\n' | '\t' | ' ' )+ /
 	ignore / '#' . ( ^'\n' )* . '\n' /
 end
 
 lex
-	token dlit / ( ^( '\"' | '\\' ) | '\\' . any )+ /
-	token TDQ / '\"' /
+	token CONS_TDQ / '\"' /
+	token CONS_SQOPEN / '[' /
+	token CONS_SQCLOSE / ']' /
+
+	token cons_data 
+		/ ( ^( '\"' | '[' | ']' | '\\' ) | '\\' . any )+ /
 end
 
 lex
@@ -82,8 +94,10 @@ lex
 		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
 	/
 
-	token lex_number / ( '0' .. '9' )+ /
-	token lex_lit / '\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\'' /
+	token lex_number 
+		/ ( '0' .. '9' )+ /
+	token lex_lit 
+		/ '\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\'' /
 
 	token LEX_DOT /'.'/
 	token LEX_BAR /'|'/
@@ -125,11 +139,11 @@ def root_item
 |	[RegionDef: region_def]
 |	[ContextDef: context_def]
 |	[NamespaceDef: namespace_def]
-#|	[function_def]
-#|	[iter_def]
+|	[FunctionDef: function_def]
+|	[IterDef: iter_def]
+|	[Statement: statement]
 #|	[global_def]
 #|	[export_def]
-|	[Statement: statement]
 #|	[pre_eof]
 #|	[precedence]
 #|	[typedef]
@@ -143,11 +157,26 @@ def context_item
 |	[CflDef: cfl_def]
 |	[RegionDef: region_def]
 |	[ContextDef: context_def]
-#|	[function_def]
-#|	[iter_def]
+|	[FunctionDef: function_def]
+|	[IterDef: iter_def]
 #|	[export_def]
 #|	[pre_eof]
 #|	[precedence]
+
+def iter_def
+	[ITER Id: id POPEN ParamVarDefList: param_var_def* PCLOSE
+		COPEN LangStmtList: lang_stmt_list CCLOSE]
+
+def reference_type_ref
+	[REF TypeRef: type_ref]
+
+def param_var_def
+	[Id: id COLON TypeRef: type_ref]
+|	[Id: id COLON RefTypeRef: reference_type_ref]
+
+def function_def
+	[TypeRef: type_ref Id: id POPEN ParamVarDefList: param_var_def* PCLOSE 
+			COPEN LangStmtList: lang_stmt_list CCLOSE]
 
 def context_var_def
 	[VarDef: var_def]
@@ -222,6 +251,7 @@ def statement
 |	[IF IfExpr: code_expr BlockOrSingle: block_or_single ElsifList: elsif_list]
 |	[WHILE WhileExpr: code_expr BlockOrSingle: block_or_single]
 |	[LhsVarRef: var_ref EQUALS CodeExpr: code_expr]
+|	[YIELD YieldVarRef: var_ref]
 
 def elsif_list
 	[ElsifClause: elsif_clause ElsifList: elsif_list]
@@ -265,10 +295,24 @@ def code_expr
 
 def code_relational
 	[Relational: code_relational EqEq: EQEQ Additive: code_additive]
+|	[Relational: code_relational Lt: LT Additive: code_additive]
+|	[Relational: code_relational Gt: GT Additive: code_additive]
 |	[Additive: code_additive]
 
 def code_additive
-	[Factor: code_factor]
+	[Additive: code_additive Plus: PLUS Multiplicitive: code_multiplicitive]
+|	[Additive: code_additive Minus: MINUS Multiplicitive: code_multiplicitive]
+|	[Multiplicitive: code_multiplicitive]
+
+def code_multiplicitive
+	[Unary: code_unary]
+
+def code_unary
+	[Bang: BANG Factor: code_factor]
+|	[Dollar: DOLLAR Factor: code_factor]
+|	[Caret: CARET Factor: code_factor]
+|	[Percent: PERCENT Factor: code_factor]
+|	[Factor: code_factor]
 
 def code_factor
 	[Number: number]
@@ -324,11 +368,11 @@ def string_el
 	[CodeExpr: code_expr]
 
 def lit_string_el
-	[DLit: dlit]
-#	['[' string_el* ']']
+	[ConsData: cons_data]
+|	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE]
 
 def string_top_el
-	[DQ LitStringElList: lit_string_el* TDQ]
+	[DQ LitStringElList: lit_string_el* CONS_TDQ]
 |	[SQOPEN StringElList: string_el* SQOPEN]
 
 def string_list
@@ -348,11 +392,11 @@ def cons_el
 	[CodeExpr: code_expr]
 
 def lit_cons_el
-	[DLit: dlit]
+	[ConsData: cons_data]
 #|	['[' cons_el_list ']']
 
 def cons_top_el
-	[DQ LitConsElList: lit_cons_el* TDQ]
+	[DQ LitConsElList: lit_cons_el* CONS_TDQ]
 |	[SQOPEN ConsElList: cons_el* SQCLOSE]
 
 def cons_list
@@ -371,11 +415,11 @@ def accum_el
 #|	['"' lit_accum_el* '"']
 
 def lit_accum_el
-	[DLit: dlit]
+	[ConsData: cons_data]
 #|	['[' accum_el_list ']']
 
 def accum_top_el
-	[DQ LitAccumElList: lit_accum_el* TDQ]
+	[DQ LitAccumElList: lit_accum_el* CONS_TDQ]
 |	[SQOPEN AccumElList: accum_el* SQCLOSE]
 
 def accum_list
@@ -384,7 +428,6 @@ def accum_list
 
 def accumulate
 	[AccumList: accum_list]
-
 
 def var_ref
 	[Qual: qual Id: id]

@@ -1,10 +1,8 @@
-
+##### LM #####
 lex
     literal '{', '}'
     literal 'struct', 'type'
     token id /[A-Za-z_][A-Za-z_0-9]*/
-
-    ignore /'/*' any* :>> '*/'/
     ignore /[ \t\r\n]+/
 end
 
@@ -19,16 +17,25 @@ def program
 
 int func( P: program )
 {
+	print( P '\n' )
 }
 
 int main()
 {
-    InputFile: stream = open( 'func.in' "r" )
-    parse PP: program[ InputFile ]
+    parse PP: program[ stdin ]
 	P: program = PP.tree
 	func( P )
-	print( P '\n' )
 }
 
 main()
 
+##### IN #####
+struct S
+{
+	type T
+}
+##### EXP #####
+struct S
+{
+	type T
+}

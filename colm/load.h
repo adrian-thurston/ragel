@@ -93,6 +93,13 @@ struct string_list;
 struct cstring;
 struct string_el;
 struct _repeat_string_el;
+struct function_def;
+struct reference_type_ref;
+struct param_var_def;
+struct _repeat_param_var_def;
+struct iter_def;
+struct code_unary;
+struct code_multiplicitive;
 
 struct LoadSource
 :
@@ -135,6 +142,7 @@ struct LoadSource
 	LangStmt *walkElsifList( elsif_list elsifList );
 	LangStmt *walkStatement( statement Statement );
 	LangStmt *walkPrintStmt( print_stmt &PrintStmt );
+	LangExpr *walkCodeUnary( code_unary codeUnary );
 	LangExpr *walkCodeFactor( code_factor codeFactor );
 	LangStmt *walkExprStmt( expr_stmt &ExprStmt );
 	QualItemVect *walkQual( qual &Qual );
@@ -179,6 +187,7 @@ struct LoadSource
 
 	LangExpr *walkCodeRelational( code_relational codeRelational );
 	LangExpr *walkCodeAdditive( code_additive codeAdditive );
+	LangExpr *walkCodeMultiplicitive( code_multiplicitive codeMultiplicitive );
 
 	ConsItemList *walkLitStringEl( lit_string_el litStringEl );
 	ConsItemList *walkLitStringElList( _repeat_lit_string_el litStringElList );
@@ -187,4 +196,10 @@ struct LoadSource
 	ConsItemList *walkString( cstring String );
 	ConsItemList *walkStringEl( string_el stringEl );
 	ConsItemList *walkStringElList( _repeat_string_el stringElList );
+	void walkFunctionDef( function_def functionDef );
+
+	TypeRef *walkReferenceTypeRef( reference_type_ref ReferenceTypeRef );
+	ObjectField *walkParamVarDef( param_var_def ParamVarDef );
+	ParameterList *walkParamVarDefList( _repeat_param_var_def ParamVarDefList );
+	void walkIterDef( iter_def IterDef );
 };
