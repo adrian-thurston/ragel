@@ -174,6 +174,11 @@ function runtests()
 				echo "FAILED: output differs from expected output"
 				ERRORS=$(( ERRORS + 1 ))
 				Nth=$((Nth + 1))
+				if [ "$diff" = true ]; then
+					echo
+					cat $DIFF
+					echo
+				fi
 				continue
 			fi
 
@@ -191,24 +196,9 @@ function runtests()
 	fi
 }
 
-function diffs()
-{
-	for TST in $TEST_PAT; do
-		EXP=${TST/.*}.exp
-		OUT=${TST/.*}.out
-
-		[ -f $EXP ] || die "error: the expected output file $EXP was not found"
-		diff -u $EXP $OUT
-	done
-}
-
 [ -d $workingdir ] || mkdir $workingdir
 
 runtests;
-
-if [ "$diff" = true ]; then
-	diffs;
-fi
 
 exit $EXIT;
 
