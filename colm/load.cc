@@ -506,17 +506,82 @@ ObjectField *walkOptCapture( opt_capture optCapture )
 	return objField;
 }
 
+ConsItemList *LoadSource::walkLitConsEl( lit_cons_el litConsEl )
+{
+	ConsItemList *list = 0;
+	if ( litConsEl.DLit() != 0 ) {
+		String dlit = litConsEl.DLit().text().c_str();
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, dlit );
+		list = ConsItemList::cons( consItem );
+	}
+	return list;
+}
 
-//def lit_accum_el
-//	[DLit: dlit]
-//#|	['[' accum_el_list ']']
+ConsItemList *LoadSource::walkLitConsElList( _repeat_lit_cons_el litConsElList )
+{
+	ConsItemList *list = new ConsItemList;
+	while ( !litConsElList.end() ) {
+		ConsItemList *extension = walkLitConsEl( litConsElList.value() );
+		list = consListConcat( list, extension );
+		litConsElList = litConsElList.next();
+	}
+	return list;
+}
 
-//def accum_top_el
-//	[DQ LitAccumElList: lit_accum_el* TDQ]
-//#|	[ accum_el_list ']']
+ConsItemList *LoadSource::walkConsEl( cons_el consEl )
+{
+	ConsItemList *list = 0;
+	if ( consEl.CodeExpr() != 0 ) {
+		LangExpr *consExpr = walkCodeExpr( consEl.CodeExpr() );
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
+		list = ConsItemList::cons( consItem );
+	}
+	return list;
+}
 
-//	[AccumTopEl: accum_top_el AccumList: accum_list]
-//|	[AccumTopEl: accum_top_el]
+ConsItemList *LoadSource::walkConsElList( _repeat_cons_el consElList )
+{
+	ConsItemList *list = new ConsItemList;
+	while ( !consElList.end() ) {
+		ConsItemList *extension = walkConsEl( consElList.value() );
+		list = consListConcat( list, extension );
+		consElList = consElList.next();
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkConsTopEl( cons_top_el consTopEl )
+{
+	ConsItemList *list = 0;
+	if ( consTopEl.LitConsElList() != 0 )
+		list = walkLitConsElList( consTopEl.LitConsElList() );
+	else if ( consTopEl.ConsElList() != 0 ) {
+		list = walkConsElList( consTopEl.ConsElList() );
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkConsList( cons_list consList )
+{
+	ConsItemList *list = walkConsTopEl( consList.ConsTopEl() );
+
+	if ( consList.ConsList() != 0 ) {
+		ConsItemList *extension = walkConsList( consList.ConsList() );
+		consListConcat( list, extension );
+	}
+
+	return list;
+}
+
+ConsItemList *LoadSource::walkConstructor( constructor Constructor )
+{
+	ConsItemList *list = walkConsList( Constructor.ConsList() );
+	return list;
+}
+
+/*
+ * Accum
+ */
 
 ConsItemList *LoadSource::walkLitAccumEl( lit_accum_el litAccumEl )
 {
@@ -655,7 +720,7 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 		type_ref typeRefTree = codeFactor.TypeRef();
 		TypeRef *typeRef = walkTypeRef( typeRefTree );
 		ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
-		ConsItemList *list = new ConsItemList;
+		ConsItemList *list = walkConstructor( codeFactor.Constructor() );
 
 		expr = construct( internal, objField, list, typeRef, 0 );
 	}
@@ -679,9 +744,29 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 	return expr;
 }
 
+LangExpr *LoadSource::walkCodeAdditive( code_additive codeAdditive )
+{
+	return walkCodeFactor( codeAdditive.Factor() );
+}
+
+LangExpr *LoadSource::walkCodeRelational( code_relational codeRelational )
+{
+	LangExpr *expr = 0;
+	if ( codeRelational.Relational() != 0 ) {
+		LangExpr *left = walkCodeRelational( codeRelational.Relational() );
+		LangExpr *right = walkCodeAdditive( codeRelational.Additive() );
+
+		expr = LangExpr::cons( internal, left, OP_DoubleEql, right );
+	}
+	else {
+		expr = walkCodeAdditive( codeRelational.Additive() );
+	}
+	return expr;
+}
+
 LangExpr *LoadSource::walkCodeExpr( code_expr codeExpr )
 {
-	return walkCodeFactor( codeExpr.CodeFactor() );
+	return walkCodeRelational( codeExpr.Relational() );
 }
 
 LangStmt *LoadSource::walkExprStmt( expr_stmt &exprStmt )

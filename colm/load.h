@@ -77,6 +77,15 @@ struct accumulate;
 struct accum_el;
 struct _repeat_accum_el;
 struct rl_def;
+struct lit_cons_el;
+struct _repeat_lit_cons_el;
+struct cons_top_el;
+struct cons_list;
+struct constructor;
+struct cons_el;
+struct _repeat_cons_el;
+struct code_relational;
+struct code_additive;
 
 struct LoadSource
 :
@@ -150,5 +159,17 @@ struct LoadSource
 	ConsItemList *walkAccumulate( accumulate Accumulate );
 	ConsItemList *walkAccumEl( accum_el accumEl );
 	ConsItemList *walkAccumElList( _repeat_accum_el accumElList );
+
 	void walkRlDef( rl_def RlDef );
+
+	ConsItemList *walkLitConsEl( lit_cons_el litConsEl );
+	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList );
+	ConsItemList *walkConsTopEl( cons_top_el consTopEl );
+	ConsItemList *walkConsList( cons_list consList );
+	ConsItemList *walkConstructor( constructor Constructor );
+	ConsItemList *walkConsEl( cons_el consEl );
+	ConsItemList *walkConsElList( _repeat_cons_el accumElList );
+
+	LangExpr *walkCodeRelational( code_relational codeRelational );
+	LangExpr *walkCodeAdditive( code_additive codeAdditive );
 };
