@@ -76,6 +76,7 @@ struct accum_list;
 struct accumulate;
 struct accum_el;
 struct _repeat_accum_el;
+struct rl_def;
 
 struct LoadSource
 :
@@ -149,4 +150,5 @@ struct LoadSource
 	ConsItemList *walkAccumulate( accumulate Accumulate );
 	ConsItemList *walkAccumEl( accum_el accumEl );
 	ConsItemList *walkAccumElList( _repeat_accum_el accumElList );
+	void walkRlDef( rl_def RlDef );
 };

@@ -388,6 +388,17 @@ LexExpression *LoadSource::walkLexExpr( lex_expr &LexExprTree )
 	}
 }
 
+void LoadSource::walkRlDef( rl_def rlDef )
+{
+	String id = rlDef.Id().text().c_str();
+
+	lex_expr LexExpr = rlDef.Expr();
+	LexExpression *expr = walkLexExpr( LexExpr );
+	LexJoin *join = LexJoin::cons( expr );
+
+	addRegularDef( internal, namespaceStack.top(), id, join );
+}
+
 void LoadSource::walkTokenDef( token_def TokenDef )
 {
 	String name = TokenDef.Id().text().c_str();
@@ -801,7 +812,10 @@ void LoadSource::walkContextVarDef( context_var_def ContextVarDef )
 
 void LoadSource::walkContextItem( context_item contextItem )
 {
-	if ( contextItem.ContextVarDef() != 0 ) {
+	if ( contextItem.RlDef() != 0 ) {
+		walkRlDef( contextItem.RlDef() );
+	}
+	else if ( contextItem.ContextVarDef() != 0 ) {
 		walkContextVarDef( contextItem.ContextVarDef() );
 	}
 	else if ( contextItem.TokenDef() != 0 ) {
@@ -849,7 +863,10 @@ void LoadSource::walkNamespaceDef( namespace_def NamespaceDef )
 
 void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
 {
-	if ( rootItem.TokenDef() != 0 ) {
+	if ( rootItem.RlDef() != 0 ) {
+		walkRlDef( rootItem.RlDef() );
+	}
+	else if ( rootItem.TokenDef() != 0 ) {
 		walkTokenDef( rootItem.TokenDef() );
 	}
 	else if ( rootItem.IgnoreDef() != 0 ) {

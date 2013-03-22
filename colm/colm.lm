@@ -4,6 +4,7 @@ lex
 	token LEX / 'lex' /
 	token END / 'end' /
 	token TOKEN / 'token' /
+	token RL / 'rl' /
 	token IGNORE / 'ignore' /
 	token PRINT / 'print' /
 	token PRINT_XML / 'print_xml' /
@@ -114,8 +115,8 @@ def start
 	[RootItemList: root_item*]
 
 def root_item
-#	[rl_def]
-	[LiteralDef: literal_def]
+	[RlDef: rl_def]
+|	[LiteralDef: literal_def]
 |	[TokenDef: token_def]
 |	[IgnoreDef: ignore_def]
 |	[CflDef: cfl_def]
@@ -134,7 +135,7 @@ def root_item
 def context_item
 	[ContextVarDef: context_var_def]
 |	[LiteralDef: literal_def]
-#|	[rl_def]
+|	[RlDef: rl_def]
 |	[TokenDef: token_def]
 |	[IgnoreDef: ignore_def]
 |	[CflDef: cfl_def]
@@ -174,6 +175,9 @@ def cfl_def
 
 def region_def
 	[LEX RootItemList: root_item* END]
+
+def rl_def
+	[RL Id: id FSLASH Expr: lex_expr LEX_FSLASH]
 
 def token_def
 	[TOKEN Id: id FSLASH Expr: lex_expr LEX_FSLASH]
@@ -341,6 +345,7 @@ def lex_expr
 
 def lex_term
 	[Term: lex_term LEX_DOT FactorRep: lex_factor_rep]
+|	[Term: lex_term FactorRep: lex_factor_rep]
 |	[FactorRep: lex_factor_rep]
 
 def lex_factor_rep
