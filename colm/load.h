@@ -86,6 +86,13 @@ struct cons_el;
 struct _repeat_cons_el;
 struct code_relational;
 struct code_additive;
+struct lit_string_el;
+struct _repeat_lit_string_el;
+struct string_top_el;
+struct string_list;
+struct cstring;
+struct string_el;
+struct _repeat_string_el;
 
 struct LoadSource
 :
@@ -168,8 +175,16 @@ struct LoadSource
 	ConsItemList *walkConsList( cons_list consList );
 	ConsItemList *walkConstructor( constructor Constructor );
 	ConsItemList *walkConsEl( cons_el consEl );
-	ConsItemList *walkConsElList( _repeat_cons_el accumElList );
+	ConsItemList *walkConsElList( _repeat_cons_el consElList );
 
 	LangExpr *walkCodeRelational( code_relational codeRelational );
 	LangExpr *walkCodeAdditive( code_additive codeAdditive );
+
+	ConsItemList *walkLitStringEl( lit_string_el litStringEl );
+	ConsItemList *walkLitStringElList( _repeat_lit_string_el litStringElList );
+	ConsItemList *walkStringTopEl( string_top_el stringTopEl );
+	ConsItemList *walkStringList( string_list stringList );
+	ConsItemList *walkString( cstring String );
+	ConsItemList *walkStringEl( string_el stringEl );
+	ConsItemList *walkStringElList( _repeat_string_el stringElList );
 };

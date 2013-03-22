@@ -35,6 +35,36 @@
 
 extern RuntimeData main_runtimeData;
 
+String unescape( const String &s )
+{
+	String out( String::Fresh(), s.length() );
+	char *d = out.data;
+
+	for ( int i = 0; i < s.length(); ) {
+		if ( s[i] == '\\' ) {
+			switch ( s[i+1] ) {
+				case '0': *d++ = '\0'; break;
+				case 'a': *d++ = '\a'; break;
+				case 'b': *d++ = '\b'; break;
+				case 't': *d++ = '\t'; break;
+				case 'n': *d++ = '\n'; break;
+				case 'v': *d++ = '\v'; break;
+				case 'f': *d++ = '\f'; break;
+				case 'r': *d++ = '\r'; break;
+				default: *d++ = s[i+1]; break;
+			}
+			i += 2;
+		}
+		else {
+			*d++ = s[i];
+			i += 1;
+		}
+	}
+	*d = 0;
+	return out;
+}
+
+
 NamespaceQual *LoadSource::walkRegionQual( region_qual regionQual )
 {
 	NamespaceQual *qual;
@@ -199,45 +229,16 @@ void LoadSource::walkProdList( LelDefList *lelDefList, prod_list &ProdList )
 	prodAppend( lelDefList, prod );
 }
 
-String transReChars( const String &s )
-{
-	String out( String::Fresh(), s.length() );
-	char *d = out.data;
-
-	for ( int i = 0; i < s.length(); ) {
-		if ( s[i] == '\\' ) {
-			switch ( s[i+1] ) {
-				case '0': *d++ = '\0'; break;
-				case 'a': *d++ = '\a'; break;
-				case 'b': *d++ = '\b'; break;
-				case 't': *d++ = '\t'; break;
-				case 'n': *d++ = '\n'; break;
-				case 'v': *d++ = '\v'; break;
-				case 'f': *d++ = '\f'; break;
-				case 'r': *d++ = '\r'; break;
-				default: *d++ = s[i+1]; break;
-			}
-			i += 2;
-		}
-		else {
-			*d++ = s[i];
-			i += 1;
-		}
-	}
-	*d = 0;
-	return out;
-}
-
 ReOrItem *LoadSource::walkRegOrChar( reg_or_char regOrChar )
 {
 	ReOrItem *orItem = 0;
 	if ( regOrChar.Char() != 0 ) {
-		String c = transReChars( regOrChar.Char().text().c_str() );
+		String c = unescape( regOrChar.Char().text().c_str() );
 		orItem = ReOrItem::cons( internal, c );
 	}
 	else {
-		String low = transReChars( regOrChar.Low().text().c_str() );
-		String high = transReChars( regOrChar.High().text().c_str() );
+		String low = unescape( regOrChar.Low().text().c_str() );
+		String high = unescape( regOrChar.High().text().c_str() );
 		orItem = ReOrItem::cons( internal, low[0], high[0] );
 	}
 	return orItem;
@@ -506,11 +507,92 @@ ObjectField *walkOptCapture( opt_capture optCapture )
 	return objField;
 }
 
+/*
+ * String
+ */
+
+ConsItemList *LoadSource::walkLitStringEl( lit_string_el litStringEl )
+{
+	ConsItemList *list = 0;
+	if ( litStringEl.DLit() != 0 ) {
+		String dlit = unescape( litStringEl.DLit().text().c_str() );
+		ConsItem *stringItem = ConsItem::cons( internal, ConsItem::InputText, dlit );
+		list = ConsItemList::cons( stringItem );
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkLitStringElList( _repeat_lit_string_el litStringElList )
+{
+	ConsItemList *list = new ConsItemList;
+	while ( !litStringElList.end() ) {
+		ConsItemList *extension = walkLitStringEl( litStringElList.value() );
+		list = consListConcat( list, extension );
+		litStringElList = litStringElList.next();
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkStringEl( string_el stringEl )
+{
+	ConsItemList *list = 0;
+	if ( stringEl.CodeExpr() != 0 ) {
+		LangExpr *consExpr = walkCodeExpr( stringEl.CodeExpr() );
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
+		list = ConsItemList::cons( consItem );
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkStringElList( _repeat_string_el stringElList )
+{
+	ConsItemList *list = new ConsItemList;
+	while ( !stringElList.end() ) {
+		ConsItemList *extension = walkStringEl( stringElList.value() );
+		list = consListConcat( list, extension );
+		stringElList = stringElList.next();
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkStringTopEl( string_top_el stringTopEl )
+{
+	ConsItemList *list = 0;
+	if ( stringTopEl.LitStringElList() != 0 )
+		list = walkLitStringElList( stringTopEl.LitStringElList() );
+	else if ( stringTopEl.StringElList() != 0 ) {
+		list = walkStringElList( stringTopEl.StringElList() );
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkStringList( string_list stringList )
+{
+	ConsItemList *list = walkStringTopEl( stringList.StringTopEl() );
+
+	if ( stringList.StringList() != 0 ) {
+		ConsItemList *extension = walkStringList( stringList.StringList() );
+		consListConcat( list, extension );
+	}
+
+	return list;
+}
+
+ConsItemList *LoadSource::walkString( cstring String )
+{
+	ConsItemList *list = walkStringList( String.StringList() );
+	return list;
+}
+
+/*
+ * Constructor
+ */
+
 ConsItemList *LoadSource::walkLitConsEl( lit_cons_el litConsEl )
 {
 	ConsItemList *list = 0;
 	if ( litConsEl.DLit() != 0 ) {
-		String dlit = litConsEl.DLit().text().c_str();
+		String dlit = unescape( litConsEl.DLit().text().c_str() );
 		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, dlit );
 		list = ConsItemList::cons( consItem );
 	}
@@ -587,7 +669,7 @@ ConsItemList *LoadSource::walkLitAccumEl( lit_accum_el litAccumEl )
 {
 	ConsItemList *list = 0;
 	if ( litAccumEl.DLit() != 0 ) {
-		String dlit = litAccumEl.DLit().text().c_str();
+		String dlit = unescape( litAccumEl.DLit().text().c_str() );
 		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, dlit );
 		list = ConsItemList::cons( consItem );
 	}
@@ -740,6 +822,10 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 	}
 	else if ( codeFactor.ParenCodeExpr() != 0 ) {
 		expr = walkCodeExpr( codeFactor.ParenCodeExpr() );
+	}
+	else if ( codeFactor.String() != 0 ) {
+		ConsItemList *list = walkString( codeFactor.String() );
+		expr = LangExpr::cons( LangTerm::cons( internal, list ) );
 	}
 	return expr;
 }

@@ -282,6 +282,7 @@ def code_factor
 		OptFieldInit: opt_field_init Accumulate: accumulate]
 |	[Cons: CONS OptCapture: opt_capture TypeRef: type_ref
 		OptFieldInit: opt_field_init Constructor: constructor]
+|	[String: cstring]
 
 def type_ref
 	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat]
@@ -311,6 +312,29 @@ def opt_field_init
 
 def field_init
 	[CodeExpr: code_expr]
+
+#
+# String List
+#
+
+def string_el
+#	['"' lit_string_el*  '"']
+	[CodeExpr: code_expr]
+
+def lit_string_el
+	[DLit: dlit]
+#	['[' string_el* ']']
+
+def string_top_el
+	[DQ LitStringElList: lit_string_el* TDQ]
+|	[SQOPEN StringElList: string_el* SQOPEN]
+
+def string_list
+	[StringTopEl: string_top_el StringList: string_list]
+|	[StringTopEl: string_top_el]
+
+def cstring
+	[StringList: string_list]
 
 #
 # Constructor List
