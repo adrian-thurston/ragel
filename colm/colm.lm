@@ -15,6 +15,7 @@ lex
 	token NAMESPACE / 'namespace' /
 	token FOR / 'for' /
 	token IF / 'if' /
+	token WHILE / 'while' /
 	token ELSIF / 'elsif' /
 	token ELSE / 'else' /
 	token IN / 'in' /
@@ -219,6 +220,7 @@ def statement
 |	[VarDef: var_def OptDefInit: opt_def_init]
 |	[FOR ForDecl: id COLON TypeRef: type_ref IN IterCall: iter_call BlockOrSingle: block_or_single]
 |	[IF IfExpr: code_expr BlockOrSingle: block_or_single ElsifList: elsif_list]
+|	[WHILE WhileExpr: code_expr BlockOrSingle: block_or_single]
 |	[LhsVarRef: var_ref EQUALS CodeExpr: code_expr]
 
 def elsif_list

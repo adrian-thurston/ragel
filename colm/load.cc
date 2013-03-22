@@ -962,9 +962,18 @@ LangStmt *LoadSource::walkStatement( statement Statement )
 
 		LangExpr *expr = walkCodeExpr( Statement.IfExpr() );
 		StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
+
+		popScope();
+
 		LangStmt *elsifList = walkElsifList( Statement.ElsifList() );
 		stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, elsifList );
 
+	}
+	else if ( Statement.WhileExpr() != 0 ) {
+		pushScope();
+		LangExpr *expr = walkCodeExpr( Statement.WhileExpr() );
+		StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
+		stmt = LangStmt::cons( LangStmt::WhileType, expr, stmtList );
 		popScope();
 	}
 	else if ( Statement.LhsVarRef() != 0 ) {
