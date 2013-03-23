@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	token id /[a-z]+/
 	ignore /[ \t]+/
@@ -11,3 +12,5 @@ export Error: str
 
 parse P: start[ stdin ]
 Error = P.error
+##### IN #####
+##### EXP #####

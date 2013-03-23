@@ -302,6 +302,22 @@ struct LoadSource
 	{
 		return walkPatternList( Pattern.PatternList() );
 	}
+
+	LangExpr *walkOptDefInit( opt_def_init optDefInit )
+	{
+		LangExpr *expr = 0;
+		if ( optDefInit.CodeExpr() != 0 )
+			expr = walkCodeExpr( optDefInit.CodeExpr() );
+		return expr;
+	}
+
+	LangStmt *walkExportDef( export_def exportDef )
+	{
+		ObjectField *objField = walkVarDef( exportDef.VarDef() );
+		LangExpr *expr = walkOptDefInit( exportDef.OptDefInit() );
+
+		return exportStmt( objField, LangStmt::AssignType, expr );
+	}
 };
 
 
@@ -1317,9 +1333,7 @@ LangStmt *LoadSource::walkStatement( statement Statement )
 	}
 	else if ( Statement.VarDef() != 0 ) {
 		ObjectField *objField = walkVarDef( Statement.VarDef() );
-		LangExpr *expr = 0;
-		if ( Statement.OptDefInit().CodeExpr() != 0 )
-			expr = walkCodeExpr( Statement.OptDefInit().CodeExpr() );
+		LangExpr *expr = walkOptDefInit( Statement.OptDefInit() );
 		stmt = varDef( objField, expr, LangStmt::AssignType );
 	}
 	else if ( Statement.ForDecl() != 0 ) {
@@ -1473,6 +1487,9 @@ void LoadSource::walkContextItem( context_item contextItem )
 	else if ( contextItem.IterDef() != 0 ) {
 		walkIterDef( contextItem.IterDef() );
 	}
+	else if ( contextItem.ExportDef() != 0 ) {
+		walkExportDef( contextItem.ExportDef() );
+	}
 }
 
 void LoadSource::walkContextDef( context_def contextDef )
@@ -1537,6 +1554,9 @@ void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
 	}
 	else if ( rootItem.IterDef() != 0 ) {
 		walkIterDef( rootItem.IterDef() );
+	}
+	else if ( rootItem.ExportDef() != 0 ) {
+		walkExportDef( rootItem.ExportDef() );
 	}
 }
 

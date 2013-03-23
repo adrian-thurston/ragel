@@ -28,6 +28,7 @@ lex
 	token PTR / 'ptr' /
 	token ITER / 'iter' /
 	token REF / 'ref' /
+	token EXPORT / 'export' /
 
 	token LITERAL /'literal'/
 	token CONTEXT /'context'/
@@ -153,7 +154,7 @@ def root_item
 |	[IterDef: iter_def]
 |	[Statement: statement]
 #|	[global_def]
-#|	[export_def]
+|	[ExportDef: export_def]
 #|	[pre_eof]
 #|	[precedence]
 #|	[typedef]
@@ -169,9 +170,12 @@ def context_item
 |	[ContextDef: context_def]
 |	[FunctionDef: function_def]
 |	[IterDef: iter_def]
-#|	[export_def]
+|	[ExportDef: export_def]
 #|	[pre_eof]
 #|	[precedence]
+
+def export_def
+	[EXPORT VarDef: var_def OptDefInit: opt_def_init]
 
 def iter_def
 	[ITER Id: id POPEN ParamVarDefList: param_var_def* PCLOSE
