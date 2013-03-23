@@ -375,6 +375,14 @@ struct LoadSource
 		return objectDef;
 	}
 
+	void walkPreEof( pre_eof PreEof )
+	{
+		ObjectDef *localFrame = blockOpen();
+		StmtList *stmtList = walkLangStmtList( PreEof.LangStmtList() );
+		preEof( internal, stmtList, localFrame );
+		blockClose();
+	}
+
 	void walkIgnoreDef( ignore_def IgnoreDef )
 	{
 		String name = walkOptId( IgnoreDef.OptId() );
@@ -1691,6 +1699,9 @@ void LoadSource::walkContextItem( context_item contextItem )
 	else if ( contextItem.IterDef() != 0 ) {
 		walkIterDef( contextItem.IterDef() );
 	}
+	else if ( contextItem.PreEof() != 0 ) {
+		walkPreEof( contextItem.PreEof() );
+	}
 	else if ( contextItem.ExportDef() != 0 ) {
 		walkExportDef( contextItem.ExportDef() );
 	}
@@ -1758,6 +1769,9 @@ void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
 	}
 	else if ( rootItem.IterDef() != 0 ) {
 		walkIterDef( rootItem.IterDef() );
+	}
+	else if ( rootItem.PreEof() != 0 ) {
+		walkPreEof( rootItem.PreEof() );
 	}
 	else if ( rootItem.ExportDef() != 0 ) {
 		walkExportDef( rootItem.ExportDef() );

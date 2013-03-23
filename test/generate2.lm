@@ -1,3 +1,4 @@
+##### LM #####
 context generate
 	def open_item
 		type: str
@@ -206,3 +207,9 @@ if S {
 	for I: generate::internal_link in S
 		print( 'INTERNAL LINK: ' I  '\n' )
 }
+##### IN #####
+[external]
+[[internal]]
+##### EXP #####
+EXTERNAL LINK: [external]
+INTERNAL LINK: [[internal]]

@@ -187,9 +187,12 @@ def root_item
 |	[Statement: statement]
 #|	[global_def]
 |	[ExportDef: export_def]
-#|	[pre_eof]
+|	[PreEof: pre_eof]
 #|	[precedence]
 |	[AliasDef: alias_def]
+
+def pre_eof
+	[PREEOF COPEN LangStmtList: lang_stmt_list CCLOSE]
 
 def alias_def
 	[ALIAS Id: id TypeRef: type_ref]
@@ -206,7 +209,7 @@ def context_item
 |	[FunctionDef: function_def]
 |	[IterDef: iter_def]
 |	[ExportDef: export_def]
-#|	[pre_eof]
+|	[PreEof: pre_eof]
 #|	[precedence]
 
 def export_def
