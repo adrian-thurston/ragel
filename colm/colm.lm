@@ -30,6 +30,11 @@ lex
 	token REF / 'ref' /
 	token EXPORT / 'export' /
 
+	token MAKE_TOKEN / 'make_token' /
+	token MAKE_TREE / 'make_tree' /
+
+	token TYPEID / 'typeid' /
+
 	token LITERAL /'literal'/
 	token CONTEXT /'context'/
 	token NI /'ni'/
@@ -107,8 +112,10 @@ lex
 
 	token lex_number 
 		/ ( '0' .. '9' )+ /
-	token lex_lit 
-		/ '\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\'' /
+	token lex_lit / 
+		'\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\'' |
+		'\"' . ( ^( '\"' | '\\' ) | '\\' . any )* .  '\"'
+	/
 
 	token LEX_DOT /'.'/
 	token LEX_BAR /'|'/
@@ -123,6 +130,11 @@ lex
 	token LEX_SQOPEN_POS /'['/ ni
 	token LEX_SQOPEN_NEG /'[^'/ ni
 	token LEX_FSLASH /'/'/
+
+	token LEX_DASHDASH /'--'/
+	token LEX_COLON_GT   /':>'/
+	token LEX_COLON_GTGT /':>>'/
+	token LEX_LT_COLON   /'<:'/
 
 	ignore / 
 		( '\n' | '\t' | ' ' ) .
@@ -224,8 +236,17 @@ def region_def
 def rl_def
 	[RL Id: id LEX_FSLASH Expr: lex_expr LEX_FSLASH]
 
+def opt_lex_expr
+	[Expr: lex_expr]
+|	[]
+
 def token_def
-	[TOKEN Id: id LEX_FSLASH Expr: lex_expr LEX_FSLASH]
+	[TOKEN Id: id LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH
+		OptTranslate: opt_translate]
+
+def opt_translate
+	[COPEN LangStmtList: lang_stmt_list CCLOSE]
+|	[]
 
 def ignore_def
 	[IGNORE LEX_FSLASH Expr: lex_expr LEX_FSLASH]
@@ -344,6 +365,9 @@ def code_factor
 |	[MATCH MatchVarRef: var_ref Pattern: pattern]
 |	[String: cstring]
 |	[TypeRef: type_ref IN InVarRef: var_ref]
+|	[MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE]
+|	[MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE]
+|	[TYPEID LT TypeIdTypeRef: type_ref GT]
 
 def type_ref
 	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat]
@@ -502,9 +526,15 @@ def lex_expr
 	[Expr: lex_expr LEX_BAR Term: lex_term]
 |	[Term: lex_term]
 
+def opt_dot
+	[LEX_DOT]
+|	[]
+
 def lex_term
-	[Term: lex_term LEX_DOT FactorRep: lex_factor_rep]
-|	[Term: lex_term FactorRep: lex_factor_rep]
+	[Term: lex_term OptDot: opt_dot FactorRep: lex_factor_rep]
+|	[Term: lex_term ColonGt: LEX_COLON_GT FactorRep: lex_factor_rep]
+|	[Term: lex_term ColonGtGt: LEX_COLON_GTGT FactorRep: lex_factor_rep]
+|	[Term: lex_term LtColon: LEX_LT_COLON FactorRep: lex_factor_rep]
 |	[FactorRep: lex_factor_rep]
 
 def lex_factor_rep

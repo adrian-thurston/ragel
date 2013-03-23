@@ -90,9 +90,14 @@ struct LoadSource
 	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
 	LexFactorRep *walkLexFactorRep( lex_factor_rep &LexFactorRepTree );
-	LexFactorAug *walkLexFactorAug( lex_factor_rep &LexFactorRepTree );
-	LexTerm *walkLexTerm( lex_term &LexTerm );
-	LexExpression *walkLexExpr( lex_expr &LexExpr );
+
+	LexFactorAug *walkLexFactorAug( lex_factor_rep LexFactorRepTree )
+	{
+		LexFactorRep *factorRep = walkLexFactorRep( LexFactorRepTree );
+		return LexFactorAug::cons( factorRep );
+	}
+
+	LexTerm *walkLexTerm( lex_term LexTerm );
 	ExprVect *walkCodeExprList( _repeat_code_expr codeExprList );
 	LangExpr *walkCodeExpr( code_expr codeExpr );
 	void walkLexRegion( region_def regionDef );
@@ -120,7 +125,44 @@ struct LoadSource
 	void walkLiteralList( literal_list literalList );
 	void walkLiteralDef( literal_def literalDef );
 
-	void walkTokenDef( token_def TokenDef );
+	LexExpression *walkLexExpr( lex_expr LexExprTree )
+	{
+		if ( LexExprTree.Expr() != 0 ) {
+			lex_expr Rec = LexExprTree.Expr();
+			LexExpression *leftExpr = walkLexExpr( Rec );
+
+			lex_term LexTermTree = LexExprTree.Term();
+			LexTerm *term = walkLexTerm( LexTermTree );
+			LexExpression *expr = LexExpression::cons( leftExpr, term, LexExpression::OrType );
+
+			return expr;
+		}
+		else {
+			lex_term LexTermTree = LexExprTree.Term();
+			LexTerm *term = walkLexTerm( LexTermTree );
+			LexExpression *expr = LexExpression::cons( term );
+			return expr;
+		}
+	}
+
+
+	void walkTokenDef( token_def TokenDef )
+	{
+		String name = TokenDef.Id().text().c_str();
+
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+
+		LexJoin *join = 0;
+		if ( TokenDef.OptExpr().Expr() != 0 ) {
+			LexExpression *expr = walkLexExpr( TokenDef.OptExpr().Expr() );
+			join = LexJoin::cons( expr );
+		}
+
+		CodeBlock *translate = walkOptTranslate( TokenDef.OptTranslate() );
+
+		defineToken( internal, name, join, objectDef, translate, false, false, false );
+	}
+
 	void walkIgnoreDef( ignore_def IgnoreDef );
 	void walkContextDef( context_def contextDef );
 	void walkContextItem( context_item contextItem );
@@ -317,6 +359,19 @@ struct LoadSource
 		LangExpr *expr = walkOptDefInit( exportDef.OptDefInit() );
 
 		return exportStmt( objField, LangStmt::AssignType, expr );
+	}
+
+	CodeBlock *walkOptTranslate( opt_translate optTranslate )
+	{
+		CodeBlock *block = 0;
+		if ( optTranslate.LangStmtList() != 0 ) {
+			ObjectDef *localFrame = blockOpen();
+			StmtList *stmtList = walkLangStmtList( optTranslate.LangStmtList() );
+			block = CodeBlock::cons( stmtList, localFrame );
+			block->context = contextStack.top();
+			blockClose();
+		}
+		return block;
 	}
 };
 
@@ -612,49 +667,32 @@ LexFactorRep *LoadSource::walkLexFactorRep( lex_factor_rep &LexFactorRepTree )
 	return factorRep;
 }
 
-LexFactorAug *LoadSource::walkLexFactorAug( lex_factor_rep &LexFactorRepTree )
+LexTerm *LoadSource::walkLexTerm( lex_term LexTermTree )
 {
-	LexFactorRep *factorRep = walkLexFactorRep( LexFactorRepTree );
-	return LexFactorAug::cons( factorRep );
-}
-
-LexTerm *LoadSource::walkLexTerm( lex_term &LexTermTree )
-{
+	LexTerm *term = 0;
 	if ( LexTermTree.Term() != 0 ) {
-		lex_term Rec = LexTermTree.Term();
-		LexTerm *leftTerm = walkLexTerm( Rec );
+		LexTerm *leftTerm = walkLexTerm( LexTermTree.Term() );
+		LexFactorAug *factorAug = walkLexFactorAug( LexTermTree.FactorRep() );
 
-		lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
-		LexFactorAug *factorAug = walkLexFactorAug( LexFactorRepTree );
-		LexTerm *term = LexTerm::cons( leftTerm, factorAug, LexTerm::ConcatType );
-		return term;
+		if ( LexTermTree.OptDot() != 0 ) {
+			term = LexTerm::cons( leftTerm, factorAug, LexTerm::ConcatType );
+		}
+		else if ( LexTermTree.ColonGt() != 0 ) {
+			term = LexTerm::cons( leftTerm, factorAug, LexTerm::RightStartType );
+		}
+		else if ( LexTermTree.ColonGtGt() != 0 ) {
+			term = LexTerm::cons( leftTerm, factorAug, LexTerm::RightFinishType );
+		}
+		else if ( LexTermTree.LtColon() != 0 ) {
+			term = LexTerm::cons( leftTerm, factorAug, LexTerm::LeftType );
+		}
 	}
 	else {
 		lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
 		LexFactorAug *factorAug = walkLexFactorAug( LexFactorRepTree );
-		LexTerm *term = LexTerm::cons( factorAug );
-		return term;
+		term = LexTerm::cons( factorAug );
 	}
-}
-
-LexExpression *LoadSource::walkLexExpr( lex_expr &LexExprTree )
-{
-	if ( LexExprTree.Expr() != 0 ) {
-		lex_expr Rec = LexExprTree.Expr();
-		LexExpression *leftExpr = walkLexExpr( Rec );
-
-		lex_term LexTermTree = LexExprTree.Term();
-		LexTerm *term = walkLexTerm( LexTermTree );
-		LexExpression *expr = LexExpression::cons( leftExpr, term, LexExpression::OrType );
-
-		return expr;
-	}
-	else {
-		lex_term LexTermTree = LexExprTree.Term();
-		LexTerm *term = walkLexTerm( LexTermTree );
-		LexExpression *expr = LexExpression::cons( term );
-		return expr;
-	}
+	return term;
 }
 
 void LoadSource::walkRlDef( rl_def rlDef )
@@ -666,19 +704,6 @@ void LoadSource::walkRlDef( rl_def rlDef )
 	LexJoin *join = LexJoin::cons( expr );
 
 	addRegularDef( internal, namespaceStack.top(), id, join );
-}
-
-void LoadSource::walkTokenDef( token_def TokenDef )
-{
-	String name = TokenDef.Id().text().c_str();
-
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
-
-	lex_expr LexExpr = TokenDef.Expr();
-	LexExpression *expr = walkLexExpr( LexExpr );
-	LexJoin *join = LexJoin::cons( expr );
-
-	defineToken( internal, name, join, objectDef, 0, false, false, false );
 }
 
 void LoadSource::walkIgnoreDef( ignore_def IgnoreDef )
@@ -1173,6 +1198,19 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 		LangVarRef *varRef = walkVarRef( codeFactor.InVarRef() );
 		expr = LangExpr::cons( LangTerm::cons( internal,
 				LangTerm::SearchType, typeRef, varRef ) );
+	}
+	else if ( codeFactor.MakeTreeExprList() != 0 ) {
+		ExprVect *exprList = walkCodeExprList( codeFactor.MakeTreeExprList() );
+		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::MakeTreeType, exprList ) );
+	}
+	else if ( codeFactor.MakeTokenExprList() != 0 ) {
+		ExprVect *exprList = walkCodeExprList( codeFactor.MakeTokenExprList() );
+		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::MakeTokenType, exprList ) );
+	}
+	else if ( codeFactor.TypeIdTypeRef() != 0 ) {
+		TypeRef *typeRef = walkTypeRef( codeFactor.TypeIdTypeRef() );
+		expr = LangExpr::cons( LangTerm::cons( internal,
+				LangTerm::TypeIdType, typeRef ) );
 	}
 	return expr;
 }

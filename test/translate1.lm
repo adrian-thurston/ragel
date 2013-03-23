@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	ignore /space+/
 	literal '*', '(', ')'
@@ -21,3 +22,7 @@ def start
 parse Input: start[ stdin ]
 print( %Input.tree )
 
+##### IN #####
+a b ( c d ) e f
+##### EXP #####
+a b ( c d ) e f
