@@ -1,3 +1,4 @@
+##### LM #####
 context heredoc
 	rl ident_char /[a-zA-Z_]/
 
@@ -46,3 +47,13 @@ cons HereDoc: heredoc[]
 
 parse S: heredoc::start(HereDoc)[stdin]
 print_xml(S.tree)
+print( '\n' )
+##### IN #####
+hello
+random 9392af j9 stuff
+hello
+##### EXP #####
+<heredoc::start><heredoc::here_name><heredoc::id>hello</heredoc::id></heredoc::here_name><heredoc::here_data><heredoc::_repeat_here_data_item><heredoc::here_data_item><heredoc::nl>
+</heredoc::nl></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>random</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::other> 9392</heredoc::other></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>af</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::other> </heredoc::other></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>j</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::other>9 </heredoc::other></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>stuff</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::nl>
+</heredoc::nl></heredoc::here_data_item></heredoc::_repeat_here_data_item></heredoc::here_data><heredoc::here_close>hell</heredoc::here_close><heredoc::id>o</heredoc::id><heredoc::nl>
+</heredoc::nl></heredoc::start>

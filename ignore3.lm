@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	ignore /space+/
 	literal '*', '(' ni, ni ')', '!', ';'
@@ -35,3 +36,16 @@ for I: item in Start {
 		print( 'innr: .' %O '.' %Inner '.' %C '.\n' )
 }
 
+##### IN #####
+a b c (   d   ) e (  ) f g;
+##### EXP #####
+item: .a .
+item: .b .
+item: .c .
+item: .(   d   ) .
+innr: .(.   d   .) .
+item: .e .
+item: .(  ) .
+innr: .(.  .) .
+item: .f .
+item: .g.

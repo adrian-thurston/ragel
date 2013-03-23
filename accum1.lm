@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	ignore /space+/
 	literal '*', '(', ')'
@@ -24,3 +25,13 @@ for Id: id in InputTree {
 S: start = Output()
 
 print( S '\n' )
+##### IN #####
+a b c ( chocolate fudge ) d e
+##### EXP #####
+( a )
+( b )
+( c )
+( chocolate )
+( fudge )
+( d )
+( e )

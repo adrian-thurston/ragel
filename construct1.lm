@@ -1,3 +1,4 @@
+##### LM #####
 rl ident_pattern /[a-zA-Z_][a-zA-Z_0-9]*/
 rl number_pattern /[0-9]+/
 
@@ -12,4 +13,7 @@ def four_ids
 
 Constructed: four_ids = construct four_ids "a  b  c  d"
 print_xml( Constructed )
+print( '\n' )
 
+##### EXP #####
+<four_ids><id>a</id><id>b</id><id>c</id><id>d</id></four_ids>

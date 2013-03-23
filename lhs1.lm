@@ -1,3 +1,4 @@
+##### LM #####
 
 lex
 	ignore /space+/
@@ -31,3 +32,10 @@ def start
 
 parse Start: start[ stdin ]
 print( Start.tree "\n" )
+##### IN #####
+a b c ( d1 d2 ) e f g ;
+##### EXP #####
+A
+B
+( a )( b )( c )( ( d1 )( d2 ) )( e )( f )( g );
+

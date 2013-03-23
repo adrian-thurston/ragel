@@ -1,3 +1,4 @@
+##### LM #####
 context accum_bt
 
 lex
@@ -44,3 +45,10 @@ send AccumBt.OneParser ['\n']
 
 print( Two )
 print( ^( AccumBt.OneParser.finish() ) '\n' )
+##### IN #####
+a b c d e ;
+##### EXP #####
+A1
+A2
+a b c d e ;
+extra a extra b extra c extra d extra e

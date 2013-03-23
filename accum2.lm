@@ -1,3 +1,4 @@
+##### LM #####
 context ctx
 
 i: int
@@ -31,3 +32,7 @@ SP.ctx = cons ctx []
 send SP [stdin]
 Input: ctx::start = SP()
 print( Input '\n' )
+##### IN #####
+a b c ( d e f )
+##### EXP #####
+a b c ( d e f )

@@ -1,3 +1,4 @@
+##### LM #####
 context ctx
 
 	i: int
@@ -41,3 +42,8 @@ Input: ctx::start = InputP.tree
 print( Input '\n' )
 
 
+##### IN #####
+a b c ( d ) e f
+##### EXP #####
+3
+a b c ( d ) e f

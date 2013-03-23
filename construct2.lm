@@ -1,3 +1,4 @@
+##### LM #####
 
 lex
 	ignore /[ \t\n]+/
@@ -8,3 +9,5 @@ end
 def lang [id*]
 
 print( construct lang "a b c" '\n' )
+##### EXP #####
+a b c

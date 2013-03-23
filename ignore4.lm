@@ -1,3 +1,4 @@
+##### LM #####
 namespace hash
 
 	lex
@@ -52,3 +53,23 @@ else {
 		print( '--' %H '==\n' )
 	}
 }
+##### IN #####
+
+hello;
+
+#include "input1"
+
+#include "input2"
+
+#include "input3"
+
+there;
+##### EXP #####
+--#include "input1"
+==
+--
+#include "input2"
+==
+--
+#include "input3"
+==

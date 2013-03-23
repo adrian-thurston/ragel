@@ -1,6 +1,0 @@
-
-%%
-
-type foo
-
-include smtp.vpt

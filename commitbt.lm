@@ -1,3 +1,4 @@
+##### LM #####
 # 2010: I'm not sure what the following means.
 
 #
@@ -102,3 +103,7 @@ def stuff
 parse S: stuff[ stdin ]
 print_xml( S.tree )
 print( '\n' )
+##### IN #####
+1 2 3 * !
+##### EXP #####
+<stuff><_repeat_item><item>1</item></_repeat_item><_literal_000d>!</_literal_000d></stuff>

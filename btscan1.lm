@@ -1,3 +1,4 @@
+##### LM #####
 #
 # R1
 #
@@ -39,3 +40,8 @@ parse P: btscan[ stdin ]
 match P.tree ~!abb !abba !aab
 print_xml(P.tree)
 print( '\n' )
+##### IN #####
+!abb !abba !aab
+
+##### EXP #####
+<btscan><_repeat_item><item><r2::line><r2::_literal_0009>!</r2::_literal_0009><r2::id>abb</r2::id></r2::line></item><item><r1::line><r1::_literal_0001>!</r1::_literal_0001><r1::_literal_0003>a</r1::_literal_0003><r1::_literal_0005>b</r1::_literal_0005><r1::_literal_0005>b</r1::_literal_0005><r1::_literal_0003>a</r1::_literal_0003></r1::line></item><item><r2::line><r2::_literal_0009>!</r2::_literal_0009><r2::id>aab</r2::id></r2::line></item></_repeat_item></btscan>

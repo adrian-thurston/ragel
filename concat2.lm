@@ -1,3 +1,4 @@
+##### LM #####
 
 lex
 
@@ -92,3 +93,9 @@ int main()
 }
 
 main()
+##### IN #####
+
+%%
+
+include smtp.vpt
+##### EXP #####

@@ -1,3 +1,4 @@
+##### LM #####
 
 #
 # Regular Definitions
@@ -72,3 +73,11 @@ IL = construct item_list
 	["<wrapper " ^CollectedAttrs ">" ^RootItemList "</wrapper>"]
 
 print( ^IL '\n' )
+##### IN #####
+<t1 a=b foo=bar1 c=d>
+	<t2 foo=bar2 e=f></t2>
+</t1>
+##### EXP #####
+<wrapper foo=bar1 foo=bar2><t1 a=b c=d>
+	<t2 e=f></t2>
+</t1></wrapper>
