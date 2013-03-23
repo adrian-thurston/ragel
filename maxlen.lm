@@ -1,3 +1,4 @@
+##### LM #####
 
 context maxlen
 
@@ -49,3 +50,8 @@ MaxLen.allow = 3
 
 parse S: maxlen::start(MaxLen)[stdin]
 print_xml( S.tree )
+print('\n')
+##### IN #####
+a b c d e f g
+##### EXP #####
+<maxlen::start><maxlen::restricted_list><maxlen::open></maxlen::open><maxlen::_repeat_item><maxlen::item><maxlen::id>a</maxlen::id></maxlen::item><maxlen::item><maxlen::id>b</maxlen::id></maxlen::item><maxlen::item><maxlen::id>c</maxlen::id></maxlen::item></maxlen::_repeat_item></maxlen::restricted_list><maxlen::_repeat_id><maxlen::id>d</maxlen::id><maxlen::id>e</maxlen::id><maxlen::id>f</maxlen::id><maxlen::id>g</maxlen::id></maxlen::_repeat_id></maxlen::start>

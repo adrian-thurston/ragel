@@ -29,4 +29,5 @@ for fn in $@; do
 	> ${fn%.lm}.tst;
 	cat ${fn%.lm}.tst > $fn;
 	rm ${fn%.lm}.tst;
+	git add $fn
 done
