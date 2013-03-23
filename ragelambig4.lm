@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	ignore /[\t\n ]+/
 	literal '^', '|', '-', ',', ':', '!', '?', '.'
@@ -69,3 +70,7 @@ def alphabet_num
 
 parse start[ stdin ]
 print( '\n' )
+##### IN #####
+1 - 1
+##### EXP #####
+<start><expression><term><factor_rep><factor_neg><factor><alphabet_num><uint>1</uint></alphabet_num></factor></factor_neg><_repeat_factor_rep_op></_repeat_factor_rep_op></factor_rep><term_op_list_short></term_op_list_short></term><_repeat_expression_op><expression_op><_literal_0007>-</_literal_0007><term><factor_rep><factor_neg><factor><alphabet_num><uint>1</uint></alphabet_num></factor></factor_neg><_repeat_factor_rep_op></_repeat_factor_rep_op></factor_rep><term_op_list_short></term_op_list_short></term></expression_op></_repeat_expression_op></expression></start>
