@@ -589,6 +589,13 @@ struct LoadSource
 		return exportStmt( objField, LangStmt::AssignType, expr );
 	}
 
+	void walkAliasDef( alias_def aliasDef )
+	{
+		String id = aliasDef.Id().text().c_str();
+		TypeRef *typeRef = walkTypeRef( aliasDef.TypeRef() );
+		alias( internal, id, typeRef );
+	}
+
 	CodeBlock *walkOptTranslate( opt_translate optTranslate )
 	{
 		CodeBlock *block = 0;
@@ -916,6 +923,8 @@ LangStmt *LoadSource::walkPrintStmt( print_stmt &printStmt )
 	LangStmt::Type type;
 	if ( printStmt.Tree() != 0 )
 		type = LangStmt::PrintType;
+	else if ( printStmt.PrintStream() != 0 )
+		type = LangStmt::PrintStreamType;
 	else if ( printStmt.Xml() != 0 )
 		type = LangStmt::PrintXMLType;
 	else if ( printStmt.XmlAc() != 0 )
@@ -1705,6 +1714,9 @@ void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
 	}
 	else if ( rootItem.ExportDef() != 0 ) {
 		walkExportDef( rootItem.ExportDef() );
+	}
+	else if ( rootItem.AliasDef() != 0 ) {
+		walkAliasDef( rootItem.AliasDef() );
 	}
 }
 

@@ -7,6 +7,7 @@ lex
 	token RL / 'rl' /
 	token IGNORE / 'ignore' /
 	token PRINT / 'print' /
+	token PRINTS / 'prints' /
 	token PRINT_XML / 'print_xml' /
 	token PRINT_XML_AC / 'print_xml_ac' /
 	token PARSE / 'parse' /
@@ -23,7 +24,7 @@ lex
 	token ELSIF / 'elsif' /
 	token ELSE / 'else' /
 	token IN / 'in' /
-	token PARSER / 'parser' /
+	token PARSER / 'parser' | 'accum' /
 	token LIST / 'list' /
 	token VECTOR / 'vector' /
 	token MAP / 'map' /
@@ -35,6 +36,7 @@ lex
 	token BREAK / 'break' /
 	token REJECT / 'reject' /
 	token REDUCEFIRST / 'reducefirst' /
+	token ALIAS / 'alias' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -89,6 +91,7 @@ lex
 	token PERCENT /'%'/
 	token PLUS /'+'/
 	token MINUS /'-'/
+	token LTLT /'<<'/
 
 	ignore / ( '\n' | '\t' | ' ' )+ /
 	ignore / '#' . ( ^'\n' )* . '\n' /
@@ -181,7 +184,10 @@ def root_item
 |	[ExportDef: export_def]
 #|	[pre_eof]
 #|	[precedence]
-#|	[typedef]
+|	[AliasDef: alias_def]
+
+def alias_def
+	[ALIAS Id: id TypeRef: type_ref]
 
 def context_item
 	[ContextVarDef: context_var_def]
@@ -353,6 +359,7 @@ def var_def
 
 def print_stmt
 	[Tree: PRINT POPEN CodeExprList: code_expr* PCLOSE]
+|	[PrintStream: PRINTS POPEN CodeExprList: code_expr* PCLOSE]
 |	[Xml: PRINT_XML POPEN CodeExprList: code_expr* PCLOSE]
 |	[XmlAc: PRINT_XML_AC POPEN CodeExprList: code_expr* PCLOSE]
 
@@ -396,6 +403,7 @@ def code_factor
 |	[False: FALSE]
 |	[POPEN ParenCodeExpr: code_expr PCLOSE]
 |	[Send: SEND ToVarRef: var_ref Accumulate: accumulate]
+|	[ToVarRef: var_ref Send: LTLT Accumulate: accumulate]
 |	[Parse: PARSE OptCapture: opt_capture TypeRef: type_ref
 		OptFieldInit: opt_field_init Accumulate: accumulate]
 |	[ParseStop: PARSE_STOP OptCapture: opt_capture TypeRef: type_ref

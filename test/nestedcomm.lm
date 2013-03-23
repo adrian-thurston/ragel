@@ -1,3 +1,4 @@
+##### LM #####
 #
 # Tokens
 #
@@ -45,3 +46,11 @@ print( '\n' )
 print_xml_ac( ^P )
 print( '\n' )
 print( ^P '\n' )
+##### IN #####
+hello there ( (this is a nested comment /*sdf;asd_++_stuff) ) and this is not
+##### EXP #####
+( (this is a nested comment /*sdf;asd_++_stuff) )
+hello there ( (this is a nested comment /*sdf;asd_++_stuff) ) and this is not
+<nested><_repeat_id><id>hello</id><id>there</id><id>and</id><id>this</id><id>is</id><id>not</id></_repeat_id></nested>
+<nested><_repeat_id><id>hello</id><_ignore_0001> </_ignore_0001><id>there</id><_ignore_0001> </_ignore_0001><nested_comment><_literal_0007>(</_literal_0007><_repeat_nc_item><nc_item><nc_data> </nc_data></nc_item><nc_item><nested_comment><_literal_0007>(</_literal_0007><_repeat_nc_item><nc_item><nc_data>this is a nested comment /*sdf;asd_++_stuff</nc_data></nc_item></_repeat_nc_item><_literal_0009>)</_literal_0009></nested_comment></nc_item><nc_item><nc_data> </nc_data></nc_item></_repeat_nc_item><_literal_0009>)</_literal_0009></nested_comment><_ignore_0001> </_ignore_0001><id>and</id><_ignore_0001> </_ignore_0001><id>this</id><_ignore_0001> </_ignore_0001><id>is</id><_ignore_0001> </_ignore_0001><id>not</id></_repeat_id></nested>
+hello there ( (this is a nested comment /*sdf;asd_++_stuff) ) and this is not

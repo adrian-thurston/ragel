@@ -1,3 +1,4 @@
+##### LM #####
 
 lex
 	token c_single_lit /( 'L'? "'" ( [^'\\\n] | '\\' any )* "'" )/
@@ -94,3 +95,21 @@ Output <<
 	"
 
 print( Output.finish() )
+##### IN #####
+#include "some_header.h"
+
+%%
+
+tcp protocol FOO 
+{
+	port 99
+
+	client c
+	server s
+}
+
+##### EXP #####
+#include "some_header.h"
+
+#include <assert.h>
+

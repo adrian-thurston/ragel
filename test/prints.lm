@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	token word /[a-z]+/
 	ignore /[\t\n ]+/
@@ -10,3 +11,7 @@ parse Start: start[stdin]
 
 prints( stderr 'fd stderr: ' Start.tree '\n' )
 prints( stdout 'fd stdout: ' Start.tree '\n' )
+##### IN #####
+a b c
+##### EXP #####
+fd stdout: a b c
