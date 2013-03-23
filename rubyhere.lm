@@ -1,3 +1,4 @@
+##### LM #####
 context rubyhere
 	rl ident_pattern /[a-zA-Z_][a-zA-Z_0-9]*/
 	rl number_pattern /[0-9]+/
@@ -94,3 +95,30 @@ S: rubyhere::start = SP.tree
 
 print_xml(S)
 print('\n')
+##### IN #####
+print( <<DATA1, more, <<DATA2, 99 )
+"&^#(@ almost
+!arbitrary text!
+DATA1
+hello
+world
+DATA2
+!
+print( <<DATA1, more, <<DATA2, 99 )
+"&^#(@ almost
+!arbitrary text!
+DATA1
+hello
+world
+DATA2
+# error here
+##### EXP #####
+<rubyhere::start><rubyhere::_repeat_item><rubyhere::item><rubyhere::statement><rubyhere::call><rubyhere::id>print</rubyhere::id><rubyhere::_literal_000d>(</rubyhere::_literal_000d><rubyhere::_opt_arglist><rubyhere::arglist><rubyhere::primary><rubyhere::heredoc><rubyhere::_literal_0007>&lt;&lt;</rubyhere::_literal_0007><rubyhere::here_id>DATA1</rubyhere::here_id></rubyhere::heredoc></rubyhere::primary><rubyhere::_repeat_arglist_more><rubyhere::arglist_more><rubyhere::_literal_000b>,</rubyhere::_literal_000b><rubyhere::primary><rubyhere::id>more</rubyhere::id></rubyhere::primary></rubyhere::arglist_more><rubyhere::arglist_more><rubyhere::_literal_000b>,</rubyhere::_literal_000b><rubyhere::primary><rubyhere::heredoc><rubyhere::_literal_0007>&lt;&lt;</rubyhere::_literal_0007><rubyhere::here_id>DATA2</rubyhere::here_id></rubyhere::heredoc></rubyhere::primary></rubyhere::arglist_more><rubyhere::arglist_more><rubyhere::_literal_000b>,</rubyhere::_literal_000b><rubyhere::primary><rubyhere::number>99</rubyhere::number></rubyhere::primary></rubyhere::arglist_more></rubyhere::_repeat_arglist_more></rubyhere::arglist></rubyhere::_opt_arglist><rubyhere::_literal_000f>)</rubyhere::_literal_000f></rubyhere::call></rubyhere::statement><rubyhere::_literal_0011>!</rubyhere::_literal_0011></rubyhere::item><rubyhere::item><rubyhere::foobar>print( &lt;&lt;DATA1, more, &lt;&lt;DATA2, 99 )
+"&amp;^#(@ almost
+!arbitrary text!
+DATA1
+hello
+world
+DATA2
+# error here
+</rubyhere::foobar></rubyhere::item></rubyhere::_repeat_item></rubyhere::start>

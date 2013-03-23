@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	ignore /space+/
 	literal '*', '(', ')'
@@ -19,3 +20,7 @@ parse Again: start[ %Input.tree ]
 
 print( %Again.tree )
 
+##### IN #####
+a b c ( chocolate fudge ) d e
+##### EXP #####
+a b c ( chocolate fudge ) d e
