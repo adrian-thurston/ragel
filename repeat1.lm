@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	ignore /space+/
 	literal '*', '(', ')'
@@ -20,3 +21,22 @@ for I: item* in repeat( ItemList )
 
 for I: item* in rev_repeat( ItemList )
 	print( ^I '\n' )
+##### IN #####
+a b ( c d ) e ( f g ) h i
+##### EXP #####
+a b ( c d ) e ( f g ) h i
+b ( c d ) e ( f g ) h i
+( c d ) e ( f g ) h i
+e ( f g ) h i
+( f g ) h i
+h i
+i
+
+
+i
+h i
+( f g ) h i
+e ( f g ) h i
+( c d ) e ( f g ) h i
+b ( c d ) e ( f g ) h i
+a b ( c d ) e ( f g ) h i

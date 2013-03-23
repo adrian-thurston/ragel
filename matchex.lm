@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	token id /[a-zA-Z_][a-zA-Z0-9_]*/
 	literal '=', '<', '>', '/'
@@ -31,3 +32,10 @@ match Tag.tree "<person name=[Val2:id attr*]>[item*]</person>"
 print( ^Val1 '\n' )
 print( ^Val2 '\n' )
 
+##### IN #####
+<person name=adrian hometown=kingston>
+	<t1 foo=bar2 e=f></t2>
+</person>
+##### EXP #####
+adrian
+adrian
