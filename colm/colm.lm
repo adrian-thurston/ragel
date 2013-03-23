@@ -37,6 +37,8 @@ lex
 	token REJECT / 'reject' /
 	token REDUCEFIRST / 'reducefirst' /
 	token ALIAS / 'alias' /
+	token COMMIT / 'commit' /
+	token NEW / 'new' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -92,6 +94,8 @@ lex
 	token PLUS /'+'/
 	token MINUS /'-'/
 	token LTLT /'<<'/
+	token AMPAMP /'&&'/
+	token BARBAR /'||'/
 
 	ignore / ( '\n' | '\t' | ' ' )+ /
 	ignore / '#' . ( ^'\n' )* . '\n' /
@@ -296,8 +300,14 @@ def prod_el_list
 	[ProdElList: prod_el_list ProdEl: prod_el]
 |	[]
 
+def opt_commit
+	[Commit: COMMIT]
+|	[]
+
 def prod
-	[SQOPEN ProdElList: prod_el_list SQCLOSE OptReduce: opt_reduce]
+	[SQOPEN ProdElList: prod_el_list SQCLOSE 
+		OptCommit: opt_commit
+		OptReduce: opt_reduce]
 
 def opt_reduce
 	[COPEN LangStmtList: lang_stmt_list CCLOSE]
@@ -367,7 +377,9 @@ def expr_stmt
 	[CodeExpr: code_expr]
 
 def code_expr
-	[Relational: code_relational]
+	[Expr: code_expr AmpAmp: AMPAMP Relational: code_relational]
+|	[Expr: code_expr BarBar: BARBAR Relational: code_relational]
+|	[Relational: code_relational]
 
 def code_relational
 	[Relational: code_relational EqEq: EQEQ Additive: code_additive]
@@ -416,6 +428,7 @@ def code_factor
 |	[MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE]
 |	[MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE]
 |	[TYPEID LT TypeIdTypeRef: type_ref GT]
+|	[NEW NewCodeFactor: code_factor]
 
 def type_ref
 	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat]
@@ -593,6 +606,10 @@ def lex_factor_rep
 |	[FactorRep: lex_factor_rep StarStar: LEX_STARSTAR]
 |	[FactorRep: lex_factor_rep Plus: LEX_PLUS]
 |	[FactorRep: lex_factor_rep Question: LEX_QUESTION]
+|	[FactorRep: lex_factor_rep COPEN Exact: lex_uint CCLOSE ]
+|	[FactorRep: lex_factor_rep COPEN COMMA Max: lex_uint CCLOSE ]
+|	[FactorRep: lex_factor_rep COPEN Min: lex_uint COMMA CCLOSE ]
+|	[FactorRep: lex_factor_rep COPEN Low: lex_uint COMMA High: lex_uint CCLOSE ]
 |	[FactorNeg: lex_factor_neg]
 
 def lex_factor_neg

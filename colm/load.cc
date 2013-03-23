@@ -148,7 +148,7 @@ struct LoadSource
 	}
 
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
-	LexFactorRep *walkLexFactorRep( lex_factor_rep &LexFactorRepTree );
+	LexFactorRep *walkLexFactorRep( lex_factor_rep LexFactorRepTree );
 
 	LexFactorAug *walkLexFactorAug( lex_factor_rep LexFactorRepTree )
 	{
@@ -158,7 +158,28 @@ struct LoadSource
 
 	LexTerm *walkLexTerm( lex_term LexTerm );
 	ExprVect *walkCodeExprList( _repeat_code_expr codeExprList );
-	LangExpr *walkCodeExpr( code_expr codeExpr );
+
+	LangExpr *walkCodeExpr( code_expr codeExpr )
+	{
+		LangExpr *expr = 0;
+		if ( codeExpr.Expr() != 0 ) {
+			LangExpr *left = walkCodeExpr( codeExpr.Expr() );
+			LangExpr *right = walkCodeRelational( codeExpr.Relational() );
+
+			char type;
+			if ( codeExpr.BarBar() != 0 )
+				type = OP_LogicalOr;
+			else if ( codeExpr.AmpAmp() != 0 )
+				type = OP_LogicalAnd;
+
+			expr = LangExpr::cons( internal, left, type, right );
+		}
+		else {
+			expr = walkCodeRelational( codeExpr.Relational() );
+		}
+		return expr;
+	}
+
 	void walkLexRegion( region_def regionDef );
 	void walkProdElList( ProdElList *list, prod_el_list ProdElList );
 	void walkProdList( LelDefList *lelDefList, prod_list ProdList );
@@ -616,8 +637,6 @@ BaseParser *consLoadSource( Compiler *pd, const char *inputFileName )
 	return new LoadSource( pd, inputFileName );
 }
 
-
-
 NamespaceQual *LoadSource::walkRegionQual( region_qual regionQual )
 {
 	NamespaceQual *qual;
@@ -758,7 +777,9 @@ void LoadSource::walkProdList( LelDefList *lelDefList, prod_list ProdList )
 	walkProdElList( list, Prod.ProdElList() );
 	CodeBlock *codeBlock = walkOptReduce( Prod.OptReduce() );
 
-	Production *prod = BaseParser::production( internal, list, false, codeBlock, 0 );
+	bool commit = Prod.OptCommit().Commit() != 0;
+
+	Production *prod = BaseParser::production( internal, list, commit, codeBlock, 0 );
 	prodAppend( lelDefList, prod );
 }
 
@@ -809,7 +830,7 @@ LexFactorNeg *LoadSource::walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
 	}
 }
 
-LexFactorRep *LoadSource::walkLexFactorRep( lex_factor_rep &LexFactorRepTree )
+LexFactorRep *LoadSource::walkLexFactorRep( lex_factor_rep LexFactorRepTree )
 {
 	LexFactorRep *factorRep = 0;
 	if ( LexFactorRepTree.Star() != 0 ) {
@@ -832,11 +853,33 @@ LexFactorRep *LoadSource::walkLexFactorRep( lex_factor_rep &LexFactorRepTree )
 		LexFactorRep *recRep = walkLexFactorRep( Rec );
 		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::OptionalType );
 	}
+	else if ( LexFactorRepTree.Exact() != 0 ) {
+		LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
+		int low = atoi( LexFactorRepTree.Exact().text().c_str() );
+		factorRep = LexFactorRep::cons( internal, recRep, low, 0, LexFactorRep::ExactType );
+	}
+	else if ( LexFactorRepTree.Max() != 0 ) {
+		LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
+		int high = atoi( LexFactorRepTree.Max().text().c_str() );
+		factorRep = LexFactorRep::cons( internal, recRep, 0, high, LexFactorRep::MaxType );
+	}
+	else if ( LexFactorRepTree.Min() != 0 ) {
+		LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
+		int low = atoi( LexFactorRepTree.Min().text().c_str() );
+		factorRep = LexFactorRep::cons( internal, recRep, low, 0, LexFactorRep::MinType );
+	}
+	else if ( LexFactorRepTree.Low() != 0 ) {
+		LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
+		int low = atoi( LexFactorRepTree.Low().text().c_str() );
+		int high = atoi( LexFactorRepTree.High().text().c_str() );
+		factorRep = LexFactorRep::cons( internal, recRep, low, high, LexFactorRep::RangeType );
+	}
 	else {
 		lex_factor_neg LexFactorNegTree = LexFactorRepTree.FactorNeg();
 		LexFactorNeg *factorNeg = walkLexFactorNeg( LexFactorNegTree );
 		factorRep = LexFactorRep::cons( internal, factorNeg );
 	}
+
 	return factorRep;
 }
 
@@ -1342,8 +1385,9 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 		TypeRef *typeRef = walkTypeRef( typeRefTree );
 		ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
 		ConsItemList *list = walkConstructor( codeFactor.Constructor() );
+		FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
 
-		expr = construct( internal, objField, list, typeRef, 0 );
+		expr = construct( internal, objField, list, typeRef, init );
 	}
 	else if ( codeFactor.Send() != 0 ) {
 		LangVarRef *varRef = walkVarRef( codeFactor.ToVarRef() );
@@ -1389,6 +1433,10 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 		TypeRef *typeRef = walkTypeRef( codeFactor.TypeIdTypeRef() );
 		expr = LangExpr::cons( LangTerm::cons( internal,
 				LangTerm::TypeIdType, typeRef ) );
+	}
+	else if ( codeFactor.NewCodeFactor() != 0 ) {
+		LangExpr *newExpr = walkCodeFactor( codeFactor.NewCodeFactor() );
+		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::NewType, newExpr ) );
 	}
 	return expr;
 }
@@ -1458,11 +1506,6 @@ LangExpr *LoadSource::walkCodeRelational( code_relational codeRelational )
 		expr = walkCodeAdditive( codeRelational.Additive() );
 	}
 	return expr;
-}
-
-LangExpr *LoadSource::walkCodeExpr( code_expr codeExpr )
-{
-	return walkCodeRelational( codeExpr.Relational() );
 }
 
 LangStmt *LoadSource::walkExprStmt( expr_stmt &exprStmt )
