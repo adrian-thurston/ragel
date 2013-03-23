@@ -34,6 +34,7 @@ lex
 	token RETURN / 'return' /
 	token BREAK / 'break' /
 	token REJECT / 'reject' /
+	token REDUCEFIRST / 'reducefirst' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -241,8 +242,15 @@ def namespace_def
 def obj_var_list
 	[]
 
+def opt_reduce_first
+	[ReduceFirst: REDUCEFIRST]
+|	[]
+
 def cfl_def
-	[DEF DefId: id VarDefList: var_def* ProdList: prod_list]
+	[DEF DefId: id 
+		VarDefList: var_def* 
+		OptReduceFirst: opt_reduce_first
+		ProdList: prod_list]
 
 def region_def
 	[LEX RootItemList: root_item* END]

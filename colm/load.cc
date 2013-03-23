@@ -888,7 +888,10 @@ void LoadSource::walkCflDef( cfl_def cflDef )
 	LelDefList *defList = new LelDefList;
 	walkProdList( defList, cflDef.ProdList() );
 
-	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
+	bool reduceFirst = cflDef.OptReduceFirst().ReduceFirst() != 0;
+
+	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(),
+			contextStack.top(), reduceFirst );
 
 	BaseParser::cflDef( ntDef, objectDef, defList );
 }
