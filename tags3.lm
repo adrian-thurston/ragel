@@ -1,3 +1,4 @@
+##### LM #####
 context tags
 
 	#
@@ -305,4 +306,17 @@ HTML: tags::start = HTML_P.tree
 flatten( HTML )
 print_xml( HTML )
 printLinks( HTML )
+##### IN #####
+<t1>
+
+  <t2>
+  <a href="foo">FOO</a>
+  <t3>
+  </t3>
+
+</t1>
+##### EXP #####
+<tags::start><tags::_repeat_item><tags::item><tags::tag><tags::open_tag><tags::_literal_0019>&lt;</tags::_literal_0019><tags::tag_id>t1</tags::tag_id><tags::_repeat_attr></tags::_repeat_attr><tags::_literal_0013>&gt;</tags::_literal_0013></tags::open_tag><tags::_repeat_item><tags::item><tags::tag><tags::open_tag><tags::_literal_0019>&lt;</tags::_literal_0019><tags::tag_id>t2</tags::tag_id><tags::_repeat_attr></tags::_repeat_attr><tags::_literal_0013>&gt;</tags::_literal_0013></tags::open_tag><tags::_repeat_item></tags::_repeat_item><tags::opt_close_tag></tags::opt_close_tag></tags::tag></tags::item><tags::item><tags::tag><tags::open_tag><tags::_literal_0019>&lt;</tags::_literal_0019><tags::tag_id>a</tags::tag_id><tags::_repeat_attr><tags::attr><tags::attr_name>href</tags::attr_name><tags::_opt_eql_attr_val><tags::eql_attr_val><tags::_literal_0009>=</tags::_literal_0009><tags::attr_val><tags::dquote_val>"foo"</tags::dquote_val></tags::attr_val></tags::eql_attr_val></tags::_opt_eql_attr_val></tags::attr></tags::_repeat_attr><tags::_literal_0013>&gt;</tags::_literal_0013></tags::open_tag><tags::_repeat_item><tags::item><tags::doc_data>FOO</tags::doc_data></tags::item></tags::_repeat_item><tags::opt_close_tag><tags::_literal_001b>&lt;/</tags::_literal_001b><tags::close_id>a</tags::close_id><tags::_literal_0013>&gt;</tags::_literal_0013></tags::opt_close_tag></tags::tag></tags::item><tags::item><tags::tag><tags::open_tag><tags::_literal_0019>&lt;</tags::_literal_0019><tags::tag_id>t3</tags::tag_id><tags::_repeat_attr></tags::_repeat_attr><tags::_literal_0013>&gt;</tags::_literal_0013></tags::open_tag><tags::_repeat_item></tags::_repeat_item><tags::opt_close_tag><tags::_literal_001b>&lt;/</tags::_literal_001b><tags::close_id>t3</tags::close_id><tags::_literal_0013>&gt;</tags::_literal_0013></tags::opt_close_tag></tags::tag></tags::item></tags::_repeat_item><tags::opt_close_tag><tags::_literal_001b>&lt;/</tags::_literal_001b><tags::close_id>t1</tags::close_id><tags::_literal_0013>&gt;</tags::_literal_0013></tags::opt_close_tag></tags::tag></tags::item></tags::_repeat_item><tags::trailing>
+</tags::trailing></tags::start>link: FOO
+target: "foo"
 
