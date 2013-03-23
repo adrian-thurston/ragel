@@ -521,6 +521,11 @@ LexFactor *LoadSource::walkLexFactor( lex_factor &LexFactorTree )
 		ReOrBlock *block = walkRegOrData( LexFactorTree.NegData() );
 		factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::NegOrBlock ) );
 	}
+	else if ( LexFactorTree.Number() != 0 ) {
+		String number = LexFactorTree.Number().text().c_str();
+		factor = LexFactor::cons( Literal::cons( internal, 
+				number, Literal::Number ) );
+	}
 	return factor;
 }
 
@@ -529,7 +534,8 @@ LexFactorNeg *LoadSource::walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
 	if ( LexFactorNegTree.FactorNeg() != 0 ) {
 		lex_factor_neg Rec = LexFactorNegTree.FactorNeg();
 		LexFactorNeg *recNeg = walkLexFactorNeg( Rec );
-		LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, recNeg, LexFactorNeg::CharNegateType );
+		LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, recNeg,
+				LexFactorNeg::CharNegateType );
 		return factorNeg;
 	}
 	else {
@@ -872,6 +878,17 @@ ConsItemList *LoadSource::walkStringEl( string_el stringEl )
 	if ( stringEl.LitStringElList() != 0 ) {
 		list = walkLitStringElList( stringEl.LitStringElList(), stringEl.Term().Nl() );
 	}
+	else if ( stringEl.TildeData() != 0 ) {
+		String consData = stringEl.TildeData().text().c_str();
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+		ConsItemList *data = ConsItemList::cons( consItem );
+
+		consData = stringEl.Nl().text().c_str();
+		consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+		ConsItemList *term = ConsItemList::cons( consItem );
+
+		list = consListConcat( data, term );
+	}
 	else if ( stringEl.CodeExpr() != 0 ) {
 		LangExpr *consExpr = walkCodeExpr( stringEl.CodeExpr() );
 		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
@@ -896,6 +913,17 @@ ConsItemList *LoadSource::walkStringTopEl( string_top_el stringTopEl )
 	ConsItemList *list = 0;
 	if ( stringTopEl.LitStringElList() != 0 )
 		list = walkLitStringElList( stringTopEl.LitStringElList(), stringTopEl.Term().Nl() );
+	else if ( stringTopEl.TildeData() != 0 ) {
+		String consData = stringTopEl.TildeData().text().c_str();
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+		ConsItemList *data = ConsItemList::cons( consItem );
+
+		consData = stringTopEl.Nl().text().c_str();
+		consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+		ConsItemList *term = ConsItemList::cons( consItem );
+
+		list = consListConcat( data, term );
+	}
 	else if ( stringTopEl.StringElList() != 0 ) {
 		list = walkStringElList( stringTopEl.StringElList() );
 	}
@@ -1105,6 +1133,12 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 		PatternItemList *list = walkPattern( codeFactor.Pattern() );
 		expr = match( internal, varRef, list );
 	}
+	else if ( codeFactor.InVarRef() != 0 ) {
+		TypeRef *typeRef = walkTypeRef( codeFactor.TypeRef() );
+		LangVarRef *varRef = walkVarRef( codeFactor.InVarRef() );
+		expr = LangExpr::cons( LangTerm::cons( internal,
+				LangTerm::SearchType, typeRef, varRef ) );
+	}
 	return expr;
 }
 
@@ -1163,6 +1197,9 @@ LangExpr *LoadSource::walkCodeRelational( code_relational codeRelational )
 
 		if ( codeRelational.EqEq() != 0 ) {
 			expr = LangExpr::cons( internal, left, OP_DoubleEql, right );
+		}
+		if ( codeRelational.Neq() != 0 ) {
+			expr = LangExpr::cons( internal, left, OP_NotEql, right );
 		}
 		else if ( codeRelational.Lt() != 0 ) {
 			expr = LangExpr::cons( internal, left, '<', right );

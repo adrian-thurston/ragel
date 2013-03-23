@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	literal '-'
 	token file /^('-'|0)(^0)*/
@@ -74,3 +75,16 @@ for Item: item in Args {
 	}
 }
 
+##### ARGS #####
+-qv -h -o output -iinput file --input=foo --input bar --help --verbose
+##### EXP #####
+single: q
+single: v
+single: h
+with opt: o -> output
+with opt: i -> input
+file: file
+long: input -> foo
+long: input -> bar
+long: help
+long: verbose

@@ -1,4 +1,7 @@
+##### LM #####
 
 print( 'before\n' )
 exit( 0 )
 print( 'after\n' )
+##### EXP #####
+before
