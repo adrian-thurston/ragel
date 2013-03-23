@@ -54,7 +54,7 @@ lex
 	token SQOPEN /'['/
 	token SQCLOSE /']'/
 	token BAR /'|'/
-	token FSLASH /'/'/ ni
+	token FSLASH /'/'/
 	token COLON /':'/
 	token DOUBLE_COLON /'::'/
 	token DOT /'.'/
@@ -121,7 +121,7 @@ lex
 	token LEX_DOTDOT /'..'/
 	token LEX_SQOPEN_POS /'['/ ni
 	token LEX_SQOPEN_NEG /'[^'/ ni
-	token LEX_FSLASH ni /'/'/
+	token LEX_FSLASH /'/'/
 
 	ignore / 
 		( '\n' | '\t' | ' ' ) .
@@ -218,13 +218,13 @@ def region_def
 	[LEX RootItemList: root_item* END]
 
 def rl_def
-	[RL Id: id FSLASH Expr: lex_expr LEX_FSLASH]
+	[RL Id: id LEX_FSLASH Expr: lex_expr LEX_FSLASH]
 
 def token_def
-	[TOKEN Id: id FSLASH Expr: lex_expr LEX_FSLASH]
+	[TOKEN Id: id LEX_FSLASH Expr: lex_expr LEX_FSLASH]
 
 def ignore_def
-	[IGNORE FSLASH Expr: lex_expr LEX_FSLASH]
+	[IGNORE LEX_FSLASH Expr: lex_expr LEX_FSLASH]
 
 def prod_el
 	[OptName: opt_prod_name Id: id OptRepeat: opt_repeat]
@@ -312,7 +312,9 @@ def code_additive
 |	[Multiplicitive: code_multiplicitive]
 
 def code_multiplicitive
-	[Unary: code_unary]
+	[Multiplicitive: code_multiplicitive Star: STAR Unary: code_unary]
+|	[Multiplicitive: code_multiplicitive Fslash: FSLASH Unary: code_unary]
+|	[Unary: code_unary]
 
 def code_unary
 	[Bang: BANG Factor: code_factor]

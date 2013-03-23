@@ -151,7 +151,26 @@ struct LoadSource
 
 	LangExpr *walkCodeRelational( code_relational codeRelational );
 	LangExpr *walkCodeAdditive( code_additive codeAdditive );
-	LangExpr *walkCodeMultiplicitive( code_multiplicitive codeMultiplicitive );
+
+	LangExpr *walkCodeMultiplicitive( code_multiplicitive mult )
+	{
+		LangExpr *expr;
+		if ( mult.Multiplicitive() != 0 ) {
+			LangExpr *left = walkCodeMultiplicitive( mult.Multiplicitive() );
+			LangExpr *right = walkCodeUnary( mult.Unary() );
+
+			if ( mult.Star() != 0 ) {
+				expr = LangExpr::cons( internal, left, '*', right );
+			}
+			else if ( mult.Fslash() != 0 ) {
+				expr = LangExpr::cons( internal, left, '/', right );
+			}
+		}
+		else {
+			expr = walkCodeUnary( mult.Unary() );
+		}
+		return expr;
+	}
 
 	ConsItemList *walkLitStringEl( lit_string_el litStringEl );
 	ConsItemList *walkLitStringElList( _repeat_lit_string_el litStringElList, CONS_NL Nl );
@@ -1159,11 +1178,6 @@ LangExpr *LoadSource::walkCodeAdditive( code_additive additive )
 		expr = walkCodeMultiplicitive( additive.Multiplicitive() );
 	}
 	return expr;
-}
-
-LangExpr *LoadSource::walkCodeMultiplicitive( code_multiplicitive codeMultiplicitive )
-{
-	return walkCodeUnary( codeMultiplicitive.Unary() );
 }
 
 
