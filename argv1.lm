@@ -1,2 +1,8 @@
+##### LM #####
 
 print_xml( argv )
+print( '\n' )
+##### ARGS #####
+a b c 1 2 3
+##### EXP #####
+<__list0><str>./working/argv1.bin</str><str>a</str><str>b</str><str>c</str><str>1</str><str>2</str><str>3</str></__list0>
