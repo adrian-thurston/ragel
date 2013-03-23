@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	token str_escape /'\\' any/
 	token str_chr /[^\\"]+/
@@ -51,3 +52,9 @@ def start
 parse S: start[stdin]
 print_xml( S.tree )
 print( '\n' )
+##### IN #####
+a + "%{{"; 1 * 2;
+
+##### EXP #####
+yes
+<start><expr_list><expr_list><expr_list></expr_list><expr><expr><term><primary><ident>a</ident></primary></term></expr><_literal_0009>+</_literal_0009><term><primary><string><_literal_000f>"</_literal_000f><_repeat_str_item><str_item><str_chr>%{{</str_chr></str_item></_repeat_str_item><_literal_000f>"</_literal_000f></string></primary></term></expr><_literal_000d>;</_literal_000d></expr_list><expr><term><term><primary><number>1</number></primary></term><_literal_000b>*</_literal_000b><primary><number>2</number></primary></term></expr><_literal_000d>;</_literal_000d></expr_list></start>

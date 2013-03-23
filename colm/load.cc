@@ -462,6 +462,20 @@ struct LoadSource
 		if ( PatternEl.LitpatElList() != 0 ) {
 			list = walkLitpatElList( PatternEl.LitpatElList(), PatternEl.Term().Nl() );
 		}
+		else if ( PatternEl.TildeData() != 0 ) {
+			String patternData = PatternEl.TildeData().text().c_str();
+			PatternItem *patternItem = PatternItem::cons( internal, patternData,
+					PatternItem::InputText );
+			PatternItemList *data = PatternItemList::cons( patternItem );
+
+			patternData = PatternEl.Nl().text().c_str();
+			patternItem = PatternItem::cons( internal, patternData, 
+					PatternItem::InputText );
+			PatternItemList *term = PatternItemList::cons( patternItem );
+
+			list = patListConcat( data, term );
+
+		}
 		else if ( PatternEl.OptLabel() != 0 ) {
 			LangVarRef *varRef = walkOptLabel( PatternEl.OptLabel() );
 			PatternItemList *typeOrLitList = walkPatternElTypeOrLit( PatternEl.TypeOrLit() );
@@ -520,6 +534,19 @@ struct LoadSource
 		PatternItemList *list = 0;
 		if ( patternTopEl.LitpatElList() != 0 ) {
 			list = walkLitpatElList( patternTopEl.LitpatElList(), patternTopEl.Term().Nl() );
+		}
+		else if ( patternTopEl.TildeData() != 0 ) {
+			String patternData = patternTopEl.TildeData().text().c_str();
+			PatternItem *patternItem = PatternItem::cons( internal, patternData,
+					PatternItem::InputText );
+			PatternItemList *data = PatternItemList::cons( patternItem );
+
+			patternData = patternTopEl.Nl().text().c_str();
+			patternItem = PatternItem::cons( internal, patternData, 
+					PatternItem::InputText );
+			PatternItemList *term = PatternItemList::cons( patternItem );
+
+			list = patListConcat( data, term );
 		}
 		else if ( patternTopEl.PatternElList() != 0 ) {
 			list = walkPatternElList( patternTopEl.PatternElList() );
