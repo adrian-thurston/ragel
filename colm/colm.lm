@@ -12,6 +12,7 @@ lex
 	token PARSE / 'parse' /
 	token CONS / 'construct' | 'cons' /
 	token MATCH / 'match' /
+	token REQUIRE / 'require' /
 	token SEND / 'send' /
 	token NAMESPACE / 'namespace' /
 	token FOR / 'for' /
@@ -29,6 +30,9 @@ lex
 	token ITER / 'iter' /
 	token REF / 'ref' /
 	token EXPORT / 'export' /
+	token RETURN / 'return' /
+	token BREAK / 'break' /
+	token REJECT / 'reject' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -110,8 +114,12 @@ lex
 		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
 	/
 
-	token lex_number 
+	token lex_uint 
 		/ ( '0' .. '9' )+ /
+
+	token lex_hex 
+		/ '0x' . ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )+ /
+
 	token lex_lit / 
 		'\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\'' |
 		'\"' . ( ^( '\"' | '\\' ) | '\\' . any )* .  '\"'
@@ -119,6 +127,8 @@ lex
 
 	token LEX_DOT /'.'/
 	token LEX_BAR /'|'/
+	token LEX_AMP /'&'/
+	token LEX_DASH /'-'/
 	token LEX_POPEN /'('/
 	token LEX_PCLOSE /')'/
 	token LEX_STAR /'*'/
@@ -248,8 +258,12 @@ def opt_translate
 	[COPEN LangStmtList: lang_stmt_list CCLOSE]
 |	[]
 
+def opt_id
+	[Id: id]
+|	[]
+
 def ignore_def
-	[IGNORE LEX_FSLASH Expr: lex_expr LEX_FSLASH]
+	[IGNORE OptId: opt_id LEX_FSLASH Expr: lex_expr LEX_FSLASH]
 
 def prod_el
 	[OptName: opt_prod_name Id: id OptRepeat: opt_repeat]
@@ -278,11 +292,15 @@ def statement
 	[Print: print_stmt]
 |	[Expr: expr_stmt]
 |	[VarDef: var_def OptDefInit: opt_def_init]
-|	[FOR ForDecl: id COLON TypeRef: type_ref IN IterCall: iter_call BlockOrSingle: block_or_single]
+|	[FOR ForDecl: id COLON TypeRef: type_ref IN IterCall: iter_call
+		BlockOrSingle: block_or_single]
 |	[IF IfExpr: code_expr BlockOrSingle: block_or_single ElsifList: elsif_list]
 |	[WHILE WhileExpr: code_expr BlockOrSingle: block_or_single]
 |	[LhsVarRef: var_ref EQUALS CodeExpr: code_expr]
 |	[YIELD YieldVarRef: var_ref]
+|	[RETURN ReturnExpr: code_expr]
+|	[Break: BREAK]
+|	[Reject: REJECT]
 
 def elsif_list
 	[ElsifClause: elsif_clause ElsifList: elsif_list]
@@ -303,8 +321,15 @@ def block_or_single
 	[COPEN LangStmtList: lang_stmt_list CCLOSE]
 |	[Statement: statement]
 
+def require_pattern
+	[REQUIRE VarRef: var_ref Pattern: pattern]
+
+def opt_require_stmt
+	[Require: require_pattern LangStmtList: lang_stmt_list]
+|	[]
+
 def lang_stmt_list
-	[StmtList: statement*]
+	[StmtList: statement* OptRequire: opt_require_stmt]
 
 def opt_def_init
 	[EQUALS CodeExpr: code_expr]
@@ -523,7 +548,10 @@ def qual
 |	[]
 
 def lex_expr
-	[Expr: lex_expr LEX_BAR Term: lex_term]
+	[Expr: lex_expr Bar: LEX_BAR Term: lex_term]
+|	[Expr: lex_expr Amp: LEX_AMP Term: lex_term]
+|	[Expr: lex_expr Dash: LEX_DASH Term: lex_term]
+|	[Expr: lex_expr DashDash: LEX_DASHDASH Term: lex_term]
 |	[Term: lex_term]
 
 def opt_dot
@@ -548,12 +576,23 @@ def lex_factor_neg
 	[LEX_CARET FactorNeg: lex_factor_neg]
 |	[Factor: lex_factor]
 
+def lex_range_lit
+	[Lit: lex_lit]
+|	[Number: lex_num]
+
+def lex_num
+	[lex_uint]
+|	[lex_hex]
+
+#|	[LEX_DASH num]
+
 def lex_factor
 	[Literal: lex_lit]
 |	[Id: lex_id]
-|	[Number: lex_number]
+|	[Number: lex_uint]
+|	[Hex: lex_hex]
 |	[LEX_POPEN Expr: lex_expr LEX_PCLOSE]
-|	[Low: lex_lit LEX_DOTDOT High: lex_lit]
+|	[Low: lex_range_lit LEX_DOTDOT High: lex_range_lit]
 |	[LEX_SQOPEN_POS PosData: reg_or_data RE_SQCLOSE]
 |	[LEX_SQOPEN_NEG NegData: reg_or_data RE_SQCLOSE]
 

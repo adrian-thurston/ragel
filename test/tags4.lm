@@ -1,3 +1,4 @@
+##### LM #####
 #
 #
 # This is somewhat broken. missing_close_id is cuasing close ids to be parseed
@@ -329,3 +330,21 @@ print( HTML.tree )
 #print_xml( HTML )
 #for C: close_tag in HTML 
 #	print( C '\n' )
+##### IN #####
+<t1>
+
+  <t2>
+  <a href="foo">&FOO</a>
+  <t3>
+  </t3>
+
+</t1>
+##### EXP #####
+<t1>
+
+  <t2>
+  <a href="foo">&FOO</a>
+  <t3>
+  </t3>
+
+</t1>

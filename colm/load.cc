@@ -87,7 +87,66 @@ struct LoadSource
 	ReOrItem *walkRegOrChar( reg_or_char regOrChar );
 	ReOrBlock *walkRegOrData( reg_or_data regOrData );
 
-	LexFactor *walkLexFactor( lex_factor &LexFactorTree );
+	Literal *walkLexRangeLit( lex_range_lit lexRangeLit )
+	{
+		Literal *literal = 0;
+		if ( lexRangeLit.Lit() != 0 ) {
+			String lit = lexRangeLit.Lit().text().c_str();
+			literal = Literal::cons( internal, lit, Literal::LitString );
+		}
+		else if ( lexRangeLit.Number() != 0 ) {
+			String num = lexRangeLit.Number().text().c_str();
+			literal = Literal::cons( internal, num, Literal::Number );
+		}
+		return literal;
+	}
+
+	LexFactor *walkLexFactor( lex_factor LexFactorTree )
+	{
+		LexFactor *factor = 0;
+		if ( LexFactorTree.Literal() != 0 ) {
+			String litString = LexFactorTree.Literal().text().c_str();
+			Literal *literal = Literal::cons( internal, litString, Literal::LitString );
+			factor = LexFactor::cons( literal );
+		}
+		else if ( LexFactorTree.Id() != 0 ) {
+			String id = LexFactorTree.Id().text().c_str();
+			factor = lexRlFactorName( id, internal );
+		}
+		else if ( LexFactorTree.Expr() != 0 ) {
+			lex_expr LexExpr = LexFactorTree.Expr();
+			LexExpression *expr = walkLexExpr( LexExpr );
+			LexJoin *join = LexJoin::cons( expr );
+			factor = LexFactor::cons( join );
+		}
+		else if ( LexFactorTree.Low() != 0 ) {
+			Literal *low = walkLexRangeLit( LexFactorTree.Low() );
+			Literal *high = walkLexRangeLit( LexFactorTree.High() );
+
+			Range *range = Range::cons( low, high );
+			factor = LexFactor::cons( range );
+		}
+		else if ( LexFactorTree.PosData() != 0 ) {
+			ReOrBlock *block = walkRegOrData( LexFactorTree.PosData() );
+			factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::OrBlock ) );
+		}
+		else if ( LexFactorTree.NegData() != 0 ) {
+			ReOrBlock *block = walkRegOrData( LexFactorTree.NegData() );
+			factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::NegOrBlock ) );
+		}
+		else if ( LexFactorTree.Number() != 0 ) {
+			String number = LexFactorTree.Number().text().c_str();
+			factor = LexFactor::cons( Literal::cons( internal, 
+					number, Literal::Number ) );
+		}
+		else if ( LexFactorTree.Hex() != 0 ) {
+			String number = LexFactorTree.Hex().text().c_str();
+			factor = LexFactor::cons( Literal::cons( internal, 
+					number, Literal::Number ) );
+		}
+		return factor;
+	}
+
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
 	LexFactorRep *walkLexFactorRep( lex_factor_rep &LexFactorRepTree );
 
@@ -108,7 +167,77 @@ struct LoadSource
 	LangStmt *walkOptionalElse( optional_else optionalElse );
 	LangStmt *walkElsifClause( elsif_clause elsifClause );
 	LangStmt *walkElsifList( elsif_list elsifList );
-	LangStmt *walkStatement( statement Statement );
+
+	LangStmt *walkStatement( statement Statement )
+	{
+		LangStmt *stmt = 0;
+		if ( Statement.Print() != 0 ) {
+			print_stmt printStmt = Statement.Print();
+			stmt = walkPrintStmt( printStmt );
+		}
+		else if ( Statement.Expr() != 0 ) {
+			expr_stmt exprStmt = Statement.Expr();
+			stmt = walkExprStmt( exprStmt );
+		}
+		else if ( Statement.VarDef() != 0 ) {
+			ObjectField *objField = walkVarDef( Statement.VarDef() );
+			LangExpr *expr = walkOptDefInit( Statement.OptDefInit() );
+			stmt = varDef( objField, expr, LangStmt::AssignType );
+		}
+		else if ( Statement.ForDecl() != 0 ) {
+			pushScope();
+
+			String forDecl = Statement.ForDecl().text().c_str();
+			TypeRef *typeRef = walkTypeRef( Statement.TypeRef() );
+			StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
+
+			LangTerm *langTerm = walkIterCall( Statement.IterCall() );
+
+			stmt = forScope( internal, forDecl, typeRef, langTerm, stmtList );
+
+			popScope();
+		}
+		else if ( Statement.IfExpr() != 0 ) {
+			pushScope();
+
+			LangExpr *expr = walkCodeExpr( Statement.IfExpr() );
+			StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
+
+			popScope();
+
+			LangStmt *elsifList = walkElsifList( Statement.ElsifList() );
+			stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, elsifList );
+
+		}
+		else if ( Statement.WhileExpr() != 0 ) {
+			pushScope();
+			LangExpr *expr = walkCodeExpr( Statement.WhileExpr() );
+			StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
+			stmt = LangStmt::cons( LangStmt::WhileType, expr, stmtList );
+			popScope();
+		}
+		else if ( Statement.LhsVarRef() != 0 ) {
+			LangVarRef *varRef = walkVarRef( Statement.LhsVarRef() );
+			LangExpr *expr = walkCodeExpr( Statement.CodeExpr() );
+			stmt = LangStmt::cons( internal, LangStmt::AssignType, varRef, expr );
+		}
+		else if ( Statement.YieldVarRef() != 0 ) {
+			LangVarRef *varRef = walkVarRef( Statement.YieldVarRef() );
+			stmt = LangStmt::cons( LangStmt::YieldType, varRef );
+		}
+		else if ( Statement.ReturnExpr() != 0 ) {
+			LangExpr *expr = walkCodeExpr( Statement.ReturnExpr() );
+			stmt = LangStmt::cons( internal, LangStmt::ReturnType, expr );
+		}
+		else if ( Statement.Break() != 0 ) {
+			stmt = LangStmt::cons( LangStmt::BreakType );
+		}
+		else if ( Statement.Reject() != 0 ) {
+			stmt = LangStmt::cons( internal, LangStmt::RejectType );
+		}
+		return stmt;
+	}
+
 	LangStmt *walkPrintStmt( print_stmt &PrintStmt );
 	LangExpr *walkCodeUnary( code_unary codeUnary );
 	LangExpr *walkCodeFactor( code_factor codeFactor );
@@ -118,7 +247,41 @@ struct LoadSource
 	void walkRootItem( root_item &rootItem, StmtList *stmtList );
 	StmtList *walkRootItemList( _repeat_root_item rootItemList );
 	void walkNamespaceDef( namespace_def NamespaceDef );
-	StmtList *walkLangStmtList( lang_stmt_list LangStmtList );
+
+	StmtList *walkLangStmtList( lang_stmt_list langStmtList )
+	{
+		StmtList *retList = new StmtList;
+		_repeat_statement stmtList = langStmtList.StmtList();
+
+		/* Walk the list of items. */
+		while ( !stmtList.end() ) {
+			statement Statement = stmtList.value();
+			LangStmt *stmt = walkStatement( Statement );
+			if ( stmt != 0 )
+				retList->append( stmt );
+			stmtList = stmtList.next();
+		}
+
+		if ( langStmtList.OptRequire().Require() != 0 ) {
+			pushScope();
+			require_pattern require = langStmtList.OptRequire().Require();
+
+			LangVarRef *varRef = walkVarRef( require.VarRef() );
+			PatternItemList *list = walkPattern( require.Pattern() );
+			LangExpr *expr = match( internal, varRef, list );
+
+ 			StmtList *reqList = walkLangStmtList( langStmtList.OptRequire().LangStmtList() );
+
+			LangStmt *stmt = LangStmt::cons( LangStmt::IfType, expr, reqList, 0 );
+
+			popScope();
+
+			retList->append( stmt );
+		}
+
+		return retList;
+	}
+
 	StmtList *walkBlockOrSingle( block_or_single blockOrSingle );
 
 	void walkLiteralItem( literal_item literalItem );
@@ -128,13 +291,18 @@ struct LoadSource
 	LexExpression *walkLexExpr( lex_expr LexExprTree )
 	{
 		if ( LexExprTree.Expr() != 0 ) {
-			lex_expr Rec = LexExprTree.Expr();
-			LexExpression *leftExpr = walkLexExpr( Rec );
+			LexExpression *leftExpr = walkLexExpr( LexExprTree.Expr() );
+			LexTerm *term = walkLexTerm( LexExprTree.Term() );
 
-			lex_term LexTermTree = LexExprTree.Term();
-			LexTerm *term = walkLexTerm( LexTermTree );
-			LexExpression *expr = LexExpression::cons( leftExpr, term, LexExpression::OrType );
-
+			LexExpression *expr = 0;
+			if ( LexExprTree.Bar() != 0 )
+				expr = LexExpression::cons( leftExpr, term, LexExpression::OrType );
+			else if ( LexExprTree.Amp() != 0 )
+				expr = LexExpression::cons( leftExpr, term, LexExpression::IntersectType );
+			else if ( LexExprTree.Dash() != 0 )
+				expr = LexExpression::cons( leftExpr, term, LexExpression::SubtractType );
+			else if ( LexExprTree.DashDash() != 0 )
+				expr = LexExpression::cons( leftExpr, term, LexExpression::StrongSubtractType );
 			return expr;
 		}
 		else {
@@ -163,7 +331,25 @@ struct LoadSource
 		defineToken( internal, name, join, objectDef, translate, false, false, false );
 	}
 
-	void walkIgnoreDef( ignore_def IgnoreDef );
+	String walkOptId( opt_id optId )
+	{
+		String name = 0;
+		if ( optId.Id() != 0 )
+			name = optId.Id().text().c_str();
+		return name;
+	}
+
+	void walkIgnoreDef( ignore_def IgnoreDef )
+	{
+		String name = walkOptId( IgnoreDef.OptId() );
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+		lex_expr LexExpr = IgnoreDef.Expr();
+		LexExpression *expr = walkLexExpr( LexExpr );
+		LexJoin *join = LexJoin::cons( expr );
+
+		defineToken( internal, name, join, objectDef, 0, true, false, false );
+	}
+
 	void walkContextDef( context_def contextDef );
 	void walkContextItem( context_item contextItem );
 	void walkContextVarDef( context_var_def contextVarDef );
@@ -445,23 +631,6 @@ TypeRef *LoadSource::walkTypeRef( type_ref typeRef )
 	return tr;
 }
 
-StmtList *LoadSource::walkLangStmtList( lang_stmt_list langStmtList )
-{
-	StmtList *retList = new StmtList;
-	_repeat_statement stmtList = langStmtList.StmtList();
-
-	/* Walk the list of items. */
-	while ( !stmtList.end() ) {
-		statement Statement = stmtList.value();
-		LangStmt *stmt = walkStatement( Statement );
-		if ( stmt != 0 )
-			retList->append( stmt );
-		stmtList = stmtList.next();
-	}
-
-	return retList;
-}
-
 StmtList *LoadSource::walkBlockOrSingle( block_or_single blockOrSingle )
 {
 	StmtList *stmtList = 0;
@@ -575,49 +744,6 @@ ReOrBlock *LoadSource::walkRegOrData( reg_or_data regOrData )
 	return block;
 }
 
-LexFactor *LoadSource::walkLexFactor( lex_factor &LexFactorTree )
-{
-	LexFactor *factor = 0;
-	if ( LexFactorTree.Literal() != 0 ) {
-		String litString = LexFactorTree.Literal().text().c_str();
-		Literal *literal = Literal::cons( internal, litString, Literal::LitString );
-		factor = LexFactor::cons( literal );
-	}
-	else if ( LexFactorTree.Id() != 0 ) {
-		String id = LexFactorTree.Id().text().c_str();
-		factor = lexRlFactorName( id, internal );
-	}
-	else if ( LexFactorTree.Expr() != 0 ) {
-		lex_expr LexExpr = LexFactorTree.Expr();
-		LexExpression *expr = walkLexExpr( LexExpr );
-		LexJoin *join = LexJoin::cons( expr );
-		factor = LexFactor::cons( join );
-	}
-	else if ( LexFactorTree.Low() != 0 ) {
-		String low = LexFactorTree.Low().text().c_str();
-		Literal *lowLit = Literal::cons( internal, low, Literal::LitString );
-
-		String high = LexFactorTree.High().text().c_str();
-		Literal *highLit = Literal::cons( internal, high, Literal::LitString );
-
-		Range *range = Range::cons( lowLit, highLit );
-		factor = LexFactor::cons( range );
-	}
-	else if ( LexFactorTree.PosData() != 0 ) {
-		ReOrBlock *block = walkRegOrData( LexFactorTree.PosData() );
-		factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::OrBlock ) );
-	}
-	else if ( LexFactorTree.NegData() != 0 ) {
-		ReOrBlock *block = walkRegOrData( LexFactorTree.NegData() );
-		factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::NegOrBlock ) );
-	}
-	else if ( LexFactorTree.Number() != 0 ) {
-		String number = LexFactorTree.Number().text().c_str();
-		factor = LexFactor::cons( Literal::cons( internal, 
-				number, Literal::Number ) );
-	}
-	return factor;
-}
 
 LexFactorNeg *LoadSource::walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
 {
@@ -704,17 +830,6 @@ void LoadSource::walkRlDef( rl_def rlDef )
 	LexJoin *join = LexJoin::cons( expr );
 
 	addRegularDef( internal, namespaceStack.top(), id, join );
-}
-
-void LoadSource::walkIgnoreDef( ignore_def IgnoreDef )
-{
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, 0, pd->nextObjectId++ ); 
-
-	lex_expr LexExpr = IgnoreDef.Expr();
-	LexExpression *expr = walkLexExpr( LexExpr );
-	LexJoin *join = LexJoin::cons( expr );
-
-	defineToken( internal, 0, join, objectDef, 0, true, false, false );
 }
 
 void LoadSource::walkLexRegion( region_def regionDef )
@@ -1358,66 +1473,6 @@ LangStmt *LoadSource::walkElsifList( elsif_list elsifList )
 	return stmt;
 }
 
-LangStmt *LoadSource::walkStatement( statement Statement )
-{
-	LangStmt *stmt = 0;
-	if ( Statement.Print() != 0 ) {
-		print_stmt printStmt = Statement.Print();
-		stmt = walkPrintStmt( printStmt );
-	}
-	else if ( Statement.Expr() != 0 ) {
-		expr_stmt exprStmt = Statement.Expr();
-		stmt = walkExprStmt( exprStmt );
-	}
-	else if ( Statement.VarDef() != 0 ) {
-		ObjectField *objField = walkVarDef( Statement.VarDef() );
-		LangExpr *expr = walkOptDefInit( Statement.OptDefInit() );
-		stmt = varDef( objField, expr, LangStmt::AssignType );
-	}
-	else if ( Statement.ForDecl() != 0 ) {
-		pushScope();
-
-		String forDecl = Statement.ForDecl().text().c_str();
-		TypeRef *typeRef = walkTypeRef( Statement.TypeRef() );
-		StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
-
-		LangTerm *langTerm = walkIterCall( Statement.IterCall() );
-
-		stmt = forScope( internal, forDecl, typeRef, langTerm, stmtList );
-
-		popScope();
-	}
-	else if ( Statement.IfExpr() != 0 ) {
-		pushScope();
-
-		LangExpr *expr = walkCodeExpr( Statement.IfExpr() );
-		StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
-
-		popScope();
-
-		LangStmt *elsifList = walkElsifList( Statement.ElsifList() );
-		stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, elsifList );
-
-	}
-	else if ( Statement.WhileExpr() != 0 ) {
-		pushScope();
-		LangExpr *expr = walkCodeExpr( Statement.WhileExpr() );
-		StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
-		stmt = LangStmt::cons( LangStmt::WhileType, expr, stmtList );
-		popScope();
-	}
-	else if ( Statement.LhsVarRef() != 0 ) {
-		LangVarRef *varRef = walkVarRef( Statement.LhsVarRef() );
-		LangExpr *expr = walkCodeExpr( Statement.CodeExpr() );
-		stmt = LangStmt::cons( internal, LangStmt::AssignType, varRef, expr );
-	}
-	else if ( Statement.YieldVarRef() != 0 ) {
-		LangVarRef *varRef = walkVarRef( Statement.YieldVarRef() );
-		stmt = LangStmt::cons( LangStmt::YieldType, varRef );
-	}
-	return stmt;
-}
-
 void LoadSource::walkContextVarDef( context_var_def ContextVarDef )
 {
 	ObjectField *objField = walkVarDef( ContextVarDef.VarDef() );
@@ -1441,7 +1496,8 @@ void LoadSource::walkContextVarDef( context_var_def ContextVarDef )
 
 TypeRef *LoadSource::walkReferenceTypeRef( reference_type_ref ReferenceTypeRef )
 {
-	return walkTypeRef( ReferenceTypeRef.TypeRef() );
+	TypeRef *typeRef = walkTypeRef( ReferenceTypeRef.TypeRef() );
+	return TypeRef::cons( internal, TypeRef::Ref, typeRef );
 }
 
 ObjectField *LoadSource::walkParamVarDef( param_var_def paramVarDef )
