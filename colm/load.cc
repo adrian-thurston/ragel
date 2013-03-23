@@ -161,7 +161,7 @@ struct LoadSource
 	LangExpr *walkCodeExpr( code_expr codeExpr );
 	void walkLexRegion( region_def regionDef );
 	void walkProdElList( ProdElList *list, prod_el_list ProdElList );
-	void walkProdList( LelDefList *lelDefList, prod_list &ProdList );
+	void walkProdList( LelDefList *lelDefList, prod_list ProdList );
 	void walkCflDef( cfl_def cflDef );
 	LangTerm *walkIterCall( iter_call IterCall );
 	LangStmt *walkOptionalElse( optional_else optionalElse );
@@ -318,7 +318,8 @@ struct LoadSource
 	{
 		String name = TokenDef.Id().text().c_str();
 
-		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+		ObjectDef *objectDef = walkVarDefList( TokenDef.VarDefList() );
+		objectDef->name = name;
 
 		LexJoin *join = 0;
 		if ( TokenDef.OptExpr().Expr() != 0 ) {
@@ -337,6 +338,20 @@ struct LoadSource
 		if ( optId.Id() != 0 )
 			name = optId.Id().text().c_str();
 		return name;
+	}
+
+	ObjectDef *walkVarDefList( _repeat_var_def varDefList )
+	{
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+				String(), pd->nextObjectId++ ); 
+
+		while ( !varDefList.end() ) {
+			ObjectField *varDef = walkVarDef( varDefList.value() );
+			objVarDef( objectDef, varDef );
+			varDefList = varDefList.next();
+		}
+
+		return objectDef;
 	}
 
 	void walkIgnoreDef( ignore_def IgnoreDef )
@@ -697,12 +712,10 @@ CodeBlock *LoadSource::walkOptReduce( opt_reduce optReduce )
 	return block;
 }
 
-void LoadSource::walkProdList( LelDefList *lelDefList, prod_list &ProdList )
+void LoadSource::walkProdList( LelDefList *lelDefList, prod_list ProdList )
 {
-	if ( ProdList.ProdList() != 0 ) {
-		prod_list RightProdList = ProdList.ProdList();
-		walkProdList( lelDefList, RightProdList );
-	}
+	if ( ProdList.ProdList() != 0 )
+		walkProdList( lelDefList, ProdList.ProdList() );
 
 	ProdElList *list = new ProdElList;
 
@@ -841,14 +854,15 @@ void LoadSource::walkLexRegion( region_def regionDef )
 
 void LoadSource::walkCflDef( cfl_def cflDef )
 {
-	prod_list prodList = cflDef.ProdList();
+	String name = cflDef.DefId().text().c_str();
+	ObjectDef *objectDef = walkVarDefList( cflDef.VarDefList() );
+	objectDef->name = name;
 
 	LelDefList *defList = new LelDefList;
-	walkProdList( defList, prodList );
+	walkProdList( defList, cflDef.ProdList() );
 
-	String name = cflDef.DefId().text().c_str();
 	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+
 	BaseParser::cflDef( ntDef, objectDef, defList );
 }
 

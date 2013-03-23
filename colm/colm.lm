@@ -237,8 +237,11 @@ def opt_no_ignore
 def namespace_def
 	[NAMESPACE Name: id RootItemList: root_item* END]
 
+def obj_var_list
+	[]
+
 def cfl_def
-	[DEF DefId: id ProdList: prod_list]
+	[DEF DefId: id VarDefList: var_def* ProdList: prod_list]
 
 def region_def
 	[LEX RootItemList: root_item* END]
@@ -251,7 +254,8 @@ def opt_lex_expr
 |	[]
 
 def token_def
-	[TOKEN Id: id LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH
+	[TOKEN Id: id VarDefList: var_def* 
+		LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH
 		OptTranslate: opt_translate]
 
 def opt_translate
