@@ -379,9 +379,12 @@ struct LoadSource
 	{
 		String name = walkOptId( IgnoreDef.OptId() );
 		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
-		lex_expr LexExpr = IgnoreDef.Expr();
-		LexExpression *expr = walkLexExpr( LexExpr );
-		LexJoin *join = LexJoin::cons( expr );
+
+		LexJoin *join = 0;
+		if ( IgnoreDef.OptExpr().Expr() != 0 ) {
+			LexExpression *expr = walkLexExpr( IgnoreDef.OptExpr().Expr() );
+			join = LexJoin::cons( expr );
+		}
 
 		defineToken( internal, name, join, objectDef, 0, true, false, false );
 	}
@@ -731,18 +734,19 @@ void LoadSource::walkProdElList( ProdElList *list, prod_el_list ProdElList )
 		}
 
 		RepeatType repeatType = walkOptRepeat( El.OptRepeat() );
+		NamespaceQual *nspaceQual = walkRegionQual( El.RegionQual() );
 
 		if ( El.Id() != 0 ) {
 			String typeName = El.Id().text().c_str();
 			ProdEl *prodEl = prodElName( internal, typeName,
-					NamespaceQual::cons(namespaceStack.top()),
+					nspaceQual,
 					captureField, repeatType, false );
 			appendProdEl( list, prodEl );
 		}
 		else if ( El.Lit() != 0 ) {
 			String lit = El.Lit().text().c_str();
 			ProdEl *prodEl = prodElLiteral( internal, lit,
-					NamespaceQual::cons(namespaceStack.top()),
+					nspaceQual,
 					captureField, repeatType, false );
 			appendProdEl( list, prodEl );
 

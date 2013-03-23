@@ -1,3 +1,4 @@
+##### LM #####
 
 #
 # Regular Definitions
@@ -50,3 +51,10 @@ construct IL: item_list
 	["<wrapper .[Attrs.tree]. ></wrapper>"]
 
 print( IL '\n' )
+##### IN #####
++ foo = asdf +
+##### EXP #####
++ foo = asdf +
+
+<wrapper .+ foo = asdf +
+. ></wrapper>

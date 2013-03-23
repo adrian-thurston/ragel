@@ -1,3 +1,4 @@
+##### LM #####
 context ctx
 	i: int
 	j: int
@@ -30,3 +31,8 @@ CTX: ctx = cons ctx[]
 parse InputP: ctx::start( CTX ) [ stdin ]
 Input: ctx::start = InputP.tree
 print( Input '\n' )
+##### IN #####
+a b c ( d e f )
+##### EXP #####
+2
+a b c ( d e f )

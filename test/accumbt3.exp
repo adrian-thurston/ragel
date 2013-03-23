@@ -1,9 +1,0 @@
-A1
-discarding: ( (this is a nested comment /*sdf asd_++_stuff) )
-A2
-discarding: ( (this is a nested comment /*sdf asd_++_stuff) )
-
-------------
-hello there  and this is not
-hello there ( (this is a nested comment /*sdf asd_++_stuff) ) and this is not ;
-

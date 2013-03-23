@@ -1,3 +1,4 @@
+##### LM #####
 
 lex
 	literal  'type', 'include'
@@ -91,3 +92,11 @@ int main()
 }
 
 main()
+##### IN #####
+
+%%
+
+type foo
+
+include smtp.vpt
+##### EXP #####

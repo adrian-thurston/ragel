@@ -1,3 +1,4 @@
+##### LM #####
 
 #
 # Regular Definitions
@@ -81,3 +82,17 @@ def start
 	}
 
 parse start[ stdin ]
+##### IN #####
+3 1 b c 1 1 0 3 a b c
+##### EXP #####
+num items: 3
+  item 1: 1
+  item 2: b
+  item 3: c
+num items: 1
+  item 1: 1
+num items: 0
+num items: 3
+  item 1: a
+  item 2: b
+  item 3: c

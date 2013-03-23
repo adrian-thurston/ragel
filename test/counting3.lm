@@ -1,3 +1,4 @@
+##### LM #####
 context counting
 
 	#
@@ -94,3 +95,36 @@ end # counting
 
 cons Counting: counting[]
 parse counting::start(Counting)[ stdin ]
+##### IN #####
+3 1 b c 1 1 0 3 a b c
+##### EXP #####
+target: 3
+ITEM
+ITEM
+ITEM
+ITEM
+trying: 3 for: 3
+target: 1
+ITEM
+ITEM
+trying: 1 for: 1
+target: 0
+ITEM
+trying: 0 for: 0
+target: 3
+ITEM
+ITEM
+ITEM
+trying: 3 for: 3
+num items: 3
+  item 1: 1
+  item 2: b
+  item 3: c
+num items: 1
+  item 1: 1
+num items: 0
+num items: 3
+  item 1: a
+  item 2: b
+  item 3: c
+*** SUCCESS ***

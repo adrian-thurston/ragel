@@ -39,6 +39,7 @@ lex
 	token ALIAS / 'alias' /
 	token COMMIT / 'commit' /
 	token NEW / 'new' /
+	token PREEOF / 'preeof' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -286,11 +287,11 @@ def opt_id
 |	[]
 
 def ignore_def
-	[IGNORE OptId: opt_id LEX_FSLASH Expr: lex_expr LEX_FSLASH]
+	[IGNORE OptId: opt_id LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH]
 
 def prod_el
-	[OptName: opt_prod_name Id: id OptRepeat: opt_repeat]
-|	[OptName: opt_prod_name Lit: lit OptRepeat: opt_repeat]
+	[OptName: opt_prod_name RegionQual: region_qual Id: id OptRepeat: opt_repeat]
+|	[OptName: opt_prod_name RegionQual: region_qual Lit: lit OptRepeat: opt_repeat]
 
 def opt_prod_name
 	[Name: id COLON]
