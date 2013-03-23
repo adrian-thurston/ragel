@@ -1314,6 +1314,16 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 
 		expr = parseCmd( internal, false, objField, typeRef, init, list );
 	}
+	else if ( codeFactor.ParseStop() != 0 ) {
+		/* The type we are parsing. */
+		type_ref typeRefTree = codeFactor.TypeRef();
+		TypeRef *typeRef = walkTypeRef( typeRefTree );
+		ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
+		FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
+		ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
+
+		expr = parseCmd( internal, true, objField, typeRef, init, list );
+	}
 	else if ( codeFactor.Cons() != 0 ) {
 		/* The type we are parsing. */
 		type_ref typeRefTree = codeFactor.TypeRef();

@@ -1,3 +1,4 @@
+##### LM #####
 # Or-literal scanner
 lex
 	token orlit_dash /'-' /
@@ -91,3 +92,10 @@ for I:orlit_item in S {
 }
 print_xml( S )
 print( '\n' )
+##### IN #####
+2 / /[^gu-zy].*o[\d-xa]*/;
+##### EXP #####
+g
+y
+a
+<start><_repeat_statement><statement><expr><term><term><factor><number>2</number></factor></term><_literal_0021>/</_literal_0021><factor><_literal_0021>/</_literal_0021><regex_body><_repeat_regex_item><regex_item><regex_base><orlit_neg_open>[^</orlit_neg_open><orlit><_repeat_orlit_item><orlit_item><orlit_chr>g</orlit_chr></orlit_item><orlit_item><orlit_chr>u</orlit_chr><orlit_dash>-</orlit_dash><orlit_chr>z</orlit_chr></orlit_item><orlit_item><orlit_chr>y</orlit_chr></orlit_item></_repeat_orlit_item></orlit><orlit_close>]</orlit_close></regex_base><regex_rep></regex_rep></regex_item><regex_item><regex_base><regex_dot>.</regex_dot></regex_base><regex_rep><regex_star>*</regex_star></regex_rep></regex_item><regex_item><regex_base><regex_chr>o</regex_chr></regex_base><regex_rep></regex_rep></regex_item><regex_item><regex_base><orlit_open>[</orlit_open><orlit><_repeat_orlit_item><orlit_item><orlit_chr>\d</orlit_chr><orlit_dash>-</orlit_dash><orlit_chr>x</orlit_chr></orlit_item><orlit_item><orlit_chr>a</orlit_chr></orlit_item></_repeat_orlit_item></orlit><orlit_close>]</orlit_close></regex_base><regex_rep><regex_star>*</regex_star></regex_rep></regex_item></_repeat_regex_item></regex_body><regex_close>/</regex_close></factor></term></expr><_literal_001f>;</_literal_001f></statement></_repeat_statement></start>

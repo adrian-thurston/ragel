@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	literal 'var', 'if', 'then', 'else', 'while', 'do', 'for', 'read', 'write',
 			'end', 'to', 'goto'
@@ -93,3 +94,25 @@ for E: expression in P {
 	print( ^(E.Term.Factor.Primary) '\n' )
 }
 
+##### IN #####
+
+var a;
+a := 1;
+
+head:
+
+a := a + 1;
+c := d;
+
+if a = 10 then
+	goto head;
+end
+
+hi := there;
+##### EXP #####
+1
+1
+d
+10
+a
+there

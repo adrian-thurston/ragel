@@ -10,6 +10,7 @@ lex
 	token PRINT_XML / 'print_xml' /
 	token PRINT_XML_AC / 'print_xml_ac' /
 	token PARSE / 'parse' /
+	token PARSE_STOP / 'parse_stop' /
 	token CONS / 'construct' | 'cons' /
 	token MATCH / 'match' /
 	token REQUIRE / 'require' /
@@ -388,6 +389,8 @@ def code_factor
 |	[POPEN ParenCodeExpr: code_expr PCLOSE]
 |	[Send: SEND ToVarRef: var_ref Accumulate: accumulate]
 |	[Parse: PARSE OptCapture: opt_capture TypeRef: type_ref
+		OptFieldInit: opt_field_init Accumulate: accumulate]
+|	[ParseStop: PARSE_STOP OptCapture: opt_capture TypeRef: type_ref
 		OptFieldInit: opt_field_init Accumulate: accumulate]
 |	[Cons: CONS OptCapture: opt_capture TypeRef: type_ref
 		OptFieldInit: opt_field_init Constructor: constructor]
