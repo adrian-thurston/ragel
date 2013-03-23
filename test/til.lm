@@ -1,3 +1,4 @@
+##### LM #####
 lex
 	literal 'var', 'if', 'then', 'else', 'while', 'do', 'for', 'read', 'write',
 			'end', 'to', 'goto'
@@ -166,3 +167,28 @@ for S: statement* in P
 }
 
 print( %P )
+##### IN #####
+
+var a;
+a := 1;
+
+head:
+
+a := a + 1;
+c := d;
+
+if a = 10 then
+	goto head;
+end
+
+hi := there;
+##### EXP #####
+
+var a;
+a := 1;
+
+do
+	a := a + 1;
+	c := d;
+while a = 10;
+hi := there;

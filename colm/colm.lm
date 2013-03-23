@@ -11,6 +11,7 @@ lex
 	token PRINT_XML_AC / 'print_xml_ac' /
 	token PARSE / 'parse' /
 	token CONS / 'construct' | 'cons' /
+	token MATCH / 'match' /
 	token SEND / 'send' /
 	token NAMESPACE / 'namespace' /
 	token FOR / 'for' /
@@ -47,7 +48,7 @@ lex
 		'\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\''
 	/
 
-	token DQ / '\"' /
+	token DQ / '\"' / ni
 
 	token SQOPEN /'['/
 	token SQCLOSE /']'/
@@ -71,7 +72,7 @@ lex
 	token BANG /'!'/
 	token DOLLAR /'$'/
 	token CARET /'^'/
-	token PERCENT /'!'/
+	token PERCENT /'%'/
 	token PLUS /'+'/
 	token MINUS /'-'/
 
@@ -81,11 +82,12 @@ end
 
 lex
 	token CONS_TDQ / '\"' /
+	token CONS_NL / '\n' /
 	token CONS_SQOPEN / '[' /
 	token CONS_SQCLOSE / ']' /
 
 	token cons_data 
-		/ ( ^( '\"' | '[' | ']' | '\\' ) | '\\' . any )+ /
+		/ ( ^( '\n' | '\"' | '[' | ']' | '\\' ) | '\\' . any )+ /
 end
 
 lex
@@ -217,15 +219,11 @@ def ignore_def
 	[IGNORE FSLASH Expr: lex_expr LEX_FSLASH]
 
 def prod_el
-	[OptName: opt_prod_name Id: id OptRepeat: opt_prod_repeat]
-|	[OptName: opt_prod_name Lit: lit OptRepeat: opt_prod_repeat]
+	[OptName: opt_prod_name Id: id OptRepeat: opt_repeat]
+|	[OptName: opt_prod_name Lit: lit OptRepeat: opt_repeat]
 
 def opt_prod_name
 	[Name: id COLON]
-|	[]
-
-def opt_prod_repeat
-	[Star: STAR]
 |	[]
 
 def prod_el_list
@@ -328,6 +326,7 @@ def code_factor
 		OptFieldInit: opt_field_init Accumulate: accumulate]
 |	[Cons: CONS OptCapture: opt_capture TypeRef: type_ref
 		OptFieldInit: opt_field_init Constructor: constructor]
+|	[MATCH MatchVarRef: var_ref Pattern: pattern]
 |	[String: cstring]
 
 def type_ref
@@ -360,43 +359,57 @@ def field_init
 	[CodeExpr: code_expr]
 
 #
-# String List
+# Pattern
 #
 
-def string_el
-#	['"' lit_string_el*  '"']
-	[CodeExpr: code_expr]
+def litpat_term
+	[CONS_TDQ] | [Nl: CONS_NL]
 
-def lit_string_el
+def pattern_el_type_or_lit
+	[RegionQual: region_qual Id: id OptRepeat: opt_repeat]
+|	[RegionQual: region_qual Lit: lit OptRepeat: opt_repeat]
+
+def opt_label
+	[Id: id COLON]
+|	[]
+
+def pattern_el
+	[DQ LitpatElList: litpat_el* Term: litpat_term]
+|	[OptLabel: opt_label TypeOrLit: pattern_el_type_or_lit]
+
+def litpat_el
 	[ConsData: cons_data]
-|	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE]
+|	[CONS_SQOPEN PatternElList: pattern_el* CONS_SQCLOSE]
 
-def string_top_el
-	[DQ LitStringElList: lit_string_el* CONS_TDQ]
-|	[SQOPEN StringElList: string_el* SQOPEN]
+def pattern_top_el
+	[DQ LitpatElList: litpat_el* Term: litpat_term]
+|	[SQOPEN PatternElList: pattern_el* SQCLOSE]
 
-def string_list
-	[StringTopEl: string_top_el StringList: string_list]
-|	[StringTopEl: string_top_el]
+def pattern_list
+	[PatternList: pattern_list PatternTopEl: pattern_top_el]
+|	[PatternTopEl: pattern_top_el]
 
-def cstring
-	[StringList: string_list]
+def pattern
+	[PatternList: pattern_list]
 
 #
 # Constructor List
 #
 
+def lit_cons_term
+	[CONS_TDQ] | [Nl: CONS_NL]
+
 def cons_el
-#	[region_qual TK_Literal]
-#|	['"' lit_cons_el_list '"']
-	[CodeExpr: code_expr]
+	[RegionQual: region_qual Lit: lit]
+|	[DQ LitConsElList: lit_cons_el* Term: lit_cons_term]
+|	[CodeExpr: code_expr]
 
 def lit_cons_el
 	[ConsData: cons_data]
-#|	['[' cons_el_list ']']
+|	[CONS_SQOPEN ConsElList: cons_el* CONS_SQCLOSE]
 
 def cons_top_el
-	[DQ LitConsElList: lit_cons_el* CONS_TDQ]
+	[DQ LitConsElList: lit_cons_el* Term: lit_cons_term]
 |	[SQOPEN ConsElList: cons_el* SQCLOSE]
 
 def cons_list
@@ -407,19 +420,43 @@ def constructor
 	[ConsList: cons_list]
 
 #
+# String List
+#
+
+def string_el
+	[DQ LitStringElList: lit_string_el* Term: lit_cons_term]
+|	[CodeExpr: code_expr]
+
+def lit_string_el
+	[ConsData: cons_data]
+|	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE]
+
+def string_top_el
+	[DQ LitStringElList: lit_string_el* Term: lit_cons_term]
+|	[SQOPEN StringElList: string_el* SQCLOSE]
+
+def string_list
+	[StringTopEl: string_top_el StringList: string_list]
+|	[StringTopEl: string_top_el]
+
+def cstring
+	[StringList: string_list]
+
+
+#
 # Accumulate
 #
 
 def accum_el
 	[CodeExpr: code_expr]
-#|	['"' lit_accum_el* '"']
+|	[DQ LitAccumElList: lit_accum_el* Term: lit_cons_term]
 
 def lit_accum_el
 	[ConsData: cons_data]
-#|	['[' accum_el_list ']']
+|	[CONS_SQOPEN AccumElList: accum_el* CONS_SQCLOSE]
 
 def accum_top_el
-	[DQ LitAccumElList: lit_accum_el* CONS_TDQ]
+	[DQ LitAccumElList: lit_accum_el* Term: lit_cons_term]
 |	[SQOPEN AccumElList: accum_el* SQCLOSE]
 
 def accum_list

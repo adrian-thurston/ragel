@@ -35,6 +35,36 @@
 
 extern RuntimeData main_runtimeData;
 
+String unescape( const String &s )
+{
+	String out( String::Fresh(), s.length() );
+	char *d = out.data;
+
+	for ( int i = 0; i < s.length(); ) {
+		if ( s[i] == '\\' ) {
+			switch ( s[i+1] ) {
+				case '0': *d++ = '\0'; break;
+				case 'a': *d++ = '\a'; break;
+				case 'b': *d++ = '\b'; break;
+				case 't': *d++ = '\t'; break;
+				case 'n': *d++ = '\n'; break;
+				case 'v': *d++ = '\v'; break;
+				case 'f': *d++ = '\f'; break;
+				case 'r': *d++ = '\r'; break;
+				default: *d++ = s[i+1]; break;
+			}
+			i += 2;
+		}
+		else {
+			*d++ = s[i];
+			i += 1;
+		}
+	}
+	out.chop( d - out.data );
+	return out;
+}
+
+
 struct LoadSource
 :
 	public BaseParser
@@ -101,7 +131,7 @@ struct LoadSource
 	FieldInitVect *walkOptFieldInit( opt_field_init optFieldInit );
 
 	ConsItemList *walkLitAccumEl( lit_accum_el litAccumEl );
-	ConsItemList *walkLitAccumElList( _repeat_lit_accum_el litAccumElList );
+	ConsItemList *walkLitAccumElList( _repeat_lit_accum_el litAccumElList, CONS_NL Nl );
 	ConsItemList *walkAccumTopEl( accum_top_el accumTopEl );
 	ConsItemList *walkAccumList( accum_list accumList );
 	ConsItemList *walkAccumulate( accumulate Accumulate );
@@ -112,6 +142,7 @@ struct LoadSource
 
 	ConsItemList *walkLitConsEl( lit_cons_el litConsEl );
 	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList );
+	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList, CONS_NL Nl );
 	ConsItemList *walkConsTopEl( cons_top_el consTopEl );
 	ConsItemList *walkConsList( cons_list consList );
 	ConsItemList *walkConstructor( constructor Constructor );
@@ -123,7 +154,7 @@ struct LoadSource
 	LangExpr *walkCodeMultiplicitive( code_multiplicitive codeMultiplicitive );
 
 	ConsItemList *walkLitStringEl( lit_string_el litStringEl );
-	ConsItemList *walkLitStringElList( _repeat_lit_string_el litStringElList );
+	ConsItemList *walkLitStringElList( _repeat_lit_string_el litStringElList, CONS_NL Nl );
 	ConsItemList *walkStringTopEl( string_top_el stringTopEl );
 	ConsItemList *walkStringList( string_list stringList );
 	ConsItemList *walkString( cstring String );
@@ -135,6 +166,123 @@ struct LoadSource
 	ObjectField *walkParamVarDef( param_var_def ParamVarDef );
 	ParameterList *walkParamVarDefList( _repeat_param_var_def ParamVarDefList );
 	void walkIterDef( iter_def IterDef );
+
+	PatternItemList *walkPatternElTypeOrLit( pattern_el_type_or_lit typeOrLit )
+	{
+		NamespaceQual *nspaceQual = walkRegionQual( typeOrLit.RegionQual() );
+		RepeatType repeatType = walkOptRepeat( typeOrLit.OptRepeat() );
+
+		PatternItemList *list = 0;
+		if ( typeOrLit.Id() != 0 ) {
+			String id = typeOrLit.Id().text().c_str();
+			list = patternElNamed( internal, nspaceQual, id, repeatType );
+		}
+		else if ( typeOrLit.Lit() != 0 ) { 
+			String lit = typeOrLit.Lit().text().c_str();
+			list = patternElType( internal, nspaceQual, lit, repeatType );
+		}
+		return list;
+	}
+
+	LangVarRef *walkOptLabel( opt_label optLabel )
+	{
+		LangVarRef *varRef = 0;
+		if ( optLabel.Id() != 0 ) {
+			String id = optLabel.Id().text().c_str();
+			varRef = LangVarRef::cons( internal, id );
+		}
+		return varRef;
+	}
+
+	PatternItemList *walkPatternEl( pattern_el PatternEl )
+	{
+		PatternItemList *list = 0;
+		if ( PatternEl.LitpatElList() != 0 ) {
+			list = walkLitpatElList( PatternEl.LitpatElList(), PatternEl.Term().Nl() );
+		}
+		else if ( PatternEl.OptLabel() != 0 ) {
+			LangVarRef *varRef = walkOptLabel( PatternEl.OptLabel() );
+			PatternItemList *typeOrLitList = walkPatternElTypeOrLit( PatternEl.TypeOrLit() );
+			list = patternEl( varRef, typeOrLitList );
+		}
+		return list;
+	}
+
+	PatternItemList *walkLitpatEl( litpat_el litpatEl )
+	{
+		PatternItemList *list = 0;
+		if ( litpatEl.ConsData() != 0 ) {
+			String consData = unescape( litpatEl.ConsData().text().c_str() );
+			PatternItem *patternItem = PatternItem::cons( internal, consData,
+					PatternItem::InputText );
+			list = PatternItemList::cons( patternItem );
+		}
+		else if ( litpatEl.PatternElList() != 0 ) {
+			list = walkPatternElList( litpatEl.PatternElList() );
+		}
+		return list;
+	}
+
+	PatternItemList *walkLitpatElList( _repeat_litpat_el litpatElList, CONS_NL Nl )
+	{
+		PatternItemList *list = new PatternItemList;
+		while ( !litpatElList.end() ) {
+			PatternItemList *tail = walkLitpatEl( litpatElList.value() );
+			list = patListConcat( list, tail );
+			litpatElList = litpatElList.next();
+		}
+
+		if ( Nl != 0 ) {
+			String nl = unescape( Nl.text().c_str() );
+			PatternItem *patternItem = PatternItem::cons( internal, nl, PatternItem::InputText );
+			PatternItemList *term = PatternItemList::cons( patternItem );
+			list = patListConcat( list, term );
+		}
+
+		return list;
+	}
+
+	PatternItemList *walkPatternElList( _repeat_pattern_el patternElList )
+	{
+		PatternItemList *list = new PatternItemList;
+		while ( !patternElList.end() ) {
+			PatternItemList *tail = walkPatternEl( patternElList.value() );
+			list = patListConcat( list, tail );
+			patternElList = patternElList.next();
+		}
+		return list;
+	}
+
+	PatternItemList *walkPattternTopEl( pattern_top_el patternTopEl )
+	{
+		PatternItemList *list = 0;
+		if ( patternTopEl.LitpatElList() != 0 ) {
+			list = walkLitpatElList( patternTopEl.LitpatElList(), patternTopEl.Term().Nl() );
+		}
+		else if ( patternTopEl.PatternElList() != 0 ) {
+			list = walkPatternElList( patternTopEl.PatternElList() );
+		}
+		return list;
+	}
+
+	PatternItemList *walkPatternList( pattern_list patternList )
+	{
+		PatternItemList *list = 0;
+		if ( patternList.PatternList() ) {
+			PatternItemList *left = walkPatternList( patternList.PatternList() );
+			PatternItemList *right = walkPattternTopEl( patternList.PatternTopEl() );
+			list = patListConcat( left, right );
+		}
+		else {
+			list = walkPattternTopEl( patternList.PatternTopEl() );
+		}
+		return list;
+	}
+
+	PatternItemList *walkPattern( pattern Pattern )
+	{
+		return walkPatternList( Pattern.PatternList() );
+	}
 };
 
 
@@ -143,35 +291,6 @@ BaseParser *consLoadSource( Compiler *pd, const char *inputFileName )
 	return new LoadSource( pd, inputFileName );
 }
 
-
-String unescape( const String &s )
-{
-	String out( String::Fresh(), s.length() );
-	char *d = out.data;
-
-	for ( int i = 0; i < s.length(); ) {
-		if ( s[i] == '\\' ) {
-			switch ( s[i+1] ) {
-				case '0': *d++ = '\0'; break;
-				case 'a': *d++ = '\a'; break;
-				case 'b': *d++ = '\b'; break;
-				case 't': *d++ = '\t'; break;
-				case 'n': *d++ = '\n'; break;
-				case 'v': *d++ = '\v'; break;
-				case 'f': *d++ = '\f'; break;
-				case 'r': *d++ = '\r'; break;
-				default: *d++ = s[i+1]; break;
-			}
-			i += 2;
-		}
-		else {
-			*d++ = s[i];
-			i += 1;
-		}
-	}
-	out.chop( d - out.data );
-	return out;
-}
 
 
 NamespaceQual *LoadSource::walkRegionQual( region_qual regionQual )
@@ -245,7 +364,8 @@ StmtList *LoadSource::walkLangStmtList( lang_stmt_list langStmtList )
 	while ( !stmtList.end() ) {
 		statement Statement = stmtList.value();
 		LangStmt *stmt = walkStatement( Statement );
-		retList->append( stmt );
+		if ( stmt != 0 )
+			retList->append( stmt );
 		stmtList = stmtList.next();
 	}
 
@@ -283,9 +403,7 @@ void LoadSource::walkProdElList( ProdElList *list, prod_el_list ProdElList )
 			captureField = ObjectField::cons( internal, 0, fieldName );
 		}
 
-		RepeatType repeatType = RepeatNone;
-		if ( El.OptRepeat().Star() != 0 )
-			repeatType = RepeatRepeat;
+		RepeatType repeatType = walkOptRepeat( El.OptRepeat() );
 
 		if ( El.Id() != 0 ) {
 			String typeName = El.Id().text().c_str();
@@ -617,86 +735,6 @@ ObjectField *walkOptCapture( opt_capture optCapture )
 }
 
 /*
- * String
- */
-
-ConsItemList *LoadSource::walkLitStringEl( lit_string_el litStringEl )
-{
-	ConsItemList *list = 0;
-	if ( litStringEl.ConsData() != 0 ) {
-		String consData = unescape( litStringEl.ConsData().text().c_str() );
-		ConsItem *stringItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		list = ConsItemList::cons( stringItem );
-	}
-	else if ( litStringEl.StringElList() != 0 ) {
-		list = walkStringElList( litStringEl.StringElList() );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkLitStringElList( _repeat_lit_string_el litStringElList )
-{
-	ConsItemList *list = new ConsItemList;
-	while ( !litStringElList.end() ) {
-		ConsItemList *extension = walkLitStringEl( litStringElList.value() );
-		list = consListConcat( list, extension );
-		litStringElList = litStringElList.next();
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkStringEl( string_el stringEl )
-{
-	ConsItemList *list = 0;
-	if ( stringEl.CodeExpr() != 0 ) {
-		LangExpr *consExpr = walkCodeExpr( stringEl.CodeExpr() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
-		list = ConsItemList::cons( consItem );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkStringElList( _repeat_string_el stringElList )
-{
-	ConsItemList *list = new ConsItemList;
-	while ( !stringElList.end() ) {
-		ConsItemList *extension = walkStringEl( stringElList.value() );
-		list = consListConcat( list, extension );
-		stringElList = stringElList.next();
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkStringTopEl( string_top_el stringTopEl )
-{
-	ConsItemList *list = 0;
-	if ( stringTopEl.LitStringElList() != 0 )
-		list = walkLitStringElList( stringTopEl.LitStringElList() );
-	else if ( stringTopEl.StringElList() != 0 ) {
-		list = walkStringElList( stringTopEl.StringElList() );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkStringList( string_list stringList )
-{
-	ConsItemList *list = walkStringTopEl( stringList.StringTopEl() );
-
-	if ( stringList.StringList() != 0 ) {
-		ConsItemList *extension = walkStringList( stringList.StringList() );
-		consListConcat( list, extension );
-	}
-
-	return list;
-}
-
-ConsItemList *LoadSource::walkString( cstring String )
-{
-	ConsItemList *list = walkStringList( String.StringList() );
-	return list;
-}
-
-/*
  * Constructor
  */
 
@@ -708,10 +746,13 @@ ConsItemList *LoadSource::walkLitConsEl( lit_cons_el litConsEl )
 		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
 		list = ConsItemList::cons( consItem );
 	}
+	else if ( litConsEl.ConsElList() != 0 ) {
+		list = walkConsElList( litConsEl.ConsElList() );
+	}
 	return list;
 }
 
-ConsItemList *LoadSource::walkLitConsElList( _repeat_lit_cons_el litConsElList )
+ConsItemList *LoadSource::walkLitConsElList( _repeat_lit_cons_el litConsElList, CONS_NL Nl )
 {
 	ConsItemList *list = new ConsItemList;
 	while ( !litConsElList.end() ) {
@@ -719,16 +760,32 @@ ConsItemList *LoadSource::walkLitConsElList( _repeat_lit_cons_el litConsElList )
 		list = consListConcat( list, extension );
 		litConsElList = litConsElList.next();
 	}
+
+	if ( Nl != 0 ) {
+		String consData = unescape( Nl.text().c_str() );
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+		ConsItemList *term = ConsItemList::cons( consItem );
+		list = consListConcat( list, term );
+	}
+
 	return list;
 }
 
 ConsItemList *LoadSource::walkConsEl( cons_el consEl )
 {
 	ConsItemList *list = 0;
-	if ( consEl.CodeExpr() != 0 ) {
+	if ( consEl.Lit() != 0 ) {
+		NamespaceQual *nspaceQual = walkRegionQual( consEl.RegionQual() );
+		String lit = consEl.Lit().text().c_str();
+		list = consElLiteral( internal, lit, nspaceQual );
+	}
+	else if ( consEl.CodeExpr() != 0 ) {
 		LangExpr *consExpr = walkCodeExpr( consEl.CodeExpr() );
 		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
 		list = ConsItemList::cons( consItem );
+	}
+	else if ( consEl.LitConsElList() != 0 ) {
+		list = walkLitConsElList( consEl.LitConsElList(), consEl.Term().Nl() );
 	}
 	return list;
 }
@@ -748,7 +805,7 @@ ConsItemList *LoadSource::walkConsTopEl( cons_top_el consTopEl )
 {
 	ConsItemList *list = 0;
 	if ( consTopEl.LitConsElList() != 0 )
-		list = walkLitConsElList( consTopEl.LitConsElList() );
+		list = walkLitConsElList( consTopEl.LitConsElList(), consTopEl.Term().Nl() );
 	else if ( consTopEl.ConsElList() != 0 ) {
 		list = walkConsElList( consTopEl.ConsElList() );
 	}
@@ -774,6 +831,96 @@ ConsItemList *LoadSource::walkConstructor( constructor Constructor )
 }
 
 /*
+ * String
+ */
+
+ConsItemList *LoadSource::walkLitStringEl( lit_string_el litStringEl )
+{
+	ConsItemList *list = 0;
+	if ( litStringEl.ConsData() != 0 ) {
+		String consData = unescape( litStringEl.ConsData().text().c_str() );
+		ConsItem *stringItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+		list = ConsItemList::cons( stringItem );
+	}
+	else if ( litStringEl.StringElList() != 0 ) {
+		list = walkStringElList( litStringEl.StringElList() );
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkLitStringElList( _repeat_lit_string_el litStringElList, CONS_NL Nl )
+{
+	ConsItemList *list = new ConsItemList;
+	while ( !litStringElList.end() ) {
+		ConsItemList *extension = walkLitStringEl( litStringElList.value() );
+		list = consListConcat( list, extension );
+		litStringElList = litStringElList.next();
+	}
+
+	if ( Nl != 0 ) {
+		String consData = unescape( Nl.text().c_str() );
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+		ConsItemList *term = ConsItemList::cons( consItem );
+		list = consListConcat( list, term );
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkStringEl( string_el stringEl )
+{
+	ConsItemList *list = 0;
+	if ( stringEl.LitStringElList() != 0 ) {
+		list = walkLitStringElList( stringEl.LitStringElList(), stringEl.Term().Nl() );
+	}
+	else if ( stringEl.CodeExpr() != 0 ) {
+		LangExpr *consExpr = walkCodeExpr( stringEl.CodeExpr() );
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
+		list = ConsItemList::cons( consItem );
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkStringElList( _repeat_string_el stringElList )
+{
+	ConsItemList *list = new ConsItemList;
+	while ( !stringElList.end() ) {
+		ConsItemList *extension = walkStringEl( stringElList.value() );
+		list = consListConcat( list, extension );
+		stringElList = stringElList.next();
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkStringTopEl( string_top_el stringTopEl )
+{
+	ConsItemList *list = 0;
+	if ( stringTopEl.LitStringElList() != 0 )
+		list = walkLitStringElList( stringTopEl.LitStringElList(), stringTopEl.Term().Nl() );
+	else if ( stringTopEl.StringElList() != 0 ) {
+		list = walkStringElList( stringTopEl.StringElList() );
+	}
+	return list;
+}
+
+ConsItemList *LoadSource::walkStringList( string_list stringList )
+{
+	ConsItemList *list = walkStringTopEl( stringList.StringTopEl() );
+
+	if ( stringList.StringList() != 0 ) {
+		ConsItemList *extension = walkStringList( stringList.StringList() );
+		consListConcat( list, extension );
+	}
+
+	return list;
+}
+
+ConsItemList *LoadSource::walkString( cstring String )
+{
+	ConsItemList *list = walkStringList( String.StringList() );
+	return list;
+}
+
+/*
  * Accum
  */
 
@@ -785,10 +932,13 @@ ConsItemList *LoadSource::walkLitAccumEl( lit_accum_el litAccumEl )
 		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
 		list = ConsItemList::cons( consItem );
 	}
+	else if ( litAccumEl.AccumElList() != 0 ) {
+		list = walkAccumElList( litAccumEl.AccumElList() );
+	}
 	return list;
 }
 
-ConsItemList *LoadSource::walkLitAccumElList( _repeat_lit_accum_el litAccumElList )
+ConsItemList *LoadSource::walkLitAccumElList( _repeat_lit_accum_el litAccumElList, CONS_NL Nl )
 {
 	ConsItemList *list = new ConsItemList;
 	while ( !litAccumElList.end() ) {
@@ -796,13 +946,24 @@ ConsItemList *LoadSource::walkLitAccumElList( _repeat_lit_accum_el litAccumElLis
 		list = consListConcat( list, extension );
 		litAccumElList = litAccumElList.next();
 	}
+
+	if ( Nl != 0 ) {
+		String consData = unescape( Nl.text().c_str() );
+		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+		ConsItemList *term = ConsItemList::cons( consItem );
+		list = consListConcat( list, term );
+	}
+
 	return list;
 }
 
 ConsItemList *LoadSource::walkAccumEl( accum_el accumEl )
 {
 	ConsItemList *list = 0;
-	if ( accumEl.CodeExpr() != 0 ) {
+	if ( accumEl.LitAccumElList() != 0 ) {
+		list = walkLitAccumElList( accumEl.LitAccumElList(), accumEl.Term().Nl() );
+	}
+	else if ( accumEl.CodeExpr() != 0 ) {
 		LangExpr *accumExpr = walkCodeExpr( accumEl.CodeExpr() );
 		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
 		list = ConsItemList::cons( consItem );
@@ -825,7 +986,7 @@ ConsItemList *LoadSource::walkAccumTopEl( accum_top_el accumTopEl )
 {
 	ConsItemList *list = 0;
 	if ( accumTopEl.LitAccumElList() != 0 )
-		list = walkLitAccumElList( accumTopEl.LitAccumElList() );
+		list = walkLitAccumElList( accumTopEl.LitAccumElList(), accumTopEl.Term().Nl() );
 	else if ( accumTopEl.AccumElList() != 0 ) {
 		list = walkAccumElList( accumTopEl.AccumElList() );
 	}
@@ -938,6 +1099,11 @@ LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
 	else if ( codeFactor.String() != 0 ) {
 		ConsItemList *list = walkString( codeFactor.String() );
 		expr = LangExpr::cons( LangTerm::cons( internal, list ) );
+	}
+	else if ( codeFactor.MatchVarRef() != 0 ) {
+		LangVarRef *varRef = walkVarRef( codeFactor.MatchVarRef() );
+		PatternItemList *list = walkPattern( codeFactor.Pattern() );
+		expr = match( internal, varRef, list );
 	}
 	return expr;
 }
