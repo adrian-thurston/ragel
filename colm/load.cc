@@ -77,16 +77,6 @@ struct LoadSource
 
 	const char *inputFileName;
 
-	void go();
-
-	ObjectField *walkVarDef( var_def varDef );
-	NamespaceQual *walkRegionQual( region_qual regionQual );
-	RepeatType walkOptRepeat( opt_repeat OptRepeat );
-	TypeRef *walkTypeRef( type_ref typeRef );
-
-	ReOrItem *walkRegOrChar( reg_or_char regOrChar );
-	ReOrBlock *walkRegOrData( reg_or_data regOrData );
-
 	Literal *walkLexRangeLit( lex_range_lit lexRangeLit )
 	{
 		Literal *literal = 0;
@@ -147,17 +137,11 @@ struct LoadSource
 		return factor;
 	}
 
-	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree );
-	LexFactorRep *walkLexFactorRep( lex_factor_rep LexFactorRepTree );
-
 	LexFactorAug *walkLexFactorAug( lex_factor_rep LexFactorRepTree )
 	{
 		LexFactorRep *factorRep = walkLexFactorRep( LexFactorRepTree );
 		return LexFactorAug::cons( factorRep );
 	}
-
-	LexTerm *walkLexTerm( lex_term LexTerm );
-	ExprVect *walkCodeExprList( _repeat_code_expr codeExprList );
 
 	LangExpr *walkCodeExpr( code_expr codeExpr )
 	{
@@ -179,15 +163,6 @@ struct LoadSource
 		}
 		return expr;
 	}
-
-	void walkLexRegion( region_def regionDef );
-	void walkProdElList( ProdElList *list, prod_el_list ProdElList );
-	void walkProdList( LelDefList *lelDefList, prod_list ProdList );
-	void walkCflDef( cfl_def cflDef );
-	LangTerm *walkIterCall( iter_call IterCall );
-	LangStmt *walkOptionalElse( optional_else optionalElse );
-	LangStmt *walkElsifClause( elsif_clause elsifClause );
-	LangStmt *walkElsifList( elsif_list elsifList );
 
 	LangStmt *walkStatement( statement Statement )
 	{
@@ -259,16 +234,6 @@ struct LoadSource
 		return stmt;
 	}
 
-	LangStmt *walkPrintStmt( print_stmt &PrintStmt );
-	LangExpr *walkCodeUnary( code_unary codeUnary );
-	LangExpr *walkCodeFactor( code_factor codeFactor );
-	LangStmt *walkExprStmt( expr_stmt &ExprStmt );
-	QualItemVect *walkQual( qual &Qual );
-	LangVarRef *walkVarRef( var_ref varRef );
-	void walkRootItem( root_item &rootItem, StmtList *stmtList );
-	StmtList *walkRootItemList( _repeat_root_item rootItemList );
-	void walkNamespaceDef( namespace_def NamespaceDef );
-
 	StmtList *walkLangStmtList( lang_stmt_list langStmtList )
 	{
 		StmtList *retList = new StmtList;
@@ -302,12 +267,6 @@ struct LoadSource
 
 		return retList;
 	}
-
-	StmtList *walkBlockOrSingle( block_or_single blockOrSingle );
-
-	void walkLiteralItem( literal_item literalItem );
-	void walkLiteralList( literal_list literalList );
-	void walkLiteralDef( literal_def literalDef );
 
 	LexExpression *walkLexExpr( lex_expr LexExprTree )
 	{
@@ -397,36 +356,6 @@ struct LoadSource
 		defineToken( internal, name, join, objectDef, 0, true, false, false );
 	}
 
-	void walkContextDef( context_def contextDef );
-	void walkContextItem( context_item contextItem );
-	void walkContextVarDef( context_var_def contextVarDef );
-	CodeBlock *walkOptReduce( opt_reduce optReduce );
-
-	void walkFieldInit( FieldInitVect *list, field_init fieldInit );
-	FieldInitVect *walkOptFieldInit( opt_field_init optFieldInit );
-
-	ConsItemList *walkLitAccumEl( lit_accum_el litAccumEl );
-	ConsItemList *walkLitAccumElList( _repeat_lit_accum_el litAccumElList, CONS_NL Nl );
-	ConsItemList *walkAccumTopEl( accum_top_el accumTopEl );
-	ConsItemList *walkAccumList( accum_list accumList );
-	ConsItemList *walkAccumulate( accumulate Accumulate );
-	ConsItemList *walkAccumEl( accum_el accumEl );
-	ConsItemList *walkAccumElList( _repeat_accum_el accumElList );
-
-	void walkRlDef( rl_def RlDef );
-
-	ConsItemList *walkLitConsEl( lit_cons_el litConsEl );
-	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList );
-	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList, CONS_NL Nl );
-	ConsItemList *walkConsTopEl( cons_top_el consTopEl );
-	ConsItemList *walkConsList( cons_list consList );
-	ConsItemList *walkConstructor( constructor Constructor );
-	ConsItemList *walkConsEl( cons_el consEl );
-	ConsItemList *walkConsElList( _repeat_cons_el consElList );
-
-	LangExpr *walkCodeRelational( code_relational codeRelational );
-	LangExpr *walkCodeAdditive( code_additive codeAdditive );
-
 	LangExpr *walkCodeMultiplicitive( code_multiplicitive mult )
 	{
 		LangExpr *expr;
@@ -446,20 +375,6 @@ struct LoadSource
 		}
 		return expr;
 	}
-
-	ConsItemList *walkLitStringEl( lit_string_el litStringEl );
-	ConsItemList *walkLitStringElList( _repeat_lit_string_el litStringElList, CONS_NL Nl );
-	ConsItemList *walkStringTopEl( string_top_el stringTopEl );
-	ConsItemList *walkStringList( string_list stringList );
-	ConsItemList *walkString( cstring String );
-	ConsItemList *walkStringEl( string_el stringEl );
-	ConsItemList *walkStringElList( _repeat_string_el stringElList );
-	void walkFunctionDef( function_def functionDef );
-
-	TypeRef *walkReferenceTypeRef( reference_type_ref ReferenceTypeRef );
-	ObjectField *walkParamVarDef( param_var_def ParamVarDef );
-	ParameterList *walkParamVarDefList( _repeat_param_var_def ParamVarDefList );
-	void walkIterDef( iter_def IterDef );
 
 	PatternItemList *walkPatternElTypeOrLit( pattern_el_type_or_lit typeOrLit )
 	{
@@ -705,1194 +620,1191 @@ struct LoadSource
 		colmDeleteProgram( program );
 		return stmtList;
 	}
-};
 
 
-BaseParser *consLoadSource( Compiler *pd, const char *inputFileName )
-{
-	return new LoadSource( pd, inputFileName );
-}
-
-NamespaceQual *LoadSource::walkRegionQual( region_qual regionQual )
-{
-	NamespaceQual *qual;
-	if ( regionQual.RegionQual() != 0 ) {
-		qual = walkRegionQual( regionQual.RegionQual() );
-		qual->qualNames.append( String( regionQual.Id().text().c_str() ) );
-	}
-	else {
-		qual = NamespaceQual::cons( namespaceStack.top() );
-	}
-	return qual;
-}
-
-RepeatType LoadSource::walkOptRepeat( opt_repeat OptRepeat )
-{
-	RepeatType repeatType = RepeatNone;
-	if ( OptRepeat.Star() != 0 )
-		repeatType = RepeatRepeat;
-	else if ( OptRepeat.Plus() != 0 )
-		repeatType = RepeatList;
-	else if ( OptRepeat.Question() != 0 )
-		repeatType = RepeatOpt;
-	return repeatType;
-}
-
-TypeRef *LoadSource::walkTypeRef( type_ref typeRef )
-{
-	TypeRef *tr = 0;
-
-	if ( typeRef.DirectId() != 0 ) {
-		NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
-		String id = typeRef.DirectId().text().c_str();
-		RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
-		tr = TypeRef::cons( internal, nspaceQual, id, repeatType );
-	}
-	else if ( typeRef.PtrId() != 0 ) {
-		NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
-		String id = typeRef.PtrId().text().c_str();
-		RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
-		TypeRef *inner = TypeRef::cons( internal, nspaceQual, id, repeatType );
-		tr = TypeRef::cons( internal, TypeRef::Ptr, inner );
-	}
-	else if ( typeRef.MapKeyType() != 0 ) {
-		TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
-		TypeRef *value = walkTypeRef( typeRef.MapValueType() );
-		tr = TypeRef::cons( internal, TypeRef::Map, 0, key, value );
-	}
-	else if ( typeRef.ListType() != 0 ) {
-		TypeRef *type = walkTypeRef( typeRef.ListType() );
-		tr = TypeRef::cons( internal, TypeRef::List, 0, type, 0 );
-	}
-	else if ( typeRef.VectorType() != 0 ) {
-		TypeRef *type = walkTypeRef( typeRef.VectorType() );
-		tr = TypeRef::cons( internal, TypeRef::Vector, 0, type, 0 );
-	}
-	else if ( typeRef.ParserType() != 0 ) {
-		TypeRef *type = walkTypeRef( typeRef.ParserType() );
-		tr = TypeRef::cons( internal, TypeRef::Parser, 0, type, 0 );
-	}
-	return tr;
-}
-
-StmtList *LoadSource::walkBlockOrSingle( block_or_single blockOrSingle )
-{
-	StmtList *stmtList = 0;
-	if ( blockOrSingle.Statement() != 0 ) {
-		stmtList = new StmtList;
-		LangStmt *stmt = walkStatement( blockOrSingle.Statement() );
-		stmtList->append( stmt );
-	}
-	else if ( blockOrSingle.LangStmtList() != 0 ) {
-		stmtList = walkLangStmtList( blockOrSingle.LangStmtList() );
+	NamespaceQual *walkRegionQual( region_qual regionQual )
+	{
+		NamespaceQual *qual;
+		if ( regionQual.RegionQual() != 0 ) {
+			qual = walkRegionQual( regionQual.RegionQual() );
+			qual->qualNames.append( String( regionQual.Id().text().c_str() ) );
+		}
+		else {
+			qual = NamespaceQual::cons( namespaceStack.top() );
+		}
+		return qual;
 	}
 
-	return stmtList;
-}
-
-void LoadSource::walkProdElList( ProdElList *list, prod_el_list ProdElList )
-{
-	if ( ProdElList.ProdElList() != 0 ) {
-		prod_el_list RightProdElList = ProdElList.ProdElList();
-		walkProdElList( list, RightProdElList );
+	RepeatType walkOptRepeat( opt_repeat OptRepeat )
+	{
+		RepeatType repeatType = RepeatNone;
+		if ( OptRepeat.Star() != 0 )
+			repeatType = RepeatRepeat;
+		else if ( OptRepeat.Plus() != 0 )
+			repeatType = RepeatList;
+		else if ( OptRepeat.Question() != 0 )
+			repeatType = RepeatOpt;
+		return repeatType;
 	}
-	
-	if ( ProdElList.ProdEl() != 0 ) {
-		prod_el El = ProdElList.ProdEl();
 
-		ObjectField *captureField = 0;
-		if ( El.OptName().Name() != 0 ) {
-			String fieldName = El.OptName().Name().text().c_str();
-			captureField = ObjectField::cons( internal, 0, fieldName );
+	TypeRef *walkTypeRef( type_ref typeRef )
+	{
+		TypeRef *tr = 0;
+
+		if ( typeRef.DirectId() != 0 ) {
+			NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
+			String id = typeRef.DirectId().text().c_str();
+			RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
+			tr = TypeRef::cons( internal, nspaceQual, id, repeatType );
+		}
+		else if ( typeRef.PtrId() != 0 ) {
+			NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
+			String id = typeRef.PtrId().text().c_str();
+			RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
+			TypeRef *inner = TypeRef::cons( internal, nspaceQual, id, repeatType );
+			tr = TypeRef::cons( internal, TypeRef::Ptr, inner );
+		}
+		else if ( typeRef.MapKeyType() != 0 ) {
+			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
+			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
+			tr = TypeRef::cons( internal, TypeRef::Map, 0, key, value );
+		}
+		else if ( typeRef.ListType() != 0 ) {
+			TypeRef *type = walkTypeRef( typeRef.ListType() );
+			tr = TypeRef::cons( internal, TypeRef::List, 0, type, 0 );
+		}
+		else if ( typeRef.VectorType() != 0 ) {
+			TypeRef *type = walkTypeRef( typeRef.VectorType() );
+			tr = TypeRef::cons( internal, TypeRef::Vector, 0, type, 0 );
+		}
+		else if ( typeRef.ParserType() != 0 ) {
+			TypeRef *type = walkTypeRef( typeRef.ParserType() );
+			tr = TypeRef::cons( internal, TypeRef::Parser, 0, type, 0 );
+		}
+		return tr;
+	}
+
+	StmtList *walkBlockOrSingle( block_or_single blockOrSingle )
+	{
+		StmtList *stmtList = 0;
+		if ( blockOrSingle.Statement() != 0 ) {
+			stmtList = new StmtList;
+			LangStmt *stmt = walkStatement( blockOrSingle.Statement() );
+			stmtList->append( stmt );
+		}
+		else if ( blockOrSingle.LangStmtList() != 0 ) {
+			stmtList = walkLangStmtList( blockOrSingle.LangStmtList() );
 		}
 
-		RepeatType repeatType = walkOptRepeat( El.OptRepeat() );
-		NamespaceQual *nspaceQual = walkRegionQual( El.RegionQual() );
+		return stmtList;
+	}
 
-		if ( El.Id() != 0 ) {
-			String typeName = El.Id().text().c_str();
-			ProdEl *prodEl = prodElName( internal, typeName,
-					nspaceQual,
-					captureField, repeatType, false );
-			appendProdEl( list, prodEl );
+	void walkProdElList( ProdElList *list, prod_el_list ProdElList )
+	{
+		if ( ProdElList.ProdElList() != 0 ) {
+			prod_el_list RightProdElList = ProdElList.ProdElList();
+			walkProdElList( list, RightProdElList );
 		}
-		else if ( El.Lit() != 0 ) {
-			String lit = El.Lit().text().c_str();
-			ProdEl *prodEl = prodElLiteral( internal, lit,
-					nspaceQual,
-					captureField, repeatType, false );
-			appendProdEl( list, prodEl );
+		
+		if ( ProdElList.ProdEl() != 0 ) {
+			prod_el El = ProdElList.ProdEl();
 
+			ObjectField *captureField = 0;
+			if ( El.OptName().Name() != 0 ) {
+				String fieldName = El.OptName().Name().text().c_str();
+				captureField = ObjectField::cons( internal, 0, fieldName );
+			}
+
+			RepeatType repeatType = walkOptRepeat( El.OptRepeat() );
+			NamespaceQual *nspaceQual = walkRegionQual( El.RegionQual() );
+
+			if ( El.Id() != 0 ) {
+				String typeName = El.Id().text().c_str();
+				ProdEl *prodEl = prodElName( internal, typeName,
+						nspaceQual,
+						captureField, repeatType, false );
+				appendProdEl( list, prodEl );
+			}
+			else if ( El.Lit() != 0 ) {
+				String lit = El.Lit().text().c_str();
+				ProdEl *prodEl = prodElLiteral( internal, lit,
+						nspaceQual,
+						captureField, repeatType, false );
+				appendProdEl( list, prodEl );
+
+			}
 		}
 	}
-}
 
-CodeBlock *LoadSource::walkOptReduce( opt_reduce optReduce )
-{
-	CodeBlock *block = 0;
-	if ( optReduce.LangStmtList() != 0 ) {
+	CodeBlock *walkOptReduce( opt_reduce optReduce )
+	{
+		CodeBlock *block = 0;
+		if ( optReduce.LangStmtList() != 0 ) {
+			ObjectDef *localFrame = blockOpen();
+			StmtList *stmtList = walkLangStmtList( optReduce.LangStmtList() );
+
+			block = CodeBlock::cons( stmtList, localFrame );
+			block->context = contextStack.top();
+
+			blockClose();
+		}
+		return block;
+	}
+
+	void walkProdList( LelDefList *lelDefList, prod_list ProdList )
+	{
+		if ( ProdList.ProdList() != 0 )
+			walkProdList( lelDefList, ProdList.ProdList() );
+
+		ProdElList *list = new ProdElList;
+
+		prod Prod = ProdList.Prod();
+
+		walkProdElList( list, Prod.ProdElList() );
+		CodeBlock *codeBlock = walkOptReduce( Prod.OptReduce() );
+
+		bool commit = Prod.OptCommit().Commit() != 0;
+
+		Production *prod = BaseParser::production( internal, list, commit, codeBlock, 0 );
+		prodAppend( lelDefList, prod );
+	}
+
+	ReOrItem *walkRegOrChar( reg_or_char regOrChar )
+	{
+		ReOrItem *orItem = 0;
+		if ( regOrChar.Char() != 0 ) {
+			String c = unescape( regOrChar.Char().text().c_str() );
+			orItem = ReOrItem::cons( internal, c );
+		}
+		else {
+			String low = unescape( regOrChar.Low().text().c_str() );
+			String high = unescape( regOrChar.High().text().c_str() );
+			orItem = ReOrItem::cons( internal, low[0], high[0] );
+		}
+		return orItem;
+	}
+
+	ReOrBlock *walkRegOrData( reg_or_data regOrData )
+	{
+		ReOrBlock *block = 0;
+		if ( regOrData.Data() != 0 ) {
+			ReOrBlock *left = walkRegOrData( regOrData.Data() );
+			ReOrItem *right = walkRegOrChar( regOrData.Char() );
+			block = lexRegularExprData( left, right );
+		}
+		else {
+			block = ReOrBlock::cons();
+		}
+		return block;
+	}
+
+
+	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
+	{
+		if ( LexFactorNegTree.FactorNeg() != 0 ) {
+			lex_factor_neg Rec = LexFactorNegTree.FactorNeg();
+			LexFactorNeg *recNeg = walkLexFactorNeg( Rec );
+			LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, recNeg,
+					LexFactorNeg::CharNegateType );
+			return factorNeg;
+		}
+		else {
+			lex_factor LexFactorTree = LexFactorNegTree.Factor();
+			LexFactor *factor = walkLexFactor( LexFactorTree );
+			LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
+			return factorNeg;
+		}
+	}
+
+	LexFactorRep *walkLexFactorRep( lex_factor_rep LexFactorRepTree )
+	{
+		LexFactorRep *factorRep = 0;
+		if ( LexFactorRepTree.Star() != 0 ) {
+			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
+			LexFactorRep *recRep = walkLexFactorRep( Rec );
+			factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
+		}
+		else if ( LexFactorRepTree.StarStar() != 0 ) {
+			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
+			LexFactorRep *recRep = walkLexFactorRep( Rec );
+			factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarStarType );
+		}
+		else if ( LexFactorRepTree.Plus() != 0 ) {
+			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
+			LexFactorRep *recRep = walkLexFactorRep( Rec );
+			factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::PlusType );
+		}
+		else if ( LexFactorRepTree.Question() != 0 ) {
+			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
+			LexFactorRep *recRep = walkLexFactorRep( Rec );
+			factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::OptionalType );
+		}
+		else if ( LexFactorRepTree.Exact() != 0 ) {
+			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
+			int low = atoi( LexFactorRepTree.Exact().text().c_str() );
+			factorRep = LexFactorRep::cons( internal, recRep, low, 0, LexFactorRep::ExactType );
+		}
+		else if ( LexFactorRepTree.Max() != 0 ) {
+			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
+			int high = atoi( LexFactorRepTree.Max().text().c_str() );
+			factorRep = LexFactorRep::cons( internal, recRep, 0, high, LexFactorRep::MaxType );
+		}
+		else if ( LexFactorRepTree.Min() != 0 ) {
+			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
+			int low = atoi( LexFactorRepTree.Min().text().c_str() );
+			factorRep = LexFactorRep::cons( internal, recRep, low, 0, LexFactorRep::MinType );
+		}
+		else if ( LexFactorRepTree.Low() != 0 ) {
+			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
+			int low = atoi( LexFactorRepTree.Low().text().c_str() );
+			int high = atoi( LexFactorRepTree.High().text().c_str() );
+			factorRep = LexFactorRep::cons( internal, recRep, low, high, LexFactorRep::RangeType );
+		}
+		else {
+			lex_factor_neg LexFactorNegTree = LexFactorRepTree.FactorNeg();
+			LexFactorNeg *factorNeg = walkLexFactorNeg( LexFactorNegTree );
+			factorRep = LexFactorRep::cons( internal, factorNeg );
+		}
+
+		return factorRep;
+	}
+
+	LexTerm *walkLexTerm( lex_term LexTermTree )
+	{
+		LexTerm *term = 0;
+		if ( LexTermTree.Term() != 0 ) {
+			LexTerm *leftTerm = walkLexTerm( LexTermTree.Term() );
+			LexFactorAug *factorAug = walkLexFactorAug( LexTermTree.FactorRep() );
+
+			if ( LexTermTree.OptDot() != 0 ) {
+				term = LexTerm::cons( leftTerm, factorAug, LexTerm::ConcatType );
+			}
+			else if ( LexTermTree.ColonGt() != 0 ) {
+				term = LexTerm::cons( leftTerm, factorAug, LexTerm::RightStartType );
+			}
+			else if ( LexTermTree.ColonGtGt() != 0 ) {
+				term = LexTerm::cons( leftTerm, factorAug, LexTerm::RightFinishType );
+			}
+			else if ( LexTermTree.LtColon() != 0 ) {
+				term = LexTerm::cons( leftTerm, factorAug, LexTerm::LeftType );
+			}
+		}
+		else {
+			lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
+			LexFactorAug *factorAug = walkLexFactorAug( LexFactorRepTree );
+			term = LexTerm::cons( factorAug );
+		}
+		return term;
+	}
+
+	void walkRlDef( rl_def rlDef )
+	{
+		String id = rlDef.Id().text().c_str();
+
+		lex_expr LexExpr = rlDef.Expr();
+		LexExpression *expr = walkLexExpr( LexExpr );
+		LexJoin *join = LexJoin::cons( expr );
+
+		addRegularDef( internal, namespaceStack.top(), id, join );
+	}
+
+	void walkLexRegion( region_def regionDef )
+	{
+		pushRegionSet( internal );
+		walkRootItemList( regionDef.RootItemList() );
+		popRegionSet();
+	}
+
+	void walkCflDef( cfl_def cflDef )
+	{
+		String name = cflDef.DefId().text().c_str();
+		ObjectDef *objectDef = walkVarDefList( cflDef.VarDefList() );
+		objectDef->name = name;
+
+		LelDefList *defList = new LelDefList;
+		walkProdList( defList, cflDef.ProdList() );
+
+		bool reduceFirst = cflDef.OptReduceFirst().ReduceFirst() != 0;
+
+		NtDef *ntDef = NtDef::cons( name, namespaceStack.top(),
+				contextStack.top(), reduceFirst );
+
+		BaseParser::cflDef( ntDef, objectDef, defList );
+	}
+
+	ExprVect *walkCodeExprList( _repeat_code_expr codeExprList )
+	{
+		ExprVect *exprVect = new ExprVect;
+		while ( !codeExprList.end() ) {
+			code_expr codeExpr = codeExprList.value();
+			LangExpr *expr = walkCodeExpr( codeExpr );
+			exprVect->append( expr );
+			codeExprList = codeExprList.next();
+		}
+		return exprVect;
+	}
+
+	LangStmt *walkPrintStmt( print_stmt &printStmt )
+	{
+		_repeat_code_expr codeExprList = printStmt.CodeExprList();
+		ExprVect *exprVect = walkCodeExprList( codeExprList );
+
+		LangStmt::Type type;
+		if ( printStmt.Tree() != 0 )
+			type = LangStmt::PrintType;
+		else if ( printStmt.PrintStream() != 0 )
+			type = LangStmt::PrintStreamType;
+		else if ( printStmt.Xml() != 0 )
+			type = LangStmt::PrintXMLType;
+		else if ( printStmt.XmlAc() != 0 )
+			type = LangStmt::PrintXMLACType;
+			
+		return LangStmt::cons( internal, type, exprVect );
+	}
+
+	QualItemVect *walkQual( qual &Qual )
+	{
+		QualItemVect *qualItemVect;
+		qual RecQual = Qual.Qual();
+		if ( RecQual != 0 ) {
+			qualItemVect = walkQual( RecQual );
+			String id = Qual.Id().text().c_str();
+			QualItem::Type type = Qual.Dot() != 0 ? QualItem::Dot : QualItem::Arrow;
+			qualItemVect->append( QualItem( internal, id, type ) );
+		}
+		else {
+			qualItemVect = new QualItemVect;
+		}
+		return qualItemVect;
+	}
+
+	LangVarRef *walkVarRef( var_ref varRef )
+	{
+		qual Qual = varRef.Qual();
+		QualItemVect *qualItemVect = walkQual( Qual );
+		String id = varRef.Id().text().c_str();
+		LangVarRef *langVarRef = LangVarRef::cons( internal, qualItemVect, id );
+		return langVarRef;
+	}
+
+	ObjectField *walkOptCapture( opt_capture optCapture )
+	{
+		ObjectField *objField = 0;
+		if ( optCapture.Id() != 0 ) {
+			String id = optCapture.Id().text().c_str();
+			objField = ObjectField::cons( internal, 0, id );
+		}
+		return objField;
+	}
+
+	/*
+	 * Constructor
+	 */
+
+	ConsItemList *walkLitConsEl( lit_cons_el litConsEl )
+	{
+		ConsItemList *list = 0;
+		if ( litConsEl.ConsData() != 0 ) {
+			String consData = unescape( litConsEl.ConsData().text().c_str() );
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			list = ConsItemList::cons( consItem );
+		}
+		else if ( litConsEl.ConsElList() != 0 ) {
+			list = walkConsElList( litConsEl.ConsElList() );
+		}
+		return list;
+	}
+
+	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList, CONS_NL Nl )
+	{
+		ConsItemList *list = new ConsItemList;
+		while ( !litConsElList.end() ) {
+			ConsItemList *extension = walkLitConsEl( litConsElList.value() );
+			list = consListConcat( list, extension );
+			litConsElList = litConsElList.next();
+		}
+
+		if ( Nl != 0 ) {
+			String consData = unescape( Nl.text().c_str() );
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItemList *term = ConsItemList::cons( consItem );
+			list = consListConcat( list, term );
+		}
+
+		return list;
+	}
+
+	ConsItemList *walkConsEl( cons_el consEl )
+	{
+		ConsItemList *list = 0;
+		if ( consEl.Lit() != 0 ) {
+			NamespaceQual *nspaceQual = walkRegionQual( consEl.RegionQual() );
+			String lit = consEl.Lit().text().c_str();
+			list = consElLiteral( internal, lit, nspaceQual );
+		}
+		else if ( consEl.CodeExpr() != 0 ) {
+			LangExpr *consExpr = walkCodeExpr( consEl.CodeExpr() );
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
+			list = ConsItemList::cons( consItem );
+		}
+		else if ( consEl.LitConsElList() != 0 ) {
+			list = walkLitConsElList( consEl.LitConsElList(), consEl.Term().Nl() );
+		}
+		return list;
+	}
+
+	ConsItemList *walkConsElList( _repeat_cons_el consElList )
+	{
+		ConsItemList *list = new ConsItemList;
+		while ( !consElList.end() ) {
+			ConsItemList *extension = walkConsEl( consElList.value() );
+			list = consListConcat( list, extension );
+			consElList = consElList.next();
+		}
+		return list;
+	}
+
+	ConsItemList *walkConsTopEl( cons_top_el consTopEl )
+	{
+		ConsItemList *list = 0;
+		if ( consTopEl.LitConsElList() != 0 )
+			list = walkLitConsElList( consTopEl.LitConsElList(), consTopEl.Term().Nl() );
+		else if ( consTopEl.ConsElList() != 0 ) {
+			list = walkConsElList( consTopEl.ConsElList() );
+		}
+		return list;
+	}
+
+	ConsItemList *walkConsList( cons_list consList )
+	{
+		ConsItemList *list = walkConsTopEl( consList.ConsTopEl() );
+
+		if ( consList.ConsList() != 0 ) {
+			ConsItemList *extension = walkConsList( consList.ConsList() );
+			consListConcat( list, extension );
+		}
+
+		return list;
+	}
+
+	ConsItemList *walkConstructor( constructor Constructor )
+	{
+		ConsItemList *list = walkConsList( Constructor.ConsList() );
+		return list;
+	}
+
+	/*
+	 * String
+	 */
+
+	ConsItemList *walkLitStringEl( lit_string_el litStringEl )
+	{
+		ConsItemList *list = 0;
+		if ( litStringEl.ConsData() != 0 ) {
+			String consData = unescape( litStringEl.ConsData().text().c_str() );
+			ConsItem *stringItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			list = ConsItemList::cons( stringItem );
+		}
+		else if ( litStringEl.StringElList() != 0 ) {
+			list = walkStringElList( litStringEl.StringElList() );
+		}
+		return list;
+	}
+
+	ConsItemList *walkLitStringElList( _repeat_lit_string_el litStringElList, CONS_NL Nl )
+	{
+		ConsItemList *list = new ConsItemList;
+		while ( !litStringElList.end() ) {
+			ConsItemList *extension = walkLitStringEl( litStringElList.value() );
+			list = consListConcat( list, extension );
+			litStringElList = litStringElList.next();
+		}
+
+		if ( Nl != 0 ) {
+			String consData = unescape( Nl.text().c_str() );
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItemList *term = ConsItemList::cons( consItem );
+			list = consListConcat( list, term );
+		}
+		return list;
+	}
+
+	ConsItemList *walkStringEl( string_el stringEl )
+	{
+		ConsItemList *list = 0;
+		if ( stringEl.LitStringElList() != 0 ) {
+			list = walkLitStringElList( stringEl.LitStringElList(), stringEl.Term().Nl() );
+		}
+		else if ( stringEl.TildeData() != 0 ) {
+			String consData = stringEl.TildeData().text().c_str();
+			consData += '\n';
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			list = ConsItemList::cons( consItem );
+		}
+		else if ( stringEl.CodeExpr() != 0 ) {
+			LangExpr *consExpr = walkCodeExpr( stringEl.CodeExpr() );
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
+			list = ConsItemList::cons( consItem );
+		}
+		return list;
+	}
+
+	ConsItemList *walkStringElList( _repeat_string_el stringElList )
+	{
+		ConsItemList *list = new ConsItemList;
+		while ( !stringElList.end() ) {
+			ConsItemList *extension = walkStringEl( stringElList.value() );
+			list = consListConcat( list, extension );
+			stringElList = stringElList.next();
+		}
+		return list;
+	}
+
+	ConsItemList *walkStringTopEl( string_top_el stringTopEl )
+	{
+		ConsItemList *list = 0;
+		if ( stringTopEl.LitStringElList() != 0 )
+			list = walkLitStringElList( stringTopEl.LitStringElList(), stringTopEl.Term().Nl() );
+		else if ( stringTopEl.TildeData() != 0 ) {
+			String consData = stringTopEl.TildeData().text().c_str();
+			consData += '\n';
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			list = ConsItemList::cons( consItem );
+		}
+		else if ( stringTopEl.StringElList() != 0 ) {
+			list = walkStringElList( stringTopEl.StringElList() );
+		}
+		return list;
+	}
+
+	ConsItemList *walkStringList( string_list stringList )
+	{
+		ConsItemList *list = walkStringTopEl( stringList.StringTopEl() );
+
+		if ( stringList.StringList() != 0 ) {
+			ConsItemList *extension = walkStringList( stringList.StringList() );
+			consListConcat( list, extension );
+		}
+
+		return list;
+	}
+
+	ConsItemList *walkString( cstring String )
+	{
+		ConsItemList *list = walkStringList( String.StringList() );
+		return list;
+	}
+
+	/*
+	 * Accum
+	 */
+
+	ConsItemList *walkLitAccumEl( lit_accum_el litAccumEl )
+	{
+		ConsItemList *list = 0;
+		if ( litAccumEl.ConsData() != 0 ) {
+			String consData = unescape( litAccumEl.ConsData().text().c_str() );
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			list = ConsItemList::cons( consItem );
+		}
+		else if ( litAccumEl.AccumElList() != 0 ) {
+			list = walkAccumElList( litAccumEl.AccumElList() );
+		}
+		return list;
+	}
+
+	ConsItemList *walkLitAccumElList( _repeat_lit_accum_el litAccumElList, CONS_NL Nl )
+	{
+		ConsItemList *list = new ConsItemList;
+		while ( !litAccumElList.end() ) {
+			ConsItemList *extension = walkLitAccumEl( litAccumElList.value() );
+			list = consListConcat( list, extension );
+			litAccumElList = litAccumElList.next();
+		}
+
+		if ( Nl != 0 ) {
+			String consData = unescape( Nl.text().c_str() );
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItemList *term = ConsItemList::cons( consItem );
+			list = consListConcat( list, term );
+		}
+
+		return list;
+	}
+
+	ConsItemList *walkAccumEl( accum_el accumEl )
+	{
+		ConsItemList *list = 0;
+		if ( accumEl.LitAccumElList() != 0 ) {
+			list = walkLitAccumElList( accumEl.LitAccumElList(), accumEl.Term().Nl() );
+		}
+		else if ( accumEl.CodeExpr() != 0 ) {
+			LangExpr *accumExpr = walkCodeExpr( accumEl.CodeExpr() );
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
+			list = ConsItemList::cons( consItem );
+		}
+		return list;
+	}
+
+	ConsItemList *walkAccumElList( _repeat_accum_el accumElList )
+	{
+		ConsItemList *list = new ConsItemList;
+		while ( !accumElList.end() ) {
+			ConsItemList *extension = walkAccumEl( accumElList.value() );
+			list = consListConcat( list, extension );
+			accumElList = accumElList.next();
+		}
+		return list;
+	}
+
+	ConsItemList *walkAccumTopEl( accum_top_el accumTopEl )
+	{
+		ConsItemList *list = 0;
+		if ( accumTopEl.LitAccumElList() != 0 )
+			list = walkLitAccumElList( accumTopEl.LitAccumElList(), accumTopEl.Term().Nl() );
+		else if ( accumTopEl.AccumElList() != 0 ) {
+			list = walkAccumElList( accumTopEl.AccumElList() );
+		}
+		return list;
+	}
+
+	ConsItemList *walkAccumList( accum_list accumList )
+	{
+		ConsItemList *list = walkAccumTopEl( accumList.AccumTopEl() );
+
+		if ( accumList.AccumList() != 0 ) {
+			ConsItemList *extension = walkAccumList( accumList.AccumList() );
+			consListConcat( list, extension );
+		}
+
+		return list;
+	}
+
+	ConsItemList *walkAccumulate( accumulate Accumulate )
+	{
+		ConsItemList *list = walkAccumList( Accumulate.AccumList() );
+		return list;
+	}
+
+	void walkFieldInit( FieldInitVect *list, field_init fieldInit )
+	{
+		LangExpr *expr = walkCodeExpr( fieldInit.CodeExpr() );
+		FieldInit *init = FieldInit::cons( internal, "_name", expr );
+		list->append( init );
+	}
+
+	FieldInitVect *walkOptFieldInit( opt_field_init optFieldInit )
+	{
+		FieldInitVect *list = 0;
+		if ( optFieldInit.FieldInitList() != 0 ) {
+			list = new FieldInitVect;
+			_repeat_field_init fieldInitList = optFieldInit.FieldInitList();
+			while ( !fieldInitList.end() ) {
+				walkFieldInit( list, fieldInitList.value() );
+				fieldInitList = fieldInitList.next();
+			}
+		}
+		return list;
+	}
+
+	LangExpr *walkCodeFactor( code_factor codeFactor )
+	{
+		LangExpr *expr = 0;
+		if ( codeFactor.VarRef() != 0 ) {
+			var_ref varRef = codeFactor.VarRef();
+			LangVarRef *langVarRef = walkVarRef( varRef );
+
+			LangTerm *term = 0;
+			if ( codeFactor.CodeExprList() == 0 ) {
+				term = LangTerm::cons( internal, LangTerm::VarRefType, langVarRef );
+			}
+			else {
+				ExprVect *exprVect = walkCodeExprList( codeFactor.CodeExprList() );
+				term = LangTerm::cons( internal, langVarRef, exprVect );
+			}
+
+			expr = LangExpr::cons( term );
+		}
+		else if ( codeFactor.Number() != 0 ) {
+			String number = codeFactor.Number().text().c_str();
+			LangTerm *term = LangTerm::cons( InputLoc(), LangTerm::NumberType, number );
+			expr = LangExpr::cons( term );
+		}
+		else if ( codeFactor.Lit() != 0 ) {
+			String lit = codeFactor.Lit().text().c_str();
+			LangTerm *term = LangTerm::cons( internal, LangTerm::StringType, lit );
+			expr = LangExpr::cons( term );
+		}
+		else if ( codeFactor.Parse() != 0 ) {
+			/* The type we are parsing. */
+			type_ref typeRefTree = codeFactor.TypeRef();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
+			FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
+			ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
+
+			expr = parseCmd( internal, false, objField, typeRef, init, list );
+		}
+		else if ( codeFactor.ParseStop() != 0 ) {
+			/* The type we are parsing. */
+			type_ref typeRefTree = codeFactor.TypeRef();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
+			FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
+			ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
+
+			expr = parseCmd( internal, true, objField, typeRef, init, list );
+		}
+		else if ( codeFactor.Cons() != 0 ) {
+			/* The type we are parsing. */
+			type_ref typeRefTree = codeFactor.TypeRef();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
+			ConsItemList *list = walkConstructor( codeFactor.Constructor() );
+			FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
+
+			expr = construct( internal, objField, list, typeRef, init );
+		}
+		else if ( codeFactor.Send() != 0 ) {
+			LangVarRef *varRef = walkVarRef( codeFactor.ToVarRef() );
+			ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
+			expr = send( internal, varRef, list );
+		}
+		else if ( codeFactor.Nil() != 0 ) {
+			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::NilType ) );
+		}
+		else if ( codeFactor.True() != 0 ) {
+			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::TrueType ) );
+		}
+		else if ( codeFactor.False() != 0 ) {
+			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::FalseType ) );
+		}
+		else if ( codeFactor.ParenCodeExpr() != 0 ) {
+			expr = walkCodeExpr( codeFactor.ParenCodeExpr() );
+		}
+		else if ( codeFactor.String() != 0 ) {
+			ConsItemList *list = walkString( codeFactor.String() );
+			expr = LangExpr::cons( LangTerm::cons( internal, list ) );
+		}
+		else if ( codeFactor.MatchVarRef() != 0 ) {
+			LangVarRef *varRef = walkVarRef( codeFactor.MatchVarRef() );
+			PatternItemList *list = walkPattern( codeFactor.Pattern() );
+			expr = match( internal, varRef, list );
+		}
+		else if ( codeFactor.InVarRef() != 0 ) {
+			TypeRef *typeRef = walkTypeRef( codeFactor.TypeRef() );
+			LangVarRef *varRef = walkVarRef( codeFactor.InVarRef() );
+			expr = LangExpr::cons( LangTerm::cons( internal,
+					LangTerm::SearchType, typeRef, varRef ) );
+		}
+		else if ( codeFactor.MakeTreeExprList() != 0 ) {
+			ExprVect *exprList = walkCodeExprList( codeFactor.MakeTreeExprList() );
+			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::MakeTreeType, exprList ) );
+		}
+		else if ( codeFactor.MakeTokenExprList() != 0 ) {
+			ExprVect *exprList = walkCodeExprList( codeFactor.MakeTokenExprList() );
+			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::MakeTokenType, exprList ) );
+		}
+		else if ( codeFactor.TypeIdTypeRef() != 0 ) {
+			TypeRef *typeRef = walkTypeRef( codeFactor.TypeIdTypeRef() );
+			expr = LangExpr::cons( LangTerm::cons( internal,
+					LangTerm::TypeIdType, typeRef ) );
+		}
+		else if ( codeFactor.NewCodeFactor() != 0 ) {
+			LangExpr *newExpr = walkCodeFactor( codeFactor.NewCodeFactor() );
+			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::NewType, newExpr ) );
+		}
+		return expr;
+	}
+
+	LangExpr *walkCodeAdditive( code_additive additive )
+	{
+		LangExpr *expr = 0;
+		if ( additive.Plus() != 0 ) {
+			LangExpr *left = walkCodeAdditive( additive.Additive() );
+			LangExpr *right = walkCodeMultiplicitive( additive.Multiplicitive() );
+			expr = LangExpr::cons( internal, left, '+', right );
+		}
+		else if ( additive.Minus() != 0 ) {
+			LangExpr *left = walkCodeAdditive( additive.Additive() );
+			LangExpr *right = walkCodeMultiplicitive( additive.Multiplicitive() );
+			expr = LangExpr::cons( internal, left, '-', right );
+		}
+		else {
+			expr = walkCodeMultiplicitive( additive.Multiplicitive() );
+		}
+		return expr;
+	}
+
+
+	LangExpr *walkCodeUnary( code_unary unary )
+	{
+		LangExpr *expr = walkCodeFactor( unary.Factor() );
+
+		if ( unary.Bang() != 0 ) {
+			expr = LangExpr::cons( internal, '!', expr );
+		}
+		else if ( unary.Dollar() != 0 ) {
+			expr = LangExpr::cons( internal, '$', expr );
+		}
+		else if ( unary.Caret() != 0 ) {
+			expr = LangExpr::cons( internal, '^', expr );
+		}
+		else if ( unary.Percent() != 0 ) {
+			expr = LangExpr::cons( internal, '%', expr );
+		}
+
+		return expr;
+	}
+
+
+	LangExpr *walkCodeRelational( code_relational codeRelational )
+	{
+		LangExpr *expr = 0;
+		if ( codeRelational.Relational() != 0 ) {
+			LangExpr *left = walkCodeRelational( codeRelational.Relational() );
+			LangExpr *right = walkCodeAdditive( codeRelational.Additive() );
+
+			if ( codeRelational.EqEq() != 0 ) {
+				expr = LangExpr::cons( internal, left, OP_DoubleEql, right );
+			}
+			if ( codeRelational.Neq() != 0 ) {
+				expr = LangExpr::cons( internal, left, OP_NotEql, right );
+			}
+			else if ( codeRelational.Lt() != 0 ) {
+				expr = LangExpr::cons( internal, left, '<', right );
+			}
+			else if ( codeRelational.Gt() != 0 ) {
+				expr = LangExpr::cons( internal, left, '>', right );
+			}
+			else if ( codeRelational.LtEq() != 0 ) {
+				expr = LangExpr::cons( internal, left, OP_LessEql, right );
+			}
+			else if ( codeRelational.GtEq() != 0 ) {
+				expr = LangExpr::cons( internal, left, OP_GrtrEql, right );
+			}
+		}
+		else {
+			expr = walkCodeAdditive( codeRelational.Additive() );
+		}
+		return expr;
+	}
+
+	LangStmt *walkExprStmt( expr_stmt &exprStmt )
+	{
+		LangStmt *stmt;
+		if ( exprStmt.CodeExpr() != 0 ) {
+			code_expr codeExpr = exprStmt.CodeExpr();
+			LangExpr *expr = walkCodeExpr( codeExpr );
+			stmt = LangStmt::cons( internal, LangStmt::ExprType, expr );
+		}
+		return stmt;
+	}
+
+	ObjectField *walkVarDef( var_def varDef )
+	{
+		TypeRef *typeRef = walkTypeRef( varDef.TypeRef() );
+		String id = varDef.Id().text().c_str();
+		return ObjectField::cons( internal, typeRef, id );
+	}
+
+	LangTerm *walkIterCall( iter_call IterCall )
+	{
+		LangTerm *langTerm = 0;
+		if ( IterCall.Id() != 0 ) {
+			String tree = IterCall.Id().text().c_str();
+			langTerm = LangTerm::cons( internal,
+					LangTerm::VarRefType, LangVarRef::cons( internal, tree ) );
+		}
+		else {
+			LangVarRef *varRef = walkVarRef( IterCall.VarRef() );
+			ExprVect *exprVect = walkCodeExprList( IterCall.CodeExprList() );
+			langTerm = LangTerm::cons( internal, varRef, exprVect );
+		}
+		
+		return langTerm;
+	}
+
+
+	LangStmt *walkElsifClause( elsif_clause elsifClause )
+	{
+		pushScope();
+		LangExpr *expr = walkCodeExpr( elsifClause.ElsifExpr() );
+		StmtList *stmtList = walkBlockOrSingle( elsifClause.BlockOrSingle() );
+		LangStmt *stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, 0 );
+		popScope();
+		return stmt;
+	}
+
+	LangStmt *walkOptionalElse( optional_else optionalElse )
+	{
+		LangStmt *stmt = 0;
+		if ( optionalElse.BlockOrSingle() != 0 ) {
+			pushScope();
+			StmtList *stmtList = walkBlockOrSingle( optionalElse.BlockOrSingle() );
+			stmt = LangStmt::cons( LangStmt::ElseType, stmtList );
+			popScope();
+		}
+		return stmt;
+	}
+
+	LangStmt *walkElsifList( elsif_list elsifList )
+	{
+		LangStmt *stmt = 0;
+		if ( elsifList.ElsifList() != 0 ) {
+			stmt = walkElsifClause( elsifList.ElsifClause() );
+			stmt->elsePart = walkElsifList( elsifList.ElsifList() );
+		}
+		else {
+			stmt = walkOptionalElse( elsifList.OptionalElse() );
+		}
+		return stmt;
+	}
+
+	void walkContextVarDef( context_var_def ContextVarDef )
+	{
+		ObjectField *objField = walkVarDef( ContextVarDef.VarDef() );
+		contextVarDef( internal, objField );
+	}
+
+	//def reference_type_ref
+	//	[REF type_ref]
+	//
+	//def param_var_def
+	//	[id COLON type_ref]
+	//|	[id COLON reference_type_ref]
+	//
+	//def param_list
+	//	[param_list param_var_def]
+	//|	[param_var_def]
+	//
+	//def opt_param_list
+	//	[param_list]
+	//|	[]
+
+	TypeRef *walkReferenceTypeRef( reference_type_ref ReferenceTypeRef )
+	{
+		TypeRef *typeRef = walkTypeRef( ReferenceTypeRef.TypeRef() );
+		return TypeRef::cons( internal, TypeRef::Ref, typeRef );
+	}
+
+	ObjectField *walkParamVarDef( param_var_def paramVarDef )
+	{
+		String id = paramVarDef.Id().text().c_str();
+		TypeRef *typeRef = 0;
+
+		if ( paramVarDef.TypeRef() != 0 )
+			typeRef = walkTypeRef( paramVarDef.TypeRef() );
+		else
+			typeRef = walkReferenceTypeRef( paramVarDef.RefTypeRef() );
+		
+		return addParam( internal, typeRef, id );
+	}
+
+	ParameterList *walkParamVarDefList( _repeat_param_var_def paramVarDefList )
+	{
+		ParameterList *paramList = new ParameterList;
+		while ( !paramVarDefList.end() ) {
+			ObjectField *param = walkParamVarDef( paramVarDefList.value() );
+			appendParam( paramList, param );
+			paramVarDefList = paramVarDefList.next();
+		}
+		return paramList;
+	}
+
+	void walkFunctionDef( function_def FunctionDef )
+	{
 		ObjectDef *localFrame = blockOpen();
-		StmtList *stmtList = walkLangStmtList( optReduce.LangStmtList() );
 
-		block = CodeBlock::cons( stmtList, localFrame );
-		block->context = contextStack.top();
+		TypeRef *typeRef = walkTypeRef( FunctionDef.TypeRef() );
+		String id = FunctionDef.Id().text().c_str();
+		ParameterList *paramList = walkParamVarDefList( FunctionDef.ParamVarDefList() );
+		StmtList *stmtList = walkLangStmtList( FunctionDef.LangStmtList() );
+		functionDef( stmtList, localFrame, paramList, typeRef, id );
 
 		blockClose();
 	}
-	return block;
-}
 
-void LoadSource::walkProdList( LelDefList *lelDefList, prod_list ProdList )
-{
-	if ( ProdList.ProdList() != 0 )
-		walkProdList( lelDefList, ProdList.ProdList() );
+	void walkIterDef( iter_def IterDef )
+	{
+		ObjectDef *localFrame = blockOpen();
 
-	ProdElList *list = new ProdElList;
+		String id = IterDef.Id().text().c_str();
+		ParameterList *paramList = walkParamVarDefList( IterDef.ParamVarDefList() );
+		StmtList *stmtList = walkLangStmtList( IterDef.LangStmtList() );
+		iterDef( stmtList, localFrame, paramList, id );
 
-	prod Prod = ProdList.Prod();
-
-	walkProdElList( list, Prod.ProdElList() );
-	CodeBlock *codeBlock = walkOptReduce( Prod.OptReduce() );
-
-	bool commit = Prod.OptCommit().Commit() != 0;
-
-	Production *prod = BaseParser::production( internal, list, commit, codeBlock, 0 );
-	prodAppend( lelDefList, prod );
-}
-
-ReOrItem *LoadSource::walkRegOrChar( reg_or_char regOrChar )
-{
-	ReOrItem *orItem = 0;
-	if ( regOrChar.Char() != 0 ) {
-		String c = unescape( regOrChar.Char().text().c_str() );
-		orItem = ReOrItem::cons( internal, c );
-	}
-	else {
-		String low = unescape( regOrChar.Low().text().c_str() );
-		String high = unescape( regOrChar.High().text().c_str() );
-		orItem = ReOrItem::cons( internal, low[0], high[0] );
-	}
-	return orItem;
-}
-
-ReOrBlock *LoadSource::walkRegOrData( reg_or_data regOrData )
-{
-	ReOrBlock *block = 0;
-	if ( regOrData.Data() != 0 ) {
-		ReOrBlock *left = walkRegOrData( regOrData.Data() );
-		ReOrItem *right = walkRegOrChar( regOrData.Char() );
-		block = lexRegularExprData( left, right );
-	}
-	else {
-		block = ReOrBlock::cons();
-	}
-	return block;
-}
-
-
-LexFactorNeg *LoadSource::walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
-{
-	if ( LexFactorNegTree.FactorNeg() != 0 ) {
-		lex_factor_neg Rec = LexFactorNegTree.FactorNeg();
-		LexFactorNeg *recNeg = walkLexFactorNeg( Rec );
-		LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, recNeg,
-				LexFactorNeg::CharNegateType );
-		return factorNeg;
-	}
-	else {
-		lex_factor LexFactorTree = LexFactorNegTree.Factor();
-		LexFactor *factor = walkLexFactor( LexFactorTree );
-		LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-		return factorNeg;
-	}
-}
-
-LexFactorRep *LoadSource::walkLexFactorRep( lex_factor_rep LexFactorRepTree )
-{
-	LexFactorRep *factorRep = 0;
-	if ( LexFactorRepTree.Star() != 0 ) {
-		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
-		LexFactorRep *recRep = walkLexFactorRep( Rec );
-		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
-	}
-	else if ( LexFactorRepTree.StarStar() != 0 ) {
-		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
-		LexFactorRep *recRep = walkLexFactorRep( Rec );
-		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarStarType );
-	}
-	else if ( LexFactorRepTree.Plus() != 0 ) {
-		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
-		LexFactorRep *recRep = walkLexFactorRep( Rec );
-		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::PlusType );
-	}
-	else if ( LexFactorRepTree.Question() != 0 ) {
-		lex_factor_rep Rec = LexFactorRepTree.FactorRep();
-		LexFactorRep *recRep = walkLexFactorRep( Rec );
-		factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::OptionalType );
-	}
-	else if ( LexFactorRepTree.Exact() != 0 ) {
-		LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
-		int low = atoi( LexFactorRepTree.Exact().text().c_str() );
-		factorRep = LexFactorRep::cons( internal, recRep, low, 0, LexFactorRep::ExactType );
-	}
-	else if ( LexFactorRepTree.Max() != 0 ) {
-		LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
-		int high = atoi( LexFactorRepTree.Max().text().c_str() );
-		factorRep = LexFactorRep::cons( internal, recRep, 0, high, LexFactorRep::MaxType );
-	}
-	else if ( LexFactorRepTree.Min() != 0 ) {
-		LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
-		int low = atoi( LexFactorRepTree.Min().text().c_str() );
-		factorRep = LexFactorRep::cons( internal, recRep, low, 0, LexFactorRep::MinType );
-	}
-	else if ( LexFactorRepTree.Low() != 0 ) {
-		LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
-		int low = atoi( LexFactorRepTree.Low().text().c_str() );
-		int high = atoi( LexFactorRepTree.High().text().c_str() );
-		factorRep = LexFactorRep::cons( internal, recRep, low, high, LexFactorRep::RangeType );
-	}
-	else {
-		lex_factor_neg LexFactorNegTree = LexFactorRepTree.FactorNeg();
-		LexFactorNeg *factorNeg = walkLexFactorNeg( LexFactorNegTree );
-		factorRep = LexFactorRep::cons( internal, factorNeg );
+		blockClose();
 	}
 
-	return factorRep;
-}
-
-LexTerm *LoadSource::walkLexTerm( lex_term LexTermTree )
-{
-	LexTerm *term = 0;
-	if ( LexTermTree.Term() != 0 ) {
-		LexTerm *leftTerm = walkLexTerm( LexTermTree.Term() );
-		LexFactorAug *factorAug = walkLexFactorAug( LexTermTree.FactorRep() );
-
-		if ( LexTermTree.OptDot() != 0 ) {
-			term = LexTerm::cons( leftTerm, factorAug, LexTerm::ConcatType );
+	void walkContextItem( context_item contextItem )
+	{
+		if ( contextItem.RlDef() != 0 ) {
+			walkRlDef( contextItem.RlDef() );
 		}
-		else if ( LexTermTree.ColonGt() != 0 ) {
-			term = LexTerm::cons( leftTerm, factorAug, LexTerm::RightStartType );
+		else if ( contextItem.ContextVarDef() != 0 ) {
+			walkContextVarDef( contextItem.ContextVarDef() );
 		}
-		else if ( LexTermTree.ColonGtGt() != 0 ) {
-			term = LexTerm::cons( leftTerm, factorAug, LexTerm::RightFinishType );
+		else if ( contextItem.TokenDef() != 0 ) {
+			walkTokenDef( contextItem.TokenDef() );
 		}
-		else if ( LexTermTree.LtColon() != 0 ) {
-			term = LexTerm::cons( leftTerm, factorAug, LexTerm::LeftType );
+		else if ( contextItem.IgnoreDef() != 0 ) {
+			walkIgnoreDef( contextItem.IgnoreDef() );
+		}
+		else if ( contextItem.LiteralDef() != 0 ) {
+			walkLiteralDef( contextItem.LiteralDef() );
+		}
+		else if ( contextItem.CflDef() != 0 ) {
+			walkCflDef( contextItem.CflDef() );
+		}
+		else if ( contextItem.RegionDef() != 0 ) {
+			walkLexRegion( contextItem.RegionDef() );
+		}
+		else if ( contextItem.ContextDef() != 0 ) {
+			walkContextDef( contextItem.ContextDef() );
+		}
+		else if ( contextItem.FunctionDef() != 0 ) {
+			walkFunctionDef( contextItem.FunctionDef() );
+		}
+		else if ( contextItem.IterDef() != 0 ) {
+			walkIterDef( contextItem.IterDef() );
+		}
+		else if ( contextItem.PreEof() != 0 ) {
+			walkPreEof( contextItem.PreEof() );
+		}
+		else if ( contextItem.ExportDef() != 0 ) {
+			walkExportDef( contextItem.ExportDef() );
+		}
+		else if ( contextItem.PrecedenceDef() != 0 ) {
+			walkPrecedenceDef( contextItem.PrecedenceDef() );
 		}
 	}
-	else {
-		lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
-		LexFactorAug *factorAug = walkLexFactorAug( LexFactorRepTree );
-		term = LexTerm::cons( factorAug );
-	}
-	return term;
-}
 
-void LoadSource::walkRlDef( rl_def rlDef )
-{
-	String id = rlDef.Id().text().c_str();
+	void walkContextDef( context_def contextDef )
+	{
+		String name = contextDef.Name().text().c_str();
+		contextHead( internal, name );
 
-	lex_expr LexExpr = rlDef.Expr();
-	LexExpression *expr = walkLexExpr( LexExpr );
-	LexJoin *join = LexJoin::cons( expr );
-
-	addRegularDef( internal, namespaceStack.top(), id, join );
-}
-
-void LoadSource::walkLexRegion( region_def regionDef )
-{
-	pushRegionSet( internal );
-	walkRootItemList( regionDef.RootItemList() );
-	popRegionSet();
-}
-
-void LoadSource::walkCflDef( cfl_def cflDef )
-{
-	String name = cflDef.DefId().text().c_str();
-	ObjectDef *objectDef = walkVarDefList( cflDef.VarDefList() );
-	objectDef->name = name;
-
-	LelDefList *defList = new LelDefList;
-	walkProdList( defList, cflDef.ProdList() );
-
-	bool reduceFirst = cflDef.OptReduceFirst().ReduceFirst() != 0;
-
-	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(),
-			contextStack.top(), reduceFirst );
-
-	BaseParser::cflDef( ntDef, objectDef, defList );
-}
-
-ExprVect *LoadSource::walkCodeExprList( _repeat_code_expr codeExprList )
-{
-	ExprVect *exprVect = new ExprVect;
-	while ( !codeExprList.end() ) {
-		code_expr codeExpr = codeExprList.value();
-		LangExpr *expr = walkCodeExpr( codeExpr );
-		exprVect->append( expr );
-		codeExprList = codeExprList.next();
-	}
-	return exprVect;
-}
-
-LangStmt *LoadSource::walkPrintStmt( print_stmt &printStmt )
-{
-	_repeat_code_expr codeExprList = printStmt.CodeExprList();
-	ExprVect *exprVect = walkCodeExprList( codeExprList );
-
-	LangStmt::Type type;
-	if ( printStmt.Tree() != 0 )
-		type = LangStmt::PrintType;
-	else if ( printStmt.PrintStream() != 0 )
-		type = LangStmt::PrintStreamType;
-	else if ( printStmt.Xml() != 0 )
-		type = LangStmt::PrintXMLType;
-	else if ( printStmt.XmlAc() != 0 )
-		type = LangStmt::PrintXMLACType;
-		
-	return LangStmt::cons( internal, type, exprVect );
-}
-
-QualItemVect *LoadSource::walkQual( qual &Qual )
-{
-	QualItemVect *qualItemVect;
-	qual RecQual = Qual.Qual();
-	if ( RecQual != 0 ) {
-		qualItemVect = walkQual( RecQual );
-		String id = Qual.Id().text().c_str();
-		QualItem::Type type = Qual.Dot() != 0 ? QualItem::Dot : QualItem::Arrow;
-		qualItemVect->append( QualItem( internal, id, type ) );
-	}
-	else {
-		qualItemVect = new QualItemVect;
-	}
-	return qualItemVect;
-}
-
-LangVarRef *LoadSource::walkVarRef( var_ref varRef )
-{
-	qual Qual = varRef.Qual();
-	QualItemVect *qualItemVect = walkQual( Qual );
-	String id = varRef.Id().text().c_str();
-	LangVarRef *langVarRef = LangVarRef::cons( internal, qualItemVect, id );
-	return langVarRef;
-}
-
-ObjectField *walkOptCapture( opt_capture optCapture )
-{
-	ObjectField *objField = 0;
-	if ( optCapture.Id() != 0 ) {
-		String id = optCapture.Id().text().c_str();
-		objField = ObjectField::cons( internal, 0, id );
-	}
-	return objField;
-}
-
-/*
- * Constructor
- */
-
-ConsItemList *LoadSource::walkLitConsEl( lit_cons_el litConsEl )
-{
-	ConsItemList *list = 0;
-	if ( litConsEl.ConsData() != 0 ) {
-		String consData = unescape( litConsEl.ConsData().text().c_str() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		list = ConsItemList::cons( consItem );
-	}
-	else if ( litConsEl.ConsElList() != 0 ) {
-		list = walkConsElList( litConsEl.ConsElList() );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkLitConsElList( _repeat_lit_cons_el litConsElList, CONS_NL Nl )
-{
-	ConsItemList *list = new ConsItemList;
-	while ( !litConsElList.end() ) {
-		ConsItemList *extension = walkLitConsEl( litConsElList.value() );
-		list = consListConcat( list, extension );
-		litConsElList = litConsElList.next();
-	}
-
-	if ( Nl != 0 ) {
-		String consData = unescape( Nl.text().c_str() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		ConsItemList *term = ConsItemList::cons( consItem );
-		list = consListConcat( list, term );
-	}
-
-	return list;
-}
-
-ConsItemList *LoadSource::walkConsEl( cons_el consEl )
-{
-	ConsItemList *list = 0;
-	if ( consEl.Lit() != 0 ) {
-		NamespaceQual *nspaceQual = walkRegionQual( consEl.RegionQual() );
-		String lit = consEl.Lit().text().c_str();
-		list = consElLiteral( internal, lit, nspaceQual );
-	}
-	else if ( consEl.CodeExpr() != 0 ) {
-		LangExpr *consExpr = walkCodeExpr( consEl.CodeExpr() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
-		list = ConsItemList::cons( consItem );
-	}
-	else if ( consEl.LitConsElList() != 0 ) {
-		list = walkLitConsElList( consEl.LitConsElList(), consEl.Term().Nl() );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkConsElList( _repeat_cons_el consElList )
-{
-	ConsItemList *list = new ConsItemList;
-	while ( !consElList.end() ) {
-		ConsItemList *extension = walkConsEl( consElList.value() );
-		list = consListConcat( list, extension );
-		consElList = consElList.next();
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkConsTopEl( cons_top_el consTopEl )
-{
-	ConsItemList *list = 0;
-	if ( consTopEl.LitConsElList() != 0 )
-		list = walkLitConsElList( consTopEl.LitConsElList(), consTopEl.Term().Nl() );
-	else if ( consTopEl.ConsElList() != 0 ) {
-		list = walkConsElList( consTopEl.ConsElList() );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkConsList( cons_list consList )
-{
-	ConsItemList *list = walkConsTopEl( consList.ConsTopEl() );
-
-	if ( consList.ConsList() != 0 ) {
-		ConsItemList *extension = walkConsList( consList.ConsList() );
-		consListConcat( list, extension );
-	}
-
-	return list;
-}
-
-ConsItemList *LoadSource::walkConstructor( constructor Constructor )
-{
-	ConsItemList *list = walkConsList( Constructor.ConsList() );
-	return list;
-}
-
-/*
- * String
- */
-
-ConsItemList *LoadSource::walkLitStringEl( lit_string_el litStringEl )
-{
-	ConsItemList *list = 0;
-	if ( litStringEl.ConsData() != 0 ) {
-		String consData = unescape( litStringEl.ConsData().text().c_str() );
-		ConsItem *stringItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		list = ConsItemList::cons( stringItem );
-	}
-	else if ( litStringEl.StringElList() != 0 ) {
-		list = walkStringElList( litStringEl.StringElList() );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkLitStringElList( _repeat_lit_string_el litStringElList, CONS_NL Nl )
-{
-	ConsItemList *list = new ConsItemList;
-	while ( !litStringElList.end() ) {
-		ConsItemList *extension = walkLitStringEl( litStringElList.value() );
-		list = consListConcat( list, extension );
-		litStringElList = litStringElList.next();
-	}
-
-	if ( Nl != 0 ) {
-		String consData = unescape( Nl.text().c_str() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		ConsItemList *term = ConsItemList::cons( consItem );
-		list = consListConcat( list, term );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkStringEl( string_el stringEl )
-{
-	ConsItemList *list = 0;
-	if ( stringEl.LitStringElList() != 0 ) {
-		list = walkLitStringElList( stringEl.LitStringElList(), stringEl.Term().Nl() );
-	}
-	else if ( stringEl.TildeData() != 0 ) {
-		String consData = stringEl.TildeData().text().c_str();
-		consData += '\n';
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		list = ConsItemList::cons( consItem );
-	}
-	else if ( stringEl.CodeExpr() != 0 ) {
-		LangExpr *consExpr = walkCodeExpr( stringEl.CodeExpr() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
-		list = ConsItemList::cons( consItem );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkStringElList( _repeat_string_el stringElList )
-{
-	ConsItemList *list = new ConsItemList;
-	while ( !stringElList.end() ) {
-		ConsItemList *extension = walkStringEl( stringElList.value() );
-		list = consListConcat( list, extension );
-		stringElList = stringElList.next();
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkStringTopEl( string_top_el stringTopEl )
-{
-	ConsItemList *list = 0;
-	if ( stringTopEl.LitStringElList() != 0 )
-		list = walkLitStringElList( stringTopEl.LitStringElList(), stringTopEl.Term().Nl() );
-	else if ( stringTopEl.TildeData() != 0 ) {
-		String consData = stringTopEl.TildeData().text().c_str();
-		consData += '\n';
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		list = ConsItemList::cons( consItem );
-	}
-	else if ( stringTopEl.StringElList() != 0 ) {
-		list = walkStringElList( stringTopEl.StringElList() );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkStringList( string_list stringList )
-{
-	ConsItemList *list = walkStringTopEl( stringList.StringTopEl() );
-
-	if ( stringList.StringList() != 0 ) {
-		ConsItemList *extension = walkStringList( stringList.StringList() );
-		consListConcat( list, extension );
-	}
-
-	return list;
-}
-
-ConsItemList *LoadSource::walkString( cstring String )
-{
-	ConsItemList *list = walkStringList( String.StringList() );
-	return list;
-}
-
-/*
- * Accum
- */
-
-ConsItemList *LoadSource::walkLitAccumEl( lit_accum_el litAccumEl )
-{
-	ConsItemList *list = 0;
-	if ( litAccumEl.ConsData() != 0 ) {
-		String consData = unescape( litAccumEl.ConsData().text().c_str() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		list = ConsItemList::cons( consItem );
-	}
-	else if ( litAccumEl.AccumElList() != 0 ) {
-		list = walkAccumElList( litAccumEl.AccumElList() );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkLitAccumElList( _repeat_lit_accum_el litAccumElList, CONS_NL Nl )
-{
-	ConsItemList *list = new ConsItemList;
-	while ( !litAccumElList.end() ) {
-		ConsItemList *extension = walkLitAccumEl( litAccumElList.value() );
-		list = consListConcat( list, extension );
-		litAccumElList = litAccumElList.next();
-	}
-
-	if ( Nl != 0 ) {
-		String consData = unescape( Nl.text().c_str() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		ConsItemList *term = ConsItemList::cons( consItem );
-		list = consListConcat( list, term );
-	}
-
-	return list;
-}
-
-ConsItemList *LoadSource::walkAccumEl( accum_el accumEl )
-{
-	ConsItemList *list = 0;
-	if ( accumEl.LitAccumElList() != 0 ) {
-		list = walkLitAccumElList( accumEl.LitAccumElList(), accumEl.Term().Nl() );
-	}
-	else if ( accumEl.CodeExpr() != 0 ) {
-		LangExpr *accumExpr = walkCodeExpr( accumEl.CodeExpr() );
-		ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
-		list = ConsItemList::cons( consItem );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkAccumElList( _repeat_accum_el accumElList )
-{
-	ConsItemList *list = new ConsItemList;
-	while ( !accumElList.end() ) {
-		ConsItemList *extension = walkAccumEl( accumElList.value() );
-		list = consListConcat( list, extension );
-		accumElList = accumElList.next();
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkAccumTopEl( accum_top_el accumTopEl )
-{
-	ConsItemList *list = 0;
-	if ( accumTopEl.LitAccumElList() != 0 )
-		list = walkLitAccumElList( accumTopEl.LitAccumElList(), accumTopEl.Term().Nl() );
-	else if ( accumTopEl.AccumElList() != 0 ) {
-		list = walkAccumElList( accumTopEl.AccumElList() );
-	}
-	return list;
-}
-
-ConsItemList *LoadSource::walkAccumList( accum_list accumList )
-{
-	ConsItemList *list = walkAccumTopEl( accumList.AccumTopEl() );
-
-	if ( accumList.AccumList() != 0 ) {
-		ConsItemList *extension = walkAccumList( accumList.AccumList() );
-		consListConcat( list, extension );
-	}
-
-	return list;
-}
-
-ConsItemList *LoadSource::walkAccumulate( accumulate Accumulate )
-{
-	ConsItemList *list = walkAccumList( Accumulate.AccumList() );
-	return list;
-}
-
-void LoadSource::walkFieldInit( FieldInitVect *list, field_init fieldInit )
-{
-	LangExpr *expr = walkCodeExpr( fieldInit.CodeExpr() );
-	FieldInit *init = FieldInit::cons( internal, "_name", expr );
-	list->append( init );
-}
-
-FieldInitVect *LoadSource::walkOptFieldInit( opt_field_init optFieldInit )
-{
-	FieldInitVect *list = 0;
-	if ( optFieldInit.FieldInitList() != 0 ) {
-		list = new FieldInitVect;
-		_repeat_field_init fieldInitList = optFieldInit.FieldInitList();
-		while ( !fieldInitList.end() ) {
-			walkFieldInit( list, fieldInitList.value() );
-			fieldInitList = fieldInitList.next();
-		}
-	}
-	return list;
-}
-
-LangExpr *LoadSource::walkCodeFactor( code_factor codeFactor )
-{
-	LangExpr *expr = 0;
-	if ( codeFactor.VarRef() != 0 ) {
-		var_ref varRef = codeFactor.VarRef();
-		LangVarRef *langVarRef = walkVarRef( varRef );
-
-		LangTerm *term = 0;
-		if ( codeFactor.CodeExprList() == 0 ) {
-			term = LangTerm::cons( internal, LangTerm::VarRefType, langVarRef );
-		}
-		else {
-			ExprVect *exprVect = walkCodeExprList( codeFactor.CodeExprList() );
-			term = LangTerm::cons( internal, langVarRef, exprVect );
+		_repeat_context_item contextItemList = contextDef.ContextItemList();
+		while ( !contextItemList.end() ) {
+			walkContextItem( contextItemList.value() );
+			contextItemList = contextItemList.next();
 		}
 
-		expr = LangExpr::cons( term );
-	}
-	else if ( codeFactor.Number() != 0 ) {
-		String number = codeFactor.Number().text().c_str();
-		LangTerm *term = LangTerm::cons( InputLoc(), LangTerm::NumberType, number );
-		expr = LangExpr::cons( term );
-	}
-	else if ( codeFactor.Lit() != 0 ) {
-		String lit = codeFactor.Lit().text().c_str();
-		LangTerm *term = LangTerm::cons( internal, LangTerm::StringType, lit );
-		expr = LangExpr::cons( term );
-	}
-	else if ( codeFactor.Parse() != 0 ) {
-		/* The type we are parsing. */
-		type_ref typeRefTree = codeFactor.TypeRef();
-		TypeRef *typeRef = walkTypeRef( typeRefTree );
-		ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
-		FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
-		ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
-
-		expr = parseCmd( internal, false, objField, typeRef, init, list );
-	}
-	else if ( codeFactor.ParseStop() != 0 ) {
-		/* The type we are parsing. */
-		type_ref typeRefTree = codeFactor.TypeRef();
-		TypeRef *typeRef = walkTypeRef( typeRefTree );
-		ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
-		FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
-		ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
-
-		expr = parseCmd( internal, true, objField, typeRef, init, list );
-	}
-	else if ( codeFactor.Cons() != 0 ) {
-		/* The type we are parsing. */
-		type_ref typeRefTree = codeFactor.TypeRef();
-		TypeRef *typeRef = walkTypeRef( typeRefTree );
-		ObjectField *objField = walkOptCapture( codeFactor.OptCapture() );
-		ConsItemList *list = walkConstructor( codeFactor.Constructor() );
-		FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
-
-		expr = construct( internal, objField, list, typeRef, init );
-	}
-	else if ( codeFactor.Send() != 0 ) {
-		LangVarRef *varRef = walkVarRef( codeFactor.ToVarRef() );
-		ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
-		expr = send( internal, varRef, list );
-	}
-	else if ( codeFactor.Nil() != 0 ) {
-		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::NilType ) );
-	}
-	else if ( codeFactor.True() != 0 ) {
-		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::TrueType ) );
-	}
-	else if ( codeFactor.False() != 0 ) {
-		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::FalseType ) );
-	}
-	else if ( codeFactor.ParenCodeExpr() != 0 ) {
-		expr = walkCodeExpr( codeFactor.ParenCodeExpr() );
-	}
-	else if ( codeFactor.String() != 0 ) {
-		ConsItemList *list = walkString( codeFactor.String() );
-		expr = LangExpr::cons( LangTerm::cons( internal, list ) );
-	}
-	else if ( codeFactor.MatchVarRef() != 0 ) {
-		LangVarRef *varRef = walkVarRef( codeFactor.MatchVarRef() );
-		PatternItemList *list = walkPattern( codeFactor.Pattern() );
-		expr = match( internal, varRef, list );
-	}
-	else if ( codeFactor.InVarRef() != 0 ) {
-		TypeRef *typeRef = walkTypeRef( codeFactor.TypeRef() );
-		LangVarRef *varRef = walkVarRef( codeFactor.InVarRef() );
-		expr = LangExpr::cons( LangTerm::cons( internal,
-				LangTerm::SearchType, typeRef, varRef ) );
-	}
-	else if ( codeFactor.MakeTreeExprList() != 0 ) {
-		ExprVect *exprList = walkCodeExprList( codeFactor.MakeTreeExprList() );
-		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::MakeTreeType, exprList ) );
-	}
-	else if ( codeFactor.MakeTokenExprList() != 0 ) {
-		ExprVect *exprList = walkCodeExprList( codeFactor.MakeTokenExprList() );
-		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::MakeTokenType, exprList ) );
-	}
-	else if ( codeFactor.TypeIdTypeRef() != 0 ) {
-		TypeRef *typeRef = walkTypeRef( codeFactor.TypeIdTypeRef() );
-		expr = LangExpr::cons( LangTerm::cons( internal,
-				LangTerm::TypeIdType, typeRef ) );
-	}
-	else if ( codeFactor.NewCodeFactor() != 0 ) {
-		LangExpr *newExpr = walkCodeFactor( codeFactor.NewCodeFactor() );
-		expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::NewType, newExpr ) );
-	}
-	return expr;
-}
-
-LangExpr *LoadSource::walkCodeAdditive( code_additive additive )
-{
-	LangExpr *expr = 0;
-	if ( additive.Plus() != 0 ) {
-		LangExpr *left = walkCodeAdditive( additive.Additive() );
-		LangExpr *right = walkCodeMultiplicitive( additive.Multiplicitive() );
-		expr = LangExpr::cons( internal, left, '+', right );
-	}
-	else if ( additive.Minus() != 0 ) {
-		LangExpr *left = walkCodeAdditive( additive.Additive() );
-		LangExpr *right = walkCodeMultiplicitive( additive.Multiplicitive() );
-		expr = LangExpr::cons( internal, left, '-', right );
-	}
-	else {
-		expr = walkCodeMultiplicitive( additive.Multiplicitive() );
-	}
-	return expr;
-}
-
-
-LangExpr *LoadSource::walkCodeUnary( code_unary unary )
-{
-	LangExpr *expr = walkCodeFactor( unary.Factor() );
-
-	if ( unary.Bang() != 0 ) {
-		expr = LangExpr::cons( internal, '!', expr );
-	}
-	else if ( unary.Dollar() != 0 ) {
-		expr = LangExpr::cons( internal, '$', expr );
-	}
-	else if ( unary.Caret() != 0 ) {
-		expr = LangExpr::cons( internal, '^', expr );
-	}
-	else if ( unary.Percent() != 0 ) {
-		expr = LangExpr::cons( internal, '%', expr );
+		contextStack.pop();
+		namespaceStack.pop();
 	}
 
-	return expr;
-}
+	void walkNamespaceDef( namespace_def NamespaceDef )
+	{
+		String name = NamespaceDef.Name().text().c_str();
+		createNamespace( internal, name );
+		walkRootItemList( NamespaceDef.RootItemList() );
+		namespaceStack.pop();
+	}
 
-
-LangExpr *LoadSource::walkCodeRelational( code_relational codeRelational )
-{
-	LangExpr *expr = 0;
-	if ( codeRelational.Relational() != 0 ) {
-		LangExpr *left = walkCodeRelational( codeRelational.Relational() );
-		LangExpr *right = walkCodeAdditive( codeRelational.Additive() );
-
-		if ( codeRelational.EqEq() != 0 ) {
-			expr = LangExpr::cons( internal, left, OP_DoubleEql, right );
+	void walkRootItem( root_item &rootItem, StmtList *stmtList )
+	{
+		if ( rootItem.RlDef() != 0 ) {
+			walkRlDef( rootItem.RlDef() );
 		}
-		if ( codeRelational.Neq() != 0 ) {
-			expr = LangExpr::cons( internal, left, OP_NotEql, right );
+		else if ( rootItem.TokenDef() != 0 ) {
+			walkTokenDef( rootItem.TokenDef() );
 		}
-		else if ( codeRelational.Lt() != 0 ) {
-			expr = LangExpr::cons( internal, left, '<', right );
+		else if ( rootItem.IgnoreDef() != 0 ) {
+			walkIgnoreDef( rootItem.IgnoreDef() );
 		}
-		else if ( codeRelational.Gt() != 0 ) {
-			expr = LangExpr::cons( internal, left, '>', right );
+		else if ( rootItem.LiteralDef() != 0 ) {
+			walkLiteralDef( rootItem.LiteralDef() );
 		}
-		else if ( codeRelational.LtEq() != 0 ) {
-			expr = LangExpr::cons( internal, left, OP_LessEql, right );
+		else if ( rootItem.CflDef() != 0 ) {
+			walkCflDef( rootItem.CflDef() );
 		}
-		else if ( codeRelational.GtEq() != 0 ) {
-			expr = LangExpr::cons( internal, left, OP_GrtrEql, right );
+		else if ( rootItem.RegionDef() != 0 ) {
+			walkLexRegion( rootItem.RegionDef() );
+		}
+		else if ( rootItem.Statement() != 0 ) {
+			LangStmt *stmt = walkStatement( rootItem.Statement() );
+			if ( stmt != 0 )
+				stmtList->append( stmt );
+		}
+		else if ( rootItem.ContextDef() != 0 ) {
+			walkContextDef( rootItem.ContextDef() );
+		}
+		else if ( rootItem.NamespaceDef() != 0 ) {
+			walkNamespaceDef( rootItem.NamespaceDef() );
+		}
+		else if ( rootItem.FunctionDef() != 0 ) {
+			walkFunctionDef( rootItem.FunctionDef() );
+		}
+		else if ( rootItem.IterDef() != 0 ) {
+			walkIterDef( rootItem.IterDef() );
+		}
+		else if ( rootItem.IterDef() != 0 ) {
+			walkIterDef( rootItem.IterDef() );
+		}
+		else if ( rootItem.PreEof() != 0 ) {
+			walkPreEof( rootItem.PreEof() );
+		}
+		else if ( rootItem.ExportDef() != 0 ) {
+			walkExportDef( rootItem.ExportDef() );
+		}
+		else if ( rootItem.AliasDef() != 0 ) {
+			walkAliasDef( rootItem.AliasDef() );
+		}
+		else if ( rootItem.PrecedenceDef() != 0 ) {
+			walkPrecedenceDef( rootItem.PrecedenceDef() );
+		}
+		else if ( rootItem.Include() != 0 ) {
+			StmtList *includeList = walkInclude( rootItem.Include() );
+			stmtList->append( *includeList );
 		}
 	}
-	else {
-		expr = walkCodeAdditive( codeRelational.Additive() );
-	}
-	return expr;
-}
 
-LangStmt *LoadSource::walkExprStmt( expr_stmt &exprStmt )
-{
-	LangStmt *stmt;
-	if ( exprStmt.CodeExpr() != 0 ) {
-		code_expr codeExpr = exprStmt.CodeExpr();
-		LangExpr *expr = walkCodeExpr( codeExpr );
-		stmt = LangStmt::cons( internal, LangStmt::ExprType, expr );
-	}
-	return stmt;
-}
-
-ObjectField *LoadSource::walkVarDef( var_def varDef )
-{
-	TypeRef *typeRef = walkTypeRef( varDef.TypeRef() );
-	String id = varDef.Id().text().c_str();
-	return ObjectField::cons( internal, typeRef, id );
-}
-
-LangTerm *LoadSource::walkIterCall( iter_call IterCall )
-{
-	LangTerm *langTerm = 0;
-	if ( IterCall.Id() != 0 ) {
-		String tree = IterCall.Id().text().c_str();
-		langTerm = LangTerm::cons( internal,
-				LangTerm::VarRefType, LangVarRef::cons( internal, tree ) );
-	}
-	else {
-		LangVarRef *varRef = walkVarRef( IterCall.VarRef() );
-		ExprVect *exprVect = walkCodeExprList( IterCall.CodeExprList() );
-		langTerm = LangTerm::cons( internal, varRef, exprVect );
-	}
-	
-	return langTerm;
-}
-
-
-LangStmt *LoadSource::walkElsifClause( elsif_clause elsifClause )
-{
-	pushScope();
-	LangExpr *expr = walkCodeExpr( elsifClause.ElsifExpr() );
-	StmtList *stmtList = walkBlockOrSingle( elsifClause.BlockOrSingle() );
-	LangStmt *stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, 0 );
-	popScope();
-	return stmt;
-}
-
-LangStmt *LoadSource::walkOptionalElse( optional_else optionalElse )
-{
-	LangStmt *stmt = 0;
-	if ( optionalElse.BlockOrSingle() != 0 ) {
-		pushScope();
-		StmtList *stmtList = walkBlockOrSingle( optionalElse.BlockOrSingle() );
-		stmt = LangStmt::cons( LangStmt::ElseType, stmtList );
-		popScope();
-	}
-	return stmt;
-}
-
-LangStmt *LoadSource::walkElsifList( elsif_list elsifList )
-{
-	LangStmt *stmt = 0;
-	if ( elsifList.ElsifList() != 0 ) {
-		stmt = walkElsifClause( elsifList.ElsifClause() );
-		stmt->elsePart = walkElsifList( elsifList.ElsifList() );
-	}
-	else {
-		stmt = walkOptionalElse( elsifList.OptionalElse() );
-	}
-	return stmt;
-}
-
-void LoadSource::walkContextVarDef( context_var_def ContextVarDef )
-{
-	ObjectField *objField = walkVarDef( ContextVarDef.VarDef() );
-	contextVarDef( internal, objField );
-}
-
-//def reference_type_ref
-//	[REF type_ref]
-//
-//def param_var_def
-//	[id COLON type_ref]
-//|	[id COLON reference_type_ref]
-//
-//def param_list
-//	[param_list param_var_def]
-//|	[param_var_def]
-//
-//def opt_param_list
-//	[param_list]
-//|	[]
-
-TypeRef *LoadSource::walkReferenceTypeRef( reference_type_ref ReferenceTypeRef )
-{
-	TypeRef *typeRef = walkTypeRef( ReferenceTypeRef.TypeRef() );
-	return TypeRef::cons( internal, TypeRef::Ref, typeRef );
-}
-
-ObjectField *LoadSource::walkParamVarDef( param_var_def paramVarDef )
-{
-	String id = paramVarDef.Id().text().c_str();
-	TypeRef *typeRef = 0;
-
-	if ( paramVarDef.TypeRef() != 0 )
-		typeRef = walkTypeRef( paramVarDef.TypeRef() );
-	else
-		typeRef = walkReferenceTypeRef( paramVarDef.RefTypeRef() );
-	
-	return addParam( internal, typeRef, id );
-}
-
-ParameterList *LoadSource::walkParamVarDefList( _repeat_param_var_def paramVarDefList )
-{
-	ParameterList *paramList = new ParameterList;
-	while ( !paramVarDefList.end() ) {
-		ObjectField *param = walkParamVarDef( paramVarDefList.value() );
-		appendParam( paramList, param );
-		paramVarDefList = paramVarDefList.next();
-	}
-	return paramList;
-}
-
-void LoadSource::walkFunctionDef( function_def FunctionDef )
-{
-	ObjectDef *localFrame = blockOpen();
-
-	TypeRef *typeRef = walkTypeRef( FunctionDef.TypeRef() );
-	String id = FunctionDef.Id().text().c_str();
-	ParameterList *paramList = walkParamVarDefList( FunctionDef.ParamVarDefList() );
-	StmtList *stmtList = walkLangStmtList( FunctionDef.LangStmtList() );
-	functionDef( stmtList, localFrame, paramList, typeRef, id );
-
-	blockClose();
-}
-
-void LoadSource::walkIterDef( iter_def IterDef )
-{
-	ObjectDef *localFrame = blockOpen();
-
-	String id = IterDef.Id().text().c_str();
-	ParameterList *paramList = walkParamVarDefList( IterDef.ParamVarDefList() );
-	StmtList *stmtList = walkLangStmtList( IterDef.LangStmtList() );
-	iterDef( stmtList, localFrame, paramList, id );
-
-	blockClose();
-}
-
-void LoadSource::walkContextItem( context_item contextItem )
-{
-	if ( contextItem.RlDef() != 0 ) {
-		walkRlDef( contextItem.RlDef() );
-	}
-	else if ( contextItem.ContextVarDef() != 0 ) {
-		walkContextVarDef( contextItem.ContextVarDef() );
-	}
-	else if ( contextItem.TokenDef() != 0 ) {
-		walkTokenDef( contextItem.TokenDef() );
-	}
-	else if ( contextItem.IgnoreDef() != 0 ) {
-		walkIgnoreDef( contextItem.IgnoreDef() );
-	}
-	else if ( contextItem.LiteralDef() != 0 ) {
-		walkLiteralDef( contextItem.LiteralDef() );
-	}
-	else if ( contextItem.CflDef() != 0 ) {
-		walkCflDef( contextItem.CflDef() );
-	}
-	else if ( contextItem.RegionDef() != 0 ) {
-		walkLexRegion( contextItem.RegionDef() );
-	}
-	else if ( contextItem.ContextDef() != 0 ) {
-		walkContextDef( contextItem.ContextDef() );
-	}
-	else if ( contextItem.FunctionDef() != 0 ) {
-		walkFunctionDef( contextItem.FunctionDef() );
-	}
-	else if ( contextItem.IterDef() != 0 ) {
-		walkIterDef( contextItem.IterDef() );
-	}
-	else if ( contextItem.PreEof() != 0 ) {
-		walkPreEof( contextItem.PreEof() );
-	}
-	else if ( contextItem.ExportDef() != 0 ) {
-		walkExportDef( contextItem.ExportDef() );
-	}
-	else if ( contextItem.PrecedenceDef() != 0 ) {
-		walkPrecedenceDef( contextItem.PrecedenceDef() );
-	}
-}
-
-void LoadSource::walkContextDef( context_def contextDef )
-{
-	String name = contextDef.Name().text().c_str();
-	contextHead( internal, name );
-
-	_repeat_context_item contextItemList = contextDef.ContextItemList();
-	while ( !contextItemList.end() ) {
-		walkContextItem( contextItemList.value() );
-		contextItemList = contextItemList.next();
+	bool walkOptNoIgnore( opt_no_ignore OptNoIngore )
+	{
+		return OptNoIngore.Ni() != 0;
 	}
 
-	contextStack.pop();
-	namespaceStack.pop();
-}
+	void walkLiteralItem( literal_item literalItem )
+	{
+		bool niLeft = walkOptNoIgnore( literalItem.NiLeft() );
+		bool niRight = walkOptNoIgnore( literalItem.NiRight() );
 
-void LoadSource::walkNamespaceDef( namespace_def NamespaceDef )
-{
-	String name = NamespaceDef.Name().text().c_str();
-	createNamespace( internal, name );
-	walkRootItemList( NamespaceDef.RootItemList() );
-	namespaceStack.pop();
-}
+		String lit = literalItem.Lit().text().c_str();
+		if ( strcmp( lit, "''" ) == 0 )
+			zeroDef( internal, lit, niLeft, niRight );
+		else
+			literalDef( internal, lit, niLeft, niRight );
+	}
 
-void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
-{
-	if ( rootItem.RlDef() != 0 ) {
-		walkRlDef( rootItem.RlDef() );
+	void walkLiteralList( literal_list literalList )
+	{
+		if ( literalList.LiteralList() != 0 )
+			walkLiteralList( literalList.LiteralList() );
+		walkLiteralItem( literalList.LiteralItem() );
 	}
-	else if ( rootItem.TokenDef() != 0 ) {
-		walkTokenDef( rootItem.TokenDef() );
-	}
-	else if ( rootItem.IgnoreDef() != 0 ) {
-		walkIgnoreDef( rootItem.IgnoreDef() );
-	}
-	else if ( rootItem.LiteralDef() != 0 ) {
-		walkLiteralDef( rootItem.LiteralDef() );
-	}
-	else if ( rootItem.CflDef() != 0 ) {
-		walkCflDef( rootItem.CflDef() );
-	}
-	else if ( rootItem.RegionDef() != 0 ) {
-		walkLexRegion( rootItem.RegionDef() );
-	}
-	else if ( rootItem.Statement() != 0 ) {
-		LangStmt *stmt = walkStatement( rootItem.Statement() );
-		if ( stmt != 0 )
-			stmtList->append( stmt );
-	}
-	else if ( rootItem.ContextDef() != 0 ) {
-		walkContextDef( rootItem.ContextDef() );
-	}
-	else if ( rootItem.NamespaceDef() != 0 ) {
-		walkNamespaceDef( rootItem.NamespaceDef() );
-	}
-	else if ( rootItem.FunctionDef() != 0 ) {
-		walkFunctionDef( rootItem.FunctionDef() );
-	}
-	else if ( rootItem.IterDef() != 0 ) {
-		walkIterDef( rootItem.IterDef() );
-	}
-	else if ( rootItem.IterDef() != 0 ) {
-		walkIterDef( rootItem.IterDef() );
-	}
-	else if ( rootItem.PreEof() != 0 ) {
-		walkPreEof( rootItem.PreEof() );
-	}
-	else if ( rootItem.ExportDef() != 0 ) {
-		walkExportDef( rootItem.ExportDef() );
-	}
-	else if ( rootItem.AliasDef() != 0 ) {
-		walkAliasDef( rootItem.AliasDef() );
-	}
-	else if ( rootItem.PrecedenceDef() != 0 ) {
-		walkPrecedenceDef( rootItem.PrecedenceDef() );
-	}
-	else if ( rootItem.Include() != 0 ) {
-		StmtList *includeList = walkInclude( rootItem.Include() );
-		stmtList->append( *includeList );
-	}
-}
 
-bool walkOptNoIgnore( opt_no_ignore OptNoIngore )
-{
-	return OptNoIngore.Ni() != 0;
-}
-
-void LoadSource::walkLiteralItem( literal_item literalItem )
-{
-	bool niLeft = walkOptNoIgnore( literalItem.NiLeft() );
-	bool niRight = walkOptNoIgnore( literalItem.NiRight() );
-
-	String lit = literalItem.Lit().text().c_str();
-	if ( strcmp( lit, "''" ) == 0 )
-		zeroDef( internal, lit, niLeft, niRight );
-	else
-		literalDef( internal, lit, niLeft, niRight );
-}
-
-void LoadSource::walkLiteralList( literal_list literalList )
-{
-	if ( literalList.LiteralList() != 0 )
-		walkLiteralList( literalList.LiteralList() );
-	walkLiteralItem( literalList.LiteralItem() );
-}
-
-void LoadSource::walkLiteralDef( literal_def literalDef )
-{
-	walkLiteralList( literalDef.LiteralList() );
-}
-
-StmtList *LoadSource::walkRootItemList( _repeat_root_item rootItemList )
-{
-	StmtList *stmtList = new StmtList;
-
-	/* Walk the list of items. */
-	while ( !rootItemList.end() ) {
-		root_item rootItem = rootItemList.value();
-		walkRootItem( rootItem, stmtList );
-		rootItemList = rootItemList.next();
+	void walkLiteralDef( literal_def literalDef )
+	{
+		walkLiteralList( literalDef.LiteralList() );
 	}
-	return stmtList;
-}
+
+	StmtList *walkRootItemList( _repeat_root_item rootItemList )
+	{
+		StmtList *stmtList = new StmtList;
+
+		/* Walk the list of items. */
+		while ( !rootItemList.end() ) {
+			root_item rootItem = rootItemList.value();
+			walkRootItem( rootItem, stmtList );
+			rootItemList = rootItemList.next();
+		}
+		return stmtList;
+	}
+
+	virtual void go();
+};
 
 void LoadSource::go()
 {
@@ -1921,3 +1833,7 @@ void LoadSource::go()
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }
 
+BaseParser *consLoadSource( Compiler *pd, const char *inputFileName )
+{
+	return new LoadSource( pd, inputFileName );
+}
