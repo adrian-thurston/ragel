@@ -93,6 +93,8 @@ lex
 	token COMMA /','/
 	token LT /'<'/
 	token GT /'>'/
+	token LTEQ /'<='/
+	token GTEQ /'>='/
 	token BANG /'!'/
 	token DOLLAR /'$'/
 	token CARET /'^'/
@@ -411,6 +413,8 @@ def code_relational
 |	[Relational: code_relational Neq: NEQ Additive: code_additive]
 |	[Relational: code_relational Lt: LT Additive: code_additive]
 |	[Relational: code_relational Gt: GT Additive: code_additive]
+|	[Relational: code_relational LtEq: LTEQ Additive: code_additive]
+|	[Relational: code_relational GtEq: GTEQ Additive: code_additive]
 |	[Additive: code_additive]
 
 def code_additive

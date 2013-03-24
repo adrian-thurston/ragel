@@ -1540,6 +1540,12 @@ LangExpr *LoadSource::walkCodeRelational( code_relational codeRelational )
 		else if ( codeRelational.Gt() != 0 ) {
 			expr = LangExpr::cons( internal, left, '>', right );
 		}
+		else if ( codeRelational.LtEq() != 0 ) {
+			expr = LangExpr::cons( internal, left, OP_LessEql, right );
+		}
+		else if ( codeRelational.GtEq() != 0 ) {
+			expr = LangExpr::cons( internal, left, OP_GrtrEql, right );
+		}
 	}
 	else {
 		expr = walkCodeAdditive( codeRelational.Additive() );
