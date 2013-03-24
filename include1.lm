@@ -1,3 +1,4 @@
+##### LM #####
 namespace string
 	lex
 		literal '"'
@@ -96,3 +97,38 @@ else {
 	S: lang::start = Input.tree
 	print( Input.tree '\n' )
 }
+##### IN #####
+
+hello;
+
+#include "include1a.in"
+
+there;
+
+#include "include1b.in"
+
+dude;
+
+#include "include1c.in"
+
+and dudettes;
+##### EXP #####
+opening include1a.in
+opening include1b.in
+opening include1c.in
+hello;
+
+a;
+b;
+
+there;
+
+c;
+d;
+
+dude;
+
+e;
+f;
+
+and dudettes;
