@@ -147,6 +147,10 @@ function runtests()
 				echo $COLM $TST
 			fi
 
+			if [ '!' -f $IN ] && [ -f $ROOT.in ]; then
+				IN=$ROOT.in;
+			fi
+
 			if [ "$verbose" = true ]; then
 				if [ -f $IN ]; then
 					echo "${VALGRIND}./$BIN $cmdargs < $IN > $OUT 2>> $LOG"
