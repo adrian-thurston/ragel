@@ -58,6 +58,7 @@ lex
 	token RIGHT /'right'/
 	token NONASSOC /'nonassoc'/
 
+	token INCLUDE /'include'/
 
 	token id / 
 		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
@@ -197,6 +198,10 @@ def root_item
 |	[PreEof: pre_eof]
 |	[PrecedenceDef: precedence_def]
 |	[AliasDef: alias_def]
+|	[Include: include]
+
+def include
+	[INCLUDE File: lit]
 
 def precedence_def
 	[PredType: pred_type PredTokenList: pred_token_list]
@@ -233,7 +238,7 @@ def context_item
 |	[IterDef: iter_def]
 |	[ExportDef: export_def]
 |	[PreEof: pre_eof]
-#|	[precedence]
+|	[PrecedenceDef: precedence_def]
 
 def export_def
 	[EXPORT VarDef: var_def OptDefInit: opt_def_init]

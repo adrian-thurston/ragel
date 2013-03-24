@@ -677,6 +677,34 @@ struct LoadSource
 		PredDeclList *predDeclList = walkPredTokenList( precedenceDef.PredTokenList() );
 		precedenceStmt( predType, predDeclList );
 	}
+
+	StmtList *walkInclude( include Include )
+	{
+		String lit = Include.File().text().c_str();
+		String file;
+		bool unused;
+		prepareLitString( file, unused, lit, internal );
+
+		const char *argv[2];
+		argv[0] = file.data;
+		argv[1] = 0;
+
+		ColmProgram *program = colmNewProgram( &main_runtimeData );
+		colmRunProgram( program, 1, argv );
+
+		/* Extract the parse tree. */
+		start Start = ColmTree( program );
+
+		if ( Start == 0 ) {
+			gblErrorCount += 1;
+			std::cerr << inputFileName << ": include parse error" << std::endl;
+			return 0;
+		}
+
+		StmtList *stmtList = walkRootItemList( Start.RootItemList() );
+		colmDeleteProgram( program );
+		return stmtList;
+	}
 };
 
 
@@ -1738,6 +1766,9 @@ void LoadSource::walkContextItem( context_item contextItem )
 	else if ( contextItem.ExportDef() != 0 ) {
 		walkExportDef( contextItem.ExportDef() );
 	}
+	else if ( contextItem.PrecedenceDef() != 0 ) {
+		walkPrecedenceDef( contextItem.PrecedenceDef() );
+	}
 }
 
 void LoadSource::walkContextDef( context_def contextDef )
@@ -1811,6 +1842,13 @@ void LoadSource::walkRootItem( root_item &rootItem, StmtList *stmtList )
 	}
 	else if ( rootItem.AliasDef() != 0 ) {
 		walkAliasDef( rootItem.AliasDef() );
+	}
+	else if ( rootItem.PrecedenceDef() != 0 ) {
+		walkPrecedenceDef( rootItem.PrecedenceDef() );
+	}
+	else if ( rootItem.Include() != 0 ) {
+		StmtList *includeList = walkInclude( rootItem.Include() );
+		stmtList->append( *includeList );
 	}
 }
 
