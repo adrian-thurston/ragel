@@ -40,6 +40,7 @@ lex
 	token COMMIT / 'commit' /
 	token NEW / 'new' /
 	token PREEOF / 'preeof' /
+	token GLOBAL / 'global' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -193,7 +194,7 @@ def root_item
 |	[FunctionDef: function_def]
 |	[IterDef: iter_def]
 |	[Statement: statement]
-#|	[global_def]
+|	[GlobalDef: global_def]
 |	[ExportDef: export_def]
 |	[PreEof: pre_eof]
 |	[PrecedenceDef: precedence_def]
@@ -242,6 +243,9 @@ def context_item
 
 def export_def
 	[EXPORT VarDef: var_def OptDefInit: opt_def_init]
+
+def global_def
+	[GLOBAL VarDef: var_def OptDefInit: opt_def_init]
 
 def iter_def
 	[ITER Id: id POPEN ParamVarDefList: param_var_def* PCLOSE
@@ -538,6 +542,7 @@ def lit_cons_term
 
 def cons_el
 	[RegionQual: region_qual Lit: lit]
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[DQ LitConsElList: lit_cons_el* Term: lit_cons_term]
 |	[CodeExpr: code_expr]
 
@@ -547,6 +552,7 @@ def lit_cons_el
 
 def cons_top_el
 	[DQ LitConsElList: lit_cons_el* Term: lit_cons_term]
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[SQOPEN ConsElList: cons_el* SQCLOSE]
 
 def cons_list
@@ -592,6 +598,7 @@ def cstring
 
 def accum_el
 	[CodeExpr: code_expr]
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[DQ LitAccumElList: lit_accum_el* Term: lit_cons_term]
 
 def lit_accum_el
@@ -600,6 +607,7 @@ def lit_accum_el
 
 def accum_top_el
 	[DQ LitAccumElList: lit_accum_el* Term: lit_cons_term]
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[SQOPEN AccumElList: accum_el* SQCLOSE]
 
 def accum_list

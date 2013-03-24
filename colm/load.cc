@@ -150,7 +150,7 @@ struct LoadSource
 			LangExpr *left = walkCodeExpr( codeExpr.Expr() );
 			LangExpr *right = walkCodeRelational( codeExpr.Relational() );
 
-			char type;
+			char type = -1;
 			if ( codeExpr.BarBar() != 0 )
 				type = OP_LogicalOr;
 			else if ( codeExpr.AmpAmp() != 0 )
@@ -358,7 +358,7 @@ struct LoadSource
 
 	LangExpr *walkCodeMultiplicitive( code_multiplicitive mult )
 	{
-		LangExpr *expr;
+		LangExpr *expr = 0;
 		if ( mult.Multiplicitive() != 0 ) {
 			LangExpr *left = walkCodeMultiplicitive( mult.Multiplicitive() );
 			LangExpr *right = walkCodeUnary( mult.Unary() );
@@ -521,6 +521,14 @@ struct LoadSource
 		LangExpr *expr = walkOptDefInit( exportDef.OptDefInit() );
 
 		return exportStmt( objField, LangStmt::AssignType, expr );
+	}
+
+	LangStmt *walkGlobalDef( global_def GlobalDef )
+	{
+		ObjectField *objField = walkVarDef( GlobalDef.VarDef() );
+		LangExpr *expr = walkOptDefInit( GlobalDef.OptDefInit() );
+
+		return globalDef( objField, expr, LangStmt::AssignType );
 	}
 
 	void walkAliasDef( alias_def aliasDef )
@@ -1042,6 +1050,12 @@ struct LoadSource
 			String lit = consEl.Lit().text().c_str();
 			list = consElLiteral( internal, lit, nspaceQual );
 		}
+		else if ( consEl.TildeData() != 0 ) {
+			String consData = consEl.TildeData().text().c_str();
+			consData += '\n';
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			list = ConsItemList::cons( consItem );
+		}
 		else if ( consEl.CodeExpr() != 0 ) {
 			LangExpr *consExpr = walkCodeExpr( consEl.CodeExpr() );
 			ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
@@ -1069,6 +1083,12 @@ struct LoadSource
 		ConsItemList *list = 0;
 		if ( consTopEl.LitConsElList() != 0 )
 			list = walkLitConsElList( consTopEl.LitConsElList(), consTopEl.Term().Nl() );
+		else if ( consTopEl.TildeData() != 0 ) {
+			String consData = consTopEl.TildeData().text().c_str();
+			consData += '\n';
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			list = ConsItemList::cons( consItem );
+		}
 		else if ( consTopEl.ConsElList() != 0 ) {
 			list = walkConsElList( consTopEl.ConsElList() );
 		}
@@ -1238,6 +1258,12 @@ struct LoadSource
 		if ( accumEl.LitAccumElList() != 0 ) {
 			list = walkLitAccumElList( accumEl.LitAccumElList(), accumEl.Term().Nl() );
 		}
+		else if ( accumEl.TildeData() != 0 ) {
+			String consData = accumEl.TildeData().text().c_str();
+			consData += '\n';
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			list = ConsItemList::cons( consItem );
+		}
 		else if ( accumEl.CodeExpr() != 0 ) {
 			LangExpr *accumExpr = walkCodeExpr( accumEl.CodeExpr() );
 			ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
@@ -1262,6 +1288,12 @@ struct LoadSource
 		ConsItemList *list = 0;
 		if ( accumTopEl.LitAccumElList() != 0 )
 			list = walkLitAccumElList( accumTopEl.LitAccumElList(), accumTopEl.Term().Nl() );
+		else if ( accumTopEl.TildeData() != 0 ) {
+			String consData = accumTopEl.TildeData().text().c_str();
+			consData += '\n';
+			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			list = ConsItemList::cons( consItem );
+		}
 		else if ( accumTopEl.AccumElList() != 0 ) {
 			list = walkAccumElList( accumTopEl.AccumElList() );
 		}
@@ -1747,7 +1779,9 @@ struct LoadSource
 			walkPreEof( rootItem.PreEof() );
 		}
 		else if ( rootItem.ExportDef() != 0 ) {
-			walkExportDef( rootItem.ExportDef() );
+			LangStmt *stmt = walkExportDef( rootItem.ExportDef() );
+			if ( stmt != 0 )
+				stmtList->append( stmt );
 		}
 		else if ( rootItem.AliasDef() != 0 ) {
 			walkAliasDef( rootItem.AliasDef() );
@@ -1758,6 +1792,11 @@ struct LoadSource
 		else if ( rootItem.Include() != 0 ) {
 			StmtList *includeList = walkInclude( rootItem.Include() );
 			stmtList->append( *includeList );
+		}
+		else if ( rootItem.GlobalDef() != 0 ) {
+			LangStmt *stmt = walkGlobalDef( rootItem.GlobalDef() );
+			if ( stmt != 0 )
+				stmtList->append( stmt );
 		}
 	}
 
