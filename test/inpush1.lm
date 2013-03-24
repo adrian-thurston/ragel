@@ -101,21 +101,21 @@ else {
 
 hello;
 
-#include "include1a.in"
+#include "inpush1a.in"
 
 there;
 
-#include "include1b.in"
+#include "inpush1b.in"
 
 dude;
 
-#include "include1c.in"
+#include "inpush1c.in"
 
 and dudettes;
 ##### EXP #####
-opening include1a.in
-opening include1b.in
-opening include1c.in
+opening inpush1a.in
+opening inpush1b.in
+opening inpush1c.in
 hello;
 
 a;
