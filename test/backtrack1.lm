@@ -1,3 +1,4 @@
+##### LM #####
 # Token names.
 
 lex
@@ -22,3 +23,8 @@ parse SP: start[ stdin ]
 S: start = SP.tree
 R: start = match S ~ 9 + 9
 print_xml( R )
+print( '\n' )
+##### IN #####
+9 + 9
+##### EXP #####
+<start><E><E><F><number>9</number></F></E><_literal_0001>+</_literal_0001><F><number>9</number></F></E></start>

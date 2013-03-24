@@ -54,6 +54,11 @@ lex
 	token TRUE / 'true' /
 	token FALSE / 'false' /
 
+	token LEFT /'left'/
+	token RIGHT /'right'/
+	token NONASSOC /'nonassoc'/
+
+
 	token id / 
 		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
 		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
@@ -188,8 +193,24 @@ def root_item
 #|	[global_def]
 |	[ExportDef: export_def]
 |	[PreEof: pre_eof]
-#|	[precedence]
+|	[PrecedenceDef: precedence_def]
 |	[AliasDef: alias_def]
+
+def precedence_def
+	[PredType: pred_type PredTokenList: pred_token_list]
+
+def pred_type
+	[Left: LEFT]
+|	[Right: RIGHT]
+|	[NonAssoc: NONASSOC]
+
+def pred_token_list
+	[PredTokenList: pred_token_list COMMA PredToken: pred_token]
+|	[PredToken: pred_token]
+
+def pred_token
+	[RegionQual: region_qual Id: id]
+|	[RegionQual: region_qual Lit: lit]
 
 def pre_eof
 	[PREEOF COPEN LangStmtList: lang_stmt_list CCLOSE]

@@ -496,17 +496,10 @@ struct LoadSource
 		}
 		else if ( PatternEl.TildeData() != 0 ) {
 			String patternData = PatternEl.TildeData().text().c_str();
+			patternData += '\n';
 			PatternItem *patternItem = PatternItem::cons( internal, patternData,
 					PatternItem::InputText );
-			PatternItemList *data = PatternItemList::cons( patternItem );
-
-			patternData = PatternEl.Nl().text().c_str();
-			patternItem = PatternItem::cons( internal, patternData, 
-					PatternItem::InputText );
-			PatternItemList *term = PatternItemList::cons( patternItem );
-
-			list = patListConcat( data, term );
-
+			list = PatternItemList::cons( patternItem );
 		}
 		else if ( PatternEl.OptLabel() != 0 ) {
 			LangVarRef *varRef = walkOptLabel( PatternEl.OptLabel() );
@@ -569,16 +562,10 @@ struct LoadSource
 		}
 		else if ( patternTopEl.TildeData() != 0 ) {
 			String patternData = patternTopEl.TildeData().text().c_str();
+			patternData += '\n';
 			PatternItem *patternItem = PatternItem::cons( internal, patternData,
 					PatternItem::InputText );
-			PatternItemList *data = PatternItemList::cons( patternItem );
-
-			patternData = patternTopEl.Nl().text().c_str();
-			patternItem = PatternItem::cons( internal, patternData, 
-					PatternItem::InputText );
-			PatternItemList *term = PatternItemList::cons( patternItem );
-
-			list = patListConcat( data, term );
+			list = PatternItemList::cons( patternItem );
 		}
 		else if ( patternTopEl.PatternElList() != 0 ) {
 			list = walkPatternElList( patternTopEl.PatternElList() );
@@ -639,6 +626,56 @@ struct LoadSource
 			blockClose();
 		}
 		return block;
+	}
+
+	PredDecl *walkPredToken( pred_token predToken )
+	{
+		NamespaceQual *nspaceQual = walkRegionQual( predToken.RegionQual() );
+		PredDecl *predDecl = 0;
+		if ( predToken.Id() != 0 ) {
+			String id = predToken.Id().text().c_str();
+			predDecl = predTokenName( internal, nspaceQual, id );
+		}
+		else if ( predToken.Lit() != 0 ) {
+			String lit = predToken.Lit().text().c_str();
+			predDecl = predTokenLit( internal, lit, nspaceQual );
+		}
+		return predDecl;
+	}
+
+	PredDeclList *walkPredTokenList( pred_token_list predTokenList )
+	{
+		PredDeclList *list = 0;
+		if ( predTokenList.PredTokenList() != 0 ) {
+			list = walkPredTokenList( predTokenList.PredTokenList() );
+			PredDecl *predDecl = walkPredToken( predTokenList.PredToken() );
+			list->append( predDecl );
+		}
+		else {
+			PredDecl *predDecl = walkPredToken( predTokenList.PredToken() );
+			list = new PredDeclList;
+			list->append( predDecl );
+		}
+		return list;
+	}
+
+	PredType walkPredType( pred_type predType )
+	{
+		PredType pt;
+		if ( predType.Left() != 0 )
+			pt = PredLeft;
+		else if ( predType.Right() != 0 )
+			pt = PredRight;
+		else if ( predType.NonAssoc() != 0 )
+			pt = PredNonassoc;
+		return pt;
+	}
+
+	void walkPrecedenceDef( precedence_def precedenceDef )
+	{
+		PredType predType = walkPredType( precedenceDef.PredType() );
+		PredDeclList *predDeclList = walkPredTokenList( precedenceDef.PredTokenList() );
+		precedenceStmt( predType, predDeclList );
 	}
 };
 
@@ -1163,14 +1200,9 @@ ConsItemList *LoadSource::walkStringEl( string_el stringEl )
 	}
 	else if ( stringEl.TildeData() != 0 ) {
 		String consData = stringEl.TildeData().text().c_str();
+		consData += '\n';
 		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		ConsItemList *data = ConsItemList::cons( consItem );
-
-		consData = stringEl.Nl().text().c_str();
-		consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		ConsItemList *term = ConsItemList::cons( consItem );
-
-		list = consListConcat( data, term );
+		list = ConsItemList::cons( consItem );
 	}
 	else if ( stringEl.CodeExpr() != 0 ) {
 		LangExpr *consExpr = walkCodeExpr( stringEl.CodeExpr() );
@@ -1198,14 +1230,9 @@ ConsItemList *LoadSource::walkStringTopEl( string_top_el stringTopEl )
 		list = walkLitStringElList( stringTopEl.LitStringElList(), stringTopEl.Term().Nl() );
 	else if ( stringTopEl.TildeData() != 0 ) {
 		String consData = stringTopEl.TildeData().text().c_str();
+		consData += '\n';
 		ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		ConsItemList *data = ConsItemList::cons( consItem );
-
-		consData = stringTopEl.Nl().text().c_str();
-		consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
-		ConsItemList *term = ConsItemList::cons( consItem );
-
-		list = consListConcat( data, term );
+		list = ConsItemList::cons( consItem );
 	}
 	else if ( stringTopEl.StringElList() != 0 ) {
 		list = walkStringElList( stringTopEl.StringElList() );
