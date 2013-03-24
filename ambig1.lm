@@ -1,3 +1,4 @@
+##### LM #####
 #
 # Grammar
 #
@@ -597,6 +598,10 @@ parse RP: ruby[stdin]
 R: ruby = RP.tree
 
 print_xml( R )
+print( '\n' )
 
 #for T: primary in R
 #	print_xml( T, '\n\n' )
+##### IN #####
+##### EXP #####
+<ruby><compstmt><stmts></stmts><opt_terms></opt_terms></compstmt></ruby>
