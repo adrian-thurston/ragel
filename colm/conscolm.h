@@ -61,7 +61,8 @@ struct LoadColm
 
 	/* Constructing statements needed to parse and export the input. */
 	void consParseStmt( StmtList *stmtList );
-	void consExportStmt( StmtList *stmtList );
+	void consExportTree( StmtList *stmtList );
+	void consExportError( StmtList *stmtList );
 
 	void go();
 };

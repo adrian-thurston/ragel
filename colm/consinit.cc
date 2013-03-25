@@ -664,12 +664,23 @@ void ConsInit::prodElList()
 	definition( "prod_el_list",  prod1, prod2 );
 }
 
+void ConsInit::optCommit()
+{
+	ProdEl *prodEl1 = prodRefName( "Commit", "COMMIT" );
+	Production *prod1 = production( prodEl1 );
+
+	Production *prod2 = production();
+
+	definition( "opt_commit",  prod1, prod2 );
+}
+
 void ConsInit::prod()
 {
 	ProdEl *prodEl1 = prodRefLit( "'['" );
 	ProdEl *prodEl2 = prodRefName( "ProdElList", "prod_el_list" );
 	ProdEl *prodEl3 = prodRefLit( "']'" );
-	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
+	ProdEl *prodEl4 = prodRefName( "OptCommit", "opt_commit" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4 );
 
 	definition( "prod",  prod1 );
 }
@@ -784,6 +795,7 @@ void ConsInit::go()
 	keyword( "'token'" );
 	keyword( "'ignore'" );
 	keyword( "NI", "'ni'" );
+	keyword( "COMMIT", "'commit'" );
 
 	idToken();
 	literalToken();
@@ -814,6 +826,7 @@ void ConsInit::go()
 	optProdName();
 	prodEl();
 	prodElList();
+	optCommit();
 	prod();
 	prodList();
 	ignore();

@@ -91,6 +91,7 @@ struct ConsInit
 	void prodList();
 	void prod();
 	void startProd();
+	void optCommit();
 
 	void parseInput( StmtList *stmtList );
 	void exportTree( StmtList *stmtList );

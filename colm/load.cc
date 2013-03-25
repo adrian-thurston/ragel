@@ -298,6 +298,9 @@ struct LoadSource
 	{
 		String name = TokenDef.Id().text().c_str();
 
+		bool niLeft = walkOptNoIgnore( TokenDef.NiLeft() );
+		bool niRight = walkOptNoIgnore( TokenDef.NiRight() );
+
 		ObjectDef *objectDef = walkVarDefList( TokenDef.VarDefList() );
 		objectDef->name = name;
 
@@ -309,7 +312,7 @@ struct LoadSource
 
 		CodeBlock *translate = walkOptTranslate( TokenDef.OptTranslate() );
 
-		defineToken( internal, name, join, objectDef, translate, false, false, false );
+		defineToken( internal, name, join, objectDef, translate, false, niLeft, niRight );
 	}
 
 	String walkOptId( opt_id optId )
@@ -617,10 +620,11 @@ struct LoadSource
 
 		/* Extract the parse tree. */
 		start Start = ColmTree( program );
+		str Error = ColmError( program );
 
 		if ( Start == 0 ) {
 			gblErrorCount += 1;
-			std::cerr << inputFileName << ": include parse error" << std::endl;
+			std::cerr << inputFileName << ": parse error: " << Error.text() << std::endl;
 			return 0;
 		}
 
@@ -1859,10 +1863,11 @@ void LoadSource::go()
 
 	/* Extract the parse tree. */
 	start Start = ColmTree( program );
+	str Error = ColmError( program );
 
 	if ( Start == 0 ) {
 		gblErrorCount += 1;
-		std::cerr << inputFileName << ": parse error" << std::endl;
+		std::cerr << inputFileName << ": parse error: " << Error.text() << std::endl;
 		return;
 	}
 

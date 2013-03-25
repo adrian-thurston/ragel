@@ -183,23 +183,23 @@ def start
 	[RootItemList: root_item*]
 
 def root_item
-	[RlDef: rl_def]
-|	[LiteralDef: literal_def]
-|	[TokenDef: token_def]
-|	[IgnoreDef: ignore_def]
-|	[CflDef: cfl_def]
-|	[RegionDef: region_def]
-|	[ContextDef: context_def]
-|	[NamespaceDef: namespace_def]
-|	[FunctionDef: function_def]
-|	[IterDef: iter_def]
-|	[Statement: statement]
-|	[GlobalDef: global_def]
-|	[ExportDef: export_def]
-|	[PreEof: pre_eof]
-|	[PrecedenceDef: precedence_def]
-|	[AliasDef: alias_def]
-|	[Include: include]
+	[RlDef: rl_def] commit
+|	[LiteralDef: literal_def] commit
+|	[TokenDef: token_def] commit
+|	[IgnoreDef: ignore_def] commit
+|	[CflDef: cfl_def] commit
+|	[RegionDef: region_def] commit
+|	[ContextDef: context_def] commit
+|	[NamespaceDef: namespace_def] commit
+|	[FunctionDef: function_def] commit
+|	[IterDef: iter_def] commit
+|	[Statement: statement] commit
+|	[GlobalDef: global_def] commit
+|	[ExportDef: export_def] commit
+|	[PreEof: pre_eof] commit
+|	[PrecedenceDef: precedence_def] commit
+|	[AliasDef: alias_def] commit
+|	[Include: include] commit
 
 def include
 	[INCLUDE File: lit]
@@ -227,19 +227,19 @@ def alias_def
 	[ALIAS Id: id TypeRef: type_ref]
 
 def context_item
-	[ContextVarDef: context_var_def]
-|	[LiteralDef: literal_def]
-|	[RlDef: rl_def]
-|	[TokenDef: token_def]
-|	[IgnoreDef: ignore_def]
-|	[CflDef: cfl_def]
-|	[RegionDef: region_def]
-|	[ContextDef: context_def]
-|	[FunctionDef: function_def]
-|	[IterDef: iter_def]
-|	[ExportDef: export_def]
-|	[PreEof: pre_eof]
-|	[PrecedenceDef: precedence_def]
+	[ContextVarDef: context_var_def] commit
+|	[LiteralDef: literal_def] commit
+|	[RlDef: rl_def] commit
+|	[TokenDef: token_def] commit
+|	[IgnoreDef: ignore_def] commit
+|	[CflDef: cfl_def] commit
+|	[RegionDef: region_def] commit
+|	[ContextDef: context_def] commit
+|	[FunctionDef: function_def] commit
+|	[IterDef: iter_def] commit
+|	[ExportDef: export_def] commit
+|	[PreEof: pre_eof] commit
+|	[PrecedenceDef: precedence_def] commit
 
 def export_def
 	[EXPORT VarDef: var_def OptDefInit: opt_def_init]
@@ -310,7 +310,7 @@ def opt_lex_expr
 
 def token_def
 	[TOKEN Id: id VarDefList: var_def* 
-		LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH
+		NiLeft: opt_no_ignore LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH NiRight: opt_no_ignore
 		OptTranslate: opt_translate]
 
 def opt_translate
