@@ -302,7 +302,7 @@ void LoadColm::consParseStmt( StmtList *stmtList )
 	stmtList->append( parseStmt );
 }
 
-void LoadColm::consExportStmt( StmtList *stmtList )
+void LoadColm::consExportTree( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
 	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
@@ -312,6 +312,20 @@ void LoadColm::consExportStmt( StmtList *stmtList )
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
 	ObjectField *program = ObjectField::cons( internal, typeRef, String("ColmTree") );
+	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
+	stmtList->append( programExport );
+}
+
+void LoadColm::consExportError( StmtList *stmtList )
+{
+	QualItemVect *qual = new QualItemVect;
+	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
+	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("error") );
+	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+
+	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
+	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("str"), RepeatNone );
+	ObjectField *program = ObjectField::cons( internal, typeRef, String("ColmError") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
 	stmtList->append( programExport );
 }
@@ -354,7 +368,8 @@ void LoadColm::go()
 	colmDeleteProgram( program );
 
 	consParseStmt( stmtList );
-	consExportStmt( stmtList );
+	consExportTree( stmtList );
+	consExportError( stmtList );
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }

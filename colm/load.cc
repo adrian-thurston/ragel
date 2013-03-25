@@ -620,10 +620,11 @@ struct LoadSource
 
 		/* Extract the parse tree. */
 		start Start = ColmTree( program );
+		str Error = ColmError( program );
 
 		if ( Start == 0 ) {
 			gblErrorCount += 1;
-			std::cerr << inputFileName << ": include parse error" << std::endl;
+			std::cerr << inputFileName << ": parse error: " << Error.text() << std::endl;
 			return 0;
 		}
 
@@ -1862,10 +1863,11 @@ void LoadSource::go()
 
 	/* Extract the parse tree. */
 	start Start = ColmTree( program );
+	str Error = ColmError( program );
 
 	if ( Start == 0 ) {
 		gblErrorCount += 1;
-		std::cerr << inputFileName << ": parse error" << std::endl;
+		std::cerr << inputFileName << ": parse error: " << Error.text() << std::endl;
 		return;
 	}
 
