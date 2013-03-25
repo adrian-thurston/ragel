@@ -221,7 +221,7 @@ def pred_token
 |	[RegionQual: region_qual Lit: lit]
 
 def pre_eof
-	[PREEOF COPEN LangStmtList: lang_stmt_list CCLOSE]
+	[PreEof: PREEOF COPEN LangStmtList: lang_stmt_list CCLOSE]
 
 def alias_def
 	[ALIAS Id: id TypeRef: type_ref]
@@ -252,7 +252,7 @@ def iter_def
 		COPEN LangStmtList: lang_stmt_list CCLOSE]
 
 def reference_type_ref
-	[REF TypeRef: type_ref]
+	[R: REF TypeRef: type_ref]
 
 def param_var_def
 	[Id: id COLON TypeRef: type_ref]
@@ -299,7 +299,7 @@ def cfl_def
 		ProdList: prod_list]
 
 def region_def
-	[LEX RootItemList: root_item* END]
+	[L: LEX RootItemList: root_item* END]
 
 def rl_def
 	[RL Id: id LEX_FSLASH Expr: lex_expr LEX_FSLASH]
@@ -322,7 +322,7 @@ def opt_id
 |	[]
 
 def ignore_def
-	[IGNORE OptId: opt_id LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH]
+	[I: IGNORE OptId: opt_id LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH]
 
 def prod_el
 	[OptName: opt_prod_name RegionQual: region_qual Id: id OptRepeat: opt_repeat]
@@ -363,7 +363,7 @@ def statement
 |	[WHILE WhileExpr: code_expr BlockOrSingle: block_or_single]
 |	[LhsVarRef: var_ref EQUALS CodeExpr: code_expr]
 |	[YIELD YieldVarRef: var_ref]
-|	[RETURN ReturnExpr: code_expr]
+|	[R: RETURN ReturnExpr: code_expr]
 |	[Break: BREAK]
 |	[Reject: REJECT]
 
@@ -387,7 +387,7 @@ def block_or_single
 |	[Statement: statement]
 
 def require_pattern
-	[REQUIRE VarRef: var_ref Pattern: pattern]
+	[R: REQUIRE VarRef: var_ref Pattern: pattern]
 
 def opt_require_stmt
 	[Require: require_pattern LangStmtList: lang_stmt_list]
@@ -404,10 +404,10 @@ def var_def
 	[Id: id COLON TypeRef: type_ref]
 
 def print_stmt
-	[Tree: PRINT POPEN CodeExprList: code_expr* PCLOSE]
-|	[PrintStream: PRINTS POPEN CodeExprList: code_expr* PCLOSE]
-|	[Xml: PRINT_XML POPEN CodeExprList: code_expr* PCLOSE]
-|	[XmlAc: PRINT_XML_AC POPEN CodeExprList: code_expr* PCLOSE]
+	[Tree: PRINT O: POPEN CodeExprList: code_expr* PCLOSE]
+|	[PrintStream: PRINTS O: POPEN CodeExprList: code_expr* PCLOSE]
+|	[Xml: PRINT_XML O: POPEN CodeExprList: code_expr* PCLOSE]
+|	[XmlAc: PRINT_XML_AC O: POPEN CodeExprList: code_expr* PCLOSE]
 
 def expr_stmt
 	[CodeExpr: code_expr]
@@ -460,21 +460,21 @@ def code_factor
 		OptFieldInit: opt_field_init Accumulate: accumulate]
 |	[Cons: CONS OptCapture: opt_capture TypeRef: type_ref
 		OptFieldInit: opt_field_init Constructor: constructor]
-|	[MATCH MatchVarRef: var_ref Pattern: pattern]
+|	[M: MATCH MatchVarRef: var_ref Pattern: pattern]
 |	[String: cstring]
 |	[TypeRef: type_ref IN InVarRef: var_ref]
-|	[MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE]
-|	[MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE]
-|	[TYPEID LT TypeIdTypeRef: type_ref GT]
-|	[NEW NewCodeFactor: code_factor]
+|	[M: MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE]
+|	[M: MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE]
+|	[T: TYPEID LT TypeIdTypeRef: type_ref GT]
+|	[N: NEW NewCodeFactor: code_factor]
 
 def type_ref
 	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat]
 |	[PTR RegionQual: region_qual PtrId: id OptRepeat: opt_repeat]
-|	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT]
-|	[LIST LT ListType: type_ref GT]
-|	[VECTOR LT VectorType: type_ref GT]
-|	[PARSER LT ParserType: type_ref GT]
+|	[M: MAP LT MapKeyType: type_ref MapValueType: type_ref GT]
+|	[L: LIST LT ListType: type_ref GT]
+|	[V: VECTOR LT VectorType: type_ref GT]
+|	[P: PARSER LT ParserType: type_ref GT]
 
 def region_qual
 	[RegionQual: region_qual Id: id DOUBLE_COLON]

@@ -9,6 +9,7 @@ struct ColmTree;
 struct ColmKid;
 struct ColmProgram;
 struct ColmRuntimeData;
+struct ColmTree;
 
 void colmInit( long debugRealm );
 struct ColmProgram *colmNewProgram( struct ColmRuntimeData *rtd );
@@ -47,6 +48,7 @@ struct ColmTree *getAttr( struct ColmTree *tree, long pos );
 struct ColmTree *getGlobal( struct ColmProgram *prg, long pos );
 struct ColmTree *getRepeatNext( struct ColmTree *tree );
 struct ColmTree *getRepeatVal( struct ColmTree *tree );
+struct ColmLocation *getLocation( struct ColmTree *tree );
 
 #ifdef __cplusplus
 }

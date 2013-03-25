@@ -35,6 +35,21 @@
 
 extern RuntimeData main_runtimeData;
 
+InputLoc::InputLoc( ColmLocation *pcloc )
+:
+	fileName(0)
+{
+	if ( pcloc != 0 ) {
+		line = pcloc->line;
+		col = pcloc->column;
+	}
+	else {
+		line = -1;
+		col = -1;
+	}
+}
+
+
 String unescape( const String &s )
 {
 	String out( String::Fresh(), s.length() );
@@ -82,11 +97,11 @@ struct LoadSource
 		Literal *literal = 0;
 		if ( lexRangeLit.Lit() != 0 ) {
 			String lit = lexRangeLit.Lit().text().c_str();
-			literal = Literal::cons( internal, lit, Literal::LitString );
+			literal = Literal::cons( lexRangeLit.Lit().loc(), lit, Literal::LitString );
 		}
 		else if ( lexRangeLit.Number() != 0 ) {
 			String num = lexRangeLit.Number().text().c_str();
-			literal = Literal::cons( internal, num, Literal::Number );
+			literal = Literal::cons( lexRangeLit.Number().loc(), num, Literal::Number );
 		}
 		return literal;
 	}
@@ -96,12 +111,13 @@ struct LoadSource
 		LexFactor *factor = 0;
 		if ( LexFactorTree.Literal() != 0 ) {
 			String litString = LexFactorTree.Literal().text().c_str();
-			Literal *literal = Literal::cons( internal, litString, Literal::LitString );
+			Literal *literal = Literal::cons( LexFactorTree.Literal().loc(),
+					litString, Literal::LitString );
 			factor = LexFactor::cons( literal );
 		}
 		else if ( LexFactorTree.Id() != 0 ) {
 			String id = LexFactorTree.Id().text().c_str();
-			factor = lexRlFactorName( id, internal );
+			factor = lexRlFactorName( id, LexFactorTree.Id().loc() );
 		}
 		else if ( LexFactorTree.Expr() != 0 ) {
 			lex_expr LexExpr = LexFactorTree.Expr();
@@ -126,12 +142,12 @@ struct LoadSource
 		}
 		else if ( LexFactorTree.Number() != 0 ) {
 			String number = LexFactorTree.Number().text().c_str();
-			factor = LexFactor::cons( Literal::cons( internal, 
+			factor = LexFactor::cons( Literal::cons( LexFactorTree.Number().loc(), 
 					number, Literal::Number ) );
 		}
 		else if ( LexFactorTree.Hex() != 0 ) {
 			String number = LexFactorTree.Hex().text().c_str();
-			factor = LexFactor::cons( Literal::cons( internal, 
+			factor = LexFactor::cons( Literal::cons( LexFactorTree.Hex().loc(), 
 					number, Literal::Number ) );
 		}
 		return factor;
@@ -189,7 +205,7 @@ struct LoadSource
 
 			LangTerm *langTerm = walkIterCall( Statement.IterCall() );
 
-			stmt = forScope( internal, forDecl, typeRef, langTerm, stmtList );
+			stmt = forScope( Statement.ForDecl().loc(), forDecl, typeRef, langTerm, stmtList );
 
 			popScope();
 		}
@@ -223,13 +239,13 @@ struct LoadSource
 		}
 		else if ( Statement.ReturnExpr() != 0 ) {
 			LangExpr *expr = walkCodeExpr( Statement.ReturnExpr() );
-			stmt = LangStmt::cons( internal, LangStmt::ReturnType, expr );
+			stmt = LangStmt::cons( Statement.R().loc(), LangStmt::ReturnType, expr );
 		}
 		else if ( Statement.Break() != 0 ) {
 			stmt = LangStmt::cons( LangStmt::BreakType );
 		}
 		else if ( Statement.Reject() != 0 ) {
-			stmt = LangStmt::cons( internal, LangStmt::RejectType );
+			stmt = LangStmt::cons( Statement.Reject().loc(), LangStmt::RejectType );
 		}
 		return stmt;
 	}
@@ -254,7 +270,7 @@ struct LoadSource
 
 			LangVarRef *varRef = walkVarRef( require.VarRef() );
 			PatternItemList *list = walkPattern( require.Pattern() );
-			LangExpr *expr = match( internal, varRef, list );
+			LangExpr *expr = match( langStmtList.OptRequire().Require().R().loc(), varRef, list );
 
  			StmtList *reqList = walkLangStmtList( langStmtList.OptRequire().LangStmtList() );
 
@@ -312,7 +328,7 @@ struct LoadSource
 
 		CodeBlock *translate = walkOptTranslate( TokenDef.OptTranslate() );
 
-		defineToken( internal, name, join, objectDef, translate, false, niLeft, niRight );
+		defineToken( TokenDef.Id().loc(), name, join, objectDef, translate, false, niLeft, niRight );
 	}
 
 	String walkOptId( opt_id optId )
@@ -341,7 +357,7 @@ struct LoadSource
 	{
 		ObjectDef *localFrame = blockOpen();
 		StmtList *stmtList = walkLangStmtList( PreEof.LangStmtList() );
-		preEof( internal, stmtList, localFrame );
+		preEof( PreEof.PreEof().loc(), stmtList, localFrame );
 		blockClose();
 	}
 
@@ -356,7 +372,7 @@ struct LoadSource
 			join = LexJoin::cons( expr );
 		}
 
-		defineToken( internal, name, join, objectDef, 0, true, false, false );
+		defineToken( IgnoreDef.I().loc(), name, join, objectDef, 0, true, false, false );
 	}
 
 	LangExpr *walkCodeMultiplicitive( code_multiplicitive mult )
@@ -367,10 +383,10 @@ struct LoadSource
 			LangExpr *right = walkCodeUnary( mult.Unary() );
 
 			if ( mult.Star() != 0 ) {
-				expr = LangExpr::cons( internal, left, '*', right );
+				expr = LangExpr::cons( mult.Star().loc(), left, '*', right );
 			}
 			else if ( mult.Fslash() != 0 ) {
-				expr = LangExpr::cons( internal, left, '/', right );
+				expr = LangExpr::cons( mult.Fslash().loc(), left, '/', right );
 			}
 		}
 		else {
@@ -387,11 +403,11 @@ struct LoadSource
 		PatternItemList *list = 0;
 		if ( typeOrLit.Id() != 0 ) {
 			String id = typeOrLit.Id().text().c_str();
-			list = patternElNamed( internal, nspaceQual, id, repeatType );
+			list = patternElNamed( typeOrLit.Id().loc(), nspaceQual, id, repeatType );
 		}
 		else if ( typeOrLit.Lit() != 0 ) { 
 			String lit = typeOrLit.Lit().text().c_str();
-			list = patternElType( internal, nspaceQual, lit, repeatType );
+			list = patternElType( typeOrLit.Lit().loc(), nspaceQual, lit, repeatType );
 		}
 		return list;
 	}
@@ -401,7 +417,7 @@ struct LoadSource
 		LangVarRef *varRef = 0;
 		if ( optLabel.Id() != 0 ) {
 			String id = optLabel.Id().text().c_str();
-			varRef = LangVarRef::cons( internal, id );
+			varRef = LangVarRef::cons( optLabel.Id().loc(), id );
 		}
 		return varRef;
 	}
@@ -415,8 +431,8 @@ struct LoadSource
 		else if ( PatternEl.TildeData() != 0 ) {
 			String patternData = PatternEl.TildeData().text().c_str();
 			patternData += '\n';
-			PatternItem *patternItem = PatternItem::cons( internal, patternData,
-					PatternItem::InputText );
+			PatternItem *patternItem = PatternItem::cons( PatternEl.TildeData().loc(),
+					patternData, PatternItem::InputText );
 			list = PatternItemList::cons( patternItem );
 		}
 		else if ( PatternEl.OptLabel() != 0 ) {
@@ -432,8 +448,8 @@ struct LoadSource
 		PatternItemList *list = 0;
 		if ( litpatEl.ConsData() != 0 ) {
 			String consData = unescape( litpatEl.ConsData().text().c_str() );
-			PatternItem *patternItem = PatternItem::cons( internal, consData,
-					PatternItem::InputText );
+			PatternItem *patternItem = PatternItem::cons( litpatEl.ConsData().loc(),
+					consData, PatternItem::InputText );
 			list = PatternItemList::cons( patternItem );
 		}
 		else if ( litpatEl.PatternElList() != 0 ) {
@@ -453,7 +469,7 @@ struct LoadSource
 
 		if ( Nl != 0 ) {
 			String nl = unescape( Nl.text().c_str() );
-			PatternItem *patternItem = PatternItem::cons( internal, nl, PatternItem::InputText );
+			PatternItem *patternItem = PatternItem::cons( Nl.loc(), nl, PatternItem::InputText );
 			PatternItemList *term = PatternItemList::cons( patternItem );
 			list = patListConcat( list, term );
 		}
@@ -481,8 +497,8 @@ struct LoadSource
 		else if ( patternTopEl.TildeData() != 0 ) {
 			String patternData = patternTopEl.TildeData().text().c_str();
 			patternData += '\n';
-			PatternItem *patternItem = PatternItem::cons( internal, patternData,
-					PatternItem::InputText );
+			PatternItem *patternItem = PatternItem::cons( patternTopEl.TildeData().loc(),
+					patternData, PatternItem::InputText );
 			list = PatternItemList::cons( patternItem );
 		}
 		else if ( patternTopEl.PatternElList() != 0 ) {
@@ -538,7 +554,7 @@ struct LoadSource
 	{
 		String id = aliasDef.Id().text().c_str();
 		TypeRef *typeRef = walkTypeRef( aliasDef.TypeRef() );
-		alias( internal, id, typeRef );
+		alias( aliasDef.Id().loc(), id, typeRef );
 	}
 
 	CodeBlock *walkOptTranslate( opt_translate optTranslate )
@@ -560,11 +576,11 @@ struct LoadSource
 		PredDecl *predDecl = 0;
 		if ( predToken.Id() != 0 ) {
 			String id = predToken.Id().text().c_str();
-			predDecl = predTokenName( internal, nspaceQual, id );
+			predDecl = predTokenName( predToken.Id().loc(), nspaceQual, id );
 		}
 		else if ( predToken.Lit() != 0 ) {
 			String lit = predToken.Lit().text().c_str();
-			predDecl = predTokenLit( internal, lit, nspaceQual );
+			predDecl = predTokenLit( predToken.Lit().loc(), lit, nspaceQual );
 		}
 		return predDecl;
 	}
@@ -609,7 +625,7 @@ struct LoadSource
 		String lit = Include.File().text().c_str();
 		String file;
 		bool unused;
-		prepareLitString( file, unused, lit, internal );
+		prepareLitString( file, unused, lit, Include.File().loc() );
 
 		const char *argv[2];
 		argv[0] = file.data;
@@ -667,31 +683,31 @@ struct LoadSource
 			NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
 			String id = typeRef.DirectId().text().c_str();
 			RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
-			tr = TypeRef::cons( internal, nspaceQual, id, repeatType );
+			tr = TypeRef::cons( typeRef.DirectId().loc(), nspaceQual, id, repeatType );
 		}
 		else if ( typeRef.PtrId() != 0 ) {
 			NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
 			String id = typeRef.PtrId().text().c_str();
 			RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
-			TypeRef *inner = TypeRef::cons( internal, nspaceQual, id, repeatType );
-			tr = TypeRef::cons( internal, TypeRef::Ptr, inner );
+			TypeRef *inner = TypeRef::cons( typeRef.PtrId().loc(), nspaceQual, id, repeatType );
+			tr = TypeRef::cons( typeRef.PtrId().loc(), TypeRef::Ptr, inner );
 		}
 		else if ( typeRef.MapKeyType() != 0 ) {
 			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
 			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
-			tr = TypeRef::cons( internal, TypeRef::Map, 0, key, value );
+			tr = TypeRef::cons( typeRef.M().loc(), TypeRef::Map, 0, key, value );
 		}
 		else if ( typeRef.ListType() != 0 ) {
 			TypeRef *type = walkTypeRef( typeRef.ListType() );
-			tr = TypeRef::cons( internal, TypeRef::List, 0, type, 0 );
+			tr = TypeRef::cons( typeRef.L().loc(), TypeRef::List, 0, type, 0 );
 		}
 		else if ( typeRef.VectorType() != 0 ) {
 			TypeRef *type = walkTypeRef( typeRef.VectorType() );
-			tr = TypeRef::cons( internal, TypeRef::Vector, 0, type, 0 );
+			tr = TypeRef::cons( typeRef.V().loc(), TypeRef::Vector, 0, type, 0 );
 		}
 		else if ( typeRef.ParserType() != 0 ) {
 			TypeRef *type = walkTypeRef( typeRef.ParserType() );
-			tr = TypeRef::cons( internal, TypeRef::Parser, 0, type, 0 );
+			tr = TypeRef::cons( typeRef.P().loc(), TypeRef::Parser, 0, type, 0 );
 		}
 		return tr;
 	}
@@ -724,7 +740,7 @@ struct LoadSource
 			ObjectField *captureField = 0;
 			if ( El.OptName().Name() != 0 ) {
 				String fieldName = El.OptName().Name().text().c_str();
-				captureField = ObjectField::cons( internal, 0, fieldName );
+				captureField = ObjectField::cons( El.OptName().Name().loc(), 0, fieldName );
 			}
 
 			RepeatType repeatType = walkOptRepeat( El.OptRepeat() );
@@ -732,14 +748,14 @@ struct LoadSource
 
 			if ( El.Id() != 0 ) {
 				String typeName = El.Id().text().c_str();
-				ProdEl *prodEl = prodElName( internal, typeName,
+				ProdEl *prodEl = prodElName( El.Id().loc(), typeName,
 						nspaceQual,
 						captureField, repeatType, false );
 				appendProdEl( list, prodEl );
 			}
 			else if ( El.Lit() != 0 ) {
 				String lit = El.Lit().text().c_str();
-				ProdEl *prodEl = prodElLiteral( internal, lit,
+				ProdEl *prodEl = prodElLiteral( El.Lit().loc(), lit,
 						nspaceQual,
 						captureField, repeatType, false );
 				appendProdEl( list, prodEl );
@@ -786,12 +802,12 @@ struct LoadSource
 		ReOrItem *orItem = 0;
 		if ( regOrChar.Char() != 0 ) {
 			String c = unescape( regOrChar.Char().text().c_str() );
-			orItem = ReOrItem::cons( internal, c );
+			orItem = ReOrItem::cons( regOrChar.Char().loc(), c );
 		}
 		else {
 			String low = unescape( regOrChar.Low().text().c_str() );
 			String high = unescape( regOrChar.High().text().c_str() );
-			orItem = ReOrItem::cons( internal, low[0], high[0] );
+			orItem = ReOrItem::cons( regOrChar.Low().loc(), low[0], high[0] );
 		}
 		return orItem;
 	}
@@ -834,43 +850,51 @@ struct LoadSource
 		if ( LexFactorRepTree.Star() != 0 ) {
 			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
 			LexFactorRep *recRep = walkLexFactorRep( Rec );
-			factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarType );
+			factorRep = LexFactorRep::cons( LexFactorRepTree.Star().loc(),
+					recRep, 0, 0, LexFactorRep::StarType );
 		}
 		else if ( LexFactorRepTree.StarStar() != 0 ) {
 			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
 			LexFactorRep *recRep = walkLexFactorRep( Rec );
-			factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::StarStarType );
+			factorRep = LexFactorRep::cons( LexFactorRepTree.StarStar().loc(),
+					recRep, 0, 0, LexFactorRep::StarStarType );
 		}
 		else if ( LexFactorRepTree.Plus() != 0 ) {
 			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
 			LexFactorRep *recRep = walkLexFactorRep( Rec );
-			factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::PlusType );
+			factorRep = LexFactorRep::cons( LexFactorRepTree.Plus().loc(),
+					recRep, 0, 0, LexFactorRep::PlusType );
 		}
 		else if ( LexFactorRepTree.Question() != 0 ) {
 			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
 			LexFactorRep *recRep = walkLexFactorRep( Rec );
-			factorRep = LexFactorRep::cons( internal, recRep, 0, 0, LexFactorRep::OptionalType );
+			factorRep = LexFactorRep::cons( LexFactorRepTree.Question().loc(),
+					recRep, 0, 0, LexFactorRep::OptionalType );
 		}
 		else if ( LexFactorRepTree.Exact() != 0 ) {
 			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
 			int low = atoi( LexFactorRepTree.Exact().text().c_str() );
-			factorRep = LexFactorRep::cons( internal, recRep, low, 0, LexFactorRep::ExactType );
+			factorRep = LexFactorRep::cons( LexFactorRepTree.Exact().loc(),
+					recRep, low, 0, LexFactorRep::ExactType );
 		}
 		else if ( LexFactorRepTree.Max() != 0 ) {
 			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
 			int high = atoi( LexFactorRepTree.Max().text().c_str() );
-			factorRep = LexFactorRep::cons( internal, recRep, 0, high, LexFactorRep::MaxType );
+			factorRep = LexFactorRep::cons( LexFactorRepTree.Max().loc(),
+					recRep, 0, high, LexFactorRep::MaxType );
 		}
 		else if ( LexFactorRepTree.Min() != 0 ) {
 			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
 			int low = atoi( LexFactorRepTree.Min().text().c_str() );
-			factorRep = LexFactorRep::cons( internal, recRep, low, 0, LexFactorRep::MinType );
+			factorRep = LexFactorRep::cons( LexFactorRepTree.Min().loc(),
+					recRep, low, 0, LexFactorRep::MinType );
 		}
 		else if ( LexFactorRepTree.Low() != 0 ) {
 			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
 			int low = atoi( LexFactorRepTree.Low().text().c_str() );
 			int high = atoi( LexFactorRepTree.High().text().c_str() );
-			factorRep = LexFactorRep::cons( internal, recRep, low, high, LexFactorRep::RangeType );
+			factorRep = LexFactorRep::cons( LexFactorRepTree.Low().loc(),
+					recRep, low, high, LexFactorRep::RangeType );
 		}
 		else {
 			lex_factor_neg LexFactorNegTree = LexFactorRepTree.FactorNeg();
@@ -917,12 +941,12 @@ struct LoadSource
 		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
-		addRegularDef( internal, namespaceStack.top(), id, join );
+		addRegularDef( rlDef.Id().loc(), namespaceStack.top(), id, join );
 	}
 
 	void walkLexRegion( region_def regionDef )
 	{
-		pushRegionSet( internal );
+		pushRegionSet( regionDef.L().loc() );
 		walkRootItemList( regionDef.RootItemList() );
 		popRegionSet();
 	}
@@ -971,7 +995,7 @@ struct LoadSource
 		else if ( printStmt.XmlAc() != 0 )
 			type = LangStmt::PrintXMLACType;
 			
-		return LangStmt::cons( internal, type, exprVect );
+		return LangStmt::cons( printStmt.O().loc(), type, exprVect );
 	}
 
 	QualItemVect *walkQual( qual &Qual )
@@ -982,7 +1006,7 @@ struct LoadSource
 			qualItemVect = walkQual( RecQual );
 			String id = Qual.Id().text().c_str();
 			QualItem::Type type = Qual.Dot() != 0 ? QualItem::Dot : QualItem::Arrow;
-			qualItemVect->append( QualItem( internal, id, type ) );
+			qualItemVect->append( QualItem( Qual.Id().loc(), id, type ) );
 		}
 		else {
 			qualItemVect = new QualItemVect;
@@ -995,7 +1019,7 @@ struct LoadSource
 		qual Qual = varRef.Qual();
 		QualItemVect *qualItemVect = walkQual( Qual );
 		String id = varRef.Id().text().c_str();
-		LangVarRef *langVarRef = LangVarRef::cons( internal, qualItemVect, id );
+		LangVarRef *langVarRef = LangVarRef::cons( varRef.Id().loc(), qualItemVect, id );
 		return langVarRef;
 	}
 
@@ -1004,7 +1028,7 @@ struct LoadSource
 		ObjectField *objField = 0;
 		if ( optCapture.Id() != 0 ) {
 			String id = optCapture.Id().text().c_str();
-			objField = ObjectField::cons( internal, 0, id );
+			objField = ObjectField::cons( optCapture.Id().loc(), 0, id );
 		}
 		return objField;
 	}
@@ -1018,7 +1042,8 @@ struct LoadSource
 		ConsItemList *list = 0;
 		if ( litConsEl.ConsData() != 0 ) {
 			String consData = unescape( litConsEl.ConsData().text().c_str() );
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( litConsEl.ConsData().loc(),
+					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
 		}
 		else if ( litConsEl.ConsElList() != 0 ) {
@@ -1038,7 +1063,7 @@ struct LoadSource
 
 		if ( Nl != 0 ) {
 			String consData = unescape( Nl.text().c_str() );
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( Nl.loc(), ConsItem::InputText, consData );
 			ConsItemList *term = ConsItemList::cons( consItem );
 			list = consListConcat( list, term );
 		}
@@ -1052,12 +1077,13 @@ struct LoadSource
 		if ( consEl.Lit() != 0 ) {
 			NamespaceQual *nspaceQual = walkRegionQual( consEl.RegionQual() );
 			String lit = consEl.Lit().text().c_str();
-			list = consElLiteral( internal, lit, nspaceQual );
+			list = consElLiteral( consEl.Lit().loc(), lit, nspaceQual );
 		}
 		else if ( consEl.TildeData() != 0 ) {
 			String consData = consEl.TildeData().text().c_str();
 			consData += '\n';
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( consEl.TildeData().loc(),
+					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
 		}
 		else if ( consEl.CodeExpr() != 0 ) {
@@ -1090,7 +1116,8 @@ struct LoadSource
 		else if ( consTopEl.TildeData() != 0 ) {
 			String consData = consTopEl.TildeData().text().c_str();
 			consData += '\n';
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( consTopEl.TildeData().loc(),
+					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
 		}
 		else if ( consTopEl.ConsElList() != 0 ) {
@@ -1126,7 +1153,8 @@ struct LoadSource
 		ConsItemList *list = 0;
 		if ( litStringEl.ConsData() != 0 ) {
 			String consData = unescape( litStringEl.ConsData().text().c_str() );
-			ConsItem *stringItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *stringItem = ConsItem::cons( litStringEl.ConsData().loc(),
+					ConsItem::InputText, consData );
 			list = ConsItemList::cons( stringItem );
 		}
 		else if ( litStringEl.StringElList() != 0 ) {
@@ -1146,7 +1174,7 @@ struct LoadSource
 
 		if ( Nl != 0 ) {
 			String consData = unescape( Nl.text().c_str() );
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( Nl.loc(), ConsItem::InputText, consData );
 			ConsItemList *term = ConsItemList::cons( consItem );
 			list = consListConcat( list, term );
 		}
@@ -1162,7 +1190,8 @@ struct LoadSource
 		else if ( stringEl.TildeData() != 0 ) {
 			String consData = stringEl.TildeData().text().c_str();
 			consData += '\n';
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( stringEl.TildeData().loc(),
+					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
 		}
 		else if ( stringEl.CodeExpr() != 0 ) {
@@ -1192,7 +1221,8 @@ struct LoadSource
 		else if ( stringTopEl.TildeData() != 0 ) {
 			String consData = stringTopEl.TildeData().text().c_str();
 			consData += '\n';
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( stringTopEl.TildeData().loc(),
+					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
 		}
 		else if ( stringTopEl.StringElList() != 0 ) {
@@ -1228,7 +1258,8 @@ struct LoadSource
 		ConsItemList *list = 0;
 		if ( litAccumEl.ConsData() != 0 ) {
 			String consData = unescape( litAccumEl.ConsData().text().c_str() );
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( litAccumEl.ConsData().loc(),
+					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
 		}
 		else if ( litAccumEl.AccumElList() != 0 ) {
@@ -1248,7 +1279,7 @@ struct LoadSource
 
 		if ( Nl != 0 ) {
 			String consData = unescape( Nl.text().c_str() );
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( Nl.loc(), ConsItem::InputText, consData );
 			ConsItemList *term = ConsItemList::cons( consItem );
 			list = consListConcat( list, term );
 		}
@@ -1265,7 +1296,8 @@ struct LoadSource
 		else if ( accumEl.TildeData() != 0 ) {
 			String consData = accumEl.TildeData().text().c_str();
 			consData += '\n';
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( accumEl.TildeData().loc(),
+					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
 		}
 		else if ( accumEl.CodeExpr() != 0 ) {
@@ -1295,7 +1327,8 @@ struct LoadSource
 		else if ( accumTopEl.TildeData() != 0 ) {
 			String consData = accumTopEl.TildeData().text().c_str();
 			consData += '\n';
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( accumTopEl.TildeData().loc(),
+					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
 		}
 		else if ( accumTopEl.AccumElList() != 0 ) {
@@ -1368,7 +1401,7 @@ struct LoadSource
 		}
 		else if ( codeFactor.Lit() != 0 ) {
 			String lit = codeFactor.Lit().text().c_str();
-			LangTerm *term = LangTerm::cons( internal, LangTerm::StringType, lit );
+			LangTerm *term = LangTerm::cons( codeFactor.Lit().loc(), LangTerm::StringType, lit );
 			expr = LangExpr::cons( term );
 		}
 		else if ( codeFactor.Parse() != 0 ) {
@@ -1379,7 +1412,7 @@ struct LoadSource
 			FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
 			ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
 
-			expr = parseCmd( internal, false, objField, typeRef, init, list );
+			expr = parseCmd( codeFactor.Parse().loc(), false, objField, typeRef, init, list );
 		}
 		else if ( codeFactor.ParseStop() != 0 ) {
 			/* The type we are parsing. */
@@ -1389,7 +1422,7 @@ struct LoadSource
 			FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
 			ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
 
-			expr = parseCmd( internal, true, objField, typeRef, init, list );
+			expr = parseCmd( codeFactor.ParseStop().loc(), true, objField, typeRef, init, list );
 		}
 		else if ( codeFactor.Cons() != 0 ) {
 			/* The type we are parsing. */
@@ -1399,21 +1432,24 @@ struct LoadSource
 			ConsItemList *list = walkConstructor( codeFactor.Constructor() );
 			FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
 
-			expr = construct( internal, objField, list, typeRef, init );
+			expr = construct( codeFactor.Cons().loc(), objField, list, typeRef, init );
 		}
 		else if ( codeFactor.Send() != 0 ) {
 			LangVarRef *varRef = walkVarRef( codeFactor.ToVarRef() );
 			ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
-			expr = send( internal, varRef, list );
+			expr = send( codeFactor.Send().loc(), varRef, list );
 		}
 		else if ( codeFactor.Nil() != 0 ) {
-			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::NilType ) );
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.Nil().loc(),
+					LangTerm::NilType ) );
 		}
 		else if ( codeFactor.True() != 0 ) {
-			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::TrueType ) );
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.True().loc(),
+					LangTerm::TrueType ) );
 		}
 		else if ( codeFactor.False() != 0 ) {
-			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::FalseType ) );
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.False().loc(),
+					LangTerm::FalseType ) );
 		}
 		else if ( codeFactor.ParenCodeExpr() != 0 ) {
 			expr = walkCodeExpr( codeFactor.ParenCodeExpr() );
@@ -1425,7 +1461,7 @@ struct LoadSource
 		else if ( codeFactor.MatchVarRef() != 0 ) {
 			LangVarRef *varRef = walkVarRef( codeFactor.MatchVarRef() );
 			PatternItemList *list = walkPattern( codeFactor.Pattern() );
-			expr = match( internal, varRef, list );
+			expr = match( codeFactor.M().loc(), varRef, list );
 		}
 		else if ( codeFactor.InVarRef() != 0 ) {
 			TypeRef *typeRef = walkTypeRef( codeFactor.TypeRef() );
@@ -1435,20 +1471,23 @@ struct LoadSource
 		}
 		else if ( codeFactor.MakeTreeExprList() != 0 ) {
 			ExprVect *exprList = walkCodeExprList( codeFactor.MakeTreeExprList() );
-			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::MakeTreeType, exprList ) );
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.M().loc(),
+					LangTerm::MakeTreeType, exprList ) );
 		}
 		else if ( codeFactor.MakeTokenExprList() != 0 ) {
 			ExprVect *exprList = walkCodeExprList( codeFactor.MakeTokenExprList() );
-			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::MakeTokenType, exprList ) );
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.M().loc(),
+					LangTerm::MakeTokenType, exprList ) );
 		}
 		else if ( codeFactor.TypeIdTypeRef() != 0 ) {
 			TypeRef *typeRef = walkTypeRef( codeFactor.TypeIdTypeRef() );
-			expr = LangExpr::cons( LangTerm::cons( internal,
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.T().loc(),
 					LangTerm::TypeIdType, typeRef ) );
 		}
 		else if ( codeFactor.NewCodeFactor() != 0 ) {
 			LangExpr *newExpr = walkCodeFactor( codeFactor.NewCodeFactor() );
-			expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::NewType, newExpr ) );
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.N().loc(),
+					LangTerm::NewType, newExpr ) );
 		}
 		return expr;
 	}
@@ -1459,12 +1498,12 @@ struct LoadSource
 		if ( additive.Plus() != 0 ) {
 			LangExpr *left = walkCodeAdditive( additive.Additive() );
 			LangExpr *right = walkCodeMultiplicitive( additive.Multiplicitive() );
-			expr = LangExpr::cons( internal, left, '+', right );
+			expr = LangExpr::cons( additive.Plus().loc(), left, '+', right );
 		}
 		else if ( additive.Minus() != 0 ) {
 			LangExpr *left = walkCodeAdditive( additive.Additive() );
 			LangExpr *right = walkCodeMultiplicitive( additive.Multiplicitive() );
-			expr = LangExpr::cons( internal, left, '-', right );
+			expr = LangExpr::cons( additive.Minus().loc(), left, '-', right );
 		}
 		else {
 			expr = walkCodeMultiplicitive( additive.Multiplicitive() );
@@ -1478,16 +1517,16 @@ struct LoadSource
 		LangExpr *expr = walkCodeFactor( unary.Factor() );
 
 		if ( unary.Bang() != 0 ) {
-			expr = LangExpr::cons( internal, '!', expr );
+			expr = LangExpr::cons( unary.Bang().loc(), '!', expr );
 		}
 		else if ( unary.Dollar() != 0 ) {
-			expr = LangExpr::cons( internal, '$', expr );
+			expr = LangExpr::cons( unary.Dollar().loc(), '$', expr );
 		}
 		else if ( unary.Caret() != 0 ) {
-			expr = LangExpr::cons( internal, '^', expr );
+			expr = LangExpr::cons( unary.Caret().loc(), '^', expr );
 		}
 		else if ( unary.Percent() != 0 ) {
-			expr = LangExpr::cons( internal, '%', expr );
+			expr = LangExpr::cons( unary.Percent().loc(), '%', expr );
 		}
 
 		return expr;
@@ -1502,22 +1541,22 @@ struct LoadSource
 			LangExpr *right = walkCodeAdditive( codeRelational.Additive() );
 
 			if ( codeRelational.EqEq() != 0 ) {
-				expr = LangExpr::cons( internal, left, OP_DoubleEql, right );
+				expr = LangExpr::cons( codeRelational.EqEq().loc(), left, OP_DoubleEql, right );
 			}
 			if ( codeRelational.Neq() != 0 ) {
-				expr = LangExpr::cons( internal, left, OP_NotEql, right );
+				expr = LangExpr::cons( codeRelational.Neq().loc(), left, OP_NotEql, right );
 			}
 			else if ( codeRelational.Lt() != 0 ) {
-				expr = LangExpr::cons( internal, left, '<', right );
+				expr = LangExpr::cons( codeRelational.Lt().loc(), left, '<', right );
 			}
 			else if ( codeRelational.Gt() != 0 ) {
-				expr = LangExpr::cons( internal, left, '>', right );
+				expr = LangExpr::cons( codeRelational.Gt().loc(), left, '>', right );
 			}
 			else if ( codeRelational.LtEq() != 0 ) {
-				expr = LangExpr::cons( internal, left, OP_LessEql, right );
+				expr = LangExpr::cons( codeRelational.LtEq().loc(), left, OP_LessEql, right );
 			}
 			else if ( codeRelational.GtEq() != 0 ) {
-				expr = LangExpr::cons( internal, left, OP_GrtrEql, right );
+				expr = LangExpr::cons( codeRelational.GtEq().loc(), left, OP_GrtrEql, right );
 			}
 		}
 		else {
@@ -1603,25 +1642,10 @@ struct LoadSource
 		contextVarDef( internal, objField );
 	}
 
-	//def reference_type_ref
-	//	[REF type_ref]
-	//
-	//def param_var_def
-	//	[id COLON type_ref]
-	//|	[id COLON reference_type_ref]
-	//
-	//def param_list
-	//	[param_list param_var_def]
-	//|	[param_var_def]
-	//
-	//def opt_param_list
-	//	[param_list]
-	//|	[]
-
 	TypeRef *walkReferenceTypeRef( reference_type_ref ReferenceTypeRef )
 	{
 		TypeRef *typeRef = walkTypeRef( ReferenceTypeRef.TypeRef() );
-		return TypeRef::cons( internal, TypeRef::Ref, typeRef );
+		return TypeRef::cons( ReferenceTypeRef.R().loc(), TypeRef::Ref, typeRef );
 	}
 
 	ObjectField *walkParamVarDef( param_var_def paramVarDef )
@@ -1634,7 +1658,7 @@ struct LoadSource
 		else
 			typeRef = walkReferenceTypeRef( paramVarDef.RefTypeRef() );
 		
-		return addParam( internal, typeRef, id );
+		return addParam( paramVarDef.Id().loc(), typeRef, id );
 	}
 
 	ParameterList *walkParamVarDefList( _repeat_param_var_def paramVarDefList )
@@ -1719,7 +1743,7 @@ struct LoadSource
 	void walkContextDef( context_def contextDef )
 	{
 		String name = contextDef.Name().text().c_str();
-		contextHead( internal, name );
+		contextHead( contextDef.Name().loc(), name );
 
 		_repeat_context_item contextItemList = contextDef.ContextItemList();
 		while ( !contextItemList.end() ) {
@@ -1734,7 +1758,7 @@ struct LoadSource
 	void walkNamespaceDef( namespace_def NamespaceDef )
 	{
 		String name = NamespaceDef.Name().text().c_str();
-		createNamespace( internal, name );
+		createNamespace( NamespaceDef.Name().loc(), name );
 		walkRootItemList( NamespaceDef.RootItemList() );
 		namespaceStack.pop();
 	}
@@ -1816,9 +1840,9 @@ struct LoadSource
 
 		String lit = literalItem.Lit().text().c_str();
 		if ( strcmp( lit, "''" ) == 0 )
-			zeroDef( internal, lit, niLeft, niRight );
+			zeroDef( literalItem.Lit().loc(), lit, niLeft, niRight );
 		else
-			literalDef( internal, lit, niLeft, niRight );
+			literalDef( literalItem.Lit().loc(), lit, niLeft, niRight );
 	}
 
 	void walkLiteralList( literal_list literalList )

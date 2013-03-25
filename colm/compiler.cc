@@ -746,7 +746,7 @@ FsmGraph *Compiler::makeScanner()
 
 void Compiler::createDefaultScanner()
 {
-	InputLoc loc = { 0, 0, 0 };
+	InputLoc loc;
 
 	const char *name = "___DEFAULT_SCANNER";
 

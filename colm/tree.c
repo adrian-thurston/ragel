@@ -36,6 +36,11 @@
 
 #define BUFFER_INITIAL_SIZE 4096
 
+struct ColmLocation *getLocation( struct ColmTree *tree )
+{
+	return (struct ColmLocation*) ( tree->tokdata != 0 ? tree->tokdata->location : 0 );
+}
+
 void listPrepend( List *list, ListEl *new_el) { listAddBefore(list, list->head, new_el); }
 void listAppend( List *list, ListEl *new_el)  { listAddAfter(list, list->tail, new_el); }
 

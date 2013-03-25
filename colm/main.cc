@@ -40,6 +40,7 @@
 #include "vector.h"
 #include "version.h"
 #include "fsmcodegen.h"
+#include "colm.h"
 
 #if defined(CONS_INIT)
 #include "consinit.h"
@@ -71,7 +72,7 @@ using std::cerr;
 using std::cin;
 using std::endl;
 
-InputLoc internal = { 0, -1, -1 };
+InputLoc internal;
 
 /* Io globals. */
 istream *inStream = 0;
