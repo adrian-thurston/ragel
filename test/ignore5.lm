@@ -1,0 +1,53 @@
+##### LM #####
+lex
+	ignore /space+/
+	literal '*', '!', ';'
+	token POPEN /'('/ ni
+	token PCLOSE ni /')'/
+	token id /[a-zA-Z_0-9]+/ 
+end
+
+lex
+	ignore /space+/
+	token inner_t /[a-zA-Z_0-9]+/ 
+
+	literal ''
+end
+
+def inner
+	['' inner_t*]
+
+def item 
+	[id]
+|	[POPEN inner PCLOSE]
+
+def start 
+	[item* ';']
+
+parse StartP: start[ stdin ]
+Start: start = StartP.tree
+
+if ( ! Start ) {
+	print( 'parse error\n' )
+	exit( 0 )
+}
+
+for I: item in Start {
+	print( 'item: .' %I '.\n' )
+	if match I [ O: POPEN Inner: inner C: PCLOSE ]
+		print( 'innr: .' %O '.' %Inner '.' %C '.\n' )
+}
+
+##### IN #####
+a b c (   d   ) e (  ) f g;
+##### EXP #####
+item: .a .
+item: .b .
+item: .c .
+item: .(   d   ) .
+innr: .(.   d   .) .
+item: .e .
+item: .(  ) .
+innr: .(.  .) .
+item: .f .
+item: .g.

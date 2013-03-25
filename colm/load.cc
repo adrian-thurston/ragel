@@ -298,6 +298,9 @@ struct LoadSource
 	{
 		String name = TokenDef.Id().text().c_str();
 
+		bool niLeft = walkOptNoIgnore( TokenDef.NiLeft() );
+		bool niRight = walkOptNoIgnore( TokenDef.NiRight() );
+
 		ObjectDef *objectDef = walkVarDefList( TokenDef.VarDefList() );
 		objectDef->name = name;
 
@@ -309,7 +312,7 @@ struct LoadSource
 
 		CodeBlock *translate = walkOptTranslate( TokenDef.OptTranslate() );
 
-		defineToken( internal, name, join, objectDef, translate, false, false, false );
+		defineToken( internal, name, join, objectDef, translate, false, niLeft, niRight );
 	}
 
 	String walkOptId( opt_id optId )
