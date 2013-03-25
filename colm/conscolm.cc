@@ -78,7 +78,9 @@ void LoadColm::walkProdList( LelDefList *outProdList, prod_list &prodList )
 	prod_el_list prodElList = prodList.Prod().ProdElList();
 	walkProdElList( outElList, prodElList );
 
-	Production *prod = BaseParser::production( internal, outElList, false, 0, 0 );
+	bool commit = prodList.Prod().OptCommit().Commit() != 0;
+
+	Production *prod = BaseParser::production( internal, outElList, commit, 0, 0 );
 	prodAppend( outProdList, prod );
 }
 
