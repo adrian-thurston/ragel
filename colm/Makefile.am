@@ -31,12 +31,15 @@ RUNTIME_HDR = \
 	bytecode.h config.h defs.h debug.h pool.h input.h \
 	pdarun.h map.h tree.h program.h colm.h
 
-lib_LIBRARIES = libcolm.a
+lib_LIBRARIES = libcolmp.a libcolmd.a
 
 noinst_LIBRARIES = libprog.a
 
-libcolm_a_SOURCES = $(RUNTIME_SRC)
-libcolm_a_CFLAGS = -I..
+libcolmp_a_SOURCES = $(RUNTIME_SRC)
+libcolmp_a_CFLAGS = -I..
+
+libcolmd_a_SOURCES = $(RUNTIME_SRC)
+libcolmd_a_CFLAGS = -I..
 
 common_CFLAGS = \
 	-Wall \
@@ -60,7 +63,7 @@ libprog_a_CXXFLAGS = $(common_CFLAGS)
 
 bootstrap0_CXXFLAGS = $(common_CFLAGS) -DCONS_INIT
 bootstrap0_SOURCES = consinit.cc consinit.h main.cc
-bootstrap0_LDADD = libprog.a libcolm.a
+bootstrap0_LDADD = libprog.a libcolmd.a
 
 bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 bootstrap1_CFLAGS = $(common_CFLAGS)
@@ -68,7 +71,7 @@ bootstrap1_SOURCES = \
 	conscolm.h conscolm.cc \
 	exports1.h exports1.cc parse1.c \
 	main.cc
-bootstrap1_LDADD = libprog.a libcolm.a
+bootstrap1_LDADD = libprog.a libcolmd.a
 
 colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_SRC
 colm_CFLAGS = $(common_CFLAGS)
@@ -76,7 +79,7 @@ colm_SOURCES = \
 	load.h load.cc \
 	exports2.h exports2.cc parse2.c \
 	main.cc
-colm_LDADD = libprog.a libcolm.a
+colm_LDADD = libprog.a libcolmd.a
 
 colmincdir = $(includedir)/colm
 

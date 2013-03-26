@@ -367,7 +367,7 @@ void compileOutputInstalled( const char *argv0 )
 		" -o %s"
 		" %s"
 		" -L" PREFIX "/lib"
-		" -lcolm",
+		" -lcolmd",
 		exec, outputFileName );
 
 	compileOutputCommand( command );
@@ -393,7 +393,7 @@ void compileOutputInSource( const char *argv0 )
 		" -o %s"
 		" %s"
 		" -L%s"
-		" -lcolm",
+		" -lcolmd",
 		location, location,
 		exec, outputFileName, location );
 	
