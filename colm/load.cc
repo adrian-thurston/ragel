@@ -779,22 +779,25 @@ struct LoadSource
 		return block;
 	}
 
-	void walkProdList( LelDefList *lelDefList, prod_list ProdList )
+	void walkProdudction( LelDefList *lelDefList, prod Prod )
 	{
-		if ( ProdList.ProdList() != 0 )
-			walkProdList( lelDefList, ProdList.ProdList() );
-
 		ProdElList *list = new ProdElList;
-
-		prod Prod = ProdList.Prod();
 
 		walkProdElList( list, Prod.ProdElList() );
 		CodeBlock *codeBlock = walkOptReduce( Prod.OptReduce() );
 
 		bool commit = Prod.OptCommit().Commit() != 0;
 
-		Production *prod = BaseParser::production( internal, list, commit, codeBlock, 0 );
+		Production *prod = BaseParser::production( Prod.Open().loc() , list, commit, codeBlock, 0 );
 		prodAppend( lelDefList, prod );
+	}
+
+	void walkProdList( LelDefList *lelDefList, prod_list ProdList )
+	{
+		if ( ProdList.ProdList() != 0 )
+			walkProdList( lelDefList, ProdList.ProdList() );
+
+		walkProdudction( lelDefList, ProdList.Prod() );
 	}
 
 	ReOrItem *walkRegOrChar( reg_or_char regOrChar )

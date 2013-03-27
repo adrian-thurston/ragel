@@ -341,7 +341,7 @@ def opt_commit
 |	[]
 
 def prod
-	[SQOPEN ProdElList: prod_el_list SQCLOSE 
+	[Open: SQOPEN ProdElList: prod_el_list SQCLOSE 
 		OptCommit: opt_commit
 		OptReduce: opt_reduce]
 
