@@ -361,7 +361,7 @@ def statement
 		BlockOrSingle: block_or_single]
 |	[IF IfExpr: code_expr BlockOrSingle: block_or_single ElsifList: elsif_list]
 |	[WHILE WhileExpr: code_expr BlockOrSingle: block_or_single]
-|	[LhsVarRef: var_ref EQUALS CodeExpr: code_expr]
+|	[LhsVarRef: var_ref E: EQUALS CodeExpr: code_expr]
 |	[YIELD YieldVarRef: var_ref]
 |	[R: RETURN ReturnExpr: code_expr]
 |	[Break: BREAK]
@@ -655,7 +655,7 @@ def lex_factor_rep
 |	[FactorNeg: lex_factor_neg]
 
 def lex_factor_neg
-	[LEX_CARET FactorNeg: lex_factor_neg]
+	[Caret: LEX_CARET FactorNeg: lex_factor_neg]
 |	[Factor: lex_factor]
 
 def lex_range_lit

@@ -41,8 +41,8 @@ LexTerm *rangeTerm( const char *low, const char *high )
 	Literal *highLit = Literal::cons( internal, String( high ), Literal::LitString );
 	Range *range = Range::cons( lowLit, highLit );
 	LexFactor *factor = LexFactor::cons( range );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( factorNeg );
 	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
 	LexTerm *term = LexTerm::cons( factorAug );
 	return term;
@@ -52,7 +52,7 @@ LexFactorNeg *litFactorNeg( const char *str )
 {
 	Literal *lit = Literal::cons( internal, String( str ), Literal::LitString );
 	LexFactor *factor = LexFactor::cons( lit );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
 	return factorNeg;
 }
 
@@ -60,8 +60,8 @@ LexFactorAug *litFactorAug( const char *str )
 {
 	Literal *lit = Literal::cons( internal, String( str ), Literal::LitString );
 	LexFactor *factor = LexFactor::cons( lit );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( factorNeg );
 	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
 	return factorAug;
 }
@@ -70,8 +70,8 @@ LexTerm *litTerm( const char *str )
 {
 	Literal *lit = Literal::cons( internal, String( str ), Literal::LitString );
 	LexFactor *factor = LexFactor::cons( lit );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( factorNeg );
 	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
 	LexTerm *term = LexTerm::cons( factorAug );
 	return term;
@@ -121,8 +121,8 @@ LexFactorAug *starFactorAug( LexExpression *expr )
 {
 	LexJoin *join = LexJoin::cons( expr );
 	LexFactor *factor = LexFactor::cons( join );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( factorNeg );
 	LexFactorRep *staredRep = LexFactorRep::cons( internal, factorRep, 0, 0, LexFactorRep::StarType );
 	LexFactorAug *factorAug = LexFactorAug::cons( staredRep );
 	return factorAug;
@@ -144,8 +144,8 @@ LexFactorAug *plusFactorAug( LexExpression *expr )
 {
 	LexJoin *join = LexJoin::cons( expr );
 	LexFactor *factor = LexFactor::cons( join );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( factorNeg );
 	LexFactorRep *staredRep = LexFactorRep::cons( internal, factorRep, 0, 0, LexFactorRep::PlusType );
 	LexFactorAug *factorAug = LexFactorAug::cons( staredRep );
 	return factorAug;
@@ -170,8 +170,8 @@ LexFactorAug *parensFactorAug( LexExpression *expr )
 {
 	LexJoin *join = LexJoin::cons( expr );
 	LexFactor *factor = LexFactor::cons( join );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( factorNeg );
 	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
 	return factorAug;
 }
@@ -180,7 +180,7 @@ LexFactorNeg *parensFactorNeg( LexExpression *expr )
 {
 	LexJoin *join = LexJoin::cons( expr );
 	LexFactor *factor = LexFactor::cons( join );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
 	return factorNeg;
 }
 
@@ -189,8 +189,8 @@ LexFactorAug *parensFactorAug( LexTerm *term )
 	LexExpression *expr = LexExpression::cons( term );
 	LexJoin *join = LexJoin::cons( expr );
 	LexFactor *factor = LexFactor::cons( join );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
-	LexFactorRep *factorRep = LexFactorRep::cons( internal, factorNeg );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( factorNeg );
 	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
 	return factorAug;
 }
@@ -198,8 +198,8 @@ LexFactorAug *parensFactorAug( LexTerm *term )
 LexFactorAug *charNegFactorAug( LexExpression *expr )
 {
 	LexFactorNeg *factorNeg = parensFactorNeg( expr );
-	LexFactorNeg *charNeg = LexFactorNeg::cons( internal, factorNeg, LexFactorNeg::CharNegateType );
-	LexFactorRep *factorRep = LexFactorRep::cons( internal, charNeg );
+	LexFactorNeg *charNeg = LexFactorNeg::cons( factorNeg, LexFactorNeg::CharNegateType );
+	LexFactorRep *factorRep = LexFactorRep::cons( charNeg );
 	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
 	return factorAug;
 }

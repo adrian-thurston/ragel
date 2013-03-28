@@ -1016,11 +1016,10 @@ struct LexFactorRep
 		return f;
 	}
 	
-	static LexFactorRep *cons( const InputLoc &loc, LexFactorNeg *factorNeg )
+	static LexFactorRep *cons( LexFactorNeg *factorNeg )
 	{
 		LexFactorRep *f = new LexFactorRep;
 		f->type = FactorNegType;
-		f->loc = loc;
 		f->factorNeg = factorNeg;
 		return f;
 	}
@@ -1057,21 +1056,19 @@ struct LexFactorNeg
 		type((Type)-1)
 	{}
 
-	static LexFactorNeg *cons( const InputLoc &loc, LexFactorNeg *factorNeg, Type type )
+	static LexFactorNeg *cons( LexFactorNeg *factorNeg, Type type )
 	{
 		LexFactorNeg *f = new LexFactorNeg;
 		f->type = type;
-		f->loc = loc;
 		f->factorNeg = factorNeg;
 		f->factor = 0;
 		return f;
 	}
 
-	static LexFactorNeg *cons( const InputLoc &loc, LexFactor *factor )
+	static LexFactorNeg *cons( LexFactor *factor )
 	{
 		LexFactorNeg *f = new LexFactorNeg;
 		f->type = FactorType;
-		f->loc = loc;
 		f->factorNeg = 0;
 		f->factor = factor;
 		return f;
@@ -1083,7 +1080,6 @@ struct LexFactorNeg
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 
-	InputLoc loc;
 	LexFactorNeg *factorNeg;
 	LexFactor *factor;
 	Type type;

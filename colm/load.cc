@@ -167,12 +167,17 @@ struct LoadSource
 			LangExpr *right = walkCodeRelational( codeExpr.Relational() );
 
 			char type = -1;
-			if ( codeExpr.BarBar() != 0 )
+			InputLoc loc;
+			if ( codeExpr.BarBar() != 0 ) {
 				type = OP_LogicalOr;
-			else if ( codeExpr.AmpAmp() != 0 )
+				loc = codeExpr.BarBar().loc();
+			}
+			else if ( codeExpr.AmpAmp() != 0 ) {
 				type = OP_LogicalAnd;
+				loc = codeExpr.AmpAmp().loc();
+			}
 
-			expr = LangExpr::cons( internal, left, type, right );
+			expr = LangExpr::cons( loc, left, type, right );
 		}
 		else {
 			expr = walkCodeRelational( codeExpr.Relational() );
@@ -231,7 +236,7 @@ struct LoadSource
 		else if ( Statement.LhsVarRef() != 0 ) {
 			LangVarRef *varRef = walkVarRef( Statement.LhsVarRef() );
 			LangExpr *expr = walkCodeExpr( Statement.CodeExpr() );
-			stmt = LangStmt::cons( internal, LangStmt::AssignType, varRef, expr );
+			stmt = LangStmt::cons( Statement.E().loc(), LangStmt::AssignType, varRef, expr );
 		}
 		else if ( Statement.YieldVarRef() != 0 ) {
 			LangVarRef *varRef = walkVarRef( Statement.YieldVarRef() );
@@ -832,17 +837,17 @@ struct LoadSource
 
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
 	{
-		if ( LexFactorNegTree.FactorNeg() != 0 ) {
+		if ( LexFactorNegTree.Caret() != 0 ) {
 			lex_factor_neg Rec = LexFactorNegTree.FactorNeg();
 			LexFactorNeg *recNeg = walkLexFactorNeg( Rec );
-			LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, recNeg,
+			LexFactorNeg *factorNeg = LexFactorNeg::cons( recNeg,
 					LexFactorNeg::CharNegateType );
 			return factorNeg;
 		}
 		else {
 			lex_factor LexFactorTree = LexFactorNegTree.Factor();
 			LexFactor *factor = walkLexFactor( LexFactorTree );
-			LexFactorNeg *factorNeg = LexFactorNeg::cons( internal, factor );
+			LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
 			return factorNeg;
 		}
 	}
@@ -902,7 +907,7 @@ struct LoadSource
 		else {
 			lex_factor_neg LexFactorNegTree = LexFactorRepTree.FactorNeg();
 			LexFactorNeg *factorNeg = walkLexFactorNeg( LexFactorNegTree );
-			factorRep = LexFactorRep::cons( internal, factorNeg );
+			factorRep = LexFactorRep::cons( factorNeg );
 		}
 
 		return factorRep;
@@ -1592,7 +1597,7 @@ struct LoadSource
 		if ( IterCall.Id() != 0 ) {
 			String tree = IterCall.Id().text().c_str();
 			langTerm = LangTerm::cons( internal,
-					LangTerm::VarRefType, LangVarRef::cons( internal, tree ) );
+					LangTerm::VarRefType, LangVarRef::cons( IterCall.Id().loc(), tree ) );
 		}
 		else {
 			LangVarRef *varRef = walkVarRef( IterCall.VarRef() );

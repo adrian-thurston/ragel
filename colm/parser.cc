@@ -150,8 +150,8 @@ LexJoin *BaseParser::literalJoin( const InputLoc &loc, const String &data )
 {
 	Literal *literal = Literal::cons( loc, data, Literal::LitString );
 	LexFactor *factor = LexFactor::cons( literal );
-	LexFactorNeg *factorNeg = LexFactorNeg::cons( loc, factor );
-	LexFactorRep *factorRep = LexFactorRep::cons( loc, factorNeg );
+	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
+	LexFactorRep *factorRep = LexFactorRep::cons( factorNeg );
 	LexFactorAug *factorAug = LexFactorAug::cons( factorRep );
 	LexTerm *term = LexTerm::cons( factorAug );
 	LexExpression *expr = LexExpression::cons( term );
