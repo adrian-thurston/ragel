@@ -1379,16 +1379,6 @@ FsmGraph *ReItem::walk( Compiler *pd, RegExpr *rootRegex )
 		}
 	}
 
-	/* If the item is followed by a star, then apply the star op. */
-	if ( star ) {
-		if ( rtnVal->startState->isFinState() ) {
-			warning(loc) << "applying kleene star to a machine that "
-					"accpets zero length word" << endl;
-		}
-
-		rtnVal->starOp();
-		rtnVal->minimizePartition2();
-	}
 	return rtnVal;
 }
 

@@ -134,11 +134,11 @@ struct LoadSource
 		}
 		else if ( LexFactorTree.PosData() != 0 ) {
 			ReOrBlock *block = walkRegOrData( LexFactorTree.PosData() );
-			factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::OrBlock ) );
+			factor = LexFactor::cons( ReItem::cons( block, ReItem::OrBlock ) );
 		}
 		else if ( LexFactorTree.NegData() != 0 ) {
 			ReOrBlock *block = walkRegOrData( LexFactorTree.NegData() );
-			factor = LexFactor::cons( ReItem::cons( internal, block, ReItem::NegOrBlock ) );
+			factor = LexFactor::cons( ReItem::cons( block, ReItem::NegOrBlock ) );
 		}
 		else if ( LexFactorTree.Number() != 0 ) {
 			String number = LexFactorTree.Number().text().c_str();

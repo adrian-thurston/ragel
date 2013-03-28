@@ -1268,31 +1268,25 @@ struct ReItem
 {
 	enum ReItemType { Data, Dot, OrBlock, NegOrBlock };
 	
-	static ReItem *cons( const InputLoc &loc, const String &data ) 
+	static ReItem *cons( const String &data ) 
 	{
 		ReItem *r = new ReItem;
-		r->loc = loc;
 		r->data = data;
-		r->star = false;
 		r->type = Data;
 		return r;
 	}
 
-	static ReItem *cons( const InputLoc &loc, ReItemType type )
+	static ReItem *cons( ReItemType type )
 	{
 		ReItem *r = new ReItem;
-		r->loc = loc;
-		r->star = false;
 		r->type = type;
 		return r;
 	}
 
-	static ReItem *cons( const InputLoc &loc, ReOrBlock *orBlock, ReItemType type )
+	static ReItem *cons( ReOrBlock *orBlock, ReItemType type )
 	{
 		ReItem *r = new ReItem;
-		r->loc = loc;
 		r->orBlock = orBlock;
-		r->star = false;
 		r->type = type;
 		return r;
 	}
@@ -1300,10 +1294,8 @@ struct ReItem
 	~ReItem();
 	FsmGraph *walk( Compiler *pd, RegExpr *rootRegex );
 
-	InputLoc loc;
 	String data;
 	ReOrBlock *orBlock;
-	bool star;
 	ReItemType type;
 };
 
