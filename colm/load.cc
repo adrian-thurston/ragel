@@ -1098,7 +1098,7 @@ struct LoadSource
 		}
 		else if ( consEl.CodeExpr() != 0 ) {
 			LangExpr *consExpr = walkCodeExpr( consEl.CodeExpr() );
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
+			ConsItem *consItem = ConsItem::cons( consExpr->loc, ConsItem::ExprType, consExpr );
 			list = ConsItemList::cons( consItem );
 		}
 		else if ( consEl.LitConsElList() != 0 ) {
@@ -1206,7 +1206,7 @@ struct LoadSource
 		}
 		else if ( stringEl.CodeExpr() != 0 ) {
 			LangExpr *consExpr = walkCodeExpr( stringEl.CodeExpr() );
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, consExpr );
+			ConsItem *consItem = ConsItem::cons( consExpr->loc, ConsItem::ExprType, consExpr );
 			list = ConsItemList::cons( consItem );
 		}
 		return list;
@@ -1312,7 +1312,7 @@ struct LoadSource
 		}
 		else if ( accumEl.CodeExpr() != 0 ) {
 			LangExpr *accumExpr = walkCodeExpr( accumEl.CodeExpr() );
-			ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, accumExpr );
+			ConsItem *consItem = ConsItem::cons( accumExpr->loc, ConsItem::ExprType, accumExpr );
 			list = ConsItemList::cons( consItem );
 		}
 		return list;
@@ -1368,7 +1368,7 @@ struct LoadSource
 	void walkFieldInit( FieldInitVect *list, field_init fieldInit )
 	{
 		LangExpr *expr = walkCodeExpr( fieldInit.CodeExpr() );
-		FieldInit *init = FieldInit::cons( internal, "_name", expr );
+		FieldInit *init = FieldInit::cons( expr->loc, "_name", expr );
 		list->append( init );
 	}
 
@@ -1395,7 +1395,7 @@ struct LoadSource
 
 			LangTerm *term = 0;
 			if ( codeFactor.CodeExprList() == 0 ) {
-				term = LangTerm::cons( internal, LangTerm::VarRefType, langVarRef );
+				term = LangTerm::cons( langVarRef->loc, LangTerm::VarRefType, langVarRef );
 			}
 			else {
 				ExprVect *exprVect = walkCodeExprList( codeFactor.CodeExprList() );
@@ -1406,7 +1406,8 @@ struct LoadSource
 		}
 		else if ( codeFactor.Number() != 0 ) {
 			String number = codeFactor.Number().text().c_str();
-			LangTerm *term = LangTerm::cons( InputLoc(), LangTerm::NumberType, number );
+			LangTerm *term = LangTerm::cons( codeFactor.Number().loc(),
+					LangTerm::NumberType, number );
 			expr = LangExpr::cons( term );
 		}
 		else if ( codeFactor.Lit() != 0 ) {
@@ -1476,7 +1477,7 @@ struct LoadSource
 		else if ( codeFactor.InVarRef() != 0 ) {
 			TypeRef *typeRef = walkTypeRef( codeFactor.TypeRef() );
 			LangVarRef *varRef = walkVarRef( codeFactor.InVarRef() );
-			expr = LangExpr::cons( LangTerm::cons( internal,
+			expr = LangExpr::cons( LangTerm::cons( typeRef->loc,
 					LangTerm::SearchType, typeRef, varRef ) );
 		}
 		else if ( codeFactor.MakeTreeExprList() != 0 ) {
@@ -1581,16 +1582,16 @@ struct LoadSource
 		if ( exprStmt.CodeExpr() != 0 ) {
 			code_expr codeExpr = exprStmt.CodeExpr();
 			LangExpr *expr = walkCodeExpr( codeExpr );
-			stmt = LangStmt::cons( internal, LangStmt::ExprType, expr );
+			stmt = LangStmt::cons( expr->loc, LangStmt::ExprType, expr );
 		}
 		return stmt;
 	}
 
 	ObjectField *walkVarDef( var_def varDef )
 	{
-		TypeRef *typeRef = walkTypeRef( varDef.TypeRef() );
 		String id = varDef.Id().text().c_str();
-		return ObjectField::cons( internal, typeRef, id );
+		TypeRef *typeRef = walkTypeRef( varDef.TypeRef() );
+		return ObjectField::cons( varDef.Id().loc(), typeRef, id );
 	}
 
 	LangTerm *walkIterCall( iter_call IterCall )
@@ -1598,13 +1599,13 @@ struct LoadSource
 		LangTerm *langTerm = 0;
 		if ( IterCall.Id() != 0 ) {
 			String tree = IterCall.Id().text().c_str();
-			langTerm = LangTerm::cons( internal,
+			langTerm = LangTerm::cons( IterCall.Id().loc(),
 					LangTerm::VarRefType, LangVarRef::cons( IterCall.Id().loc(), tree ) );
 		}
 		else {
 			LangVarRef *varRef = walkVarRef( IterCall.VarRef() );
 			ExprVect *exprVect = walkCodeExprList( IterCall.CodeExprList() );
-			langTerm = LangTerm::cons( internal, varRef, exprVect );
+			langTerm = LangTerm::cons( varRef->loc, varRef, exprVect );
 		}
 		
 		return langTerm;
@@ -1649,7 +1650,7 @@ struct LoadSource
 	void walkContextVarDef( context_var_def ContextVarDef )
 	{
 		ObjectField *objField = walkVarDef( ContextVarDef.VarDef() );
-		contextVarDef( internal, objField );
+		contextVarDef( objField->loc, objField );
 	}
 
 	TypeRef *walkReferenceTypeRef( reference_type_ref ReferenceTypeRef )
