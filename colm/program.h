@@ -100,6 +100,8 @@ typedef struct ColmRuntimeData
 
 typedef struct ColmProgram
 {
+	long activeRealm;
+
 	int argc;
 	const char **argv;
 

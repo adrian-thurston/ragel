@@ -330,7 +330,7 @@ void LoadColm::consExportError( StmtList *stmtList )
 	stmtList->append( programExport );
 }
 
-void LoadColm::go()
+void LoadColm::go( long activeRealm )
 {
 	LoadColm::init();
 
@@ -341,7 +341,7 @@ void LoadColm::go()
 	argv[1] = 0;
 
 	colmInit( 0 );
-	ColmProgram *program = colmNewProgram( &main_runtimeData );
+	ColmProgram *program = colmNewProgram( &main_runtimeData, 0 );
 	colmRunProgram( program, 1, argv );
 
 	/* Extract the parse tree. */

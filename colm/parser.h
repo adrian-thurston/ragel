@@ -136,7 +136,7 @@ struct BaseParser
 	void pushScope();
 	void popScope();
 
-	virtual void go() = 0;
+	virtual void go( long activeRealm ) = 0;
 };
 
 #endif

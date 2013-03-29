@@ -28,14 +28,16 @@ extern "C" {
 void fatal( const char *fmt, ... );
 
 #ifdef DEBUG
-#define debug( realm, ... ) _debug( realm, __VA_ARGS__ )
+#define debug( prg, realm, ... ) _debug( prg, realm, __VA_ARGS__ )
 #define check_realm( realm ) _check_realm( realm )
 #else
-#define debug( realm, ... ) 
+#define debug( prg, realm, ... ) 
 #define check_realm( realm ) 
 #endif
 
-int _debug( long realm, const char *fmt, ... );
+struct ColmProgram;
+
+int _debug( struct ColmProgram *prg, long realm, const char *fmt, ... );
 
 void message( const char *fmt, ... );
 
@@ -50,8 +52,7 @@ void message( const char *fmt, ... );
 
 #define REALMS            32
 
-extern long colmActiveRealm;
-extern const char *colmRealmNames[REALMS];
+extern const char *const colmRealmNames[REALMS];
 
 #ifdef __cplusplus
 }

@@ -20,12 +20,12 @@
  */
 
 #include <colm/debug.h>
+#include <colm/program.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-long colmActiveRealm = 0;
-const char *colmRealmNames[REALMS] =
+const char *const colmRealmNames[REALMS] =
 	{
 		"BYTECODE",
 		"PARSE",
@@ -37,10 +37,10 @@ const char *colmRealmNames[REALMS] =
 		"SCAN",
 	};
 
-int _debug( long realm, const char *fmt, ... )
+int _debug( struct ColmProgram *prg, long realm, const char *fmt, ... )
 {
 	int result = 0;
-	if ( colmActiveRealm & realm ) {
+	if ( prg->activeRealm & realm ) {
 		/* Compute the index by shifting. */
 		int ind = 0;
 		while ( (realm & 0x1) != 0x1 ) {

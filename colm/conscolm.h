@@ -64,5 +64,5 @@ struct LoadColm
 	void consExportTree( StmtList *stmtList );
 	void consExportError( StmtList *stmtList );
 
-	void go();
+	virtual void go( long activeRealm );
 };

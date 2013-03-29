@@ -777,7 +777,7 @@ void ConsInit::exportTree( StmtList *stmtList )
 	stmtList->append( programExport );
 }
 
-void ConsInit::go()
+void ConsInit::go( long activeRealm )
 {
 	ConsInit::init();
 

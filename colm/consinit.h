@@ -96,7 +96,7 @@ struct ConsInit
 	void parseInput( StmtList *stmtList );
 	void exportTree( StmtList *stmtList );
 
-	void go();
+	virtual void go( long activeRealm );
 };
 
 

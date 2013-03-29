@@ -28,15 +28,15 @@
 #include <string>
 
 
-void FsmCodeGen::writeMain()
+void FsmCodeGen::writeMain( long activeRealm )
 {
 	out << 
 		"int main( int argc, const char **argv )\n"
 		"{\n"
 		"	struct ColmProgram *prg;\n"
 		"	int exitStatus;\n"
-		"	colmInit( " << colmActiveRealm << " );\n"
-		"	prg = colmNewProgram( &main_runtimeData );\n"
+		"	colmInit( 0 );\n"
+		"	prg = colmNewProgram( &main_runtimeData, " << activeRealm << " );\n"
 		"	colmRunProgram( prg, argc, argv );\n"
 		"	exitStatus = colmDeleteProgram( prg );\n"
 		"	return exitStatus;\n"

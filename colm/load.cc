@@ -636,7 +636,7 @@ struct LoadSource
 		argv[0] = file.data;
 		argv[1] = 0;
 
-		ColmProgram *program = colmNewProgram( &main_runtimeData );
+		ColmProgram *program = colmNewProgram( &main_runtimeData, 0 );
 		colmRunProgram( program, 1, argv );
 
 		/* Extract the parse tree. */
@@ -1881,10 +1881,10 @@ struct LoadSource
 		return stmtList;
 	}
 
-	virtual void go();
+	virtual void go( long activeRealm );
 };
 
-void LoadSource::go()
+void LoadSource::go( long activeRealm )
 {
 	LoadSource::init();
 
@@ -1893,7 +1893,7 @@ void LoadSource::go()
 	argv[1] = 0;
 
 	colmInit( 0 );
-	ColmProgram *program = colmNewProgram( &main_runtimeData );
+	ColmProgram *program = colmNewProgram( &main_runtimeData, activeRealm );
 	colmRunProgram( program, 1, argv );
 
 	/* Extract the parse tree. */

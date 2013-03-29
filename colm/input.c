@@ -229,7 +229,7 @@ int fdGetData( StreamImpl *ss, char *dest, int length )
 		}
 
 		if ( length == 0 ) {
-			debug( REALM_INPUT, "exiting get data\n", length );
+			//debug( REALM_INPUT, "exiting get data\n", length );
 			break;
 		}
 
@@ -241,7 +241,7 @@ int fdGetData( StreamImpl *ss, char *dest, int length )
 
 int fdConsumeData( StreamImpl *ss, int length )
 {
-	debug( REALM_INPUT, "source consuming %ld bytes\n", length );
+	//debug( REALM_INPUT, "source consuming %ld bytes\n", length );
 
 	int consumed = 0;
 
@@ -262,7 +262,7 @@ int fdConsumeData( StreamImpl *ss, int length )
 			if ( avail > 0 ) {
 				/* The source data from the current buffer. */
 				int slen = avail <= length ? avail : length;
-				debug( REALM_INPUT, "consumed: %.*s\n", slen, buf->data + buf->offset );
+				//debug( REALM_INPUT, "consumed: %.*s\n", slen, buf->data + buf->offset );
 				consumed += slen;
 				length -= slen;
 				buf->offset += slen;
@@ -281,7 +281,7 @@ int fdConsumeData( StreamImpl *ss, int length )
 
 int fdUndoConsumeData( StreamImpl *ss, const char *data, int length )
 {
-	debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
+	//debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
 	RunBuf *newBuf = newRunBuf();
 	newBuf->length = length;
@@ -297,7 +297,7 @@ int fdUndoConsumeData( StreamImpl *ss, const char *data, int length )
 
 int fileGetDataSource( StreamImpl *ss, char *dest, int length )
 {
-	debug( REALM_INPUT, "inputStreamFileGetDataSource length = %ld\n", length );
+	//debug( REALM_INPUT, "inputStreamFileGetDataSource length = %ld\n", length );
 	size_t res = fread( dest, 1, length, ss->file );
 	return res;
 }
@@ -420,7 +420,7 @@ static int isSourceStream( StreamImpl *is )
 
 static void _setEof( StreamImpl *is )
 {
-	debug( REALM_INPUT, "setting EOF in input stream\n" );
+	//debug( REALM_INPUT, "setting EOF in input stream\n" );
 	is->eof = true;
 }
 
@@ -460,7 +460,7 @@ static int _getParseBlock( StreamImpl *is, int skip, char **pdp, int *copied )
 //			}
 
 			if ( type == INPUT_EOD || type == INPUT_EOF ) {
-				debug( REALM_INPUT, "skipping over input\n" );
+				//debug( REALM_INPUT, "skipping over input\n" );
 				buf = buf->next;
 				continue;
 			}
@@ -511,22 +511,22 @@ static int _getParseBlock( StreamImpl *is, int skip, char **pdp, int *copied )
 #if DEBUG
 	switch ( ret ) {
 		case INPUT_DATA:
-			debug( REALM_INPUT, "get parse block: DATA: %d\n", *copied );
+			//debug( REALM_INPUT, "get parse block: DATA: %d\n", *copied );
 			break;
 		case INPUT_EOD:
-			debug( REALM_INPUT, "get parse block: EOD\n" );
+			//debug( REALM_INPUT, "get parse block: EOD\n" );
 			break;
 		case INPUT_EOF:
-			debug( REALM_INPUT, "get parse block: EOF\n" );
+			//debug( REALM_INPUT, "get parse block: EOF\n" );
 			break;
 		case INPUT_TREE:
-			debug( REALM_INPUT, "get parse block: TREE\n" );
+			//debug( REALM_INPUT, "get parse block: TREE\n" );
 			break;
 		case INPUT_IGNORE:
-			debug( REALM_INPUT, "get parse block: IGNORE\n" );
+			//debug( REALM_INPUT, "get parse block: IGNORE\n" );
 			break;
 		case INPUT_LANG_EL:
-			debug( REALM_INPUT, "get parse block: LANG_EL\n" );
+			//debug( REALM_INPUT, "get parse block: LANG_EL\n" );
 			break;
 	}
 #endif
@@ -551,7 +551,7 @@ static int _getData( StreamImpl *is, char *dest, int length )
 			int glen = stream->in->funcs->getData( stream->in, dest+copied, length );
 
 			if ( glen == 0 ) {
-				debug( REALM_INPUT, "skipping over input\n" );
+				//debug( REALM_INPUT, "skipping over input\n" );
 				buf = buf->next;
 				continue;
 			}
@@ -580,7 +580,7 @@ static int _getData( StreamImpl *is, char *dest, int length )
 		}
 
 		if ( length == 0 ) {
-			debug( REALM_INPUT, "exiting get data\n", length );
+			//debug( REALM_INPUT, "exiting get data\n", length );
 			break;
 		}
 
@@ -592,7 +592,7 @@ static int _getData( StreamImpl *is, char *dest, int length )
 
 static int _consumeData( StreamImpl *is, int length )
 {
-	debug( REALM_INPUT, "consuming %d bytes\n", length );
+	//debug( REALM_INPUT, "consuming %d bytes\n", length );
 
 	int consumed = 0;
 
@@ -606,7 +606,7 @@ static int _consumeData( StreamImpl *is, int length )
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
 			int slen = stream->in->funcs->consumeData( stream->in, length );
-			debug( REALM_INPUT, " got %d bytes from source\n", slen );
+			//debug( REALM_INPUT, " got %d bytes from source\n", slen );
 
 			consumed += slen;
 			length -= slen;
@@ -628,7 +628,7 @@ static int _consumeData( StreamImpl *is, int length )
 		}
 
 		if ( length == 0 ) {
-			debug( REALM_INPUT, "exiting consume\n", length );
+			//debug( REALM_INPUT, "exiting consume\n", length );
 			break;
 		}
 
@@ -641,7 +641,7 @@ static int _consumeData( StreamImpl *is, int length )
 
 static int _undoConsumeData( StreamImpl *is, const char *data, int length )
 {
-	debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
+	//debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
 	if ( isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
@@ -756,7 +756,7 @@ static void _prependStream( StreamImpl *in, struct ColmTree *tree )
 
 static int _undoPrependData( StreamImpl *is, int length )
 {
-	debug( REALM_INPUT, "consuming %d bytes\n", length );
+	//debug( REALM_INPUT, "consuming %d bytes\n", length );
 
 	int consumed = 0;
 

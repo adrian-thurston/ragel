@@ -36,7 +36,7 @@ void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT )
 
 void *poolAllocAllocate( PoolAlloc *poolAlloc )
 {
-	debug( REALM_POOL, "pool allocation\n" );
+	//debug( REALM_POOL, "pool allocation\n" );
 
 #ifdef POOL_MALLOC
 	void *res = malloc( poolAlloc->sizeofT );

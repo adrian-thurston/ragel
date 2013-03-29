@@ -188,7 +188,7 @@ public:
 	void writeInit();
 	void writeExec();
 	void writeCode();
-	void writeMain();
+	void writeMain( long activeRealm );
 
 protected:
 	bool useAgainLabel();

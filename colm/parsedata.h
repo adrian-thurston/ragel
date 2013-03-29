@@ -806,7 +806,7 @@ struct Compiler
 
 	void resolveUses();
 	void createDefaultScanner();
-	void generateOutput();
+	void generateOutput( long activeRealm );
 	void compile();
 
 	void openNameSpace( ostream &out, Namespace *nspace );

@@ -89,6 +89,7 @@ bool logging = false;
 bool branchPointInfo = false;
 bool addUniqueEmptyProductions = false;
 bool gblLibrary = false;
+long gblActiveRealm = 0;
 
 ArgsVector includePaths;
 
@@ -253,7 +254,7 @@ void openOutput( )
 		}
 	}
 
-	debug( REALM_PARSE, "opening output file: %s\n", outputFileName );
+	//debug( REALM_PARSE, "opening output file: %s\n", outputFileName );
 
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 && inputFileName != 0 &&
@@ -491,21 +492,21 @@ void processArgs( int argc, const char **argv )
 			case 'D':
 #if DEBUG
 				if ( strcmp( pc.parameterArg, "BYTECODE" ) == 0 )
-					colmActiveRealm |= REALM_BYTECODE;
+					gblActiveRealm |= REALM_BYTECODE;
 				else if ( strcmp( pc.parameterArg, "PARSE" ) == 0 )
-					colmActiveRealm |= REALM_PARSE;
+					gblActiveRealm |= REALM_PARSE;
 				else if ( strcmp( pc.parameterArg, "MATCH" ) == 0 )
-					colmActiveRealm |= REALM_MATCH;
+					gblActiveRealm |= REALM_MATCH;
 				else if ( strcmp( pc.parameterArg, "COMPILE" ) == 0 )
-					colmActiveRealm |= REALM_COMPILE;
+					gblActiveRealm |= REALM_COMPILE;
 				else if ( strcmp( pc.parameterArg, "POOL" ) == 0 )
-					colmActiveRealm |= REALM_POOL;
+					gblActiveRealm |= REALM_POOL;
 				else if ( strcmp( pc.parameterArg, "PRINT" ) == 0 )
-					colmActiveRealm |= REALM_PRINT;
+					gblActiveRealm |= REALM_PRINT;
 				else if ( strcmp( pc.parameterArg, "INPUT" ) == 0 )
-					colmActiveRealm |= REALM_INPUT;
+					gblActiveRealm |= REALM_INPUT;
 				else if ( strcmp( pc.parameterArg, "SCAN" ) == 0 )
-					colmActiveRealm |= REALM_SCAN;
+					gblActiveRealm |= REALM_SCAN;
 				else
 					fatal( "unknown argument to -D %s\n", pc.parameterArg );
 #else
@@ -540,7 +541,7 @@ int main(int argc, const char **argv)
 	processArgs( argc, argv );
 
 	if ( verbose )
-		colmActiveRealm = 0xffffffff;
+		gblActiveRealm = 0xffffffff;
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )
@@ -583,7 +584,7 @@ int main(int argc, const char **argv)
 	BaseParser *parser = consLoadSource( pd, inputFileName );
 #endif
 
-	parser->go();
+	parser->go( gblActiveRealm );
 
 	/* Parsing complete, check for errors.. */
 	if ( gblErrorCount > 0 )
@@ -601,7 +602,7 @@ int main(int argc, const char **argv)
 	}
 	else {
 		openOutput();
-		pd->generateOutput();
+		pd->generateOutput( gblActiveRealm );
 		if ( outStream != 0 )
 			delete outStream;
 

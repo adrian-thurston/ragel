@@ -36,9 +36,6 @@
 
 void colmInit( long debugRealm )
 {
-	/* Always on because because logging is controlled with ifdefs in\n" the
-	 * runtime lib. */
-	colmActiveRealm = debugRealm;
 }
 
 void clearGlobal( Program *prg, Tree **sp )
@@ -186,10 +183,12 @@ Tree *returnVal( struct ColmProgram *prg )
 	return prg->returnVal;
 }
 
-Program *colmNewProgram( RuntimeData *rtd )
+Program *colmNewProgram( RuntimeData *rtd, long activeRealm )
 {
 	Program *prg = malloc(sizeof(Program));
 	memset( prg, 0, sizeof(Program) );
+
+	prg->activeRealm = activeRealm;
 
 	assert( sizeof(Int)      <= sizeof(Tree) );
 	assert( sizeof(Str)      <= sizeof(Tree) );

@@ -2098,7 +2098,7 @@ void appendFd( struct ColmPrintArgs *args, const char *data, int length )
 
 Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
 {
-	debug( REALM_PARSE, "attaching left ignore\n" );
+	debug( prg, REALM_PARSE, "attaching left ignore\n" );
 
 	/* Make the ignore list for the left-ignore. */
 	Tree *leftIgnore = treeAllocate( prg );
@@ -2107,7 +2107,7 @@ Tree *treeTrim( struct ColmProgram *prg, Tree **sp, Tree *tree )
 
 	tree = pushLeftIgnore( prg, tree, leftIgnore );
 
-	debug( REALM_PARSE, "attaching ignore right\n" );
+	debug( prg, REALM_PARSE, "attaching ignore right\n" );
 
 	/* Copy the ignore list first if we need to attach it as a right
 	 * ignore. */
@@ -2186,10 +2186,10 @@ rec_call:
 	else
 		visitType = NonTerm;
 	
-	debug( REALM_PRINT, "visit type: %d\n", visitType );
+	debug( prg, REALM_PRINT, "visit type: %d\n", visitType );
 
 	if ( visitType == IgnoreData ) {
-		debug( REALM_PRINT, "putting %p on ignore list\n", kid->tree );
+		debug( prg, REALM_PRINT, "putting %p on ignore list\n", kid->tree );
 		Kid *newIgnore = kidAllocate( prg );
 		newIgnore->next = leadingIgnore;
 		leadingIgnore = newIgnore;
@@ -2219,7 +2219,7 @@ rec_call:
 
 				if ( leadingIgnore->tree->flags & AF_SUPPRESS_LEFT ) {
 					/* We are moving left. Chop off the tail. */
-					debug( REALM_PRINT, "suppressing left\n" );
+					debug( prg, REALM_PRINT, "suppressing left\n" );
 					freeKidList( prg, next );
 					break;
 				}
@@ -2250,7 +2250,7 @@ rec_call:
 						kid = ignore;
 						parent = 0;
 
-						debug( REALM_PRINT, "rec call on %p\n", kid->tree );
+						debug( prg, REALM_PRINT, "rec call on %p\n", kid->tree );
 						vm_push( (SW) RecIgnoreList );
 						goto rec_call;
 						rec_return_il:
@@ -2283,7 +2283,7 @@ rec_call:
 	if ( visitType == Term || visitType == IgnoreData ) {
 		/* Print contents. */
 		if ( kid->tree->id < prg->rtd->firstNonTermId ) {
-			debug( REALM_PRINT, "printing terminal %p\n", kid->tree );
+			debug( prg, REALM_PRINT, "printing terminal %p\n", kid->tree );
 			if ( kid->tree->id != 0 )
 				printArgs->printTerm( prg, sp, printArgs, kid );
 		}
@@ -2321,7 +2321,7 @@ skip_node:
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
 	if ( kid->tree->flags & AF_RIGHT_IGNORE ) {
-		debug( REALM_PRINT, "right ignore\n" );
+		debug( prg, REALM_PRINT, "right ignore\n" );
 		vm_push( (SW)parent );
 		vm_push( (SW)kid );
 		parent = kid;
@@ -2339,20 +2339,20 @@ skip_null:
 	rt = (enum ReturnType)vm_pop();
 	switch ( rt ) {
 		case Done:
-			debug( REALM_PRINT, "return: done\n" );
+			debug( prg, REALM_PRINT, "return: done\n" );
 			goto rec_return_top;
 			break;
 		case CollectIgnoreLeft:
-			debug( REALM_PRINT, "return: ignore left\n" );
+			debug( prg, REALM_PRINT, "return: ignore left\n" );
 			goto rec_return_ign_left;
 		case CollectIgnoreRight:
-			debug( REALM_PRINT, "return: ignore right\n" );
+			debug( prg, REALM_PRINT, "return: ignore right\n" );
 			goto rec_return_ign_right;
 		case RecIgnoreList:
-			debug( REALM_PRINT, "return: ignore list\n" );
+			debug( prg, REALM_PRINT, "return: ignore list\n" );
 			goto rec_return_il;
 		case ChildPrint:
-			debug( REALM_PRINT, "return: child print\n" );
+			debug( prg, REALM_PRINT, "return: child print\n" );
 			goto rec_return;
 	}
 }
@@ -2381,7 +2381,7 @@ void printTreeArgs( Program *prg, Tree **sp, struct ColmPrintArgs *printArgs, Tr
 
 void printTermTree( Program *prg, Tree **sp, struct ColmPrintArgs *printArgs, Kid *kid )
 {
-	debug( REALM_PRINT, "printing term %p\n", kid->tree );
+	debug( prg, REALM_PRINT, "printing term %p\n", kid->tree );
 
 	if ( kid->tree->id == LEL_ID_INT ) {
 		char buf[INT_SZ];

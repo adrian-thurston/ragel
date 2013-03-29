@@ -1043,7 +1043,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 
 void Compiler::parsePatterns()
 {
-	Program *prg = colmNewProgram( runtimeData );
+	Program *prg = colmNewProgram( runtimeData, 0 );
 
 	/* Turn off context-dependent parsing. */
 	prg->ctxDepParsing = 0;
@@ -1099,7 +1099,7 @@ void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
 }
 
 
-void Compiler::generateOutput()
+void Compiler::generateOutput( long activeRealm )
 {
 	FsmCodeGen *fsmGen = new FsmCodeGen( *outStream, redFsm, fsmTables );
 
@@ -1116,7 +1116,7 @@ void Compiler::generateOutput()
 	pdaGen->writeRuntimeData( runtimeData, pdaTables );
 
 	if ( !gblLibrary ) 
-		fsmGen->writeMain();
+		fsmGen->writeMain( activeRealm );
 
 	outStream->flush();
 }

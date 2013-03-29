@@ -19,9 +19,6 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include <iostream>
-#include "avltree.h"
-#include "parsedata.h"
 #include "parser.h"
 
 BaseParser *consLoadSource( Compiler *pd, const char *inputFileName );

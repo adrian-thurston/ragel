@@ -180,7 +180,7 @@ void inputStreamPatternUndoConsumeLangEl( StreamImpl *ss )
 
 int inputStreamPatternConsumeData( StreamImpl *ss, int length )
 {
-	debug( REALM_INPUT, "consuming %ld bytes\n", length );
+	//debug( REALM_INPUT, "consuming %ld bytes\n", length );
 
 	int consumed = 0;
 
