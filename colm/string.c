@@ -44,6 +44,14 @@ Head *stringCopy( Program *prg, Head *head )
 			result = stringAllocFull( prg, head->data, head->length );
 		else
 			result = stringAllocPointer( prg, head->data, head->length );
+
+		if ( head->location != 0 ) {
+			result->location = locationAllocate( prg );
+			result->location->file = head->location->file;
+			result->location->line = head->location->line;
+			result->location->column = head->location->column;
+			result->location->byte = head->location->byte;
+		}
 	}
 	return result;
 }
