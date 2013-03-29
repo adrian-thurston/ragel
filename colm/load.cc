@@ -732,6 +732,34 @@ struct LoadSource
 		return stmtList;
 	}
 
+	void walkProdEl( ProdElList *list, prod_el El )
+	{
+		ObjectField *captureField = 0;
+		if ( El.OptName().Name() != 0 ) {
+			String fieldName = El.OptName().Name().text().c_str();
+			captureField = ObjectField::cons( El.OptName().Name().loc(), 0, fieldName );
+		}
+
+		RepeatType repeatType = walkOptRepeat( El.OptRepeat() );
+		NamespaceQual *nspaceQual = walkRegionQual( El.RegionQual() );
+
+		if ( El.Id() != 0 ) {
+			String typeName = El.Id().text().c_str();
+			ProdEl *prodEl = prodElName( El.Id().loc(), typeName,
+					nspaceQual,
+					captureField, repeatType, false );
+			appendProdEl( list, prodEl );
+		}
+		else if ( El.Lit() != 0 ) {
+			String lit = El.Lit().text().c_str();
+			ProdEl *prodEl = prodElLiteral( El.Lit().loc(), lit,
+					nspaceQual,
+					captureField, repeatType, false );
+			appendProdEl( list, prodEl );
+
+		}
+	}
+
 	void walkProdElList( ProdElList *list, prod_el_list ProdElList )
 	{
 		if ( ProdElList.ProdElList() != 0 ) {
@@ -739,34 +767,8 @@ struct LoadSource
 			walkProdElList( list, RightProdElList );
 		}
 		
-		if ( ProdElList.ProdEl() != 0 ) {
-			prod_el El = ProdElList.ProdEl();
-
-			ObjectField *captureField = 0;
-			if ( El.OptName().Name() != 0 ) {
-				String fieldName = El.OptName().Name().text().c_str();
-				captureField = ObjectField::cons( El.OptName().Name().loc(), 0, fieldName );
-			}
-
-			RepeatType repeatType = walkOptRepeat( El.OptRepeat() );
-			NamespaceQual *nspaceQual = walkRegionQual( El.RegionQual() );
-
-			if ( El.Id() != 0 ) {
-				String typeName = El.Id().text().c_str();
-				ProdEl *prodEl = prodElName( El.Id().loc(), typeName,
-						nspaceQual,
-						captureField, repeatType, false );
-				appendProdEl( list, prodEl );
-			}
-			else if ( El.Lit() != 0 ) {
-				String lit = El.Lit().text().c_str();
-				ProdEl *prodEl = prodElLiteral( El.Lit().loc(), lit,
-						nspaceQual,
-						captureField, repeatType, false );
-				appendProdEl( list, prodEl );
-
-			}
-		}
+		if ( ProdElList.ProdEl() != 0 ) 
+			walkProdEl( list, ProdElList.ProdEl() );
 	}
 
 	CodeBlock *walkOptReduce( opt_reduce optReduce )

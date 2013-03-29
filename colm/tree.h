@@ -293,8 +293,8 @@ void setField( struct ColmProgram *prg, Tree *tree, long field, Tree *value );
 void setTriterCur( struct ColmProgram *prg, TreeIter *iter, Tree *tree );
 void setUiterCur( struct ColmProgram *prg, UserIter *uiter, Tree *tree );
 void refSetValue( Ref *ref, Tree *v );
-Tree *treeSearch( struct ColmProgram *prg, Kid *kid, long id );
-Tree *treeSearch2( struct ColmProgram *prg, Tree *tree, long id );
+Tree *treeSearch( struct ColmProgram *prg, Tree *tree, long id );
+Location *locSearch( struct ColmProgram *prg, Tree *tree );
 
 int matchPattern( Tree **bindings, struct ColmProgram *prg, long pat, Kid *kid, int checkNext );
 Tree *treeIterDerefCur( TreeIter *iter );

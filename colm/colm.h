@@ -48,7 +48,7 @@ struct ColmTree *getAttr( struct ColmTree *tree, long pos );
 struct ColmTree *getGlobal( struct ColmProgram *prg, long pos );
 struct ColmTree *getRepeatNext( struct ColmTree *tree );
 struct ColmTree *getRepeatVal( struct ColmTree *tree );
-struct ColmLocation *getLocation( struct ColmTree *tree );
+struct ColmLocation *findLocation( struct ColmProgram *prg, struct ColmTree *tree );
 
 #ifdef __cplusplus
 }

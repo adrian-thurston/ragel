@@ -36,11 +36,6 @@
 
 #define BUFFER_INITIAL_SIZE 4096
 
-struct ColmLocation *getLocation( struct ColmTree *tree )
-{
-	return (struct ColmLocation*) ( tree->tokdata != 0 ? tree->tokdata->location : 0 );
-}
-
 void listPrepend( List *list, ListEl *new_el) { listAddBefore(list, list->head, new_el); }
 void listAppend( List *list, ListEl *new_el)  { listAddAfter(list, list->tail, new_el); }
 
@@ -1954,7 +1949,7 @@ Tree *treeIterPrevRepeat( Program *prg, Tree ***psp, TreeIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
-Tree *treeSearch( Program *prg, Kid *kid, long id )
+static Tree *treeSearchKid( Program *prg, Kid *kid, long id )
 {
 	/* This node the one? */
 	if ( kid->tree->id == id )
@@ -1965,16 +1960,16 @@ Tree *treeSearch( Program *prg, Kid *kid, long id )
 	/* Search children. */
 	Kid *child = treeChild( prg, kid->tree );
 	if ( child != 0 )
-		res = treeSearch( prg, child, id );
+		res = treeSearchKid( prg, child, id );
 	
 	/* Search siblings. */
 	if ( res == 0 && kid->next != 0 )
-		res = treeSearch( prg, kid->next, id );
+		res = treeSearchKid( prg, kid->next, id );
 
 	return res;	
 }
 
-Tree *treeSearch2( Program *prg, Tree *tree, long id )
+Tree *treeSearch( Program *prg, Tree *tree, long id )
 {
 	Tree *res = 0;
 	if ( tree->id == id )
@@ -1982,9 +1977,47 @@ Tree *treeSearch2( Program *prg, Tree *tree, long id )
 	else {
 		Kid *child = treeChild( prg, tree );
 		if ( child != 0 )
-			res = treeSearch( prg, child, id );
+			res = treeSearchKid( prg, child, id );
 	}
 	return res;
+}
+
+static Location *locSearchKid( Program *prg, Kid *kid )
+{
+	/* This node the one? */
+	if ( kid->tree->tokdata != 0 && kid->tree->tokdata->location != 0 )
+		return kid->tree->tokdata->location;
+
+	Location *res = 0;
+
+	/* Search children. */
+	Kid *child = treeChild( prg, kid->tree );
+	if ( child != 0 )
+		res = locSearchKid( prg, child );
+	
+	/* Search siblings. */
+	if ( res == 0 && kid->next != 0 )
+		res = locSearchKid( prg, kid->next );
+
+	return res;	
+}
+
+Location *locSearch( Program *prg, Tree *tree )
+{
+	Location *res = 0;
+	if ( tree->tokdata != 0 && tree->tokdata->location != 0 )
+		return tree->tokdata->location;
+
+	Kid *child = treeChild( prg, tree );
+	if ( child != 0 )
+		res = locSearchKid( prg, child );
+
+	return res;
+}
+
+struct ColmLocation *findLocation( Program *prg, Tree *tree )
+{
+	return (struct ColmLocation*)locSearch( prg, tree );
 }
 
 void xmlEscapeData( struct ColmPrintArgs *printArgs, const char *data, long len )
@@ -1997,8 +2030,11 @@ void xmlEscapeData( struct ColmPrintArgs *printArgs, const char *data, long len 
 			printArgs->out( printArgs, "&gt;", 4 );
 		else if ( data[i] == '&' )
 			printArgs->out( printArgs, "&amp;", 5 );
-		else if ( (32 <= data[i] && data[i] <= 126) || data[i] == '\t' || data[i] == '\n' || data[i] == '\r' )
+		else if ( (32 <= data[i] && data[i] <= 126) || 
+				data[i] == '\t' || data[i] == '\n' || data[i] == '\r' )
+		{
 			printArgs->out( printArgs, &data[i], 1 );
+		}
 		else {
 			char out[64];
 			sprintf( out, "&#%u;", ((unsigned)data[i]) );

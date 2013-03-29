@@ -123,7 +123,7 @@ void Compiler::generateExports()
 		out << "struct " << lel->fullName << "\n";
 		out << "{\n";
 		out << "	std::string text() { return printTreeStr( __prg, __tree, true ); }\n";
-		out << "	ColmLocation *loc() { return getLocation( __tree ); }\n";
+		out << "	ColmLocation *loc() { return findLocation( __prg, __tree ); }\n";
 		out << "	std::string text_notrim() { return printTreeStr( __prg, __tree, false ); }\n";
 		out << "	operator ColmTree *() { return __tree; }\n";
 		out << "	ColmProgram *__prg;\n";

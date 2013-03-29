@@ -1939,7 +1939,7 @@ again:
 			debug( REALM_BYTECODE, "IN_TREE_SEARCH\n" );
 
 			Tree *tree = vm_pop();
-			Tree *res = treeSearch2( prg, tree, id );
+			Tree *res = treeSearch( prg, tree, id );
 			treeUpref( res );
 			vm_push( res );
 			treeDownref( prg, sp, tree );
