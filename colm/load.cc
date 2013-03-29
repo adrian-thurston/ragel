@@ -1399,7 +1399,7 @@ struct LoadSource
 			}
 			else {
 				ExprVect *exprVect = walkCodeExprList( codeFactor.CodeExprList() );
-				term = LangTerm::cons( internal, langVarRef, exprVect );
+				term = LangTerm::cons( langVarRef->loc, langVarRef, exprVect );
 			}
 
 			expr = LangExpr::cons( term );
@@ -1467,7 +1467,7 @@ struct LoadSource
 		}
 		else if ( codeFactor.String() != 0 ) {
 			ConsItemList *list = walkString( codeFactor.String() );
-			expr = LangExpr::cons( LangTerm::cons( internal, list ) );
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.String().loc(), list ) );
 		}
 		else if ( codeFactor.MatchVarRef() != 0 ) {
 			LangVarRef *varRef = walkVarRef( codeFactor.MatchVarRef() );
