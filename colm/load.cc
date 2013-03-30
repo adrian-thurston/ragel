@@ -400,7 +400,7 @@ struct LoadSource
 		return expr;
 	}
 
-	PatternItemList *walkPatternElTypeOrLit( pattern_el_type_or_lit typeOrLit )
+	PatternItemList *walkPatternElTypeOrLit( pattern_el_lel typeOrLit )
 	{
 		NamespaceQual *nspaceQual = walkRegionQual( typeOrLit.RegionQual() );
 		RepeatType repeatType = walkOptRepeat( typeOrLit.OptRepeat() );
