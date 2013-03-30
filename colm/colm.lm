@@ -566,32 +566,6 @@ def cons_list
 def constructor
 	[ConsList: cons_list]
 
-#
-# String List
-#
-
-
-def string_el
-	[DQ LitStringElList: lit_string_el* Term: dq_lit_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[CodeExpr: code_expr]
-
-def lit_string_el
-	[ConsData: cons_data]
-|	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE]
-
-def string_top_el
-	[DQ LitStringElList: lit_string_el* Term: dq_lit_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[SQOPEN StringElList: string_el* SQCLOSE]
-
-def string_list
-	[StringTopEl: string_top_el StringList: string_list]
-|	[StringTopEl: string_top_el]
-
-def cstring
-	[StringList: string_list]
-
 
 #
 # Accumulate
@@ -618,6 +592,35 @@ def accum_list
 def accumulate
 	[AccumList: accum_list]
 
+#
+# String List
+#
+
+def string_el
+	[DQ LitStringElList: lit_string_el* Term: dq_lit_term]
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
+|	[CodeExpr: code_expr]
+
+def lit_string_el
+	[ConsData: cons_data]
+|	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE]
+
+def string_top_el
+	[DQ LitStringElList: lit_string_el* Term: dq_lit_term]
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
+|	[SQOPEN StringElList: string_el* SQCLOSE]
+
+def string_list
+	[StringTopEl: string_top_el StringList: string_list]
+|	[StringTopEl: string_top_el]
+
+def cstring
+	[StringList: string_list]
+
+#
+# Variable References
+#
+
 def var_ref
 	[Qual: qual Id: id]
 
@@ -625,6 +628,10 @@ def qual
 	[Qual: qual Id: id Dot: DOT]
 |	[Qual: qual Id: id Arrow: ARROW]
 |	[]
+
+#
+# Lexical analysis.
+#
 
 def lex_expr
 	[Expr: lex_expr Bar: LEX_BAR Term: lex_term]
