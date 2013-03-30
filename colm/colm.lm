@@ -299,7 +299,7 @@ def cfl_def
 		ProdList: prod_list]
 
 def region_def
-	[L: LEX RootItemList: root_item* END]
+	[LEX RootItemList: root_item* END]
 
 def rl_def
 	[RL Id: id LEX_FSLASH Expr: lex_expr LEX_FSLASH]
@@ -309,8 +309,10 @@ def opt_lex_expr
 |	[]
 
 def token_def
-	[TOKEN Id: id VarDefList: var_def* 
-		NiLeft: opt_no_ignore LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH NiRight: opt_no_ignore
+	[TOKEN Id: id VarDefList: var_def*
+		NiLeft: opt_no_ignore
+		LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH
+		NiRight: opt_no_ignore
 		OptTranslate: opt_translate]
 
 def opt_translate
@@ -361,9 +363,9 @@ def statement
 		BlockOrSingle: block_or_single]
 |	[IF IfExpr: code_expr BlockOrSingle: block_or_single ElsifList: elsif_list]
 |	[WHILE WhileExpr: code_expr BlockOrSingle: block_or_single]
-|	[LhsVarRef: var_ref E: EQUALS CodeExpr: code_expr]
+|	[LhsVarRef: var_ref EQUALS CodeExpr: code_expr]
 |	[YIELD YieldVarRef: var_ref]
-|	[R: RETURN ReturnExpr: code_expr]
+|	[RETURN ReturnExpr: code_expr]
 |	[Break: BREAK]
 |	[Reject: REJECT]
 
@@ -460,21 +462,21 @@ def code_factor
 		OptFieldInit: opt_field_init Accumulate: accumulate]
 |	[Cons: CONS OptCapture: opt_capture TypeRef: type_ref
 		OptFieldInit: opt_field_init Constructor: constructor]
-|	[M: MATCH MatchVarRef: var_ref Pattern: pattern]
+|	[MATCH MatchVarRef: var_ref Pattern: pattern]
 |	[String: cstring]
 |	[TypeRef: type_ref IN InVarRef: var_ref]
-|	[M: MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE]
-|	[M: MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE]
-|	[T: TYPEID LT TypeIdTypeRef: type_ref GT]
-|	[N: NEW NewCodeFactor: code_factor]
+|	[MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE]
+|	[MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE]
+|	[TYPEID LT TypeIdTypeRef: type_ref GT]
+|	[NEW NewCodeFactor: code_factor]
 
 def type_ref
 	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat]
 |	[PTR RegionQual: region_qual PtrId: id OptRepeat: opt_repeat]
-|	[M: MAP LT MapKeyType: type_ref MapValueType: type_ref GT]
-|	[L: LIST LT ListType: type_ref GT]
-|	[V: VECTOR LT VectorType: type_ref GT]
-|	[P: PARSER LT ParserType: type_ref GT]
+|	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT]
+|	[LIST LT ListType: type_ref GT]
+|	[VECTOR LT VectorType: type_ref GT]
+|	[PARSER LT ParserType: type_ref GT]
 
 def region_qual
 	[RegionQual: region_qual Id: id DOUBLE_COLON]

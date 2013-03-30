@@ -236,7 +236,7 @@ struct LoadSource
 		else if ( Statement.LhsVarRef() != 0 ) {
 			LangVarRef *varRef = walkVarRef( Statement.LhsVarRef() );
 			LangExpr *expr = walkCodeExpr( Statement.CodeExpr() );
-			stmt = LangStmt::cons( Statement.E().loc(), LangStmt::AssignType, varRef, expr );
+			stmt = LangStmt::cons( varRef->loc, LangStmt::AssignType, varRef, expr );
 		}
 		else if ( Statement.YieldVarRef() != 0 ) {
 			LangVarRef *varRef = walkVarRef( Statement.YieldVarRef() );
@@ -244,7 +244,7 @@ struct LoadSource
 		}
 		else if ( Statement.ReturnExpr() != 0 ) {
 			LangExpr *expr = walkCodeExpr( Statement.ReturnExpr() );
-			stmt = LangStmt::cons( Statement.R().loc(), LangStmt::ReturnType, expr );
+			stmt = LangStmt::cons( Statement.loc(), LangStmt::ReturnType, expr );
 		}
 		else if ( Statement.Break() != 0 ) {
 			stmt = LangStmt::cons( LangStmt::BreakType );
@@ -700,19 +700,19 @@ struct LoadSource
 		else if ( typeRef.MapKeyType() != 0 ) {
 			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
 			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
-			tr = TypeRef::cons( typeRef.M().loc(), TypeRef::Map, 0, key, value );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, key, value );
 		}
 		else if ( typeRef.ListType() != 0 ) {
 			TypeRef *type = walkTypeRef( typeRef.ListType() );
-			tr = TypeRef::cons( typeRef.L().loc(), TypeRef::List, 0, type, 0 );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
 		}
 		else if ( typeRef.VectorType() != 0 ) {
 			TypeRef *type = walkTypeRef( typeRef.VectorType() );
-			tr = TypeRef::cons( typeRef.V().loc(), TypeRef::Vector, 0, type, 0 );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Vector, 0, type, 0 );
 		}
 		else if ( typeRef.ParserType() != 0 ) {
 			TypeRef *type = walkTypeRef( typeRef.ParserType() );
-			tr = TypeRef::cons( typeRef.P().loc(), TypeRef::Parser, 0, type, 0 );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );
 		}
 		return tr;
 	}
@@ -956,7 +956,7 @@ struct LoadSource
 
 	void walkLexRegion( region_def regionDef )
 	{
-		pushRegionSet( regionDef.L().loc() );
+		pushRegionSet( regionDef.loc() );
 		walkRootItemList( regionDef.RootItemList() );
 		popRegionSet();
 	}
@@ -1472,7 +1472,7 @@ struct LoadSource
 		else if ( codeFactor.MatchVarRef() != 0 ) {
 			LangVarRef *varRef = walkVarRef( codeFactor.MatchVarRef() );
 			PatternItemList *list = walkPattern( codeFactor.Pattern() );
-			expr = match( codeFactor.M().loc(), varRef, list );
+			expr = match( codeFactor.loc(), varRef, list );
 		}
 		else if ( codeFactor.InVarRef() != 0 ) {
 			TypeRef *typeRef = walkTypeRef( codeFactor.TypeRef() );
@@ -1482,22 +1482,22 @@ struct LoadSource
 		}
 		else if ( codeFactor.MakeTreeExprList() != 0 ) {
 			ExprVect *exprList = walkCodeExprList( codeFactor.MakeTreeExprList() );
-			expr = LangExpr::cons( LangTerm::cons( codeFactor.M().loc(),
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::MakeTreeType, exprList ) );
 		}
 		else if ( codeFactor.MakeTokenExprList() != 0 ) {
 			ExprVect *exprList = walkCodeExprList( codeFactor.MakeTokenExprList() );
-			expr = LangExpr::cons( LangTerm::cons( codeFactor.M().loc(),
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::MakeTokenType, exprList ) );
 		}
 		else if ( codeFactor.TypeIdTypeRef() != 0 ) {
 			TypeRef *typeRef = walkTypeRef( codeFactor.TypeIdTypeRef() );
-			expr = LangExpr::cons( LangTerm::cons( codeFactor.T().loc(),
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::TypeIdType, typeRef ) );
 		}
 		else if ( codeFactor.NewCodeFactor() != 0 ) {
 			LangExpr *newExpr = walkCodeFactor( codeFactor.NewCodeFactor() );
-			expr = LangExpr::cons( LangTerm::cons( codeFactor.N().loc(),
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::NewType, newExpr ) );
 		}
 		return expr;
