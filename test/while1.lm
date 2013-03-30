@@ -1,0 +1,52 @@
+##### LM #####
+while 0
+	print( '0\n' )
+
+global I: int = 3
+
+int f()
+{
+	I = I - 1
+	print( ' ' I )
+}
+
+# simple expr and stmt
+while I
+	f()
+print( '\n' )
+
+# compound stmt list
+I = 3
+while I
+{
+	I = I - 1
+	print( ' ' I )
+}
+print( '\n' )
+
+# paren expr
+I = 3
+while ( I )
+	f()
+print( '\n' )
+
+# expr with computation
+I = 3
+while ( I + 1 )
+	f()
+print( '\n' )
+
+# computation and stmt list
+I = 3
+while ( I + 2 )
+{
+	I = I - 1
+	print( ' ' I )
+}
+print( '\n' )
+##### EXP #####
+ 2 1 0
+ 2 1 0
+ 2 1 0
+ 2 1 0 -1
+ 2 1 0 -1 -2
