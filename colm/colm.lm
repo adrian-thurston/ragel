@@ -499,33 +499,38 @@ def opt_field_init
 def field_init
 	[CodeExpr: code_expr]
 
+
 #
 # Pattern
 #
-
-def litpat_term
-	[CONS_DQ] | [Nl: CONS_NL]
-
-def pattern_el_lel
-	[RegionQual: region_qual Id: id OptRepeat: opt_repeat]
-|	[RegionQual: region_qual Lit: lit OptRepeat: opt_repeat]
 
 def opt_label
 	[Id: id COLON]
 |	[]
 
+def dq_lit_term
+	[CONS_DQ] | [Nl: CONS_NL]
+
+def opt_tilde_data
+	[tilde_data]
+|	[]
+
+def pattern_el_lel
+	[RegionQual: region_qual Id: id OptRepeat: opt_repeat]
+|	[RegionQual: region_qual Lit: lit OptRepeat: opt_repeat]
+
 def pattern_el
 	[OptLabel: opt_label TypeOrLit: pattern_el_lel]
-|	[DQ LitpatElList: litpat_el* Term: litpat_term]
-|	[TILDE TildeData: tilde_data Nl: TILDE_NL]
+|	[DQ LitpatElList: litpat_el* Term: dq_lit_term]
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 
 def litpat_el
 	[ConsData: cons_data]
 |	[CONS_SQOPEN PatternElList: pattern_el* CONS_SQCLOSE]
 
 def pattern_top_el
-	[DQ LitpatElList: litpat_el* Term: litpat_term]
-|	[TILDE TildeData: tilde_data Nl: TILDE_NL]
+	[DQ LitpatElList: litpat_el* Term: dq_lit_term]
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[SQOPEN PatternElList: pattern_el* SQCLOSE]
 
 def pattern_list
@@ -539,12 +544,9 @@ def pattern
 # Constructor List
 #
 
-def lit_cons_term
-	[CONS_DQ] | [Nl: CONS_NL]
-
 def cons_el
 	[RegionQual: region_qual Lit: lit]
-|	[DQ LitConsElList: lit_cons_el* Term: lit_cons_term]
+|	[DQ LitConsElList: lit_cons_el* Term: dq_lit_term]
 |	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[CodeExpr: code_expr]
 
@@ -553,7 +555,7 @@ def lit_cons_el
 |	[CONS_SQOPEN ConsElList: cons_el* CONS_SQCLOSE]
 
 def cons_top_el
-	[DQ LitConsElList: lit_cons_el* Term: lit_cons_term]
+	[DQ LitConsElList: lit_cons_el* Term: dq_lit_term]
 |	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[SQOPEN ConsElList: cons_el* SQCLOSE]
 
@@ -568,12 +570,9 @@ def constructor
 # String List
 #
 
-def opt_tilde_data
-	[tilde_data]
-|	[]
 
 def string_el
-	[DQ LitStringElList: lit_string_el* Term: lit_cons_term]
+	[DQ LitStringElList: lit_string_el* Term: dq_lit_term]
 |	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[CodeExpr: code_expr]
 
@@ -582,7 +581,7 @@ def lit_string_el
 |	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE]
 
 def string_top_el
-	[DQ LitStringElList: lit_string_el* Term: lit_cons_term]
+	[DQ LitStringElList: lit_string_el* Term: dq_lit_term]
 |	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[SQOPEN StringElList: string_el* SQCLOSE]
 
@@ -599,7 +598,7 @@ def cstring
 #
 
 def accum_el
-	[DQ LitAccumElList: lit_accum_el* Term: lit_cons_term]
+	[DQ LitAccumElList: lit_accum_el* Term: dq_lit_term]
 |	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[CodeExpr: code_expr]
 
@@ -608,7 +607,7 @@ def lit_accum_el
 |	[CONS_SQOPEN AccumElList: accum_el* CONS_SQCLOSE]
 
 def accum_top_el
-	[DQ LitAccumElList: lit_accum_el* Term: lit_cons_term]
+	[DQ LitAccumElList: lit_accum_el* Term: dq_lit_term]
 |	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
 |	[SQOPEN AccumElList: accum_el* SQCLOSE]
 
