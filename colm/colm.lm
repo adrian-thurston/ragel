@@ -463,7 +463,7 @@ def code_factor
 |	[Cons: CONS OptCapture: opt_capture TypeRef: type_ref
 		OptFieldInit: opt_field_init Constructor: constructor]
 |	[MATCH MatchVarRef: var_ref Pattern: pattern]
-|	[String: accumulate]
+|	[String: cstring]
 |	[TypeRef: type_ref IN InVarRef: var_ref]
 |	[MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE]
 |	[MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE]
@@ -503,10 +503,6 @@ def field_init
 # Pattern
 #
 
-def opt_tilde_data
-	[tilde_data]
-|	[]
-
 def litpat_term
 	[CONS_DQ] | [Nl: CONS_NL]
 
@@ -521,7 +517,7 @@ def opt_label
 def pattern_el
 	[OptLabel: opt_label TypeOrLit: pattern_el_lel]
 |	[DQ LitpatElList: litpat_el* Term: litpat_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
+|	[TILDE TildeData: tilde_data Nl: TILDE_NL]
 
 def litpat_el
 	[ConsData: cons_data]
@@ -569,6 +565,36 @@ def constructor
 	[ConsList: cons_list]
 
 #
+# String List
+#
+
+def opt_tilde_data
+	[tilde_data]
+|	[]
+
+def string_el
+	[DQ LitStringElList: lit_string_el* Term: lit_cons_term]
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
+|	[CodeExpr: code_expr]
+
+def lit_string_el
+	[ConsData: cons_data]
+|	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE]
+
+def string_top_el
+	[DQ LitStringElList: lit_string_el* Term: lit_cons_term]
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
+|	[SQOPEN StringElList: string_el* SQCLOSE]
+
+def string_list
+	[StringTopEl: string_top_el StringList: string_list]
+|	[StringTopEl: string_top_el]
+
+def cstring
+	[StringList: string_list]
+
+
+#
 # Accumulate
 #
 
@@ -592,10 +618,6 @@ def accum_list
 
 def accumulate
 	[AccumList: accum_list]
-
-#
-# VarRef
-#
 
 def var_ref
 	[Qual: qual Id: id]
