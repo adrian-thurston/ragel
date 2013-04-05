@@ -81,36 +81,6 @@ void clearFsmRun( Program *prg, FsmRun *fsmRun )
 	}
 }
 
-/* Keep the position up to date after consuming text. */
-void updatePosition( StreamImpl *is, const char *data, long length )
-{
-	int i;
-	for ( i = 0; i < length; i++ ) {
-		if ( data[i] != '\n' )
-			is->column += 1;
-		else {
-			is->line += 1;
-			is->column = 1;
-		}
-	}
-
-	is->byte += length;
-}
-
-/* Keep the position up to date after sending back text. */
-void undoPosition( StreamImpl *is, const char *data, long length )
-{
-	/* FIXME: this needs to fetch the position information from the parsed
-	 * token and restore based on that.. */
-	int i;
-	for ( i = 0; i < length; i++ ) {
-		if ( data[i] == '\n' )
-			is->line -= 1;
-	}
-
-	is->byte -= length;
-}
-
 void incrementSteps( PdaRun *pdaRun )
 {
 	pdaRun->steps += 1;
@@ -211,7 +181,6 @@ Head *streamPull( Program *prg, PdaRun *pdaRun, StreamImpl *is, long length )
 		fsmRun->toklen = 0;
 
 		Head *tokdata = stringAllocPointer( prg, dest, length );
-		updatePosition( is, dest, length );
 
 		return tokdata;
 	}
@@ -222,7 +191,6 @@ Head *streamPull( Program *prg, PdaRun *pdaRun, StreamImpl *is, long length )
 		is->funcs->getData( is, dest, length );
 		is->funcs->consumeData( is, length );
 
-		updatePosition( is, dest, length );
 		return head;
 	}
 }
@@ -286,7 +254,6 @@ static void sendBackText( FsmRun *fsmRun, StreamImpl *is, const char *data, long
 	//		(int)length, data );
 
 	is->funcs->undoConsumeData( is, data, length );
-	undoPosition( is, data, length );
 }
 
 void sendBackTree( StreamImpl *is, Tree *tree )
@@ -364,10 +331,6 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	debug( prg, REALM_PARSE, "sending back: %s\n", prg->rtd->lelInfo[parseTree->id].name );
 
 	if ( parseTree->flags & PF_NAMED ) {
-		///* Send back anything in the buffer that has not been parsed. */
-		//if ( fsmRun->p == fsmRun->runBuf->data )
-		//	sendBackRunBufHead( fsmRun, is );
-
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
 		is->funcs->undoConsumeLangEl( is );
@@ -821,8 +784,7 @@ void sendIgnore( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun
 
 	/* Make the ignore string. */
 	Head *ignoreStr = extractMatch( prg, fsmRun, is );
-	updatePosition( is, ignoreStr->data, ignoreStr->length );
-	
+
 	debug( prg, REALM_PARSE, "ignoring: %.*s\n", ignoreStr->length, ignoreStr->data );
 
 	Tree *tree = treeAllocate( prg );
@@ -845,8 +807,6 @@ static void sendToken( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, 
 	debug( prg, REALM_PARSE, "token: %s  text: %.*s\n",
 		prg->rtd->lelInfo[id].name,
 		stringLength(tokdata), stringData(tokdata) );
-
-	updatePosition( is, stringData(tokdata), stringLength(tokdata) );
 
 	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, is, id, tokdata );
 
@@ -902,8 +862,6 @@ static void sendCi( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, Pda
 	debug( prg, REALM_PARSE, "token: %s  text: %.*s\n",
 		prg->rtd->lelInfo[id].name,
 		stringLength(tokdata), stringData(tokdata) );
-
-	updatePosition( is, stringData(tokdata), stringLength(tokdata) );
 
 	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, is, id, tokdata );
 

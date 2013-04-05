@@ -92,9 +92,6 @@ typedef struct _FsmRun
 	long matchedToken;
 } FsmRun;
 
-void updatePosition( StreamImpl *inputStream, const char *data, long length );
-void undoPosition( StreamImpl *inputStream, const char *data, long length );
-void sendBackRunBufHead( FsmRun *fsmRun, StreamImpl *inputStream );
 void undoStreamPull( StreamImpl *inputStream, const char *data, long length );
 
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
@@ -445,8 +442,6 @@ void pushBinding( PdaRun *pdaRun, ParseTree *parseTree );
 void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
 		StreamImpl *inputStream, int frameId, Code *code, long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );
-long sendBackQueuedIgnore( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream,
-		FsmRun *fsmRun, PdaRun *pdaRun, long entry );
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
 Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );

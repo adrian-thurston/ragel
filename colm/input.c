@@ -94,6 +94,37 @@ StreamImpl *newSourceStreamFd( long fd )
 	return ss;
 }
 
+/* Keep the position up to date after consuming text. */
+void updatePosition( StreamImpl *is, const char *data, long length )
+{
+	int i;
+	for ( i = 0; i < length; i++ ) {
+		if ( data[i] != '\n' )
+			is->column += 1;
+		else {
+			is->line += 1;
+			is->column = 1;
+		}
+	}
+
+	is->byte += length;
+}
+
+/* Keep the position up to date after sending back text. */
+void undoPosition( StreamImpl *is, const char *data, long length )
+{
+	/* FIXME: this needs to fetch the position information from the parsed
+	 * token and restore based on that.. */
+	int i;
+	for ( i = 0; i < length; i++ ) {
+		if ( data[i] == '\n' )
+			is->line -= 1;
+	}
+
+	is->byte -= length;
+}
+
+
 static RunBuf *sourceStreamPopHead( StreamImpl *ss )
 {
 	RunBuf *ret = ss->queue;
@@ -241,8 +272,6 @@ int fdGetData( StreamImpl *ss, char *dest, int length )
 
 int fdConsumeData( StreamImpl *ss, int length )
 {
-	//debug( REALM_INPUT, "source consuming %ld bytes\n", length );
-
 	int consumed = 0;
 
 	/* Move over skip bytes. */
@@ -262,9 +291,9 @@ int fdConsumeData( StreamImpl *ss, int length )
 			if ( avail > 0 ) {
 				/* The source data from the current buffer. */
 				int slen = avail <= length ? avail : length;
-				//debug( REALM_INPUT, "consumed: %.*s\n", slen, buf->data + buf->offset );
 				consumed += slen;
 				length -= slen;
+				updatePosition( ss, buf->data + buf->offset, slen );
 				buf->offset += slen;
 			}
 		}
@@ -281,12 +310,11 @@ int fdConsumeData( StreamImpl *ss, int length )
 
 int fdUndoConsumeData( StreamImpl *ss, const char *data, int length )
 {
-	//debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
-
 	RunBuf *newBuf = newRunBuf();
 	newBuf->length = length;
 	memcpy( newBuf->data, data, length );
 	sourceStreamPrepend( ss, newBuf );
+	undoPosition( ss, data, length );
 
 	return length;
 }

@@ -160,6 +160,9 @@ StreamImpl *newSourceStreamCons( struct Constructor *constructor );
 StreamImpl *newSourceStreamFile( FILE *file );
 StreamImpl *newSourceStreamFd( long fd );
 
+void updatePosition( StreamImpl *inputStream, const char *data, long length );
+void undoPosition( StreamImpl *inputStream, const char *data, long length );
+
 #ifdef __cplusplus
 }
 #endif
