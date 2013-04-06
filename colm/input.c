@@ -295,6 +295,7 @@ int fdConsumeData( StreamImpl *ss, int length )
 				length -= slen;
 				updatePosition( ss, buf->data + buf->offset, slen );
 				buf->offset += slen;
+				ss->consumed += slen;
 			}
 		}
 
@@ -315,6 +316,7 @@ int fdUndoConsumeData( StreamImpl *ss, const char *data, int length )
 	memcpy( newBuf->data, data, length );
 	sourceStreamPrepend( ss, newBuf );
 	undoPosition( ss, data, length );
+	ss->consumed -= length;
 
 	return length;
 }
@@ -652,6 +654,7 @@ static int _consumeData( StreamImpl *is, int length )
 				consumed += slen;
 				length -= slen;
 				buf->offset += slen;
+				is->consumed += slen;
 			}
 		}
 
@@ -671,10 +674,9 @@ static int _undoConsumeData( StreamImpl *is, const char *data, int length )
 {
 	//debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
-	if ( isSourceStream( is ) ) {
+	if ( is->consumed == 0 && isSourceStream( is ) ) {
 		Stream *stream = (Stream*)is->queue->tree;
 		int len = stream->in->funcs->undoConsumeData( stream->in, data, length );
-
 		return len;
 	}
 	else {
@@ -682,6 +684,7 @@ static int _undoConsumeData( StreamImpl *is, const char *data, int length )
 		newBuf->length = length;
 		memcpy( newBuf->data, data, length );
 		inputStreamPrepend( is, newBuf );
+		is->consumed -= length;
 
 		return length;
 	}

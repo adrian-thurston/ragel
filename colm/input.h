@@ -153,6 +153,8 @@ struct _StreamImpl
 	struct PatternItem *patItem;
 	struct Constructor *constructor;
 	struct ConsItem *consItem;
+
+	int consumed;
 };
 
 StreamImpl *newSourceStreamPat( struct Pattern *pattern );
