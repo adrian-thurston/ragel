@@ -270,7 +270,7 @@ int fdGetData( StreamImpl *ss, char *dest, int length )
 	return copied;
 }
 
-int fdConsumeData( StreamImpl *ss, int length )
+int fdConsumeData( StreamImpl *ss, int length, Location *loc )
 {
 	int consumed = 0;
 
@@ -286,6 +286,12 @@ int fdConsumeData( StreamImpl *ss, int length )
 		else if ( buf->type == RunBufIgnoreType )
 			break;
 		else {
+			if ( loc != 0 && loc->line == 0 ) {
+				loc->line = ss->line;
+				loc->column = ss->column;
+				loc->byte = ss->byte;
+			}
+
 			/* Anything available in the current buffer. */
 			int avail = buf->length - buf->offset;
 			if ( avail > 0 ) {
@@ -620,7 +626,7 @@ static int _getData( StreamImpl *is, char *dest, int length )
 	return copied;
 }
 
-static int _consumeData( StreamImpl *is, int length )
+static int _consumeData( StreamImpl *is, int length, Location *loc )
 {
 	//debug( REALM_INPUT, "consuming %d bytes\n", length );
 
@@ -635,7 +641,7 @@ static int _consumeData( StreamImpl *is, int length )
 
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
-			int slen = stream->in->funcs->consumeData( stream->in, length );
+			int slen = stream->in->funcs->consumeData( stream->in, length, loc );
 			//debug( REALM_INPUT, " got %d bytes from source\n", slen );
 
 			consumed += slen;
@@ -800,7 +806,8 @@ static int _undoPrependData( StreamImpl *is, int length )
 
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
-			int slen = stream->in->funcs->consumeData( stream->in, length );
+			/* FIXME: provide real impl. */
+			int slen = stream->in->funcs->consumeData( stream->in, length, 0 );
 
 			consumed += slen;
 			length -= slen;

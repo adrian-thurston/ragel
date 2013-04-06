@@ -109,7 +109,8 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 	char *dest = runBuf->data + runBuf->length;
 
 	is->funcs->getData( is, dest, length );
-	is->funcs->consumeData( is, length );
+	Location *location = locationAllocate( prg );
+	is->funcs->consumeData( is, length, location );
 
 	runBuf->length += length;
 
@@ -119,10 +120,7 @@ Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 
 	Head *head = stringAllocPointer( prg, dest, length );
 
-	head->location = locationAllocate( prg );
-	head->location->line = is->line;
-	head->location->column = is->column;
-	head->location->byte = is->byte;
+	head->location = location;
 
 	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
 
@@ -173,7 +171,8 @@ Head *streamPull( Program *prg, PdaRun *pdaRun, StreamImpl *is, long length )
 		char *dest = runBuf->data + runBuf->length;
 
 		is->funcs->getData( is, dest, length );
-		is->funcs->consumeData( is, length );
+		Location *loc = locationAllocate( prg );
+		is->funcs->consumeData( is, length, loc );
 
 		runBuf->length += length;
 
@@ -181,6 +180,7 @@ Head *streamPull( Program *prg, PdaRun *pdaRun, StreamImpl *is, long length )
 		fsmRun->toklen = 0;
 
 		Head *tokdata = stringAllocPointer( prg, dest, length );
+		tokdata->location = loc;
 
 		return tokdata;
 	}
@@ -189,7 +189,9 @@ Head *streamPull( Program *prg, PdaRun *pdaRun, StreamImpl *is, long length )
 		char *dest = (char*)head->data;
 
 		is->funcs->getData( is, dest, length );
-		is->funcs->consumeData( is, length );
+		Location *loc = locationAllocate( prg );
+		is->funcs->consumeData( is, length, loc );
+		head->location = loc;
 
 		return head;
 	}
