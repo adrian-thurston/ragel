@@ -3506,7 +3506,7 @@ again:
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
 			if ( prg->stdinVal == 0 ) {
-				prg->stdinVal = openStreamFd( prg, 0 );
+				prg->stdinVal = openStreamFd( prg, "<stdin>", 0 );
 				treeUpref( (Tree*)prg->stdinVal );
 			}
 
@@ -3521,7 +3521,7 @@ again:
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
 			if ( prg->stdoutVal == 0 ) {
-				prg->stdoutVal = openStreamFd( prg, 1 );
+				prg->stdoutVal = openStreamFd( prg, "<stdout>", 1 );
 				treeUpref( (Tree*)prg->stdoutVal );
 			}
 
@@ -3536,7 +3536,7 @@ again:
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
 			if ( prg->stderrVal == 0 ) {
-				prg->stderrVal = openStreamFd( prg, 2 );
+				prg->stderrVal = openStreamFd( prg, "<stderr>", 2 );
 				treeUpref( (Tree*)prg->stderrVal );
 			}
 

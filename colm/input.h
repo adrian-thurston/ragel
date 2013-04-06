@@ -147,6 +147,7 @@ struct _StreamImpl
 	long column;
 	long byte;
 
+	const char *name;
 	FILE *file;
 	long fd;
 
@@ -158,14 +159,14 @@ struct _StreamImpl
 	int consumed;
 };
 
-StreamImpl *newSourceStreamPat( struct Pattern *pattern );
-StreamImpl *newSourceStreamCons( struct Constructor *constructor );
-StreamImpl *newSourceStreamFile( FILE *file );
-StreamImpl *newSourceStreamFd( long fd );
+StreamImpl *newSourceStreamPat( const char *name, struct Pattern *pattern );
+StreamImpl *newSourceStreamCons( const char *name, struct Constructor *constructor );
+StreamImpl *newSourceStreamFile( const char *name, FILE *file );
+StreamImpl *newSourceStreamFd( const char *name, long fd );
+StreamImpl *newSourceStreamGeneric( const char *name );
 
 void updatePosition( StreamImpl *inputStream, const char *data, long length );
 void undoPosition( StreamImpl *inputStream, const char *data, long length );
-StreamImpl *newSourceStreamGeneric();
 
 #ifdef __cplusplus
 }

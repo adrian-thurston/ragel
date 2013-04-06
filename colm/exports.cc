@@ -66,7 +66,7 @@ void Compiler::generateExports()
 	out << 
 		"struct ColmLocation\n"
 		"{\n"
-		"	void *file;\n"
+		"	const char *name;\n"
 		"	long line;\n"
 		"	long column;\n"
 		"	long byte;\n"

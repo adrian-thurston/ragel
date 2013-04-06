@@ -36,14 +36,14 @@
 extern RuntimeData main_runtimeData;
 
 InputLoc::InputLoc( ColmLocation *pcloc )
-:
-	fileName(0)
 {
 	if ( pcloc != 0 ) {
+		fileName = pcloc->name;
 		line = pcloc->line;
 		col = pcloc->column;
 	}
 	else {
+		fileName = 0;
 		line = -1;
 		col = -1;
 	}
@@ -645,7 +645,8 @@ struct LoadSource
 
 		if ( Start == 0 ) {
 			gblErrorCount += 1;
-			std::cerr << inputFileName << ": parse error: " << Error.text() << std::endl;
+			InputLoc loc = Error.loc();
+			error(loc) << file.data << ": parse error: " << Error.text() << std::endl;
 			return 0;
 		}
 
@@ -1902,7 +1903,8 @@ void LoadSource::go( long activeRealm )
 
 	if ( Start == 0 ) {
 		gblErrorCount += 1;
-		std::cerr << inputFileName << ": parse error: " << Error.text() << std::endl;
+		InputLoc loc = Error.loc();
+		error(loc) << inputFileName << ": parse error: " << Error.text() << std::endl;
 		return;
 	}
 

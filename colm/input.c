@@ -49,10 +49,6 @@ extern struct StreamFuncs fileFuncs;
 extern struct StreamFuncs fdFuncs;
 extern struct StreamFuncs streamFuncs;
 
-void initSourceStream( StreamImpl *inputStream )
-{
-}
-
 void clearSourceStream( struct ColmProgram *prg, Tree **sp, StreamImpl *sourceStream )
 {
 	RunBuf *buf = sourceStream->queue;
@@ -269,6 +265,7 @@ int fdConsumeData( StreamImpl *ss, int length, Location *loc )
 			break;
 		else {
 			if ( loc->line == 0 ) {
+				loc->name = ss->name;
 				loc->line = ss->line;
 				loc->column = ss->column;
 				loc->byte = ss->byte;
@@ -345,13 +342,14 @@ int fdGetDataSource( StreamImpl *ss, char *dest, int length )
  * StreamImpl struct, this wraps the list of input streams.
  */
 
-void initStreamImpl( StreamImpl *inputStream )
+void initStreamImpl( StreamImpl *is, const char *name )
 {
-	memset( inputStream, 0, sizeof(StreamImpl) );
+	memset( is, 0, sizeof(StreamImpl) );
 
-	inputStream->line = 1;
-	inputStream->column = 1;
-	inputStream->byte = 0;
+	is->name = name;
+	is->line = 1;
+	is->column = 1;
+	is->byte = 0;
 }
 
 void clearStreamImpl( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream )
@@ -975,10 +973,10 @@ struct StreamFuncs fileFuncs =
 };
 
 
-StreamImpl *newSourceStreamFile( FILE *file )
+StreamImpl *newSourceStreamFile( const char *name, FILE *file )
 {
 	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
-	initStreamImpl( ss );
+	initStreamImpl( ss, name );
 	ss->funcs = &fileFuncs;
 
 	ss->file = file;
@@ -986,10 +984,10 @@ StreamImpl *newSourceStreamFile( FILE *file )
 	return ss;
 }
 
-StreamImpl *newSourceStreamFd( long fd )
+StreamImpl *newSourceStreamFd( const char *name, long fd )
 {
 	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
-	initStreamImpl( ss );
+	initStreamImpl( ss, name );
 	ss->funcs = &fdFuncs;
 
 	ss->fd = fd;
@@ -997,10 +995,10 @@ StreamImpl *newSourceStreamFd( long fd )
 	return ss;
 }
 
-StreamImpl *newSourceStreamGeneric( )
+StreamImpl *newSourceStreamGeneric( const char *name )
 {
 	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
-	initStreamImpl( ss );
+	initStreamImpl( ss, name );
 	ss->funcs = &streamFuncs;
 
 	return ss;

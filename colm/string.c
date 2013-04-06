@@ -47,7 +47,7 @@ Head *stringCopy( Program *prg, Head *head )
 
 		if ( head->location != 0 ) {
 			result->location = locationAllocate( prg );
-			result->location->file = head->location->file;
+			result->location->name = head->location->name;
 			result->location->line = head->location->line;
 			result->location->column = head->location->column;
 			result->location->byte = head->location->byte;

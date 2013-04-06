@@ -33,15 +33,9 @@ typedef unsigned long Word;
 typedef unsigned long Half;
 struct Bindings;
 
-typedef struct _File
-{
-	struct _File *prev;
-	struct _File *next;
-} File;
-
 typedef struct _Location
 {
-	File *file;
+	const char *name;
 	long line;
 	long column;
 	long byte;
@@ -277,7 +271,7 @@ Tree *constructStream( struct ColmProgram *prg );
 int testFalse( struct ColmProgram *prg, Tree *tree );
 Tree *makeTree( struct ColmProgram *prg, Tree **root, long nargs );
 Stream *openFile( struct ColmProgram *prg, Tree *name, Tree *mode );
-Stream *openStreamFd( struct ColmProgram *prg, long fd );
+Stream *openStreamFd( struct ColmProgram *prg, char *name, long fd );
 Kid *copyIgnoreList( struct ColmProgram *prg, Kid *ignoreHeader );
 Kid *copyKidList( struct ColmProgram *prg, Kid *kidList );
 void streamFree( struct ColmProgram *prg, Stream *s );

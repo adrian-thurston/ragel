@@ -37,7 +37,7 @@ extern StreamFuncs replFuncs;
  * Pattern
  */
 
-StreamImpl *newSourceStreamPat( Pattern *pattern )
+StreamImpl *newSourceStreamPat( const char *name, Pattern *pattern )
 {
 	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
 	memset( ss, 0, sizeof(StreamImpl) );
@@ -235,7 +235,7 @@ StreamFuncs patternFuncs =
  * Constructor
  */
 
-StreamImpl *newSourceStreamCons( Constructor *constructor )
+StreamImpl *newSourceStreamCons( const char *name, Constructor *constructor )
 {
 	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
 	memset( ss, 0, sizeof(StreamImpl) );

@@ -230,21 +230,19 @@ Kid *kidListConcat( Kid *list1, Kid *list2 )
 }
 
 
-Stream *openStreamFile( Program *prg, FILE *file )
+Stream *openStreamFile( Program *prg, char *name, FILE *file )
 {
 	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
-	res->in = newSourceStreamFile( file );
-	initSourceStream( res->in );
+	res->in = newSourceStreamFile( name, file );
 	return res;
 }
 
-Stream *openStreamFd( Program *prg, long fd )
+Stream *openStreamFd( Program *prg, char *name, long fd )
 {
 	Stream *res = (Stream*)mapElAllocate( prg );
 	res->id = LEL_ID_STREAM;
-	res->in = newSourceStreamFd( fd );
-	initSourceStream( res->in );
+	res->in = newSourceStreamFd( name, fd );
 	return res;
 }
 
@@ -268,8 +266,7 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode )
 	memcpy( fileName, stringData(headName), stringLength(headName) );
 	fileName[stringLength(headName)] = 0;
 	FILE *file = fopen( fileName, fopenMode );
-	free(fileName);
-	return openStreamFile( prg, file );
+	return openStreamFile( prg, fileName, file );
 }
 
 Tree *constructInteger( Program *prg, long i )
@@ -325,7 +322,7 @@ Tree *constructStream( Program *prg )
 	input->refs = 0;
 	input->id = LEL_ID_STREAM;
 
-	input->in = newSourceStreamGeneric();
+	input->in = newSourceStreamGeneric( "<internal>" );
 	return (Tree*)input;
 }
 

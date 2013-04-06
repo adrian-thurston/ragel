@@ -113,12 +113,16 @@ ostream &error( const InputLoc &loc )
 	/* Keep the error count. */
 	gblErrorCount += 1;
 
+	if ( loc.fileName != 0 )
+		cerr << loc.fileName << ":";
+	else
+		cerr << "<input>:";
+
 	if ( loc.line == -1 ) {
-		cerr << "error: INTERNAL: ";
+		cerr << "INT: ";
 	}
 	else {
-		cerr << "error: " << inputFileName << ":" << 
-				loc.line << ":" << loc.col << ": ";
+		cerr << loc.line << ":" << loc.col << ": ";
 	}
 	return cerr;
 }

@@ -525,10 +525,11 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 		errorHead = stringAllocFull( prg, formatted, strlen(formatted) );
 
 		errorHead->location = locationAllocate( prg );
+
+		errorHead->location->name = deepest->location->name;
 		errorHead->location->line = line;
 		errorHead->location->column = column;
 		errorHead->location->byte = byte;
-		errorHead->location->file = deepest->location->file;
 	}
 
 	Tree *tree = constructString( prg, errorHead );
