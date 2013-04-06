@@ -286,7 +286,7 @@ int fdConsumeData( StreamImpl *ss, int length, Location *loc )
 		else if ( buf->type == RunBufIgnoreType )
 			break;
 		else {
-			if ( loc != 0 && loc->line == 0 ) {
+			if ( loc->line == 0 ) {
 				loc->line = ss->line;
 				loc->column = ss->column;
 				loc->byte = ss->byte;
