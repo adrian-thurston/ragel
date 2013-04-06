@@ -165,6 +165,7 @@ StreamImpl *newSourceStreamFd( long fd );
 
 void updatePosition( StreamImpl *inputStream, const char *data, long length );
 void undoPosition( StreamImpl *inputStream, const char *data, long length );
+StreamImpl *newSourceStreamGeneric();
 
 #ifdef __cplusplus
 }

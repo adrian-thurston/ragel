@@ -76,24 +76,6 @@ void clearSourceStream( struct ColmProgram *prg, Tree **sp, StreamImpl *sourceSt
 	sourceStream->queue = 0;
 }
 
-StreamImpl *newSourceStreamFile( FILE *file )
-{
-	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
-	memset( ss, 0, sizeof(StreamImpl) );
-	ss->file = file;
-	ss->funcs = &fileFuncs;
-	return ss;
-}
-
-StreamImpl *newSourceStreamFd( long fd )
-{
-	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
-	memset( ss, 0, sizeof(StreamImpl) );
-	ss->fd = fd;
-	ss->funcs = &fdFuncs;
-	return ss;
-}
-
 /* Keep the position up to date after consuming text. */
 void updatePosition( StreamImpl *is, const char *data, long length )
 {
@@ -370,8 +352,6 @@ void initStreamImpl( StreamImpl *inputStream )
 	inputStream->line = 1;
 	inputStream->column = 1;
 	inputStream->byte = 0;
-
-	inputStream->funcs = &streamFuncs;
 }
 
 void clearStreamImpl( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream )
@@ -993,3 +973,35 @@ struct StreamFuncs fileFuncs =
 	.undoConsumeData = &fdUndoConsumeData,
 	.getDataSource = &fileGetDataSource,
 };
+
+
+StreamImpl *newSourceStreamFile( FILE *file )
+{
+	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
+	initStreamImpl( ss );
+	ss->funcs = &fileFuncs;
+
+	ss->file = file;
+
+	return ss;
+}
+
+StreamImpl *newSourceStreamFd( long fd )
+{
+	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
+	initStreamImpl( ss );
+	ss->funcs = &fdFuncs;
+
+	ss->fd = fd;
+
+	return ss;
+}
+
+StreamImpl *newSourceStreamGeneric( )
+{
+	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
+	initStreamImpl( ss );
+	ss->funcs = &streamFuncs;
+
+	return ss;
+}

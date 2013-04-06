@@ -397,7 +397,6 @@ void decrementSteps( PdaRun *pdaRun );
 int makeReverseCode( PdaRun *pdaRun );
 void transferReverseCode( PdaRun *pdaRun, ParseTree *tree );
 
-void initStreamImpl( StreamImpl *inputStream );
 void clearStreamImpl( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream );
 void initSourceStream( StreamImpl *in );
 void clearSourceStream( struct ColmProgram *prg, Tree **sp, StreamImpl *sourceStream );

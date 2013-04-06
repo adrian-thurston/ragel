@@ -324,8 +324,8 @@ Tree *constructStream( Program *prg )
 	Stream *input = streamAllocate( prg );
 	input->refs = 0;
 	input->id = LEL_ID_STREAM;
-	input->in = malloc( sizeof(StreamImpl) );
-	initStreamImpl( input->in );
+
+	input->in = newSourceStreamGeneric();
 	return (Tree*)input;
 }
 

@@ -1012,8 +1012,7 @@ void Compiler::initEmptyScanners()
 PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc, 
 		int parserId, StreamImpl *sourceStream )
 {
-	StreamImpl *in = new StreamImpl;
-	initStreamImpl( in );
+	StreamImpl *in = newSourceStreamGeneric();
 
 	PdaRun *pdaRun = new PdaRun;
 	initPdaRun( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
