@@ -497,13 +497,18 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	Head *errorHead = 0;
 
 	/* If there are no error points on record assume the error occurred at the beginning of the stream. */
-	if ( deepest == 0 ) 
+	if ( deepest == 0 )  {
 		errorHead = stringAllocFull( prg, "PARSE ERROR at 1:1", 18 );
+		errorHead->location = locationAllocate( prg );
+		errorHead->location->line = 1;
+		errorHead->location->column = 1;
+	}
 	else {
 		debug( prg, REALM_PARSE, "deepest location byte: %d\n", deepest->location->byte );
 
 		long line = deepest->location->line;
 		long i, column = deepest->location->column;
+		long byte = deepest->location->byte;
 
 		for ( i = 0; i < deepest->length; i++ ) {
 			if ( deepest->data[i] != '\n' )
@@ -512,11 +517,18 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 				line += 1;
 				column = 1;
 			}
+			byte += 1;
 		}
 
 		char formatted[128];
 		sprintf( formatted, "PARSE ERROR at %ld:%ld", line, column );
 		errorHead = stringAllocFull( prg, formatted, strlen(formatted) );
+
+		errorHead->location = locationAllocate( prg );
+		errorHead->location->line = line;
+		errorHead->location->column = column;
+		errorHead->location->byte = byte;
+		errorHead->location->file = deepest->location->file;
 	}
 
 	Tree *tree = constructString( prg, errorHead );
