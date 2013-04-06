@@ -806,8 +806,7 @@ static int _undoPrependData( StreamImpl *is, int length )
 
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
-			/* FIXME: provide real impl. */
-			int slen = stream->in->funcs->consumeData( stream->in, length, 0 );
+			int slen = stream->in->funcs->undoPrependData( stream->in, length );
 
 			consumed += slen;
 			length -= slen;
