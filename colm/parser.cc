@@ -41,9 +41,11 @@ void BaseParser::init()
 			internal, String("___ROOT_NAMESPACE") );
 	pd->rootNamespace = rootNamespace;
 
-	TokenRegion *rootRegion = createRegion( internal );
+	RegionImpl *rootImpl = new RegionImpl;
+	pd->regionImplList.append( rootImpl );
+	TokenRegion *rootRegion = createRegion( internal, rootImpl );
 
-	RegionSet *rootRegionSet = new RegionSet( rootRegion, 0, 0, 0 );
+	RegionSet *rootRegionSet = new RegionSet( rootImpl, 0, 0, rootRegion, 0, 0, 0 );
 	pd->regionSetList.append( rootRegionSet );
 	regionStack.push( rootRegionSet );
 
@@ -92,10 +94,10 @@ void BaseParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 	}
 }
 
-TokenRegion *BaseParser::createRegion( const InputLoc &loc )
+TokenRegion *BaseParser::createRegion( const InputLoc &loc, RegionImpl *impl )
 {
 	TokenRegion *tokenRegion = new TokenRegion( loc,
-			pd->regionList.length() );
+			pd->regionList.length(), impl );
 
 	pd->regionList.append( tokenRegion );
 
@@ -104,13 +106,22 @@ TokenRegion *BaseParser::createRegion( const InputLoc &loc )
 
 void BaseParser::pushRegionSet( const InputLoc &loc )
 {
-	TokenRegion *tokenIgnore = createRegion( loc );
-	TokenRegion *tokenOnly = createRegion( loc );
-	TokenRegion *ignoreOnly = createRegion( loc );
-	TokenRegion *collectIgnore = createRegion( loc );
+	RegionImpl *implTokenIgnore = new RegionImpl;
+	RegionImpl *implTokenOnly = new RegionImpl;
+	RegionImpl *implIgnoreOnly = new RegionImpl;
 
-	RegionSet *regionSet = new RegionSet( tokenIgnore,
-			tokenOnly, ignoreOnly, collectIgnore );
+	pd->regionImplList.append( implTokenIgnore );
+	pd->regionImplList.append( implTokenOnly );
+	pd->regionImplList.append( implIgnoreOnly );
+
+	TokenRegion *tokenIgnore = createRegion( loc, implTokenIgnore );
+	TokenRegion *tokenOnly = createRegion( loc, implTokenOnly );
+	TokenRegion *ignoreOnly = createRegion( loc, implIgnoreOnly );
+	TokenRegion *collectIgnore = createRegion( loc, implIgnoreOnly );
+
+	RegionSet *regionSet = new RegionSet(
+			implTokenIgnore, implTokenIgnore, implIgnoreOnly,
+			tokenIgnore, tokenOnly, ignoreOnly, collectIgnore );
 
 	collectIgnore->ignoreOnly = ignoreOnly;
 
@@ -190,7 +201,7 @@ void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join, O
 			join, loc, pd->nextTokenId++, nspace, 
 			regionSet->tokenIgnore );
 
-	regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
+	regionSet->tokenIgnore->impl->tokenInstanceList.append( tokenInstance );
 
 	tokenDef->noPreIgnore = noPreIgnore;
 	tokenDef->noPostIgnore = noPostIgnore;
@@ -202,7 +213,7 @@ void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join, O
 
 		tokenInstanceIgn->dupOf = tokenInstance;
 
-		regionSet->ignoreOnly->tokenInstanceList.append( tokenInstanceIgn );
+		regionSet->ignoreOnly->impl->tokenInstanceList.append( tokenInstanceIgn );
 	}
 	else {
 		/* The instance for the token-only. */
@@ -211,7 +222,7 @@ void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join, O
 
 		tokenInstanceTok->dupOf = tokenInstance;
 
-		regionSet->tokenOnly->tokenInstanceList.append( tokenInstanceTok );
+		regionSet->tokenOnly->impl->tokenInstanceList.append( tokenInstanceTok );
 	}
 
 	/* This is created and pushed in the name. */
@@ -299,7 +310,7 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef, join, 
 			loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore );
 
-	regionSet->tokenIgnore->tokenInstanceList.append( tokenInstance );
+	regionSet->tokenIgnore->impl->tokenInstanceList.append( tokenInstance );
 
 	ldel = nspace->literalDict.insert( interp, tokenInstance );
 
@@ -314,7 +325,7 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 
 	tokenInstanceTok->dupOf = tokenInstance;
 
-	regionSet->tokenOnly->tokenInstanceList.append( tokenInstanceTok );
+	regionSet->tokenOnly->impl->tokenInstanceList.append( tokenInstanceTok );
 
 	if ( pushedRegion )
 		popRegionSet();

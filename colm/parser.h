@@ -53,7 +53,7 @@ struct BaseParser
 	void init();
 	void addRegularDef( const InputLoc &loc, Namespace *nspace, 
 			const String &name, LexJoin *join );
-	TokenRegion *createRegion( const InputLoc &loc );
+	TokenRegion *createRegion( const InputLoc &loc, RegionImpl *impl );
 	Namespace *createNamespace( const InputLoc &loc, const String &name );
 	void pushRegionSet( const InputLoc &loc );
 	void popRegionSet();

@@ -568,73 +568,101 @@ typedef AvlTree< TypeMapEl, String, CmpStr > TypeMap;
 
 typedef Vector<TokenRegion*> RegionVect;
 
-struct TokenRegion
+struct RegionImpl
 {
-	/* Construct with a list of joins */
-	TokenRegion( const InputLoc &loc, int id )
-	: 
-		loc(loc),
-		id(id),
-		lmSwitchHandlesError(false),
+	RegionImpl()
+	:
 		regionNameInst(0),
+		lmActSelect(0),
+		lmSwitchHandlesError(false),
 		defaultTokenInstance(0),
-		preEofBlock(0), 
-		wasEmpty(false), 
-		zeroLel(0),
-		ignoreOnly(0)
-	{ }
-
-	/* Tree traversal. */
-	FsmGraph *walk( Compiler *pd );
-	void makeNameTree( const InputLoc &loc, Compiler *pd );
-	void runLongestMatch( Compiler *pd, FsmGraph *graph );
-	void transferScannerLeavingActions( FsmGraph *graph );
-	Action *newAction( Compiler *pd, const InputLoc &loc, const String &name, 
-			InlineList *inlineList );
-	void makeActions( Compiler *pd );
-	void findName( Compiler *pd );
-	void restart( FsmGraph *graph, FsmTrans *trans );
+		wasEmpty(false)
+	{}
 
 	InputLoc loc;
-	TokenInstanceListReg tokenInstanceList;
-	int id;
-
-	Action *lmActSelect;
-	bool lmSwitchHandlesError;
 
 	/* This gets saved off during the name walk. Can save it off because token
 	 * regions are referenced once only. */
 	NameInst *regionNameInst;
 
+	TokenInstanceListReg tokenInstanceList;
+	Action *lmActSelect;
+	bool lmSwitchHandlesError;
 	TokenInstance *defaultTokenInstance;
-
-	CodeBlock *preEofBlock;
 
 	/* We alway init empty scanners with a single token. If we had to do this
 	 * then wasEmpty is true. */
 	bool wasEmpty;
 
+	RegionImpl *prev, *next;
+
+	void runLongestMatch( Compiler *pd, FsmGraph *graph );
+	void transferScannerLeavingActions( FsmGraph *graph );
+	FsmGraph *walk( Compiler *pd );
+
+	void restart( FsmGraph *graph, FsmTrans *trans );
+	void makeNameTree( const InputLoc &loc, Compiler *pd );
+	void makeActions( Compiler *pd );
+	Action *newAction( Compiler *pd, const InputLoc &loc,
+			const String &name, InlineList *inlineList );
+};
+
+struct TokenRegion
+{
+	/* Construct with a list of joins */
+	TokenRegion( const InputLoc &loc, int id, RegionImpl *impl )
+	: 
+		loc(loc),
+		id(id),
+		preEofBlock(0), 
+		zeroLel(0),
+		ignoreOnly(0),
+		impl(impl)
+	{ }
+
+	InputLoc loc;
+	int id;
+
+	CodeBlock *preEofBlock;
+
 	LangEl *zeroLel;
 	TokenRegion *ignoreOnly;
 
+	RegionImpl *impl;
+
 	TokenRegion *next, *prev;
+
+	/* Tree traversal. */
+	void findName( Compiler *pd );
 };
 
 struct RegionSet
 {
-	RegionSet( TokenRegion *tokenIgnore, TokenRegion *tokenOnly, 
-			TokenRegion *ignoreOnly, TokenRegion *collectIgnore )
+	RegionSet( RegionImpl *implTokenIgnore, RegionImpl *implTokenOnly,
+			RegionImpl *implIgnoreOnly, TokenRegion *tokenIgnore,
+			TokenRegion *tokenOnly, TokenRegion *ignoreOnly,
+			TokenRegion *collectIgnore )
 	:
+		implTokenIgnore(implTokenIgnore),
+		implTokenOnly(implTokenOnly),
+		implIgnoreOnly(implIgnoreOnly),
+
 		tokenIgnore(tokenIgnore),
 		tokenOnly(tokenOnly),
 		ignoreOnly(ignoreOnly),
 		collectIgnore(collectIgnore)
 	{}
 
+	/* Provides the scanner state machines. We reuse ignore-only. */
+	RegionImpl *implTokenIgnore;
+	RegionImpl *implTokenOnly;
+	RegionImpl *implIgnoreOnly;
+
 	TokenRegion *tokenIgnore;
 	TokenRegion *tokenOnly;
 	TokenRegion *ignoreOnly;
 	TokenRegion *collectIgnore;
+
 
 	TokenDefListReg tokenDefList;
 
@@ -645,6 +673,7 @@ typedef Vector<RegionSet*> RegionSetVect;
 
 typedef DList<RegionSet> RegionSetList;
 typedef DList<TokenRegion> RegionList;
+typedef DList<RegionImpl> RegionImplList;
 
 typedef Vector<Namespace*> NamespaceVect;
 
@@ -1377,7 +1406,7 @@ struct InlineItem
 		return i;
 	}
 
-	static InlineItem *cons( const InputLoc &loc, TokenRegion *tokenRegion, 
+	static InlineItem *cons( const InputLoc &loc, RegionImpl *tokenRegion, 
 		TokenInstance *longestMatchPart, Type type ) 
 	{
 		InlineItem *i = new InlineItem;
@@ -1416,7 +1445,7 @@ struct InlineItem
 	NameRef *nameRef;
 	NameInst *nameTarg;
 	InlineList *children;
-	TokenRegion *tokenRegion;
+	RegionImpl *tokenRegion;
 	TokenInstance *longestMatchPart;
 	Type type;
 

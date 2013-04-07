@@ -195,7 +195,7 @@ FsmGraph *LexDefinition::walk( Compiler *pd )
 	return rtnVal;
 }
 
-void TokenRegion::makeNameTree( const InputLoc &loc, Compiler *pd )
+void RegionImpl::makeNameTree( const InputLoc &loc, Compiler *pd )
 {
 	NameInst *nameInst = new NameInst( pd->nextNameId++ );
 	pd->nameInstList.append( nameInst );
@@ -226,7 +226,7 @@ InputLoc TokenInstance::getLoc()
  *  4. start state of all longest match routines.
  */
 
-Action *TokenRegion::newAction( Compiler *pd, const InputLoc &loc, 
+Action *RegionImpl::newAction( Compiler *pd, const InputLoc &loc, 
 		const String &name, InlineList *inlineList )
 {
 	Action *action = Action::cons( loc, name, inlineList );
@@ -235,7 +235,7 @@ Action *TokenRegion::newAction( Compiler *pd, const InputLoc &loc,
 	return action;
 }
 
-void TokenRegion::makeActions( Compiler *pd )
+void RegionImpl::makeActions( Compiler *pd )
 {
 	/* Make actions that set the action id. */
 	for ( TokenInstanceListReg::Iter lmi = tokenInstanceList; lmi.lte(); lmi++ ) {
@@ -298,14 +298,14 @@ void TokenRegion::makeActions( Compiler *pd )
 	lmActSelect = newAction( pd, loc, "lagsel", il6 );
 }
 
-void TokenRegion::restart( FsmGraph *graph, FsmTrans *trans )
+void RegionImpl::restart( FsmGraph *graph, FsmTrans *trans )
 {
 	FsmState *fromState = trans->fromState;
 	graph->detachTrans( fromState, trans->toState, trans );
 	graph->attachTrans( fromState, graph->startState, trans );
 }
 
-void TokenRegion::runLongestMatch( Compiler *pd, FsmGraph *graph )
+void RegionImpl::runLongestMatch( Compiler *pd, FsmGraph *graph )
 {
 	graph->markReachableFromHereStopFinal( graph->startState );
 	for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
@@ -478,7 +478,7 @@ void TokenRegion::runLongestMatch( Compiler *pd, FsmGraph *graph )
 	graph->setFinState( graph->startState );
 }
 
-void TokenRegion::transferScannerLeavingActions( FsmGraph *graph )
+void RegionImpl::transferScannerLeavingActions( FsmGraph *graph )
 {
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		if ( st->outActionTable.length() > 0 )
@@ -486,7 +486,7 @@ void TokenRegion::transferScannerLeavingActions( FsmGraph *graph )
 	}
 }
 
-FsmGraph *TokenRegion::walk( Compiler *pd )
+FsmGraph *RegionImpl::walk( Compiler *pd )
 {
 	/* Make each part of the longest match. */
 	int numParts = 0;

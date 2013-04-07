@@ -610,6 +610,7 @@ struct Compiler
 	/* Counter for assigning ids to longest match items. */
 	int nextTokenId;
 
+	RegionImplList regionImplList;
 	RegionList regionList;
 	RegionSetList regionSetList;
 

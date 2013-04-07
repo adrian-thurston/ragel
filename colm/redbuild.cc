@@ -487,14 +487,14 @@ void RedFsmBuild::makeEntryPoints()
 	}
 
 	for ( RegionList::Iter reg = pd->regionList; reg.lte(); reg++ ) {
-		assert( reg->regionNameInst != 0 );
+		assert( reg->impl->regionNameInst != 0 );
 
 		TokenRegion *use = reg;
 
 		if ( use->zeroLel != 0 )
 			use = use->ignoreOnly;
 
-		NameInst *regionName = use->regionNameInst;
+		NameInst *regionName = use->impl->regionNameInst;
 		addRegionToEntry( reg->id, regionName->id );
 	}
 }

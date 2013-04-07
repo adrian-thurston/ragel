@@ -540,7 +540,7 @@ Action *Compiler::newAction( const String &name, InlineList *inlineList )
 
 void Compiler::initLongestMatchData()
 {
-	if ( regionList.length() > 0 ) {
+	if ( regionSetList.length() > 0 ) {
 		/* The initActId action gives act a default value. */
 		InlineList *il4 = InlineList::cons();
 		il4->append( InlineItem::cons( InputLoc(), InlineItem::LmInitAct ) );
@@ -610,7 +610,7 @@ NameInst *Compiler::makeNameTree()
 	nextNameId = 1;
 
 	/* First make the name tree. */
-	for ( RegionList::Iter rel = regionList; rel.lte(); rel++ ) {
+	for ( RegionImplList::Iter rel = regionImplList; rel.lte(); rel++ ) {
 		/* Recurse on the instance. */
 		rel->makeNameTree( rel->loc, this );
 	}
@@ -625,10 +625,10 @@ FsmGraph *Compiler::makeAllRegions()
 	NameInst **nameIndex = makeNameIndex();
 
 	int numGraphs = 0;
-	FsmGraph **graphs = new FsmGraph*[regionList.length()];
+	FsmGraph **graphs = new FsmGraph*[regionImplList.length()];
 
 	/* Make all the instantiations, we know that main exists in this list. */
-	for ( RegionList::Iter rel = regionList; rel.lte(); rel++ ) {
+	for ( RegionImplList::Iter rel = regionImplList; rel.lte(); rel++ ) {
 		/* Build the graph from a walk of the parse tree. */
 		FsmGraph *newGraph = rel->walk( this );
 
@@ -649,7 +649,7 @@ FsmGraph *Compiler::makeAllRegions()
 	delete[] graphs;
 
 	/* Go through all the token regions and check for lmRequiresErrorState. */
-	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
+	for ( RegionImplList::Iter reg = regionImplList; reg.lte(); reg++ ) {
 		if ( reg->lmSwitchHandlesError )
 			all->lmRequiresErrorState = true;
 	}
@@ -668,7 +668,7 @@ void Compiler::analyzeAction( Action *action, InlineList *inlineList )
 
 		/* Need to recurse into longest match items. */
 		if ( item->type == InlineItem::LmSwitch ) {
-			TokenRegion *lm = item->tokenRegion;
+			RegionImpl *lm = item->tokenRegion;
 			for ( TokenInstanceListReg::Iter lmi = lm->tokenInstanceList; lmi.lte(); lmi++ ) {
 				if ( lmi->action != 0 )
 					analyzeAction( action, lmi->action->inlineList );
@@ -757,11 +757,12 @@ void Compiler::createDefaultScanner()
 
 	/* Create a scanner which will be used when no other scanner can be
 	 * figured out. It returns single characters. */
-	defaultRegion = new TokenRegion( InputLoc(),
-			regionList.length() );
+	RegionImpl *impl = new RegionImpl;
+	regionImplList.append( impl );
+	defaultRegion = new TokenRegion( internal, regionList.length(), impl );
 	regionList.append( defaultRegion );
 
-	RegionSet *regionSet = new RegionSet( defaultRegion, 0, 0, 0 );
+	RegionSet *regionSet = new RegionSet( impl, 0, 0, defaultRegion, 0, 0, 0 );
 	regionSetList.append( regionSet );
 
 	LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
@@ -773,7 +774,7 @@ void Compiler::createDefaultScanner()
 			join, loc, nextTokenId++,
 			rootNamespace, defaultRegion );
 
-	defaultRegion->tokenInstanceList.append( tokenInstance );
+	defaultRegion->impl->tokenInstanceList.append( tokenInstance );
 
 	/* Now create the one and only token -> "<chr>" / any /  */
 	name = "___DEFAULT_SCANNER_CHR";
@@ -969,8 +970,8 @@ Namespace *NamespaceQual::getQual( Compiler *pd )
 
 void Compiler::initEmptyScanner( RegionSet *regionSet, TokenRegion *reg )
 {
-	if ( reg != 0 && reg->tokenInstanceList.length() == 0 ) {
-		reg->wasEmpty = true;
+	if ( reg != 0 && reg->impl->tokenInstanceList.length() == 0 ) {
+		reg->impl->wasEmpty = true;
 
 		static int def = 1;
 		String name( 64, "__%p_DEF_PAT_%d", reg, def++ );
@@ -985,7 +986,7 @@ void Compiler::initEmptyScanner( RegionSet *regionSet, TokenRegion *reg )
 				join, internal, nextTokenId++,
 				rootNamespace, reg );
 
-		reg->tokenInstanceList.append( tokenInstance );
+		reg->impl->tokenInstanceList.append( tokenInstance );
 
 		/* These do not go in the namespace so so they cannot get declared
 		 * in the declare pass. */
@@ -1093,7 +1094,6 @@ void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
 			parserEls.insert( lel );
 	}
 }
-
 
 void Compiler::generateOutput( long activeRealm )
 {

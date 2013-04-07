@@ -1350,7 +1350,9 @@ void Compiler::makeRuntimeData()
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
 		long regId = reg->id+1;
 		runtimeData->regionInfo[regId].defaultToken =
-			reg->defaultTokenInstance == 0 ? -1 : reg->defaultTokenInstance->tokenDef->tdLangEl->id;
+				reg->impl->defaultTokenInstance == 0 ?
+				-1 : 
+				reg->impl->defaultTokenInstance->tokenDef->tdLangEl->id;
 		runtimeData->regionInfo[regId].eofFrameId = -1;
 		runtimeData->regionInfo[regId].ciLelId = reg->zeroLel != 0 ? reg->zeroLel->id : 0;
 
@@ -2051,7 +2053,7 @@ PdaTables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		for ( RegionVect::Iter reg = state->regions; reg.lte(); reg++ ) {
 			assert( state->preRegions.length() <= 1 );
-			if ( state->preRegions.length() == 0 || state->preRegions[0]->wasEmpty )
+			if ( state->preRegions.length() == 0 || state->preRegions[0]->impl->wasEmpty )
 				pdaTables->tokenPreRegions[count++] = -1;
 			else 
 				pdaTables->tokenPreRegions[count++] = state->preRegions[0]->id + 1;
