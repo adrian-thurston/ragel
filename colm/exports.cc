@@ -94,14 +94,9 @@ void Compiler::generateExports()
 
 	/* Declare. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->isEOF ) {
-			out << "// isEOF\n";
+		if ( lel->isEOF || lel->isZero )
 			continue;
-		}
-		if ( lel->isCI != 0 ) {
-			out << "// isCI != 0\n";
-			continue;
-		}	
+
 		openNameSpace( out, lel->nspace );
 		out << "struct " << lel->fullName << ";";
 		closeNameSpace( out, lel->nspace );
@@ -110,14 +105,8 @@ void Compiler::generateExports()
 
 	/* Class definitions. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->isEOF ) {
-			out << "// isEOF\n";
+		if ( lel->isEOF || lel->isZero )
 			continue;
-		}
-		if ( lel->isCI != 0 ) {
-			out << "// isCI != 0\n";
-			continue;
-		}	
 
 		openNameSpace( out, lel->nspace );
 		out << "struct " << lel->fullName << "\n";

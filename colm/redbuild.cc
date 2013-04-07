@@ -491,7 +491,7 @@ void RedFsmBuild::makeEntryPoints()
 
 		TokenRegion *use = reg;
 
-		if ( use->ciLel != 0 )
+		if ( use->zeroLel != 0 )
 			use = use->ignoreOnly;
 
 		NameInst *regionName = use->regionNameInst;

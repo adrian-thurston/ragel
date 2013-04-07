@@ -306,8 +306,8 @@ void Namespace::declare( Compiler *pd )
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {
 		if ( tokenDef->isLiteral ) {
 			if ( tokenDef->isZero ) {
-				assert( tokenDef->regionSet->collectIgnore->ciLel != 0 );
-				tokenDef->tdLangEl = tokenDef->regionSet->collectIgnore->ciLel;
+				assert( tokenDef->regionSet->collectIgnore->zeroLel != 0 );
+				tokenDef->tdLangEl = tokenDef->regionSet->collectIgnore->zeroLel;
 			}
 			else {
 				/* Original. Create a token for the literal. */
@@ -426,12 +426,12 @@ void Compiler::makeIgnoreCollectors()
 	for ( RegionSetList::Iter regionSet = regionSetList; regionSet.lte(); regionSet++ ) {
 		if ( regionSet->tokenIgnore != rootRegion && regionSet->tokenIgnore != defaultRegion ) {
 			String name( 128, "_ign_%p", regionSet->tokenIgnore );
-			LangEl *ignLel = new LangEl( rootNamespace, name, LangEl::Term );
-			langEls.append( ignLel );
-			ignLel->isCI = true;
-			ignLel->regionSet = regionSet;
+			LangEl *zeroLel = new LangEl( rootNamespace, name, LangEl::Term );
+			langEls.append( zeroLel );
+			zeroLel->isZero = true;
+			zeroLel->regionSet = regionSet;
 
-			regionSet->collectIgnore->ciLel = ignLel;
+			regionSet->collectIgnore->zeroLel = zeroLel;
 		}
 	}
 }

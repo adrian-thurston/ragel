@@ -580,8 +580,7 @@ struct TokenRegion
 		defaultTokenInstance(0),
 		preEofBlock(0), 
 		wasEmpty(false), 
-		isCiOnly(false),
-		ciLel(0),
+		zeroLel(0),
 		ignoreOnly(0)
 	{ }
 
@@ -615,9 +614,7 @@ struct TokenRegion
 	 * then wasEmpty is true. */
 	bool wasEmpty;
 
-	bool isCiOnly;
-
-	LangEl *ciLel;
+	LangEl *zeroLel;
 	TokenRegion *ignoreOnly;
 
 	TokenRegion *next, *prev;

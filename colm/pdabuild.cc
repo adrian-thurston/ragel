@@ -93,7 +93,7 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	contextIn(0), 
 	noPreIgnore(false),
 	noPostIgnore(false),
-	isCI(false)
+	isZero(false)
 {
 }
  
@@ -479,7 +479,7 @@ void Compiler::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 
 		/* If it is not the eof, then use the region associated 
 		 * with the token definition. */
-		if ( langEl->isCI ) {
+		if ( langEl->isZero ) {
 			region = langEl->regionSet->collectIgnore;
 			regionSet = langEl->regionSet;
 		}
@@ -1352,7 +1352,7 @@ void Compiler::makeRuntimeData()
 		runtimeData->regionInfo[regId].defaultToken =
 			reg->defaultTokenInstance == 0 ? -1 : reg->defaultTokenInstance->tokenDef->tdLangEl->id;
 		runtimeData->regionInfo[regId].eofFrameId = -1;
-		runtimeData->regionInfo[regId].ciLelId = reg->ciLel != 0 ? reg->ciLel->id : 0;
+		runtimeData->regionInfo[regId].ciLelId = reg->zeroLel != 0 ? reg->zeroLel->id : 0;
 
 		CodeBlock *block = reg->preEofBlock;
 		if ( block != 0 ) {

@@ -296,7 +296,7 @@ struct LangEl : public DListEl<LangEl>
 	Context *contextIn;
 	bool noPreIgnore;
 	bool noPostIgnore;
-	bool isCI;
+	bool isZero;
 	RegionSet *regionSet;
 };
 
