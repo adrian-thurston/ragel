@@ -56,9 +56,6 @@ void BaseParser::init()
 	pd->globalObjectDef = ObjectDef::cons( ObjectDef::UserType,
 			global, pd->nextObjectId++ ); 
 	
-	/* The eofTokenRegion defaults to the root region. */
-	pd->eofTokenRegion = rootRegion;
-
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the
 	 * beginning of a machine spec so any assignment operators can reference

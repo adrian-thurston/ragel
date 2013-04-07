@@ -860,7 +860,6 @@ struct Compiler
 	LangEl *ignoreLangEl;
 
 	TokenRegion *rootRegion;
-	TokenRegion *eofTokenRegion;
 
 	Namespace *rootNamespace;
 

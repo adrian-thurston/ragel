@@ -19,6 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
+#define EOF_REGION 0
+
 #include <iostream>
 #include <iomanip>
 #include <errno.h>
@@ -639,7 +641,7 @@ void Compiler::pdaActionOrder( PdaGraph *pdaGraph, LangElSet &parserEls )
 				PdaTrans *trans = tel->value;
 				LangEl *lel = langElIndex[trans->lowKey];
 				if ( lel != 0 && lel->isEOF )
-					state->regions.append( eofTokenRegion );
+					state->regions.append( EOF_REGION );
 			}
 		}
 	}
@@ -1347,6 +1349,9 @@ void Compiler::makeRuntimeData()
 	memset( runtimeData->regionInfo, 0, sizeof(RegionInfo) * runtimeData->numRegions );
 
 	runtimeData->regionInfo[0].defaultToken = -1;
+	runtimeData->regionInfo[0].eofFrameId = -1;
+	runtimeData->regionInfo[0].ciLelId = 0;
+
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
 		long regId = reg->id+1;
 		runtimeData->regionInfo[regId].defaultToken =
@@ -2031,8 +2036,10 @@ PdaTables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	count = 0;
 	pdaTables->tokenRegions[count++] = 0;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
-		for ( RegionVect::Iter reg = state->regions; reg.lte(); reg++ )
-			pdaTables->tokenRegions[count++] = (*reg)->id + 1;
+		for ( RegionVect::Iter reg = state->regions; reg.lte(); reg++ ) {
+			int id = ( *reg == EOF_REGION ) ? 0 : (*reg)->id + 1;
+			pdaTables->tokenRegions[count++] = id;
+		}
 
 		pdaTables->tokenRegions[count++] = 0;
 	}
