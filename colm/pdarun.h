@@ -442,8 +442,6 @@ void executeGenerationAction( struct ColmProgram *prg, Tree **sp, FsmRun *fsmRun
 		StreamImpl *inputStream, int frameId, Code *code, long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );
 void clearIgnoreList( struct ColmProgram *prg, Tree **sp, Kid *kid );
-Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
-Head *extractMatch( struct ColmProgram *prg, FsmRun *fsmRun, StreamImpl *inputStream );
 long parseLoop( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, 
 		StreamImpl *inputStream, long entry );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );

@@ -93,70 +93,6 @@ void decrementSteps( PdaRun *pdaRun )
 	//debug( prg, REALM_PARSE, "steps down to %ld\n", pdaRun->steps );
 }
 
-Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
-{
-	long length = fsmRun->toklen;
-
-	//debug( prg, REALM_PARSE, "extracting token of length: %ld\n", length );
-
-	RunBuf *runBuf = fsmRun->consumeBuf;
-	if ( runBuf == 0 || length > ( FSM_BUFSIZE - runBuf->length ) ) {
-		runBuf = newRunBuf();
-		runBuf->next = fsmRun->consumeBuf;
-		fsmRun->consumeBuf = runBuf;
-	}
-
-	char *dest = runBuf->data + runBuf->length;
-
-	is->funcs->getData( is, dest, length );
-	Location *location = locationAllocate( prg );
-	is->funcs->consumeData( is, length, location );
-
-	runBuf->length += length;
-
-	fsmRun->p = fsmRun->pe = 0;
-	fsmRun->toklen = 0;
-	fsmRun->tokstart = 0;
-
-	Head *head = stringAllocPointer( prg, dest, length );
-
-	head->location = location;
-
-	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
-
-	return head;
-}
-
-Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
-{
-	long length = fsmRun->toklen;
-
-	RunBuf *runBuf = fsmRun->consumeBuf;
-	if ( runBuf == 0 || length > ( FSM_BUFSIZE - runBuf->length ) ) {
-		runBuf = newRunBuf();
-		runBuf->next = fsmRun->consumeBuf;
-		fsmRun->consumeBuf = runBuf;
-	}
-
-	char *dest = runBuf->data + runBuf->length;
-
-	is->funcs->getData( is, dest, length );
-
-	fsmRun->p = fsmRun->pe = 0;
-	fsmRun->toklen = 0;
-
-	Head *head = stringAllocPointer( prg, dest, length );
-
-	head->location = locationAllocate( prg );
-	head->location->line = is->line;
-	head->location->column = is->column;
-	head->location->byte = is->byte;
-
-	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
-
-	return head;
-}
-
 Head *streamPull( Program *prg, PdaRun *pdaRun, StreamImpl *is, long length )
 {
 	if ( pdaRun != 0 ) {
@@ -793,7 +729,72 @@ void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	}
 }
 
-void sendIgnore( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+static Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
+{
+	long length = fsmRun->toklen;
+
+	//debug( prg, REALM_PARSE, "extracting token of length: %ld\n", length );
+
+	RunBuf *runBuf = fsmRun->consumeBuf;
+	if ( runBuf == 0 || length > ( FSM_BUFSIZE - runBuf->length ) ) {
+		runBuf = newRunBuf();
+		runBuf->next = fsmRun->consumeBuf;
+		fsmRun->consumeBuf = runBuf;
+	}
+
+	char *dest = runBuf->data + runBuf->length;
+
+	is->funcs->getData( is, dest, length );
+	Location *location = locationAllocate( prg );
+	is->funcs->consumeData( is, length, location );
+
+	runBuf->length += length;
+
+	fsmRun->p = fsmRun->pe = 0;
+	fsmRun->toklen = 0;
+	fsmRun->tokstart = 0;
+
+	Head *head = stringAllocPointer( prg, dest, length );
+
+	head->location = location;
+
+	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
+
+	return head;
+}
+
+static Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
+{
+	long length = fsmRun->toklen;
+
+	RunBuf *runBuf = fsmRun->consumeBuf;
+	if ( runBuf == 0 || length > ( FSM_BUFSIZE - runBuf->length ) ) {
+		runBuf = newRunBuf();
+		runBuf->next = fsmRun->consumeBuf;
+		fsmRun->consumeBuf = runBuf;
+	}
+
+	char *dest = runBuf->data + runBuf->length;
+
+	is->funcs->getData( is, dest, length );
+
+	fsmRun->p = fsmRun->pe = 0;
+	fsmRun->toklen = 0;
+
+	Head *head = stringAllocPointer( prg, dest, length );
+
+	head->location = locationAllocate( prg );
+	head->location->line = is->line;
+	head->location->column = is->column;
+	head->location->byte = is->byte;
+
+	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
+
+	return head;
+}
+
+
+static void sendIgnore( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	debug( prg, REALM_PARSE, "ignoring: %s\n", prg->rtd->lelInfo[id].name );
 
@@ -862,8 +863,6 @@ static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 static void sendCi( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun, int id )
 {
 	debug( prg, REALM_PARSE, "token: CI\n" );
-
-/**/
 
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
