@@ -195,32 +195,20 @@ FsmGraph *LexDefinition::walk( Compiler *pd )
 	return rtnVal;
 }
 
-
-FsmGraph *RegionDef::walk( Compiler *pd )
-{
-	/* Recurse on the expression. */
-	FsmGraph *rtnVal = tokenRegion->walk( pd );
-
-	/* Need the entry point for the region. */
-	rtnVal->setEntry( tokenRegion->regionNameInst->id, rtnVal->startState );
-	
-	return rtnVal;
-}
-
-void RegionDef::makeNameTree( const InputLoc &loc, Compiler *pd )
+void TokenRegion::makeNameTree( const InputLoc &loc, Compiler *pd )
 {
 	NameInst *nameInst = new NameInst( pd->nextNameId++ );
 	pd->nameInstList.append( nameInst );
 
 	/* Guess we do this now. */
-	tokenRegion->makeActions( pd );
+	makeActions( pd );
 
 	/* Save off the name inst into the token region. This is only legal for
 	 * token regions because they are only ever referenced once (near the root
 	 * of the name tree). They cannot have more than one corresponding name
 	 * inst. */
-	assert( tokenRegion->regionNameInst == 0 );
-	tokenRegion->regionNameInst = nameInst;
+	assert( regionNameInst == 0 );
+	regionNameInst = nameInst;
 }
 
 InputLoc TokenInstance::getLoc()
@@ -546,6 +534,9 @@ FsmGraph *TokenRegion::walk( Compiler *pd )
 		runLongestMatch( pd, retFsm );
 		delete[] parts;
 	}
+
+	/* Need the entry point for the region. */
+	retFsm->setEntry( regionNameInst->id, retFsm->startState );
 
 	return retFsm;
 }

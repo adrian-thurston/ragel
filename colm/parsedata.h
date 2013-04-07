@@ -563,9 +563,6 @@ struct Compiler
 	 * Data collected during the parse.
 	 */
 
-	/* The list of instances. */
-	RegionDefList regionDefList;
-
 	/* List of actions. Will be pasted into a switch statement. */
 	ActionList actionList;
 

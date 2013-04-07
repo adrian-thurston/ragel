@@ -274,24 +274,6 @@ struct LexDefinition
 	LexJoin *join;
 };
 
-/*
- * A Variable Definition
- */
-struct RegionDef
-:
-	public DListEl<RegionDef>
-{
-	RegionDef( TokenRegion *tokenRegion, const InputLoc &loc )
-		: tokenRegion(tokenRegion), loc(loc) { }
-	
-	/* Parse tree traversal. */
-	FsmGraph *walk( Compiler *pd );
-	void makeNameTree( const InputLoc &loc, Compiler *pd );
-
-	TokenRegion *tokenRegion;
-	InputLoc loc;
-};
-
 typedef Vector<String> StringVect;
 typedef CmpTable<String, CmpStr> CmpStrVect;
 
@@ -605,7 +587,7 @@ struct TokenRegion
 
 	/* Tree traversal. */
 	FsmGraph *walk( Compiler *pd );
-	void makeNameTree( Compiler *pd );
+	void makeNameTree( const InputLoc &loc, Compiler *pd );
 	void runLongestMatch( Compiler *pd, FsmGraph *graph );
 	void transferScannerLeavingActions( FsmGraph *graph );
 	Action *newAction( Compiler *pd, const InputLoc &loc, const String &name, 
@@ -728,8 +710,6 @@ struct GraphDictEl
 
 typedef AvlTree<GraphDictEl, String, CmpStr> GraphDict;
 typedef DList<GraphDictEl> GraphList;
-
-typedef DList<RegionDef> RegionDefList;
 
 struct TypeAlias
 {

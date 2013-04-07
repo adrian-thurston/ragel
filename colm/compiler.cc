@@ -610,9 +610,9 @@ NameInst *Compiler::makeNameTree()
 	nextNameId = 1;
 
 	/* First make the name tree. */
-	for ( RegionDefList::Iter rdel = regionDefList; rdel.lte(); rdel++ ) {
+	for ( RegionList::Iter rel = regionList; rel.lte(); rel++ ) {
 		/* Recurse on the instance. */
-		rdel->makeNameTree( rdel->loc, this );
+		rel->makeNameTree( rel->loc, this );
 	}
 
 	return 0;
@@ -625,12 +625,12 @@ FsmGraph *Compiler::makeAllRegions()
 	NameInst **nameIndex = makeNameIndex();
 
 	int numGraphs = 0;
-	FsmGraph **graphs = new FsmGraph*[regionDefList.length()];
+	FsmGraph **graphs = new FsmGraph*[regionList.length()];
 
 	/* Make all the instantiations, we know that main exists in this list. */
-	for ( RegionDefList::Iter rdel = regionDefList; rdel.lte(); rdel++ ) {
+	for ( RegionList::Iter rel = regionList; rel.lte(); rel++ ) {
 		/* Build the graph from a walk of the parse tree. */
-		FsmGraph *newGraph = rdel->walk( this );
+		FsmGraph *newGraph = rel->walk( this );
 
 		/* Wrap up the construction. */
 		finishGraphBuild( newGraph );
@@ -760,9 +760,6 @@ void Compiler::createDefaultScanner()
 	defaultRegion = new TokenRegion( InputLoc(),
 			regionList.length() );
 	regionList.append( defaultRegion );
-
-	RegionDef *rdel = new RegionDef( defaultRegion, loc );
-	regionDefList.append( rdel );
 
 	RegionSet *regionSet = new RegionSet( defaultRegion, 0, 0, 0 );
 	regionSetList.append( regionSet );

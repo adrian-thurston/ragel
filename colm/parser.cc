@@ -99,10 +99,6 @@ TokenRegion *BaseParser::createRegion( const InputLoc &loc )
 
 	pd->regionList.append( tokenRegion );
 
-	/* New element in the dict, all good. */
-	RegionDef *regionDef = new RegionDef( tokenRegion, loc );
-	pd->regionDefList.append( regionDef );
-
 	return tokenRegion;
 }
 
