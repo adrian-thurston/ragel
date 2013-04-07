@@ -424,7 +424,7 @@ void Compiler::setPrecedence()
 void Compiler::makeIgnoreCollectors()
 {
 	for ( RegionSetList::Iter regionSet = regionSetList; regionSet.lte(); regionSet++ ) {
-		if ( regionSet->tokenIgnore != rootRegion && regionSet->tokenIgnore != defaultRegion ) {
+		if ( regionSet->tokenIgnore != rootRegion ) {
 			String name( 128, "_ign_%p", regionSet->tokenIgnore );
 			LangEl *zeroLel = new LangEl( rootNamespace, name, LangEl::Term );
 			langEls.append( zeroLel );
@@ -450,7 +450,5 @@ void Compiler::typeDeclaration()
 
 	/* Create the default scanner which will return single characters for us
 	 * when we have no other scanner */
-	createDefaultScanner();
-
 	setPrecedence();
 }

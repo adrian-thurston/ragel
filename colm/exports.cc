@@ -35,7 +35,7 @@ using std::endl;
 
 void Compiler::openNameSpace( ostream &out, Namespace *nspace )
 {
-	if ( nspace == defaultNamespace || nspace == rootNamespace )
+	if ( nspace == rootNamespace )
 		return;
 	
 	openNameSpace( out, nspace->parentNamespace );
@@ -44,7 +44,7 @@ void Compiler::openNameSpace( ostream &out, Namespace *nspace )
 
 void Compiler::closeNameSpace( ostream &out, Namespace *nspace )
 {
-	if ( nspace == defaultNamespace || nspace == rootNamespace )
+	if ( nspace == rootNamespace )
 		return;
 	
 	openNameSpace( out, nspace->parentNamespace );

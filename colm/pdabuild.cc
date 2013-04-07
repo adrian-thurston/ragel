@@ -218,7 +218,7 @@ void Compiler::makeLangElIds()
 
 void Compiler::refNameSpace( LangEl *lel, Namespace *nspace )
 {
-	if ( nspace == defaultNamespace || nspace == rootNamespace ) {
+	if ( nspace == rootNamespace ) {
 		lel->refName = "::" + lel->refName;
 		return;
 	}

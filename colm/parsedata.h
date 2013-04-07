@@ -803,7 +803,6 @@ struct Compiler
 	void compileByteCode();
 
 	void resolveUses();
-	void createDefaultScanner();
 	void generateOutput( long activeRealm );
 	void compile();
 
@@ -858,14 +857,11 @@ struct Compiler
 	LangEl *noTokenLangEl;
 	LangEl *eofLangEl;
 	LangEl *errorLangEl;
-	LangEl *defaultCharLangEl;
 	LangEl *ignoreLangEl;
 
 	TokenRegion *rootRegion;
-	TokenRegion *defaultRegion;
 	TokenRegion *eofTokenRegion;
 
-	Namespace *defaultNamespace;
 	Namespace *rootNamespace;
 
 	int nextSymbolId;

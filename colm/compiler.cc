@@ -373,11 +373,9 @@ Compiler::Compiler( )
 	noTokenLangEl(0),
 	eofLangEl(0),
 	errorLangEl(0),
-	defaultCharLangEl(0),
 	ignoreLangEl(0),
 
 	rootRegion(0),
-	defaultRegion(0),
 	firstNonTermId(0),
 	prodIdIndex(0),
 
@@ -742,46 +740,6 @@ FsmGraph *Compiler::makeScanner()
 	fsmGraph->setStateNumbers( 0 );
 
 	return fsmGraph;
-}
-
-void Compiler::createDefaultScanner()
-{
-	InputLoc loc;
-
-	const char *name = "___DEFAULT_SCANNER";
-
-	/* Create the default namespace. */
-	defaultNamespace = new Namespace( InputLoc(), name,
-			namespaceList.length(), 0 );
-	namespaceList.append( defaultNamespace );
-
-	/* Create a scanner which will be used when no other scanner can be
-	 * figured out. It returns single characters. */
-	RegionImpl *impl = new RegionImpl;
-	regionImplList.append( impl );
-	defaultRegion = new TokenRegion( internal, regionList.length(), impl );
-	regionList.append( defaultRegion );
-
-	RegionSet *regionSet = new RegionSet( impl, 0, 0, defaultRegion, 0, 0, 0 );
-	regionSetList.append( regionSet );
-
-	LexJoin *join = LexJoin::cons( LexExpression::cons( BT_Any ) );
-
-	TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, 
-			join, 0, loc, 0, rootNamespace, regionSet, 0, 0 );
-		
-	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef,
-			join, loc, nextTokenId++,
-			rootNamespace, defaultRegion );
-
-	defaultRegion->impl->tokenInstanceList.append( tokenInstance );
-
-	/* Now create the one and only token -> "<chr>" / any /  */
-	name = "___DEFAULT_SCANNER_CHR";
-	defaultCharLangEl = addLangEl( this, defaultNamespace, name, LangEl::Term );
-
-	tokenInstance->tokenDef->tdLangEl = defaultCharLangEl;
-	defaultCharLangEl->tokenDef = tokenDef;
 }
 
 LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
