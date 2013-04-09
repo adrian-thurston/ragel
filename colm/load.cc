@@ -1893,7 +1893,6 @@ void LoadSource::go( long activeRealm )
 	argv[0] = inputFileName;
 	argv[1] = 0;
 
-	colmInit( 0 );
 	ColmProgram *program = colmNewProgram( &main_runtimeData, activeRealm );
 	colmRunProgram( program, 1, argv );
 

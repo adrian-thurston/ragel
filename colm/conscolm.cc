@@ -340,7 +340,6 @@ void LoadColm::go( long activeRealm )
 	argv[0] = inputFileName;
 	argv[1] = 0;
 
-	colmInit( 0 );
 	ColmProgram *program = colmNewProgram( &main_runtimeData, 0 );
 	colmRunProgram( program, 1, argv );
 

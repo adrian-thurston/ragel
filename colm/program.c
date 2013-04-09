@@ -34,10 +34,6 @@
 
 #define VM_STACK_SIZE (8192)
 
-void colmInit( long debugRealm )
-{
-}
-
 void clearGlobal( Program *prg, Tree **sp )
 {
 	/* Downref all the fields in the global object. */
