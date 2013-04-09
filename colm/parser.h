@@ -46,7 +46,7 @@ struct BaseParser
 	bool enterRl;
 
 	bool insideRegion()
-		{ return regionStack.length() > 1; }
+		{ return regionStack.length() > 0; }
 
 	/* Lexical feedback. */
 

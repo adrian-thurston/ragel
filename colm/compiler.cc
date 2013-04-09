@@ -375,7 +375,6 @@ Compiler::Compiler( )
 	errorLangEl(0),
 	ignoreLangEl(0),
 
-	rootRegion(0),
 	firstNonTermId(0),
 	prodIdIndex(0),
 
@@ -641,10 +640,17 @@ FsmGraph *Compiler::makeAllRegions()
 	 * into the minimization algorithm. It is currently set by the longest
 	 * match operator and not considered anywhere else. */
 
-	/* Add all the other graphs into the first. */
-	FsmGraph *all = graphs[0];
-	all->globOp( graphs+1, numGraphs-1 );
-	delete[] graphs;
+	FsmGraph *all;
+	if ( numGraphs == 0 ) {
+		all = new FsmGraph;
+		all->lambdaFsm();
+	}
+	else {
+		/* Add all the other graphs into the first. */
+		all = graphs[0];
+		all->globOp( graphs+1, numGraphs-1 );
+		delete[] graphs;
+	}
 
 	/* Go through all the token regions and check for lmRequiresErrorState. */
 	for ( RegionImplList::Iter reg = regionImplList; reg.lte(); reg++ ) {

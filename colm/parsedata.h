@@ -859,8 +859,6 @@ struct Compiler
 	LangEl *errorLangEl;
 	LangEl *ignoreLangEl;
 
-	TokenRegion *rootRegion;
-
 	Namespace *rootNamespace;
 
 	int nextSymbolId;

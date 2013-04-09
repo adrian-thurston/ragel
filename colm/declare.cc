@@ -424,15 +424,13 @@ void Compiler::setPrecedence()
 void Compiler::makeIgnoreCollectors()
 {
 	for ( RegionSetList::Iter regionSet = regionSetList; regionSet.lte(); regionSet++ ) {
-		if ( regionSet->tokenIgnore != rootRegion ) {
-			String name( 128, "_ign_%p", regionSet->tokenIgnore );
-			LangEl *zeroLel = new LangEl( rootNamespace, name, LangEl::Term );
-			langEls.append( zeroLel );
-			zeroLel->isZero = true;
-			zeroLel->regionSet = regionSet;
+		String name( 128, "_ign_%p", regionSet->tokenIgnore );
+		LangEl *zeroLel = new LangEl( rootNamespace, name, LangEl::Term );
+		langEls.append( zeroLel );
+		zeroLel->isZero = true;
+		zeroLel->regionSet = regionSet;
 
-			regionSet->collectIgnore->zeroLel = zeroLel;
-		}
+		regionSet->collectIgnore->zeroLel = zeroLel;
 	}
 }
 

@@ -41,16 +41,6 @@ void BaseParser::init()
 			internal, String("___ROOT_NAMESPACE") );
 	pd->rootNamespace = rootNamespace;
 
-	RegionImpl *rootImpl = new RegionImpl;
-	pd->regionImplList.append( rootImpl );
-	TokenRegion *rootRegion = createRegion( internal, rootImpl );
-
-	RegionSet *rootRegionSet = new RegionSet( rootImpl, 0, 0, rootRegion, 0, 0, 0 );
-	pd->regionSetList.append( rootRegionSet );
-	regionStack.push( rootRegionSet );
-
-	pd->rootRegion = rootRegion;
-
 	/* Set up the global object. */
 	String global = "global";
 	pd->globalObjectDef = ObjectDef::cons( ObjectDef::UserType,
