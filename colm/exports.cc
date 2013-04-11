@@ -64,16 +64,6 @@ void Compiler::generateExports()
 		"\n";
 	
 	out << 
-		"struct ColmLocation\n"
-		"{\n"
-		"	const char *name;\n"
-		"	long line;\n"
-		"	long column;\n"
-		"	long byte;\n"
-		"};\n"
-		"\n";
-
-	out << 
 		"inline void appendString( ColmPrintArgs *args, const char *data, int length )\n"
 		"{\n"
 		"	std::string *str = (std::string*)args->arg;\n"

@@ -10,6 +10,7 @@ struct ColmKid;
 struct ColmProgram;
 struct ColmRuntimeData;
 struct ColmTree;
+struct ColmLocation;
 
 struct ColmProgram *colmNewProgram( struct ColmRuntimeData *rtd, long debugRealm );
 void colmRunProgram( struct ColmProgram *prg, int argc, const char **argv );

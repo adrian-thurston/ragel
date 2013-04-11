@@ -33,7 +33,7 @@ typedef unsigned long Word;
 typedef unsigned long Half;
 struct Bindings;
 
-typedef struct _Location
+typedef struct ColmLocation
 {
 	const char *name;
 	long line;

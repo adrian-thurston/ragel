@@ -65,7 +65,8 @@ extern int gblErrorCount;
 extern char machineMain[];
 extern bool gblLibrary;
 extern const char *gblExportTo;
-extern "C" struct ColmLocation;
+
+struct ColmLocation;
 
 /* Location in an input file. */
 struct InputLoc

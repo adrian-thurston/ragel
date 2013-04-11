@@ -2014,7 +2014,7 @@ Location *locSearch( Program *prg, Tree *tree )
 
 struct ColmLocation *findLocation( Program *prg, Tree *tree )
 {
-	return (struct ColmLocation*)locSearch( prg, tree );
+	return locSearch( prg, tree );
 }
 
 void xmlEscapeData( struct ColmPrintArgs *printArgs, const char *data, long len )

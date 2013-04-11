@@ -64,6 +64,7 @@ struct Constructor;
 struct ConsItem;
 struct _FsmRun;
 struct ColmTree;
+struct ColmLocation;
 struct ColmProgram;
 
 enum RunBufType {
@@ -86,7 +87,7 @@ typedef struct _RunBuf
 RunBuf *newRunBuf();
 
 typedef struct _StreamImpl StreamImpl;
-typedef struct _Location Location;
+typedef struct ColmLocation Location;
 
 struct StreamFuncs
 {
