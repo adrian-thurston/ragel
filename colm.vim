@@ -57,6 +57,7 @@ syntax keyword Type
 	\ namespace lex reducefirst global include export
 	\ construct cons parse parse_stop match require send
 	\ preeof left right nonassoc prec accum context alias
+	\ end
 
 syntax keyword typeKeywords
 	\ int str bool any ref ptr
