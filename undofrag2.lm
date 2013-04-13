@@ -41,9 +41,9 @@ end # undo
 cons Undo: undo[]
 Undo.Out = construct parser<undo::out> []
 
-parse InputP: undo::start(Undo)[ stdin ]
-Input: undo::start = InputP.tree
+parse Input: undo::start(Undo)[ stdin ]
 print( Input )
+
 ##### IN #####
 a b c;
 ##### EXP #####

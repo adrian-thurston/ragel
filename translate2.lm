@@ -48,10 +48,9 @@ context ctx
 end # ctx
 
 CTX: ctx = cons ctx []
-parse InputP: ctx::start( CTX ) [ stdin ]
-Input: ctx::start = InputP.tree
-
+parse Input: ctx::start( CTX ) [ stdin ]
 print( Input )
+
 ##### IN #####
 a b c ( d1 ... d2 ) e f g ;
 ##### EXP #####

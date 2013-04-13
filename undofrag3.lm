@@ -47,7 +47,8 @@ cons Undo: undo[]
 Undo.Out = construct parser<undo::out> []
 
 parse Input: undo::start(Undo)[ stdin ]
-print( Input.tree )
+print( Input )
+
 ##### IN #####
 a . ;
 ##### EXP #####

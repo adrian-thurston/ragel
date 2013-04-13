@@ -38,8 +38,7 @@ end # accum_bt
 AccumBt: accum_bt = cons accum_bt[]
 AccumBt.OneParser = cons parser<accum_bt::one>[]
 
-parse TwoParser: accum_bt::two(AccumBt)[ stdin ]
-Two: accum_bt::two = TwoParser.tree
+parse Two: accum_bt::two(AccumBt)[ stdin ]
 
 send AccumBt.OneParser ['\n']
 

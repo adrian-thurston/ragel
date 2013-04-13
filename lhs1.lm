@@ -31,7 +31,7 @@ def start
 |	[B item* ';\n']
 
 parse Start: start[ stdin ]
-print( Start.tree "\n" )
+print( Start "\n" )
 ##### IN #####
 a b c ( d1 d2 ) e f g ;
 ##### EXP #####

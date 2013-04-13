@@ -41,7 +41,7 @@ def start
 	[message*]
 
 parse S: start[ stdin ]
-print_xml( S.tree )
+print_xml( S )
 print( '\n' )
 ##### IN #####
 From thurston  Tue Jan  2 21:16:50 2007

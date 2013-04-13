@@ -288,7 +288,7 @@ context tags
 #				parse CloseId: close_id[ TagId.data ]
 #
 #				CloseTag: opt_close_tag = 
-#					construct opt_close_tag ['</' CloseId.tree '>']
+#					construct opt_close_tag ['</' CloseId '>']
 #
 #				# Close the tag and put inside after it.
 #				TL = construct item
@@ -302,7 +302,7 @@ cons Tags: tags[]
 Tags.TagStack = construct tags::tag_stack []
 
 parse HTML_P: tags::start(Tags)[ stdin ]
-HTML: tags::start = HTML_P.tree
+HTML: tags::start = HTML_P
 flatten( HTML )
 print_xml( HTML )
 printLinks( HTML )

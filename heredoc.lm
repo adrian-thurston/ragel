@@ -46,7 +46,7 @@ end # heredoc
 cons HereDoc: heredoc[]
 
 parse S: heredoc::start(HereDoc)[stdin]
-print_xml(S.tree)
+print_xml(S)
 print( '\n' )
 ##### IN #####
 hello

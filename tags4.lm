@@ -324,8 +324,8 @@ end # tags
 
 cons Tags: tags[]
 Tags.TagStack = construct tags::tag_stack []
-HTML: parser<tags::start> = parse tags::start(Tags)[ stdin ]
-print( HTML.tree )
+parse HTML: tags::start(Tags)[ stdin ]
+print( HTML )
 
 #print_xml( HTML )
 #for C: close_tag in HTML 

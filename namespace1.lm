@@ -11,7 +11,7 @@ namespace n1
 end
 
 parse P: n1::start[stdin]
-print( P.tree '\n' )
+print( P '\n' )
 ##### IN #####
 a
   b

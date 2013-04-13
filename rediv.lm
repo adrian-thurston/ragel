@@ -82,8 +82,7 @@ def start
 	[statement*]
 
 
-parse SP: start[ stdin ]
-S: start = SP.tree
+parse S: start[ stdin ]
 
 for I:orlit_item in S {
 	if match I [orlit_chr] {

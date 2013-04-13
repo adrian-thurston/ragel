@@ -13,11 +13,10 @@ def start
 	[item*]
 
 parse Input: start[ stdin ]
-InputTree: start = Input.tree
 
 cons Output: accum<start> []
 
-for Id: id in InputTree {
+for Id: id in Input {
 	send Output
 		"( [^Id] )
 }

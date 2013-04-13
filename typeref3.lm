@@ -13,7 +13,7 @@ namespace n1
 end
 
 parse P: n1::n2::id?[stdin]
-print( P.tree '\n' )
+print( P '\n' )
 ##### IN #####
 
 ##### EXP #####

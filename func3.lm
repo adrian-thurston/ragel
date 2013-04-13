@@ -22,8 +22,7 @@ int func( P: program )
 
 int main()
 {
-    parse PP: program[ stdin ]
-	P: program = PP.tree
+    parse P: program[ stdin ]
 	func( P )
 }
 

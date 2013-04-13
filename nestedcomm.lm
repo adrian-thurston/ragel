@@ -14,8 +14,8 @@ lex
 	token open_paren /'('/ 
 	{
 		parse_stop NC: nested_comment[ stdin ]
-		print( %NC.tree '\n' )
-		input.push_ignore( NC.tree )
+		print( %NC '\n' )
+		input.push_ignore( NC )
 	}
 end
 
@@ -37,8 +37,7 @@ def nested_comment
 
 def nested [id*]
 
-parse NP: nested[ stdin ]
-P: nested = NP.tree
+parse P: nested[ stdin ]
 
 print( ^P '\n' )
 print_xml( ^P )

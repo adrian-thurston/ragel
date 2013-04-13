@@ -8,7 +8,7 @@ def start
 	[id*]
 
 parse P: start[stdin]
-Start: start = P.tree
+Start: start = P
 for Id: id in triter(Start)
 	print( Id '\n' )
 ##### IN #####

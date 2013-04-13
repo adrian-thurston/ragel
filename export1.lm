@@ -11,6 +11,6 @@ export Start: start
 export Error: str
 
 parse P: start[ stdin ]
-Error = P.error
+Error = error
 ##### IN #####
 ##### EXP #####

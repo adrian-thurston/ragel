@@ -60,7 +60,7 @@ end # si
 
 cons SuperId: si[]
 parse S: si::start(SuperId)[stdin]
-print_xml( S.tree )
+print_xml( S )
 print( '\n' )
 ##### IN #####
 !a b b a;

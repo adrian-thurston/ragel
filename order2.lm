@@ -88,7 +88,7 @@ parse P: program[ stdin ]
 Output: output Output = construct output []
 
 # Take off the leading C from the input file and send it out.
-match P.tree [C: c '%%' protocol*]
+match P [C: c '%%' protocol*]
 
 Output << [$C]
 Output <<

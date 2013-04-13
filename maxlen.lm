@@ -49,7 +49,7 @@ cons MaxLen: maxlen[]
 MaxLen.allow = 3
 
 parse S: maxlen::start(MaxLen)[stdin]
-print_xml( S.tree )
+print_xml( S )
 print('\n')
 ##### IN #####
 a b c d e f g

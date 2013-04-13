@@ -30,10 +30,10 @@ context rubyhere
 				parse_stop HereData: here_data(ctx)[ input ]
 
 				# Push the rest-of-line data back to the input stream.
-				input.push( $ROL.tree )
+				input.push( $ROL )
 
 				# Send the here_id token. Attach the heredoc data as an attribute.
-				input.push( make_token( typeid<here_id> HereId HereData.tree ) )
+				input.push( make_token( typeid<here_id> HereId HereData ) )
 			}
 	end
 
@@ -90,8 +90,7 @@ end # rubyhere
 
 cons RubyHere: rubyhere[]
 
-parse SP: rubyhere::start(RubyHere)[ stdin ]
-S: rubyhere::start = SP.tree
+parse S: rubyhere::start(RubyHere)[ stdin ]
 
 print_xml(S)
 print('\n')
