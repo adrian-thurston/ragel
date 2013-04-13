@@ -37,8 +37,8 @@ def btscan
 
 parse P: btscan[ stdin ]
 
-match P.tree ~!abb !abba !aab
-print_xml(P.tree)
+match P ~!abb !abba !aab
+print_xml(P)
 print( '\n' )
 ##### IN #####
 !abb !abba !aab

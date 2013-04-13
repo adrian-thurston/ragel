@@ -23,7 +23,7 @@ def item
 
 parse PersonTag: tag[ stdin ]
 
-match PersonTag.tree
+match PersonTag
 	["<person name=" Val:id attr*">" item* "</person>"]
 
 NameTag1: tag = construct tag 

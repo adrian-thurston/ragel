@@ -738,11 +738,11 @@ Generate.newline_sent = 0
 parse S: generate::start(Generate)[ stdin ]
 
 print( '*** SUCCESS ***\n' )
-print( ^S.tree '\n' )
+print( ^S '\n' )
 print( '***\n' )
-print_stmts( S.tree )
-print_target_subscriptions_and_slicings( S.tree )
-print_primary_subscriptions_and_slicings( S.tree )
+print_stmts( S )
+print_target_subscriptions_and_slicings( S )
+print_primary_subscriptions_and_slicings( S )
 print( '*** SUCCESS ***\n' )
 ##### IN #####
 

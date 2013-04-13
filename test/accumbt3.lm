@@ -15,7 +15,7 @@ lex
 	token open_paren /'('/ 
 	{
 		parse_stop NC: nested_comment[ input ]
-		print( 'discarding: ' NC.tree '\n' )
+		print( 'discarding: ' NC '\n' )
 	}
 end
 
@@ -82,8 +82,7 @@ end # accum_bt
 cons AccumBt: accum_bt[]
 AccumBt.NestedParser = cons parser<nested>[]
 
-parse TwoParser: accum_bt::two(AccumBt)[ stdin ]
-Two: accum_bt::two = TwoParser.tree
+parse Two: accum_bt::two(AccumBt)[ stdin ]
 
 Nested: nested = AccumBt.NestedParser.finish()
 

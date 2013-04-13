@@ -2185,10 +2185,9 @@ Lookup.qualNs.push( nil )
 Lookup.templDecl.push( 0 )
 Lookup.declarationData.push( construct lookup::declaration_data( 0 0 0 ) [] )
 
-parse SP: lookup::start( Lookup )[ stdin ]
-S: lookup::start = SP.tree
+parse S: lookup::start( Lookup )[ stdin ]
 if ! S {
-	print( SP.error )
+	print( error )
 	exit( 1 )
 }
 

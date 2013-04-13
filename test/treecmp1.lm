@@ -13,8 +13,7 @@ def four_ids
 
 B: id = construct id "b"
 
-parse InputP: four_ids[ stdin ]
-Input: four_ids = InputP.tree
+parse Input: four_ids[ stdin ]
 
 for Id: id in Input {
 	if ( Id == B )

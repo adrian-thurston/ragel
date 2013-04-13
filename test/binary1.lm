@@ -489,7 +489,7 @@ cons Binary: binary[]
 Binary.CL = cons list<int> []
 
 parse S: binary::start(Binary) [ stdin ]
-print_all_names( S.tree )
+print_all_names( S )
 print( '*** SUCCESS ***\n' )
 ##### EXP #####
 www.google.ca.

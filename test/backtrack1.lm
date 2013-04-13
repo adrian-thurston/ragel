@@ -19,8 +19,7 @@ def E
 def start 
 	[E]
 
-parse SP: start[ stdin ]
-S: start = SP.tree
+parse S: start[ stdin ]
 R: start = match S ~ 9 + 9
 print_xml( R )
 print( '\n' )

@@ -93,7 +93,7 @@ token item
 	{
 		M: str = input.pull(match_length)
 		parse_stop S: sub[input]
-		input.push( make_token( typeid<item> M S.tree ) )
+		input.push( make_token( typeid<item> M S ) )
 	}
 
 def stuff
@@ -101,7 +101,7 @@ def stuff
 |	[sub]
 
 parse S: stuff[ stdin ]
-print_xml( S.tree )
+print_xml( S )
 print( '\n' )
 ##### IN #####
 1 2 3 * !

@@ -43,12 +43,11 @@ end # lang
 
 parse Input: lang::start[ stdin ]
 
-if ! Input.tree 
-	print( Input.error '\n' )
+if ! Input 
+	print( error '\n' )
 else {
 	#print( Input.tree '\n' )
-	S: lang::start = Input.tree
-	for H: lang::statement in S {
+	for H: lang::statement in Input {
 		require H [ lang::'#' hash::hash ]
 		print( '--' %H '==\n' )
 	}

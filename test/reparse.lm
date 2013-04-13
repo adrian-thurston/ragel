@@ -14,11 +14,11 @@ def start
 
 parse Input: item*[ stdin ]
 
-S: start = cons start[ Input.tree ]
+S: start = cons start[ Input ]
 
-parse Again: start[ %Input.tree ]
+parse Again: start[ %Input ]
 
-print( %Again.tree )
+print( %Again )
 
 ##### IN #####
 a b c ( chocolate fudge ) d e

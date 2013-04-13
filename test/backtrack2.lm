@@ -21,7 +21,7 @@ def start
 	[prods]
 
 parse S: start[ stdin ]
-print_xml( match S.tree "!aa bb cc dd" )
+print_xml( match S "!aa bb cc dd" )
 print( '\n' )
 ##### IN #####
 !aa bb cc dd

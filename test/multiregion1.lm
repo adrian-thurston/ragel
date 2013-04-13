@@ -48,8 +48,7 @@ def file_diff
 def start 
 	[file_diff*]
 
-parse SP: start[ stdin ]
-S: start = SP.tree
+parse S: start[ stdin ]
 
 for OF: old_file in S {
 	# Get the first word and check if it is 

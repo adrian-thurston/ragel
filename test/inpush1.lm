@@ -53,9 +53,9 @@ namespace lang
 
 		token hash /'#'/ {
 			parse_stop H: hash::hash[ input ]
-			if ( H.tree ) {
-				if ( H.tree.Inc ) {
-					FN: str = unquote( H.tree.Inc )
+			if ( H ) {
+				if ( H.Inc ) {
+					FN: str = unquote( H.Inc )
 					print( 'opening ' FN '\n' )
 					IS: stream = open( FN 'r' )
 					if ( ! IS ) {
@@ -67,11 +67,11 @@ namespace lang
 			}
 			else {
 				parse_stop L: rest_of_line[ input ]
-				if ! L.tree {
-					print( "ERROR: stuck: " L.error )
+				if ! L {
+					print( "ERROR: stuck: " error )
 					exit(1)
 				}
-				print( "ERROR: failed to parse # directive: " L.tree )
+				print( "ERROR: failed to parse # directive: " L )
 			}
 		}
 	end
@@ -90,12 +90,10 @@ end # lang
 
 parse Input: lang::start[ stdin ]
 
-if ! Input.tree 
-	print( Input.error '\n' )
+if ! Input
+	print( error '\n' )
 else {
-	#print( Input.tree '\n' )
-	S: lang::start = Input.tree
-	print( Input.tree '\n' )
+	print( Input '\n' )
 }
 ##### IN #####
 

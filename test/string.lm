@@ -50,7 +50,7 @@ def start
 	}
 
 parse S: start[stdin]
-print_xml( S.tree )
+print_xml( S )
 print( '\n' )
 ##### IN #####
 a + "%{{"; 1 * 2;
