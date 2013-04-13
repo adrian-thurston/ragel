@@ -87,7 +87,6 @@ typedef struct _RunBuf
 RunBuf *newRunBuf();
 
 typedef struct _StreamImpl StreamImpl;
-typedef struct ColmLocation Location;
 
 struct StreamFuncs
 {
@@ -95,7 +94,7 @@ struct StreamFuncs
 
 	int (*getData)( StreamImpl *ss, char *dest, int length );
 
-	int (*consumeData)( StreamImpl *ss, int length, Location *loc );
+	int (*consumeData)( StreamImpl *ss, int length, struct ColmLocation *loc );
 	int (*undoConsumeData)( StreamImpl *ss, const char *data, int length );
 
 	struct ColmTree *(*consumeTree)( StreamImpl *ss );
