@@ -305,8 +305,7 @@ void LoadColm::consParseStmt( StmtList *stmtList )
 void LoadColm::consExportTree( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
-	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
-	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("tree") );
+	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("P") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
 
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
@@ -319,7 +318,6 @@ void LoadColm::consExportTree( StmtList *stmtList )
 void LoadColm::consExportError( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
-	qual->append( QualItem( internal, String( "P" ), QualItem::Dot ) );
 	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("error") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
 

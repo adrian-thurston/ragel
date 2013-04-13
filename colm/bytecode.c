@@ -2161,6 +2161,26 @@ again:
 			break;
 		}
 
+		case IN_SET_ERROR: {
+			debug( prg, REALM_BYTECODE, "IN_SET_ERROR\n" );
+
+			Tree *error = vm_pop();
+			treeDownref( prg, sp, prg->error );
+			prg->error = error;
+			break;
+		}
+
+		case IN_GET_ERROR: {
+			debug( prg, REALM_BYTECODE, "IN_GET_ERROR\n" );
+
+			Tree *obj = vm_pop();
+			treeDownref( prg, sp, obj );
+
+			treeUpref( (Tree*)prg->error );
+			vm_push( (Tree*)prg->error );
+			break;
+		}
+
 		case IN_PARSE_SAVE_STEPS: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
 

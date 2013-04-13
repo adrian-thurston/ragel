@@ -2601,7 +2601,7 @@ struct LangTerm
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;
-	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool stop, bool orig ) const;
+	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const;
 	UniqueType *evaluateSend( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateMatch( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;
@@ -2621,7 +2621,6 @@ struct LangTerm
 	Pattern *pattern;
 	FieldInitVect *fieldInitArgs;
 	GenericType *generic;
-	TypeRef *parserTypeRef;
 	Constructor *constructor;
 	ParserText *parserText;
 	LangExpr *expr;

@@ -1339,7 +1339,7 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 	}
 }
 
-UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bool orig ) const
+UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const
 {
 	UniqueType *ut = typeRef->uniqueType->langEl->generic->utArg;
 
@@ -1500,26 +1500,32 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop, bo
 
 	code.append( IN_POP );
 
+	/* Parser is on the top of the stack. */
+
+	/* Pull out the error and save it off. */
+	code.append( IN_DUP_TOP );
+	code.append( IN_GET_PARSER_MEM_R );
+	code.appendHalf( 1 );
+	code.append( IN_SET_ERROR );
+
+	/* Replace the parser with the parsed tree. */
+	code.append( IN_GET_PARSER_MEM_R );
+	code.appendHalf( 0 );
+
 	/*
 	 * Capture to the local var.
 	 */
 	if ( varRef != 0 ) {
 		code.append( IN_DUP_TOP );
 
-		if ( orig ) {
-			code.append( IN_GET_PARSER_MEM_R );
-			code.appendHalf( 0 );
-		}
-
 		/* Get the type of the variable being assigned to. */
 		VarRefLookup lookup = varRef->lookupField( pd );
 
 		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-		varRef->setField( pd, code, lookup.inObject, replUT, false );
+		varRef->setField( pd, code, lookup.inObject, ut, false );
 	}
 
-
-	return replUT;
+	return ut;
 }
 
 
@@ -1672,9 +1678,9 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 		case MatchType:
 			return evaluateMatch( pd, code );
 		case ParseType:
-			return evaluateParse( pd, code, false, false );
+			return evaluateParse( pd, code, false );
 		case ParseStopType:
-			return evaluateParse( pd, code, true, false );
+			return evaluateParse( pd, code, true );
 		case ConstructType:
 			return evaluateConstruct( pd, code );
 		case SendType:
@@ -3296,6 +3302,23 @@ void Compiler::addArgv()
 	globalObjectDef->insertField( el->name, el );
 }
 
+void Compiler::addError()
+{
+	/* Make the type ref. */
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
+
+	/* Create the field and insert it into the map. */
+	ObjectField *el = ObjectField::cons( internal, typeRef, "error" );
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+	el->isConst = true;
+	el->useOffset = false;
+	el->inGetR     = IN_GET_ERROR;
+	el->inGetWC    = IN_GET_ERROR;
+	el->inGetWV    = IN_GET_ERROR;
+	globalObjectDef->insertField( el->name, el );
+}
+
 int Compiler::argvOffset()
 {
 	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
@@ -3332,6 +3355,7 @@ void Compiler::initGlobalFunctions()
 	addStdout();
 	addStderr();
 	addArgv();
+	addError();
 }
 
 void Compiler::removeNonUnparsableRepls()

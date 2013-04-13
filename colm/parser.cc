@@ -575,7 +575,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 		}
 
 		/* Insert it into the field map. */
-		objField->typeRef = parserTypeRef;
+		objField->typeRef = typeRef;
 		pd->curLocalFrame->insertField( objField->name, objField );
 	}
 

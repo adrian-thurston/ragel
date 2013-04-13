@@ -768,6 +768,7 @@ struct Compiler
 	void addStdout();
 	void addStderr();
 	void addArgv();
+	void addError();
 	int argvOffset();
 	void initGlobalFunctions();
 	void makeDefaultIterators();

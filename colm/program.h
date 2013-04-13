@@ -128,6 +128,8 @@ typedef struct ColmProgram
 	Stream *stdoutVal;
 	Stream *stderrVal;
 
+	Tree *error;
+
 	RunBuf *allocRunBuf;
 
 	/* Current stack block limits. Changed when crossing block boundaries. */
