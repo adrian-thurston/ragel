@@ -40,10 +40,10 @@ AccumBt.OneParser = cons parser<accum_bt::one>[]
 
 parse Two: accum_bt::two(AccumBt)[ stdin ]
 
-send AccumBt.OneParser ['\n']
+send AccumBt.OneParser ['\n'] eos
 
 print( Two )
-print( ^( AccumBt.OneParser.finish() ) '\n' )
+print( ^( AccumBt.OneParser.tree ) '\n' )
 ##### IN #####
 a b c d e ;
 ##### EXP #####
