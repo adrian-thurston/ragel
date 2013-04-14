@@ -314,7 +314,6 @@ struct LoadColm
 		}
 	}
 
-
 	void walkTokenDef( token_def TokenDef )
 	{
 		String name = TokenDef.Id().text().c_str();
@@ -1449,7 +1448,8 @@ struct LoadColm
 		else if ( codeFactor.Send() != 0 ) {
 			LangVarRef *varRef = walkVarRef( codeFactor.ToVarRef() );
 			ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
-			expr = send( codeFactor.Send().loc(), varRef, list );
+			bool eof = walkOptEos( codeFactor.OptEos() );
+			expr = send( codeFactor.Send().loc(), varRef, list, eof );
 		}
 		else if ( codeFactor.Nil() != 0 ) {
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.Nil().loc(),
@@ -1843,6 +1843,11 @@ struct LoadColm
 	bool walkOptNoIgnore( opt_no_ignore OptNoIngore )
 	{
 		return OptNoIngore.Ni() != 0;
+	}
+
+	bool walkOptEos( opt_eos OptEos )
+	{
+		return OptEos.Eos() != 0;
 	}
 
 	void walkLiteralItem( literal_item literalItem )

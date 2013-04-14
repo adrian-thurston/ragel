@@ -2596,6 +2596,17 @@ struct LangTerm
 		return s;
 	}
 	
+	static LangTerm *consSend( const InputLoc &loc, LangVarRef *varRef, ParserText *parserText, bool eof ) 
+	{
+		LangTerm *s = new LangTerm;
+		s->loc = loc;
+		s->type = SendType;
+		s->varRef = varRef;
+		s->parserText = parserText;
+		s->eof = eof;
+		return s;
+	}
+	
 	void resolve( Compiler *pd );
 
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
@@ -2625,6 +2636,7 @@ struct LangTerm
 	ParserText *parserText;
 	LangExpr *expr;
 	ConsItemList *consItemList;
+	bool eof;
 };
 
 struct LangExpr

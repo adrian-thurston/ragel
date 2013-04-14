@@ -41,6 +41,7 @@ lex
 	token NEW / 'new' /
 	token PREEOF / 'preeof' /
 	token GLOBAL / 'global' /
+	token EOS / 'eos' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -445,6 +446,11 @@ def code_unary
 |	[Percent: PERCENT Factor: code_factor]
 |	[Factor: code_factor]
 
+def opt_eos
+	[Eos: DOT]
+|	[Eos: EOS]
+|	[]
+
 def code_factor
 	[Number: number]
 |	[Lit: lit]
@@ -454,7 +460,7 @@ def code_factor
 |	[True: TRUE]
 |	[False: FALSE]
 |	[POPEN ParenCodeExpr: code_expr PCLOSE]
-|	[Send: SEND ToVarRef: var_ref Accumulate: accumulate]
+|	[Send: SEND ToVarRef: var_ref Accumulate: accumulate OptEos: opt_eos]
 |	[ToVarRef: var_ref Send: LTLT Accumulate: accumulate]
 |	[Parse: PARSE OptCapture: opt_capture TypeRef: type_ref
 		OptFieldInit: opt_field_init Accumulate: accumulate]
@@ -640,12 +646,12 @@ def lex_expr
 |	[Expr: lex_expr DashDash: LEX_DASHDASH Term: lex_term]
 |	[Term: lex_term]
 
-def opt_dot
+def opt_lex_dot
 	[LEX_DOT]
 |	[]
 
 def lex_term
-	[Term: lex_term OptDot: opt_dot FactorRep: lex_factor_rep]
+	[Term: lex_term OptDot: opt_lex_dot FactorRep: lex_factor_rep]
 |	[Term: lex_term ColonGt: LEX_COLON_GT FactorRep: lex_factor_rep]
 |	[Term: lex_term ColonGtGt: LEX_COLON_GTGT FactorRep: lex_factor_rep]
 |	[Term: lex_term LtColon: LEX_LT_COLON FactorRep: lex_factor_rep]

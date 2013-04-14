@@ -1586,6 +1586,22 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 		parseFrag( pd, code, 0 );
 	}
 
+	if ( eof ) { 
+		code.append( IN_PARSE_SAVE_STEPS );
+		if ( pd->revertOn ) {
+			code.append( IN_PARSE_FINISH_WV );
+			code.appendHalf( 0 );
+			code.append( IN_PCR_CALL );
+			code.append( IN_PARSE_FINISH_EXIT_WV );
+		}
+		else {
+			code.append( IN_PARSE_FINISH_WC );
+			code.appendHalf( 0 );
+			code.append( IN_PCR_CALL );
+			code.append( IN_PARSE_FINISH_EXIT_WC );
+		}
+	}
+
 	return varUt;
 }
 

@@ -526,14 +526,14 @@ LexJoin *BaseParser::lexOptJoin( LexJoin *join, LexJoin *context )
 	return join;
 }
 
-LangExpr *BaseParser::send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list )
+LangExpr *BaseParser::send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof )
 {
 	Namespace *nspace = namespaceStack.top();
 	ParserText *parserText = ParserText::cons( loc, nspace, list );
 	pd->parserTextList.append( parserText );
 
-	return LangExpr::cons( LangTerm::cons( InputLoc(),
-			LangTerm::SendType, varRef, parserText ) );
+	return LangExpr::cons( LangTerm::consSend( loc, varRef,
+			parserText, eof ) );
 }
 
 LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *objField,
