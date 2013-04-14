@@ -56,7 +56,7 @@ syntax keyword Type
 	\ commit include literal iter
 	\ namespace lex reducefirst global include export
 	\ construct cons parse parse_stop match require send
-	\ preeof left right nonassoc prec accum context alias
+	\ preeof left right nonassoc prec context alias
 	\ end
 
 syntax keyword typeKeywords
