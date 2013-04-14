@@ -34,11 +34,11 @@ struct prod_el_list;
 struct prod_list;
 struct item;
 
-struct LoadColm
+struct LoadInit
 :
 	public BaseParser
 {
-	LoadColm( Compiler *pd, const char *inputFileName )
+	LoadInit( Compiler *pd, const char *inputFileName )
 	:
 		BaseParser(pd),
 		inputFileName(inputFileName)

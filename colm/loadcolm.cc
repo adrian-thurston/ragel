@@ -29,8 +29,8 @@
 #include "parser.h"
 #include "global.h"
 #include "input.h"
-#include "load.h"
-#include "exports2.h"
+#include "loadcolm.h"
+#include "if2.h"
 #include "colm/colm.h"
 
 extern RuntimeData main_runtimeData;
@@ -80,11 +80,11 @@ String unescape( const String &s )
 }
 
 
-struct LoadSource
+struct LoadColm
 :
 	public BaseParser
 {
-	LoadSource( Compiler *pd, const char *inputFileName )
+	LoadColm( Compiler *pd, const char *inputFileName )
 	:
 		BaseParser( pd ),
 		inputFileName( inputFileName )
@@ -1885,9 +1885,9 @@ struct LoadSource
 	virtual void go( long activeRealm );
 };
 
-void LoadSource::go( long activeRealm )
+void LoadColm::go( long activeRealm )
 {
-	LoadSource::init();
+	LoadColm::init();
 
 	const char *argv[2];
 	argv[0] = inputFileName;
@@ -1913,7 +1913,7 @@ void LoadSource::go( long activeRealm )
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }
 
-BaseParser *consLoadSource( Compiler *pd, const char *inputFileName )
+BaseParser *consLoadColm( Compiler *pd, const char *inputFileName )
 {
-	return new LoadSource( pd, inputFileName );
+	return new LoadColm( pd, inputFileName );
 }

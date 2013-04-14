@@ -65,19 +65,19 @@ bootstrap0_CXXFLAGS = $(common_CFLAGS) -DCONS_INIT
 bootstrap0_SOURCES = consinit.cc consinit.h main.cc
 bootstrap0_LDADD = libprog.a libcolmd.a
 
-bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
+bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_INIT
 bootstrap1_CFLAGS = $(common_CFLAGS)
 bootstrap1_SOURCES = \
-	conscolm.h conscolm.cc \
-	exports1.h exports1.cc parse1.c \
+	loadinit.h loadinit.cc \
+	if1.h if1.cc parse1.c \
 	main.cc
 bootstrap1_LDADD = libprog.a libcolmd.a
 
-colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_SRC
+colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 colm_CFLAGS = $(common_CFLAGS)
 colm_SOURCES = \
-	load.h load.cc \
-	exports2.h exports2.cc parse2.c \
+	loadcolm.h loadcolm.cc \
+	if2.h if2.cc parse2.c \
 	main.cc
 colm_LDADD = libprog.a libcolmd.a
 
@@ -86,20 +86,20 @@ colmincdir = $(includedir)/colm
 colminc_HEADERS = $(RUNTIME_HDR)
 
 parse1.c: bootstrap0
-	$(builddir)/bootstrap0 -L -o parse1.c -e exports1.h -c exports1.cc
-exports1.h: parse1.c
-exports1.cc: parse1.c
+	$(builddir)/bootstrap0 -L -o parse1.c -e if1.h -c if1.cc
+if1.h: parse1.c
+if1.cc: parse1.c
 
 parse2.c: bootstrap1 colm.lm
-	$(builddir)/bootstrap1 -L -o parse2.c -e exports2.h -c exports2.cc colm.lm
-exports2.h: parse2.c
-exports2.cc: parse2.c
+	$(builddir)/bootstrap1 -L -o parse2.c -e if2.h -c if2.cc colm.lm
+if2.h: parse2.c
+if2.cc: parse2.c
 
-bootstrap1-exports1.$(OBJEXT): exports1.h exports1.cc parse1.c
-bootstrap1-conscolm.$(OBJEXT): exports1.h exports1.cc parse1.c
+bootstrap1-if1.$(OBJEXT): if1.h if1.cc parse1.c
+bootstrap1-loadinit.$(OBJEXT): if1.h if1.cc parse1.c
 
-colm-exports2.$(OBJEXT): exports2.h exports2.cc parse2.c
-colm-load.$(OBJEXT): exports2.h exports2.cc parse2.c
+colm-if2.$(OBJEXT): if2.h if2.cc parse2.c
+colm-loadcolm.$(OBJEXT): if2.h if2.cc parse2.c
 
 BUILT_SOURCES = version.h 
 

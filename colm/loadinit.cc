@@ -30,15 +30,15 @@
 #include "parser.h"
 #include "global.h"
 #include "input.h"
-#include "conscolm.h"
-#include "exports1.h"
+#include "loadinit.h"
+#include "if1.h"
 #include "colm/colm.h"
 
 using std::string;
 
 extern RuntimeData main_runtimeData;
 
-void LoadColm::walkProdElList( ProdElList *list, prod_el_list &prodElList )
+void LoadInit::walkProdElList( ProdElList *list, prod_el_list &prodElList )
 {
 	if ( prodElList.ProdElList() != 0 ) {
 		prod_el_list RightProdElList = prodElList.ProdElList();
@@ -67,7 +67,7 @@ void LoadColm::walkProdElList( ProdElList *list, prod_el_list &prodElList )
 	}
 }
 
-void LoadColm::walkProdList( LelDefList *outProdList, prod_list &prodList )
+void LoadInit::walkProdList( LelDefList *outProdList, prod_list &prodList )
 {
 	if ( prodList.ProdList() != 0 ) {
 		prod_list RightProdList = prodList.ProdList();
@@ -84,7 +84,7 @@ void LoadColm::walkProdList( LelDefList *outProdList, prod_list &prodList )
 	prodAppend( outProdList, prod );
 }
 
-LexFactor *LoadColm::walkLexFactor( lex_factor &lexFactor )
+LexFactor *LoadInit::walkLexFactor( lex_factor &lexFactor )
 {
 	LexFactor *factor = 0;
 	if ( lexFactor.Literal() != 0 ) {
@@ -115,7 +115,7 @@ LexFactor *LoadColm::walkLexFactor( lex_factor &lexFactor )
 	return factor;
 }
 
-LexFactorNeg *LoadColm::walkLexFactorNeg( lex_factor_neg &lexFactorNeg )
+LexFactorNeg *LoadInit::walkLexFactorNeg( lex_factor_neg &lexFactorNeg )
 {
 	if ( lexFactorNeg.FactorNeg() != 0 ) {
 		lex_factor_neg Rec = lexFactorNeg.FactorNeg();
@@ -131,7 +131,7 @@ LexFactorNeg *LoadColm::walkLexFactorNeg( lex_factor_neg &lexFactorNeg )
 	}
 }
 
-LexFactorRep *LoadColm::walkLexFactorRep( lex_factor_rep &lexFactorRep )
+LexFactorRep *LoadInit::walkLexFactorRep( lex_factor_rep &lexFactorRep )
 {
 	LexFactorRep *factorRep = 0;
 	if ( lexFactorRep.Star() != 0 ) {
@@ -152,13 +152,13 @@ LexFactorRep *LoadColm::walkLexFactorRep( lex_factor_rep &lexFactorRep )
 	return factorRep;
 }
 
-LexFactorAug *LoadColm::walkLexFactorAug( lex_factor_rep &lexFactorRep )
+LexFactorAug *LoadInit::walkLexFactorAug( lex_factor_rep &lexFactorRep )
 {
 	LexFactorRep *factorRep = walkLexFactorRep( lexFactorRep );
 	return LexFactorAug::cons( factorRep );
 }
 
-LexTerm *LoadColm::walkLexTerm( lex_term &lexTerm )
+LexTerm *LoadInit::walkLexTerm( lex_term &lexTerm )
 {
 	if ( lexTerm.Term() != 0 ) {
 		lex_term Rec = lexTerm.Term();
@@ -177,7 +177,7 @@ LexTerm *LoadColm::walkLexTerm( lex_term &lexTerm )
 	}
 }
 
-LexExpression *LoadColm::walkLexExpr( lex_expr &LexExprTree )
+LexExpression *LoadInit::walkLexExpr( lex_expr &LexExprTree )
 {
 	if ( LexExprTree.Expr() != 0 ) {
 		lex_expr Rec = LexExprTree.Expr();
@@ -202,7 +202,7 @@ bool walkNoIgnore( opt_ni OptNi )
 	return OptNi.Ni() != 0;
 }
 
-void LoadColm::walkTokenList( token_list &tokenList )
+void LoadInit::walkTokenList( token_list &tokenList )
 {
 	if ( tokenList.TokenList() != 0 ) {
 		token_list RightTokenList = tokenList.TokenList();
@@ -238,7 +238,7 @@ void LoadColm::walkTokenList( token_list &tokenList )
 	}
 }
 
-void LoadColm::walkLexRegion( item &LexRegion )
+void LoadInit::walkLexRegion( item &LexRegion )
 {
 	pushRegionSet( internal );
 
@@ -248,7 +248,7 @@ void LoadColm::walkLexRegion( item &LexRegion )
 	popRegionSet();
 }
 
-void LoadColm::walkDefinition( item &define )
+void LoadInit::walkDefinition( item &define )
 {
 	prod_list ProdList = define.ProdList();
 
@@ -261,7 +261,7 @@ void LoadColm::walkDefinition( item &define )
 	cflDef( ntDef, objectDef, defList );
 }
 
-void LoadColm::consParseStmt( StmtList *stmtList )
+void LoadInit::consParseStmt( StmtList *stmtList )
 {
 	/* Parse the "start" def. */
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
@@ -302,7 +302,7 @@ void LoadColm::consParseStmt( StmtList *stmtList )
 	stmtList->append( parseStmt );
 }
 
-void LoadColm::consExportTree( StmtList *stmtList )
+void LoadInit::consExportTree( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
 	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("P") );
@@ -315,7 +315,7 @@ void LoadColm::consExportTree( StmtList *stmtList )
 	stmtList->append( programExport );
 }
 
-void LoadColm::consExportError( StmtList *stmtList )
+void LoadInit::consExportError( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
 	LangVarRef *varRef = LangVarRef::cons( internal, qual, String("error") );
@@ -328,9 +328,9 @@ void LoadColm::consExportError( StmtList *stmtList )
 	stmtList->append( programExport );
 }
 
-void LoadColm::go( long activeRealm )
+void LoadInit::go( long activeRealm )
 {
-	LoadColm::init();
+	LoadInit::init();
 
 	StmtList *stmtList = new StmtList;
 

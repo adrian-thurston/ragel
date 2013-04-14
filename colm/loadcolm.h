@@ -21,4 +21,4 @@
 
 #include "parser.h"
 
-BaseParser *consLoadSource( Compiler *pd, const char *inputFileName );
+BaseParser *consLoadColm( Compiler *pd, const char *inputFileName );

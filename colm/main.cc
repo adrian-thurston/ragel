@@ -44,10 +44,10 @@
 
 #if defined(CONS_INIT)
 #include "consinit.h"
-#elif defined(LOAD_COLM)
-#include "conscolm.h"
+#elif defined(LOAD_INIT)
+#include "loadinit.h"
 #else
-#include "load.h"
+#include "loadcolm.h"
 #endif
 
 using std::istream;
@@ -582,10 +582,10 @@ int main(int argc, const char **argv)
 
 #if defined(CONS_INIT)
 	BaseParser *parser = new ConsInit( pd );
-#elif defined(LOAD_COLM)
-	BaseParser *parser = new LoadColm( pd, inputFileName );
+#elif defined(LOAD_INIT)
+	BaseParser *parser = new LoadInit( pd, inputFileName );
 #else
-	BaseParser *parser = consLoadSource( pd, inputFileName );
+	BaseParser *parser = consLoadColm( pd, inputFileName );
 #endif
 
 	parser->go( gblActiveRealm );
