@@ -88,12 +88,13 @@ Output: output Output = construct output []
 # Take off the leading C from the input file and send it out.
 match P [C: c '%%' protocol*]
 
-Output << [$C]
-Output <<
+send Output [$C]
+send Output
 	"#include <assert.h>
 	"
+	eos
 
-print( Output.finish() )
+print( Output.tree )
 ##### IN #####
 #include "some_header.h"
 
