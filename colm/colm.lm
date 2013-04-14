@@ -104,7 +104,6 @@ lex
 	token PERCENT /'%'/
 	token PLUS /'+'/
 	token MINUS /'-'/
-	token LTLT /'<<'/
 	token AMPAMP /'&&'/
 	token BARBAR /'||'/
 
@@ -461,7 +460,6 @@ def code_factor
 |	[False: FALSE]
 |	[POPEN ParenCodeExpr: code_expr PCLOSE]
 |	[Send: SEND ToVarRef: var_ref Accumulate: accumulate OptEos: opt_eos]
-|	[ToVarRef: var_ref Send: LTLT Accumulate: accumulate]
 |	[Parse: PARSE OptCapture: opt_capture TypeRef: type_ref
 		OptFieldInit: opt_field_init Accumulate: accumulate]
 |	[ParseStop: PARSE_STOP OptCapture: opt_capture TypeRef: type_ref

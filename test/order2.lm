@@ -75,7 +75,7 @@ def protocol
 def program
 	[c '%%' protocol*]
 
-alias output accum<c>
+alias output parser<c>
 
 def port 
 	Port: int 
@@ -90,11 +90,12 @@ Output: output Output = construct output []
 # Take off the leading C from the input file and send it out.
 match P [C: c '%%' protocol*]
 
-Output << [$C]
-Output <<
+send Output [
+	$C
 	"#include <assert.h>
 	"
-print( Output.finish() )
+	] eos
+print( Output.tree )
 ##### IN #####
 #include "some_header.h"
 
