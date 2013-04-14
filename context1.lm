@@ -27,9 +27,14 @@ context ctx
 		[item*]
 end # ctx
 
-CTX: ctx = cons ctx[]
+CTX: ctx = cons CTX: ctx[]
+
+send
+
 parse Input: ctx::start( CTX ) [ stdin ]
 print( Input '\n' )
+
+
 ##### IN #####
 a b c ( d e f )
 ##### EXP #####

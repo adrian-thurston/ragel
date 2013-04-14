@@ -84,7 +84,8 @@ AccumBt.NestedParser = cons parser<nested>[]
 
 parse Two: accum_bt::two(AccumBt)[ stdin ]
 
-Nested: nested = AccumBt.NestedParser.finish()
+send AccumBt.NestedParser [] eos
+Nested: nested = AccumBt.NestedParser.tree
 
 print( '\n------------\n' )
 print( ^Nested '\n' )
