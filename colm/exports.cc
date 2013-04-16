@@ -161,6 +161,22 @@ void Compiler::generateExports()
 		}
 	}
 	
+	out << "\n";
+
+	for ( FunctionList::Iter func = functionList; func.lte(); func++ ) {
+		if ( func->exprt ) {
+			char *refName = func->typeRef->uniqueType->langEl->refName;
+			int paramCount = func->paramList->length();
+			out <<
+				refName << " " << func->name << "( ColmProgram *prg";
+
+			for ( int p = 0; p < paramCount; p++ )
+				out << ", const char *p" << p;
+
+			out << " );\n";
+		}
+	}
+
 	out << "#endif\n";
 }
 
@@ -245,6 +261,31 @@ void Compiler::generateExportsImpl()
 			}
 		}
 	}
+
+	out << "\n";
+
+	for ( FunctionList::Iter func = functionList; func.lte(); func++ ) {
+		if ( func->exprt ) {
+			char *refName = func->typeRef->uniqueType->langEl->refName;
+			int paramCount = func->paramList->length();
+			out <<
+				refName << " " << func->name << "( ColmProgram *prg";
+
+			for ( int p = 0; p < paramCount; p++ )
+				out << ", const char *p" << p;
+
+			out << " )\n"
+				"{\n"
+				"	int funcId = " << func->funcId << ";\n"
+				"	const char *params[" << paramCount << "];\n";
+
+			for ( int p = 0; p < paramCount; p++ )
+				out << "	params[" << p << "] = p" << p << ";\n";
+
+			out << 
+				"	return " << refName <<
+						"( prg, colmRunFunc( prg, funcId, params, " << paramCount << " ));\n"
+				"}\n";
+		}
+	}
 }
-
-

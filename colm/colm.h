@@ -14,6 +14,7 @@ struct ColmLocation;
 
 struct ColmProgram *colmNewProgram( struct ColmRuntimeData *rtd, long debugRealm );
 void colmRunProgram( struct ColmProgram *prg, int argc, const char **argv );
+struct ColmTree *colmRunFunc( struct ColmProgram *prg, int frameId, const char **params, int paramCount );
 int colmDeleteProgram( struct ColmProgram *prg );
 
 struct ColmPrintArgs

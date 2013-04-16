@@ -73,7 +73,7 @@ struct BaseParser
 	ObjectDef *blockOpen();
 	void blockClose();
 	void functionDef( StmtList *stmtList, ObjectDef *localFrame,
-			ParameterList *paramList, TypeRef *typeRef, const String &name );
+			ParameterList *paramList, TypeRef *typeRef, const String &name, bool exprt );
 	void iterDef( StmtList *stmtList, ObjectDef *localFrame,
 			ParameterList *paramList, const String &name );
 	LangStmt *globalDef( ObjectField *objField, LangExpr *expr, LangStmt::Type assignType );

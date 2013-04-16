@@ -141,7 +141,7 @@ typedef struct ColmProgram
 	StackBlock *stackBlock;
 	Tree **stackRoot;
 
-	/* Returned from the main line. Should have exports instead. */
+	/* Returned value for main program and any exported functions. */
 	Tree *returnVal;
 } Program;
 

@@ -340,11 +340,11 @@ void BaseParser::blockClose()
 }
 
 void BaseParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
-	ParameterList *paramList, TypeRef *typeRef, const String &name )
+	ParameterList *paramList, TypeRef *typeRef, const String &name, bool exprt )
 {
 	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
 	Function *newFunction = Function::cons( typeRef, name, 
-			paramList, codeBlock, pd->nextFuncId++, false );
+			paramList, codeBlock, pd->nextFuncId++, false, exprt );
 	pd->functionList.append( newFunction );
 	newFunction->inContext = contextStack.top();
 }
@@ -354,7 +354,7 @@ void BaseParser::iterDef( StmtList *stmtList, ObjectDef *localFrame,
 {
 	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
 	Function *newFunction = Function::cons( 0, name, 
-			paramList, codeBlock, pd->nextFuncId++, true );
+			paramList, codeBlock, pd->nextFuncId++, true, false );
 	pd->functionList.append( newFunction );
 }
 

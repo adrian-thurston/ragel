@@ -246,6 +246,54 @@ void colmRunProgram( Program *prg, int argc, const char **argv )
 	prg->argv = 0;
 }
 
+Tree *colmRunFunc( struct ColmProgram *prg, int frameId, const char **params, int paramCount )
+{
+	/* Make the arguments available to the program. */
+	prg->argc = 0;
+	prg->argv = 0;
+
+	Execution execution;
+	memset( &execution, 0, sizeof(execution) );
+
+	Tree **sp = prg->stackRoot;
+
+	FrameInfo *fi = &prg->rtd->frameInfo[frameId];
+	Code *code = fi->codeWC;
+	long stretch = fi->argSize + 4 + fi->frameSize;
+	vm_contiguous( stretch );
+
+	int p;
+	for ( p = 0; p < paramCount; p++ ) {
+		if ( params[p] == 0 ) {
+			vm_push( 0 );
+		}
+		else {
+			Head *head = stringAllocPointer( prg, params[p], strlen(params[p]) );
+			Tree *tree = constructString( prg, head );
+			treeUpref( tree );
+			vm_push( tree );
+		}
+	}
+
+	/* Set up the stack as if we have called. We allow a return value. */
+	vm_push( 0 ); 
+	vm_push( 0 );
+	vm_push( 0 );
+	vm_push( 0 );
+
+	execution.framePtr = vm_ptop();
+	execution.frameId = frameId;
+
+	/* Execution loop. */
+	sp = executeCode( prg, &execution, sp, code );
+	
+	treeDownref( prg, sp, prg->returnVal );
+	prg->returnVal = vm_pop();
+
+	assert( sp == prg->stackRoot );
+
+	return prg->returnVal;
+};
 
 int colmDeleteProgram( Program *prg )
 {

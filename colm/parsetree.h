@@ -2923,7 +2923,7 @@ struct Function
 
 	static Function *cons( TypeRef *typeRef, const String &name, 
 			ParameterList *paramList, CodeBlock *codeBlock, 
-			int funcId, bool isUserIter )
+			int funcId, bool isUserIter, bool exprt )
 	{
 		Function *f = new Function;
 
@@ -2933,6 +2933,7 @@ struct Function
 		f->codeBlock = codeBlock;
 		f->funcId = funcId;
 		f->isUserIter = isUserIter;
+		f->exprt = exprt;
 
 		return f;
 	}
@@ -2948,6 +2949,7 @@ struct Function
 	long paramListSize;
 	UniqueType **paramUTs;
 	Context *inContext;
+	bool exprt;
 
 	Function *prev, *next;
 };

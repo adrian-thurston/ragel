@@ -723,6 +723,7 @@ void mainExecution( Program *prg, Execution *exec, Code *code )
 
 	vm_pop_ignore();
 	vm_pop_ignore();
+	treeDownref( prg, sp, prg->returnVal );
 	prg->returnVal = vm_pop();
 	vm_pop_ignore();
 
@@ -3483,6 +3484,13 @@ again:
 			Tree *retVal = vm_pop();
 			vm_popn( fi->argSize );
 			vm_push( retVal );
+
+			/* This if for direct calls of functions. */
+			if ( instr == 0 ){
+				//assert( sp == root );
+				return sp;
+			}
+				
 			break;
 		}
 		case IN_TO_UPPER: {

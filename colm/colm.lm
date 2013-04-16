@@ -258,8 +258,13 @@ def param_var_def
 	[Id: id COLON TypeRef: type_ref]
 |	[Id: id COLON RefTypeRef: reference_type_ref]
 
+def opt_export
+	[Export: EXPORT]
+|	[]
+
 def function_def
-	[TypeRef: type_ref Id: id POPEN ParamVarDefList: param_var_def* PCLOSE 
+	[OptExport: opt_export TypeRef: type_ref Id: id 
+			POPEN ParamVarDefList: param_var_def* PCLOSE 
 			COPEN LangStmtList: lang_stmt_list CCLOSE]
 
 def context_var_def

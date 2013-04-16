@@ -1684,15 +1684,21 @@ struct LoadColm
 		return paramList;
 	}
 
+	bool walkOptExport( opt_export OptExport )
+	{
+		return OptExport.Export() != 0;
+	}
+
 	void walkFunctionDef( function_def FunctionDef )
 	{
 		ObjectDef *localFrame = blockOpen();
 
+		bool exprt = walkOptExport( FunctionDef.OptExport() );
 		TypeRef *typeRef = walkTypeRef( FunctionDef.TypeRef() );
 		String id = FunctionDef.Id().text().c_str();
 		ParameterList *paramList = walkParamVarDefList( FunctionDef.ParamVarDefList() );
 		StmtList *stmtList = walkLangStmtList( FunctionDef.LangStmtList() );
-		functionDef( stmtList, localFrame, paramList, typeRef, id );
+		functionDef( stmtList, localFrame, paramList, typeRef, id, exprt );
 
 		blockClose();
 	}
