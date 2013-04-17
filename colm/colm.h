@@ -8,11 +8,11 @@ extern "C" {
 struct colm_tree;
 struct colm_kid;
 struct colm_program;
-struct colm_runtime_data;
+struct colm_sections;
 struct colm_tree;
 struct colm_location;
 
-struct colm_program *colm_new_program( struct colm_runtime_data *rtd, long debug_realm );
+struct colm_program *colm_new_program( struct colm_sections *rtd, long debug_realm );
 void colm_run_program( struct colm_program *prg, int argc, const char **argv );
 struct colm_tree *colm_run_func( struct colm_program *prg, int frame_id, const char **params, int param_count );
 int colm_delete_program( struct colm_program *prg );

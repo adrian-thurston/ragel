@@ -35,7 +35,7 @@ void FsmCodeGen::writeMain( long activeRealm )
 		"{\n"
 		"	struct colm_program *prg;\n"
 		"	int exitStatus;\n"
-		"	prg = colm_new_program( &main_runtimeData, " << activeRealm << " );\n"
+		"	prg = colm_new_program( &colm_object, " << activeRealm << " );\n"
 		"	colm_run_program( prg, argc, argv );\n"
 		"	exitStatus = colm_delete_program( prg );\n"
 		"	return exitStatus;\n"

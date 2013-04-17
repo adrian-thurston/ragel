@@ -33,7 +33,7 @@
 #include "if2.h"
 #include "colm/colm.h"
 
-extern RuntimeData main_runtimeData;
+extern RuntimeData colm_object;
 
 InputLoc::InputLoc( colm_location *pcloc )
 {
@@ -635,7 +635,7 @@ struct LoadColm
 		argv[0] = file.data;
 		argv[1] = 0;
 
-		colm_program *program = colm_new_program( &main_runtimeData, 0 );
+		colm_program *program = colm_new_program( &colm_object, 0 );
 		colm_run_program( program, 1, argv );
 
 		/* Extract the parse tree. */
@@ -1904,7 +1904,7 @@ void LoadColm::go( long activeRealm )
 	argv[0] = inputFileName;
 	argv[1] = 0;
 
-	colm_program *program = colm_new_program( &main_runtimeData, activeRealm );
+	colm_program *program = colm_new_program( &colm_object, activeRealm );
 	colm_run_program( program, 1, argv );
 
 	/* Extract the parse tree. */

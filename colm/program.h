@@ -32,7 +32,7 @@ typedef struct ColmStackBlock
 	struct ColmStackBlock *next;
 } StackBlock;
 
-typedef struct colm_runtime_data
+typedef struct colm_sections
 {
 	LangElInfo *lelInfo;
 	long numLangEls;

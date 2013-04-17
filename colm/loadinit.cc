@@ -36,7 +36,7 @@
 
 using std::string;
 
-extern RuntimeData main_runtimeData;
+extern RuntimeData colm_object;
 
 void LoadInit::walkProdElList( ProdElList *list, prod_el_list &prodElList )
 {
@@ -338,7 +338,7 @@ void LoadInit::go( long activeRealm )
 	argv[0] = inputFileName;
 	argv[1] = 0;
 
-	colm_program *program = colm_new_program( &main_runtimeData, 0 );
+	colm_program *program = colm_new_program( &colm_object, 0 );
 	colm_run_program( program, 1, argv );
 
 	/* Extract the parse tree. */
