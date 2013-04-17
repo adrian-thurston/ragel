@@ -39,8 +39,8 @@ void clearGlobal( Program *prg, Tree **sp )
 	/* Downref all the fields in the global object. */
 	int g;
 	for ( g = 0; g < prg->rtd->globalSize; g++ ) {
-		//assert( getAttr( global, g )->refs == 1 );
-		treeDownref( prg, sp, getAttr( prg->global, g ) );
+		//assert( colm_get_attr( global, g )->refs == 1 );
+		treeDownref( prg, sp, colm_get_attr( prg->global, g ) );
 	}
 
 	/* Free the global object. */
@@ -74,7 +74,7 @@ void vm_init( Program *prg )
 	prg->stackRoot = prg->sb_end;
 }
 
-struct ColmTree **vm_root( struct ColmProgram *prg )
+Tree **colm_vm_root( Program *prg )
 {
 	return prg->stackRoot;
 }
@@ -174,12 +174,12 @@ void vm_clear( Program *prg )
 	}
 }
 
-Tree *returnVal( struct ColmProgram *prg )
+Tree *colm_return_val( struct colm_program *prg )
 {
 	return prg->returnVal;
 }
 
-Program *colmNewProgram( RuntimeData *rtd, long activeRealm )
+Program *colm_new_program( RuntimeData *rtd, long activeRealm )
 {
 	Program *prg = malloc(sizeof(Program));
 	memset( prg, 0, sizeof(Program) );
@@ -226,7 +226,7 @@ Program *colmNewProgram( RuntimeData *rtd, long activeRealm )
 	return prg;
 }
 
-void colmRunProgram( Program *prg, int argc, const char **argv )
+void colm_run_program( Program *prg, int argc, const char **argv )
 {
 	if ( prg->rtd->rootCodeLen == 0 )
 		return;
@@ -246,7 +246,7 @@ void colmRunProgram( Program *prg, int argc, const char **argv )
 	prg->argv = 0;
 }
 
-Tree *colmRunFunc( struct ColmProgram *prg, int frameId, const char **params, int paramCount )
+Tree *colm_run_func( struct colm_program *prg, int frameId, const char **params, int paramCount )
 {
 	/* Make the arguments available to the program. */
 	prg->argc = 0;
@@ -295,7 +295,7 @@ Tree *colmRunFunc( struct ColmProgram *prg, int frameId, const char **params, in
 	return prg->returnVal;
 };
 
-int colmDeleteProgram( Program *prg )
+int colm_delete_program( Program *prg )
 {
 	Tree **sp = prg->stackRoot;
 	int exitStatus = prg->exitStatus;

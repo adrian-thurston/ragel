@@ -1699,7 +1699,7 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		//	CaptureAttr *cap = prg->rtd->captureAttr + 
 		//			prg->rtd->lelInfo[kid->tree->id].captureAttr + i;
 		//
-		//	Tree *attr = getAttr( kid->tree, cap->offset );
+		//	Tree *attr = colm_get_attr( kid->tree, cap->offset );
 		//
 		//	PatConsNode &node = nodes[nextAvail++];
 		//	memset( &node, 0, sizeof(PatConsNode) );

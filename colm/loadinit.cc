@@ -338,8 +338,8 @@ void LoadInit::go( long activeRealm )
 	argv[0] = inputFileName;
 	argv[1] = 0;
 
-	ColmProgram *program = colmNewProgram( &main_runtimeData, 0 );
-	colmRunProgram( program, 1, argv );
+	colm_program *program = colm_new_program( &main_runtimeData, 0 );
+	colm_run_program( program, 1, argv );
 
 	/* Extract the parse tree. */
 	start Start = ColmTree( program );
@@ -362,7 +362,7 @@ void LoadInit::go( long activeRealm )
 		ItemList = ItemList.next();
 	}
 
-	colmDeleteProgram( program );
+	colm_delete_program( program );
 
 	consParseStmt( stmtList );
 	consExportTree( stmtList );

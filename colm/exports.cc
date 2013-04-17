@@ -64,7 +64,7 @@ void Compiler::generateExports()
 		"\n";
 	
 	out << 
-		"inline void appendString( ColmPrintArgs *args, const char *data, int length )\n"
+		"inline void appendString( colm_print_args *args, const char *data, int length )\n"
 		"{\n"
 		"	std::string *str = (std::string*)args->arg;\n"
 		"	*str += std::string( data, length );\n"
@@ -72,12 +72,12 @@ void Compiler::generateExports()
 		"\n";
 
 	out << 
-		"inline std::string printTreeStr( ColmProgram *prg, ColmTree *tree, bool trim )\n"
+		"inline std::string printTreeStr( colm_program *prg, colm_tree *tree, bool trim )\n"
 		"{\n"
 		"	std::string str;\n"
-		"	ColmPrintArgs printArgs = { &str, 1, 0, trim, &appendString, \n"
-		"			&printNull, &printTermTree, &printNull };\n"
-		"	printTreeArgs( prg, vm_root(prg), &printArgs, tree );\n"
+		"	colm_print_args printArgs = { &str, 1, 0, trim, &appendString, \n"
+		"			&colm_print_null, &colm_print_term_tree, &colm_print_null };\n"
+		"	colm_print_tree_args( prg, colm_vm_root(prg), &printArgs, tree );\n"
 		"	return str;\n"
 		"}\n"
 		"\n";
@@ -102,16 +102,16 @@ void Compiler::generateExports()
 		out << "struct " << lel->fullName << "\n";
 		out << "{\n";
 		out << "	std::string text() { return printTreeStr( __prg, __tree, true ); }\n";
-		out << "	ColmLocation *loc() { return findLocation( __prg, __tree ); }\n";
+		out << "	colm_location *loc() { return colm_find_location( __prg, __tree ); }\n";
 		out << "	std::string text_notrim() { return printTreeStr( __prg, __tree, false ); }\n";
-		out << "	operator ColmTree *() { return __tree; }\n";
-		out << "	ColmProgram *__prg;\n";
-		out << "	ColmTree *__tree;\n";
+		out << "	operator colm_tree *() { return __tree; }\n";
+		out << "	colm_program *__prg;\n";
+		out << "	colm_tree *__tree;\n";
 
 		if ( mainReturnUT != 0 && mainReturnUT->langEl == lel ) {
-			out << "	" << lel->fullName << "( ColmProgram *prg ) : __prg(prg), __tree(returnVal(prg)) {}\n";
+			out << "	" << lel->fullName << "( colm_program *prg ) : __prg(prg), __tree(returnVal(prg)) {}\n";
 		}
-		out << "	" << lel->fullName << "( ColmProgram *prg, ColmTree *tree ) : __prg(prg), __tree(tree) {}\n";
+		out << "	" << lel->fullName << "( colm_program *prg, colm_tree *tree ) : __prg(prg), __tree(tree) {}\n";
 
 		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
@@ -136,13 +136,13 @@ void Compiler::generateExports()
 		}
 
 		if ( lel->isRepeat ) {
-			out << "	" << "int end() { return repeatEnd( __tree ); }\n";
+			out << "	" << "int end() { return colm_repeat_end( __tree ); }\n";
 			out << "	" << lel->refName << " next();\n";
 			out << "	" << lel->repeatOf->refName << " value();\n";
 		}
 
 		if ( lel->isList ) {
-			out << "	" << "int last() { return listLast( __tree ); }\n";
+			out << "	" << "int last() { return colm_list_last( __tree ); }\n";
 			out << "	" << lel->refName << " next();\n";
 			out << "	" << lel->repeatOf->refName << " value();\n";
 		}
@@ -156,7 +156,7 @@ void Compiler::generateExports()
 		if ( field->isExport ) {
 			UniqueType *ut = field->typeRef->lookupType(this);
 			if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
-				out << ut->langEl->refName << " " << field->name << "( ColmProgram *prg );\n";
+				out << ut->langEl->refName << " " << field->name << "( colm_program *prg );\n";
 			}
 		}
 	}
@@ -168,7 +168,7 @@ void Compiler::generateExports()
 			char *refName = func->typeRef->uniqueType->langEl->refName;
 			int paramCount = func->paramList->length();
 			out <<
-				refName << " " << func->name << "( ColmProgram *prg";
+				refName << " " << func->name << "( colm_program *prg";
 
 			for ( int p = 0; p < paramCount; p++ )
 				out << ", const char *p" << p;
@@ -200,7 +200,7 @@ void Compiler::generateExportsImpl()
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 						out << ut->langEl->refName << " " << lel->declName << "::" << field->name << 
 							"() { return " << ut->langEl->refName << 
-							"( __prg, getAttr( __tree, " << field->offset << ") ); }\n";
+							"( __prg, colm_get_attr( __tree, " << field->offset << ") ); }\n";
 					}
 				}
 
@@ -219,7 +219,7 @@ void Compiler::generateExportsImpl()
 						}
 
 						out << "}; return " << ut->langEl->refName << 
-							"( __prg, getRhsVal( __prg, __tree, a ) ); }\n";
+							"( __prg, colm_get_rhs_val( __prg, __tree, a ) ); }\n";
 					}
 				}
 			}
@@ -228,22 +228,22 @@ void Compiler::generateExportsImpl()
 		if ( lel->isRepeat ) {
 			out << lel->refName << " " << lel->declName << "::" << " next"
 				"() { return " << lel->refName << 
-				"( __prg, getRepeatNext( __tree ) ); }\n";
+				"( __prg, colm_get_repeat_next( __tree ) ); }\n";
 
 			out << lel->repeatOf->refName << " " << lel->declName << "::" << " value"
 				"() { return " << lel->repeatOf->refName << 
-				"( __prg, getRepeatVal( __tree ) ); }\n";
+				"( __prg, colm_get_repeat_val( __tree ) ); }\n";
 
 		}
 
 		if ( lel->isList ) {
 			out << lel->refName << " " << lel->declName << "::" << " next"
 				"() { return " << lel->refName << 
-				"( __prg, getRepeatNext( __tree ) ); }\n";
+				"( __prg, colm_get_repeat_next( __tree ) ); }\n";
 
 			out << lel->repeatOf->refName << " " << lel->declName << "::" << " value"
 				"() { return " << lel->repeatOf->refName << 
-				"( __prg, getRepeatVal( __tree ) ); }\n";
+				"( __prg, colm_get_repeat_val( __tree ) ); }\n";
 		}
 	}
 
@@ -255,8 +255,8 @@ void Compiler::generateExportsImpl()
 			UniqueType *ut = field->typeRef->lookupType(this);
 			if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 				out << 
-					ut->langEl->refName << " " << field->name << "( ColmProgram *prg )\n"
-					"{ return " << ut->langEl->refName << "( prg, getGlobal( prg, " << 
+					ut->langEl->refName << " " << field->name << "( colm_program *prg )\n"
+					"{ return " << ut->langEl->refName << "( prg, colm_get_global( prg, " << 
 					field->offset << ") ); }\n";
 			}
 		}
@@ -269,7 +269,7 @@ void Compiler::generateExportsImpl()
 			char *refName = func->typeRef->uniqueType->langEl->refName;
 			int paramCount = func->paramList->length();
 			out <<
-				refName << " " << func->name << "( ColmProgram *prg";
+				refName << " " << func->name << "( colm_program *prg";
 
 			for ( int p = 0; p < paramCount; p++ )
 				out << ", const char *p" << p;
@@ -284,7 +284,7 @@ void Compiler::generateExportsImpl()
 
 			out << 
 				"	return " << refName <<
-						"( prg, colmRunFunc( prg, funcId, params, " << paramCount << " ));\n"
+						"( prg, colm_run_func( prg, funcId, params, " << paramCount << " ));\n"
 				"}\n";
 		}
 	}

@@ -35,9 +35,9 @@ void fatal( const char *fmt, ... );
 #define check_realm( realm ) 
 #endif
 
-struct ColmProgram;
+struct colm_program;
 
-int _debug( struct ColmProgram *prg, long realm, const char *fmt, ... );
+int _debug( struct colm_program *prg, long realm, const char *fmt, ... );
 
 void message( const char *fmt, ... );
 

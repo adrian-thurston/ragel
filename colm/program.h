@@ -32,7 +32,7 @@ typedef struct ColmStackBlock
 	struct ColmStackBlock *next;
 } StackBlock;
 
-typedef struct ColmRuntimeData
+typedef struct colm_runtime_data
 {
 	LangElInfo *lelInfo;
 	long numLangEls;
@@ -90,7 +90,7 @@ typedef struct ColmRuntimeData
 	long noTokenId;
 
 	void (*fsmExecute)( struct _FsmRun *fsmRun, struct _StreamImpl *inputStream );
-	void (*sendNamedLangEl)( struct ColmProgram *prg, Tree **tree, struct _PdaRun *pdaRun,
+	void (*sendNamedLangEl)( struct colm_program *prg, Tree **tree, struct _PdaRun *pdaRun,
 			struct _FsmRun *fsmRun, struct _StreamImpl *inputStream );
 	void (*initBindings)( struct _PdaRun *pdaRun );
 	void (*popBinding)( struct _PdaRun *pdaRun, ParseTree *tree );
@@ -98,7 +98,7 @@ typedef struct ColmRuntimeData
 } RuntimeData;
 
 
-typedef struct ColmProgram
+typedef struct colm_program
 {
 	long activeRealm;
 

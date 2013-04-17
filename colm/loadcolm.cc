@@ -35,7 +35,7 @@
 
 extern RuntimeData main_runtimeData;
 
-InputLoc::InputLoc( ColmLocation *pcloc )
+InputLoc::InputLoc( colm_location *pcloc )
 {
 	if ( pcloc != 0 ) {
 		fileName = pcloc->name;
@@ -635,8 +635,8 @@ struct LoadColm
 		argv[0] = file.data;
 		argv[1] = 0;
 
-		ColmProgram *program = colmNewProgram( &main_runtimeData, 0 );
-		colmRunProgram( program, 1, argv );
+		colm_program *program = colm_new_program( &main_runtimeData, 0 );
+		colm_run_program( program, 1, argv );
 
 		/* Extract the parse tree. */
 		start Start = ColmTree( program );
@@ -650,7 +650,7 @@ struct LoadColm
 		}
 
 		StmtList *stmtList = walkRootItemList( Start.RootItemList() );
-		colmDeleteProgram( program );
+		colm_delete_program( program );
 		return stmtList;
 	}
 
@@ -1904,8 +1904,8 @@ void LoadColm::go( long activeRealm )
 	argv[0] = inputFileName;
 	argv[1] = 0;
 
-	ColmProgram *program = colmNewProgram( &main_runtimeData, activeRealm );
-	colmRunProgram( program, 1, argv );
+	colm_program *program = colm_new_program( &main_runtimeData, activeRealm );
+	colm_run_program( program, 1, argv );
 
 	/* Extract the parse tree. */
 	start Start = ColmTree( program );
@@ -1919,7 +1919,7 @@ void LoadColm::go( long activeRealm )
 	}
 
 	StmtList *stmtList = walkRootItemList( Start.RootItemList() );
-	colmDeleteProgram( program );
+	colm_delete_program( program );
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );
 }

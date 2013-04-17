@@ -33,11 +33,11 @@ void FsmCodeGen::writeMain( long activeRealm )
 	out << 
 		"int main( int argc, const char **argv )\n"
 		"{\n"
-		"	struct ColmProgram *prg;\n"
+		"	struct colm_program *prg;\n"
 		"	int exitStatus;\n"
-		"	prg = colmNewProgram( &main_runtimeData, " << activeRealm << " );\n"
-		"	colmRunProgram( prg, argc, argv );\n"
-		"	exitStatus = colmDeleteProgram( prg );\n"
+		"	prg = colm_new_program( &main_runtimeData, " << activeRealm << " );\n"
+		"	colm_run_program( prg, argc, argv );\n"
+		"	exitStatus = colm_delete_program( prg );\n"
 		"	return exitStatus;\n"
 		"}\n"
 		"\n";
