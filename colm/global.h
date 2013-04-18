@@ -42,7 +42,6 @@ extern int gblErrorCount;
 std::ostream &error();
 
 /* IO filenames and stream. */
-extern const char *outputFileName;
 extern std::ostream *outStream;
 extern bool generateGraphviz;
 extern bool branchPointInfo;
@@ -62,9 +61,9 @@ extern std::ostream *outStream;
 extern bool printStatistics;
 
 extern int gblErrorCount;
-extern char machineMain[];
 extern bool gblLibrary;
-extern const char *gblExportTo;
+extern char machineMain[];
+extern const char *exportHeaderFn;
 
 struct colm_location;
 

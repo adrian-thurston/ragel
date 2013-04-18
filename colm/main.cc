@@ -77,11 +77,12 @@ InputLoc internal;
 /* Io globals. */
 istream *inStream = 0;
 ostream *outStream = 0;
-const char *inputFileName = 0;
-const char *outputFileName = 0;
-const char *intermedFileName = 0;
-const char *gblExportTo = 0;
-const char *gblExpImplTo = 0;
+const char *inputFn = 0;
+const char *outputFn = 0;
+const char *intermedFn = 0;
+const char *binaryFn = 0;
+const char *exportHeaderFn = 0;
+const char *exportCodeFn = 0;
 bool exportCode = false;
 
 bool generateGraphviz = false;
@@ -140,15 +141,15 @@ ostream &error()
 /* Print the opening to a warning, then return the error ostream. */
 ostream &warning( )
 {
-	cerr << "warning: " << inputFileName << ": ";
+	cerr << "warning: " << inputFn << ": ";
 	return cerr;
 }
 
 /* Print the opening to a warning in the input, then return the error ostream. */
 ostream &warning( const InputLoc &loc )
 {
-	assert( inputFileName != 0 );
-	cerr << "warning: " << inputFileName << ":" << 
+	assert( inputFn != 0 );
+	cerr << "warning: " << inputFn << ":" << 
 			loc.line << ":" << loc.col << ": ";
 	return cerr;
 }
@@ -235,46 +236,74 @@ char *fileNameFromStem( const char *stemFile, const char *suffix )
 	if ( ppos != 0 )
 		len = ppos - stemFile;
 
-	/* Make the return string from the stem and the suffix. */
-	char *retVal = new char[ len + strlen( suffix ) + 1 ];
+	int slen = suffix != 0 ? strlen( suffix ) : 0;
+	char *retVal = new char[ len + slen + 1 ];
 	strncpy( retVal, stemFile, len );
-	strcpy( retVal + len, suffix );
+	if ( suffix != 0 )
+		strcpy( retVal + len, suffix );
+	retVal[len+slen] = 0;
 
 	return retVal;
 }
 
-
-/* Invoked by the parser when the root element is opened. */
-void openOutput( )
+void openOutputCompiled()
 {
-	/* If the output format is code and no output file name is given, then
-	 * make a default. */
-	if ( outputFileName == 0 ) {
-		const char *ext = findFileExtension( inputFileName );
-		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
-			outputFileName = fileNameFromStem( inputFileName, ".h" );
-		else {
-			const char *defExtension = ".c";
-			outputFileName = fileNameFromStem( inputFileName, defExtension );
-		}
-	}
+	if ( binaryFn == 0 )
+		binaryFn = fileNameFromStem( inputFn, 0 );
 
-	//debug( REALM_PARSE, "opening output file: %s\n", outputFileName );
+	if ( intermedFn == 0 )
+		intermedFn = fileNameFromStem( binaryFn, ".c" );
 
-	/* Make sure we are not writing to the same file as the input file. */
-	if ( outputFileName != 0 && inputFileName != 0 &&
-			strcmp( inputFileName, outputFileName  ) == 0 )
+	if ( binaryFn != 0 && inputFn != 0 &&
+			strcmp( inputFn, binaryFn  ) == 0 )
 	{
-		error() << "output file \"" << outputFileName  << 
+		error() << "output file \"" << binaryFn  << 
 				"\" is the same as the input file" << endl;
 	}
 
-	if ( outputFileName != 0 ) {
+	if ( intermedFn != 0 && inputFn != 0 &&
+			strcmp( inputFn, intermedFn  ) == 0 )
+	{
+		error() << "intermediate file \"" << intermedFn  << 
+				"\" is the same as the input file" << endl;
+	}
+
+	if ( intermedFn != 0 ) {
 		/* Open the output stream, attaching it to the filter. */
-		ofstream *outFStream = new ofstream( outputFileName );
+		ofstream *outFStream = new ofstream( intermedFn );
 
 		if ( !outFStream->is_open() ) {
-			error() << "error opening " << outputFileName << " for writing" << endl;
+			error() << "error opening " << intermedFn << " for writing" << endl;
+			exit(1);
+		}
+
+		outStream = outFStream;
+	}
+	else {
+		/* Writing out ot std out. */
+		outStream = &cout;
+	}
+}
+
+void openOutputLibrary()
+{
+	if ( outputFn == 0 )
+		outputFn = fileNameFromStem( inputFn, ".c" );
+
+	/* Make sure we are not writing to the same file as the input file. */
+	if ( outputFn != 0 && inputFn != 0 &&
+			strcmp( inputFn, outputFn  ) == 0 )
+	{
+		error() << "output file \"" << outputFn  << 
+				"\" is the same as the input file" << endl;
+	}
+
+	if ( outputFn != 0 ) {
+		/* Open the output stream, attaching it to the filter. */
+		ofstream *outFStream = new ofstream( outputFn );
+
+		if ( !outFStream->is_open() ) {
+			error() << "error opening " << outputFn << " for writing" << endl;
 			exit(1);
 		}
 
@@ -289,17 +318,17 @@ void openOutput( )
 void openExports( )
 {
 	/* Make sure we are not writing to the same file as the input file. */
-	if ( inputFileName != 0 && gblExportTo != 0 && strcmp( inputFileName, gblExportTo  ) == 0 ) {
-		error() << "output file \"" << gblExportTo  << 
+	if ( inputFn != 0 && exportHeaderFn != 0 && strcmp( inputFn, exportHeaderFn  ) == 0 ) {
+		error() << "output file \"" << exportHeaderFn  << 
 				"\" is the same as the input file" << endl;
 	}
 
-	if ( gblExportTo != 0 ) {
+	if ( exportHeaderFn != 0 ) {
 		/* Open the output stream, attaching it to the filter. */
-		ofstream *outFStream = new ofstream( gblExportTo );
+		ofstream *outFStream = new ofstream( exportHeaderFn );
 
 		if ( !outFStream->is_open() ) {
-			error() << "error opening " << outputFileName << " for writing" << endl;
+			error() << "error opening " << exportHeaderFn << " for writing" << endl;
 			exit(1);
 		}
 
@@ -314,17 +343,17 @@ void openExports( )
 void openExportsImpl( )
 {
 	/* Make sure we are not writing to the same file as the input file. */
-	if ( inputFileName != 0 && gblExpImplTo != 0 && strcmp( inputFileName, gblExpImplTo  ) == 0 ) {
-		error() << "output file \"" << gblExpImplTo  << 
+	if ( inputFn != 0 && exportCodeFn != 0 && strcmp( inputFn, exportCodeFn  ) == 0 ) {
+		error() << "output file \"" << exportCodeFn  << 
 				"\" is the same as the input file" << endl;
 	}
 
-	if ( gblExpImplTo != 0 ) {
+	if ( exportCodeFn != 0 ) {
 		/* Open the output stream, attaching it to the filter. */
-		ofstream *outFStream = new ofstream( gblExpImplTo );
+		ofstream *outFStream = new ofstream( exportCodeFn );
 
 		if ( !outFStream->is_open() ) {
-			error() << "error opening " << outputFileName << " for writing" << endl;
+			error() << "error opening " << exportCodeFn << " for writing" << endl;
 			exit(1);
 		}
 
@@ -362,9 +391,7 @@ void compileOutputInstalled( const char *argv0 )
 		last -= 1;
 	}
 
-	char *exec = fileNameFromStem( outputFileName, ".bin" );
-
-	int length = 1024 + 3*strlen(location) + strlen(outputFileName) + strlen(exec);
+	int length = 1024 + strlen(intermedFn) + strlen(binaryFn);
 	char command[length];
 	sprintf( command, 
 		"gcc -Wall -Wwrite-strings"
@@ -374,7 +401,7 @@ void compileOutputInstalled( const char *argv0 )
 		" %s"
 		" -L" PREFIX "/lib"
 		" -lcolmd",
-		exec, outputFileName );
+		binaryFn, intermedFn );
 
 	compileOutputCommand( command );
 }
@@ -387,9 +414,7 @@ void compileOutputInSource( const char *argv0 )
 	assert( last != 0 );
 	last[1] = 0;
 
-	char *exec = fileNameFromStem( outputFileName, ".bin" );
-
-	int length = 1024 + 3*strlen(location) + strlen(outputFileName) + strlen(exec);
+	int length = 1024 + 3 * strlen(location) + strlen(intermedFn) + strlen(binaryFn);
 	char command[length];
 	sprintf( command, 
 		"gcc -Wall -Wwrite-strings"
@@ -401,7 +426,7 @@ void compileOutputInSource( const char *argv0 )
 		" -L%s"
 		" -lcolmd",
 		location, location,
-		exec, outputFileName, location );
+		binaryFn, intermedFn, location );
 	
 	compileOutputCommand( command );
 }
@@ -428,7 +453,7 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "D:e:c:LI:vdlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "cD:e:E:I:vdlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -454,11 +479,11 @@ void processArgs( int argc, const char **argv )
 			case 'o':
 				if ( *pc.parameterArg == 0 )
 					error() << "a zero length output file name was given" << endl;
-				else if ( outputFileName != 0 )
+				else if ( outputFn != 0 )
 					error() << "more than one output file name was given" << endl;
 				else {
 					/* Ok, remember the output file name. */
-					outputFileName = pc.parameterArg;
+					outputFn = pc.parameterArg;
 				}
 				break;
 
@@ -485,14 +510,14 @@ void processArgs( int argc, const char **argv )
 							" is an invalid argument" << endl;
 				}
 				break;
-			case 'L':
+			case 'c':
 				gblLibrary = true;
 				break;
 			case 'e':
-				gblExportTo = pc.parameterArg;
+				exportHeaderFn = pc.parameterArg;
 				break;
-			case 'c':
-				gblExpImplTo = pc.parameterArg;
+			case 'E':
+				exportCodeFn = pc.parameterArg;
 				break;
 			case 'D':
 #if DEBUG
@@ -529,11 +554,11 @@ void processArgs( int argc, const char **argv )
 			/* It is interpreted as an input file. */
 			if ( *pc.curArg == 0 )
 				error() << "a zero length input file name was given" << endl;
-			else if ( inputFileName != 0 )
+			else if ( inputFn != 0 )
 				error() << "more than one input file name was given" << endl;
 			else {
 				/* OK, Remember the filename. */
-				inputFileName = pc.curArg;
+				inputFn = pc.curArg;
 			}
 			break;
 		}
@@ -553,24 +578,24 @@ int main(int argc, const char **argv)
 		exit(1);
 
 	/* Make sure we are not writing to the same file as the input file. */
-	if ( inputFileName != 0 && outputFileName != 0 && 
-			strcmp( inputFileName, outputFileName  ) == 0 )
+	if ( inputFn != 0 && outputFn != 0 && 
+			strcmp( inputFn, outputFn  ) == 0 )
 	{
-		error() << "output file \"" << outputFileName  << 
+		error() << "output file \"" << outputFn  << 
 				"\" is the same as the input file" << endl;
 	}
 
 
 #if defined(CONS_COLM) || defined(LOAD_SRC)
 	/* Open the input file for reading. */
-	if ( inputFileName == 0 ) {
+	if ( inputFn == 0 ) {
 		error() << "colm: no input file given" << endl;
 	}
 	else {
 		/* Open the input file for reading. */
-		ifstream *inFile = new ifstream( inputFileName );
+		ifstream *inFile = new ifstream( inputFn );
 		if ( ! inFile->is_open() )
-			error() << "could not open " << inputFileName << " for reading" << endl;
+			error() << "could not open " << inputFn << " for reading" << endl;
 		delete inFile;
 	}
 #endif
@@ -584,9 +609,9 @@ int main(int argc, const char **argv)
 #if defined(CONS_INIT)
 	BaseParser *parser = new ConsInit( pd );
 #elif defined(LOAD_INIT)
-	BaseParser *parser = new LoadInit( pd, inputFileName );
+	BaseParser *parser = new LoadInit( pd, inputFn );
 #else
-	BaseParser *parser = consLoadColm( pd, inputFileName );
+	BaseParser *parser = consLoadColm( pd, inputFn );
 #endif
 
 	parser->go( gblActiveRealm );
@@ -606,7 +631,11 @@ int main(int argc, const char **argv)
 		pd->writeDotFile();
 	}
 	else {
-		openOutput();
+		if ( gblLibrary )
+			openOutputLibrary();
+		else
+			openOutputCompiled();
+
 		pd->generateOutput( gblActiveRealm );
 		if ( outStream != 0 )
 			delete outStream;
@@ -618,12 +647,12 @@ int main(int argc, const char **argv)
 				compileOutputInstalled( argv[0] );
 		}
 
-		if ( gblExportTo != 0 )  {
+		if ( exportHeaderFn != 0 )  {
 			openExports();
 			pd->generateExports();
 			delete outStream;
 		}
-		if ( gblExpImplTo != 0 )  {
+		if ( exportCodeFn != 0 )  {
 			openExportsImpl();
 			pd->generateExportsImpl();
 			delete outStream;

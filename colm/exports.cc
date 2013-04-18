@@ -184,8 +184,8 @@ void Compiler::generateExportsImpl()
 {
 	ostream &out = *outStream;
 
-	if ( gblExportTo != 0 )  {
-		out << "#include \"" << gblExportTo << "\"\n";
+	if ( exportHeaderFn != 0 )  {
+		out << "#include \"" << exportHeaderFn << "\"\n";
 	}
 
 	/* Function implementations. */
