@@ -12,10 +12,9 @@ struct colm_sections;
 struct colm_tree;
 struct colm_location;
 
-struct colm_program *colm_new_program( struct colm_sections *rtd, long debug_realm );
-void colm_run_program( struct colm_program *prg, int argc, const char **argv );
-struct colm_tree *colm_run_func( struct colm_program *prg, int frame_id, const char **params, int param_count );
-int colm_delete_program( struct colm_program *prg );
+/*
+ * Interface
+ */
 
 struct colm_print_args
 {
@@ -50,6 +49,16 @@ struct colm_tree *colm_get_global( struct colm_program *prg, long pos );
 struct colm_tree *colm_get_repeat_next( struct colm_tree *tree );
 struct colm_tree *colm_get_repeat_val( struct colm_tree *tree );
 struct colm_location *colm_find_location( struct colm_program *prg, struct colm_tree *tree );
+
+/*
+ * Primary interface.
+ */
+
+struct colm_program *colm_new_program( struct colm_sections *rtd );
+void colm_set_debug( struct colm_program *prg, long active_realm );
+void colm_run_program( struct colm_program *prg, int argc, const char **argv );
+struct colm_tree *colm_run_func( struct colm_program *prg, int frame_id, const char **params, int param_count );
+int colm_delete_program( struct colm_program *prg );
 
 #ifdef __cplusplus
 }

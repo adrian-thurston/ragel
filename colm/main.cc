@@ -79,6 +79,7 @@ istream *inStream = 0;
 ostream *outStream = 0;
 const char *inputFileName = 0;
 const char *outputFileName = 0;
+const char *intermedFileName = 0;
 const char *gblExportTo = 0;
 const char *gblExpImplTo = 0;
 bool exportCode = false;

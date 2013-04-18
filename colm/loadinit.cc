@@ -338,7 +338,7 @@ void LoadInit::go( long activeRealm )
 	argv[0] = inputFileName;
 	argv[1] = 0;
 
-	colm_program *program = colm_new_program( &colm_object, 0 );
+	colm_program *program = colm_new_program( &colm_object );
 	colm_run_program( program, 1, argv );
 
 	/* Extract the parse tree. */

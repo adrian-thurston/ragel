@@ -179,12 +179,15 @@ Tree *colm_return_val( struct colm_program *prg )
 	return prg->returnVal;
 }
 
-Program *colm_new_program( RuntimeData *rtd, long activeRealm )
+void colm_set_debug( Program *prg, long activeRealm )
+{
+	prg->activeRealm = activeRealm;
+}
+
+Program *colm_new_program( RuntimeData *rtd )
 {
 	Program *prg = malloc(sizeof(Program));
 	memset( prg, 0, sizeof(Program) );
-
-	prg->activeRealm = activeRealm;
 
 	assert( sizeof(Int)      <= sizeof(Tree) );
 	assert( sizeof(Str)      <= sizeof(Tree) );
