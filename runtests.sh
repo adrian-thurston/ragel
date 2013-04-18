@@ -104,7 +104,7 @@ function runtests()
 
 		section LM 0 $TST $LM
 
-		BIN=$WORKING/$ROOT.bin
+		BIN=$WORKING/$ROOT
 		OUT=$WORKING/$ROOT.out
 		DIFF=$WORKING/$ROOT.diff
 		LOG=$WORKING/$ROOT.log
