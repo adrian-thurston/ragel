@@ -108,3 +108,4 @@ version.h: Makefile
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
 CLEANFILES = $(BUILT_SOURCES)
+EXTRA_DIST = colm.lm
