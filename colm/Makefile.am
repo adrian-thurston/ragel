@@ -86,12 +86,12 @@ colmincdir = $(includedir)/colm
 colminc_HEADERS = $(RUNTIME_HDR)
 
 parse1.c: bootstrap0
-	$(builddir)/bootstrap0 -L -o parse1.c -e if1.h -c if1.cc
+	$(builddir)/bootstrap0 -c -o parse1.c -e if1.h -E if1.cc
 if1.h: parse1.c
 if1.cc: parse1.c
 
 parse2.c: bootstrap1 colm.lm
-	$(builddir)/bootstrap1 -L -o parse2.c -e if2.h -c if2.cc colm.lm
+	$(builddir)/bootstrap1 -c -o parse2.c -e if2.h -E if2.cc colm.lm
 if2.h: parse2.c
 if2.cc: parse2.c
 

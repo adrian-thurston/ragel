@@ -66,7 +66,7 @@ void escapeLiteralString( std::ostream &out, const char *path )
 void PdaCodeGen::defineRuntime()
 {
 	out << 
-		"extern RuntimeData main_runtimeData;\n"
+		"extern RuntimeData colm_program_text;\n"
 		"\n";
 }
 
@@ -414,7 +414,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	out << "};\n\n";
 
 	out <<
-		"RuntimeData main_runtimeData = \n"
+		"RuntimeData colm_object = \n"
 		"{\n"
 		"	" << lelInfo() << ",\n"
 		"	" << runtimeData->numLangEls << ",\n"

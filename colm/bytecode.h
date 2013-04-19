@@ -432,10 +432,10 @@ typedef unsigned char uchar;
 #define vm_local_iframe(o) (exec->iframePtr[o])
 #define vm_plocal_iframe(o) (&exec->iframePtr[o])
 
-void vm_init( struct ColmProgram * );
-Tree** vm_bs_add( struct ColmProgram *, Tree **, int );
-Tree** vm_bs_pop( struct ColmProgram *, Tree **, int );
-void vm_clear( struct ColmProgram * );
+void vm_init( struct colm_program * );
+Tree** vm_bs_add( struct colm_program *, Tree **, int );
+Tree** vm_bs_pop( struct colm_program *, Tree **, int );
+void vm_clear( struct colm_program * );
 
 typedef Tree *SW;
 typedef Tree **StackPtr;
@@ -461,10 +461,10 @@ typedef struct _Execution
 
 long stringLength( Head *str );
 const char *stringData( Head *str );
-Head *stringAllocFull( struct ColmProgram *prg, const char *data, long length );
+Head *stringAllocFull( struct colm_program *prg, const char *data, long length );
 Head *initStrSpace( long length );
-Head *stringCopy( struct ColmProgram *prg, Head *head );
-void stringFree( struct ColmProgram *prg, Head *head );
+Head *stringCopy( struct colm_program *prg, Head *head );
+void stringFree( struct colm_program *prg, Head *head );
 void stringShorten( Head *tokdata, long newlen );
 Head *concatStr( Head *s1, Head *s2 );
 Word strAtoi( Head *str );
@@ -473,32 +473,32 @@ Word strUord8( Head *head );
 Word cmpString( Head *s1, Head *s2 );
 Head *stringToUpper( Head *s );
 Head *stringToLower( Head *s );
-Head *stringSprintf( struct ColmProgram *prg, Str *format, Int *integer );
+Head *stringSprintf( struct colm_program *prg, Str *format, Int *integer );
 
-Head *makeLiteral( struct ColmProgram *prg, long litoffset );
-Head *intToStr( struct ColmProgram *prg, Word i );
+Head *makeLiteral( struct colm_program *prg, long litoffset );
+Head *intToStr( struct colm_program *prg, Word i );
 
-Tree *constructString( struct ColmProgram *prg, Head *s );
+Tree *constructString( struct colm_program *prg, Head *s );
 
-void mainExecution( struct ColmProgram *prg, Execution *exec, Code *code );
+void mainExecution( struct colm_program *prg, Execution *exec, Code *code );
 void reductionExecution( Execution *exec, Tree **sp );
 void generationExecution( Execution *exec, Tree **sp );
 void reverseExecution( Execution *exec, Tree **sp, RtCodeVect *allRev );
 
-Kid *allocAttrs( struct ColmProgram *prg, long length );
-void freeAttrs( struct ColmProgram *prg, Kid *attrs );
+Kid *allocAttrs( struct colm_program *prg, long length );
+void freeAttrs( struct colm_program *prg, Kid *attrs );
 void setAttr( Tree *tree, long pos, Tree *val );
 Kid *getAttrKid( Tree *tree, long pos );
 
-Tree *splitTree( struct ColmProgram *prg, Tree *t );
-void rcodeDownrefAll( struct ColmProgram *prg, Tree **sp, RtCodeVect *cv );
-void commitFull( struct ColmProgram *prg, Tree **sp, PdaRun *pdaRun, long commitReduce );
+Tree *splitTree( struct colm_program *prg, Tree *t );
+void rcodeDownrefAll( struct colm_program *prg, Tree **sp, RtCodeVect *cv );
+void commitFull( struct colm_program *prg, Tree **sp, PdaRun *pdaRun, long commitReduce );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
-void splitRef( struct ColmProgram *prg, Tree ***sp, Ref *fromRef );
+void splitRef( struct colm_program *prg, Tree ***sp, Ref *fromRef );
 
-void allocGlobal( struct ColmProgram *prg );
-Tree **executeCode( struct ColmProgram *prg, Execution *exec, Tree **sp, Code *instr );
-void rcodeDownref( struct ColmProgram *prg, Tree **sp, Code *instr );
+void allocGlobal( struct colm_program *prg );
+Tree **executeCode( struct colm_program *prg, Execution *exec, Tree **sp, Code *instr );
+void rcodeDownref( struct colm_program *prg, Tree **sp, Code *instr );
 Code *popReverseCode( RtCodeVect *allRev );
 
 #ifdef __cplusplus

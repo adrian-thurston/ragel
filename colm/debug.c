@@ -37,7 +37,7 @@ const char *const colmRealmNames[REALMS] =
 		"SCAN",
 	};
 
-int _debug( struct ColmProgram *prg, long realm, const char *fmt, ... )
+int _debug( struct colm_program *prg, long realm, const char *fmt, ... )
 {
 	int result = 0;
 	if ( prg->activeRealm & realm ) {

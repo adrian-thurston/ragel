@@ -63,9 +63,9 @@ struct PatternItem;
 struct Constructor;
 struct ConsItem;
 struct _FsmRun;
-struct ColmTree;
-struct ColmLocation;
-struct ColmProgram;
+struct colm_tree;
+struct colm_location;
+struct colm_program;
 
 enum RunBufType {
 	RunBufDataType = 0,
@@ -79,7 +79,7 @@ typedef struct _RunBuf
 	enum RunBufType type;
 	char data[FSM_BUFSIZE];
 	long length;
-	struct ColmTree *tree;
+	struct colm_tree *tree;
 	long offset;
 	struct _RunBuf *next, *prev;
 } RunBuf;
@@ -94,11 +94,11 @@ struct StreamFuncs
 
 	int (*getData)( StreamImpl *ss, char *dest, int length );
 
-	int (*consumeData)( StreamImpl *ss, int length, struct ColmLocation *loc );
+	int (*consumeData)( StreamImpl *ss, int length, struct colm_location *loc );
 	int (*undoConsumeData)( StreamImpl *ss, const char *data, int length );
 
-	struct ColmTree *(*consumeTree)( StreamImpl *ss );
-	void (*undoConsumeTree)( StreamImpl *ss, struct ColmTree *tree, int ignore );
+	struct colm_tree *(*consumeTree)( StreamImpl *ss );
+	void (*undoConsumeTree)( StreamImpl *ss, struct colm_tree *tree, int ignore );
 
 	/* Language elments (compile-time). */
 	struct LangEl *(*consumeLangEl)( StreamImpl *ss, long *bindId, char **data, long *length );
@@ -112,19 +112,19 @@ struct StreamFuncs
 
 	/* Prepending to a stream. */
 	void (*prependData)( StreamImpl *in, const char *data, long len );
-	void (*prependTree)( StreamImpl *is, struct ColmTree *tree, int ignore );
-	void (*prependStream)( StreamImpl *in, struct ColmTree *tree );
+	void (*prependTree)( StreamImpl *is, struct colm_tree *tree, int ignore );
+	void (*prependStream)( StreamImpl *in, struct colm_tree *tree );
 	int (*undoPrependData)( StreamImpl *is, int length );
-	struct ColmTree *(*undoPrependTree)( StreamImpl *is );
-	struct ColmTree *(*undoPrependStream)( StreamImpl *in );
+	struct colm_tree *(*undoPrependTree)( StreamImpl *is );
+	struct colm_tree *(*undoPrependStream)( StreamImpl *in );
 
 	/* Appending to a stream. */
 	void (*appendData)( StreamImpl *in, const char *data, long len );
-	void (*appendTree)( StreamImpl *in, struct ColmTree *tree );
-	void (*appendStream)( StreamImpl *in, struct ColmTree *tree );
-	struct ColmTree *(*undoAppendData)( StreamImpl *in, int length );
-	struct ColmTree *(*undoAppendTree)( StreamImpl *in );
-	struct ColmTree *(*undoAppendStream)( StreamImpl *in );
+	void (*appendTree)( StreamImpl *in, struct colm_tree *tree );
+	void (*appendStream)( StreamImpl *in, struct colm_tree *tree );
+	struct colm_tree *(*undoAppendData)( StreamImpl *in, int length );
+	struct colm_tree *(*undoAppendTree)( StreamImpl *in );
+	struct colm_tree *(*undoAppendStream)( StreamImpl *in );
 };
 
 /* List of source streams. Enables streams to be pushed/popped. */

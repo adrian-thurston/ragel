@@ -49,7 +49,7 @@ extern struct StreamFuncs fileFuncs;
 extern struct StreamFuncs fdFuncs;
 extern struct StreamFuncs streamFuncs;
 
-void clearSourceStream( struct ColmProgram *prg, Tree **sp, StreamImpl *sourceStream )
+void clearSourceStream( struct colm_program *prg, Tree **sp, StreamImpl *sourceStream )
 {
 	RunBuf *buf = sourceStream->queue;
 	while ( buf != 0 ) {
@@ -352,7 +352,7 @@ void initStreamImpl( StreamImpl *is, const char *name )
 	is->byte = 0;
 }
 
-void clearStreamImpl( struct ColmProgram *prg, Tree **sp, StreamImpl *inputStream )
+void clearStreamImpl( struct colm_program *prg, Tree **sp, StreamImpl *inputStream )
 {
 	RunBuf *buf = inputStream->queue;
 	while ( buf != 0 ) {
@@ -758,7 +758,7 @@ static void _prependTree( StreamImpl *is, Tree *tree, int ignore )
 	inputStreamPrepend( is, newBuf );
 }
 
-static void _prependStream( StreamImpl *in, struct ColmTree *tree )
+static void _prependStream( StreamImpl *in, struct colm_tree *tree )
 {
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -900,7 +900,7 @@ static void _appendTree( StreamImpl *is, Tree *tree )
 	ad->length = 0;
 }
 
-static void _appendStream( StreamImpl *in, struct ColmTree *tree )
+static void _appendStream( StreamImpl *in, struct colm_tree *tree )
 {
 	RunBuf *ad = newRunBuf();
 
