@@ -178,9 +178,9 @@ void usage()
 "   -h, -H, -?, --help   print this usage and exit\n"
 "   -v --version         print version information and exit\n"
 "   -o <file>            write output to <file>\n"
-"   -i                   show conflict information\n"
-"   -d                   make colm verbose\n"
-"   -l                   compile logging into the output executable\n"
+"   -c                   compile only (don't produce binary)\n"
+"   -e <file>            write C++ export header to <file>\n"
+"   -x <file>            write C++ export code to <file>\n"
 	;	
 }
 
@@ -516,7 +516,7 @@ void processArgs( int argc, const char **argv )
 			case 'e':
 				exportHeaderFn = pc.parameterArg;
 				break;
-			case 'E':
+			case 'x':
 				exportCodeFn = pc.parameterArg;
 				break;
 			case 'D':
