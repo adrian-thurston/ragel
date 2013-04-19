@@ -453,7 +453,7 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "cD:e:E:I:vdlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "cD:e:x:I:vdlio:S:M:vHh?-:sV", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
