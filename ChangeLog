@@ -1,4 +1,25 @@
-colm 0.9 - Feb 19, 2012
+colm 0.10 - April 18, 2013
+--------------------------
+	* Implemented the colm parser in colm. Bootstrapping with a parse tree
+	  construction in C++. Using that generated parser to to parse the colm
+	  grammar, from which the primary parser is produced.
+	* Improved error reporting.
+	* Added some tracking of progress through a stream for better
+	  backtracking over includes that are pushed onto a stream.
+	* Updated the vim syntax, no longer highlighting parser, list, etc
+	  (types).
+	* Parse expressions are now returning trees again. Returning the parser
+	  results in semantics inconsistent with many other areas of the
+	  program.
+	* Can now put '.' or eos on the end of a send expression to terminate
+	  the parse
+	* Removed the original send syntax (<<).
+	* Lowercased and otherwise improved the C interface.
+	* The default binary name no longer has .bin suffix.
+	* Fixed -o option, now using -c to mean compile on (library). The
+	  export filename options are now -e and -x.
+
+colm 0.9 - Feb 19, 2013
 -----------------------
 	* The parse loop now scans data that is owned by the input stream. It
 	  is copied into a contiguous block in the scanner when the token is
