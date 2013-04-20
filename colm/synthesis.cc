@@ -1341,16 +1341,16 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 
 UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const
 {
-	UniqueType *ut = typeRef->uniqueType->langEl->generic->utArg;
+	UniqueType *targetUT = typeRef->uniqueType->langEl->generic->utArg;
 
 	/* If this is a parse stop then we need to verify that the type is
 	 * compatible with parse stop. */
 	if ( stop )
-		ut->langEl->parseStop = true;
-	int stopId = stop ? ut->langEl->id : 0;
+		targetUT->langEl->parseStop = true;
+	int stopId = stop ? targetUT->langEl->id : 0;
 
 	bool context = false;
-	if ( ut->langEl->contextIn != 0 ) {
+	if ( targetUT->langEl->contextIn != 0 ) {
 		if ( fieldInitArgs == 0 || fieldInitArgs->length() != 1 )
 			error(loc) << "parse command requires just input" << endp;
 		context = true;
@@ -1400,20 +1400,10 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 		code.append( IN_SET_PARSER_CTX_WC );
 	}
 
-	/* Lookup the type of the replacement and store it in the replacement
-	 * object so that replacement parsing has a target. */
-	UniqueType *replUT = typeRef->uniqueType;
-	if ( replUT->typeId != TYPE_TREE )
-		error(loc) << "don't know how to construct this type" << endp;
+	/* For access to the replacement pattern. */
+	UniqueType *parserUT = typeRef->uniqueType;
+	constructor->langEl = parserUT->langEl;
 	
-	/*
-	 * Construct and set the input stream.
-	 */
-	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
-	}
-	
-	constructor->langEl = replUT->langEl;
-
 	/*****************************/
 
 	code.append( IN_DUP_TOP );
@@ -1522,10 +1512,10 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 		VarRefLookup lookup = varRef->lookupField( pd );
 
 		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-		varRef->setField( pd, code, lookup.inObject, ut, false );
+		varRef->setField( pd, code, lookup.inObject, targetUT, false );
 	}
 
-	return ut;
+	return targetUT;
 }
 
 
