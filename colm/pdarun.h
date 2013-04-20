@@ -445,10 +445,7 @@ void clearIgnoreList( struct colm_program *prg, Tree **sp, Kid *kid );
 long parseLoop( struct colm_program *prg, Tree **sp, PdaRun *pdaRun, 
 		StreamImpl *inputStream, long entry );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
-void undoParseStream( struct colm_program *prg, Tree **sp, StreamImpl *inputStream, FsmRun *fsmRun, 
-		PdaRun *pdaRun, long steps );
 
-void clearBuffered( FsmRun *fsmRun );
 void resetToken( PdaRun *pdaRun );
 
 #ifdef __cplusplus

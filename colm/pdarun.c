@@ -233,19 +233,6 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	}
 }
 
-void clearBuffered( FsmRun *fsmRun )
-{
-	if ( fsmRun->tokstart != 0 ) {
-		//fsmRun->p = fsmRun->pe = fsmRun->tokstart;
-		//fsmRun->tokstart = 0;
-
-		fsmRun->pe = fsmRun->p;
-	}
-	else {
-		fsmRun->pe = fsmRun->p;
-	}
-}
-
 void resetToken( PdaRun *pdaRun )
 {
 	FsmRun *fsmRun = pdaRun->fsmRun;
