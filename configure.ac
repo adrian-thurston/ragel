@@ -87,6 +87,22 @@ fi
 
 fi 
 
+#
+# COLM
+#
+
+EXPECTED_COLM_VERSION=0.10
+
+AC_CHECK_PROG(COLM, colm, colm)
+if test -z "$COLM"; then
+	AC_ERROR([error: colm is required to build the parsers])
+fi
+
+COLM_VERSION=[`$COLM -v | sed -n '/version/s/^.*version \([0-9\.]*\).*$/\1/p'`]
+if test "$COLM_VERSION" != $EXPECTED_COLM_VERSION; then
+	AC_ERROR([expected colm version $EXPECTED_COLM_VERSION, but $COLM_VERSION is installed])
+fi
+
 # Checks to carry out if we are building the manual.
 if test "x$build_manual" = "xyes"; then
 

@@ -21,3 +21,5 @@
 /*_go.rl
 /cur-tests
 /.deps
+/ragel-parse
+/ragel-parse.c
