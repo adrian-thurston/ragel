@@ -21,10 +21,10 @@
 
 TESTS = runtests
 
-bin_PROGRAMS = ragel.bin
+bin_PROGRAMS = ragel-parse
 
-ragel.bin: ragel.lm
-	$(HOME)/pkgs/colm/bin/colm ragel.lm
+ragel-parse: ragel-parse.lm
+	$(COLM) $<
 
 EXTRA_DIST = \
 	atoi1.rl clang2.rl cond7.rl element3.rl erract8.rl forder3.rl java1.rl \
