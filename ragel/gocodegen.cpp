@@ -50,7 +50,7 @@ using std::endl;
 
 void goLineDirective( ostream &out, const char *fileName, int line )
 {
-	out << "// line " << line << " \"" << fileName << "\"" << endl;
+	out << "//line " << fileName << ":" << line << endl;
 }
 
 void GoCodeGen::genLineDirective( ostream &out )
@@ -519,7 +519,6 @@ void GoCodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 	goLineDirective( ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
-	ret << endl;
 	INLINE_LIST( ret, action->inlineList, targState, inFinish, csForced );
 	ret << endl;
 }
