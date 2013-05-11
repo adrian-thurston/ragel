@@ -801,6 +801,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDow
 
 	newTree->id = tree->id;
 	newTree->tokdata = stringCopy( prg, tree->tokdata );
+	newTree->prodNum = tree->prodNum;
 
 	/* Copy the child list. Start with ignores, then the list. */
 	Kid *child = tree->child, *last = 0;
