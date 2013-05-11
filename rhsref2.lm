@@ -1,0 +1,52 @@
+##### LM #####
+
+lex
+	literal '-', '=', ';', '*', '->'
+	literal 'option'
+
+	token id /[A-Za-z_][A-Za-z_0-9]*/
+
+	ignore /[ \t\r\n]+/
+end
+
+def arg_option
+	I: int
+	['option' '-' Short: id '->' Func: id ';']
+|	['option' '-' '-' Long: id '->' Func: id ';']
+
+def arg_defs
+	[arg_option+]
+
+def input [ arg_defs ]
+
+def program
+	[Input: input]
+
+parse Input: input[stdin]
+cons P: program [ Input ]
+
+I: int = 1
+
+for AO: arg_option in P {
+	if AO.Long {
+		AO.I = I
+		I = I + 1
+	}
+}
+
+I = 1
+
+for AO: arg_option in P {
+	if AO.Short
+		print( AO.Short ' ' AO.Func  '\n' )
+
+	I = I + 1
+}
+
+##### IN #####
+option -h      -> help;
+option -H      -> help;
+option --help  -> help;
+##### EXP #####
+h help
+H help
