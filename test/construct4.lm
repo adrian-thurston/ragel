@@ -1,0 +1,68 @@
+##### LM #####
+lex
+	literal '-', '=', ';', '{', '}', '<', '>', '*', '->'
+	literal 'struct', 'string', 'bytes',
+		'unsigned', 'long', 'int',
+		'list', 'message', 'option'
+
+	token id /[A-Za-z_][A-Za-z_0-9]*/
+	token number /[0-9]+/
+
+	ignore /[ \t\r\n]+/
+
+	literal ''
+end
+
+def type
+	[id]
+|	['int']
+|	[id '*']
+
+def decl
+	[type id ';']
+
+def struct_def
+	['struct' Id: id '{' decl* '}' ';']
+
+def message_def
+	ID: int
+	['message' id ';']
+
+def definition
+	[struct_def]
+|	[message_def]
+
+def shared_queue
+	[definition*]
+
+cons SQ: shared_queue [
+	"
+	"struct Signal
+	"{
+	"	int signum;
+	"};
+	"
+	"struct Foo
+	"{
+	"	int signum;
+	"};
+	"
+	"message Signal;
+	"
+]
+
+print( %SQ )
+##### EXP #####
+
+struct Signal
+{
+	int signum;
+};
+
+struct Foo
+{
+	int signum;
+};
+
+message Signal;
+
