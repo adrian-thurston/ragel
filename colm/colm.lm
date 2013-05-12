@@ -553,11 +553,14 @@ def pattern
 # Constructor List
 #
 
+def E1 []
+def E2 []
+
 def cons_el
-	[RegionQual: region_qual Lit: lit]
-|	[DQ LitConsElList: lit_cons_el* Term: dq_lit_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[CodeExpr: code_expr]
+	[E1 RegionQual: region_qual Lit: lit]
+|	[E1 DQ LitConsElList: lit_cons_el* Term: dq_lit_term]
+|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
+|	[E2 CodeExpr: code_expr]
 
 def lit_cons_el
 	[ConsData: cons_data]
@@ -581,9 +584,9 @@ def constructor
 #
 
 def accum_el
-	[DQ LitAccumElList: lit_accum_el* Term: dq_lit_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[CodeExpr: code_expr]
+	[E1 DQ LitAccumElList: lit_accum_el* Term: dq_lit_term]
+|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
+|	[E2 CodeExpr: code_expr]
 
 def lit_accum_el
 	[ConsData: cons_data]
@@ -606,9 +609,9 @@ def accumulate
 #
 
 def string_el
-	[DQ LitStringElList: lit_string_el* Term: dq_lit_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[CodeExpr: code_expr]
+	[E1 DQ LitStringElList: lit_string_el* Term: dq_lit_term]
+|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
+|	[E2 CodeExpr: code_expr]
 
 def lit_string_el
 	[ConsData: cons_data]
