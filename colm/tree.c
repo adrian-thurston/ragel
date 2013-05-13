@@ -585,6 +585,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 		tree->tokdata = nodes[pat].length == 0 ? 0 :
 				stringAllocPointer( prg, 
 				nodes[pat].data, nodes[pat].length );
+		tree->prodNum = nodes[pat].prodNum;
 
 		int objectLength = lelInfo[tree->id].objectLength;
 
