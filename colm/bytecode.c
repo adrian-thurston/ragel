@@ -141,7 +141,7 @@ void parserSetContext( Program *prg, Tree **sp, Parser *parser, Tree *val )
 	parser->pdaRun->context = splitTree( prg, val );
 }
 
-Head *treeToStr( Program *prg, Tree **sp, Tree *tree, int trim )
+static Head *treeToStr( Program *prg, Tree **sp, Tree *tree, int trim )
 {
 	/* Collect the tree data. */
 	StrCollect collect;
