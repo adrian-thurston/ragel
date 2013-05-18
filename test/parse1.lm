@@ -7,7 +7,7 @@ end
 def start [id*]
 
 parse S: start[stdin]
-print( S '\n' )
+print( S )
 ##### IN #####
 ab cd ef
 ##### EXP #####

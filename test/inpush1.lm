@@ -93,7 +93,7 @@ parse Input: lang::start[ stdin ]
 if ! Input
 	print( error '\n' )
 else {
-	print( Input '\n' )
+	print( Input )
 }
 ##### IN #####
 
@@ -114,6 +114,7 @@ and dudettes;
 opening inpush1a.in
 opening inpush1b.in
 opening inpush1c.in
+
 hello;
 
 a;

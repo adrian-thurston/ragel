@@ -10,7 +10,7 @@ def start
 parse P: start[stdin]
 Start: start = P
 for Id: id in triter(Start) {
-	print( Id )
+	print( ^Id )
 	print( '\n' )
 }
 ##### IN #####

@@ -18,7 +18,7 @@ S: start = cons start[ Input ]
 
 parse Again: start[ %Input ]
 
-print( %Again )
+print( Again )
 
 ##### IN #####
 a b c ( chocolate fudge ) d e

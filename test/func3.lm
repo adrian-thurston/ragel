@@ -17,7 +17,7 @@ def program
 
 int func( P: program )
 {
-	print( P '\n' )
+	print( P )
 }
 
 int main()

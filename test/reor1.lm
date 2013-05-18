@@ -10,7 +10,7 @@ def item [id] | [number]
 def start [item*]
 
 parse P: start[stdin]
-print( P '\n' )
+print( P )
 ##### IN #####
 ab cd ef
 ##### EXP #####
@@ -18,7 +18,7 @@ ab cd ef
 ##### IN #####
 ag
 ##### EXP #####
-NIL
+NIL--noeol
 ##### IN #####
 93 
 ab	22

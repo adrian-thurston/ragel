@@ -29,8 +29,7 @@ end # ctx
 
 cons CTX: ctx[]
 parse Input: ctx::start( CTX ) [ stdin ]
-print( Input '\n' )
-
+print( Input )
 
 ##### IN #####
 a b c ( d e f )

@@ -20,7 +20,7 @@ def start
 	[item*]
 
 parse Input: start[ stdin ]
-print( %Input )
+print( Input )
 
 ##### IN #####
 a b ( c d ) e f

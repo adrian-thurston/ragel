@@ -23,7 +23,7 @@ for Id: id in Input {
 
 S: start = Output()
 
-print( S '\n' )
+print( S )
 ##### IN #####
 a b c ( chocolate fudge ) d e
 ##### EXP #####

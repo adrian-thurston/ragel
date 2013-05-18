@@ -10,7 +10,7 @@ def start
 parse P: start[stdin]
 Start: start = P
 for Id: id in Start
-	print( Id '\n' )
+	print( ^Id '\n' )
 ##### IN #####
 a b c
 ##### EXP #####
