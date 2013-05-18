@@ -912,7 +912,7 @@ again:
 
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printTreeFile( prg, sp, stdout, tree, true );
+				printTreeFile( prg, sp, stdout, tree, false );
 				treeDownref( prg, sp, tree );
 			}
 			break;
@@ -951,9 +951,9 @@ again:
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
 				if ( stream->in->file != 0 )
-					printTreeFile( prg, sp, stream->in->file, tree, true );
+					printTreeFile( prg, sp, stream->in->file, tree, false );
 				else
-					printTreeFd( prg, sp, stream->in->fd, tree, true );
+					printTreeFd( prg, sp, stream->in->fd, tree, false );
 				treeDownref( prg, sp, tree );
 			}
 			treeDownref( prg, sp, (Tree*)stream );
