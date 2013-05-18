@@ -87,10 +87,17 @@ function section
 		END {
 			exit( found ? 0 : 1 )
 		}
-	' $in > $out
+	' $in | awk '
+		/--noeol$/ {
+			gsub(/--noeol$/,"");
+			printf("%s", $0);
+			next;
+		}
+		{ print $0 }
+	' > $out
 
 	# Remove the file if no section was found
-	[ $? = 0 ] || rm $out
+	[ ${PIPESTATUS[0]} = 0 ] || rm $out
 }
 
 function runtests()
