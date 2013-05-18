@@ -5,12 +5,27 @@
 extern "C" {
 #endif
 
+struct colm_data;
 struct colm_tree;
 struct colm_kid;
 struct colm_program;
 struct colm_sections;
 struct colm_tree;
 struct colm_location;
+
+struct colm_tree
+{
+	/* First four will be overlaid in other structures. */
+	short id;
+	unsigned short flags;
+	long refs;
+	struct colm_kid *child;
+
+	struct colm_data *tokdata;
+
+	/* FIXME: this needs to go somewhere else. Will do for now. */
+	unsigned short prodNum;
+};
 
 /*
  * Interface

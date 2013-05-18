@@ -42,11 +42,11 @@ typedef struct colm_location
 } Location;
 
 /* Header located just before string data. */
-typedef struct _Head
+typedef struct colm_data
 {
 	const char *data; 
 	long length;
-	Location *location;
+	struct colm_location *location;
 } Head;
 
 typedef struct colm_kid
@@ -65,20 +65,7 @@ typedef struct _Ref
 	struct _Ref *next;
 } Ref;
 
-typedef struct colm_tree
-{
-	/* First four will be overlaid in other structures. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	Head *tokdata;
-
-	/* FIXME: this needs to go somewhere else. Will do for now. */
-	unsigned short prodNum;
-} Tree;
-
+typedef struct colm_tree Tree;
 
 typedef struct _TreePair
 {

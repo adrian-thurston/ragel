@@ -105,6 +105,7 @@ void Compiler::generateExports()
 		out << "	colm_location *loc() { return colm_find_location( __prg, __tree ); }\n";
 		out << "	std::string text_notrim() { return printTreeStr( __prg, __tree, false ); }\n";
 		out << "	std::string text_ws() { return printTreeStr( __prg, __tree, false ); }\n";
+		out << "	colm_data *data() { return __tree->tokdata; }\n";
 		out << "	operator colm_tree *() { return __tree; }\n";
 		out << "	colm_program *__prg;\n";
 		out << "	colm_tree *__tree;\n";
