@@ -1562,18 +1562,18 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_TREE_TO_STR\n" );
 
 			Tree *tree = vm_pop();
-			Head *res = treeToStr( prg, sp, tree, true );
+			Head *res = treeToStr( prg, sp, tree, false );
 			Tree *str = constructString( prg, res );
 			treeUpref( str );
 			vm_push( str );
 			treeDownref( prg, sp, tree );
 			break;
 		}
-		case IN_TREE_TO_STR_NOTRIM: {
-			debug( prg, REALM_BYTECODE, "IN_TREE_TO_STR_NOTRIM\n" );
+		case IN_TREE_TO_STR_TRIM: {
+			debug( prg, REALM_BYTECODE, "IN_TREE_TO_STR_TRIM\n" );
 
 			Tree *tree = vm_pop();
-			Head *res = treeToStr( prg, sp, tree, false );
+			Head *res = treeToStr( prg, sp, tree, true );
 			Tree *str = constructString( prg, res );
 			treeUpref( str );
 			vm_push( str );

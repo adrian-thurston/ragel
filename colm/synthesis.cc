@@ -1891,13 +1891,13 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 				}
 				case '$': {
 					right->evaluate( pd, code );
-					code.append( IN_TREE_TO_STR );
+					code.append( IN_TREE_TO_STR_TRIM );
 					return pd->uniqueTypeStr;
 					
 				}
 				case '%': {
 					right->evaluate( pd, code );
-					code.append( IN_TREE_TO_STR_NOTRIM );
+					code.append( IN_TREE_TO_STR );
 					return pd->uniqueTypeStr;
 				}
 				case '^': {
