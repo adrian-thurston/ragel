@@ -31,7 +31,7 @@ cons SP: parser<ctx::start> []
 SP.ctx = cons ctx []
 send SP [stdin]
 Input: ctx::start = SP()
-print( Input '\n' )
+print( Input )
 ##### IN #####
 a b c ( d e f )
 ##### EXP #####

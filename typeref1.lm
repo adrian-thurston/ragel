@@ -13,11 +13,10 @@ namespace n1
 end
 
 parse P: n1::n2::id*[stdin]
-print( P '\n' )
+print( P )
 ##### IN #####
 
 ##### EXP #####
-
 ##### IN #####
 a
 ##### EXP #####

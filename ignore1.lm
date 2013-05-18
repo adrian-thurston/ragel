@@ -45,16 +45,15 @@ def item_list
 
 parse Attrs: attr_list[ stdin ]
 
-print( %Attrs '\n' )
+print( Attrs )
 
 construct IL: item_list 
-	["<wrapper .[Attrs]. ></wrapper>"]
+	["<wrapper .[Attrs]. ></wrapper>\n"]
 
-print( IL '\n' )
+print( IL  )
 ##### IN #####
 + foo = asdf +
 ##### EXP #####
 + foo = asdf +
-
 <wrapper .+ foo = asdf +
 . ></wrapper>

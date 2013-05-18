@@ -32,9 +32,9 @@ if ( ! Start ) {
 }
 
 for I: item in Start {
-	print( 'item: .' %I '.\n' )
+	print( 'item: .' I '.\n' )
 	if match I [ O: POPEN Inner: inner C: PCLOSE ]
-		print( 'innr: .' %O '.' %Inner '.' %C '.\n' )
+		print( 'innr: .' O '.' Inner '.' C '.\n' )
 }
 
 ##### IN #####

@@ -165,7 +165,7 @@ for S: statement* in P
     }
 }
 
-print( %P )
+print( P )
 ##### IN #####
 
 var a;

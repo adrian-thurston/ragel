@@ -38,7 +38,7 @@ I = 1
 
 for AO: arg_option in P {
 	if AO.Short
-		print( AO.Short ' ' AO.Func  '\n' )
+		print( ^AO.Short ' ' ^AO.Func  '\n' )
 
 	I = I + 1
 }
