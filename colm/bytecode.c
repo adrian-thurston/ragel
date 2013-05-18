@@ -165,7 +165,7 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, StreamImpl *is )
 		/* Collect the tree data. */
 		StrCollect collect;
 		initStrCollect( &collect );
-		printTreeCollect( prg, sp, &collect, input, true );
+		printTreeCollect( prg, sp, &collect, input, false );
 
 		/* Load it into the input. */
 		is->funcs->appendData( is, collect.data, collect.length );
@@ -324,7 +324,7 @@ static long streamPush( Program *prg, Tree **sp, StreamImpl *in, Tree *tree, int
 		/* Collect the tree data. */
 		StrCollect collect;
 		initStrCollect( &collect );
-		printTreeCollect( prg, sp, &collect, tree, true );
+		printTreeCollect( prg, sp, &collect, tree, false );
 
 		streamPushText( in, collect.data, collect.length );
 		long length = collect.length;
