@@ -357,11 +357,11 @@ struct LoadColm
 		return objectDef;
 	}
 
-	void walkPreEof( pre_eof PreEof )
+	void walkPreEof( pre_eof_def PreEofDef )
 	{
 		ObjectDef *localFrame = blockOpen();
-		StmtList *stmtList = walkLangStmtList( PreEof.LangStmtList() );
-		preEof( PreEof.PreEof().loc(), stmtList, localFrame );
+		StmtList *stmtList = walkLangStmtList( PreEofDef.LangStmtList() );
+		preEof( PreEofDef.PreEof().loc(), stmtList, localFrame );
 		blockClose();
 	}
 
@@ -771,12 +771,12 @@ struct LoadColm
 			walkProdEl( list, ProdElList.ProdEl() );
 	}
 
-	CodeBlock *walkOptReduce( opt_reduce optReduce )
+	CodeBlock *walkOptReduce( opt_reduce OptReduce )
 	{
 		CodeBlock *block = 0;
-		if ( optReduce.LangStmtList() != 0 ) {
+		if ( OptReduce.LangStmtList() != 0 ) {
 			ObjectDef *localFrame = blockOpen();
-			StmtList *stmtList = walkLangStmtList( optReduce.LangStmtList() );
+			StmtList *stmtList = walkLangStmtList( OptReduce.LangStmtList() );
 
 			block = CodeBlock::cons( stmtList, localFrame );
 			block->context = contextStack.top();
@@ -791,11 +791,15 @@ struct LoadColm
 		ProdElList *list = new ProdElList;
 
 		walkProdElList( list, Prod.ProdElList() );
-		CodeBlock *codeBlock = walkOptReduce( Prod.OptReduce() );
 
+		String name;
+		if ( Prod.OptName().Name() != 0 )
+			name = Prod.OptName().Name().text().c_str();
+
+		CodeBlock *codeBlock = walkOptReduce( Prod.OptReduce() );
 		bool commit = Prod.OptCommit().Commit() != 0;
 
-		Production *prod = BaseParser::production( Prod.Open().loc() , list, commit, codeBlock, 0 );
+		Production *prod = BaseParser::production( Prod.Open().loc(), list, name, commit, codeBlock, 0 );
 		prodAppend( lelDefList, prod );
 	}
 
@@ -1717,44 +1721,46 @@ struct LoadColm
 
 	void walkContextItem( context_item contextItem )
 	{
-		if ( contextItem.RlDef() != 0 ) {
+		switch ( contextItem.prodType() ) {
+		case context_item::Rl:
 			walkRlDef( contextItem.RlDef() );
-		}
-		else if ( contextItem.ContextVarDef() != 0 ) {
+			break;
+		case context_item::ContextVar:
 			walkContextVarDef( contextItem.ContextVarDef() );
-		}
-		else if ( contextItem.TokenDef() != 0 ) {
+			break;
+		case context_item::Token:
 			walkTokenDef( contextItem.TokenDef() );
-		}
-		else if ( contextItem.IgnoreDef() != 0 ) {
+			break;
+		case context_item::Ignore:
 			walkIgnoreDef( contextItem.IgnoreDef() );
-		}
-		else if ( contextItem.LiteralDef() != 0 ) {
+			break;
+		case context_item::Literal:
 			walkLiteralDef( contextItem.LiteralDef() );
-		}
-		else if ( contextItem.CflDef() != 0 ) {
+			break;
+		case context_item::Cfl:
 			walkCflDef( contextItem.CflDef() );
-		}
-		else if ( contextItem.RegionDef() != 0 ) {
+			break;
+		case context_item::Region:
 			walkLexRegion( contextItem.RegionDef() );
-		}
-		else if ( contextItem.ContextDef() != 0 ) {
+			break;
+		case context_item::Context:
 			walkContextDef( contextItem.ContextDef() );
-		}
-		else if ( contextItem.FunctionDef() != 0 ) {
+			break;
+		case context_item::Function:
 			walkFunctionDef( contextItem.FunctionDef() );
-		}
-		else if ( contextItem.IterDef() != 0 ) {
+			break;
+		case context_item::Iter:
 			walkIterDef( contextItem.IterDef() );
-		}
-		else if ( contextItem.PreEof() != 0 ) {
-			walkPreEof( contextItem.PreEof() );
-		}
-		else if ( contextItem.ExportDef() != 0 ) {
+			break;
+		case context_item::PreEof:
+			walkPreEof( contextItem.PreEofDef() );
+			break;
+		case context_item::Export:
 			walkExportDef( contextItem.ExportDef() );
-		}
-		else if ( contextItem.PrecedenceDef() != 0 ) {
+			break;
+		case context_item::Precedence:
 			walkPrecedenceDef( contextItem.PrecedenceDef() );
+			break;
 		}
 	}
 
@@ -1821,8 +1827,8 @@ struct LoadColm
 		else if ( rootItem.IterDef() != 0 ) {
 			walkIterDef( rootItem.IterDef() );
 		}
-		else if ( rootItem.PreEof() != 0 ) {
-			walkPreEof( rootItem.PreEof() );
+		else if ( rootItem.PreEofDef() != 0 ) {
+			walkPreEof( rootItem.PreEofDef() );
 		}
 		else if ( rootItem.ExportDef() != 0 ) {
 			LangStmt *stmt = walkExportDef( rootItem.ExportDef() );

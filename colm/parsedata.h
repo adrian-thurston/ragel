@@ -136,11 +136,12 @@ struct Production
 		isLeftRec(false), localFrame(0), lhsField(0), predOf(0) {}
 
 	static Production* cons( const InputLoc &loc, LangEl *prodName, ProdElList *prodElList, 
-			bool prodCommit, CodeBlock *redBlock, int prodId, int prodNum )
+			String name, bool prodCommit, CodeBlock *redBlock, int prodId, int prodNum )
 	{
 		Production *p = new Production;
 		p->loc = loc;
 		p->prodName = prodName;
+		p->name = name;
 		p->prodElList = prodElList;
 		p->prodCommit = prodCommit;
 		p->redBlock = redBlock;
@@ -152,6 +153,7 @@ struct Production
 	InputLoc loc;
 	LangEl *prodName;
 	ProdElList *prodElList;
+	String name;
 	bool prodCommit;
 
 	CodeBlock *redBlock;

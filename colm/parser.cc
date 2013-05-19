@@ -709,10 +709,10 @@ ConsItemList *BaseParser::consElLiteral( const InputLoc &loc,
 }
 
 Production *BaseParser::production( const InputLoc &loc, ProdElList *prodElList,
-		bool commit, CodeBlock *codeBlock, LangEl *predOf )
+		String name, bool commit, CodeBlock *codeBlock, LangEl *predOf )
 {
 	Production *prod = Production::cons( loc, 0, prodElList,
-			commit, codeBlock, pd->prodList.length(), 0 );
+			name, commit, codeBlock, pd->prodList.length(), 0 );
 	prod->predOf = predOf;
 
 	/* Link the production elements back to the production. */

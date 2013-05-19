@@ -376,14 +376,14 @@ ProdEl *ConsInit::prodRefLit( const String &lit )
 Production *ConsInit::production()
 {
 	ProdElList *prodElList = new ProdElList;
-	return BaseParser::production( internal, prodElList, false, 0, 0 );
+	return BaseParser::production( internal, prodElList, String(), false, 0, 0 );
 }
 
 Production *ConsInit::production( ProdEl *prodEl1 )
 {
 	ProdElList *prodElList = new ProdElList;
 	appendProdEl( prodElList, prodEl1 );
-	return BaseParser::production( internal, prodElList, false, 0, 0 );
+	return BaseParser::production( internal, prodElList, String(), false, 0, 0 );
 }
 
 Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2 )
@@ -391,7 +391,7 @@ Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2 )
 	ProdElList *prodElList = new ProdElList;
 	appendProdEl( prodElList, prodEl1 );
 	appendProdEl( prodElList, prodEl2 );
-	return BaseParser::production( internal, prodElList, false, 0, 0 );
+	return BaseParser::production( internal, prodElList, String(), false, 0, 0 );
 }
 
 Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
@@ -401,7 +401,7 @@ Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	appendProdEl( prodElList, prodEl1 );
 	appendProdEl( prodElList, prodEl2 );
 	appendProdEl( prodElList, prodEl3 );
-	return BaseParser::production( internal, prodElList, false, 0, 0 );
+	return BaseParser::production( internal, prodElList, String(), false, 0, 0 );
 }
 
 Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
@@ -412,7 +412,7 @@ Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	appendProdEl( prodElList, prodEl2 );
 	appendProdEl( prodElList, prodEl3 );
 	appendProdEl( prodElList, prodEl4 );
-	return BaseParser::production( internal, prodElList, false, 0, 0 );
+	return BaseParser::production( internal, prodElList, String(), false, 0, 0 );
 }
 
 Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
@@ -424,7 +424,7 @@ Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	appendProdEl( prodElList, prodEl3 );
 	appendProdEl( prodElList, prodEl4 );
 	appendProdEl( prodElList, prodEl5 );
-	return BaseParser::production( internal, prodElList, false, 0, 0 );
+	return BaseParser::production( internal, prodElList, String(), false, 0, 0 );
 }
 
 Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
@@ -439,7 +439,7 @@ Production *ConsInit::production( ProdEl *prodEl1, ProdEl *prodEl2,
 	appendProdEl( prodElList, prodEl5 );
 	appendProdEl( prodElList, prodEl6 );
 	appendProdEl( prodElList, prodEl7 );
-	return BaseParser::production( internal, prodElList, false, 0, 0 );
+	return BaseParser::production( internal, prodElList, String(), false, 0, 0 );
 }
 
 void ConsInit::definition( const String &name, Production *prod1, Production *prod2,
@@ -612,7 +612,7 @@ Production *ConsInit::prodLex()
 	return production( prodEl1, prodEl2, prodEl3 );
 }
 
-void ConsInit::optProdName()
+void ConsInit::optProdElName()
 {
 	ProdEl *prodEl1 = prodRefName( "Name", "id" );
 	ProdEl *prodEl2 = prodRefLit( "':'" );
@@ -620,7 +620,7 @@ void ConsInit::optProdName()
 	
 	Production *prod2 = production();
 
-	definition( "opt_prod_name",  prod1, prod2 );
+	definition( "opt_prod_el_name",  prod1, prod2 );
 }
 
 void ConsInit::optNi()
@@ -645,7 +645,7 @@ void ConsInit::optRepeat()
 
 void ConsInit::prodEl()
 {
-	ProdEl *prodEl1 = prodRefName( "OptName", "opt_prod_name" );
+	ProdEl *prodEl1 = prodRefName( "OptName", "opt_prod_el_name" );
 	ProdEl *prodEl2 = prodRefName( "Id", "id" );
 	ProdEl *prodEl3 = prodRefName( "OptRepeat", "opt_prod_repeat" );
 	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
@@ -674,13 +674,25 @@ void ConsInit::optCommit()
 	definition( "opt_commit",  prod1, prod2 );
 }
 
+void ConsInit::optProdName()
+{
+	ProdEl *prodEl1 = prodRefLit( "':'" );
+	ProdEl *prodEl2 = prodRefName( "Name", "id" );
+	Production *prod1 = production( prodEl1, prodEl2 );
+	
+	Production *prod2 = production();
+
+	definition( "opt_prod_name",  prod1, prod2 );
+}
+
 void ConsInit::prod()
 {
 	ProdEl *prodEl1 = prodRefLit( "'['" );
 	ProdEl *prodEl2 = prodRefName( "ProdElList", "prod_el_list" );
 	ProdEl *prodEl3 = prodRefLit( "']'" );
-	ProdEl *prodEl4 = prodRefName( "OptCommit", "opt_commit" );
-	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4 );
+	ProdEl *prodEl4 = prodRefName( "OptName", "opt_prod_name" );
+	ProdEl *prodEl5 = prodRefName( "OptCommit", "opt_commit" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3, prodEl4, prodEl5 );
 
 	definition( "prod",  prod1 );
 }
@@ -822,10 +834,11 @@ void ConsInit::go( long activeRealm )
 
 	optNi();
 	optRepeat();
-	optProdName();
+	optProdElName();
 	prodEl();
 	prodElList();
 	optCommit();
+	optProdName();
 	prod();
 	prodList();
 	ignore();

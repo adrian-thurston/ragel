@@ -286,7 +286,7 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 		assert( prodName->type == LangEl::NonTerm );
 
 		Production *newDef = Production::cons( InputLoc(), prodName, 
-			emptyList, false, 0,
+			emptyList, String(), false, 0,
 			pd->prodList.length(), prodName->defList.length() );
 			
 		prodName->defList.append( newDef );
@@ -337,7 +337,7 @@ void Namespace::declare( Compiler *pd )
 			assert( prodName->type == LangEl::NonTerm );
 
 			Production *newDef = Production::cons( loc, prodName, 
-				emptyList, false, 0,
+				emptyList, String(), false, 0,
 				pd->prodList.length(), prodName->defList.length() );
 			
 			prodName->defList.append( newDef );

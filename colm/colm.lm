@@ -196,7 +196,7 @@ def root_item
 |	[Statement: statement] commit
 |	[GlobalDef: global_def] commit
 |	[ExportDef: export_def] commit
-|	[PreEof: pre_eof] commit
+|	[PreEofDef: pre_eof_def] commit
 |	[PrecedenceDef: precedence_def] commit
 |	[AliasDef: alias_def] commit
 |	[Include: include] commit
@@ -220,26 +220,26 @@ def pred_token
 	[RegionQual: region_qual Id: id]
 |	[RegionQual: region_qual Lit: lit]
 
-def pre_eof
+def pre_eof_def
 	[PreEof: PREEOF COPEN LangStmtList: lang_stmt_list CCLOSE]
 
 def alias_def
 	[ALIAS Id: id TypeRef: type_ref]
 
 def context_item
-	[ContextVarDef: context_var_def] commit
-|	[LiteralDef: literal_def] commit
-|	[RlDef: rl_def] commit
-|	[TokenDef: token_def] commit
-|	[IgnoreDef: ignore_def] commit
-|	[CflDef: cfl_def] commit
-|	[RegionDef: region_def] commit
-|	[ContextDef: context_def] commit
-|	[FunctionDef: function_def] commit
-|	[IterDef: iter_def] commit
-|	[ExportDef: export_def] commit
-|	[PreEof: pre_eof] commit
-|	[PrecedenceDef: precedence_def] commit
+	[ContextVarDef: context_var_def] :ContextVar commit
+|	[LiteralDef: literal_def] :Literal commit
+|	[RlDef: rl_def] :Rl commit
+|	[TokenDef: token_def] :Token commit
+|	[IgnoreDef: ignore_def] :Ignore commit
+|	[CflDef: cfl_def] :Cfl commit
+|	[RegionDef: region_def] :Region commit
+|	[ContextDef: context_def] :Context commit
+|	[FunctionDef: function_def] :Function commit
+|	[IterDef: iter_def] :Iter commit
+|	[ExportDef: export_def] :Export commit
+|	[PreEofDef: pre_eof_def] :PreEof commit
+|	[PrecedenceDef: precedence_def] :Precedence commit
 
 def export_def
 	[EXPORT VarDef: var_def OptDefInit: opt_def_init]
@@ -332,10 +332,10 @@ def ignore_def
 	[I: IGNORE OptId: opt_id LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH]
 
 def prod_el
-	[OptName: opt_prod_name RegionQual: region_qual Id: id OptRepeat: opt_repeat]
-|	[OptName: opt_prod_name RegionQual: region_qual Lit: lit OptRepeat: opt_repeat]
+	[OptName: opt_prod_el_name RegionQual: region_qual Id: id OptRepeat: opt_repeat]
+|	[OptName: opt_prod_el_name RegionQual: region_qual Lit: lit OptRepeat: opt_repeat]
 
-def opt_prod_name
+def opt_prod_el_name
 	[Name: id COLON]
 |	[]
 
@@ -347,8 +347,14 @@ def opt_commit
 	[Commit: COMMIT]
 |	[]
 
+def opt_prod_name
+	[COLON Name: id]
+|	[]
+
+
 def prod
 	[Open: SQOPEN ProdElList: prod_el_list SQCLOSE 
+		OptName: opt_prod_name
 		OptCommit: opt_commit
 		OptReduce: opt_reduce]
 

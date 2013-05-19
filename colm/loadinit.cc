@@ -78,9 +78,13 @@ void LoadInit::walkProdList( LelDefList *outProdList, prod_list &prodList )
 	prod_el_list prodElList = prodList.Prod().ProdElList();
 	walkProdElList( outElList, prodElList );
 
+	String name;
+	if ( prodList.Prod().OptName().Name() != 0 )
+		name = prodList.Prod().OptName().Name().text().c_str();
+
 	bool commit = prodList.Prod().OptCommit().Commit() != 0;
 
-	Production *prod = BaseParser::production( internal, outElList, commit, 0, 0 );
+	Production *prod = BaseParser::production( internal, outElList, name, commit, 0, 0 );
 	prodAppend( outProdList, prod );
 }
 

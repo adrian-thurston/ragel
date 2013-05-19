@@ -111,9 +111,12 @@ void Compiler::generateExports()
 		out << "	colm_tree *__tree;\n";
 
 		if ( mainReturnUT != 0 && mainReturnUT->langEl == lel ) {
-			out << "	" << lel->fullName << "( colm_program *prg ) : __prg(prg), __tree(returnVal(prg)) {}\n";
+			out << "	" << lel->fullName <<
+					"( colm_program *prg ) : __prg(prg), __tree(returnVal(prg)) {}\n";
 		}
-		out << "	" << lel->fullName << "( colm_program *prg, colm_tree *tree ) : __prg(prg), __tree(tree) {}\n";
+
+		out << "	" << lel->fullName <<
+				"( colm_program *prg, colm_tree *tree ) : __prg(prg), __tree(tree) {}\n";
 
 		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
@@ -137,6 +140,23 @@ void Compiler::generateExports()
 			}
 		}
 
+		bool prodNames = false;
+		for ( LelDefList::Iter prod = lel->defList; prod.lte(); prod++ ) {
+			if ( prod->name.length() > 0 )
+				prodNames = true;
+		}
+
+		if ( prodNames ) {
+			out << "	enum Prod {\n";
+			for ( LelDefList::Iter prod = lel->defList; prod.lte(); prod++ ) {
+				if ( prod->name.length() > 0 )
+					out << "\t\t" << prod->name << " = " << prod->prodNum << ",\n";
+			}
+			out << "	};\n";
+			out << "	enum Prod prodType() { return (enum Prod)__tree->prodNum; }\n";
+		}
+		
+
 		if ( lel->isRepeat ) {
 			out << "	" << "int end() { return colm_repeat_end( __tree ); }\n";
 			out << "	" << lel->refName << " next();\n";
@@ -148,6 +168,8 @@ void Compiler::generateExports()
 			out << "	" << lel->refName << " next();\n";
 			out << "	" << lel->repeatOf->refName << " value();\n";
 		}
+
+
 		out << "};";
 		closeNameSpace( out, lel->nspace );
 		out << "\n";

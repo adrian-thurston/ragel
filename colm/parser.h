@@ -108,7 +108,7 @@ struct BaseParser
 	ConsItemList *consElLiteral( const InputLoc &loc,
 			const String &data, NamespaceQual *nspaceQual );
 	Production *production( const InputLoc &loc, ProdElList *prodElList,
-			bool commit, CodeBlock *codeBlock, LangEl *predOf );
+			String name, bool commit, CodeBlock *codeBlock, LangEl *predOf );
 	void objVarDef( ObjectDef *objectDef, ObjectField *objField );
 	LelDefList *prodAppend( LelDefList *defList, Production *definition );
 

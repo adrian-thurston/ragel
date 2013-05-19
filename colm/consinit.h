@@ -84,11 +84,12 @@ struct ConsInit
 
 	void optNi();
 	void optRepeat();
-	void optProdName();
+	void optProdElName();
 	void prodEl();
 	void prodElList();
 	void item();
 	void prodList();
+	void optProdName();
 	void prod();
 	void startProd();
 	void optCommit();

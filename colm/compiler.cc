@@ -768,7 +768,7 @@ LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
 	prodElList1->append( factor2 );
 
 	Production *newDef1 = Production::cons( InputLoc(),
-			prodName, prodElList1, false, 0,
+			prodName, prodElList1, String(), false, 0,
 			prodList.length(), prodName->defList.length() );
 
 	prodName->defList.append( newDef1 );
@@ -778,7 +778,7 @@ LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
 	ProdElList *prodElList2 = new ProdElList;
 
 	Production *newDef2 = Production::cons( InputLoc(),
-			prodName, prodElList2, false, 0,
+			prodName, prodElList2, String(), false, 0,
 			prodList.length(), prodName->defList.length() );
 
 	prodName->defList.append( newDef2 );
@@ -806,7 +806,7 @@ LangEl *Compiler::makeListProd( const InputLoc &loc, Namespace *nspace,
 	prodElList1->append( factor2 );
 
 	Production *newDef1 = Production::cons( loc,
-			prodName, prodElList1, false, 0,
+			prodName, prodElList1, String(), false, 0,
 			prodList.length(), prodName->defList.length() );
 
 	prodName->defList.append( newDef1 );
@@ -820,7 +820,7 @@ LangEl *Compiler::makeListProd( const InputLoc &loc, Namespace *nspace,
 	prodElList2->append( factor3 );
 
 	Production *newDef2 = Production::cons( loc,
-			prodName, prodElList2, false, 0,
+			prodName, prodElList2, String(), false, 0,
 			prodList.length(), prodName->defList.length() );
 
 	prodName->defList.append( newDef2 );
@@ -843,7 +843,7 @@ LangEl *Compiler::makeOptProd( const InputLoc &loc, Namespace *nspace,
 	prodElList1->append( factor1 );
 
 	Production *newDef1 = Production::cons( loc,
-			prodName, prodElList1, false, 0,
+			prodName, prodElList1, String(), false, 0,
 			prodList.length(), prodName->defList.length() );
 
 	prodName->defList.append( newDef1 );
@@ -853,7 +853,7 @@ LangEl *Compiler::makeOptProd( const InputLoc &loc, Namespace *nspace,
 	ProdElList *prodElList2 = new ProdElList;
 
 	Production *newDef2 = Production::cons( loc,
-			prodName, prodElList2, false, 0,
+			prodName, prodElList2, String(), false, 0,
 			prodList.length(), prodName->defList.length() );
 
 	prodName->defList.append( newDef2 );

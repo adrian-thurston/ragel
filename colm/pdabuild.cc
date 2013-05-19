@@ -1060,7 +1060,7 @@ void Compiler::wrapNonTerminals()
 		/* Make a single production used when the lel is a root. */
 		ProdElList *prodElList = makeProdElList( lel );
 		lel->rootDef = Production::cons( InputLoc(), rootLangEl, 
-				prodElList, false, 0,
+				prodElList, String(), false, 0,
 				prodList.length(), rootLangEl->defList.length() );
 		prodList.append( lel->rootDef );
 		rootLangEl->defList.append( lel->rootDef );
@@ -1262,7 +1262,7 @@ void Compiler::insertUniqueEmptyProductions()
 		sprintf(name, "U%li", prodList.length());
 		LangEl *prodName = addLangEl( this, rootNamespace, name, LangEl::NonTerm );
 		Production *newDef = Production::cons( InputLoc(), prodName, 
-				0, false, 0, prodList.length(), prodName->defList.length() );
+				0, String(), false, 0, prodList.length(), prodName->defList.length() );
 		prodName->defList.append( newDef );
 		prodList.append( newDef );
 
