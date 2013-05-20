@@ -1721,44 +1721,44 @@ struct LoadColm
 
 	void walkContextItem( context_item contextItem )
 	{
-		switch ( contextItem.prodType() ) {
-		case context_item::Rl:
+		switch ( contextItem.prodName() ) {
+		case context_item::_Rl:
 			walkRlDef( contextItem.RlDef() );
 			break;
-		case context_item::ContextVar:
+		case context_item::_ContextVar:
 			walkContextVarDef( contextItem.ContextVarDef() );
 			break;
-		case context_item::Token:
+		case context_item::_Token:
 			walkTokenDef( contextItem.TokenDef() );
 			break;
-		case context_item::Ignore:
+		case context_item::_Ignore:
 			walkIgnoreDef( contextItem.IgnoreDef() );
 			break;
-		case context_item::Literal:
+		case context_item::_Literal:
 			walkLiteralDef( contextItem.LiteralDef() );
 			break;
-		case context_item::Cfl:
+		case context_item::_Cfl:
 			walkCflDef( contextItem.CflDef() );
 			break;
-		case context_item::Region:
+		case context_item::_Region:
 			walkLexRegion( contextItem.RegionDef() );
 			break;
-		case context_item::Context:
+		case context_item::_Context:
 			walkContextDef( contextItem.ContextDef() );
 			break;
-		case context_item::Function:
+		case context_item::_Function:
 			walkFunctionDef( contextItem.FunctionDef() );
 			break;
-		case context_item::Iter:
+		case context_item::_Iter:
 			walkIterDef( contextItem.IterDef() );
 			break;
-		case context_item::PreEof:
+		case context_item::_PreEof:
 			walkPreEof( contextItem.PreEofDef() );
 			break;
-		case context_item::Export:
+		case context_item::_Export:
 			walkExportDef( contextItem.ExportDef() );
 			break;
-		case context_item::Precedence:
+		case context_item::_Precedence:
 			walkPrecedenceDef( contextItem.PrecedenceDef() );
 			break;
 		}
@@ -1789,64 +1789,64 @@ struct LoadColm
 
 	void walkRootItem( root_item &rootItem, StmtList *stmtList )
 	{
-		switch ( rootItem.prodType() ) {
-		case root_item::RlProd:
+		switch ( rootItem.prodName() ) {
+		case root_item::_RlProd:
 			walkRlDef( rootItem.RlDef() );
 			break;
-		case root_item::TokenProd:
+		case root_item::_TokenProd:
 			walkTokenDef( rootItem.TokenDef() );
 			break;
-		case root_item::IgnoreProd:
+		case root_item::_IgnoreProd:
 			walkIgnoreDef( rootItem.IgnoreDef() );
 			break;
-		case root_item::LiteralProd:
+		case root_item::_LiteralProd:
 			walkLiteralDef( rootItem.LiteralDef() );
 			break;
-		case root_item::CflProd:
+		case root_item::_CflProd:
 			walkCflDef( rootItem.CflDef() );
 			break;
-		case root_item::RegionProd:
+		case root_item::_RegionProd:
 			walkLexRegion( rootItem.RegionDef() );
 			break;
-		case root_item::StatementProd: {
+		case root_item::_StatementProd: {
 			LangStmt *stmt = walkStatement( rootItem.Statement() );
 			if ( stmt != 0 )
 				stmtList->append( stmt );
 			break;
 		}
-		case root_item::ContextProd:
+		case root_item::_ContextProd:
 			walkContextDef( rootItem.ContextDef() );
 			break;
-		case root_item::NamespaceProd:
+		case root_item::_NamespaceProd:
 			walkNamespaceDef( rootItem.NamespaceDef() );
 			break;
-		case root_item::FunctionProd:
+		case root_item::_FunctionProd:
 			walkFunctionDef( rootItem.FunctionDef() );
 			break;
-		case root_item::IterProd:
+		case root_item::_IterProd:
 			walkIterDef( rootItem.IterDef() );
 			break;
-		case root_item::PreEofProd:
+		case root_item::_PreEofProd:
 			walkPreEof( rootItem.PreEofDef() );
 			break;
-		case root_item::ExportProd: {
+		case root_item::_ExportProd: {
 			LangStmt *stmt = walkExportDef( rootItem.ExportDef() );
 			if ( stmt != 0 )
 				stmtList->append( stmt );
 			break;
 		}
-		case root_item::AliasProd:
+		case root_item::_AliasProd:
 			walkAliasDef( rootItem.AliasDef() );
 			break;
-		case root_item::PrecedenceProd:
+		case root_item::_PrecedenceProd:
 			walkPrecedenceDef( rootItem.PrecedenceDef() );
 			break;
-		case root_item::IncludeProd: {
+		case root_item::_IncludeProd: {
 			StmtList *includeList = walkInclude( rootItem.Include() );
 			stmtList->append( *includeList );
 			break;
 		}
-		case root_item::GlobalProd: {
+		case root_item::_GlobalProd: {
 			LangStmt *stmt = walkGlobalDef( rootItem.GlobalDef() );
 			if ( stmt != 0 )
 				stmtList->append( stmt );
