@@ -1789,67 +1789,69 @@ struct LoadColm
 
 	void walkRootItem( root_item &rootItem, StmtList *stmtList )
 	{
-		if ( rootItem.RlDef() != 0 ) {
+		switch ( rootItem.prodType() ) {
+		case root_item::RlProd:
 			walkRlDef( rootItem.RlDef() );
-		}
-		else if ( rootItem.TokenDef() != 0 ) {
+			break;
+		case root_item::TokenProd:
 			walkTokenDef( rootItem.TokenDef() );
-		}
-		else if ( rootItem.IgnoreDef() != 0 ) {
+			break;
+		case root_item::IgnoreProd:
 			walkIgnoreDef( rootItem.IgnoreDef() );
-		}
-		else if ( rootItem.LiteralDef() != 0 ) {
+			break;
+		case root_item::LiteralProd:
 			walkLiteralDef( rootItem.LiteralDef() );
-		}
-		else if ( rootItem.CflDef() != 0 ) {
+			break;
+		case root_item::CflProd:
 			walkCflDef( rootItem.CflDef() );
-		}
-		else if ( rootItem.RegionDef() != 0 ) {
+			break;
+		case root_item::RegionProd:
 			walkLexRegion( rootItem.RegionDef() );
-		}
-		else if ( rootItem.Statement() != 0 ) {
+			break;
+		case root_item::StatementProd: {
 			LangStmt *stmt = walkStatement( rootItem.Statement() );
 			if ( stmt != 0 )
 				stmtList->append( stmt );
+			break;
 		}
-		else if ( rootItem.ContextDef() != 0 ) {
+		case root_item::ContextProd:
 			walkContextDef( rootItem.ContextDef() );
-		}
-		else if ( rootItem.NamespaceDef() != 0 ) {
+			break;
+		case root_item::NamespaceProd:
 			walkNamespaceDef( rootItem.NamespaceDef() );
-		}
-		else if ( rootItem.FunctionDef() != 0 ) {
+			break;
+		case root_item::FunctionProd:
 			walkFunctionDef( rootItem.FunctionDef() );
-		}
-		else if ( rootItem.IterDef() != 0 ) {
+			break;
+		case root_item::IterProd:
 			walkIterDef( rootItem.IterDef() );
-		}
-		else if ( rootItem.IterDef() != 0 ) {
-			walkIterDef( rootItem.IterDef() );
-		}
-		else if ( rootItem.PreEofDef() != 0 ) {
+			break;
+		case root_item::PreEofProd:
 			walkPreEof( rootItem.PreEofDef() );
-		}
-		else if ( rootItem.ExportDef() != 0 ) {
+			break;
+		case root_item::ExportProd: {
 			LangStmt *stmt = walkExportDef( rootItem.ExportDef() );
 			if ( stmt != 0 )
 				stmtList->append( stmt );
+			break;
 		}
-		else if ( rootItem.AliasDef() != 0 ) {
+		case root_item::AliasProd:
 			walkAliasDef( rootItem.AliasDef() );
-		}
-		else if ( rootItem.PrecedenceDef() != 0 ) {
+			break;
+		case root_item::PrecedenceProd:
 			walkPrecedenceDef( rootItem.PrecedenceDef() );
-		}
-		else if ( rootItem.Include() != 0 ) {
+			break;
+		case root_item::IncludeProd: {
 			StmtList *includeList = walkInclude( rootItem.Include() );
 			stmtList->append( *includeList );
+			break;
 		}
-		else if ( rootItem.GlobalDef() != 0 ) {
+		case root_item::GlobalProd: {
 			LangStmt *stmt = walkGlobalDef( rootItem.GlobalDef() );
 			if ( stmt != 0 )
 				stmtList->append( stmt );
-		}
+			break;
+		}}
 	}
 
 	bool walkOptNoIgnore( opt_no_ignore OptNoIngore )

@@ -183,23 +183,23 @@ def start
 	[RootItemList: root_item*]
 
 def root_item
-	[RlDef: rl_def] commit
-|	[LiteralDef: literal_def] commit
-|	[TokenDef: token_def] commit
-|	[IgnoreDef: ignore_def] commit
-|	[CflDef: cfl_def] commit
-|	[RegionDef: region_def] commit
-|	[ContextDef: context_def] commit
-|	[NamespaceDef: namespace_def] commit
-|	[FunctionDef: function_def] commit
-|	[IterDef: iter_def] commit
-|	[Statement: statement] commit
-|	[GlobalDef: global_def] commit
-|	[ExportDef: export_def] commit
-|	[PreEofDef: pre_eof_def] commit
-|	[PrecedenceDef: precedence_def] commit
-|	[AliasDef: alias_def] commit
-|	[Include: include] commit
+	[RlDef: rl_def] :RlProd commit
+|	[LiteralDef: literal_def] :LiteralProd commit
+|	[TokenDef: token_def] :TokenProd commit
+|	[IgnoreDef: ignore_def] :IgnoreProd commit
+|	[CflDef: cfl_def] :CflProd commit
+|	[RegionDef: region_def] :RegionProd commit
+|	[ContextDef: context_def] :ContextProd commit
+|	[NamespaceDef: namespace_def] :NamespaceProd commit
+|	[FunctionDef: function_def] :FunctionProd commit
+|	[IterDef: iter_def] :IterProd commit
+|	[Statement: statement] :StatementProd commit
+|	[GlobalDef: global_def] :GlobalProd commit
+|	[ExportDef: export_def] :ExportProd commit
+|	[PreEofDef: pre_eof_def] :PreEofProd commit
+|	[PrecedenceDef: precedence_def] :PrecedenceProd commit
+|	[AliasDef: alias_def] :AliasProd commit
+|	[Include: include] :IncludeProd commit
 
 def include
 	[INCLUDE File: lit]
