@@ -238,7 +238,7 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 			 * demand. */
 			String name( 8, "r%d", position );
 			ObjectField *el = ObjectField::cons( InputLoc(), rhsEl->typeRef, name );
-			rhsEl->objField = el;
+			rhsEl->rhsElField = el;
 
 			/* Right hand side elements are constant. */
 			el->isConst = true;
@@ -258,10 +258,10 @@ void Compiler::addProdRHSLoads( Production *prod, CodeVect &code, long &insertPo
 	long elPos = 0;
 	for ( ProdElList::Iter rhsEl = *prod->prodElList; rhsEl.lte(); rhsEl++, elPos++ ) {
 		if ( rhsEl->type == ProdEl::ReferenceType ) {
-			if ( rhsEl->objField->beenReferenced ) {
+			if ( rhsEl->rhsElField->beenReferenced ) {
 				loads.append ( IN_INIT_RHS_EL );
 				loads.appendHalf( elPos );
-				loads.appendHalf( rhsEl->objField->offset );
+				loads.appendHalf( rhsEl->rhsElField->offset );
 			}
 		}
 	}

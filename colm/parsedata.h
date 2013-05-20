@@ -311,41 +311,41 @@ struct ProdEl
 	}; 
 
 	/* Construct with a reference to a var def. */
-	ProdEl( Type type, const InputLoc &loc, ObjectField *captureField, bool commit, TypeRef *typeRef, int priorVal )
+	ProdEl( Type type, const InputLoc &loc, ObjectField *captureField,
+			bool commit, TypeRef *typeRef, int priorVal )
 	:
+		type(type), 
 		production(0),
 		captureField(captureField),
+		rhsElField(0),
 		commit(commit),
 		typeRef(typeRef),
 		langEl(0),
-		priorVal(priorVal),
-		type(type), 
-		objField(0)
+		priorVal(priorVal)
 	{}
 
 	ProdEl( const InputLoc &loc, TypeRef *typeRef )
 	:
+		type(ReferenceType),
 		production(0),
 		captureField(0), 
+		rhsElField(0),
 		commit(false), 
 		typeRef(typeRef), 
 		langEl(0), 
-		priorVal(0), 
-		type(ReferenceType), 
-		objField(0)
+		priorVal(0)
 	{}
 
+	Type type;
 	Production *production;
 	int pos;
 	ObjectField *captureField;
+	ObjectField *rhsElField;
 	bool commit;
-
 	TypeRef *typeRef;
-
 	LangEl *langEl;
 	int priorVal;
-	Type type;
-	ObjectField *objField;
+
 	ProdEl *prev, *next;
 };
 
