@@ -652,10 +652,10 @@ def qual
 #
 
 def lex_expr
-	[Expr: lex_expr Bar: LEX_BAR Term: lex_term] :Bar
-|	[Expr: lex_expr Amp: LEX_AMP Term: lex_term] :Amp
-|	[Expr: lex_expr Dash: LEX_DASH Term: lex_term] :Dash
-|	[Expr: lex_expr DashDash: LEX_DASHDASH Term: lex_term] :DashDash
+	[Expr: lex_expr LEX_BAR Term: lex_term] :Bar
+|	[Expr: lex_expr LEX_AMP Term: lex_term] :Amp
+|	[Expr: lex_expr LEX_DASH Term: lex_term] :Dash
+|	[Expr: lex_expr LEX_DASHDASH Term: lex_term] :DashDash
 |	[Term: lex_term] :Base
 
 def opt_lex_dot
@@ -663,26 +663,26 @@ def opt_lex_dot
 |	[]
 
 def lex_term
-	[Term: lex_term OptDot: opt_lex_dot FactorRep: lex_factor_rep] :Dot
-|	[Term: lex_term ColonGt: LEX_COLON_GT FactorRep: lex_factor_rep] :ColonGt
-|	[Term: lex_term ColonGtGt: LEX_COLON_GTGT FactorRep: lex_factor_rep] :ColonGtGt
-|	[Term: lex_term LtColon: LEX_LT_COLON FactorRep: lex_factor_rep] :LtColon
+	[Term: lex_term opt_lex_dot FactorRep: lex_factor_rep] :Dot
+|	[Term: lex_term LEX_COLON_GT FactorRep: lex_factor_rep] :ColonGt
+|	[Term: lex_term LEX_COLON_GTGT FactorRep: lex_factor_rep] :ColonGtGt
+|	[Term: lex_term LEX_LT_COLON FactorRep: lex_factor_rep] :LtColon
 |	[FactorRep: lex_factor_rep] :Base
 
 def lex_factor_rep
-	[FactorRep: lex_factor_rep Star: LEX_STAR]
-|	[FactorRep: lex_factor_rep StarStar: LEX_STARSTAR]
-|	[FactorRep: lex_factor_rep Plus: LEX_PLUS]
-|	[FactorRep: lex_factor_rep Question: LEX_QUESTION]
-|	[FactorRep: lex_factor_rep COPEN Exact: lex_uint CCLOSE ]
-|	[FactorRep: lex_factor_rep COPEN COMMA Max: lex_uint CCLOSE ]
-|	[FactorRep: lex_factor_rep COPEN Min: lex_uint COMMA CCLOSE ]
-|	[FactorRep: lex_factor_rep COPEN Low: lex_uint COMMA High: lex_uint CCLOSE ]
-|	[FactorNeg: lex_factor_neg]
+	[FactorRep: lex_factor_rep Star: LEX_STAR] :Star
+|	[FactorRep: lex_factor_rep StarStar: LEX_STARSTAR] :StarStar
+|	[FactorRep: lex_factor_rep Plus: LEX_PLUS] :Plus
+|	[FactorRep: lex_factor_rep Question: LEX_QUESTION] :Question
+|	[FactorRep: lex_factor_rep COPEN Exact: lex_uint CCLOSE ] :Exact
+|	[FactorRep: lex_factor_rep COPEN COMMA Max: lex_uint CCLOSE ] :Max
+|	[FactorRep: lex_factor_rep COPEN Min: lex_uint COMMA CCLOSE ] :Min
+|	[FactorRep: lex_factor_rep COPEN Low: lex_uint COMMA High: lex_uint CCLOSE ] :Range
+|	[FactorNeg: lex_factor_neg] :Base
 
 def lex_factor_neg
-	[Caret: LEX_CARET FactorNeg: lex_factor_neg]
-|	[Factor: lex_factor]
+	[LEX_CARET FactorNeg: lex_factor_neg] :Caret
+|	[Factor: lex_factor] :Base
 
 def lex_range_lit
 	[Lit: lex_lit]

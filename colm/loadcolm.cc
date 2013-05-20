@@ -816,80 +816,81 @@ struct LoadColm
 	}
 
 
-	LexFactorNeg *walkLexFactorNeg( lex_factor_neg &LexFactorNegTree )
+	LexFactorNeg *walkLexFactorNeg( lex_factor_neg lexFactorNeg )
 	{
-		if ( LexFactorNegTree.Caret() != 0 ) {
-			lex_factor_neg Rec = LexFactorNegTree.FactorNeg();
-			LexFactorNeg *recNeg = walkLexFactorNeg( Rec );
+		switch ( lexFactorNeg.prodName() ) {
+		case lex_factor_neg::_Caret: {
+			LexFactorNeg *recNeg = walkLexFactorNeg( lexFactorNeg.FactorNeg() );
 			LexFactorNeg *factorNeg = LexFactorNeg::cons( recNeg,
 					LexFactorNeg::CharNegateType );
 			return factorNeg;
 		}
-		else {
-			lex_factor LexFactorTree = LexFactorNegTree.Factor();
-			LexFactor *factor = walkLexFactor( LexFactorTree );
+		case lex_factor_neg::_Base: {
+			LexFactor *factor = walkLexFactor( lexFactorNeg.Factor() );
 			LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
 			return factorNeg;
-		}
+		}}
 	}
 
-	LexFactorRep *walkLexFactorRep( lex_factor_rep LexFactorRepTree )
+	LexFactorRep *walkLexFactorRep( lex_factor_rep lexFactorRep )
 	{
 		LexFactorRep *factorRep = 0;
-		if ( LexFactorRepTree.Star() != 0 ) {
-			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
-			LexFactorRep *recRep = walkLexFactorRep( Rec );
-			factorRep = LexFactorRep::cons( LexFactorRepTree.Star().loc(),
+		LexFactorRep *recRep = 0;
+		lex_factor_rep::prod_name pn = lexFactorRep.prodName();
+
+		if ( pn != lex_factor_rep::_Base )
+			recRep = walkLexFactorRep( lexFactorRep.FactorRep() );
+
+		switch ( pn ) {
+		case lex_factor_rep::_Star: {
+			factorRep = LexFactorRep::cons( lexFactorRep.Star().loc(),
 					recRep, 0, 0, LexFactorRep::StarType );
+			break;
 		}
-		else if ( LexFactorRepTree.StarStar() != 0 ) {
-			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
-			LexFactorRep *recRep = walkLexFactorRep( Rec );
-			factorRep = LexFactorRep::cons( LexFactorRepTree.StarStar().loc(),
+		case lex_factor_rep::_StarStar: {
+			factorRep = LexFactorRep::cons( lexFactorRep.StarStar().loc(),
 					recRep, 0, 0, LexFactorRep::StarStarType );
+			break;
 		}
-		else if ( LexFactorRepTree.Plus() != 0 ) {
-			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
-			LexFactorRep *recRep = walkLexFactorRep( Rec );
-			factorRep = LexFactorRep::cons( LexFactorRepTree.Plus().loc(),
+		case lex_factor_rep::_Plus: {
+			factorRep = LexFactorRep::cons( lexFactorRep.Plus().loc(),
 					recRep, 0, 0, LexFactorRep::PlusType );
+			break;
 		}
-		else if ( LexFactorRepTree.Question() != 0 ) {
-			lex_factor_rep Rec = LexFactorRepTree.FactorRep();
-			LexFactorRep *recRep = walkLexFactorRep( Rec );
-			factorRep = LexFactorRep::cons( LexFactorRepTree.Question().loc(),
+		case lex_factor_rep::_Question: {
+			factorRep = LexFactorRep::cons( lexFactorRep.Question().loc(),
 					recRep, 0, 0, LexFactorRep::OptionalType );
+			break;
 		}
-		else if ( LexFactorRepTree.Exact() != 0 ) {
-			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
-			int low = atoi( LexFactorRepTree.Exact().text().c_str() );
-			factorRep = LexFactorRep::cons( LexFactorRepTree.Exact().loc(),
+		case lex_factor_rep::_Exact: {
+			int low = atoi( lexFactorRep.Exact().text().c_str() );
+			factorRep = LexFactorRep::cons( lexFactorRep.Exact().loc(),
 					recRep, low, 0, LexFactorRep::ExactType );
+			break;
 		}
-		else if ( LexFactorRepTree.Max() != 0 ) {
-			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
-			int high = atoi( LexFactorRepTree.Max().text().c_str() );
-			factorRep = LexFactorRep::cons( LexFactorRepTree.Max().loc(),
+		case lex_factor_rep::_Max: {
+			int high = atoi( lexFactorRep.Max().text().c_str() );
+			factorRep = LexFactorRep::cons( lexFactorRep.Max().loc(),
 					recRep, 0, high, LexFactorRep::MaxType );
+			break;
 		}
-		else if ( LexFactorRepTree.Min() != 0 ) {
-			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
-			int low = atoi( LexFactorRepTree.Min().text().c_str() );
-			factorRep = LexFactorRep::cons( LexFactorRepTree.Min().loc(),
+		case lex_factor_rep::_Min: {
+			int low = atoi( lexFactorRep.Min().text().c_str() );
+			factorRep = LexFactorRep::cons( lexFactorRep.Min().loc(),
 					recRep, low, 0, LexFactorRep::MinType );
+			break;
 		}
-		else if ( LexFactorRepTree.Low() != 0 ) {
-			LexFactorRep *recRep = walkLexFactorRep( LexFactorRepTree.FactorRep() );
-			int low = atoi( LexFactorRepTree.Low().text().c_str() );
-			int high = atoi( LexFactorRepTree.High().text().c_str() );
-			factorRep = LexFactorRep::cons( LexFactorRepTree.Low().loc(),
+		case lex_factor_rep::_Range: {
+			int low = atoi( lexFactorRep.Low().text().c_str() );
+			int high = atoi( lexFactorRep.High().text().c_str() );
+			factorRep = LexFactorRep::cons( lexFactorRep.Low().loc(),
 					recRep, low, high, LexFactorRep::RangeType );
+			break;
 		}
-		else {
-			lex_factor_neg LexFactorNegTree = LexFactorRepTree.FactorNeg();
-			LexFactorNeg *factorNeg = walkLexFactorNeg( LexFactorNegTree );
+		case lex_factor_rep::_Base: {
+			LexFactorNeg *factorNeg = walkLexFactorNeg( lexFactorRep.FactorNeg() );
 			factorRep = LexFactorRep::cons( factorNeg );
-		}
+		}}
 
 		return factorRep;
 	}
