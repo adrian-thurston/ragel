@@ -289,31 +289,6 @@ struct LoadColm
 		return retList;
 	}
 
-	LexExpression *walkLexExpr( lex_expr LexExprTree )
-	{
-		if ( LexExprTree.Expr() != 0 ) {
-			LexExpression *leftExpr = walkLexExpr( LexExprTree.Expr() );
-			LexTerm *term = walkLexTerm( LexExprTree.Term() );
-
-			LexExpression *expr = 0;
-			if ( LexExprTree.Bar() != 0 )
-				expr = LexExpression::cons( leftExpr, term, LexExpression::OrType );
-			else if ( LexExprTree.Amp() != 0 )
-				expr = LexExpression::cons( leftExpr, term, LexExpression::IntersectType );
-			else if ( LexExprTree.Dash() != 0 )
-				expr = LexExpression::cons( leftExpr, term, LexExpression::SubtractType );
-			else if ( LexExprTree.DashDash() != 0 )
-				expr = LexExpression::cons( leftExpr, term, LexExpression::StrongSubtractType );
-			return expr;
-		}
-		else {
-			lex_term LexTermTree = LexExprTree.Term();
-			LexTerm *term = walkLexTerm( LexTermTree );
-			LexExpression *expr = LexExpression::cons( term );
-			return expr;
-		}
-	}
-
 	void walkTokenDef( token_def TokenDef )
 	{
 		String name = TokenDef.Id().text().c_str();
@@ -919,33 +894,68 @@ struct LoadColm
 		return factorRep;
 	}
 
-	LexTerm *walkLexTerm( lex_term LexTermTree )
+	LexTerm *walkLexTerm( lex_term lexTerm )
 	{
 		LexTerm *term = 0;
-		if ( LexTermTree.Term() != 0 ) {
-			LexTerm *leftTerm = walkLexTerm( LexTermTree.Term() );
-			LexFactorAug *factorAug = walkLexFactorAug( LexTermTree.FactorRep() );
+		lex_term::prod_name pn = lexTerm.prodName();
 
-			if ( LexTermTree.OptDot() != 0 ) {
-				term = LexTerm::cons( leftTerm, factorAug, LexTerm::ConcatType );
-			}
-			else if ( LexTermTree.ColonGt() != 0 ) {
-				term = LexTerm::cons( leftTerm, factorAug, LexTerm::RightStartType );
-			}
-			else if ( LexTermTree.ColonGtGt() != 0 ) {
-				term = LexTerm::cons( leftTerm, factorAug, LexTerm::RightFinishType );
-			}
-			else if ( LexTermTree.LtColon() != 0 ) {
-				term = LexTerm::cons( leftTerm, factorAug, LexTerm::LeftType );
-			}
-		}
-		else {
-			lex_factor_rep LexFactorRepTree = LexTermTree.FactorRep();
-			LexFactorAug *factorAug = walkLexFactorAug( LexFactorRepTree );
+		LexTerm *leftTerm = 0;
+		if ( pn != lex_term::_Base )
+			leftTerm = walkLexTerm( lexTerm.Term() );
+
+		LexFactorAug *factorAug = walkLexFactorAug( lexTerm.FactorRep() );
+
+		switch ( pn ) {
+		case lex_term::_Dot:
+			term = LexTerm::cons( leftTerm, factorAug, LexTerm::ConcatType );
+			break;
+		case lex_term::_ColonGt:
+			term = LexTerm::cons( leftTerm, factorAug, LexTerm::RightStartType );
+			break;
+		case lex_term::_ColonGtGt:
+			term = LexTerm::cons( leftTerm, factorAug, LexTerm::RightFinishType );
+			break;
+		case lex_term::_LtColon:
+			term = LexTerm::cons( leftTerm, factorAug, LexTerm::LeftType );
+			break;
+		default:
 			term = LexTerm::cons( factorAug );
+			break;
 		}
+
 		return term;
 	}
+
+	LexExpression *walkLexExpr( lex_expr lexExpr )
+	{
+		LexExpression *expr = 0;
+		lex_expr::prod_name pn = lexExpr.prodName();
+
+		LexExpression *leftExpr = 0;
+		if ( pn != lex_expr::_Base )
+			leftExpr = walkLexExpr( lexExpr.Expr() );
+
+		LexTerm *term = walkLexTerm( lexExpr.Term() );
+
+		switch ( pn ) {
+		case lex_expr::_Bar:
+			expr = LexExpression::cons( leftExpr, term, LexExpression::OrType );
+			break;
+		case lex_expr::_Amp:
+			expr = LexExpression::cons( leftExpr, term, LexExpression::IntersectType );
+			break;
+		case lex_expr::_Dash:
+			expr = LexExpression::cons( leftExpr, term, LexExpression::SubtractType );
+			break;
+		case lex_expr::_DashDash:
+			expr = LexExpression::cons( leftExpr, term, LexExpression::StrongSubtractType );
+			break;
+		case lex_expr::_Base:
+			expr = LexExpression::cons( term );
+		}
+		return expr;
+	}
+
 
 	void walkRlDef( rl_def rlDef )
 	{
@@ -1790,63 +1800,63 @@ struct LoadColm
 	void walkRootItem( root_item &rootItem, StmtList *stmtList )
 	{
 		switch ( rootItem.prodName() ) {
-		case root_item::_RlProd:
+		case root_item::_Rl:
 			walkRlDef( rootItem.RlDef() );
 			break;
-		case root_item::_TokenProd:
+		case root_item::_Token:
 			walkTokenDef( rootItem.TokenDef() );
 			break;
-		case root_item::_IgnoreProd:
+		case root_item::_Ignore:
 			walkIgnoreDef( rootItem.IgnoreDef() );
 			break;
-		case root_item::_LiteralProd:
+		case root_item::_Literal:
 			walkLiteralDef( rootItem.LiteralDef() );
 			break;
-		case root_item::_CflProd:
+		case root_item::_Cfl:
 			walkCflDef( rootItem.CflDef() );
 			break;
-		case root_item::_RegionProd:
+		case root_item::_Region:
 			walkLexRegion( rootItem.RegionDef() );
 			break;
-		case root_item::_StatementProd: {
+		case root_item::_Statement: {
 			LangStmt *stmt = walkStatement( rootItem.Statement() );
 			if ( stmt != 0 )
 				stmtList->append( stmt );
 			break;
 		}
-		case root_item::_ContextProd:
+		case root_item::_Context:
 			walkContextDef( rootItem.ContextDef() );
 			break;
-		case root_item::_NamespaceProd:
+		case root_item::_Namespace:
 			walkNamespaceDef( rootItem.NamespaceDef() );
 			break;
-		case root_item::_FunctionProd:
+		case root_item::_Function:
 			walkFunctionDef( rootItem.FunctionDef() );
 			break;
-		case root_item::_IterProd:
+		case root_item::_Iter:
 			walkIterDef( rootItem.IterDef() );
 			break;
-		case root_item::_PreEofProd:
+		case root_item::_PreEof:
 			walkPreEof( rootItem.PreEofDef() );
 			break;
-		case root_item::_ExportProd: {
+		case root_item::_Export: {
 			LangStmt *stmt = walkExportDef( rootItem.ExportDef() );
 			if ( stmt != 0 )
 				stmtList->append( stmt );
 			break;
 		}
-		case root_item::_AliasProd:
+		case root_item::_Alias:
 			walkAliasDef( rootItem.AliasDef() );
 			break;
-		case root_item::_PrecedenceProd:
+		case root_item::_Precedence:
 			walkPrecedenceDef( rootItem.PrecedenceDef() );
 			break;
-		case root_item::_IncludeProd: {
+		case root_item::_Include: {
 			StmtList *includeList = walkInclude( rootItem.Include() );
 			stmtList->append( *includeList );
 			break;
 		}
-		case root_item::_GlobalProd: {
+		case root_item::_Global: {
 			LangStmt *stmt = walkGlobalDef( rootItem.GlobalDef() );
 			if ( stmt != 0 )
 				stmtList->append( stmt );
