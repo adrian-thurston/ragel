@@ -63,7 +63,7 @@ item* concatItems( IL1: item* IL2: item* )
 	return IL1
 }
 
-item* expandIncludes( ItemList: ref item* )
+item* expandIncludes( ItemList: ref<item*> )
 {
 	for IL: item* in ItemList {
 		if match IL 
