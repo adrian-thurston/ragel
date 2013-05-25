@@ -252,7 +252,7 @@ def iter_def
 		COPEN LangStmtList: lang_stmt_list CCLOSE]
 
 def reference_type_ref
-	[R: REF TypeRef: type_ref]
+	[R: REF LT TypeRef: type_ref GT]
 
 def param_var_def
 	[Id: id COLON TypeRef: type_ref]
