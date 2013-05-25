@@ -213,7 +213,7 @@ context tags
 	# END GRAMMAR
 	#
 
-	int addDefaultAltTags( Start: ref start )
+	int addDefaultAltTags( Start: ref<start> )
 	{
 		for T: open_tag in Start {
 			require T 
@@ -264,7 +264,7 @@ end # tags
 
 # Finds unclosed tags and puts the content after the tag. Afterwards
 # all unclosed tags will be empty 'inside'.
-#int flatten( ref start Start )
+#int flatten( Start: ref<start> )
 #{
 #    for TL: item* in Start {
 #        require TL
@@ -298,7 +298,7 @@ end # tags
 #    }
 #}
 #
-#int close( ref start Start )
+#int close( Start: ref<start> )
 #{
 #    for TL: item in Start {
 #        require TL
