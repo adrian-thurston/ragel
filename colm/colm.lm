@@ -685,8 +685,8 @@ def lex_factor_neg
 |	[Factor: lex_factor] :Base
 
 def lex_range_lit
-	[Lit: lex_lit]
-|	[Number: lex_num]
+	[Lit: lex_lit] :Lit
+|	[Number: lex_num] :Number
 
 def lex_num
 	[lex_uint]
@@ -695,19 +695,19 @@ def lex_num
 #|	[LEX_DASH num]
 
 def lex_factor
-	[Literal: lex_lit]
-|	[Id: lex_id]
-|	[Number: lex_uint]
-|	[Hex: lex_hex]
-|	[LEX_POPEN Expr: lex_expr LEX_PCLOSE]
-|	[Low: lex_range_lit LEX_DOTDOT High: lex_range_lit]
-|	[LEX_SQOPEN_POS PosData: reg_or_data RE_SQCLOSE]
-|	[LEX_SQOPEN_NEG NegData: reg_or_data RE_SQCLOSE]
+	[Literal: lex_lit] :Literal
+|	[Id: lex_id] :Id
+|	[Number: lex_uint] :Number
+|	[Hex: lex_hex] :Hex
+|	[Low: lex_range_lit LEX_DOTDOT High: lex_range_lit] :Range
+|	[LEX_SQOPEN_POS PosData: reg_or_data RE_SQCLOSE] :PosOrBlock
+|	[LEX_SQOPEN_NEG NegData: reg_or_data RE_SQCLOSE] :NegOrBlock
+|	[LEX_POPEN Expr: lex_expr LEX_PCLOSE] :Paren
 
 def reg_or_data
-	[Data: reg_or_data Char: reg_or_char]
-|	[]
+	[Data: reg_or_data Char: reg_or_char] :Data
+|	[] :Base
 
 def reg_or_char
-	[Char: RE_CHAR]
-|	[Low: RE_CHAR RE_DASH High: RE_CHAR]
+	[Char: RE_CHAR] :Char
+|	[Low: RE_CHAR RE_DASH High: RE_CHAR] :Range

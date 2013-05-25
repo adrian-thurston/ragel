@@ -95,61 +95,73 @@ struct LoadColm
 	Literal *walkLexRangeLit( lex_range_lit lexRangeLit )
 	{
 		Literal *literal = 0;
-		if ( lexRangeLit.Lit() != 0 ) {
+		switch ( lexRangeLit.prodName() ) {
+		case lex_range_lit::_Lit: {
 			String lit = lexRangeLit.Lit().text().c_str();
 			literal = Literal::cons( lexRangeLit.Lit().loc(), lit, Literal::LitString );
+			break;
 		}
-		else if ( lexRangeLit.Number() != 0 ) {
+		case lex_range_lit::_Number: {
 			String num = lexRangeLit.Number().text().c_str();
 			literal = Literal::cons( lexRangeLit.Number().loc(), num, Literal::Number );
-		}
+			break;
+		}}
 		return literal;
 	}
 
-	LexFactor *walkLexFactor( lex_factor LexFactorTree )
+	LexFactor *walkLexFactor( lex_factor lexFactor )
 	{
 		LexFactor *factor = 0;
-		if ( LexFactorTree.Literal() != 0 ) {
-			String litString = LexFactorTree.Literal().text().c_str();
-			Literal *literal = Literal::cons( LexFactorTree.Literal().loc(),
+		switch ( lexFactor.prodName() ) {
+		case lex_factor::_Literal: {
+			String litString = lexFactor.Literal().text().c_str();
+			Literal *literal = Literal::cons( lexFactor.Literal().loc(),
 					litString, Literal::LitString );
 			factor = LexFactor::cons( literal );
+			break;
 		}
-		else if ( LexFactorTree.Id() != 0 ) {
-			String id = LexFactorTree.Id().text().c_str();
-			factor = lexRlFactorName( id, LexFactorTree.Id().loc() );
+		case lex_factor::_Id: {
+			String id = lexFactor.Id().text().c_str();
+			factor = lexRlFactorName( id, lexFactor.Id().loc() );
+			break;
 		}
-		else if ( LexFactorTree.Expr() != 0 ) {
-			lex_expr LexExpr = LexFactorTree.Expr();
-			LexExpression *expr = walkLexExpr( LexExpr );
-			LexJoin *join = LexJoin::cons( expr );
-			factor = LexFactor::cons( join );
-		}
-		else if ( LexFactorTree.Low() != 0 ) {
-			Literal *low = walkLexRangeLit( LexFactorTree.Low() );
-			Literal *high = walkLexRangeLit( LexFactorTree.High() );
+		case lex_factor::_Range: {
+			Literal *low = walkLexRangeLit( lexFactor.Low() );
+			Literal *high = walkLexRangeLit( lexFactor.High() );
 
 			Range *range = Range::cons( low, high );
 			factor = LexFactor::cons( range );
+			break;
 		}
-		else if ( LexFactorTree.PosData() != 0 ) {
-			ReOrBlock *block = walkRegOrData( LexFactorTree.PosData() );
+		case lex_factor::_PosOrBlock: {
+			ReOrBlock *block = walkRegOrData( lexFactor.PosData() );
 			factor = LexFactor::cons( ReItem::cons( block, ReItem::OrBlock ) );
+			break;
 		}
-		else if ( LexFactorTree.NegData() != 0 ) {
-			ReOrBlock *block = walkRegOrData( LexFactorTree.NegData() );
+		case lex_factor::_NegOrBlock: {
+			ReOrBlock *block = walkRegOrData( lexFactor.NegData() );
 			factor = LexFactor::cons( ReItem::cons( block, ReItem::NegOrBlock ) );
+			break;
 		}
-		else if ( LexFactorTree.Number() != 0 ) {
-			String number = LexFactorTree.Number().text().c_str();
-			factor = LexFactor::cons( Literal::cons( LexFactorTree.Number().loc(), 
+		case lex_factor::_Number: {
+			String number = lexFactor.Number().text().c_str();
+			factor = LexFactor::cons( Literal::cons( lexFactor.Number().loc(), 
 					number, Literal::Number ) );
+			break;
 		}
-		else if ( LexFactorTree.Hex() != 0 ) {
-			String number = LexFactorTree.Hex().text().c_str();
-			factor = LexFactor::cons( Literal::cons( LexFactorTree.Hex().loc(), 
+		case lex_factor::_Hex: {
+			String number = lexFactor.Hex().text().c_str();
+			factor = LexFactor::cons( Literal::cons( lexFactor.Hex().loc(), 
 					number, Literal::Number ) );
+			break;
 		}
+		case lex_factor::_Paren: {
+			lex_expr LexExpr = lexFactor.Expr();
+			LexExpression *expr = walkLexExpr( LexExpr );
+			LexJoin *join = LexJoin::cons( expr );
+			factor = LexFactor::cons( join );
+			break;
+		}}
 		return factor;
 	}
 
@@ -789,47 +801,53 @@ struct LoadColm
 	ReOrItem *walkRegOrChar( reg_or_char regOrChar )
 	{
 		ReOrItem *orItem = 0;
-		if ( regOrChar.Char() != 0 ) {
+		switch ( regOrChar.prodName() ) {
+		case reg_or_char::_Char: {
 			String c = unescape( regOrChar.Char().text().c_str() );
 			orItem = ReOrItem::cons( regOrChar.Char().loc(), c );
+			break;
 		}
-		else {
+		case reg_or_char::_Range: {
 			String low = unescape( regOrChar.Low().text().c_str() );
 			String high = unescape( regOrChar.High().text().c_str() );
 			orItem = ReOrItem::cons( regOrChar.Low().loc(), low[0], high[0] );
-		}
+			break;
+		}}
 		return orItem;
 	}
 
 	ReOrBlock *walkRegOrData( reg_or_data regOrData )
 	{
 		ReOrBlock *block = 0;
-		if ( regOrData.Data() != 0 ) {
+		switch ( regOrData.prodName() ) {
+		case reg_or_data::_Data: {
 			ReOrBlock *left = walkRegOrData( regOrData.Data() );
 			ReOrItem *right = walkRegOrChar( regOrData.Char() );
 			block = lexRegularExprData( left, right );
+			break;
 		}
-		else {
+		case reg_or_data::_Base: {
 			block = ReOrBlock::cons();
-		}
+			break;
+		}}
 		return block;
 	}
 
-
 	LexFactorNeg *walkLexFactorNeg( lex_factor_neg lexFactorNeg )
 	{
+		LexFactorNeg *factorNeg = 0;
 		switch ( lexFactorNeg.prodName() ) {
 		case lex_factor_neg::_Caret: {
 			LexFactorNeg *recNeg = walkLexFactorNeg( lexFactorNeg.FactorNeg() );
-			LexFactorNeg *factorNeg = LexFactorNeg::cons( recNeg,
-					LexFactorNeg::CharNegateType );
-			return factorNeg;
+			factorNeg = LexFactorNeg::cons( recNeg, LexFactorNeg::CharNegateType );
+			break;
 		}
 		case lex_factor_neg::_Base: {
 			LexFactor *factor = walkLexFactor( lexFactorNeg.Factor() );
-			LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
-			return factorNeg;
+			factorNeg = LexFactorNeg::cons( factor );
+			break;
 		}}
+		return factorNeg;
 	}
 
 	LexFactorRep *walkLexFactorRep( lex_factor_rep lexFactorRep )
@@ -1798,7 +1816,7 @@ struct LoadColm
 		namespaceStack.pop();
 	}
 
-	void walkRootItem( root_item &rootItem, StmtList *stmtList )
+	void walkRootItem( root_item rootItem, StmtList *stmtList )
 	{
 		switch ( rootItem.prodName() ) {
 		case root_item::_Rl:
@@ -1905,8 +1923,7 @@ struct LoadColm
 
 		/* Walk the list of items. */
 		while ( !rootItemList.end() ) {
-			root_item rootItem = rootItemList.value();
-			walkRootItem( rootItem, stmtList );
+			walkRootItem( rootItemList.value(), stmtList );
 			rootItemList = rootItemList.next();
 		}
 		return stmtList;
