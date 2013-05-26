@@ -1,5 +1,20 @@
-colm 0.10 - April 18, 2013
---------------------------
+colm 0.11 - May 26, 2013
+------------------------
+	* Require <> around ref and ptr type declarations (eg: ptr<type_ref>)
+	* Added production labels, which follow a production with the form
+	  :Label. Labels are exposed in the C++ interface using an enum. They
+	  are prefixed with _ to avoid conflict with member access functions.
+	* It's now possible to access Tree::tokdata from the C++ interface.
+	* The print, stream print, stream push, and stream append operations all
+	  no longer trim trees by default. This makes these functions
+	  consistent with constructor, which refrains from trimming to avoid
+	  extra work. A construct with a tree trim is accomplished with an
+	  additional operator. The above print and stream operations now have
+	  the same usage patterns.
+	* Fixes to prodNum preservation through tree copy, and to the parser
+
+colm 0.10 - Apr 18, 2013
+------------------------
 	* Implemented the colm parser in colm. Bootstrapping with a parse tree
 	  construction in C++. Using that generated parser to to parse the colm
 	  grammar, from which the primary parser is produced.
