@@ -3,14 +3,22 @@
 
 # Test cases contain sections giving the program, input and expected output.
 
-###### COLM #####
+###### LM #####
+#
 #   colm program
+#
 ###### ARGS #####
+#
 #   program arguments
+#
 ###### IN #####
+#
 #   program input
+#
 ###### EXP #####
+#
 #   expected output
+#
 
 #######################################
 
