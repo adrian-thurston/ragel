@@ -1216,13 +1216,10 @@ Tree *treeIterDerefCur( TreeIter *iter )
 	return iter->ref.kid == 0 ? 0 : iter->ref.kid->tree;
 }
 
-void refSetValue( Ref *ref, Tree *v )
+void refSetValue( Program *prg, Tree **sp, Ref *ref, Tree *v )
 {
-	Kid *firstKid = ref->kid;
-	while ( ref != 0 && ref->kid == firstKid ) {
-		ref->kid->tree = v;
-		ref = ref->next;
-	}
+	treeDownref( prg, sp, ref->kid->tree );
+	ref->kid->tree = v;
 }
 
 Tree *getRhsEl( Program *prg, Tree *lhs, long position )

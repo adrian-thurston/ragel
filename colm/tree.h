@@ -273,7 +273,7 @@ void setField( struct colm_program *prg, Tree *tree, long field, Tree *value );
 
 void setTriterCur( struct colm_program *prg, TreeIter *iter, Tree *tree );
 void setUiterCur( struct colm_program *prg, UserIter *uiter, Tree *tree );
-void refSetValue( Ref *ref, Tree *v );
+void refSetValue( struct colm_program *prg, Tree **sp, Ref *ref, Tree *v );
 Tree *treeSearch( struct colm_program *prg, Tree *tree, long id );
 Location *locSearch( struct colm_program *prg, Tree *tree );
 

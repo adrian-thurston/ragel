@@ -1341,7 +1341,7 @@ again:
 			Tree *val = vm_pop();
 			Ref *ref = (Ref*) vm_plocal(field);
 			splitRef( prg, &sp, ref );
-			refSetValue( ref, val );
+			refSetValue( prg, sp, ref, val );
 			break;
 		}
 		case IN_GET_FIELD_R: {
