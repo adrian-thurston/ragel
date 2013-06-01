@@ -1,0 +1,41 @@
+### LM ###
+lex
+	literal 'application'
+	literal ';'
+
+	token id /[A-Za-z_][A-Za-z_0-9]*/
+	ignore /[ \t\r\n]+/
+end
+
+def definition
+	['application' id ';']
+
+def program
+	[definition*]
+
+int h( P: ref<program> )
+{
+	print( (id in P) '\n' )
+}
+
+int g( P: ref<program> )
+{
+	h( P )
+}
+
+int f( P: ref<program> )
+{
+	g( P )
+}
+
+parse P: program
+	[ stdin ]
+
+f( P )
+
+### IN ###
+
+application id;
+
+### EXP ###
+id
