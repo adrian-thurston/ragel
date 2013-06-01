@@ -2620,6 +2620,7 @@ struct LangTerm
 	UniqueType *evaluateMakeToken( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateMakeTree( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateEmbedString( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateSearch( Compiler *pd, CodeVect &code ) const;
 
 	InputLoc loc;
 	Type type;

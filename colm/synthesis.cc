@@ -1191,7 +1191,7 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 
 	UniqueType *ut = varRef->evaluate( pd, code );
 	if ( ut->typeId != TYPE_TREE && ut->typeId != TYPE_REF ) {
-		error(varRef->loc) << "expected match against a tree type" << endp;
+		error(varRef->loc) << "expected match against a tree/ref type" << endp;
 	}
 
 	/* Store the language element type in the pattern. This is needed by
@@ -1642,6 +1642,23 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 	return pd->uniqueTypeStr;
 }
 
+UniqueType *LangTerm::evaluateSearch( Compiler *pd, CodeVect &code ) const
+{
+	UniqueType *ut = typeRef->uniqueType;
+	if ( ut->typeId != TYPE_TREE )
+		error(loc) << "can only search for tree types" << endp;
+
+	/* Evaluate the expression. */
+	UniqueType *treeUT = varRef->evaluate( pd, code );
+	if ( treeUT->typeId != TYPE_TREE && treeUT->typeId != TYPE_REF )
+		error(loc) << "search can be applied only to tree/ref types" << endp;
+
+	/* Run the search. */
+	code.append( IN_TREE_SEARCH );
+	code.appendWord( ut->langEl->id );
+	return ut;
+}
+
 UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 {
 	switch ( type ) {
@@ -1704,23 +1721,10 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 			code.appendWord( ut->langEl->id );
 			return pd->uniqueTypeInt;
 		}
-		case SearchType: {
-			/* Evaluate the expression. */
-			UniqueType *ut = typeRef->uniqueType;
-			if ( ut->typeId != TYPE_TREE )
-				error(loc) << "can only search for tree types" << endp;
-
-			UniqueType *treeUT = varRef->evaluate( pd, code );
-			if ( treeUT->typeId != TYPE_TREE )
-				error(loc) << "search can be applied only to tree types" << endl;
-
-			code.append( IN_TREE_SEARCH );
-			code.appendWord( ut->langEl->id );
-			return ut;
-		};
-		case EmbedStringType: {
+		case SearchType:
+			return evaluateSearch( pd, code );
+		case EmbedStringType:
 			return evaluateEmbedString( pd, code );
-		}
 	}
 	return 0;
 }
