@@ -1190,8 +1190,9 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 	}
 
 	UniqueType *ut = varRef->evaluate( pd, code );
-	if ( ut->typeId != TYPE_TREE )
+	if ( ut->typeId != TYPE_TREE && ut->typeId != TYPE_REF ) {
 		error(varRef->loc) << "expected match against a tree type" << endp;
+	}
 
 	/* Store the language element type in the pattern. This is needed by
 	 * the pattern parser. */
