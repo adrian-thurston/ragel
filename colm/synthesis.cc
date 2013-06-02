@@ -953,7 +953,7 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 }
 
 ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
-		VarRefLookup &lookup, ExprVect *args ) const
+		VarRefLookup &lookup, CallArgVect *args ) const
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
 	 * will be null. */
@@ -976,9 +976,9 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 
 		/* First pass we need to push object loads for reference parameters. */
 		paramList != 0 && ( p = *paramList );
-		for ( ExprVect::Iter pe = *args; pe.lte(); pe++ ) {
+		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
 			/* Get the expression and the UT for the arg. */
-			LangExpr *expression = *pe;
+			LangExpr *expression = (*pe)->expr;
 			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 			if ( paramUT->typeId == TYPE_REF ) {
@@ -1002,9 +1002,9 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 		}
 
 		paramList != 0 && ( p = *paramList );
-		for ( ExprVect::Iter pe = *args; pe.lte(); pe++ ) {
+		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
 			/* Get the expression and the UT for the arg. */
-			LangExpr *expression = *pe;
+			LangExpr *expression = (*pe)->expr;
 			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 			if ( paramUT->typeId == TYPE_REF ) {
@@ -1099,16 +1099,16 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 }
 
 void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code, 
-		VarRefLookup &lookup, ExprVect *args ) const
+		VarRefLookup &lookup, CallArgVect *args ) const
 {
 	long popCount = 0;
 
 	/* Evaluate and push the args. */
 	if ( args != 0 ) {
 		/* We use this only if there is a paramter list. */
-		for ( ExprVect::Iter pe = *args; pe.lte(); pe++ ) {
+		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
 			/* Get the expression and the UT for the arg. */
-			LangExpr *expression = *pe;
+			LangExpr *expression = (*pe)->expr;
 			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 			if ( paramUT->typeId == TYPE_REF ) {
@@ -1152,7 +1152,7 @@ void Compiler::endContiguous( CodeVect &code, bool resetContiguous )
 	}
 }
 
-UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, ExprVect *args ) 
+UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect *args ) 
 {
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );
@@ -1982,9 +1982,9 @@ UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 	if ( numArgs < 2 )
 		error(loc) << "need at least two arguments" << endp;
 
-	for ( ExprVect::Iter pe = *args; pe.lte(); pe++ ) {
+	for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
 		/* Evaluate. */
-		UniqueType *exprUT = (*pe)->evaluate( pd, code );
+		UniqueType *exprUT = (*pe)->expr->evaluate( pd, code );
 
 		if ( pe.pos() == 0 && exprUT != pd->uniqueTypeInt )
 			error(loc) << "first arg, id, must be an int" << endp;
@@ -2015,9 +2015,9 @@ UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 	if ( numArgs < 1 )
 		error(loc) << "need at least one argument" << endp;
 
-	for ( ExprVect::Iter pe = *args; pe.lte(); pe++ ) {
+	for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
 		/* Evaluate. */
-		UniqueType *exprUT = (*pe)->evaluate( pd, code );
+		UniqueType *exprUT = (*pe)->expr->evaluate( pd, code );
 
 		if ( pe.pos() == 0 && exprUT != pd->uniqueTypeInt )
 			error(loc) << "first arg, nonterm id, must be an int" << endp;
@@ -2118,10 +2118,10 @@ LangTerm *LangStmt::chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) cons
 	}
 
 	/* The parameters. */
-	ExprVect *callExprVect = new ExprVect;
+	CallArgVect *callExprVect = new CallArgVect;
 	LangExpr *callExpr = LangExpr::cons( LangTerm::cons( 
 			InputLoc(), LangTerm::VarRefType, fromVarRef->varRef ) );
-	callExprVect->append( callExpr );
+	callExprVect->append( new CallArg( callExpr ) );
 
 	LangTerm *callLangTerm = LangTerm::cons( InputLoc(), callVarRef, callExprVect );
 
@@ -2250,8 +2250,8 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			UniqueType **types = new UniqueType*[exprPtrVect->length()];
 			
 			/* Push the args backwards. */
-			for ( ExprVect::Iter pex = exprPtrVect->last(); pex.gtb(); pex-- )
-				types[pex.pos()] = (*pex)->evaluate( pd, code );
+			for ( CallArgVect::Iter pex = exprPtrVect->last(); pex.gtb(); pex-- )
+				types[pex.pos()] = (*pex)->expr->evaluate( pd, code );
 
 			/* Run the printing forwards. */
 			if ( type == PrintType ) {

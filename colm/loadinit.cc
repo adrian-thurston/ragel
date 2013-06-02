@@ -272,7 +272,7 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
 
 	/* Pop argv, this yields the file name . */
-	ExprVect *popArgs = new ExprVect;
+	CallArgVect *popArgs = new CallArgVect;
 	QualItemVect *popQual = new QualItemVect;
 	popQual->append( QualItem( internal, String( "argv" ), QualItem::Dot ) );
 
@@ -288,9 +288,9 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	/* Call open. */
 	QualItemVect *openQual = new QualItemVect;
 	LangVarRef *openRef = LangVarRef::cons( internal, openQual, String("open") );
-	ExprVect *openArgs = new ExprVect;
-	openArgs->append( pop );
-	openArgs->append( modeExpr );
+	CallArgVect *openArgs = new CallArgVect;
+	openArgs->append( new CallArg(pop) );
+	openArgs->append( new CallArg(modeExpr) );
 	LangExpr *open = LangExpr::cons( LangTerm::cons( InputLoc(), openRef, openArgs ) );
 
 	/* Construct a list containing the open stream. */

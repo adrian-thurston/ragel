@@ -1011,22 +1011,22 @@ struct LoadColm
 		BaseParser::cflDef( ntDef, objectDef, defList );
 	}
 
-	ExprVect *walkCodeExprList( _repeat_code_expr codeExprList )
+	CallArgVect *walkCodeExprList( _repeat_code_expr codeExprList )
 	{
-		ExprVect *exprVect = new ExprVect;
+		CallArgVect *callArgVect = new CallArgVect;
 		while ( !codeExprList.end() ) {
 			code_expr codeExpr = codeExprList.value();
 			LangExpr *expr = walkCodeExpr( codeExpr );
-			exprVect->append( expr );
+			callArgVect->append( new CallArg(expr) );
 			codeExprList = codeExprList.next();
 		}
-		return exprVect;
+		return callArgVect;
 	}
 
 	LangStmt *walkPrintStmt( print_stmt &printStmt )
 	{
 		_repeat_code_expr codeExprList = printStmt.CodeExprList();
-		ExprVect *exprVect = walkCodeExprList( codeExprList );
+		CallArgVect *exprVect = walkCodeExprList( codeExprList );
 
 		LangStmt::Type type;
 		if ( printStmt.Tree() != 0 )
@@ -1431,7 +1431,7 @@ struct LoadColm
 				term = LangTerm::cons( langVarRef->loc, LangTerm::VarRefType, langVarRef );
 			}
 			else {
-				ExprVect *exprVect = walkCodeExprList( codeFactor.CodeExprList() );
+				CallArgVect *exprVect = walkCodeExprList( codeFactor.CodeExprList() );
 				term = LangTerm::cons( langVarRef->loc, langVarRef, exprVect );
 			}
 
@@ -1515,12 +1515,12 @@ struct LoadColm
 					LangTerm::SearchType, typeRef, varRef ) );
 		}
 		else if ( codeFactor.MakeTreeExprList() != 0 ) {
-			ExprVect *exprList = walkCodeExprList( codeFactor.MakeTreeExprList() );
+			CallArgVect *exprList = walkCodeExprList( codeFactor.MakeTreeExprList() );
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::MakeTreeType, exprList ) );
 		}
 		else if ( codeFactor.MakeTokenExprList() != 0 ) {
-			ExprVect *exprList = walkCodeExprList( codeFactor.MakeTokenExprList() );
+			CallArgVect *exprList = walkCodeExprList( codeFactor.MakeTokenExprList() );
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::MakeTokenType, exprList ) );
 		}
@@ -1638,7 +1638,7 @@ struct LoadColm
 		}
 		else {
 			LangVarRef *varRef = walkVarRef( IterCall.VarRef() );
-			ExprVect *exprVect = walkCodeExprList( IterCall.CodeExprList() );
+			CallArgVect *exprVect = walkCodeExprList( IterCall.CodeExprList() );
 			langTerm = LangTerm::cons( varRef->loc, varRef, exprVect );
 		}
 		

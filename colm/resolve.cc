@@ -335,8 +335,8 @@ void LangTerm::resolve( Compiler *pd )
 		case MakeTokenType:
 		case MethodCallType:
 			if ( args != 0 ) {
-				for ( ExprVect::Iter pe = *args; pe.lte(); pe++ )
-					(*pe)->resolve( pd );
+				for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ )
+					(*pe)->expr->resolve( pd );
 			}
 			break;
 
@@ -426,8 +426,8 @@ void LangStmt::resolve( Compiler *pd ) const
 		case PrintXMLType:
 		case PrintStreamType: {
 			/* Push the args backwards. */
-			for ( ExprVect::Iter pex = exprPtrVect->last(); pex.gtb(); pex-- )
-				(*pex)->resolve( pd );
+			for ( CallArgVect::Iter pex = exprPtrVect->last(); pex.gtb(); pex-- )
+				(*pex)->expr->resolve( pd );
 			break;
 		}
 		case ExprType: {
