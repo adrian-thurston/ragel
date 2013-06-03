@@ -418,6 +418,19 @@ void LangStmt::resolveParserItems( Compiler *pd ) const
 	}
 }
 
+void LangIterCall::resolve( Compiler *pd ) const
+{
+	switch ( type ) {
+		case IterCall:
+			langTerm->resolve( pd );
+			break;
+		case VarRef:
+		case Expr:
+			langExpr->resolve( pd );
+			break;
+	}
+}
+
 void LangStmt::resolve( Compiler *pd ) const
 {
 	switch ( type ) {
@@ -472,7 +485,7 @@ void LangStmt::resolve( Compiler *pd ) const
 			typeRef->lookupType( pd );
 
 			/* Evaluate and push the arguments. */
-			langTerm->resolve( pd );
+			iterCall->resolve( pd );
 
 			/* Compile the contents. */
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )

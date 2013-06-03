@@ -881,7 +881,7 @@ UniqueType *LangVarRef::evaluate( Compiler *pd, CodeVect &code, bool forWriting 
 	return ut;
 }
 
-void LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
+bool LangVarRef::canTakeRefTest( Compiler *pd, VarRefLookup &lookup ) const
 {
 	bool canTake = false;
 
@@ -892,6 +892,13 @@ void LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
 	else if ( isLocalRef(pd) && lookup.lastPtrInQual < 0 && lookup.uniqueType->typeId != TYPE_PTR ) 
 		canTake = true;
 
+	return canTake;
+}
+
+void LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
+{
+	bool canTake = canTakeRefTest( pd, lookup );
+
 	if ( !canTake ) {
 		error(loc) << "can only take references of locals or "
 				"attributes accessed via a local" << endp;
@@ -900,6 +907,19 @@ void LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
 	if ( lookup.objField->refActive )
 		error(loc) << "reference currently active, cannot take another" << endp;
 }
+
+bool LangExpr::canTakeRefTest( Compiler *pd ) const
+{
+	bool canTake = false;
+
+	if ( type == LangExpr::TermType && term->type == LangTerm::VarRefType ) {
+		VarRefLookup lookup = term->varRef->lookupField( pd );
+		if ( term->varRef->canTakeRefTest( pd, lookup ) )
+			canTake = true;
+	}
+	return canTake;
+}
+
 
 /* Return the field referenced. */
 ObjectField *LangVarRef::preEvaluateRef( Compiler *pd, CodeVect &code ) const
@@ -952,8 +972,9 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 	return lookup.objField;
 }
 
+
 ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
-		VarRefLookup &lookup, CallArgVect *args ) const
+		VarRefLookup &lookup, CallArgVect *args, ObjectField *tmpTreeField ) const
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
 	 * will be null. */
@@ -983,14 +1004,37 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 
 			if ( paramUT->typeId == TYPE_REF ) {
 				/* Make sure we are dealing with a variable reference. */
-				if ( expression->type != LangExpr::TermType )
-					error(loc) << "not a term: argument must be a local variable" << endp;
-				if ( expression->term->type != LangTerm::VarRefType )
-					error(loc) << "not a variable: argument must be a local variable" << endp;
+				if ( ! expression->canTakeRefTest( pd ) ) {
+					if ( tmpTreeField == 0 ) {
+						/* Can't make this local. */
+						error(loc) << "argument must be a local variable" << endp;
+					}
+					else {
+						/* Evaluate the expression. */
+						UniqueType *exprUT = expression->evaluate( pd, code );
+
+						/* Can copy the value to a tmp local and render the
+						 * iterator constant. Give the tmp a type. */
+						tmpTreeField->typeRef = TypeRef::cons( loc, exprUT );
+
+						/* Make an expression that refereces the tmp local. */
+						LangVarRef *varRef = LangVarRef::cons( loc, tmpTreeField->name );
+						LangTerm *langTerm = LangTerm::cons( loc, LangTerm::VarRefType, varRef );
+						(*pe)->varRefExpr = LangExpr::cons( langTerm );
+
+						/* Stash to the local. */
+						varRef->assignValue( pd, code, exprUT );
+
+						/* Replace the argument with the local referene. */
+						expression = (*pe)->varRefExpr;
+
+						/* Only have one to use. */
+						tmpTreeField = 0;
+					}
+				}
 
 				/* Lookup the field. */
 				LangVarRef *varRef = expression->term->varRef;
-
 				ObjectField *refOf = varRef->preEvaluateRef( pd, code );
 				paramRefs[pe.pos()] = refOf;
 
@@ -1008,12 +1052,8 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 			if ( paramUT->typeId == TYPE_REF ) {
-				
-				/* Make sure we are dealing with a variable reference. */
-				if ( expression->type != LangExpr::TermType )
-					error(loc) << "not a term: argument must be a local variable" << endp;
-				if ( expression->term->type != LangTerm::VarRefType )
-					error(loc) << "not a variable: argument must be a local variable" << endp;
+				if ( ! expression->canTakeRefTest( pd ) )
+					expression = (*pe)->varRefExpr;
 
 				/* Lookup the field. */
 				LangVarRef *varRef = expression->term->varRef;
@@ -1112,6 +1152,9 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 			if ( paramUT->typeId == TYPE_REF ) {
+				if ( ! expression->canTakeRefTest( pd ) )
+					expression = (*pe)->varRefExpr;
+
 				/* Lookup the field. */
 				LangVarRef *varRef = expression->term->varRef;
 				popCount += varRef->qual->length() * 2;
@@ -1165,7 +1208,7 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	}
 
 	/* Evaluate and push the arguments. */
-	ObjectField **paramRefs = evaluateArgs( pd, code, lookup, args );
+	ObjectField **paramRefs = evaluateArgs( pd, code, lookup, args, 0 );
 
 	/* Write the call opcode. */
 	callOperation( pd, code, lookup );
@@ -2094,55 +2137,31 @@ void LangStmt::compileForIterBody( Compiler *pd,
 	/* Clean up any prepush args. */
 }
 
-LangTerm *LangStmt::chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) const
+void LangStmt::chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const
 {
-	/* Lookup the lang term and decide what iterator to use based
-	 * on its type. */
-	VarRefLookup lookup = fromVarRef->varRef->lookupField( pd );
-	
-	if ( lookup.inObject->type != ObjectDef::FrameType )
-		error(loc) << "root of iteration must be a local" << endp;
-	
-	LangVarRef *callVarRef = 0;
-	if ( lookup.uniqueType->typeId == TYPE_TREE || 
-			lookup.uniqueType->typeId == TYPE_REF ||
-			lookup.uniqueType->typeId == TYPE_ITER ||
-			lookup.uniqueType->typeId == TYPE_PTR )
-	{
-		/* The iterator name. */
-		callVarRef = LangVarRef::cons( loc, "triter" );
-	}
-	else {
-		error(loc) << "there is no default iterator for a "
-				"root of that type" << endp;
-	}
+	/* The iterator name. */
+	LangVarRef *callVarRef = LangVarRef::cons( loc, "triter" );
 
 	/* The parameters. */
 	CallArgVect *callExprVect = new CallArgVect;
-	LangExpr *callExpr = LangExpr::cons( LangTerm::cons( 
-			InputLoc(), LangTerm::VarRefType, fromVarRef->varRef ) );
-	callExprVect->append( new CallArg( callExpr ) );
-
-	LangTerm *callLangTerm = LangTerm::cons( InputLoc(), callVarRef, callExprVect );
-
-	return callLangTerm;
+	callExprVect->append( new CallArg( iterCall->langExpr ) );
+	iterCall->langTerm = LangTerm::cons( InputLoc(), callVarRef, callExprVect );
+	iterCall->langExpr = 0;
+	iterCall->type = LangIterCall::IterCall;
 }
 
 void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 {
 	pd->curLocalFrame->iterPushScope();
 
-	LangTerm *iterCallTerm = langTerm;
-	if ( iterCallTerm->type != LangTerm::MethodCallType )
-		iterCallTerm = chooseDefaultIter( pd, langTerm );
+	if ( iterCall->type != LangIterCall::IterCall )
+		chooseDefaultIter( pd, iterCall );
 
 	/* The type we are searching for. */
 	UniqueType *searchUT = typeRef->uniqueType;
 
-	/* 
-	 * Declare the iterator variable.
-	 */
-	VarRefLookup lookup = iterCallTerm->varRef->lookupMethod( pd );
+	/* Lookup the iterator call. Make sure it is an iterator. */
+	VarRefLookup lookup = iterCall->langTerm->varRef->lookupMethod( pd );
 	if ( lookup.objMethod->iterDef == 0 ) {
 		error(loc) << "attempt to iterate using something "
 				"that is not an iterator" << endp;
@@ -2155,7 +2174,6 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 		long stretch = func->paramListSize + 16 + func->localFrame->size();
 		resetContiguous = pd->beginContiguous( code, stretch );
 	}
-
 
 	/* Now that we have done the iterator call lookup we can make the type
 	 * reference for the object field. */
@@ -2172,8 +2190,8 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	UniqueType *iterUT = objField->typeRef->uniqueType;
 
 	/* Evaluate and push the arguments. */
-	ObjectField **paramRefs = iterCallTerm->varRef->evaluateArgs( 
-			pd, code, lookup, iterCallTerm->args );
+	ObjectField **paramRefs = iterCall->langTerm->varRef->evaluateArgs(
+			pd, code, lookup, iterCall->langTerm->args, iterCall->tmpTreeField );
 
 	if ( pd->revertOn )
 		code.append( iterUT->iterDef->inCreateWV );
@@ -2195,9 +2213,9 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 
 	compileForIterBody( pd, code, iterUT );
 
-	iterCallTerm->varRef->popRefQuals( pd, code, lookup, iterCallTerm->args );
+	iterCall->langTerm->varRef->popRefQuals( pd, code, lookup, iterCall->langTerm->args );
 
-	iterCallTerm->varRef->resetActiveRefs( pd, lookup, paramRefs );
+	iterCall->langTerm->varRef->resetActiveRefs( pd, lookup, paramRefs );
 	delete[] paramRefs;
 
 	pd->curLocalFrame->iterPopScope();

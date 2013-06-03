@@ -647,20 +647,27 @@ ConsItemList *BaseParser::consListConcat( ConsItemList *list1,
 }
 
 LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
-		TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList )
+		TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList )
 {
 	/* Check for redeclaration. */
 	if ( pd->curLocalFrame->checkRedecl( data ) != 0 )
 		error( loc ) << "variable " << data << " redeclared" << endp;
 
-	/* Note that we pass in a null type reference. This type is dependent
-	 * on the result of the iter_call lookup since it must contain a reference
-	 * to the iterator that is called. This lookup is done at compile time. */
+	/* Note that we pass in a null type reference. This type is dependent on
+	 * the result of the iter_call lookup since it must contain a reference to
+	 * the iterator that is called. This lookup is done at compile time. */
 	ObjectField *iterField = ObjectField::cons( loc, (TypeRef*)0, data );
 	pd->curLocalFrame->insertField( data, iterField );
 
+	/* This temporary is for the tree being walked, used only if it cannot be
+	 * referenced. In this case the iterator is constant. */
+	String iterTemp = "__iter_tmp_" + data + "__";
+	ObjectField *tmpTreeField = ObjectField::cons( loc, (TypeRef*)0, iterTemp );
+	pd->curLocalFrame->insertField( iterTemp, tmpTreeField );
+	iterCall->tmpTreeField = tmpTreeField;
+
 	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
-			iterField, typeRef, langTerm, stmtList );
+			iterField, tmpTreeField, typeRef, iterCall, stmtList );
 
 	return stmt;
 }

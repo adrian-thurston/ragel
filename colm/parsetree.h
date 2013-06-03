@@ -2298,9 +2298,10 @@ struct ObjectDef
 struct CallArg
 {
 	CallArg( LangExpr *expr )
-		: expr(expr) {}
+		: expr(expr), varRefExpr(0) {}
 
 	LangExpr *expr;
+	LangExpr *varRefExpr;
 };
 
 typedef Vector<LangExpr*> ExprVect;
@@ -2414,6 +2415,7 @@ struct LangVarRef
 			int lastPtrInQual, bool forWriting ) const;
 	void loadObj( Compiler *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
 	void canTakeRef( Compiler *pd, VarRefLookup &lookup ) const;
+	bool canTakeRefTest( Compiler *pd, VarRefLookup &lookup ) const;
 
 	void setFieldIter( Compiler *pd, CodeVect &code, 
 			ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert ) const;
@@ -2424,7 +2426,7 @@ struct LangVarRef
 
 	void assignValue( Compiler *pd, CodeVect &code, UniqueType *exprUT ) const;
 	ObjectField **evaluateArgs( Compiler *pd, CodeVect &code, 
-			VarRefLookup &lookup, CallArgVect *args ) const;
+			VarRefLookup &lookup, CallArgVect *args, ObjectField *tmpTreeField ) const;
 	void callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const;
 	UniqueType *evaluateCall( Compiler *pd, CodeVect &code, CallArgVect *args );
 	UniqueType *evaluate( Compiler *pd, CodeVect &code, bool forWriting = false ) const;
@@ -2690,6 +2692,7 @@ struct LangExpr
 	void resolve( Compiler *pd ) const;
 
 	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;
+	bool canTakeRefTest( Compiler *pd ) const;
 
 	InputLoc loc;
 	Type type;
@@ -2701,6 +2704,45 @@ struct LangExpr
 
 struct LangStmt;
 typedef DList<LangStmt> StmtList;
+
+struct LangIterCall
+{
+	enum Type {
+		VarRef,
+		IterCall,
+		Expr
+	};
+
+	LangIterCall()
+	:
+		langTerm(0),
+		langExpr(0),
+		tmpTreeField(0)
+	{}
+
+	static LangIterCall *cons( Type type, LangTerm *langTerm )
+	{
+		LangIterCall *iterCall = new LangIterCall;
+		iterCall->type = type;
+		iterCall->langTerm = langTerm;
+		return iterCall;
+	}
+
+	static LangIterCall *cons( Type type, LangExpr *langExpr )
+	{
+		LangIterCall *iterCall = new LangIterCall;
+		iterCall->type = type;
+		iterCall->langExpr = langExpr;
+		return iterCall;
+	}
+
+	void resolve( Compiler *pd ) const;
+
+	Type type;
+	LangTerm *langTerm;
+	LangExpr *langExpr;
+	ObjectField *tmpTreeField;
+};
 
 struct LangStmt
 {
@@ -2735,6 +2777,7 @@ struct LangStmt
 		fieldInitVect(0),
 		stmtList(0),
 		elsePart(0),
+		iterCall(0),
 
 		/* Normally you don't need to initialize double list pointers, however,
 		 * we make use of the next pointer for returning a pair of statements
@@ -2841,7 +2884,7 @@ struct LangStmt
 		return s;
 	}
 
-	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField, 
+	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField,
 			TypeRef *typeRef, LangTerm *langTerm, StmtList *stmtList )
 	{
 		LangStmt *s = new LangStmt;
@@ -2854,6 +2897,21 @@ struct LangStmt
 		return s;
 	}
 
+	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField,
+			ObjectField *tmpTreeField, TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList )
+	{
+		LangStmt *s = new LangStmt;
+		s->loc = loc;
+		s->type = type;
+		s->objField = objField;
+		s->tmpTreeField = tmpTreeField;
+		s->typeRef = typeRef;
+		s->iterCall = iterCall;
+		s->stmtList = stmtList;
+		return s;
+	}
+
+
 	static LangStmt *cons( Type type )
 	{
 		LangStmt *s = new LangStmt;
@@ -2864,7 +2922,7 @@ struct LangStmt
 	void resolve( Compiler *pd ) const;
 	void resolveParserItems( Compiler *pd ) const;
 
-	LangTerm *chooseDefaultIter( Compiler *pd, LangTerm *fromVarRef ) const;
+	void chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const;
 	void compileWhile( Compiler *pd, CodeVect &code ) const;
 	void compileForIterBody( Compiler *pd, CodeVect &code, UniqueType *iterUT ) const;
 	void compileForIter( Compiler *pd, CodeVect &code ) const;
@@ -2875,6 +2933,7 @@ struct LangStmt
 	LangVarRef *varRef;
 	LangTerm *langTerm;
 	ObjectField *objField;
+	ObjectField *tmpTreeField;
 	TypeRef *typeRef;
 	LangExpr *expr;
 	Constructor *constructor;
@@ -2885,6 +2944,7 @@ struct LangStmt
 	/* Either another if, or an else. */
 	LangStmt *elsePart;
 	String name;
+	LangIterCall *iterCall;
 
 	/* Normally you don't need to initialize double list pointers, however, we
 	 * make use of the next pointer for returning a pair of statements using

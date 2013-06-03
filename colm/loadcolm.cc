@@ -220,9 +220,9 @@ struct LoadColm
 			TypeRef *typeRef = walkTypeRef( Statement.TypeRef() );
 			StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
 
-			LangTerm *langTerm = walkIterCall( Statement.IterCall() );
+			LangIterCall *iterCall = walkIterCall( Statement.IterCall() );
 
-			stmt = forScope( Statement.ForDecl().loc(), forDecl, typeRef, langTerm, stmtList );
+			stmt = forScope( Statement.ForDecl().loc(), forDecl, typeRef, iterCall, stmtList );
 
 			popScope();
 		}
@@ -1628,21 +1628,29 @@ struct LoadColm
 		return ObjectField::cons( varDef.Id().loc(), typeRef, id );
 	}
 
-	LangTerm *walkIterCall( iter_call IterCall )
+	LangIterCall *walkIterCall( iter_call IterCall )
 	{
-		LangTerm *langTerm = 0;
-		if ( IterCall.Id() != 0 ) {
-			String tree = IterCall.Id().text().c_str();
-			langTerm = LangTerm::cons( IterCall.Id().loc(),
-					LangTerm::VarRefType, LangVarRef::cons( IterCall.Id().loc(), tree ) );
-		}
-		else {
+		LangIterCall *iterCall = 0;
+		if ( IterCall.VarRef() != 0 ) {
 			LangVarRef *varRef = walkVarRef( IterCall.VarRef() );
 			CallArgVect *exprVect = walkCodeExprList( IterCall.CodeExprList() );
-			langTerm = LangTerm::cons( varRef->loc, varRef, exprVect );
+			LangTerm *langTerm = LangTerm::cons( varRef->loc, varRef, exprVect );
+			iterCall = LangIterCall::cons( LangIterCall::IterCall, langTerm );
+
+		}
+		else if ( IterCall.Id() != 0 ) {
+			String tree = IterCall.Id().text().c_str();
+			LangTerm *langTerm = LangTerm::cons( IterCall.Id().loc(),
+					LangTerm::VarRefType, LangVarRef::cons( IterCall.Id().loc(), tree ) );
+			LangExpr *langExpr = LangExpr::cons( langTerm );
+			iterCall = LangIterCall::cons( LangIterCall::VarRef, langExpr );
+		}
+		else {
+			LangExpr *langExpr = walkCodeExpr( IterCall.Expr() );
+			iterCall = LangIterCall::cons( LangIterCall::Expr, langExpr );
 		}
 		
-		return langTerm;
+		return iterCall;
 	}
 
 

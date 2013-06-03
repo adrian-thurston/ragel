@@ -2738,7 +2738,7 @@ again:
 			short int field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_REF_FROM_LOCAL\n" );
+			debug( prg, REALM_BYTECODE, "IN_REF_FROM_LOCAL %hd\n", field );
 
 			/* First push the null next pointer, then the kid pointer. */
 			Tree **ptr = vm_plocal(field);

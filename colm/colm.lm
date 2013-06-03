@@ -392,8 +392,9 @@ def optional_else
 |	[]
 
 def iter_call
-	[VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE]
-|	[Id: id]
+	[E1 VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE]
+|	[E2 Id: id]
+|	[E3 Expr: code_expr]
 
 def block_or_single
 	[COPEN LangStmtList: lang_stmt_list CCLOSE]
@@ -561,6 +562,7 @@ def pattern
 
 def E1 []
 def E2 []
+def E3 []
 
 def cons_el
 	[E1 RegionQual: region_qual Lit: lit]
