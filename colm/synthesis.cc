@@ -974,7 +974,7 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 
 
 ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
-		VarRefLookup &lookup, CallArgVect *args, ObjectField *tmpTreeField ) const
+		VarRefLookup &lookup, CallArgVect *args ) const
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
 	 * will be null. */
@@ -993,9 +993,9 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 	if ( args != 0 ) {
 		/* We use this only if there is a paramter list. */
 		ParameterList::Iter p;
-		long pushCount = 0;
+		long size = 0;
 
-		/* First pass we need to push object loads for reference parameters. */
+		/* First pass we need to allocate and evaluate temporaries. */
 		paramList != 0 && ( p = *paramList );
 		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
 			/* Get the expression and the UT for the arg. */
@@ -1005,40 +1005,37 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 			if ( paramUT->typeId == TYPE_REF ) {
 				/* Make sure we are dealing with a variable reference. */
 				if ( ! expression->canTakeRefTest( pd ) ) {
-					if ( tmpTreeField == 0 ) {
-						/* Can't make this local. */
-						error(loc) << "argument must be a local variable" << endp;
-					}
-					else {
-						/* Evaluate the expression. */
-						UniqueType *exprUT = expression->evaluate( pd, code );
+					/* Evaluate the expression. */
+					UniqueType *exprUT = expression->evaluate( pd, code );
+					(*pe)->exprUT = exprUT;
 
-						/* Can copy the value to a tmp local and render the
-						 * iterator constant. Give the tmp a type. */
-						tmpTreeField->typeRef = TypeRef::cons( loc, exprUT );
-
-						/* Make an expression that refereces the tmp local. */
-						LangVarRef *varRef = LangVarRef::cons( loc, tmpTreeField->name );
-						LangTerm *langTerm = LangTerm::cons( loc, LangTerm::VarRefType, varRef );
-						(*pe)->varRefExpr = LangExpr::cons( langTerm );
-
-						/* Stash to the local. */
-						varRef->assignValue( pd, code, exprUT );
-
-						/* Replace the argument with the local referene. */
-						expression = (*pe)->varRefExpr;
-
-						/* Only have one to use. */
-						tmpTreeField = 0;
-					}
+					size += 1;
+					(*pe)->offTmp = size;
 				}
+			}
 
-				/* Lookup the field. */
-				LangVarRef *varRef = expression->term->varRef;
-				ObjectField *refOf = varRef->preEvaluateRef( pd, code );
-				paramRefs[pe.pos()] = refOf;
+			/* Advance the parameter list iterator if we have it. */
+			paramList != 0 && p.increment();
+		}
 
-				pushCount += varRef->qual->length() * 2;
+
+		/* Second pass we need to push object loads for reference parameters. */
+		paramList != 0 && ( p = *paramList );
+		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
+			/* Get the expression and the UT for the arg. */
+			LangExpr *expression = (*pe)->expr;
+			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
+
+			if ( paramUT->typeId == TYPE_REF ) {
+				if ( expression->canTakeRefTest( pd ) ) {
+					/* Lookup the field. */
+					LangVarRef *varRef = expression->term->varRef;
+					ObjectField *refOf = varRef->preEvaluateRef( pd, code );
+					paramRefs[pe.pos()] = refOf;
+
+					size += varRef->qual->length() * 2;
+					(*pe)->offQualRef = size;
+				}
 			}
 
 			/* Advance the parameter list iterator if we have it. */
@@ -1052,18 +1049,21 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 			if ( paramUT->typeId == TYPE_REF ) {
-				if ( ! expression->canTakeRefTest( pd ) )
-					expression = (*pe)->varRefExpr;
+				if ( expression->canTakeRefTest( pd ) ) {
+					/* Lookup the field. */
+					LangVarRef *varRef = expression->term->varRef;
 
-				/* Lookup the field. */
-				LangVarRef *varRef = expression->term->varRef;
+					ObjectField *refOf = varRef->evaluateRef( pd, code, (size - (*pe)->offQualRef) );
+					paramRefs[pe.pos()] = refOf;
 
-				pushCount -= varRef->qual->length() * 2;
+					size += 2;
+				}
+				else {
+					code.append( IN_REF_FROM_BACK );
+					code.appendHalf( size - (*pe)->offTmp );
 
-				ObjectField *refOf = varRef->evaluateRef( pd, code, pushCount );
-				paramRefs[pe.pos()] = refOf;
-
-				pushCount += 2;
+					size += 2;
+				}
 			}
 			else {
 				UniqueType *exprUT = expression->evaluate( pd, code );
@@ -1071,7 +1071,7 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 				if ( !castAssignment( pd, code, paramUT, 0, exprUT ) )
 					error(loc) << "arg " << pe.pos()+1 << " is of the wrong type" << endp;
 
-				pushCount += 1;
+				size += 1;
 			}
 
 			/* Advance the parameter list iterator if we have it. */
@@ -1091,7 +1091,6 @@ void LangVarRef::resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjectFiel
 			paramRefs[p]->refActive = false;
 	}
 }
-
 
 void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const
 {
@@ -1145,7 +1144,24 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 
 	/* Evaluate and push the args. */
 	if ( args != 0 ) {
-		/* We use this only if there is a paramter list. */
+		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
+			/* Get the expression and the UT for the arg. */
+			LangExpr *expression = (*pe)->expr;
+			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
+
+			if ( paramUT->typeId == TYPE_REF ) {
+				if ( expression->canTakeRefTest( pd ) ) {
+					LangVarRef *varRef = expression->term->varRef;
+					popCount += varRef->qual->length() * 2;
+				}
+			}
+		}
+
+		if ( popCount > 0 ) {
+			code.append( IN_POP_N_WORDS );
+			code.appendHalf( (short)popCount );
+		}
+
 		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
 			/* Get the expression and the UT for the arg. */
 			LangExpr *expression = (*pe)->expr;
@@ -1153,17 +1169,10 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 
 			if ( paramUT->typeId == TYPE_REF ) {
 				if ( ! expression->canTakeRefTest( pd ) )
-					expression = (*pe)->varRefExpr;
-
-				/* Lookup the field. */
-				LangVarRef *varRef = expression->term->varRef;
-				popCount += varRef->qual->length() * 2;
+					code.append( IN_POP );
 			}
 		}
-		if ( popCount > 0 ) {
-			code.append( IN_POP_N_WORDS );
-			code.appendHalf( (short)popCount );
-		}
+
 	}
 }
 
@@ -1208,7 +1217,7 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	}
 
 	/* Evaluate and push the arguments. */
-	ObjectField **paramRefs = evaluateArgs( pd, code, lookup, args, 0 );
+	ObjectField **paramRefs = evaluateArgs( pd, code, lookup, args );
 
 	/* Write the call opcode. */
 	callOperation( pd, code, lookup );
@@ -2191,7 +2200,7 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 
 	/* Evaluate and push the arguments. */
 	ObjectField **paramRefs = iterCall->langTerm->varRef->evaluateArgs(
-			pd, code, lookup, iterCall->langTerm->args, iterCall->tmpTreeField );
+			pd, code, lookup, iterCall->langTerm->args );
 
 	if ( pd->revertOn )
 		code.append( iterUT->iterDef->inCreateWV );

@@ -659,15 +659,8 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 	ObjectField *iterField = ObjectField::cons( loc, (TypeRef*)0, data );
 	pd->curLocalFrame->insertField( data, iterField );
 
-	/* This temporary is for the tree being walked, used only if it cannot be
-	 * referenced. In this case the iterator is constant. */
-	String iterTemp = "__iter_tmp_" + data + "__";
-	ObjectField *tmpTreeField = ObjectField::cons( loc, (TypeRef*)0, iterTemp );
-	pd->curLocalFrame->insertField( iterTemp, tmpTreeField );
-	iterCall->tmpTreeField = tmpTreeField;
-
 	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
-			iterField, tmpTreeField, typeRef, iterCall, stmtList );
+			iterField, typeRef, iterCall, stmtList );
 
 	return stmt;
 }
@@ -951,5 +944,3 @@ void BaseParser::popScope()
 {
 	pd->curLocalFrame->popScope();
 }
-
-

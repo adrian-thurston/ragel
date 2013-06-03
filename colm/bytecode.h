@@ -154,6 +154,7 @@ typedef unsigned char uchar;
 #define IN_REF_FROM_LOCAL        0x62
 #define IN_REF_FROM_REF          0x63
 #define IN_REF_FROM_QUAL_REF     0x64
+#define IN_REF_FROM_BACK         0xe3
 #define IN_TRITER_REF_FROM_CUR   0x65
 #define IN_UITER_REF_FROM_CUR    0x66
 

@@ -1516,7 +1516,7 @@ again:
 			short n;
 			read_half( n );
 
-			debug( prg, REALM_BYTECODE, "IN_POP_N_WORDS\n" );
+			debug( prg, REALM_BYTECODE, "IN_POP_N_WORDS %hd\n", n );
 
 			vm_popn( n );
 			break;
@@ -2775,6 +2775,19 @@ again:
 			vm_contiguous( 2 );
 			vm_push( (SW)ref );
 			vm_push( (SW)attr_kid );
+			break;
+		}
+		case IN_REF_FROM_BACK: {
+			short int back;
+			read_half( back );
+
+			debug( prg, REALM_BYTECODE, "IN_REF_FROM_BACK %hd\n", back );
+
+			Tree **ptr = (Tree**)(sp + back);
+
+			vm_contiguous( 2 );
+			vm_push( 0 );
+			vm_push( (SW)ptr );
 			break;
 		}
 		case IN_TRITER_REF_FROM_CUR: {

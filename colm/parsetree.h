@@ -2298,10 +2298,12 @@ struct ObjectDef
 struct CallArg
 {
 	CallArg( LangExpr *expr )
-		: expr(expr), varRefExpr(0) {}
+		: expr(expr), exprUT(0), offTmp(-1), offQualRef(-1) {}
 
 	LangExpr *expr;
-	LangExpr *varRefExpr;
+	UniqueType *exprUT;
+	int offTmp;
+	int offQualRef;
 };
 
 typedef Vector<LangExpr*> ExprVect;
@@ -2426,7 +2428,7 @@ struct LangVarRef
 
 	void assignValue( Compiler *pd, CodeVect &code, UniqueType *exprUT ) const;
 	ObjectField **evaluateArgs( Compiler *pd, CodeVect &code, 
-			VarRefLookup &lookup, CallArgVect *args, ObjectField *tmpTreeField ) const;
+			VarRefLookup &lookup, CallArgVect *args ) const;
 	void callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const;
 	UniqueType *evaluateCall( Compiler *pd, CodeVect &code, CallArgVect *args );
 	UniqueType *evaluate( Compiler *pd, CodeVect &code, bool forWriting = false ) const;
@@ -2716,8 +2718,7 @@ struct LangIterCall
 	LangIterCall()
 	:
 		langTerm(0),
-		langExpr(0),
-		tmpTreeField(0)
+		langExpr(0)
 	{}
 
 	static LangIterCall *cons( Type type, LangTerm *langTerm )
@@ -2741,7 +2742,6 @@ struct LangIterCall
 	Type type;
 	LangTerm *langTerm;
 	LangExpr *langExpr;
-	ObjectField *tmpTreeField;
 };
 
 struct LangStmt
@@ -2898,13 +2898,12 @@ struct LangStmt
 	}
 
 	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField,
-			ObjectField *tmpTreeField, TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList )
+			TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList )
 	{
 		LangStmt *s = new LangStmt;
 		s->loc = loc;
 		s->type = type;
 		s->objField = objField;
-		s->tmpTreeField = tmpTreeField;
 		s->typeRef = typeRef;
 		s->iterCall = iterCall;
 		s->stmtList = stmtList;
@@ -2933,7 +2932,6 @@ struct LangStmt
 	LangVarRef *varRef;
 	LangTerm *langTerm;
 	ObjectField *objField;
-	ObjectField *tmpTreeField;
 	TypeRef *typeRef;
 	LangExpr *expr;
 	Constructor *constructor;
