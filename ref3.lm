@@ -1,0 +1,80 @@
+#### LM ####
+lex 
+	token id / [a-z] /
+	ignore / [\n\t ] /
+end
+
+def start [id*]
+
+parse S: start[stdin]
+
+for Id: id in ((start in S))
+{
+	print( Id )
+	Id = cons id "s"
+}
+
+print( S )
+
+def on_heap
+	S: start
+	[]
+
+ptr<on_heap> newHeap( S: start )
+{
+	return new cons on_heap(S)[]
+}
+
+OnHeap: ptr<on_heap> = newHeap( S )
+
+for Id: id in OnHeap->S 
+{
+	print( Id )
+	Id = cons id "s"
+}
+
+print( S )
+
+int main( S: start )
+{
+	OnHeap: ptr<on_heap> = new cons on_heap(S)[]
+
+	for Id: id in OnHeap->S 
+	{
+		print( Id )
+		Id = cons id "s"
+	}
+
+	print( S )
+}
+
+main( S )
+
+int someRefs( S1: ref<start> S2: ref<start> S3: ref<start> S4: ref<start> )
+{
+	print( S1 )
+	print( S2 )
+	print( S3 )
+	print( S4 )
+}
+
+cons S1: start "a b
+cons S2: start "c d
+cons S3: start "e f
+cons S4: start "g h
+
+someRefs( (start in S1) (start in S2) (start in S3) (start in S4 ) )
+
+#### IN ####
+x y
+#### EXP ####
+x y
+x y
+x y
+x y
+x y
+x y
+a b
+c d
+e f
+g h
