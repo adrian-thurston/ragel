@@ -988,14 +988,18 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	long pcr = parseLoop( prg, sp, pdaRun, in, PcrStart );
 	assert( pcr == PcrDone );
 	if ( pdaRun->parseError ) {
-		cout << "PARSE ERROR " << loc.line << ":" << loc.col;
+		cerr << ( loc.fileName != 0 ? loc.fileName : "<input>" ) <<
+				":" << loc.line << ":" << loc.col;
 
 		if ( pdaRun->parseErrorText != 0 ) {
-			cout << ", offset into pattern/constructor " << 
+			cerr << ": relative error: " << 
 					pdaRun->parseErrorText->tokdata->data;
 		}
+		else {
+			cerr << ": parse error";
+		}
 
-		cout << endl;
+		cerr << endl;
 	}
 
 	return pdaRun;
