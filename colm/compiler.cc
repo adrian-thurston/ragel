@@ -1000,6 +1000,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 		}
 
 		cerr << endl;
+		gblErrorCount += 1;
 	}
 
 	return pdaRun;
@@ -1024,6 +1025,10 @@ void Compiler::parsePatterns()
 		StreamImpl *in = newSourceStreamPat( "<internal>", pat );
 		pat->pdaRun = parsePattern( prg, sp, pat->loc, pat->langEl->parserId, in );
 	}
+
+	/* Bail on above errors. */
+	if ( gblErrorCount > 0 )
+		exit(1);
 
 	fillInPatterns( prg );
 }
