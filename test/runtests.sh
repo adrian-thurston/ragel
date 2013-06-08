@@ -23,7 +23,7 @@
 #######################################
 
 WORKING=working
-COLM=../colm/colm
+COLM=../src/colm
 ERRORS=0
 
 cd `dirname $0`

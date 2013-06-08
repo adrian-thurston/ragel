@@ -412,14 +412,14 @@ void compileOutputInSource( const char *argv0 )
 	char *location = strdup( argv0 );
 	char *last = strrchr( location, '/' );
 	assert( last != 0 );
-	last[1] = 0;
+	last[0] = 0;
 
 	int length = 1024 + 3 * strlen(location) + strlen(intermedFn) + strlen(binaryFn);
 	char command[length];
 	sprintf( command, 
 		"gcc -Wall -Wwrite-strings"
-		" -I%s.."
-		" -I%s../aapl"
+		" -I%s/../aapl"
+		" -I%s/include"
 		" -g"
 		" -o %s"
 		" %s"

@@ -12,6 +12,7 @@
 /.*.d
 /colm
 /config.h.in
+/config.h.in~
 /config.h
 /defs.h
 /version.h
@@ -22,6 +23,8 @@
 /.libs
 /stamp-h1
 /stamp-h2
+
+/include
 
 /bootstrap0
 

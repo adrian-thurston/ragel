@@ -36,15 +36,15 @@ lib_LIBRARIES = libcolmp.a libcolmd.a
 noinst_LIBRARIES = libprog.a
 
 libcolmp_a_SOURCES = $(RUNTIME_SRC)
-libcolmp_a_CFLAGS = -I..
+libcolmp_a_CFLAGS = -Iinclude
 
 libcolmd_a_SOURCES = $(RUNTIME_SRC)
-libcolmd_a_CFLAGS = -I..
+libcolmd_a_CFLAGS = -Iinclude
 
 common_CFLAGS = \
 	-Wall \
 	-DPREFIX='"$(prefix)"' \
-	-I..
+	-Iinclude
 
 libprog_a_SOURCES = \
 	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
@@ -101,7 +101,11 @@ bootstrap1-loadinit.$(OBJEXT): if1.h if1.cc parse1.c
 colm-if2.$(OBJEXT): if2.h if2.cc parse2.c
 colm-loadcolm.$(OBJEXT): if2.h if2.cc parse2.c
 
-BUILT_SOURCES = version.h 
+BUILT_SOURCES = version.h include/colm
+
+include/colm:
+	mkdir -p include
+	ln -s .. include/colm
 
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
