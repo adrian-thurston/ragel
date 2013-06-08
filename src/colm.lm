@@ -255,8 +255,8 @@ def reference_type_ref
 	[R: REF LT TypeRef: type_ref GT]
 
 def param_var_def
-	[Id: id COLON TypeRef: type_ref]
-|	[Id: id COLON RefTypeRef: reference_type_ref]
+	[Id: id COLON TypeRef: type_ref] :Type
+|	[Id: id COLON RefTypeRef: reference_type_ref] :Ref
 
 def opt_export
 	[Export: EXPORT]
@@ -277,8 +277,8 @@ def literal_def
 	[LITERAL LiteralList: literal_list]
 
 def literal_list
-	[LiteralList: literal_list COMMA LiteralItem: literal_item]
-|	[LiteralItem: literal_item]
+	[LiteralList: literal_list COMMA LiteralItem: literal_item] :Item
+|	[LiteralItem: literal_item] :Base
 
 def literal_item
 	[NiLeft: opt_no_ignore Lit: lit NiRight: opt_no_ignore]
@@ -381,20 +381,20 @@ def statement
 |	[Reject: REJECT]
 
 def elsif_list
-	[ElsifClause: elsif_clause ElsifList: elsif_list]
-|	[OptionalElse: optional_else]
+	[ElsifClause: elsif_clause ElsifList: elsif_list] :Clause
+|	[OptionalElse: optional_else] :OptElse
 
 def elsif_clause
 	[ELSIF ElsifExpr: code_expr BlockOrSingle: block_or_single]
 
 def optional_else
-	[ELSE BlockOrSingle: block_or_single]
+	[ELSE BlockOrSingle: block_or_single] :Else
 |	[]
 
 def iter_call
-	[E1 VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE]
-|	[E2 Id: id]
-|	[E3 Expr: code_expr]
+	[E1 VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE] :Call
+|	[E2 Id: id] :Id
+|	[E3 Expr: code_expr] :Expr
 
 def block_or_single
 	[COPEN LangStmtList: lang_stmt_list CCLOSE]
@@ -432,18 +432,18 @@ def code_expr
 |	[Relational: code_relational]
 
 def code_relational
-	[Relational: code_relational EqEq: EQEQ Additive: code_additive]
-|	[Relational: code_relational Neq: NEQ Additive: code_additive]
-|	[Relational: code_relational Lt: LT Additive: code_additive]
-|	[Relational: code_relational Gt: GT Additive: code_additive]
-|	[Relational: code_relational LtEq: LTEQ Additive: code_additive]
-|	[Relational: code_relational GtEq: GTEQ Additive: code_additive]
-|	[Additive: code_additive]
+	[Relational: code_relational EQEQ Additive: code_additive] :EqEq
+|	[Relational: code_relational NEQ Additive: code_additive] :Neq
+|	[Relational: code_relational LT Additive: code_additive] :Lt
+|	[Relational: code_relational GT Additive: code_additive] :Gt
+|	[Relational: code_relational LTEQ Additive: code_additive] :LtEq
+|	[Relational: code_relational GTEQ Additive: code_additive] :GtEq
+|	[Additive: code_additive] :Base
 
 def code_additive
-	[Additive: code_additive Plus: PLUS Multiplicitive: code_multiplicitive]
-|	[Additive: code_additive Minus: MINUS Multiplicitive: code_multiplicitive]
-|	[Multiplicitive: code_multiplicitive]
+	[Additive: code_additive Plus: PLUS Multiplicitive: code_multiplicitive] :Plus
+|	[Additive: code_additive Minus: MINUS Multiplicitive: code_multiplicitive] :Minus
+|	[Multiplicitive: code_multiplicitive] :Base
 
 def code_multiplicitive
 	[Multiplicitive: code_multiplicitive Star: STAR Unary: code_unary]
@@ -451,11 +451,11 @@ def code_multiplicitive
 |	[Unary: code_unary]
 
 def code_unary
-	[Bang: BANG Factor: code_factor]
-|	[Dollar: DOLLAR Factor: code_factor]
-|	[Caret: CARET Factor: code_factor]
-|	[Percent: PERCENT Factor: code_factor]
-|	[Factor: code_factor]
+	[Bang: BANG Factor: code_factor] :Bang
+|	[Dollar: DOLLAR Factor: code_factor] :Dollar
+|	[Caret: CARET Factor: code_factor] :Caret
+|	[Percent: PERCENT Factor: code_factor] :Percent
+|	[Factor: code_factor] :Base
 
 def opt_eos
 	[Eos: DOT]

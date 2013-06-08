@@ -1540,84 +1540,99 @@ struct LoadColm
 	LangExpr *walkCodeAdditive( code_additive additive )
 	{
 		LangExpr *expr = 0;
-		if ( additive.Plus() != 0 ) {
+		switch ( additive.prodName() ) {
+		case code_additive::_Plus: {
 			LangExpr *left = walkCodeAdditive( additive.Additive() );
 			LangExpr *right = walkCodeMultiplicitive( additive.Multiplicitive() );
 			expr = LangExpr::cons( additive.Plus().loc(), left, '+', right );
+			break;
 		}
-		else if ( additive.Minus() != 0 ) {
+		case code_additive::_Minus: {
 			LangExpr *left = walkCodeAdditive( additive.Additive() );
 			LangExpr *right = walkCodeMultiplicitive( additive.Multiplicitive() );
 			expr = LangExpr::cons( additive.Minus().loc(), left, '-', right );
+			break;
 		}
-		else {
+		case code_additive::_Base: {
 			expr = walkCodeMultiplicitive( additive.Multiplicitive() );
-		}
+			break;
+		}}
 		return expr;
 	}
-
 
 	LangExpr *walkCodeUnary( code_unary unary )
 	{
-		LangExpr *expr = walkCodeFactor( unary.Factor() );
+		LangExpr *expr = 0, *factor = walkCodeFactor( unary.Factor() );
 
-		if ( unary.Bang() != 0 ) {
-			expr = LangExpr::cons( unary.Bang().loc(), '!', expr );
+		switch ( unary.prodName() ) {
+		case code_unary::_Bang: {
+			expr = LangExpr::cons( unary.Bang().loc(), '!', factor );
+			break;
 		}
-		else if ( unary.Dollar() != 0 ) {
-			expr = LangExpr::cons( unary.Dollar().loc(), '$', expr );
+		case code_unary::_Dollar: {
+			expr = LangExpr::cons( unary.Dollar().loc(), '$', factor );
+			break;
 		}
-		else if ( unary.Caret() != 0 ) {
-			expr = LangExpr::cons( unary.Caret().loc(), '^', expr );
+		case code_unary::_Caret: {
+			expr = LangExpr::cons( unary.Caret().loc(), '^', factor );
+			break;
 		}
-		else if ( unary.Percent() != 0 ) {
-			expr = LangExpr::cons( unary.Percent().loc(), '%', expr );
+		case code_unary::_Percent: {
+			expr = LangExpr::cons( unary.Percent().loc(), '%', factor );
+			break;
 		}
+		case code_unary::_Base: {
+			expr = factor;
+		}}
 
 		return expr;
 	}
-
 
 	LangExpr *walkCodeRelational( code_relational codeRelational )
 	{
-		LangExpr *expr = 0;
-		if ( codeRelational.Relational() != 0 ) {
-			LangExpr *left = walkCodeRelational( codeRelational.Relational() );
-			LangExpr *right = walkCodeAdditive( codeRelational.Additive() );
+		LangExpr *expr = 0, *left;
 
-			if ( codeRelational.EqEq() != 0 ) {
-				expr = LangExpr::cons( codeRelational.EqEq().loc(), left, OP_DoubleEql, right );
-			}
-			if ( codeRelational.Neq() != 0 ) {
-				expr = LangExpr::cons( codeRelational.Neq().loc(), left, OP_NotEql, right );
-			}
-			else if ( codeRelational.Lt() != 0 ) {
-				expr = LangExpr::cons( codeRelational.Lt().loc(), left, '<', right );
-			}
-			else if ( codeRelational.Gt() != 0 ) {
-				expr = LangExpr::cons( codeRelational.Gt().loc(), left, '>', right );
-			}
-			else if ( codeRelational.LtEq() != 0 ) {
-				expr = LangExpr::cons( codeRelational.LtEq().loc(), left, OP_LessEql, right );
-			}
-			else if ( codeRelational.GtEq() != 0 ) {
-				expr = LangExpr::cons( codeRelational.GtEq().loc(), left, OP_GrtrEql, right );
-			}
+		if ( codeRelational.prodName() != code_relational::_Base )
+			left = walkCodeRelational( codeRelational.Relational() );
+
+		LangExpr *additive = walkCodeAdditive( codeRelational.Additive() );
+
+		switch ( codeRelational.prodName() ) {
+		case code_relational::_EqEq: {
+			expr = LangExpr::cons( codeRelational.loc(), left, OP_DoubleEql, additive );
+			break;
 		}
-		else {
-			expr = walkCodeAdditive( codeRelational.Additive() );
+		case code_relational::_Neq: {
+			expr = LangExpr::cons( codeRelational.loc(), left, OP_NotEql, additive );
+			break;
 		}
+		case code_relational::_Lt: {
+			expr = LangExpr::cons( codeRelational.loc(), left, '<', additive );
+			break;
+		}
+		case code_relational::_Gt: {
+			expr = LangExpr::cons( codeRelational.loc(), left, '>', additive );
+			break;
+		}
+		case code_relational::_LtEq: {
+			expr = LangExpr::cons( codeRelational.loc(), left, OP_LessEql, additive );
+			break;
+		}
+		case code_relational::_GtEq: {
+			expr = LangExpr::cons( codeRelational.loc(), left, OP_GrtrEql, additive );
+			break;
+		}
+		case code_relational::_Base: {
+			expr = additive;
+			break;
+		}}
 		return expr;
 	}
 
-	LangStmt *walkExprStmt( expr_stmt &exprStmt )
+	LangStmt *walkExprStmt( expr_stmt exprStmt )
 	{
-		LangStmt *stmt;
-		if ( exprStmt.CodeExpr() != 0 ) {
-			code_expr codeExpr = exprStmt.CodeExpr();
-			LangExpr *expr = walkCodeExpr( codeExpr );
-			stmt = LangStmt::cons( expr->loc, LangStmt::ExprType, expr );
-		}
+		LangExpr *expr = walkCodeExpr( exprStmt.CodeExpr() );
+		LangStmt *stmt = LangStmt::cons( expr->loc, LangStmt::ExprType, expr );
 		return stmt;
 	}
 
@@ -1631,28 +1646,30 @@ struct LoadColm
 	LangIterCall *walkIterCall( iter_call IterCall )
 	{
 		LangIterCall *iterCall = 0;
-		if ( IterCall.VarRef() != 0 ) {
+		switch ( IterCall.prodName() ) {
+		case iter_call::_Call: {
 			LangVarRef *varRef = walkVarRef( IterCall.VarRef() );
 			CallArgVect *exprVect = walkCodeExprList( IterCall.CodeExprList() );
 			LangTerm *langTerm = LangTerm::cons( varRef->loc, varRef, exprVect );
 			iterCall = LangIterCall::cons( LangIterCall::IterCall, langTerm );
-
+			break;
 		}
-		else if ( IterCall.Id() != 0 ) {
+		case iter_call::_Id: {
 			String tree = IterCall.Id().text().c_str();
 			LangTerm *langTerm = LangTerm::cons( IterCall.Id().loc(),
 					LangTerm::VarRefType, LangVarRef::cons( IterCall.Id().loc(), tree ) );
 			LangExpr *langExpr = LangExpr::cons( langTerm );
 			iterCall = LangIterCall::cons( LangIterCall::VarRef, langExpr );
+			break;
 		}
-		else {
+		case iter_call::_Expr: {
 			LangExpr *langExpr = walkCodeExpr( IterCall.Expr() );
 			iterCall = LangIterCall::cons( LangIterCall::Expr, langExpr );
-		}
+			break;
+		}}
 		
 		return iterCall;
 	}
-
 
 	LangStmt *walkElsifClause( elsif_clause elsifClause )
 	{
@@ -1667,7 +1684,7 @@ struct LoadColm
 	LangStmt *walkOptionalElse( optional_else optionalElse )
 	{
 		LangStmt *stmt = 0;
-		if ( optionalElse.BlockOrSingle() != 0 ) {
+		if ( optionalElse.prodName() == optional_else::_Else ) {
 			pushScope();
 			StmtList *stmtList = walkBlockOrSingle( optionalElse.BlockOrSingle() );
 			stmt = LangStmt::cons( LangStmt::ElseType, stmtList );
@@ -1679,12 +1696,14 @@ struct LoadColm
 	LangStmt *walkElsifList( elsif_list elsifList )
 	{
 		LangStmt *stmt = 0;
-		if ( elsifList.ElsifList() != 0 ) {
-			stmt = walkElsifClause( elsifList.ElsifClause() );
-			stmt->elsePart = walkElsifList( elsifList.ElsifList() );
-		}
-		else {
-			stmt = walkOptionalElse( elsifList.OptionalElse() );
+		switch ( elsifList.prodName() ) {
+			case elsif_list::_Clause:
+				stmt = walkElsifClause( elsifList.ElsifClause() );
+				stmt->elsePart = walkElsifList( elsifList.ElsifList() );
+				break;
+			case elsif_list::_OptElse:
+				stmt = walkOptionalElse( elsifList.OptionalElse() );
+				break;
 		}
 		return stmt;
 	}
@@ -1706,10 +1725,14 @@ struct LoadColm
 		String id = paramVarDef.Id().text().c_str();
 		TypeRef *typeRef = 0;
 
-		if ( paramVarDef.TypeRef() != 0 )
+		switch ( paramVarDef.prodName() ) {
+		case param_var_def::_Type: 
 			typeRef = walkTypeRef( paramVarDef.TypeRef() );
-		else
+			break;
+		case param_var_def::_Ref:
 			typeRef = walkReferenceTypeRef( paramVarDef.RefTypeRef() );
+			break;
+		}
 		
 		return addParam( paramVarDef.Id().loc(), typeRef, id );
 	}
@@ -1915,7 +1938,7 @@ struct LoadColm
 
 	void walkLiteralList( literal_list literalList )
 	{
-		if ( literalList.LiteralList() != 0 )
+		if ( literalList.prodName() == literal_list::_Item )
 			walkLiteralList( literalList.LiteralList() );
 		walkLiteralItem( literalList.LiteralItem() );
 	}
