@@ -586,7 +586,7 @@ int main(int argc, const char **argv)
 	}
 
 
-#if defined(CONS_COLM) || defined(LOAD_SRC)
+#if defined(LOAD_INIT) || defined(LOAD_COLM)
 	/* Open the input file for reading. */
 	if ( inputFn == 0 ) {
 		error() << "colm: no input file given" << endl;
