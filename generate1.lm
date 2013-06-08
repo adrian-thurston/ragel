@@ -170,10 +170,7 @@ context generate
 		[if_stmt]
 	|	[while_stmt]
 	|	[for_stmt]
-	|	[try_stmt]
-	|	[with_stmt]
 	|	[funcdef]
-	|	[classdef]
 
 	def if_stmt 
 		['if' expression ':' suite elif_part* opt_else_part]
@@ -191,46 +188,12 @@ context generate
 	def for_stmt 
 		['for' target_list 'in' expression_list ':' suite opt_else_part]
 
-	def try_stmt 
-		['try' ':' suite except_list opt_else_part opt_finally_part]
-	|	['try' ':' suite 'finally' ':' suite]
-
-	def except_list 
-		[except_list except_part]
-	|	[except_part]
-
-	def except_part 
-		['except' ':' suite]
-	|	['except' expression ':' suite]
-	|	['except' expression ',' target ':' suite]
-
-	def opt_finally_part 
-		['finally' ':' suite]
-	|	[]
-	  
-	def with_stmt 
-		['with' expression ':' suite]
-	|	['with' expression 'as' target ':' suite]
-
 	def funcdef 
-		[decorators 'def' funcname '(' opt_parameter_list ')' ':' suite]
+		['def' funcname '(' opt_parameter_list ')' ':' suite]
 
 	def funcname 
 		[identifier]
 
-	def decorators 
-		[decorators decorator]
-	|	[]
-	  
-	def decorator 
-		['@' dotted_name opt_decorator_pal NEWLINE]
-
-	def opt_decorator_pal 
-		[]
-	|	['(' ')'] 
-	|	['(' argument_list ')'] 
-	|	['(' argument_list ',' ')'] 
-	  
 	def dotted_name 
 		[dotted_name '.' identifier]
 	|	[identifier]
@@ -241,9 +204,6 @@ context generate
 
 	def parameter_list 
 		[defparameter_list defparameter opt_comma]
-	|	[defparameter_list '*' identifier]
-	|	[defparameter_list '*' identifier '**' identifier]
-	|	[defparameter_list '**' identifier]
 
 	def defparameter_list 
 		[defparameter_list defparameter ',']
@@ -264,39 +224,16 @@ context generate
 		[identifier]
 	|	['(' sublist ')']
 	  
-	def classdef 
-		['class' classname opt_inheritance ':' suite]
-
 	def classname 
 		[identifier]
 
-	def opt_inheritance 
-		['(' ')']
-	|	['(' expression_list ')']
-	|	[]
-
 	def simple_stmt 
 		[expression_stmt]
-	|	[assert_stmt]
 	|	[assignment_stmt]
-	|	[augmented_assignment_stmt]
-	|	[pass_stmt]
-	|	[del_stmt]
 	|	[print_stmt]
-	|	[return_stmt]
-	|	[yield_stmt]
-	|	[raise_stmt]
-	|	[break_stmt]
-	|	[continue_stmt]
-	|	[import_stmt]
-	|	[global_stmt]
-	|	[exec_stmt]
 
 	def expression_stmt 
 		[expression_list]
-
-	def assert_stmt 
-		['assert' expression_list_core]
 
 	def assignment_stmt 
 		[target_equals_list expression_list]
@@ -332,71 +269,8 @@ context generate
 	|	[subscription]
 	|	[slicing]
 
-	def augmented_assignment_stmt 
-		[target augop expression_list]
-	  
-	def augop 
-		['+='] | ['-='] | ['*='] | ['/=']
-	|	['\%='] | ['**='] | ['>>='] | ['<<='] | ['\&=']
-	|	['^'] | ['|=']
-
-	def pass_stmt 
-		['pass']
-
-	def del_stmt 
-		['del' target_list]
-
 	def print_stmt 
 		['print' opt_expression_list]
-	|	['print' '>>' expression_list]
-
-	def return_stmt 
-		['return' opt_expression_list] 
-
-	def yield_stmt 
-		['yield' expression_list]
-
-	def raise_stmt 
-		['raise']
-	|	['raise' expression]
-	|	['raise' expression ',' expression]
-	|	['raise' expression ',' expression ',' expression]
-
-	def break_stmt 
-		['break']
-
-	def continue_stmt 
-		['continue']
-
-	def import_stmt 
-		['import' module opt_as_name more_imports]
-	|	['from' module 'import' identifier opt_as_name more_imports]
-	|	['from' module 'import' '(' identifier opt_as_name more_imports opt_comma ')']
-	|	['from' module 'import' '*']
-
-	def more_imports 
-		[more_imports ',' identifier opt_as_name]
-	|	[]
-
-	def module 
-		[module '.' identifier]
-	|	[identifier]
-
-	def opt_as_name 
-		['as' identifier]
-	|	[]
-
-	def global_stmt 
-		['global' identifer_list]
-
-	def identifer_list 
-		[identifer_list ',' identifier]
-	|	[identifier]
-
-	def exec_stmt 
-		['exec' expression]
-	|	['exec' expression 'in' expression]
-	|	['exec' expression 'in' expression ',' expression]
 
 	def opt_expression_list 
 		[expression_list]
@@ -448,43 +322,7 @@ context generate
 		['is' 'not'] | ['in'] | ['not' 'in']
 
 	def or_expr 
-		[or_expr '|' xor_expr]
-	|	[xor_expr]
-
-	def xor_expr 
-		[xor_expr '^' and_expr]
-	|	[and_expr]
-
-	def and_expr 
-		[and_expr '&' shift_expr]
-	|	[shift_expr]
-
-	def shift_expr 
-		[shift_expr '<<' a_expr]
-	|	[shift_expr '>>' a_expr]
-	|	[a_expr]
-
-	def a_expr 
-		[a_expr '+' m_expr]
-	|	[a_expr '-' m_expr]
-	|	[m_expr]
-
-	def m_expr 
-		[m_expr '*' u_expr]
-	|	[m_expr '//' u_expr]
-	|	[m_expr '/' u_expr]
-	|	[m_expr '\%' u_expr]
-	|	[u_expr]
-
-	def u_expr 
-		[power]
-	|	['-' u_expr]
-	|	['+' u_expr]
-	|	['\~' u_expr]
-
-	def power 
-		[primary '**' u_expr]
-	|	[primary] 
+		[primary]
 
 	def primary 
 		[atom primary_ext_rep]
@@ -654,20 +492,9 @@ context generate
 	|	[]
 	  
 	def argument_list 
-		[positional_arguments opt_comma_keyword_arguments
-			opt_comma_star_expr opt_comma_dstar_expr]
-	|	[keyword_arguments opt_comma_star_expr opt_comma_dstar_expr]
-	|	['*' expression opt_comma_dstar_expr]
-	|	['**' expression]
+		[positional_arguments opt_comma_keyword_arguments]
+	|	[keyword_arguments]
 
-	def opt_comma_star_expr 
-		[',' '*' expression] 
-	|	[] 
-
-	def opt_comma_dstar_expr 
-		[',' '**' expression] 
-	|	[] 
-	  
 	def positional_arguments 
 		[positional_arguments ',' expression]
 	|	[expression]
