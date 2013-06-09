@@ -463,28 +463,28 @@ def opt_eos
 |	[]
 
 def code_factor
-	[Number: number]
-|	[Lit: lit]
-|	[VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE]
-|	[VarRef: var_ref]
-|	[Nil: NIL]
-|	[True: TRUE]
-|	[False: FALSE]
-|	[POPEN ParenCodeExpr: code_expr PCLOSE]
-|	[Send: SEND ToVarRef: var_ref Accumulate: accumulate OptEos: opt_eos]
+	[Number: number] :Number
+|	[Lit: lit] :Lit
+|	[VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE] :Call
+|	[VarRef: var_ref] :VarRef
+|	[Nil: NIL] :Nil
+|	[True: TRUE] :True
+|	[False: FALSE] :False
+|	[POPEN ParenCodeExpr: code_expr PCLOSE] :Paren
+|	[Send: SEND ToVarRef: var_ref Accumulate: accumulate OptEos: opt_eos] :Send
 |	[Parse: PARSE OptCapture: opt_capture TypeRef: type_ref
-		OptFieldInit: opt_field_init Accumulate: accumulate]
+		OptFieldInit: opt_field_init Accumulate: accumulate] :Parse
 |	[ParseStop: PARSE_STOP OptCapture: opt_capture TypeRef: type_ref
-		OptFieldInit: opt_field_init Accumulate: accumulate]
+		OptFieldInit: opt_field_init Accumulate: accumulate] :ParseStop
 |	[Cons: CONS OptCapture: opt_capture TypeRef: type_ref
-		OptFieldInit: opt_field_init Constructor: constructor]
-|	[MATCH MatchVarRef: var_ref Pattern: pattern]
-|	[String: cstring]
-|	[TypeRef: type_ref IN InVarRef: var_ref]
-|	[MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE]
-|	[MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE]
-|	[TYPEID LT TypeIdTypeRef: type_ref GT]
-|	[NEW NewCodeFactor: code_factor]
+		OptFieldInit: opt_field_init Constructor: constructor] :Cons
+|	[MATCH MatchVarRef: var_ref Pattern: pattern] :Match
+|	[String: cstring] :String
+|	[TypeRef: type_ref IN InVarRef: var_ref] :In
+|	[MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE] :MakeTree
+|	[MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE] :MakeToken
+|	[TYPEID LT TypeIdTypeRef: type_ref GT] :TypeId
+|	[NEW NewCodeFactor: code_factor] :New
 
 def type_ref
 	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat]
@@ -509,8 +509,8 @@ def opt_capture
 |	[]
 
 def opt_field_init
-	[POPEN FieldInitList: field_init* PCLOSE]
-|	[]
+	[POPEN FieldInitList: field_init* PCLOSE] :Init
+|	[] :Base
 
 def field_init
 	[CodeExpr: code_expr]
@@ -565,49 +565,48 @@ def E2 []
 def E3 []
 
 def cons_el
-	[E1 RegionQual: region_qual Lit: lit]
-|	[E1 DQ LitConsElList: lit_cons_el* Term: dq_lit_term]
-|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[E2 CodeExpr: code_expr]
+	[E1 RegionQual: region_qual Lit: lit] :Lit
+|	[E1 DQ LitConsElList: lit_cons_el* Term: dq_lit_term] :Dq
+|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+|	[E2 CodeExpr: code_expr] :CodeExpr
 
 def lit_cons_el
-	[ConsData: cons_data]
-|	[CONS_SQOPEN ConsElList: cons_el* CONS_SQCLOSE]
+	[ConsData: cons_data] :ConsData
+|	[CONS_SQOPEN ConsElList: cons_el* CONS_SQCLOSE] :SubList
 
 def cons_top_el
-	[DQ LitConsElList: lit_cons_el* Term: dq_lit_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[SQOPEN ConsElList: cons_el* SQCLOSE]
+	[DQ LitConsElList: lit_cons_el* Term: dq_lit_term] :Dq
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+|	[SQOPEN ConsElList: cons_el* SQCLOSE] :SubList
 
 def cons_list
-	[ConsTopEl: cons_top_el ConsList: cons_list]
-|	[ConsTopEl: cons_top_el]
+	[ConsTopEl: cons_top_el ConsList: cons_list] :List
+|	[ConsTopEl: cons_top_el] :Base
 
 def constructor
 	[ConsList: cons_list]
-
 
 #
 # Accumulate
 #
 
 def accum_el
-	[E1 DQ LitAccumElList: lit_accum_el* Term: dq_lit_term]
-|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[E2 CodeExpr: code_expr]
+	[E1 DQ LitAccumElList: lit_accum_el* Term: dq_lit_term] :Dq
+|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+|	[E2 CodeExpr: code_expr] :CodeExpr
 
 def lit_accum_el
-	[ConsData: cons_data]
-|	[CONS_SQOPEN AccumElList: accum_el* CONS_SQCLOSE]
+	[ConsData: cons_data] :ConsData
+|	[CONS_SQOPEN AccumElList: accum_el* CONS_SQCLOSE] :SubList
 
 def accum_top_el
-	[DQ LitAccumElList: lit_accum_el* Term: dq_lit_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[SQOPEN AccumElList: accum_el* SQCLOSE]
+	[DQ LitAccumElList: lit_accum_el* Term: dq_lit_term] :Dq
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+|	[SQOPEN AccumElList: accum_el* SQCLOSE] :SubList
 
 def accum_list
-	[AccumTopEl: accum_top_el AccumList: accum_list]
-|	[AccumTopEl: accum_top_el]
+	[AccumTopEl: accum_top_el AccumList: accum_list] :List
+|	[AccumTopEl: accum_top_el] :Base
 
 def accumulate
 	[AccumList: accum_list]
@@ -617,22 +616,22 @@ def accumulate
 #
 
 def string_el
-	[E1 DQ LitStringElList: lit_string_el* Term: dq_lit_term]
-|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[E2 CodeExpr: code_expr]
+	[E1 DQ LitStringElList: lit_string_el* Term: dq_lit_term] :Dq
+|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+|	[E2 CodeExpr: code_expr] :CodeExpr
 
 def lit_string_el
-	[ConsData: cons_data]
-|	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE]
+	[ConsData: cons_data] :ConsData
+|	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE] :SubList
 
 def string_top_el
-	[DQ LitStringElList: lit_string_el* Term: dq_lit_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[SQOPEN StringElList: string_el* SQCLOSE]
+	[DQ LitStringElList: lit_string_el* Term: dq_lit_term] :Dq
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+|	[SQOPEN StringElList: string_el* SQCLOSE] :SubList
 
 def string_list
-	[StringTopEl: string_top_el StringList: string_list]
-|	[StringTopEl: string_top_el]
+	[StringTopEl: string_top_el StringList: string_list] :List
+|	[StringTopEl: string_top_el] :Base
 
 def cstring
 	[StringList: string_list]

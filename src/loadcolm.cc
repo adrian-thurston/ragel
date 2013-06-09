@@ -1083,15 +1083,18 @@ struct LoadColm
 	ConsItemList *walkLitConsEl( lit_cons_el litConsEl )
 	{
 		ConsItemList *list = 0;
-		if ( litConsEl.ConsData() != 0 ) {
+		switch ( litConsEl.prodName() ) {
+		case lit_cons_el::_ConsData: {
 			String consData = unescape( litConsEl.ConsData().text().c_str() );
 			ConsItem *consItem = ConsItem::cons( litConsEl.ConsData().loc(),
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
+			break;
 		}
-		else if ( litConsEl.ConsElList() != 0 ) {
+		case lit_cons_el::_SubList: {
 			list = walkConsElList( litConsEl.ConsElList() );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -1117,26 +1120,31 @@ struct LoadColm
 	ConsItemList *walkConsEl( cons_el consEl )
 	{
 		ConsItemList *list = 0;
-		if ( consEl.Lit() != 0 ) {
+		switch ( consEl.prodName() ) {
+		case cons_el::_Lit: {
 			NamespaceQual *nspaceQual = walkRegionQual( consEl.RegionQual() );
 			String lit = consEl.Lit().text().c_str();
 			list = consElLiteral( consEl.Lit().loc(), lit, nspaceQual );
+			break;
 		}
-		else if ( consEl.TildeData() != 0 ) {
+		case cons_el::_Tilde: {
 			String consData = consEl.TildeData().text().c_str();
 			consData += '\n';
 			ConsItem *consItem = ConsItem::cons( consEl.TildeData().loc(),
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
+			break;
 		}
-		else if ( consEl.CodeExpr() != 0 ) {
+		case cons_el::_CodeExpr: {
 			LangExpr *consExpr = walkCodeExpr( consEl.CodeExpr() );
 			ConsItem *consItem = ConsItem::cons( consExpr->loc, ConsItem::ExprType, consExpr );
 			list = ConsItemList::cons( consItem );
+			break;
 		}
-		else if ( consEl.LitConsElList() != 0 ) {
+		case cons_el::_Dq: {
 			list = walkLitConsElList( consEl.LitConsElList(), consEl.Term().Nl() );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -1154,18 +1162,23 @@ struct LoadColm
 	ConsItemList *walkConsTopEl( cons_top_el consTopEl )
 	{
 		ConsItemList *list = 0;
-		if ( consTopEl.LitConsElList() != 0 )
+		switch ( consTopEl.prodName() ) {
+		case cons_top_el::_Dq: {
 			list = walkLitConsElList( consTopEl.LitConsElList(), consTopEl.Term().Nl() );
-		else if ( consTopEl.TildeData() != 0 ) {
+			break;
+		}
+		case cons_top_el::_Tilde: {
 			String consData = consTopEl.TildeData().text().c_str();
 			consData += '\n';
 			ConsItem *consItem = ConsItem::cons( consTopEl.TildeData().loc(),
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
+			break;
 		}
-		else if ( consTopEl.ConsElList() != 0 ) {
+		case cons_top_el::_SubList: {
 			list = walkConsElList( consTopEl.ConsElList() );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -1194,15 +1207,18 @@ struct LoadColm
 	ConsItemList *walkLitStringEl( lit_string_el litStringEl )
 	{
 		ConsItemList *list = 0;
-		if ( litStringEl.ConsData() != 0 ) {
+		switch ( litStringEl.prodName() ) {
+		case lit_string_el::_ConsData: {
 			String consData = unescape( litStringEl.ConsData().text().c_str() );
 			ConsItem *stringItem = ConsItem::cons( litStringEl.ConsData().loc(),
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( stringItem );
+			break;
 		}
-		else if ( litStringEl.StringElList() != 0 ) {
+		case lit_string_el::_SubList: {
 			list = walkStringElList( litStringEl.StringElList() );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -1227,21 +1243,25 @@ struct LoadColm
 	ConsItemList *walkStringEl( string_el stringEl )
 	{
 		ConsItemList *list = 0;
-		if ( stringEl.LitStringElList() != 0 ) {
+		switch ( stringEl.prodName() ) {
+		case string_el::_Dq: {
 			list = walkLitStringElList( stringEl.LitStringElList(), stringEl.Term().Nl() );
+			break;
 		}
-		else if ( stringEl.TildeData() != 0 ) {
+		case string_el::_Tilde: {
 			String consData = stringEl.TildeData().text().c_str();
 			consData += '\n';
 			ConsItem *consItem = ConsItem::cons( stringEl.TildeData().loc(),
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
+			break;
 		}
-		else if ( stringEl.CodeExpr() != 0 ) {
+		case string_el::_CodeExpr: {
 			LangExpr *consExpr = walkCodeExpr( stringEl.CodeExpr() );
 			ConsItem *consItem = ConsItem::cons( consExpr->loc, ConsItem::ExprType, consExpr );
 			list = ConsItemList::cons( consItem );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -1259,18 +1279,23 @@ struct LoadColm
 	ConsItemList *walkStringTopEl( string_top_el stringTopEl )
 	{
 		ConsItemList *list = 0;
-		if ( stringTopEl.LitStringElList() != 0 )
+		switch ( stringTopEl.prodName() ) {
+		case string_top_el::_Dq: {
 			list = walkLitStringElList( stringTopEl.LitStringElList(), stringTopEl.Term().Nl() );
-		else if ( stringTopEl.TildeData() != 0 ) {
+			break;
+		}
+		case string_top_el::_Tilde: {
 			String consData = stringTopEl.TildeData().text().c_str();
 			consData += '\n';
 			ConsItem *consItem = ConsItem::cons( stringTopEl.TildeData().loc(),
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
+			break;
 		}
-		else if ( stringTopEl.StringElList() != 0 ) {
+		case string_top_el::_SubList: {
 			list = walkStringElList( stringTopEl.StringElList() );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -1299,15 +1324,18 @@ struct LoadColm
 	ConsItemList *walkLitAccumEl( lit_accum_el litAccumEl )
 	{
 		ConsItemList *list = 0;
-		if ( litAccumEl.ConsData() != 0 ) {
+		switch ( litAccumEl.prodName() ) {
+		case lit_accum_el::_ConsData: {
 			String consData = unescape( litAccumEl.ConsData().text().c_str() );
 			ConsItem *consItem = ConsItem::cons( litAccumEl.ConsData().loc(),
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
+			break;
 		}
-		else if ( litAccumEl.AccumElList() != 0 ) {
+		case lit_accum_el::_SubList: {
 			list = walkAccumElList( litAccumEl.AccumElList() );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -1333,21 +1361,25 @@ struct LoadColm
 	ConsItemList *walkAccumEl( accum_el accumEl )
 	{
 		ConsItemList *list = 0;
-		if ( accumEl.LitAccumElList() != 0 ) {
+		switch ( accumEl.prodName() ) {
+		case accum_el::_Dq: {
 			list = walkLitAccumElList( accumEl.LitAccumElList(), accumEl.Term().Nl() );
+			break;
 		}
-		else if ( accumEl.TildeData() != 0 ) {
+		case accum_el::_Tilde: {
 			String consData = accumEl.TildeData().text().c_str();
 			consData += '\n';
 			ConsItem *consItem = ConsItem::cons( accumEl.TildeData().loc(),
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
+			break;
 		}
-		else if ( accumEl.CodeExpr() != 0 ) {
+		case accum_el::_CodeExpr: {
 			LangExpr *accumExpr = walkCodeExpr( accumEl.CodeExpr() );
 			ConsItem *consItem = ConsItem::cons( accumExpr->loc, ConsItem::ExprType, accumExpr );
 			list = ConsItemList::cons( consItem );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -1365,18 +1397,23 @@ struct LoadColm
 	ConsItemList *walkAccumTopEl( accum_top_el accumTopEl )
 	{
 		ConsItemList *list = 0;
-		if ( accumTopEl.LitAccumElList() != 0 )
+		switch ( accumTopEl.prodName() ) {
+		case accum_top_el::_Dq: {
 			list = walkLitAccumElList( accumTopEl.LitAccumElList(), accumTopEl.Term().Nl() );
-		else if ( accumTopEl.TildeData() != 0 ) {
+			break;
+		}
+		case accum_top_el::_Tilde: {
 			String consData = accumTopEl.TildeData().text().c_str();
 			consData += '\n';
 			ConsItem *consItem = ConsItem::cons( accumTopEl.TildeData().loc(),
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
+			break;
 		}
-		else if ( accumTopEl.AccumElList() != 0 ) {
+		case accum_top_el::_SubList: {
 			list = walkAccumElList( accumTopEl.AccumElList() );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -1384,7 +1421,7 @@ struct LoadColm
 	{
 		ConsItemList *list = walkAccumTopEl( accumList.AccumTopEl() );
 
-		if ( accumList.AccumList() != 0 ) {
+		if ( accumList.prodName() == accum_list::_List ) {
 			ConsItemList *extension = walkAccumList( accumList.AccumList() );
 			consListConcat( list, extension );
 		}
@@ -1408,7 +1445,7 @@ struct LoadColm
 	FieldInitVect *walkOptFieldInit( opt_field_init optFieldInit )
 	{
 		FieldInitVect *list = 0;
-		if ( optFieldInit.FieldInitList() != 0 ) {
+		if ( optFieldInit.prodName() == opt_field_init::_Init ) {
 			list = new FieldInitVect;
 			_repeat_field_init fieldInitList = optFieldInit.FieldInitList();
 			while ( !fieldInitList.end() ) {
@@ -1422,33 +1459,34 @@ struct LoadColm
 	LangExpr *walkCodeFactor( code_factor codeFactor )
 	{
 		LangExpr *expr = 0;
-		if ( codeFactor.VarRef() != 0 ) {
-			var_ref varRef = codeFactor.VarRef();
-			LangVarRef *langVarRef = walkVarRef( varRef );
-
-			LangTerm *term = 0;
-			if ( codeFactor.CodeExprList() == 0 ) {
-				term = LangTerm::cons( langVarRef->loc, LangTerm::VarRefType, langVarRef );
-			}
-			else {
-				CallArgVect *exprVect = walkCodeExprList( codeFactor.CodeExprList() );
-				term = LangTerm::cons( langVarRef->loc, langVarRef, exprVect );
-			}
-
+		switch ( codeFactor.prodName() ) {
+		case code_factor::_VarRef: {
+			LangVarRef *langVarRef = walkVarRef( codeFactor.VarRef() );
+			LangTerm *term = LangTerm::cons( langVarRef->loc, LangTerm::VarRefType, langVarRef );
 			expr = LangExpr::cons( term );
+			break;
 		}
-		else if ( codeFactor.Number() != 0 ) {
+		case code_factor::_Call: {
+			LangVarRef *langVarRef = walkVarRef( codeFactor.VarRef() );
+			CallArgVect *exprVect = walkCodeExprList( codeFactor.CodeExprList() );
+			LangTerm *term = LangTerm::cons( langVarRef->loc, langVarRef, exprVect );
+			expr = LangExpr::cons( term );
+			break;
+		}
+		case code_factor::_Number: {
 			String number = codeFactor.Number().text().c_str();
 			LangTerm *term = LangTerm::cons( codeFactor.Number().loc(),
 					LangTerm::NumberType, number );
 			expr = LangExpr::cons( term );
+			break;
 		}
-		else if ( codeFactor.Lit() != 0 ) {
+		case code_factor::_Lit: {
 			String lit = codeFactor.Lit().text().c_str();
 			LangTerm *term = LangTerm::cons( codeFactor.Lit().loc(), LangTerm::StringType, lit );
 			expr = LangExpr::cons( term );
+			break;
 		}
-		else if ( codeFactor.Parse() != 0 ) {
+		case code_factor::_Parse: {
 			/* The type we are parsing. */
 			type_ref typeRefTree = codeFactor.TypeRef();
 			TypeRef *typeRef = walkTypeRef( typeRefTree );
@@ -1457,8 +1495,9 @@ struct LoadColm
 			ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
 
 			expr = parseCmd( codeFactor.Parse().loc(), false, objField, typeRef, init, list );
+			break;
 		}
-		else if ( codeFactor.ParseStop() != 0 ) {
+		case code_factor::_ParseStop: {
 			/* The type we are parsing. */
 			type_ref typeRefTree = codeFactor.TypeRef();
 			TypeRef *typeRef = walkTypeRef( typeRefTree );
@@ -1467,8 +1506,9 @@ struct LoadColm
 			ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
 
 			expr = parseCmd( codeFactor.ParseStop().loc(), true, objField, typeRef, init, list );
+			break;
 		}
-		else if ( codeFactor.Cons() != 0 ) {
+		case code_factor::_Cons: {
 			/* The type we are parsing. */
 			type_ref typeRefTree = codeFactor.TypeRef();
 			TypeRef *typeRef = walkTypeRef( typeRefTree );
@@ -1477,63 +1517,76 @@ struct LoadColm
 			FieldInitVect *init = walkOptFieldInit( codeFactor.OptFieldInit() );
 
 			expr = construct( codeFactor.Cons().loc(), objField, list, typeRef, init );
+			break;
 		}
-		else if ( codeFactor.Send() != 0 ) {
+		case code_factor::_Send: {
 			LangVarRef *varRef = walkVarRef( codeFactor.ToVarRef() );
 			ConsItemList *list = walkAccumulate( codeFactor.Accumulate() );
 			bool eof = walkOptEos( codeFactor.OptEos() );
 			expr = send( codeFactor.Send().loc(), varRef, list, eof );
+			break;
 		}
-		else if ( codeFactor.Nil() != 0 ) {
+		case code_factor::_Nil: {
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.Nil().loc(),
 					LangTerm::NilType ) );
+			break;
 		}
-		else if ( codeFactor.True() != 0 ) {
+		case code_factor::_True: {
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.True().loc(),
 					LangTerm::TrueType ) );
+			break;
 		}
-		else if ( codeFactor.False() != 0 ) {
+		case code_factor::_False: {
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.False().loc(),
 					LangTerm::FalseType ) );
+			break;
 		}
-		else if ( codeFactor.ParenCodeExpr() != 0 ) {
+		case code_factor::_Paren: {
 			expr = walkCodeExpr( codeFactor.ParenCodeExpr() );
+			break;
 		}
-		else if ( codeFactor.String() != 0 ) {
+		case code_factor::_String: {
 			ConsItemList *list = walkString( codeFactor.String() );
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.String().loc(), list ) );
+			break;
 		}
-		else if ( codeFactor.MatchVarRef() != 0 ) {
+		case code_factor::_Match: {
 			LangVarRef *varRef = walkVarRef( codeFactor.MatchVarRef() );
 			PatternItemList *list = walkPattern( codeFactor.Pattern() );
 			expr = match( codeFactor.loc(), varRef, list );
+			break;
 		}
-		else if ( codeFactor.InVarRef() != 0 ) {
+		case code_factor::_In: {
 			TypeRef *typeRef = walkTypeRef( codeFactor.TypeRef() );
 			LangVarRef *varRef = walkVarRef( codeFactor.InVarRef() );
 			expr = LangExpr::cons( LangTerm::cons( typeRef->loc,
 					LangTerm::SearchType, typeRef, varRef ) );
+			break;
 		}
-		else if ( codeFactor.MakeTreeExprList() != 0 ) {
+		case code_factor::_MakeTree: {
 			CallArgVect *exprList = walkCodeExprList( codeFactor.MakeTreeExprList() );
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::MakeTreeType, exprList ) );
+			break;
 		}
-		else if ( codeFactor.MakeTokenExprList() != 0 ) {
+		case code_factor::_MakeToken: {
 			CallArgVect *exprList = walkCodeExprList( codeFactor.MakeTokenExprList() );
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::MakeTokenType, exprList ) );
+			break;
 		}
-		else if ( codeFactor.TypeIdTypeRef() != 0 ) {
+		case code_factor::_TypeId: {
 			TypeRef *typeRef = walkTypeRef( codeFactor.TypeIdTypeRef() );
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::TypeIdType, typeRef ) );
+			break;
 		}
-		else if ( codeFactor.NewCodeFactor() != 0 ) {
+		case code_factor::_New: {
 			LangExpr *newExpr = walkCodeFactor( codeFactor.NewCodeFactor() );
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::NewType, newExpr ) );
-		}
+			break;
+		}}
 		return expr;
 	}
 
