@@ -174,46 +174,51 @@ struct LoadColm
 	LangExpr *walkCodeExpr( code_expr codeExpr )
 	{
 		LangExpr *expr = 0;
-		if ( codeExpr.Expr() != 0 ) {
+		LangExpr *relational = walkCodeRelational( codeExpr.Relational() );
+
+		switch ( codeExpr.prodName() ) {
+		case code_expr::_AmpAmp: {
 			LangExpr *left = walkCodeExpr( codeExpr.Expr() );
-			LangExpr *right = walkCodeRelational( codeExpr.Relational() );
 
-			char type = -1;
-			InputLoc loc;
-			if ( codeExpr.BarBar() != 0 ) {
-				type = OP_LogicalOr;
-				loc = codeExpr.BarBar().loc();
-			}
-			else if ( codeExpr.AmpAmp() != 0 ) {
-				type = OP_LogicalAnd;
-				loc = codeExpr.AmpAmp().loc();
-			}
+			InputLoc loc = codeExpr.AmpAmp().loc();
+			expr = LangExpr::cons( loc, left, OP_LogicalAnd, relational );
+			break;
+		}
+		case code_expr::_BarBar: {
+			LangExpr *left = walkCodeExpr( codeExpr.Expr() );
 
-			expr = LangExpr::cons( loc, left, type, right );
+			InputLoc loc = codeExpr.BarBar().loc();
+			expr = LangExpr::cons( loc, left, OP_LogicalOr, relational );
+			break;
 		}
-		else {
-			expr = walkCodeRelational( codeExpr.Relational() );
-		}
+		case code_expr::_Base: {
+			expr = relational;
+			break;
+		}}
 		return expr;
 	}
 
 	LangStmt *walkStatement( statement Statement )
 	{
 		LangStmt *stmt = 0;
-		if ( Statement.Print() != 0 ) {
+		switch ( Statement.prodName() ) {
+		case statement::_Print: {
 			print_stmt printStmt = Statement.Print();
 			stmt = walkPrintStmt( printStmt );
+			break;
 		}
-		else if ( Statement.Expr() != 0 ) {
+		case statement::_Expr: {
 			expr_stmt exprStmt = Statement.Expr();
 			stmt = walkExprStmt( exprStmt );
+			break;
 		}
-		else if ( Statement.VarDef() != 0 ) {
+		case statement::_VarDef: {
 			ObjectField *objField = walkVarDef( Statement.VarDef() );
 			LangExpr *expr = walkOptDefInit( Statement.OptDefInit() );
 			stmt = varDef( objField, expr, LangStmt::AssignType );
+			break;
 		}
-		else if ( Statement.ForDecl() != 0 ) {
+		case statement::_For: {
 			pushScope();
 
 			String forDecl = Statement.ForDecl().text().c_str();
@@ -225,8 +230,9 @@ struct LoadColm
 			stmt = forScope( Statement.ForDecl().loc(), forDecl, typeRef, iterCall, stmtList );
 
 			popScope();
+			break;
 		}
-		else if ( Statement.IfExpr() != 0 ) {
+		case statement::_If: {
 			pushScope();
 
 			LangExpr *expr = walkCodeExpr( Statement.IfExpr() );
@@ -236,34 +242,40 @@ struct LoadColm
 
 			LangStmt *elsifList = walkElsifList( Statement.ElsifList() );
 			stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, elsifList );
-
+			break;
 		}
-		else if ( Statement.WhileExpr() != 0 ) {
+		case statement::_While: {
 			pushScope();
 			LangExpr *expr = walkCodeExpr( Statement.WhileExpr() );
 			StmtList *stmtList = walkBlockOrSingle( Statement.BlockOrSingle() );
 			stmt = LangStmt::cons( LangStmt::WhileType, expr, stmtList );
 			popScope();
+			break;
 		}
-		else if ( Statement.LhsVarRef() != 0 ) {
+		case statement::_LhsVarRef: {
 			LangVarRef *varRef = walkVarRef( Statement.LhsVarRef() );
 			LangExpr *expr = walkCodeExpr( Statement.CodeExpr() );
 			stmt = LangStmt::cons( varRef->loc, LangStmt::AssignType, varRef, expr );
+			break;
 		}
-		else if ( Statement.YieldVarRef() != 0 ) {
+		case statement::_Yield: {
 			LangVarRef *varRef = walkVarRef( Statement.YieldVarRef() );
 			stmt = LangStmt::cons( LangStmt::YieldType, varRef );
+			break;
 		}
-		else if ( Statement.ReturnExpr() != 0 ) {
+		case statement::_Return: {
 			LangExpr *expr = walkCodeExpr( Statement.ReturnExpr() );
 			stmt = LangStmt::cons( Statement.loc(), LangStmt::ReturnType, expr );
+			break;
 		}
-		else if ( Statement.Break() != 0 ) {
+		case statement::_Break: {
 			stmt = LangStmt::cons( LangStmt::BreakType );
+			break;
 		}
-		else if ( Statement.Reject() != 0 ) {
+		case statement::_Reject: {
 			stmt = LangStmt::cons( Statement.Reject().loc(), LangStmt::RejectType );
-		}
+			break;
+		}}
 		return stmt;
 	}
 
@@ -325,7 +337,7 @@ struct LoadColm
 	String walkOptId( opt_id optId )
 	{
 		String name = 0;
-		if ( optId.Id() != 0 )
+		if ( optId.prodName() == opt_id::_Id )
 			name = optId.Id().text().c_str();
 		return name;
 	}
@@ -369,20 +381,22 @@ struct LoadColm
 	LangExpr *walkCodeMultiplicitive( code_multiplicitive mult )
 	{
 		LangExpr *expr = 0;
-		if ( mult.Multiplicitive() != 0 ) {
+		LangExpr *right = walkCodeUnary( mult.Unary() );
+		switch ( mult.prodName() ) {
+		case code_multiplicitive::_Star: {
 			LangExpr *left = walkCodeMultiplicitive( mult.Multiplicitive() );
-			LangExpr *right = walkCodeUnary( mult.Unary() );
-
-			if ( mult.Star() != 0 ) {
-				expr = LangExpr::cons( mult.Star().loc(), left, '*', right );
-			}
-			else if ( mult.Fslash() != 0 ) {
-				expr = LangExpr::cons( mult.Fslash().loc(), left, '/', right );
-			}
+			expr = LangExpr::cons( mult.Star().loc(), left, '*', right );
+			break;
 		}
-		else {
-			expr = walkCodeUnary( mult.Unary() );
+		case code_multiplicitive::_Fslash: {
+			LangExpr *left = walkCodeMultiplicitive( mult.Multiplicitive() );
+			expr = LangExpr::cons( mult.Fslash().loc(), left, '/', right );
+			break;
 		}
+		case code_multiplicitive::_Base: {
+			expr = right;
+			break;
+		}}
 		return expr;
 	}
 
@@ -392,60 +406,70 @@ struct LoadColm
 		RepeatType repeatType = walkOptRepeat( typeOrLit.OptRepeat() );
 
 		PatternItemList *list = 0;
-		if ( typeOrLit.Id() != 0 ) {
+		switch ( typeOrLit.prodName() ) {
+		case pattern_el_lel::_Id: {
 			String id = typeOrLit.Id().text().c_str();
 			list = patternElNamed( typeOrLit.Id().loc(), nspaceQual, id, repeatType );
+			break;
 		}
-		else if ( typeOrLit.Lit() != 0 ) { 
+		case pattern_el_lel::_Lit: {
 			String lit = typeOrLit.Lit().text().c_str();
 			list = patternElType( typeOrLit.Lit().loc(), nspaceQual, lit, repeatType );
-		}
+			break;
+		}}
 		return list;
 	}
 
 	LangVarRef *walkOptLabel( opt_label optLabel )
 	{
 		LangVarRef *varRef = 0;
-		if ( optLabel.Id() != 0 ) {
+		if ( optLabel.prodName() == opt_label::_Id ) {
 			String id = optLabel.Id().text().c_str();
 			varRef = LangVarRef::cons( optLabel.Id().loc(), id );
 		}
 		return varRef;
 	}
 
-	PatternItemList *walkPatternEl( pattern_el PatternEl )
+	PatternItemList *walkPatternEl( pattern_el patternEl )
 	{
 		PatternItemList *list = 0;
-		if ( PatternEl.LitpatElList() != 0 ) {
-			list = walkLitpatElList( PatternEl.LitpatElList(), PatternEl.Term().Nl() );
+		switch ( patternEl.prodName() ) {
+		case pattern_el::_Dq: {
+			list = walkLitpatElList( patternEl.LitpatElList(), patternEl.Term().Nl() );
+			break;
 		}
-		else if ( PatternEl.TildeData() != 0 ) {
-			String patternData = PatternEl.TildeData().text().c_str();
+		case pattern_el::_Tilde: {
+			String patternData = patternEl.TildeData().text().c_str();
 			patternData += '\n';
-			PatternItem *patternItem = PatternItem::cons( PatternEl.TildeData().loc(),
+			PatternItem *patternItem = PatternItem::cons( patternEl.TildeData().loc(),
 					patternData, PatternItem::InputText );
 			list = PatternItemList::cons( patternItem );
+			break;
 		}
-		else if ( PatternEl.OptLabel() != 0 ) {
-			LangVarRef *varRef = walkOptLabel( PatternEl.OptLabel() );
-			PatternItemList *typeOrLitList = walkPatternElTypeOrLit( PatternEl.TypeOrLit() );
-			list = patternEl( varRef, typeOrLitList );
-		}
+		case pattern_el::_PatternEl: {
+			LangVarRef *varRef = walkOptLabel( patternEl.OptLabel() );
+			PatternItemList *typeOrLitList = walkPatternElTypeOrLit( patternEl.TypeOrLit() );
+			list = consPatternEl( varRef, typeOrLitList );
+			break;
+		}}
 		return list;
 	}
 
 	PatternItemList *walkLitpatEl( litpat_el litpatEl )
 	{
 		PatternItemList *list = 0;
-		if ( litpatEl.ConsData() != 0 ) {
+		switch ( litpatEl.prodName() ) {
+		case litpat_el::_ConsData: {
 			String consData = unescape( litpatEl.ConsData().text().c_str() );
 			PatternItem *patternItem = PatternItem::cons( litpatEl.ConsData().loc(),
 					consData, PatternItem::InputText );
 			list = PatternItemList::cons( patternItem );
+			break;
 		}
-		else if ( litpatEl.PatternElList() != 0 ) {
+		case litpat_el::_SubList: {
 			list = walkPatternElList( litpatEl.PatternElList() );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -482,33 +506,40 @@ struct LoadColm
 	PatternItemList *walkPattternTopEl( pattern_top_el patternTopEl )
 	{
 		PatternItemList *list = 0;
-		if ( patternTopEl.LitpatElList() != 0 ) {
+		switch ( patternTopEl.prodName() ) {
+		case pattern_top_el::_Dq: {
 			list = walkLitpatElList( patternTopEl.LitpatElList(), patternTopEl.Term().Nl() );
+			break;
 		}
-		else if ( patternTopEl.TildeData() != 0 ) {
+		case pattern_top_el::_Tilde: {
 			String patternData = patternTopEl.TildeData().text().c_str();
 			patternData += '\n';
 			PatternItem *patternItem = PatternItem::cons( patternTopEl.TildeData().loc(),
 					patternData, PatternItem::InputText );
 			list = PatternItemList::cons( patternItem );
+			break;
 		}
-		else if ( patternTopEl.PatternElList() != 0 ) {
+		case pattern_top_el::_SubList: {
 			list = walkPatternElList( patternTopEl.PatternElList() );
-		}
+			break;
+		}}
 		return list;
 	}
 
 	PatternItemList *walkPatternList( pattern_list patternList )
 	{
 		PatternItemList *list = 0;
-		if ( patternList.PatternList() ) {
+		switch ( patternList.prodName() ) {
+		case pattern_list::_List: {
 			PatternItemList *left = walkPatternList( patternList.PatternList() );
 			PatternItemList *right = walkPattternTopEl( patternList.PatternTopEl() );
 			list = patListConcat( left, right );
+			break;
 		}
-		else {
+		case pattern_list::_Base: {
 			list = walkPattternTopEl( patternList.PatternTopEl() );
-		}
+			break;
+		}}
 		return list;
 	}
 
@@ -551,7 +582,7 @@ struct LoadColm
 	CodeBlock *walkOptTranslate( opt_translate optTranslate )
 	{
 		CodeBlock *block = 0;
-		if ( optTranslate.LangStmtList() != 0 ) {
+		if ( optTranslate.prodName() == opt_translate::_Translate ) {
 			ObjectDef *localFrame = blockOpen();
 			StmtList *stmtList = walkLangStmtList( optTranslate.LangStmtList() );
 			block = CodeBlock::cons( stmtList, localFrame );

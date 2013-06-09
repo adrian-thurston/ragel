@@ -582,7 +582,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	return expr;
 }
 
-PatternItemList *BaseParser::patternEl( LangVarRef *varRef, PatternItemList *list )
+PatternItemList *BaseParser::consPatternEl( LangVarRef *varRef, PatternItemList *list )
 {
 	/* Store the variable reference in the pattern itemm. */
 	list->head->varRef = varRef;

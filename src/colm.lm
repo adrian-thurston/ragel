@@ -321,11 +321,11 @@ def token_def
 		OptTranslate: opt_translate]
 
 def opt_translate
-	[COPEN LangStmtList: lang_stmt_list CCLOSE]
+	[COPEN LangStmtList: lang_stmt_list CCLOSE] :Translate
 |	[]
 
 def opt_id
-	[Id: id]
+	[Id: id] :Id
 |	[]
 
 def ignore_def
@@ -367,18 +367,18 @@ def prod_list
 |	[Prod: prod]
 
 def statement
-	[Print: print_stmt]
-|	[Expr: expr_stmt]
-|	[VarDef: var_def OptDefInit: opt_def_init]
+	[Print: print_stmt] :Print
+|	[Expr: expr_stmt] :Expr
+|	[VarDef: var_def OptDefInit: opt_def_init] :VarDef
 |	[FOR ForDecl: id COLON TypeRef: type_ref IN IterCall: iter_call
-		BlockOrSingle: block_or_single]
-|	[IF IfExpr: code_expr BlockOrSingle: block_or_single ElsifList: elsif_list]
-|	[WHILE WhileExpr: code_expr BlockOrSingle: block_or_single]
-|	[LhsVarRef: var_ref EQUALS CodeExpr: code_expr]
-|	[YIELD YieldVarRef: var_ref]
-|	[RETURN ReturnExpr: code_expr]
-|	[Break: BREAK]
-|	[Reject: REJECT]
+		BlockOrSingle: block_or_single] :For
+|	[IF IfExpr: code_expr BlockOrSingle: block_or_single ElsifList: elsif_list] :If
+|	[WHILE WhileExpr: code_expr BlockOrSingle: block_or_single] :While
+|	[LhsVarRef: var_ref EQUALS CodeExpr: code_expr] :LhsVarRef
+|	[YIELD YieldVarRef: var_ref] :Yield
+|	[RETURN ReturnExpr: code_expr] :Return
+|	[Break: BREAK] :Break
+|	[Reject: REJECT] :Reject
 
 def elsif_list
 	[ElsifClause: elsif_clause ElsifList: elsif_list] :Clause
@@ -427,9 +427,9 @@ def expr_stmt
 	[CodeExpr: code_expr]
 
 def code_expr
-	[Expr: code_expr AmpAmp: AMPAMP Relational: code_relational]
-|	[Expr: code_expr BarBar: BARBAR Relational: code_relational]
-|	[Relational: code_relational]
+	[Expr: code_expr AmpAmp: AMPAMP Relational: code_relational] :AmpAmp
+|	[Expr: code_expr BarBar: BARBAR Relational: code_relational] :BarBar
+|	[Relational: code_relational] :Base
 
 def code_relational
 	[Relational: code_relational EQEQ Additive: code_additive] :EqEq
@@ -446,9 +446,9 @@ def code_additive
 |	[Multiplicitive: code_multiplicitive] :Base
 
 def code_multiplicitive
-	[Multiplicitive: code_multiplicitive Star: STAR Unary: code_unary]
-|	[Multiplicitive: code_multiplicitive Fslash: FSLASH Unary: code_unary]
-|	[Unary: code_unary]
+	[Multiplicitive: code_multiplicitive Star: STAR Unary: code_unary] :Star
+|	[Multiplicitive: code_multiplicitive Fslash: FSLASH Unary: code_unary] :Fslash
+|	[Unary: code_unary] :Base
 
 def code_unary
 	[Bang: BANG Factor: code_factor] :Bang
@@ -521,7 +521,7 @@ def field_init
 #
 
 def opt_label
-	[Id: id COLON]
+	[Id: id COLON] :Id
 |	[]
 
 def dq_lit_term
@@ -532,26 +532,26 @@ def opt_tilde_data
 |	[]
 
 def pattern_el_lel
-	[RegionQual: region_qual Id: id OptRepeat: opt_repeat]
-|	[RegionQual: region_qual Lit: lit OptRepeat: opt_repeat]
+	[RegionQual: region_qual Id: id OptRepeat: opt_repeat] :Id
+|	[RegionQual: region_qual Lit: lit OptRepeat: opt_repeat] :Lit
 
 def pattern_el
-	[OptLabel: opt_label TypeOrLit: pattern_el_lel]
-|	[DQ LitpatElList: litpat_el* Term: dq_lit_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
+	[OptLabel: opt_label TypeOrLit: pattern_el_lel] :PatternEl
+|	[DQ LitpatElList: litpat_el* Term: dq_lit_term] :Dq
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
 
 def litpat_el
-	[ConsData: cons_data]
-|	[CONS_SQOPEN PatternElList: pattern_el* CONS_SQCLOSE]
+	[ConsData: cons_data] :ConsData
+|	[CONS_SQOPEN PatternElList: pattern_el* CONS_SQCLOSE] :SubList
 
 def pattern_top_el
-	[DQ LitpatElList: litpat_el* Term: dq_lit_term]
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL]
-|	[SQOPEN PatternElList: pattern_el* SQCLOSE]
+	[DQ LitpatElList: litpat_el* Term: dq_lit_term] :Dq
+|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+|	[SQOPEN PatternElList: pattern_el* SQCLOSE] :SubList
 
 def pattern_list
-	[PatternList: pattern_list PatternTopEl: pattern_top_el]
-|	[PatternTopEl: pattern_top_el]
+	[PatternList: pattern_list PatternTopEl: pattern_top_el] :List
+|	[PatternTopEl: pattern_top_el] :Base
 
 def pattern
 	[PatternList: pattern_list]

@@ -88,7 +88,7 @@ struct BaseParser
 	LangExpr *send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof );
 	LangExpr *parseCmd( const InputLoc &loc, bool stop, ObjectField *objField,
 			TypeRef *typeRef, FieldInitVect *fieldInitVect, ConsItemList *list );
-	PatternItemList *patternEl( LangVarRef *varRef, PatternItemList *list );
+	PatternItemList *consPatternEl( LangVarRef *varRef, PatternItemList *list );
 	PatternItemList *patternElNamed( const InputLoc &loc, NamespaceQual *nspaceQual,
 			const String &data, RepeatType repeatType );
 	PatternItemList *patternElType( const InputLoc &loc,
