@@ -259,7 +259,7 @@ def param_var_def
 |	[Id: id COLON RefTypeRef: reference_type_ref] :Ref
 
 def opt_export
-	[Export: EXPORT]
+	[Export: EXPORT] :Export
 |	[]
 
 def function_def
@@ -284,7 +284,7 @@ def literal_item
 	[NiLeft: opt_no_ignore Lit: lit NiRight: opt_no_ignore]
 
 def opt_no_ignore
-	[Ni: NI]
+	[Ni: NI] :Ni
 |	[]
 
 def namespace_def
@@ -336,7 +336,7 @@ def prod_el
 |	[OptName: opt_prod_el_name RegionQual: region_qual Lit: lit OptRepeat: opt_repeat] :Lit
 
 def opt_prod_el_name
-	[Name: id COLON]
+	[Name: id COLON] :Name
 |	[]
 
 def prod_el_list
@@ -344,13 +344,12 @@ def prod_el_list
 |	[]
 
 def opt_commit
-	[Commit: COMMIT]
+	[Commit: COMMIT] :Commit
 |	[]
 
 def opt_prod_name
-	[COLON Name: id]
+	[COLON Name: id] :Name
 |	[]
-
 
 def prod
 	[Open: SQOPEN ProdElList: prod_el_list SQCLOSE 
@@ -458,8 +457,8 @@ def code_unary
 |	[Factor: code_factor] :Base
 
 def opt_eos
-	[Eos: DOT]
-|	[Eos: EOS]
+	[Eos: DOT] :Dot
+|	[Eos: EOS] :Eos
 |	[]
 
 def code_factor

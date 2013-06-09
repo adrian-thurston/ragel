@@ -782,7 +782,7 @@ struct LoadColm
 	void walkProdEl( ProdElList *list, prod_el El )
 	{
 		ObjectField *captureField = 0;
-		if ( El.OptName().Name() != 0 ) {
+		if ( El.OptName().prodName() == opt_prod_el_name::_Name ) {
 			String fieldName = El.OptName().Name().text().c_str();
 			captureField = ObjectField::cons( El.OptName().Name().loc(), 0, fieldName );
 		}
@@ -840,11 +840,11 @@ struct LoadColm
 		walkProdElList( list, Prod.ProdElList() );
 
 		String name;
-		if ( Prod.OptName().Name() != 0 )
+		if ( Prod.OptName().prodName() == opt_prod_name::_Name )
 			name = Prod.OptName().Name().text().c_str();
 
 		CodeBlock *codeBlock = walkOptReduce( Prod.OptReduce() );
-		bool commit = Prod.OptCommit().Commit() != 0;
+		bool commit = Prod.OptCommit().prodName() == opt_commit::_Commit;
 
 		Production *prod = BaseParser::production( Prod.Open().loc(), list, name, commit, codeBlock, 0 );
 		prodAppend( lelDefList, prod );
@@ -1873,7 +1873,7 @@ struct LoadColm
 
 	bool walkOptExport( opt_export OptExport )
 	{
-		return OptExport.Export() != 0;
+		return OptExport.prodName() == opt_export::_Export;
 	}
 
 	void walkFunctionDef( function_def FunctionDef )
@@ -2039,12 +2039,13 @@ struct LoadColm
 
 	bool walkOptNoIgnore( opt_no_ignore OptNoIngore )
 	{
-		return OptNoIngore.Ni() != 0;
+		return OptNoIngore.prodName() == opt_no_ignore::_Ni;
 	}
 
 	bool walkOptEos( opt_eos OptEos )
 	{
-		return OptEos.Eos() != 0;
+		opt_eos::prod_name pn = OptEos.prodName();
+		return pn == opt_eos::_Dot || pn == opt_eos::_Eos;
 	}
 
 	void walkLiteralItem( literal_item literalItem )
