@@ -208,17 +208,17 @@ def precedence_def
 	[PredType: pred_type PredTokenList: pred_token_list]
 
 def pred_type
-	[Left: LEFT]
-|	[Right: RIGHT]
-|	[NonAssoc: NONASSOC]
+	[Left: LEFT] :Left
+|	[Right: RIGHT] :Right
+|	[NonAssoc: NONASSOC] :NonAssoc
 
 def pred_token_list
-	[PredTokenList: pred_token_list COMMA PredToken: pred_token]
-|	[PredToken: pred_token]
+	[PredTokenList: pred_token_list COMMA PredToken: pred_token] :List
+|	[PredToken: pred_token] :Base
 
 def pred_token
-	[RegionQual: region_qual Id: id]
-|	[RegionQual: region_qual Lit: lit]
+	[RegionQual: region_qual Id: id] :Id
+|	[RegionQual: region_qual Lit: lit] :Lit
 
 def pre_eof_def
 	[PreEof: PREEOF COPEN LangStmtList: lang_stmt_list CCLOSE]
@@ -332,15 +332,15 @@ def ignore_def
 	[I: IGNORE OptId: opt_id LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH]
 
 def prod_el
-	[OptName: opt_prod_el_name RegionQual: region_qual Id: id OptRepeat: opt_repeat]
-|	[OptName: opt_prod_el_name RegionQual: region_qual Lit: lit OptRepeat: opt_repeat]
+	[OptName: opt_prod_el_name RegionQual: region_qual Id: id OptRepeat: opt_repeat] :Id
+|	[OptName: opt_prod_el_name RegionQual: region_qual Lit: lit OptRepeat: opt_repeat] :Lit
 
 def opt_prod_el_name
 	[Name: id COLON]
 |	[]
 
 def prod_el_list
-	[ProdElList: prod_el_list ProdEl: prod_el]
+	[ProdElList: prod_el_list ProdEl: prod_el] :List
 |	[]
 
 def opt_commit
@@ -359,12 +359,12 @@ def prod
 		OptReduce: opt_reduce]
 
 def opt_reduce
-	[COPEN LangStmtList: lang_stmt_list CCLOSE]
+	[COPEN LangStmtList: lang_stmt_list CCLOSE] :Reduce
 |	[]
 
 def prod_list
-	[ProdList: prod_list BAR Prod: prod]
-|	[Prod: prod]
+	[ProdList: prod_list BAR Prod: prod] :List
+|	[Prod: prod] :Base
 
 def statement
 	[Print: print_stmt] :Print
@@ -397,31 +397,31 @@ def iter_call
 |	[E3 Expr: code_expr] :Expr
 
 def block_or_single
-	[COPEN LangStmtList: lang_stmt_list CCLOSE]
-|	[Statement: statement]
+	[COPEN LangStmtList: lang_stmt_list CCLOSE] :Block
+|	[Statement: statement] :Single
 
 def require_pattern
 	[R: REQUIRE VarRef: var_ref Pattern: pattern]
 
 def opt_require_stmt
-	[Require: require_pattern LangStmtList: lang_stmt_list]
-|	[]
+	[Require: require_pattern LangStmtList: lang_stmt_list] :Require
+|	[] :Base
 
 def lang_stmt_list
 	[StmtList: statement* OptRequire: opt_require_stmt]
 
 def opt_def_init
-	[EQUALS CodeExpr: code_expr]
-|	[]
+	[EQUALS CodeExpr: code_expr] :Init
+|	[] :Base
 
 def var_def
 	[Id: id COLON TypeRef: type_ref]
 
 def print_stmt
-	[Tree: PRINT O: POPEN CodeExprList: code_expr* PCLOSE]
-|	[PrintStream: PRINTS O: POPEN CodeExprList: code_expr* PCLOSE]
-|	[Xml: PRINT_XML O: POPEN CodeExprList: code_expr* PCLOSE]
-|	[XmlAc: PRINT_XML_AC O: POPEN CodeExprList: code_expr* PCLOSE]
+	[Tree: PRINT O: POPEN CodeExprList: code_expr* PCLOSE] :Tree
+|	[PrintStream: PRINTS O: POPEN CodeExprList: code_expr* PCLOSE] :PrintStream
+|	[Xml: PRINT_XML O: POPEN CodeExprList: code_expr* PCLOSE] :Xml
+|	[XmlAc: PRINT_XML_AC O: POPEN CodeExprList: code_expr* PCLOSE] :XmlAc
 
 def expr_stmt
 	[CodeExpr: code_expr]
@@ -487,25 +487,25 @@ def code_factor
 |	[NEW NewCodeFactor: code_factor] :New
 
 def type_ref
-	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat]
-|	[PTR LT RegionQual: region_qual PtrId: id OptRepeat: opt_repeat GT]
-|	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT]
-|	[LIST LT ListType: type_ref GT]
-|	[VECTOR LT VectorType: type_ref GT]
-|	[PARSER LT ParserType: type_ref GT]
+	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat] :Id
+|	[PTR LT RegionQual: region_qual PtrId: id OptRepeat: opt_repeat GT] :Ptr
+|	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT] :Map
+|	[LIST LT ListType: type_ref GT] :List
+|	[VECTOR LT VectorType: type_ref GT] :Vector
+|	[PARSER LT ParserType: type_ref GT] :Parser
 
 def region_qual
-	[RegionQual: region_qual Id: id DOUBLE_COLON]
-|	[]
+	[RegionQual: region_qual Id: id DOUBLE_COLON] :Qual
+|	[] :Base
 
 def opt_repeat
-	[Star: STAR]
-|	[Plus: PLUS]
-|	[Question: QUESTION]
+	[Star: STAR] :Star
+|	[Plus: PLUS] :Plus
+|	[Question: QUESTION] :Question
 |	[]
 
 def opt_capture
-	[Id: id COLON]
+	[Id: id COLON] :Id
 |	[]
 
 def opt_field_init
@@ -644,9 +644,9 @@ def var_ref
 	[Qual: qual Id: id]
 
 def qual
-	[Qual: qual Id: id Dot: DOT]
-|	[Qual: qual Id: id Arrow: ARROW]
-|	[]
+	[Qual: qual Id: id Dot: DOT] :Dot
+|	[Qual: qual Id: id Arrow: ARROW] :Arrow
+|	[] :Base
 
 #
 # Lexical analysis.

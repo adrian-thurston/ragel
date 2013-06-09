@@ -551,7 +551,7 @@ struct LoadColm
 	LangExpr *walkOptDefInit( opt_def_init optDefInit )
 	{
 		LangExpr *expr = 0;
-		if ( optDefInit.CodeExpr() != 0 )
+		if ( optDefInit.prodName() == opt_def_init::_Init )
 			expr = walkCodeExpr( optDefInit.CodeExpr() );
 		return expr;
 	}
@@ -596,42 +596,54 @@ struct LoadColm
 	{
 		NamespaceQual *nspaceQual = walkRegionQual( predToken.RegionQual() );
 		PredDecl *predDecl = 0;
-		if ( predToken.Id() != 0 ) {
+		switch ( predToken.prodName() ) {
+		case pred_token::_Id: {
 			String id = predToken.Id().text().c_str();
 			predDecl = predTokenName( predToken.Id().loc(), nspaceQual, id );
+			break;
 		}
-		else if ( predToken.Lit() != 0 ) {
+		case pred_token::_Lit: {
 			String lit = predToken.Lit().text().c_str();
 			predDecl = predTokenLit( predToken.Lit().loc(), lit, nspaceQual );
-		}
+			break;
+		}}
 		return predDecl;
 	}
 
 	PredDeclList *walkPredTokenList( pred_token_list predTokenList )
 	{
 		PredDeclList *list = 0;
-		if ( predTokenList.PredTokenList() != 0 ) {
+		switch ( predTokenList.prodName() ) {
+		case pred_token_list::_List: {
 			list = walkPredTokenList( predTokenList.PredTokenList() );
 			PredDecl *predDecl = walkPredToken( predTokenList.PredToken() );
 			list->append( predDecl );
+			break;
 		}
-		else {
+		case pred_token_list::_Base: {
 			PredDecl *predDecl = walkPredToken( predTokenList.PredToken() );
 			list = new PredDeclList;
 			list->append( predDecl );
-		}
+			break;
+		}}
 		return list;
 	}
 
 	PredType walkPredType( pred_type predType )
 	{
 		PredType pt;
-		if ( predType.Left() != 0 )
+		switch ( predType.prodName() ) {
+		case pred_type::_Left:
 			pt = PredLeft;
-		else if ( predType.Right() != 0 )
+			break;
+		case pred_type::_Right:
 			pt = PredRight;
-		else if ( predType.NonAssoc() != 0 )
+			break;
+		case pred_type::_NonAssoc:
 			pt = PredNonassoc;
+			break;
+		}
+
 		return pt;
 	}
 
@@ -676,76 +688,93 @@ struct LoadColm
 	NamespaceQual *walkRegionQual( region_qual regionQual )
 	{
 		NamespaceQual *qual;
-		if ( regionQual.RegionQual() != 0 ) {
+		switch ( regionQual.prodName() ) {
+		case region_qual::_Qual: {
 			qual = walkRegionQual( regionQual.RegionQual() );
 			qual->qualNames.append( String( regionQual.Id().text().c_str() ) );
+			break;
 		}
-		else {
+		case region_qual::_Base: {
 			qual = NamespaceQual::cons( namespaceStack.top() );
-		}
+			break;
+		}}
 		return qual;
 	}
 
 	RepeatType walkOptRepeat( opt_repeat OptRepeat )
 	{
 		RepeatType repeatType = RepeatNone;
-		if ( OptRepeat.Star() != 0 )
+		switch ( OptRepeat.prodName() ) {
+		case opt_repeat::_Star:
 			repeatType = RepeatRepeat;
-		else if ( OptRepeat.Plus() != 0 )
+			break;
+		case opt_repeat::_Plus:
 			repeatType = RepeatList;
-		else if ( OptRepeat.Question() != 0 )
+			break;
+		case opt_repeat::_Question:
 			repeatType = RepeatOpt;
+			break;
+		}
 		return repeatType;
 	}
 
 	TypeRef *walkTypeRef( type_ref typeRef )
 	{
 		TypeRef *tr = 0;
-
-		if ( typeRef.DirectId() != 0 ) {
+		switch ( typeRef.prodName() ) {
+		case type_ref::_Id: {
 			NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
 			String id = typeRef.DirectId().text().c_str();
 			RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
 			tr = TypeRef::cons( typeRef.DirectId().loc(), nspaceQual, id, repeatType );
+			break;
 		}
-		else if ( typeRef.PtrId() != 0 ) {
+		case type_ref::_Ptr: {
 			NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
 			String id = typeRef.PtrId().text().c_str();
 			RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
 			TypeRef *inner = TypeRef::cons( typeRef.PtrId().loc(), nspaceQual, id, repeatType );
 			tr = TypeRef::cons( typeRef.PtrId().loc(), TypeRef::Ptr, inner );
+			break;
 		}
-		else if ( typeRef.MapKeyType() != 0 ) {
+		case type_ref::_Map: {
 			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
 			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, key, value );
+			break;
 		}
-		else if ( typeRef.ListType() != 0 ) {
+		case type_ref::_List: {
 			TypeRef *type = walkTypeRef( typeRef.ListType() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
+			break;
 		}
-		else if ( typeRef.VectorType() != 0 ) {
+		case type_ref::_Vector: {
 			TypeRef *type = walkTypeRef( typeRef.VectorType() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Vector, 0, type, 0 );
+			break;
 		}
-		else if ( typeRef.ParserType() != 0 ) {
+		case type_ref::_Parser: {
 			TypeRef *type = walkTypeRef( typeRef.ParserType() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );
-		}
+			break;
+		}}
 		return tr;
 	}
 
 	StmtList *walkBlockOrSingle( block_or_single blockOrSingle )
 	{
 		StmtList *stmtList = 0;
-		if ( blockOrSingle.Statement() != 0 ) {
+		switch ( blockOrSingle.prodName() ) {
+		case block_or_single::_Single: {
 			stmtList = new StmtList;
 			LangStmt *stmt = walkStatement( blockOrSingle.Statement() );
 			stmtList->append( stmt );
+			break;
 		}
-		else if ( blockOrSingle.LangStmtList() != 0 ) {
+		case block_or_single::_Block: {
 			stmtList = walkLangStmtList( blockOrSingle.LangStmtList() );
-		}
+			break;
+		}}
 
 		return stmtList;
 	}
@@ -761,38 +790,38 @@ struct LoadColm
 		RepeatType repeatType = walkOptRepeat( El.OptRepeat() );
 		NamespaceQual *nspaceQual = walkRegionQual( El.RegionQual() );
 
-		if ( El.Id() != 0 ) {
+		switch ( El.prodName() ) {
+		case prod_el::_Id: {
 			String typeName = El.Id().text().c_str();
 			ProdEl *prodEl = prodElName( El.Id().loc(), typeName,
 					nspaceQual,
 					captureField, repeatType, false );
 			appendProdEl( list, prodEl );
+			break;
 		}
-		else if ( El.Lit() != 0 ) {
+		case prod_el::_Lit: {
 			String lit = El.Lit().text().c_str();
 			ProdEl *prodEl = prodElLiteral( El.Lit().loc(), lit,
 					nspaceQual,
 					captureField, repeatType, false );
 			appendProdEl( list, prodEl );
-
-		}
+			break;
+		}}
 	}
 
 	void walkProdElList( ProdElList *list, prod_el_list ProdElList )
 	{
-		if ( ProdElList.ProdElList() != 0 ) {
+		if ( ProdElList.prodName() == prod_el_list::_List ) {
 			prod_el_list RightProdElList = ProdElList.ProdElList();
 			walkProdElList( list, RightProdElList );
-		}
-		
-		if ( ProdElList.ProdEl() != 0 ) 
 			walkProdEl( list, ProdElList.ProdEl() );
+		}
 	}
 
 	CodeBlock *walkOptReduce( opt_reduce OptReduce )
 	{
 		CodeBlock *block = 0;
-		if ( OptReduce.LangStmtList() != 0 ) {
+		if ( OptReduce.prodName() == opt_reduce::_Reduce ) {
 			ObjectDef *localFrame = blockOpen();
 			StmtList *stmtList = walkLangStmtList( OptReduce.LangStmtList() );
 
@@ -823,7 +852,7 @@ struct LoadColm
 
 	void walkProdList( LelDefList *lelDefList, prod_list ProdList )
 	{
-		if ( ProdList.ProdList() != 0 )
+		if ( ProdList.prodName() == prod_list::_List ) 
 			walkProdList( lelDefList, ProdList.ProdList() );
 
 		walkProdudction( lelDefList, ProdList.Prod() );
@@ -1060,14 +1089,20 @@ struct LoadColm
 		CallArgVect *exprVect = walkCodeExprList( codeExprList );
 
 		LangStmt::Type type;
-		if ( printStmt.Tree() != 0 )
+		switch ( printStmt.prodName() ) {
+		case print_stmt::_Tree:
 			type = LangStmt::PrintType;
-		else if ( printStmt.PrintStream() != 0 )
+			break;
+		case print_stmt::_PrintStream:
 			type = LangStmt::PrintStreamType;
-		else if ( printStmt.Xml() != 0 )
+			break;
+		case print_stmt::_Xml:
 			type = LangStmt::PrintXMLType;
-		else if ( printStmt.XmlAc() != 0 )
+			break;
+		case print_stmt::_XmlAc:
 			type = LangStmt::PrintXMLACType;
+			break;
+		}
 			
 		return LangStmt::cons( printStmt.O().loc(), type, exprVect );
 	}
@@ -1076,15 +1111,19 @@ struct LoadColm
 	{
 		QualItemVect *qualItemVect;
 		qual RecQual = Qual.Qual();
-		if ( RecQual != 0 ) {
+		switch ( Qual.prodName() ) {
+		case qual::_Dot:
+		case qual::_Arrow: {
 			qualItemVect = walkQual( RecQual );
 			String id = Qual.Id().text().c_str();
 			QualItem::Type type = Qual.Dot() != 0 ? QualItem::Dot : QualItem::Arrow;
 			qualItemVect->append( QualItem( Qual.Id().loc(), id, type ) );
+			break;
 		}
-		else {
+		case qual::_Base: {
 			qualItemVect = new QualItemVect;
-		}
+			break;
+		}}
 		return qualItemVect;
 	}
 
@@ -1100,7 +1139,7 @@ struct LoadColm
 	ObjectField *walkOptCapture( opt_capture optCapture )
 	{
 		ObjectField *objField = 0;
-		if ( optCapture.Id() != 0 ) {
+		if ( optCapture.prodName() == opt_capture::_Id ) {
 			String id = optCapture.Id().text().c_str();
 			objField = ObjectField::cons( optCapture.Id().loc(), 0, id );
 		}
