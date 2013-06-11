@@ -1,19 +1,20 @@
 TESTS = runtests.sh
 
 EXTRA_DIST = \
+	runtests.sh \
 	accum1.lm \
 	accum2.lm \
 	accum3.lm \
 	accumbt1.lm \
 	accumbt2.lm \
 	accumbt3.lm \
-	ambig1.lm \
 	argv1.lm \
 	argv2.lm \
 	backtrack1.lm \
 	backtrack2.lm \
 	backtrack3.lm \
 	binary1.lm \
+	binary1.in \
 	btscan1.lm \
 	btscan2.lm \
 	call1.lm \
@@ -61,7 +62,11 @@ EXTRA_DIST = \
 	ignore4.lm \
 	ignore5.lm \
 	include1.lm \
+	include1a.lmi \
 	inpush1.lm \
+	inpush1a.in \
+	inpush1b.in \
+	inpush1c.in \
 	island.lm \
 	lhs1.lm \
 	liftattrs.lm \
@@ -101,6 +106,7 @@ EXTRA_DIST = \
 	tags2.lm \
 	tags3.lm \
 	tags4.lm \
+	tcontext1.lm \
 	til.lm \
 	translate1.lm \
 	translate2.lm \
