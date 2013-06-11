@@ -97,7 +97,7 @@ struct LoadColm
 		Literal *literal = 0;
 		switch ( lexRangeLit.prodName() ) {
 		case lex_range_lit::_Lit: {
-			String lit = lexRangeLit.Lit().text().c_str();
+			String lit = lexRangeLit.Lit().data();
 			literal = Literal::cons( lexRangeLit.Lit().loc(), lit, Literal::LitString );
 			break;
 		}
@@ -114,14 +114,14 @@ struct LoadColm
 		LexFactor *factor = 0;
 		switch ( lexFactor.prodName() ) {
 		case lex_factor::_Literal: {
-			String litString = lexFactor.Literal().text().c_str();
+			String litString = lexFactor.Literal().data();
 			Literal *literal = Literal::cons( lexFactor.Literal().loc(),
 					litString, Literal::LitString );
 			factor = LexFactor::cons( literal );
 			break;
 		}
 		case lex_factor::_Id: {
-			String id = lexFactor.Id().text().c_str();
+			String id = lexFactor.Id().data();
 			factor = lexRlFactorName( id, lexFactor.Id().loc() );
 			break;
 		}
@@ -315,7 +315,7 @@ struct LoadColm
 
 	void walkTokenDef( token_def TokenDef )
 	{
-		String name = TokenDef.Id().text().c_str();
+		String name = TokenDef.Id().data();
 
 		bool niLeft = walkOptNoIgnore( TokenDef.NiLeft() );
 		bool niRight = walkOptNoIgnore( TokenDef.NiRight() );
@@ -338,7 +338,7 @@ struct LoadColm
 	{
 		String name;
 		if ( optId.prodName() == opt_id::_Id )
-			name = optId.Id().text().c_str();
+			name = optId.Id().data();
 		return name;
 	}
 
@@ -408,12 +408,12 @@ struct LoadColm
 		PatternItemList *list = 0;
 		switch ( typeOrLit.prodName() ) {
 		case pattern_el_lel::_Id: {
-			String id = typeOrLit.Id().text().c_str();
+			String id = typeOrLit.Id().data();
 			list = patternElNamed( typeOrLit.Id().loc(), nspaceQual, id, repeatType );
 			break;
 		}
 		case pattern_el_lel::_Lit: {
-			String lit = typeOrLit.Lit().text().c_str();
+			String lit = typeOrLit.Lit().data();
 			list = patternElType( typeOrLit.Lit().loc(), nspaceQual, lit, repeatType );
 			break;
 		}}
@@ -424,7 +424,7 @@ struct LoadColm
 	{
 		LangVarRef *varRef = 0;
 		if ( optLabel.prodName() == opt_label::_Id ) {
-			String id = optLabel.Id().text().c_str();
+			String id = optLabel.Id().data();
 			varRef = LangVarRef::cons( optLabel.Id().loc(), id );
 		}
 		return varRef;
@@ -483,7 +483,7 @@ struct LoadColm
 		}
 
 		if ( Nl != 0 ) {
-			String nl = unescape( Nl.text().c_str() );
+			String nl = unescape( Nl.data() );
 			PatternItem *patternItem = PatternItem::cons( Nl.loc(), nl, PatternItem::InputText );
 			PatternItemList *term = PatternItemList::cons( patternItem );
 			list = patListConcat( list, term );
@@ -574,7 +574,7 @@ struct LoadColm
 
 	void walkAliasDef( alias_def aliasDef )
 	{
-		String id = aliasDef.Id().text().c_str();
+		String id = aliasDef.Id().data();
 		TypeRef *typeRef = walkTypeRef( aliasDef.TypeRef() );
 		alias( aliasDef.Id().loc(), id, typeRef );
 	}
@@ -598,12 +598,12 @@ struct LoadColm
 		PredDecl *predDecl = 0;
 		switch ( predToken.prodName() ) {
 		case pred_token::_Id: {
-			String id = predToken.Id().text().c_str();
+			String id = predToken.Id().data();
 			predDecl = predTokenName( predToken.Id().loc(), nspaceQual, id );
 			break;
 		}
 		case pred_token::_Lit: {
-			String lit = predToken.Lit().text().c_str();
+			String lit = predToken.Lit().data();
 			predDecl = predTokenLit( predToken.Lit().loc(), lit, nspaceQual );
 			break;
 		}}
@@ -656,7 +656,7 @@ struct LoadColm
 
 	StmtList *walkInclude( include Include )
 	{
-		String lit = Include.File().text().c_str();
+		String lit = Include.File().data();
 		String file;
 		bool unused;
 		prepareLitString( file, unused, lit, Include.File().loc() );
@@ -691,7 +691,7 @@ struct LoadColm
 		switch ( regionQual.prodName() ) {
 		case region_qual::_Qual: {
 			qual = walkRegionQual( regionQual.RegionQual() );
-			qual->qualNames.append( String( regionQual.Id().text().c_str() ) );
+			qual->qualNames.append( String( regionQual.Id().data() ) );
 			break;
 		}
 		case region_qual::_Base: {
@@ -724,14 +724,14 @@ struct LoadColm
 		switch ( typeRef.prodName() ) {
 		case type_ref::_Id: {
 			NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
-			String id = typeRef.DirectId().text().c_str();
+			String id = typeRef.DirectId().data();
 			RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
 			tr = TypeRef::cons( typeRef.DirectId().loc(), nspaceQual, id, repeatType );
 			break;
 		}
 		case type_ref::_Ptr: {
 			NamespaceQual *nspaceQual = walkRegionQual( typeRef.RegionQual() );
-			String id = typeRef.PtrId().text().c_str();
+			String id = typeRef.PtrId().data();
 			RepeatType repeatType = walkOptRepeat( typeRef.OptRepeat() );
 			TypeRef *inner = TypeRef::cons( typeRef.PtrId().loc(), nspaceQual, id, repeatType );
 			tr = TypeRef::cons( typeRef.PtrId().loc(), TypeRef::Ptr, inner );
@@ -783,7 +783,7 @@ struct LoadColm
 	{
 		ObjectField *captureField = 0;
 		if ( El.OptName().prodName() == opt_prod_el_name::_Name ) {
-			String fieldName = El.OptName().Name().text().c_str();
+			String fieldName = El.OptName().Name().data();
 			captureField = ObjectField::cons( El.OptName().Name().loc(), 0, fieldName );
 		}
 
@@ -792,7 +792,7 @@ struct LoadColm
 
 		switch ( El.prodName() ) {
 		case prod_el::_Id: {
-			String typeName = El.Id().text().c_str();
+			String typeName = El.Id().data();
 			ProdEl *prodEl = prodElName( El.Id().loc(), typeName,
 					nspaceQual,
 					captureField, repeatType, false );
@@ -800,7 +800,7 @@ struct LoadColm
 			break;
 		}
 		case prod_el::_Lit: {
-			String lit = El.Lit().text().c_str();
+			String lit = El.Lit().data();
 			ProdEl *prodEl = prodElLiteral( El.Lit().loc(), lit,
 					nspaceQual,
 					captureField, repeatType, false );
@@ -841,7 +841,7 @@ struct LoadColm
 
 		String name;
 		if ( Prod.OptName().prodName() == opt_prod_name::_Name )
-			name = Prod.OptName().Name().text().c_str();
+			name = Prod.OptName().Name().data();
 
 		CodeBlock *codeBlock = walkOptReduce( Prod.OptReduce() );
 		bool commit = Prod.OptCommit().prodName() == opt_commit::_Commit;
@@ -863,13 +863,13 @@ struct LoadColm
 		ReOrItem *orItem = 0;
 		switch ( regOrChar.prodName() ) {
 		case reg_or_char::_Char: {
-			String c = unescape( regOrChar.Char().text().c_str() );
+			String c = unescape( regOrChar.Char().data() );
 			orItem = ReOrItem::cons( regOrChar.Char().loc(), c );
 			break;
 		}
 		case reg_or_char::_Range: {
-			String low = unescape( regOrChar.Low().text().c_str() );
-			String high = unescape( regOrChar.High().text().c_str() );
+			String low = unescape( regOrChar.Low().data() );
+			String high = unescape( regOrChar.High().data() );
 			orItem = ReOrItem::cons( regOrChar.Low().loc(), low[0], high[0] );
 			break;
 		}}
@@ -941,26 +941,26 @@ struct LoadColm
 			break;
 		}
 		case lex_factor_rep::_Exact: {
-			int low = atoi( lexFactorRep.Exact().text().c_str() );
+			int low = atoi( lexFactorRep.Exact().data()->data );
 			factorRep = LexFactorRep::cons( lexFactorRep.Exact().loc(),
 					recRep, low, 0, LexFactorRep::ExactType );
 			break;
 		}
 		case lex_factor_rep::_Max: {
-			int high = atoi( lexFactorRep.Max().text().c_str() );
+			int high = atoi( lexFactorRep.Max().data()->data );
 			factorRep = LexFactorRep::cons( lexFactorRep.Max().loc(),
 					recRep, 0, high, LexFactorRep::MaxType );
 			break;
 		}
 		case lex_factor_rep::_Min: {
-			int low = atoi( lexFactorRep.Min().text().c_str() );
+			int low = atoi( lexFactorRep.Min().data()->data );
 			factorRep = LexFactorRep::cons( lexFactorRep.Min().loc(),
 					recRep, low, 0, LexFactorRep::MinType );
 			break;
 		}
 		case lex_factor_rep::_Range: {
-			int low = atoi( lexFactorRep.Low().text().c_str() );
-			int high = atoi( lexFactorRep.High().text().c_str() );
+			int low = atoi( lexFactorRep.Low().data()->data );
+			int high = atoi( lexFactorRep.High().data()->data );
 			factorRep = LexFactorRep::cons( lexFactorRep.Low().loc(),
 					recRep, low, high, LexFactorRep::RangeType );
 			break;
@@ -1038,7 +1038,7 @@ struct LoadColm
 
 	void walkRlDef( rl_def rlDef )
 	{
-		String id = rlDef.Id().text().c_str();
+		String id = rlDef.Id().data();
 
 		lex_expr LexExpr = rlDef.Expr();
 		LexExpression *expr = walkLexExpr( LexExpr );
@@ -1056,7 +1056,7 @@ struct LoadColm
 
 	void walkCflDef( cfl_def cflDef )
 	{
-		String name = cflDef.DefId().text().c_str();
+		String name = cflDef.DefId().data();
 		ObjectDef *objectDef = walkVarDefList( cflDef.VarDefList() );
 		objectDef->name = name;
 
@@ -1115,7 +1115,7 @@ struct LoadColm
 		case qual::_Dot:
 		case qual::_Arrow: {
 			qualItemVect = walkQual( RecQual );
-			String id = Qual.Id().text().c_str();
+			String id = Qual.Id().data();
 			QualItem::Type type = Qual.Dot() != 0 ? QualItem::Dot : QualItem::Arrow;
 			qualItemVect->append( QualItem( Qual.Id().loc(), id, type ) );
 			break;
@@ -1131,7 +1131,7 @@ struct LoadColm
 	{
 		qual Qual = varRef.Qual();
 		QualItemVect *qualItemVect = walkQual( Qual );
-		String id = varRef.Id().text().c_str();
+		String id = varRef.Id().data();
 		LangVarRef *langVarRef = LangVarRef::cons( varRef.Id().loc(), qualItemVect, id );
 		return langVarRef;
 	}
@@ -1140,7 +1140,7 @@ struct LoadColm
 	{
 		ObjectField *objField = 0;
 		if ( optCapture.prodName() == opt_capture::_Id ) {
-			String id = optCapture.Id().text().c_str();
+			String id = optCapture.Id().data();
 			objField = ObjectField::cons( optCapture.Id().loc(), 0, id );
 		}
 		return objField;
@@ -1178,7 +1178,7 @@ struct LoadColm
 		}
 
 		if ( Nl != 0 ) {
-			String consData = unescape( Nl.text().c_str() );
+			String consData = unescape( Nl.data() );
 			ConsItem *consItem = ConsItem::cons( Nl.loc(), ConsItem::InputText, consData );
 			ConsItemList *term = ConsItemList::cons( consItem );
 			list = consListConcat( list, term );
@@ -1193,7 +1193,7 @@ struct LoadColm
 		switch ( consEl.prodName() ) {
 		case cons_el::_Lit: {
 			NamespaceQual *nspaceQual = walkRegionQual( consEl.RegionQual() );
-			String lit = consEl.Lit().text().c_str();
+			String lit = consEl.Lit().data();
 			list = consElLiteral( consEl.Lit().loc(), lit, nspaceQual );
 			break;
 		}
@@ -1302,7 +1302,7 @@ struct LoadColm
 		}
 
 		if ( Nl != 0 ) {
-			String consData = unescape( Nl.text().c_str() );
+			String consData = unescape( Nl.data() );
 			ConsItem *consItem = ConsItem::cons( Nl.loc(), ConsItem::InputText, consData );
 			ConsItemList *term = ConsItemList::cons( consItem );
 			list = consListConcat( list, term );
@@ -1419,7 +1419,7 @@ struct LoadColm
 		}
 
 		if ( Nl != 0 ) {
-			String consData = unescape( Nl.text().c_str() );
+			String consData = unescape( Nl.data() );
 			ConsItem *consItem = ConsItem::cons( Nl.loc(), ConsItem::InputText, consData );
 			ConsItemList *term = ConsItemList::cons( consItem );
 			list = consListConcat( list, term );
@@ -1551,7 +1551,7 @@ struct LoadColm
 			break;
 		}
 		case code_factor::_Lit: {
-			String lit = codeFactor.Lit().text().c_str();
+			String lit = codeFactor.Lit().data();
 			LangTerm *term = LangTerm::cons( codeFactor.Lit().loc(), LangTerm::StringType, lit );
 			expr = LangExpr::cons( term );
 			break;
@@ -1761,7 +1761,7 @@ struct LoadColm
 
 	ObjectField *walkVarDef( var_def varDef )
 	{
-		String id = varDef.Id().text().c_str();
+		String id = varDef.Id().data();
 		TypeRef *typeRef = walkTypeRef( varDef.TypeRef() );
 		return ObjectField::cons( varDef.Id().loc(), typeRef, id );
 	}
@@ -1778,7 +1778,7 @@ struct LoadColm
 			break;
 		}
 		case iter_call::_Id: {
-			String tree = IterCall.Id().text().c_str();
+			String tree = IterCall.Id().data();
 			LangTerm *langTerm = LangTerm::cons( IterCall.Id().loc(),
 					LangTerm::VarRefType, LangVarRef::cons( IterCall.Id().loc(), tree ) );
 			LangExpr *langExpr = LangExpr::cons( langTerm );
@@ -1845,7 +1845,7 @@ struct LoadColm
 
 	ObjectField *walkParamVarDef( param_var_def paramVarDef )
 	{
-		String id = paramVarDef.Id().text().c_str();
+		String id = paramVarDef.Id().data();
 		TypeRef *typeRef = 0;
 
 		switch ( paramVarDef.prodName() ) {
@@ -1882,7 +1882,7 @@ struct LoadColm
 
 		bool exprt = walkOptExport( FunctionDef.OptExport() );
 		TypeRef *typeRef = walkTypeRef( FunctionDef.TypeRef() );
-		String id = FunctionDef.Id().text().c_str();
+		String id = FunctionDef.Id().data();
 		ParameterList *paramList = walkParamVarDefList( FunctionDef.ParamVarDefList() );
 		StmtList *stmtList = walkLangStmtList( FunctionDef.LangStmtList() );
 		functionDef( stmtList, localFrame, paramList, typeRef, id, exprt );
@@ -1894,7 +1894,7 @@ struct LoadColm
 	{
 		ObjectDef *localFrame = blockOpen();
 
-		String id = IterDef.Id().text().c_str();
+		String id = IterDef.Id().data();
 		ParameterList *paramList = walkParamVarDefList( IterDef.ParamVarDefList() );
 		StmtList *stmtList = walkLangStmtList( IterDef.LangStmtList() );
 		iterDef( stmtList, localFrame, paramList, id );
@@ -1949,7 +1949,7 @@ struct LoadColm
 
 	void walkContextDef( context_def contextDef )
 	{
-		String name = contextDef.Name().text().c_str();
+		String name = contextDef.Name().data();
 		contextHead( contextDef.Name().loc(), name );
 
 		_repeat_context_item contextItemList = contextDef.ContextItemList();
@@ -1964,7 +1964,7 @@ struct LoadColm
 
 	void walkNamespaceDef( namespace_def NamespaceDef )
 	{
-		String name = NamespaceDef.Name().text().c_str();
+		String name = NamespaceDef.Name().data();
 		createNamespace( NamespaceDef.Name().loc(), name );
 		walkRootItemList( NamespaceDef.RootItemList() );
 		namespaceStack.pop();
@@ -2053,7 +2053,7 @@ struct LoadColm
 		bool niLeft = walkOptNoIgnore( literalItem.NiLeft() );
 		bool niRight = walkOptNoIgnore( literalItem.NiRight() );
 
-		String lit = literalItem.Lit().text().c_str();
+		String lit = literalItem.Lit().data();
 		if ( strcmp( lit, "''" ) == 0 )
 			zeroDef( literalItem.Lit().loc(), lit, niLeft, niRight );
 		else
