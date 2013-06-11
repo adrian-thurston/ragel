@@ -23,7 +23,6 @@
 #define _AAPL_COMPARE_H
 
 #include <string.h>
-#include "astring.h"
 #include "table.h"
 
 #ifdef AAPL_NAMESPACE
@@ -49,32 +48,6 @@ namespace Aapl {
  *
  * @{
  */
-
-/**
- * \brief Compare two null terminated character sequences.
- *
- * This comparision class is a wrapper for strcmp.
- */
-template<class T> struct CmpStrTmpl
-{
-	/**
-	 * \brief Compare two null terminated string types.
-	 */
-	static inline long compare( const char *k1, const char *k2 )
-		{ return strcmp(k1, k2); }
-
-	static int compare( const StrTmpl<T> &s1, const StrTmpl<T> &s2 )
-	{
-		if ( s1.length() < s2.length() )
-			return -1;
-		else if ( s1.length() > s2.length() )
-			return 1;
-		else
-			return memcmp( s1.data, s2.data, s1.length() );
-	}
-};
-
-typedef CmpStrTmpl<char> CmpStr;
 
 /**
  * \brief Compare a type for which < and > are implemented.

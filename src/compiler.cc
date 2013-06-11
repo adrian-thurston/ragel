@@ -360,8 +360,8 @@ Compiler::Compiler( )
 	nextTokenId(1),
 	rootCodeBlock(0),
 	mainReturnUT(0),
-	access(0),
-	tokenStruct(0),
+	//access(0),
+	//tokenStruct(0),
 
 	ptrLangEl(0),
 	boolLangEl(0),

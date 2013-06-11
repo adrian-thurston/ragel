@@ -65,7 +65,7 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	id(-1),
 	isUserTerm(false),
 	isContext(false),
-	displayString(0),
+	//displayString(0),
 	numAppearances(0),
 	commit(false),
 	isIgnore(false),

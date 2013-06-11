@@ -232,13 +232,13 @@ void LoadInit::walkTokenList( token_list &tokenList )
 	if ( tokenList.IgnoreDef() != 0 ) {
 		ignore_def IgnoreDef = tokenList.IgnoreDef();
 
-		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, 0, pd->nextObjectId++ ); 
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, String(), pd->nextObjectId++ ); 
 
 		lex_expr LexExpr = IgnoreDef.Expr();
 		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
-		defineToken( internal, 0, join, objectDef, 0, true, false, false );
+		defineToken( internal, String(), join, objectDef, 0, true, false, false );
 	}
 }
 

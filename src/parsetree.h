@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <string.h>
+
 #include "global.h"
 #include "avlmap.h"
 #include "bstmap.h"
@@ -32,7 +33,7 @@
 #include "dlist.h"
 #include "dlistval.h"
 #include "dlistmel.h"
-#include "astring.h"
+#include "cstring.h"
 #include "bytecode.h"
 #include "avlbasic.h"
 

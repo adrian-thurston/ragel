@@ -37,7 +37,7 @@
 #include "vector.h"
 #include "keyops.h"
 #include "parsetree.h"
-#include "astring.h"
+#include "cstring.h"
 #include "pdagraph.h"
 #include "compare.h"
 #include "pdarun.h"

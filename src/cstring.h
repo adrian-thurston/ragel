@@ -30,6 +30,10 @@
 #include <iostream>
 #include <assert.h>
 
+#include "tree.h"
+
+struct colm_data;
+
 #ifdef AAPL_NAMESPACE
 namespace Aapl {
 #endif
@@ -302,6 +306,9 @@ public:
 	/* Construct a string from with, sprintf. */
 	StrTmpl( long lenGuess, const char *format, ... );
 
+	/* Construct a string from with, sprintf. */
+	StrTmpl( const colm_data *cd );
+
 	/* Set the string from a c-style string. */
 	StrTmpl &operator=( const char *s );
 
@@ -455,6 +462,23 @@ template<class T> StrTmpl<T>::StrTmpl( long lenGuess, const char *format, ... )
 
 	va_end( args );
 }
+
+/* Create from another string class. */
+template<class T> StrTmpl<T>::StrTmpl( const colm_data *cd )
+{
+	if ( cd->data == 0 )
+		data = 0;
+	else {
+		/* Init space for the data. */
+		initSpace( cd->length );
+
+		/* Copy in the data. */
+		memcpy( data, cd->data, cd->length );
+		data[cd->length] = 0;
+	}
+}
+
+
 
 /* Construct a string from with, sprintf. */
 template<class T> void StrTmpl<T>::setAs( long lenGuess, const char *format, ... )
@@ -801,6 +825,33 @@ template <class T> inline std::ostream &operator<<( std::ostream &o, const StrTm
 }
 
 typedef StrTmpl<char> String;
+
+/**
+ * \brief Compare two null terminated character sequences.
+ *
+ * This comparision class is a wrapper for strcmp.
+ */
+template<class T> struct CmpStrTmpl
+{
+	/**
+	 * \brief Compare two null terminated string types.
+	 */
+	static inline long compare( const char *k1, const char *k2 )
+		{ return strcmp(k1, k2); }
+
+	static int compare( const StrTmpl<T> &s1, const StrTmpl<T> &s2 )
+	{
+		if ( s1.length() < s2.length() )
+			return -1;
+		else if ( s1.length() > s2.length() )
+			return 1;
+		else
+			return memcmp( s1.data, s2.data, s1.length() );
+	}
+};
+
+typedef CmpStrTmpl<char> CmpStr;
+
 
 
 #ifdef AAPL_NAMESPACE

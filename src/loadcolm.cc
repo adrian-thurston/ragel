@@ -336,7 +336,7 @@ struct LoadColm
 
 	String walkOptId( opt_id optId )
 	{
-		String name = 0;
+		String name;
 		if ( optId.prodName() == opt_id::_Id )
 			name = optId.Id().text().c_str();
 		return name;
