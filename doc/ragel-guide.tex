@@ -74,7 +74,7 @@ details.
 
 {\bf\it\noindent You should have received a copy of the GNU General Public
 License along with Ragel; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 }
 
 \clearpage
@@ -114,11 +114,11 @@ large state machines.
 \section{Motivation}
 
 When a programmer is faced with the task of producing a parser for a
-context-free language there are many tools to choose from. It is quite common
+context-free language there, are many tools to choose from. It is quite common
 to generate useful and efficient parsers for programming languages from a
 formal grammar. It is also quite common for programmers to avoid such tools
 when making parsers for simple computer languages, such as file formats and
-communication protocols.  Such languages are often regular and tools for
+communication protocols.  Such languages are often regular, and tools for
 processing the context-free languages are viewed as too heavyweight for the
 purpose of parsing regular languages. The extra run-time effort required for
 supporting the recursive nature of context-free languages is wasted.
@@ -128,15 +128,15 @@ and scripting languages such as Sed, Awk and Perl we find that they are split
 into two levels: a regular expression matching engine and some kind of program
 logic for linking patterns together.  For example, a Lex program is composed of
 sets of regular expressions. The implied program logic repeatedly attempts to
-match a pattern in the current set. When a match is found the associated user
+match a pattern in the current set. When a match is found, the associated user
 code executed. It requires the user to consider a language as a sequence of
 independent tokens. Scripting languages and regular expression libraries allow
 one to link patterns together using arbitrary program code.  This is very
-flexible and powerful, however we can be more concise and clear if we avoid
+flexible and powerful; however, we can be more concise and clear if we avoid
 gluing together regular expressions with if statements and while loops.
 
 This model of execution, where the runtime alternates between regular
-expression matching and user code exectution places restrictions on when
+expression matching and user code execution places restrictions on when
 action code may be executed. Since action code can only be associated with
 complete patterns, any action code that must be executed before an entire
 pattern is matched requires that the pattern be broken into smaller units.
@@ -145,7 +145,7 @@ smaller expressions, it is desirable to retain a single expression and embed
 code for performing actions directly into the transitions that move over the
 characters. After all, capable programmers are astutely aware of the machinery
 underlying their programs, so why not provide them with access to that
-machinery? To achieve this we require an action execution model for associating
+machinery? To achieve this, we require an action execution model for associating
 code with the sub-expressions of a regular expression in a way that does not
 disrupt its syntax.
 
@@ -231,7 +231,7 @@ embedding operators access. For example, one can access start states, final
 states or all states, among others. Unlike the transition embeddings, there are
 several different types of state action embeddings. These are executed at
 various different times during the processing of input. It is possible to embed
-actions that are exectued on transitions into a state, on transitions out of a
+actions that are executed on transitions into a state, on transitions out of a
 state, on transitions taken on the error event, or on transitions taken on the
 EOF event.
 
@@ -332,7 +332,7 @@ regular expressions. Perl embeddings do not translate into the embedding of
 code into deterministic state machines. Perl regular expressions are in fact
 not fully compiled to deterministic machines when embedded code is involved.
 They are instead interpreted and involve backtracking. This is shown by the
-following Perl program. When it is fed the input \verb|abcd| the interpretor
+following Perl program. When it is fed the input \verb|abcd| the interpreter
 attempts to match the first alternative, printing \verb|a1 b1|.  When this
 possibility fails it backtracks and tries the second possibility, printing
 \verb|a2 b2|, at which point it succeeds.
@@ -346,7 +346,7 @@ print "YES\n" if ( <STDIN> =~
 \end{inline_code}
 \verbspace
 
-In Ragel there is no regular expression interpretor. Aside from the scanner
+In Ragel there is no regular expression interpreter. Aside from the scanner
 operator, all Ragel expressions are made into deterministic machines and the
 run time simply moves from state to state as it consumes input. An equivalent
 parser expressed in Ragel would attempt both of the alternatives concurrently,
@@ -494,7 +494,7 @@ include FsmName "inputfile.rl";
 The \verb|include| statement can be used to draw in the statements of another FSM
 specification. Both the name and input file are optional, however at least one
 must be given. Without an FSM name, the given input file is searched for an FSM
-of the same name as the current specification. Without an input file the
+of the same name as the current specification. Without an input file, the
 current file is searched for a machine of the given name. If both are present,
 the given input file is searched for a machine of the given name.
 
@@ -795,7 +795,7 @@ epsilon transitions to be made.
 
 A very common error that is made when using Ragel is to make machines that do
 too much. That is, to create machines that have unintentional
-nondetermistic properties. This usually results from being unaware of the common strings
+nondeterministic properties. This usually results from being unaware of the common strings
 between machines that are combined together using the regular language
 operators. This can involve never leaving a machine, causing its actions to be
 propagated through all the following states. Or it can involve an alternation
@@ -996,8 +996,8 @@ never leave the \verb|any*| machine.  This is a problem especially if actions
 are embedded to process the characters of the \verb|any*| component.
 
 In the following example, the first machine is always active due to the
-nondeterministic nature of concatenation. This particular nondeterminism is intended
-however because we wish to permit EOF strings before the end of the input.
+nondeterministic nature of concatenation. This particular nondeterminism is intended,
+however, because we wish to permit EOF strings before the end of the input.
 
 % GENERATE: exconcat
 % OPT: -p
@@ -1044,7 +1044,7 @@ It creates a new start state and an additional final
 state.  Epsilon transitions are drawn between the new start state and the old start
 state, between the new start state and the new final state, and
 between the final states of the machine and the new start state.  After the
-machine is made deterministic the effect is of the final states getting all the
+machine is made deterministic, the final states get all the
 transitions of the start state. 
 
 \graphspace
@@ -1290,9 +1290,9 @@ means that if a machine accepts the zero-length string and control passes
 through the start state then the entering action is executed. Note
 that this can happen on both a following character and on the EOF event.
 
-In some machines the start state has transtions coming in from within the
+In some machines, the start state has transtions coming in from within the
 machine. In these cases the start state is first isolated from the rest of the
-machine ensuring that the entering actions are exected once only.
+machine ensuring that the entering actions are executed once only.
 
 % GENERATE: exstact
 % OPT: -p
@@ -1321,9 +1321,9 @@ main := ( lower* >A ) . ' ';
 
 The finishing action operator embeds an action into any transitions that move
 the machine into a final state. Further input may move the machine out of the
-final state, but keep it in the machine. Therefore finishing actions may be
+final state, but keep it in the machine. Therefore, finishing actions may be
 executed more than once if a machine has any internal transitions out of a
-final state. In the following example the final state has no transitions out
+final state. In the following example, the final state has no transitions out
 and the finishing action is executed only once.
 
 % GENERATE: exdoneact
@@ -1493,7 +1493,7 @@ be associated with. Therefore the state embedding operators have two
 components.  The first, which is the first one or two characters, specifies the
 class of states that the action will be embedded into. The second component
 specifies the type of event the action will be executed on. The symbols of the
-second component also have equivalent kewords. 
+second component also have equivalent keywords. 
 
 \begin{multicols}{2}
 The different classes of states are:
@@ -1706,10 +1706,10 @@ predictable for the user, and repeatable for the compiler.
 
 We associate with the embedding of each action a unique timestamp that is
 used to order actions that appear together on a single transition in the final
-state machine. To accomplish this we recursively traverse the parse tree of
+state machine. To accomplish this, we recursively traverse the parse tree of
 regular expressions and assign timestamps to action embeddings. References to
 machine definitions are followed in the traversal. When we visit a
-parse tree node we assign timestamps to all {\em entering} action embeddings,
+parse tree node, we assign timestamps to all {\em entering} action embeddings,
 recurse on the parse tree, then assign timestamps to the remaining {\em all},
 {\em finishing}, and {\em leaving} embeddings in the order in which they
 appear.
@@ -2031,7 +2031,7 @@ In this case, the problem with using a standard kleene star operation is that
 there is an ambiguity between extending a token and wrapping around the machine
 to begin a new token. Using the standard operator, we get an undesirable
 nondeterministic behaviour. Evidence of this can be seen on the transition out
-of state one to itself.  The transition extends the string, and simultaneously,
+of state one, back to itself.  The transition extends the string, and simultaneously,
 finishes the string only to immediately begin a new one.  What is required is
 for the
 transitions that represent an extension of a token to take precedence over the
@@ -2059,7 +2059,7 @@ eliminates the need to ever delete them. Such a scheme allows the user to
 choose a unique name, embed two different priority values using that name
 and be confident that the priority embedding will be free of any side effects.
 
-In the first form of priority embedding the name defaults to the name of the machine
+In the first form of priority embedding, the name defaults to the name of the machine
 definition that the priority is assigned in. In this sense priorities are by
 default local to the current machine definition or instantiation. Beware of
 using this form in a longest-match machine, since there is only one name for
@@ -2199,7 +2199,7 @@ This operator is
 like the previous operator, except the higher priority is placed on the final
 transitions of the second machine. This is useful if one wishes to entertain
 the possibility of continuing to match the first machine right up until the
-second machine enters a final state. In other words it terminates the first
+second machine enters a final state. In other words, it terminates the first
 machine only when the second accepts. In the following example, finish-guarded
 concatenation causes the move out of the machine that matches everything to be
 delayed until the full end-of-input marker has been matched.
@@ -2343,15 +2343,15 @@ stream. These can live in any scope. Control of the input processing loop is
 also possible: the user may break out of the processing loop and return to it
 at any time.
 
-In the case of the C, D, Go, OCaml host languages, Ragel is able to generate very
+In the case of the C, D, Go and OCaml host languages, Ragel is able to generate very
 fast-running code that implements state machines as directly executable code.
 Since very large files strain the host language compiler, table-based code
-generation is also supported. In the future we hope to provide a partitioned,
+generation is also supported. In the future, we hope to provide a partitioned,
 directly executable format that is able to reduce the burden on the host
 compiler by splitting large machines across multiple functions.
 
 In the case of Java and Ruby, table-based code generation is the only code
-style supported. In the future this may be expanded to include other code
+style supported. In the future, this may be expanded to include other code
 styles.
 
 Ragel can be used to parse input in one block, or it can be used to parse input
@@ -2434,7 +2434,7 @@ event can be known only after the final buffer block has been processed, then
 it is possible to set \verb|p = pe = eof| and run the execute block.
 
 \item \verb|data| - This variable is only required in Go, Java, Ruby and OCaml code. It
-must be an array containting the data to process.
+must be an array containing the data to process.
 
 \item \verb|stack| - This must be an array of integers. It is used to store
 integer values representing states. If the stack must resize dynamically the

@@ -52,7 +52,7 @@ large state machines.
 .section Motivation
 
 When a programmer is faced with the task of producing a parser for a
-context-free language there, are many tools to choose from. It is quite common
+context-free language, there are many tools to choose from. It is quite common
 to generate useful and efficient parsers for programming languages from a
 formal grammar. It is also quite common for programmers to avoid such tools
 when making parsers for simple computer languages, such as file formats and
