@@ -1,5 +1,5 @@
 dnl 
-dnl   Copyright 2001-2009 Adrian Thurston <thurston@complang.org>
+dnl   Copyright 2001-2013 Adrian Thurston <thurston@complang.org>
 dnl
 
 dnl   This file is part of Ragel.

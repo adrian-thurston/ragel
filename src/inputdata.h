@@ -119,6 +119,7 @@ struct InputData
 	void checkArgs();
 
 	void process();
+	void processColm();
 };
 
 #endif

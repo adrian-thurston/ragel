@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2013 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -93,6 +93,8 @@ bool displayPrintables = false;
 /* Target ruby impl */
 RubyImplEnum rubyImpl = MRI;
 
+bool colmParser = false;
+
 /* Print a summary of the options. */
 void usage()
 {
@@ -152,7 +154,7 @@ void usage()
 void version()
 {
 	cout << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
-			"Copyright (c) 2001-2009 by Adrian Thurston" << endl;
+			"Copyright (c) 2001-2013 by Adrian Thurston" << endl;
 	exit(0);
 }
 
@@ -222,7 +224,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc("xo:dnmleabjkS:M:I:CDEJZRAOKvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc("cxo:dnmleabjkS:M:I:CDEJZRAOKvHh?-:sT:F:G:P:LpV", argc, argv);
 
 	/* FIXME: Need to check code styles VS langauge. */
 
@@ -434,6 +436,9 @@ void InputData::parseArgs( int argc, const char **argv )
 			case 'L':
 				noLineDirectives = true;
 				break;
+			case 'c':
+				colmParser = true;
+				break;
 			}
 			break;
 
@@ -484,7 +489,11 @@ int main( int argc, const char **argv )
 
 	id.parseArgs( argc, argv );
 	id.checkArgs();
-	id.process();
+
+	if ( colmParser )
+		id.processColm();
+	else
+		id.process();
 
 	return 0;
 }

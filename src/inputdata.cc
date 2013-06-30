@@ -25,6 +25,8 @@
 #include "parsedata.h"
 #include "rlparse.h"
 #include "rlscan.h"
+#include "load.h"
+
 #include <iostream>
 
 using std::istream;
@@ -343,6 +345,13 @@ void InputData::processCode()
 
 	openOutput();
 	writeOutput();
+}
+
+void InputData::processColm()
+{
+	LoadRagel *lr = newLoadRagel();
+	loadRagel( lr, inputFileName );
+	deleteLoadRagel( lr );
 }
 
 void InputData::process()

@@ -236,12 +236,14 @@ end
 def start
 	[c_host::section*]
 
-parse Start: start[ stdin ]
+print( "hello world\n" )
 
-export Error: str
-
-export start parseStart()
-{
-	cons S: start ""
-	return S
-}
+#parse Start: start[ stdin ]
+#
+#export Error: str
+#
+#export start parseStart()
+#{
+#	cons S: start ""
+#	return S
+#}

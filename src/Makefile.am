@@ -4,16 +4,16 @@ SUBDIRS = c dot xml go
 
 bin_PROGRAMS = ragel
 
-ragel_CPPFLAGS = -I$(top_srcdir)/aapl -I$(COLM_INCLUDE)
+ragel_CPPFLAGS = -I$(top_srcdir)/aapl
 
 ragel_SOURCES = \
 	buffer.h inputdata.h redfsm.h parsedata.h rlparse.h \
 	dotcodegen.h parsetree.h rlscan.h version.h common.h \
-	fsmgraph.h pcheck.h gendata.h ragel.h if.h \
+	fsmgraph.h pcheck.h gendata.h ragel.h load.h if.h \
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc rlscan.cc rlparse.cc \
 	inputdata.cc common.cc redfsm.cc gendata.cc allocgen.cc \
-	parse.c if.cc
+	load.cc parse.c if.cc
 
 ragel_CXXFLAGS = -Wall
 
