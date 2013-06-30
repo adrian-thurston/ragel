@@ -13,6 +13,11 @@
 /.deps
 /stamp-h1
 
+# Parsing
+/if.h
+/if.cc
+/parse.c
+
 # Common testing file.
 /tmp.rl
 /tmp.c

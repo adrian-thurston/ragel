@@ -104,6 +104,16 @@ if test "$COLM_VERSION" != $EXPECTED_COLM_VERSION; then
 	AC_ERROR([expected colm version $EXPECTED_COLM_VERSION, but $COLM_VERSION is installed])
 fi
 
+COLM_FULL=[`which $COLM`]
+COLM_INCLUDE=[`dirname $COLM_FULL`/../include]
+COLM_LIB=[`dirname $COLM_FULL`/../lib]
+
+CPPFLAGS="$CPPFLAGS -I$COLM_INCLUDE"
+LDFLAGS="$LDFLAGS -L$COLM_LIB"
+
+AC_CHECK_HEADER([colm/colm.h], [], [AC_ERROR([colm.h not found])])
+AC_CHECK_LIB([colmd], [colm_new_program])
+
 dnl Checks to carry out if we are building the manual.
 if test "x$build_manual" = "xyes"; then
 
