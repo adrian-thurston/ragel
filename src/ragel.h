@@ -88,7 +88,10 @@ extern ErrorFormat errorFormat;
 extern int gblErrorCount;
 extern char mainMachine[];
 
+struct colm_location;
+
 InputLoc makeInputLoc( const char *fileName, int line = 0, int col = 0 );
+InputLoc makeInputLoc( const struct colm_location *loc );
 std::ostream &operator<<( std::ostream &out, const InputLoc &loc );
 
 /* Error reporting. */

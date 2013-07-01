@@ -161,7 +161,7 @@ void version()
 /* Error reporting format. */
 ErrorFormat errorFormat = ErrorFormatGNU;
 
-InputLoc makeInputLoc( const char *fileName, int line, int col)
+InputLoc makeInputLoc( const char *fileName, int line, int col )
 {
 	InputLoc loc = { fileName, line, col };
 	return loc;

@@ -349,6 +349,12 @@ void InputData::processCode()
 
 void InputData::processColm()
 {
+	/* Check input file. */
+	ifstream *inFile = new ifstream( inputFileName );
+	if ( ! inFile->is_open() )
+		error() << "could not open " << inputFileName << " for reading" << endp;
+	delete inFile;
+
 	LoadRagel *lr = newLoadRagel();
 	loadRagel( lr, inputFileName );
 	deleteLoadRagel( lr );
