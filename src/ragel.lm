@@ -1,8 +1,58 @@
 rl ident
 	/( alpha | '_' ) ( alpha | digit | '_' )*/
 
-namespace ragel
+rl number
+	/ digit+ /
 
+rl hex_number
+	/ '0x' [0-9a-fA-F]+ /
+
+rl NL / '\n' /
+
+rl c_comment 
+	/ '/*' ( any | NL )* :>> '*/' /
+
+rl cpp_comment
+	/ '//' [^\n]* NL /
+
+rl s_literal
+	/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+
+rl d_literal
+	/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+namespace c_inline
+	lex 
+		token ident /ident/
+		token number /digit+/
+		token hex_number /'0x' [0-9a-fA-F]+/
+
+		token comment
+			/c_comment | cpp_comment/
+
+		token string
+			/ s_literal | d_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		literal '{', '}'
+
+		token c_any / any /
+	end
+
+	def item
+		[ident]
+	|	[number]
+	|	[hex_number]
+	|	[comment]
+	|	[string]
+	|	[whitespace]
+	|	['{' item* '}']
+	|	[c_any]
+end
+
+namespace ragel
 	lex
 		ignore /[\t\n ]+/
 		ignore /'#' any* :> '\n'/
@@ -27,19 +77,29 @@ namespace ragel
 		literal '>^', '$^', '%^', '<^', '@^', '<>^' 
 		literal '<>'
 
-		literal 'machine', 'action'
+		literal 'machine', 'action', 'variable', 'alphtype',
+				'access', 'write', 'getkey', 'export', 'import',
+				'include', 'prepush', 'postpop'
 
 		token string /
 			'"' ( [^"\\] | '\\' any )* '"' |
 			"'" ( [^'\\] | '\\' any )* "'"
 		/
+
+		token re_literal /
+			'/' ( [^/\\] | '\\' any )* '/'
+		/
 		token _union /
-			'[' any* :> ']'
+			'[' ( [^\]\\] | '\\' any )* ']'
 		/
 
 		token word /[a-zA-Z_][a-zA-Z0-9_]*/
-		token uint /[0-9]+/
+		token uint / number /
+		token hex / hex_number /
 	end 
+
+	# Not ';'
+	token inline_expr /[^;]+/
 
 	def join
 		[join ',' expression]
@@ -69,8 +129,8 @@ namespace ragel
 	|	['<:' factor_label]
 
 	def factor_label
-		[factor_ep]
-	|	[word ':' factor_ep]
+		[word ':' factor_label]
+	|	[factor_ep]
 
 	def factor_ep
 		[factor_aug]
@@ -84,10 +144,14 @@ namespace ragel
 	|	['>' 'from']
 	|	['>' 'to']
 
+	def action_block
+		['{' c_inline::item* '}']
+
 	def action_ref 
 		[word]
-	|	['{' c_host::tok* '}']
-
+	|	['(' word ')']
+	|	[action_block]
+	
 	def priority_aug
 		[uint]
 	|	['+' uint]
@@ -164,6 +228,7 @@ namespace ragel
 	|	[S: string]
 	|	[U: _union]
 	|	[RL1: range_lit '..' RL2: range_lit]
+	|	[re_literal]
 	|	['(' J: join ')']
 
 	def range_lit
@@ -173,23 +238,46 @@ namespace ragel
 	def alphabet_num 
 		[uint]
 	|	['-' uint]
+	|	[hex]
 
 	def lm_act
 		['=>' action_ref]
+	|	[action_block]
 
 	def lm_stmt
 		[join lm_act? ';'] commit
-	|	[word '=' join ';'] commit
+	|	[assignment]
+	|	[action_spec]
 
 	def lm
 		[join]
 	|	['|*' lm_stmt+ '*|']
 
-	def statement
+	def action_spec
+		['action' word action_block] commit
+
+	def assignment
 		[word '=' join ';'] commit
-	|	[word ':=' lm ';'] commit
-	|	['machine' word ';'] commit
-	|	['action' word '{' c_host::tok+ '}'] commit
+
+	def instantiation
+		[word ':=' lm ';'] commit
+
+	def statement
+		['machine' word ';'] commit
+	|	[assignment]
+	|	[instantiation]
+	|	[action_spec]
+	|	['prepush' action_block] commit
+	|	['postpop' action_block] commit
+	|	['variable' inline_expr ';'] commit
+	|	['alphtype' inline_expr ';'] commit
+	|	['access' inline_expr ';'] commit
+	|	['write' inline_expr ';'] commit
+	|	['getkey' inline_expr ';'] commit
+	|	['import' inline_expr ';'] commit
+	|	['export' inline_expr ';'] commit
+	|	['include' inline_expr ';'] commit
+
 
 	def ragel_start 
 		[statement*]
@@ -200,12 +288,6 @@ namespace c_host
 		literal '%%', '%%{', '}%%'
 
 		rl NL / '\n' /
-
-		rl c_comment 
-			/ '/*' ( any | NL )* :>> '*/' /
-
-		rl cpp_comment
-			/ '//' [^\n]* NL /
 
 		rl ruby_comment / '#' [^\n]* NL /
 
@@ -223,19 +305,15 @@ namespace c_host
 		token hex_number /'0x' [0-9a-fA-F]+/
 
 		token comment
-			/c_comment | cpp_comment | ruby_comment/
+			/c_comment | cpp_comment/
+
+		token string
+			/ s_literal | d_literal /
 
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
-		token string
-			/ s_literal | d_literal | host_re_literal /
-
-		token sym /
-			';' | '=' | '-' | '+' | '*' | '/' |
-			'<' | '>' | '(' | ')' | '{' | '}' |
-			'[' | ']'
-		/
+		token c_any / any /
 	end
 
 	def tok
@@ -243,14 +321,14 @@ namespace c_host
 	|	[number]
 	|	[hex_number]
 	|	[comment]
-	|	[whitespace]
 	|	[string]
-	|	[sym]
+	|	[whitespace]
+	|	[c_any]
 
 	def section
-		['%%' tok+]
+		['%%' ragel::inline_expr ragel::';']
 	|	['%%{' ragel::ragel_start '}%%']
-	|	[tok+]
+	|	[tok]
 end
 
 def start
