@@ -63,7 +63,7 @@ parse.c: ragel.lm
 if.h: parse.c
 if.cc: parse.c
 
-ragel-if1.$(OBJEXT): if.h if.cc parse.c
-ragel-loadcolm.$(OBJEXT): if.h if.cc parse.c
+ragel-if.$(OBJEXT): if.h if.cc parse.c
+ragel-load.$(OBJEXT): if.h if.cc parse.c
 
 endif
