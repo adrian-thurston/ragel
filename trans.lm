@@ -1,0 +1,14 @@
+include '../src/ragel.lm'
+
+Output: str = argv.pop()
+Input: str = argv.pop()
+Lang: str = argv.pop()
+
+print( Lang ' ' Input ' ' Output '\n' )
+
+def start
+	[c_host::section*]
+
+Stream: stream = open( Input "r" )
+RagelTree: start = parse start[ Stream ]
+print( RagelTree )
