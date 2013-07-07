@@ -23,3 +23,4 @@
 /.deps
 /ragel-parse
 /ragel-parse.c
+/trans

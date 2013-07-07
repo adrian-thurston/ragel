@@ -58,8 +58,8 @@ rlscan.cc: rlparse.h
 rlscan.cc: rlscan.rl
 	ragel -G2 -I$(builddir) -o $@ $<
 
-parse.c: ragel.lm
-	$(COLM) -c -o parse.c -e if.h -x if.cc ragel.lm
+parse.c: rlparse.lm
+	$(COLM) -c -o parse.c -e if.h -x if.cc rlparse.lm
 if.h: parse.c
 if.cc: parse.c
 

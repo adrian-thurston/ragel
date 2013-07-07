@@ -21,7 +21,7 @@
 
 TESTS = runtests
 
-bin_PROGRAMS = ragel-parse
+bin_PROGRAMS = ragel-parse trans
 
 ragel-parse: ragel-parse.lm
 	$(COLM) $<
@@ -49,3 +49,6 @@ CLEANFILES = \
 	*.c *.cpp *.m *.d *.java *.bin *.class *.exp \
 	*.out *_c.rl *_d.rl *_java.rl *_ruby.rl *_csharp.rl *.cs \
 	*_go.rl *.go *.exe
+
+trans: trans.lm
+	$(COLM) -o $@ $<

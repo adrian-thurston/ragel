@@ -1,0 +1,15 @@
+include 'ragel.lm'
+
+def start
+	[c_host::section*]
+
+export RagelTree: start
+export RagelError: str
+
+# The open is expected to succeed. The open is tested before
+# the colm program is called.
+FileName: str = argv.pop()
+Stream: stream = open( FileName "r" )
+RagelTree = parse start[ Stream ]
+RagelError = error
+
