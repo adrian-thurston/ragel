@@ -1,14 +1,28 @@
 include '../src/ragel.lm'
 
-Output: str = argv.pop()
-Input: str = argv.pop()
+OutputFile: str = argv.pop()
+InputFile: str = argv.pop()
 Lang: str = argv.pop()
-
-print( Lang ' ' Input ' ' Output '\n' )
 
 def start
 	[c_host::section*]
 
-Stream: stream = open( Input "r" )
-RagelTree: start = parse start[ Stream ]
-print( RagelTree )
+Input: stream = open( InputFile "r" )
+Output: stream = open( OutputFile "w" )
+
+RagelTree: start = parse start[ Input ]
+
+prints( Output
+	"/*
+	" * @LANG: [Lang]
+	" * @GENERATED: yes
+	" */
+)
+
+for Section: c_host::section in RagelTree {
+	if match Section [c_host::'%%' ragel::inline_expr ragel::';'] ||
+		match Section [c_host::'%%{' ragel::ragel_start c_host::'}%%']
+	{
+		prints( Output Section )
+	}
+}
