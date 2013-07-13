@@ -347,19 +347,7 @@ void InputData::processCode()
 	writeOutput();
 }
 
-void InputData::processColm()
-{
-	/* Check input file. */
-	ifstream *inFile = new ifstream( inputFileName );
-	if ( ! inFile->is_open() )
-		error() << "could not open " << inputFileName << " for reading" << endp;
-	delete inFile;
-
-	LoadRagel *lr = newLoadRagel();
-	loadRagel( lr, inputFileName );
-	deleteLoadRagel( lr );
-}
-
+#if 0
 void InputData::process()
 {
 	/* Open the input file for reading. */
@@ -411,5 +399,19 @@ void InputData::process()
 	}
 
 	assert( gblErrorCount == 0 );
+}
+#endif
+
+void InputData::process()
+{
+	/* Check input file. */
+	ifstream *inFile = new ifstream( inputFileName );
+	if ( ! inFile->is_open() )
+		error() << "could not open " << inputFileName << " for reading" << endp;
+	delete inFile;
+
+	LoadRagel *lr = newLoadRagel();
+	loadRagel( lr, inputFileName );
+	deleteLoadRagel( lr );
 }
 

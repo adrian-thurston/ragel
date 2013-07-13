@@ -224,7 +224,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc("cxo:dnmleabjkS:M:I:CDEJZRAOKvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc("xo:dnmleabjkS:M:I:CDEJZRAOKvHh?-:sT:F:G:P:LpV", argc, argv);
 
 	/* FIXME: Need to check code styles VS langauge. */
 
@@ -436,9 +436,6 @@ void InputData::parseArgs( int argc, const char **argv )
 			case 'L':
 				noLineDirectives = true;
 				break;
-			case 'c':
-				colmParser = true;
-				break;
 			}
 			break;
 
@@ -481,7 +478,6 @@ void InputData::checkArgs()
 	}
 }
 
-
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
 {
@@ -490,10 +486,7 @@ int main( int argc, const char **argv )
 	id.parseArgs( argc, argv );
 	id.checkArgs();
 
-	if ( colmParser )
-		id.processColm();
-	else
-		id.process();
+	id.process();
 
 	return 0;
 }
