@@ -102,6 +102,8 @@ function run_test()
 		test_error;
 	fi
 
+	return;
+
 	out_args=""
 	[ $lang != java ] && out_args="-o ${binary}";
     [ $lang == csharp ] && out_args="-out:${binary}";
@@ -228,8 +230,8 @@ for test_case; do
 				echo "$langflags" | grep -e $lf >/dev/null || continue
 
 				targ=${root}_$lang.rl
-				echo "./langtrans_$lang.sh $test_case > $targ"
-				if ! ./langtrans_$lang.sh $test_case > $targ; then
+				echo "./trans $lang $test_case $targ"
+				if ! ./trans $lang $test_case $targ; then
 					test_error
 				fi
 				echo "./runtests -g $options $targ"
