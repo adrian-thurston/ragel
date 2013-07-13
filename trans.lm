@@ -1,16 +1,70 @@
 include '../src/ragel.lm'
 
+namespace indep_host
+	lex 
+		literal '%%', '%%{', '}%%'
+
+		rl NL / '\n' /
+
+		rl s_literal
+			/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+
+		rl d_literal
+			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+		token ident /ident/
+		token number /digit+/
+		token hex_number /'0x' [0-9a-fA-F]+/
+
+		token comment
+			/c_comment | cpp_comment/
+
+		token string
+			/ s_literal | d_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		token indep_any / any /
+	end
+
+	def tok
+		[ident]
+	|	[number]
+	|	[hex_number]
+	|	[comment]
+	|	[string]
+	|	[whitespace]
+	|	[indep_any]
+
+	def section_single
+		['%%']
+
+	def section_multiline
+		['%%{' ragel::ragel_start '}%%']
+
+	def section
+		[section_single]
+	|	[section_multiline]
+	|	[tok]
+end
+
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
 Lang: str = argv.pop()
 
 def start
-	[c_host::section*]
+	[indep_host::section*]
 
 Input: stream = open( InputFile "r" )
 Output: stream = open( OutputFile "w" )
 
 RagelTree: start = parse start[ Input ]
+
+if ( !RagelTree ) {
+	print( error '\n' )
+	exit(1)
+}
 
 prints( Output
 	"/*
@@ -19,10 +73,7 @@ prints( Output
 	" */
 )
 
-for Section: c_host::section in RagelTree {
-	if match Section [c_host::'%%' ragel::inline_expr ragel::';'] ||
-		match Section [c_host::'%%{' ragel::ragel_start c_host::'}%%']
-	{
+for Section: indep_host::section in RagelTree {
+	if match Section [indep_host::section_multiline]
 		prints( Output Section )
-	}
 }
