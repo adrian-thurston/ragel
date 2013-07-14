@@ -25,11 +25,11 @@ AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
 AC_CONFIG_HEADER(src/config.h)
 
-dnl Choose defaults for the build_parsers and build_manual vars. If the dist
-dnl file is present in the root then default to no, otherwise go for it.
+dnl Choose defaults for the build_manual var. If the dist file is present in the
+dnl root then default to no, otherwise go for it.
 AC_CHECK_FILES( $srcdir/DIST, 
 	[ . $srcdir/DIST; ], 
-	[ build_parsers=yes; build_manual=yes; ] )
+	[ build_manual=yes; ] )
 
 dnl
 dnl Enable arg to explicitly control the building of the manual
@@ -45,12 +45,6 @@ AC_ARG_ENABLE(manual,
 	],
 )
 
-
-dnl Set to true if the build system should generate parsers from ragel and kelbt
-dnl sources. Set to false if generated files are included and not to be built
-dnl (production).
-AM_CONDITIONAL(BUILD_PARSERS, [test "x$build_parsers" = "xyes"])
-
 dnl Set to true if the manual should be built.
 AM_CONDITIONAL(BUILD_MANUAL, [test "x$build_manual" = "xyes"])
 
@@ -65,27 +59,6 @@ AC_LANG_CPLUSPLUS
 
 dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
-
-# Checks to carry out if we are building parsers.
-if test "x$build_parsers" = "xyes"; then
-
-AC_CHECK_PROG(RAGEL, ragel, ragel)
-if test -z "$RAGEL"; then
-	echo
-	echo "error: ragel is required to build the parsers"
-	echo
-	exit 1
-fi
-
-AC_CHECK_PROG(KELBT, kelbt, kelbt)
-if test -z "$KELBT"; then
-	echo
-	echo "error: kelbt is required to build the parsers"
-	echo
-	exit 1
-fi
-
-fi 
 
 dnl
 dnl COLM

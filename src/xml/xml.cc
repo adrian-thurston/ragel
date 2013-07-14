@@ -27,7 +27,6 @@
 #include "gendata.h"
 #include "inputdata.h"
 #include <string.h>
-#include "rlparse.h"
 #include "version.h"
 
 using std::cerr;
@@ -707,6 +706,7 @@ void InputData::writeLanguage( std::ostream &out )
 
 void InputData::writeXML( std::ostream &out )
 {
+#ifdef KELBT_PARSER
 	out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
 	writeLanguage( out );
 	out << ">\n";
@@ -718,4 +718,5 @@ void InputData::writeXML( std::ostream &out )
 	}
 
 	out << "</ragel>\n";
+#endif
 }

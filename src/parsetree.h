@@ -27,6 +27,7 @@
 #include "bstmap.h"
 #include "vector.h"
 #include "dlist.h"
+#include "fsmgraph.h"
 
 struct NameInst;
 

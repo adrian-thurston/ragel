@@ -23,8 +23,6 @@
 #include "common.h"
 #include "inputdata.h"
 #include "parsedata.h"
-#include "rlparse.h"
-#include "rlscan.h"
 #include "load.h"
 
 #include <iostream>
@@ -183,6 +181,7 @@ void InputData::openOutput()
 
 void InputData::prepareSingleMachine()
 {
+#ifdef KELBT_PARSER
 	/* Locate a machine spec to generate dot output for. We can only emit.
 	 * Dot takes one graph at a time. */
 	if ( machineSpec != 0 ) {
@@ -215,31 +214,37 @@ void InputData::prepareSingleMachine()
 	}
 
 	dotGenParser->pd->prepareMachineGen( gdEl );
+#endif
 }
 
 void InputData::prepareAllMachines()
 {
+#ifdef KELBT_PARSER
 	/* No machine spec or machine name given. Generate everything. */
 	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 		ParseData *pd = parser->value->pd;
 		if ( pd->instanceList.length() > 0 )
 			pd->prepareMachineGen( 0 );
 	}
+#endif
 }
 
 
 void InputData::generateReduced()
 {
+#ifdef KELBT_PARSER
 	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
 		ParseData *pd = parser->value->pd;
 		if ( pd->instanceList.length() > 0 )
 			pd->generateReduced( *this );
 	}
+#endif
 }
 
 /* Send eof to all parsers. */
 void InputData::terminateAllParsers( )
 {
+#ifdef KELBT_PARSER
 	/* FIXME: a proper token is needed here. Suppose we should use the
 	 * location of EOF in the last file that the parser was referenced in. */
 	InputLoc loc;
@@ -248,6 +253,7 @@ void InputData::terminateAllParsers( )
 	loc.col = 0;
 	for ( ParserDict::Iter pdel = parserDict; pdel.lte(); pdel++ )
 		pdel->value->token( loc, Parser_tk_eof, 0, 0 );
+#endif
 }
 
 void InputData::verifyWritesHaveData()

@@ -27,8 +27,8 @@
 
 /* Parsing. */
 #include "ragel.h"
-#include "rlparse.h"
 #include "parsetree.h"
+#include "parsedata.h"
 
 using namespace std;
 ostream &operator<<( ostream &out, const NameRef &nameRef );

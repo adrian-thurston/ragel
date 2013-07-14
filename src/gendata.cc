@@ -24,7 +24,6 @@
 #include "parsedata.h"
 #include "fsmgraph.h"
 #include "inputdata.h"
-#include "rlparse.h"
 #include "version.h"
 
 #include <string.h>

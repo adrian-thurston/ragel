@@ -23,8 +23,7 @@
 #include "dot.h"
 #include "gendata.h"
 #include "inputdata.h"
-#include "rlparse.h"
-#include "rlscan.h"
+#include "parsedata.h"
 
 using std::istream;
 using std::ifstream;
@@ -276,6 +275,7 @@ void GraphvizDotGen::write( )
 
 void InputData::writeDot( ostream &out )
 {
+#ifdef KELBT_PARSER
 	ParseData *pd = dotGenParser->pd;
 	FsmAp *graph = pd->sectionGraph;
 
@@ -284,5 +284,6 @@ void InputData::writeDot( ostream &out )
 	GraphvizDotGen dotGen( args );
 
 	dotGen.write();
+#endif
 }
 

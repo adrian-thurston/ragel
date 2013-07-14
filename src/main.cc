@@ -47,7 +47,6 @@
 
 /* Parsing. */
 #include "ragel.h"
-#include "rlscan.h"
 
 /* Parameters and output. */
 #include "pcheck.h"
