@@ -408,6 +408,17 @@ void InputData::process()
 }
 #endif
 
+void InputData::makeFirstInputItem()
+{
+	/* Make the first input item. */
+	InputItem *firstInputItem = new InputItem;
+	firstInputItem->type = InputItem::HostData;
+	firstInputItem->loc.fileName = inputFileName;
+	firstInputItem->loc.line = 1;
+	firstInputItem->loc.col = 1;
+	inputItems.append( firstInputItem );
+}
+
 void InputData::process()
 {
 	/* Check input file. */
@@ -416,8 +427,30 @@ void InputData::process()
 		error() << "could not open " << inputFileName << " for reading" << endp;
 	delete inFile;
 
-	LoadRagel *lr = newLoadRagel();
+	makeFirstInputItem();
+
+	LoadRagel *lr = newLoadRagel( *this );
 	loadRagel( lr, inputFileName );
 	deleteLoadRagel( lr );
+
+	/* Bail on above error. */
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	if ( generateXML )
+		processXML();
+	else if ( generateDot )
+		processDot();
+	else 
+		processCode();
+
+	/* If writing to a file, delete the ostream, causing it to flush.
+	 * Standard out is flushed automatically. */
+	if ( outputFileName != 0 ) {
+		delete outStream;
+		delete outFilter;
+	}
+
+	assert( gblErrorCount == 0 );
 }
 

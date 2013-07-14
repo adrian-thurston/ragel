@@ -1,6 +1,8 @@
 #include "load.h"
 #include "if.h"
 #include "ragel.h"
+#include "inputdata.h"
+
 #include <colm/colm.h>
 #include <colm/tree.h>
 
@@ -13,6 +15,47 @@ InputLoc makeInputLoc( const struct colm_location *cl )
 
 struct LoadRagel
 {
+	LoadRagel( InputData &id )
+	:
+		id(id),
+		machineSpec(0),
+		machineName(0),
+		includeDepth(0)
+	{}
+
+	InputData &id;
+	char *machineSpec;
+	char *machineName;
+	int includeDepth;
+
+	void loadSection( c_host::section Section )
+	{
+		switch ( Section.prodName() ) {
+			case c_host::section::_SingleLine:
+			case c_host::section::_MultiLine:
+				break;
+
+			case c_host::section::_Tok:
+				/* If no errors and we are at the bottom of the include stack (the
+				 * source file listed on the command line) then write out the data. */
+				if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 ) {
+					string text = Section.Tok().text();
+					id.inputItems.tail->data << text;
+				}
+
+				break;
+		}
+	}
+
+	void load( start Start )
+	{
+		c_host::_repeat_section SectionList = Start.SectionList();
+		while ( !SectionList.end() ) {
+			loadSection( SectionList.value() );
+			SectionList = SectionList.next();
+		}
+	}
+
 	void load( const char *inputFileName )
 	{
 		const char *argv[2];
@@ -34,13 +77,15 @@ struct LoadRagel
 			return;
 		}
 
+		load( Start );
+
 		colm_delete_program( program );
 	}
 };
 
-LoadRagel *newLoadRagel()
+LoadRagel *newLoadRagel( InputData &id )
 {
-	return new LoadRagel;
+	return new LoadRagel( id );
 }
 
 void loadRagel( LoadRagel *lr, const char *inputFileName )

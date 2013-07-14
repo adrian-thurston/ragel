@@ -326,8 +326,8 @@ namespace c_host
 	|	[c_any]
 
 	def section
-		['%%' ragel::inline_expr ragel::';']
-	|	['%%{' ragel::ragel_start '}%%']
-	|	[tok]
+		['%%' ragel::inline_expr ragel::';'] :SingleLine
+	|	['%%{' ragel::ragel_start '}%%'] :MultiLine
+	|	[Tok: tok] :Tok
 end
 

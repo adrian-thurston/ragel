@@ -39,7 +39,7 @@ EXTRA_DIST = ragel.lm rlparse.lm
 
 CLEANFILES = parse.c if.h if.cc
 
-parse.c: rlparse.lm
+parse.c: ragel.lm rlparse.lm
 	$(COLM) -c -o parse.c -e if.h -x if.cc rlparse.lm
 if.h: parse.c
 if.cc: parse.c

@@ -26,7 +26,7 @@
 #include <iostream>
 #include <sstream>
 
-struct Parser;
+struct OrigParser;
 struct ParseData;
 struct CondSpace;
 struct CondAp;
@@ -50,11 +50,11 @@ struct InputItem
 	InputItem *prev, *next;
 };
 
-struct Parser;
+struct OrigParser;
 
-typedef AvlMap<const char*, Parser*, CmpStr> ParserDict;
-typedef AvlMapEl<const char*, Parser*> ParserDictEl;
-typedef DList<Parser> ParserList;
+typedef AvlMap<const char*, OrigParser*, CmpStr> ParserDict;
+typedef AvlMapEl<const char*, OrigParser*> ParserDictEl;
+typedef DList<OrigParser> ParserList;
 typedef DList<InputItem> InputItemList;
 typedef Vector<const char *> ArgsVector;
 
@@ -78,7 +78,7 @@ struct InputData
 	std::ostream *outStream;
 	output_filter *outFilter;
 
-	Parser *dotGenParser;
+	OrigParser *dotGenParser;
 
 	ParserDict parserDict;
 	ParserList parserList;
@@ -88,6 +88,7 @@ struct InputData
 
 	void verifyWritesHaveData();
 
+	void makeFirstInputItem();
 	void writeOutput();
 	void makeDefaultFileName();
 	void makeOutputStream();

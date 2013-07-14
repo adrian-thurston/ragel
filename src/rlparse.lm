@@ -1,7 +1,7 @@
 include 'ragel.lm'
 
 def start
-	[c_host::section*]
+	[SectionList: c_host::section*]
 
 export RagelTree: start
 export RagelError: str
