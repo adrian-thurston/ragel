@@ -278,14 +278,22 @@ namespace ragel
 	|	['export' inline_expr ';'] commit
 	|	['include' inline_expr ';'] commit
 
-
 	def ragel_start 
 		[statement*]
 end
 
 namespace c_host
 	lex 
-		literal '%%', '%%{', '}%%'
+		literal '%%{', '}%%'
+
+		token slr /'%%' [^{] [^\n] '\n'/
+		{
+			input.pull( 2 )
+			R: str = input.pull( match_length - 3 )
+			input.push( "}%%" )
+			input.push( R )
+			input.push( "%%{" )
+		}
 
 		rl NL / '\n' /
 
@@ -326,8 +334,7 @@ namespace c_host
 	|	[c_any]
 
 	def section
-		['%%' ragel::inline_expr ragel::';'] :SingleLine
-	|	['%%{' ragel::ragel_start '}%%'] :MultiLine
+		['%%{' ragel::statement* '}%%'] :MultiLine
 	|	[Tok: tok] :Tok
 end
 

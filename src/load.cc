@@ -31,7 +31,6 @@ struct LoadRagel
 	void loadSection( c_host::section Section )
 	{
 		switch ( Section.prodName() ) {
-			case c_host::section::_SingleLine:
 			case c_host::section::_MultiLine:
 				break;
 
