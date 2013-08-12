@@ -50,5 +50,5 @@ CLEANFILES = \
 	*.out *_c.rl *_d.rl *_java.rl *_ruby.rl *_csharp.rl *.cs \
 	*_go.rl *.go *.exe
 
-trans: trans.lm
+trans: trans.lm ../src/ragel.lm
 	$(COLM) -o $@ $<
