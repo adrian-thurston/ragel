@@ -162,7 +162,7 @@ ErrorFormat errorFormat = ErrorFormatGNU;
 
 InputLoc makeInputLoc( const char *fileName, int line, int col )
 {
-	InputLoc loc = { fileName, line, col };
+	InputLoc loc( fileName, line, col );
 	return loc;
 }
 

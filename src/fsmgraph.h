@@ -161,7 +161,7 @@ struct CmpCondId
 
 /* A list of actions. */
 typedef DList<Action> ActionList;
-typedef AvlTree<Action, char *, CmpStr> ActionDict;
+typedef AvlTree<Action, const char *, CmpStr> ActionDict;
 
 /* Structure for reverse action mapping. */
 struct RevActionMapEl

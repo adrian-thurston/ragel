@@ -145,7 +145,7 @@ namespace ragel
 	|	['>' 'to']
 
 	def action_block
-		['{' c_inline::item* '}']
+		['{' InlineList: c_inline::item* '}']
 
 	def action_ref 
 		[word]
@@ -254,7 +254,7 @@ namespace ragel
 	|	['|*' lm_stmt+ '*|']
 
 	def action_spec
-		['action' word action_block] commit
+		['action' Name: word ActionBlock: action_block] commit
 
 	def assignment
 		[word '=' join ';'] commit
@@ -266,7 +266,7 @@ namespace ragel
 		['machine' word ';'] commit
 	|	[assignment]
 	|	[instantiation]
-	|	[action_spec]
+	|	[ActionSpec: action_spec] :ActionSpec
 	|	['prepush' action_block] commit
 	|	['postpop' action_block] commit
 	|	['variable' inline_expr ';'] commit
@@ -286,7 +286,7 @@ namespace c_host
 	lex 
 		literal '%%{', '}%%'
 
-		token slr /'%%' [^{] [^\n] '\n'/
+		token slr /'%%' [^{] [^\n]* '\n'/
 		{
 			input.pull( 2 )
 			R: str = input.pull( match_length - 3 )
@@ -334,7 +334,7 @@ namespace c_host
 	|	[c_any]
 
 	def section
-		['%%{' ragel::statement* '}%%'] :MultiLine
+		['%%{' StmtList: ragel::statement* '}%%'] :MultiLine
 	|	[Tok: tok] :Tok
 end
 

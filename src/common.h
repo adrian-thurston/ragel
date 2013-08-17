@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2006, 2013 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -26,13 +26,31 @@
 #include <climits>
 #include "dlist.h"
 
+struct colm_location;
+
 /* Location in an input file. */
 struct InputLoc
 {
+	InputLoc( colm_location *pcloc );
+
+	InputLoc() : fileName(0), line(-1), col(-1)  {}
+
+	InputLoc( const InputLoc &loc )
+	{
+		fileName = loc.fileName;
+		line = loc.line;
+		col = loc.col;
+	}
+
+	InputLoc( const char *fileName, int line, int col )
+		: fileName(fileName), line(line), col(col) {}
+
 	const char *fileName;
-	long line;
-	long col;
+	int line;
+	int col;
 };
+
+extern InputLoc internal;
 
 typedef unsigned long long Size;
 
