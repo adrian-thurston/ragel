@@ -67,7 +67,7 @@ void genLineDirective( ostream &out )
 	lineDirective( out, filter->fileName, filter->line + 1 );
 }
 
-GenBase::GenBase( char *fsmName, ParseData *pd, FsmAp *fsm )
+GenBase::GenBase( const char *fsmName, ParseData *pd, FsmAp *fsm )
 :
 	fsmName(fsmName),
 	pd(pd),

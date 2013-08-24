@@ -26,7 +26,6 @@
 #include <iostream>
 #include <sstream>
 
-struct OrigParser;
 struct ParseData;
 struct CondSpace;
 struct CondAp;
@@ -50,11 +49,10 @@ struct InputItem
 	InputItem *prev, *next;
 };
 
-struct OrigParser;
+typedef AvlMap<const char*, ParseData*, CmpStr> ParseDataDict;
+typedef AvlMapEl<const char*, ParseData*> ParseDataDictEl;
+typedef DList<ParseData> ParseDataList;
 
-typedef AvlMap<const char*, OrigParser*, CmpStr> ParserDict;
-typedef AvlMapEl<const char*, OrigParser*> ParserDictEl;
-typedef DList<OrigParser> ParserList;
 typedef DList<InputItem> InputItemList;
 typedef Vector<const char *> ArgsVector;
 
@@ -65,8 +63,7 @@ struct InputData
 		outputFileName(0),
 		inStream(0),
 		outStream(0),
-		outFilter(0),
-		dotGenParser(0)
+		outFilter(0)
 	{}
 
 	/* The name of the root section, this does not change during an include. */
@@ -78,10 +75,8 @@ struct InputData
 	std::ostream *outStream;
 	output_filter *outFilter;
 
-	OrigParser *dotGenParser;
-
-	ParserDict parserDict;
-	ParserList parserList;
+	ParseDataDict parseDataDict;
+	ParseDataList parseDataList;
 	InputItemList inputItems;
 
 	ArgsVector includePaths;

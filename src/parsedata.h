@@ -168,7 +168,7 @@ struct ParseData
 {
 	/* Create a new parse data object. This is done at the beginning of every
 	 * fsm specification. */
-	ParseData( const char *fileName, char *sectionName, const InputLoc &sectionLoc );
+	ParseData( const char *fileName, const char *sectionName, const InputLoc &sectionLoc );
 	~ParseData();
 
 	/*
@@ -298,7 +298,7 @@ struct ParseData
 
 	/* The name of the file the fsm is from, and the spec name. */
 	const char *fileName;
-	char *sectionName;
+	const char *sectionName;
 	InputLoc sectionLoc;
 
 	/* Counting the action and priority ordering. */
@@ -364,6 +364,7 @@ struct ParseData
 
 	CodeGenData *cgd;
 
+	ParseData *prev, *next;
 };
 
 void afterOpMinimize( FsmAp *fsm, bool lastInSeq = true );

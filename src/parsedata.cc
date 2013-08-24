@@ -416,7 +416,7 @@ bool NameInst::anyRefsRec()
 
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
-ParseData::ParseData( const char *fileName, char *sectionName, 
+ParseData::ParseData( const char *fileName, const char *sectionName, 
 		const InputLoc &sectionLoc )
 :	
 	sectionGraph(0),

@@ -33,7 +33,8 @@ struct LoadRagel
 		pd(0),
 		machineSpec(0),
 		machineName(0),
-		includeDepth(0)
+		includeDepth(0),
+		machineNameError(false)
 	{}
 
 	InputData &id;
@@ -41,6 +42,24 @@ struct LoadRagel
 	char *machineSpec;
 	char *machineName;
 	int includeDepth;
+	int machineNameError;
+
+	void loadMachineName( ragel::word MachineName )
+	{
+		InputLoc sectionLoc;
+		char *fileName = 0;
+		const char *machine = MachineName.data()->data;
+
+		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
+		if ( pdEl == 0 ) {
+			pdEl = new ParseDataDictEl( machine );
+			pdEl->value = new ParseData( fileName, machine, sectionLoc );
+			id.parseDataDict.insert( pdEl );
+			id.parseDataList.append( pdEl->value );
+		}
+
+		pd = pdEl->value;
+	}
 
 	void loadActionSpec( ragel::action_spec ActionSpec )
 	{
@@ -69,7 +88,21 @@ struct LoadRagel
 
 	void loadStatement( ragel::statement Statement )
 	{
-		switch( Statement.prodName() ) {
+		ragel::statement::prod_name prodName = Statement.prodName();
+		if ( prodName != ragel::statement::_MachineName && pd == 0 && !machineNameError ) {
+			InputLoc loc = Statement.loc();
+			error(loc) << "this specification has no name, nor does any previous"
+				" specification" << endl;
+			machineNameError = true;
+		}
+
+		if ( machineNameError )
+			return;
+
+		switch( prodName ) {
+			case ragel::statement::_MachineName:
+				loadMachineName( Statement.MachineName() );
+				break;
 			case ragel::statement::_ActionSpec: {
 				loadActionSpec( Statement.ActionSpec() );
 				break;
@@ -107,7 +140,6 @@ struct LoadRagel
 	void load( start Start )
 	{
 		InputLoc loc;
-		pd = new ParseData( "foo", "bar", loc );
 
 		c_host::_repeat_section SectionList = Start.SectionList();
 		while ( !SectionList.end() ) {

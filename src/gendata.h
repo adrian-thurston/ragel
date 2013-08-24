@@ -82,12 +82,12 @@ struct NextRedTrans
 
 struct GenBase
 {
-	GenBase( char *fsmName, ParseData *pd, FsmAp *fsm );
+	GenBase( const char *fsmName, ParseData *pd, FsmAp *fsm );
 
 	void appendTrans( TransListVect &outList, Key lowKey, Key highKey, TransAp *trans );
 	void reduceActionTables();
 
-	char *fsmName;
+	const char *fsmName;
 	ParseData *pd;
 	FsmAp *fsm;
 	KeyOps *keyOps;
@@ -136,7 +136,7 @@ struct CodeGenArgs;
 struct CodeGenArgs
 {
 	CodeGenArgs( InputData &inputData, const char *sourceFileName, 
-			char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
+			const char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
 	:
 		inputData(inputData),
 		sourceFileName(sourceFileName),
@@ -148,7 +148,7 @@ struct CodeGenArgs
 
 	InputData &inputData;
 	const char *sourceFileName;
-	char *fsmName;
+	const char *fsmName;
 	ParseData *pd;
 	FsmAp *fsm;
 	std::ostream &out;

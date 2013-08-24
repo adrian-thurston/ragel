@@ -32,7 +32,7 @@
 using std::cerr;
 using std::endl;
 
-XMLCodeGen::XMLCodeGen( char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
+XMLCodeGen::XMLCodeGen( const char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
 :
 	GenBase(fsmName, pd, fsm),
 	out(out)

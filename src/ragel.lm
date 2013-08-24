@@ -263,7 +263,7 @@ namespace ragel
 		[word ':=' lm ';'] commit
 
 	def statement
-		['machine' word ';'] commit
+		['machine' MachineName: word ';'] :MachineName commit
 	|	[assignment]
 	|	[instantiation]
 	|	[ActionSpec: action_spec] :ActionSpec
