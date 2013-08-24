@@ -86,6 +86,32 @@ struct LoadRagel
 		}
 	}
 
+	void loadPrePush( ragel::action_block PrePushBlock )
+	{
+		InlineList *inlineList = 0;
+		InputLoc loc = PrePushBlock.loc();
+
+		if ( pd->prePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(loc) << "pre_push code already defined" << endl;
+		}
+
+		pd->prePushExpr = inlineList;
+	}
+
+	void loadPostPop( ragel::action_block PostPopBlock )
+	{
+		InlineList *inlineList = 0;
+		InputLoc loc = PostPopBlock.loc();
+
+		if ( pd->postPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(loc) << "post_pop code already defined" << endl;
+		}
+
+		pd->postPopExpr = inlineList;
+	}
+
 	void loadStatement( ragel::statement Statement )
 	{
 		ragel::statement::prod_name prodName = Statement.prodName();
@@ -100,6 +126,12 @@ struct LoadRagel
 			return;
 
 		switch( prodName ) {
+			case ragel::statement::_PrePushSpec:
+				loadPrePush( Statement.PrePushBlock() );
+				break;
+			case ragel::statement::_PostPopSpec:
+				loadPostPop( Statement.PostPopBlock() );
+				break;
 			case ragel::statement::_MachineName:
 				loadMachineName( Statement.MachineName() );
 				break;

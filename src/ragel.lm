@@ -267,8 +267,8 @@ namespace ragel
 	|	[assignment]
 	|	[instantiation]
 	|	[ActionSpec: action_spec] :ActionSpec
-	|	['prepush' action_block] commit
-	|	['postpop' action_block] commit
+	|	['prepush' PrePushBlock: action_block] :PrePushSpec commit
+	|	['postpop' PostPopBlock: action_block] :PostPopSpec commit
 	|	['variable' inline_expr ';'] commit
 	|	['alphtype' inline_expr ';'] commit
 	|	['access' inline_expr ';'] commit
