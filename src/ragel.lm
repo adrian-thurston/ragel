@@ -23,6 +23,10 @@ rl d_literal
 
 namespace c_inline
 	lex 
+		literal 'fpc', 'fc', 'fcurs', 'ftargs',
+			'fentry', 'fhold', 'fexec', 'fgoto', 'fnext',
+			'fcall', 'fret', 'fbreak'
+
 		token ident /ident/
 		token number /digit+/
 		token hex_number /'0x' [0-9a-fA-F]+/
@@ -36,20 +40,35 @@ namespace c_inline
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
-		literal '{', '}'
+		literal '{', '}', '::', '*', ',', '(', ')'
 
 		token c_any / any /
 	end
 
 	def item
-		[ident]
-	|	[number]
-	|	[hex_number]
+		[item_any]
+	|	[item_symbol]
+	|	[item_interpret]
+
+	def item_any
+		[whitespace]
 	|	[comment]
 	|	[string]
-	|	[whitespace]
 	|	['{' item* '}']
+	|	[number]
+	|	[hex_number]
+	|	[ident]
 	|	[c_any]
+
+	def item_symbol
+		[','] | ['('] | [')'] | ['*'] | ['::']
+
+	def item_interpret
+		['fpc']
+	|	['fc']
+	|	['fcurs']
+	|	['ftargs'] 
+#	|	['fentry' '(' state_ref ')']
 end
 
 namespace ragel
