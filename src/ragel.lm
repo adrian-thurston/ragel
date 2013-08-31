@@ -21,6 +21,14 @@ rl s_literal
 rl d_literal
 	/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
 
+namespace srlex
+	lex
+		ignore /[\t\n ]+/
+		literal '::', ';', ')'
+		token word /[a-zA-Z_][a-zA-Z0-9_]*/
+	end
+end
+
 namespace c_inline
 	lex 
 		literal 'fpc', 'fc', 'fcurs', 'ftargs',
@@ -40,35 +48,73 @@ namespace c_inline
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
-		literal '{', '}', '::', '*', ',', '(', ')'
+		literal '{', '}', '::', '*', ',', '(', ')', ';'
 
 		token c_any / any /
 	end
 
-	def item
-		[item_any]
-	|	[item_symbol]
-	|	[item_interpret]
+	def inline_block
+		[block_item*]
+	
+	def block_item
+		[expr_any]
+	|	[block_symbol]
+	|	[block_interpret]
 
-	def item_any
+	def block_symbol
+		[','] | [';'] | ['('] | [')'] | ['*'] | ['::']
+
+	def block_interpret
+		[expr_interpret]
+	|	['fhold' whitespace? ';']
+	|	['fgoto' whitespace? '*' inline_expr ';']
+	|	['fnext' whitespace? '*' inline_expr ';']
+	|	['fcall' whitespace? '*' inline_expr ';']
+	|	['fexec' inline_expr ';']
+	|	['fgoto' state_ref srlex::';']
+	|	['fnext' state_ref srlex::';']
+	|	['fcall' state_ref srlex::';']
+	|	['fret' ';']
+	|	['fbreak' ';']
+
+	def inline_expr
+		[expr_item*]
+
+	def expr_item
+		[expr_any]
+	|	[expr_symbol]
+	|	[expr_interpret]
+
+	def expr_any
 		[whitespace]
 	|	[comment]
 	|	[string]
-	|	['{' item* '}']
 	|	[number]
 	|	[hex_number]
 	|	[ident]
 	|	[c_any]
+	|	['{' block_item* '}']
 
-	def item_symbol
+	def expr_symbol
 		[','] | ['('] | [')'] | ['*'] | ['::']
 
-	def item_interpret
+	def expr_interpret
 		['fpc']
 	|	['fc']
 	|	['fcurs']
 	|	['ftargs'] 
-#	|	['fentry' '(' state_ref ')']
+	|	['fentry' '(' state_ref srlex::')']
+
+	def state_ref
+		[opt_name_sep state_ref_names]
+
+	def opt_name_sep
+		[srlex::'::'] | []
+
+	# List of names separated by ::
+	def state_ref_names
+		[state_ref_names srlex::'::' srlex::word]
+	|	[srlex::word]
 end
 
 namespace ragel
@@ -129,7 +175,7 @@ namespace ragel
 
 	def inline_expr_reparse
 		[_inline_expr_reparse]
-	|	[action_block]
+	|	[action_expr]
 
 	def join
 		[join ',' expression]
@@ -174,8 +220,11 @@ namespace ragel
 	|	['>' 'from']
 	|	['>' 'to']
 
+	def action_expr
+		['{' InlineList: c_inline::expr_item* '}']
+
 	def action_block
-		['{' InlineList: c_inline::item* '}']
+		['{' InlineList: c_inline::block_item* '}']
 
 	def action_ref 
 		[word]
