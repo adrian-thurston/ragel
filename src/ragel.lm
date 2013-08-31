@@ -23,6 +23,10 @@ rl d_literal
 
 namespace c_inline
 	lex 
+		literal 'fpc', 'fc', 'fcurs', 'ftargs',
+			'fentry', 'fhold', 'fexec', 'fgoto', 'fnext',
+			'fcall', 'fret', 'fbreak'
+
 		token ident /ident/
 		token number /digit+/
 		token hex_number /'0x' [0-9a-fA-F]+/
@@ -36,20 +40,35 @@ namespace c_inline
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
-		literal '{', '}'
+		literal '{', '}', '::', '*', ',', '(', ')'
 
 		token c_any / any /
 	end
 
 	def item
-		[ident]
-	|	[number]
-	|	[hex_number]
+		[item_any]
+	|	[item_symbol]
+	|	[item_interpret]
+
+	def item_any
+		[whitespace]
 	|	[comment]
 	|	[string]
-	|	[whitespace]
 	|	['{' item* '}']
+	|	[number]
+	|	[hex_number]
+	|	[ident]
 	|	[c_any]
+
+	def item_symbol
+		[','] | ['('] | [')'] | ['*'] | ['::']
+
+	def item_interpret
+		['fpc']
+	|	['fc']
+	|	['fcurs']
+	|	['ftargs'] 
+#	|	['fentry' '(' state_ref ')']
 end
 
 namespace ragel
@@ -98,8 +117,19 @@ namespace ragel
 		token hex / hex_number /
 	end 
 
-	# Not ';'
-	token inline_expr /[^;]+/
+	# Not cannot start with '{', terminated by ';', rewritten into { inline_expr }
+	token _inline_expr_reparse
+		/[^{;] [^;]* ';'/ {
+			R: str = input.pull( match_length - 1 )
+			input.pull( 1 )
+			input.push( "}" )
+			input.push( R )
+			input.push( "{" )
+		}
+
+	def inline_expr_reparse
+		[_inline_expr_reparse]
+	|	[action_block]
 
 	def join
 		[join ',' expression]
@@ -269,14 +299,14 @@ namespace ragel
 	|	[ActionSpec: action_spec] :ActionSpec
 	|	['prepush' PrePushBlock: action_block] :PrePushSpec commit
 	|	['postpop' PostPopBlock: action_block] :PostPopSpec commit
-	|	['variable' inline_expr ';'] commit
-	|	['alphtype' inline_expr ';'] commit
-	|	['access' inline_expr ';'] commit
-	|	['write' inline_expr ';'] commit
-	|	['getkey' inline_expr ';'] commit
-	|	['import' inline_expr ';'] commit
-	|	['export' inline_expr ';'] commit
-	|	['include' inline_expr ';'] commit
+	|	['variable' inline_expr_reparse] commit
+	|	['alphtype' inline_expr_reparse] commit
+	|	['access' inline_expr_reparse] commit
+	|	['write' inline_expr_reparse] commit
+	|	['getkey' inline_expr_reparse] commit
+	|	['import' inline_expr_reparse] commit
+	|	['export' inline_expr_reparse] commit
+	|	['include' inline_expr_reparse] commit
 
 	def ragel_start 
 		[statement*]

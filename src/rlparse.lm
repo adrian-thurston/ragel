@@ -13,3 +13,5 @@ Stream: stream = open( FileName "r" )
 RagelTree = parse start[ Stream ]
 RagelError = error
 
+#for T: ragel::inline_expr_reparse in RagelTree
+#	print( T )

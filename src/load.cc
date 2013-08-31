@@ -63,9 +63,6 @@ struct LoadRagel
 
 	void loadActionSpec( ragel::action_spec ActionSpec )
 	{
-		std::cerr << "loading: " << ActionSpec.Name().text() <<
-				" - " << ActionSpec.ActionBlock().InlineList().text() << std::endl;
-
 		ragel::word Name = ActionSpec.Name();
 		InputLoc loc = Name.loc();
 		colm_data *name = Name.data();
