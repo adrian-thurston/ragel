@@ -594,7 +594,7 @@ void ParseData::resolveFrom( NameSet &result, NameInst *refFrom,
 		const NameRef &nameRef, int namePos )
 {
 	/* Look for the name in the owning scope of the factor with aug. */
-	NameSet partResult = resolvePart( refFrom, nameRef[namePos], false );
+	NameSet partResult = resolvePart( refFrom, nameRef[namePos].c_str(), false );
 	
 	/* If there are more parts to the name then continue on. */
 	if ( ++namePos < nameRef.length() ) {
@@ -614,7 +614,7 @@ void ParseData::resolveFrom( NameSet &result, NameInst *refFrom,
 ostream &operator<<( ostream &out, const NameRef &nameRef )
 {
 	int pos = 0;
-	if ( nameRef[pos] == 0 ) {
+	if ( nameRef[pos] == "" ) {
 		out << "::";
 		pos += 1;
 	}
@@ -683,7 +683,7 @@ NameInst *ParseData::resolveStateRef( const NameRef &nameRef, InputLoc &loc, Act
 
 	/* Do the local search if the name is not strictly a root level name
 	 * search. */
-	if ( nameRef[0] != 0 ) {
+	if ( nameRef[0] != "" ) {
 		/* If the action is referenced, resolve all of them. */
 		if ( action != 0 && action->actionRefs.length() > 0 ) {
 			/* Look for the name in all referencing scopes. */
@@ -707,7 +707,7 @@ NameInst *ParseData::resolveStateRef( const NameRef &nameRef, InputLoc &loc, Act
 	/* If not found in the local scope, look in global. */
 	if ( nameInst == 0 ) {
 		NameSet resolved;
-		int fromPos = nameRef[0] != 0 ? 0 : 1;
+		int fromPos = nameRef[0] != "" ? 0 : 1;
 		resolveFrom( resolved, rootName, nameRef, fromPos );
 
 		if ( resolved.length() > 0 ) {

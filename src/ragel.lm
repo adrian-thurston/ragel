@@ -53,37 +53,13 @@ namespace c_inline
 		token c_any / any /
 	end
 
-	def inline_block
-		[block_item*]
-	
-	def block_item
-		[expr_any]
-	|	[block_symbol]
-	|	[block_interpret]
-
-	def block_symbol
-		[','] | [';'] | ['('] | [')'] | ['*'] | ['::']
-
-	def block_interpret
-		[expr_interpret]
-	|	['fhold' whitespace? ';']
-	|	['fgoto' whitespace? '*' inline_expr ';']
-	|	['fnext' whitespace? '*' inline_expr ';']
-	|	['fcall' whitespace? '*' inline_expr ';']
-	|	['fexec' inline_expr ';']
-	|	['fgoto' state_ref srlex::';']
-	|	['fnext' state_ref srlex::';']
-	|	['fcall' state_ref srlex::';']
-	|	['fret' ';']
-	|	['fbreak' ';']
-
 	def inline_expr
-		[expr_item*]
+		[ExprItemList: expr_item*]
 
 	def expr_item
-		[expr_any]
-	|	[expr_symbol]
-	|	[expr_interpret]
+		[ExprAny: expr_any] :ExprAny
+	|	[ExprSymbol: expr_symbol] :ExprSymbol
+	|	[ExprInterpret: expr_interpret] :ExprInterpret
 
 	def expr_any
 		[whitespace]
@@ -93,28 +69,53 @@ namespace c_inline
 	|	[hex_number]
 	|	[ident]
 	|	[c_any]
-	|	['{' block_item* '}']
 
 	def expr_symbol
 		[','] | ['('] | [')'] | ['*'] | ['::']
 
 	def expr_interpret
-		['fpc']
-	|	['fc']
-	|	['fcurs']
-	|	['ftargs'] 
-	|	['fentry' '(' state_ref srlex::')']
+		['fpc'] :Fpc
+	|	['fc'] :Fc
+	|	['fcurs'] :Fcurs
+	|	['ftargs']  :Ftargs
+	|	['fentry' '(' StateRef: state_ref srlex::')'] :Fentry
 
 	def state_ref
-		[opt_name_sep state_ref_names]
+		[OptNameSep: opt_name_sep StateRefNames: state_ref_names]
 
 	def opt_name_sep
-		[srlex::'::'] | []
+		[srlex::'::'] :ColonColon
+	|	[] :Empty
 
 	# List of names separated by ::
 	def state_ref_names
-		[state_ref_names srlex::'::' srlex::word]
-	|	[srlex::word]
+		[StateRefNames: state_ref_names srlex::'::' Word: srlex::word] :Rec
+	|	[Word: srlex::word] :Base
+
+	def inline_block
+		[BlockItemList: block_item*]
+	
+	def block_item
+		[ExprAny: expr_any] :ExprAny
+	|	[BlockSymbol: block_symbol] :BlockSymbol
+	|	[BlockInterpret: block_interpret] :BlockInterpret
+	|	['{' InlineBlock: inline_block '}'] :RecBlock
+
+	def block_symbol
+		[','] | [';'] | ['('] | [')'] | ['*'] | ['::']
+
+	def block_interpret
+		[ExprInterpret: expr_interpret] :ExprInterpret
+	|	['fhold' whitespace? ';'] :Fhold
+	|	['fgoto' whitespace? '*' InlineExpr: inline_expr ';'] :FgotoExpr
+	|	['fnext' whitespace? '*' InlineExpr: inline_expr ';'] :FnextExpr
+	|	['fcall' whitespace? '*' InlineExpr: inline_expr ';'] :FcallExpr
+	|	['fexec' InlineExpr: inline_expr ';'] :Fexec
+	|	['fgoto' StateRef: state_ref srlex::';'] :FgotoSr
+	|	['fnext' StateRef: state_ref srlex::';'] :FnextSr
+	|	['fcall' StateRef: state_ref srlex::';'] :FcallSr
+	|	['fret' ';'] :Fret
+	|	['fbreak' ';'] :Fbreak
 end
 
 namespace ragel
@@ -175,7 +176,7 @@ namespace ragel
 
 	def inline_expr_reparse
 		[_inline_expr_reparse]
-	|	[action_expr]
+	|	[ActionExpr: action_expr]
 
 	def join
 		[join ',' expression]
@@ -221,10 +222,10 @@ namespace ragel
 	|	['>' 'to']
 
 	def action_expr
-		['{' InlineList: c_inline::expr_item* '}']
+		['{' InlineExpr: c_inline::inline_expr '}']
 
 	def action_block
-		['{' InlineList: c_inline::block_item* '}']
+		['{' InlineBlock: c_inline::inline_block '}']
 
 	def action_ref 
 		[word]

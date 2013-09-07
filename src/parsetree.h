@@ -147,7 +147,7 @@ struct InlineItem;
 struct InlineList;
 
 /* Reference to a named state. */
-typedef Vector<char*> NameRef;
+typedef Vector<std::string> NameRef;
 typedef Vector<NameRef*> NameRefList;
 typedef Vector<NameInst*> NameTargList;
 
@@ -736,26 +736,26 @@ struct InlineItem
 		LmInitTokStart, LmSetTokStart, Break
 	};
 
-	InlineItem( const InputLoc &loc, char *data, Type type ) : 
+	InlineItem( const InputLoc &loc, std::string data, Type type ) : 
 		loc(loc), data(data), nameRef(0), children(0), type(type) { }
 
 	InlineItem( const InputLoc &loc, NameRef *nameRef, Type type ) : 
-		loc(loc), data(0), nameRef(nameRef), children(0), type(type) { }
+		loc(loc), nameRef(nameRef), children(0), type(type) { }
 
 	InlineItem( const InputLoc &loc, LongestMatch *longestMatch, 
-		LongestMatchPart *longestMatchPart, Type type ) : loc(loc), data(0),
+		LongestMatchPart *longestMatchPart, Type type ) : loc(loc),
 		nameRef(0), children(0), longestMatch(longestMatch),
 		longestMatchPart(longestMatchPart), type(type) { } 
 
 	InlineItem( const InputLoc &loc, NameInst *nameTarg, Type type ) : 
-		loc(loc), data(0), nameRef(0), nameTarg(nameTarg), children(0),
+		loc(loc), nameRef(0), nameTarg(nameTarg), children(0),
 		type(type) { }
 
 	InlineItem( const InputLoc &loc, Type type ) : 
-		loc(loc), data(0), nameRef(0), children(0), type(type) { }
+		loc(loc), nameRef(0), children(0), type(type) { }
 	
 	InputLoc loc;
-	char *data;
+	std::string data;
 	NameRef *nameRef;
 	NameInst *nameTarg;
 	InlineList *children;

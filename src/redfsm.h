@@ -64,12 +64,12 @@ struct GenInlineItem
 	};
 
 	GenInlineItem( const InputLoc &loc, Type type ) : 
-		loc(loc), data(0), targId(0), targState(0), 
+		loc(loc), targId(0), targState(0), 
 		lmId(0), children(0), offset(0),
 		type(type) { }
 	
 	InputLoc loc;
-	char *data;
+	std::string data;
 	int targId;
 	RedStateAp *targState;
 	int lmId;

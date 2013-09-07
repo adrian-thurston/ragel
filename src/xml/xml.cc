@@ -157,7 +157,7 @@ void XMLCodeGen::writeText( InlineItem *item )
 {
 	if ( item->prev == 0 || item->prev->type != InlineItem::Text )
 		out << "<text>";
-	xmlEscapeHost( out, item->data, strlen(item->data) );
+	xmlEscapeHost( out, item->data.c_str(), item->data.size() );
 	if ( item->next == 0 || item->next->type != InlineItem::Text )
 		out << "</text>";
 }
@@ -408,9 +408,9 @@ void XMLCodeGen::writeAction( Action *action )
 	out << "</action>\n";
 }
 
-void xmlEscapeHost( std::ostream &out, char *data, long len )
+void xmlEscapeHost( std::ostream &out, const char *data, long len )
 {
-	char *end = data + len;
+	const char *end = data + len;
 	while ( data != end ) {
 		switch ( *data ) {
 		case '<': out << "&lt;"; break;

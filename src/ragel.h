@@ -101,7 +101,7 @@ std::ostream &warning( const InputLoc &loc );
 
 struct XmlParser;
 
-void xmlEscapeHost( std::ostream &out, char *data, long len );
+void xmlEscapeHost( std::ostream &out, const char *data, long len );
 
 extern CodeStyle codeStyle;
 

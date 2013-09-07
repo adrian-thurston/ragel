@@ -1329,7 +1329,7 @@ void FactorWithAug::resolveNameRefs( ParseData *pd )
 		EpsilonLink &link = epsilonLinks[ep];
 		NameInst *resolvedName = 0;
 
-		if ( link.target.length() == 1 && strcmp( link.target.data[0], "final" ) == 0 ) {
+		if ( link.target.length() == 1 && link.target.data[0] == "final" ) {
 			/* Epsilon drawn to an implicit final state. An implicit final is
 			 * only available in join operations. */
 			resolvedName = pd->localNameScope->final;

@@ -3,6 +3,7 @@
 #include "ragel.h"
 #include "inputdata.h"
 #include "parsedata.h"
+#include "parsetree.h"
 
 #include <colm/colm.h>
 #include <colm/tree.h>
@@ -61,6 +62,199 @@ struct LoadRagel
 		pd = pdEl->value;
 	}
 
+	InlineItem *loadExprAny( c_inline::expr_any ExprAny )
+	{
+		string t = ExprAny.text();
+		InputLoc loc = ExprAny.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	InlineItem *loadExprSymbol( c_inline::expr_symbol ExprSymbol )
+	{
+		string t = ExprSymbol.text();
+		InputLoc loc = ExprSymbol.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	NameRef *loadStateRefNames( c_inline::state_ref_names StateRefNames )
+	{
+		NameRef *nameRef = 0;
+		switch ( StateRefNames.prodName() ) {
+			case c_inline::state_ref_names::_Rec:
+				nameRef = loadStateRefNames( StateRefNames.StateRefNames() );
+				nameRef->append( StateRefNames.Word().text() );
+				break;
+			case c_inline::state_ref_names::_Base:
+				nameRef = new NameRef;
+				nameRef->append( StateRefNames.Word().text() );
+				break;
+		}
+		return nameRef;
+	}
+
+	NameRef *loadStateRef( c_inline::state_ref StateRef )
+	{
+		NameRef *nameRef = loadStateRefNames( StateRef.StateRefNames() );
+		if ( StateRef.OptNameSep().prodName() == c_inline::opt_name_sep::_ColonColon )
+			nameRef->prepend( "" );
+		return nameRef;
+	}
+
+	InlineItem *loadExprInterpret( c_inline::expr_interpret ExprInterpret )
+	{
+		InlineItem *inlineItem = 0;
+		InputLoc loc = ExprInterpret.loc();
+		switch ( ExprInterpret.prodName() ) {
+			case c_inline::expr_interpret::_Fpc:
+				inlineItem = new InlineItem( loc, InlineItem::PChar );
+				break;
+			case c_inline::expr_interpret::_Fc:
+				inlineItem = new InlineItem( loc, InlineItem::Char );
+				break;
+			case c_inline::expr_interpret::_Fcurs:
+				inlineItem = new InlineItem( loc, InlineItem::Curs );
+				break;
+			case c_inline::expr_interpret::_Ftargs:
+				inlineItem = new InlineItem( loc, InlineItem::Targs );
+				break;
+			case c_inline::expr_interpret::_Fentry: {
+				NameRef *nameRef = loadStateRef( ExprInterpret.StateRef() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Entry );
+				break;
+			}
+		}
+		return inlineItem;
+	}
+
+	InlineItem *loadExprItem( c_inline::expr_item ExprItem )
+	{
+		switch ( ExprItem.prodName() ) {
+			case c_inline::expr_item::_ExprAny:
+				return loadExprAny( ExprItem.ExprAny() );
+			case c_inline::expr_item::_ExprSymbol:
+				return loadExprSymbol( ExprItem.ExprSymbol() );
+			case c_inline::expr_item::_ExprInterpret:
+				return loadExprInterpret( ExprItem.ExprInterpret() );
+		}
+		return 0;
+	}
+
+
+	InlineItem *loadBlockSymbol( c_inline::block_symbol BlockSymbol )
+	{
+		string t = BlockSymbol.text();
+		InputLoc loc = BlockSymbol.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	InlineItem *loadBlockInterpret( c_inline::block_interpret BlockInterpret )
+	{
+		InlineItem *inlineItem = 0;
+		InputLoc loc = BlockInterpret.loc();
+		switch ( BlockInterpret.prodName() ) {
+			case c_inline::block_interpret::_ExprInterpret:
+				inlineItem = loadExprInterpret( BlockInterpret.ExprInterpret() );
+				break;
+			case c_inline::block_interpret::_Fhold:
+				inlineItem = new InlineItem( loc, InlineItem::Hold );
+				break;
+			case c_inline::block_interpret::_Fret:
+				inlineItem = new InlineItem( loc, InlineItem::Ret );
+				break;
+			case c_inline::block_interpret::_Fbreak:
+				inlineItem = new InlineItem( loc, InlineItem::Break );
+				break;
+
+			case c_inline::block_interpret::_FgotoExpr:
+				inlineItem = new InlineItem( loc, InlineItem::GotoExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.InlineExpr() );
+				break;
+			case c_inline::block_interpret::_FnextExpr:
+				inlineItem = new InlineItem( loc, InlineItem::NextExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.InlineExpr() );
+				break;
+			case c_inline::block_interpret::_FcallExpr:
+				inlineItem = new InlineItem( loc, InlineItem::CallExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.InlineExpr() );
+				break;
+			case c_inline::block_interpret::_Fexec:
+				inlineItem = new InlineItem( loc, InlineItem::Exec );
+				inlineItem->children = loadInlineExpr( BlockInterpret.InlineExpr() );
+				break;
+			case c_inline::block_interpret::_FgotoSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.StateRef() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Goto );
+				break;
+			}
+			case c_inline::block_interpret::_FnextSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.StateRef() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Next );
+				break;
+			}
+			case c_inline::block_interpret::_FcallSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.StateRef() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Call );
+				break;
+			}
+		}
+		return inlineItem;
+	}
+
+	InlineList *loadInlineBlock( InlineList *inlineList, c_inline::inline_block InlineBlock )
+	{
+		c_inline::_repeat_block_item BlockItemList = InlineBlock.BlockItemList();
+		while ( !BlockItemList.end() ) {
+			loadBlockItem( inlineList, BlockItemList.value() );
+			BlockItemList = BlockItemList.next();
+		}
+		return inlineList;
+	}
+
+	InlineList *loadInlineBlock( c_inline::inline_block InlineBlock )
+	{
+		InlineList *inlineList = new InlineList;
+		return loadInlineBlock( inlineList, InlineBlock );
+	}
+
+	void loadBlockItem( InlineList *inlineList, c_inline::block_item BlockItem )
+	{
+		switch ( BlockItem.prodName() ) {
+			case c_inline::block_item::_ExprAny: {
+				InlineItem *inlineItem = loadExprAny( BlockItem.ExprAny() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case c_inline::block_item::_BlockSymbol: {
+				InlineItem *inlineItem = loadBlockSymbol( BlockItem.BlockSymbol() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case c_inline::block_item::_BlockInterpret: {
+				InlineItem *inlineItem = loadBlockInterpret( BlockItem.BlockInterpret() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case c_inline::block_item::_RecBlock:
+				InputLoc loc = BlockItem.loc();
+				inlineList->append( new InlineItem( loc, "{", InlineItem::Text ) );
+				loadInlineBlock( inlineList, BlockItem.InlineBlock() );
+				inlineList->append( new InlineItem( loc, "}", InlineItem::Text ) );
+				break;
+		}
+	}
+
+	InlineList *loadInlineExpr( c_inline::inline_expr InlineExpr )
+	{
+		InlineList *inlineList = new InlineList;
+		c_inline::_repeat_expr_item ExprItemList = InlineExpr.ExprItemList();
+		while ( !ExprItemList.end() ) {
+			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
+			inlineList->append( inlineItem );
+			ExprItemList = ExprItemList.next();
+		}
+		return inlineList;
+	}
+
 	void loadActionSpec( ragel::action_spec ActionSpec )
 	{
 		ragel::word Name = ActionSpec.Name();
@@ -73,6 +267,8 @@ struct LoadRagel
 			error(loc) << "action \"" << name << "\" already defined" << endl;
 		}
 		else {
+			inlineList = loadInlineBlock( ActionSpec.ActionBlock().InlineBlock() );
+
 			/* Add the action to the list of actions. */
 			Action *newAction = new Action( loc, name->data, 
 					inlineList, pd->nextCondId++ );
