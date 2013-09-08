@@ -29,12 +29,13 @@ using std::ostringstream;
 
 string GenAction::nameOrLoc()
 {
-	if ( name != 0 )
-		return string(name);
-	else {
+	if ( name.empty() ) {
 		ostringstream ret;
 		ret << loc.line << ":" << loc.col;
 		return ret.str();
+	}
+	else {
+		return name;
 	}
 }
 

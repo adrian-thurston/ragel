@@ -401,7 +401,7 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList )
 void XMLCodeGen::writeAction( Action *action )
 {
 	out << "      <action id=\"" << action->actionId << "\"";
-	if ( action->name != 0 ) 
+	if ( !action->name.empty() ) 
 		out << " name=\"" << action->name << "\"";
 	out << " line=\"" << action->loc.line << "\" col=\"" << action->loc.col << "\">";
 	writeInlineList( action->inlineList );

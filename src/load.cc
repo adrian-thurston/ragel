@@ -262,10 +262,10 @@ struct LoadRagel
 	{
 		ragel::word Name = ActionSpec.Name();
 		InputLoc loc = Name.loc();
-		colm_data *name = Name.data();
+		string name = Name.text();
 		InlineList *inlineList = 0;
 
-		if ( pd->actionDict.find( name->data ) ) {
+		if ( pd->actionDict.find( name ) ) {
 			/* Recover by just ignoring the duplicate. */
 			error(loc) << "action \"" << name << "\" already defined" << endl;
 		}
@@ -273,7 +273,7 @@ struct LoadRagel
 			inlineList = loadInlineBlock( ActionSpec.ActionBlock().InlineBlock() );
 
 			/* Add the action to the list of actions. */
-			Action *newAction = new Action( loc, name->data, 
+			Action *newAction = new Action( loc, name, 
 					inlineList, pd->nextCondId++ );
 
 			/* Insert to list and dict. */
@@ -331,21 +331,25 @@ struct LoadRagel
 
 	Literal *loadRangeLit( ragel::range_lit RL )
 	{
+		Literal *literal = 0;
 		switch ( RL.prodName() ) {
 			case ragel::range_lit::_String: {
 				string s = RL.String().text();
 				Token tok;
 				tok.set( s.c_str(), s.size() );
-				return new Literal( tok, Literal::LitString );
+				literal = new Literal( tok, Literal::LitString );
+				break;
 			}
 
 			case ragel::range_lit::_AN: {
 				string s = RL.AN().text();
 				Token tok;
 				tok.set( s.c_str(), s.size() );
-				return new Literal( tok, Literal::Number );
+				literal = new Literal( tok, Literal::Number );
+				break;
 			}
 		}
+		return literal;
 	}
 
 	Factor *loadFactor( ragel::factor FactorTree )
@@ -353,7 +357,7 @@ struct LoadRagel
 		InputLoc loc = FactorTree.loc();
 		Factor *factor = 0;
 		switch ( FactorTree.prodName() ) {
-			case ragel::factor::_AN: {
+			case ragel::factor::_AlphabetNum: {
 				string s = FactorTree.AN().text();
 				Token tok;
 				tok.set( s.c_str(), s.size() );
@@ -362,7 +366,7 @@ struct LoadRagel
 				break;
 			}
 
-			case ragel::factor::_W: {
+			case ragel::factor::_Word: {
 				string s = FactorTree.W().text();
 				/* Find the named graph. */
 				GraphDictEl *gdNode = pd->graphDict.find( s );
@@ -384,14 +388,15 @@ struct LoadRagel
 				break;
 			}
 
-			case ragel::factor::_S: {
+			case ragel::factor::_String: {
 				string s = FactorTree.S().text();
 				Token tok;
 				tok.set( s.c_str(), s.size() );
 
 				factor = new Factor( new Literal( tok, Literal::LitString ) );
+				break;
 			}
-			case ragel::factor::_U:
+			case ragel::factor::_Union:
 				break;
 			case ragel::factor::_Range: {
 				Literal *lit1 = loadRangeLit( FactorTree.RL1() );
@@ -402,18 +407,93 @@ struct LoadRagel
 			case ragel::factor::_Regex:
 				break;
 			case ragel::factor::_Join:
+				Join *join = loadJoin( FactorTree.Join() );
+				join->loc = loc;
+				factor = new Factor( join );
 				break;
 		}
 		return factor;
 	}
 
+	FactorWithNeg *loadFactorNeg( ragel::factor_neg FactorNeg )
+	{
+		ragel::factor FactorTree = FactorNeg.Factor();
+		return new FactorWithNeg( loadFactor( FactorTree ) );
+	}
+
+	FactorWithRep *loadFactorRep( ragel::factor_rep FactorRep )
+	{
+		return new FactorWithRep( loadFactorNeg( FactorRep.FactorNeg() ) );
+	}
+
+	Action *loadActionRef( ragel::action_ref ActionRef )
+	{
+		InputLoc loc = ActionRef.loc();
+
+		switch ( ActionRef.prodName() ) {
+			case ragel::action_ref::_Word: {
+				string s = ActionRef.Word().text();
+
+				/* Set the name in the actionDict. */
+				Action *action = pd->actionDict.find( s );
+				if ( action == 0 ) {
+					/* Will recover by returning null as the action. */
+					error(loc) << "action lookup of \"" << s << "\" failed" << endl;
+				}
+				return action;
+			}
+		}
+
+		return 0;
+	}
+
+	FactorWithAug *loadFactorAug( ragel::factor_aug FactorAug )
+	{
+		InputLoc loc = FactorAug.loc();
+		FactorWithAug *factorWithAug = 0;
+		switch ( FactorAug.prodName() ) {
+			case ragel::factor_aug::_ActionRef: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug->actions.append( ParserAction( loc, at_finish, 0, action ) );
+				break;
+			}
+			case ragel::factor_aug::_Base:
+				factorWithAug = new FactorWithAug( loadFactorRep( FactorAug.FactorRep() ) );
+				break;
+		}
+		return factorWithAug;
+	}
+
+	FactorWithAug *loadFactorEp( ragel::factor_ep FactorEp )
+	{
+		return loadFactorAug( FactorEp.FactorAug() );
+	}
+
+	FactorWithAug *loadFactorLabel( ragel::factor_label FactorLabel )
+	{
+		return loadFactorEp( FactorLabel.FactorEp() );
+	}
+
+	Term *loadTerm( ragel::term TermTree )
+	{
+		Term *term = new Term( loadFactorLabel( TermTree.FactorLabel() ) );
+
+		/* Walk the list of terms. */
+		ragel::term_op_list_short TermOpList = TermTree.TermOpList();
+		while ( TermOpList.prodName() == ragel::term_op_list_short::_Terms ) {
+			/* Push. */
+			FactorWithAug *factorWithAug = loadFactorLabel( TermOpList.TermOp().FactorLabel() );
+			term = new Term( term, factorWithAug, Term::ConcatType );
+			TermOpList = TermOpList.TermOpList();
+		}
+
+		return term;
+	}
+
 	Expression *loadExpression( ragel::expression ExprTree )
 	{
-		ragel::factor FactorTree = ExprTree.Term().FactorLabel().FactorEp().
-				FactorAug().FactorRep().FactorNeg().Factor();
-
-		return new Expression( new Term( new FactorWithAug( new FactorWithRep(
-				new FactorWithNeg( loadFactor( FactorTree ) ) ) ) ) );
+		return new Expression( loadTerm( ExprTree.Term() ) );
 	}
 
 	Join *loadJoin( ragel::join JoinTree )

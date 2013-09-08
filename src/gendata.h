@@ -272,7 +272,7 @@ public:
 
 	void createMachine();
 	void initActionList( unsigned long length );
-	void newAction( int anum, const char *name, const InputLoc &loc, GenInlineList *inlineList );
+	void newAction( int anum, std::string name, const InputLoc &loc, GenInlineList *inlineList );
 	void initActionTableList( unsigned long length );
 	void initStateList( unsigned long length );
 	void setStartState( unsigned long startState );

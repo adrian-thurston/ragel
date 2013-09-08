@@ -91,7 +91,6 @@ struct GenAction
 {
 	GenAction( )
 	:
-		name(0),
 		inlineList(0), 
 		actionId(0),
 		numTransRefs(0),
@@ -103,7 +102,7 @@ struct GenAction
 
 	/* Data collected during parse. */
 	InputLoc loc;
-	const char *name;
+	std::string name;
 	GenInlineList *inlineList;
 	int actionId;
 

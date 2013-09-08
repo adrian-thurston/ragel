@@ -192,19 +192,19 @@ namespace ragel
 	|	['--' term]
 
 	def term
-		[FactorLabel: factor_label term_op_list_short]
+		[FactorLabel: factor_label TermOpList: term_op_list_short]
 
 	# This list is done manually to get shortest match.
 	def term_op_list_short
-		[]
-	|	[term_op term_op_list_short]
+		[] :Empty
+	|	[TermOp: term_op TermOpList: term_op_list_short] :Terms
 
 	def term_op
-		[factor_label]
-	|	['.' factor_label]
-	|	[':>' factor_label]
-	|	[':>>' factor_label]
-	|	['<:' factor_label]
+		[FactorLabel: factor_label]
+	|	['.' FactorLabel: factor_label]
+	|	[':>' FactorLabel: factor_label]
+	|	[':>>' FactorLabel: factor_label]
+	|	['<:' FactorLabel: factor_label]
 
 	def factor_label
 		[word ':' factor_label]
@@ -229,7 +229,7 @@ namespace ragel
 		['{' InlineBlock: c_inline::inline_block '}']
 
 	def action_ref 
-		[word]
+		[Word: word] :Word
 	|	['(' word ')']
 	|	[action_block]
 	
@@ -269,7 +269,7 @@ namespace ragel
 	|	['<>^'] | ['<>' 'lerr']
 
 	def factor_aug
-		[factor_aug aug_base action_ref]
+		[FactorAug: factor_aug AugBase: aug_base ActionRef: action_ref] :ActionRef
 	|	[factor_aug aug_base priority_aug]
 	|	[factor_aug aug_base '(' word ',' priority_aug ')']
 	|	[factor_aug aug_cond action_ref]
@@ -280,7 +280,7 @@ namespace ragel
 	|	[factor_aug aug_gbl_error action_ref]
 	|	[factor_aug aug_local_error action_ref]
 	|	[factor_aug aug_local_error '(' word ',' action_ref ')']
-	|	[FactorRep: factor_rep]
+	|	[FactorRep: factor_rep] :Base
 
 	def factor_rep 
 		[FactorNeg: factor_neg factor_rep_op*]
@@ -304,13 +304,13 @@ namespace ragel
 	|	[Factor: factor]
 
 	def factor 
-		[AN: alphabet_num] :AN
-	|	[W: word] :W
-	|	[S: string] :S
-	|	[U: _union] :U
+		[AN: alphabet_num] :AlphabetNum
+	|	[W: word] :Word
+	|	[S: string] :String
+	|	[U: _union] :Union
 	|	[RL1: range_lit '..' RL2: range_lit] :Range
 	|	[re_literal] :Regex
-	|	['(' J: join ')'] :Join
+	|	['(' Join: join ')'] :Join
 
 	def range_lit
 		[String: string] :String

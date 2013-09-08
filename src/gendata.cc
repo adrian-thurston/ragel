@@ -807,7 +807,7 @@ void CodeGenData::initActionList( unsigned long length )
 		actionList.append( allActions+a );
 }
 
-void CodeGenData::newAction( int anum, const char *name,
+void CodeGenData::newAction( int anum, std::string name,
 		const InputLoc &loc, GenInlineList *inlineList )
 {
 	allActions[anum].actionId = anum;

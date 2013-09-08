@@ -96,7 +96,7 @@ struct Action
 {
 public:
 
-	Action( const InputLoc &loc, const char *name, InlineList *inlineList, int condId )
+	Action( const InputLoc &loc, std::string name, InlineList *inlineList, int condId )
 	:
 		loc(loc),
 		name(name),
@@ -114,20 +114,20 @@ public:
 	}
 
 	/* Key for action dictionary. */
-	const char *getKey() const { return name; }
+	std::string getKey() const { return name; }
 
 	/* Data collected during parse. */
 	InputLoc loc;
-	const char *name;
+	std::string name;
 	InlineList *inlineList;
 	int actionId;
 
 	void actionName( ostream &out )
 	{
-		if ( name != 0 )
-			out << name;
-		else
+		if ( name.empty() )
 			out << loc.line << ":" << loc.col;
+		else
+			out << name;
 	}
 
 	/* Places in the input text that reference the action. */
@@ -161,7 +161,7 @@ struct CmpCondId
 
 /* A list of actions. */
 typedef DList<Action> ActionList;
-typedef AvlTree<Action, const char *, CmpStr> ActionDict;
+typedef AvlTree<Action, std::string, CmpString> ActionDict;
 
 /* Structure for reverse action mapping. */
 struct RevActionMapEl
