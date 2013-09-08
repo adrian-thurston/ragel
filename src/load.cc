@@ -329,17 +329,91 @@ struct LoadRagel
 		}
 	}
 
+	Literal *loadRangeLit( ragel::range_lit RL )
+	{
+		switch ( RL.prodName() ) {
+			case ragel::range_lit::_String: {
+				string s = RL.String().text();
+				Token tok;
+				tok.set( s.c_str(), s.size() );
+				return new Literal( tok, Literal::LitString );
+			}
+
+			case ragel::range_lit::_AN: {
+				string s = RL.AN().text();
+				Token tok;
+				tok.set( s.c_str(), s.size() );
+				return new Literal( tok, Literal::Number );
+			}
+		}
+	}
+
+	Factor *loadFactor( ragel::factor FactorTree )
+	{
+		InputLoc loc = FactorTree.loc();
+		Factor *factor = 0;
+		switch ( FactorTree.prodName() ) {
+			case ragel::factor::_AN: {
+				string s = FactorTree.AN().text();
+				Token tok;
+				tok.set( s.c_str(), s.size() );
+
+				factor = new Factor( new Literal( tok, Literal::Number ) );
+				break;
+			}
+
+			case ragel::factor::_W: {
+				string s = FactorTree.W().text();
+				/* Find the named graph. */
+				GraphDictEl *gdNode = pd->graphDict.find( s );
+				if ( gdNode == 0 ) {
+					/* Recover by returning null as the factor node. */
+					error(loc) << "graph lookup of \"" << s << "\" failed" << endl;
+					factor = 0;
+				}
+				else if ( gdNode->isInstance ) {
+					/* Recover by retuning null as the factor node. */
+					error(loc) << "references to graph instantiations not allowed "
+							"in expressions" << endl;
+					factor = 0;
+				}
+				else {
+					/* Create a factor node that is a lookup of an expression. */
+					factor = new Factor( loc, gdNode->value );
+				}
+				break;
+			}
+
+			case ragel::factor::_S: {
+				string s = FactorTree.S().text();
+				Token tok;
+				tok.set( s.c_str(), s.size() );
+
+				factor = new Factor( new Literal( tok, Literal::LitString ) );
+			}
+			case ragel::factor::_U:
+				break;
+			case ragel::factor::_Range: {
+				Literal *lit1 = loadRangeLit( FactorTree.RL1() );
+				Literal *lit2 = loadRangeLit( FactorTree.RL2() );
+				factor = new Factor( new Range( lit1, lit2 ) );
+				break;
+			}
+			case ragel::factor::_Regex:
+				break;
+			case ragel::factor::_Join:
+				break;
+		}
+		return factor;
+	}
+
 	Expression *loadExpression( ragel::expression ExprTree )
 	{
-		ragel::string S = ExprTree.Term().FactorLabel().FactorEp().
-				FactorAug().FactorRep().FactorNeg().Factor().S();
-
-		string s = S.text();
-		Token tok;
-		tok.set( s.c_str(), s.size() );
+		ragel::factor FactorTree = ExprTree.Term().FactorLabel().FactorEp().
+				FactorAug().FactorRep().FactorNeg().Factor();
 
 		return new Expression( new Term( new FactorWithAug( new FactorWithRep(
-				new FactorWithNeg( new Factor( new Literal( tok, Literal::LitString ) ) ) ) ) ) );
+				new FactorWithNeg( loadFactor( FactorTree ) ) ) ) ) );
 	}
 
 	Join *loadJoin( ragel::join JoinTree )
@@ -380,6 +454,31 @@ struct LoadRagel
 
 		/* Generic creation of machine for instantiation and assignment. */
 		tryMachineDef( loc, Instantiation.Name().text(), machineDef, true );
+
+		//if ( $1->isSet )
+		//	exportContext.remove( exportContext.length()-1 );
+
+		/* Pass a location to join_or_lm */
+		if ( machineDef->join != 0 )
+			machineDef->join->loc = loc;
+	}
+
+	void loadAssignment( ragel::assignment Assignment )
+	{
+		InputLoc loc = Assignment.loc();
+
+		/* Main machine must be an instance. */
+		bool isInstance = false;
+		string name = Assignment.Name().text();
+		if ( name == mainMachine ) {
+			warning(loc) << "main machine will be implicitly instantiated" << endl;
+			isInstance = true;
+		}
+
+		MachineDef *machineDef = new MachineDef( loadJoin( Assignment.Join() ) );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, Assignment.Name().text(), machineDef, isInstance );
 
 		//if ( $1->isSet )
 		//	exportContext.remove( exportContext.length()-1 );
@@ -436,6 +535,9 @@ struct LoadRagel
 				break;
 			case ragel::statement::_Instantiation:
 				loadInstantiation( Statement.Instantiation() );
+				break;
+			case ragel::statement::_Assignment:
+				loadAssignment( Statement.Assignment() );
 				break;
 			case ragel::statement::_Write:
 				loadWrite( Statement.Cmd(), Statement.ArgList() );

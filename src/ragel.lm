@@ -304,17 +304,17 @@ namespace ragel
 	|	[Factor: factor]
 
 	def factor 
-		[AN: alphabet_num]
-	|	[W: word]
-	|	[S: string]
-	|	[U: _union]
-	|	[RL1: range_lit '..' RL2: range_lit]
-	|	[re_literal]
-	|	['(' J: join ')']
+		[AN: alphabet_num] :AN
+	|	[W: word] :W
+	|	[S: string] :S
+	|	[U: _union] :U
+	|	[RL1: range_lit '..' RL2: range_lit] :Range
+	|	[re_literal] :Regex
+	|	['(' J: join ')'] :Join
 
 	def range_lit
-		[string]
-	|	[alphabet_num]
+		[String: string] :String
+	|	[AN: alphabet_num] :AN
 
 	def alphabet_num 
 		[uint]
@@ -338,14 +338,14 @@ namespace ragel
 		['action' Name: word ActionBlock: action_block] commit
 
 	def assignment
-		[word '=' join ';'] commit
+		[Name: word '=' Join: join ';'] commit
 
 	def instantiation
 		[Name: word ':=' Lm: lm ';'] commit
 
 	def statement
 		['machine' MachineName: word ';'] :MachineName commit
-	|	[assignment]
+	|	[Assignment: assignment] :Assignment
 	|	[Instantiation: instantiation] :Instantiation
 	|	[ActionSpec: action_spec] :ActionSpec
 	|	['prepush' PrePushBlock: action_block] :PrePushSpec commit
