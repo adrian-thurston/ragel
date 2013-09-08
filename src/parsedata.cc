@@ -876,7 +876,7 @@ bool ParseData::setAlphType( const InputLoc &loc, char *s1 )
 	return userAlphType != 0;
 }
 
-bool ParseData::setVariable( char *var, InlineList *inlineList )
+bool ParseData::setVariable( const char *var, InlineList *inlineList )
 {
 	bool set = true;
 

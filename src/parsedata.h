@@ -206,7 +206,7 @@ struct ParseData
 	bool setAlphType( const InputLoc &loc, char *s1 );
 
 	/* Override one of the variables ragel uses. */
-	bool setVariable( char *var, InlineList *inlineList );
+	bool setVariable( const char *var, InlineList *inlineList );
 
 	/* Unique actions. */
 	void removeDups( ActionTable &actionTable );

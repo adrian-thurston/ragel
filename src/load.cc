@@ -587,6 +587,15 @@ struct LoadRagel
 		id.inputItems.append( inputItem );
 	}
 
+	void loadVariable( ragel::word Var, c_inline::inline_expr InlineExpr )
+	{
+		InputLoc loc = InlineExpr.loc();
+		InlineList *inlineList = loadInlineExpr( InlineExpr );
+		bool wasSet = pd->setVariable( Var.text().c_str(), inlineList );
+		if ( !wasSet )
+			error(loc) << "bad variable name: " << Var.text() << endl;
+	}
+
 	void loadStatement( ragel::statement Statement )
 	{
 		ragel::statement::prod_name prodName = Statement.prodName();
@@ -622,6 +631,9 @@ struct LoadRagel
 			case ragel::statement::_Write:
 				loadWrite( Statement.Cmd(), Statement.ArgList() );
 				break;
+			case ragel::statement::_Variable:
+				loadVariable( Statement.Var(), Statement.Reparse().ActionExpr().InlineExpr() );
+				break;
 		}
 	}
 
@@ -641,6 +653,14 @@ struct LoadRagel
 				break;
 
 			case c_host::section::_Tok:
+				if ( id.inputItems.tail->type != InputItem::HostData ) {
+					/* Make the first input item. */
+					InputItem *inputItem = new InputItem;
+					inputItem->type = InputItem::HostData;
+					inputItem->loc = Section.loc();
+					id.inputItems.append( inputItem );
+				}
+
 				/* If no errors and we are at the bottom of the include stack (the
 				 * source file listed on the command line) then write out the data. */
 				if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 ) {

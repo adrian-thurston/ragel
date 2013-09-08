@@ -350,7 +350,7 @@ namespace ragel
 	|	[ActionSpec: action_spec] :ActionSpec
 	|	['prepush' PrePushBlock: action_block] :PrePushSpec commit
 	|	['postpop' PostPopBlock: action_block] :PostPopSpec commit
-	|	['variable' inline_expr_reparse] commit
+	|	['variable' Var: word Reparse: inline_expr_reparse] :Variable commit
 	|	['alphtype' inline_expr_reparse] commit
 	|	['access' inline_expr_reparse] commit
 	|	['write' Cmd: word ArgList: word* ';'] :Write commit
