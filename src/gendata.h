@@ -215,7 +215,7 @@ public:
 
 	/* This can also be overridden to modify the processing of write
 	 * statements. */
-	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
+	virtual void writeStatement( InputLoc &loc, int nargs, std::string *args );
 
 	/********************/
 
@@ -318,7 +318,7 @@ public:
 
 	ostream &source_warning( const InputLoc &loc );
 	ostream &source_error( const InputLoc &loc );
-	void write_option_error( InputLoc &loc, char *arg );
+	void write_option_error( InputLoc &loc, std::string arg );
 };
 
 #endif

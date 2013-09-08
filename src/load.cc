@@ -389,18 +389,23 @@ struct LoadRagel
 			machineDef->join->loc = loc;
 	}
 
-	void loadWrite()
+	void loadWrite( ragel::word Cmd, ragel::_repeat_word WordList )
 	{
 		InputItem *inputItem = new InputItem;
 		inputItem->type = InputItem::Write;
-//		inputItem->loc.fileName = fileName;
-//		inputItem->loc.line = line;
-//		inputItem->loc.col = column;
-		inputItem->name = "foo";//machineName;
+		inputItem->loc = Cmd.loc();
+		inputItem->name = pd->sectionName;
 		inputItem->pd = pd;
-		id.inputItems.append( inputItem );
 
-		id.inputItems.tail->writeArgs.append( strdup("data") );
+		inputItem->writeArgs.append( Cmd.text() );
+
+		while ( !WordList.end() ) {
+			inputItem->writeArgs.append( WordList.value().text() );
+			std::cerr << WordList.value().text() << std::endl;
+			WordList = WordList.next();
+		}
+
+		id.inputItems.append( inputItem );
 	}
 
 	void loadStatement( ragel::statement Statement )
@@ -433,7 +438,8 @@ struct LoadRagel
 				loadInstantiation( Statement.Instantiation() );
 				break;
 			case ragel::statement::_Write:
-				loadWrite();
+				loadWrite( Statement.Cmd(), Statement.ArgList() );
+				break;
 		}
 	}
 

@@ -353,7 +353,7 @@ namespace ragel
 	|	['variable' inline_expr_reparse] commit
 	|	['alphtype' inline_expr_reparse] commit
 	|	['access' inline_expr_reparse] commit
-	|	['write' inline_expr_reparse] :Write commit
+	|	['write' Cmd: word ArgList: word* ';'] :Write commit
 	|	['getkey' inline_expr_reparse] commit
 	|	['import' inline_expr_reparse] commit
 	|	['export' inline_expr_reparse] commit

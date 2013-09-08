@@ -42,7 +42,7 @@ struct InputItem
 	std::ostringstream data;
 	std::string name;
 	ParseData *pd;
-	Vector<char *> writeArgs;
+	Vector<std::string> writeArgs;
 
 	InputLoc loc;
 

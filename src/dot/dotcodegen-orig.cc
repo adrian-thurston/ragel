@@ -36,7 +36,7 @@ using std::cerr;
 using std::endl;
 
 /* Override this so that write statement processing is ignored */
-void GraphvizDotGenOrig::writeStatement( InputLoc &, int, char ** )
+void GraphvizDotGenOrig::writeStatement( InputLoc &, int, std::string * )
 {
 }
 
