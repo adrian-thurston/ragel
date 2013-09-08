@@ -416,7 +416,7 @@ bool NameInst::anyRefsRec()
 
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
-ParseData::ParseData( const char *fileName, const char *sectionName, 
+ParseData::ParseData( std::string fileName, string sectionName, 
 		const InputLoc &sectionLoc )
 :	
 	sectionGraph(0),
@@ -474,12 +474,12 @@ ParseData::~ParseData()
 
 /* Make a name id in the current name instantiation scope if it is not
  * already there. */
-NameInst *ParseData::addNameInst( const InputLoc &loc, const char *data, bool isLabel )
+NameInst *ParseData::addNameInst( const InputLoc &loc, std::string data, bool isLabel )
 {
 	/* Create the name instantitaion object and insert it. */
 	NameInst *newNameInst = new NameInst( loc, curNameInst, data, nextNameId++, isLabel );
 	curNameInst->childVect.append( newNameInst );
-	if ( data != 0 )
+	if ( !data.empty() )
 		curNameInst->children.insertMulti( data, newNameInst );
 	return newNameInst;
 }
@@ -644,10 +644,10 @@ ostream &operator<<( ostream &out, const NameInst &nameInst )
 		
 	/* Write the parents out, skip the root. */
 	for ( int p = 1; p < numParents; p++ )
-		out << "::" << ( parents[p]->name != 0 ? parents[p]->name : "<ANON>" );
+		out << "::" << ( !parents[p]->name.empty() ? parents[p]->name : "<ANON>" );
 
 	/* Write the name and cleanup. */
-	out << "::" << ( nameInst.name != 0 ? nameInst.name : "<ANON>" );
+	out << "::" << ( !nameInst.name.empty() ? nameInst.name : "<ANON>" );
 	delete[] parents;
 	return out;
 }
@@ -796,8 +796,8 @@ void ParseData::fillNameIndex( NameInst *from )
 void ParseData::makeRootNames()
 {
 	/* Create the root name. */
-	rootName = new NameInst( InputLoc(), 0, 0, nextNameId++, false );
-	exportsRootName = new NameInst( InputLoc(), 0, 0, nextNameId++, false );
+	rootName = new NameInst( InputLoc(), 0, string(), nextNameId++, false );
+	exportsRootName = new NameInst( InputLoc(), 0, string(), nextNameId++, false );
 }
 
 /* Build the name tree and supporting data structures. */
@@ -925,7 +925,7 @@ void ParseData::printNameInst( NameInst *nameInst, int level )
 {
 	for ( int i = 0; i < level; i++ )
 		cerr << "  ";
-	cerr << (nameInst->name != 0 ? nameInst->name : "<ANON>") << 
+	cerr << (!nameInst->name.empty() ? nameInst->name : "<ANON>") << 
 			"  id: " << nameInst->id << 
 			"  refs: " << nameInst->numRefs <<
 			"  uses: " << nameInst->numUses << endl;
@@ -1129,8 +1129,8 @@ void ParseData::printNameTree()
 	/* Show that the name index is correct. */
 	for ( int ni = 0; ni < nextNameId; ni++ ) {
 		cerr << ni << ": ";
-		const char *name = nameIndex[ni]->name;
-		cerr << ( name != 0 ? name : "<ANON>" ) << endl;
+		std::string name = nameIndex[ni]->name;
+		cerr << ( !name.empty() ? name : "<ANON>" ) << endl;
 	}
 }
 
@@ -1185,7 +1185,7 @@ FsmAp *ParseData::makeAll()
 	/* Make all the instantiations, we know that main exists in this list. */
 	initNameWalk();
 	for ( GraphList::Iter glel = instanceList; glel.lte();  glel++ ) {
-		if ( strcmp( glel->key, mainMachine ) == 0 ) {
+		if ( glel->key == mainMachine ) {
 			/* Main graph is always instantiated. */
 			mainGraph = makeInstance( glel );
 		}

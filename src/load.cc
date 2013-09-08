@@ -45,11 +45,14 @@ struct LoadRagel
 	int includeDepth;
 	int machineNameError;
 
+	/* Should this go in the parse data? Probably. */
+	Vector<bool> exportContext;
+
 	void loadMachineName( ragel::word MachineName )
 	{
 		InputLoc sectionLoc;
-		char *fileName = 0;
-		const char *machine = MachineName.data()->data;
+		string fileName = "input.rl";
+		string machine = MachineName.text();
 
 		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
@@ -305,6 +308,101 @@ struct LoadRagel
 		pd->postPopExpr = inlineList;
 	}
 
+	void tryMachineDef( InputLoc &loc, std::string name, 
+			MachineDef *machineDef, bool isInstance )
+	{
+		GraphDictEl *newEl = pd->graphDict.insert( name );
+		if ( newEl != 0 ) {
+			/* New element in the dict, all good. */
+			newEl->value = new VarDef( name, machineDef );
+			newEl->isInstance = isInstance;
+			newEl->loc = loc;
+			newEl->value->isExport = exportContext[exportContext.length()-1];
+
+			/* It it is an instance, put on the instance list. */
+			if ( isInstance )
+				pd->instanceList.append( newEl );
+		}
+		else {
+			// Recover by ignoring the duplicate.
+			error(loc) << "fsm \"" << name << "\" previously defined" << endl;
+		}
+	}
+
+	Expression *loadExpression( ragel::expression ExprTree )
+	{
+		ragel::string S = ExprTree.Term().FactorLabel().FactorEp().
+				FactorAug().FactorRep().FactorNeg().Factor().S();
+
+		string s = S.text();
+		Token tok;
+		tok.set( s.c_str(), s.size() );
+
+		return new Expression( new Term( new FactorWithAug( new FactorWithRep(
+				new FactorWithNeg( new Factor( new Literal( tok, Literal::LitString ) ) ) ) ) ) );
+	}
+
+	Join *loadJoin( ragel::join JoinTree )
+	{
+		Join *join = 0;
+		switch ( JoinTree.prodName() ) {
+			case ragel::join::_Rec: {
+				join = loadJoin( JoinTree.Join() );
+				Expression *expr = loadExpression( JoinTree.Expr() );
+				join->exprList.append( expr );
+				break;
+			}
+			case ragel::join::_Base: {
+				Expression *expr = loadExpression( JoinTree.Expr() );
+				join = new Join( expr );
+				break;
+			}
+		}
+		return join;
+	}
+
+	MachineDef *loadLm( ragel::lm Lm )
+	{
+		switch ( Lm.prodName() ) {
+			case ragel::lm::_Join:
+				return new MachineDef( loadJoin( Lm.Join() ) );
+			case ragel::lm::_Lm:
+				break;
+		}
+		return 0;
+	}
+
+	void loadInstantiation( ragel::instantiation Instantiation )
+	{
+		InputLoc loc = Instantiation.loc();
+
+		MachineDef *machineDef = loadLm( Instantiation.Lm() );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, Instantiation.Name().text(), machineDef, true );
+
+		//if ( $1->isSet )
+		//	exportContext.remove( exportContext.length()-1 );
+
+		/* Pass a location to join_or_lm */
+		if ( machineDef->join != 0 )
+			machineDef->join->loc = loc;
+	}
+
+	void loadWrite()
+	{
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::Write;
+//		inputItem->loc.fileName = fileName;
+//		inputItem->loc.line = line;
+//		inputItem->loc.col = column;
+		inputItem->name = "foo";//machineName;
+		inputItem->pd = pd;
+		id.inputItems.append( inputItem );
+
+		id.inputItems.tail->writeArgs.append( strdup("data") );
+	}
+
 	void loadStatement( ragel::statement Statement )
 	{
 		ragel::statement::prod_name prodName = Statement.prodName();
@@ -328,10 +426,14 @@ struct LoadRagel
 			case ragel::statement::_MachineName:
 				loadMachineName( Statement.MachineName() );
 				break;
-			case ragel::statement::_ActionSpec: {
+			case ragel::statement::_ActionSpec:
 				loadActionSpec( Statement.ActionSpec() );
 				break;
-			}
+			case ragel::statement::_Instantiation:
+				loadInstantiation( Statement.Instantiation() );
+				break;
+			case ragel::statement::_Write:
+				loadWrite();
 		}
 	}
 
@@ -365,6 +467,7 @@ struct LoadRagel
 	void load( start Start )
 	{
 		InputLoc loc;
+		exportContext.append( false );
 
 		c_host::_repeat_section SectionList = Start.SectionList();
 		while ( !SectionList.end() ) {

@@ -67,7 +67,7 @@ void genLineDirective( ostream &out )
 	lineDirective( out, filter->fileName, filter->line + 1 );
 }
 
-GenBase::GenBase( const char *fsmName, ParseData *pd, FsmAp *fsm )
+GenBase::GenBase( std::string fsmName, ParseData *pd, FsmAp *fsm )
 :
 	fsmName(fsmName),
 	pd(pd),
@@ -520,7 +520,7 @@ bool CodeGenData::makeNameInst( std::string &res, NameInst *nameInst )
 	if ( nameInst->parent != 0 )
 		written = makeNameInst( res, nameInst->parent );
 	
-	if ( nameInst->name != 0 ) {
+	if ( !nameInst->name.empty() ) {
 		if ( written )
 			res += '_';
 		res += nameInst->name;
@@ -1464,7 +1464,6 @@ ostream &CodeGenData::source_warning( const InputLoc &loc )
 ostream &CodeGenData::source_error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
-	assert( sourceFileName != 0 );
 	std::cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
 	return std::cerr;
 }

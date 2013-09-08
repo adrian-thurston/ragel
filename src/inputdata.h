@@ -49,8 +49,8 @@ struct InputItem
 	InputItem *prev, *next;
 };
 
-typedef AvlMap<const char*, ParseData*, CmpStr> ParseDataDict;
-typedef AvlMapEl<const char*, ParseData*> ParseDataDictEl;
+typedef AvlMap<std::string, ParseData*, CmpString> ParseDataDict;
+typedef AvlMapEl<std::string, ParseData*> ParseDataDictEl;
 typedef DList<ParseData> ParseDataList;
 
 typedef DList<InputItem> InputItemList;

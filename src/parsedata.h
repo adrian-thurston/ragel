@@ -35,6 +35,7 @@
 #include "common.h"
 #include "parsetree.h"
 
+
 /* Forwards. */
 using std::ostream;
 
@@ -65,14 +66,14 @@ struct GraphDictEl
 	public AvlTreeEl<GraphDictEl>,
 	public DListEl<GraphDictEl>
 {
-	GraphDictEl( const char *k ) 
+	GraphDictEl( std::string k ) 
 		: key(k), value(0), isInstance(false) { }
-	GraphDictEl( const char *k, VarDef *value ) 
+	GraphDictEl( std::string k, VarDef *value ) 
 		: key(k), value(value), isInstance(false) { }
 
-	const char *getKey() { return key; }
+	std::string getKey() { return key; }
 
-	const char *key;
+	std::string key;
 	VarDef *value;
 	bool isInstance;
 
@@ -80,27 +81,27 @@ struct GraphDictEl
 	InputLoc loc;
 };
 
-typedef AvlTree<GraphDictEl, const char*, CmpStr> GraphDict;
+typedef AvlTree<GraphDictEl, std::string, CmpString> GraphDict;
 typedef DList<GraphDictEl> GraphList;
 
 /* Priority name dictionary. */
-typedef AvlMapEl<char*, int> PriorDictEl;
-typedef AvlMap<char*, int, CmpStr> PriorDict;
+typedef AvlMapEl<std::string, int> PriorDictEl;
+typedef AvlMap<std::string, int, CmpString> PriorDict;
 
 /* Local error name dictionary. */
-typedef AvlMapEl<const char*, int> LocalErrDictEl;
-typedef AvlMap<const char*, int, CmpStr> LocalErrDict;
+typedef AvlMapEl<std::string, int> LocalErrDictEl;
+typedef AvlMap<std::string, int, CmpString> LocalErrDict;
 
 /* Tree of instantiated names. */
-typedef BstMapEl<const char*, NameInst*> NameMapEl;
-typedef BstMap<const char*, NameInst*, CmpStr> NameMap;
+typedef BstMapEl<std::string, NameInst*> NameMapEl;
+typedef BstMap<std::string, NameInst*, CmpString> NameMap;
 typedef Vector<NameInst*> NameVect;
 typedef BstSet<NameInst*> NameSet;
 
 /* Node in the tree of instantiated names. */
 struct NameInst
 {
-	NameInst( const InputLoc &loc, NameInst *parent, const char *name, int id, bool isLabel ) : 
+	NameInst( const InputLoc &loc, NameInst *parent, std::string name, int id, bool isLabel ) : 
 		loc(loc), parent(parent), name(name), id(id), isLabel(isLabel),
 		isLongestMatch(false), numRefs(0), numUses(0), start(0), final(0) {}
 
@@ -110,7 +111,7 @@ struct NameInst
 	 * fully qulified names. */
 	NameInst *parent;
 
-	const char *name;
+	std::string name;
 	int id;
 	bool isLabel;
 	bool isLongestMatch;
@@ -168,7 +169,7 @@ struct ParseData
 {
 	/* Create a new parse data object. This is done at the beginning of every
 	 * fsm specification. */
-	ParseData( const char *fileName, const char *sectionName, const InputLoc &sectionLoc );
+	ParseData( std::string fileName, std::string sectionName, const InputLoc &sectionLoc );
 	~ParseData();
 
 	/*
@@ -181,7 +182,7 @@ struct ParseData
 
 	/* Make a name id in the current name instantiation scope if it is not
 	 * already there. */
-	NameInst *addNameInst( const InputLoc &loc, const char *data, bool isLabel );
+	NameInst *addNameInst( const InputLoc &loc, std::string data, bool isLabel );
 	void makeRootNames();
 	void makeNameTree( GraphDictEl *gdNode );
 	void makeExportsNameTree();
@@ -297,8 +298,8 @@ struct ParseData
 	InputLoc rangeLowLoc, rangeHighLoc;
 
 	/* The name of the file the fsm is from, and the spec name. */
-	const char *fileName;
-	const char *sectionName;
+	std::string fileName;
+	std::string sectionName;
 	InputLoc sectionLoc;
 
 	/* Counting the action and priority ordering. */

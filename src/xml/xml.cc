@@ -32,7 +32,7 @@
 using std::cerr;
 using std::endl;
 
-XMLCodeGen::XMLCodeGen( const char *fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
+XMLCodeGen::XMLCodeGen( std::string fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
 :
 	GenBase(fsmName, pd, fsm),
 	out(out)
@@ -487,7 +487,7 @@ bool XMLCodeGen::writeNameInst( NameInst *nameInst )
 	if ( nameInst->parent != 0 )
 		written = writeNameInst( nameInst->parent );
 	
-	if ( nameInst->name != 0 ) {
+	if ( !nameInst->name.empty() ) {
 		if ( written )
 			out << '_';
 		out << nameInst->name;

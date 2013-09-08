@@ -223,7 +223,7 @@ struct PriorityAug
  */
 struct VarDef
 {
-	VarDef( const char *name, MachineDef *machineDef )
+	VarDef( std::string name, MachineDef *machineDef )
 		: name(name), machineDef(machineDef), isExport(false) { }
 	
 	/* Parse tree traversal. */
@@ -231,7 +231,7 @@ struct VarDef
 	void makeNameTree( const InputLoc &loc, ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
-	const char *name;
+	std::string name;
 	MachineDef *machineDef;
 	bool isExport;
 };
@@ -295,7 +295,7 @@ struct LongestMatch
 {
 	/* Construct with a list of joins */
 	LongestMatch( const InputLoc &loc, LmPartList *longestMatchList ) : 
-		loc(loc), longestMatchList(longestMatchList), name(0), 
+		loc(loc), longestMatchList(longestMatchList),
 		lmSwitchHandlesError(false) { }
 
 	/* Tree traversal. */
@@ -312,7 +312,7 @@ struct LongestMatch
 
 	InputLoc loc;
 	LmPartList *longestMatchList;
-	const char *name;
+	std::string name;
 
 	Action *lmActSelect;
 	bool lmSwitchHandlesError;

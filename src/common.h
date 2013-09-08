@@ -395,10 +395,10 @@ const char *fileNameFromStem( const char *stemFile, const char *suffix );
 
 struct Export
 {
-	Export( const char *name, Key key )
+	Export( std::string name, Key key )
 		: name(name), key(key) {}
 
-	const char *name;
+	std::string name;
 	Key key;
 
 	Export *prev, *next;

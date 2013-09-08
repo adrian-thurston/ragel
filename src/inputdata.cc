@@ -219,26 +219,21 @@ void InputData::prepareSingleMachine()
 
 void InputData::prepareAllMachines()
 {
-#ifdef KELBT_PARSER
-	/* No machine spec or machine name given. Generate everything. */
-	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-		ParseData *pd = parser->value->pd;
+	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
+		ParseData *pd = pdel->value;
 		if ( pd->instanceList.length() > 0 )
 			pd->prepareMachineGen( 0 );
 	}
-#endif
 }
 
 
 void InputData::generateReduced()
 {
-#ifdef KELBT_PARSER
-	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-		ParseData *pd = parser->value->pd;
+	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
+		ParseData *pd = pdel->value;
 		if ( pd->instanceList.length() > 0 )
 			pd->generateReduced( *this );
 	}
-#endif
 }
 
 /* Send eof to all parsers. */

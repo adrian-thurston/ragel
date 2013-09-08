@@ -752,7 +752,6 @@ ostream &CodeGen::source_warning( const InputLoc &loc )
 ostream &CodeGen::source_error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
-	assert( sourceFileName != 0 );
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
 	return cerr;
 }

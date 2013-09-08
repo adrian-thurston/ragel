@@ -174,7 +174,7 @@ bool GraphvizDotGen::makeNameInst( std::string &res, NameInst *nameInst )
 	if ( nameInst->parent != 0 )
 		written = makeNameInst( res, nameInst->parent );
 	
-	if ( nameInst->name != 0 ) {
+	if ( !nameInst->name.empty() ) {
 		if ( written )
 			res += '_';
 		res += nameInst->name;

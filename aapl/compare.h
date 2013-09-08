@@ -23,6 +23,7 @@
 #define _AAPL_COMPARE_H
 
 #include <string.h>
+#include <string>
 #include "table.h"
 
 #ifdef AAPL_NAMESPACE
@@ -62,6 +63,13 @@ struct CmpStr
 	static inline long compare(const char *k1, const char *k2)
 		{ return strcmp(k1, k2); }
 };
+
+struct CmpString
+{
+	static inline long compare(const std::string &k1, const std::string &k2)
+		{ return k1.compare( k2 ); }
+};
+
 
 /**
  * \brief Compare a type for which < and > are implemented.

@@ -179,11 +179,11 @@ namespace ragel
 	|	[ActionExpr: action_expr]
 
 	def join
-		[join ',' expression]
-	|	[expression]
+		[Join: join ',' Expr: expression] :Rec
+	|	[Expr: expression] :Base
 
 	def expression
-		[term expression_op*]
+		[Term: term expression_op*]
 
 	def expression_op
 		['|' term]
@@ -191,7 +191,8 @@ namespace ragel
 	|	['-' term]
 	|	['--' term]
 
-	def term [factor_label term_op_list_short]
+	def term
+		[FactorLabel: factor_label term_op_list_short]
 
 	# This list is done manually to get shortest match.
 	def term_op_list_short
@@ -207,10 +208,10 @@ namespace ragel
 
 	def factor_label
 		[word ':' factor_label]
-	|	[factor_ep]
+	|	[FactorEp: factor_ep]
 
 	def factor_ep
-		[factor_aug]
+		[FactorAug: factor_aug]
 	|	[factor_aug '->' word]
 
 	def aug_base
@@ -279,10 +280,10 @@ namespace ragel
 	|	[factor_aug aug_gbl_error action_ref]
 	|	[factor_aug aug_local_error action_ref]
 	|	[factor_aug aug_local_error '(' word ',' action_ref ')']
-	|	[factor_rep]
+	|	[FactorRep: factor_rep]
 
 	def factor_rep 
-		[factor_neg factor_rep_op*]
+		[FactorNeg: factor_neg factor_rep_op*]
 
 	def factor_rep_op
 		['*']
@@ -300,7 +301,7 @@ namespace ragel
 	def factor_neg 
 		['!' factor_neg]
 	|	['^' factor_neg]
-	|	[factor]
+	|	[Factor: factor]
 
 	def factor 
 		[AN: alphabet_num]
@@ -330,8 +331,8 @@ namespace ragel
 	|	[action_spec]
 
 	def lm
-		[join]
-	|	['|*' lm_stmt+ '*|']
+		[Join: join] :Join
+	|	['|*' LmStmtList: lm_stmt+ '*|'] :Lm
 
 	def action_spec
 		['action' Name: word ActionBlock: action_block] commit
@@ -340,19 +341,19 @@ namespace ragel
 		[word '=' join ';'] commit
 
 	def instantiation
-		[word ':=' lm ';'] commit
+		[Name: word ':=' Lm: lm ';'] commit
 
 	def statement
 		['machine' MachineName: word ';'] :MachineName commit
 	|	[assignment]
-	|	[instantiation]
+	|	[Instantiation: instantiation] :Instantiation
 	|	[ActionSpec: action_spec] :ActionSpec
 	|	['prepush' PrePushBlock: action_block] :PrePushSpec commit
 	|	['postpop' PostPopBlock: action_block] :PostPopSpec commit
 	|	['variable' inline_expr_reparse] commit
 	|	['alphtype' inline_expr_reparse] commit
 	|	['access' inline_expr_reparse] commit
-	|	['write' inline_expr_reparse] commit
+	|	['write' inline_expr_reparse] :Write commit
 	|	['getkey' inline_expr_reparse] commit
 	|	['import' inline_expr_reparse] commit
 	|	['export' inline_expr_reparse] commit

@@ -240,7 +240,7 @@ void LongestMatch::makeActions( ParseData *pd )
 void LongestMatch::findName( ParseData *pd )
 {
 	NameInst *nameInst = pd->curNameInst;
-	while ( nameInst->name == 0 ) {
+	while ( nameInst->name.empty() ) {
 		nameInst = nameInst->parent;
 		/* Since every machine must must have a name, we should always find a
 		 * name for the longest match. */
