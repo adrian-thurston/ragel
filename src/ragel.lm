@@ -222,8 +222,8 @@ namespace ragel
 
 	def action_ref 
 		[Word: word] :Word
-	|	['(' word ')']
-	|	[action_block]
+	|	['(' Word: word ')'] :ParenWord
+	|	[ActionBlock: action_block] :Block
 	
 	def priority_aug
 		[uint]

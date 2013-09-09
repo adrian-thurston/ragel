@@ -459,7 +459,8 @@ struct LoadRagel
 		InputLoc loc = ActionRef.loc();
 
 		switch ( ActionRef.prodName() ) {
-			case ragel::action_ref::_Word: {
+			case ragel::action_ref::_Word:
+			case ragel::action_ref::_ParenWord: {
 				string s = ActionRef.Word().text();
 
 				/* Set the name in the actionDict. */
@@ -470,6 +471,13 @@ struct LoadRagel
 				}
 				return action;
 			}
+			case ragel::action_ref::_Block:
+				InlineList *inlineList = loadInlineBlock( ActionRef.ActionBlock().InlineBlock() );
+
+				/* Create the action, add it to the list and pass up. */
+				Action *action = new Action( loc, std::string(), inlineList, pd->nextCondId++ );
+				pd->actionList.append( action );
+				return action;
 		}
 
 		return 0;
