@@ -7,6 +7,7 @@
 
 #include <colm/colm.h>
 #include <colm/tree.h>
+#include <errno.h>
 
 using std::endl;
 
@@ -447,6 +448,56 @@ struct LoadRagel
 		return 0;
 	}
 
+	AugType loadAugBase( ragel::aug_base AugBase )
+	{
+		AugType augType = at_finish;
+		switch ( AugBase.prodName() ) {
+			case ragel::aug_base::_Finish:
+				augType = at_finish;
+				break;
+			case ragel::aug_base::_Enter:
+				augType = at_start;
+				break;
+			case ragel::aug_base::_Leave:
+				augType = at_leave;
+				break;
+			case ragel::aug_base::_All:
+				augType = at_all;
+				break;
+		}
+		return augType;
+	}
+
+	int loadPriorAug( ragel::priority_aug PriorAug )
+	{
+		InputLoc loc = PriorAug.loc();
+		string data = PriorAug.text();
+		int priorityNum = 0;
+
+		/* Convert the priority number to a long. Check for overflow. */
+		errno = 0;
+
+		//std::cerr << "PRIOR AUG: " << $1->token.data << std::endl;
+		long aug = strtol( data.c_str(), 0, 10 );
+		if ( errno == ERANGE && aug == LONG_MAX ) {
+			/* Priority number too large. Recover by setting the priority to 0. */
+			error(loc) << "priority number " << data << 
+					" overflows" << endl;
+			priorityNum = 0;
+		}
+		else if ( errno == ERANGE && aug == LONG_MIN ) {
+			/* Priority number too large in the neg. Recover by using 0. */
+			error(loc) << "priority number " << data << 
+					" underflows" << endl;
+			priorityNum = 0;
+		}
+		else {
+			/* No overflow or underflow. */
+			priorityNum = aug;
+		}
+		return priorityNum;
+	}
+
 	FactorWithAug *loadFactorAug( ragel::factor_aug FactorAug )
 	{
 		InputLoc loc = FactorAug.loc();
@@ -454,8 +505,16 @@ struct LoadRagel
 		switch ( FactorAug.prodName() ) {
 			case ragel::factor_aug::_ActionRef: {
 				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugBase( FactorAug.AugBase() );
 				Action *action = loadActionRef( FactorAug.ActionRef() );
-				factorWithAug->actions.append( ParserAction( loc, at_finish, 0, action ) );
+				factorWithAug->actions.append( ParserAction( loc, augType, 0, action ) );
+				break;
+			}
+			case ragel::factor_aug::_PriorEmbed: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugBase( FactorAug.AugBase() );
+				int priorityNum = loadPriorAug( FactorAug.PriorityAug() );
+				factorWithAug->priorityAugs.append( PriorityAug( augType, pd->curDefPriorKey, priorityNum ) );
 				break;
 			}
 			case ragel::factor_aug::_Base:

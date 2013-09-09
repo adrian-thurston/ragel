@@ -214,14 +214,6 @@ namespace ragel
 		[FactorAug: factor_aug]
 	|	[factor_aug '->' word]
 
-	def aug_base
-		['@'] |	['>'] |	['%'] | ['$']
-
-	def aug_op
-		['@'] |	['>'] |	['%'] | ['$']
-	|	['>' 'from']
-	|	['>' 'to']
-
 	def action_expr
 		['{' InlineExpr: c_inline::inline_expr '}']
 
@@ -237,6 +229,9 @@ namespace ragel
 		[uint]
 	|	['+' uint]
 	|	['-' uint]
+
+	def aug_base
+		['@'] :Finish | ['>'] :Enter | ['%'] :Leave | ['$'] :All
 
 	def aug_cond
 		['>?'] | ['$?'] | ['%?']
@@ -270,7 +265,7 @@ namespace ragel
 
 	def factor_aug
 		[FactorAug: factor_aug AugBase: aug_base ActionRef: action_ref] :ActionRef
-	|	[factor_aug aug_base priority_aug]
+	|	[FactorAug: factor_aug AugBase: aug_base PriorityAug: priority_aug] :PriorEmbed
 	|	[factor_aug aug_base '(' word ',' priority_aug ')']
 	|	[factor_aug aug_cond action_ref]
 	|	[factor_aug aug_cond '!' action_ref]
