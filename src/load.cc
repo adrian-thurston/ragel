@@ -485,8 +485,6 @@ struct LoadRagel
 				factor = new Factor( new Range( lit1, lit2 ) );
 				break;
 			}
-			case ragel::factor::_Regex:
-				break;
 			case ragel::factor::_Join:
 				Join *join = loadJoin( FactorTree.Join() );
 				join->loc = loc;
@@ -805,7 +803,7 @@ struct LoadRagel
 		id.inputItems.append( inputItem );
 	}
 
-	void loadVariable( ragel::word Var, c_inline::inline_expr InlineExpr )
+	void loadVariable( ragel::variable_name Var, c_inline::inline_expr InlineExpr )
 	{
 		InputLoc loc = InlineExpr.loc();
 		InlineList *inlineList = loadInlineExpr( InlineExpr );

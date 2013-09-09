@@ -47,7 +47,7 @@ void BinaryLooped::calcIndexSize()
 		transOffsets.size() +
 		transLengths.size();
 
-	std::cerr << "sizes: " << sizeWithInds << " " << sizeWithoutInds << std::endl;
+	//std::cerr << "sizes: " << sizeWithInds << " " << sizeWithoutInds << std::endl;
 
 	///* If using indicies reduces the size, use them. */
 	//useIndicies = sizeWithInds < sizeWithoutInds;

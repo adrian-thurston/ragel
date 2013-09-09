@@ -152,12 +152,9 @@ namespace ragel
 			"'" ( [^'\\] | '\\' any )* "'"
 		/
 
-		token re_literal /
-			'/' ( [^/\\] | '\\' any )* '/'
-		/
-
-		token LEX_SQOPEN_POS /'['/ ni
-		token LEX_SQOPEN_NEG /'[^'/ ni
+		token lex_regex_open /'/'/ ni
+		token lex_sqopen_pos /'['/ ni
+		token lex_sqopen_neg /'[^'/ ni
 
 		token word /[a-zA-Z_][a-zA-Z0-9_]*/
 		token uint / number /
@@ -165,9 +162,18 @@ namespace ragel
 	end 
 
 	lex
-		token RE_DASH / '-' /
-		token RE_CHAR / ^( '\\' | '-' | ']' ) | '\\' . any /
-		token RE_SQCLOSE / ']' /
+		token re_dot / '.' /
+		token re_star / '*' /
+		token re_char / ^( '\\' | '.' | '*' | '[' | '/' ) | '\\' . any /
+		token re_close / '/' /
+		token re_sqopen_pos /'['/
+		token re_sqopen_neg /'[^'/
+	end
+
+	lex
+		token re_or_dash / '-' /
+		token re_or_char / ^( '\\' | '-' | ']' ) | '\\' . any /
+		token re_or_sqclose / ']' /
 	end
 
 	# Not cannot start with '{', terminated by ';', rewritten into { inline_expr }
@@ -179,6 +185,8 @@ namespace ragel
 			input.push( R )
 			input.push( "{" )
 		}
+
+	token variable_name /ident/
 
 	def inline_expr_reparse
 		[_inline_expr_reparse]
@@ -308,19 +316,32 @@ namespace ragel
 		[AN: alphabet_num] :AlphabetNum
 	|	[W: word] :Word
 	|	[S: string] :String
-	|	[LEX_SQOPEN_POS PosData: reg_or_data RE_SQCLOSE] :PosOrBlock
-	|	[LEX_SQOPEN_NEG NegData: reg_or_data RE_SQCLOSE] :NegOrBlock
+	|	[lex_sqopen_pos PosData: reg_or_data re_or_sqclose] :PosOrBlock
+	|	[lex_sqopen_neg NegData: reg_or_data re_or_sqclose] :NegOrBlock
+	|	[lex_regex_open Regex: regex re_close]
 	|	[RL1: range_lit '..' RL2: range_lit] :Range
-	|	[re_literal] :Regex
 	|	['(' Join: join ')'] :Join
+
+	def regex
+		[reg_item_rep*]
+
+	def reg_item_rep
+		[reg_item]
+	|	[reg_item re_star]
+
+	def reg_item
+		[re_sqopen_pos PosData: reg_or_data re_or_sqclose]
+	|	[re_sqopen_neg NegData: reg_or_data re_or_sqclose]
+	|	[re_dot]
+	|	[re_char]
 
 	def reg_or_data
 		[Data: reg_or_data Char: reg_or_char] :Data
 	|	[] :Base
 
 	def reg_or_char
-		[Char: RE_CHAR] :Char
-	|	[Low: RE_CHAR RE_DASH High: RE_CHAR] :Range
+		[Char: re_or_char] :Char
+	|	[Low: re_or_char re_or_dash High: re_or_char] :Range
 
 	def range_lit
 		[String: string] :String
@@ -360,7 +381,7 @@ namespace ragel
 	|	[ActionSpec: action_spec] :ActionSpec
 	|	['prepush' PrePushBlock: action_block] :PrePushSpec commit
 	|	['postpop' PostPopBlock: action_block] :PostPopSpec commit
-	|	['variable' Var: word Reparse: inline_expr_reparse] :Variable commit
+	|	['variable' Var: variable_name Reparse: inline_expr_reparse] :Variable commit
 	|	['alphtype' inline_expr_reparse] commit
 	|	['access' inline_expr_reparse] commit
 	|	['write' Cmd: word ArgList: word* ';'] :Write commit
