@@ -200,11 +200,11 @@ namespace ragel
 	|	[TermOp: term_op TermOpList: term_op_list_short] :Terms
 
 	def term_op
-		[FactorLabel: factor_label]
-	|	['.' FactorLabel: factor_label]
-	|	[':>' FactorLabel: factor_label]
-	|	[':>>' FactorLabel: factor_label]
-	|	['<:' FactorLabel: factor_label]
+		[FactorLabel: factor_label] :None
+	|	['.' FactorLabel: factor_label] :Dot
+	|	[':>' FactorLabel: factor_label] :ColonLt
+	|	[':>>' FactorLabel: factor_label] :ColonLtLt
+	|	['<:' FactorLabel: factor_label] :GtColon
 
 	def factor_label
 		[word ':' factor_label]

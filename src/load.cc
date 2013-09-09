@@ -542,8 +542,26 @@ struct LoadRagel
 		ragel::term_op_list_short TermOpList = TermTree.TermOpList();
 		while ( TermOpList.prodName() == ragel::term_op_list_short::_Terms ) {
 			/* Push. */
-			FactorWithAug *factorWithAug = loadFactorLabel( TermOpList.TermOp().FactorLabel() );
-			term = new Term( term, factorWithAug, Term::ConcatType );
+			ragel::term_op TermOp = TermOpList.TermOp();
+			FactorWithAug *factorWithAug = loadFactorLabel( TermOp.FactorLabel() );
+
+			Term::Type type;
+			switch ( TermOp.prodName() ) {
+				case ragel::term_op::_None:
+				case ragel::term_op::_Dot:
+					type = Term::ConcatType;
+					break;
+				case ragel::term_op::_ColonLt:
+					type = Term::RightStartType;
+					break;
+				case ragel::term_op::_ColonLtLt:
+					type = Term::RightFinishType;
+					break;
+				case ragel::term_op::_GtColon:
+					type = Term::LeftType;
+					break;
+			}
+			term = new Term( term, factorWithAug, type );
 			TermOpList = TermOpList.TermOpList();
 		}
 
