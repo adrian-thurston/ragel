@@ -278,13 +278,13 @@ namespace ragel
 	|	[FactorRep: factor_rep] :Base
 
 	def factor_rep 
-		[FactorNeg: factor_neg factor_rep_op*]
+		[FactorNeg: factor_neg OpList: factor_rep_op*]
 
 	def factor_rep_op
-		['*']
-	|	['**']
-	|	['?']
-	|	['+']
+		['*'] :Star
+	|	['**'] :StarStar
+	|	['?'] :Optional
+	|	['+'] :Plus
 	|	['{' factor_rep_num '}']
 	|	['{' ',' factor_rep_num '}']
 	|	['{' factor_rep_num ',' '}']

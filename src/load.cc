@@ -424,7 +424,34 @@ struct LoadRagel
 
 	FactorWithRep *loadFactorRep( ragel::factor_rep FactorRep )
 	{
-		return new FactorWithRep( loadFactorNeg( FactorRep.FactorNeg() ) );
+		FactorWithRep *factorWithRep = new FactorWithRep( loadFactorNeg( FactorRep.FactorNeg() ) );
+		ragel::_repeat_factor_rep_op OpList = FactorRep.OpList();
+		while ( !OpList.end() ) {
+			ragel::factor_rep_op FactorRepOp = OpList.value();
+			InputLoc loc = FactorRepOp.loc();
+			switch ( FactorRepOp.prodName() ) {
+				case ragel::factor_rep_op::_Star:
+					factorWithRep = new FactorWithRep( loc, factorWithRep, 
+							0, 0, FactorWithRep::StarType );
+					break;
+					
+				case ragel::factor_rep_op::_StarStar:
+					factorWithRep = new FactorWithRep( loc, factorWithRep, 
+							0, 0, FactorWithRep::StarStarType );
+					break;
+				case ragel::factor_rep_op::_Optional:
+					factorWithRep = new FactorWithRep( loc, factorWithRep, 
+							0, 0, FactorWithRep::OptionalType );
+					break;
+				case ragel::factor_rep_op::_Plus:
+					factorWithRep = new FactorWithRep( loc, factorWithRep, 
+							0, 0, FactorWithRep::PlusType );
+					break;
+			}
+			OpList = OpList.next();
+		}
+
+		return factorWithRep;
 	}
 
 	Action *loadActionRef( ragel::action_ref ActionRef )
