@@ -493,7 +493,17 @@ struct LoadRagel
 
 	Expression *loadExpression( ragel::expression ExprTree )
 	{
-		return new Expression( loadTerm( ExprTree.Term() ) );
+		Expression *expr = new Expression( loadTerm( ExprTree.Term() ) );
+
+		/* Walk the list of terms. */
+		ragel::_repeat_expression_op ExprOpList = ExprTree.ExprOpList();
+		while ( !ExprOpList.end() ) {
+			Term *term = loadTerm( ExprOpList.value().Term() );
+			expr = new Expression( expr, term, Expression::OrType );
+			ExprOpList = ExprOpList.next();
+		}
+
+		return expr;
 	}
 
 	Join *loadJoin( ragel::join JoinTree )

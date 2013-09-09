@@ -183,13 +183,13 @@ namespace ragel
 	|	[Expr: expression] :Base
 
 	def expression
-		[Term: term expression_op*]
+		[Term: term ExprOpList: expression_op*]
 
 	def expression_op
-		['|' term]
-	|	['&' term]
-	|	['-' term]
-	|	['--' term]
+		['|' Term: term]
+	|	['&' Term: term]
+	|	['-' Term: term]
+	|	['--' Term: term]
 
 	def term
 		[FactorLabel: factor_label TermOpList: term_op_list_short]
