@@ -557,8 +557,24 @@ struct LoadRagel
 		/* Walk the list of terms. */
 		ragel::_repeat_expression_op ExprOpList = ExprTree.ExprOpList();
 		while ( !ExprOpList.end() ) {
-			Term *term = loadTerm( ExprOpList.value().Term() );
-			expr = new Expression( expr, term, Expression::OrType );
+			ragel::expression_op ExprOp = ExprOpList.value();
+			Expression::Type type = Expression::OrType;
+			switch ( ExprOp.prodName() ) {
+				case ragel::expression_op::_Or:
+					type = Expression::OrType;
+					break;
+				case ragel::expression_op::_And:
+					type = Expression::IntersectType;
+					break;
+				case ragel::expression_op::_Sub:
+					type = Expression::SubtractType;
+					break;
+				case ragel::expression_op::_Ssub:
+					type = Expression::StrongSubtractType;
+					break;
+			}
+			Term *term = loadTerm( ExprOp.Term() );
+			expr = new Expression( expr, term, type );
 			ExprOpList = ExprOpList.next();
 		}
 
