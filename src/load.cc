@@ -13,6 +13,36 @@ using std::endl;
 
 extern colm_sections colm_object;
 
+char *unescape( const char *s )
+{
+	int slen = strlen(s);
+	char *out = new char[slen];
+	char *d = out;
+
+	for ( int i = 0; i < slen; ) {
+		if ( s[i] == '\\' ) {
+			switch ( s[i+1] ) {
+				case '0': *d++ = '\0'; break;
+				case 'a': *d++ = '\a'; break;
+				case 'b': *d++ = '\b'; break;
+				case 't': *d++ = '\t'; break;
+				case 'n': *d++ = '\n'; break;
+				case 'v': *d++ = '\v'; break;
+				case 'f': *d++ = '\f'; break;
+				case 'r': *d++ = '\r'; break;
+				default: *d++ = s[i+1]; break;
+			}
+			i += 2;
+		}
+		else {
+			*d++ = s[i];
+			i += 1;
+		}
+	}
+	*d = 0;
+	return out;
+}
+
 InputLoc::InputLoc( colm_location *pcloc )
 {
 	if ( pcloc != 0 ) {
@@ -353,6 +383,48 @@ struct LoadRagel
 		return literal;
 	}
 
+	ReOrItem *walkRegOrChar( ragel::reg_or_char RegOrChar )
+	{
+		ReOrItem *orItem = 0;
+		switch ( RegOrChar.prodName() ) {
+			case ragel::reg_or_char::_Char: {
+				char *c = unescape( RegOrChar.Char().text().c_str() );
+				Token tok;
+				tok.set( c, strlen(c) );
+				orItem = new ReOrItem( RegOrChar.Char().loc(), tok );
+				break;
+			}
+			case ragel::reg_or_char::_Range: {
+				char *low = unescape( RegOrChar.Low().text().c_str() );
+				char *high = unescape( RegOrChar.High().text().c_str() );
+				orItem = new ReOrItem( RegOrChar.Low().loc(), low[0], high[0] );
+				delete[] low;
+				delete[] high;
+				break;
+			}
+		}
+		return orItem;
+	}
+
+	ReOrBlock *walkRegOrData( ragel::reg_or_data RegOrData )
+	{
+		ReOrBlock *block = 0;
+		switch ( RegOrData.prodName() ) {
+			case ragel::reg_or_data::_Data: {
+				ReOrBlock *left = walkRegOrData( RegOrData.Data() );
+				ReOrItem *right = walkRegOrChar( RegOrData.Char() );
+				block = new ReOrBlock( left, right );
+				break;
+			}
+			case ragel::reg_or_data::_Base: {
+				block = new ReOrBlock();
+				break;
+			}
+		}
+		return block;
+	}
+
+
 	Factor *loadFactor( ragel::factor FactorTree )
 	{
 		InputLoc loc = FactorTree.loc();
@@ -397,8 +469,16 @@ struct LoadRagel
 				factor = new Factor( new Literal( tok, Literal::LitString ) );
 				break;
 			}
-			case ragel::factor::_Union:
+			case ragel::factor::_PosOrBlock: {
+				ReOrBlock *block = walkRegOrData( FactorTree.PosData() );
+				factor = new Factor( new ReItem( loc, block, ReItem::OrBlock ) );
 				break;
+			}
+			case ragel::factor::_NegOrBlock: {
+				ReOrBlock *block = walkRegOrData( FactorTree.NegData() );
+				factor = new Factor( new ReItem( loc, block, ReItem::NegOrBlock ) );
+				break;
+			}
 			case ragel::factor::_Range: {
 				Literal *lit1 = loadRangeLit( FactorTree.RL1() );
 				Literal *lit2 = loadRangeLit( FactorTree.RL2() );
