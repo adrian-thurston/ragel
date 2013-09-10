@@ -16,7 +16,7 @@ extern colm_sections colm_object;
 char *unescape( const char *s )
 {
 	int slen = strlen(s);
-	char *out = new char[slen];
+	char *out = new char[slen+1];
 	char *d = out;
 
 	for ( int i = 0; i < slen; ) {
