@@ -318,22 +318,22 @@ namespace ragel
 	|	[S: string] :String
 	|	[lex_sqopen_pos PosData: reg_or_data re_or_sqclose] :PosOrBlock
 	|	[lex_sqopen_neg NegData: reg_or_data re_or_sqclose] :NegOrBlock
-	|	[lex_regex_open Regex: regex re_close]
+	|	[lex_regex_open Regex: regex re_close] :Regex
 	|	[RL1: range_lit '..' RL2: range_lit] :Range
 	|	['(' Join: join ')'] :Join
 
 	def regex
-		[reg_item_rep*]
+		[RegItemRepList: reg_item_rep*]
 
 	def reg_item_rep
-		[reg_item]
-	|	[reg_item re_star]
+		[RegItem: reg_item re_star] :Star
+	|	[RegItem: reg_item] :Base
 
 	def reg_item
-		[re_sqopen_pos PosData: reg_or_data re_or_sqclose]
-	|	[re_sqopen_neg NegData: reg_or_data re_or_sqclose]
-	|	[re_dot]
-	|	[re_char]
+		[re_sqopen_pos PosData: reg_or_data re_or_sqclose] :PosOrBlock
+	|	[re_sqopen_neg NegData: reg_or_data re_or_sqclose] :NegOrBlock
+	|	[re_dot] :Dot
+	|	[Char: re_char] :Char
 
 	def reg_or_data
 		[Data: reg_or_data Char: reg_or_char] :Data

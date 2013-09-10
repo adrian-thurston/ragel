@@ -383,7 +383,7 @@ struct LoadRagel
 		return literal;
 	}
 
-	ReOrItem *walkRegOrChar( ragel::reg_or_char RegOrChar )
+	ReOrItem *loadRegOrChar( ragel::reg_or_char RegOrChar )
 	{
 		ReOrItem *orItem = 0;
 		switch ( RegOrChar.prodName() ) {
@@ -406,13 +406,13 @@ struct LoadRagel
 		return orItem;
 	}
 
-	ReOrBlock *walkRegOrData( ragel::reg_or_data RegOrData )
+	ReOrBlock *loadRegOrData( ragel::reg_or_data RegOrData )
 	{
 		ReOrBlock *block = 0;
 		switch ( RegOrData.prodName() ) {
 			case ragel::reg_or_data::_Data: {
-				ReOrBlock *left = walkRegOrData( RegOrData.Data() );
-				ReOrItem *right = walkRegOrChar( RegOrData.Char() );
+				ReOrBlock *left = loadRegOrData( RegOrData.Data() );
+				ReOrItem *right = loadRegOrChar( RegOrData.Char() );
 				block = new ReOrBlock( left, right );
 				break;
 			}
@@ -424,6 +424,60 @@ struct LoadRagel
 		return block;
 	}
 
+	ReItem *loadRegexItem( ragel::reg_item RegItem )
+	{
+		InputLoc loc = RegItem.loc();
+		ReItem *reItem = 0;
+		switch ( RegItem.prodName() ) {
+			case ragel::reg_item::_PosOrBlock: {
+				ReOrBlock *block = loadRegOrData( RegItem.PosData() );
+				reItem = new ReItem( loc, block, ReItem::OrBlock );
+				break;
+			}
+
+			case ragel::reg_item::_NegOrBlock: {
+				ReOrBlock *block = loadRegOrData( RegItem.NegData() );
+				reItem = new ReItem( loc, block, ReItem::NegOrBlock );
+				break;
+			}
+
+			case ragel::reg_item::_Dot: {
+				reItem = new ReItem( loc, ReItem::Dot );
+				break;
+			}
+
+			case ragel::reg_item::_Char: {
+				Token tok;
+				string s = RegItem.Char().text();
+				tok.set( s.c_str(), s.size() );
+				reItem = new ReItem( loc, tok );
+				break;
+			}
+		}
+		return reItem;
+	}
+
+	ReItem *loadRegexItemRep( ragel::reg_item_rep RegItemRep )
+	{
+		ReItem *reItem = loadRegexItem( RegItemRep.RegItem() );
+		if ( RegItemRep.prodName() == ragel::reg_item_rep::_Star )
+			reItem->star = true;
+		return reItem;
+	}
+
+	RegExpr *loadRegex( ragel::regex Regex )
+	{
+		RegExpr *regExpr = new RegExpr();
+		ragel::_repeat_reg_item_rep RegItemRepList = Regex.RegItemRepList();
+		while ( !RegItemRepList.end() ) {
+			ragel::reg_item_rep RegItemRep = RegItemRepList.value();
+			ReItem *reItem = loadRegexItemRep( RegItemRep );
+			regExpr = new RegExpr( regExpr, reItem );
+			RegItemRepList = RegItemRepList.next();
+		}
+
+		return regExpr;
+	}
 
 	Factor *loadFactor( ragel::factor FactorTree )
 	{
@@ -470,13 +524,18 @@ struct LoadRagel
 				break;
 			}
 			case ragel::factor::_PosOrBlock: {
-				ReOrBlock *block = walkRegOrData( FactorTree.PosData() );
+				ReOrBlock *block = loadRegOrData( FactorTree.PosData() );
 				factor = new Factor( new ReItem( loc, block, ReItem::OrBlock ) );
 				break;
 			}
 			case ragel::factor::_NegOrBlock: {
-				ReOrBlock *block = walkRegOrData( FactorTree.NegData() );
+				ReOrBlock *block = loadRegOrData( FactorTree.NegData() );
 				factor = new Factor( new ReItem( loc, block, ReItem::NegOrBlock ) );
+				break;
+			}
+			case ragel::factor::_Regex: {
+				RegExpr *regExp = loadRegex( FactorTree.Regex() );
+				factor = new Factor( regExp );
 				break;
 			}
 			case ragel::factor::_Range: {
