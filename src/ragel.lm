@@ -280,7 +280,7 @@ namespace ragel
 	def factor_aug
 		[FactorAug: factor_aug AugBase: aug_base ActionRef: action_ref] :ActionRef
 	|	[FactorAug: factor_aug AugBase: aug_base PriorityAug: priority_aug] :PriorEmbed
-	|	[factor_aug aug_base '(' word ',' priority_aug ')']
+	|	[FactorAug: factor_aug AugBase: aug_base '(' Name: word ',' PriorityAug: priority_aug ')'] :NamedPriorEmbed
 	|	[factor_aug aug_cond action_ref]
 	|	[factor_aug aug_cond '!' action_ref]
 	|	[factor_aug aug_to_state action_ref]

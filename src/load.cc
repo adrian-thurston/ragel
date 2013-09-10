@@ -689,6 +689,22 @@ struct LoadRagel
 				factorWithAug->priorityAugs.append( PriorityAug( augType, pd->curDefPriorKey, priorityNum ) );
 				break;
 			}
+			case ragel::factor_aug::_NamedPriorEmbed: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugBase( FactorAug.AugBase() );
+
+				/* Lookup/create the priority key. */
+				PriorDictEl *priorDictEl;
+				if ( pd->priorDict.insert( FactorAug.Name().text(), pd->nextPriorKey, &priorDictEl ) )
+					pd->nextPriorKey += 1;
+
+				/* Use the inserted/found priority key. */
+				int priorityName = priorDictEl->value;
+
+				int priorityNum = loadPriorAug( FactorAug.PriorityAug() );
+				factorWithAug->priorityAugs.append( PriorityAug( augType, priorityName, priorityNum ) );
+				break;
+			}
 			case ragel::factor_aug::_Base:
 				factorWithAug = new FactorWithAug( loadFactorRep( FactorAug.FactorRep() ) );
 				break;
