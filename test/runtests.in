@@ -102,8 +102,6 @@ function run_test()
 		test_error;
 	fi
 
-	return;
-
 	out_args=""
 	[ $lang != java ] && out_args="-o ${binary}";
     [ $lang == csharp ] && out_args="-out:${binary}";
