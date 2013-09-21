@@ -95,7 +95,6 @@
 
 void MBox::init( )
 {
-	MBox *fsm = this;
 	%% write init;
 }
 
