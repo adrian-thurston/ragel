@@ -299,10 +299,10 @@ namespace ragel
 	|	['**'] :StarStar
 	|	['?'] :Optional
 	|	['+'] :Plus
-	|	['{' factor_rep_num '}']
-	|	['{' ',' factor_rep_num '}']
-	|	['{' factor_rep_num ',' '}']
-	|	['{' factor_rep_num ',' factor_rep_num '}']
+	|	['{' Rep: factor_rep_num '}'] :ExactRep
+	|	['{' ',' Rep: factor_rep_num '}'] :MaxRep
+	|	['{' Rep: factor_rep_num ',' '}'] :MinRep
+	|	['{' LowRep: factor_rep_num ',' HighRep: factor_rep_num '}'] :RangeRep
 
 	def factor_rep_num
 		[uint]

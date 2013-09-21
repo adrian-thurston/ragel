@@ -559,6 +559,20 @@ struct LoadRagel
 		return new FactorWithNeg( loadFactor( FactorTree ) );
 	}
 
+	int loadFactorRepNum( ragel::factor_rep_num FactorRepNum )
+	{
+		// Convert the priority number to a long. Check for overflow.
+		InputLoc loc = FactorRepNum.loc();
+		errno = 0;
+		long rep = strtol( FactorRepNum.text().c_str(), 0, 10 );
+		if ( errno == ERANGE && rep == LONG_MAX ) {
+			// Repetition too large. Recover by returing repetition 1. */
+			error(loc) << "repetition number " << FactorRepNum.text() << " overflows" << endl;
+			rep = 1;
+		}
+		return rep;
+	}
+
 	FactorWithRep *loadFactorRep( ragel::factor_rep FactorRep )
 	{
 		FactorWithRep *factorWithRep = new FactorWithRep( loadFactorNeg( FactorRep.FactorNeg() ) );
@@ -568,22 +582,47 @@ struct LoadRagel
 			InputLoc loc = FactorRepOp.loc();
 			switch ( FactorRepOp.prodName() ) {
 				case ragel::factor_rep_op::_Star:
-					factorWithRep = new FactorWithRep( loc, factorWithRep, 
+					factorWithRep = new FactorWithRep( loc, factorWithRep,
 							0, 0, FactorWithRep::StarType );
 					break;
 					
 				case ragel::factor_rep_op::_StarStar:
-					factorWithRep = new FactorWithRep( loc, factorWithRep, 
+					factorWithRep = new FactorWithRep( loc, factorWithRep,
 							0, 0, FactorWithRep::StarStarType );
 					break;
 				case ragel::factor_rep_op::_Optional:
-					factorWithRep = new FactorWithRep( loc, factorWithRep, 
+					factorWithRep = new FactorWithRep( loc, factorWithRep,
 							0, 0, FactorWithRep::OptionalType );
 					break;
 				case ragel::factor_rep_op::_Plus:
-					factorWithRep = new FactorWithRep( loc, factorWithRep, 
+					factorWithRep = new FactorWithRep( loc, factorWithRep,
 							0, 0, FactorWithRep::PlusType );
 					break;
+				case ragel::factor_rep_op::_ExactRep: {
+					int rep = loadFactorRepNum( FactorRepOp.Rep() );
+					factorWithRep = new FactorWithRep( loc, factorWithRep,
+							rep, 0, FactorWithRep::ExactType );
+					break;
+				}
+				case ragel::factor_rep_op::_MaxRep: {
+					int rep = loadFactorRepNum( FactorRepOp.Rep() );
+					factorWithRep = new FactorWithRep( loc, factorWithRep, 
+							0, rep, FactorWithRep::MaxType );
+					break;
+				}
+				case ragel::factor_rep_op::_MinRep: {
+					int rep = loadFactorRepNum( FactorRepOp.Rep() );
+					factorWithRep = new FactorWithRep( loc, factorWithRep,
+							rep, 0, FactorWithRep::MinType );
+					break;
+				}
+				case ragel::factor_rep_op::_RangeRep: {
+					int low = loadFactorRepNum( FactorRepOp.LowRep() );
+					int high = loadFactorRepNum( FactorRepOp.HighRep() );
+					factorWithRep = new FactorWithRep( loc, factorWithRep, 
+							low, high, FactorWithRep::RangeType );
+					break;
+				}
 			}
 			OpList = OpList.next();
 		}
