@@ -194,10 +194,10 @@ struct ParseData
 	void unsetObsoleteEntries( FsmAp *graph );
 
 	/* Resove name references in action code and epsilon transitions. */
-	NameSet resolvePart( NameInst *refFrom, const char *data, bool recLabelsOnly );
+	NameSet resolvePart( NameInst *refFrom, const std::string &data, bool recLabelsOnly );
 	void resolveFrom( NameSet &result, NameInst *refFrom, 
-			const NameRef &nameRef, int namePos );
-	NameInst *resolveStateRef( const NameRef &nameRef, InputLoc &loc, Action *action );
+			NameRef *nameRef, int namePos );
+	NameInst *resolveStateRef( NameRef *nameRef, InputLoc &loc, Action *action );
 	void resolveNameRefs( InlineList *inlineList, Action *action );
 	void resolveActionNameRefs();
 

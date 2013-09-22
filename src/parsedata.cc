@@ -559,7 +559,7 @@ void ParseData::unsetObsoleteEntries( FsmAp *graph )
 	}
 }
 
-NameSet ParseData::resolvePart( NameInst *refFrom, const char *data, bool recLabelsOnly )
+NameSet ParseData::resolvePart( NameInst *refFrom, const std::string &data, bool recLabelsOnly )
 {
 	/* Queue needed for breadth-first search, load it with the start node. */
 	NameInstList nameQueue;
@@ -591,13 +591,13 @@ NameSet ParseData::resolvePart( NameInst *refFrom, const char *data, bool recLab
 }
 
 void ParseData::resolveFrom( NameSet &result, NameInst *refFrom, 
-		const NameRef &nameRef, int namePos )
+		NameRef *nameRef, int namePos )
 {
 	/* Look for the name in the owning scope of the factor with aug. */
-	NameSet partResult = resolvePart( refFrom, nameRef[namePos].c_str(), false );
+	NameSet partResult = resolvePart( refFrom, nameRef->data[namePos], false );
 	
 	/* If there are more parts to the name then continue on. */
-	if ( ++namePos < nameRef.length() ) {
+	if ( ++namePos < nameRef->length() ) {
 		/* There are more components to the name, search using all the part
 		 * results as the base. */
 		for ( NameSet::Iter name = partResult; name.lte(); name++ )
@@ -677,13 +677,13 @@ void errorStateLabels( const NameSet &resolved )
 }
 
 
-NameInst *ParseData::resolveStateRef( const NameRef &nameRef, InputLoc &loc, Action *action )
+NameInst *ParseData::resolveStateRef( NameRef *nameRef, InputLoc &loc, Action *action )
 {
 	NameInst *nameInst = 0;
 
 	/* Do the local search if the name is not strictly a root level name
 	 * search. */
-	if ( nameRef[0] != "" ) {
+	if ( nameRef->data[0] != "" ) {
 		/* If the action is referenced, resolve all of them. */
 		if ( action != 0 && action->actionRefs.length() > 0 ) {
 			/* Look for the name in all referencing scopes. */
@@ -707,7 +707,7 @@ NameInst *ParseData::resolveStateRef( const NameRef &nameRef, InputLoc &loc, Act
 	/* If not found in the local scope, look in global. */
 	if ( nameInst == 0 ) {
 		NameSet resolved;
-		int fromPos = nameRef[0] != "" ? 0 : 1;
+		int fromPos = nameRef->data[0] != "" ? 0 : 1;
 		resolveFrom( resolved, rootName, nameRef, fromPos );
 
 		if ( resolved.length() > 0 ) {
@@ -736,7 +736,7 @@ void ParseData::resolveNameRefs( InlineList *inlineList, Action *action )
 			case InlineItem::Entry: case InlineItem::Goto:
 			case InlineItem::Call: case InlineItem::Next: {
 				/* Resolve, pass action for local search. */
-				NameInst *target = resolveStateRef( *item->nameRef, item->loc, action );
+				NameInst *target = resolveStateRef( item->nameRef, item->loc, action );
 
 				/* Name lookup error reporting is handled by resolveStateRef. */
 				if ( target != 0 ) {

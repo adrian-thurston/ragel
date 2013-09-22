@@ -649,7 +649,7 @@ void Join::makeNameTree( ParseData *pd )
 	if ( exprList.length() > 1 ) {
 		/* Create the new anonymous scope. */
 		NameInst *prevNameInst = pd->curNameInst;
-		pd->curNameInst = pd->addNameInst( loc, 0, false );
+		pd->curNameInst = pd->addNameInst( loc, std::string(), false );
 
 		/* Join scopes need an implicit "final" target. */
 		pd->curNameInst->final = new NameInst( InputLoc(), pd->curNameInst, "final", 
@@ -1329,7 +1329,7 @@ void FactorWithAug::resolveNameRefs( ParseData *pd )
 		EpsilonLink &link = epsilonLinks[ep];
 		NameInst *resolvedName = 0;
 
-		if ( link.target.length() == 1 && link.target.data[0] == "final" ) {
+		if ( link.target->length() == 1 && link.target->data[0] == "final" ) {
 			/* Epsilon drawn to an implicit final state. An implicit final is
 			 * only available in join operations. */
 			resolvedName = pd->localNameScope->final;

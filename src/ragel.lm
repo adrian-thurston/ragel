@@ -83,6 +83,7 @@ namespace c_inline
 	def state_ref
 		[OptNameSep: opt_name_sep StateRefNames: state_ref_names]
 
+
 	def opt_name_sep
 		[srlex::'::'] :ColonColon
 	|	[] :Empty
@@ -134,7 +135,7 @@ namespace ragel
 		literal 'from', 'to', 'eof', 'lerr', 'err'
 		literal 'when', 'inwhen', 'outwhen', '>?', '$?', '%?' 
 
-		literal ':=', '=', ';', '..'
+		literal ':=', '=', ';', '..', '::'
 
 		literal '>~', '$~', '%~', '<~', '@~', '<>~' 
 		literal '>*', '$*', '%*', '<*', '@*', '<>*' 
@@ -221,12 +222,16 @@ namespace ragel
 	|	['<:' FactorLabel: factor_label] :GtColon
 
 	def factor_label
-		[word ':' factor_label]
-	|	[FactorEp: factor_ep]
+		[Label: word ':' FactorLabel: factor_label] :Label
+	|	[FactorEp: factor_ep] :Ep
 
 	def factor_ep
-		[FactorAug: factor_aug]
-	|	[factor_aug '->' word]
+		[FactorAug: factor_aug '->' EpsilonTarget: epsilon_target] :Epsilon
+	|	[FactorAug: factor_aug] :Base
+
+	def epsilon_target
+		[EpsilonTarget: epsilon_target '::' Word: word] :Rec
+	|	[Word: word] :Base
 
 	def action_expr
 		['{' InlineExpr: c_inline::inline_expr '}']
@@ -385,7 +390,7 @@ namespace ragel
 	|	['alphtype' inline_expr_reparse] commit
 	|	['access' inline_expr_reparse] commit
 	|	['write' Cmd: word ArgList: word* ';'] :Write commit
-	|	['getkey' inline_expr_reparse] commit
+	|	['getkey' Reparse: inline_expr_reparse] :GetKey commit
 	|	['import' inline_expr_reparse] commit
 	|	['export' inline_expr_reparse] commit
 	|	['include' inline_expr_reparse] commit

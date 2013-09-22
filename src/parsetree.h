@@ -154,20 +154,20 @@ typedef Vector<NameInst*> NameTargList;
 /* Structure for storing location of epsilon transitons. */
 struct EpsilonLink
 {
-	EpsilonLink( const InputLoc &loc, NameRef &target )
+	EpsilonLink( const InputLoc &loc, NameRef *target )
 		: loc(loc), target(target) { }
 
 	InputLoc loc;
-	NameRef target;
+	NameRef *target;
 };
 
 struct Label
 {
-	Label( const InputLoc &loc, char *data )
+	Label( const InputLoc &loc, std::string data )
 		: loc(loc), data(data) { }
 
 	InputLoc loc;
-	char *data;
+	std::string data;
 };
 
 /* Structrue represents an action assigned to some FactorWithAug node. The

@@ -751,14 +751,59 @@ struct LoadRagel
 		return factorWithAug;
 	}
 
+	NameRef *loadEpsilonTarget( ragel::epsilon_target EpsilonTarget )
+	{
+		NameRef *nameRef = 0;
+		switch ( EpsilonTarget.prodName() ) {
+			case ragel::epsilon_target::_Rec:
+				nameRef = loadEpsilonTarget( EpsilonTarget.EpsilonTarget() );
+				nameRef->append( EpsilonTarget.Word().text() );
+				break;
+			case ragel::epsilon_target::_Base:
+				nameRef = new NameRef;
+				nameRef->append( EpsilonTarget.Word().text() );
+				break;
+		}
+		return nameRef;
+	}
+
 	FactorWithAug *loadFactorEp( ragel::factor_ep FactorEp )
 	{
-		return loadFactorAug( FactorEp.FactorAug() );
+		FactorWithAug *factorWithAug = 0;
+		switch ( FactorEp.prodName() ) {
+			case ragel::factor_ep::_Epsilon: {
+				InputLoc loc = FactorEp.loc();
+				factorWithAug = loadFactorAug( FactorEp.FactorAug() );
+				NameRef *nameRef = loadEpsilonTarget( FactorEp.EpsilonTarget() );
+
+				/* Add the target to the list and return the factor object. */
+				factorWithAug->epsilonLinks.append( EpsilonLink( loc, nameRef ) );
+				break;
+			}
+				
+			case ragel::factor_ep::_Base:
+				factorWithAug = loadFactorAug( FactorEp.FactorAug() );
+				break;
+		}
+		return factorWithAug;
 	}
 
 	FactorWithAug *loadFactorLabel( ragel::factor_label FactorLabel )
 	{
-		return loadFactorEp( FactorLabel.FactorEp() );
+		FactorWithAug *factorWithAug = 0;
+		switch ( FactorLabel.prodName() ) {
+			case ragel::factor_label::_Label: {
+				InputLoc loc = FactorLabel.loc();
+				string label = FactorLabel.Label().text();
+				factorWithAug = loadFactorLabel( FactorLabel.FactorLabel() );
+				factorWithAug->labels.prepend( Label(loc, label) );
+				break;
+			}
+			case ragel::factor_label::_Ep:
+				factorWithAug = loadFactorEp( FactorLabel.FactorEp() );
+				break;
+		}
+		return factorWithAug;
 	}
 
 	Term *loadTerm( ragel::term TermTree )
