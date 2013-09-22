@@ -926,6 +926,12 @@ struct LoadRagel
 			error(loc) << "bad variable name: " << Var.text() << endl;
 	}
 
+	void loadGetKey( c_inline::inline_expr InlineExpr )
+	{
+		InlineList *inlineList = loadInlineExpr( InlineExpr );
+		pd->getKeyExpr = inlineList;
+	}
+
 	void loadStatement( ragel::statement Statement )
 	{
 		ragel::statement::prod_name prodName = Statement.prodName();
@@ -963,6 +969,9 @@ struct LoadRagel
 				break;
 			case ragel::statement::_Variable:
 				loadVariable( Statement.Var(), Statement.Reparse().ActionExpr().InlineExpr() );
+				break;
+			case ragel::statement::_GetKey:
+				loadGetKey( Statement.Reparse().ActionExpr().InlineExpr() );
 				break;
 		}
 	}
