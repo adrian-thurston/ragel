@@ -313,9 +313,9 @@ namespace ragel
 		[uint]
 
 	def factor_neg 
-		['!' factor_neg]
-	|	['^' factor_neg]
-	|	[Factor: factor]
+		['!' FactorNeg: factor_neg] :Bang
+	|	['^' FactorNeg: factor_neg] :Caret
+	|	[Factor: factor] :Base
 
 	def factor 
 		[AN: alphabet_num] :AlphabetNum

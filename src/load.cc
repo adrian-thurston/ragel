@@ -555,8 +555,29 @@ struct LoadRagel
 
 	FactorWithNeg *loadFactorNeg( ragel::factor_neg FactorNeg )
 	{
-		ragel::factor FactorTree = FactorNeg.Factor();
-		return new FactorWithNeg( loadFactor( FactorTree ) );
+		InputLoc loc = FactorNeg.loc();
+		FactorWithNeg *factorWithNeg = 0;
+		switch ( FactorNeg.prodName() ) {
+			case ragel::factor_neg::_Bang: {
+				FactorWithNeg *rec = loadFactorNeg( FactorNeg.FactorNeg() );
+				factorWithNeg = new FactorWithNeg( loc,
+						rec, FactorWithNeg::NegateType );
+				break;
+			}
+			case ragel::factor_neg::_Caret: {
+				FactorWithNeg *rec = loadFactorNeg( FactorNeg.FactorNeg() );
+				factorWithNeg = new FactorWithNeg( loc,
+						rec, FactorWithNeg::CharNegateType );
+				break;
+			}
+			case ragel::factor_neg::_Base: {
+				Factor *factor = loadFactor( FactorNeg.Factor() );
+				factorWithNeg = new FactorWithNeg( factor );
+				break;
+			}
+		}
+
+		return factorWithNeg;
 	}
 
 	int loadFactorRepNum( ragel::factor_rep_num FactorRepNum )
