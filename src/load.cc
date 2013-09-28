@@ -977,6 +977,33 @@ struct LoadRagel
 		pd->getKeyExpr = inlineList;
 	}
 
+	void loadAlphType( ragel::alphtype_type AlphTypeType )
+	{
+		InputLoc loc = AlphTypeType.loc();
+		switch ( AlphTypeType.prodName() ) {
+			case ragel::alphtype_type::_One: {
+				string one = AlphTypeType.W1().text();
+				if ( ! pd->setAlphType( loc, one.c_str() ) ) {
+					// Recover by ignoring the alphtype statement.
+					error(loc) << "\"" << one << 
+							"\" is not a valid alphabet type" << endl;
+				}
+				break;
+			}
+
+			case ragel::alphtype_type::_Two: {
+				string one = AlphTypeType.W1().text();
+				string two = AlphTypeType.W2().text();
+				if ( ! pd->setAlphType( loc, one.c_str(), two.c_str() ) ) {
+					// Recover by ignoring the alphtype statement.
+					error(loc) << "\"" << one << 
+							"\" is not a valid alphabet type" << endl;
+				}
+				break;
+			}
+		}
+	}
+
 	void loadStatement( ragel::statement Statement )
 	{
 		ragel::statement::prod_name prodName = Statement.prodName();
@@ -1017,6 +1044,9 @@ struct LoadRagel
 				break;
 			case ragel::statement::_GetKey:
 				loadGetKey( Statement.Reparse().ActionExpr().InlineExpr() );
+				break;
+			case ragel::statement::_AlphType:
+				loadAlphType( Statement.AlphTypeType() );
 				break;
 		}
 	}

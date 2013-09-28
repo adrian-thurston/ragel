@@ -202,8 +202,8 @@ struct ParseData
 	void resolveActionNameRefs();
 
 	/* Set the alphabet type. If type types are not valid returns false. */
-	bool setAlphType( const InputLoc &loc, char *s1, char *s2 );
-	bool setAlphType( const InputLoc &loc, char *s1 );
+	bool setAlphType( const InputLoc &loc, const char *s1, const char *s2 );
+	bool setAlphType( const InputLoc &loc, const char *s1 );
 
 	/* Override one of the variables ragel uses. */
 	bool setVariable( const char *var, InlineList *inlineList );

@@ -379,6 +379,10 @@ namespace ragel
 	def instantiation
 		[Name: word ':=' Lm: lm ';'] commit
 
+	def alphtype_type
+		[W1: word] :One
+	|	[W1: word W2: word] :Two
+
 	def statement
 		['machine' MachineName: word ';'] :MachineName commit
 	|	[Assignment: assignment] :Assignment
@@ -387,7 +391,7 @@ namespace ragel
 	|	['prepush' PrePushBlock: action_block] :PrePushSpec commit
 	|	['postpop' PostPopBlock: action_block] :PostPopSpec commit
 	|	['variable' Var: variable_name Reparse: inline_expr_reparse] :Variable commit
-	|	['alphtype' inline_expr_reparse] commit
+	|	['alphtype' AlphTypeType: alphtype_type ';'] :AlphType commit
 	|	['access' inline_expr_reparse] commit
 	|	['write' Cmd: word ArgList: word* ';'] :Write commit
 	|	['getkey' Reparse: inline_expr_reparse] :GetKey commit

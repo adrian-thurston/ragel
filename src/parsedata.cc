@@ -859,7 +859,7 @@ void ParseData::initGraphDict( )
 }
 
 /* Set the alphabet type. If the types are not valid returns false. */
-bool ParseData::setAlphType( const InputLoc &loc, char *s1, char *s2 )
+bool ParseData::setAlphType( const InputLoc &loc, const char *s1, const char *s2 )
 {
 	alphTypeLoc = loc;
 	userAlphType = findAlphType( s1, s2 );
@@ -868,7 +868,7 @@ bool ParseData::setAlphType( const InputLoc &loc, char *s1, char *s2 )
 }
 
 /* Set the alphabet type. If the types are not valid returns false. */
-bool ParseData::setAlphType( const InputLoc &loc, char *s1 )
+bool ParseData::setAlphType( const InputLoc &loc, const char *s1 )
 {
 	alphTypeLoc = loc;
 	userAlphType = findAlphType( s1 );
