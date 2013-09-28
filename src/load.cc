@@ -1004,6 +1004,12 @@ struct LoadRagel
 		}
 	}
 
+	void loadAccess( c_inline::inline_expr InlineExpr )
+	{
+		InlineList *inlineList = loadInlineExpr( InlineExpr );
+		pd->accessExpr = inlineList;
+	}
+
 	void loadStatement( ragel::statement Statement )
 	{
 		ragel::statement::prod_name prodName = Statement.prodName();
@@ -1047,6 +1053,9 @@ struct LoadRagel
 				break;
 			case ragel::statement::_AlphType:
 				loadAlphType( Statement.AlphTypeType() );
+				break;
+			case ragel::statement::_Access:
+				loadAccess( Statement.Reparse().ActionExpr().InlineExpr() );
 				break;
 		}
 	}

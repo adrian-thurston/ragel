@@ -392,7 +392,7 @@ namespace ragel
 	|	['postpop' PostPopBlock: action_block] :PostPopSpec commit
 	|	['variable' Var: variable_name Reparse: inline_expr_reparse] :Variable commit
 	|	['alphtype' AlphTypeType: alphtype_type ';'] :AlphType commit
-	|	['access' inline_expr_reparse] commit
+	|	['access' Reparse: inline_expr_reparse] :Access commit
 	|	['write' Cmd: word ArgList: word* ';'] :Write commit
 	|	['getkey' Reparse: inline_expr_reparse] :GetKey commit
 	|	['import' inline_expr_reparse] commit
