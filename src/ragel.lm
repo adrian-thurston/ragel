@@ -149,8 +149,8 @@ namespace ragel
 				'include', 'prepush', 'postpop'
 
 		token string /
-			'"' ( [^"\\] | '\\' any )* '"' |
-			"'" ( [^'\\] | '\\' any )* "'"
+			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
+			"'" ( [^'\\] | '\\' any )* "'" 'i'?
 		/
 
 		token lex_regex_open /'/'/ ni
