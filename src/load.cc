@@ -79,11 +79,14 @@ struct LoadRagel
 	/* Should this go in the parse data? Probably. */
 	Vector<bool> exportContext;
 
-	void loadMachineName( ragel::word MachineName )
+	void loadMachineName( ragel::word MachineName, const char *targetMachine, const char *sourceMachine )
 	{
 		InputLoc sectionLoc;
 		string fileName = "input.rl";
 		string machine = MachineName.text();
+
+		if ( includeDepth > 0 && machine == sourceMachine )
+			machine = targetMachine;
 
 		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
@@ -1031,7 +1034,31 @@ struct LoadRagel
 		pd->accessExpr = inlineList;
 	}
 
-	void loadStatement( ragel::statement Statement )
+	void loadInclude( ragel::include_spec IncludeSpec )
+	{
+		string machine = pd->sectionName;
+		string fileName = id.inputFileName;
+
+		if ( IncludeSpec.Word() != 0 )
+			machine = IncludeSpec.Word().text();
+
+		if ( IncludeSpec.String() != 0 ) {
+			fileName = IncludeSpec.String().text();
+
+			InputLoc loc = IncludeSpec.loc();
+			long length;
+			bool caseInsensitive;
+			char *unescaped = prepareLitString( loc, fileName.c_str(), fileName.size(),
+					length, caseInsensitive );
+			fileName = unescaped;
+		}
+
+		includeDepth += 1;
+		load( fileName.c_str(), pd->sectionName.c_str(), machine.c_str() );
+		includeDepth -= 1;
+	}
+
+	void loadStatement( ragel::statement Statement, const char *targetMachine, const char *sourceMachine )
 	{
 		ragel::statement::prod_name prodName = Statement.prodName();
 		if ( prodName != ragel::statement::_MachineName && pd == 0 && !machineNameError ) {
@@ -1052,7 +1079,7 @@ struct LoadRagel
 				loadPostPop( Statement.PostPopBlock() );
 				break;
 			case ragel::statement::_MachineName:
-				loadMachineName( Statement.MachineName() );
+				loadMachineName( Statement.MachineName(), targetMachine, sourceMachine );
 				break;
 			case ragel::statement::_ActionSpec:
 				loadActionSpec( Statement.ActionSpec() );
@@ -1078,22 +1105,25 @@ struct LoadRagel
 			case ragel::statement::_Access:
 				loadAccess( Statement.Reparse().ActionExpr().InlineExpr() );
 				break;
+			case ragel::statement::_Include:
+				loadInclude( Statement.IncludeSpec() );
+				break;
 		}
 	}
 
-	void loadStmtList( ragel::_repeat_statement StmtList )
+	void loadStmtList( ragel::_repeat_statement StmtList, const char *targetMachine, const char *sourceMachine )
 	{
 		while ( !StmtList.end() ) {
-			loadStatement( StmtList.value() );
+			loadStatement( StmtList.value(), targetMachine, sourceMachine );
 			StmtList = StmtList.next();
 		}
 	}
 
-	void loadSection( c_host::section Section )
+	void loadSection( c_host::section Section, const char *targetMachine, const char *sourceMachine )
 	{
 		switch ( Section.prodName() ) {
 			case c_host::section::_MultiLine:
-				loadStmtList( Section.StmtList() );
+				loadStmtList( Section.StmtList(), targetMachine, sourceMachine );
 				break;
 
 			case c_host::section::_Tok:
@@ -1116,19 +1146,19 @@ struct LoadRagel
 		}
 	}
 
-	void load( start Start )
+	void load( start Start, const char *targetMachine, const char *sourceMachine )
 	{
 		InputLoc loc;
 		exportContext.append( false );
 
 		c_host::_repeat_section SectionList = Start.SectionList();
 		while ( !SectionList.end() ) {
-			loadSection( SectionList.value() );
+			loadSection( SectionList.value(), targetMachine, sourceMachine );
 			SectionList = SectionList.next();
 		}
 	}
 
-	void load( const char *inputFileName )
+	void load( const char *inputFileName, const char *targetMachine, const char *sourceMachine )
 	{
 		const char *argv[2];
 		argv[0] = inputFileName;
@@ -1149,7 +1179,7 @@ struct LoadRagel
 			return;
 		}
 
-		load( Start );
+		load( Start, targetMachine, sourceMachine );
 
 		colm_delete_program( program );
 	}
@@ -1162,7 +1192,7 @@ LoadRagel *newLoadRagel( InputData &id )
 
 void loadRagel( LoadRagel *lr, const char *inputFileName )
 {
-	lr->load( inputFileName );
+	lr->load( inputFileName, 0, 0 );
 }
 
 void deleteLoadRagel( LoadRagel *lr )

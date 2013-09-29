@@ -383,6 +383,11 @@ namespace ragel
 		[W1: word] :One
 	|	[W1: word W2: word] :Two
 
+	def include_spec
+		[Word: word] 
+	|	[String: string]
+	|	[Word: word String: string]
+
 	def statement
 		['machine' MachineName: word ';'] :MachineName commit
 	|	[Assignment: assignment] :Assignment
@@ -397,7 +402,7 @@ namespace ragel
 	|	['getkey' Reparse: inline_expr_reparse] :GetKey commit
 	|	['import' inline_expr_reparse] commit
 	|	['export' inline_expr_reparse] commit
-	|	['include' inline_expr_reparse] commit
+	|	['include' IncludeSpec: include_spec ';'] :Include commit
 
 	def ragel_start 
 		[statement*]
