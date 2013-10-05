@@ -252,45 +252,40 @@ namespace ragel
 	def aug_base
 		['@'] :Finish | ['>'] :Enter | ['%'] :Leave | ['$'] :All
 
-# aug_type_cond: TK_StartCond final { $$->loc = $1->loc; $$->augType = at_start; };
-# aug_type_cond: '>' KW_When final { $$->loc = $1->loc; $$->augType = at_start; };
-# aug_type_cond: TK_AllCond final { $$->loc = $1->loc; $$->augType = at_all; };
-# aug_type_cond: '$' KW_When final { $$->loc = $1->loc; $$->augType = at_all; };
-# aug_type_cond: TK_LeavingCond final { $$->loc = $1->loc; $$->augType = at_leave; };
-# aug_type_cond: '%' KW_When final { $$->loc = $1->loc; $$->augType = at_leave; };
-# aug_type_cond: KW_When final { $$->loc = $1->loc; $$->augType = at_all; };
-# aug_type_cond: KW_InWhen final { $$->loc = $1->loc; $$->augType = at_start; };
-# aug_type_cond: KW_OutWhen final { $$->loc = $1->loc; $$->augType = at_leave; };
-
 	def aug_cond
 		['>?'] :Start1 | ['$?'] :All1 | ['%?'] :Leave1
 	|	['>' 'when'] :Start2 | ['$' 'when'] :All2 | ['%' 'when'] :Leave2
 	|	['inwhen'] :Start3 | ['when'] :All3 | ['outwhen'] :Leave3
 
 	def aug_to_state
-		['>~'] | ['<~'] | ['$~'] | ['%~'] | ['@~']
-	|	['>' 'to'] | ['<' 'to'] | ['$' 'to'] | ['%' 'to'] | ['@' 'to']
-	|	['<>~'] | ['<>' 'to']
+		['>~'] :Start1 | ['<~'] :NotStart1 | ['$~'] :All1
+	|	['%~'] :Final1 | ['@~'] :NotFinal1 | ['<>~'] :Middle1
+	|	['>' 'to'] :Start2 | ['<' 'to'] :NotStart2 | ['$' 'to'] :All2
+	|	['%' 'to'] :Final2 | ['@' 'to'] :NotFinal2 | ['<>' 'to'] :Middle2
 
 	def aug_from_state
-		['>*'] | ['<*'] | ['$*'] | ['%*'] | ['@*']
-	|	['>' 'from'] | ['<' 'from'] | ['$' 'from'] | ['%' 'from'] | ['@' 'from']
-	|	['<>*'] | ['<>' 'from']
+		['>*'] :Start1 | ['<*'] :NotStart1 | ['$*'] :All1
+	|	['%*'] :Final1 | ['@*'] :NotFinal1 | ['<>*'] :Middle1
+	|	['>' 'from'] :Start2 | ['<' 'from'] :NotStart2 | ['$' 'from'] :All2
+	|	['%' 'from'] :Final2 | ['@' 'from'] :NotFinal2 | ['<>' 'from'] :Middle2
 
 	def aug_eof
-		['>/'] | ['</'] | ['$/'] | ['%/'] | ['@/']
-	|	['>' 'eof'] | ['<' 'eof'] | ['$' 'eof'] | ['%' 'eof'] | ['@' 'eof']
-	|	['<>/'] | ['<>' 'eof']
+		['>/'] :Start1 | ['</'] :NotStart1 | ['$/'] :All1
+	|	['%/'] :Final1 | ['@/'] :NotFinal1 | ['<>/'] :Middle1
+	|	['>' 'eof'] :Start2 | ['<' 'eof'] :NotStart2 | ['$' 'eof'] :All2
+	|	['%' 'eof'] :Final2 | ['@' 'eof'] :NotFinal2 | ['<>' 'eof'] :Middle2
 
 	def aug_gbl_error
-		['>!'] | ['<!'] | ['$!'] | ['%!'] | ['@!']
-	|	['>' 'err'] | ['<' 'err'] | ['$' 'err'] | ['%' 'err'] | ['@' 'err']
-	|	['<>!'] | ['<>' 'err']
+		['>!'] :Start1 | ['<!'] :NotStart1 | ['$!'] :All1
+	|	['%!'] :Final1 | ['@!'] :NotFinal1 | ['<>!'] :Middle1
+	|	['>' 'err'] :Start2 | ['<' 'err'] :NotStart2 | ['$' 'err'] :All2
+	|	['%' 'err'] :Final2 | ['@' 'err'] :NotFinal2 | ['<>' 'err'] :Middle2
 
 	def aug_local_error
-		['>^'] | ['<^'] | ['$^'] | ['%^'] | ['@^']
-	|	['>' 'lerr'] | ['<' 'lerr'] | ['$' 'lerr'] | ['%' 'lerr'] | ['@' 'lerr']
-	|	['<>^'] | ['<>' 'lerr']
+		['>^'] :Start1 | ['<^'] :NotStart1 | ['$^'] :All1
+	|	['%^'] :Final1 | ['@^'] :NotFinal1 | ['<>^'] :Middle1
+	|	['>' 'lerr'] :Start2 | ['<' 'lerr'] :NotStart2 | ['$' 'lerr'] :All2
+	|	['%' 'lerr'] :Final2 | ['@' 'lerr'] :NotFinal2 | ['<>' 'lerr'] :Middle2
 
 	def factor_aug
 		[FactorAug: factor_aug AugBase: aug_base ActionRef: action_ref] :ActionRef
@@ -298,12 +293,12 @@ namespace ragel
 	|	[FactorAug: factor_aug AugBase: aug_base '(' Name: word ',' PriorityAug: priority_aug ')'] :NamedPriorEmbed
 	|	[FactorAug: factor_aug AugCond: aug_cond ActionRef: action_ref] :CondEmbed
 	|	[FactorAug: factor_aug AugCond: aug_cond '!' ActionRef: action_ref] :NegCondEmbed
-	|	[factor_aug aug_to_state action_ref]
-	|	[factor_aug aug_from_state action_ref]
-	|	[factor_aug aug_eof action_ref]
-	|	[factor_aug aug_gbl_error action_ref]
-	|	[factor_aug aug_local_error action_ref]
-	|	[factor_aug aug_local_error '(' word ',' action_ref ')']
+	|	[FactorAug: factor_aug AugToState: aug_to_state ActionRef: action_ref] :ToStateAction
+	|	[FactorAug: factor_aug AugFromState: aug_from_state ActionRef: action_ref] :FromStateAction
+	|	[FactorAug: factor_aug AugEof: aug_eof ActionRef: action_ref] :EofAction
+	|	[FactorAug: factor_aug AugGblError: aug_gbl_error ActionRef: action_ref] :GblErrorAction
+	|	[FactorAug: factor_aug AugLocalError: aug_local_error ActionRef: action_ref] :LocalErrorDef
+	|	[FactorAug: factor_aug AugLocalError: aug_local_error '(' ErrName: word ',' ActionRef: action_ref ')'] :LocalErrorName
 	|	[FactorRep: factor_rep] :Base
 
 	def factor_rep 

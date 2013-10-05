@@ -726,6 +726,166 @@ struct LoadRagel
 		return augType;
 	}
 
+	AugType loadAugToState( ragel::aug_to_state AugToState )
+	{
+		AugType augType = at_finish;
+		switch ( AugToState.prodName() ) {
+			case ragel::aug_to_state::_Start1:
+			case ragel::aug_to_state::_Start2:
+				augType = at_start_to_state;
+				break;
+			case ragel::aug_to_state::_NotStart1:
+			case ragel::aug_to_state::_NotStart2:
+				augType = at_not_start_to_state;
+				break;
+			case ragel::aug_to_state::_All1:
+			case ragel::aug_to_state::_All2:
+				augType = at_all_to_state;
+				break;
+			case ragel::aug_to_state::_Final1:
+			case ragel::aug_to_state::_Final2:
+				augType = at_final_to_state;
+				break;
+			case ragel::aug_to_state::_NotFinal1:
+			case ragel::aug_to_state::_NotFinal2:
+				augType = at_not_final_to_state;
+				break;
+			case ragel::aug_to_state::_Middle1:
+			case ragel::aug_to_state::_Middle2:
+				augType = at_middle_to_state;
+				break;
+		}
+		return augType;
+	}
+
+	AugType loadAugFromState( ragel::aug_from_state AugFromState )
+	{
+		AugType augType = at_finish;
+		switch ( AugFromState.prodName() ) {
+			case ragel::aug_from_state::_Start1:
+			case ragel::aug_from_state::_Start2:
+				augType = at_start_from_state;
+				break;
+			case ragel::aug_from_state::_NotStart1:
+			case ragel::aug_from_state::_NotStart2:
+				augType = at_not_start_from_state;
+				break;
+			case ragel::aug_from_state::_All1:
+			case ragel::aug_from_state::_All2:
+				augType = at_all_from_state;
+				break;
+			case ragel::aug_from_state::_Final1:
+			case ragel::aug_from_state::_Final2:
+				augType = at_final_from_state;
+				break;
+			case ragel::aug_from_state::_NotFinal1:
+			case ragel::aug_from_state::_NotFinal2:
+				augType = at_not_final_from_state;
+				break;
+			case ragel::aug_from_state::_Middle1:
+			case ragel::aug_from_state::_Middle2:
+				augType = at_middle_from_state;
+				break;
+		}
+		return augType;
+	}
+
+	AugType loadAugEof( ragel::aug_eof AugEof )
+	{
+		AugType augType = at_finish;
+		switch ( AugEof.prodName() ) {
+			case ragel::aug_eof::_Start1:
+			case ragel::aug_eof::_Start2:
+				augType = at_start_eof;
+				break;
+			case ragel::aug_eof::_NotStart1:
+			case ragel::aug_eof::_NotStart2:
+				augType = at_not_start_eof;
+				break;
+			case ragel::aug_eof::_All1:
+			case ragel::aug_eof::_All2:
+				augType = at_all_eof;
+				break;
+			case ragel::aug_eof::_Final1:
+			case ragel::aug_eof::_Final2:
+				augType = at_final_eof;
+				break;
+			case ragel::aug_eof::_NotFinal1:
+			case ragel::aug_eof::_NotFinal2:
+				augType = at_not_final_eof;
+				break;
+			case ragel::aug_eof::_Middle1:
+			case ragel::aug_eof::_Middle2:
+				augType = at_middle_eof;
+				break;
+		}
+		return augType;
+	}
+
+	AugType loadAugGblError( ragel::aug_gbl_error AugGblError )
+	{
+		AugType augType = at_finish;
+		switch ( AugGblError.prodName() ) {
+			case ragel::aug_gbl_error::_Start1:
+			case ragel::aug_gbl_error::_Start2:
+				augType = at_start_gbl_error;
+				break;
+			case ragel::aug_gbl_error::_NotStart1:
+			case ragel::aug_gbl_error::_NotStart2:
+				augType = at_not_start_gbl_error;
+				break;
+			case ragel::aug_gbl_error::_All1:
+			case ragel::aug_gbl_error::_All2:
+				augType = at_all_gbl_error;
+				break;
+			case ragel::aug_gbl_error::_Final1:
+			case ragel::aug_gbl_error::_Final2:
+				augType = at_final_gbl_error;
+				break;
+			case ragel::aug_gbl_error::_NotFinal1:
+			case ragel::aug_gbl_error::_NotFinal2:
+				augType = at_not_final_gbl_error;
+				break;
+			case ragel::aug_gbl_error::_Middle1:
+			case ragel::aug_gbl_error::_Middle2:
+				augType = at_middle_gbl_error;
+				break;
+		}
+		return augType;
+	}
+
+	AugType loadAugLocalError( ragel::aug_local_error AugLocalError )
+	{
+		AugType augType = at_finish;
+		switch ( AugLocalError.prodName() ) {
+			case ragel::aug_local_error::_Start1:
+			case ragel::aug_local_error::_Start2:
+				augType = at_start_local_error;
+				break;
+			case ragel::aug_local_error::_NotStart1:
+			case ragel::aug_local_error::_NotStart2:
+				augType = at_not_start_local_error;
+				break;
+			case ragel::aug_local_error::_All1:
+			case ragel::aug_local_error::_All2:
+				augType = at_all_local_error;
+				break;
+			case ragel::aug_local_error::_Final1:
+			case ragel::aug_local_error::_Final2:
+				augType = at_final_local_error;
+				break;
+			case ragel::aug_local_error::_NotFinal1:
+			case ragel::aug_local_error::_NotFinal2:
+				augType = at_not_final_local_error;
+				break;
+			case ragel::aug_local_error::_Middle1:
+			case ragel::aug_local_error::_Middle2:
+				augType = at_middle_local_error;
+				break;
+		}
+		return augType;
+	}
+
 	int loadPriorAug( ragel::priority_aug PriorAug )
 	{
 		InputLoc loc = PriorAug.loc();
@@ -805,6 +965,60 @@ struct LoadRagel
 				Action *action = loadActionRef( FactorAug.ActionRef() );
 				factorWithAug->conditions.append( ConditionTest( loc, 
 						augType, action, false ) );
+				break;
+			}
+			case ragel::factor_aug::_ToStateAction: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugToState( FactorAug.AugToState() );
+				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug->actions.append( ParserAction( loc, 
+						augType, 0, action ) );
+				break;
+			}
+			case ragel::factor_aug::_FromStateAction: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugFromState( FactorAug.AugFromState() );
+				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug->actions.append( ParserAction( loc, 
+						augType, 0, action ) );
+				break;
+			}
+			case ragel::factor_aug::_EofAction: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugEof( FactorAug.AugEof() );
+				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug->actions.append( ParserAction( loc, 
+						augType, 0, action ) );
+				break;
+			}
+			case ragel::factor_aug::_GblErrorAction: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugGblError( FactorAug.AugGblError() );
+				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug->actions.append( ParserAction( loc, 
+						augType, pd->curDefLocalErrKey, action ) );
+				break;
+			}
+			case ragel::factor_aug::_LocalErrorDef: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugLocalError( FactorAug.AugLocalError() );
+				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug->actions.append( ParserAction( loc, 
+						augType, pd->curDefLocalErrKey, action ) );
+				break;
+			}
+			case ragel::factor_aug::_LocalErrorName: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugLocalError( FactorAug.AugLocalError() );
+				Action *action = loadActionRef( FactorAug.ActionRef() );
+
+				string errName = FactorAug.ErrName().text();
+				LocalErrDictEl *localErrDictEl;
+				if ( pd->localErrDict.insert( errName, pd->nextLocalErrKey, &localErrDictEl ) )
+					pd->nextLocalErrKey += 1;
+
+				factorWithAug->actions.append( ParserAction( loc, 
+						augType, localErrDictEl->value, action ) );
 				break;
 			}
 			case ragel::factor_aug::_Base:
@@ -967,11 +1181,11 @@ struct LoadRagel
 	void loadInstantiation( ragel::instantiation Instantiation )
 	{
 		InputLoc loc = Instantiation.loc();
-
+		string name = loadMachineName( Instantiation.Name() );
 		MachineDef *machineDef = loadLm( Instantiation.Lm() );
 
 		/* Generic creation of machine for instantiation and assignment. */
-		tryMachineDef( loc, Instantiation.Name().text(), machineDef, true );
+		tryMachineDef( loc, name, machineDef, true );
 
 		//if ( $1->isSet )
 		//	exportContext.remove( exportContext.length()-1 );
@@ -980,14 +1194,34 @@ struct LoadRagel
 		if ( machineDef->join != 0 )
 			machineDef->join->loc = loc;
 	}
+	
+	string loadMachineName( ragel::word Name )
+	{
+		string data = Name.text();
+
+		/* Make/get the priority key. The name may have already been referenced
+		 * and therefore exist. */
+		PriorDictEl *priorDictEl;
+		if ( pd->priorDict.insert( data, pd->nextPriorKey, &priorDictEl ) )
+			pd->nextPriorKey += 1;
+		pd->curDefPriorKey = priorDictEl->value;
+
+		/* Make/get the local error key. */
+		LocalErrDictEl *localErrDictEl;
+		if ( pd->localErrDict.insert( data, pd->nextLocalErrKey, &localErrDictEl ) )
+			pd->nextLocalErrKey += 1;
+		pd->curDefLocalErrKey = localErrDictEl->value;
+
+		return data;
+	}
 
 	void loadAssignment( ragel::assignment Assignment )
 	{
 		InputLoc loc = Assignment.loc();
+		string name = loadMachineName( Assignment.Name() );
 
 		/* Main machine must be an instance. */
 		bool isInstance = false;
-		string name = Assignment.Name().text();
 		if ( name == mainMachine ) {
 			warning(loc) << "main machine will be implicitly instantiated" << endl;
 			isInstance = true;
@@ -996,7 +1230,7 @@ struct LoadRagel
 		MachineDef *machineDef = new MachineDef( loadJoin( Assignment.Join() ) );
 
 		/* Generic creation of machine for instantiation and assignment. */
-		tryMachineDef( loc, Assignment.Name().text(), machineDef, isInstance );
+		tryMachineDef( loc, name, machineDef, isInstance );
 
 		//if ( $1->isSet )
 		//	exportContext.remove( exportContext.length()-1 );
