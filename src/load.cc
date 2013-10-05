@@ -687,17 +687,40 @@ struct LoadRagel
 	{
 		AugType augType = at_finish;
 		switch ( AugBase.prodName() ) {
-			case ragel::aug_base::_Finish:
-				augType = at_finish;
-				break;
 			case ragel::aug_base::_Enter:
 				augType = at_start;
+				break;
+			case ragel::aug_base::_All:
+				augType = at_all;
+				break;
+			case ragel::aug_base::_Finish:
+				augType = at_finish;
 				break;
 			case ragel::aug_base::_Leave:
 				augType = at_leave;
 				break;
-			case ragel::aug_base::_All:
+		}
+		return augType;
+	}
+
+	AugType loadAugCond( ragel::aug_cond AugCond )
+	{
+		AugType augType = at_finish;
+		switch ( AugCond.prodName() ) {
+			case ragel::aug_cond::_Start1:
+			case ragel::aug_cond::_Start2:
+			case ragel::aug_cond::_Start3:
+				augType = at_start;
+				break;
+			case ragel::aug_cond::_All1:
+			case ragel::aug_cond::_All2:
+			case ragel::aug_cond::_All3:
 				augType = at_all;
+				break;
+			case ragel::aug_cond::_Leave1:
+			case ragel::aug_cond::_Leave2:
+			case ragel::aug_cond::_Leave3:
+				augType = at_leave;
 				break;
 		}
 		return augType;
@@ -766,6 +789,22 @@ struct LoadRagel
 
 				int priorityNum = loadPriorAug( FactorAug.PriorityAug() );
 				factorWithAug->priorityAugs.append( PriorityAug( augType, priorityName, priorityNum ) );
+				break;
+			}
+			case ragel::factor_aug::_CondEmbed: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugCond( FactorAug.AugCond() );
+				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug->conditions.append( ConditionTest( loc, 
+						augType, action, true ) );
+				break;
+			}
+			case ragel::factor_aug::_NegCondEmbed: {
+				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
+				AugType augType = loadAugCond( FactorAug.AugCond() );
+				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug->conditions.append( ConditionTest( loc, 
+						augType, action, false ) );
 				break;
 			}
 			case ragel::factor_aug::_Base:

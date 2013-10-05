@@ -252,10 +252,20 @@ namespace ragel
 	def aug_base
 		['@'] :Finish | ['>'] :Enter | ['%'] :Leave | ['$'] :All
 
+# aug_type_cond: TK_StartCond final { $$->loc = $1->loc; $$->augType = at_start; };
+# aug_type_cond: '>' KW_When final { $$->loc = $1->loc; $$->augType = at_start; };
+# aug_type_cond: TK_AllCond final { $$->loc = $1->loc; $$->augType = at_all; };
+# aug_type_cond: '$' KW_When final { $$->loc = $1->loc; $$->augType = at_all; };
+# aug_type_cond: TK_LeavingCond final { $$->loc = $1->loc; $$->augType = at_leave; };
+# aug_type_cond: '%' KW_When final { $$->loc = $1->loc; $$->augType = at_leave; };
+# aug_type_cond: KW_When final { $$->loc = $1->loc; $$->augType = at_all; };
+# aug_type_cond: KW_InWhen final { $$->loc = $1->loc; $$->augType = at_start; };
+# aug_type_cond: KW_OutWhen final { $$->loc = $1->loc; $$->augType = at_leave; };
+
 	def aug_cond
-		['>?'] | ['$?'] | ['%?']
-	|	['>' 'when'] | ['$' 'when'] | ['%' 'when']
-	|	['when'] | ['inwhen'] | ['outwhen']
+		['>?'] :Start1 | ['$?'] :All1 | ['%?'] :Leave1
+	|	['>' 'when'] :Start2 | ['$' 'when'] :All2 | ['%' 'when'] :Leave2
+	|	['inwhen'] :Start3 | ['when'] :All3 | ['outwhen'] :Leave3
 
 	def aug_to_state
 		['>~'] | ['<~'] | ['$~'] | ['%~'] | ['@~']
@@ -286,8 +296,8 @@ namespace ragel
 		[FactorAug: factor_aug AugBase: aug_base ActionRef: action_ref] :ActionRef
 	|	[FactorAug: factor_aug AugBase: aug_base PriorityAug: priority_aug] :PriorEmbed
 	|	[FactorAug: factor_aug AugBase: aug_base '(' Name: word ',' PriorityAug: priority_aug ')'] :NamedPriorEmbed
-	|	[factor_aug aug_cond action_ref]
-	|	[factor_aug aug_cond '!' action_ref]
+	|	[FactorAug: factor_aug AugCond: aug_cond ActionRef: action_ref] :CondEmbed
+	|	[FactorAug: factor_aug AugCond: aug_cond '!' ActionRef: action_ref] :NegCondEmbed
 	|	[factor_aug aug_to_state action_ref]
 	|	[factor_aug aug_from_state action_ref]
 	|	[factor_aug aug_eof action_ref]
