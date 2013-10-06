@@ -1338,7 +1338,6 @@ struct LoadRagel
 
 		while ( !WordList.end() ) {
 			inputItem->writeArgs.append( WordList.value().text() );
-			std::cerr << WordList.value().text() << std::endl;
 			WordList = WordList.next();
 		}
 
