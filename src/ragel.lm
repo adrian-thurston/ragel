@@ -363,17 +363,25 @@ namespace ragel
 	|	[hex]
 
 	def lm_act
-		['=>' action_ref]
-	|	[action_block]
+		['=>' ActionRef: action_ref] :ActionRef
+	|	[ActionBlock: action_block] :ActionBlock
+
+	def opt_lm_act
+		[LmAct: lm_act]
+	|	[]
 
 	def lm_stmt
-		[join lm_act? ';'] commit
-	|	[assignment]
-	|	[action_spec]
+		[Join: join OptLmAct: opt_lm_act ';'] :LmStmt commit
+	|	[Assignment: assignment] :Assignment
+	|	[ActionSpec: action_spec] :ActionSpec
+
+	def lm_stmt_list
+		[LmStmtList: lm_stmt_list LmStmt: lm_stmt] :Rec
+	|	[LmStmt: lm_stmt] :Base
 
 	def lm
 		[Join: join] :Join
-	|	['|*' LmStmtList: lm_stmt+ '*|'] :Lm
+	|	['|*' LmStmtList: lm_stmt_list '*|'] :Lm
 
 	def action_spec
 		['action' Name: word ActionBlock: action_block] commit

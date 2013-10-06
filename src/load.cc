@@ -292,26 +292,33 @@ struct LoadRagel
 		return inlineList;
 	}
 
+	Action *loadActionBlock( string name, ragel::action_block ActionBlock )
+	{
+		InputLoc loc = ActionBlock.loc();
+		InlineList *inlineList = loadInlineBlock( ActionBlock.InlineBlock() );
+
+		/* Add the action to the list of actions. */
+		Action *newAction = new Action( loc, name, 
+				inlineList, pd->nextCondId++ );
+
+		/* Append to the action list. */
+		pd->actionList.append( newAction );
+
+		return newAction;
+	}
+
 	void loadActionSpec( ragel::action_spec ActionSpec )
 	{
 		ragel::word Name = ActionSpec.Name();
 		InputLoc loc = Name.loc();
 		string name = Name.text();
-		InlineList *inlineList = 0;
 
 		if ( pd->actionDict.find( name ) ) {
 			/* Recover by just ignoring the duplicate. */
 			error(loc) << "action \"" << name << "\" already defined" << endl;
 		}
 		else {
-			inlineList = loadInlineBlock( ActionSpec.ActionBlock().InlineBlock() );
-
-			/* Add the action to the list of actions. */
-			Action *newAction = new Action( loc, name, 
-					inlineList, pd->nextCondId++ );
-
-			/* Insert to list and dict. */
-			pd->actionList.append( newAction );
+			Action *newAction = loadActionBlock( name, ActionSpec.ActionBlock() );
 			pd->actionDict.insert( newAction );
 		}
 	}
@@ -1167,15 +1174,92 @@ struct LoadRagel
 		return join;
 	}
 
-	MachineDef *loadLm( ragel::lm Lm )
+	Action *loadOptLmAction( ragel::opt_lm_act OptLmAct )
 	{
-		switch ( Lm.prodName() ) {
-			case ragel::lm::_Join:
-				return new MachineDef( loadJoin( Lm.Join() ) );
-			case ragel::lm::_Lm:
+		Action *action = 0;
+		if ( OptLmAct.LmAct() != 0 ) {
+			ragel::lm_act LmAct = OptLmAct.LmAct();
+			switch ( LmAct.prodName() ) {
+				case ragel::lm_act::_ActionRef:
+					action = loadActionRef( LmAct.ActionRef() );
+					break;
+				case ragel::lm_act::_ActionBlock:
+					action = loadActionBlock( string(), LmAct.ActionBlock() );
+					break;
+			}
+		}
+		return action;
+	}
+
+	LongestMatchPart *loadLmStmt( ragel::lm_stmt LmStmt )
+	{
+		LongestMatchPart *longestMatchPart = 0;
+		switch ( LmStmt.prodName() ) {
+			case ragel::lm_stmt::_LmStmt: {
+				InputLoc loc = LmStmt.loc();
+				Join *join = loadJoin( LmStmt.Join() );
+				Action *action = loadOptLmAction( LmStmt.OptLmAct() );
+
+				if ( action != 0 )
+					action->isLmAction = true;
+
+				longestMatchPart = new LongestMatchPart( join, action, 
+						loc, pd->nextLongestMatchId++ );
+
+				/* Provide a location to join. Unfortunately We don't
+				 * have the start of the join as in other occurances. Use the end. */
+				join->loc = loc;
+				break;
+			}
+			case ragel::lm_stmt::_Assignment:
+				loadAssignment( LmStmt.Assignment() );
+				break;
+			case ragel::lm_stmt::_ActionSpec:
+				loadActionSpec( LmStmt.ActionSpec() );
 				break;
 		}
-		return 0;
+		return longestMatchPart;
+	}
+
+	LmPartList *loadLmStmtList( ragel::lm_stmt_list LmStmtList )
+	{
+		LmPartList *lmPartList = 0;
+		switch ( LmStmtList.prodName() ) {
+			case ragel::lm_stmt_list::_Rec:
+				lmPartList = loadLmStmtList( LmStmtList.LmStmtList() );
+				break;
+			case ragel::lm_stmt_list::_Base:
+				lmPartList = new LmPartList;
+				break;
+		}
+
+		LongestMatchPart *lmPart = loadLmStmt( LmStmtList.LmStmt() );
+		if ( lmPart != 0 )
+			lmPartList->append( lmPart );
+
+		return lmPartList;
+	}
+
+	MachineDef *loadLm( ragel::lm Lm )
+	{
+		InputLoc loc = Lm.loc();
+		MachineDef *machineDef = 0;
+		switch ( Lm.prodName() ) {
+			case ragel::lm::_Join:
+				machineDef = new MachineDef( loadJoin( Lm.Join() ) );
+				break;
+			case ragel::lm::_Lm:
+				/* Create a new factor going to a longest match structure. Record
+				 * in the parse data that we have a longest match. */
+				LmPartList *lmPartList = loadLmStmtList( Lm.LmStmtList() );
+				LongestMatch *lm = new LongestMatch( loc, lmPartList );
+				pd->lmList.append( lm );
+				for ( LmPartList::Iter lmp = *lmPartList; lmp.lte(); lmp++ )
+					lmp->longestMatch = lm;
+				machineDef = new MachineDef( lm );
+				break;
+		}
+		return machineDef;
 	}
 
 	void loadInstantiation( ragel::instantiation Instantiation )

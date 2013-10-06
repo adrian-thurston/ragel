@@ -254,7 +254,7 @@ void LongestMatch::makeNameTree( ParseData *pd )
 	/* Create an anonymous scope for the longest match. Will be used for
 	 * restarting machine after matching a token. */
 	NameInst *prevNameInst = pd->curNameInst;
-	pd->curNameInst = pd->addNameInst( loc, 0, false );
+	pd->curNameInst = pd->addNameInst( loc, std::string(), false );
 
 	/* Recurse into all parts of the longest match operator. */
 	for ( LmPartList::Iter lmi = *longestMatchList; lmi.lte(); lmi++ )
