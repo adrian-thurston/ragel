@@ -402,6 +402,7 @@ struct LoadRagel
 				Token tok;
 				tok.set( c, strlen(c) );
 				orItem = new ReOrItem( RegOrChar.Char().loc(), tok );
+				delete[] c;
 				break;
 			}
 			case ragel::reg_or_char::_Range: {
@@ -457,10 +458,11 @@ struct LoadRagel
 			}
 
 			case ragel::reg_item::_Char: {
+				char *c = unescape( RegItem.Char().text().c_str() );
 				Token tok;
-				string s = RegItem.Char().text();
-				tok.set( s.c_str(), s.size() );
+				tok.set( c, strlen( c ) );
 				reItem = new ReItem( loc, tok );
+				delete[] c;
 				break;
 			}
 		}
