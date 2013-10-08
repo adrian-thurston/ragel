@@ -387,10 +387,10 @@ namespace ragel
 		['action' Name: word ActionBlock: action_block] commit
 
 	def assignment
-		[Name: word '=' Join: join ';'] commit
+		[OptExport: opt_export Name: word '=' Join: join ';'] commit
 
 	def instantiation
-		[Name: word ':=' Lm: lm ';'] commit
+		[OptExport: opt_export Name: word ':=' Lm: lm ';'] commit
 
 	def alphtype_type
 		[W1: word] :One
@@ -400,6 +400,10 @@ namespace ragel
 		[Word: word] 
 	|	[String: string]
 	|	[Word: word String: string]
+
+	def opt_export
+		['export'] :Export
+	|	[] :Base
 
 	def statement
 		['machine' MachineName: word ';'] :MachineName commit
@@ -414,7 +418,6 @@ namespace ragel
 	|	['write' Cmd: word ArgList: word* ';'] :Write commit
 	|	['getkey' Reparse: inline_expr_reparse] :GetKey commit
 	|	['import' inline_expr_reparse] commit
-	|	['export' inline_expr_reparse] commit
 	|	['include' IncludeSpec: include_spec ';'] :Include commit
 
 	def ragel_start 

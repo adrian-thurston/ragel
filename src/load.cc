@@ -1264,23 +1264,6 @@ struct LoadRagel
 		return machineDef;
 	}
 
-	void loadInstantiation( ragel::instantiation Instantiation )
-	{
-		InputLoc loc = Instantiation.loc();
-		string name = loadMachineName( Instantiation.Name() );
-		MachineDef *machineDef = loadLm( Instantiation.Lm() );
-
-		/* Generic creation of machine for instantiation and assignment. */
-		tryMachineDef( loc, name, machineDef, true );
-
-		//if ( $1->isSet )
-		//	exportContext.remove( exportContext.length()-1 );
-
-		/* Pass a location to join_or_lm */
-		if ( machineDef->join != 0 )
-			machineDef->join->loc = loc;
-	}
-	
 	string loadMachineName( ragel::word Name )
 	{
 		string data = Name.text();
@@ -1304,6 +1287,9 @@ struct LoadRagel
 	void loadAssignment( ragel::assignment Assignment )
 	{
 		InputLoc loc = Assignment.loc();
+		bool exportMachine = Assignment.OptExport().prodName() == ragel::opt_export::_Export;
+		if ( exportMachine )
+			exportContext.append( true );
 		string name = loadMachineName( Assignment.Name() );
 
 		/* Main machine must be an instance. */
@@ -1318,13 +1304,37 @@ struct LoadRagel
 		/* Generic creation of machine for instantiation and assignment. */
 		tryMachineDef( loc, name, machineDef, isInstance );
 
-		//if ( $1->isSet )
-		//	exportContext.remove( exportContext.length()-1 );
+		if ( exportMachine )
+			exportContext.remove( exportContext.length()-1 );
+
 
 		/* Pass a location to join_or_lm */
 		if ( machineDef->join != 0 )
 			machineDef->join->loc = loc;
 	}
+
+	void loadInstantiation( ragel::instantiation Instantiation )
+	{
+		InputLoc loc = Instantiation.loc();
+		bool exportMachine = Instantiation.OptExport().prodName() == ragel::opt_export::_Export;
+		if ( exportMachine )
+			exportContext.append( true );
+
+		string name = loadMachineName( Instantiation.Name() );
+
+		MachineDef *machineDef = loadLm( Instantiation.Lm() );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, true );
+
+		if ( exportMachine )
+			exportContext.remove( exportContext.length()-1 );
+
+		/* Pass a location to join_or_lm */
+		if ( machineDef->join != 0 )
+			machineDef->join->loc = loc;
+	}
+	
 
 	void loadWrite( ragel::word Cmd, ragel::_repeat_word WordList )
 	{
