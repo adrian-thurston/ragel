@@ -85,8 +85,15 @@ struct LoadRagel
 		string fileName = "input.rl";
 		string machine = MachineName.text();
 
-		if ( includeDepth > 0 && machine == sourceMachine )
-			machine = targetMachine;
+		if ( includeDepth > 0 ) {
+			if ( machine == sourceMachine ) {
+				machine = targetMachine;
+			}
+			else {
+				pd = 0;
+				return;
+			}
+		}
 
 		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
@@ -1418,9 +1425,12 @@ struct LoadRagel
 			fileName = unescaped;
 		}
 
+		string sectionName = pd->sectionName;
+
 		ParseData *savedPd = pd;
+		pd = 0;
 		includeDepth += 1;
-		loadFile( fileName.c_str(), pd->sectionName.c_str(), machine.c_str() );
+		loadFile( fileName.c_str(), sectionName.c_str(), machine.c_str() );
 		includeDepth -= 1;
 		pd = savedPd;
 	}
@@ -1517,10 +1527,13 @@ struct LoadRagel
 		colm_delete_program( program );
 	}
 
-	void loadStatement( ragel::statement Statement, const char *targetMachine, const char *sourceMachine )
+	bool loadStatement( ragel::statement Statement, const char *targetMachine, const char *sourceMachine )
 	{
 		ragel::statement::prod_name prodName = Statement.prodName();
 		if ( prodName != ragel::statement::_MachineName && pd == 0 && !machineNameError ) {
+			if ( includeDepth > 0 )
+				return false;
+
 			InputLoc loc = Statement.loc();
 			error(loc) << "this specification has no name, nor does any previous"
 				" specification" << endl;
@@ -1528,7 +1541,7 @@ struct LoadRagel
 		}
 
 		if ( machineNameError )
-			return;
+			return false;
 
 		switch( prodName ) {
 			case ragel::statement::_PrePushSpec:
@@ -1571,12 +1584,15 @@ struct LoadRagel
 				loadImport( Statement.ImportFn() );
 				break;
 		}
+		return true;
 	}
 
 	void loadStmtList( ragel::_repeat_statement StmtList, const char *targetMachine, const char *sourceMachine )
 	{
 		while ( !StmtList.end() ) {
-			loadStatement( StmtList.value(), targetMachine, sourceMachine );
+			bool b = loadStatement( StmtList.value(), targetMachine, sourceMachine );
+			if ( !b )
+				break;
 			StmtList = StmtList.next();
 		}
 	}
