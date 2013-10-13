@@ -3,8 +3,16 @@ include 'ragel.lm'
 def start
 	[SectionList: c_host::section*]
 
+def import_val
+	[Number: c_host::number] :Number
+|	[String: c_host::string] :String
+
+def import
+	[Name: c_host::ident Val: import_val]
+
 export RagelTree: start
 export RagelError: str
+export RagelImport: import*
 
 # The open is expected to succeed. The open is tested before
 # the colm program is called.
@@ -13,5 +21,60 @@ Stream: stream = open( FileName "r" )
 RagelTree = parse start[ Stream ]
 RagelError = error
 
-#for T: ragel::inline_expr_reparse in RagelTree
-#	print( T )
+import* import( FileName: str Start: start )
+{
+	print( "IMPORTING from " FileName "\n" )
+
+	ImportList: import* = cons import* []
+
+	for Pref: c_host::section* in RagelTree { 
+		# IMP_Define IMP_Word IMP_UInt
+		# IMP_Word '=' IMP_UInt
+		# IMP_Define IMP_Word IMP_Literal
+		# IMP_Word '=' IMP_Literal
+
+		if match Pref [
+			"#define " Word: c_host::ident c_host::whitespace
+			Number: c_host::number c_host::section*
+		]
+		{
+			ImportList = cons import*[ Word Number ImportList ]
+		}
+
+		if match Pref [
+			Word: c_host::ident c_host::whitespace
+			"=" c_host::whitespace
+			Number: c_host::number c_host::section*
+		]
+		{
+			ImportList = cons import*[ Word Number ImportList ]
+		}
+
+		if match Pref [
+			"#define " Word: c_host::ident c_host::whitespace
+			String: c_host::string c_host::section*
+		]
+		{
+			ImportList = cons import*[ Word String ImportList ]
+		}
+
+		if match Pref [
+			Word: c_host::ident c_host::whitespace
+			"=" c_host::whitespace
+			String: c_host::string c_host::section*
+		]
+		{
+			ImportList = cons import*[ Word String ImportList ]
+		}
+	}
+
+	return ImportList
+}
+
+# Extra operations.
+if ( argv.length > 0 ) {
+	Cmd: str = argv.pop()
+	if ( Cmd == 'import' ) {
+		RagelImport = import( FileName RagelTree )
+	}
+}

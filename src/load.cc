@@ -1264,10 +1264,8 @@ struct LoadRagel
 		return machineDef;
 	}
 
-	string loadMachineName( ragel::word Name )
+	string loadMachineName( string data )
 	{
-		string data = Name.text();
-
 		/* Make/get the priority key. The name may have already been referenced
 		 * and therefore exist. */
 		PriorDictEl *priorDictEl;
@@ -1290,7 +1288,7 @@ struct LoadRagel
 		bool exportMachine = Assignment.OptExport().prodName() == ragel::opt_export::_Export;
 		if ( exportMachine )
 			exportContext.append( true );
-		string name = loadMachineName( Assignment.Name() );
+		string name = loadMachineName( Assignment.Name().text() );
 
 		/* Main machine must be an instance. */
 		bool isInstance = false;
@@ -1307,7 +1305,6 @@ struct LoadRagel
 		if ( exportMachine )
 			exportContext.remove( exportContext.length()-1 );
 
-
 		/* Pass a location to join_or_lm */
 		if ( machineDef->join != 0 )
 			machineDef->join->loc = loc;
@@ -1320,7 +1317,7 @@ struct LoadRagel
 		if ( exportMachine )
 			exportContext.append( true );
 
-		string name = loadMachineName( Instantiation.Name() );
+		string name = loadMachineName( Instantiation.Name().text() );
 
 		MachineDef *machineDef = loadLm( Instantiation.Lm() );
 
@@ -1422,8 +1419,100 @@ struct LoadRagel
 		}
 
 		includeDepth += 1;
-		load( fileName.c_str(), pd->sectionName.c_str(), machine.c_str() );
+		loadFile( fileName.c_str(), pd->sectionName.c_str(), machine.c_str() );
 		includeDepth -= 1;
+	}
+
+	void loadImport( import Import )
+	{
+		InputLoc loc = Import.loc();
+		string name = loadMachineName( Import.Name().text() );
+
+		Literal *literal = 0;
+		switch ( Import.Val().prodName() ) {
+			case import_val::_String: {
+				string s = Import.Val().String().text();
+				Token tok;
+				tok.loc = loc;
+				tok.set( s.c_str(), s.size() );
+				literal = new Literal( tok, Literal::LitString );
+				break;
+			}
+
+			case import_val::_Number: {
+				string s = Import.Val().Number().text();
+				Token tok;
+				tok.loc = loc;
+				tok.set( s.c_str(), s.size() );
+				literal = new Literal( tok, Literal::Number );
+				break;
+			}
+		}
+
+		MachineDef *machineDef = new MachineDef(
+			new Join(
+				new Expression(
+					new Term(
+						new FactorWithAug(
+							new FactorWithRep(
+								new FactorWithNeg( new Factor( literal ) )
+							)
+						)
+					)
+				)
+			)
+		);
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, false );
+		machineDef->join->loc = loc;
+	}
+	
+	void loadImportList( _repeat_import ImportList )
+	{
+		while ( !ImportList.end() ) {
+			loadImport( ImportList.value() );
+			ImportList = ImportList.next();
+		}
+		
+	}
+
+	void loadImport( ragel::string ImportFn )
+	{
+		InputLoc loc = ImportFn.loc();
+		std::string fileName = ImportFn.text();
+
+		std::cout << "loading " << fileName << endl;
+
+		long length;
+		bool caseInsensitive;
+		char *unescaped = prepareLitString( loc,
+					fileName.c_str(), fileName.size(),
+					length, caseInsensitive );
+
+		const char *argv[3];
+		argv[0] = "import";
+		argv[1] = unescaped;
+		argv[2] = 0;
+
+		colm_program *program = colm_new_program( &colm_object );
+		colm_set_debug( program, 0 );
+		colm_run_program( program, 2, argv );
+
+		/* Extract the parse tree. */
+		start Start = RagelTree( program );
+		str Error = RagelError( program );
+		_repeat_import ImportList = RagelImport( program );
+
+		if ( Start == 0 ) {
+			gblErrorCount += 1;
+			InputLoc loc( Error.loc() );
+			error(loc) << fileName << ": parse error: " << Error.text() << std::endl;
+			return;
+		}
+
+		loadImportList( ImportList );
+		colm_delete_program( program );
 	}
 
 	void loadStatement( ragel::statement Statement, const char *targetMachine, const char *sourceMachine )
@@ -1476,6 +1565,9 @@ struct LoadRagel
 			case ragel::statement::_Include:
 				loadInclude( Statement.IncludeSpec() );
 				break;
+			case ragel::statement::_Import:
+				loadImport( Statement.ImportFn() );
+				break;
 		}
 	}
 
@@ -1526,7 +1618,7 @@ struct LoadRagel
 		}
 	}
 
-	void load( const char *inputFileName, const char *targetMachine, const char *sourceMachine )
+	void loadFile( const char *inputFileName, const char *targetMachine, const char *sourceMachine )
 	{
 		const char *argv[2];
 		argv[0] = inputFileName;
@@ -1560,7 +1652,7 @@ LoadRagel *newLoadRagel( InputData &id )
 
 void loadRagel( LoadRagel *lr, const char *inputFileName )
 {
-	lr->load( inputFileName, 0, 0 );
+	lr->loadFile( inputFileName, 0, 0 );
 }
 
 void deleteLoadRagel( LoadRagel *lr )

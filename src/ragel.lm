@@ -417,7 +417,7 @@ namespace ragel
 	|	['access' Reparse: inline_expr_reparse] :Access commit
 	|	['write' Cmd: word ArgList: word* ';'] :Write commit
 	|	['getkey' Reparse: inline_expr_reparse] :GetKey commit
-	|	['import' inline_expr_reparse] commit
+	|	['import' ImportFn: string ';'] :Import commit
 	|	['include' IncludeSpec: include_spec ';'] :Include commit
 
 	def ragel_start 
