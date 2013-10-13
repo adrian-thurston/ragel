@@ -332,7 +332,6 @@ struct LoadRagel
 
 	void loadPrePush( ragel::action_block PrePushBlock )
 	{
-		InlineList *inlineList = 0;
 		InputLoc loc = PrePushBlock.loc();
 
 		if ( pd->prePushExpr != 0 ) {
@@ -340,12 +339,11 @@ struct LoadRagel
 			error(loc) << "pre_push code already defined" << endl;
 		}
 
-		pd->prePushExpr = inlineList;
+		pd->prePushExpr = loadInlineBlock( PrePushBlock.InlineBlock() );
 	}
 
 	void loadPostPop( ragel::action_block PostPopBlock )
 	{
-		InlineList *inlineList = 0;
 		InputLoc loc = PostPopBlock.loc();
 
 		if ( pd->postPopExpr != 0 ) {
@@ -353,7 +351,7 @@ struct LoadRagel
 			error(loc) << "post_pop code already defined" << endl;
 		}
 
-		pd->postPopExpr = inlineList;
+		pd->postPopExpr = loadInlineBlock( PostPopBlock.InlineBlock() );
 	}
 
 	void tryMachineDef( InputLoc &loc, std::string name, 
