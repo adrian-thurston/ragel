@@ -1418,9 +1418,11 @@ struct LoadRagel
 			fileName = unescaped;
 		}
 
+		ParseData *savedPd = pd;
 		includeDepth += 1;
 		loadFile( fileName.c_str(), pd->sectionName.c_str(), machine.c_str() );
 		includeDepth -= 1;
+		pd = savedPd;
 	}
 
 	void loadImport( import Import )
