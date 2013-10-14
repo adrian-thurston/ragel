@@ -4,9 +4,10 @@
  */
 bool neg;
 int val;
-%%
+
 val = 0;
 neg = false;
+
 %%{
 	machine StateChart;
 
@@ -50,7 +51,8 @@ neg = false;
 	action oneof { printi val; prints "\n"; }
 	main := ( atoi '\n' @oneof )*;
 }%%
-/* _____INPUT_____
+
+#ifdef _____INPUT_____
 "1\n"
 "12\n"
 "222222\n"
@@ -60,9 +62,9 @@ neg = false;
 "--123\n"
 "-99\n"
 " -3000\n"
-_____INPUT_____ */
+#endif
 
-/* _____OUTPUT_____
+#ifdef _____OUTPUT_____
 1
 ACCEPT
 12
@@ -78,4 +80,4 @@ FAIL
 -99
 ACCEPT
 FAIL
-_____OUTPUT_____ */
+#endif
