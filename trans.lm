@@ -91,6 +91,9 @@ if ( !RagelTree ) {
 	exit(1)
 }
 
+# Find the machine name.
+MachineName: ragel::machine_name = ragel::machine_name in RagelTree
+
 prints( Output
 	"/*
 	" * @LANG: [Lang]
@@ -180,7 +183,7 @@ prints( Output
 	"
 	"void finish( )
 	"{
-	"	if ( cs >= AtoI_first_final )
+	"	if ( cs >= [$MachineName.MachineName]_first_final )
 	"		printf( \"ACCEPT\\n\" );
 	"	else
 	"		printf( \"FAIL\\n\" );
