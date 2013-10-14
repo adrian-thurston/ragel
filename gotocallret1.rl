@@ -1,5 +1,6 @@
 /*
  * @LANG: indep
+ * @NEEDS_EOF: yes
  */
 
 /*
@@ -14,7 +15,7 @@
 char comm;
 int top;
 int stack[32];
-%%
+
 %%{
 	machine GotoCallRet;
 
@@ -56,7 +57,8 @@ int stack[32];
 	# error anywhere, garble the line.
 	main := command* $!{fhold;fgoto garble_line;}; 
 }%%
-/* _____INPUT_____
+
+#ifdef _____INPUT_____
 "lkajsdf\n"
 "2134\n"
 "(\n"
@@ -74,8 +76,9 @@ int stack[32];
 "a abcdef\n"
 "h"
 "a aa1"
-_____INPUT_____ */
-/* _____OUTPUT_____
+#endif
+
+#ifdef _____OUTPUT_____
 error: garbling line
 ACCEPT
 error: garbling line
@@ -111,4 +114,4 @@ FAIL
 error: garbling line
 error: failed to recover
 FAIL
-_____OUTPUT_____ */
+#endif

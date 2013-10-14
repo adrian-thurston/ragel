@@ -1,9 +1,10 @@
 /*
  * @LANG: indep
+ * @NEEDS_EOF: yes
  *
  * Test works with split code gen.
  */
-%%
+
 %%{
 	machine eofact;
 
@@ -19,7 +20,8 @@
 	);
 
 }%%
-/* _____INPUT_____
+
+#ifdef _____INPUT_____
 ""
 "h"
 "hell"
@@ -29,8 +31,9 @@
 "ther"
 "there"
 "friend"
-_____INPUT_____ */
-/* _____OUTPUT_____
+#endif
+
+#ifdef _____OUTPUT_____
 a1
 a3
 FAIL
@@ -48,4 +51,4 @@ FAIL
 a4
 ACCEPT
 FAIL
-_____OUTPUT_____ */
+#endif

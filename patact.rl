@@ -1,5 +1,6 @@
 /*
  * @LANG: indep
+ * @NEEDS_EOF: yes
  */
 
 char comm;
@@ -9,7 +10,7 @@ ptr ts;
 ptr te;
 int act;
 int val;
-%%
+
 %%{
 	machine patact;
 
@@ -44,7 +45,8 @@ int val;
 		'!' => { prints "immdiate\n"; fgoto exec_test; };
 	*|;
 }%%
-/* _____INPUT_____
+
+#ifdef _____INPUT_____
 "abcd foix\n"
 "abcd\nanother\n"
 "123 foix\n"
@@ -52,8 +54,9 @@ int val;
 "!abcd\nanother\n"
 "!123 foix\n"
 ";"
-_____INPUT_____ */
-/* _____OUTPUT_____
+#endif
+
+#ifdef _____OUTPUT_____
 word (w/lbh)
 word
 space
@@ -96,5 +99,4 @@ ACCEPT
 going to semi
 in semi
 ACCEPT
-_____OUTPUT_____ */
-
+#endif
