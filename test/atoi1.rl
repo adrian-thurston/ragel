@@ -39,7 +39,7 @@ neg = false;
 	main := atoi '\n' @print;
 }%%
 
-_____INPUT_____
+#ifdef _____INPUT_____
 "1\n"
 "12\n"
 "222222\n"
@@ -49,7 +49,7 @@ _____INPUT_____
 "--123\n"
 "-99\n"
 " -3000\n"
-_____INPUT_____
+#endif
 
 #ifdef _____OUTPUT_____
 1

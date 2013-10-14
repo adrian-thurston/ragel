@@ -11,14 +11,18 @@ lex
 	rl INPUT /'_'+ 'INPUT' '_'+/
 	rl OUTPUT /'_'+ 'OUTPUT' '_'+/
 
-	token input_id / INPUT /
-
 	token tk_ident /ident/
 	token tk_number /digit+/
 	token tk_hex_number /'0x' [0-9a-fA-F]+/
 
 	token output
 		/ '#ifdef' ' '* OUTPUT any* :>> ( '#endif' ) /
+
+	token input_id
+		/ '#ifdef' ' '* INPUT /
+
+	token endif
+		/ '#endif' /
 
 	token tk_cpp_comment
 		/ cpp_comment /
@@ -53,7 +57,7 @@ def input_list
 | 	[input_string]
 
 def input
-	[input_id input_list input_id]
+	[input_id input_list endif]
 
 def tok
 	[tk_ident]
