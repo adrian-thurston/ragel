@@ -51,7 +51,7 @@ _____INPUT_____
 " -3000\n"
 _____INPUT_____
 
-/* _____OUTPUT_____
+#ifdef _____OUTPUT_____
 1
 ACCEPT
 12
@@ -67,4 +67,4 @@ FAIL
 -99
 ACCEPT
 FAIL
-_____OUTPUT_____ */
+#endif
