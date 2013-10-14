@@ -1,11 +1,12 @@
 /*
  * @LANG: indep
+ * @NEEDS_EOF: yes
  */
 ptr ts;
 ptr te;
 int act;
 int token;
-%%
+
 %%{
 	machine scanner;
 
@@ -25,10 +26,12 @@ int token;
 		};
 	*|;
 }%%
-/* _____INPUT_____
+
+#ifdef _____INPUT_____
 "a"
-_____INPUT_____ */
-/* _____OUTPUT_____
+#endif
+
+#ifdef _____OUTPUT_____
 pat1
 ACCEPT
-_____OUTPUT_____ */
+#endif

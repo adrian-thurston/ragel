@@ -1,11 +1,13 @@
 /*
  * @LANG: indep
+ * @NEEDS_EOF: yes
  */
+
 ptr ts;
 ptr te;
 int act;
 int token;
-%%
+
 %%{
 	machine scanner;
 
@@ -51,14 +53,16 @@ int token;
 		'\n';
 	*|;
 }%%
-/* _____INPUT_____
+
+#ifdef _____INPUT_____
 "abbc1d1d2\n"
-_____INPUT_____ */
-/* _____OUTPUT_____
+#endif
+
+#ifdef _____OUTPUT_____
 on last     yes
 on next     yes
 on lag      yes
 lm switch1  yes
 lm switch2  yes
 ACCEPT
-_____OUTPUT_____ */
+#endif

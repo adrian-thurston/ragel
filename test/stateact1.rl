@@ -3,7 +3,7 @@
  *
  * Test in and out state actions.
  */
-%%
+
 %%{
 	machine state_act;
 
@@ -30,11 +30,11 @@
 			>from a2;
 }%%
 
-/* _____INPUT_____
+#ifdef _____INPUT_____
 "hi\nhi\n"
-_____INPUT_____ */
+#endif
 
-/* _____OUTPUT_____
+#ifdef _____OUTPUT_____
 a2
 b2
 c1
@@ -45,4 +45,4 @@ c1
 c2
 b1
 FAIL
-_____OUTPUT_____ */
+#endif

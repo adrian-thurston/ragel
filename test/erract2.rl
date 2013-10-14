@@ -1,9 +1,10 @@
 /*
  * @LANG: indep
+ * @NEEDS_EOF: yes
  *
  * Test error actions.
  */
-%%
+
 %%{
 	machine ErrAct;
 
@@ -23,7 +24,7 @@
 		) '\n';
 }%%
 
-/* _____INPUT_____
+#ifdef _____INPUT_____
 ""
 "h"
 "x"
@@ -37,9 +38,9 @@
 "hellx"
 "hello\n"
 "hellox"
-_____INPUT_____ */
+#endif
 
-/* _____OUTPUT_____
+#ifdef _____OUTPUT_____
 err_start
 eof_start
 err_all
@@ -89,4 +90,4 @@ ACCEPT
 err_all
 err_out
 FAIL
-_____OUTPUT_____ */
+#endif

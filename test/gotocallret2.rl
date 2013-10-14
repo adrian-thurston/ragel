@@ -1,5 +1,6 @@
 /*
  * @LANG: indep
+ * @NEEDS_EOF: yes
  */
 
 char comm;
@@ -9,7 +10,7 @@ ptr ts;
 ptr te;
 int act;
 int val;
-%%
+
 %%{
 	machine GotoCallRet;
 
@@ -48,7 +49,8 @@ int val;
 		'\n';
 	*|;
 }%%
-/* _____INPUT_____
+
+#ifdef _____INPUT_____
 "{a{b[c d]d}c}\n"
 "[a{b[c d]d}c}\n"
 "[a[b]c]d{ef{g{h}i}j}l\n"
@@ -60,8 +62,9 @@ int val;
 "{{}\n"
 "[[[[[[]]]]]]\n"
 "[[[[[[]]}]]]\n"
-_____INPUT_____ */
-/* _____OUTPUT_____
+#endif
+
+#ifdef _____OUTPUT_____
 { word handle { word handle [ word handle space word handle ] word handle } word handle } ACCEPT
 [ word handle { word handle [ word handle space word handle ] word handle } word handle FAIL
 [ word handle [ word handle ] word handle ] word handle { word handle { word handle { word handle } word handle } word handle } word handle ACCEPT
@@ -73,5 +76,4 @@ word handle space word handle space word handle ACCEPT
 { { } FAIL
 [ [ [ [ [ [ ] ] ] ] ] ] ACCEPT
 [ [ [ [ [ [ ] ] FAIL
-_____OUTPUT_____ */
-
+#endif
