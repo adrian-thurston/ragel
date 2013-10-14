@@ -1,95 +1,85 @@
 include '../src/ragel.lm'
 
-namespace indep_host
-	lex 
-		literal '%%{', '}%%'
-		literal 'int', 'bool', 'char', 'ptr', 'printi', 'prints', 'printf'
+lex 
+	literal '%%{', '}%%'
+	literal 'int', 'bool', 'char', 'ptr', 'printi', 'prints', 'printf'
 
-		literal ';', '<', '>', '(', ')'
+	literal ';', '<', '>', '(', ')'
 
-		ignore / ( [ \t] | NL )+ /
+	ignore / ( [ \t] | NL )+ /
 
-		rl NL / '\n' /
+	rl INPUT /'_'+ 'INPUT' '_'+/
+	rl OUTPUT /'_'+ 'OUTPUT' '_'+/
 
-		rl s_literal
-			/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+	token input_id / INPUT /
 
-		rl d_literal
-			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+	token tk_ident /ident/
+	token tk_number /digit+/
+	token tk_hex_number /'0x' [0-9a-fA-F]+/
 
-		rl INPUT /'_'+ 'INPUT' '_'+/
-		rl OUTPUT /'_'+ 'OUTPUT' '_'+/
+	token output
+		/ '/*' ' '* OUTPUT any* :>> ( OUTPUT ' '* '*/' ) /
 
-		token input_id / INPUT /
+	token comment
+		/ c_comment | cpp_comment /
 
-		token ident /ident/
-		token number /digit+/
-		token hex_number /'0x' [0-9a-fA-F]+/
+	token string
+		/ s_literal | d_literal /
 
-		token output
-			/ '/*' ' '* OUTPUT any* :>> ( OUTPUT ' '* '*/' ) /
-
-		token comment
-			/ c_comment | cpp_comment /
-
-		token string
-			/ s_literal | d_literal /
-
-		token indep_any / any /
-	end
-
-	def input_string
-		[string]
-
-	def input_list
-		[input_list input_string]
-	| 	[input_string]
-
-	def input
-		[input_id input_list input_id]
-
-	def tok
-		[ident]
-	|	[number]
-	|	[hex_number]
-	|	[input]
-	|	[output]
-	|	[comment]
-	|	[string]
-	|	['<' type '>' '(' tok* ')']
-	|	['(' tok* ')']
-	|	['printi' tok ';']
-	|	['prints' tok ';']
-	|	['printf' '(' tok* ')' ';']
-	|	[indep_any]
-	|	[';']
-	|	['<']
-	|	['>']
-
-	def section_multiline
-		['%%{' ragel::ragel_start '}%%']
-
-	def type
-		['int'] | ['bool'] | ['char'] | ['ptr']
-
-	def var_decl
-		[type ident ';']
-
-	def stmt
-		[var_decl]
-
-	def section
-		[section_multiline]
-	|	[stmt]
-	|	[tok]
+	token indep_any / any /
 end
+
+def input_string
+	[string]
+
+def input_list
+	[input_list input_string]
+| 	[input_string]
+
+def input
+	[input_id input_list input_id]
+
+def tok
+	[tk_ident]
+|	[tk_number]
+|	[tk_hex_number]
+|	[input]
+|	[output]
+|	[comment]
+|	[string]
+|	['<' type '>' '(' tok* ')']
+|	['(' tok* ')']
+|	['printi' tok ';']
+|	['prints' tok ';']
+|	['printf' '(' tok* ')' ';']
+|	[indep_any]
+|	[';']
+|	['<']
+|	['>']
+
+def section_multiline
+	['%%{' ragel::ragel_start '}%%']
+
+def type
+	['int'] | ['bool'] | ['char'] | ['ptr']
+
+def var_decl
+	[type tk_ident ';']
+
+def stmt
+	[var_decl]
+
+def section
+	[section_multiline]
+|	[stmt]
+|	[tok]
 
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
 Lang: str = argv.pop()
 
 def start
-	[indep_host::section*]
+	[section*]
 
 Input: stream = open( InputFile "r" )
 Output: stream = open( OutputFile "w" )
@@ -112,49 +102,49 @@ prints( Output
 	"
 )
 
-int indepToHost( Indep: ref<indep_host::section*> )
+int indepToHost( Indep: ref<section*> )
 {
-	for Decl: indep_host::var_decl in Indep {
+	for Decl: var_decl in Indep {
 		if match Decl
-			"bool [Ident: indep_host::ident];
+			"bool [Ident: tk_ident];
 		{
-			Decl = cons indep_host::var_decl
+			Decl = cons var_decl
 				"int [Ident];
 		}
 	}
 
-	for Tok: indep_host::tok in Indep {
+	for Tok: tok in Indep {
 		if match Tok "true"
-			Tok = cons indep_host::tok "1"
+			Tok = cons tok "1"
 		elsif match Tok "false"
-			Tok = cons indep_host::tok "0"
-		elsif match Tok [indep_host::'<' indep_host::type indep_host::'>' indep_host::'(' TokList: indep_host::tok* indep_host::')']
-			Tok = cons indep_host::tok [indep_host::'(' TokList indep_host::')']
-		elsif match Tok [indep_host::'printi' V: indep_host::tok indep_host::';' ] {
-			cons VL: indep_host::tok*[V]
-			Tok = cons indep_host::tok[ "printf( \"%d\", [V] );"]
+			Tok = cons tok "0"
+		elsif match Tok ['<' type '>' '(' TokList: tok* ')']
+			Tok = cons tok ['(' TokList ')']
+		elsif match Tok ['printi' V: tok ';' ] {
+			cons VL: tok*[V]
+			Tok = cons tok[ "printf( \"%d\", [V] );"]
 		}
-		elsif match Tok [indep_host::'prints' V: indep_host::tok indep_host::';' ] {
-			cons VL: indep_host::tok*[V]
-			Tok = cons indep_host::tok[ "printf( \"%s\", [V] );"]
+		elsif match Tok ['prints' V: tok ';' ] {
+			cons VL: tok*[V]
+			Tok = cons tok[ "printf( \"%s\", [V] );"]
 		}
 			
 	}
 }
 
-for Section: indep_host::section in RagelTree {
-	if match Section [Decl: indep_host::var_decl] {
-		cons SectionList: indep_host::section* [Decl]
+for Section: section in RagelTree {
+	if match Section [Decl: var_decl] {
+		cons SectionList: section* [Decl]
 		indepToHost( SectionList )
 		prints( Output SectionList )
 	}
 }
 
-for Section: indep_host::section in RagelTree {
-	if match Section [indep_host::section_multiline] {
+for Section: section in RagelTree {
+	if match Section [section_multiline] {
 		for Action: ragel::action_block in Section {
 			# Reparse as lang-independent code.
-			parse SectionList: indep_host::section*[$Action]
+			parse SectionList: section*[$Action]
 
 			# Translate to specific language.
 			indepToHost( SectionList )
@@ -203,7 +193,7 @@ prints( Output
 )
 
 NR: int = 0
-for InputString: indep_host::input_string in RagelTree {
+for InputString: input_string in RagelTree {
 	prints( Output ^InputString ',\n' )
 	NR = NR + 1
 }
@@ -229,7 +219,7 @@ prints( Output
 	"
 )
 
-for Section: indep_host::section in RagelTree {
-	if match Section [OutputBlock: indep_host::output]
+for Section: section in RagelTree {
+	if match Section [OutputBlock: output]
 		prints( Output OutputBlock )
 }
