@@ -2,10 +2,10 @@
  * @LANG: indep
  * @ALLOW_GENFLAGS: -T0 -T1 -G0 -G1 -G2
  */
+
 bool i;
 bool j;
 bool k;
-%%
 
 %%{
 	machine foo;
@@ -35,7 +35,7 @@ bool k;
 	
 }%%
 
-/* _____INPUT_____ 
+#ifdef _____INPUT_____ 
 "000abc\n"
 "100abc\n"
 "010abc\n"
@@ -44,8 +44,9 @@ bool k;
 "101abc\n"
 "011abc\n"
 "111abc\n"
-_____INPUT_____ */
-/* _____OUTPUT_____
+#endif
+
+#ifdef _____OUTPUT_____
 FAIL
   one
 ACCEPT
@@ -66,4 +67,4 @@ ACCEPT
   two
   three
 ACCEPT
-_____OUTPUT_____ */
+#endif

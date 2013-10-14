@@ -1,5 +1,6 @@
 /*
  * @LANG: indep
+ * @NEEDS_EOF: yes
  *
  * const char *data = ts;
  * int len = te - ts;
@@ -8,11 +9,12 @@
  *     cout << data[i];
  * cout << '\n';
  */
+
 ptr ts;
 ptr te;
 int act;
 int token;
-%%
+
 %%{
 	machine scanner;
 
@@ -287,12 +289,14 @@ int token;
 	};
 	*|;
 }%%
-/* _____INPUT_____
+
+#ifdef _____INPUT_____
 "\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22"
 "'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/"
 "'\n'\n"
-_____INPUT_____ */
-/* _____OUTPUT_____
+#endif
+
+#ifdef _____OUTPUT_____
 <192> "\"hi"
 <241>  
 <242> /!
@@ -355,4 +359,4 @@ ACCEPT
 <242> /! * !/
 ACCEPT
 FAIL
-_____OUTPUT_____ */
+#endif

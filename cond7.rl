@@ -1,9 +1,9 @@
 /* 
  * @LANG: indep
  */
+
 int i;
 int c;
-%%
 
 %%{
 	machine foo;
@@ -31,7 +31,7 @@ int c;
     main := sub sub '\n';
 }%%
 
-/* _____INPUT_____ 
+#ifdef _____INPUT_____ 
 "00\n"
 "019\n"
 "190\n"
@@ -39,8 +39,9 @@ int c;
 "1040000\n"
 "104000a\n"
 "104000\n"
-_____INPUT_____ */
-/* _____OUTPUT_____
+#endif
+
+#ifdef _____OUTPUT_____
 count: 0
 count: 0
 ACCEPT
@@ -79,4 +80,4 @@ item: 48
 item: 48
 item: 48
 FAIL
-_____OUTPUT_____ */
+#endif
