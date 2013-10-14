@@ -1549,7 +1549,7 @@ struct LoadRagel
 				loadPostPop( Statement.PostPopBlock() );
 				break;
 			case ragel::statement::_MachineName:
-				loadMachineName( Statement.MachineName(), targetMachine, sourceMachine );
+				loadMachineName( Statement.MachineName().MachineName(), targetMachine, sourceMachine );
 				break;
 			case ragel::statement::_ActionSpec:
 				loadActionSpec( Statement.ActionSpec() );

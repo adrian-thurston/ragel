@@ -405,8 +405,11 @@ namespace ragel
 		['export'] :Export
 	|	[] :Base
 
+	def machine_name
+		['machine' MachineName: word ';']
+
 	def statement
-		['machine' MachineName: word ';'] :MachineName commit
+		[MachineName: machine_name] :MachineName commit
 	|	[Assignment: assignment] :Assignment
 	|	[Instantiation: instantiation] :Instantiation
 	|	[ActionSpec: action_spec] :ActionSpec
