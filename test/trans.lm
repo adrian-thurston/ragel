@@ -18,7 +18,7 @@ lex
 	token tk_hex_number /'0x' [0-9a-fA-F]+/
 
 	token output
-		/ '/*' ' '* OUTPUT any* :>> ( OUTPUT ' '* '*/' ) /
+		/ '#ifdef' ' '* OUTPUT any* :>> ( '#endif' ) /
 
 	token comment
 		/ c_comment | cpp_comment /
