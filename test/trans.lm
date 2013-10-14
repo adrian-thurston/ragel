@@ -2,7 +2,12 @@ include '../src/ragel.lm'
 
 namespace indep_host
 	lex 
-		literal '%%', '%%{', '}%%'
+		literal '%%{', '}%%'
+		literal 'int', 'bool', 'char', 'ptr'
+
+		literal ';'
+
+		ignore / ( [ \t] | NL )+ /
 
 		rl NL / '\n' /
 
@@ -12,40 +17,63 @@ namespace indep_host
 		rl d_literal
 			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
 
+		rl INPUT /'_'+ 'INPUT' '_'+/
+		rl OUTPUT /'_'+ 'OUTPUT' '_'+/
+
+		token input_id / INPUT /
+
 		token ident /ident/
 		token number /digit+/
 		token hex_number /'0x' [0-9a-fA-F]+/
 
+		token output
+			/ '/*' ' '* OUTPUT any* :>> ( OUTPUT ' '* '*/' ) /
+
 		token comment
-			/c_comment | cpp_comment/
+			/ c_comment | cpp_comment /
 
 		token string
 			/ s_literal | d_literal /
 
-		token whitespace
-			/ ( [ \t] | NL )+ /
-
 		token indep_any / any /
 	end
+
+	def input_string
+		[string]
+
+	def input_list
+		[input_list input_string]
+	| 	[input_string]
+
+	def input
+		[input_id input_list input_id]
 
 	def tok
 		[ident]
 	|	[number]
 	|	[hex_number]
+	|	[input]
+	|	[output]
 	|	[comment]
 	|	[string]
-	|	[whitespace]
 	|	[indep_any]
-
-	def section_single
-		['%%']
+	|	[';']
 
 	def section_multiline
 		['%%{' ragel::ragel_start '}%%']
 
+	def type
+		['int'] | ['bool'] | ['char'] | ['ptr']
+
+	def var_decl
+		[type ident ';']
+
+	def stmt
+		[var_decl]
+
 	def section
-		[section_single]
-	|	[section_multiline]
+		[section_multiline]
+	|	[stmt]
 	|	[tok]
 end
 
@@ -71,9 +99,97 @@ prints( Output
 	" * @LANG: [Lang]
 	" * @GENERATED: yes
 	" */
+	"
+	"#include <string.h>
+	"#include <stdio.h>
+	"
 )
+
+int printDecls( Output: stream Decl: indep_host::var_decl )
+{
+	if match Decl
+		"bool [Ident: indep_host::ident];
+	{
+		Decl = cons indep_host::var_decl
+			"int [Ident];
+	}
+
+	prints( Output Decl )
+}
+
+for Section: indep_host::section in RagelTree {
+	if match Section [Decl: indep_host::var_decl]
+		printDecls( Output Decl )
+}
 
 for Section: indep_host::section in RagelTree {
 	if match Section [indep_host::section_multiline]
-		prints( Output Section )
+		prints( Output '\n' Section '\n' )
+}
+
+prints( Output
+	"int cs;
+	"
+	"%% write data;
+	"
+	"void init()
+	"{
+)
+
+prints( Output
+	"	%% write init;
+	"}
+	"
+	"void exec( char *data, int len )
+	"{
+	"	char *p = data;
+	"	char *pe = data + len;
+	"	char *eof = pe;
+	"	%% write exec;
+	"}
+	"
+	"void finish( )
+	"{
+	"	if ( cs >= ${machine}_first_final )
+	"		printf( \"ACCEPT\\n\" );
+	"	else
+	"		printf( \"FAIL\\n\" );
+	"}
+	"
+)
+
+prints( Output
+	"char *inp\[\] = {
+)
+
+NR: int = 0
+for InputString: indep_host::input_string in RagelTree {
+	prints( Output ^InputString ',\n' )
+	NR = NR + 1
+}
+
+prints( Output
+	"};
+	"
+)
+
+prints( Output "int inplen = " NR ";\n\n" )
+
+prints( Output
+	"int main( )
+	"{
+	"	int i;
+	"	for ( i = 0; i < inplen; i++ ) {
+	"		init();
+	"		exec( inp\[i\], strlen(inp\[i\]) );
+	"		finish();
+	"	}
+	"	return 0;
+	"}
+	"
+)
+
+for Section: indep_host::section in RagelTree {
+	if match Section [OutputBlock: indep_host::output]
+		prints( Output OutputBlock '\n' )
 }

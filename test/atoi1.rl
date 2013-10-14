@@ -3,7 +3,7 @@
  */
 bool neg;
 int val;
-%%
+
 val = 0;
 neg = false;
 %%{
@@ -38,7 +38,8 @@ neg = false;
 
 	main := atoi '\n' @print;
 }%%
-/* _____INPUT_____
+
+_____INPUT_____
 "1\n"
 "12\n"
 "222222\n"
@@ -48,7 +49,7 @@ neg = false;
 "--123\n"
 "-99\n"
 " -3000\n"
-_____INPUT_____ */
+_____INPUT_____
 
 /* _____OUTPUT_____
 1
