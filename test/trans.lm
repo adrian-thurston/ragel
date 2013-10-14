@@ -3,9 +3,9 @@ include '../src/ragel.lm'
 namespace indep_host
 	lex 
 		literal '%%{', '}%%'
-		literal 'int', 'bool', 'char', 'ptr'
+		literal 'int', 'bool', 'char', 'ptr', 'printi', 'prints', 'printf'
 
-		literal ';'
+		literal ';', '<', '>', '(', ')'
 
 		ignore / ( [ \t] | NL )+ /
 
@@ -56,8 +56,15 @@ namespace indep_host
 	|	[output]
 	|	[comment]
 	|	[string]
+	|	['<' type '>' '(' tok* ')']
+	|	['(' tok* ')']
+	|	['printi' tok ';']
+	|	['prints' tok ';']
+	|	['printf' '(' tok* ')' ';']
 	|	[indep_any]
 	|	[';']
+	|	['<']
+	|	['>']
 
 	def section_multiline
 		['%%{' ragel::ragel_start '}%%']
@@ -105,26 +112,59 @@ prints( Output
 	"
 )
 
-int printDecls( Output: stream Decl: indep_host::var_decl )
+int indepToHost( Indep: ref<indep_host::section*> )
 {
-	if match Decl
-		"bool [Ident: indep_host::ident];
-	{
-		Decl = cons indep_host::var_decl
-			"int [Ident];
+	for Decl: indep_host::var_decl in Indep {
+		if match Decl
+			"bool [Ident: indep_host::ident];
+		{
+			Decl = cons indep_host::var_decl
+				"int [Ident];
+		}
 	}
 
-	prints( Output Decl )
+	for Tok: indep_host::tok in Indep {
+		if match Tok "true"
+			Tok = cons indep_host::tok "1"
+		elsif match Tok "false"
+			Tok = cons indep_host::tok "0"
+		elsif match Tok [indep_host::'<' indep_host::type indep_host::'>' indep_host::'(' TokList: indep_host::tok* indep_host::')']
+			Tok = cons indep_host::tok [indep_host::'(' TokList indep_host::')']
+		elsif match Tok [indep_host::'printi' V: indep_host::tok indep_host::';' ] {
+			cons VL: indep_host::tok*[V]
+			Tok = cons indep_host::tok[ "printf( \"%d\", [V] );"]
+		}
+		elsif match Tok [indep_host::'prints' V: indep_host::tok indep_host::';' ] {
+			cons VL: indep_host::tok*[V]
+			Tok = cons indep_host::tok[ "printf( \"%s\", [V] );"]
+		}
+			
+	}
 }
 
 for Section: indep_host::section in RagelTree {
-	if match Section [Decl: indep_host::var_decl]
-		printDecls( Output Decl )
+	if match Section [Decl: indep_host::var_decl] {
+		cons SectionList: indep_host::section* [Decl]
+		indepToHost( SectionList )
+		prints( Output SectionList )
+	}
 }
 
 for Section: indep_host::section in RagelTree {
-	if match Section [indep_host::section_multiline]
+	if match Section [indep_host::section_multiline] {
+		for Action: ragel::action_block in Section {
+			# Reparse as lang-independent code.
+			parse SectionList: indep_host::section*[$Action]
+
+			# Translate to specific language.
+			indepToHost( SectionList )
+
+			# Reparse back to ragel action block.
+			Action = parse ragel::action_block[$SectionList]
+		}
+
 		prints( Output '\n' Section '\n' )
+	}
 }
 
 prints( Output
@@ -150,7 +190,7 @@ prints( Output
 	"
 	"void finish( )
 	"{
-	"	if ( cs >= ${machine}_first_final )
+	"	if ( cs >= AtoI_first_final )
 	"		printf( \"ACCEPT\\n\" );
 	"	else
 	"		printf( \"FAIL\\n\" );
@@ -191,5 +231,5 @@ prints( Output
 
 for Section: indep_host::section in RagelTree {
 	if match Section [OutputBlock: indep_host::output]
-		prints( Output OutputBlock '\n' )
+		prints( Output OutputBlock )
 }
