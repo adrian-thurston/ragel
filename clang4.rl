@@ -6,7 +6,7 @@
 char array[32];
 int pos;
 int line;
-%%
+
 pos = 0;
 line = 1;
 %%{
@@ -151,11 +151,13 @@ line = 1;
 	# the newline machine overlays line counting.
 	main := clang_main & newline;
 }%%
-/* _____INPUT_____
+
+#ifdef _____INPUT_____
 "999 0xaAFF99 99.99 /!\n!/ 'lksdj' //\n\"\n\nliteral\n\n\n\"0x00aba foobardd.ddsf 0x0.9\n"
 "wordwithnum00asdf\n000wordfollowsnum,makes new symbol\n\nfinishing early /! unfinished ...\n"
-_____INPUT_____ */
-/* _____OUTPUT_____
+#endif
+
+#ifdef _____OUTPUT_____
 int(1,3): 999
 hex(1,6): aAFF99
 float(1,5): 99.99
@@ -184,5 +186,4 @@ ident(2,6): symbol
 ident(4,9): finishing
 ident(4,5): early
 FAIL
-_____OUTPUT_____ */
-
+#endif
