@@ -20,14 +20,30 @@ lex
 	token output
 		/ '#ifdef' ' '* OUTPUT any* :>> ( '#endif' ) /
 
-	token comment
-		/ c_comment | cpp_comment /
+	token tk_cpp_comment
+		/ cpp_comment /
+
+	token c_comm_open
+		/ '/*' /
 
 	token string
 		/ s_literal | d_literal /
 
 	token indep_any / any /
 end
+
+lex
+	token comm_val /'@' [A-Za-z0-9_]+ ': ' [^\n]+ '\n' /
+	token comm_term /'*/'/
+	token comm_any / any /
+end
+
+def comm_item
+	[comm_val]
+|	[comm_any]
+
+def c_comment
+	[c_comm_open comm_item* comm_term]
 
 def input_string
 	[string]
@@ -45,7 +61,8 @@ def tok
 |	[tk_hex_number]
 |	[input]
 |	[output]
-|	[comment]
+|	[tk_cpp_comment]
+|	[c_comment]
 |	[string]
 |	['<' type '>' '(' tok* ')']
 |	['(' tok* ')']
@@ -93,6 +110,16 @@ if ( !RagelTree ) {
 
 # Find the machine name.
 MachineName: ragel::machine_name = ragel::machine_name in RagelTree
+
+# Do we need EOF?
+NeedsEof: bool = false
+for CommVal: comm_val in RagelTree {
+	if $CommVal ==
+		'@NEEDS_EOF: yes\n'
+	{
+		NeedsEof = true
+	}
+}
 
 prints( Output
 	"/*
@@ -177,7 +204,12 @@ prints( Output
 	"{
 	"	char *p = data;
 	"	char *pe = data + len;
-	"	char *eof = pe;
+)
+
+if NeedsEof
+	prints( Output "	char *eof = pe;\n" )
+
+prints( Output
 	"	%% write exec;
 	"}
 	"
