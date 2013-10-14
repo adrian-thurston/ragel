@@ -59,7 +59,6 @@ c_compiler="@CC@"
 objc_compiler="@GOBJC@"
 d_compiler="@GDC@"
 java_compiler="@JAVAC@"
-txl_engine="@TXL@"
 ruby_engine="@RUBY@"
 csharp_compiler="@GMCS@"
 go_compiler="@GOBIN@ build"
@@ -213,9 +212,7 @@ for test_case; do
 		indep)
 			lang_opt="";
 
-			# If we have no txl engine then skip this test.
-			[ -z "$txl_engine" ] && continue
-			for lang in c d java ruby csharp go; do
+			for lang in c; do
 				case $lang in 
 					c) lf="-C";;
 					d) lf="-D";;
