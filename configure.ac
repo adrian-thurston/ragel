@@ -129,9 +129,6 @@ AC_SUBST(GOBJC)
 dnl Check for the Java compiler.
 AC_CHECK_PROG(JAVAC, javac, javac)
 
-dnl Check for TXL.
-AC_CHECK_PROG(TXL, txl, txl)
-
 dnl Check for Ruby.
 AC_CHECK_PROG(RUBY, ruby, ruby)
 
