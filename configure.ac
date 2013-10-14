@@ -86,6 +86,7 @@ LDFLAGS="$LDFLAGS -L$COLM_LIB"
 
 AC_CHECK_HEADER([colm/colm.h], [], [AC_ERROR([colm.h not found])])
 AC_CHECK_LIB([colmd], [colm_new_program])
+AC_SUBST(COLM_FULL)
 
 dnl Checks to carry out if we are building the manual.
 if test "x$build_manual" = "xyes"; then
