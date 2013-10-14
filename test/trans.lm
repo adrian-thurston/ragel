@@ -2,9 +2,9 @@ include '../src/ragel.lm'
 
 lex 
 	literal '%%{', '}%%'
-	literal 'int', 'bool', 'char', 'ptr', 'printi', 'prints', 'printf'
+	literal 'int', 'bool', 'char', 'ptr', 'printi', 'printb', 'prints', 'printf', 'fwrite'
 
-	literal ';', '<', '>', '(', ')'
+	literal ';', '<', '>', '(', ')', '[', ']', '='
 
 	ignore / ( [ \t] | NL )+ /
 
@@ -71,12 +71,17 @@ def tok
 |	['<' type '>' '(' tok* ')']
 |	['(' tok* ')']
 |	['printi' tok ';']
+|	['printb' tok ';']
 |	['prints' tok ';']
 |	['printf' '(' tok* ')' ';']
+|	['fwrite' '(' tok* ')' ';']
 |	[indep_any]
 |	[';']
 |	['<']
 |	['>']
+|	['[']
+|	[']']
+|	['=']
 
 def section_multiline
 	['%%{' ragel::ragel_start '}%%']
@@ -84,11 +89,19 @@ def section_multiline
 def type
 	['int'] | ['bool'] | ['char'] | ['ptr']
 
+def opt_arr
+	['[' tok ']']
+|	[]
+
 def var_decl
-	[type tk_ident ';']
+	[type tk_ident opt_arr ';']
+
+def expr_stmt
+	[tk_ident '=' tok* ';']
 
 def stmt
 	[var_decl]
+|	[expr_stmt]
 
 def section
 	[section_multiline]
@@ -140,10 +153,10 @@ int indepToHost( Indep: ref<section*> )
 {
 	for Decl: var_decl in Indep {
 		if match Decl
-			"bool [Ident: tk_ident];
+			"bool [Ident: tk_ident OptArr: opt_arr];
 		{
 			Decl = cons var_decl
-				"int [Ident];
+				"int [Ident OptArr];
 		}
 	}
 
@@ -157,6 +170,10 @@ int indepToHost( Indep: ref<section*> )
 		elsif match Tok ['printi' V: tok ';' ] {
 			cons VL: tok*[V]
 			Tok = cons tok[ "printf( \"%d\", [V] );"]
+		}
+		elsif match Tok ['printb' V: tok ';' ] {
+			cons VL: tok*[V]
+			Tok = cons tok[ "fwrite( [V], 1, pos, stdout );"]
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
 			cons VL: tok*[V]
@@ -199,6 +216,14 @@ prints( Output
 	"void init()
 	"{
 )
+
+for Section: section in RagelTree {
+	if match Section [ExprStmt: expr_stmt] {
+		cons SectionList: section* [ExprStmt]
+		indepToHost( SectionList )
+		prints( Output SectionList )
+	}
+}
 
 prints( Output
 	"	%% write init;
