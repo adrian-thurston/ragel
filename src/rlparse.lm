@@ -23,16 +23,9 @@ RagelError = error
 
 import* import( FileName: str Start: start )
 {
-	print( "IMPORTING from " FileName "\n" )
-
 	ImportList: import* = cons import* []
 
 	for Pref: c_host::section* in RagelTree { 
-		# IMP_Define IMP_Word IMP_UInt
-		# IMP_Word '=' IMP_UInt
-		# IMP_Define IMP_Word IMP_Literal
-		# IMP_Word '=' IMP_Literal
-
 		if match Pref [
 			"#define " Word: c_host::ident c_host::whitespace
 			Number: c_host::number c_host::section*
