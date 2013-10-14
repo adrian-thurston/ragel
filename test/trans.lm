@@ -2,9 +2,8 @@ include '../src/ragel.lm'
 
 lex 
 	literal '%%{', '}%%'
-	literal 'int', 'bool', 'char', 'ptr', 'printi', 'printb', 'prints', 'printf', 'fwrite'
-
-	literal ';', '<', '>', '(', ')', '[', ']', '='
+	literal 'int', 'bool', 'char', 'ptr', 'printi', 'printb', 'prints', 'print_token', 'printf', 'fwrite', 'first_token_char'
+	literal ';', '<', '>', '(', ')', '[', ']', '=', '*'
 
 	ignore / ( [ \t] | NL )+ /
 
@@ -61,6 +60,7 @@ def input
 
 def tok
 	[tk_ident]
+|	[tk_ident '[' tok ']']
 |	[tk_number]
 |	[tk_hex_number]
 |	[input]
@@ -73,21 +73,24 @@ def tok
 |	['printi' tok ';']
 |	['printb' tok ';']
 |	['prints' tok ';']
+|	['print_token' ';']
+|	['first_token_char']
 |	['printf' '(' tok* ')' ';']
 |	['fwrite' '(' tok* ')' ';']
-|	[indep_any]
 |	[';']
 |	['<']
 |	['>']
 |	['[']
 |	[']']
 |	['=']
+|	['*']
+|	[indep_any]
 
 def section_multiline
 	['%%{' ragel::ragel_start '}%%']
 
 def type
-	['int'] | ['bool'] | ['char'] | ['ptr']
+	['int'] | ['bool'] | ['char'] | ['char' '*'] | ['ptr']
 
 def opt_arr
 	['[' tok ']']
@@ -158,6 +161,12 @@ int indepToHost( Indep: ref<section*> )
 			Decl = cons var_decl
 				"int [Ident OptArr];
 		}
+		elsif match Decl
+			"ptr [Ident: tk_ident];
+		{
+			Decl = cons var_decl
+				"char* [Ident];
+		}
 	}
 
 	for Tok: tok in Indep {
@@ -179,7 +188,12 @@ int indepToHost( Indep: ref<section*> )
 			cons VL: tok*[V]
 			Tok = cons tok[ "printf( \"%s\", [V] );"]
 		}
-			
+		elsif match Tok ['print_token' ';' ] {
+			Tok = cons tok[ "fwrite ( ts , 1 , te - ts , stdout );" ]
+		}
+		elsif match Tok ['first_token_char'] {
+			Tok = cons tok ["ts\[0\]"]
+		}
 	}
 }
 
