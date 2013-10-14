@@ -2,6 +2,8 @@ SUBDIRS = c dot xml go
 
 # d crack cs java ml rbx ruby
 
+COLM = @COLM_FULL@
+
 bin_PROGRAMS = ragel
 
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl
