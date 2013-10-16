@@ -65,8 +65,7 @@ struct LoadRagel
 		pd(0),
 		machineSpec(0),
 		machineName(0),
-		includeDepth(0),
-		machineNameError(false)
+		includeDepth(0)
 	{}
 
 	InputData &id;
@@ -74,25 +73,26 @@ struct LoadRagel
 	char *machineSpec;
 	char *machineName;
 	int includeDepth;
-	int machineNameError;
 
 	/* Should this go in the parse data? Probably. */
 	Vector<bool> exportContext;
 
-	void loadMachineName( ragel::word MachineName, const char *targetMachine, const char *sourceMachine )
+	void loadMachineStmt( ragel::word MachineName, const char *targetMachine, const char *searchMachine )
 	{
 		InputLoc sectionLoc;
 		string fileName = "input.rl";
 		string machine = MachineName.text();
 
 		if ( includeDepth > 0 ) {
-			if ( machine == sourceMachine ) {
-				machine = targetMachine;
-			}
-			else {
+			/* Check if the the machine is the one we are searching for. If
+			 * not, reset pd. Otherwise, rename it to target machine because we
+			 * are drawing the statements into target. */
+			if ( machine != searchMachine ) {
 				pd = 0;
 				return;
 			}
+
+			machine = targetMachine;
 		}
 
 		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
@@ -1525,21 +1525,23 @@ struct LoadRagel
 		colm_delete_program( program );
 	}
 
-	bool loadStatement( ragel::statement Statement, const char *targetMachine, const char *sourceMachine )
+	/* Return true if we are to stop processing the statement list. */
+	bool loadStatement( ragel::statement Statement )
 	{
 		ragel::statement::prod_name prodName = Statement.prodName();
-		if ( prodName != ragel::statement::_MachineName && pd == 0 && !machineNameError ) {
-			if ( includeDepth > 0 )
-				return false;
+		InputLoc loc = Statement.loc();
 
-			InputLoc loc = Statement.loc();
-			error(loc) << "this specification has no name, nor does any previous"
-				" specification" << endl;
-			machineNameError = true;
+		if ( pd == 0 ) {
+			/* No parse data can happen for two reasons. Either because none
+			 * was given, or because we are in an included file and the machine
+			 * name did not match the machine name we were looking for. */
+			if ( includeDepth == 0 ) {
+				error(loc) << "this specification has no name, nor does any previous"
+					" specification" << endl;
+			}
+
+			return true;
 		}
-
-		if ( machineNameError )
-			return false;
 
 		switch( prodName ) {
 			case ragel::statement::_PrePushSpec:
@@ -1549,7 +1551,7 @@ struct LoadRagel
 				loadPostPop( Statement.PostPopBlock() );
 				break;
 			case ragel::statement::_MachineName:
-				loadMachineName( Statement.MachineName().MachineName(), targetMachine, sourceMachine );
+				error(loc) << "machine statements must be the first statement" << endl;
 				break;
 			case ragel::statement::_ActionSpec:
 				loadActionSpec( Statement.ActionSpec() );
@@ -1582,24 +1584,36 @@ struct LoadRagel
 				loadImport( Statement.ImportFn() );
 				break;
 		}
-		return true;
+		return false;
 	}
 
-	void loadStmtList( ragel::_repeat_statement StmtList, const char *targetMachine, const char *sourceMachine )
+	void loadStmtList( ragel::_repeat_statement StmtList, const char *targetMachine, const char *searchMachine )
 	{
+		if ( StmtList.end() )
+			return;
+
+		/* Handle machine statements separately. They must appear at the head
+		 * of a block. */
+		ragel::statement::prod_name prodName = StmtList.value().prodName();
+		if ( prodName == ragel::statement::_MachineName ) {
+			/* Process the name, move over it. */
+			loadMachineStmt( StmtList.value().MachineName().MachineName(), targetMachine, searchMachine );
+			StmtList = StmtList.next();
+		}
+
 		while ( !StmtList.end() ) {
-			bool b = loadStatement( StmtList.value(), targetMachine, sourceMachine );
-			if ( !b )
+			bool stop = loadStatement( StmtList.value() );
+			if ( stop )
 				break;
 			StmtList = StmtList.next();
 		}
 	}
 
-	void loadSection( c_host::section Section, const char *targetMachine, const char *sourceMachine )
+	void loadSection( c_host::section Section, const char *targetMachine, const char *searchMachine )
 	{
 		switch ( Section.prodName() ) {
 			case c_host::section::_MultiLine:
-				loadStmtList( Section.StmtList(), targetMachine, sourceMachine );
+				loadStmtList( Section.StmtList(), targetMachine, searchMachine );
 				break;
 
 			case c_host::section::_Tok:
@@ -1622,19 +1636,19 @@ struct LoadRagel
 		}
 	}
 
-	void load( start Start, const char *targetMachine, const char *sourceMachine )
+	void load( start Start, const char *targetMachine, const char *searchMachine )
 	{
 		InputLoc loc;
 		exportContext.append( false );
 
 		c_host::_repeat_section SectionList = Start.SectionList();
 		while ( !SectionList.end() ) {
-			loadSection( SectionList.value(), targetMachine, sourceMachine );
+			loadSection( SectionList.value(), targetMachine, searchMachine );
 			SectionList = SectionList.next();
 		}
 	}
 
-	void loadFile( const char *inputFileName, const char *targetMachine, const char *sourceMachine )
+	void loadFile( const char *inputFileName, const char *targetMachine, const char *searchMachine )
 	{
 		const char *argv[2];
 		argv[0] = inputFileName;
@@ -1655,7 +1669,7 @@ struct LoadRagel
 			return;
 		}
 
-		load( Start, targetMachine, sourceMachine );
+		load( Start, targetMachine, searchMachine );
 
 		colm_delete_program( program );
 	}
