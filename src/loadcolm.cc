@@ -631,7 +631,7 @@ struct LoadColm
 
 	PredType walkPredType( pred_type predType )
 	{
-		PredType pt;
+		PredType pt = PredLeft;
 		switch ( predType.prodName() ) {
 		case pred_type::_Left:
 			pt = PredLeft;
@@ -687,7 +687,7 @@ struct LoadColm
 
 	NamespaceQual *walkRegionQual( region_qual regionQual )
 	{
-		NamespaceQual *qual;
+		NamespaceQual *qual = 0;
 		switch ( regionQual.prodName() ) {
 		case region_qual::_Qual: {
 			qual = walkRegionQual( regionQual.RegionQual() );
@@ -1088,7 +1088,7 @@ struct LoadColm
 		_repeat_code_expr codeExprList = printStmt.CodeExprList();
 		CallArgVect *exprVect = walkCodeExprList( codeExprList );
 
-		LangStmt::Type type;
+		LangStmt::Type type = LangStmt::PrintType;
 		switch ( printStmt.prodName() ) {
 		case print_stmt::_Tree:
 			type = LangStmt::PrintType;
@@ -1109,7 +1109,7 @@ struct LoadColm
 
 	QualItemVect *walkQual( qual &Qual )
 	{
-		QualItemVect *qualItemVect;
+		QualItemVect *qualItemVect = 0;
 		qual RecQual = Qual.Qual();
 		switch ( Qual.prodName() ) {
 		case qual::_Dot:
@@ -1713,7 +1713,7 @@ struct LoadColm
 
 	LangExpr *walkCodeRelational( code_relational codeRelational )
 	{
-		LangExpr *expr = 0, *left;
+		LangExpr *expr = 0, *left = 0;
 
 		if ( codeRelational.prodName() != code_relational::_Base )
 			left = walkCodeRelational( codeRelational.Relational() );
