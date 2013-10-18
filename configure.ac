@@ -66,10 +66,16 @@ dnl
 
 EXPECTED_COLM_VERSION=0.11
 
-AC_CHECK_PROG(COLM, colm, colm)
+AC_ARG_WITH(colm,
+	[AC_HELP_STRING([--with-colm], [location of colm install])],
+		[COLM="$withval/bin/colm"],
+		[COLM=`which colm`] )
+
 if test -z "$COLM"; then
-	AC_ERROR([error: colm is required to build the parsers])
+	AC_ERROR([colm is required to build ragel])
 fi
+
+AC_CHECK_FILES([$COLM], [colm], [AC_ERROR([colm is required to build ragel])])
 
 dnl extract the first two precision points from the version
 COLM_VERSION=[`$COLM -v | sed -n '/version/s/^.*version \([0-9]\+\.[0-9]\+\).*$/\1/p'`]
@@ -77,7 +83,7 @@ if test "$COLM_VERSION" != $EXPECTED_COLM_VERSION; then
 	AC_ERROR([expected colm version $EXPECTED_COLM_VERSION, but $COLM_VERSION is installed])
 fi
 
-COLM_FULL=[`which $COLM`]
+COLM_FULL=[$COLM]
 COLM_INCLUDE=[`dirname $COLM_FULL`/../include]
 COLM_LIB=[`dirname $COLM_FULL`/../lib]
 
