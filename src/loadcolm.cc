@@ -786,6 +786,13 @@ struct LoadColm
 			String fieldName = El.OptName().Name().data();
 			captureField = ObjectField::cons( El.OptName().Name().loc(), 0, fieldName );
 		}
+		else {
+			/* default the prod name. */
+			if ( El.prodName() == prod_el::_Id ) {
+				String fieldName = El.Id().data();
+				captureField = ObjectField::cons( El.Id().loc(), 0, fieldName );
+			}
+		}
 
 		RepeatType repeatType = walkOptRepeat( El.OptRepeat() );
 		NamespaceQual *nspaceQual = walkRegionQual( El.RegionQual() );
