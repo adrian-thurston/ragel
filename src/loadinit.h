@@ -55,8 +55,8 @@ struct LoadInit
 	LexExpression *walkLexExpr( lex_expr &LexExpr );
 	void walkTokenList( token_list &TokenList );
 	void walkLexRegion( item &LexRegion );
-	void walkProdElList( ProdElList *list, prod_el_list &prodElList );
-	void walkProdList( LelDefList *list, prod_list &prodList );
+	void walkProdElList( String defName, ProdElList *list, prod_el_list &prodElList );
+	void walkProdList( String defName, LelDefList *list, prod_list &prodList );
 	void walkDefinition( item &define );
 
 	/* Constructing statements needed to parse and export the input. */

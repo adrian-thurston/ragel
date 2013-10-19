@@ -38,11 +38,11 @@ using std::string;
 
 extern RuntimeData colm_object;
 
-void LoadInit::walkProdElList( ProdElList *list, prod_el_list &prodElList )
+void LoadInit::walkProdElList( String defName, ProdElList *list, prod_el_list &prodElList )
 {
 	if ( prodElList.ProdElList() != 0 ) {
 		prod_el_list RightProdElList = prodElList.ProdElList();
-		walkProdElList( list, RightProdElList );
+		walkProdElList( defName, list, RightProdElList );
 	}
 	
 	if ( prodElList.ProdEl() != 0 ) {
@@ -57,7 +57,10 @@ void LoadInit::walkProdElList( ProdElList *list, prod_el_list &prodElList )
 		}
 		else {
 			/* Default the capture to the name of the type. */
-			captureField = ObjectField::cons( internal, 0, typeName );
+			String fieldName = typeName;
+			if ( strcmp( fieldName, defName ) == 0 )
+				fieldName = "_" + defName;
+			captureField = ObjectField::cons( internal, 0, fieldName );
 		}
 
 		RepeatType repeatType = RepeatNone;
@@ -72,16 +75,16 @@ void LoadInit::walkProdElList( ProdElList *list, prod_el_list &prodElList )
 	}
 }
 
-void LoadInit::walkProdList( LelDefList *outProdList, prod_list &prodList )
+void LoadInit::walkProdList( String defName, LelDefList *outProdList, prod_list &prodList )
 {
 	if ( prodList.ProdList() != 0 ) {
 		prod_list RightProdList = prodList.ProdList();
-		walkProdList( outProdList, RightProdList );
+		walkProdList( defName, outProdList, RightProdList );
 	}
 
 	ProdElList *outElList = new ProdElList;
 	prod_el_list prodElList = prodList.Prod().ProdElList();
-	walkProdElList( outElList, prodElList );
+	walkProdElList( defName, outElList, prodElList );
 
 	String name;
 	if ( prodList.Prod().OptName().Name() != 0 )
@@ -261,10 +264,11 @@ void LoadInit::walkDefinition( item &define )
 {
 	prod_list ProdList = define.ProdList();
 
-	LelDefList *defList = new LelDefList;
-	walkProdList( defList, ProdList );
-
 	String name = define.DefId().text().c_str();
+
+	LelDefList *defList = new LelDefList;
+	walkProdList( name, defList, ProdList );
+
 	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
