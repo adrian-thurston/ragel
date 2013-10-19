@@ -51,8 +51,13 @@ void LoadInit::walkProdElList( ProdElList *list, prod_el_list &prodElList )
 
 		ObjectField *captureField = 0;
 		if ( El.OptName().Name() != 0 ) {
+			/* Has a capture. */
 			String fieldName = El.OptName().Name().text().c_str();
 			captureField = ObjectField::cons( internal, 0, fieldName );
+		}
+		else {
+			/* Default the capture to the name of the type. */
+			captureField = ObjectField::cons( internal, 0, typeName );
 		}
 
 		RepeatType repeatType = RepeatNone;
