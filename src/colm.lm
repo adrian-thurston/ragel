@@ -183,328 +183,324 @@ def start
 	[RootItemList: root_item*]
 
 def root_item
-	[RlDef: rl_def] :Rl commit
-|	[LiteralDef: literal_def] :Literal commit
-|	[TokenDef: token_def] :Token commit
-|	[IgnoreDef: ignore_def] :Ignore commit
-|	[CflDef: cfl_def] :Cfl commit
-|	[RegionDef: region_def] :Region commit
-|	[ContextDef: context_def] :Context commit
-|	[NamespaceDef: namespace_def] :Namespace commit
-|	[FunctionDef: function_def] :Function commit
-|	[IterDef: iter_def] :Iter commit
-|	[Statement: statement] :Statement commit
-|	[GlobalDef: global_def] :Global commit
-|	[ExportDef: export_def] :Export commit
-|	[PreEofDef: pre_eof_def] :PreEof commit
-|	[PrecedenceDef: precedence_def] :Precedence commit
-|	[AliasDef: alias_def] :Alias commit
-|	[Include: include] :Include commit
+	[rl_def] :Rl commit
+|	[literal_def] :Literal commit
+|	[token_def] :Token commit
+|	[ignore_def] :Ignore commit
+|	[cfl_def] :Cfl commit
+|	[region_def] :Region commit
+|	[context_def] :Context commit
+|	[namespace_def] :Namespace commit
+|	[function_def] :Function commit
+|	[iter_def] :Iter commit
+|	[statement] :Statement commit
+|	[global_def] :Global commit
+|	[export_def] :Export commit
+|	[pre_eof_def] :PreEof commit
+|	[precedence_def] :Precedence commit
+|	[alias_def] :Alias commit
+|	[include] :Include commit
 
 def include
-	[INCLUDE File: lit]
+	[INCLUDE lit]
 
 def precedence_def
-	[PredType: pred_type PredTokenList: pred_token_list]
+	[pred_type pred_token_list]
 
 def pred_type
-	[Left: LEFT] :Left
-|	[Right: RIGHT] :Right
-|	[NonAssoc: NONASSOC] :NonAssoc
+	[LEFT] :Left
+|	[RIGHT] :Right
+|	[NONASSOC] :NonAssoc
 
 def pred_token_list
-	[PredTokenList: pred_token_list COMMA PredToken: pred_token] :List
-|	[PredToken: pred_token] :Base
+	[pred_token_list COMMA pred_token] :List
+|	[pred_token] :Base
 
 def pred_token
-	[RegionQual: region_qual Id: id] :Id
-|	[RegionQual: region_qual Lit: lit] :Lit
+	[region_qual id] :Id
+|	[region_qual lit] :Lit
 
 def pre_eof_def
-	[PreEof: PREEOF COPEN LangStmtList: lang_stmt_list CCLOSE]
+	[PREEOF COPEN lang_stmt_list CCLOSE]
 
 def alias_def
-	[ALIAS Id: id TypeRef: type_ref]
+	[ALIAS id type_ref]
 
 def context_item
-	[ContextVarDef: context_var_def] :ContextVar commit
-|	[LiteralDef: literal_def] :Literal commit
-|	[RlDef: rl_def] :Rl commit
-|	[TokenDef: token_def] :Token commit
-|	[IgnoreDef: ignore_def] :Ignore commit
-|	[CflDef: cfl_def] :Cfl commit
-|	[RegionDef: region_def] :Region commit
-|	[ContextDef: context_def] :Context commit
-|	[FunctionDef: function_def] :Function commit
-|	[IterDef: iter_def] :Iter commit
-|	[ExportDef: export_def] :Export commit
-|	[PreEofDef: pre_eof_def] :PreEof commit
-|	[PrecedenceDef: precedence_def] :Precedence commit
+	[context_var_def] :ContextVar commit
+|	[literal_def] :Literal commit
+|	[rl_def] :Rl commit
+|	[token_def] :Token commit
+|	[ignore_def] :Ignore commit
+|	[cfl_def] :Cfl commit
+|	[region_def] :Region commit
+|	[context_def] :Context commit
+|	[function_def] :Function commit
+|	[iter_def] :Iter commit
+|	[export_def] :Export commit
+|	[pre_eof_def] :PreEof commit
+|	[precedence_def] :Precedence commit
 
 def export_def
-	[EXPORT VarDef: var_def OptDefInit: opt_def_init]
+	[EXPORT var_def opt_def_init]
 
 def global_def
-	[GLOBAL VarDef: var_def OptDefInit: opt_def_init]
+	[GLOBAL var_def opt_def_init]
 
 def iter_def
-	[ITER Id: id POPEN ParamVarDefList: param_var_def* PCLOSE
-		COPEN LangStmtList: lang_stmt_list CCLOSE]
+	[ITER id POPEN ParamVarDefList: param_var_def* PCLOSE
+		COPEN lang_stmt_list CCLOSE]
 
 def reference_type_ref
-	[R: REF LT TypeRef: type_ref GT]
+	[REF LT type_ref GT]
 
 def param_var_def
-	[Id: id COLON TypeRef: type_ref] :Type
-|	[Id: id COLON RefTypeRef: reference_type_ref] :Ref
+	[id COLON type_ref] :Type
+|	[id COLON reference_type_ref] :Ref
 
 def opt_export
-	[Export: EXPORT] :Export
+	[EXPORT] :Export
 |	[]
 
 def function_def
-	[OptExport: opt_export TypeRef: type_ref Id: id 
+	[opt_export type_ref id 
 			POPEN ParamVarDefList: param_var_def* PCLOSE 
-			COPEN LangStmtList: lang_stmt_list CCLOSE]
+			COPEN lang_stmt_list CCLOSE]
 
 def context_var_def
-	[VarDef: var_def]
+	[var_def]
 
 def context_def
-	[CONTEXT Name: id ContextItemList: context_item* END]
+	[CONTEXT id ContextItemList: context_item* END]
 
 def literal_def
-	[LITERAL LiteralList: literal_list]
+	[LITERAL literal_list]
 
 def literal_list
-	[LiteralList: literal_list COMMA LiteralItem: literal_item] :Item
-|	[LiteralItem: literal_item] :Base
+	[literal_list COMMA literal_item] :Item
+|	[literal_item] :Base
 
 def literal_item
-	[NiLeft: opt_no_ignore Lit: lit NiRight: opt_no_ignore]
+	[NiLeft: opt_no_ignore lit NiRight: opt_no_ignore]
 
 def opt_no_ignore
-	[Ni: NI] :Ni
+	[NI] :Ni
 |	[]
 
 def namespace_def
-	[NAMESPACE Name: id RootItemList: root_item* END]
+	[NAMESPACE id RootItemList: root_item* END]
 
 def obj_var_list
 	[]
 
 def opt_reduce_first
-	[ReduceFirst: REDUCEFIRST]
+	[REDUCEFIRST]
 |	[]
 
 def cfl_def
-	[DEF DefId: id 
+	[DEF id 
 		VarDefList: var_def* 
-		OptReduceFirst: opt_reduce_first
-		ProdList: prod_list]
+		opt_reduce_first
+		prod_list]
 
 def region_def
 	[LEX RootItemList: root_item* END]
 
 def rl_def
-	[RL Id: id LEX_FSLASH Expr: lex_expr LEX_FSLASH]
+	[RL id LEX_FSLASH lex_expr LEX_FSLASH]
 
 def opt_lex_expr
-	[Expr: lex_expr]
+	[lex_expr]
 |	[]
 
 def token_def
-	[TOKEN Id: id VarDefList: var_def*
+	[TOKEN id VarDefList: var_def*
 		NiLeft: opt_no_ignore
-		LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH
+		LEX_FSLASH opt_lex_expr LEX_FSLASH
 		NiRight: opt_no_ignore
-		OptTranslate: opt_translate]
+		opt_translate]
 
 def opt_translate
-	[COPEN LangStmtList: lang_stmt_list CCLOSE] :Translate
+	[COPEN lang_stmt_list CCLOSE] :Translate
 |	[]
 
 def opt_id
-	[Id: id] :Id
+	[id] :Id
 |	[]
 
 def ignore_def
-	[I: IGNORE OptId: opt_id LEX_FSLASH OptExpr: opt_lex_expr LEX_FSLASH]
+	[IGNORE opt_id LEX_FSLASH opt_lex_expr LEX_FSLASH]
 
 def prod_el
-	[OptName: opt_prod_el_name RegionQual: region_qual Id: id OptRepeat: opt_repeat] :Id
-|	[OptName: opt_prod_el_name RegionQual: region_qual Lit: lit OptRepeat: opt_repeat] :Lit
+	[opt_prod_el_name region_qual id opt_repeat] :Id
+|	[opt_prod_el_name region_qual lit opt_repeat] :Lit
 
 def opt_prod_el_name
-	[Name: id COLON] :Name
+	[id COLON] :Name
 |	[]
 
 def prod_el_list
-	[ProdElList: prod_el_list ProdEl: prod_el] :List
+	[prod_el_list prod_el] :List
 |	[]
 
 def opt_commit
-	[Commit: COMMIT] :Commit
+	[COMMIT] :Commit
 |	[]
 
 def opt_prod_name
-	[COLON Name: id] :Name
+	[COLON id] :Name
 |	[]
 
 def prod
-	[Open: SQOPEN ProdElList: prod_el_list SQCLOSE 
-		OptName: opt_prod_name
-		OptCommit: opt_commit
-		OptReduce: opt_reduce]
+	[SQOPEN prod_el_list SQCLOSE 
+		opt_prod_name
+		opt_commit
+		opt_reduce]
 
 def opt_reduce
-	[COPEN LangStmtList: lang_stmt_list CCLOSE] :Reduce
+	[COPEN lang_stmt_list CCLOSE] :Reduce
 |	[]
 
 def prod_list
-	[ProdList: prod_list BAR Prod: prod] :List
-|	[Prod: prod] :Base
+	[prod_list BAR prod] :List
+|	[prod] :Base
 
 def statement
-	[Print: print_stmt] :Print
-|	[Expr: expr_stmt] :Expr
-|	[VarDef: var_def OptDefInit: opt_def_init] :VarDef
-|	[FOR ForDecl: id COLON TypeRef: type_ref IN IterCall: iter_call
-		BlockOrSingle: block_or_single] :For
-|	[IF IfExpr: code_expr BlockOrSingle: block_or_single ElsifList: elsif_list] :If
-|	[WHILE WhileExpr: code_expr BlockOrSingle: block_or_single] :While
-|	[LhsVarRef: var_ref EQUALS CodeExpr: code_expr] :LhsVarRef
-|	[YIELD YieldVarRef: var_ref] :Yield
-|	[RETURN ReturnExpr: code_expr] :Return
-|	[Break: BREAK] :Break
-|	[Reject: REJECT] :Reject
+	[print_stmt] :Print
+|	[expr_stmt] :Expr
+|	[var_def opt_def_init] :VarDef
+|	[FOR id COLON type_ref IN iter_call block_or_single] :For
+|	[IF code_expr block_or_single elsif_list] :If
+|	[WHILE code_expr block_or_single] :While
+|	[var_ref EQUALS code_expr] :LhsVarRef
+|	[YIELD var_ref] :Yield
+|	[RETURN code_expr] :Return
+|	[BREAK] :Break
+|	[REJECT] :Reject
 
 def elsif_list
-	[ElsifClause: elsif_clause ElsifList: elsif_list] :Clause
-|	[OptionalElse: optional_else] :OptElse
+	[elsif_clause elsif_list] :Clause
+|	[optional_else] :OptElse
 
 def elsif_clause
-	[ELSIF ElsifExpr: code_expr BlockOrSingle: block_or_single]
+	[ELSIF code_expr block_or_single]
 
 def optional_else
-	[ELSE BlockOrSingle: block_or_single] :Else
+	[ELSE block_or_single] :Else
 |	[]
 
 def iter_call
-	[E1 VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE] :Call
-|	[E2 Id: id] :Id
-|	[E3 Expr: code_expr] :Expr
+	[E1 var_ref POPEN CodeExprList: code_expr* PCLOSE] :Call
+|	[E2 id] :Id
+|	[E3 code_expr] :Expr
 
 def block_or_single
-	[COPEN LangStmtList: lang_stmt_list CCLOSE] :Block
-|	[Statement: statement] :Single
+	[COPEN lang_stmt_list CCLOSE] :Block
+|	[statement] :Single
 
 def require_pattern
-	[R: REQUIRE VarRef: var_ref Pattern: pattern]
+	[REQUIRE var_ref pattern]
 
 def opt_require_stmt
-	[Require: require_pattern LangStmtList: lang_stmt_list] :Require
+	[require_pattern lang_stmt_list] :Require
 |	[] :Base
 
 def lang_stmt_list
-	[StmtList: statement* OptRequire: opt_require_stmt]
+	[StmtList: statement* opt_require_stmt]
 
 def opt_def_init
-	[EQUALS CodeExpr: code_expr] :Init
+	[EQUALS code_expr] :Init
 |	[] :Base
 
 def var_def
-	[Id: id COLON TypeRef: type_ref]
+	[id COLON type_ref]
 
 def print_stmt
-	[Tree: PRINT O: POPEN CodeExprList: code_expr* PCLOSE] :Tree
-|	[PrintStream: PRINTS O: POPEN CodeExprList: code_expr* PCLOSE] :PrintStream
-|	[Xml: PRINT_XML O: POPEN CodeExprList: code_expr* PCLOSE] :Xml
-|	[XmlAc: PRINT_XML_AC O: POPEN CodeExprList: code_expr* PCLOSE] :XmlAc
+	[PRINT POPEN CodeExprList: code_expr* PCLOSE] :Tree
+|	[PRINTS POPEN CodeExprList: code_expr* PCLOSE] :PrintStream
+|	[PRINT_XML POPEN CodeExprList: code_expr* PCLOSE] :Xml
+|	[PRINT_XML_AC POPEN CodeExprList: code_expr* PCLOSE] :XmlAc
 
 def expr_stmt
-	[CodeExpr: code_expr]
+	[code_expr]
 
 def code_expr
-	[Expr: code_expr AmpAmp: AMPAMP Relational: code_relational] :AmpAmp
-|	[Expr: code_expr BarBar: BARBAR Relational: code_relational] :BarBar
-|	[Relational: code_relational] :Base
+	[code_expr AMPAMP code_relational] :AmpAmp
+|	[code_expr BARBAR code_relational] :BarBar
+|	[code_relational] :Base
 
 def code_relational
-	[Relational: code_relational EQEQ Additive: code_additive] :EqEq
-|	[Relational: code_relational NEQ Additive: code_additive] :Neq
-|	[Relational: code_relational LT Additive: code_additive] :Lt
-|	[Relational: code_relational GT Additive: code_additive] :Gt
-|	[Relational: code_relational LTEQ Additive: code_additive] :LtEq
-|	[Relational: code_relational GTEQ Additive: code_additive] :GtEq
-|	[Additive: code_additive] :Base
+	[code_relational EQEQ code_additive] :EqEq
+|	[code_relational NEQ code_additive] :Neq
+|	[code_relational LT code_additive] :Lt
+|	[code_relational GT code_additive] :Gt
+|	[code_relational LTEQ code_additive] :LtEq
+|	[code_relational GTEQ code_additive] :GtEq
+|	[code_additive] :Base
 
 def code_additive
-	[Additive: code_additive Plus: PLUS Multiplicitive: code_multiplicitive] :Plus
-|	[Additive: code_additive Minus: MINUS Multiplicitive: code_multiplicitive] :Minus
-|	[Multiplicitive: code_multiplicitive] :Base
+	[code_additive PLUS code_multiplicitive] :Plus
+|	[code_additive MINUS code_multiplicitive] :Minus
+|	[code_multiplicitive] :Base
 
 def code_multiplicitive
-	[Multiplicitive: code_multiplicitive Star: STAR Unary: code_unary] :Star
-|	[Multiplicitive: code_multiplicitive Fslash: FSLASH Unary: code_unary] :Fslash
-|	[Unary: code_unary] :Base
+	[code_multiplicitive STAR code_unary] :Star
+|	[code_multiplicitive FSLASH code_unary] :Fslash
+|	[code_unary] :Base
 
 def code_unary
-	[Bang: BANG Factor: code_factor] :Bang
-|	[Dollar: DOLLAR Factor: code_factor] :Dollar
-|	[Caret: CARET Factor: code_factor] :Caret
-|	[Percent: PERCENT Factor: code_factor] :Percent
-|	[Factor: code_factor] :Base
+	[BANG code_factor] :Bang
+|	[DOLLAR code_factor] :Dollar
+|	[CARET code_factor] :Caret
+|	[PERCENT code_factor] :Percent
+|	[code_factor] :Base
 
 def opt_eos
-	[Eos: DOT] :Dot
-|	[Eos: EOS] :Eos
+	[DOT] :Dot
+|	[EOS] :Eos
 |	[]
 
 def code_factor
-	[Number: number] :Number
-|	[Lit: lit] :Lit
-|	[VarRef: var_ref POPEN CodeExprList: code_expr* PCLOSE] :Call
-|	[VarRef: var_ref] :VarRef
-|	[Nil: NIL] :Nil
-|	[True: TRUE] :True
-|	[False: FALSE] :False
-|	[POPEN ParenCodeExpr: code_expr PCLOSE] :Paren
-|	[Send: SEND ToVarRef: var_ref Accumulate: accumulate OptEos: opt_eos] :Send
-|	[Parse: PARSE OptCapture: opt_capture TypeRef: type_ref
-		OptFieldInit: opt_field_init Accumulate: accumulate] :Parse
-|	[ParseStop: PARSE_STOP OptCapture: opt_capture TypeRef: type_ref
-		OptFieldInit: opt_field_init Accumulate: accumulate] :ParseStop
-|	[Cons: CONS OptCapture: opt_capture TypeRef: type_ref
-		OptFieldInit: opt_field_init Constructor: constructor] :Cons
-|	[MATCH MatchVarRef: var_ref Pattern: pattern] :Match
-|	[String: cstring] :String
-|	[TypeRef: type_ref IN InVarRef: var_ref] :In
+	[number] :Number
+|	[lit] :Lit
+|	[var_ref POPEN CodeExprList: code_expr* PCLOSE] :Call
+|	[var_ref] :VarRef
+|	[NIL] :Nil
+|	[TRUE] :True
+|	[FALSE] :False
+|	[POPEN code_expr PCLOSE] :Paren
+|	[SEND var_ref accumulate opt_eos] :Send
+|	[PARSE opt_capture type_ref opt_field_init accumulate] :Parse
+|	[PARSE_STOP opt_capture type_ref opt_field_init accumulate] :ParseStop
+|	[CONS opt_capture type_ref opt_field_init constructor] :Cons
+|	[MATCH var_ref pattern] :Match
+|	[cstring] :String
+|	[type_ref IN var_ref] :In
 |	[MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE] :MakeTree
 |	[MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE] :MakeToken
-|	[TYPEID LT TypeIdTypeRef: type_ref GT] :TypeId
-|	[NEW NewCodeFactor: code_factor] :New
+|	[TYPEID LT type_ref GT] :TypeId
+|	[NEW code_factor] :New
 
 def type_ref
-	[RegionQual: region_qual DirectId: id OptRepeat: opt_repeat] :Id
-|	[PTR LT RegionQual: region_qual PtrId: id OptRepeat: opt_repeat GT] :Ptr
+	[region_qual id opt_repeat] :Id
+|	[PTR LT region_qual id opt_repeat GT] :Ptr
 |	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT] :Map
-|	[LIST LT ListType: type_ref GT] :List
-|	[VECTOR LT VectorType: type_ref GT] :Vector
-|	[PARSER LT ParserType: type_ref GT] :Parser
+|	[LIST LT type_ref GT] :List
+|	[VECTOR LT type_ref GT] :Vector
+|	[PARSER LT type_ref GT] :Parser
 
 def region_qual
-	[RegionQual: region_qual Id: id DOUBLE_COLON] :Qual
+	[region_qual id DOUBLE_COLON] :Qual
 |	[] :Base
 
 def opt_repeat
-	[Star: STAR] :Star
-|	[Plus: PLUS] :Plus
-|	[Question: QUESTION] :Question
+	[STAR] :Star
+|	[PLUS] :Plus
+|	[QUESTION] :Question
 |	[]
 
 def opt_capture
-	[Id: id COLON] :Id
+	[id COLON] :Id
 |	[]
 
 def opt_field_init
@@ -512,7 +508,7 @@ def opt_field_init
 |	[] :Base
 
 def field_init
-	[CodeExpr: code_expr]
+	[code_expr]
 
 
 #
@@ -520,40 +516,40 @@ def field_init
 #
 
 def opt_label
-	[Id: id COLON] :Id
+	[id COLON] :Id
 |	[]
 
 def dq_lit_term
-	[CONS_DQ] | [Nl: CONS_NL]
+	[CONS_DQ] | [CONS_NL]
 
 def opt_tilde_data
 	[tilde_data]
 |	[]
 
 def pattern_el_lel
-	[RegionQual: region_qual Id: id OptRepeat: opt_repeat] :Id
-|	[RegionQual: region_qual Lit: lit OptRepeat: opt_repeat] :Lit
+	[region_qual id opt_repeat] :Id
+|	[region_qual lit opt_repeat] :Lit
 
 def pattern_el
-	[OptLabel: opt_label TypeOrLit: pattern_el_lel] :PatternEl
-|	[DQ LitpatElList: litpat_el* Term: dq_lit_term] :Dq
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+	[opt_label pattern_el_lel] :PatternEl
+|	[DQ LitpatElList: litpat_el* dq_lit_term] :Dq
+|	[TILDE opt_tilde_data TILDE_NL] :Tilde
 
 def litpat_el
-	[ConsData: cons_data] :ConsData
+	[cons_data] :ConsData
 |	[CONS_SQOPEN PatternElList: pattern_el* CONS_SQCLOSE] :SubList
 
 def pattern_top_el
-	[DQ LitpatElList: litpat_el* Term: dq_lit_term] :Dq
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+	[DQ LitpatElList: litpat_el* dq_lit_term] :Dq
+|	[TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[SQOPEN PatternElList: pattern_el* SQCLOSE] :SubList
 
 def pattern_list
-	[PatternList: pattern_list PatternTopEl: pattern_top_el] :List
-|	[PatternTopEl: pattern_top_el] :Base
+	[pattern_list pattern_top_el] :List
+|	[pattern_top_el] :Base
 
 def pattern
-	[PatternList: pattern_list]
+	[pattern_list]
 
 #
 # Constructor List
@@ -564,87 +560,87 @@ def E2 []
 def E3 []
 
 def cons_el
-	[E1 RegionQual: region_qual Lit: lit] :Lit
-|	[E1 DQ LitConsElList: lit_cons_el* Term: dq_lit_term] :Dq
-|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
-|	[E2 CodeExpr: code_expr] :CodeExpr
+	[E1 region_qual lit] :Lit
+|	[E1 DQ LitConsElList: lit_cons_el* dq_lit_term] :Dq
+|	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
+|	[E2 code_expr] :CodeExpr
 
 def lit_cons_el
-	[ConsData: cons_data] :ConsData
+	[cons_data] :ConsData
 |	[CONS_SQOPEN ConsElList: cons_el* CONS_SQCLOSE] :SubList
 
 def cons_top_el
-	[DQ LitConsElList: lit_cons_el* Term: dq_lit_term] :Dq
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+	[DQ LitConsElList: lit_cons_el* dq_lit_term] :Dq
+|	[TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[SQOPEN ConsElList: cons_el* SQCLOSE] :SubList
 
 def cons_list
-	[ConsTopEl: cons_top_el ConsList: cons_list] :List
-|	[ConsTopEl: cons_top_el] :Base
+	[cons_top_el cons_list] :List
+|	[cons_top_el] :Base
 
 def constructor
-	[ConsList: cons_list]
+	[cons_list]
 
 #
 # Accumulate
 #
 
 def accum_el
-	[E1 DQ LitAccumElList: lit_accum_el* Term: dq_lit_term] :Dq
-|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
-|	[E2 CodeExpr: code_expr] :CodeExpr
+	[E1 DQ LitAccumElList: lit_accum_el* dq_lit_term] :Dq
+|	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
+|	[E2 code_expr] :CodeExpr
 
 def lit_accum_el
-	[ConsData: cons_data] :ConsData
+	[cons_data] :ConsData
 |	[CONS_SQOPEN AccumElList: accum_el* CONS_SQCLOSE] :SubList
 
 def accum_top_el
-	[DQ LitAccumElList: lit_accum_el* Term: dq_lit_term] :Dq
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+	[DQ LitAccumElList: lit_accum_el* dq_lit_term] :Dq
+|	[TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[SQOPEN AccumElList: accum_el* SQCLOSE] :SubList
 
 def accum_list
-	[AccumTopEl: accum_top_el AccumList: accum_list] :List
-|	[AccumTopEl: accum_top_el] :Base
+	[accum_top_el accum_list] :List
+|	[accum_top_el] :Base
 
 def accumulate
-	[AccumList: accum_list]
+	[accum_list]
 
 #
 # String List
 #
 
 def string_el
-	[E1 DQ LitStringElList: lit_string_el* Term: dq_lit_term] :Dq
-|	[E1 TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
-|	[E2 CodeExpr: code_expr] :CodeExpr
+	[E1 DQ LitStringElList: lit_string_el* dq_lit_term] :Dq
+|	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
+|	[E2 code_expr] :CodeExpr
 
 def lit_string_el
-	[ConsData: cons_data] :ConsData
+	[cons_data] :ConsData
 |	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE] :SubList
 
 def string_top_el
-	[DQ LitStringElList: lit_string_el* Term: dq_lit_term] :Dq
-|	[TILDE TildeData: opt_tilde_data Nl: TILDE_NL] :Tilde
+	[DQ LitStringElList: lit_string_el* dq_lit_term] :Dq
+|	[TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[SQOPEN StringElList: string_el* SQCLOSE] :SubList
 
 def string_list
-	[StringTopEl: string_top_el StringList: string_list] :List
-|	[StringTopEl: string_top_el] :Base
+	[string_top_el string_list] :List
+|	[string_top_el] :Base
 
 def cstring
-	[StringList: string_list]
+	[string_list]
 
 #
 # Variable References
 #
 
 def var_ref
-	[Qual: qual Id: id]
+	[qual id]
 
 def qual
-	[Qual: qual Id: id Dot: DOT] :Dot
-|	[Qual: qual Id: id Arrow: ARROW] :Arrow
+	[qual id DOT] :Dot
+|	[qual id ARROW] :Arrow
 |	[] :Base
 
 #
@@ -652,41 +648,41 @@ def qual
 #
 
 def lex_expr
-	[Expr: lex_expr LEX_BAR Term: lex_term] :Bar
-|	[Expr: lex_expr LEX_AMP Term: lex_term] :Amp
-|	[Expr: lex_expr LEX_DASH Term: lex_term] :Dash
-|	[Expr: lex_expr LEX_DASHDASH Term: lex_term] :DashDash
-|	[Term: lex_term] :Base
+	[lex_expr LEX_BAR lex_term] :Bar
+|	[lex_expr LEX_AMP lex_term] :Amp
+|	[lex_expr LEX_DASH lex_term] :Dash
+|	[lex_expr LEX_DASHDASH lex_term] :DashDash
+|	[lex_term] :Base
 
 def opt_lex_dot
 	[LEX_DOT]
 |	[]
 
 def lex_term
-	[Term: lex_term opt_lex_dot FactorRep: lex_factor_rep] :Dot
-|	[Term: lex_term LEX_COLON_GT FactorRep: lex_factor_rep] :ColonGt
-|	[Term: lex_term LEX_COLON_GTGT FactorRep: lex_factor_rep] :ColonGtGt
-|	[Term: lex_term LEX_LT_COLON FactorRep: lex_factor_rep] :LtColon
-|	[FactorRep: lex_factor_rep] :Base
+	[lex_term opt_lex_dot lex_factor_rep] :Dot
+|	[lex_term LEX_COLON_GT lex_factor_rep] :ColonGt
+|	[lex_term LEX_COLON_GTGT lex_factor_rep] :ColonGtGt
+|	[lex_term LEX_LT_COLON lex_factor_rep] :LtColon
+|	[lex_factor_rep] :Base
 
 def lex_factor_rep
-	[FactorRep: lex_factor_rep Star: LEX_STAR] :Star
-|	[FactorRep: lex_factor_rep StarStar: LEX_STARSTAR] :StarStar
-|	[FactorRep: lex_factor_rep Plus: LEX_PLUS] :Plus
-|	[FactorRep: lex_factor_rep Question: LEX_QUESTION] :Question
-|	[FactorRep: lex_factor_rep COPEN Exact: lex_uint CCLOSE ] :Exact
-|	[FactorRep: lex_factor_rep COPEN COMMA Max: lex_uint CCLOSE ] :Max
-|	[FactorRep: lex_factor_rep COPEN Min: lex_uint COMMA CCLOSE ] :Min
-|	[FactorRep: lex_factor_rep COPEN Low: lex_uint COMMA High: lex_uint CCLOSE ] :Range
-|	[FactorNeg: lex_factor_neg] :Base
+	[lex_factor_rep LEX_STAR] :Star
+|	[lex_factor_rep LEX_STARSTAR] :StarStar
+|	[lex_factor_rep LEX_PLUS] :Plus
+|	[lex_factor_rep LEX_QUESTION] :Question
+|	[lex_factor_rep COPEN lex_uint CCLOSE ] :Exact
+|	[lex_factor_rep COPEN COMMA lex_uint CCLOSE ] :Max
+|	[lex_factor_rep COPEN lex_uint COMMA CCLOSE ] :Min
+|	[lex_factor_rep COPEN Low: lex_uint COMMA High: lex_uint CCLOSE ] :Range
+|	[lex_factor_neg] :Base
 
 def lex_factor_neg
-	[LEX_CARET FactorNeg: lex_factor_neg] :Caret
-|	[Factor: lex_factor] :Base
+	[LEX_CARET lex_factor_neg] :Caret
+|	[lex_factor] :Base
 
 def lex_range_lit
-	[Lit: lex_lit] :Lit
-|	[Number: lex_num] :Number
+	[lex_lit] :Lit
+|	[lex_num] :Number
 
 def lex_num
 	[lex_uint]
@@ -695,19 +691,19 @@ def lex_num
 #|	[LEX_DASH num]
 
 def lex_factor
-	[Literal: lex_lit] :Literal
-|	[Id: lex_id] :Id
-|	[Number: lex_uint] :Number
-|	[Hex: lex_hex] :Hex
+	[lex_lit] :Literal
+|	[lex_id] :Id
+|	[lex_uint] :Number
+|	[lex_hex] :Hex
 |	[Low: lex_range_lit LEX_DOTDOT High: lex_range_lit] :Range
-|	[LEX_SQOPEN_POS PosData: reg_or_data RE_SQCLOSE] :PosOrBlock
-|	[LEX_SQOPEN_NEG NegData: reg_or_data RE_SQCLOSE] :NegOrBlock
-|	[LEX_POPEN Expr: lex_expr LEX_PCLOSE] :Paren
+|	[LEX_SQOPEN_POS reg_or_data RE_SQCLOSE] :PosOrBlock
+|	[LEX_SQOPEN_NEG reg_or_data RE_SQCLOSE] :NegOrBlock
+|	[LEX_POPEN lex_expr LEX_PCLOSE] :Paren
 
 def reg_or_data
-	[Data: reg_or_data Char: reg_or_char] :Data
+	[reg_or_data reg_or_char] :Data
 |	[] :Base
 
 def reg_or_char
-	[Char: RE_CHAR] :Char
+	[RE_CHAR] :Char
 |	[Low: RE_CHAR RE_DASH High: RE_CHAR] :Range
