@@ -1408,7 +1408,7 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 
 CodeGenData *makeCodeGen( const CodeGenArgs &args );
 
-void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle, std::ostream &out )
+void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle, std::ostream &out, bool printStatistics )
 {
 	CodeGenArgs args( inputFileName, sectionName,
 			this, sectionGraph, codeStyle, out );
@@ -1425,7 +1425,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 	}
 }
 
-void ParseData::generateXML( ostream &out )
+void ParseData::generateXML( ostream &out, bool printStatistics )
 {
 	/* Make the generator. */
 	XMLCodeGen codeGen( sectionName, this, sectionGraph, out );
