@@ -92,8 +92,6 @@ bool displayPrintables = false;
 /* Target ruby impl */
 RubyImplEnum rubyImpl = MRI;
 
-bool colmParser = false;
-
 /* Print a summary of the options. */
 void usage()
 {
@@ -484,8 +482,6 @@ int main( int argc, const char **argv )
 
 	id.parseArgs( argc, argv );
 	id.checkArgs();
-
 	id.process();
-
 	return 0;
 }

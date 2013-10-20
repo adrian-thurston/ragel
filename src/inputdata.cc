@@ -236,21 +236,6 @@ void InputData::generateReduced()
 	}
 }
 
-/* Send eof to all parsers. */
-void InputData::terminateAllParsers( )
-{
-#ifdef KELBT_PARSER
-	/* FIXME: a proper token is needed here. Suppose we should use the
-	 * location of EOF in the last file that the parser was referenced in. */
-	InputLoc loc;
-	loc.fileName = "<EOF>";
-	loc.line = 0;
-	loc.col = 0;
-	for ( ParserDict::Iter pdel = parserDict; pdel.lte(); pdel++ )
-		pdel->value->token( loc, Parser_tk_eof, 0, 0 );
-#endif
-}
-
 void InputData::verifyWritesHaveData()
 {
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
@@ -347,61 +332,6 @@ void InputData::processCode()
 	openOutput();
 	writeOutput();
 }
-
-#if 0
-void InputData::process()
-{
-	/* Open the input file for reading. */
-	assert( inputFileName != 0 );
-	ifstream *inFile = new ifstream( inputFileName );
-	if ( ! inFile->is_open() )
-		error() << "could not open " << inputFileName << " for reading" << endp;
-
-	/* Used for just a few things. */
-	std::ostringstream hostData;
-
-	/* Make the first input item. */
-	InputItem *firstInputItem = new InputItem;
-	firstInputItem->type = InputItem::HostData;
-	firstInputItem->loc.fileName = inputFileName;
-	firstInputItem->loc.line = 1;
-	firstInputItem->loc.col = 1;
-	inputItems.append( firstInputItem );
-
-	Scanner scanner( *this, inputFileName, *inFile, 0, 0, 0, false );
-	scanner.do_scan();
-
-	/* Finished, final check for errors.. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	/* Now send EOF to all parsers. */
-	terminateAllParsers();
-
-	/* Bail on above error. */
-	if ( gblErrorCount > 0 )
-		exit(1);
-
-	if ( generateXML )
-		processXML();
-	else if ( generateDot )
-		processDot();
-	else 
-		processCode();
-
-	/* Close the input and the intermediate file. */
-	delete inFile;
-
-	/* If writing to a file, delete the ostream, causing it to flush.
-	 * Standard out is flushed automatically. */
-	if ( outputFileName != 0 ) {
-		delete outStream;
-		delete outFilter;
-	}
-
-	assert( gblErrorCount == 0 );
-}
-#endif
 
 void InputData::makeFirstInputItem()
 {

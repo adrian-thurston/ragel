@@ -92,8 +92,6 @@ struct InputData
 	void prepareSingleMachine();
 	void prepareAllMachines();
 
-	void terminateAllParsers();
-
 	void cdDefaultFileName( const char *inputFile );
 	void goDefaultFileName( const char *inputFile );
 	void javaDefaultFileName( const char *inputFile );
