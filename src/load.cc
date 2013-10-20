@@ -98,7 +98,7 @@ struct LoadRagel
 		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
 			pdEl = new ParseDataDictEl( machine );
-			pdEl->value = new ParseData( fileName, machine, sectionLoc );
+			pdEl->value = new ParseData( fileName, machine, sectionLoc, hostLang );
 			id.parseDataDict.insert( pdEl );
 			id.parseDataList.append( pdEl->value );
 		}

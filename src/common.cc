@@ -144,7 +144,7 @@ const HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9,  hostTyp
 const HostLang hostLangOCaml =  { HostLang::OCaml,  hostTypesOCaml,  1,  hostTypesOCaml+0,   false };
 const HostLang hostLangCrack =  { HostLang::Crack,  hostTypesCrack,  5,  hostTypesCrack+0,   true };
 
-HostType *findAlphType( const char *s1 )
+HostType *findAlphType( const HostLang *hostLang, const char *s1 )
 {
 	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
 		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
@@ -157,7 +157,7 @@ HostType *findAlphType( const char *s1 )
 	return 0;
 }
 
-HostType *findAlphType( const char *s1, const char *s2 )
+HostType *findAlphType( const HostLang *hostLang, const char *s1, const char *s2 )
 {
 	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
 		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
@@ -171,7 +171,7 @@ HostType *findAlphType( const char *s1, const char *s2 )
 	return 0;
 }
 
-HostType *findAlphTypeInternal( const char *s1 )
+HostType *findAlphTypeInternal( const HostLang *hostLang, const char *s1 )
 {
 	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
 		if ( strcmp( s1, hostLang->hostTypes[i].internalName ) == 0 )

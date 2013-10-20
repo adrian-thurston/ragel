@@ -417,7 +417,7 @@ bool NameInst::anyRefsRec()
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
 ParseData::ParseData( std::string fileName, string sectionName, 
-		const InputLoc &sectionLoc )
+		const InputLoc &sectionLoc, const HostLang *hostLang )
 :	
 	sectionGraph(0),
 	generatingSectionSubset(false),
@@ -461,7 +461,7 @@ ParseData::ParseData( std::string fileName, string sectionName,
 	 * the builtins. */
 	initGraphDict();
 
-	fsmCtx = new FsmCtx;
+	fsmCtx = new FsmCtx(hostLang);
 }
 
 /* Clean up the data collected during a parse. */
@@ -862,7 +862,7 @@ void ParseData::initGraphDict( )
 bool ParseData::setAlphType( const InputLoc &loc, const char *s1, const char *s2 )
 {
 	alphTypeLoc = loc;
-	userAlphType = findAlphType( s1, s2 );
+	userAlphType = findAlphType( hostLang, s1, s2 );
 	alphTypeSet = true;
 	return userAlphType != 0;
 }
@@ -871,7 +871,7 @@ bool ParseData::setAlphType( const InputLoc &loc, const char *s1, const char *s2
 bool ParseData::setAlphType( const InputLoc &loc, const char *s1 )
 {
 	alphTypeLoc = loc;
-	userAlphType = findAlphType( s1 );
+	userAlphType = findAlphType( hostLang, s1 );
 	alphTypeSet = true;
 	return userAlphType != 0;
 }

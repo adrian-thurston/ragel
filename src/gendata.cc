@@ -36,7 +36,7 @@ string itoa( int i )
 	return buf;
 }
 
-void lineDirective( ostream &out, const char *fileName, int line, bool generateDot )
+void lineDirective( ostream &out, const char *fileName, int line, bool generateDot, const HostLang *hostLang )
 {
 	if ( !generateDot ) {
 		if ( hostLang == &hostLangC )
@@ -60,11 +60,11 @@ void lineDirective( ostream &out, const char *fileName, int line, bool generateD
 	}
 }
 
-void CodeGenData::genLineDirective( bool generateDot )
+void CodeGenData::genLineDirective( bool generateDot, const HostLang *hostLang )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
-	lineDirective( out, filter->fileName, filter->line + 1, generateDot );
+	lineDirective( out, filter->fileName, filter->line + 1, generateDot, hostLang );
 }
 
 GenBase::GenBase( std::string fsmName, ParseData *pd, FsmAp *fsm )
@@ -1060,11 +1060,10 @@ void CodeGenData::resolveTargetStates()
 
 bool CodeGenData::setAlphType( const char *data )
 {
-	HostType *alphType = findAlphTypeInternal( data );
+	HostType *alphType = findAlphTypeInternal( hostLang, data );
 	if ( alphType == 0 )
 		return false;
 
-	thisKeyOps.setAlphType( alphType );
 	return true;
 }
 
@@ -1395,7 +1394,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, std::string *args, b
 	 *
 	 * Force a newline. */
 	out << '\n';
-	genLineDirective( generateDot );
+	genLineDirective( generateDot, hostLang );
 
 	if ( args[0] == "data" ) {
 		for ( int i = 1; i < nargs; i++ ) {

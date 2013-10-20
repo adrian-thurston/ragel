@@ -663,8 +663,8 @@ struct CondData
  * structure. */
 struct FsmCtx
 {
-	FsmCtx() {
-		keyOps = new KeyOps;
+	FsmCtx( const HostLang *hostLang ) {
+		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
 	}
 

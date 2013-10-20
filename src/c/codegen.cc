@@ -407,7 +407,7 @@ string CodeGen::TABS( int level )
 string CodeGen::KEY( Key key )
 {
 	ostringstream ret;
-	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
+	if ( keyOps->isSigned || !keyOps->hostLang->explicitUnsigned )
 		ret << key.getVal();
 	else
 		ret << (unsigned long) key.getVal() << 'u';

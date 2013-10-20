@@ -92,7 +92,7 @@ struct InputData
 	void prepareSingleMachine();
 	void prepareAllMachines();
 
-	void cdDefaultFileName( const char *inputFile );
+	void cdDefaultFileName( const char *inputFile, const HostLang *hostLang );
 	void goDefaultFileName( const char *inputFile );
 	void javaDefaultFileName( const char *inputFile );
 	void rubyDefaultFileName( const char *inputFile );

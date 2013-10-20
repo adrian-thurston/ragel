@@ -36,7 +36,7 @@ using std::endl;
 using std::ios;
 
 /* Invoked by the parser when the root element is opened. */
-void InputData::cdDefaultFileName( const char *inputFile )
+void InputData::cdDefaultFileName( const char *inputFile, const HostLang *hostLang )
 {
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */
@@ -123,7 +123,7 @@ void InputData::makeDefaultFileName()
 		case HostLang::C:
 		case HostLang::D:
 		case HostLang::D2:
-			cdDefaultFileName( inputFileName );
+			cdDefaultFileName( inputFileName, hostLang );
 			break;
 		case HostLang::Java:
 			javaDefaultFileName( inputFileName );
@@ -255,7 +255,7 @@ void InputData::writeOutput( bool generateDot )
 		}
 		else {
 			*outStream << '\n';
-			lineDirective( *outStream, inputFileName, ii->loc.line, generateDot );
+			lineDirective( *outStream, inputFileName, ii->loc.line, generateDot, hostLang );
 			*outStream << ii->data.str();
 		}
 	}

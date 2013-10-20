@@ -121,7 +121,7 @@ void rubyLineDirective( ostream &out, const char *fileName, int line );
 void csharpLineDirective( ostream &out, const char *fileName, int line );
 void ocamlLineDirective( ostream &out, const char *fileName, int line );
 void genLineDirective( ostream &out );
-void lineDirective( ostream &out, const char *fileName, int line, bool generateDot );
+void lineDirective( ostream &out, const char *fileName, int line, bool generateDot, const HostLang *hostLang );
 
 string itoa( int i );
 
@@ -187,7 +187,7 @@ private:
 	void makeEofTrans( StateAp *state );
 	void makeTransList( StateAp *state );
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
-	void genLineDirective( bool generateDot );
+	void genLineDirective( bool generateDot, const HostLang *hostLang );
 
 	/* Collected during parsing. */
 	int curAction;
@@ -256,7 +256,6 @@ public:
 	GenInlineList *tokendExpr;
 	GenInlineList *dataExpr;
 
-	KeyOps thisKeyOps;
 	EntryIdVect entryPointIds;
 	EntryNameVect entryPointNames;
 	bool hasLongestMatch;

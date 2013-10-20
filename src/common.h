@@ -161,8 +161,6 @@ struct HostLang
 	bool explicitUnsigned;
 };
 
-extern const HostLang *hostLang;
-
 extern const HostLang hostLangC;
 extern const HostLang hostLangD;
 extern const HostLang hostLangD2;
@@ -173,18 +171,21 @@ extern const HostLang hostLangCSharp;
 extern const HostLang hostLangOCaml;
 extern const HostLang hostLangCrack;
 
-HostType *findAlphType( const char *s1 );
-HostType *findAlphType( const char *s1, const char *s2 );
-HostType *findAlphTypeInternal( const char *s1 );
+extern const HostLang *hostLang;
+
+HostType *findAlphType( const HostLang *hostLang, const char *s1 );
+HostType *findAlphType( const HostLang *hostLang, const char *s1, const char *s2 );
+HostType *findAlphTypeInternal( const HostLang *hostLang, const char *s1 );
 
 /* An abstraction of the key operators that manages key operations such as
  * comparison and increment according the signedness of the key. */
 struct KeyOps
 {
 	/* Default to signed alphabet. */
-	KeyOps() :
+	KeyOps( const HostLang *hostLang ) :
 		isSigned(true),
-		alphType(0)
+		alphType(0),
+		hostLang(hostLang)
 	{}
 
 	/* Default to signed alphabet. */
@@ -194,6 +195,7 @@ struct KeyOps
 	bool isSigned;
 	Key minKey, maxKey;
 	HostType *alphType;
+	const HostLang *hostLang;
 
 	void setAlphType( HostType *alphType )
 	{
