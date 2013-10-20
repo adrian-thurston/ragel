@@ -230,7 +230,7 @@ struct ParseData
 
 	void prepareMachineGen( GraphDictEl *graphDictEl );
 	void generateXML( ostream &out );
-	void generateReduced( const char *inputFileName, std::ostream &out );
+	void generateReduced( const char *inputFileName, CodeStyle codeStyle, std::ostream &out );
 	FsmAp *sectionGraph;
 	bool generatingSectionSubset;
 

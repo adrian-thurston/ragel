@@ -94,7 +94,7 @@ CodeGenData *cMakeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
 
-	switch ( codeStyle ) {
+	switch ( args.codeStyle ) {
 	case GenTables:
 		codeGen = new C::BinaryLooped(args);
 		break;
@@ -129,7 +129,7 @@ CodeGenData *cMakeCodeGen( const CodeGenArgs &args )
 //{
 //	CodeGenData *codeGen = 0;
 //
-//	switch ( codeStyle ) {
+//	switch ( args.codeStyle ) {
 //	case GenTables:
 //		codeGen = new D::DTabCodeGen(args);
 //		break;
@@ -164,7 +164,7 @@ CodeGenData *cMakeCodeGen( const CodeGenArgs &args )
 //{
 //	CodeGenData *codeGen = 0;
 //
-//	switch ( codeStyle ) {
+//	switch ( args.codeStyle ) {
 //	case GenTables:
 //		codeGen = new D::D2TabCodeGen(args);
 //		break;
@@ -207,7 +207,7 @@ CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
 
-	switch ( codeStyle ) {
+	switch ( args.codeStyle ) {
 	case GenTables:
 		codeGen = new Go::BinaryLooped(args);
 		break;
@@ -242,7 +242,7 @@ CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
 //{
 //	CodeGenData *codeGen;
 //
-//	switch ( codeStyle ) {
+//	switch ( args.codeStyle ) {
 //	case GenFlat:
 //		codeGen = new Crack::CrackFlatCodeGen(args);
 //		break;
@@ -260,7 +260,7 @@ CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
 //CodeGenData *rubyMakeCodeGen( const CodeGenArgs &args )
 //{
 //	CodeGenData *codeGen = 0;
-//	switch ( codeStyle ) {
+//	switch ( args.codeStyle ) {
 //		case GenTables: 
 //			codeGen = new Ruby::RubyTabCodeGen(args);
 //			break;
@@ -298,7 +298,7 @@ CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
 //{
 //	CodeGenData *codeGen = 0;
 //
-//	switch ( codeStyle ) {
+//	switch ( args.codeStyle ) {
 //	case GenTables:
 //		codeGen = new CSharp::CSharpTabCodeGen(args);
 //		break;
@@ -333,7 +333,7 @@ CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
 //{
 //	CodeGenData *codeGen = 0;
 //
-//	switch ( codeStyle ) {
+//	switch ( args.codeStyle ) {
 //	case GenTables:
 //		codeGen = new OCaml::OCamlTabCodeGen(args);
 //		break;

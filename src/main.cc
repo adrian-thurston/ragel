@@ -80,7 +80,7 @@ bool generateDot = false;
 bool printStatistics = false;
 
 /* Target language and output style. */
-CodeStyle codeStyle = GenTables;
+static CodeStyle codeStyle = GenTables;
 
 long maxTransitions = LONG_MAX;
 
@@ -482,6 +482,6 @@ int main( int argc, const char **argv )
 
 	id.parseArgs( argc, argv );
 	id.checkArgs();
-	id.process();
+	id.process( codeStyle );
 	return 0;
 }

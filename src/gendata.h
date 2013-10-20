@@ -135,13 +135,14 @@ struct CodeGenArgs;
 
 struct CodeGenArgs
 {
-	CodeGenArgs( std::string sourceFileName, 
-			std::string fsmName, ParseData *pd, FsmAp *fsm, std::ostream &out )
+	CodeGenArgs( std::string sourceFileName, std::string fsmName,
+			ParseData *pd, FsmAp *fsm, CodeStyle codeStyle, std::ostream &out )
 	:
 		sourceFileName(sourceFileName),
 		fsmName(fsmName),
 		pd(pd),
 		fsm(fsm),
+		codeStyle(codeStyle),
 		out(out)
 	{}
 
@@ -149,6 +150,7 @@ struct CodeGenArgs
 	std::string fsmName;
 	ParseData *pd;
 	FsmAp *fsm;
+	CodeStyle codeStyle;
 	std::ostream &out;
 };
 

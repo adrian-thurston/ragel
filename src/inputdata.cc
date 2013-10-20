@@ -227,12 +227,12 @@ void InputData::prepareAllMachines()
 }
 
 
-void InputData::generateReduced()
+void InputData::generateReduced( CodeStyle codeStyle )
 {
 	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
 		ParseData *pd = pdel->value;
 		if ( pd->instanceList.length() > 0 )
-			pd->generateReduced( inputFileName, *outStream );
+			pd->generateReduced( inputFileName, codeStyle, *outStream );
 	}
 }
 
@@ -303,7 +303,7 @@ void InputData::processDot()
 	writeDot( *outStream );
 }
 
-void InputData::processCode()
+void InputData::processCode( CodeStyle codeStyle )
 {
 	/* Compiles machines. */
 	prepareAllMachines();
@@ -315,7 +315,7 @@ void InputData::processCode()
 	makeOutputStream();
 
 	/* Generates the reduced machine, which we use to write output. */
-	generateReduced();
+	generateReduced( codeStyle );
 
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -344,7 +344,7 @@ void InputData::makeFirstInputItem()
 	inputItems.append( firstInputItem );
 }
 
-void InputData::process()
+void InputData::process( CodeStyle codeStyle )
 {
 	/* Check input file. */
 	ifstream *inFile = new ifstream( inputFileName );
@@ -367,7 +367,7 @@ void InputData::process()
 	else if ( generateDot )
 		processDot();
 	else 
-		processCode();
+		processCode( codeStyle );
 
 	/* If writing to a file, delete the ostream, causing it to flush.
 	 * Standard out is flushed automatically. */

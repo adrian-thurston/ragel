@@ -103,8 +103,6 @@ struct XmlParser;
 
 void xmlEscapeHost( std::ostream &out, const char *data, long len );
 
-extern CodeStyle codeStyle;
-
 /* IO filenames and stream. */
 extern bool displayPrintables;
 extern int gblErrorCount;
@@ -116,9 +114,6 @@ extern bool noLineDirectives;
 extern long maxTransitions;
 
 std::ostream &error();
-
-/* Target language and output style. */
-extern CodeStyle codeStyle;
 
 extern int numSplitPartitions;
 extern bool noLineDirectives;

@@ -88,7 +88,7 @@ struct InputData
 	void makeDefaultFileName();
 	void makeOutputStream();
 	void openOutput();
-	void generateReduced();
+	void generateReduced( CodeStyle codeStyle );
 	void prepareSingleMachine();
 	void prepareAllMachines();
 
@@ -105,14 +105,14 @@ struct InputData
 
 	void processXML();
 	void processDot();
-	void processCode();
+	void processCode( CodeStyle codeStyle );
 
 	void writeDot( std::ostream &out );
 
 	void parseArgs( int argc, const char **argv );
 	void checkArgs();
 
-	void process();
+	void process( CodeStyle codeStyle );
 };
 
 #endif

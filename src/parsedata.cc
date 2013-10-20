@@ -1408,10 +1408,10 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 
 CodeGenData *makeCodeGen( const CodeGenArgs &args );
 
-void ParseData::generateReduced( const char *inputFileName, std::ostream &out )
+void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle, std::ostream &out )
 {
 	CodeGenArgs args( inputFileName, sectionName,
-			this, sectionGraph, out );
+			this, sectionGraph, codeStyle, out );
 
 	/* Write out with it. */
 	cgd = makeCodeGen( args );
