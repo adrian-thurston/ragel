@@ -447,7 +447,6 @@ struct LoadColm
 			break;
 		}
 		case pattern_el::_PatternEl: {
-			String defaultLabel;
 			PatternItemList *typeOrLitList = walkPatternElTypeOrLit( patternEl.pattern_el_lel() );
 			LangVarRef *varRef = walkOptLabel( patternEl.opt_label() );
 			list = consPatternEl( varRef, typeOrLitList );
@@ -780,7 +779,7 @@ struct LoadColm
 		return stmtList;
 	}
 
-	void walkProdEl( ProdElList *list, prod_el El )
+	void walkProdEl( const String &defName, ProdElList *list, prod_el El )
 	{
 		ObjectField *captureField = 0;
 		if ( El.opt_prod_el_name().prodName() == opt_prod_el_name::_Name ) {
@@ -791,6 +790,8 @@ struct LoadColm
 			/* default the prod name. */
 			if ( El.prodName() == prod_el::_Id ) {
 				String fieldName = El.id().data();
+				if ( strcmp( fieldName, defName ) == 0 )
+					fieldName = "_" + fieldName;
 				captureField = ObjectField::cons( El.id().loc(), 0, fieldName );
 			}
 		}
@@ -815,12 +816,12 @@ struct LoadColm
 		}}
 	}
 
-	void walkProdElList( ProdElList *list, prod_el_list ProdElList )
+	void walkProdElList( const String &defName, ProdElList *list, prod_el_list ProdElList )
 	{
 		if ( ProdElList.prodName() == prod_el_list::_List ) {
 			prod_el_list RightProdElList = ProdElList._prod_el_list();
-			walkProdElList( list, RightProdElList );
-			walkProdEl( list, ProdElList.prod_el() );
+			walkProdElList( defName, list, RightProdElList );
+			walkProdEl( defName, list, ProdElList.prod_el() );
 		}
 	}
 
@@ -839,11 +840,11 @@ struct LoadColm
 		return block;
 	}
 
-	void walkProdudction( LelDefList *lelDefList, prod Prod )
+	void walkProdudction( const String &defName, LelDefList *lelDefList, prod Prod )
 	{
 		ProdElList *list = new ProdElList;
 
-		walkProdElList( list, Prod.prod_el_list() );
+		walkProdElList( defName, list, Prod.prod_el_list() );
 
 		String name;
 		if ( Prod.opt_prod_name().prodName() == opt_prod_name::_Name )
@@ -856,12 +857,12 @@ struct LoadColm
 		prodAppend( lelDefList, prod );
 	}
 
-	void walkProdList( LelDefList *lelDefList, prod_list ProdList )
+	void walkProdList( const String &name, LelDefList *lelDefList, prod_list ProdList )
 	{
 		if ( ProdList.prodName() == prod_list::_List ) 
-			walkProdList( lelDefList, ProdList._prod_list() );
+			walkProdList( name, lelDefList, ProdList._prod_list() );
 
-		walkProdudction( lelDefList, ProdList.prod() );
+		walkProdudction( name, lelDefList, ProdList.prod() );
 	}
 
 	ReOrItem *walkRegOrChar( reg_or_char regOrChar )
@@ -1067,7 +1068,7 @@ struct LoadColm
 		objectDef->name = name;
 
 		LelDefList *defList = new LelDefList;
-		walkProdList( defList, cflDef.prod_list() );
+		walkProdList( name, defList, cflDef.prod_list() );
 
 		bool reduceFirst = cflDef.opt_reduce_first().REDUCEFIRST() != 0;
 
