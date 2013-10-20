@@ -258,7 +258,7 @@ prints( Output
 	"
 	"void finish( )
 	"{
-	"	if ( cs >= [$MachineName.MachineName]_first_final )
+	"	if ( cs >= [$MachineName.word]_first_final )
 	"		printf( \"ACCEPT\\n\" );
 	"	else
 	"		printf( \"FAIL\\n\" );
