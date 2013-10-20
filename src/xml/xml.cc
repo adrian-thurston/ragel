@@ -687,7 +687,7 @@ void XMLCodeGen::writeXML()
 		"</ragel_def>\n";
 }
 
-void InputData::writeLanguage( std::ostream &out )
+void InputData::writeLanguage( std::ostream &out, const HostLang *hostLang )
 {
 	out << " lang=\"";
 	switch ( hostLang->lang ) {
@@ -704,7 +704,7 @@ void InputData::writeLanguage( std::ostream &out )
 	out << "\"";
 }
 
-void InputData::writeXML( std::ostream &out )
+void InputData::writeXML( std::ostream &out, const HostLang *hostLang )
 {
 #ifdef KELBT_PARSER
 	out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";

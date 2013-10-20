@@ -84,13 +84,13 @@ struct InputData
 	void verifyWritesHaveData();
 
 	void makeFirstInputItem();
-	void writeOutput( bool generateDot );
-	void makeDefaultFileName();
+	void writeOutput( bool generateDot, const HostLang *hostLang );
+	void makeDefaultFileName( const HostLang *hostLang );
 	void makeOutputStream();
 	void openOutput();
-	void generateReduced( CodeStyle codeStyle, bool printStatistics );
+	void generateReduced( CodeStyle codeStyle, bool printStatistics, const HostLang *hostLang );
 	void prepareSingleMachine();
-	void prepareAllMachines();
+	void prepareAllMachines( const HostLang *hostLang );
 
 	void cdDefaultFileName( const char *inputFile, const HostLang *hostLang );
 	void goDefaultFileName( const char *inputFile );
@@ -100,19 +100,19 @@ struct InputData
 	void ocamlDefaultFileName( const char *inputFile );
 	void crackDefaultFileName( const char *inputFile );
 
-	void writeLanguage( std::ostream &out );
-	void writeXML( std::ostream &out );
+	void writeLanguage( std::ostream &out, const HostLang *hostLang );
+	void writeXML( std::ostream &out, const HostLang *hostLang );
 
-	void processXML();
+	void processXML( const HostLang *hostLang );
 	void processDot();
-	void processCode( CodeStyle codeStyle, bool generateDot, bool printStatistics );
+	void processCode( CodeStyle codeStyle, bool generateDot, bool printStatistics, const HostLang *hostLang );
 
 	void writeDot( std::ostream &out );
 
 	void parseArgs( int argc, const char **argv );
 	void checkArgs();
 
-	void process( CodeStyle codeStyle, bool generateXML, bool generateDot, bool printStatistics );
+	void process( CodeStyle codeStyle, bool generateXML, bool generateDot, bool printStatistics, const HostLang *hostLang );
 };
 
 #endif

@@ -171,8 +171,6 @@ extern const HostLang hostLangCSharp;
 extern const HostLang hostLangOCaml;
 extern const HostLang hostLangCrack;
 
-extern const HostLang *hostLang;
-
 HostType *findAlphType( const HostLang *hostLang, const char *s1 );
 HostType *findAlphType( const HostLang *hostLang, const char *s1, const char *s2 );
 HostType *findAlphTypeInternal( const HostLang *hostLang, const char *s1 );

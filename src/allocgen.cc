@@ -360,7 +360,7 @@ CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
 //	return codeGen;
 //}
 
-CodeGenData *makeCodeGen( const CodeGenArgs &args )
+CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
 	CodeGenData *cgd = 0;
 	if ( hostLang == &hostLangC )

@@ -156,7 +156,7 @@ struct CodeGenData : protected GenBase
 {
 public:
 	CodeGenData( const CodeGenArgs &args );
-	void make();
+	void make( const HostLang *hostLang );
 
 private:
 	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
@@ -214,7 +214,7 @@ public:
 
 	/* This can also be overridden to modify the processing of write
 	 * statements. */
-	virtual void writeStatement( InputLoc &loc, int nargs, std::string *args, bool generateDot );
+	virtual void writeStatement( InputLoc &loc, int nargs, std::string *args, bool generateDot, const HostLang *hostLang );
 
 	/********************/
 
@@ -296,7 +296,7 @@ public:
 	void initStateCondList( int snum, ulong length );
 	void addStateCond( int snum, Key lowKey, Key highKey, long condNum );
 
-	bool setAlphType( const char *data );
+	bool setAlphType( const HostLang *hostLang, const char *data );
 
 	void resolveTargetStates( GenInlineList *inlineList );
 	Key findMaxKey();

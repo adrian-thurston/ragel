@@ -59,13 +59,14 @@ InputLoc::InputLoc( colm_location *pcloc )
 
 struct LoadRagel
 {
-	LoadRagel( InputData &id )
+	LoadRagel( InputData &id, const HostLang *hostLang )
 	:
 		id(id),
 		pd(0),
 		machineSpec(0),
 		machineName(0),
-		includeDepth(0)
+		includeDepth(0),
+		hostLang(hostLang)
 	{}
 
 	InputData &id;
@@ -73,6 +74,7 @@ struct LoadRagel
 	char *machineSpec;
 	char *machineName;
 	int includeDepth;
+	const HostLang *hostLang;
 
 	/* Should this go in the parse data? Probably. */
 	Vector<bool> exportContext;
@@ -1377,7 +1379,7 @@ struct LoadRagel
 		switch ( AlphTypeType.prodName() ) {
 			case ragel::alphtype_type::_One: {
 				string one = AlphTypeType.W1().text();
-				if ( ! pd->setAlphType( loc, one.c_str() ) ) {
+				if ( ! pd->setAlphType( loc, hostLang, one.c_str() ) ) {
 					// Recover by ignoring the alphtype statement.
 					error(loc) << "\"" << one << 
 							"\" is not a valid alphabet type" << endl;
@@ -1388,7 +1390,7 @@ struct LoadRagel
 			case ragel::alphtype_type::_Two: {
 				string one = AlphTypeType.W1().text();
 				string two = AlphTypeType.W2().text();
-				if ( ! pd->setAlphType( loc, one.c_str(), two.c_str() ) ) {
+				if ( ! pd->setAlphType( loc, hostLang, one.c_str(), two.c_str() ) ) {
 					// Recover by ignoring the alphtype statement.
 					error(loc) << "\"" << one << 
 							"\" is not a valid alphabet type" << endl;
@@ -1675,9 +1677,9 @@ struct LoadRagel
 	}
 };
 
-LoadRagel *newLoadRagel( InputData &id )
+LoadRagel *newLoadRagel( InputData &id, const HostLang *hostLang )
 {
-	return new LoadRagel( id );
+	return new LoadRagel( id, hostLang );
 }
 
 void loadRagel( LoadRagel *lr, const char *inputFileName )

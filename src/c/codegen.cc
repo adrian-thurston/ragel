@@ -465,7 +465,7 @@ void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 		ret << "	break;\n";
 	}
 
-	if ( (hostLang->lang == HostLang::D || hostLang->lang == HostLang::D2) && !haveDefault )
+	if ( (keyOps->hostLang->lang == HostLang::D || keyOps->hostLang->lang == HostLang::D2) && !haveDefault )
 		ret << "	default: break;";
 
 	ret << 

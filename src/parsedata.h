@@ -202,8 +202,8 @@ struct ParseData
 	void resolveActionNameRefs();
 
 	/* Set the alphabet type. If type types are not valid returns false. */
-	bool setAlphType( const InputLoc &loc, const char *s1, const char *s2 );
-	bool setAlphType( const InputLoc &loc, const char *s1 );
+	bool setAlphType( const InputLoc &loc, const HostLang *hostLang, const char *s1, const char *s2 );
+	bool setAlphType( const InputLoc &loc, const HostLang *hostLang, const char *s1 );
 
 	/* Override one of the variables ragel uses. */
 	bool setVariable( const char *var, InlineList *inlineList );
@@ -228,13 +228,13 @@ struct ParseData
 	void analyzeGraph( FsmAp *graph );
 	void makeExports();
 
-	void prepareMachineGen( GraphDictEl *graphDictEl );
+	void prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang );
 	void generateXML( ostream &out, bool printStatistics );
-	void generateReduced( const char *inputFileName, CodeStyle codeStyle, std::ostream &out, bool printStatistics );
+	void generateReduced( const char *inputFileName, CodeStyle codeStyle, std::ostream &out, bool printStatistics, const HostLang *hostLang );
 	FsmAp *sectionGraph;
 	bool generatingSectionSubset;
 
-	void initKeyOps();
+	void initKeyOps( const HostLang *hostLang );
 
 	/*
 	 * Data collected during the parse.
@@ -381,6 +381,5 @@ FsmAp *dotFsm( ParseData *pd );
 FsmAp *dotStarFsm( ParseData *pd );
 
 void errorStateLabels( const NameSet &locations );
-
 
 #endif

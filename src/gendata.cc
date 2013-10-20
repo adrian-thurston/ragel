@@ -696,10 +696,10 @@ void CodeGenData::makeMachine()
 	resolveTargetStates();
 }
 
-void CodeGenData::make()
+void CodeGenData::make( const HostLang *hostLang )
 {
 	/* Alphabet type. */
-	setAlphType( pd->fsmCtx->keyOps->alphType->internalName );
+	setAlphType( hostLang, pd->fsmCtx->keyOps->alphType->internalName );
 	
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {
@@ -1058,7 +1058,7 @@ void CodeGenData::resolveTargetStates()
 }
 
 
-bool CodeGenData::setAlphType( const char *data )
+bool CodeGenData::setAlphType( const HostLang *hostLang, const char *data )
 {
 	HostType *alphType = findAlphTypeInternal( hostLang, data );
 	if ( alphType == 0 )
@@ -1387,7 +1387,7 @@ void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 	source_warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
 }
 
-void CodeGenData::writeStatement( InputLoc &loc, int nargs, std::string *args, bool generateDot )
+void CodeGenData::writeStatement( InputLoc &loc, int nargs, std::string *args, bool generateDot, const HostLang *hostLang )
 {
 	/* FIXME: This should be moved to the virtual functions in the code
 	 * generators.

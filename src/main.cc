@@ -66,7 +66,7 @@ using std::endl;
 using std::ios;
 using std::streamsize;
 
-const HostLang *hostLang = &hostLangC;
+static const HostLang *hostLang = &hostLangC;
 
 /* Controls minimization. */
 MinimizeLevel minimizeLevel = MinimizePartition2;
@@ -481,6 +481,6 @@ int main( int argc, const char **argv )
 
 	id.parseArgs( argc, argv );
 	id.checkArgs();
-	id.process( codeStyle, generateXML, generateDot, printStatistics );
+	id.process( codeStyle, generateXML, generateDot, printStatistics, hostLang );
 	return 0;
 }

@@ -36,6 +36,7 @@
 using namespace std;
 
 char mainMachine[] = "main";
+CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
 
 void Token::set( const char *str, int len )
 {
@@ -859,7 +860,7 @@ void ParseData::initGraphDict( )
 }
 
 /* Set the alphabet type. If the types are not valid returns false. */
-bool ParseData::setAlphType( const InputLoc &loc, const char *s1, const char *s2 )
+bool ParseData::setAlphType( const InputLoc &loc, const HostLang *hostLang, const char *s1, const char *s2 )
 {
 	alphTypeLoc = loc;
 	userAlphType = findAlphType( hostLang, s1, s2 );
@@ -868,7 +869,7 @@ bool ParseData::setAlphType( const InputLoc &loc, const char *s1, const char *s2
 }
 
 /* Set the alphabet type. If the types are not valid returns false. */
-bool ParseData::setAlphType( const InputLoc &loc, const char *s1 )
+bool ParseData::setAlphType( const InputLoc &loc, const HostLang *hostLang, const char *s1 )
 {
 	alphTypeLoc = loc;
 	userAlphType = findAlphType( hostLang, s1 );
@@ -908,7 +909,7 @@ bool ParseData::setVariable( const char *var, InlineList *inlineList )
 
 /* Initialize the key operators object that will be referenced by all fsms
  * created. */
-void ParseData::initKeyOps( )
+void ParseData::initKeyOps( const HostLang *hostLang )
 {
 	/* Signedness and bounds. */
 	HostType *alphType = alphTypeSet ? userAlphType : hostLang->defaultAlphType;
@@ -1363,9 +1364,9 @@ void ParseData::makeExports()
 
 }
 
-void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
+void ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang )
 {
-	initKeyOps();
+	initKeyOps( hostLang );
 	makeRootNames();
 	initLongestMatchData();
 
@@ -1406,17 +1407,15 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl )
 	sectionGraph->setStateNumbers( 0 );
 }
 
-CodeGenData *makeCodeGen( const CodeGenArgs &args );
-
-void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle, std::ostream &out, bool printStatistics )
+void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle, std::ostream &out, bool printStatistics, const HostLang *hostLang )
 {
 	CodeGenArgs args( inputFileName, sectionName,
 			this, sectionGraph, codeStyle, out );
 
 	/* Write out with it. */
-	cgd = makeCodeGen( args );
+	cgd = makeCodeGen( hostLang, args );
 
-	cgd->make();
+	cgd->make( hostLang );
 
 	if ( printStatistics ) {
 		cerr << "fsm name  : " << sectionName << endl;

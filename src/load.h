@@ -3,8 +3,9 @@
 
 struct LoadRagel;
 struct InputData;
+struct HostLang;
 
-LoadRagel *newLoadRagel( InputData &id );
+LoadRagel *newLoadRagel( InputData &id, const HostLang *hostLang );
 void loadRagel( LoadRagel *lr, const char *inputFileName );
 void deleteLoadRagel( LoadRagel * );
 

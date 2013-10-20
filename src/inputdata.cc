@@ -117,7 +117,7 @@ void InputData::crackDefaultFileName( const char *inputFile )
 }
 
 
-void InputData::makeDefaultFileName()
+void InputData::makeDefaultFileName( const HostLang *hostLang )
 {
 	switch ( hostLang->lang ) {
 		case HostLang::C:
@@ -217,22 +217,22 @@ void InputData::prepareSingleMachine()
 #endif
 }
 
-void InputData::prepareAllMachines()
+void InputData::prepareAllMachines( const HostLang *hostLang )
 {
 	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
 		ParseData *pd = pdel->value;
 		if ( pd->instanceList.length() > 0 )
-			pd->prepareMachineGen( 0 );
+			pd->prepareMachineGen( 0, hostLang );
 	}
 }
 
 
-void InputData::generateReduced( CodeStyle codeStyle, bool printStatistics )
+void InputData::generateReduced( CodeStyle codeStyle, bool printStatistics, const HostLang *hostLang )
 {
 	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
 		ParseData *pd = pdel->value;
 		if ( pd->instanceList.length() > 0 )
-			pd->generateReduced( inputFileName, codeStyle, *outStream, printStatistics );
+			pd->generateReduced( inputFileName, codeStyle, *outStream, printStatistics, hostLang );
 	}
 }
 
@@ -246,12 +246,12 @@ void InputData::verifyWritesHaveData()
 	}
 }
 
-void InputData::writeOutput( bool generateDot )
+void InputData::writeOutput( bool generateDot, const HostLang *hostLang )
 {
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 		if ( ii->type == InputItem::Write ) {
 			CodeGenData *cgd = ii->pd->cgd;
-			cgd->writeStatement( ii->loc, ii->writeArgs.length(), ii->writeArgs.data, generateDot );
+			cgd->writeStatement( ii->loc, ii->writeArgs.length(), ii->writeArgs.data, generateDot, hostLang );
 		}
 		else {
 			*outStream << '\n';
@@ -261,10 +261,10 @@ void InputData::writeOutput( bool generateDot )
 	}
 }
 
-void InputData::processXML()
+void InputData::processXML( const HostLang *hostLang )
 {
 	/* Compiles machines. */
-	prepareAllMachines();
+	prepareAllMachines( hostLang );
 
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -279,7 +279,7 @@ void InputData::processXML()
 	 */
 
 	openOutput();
-	writeXML( *outStream );
+	writeXML( *outStream, hostLang );
 }
 
 void InputData::processDot()
@@ -303,19 +303,19 @@ void InputData::processDot()
 	writeDot( *outStream );
 }
 
-void InputData::processCode( CodeStyle codeStyle, bool generateDot, bool printStatistics )
+void InputData::processCode( CodeStyle codeStyle, bool generateDot, bool printStatistics, const HostLang *hostLang )
 {
 	/* Compiles machines. */
-	prepareAllMachines();
+	prepareAllMachines( hostLang );
 
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	makeDefaultFileName();
+	makeDefaultFileName( hostLang );
 	makeOutputStream();
 
 	/* Generates the reduced machine, which we use to write output. */
-	generateReduced( codeStyle, printStatistics );
+	generateReduced( codeStyle, printStatistics, hostLang );
 
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -330,7 +330,7 @@ void InputData::processCode( CodeStyle codeStyle, bool generateDot, bool printSt
 	 */
 
 	openOutput();
-	writeOutput( generateDot );
+	writeOutput( generateDot, hostLang );
 }
 
 void InputData::makeFirstInputItem()
@@ -344,7 +344,7 @@ void InputData::makeFirstInputItem()
 	inputItems.append( firstInputItem );
 }
 
-void InputData::process( CodeStyle codeStyle, bool generateXML, bool generateDot, bool printStatistics )
+void InputData::process( CodeStyle codeStyle, bool generateXML, bool generateDot, bool printStatistics, const HostLang *hostLang )
 {
 	/* Check input file. */
 	ifstream *inFile = new ifstream( inputFileName );
@@ -354,7 +354,7 @@ void InputData::process( CodeStyle codeStyle, bool generateXML, bool generateDot
 
 	makeFirstInputItem();
 
-	LoadRagel *lr = newLoadRagel( *this );
+	LoadRagel *lr = newLoadRagel( *this, hostLang );
 	loadRagel( lr, inputFileName );
 	deleteLoadRagel( lr );
 
@@ -363,11 +363,11 @@ void InputData::process( CodeStyle codeStyle, bool generateXML, bool generateDot
 		exit(1);
 
 	if ( generateXML )
-		processXML();
+		processXML( hostLang );
 	else if ( generateDot )
 		processDot();
 	else 
-		processCode( codeStyle, generateDot, printStatistics );
+		processCode( codeStyle, generateDot, printStatistics, hostLang );
 
 	/* If writing to a file, delete the ostream, causing it to flush.
 	 * Standard out is flushed automatically. */
