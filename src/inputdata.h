@@ -112,7 +112,9 @@ struct InputData
 	void parseArgs( int argc, const char **argv );
 	void checkArgs();
 
-	void process( CodeStyle codeStyle, bool generateXML, bool generateDot, bool printStatistics, const HostLang *hostLang );
+	void process( CodeStyle codeStyle, bool generateXML, bool generateDot,
+			bool printStatistics, const HostLang *hostLang,
+			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
 };
 
 #endif

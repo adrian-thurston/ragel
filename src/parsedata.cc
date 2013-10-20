@@ -62,14 +62,14 @@ void Token::append( const Token &other )
 void afterOpMinimize( FsmAp *fsm, bool lastInSeq )
 {
 	/* Switch on the prefered minimization algorithm. */
-	if ( minimizeOpt == MinimizeEveryOp || ( minimizeOpt == MinimizeMostOps && lastInSeq ) ) {
+	if ( fsm->ctx->minimizeOpt == MinimizeEveryOp || ( fsm->ctx->minimizeOpt == MinimizeMostOps && lastInSeq ) ) {
 		/* First clean up the graph. FsmAp operations may leave these
 		 * lying around. There should be no dead end states. The subtract
 		 * intersection operators are the only places where they may be
 		 * created and those operators clean them up. */
 		fsm->removeUnreachableStates();
 
-		switch ( minimizeLevel ) {
+		switch ( fsm->ctx->minimizeLevel ) {
 			case MinimizeApprox:
 				fsm->minimizeApproximate();
 				break;
@@ -418,7 +418,8 @@ bool NameInst::anyRefsRec()
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
 ParseData::ParseData( std::string fileName, string sectionName, 
-		const InputLoc &sectionLoc, const HostLang *hostLang )
+		const InputLoc &sectionLoc, const HostLang *hostLang,
+		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 :	
 	sectionGraph(0),
 	generatingSectionSubset(false),
@@ -462,7 +463,7 @@ ParseData::ParseData( std::string fileName, string sectionName,
 	 * the builtins. */
 	initGraphDict();
 
-	fsmCtx = new FsmCtx(hostLang);
+	fsmCtx = new FsmCtx( hostLang, minimizeLevel, minimizeOpt );
 }
 
 /* Clean up the data collected during a parse. */
@@ -1096,10 +1097,10 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 	 * because they will just hinder minimization as well. Clear them. */
 	graph->clearAllPriorities();
 
-	if ( minimizeOpt != MinimizeNone ) {
+	if ( graph->ctx->minimizeOpt != MinimizeNone ) {
 		/* Minimize here even if we minimized at every op. Now that function
 		 * keys have been cleared we may get a more minimal fsm. */
-		switch ( minimizeLevel ) {
+		switch ( graph->ctx->minimizeLevel ) {
 			case MinimizeApprox:
 				graph->minimizeApproximate();
 				break;

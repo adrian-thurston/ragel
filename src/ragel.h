@@ -68,8 +68,6 @@ enum RubyImplEnum
 };
 
 /* Options. */
-extern MinimizeLevel minimizeLevel;
-extern MinimizeOpt minimizeOpt;
 extern const char *machineSpec, *machineName;
 extern bool wantDupsRemoved;
 extern RubyImplEnum rubyImpl;

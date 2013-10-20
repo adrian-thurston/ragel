@@ -344,7 +344,9 @@ void InputData::makeFirstInputItem()
 	inputItems.append( firstInputItem );
 }
 
-void InputData::process( CodeStyle codeStyle, bool generateXML, bool generateDot, bool printStatistics, const HostLang *hostLang )
+void InputData::process( CodeStyle codeStyle, bool generateXML, bool generateDot,
+		bool printStatistics, const HostLang *hostLang,
+		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 {
 	/* Check input file. */
 	ifstream *inFile = new ifstream( inputFileName );
@@ -354,7 +356,7 @@ void InputData::process( CodeStyle codeStyle, bool generateXML, bool generateDot
 
 	makeFirstInputItem();
 
-	LoadRagel *lr = newLoadRagel( *this, hostLang );
+	LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
 	loadRagel( lr, inputFileName );
 	deleteLoadRagel( lr );
 

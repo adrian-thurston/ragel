@@ -69,8 +69,8 @@ using std::streamsize;
 static const HostLang *hostLang = &hostLangC;
 
 /* Controls minimization. */
-MinimizeLevel minimizeLevel = MinimizePartition2;
-MinimizeOpt minimizeOpt = MinimizeMostOps;
+static MinimizeLevel minimizeLevel = MinimizePartition2;
+static MinimizeOpt minimizeOpt = MinimizeMostOps;
 
 /* Graphviz dot file generation. */
 const char *machineSpec = 0, *machineName = 0;
@@ -481,6 +481,6 @@ int main( int argc, const char **argv )
 
 	id.parseArgs( argc, argv );
 	id.checkArgs();
-	id.process( codeStyle, generateXML, generateDot, printStatistics, hostLang );
+	id.process( codeStyle, generateXML, generateDot, printStatistics, hostLang, minimizeLevel, minimizeOpt );
 	return 0;
 }

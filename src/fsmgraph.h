@@ -663,13 +663,19 @@ struct CondData
  * structure. */
 struct FsmCtx
 {
-	FsmCtx( const HostLang *hostLang ) {
+	FsmCtx( const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
+	:
+		minimizeLevel(minimizeLevel),
+		minimizeOpt(minimizeOpt)
+	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
 	}
 
 	KeyOps *keyOps;
 	CondData *condData;
+	MinimizeLevel minimizeLevel;
+	MinimizeOpt minimizeOpt;
 };
 
 

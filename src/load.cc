@@ -59,14 +59,17 @@ InputLoc::InputLoc( colm_location *pcloc )
 
 struct LoadRagel
 {
-	LoadRagel( InputData &id, const HostLang *hostLang )
+	LoadRagel( InputData &id, const HostLang *hostLang,
+			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 	:
 		id(id),
 		pd(0),
 		machineSpec(0),
 		machineName(0),
 		includeDepth(0),
-		hostLang(hostLang)
+		hostLang(hostLang),
+		minimizeLevel(minimizeLevel),
+		minimizeOpt(minimizeOpt)
 	{}
 
 	InputData &id;
@@ -75,6 +78,8 @@ struct LoadRagel
 	char *machineName;
 	int includeDepth;
 	const HostLang *hostLang;
+	MinimizeLevel minimizeLevel;
+	MinimizeOpt minimizeOpt;
 
 	/* Should this go in the parse data? Probably. */
 	Vector<bool> exportContext;
@@ -100,7 +105,7 @@ struct LoadRagel
 		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
 			pdEl = new ParseDataDictEl( machine );
-			pdEl->value = new ParseData( fileName, machine, sectionLoc, hostLang );
+			pdEl->value = new ParseData( fileName, machine, sectionLoc, hostLang, minimizeLevel, minimizeOpt );
 			id.parseDataDict.insert( pdEl );
 			id.parseDataList.append( pdEl->value );
 		}
@@ -1677,9 +1682,10 @@ struct LoadRagel
 	}
 };
 
-LoadRagel *newLoadRagel( InputData &id, const HostLang *hostLang )
+LoadRagel *newLoadRagel( InputData &id, const HostLang *hostLang,
+		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 {
-	return new LoadRagel( id, hostLang );
+	return new LoadRagel( id, hostLang, minimizeLevel, minimizeOpt );
 }
 
 void loadRagel( LoadRagel *lr, const char *inputFileName )
