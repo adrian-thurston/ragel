@@ -790,8 +790,8 @@ struct LoadColm
 		else {
 			/* default the prod name. */
 			if ( El.prodName() == prod_el::_Id ) {
-				String fieldName = El.Id().data();
-				captureField = ObjectField::cons( El.Id().loc(), 0, fieldName );
+				String fieldName = El.id().data();
+				captureField = ObjectField::cons( El.id().loc(), 0, fieldName );
 			}
 		}
 
