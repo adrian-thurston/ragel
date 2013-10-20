@@ -57,9 +57,9 @@ namespace c_inline
 		[ExprItemList: expr_item*]
 
 	def expr_item
-		[ExprAny: expr_any] :ExprAny
-	|	[ExprSymbol: expr_symbol] :ExprSymbol
-	|	[ExprInterpret: expr_interpret] :ExprInterpret
+		[expr_any] :ExprAny
+	|	[expr_symbol] :ExprSymbol
+	|	[expr_interpret] :ExprInterpret
 
 	def expr_any
 		[whitespace]
@@ -78,11 +78,10 @@ namespace c_inline
 	|	['fc'] :Fc
 	|	['fcurs'] :Fcurs
 	|	['ftargs']  :Ftargs
-	|	['fentry' '(' StateRef: state_ref srlex::')'] :Fentry
+	|	['fentry' '(' state_ref srlex::')'] :Fentry
 
 	def state_ref
-		[OptNameSep: opt_name_sep StateRefNames: state_ref_names]
-
+		[opt_name_sep state_ref_names]
 
 	def opt_name_sep
 		[srlex::'::'] :ColonColon
@@ -90,31 +89,31 @@ namespace c_inline
 
 	# List of names separated by ::
 	def state_ref_names
-		[StateRefNames: state_ref_names srlex::'::' Word: srlex::word] :Rec
-	|	[Word: srlex::word] :Base
+		[state_ref_names srlex::'::' srlex::word] :Rec
+	|	[srlex::word] :Base
 
 	def inline_block
 		[BlockItemList: block_item*]
 	
 	def block_item
-		[ExprAny: expr_any] :ExprAny
-	|	[BlockSymbol: block_symbol] :BlockSymbol
-	|	[BlockInterpret: block_interpret] :BlockInterpret
-	|	['{' InlineBlock: inline_block '}'] :RecBlock
+		[expr_any] :ExprAny
+	|	[block_symbol] :BlockSymbol
+	|	[block_interpret] :BlockInterpret
+	|	['{' inline_block '}'] :RecBlock
 
 	def block_symbol
 		[','] | [';'] | ['('] | [')'] | ['*'] | ['::']
 
 	def block_interpret
-		[ExprInterpret: expr_interpret] :ExprInterpret
+		[expr_interpret] :ExprInterpret
 	|	['fhold' whitespace? ';'] :Fhold
-	|	['fgoto' whitespace? '*' InlineExpr: inline_expr ';'] :FgotoExpr
-	|	['fnext' whitespace? '*' InlineExpr: inline_expr ';'] :FnextExpr
-	|	['fcall' whitespace? '*' InlineExpr: inline_expr ';'] :FcallExpr
-	|	['fexec' InlineExpr: inline_expr ';'] :Fexec
-	|	['fgoto' StateRef: state_ref srlex::';'] :FgotoSr
-	|	['fnext' StateRef: state_ref srlex::';'] :FnextSr
-	|	['fcall' StateRef: state_ref srlex::';'] :FcallSr
+	|	['fgoto' whitespace? '*' inline_expr ';'] :FgotoExpr
+	|	['fnext' whitespace? '*' inline_expr ';'] :FnextExpr
+	|	['fcall' whitespace? '*' inline_expr ';'] :FcallExpr
+	|	['fexec' inline_expr ';'] :Fexec
+	|	['fgoto' state_ref srlex::';'] :FgotoSr
+	|	['fnext' state_ref srlex::';'] :FnextSr
+	|	['fcall' state_ref srlex::';'] :FcallSr
 	|	['fret' ';'] :Fret
 	|	['fbreak' ';'] :Fbreak
 end
@@ -191,58 +190,58 @@ namespace ragel
 
 	def inline_expr_reparse
 		[_inline_expr_reparse]
-	|	[ActionExpr: action_expr]
+	|	[action_expr]
 
 	def join
-		[Join: join ',' Expr: expression] :Rec
-	|	[Expr: expression] :Base
+		[join ',' expression] :Rec
+	|	[expression] :Base
 
 	def expression
-		[Term: term ExprOpList: expression_op*]
+		[term ExprOpList: expression_op*]
 
 	def expression_op
-		['|' Term: term] :Or
-	|	['&' Term: term] :And
-	|	['-' Term: term] :Sub
-	|	['--' Term: term] :Ssub
+		['|' term] :Or
+	|	['&' term] :And
+	|	['-' term] :Sub
+	|	['--' term] :Ssub
 
 	def term
-		[FactorLabel: factor_label TermOpList: term_op_list_short]
+		[factor_label term_op_list_short]
 
 	# This list is done manually to get shortest match.
 	def term_op_list_short
 		[] :Empty
-	|	[TermOp: term_op TermOpList: term_op_list_short] :Terms
+	|	[term_op term_op_list_short] :Terms
 
 	def term_op
-		[FactorLabel: factor_label] :None
-	|	['.' FactorLabel: factor_label] :Dot
-	|	[':>' FactorLabel: factor_label] :ColonLt
-	|	[':>>' FactorLabel: factor_label] :ColonLtLt
-	|	['<:' FactorLabel: factor_label] :GtColon
+		[factor_label] :None
+	|	['.' factor_label] :Dot
+	|	[':>' factor_label] :ColonLt
+	|	[':>>' factor_label] :ColonLtLt
+	|	['<:' factor_label] :GtColon
 
 	def factor_label
-		[Label: word ':' FactorLabel: factor_label] :Label
-	|	[FactorEp: factor_ep] :Ep
+		[word ':' factor_label] :Label
+	|	[factor_ep] :Ep
 
 	def factor_ep
-		[FactorAug: factor_aug '->' EpsilonTarget: epsilon_target] :Epsilon
-	|	[FactorAug: factor_aug] :Base
+		[factor_aug '->' epsilon_target] :Epsilon
+	|	[factor_aug] :Base
 
 	def epsilon_target
-		[EpsilonTarget: epsilon_target '::' Word: word] :Rec
-	|	[Word: word] :Base
+		[epsilon_target '::' word] :Rec
+	|	[word] :Base
 
 	def action_expr
-		['{' InlineExpr: c_inline::inline_expr '}']
+		['{' c_inline::inline_expr '}']
 
 	def action_block
-		['{' InlineBlock: c_inline::inline_block '}']
+		['{' c_inline::inline_block '}']
 
 	def action_ref 
-		[Word: word] :Word
-	|	['(' Word: word ')'] :ParenWord
-	|	[ActionBlock: action_block] :Block
+		[word] :Word
+	|	['(' word ')'] :ParenWord
+	|	[action_block] :Block
 	
 	def priority_aug
 		[uint]
@@ -288,74 +287,74 @@ namespace ragel
 	|	['%' 'lerr'] :Final2 | ['@' 'lerr'] :NotFinal2 | ['<>' 'lerr'] :Middle2
 
 	def factor_aug
-		[FactorAug: factor_aug AugBase: aug_base ActionRef: action_ref] :ActionRef
-	|	[FactorAug: factor_aug AugBase: aug_base PriorityAug: priority_aug] :PriorEmbed
-	|	[FactorAug: factor_aug AugBase: aug_base '(' Name: word ',' PriorityAug: priority_aug ')'] :NamedPriorEmbed
-	|	[FactorAug: factor_aug AugCond: aug_cond ActionRef: action_ref] :CondEmbed
-	|	[FactorAug: factor_aug AugCond: aug_cond '!' ActionRef: action_ref] :NegCondEmbed
-	|	[FactorAug: factor_aug AugToState: aug_to_state ActionRef: action_ref] :ToStateAction
-	|	[FactorAug: factor_aug AugFromState: aug_from_state ActionRef: action_ref] :FromStateAction
-	|	[FactorAug: factor_aug AugEof: aug_eof ActionRef: action_ref] :EofAction
-	|	[FactorAug: factor_aug AugGblError: aug_gbl_error ActionRef: action_ref] :GblErrorAction
-	|	[FactorAug: factor_aug AugLocalError: aug_local_error ActionRef: action_ref] :LocalErrorDef
-	|	[FactorAug: factor_aug AugLocalError: aug_local_error '(' ErrName: word ',' ActionRef: action_ref ')'] :LocalErrorName
-	|	[FactorRep: factor_rep] :Base
+		[factor_aug aug_base action_ref] :ActionRef
+	|	[factor_aug aug_base priority_aug] :PriorEmbed
+	|	[factor_aug aug_base '(' word ',' priority_aug ')'] :NamedPriorEmbed
+	|	[factor_aug aug_cond action_ref] :CondEmbed
+	|	[factor_aug aug_cond '!' action_ref] :NegCondEmbed
+	|	[factor_aug aug_to_state action_ref] :ToStateAction
+	|	[factor_aug aug_from_state action_ref] :FromStateAction
+	|	[factor_aug aug_eof action_ref] :EofAction
+	|	[factor_aug aug_gbl_error action_ref] :GblErrorAction
+	|	[factor_aug aug_local_error action_ref] :LocalErrorDef
+	|	[factor_aug aug_local_error '(' word ',' action_ref ')'] :LocalErrorName
+	|	[factor_rep] :Base
 
 	def factor_rep 
-		[FactorNeg: factor_neg OpList: factor_rep_op*]
+		[factor_neg OpList: factor_rep_op*]
 
 	def factor_rep_op
 		['*'] :Star
 	|	['**'] :StarStar
 	|	['?'] :Optional
 	|	['+'] :Plus
-	|	['{' Rep: factor_rep_num '}'] :ExactRep
-	|	['{' ',' Rep: factor_rep_num '}'] :MaxRep
-	|	['{' Rep: factor_rep_num ',' '}'] :MinRep
+	|	['{' factor_rep_num '}'] :ExactRep
+	|	['{' ',' factor_rep_num '}'] :MaxRep
+	|	['{' factor_rep_num ',' '}'] :MinRep
 	|	['{' LowRep: factor_rep_num ',' HighRep: factor_rep_num '}'] :RangeRep
 
 	def factor_rep_num
 		[uint]
 
 	def factor_neg 
-		['!' FactorNeg: factor_neg] :Bang
-	|	['^' FactorNeg: factor_neg] :Caret
-	|	[Factor: factor] :Base
+		['!' factor_neg] :Bang
+	|	['^' factor_neg] :Caret
+	|	[factor] :Base
 
 	def factor 
-		[AN: alphabet_num] :AlphabetNum
-	|	[W: word] :Word
-	|	[S: string] :String
-	|	[lex_sqopen_pos PosData: reg_or_data re_or_sqclose] :PosOrBlock
-	|	[lex_sqopen_neg NegData: reg_or_data re_or_sqclose] :NegOrBlock
-	|	[lex_regex_open Regex: regex re_close] :Regex
+		[alphabet_num] :AlphabetNum
+	|	[word] :Word
+	|	[string] :String
+	|	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	|	[lex_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
+	|	[lex_regex_open regex re_close] :Regex
 	|	[RL1: range_lit '..' RL2: range_lit] :Range
-	|	['(' Join: join ')'] :Join
+	|	['(' join ')'] :Join
 
 	def regex
 		[RegItemRepList: reg_item_rep*]
 
 	def reg_item_rep
-		[RegItem: reg_item re_star] :Star
-	|	[RegItem: reg_item] :Base
+		[reg_item re_star] :Star
+	|	[reg_item] :Base
 
 	def reg_item
-		[re_sqopen_pos PosData: reg_or_data re_or_sqclose] :PosOrBlock
-	|	[re_sqopen_neg NegData: reg_or_data re_or_sqclose] :NegOrBlock
+		[re_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	|	[re_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
 	|	[re_dot] :Dot
-	|	[Char: re_char] :Char
+	|	[re_char] :Char
 
 	def reg_or_data
-		[Data: reg_or_data Char: reg_or_char] :Data
+		[reg_or_data reg_or_char] :Data
 	|	[] :Base
 
 	def reg_or_char
-		[Char: re_or_char] :Char
+		[re_or_char] :Char
 	|	[Low: re_or_char re_or_dash High: re_or_char] :Range
 
 	def range_lit
-		[String: string] :String
-	|	[AN: alphabet_num] :AN
+		[string] :String
+	|	[alphabet_num] :AN
 
 	def alphabet_num 
 		[uint]
@@ -363,65 +362,65 @@ namespace ragel
 	|	[hex]
 
 	def lm_act
-		['=>' ActionRef: action_ref] :ActionRef
-	|	[ActionBlock: action_block] :ActionBlock
+		['=>' action_ref] :ActionRef
+	|	[action_block] :ActionBlock
 
 	def opt_lm_act
-		[LmAct: lm_act]
+		[lm_act]
 	|	[]
 
 	def lm_stmt
-		[Join: join OptLmAct: opt_lm_act ';'] :LmStmt commit
-	|	[Assignment: assignment] :Assignment
-	|	[ActionSpec: action_spec] :ActionSpec
+		[join opt_lm_act ';'] :LmStmt commit
+	|	[assignment] :Assignment
+	|	[action_spec] :ActionSpec
 
 	def lm_stmt_list
-		[LmStmtList: lm_stmt_list LmStmt: lm_stmt] :Rec
-	|	[LmStmt: lm_stmt] :Base
+		[lm_stmt_list lm_stmt] :Rec
+	|	[lm_stmt] :Base
 
 	def lm
-		[Join: join] :Join
-	|	['|*' LmStmtList: lm_stmt_list '*|'] :Lm
+		[join] :Join
+	|	['|*' lm_stmt_list '*|'] :Lm
 
 	def action_spec
-		['action' Name: word ActionBlock: action_block] commit
+		['action' word action_block] commit
 
 	def assignment
-		[OptExport: opt_export Name: word '=' Join: join ';'] commit
+		[opt_export word '=' join ';'] commit
 
 	def instantiation
-		[OptExport: opt_export Name: word ':=' Lm: lm ';'] commit
+		[opt_export word ':=' lm ';'] commit
 
 	def alphtype_type
 		[W1: word] :One
 	|	[W1: word W2: word] :Two
 
 	def include_spec
-		[Word: word] 
-	|	[String: string]
-	|	[Word: word String: string]
+		[word] 
+	|	[string]
+	|	[word string]
 
 	def opt_export
 		['export'] :Export
 	|	[] :Base
 
 	def machine_name
-		['machine' MachineName: word ';']
+		['machine' word ';']
 
 	def statement
-		[MachineName: machine_name] :MachineName commit
-	|	[Assignment: assignment] :Assignment
-	|	[Instantiation: instantiation] :Instantiation
-	|	[ActionSpec: action_spec] :ActionSpec
-	|	['prepush' PrePushBlock: action_block] :PrePushSpec commit
-	|	['postpop' PostPopBlock: action_block] :PostPopSpec commit
-	|	['variable' Var: variable_name Reparse: inline_expr_reparse] :Variable commit
-	|	['alphtype' AlphTypeType: alphtype_type ';'] :AlphType commit
-	|	['access' Reparse: inline_expr_reparse] :Access commit
+		[machine_name] :MachineName commit
+	|	[assignment] :Assignment
+	|	[instantiation] :Instantiation
+	|	[action_spec] :ActionSpec
+	|	['prepush' action_block] :PrePushSpec commit
+	|	['postpop' action_block] :PostPopSpec commit
+	|	['variable' variable_name inline_expr_reparse] :Variable commit
+	|	['alphtype' alphtype_type ';'] :AlphType commit
+	|	['access' inline_expr_reparse] :Access commit
 	|	['write' Cmd: word ArgList: word* ';'] :Write commit
-	|	['getkey' Reparse: inline_expr_reparse] :GetKey commit
-	|	['import' ImportFn: string ';'] :Import commit
-	|	['include' IncludeSpec: include_spec ';'] :Include commit
+	|	['getkey' inline_expr_reparse] :GetKey commit
+	|	['import' string ';'] :Import commit
+	|	['include' include_spec ';'] :Include commit
 
 	def ragel_start 
 		[statement*]
@@ -480,6 +479,6 @@ namespace c_host
 
 	def section
 		['%%{' StmtList: ragel::statement* '}%%'] :MultiLine
-	|	[Tok: tok] :Tok
+	|	[tok] :Tok
 end
 

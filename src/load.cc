@@ -125,12 +125,12 @@ struct LoadRagel
 		NameRef *nameRef = 0;
 		switch ( StateRefNames.prodName() ) {
 			case c_inline::state_ref_names::_Rec:
-				nameRef = loadStateRefNames( StateRefNames.StateRefNames() );
-				nameRef->append( StateRefNames.Word().text() );
+				nameRef = loadStateRefNames( StateRefNames._state_ref_names() );
+				nameRef->append( StateRefNames.word().text() );
 				break;
 			case c_inline::state_ref_names::_Base:
 				nameRef = new NameRef;
-				nameRef->append( StateRefNames.Word().text() );
+				nameRef->append( StateRefNames.word().text() );
 				break;
 		}
 		return nameRef;
@@ -138,8 +138,8 @@ struct LoadRagel
 
 	NameRef *loadStateRef( c_inline::state_ref StateRef )
 	{
-		NameRef *nameRef = loadStateRefNames( StateRef.StateRefNames() );
-		if ( StateRef.OptNameSep().prodName() == c_inline::opt_name_sep::_ColonColon )
+		NameRef *nameRef = loadStateRefNames( StateRef.state_ref_names() );
+		if ( StateRef.opt_name_sep().prodName() == c_inline::opt_name_sep::_ColonColon )
 			nameRef->prepend( "" );
 		return nameRef;
 	}
@@ -162,7 +162,7 @@ struct LoadRagel
 				inlineItem = new InlineItem( loc, InlineItem::Targs );
 				break;
 			case c_inline::expr_interpret::_Fentry: {
-				NameRef *nameRef = loadStateRef( ExprInterpret.StateRef() );
+				NameRef *nameRef = loadStateRef( ExprInterpret.state_ref() );
 				inlineItem = new InlineItem( loc, nameRef, InlineItem::Entry );
 				break;
 			}
@@ -174,11 +174,11 @@ struct LoadRagel
 	{
 		switch ( ExprItem.prodName() ) {
 			case c_inline::expr_item::_ExprAny:
-				return loadExprAny( ExprItem.ExprAny() );
+				return loadExprAny( ExprItem.expr_any() );
 			case c_inline::expr_item::_ExprSymbol:
-				return loadExprSymbol( ExprItem.ExprSymbol() );
+				return loadExprSymbol( ExprItem.expr_symbol() );
 			case c_inline::expr_item::_ExprInterpret:
-				return loadExprInterpret( ExprItem.ExprInterpret() );
+				return loadExprInterpret( ExprItem.expr_interpret() );
 		}
 		return 0;
 	}
@@ -197,7 +197,7 @@ struct LoadRagel
 		InputLoc loc = BlockInterpret.loc();
 		switch ( BlockInterpret.prodName() ) {
 			case c_inline::block_interpret::_ExprInterpret:
-				inlineItem = loadExprInterpret( BlockInterpret.ExprInterpret() );
+				inlineItem = loadExprInterpret( BlockInterpret.expr_interpret() );
 				break;
 			case c_inline::block_interpret::_Fhold:
 				inlineItem = new InlineItem( loc, InlineItem::Hold );
@@ -211,32 +211,32 @@ struct LoadRagel
 
 			case c_inline::block_interpret::_FgotoExpr:
 				inlineItem = new InlineItem( loc, InlineItem::GotoExpr );
-				inlineItem->children = loadInlineExpr( BlockInterpret.InlineExpr() );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
 				break;
 			case c_inline::block_interpret::_FnextExpr:
 				inlineItem = new InlineItem( loc, InlineItem::NextExpr );
-				inlineItem->children = loadInlineExpr( BlockInterpret.InlineExpr() );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
 				break;
 			case c_inline::block_interpret::_FcallExpr:
 				inlineItem = new InlineItem( loc, InlineItem::CallExpr );
-				inlineItem->children = loadInlineExpr( BlockInterpret.InlineExpr() );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
 				break;
 			case c_inline::block_interpret::_Fexec:
 				inlineItem = new InlineItem( loc, InlineItem::Exec );
-				inlineItem->children = loadInlineExpr( BlockInterpret.InlineExpr() );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
 				break;
 			case c_inline::block_interpret::_FgotoSr: {
-				NameRef *nameRef = loadStateRef( BlockInterpret.StateRef() );
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
 				inlineItem = new InlineItem( loc, nameRef, InlineItem::Goto );
 				break;
 			}
 			case c_inline::block_interpret::_FnextSr: {
-				NameRef *nameRef = loadStateRef( BlockInterpret.StateRef() );
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
 				inlineItem = new InlineItem( loc, nameRef, InlineItem::Next );
 				break;
 			}
 			case c_inline::block_interpret::_FcallSr: {
-				NameRef *nameRef = loadStateRef( BlockInterpret.StateRef() );
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
 				inlineItem = new InlineItem( loc, nameRef, InlineItem::Call );
 				break;
 			}
@@ -264,24 +264,24 @@ struct LoadRagel
 	{
 		switch ( BlockItem.prodName() ) {
 			case c_inline::block_item::_ExprAny: {
-				InlineItem *inlineItem = loadExprAny( BlockItem.ExprAny() );
+				InlineItem *inlineItem = loadExprAny( BlockItem.expr_any() );
 				inlineList->append( inlineItem );
 				break;
 			}
 			case c_inline::block_item::_BlockSymbol: {
-				InlineItem *inlineItem = loadBlockSymbol( BlockItem.BlockSymbol() );
+				InlineItem *inlineItem = loadBlockSymbol( BlockItem.block_symbol() );
 				inlineList->append( inlineItem );
 				break;
 			}
 			case c_inline::block_item::_BlockInterpret: {
-				InlineItem *inlineItem = loadBlockInterpret( BlockItem.BlockInterpret() );
+				InlineItem *inlineItem = loadBlockInterpret( BlockItem.block_interpret() );
 				inlineList->append( inlineItem );
 				break;
 			}
 			case c_inline::block_item::_RecBlock:
 				InputLoc loc = BlockItem.loc();
 				inlineList->append( new InlineItem( loc, "{", InlineItem::Text ) );
-				loadInlineBlock( inlineList, BlockItem.InlineBlock() );
+				loadInlineBlock( inlineList, BlockItem.inline_block() );
 				inlineList->append( new InlineItem( loc, "}", InlineItem::Text ) );
 				break;
 		}
@@ -302,7 +302,7 @@ struct LoadRagel
 	Action *loadActionBlock( string name, ragel::action_block ActionBlock )
 	{
 		InputLoc loc = ActionBlock.loc();
-		InlineList *inlineList = loadInlineBlock( ActionBlock.InlineBlock() );
+		InlineList *inlineList = loadInlineBlock( ActionBlock.inline_block() );
 
 		/* Add the action to the list of actions. */
 		Action *newAction = new Action( loc, name, 
@@ -316,7 +316,7 @@ struct LoadRagel
 
 	void loadActionSpec( ragel::action_spec ActionSpec )
 	{
-		ragel::word Name = ActionSpec.Name();
+		ragel::word Name = ActionSpec.word();
 		InputLoc loc = Name.loc();
 		string name = Name.text();
 
@@ -325,7 +325,7 @@ struct LoadRagel
 			error(loc) << "action \"" << name << "\" already defined" << endl;
 		}
 		else {
-			Action *newAction = loadActionBlock( name, ActionSpec.ActionBlock() );
+			Action *newAction = loadActionBlock( name, ActionSpec.action_block() );
 			pd->actionDict.insert( newAction );
 		}
 	}
@@ -339,7 +339,7 @@ struct LoadRagel
 			error(loc) << "pre_push code already defined" << endl;
 		}
 
-		pd->prePushExpr = loadInlineBlock( PrePushBlock.InlineBlock() );
+		pd->prePushExpr = loadInlineBlock( PrePushBlock.inline_block() );
 	}
 
 	void loadPostPop( ragel::action_block PostPopBlock )
@@ -351,7 +351,7 @@ struct LoadRagel
 			error(loc) << "post_pop code already defined" << endl;
 		}
 
-		pd->postPopExpr = loadInlineBlock( PostPopBlock.InlineBlock() );
+		pd->postPopExpr = loadInlineBlock( PostPopBlock.inline_block() );
 	}
 
 	void tryMachineDef( InputLoc &loc, std::string name, 
@@ -380,7 +380,7 @@ struct LoadRagel
 		Literal *literal = 0;
 		switch ( RL.prodName() ) {
 			case ragel::range_lit::_String: {
-				string s = RL.String().text();
+				string s = RL.string().text();
 				Token tok;
 				tok.set( s.c_str(), s.size() );
 				literal = new Literal( tok, Literal::LitString );
@@ -388,7 +388,7 @@ struct LoadRagel
 			}
 
 			case ragel::range_lit::_AN: {
-				string s = RL.AN().text();
+				string s = RL.alphabet_num().text();
 				Token tok;
 				tok.set( s.c_str(), s.size() );
 				literal = new Literal( tok, Literal::Number );
@@ -403,10 +403,10 @@ struct LoadRagel
 		ReOrItem *orItem = 0;
 		switch ( RegOrChar.prodName() ) {
 			case ragel::reg_or_char::_Char: {
-				char *c = unescape( RegOrChar.Char().text().c_str() );
+				char *c = unescape( RegOrChar.re_or_char().text().c_str() );
 				Token tok;
 				tok.set( c, strlen(c) );
-				orItem = new ReOrItem( RegOrChar.Char().loc(), tok );
+				orItem = new ReOrItem( RegOrChar.re_or_char().loc(), tok );
 				delete[] c;
 				break;
 			}
@@ -427,8 +427,8 @@ struct LoadRagel
 		ReOrBlock *block = 0;
 		switch ( RegOrData.prodName() ) {
 			case ragel::reg_or_data::_Data: {
-				ReOrBlock *left = loadRegOrData( RegOrData.Data() );
-				ReOrItem *right = loadRegOrChar( RegOrData.Char() );
+				ReOrBlock *left = loadRegOrData( RegOrData._reg_or_data() );
+				ReOrItem *right = loadRegOrChar( RegOrData.reg_or_char() );
 				block = new ReOrBlock( left, right );
 				break;
 			}
@@ -446,13 +446,13 @@ struct LoadRagel
 		ReItem *reItem = 0;
 		switch ( RegItem.prodName() ) {
 			case ragel::reg_item::_PosOrBlock: {
-				ReOrBlock *block = loadRegOrData( RegItem.PosData() );
+				ReOrBlock *block = loadRegOrData( RegItem.reg_or_data() );
 				reItem = new ReItem( loc, block, ReItem::OrBlock );
 				break;
 			}
 
 			case ragel::reg_item::_NegOrBlock: {
-				ReOrBlock *block = loadRegOrData( RegItem.NegData() );
+				ReOrBlock *block = loadRegOrData( RegItem.reg_or_data() );
 				reItem = new ReItem( loc, block, ReItem::NegOrBlock );
 				break;
 			}
@@ -463,7 +463,7 @@ struct LoadRagel
 			}
 
 			case ragel::reg_item::_Char: {
-				char *c = unescape( RegItem.Char().text().c_str() );
+				char *c = unescape( RegItem.re_char().text().c_str() );
 				Token tok;
 				tok.set( c, strlen( c ) );
 				reItem = new ReItem( loc, tok );
@@ -476,7 +476,7 @@ struct LoadRagel
 
 	ReItem *loadRegexItemRep( ragel::reg_item_rep RegItemRep )
 	{
-		ReItem *reItem = loadRegexItem( RegItemRep.RegItem() );
+		ReItem *reItem = loadRegexItem( RegItemRep.reg_item() );
 		if ( RegItemRep.prodName() == ragel::reg_item_rep::_Star )
 			reItem->star = true;
 		return reItem;
@@ -502,7 +502,7 @@ struct LoadRagel
 		Factor *factor = 0;
 		switch ( FactorTree.prodName() ) {
 			case ragel::factor::_AlphabetNum: {
-				string s = FactorTree.AN().text();
+				string s = FactorTree.alphabet_num().text();
 				Token tok;
 				tok.set( s.c_str(), s.size() );
 
@@ -511,7 +511,7 @@ struct LoadRagel
 			}
 
 			case ragel::factor::_Word: {
-				string s = FactorTree.W().text();
+				string s = FactorTree.word().text();
 				/* Find the named graph. */
 				GraphDictEl *gdNode = pd->graphDict.find( s );
 				if ( gdNode == 0 ) {
@@ -533,7 +533,7 @@ struct LoadRagel
 			}
 
 			case ragel::factor::_String: {
-				string s = FactorTree.S().text();
+				string s = FactorTree.string().text();
 				Token tok;
 				tok.set( s.c_str(), s.size() );
 
@@ -541,17 +541,17 @@ struct LoadRagel
 				break;
 			}
 			case ragel::factor::_PosOrBlock: {
-				ReOrBlock *block = loadRegOrData( FactorTree.PosData() );
+				ReOrBlock *block = loadRegOrData( FactorTree.reg_or_data() );
 				factor = new Factor( new ReItem( loc, block, ReItem::OrBlock ) );
 				break;
 			}
 			case ragel::factor::_NegOrBlock: {
-				ReOrBlock *block = loadRegOrData( FactorTree.NegData() );
+				ReOrBlock *block = loadRegOrData( FactorTree.reg_or_data() );
 				factor = new Factor( new ReItem( loc, block, ReItem::NegOrBlock ) );
 				break;
 			}
 			case ragel::factor::_Regex: {
-				RegExpr *regExp = loadRegex( FactorTree.Regex() );
+				RegExpr *regExp = loadRegex( FactorTree.regex() );
 				factor = new Factor( regExp );
 				break;
 			}
@@ -562,7 +562,7 @@ struct LoadRagel
 				break;
 			}
 			case ragel::factor::_Join:
-				Join *join = loadJoin( FactorTree.Join() );
+				Join *join = loadJoin( FactorTree.join() );
 				join->loc = loc;
 				factor = new Factor( join );
 				break;
@@ -576,19 +576,19 @@ struct LoadRagel
 		FactorWithNeg *factorWithNeg = 0;
 		switch ( FactorNeg.prodName() ) {
 			case ragel::factor_neg::_Bang: {
-				FactorWithNeg *rec = loadFactorNeg( FactorNeg.FactorNeg() );
+				FactorWithNeg *rec = loadFactorNeg( FactorNeg._factor_neg() );
 				factorWithNeg = new FactorWithNeg( loc,
 						rec, FactorWithNeg::NegateType );
 				break;
 			}
 			case ragel::factor_neg::_Caret: {
-				FactorWithNeg *rec = loadFactorNeg( FactorNeg.FactorNeg() );
+				FactorWithNeg *rec = loadFactorNeg( FactorNeg._factor_neg() );
 				factorWithNeg = new FactorWithNeg( loc,
 						rec, FactorWithNeg::CharNegateType );
 				break;
 			}
 			case ragel::factor_neg::_Base: {
-				Factor *factor = loadFactor( FactorNeg.Factor() );
+				Factor *factor = loadFactor( FactorNeg.factor() );
 				factorWithNeg = new FactorWithNeg( factor );
 				break;
 			}
@@ -613,7 +613,7 @@ struct LoadRagel
 
 	FactorWithRep *loadFactorRep( ragel::factor_rep FactorRep )
 	{
-		FactorWithRep *factorWithRep = new FactorWithRep( loadFactorNeg( FactorRep.FactorNeg() ) );
+		FactorWithRep *factorWithRep = new FactorWithRep( loadFactorNeg( FactorRep.factor_neg() ) );
 		ragel::_repeat_factor_rep_op OpList = FactorRep.OpList();
 		while ( !OpList.end() ) {
 			ragel::factor_rep_op FactorRepOp = OpList.value();
@@ -637,19 +637,19 @@ struct LoadRagel
 							0, 0, FactorWithRep::PlusType );
 					break;
 				case ragel::factor_rep_op::_ExactRep: {
-					int rep = loadFactorRepNum( FactorRepOp.Rep() );
+					int rep = loadFactorRepNum( FactorRepOp.factor_rep_num() );
 					factorWithRep = new FactorWithRep( loc, factorWithRep,
 							rep, 0, FactorWithRep::ExactType );
 					break;
 				}
 				case ragel::factor_rep_op::_MaxRep: {
-					int rep = loadFactorRepNum( FactorRepOp.Rep() );
+					int rep = loadFactorRepNum( FactorRepOp.factor_rep_num() );
 					factorWithRep = new FactorWithRep( loc, factorWithRep, 
 							0, rep, FactorWithRep::MaxType );
 					break;
 				}
 				case ragel::factor_rep_op::_MinRep: {
-					int rep = loadFactorRepNum( FactorRepOp.Rep() );
+					int rep = loadFactorRepNum( FactorRepOp.factor_rep_num() );
 					factorWithRep = new FactorWithRep( loc, factorWithRep,
 							rep, 0, FactorWithRep::MinType );
 					break;
@@ -675,7 +675,7 @@ struct LoadRagel
 		switch ( ActionRef.prodName() ) {
 			case ragel::action_ref::_Word:
 			case ragel::action_ref::_ParenWord: {
-				string s = ActionRef.Word().text();
+				string s = ActionRef.word().text();
 
 				/* Set the name in the actionDict. */
 				Action *action = pd->actionDict.find( s );
@@ -686,7 +686,7 @@ struct LoadRagel
 				return action;
 			}
 			case ragel::action_ref::_Block:
-				InlineList *inlineList = loadInlineBlock( ActionRef.ActionBlock().InlineBlock() );
+				InlineList *inlineList = loadInlineBlock( ActionRef.action_block().inline_block() );
 
 				/* Create the action, add it to the list and pass up. */
 				Action *action = new Action( loc, std::string(), inlineList, pd->nextCondId++ );
@@ -936,97 +936,97 @@ struct LoadRagel
 		FactorWithAug *factorWithAug = 0;
 		switch ( FactorAug.prodName() ) {
 			case ragel::factor_aug::_ActionRef: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugBase( FactorAug.AugBase() );
-				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugBase( FactorAug.aug_base() );
+				Action *action = loadActionRef( FactorAug.action_ref() );
 				factorWithAug->actions.append( ParserAction( loc, augType, 0, action ) );
 				break;
 			}
 			case ragel::factor_aug::_PriorEmbed: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugBase( FactorAug.AugBase() );
-				int priorityNum = loadPriorAug( FactorAug.PriorityAug() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugBase( FactorAug.aug_base() );
+				int priorityNum = loadPriorAug( FactorAug.priority_aug() );
 				factorWithAug->priorityAugs.append( PriorityAug( augType, pd->curDefPriorKey, priorityNum ) );
 				break;
 			}
 			case ragel::factor_aug::_NamedPriorEmbed: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugBase( FactorAug.AugBase() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugBase( FactorAug.aug_base() );
 
 				/* Lookup/create the priority key. */
 				PriorDictEl *priorDictEl;
-				if ( pd->priorDict.insert( FactorAug.Name().text(), pd->nextPriorKey, &priorDictEl ) )
+				if ( pd->priorDict.insert( FactorAug.word().text(), pd->nextPriorKey, &priorDictEl ) )
 					pd->nextPriorKey += 1;
 
 				/* Use the inserted/found priority key. */
 				int priorityName = priorDictEl->value;
 
-				int priorityNum = loadPriorAug( FactorAug.PriorityAug() );
+				int priorityNum = loadPriorAug( FactorAug.priority_aug() );
 				factorWithAug->priorityAugs.append( PriorityAug( augType, priorityName, priorityNum ) );
 				break;
 			}
 			case ragel::factor_aug::_CondEmbed: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugCond( FactorAug.AugCond() );
-				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugCond( FactorAug.aug_cond() );
+				Action *action = loadActionRef( FactorAug.action_ref() );
 				factorWithAug->conditions.append( ConditionTest( loc, 
 						augType, action, true ) );
 				break;
 			}
 			case ragel::factor_aug::_NegCondEmbed: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugCond( FactorAug.AugCond() );
-				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugCond( FactorAug.aug_cond() );
+				Action *action = loadActionRef( FactorAug.action_ref() );
 				factorWithAug->conditions.append( ConditionTest( loc, 
 						augType, action, false ) );
 				break;
 			}
 			case ragel::factor_aug::_ToStateAction: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugToState( FactorAug.AugToState() );
-				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugToState( FactorAug.aug_to_state() );
+				Action *action = loadActionRef( FactorAug.action_ref() );
 				factorWithAug->actions.append( ParserAction( loc, 
 						augType, 0, action ) );
 				break;
 			}
 			case ragel::factor_aug::_FromStateAction: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugFromState( FactorAug.AugFromState() );
-				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugFromState( FactorAug.aug_from_state() );
+				Action *action = loadActionRef( FactorAug.action_ref() );
 				factorWithAug->actions.append( ParserAction( loc, 
 						augType, 0, action ) );
 				break;
 			}
 			case ragel::factor_aug::_EofAction: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugEof( FactorAug.AugEof() );
-				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugEof( FactorAug.aug_eof() );
+				Action *action = loadActionRef( FactorAug.action_ref() );
 				factorWithAug->actions.append( ParserAction( loc, 
 						augType, 0, action ) );
 				break;
 			}
 			case ragel::factor_aug::_GblErrorAction: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugGblError( FactorAug.AugGblError() );
-				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugGblError( FactorAug.aug_gbl_error() );
+				Action *action = loadActionRef( FactorAug.action_ref() );
 				factorWithAug->actions.append( ParserAction( loc, 
 						augType, pd->curDefLocalErrKey, action ) );
 				break;
 			}
 			case ragel::factor_aug::_LocalErrorDef: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugLocalError( FactorAug.AugLocalError() );
-				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugLocalError( FactorAug.aug_local_error() );
+				Action *action = loadActionRef( FactorAug.action_ref() );
 				factorWithAug->actions.append( ParserAction( loc, 
 						augType, pd->curDefLocalErrKey, action ) );
 				break;
 			}
 			case ragel::factor_aug::_LocalErrorName: {
-				factorWithAug = loadFactorAug( FactorAug.FactorAug() );
-				AugType augType = loadAugLocalError( FactorAug.AugLocalError() );
-				Action *action = loadActionRef( FactorAug.ActionRef() );
+				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
+				AugType augType = loadAugLocalError( FactorAug.aug_local_error() );
+				Action *action = loadActionRef( FactorAug.action_ref() );
 
-				string errName = FactorAug.ErrName().text();
+				string errName = FactorAug.word().text();
 				LocalErrDictEl *localErrDictEl;
 				if ( pd->localErrDict.insert( errName, pd->nextLocalErrKey, &localErrDictEl ) )
 					pd->nextLocalErrKey += 1;
@@ -1036,7 +1036,7 @@ struct LoadRagel
 				break;
 			}
 			case ragel::factor_aug::_Base:
-				factorWithAug = new FactorWithAug( loadFactorRep( FactorAug.FactorRep() ) );
+				factorWithAug = new FactorWithAug( loadFactorRep( FactorAug.factor_rep() ) );
 				break;
 		}
 		return factorWithAug;
@@ -1047,12 +1047,12 @@ struct LoadRagel
 		NameRef *nameRef = 0;
 		switch ( EpsilonTarget.prodName() ) {
 			case ragel::epsilon_target::_Rec:
-				nameRef = loadEpsilonTarget( EpsilonTarget.EpsilonTarget() );
-				nameRef->append( EpsilonTarget.Word().text() );
+				nameRef = loadEpsilonTarget( EpsilonTarget._epsilon_target() );
+				nameRef->append( EpsilonTarget.word().text() );
 				break;
 			case ragel::epsilon_target::_Base:
 				nameRef = new NameRef;
-				nameRef->append( EpsilonTarget.Word().text() );
+				nameRef->append( EpsilonTarget.word().text() );
 				break;
 		}
 		return nameRef;
@@ -1064,8 +1064,8 @@ struct LoadRagel
 		switch ( FactorEp.prodName() ) {
 			case ragel::factor_ep::_Epsilon: {
 				InputLoc loc = FactorEp.loc();
-				factorWithAug = loadFactorAug( FactorEp.FactorAug() );
-				NameRef *nameRef = loadEpsilonTarget( FactorEp.EpsilonTarget() );
+				factorWithAug = loadFactorAug( FactorEp.factor_aug() );
+				NameRef *nameRef = loadEpsilonTarget( FactorEp.epsilon_target() );
 
 				/* Add the target to the list and return the factor object. */
 				factorWithAug->epsilonLinks.append( EpsilonLink( loc, nameRef ) );
@@ -1073,7 +1073,7 @@ struct LoadRagel
 			}
 				
 			case ragel::factor_ep::_Base:
-				factorWithAug = loadFactorAug( FactorEp.FactorAug() );
+				factorWithAug = loadFactorAug( FactorEp.factor_aug() );
 				break;
 		}
 		return factorWithAug;
@@ -1085,13 +1085,13 @@ struct LoadRagel
 		switch ( FactorLabel.prodName() ) {
 			case ragel::factor_label::_Label: {
 				InputLoc loc = FactorLabel.loc();
-				string label = FactorLabel.Label().text();
-				factorWithAug = loadFactorLabel( FactorLabel.FactorLabel() );
+				string label = FactorLabel.word().text();
+				factorWithAug = loadFactorLabel( FactorLabel._factor_label() );
 				factorWithAug->labels.prepend( Label(loc, label) );
 				break;
 			}
 			case ragel::factor_label::_Ep:
-				factorWithAug = loadFactorEp( FactorLabel.FactorEp() );
+				factorWithAug = loadFactorEp( FactorLabel.factor_ep() );
 				break;
 		}
 		return factorWithAug;
@@ -1099,14 +1099,14 @@ struct LoadRagel
 
 	Term *loadTerm( ragel::term TermTree )
 	{
-		Term *term = new Term( loadFactorLabel( TermTree.FactorLabel() ) );
+		Term *term = new Term( loadFactorLabel( TermTree.factor_label() ) );
 
 		/* Walk the list of terms. */
-		ragel::term_op_list_short TermOpList = TermTree.TermOpList();
+		ragel::term_op_list_short TermOpList = TermTree.term_op_list_short();
 		while ( TermOpList.prodName() == ragel::term_op_list_short::_Terms ) {
 			/* Push. */
-			ragel::term_op TermOp = TermOpList.TermOp();
-			FactorWithAug *factorWithAug = loadFactorLabel( TermOp.FactorLabel() );
+			ragel::term_op TermOp = TermOpList.term_op();
+			FactorWithAug *factorWithAug = loadFactorLabel( TermOp.factor_label() );
 
 			Term::Type type;
 			switch ( TermOp.prodName() ) {
@@ -1125,7 +1125,7 @@ struct LoadRagel
 					break;
 			}
 			term = new Term( term, factorWithAug, type );
-			TermOpList = TermOpList.TermOpList();
+			TermOpList = TermOpList._term_op_list_short();
 		}
 
 		return term;
@@ -1133,7 +1133,7 @@ struct LoadRagel
 
 	Expression *loadExpression( ragel::expression ExprTree )
 	{
-		Expression *expr = new Expression( loadTerm( ExprTree.Term() ) );
+		Expression *expr = new Expression( loadTerm( ExprTree.term() ) );
 
 		/* Walk the list of terms. */
 		ragel::_repeat_expression_op ExprOpList = ExprTree.ExprOpList();
@@ -1154,7 +1154,7 @@ struct LoadRagel
 					type = Expression::StrongSubtractType;
 					break;
 			}
-			Term *term = loadTerm( ExprOp.Term() );
+			Term *term = loadTerm( ExprOp.term() );
 			expr = new Expression( expr, term, type );
 			ExprOpList = ExprOpList.next();
 		}
@@ -1167,13 +1167,13 @@ struct LoadRagel
 		Join *join = 0;
 		switch ( JoinTree.prodName() ) {
 			case ragel::join::_Rec: {
-				join = loadJoin( JoinTree.Join() );
-				Expression *expr = loadExpression( JoinTree.Expr() );
+				join = loadJoin( JoinTree._join() );
+				Expression *expr = loadExpression( JoinTree.expression() );
 				join->exprList.append( expr );
 				break;
 			}
 			case ragel::join::_Base: {
-				Expression *expr = loadExpression( JoinTree.Expr() );
+				Expression *expr = loadExpression( JoinTree.expression() );
 				join = new Join( expr );
 				break;
 			}
@@ -1184,14 +1184,14 @@ struct LoadRagel
 	Action *loadOptLmAction( ragel::opt_lm_act OptLmAct )
 	{
 		Action *action = 0;
-		if ( OptLmAct.LmAct() != 0 ) {
-			ragel::lm_act LmAct = OptLmAct.LmAct();
+		if ( OptLmAct.lm_act() != 0 ) {
+			ragel::lm_act LmAct = OptLmAct.lm_act();
 			switch ( LmAct.prodName() ) {
 				case ragel::lm_act::_ActionRef:
-					action = loadActionRef( LmAct.ActionRef() );
+					action = loadActionRef( LmAct.action_ref() );
 					break;
 				case ragel::lm_act::_ActionBlock:
-					action = loadActionBlock( string(), LmAct.ActionBlock() );
+					action = loadActionBlock( string(), LmAct.action_block() );
 					break;
 			}
 		}
@@ -1204,8 +1204,8 @@ struct LoadRagel
 		switch ( LmStmt.prodName() ) {
 			case ragel::lm_stmt::_LmStmt: {
 				InputLoc loc = LmStmt.loc();
-				Join *join = loadJoin( LmStmt.Join() );
-				Action *action = loadOptLmAction( LmStmt.OptLmAct() );
+				Join *join = loadJoin( LmStmt.join() );
+				Action *action = loadOptLmAction( LmStmt.opt_lm_act() );
 
 				if ( action != 0 )
 					action->isLmAction = true;
@@ -1219,10 +1219,10 @@ struct LoadRagel
 				break;
 			}
 			case ragel::lm_stmt::_Assignment:
-				loadAssignment( LmStmt.Assignment() );
+				loadAssignment( LmStmt.assignment() );
 				break;
 			case ragel::lm_stmt::_ActionSpec:
-				loadActionSpec( LmStmt.ActionSpec() );
+				loadActionSpec( LmStmt.action_spec() );
 				break;
 		}
 		return longestMatchPart;
@@ -1233,14 +1233,14 @@ struct LoadRagel
 		LmPartList *lmPartList = 0;
 		switch ( LmStmtList.prodName() ) {
 			case ragel::lm_stmt_list::_Rec:
-				lmPartList = loadLmStmtList( LmStmtList.LmStmtList() );
+				lmPartList = loadLmStmtList( LmStmtList._lm_stmt_list() );
 				break;
 			case ragel::lm_stmt_list::_Base:
 				lmPartList = new LmPartList;
 				break;
 		}
 
-		LongestMatchPart *lmPart = loadLmStmt( LmStmtList.LmStmt() );
+		LongestMatchPart *lmPart = loadLmStmt( LmStmtList.lm_stmt() );
 		if ( lmPart != 0 )
 			lmPartList->append( lmPart );
 
@@ -1253,12 +1253,12 @@ struct LoadRagel
 		MachineDef *machineDef = 0;
 		switch ( Lm.prodName() ) {
 			case ragel::lm::_Join:
-				machineDef = new MachineDef( loadJoin( Lm.Join() ) );
+				machineDef = new MachineDef( loadJoin( Lm.join() ) );
 				break;
 			case ragel::lm::_Lm:
 				/* Create a new factor going to a longest match structure. Record
 				 * in the parse data that we have a longest match. */
-				LmPartList *lmPartList = loadLmStmtList( Lm.LmStmtList() );
+				LmPartList *lmPartList = loadLmStmtList( Lm.lm_stmt_list() );
 				LongestMatch *lm = new LongestMatch( loc, lmPartList );
 				pd->lmList.append( lm );
 				for ( LmPartList::Iter lmp = *lmPartList; lmp.lte(); lmp++ )
@@ -1290,10 +1290,10 @@ struct LoadRagel
 	void loadAssignment( ragel::assignment Assignment )
 	{
 		InputLoc loc = Assignment.loc();
-		bool exportMachine = Assignment.OptExport().prodName() == ragel::opt_export::_Export;
+		bool exportMachine = Assignment.opt_export().prodName() == ragel::opt_export::_Export;
 		if ( exportMachine )
 			exportContext.append( true );
-		string name = loadMachineName( Assignment.Name().text() );
+		string name = loadMachineName( Assignment.word().text() );
 
 		/* Main machine must be an instance. */
 		bool isInstance = false;
@@ -1302,7 +1302,7 @@ struct LoadRagel
 			isInstance = true;
 		}
 
-		MachineDef *machineDef = new MachineDef( loadJoin( Assignment.Join() ) );
+		MachineDef *machineDef = new MachineDef( loadJoin( Assignment.join() ) );
 
 		/* Generic creation of machine for instantiation and assignment. */
 		tryMachineDef( loc, name, machineDef, isInstance );
@@ -1318,13 +1318,13 @@ struct LoadRagel
 	void loadInstantiation( ragel::instantiation Instantiation )
 	{
 		InputLoc loc = Instantiation.loc();
-		bool exportMachine = Instantiation.OptExport().prodName() == ragel::opt_export::_Export;
+		bool exportMachine = Instantiation.opt_export().prodName() == ragel::opt_export::_Export;
 		if ( exportMachine )
 			exportContext.append( true );
 
-		string name = loadMachineName( Instantiation.Name().text() );
+		string name = loadMachineName( Instantiation.word().text() );
 
-		MachineDef *machineDef = loadLm( Instantiation.Lm() );
+		MachineDef *machineDef = loadLm( Instantiation.lm() );
 
 		/* Generic creation of machine for instantiation and assignment. */
 		tryMachineDef( loc, name, machineDef, true );
@@ -1409,11 +1409,11 @@ struct LoadRagel
 		string machine = pd->sectionName;
 		string fileName = id.inputFileName;
 
-		if ( IncludeSpec.Word() != 0 )
-			machine = IncludeSpec.Word().text();
+		if ( IncludeSpec.word() != 0 )
+			machine = IncludeSpec.word().text();
 
-		if ( IncludeSpec.String() != 0 ) {
-			fileName = IncludeSpec.String().text();
+		if ( IncludeSpec.string() != 0 ) {
+			fileName = IncludeSpec.string().text();
 
 			InputLoc loc = IncludeSpec.loc();
 			long length;
@@ -1545,43 +1545,43 @@ struct LoadRagel
 
 		switch( prodName ) {
 			case ragel::statement::_PrePushSpec:
-				loadPrePush( Statement.PrePushBlock() );
+				loadPrePush( Statement.action_block() );
 				break;
 			case ragel::statement::_PostPopSpec:
-				loadPostPop( Statement.PostPopBlock() );
+				loadPostPop( Statement.action_block() );
 				break;
 			case ragel::statement::_MachineName:
 				error(loc) << "machine statements must be the first statement" << endl;
 				break;
 			case ragel::statement::_ActionSpec:
-				loadActionSpec( Statement.ActionSpec() );
+				loadActionSpec( Statement.action_spec() );
 				break;
 			case ragel::statement::_Instantiation:
-				loadInstantiation( Statement.Instantiation() );
+				loadInstantiation( Statement.instantiation() );
 				break;
 			case ragel::statement::_Assignment:
-				loadAssignment( Statement.Assignment() );
+				loadAssignment( Statement.assignment() );
 				break;
 			case ragel::statement::_Write:
 				loadWrite( Statement.Cmd(), Statement.ArgList() );
 				break;
 			case ragel::statement::_Variable:
-				loadVariable( Statement.Var(), Statement.Reparse().ActionExpr().InlineExpr() );
+				loadVariable( Statement.variable_name(), Statement.inline_expr_reparse().action_expr().inline_expr() );
 				break;
 			case ragel::statement::_GetKey:
-				loadGetKey( Statement.Reparse().ActionExpr().InlineExpr() );
+				loadGetKey( Statement.inline_expr_reparse().action_expr().inline_expr() );
 				break;
 			case ragel::statement::_AlphType:
-				loadAlphType( Statement.AlphTypeType() );
+				loadAlphType( Statement.alphtype_type() );
 				break;
 			case ragel::statement::_Access:
-				loadAccess( Statement.Reparse().ActionExpr().InlineExpr() );
+				loadAccess( Statement.inline_expr_reparse().action_expr().inline_expr() );
 				break;
 			case ragel::statement::_Include:
-				loadInclude( Statement.IncludeSpec() );
+				loadInclude( Statement.include_spec() );
 				break;
 			case ragel::statement::_Import:
-				loadImport( Statement.ImportFn() );
+				loadImport( Statement.string() );
 				break;
 		}
 		return false;
@@ -1597,7 +1597,7 @@ struct LoadRagel
 		ragel::statement::prod_name prodName = StmtList.value().prodName();
 		if ( prodName == ragel::statement::_MachineName ) {
 			/* Process the name, move over it. */
-			loadMachineStmt( StmtList.value().MachineName().MachineName(), targetMachine, searchMachine );
+			loadMachineStmt( StmtList.value().machine_name().word(), targetMachine, searchMachine );
 			StmtList = StmtList.next();
 		}
 
@@ -1628,7 +1628,7 @@ struct LoadRagel
 				/* If no errors and we are at the bottom of the include stack (the
 				 * source file listed on the command line) then write out the data. */
 				if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 ) {
-					string text = Section.Tok().text();
+					string text = Section.tok().text();
 					id.inputItems.tail->data << text;
 				}
 
