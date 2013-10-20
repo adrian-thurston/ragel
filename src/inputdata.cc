@@ -232,7 +232,7 @@ void InputData::generateReduced()
 	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
 		ParseData *pd = pdel->value;
 		if ( pd->instanceList.length() > 0 )
-			pd->generateReduced( *this );
+			pd->generateReduced( inputFileName, *outStream );
 	}
 }
 

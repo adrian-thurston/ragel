@@ -55,8 +55,8 @@ struct ReItem;
 struct ReOrBlock;
 struct ReOrItem;
 struct LongestMatch;
-struct InputData;
 struct CodeGenData;
+struct InputData;
 typedef DList<LongestMatch> LmList;
 
 
@@ -230,7 +230,7 @@ struct ParseData
 
 	void prepareMachineGen( GraphDictEl *graphDictEl );
 	void generateXML( ostream &out );
-	void generateReduced( InputData &inputData );
+	void generateReduced( const char *inputFileName, std::ostream &out );
 	FsmAp *sectionGraph;
 	bool generatingSectionSubset;
 
