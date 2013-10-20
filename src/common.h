@@ -161,17 +161,17 @@ struct HostLang
 	bool explicitUnsigned;
 };
 
-extern HostLang *hostLang;
+extern const HostLang *hostLang;
 
-extern HostLang hostLangC;
-extern HostLang hostLangD;
-extern HostLang hostLangD2;
-extern HostLang hostLangGo;
-extern HostLang hostLangJava;
-extern HostLang hostLangRuby;
-extern HostLang hostLangCSharp;
-extern HostLang hostLangOCaml;
-extern HostLang hostLangCrack;
+extern const HostLang hostLangC;
+extern const HostLang hostLangD;
+extern const HostLang hostLangD2;
+extern const HostLang hostLangGo;
+extern const HostLang hostLangJava;
+extern const HostLang hostLangRuby;
+extern const HostLang hostLangCSharp;
+extern const HostLang hostLangOCaml;
+extern const HostLang hostLangCrack;
 
 HostType *findAlphType( const char *s1 );
 HostType *findAlphType( const char *s1, const char *s2 );

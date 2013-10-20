@@ -66,6 +66,8 @@ using std::endl;
 using std::ios;
 using std::streamsize;
 
+const HostLang *hostLang = &hostLangC;
+
 /* Controls minimization. */
 MinimizeLevel minimizeLevel = MinimizePartition2;
 MinimizeOpt minimizeOpt = MinimizeMostOps;
