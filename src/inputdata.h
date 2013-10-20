@@ -84,7 +84,7 @@ struct InputData
 	void verifyWritesHaveData();
 
 	void makeFirstInputItem();
-	void writeOutput();
+	void writeOutput( bool generateDot );
 	void makeDefaultFileName();
 	void makeOutputStream();
 	void openOutput();
@@ -105,14 +105,14 @@ struct InputData
 
 	void processXML();
 	void processDot();
-	void processCode( CodeStyle codeStyle );
+	void processCode( CodeStyle codeStyle, bool generateDot );
 
 	void writeDot( std::ostream &out );
 
 	void parseArgs( int argc, const char **argv );
 	void checkArgs();
 
-	void process( CodeStyle codeStyle );
+	void process( CodeStyle codeStyle, bool generateXML, bool generateDot );
 };
 
 #endif

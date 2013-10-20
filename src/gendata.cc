@@ -36,7 +36,7 @@ string itoa( int i )
 	return buf;
 }
 
-void lineDirective( ostream &out, const char *fileName, int line )
+void lineDirective( ostream &out, const char *fileName, int line, bool generateDot )
 {
 	if ( !generateDot ) {
 		if ( hostLang == &hostLangC )
@@ -60,11 +60,11 @@ void lineDirective( ostream &out, const char *fileName, int line )
 	}
 }
 
-void genLineDirective( ostream &out )
+void CodeGenData::genLineDirective( bool generateDot )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
-	lineDirective( out, filter->fileName, filter->line + 1 );
+	lineDirective( out, filter->fileName, filter->line + 1, generateDot );
 }
 
 GenBase::GenBase( std::string fsmName, ParseData *pd, FsmAp *fsm )
@@ -1388,14 +1388,14 @@ void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 	source_warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
 }
 
-void CodeGenData::writeStatement( InputLoc &loc, int nargs, std::string *args )
+void CodeGenData::writeStatement( InputLoc &loc, int nargs, std::string *args, bool generateDot )
 {
 	/* FIXME: This should be moved to the virtual functions in the code
 	 * generators.
 	 *
 	 * Force a newline. */
 	out << '\n';
-	genLineDirective( out );
+	genLineDirective( generateDot );
 
 	if ( args[0] == "data" ) {
 		for ( int i = 1; i < nargs; i++ ) {

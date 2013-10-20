@@ -75,8 +75,8 @@ const char *machineSpec = 0, *machineName = 0;
 bool machineSpecFound = false;
 bool wantDupsRemoved = true;
 
-bool generateXML = false;
-bool generateDot = false;
+static bool generateXML = false;
+static bool generateDot = false;
 bool printStatistics = false;
 
 /* Target language and output style. */
@@ -482,6 +482,6 @@ int main( int argc, const char **argv )
 
 	id.parseArgs( argc, argv );
 	id.checkArgs();
-	id.process( codeStyle );
+	id.process( codeStyle, generateXML, generateDot );
 	return 0;
 }

@@ -75,9 +75,6 @@ extern bool printStatistics;
 extern bool wantDupsRemoved;
 extern RubyImplEnum rubyImpl;
 
-extern bool generateXML;
-extern bool generateDot;
-
 /* Error reporting format. */
 enum ErrorFormat {
 	ErrorFormatGNU,

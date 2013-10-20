@@ -246,16 +246,16 @@ void InputData::verifyWritesHaveData()
 	}
 }
 
-void InputData::writeOutput()
+void InputData::writeOutput( bool generateDot )
 {
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 		if ( ii->type == InputItem::Write ) {
 			CodeGenData *cgd = ii->pd->cgd;
-			cgd->writeStatement( ii->loc, ii->writeArgs.length(), ii->writeArgs.data );
+			cgd->writeStatement( ii->loc, ii->writeArgs.length(), ii->writeArgs.data, generateDot );
 		}
 		else {
 			*outStream << '\n';
-			lineDirective( *outStream, inputFileName, ii->loc.line );
+			lineDirective( *outStream, inputFileName, ii->loc.line, generateDot );
 			*outStream << ii->data.str();
 		}
 	}
@@ -303,7 +303,7 @@ void InputData::processDot()
 	writeDot( *outStream );
 }
 
-void InputData::processCode( CodeStyle codeStyle )
+void InputData::processCode( CodeStyle codeStyle, bool generateDot )
 {
 	/* Compiles machines. */
 	prepareAllMachines();
@@ -330,7 +330,7 @@ void InputData::processCode( CodeStyle codeStyle )
 	 */
 
 	openOutput();
-	writeOutput();
+	writeOutput( generateDot );
 }
 
 void InputData::makeFirstInputItem()
@@ -344,7 +344,7 @@ void InputData::makeFirstInputItem()
 	inputItems.append( firstInputItem );
 }
 
-void InputData::process( CodeStyle codeStyle )
+void InputData::process( CodeStyle codeStyle, bool generateXML, bool generateDot )
 {
 	/* Check input file. */
 	ifstream *inFile = new ifstream( inputFileName );
@@ -367,7 +367,7 @@ void InputData::process( CodeStyle codeStyle )
 	else if ( generateDot )
 		processDot();
 	else 
-		processCode( codeStyle );
+		processCode( codeStyle, generateDot );
 
 	/* If writing to a file, delete the ostream, causing it to flush.
 	 * Standard out is flushed automatically. */

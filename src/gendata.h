@@ -98,8 +98,6 @@ struct GenBase
 
 using std::ostream;
 
-extern bool generateDot;
-
 struct NameInst;
 typedef DList<GenAction> GenActionList;
 
@@ -123,7 +121,7 @@ void rubyLineDirective( ostream &out, const char *fileName, int line );
 void csharpLineDirective( ostream &out, const char *fileName, int line );
 void ocamlLineDirective( ostream &out, const char *fileName, int line );
 void genLineDirective( ostream &out );
-void lineDirective( ostream &out, const char *fileName, int line );
+void lineDirective( ostream &out, const char *fileName, int line, bool generateDot );
 
 string itoa( int i );
 
@@ -189,6 +187,7 @@ private:
 	void makeEofTrans( StateAp *state );
 	void makeTransList( StateAp *state );
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
+	void genLineDirective( bool generateDot );
 
 	/* Collected during parsing. */
 	int curAction;
@@ -215,7 +214,7 @@ public:
 
 	/* This can also be overridden to modify the processing of write
 	 * statements. */
-	virtual void writeStatement( InputLoc &loc, int nargs, std::string *args );
+	virtual void writeStatement( InputLoc &loc, int nargs, std::string *args, bool generateDot );
 
 	/********************/
 
