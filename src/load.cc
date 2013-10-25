@@ -253,7 +253,7 @@ struct LoadRagel
 
 	InlineList *loadInlineBlock( InlineList *inlineList, c_inline::inline_block InlineBlock )
 	{
-		c_inline::_repeat_block_item BlockItemList = InlineBlock.BlockItemList();
+		c_inline::_repeat_block_item BlockItemList = InlineBlock._repeat_block_item();
 		while ( !BlockItemList.end() ) {
 			loadBlockItem( inlineList, BlockItemList.value() );
 			BlockItemList = BlockItemList.next();
@@ -297,7 +297,7 @@ struct LoadRagel
 	InlineList *loadInlineExpr( c_inline::inline_expr InlineExpr )
 	{
 		InlineList *inlineList = new InlineList;
-		c_inline::_repeat_expr_item ExprItemList = InlineExpr.ExprItemList();
+		c_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
 		while ( !ExprItemList.end() ) {
 			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
 			inlineList->append( inlineItem );
@@ -492,7 +492,7 @@ struct LoadRagel
 	RegExpr *loadRegex( ragel::regex Regex )
 	{
 		RegExpr *regExpr = new RegExpr();
-		ragel::_repeat_reg_item_rep RegItemRepList = Regex.RegItemRepList();
+		ragel::_repeat_reg_item_rep RegItemRepList = Regex._repeat_reg_item_rep();
 		while ( !RegItemRepList.end() ) {
 			ragel::reg_item_rep RegItemRep = RegItemRepList.value();
 			ReItem *reItem = loadRegexItemRep( RegItemRep );
@@ -621,7 +621,7 @@ struct LoadRagel
 	FactorWithRep *loadFactorRep( ragel::factor_rep FactorRep )
 	{
 		FactorWithRep *factorWithRep = new FactorWithRep( loadFactorNeg( FactorRep.factor_neg() ) );
-		ragel::_repeat_factor_rep_op OpList = FactorRep.OpList();
+		ragel::_repeat_factor_rep_op OpList = FactorRep._repeat_factor_rep_op();
 		while ( !OpList.end() ) {
 			ragel::factor_rep_op FactorRepOp = OpList.value();
 			InputLoc loc = FactorRepOp.loc();
@@ -1143,7 +1143,7 @@ struct LoadRagel
 		Expression *expr = new Expression( loadTerm( ExprTree.term() ) );
 
 		/* Walk the list of terms. */
-		ragel::_repeat_expression_op ExprOpList = ExprTree.ExprOpList();
+		ragel::_repeat_expression_op ExprOpList = ExprTree._repeat_expression_op();
 		while ( !ExprOpList.end() ) {
 			ragel::expression_op ExprOp = ExprOpList.value();
 			Expression::Type type = Expression::OrType;
@@ -1620,7 +1620,7 @@ struct LoadRagel
 	{
 		switch ( Section.prodName() ) {
 			case c_host::section::_MultiLine:
-				loadStmtList( Section.StmtList(), targetMachine, searchMachine );
+				loadStmtList( Section._repeat_statement(), targetMachine, searchMachine );
 				break;
 
 			case c_host::section::_Tok:

@@ -54,7 +54,7 @@ namespace c_inline
 	end
 
 	def inline_expr
-		[ExprItemList: expr_item*]
+		[expr_item*]
 
 	def expr_item
 		[expr_any] :ExprAny
@@ -93,7 +93,7 @@ namespace c_inline
 	|	[srlex::word] :Base
 
 	def inline_block
-		[BlockItemList: block_item*]
+		[block_item*]
 	
 	def block_item
 		[expr_any] :ExprAny
@@ -197,7 +197,7 @@ namespace ragel
 	|	[expression] :Base
 
 	def expression
-		[term ExprOpList: expression_op*]
+		[term expression_op*]
 
 	def expression_op
 		['|' term] :Or
@@ -301,7 +301,7 @@ namespace ragel
 	|	[factor_rep] :Base
 
 	def factor_rep 
-		[factor_neg OpList: factor_rep_op*]
+		[factor_neg factor_rep_op*]
 
 	def factor_rep_op
 		['*'] :Star
@@ -332,7 +332,7 @@ namespace ragel
 	|	['(' join ')'] :Join
 
 	def regex
-		[RegItemRepList: reg_item_rep*]
+		[reg_item_rep*]
 
 	def reg_item_rep
 		[reg_item re_star] :Star
@@ -421,9 +421,6 @@ namespace ragel
 	|	['getkey' inline_expr_reparse] :GetKey commit
 	|	['import' string ';'] :Import commit
 	|	['include' include_spec ';'] :Include commit
-
-	def ragel_start 
-		[statement*]
 end
 
 namespace c_host
@@ -478,7 +475,7 @@ namespace c_host
 	|	[c_any]
 
 	def section
-		['%%{' StmtList: ragel::statement* '}%%'] :MultiLine
+		['%%{' ragel::statement* '}%%'] :MultiLine
 	|	[tok] :Tok
 end
 
