@@ -790,7 +790,14 @@ struct LoadColm
 			/* default the prod name. */
 			if ( El.prodName() == prod_el::_Id ) {
 				String fieldName = El.id().data();
-				if ( strcmp( fieldName, defName ) == 0 )
+				opt_repeat::prod_name orpn = El.opt_repeat().prodName();
+				if ( orpn == opt_repeat::_Star )
+					fieldName = "_repeat_" + fieldName;
+				else if ( orpn == opt_repeat::_Plus )
+					fieldName = "_list_" + fieldName;
+				else if ( orpn == opt_repeat::_Question )
+					fieldName = "_opt_" + fieldName;
+				else if ( strcmp( fieldName, defName ) == 0 )
 					fieldName = "_" + fieldName;
 				captureField = ObjectField::cons( El.id().loc(), 0, fieldName );
 			}
