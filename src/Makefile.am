@@ -33,6 +33,8 @@ ragel_LDADD = \
 #	rbx/librbx.a
 #	ruby/libruby.a
 
+BUILT_SOURCES = version.h
+
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
