@@ -417,7 +417,7 @@ bool NameInst::anyRefsRec()
 
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
-ParseData::ParseData( std::string fileName, string sectionName, 
+ParseData::ParseData( InputData *id, std::string fileName, string sectionName, 
 		const InputLoc &sectionLoc, const HostLang *hostLang,
 		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 :	
@@ -445,6 +445,7 @@ ParseData::ParseData( std::string fileName, string sectionName,
 	dataExpr(0),
 	lowerNum(0),
 	upperNum(0),
+	id(id),
 	fileName(fileName),
 	sectionName(sectionName),
 	sectionLoc(sectionLoc),
@@ -1081,7 +1082,7 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 	for ( StateList::Iter state = graph->stateList; state.lte(); state++ )
 		graph->transferErrorActions( state, 0 );
 	
-	if ( ::wantDupsRemoved )
+	if ( id->wantDupsRemoved )
 		removeActionDups( graph );
 
 	/* Remove unreachable states. There should be no dead end states. The

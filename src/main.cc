@@ -74,7 +74,6 @@ static MinimizeOpt minimizeOpt = MinimizeMostOps;
 
 /* Graphviz dot file generation. */
 const char *machineSpec = 0, *machineName = 0;
-bool wantDupsRemoved = true;
 
 static bool generateXML = false;
 static bool generateDot = false;

@@ -63,7 +63,8 @@ struct InputData
 		outputFileName(0),
 		inStream(0),
 		outStream(0),
-		outFilter(0)
+		outFilter(0),
+		wantDupsRemoved(true)
 	{}
 
 	/* The name of the root section, this does not change during an include. */
@@ -80,6 +81,8 @@ struct InputData
 	InputItemList inputItems;
 
 	ArgsVector includePaths;
+
+	bool wantDupsRemoved;
 
 	void verifyWritesHaveData();
 

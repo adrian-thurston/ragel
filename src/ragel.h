@@ -69,7 +69,6 @@ enum RubyImplEnum
 
 /* Options. */
 extern const char *machineSpec, *machineName;
-extern bool wantDupsRemoved;
 extern RubyImplEnum rubyImpl;
 
 /* Error reporting format. */
