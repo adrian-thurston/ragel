@@ -34,6 +34,8 @@
 #include "version.h"
 #include "inputdata.h"
 
+#include "timing.h"
+
 using namespace std;
 
 char mainMachine[] = "main";
@@ -61,8 +63,10 @@ void Token::append( const Token &other )
  * to the command line args. */
 void afterOpMinimize( FsmAp *fsm, bool lastInSeq )
 {
+	ProgressState oldState = ProgressBar::state;
 	/* Switch on the prefered minimization algorithm. */
 	if ( minimizeOpt == MinimizeEveryOp || ( minimizeOpt == MinimizeMostOps && lastInSeq ) ) {
+		ProgressBar::printProgBar(MINIMIZING);
 		/* First clean up the graph. FsmAp operations may leave these
 		 * lying around. There should be no dead end states. The subtract
 		 * intersection operators are the only places where they may be
@@ -83,6 +87,7 @@ void afterOpMinimize( FsmAp *fsm, bool lastInSeq )
 				fsm->minimizeStable();
 				break;
 		}
+		ProgressBar::printProgBar(oldState);
 	}
 }
 
@@ -1058,8 +1063,15 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 /* Make the graph from a graph dict node. Does minimization and state sorting. */
 FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 {
+		/* Build the number of tree nodes */
+		gdNode->value->countTreeNodes(numTreeNodes);
+
 	/* Build the graph from a walk of the parse tree. */
 	FsmAp *graph = gdNode->value->walk( this );
+		if (progressBar) {
+			std::cout << std::endl;
+			std::cout << "Finished walking parse tree\n";
+		}
 
 	/* Resolve any labels that point to multiple states. Any labels that are
 	 * still around are referenced only by gotos and calls and they need to be

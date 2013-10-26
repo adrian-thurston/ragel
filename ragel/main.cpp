@@ -77,6 +77,7 @@ bool machineSpecFound = false;
 bool wantDupsRemoved = true;
 
 bool printStatistics = false;
+bool progressBar = false;
 bool generateXML = false;
 bool generateDot = false;
 
@@ -87,6 +88,9 @@ int numSplitPartitions = 0;
 bool noLineDirectives = false;
 
 bool displayPrintables = false;
+
+/* Number of nodes in tree */
+long numTreeNodes = 0;
 
 /* Target ruby impl */
 RubyImplEnum rubyImpl = MRI;
@@ -104,6 +108,7 @@ void usage()
 "   -d                   Do not remove duplicates from action lists\n"
 "   -I <dir>             Add <dir> to the list of directories to search\n"
 "                        for included an imported files\n"
+"   -r                   Adds a progress bar to the display to show completion\n"
 "error reporting format:\n"
 "   --error-format=gnu   file:line:column: message (default)\n"
 "   --error-format=msvc  file(line,column): message\n"
@@ -219,7 +224,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void processArgs( int argc, const char **argv, InputData &id )
 {
-	ParamCheck pc("xo:dnmleabjkS:M:I:CDEJZRAOvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc("xo:dnmleabjkS:M:I:CDEJZRAOvHh?-:srT:F:G:P:LpV", argc, argv);
 
 	/* FIXME: Need to check code styles VS langauge. */
 
@@ -345,6 +350,9 @@ void processArgs( int argc, const char **argv, InputData &id )
 				break;
 			case 's':
 				printStatistics = true;
+				break;
+			case 'r':
+				progressBar = true;
 				break;
 			case '-': {
 				char *arg = strdup( pc.paramArg );

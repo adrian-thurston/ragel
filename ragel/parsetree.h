@@ -227,6 +227,7 @@ struct VarDef
 	
 	/* Parse tree traversal. */
 	FsmAp *walk( ParseData *pd );
+  void countTreeNodes(long & count);
 	void makeNameTree( const InputLoc &loc, ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -298,6 +299,7 @@ struct LongestMatch
 		lmSwitchHandlesError(false) { }
 
 	/* Tree traversal. */
+  void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
@@ -338,6 +340,7 @@ struct MachineDef
 	MachineDef( LengthDef *lengthDef )
 		: join(0), longestMatch(0), lengthDef(lengthDef), type(LengthDefType) {}
 
+	void countTreeNodes(long& count);
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
@@ -358,6 +361,7 @@ struct Join
 	Join( const InputLoc &loc, Expression *expr );
 
 	/* Tree traversal. */
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd );
 	FsmAp *walkJoin( ParseData *pd );
 	void makeNameTree( ParseData *pd );
@@ -400,6 +404,7 @@ struct Expression
 	~Expression();
 
 	/* Tree traversal. */
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd, bool lastInSeq = true );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
@@ -437,6 +442,7 @@ struct Term
 	
 	~Term();
 
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd, bool lastInSeq = true );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
@@ -458,6 +464,7 @@ struct FactorWithAug
 	~FactorWithAug();
 
 	/* Tree traversal. */
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
@@ -506,6 +513,7 @@ struct FactorWithRep
 	~FactorWithRep();
 
 	/* Tree traversal. */
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
@@ -538,6 +546,7 @@ struct FactorWithNeg
 	~FactorWithNeg();
 
 	/* Tree traversal. */
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
@@ -596,6 +605,7 @@ struct Factor
 	~Factor();
 
 	/* Tree traversal. */
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
@@ -619,6 +629,7 @@ struct Range
 		: lowerLit(lowerLit), upperLit(upperLit) { }
 
 	~Range();
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd );
 
 	Literal *lowerLit;
@@ -633,6 +644,7 @@ struct Literal
 	Literal( const Token &token, LiteralType type )
 		: token(token), type(type) { }
 
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd );
 	
 	Token token;
@@ -652,6 +664,7 @@ struct RegExpr
 		type(RecurseItem), caseInsensitive(false) { }
 
 	~RegExpr();
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd, RegExpr *rootRegex );
 
 	RegExpr *regExpr;
@@ -673,6 +686,7 @@ struct ReItem
 		: loc(loc), orBlock(orBlock), star(false), type(type) { }
 
 	~ReItem();
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd, RegExpr *rootRegex );
 
 	InputLoc loc;
@@ -694,6 +708,7 @@ struct ReOrBlock
 		: orBlock(orBlock), item(item), type(RecurseItem) { }
 
 	~ReOrBlock();
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd, RegExpr *rootRegex );
 	
 	ReOrBlock *orBlock;
@@ -711,6 +726,7 @@ struct ReOrItem
 	ReOrItem( const InputLoc &loc, char lower, char upper )
 		: loc(loc), lower(lower), upper(upper), type(Range) { }
 
+	void countTreeNodes(long & count);
 	FsmAp *walk( ParseData *pd, RegExpr *rootRegex );
 
 	InputLoc loc;

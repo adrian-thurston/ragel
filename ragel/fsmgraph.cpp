@@ -26,6 +26,8 @@
 #include "mergesort.h"
 #include "parsedata.h"
 
+#include "timing.h"
+
 using std::cerr;
 using std::endl;
 
@@ -319,6 +321,8 @@ void FsmAp::optionalRepeatOp( int times )
  * which essentially leaves the final states of machine one as final. */
 void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 {
+	ProgressState oldState = ProgressBar::state;
+	ProgressBar::printProgBar(CONCATING);
 	/* For the merging process. */
 	StateSet finStateSetCopy, startStateSet;
 	MergeData md;
@@ -378,6 +382,7 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
 	setMisfitAccounting( false );
+	ProgressBar::printProgBar(oldState);
 }
 
 /* Concatenates other to the end of this machine. Other is deleted.  Any
@@ -635,7 +640,9 @@ void FsmAp::epsilonOp()
  * final id. */
 void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 {
+	ProgressState oldState = ProgressBar::state;
 	/* For the merging process. */
+	ProgressBar::printProgBar(JOINING);
 	MergeData md;
 
 	/* Set the owning machines. Start at one. Zero is reserved for the start
@@ -735,6 +742,7 @@ void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 	/* Joining can be messy. Instead of having misfit accounting on (which is
 	 * tricky here) do a full cleaning. */
 	removeUnreachableStates();
+	ProgressBar::printProgBar(oldState);
 }
 
 void FsmAp::globOp( FsmAp **others, int numOthers )
@@ -1206,6 +1214,8 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState,
 
 void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 {
+	ProgressState oldState = ProgressBar::state;
+	ProgressBar::printProgBar(MERGING);
 	ExpansionList expList1;
 	ExpansionList expList2;
 
@@ -1262,6 +1272,8 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 		destState->errActionTable.setActions( srcState->errActionTable );
 		destState->eofActionTable.setActions( srcState->eofActionTable );
 	}
+	ProgressBar::printProgBar(oldState);
+
 }
 
 void FsmAp::fillInStates( MergeData &md )

@@ -67,11 +67,15 @@ enum RubyImplEnum
 	Rubinius
 };
 
+/* Count Number of numnodes */
+extern long numTreeNodes;
+
 /* Options. */
 extern MinimizeLevel minimizeLevel;
 extern MinimizeOpt minimizeOpt;
 extern const char *machineSpec, *machineName;
 extern bool printStatistics;
+extern bool progressBar;
 extern bool wantDupsRemoved;
 extern bool generateDot;
 extern bool generateXML;
