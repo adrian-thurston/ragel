@@ -75,8 +75,6 @@ if test -z "$COLM"; then
 	AC_ERROR([colm is required to build ragel])
 fi
 
-AC_CHECK_FILES([$COLM], [colm], [AC_ERROR([colm is required to build ragel])])
-
 dnl extract the first two precision points from the version
 COLM_VERSION=[`$COLM -v | sed -n '/version/s/^.*version \([0-9]\+\.[0-9]\+\).*$/\1/p'`]
 if test "$COLM_VERSION" != $EXPECTED_COLM_VERSION; then
