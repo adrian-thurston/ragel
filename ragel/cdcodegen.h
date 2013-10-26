@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include "common.h"
 #include "gendata.h"
+#include "ragel.h"
 
 using std::string;
 using std::ostream;
@@ -130,6 +131,9 @@ protected:
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 	string CTXDATA() { return DATA_PREFIX() + "ctxdata"; }
+	string MMAP_FILENAME() {return indexFilePrefix + DATA_PREFIX() + "_" +  "indexFile";}
+	string MMAP_VAR_NAME() {return "_" + DATA_PREFIX() + "_" + "indexFile";}
+	string MMAP_VAR_SIZE() {return "_" + DATA_PREFIX() + "_" + "indexFileSize";}
 
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );
@@ -163,6 +167,9 @@ protected:
 	virtual string PTR_CONST() = 0;
 	virtual string PTR_CONST_END() = 0;
 	virtual ostream &OPEN_ARRAY( string type, string name ) = 0;
+	virtual ostream &MMAP ( string type, string name ) {return out;}
+	virtual ostream &MMAP_FILE_VAR( const std::string & varName, const std::string & filename ) {return out; }
+	virtual ostream &MMAP_FILE_SIZE_VAR( const std::string & varName, unsigned long long size ) { return out; }
 	virtual ostream &CLOSE_ARRAY() = 0;
 	virtual ostream &STATIC_VAR( string type, string name ) = 0;
 
@@ -194,8 +201,10 @@ public:
 	virtual string POINTER();
 	virtual ostream &SWITCH_DEFAULT();
 	virtual ostream &OPEN_ARRAY( string type, string name );
+	virtual ostream &MMAP( string type, string name );
 	virtual ostream &CLOSE_ARRAY();
 	virtual ostream &STATIC_VAR( string type, string name );
+  virtual ostream &MMAP_LOAD_FUNCTION( unsigned long datatypeSize);
 	virtual string ARR_OFF( string ptr, string offset );
 	virtual string CAST( string type );
 	virtual string UINT();
@@ -204,6 +213,10 @@ public:
 	virtual string CTRL_FLOW();
 
 	virtual void writeExports();
+  virtual void writeLoadIndex();
+  virtual void writeInclude();
+	virtual ostream &MMAP_FILE_VAR( const std::string & varName, const std::string & filename );
+	virtual ostream &MMAP_FILE_SIZE_VAR( const std::string & varName, unsigned long long size );
 };
 
 class DCodeGen : virtual public FsmCodeGen

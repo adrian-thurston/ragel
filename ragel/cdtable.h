@@ -88,6 +88,7 @@ protected:
 	virtual std::ostream &EOF_ACTION( RedStateAp *state );
 	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
 	virtual void calcIndexSize();
+
 };
 
 
@@ -99,6 +100,10 @@ struct CTabCodeGen
 {
 	CTabCodeGen( ostream &out ) : 
 		FsmCodeGen(out), TabCodeGen(out), CCodeGen(out) {}
+	
+	virtual void writeData();
+	virtual unsigned long long MMAP_INDICIES(const std::string & fileName, int dataSize);
+	virtual ~CTabCodeGen() {}
 };
 
 /*

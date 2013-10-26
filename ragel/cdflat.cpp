@@ -849,3 +849,147 @@ void FlatCodeGen::writeExec()
 
 	out << "	}\n";
 }
+
+void CFlatCodeGen::writeData()
+{
+	/* If there are any transtion functions then output the array. If there
+	 * are none, don't bother emitting an empty array that won't be used. */
+	if ( redFsm->anyActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
+		ACTIONS_ARRAY();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	if ( redFsm->anyConditions() ) {
+		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
+		COND_KEYS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpan), CSP() );
+		COND_KEY_SPANS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCond), C() );
+		CONDS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondIndexOffset), CO() );
+		COND_INDEX_OFFSET();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
+	KEYS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSpan), SP() );
+	KEY_SPANS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
+	FLAT_INDEX_OFFSET();
+	CLOSE_ARRAY() <<
+	"\n";
+
+  if (table2Mmap())
+	{
+		MMAP( ARRAY_TYPE(redFsm->maxIndex), I() );
+		unsigned long long size = MMAP_INDICIES(MMAP_FILENAME(), arrayTypeSize(redFsm->maxIndex) );
+		MMAP_FILE_VAR(MMAP_VAR_NAME(), MMAP_FILENAME());
+		MMAP_FILE_SIZE_VAR(MMAP_VAR_SIZE(), size );
+	}
+	else {	
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
+		INDICIES();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
+	TRANS_TARGS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	if ( redFsm->anyActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+		TRANS_ACTIONS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	if ( redFsm->anyToStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+		TO_STATE_ACTIONS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	if ( redFsm->anyFromStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+		FROM_STATE_ACTIONS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	if ( redFsm->anyEofActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
+		EOF_ACTIONS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	if ( redFsm->anyEofTrans() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
+		EOF_TRANS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	STATE_IDS();
+
+  if (table2Mmap()) {
+    MMAP_LOAD_FUNCTION(redFsm->maxIndex);
+  }
+}
+
+unsigned long long CFlatCodeGen::MMAP_INDICIES(const std::string & fileName, int dataSize) {
+  unsigned long long total_output = 0;
+	std::ofstream  mfile(fileName.c_str(), std::ios::out | std::ios::binary);
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->transList != 0 ) {
+			/* Walk the singles. */
+			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
+			for ( unsigned long long pos = 0; pos < span; pos++ ) {
+				mfile.write(reinterpret_cast<const char*>(&(st->transList[pos]->id)), dataSize);
+        total_output++;
+			}
+		}
+
+		/* The state's default index goes next. */
+		if ( st->defTrans != 0 ) {
+			mfile.write(reinterpret_cast<const char*>(&(st->defTrans->id)), dataSize);
+      total_output++;
+    }
+	}
+	mfile.close();
+  return total_output;
+}
+
+void CFlatCodeGen::writeLoadIndex()
+{
+	if ( table2Mmap() ) {
+		out << "load_" << DATA_PREFIX() << "_indicies();\n";
+		out << "if (" << I() << " <= 0) {\n";
+		out << "\tperror(\"Failed to open indicies file.\");\n";
+		out << "\texit(-1);\n";
+		out << "}\n";
+	}
+
+}

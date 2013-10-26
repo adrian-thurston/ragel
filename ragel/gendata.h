@@ -66,6 +66,8 @@ struct CodeGenData
 	/* These are invoked by the corresponding write statements. */
 	virtual void writeData() {};
 	virtual void writeInit() {};
+  virtual void writeLoadIndex() {};
+	virtual void writeInclude() {};
 	virtual void writeExec() {};
 	virtual void writeExports() {};
 	virtual void writeStart() {};

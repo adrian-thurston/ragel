@@ -76,6 +76,7 @@ extern bool wantDupsRemoved;
 extern bool generateDot;
 extern bool generateXML;
 extern RubyImplEnum rubyImpl;
+extern std::string indexFilePrefix;
 
 /* Error reporting format. */
 enum ErrorFormat {
@@ -89,6 +90,8 @@ extern char mainMachine[];
 
 InputLoc makeInputLoc( const char *fileName, int line = 0, int col = 0 );
 std::ostream &operator<<( std::ostream &out, const InputLoc &loc );
+
+bool table2Mmap();
 
 /* Error reporting. */
 std::ostream &error();

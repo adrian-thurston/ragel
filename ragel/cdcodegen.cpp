@@ -700,6 +700,27 @@ std::ostream &CCodeGen::OPEN_ARRAY( string type, string name )
 	return out;
 }
 
+std::ostream &CCodeGen::MMAP( string type, string name )
+{
+	assert(table2Mmap());
+	out << "static " << type << "* " << name << ";\n";
+	return out;
+}
+
+std::ostream &CCodeGen::MMAP_FILE_VAR( const std::string & varName, const std::string & filename )
+{
+	assert(table2Mmap());
+	STATIC_VAR(std::string("char") + POINTER(), varName) <<  " = \"" <<  filename << "\";\n";
+	return out;
+}
+
+std::ostream &CCodeGen::MMAP_FILE_SIZE_VAR( const std::string & varName, unsigned long long size )
+{
+	assert(table2Mmap());
+	STATIC_VAR("unsigned long", varName) << " = " <<  size << ";\n";
+	return out;
+}
+
 std::ostream &CCodeGen::CLOSE_ARRAY()
 {
 	return out << "};\n";
@@ -741,6 +762,21 @@ std::ostream &CCodeGen::SWITCH_DEFAULT()
 	return out;
 }
 
+std::ostream &CCodeGen::MMAP_LOAD_FUNCTION( unsigned long datatypeSize)
+{
+		out << ARRAY_TYPE(datatypeSize) << " * load_" << DATA_PREFIX() << "_indicies()\n{\n";
+    out << "\tint rl_fdin;\n";
+		out << "\tif ((rl_fdin = open(" << MMAP_VAR_NAME() << " , O_RDONLY)) < 0)\n\t{\n";
+    out << "\t\treturn (" << ARRAY_TYPE(datatypeSize) << " * ) (-1);\n";
+    out << "\t}\n";
+		out << "\t" << I() << " = (" << ARRAY_TYPE(datatypeSize) << "*) mmap (0," << MMAP_VAR_SIZE()
+        << "* sizeof(" << ARRAY_TYPE(datatypeSize) << ")"
+        << ", PROT_READ, MAP_SHARED, rl_fdin, 0);\n";
+		out << "\tclose(rl_fdin);\n";
+		out << "\treturn " << I() << ";\n}\n";
+		return out;
+}
+
 string CCodeGen::CTRL_FLOW()
 {
 	return "";
@@ -755,6 +791,26 @@ void CCodeGen::writeExports()
 		}
 		out << "\n";
 	}
+}
+
+void CCodeGen::writeLoadIndex()
+{
+	if ( useIndicies && table2Mmap()) {
+		out << "load_" << DATA_PREFIX() << "_indicies();\n";
+		out << "if (" << I() << " <= 0) {\n";
+		out << "\tperror(\"Failed to open indicies file.\");\n";
+		out << "\texit(-1);\n";
+		out << "}\n";
+	}
+
+}
+
+void CCodeGen::writeInclude() {
+	out << "#include <sys/mman.h>\n";
+	out << "#include <stdlib.h>\n";
+	out << "#include <stdio.h>\n";
+	out << "#include <unistd.h>\n";
+	out << "#include <fcntl.h>\n";
 }
 
 /*

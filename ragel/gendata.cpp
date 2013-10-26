@@ -1089,6 +1089,12 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 		}
 		writeInit();
 	}
+  else if ( strcmp( args[0], "load_index" ) == 0) {
+    writeLoadIndex();
+  }
+	else if ( strcmp( args[0], "include" ) == 0 ) {
+		writeInclude();
+	}
 	else if ( strcmp( args[0], "exec" ) == 0 ) {
 		for ( int i = 1; i < nargs; i++ ) {
 			if ( strcmp( args[i], "noend" ) == 0 )

@@ -83,6 +83,9 @@ bool generateDot = false;
 /* Target language and output style. */
 CodeStyle codeStyle = GenTables;
 
+/* Table output */
+std::string indexFilePrefix;
+
 int numSplitPartitions = 0;
 bool noLineDirectives = false;
 
@@ -140,6 +143,8 @@ void usage()
 "code style: (C/D)\n"
 "   -G2                  Really fast goto-driven FSM\n"
 "   -P<N>                N-Way Split really fast goto-driven FSM\n"
+"table options: (C)\n"
+"   --indexfileprefix=f Output large tables into files prefixed with f. These will be mmap into the program\n"
 	;	
 
 	exit(0);
@@ -180,6 +185,10 @@ ostream &operator<<( ostream &out, const InputLoc &loc )
 		break;
 	}
 	return out;
+}
+
+bool table2Mmap() {
+  return (!(indexFilePrefix.empty()));
 }
 
 /* Total error count. */
@@ -369,6 +378,12 @@ void processArgs( int argc, const char **argv, InputData &id )
 				}
 				else if ( strcmp( arg, "rbx" ) == 0 )
 					rubyImpl = Rubinius;
+        else if ( strcmp( arg, "indexfileprefix" ) == 0 ) {
+          if ( eq == 0 || strlen(eq) == 0 )
+            indexFilePrefix = "/dev/shm/ragel_";
+          else
+            indexFilePrefix.assign(eq);
+        }
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

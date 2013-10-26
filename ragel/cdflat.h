@@ -93,6 +93,9 @@ struct CFlatCodeGen
 {
 	CFlatCodeGen( ostream &out ) : 
 		FsmCodeGen(out), FlatCodeGen(out), CCodeGen(out) {}
+  void writeData();
+  void writeLoadIndex();
+	virtual unsigned long long MMAP_INDICIES(const std::string & fileName, int dataSize);
 };
 
 /*

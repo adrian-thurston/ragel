@@ -60,6 +60,9 @@ struct CFFlatCodeGen
 {
 	CFFlatCodeGen( ostream &out ) : 
 		FsmCodeGen(out), FFlatCodeGen(out), CCodeGen(out) {}
+	virtual void writeData();
+  virtual void writeLoadIndex();
+	virtual unsigned long long MMAP_INDICIES(const std::string & fileName, int dataSize);
 };
 
 /*

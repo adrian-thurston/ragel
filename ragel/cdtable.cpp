@@ -430,6 +430,7 @@ std::ostream &TabCodeGen::KEYS()
 
 std::ostream &TabCodeGen::INDICIES()
 {
+	
 	int totalTrans = 0;
 	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -748,6 +749,8 @@ void TabCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
 }
 
+
+
 void TabCodeGen::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
@@ -807,10 +810,10 @@ void TabCodeGen::writeData()
 	"\n";
 
 	if ( useIndicies ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
-		INDICIES();
-		CLOSE_ARRAY() <<
-		"\n";
+    OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
+    INDICIES();
+    CLOSE_ARRAY() <<
+    "\n";
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 		TRANS_TARGS_WI();
@@ -1093,4 +1096,162 @@ void TabCodeGen::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
+}
+
+void CTabCodeGen::writeData()
+{
+	/* If there are any transtion functions then output the array. If there
+	 * are none, don't bother emitting an empty array that won't be used. */
+	if ( redFsm->anyActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
+		ACTIONS_ARRAY();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	if ( redFsm->anyConditions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );
+		COND_OFFSETS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondLen), CL() );
+		COND_LENS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
+		COND_KEYS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
+		COND_SPACES();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
+	KEY_OFFSETS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
+	KEYS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSingleLen), SL() );
+	SINGLE_LENS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxRangeLen), RL() );
+	RANGE_LENS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset), IO() );
+	INDEX_OFFSETS();
+	CLOSE_ARRAY() <<
+	"\n";
+
+	if ( useIndicies ) {
+	  if (table2Mmap()) {
+	    MMAP( ARRAY_TYPE(redFsm->maxIndex), I() );
+	    unsigned long long size = MMAP_INDICIES(MMAP_FILENAME(), arrayTypeSize(redFsm->maxIndex) );
+	    MMAP_FILE_VAR(MMAP_VAR_NAME(), MMAP_FILENAME());
+	    MMAP_FILE_SIZE_VAR(MMAP_VAR_SIZE(), size );
+	  }
+	  else {
+	    OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
+	    INDICIES();
+	    CLOSE_ARRAY() <<
+	    "\n";
+	  }
+
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
+		TRANS_TARGS_WI();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		if ( redFsm->anyActions() ) {
+			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+			TRANS_ACTIONS_WI();
+			CLOSE_ARRAY() <<
+			"\n";
+		}
+	}
+	else {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
+		TRANS_TARGS();
+		CLOSE_ARRAY() <<
+		"\n";
+
+		if ( redFsm->anyActions() ) {
+			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+			TRANS_ACTIONS();
+			CLOSE_ARRAY() <<
+			"\n";
+		}
+	}
+
+	if ( redFsm->anyToStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+		TO_STATE_ACTIONS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	if ( redFsm->anyFromStateActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+		FROM_STATE_ACTIONS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	if ( redFsm->anyEofActions() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
+		EOF_ACTIONS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	if ( redFsm->anyEofTrans() ) {
+		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
+		EOF_TRANS();
+		CLOSE_ARRAY() <<
+		"\n";
+	}
+
+	STATE_IDS();
+	if ( useIndicies && table2Mmap()) {
+    MMAP_LOAD_FUNCTION(redFsm->maxIndex);
+	}
+}
+
+unsigned long long CTabCodeGen::MMAP_INDICIES(const std::string & filename, int dataSize) {
+  unsigned long long total_output = 0;
+	std::ofstream  mfile(filename.c_str(), std::ios::out | std::ios::binary);
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Walk the singles. */
+		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
+	    mfile.write(reinterpret_cast<const char*>(&(stel->value->id)), dataSize);
+      total_output++;
+		}
+
+		/* Walk the ranges. */
+		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
+	    mfile.write(reinterpret_cast<const char*>(&(rtel->value->id)), dataSize);
+      total_output++;
+		}
+
+		/* The state's default index goes next. */
+		if ( st->defTrans != 0 ) {
+	    mfile.write(reinterpret_cast<const char*>(&(st->defTrans->id)), dataSize);
+      total_output++;
+		}
+	}
+	mfile.close();
+  return total_output;
 }
