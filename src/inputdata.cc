@@ -255,7 +255,7 @@ void InputData::writeOutput( bool generateDot, const HostLang *hostLang )
 		}
 		else {
 			*outStream << '\n';
-			lineDirective( *outStream, inputFileName, ii->loc.line, generateDot, hostLang );
+			lineDirective( this, *outStream, inputFileName, ii->loc.line, generateDot, hostLang );
 			*outStream << ii->data.str();
 		}
 	}

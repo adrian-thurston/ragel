@@ -64,7 +64,8 @@ struct InputData
 		inStream(0),
 		outStream(0),
 		outFilter(0),
-		wantDupsRemoved(true)
+		wantDupsRemoved(true),
+		noLineDirectives(false)
 	{}
 
 	/* The name of the root section, this does not change during an include. */
@@ -83,6 +84,7 @@ struct InputData
 	ArgsVector includePaths;
 
 	bool wantDupsRemoved;
+	bool noLineDirectives;
 
 	void verifyWritesHaveData();
 

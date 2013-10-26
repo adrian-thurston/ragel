@@ -36,17 +36,17 @@ string itoa( int i )
 	return buf;
 }
 
-void lineDirective( ostream &out, const char *fileName, int line, bool generateDot, const HostLang *hostLang )
+void lineDirective( InputData *id, ostream &out, const char *fileName, int line, bool generateDot, const HostLang *hostLang )
 {
 	if ( !generateDot ) {
 		if ( hostLang == &hostLangC )
-			cLineDirective( out, fileName, line );
+			cLineDirective( id, out, fileName, line );
 //		else if ( hostLang == &hostLangD )
 //			dLineDirective( out, fileName, line );
 //		else if ( hostLang == &hostLangD2 )
 //			dLineDirective( out, fileName, line );
 		else if ( hostLang == &hostLangGo )
-			goLineDirective( out, fileName, line );
+			goLineDirective( id, out, fileName, line );
 //		else if ( hostLang == &hostLangJava )
 //			javaLineDirective( out, fileName, line );
 //		else if ( hostLang == &hostLangRuby )
@@ -64,7 +64,7 @@ void CodeGenData::genLineDirective( bool generateDot, const HostLang *hostLang )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
-	lineDirective( out, filter->fileName, filter->line + 1, generateDot, hostLang );
+	lineDirective( pd->id, out, filter->fileName, filter->line + 1, generateDot, hostLang );
 }
 
 GenBase::GenBase( std::string fsmName, ParseData *pd, FsmAp *fsm )

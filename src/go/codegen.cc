@@ -25,6 +25,8 @@
 #include "ragel.h"
 #include "redfsm.h"
 #include "gendata.h"
+#include "parsedata.h"
+#include "inputdata.h"
 #include <sstream>
 #include <string>
 #include <assert.h>
@@ -45,7 +47,6 @@ using std::cerr;
 using std::endl;
 
 extern int numSplitPartitions;
-extern bool noLineDirectives;
 
 #define S8BIT_MIN  -128
 #define S8BIT_MAX  127
@@ -59,7 +60,7 @@ extern bool noLineDirectives;
 #define S64BIT_MIN -9223372036854775807LL
 #define S64BIT_MAX 9223372036854775807LL
 
-void goLineDirective( ostream &out, const char *fileName, int line )
+void goLineDirective( InputData *id, ostream &out, const char *fileName, int line )
 {
     /* Write the line info for to the input file. */
     out << "// line " << line  << " \"";
@@ -204,7 +205,7 @@ void CodeGen::genLineDirective( ostream &out )
 {
     std::streambuf *sbuf = out.rdbuf();
     output_filter *filter = static_cast<output_filter*>(sbuf);
-    goLineDirective( out, filter->fileName, filter->line + 1 );
+    goLineDirective( pd->id, out, filter->fileName, filter->line + 1 );
 }
 
 /* Init code gen with in parameters. */
@@ -629,7 +630,7 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, int targState,
         bool inFinish, bool csForced )
 {
     /* Write the preprocessor line info for going into the source file. */
-    goLineDirective( ret, action->loc.fileName, action->loc.line );
+    goLineDirective( pd->id, ret, action->loc.fileName, action->loc.line );
 
     /* Write the block and close it off. */
     ret << "\t{\n";
@@ -640,7 +641,7 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
     ret << "\n";
-    goLineDirective( ret, condition->loc.fileName, condition->loc.line );
+    goLineDirective( pd->id, ret, condition->loc.fileName, condition->loc.line );
     INLINE_LIST( ret, condition->inlineList, 0, false, false );
 }
 

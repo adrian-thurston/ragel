@@ -113,15 +113,15 @@ struct FsmAp;
 typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
 typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 
-void cLineDirective( ostream &out, const char *fileName, int line );
+void cLineDirective( InputData *id, ostream &out, const char *fileName, int line );
 void dLineDirective( ostream &out, const char *fileName, int line );
 void javaLineDirective( ostream &out, const char *fileName, int line );
-void goLineDirective( ostream &out, const char *fileName, int line );
+void goLineDirective( InputData *id, ostream &out, const char *fileName, int line );
 void rubyLineDirective( ostream &out, const char *fileName, int line );
 void csharpLineDirective( ostream &out, const char *fileName, int line );
 void ocamlLineDirective( ostream &out, const char *fileName, int line );
 void genLineDirective( ostream &out );
-void lineDirective( ostream &out, const char *fileName, int line, bool generateDot, const HostLang *hostLang );
+void lineDirective( InputData *id, ostream &out, const char *fileName, int line, bool generateDot, const HostLang *hostLang );
 
 string itoa( int i );
 

@@ -25,6 +25,8 @@
 #include "ragel.h"
 #include "redfsm.h"
 #include "gendata.h"
+#include "inputdata.h"
+#include "parsedata.h"
 #include <sstream>
 #include <string>
 #include <assert.h>
@@ -45,11 +47,10 @@ using std::cerr;
 using std::endl;
 
 extern int numSplitPartitions;
-extern bool noLineDirectives;
 
-void cLineDirective( ostream &out, const char *fileName, int line )
+void cLineDirective( InputData *id, ostream &out, const char *fileName, int line )
 {
-	if ( noLineDirectives )
+	if ( id->noLineDirectives )
 		out << "/* ";
 
 	/* Write the preprocessor line info for to the input file. */
@@ -62,7 +63,7 @@ void cLineDirective( ostream &out, const char *fileName, int line )
 	}
 	out << '"';
 
-	if ( noLineDirectives )
+	if ( id->noLineDirectives )
 		out << " */";
 
 	out << '\n';
@@ -201,7 +202,7 @@ void CodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
-	cLineDirective( out, filter->fileName, filter->line + 1 );
+	cLineDirective( pd->id, out, filter->fileName, filter->line + 1 );
 }
 
 /* Init code gen with in parameters. */
@@ -618,7 +619,7 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 		bool inFinish, bool csForced )
 {
 	/* Write the preprocessor line info for going into the source file. */
-	cLineDirective( ret, action->loc.fileName, action->loc.line );
+	cLineDirective( pd->id, ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
 	ret << "\t{";
@@ -629,7 +630,7 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
-	cLineDirective( ret, condition->loc.fileName, condition->loc.line );
+	cLineDirective( pd->id, ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 }
 
