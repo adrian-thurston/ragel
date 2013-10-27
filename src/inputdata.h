@@ -64,6 +64,7 @@ struct InputData
 		inStream(0),
 		outStream(0),
 		outFilter(0),
+		hostLang(&hostLangC),
 		wantDupsRemoved(true),
 		noLineDirectives(false),
 		displayPrintables(false),
@@ -87,6 +88,8 @@ struct InputData
 
 	ArgsVector includePaths;
 
+	const HostLang *hostLang;
+
 	bool wantDupsRemoved;
 	bool noLineDirectives;
 	bool displayPrintables;
@@ -100,15 +103,15 @@ struct InputData
 	void verifyWritesHaveData();
 
 	void makeFirstInputItem();
-	void writeOutput( bool generateDot, const HostLang *hostLang );
-	void makeDefaultFileName( const HostLang *hostLang );
+	void writeOutput( bool generateDot );
+	void makeDefaultFileName();
 	void makeOutputStream();
 	void openOutput();
-	void generateReduced( CodeStyle codeStyle, bool printStatistics, const HostLang *hostLang );
+	void generateReduced( CodeStyle codeStyle, bool printStatistics );
 	void prepareSingleMachine();
-	void prepareAllMachines( const HostLang *hostLang );
+	void prepareAllMachines();
 
-	void cdDefaultFileName( const char *inputFile, const HostLang *hostLang );
+	void cdDefaultFileName( const char *inputFile );
 	void goDefaultFileName( const char *inputFile );
 	void javaDefaultFileName( const char *inputFile );
 	void rubyDefaultFileName( const char *inputFile );
@@ -116,12 +119,12 @@ struct InputData
 	void ocamlDefaultFileName( const char *inputFile );
 	void crackDefaultFileName( const char *inputFile );
 
-	void writeLanguage( std::ostream &out, const HostLang *hostLang );
-	void writeXML( std::ostream &out, const HostLang *hostLang );
+	void writeLanguage( std::ostream &out );
+	void writeXML( std::ostream &out );
 
-	void processXML( const HostLang *hostLang );
+	void processXML();
 	void processDot();
-	void processCode( CodeStyle codeStyle, bool generateDot, bool printStatistics, const HostLang *hostLang );
+	void processCode( CodeStyle codeStyle, bool generateDot, bool printStatistics );
 
 	void writeDot( std::ostream &out );
 
@@ -129,8 +132,7 @@ struct InputData
 	void checkArgs();
 
 	void process( CodeStyle codeStyle, bool generateXML, bool generateDot,
-			bool printStatistics, const HostLang *hostLang,
-			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
+			bool printStatistics, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
 };
 
 #endif

@@ -36,7 +36,7 @@ using std::endl;
 using std::ios;
 
 /* Invoked by the parser when the root element is opened. */
-void InputData::cdDefaultFileName( const char *inputFile, const HostLang *hostLang )
+void InputData::cdDefaultFileName( const char *inputFile )
 {
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */
@@ -117,13 +117,13 @@ void InputData::crackDefaultFileName( const char *inputFile )
 }
 
 
-void InputData::makeDefaultFileName( const HostLang *hostLang )
+void InputData::makeDefaultFileName()
 {
 	switch ( hostLang->lang ) {
 		case HostLang::C:
 		case HostLang::D:
 		case HostLang::D2:
-			cdDefaultFileName( inputFileName, hostLang );
+			cdDefaultFileName( inputFileName );
 			break;
 		case HostLang::Java:
 			javaDefaultFileName( inputFileName );
@@ -217,7 +217,7 @@ void InputData::prepareSingleMachine()
 #endif
 }
 
-void InputData::prepareAllMachines( const HostLang *hostLang )
+void InputData::prepareAllMachines()
 {
 	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
 		ParseData *pd = pdel->value;
@@ -227,7 +227,7 @@ void InputData::prepareAllMachines( const HostLang *hostLang )
 }
 
 
-void InputData::generateReduced( CodeStyle codeStyle, bool printStatistics, const HostLang *hostLang )
+void InputData::generateReduced( CodeStyle codeStyle, bool printStatistics )
 {
 	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
 		ParseData *pd = pdel->value;
@@ -246,7 +246,7 @@ void InputData::verifyWritesHaveData()
 	}
 }
 
-void InputData::writeOutput( bool generateDot, const HostLang *hostLang )
+void InputData::writeOutput( bool generateDot )
 {
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 		if ( ii->type == InputItem::Write ) {
@@ -261,10 +261,10 @@ void InputData::writeOutput( bool generateDot, const HostLang *hostLang )
 	}
 }
 
-void InputData::processXML( const HostLang *hostLang )
+void InputData::processXML()
 {
 	/* Compiles machines. */
-	prepareAllMachines( hostLang );
+	prepareAllMachines();
 
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -279,7 +279,7 @@ void InputData::processXML( const HostLang *hostLang )
 	 */
 
 	openOutput();
-	writeXML( *outStream, hostLang );
+	writeXML( *outStream );
 }
 
 void InputData::processDot()
@@ -303,19 +303,19 @@ void InputData::processDot()
 	writeDot( *outStream );
 }
 
-void InputData::processCode( CodeStyle codeStyle, bool generateDot, bool printStatistics, const HostLang *hostLang )
+void InputData::processCode( CodeStyle codeStyle, bool generateDot, bool printStatistics )
 {
 	/* Compiles machines. */
-	prepareAllMachines( hostLang );
+	prepareAllMachines();
 
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	makeDefaultFileName( hostLang );
+	makeDefaultFileName();
 	makeOutputStream();
 
 	/* Generates the reduced machine, which we use to write output. */
-	generateReduced( codeStyle, printStatistics, hostLang );
+	generateReduced( codeStyle, printStatistics );
 
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -330,7 +330,7 @@ void InputData::processCode( CodeStyle codeStyle, bool generateDot, bool printSt
 	 */
 
 	openOutput();
-	writeOutput( generateDot, hostLang );
+	writeOutput( generateDot );
 }
 
 void InputData::makeFirstInputItem()
@@ -345,8 +345,7 @@ void InputData::makeFirstInputItem()
 }
 
 void InputData::process( CodeStyle codeStyle, bool generateXML, bool generateDot,
-		bool printStatistics, const HostLang *hostLang,
-		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
+		bool printStatistics, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 {
 	/* Check input file. */
 	ifstream *inFile = new ifstream( inputFileName );
@@ -365,11 +364,11 @@ void InputData::process( CodeStyle codeStyle, bool generateXML, bool generateDot
 		exit(1);
 
 	if ( generateXML )
-		processXML( hostLang );
+		processXML();
 	else if ( generateDot )
 		processDot();
 	else 
-		processCode( codeStyle, generateDot, printStatistics, hostLang );
+		processCode( codeStyle, generateDot, printStatistics );
 
 	/* If writing to a file, delete the ostream, causing it to flush.
 	 * Standard out is flushed automatically. */
