@@ -66,12 +66,6 @@ using std::endl;
 using std::ios;
 using std::streamsize;
 
-/* Controls minimization. */
-
-/* Graphviz dot file generation. */
-const char *machineSpec = 0, *machineName = 0;
-
-
 /* Print a summary of the options. */
 void usage()
 {
@@ -136,7 +130,7 @@ void version()
 }
 
 /* Error reporting format. */
-ErrorFormat errorFormat = ErrorFormatGNU;
+static ErrorFormat errorFormat = ErrorFormatGNU;
 
 InputLoc makeInputLoc( const char *fileName, int line, int col )
 {

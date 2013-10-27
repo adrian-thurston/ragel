@@ -35,7 +35,7 @@
 
 using namespace std;
 
-char mainMachine[] = "main";
+const char mainMachine[] = "main";
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
 
 void Token::set( const char *str, int len )

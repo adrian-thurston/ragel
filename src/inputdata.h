@@ -66,6 +66,8 @@ struct InputData
 		outFilter(0),
 		hostLang(&hostLangC),
 		codeStyle(GenTables),
+		machineSpec(0),
+		machineName(0),
 		minimizeLevel(MinimizePartition2),
 		minimizeOpt(MinimizeMostOps),
 		generateXML(false),
@@ -98,6 +100,9 @@ struct InputData
 
 	/* Target language and output style. */
 	CodeStyle codeStyle;
+
+	const char *machineSpec;
+	const char *machineName;
 
 	MinimizeLevel minimizeLevel;
 	MinimizeOpt minimizeOpt;

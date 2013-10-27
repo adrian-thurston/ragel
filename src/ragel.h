@@ -77,9 +77,8 @@ enum ErrorFormat {
 	ErrorFormatMSVC,
 };
 
-extern ErrorFormat errorFormat;
 extern int gblErrorCount;
-extern char mainMachine[];
+extern const char mainMachine[];
 
 struct colm_location;
 
