@@ -67,6 +67,8 @@ struct InputData
 		wantDupsRemoved(true),
 		noLineDirectives(false),
 		displayPrintables(false),
+		maxTransitions(LONG_MAX),
+		numSplitPartitions(0),
 		rubyImpl(MRI)
 	{}
 
@@ -88,6 +90,9 @@ struct InputData
 	bool wantDupsRemoved;
 	bool noLineDirectives;
 	bool displayPrintables;
+
+	long maxTransitions;
+	int numSplitPartitions;
 
 	/* Target ruby impl */
 	RubyImplEnum rubyImpl;

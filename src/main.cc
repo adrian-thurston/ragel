@@ -82,9 +82,6 @@ static bool printStatistics = false;
 /* Target language and output style. */
 static CodeStyle codeStyle = GenTables;
 
-long maxTransitions = LONG_MAX;
-int numSplitPartitions = 0;
-
 /* Print a summary of the options. */
 void usage()
 {
