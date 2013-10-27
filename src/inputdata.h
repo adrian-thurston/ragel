@@ -65,7 +65,9 @@ struct InputData
 		outStream(0),
 		outFilter(0),
 		wantDupsRemoved(true),
-		noLineDirectives(false)
+		noLineDirectives(false),
+		displayPrintables(false),
+		rubyImpl(MRI)
 	{}
 
 	/* The name of the root section, this does not change during an include. */
@@ -85,6 +87,10 @@ struct InputData
 
 	bool wantDupsRemoved;
 	bool noLineDirectives;
+	bool displayPrintables;
+
+	/* Target ruby impl */
+	RubyImplEnum rubyImpl;
 
 	void verifyWritesHaveData();
 

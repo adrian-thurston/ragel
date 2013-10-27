@@ -84,11 +84,6 @@ static CodeStyle codeStyle = GenTables;
 
 long maxTransitions = LONG_MAX;
 int numSplitPartitions = 0;
-bool noLineDirectives = false;
-bool displayPrintables = false;
-
-/* Target ruby impl */
-RubyImplEnum rubyImpl = MRI;
 
 /* Print a summary of the options. */
 void usage()
