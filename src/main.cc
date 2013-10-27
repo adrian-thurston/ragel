@@ -67,18 +67,10 @@ using std::ios;
 using std::streamsize;
 
 /* Controls minimization. */
-static MinimizeLevel minimizeLevel = MinimizePartition2;
-static MinimizeOpt minimizeOpt = MinimizeMostOps;
 
 /* Graphviz dot file generation. */
 const char *machineSpec = 0, *machineName = 0;
 
-static bool generateXML = false;
-static bool generateDot = false;
-static bool printStatistics = false;
-
-/* Target language and output style. */
-static CodeStyle codeStyle = GenTables;
 
 /* Print a summary of the options. */
 void usage()
@@ -470,6 +462,6 @@ int main( int argc, const char **argv )
 
 	id.parseArgs( argc, argv );
 	id.checkArgs();
-	id.process( codeStyle, generateXML, generateDot, printStatistics, minimizeLevel, minimizeOpt );
+	id.process();
 	return 0;
 }

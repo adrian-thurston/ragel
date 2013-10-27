@@ -65,6 +65,12 @@ struct InputData
 		outStream(0),
 		outFilter(0),
 		hostLang(&hostLangC),
+		codeStyle(GenTables),
+		minimizeLevel(MinimizePartition2),
+		minimizeOpt(MinimizeMostOps),
+		generateXML(false),
+		generateDot(false),
+		printStatistics(false),
 		wantDupsRemoved(true),
 		noLineDirectives(false),
 		displayPrintables(false),
@@ -90,6 +96,15 @@ struct InputData
 
 	const HostLang *hostLang;
 
+	/* Target language and output style. */
+	CodeStyle codeStyle;
+
+	MinimizeLevel minimizeLevel;
+	MinimizeOpt minimizeOpt;
+	bool generateXML;
+	bool generateDot;
+	bool printStatistics;
+
 	bool wantDupsRemoved;
 	bool noLineDirectives;
 	bool displayPrintables;
@@ -107,7 +122,7 @@ struct InputData
 	void makeDefaultFileName();
 	void makeOutputStream();
 	void openOutput();
-	void generateReduced( CodeStyle codeStyle, bool printStatistics );
+	void generateReduced( bool printStatistics );
 	void prepareSingleMachine();
 	void prepareAllMachines();
 
@@ -124,15 +139,14 @@ struct InputData
 
 	void processXML();
 	void processDot();
-	void processCode( CodeStyle codeStyle, bool generateDot, bool printStatistics );
+	void processCode( bool generateDot, bool printStatistics );
 
 	void writeDot( std::ostream &out );
 
 	void parseArgs( int argc, const char **argv );
 	void checkArgs();
 
-	void process( CodeStyle codeStyle, bool generateXML, bool generateDot,
-			bool printStatistics, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
+	void process();
 };
 
 #endif
