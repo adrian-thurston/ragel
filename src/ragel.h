@@ -32,6 +32,8 @@
 
 #define PROGNAME "ragel"
 
+#define MAIN_MACHINE "main"
+
 /* Target output style. */
 enum CodeStyle
 {
@@ -67,18 +69,11 @@ enum RubyImplEnum
 	Rubinius
 };
 
-/* Options. */
-extern const char *machineSpec, *machineName;
-extern RubyImplEnum rubyImpl;
-
 /* Error reporting format. */
 enum ErrorFormat {
 	ErrorFormatGNU,
 	ErrorFormatMSVC,
 };
-
-extern int gblErrorCount;
-extern const char mainMachine[];
 
 struct colm_location;
 
@@ -91,21 +86,11 @@ std::ostream &error();
 std::ostream &error( const InputLoc &loc ); 
 std::ostream &warning( const InputLoc &loc ); 
 
-struct XmlParser;
-
 void xmlEscapeHost( std::ostream &out, const char *data, long len );
 
 /* IO filenames and stream. */
-extern bool displayPrintables;
 extern int gblErrorCount;
 
-/* Options. */
-extern int numSplitPartitions;
-
-extern long maxTransitions;
-
 std::ostream &error();
-
-extern int numSplitPartitions;
 
 #endif

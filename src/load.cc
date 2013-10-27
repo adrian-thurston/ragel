@@ -1304,7 +1304,7 @@ struct LoadRagel
 
 		/* Main machine must be an instance. */
 		bool isInstance = false;
-		if ( name == mainMachine ) {
+		if ( name == MAIN_MACHINE ) {
 			warning(loc) << "main machine will be implicitly instantiated" << endl;
 			isInstance = true;
 		}

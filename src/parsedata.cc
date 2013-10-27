@@ -1188,7 +1188,7 @@ FsmAp *ParseData::makeAll()
 	/* Make all the instantiations, we know that main exists in this list. */
 	initNameWalk();
 	for ( GraphList::Iter glel = instanceList; glel.lte();  glel++ ) {
-		if ( glel->key == mainMachine ) {
+		if ( glel->key == MAIN_MACHINE ) {
 			/* Main graph is always instantiated. */
 			mainGraph = makeInstance( glel );
 		}
