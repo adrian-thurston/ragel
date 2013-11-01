@@ -1594,7 +1594,8 @@ struct LoadRagel
 		return false;
 	}
 
-	void loadStmtList( ragel::_repeat_statement StmtList, const char *targetMachine, const char *searchMachine )
+	void loadStmtList( ragel::_repeat_statement StmtList, const char *targetMachine,
+			const char *searchMachine )
 	{
 		if ( StmtList.end() )
 			return;
@@ -1616,11 +1617,13 @@ struct LoadRagel
 		}
 	}
 
-	void loadSection( c_host::section Section, const char *targetMachine, const char *searchMachine )
+	void loadSection( c_host::section Section, const char *targetMachine,
+			const char *searchMachine )
 	{
 		switch ( Section.prodName() ) {
 			case c_host::section::_MultiLine:
-				loadStmtList( Section._repeat_statement(), targetMachine, searchMachine );
+				loadStmtList( Section.ragel_start()._repeat_statement(),
+						targetMachine, searchMachine );
 				break;
 
 			case c_host::section::_Tok:

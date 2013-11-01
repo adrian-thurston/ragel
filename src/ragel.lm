@@ -421,6 +421,9 @@ namespace ragel
 	|	['getkey' inline_expr_reparse] :GetKey commit
 	|	['import' string ';'] :Import commit
 	|	['include' include_spec ';'] :Include commit
+
+	def ragel_start
+		[statement*]
 end
 
 namespace c_host
@@ -475,7 +478,7 @@ namespace c_host
 	|	[c_any]
 
 	def section
-		['%%{' ragel::statement* '}%%'] :MultiLine
+		['%%{' ragel::ragel_start '}%%'] :MultiLine
 	|	[tok] :Tok
 end
 
