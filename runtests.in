@@ -172,6 +172,7 @@ for test_case; do
 			code_suffix=d;
 			compiler=$d_compiler;
 			cflags="-Wall -O3"
+			continue;
 		;;
 		c)
 			lang_opt=-C;
@@ -190,18 +191,21 @@ for test_case; do
 			code_suffix=java;
 			compiler=$java_compiler
 			cflags=""
+			continue;
 		;;
 		ruby)
 			lang_opt=-R;
 			code_suffix=rb;
 			compiler=$ruby_engine
 			cflags=""
+			continue;
 		;;
         csharp)
             lang_opt="-A";
             code_suffix=cs;
             compiler=$csharp_compiler
             cflags=""
+			continue;
         ;;
         go)
 			lang_opt="-Z"
