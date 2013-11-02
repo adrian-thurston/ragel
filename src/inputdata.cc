@@ -261,6 +261,16 @@ void InputData::writeOutput( bool generateDot )
 	}
 }
 
+void InputData::closeOutput()
+{
+	/* If writing to a file, delete the ostream, causing it to flush.
+	 * Standard out is flushed automatically. */
+	if ( outputFileName != 0 ) {
+		delete outStream;
+		delete outFilter;
+	}
+}
+
 void InputData::processXML()
 {
 	/* Compiles machines. */
@@ -280,6 +290,7 @@ void InputData::processXML()
 
 	openOutput();
 	writeXML( *outStream );
+	closeOutput();
 }
 
 void InputData::processDot()
@@ -301,6 +312,7 @@ void InputData::processDot()
 
 	openOutput();
 	writeDot( *outStream );
+	closeOutput();
 }
 
 void InputData::processCode( bool generateDot, bool printStatistics )
@@ -331,6 +343,7 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 
 	openOutput();
 	writeOutput( generateDot );
+	closeOutput();
 }
 
 void InputData::makeFirstInputItem()
@@ -368,13 +381,6 @@ void InputData::process()
 		processDot();
 	else 
 		processCode( generateDot, printStatistics );
-
-	/* If writing to a file, delete the ostream, causing it to flush.
-	 * Standard out is flushed automatically. */
-	if ( outputFileName != 0 ) {
-		delete outStream;
-		delete outFilter;
-	}
 
 	assert( gblErrorCount == 0 );
 }

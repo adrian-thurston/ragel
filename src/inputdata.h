@@ -127,6 +127,7 @@ struct InputData
 	void makeDefaultFileName();
 	void makeOutputStream();
 	void openOutput();
+	void closeOutput();
 	void generateReduced( bool printStatistics );
 	void prepareSingleMachine();
 	void prepareAllMachines();
