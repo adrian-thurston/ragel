@@ -324,6 +324,11 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 		exit(1);
 
 	makeDefaultFileName();
+
+	origOutputFileName = outputFileName;
+	genOutputFileName = origOutputFileName + ".ri";
+	outputFileName = genOutputFileName.c_str();
+
 	makeOutputStream();
 
 	/* Generates the reduced machine, which we use to write output. */
@@ -344,6 +349,10 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	openOutput();
 	writeOutput( generateDot );
 	closeOutput();
+
+	string final = dirName + "/rlhc " + 
+			origOutputFileName + " " + genOutputFileName;
+	system( final.c_str() );
 }
 
 void InputData::makeFirstInputItem()

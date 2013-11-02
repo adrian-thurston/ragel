@@ -81,9 +81,15 @@ struct InputData
 		rubyImpl(MRI)
 	{}
 
+	std::string dirName;
+
 	/* The name of the root section, this does not change during an include. */
 	const char *inputFileName;
 	const char *outputFileName;
+
+	std::string origOutputFileName;
+	std::string genOutputFileName;
+
 
 	/* Io globals. */
 	std::istream *inStream;

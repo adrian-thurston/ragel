@@ -5,8 +5,9 @@ SUBDIRS = c dot xml go
 COLM = @COLM_FULL@
 
 bin_PROGRAMS = ragel
+bin_SCRIPTS = rlhc
 
-ragel_CPPFLAGS = -I$(top_srcdir)/aapl
+ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 ragel_SOURCES = \
 	buffer.h inputdata.h redfsm.h parsedata.h \

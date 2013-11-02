@@ -195,7 +195,18 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc("xo:dnmleabjkS:M:I:CDEJZRAOKvHh?-:sT:F:G:P:LpV", argc, argv);
+	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKvHh?-:sT:F:G:P:LpV", argc, argv );
+
+	/* Decide if we were invoked using a path variable, or with an explicit path. */
+	const char *lastSlash = strrchr( argv[0], '/' );
+	if ( lastSlash == 0 ) {
+		/* Defualt to the the binary install location. */
+		dirName = BINDIR;
+	}
+	else {
+		/* Compute dirName from argv0. */
+		dirName = string( argv[0], lastSlash - argv[0] );
+	}
 
 	/* FIXME: Need to check code styles VS langauge. */
 
