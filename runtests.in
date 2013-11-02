@@ -229,8 +229,8 @@ for test_case; do
 				echo "$langflags" | grep -e $lf >/dev/null || continue
 
 				targ=${root}_$lang.rl
-				echo "./trans $lang $test_case $targ"
-				if ! ./trans $lang $test_case $targ; then
+				echo "./trans-$lang $lang $test_case $targ"
+				if ! ./trans-$lang $lang $test_case $targ; then
 					test_error
 				fi
 				echo "./runtests -g $options $targ"
