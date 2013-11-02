@@ -4,8 +4,7 @@ SUBDIRS = c dot xml go
 
 COLM = @COLM_FULL@
 
-bin_PROGRAMS = ragel
-bin_SCRIPTS = rlhc
+bin_PROGRAMS = ragel rlhc
 
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
@@ -51,3 +50,6 @@ if.cc: parse.c
 
 ragel-if.$(OBJEXT): if.h if.cc parse.c
 ragel-load.$(OBJEXT): if.h if.cc parse.c
+
+rlhc: rlhc.lm
+	$(COLM) -o $@ $<

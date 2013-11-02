@@ -1,0 +1,65 @@
+namespace host
+	lex 
+		rl NL / '\n' /
+
+		rl s_literal
+			/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+
+		rl d_literal
+			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+		rl c_comment 
+			/ '/*' ( any | NL )* :>> '*/' /
+
+		rl cpp_comment
+			/ '//' [^\n]* NL /
+
+		token ident
+			/( alpha | '_' ) ( alpha | digit | '_' )*/
+
+		token number
+			/ digit+ /
+
+		token hex_number
+			/ '0x' [0-9a-fA-F]+ /
+
+		token comment
+			/ c_comment | cpp_comment /
+
+		token string
+			/ s_literal | d_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		token c_any / any /
+	end
+
+	def tok
+		[ident]
+	|	[number]
+	|	[hex_number]
+	|	[comment]
+	|	[string]
+	|	[whitespace]
+	|	[c_any]
+end
+
+def start
+	[host::tok*]
+
+InputFile: str = argv.pop()
+OutputFile: str = argv.pop()
+
+Input: stream = open( InputFile "r" )
+
+Start: start = parse start[ Input ]
+
+if ( !Start ) {
+	print( error '\n' )
+	exit(1)
+}
+
+Output: stream = open( OutputFile "w" )
+
+prints( Output Start )

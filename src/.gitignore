@@ -12,6 +12,8 @@
 /ragel.exe
 /.deps
 /stamp-h1
+/rlhc
+/rlhc.c
 
 # Parsing
 /if.h
