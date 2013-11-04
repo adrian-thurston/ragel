@@ -622,16 +622,20 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 	cLineDirective( pd->id, ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
+	ret << "${";
 	ret << "\t{";
 	INLINE_LIST( ret, action->inlineList, targState, inFinish, csForced );
 	ret << "}\n";
+	ret << "}$";
 }
 
 void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
 	cLineDirective( pd->id, ret, condition->loc.fileName, condition->loc.line );
+	ret << "${";
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
+	ret << "}$";
 }
 
 string CodeGen::ERROR_STATE()

@@ -32,34 +32,61 @@ namespace host
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
+		token pound_host /'#host'/
+		token pound_gen /'#gen'/
+
+		token delim / '${' | '}$' | '%{' | '}%' /
+
 		token c_any / any /
 	end
 
+	def host
+		[pound_host whitespace number whitespace string]
+
+	def gen
+		[pound_gen whitespace number whitespace string]
+
 	def tok
-		[ident]
+		[host]
+	|	[gen]
+	|	[delim]
+	|	[ident]
 	|	[number]
 	|	[hex_number]
 	|	[comment]
 	|	[string]
 	|	[whitespace]
 	|	[c_any]
-end
 
-def start
-	[host::tok*]
+	def start
+		[tok*]
+
+	int trans( Start: ref<start> )
+	{
+		for RepTok: host::tok* in Start
+		{
+			if match RepTok
+				[delim Rest: host::tok*]
+			{
+				RepTok = Rest
+			}
+		}
+	}
+end
 
 InputFile: str = argv.pop()
 OutputFile: str = argv.pop()
 
 Input: stream = open( InputFile "r" )
 
-Start: start = parse start[ Input ]
+parse Start: host::start[ Input ]
 
 if ( !Start ) {
 	print( error '\n' )
 	exit(1)
 }
 
-Output: stream = open( OutputFile "w" )
+trans( Start )
 
+Output: stream = open( OutputFile "w" )
 prints( Output Start )

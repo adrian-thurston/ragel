@@ -254,9 +254,11 @@ void InputData::writeOutput( bool generateDot )
 			cgd->writeStatement( ii->loc, ii->writeArgs.length(), ii->writeArgs.data, generateDot, hostLang );
 		}
 		else {
+			*outStream << "${";
 			*outStream << '\n';
 			lineDirective( this, *outStream, inputFileName, ii->loc.line, generateDot, hostLang );
 			*outStream << ii->data.str();
+			*outStream << "}$";
 		}
 	}
 }
