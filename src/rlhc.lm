@@ -35,7 +35,7 @@ namespace host
 		token pound_host /'#host'/
 		token pound_gen /'#gen'/
 
-		token delim / '${' | '}$' | '%{' | '}%' /
+		literal '${', '}$'
 
 		token c_any / any /
 	end
@@ -46,10 +46,9 @@ namespace host
 	def gen
 		[pound_gen whitespace number whitespace string]
 
-	def tok
+	def host_tok
 		[host]
 	|	[gen]
-	|	[delim]
 	|	[ident]
 	|	[number]
 	|	[hex_number]
@@ -58,17 +57,34 @@ namespace host
 	|	[whitespace]
 	|	[c_any]
 
+	def ehost
+		['${' host_tok* '}$']
+
+	def tok
+		[host]
+	|	[gen]
+	|	[ident]
+	|	[number]
+	|	[hex_number]
+	|	[comment]
+	|	[string]
+	|	[whitespace]
+	|	[c_any]
+	|	[ehost]
+
 	def start
 		[tok*]
 
 	int trans( Start: ref<start> )
 	{
-		for RepTok: host::tok* in Start
+		for Tok: tok in Start
 		{
-			if match RepTok
-				[delim Rest: host::tok*]
+			if match Tok
+				[L: '${' Rep: host_tok* R: '}$']
 			{
-				RepTok = Rest
+				L.data = ''
+				R.data = ''
+				Tok = cons tok [L Rep R]
 			}
 		}
 	}
