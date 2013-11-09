@@ -17,7 +17,7 @@ namespace host
 		token ident
 			/( alpha | '_' ) ( alpha | digit | '_' )*/
 
-		token number
+		token uint
 			/ digit+ /
 
 		token hex_number
@@ -41,16 +41,16 @@ namespace host
 	end
 
 	def host
-		[pound_host whitespace number whitespace string]
+		[pound_host whitespace uint whitespace string]
 
 	def gen
-		[pound_gen whitespace number whitespace string]
+		[pound_gen whitespace uint whitespace string]
 
 	def tok
 		[host]
 	|	[gen]
 	|	[ident]
-	|	[number]
+	|	[uint]
 	|	[hex_number]
 	|	[comment]
 	|	[string]
@@ -91,7 +91,7 @@ namespace gen
 		token ident
 			/( alpha | '_' ) ( alpha | digit | '_' )*/
 
-		token number
+		token uint
 			/ digit+ [u]? /
 
 		token hex_number
@@ -114,17 +114,17 @@ namespace gen
 	end
 
 	def embedded_host
-		['$' string number '{' host::tok* host::'}$']
+		['$' string uint '{' host::tok* host::'}$']
 
-	def num_list_num
-		[number]
-	|	['-' number]
+	def number
+		[uint]
+	|	['-' uint]
 
 	def comma_num
-		[',' num_list_num]
+		[',' number]
 
 	def num_list
-		[num_list_num comma_num*]
+		[number comma_num*]
 	|	[]
 
 	def type
@@ -133,12 +133,16 @@ namespace gen
 
 	def array
 		[ident ident type ident '[' ']' '=' '{' num_list '}' ';']
+	
+	def value
+		[ident ident type ident '=' number ';']
 
 	def tok
 		[embedded_host]
 	|	[array]
+	|	[value]
 	|	[ident]
-	|	[number]
+	|	[uint]
 	|	[hex_number]
 	|	[comment]
 	|	[string]
@@ -155,14 +159,16 @@ namespace gen
 		cons OutList: host::tok* []
 		for Tok: tok in Start {
 			if match Tok
-				['$' string number '{' TL: host::tok* host::'}$']
+				['$' string uint '{' TL: host::tok* host::'}$']
 			{
 				prints( Output TL )
 			}
-			elsif match Tok
-				[array]
-			{
+			elsif match Tok [array] {
 				prints( Output '/* array */\n' )
+				prints( Output Tok )
+			}
+			elsif match Tok [value] {
+				prints( Output '/* value */\n' )
 				prints( Output Tok )
 			}
 			else
