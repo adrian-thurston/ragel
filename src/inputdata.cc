@@ -246,7 +246,7 @@ void InputData::verifyWritesHaveData()
 	}
 }
 
-void InputData::writeOutput( bool generateDot )
+void InputData::writeOutput()
 {
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 		if ( ii->type == InputItem::Write ) {
@@ -254,9 +254,7 @@ void InputData::writeOutput( bool generateDot )
 			cgd->writeStatement( ii->loc, ii->writeArgs.length(), ii->writeArgs.data, generateDot, hostLang );
 		}
 		else {
-			*outStream << "${";
-			*outStream << '\n';
-			lineDirective( this, *outStream, inputFileName, ii->loc.line, generateDot, hostLang );
+			openHostBlock( this, *outStream, inputFileName, ii->loc.line );
 			*outStream << ii->data.str();
 			*outStream << "}$";
 		}
@@ -349,7 +347,7 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	 */
 
 	openOutput();
-	writeOutput( generateDot );
+	writeOutput();
 	closeOutput();
 
 	string final = dirName + "/rlhc " + 

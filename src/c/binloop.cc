@@ -164,7 +164,6 @@ std::ostream &BinaryLooped::TO_STATE_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -181,7 +180,6 @@ std::ostream &BinaryLooped::FROM_STATE_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -198,7 +196,6 @@ std::ostream &BinaryLooped::EOF_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -216,7 +213,6 @@ std::ostream &BinaryLooped::ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 

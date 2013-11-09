@@ -127,7 +127,6 @@ std::ostream &FlatExpanded::TO_STATE_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -149,7 +148,6 @@ std::ostream &FlatExpanded::FROM_STATE_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -169,7 +167,6 @@ std::ostream &FlatExpanded::EOF_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -191,7 +188,6 @@ std::ostream &FlatExpanded::ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 

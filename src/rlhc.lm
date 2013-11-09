@@ -35,7 +35,7 @@ namespace host
 		token pound_host /'#host'/
 		token pound_gen /'#gen'/
 
-		literal '${', '}$'
+		literal '}$'
 
 		token c_any / any /
 	end
@@ -45,20 +45,6 @@ namespace host
 
 	def gen
 		[pound_gen whitespace number whitespace string]
-
-	def host_tok
-		[host]
-	|	[gen]
-	|	[ident]
-	|	[number]
-	|	[hex_number]
-	|	[comment]
-	|	[string]
-	|	[whitespace]
-	|	[c_any]
-
-	def ehost
-		['${' host_tok* '}$']
 
 	def tok
 		[host]
@@ -70,21 +56,92 @@ namespace host
 	|	[string]
 	|	[whitespace]
 	|	[c_any]
-	|	[ehost]
+
+	def out
+		[tok*]
+	
+	tok* concat( H: tok* T: tok* )
+	{
+		for L: tok* in H {
+			if match L [] {
+				L = T
+				break
+			}
+		}
+		return H
+	}
+end
+
+namespace gen
+	lex 
+		rl NL / '\n' /
+
+		rl s_literal
+			/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+
+		rl d_literal
+			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+		rl c_comment 
+			/ '/*' ( any | NL )* :>> '*/' /
+
+		rl cpp_comment
+			/ '//' [^\n]* NL /
+
+		token ident
+			/( alpha | '_' ) ( alpha | digit | '_' )*/
+
+		token number
+			/ digit+ /
+
+		token hex_number
+			/ '0x' [0-9a-fA-F]+ /
+
+		token comment
+			/ c_comment | cpp_comment /
+
+		token string
+			/ s_literal | d_literal /
+
+		ignore / ( [ \t] | NL )+ /
+
+		token pound_host /'#host'/
+		token pound_gen /'#gen'/
+
+		literal '$', '{', '}'
+
+		token c_any / any /
+	end
+
+	def ehost
+		['$' string number '{' host::tok* host::'}$']
+
+	def tok
+		[ehost]
+	|	[ident]
+	|	[number]
+	|	[hex_number]
+	|	[comment]
+	|	[string]
+	|	['{']
+	|	['}']
+	|	[c_any]
 
 	def start
 		[tok*]
 
-	int trans( Start: ref<start> )
+	host::out trans( Output: stream Start: ref<start> )
 	{
-		for Tok: tok in Start
-		{
+		cons OutList: host::tok* []
+		for Tok: tok in Start {
 			if match Tok
-				[L: '${' Rep: host_tok* R: '}$']
+				['$' string number '{' TL: host::tok* host::'}$']
 			{
-				L.data = ''
-				R.data = ''
-				Tok = cons tok [L Rep R]
+				prints( Output TL )
+			}
+			else
+			{
+				prints( Output Tok )
 			}
 		}
 	}
@@ -95,14 +152,13 @@ OutputFile: str = argv.pop()
 
 Input: stream = open( InputFile "r" )
 
-parse Start: host::start[ Input ]
+parse Start: gen::start[ Input ]
 
 if ( !Start ) {
 	print( error '\n' )
 	exit(1)
 }
 
-trans( Start )
-
 Output: stream = open( OutputFile "w" )
-prints( Output Start )
+
+trans( Output Start )

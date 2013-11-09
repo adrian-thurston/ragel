@@ -101,9 +101,6 @@ void SplitGoto::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 		}
 	}
 
-	if ( anyWritten )
-		genLineDirective( out );
-
 	/* Record the prev state if necessary. */
 	if ( state->anyRegCurStateRef() )
 		out << "	_ps = " << state->id << ";\n";
@@ -184,7 +181,6 @@ std::ostream &SplitGoto::PART_TRANS( int partition )
 					ACTION( out, item->value, st->id, false,
 							st->toStateAction->anyNextStmt() );
 				}
-				genLineDirective( out );
 			}
 
 			ptOutLabelUsed = true;

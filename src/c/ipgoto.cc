@@ -232,9 +232,6 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 		}
 	}
 
-	if ( anyWritten )
-		genLineDirective( out );
-
 	/* Record the prev state if necessary. */
 	if ( state->anyRegCurStateRef() )
 		out << "	_ps = " << state->id << ";\n";
@@ -248,9 +245,6 @@ void IpGoto::STATE_GOTO_ERROR()
 	bool anyWritten = IN_TRANS_ACTIONS( state );
 
 	/* No case label needed since we don't switch on the error state. */
-	if ( anyWritten )
-		genLineDirective( out );
-
 	if ( state->labelNeeded ) 
 		out << "st" << state->id << ":\n";
 
@@ -398,8 +392,6 @@ std::ostream &IpGoto::FINISH_CASES()
 		}
 	}
 
-	if ( anyWritten )
-		genLineDirective( out );
 	return out;
 }
 

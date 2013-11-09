@@ -129,7 +129,7 @@ struct InputData
 	void verifyWritesHaveData();
 
 	void makeFirstInputItem();
-	void writeOutput( bool generateDot );
+	void writeOutput();
 	void makeDefaultFileName();
 	void makeOutputStream();
 	void openOutput();

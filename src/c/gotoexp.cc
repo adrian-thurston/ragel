@@ -102,7 +102,6 @@ std::ostream &GotoExpanded::TO_STATE_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -124,7 +123,6 @@ std::ostream &GotoExpanded::FROM_STATE_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -144,7 +142,6 @@ std::ostream &GotoExpanded::EOF_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 

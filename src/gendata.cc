@@ -36,35 +36,16 @@ string itoa( int i )
 	return buf;
 }
 
-void lineDirective( InputData *id, ostream &out, const char *fileName, int line, bool generateDot, const HostLang *hostLang )
+void openHostBlock( InputData *id, ostream &out, const char *fileName, int line )
 {
-	if ( !generateDot ) {
-		if ( hostLang == &hostLangC )
-			cLineDirective( id, out, fileName, line );
-//		else if ( hostLang == &hostLangD )
-//			dLineDirective( out, fileName, line );
-//		else if ( hostLang == &hostLangD2 )
-//			dLineDirective( out, fileName, line );
-		else if ( hostLang == &hostLangGo )
-			goLineDirective( id, out, fileName, line );
-//		else if ( hostLang == &hostLangJava )
-//			javaLineDirective( out, fileName, line );
-//		else if ( hostLang == &hostLangRuby )
-//			rubyLineDirective( out, fileName, line );
-//		else if ( hostLang == &hostLangCSharp )
-//			csharpLineDirective( out, fileName, line );
-//		else if ( hostLang == &hostLangOCaml )
-//			ocamlLineDirective( out, fileName, line );
-//		else if ( hostLang == &hostLangCrack )
-//			rubyLineDirective( out, fileName, line );
+	out << "$ \"";
+	for ( const char *pc = fileName; *pc != 0; pc++ ) {
+		if ( *pc == '\\' )
+			out << "\\\\";
+		else
+			out << *pc;
 	}
-}
-
-void CodeGenData::genLineDirective( bool generateDot, const HostLang *hostLang )
-{
-	std::streambuf *sbuf = out.rdbuf();
-	output_filter *filter = static_cast<output_filter*>(sbuf);
-	lineDirective( pd->id, out, filter->fileName, filter->line + 1, generateDot, hostLang );
+	out << "\" " << line << " {";
 }
 
 GenBase::GenBase( std::string fsmName, ParseData *pd, FsmAp *fsm )
@@ -1389,12 +1370,8 @@ void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 
 void CodeGenData::writeStatement( InputLoc &loc, int nargs, std::string *args, bool generateDot, const HostLang *hostLang )
 {
-	/* FIXME: This should be moved to the virtual functions in the code
-	 * generators.
-	 *
-	 * Force a newline. */
+	/* Start write generation on a fresh line. */
 	out << '\n';
-	genLineDirective( generateDot, hostLang );
 
 	if ( args[0] == "data" ) {
 		for ( int i = 1; i < nargs; i++ ) {

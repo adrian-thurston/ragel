@@ -91,7 +91,6 @@ std::ostream &FlatLooped::TO_STATE_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -108,7 +107,6 @@ std::ostream &FlatLooped::FROM_STATE_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -125,7 +123,6 @@ std::ostream &FlatLooped::EOF_ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 
@@ -142,7 +139,6 @@ std::ostream &FlatLooped::ACTION_SWITCH()
 		}
 	}
 
-	genLineDirective( out );
 	return out;
 }
 

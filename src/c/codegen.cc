@@ -48,27 +48,6 @@ using std::endl;
 
 extern int numSplitPartitions;
 
-void cLineDirective( InputData *id, ostream &out, const char *fileName, int line )
-{
-	if ( id->noLineDirectives )
-		out << "/* ";
-
-	/* Write the preprocessor line info for to the input file. */
-	out << "#line " << line  << " \"";
-	for ( const char *pc = fileName; *pc != 0; pc++ ) {
-		if ( *pc == '\\' )
-			out << "\\\\";
-		else
-			out << *pc;
-	}
-	out << '"';
-
-	if ( id->noLineDirectives )
-		out << " */";
-
-	out << '\n';
-}
-
 namespace C {
 
 TableArray::TableArray( const char *name, CodeGen &codeGen )
@@ -196,13 +175,6 @@ void TableArray::finish()
 			finishGenerate();
 			break;
 	}
-}
-
-void CodeGen::genLineDirective( ostream &out )
-{
-	std::streambuf *sbuf = out.rdbuf();
-	output_filter *filter = static_cast<output_filter*>(sbuf);
-	cLineDirective( pd->id, out, filter->fileName, filter->line + 1 );
 }
 
 /* Init code gen with in parameters. */
@@ -618,22 +590,16 @@ string CodeGen::LDIR_PATH( char *path )
 void CodeGen::ACTION( ostream &ret, GenAction *action, int targState, 
 		bool inFinish, bool csForced )
 {
-	/* Write the preprocessor line info for going into the source file. */
-	cLineDirective( pd->id, ret, action->loc.fileName, action->loc.line );
-
-	/* Write the block and close it off. */
-	ret << "${";
-	ret << "\t{";
+	ret << '\t';
+	openHostBlock( pd->id, ret, action->loc.fileName, action->loc.line );
+	ret << '{';
 	INLINE_LIST( ret, action->inlineList, targState, inFinish, csForced );
-	ret << "}\n";
-	ret << "}$";
+	ret << "}}$";
 }
 
 void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
-	ret << "\n";
-	cLineDirective( pd->id, ret, condition->loc.fileName, condition->loc.line );
-	ret << "${";
+	openHostBlock( pd->id, ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 	ret << "}$";
 }

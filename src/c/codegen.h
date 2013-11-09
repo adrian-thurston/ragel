@@ -205,8 +205,6 @@ protected:
 	bool againLabelUsed;
 	bool useIndicies;
 
-	void genLineDirective( ostream &out );
-
 public:
 	virtual void writeExports();
 };
