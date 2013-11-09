@@ -32,24 +32,13 @@ namespace host
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
-		token pound_host /'#host'/
-		token pound_gen /'#gen'/
-
 		literal '}$'
 
 		token c_any / any /
 	end
 
-	def host
-		[pound_host whitespace uint whitespace string]
-
-	def gen
-		[pound_gen whitespace uint whitespace string]
-
 	def tok
-		[host]
-	|	[gen]
-	|	[ident]
+		[ident]
 	|	[uint]
 	|	[hex_number]
 	|	[comment]
