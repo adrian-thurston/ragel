@@ -92,7 +92,7 @@ namespace gen
 			/( alpha | '_' ) ( alpha | digit | '_' )*/
 
 		token number
-			/ digit+ /
+			/ digit+ [u]? /
 
 		token hex_number
 			/ '0x' [0-9a-fA-F]+ /
@@ -108,23 +108,43 @@ namespace gen
 		token pound_host /'#host'/
 		token pound_gen /'#gen'/
 
-		literal '$', '{', '}'
+		literal '$', '{', '}', '=', '[', ']', '-', ',', ';'
 
 		token c_any / any /
 	end
 
-	def ehost
+	def embedded_host
 		['$' string number '{' host::tok* host::'}$']
 
+	def num_list_num
+		[number]
+	|	['-' number]
+
+	def comma_num
+		[',' num_list_num]
+
+	def num_list
+		[num_list_num comma_num*]
+	|	[]
+
+	def type
+		[ident]
+	|	[ident ident]
+
+	def array
+		[ident ident type ident '[' ']' '=' '{' num_list '}' ';']
+
 	def tok
-		[ehost]
+		[embedded_host]
+	|	[array]
 	|	[ident]
 	|	[number]
 	|	[hex_number]
 	|	[comment]
 	|	[string]
-	|	['{']
-	|	['}']
+	|	['{'] | ['}'] | ['=']
+	|	['['] | [']']
+	|	['-'] | [','] | [';']
 	|	[c_any]
 
 	def start
@@ -138,6 +158,12 @@ namespace gen
 				['$' string number '{' TL: host::tok* host::'}$']
 			{
 				prints( Output TL )
+			}
+			elsif match Tok
+				[array]
+			{
+				prints( Output '/* array */\n' )
+				prints( Output Tok )
 			}
 			else
 			{
