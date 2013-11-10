@@ -133,7 +133,7 @@ namespace gen
 		['value' value_pass]
 	
 	def while_true
-		['while' '(' 'TRUE' ')' '{' TokList: tok* '}']
+		['while' '(' tok* ')' '{' TokList: tok* '}']
 
 	def tok
 		[embedded_host]
@@ -143,9 +143,9 @@ namespace gen
 	|	[ident]
 	|	[uint]
 	|	[hex_number]
+	|	['TRUE']
 	|	[comment]
 	|	[string]
-	|	['while']
 	|	['='] |	['['] | [']']
 	|	['-'] | [','] | [';']
 	|	['{' tok* '}']
@@ -170,9 +170,9 @@ namespace gen
 			elsif match Tok [Value: value] {
 				prints( Output 'static const ' Value.value_pass )
 			}
-			elsif match Tok [WhileTrue: while_true] {
+			elsif match Tok ['while' '(' 'TRUE' ')' '{' TokList: tok* '}'] {
 				prints( Output 'while ( 1 ) {\n' )
-				trans( Output WhileTrue.TokList )
+				trans( Output TokList )
 				prints( Output '}\n' )
 			}
 			elsif match Tok [L: '{' TL: tok* R: '}'] {
