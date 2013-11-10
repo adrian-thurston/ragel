@@ -326,7 +326,7 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	makeDefaultFileName();
 
 	origOutputFileName = outputFileName;
-	genOutputFileName = origOutputFileName + ".ri";
+	genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
 	outputFileName = genOutputFileName.c_str();
 
 	makeOutputStream();
