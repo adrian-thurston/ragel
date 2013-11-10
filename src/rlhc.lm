@@ -77,7 +77,7 @@ namespace gen
 		rl cpp_comment
 			/ '//' [^\n]* NL /
 
-		literal 'array', 'value'
+		literal 'array', 'value', 'while', 'TRUE'
 
 		token ident
 			/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -96,7 +96,8 @@ namespace gen
 
 		ignore / ( [ \t] | NL )+ /
 
-		literal '$', '{', '}', '=', '[', ']', '-', ',', ';'
+		literal '$', '{', '}', '=', '[', ']',
+				'-', ',', ';', '(', ')'
 
 		token c_any / any /
 	end
@@ -130,28 +131,34 @@ namespace gen
 
 	def value
 		['value' value_pass]
+	
+	def while_true
+		['while' '(' 'TRUE' ')' '{' TokList: tok* '}']
 
 	def tok
 		[embedded_host]
 	|	[array]
 	|	[value]
+	|	[while_true]
 	|	[ident]
 	|	[uint]
 	|	[hex_number]
 	|	[comment]
 	|	[string]
-	|	['{'] | ['}'] | ['=']
-	|	['['] | [']']
+	|	['while']
+	|	['='] |	['['] | [']']
 	|	['-'] | [','] | [';']
+	|	['{' tok* '}']
+	|	['(' tok* ')']
 	|	[c_any]
 
 	def start
 		[tok*]
 
-	host::out trans( Output: stream Start: ref<start> )
+	int trans( Output: stream TokList: tok* )
 	{
 		cons OutList: host::tok* []
-		for Tok: tok in Start {
+		for Tok: tok in repeat(TokList) {
 			if match Tok
 				['$' string uint '{' TL: host::tok* host::'}$']
 			{
@@ -162,6 +169,21 @@ namespace gen
 			}
 			elsif match Tok [Value: value] {
 				prints( Output 'static const ' Value.value_pass )
+			}
+			elsif match Tok [WhileTrue: while_true] {
+				prints( Output 'while ( 1 ) {\n' )
+				trans( Output WhileTrue.TokList )
+				prints( Output '}\n' )
+			}
+			elsif match Tok [L: '{' TL: tok* R: '}'] {
+				prints( Output L )
+				trans( Output TL )
+				prints( Output R )
+			}
+			elsif match Tok [L: '(' TL: tok* R: ')'] {
+				prints( Output L )
+				trans( Output TL )
+				prints( Output R )
 			}
 			else
 			{
@@ -184,5 +206,4 @@ if ( !Start ) {
 }
 
 Output: stream = open( OutputFile "w" )
-
-trans( Output Start )
+trans( Output Start._repeat_tok )

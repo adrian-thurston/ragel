@@ -406,7 +406,7 @@ void Flat::LOCATE_TRANS()
 		"		const " << ARR_TYPE( condKeys ) << " *_lower = _ckeys;\n"
 		"		const " << ARR_TYPE( condKeys ) << " *_mid;\n"
 		"		const " << ARR_TYPE( condKeys ) << " *_upper = _ckeys + _klen - 1;\n"
-		"		while (1) {\n"
+		"		while ( TRUE ) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
 		"\n"
