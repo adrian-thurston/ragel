@@ -353,7 +353,7 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	string final = dirName + "/rlhc " + 
 			origOutputFileName + " " + genOutputFileName;
 	system( final.c_str() );
-	unlink( genOutputFileName.c_str() );
+	//unlink( genOutputFileName.c_str() );
 }
 
 void InputData::makeFirstInputItem()
