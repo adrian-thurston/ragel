@@ -31,7 +31,7 @@
 #include "mergesort.h"
 #include "version.h"
 #include "inputdata.h"
-#include "xml/xml.h"
+#include "xml.h"
 
 using namespace std;
 

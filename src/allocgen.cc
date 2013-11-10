@@ -30,15 +30,16 @@
 /*
  * Code generators.
  */
-#include "xml/xml.h"
+#include "xml.h"
 
-#include "c/binloop.h"
-#include "c/binexp.h"
-#include "c/flatloop.h"
-#include "c/flatexp.h"
-#include "c/gotoloop.h"
-#include "c/gotoexp.h"
-#include "c/ipgoto.h"
+#include "binloop.h"
+#include "binexp.h"
+#include "flatloop.h"
+#include "flatexp.h"
+#include "gotoloop.h"
+#include "gotoexp.h"
+#include "ipgoto.h"
+
 //#include "c/split.h"
 
 //#include "d/table.h"
@@ -202,40 +203,40 @@ CodeGenData *cMakeCodeGen( const CodeGenArgs &args )
 //	return codeGen;
 //}
 
-/* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
-{
-	CodeGenData *codeGen = 0;
-
-	switch ( args.codeStyle ) {
-	case GenTables:
-		codeGen = new Go::BinaryLooped(args);
-		break;
-	case GenFTables:
-		codeGen = new Go::BinaryExpanded(args);
-		break;
-	case GenFlat:
-		codeGen = new Go::FlatLooped(args);
-		break;
-	case GenFFlat:
-		codeGen = new Go::FlatExpanded(args);
-		break;
-	case GenGoto:
-		codeGen = new Go::GotoLooped(args);
-		break;
-	case GenFGoto:
-		codeGen = new Go::GotoExpanded(args);
-		break;
-	case GenIpGoto:
-		codeGen = new Go::IpGoto(args);
-		break;
-	default:
-		cerr << "Invalid output style, only -T0, -T1, -F0, -F1, -G0, -G1 and -G2 are supported.\n";
-		exit(1);
-	}
-
-	return codeGen;
-}
+///* Invoked by the parser when a ragel definition is opened. */
+//CodeGenData *goMakeCodeGen( const CodeGenArgs &args )
+//{
+//	CodeGenData *codeGen = 0;
+//
+//	switch ( args.codeStyle ) {
+//	case GenTables:
+//		codeGen = new Go::BinaryLooped(args);
+//		break;
+//	case GenFTables:
+//		codeGen = new Go::BinaryExpanded(args);
+//		break;
+//	case GenFlat:
+//		codeGen = new Go::FlatLooped(args);
+//		break;
+//	case GenFFlat:
+//		codeGen = new Go::FlatExpanded(args);
+//		break;
+//	case GenGoto:
+//		codeGen = new Go::GotoLooped(args);
+//		break;
+//	case GenFGoto:
+//		codeGen = new Go::GotoExpanded(args);
+//		break;
+//	case GenIpGoto:
+//		codeGen = new Go::IpGoto(args);
+//		break;
+//	default:
+//		cerr << "Invalid output style, only -T0, -T1, -F0, -F1, -G0, -G1 and -G2 are supported.\n";
+//		exit(1);
+//	}
+//
+//	return codeGen;
+//}
 
 ///* Invoked by the parser when a ragel definition is opened. */
 //CodeGenData *crackMakeCodeGen( const CodeGenArgs &args )
@@ -369,8 +370,8 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 //		cgd = dMakeCodeGen( args );
 //	else if ( hostLang == &hostLangD2 )
 //		cgd = d2MakeCodeGen( args );
-	else if ( hostLang == &hostLangGo )
-		cgd = goMakeCodeGen( args );
+//	else if ( hostLang == &hostLangGo )
+//		cgd = goMakeCodeGen( args );
 //	else if ( hostLang == &hostLangJava )
 //		cgd = javaMakeCodeGen( args );
 //	else if ( hostLang == &hostLangRuby )

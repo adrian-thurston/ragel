@@ -1,7 +1,3 @@
-SUBDIRS = c dot xml go
-
-# d crack cs java ml rbx ruby
-
 COLM = @COLM_FULL@
 
 bin_PROGRAMS = ragel rlhc
@@ -12,26 +8,17 @@ ragel_SOURCES = \
 	buffer.h inputdata.h redfsm.h parsedata.h \
 	dotcodegen.h parsetree.h rlscan.h version.h common.h \
 	fsmgraph.h pcheck.h gendata.h ragel.h load.h if.h \
+	codegen.h binary.h binloop.h binexp.h flat.h flatloop.h \
+	flatexp.h goto.h gotoloop.h gotoexp.h ipgoto.h xml.h dot.h \
+	\
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc \
 	inputdata.cc common.cc redfsm.cc gendata.cc allocgen.cc \
-	load.cc parse.c if.cc
+	load.cc parse.c if.cc codegen.cc binary.cc binloop.cc \
+	binexp.cc flat.cc flatloop.cc flatexp.cc goto.cc \
+	gotoloop.cc gotoexp.cc ipgoto.cc xml.cc dot.cc
 
 ragel_CXXFLAGS = -Wall
-
-ragel_LDADD = \
-	c/libc.a \
-	dot/libdot.a \
-	xml/libxml.a \
-	go/libgo.a
-
-#	crack/libcrack.a
-#	cs/libcs.a
-#	d/libd.a
-#	java/libjava.a
-#	ml/libml.a
-#	rbx/librbx.a
-#	ruby/libruby.a
 
 BUILT_SOURCES = version.h
 
