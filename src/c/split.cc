@@ -304,18 +304,18 @@ std::ostream &SplitGoto::PART_MAP()
 void SplitGoto::writeData()
 {
 	out <<
-		"static const int " << START() << " = " << START_STATE_ID() << ";\n"
+		"value int " << START() << " = " << START_STATE_ID() << ";\n"
 		"\n";
 
 	if ( !noFinal ) {
 		out <<
-			"static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n"
+			"value int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n"
 			"\n";
 	}
 
 	if ( !noError ) {
 		out <<
-			"static const int " << ERROR() << " = " << ERROR_STATE() << ";\n"
+			"value int " << ERROR() << " = " << ERROR_STATE() << ";\n"
 			"\n";
 	}
 

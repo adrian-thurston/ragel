@@ -118,7 +118,7 @@ void TableArray::finishAnalyze()
 
 void TableArray::startGenerate()
 {
-	out << "static const " << type << " " << 
+	out << "array " << type << " " << 
 		"_" << codeGen.DATA_PREFIX() << name << "[] = {\n\t";
 }
 
@@ -669,19 +669,19 @@ string CodeGen::ALPH_TYPE()
 void CodeGen::STATE_IDS()
 {
 	if ( redFsm->startState != 0 )
-		out << "static const int " << START() << " = " << START_STATE_ID() << ";\n";
+		out << "value int " << START() << " = " << START_STATE_ID() << ";\n";
 
 	if ( !noFinal )
-		out << "static const int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n";
+		out << "value int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n";
 
 	if ( !noError )
-		out << "static const int " << ERROR() << " = " << ERROR_STATE() << ";\n";
+		out << "value int " << ERROR() << " = " << ERROR_STATE() << ";\n";
 
 	out << "\n";
 
 	if ( entryPointNames.length() > 0 ) {
 		for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
-			out << "static const int " << DATA_PREFIX() + "en_" + *en << 
+			out << "value int " << DATA_PREFIX() + "en_" + *en << 
 					" = " << entryPointIds[en.pos()] << ";\n";
 		}
 		out << "\n";

@@ -77,6 +77,8 @@ namespace gen
 		rl cpp_comment
 			/ '//' [^\n]* NL /
 
+		literal 'array', 'value'
+
 		token ident
 			/( alpha | '_' ) ( alpha | digit | '_' )*/
 
@@ -93,9 +95,6 @@ namespace gen
 			/ s_literal | d_literal /
 
 		ignore / ( [ \t] | NL )+ /
-
-		token pound_host /'#host'/
-		token pound_gen /'#gen'/
 
 		literal '$', '{', '}', '=', '[', ']', '-', ',', ';'
 
@@ -120,11 +119,17 @@ namespace gen
 		[ident]
 	|	[ident ident]
 
+	def array_pass
+		[type ident '[' ']' '=' '{' num_list '}' ';']
+
 	def array
-		[ident ident type ident '[' ']' '=' '{' num_list '}' ';']
+		['array' array_pass]
 	
+	def value_pass
+		[type ident '=' number ';']
+
 	def value
-		[ident ident type ident '=' number ';']
+		['value' value_pass]
 
 	def tok
 		[embedded_host]
@@ -152,13 +157,11 @@ namespace gen
 			{
 				prints( Output TL )
 			}
-			elsif match Tok [array] {
-				prints( Output '/* array */\n' )
-				prints( Output Tok )
+			elsif match Tok [Array: array] {
+				prints( Output 'static const ' Array.array_pass )
 			}
-			elsif match Tok [value] {
-				prints( Output '/* value */\n' )
-				prints( Output Tok )
+			elsif match Tok [Value: value] {
+				prints( Output 'static const ' Value.value_pass )
 			}
 			else
 			{
