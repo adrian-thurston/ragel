@@ -280,13 +280,12 @@ void BinaryExpanded::writeExec()
 
 	out << 
 		"	{\n"
-		"	int _klen";
+		"	int _klen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << ", _ps";
+		out << "	int _ps;\n";
 
 	out <<
-		";\n"
 		"	const " << ALPH_TYPE() << " *_keys;\n"
 		"	const " << ARR_TYPE( condKeys ) << " *_ckeys;\n"
 		"	int _cpc;\n"

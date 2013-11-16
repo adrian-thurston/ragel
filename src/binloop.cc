@@ -271,13 +271,12 @@ void BinaryLooped::writeExec()
 
 	out <<
 		"	{\n"
-		"	int _klen";
+		"	int _klen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << ", _ps";
+		out << "	int _ps;\n";
 
 	out <<
-		";\n"
 		"	" << "unsigned int" << " _trans;\n" <<
 		"	" << "unsigned int" << " _cond;\n";
 

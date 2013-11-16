@@ -227,13 +227,13 @@ void FlatExpanded::writeExec()
 
 	out << 
 		"	{\n"
-		"	int _slen";
+		"	int _slen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << ", _ps";
+		out << "	int _ps;\n";
 	
-	out << ";\n";
-	out << "	int _trans, _cond;\n";
+	out << "	int _trans;\n";
+	out << "	int _cond;\n";
 
 	out <<
 		"	const " << ALPH_TYPE() << " *_keys;\n"

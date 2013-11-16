@@ -48,17 +48,6 @@ namespace host
 
 	def out
 		[tok*]
-	
-	tok* concat( H: tok* T: tok* )
-	{
-		for L: tok* in H {
-			if match L [] {
-				L = T
-				break
-			}
-		}
-		return H
-	}
 end
 
 namespace gen
@@ -98,15 +87,87 @@ namespace gen
 
 		ignore / ( [ \t] | NL )+ /
 
+		token pragma /'#' any* :> '\n' /
+
 		literal '$', '{', '}', '=', '[', ']',
 				'-', ',', ';', '(', ')', ':',
 				'?', '*', '+', '>', '<', '&',
-				'~', '!'
+				'~', '!', '!=', '==', '<<', '>>',
+				'+=', '&&', '||', '<=', '>=', '->',
+				'++', '--'
 	end
 
 	def embedded_host
 		['$' string uint '{' host::tok* host::'}$']
 
+	def expr_factor
+		[embedded_host]
+	|	[ident]
+	|	[ident '[' expr ']']
+	|	[uint]
+	|	['-' uint]
+	|	['TRUE']
+	|	['FALSE']
+	|	[hex_number]
+	|	[string]
+	|	['(' expr ')']
+
+	def expr_ptr
+		[expr_ptr '->' expr_factor]
+	|	['*' expr_ptr]
+	|	['++' expr_ptr]
+	|	['--' expr_ptr]
+	|	[expr_ptr '++']
+	|	[expr_ptr '--']
+	|	['(' ident+ ')' expr_ptr]
+	|	[expr_factor]
+
+	def expr_factor_op
+		['!' expr_factor_op]
+	|	['~' expr_factor_op]
+	|	[expr_ptr]
+
+	def expr_bitwise
+		[expr_bitwise '&' expr_factor_op]
+	|	[expr_factor_op]
+
+	def expr_mult
+		[expr_mult '*' expr_bitwise]
+	|	[expr_bitwise]
+
+	def expr_add
+		[expr_add '+' expr_mult]
+	|	[expr_add '-' expr_mult]
+	|	[expr_mult]
+
+	def expr_shift
+		[expr_shift '<<' expr_add]
+	|	[expr_shift '>>' expr_add]
+	|	[expr_add]
+
+	def expr_test
+		[expr_test '<' expr_shift]
+	|	[expr_test '>' expr_shift]
+	|	[expr_test '<=' expr_shift]
+	|	[expr_test '>=' expr_shift]
+	|	[expr_test '==' expr_shift]
+	|	[expr_test '!=' expr_shift]
+	|	[expr_test '&&' expr_shift]
+	|	[expr_test '||' expr_shift]
+	|	[expr_shift]
+
+	def expr_cond
+		[expr_test '?' expr ':' expr_cond]
+	|	[expr_test]
+
+	def expr_assign
+		[expr_assign '=' expr_cond]
+	|	[expr_assign '+=' expr_cond]
+	|	[expr_cond]
+
+	def expr
+		[expr_assign]
+	
 	def number
 		[uint]
 	|	['-' uint]
@@ -135,87 +196,346 @@ namespace gen
 		['value' value_pass]
 	
 	def while_stmt
-		['while' '(' expr_tok* ')' stmt]
+		['while' '(' expr ')' stmt]
 	
 	def else_if_clause
-		['else' 'if' '(' expr_tok* ')' stmt]
+		['else' 'if' '(' expr ')' stmt]
 
 	def else_clause
 		['else' stmt]
 
 	def if_stmt [
-		'if' '(' expr_tok* ')' stmt
+		'if' '(' expr ')' stmt
 		else_if_clause* else_clause?
 	]
 
 	def switch_stmt
-		['switch' '(' expr_tok* ')' stmt]
+		['switch' '(' expr ')' stmt]
 
 	def case_label
-		['case' expr_tok* ':']
+		['case' expr ':']
 
 	def goto_label
 		[ident ':']
 
-	def expr_tok
-		[embedded_host]
-	|	[ident]
-	|	[uint]
-	|	['TRUE']
-	|	['FALSE']
-	|	[hex_number]
-	|	[string]
-	|	['['] | [']']
-	| 	['='] | ['-'] | [',']
-	|	['?'] | [':'] | ['*']
-	|	['+'] | ['<'] | ['>']
-	|	['&'] | ['~'] | ['!']
-	|	['(' expr_tok* ')']
+	def opt_init
+		['=' expr]
+	|	[]
+
+	def opt_ptr
+		['*']
+	|	[]
+
+	def declaration
+		[ident+ opt_ptr ident opt_init ';']
 
 	def stmt
 		[embedded_host]
 	|	[array]
 	|	[value]
+	|	[declaration]
 	|	[while_stmt]
 	|	[if_stmt]
 	|	[switch_stmt]
 	|	[case_label]
 	|	[goto_label]
-	|	[expr_tok* ';']
+	|	[expr ';']
+	|	[pragma]
 	|	['{' stmt* '}']
 
 	def start
 		[stmt*]
 
-	int trans_expr( Output: stream Expr: expr_tok* )
+	int trans_expr_factor( Output: stream ExprFactor: expr_factor )
 	{
-		for ExprTok: expr_tok in repeat(Expr) {
-			if match ExprTok
-				['$' string uint '{' TL: host::tok* host::'}$']
-			{
-				prints( Output TL )
-			}
-			elsif match ExprTok
-				['(' TL: expr_tok* ')']
-			{
-				prints( Output '(' )
-				trans_expr( Output TL )
-				prints( Output ')' )
-			}
-			elsif match ExprTok
-					['TRUE']
-			{
-				prints( Output '1' )
-			}
-			elsif match ExprTok
-					['FALSE']
-			{
-				prints( Output '0' )
-			}
-			else {
-				prints( Output ExprTok )
-			}
+		if match ExprFactor
+			['$' string uint '{' TL: host::tok* host::'}$']
+		{
+			prints( Output TL )
 		}
+		elsif match ExprFactor
+			['(' TL: expr ')']
+		{
+			prints( Output '(' )
+			trans_expr( Output TL )
+			prints( Output ')' )
+		}
+		elsif match ExprFactor
+			[ident '[' TL: expr ']']
+		{
+			prints( Output ExprFactor.ident )
+			prints( Output '/* subscript */' )
+			prints( Output '[' )
+			trans_expr( Output TL )
+			prints( Output ']' )
+		}
+		elsif match ExprFactor
+				['TRUE']
+		{
+			prints( Output '1' )
+		}
+		elsif match ExprFactor
+				['FALSE']
+		{
+			prints( Output '0' )
+		}
+		else {
+			# Catches cases not specified
+			prints( Output ExprFactor )
+		}
+	}
+
+	int trans_expr_ptr( Output: stream ExprPtr: expr_ptr )
+	{
+		if match ExprPtr [expr_ptr '->' expr_factor]
+		{
+			trans_expr_ptr( Output ExprPtr._expr_ptr )
+			prints( Output '->' )
+			trans_expr_factor( Output ExprPtr.expr_factor )
+		}
+		elsif match ExprPtr ['*' expr_ptr]
+		{
+			prints( Output '*' )
+			trans_expr_ptr( Output ExprPtr._expr_ptr )
+		}
+		elsif match ExprPtr ['++' expr_ptr]
+		{
+			prints( Output '++' )
+			trans_expr_ptr( Output ExprPtr._expr_ptr )
+		}
+		elsif match ExprPtr ['--' expr_ptr]
+		{
+			prints( Output '--' )
+			trans_expr_ptr( Output ExprPtr._expr_ptr )
+		}
+		elsif match ExprPtr [expr_ptr '++']
+		{
+			trans_expr_ptr( Output ExprPtr._expr_ptr )
+			prints( Output '++' )
+		}
+		elsif match ExprPtr [expr_ptr '--']
+		{
+			trans_expr_ptr( Output ExprPtr._expr_ptr )
+			prints( Output '--' )
+		}
+		elsif match ExprPtr ['(' Type: ident+ ')' expr_ptr]
+		{
+			prints( Output '(' )
+			prints( Output Type )
+			prints( Output ')' )
+			trans_expr_ptr( Output ExprPtr._expr_ptr )
+		}
+		elsif match ExprPtr [expr_factor]
+		{
+			trans_expr_factor( Output ExprPtr.expr_factor )
+		}
+		else {
+			prints( Output ExprPtr )
+		}
+	}
+	
+	int trans_expr_factor_op( Output: stream ExprFactorOp: expr_factor_op )
+	{
+		if match ExprFactorOp ['!' expr_factor_op]
+		{
+			prints( Output '/* bang */' )
+			prints( Output '!' )
+			trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
+		}
+		elsif match ExprFactorOp ['~' expr_factor_op]
+		{
+			prints( Output '/* tilde */' )
+			prints( Output '~' )
+			trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
+		}
+		elsif match ExprFactorOp [expr_ptr]
+		{
+			trans_expr_ptr( Output ExprFactorOp.expr_ptr )
+		}
+	}
+
+	int trans_expr_bitwise( Output: stream ExprBitwise: expr_bitwise )
+	{
+		if match ExprBitwise [expr_bitwise '&' expr_factor_op]
+		{
+			prints( Output '/* bitwise and */' )
+			trans_expr_bitwise( Output ExprBitwise._expr_bitwise )
+			prints( Output '&' )
+			trans_expr_factor_op( Output ExprBitwise.expr_factor_op )
+		}
+		elsif match ExprBitwise [expr_factor_op]
+		{
+			trans_expr_factor_op( Output ExprBitwise.expr_factor_op )
+		}
+	}
+
+	int trans_expr_mult( Output: stream ExprMult: expr_mult )
+	{
+		if match ExprMult [expr_mult '*' expr_bitwise]
+		{
+			prints( Output '/* mult */' )
+			trans_expr_mult( Output ExprMult._expr_mult )
+			prints( Output '*' )
+			trans_expr_bitwise( Output ExprMult.expr_bitwise )
+		}
+		elsif match ExprMult [expr_bitwise]
+		{
+			trans_expr_bitwise( Output ExprMult.expr_bitwise )
+		}
+	}
+
+	int trans_expr_add( Output: stream ExprAdd: expr_add )
+	{
+		if match ExprAdd [expr_add '+' expr_mult]
+		{
+			prints( Output '/* add */' )
+			trans_expr_add( Output ExprAdd._expr_add )
+			prints( Output '+' )
+			trans_expr_mult( Output ExprAdd.expr_mult )
+		}
+		elsif match ExprAdd [expr_add '-' expr_mult]
+		{
+			prints( Output '/* sub */' )
+			trans_expr_add( Output ExprAdd._expr_add )
+			prints( Output '-' )
+			trans_expr_mult( Output ExprAdd.expr_mult )
+		}
+		elsif match ExprAdd [expr_mult]
+		{
+			trans_expr_mult( Output ExprAdd.expr_mult )
+		}
+	}
+
+	int trans_expr_shift( Output: stream ExprShift: expr_shift )
+	{
+		if match ExprShift [expr_shift '<<' expr_add]
+		{
+			prints( Output '/* lshift */' )
+			trans_expr_shift( Output ExprShift._expr_shift )
+			prints( Output '<<' )
+			trans_expr_add( Output ExprShift.expr_add )
+		}
+		elsif match ExprShift [expr_shift '>>' expr_add]
+		{
+			prints( Output '/* rshift */' )
+			trans_expr_shift( Output ExprShift._expr_shift )
+			prints( Output '>>' )
+			trans_expr_add( Output ExprShift.expr_add )
+		}
+		elsif match ExprShift [expr_add]
+		{
+			trans_expr_add( Output ExprShift.expr_add )
+		}
+	}
+
+	int trans_expr_test( Output: stream ExprTest: expr_test )
+	{
+		if match ExprTest [expr_test '<' expr_shift]
+		{
+			prints( Output '/* lt */' )
+			trans_expr_test( Output ExprTest._expr_test )
+			prints( Output '<' )
+			trans_expr_shift( Output ExprTest.expr_shift )
+		}
+		elsif match ExprTest [expr_test '>' expr_shift]
+		{
+			prints( Output '/* gt */' )
+			trans_expr_test( Output ExprTest._expr_test )
+			prints( Output '>' )
+			trans_expr_shift( Output ExprTest.expr_shift )
+		}
+		elsif match ExprTest [expr_test '<=' expr_shift]
+		{
+			prints( Output '/* lte */' )
+			trans_expr_test( Output ExprTest._expr_test )
+			prints( Output '<=' )
+			trans_expr_shift( Output ExprTest.expr_shift )
+		}
+		elsif match ExprTest [expr_test '>=' expr_shift]
+		{
+			prints( Output '/* gte */' )
+			trans_expr_test( Output ExprTest._expr_test )
+			prints( Output '>=' )
+			trans_expr_shift( Output ExprTest.expr_shift )
+		}
+		elsif match ExprTest [expr_test '==' expr_shift]
+		{
+			prints( Output '/* equals */' )
+			trans_expr_test( Output ExprTest._expr_test )
+			prints( Output '==' )
+			trans_expr_shift( Output ExprTest.expr_shift )
+		}
+		elsif match ExprTest [expr_test '!=' expr_shift]
+		{
+			prints( Output '/* not equals */' )
+			trans_expr_test( Output ExprTest._expr_test )
+			prints( Output '!=' )
+			trans_expr_shift( Output ExprTest.expr_shift )
+		}
+		elsif match ExprTest [expr_test '&&' expr_shift]
+		{
+			prints( Output '/* logical and */' )
+			trans_expr_test( Output ExprTest._expr_test )
+			prints( Output '&&' )
+			trans_expr_shift( Output ExprTest.expr_shift )
+		}
+		elsif match ExprTest [expr_test '||' expr_shift]
+		{
+			prints( Output '/* logical or */' )
+			trans_expr_test( Output ExprTest._expr_test )
+			prints( Output '&&' )
+			trans_expr_shift( Output ExprTest.expr_shift )
+		}
+		elsif match ExprTest [expr_shift]
+		{
+			trans_expr_shift( Output ExprTest.expr_shift )
+		}
+	}
+
+	int trans_expr_cond( Output: stream ExprCond: expr_cond )
+	{
+		if match ExprCond [expr_test '?' expr ':' expr_cond]
+		{
+			prints( Output '/* cond test */' )
+			trans_expr_test( Output ExprCond.expr_test )
+			prints( Output '?' )
+			prints( Output '/* cond true */' )
+			trans_expr( Output ExprCond.expr )
+			prints( Output ':' )
+			prints( Output '/* cond false */' )
+			trans_expr_cond( Output ExprCond._expr_cond )
+		}
+		elsif match ExprCond [expr_test]
+		{
+			trans_expr_test( Output ExprCond.expr_test )
+		}
+	}
+
+	int trans_expr_assign( Output: stream ExprAssign: expr_assign )
+	{
+		if match ExprAssign [expr_assign '=' expr_cond]
+		{
+			prints( Output '/* assign */' )
+			trans_expr_assign( Output ExprAssign._expr_assign )
+			prints( Output '=' )
+			trans_expr_cond( Output ExprAssign.expr_cond )
+		}
+		elsif match ExprAssign [expr_assign '+=' expr_cond]
+		{
+			prints( Output '/* +assign */' )
+			trans_expr_assign( Output ExprAssign._expr_assign )
+			prints( Output '+=' )
+			trans_expr_cond( Output ExprAssign.expr_cond )
+		}
+		elsif match ExprAssign [expr_cond]
+		{
+			trans_expr_cond( Output ExprAssign.expr_cond )
+		}
+	}
+
+	int trans_expr( Output: stream Expr: expr )
+	{
+		trans_expr_assign( Output Expr.expr_assign )
 	}
 
 	int trans_stmt( Output: stream Stmt: stmt )
@@ -232,7 +552,7 @@ namespace gen
 			prints( Output 'static const ' Value.value_pass )
 		}
 		elsif match Stmt [
-				'if' '(' IfExpr: expr_tok* ')' IfStmt: stmt
+				'if' '(' IfExpr: expr ')' IfStmt: stmt
 				ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 		] {
 			prints( Output '/* if */ if ( ' )
@@ -243,7 +563,7 @@ namespace gen
 
 			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 				match ElseIfClause
-					['else' 'if' '(' ElseIfExpr: expr_tok* ')' ElseIfStmt: stmt]
+					['else' 'if' '(' ElseIfExpr: expr ')' ElseIfStmt: stmt]
 
 				prints( Output '/* else if */ else if ( ' )
 				trans_expr( Output ElseIfExpr )
@@ -257,19 +577,19 @@ namespace gen
 				trans_stmt( Output ElseStmt )
 			}
 		}
-		elsif match Stmt ['while' '(' WhileExpr: expr_tok* ')' WhileStmt: stmt] {
+		elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
 			prints( Output 'while ( ' )
 			trans_expr( Output WhileExpr )
 			prints( Output ')\n' )
 			trans_stmt( Output WhileStmt )
 		}
-		elsif match Stmt ['switch' '(' SwitchExpr: expr_tok* ')' SwitchStmt: stmt] {
+		elsif match Stmt ['switch' '(' SwitchExpr: expr ')' SwitchStmt: stmt] {
 			prints( Output '/* switch */ switch ( ' )
 			trans_expr( Output SwitchExpr )
 			prints( Output ')\n' )
 			trans_stmt( Output SwitchStmt )
 		}
-		elsif match Stmt [ExprExpr: expr_tok* ';'] {
+		elsif match Stmt [ExprExpr: expr ';'] {
 			prints( Output '/* expr */ ' )
 			trans_expr( Output ExprExpr )
 			prints( Output ';\n' )
@@ -279,7 +599,17 @@ namespace gen
 			trans_stmt_list( Output TL )
 			prints( Output R )
 		}
+		elsif match Stmt [TypeList: ident+ OptPtr: opt_ptr Ident: ident OptInit: opt_init ';']
+		{
+			prints( Output TypeList ' ' OptPtr ' ' Ident  )
+			if match OptInit ['=' expr] {
+				prints( Output '=' )
+				trans_expr( Output OptInit.expr )
+			}
+			prints( Output ';\n' )
+		}
 		else {
+			# catches unspecified cases
 			prints( Output Stmt )
 		}
 	}

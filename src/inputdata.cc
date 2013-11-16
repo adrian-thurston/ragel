@@ -352,7 +352,9 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 
 	string final = dirName + "/rlhc " + 
 			origOutputFileName + " " + genOutputFileName;
-	system( final.c_str() );
+	int res = system( final.c_str() );
+	if ( res != 0 )
+		exit( 1 );
 	//unlink( genOutputFileName.c_str() );
 }
 

@@ -183,15 +183,14 @@ void FlatLooped::writeExec()
 
 	out << 
 		"	{\n"
-		"	int _slen";
+		"	int _slen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << ", _ps";
+		out << "	int _ps;\n";
 
 	out << 
-		";\n"
-		"	int _trans, _cond";
-	out << ";\n";
+		"	int _trans;\n"
+		"	int _cond;\n";
 
 	if ( redFsm->anyToStateActions() || 
 			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
