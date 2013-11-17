@@ -54,7 +54,6 @@ TableArray::TableArray( const char *name, CodeGen &codeGen )
 :
 	state(InitialState),
 	name(name),
-	type("_"),
 	width(0),
 	isSigned(true),
 	values(0),
@@ -98,7 +97,7 @@ void TableArray::valueAnalyze( long long v )
 void TableArray::finishAnalyze()
 {
 	/* Calculate the type if it is not already set. */
-	if ( type == "_" ) {
+	if ( type.empty() ) {
 		if ( min >= CHAR_MIN && max <= CHAR_MAX ) {
 			type = "char";
 			width = sizeof(char);
