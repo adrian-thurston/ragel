@@ -73,7 +73,7 @@ int d_trans_expr_ptr( Output: stream ExprPtr: expr_ptr )
 	}
 	elsif match ExprPtr [Open: '(' Type: type Close: ')' expr_ptr]
 	{
-		prints( Output Open )
+		prints( Output 'cast' Open )
 		d_type( Output Type )
 		prints( Output Close )
 		d_trans_expr_ptr( Output ExprPtr._expr_ptr )
