@@ -350,8 +350,10 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	writeOutput();
 	closeOutput();
 
-	string final = dirName + "/rlhc c " + 
-			origOutputFileName + " " + genOutputFileName;
+	string final = dirName + "/rlhc " + 
+			hostLang->rlhcArg + " " + 
+			origOutputFileName + " " +
+			genOutputFileName;
 	int res = system( final.c_str() );
 	if ( res != 0 )
 		exit( 1 );

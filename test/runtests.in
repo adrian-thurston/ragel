@@ -172,7 +172,6 @@ for test_case; do
 			code_suffix=d;
 			compiler=$d_compiler;
 			cflags="-Wall -O3"
-			continue;
 		;;
 		c)
 			lang_opt=-C;

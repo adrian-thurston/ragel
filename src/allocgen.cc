@@ -363,24 +363,6 @@ CodeGenData *cMakeCodeGen( const CodeGenArgs &args )
 
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
-	CodeGenData *cgd = 0;
-	if ( hostLang == &hostLangC )
-		cgd = cMakeCodeGen( args );
-//	else if ( hostLang == &hostLangD )
-//		cgd = dMakeCodeGen( args );
-//	else if ( hostLang == &hostLangD2 )
-//		cgd = d2MakeCodeGen( args );
-//	else if ( hostLang == &hostLangGo )
-//		cgd = goMakeCodeGen( args );
-//	else if ( hostLang == &hostLangJava )
-//		cgd = javaMakeCodeGen( args );
-//	else if ( hostLang == &hostLangRuby )
-//		cgd = rubyMakeCodeGen( args );
-//	else if ( hostLang == &hostLangCSharp )
-//		cgd = csharpMakeCodeGen( args );
-//	else if ( hostLang == &hostLangOCaml )
-//		cgd = ocamlMakeCodeGen( args );
-//	else if ( hostLang == &hostLangCrack )
-//		cgd = crackMakeCodeGen( args );
+	CodeGenData *cgd = cMakeCodeGen( args );
 	return cgd;
 }

@@ -159,6 +159,7 @@ struct HostLang
 	int numHostTypes;
 	HostType *defaultAlphType;
 	bool explicitUnsigned;
+	const char *rlhcArg;
 };
 
 extern const HostLang hostLangC;

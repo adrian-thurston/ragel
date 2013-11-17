@@ -246,6 +246,7 @@ def start
 	[stmt*]
 
 include 'rlhc-c.lm'
+include 'rlhc-d.lm'
 
 InputFile: str = argv.pop()
 OutputFile: str = argv.pop()
@@ -263,3 +264,5 @@ if ( !Start ) {
 Output: stream = open( OutputFile "w" )
 if ( Lang == 'c' )
 	c_trans_stmt_list( Output Start._repeat_stmt )
+elsif ( Lang == 'd' )
+	d_trans_stmt_list( Output Start._repeat_stmt )

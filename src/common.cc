@@ -134,8 +134,8 @@ HostType hostTypesOCaml[] =
 	{ "int",    0,  "int",      true,   true,  false, S31BIT_MIN, S31BIT_MAX, 4 },
 };
 
-const HostLang hostLangC =      { HostLang::C,      hostTypesC,      8,  hostTypesC+0,       true };
-const HostLang hostLangD =      { HostLang::D,      hostTypesD,      9,  hostTypesD+2,       true };
+const HostLang hostLangC =      { HostLang::C,      hostTypesC,      8,  hostTypesC+0,       true,  "c" };
+const HostLang hostLangD =      { HostLang::D,      hostTypesD,      9,  hostTypesD+2,       true,  "d" };
 const HostLang hostLangD2 =     { HostLang::D2,     hostTypesD,      9,  hostTypesD+2,       true };
 const HostLang hostLangGo =     { HostLang::Go,     hostTypesGo,    10,  hostTypesGo+0,      false };
 const HostLang hostLangJava =   { HostLang::Java,   hostTypesJava,   4,  hostTypesJava+2,    false };
