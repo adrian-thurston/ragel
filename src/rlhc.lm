@@ -182,11 +182,8 @@ def type
 	[ident]
 |	[ident ident]
 
-def array_pass
-	[type ident '[' ']' '=' '{' num_list '}' ';']
-
 def array
-	['array' array_pass]
+	['array' type ident '=' '{' num_list '}' ';']
 
 def value_pass
 	[type ident '=' number ';']
