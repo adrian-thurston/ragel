@@ -58,8 +58,14 @@ TableArray::TableArray( const char *name, CodeGen &codeGen )
 	width(0),
 	isSigned(true),
 	values(0),
-	min(LLONG_MAX),
-	max(LLONG_MIN),
+
+	/*
+	 * Use zero for min and max because 
+	 * we we null terminate every array.
+	 */
+	min(0),
+	max(0),
+
 	codeGen(codeGen),
 	out(codeGen.out)
 {
