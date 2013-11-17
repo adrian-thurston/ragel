@@ -125,7 +125,8 @@ void TableArray::finishAnalyze()
 void TableArray::startGenerate()
 {
 	out << "array " << type << " " << 
-		"_" << codeGen.DATA_PREFIX() << name << " = {\n\t";
+		"_" << codeGen.DATA_PREFIX() << name << 
+		"( " << min << ", " << max << " ) = {\n\t";
 }
 
 void TableArray::valueGenerate( long long v )

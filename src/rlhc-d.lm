@@ -276,7 +276,6 @@ int d_type( Output: stream Type: type )
 		prints( Output 'uint ' )
 	else
 		prints( Output Type )
-	print( Type '\n' )
 }
 
 int d_trans_stmt( Output: stream Stmt: stmt )
