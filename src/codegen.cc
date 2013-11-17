@@ -98,24 +98,24 @@ void TableArray::finishAnalyze()
 {
 	/* Calculate the type if it is not already set. */
 	if ( type.empty() ) {
-		if ( min >= CHAR_MIN && max <= CHAR_MAX ) {
-			type = "char";
+		if ( min >= S8BIT_MIN && max <= S8BIT_MAX ) {
+			type = "s8";
 			width = sizeof(char);
 		}
-		else if ( min >= SHRT_MIN && max <= SHRT_MAX ) {
-			type = "short";
+		else if ( min >= S16BIT_MIN && max <= S16BIT_MAX ) {
+			type = "s16";
 			width = sizeof(short);
 		}
-		else if ( min >= INT_MIN && max <= INT_MAX ) {
-			type = "int";
+		else if ( min >= S32BIT_MIN && max <= S32BIT_MAX ) {
+			type = "s32";
 			width = sizeof(int);
 		}
-		else if ( min >= LONG_MIN && max <= LONG_MAX ) {
-			type = "long";
+		else if ( min >= S64BIT_MAX && max <= S64BIT_MAX ) {
+			type = "s64";
 			width = sizeof(long);
 		}
 		else  {
-			type = "long long";
+			type = "s128";
 			width = sizeof(long long);
 		}
 	}
@@ -125,7 +125,7 @@ void TableArray::startGenerate()
 {
 	out << "array " << type << " " << 
 		"_" << codeGen.DATA_PREFIX() << name << 
-		"( " << min << ", " << max << " ) = {\n\t";
+		"( " << min << ", " << max << " ) = { ";
 }
 
 void TableArray::valueGenerate( long long v )
@@ -138,7 +138,7 @@ void TableArray::valueGenerate( long long v )
 
 void TableArray::finishGenerate()
 {
-	out << "0\n};\n\n";
+	out << "0 };\n\n";
 }
 
 void TableArray::start()

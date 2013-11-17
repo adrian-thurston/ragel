@@ -69,7 +69,7 @@ lex
 			'while', 'switch', 'case',
 			'if', 'else'
 
-	literal 'uint', 'unsigned'
+	literal 'uint', 'unsigned', 's8', 's16', 's32', 's64', 's128'
 
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -100,6 +100,17 @@ end
 
 def embedded_host
 	['$' string uint '{' host::tok* host::'}$']
+
+def type
+	[ident]
+|	[ident ident]
+|	['unsigned' ident]
+|	['uint']
+|	['s8']
+|	['s16']
+|	['s32']
+|	['s64']
+|	['s128']
 
 def expr_factor
 	[embedded_host]
@@ -179,12 +190,6 @@ def comma_num
 def num_list
 	[number comma_num*]
 |	[]
-
-def type
-	[ident]
-|	[ident ident]
-|	['unsigned' ident]
-|	['uint']
 
 def array
 	['array' type ident '(' number ',' number  ')' '=' '{' num_list '}' ';']
