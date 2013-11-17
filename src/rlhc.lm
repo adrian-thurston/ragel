@@ -69,6 +69,8 @@ lex
 			'while', 'switch', 'case',
 			'if', 'else'
 
+	literal 'uint', 'unsigned'
+
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
 
@@ -118,7 +120,7 @@ def expr_ptr
 |	['--' expr_ptr]
 |	[expr_ptr '++']
 |	[expr_ptr '--']
-|	['(' ident+ ')' expr_ptr]
+|	['(' type ')' expr_ptr]
 |	[expr_factor]
 
 def expr_factor_op
@@ -181,6 +183,8 @@ def num_list
 def type
 	[ident]
 |	[ident ident]
+|	['unsigned' ident]
+|	['uint']
 
 def array
 	['array' type ident '=' '{' num_list '}' ';']
@@ -223,7 +227,7 @@ def opt_ptr
 |	[]
 
 def declaration
-	[ident+ opt_ptr ident opt_init ';']
+	[ident* type opt_ptr ident opt_init ';']
 
 def stmt
 	[embedded_host]

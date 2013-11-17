@@ -71,10 +71,10 @@ int d_trans_expr_ptr( Output: stream ExprPtr: expr_ptr )
 		d_trans_expr_ptr( Output ExprPtr._expr_ptr )
 		prints( Output MM )
 	}
-	elsif match ExprPtr [Open: '(' Type: ident+ Close: ')' expr_ptr]
+	elsif match ExprPtr [Open: '(' Type: type Close: ')' expr_ptr]
 	{
 		prints( Output Open )
-		prints( Output Type )
+		d_type( Output Type )
 		prints( Output Close )
 		d_trans_expr_ptr( Output ExprPtr._expr_ptr )
 	}
@@ -87,17 +87,17 @@ int d_trans_expr_ptr( Output: stream ExprPtr: expr_ptr )
 	}
 }
 
-int trans_expr_factor_op( Output: stream ExprFactorOp: expr_factor_op )
+int d_trans_expr_factor_op( Output: stream ExprFactorOp: expr_factor_op )
 {
 	if match ExprFactorOp [B: '!' expr_factor_op]
 	{
 		prints( Output B )
-		trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
+		d_trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
 	}
 	elsif match ExprFactorOp [T: '~' expr_factor_op]
 	{
 		prints( Output T )
-		trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
+		d_trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
 	}
 	elsif match ExprFactorOp [expr_ptr]
 	{
@@ -111,11 +111,11 @@ int d_trans_expr_bitwise( Output: stream ExprBitwise: expr_bitwise )
 	{
 		d_trans_expr_bitwise( Output ExprBitwise._expr_bitwise )
 		prints( Output A )
-		trans_expr_factor_op( Output ExprBitwise.expr_factor_op )
+		d_trans_expr_factor_op( Output ExprBitwise.expr_factor_op )
 	}
 	elsif match ExprBitwise [expr_factor_op]
 	{
-		trans_expr_factor_op( Output ExprBitwise.expr_factor_op )
+		d_trans_expr_factor_op( Output ExprBitwise.expr_factor_op )
 	}
 }
 
@@ -270,6 +270,15 @@ int d_trans_expr( Output: stream Expr: expr )
 	d_trans_expr_assign( Output Expr.expr_assign )
 }
 
+int d_type( Output: stream Type: type )
+{
+	if match Type "unsigned int"
+		prints( Output 'uint ' )
+	else
+		prints( Output Type )
+	print( Type '\n' )
+}
+
 int d_trans_stmt( Output: stream Stmt: stmt )
 {
 	if match Stmt
@@ -330,9 +339,11 @@ int d_trans_stmt( Output: stream Stmt: stmt )
 		d_trans_stmt_list( Output TL )
 		prints( Output R )
 	}
-	elsif match Stmt [TypeList: ident+ OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
+	elsif match Stmt [TypeList: ident* Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
 	{
-		prints( Output TypeList OptPtr Ident  )
+		prints( Output TypeList )
+		d_type( Output Type )
+		prints( Output OptPtr Ident  )
 		if match OptInit [E: '=' expr] {
 			prints( Output E )
 			d_trans_expr( Output OptInit.expr )
