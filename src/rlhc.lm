@@ -67,7 +67,7 @@ lex
 
 	literal 'array', 'value', 'TRUE', 'FALSE',
 			'while', 'switch', 'case',
-			'if', 'else'
+			'if', 'else', 'offset'
 
 	literal 'uint', 'unsigned', 's8', 's16', 's32', 's64', 's128'
 
@@ -116,6 +116,7 @@ def expr_factor
 	[embedded_host]
 |	[ident]
 |	[ident '[' expr ']']
+|	['offset' '(' ident ',' expr ')']
 |	[uint]
 |	['-' uint]
 |	['TRUE']

@@ -21,6 +21,13 @@ int d_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 		prints( Output C )
 	}
 	elsif match ExprFactor
+		['offset' '(' ident ',' expr ')']
+	{
+		prints( Output '&' ExprFactor.ident '[' )
+		c_trans_expr( Output ExprFactor.expr )
+		prints( Output ']' )
+	}
+	elsif match ExprFactor
 			[T: 'TRUE']
 	{
 		T.data = '1'
