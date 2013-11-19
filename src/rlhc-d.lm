@@ -357,10 +357,16 @@ int d_trans_stmt( Output: stream Stmt: stmt )
 		d_trans_stmt_list( Output TL )
 		prints( Output R )
 	}
-	elsif match Stmt [TypeList: ident* Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
+	elsif match Stmt [OptConst: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
 	{
-		prints( Output TypeList )
-		d_type( Output Type )
+		if match OptConst ['const']
+		{
+			prints( Output 'const(' )
+			d_type( Output Type )
+			prints( Output ')' )
+		}
+		else
+			d_type( Output Type )
 		prints( Output OptPtr Ident  )
 		if match OptInit [E: '=' expr] {
 			prints( Output E )

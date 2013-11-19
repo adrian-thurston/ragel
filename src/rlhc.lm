@@ -69,7 +69,8 @@ lex
 			'while', 'switch', 'case',
 			'if', 'else', 'offset'
 
-	literal 'uint', 'unsigned', 's8', 's16', 's32', 's64', 's128'
+	literal 'uint', 'unsigned', 'const',
+			's8', 's16', 's32', 's64', 's128'
 
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -232,8 +233,12 @@ def opt_ptr
 	['*']
 |	[]
 
+def opt_const
+	['const']
+|	[]
+
 def declaration
-	[ident* type opt_ptr ident opt_init ';']
+	[opt_const type opt_ptr ident opt_init ';']
 
 def stmt
 	[embedded_host]

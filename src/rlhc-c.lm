@@ -354,7 +354,7 @@ int c_trans_stmt( Output: stream Stmt: stmt )
 		c_trans_stmt_list( Output TL )
 		prints( Output R )
 	}
-	elsif match Stmt [TypeList: ident* Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
+	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
 	{
 		prints( Output TypeList )
 		c_type( Output Type )
