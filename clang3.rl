@@ -155,11 +155,11 @@ class CLang
 	// the data, the machine is in the error state and can never accept, 0 if
 	// the machine is in a non-accepting state and 1 if the machine is in an
 	// accepting state.
-	void execute( char* _data, int _len )
+	void execute( const(char)* _data, ulong _len )
 	{
-		char *p = _data;
-		char *pe = _data + _len;
-		char *eof = pe;
+		const(char)* p = _data;
+		const(char)* pe = _data + _len;
+		const(char)* eof = pe;
 		%% write exec;
 	}
 
@@ -179,7 +179,7 @@ class CLang
 
 static const int BUFSIZE = 1024;
 
-void test( char buf[] )
+void test( const char buf[] )
 {
 	CLang scanner = new CLang();
 	scanner.init();
@@ -188,8 +188,6 @@ void test( char buf[] )
 		printf("ACCEPT\n");
 	else
 		printf("FAIL\n");
-
-	return 0;
 }
 
 int main()

@@ -45,8 +45,8 @@ class Scanner
 	int tokStart;
 	int inlineDepth;
 	int count;
-	char[] tokBuf;
-	char[] nonTokBuf;
+	const (char)[] tokBuf;
+	const (char)[] nonTokBuf;
 
 	void pass(char c) { nonTokBuf ~= c; }
 	void buf(char c) { tokBuf ~= c; }
@@ -185,14 +185,13 @@ class Scanner
 		line = 1;
 		col = 1;
 		%% write init;
-		return 1;
 	}
 
-	int execute( char* _data, int _len )
+	int execute( const(char)* _data, ulong _len )
 	{
-		char *p = _data;
-		char *pe = _data + _len;
-		char *eof = null;
+		const(char) *p = _data;
+		const(char) *pe = _data + _len;
+		const(char) *eof = null;
 
 		%% write exec;
 
@@ -217,7 +216,7 @@ class Scanner
 	}
 };
 
-void test(char[] buf)
+void test(const(char)[] buf)
 {
 	Scanner scanner = new Scanner();
 	scanner.init();
@@ -225,7 +224,7 @@ void test(char[] buf)
 
 	/* The last token is ignored (because there is no next token). Send
 	 * trailing null to force the last token into whitespace. */
-	char eof_char = 0;
+	const(char) eof_char = 0;
 	if ( scanner.execute( &eof_char, 1 ) <= 0 ) {
 		fprintf(stderr, "cppscan: scan failed\n");
 	}
