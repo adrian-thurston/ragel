@@ -477,7 +477,7 @@ std::ostream &Goto::EXEC_FUNCS()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			out << "	f" << redAct->actListId << ": " <<
-				"_acts = " << ARR_REF( actions ) << " + " << itoa( redAct->location+1 ) << ";"
+				"_acts = offset( " << ARR_REF( actions ) << ", " << itoa( redAct->location+1 ) << ");"
 				" goto execFuncs;\n";
 		}
 	}

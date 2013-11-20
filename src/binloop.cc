@@ -312,8 +312,8 @@ void BinaryLooped::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << ARR_REF( actions ) << " + " << ARR_REF( fromStateActions ) <<
-					"[" << vCS() << "]" << ";\n"
+			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
+					"[" << vCS() << "]" << " );\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -349,7 +349,7 @@ void BinaryLooped::writeExec()
 			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
 			"		goto _again;\n"
 			"\n"
-			"	_acts = " << ARR_REF( actions ) << " + " << ARR_REF( condActions ) << "[_cond]" << ";\n"
+			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 )\n	{\n"
 			"		switch ( *_acts++ )\n		{\n";
@@ -365,8 +365,8 @@ void BinaryLooped::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << ARR_REF( actions ) << " + " << ARR_REF( toStateActions ) <<
-					"[" << vCS() << "]" << ";\n"
+			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) <<
+					"[" << vCS() << "]" << " );\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -414,8 +414,8 @@ void BinaryLooped::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	const " << ARR_TYPE( actions ) << " *__acts = " << 
-						ARR_REF( actions ) << " + " << ARR_REF( eofActions ) << "[" << vCS() << "]" << ";\n"
+				"	const " << ARR_TYPE( actions ) << " *__acts = offset( " << 
+						ARR_REF( actions ) << ", " << ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
 				"	" << "unsigned int" << " __nacts = " << "(unsigned int)" << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";

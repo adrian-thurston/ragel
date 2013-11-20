@@ -362,8 +362,8 @@ void Flat::taActions()
 void Flat::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << ARR_REF( keys ) << " + " << "(" << vCS() << "<<1)" << ";\n"
-		"	_inds = " << ARR_REF( indicies ) << " + " << ARR_REF( flatIndexOffset ) << "[" << vCS() << "]" << ";\n"
+		"	_keys = offset( " << ARR_REF( keys ) << ", " << "(" << vCS() << "<<1)" << " );\n"
+		"	_inds = offset( " << ARR_REF( indicies ) << ", " << ARR_REF( flatIndexOffset ) << "[" << vCS() << "]" << " );\n"
 		"\n"
 		"	_slen = " << ARR_REF( keySpans ) << "[" << vCS() << "];\n"
 		"	_trans = _inds[ _slen > 0 && _keys[0] <=" << GET_KEY() << " &&\n"
@@ -373,7 +373,7 @@ void Flat::LOCATE_TRANS()
 		"\n";
 
 	out <<
-		"	_ckeys = " << ARR_REF( condKeys ) << " + " << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	_ckeys = offset( " << ARR_REF( condKeys ) << ", " << ARR_REF( transOffsets ) << "[_trans] );\n"
 		"	_klen = " << ARR_REF( transLengths ) << "[_trans];\n"
 		"	_cond = " << ARR_REF( transOffsets ) << "[_trans];\n"
 		"\n";

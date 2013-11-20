@@ -201,8 +201,8 @@ void GotoLooped::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	const " << ARR_TYPE( actions ) <<
-						" *__acts = " << ARR_REF( actions ) << " + " << 
-						ARR_REF( eofActions ) << "[" << vCS() << "];\n"
+						" *__acts = offset( " << ARR_REF( actions ) << ", " << 
+						ARR_REF( eofActions ) << "[" << vCS() << "] );\n"
 				"	" << "unsigned int" << " __nacts = " << "(unsigned int)" << " *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";
