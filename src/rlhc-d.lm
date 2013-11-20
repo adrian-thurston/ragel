@@ -375,6 +375,10 @@ int d_trans_stmt( Output: stream Stmt: stmt )
 		}
 		prints( Output Semi )
 	}
+	elsif match Stmt [case_label]
+	{
+		prints( Output 'goto case; ' Stmt.case_label )
+	}
 	else {
 		# catches unspecified cases
 		prints( Output Stmt )
