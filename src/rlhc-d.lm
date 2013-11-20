@@ -342,11 +342,12 @@ int d_trans_stmt( Output: stream Stmt: stmt )
 		prints( Output C )
 		d_trans_stmt( Output WhileStmt )
 	}
-	elsif match Stmt ['switch' O: '(' SwitchExpr: expr C: ')' SwitchStmt: stmt] {
+	elsif match Stmt ['switch' O: '(' SwitchExpr: expr C: ')' '{' StmtList: stmt* '}'] {
 		prints( Output 'switch ' O )
 		d_trans_expr( Output SwitchExpr )
-		prints( Output C )
-		d_trans_stmt( Output SwitchStmt )
+		prints( Output C '{' )
+		d_trans_stmt_list( Output StmtList )
+		prints( Output 'default: break; }' )
 	}
 	elsif match Stmt [ExprExpr: expr Semi: ';'] {
 		d_trans_expr( Output ExprExpr )

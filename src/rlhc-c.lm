@@ -339,11 +339,12 @@ int c_trans_stmt( Output: stream Stmt: stmt )
 		prints( Output C )
 		c_trans_stmt( Output WhileStmt )
 	}
-	elsif match Stmt ['switch' O: '(' SwitchExpr: expr C: ')' SwitchStmt: stmt] {
+	elsif match Stmt ['switch' O: '(' SwitchExpr: expr C: ')' '{' StmtList: stmt* '}'] {
 		prints( Output 'switch ' O )
 		c_trans_expr( Output SwitchExpr )
-		prints( Output C )
-		c_trans_stmt( Output SwitchStmt )
+		prints( Output C '{' )
+		c_trans_stmt_list( Output StmtList )
+		prints( Output '}' )
 	}
 	elsif match Stmt [ExprExpr: expr Semi: ';'] {
 		c_trans_expr( Output ExprExpr )

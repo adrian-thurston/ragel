@@ -217,7 +217,7 @@ def if_stmt [
 ]
 
 def switch_stmt
-	['switch' '(' expr ')' stmt]
+	['switch' '(' expr ')' '{' stmt* '}']
 
 def case_label
 	['case' expr ':']
