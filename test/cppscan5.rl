@@ -43,12 +43,12 @@ static const int TK_Comment = 242;
 class Scanner 
 {
 	int cs, act;
-	char *ts, te;
+	const(char) *ts, te;
 
 	void token( int tok )
 	{
-		char *data = ts;
-		int len = te - ts;
+		const(char) *data = ts;
+		long len = te - ts;
 		printf( "<%i> ", tok );
 		for ( int i = 0; i < len; i++ )
 			printf( "%c", data[i] );
@@ -138,11 +138,11 @@ class Scanner
 		%% write init;
 	}
 
-	void execute( char* data, int len )
+	void execute( const(char)* data, ulong len )
 	{
-		char *p = data;
-		char *pe = data + len;
-		char *eof = pe;
+		const(char) *p = data;
+		const(char) *pe = data + len;
+		const(char) *eof = pe;
 
 		%% write exec;
 	}
@@ -163,7 +163,7 @@ class Scanner
 
 static const int BUFSIZE = 12;
 
-void test( char buf[] )
+void test( const(char) buf[] )
 {
 	Scanner scanner = new Scanner();
 	scanner.init();
@@ -174,7 +174,6 @@ void test( char buf[] )
 		printf("PARSE ERROR\n");
 	}
 	scanner.finish();
-	return 0;
 }
 
 int main()
