@@ -70,7 +70,7 @@ lex
 			'if', 'else', 'offset'
 
 	literal 'uint', 'unsigned', 'const',
-			's8', 's16', 's32', 's64', 's128'
+			's8', 's16', 's32', 's64', 's128', 'nil'
 
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -122,6 +122,7 @@ def expr_factor
 |	['-' uint]
 |	['TRUE']
 |	['FALSE']
+|	['nil']
 |	[hex_number]
 |	[string]
 |	['(' expr ')']

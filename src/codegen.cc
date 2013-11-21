@@ -473,7 +473,7 @@ void CodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 
 void CodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
 {
-	ret << TOKSTART() << " = 0;";
+	ret << TOKSTART() << " = nil;";
 }
 
 void CodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
@@ -643,8 +643,8 @@ void CodeGen::writeInit()
 
 	if ( hasLongestMatch ) {
 		out << 
-			"	" << TOKSTART() << " = 0;\n"
-			"	" << TOKEND() << " = 0;\n";
+			"	" << TOKSTART() << " = nil;\n"
+			"	" << TOKEND() << " = nil;\n";
 
 		if ( redFsm->usingAct() ) {
 			out << 

@@ -38,6 +38,12 @@ int c_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 		F.data = '0'
 		prints( Output F )
 	}
+	elsif match ExprFactor
+			[N: 'nil']
+	{
+		N.data = '0'
+		prints( Output N )
+	}
 	else {
 		# Catches cases not specified
 		prints( Output ExprFactor )
