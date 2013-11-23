@@ -97,7 +97,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, Compiler *pd )
 	}
 
 	if ( unusedBits && ul >> (size * 8 - 1) )
-		ul |= (0xffffffff >> (size*8 ) ) << (size*8);
+		ul |= (ULONG_MAX >> (size*8 ) ) << (size*8);
 
 	return Key( (long)ul );
 }

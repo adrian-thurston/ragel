@@ -1,0 +1,30 @@
+##### LM #####
+lex
+  # http://www.ietf.org/rfc/rfc3629.txt
+  rl UTF8_tail / 0x80..0xBF /
+  rl UTF8_1    / 0x00..0x7F /
+  rl UTF8_2    / 0xC2..0xDF UTF8_tail /
+  rl UTF8_3    / 0xE0 0xA0..0xBF UTF8_tail | 0xE1..0xEC UTF8_tail{2} |
+                 0xED 0x80..0x9F UTF8_tail | 0xEE..0xEF UTF8_tail{2} /
+  rl UTF8_4    / 0xF0 0x90..0xBF UTF8_tail{2} | 0xF1..0xF3 UTF8_tail{3} |
+                 0xF4 0x80..0x8F UTF8_tail{2} /
+  token UTF8_char / UTF8_1 | UTF8_2 | UTF8_3 | UTF8_4 /
+end
+
+global count: int = 0
+
+def utf8_char
+  [UTF8_char] { count = count + 1 }
+
+def utf8_octets
+  [utf8_char*]
+
+parse P: utf8_octets[stdin]
+print(count '\n')
+##### IN #####
+A≢Α.
+한국어
+日本語
+﻿𣎴
+###### EXP ######
+16
