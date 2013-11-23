@@ -122,7 +122,8 @@ void GotoLooped::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << ARR_REF( actions ) << " + " << ARR_REF( fromStateActions ) << "[" << vCS() << "];\n"
+			"	_acts = offset( " << ARR_REF( actions ) << ", " <<
+					ARR_REF( fromStateActions ) << "[" << vCS() << "] );\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
@@ -147,7 +148,8 @@ void GotoLooped::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << ARR_REF( actions ) << " + " << ARR_REF( toStateActions ) << "[" << vCS() << "];\n"
+			"	_acts = offset( " << ARR_REF( actions ) << ", " <<
+					ARR_REF( toStateActions ) << "[" << vCS() << "] );\n"
 			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
