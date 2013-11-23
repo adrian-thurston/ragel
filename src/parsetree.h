@@ -2627,6 +2627,8 @@ struct LangTerm
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;
 	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const;
+	void evaluateSendStream( Compiler *pd, CodeVect &code ) const;
+	void evaluateSendParser( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateSend( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateMatch( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;

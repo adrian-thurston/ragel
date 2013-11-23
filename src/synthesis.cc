@@ -1571,11 +1571,58 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 	return targetUT;
 }
 
-
-UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
+void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 {
-	UniqueType *varUt = varRef->evaluate( pd, code );
+	/* Go backwards. */
+	for ( ConsItemList::Iter item = parserText->list->last(); item.gtb(); item-- ) {
+		switch ( item->type ) {
+		case ConsItem::FactorType: {
+			String result;
+			bool unusedCI;
+			prepareLitString( result, unusedCI, 
+					item->factor->typeRef->pdaLiteral->data,
+					item->factor->typeRef->pdaLiteral->loc );
 
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( result, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ConsItem::InputText: {
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( item->data, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ConsItem::ExprType:
+			item->expr->evaluate( pd, code );
+			break;
+		}
+
+	}
+
+	/* Evaluate the var ref again, print, pop the extra var ref. */
+	varRef->evaluate( pd, code );
+
+	code.append( IN_PRINT_STREAM );
+	code.append( parserText->list->length() );
+
+	/* Normally we would have to pop the stream var ref that we evaluated
+	 * before all the print arguments (which includes the stream, evaluated
+	 * last), however we send is part of an expression, and is supposed to
+	 * leave the varref on the stack. */
+}
+
+void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
+{
 	/* Dup for every send. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ )
 		code.append( IN_DUP_TOP );
@@ -1643,6 +1690,21 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FINISH_EXIT_WC );
 		}
+	}
+}
+
+UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
+{
+	UniqueType *varUt = varRef->evaluate( pd, code );
+
+	if ( varUt == pd->uniqueTypeStream ) {
+		evaluateSendStream( pd, code );
+	}
+	else if ( varUt->langEl->generic != 0 && varUt->langEl->generic->typeId == GEN_PARSER ) {
+		evaluateSendParser( pd, code );
+	}
+	else {
+		error(loc) << "can only send to parsers and streams" << endl;
 	}
 
 	return varUt;
