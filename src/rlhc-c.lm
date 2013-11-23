@@ -2,9 +2,9 @@ int c_tok_list( Output: stream TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
 		if match Tok [host::'${' StmtList: stmt* host::'}$']
-			d_trans_stmt_list( Output StmtList )
+			c_trans_stmt_list( Output StmtList )
 		elsif match Tok [host::'={' Expr: expr host::'}$']
-			d_trans_expr( Output Expr )
+			c_trans_expr( Output Expr )
 		else {
 			prints( Output Tok )
 		}
