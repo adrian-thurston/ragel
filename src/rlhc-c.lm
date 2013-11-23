@@ -385,6 +385,10 @@ int c_trans_stmt( Output: stream Stmt: stmt )
 		}
 		prints( Output Semi )
 	}
+	elsif match Stmt [export_stmt]
+	{
+		prints( Output '#define ' Stmt.export_stmt.ident Stmt.export_stmt.number '\n' )
+	}
 	else {
 		# catches unspecified cases
 		prints( Output Stmt )
@@ -396,5 +400,3 @@ int c_trans_stmt_list( Output: stream StmtList: stmt* )
 	for Stmt: stmt in repeat( StmtList )
 		c_trans_stmt( Output Stmt )
 }
-
-

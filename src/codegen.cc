@@ -713,8 +713,9 @@ void CodeGen::writeExports()
 {
 	if ( exportList.length() > 0 ) {
 		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
-			out << "#define " << DATA_PREFIX() << "ex_" << ex->name << " " << 
-					KEY(ex->key) << "\n";
+			out << "export " << ALPH_TYPE() << " " << 
+					DATA_PREFIX() << "ex_" << ex->name << " " << 
+					KEY(ex->key) << ";\n";
 		}
 		out << "\n";
 	}

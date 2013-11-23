@@ -72,7 +72,8 @@ lex
 			'if', 'else', 'offset'
 
 	literal 'uint', 'unsigned', 'const',
-			's8', 's16', 's32', 's64', 's128', 'nil'
+			's8', 's16', 's32', 's64',
+			's128', 'nil', 'export'
 
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -243,6 +244,9 @@ def opt_const
 def declaration
 	[opt_const type opt_ptr ident opt_init ';']
 
+def export_stmt
+	['export' type ident number ';']
+
 def stmt
 	[embedded_host]
 |	[array]
@@ -255,6 +259,7 @@ def stmt
 |	[goto_label]
 |	[expr ';']
 |	[pragma]
+|	[export_stmt]
 |	['{' stmt* '}']
 
 def start
