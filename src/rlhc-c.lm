@@ -389,6 +389,10 @@ int c_trans_stmt( Output: stream Stmt: stmt )
 	{
 		prints( Output '#define ' Stmt.export_stmt.ident Stmt.export_stmt.number '\n' )
 	}
+	elsif match Stmt ['fallthrough' ';']
+	{
+		# Nothing needed here.
+	}
 	else {
 		# catches unspecified cases
 		prints( Output Stmt )

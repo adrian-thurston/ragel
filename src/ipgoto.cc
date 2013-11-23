@@ -220,6 +220,8 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 		}
 	}
 
+	out << "fallthrough;\n";
+
 	/* Give the state a switch case. */
 	out << "case " << state->id << ":\n";
 

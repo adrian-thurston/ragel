@@ -73,7 +73,8 @@ lex
 
 	literal 'uint', 'unsigned', 'const',
 			's8', 's16', 's32', 's64',
-			's128', 'nil', 'export'
+			's128', 'nil', 'export',
+			'fallthrough'
 
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -260,6 +261,7 @@ def stmt
 |	[expr ';']
 |	[pragma]
 |	[export_stmt]
+|	['fallthrough' ';']
 |	['{' stmt* '}']
 
 def start

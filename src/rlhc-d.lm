@@ -404,6 +404,10 @@ int d_trans_stmt( Output: stream Stmt: stmt )
 		d_type( Output Stmt.export_stmt.type )
 		prints( Output ' ' Stmt.export_stmt.ident ' = ' Stmt.export_stmt.number ';\n' )
 	}
+	elsif match Stmt ['fallthrough' ';']
+	{
+		prints( Output 'goto case;' )
+	}
 	else {
 		# catches unspecified cases
 		prints( Output Stmt )
