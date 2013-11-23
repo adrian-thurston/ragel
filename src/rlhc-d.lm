@@ -1,9 +1,22 @@
+int d_tok_list( Output: stream TL: host::tok* )
+{
+	for Tok: host::tok in repeat(TL) {
+		if match Tok [host::'${' StmtList: stmt* host::'}$']
+			d_trans_stmt_list( Output StmtList )
+		elsif match Tok [host::'={' Expr: expr host::'}$']
+			d_trans_expr( Output Expr )
+		else {
+			prints( Output Tok )
+		}
+	}
+}
+
 int d_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 {
 	if match ExprFactor
 		['$' string uint '{' TL: host::tok* host::'}$']
 	{
-		prints( Output TL )
+		d_tok_list( Output TL )
 	}
 	elsif match ExprFactor
 		[O:'(' TL: expr C: ')']
@@ -306,7 +319,7 @@ int d_trans_stmt( Output: stream Stmt: stmt )
 	if match Stmt
 		['$' string uint '{' TL: host::tok* host::'}$']
 	{
-		prints( Output TL )
+		d_tok_list( Output TL )
 	}
 	elsif match Stmt [Array: array] {
 		prints( Output 'static const ' )
@@ -383,7 +396,7 @@ int d_trans_stmt( Output: stream Stmt: stmt )
 	}
 	elsif match Stmt [case_label]
 	{
-		prints( Output 'goto case; ' Stmt.case_label )
+		prints( Output Stmt.case_label )
 	}
 	else {
 		# catches unspecified cases

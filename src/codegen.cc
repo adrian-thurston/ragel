@@ -473,7 +473,7 @@ void CodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 
 void CodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
 {
-	ret << TOKSTART() << " = nil;";
+	ret << "${" << TOKSTART() << " = nil;}$";
 }
 
 void CodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
