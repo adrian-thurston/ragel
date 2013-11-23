@@ -6,7 +6,7 @@ int c_tok_list( Output: stream TL: host::tok* )
 		elsif match Tok [host::'={' Expr: expr host::'}$']
 			c_trans_expr( Output Expr )
 		else {
-			prints( Output Tok )
+			send Output [Tok]
 		}
 	}
 }
@@ -21,45 +21,44 @@ int c_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 	elsif match ExprFactor
 		[O:'(' TL: expr C: ')']
 	{
-		prints( Output O )
+		send Output [O]
 		c_trans_expr( Output TL )
-		prints( Output C )
+		send Output [C]
 	}
 	elsif match ExprFactor
 		[ident O: '[' TL: expr C: ']']
 	{
-		prints( Output ExprFactor.ident )
-		prints( Output O )
+		send Output [ExprFactor.ident O]
 		c_trans_expr( Output TL )
-		prints( Output C )
+		send Output [C]
 	}
 	elsif match ExprFactor
 		['offset' '(' ident ',' expr ')']
 	{
-		prints( Output ExprFactor.ident ' + ' )
+		send Output [ExprFactor.ident ' + ']
 		c_trans_expr( Output ExprFactor.expr )
 	}
 	elsif match ExprFactor
 			[T: 'TRUE']
 	{
 		T.data = '1'
-		prints( Output T )
+		send Output [T]
 	}
 	elsif match ExprFactor
 			[F: 'FALSE']
 	{
 		F.data = '0'
-		prints( Output F )
+		send Output [F]
 	}
 	elsif match ExprFactor
 			[N: 'nil']
 	{
 		N.data = '0'
-		prints( Output N )
+		send Output [N]
 	}
 	else {
 		# Catches cases not specified
-		prints( Output ExprFactor )
+		send Output [ExprFactor]
 	}
 }
 
@@ -68,39 +67,39 @@ int c_trans_expr_ptr( Output: stream ExprPtr: expr_ptr )
 	if match ExprPtr [expr_ptr Arrow: '->' expr_factor]
 	{
 		c_trans_expr_ptr( Output ExprPtr._expr_ptr )
-		prints( Output Arrow )
+		send Output [Arrow]
 		c_trans_expr_factor( Output ExprPtr.expr_factor )
 	}
 	elsif match ExprPtr [Star: '*' expr_ptr]
 	{
-		prints( Output Star )
+		send Output [Star]
 		c_trans_expr_ptr( Output ExprPtr._expr_ptr )
 	}
 	elsif match ExprPtr [PP: '++' expr_ptr]
 	{
-		prints( Output PP )
+		send Output [PP]
 		c_trans_expr_ptr( Output ExprPtr._expr_ptr )
 	}
 	elsif match ExprPtr [MM: '--' expr_ptr]
 	{
-		prints( Output MM )
+		send Output [MM]
 		c_trans_expr_ptr( Output ExprPtr._expr_ptr )
 	}
 	elsif match ExprPtr [expr_ptr PP: '++']
 	{
 		c_trans_expr_ptr( Output ExprPtr._expr_ptr )
-		prints( Output PP )
+		send Output [PP]
 	}
 	elsif match ExprPtr [expr_ptr MM: '--']
 	{
 		c_trans_expr_ptr( Output ExprPtr._expr_ptr )
-		prints( Output MM )
+		send Output [MM]
 	}
 	elsif match ExprPtr [Open: '(' Type: type Close: ')' expr_ptr]
 	{
-		prints( Output Open )
+		send Output [Open]
 		c_type( Output Type )
-		prints( Output Close )
+		send Output [Close]
 		c_trans_expr_ptr( Output ExprPtr._expr_ptr )
 	}
 	elsif match ExprPtr [expr_factor]
@@ -108,7 +107,7 @@ int c_trans_expr_ptr( Output: stream ExprPtr: expr_ptr )
 		c_trans_expr_factor( Output ExprPtr.expr_factor )
 	}
 	else {
-		prints( Output ExprPtr )
+		send Output [ExprPtr]
 	}
 }
 
@@ -116,12 +115,12 @@ int c_trans_expr_factor_op( Output: stream ExprFactorOp: expr_factor_op )
 {
 	if match ExprFactorOp [B: '!' expr_factor_op]
 	{
-		prints( Output B )
+		send Output [B]
 		c_trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
 	}
 	elsif match ExprFactorOp [T: '~' expr_factor_op]
 	{
-		prints( Output T )
+		send Output [T]
 		c_trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
 	}
 	elsif match ExprFactorOp [expr_ptr]
@@ -135,7 +134,7 @@ int c_trans_expr_bitwise( Output: stream ExprBitwise: expr_bitwise )
 	if match ExprBitwise [expr_bitwise A: '&' expr_factor_op]
 	{
 		c_trans_expr_bitwise( Output ExprBitwise._expr_bitwise )
-		prints( Output A )
+		send Output [A]
 		c_trans_expr_factor_op( Output ExprBitwise.expr_factor_op )
 	}
 	elsif match ExprBitwise [expr_factor_op]
@@ -149,7 +148,7 @@ int c_trans_expr_mult( Output: stream ExprMult: expr_mult )
 	if match ExprMult [expr_mult T: '*' expr_bitwise]
 	{
 		c_trans_expr_mult( Output ExprMult._expr_mult )
-		prints( Output T )
+		send Output [T]
 		c_trans_expr_bitwise( Output ExprMult.expr_bitwise )
 	}
 	elsif match ExprMult [expr_bitwise]
@@ -163,13 +162,13 @@ int c_trans_expr_add( Output: stream ExprAdd: expr_add )
 	if match ExprAdd [expr_add Plus: '+' expr_mult]
 	{
 		c_trans_expr_add( Output ExprAdd._expr_add )
-		prints( Output Plus )
+		send Output [Plus]
 		c_trans_expr_mult( Output ExprAdd.expr_mult )
 	}
 	elsif match ExprAdd [expr_add Minus: '-' expr_mult]
 	{
 		c_trans_expr_add( Output ExprAdd._expr_add )
-		prints( Output Minus )
+		send Output [Minus]
 		c_trans_expr_mult( Output ExprAdd.expr_mult )
 	}
 	elsif match ExprAdd [expr_mult]
@@ -183,13 +182,13 @@ int c_trans_expr_shift( Output: stream ExprShift: expr_shift )
 	if match ExprShift [expr_shift LL: '<<' expr_add]
 	{
 		c_trans_expr_shift( Output ExprShift._expr_shift )
-		prints( Output LL )
+		send Output [LL]
 		c_trans_expr_add( Output ExprShift.expr_add )
 	}
 	elsif match ExprShift [expr_shift RR: '>>' expr_add]
 	{
 		c_trans_expr_shift( Output ExprShift._expr_shift )
-		prints( Output RR )
+		send Output [RR]
 		c_trans_expr_add( Output ExprShift.expr_add )
 	}
 	elsif match ExprShift [expr_add]
@@ -203,49 +202,49 @@ int c_trans_expr_test( Output: stream ExprTest: expr_test )
 	if match ExprTest [expr_test LT: '<' expr_shift]
 	{
 		c_trans_expr_test( Output ExprTest._expr_test )
-		prints( Output LT )
+		send Output [LT]
 		c_trans_expr_shift( Output ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_test GT: '>' expr_shift]
 	{
 		c_trans_expr_test( Output ExprTest._expr_test )
-		prints( Output GT )
+		send Output [GT]
 		c_trans_expr_shift( Output ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_test LTE: '<=' expr_shift]
 	{
 		c_trans_expr_test( Output ExprTest._expr_test )
-		prints( Output LTE )
+		send Output [LTE]
 		c_trans_expr_shift( Output ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_test GTE: '>=' expr_shift]
 	{
 		c_trans_expr_test( Output ExprTest._expr_test )
-		prints( Output GTE )
+		send Output [GTE]
 		c_trans_expr_shift( Output ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_test EQ: '==' expr_shift]
 	{
 		c_trans_expr_test( Output ExprTest._expr_test )
-		prints( Output EQ )
+		send Output [EQ]
 		c_trans_expr_shift( Output ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_test NE: '!=' expr_shift]
 	{
 		c_trans_expr_test( Output ExprTest._expr_test )
-		prints( Output NE )
+		send Output [NE]
 		c_trans_expr_shift( Output ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_test AND: '&&' expr_shift]
 	{
 		c_trans_expr_test( Output ExprTest._expr_test )
-		prints( Output AND )
+		send Output [AND]
 		c_trans_expr_shift( Output ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_test OR: '||' expr_shift]
 	{
 		c_trans_expr_test( Output ExprTest._expr_test )
-		prints( Output OR )
+		send Output [OR]
 		c_trans_expr_shift( Output ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_shift]
@@ -259,9 +258,9 @@ int c_trans_expr_cond( Output: stream ExprCond: expr_cond )
 	if match ExprCond [expr_test Q: '?' expr C: ':' expr_cond]
 	{
 		c_trans_expr_test( Output ExprCond.expr_test )
-		prints( Output Q )
+		send Output [Q]
 		c_trans_expr( Output ExprCond.expr )
-		prints( Output C )
+		send Output [C]
 		c_trans_expr_cond( Output ExprCond._expr_cond )
 	}
 	elsif match ExprCond [expr_test]
@@ -275,13 +274,13 @@ int c_trans_expr_assign( Output: stream ExprAssign: expr_assign )
 	if match ExprAssign [expr_assign E: '=' expr_cond]
 	{
 		c_trans_expr_assign( Output ExprAssign._expr_assign )
-		prints( Output E )
+		send Output [E]
 		c_trans_expr_cond( Output ExprAssign.expr_cond )
 	}
 	elsif match ExprAssign [expr_assign PE: '+=' expr_cond]
 	{
 		c_trans_expr_assign( Output ExprAssign._expr_assign )
-		prints( Output PE )
+		send Output [PE]
 		c_trans_expr_cond( Output ExprAssign.expr_cond )
 	}
 	elsif match ExprAssign [expr_cond]
@@ -298,17 +297,17 @@ int c_trans_expr( Output: stream Expr: expr )
 int c_type( Output: stream Type: type )
 {
 	if match Type "s8"
-		prints( Output 'char ' )
+		send Output ['char ']
 	elsif match Type "s16"
-		prints( Output 'short ' )
+		send Output ['short ']
 	elsif match Type "s32"
-		prints( Output 'int ' )
+		send Output ['int ']
 	elsif match Type "s64"
-		prints( Output 'long ' )
+		send Output ['long ']
 	elsif match Type "s128"
-		prints( Output 'long long ' )
+		send Output ['long long ']
 	else
-		prints( Output Type )
+		send Output [Type]
 }
 
 int c_trans_stmt( Output: stream Stmt: stmt )
@@ -319,20 +318,20 @@ int c_trans_stmt( Output: stream Stmt: stmt )
 		c_tok_list( Output TL )
 	}
 	elsif match Stmt [Array: array] {
-		prints( Output 'static const ' )
+		send Output ['static const ']
 		c_type( Output Array.type )
-		prints( Output Array.ident '[] = { ' Array.num_list ' };\n' )
+		send Output [Array.ident '[] = { ' Array.num_list ' };\n']
 	}
 	elsif match Stmt [Value: value] {
-		prints( Output 'static const ' Value.value_pass )
+		send Output ['static const ' Value.value_pass]
 	}
 	elsif match Stmt [
 			'if' O: '(' IfExpr: expr C: ')' IfStmt: stmt
 			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 	] {
-		prints( Output 'if ' O )
+		send Output ['if ' O]
 		c_trans_expr( Output IfExpr )
-		prints( Output C )
+		send Output [C]
 
 		c_trans_stmt( Output IfStmt )
 
@@ -340,54 +339,54 @@ int c_trans_stmt( Output: stream Stmt: stmt )
 			match ElseIfClause
 				['else' 'if' O2: '(' ElseIfExpr: expr C2: ')' ElseIfStmt: stmt]
 
-			prints( Output 'else if ' O2 )
+			send Output ['else if ' O2]
 			c_trans_expr( Output ElseIfExpr )
-			prints( Output C2 )
+			send Output [C2]
 
 			c_trans_stmt( Output ElseIfStmt )
 		}
 
 		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-			prints( Output 'else ' )
+			send Output ['else ']
 			c_trans_stmt( Output ElseStmt )
 		}
 	}
 	elsif match Stmt ['while' O: '(' WhileExpr: expr C: ')' WhileStmt: stmt] {
-		prints( Output 'while ' O )
+		send Output ['while ' O]
 		c_trans_expr( Output WhileExpr )
-		prints( Output C )
+		send Output [C]
 		c_trans_stmt( Output WhileStmt )
 	}
 	elsif match Stmt ['switch' O: '(' SwitchExpr: expr C: ')' '{' StmtList: stmt* '}'] {
-		prints( Output 'switch ' O )
+		send Output ['switch ' O]
 		c_trans_expr( Output SwitchExpr )
-		prints( Output C '{' )
+		send Output [C '{']
 		c_trans_stmt_list( Output StmtList )
-		prints( Output '}' )
+		send Output ['}']
 	}
 	elsif match Stmt [ExprExpr: expr Semi: ';'] {
 		c_trans_expr( Output ExprExpr )
-		prints( Output Semi )
+		send Output [Semi]
 	}
 	elsif match Stmt [L: '{' TL: stmt* R: '}'] {
-		prints( Output L )
+		send Output [L]
 		c_trans_stmt_list( Output TL )
-		prints( Output R )
+		send Output [R]
 	}
 	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
 	{
-		prints( Output TypeList )
+		send Output [TypeList]
 		c_type( Output Type )
-		prints( Output OptPtr Ident  )
+		send Output [OptPtr Ident]
 		if match OptInit [E: '=' expr] {
-			prints( Output E )
+			send Output [E]
 			c_trans_expr( Output OptInit.expr )
 		}
-		prints( Output Semi )
+		send Output [Semi]
 	}
 	elsif match Stmt [export_stmt]
 	{
-		prints( Output '#define ' Stmt.export_stmt.ident Stmt.export_stmt.number '\n' )
+		send Output ['#define ' Stmt.export_stmt.ident Stmt.export_stmt.number '\n' ]
 	}
 	elsif match Stmt ['fallthrough' ';']
 	{
@@ -395,7 +394,7 @@ int c_trans_stmt( Output: stream Stmt: stmt )
 	}
 	else {
 		# catches unspecified cases
-		prints( Output Stmt )
+		send Output [Stmt]
 	}
 }
 
