@@ -27,9 +27,7 @@ AC_CONFIG_HEADER(src/config.h)
 
 dnl Choose defaults for the build_manual var. If the dist file is present in the
 dnl root then default to no, otherwise go for it.
-AC_CHECK_FILES( $srcdir/DIST, 
-	[ . $srcdir/DIST; ], 
-	[ build_manual=yes; ] )
+AS_IF([test -r $srcdir/DIST], [. $srcdir/DIST], [build_manual=yes])
 
 dnl
 dnl Enable arg to explicitly control the building of the manual
