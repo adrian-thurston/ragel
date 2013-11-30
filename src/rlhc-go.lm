@@ -344,7 +344,9 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 		send Output [' }\n']
 	}
 	elsif match Stmt [Value: value] {
-		send Output ['static const ' Value.value_pass]
+		send Output ['var ' Value.value_pass.ident ' ']
+		go_type( Output Value.value_pass.type )
+		send Output ['= ' Value.value_pass.number '\n']
 	}
 	elsif match Stmt [
 			'if' O: '(' IfExpr: expr C: ')' IfStmt: stmt
