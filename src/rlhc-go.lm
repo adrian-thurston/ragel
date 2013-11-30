@@ -318,9 +318,11 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 		go_tok_list( Output TL )
 	}
 	elsif match Stmt [Array: array] {
-		send Output ['static const ']
-		c_type( Output Array.type )
-		send Output [Array.ident '[] = { ' Array.num_list ' };\n']
+		send Output ['var ' Array.ident ' []']
+		go_type( Output Array.type )
+		send Output [' = []']
+		go_type( Output Array.type )
+		send Output [' { ' Array.num_list ' }\n']
 	}
 	elsif match Stmt [Value: value] {
 		send Output ['static const ' Value.value_pass]
