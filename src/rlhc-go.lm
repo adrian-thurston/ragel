@@ -310,6 +310,23 @@ int go_type( Output: stream Type: type )
 		send Output [Type]
 }
 
+int go_num( Output: stream Number: number )
+{
+	if match Number [sint 'u']
+		send Output [Number.uint.sint]
+	else
+		send Output [Number]
+}
+
+int go_num_list( Output: stream NumList: num_list )
+{
+	go_num( Output NumList.number )
+	for CommaNum: comma_num in NumList {
+		send Output [', ']
+		go_num( Output CommaNum.number )
+	}
+}
+
 int go_trans_stmt( Output: stream Stmt: stmt )
 {
 	if match Stmt
@@ -322,7 +339,9 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 		go_type( Output Array.type )
 		send Output [' = []']
 		go_type( Output Array.type )
-		send Output [' { ' Array.num_list ' }\n']
+		send Output [' { ']
+		go_num_list( Output Array.num_list )
+		send Output [' }\n']
 	}
 	elsif match Stmt [Value: value] {
 		send Output ['static const ' Value.value_pass]

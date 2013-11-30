@@ -74,13 +74,13 @@ lex
 	literal 'uint', 'unsigned', 'const',
 			's8', 's16', 's32', 's64',
 			's128', 'nil', 'export',
-			'fallthrough'
+			'fallthrough', 'u'
 
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
 
-	token uint
-		/ digit+ [u]? /
+	token sint
+		/ digit+ /
 
 	token hex_number
 		/ '0x' [0-9a-fA-F]+ /
@@ -102,6 +102,10 @@ lex
 			'+=', '&&', '||', '<=', '>=', '->',
 			'++', '--'
 end
+
+def uint
+	[sint 'u']
+|	[sint]
 
 def embedded_host
 	['$' string uint '{' host::tok* host::'}$']
