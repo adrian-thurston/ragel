@@ -269,6 +269,7 @@ def start
 
 include 'rlhc-c.lm'
 include 'rlhc-d.lm'
+include 'rlhc-go.lm'
 
 InputFile: str = argv.pop()
 OutputFile: str = argv.pop()
@@ -288,3 +289,8 @@ if ( Lang == 'c' )
 	c_trans_stmt_list( Output Start._repeat_stmt )
 elsif ( Lang == 'd' )
 	d_trans_stmt_list( Output Start._repeat_stmt )
+elsif ( Lang == 'go' )
+	go_trans_stmt_list( Output Start._repeat_stmt )
+else {
+	print( 'rlhc: unrecognized language: ' Lang '\n' )
+}

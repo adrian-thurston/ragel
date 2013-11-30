@@ -108,15 +108,15 @@ HostType hostTypesOCaml[] =
 	{ "int",    0,  "int",      true,   true,  false, S31BIT_MIN, S31BIT_MAX, 4 },
 };
 
-const HostLang hostLangC =      { HostLang::C,      hostTypesC,      8,  hostTypesC+0,       true,  "c" };
-const HostLang hostLangD =      { HostLang::D,      hostTypesD,      9,  hostTypesD+2,       true,  "d" };
-const HostLang hostLangD2 =     { HostLang::D2,     hostTypesD,      9,  hostTypesD+2,       true };
-const HostLang hostLangGo =     { HostLang::Go,     hostTypesGo,    10,  hostTypesGo+0,      false };
-const HostLang hostLangJava =   { HostLang::Java,   hostTypesJava,   4,  hostTypesJava+2,    false };
-const HostLang hostLangRuby =   { HostLang::Ruby,   hostTypesRuby,   2,  hostTypesRuby+0,    false };
-const HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9,  hostTypesCSharp+4,  true };
-const HostLang hostLangOCaml =  { HostLang::OCaml,  hostTypesOCaml,  1,  hostTypesOCaml+0,   false };
-const HostLang hostLangCrack =  { HostLang::Crack,  hostTypesCrack,  5,  hostTypesCrack+0,   true };
+const HostLang hostLangC =      { HostLang::C,      hostTypesC,      8,  hostTypesC+0,       true,  "c"  };
+const HostLang hostLangD =      { HostLang::D,      hostTypesD,      9,  hostTypesD+2,       true,  "d"  };
+const HostLang hostLangD2 =     { HostLang::D2,     hostTypesD,      9,  hostTypesD+2,       true,  "no-lang"  };
+const HostLang hostLangGo =     { HostLang::Go,     hostTypesGo,    10,  hostTypesGo+0,      false, "go" };
+const HostLang hostLangJava =   { HostLang::Java,   hostTypesJava,   4,  hostTypesJava+2,    false, "no-lang"  };
+const HostLang hostLangRuby =   { HostLang::Ruby,   hostTypesRuby,   2,  hostTypesRuby+0,    false, "no-lang"  };
+const HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9,  hostTypesCSharp+4,  true,  "no-lang"  };
+const HostLang hostLangOCaml =  { HostLang::OCaml,  hostTypesOCaml,  1,  hostTypesOCaml+0,   false, "no-lang"  };
+const HostLang hostLangCrack =  { HostLang::Crack,  hostTypesCrack,  5,  hostTypesCrack+0,   true,  "no-lang"  };
 
 HostType *findAlphType( const HostLang *hostLang, const char *s1 )
 {

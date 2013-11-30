@@ -1,0 +1,405 @@
+int go_tok_list( Output: stream TL: host::tok* )
+{
+	for Tok: host::tok in repeat(TL) {
+		if match Tok [host::'${' StmtList: stmt* host::'}$']
+			go_trans_stmt_list( Output StmtList )
+		elsif match Tok [host::'={' Expr: expr host::'}$']
+			go_trans_expr( Output Expr )
+		else {
+			send Output [Tok]
+		}
+	}
+}
+
+int go_trans_expr_factor( Output: stream ExprFactor: expr_factor )
+{
+	if match ExprFactor
+		['$' string uint '{' TL: host::tok* host::'}$']
+	{
+		go_tok_list( Output TL )
+	}
+	elsif match ExprFactor
+		[O:'(' TL: expr C: ')']
+	{
+		send Output [O]
+		go_trans_expr( Output TL )
+		send Output [C]
+	}
+	elsif match ExprFactor
+		[ident O: '[' TL: expr C: ']']
+	{
+		send Output [ExprFactor.ident O]
+		go_trans_expr( Output TL )
+		send Output [C]
+	}
+	elsif match ExprFactor
+		['offset' '(' ident ',' expr ')']
+	{
+		send Output [ExprFactor.ident ' + ']
+		go_trans_expr( Output ExprFactor.expr )
+	}
+	elsif match ExprFactor
+			[T: 'TRUE']
+	{
+		T.data = '1'
+		send Output [T]
+	}
+	elsif match ExprFactor
+			[F: 'FALSE']
+	{
+		F.data = '0'
+		send Output [F]
+	}
+	elsif match ExprFactor
+			[N: 'nil']
+	{
+		N.data = '0'
+		send Output [N]
+	}
+	else {
+		# Catches cases not specified
+		send Output [ExprFactor]
+	}
+}
+
+int go_trans_expr_ptr( Output: stream ExprPtr: expr_ptr )
+{
+	if match ExprPtr [expr_ptr Arrow: '->' expr_factor]
+	{
+		go_trans_expr_ptr( Output ExprPtr._expr_ptr )
+		send Output [Arrow]
+		go_trans_expr_factor( Output ExprPtr.expr_factor )
+	}
+	elsif match ExprPtr [Star: '*' expr_ptr]
+	{
+		send Output [Star]
+		go_trans_expr_ptr( Output ExprPtr._expr_ptr )
+	}
+	elsif match ExprPtr [PP: '++' expr_ptr]
+	{
+		send Output [PP]
+		go_trans_expr_ptr( Output ExprPtr._expr_ptr )
+	}
+	elsif match ExprPtr [MM: '--' expr_ptr]
+	{
+		send Output [MM]
+		go_trans_expr_ptr( Output ExprPtr._expr_ptr )
+	}
+	elsif match ExprPtr [expr_ptr PP: '++']
+	{
+		go_trans_expr_ptr( Output ExprPtr._expr_ptr )
+		send Output [PP]
+	}
+	elsif match ExprPtr [expr_ptr MM: '--']
+	{
+		go_trans_expr_ptr( Output ExprPtr._expr_ptr )
+		send Output [MM]
+	}
+	elsif match ExprPtr [Open: '(' Type: type Close: ')' expr_ptr]
+	{
+		send Output [Open]
+		go_type( Output Type )
+		send Output [Close]
+		go_trans_expr_ptr( Output ExprPtr._expr_ptr )
+	}
+	elsif match ExprPtr [expr_factor]
+	{
+		go_trans_expr_factor( Output ExprPtr.expr_factor )
+	}
+	else {
+		send Output [ExprPtr]
+	}
+}
+
+int go_trans_expr_factor_op( Output: stream ExprFactorOp: expr_factor_op )
+{
+	if match ExprFactorOp [B: '!' expr_factor_op]
+	{
+		send Output [B]
+		go_trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
+	}
+	elsif match ExprFactorOp [T: '~' expr_factor_op]
+	{
+		send Output [T]
+		go_trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
+	}
+	elsif match ExprFactorOp [expr_ptr]
+	{
+		go_trans_expr_ptr( Output ExprFactorOp.expr_ptr )
+	}
+}
+
+int go_trans_expr_bitwise( Output: stream ExprBitwise: expr_bitwise )
+{
+	if match ExprBitwise [expr_bitwise A: '&' expr_factor_op]
+	{
+		go_trans_expr_bitwise( Output ExprBitwise._expr_bitwise )
+		send Output [A]
+		go_trans_expr_factor_op( Output ExprBitwise.expr_factor_op )
+	}
+	elsif match ExprBitwise [expr_factor_op]
+	{
+		go_trans_expr_factor_op( Output ExprBitwise.expr_factor_op )
+	}
+}
+
+int go_trans_expr_mult( Output: stream ExprMult: expr_mult )
+{
+	if match ExprMult [expr_mult T: '*' expr_bitwise]
+	{
+		go_trans_expr_mult( Output ExprMult._expr_mult )
+		send Output [T]
+		go_trans_expr_bitwise( Output ExprMult.expr_bitwise )
+	}
+	elsif match ExprMult [expr_bitwise]
+	{
+		go_trans_expr_bitwise( Output ExprMult.expr_bitwise )
+	}
+}
+
+int go_trans_expr_add( Output: stream ExprAdd: expr_add )
+{
+	if match ExprAdd [expr_add Plus: '+' expr_mult]
+	{
+		go_trans_expr_add( Output ExprAdd._expr_add )
+		send Output [Plus]
+		go_trans_expr_mult( Output ExprAdd.expr_mult )
+	}
+	elsif match ExprAdd [expr_add Minus: '-' expr_mult]
+	{
+		go_trans_expr_add( Output ExprAdd._expr_add )
+		send Output [Minus]
+		go_trans_expr_mult( Output ExprAdd.expr_mult )
+	}
+	elsif match ExprAdd [expr_mult]
+	{
+		go_trans_expr_mult( Output ExprAdd.expr_mult )
+	}
+}
+
+int go_trans_expr_shift( Output: stream ExprShift: expr_shift )
+{
+	if match ExprShift [expr_shift LL: '<<' expr_add]
+	{
+		go_trans_expr_shift( Output ExprShift._expr_shift )
+		send Output [LL]
+		go_trans_expr_add( Output ExprShift.expr_add )
+	}
+	elsif match ExprShift [expr_shift RR: '>>' expr_add]
+	{
+		go_trans_expr_shift( Output ExprShift._expr_shift )
+		send Output [RR]
+		go_trans_expr_add( Output ExprShift.expr_add )
+	}
+	elsif match ExprShift [expr_add]
+	{
+		go_trans_expr_add( Output ExprShift.expr_add )
+	}
+}
+
+int go_trans_expr_test( Output: stream ExprTest: expr_test )
+{
+	if match ExprTest [expr_test LT: '<' expr_shift]
+	{
+		go_trans_expr_test( Output ExprTest._expr_test )
+		send Output [LT]
+		go_trans_expr_shift( Output ExprTest.expr_shift )
+	}
+	elsif match ExprTest [expr_test GT: '>' expr_shift]
+	{
+		go_trans_expr_test( Output ExprTest._expr_test )
+		send Output [GT]
+		go_trans_expr_shift( Output ExprTest.expr_shift )
+	}
+	elsif match ExprTest [expr_test LTE: '<=' expr_shift]
+	{
+		go_trans_expr_test( Output ExprTest._expr_test )
+		send Output [LTE]
+		go_trans_expr_shift( Output ExprTest.expr_shift )
+	}
+	elsif match ExprTest [expr_test GTE: '>=' expr_shift]
+	{
+		go_trans_expr_test( Output ExprTest._expr_test )
+		send Output [GTE]
+		go_trans_expr_shift( Output ExprTest.expr_shift )
+	}
+	elsif match ExprTest [expr_test EQ: '==' expr_shift]
+	{
+		go_trans_expr_test( Output ExprTest._expr_test )
+		send Output [EQ]
+		go_trans_expr_shift( Output ExprTest.expr_shift )
+	}
+	elsif match ExprTest [expr_test NE: '!=' expr_shift]
+	{
+		go_trans_expr_test( Output ExprTest._expr_test )
+		send Output [NE]
+		go_trans_expr_shift( Output ExprTest.expr_shift )
+	}
+	elsif match ExprTest [expr_test AND: '&&' expr_shift]
+	{
+		go_trans_expr_test( Output ExprTest._expr_test )
+		send Output [AND]
+		go_trans_expr_shift( Output ExprTest.expr_shift )
+	}
+	elsif match ExprTest [expr_test OR: '||' expr_shift]
+	{
+		go_trans_expr_test( Output ExprTest._expr_test )
+		send Output [OR]
+		go_trans_expr_shift( Output ExprTest.expr_shift )
+	}
+	elsif match ExprTest [expr_shift]
+	{
+		go_trans_expr_shift( Output ExprTest.expr_shift )
+	}
+}
+
+int go_trans_expr_cond( Output: stream ExprCond: expr_cond )
+{
+	if match ExprCond [expr_test Q: '?' expr C: ':' expr_cond]
+	{
+		go_trans_expr_test( Output ExprCond.expr_test )
+		send Output [Q]
+		go_trans_expr( Output ExprCond.expr )
+		send Output [C]
+		go_trans_expr_cond( Output ExprCond._expr_cond )
+	}
+	elsif match ExprCond [expr_test]
+	{
+		go_trans_expr_test( Output ExprCond.expr_test )
+	}
+}
+
+int go_trans_expr_assign( Output: stream ExprAssign: expr_assign )
+{
+	if match ExprAssign [expr_assign E: '=' expr_cond]
+	{
+		go_trans_expr_assign( Output ExprAssign._expr_assign )
+		send Output [E]
+		go_trans_expr_cond( Output ExprAssign.expr_cond )
+	}
+	elsif match ExprAssign [expr_assign PE: '+=' expr_cond]
+	{
+		go_trans_expr_assign( Output ExprAssign._expr_assign )
+		send Output [PE]
+		go_trans_expr_cond( Output ExprAssign.expr_cond )
+	}
+	elsif match ExprAssign [expr_cond]
+	{
+		go_trans_expr_cond( Output ExprAssign.expr_cond )
+	}
+}
+
+int go_trans_expr( Output: stream Expr: expr )
+{
+	go_trans_expr_assign( Output Expr.expr_assign )
+}
+
+int go_type( Output: stream Type: type )
+{
+	if match Type "s8"
+		send Output ['char ']
+	elsif match Type "s16"
+		send Output ['short ']
+	elsif match Type "s32"
+		send Output ['int ']
+	elsif match Type "s64"
+		send Output ['long ']
+	elsif match Type "s128"
+		send Output ['long long ']
+	else
+		send Output [Type]
+}
+
+int go_trans_stmt( Output: stream Stmt: stmt )
+{
+	if match Stmt
+		['$' string uint '{' TL: host::tok* host::'}$']
+	{
+		go_tok_list( Output TL )
+	}
+	elsif match Stmt [Array: array] {
+		send Output ['static const ']
+		c_type( Output Array.type )
+		send Output [Array.ident '[] = { ' Array.num_list ' };\n']
+	}
+	elsif match Stmt [Value: value] {
+		send Output ['static const ' Value.value_pass]
+	}
+	elsif match Stmt [
+			'if' O: '(' IfExpr: expr C: ')' IfStmt: stmt
+			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
+	] {
+		send Output ['if ' O]
+		go_trans_expr( Output IfExpr )
+		send Output [C]
+
+		go_trans_stmt( Output IfStmt )
+
+		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
+			match ElseIfClause
+				['else' 'if' O2: '(' ElseIfExpr: expr C2: ')' ElseIfStmt: stmt]
+
+			send Output ['else if ' O2]
+			go_trans_expr( Output ElseIfExpr )
+			send Output [C2]
+
+			go_trans_stmt( Output ElseIfStmt )
+		}
+
+		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
+			send Output ['else ']
+			go_trans_stmt( Output ElseStmt )
+		}
+	}
+	elsif match Stmt ['while' O: '(' WhileExpr: expr C: ')' WhileStmt: stmt] {
+		send Output ['while ' O]
+		go_trans_expr( Output WhileExpr )
+		send Output [C]
+		go_trans_stmt( Output WhileStmt )
+	}
+	elsif match Stmt ['switch' O: '(' SwitchExpr: expr C: ')' '{' StmtList: stmt* '}'] {
+		send Output ['switch ' O]
+		go_trans_expr( Output SwitchExpr )
+		send Output [C '{']
+		go_trans_stmt_list( Output StmtList )
+		send Output ['}']
+	}
+	elsif match Stmt [ExprExpr: expr Semi: ';'] {
+		go_trans_expr( Output ExprExpr )
+		send Output [Semi]
+	}
+	elsif match Stmt [L: '{' TL: stmt* R: '}'] {
+		send Output [L]
+		go_trans_stmt_list( Output TL )
+		send Output [R]
+	}
+	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
+	{
+		send Output [TypeList]
+		go_type( Output Type )
+		send Output [OptPtr Ident]
+		if match OptInit [E: '=' expr] {
+			send Output [E]
+			go_trans_expr( Output OptInit.expr )
+		}
+		send Output [Semi]
+	}
+	elsif match Stmt [export_stmt]
+	{
+		send Output ['#define ' Stmt.export_stmt.ident Stmt.export_stmt.number '\n' ]
+	}
+	elsif match Stmt ['fallthrough' ';']
+	{
+		# Nothing needed here.
+	}
+	else {
+		# catches unspecified cases
+		send Output [Stmt]
+	}
+}
+
+int go_trans_stmt_list( Output: stream StmtList: stmt* )
+{
+	for Stmt: stmt in repeat( StmtList )
+		go_trans_stmt( Output Stmt )
+}
