@@ -286,8 +286,8 @@ void BinaryExpanded::writeExec()
 		out << "	int _ps;\n";
 
 	out <<
-		"	const " << ALPH_TYPE() << " *_keys;\n"
-		"	const " << ARR_TYPE( condKeys ) << " *_ckeys;\n"
+		"	index " << ALPH_TYPE() << " _keys;\n"
+		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _cpc;\n"
 		"	int _trans;\n"
 		"	unsigned int _cond;\n";

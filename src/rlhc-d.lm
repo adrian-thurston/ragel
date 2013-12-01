@@ -37,7 +37,7 @@ int d_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 		['offset' '(' ident ',' expr ')']
 	{
 		send Output ['&' ExprFactor.ident '[']
-		c_trans_expr( Output ExprFactor.expr )
+		d_trans_expr( Output ExprFactor.expr )
 		send Output [']']
 	}
 	elsif match ExprFactor
@@ -407,6 +407,12 @@ int d_trans_stmt( Output: stream Stmt: stmt )
 	elsif match Stmt ['fallthrough' ';']
 	{
 		send Output ['goto case;']
+	}
+	elsif match Stmt [index_stmt]
+	{
+		send Output ['const(']
+		d_type( Output Stmt.index_stmt.type )
+		send Output [') * ' Stmt.index_stmt.ident ';\n']
 	}
 	else {
 		# catches unspecified cases

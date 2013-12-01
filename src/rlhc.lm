@@ -69,7 +69,7 @@ lex
 
 	literal 'array', 'value', 'TRUE', 'FALSE',
 			'while', 'switch', 'case',
-			'if', 'else', 'offset'
+			'if', 'else', 'offset', 'index'
 
 	literal 'uint', 'unsigned', 'const',
 			's8', 's16', 's32', 's64',
@@ -252,10 +252,14 @@ def declaration
 def export_stmt
 	['export' type ident number ';']
 
+def index_stmt
+	['index' type  ident ';']
+
 def stmt
 	[embedded_host]
 |	[array]
 |	[value]
+|	[index_stmt]
 |	[declaration]
 |	[while_stmt]
 |	[if_stmt]

@@ -277,20 +277,20 @@ void BinaryLooped::writeExec()
 		out << "	int _ps;\n";
 
 	out <<
-		"	" << "unsigned int" << " _trans;\n" <<
-		"	" << "unsigned int" << " _cond;\n";
+		"	unsigned int _trans;\n" <<
+		"	unsigned int _cond;\n";
 
 	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 			|| redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	const " << ARR_TYPE( actions ) << " *_acts;\n"
-			"	" << "unsigned int" << " _nacts;\n";
+			"	index " << ARR_TYPE( actions ) << " _acts;\n"
+			"	unsigned int _nacts;\n";
 	}
 
 	out <<
-		"	const " << ALPH_TYPE() << " *_keys;\n"
-		"	const " << ARR_TYPE( condKeys ) << " *_ckeys;\n"
+		"	index " << ALPH_TYPE() << " _keys;\n"
+		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _cpc;\n"
 		"\n";
 
@@ -350,7 +350,7 @@ void BinaryLooped::writeExec()
 			"		goto _again;\n"
 			"\n"
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
-			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
+			"	_nacts = (unsigned int) *_acts++;\n"
 			"	while ( _nacts-- > 0 )\n	{\n"
 			"		switch ( *_acts++ )\n		{\n";
 			ACTION_SWITCH() <<

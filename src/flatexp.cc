@@ -236,9 +236,9 @@ void FlatExpanded::writeExec()
 	out << "	int _cond;\n";
 
 	out <<
-		"	const " << ALPH_TYPE() << " *_keys;\n"
-		"	const " << ARR_TYPE( indicies ) << " *_inds;\n"
-		"	const " << ARR_TYPE( condKeys ) << " *_ckeys;\n"
+		"	index " << ALPH_TYPE() << " _keys;\n"
+		"	index " << ARR_TYPE( indicies ) << " _inds;\n"
+		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _klen;\n"
 		"	int _cpc;\n";
 

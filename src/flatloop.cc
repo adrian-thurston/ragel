@@ -196,14 +196,14 @@ void FlatLooped::writeExec()
 			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	const " << ARR_TYPE( actions ) << " *_acts;\n"
+			"	index " << ARR_TYPE( actions ) << " _acts;\n"
 			"	unsigned int _nacts;\n"; 
 	}
 
 	out <<
-		"	const " << ALPH_TYPE() << " *_keys;\n"
-		"	const " << ARR_TYPE( indicies ) << " *_inds;\n"
-		"	const " << ARR_TYPE( condKeys ) << " *_ckeys;\n"
+		"	index " << ALPH_TYPE() << " _keys;\n"
+		"	index " << ARR_TYPE( indicies ) << " _inds;\n"
+		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _klen;\n"
 		"	int _cpc;\n";
 

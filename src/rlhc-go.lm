@@ -415,6 +415,12 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 	{
 		# Nothing needed here.
 	}
+	elsif match Stmt [index_stmt]
+	{
+		send Output ['const ']
+		go_type( Output Stmt.index_stmt.type )
+		send Output ['  * ' Stmt.index_stmt.ident]
+	}
 	else {
 		# catches unspecified cases
 		send Output [Stmt]
