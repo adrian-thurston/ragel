@@ -357,16 +357,15 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 		go_trans_stmt_list( Output TL )
 		send Output [R]
 	}
-	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
+	elsif match Stmt [OptConst: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
 	{
-		send Output [TypeList]
+		send Output ['var ' Ident ' ']
 		go_type( Output Type )
-		send Output [OptPtr Ident]
 		if match OptInit [E: '=' expr] {
-			send Output [E]
+			send Output [' ' E]
 			go_trans_expr( Output OptInit.expr )
 		}
-		send Output [Semi]
+		send Output ['\n']
 	}
 	elsif match Stmt [export_stmt]
 	{
