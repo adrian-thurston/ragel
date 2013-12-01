@@ -159,16 +159,10 @@ int go_trans_expr_mult( Output: stream ExprMult: expr_mult )
 
 int go_trans_expr_add( Output: stream ExprAdd: expr_add )
 {
-	if match ExprAdd [expr_add Plus: '+' expr_mult]
+	if match ExprAdd [expr_add Op: add_op expr_mult]
 	{
 		go_trans_expr_add( Output ExprAdd._expr_add )
-		send Output [Plus]
-		go_trans_expr_mult( Output ExprAdd.expr_mult )
-	}
-	elsif match ExprAdd [expr_add Minus: '-' expr_mult]
-	{
-		go_trans_expr_add( Output ExprAdd._expr_add )
-		send Output [Minus]
+		send Output [Op]
 		go_trans_expr_mult( Output ExprAdd.expr_mult )
 	}
 	elsif match ExprAdd [expr_mult]
@@ -179,16 +173,10 @@ int go_trans_expr_add( Output: stream ExprAdd: expr_add )
 
 int go_trans_expr_shift( Output: stream ExprShift: expr_shift )
 {
-	if match ExprShift [expr_shift LL: '<<' expr_add]
+	if match ExprShift [expr_shift Op: shift_op expr_add]
 	{
 		go_trans_expr_shift( Output ExprShift._expr_shift )
-		send Output [LL]
-		go_trans_expr_add( Output ExprShift.expr_add )
-	}
-	elsif match ExprShift [expr_shift RR: '>>' expr_add]
-	{
-		go_trans_expr_shift( Output ExprShift._expr_shift )
-		send Output [RR]
+		send Output [Op]
 		go_trans_expr_add( Output ExprShift.expr_add )
 	}
 	elsif match ExprShift [expr_add]
@@ -199,52 +187,10 @@ int go_trans_expr_shift( Output: stream ExprShift: expr_shift )
 
 int go_trans_expr_test( Output: stream ExprTest: expr_test )
 {
-	if match ExprTest [expr_test LT: '<' expr_shift]
+	if match ExprTest [expr_test Op: test_op expr_shift]
 	{
 		go_trans_expr_test( Output ExprTest._expr_test )
-		send Output [LT]
-		go_trans_expr_shift( Output ExprTest.expr_shift )
-	}
-	elsif match ExprTest [expr_test GT: '>' expr_shift]
-	{
-		go_trans_expr_test( Output ExprTest._expr_test )
-		send Output [GT]
-		go_trans_expr_shift( Output ExprTest.expr_shift )
-	}
-	elsif match ExprTest [expr_test LTE: '<=' expr_shift]
-	{
-		go_trans_expr_test( Output ExprTest._expr_test )
-		send Output [LTE]
-		go_trans_expr_shift( Output ExprTest.expr_shift )
-	}
-	elsif match ExprTest [expr_test GTE: '>=' expr_shift]
-	{
-		go_trans_expr_test( Output ExprTest._expr_test )
-		send Output [GTE]
-		go_trans_expr_shift( Output ExprTest.expr_shift )
-	}
-	elsif match ExprTest [expr_test EQ: '==' expr_shift]
-	{
-		go_trans_expr_test( Output ExprTest._expr_test )
-		send Output [EQ]
-		go_trans_expr_shift( Output ExprTest.expr_shift )
-	}
-	elsif match ExprTest [expr_test NE: '!=' expr_shift]
-	{
-		go_trans_expr_test( Output ExprTest._expr_test )
-		send Output [NE]
-		go_trans_expr_shift( Output ExprTest.expr_shift )
-	}
-	elsif match ExprTest [expr_test AND: '&&' expr_shift]
-	{
-		go_trans_expr_test( Output ExprTest._expr_test )
-		send Output [AND]
-		go_trans_expr_shift( Output ExprTest.expr_shift )
-	}
-	elsif match ExprTest [expr_test OR: '||' expr_shift]
-	{
-		go_trans_expr_test( Output ExprTest._expr_test )
-		send Output [OR]
+		send Output [Op]
 		go_trans_expr_shift( Output ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_shift]
@@ -271,16 +217,10 @@ int go_trans_expr_cond( Output: stream ExprCond: expr_cond )
 
 int go_trans_expr_assign( Output: stream ExprAssign: expr_assign )
 {
-	if match ExprAssign [expr_assign E: '=' expr_cond]
+	if match ExprAssign [expr_assign Op: assign_op expr_cond]
 	{
 		go_trans_expr_assign( Output ExprAssign._expr_assign )
-		send Output [E]
-		go_trans_expr_cond( Output ExprAssign.expr_cond )
-	}
-	elsif match ExprAssign [expr_assign PE: '+=' expr_cond]
-	{
-		go_trans_expr_assign( Output ExprAssign._expr_assign )
-		send Output [PE]
+		send Output [Op]
 		go_trans_expr_cond( Output ExprAssign.expr_cond )
 	}
 	elsif match ExprAssign [expr_cond]
