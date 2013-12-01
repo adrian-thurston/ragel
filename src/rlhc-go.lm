@@ -377,9 +377,9 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 	}
 	elsif match Stmt [index_stmt]
 	{
-		send Output ['const ']
+		send Output ['var ' Stmt.index_stmt.ident ' ']
 		go_type( Output Stmt.index_stmt.type )
-		send Output ['  * ' Stmt.index_stmt.ident]
+		send Output ['\n']
 	}
 	else {
 		# catches unspecified cases
