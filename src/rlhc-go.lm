@@ -341,12 +341,12 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 		go_trans_stmt( Output WhileStmt )
 		send Output ['}\n']
 	}
-	elsif match Stmt ['switch' O: '(' SwitchExpr: expr C: ')' '{' StmtList: stmt* '}'] {
-		send Output ['switch ' O]
+	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
+		send Output ['switch ']
 		go_trans_expr( Output SwitchExpr )
-		send Output [C '{']
+		send Output ['{\n']
 		go_trans_stmt_list( Output StmtList )
-		send Output ['}']
+		send Output ['}\n']
 	}
 	elsif match Stmt [ExprExpr: expr Semi: ';'] {
 		go_trans_expr( Output ExprExpr )
