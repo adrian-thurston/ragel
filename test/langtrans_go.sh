@@ -71,7 +71,7 @@ cat << EOF
 }
 
 func finish() {
-    if cs >= ${machine}_first_final {
+    if cs >= %%{ write first_final; }%% {
         fmt.Println("ACCEPT")
     } else {
         fmt.Println("FAIL")

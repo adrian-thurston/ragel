@@ -1058,16 +1058,16 @@ void CodeGenData::write_option_error( InputLoc &loc, char *arg )
 	source_warning(loc) << "unrecognized write option \"" << arg << "\"" << endl;
 }
 
-void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
+/* returns true if the following section should generate line directives. */
+bool CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 {
-	/* FIXME: This should be moved to the virtual functions in the code
-	 * generators.
-	 *
-	 * Force a newline. */
-	out << '\n';
-	genLineDirective( out );
+	bool followLineDirective = false;
 
 	if ( strcmp( args[0], "data" ) == 0 ) {
+		out << '\n';
+		genLineDirective( out );
+		followLineDirective = true;
+
 		for ( int i = 1; i < nargs; i++ ) {
 			if ( strcmp( args[i], "noerror" ) == 0 )
 				noError = true;
@@ -1081,6 +1081,10 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 		writeData();
 	}
 	else if ( strcmp( args[0], "init" ) == 0 ) {
+		out << '\n';
+		genLineDirective( out );
+		followLineDirective = true;
+
 		for ( int i = 1; i < nargs; i++ ) {
 			if ( strcmp( args[i], "nocs" ) == 0 )
 				noCS = true;
@@ -1090,6 +1094,10 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 		writeInit();
 	}
 	else if ( strcmp( args[0], "exec" ) == 0 ) {
+		out << '\n';
+		genLineDirective( out );
+		followLineDirective = true;
+
 		for ( int i = 1; i < nargs; i++ ) {
 			if ( strcmp( args[i], "noend" ) == 0 )
 				noEnd = true;
@@ -1099,6 +1107,10 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 		writeExec();
 	}
 	else if ( strcmp( args[0], "exports" ) == 0 ) {
+		out << '\n';
+		genLineDirective( out );
+		followLineDirective = true;
+
 		for ( int i = 1; i < nargs; i++ )
 			write_option_error( loc, args[i] );
 		writeExports();
@@ -1123,6 +1135,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 		source_error(loc) << "unrecognized write command \"" << 
 				args[0] << "\"" << endl;
 	}
+	return followLineDirective;
 }
 
 ostream &CodeGenData::source_warning( const InputLoc &loc )

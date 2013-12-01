@@ -74,7 +74,7 @@ struct CodeGenData
 
 	/* This can also be overwridden to modify the processing of write
 	 * statements. */
-	virtual void writeStatement( InputLoc &loc, int nargs, char **args );
+	virtual bool writeStatement( InputLoc &loc, int nargs, char **args );
 
 	/********************/
 

@@ -252,17 +252,24 @@ void InputData::writeOutput()
 	else if ( generateDot )
 		static_cast<GraphvizDotGen*>(dotGenParser->pd->cgd)->writeDotFile();
 	else {
+		bool hostLineDirective = true;
 		for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 			if ( ii->type == InputItem::Write ) {
 				CodeGenData *cgd = ii->pd->cgd;
 				::keyOps = &cgd->thisKeyOps;
 
-				cgd->writeStatement( ii->loc, ii->writeArgs.length()-1, ii->writeArgs.data );
+				hostLineDirective = cgd->writeStatement( ii->loc,
+						ii->writeArgs.length()-1, ii->writeArgs.data );
 			}
 			else {
-				*outStream << '\n';
-				lineDirective( *outStream, inputFileName, ii->loc.line );
+				if ( hostLineDirective ) {
+					/* Write statements can turn off host line directives for
+					 * host sections that follow them. */
+					*outStream << '\n';
+					lineDirective( *outStream, inputFileName, ii->loc.line );
+				}
 				*outStream << ii->data.str();
+				hostLineDirective = true;
 			}
 		}
 	}
