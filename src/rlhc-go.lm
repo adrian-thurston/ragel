@@ -41,7 +41,7 @@ int go_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 	elsif match ExprFactor
 			[T: 'TRUE']
 	{
-		T.data = '1'
+		T.data = 'true'
 		send Output [T]
 	}
 	elsif match ExprFactor
