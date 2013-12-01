@@ -95,12 +95,12 @@ int go_trans_expr_ptr( Output: stream ExprPtr: expr_ptr )
 		go_trans_expr_ptr( Output ExprPtr._expr_ptr )
 		send Output [MM]
 	}
-	elsif match ExprPtr [Open: '(' Type: type Close: ')' expr_ptr]
+	elsif match ExprPtr ['(' Type: type ')' expr_ptr]
 	{
-		send Output [Open]
 		go_type( Output Type )
-		send Output [Close]
+		send Output ['(']
 		go_trans_expr_ptr( Output ExprPtr._expr_ptr )
+		send Output [')']
 	}
 	elsif match ExprPtr [expr_factor]
 	{
