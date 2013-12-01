@@ -69,7 +69,7 @@ lex
 
 	literal 'array', 'value', 'TRUE', 'FALSE',
 			'while', 'switch', 'case',
-			'if', 'else', 'offset', 'index'
+			'if', 'else', 'offset', 'index', 'goto'
 
 	literal 'uint', 'unsigned', 'const',
 			's8', 's16', 's32', 's64',
@@ -273,6 +273,7 @@ def stmt
 |	[pragma]
 |	[export_stmt]
 |	['fallthrough' ';']
+|	['goto' ident ';']
 |	['{' stmt* '}']
 
 def start
