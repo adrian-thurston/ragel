@@ -94,6 +94,9 @@ struct Concurrent
 void Concurrent::init( )
 {
 	cur_char = 0;
+	start_word = 0;
+	start_comment = 0;
+	start_literal = 0;
 	%% write init;
 }
 
