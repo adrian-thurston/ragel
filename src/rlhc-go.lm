@@ -120,7 +120,7 @@ int go_trans_expr_factor_op( Output: stream ExprFactorOp: expr_factor_op )
 	}
 	elsif match ExprFactorOp [T: '~' expr_factor_op]
 	{
-		send Output [T]
+		send Output ['^']
 		go_trans_expr_factor_op( Output ExprFactorOp._expr_factor_op )
 	}
 	elsif match ExprFactorOp [expr_ptr]
