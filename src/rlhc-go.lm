@@ -292,35 +292,54 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 	}
 	elsif match Stmt [
 			'if' O: '(' IfExpr: expr C: ')' IfStmt: stmt
+	] {
+		# if-statements with only the if clause can go out as an if.
+		send Output ['if ' ]
+		go_trans_expr( Output IfExpr )
+		send Output ['{\n']
+		go_trans_stmt( Output IfStmt )
+		send Output ['}\n']
+	}
+	elsif match Stmt [
+			'if' O: '(' IfExpr: expr C: ')' IfStmt: stmt
 			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 	] {
-		send Output ['if ' O]
-		go_trans_expr( Output IfExpr )
-		send Output [C]
+		# If the if-statement has more than just an if clause it goes out as a switch.
+		send Output ['switch {\n ' ]
 
+		send Output ['case ' ]
+		go_trans_expr( Output IfExpr )
+		send Output [':\n']
 		go_trans_stmt( Output IfStmt )
 
 		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 			match ElseIfClause
-				['else' 'if' O2: '(' ElseIfExpr: expr C2: ')' ElseIfStmt: stmt]
+				['else' 'if' '(' ElseIfExpr: expr ')' ElseIfStmt: stmt]
 
-			send Output ['else if ' O2]
+			send Output ['case ']
 			go_trans_expr( Output ElseIfExpr )
-			send Output [C2]
-
+			send Output [':\n']
 			go_trans_stmt( Output ElseIfStmt )
 		}
 
 		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-			send Output ['else ']
+			send Output ['default:\n']
 			go_trans_stmt( Output ElseStmt )
 		}
+		send Output ['}']
 	}
-	elsif match Stmt ['while' O: '(' WhileExpr: expr C: ')' WhileStmt: stmt] {
-		send Output ['while ' O]
-		go_trans_expr( Output WhileExpr )
-		send Output [C]
+	elsif match Stmt ["while ( TRUE )" WhileStmt: stmt] {
+		send Output ['for ']
+		send Output ['{\n']
 		go_trans_stmt( Output WhileStmt )
+		send Output ['}\n']
+	}
+	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
+		send Output ['while ']
+		go_trans_expr( Output WhileExpr )
+		send Output ['{\n']
+		go_trans_stmt( Output WhileStmt )
+		send Output ['}\n']
 	}
 	elsif match Stmt ['switch' O: '(' SwitchExpr: expr C: ')' '{' StmtList: stmt* '}'] {
 		send Output ['switch ' O]
