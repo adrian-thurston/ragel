@@ -314,7 +314,7 @@ void BinaryLooped::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
+			"	_nacts = (unsigned int) *_acts; _acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
@@ -350,7 +350,7 @@ void BinaryLooped::writeExec()
 			"		goto _again;\n"
 			"\n"
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
-			"	_nacts = (unsigned int) *_acts++;\n"
+			"	_nacts = (unsigned int) *_acts; _acts++;\n"
 			"	while ( _nacts-- > 0 )\n	{\n"
 			"		switch ( *_acts++ )\n		{\n";
 			ACTION_SWITCH() <<
@@ -367,7 +367,7 @@ void BinaryLooped::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
+			"	_nacts = (unsigned int) *_acts; _acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
@@ -416,7 +416,7 @@ void BinaryLooped::writeExec()
 			out <<
 				"	const " << ARR_TYPE( actions ) << " *__acts = offset( " << 
 						ARR_REF( actions ) << ", " << ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
-				"	" << "unsigned int" << " __nacts = " << "(unsigned int)" << " *__acts++;\n"
+				"	unsigned int __nacts = (unsigned int) *__acts; __acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";
 				EOF_ACTION_SWITCH() <<
