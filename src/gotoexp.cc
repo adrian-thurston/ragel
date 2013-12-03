@@ -78,7 +78,7 @@ std::ostream &GotoExpanded::EXEC_ACTIONS()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
-			out << "\tgoto _again;\n";
+			out << "\n\tgoto _again;\n";
 		}
 	}
 	return out;
@@ -98,7 +98,7 @@ std::ostream &GotoExpanded::TO_STATE_ACTION_SWITCH()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
-			out << "\tbreak;\n";
+			out << "\n\tbreak;\n";
 		}
 	}
 
@@ -119,7 +119,7 @@ std::ostream &GotoExpanded::FROM_STATE_ACTION_SWITCH()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
-			out << "\tbreak;\n";
+			out << "\n\tbreak;\n";
 		}
 	}
 
@@ -138,7 +138,7 @@ std::ostream &GotoExpanded::EOF_ACTION_SWITCH()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, true, false );
 
-			out << "\tbreak;\n";
+			out << "\n\tbreak;\n";
 		}
 	}
 

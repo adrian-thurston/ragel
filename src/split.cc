@@ -73,6 +73,7 @@ void SplitGoto::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 		for ( GenActionTable::Iter item = state->toStateAction->key; item.lte(); item++ ) {
 			ACTION( out, item->value, state->id, false,
 					state->toStateAction->anyNextStmt() );
+			out << "\n";
 		}
 	}
 
@@ -98,6 +99,7 @@ void SplitGoto::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 		for ( GenActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ ) {
 			ACTION( out, item->value, state->id, false,
 					state->fromStateAction->anyNextStmt() );
+			out << "\n";
 		}
 	}
 
@@ -160,6 +162,7 @@ std::ostream &SplitGoto::PART_TRANS( int partition )
 				for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
 					ACTION( out, item->value, trans->targ->id, false,
 							trans->action->anyNextStmt() );
+					out << "\n";
 				}
 			}
 
@@ -180,6 +183,7 @@ std::ostream &SplitGoto::PART_TRANS( int partition )
 				for ( GenActionTable::Iter item = st->toStateAction->key; item.lte(); item++ ) {
 					ACTION( out, item->value, st->id, false,
 							st->toStateAction->anyNextStmt() );
+					out << "\n";
 				}
 			}
 

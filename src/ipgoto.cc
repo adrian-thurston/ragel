@@ -174,14 +174,15 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
 				ACTION( out, item->value, trans->targ->id, false, 
 						trans->action->anyNextStmt() );
+				out << "\n";
 			}
 
 			/* If the action contains a next then we need to reload, otherwise
 			 * jump directly to the target state. */
 			if ( trans->action->anyNextStmt() )
-				out << "\tgoto _again;\n";
+				out << "\n\tgoto _again;\n";
 			else
-				out << "\tgoto st" << trans->targ->id << ";\n";
+				out << "\n\tgoto st" << trans->targ->id << ";\n";
 		}
 	}
 
@@ -204,6 +205,7 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 		for ( GenActionTable::Iter item = state->toStateAction->key; item.lte(); item++ ) {
 			ACTION( out, item->value, state->id, false, 
 					state->toStateAction->anyNextStmt() );
+			out << "\n";
 		}
 	}
 
@@ -231,6 +233,7 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 		for ( GenActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ ) {
 			ACTION( out, item->value, state->id, false,
 					state->fromStateAction->anyNextStmt() );
+			out << "\n";
 		}
 	}
 
@@ -390,7 +393,7 @@ std::ostream &IpGoto::FINISH_CASES()
 			/* Write each action in the eof action list. */
 			for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
 				ACTION( out, item->value, STATE_ERR_STATE, true, false );
-			out << "\tbreak;\n";
+			out << "\n\tbreak;\n";
 		}
 	}
 

@@ -87,7 +87,7 @@ std::ostream &FlatLooped::TO_STATE_ACTION_SWITCH()
 			/* Write the case label, the action and the case break */
 			out << "\tcase " << act->actionId << ":\n";
 			ACTION( out, act, 0, false, false );
-			out << "\tbreak;\n";
+			out << "\n\tbreak;\n";
 		}
 	}
 
@@ -103,7 +103,7 @@ std::ostream &FlatLooped::FROM_STATE_ACTION_SWITCH()
 			/* Write the case label, the action and the case break */
 			out << "\tcase " << act->actionId << ":\n";
 			ACTION( out, act, 0, false, false );
-			out << "\tbreak;\n";
+			out << "\n\tbreak;\n";
 		}
 	}
 
@@ -119,7 +119,7 @@ std::ostream &FlatLooped::EOF_ACTION_SWITCH()
 			/* Write the case label, the action and the case break */
 			out << "\tcase " << act->actionId << ":\n";
 			ACTION( out, act, 0, true, false );
-			out << "\tbreak;\n";
+			out << "\n\tbreak;\n";
 		}
 	}
 
@@ -135,7 +135,7 @@ std::ostream &FlatLooped::ACTION_SWITCH()
 			/* Write the case label, the action and the case break */
 			out << "\tcase " << act->actionId << ":\n";
 			ACTION( out, act, 0, false, false );
-			out << "\tbreak;\n";
+			out << "\n\tbreak;\n";
 		}
 	}
 
