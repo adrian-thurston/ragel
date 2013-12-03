@@ -264,7 +264,8 @@ void GotoExpanded::writeExec()
 
 	if ( !noEnd ) {
 		out << 
-			"	if ( ++" << P() << " != " << PE() << " )\n"
+			"	" << P() << "++;\n"
+			"	if ( " << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";
 	}
 	else {

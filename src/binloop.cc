@@ -315,10 +315,12 @@ void BinaryLooped::writeExec()
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
 			"	_nacts = (unsigned int) *_acts; _acts++;\n"
-			"	while ( _nacts-- > 0 ) {\n"
-			"		switch ( *_acts++ ) {\n";
+			"	while ( _nacts > 0 ) {\n"
+			"		switch ( *_acts ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
+			"		_nacts--;\n"
+			"		_acts++;\n"
 			"	}\n"
 			"\n";
 	}
@@ -351,10 +353,12 @@ void BinaryLooped::writeExec()
 			"\n"
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
 			"	_nacts = (unsigned int) *_acts; _acts++;\n"
-			"	while ( _nacts-- > 0 )\n	{\n"
-			"		switch ( *_acts++ )\n		{\n";
+			"	while ( _nacts > 0 )\n	{\n"
+			"		switch ( *_acts )\n		{\n";
 			ACTION_SWITCH() <<
 			"		}\n"
+			"		_nacts--;\n"
+			"		_acts++;\n"
 			"	}\n"
 			"\n";
 	}
@@ -368,10 +372,12 @@ void BinaryLooped::writeExec()
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
 			"	_nacts = (unsigned int) *_acts; _acts++;\n"
-			"	while ( _nacts-- > 0 ) {\n"
-			"		switch ( *_acts++ ) {\n";
+			"	while ( _nacts > 0 ) {\n"
+			"		switch ( *_acts ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
+			"		_nacts--;\n"
+			"		_acts++;\n"
 			"	}\n"
 			"\n";
 	}
@@ -385,7 +391,8 @@ void BinaryLooped::writeExec()
 
 	if ( !noEnd ) {
 		out << 
-			"	if ( ++" << P() << " != " << PE() << " )\n"
+			"	" << P() << "++;\n"
+			"	if ( " << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";
 	}
 	else {
@@ -417,10 +424,12 @@ void BinaryLooped::writeExec()
 				"	const " << ARR_TYPE( actions ) << " *__acts = offset( " << 
 						ARR_REF( actions ) << ", " << ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
 				"	unsigned int __nacts = (unsigned int) *__acts; __acts++;\n"
-				"	while ( __nacts-- > 0 ) {\n"
-				"		switch ( *__acts++ ) {\n";
+				"	while ( __nacts > 0 ) {\n"
+				"		switch ( *__acts ) {\n";
 				EOF_ACTION_SWITCH() <<
 				"		}\n"
+				"		__nacts--;\n"
+				"		__acts++;\n"
 				"	}\n";
 		}
 		
