@@ -335,7 +335,7 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 		send Output ['}\n']
 	}
 	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
-		send Output ['while ']
+		send Output ['for ']
 		go_trans_expr( Output WhileExpr )
 		send Output ['{\n']
 		go_trans_stmt( Output WhileStmt )
