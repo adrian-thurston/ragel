@@ -237,13 +237,13 @@ int go_trans_expr( Output: stream Expr: expr )
 int go_type( Output: stream Type: type )
 {
 	if match Type "s8"
-		send Output ['char ']
+		send Output ['int8 ']
 	elsif match Type "s16"
-		send Output ['short ']
+		send Output ['int16 ']
 	elsif match Type "s32"
-		send Output ['int ']
+		send Output ['int32 ']
 	elsif match Type "s64"
-		send Output ['long ']
+		send Output ['int64 ']
 	elsif match Type "s128"
 		send Output ['long long ']
 	elsif match Type "unsigned int"
