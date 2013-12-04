@@ -35,8 +35,9 @@ int go_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 	elsif match ExprFactor
 		['offset' '(' ident ',' expr ')']
 	{
-		send Output [ExprFactor.ident ' + ']
+		send Output ['int(']
 		go_trans_expr( Output ExprFactor.expr )
+		send Output [')']
 	}
 	elsif match ExprFactor
 			[T: 'TRUE']
@@ -377,9 +378,7 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 	}
 	elsif match Stmt [index_stmt]
 	{
-		send Output ['var ' Stmt.index_stmt.ident ' ']
-		go_type( Output Stmt.index_stmt.type )
-		send Output ['\n']
+		send Output ['var ' Stmt.index_stmt.ident ' int\n']
 	}
 	else {
 		# catches unspecified cases
