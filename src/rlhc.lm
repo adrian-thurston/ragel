@@ -32,7 +32,7 @@ namespace host
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
-		literal '={', '${', '}$'
+		literal '={', '}=', '${', '}$'
 
 		token c_any / any /
 	end
@@ -45,7 +45,7 @@ namespace host
 	|	[string]
 	|	[whitespace]
 	|	['${' stmt* '}$']
-	|	['={' expr '}$']
+	|	['={' expr '}=']
 	|	[c_any]
 
 	def out

@@ -3,7 +3,7 @@ int go_tok_list( Output: stream TL: host::tok* )
 	for Tok: host::tok in repeat(TL) {
 		if match Tok [host::'${' StmtList: stmt* host::'}$']
 			go_trans_stmt_list( Output StmtList )
-		elsif match Tok [host::'={' Expr: expr host::'}$']
+		elsif match Tok [host::'={' Expr: expr host::'}=']
 			go_trans_expr( Output Expr )
 		else {
 			send Output [Tok]

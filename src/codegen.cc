@@ -524,7 +524,7 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			ret << P();
 			break;
 		case GenInlineItem::Char:
-			ret << GET_KEY();
+			ret << "={" << GET_KEY() << "}=";
 			break;
 		case GenInlineItem::Hold:
 			ret << P() << "--;";
