@@ -485,11 +485,14 @@ std::ostream &Goto::EXEC_FUNCS()
 	out <<
 		"\n"
 		"execFuncs:\n"
-		"	_nacts = *_acts++;\n"
-		"	while ( _nacts-- > 0 ) {\n"
-		"		switch ( *_acts++ ) {\n";
+		"	_nacts = (unsigned int)deref( " << ARR_REF( actions ) << ", _acts );\n"
+		"	_acts++;\n"
+		"	while ( _nacts > 0 ) {\n"
+		"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
 		ACTION_SWITCH() << 
 		"		}\n"
+		"		_nacts--;\n"
+		"		_acts++;\n"
 		"	}\n"
 		"	goto _again;\n";
 	return out;
