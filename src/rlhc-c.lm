@@ -42,7 +42,7 @@ int c_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 		['deref' '(' ident ',' expr ')']
 	{
 		send Output [ '(*(']
-		go_trans_expr( Output ExprFactor.expr )
+		c_trans_expr( Output ExprFactor.expr )
 		send Output ['))']
 	}
 	elsif match ExprFactor
