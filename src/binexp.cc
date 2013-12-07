@@ -289,7 +289,7 @@ void BinaryExpanded::writeExec()
 		"	index " << ALPH_TYPE() << " _keys;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _cpc;\n"
-		"	int _trans;\n"
+		"	unsigned int _trans;\n"
 		"	unsigned int _cond;\n";
 
 	out << "\n";
@@ -336,7 +336,7 @@ void BinaryExpanded::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = " << ARR_REF( condTargs ) << "[_cond];\n"
+		"	" << vCS() << " = (int) " << ARR_REF( condTargs ) << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {

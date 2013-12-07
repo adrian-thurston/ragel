@@ -698,7 +698,7 @@ void Binary::LOCATE_COND()
 		"			else if ( _cpc > (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_cond += " << "(unsigned int)" << "(_mid - _ckeys);\n"
+		"				_cond += (unsigned int)(_mid - _ckeys);\n"
 		"				goto _match_cond;\n"
 		"			}\n"
 		"		}\n"

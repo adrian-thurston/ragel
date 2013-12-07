@@ -314,7 +314,8 @@ void BinaryLooped::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (unsigned int) *_acts; _acts++;\n"
+			"	_nacts = (unsigned int) *_acts;\n"
+			"	_acts++;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( *_acts ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
