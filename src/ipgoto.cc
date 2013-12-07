@@ -194,14 +194,13 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
  * state. */
 void IpGoto::GOTO_HEADER( RedStateAp *state )
 {
-	bool anyWritten = IN_TRANS_ACTIONS( state );
+	IN_TRANS_ACTIONS( state );
 
 	if ( state->labelNeeded ) 
 		out << "st" << state->id << ":\n";
 
 	if ( state->toStateAction != 0 ) {
-		/* Remember that we wrote an action. Write every action in the list. */
-		anyWritten = true;
+		/* Write every action in the list. */
 		for ( GenActionTable::Iter item = state->toStateAction->key; item.lte(); item++ ) {
 			ACTION( out, item->value, state->id, false, 
 					state->toStateAction->anyNextStmt() );
@@ -223,14 +222,11 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 		}
 	}
 
-	out << "fallthrough;\n";
-
 	/* Give the state a switch case. */
-	out << "case " << state->id << ":\n";
+	out << "st_case_" << state->id << ":\n";
 
 	if ( state->fromStateAction != 0 ) {
-		/* Remember that we wrote an action. Write every action in the list. */
-		anyWritten = true;
+		/* Write every action in the list. */
 		for ( GenActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ ) {
 			ACTION( out, item->value, state->id, false,
 					state->fromStateAction->anyNextStmt() );
@@ -248,9 +244,9 @@ void IpGoto::STATE_GOTO_ERROR()
 	/* In the error state we need to emit some stuff that usually goes into
 	 * the header. */
 	RedStateAp *state = redFsm->errState;
-	bool anyWritten = IN_TRANS_ACTIONS( state );
+	IN_TRANS_ACTIONS( state );
 
-	/* No case label needed since we don't switch on the error state. */
+	out << "st_case_" << state->id << ":\n";
 	if ( state->labelNeeded ) 
 		out << "st" << state->id << ":\n";
 
@@ -334,6 +330,15 @@ std::ostream &IpGoto::AGAIN_CASES()
 	return out;
 }
 
+std::ostream &IpGoto::STATE_GOTO_CASES()
+{
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		out << TABS(1) << "case " << st->id << ":\n";
+		out << TABS(2) << "goto st_case_" << st->id << ";\n";
+	}
+	return out;
+}
+
 std::ostream &IpGoto::STATE_GOTOS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -365,8 +370,6 @@ std::ostream &IpGoto::STATE_GOTOS()
 
 std::ostream &IpGoto::FINISH_CASES()
 {
-	bool anyWritten = false;
-
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofAction != 0 ) {
 			if ( st->eofAction->eofRefs == 0 )
@@ -386,10 +389,6 @@ std::ostream &IpGoto::FINISH_CASES()
 		if ( act->eofRefs != 0 ) {
 			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ )
 				out << "	case " << *pst << ": \n";
-
-			/* Remember that we wrote a trans so we know to write the
-			 * line directive for going back to the output. */
-			anyWritten = true;
 
 			/* Write each action in the eof action list. */
 			for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
@@ -509,11 +508,15 @@ void IpGoto::writeExec()
 		out << "_resume:\n";
 	}
 
-	out << 
-		"	switch ( " << vCS() << " )\n	{\n";
+	out <<
+		"	switch ( " << vCS() << " )\n"
+		"	{\n";
+		STATE_GOTO_CASES() <<
+		"	}\n"
+		"	goto st_out;\n";
 		STATE_GOTOS() <<
-		"	}\n";
-		EXIT_STATES() << 
+		"	st_out:\n";
+		EXIT_STATES() <<
 		"\n";
 
 	if ( testEofUsed ) 

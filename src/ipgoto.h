@@ -48,6 +48,7 @@ public:
 	std::ostream &FINISH_CASES();
 	std::ostream &AGAIN_CASES();
 	std::ostream &STATE_GOTOS();
+	std::ostream &STATE_GOTO_CASES();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
