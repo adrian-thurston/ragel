@@ -365,11 +365,11 @@ void Flat::LOCATE_TRANS()
 		"	_keys = offset( " << ARR_REF( keys ) << ", " << "(" << vCS() << "<<1)" << " );\n"
 		"	_inds = offset( " << ARR_REF( indicies ) << ", " << ARR_REF( flatIndexOffset ) << "[" << vCS() << "]" << " );\n"
 		"\n"
-		"	_slen = " << ARR_REF( keySpans ) << "[" << vCS() << "];\n"
-		"	_trans = _inds[ _slen > 0 && _keys[0] <=" << GET_KEY() << " &&\n"
-		"		" << GET_KEY() << " <= _keys[1] ?\n"
-		"		" << GET_KEY() << " - _keys[0] : _slen ];\n"
-
+		"	_slen = (int)" << ARR_REF( keySpans ) << "[" << vCS() << "];\n"
+		"	if ( _slen > 0 && deref( " << ARR_REF( keys ) << ", _keys ) <=" << GET_KEY() << " && " << GET_KEY() << " <= deref( " << ARR_REF( keys ) << ", _keys+1 ) )\n"
+		"		_trans = (int)deref( " << ARR_REF( indicies ) << ", _inds + (int)( " << GET_KEY() << " - deref( " << ARR_REF( keys ) << ", _keys ) ) );\n"
+		"	else\n"
+		"		_trans = (int)deref( " << ARR_REF( indicies ) << ", _inds + _slen );\n"
 		"\n";
 
 	out <<
