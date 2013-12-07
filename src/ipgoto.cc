@@ -213,7 +213,8 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 	if ( state->labelNeeded ) {
 		if ( !noEnd ) {
 			out <<
-				"	if ( ++" << P() << " == " << PE() << " )\n"
+				"	" << P() << "++;\n"
+				"	if ( " << P() << " == " << PE() << " )\n"
 				"		goto _test_eof" << state->id << ";\n";
 		}
 		else {
@@ -496,7 +497,8 @@ void IpGoto::writeExec()
 		if ( !noEnd ) {
 			testEofUsed = true;
 			out << 
-				"	if ( ++" << P() << " == " << PE() << " )\n"
+				"	" << P() << "++;\n"
+				"	if ( " << P() << " == " << PE() << " )\n"
 				"		goto _test_eof;\n";
 		}
 		else {
