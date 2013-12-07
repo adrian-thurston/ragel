@@ -69,7 +69,8 @@ lex
 
 	literal 'array', 'value', 'TRUE', 'FALSE',
 			'while', 'switch', 'case',
-			'if', 'else', 'offset', 'index', 'goto'
+			'if', 'else', 'offset', 'index',
+			'goto', 'deref'
 
 	literal 'uint', 'unsigned', 'const',
 			's8', 's16', 's32', 's64',
@@ -126,6 +127,7 @@ def expr_factor
 |	[ident]
 |	[ident '[' expr ']']
 |	['offset' '(' ident ',' expr ')']
+|	['deref' '(' ident ',' expr ')']
 |	[uint]
 |	['-' uint]
 |	['TRUE']

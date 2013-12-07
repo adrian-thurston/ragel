@@ -366,7 +366,7 @@ string CodeGen::GET_KEY()
 	}
 	else {
 		/* Expression for retrieving the key, use simple dereference. */
-		ret << "(*" << P() << ")";
+		ret << "( deref( data, " << P() << " ) )";
 	}
 	return ret.str();
 }

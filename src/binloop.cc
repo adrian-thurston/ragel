@@ -343,7 +343,7 @@ void BinaryLooped::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = " << ARR_REF( condTargs ) << "[_cond];\n"
+		"	" << vCS() << " = (int)" << ARR_REF( condTargs ) << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -352,9 +352,10 @@ void BinaryLooped::writeExec()
 			"		goto _again;\n"
 			"\n"
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
-			"	_nacts = (unsigned int) *_acts; _acts++;\n"
+			"	_nacts = (unsigned int) deref( " << ARR_REF( actions ) << ", _acts); _acts++;\n"
 			"	while ( _nacts > 0 )\n	{\n"
-			"		switch ( *_acts )\n		{\n";
+			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
+			"		{\n";
 			ACTION_SWITCH() <<
 			"		}\n"
 			"		_nacts--;\n"

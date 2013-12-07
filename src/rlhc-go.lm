@@ -40,6 +40,13 @@ int go_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 		send Output [')']
 	}
 	elsif match ExprFactor
+		['deref' '(' ident ',' expr ')']
+	{
+		send Output [ ExprFactor.ident '[']
+		go_trans_expr( Output ExprFactor.expr )
+		send Output [']']
+	}
+	elsif match ExprFactor
 			[T: 'TRUE']
 	{
 		T.data = 'true'
