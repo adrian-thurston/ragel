@@ -319,6 +319,7 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 		go_trans_expr( Output IfExpr )
 		send Output [':\n']
 		go_trans_stmt( Output IfStmt )
+		send Output ['\n']
 
 		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 			match ElseIfClause
@@ -328,13 +329,14 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 			go_trans_expr( Output ElseIfExpr )
 			send Output [':\n']
 			go_trans_stmt( Output ElseIfStmt )
+			send Output ['\n']
 		}
 
 		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
 			send Output ['default:\n']
 			go_trans_stmt( Output ElseStmt )
+			send Output ['}\n']
 		}
-		send Output ['}']
 	}
 	elsif match Stmt ["while ( TRUE )" WhileStmt: stmt] {
 		send Output ['for ']
