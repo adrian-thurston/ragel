@@ -374,8 +374,8 @@ void Flat::LOCATE_TRANS()
 
 	out <<
 		"	_ckeys = offset( " << ARR_REF( condKeys ) << ", " << ARR_REF( transOffsets ) << "[_trans] );\n"
-		"	_klen = " << ARR_REF( transLengths ) << "[_trans];\n"
-		"	_cond = " << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	_klen = (int)" << ARR_REF( transLengths ) << "[_trans];\n"
+		"	_cond = (unsigned int)" << ARR_REF( transOffsets ) << "[_trans];\n"
 		"\n";
 
 	out <<
@@ -403,20 +403,22 @@ void Flat::LOCATE_TRANS()
 	
 	out <<
 		"	{\n"
-		"		const " << ARR_TYPE( condKeys ) << " *_lower = _ckeys;\n"
-		"		const " << ARR_TYPE( condKeys ) << " *_mid;\n"
-		"		const " << ARR_TYPE( condKeys ) << " *_upper = _ckeys + _klen - 1;\n"
+		"		index " << ARR_TYPE( condKeys ) << " _lower;\n"
+		"		index " << ARR_TYPE( condKeys ) << " _mid;\n"
+		"		index " << ARR_TYPE( condKeys ) << " _upper;\n"
+		"		_lower = _ckeys;\n"
+		"		_upper = _ckeys + _klen - 1;\n"
 		"		while ( TRUE ) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
 		"\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( " << "_cpc" << " < *_mid )\n"
+		"			if ( _cpc < (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
 		"				_upper = _mid - 1;\n"
-		"			else if ( " << "_cpc" << " > *_mid )\n"
+		"			else if ( _cpc > (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_cond += " << "(unsigned int)" << "(_mid - _ckeys);\n"
+		"				_cond += (unsigned int)(_mid - _ckeys);\n"
 		"				goto _match_cond;\n"
 		"			}\n"
 		"		}\n"

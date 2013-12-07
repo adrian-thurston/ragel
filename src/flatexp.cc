@@ -233,7 +233,7 @@ void FlatExpanded::writeExec()
 		out << "	int _ps;\n";
 	
 	out << "	int _trans;\n";
-	out << "	int _cond;\n";
+	out << "	unsigned int _cond;\n";
 
 	out <<
 		"	index " << ALPH_TYPE() << " _keys;\n"
@@ -277,7 +277,7 @@ void FlatExpanded::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out << 
-		"	" << vCS() << " = " << ARR_REF( condTargs ) << "[_cond];\n\n";
+		"	" << vCS() << " = (int) " << ARR_REF( condTargs ) << "[_cond];\n\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
