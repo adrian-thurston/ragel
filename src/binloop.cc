@@ -314,10 +314,10 @@ void BinaryLooped::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (uint) *_acts;\n"
+			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts++;\n"
 			"	while ( _nacts > 0 ) {\n"
-			"		switch ( *_acts ) {\n";
+			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		_nacts--;\n"
@@ -353,7 +353,7 @@ void BinaryLooped::writeExec()
 			"		goto _again;\n"
 			"\n"
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts); _acts++;\n"
+			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts ); _acts++;\n"
 			"	while ( _nacts > 0 )\n	{\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
 			"		{\n";
@@ -373,9 +373,9 @@ void BinaryLooped::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (uint) *_acts; _acts++;\n"
+			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts ); _acts++;\n"
 			"	while ( _nacts > 0 ) {\n"
-			"		switch ( *_acts ) {\n";
+			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		_nacts--;\n"
@@ -415,19 +415,20 @@ void BinaryLooped::writeExec()
 			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		_trans = (uint)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	const " << ARR_TYPE( actions ) << " *__acts = offset( " << 
-						ARR_REF( actions ) << ", " << ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
-				"	uint __nacts = (uint) *__acts; __acts++;\n"
+				"	index " << ARR_TYPE( actions ) << " __acts;\n"
+				"	uint __nacts;\n"
+				"	__acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
+				"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts ); __acts++;\n"
 				"	while ( __nacts > 0 ) {\n"
-				"		switch ( *__acts ) {\n";
+				"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
 				EOF_ACTION_SWITCH() <<
 				"		}\n"
 				"		__nacts--;\n"

@@ -417,7 +417,7 @@ void CodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFini
 	 * C-style cast by the D compiler. */
 	ret << "{" << P() << " = ((";
 	INLINE_LIST( ret, item->children, targState, inFinish, false );
-	ret << "))-1;}";
+	ret << "))-1;}\n";
 }
 
 void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
