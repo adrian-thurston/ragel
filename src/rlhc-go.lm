@@ -5,9 +5,8 @@ int go_tok_list( Output: stream TL: host::tok* )
 			go_trans_stmt_list( Output StmtList )
 		elsif match Tok [host::'={' Expr: expr host::'}=']
 			go_trans_expr( Output Expr )
-		else {
+		else
 			send Output [Tok]
-		}
 	}
 }
 
@@ -17,6 +16,7 @@ int go_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 		['$' string uint '{' TL: host::tok* host::'}$']
 	{
 		go_tok_list( Output TL )
+		send Output ["\n"]
 	}
 	elsif match ExprFactor
 		[O:'(' TL: expr C: ')']
@@ -270,6 +270,7 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 		['$' string uint '{' TL: host::tok* host::'}$']
 	{
 		go_tok_list( Output TL )
+		send Output ["\n"]
 	}
 	elsif match Stmt [Array: array] {
 		send Output ['var ' Array.ident ' []']

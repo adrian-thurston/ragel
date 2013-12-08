@@ -159,10 +159,12 @@ std::ostream &BinaryExpanded::TO_STATE_ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
 				ACTION( out, item->value, 0, false, false );
+				out << "\n\t";
+			}
 
-			out << "\n\tbreak;\n";
+			out << "break;\n";
 		}
 	}
 
@@ -180,10 +182,12 @@ std::ostream &BinaryExpanded::FROM_STATE_ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
 				ACTION( out, item->value, 0, false, false );
+				out << "\n\t";
+			}
 
-			out << "\n\tbreak;\n";
+			out << "break;\n";
 		}
 	}
 
@@ -199,10 +203,12 @@ std::ostream &BinaryExpanded::EOF_ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
 				ACTION( out, item->value, 0, true, false );
+				out << "\n\t";
+			}
 
-			out << "\n\tbreak;\n";
+			out << "break;\n";
 		}
 	}
 
@@ -220,10 +226,12 @@ std::ostream &BinaryExpanded::ACTION_SWITCH()
 			out << "\tcase " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
 				ACTION( out, item->value, 0, false, false );
+				out << "\n\t";
+			}
 
-			out << "\n\tbreak;\n";
+			out << "break;\n";
 		}
 	}
 
