@@ -489,7 +489,6 @@ void IpGoto::writeExec()
 			"_again:\n"
 			"	switch ( " << vCS() << " ) {\n";
 			AGAIN_CASES() <<
-			"	default: break;\n"
 			"	}\n"
 			"\n";
 
