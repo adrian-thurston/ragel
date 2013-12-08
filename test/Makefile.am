@@ -22,7 +22,7 @@ COLM = @COLM_FULL@
 
 TESTS = runtests
 
-bin_PROGRAMS = ragel-parse trans-c trans-go
+bin_PROGRAMS = ragel-parse trans-c trans-d trans-go
 
 ragel-parse: ragel-parse.lm
 	$(COLM) $<
@@ -52,6 +52,9 @@ CLEANFILES = \
 	*_go.rl *.go *.exe
 
 trans-c: trans-c.lm trans.lm ../src/ragel.lm
+	$(COLM) -o $@ $<
+
+trans-d: trans-d.lm trans.lm ../src/ragel.lm
 	$(COLM) -o $@ $<
 
 trans-go: trans-go.lm trans.lm ../src/ragel.lm

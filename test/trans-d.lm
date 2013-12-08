@@ -29,13 +29,15 @@ for CommVal: comm_val in RagelTree {
 
 send Output
 	"/*
-	" * @LANG: [Lang]
+	" * @LANG: d
 	" * @GENERATED: yes
 	" */
 	"
-	"#include <string.h>
-	"#include <stdio.h>
+	"import std.stdio;
+	"import std.string;
 	"
+	"class [MachineName.word]
+	"{
 
 int indepToHost( Indep: ref<section*> )
 {
@@ -50,7 +52,7 @@ int indepToHost( Indep: ref<section*> )
 			"ptr [Ident: tk_ident];
 		{
 			Decl = cons var_decl
-				"char* [Ident];
+				"const(char) * [Ident];
 		}
 	}
 
@@ -67,14 +69,14 @@ int indepToHost( Indep: ref<section*> )
 		}
 		elsif match Tok ['printb' V: tok ';' ] {
 			cons VL: tok*[V]
-			Tok = cons tok[ "fwrite( [V], 1, pos, stdout );"]
+			Tok = cons tok[ "printf( \"%.*s\", [V]\[0..(pos)\] );"]
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
 			cons VL: tok*[V]
-			Tok = cons tok[ "printf( \"%s\", [V] );"]
+			Tok = cons tok[ "printf( \"%.*s\", [V] );"]
 		}
 		elsif match Tok ['print_token' ';' ] {
-			Tok = cons tok[ "fwrite ( ts , 1 , te - ts , stdout );" ]
+			Tok = cons tok[ "printf( \"%.*s\", ts\[0..(te - ts)\] );"]
 		}
 		elsif match Tok ['first_token_char'] {
 			Tok = cons tok ["ts\[0\]"]
@@ -86,7 +88,7 @@ for Section: section in RagelTree {
 	if match Section [Decl: var_decl] {
 		cons SectionList: section* [Decl]
 		indepToHost( SectionList )
-		send Output [SectionList]
+		prints( Output SectionList )
 	}
 }
 
@@ -103,7 +105,7 @@ for Section: section in RagelTree {
 			Action = parse ragel::action_block[$SectionList]
 		}
 
-		send Output ["\n" Section "\n"]
+		prints( Output '\n' Section '\n' )
 	}
 }
 
@@ -118,63 +120,64 @@ for Section: section in RagelTree {
 	if match Section [ExprStmt: expr_stmt] {
 		cons SectionList: section* [ExprStmt]
 		indepToHost( SectionList )
-		send Output [SectionList]
+		prints( Output SectionList )
 	}
 }
 
 send Output
 	"	%% write init;
 	"}
-	"
-	"void exec( char *data, int len )
+
+send Output
+	"void exec( const(char) data\[\] )
 	"{
-	"	char *p = data;
-	"	char *pe = data + len;
+	"	const(char) *p = data.ptr;
+	"	const(char) *pe = data.ptr + data.length;
 
 if NeedsEof {
 	send Output
-		"	char *eof = pe;
+		"	const(char) *eof = pe;
 }
 
 send Output
+	"	char _s\[\];
+	"
 	"	%% write exec;
 	"}
 	"
 	"void finish( )
 	"{
-	"	if ( cs >= [$MachineName.word]_first_final )
-	"		printf( \"ACCEPT\\n\" );
+	"	if ( cs >= [MachineName.word]_first_final )
+	"		writefln( \"ACCEPT\" );
 	"	else
-	"		printf( \"FAIL\\n\" );
+	"		writefln( \"FAIL\" );
 	"}
-	"
 
 send Output
-	"char *inp\[\] = {
+	~const char[][] inp = [
 
 NR: int = 0
 for InputString: input_string in RagelTree {
-	send Output 
-		[^InputString ",\n"]
+	send Output [^InputString ",\n"]
 	NR = NR + 1
 }
 
 send Output
-	"};
+	"\];
 	"
-
-send Output
 	"int inplen = [NR];
 	"
+	"}
 
 send Output
-	"int main( )
+	"int main()
 	"{
+	"	[MachineName.word] m = new [MachineName.word]();
 	"	int i;
-	"	for ( i = 0; i < inplen; i++ ) {
-	"		init();
-	"		exec( inp\[i\], strlen(inp\[i\]) );
-	"		finish();
+	"	for ( i = 0; i < m.inplen; i++ ) {
+	"		m.init();
+	"		m.exec( m.inp\[i\] );
+	"		m.finish();
 	"	}
 	"	return 0;
 	"}
@@ -182,6 +185,6 @@ send Output
 
 send Output "/* _____OUTPUT_____
 for OutputLine: output_line in RagelTree {
-	send Output [OutputLine]
+	prints( Output OutputLine )
 }
 send Output "*/
