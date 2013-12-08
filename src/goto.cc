@@ -642,7 +642,7 @@ void Goto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
+	ret << "{" << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++;" << vCS() << " = " << 
 			callDest << "; " << "goto _again;}";
 
 	if ( prePushExpr != 0 )
@@ -656,7 +656,7 @@ void Goto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool i
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "] = " << vCS() << "; "  << TOP() << "++;"<< vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
 	ret << "); " << "goto _again;}";
 
@@ -666,7 +666,7 @@ void Goto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool i
 
 void Goto::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
+	ret << "{" << TOP() << "--;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";

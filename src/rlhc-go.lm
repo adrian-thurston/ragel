@@ -333,8 +333,9 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
 			send Output ['default:\n']
 			go_trans_stmt( Output ElseStmt )
-			send Output ['}\n']
+			send Output ['\n']
 		}
+		send Output ['}\n']
 	}
 	elsif match Stmt ["while ( TRUE )" WhileStmt: stmt] {
 		send Output ['for ']

@@ -401,8 +401,8 @@ void BinaryExpanded::writeExec()
 			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		_trans = (uint)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _eof_trans;\n"
 				"	}\n";
 		}
