@@ -2,25 +2,25 @@ include '../src/ragel.lm'
 
 lex 
 	literal '%%{', '}%%'
-	literal 'int', 'bool', 'char', 'ptr', 'printi',
+	literal 'int', 'bool', 'const', 'char', 'ptr', 'printi',
 			'printb', 'prints', 'print_token', 'printf',
 			'fwrite', 'first_token_char'
 	literal ';', '<', '>', '(', ')', '[', ']', '=', '*'
 
 	ignore / ( [ \t] | NL )+ /
 
-	rl INPUT /'_'+ 'INPUT' '_'+/
-	rl OUTPUT /'_'+ 'OUTPUT' '_'+/
-
 	token tk_ident /ident/
 	token tk_number /digit+/
 	token tk_hex_number /'0x' [0-9a-fA-F]+/
 
-	token output
-		/ '#ifdef' ' '* OUTPUT any* :>> ( '#endif' ) /
+	rl INPUT /'_'+ 'INPUT' '_'+/
+	rl OUTPUT /'_'+ 'OUTPUT' '_'+/
 
-	token input_id
+	token ifdef_INPUT
 		/ '#ifdef' ' '* INPUT /
+
+	token ifdef_OUTPUT
+		/ '#ifdef' ' '* OUTPUT ' '* '\n' / ni
 
 	token endif
 		/ '#endif' /
@@ -36,6 +36,12 @@ lex
 
 	token indep_any / any /
 end
+
+lex
+	token output_endif / '#endif\n' /
+	token output_line /[^\n]* '\n'/
+end
+
 
 lex
 	token comm_val /'@' [A-Za-z0-9_]+ ': ' [^\n]+ '\n' /
@@ -58,7 +64,10 @@ def input_list
 | 	[input_string]
 
 def input
-	[input_id input_list endif]
+	[ifdef_INPUT input_list endif]
+
+def output
+	[ifdef_OUTPUT output_line* output_endif]
 
 def tok
 	[tk_ident]
@@ -96,6 +105,7 @@ def type
 |	['bool']
 |	['char']
 |	['char' '*']
+|	['const' '(' 'char' ')' '*']
 |	['ptr']
 
 def opt_arr

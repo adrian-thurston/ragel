@@ -215,7 +215,7 @@ for test_case; do
 		indep)
 			lang_opt="";
 
-			for lang in c; do
+			for lang in c d; do
 				case $lang in 
 					c) lf="-C";;
 					d) lf="-D";;
