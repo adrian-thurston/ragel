@@ -19,9 +19,9 @@ int val;
 	handle := any @{ 
 		prints "handle ";
 		fhold; 
-		if ( val == 1 ) fnext *fentry(one); 
-		if ( val == 2 ) fnext *fentry(two); 
-		if ( val == 3 ) fnext main;
+		if ( val == 1 ) { fnext *fentry(one); }
+		if ( val == 2 ) { fnext *fentry(two); }
+		if ( val == 3 ) { fnext main; }
 	};
 
 	one := |*

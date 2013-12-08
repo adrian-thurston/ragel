@@ -34,7 +34,7 @@ prints( Output
 	" */
 	"
 	"package main
-#	"import \"fmt\"
+	"import \"fmt\"
 	"
 )
 
@@ -45,13 +45,25 @@ int indepToHost( Indep: ref<section*> )
 			"bool [Ident: tk_ident OptArr: opt_arr];
 		{
 			Decl = cons var_decl
-				"int [Ident OptArr];
+				"var [Ident] [OptArr] int
+		}
+		elsif match Decl
+			"int [Ident: tk_ident OptArr: opt_arr];
+		{
+			Decl = cons var_decl
+				"var [Ident] [OptArr] int
+		}
+		elsif match Decl
+			"char [Ident: tk_ident OptArr: opt_arr];
+		{
+			Decl = cons var_decl
+				"var [Ident] [OptArr] byte
 		}
 		elsif match Decl
 			"ptr [Ident: tk_ident];
 		{
 			Decl = cons var_decl
-				"char* [Ident];
+				"var [Ident] int
 		}
 	}
 
@@ -61,126 +73,111 @@ int indepToHost( Indep: ref<section*> )
 		elsif match Tok "false"
 			Tok = cons tok "0"
 		elsif match Tok ['<' type '>' '(' TokList: tok* ')']
-			Tok = cons tok ['(' TokList ')']
+			Tok = cons tok ['(' Tok.type ')' '(' TokList ')']
 		elsif match Tok ['printi' V: tok ';' ] {
 			cons VL: tok*[V]
-			Tok = cons tok[ "printf( \"%d\", [V] );"]
+			Tok = cons tok[ "fmt.Print( [V] );"]
 		}
 		elsif match Tok ['printb' V: tok ';' ] {
 			cons VL: tok*[V]
-			Tok = cons tok[ "fwrite( [V], 1, pos, stdout );"]
+			Tok = cons tok[ "fmt.Print( string ( [V]\[:pos\] ));"]
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
 			cons VL: tok*[V]
-			Tok = cons tok[ "printf( \"%s\", [V] );"]
+			Tok = cons tok[ "fmt.Print( [V] );"]
 		}
 		elsif match Tok ['print_token' ';' ] {
-			Tok = cons tok[ "fwrite ( ts , 1 , te - ts , stdout );" ]
+			Tok = cons tok[ "fmt.Print( data\[ts:te\] );" ]
 		}
 		elsif match Tok ['first_token_char'] {
-			Tok = cons tok ["ts\[0\]"]
+			Tok = cons tok ["data\[ts\]"]
 		}
 	}
 }
 
-#for Section: section in RagelTree {
-#	if match Section [Decl: var_decl] {
-#		cons SectionList: section* [Decl]
-#		indepToHost( SectionList )
-#		prints( Output SectionList )
-#	}
-#}
+for Section: section in RagelTree {
+	if match Section [Decl: var_decl] {
+		cons SectionList: section* [Decl]
+		indepToHost( SectionList )
+		prints( Output SectionList )
+	}
+}
 
-#for Section: section in RagelTree {
-#	if match Section [section_multiline] {
-#		for Action: ragel::action_block in Section {
-#			# Reparse as lang-independent code.
-#			parse SectionList: section*[$Action]
-#
-#			# Translate to specific language.
-#			indepToHost( SectionList )
-#
-#			# Reparse back to ragel action block.
-#			Action = parse ragel::action_block[$SectionList]
-#		}
-#
-#		prints( Output '\n' Section '\n' )
-#	}
-#}
+for Section: section in RagelTree {
+	if match Section [section_multiline] {
+		for Action: ragel::action_block in Section {
+			# Reparse as lang-independent code.
+			parse SectionList: section*[$Action]
 
-#prints( Output
-#	"int cs;
-#	"
-#	"%% write data;
-#	"
-#	"void init()
-#	"{
-#)
+			# Translate to specific language.
+			indepToHost( SectionList )
 
-#for Section: section in RagelTree {
-#	if match Section [ExprStmt: expr_stmt] {
-#		cons SectionList: section* [ExprStmt]
-#		indepToHost( SectionList )
-#		prints( Output SectionList )
-#	}
-#}
+			# Reparse back to ragel action block.
+			Action = parse ragel::action_block[$SectionList]
+		}
 
-#prints( Output
-#	"	%% write init;
-#	"}
-#	"
-#	"void exec( char *data, int len )
-#	"{
-#	"	char *p = data;
-#	"	char *pe = data + len;
-#)
+		prints( Output '\n' Section '\n' )
+	}
+}
 
-#if NeedsEof
-#	prints( Output "	char *eof = pe;\n" )
+send Output
+	"var cs int
+	"
+	"%% write data;
+	"
+	"func prepare() {
 
-#prints( Output
-#	"	%% write exec;
-#	"}
-#	"
-#	"void finish( )
-#	"{
-#	"	if ( cs >= [$MachineName.word]_first_final )
-#	"		printf( \"ACCEPT\\n\" );
-#	"	else
-#	"		printf( \"FAIL\\n\" );
-#	"}
-#	"
-#)
+for Section: section in RagelTree {
+	if match Section [ExprStmt: expr_stmt] {
+		cons SectionList: section* [ExprStmt]
+		indepToHost( SectionList )
+		prints( Output SectionList )
+	}
+}
 
-#prints( Output
-#	"char *inp\[\] = {
-#)
-
-#NR: int = 0
-#for InputString: input_string in RagelTree {
-#	prints( Output ^InputString ',\n' )
-#	NR = NR + 1
-#}
-
-#prints( Output
-#	"};
-#	"
-#)
-
-#prints( Output "int inplen = " NR ";\n\n" )
-
-prints( Output
-	"func main() {
-#	"	int i;
-#	"	for ( i = 0; i < inplen; i++ ) {
-#	"		init();
-#	"		exec( inp\[i\], strlen(inp\[i\]) );
-#	"		finish();
-#	"	}
-#	"	return 0;
+send Output
+	"	%% write init;
 	"}
 	"
-)
+	"func exec(data string) {
+    "	var p int = 0
+    "	var pe int = len(data)
+
+if NeedsEof {
+	send Output
+		"	var eof int = pe
+}
+
+send Output
+	"	%% write exec;
+	"}
+	"func finish() {
+	"	if cs >= [MachineName.word]_first_final {
+	"		fmt.Println(\"ACCEPT\")
+	"	} else {
+	"		fmt.Println(\"FAIL\")
+	"	}
+	"}
+
+send Output
+	~var inp []string = []string {
+
+for InputString: input_string in RagelTree {
+	send Output [^InputString ",\n"]
+}
+
+send Output
+	"};
+	"
+
+send Output
+	"func main() {
+	"	for _, data := range inp {
+	"		prepare()
+	"		exec(data)
+	"		finish()
+	"	}
+	"}
 
 send Output "/* _____OUTPUT_____
 for OutputLine: output_line in RagelTree {
