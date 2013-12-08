@@ -254,7 +254,7 @@ void InputData::writeOutput()
 			cgd->writeStatement( ii->loc, ii->writeArgs.length(), ii->writeArgs.data, generateDot, hostLang );
 		}
 		else {
-			openHostBlock( this, *outStream, inputFileName, ii->loc.line );
+			openHostBlock( '$', this, *outStream, inputFileName, ii->loc.line );
 			*outStream << ii->data.str();
 			*outStream << "}$";
 		}

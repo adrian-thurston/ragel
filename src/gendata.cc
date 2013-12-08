@@ -36,9 +36,9 @@ string itoa( int i )
 	return buf;
 }
 
-void openHostBlock( InputData *id, ostream &out, const char *fileName, int line )
+void openHostBlock( char opener, InputData *id, ostream &out, const char *fileName, int line )
 {
-	out << "$ \"";
+	out << opener << " \"";
 	for ( const char *pc = fileName; *pc != 0; pc++ ) {
 		if ( *pc == '\\' )
 			out << "\\\\";

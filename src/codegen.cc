@@ -597,7 +597,7 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 		bool inFinish, bool csForced )
 {
 	ret << '\t';
-	openHostBlock( pd->id, ret, action->loc.fileName, action->loc.line );
+	openHostBlock( '$', pd->id, ret, action->loc.fileName, action->loc.line );
 	ret << '{';
 	INLINE_LIST( ret, action->inlineList, targState, inFinish, csForced );
 	ret << "}}$";
@@ -605,7 +605,7 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 
 void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
-	openHostBlock( pd->id, ret, condition->loc.fileName, condition->loc.line );
+	openHostBlock( '=', pd->id, ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 	ret << "}$";
 }

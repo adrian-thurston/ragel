@@ -19,6 +19,11 @@ int d_trans_expr_factor( Output: stream ExprFactor: expr_factor )
 		d_tok_list( Output TL )
 	}
 	elsif match ExprFactor
+		['=' string uint '{' TL: host::tok* host::'}$']
+	{
+		d_tok_list( Output TL )
+	}
+	elsif match ExprFactor
 		[O:'(' TL: expr C: ')']
 	{
 		send Output [O]
@@ -252,6 +257,11 @@ int d_trans_stmt( Output: stream Stmt: stmt )
 {
 	if match Stmt
 		['$' string uint '{' TL: host::tok* host::'}$']
+	{
+		d_tok_list( Output TL )
+	}
+	elsif match Stmt
+		['=' string uint '{' TL: host::tok* host::'}$']
 	{
 		d_tok_list( Output TL )
 	}

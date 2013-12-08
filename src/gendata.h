@@ -113,7 +113,7 @@ struct FsmAp;
 typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
 typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 
-void openHostBlock( InputData *id, ostream &out, const char *fileName, int line );
+void openHostBlock( char opener, InputData *id, ostream &out, const char *fileName, int line );
 
 string itoa( int i );
 
