@@ -183,8 +183,7 @@ def expr_test
 |	[expr_shift]
 
 def expr_cond
-	[expr_test '?' expr ':' expr_cond]
-|	[expr_test]
+	[expr_test]
 
 def assign_op
 	['='] | ['+=']

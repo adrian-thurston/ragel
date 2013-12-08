@@ -209,18 +209,7 @@ int go_trans_expr_test( Output: stream ExprTest: expr_test )
 
 int go_trans_expr_cond( Output: stream ExprCond: expr_cond )
 {
-	if match ExprCond [expr_test Q: '?' expr C: ':' expr_cond]
-	{
-		go_trans_expr_test( Output ExprCond.expr_test )
-		send Output [Q]
-		go_trans_expr( Output ExprCond.expr )
-		send Output [C]
-		go_trans_expr_cond( Output ExprCond._expr_cond )
-	}
-	elsif match ExprCond [expr_test]
-	{
-		go_trans_expr_test( Output ExprCond.expr_test )
-	}
+	go_trans_expr_test( Output ExprCond.expr_test )
 }
 
 int go_trans_expr_assign( Output: stream ExprAssign: expr_assign )
