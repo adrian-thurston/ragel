@@ -16,35 +16,40 @@ int token;
 	main := |*
 		'a' => { 
 			prints "on last     ";
-			if ( p+1 == te )
+			if ( p+1 == te ) {
 				prints "yes";
+			}
 			prints "\n";
 		};
 
 		'b'+ => {
 			prints "on next     ";
-			if ( p+1 == te )
+			if ( p+1 == te ) {
 				prints "yes";
+			}
 			prints "\n";
 		};
 
 		'c1' 'dxxx'? => {
 			prints "on lag      ";
-			if ( p+1 == te )
+			if ( p+1 == te ) {
 				prints "yes";
+			}
 			prints "\n";
 		};
 
 		'd1' => {
 			prints "lm switch1  ";
-			if ( p+1 == te )
+			if ( p+1 == te ) {
 				prints "yes";
+			}
 			prints "\n";
 		};
 		'd2' => {
 			prints "lm switch2  ";
-			if ( p+1 == te )
+			if ( p+1 == te ) {
 				prints "yes";
+			}
 			prints "\n";
 		};
 

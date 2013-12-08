@@ -2,10 +2,12 @@ include '../src/ragel.lm'
 
 lex 
 	literal '%%{', '}%%'
+
 	literal 'int', 'bool', 'const', 'char', 'ptr', 'printi',
 			'printb', 'prints', 'print_token', 'printf',
-			'fwrite', 'first_token_char'
-	literal ';', '<', '>', '(', ')', '[', ']', '=', '*'
+			'fwrite', 'first_token_char', 'var', 'fmt.Print', 'byte'
+
+	literal ';', '<', '>', '(', ')', '[', ']', '=', '*', '!'
 
 	ignore / ( [ \t] | NL )+ /
 
@@ -80,6 +82,7 @@ def tok
 |	[c_comment]
 |	[string]
 |	['<' type '>' '(' tok* ')']
+|	['(' type ')' '(' tok* ')']
 |	['(' tok* ')']
 |	['printi' tok ';']
 |	['printb' tok ';']
@@ -88,12 +91,14 @@ def tok
 |	['first_token_char']
 |	['printf' '(' tok* ')' ';']
 |	['fwrite' '(' tok* ')' ';']
+|	['fmt.Print' '(' tok* ')' ';']
 |	[';']
 |	['<']
 |	['>']
 |	['[']
 |	[']']
 |	['=']
+|	['!']
 |	['*']
 |	[indep_any]
 
@@ -107,6 +112,7 @@ def type
 |	['char' '*']
 |	['const' '(' 'char' ')' '*']
 |	['ptr']
+|	['byte']
 
 def opt_arr
 	['[' tok ']']
@@ -114,6 +120,7 @@ def opt_arr
 
 def var_decl
 	[type tk_ident opt_arr ';']
+|	['var' tk_ident opt_arr type]
 
 def expr_stmt
 	[tk_ident '=' tok* ';']

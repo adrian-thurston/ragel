@@ -10,16 +10,34 @@ bool k;
 %%{
 	machine foo;
 
-	action c1 {i}
-	action c2 {j}
-	action c3 {k}
+	action c1 {i != 0}
+	action c2 {j != 0}
+	action c3 {k != 0}
 	action one { prints "  one\n";}
 	action two { prints "  two\n";}
 	action three { prints "  three\n";}
 
-	action seti { if ( fc == 48 ) i = false; else i = true; }
-	action setj { if ( fc == 48 ) j = false; else j = true; }
-	action setk { if ( fc == 48 ) k = false; else k = true; }
+	action seti {
+		if ( fc == 48 ) {
+			i = false;
+		} else {
+			i = true;
+		}
+	}
+	action setj {
+		if ( fc == 48 ) {
+			j = false; 
+		} else {
+			j = true;
+		}
+	}
+	action setk {
+		if ( fc == 48 ) {
+			k = false; 
+		} else {
+			k = true;
+		}
+	}
 
 	action break {fbreak;}
 
