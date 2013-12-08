@@ -243,8 +243,6 @@ int go_type( Output: stream Type: type )
 		send Output ['int64 ']
 	elsif match Type "s128"
 		send Output ['long long ']
-	elsif match Type "unsigned int"
-		send Output ['uint ']
 	else
 		send Output [Type]
 }

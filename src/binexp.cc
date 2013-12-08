@@ -37,18 +37,18 @@ BinaryExpanded::BinaryExpanded( const CodeGenArgs &args )
 /* Determine if we should use indicies or not. */
 void BinaryExpanded::calcIndexSize()
 {
-	long long sizeWithInds =
-		indicies.size() +
-		transCondSpacesWi.size() +
-		transOffsetsWi.size() +
-		transLengthsWi.size();
-
-	long long sizeWithoutInds =
-		transCondSpaces.size() +
-		transOffsets.size() +
-		transLengths.size();
-
-	//std::cerr << "sizes: " << sizeWithInds << " " << sizeWithoutInds << std::endl;
+//	long long sizeWithInds =
+//		indicies.size() +
+//		transCondSpacesWi.size() +
+//		transOffsetsWi.size() +
+//		transLengthsWi.size();
+//
+//	long long sizeWithoutInds =
+//		transCondSpaces.size() +
+//		transOffsets.size() +
+//		transLengths.size();
+//
+//	//std::cerr << "sizes: " << sizeWithInds << " " << sizeWithoutInds << std::endl;
 
 	useIndicies = false;
 }
@@ -289,8 +289,8 @@ void BinaryExpanded::writeExec()
 		"	index " << ALPH_TYPE() << " _keys;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _cpc;\n"
-		"	unsigned int _trans;\n"
-		"	unsigned int _cond;\n";
+		"	uint _trans;\n"
+		"	uint _cond;\n";
 
 	out << "\n";
 

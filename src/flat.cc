@@ -375,7 +375,7 @@ void Flat::LOCATE_TRANS()
 	out <<
 		"	_ckeys = offset( " << ARR_REF( condKeys ) << ", " << ARR_REF( transOffsets ) << "[_trans] );\n"
 		"	_klen = (int)" << ARR_REF( transLengths ) << "[_trans];\n"
-		"	_cond = (unsigned int)" << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
 		"\n";
 
 	out <<
@@ -418,7 +418,7 @@ void Flat::LOCATE_TRANS()
 		"			else if ( _cpc > (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_cond += (unsigned int)(_mid - _ckeys);\n"
+		"				_cond += (uint)(_mid - _ckeys);\n"
 		"				goto _match_cond;\n"
 		"			}\n"
 		"		}\n"

@@ -99,7 +99,7 @@ void GotoLooped::writeExec()
 	{
 		out << 
 			"	index " << ARR_TYPE( actions ) << " _acts;\n"
-			"	unsigned int _nacts;\n";
+			"	uint _nacts;\n";
 	}
 
 	out << "\n";
@@ -124,7 +124,7 @@ void GotoLooped::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " <<
 					ARR_REF( fromStateActions ) << "[" << vCS() << "] );\n"
-			"	_nacts = (unsigned int) *_acts++;\n"
+			"	_nacts = (uint) *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
@@ -150,7 +150,7 @@ void GotoLooped::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " <<
 					ARR_REF( toStateActions ) << "[" << vCS() << "] );\n"
-			"	_nacts = " << "(unsigned int)" << " *_acts++;\n"
+			"	_nacts = " << "(uint)" << " *_acts++;\n"
 			"	while ( _nacts-- > 0 ) {\n"
 			"		switch ( *_acts++ ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
@@ -206,7 +206,7 @@ void GotoLooped::writeExec()
 				"	index " << ARR_TYPE( actions ) << " __acts;\n"
 				"	__acts = offset( " << ARR_REF( actions ) << ", " << 
 						ARR_REF( eofActions ) << "[" << vCS() << "] );\n"
-				"	" << "unsigned int" << " __nacts = " << "(unsigned int)" << " *__acts++;\n"
+				"	uint __nacts = (uint) *__acts++;\n"
 				"	while ( __nacts-- > 0 ) {\n"
 				"		switch ( *__acts++ ) {\n";
 				EOF_ACTION_SWITCH() <<

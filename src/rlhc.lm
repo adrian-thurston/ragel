@@ -72,7 +72,7 @@ lex
 			'if', 'else', 'offset', 'index',
 			'goto', 'deref'
 
-	literal 'uint', 'unsigned', 'const',
+	literal 'uint', 'const',
 			's8', 's16', 's32', 's64',
 			's128', 'nil', 'export',
 			'fallthrough', 'u'
@@ -114,7 +114,6 @@ def embedded_host
 def type
 	[ident]
 |	[ident ident]
-|	['unsigned' ident]
 |	['uint']
 |	['s8']
 |	['s16']

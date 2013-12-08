@@ -233,7 +233,7 @@ void FlatExpanded::writeExec()
 		out << "	int _ps;\n";
 	
 	out << "	int _trans;\n";
-	out << "	unsigned int _cond;\n";
+	out << "	uint _cond;\n";
 
 	out <<
 		"	index " << ALPH_TYPE() << " _keys;\n"
