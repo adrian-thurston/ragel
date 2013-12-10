@@ -387,8 +387,11 @@ std::ostream &IpGoto::FINISH_CASES()
 
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		if ( act->eofRefs != 0 ) {
-			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ )
+			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ ) {
 				out << "	case " << *pst << ": \n";
+				if ( ! pst.last() )
+					out << "		fallthrough;\n";
+			}
 
 			/* Write each action in the eof action list. */
 			for ( GenActionTable::Iter item = act->key; item.lte(); item++ )

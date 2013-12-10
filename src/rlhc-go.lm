@@ -382,6 +382,7 @@ int go_trans_stmt( Output: stream Stmt: stmt )
 	}
 	elsif match Stmt ['fallthrough' ';']
 	{
+		send Output "fallthrough\n"
 		# Nothing needed here.
 	}
 	elsif match Stmt [index_stmt]
