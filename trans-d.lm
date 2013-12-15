@@ -1,5 +1,50 @@
 include 'trans.lm'
 
+namespace d
+	lex 
+		literal '%%{', '}%%'
+
+		literal 'int', 'bool', 'const', 'char', 'ptr', 'printi',
+				'printb', 'prints', 'print_token', 'printf',
+				'fwrite', 'first_token_char', 'var', 'byte'
+
+		literal ';', '<', '>', '(', ')', '[', ']', '=', '*', '!'
+
+		ignore / ( [ \t] | NL )+ /
+
+		token tk_ident /ident/
+		token tk_number /digit+/
+		token tk_hex_number /'0x' [0-9a-fA-F]+/
+
+		token string
+			/ s_literal | d_literal /
+
+		token indep_any / any /
+	end
+
+	def tok
+		[tk_ident]
+	|	[tk_ident '[' tok ']']
+	|	[tk_number]
+	|	[tk_hex_number]
+	|	[string]
+	|	['<' type '>' '(' tok* ')']
+	|	['(' type ')' '(' tok* ')']
+	|	['(' tok* ')']
+	|	['printf' '(' tok* ')' ';']
+	|	['fwrite' '(' tok* ')' ';']
+	|	[';']
+	|	['<']
+	|	['>']
+	|	['[']
+	|	[']']
+	|	['=']
+	|	['!']
+	|	['*']
+	|	[indep_any]
+end
+
+
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
 Lang: str = argv.pop()
@@ -57,29 +102,32 @@ int indepToHost( Indep: ref<section*> )
 	}
 
 	for Tok: tok in Indep {
-		if match Tok "true"
+		if match Tok "true" {
 			Tok = cons tok "1"
-		elsif match Tok "false"
+		}
+		elsif match Tok "false" {
 			Tok = cons tok "0"
-		elsif match Tok ['<' type '>' '(' TokList: tok* ')']
+		}
+		elsif match Tok ['<' type '>' '(' TokList: tok* ')'] {
 			Tok = cons tok ['(' TokList ')']
+		}
 		elsif match Tok ['printi' V: tok ';' ] {
-			cons VL: tok*[V]
-			Tok = cons tok[ "printf( \"%d\", [V] );"]
+			DV: d::tok = cast<d::tok> V
+			Tok = cast<tok> cons d::tok[ "printf( \"%d\", [DV] );"]
 		}
 		elsif match Tok ['printb' V: tok ';' ] {
-			cons VL: tok*[V]
-			Tok = cons tok[ "printf( \"%.*s\", [V]\[0..(pos)\] );"]
+			DV: d::tok = cast<d::tok> V
+			Tok = cast<tok> cons d::tok[ "printf( \"%.*s\", [DV]\[0..(pos)\] );"]
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
-			cons VL: tok*[V]
-			Tok = cons tok[ "printf( \"%.*s\", [V] );"]
+			DV: d::tok = cast<d::tok> V
+			Tok = cast<tok> cons d::tok[ "printf( \"%.*s\", [DV] );"]
 		}
 		elsif match Tok ['print_token' ';' ] {
-			Tok = cons tok[ "printf( \"%.*s\", ts\[0..(te - ts)\] );"]
+			Tok = cast<tok> cons d::tok[ "printf( \"%.*s\", ts\[0..(te - ts)\] );"]
 		}
 		elsif match Tok ['first_token_char'] {
-			Tok = cons tok ["ts\[0\]"]
+			Tok = cast<tok> cons d::tok ["ts\[0\]"]
 		}
 	}
 }

@@ -4,8 +4,8 @@ lex
 	literal '%%{', '}%%'
 
 	literal 'int', 'bool', 'const', 'char', 'ptr', 'printi',
-			'printb', 'prints', 'print_token', 'printf',
-			'fwrite', 'first_token_char', 'var', 'fmt.Print', 'byte'
+			'printb', 'prints', 'print_token',
+			'fwrite', 'first_token_char', 'var', 'byte'
 
 	literal ';', '<', '>', '(', ')', '[', ']', '=', '*', '!'
 
@@ -89,9 +89,6 @@ def tok
 |	['prints' tok ';']
 |	['print_token' ';']
 |	['first_token_char']
-|	['printf' '(' tok* ')' ';']
-|	['fwrite' '(' tok* ')' ';']
-|	['fmt.Print' '(' tok* ')' ';']
 |	[';']
 |	['<']
 |	['>']
@@ -136,4 +133,3 @@ def section
 
 def start
 	[section*]
-
