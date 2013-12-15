@@ -1,5 +1,48 @@
 include 'trans.lm'
 
+namespace go
+	lex 
+		literal '%%{', '}%%'
+
+		literal 'int', 'bool', 'const', 'char', 'ptr',
+				'var', 'fmt.Print', 'byte'
+
+		literal ';', '<', '>', '(', ')', '[', ']', '=', '*', '!'
+
+		ignore / ( [ \t] | NL )+ /
+
+		token tk_ident /ident/
+		token tk_number /digit+/
+		token tk_hex_number /'0x' [0-9a-fA-F]+/
+
+		token string
+			/ s_literal | d_literal /
+
+		token indep_any / any /
+	end
+
+	def tok
+		[tk_ident]
+	|	[tk_ident '[' tok ']']
+	|	[tk_number]
+	|	[tk_hex_number]
+	|	[string]
+	|	['<' type '>' '(' tok* ')']
+	|	['(' type ')' '(' tok* ')']
+	|	['(' tok* ')']
+	|	['fmt.Print' '(' tok* ')' ';']
+	|	[';']
+	|	['<']
+	|	['>']
+	|	['[']
+	|	[']']
+	|	['=']
+	|	['!']
+	|	['*']
+	|	[indep_any]
+end
+
+
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
 Lang: str = argv.pop()
@@ -68,29 +111,32 @@ int indepToHost( Indep: ref<section*> )
 	}
 
 	for Tok: tok in Indep {
-		if match Tok "true"
+		if match Tok "true" {
 			Tok = cons tok "1"
-		elsif match Tok "false"
+		}
+		elsif match Tok "false" {
 			Tok = cons tok "0"
-		elsif match Tok ['<' type '>' '(' TokList: tok* ')']
+		}
+		elsif match Tok ['<' type '>' '(' TokList: tok* ')'] {
 			Tok = cons tok ['(' Tok.type ')' '(' TokList ')']
+		}
 		elsif match Tok ['printi' V: tok ';' ] {
-			cons VL: tok*[V]
-			Tok = cons tok[ "fmt.Print( [V] );"]
+			GV: go::tok = cast<go::tok> V
+			Tok = cast<tok> cons go::tok[ "fmt.Print( [GV] );"]
 		}
 		elsif match Tok ['printb' V: tok ';' ] {
-			cons VL: tok*[V]
-			Tok = cons tok[ "fmt.Print( string ( [V]\[:pos\] ));"]
+			GV: go::tok = cast<go::tok> V
+			Tok = cast<tok> cons go::tok[ "fmt.Print( string ( [GV]\[:pos\] ));"]
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
-			cons VL: tok*[V]
-			Tok = cons tok[ "fmt.Print( [V] );"]
+			GV: go::tok = cast<go::tok> V
+			Tok = cast<tok> cons go::tok[ "fmt.Print( [GV] );"]
 		}
 		elsif match Tok ['print_token' ';' ] {
-			Tok = cons tok[ "fmt.Print( data\[ts:te\] );" ]
+			Tok = cast<tok> cons go::tok[ "fmt.Print( data\[ts:te\] );" ]
 		}
 		elsif match Tok ['first_token_char'] {
-			Tok = cons tok ["data\[ts\]"]
+			Tok = cast<tok> cons go::tok ["data\[ts\]"]
 		}
 	}
 }
