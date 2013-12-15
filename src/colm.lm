@@ -42,6 +42,7 @@ lex
 	token PREEOF / 'preeof' /
 	token GLOBAL / 'global' /
 	token EOS / 'eos' /
+	token CAST / 'cast' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -480,6 +481,7 @@ def code_factor
 |	[MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE] :MakeToken
 |	[TYPEID LT type_ref GT] :TypeId
 |	[NEW code_factor] :New
+|	[CAST LT type_ref GT code_factor] :Cast
 
 def type_ref
 	[region_qual id opt_repeat] :Id

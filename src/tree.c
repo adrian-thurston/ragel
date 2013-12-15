@@ -704,6 +704,93 @@ Tree *constructToken( Program *prg, Tree **root, long nargs )
 	return tree;
 }
 
+Tree *castTree( Program *prg, int langElId, Tree *tree )
+{
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+
+	/* Need to keep a lookout for next down. If 
+	 * copying it, return the copy. */
+	Tree *newTree = treeAllocate( prg );
+
+	newTree->id = langElId;
+	newTree->tokdata = stringCopy( prg, tree->tokdata );
+
+	/* Invalidate the production number. */
+	newTree->prodNum = -1;
+
+	/* Copy the child list. Start with ignores, then the list. */
+	Kid *child = tree->child, *last = 0;
+
+	/* Flags we are interested in. */
+	newTree->flags |= tree->flags & ( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
+
+	int ignores = 0;
+	if ( tree->flags & AF_LEFT_IGNORE )
+		ignores += 1;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		ignores += 1;
+
+	/* Igores. */
+	while ( ignores-- > 0 ) {
+		Kid *newKid = kidAllocate( prg );
+
+		newKid->tree = child->tree;
+		newKid->next = 0;
+		newKid->tree->refs += 1;
+
+		/* Store the first child. */
+		if ( last == 0 )
+			newTree->child = newKid;
+		else
+			last->next = newKid;
+
+		child = child->next;
+		last = newKid;
+	}
+
+	/* Skip over the source's attributes. */
+	int objectLength = lelInfo[tree->id].objectLength;
+	while ( objectLength-- > 0 )
+		child = child->next;
+
+	/* Allocate the target type's kids. */
+	objectLength = lelInfo[langElId].objectLength;
+	while ( objectLength-- > 0 ) {
+		Kid *newKid = kidAllocate( prg );
+
+		newKid->tree = 0;
+		newKid->next = 0;
+
+		/* Store the first child. */
+		if ( last == 0 )
+			newTree->child = newKid;
+		else
+			last->next = newKid;
+
+		last = newKid;
+	}
+	
+	/* Copy the source's children. */
+	while ( child != 0 ) {
+		Kid *newKid = kidAllocate( prg );
+
+		newKid->tree = child->tree;
+		newKid->next = 0;
+		newKid->tree->refs += 1;
+
+		/* Store the first child. */
+		if ( last == 0 )
+			newTree->child = newKid;
+		else
+			last->next = newKid;
+
+		child = child->next;
+		last = newKid;
+	}
+	
+	return newTree;
+}
+
 Tree *makeTree( Program *prg, Tree **root, long nargs )
 {
 	Tree **const sp = root;
@@ -2526,4 +2613,5 @@ void printXmlStdout( Program *prg, Tree **sp, Tree *tree, int commAttr, int trim
 			&openTreeXml, &printTermXml, &closeTreeXml };
 	colm_print_tree_args( prg, sp, &printArgs, tree );
 }
+
 

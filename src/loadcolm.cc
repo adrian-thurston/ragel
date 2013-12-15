@@ -1670,6 +1670,13 @@ struct LoadColm
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::NewType, newExpr ) );
 			break;
+		}
+		case code_factor::_Cast: {
+			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
+			LangExpr *castExpr = walkCodeFactor( codeFactor._code_factor() );
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
+					LangTerm::CastType, typeRef, castExpr ) );
+			break;
 		}}
 		return expr;
 	}

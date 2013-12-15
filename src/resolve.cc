@@ -370,8 +370,11 @@ void LangTerm::resolve( Compiler *pd )
 
 		case SendType:
 			break;
-
 		case EmbedStringType:
+			break;
+		case CastType:
+			typeRef->lookupType( pd );
+			expr->resolve( pd );
 			break;
 	}
 }

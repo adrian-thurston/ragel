@@ -1280,6 +1280,14 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	return pd->findUniqueType( TYPE_PTR, ut->langEl );
 }
 
+UniqueType *LangTerm::evaluateCast( Compiler *pd, CodeVect &code ) const
+{
+	UniqueType *ut = expr->evaluate( pd, code );
+	code.append( IN_TREE_CAST );
+	code.appendHalf( typeRef->uniqueType->langEl->id );
+	return typeRef->uniqueType;
+}
+
 void LangTerm::assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT ) const
 {
 	/* Now assign the field initializations. Note that we need to do this in
@@ -1839,6 +1847,8 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 			return evaluateSearch( pd, code );
 		case EmbedStringType:
 			return evaluateEmbedString( pd, code );
+		case CastType:
+			return evaluateCast( pd, code );
 	}
 	return 0;
 }

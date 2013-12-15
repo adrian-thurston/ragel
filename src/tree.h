@@ -331,6 +331,8 @@ void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long rootSize,
 void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
 		long argSize, long searchId );
 
+Tree *castTree( struct colm_program *prg, int langElId, Tree *tree );
+
 #if defined(__cplusplus)
 }
 #endif

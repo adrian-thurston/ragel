@@ -2466,6 +2466,7 @@ struct LangTerm
 		MakeTreeType,
 		MakeTokenType,
 		EmbedStringType,
+		CastType,
 	};
 
 	LangTerm()
@@ -2529,6 +2530,17 @@ struct LangTerm
 		t->type = type;
 		t->varRef = 0;
 		t->typeRef = typeRef;
+		return t;
+	}
+
+	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef, LangExpr *langExpr )
+	{
+		LangTerm *t = new LangTerm;
+		t->loc = loc;
+		t->type = type;
+		t->varRef = 0;
+		t->typeRef = typeRef;
+		t->expr = langExpr;
 		return t;
 	}
 
@@ -2637,6 +2649,7 @@ struct LangTerm
 	UniqueType *evaluateMakeTree( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateEmbedString( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateSearch( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateCast( Compiler *pd, CodeVect &code ) const;
 
 	InputLoc loc;
 	Type type;

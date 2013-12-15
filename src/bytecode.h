@@ -79,6 +79,7 @@ typedef unsigned char uchar;
 #define IN_MATCH                 0x22
 #define IN_CONSTRUCT             0x23
 #define IN_TREE_NEW              0x24
+#define IN_TREE_CAST             0xe4
 
 #define IN_GET_LOCAL_R           0x25
 #define IN_GET_LOCAL_WC          0x26

@@ -2671,6 +2671,19 @@ again:
 			vm_push( result );
 			break;
 		}
+		case IN_TREE_CAST: {
+			Half langElId;
+			read_half( langElId );
+
+			debug( prg, REALM_BYTECODE, "IN_TREE_CAST %hd\n", langElId );
+
+			Tree *tree = vm_pop();
+			Tree *res = castTree( prg, langElId, tree );
+			treeUpref( res );
+			treeDownref( prg, sp, tree );
+			vm_push( res );
+			break;
+		}
 		case IN_TREE_NEW: {
 			debug( prg, REALM_BYTECODE, "IN_TREE_NEW \n" );
 
