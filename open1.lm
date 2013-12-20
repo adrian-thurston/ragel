@@ -1,0 +1,18 @@
+##### LM #####
+
+int testOpen( Fn: str )
+{
+	S: stream = open( Fn 'r' )
+
+	if ( S )
+		print( 'yes\n' )
+	else
+		print( 'no\n' )
+}
+
+testOpen( 'open1.lm' )
+testOpen( 'this-wont-exist--probably' )
+
+##### EXP #####
+yes
+no
