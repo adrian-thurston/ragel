@@ -250,6 +250,7 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode )
 {
 	Head *headName = ((Str*)name)->value;
 	Head *headMode = ((Str*)mode)->value;
+	Stream *stream = 0;
 
 	const char *givenMode = stringData(headMode);
 	const char *fopenMode = 0;
@@ -266,7 +267,10 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode )
 	memcpy( fileName, stringData(headName), stringLength(headName) );
 	fileName[stringLength(headName)] = 0;
 	FILE *file = fopen( fileName, fopenMode );
-	return openStreamFile( prg, fileName, file );
+	if ( file != 0 )
+		stream = openStreamFile( prg, fileName, file );
+
+	return stream;
 }
 
 Tree *constructInteger( Program *prg, long i )
