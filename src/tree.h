@@ -189,8 +189,16 @@ typedef struct _Parser
 	Tree *result;
 } Parser;
 
+enum IterType
+{
+	IT_Tree = 1,
+	IT_RevTree,
+	IT_User
+};
+
 typedef struct _TreeIter
 {
+	enum IterType type;
 	Ref rootRef;
 	Ref ref;
 	long searchId;
@@ -202,6 +210,7 @@ typedef struct _TreeIter
 /* This must overlay tree iter because some of the same bytecodes are used. */
 typedef struct _RevTreeIter
 {
+	enum IterType type;
 	Ref rootRef;
 	Ref ref;
 	long searchId;
@@ -216,6 +225,7 @@ typedef struct _RevTreeIter
 
 typedef struct _UserIter
 {
+	enum IterType type;
 	/* The current item. */
 	Ref ref;
 	Tree **stackRoot;
@@ -330,6 +340,8 @@ void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long rootSize,
 		const Ref *rootRef, int searchId, int children );
 void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
 		long argSize, long searchId );
+
+void treeIterDestroy( struct colm_program *prg, Tree ***psp, TreeIter *iter );
 
 Tree *castTree( struct colm_program *prg, int langElId, Tree *tree );
 

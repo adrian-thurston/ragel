@@ -369,6 +369,22 @@ void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, char *trees, long
 	}
 }
 
+void downrefLocalIters( Program *prg, Tree ***psp, Tree **frame, char *iters, long itersLen )
+{
+	long i;
+	for ( i = itersLen-1; i >= 0; i-- ) {
+		enum IterType *type = (enum IterType*) &frame[(long) iters[i]];
+		debug( prg, REALM_BYTECODE, "local iter downref: %ld %ld\n", (long)iters[i], (long)*type );
+		switch ( *type ) {
+			case IT_Tree: {
+				TreeIter *iter = (TreeIter*) &frame[(long) iters[i]];
+				treeIterDestroy( prg, psp, iter );
+				break;
+			}
+		}
+	}
+}
+
 UserIter *uiterCreate( Program *prg, Tree ***psp, FunctionInfo *fi, long searchId )
 {
 	Tree **sp = *psp;
@@ -407,6 +423,7 @@ void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
 	assert( iter->yieldSize == curStackSize );
 	vm_popn( iter->yieldSize );
 	*psp = sp;
+	iter->type = 0;
 }
 
 void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
@@ -3623,6 +3640,7 @@ again:
 				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 				int frameId = exec->frameId;
 
+				downrefLocalIters( prg, &sp, exec->framePtr, fi->iters, fi->itersLen );
 				downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
 
 				vm_popn( fi->frameSize );

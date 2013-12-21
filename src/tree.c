@@ -49,6 +49,7 @@ long listLength(List *list)
 void initTreeIter( TreeIter *treeIter, Tree **stackRoot, long rootSize,
 		const Ref *rootRef, int searchId )
 {
+	treeIter->type = IT_Tree;
 	treeIter->rootRef = *rootRef;
 	treeIter->searchId = searchId;
 	treeIter->stackRoot = stackRoot;
