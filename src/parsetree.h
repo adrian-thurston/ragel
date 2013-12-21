@@ -63,6 +63,7 @@ struct CodeBlock;
 struct PdaLiteral;
 struct TypeAlias;
 struct RegionSet;
+struct ObjNameScope;
 typedef struct _PdaRun PdaRun;
 
 /* 
@@ -146,6 +147,33 @@ enum BuiltinMachine
 	BT_Xdigit,
 	BT_Lambda,
 	BT_Empty
+};
+
+struct IterLoc
+{
+	IterLoc( int scope, int loc )
+		: scope(scope), loc(loc) {}
+
+	int scope;
+	int loc;
+};
+
+struct Iters
+{
+	Vector<IterLoc> ordered;
+	Vector<char> locs;
+
+	void append( const IterLoc &il )
+	{
+		int pos = 0;
+		while ( pos < ordered.length() && il.scope >= ordered[pos].scope )
+			pos += 1;
+		ordered.insert( pos, il );
+		locs.insert( pos, il.loc );
+	}
+
+	char *data() { return locs.data; }
+	int length() { return locs.length(); }
 };
 
 typedef BstSet<char> CharSet;
@@ -2139,7 +2167,9 @@ struct ObjectField
 	: 
 		typeRef(0),
 		context(0),
-		pos(0), offset(0),
+		scope(0),
+		pos(0),
+		offset(0),
 		beenReferenced(false),
 		beenInitialized(false),
 		useOffset(true),
@@ -2172,6 +2202,7 @@ struct ObjectField
 	TypeRef *typeRef;
 	String name;
 	Context *context;
+	ObjNameScope *scope;
 	long pos;
 	long offset;
 	bool beenReferenced;
@@ -2230,6 +2261,17 @@ struct ObjNameScope
 	ObjNameScope *childIter;
 
 	ObjNameScope *prev, *next;
+
+	int depth()
+	{
+		int depth = 0;
+		ObjNameScope *scope = this;
+		while ( scope != 0 ) {
+			depth += 1;
+			scope = scope->parentScope;
+		}
+		return depth;
+	}
 };
 
 struct ObjectDef
@@ -2989,6 +3031,7 @@ struct CodeBlock
 	StmtList *stmtList;
 	ObjectDef *localFrame;
 	CharSet trees;
+	Iters iters;
 	Context *context;
 
 	/* Each frame has two versions of 

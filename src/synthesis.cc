@@ -262,6 +262,7 @@ void ObjectDef::insertField( const String &name, ObjectField *value )
 {
 	scope->objFieldMap->insert( name, value );
 	objFieldList->append( value );
+	value->scope = scope;
 }
 
 /* Recurisve find through a single object def's scope. */
@@ -1282,7 +1283,7 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 
 UniqueType *LangTerm::evaluateCast( Compiler *pd, CodeVect &code ) const
 {
-	UniqueType *ut = expr->evaluate( pd, code );
+	expr->evaluate( pd, code );
 	code.append( IN_TREE_CAST );
 	code.appendHalf( typeRef->uniqueType->langEl->id );
 	return typeRef->uniqueType;
@@ -2758,6 +2759,22 @@ void Compiler::findLocalTrees( CharSet &trees )
 	}
 }
 
+void Compiler::findLocalIters( Iters &iters )
+{
+	/* We exlcude "lhs" from being downrefed because we need to use if after
+	 * the frame is is cleaned and so it must survive. */
+	for ( ObjFieldList::Iter ol = *curLocalFrame->objFieldList; ol.lte(); ol++ ) {
+		ObjectField *el = ol->value;
+		if ( el->useOffset ) {
+			UniqueType *ut = el->typeRef->uniqueType;
+			if ( ut->typeId == TYPE_ITER ) {
+				int depth = el->scope->depth();
+				iters.append( IterLoc( depth, (int)el->offset ) );
+			}
+		}
+	}
+}
+
 void Compiler::makeProdCopies( Production *prod )
 {
 	int pos = 0;
@@ -2805,6 +2822,7 @@ void Compiler::compileReductionCode( Production *prod )
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
 	findLocalTrees( block->trees );
+	findLocalIters( block->iters );
 }
 
 void Compiler::compileTranslateBlock( LangEl *langEl )
@@ -2851,6 +2869,7 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
 	findLocalTrees( block->trees );
+	findLocalIters( block->iters );
 }
 
 void Compiler::compilePreEof( TokenRegion *region )
@@ -2885,6 +2904,7 @@ void Compiler::compilePreEof( TokenRegion *region )
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
 	findLocalTrees( block->trees );
+	findLocalIters( block->iters );
 }
 
 void Compiler::compileRootBlock( )
@@ -2923,6 +2943,7 @@ void Compiler::compileRootBlock( )
 
 	/* Make the local trees descriptor. */
 	findLocalTrees( block->trees );
+	findLocalIters( block->iters );
 }
 
 void Compiler::initAllLanguageObjects()
@@ -3228,6 +3249,7 @@ void Compiler::compileUserIter( Function *func )
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
 	findLocalTrees( block->trees );
+	findLocalIters( block->iters );
 
 	/* FIXME: Need to deal with the freeing of local trees. */
 }
@@ -3297,6 +3319,7 @@ void Compiler::compileFunction( Function *func )
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
 	findLocalTrees( block->trees );
+	findLocalIters( block->iters );
 }
 
 void Compiler::makeDefaultIterators()

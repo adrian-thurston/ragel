@@ -799,6 +799,7 @@ struct Compiler
 	void compileRootBlock();
 	void compileTranslateBlock( LangEl *langEl );
 	void findLocalTrees( CharSet &trees );
+	void findLocalIters( Iters &iters );
 	void makeProdCopies( Production *prod );
 	void compileReductionCode( Production *prod );
 	void initGenericTypes();

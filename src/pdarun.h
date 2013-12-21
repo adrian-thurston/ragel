@@ -207,6 +207,8 @@ typedef struct _FrameInfo
 	long codeLenWC;
 	char *trees;
 	long treesLen;
+	char *iters;
+	long itersLen;
 	long argSize;
 	long frameSize;
 } FrameInfo;
