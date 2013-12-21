@@ -381,6 +381,11 @@ void downrefLocalIters( Program *prg, Tree ***psp, Tree **frame, char *iters, lo
 				treeIterDestroy( prg, psp, iter );
 				break;
 			}
+			case IT_RevTree: {
+				RevTreeIter *riter = (RevTreeIter*) &frame[(long) iters[i]];
+				revTreeIterDestroy( prg, psp, riter );
+				break;
+			}
 		}
 	}
 }
@@ -422,8 +427,18 @@ void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
 	long curStackSize = vm_ssize() - iter->rootSize;
 	assert( iter->yieldSize == curStackSize );
 	vm_popn( iter->yieldSize );
-	*psp = sp;
 	iter->type = 0;
+	*psp = sp;
+}
+
+void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *riter )
+{
+	Tree **sp = *psp;
+	long curStackSize = vm_ssize() - riter->rootSize;
+	assert( riter->yieldSize == curStackSize );
+	vm_popn( riter->yieldSize );
+	riter->type = 0;
+	*psp = sp;
 }
 
 void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
@@ -1945,9 +1960,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_REV_TRITER_DESTROY\n" );
 
 			RevTreeIter *iter = (RevTreeIter*) vm_plocal(field);
-			long curStackSize = vm_ssize() - iter->rootSize;
-			assert( iter->yieldSize == curStackSize );
-			vm_popn( iter->yieldSize );
+			revTreeIterDestroy( prg, &sp, iter );
 			break;
 		}
 		case IN_TREE_SEARCH: {

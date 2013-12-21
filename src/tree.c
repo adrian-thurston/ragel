@@ -62,6 +62,7 @@ void initTreeIter( TreeIter *treeIter, Tree **stackRoot, long rootSize,
 void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long rootSize,
 		const Ref *rootRef, int searchId, int children )
 {
+	revTriter->type = IT_RevTree;
 	revTriter->rootRef = *rootRef;
 	revTriter->searchId = searchId;
 	revTriter->stackRoot = stackRoot;
