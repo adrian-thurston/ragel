@@ -4,7 +4,7 @@
 /tmp
 /input[0-9]
 /input
-/out
+/output
 
 /*.o
 /Makefile.in
