@@ -1270,6 +1270,18 @@ void Compiler::insertUniqueEmptyProductions()
 	}
 }
 
+LocalInfo *Compiler::makeLocalInfo( Locals &locals )
+{
+	LocalInfo *localInfo = new LocalInfo[locals.locals.length()];
+	memset( localInfo, 0, sizeof(LocalInfo) * locals.locals.length() );
+
+	for ( Vector<LocalLoc>::Iter l = locals.locals; l.lte(); l++ ) {
+		localInfo[l.pos()].type = (int) l->type;
+		localInfo[l.pos()].offset = l->offset;
+	}
+	return localInfo;
+}
+
 void Compiler::makeRuntimeData()
 {
 	long count = 0;
@@ -1309,6 +1321,9 @@ void Compiler::makeRuntimeData()
 	runtimeData->frameInfo[rootCodeBlock->frameId].iters = rootCodeBlock->iters.data();
 	runtimeData->frameInfo[rootCodeBlock->frameId].itersLen = rootCodeBlock->iters.length();
 
+	runtimeData->frameInfo[rootCodeBlock->frameId].locals = makeLocalInfo( rootCodeBlock->locals );
+	runtimeData->frameInfo[rootCodeBlock->frameId].localsLen = rootCodeBlock->locals.locals.length();
+
 	runtimeData->frameInfo[rootCodeBlock->frameId].frameSize = rootLocalFrame->size();
 	runtimeData->frameInfo[rootCodeBlock->frameId].argSize = 0;
 
@@ -1338,6 +1353,9 @@ void Compiler::makeRuntimeData()
 
 			runtimeData->frameInfo[block->frameId].iters = block->iters.data();
 			runtimeData->frameInfo[block->frameId].itersLen = block->iters.length();
+
+			runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
+			runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
 
 			runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
 			runtimeData->frameInfo[block->frameId].argSize = 0;
@@ -1381,6 +1399,9 @@ void Compiler::makeRuntimeData()
 			runtimeData->frameInfo[block->frameId].iters = block->iters.data();
 			runtimeData->frameInfo[block->frameId].itersLen = block->iters.length();
 
+			runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
+			runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
+
 			runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
 			runtimeData->frameInfo[block->frameId].argSize = 0;
 		}
@@ -1418,10 +1439,12 @@ void Compiler::makeRuntimeData()
 				runtimeData->frameInfo[block->frameId].iters = block->iters.data();
 				runtimeData->frameInfo[block->frameId].itersLen = block->iters.length();
 
+				runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
+				runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
+
 				runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
 				runtimeData->frameInfo[block->frameId].argSize = 0;
 			}
-
 			
 			runtimeData->lelInfo[i].objectTypeId = 
 					lel->objectDef == 0 ? 0 : lel->objectDef->id;
@@ -1485,6 +1508,9 @@ void Compiler::makeRuntimeData()
 
 			runtimeData->frameInfo[block->frameId].iters = block->iters.data();
 			runtimeData->frameInfo[block->frameId].itersLen = block->iters.length();
+
+			runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
+			runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
 
 			runtimeData->frameInfo[block->frameId].frameSize = func->localFrame->size();
 			runtimeData->frameInfo[block->frameId].argSize = func->paramListSize;

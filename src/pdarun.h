@@ -199,6 +199,12 @@ typedef struct _ProdInfo
 	long copyLen;
 } ProdInfo;
 
+typedef struct _LocalInfo
+{
+	char type;
+	short offset;
+} LocalInfo;
+
 typedef struct _FrameInfo
 {
 	Code *codeWV;
@@ -209,6 +215,8 @@ typedef struct _FrameInfo
 	long treesLen;
 	char *iters;
 	long itersLen;
+	LocalInfo *locals;
+	long localsLen;
 	long argSize;
 	long frameSize;
 } FrameInfo;

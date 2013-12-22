@@ -140,6 +140,22 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 			}
 			out << "\n};\n\n";
 		}
+
+		if ( runtimeData->frameInfo[i].localsLen > 0 ) {
+			out << "static LocalInfo locals_" << i << "[] = {\n\t";
+
+			LocalInfo *li = runtimeData->frameInfo[i].locals;
+			for ( int j = 0; j < runtimeData->frameInfo[i].localsLen; j++ ) {
+				out << "{ " << (int)li[j].type << ", " << li[j].offset << " }";
+
+				if ( j < runtimeData->frameInfo[i].localsLen-1 ) {
+					out << ", ";
+					if ( (j+1) % 8 == 0 )
+						out << "\n\t";
+				}
+			}
+			out << "\n};\n\n";
+		}
 	}
 
 	/*
@@ -264,6 +280,14 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 			out << "0, ";
 
 		out << runtimeData->frameInfo[i].itersLen << ", ";
+
+		/* locals. */
+		if ( runtimeData->frameInfo[i].localsLen > 0 )
+			out << "locals_" << i << ", ";
+		else
+			out << "0, ";
+
+		out << runtimeData->frameInfo[i].localsLen << ", ";
 
 		out <<
 			runtimeData->frameInfo[i].argSize << ", " <<

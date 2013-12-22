@@ -817,6 +817,8 @@ struct Compiler
 	void generateExports();
 	void generateExportsImpl();
 
+	LocalInfo *makeLocalInfo( Locals &locals );
+
 	/* 
 	 * Graphviz Generation
 	 */
