@@ -2775,6 +2775,52 @@ void Compiler::findLocalIters( Iters &iters )
 	}
 }
 
+void Compiler::findLocals( CodeBlock *block )
+{
+	findLocalTrees( block->trees );
+	findLocalIters( block->iters );
+
+	Locals &locals = block->locals;
+
+	for ( ObjFieldList::Iter ol = *curLocalFrame->objFieldList; ol.lte(); ol++ ) {
+		ObjectField *el = ol->value;
+
+		/* FIXME: This test needs to be improved. Match_text was getting
+		 * through before useOffset was tested. What will? */
+		if ( el->useOffset && !el->isLhsEl && ( el->beenReferenced || el->isParam ) ) {
+			UniqueType *ut = el->typeRef->uniqueType;
+			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR ) {
+				int depth = el->scope->depth();
+				locals.append( LocalLoc( LT_Tree, depth, el->offset ) );
+			}
+		}
+
+		if ( el->useOffset ) {
+			UniqueType *ut = el->typeRef->uniqueType;
+			if ( ut->typeId == TYPE_ITER ) {
+				int depth = el->scope->depth();
+				LocalType type;
+				switch ( ut->iterDef->type ) {
+					case IterDef::Tree:
+					case IterDef::Child:
+					case IterDef::Repeat:
+					case IterDef::RevRepeat:
+						type = LT_Iter;
+						break;
+					case IterDef::RevChild:
+						type = LT_RevIter;
+						break;
+					case IterDef::User:
+						type = LT_UserIter;
+						break;
+				}
+
+				locals.append( LocalLoc( type, depth, (int)el->offset ) );
+			}
+		}
+	}
+}
+
 void Compiler::makeProdCopies( Production *prod )
 {
 	int pos = 0;
@@ -2821,8 +2867,7 @@ void Compiler::compileReductionCode( Production *prod )
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
-	findLocalTrees( block->trees );
-	findLocalIters( block->iters );
+	findLocals( block );
 }
 
 void Compiler::compileTranslateBlock( LangEl *langEl )
@@ -2868,8 +2913,7 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
-	findLocalTrees( block->trees );
-	findLocalIters( block->iters );
+	findLocals( block );
 }
 
 void Compiler::compilePreEof( TokenRegion *region )
@@ -2903,8 +2947,7 @@ void Compiler::compilePreEof( TokenRegion *region )
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
-	findLocalTrees( block->trees );
-	findLocalIters( block->iters );
+	findLocals( block );
 }
 
 void Compiler::compileRootBlock( )
@@ -2942,8 +2985,7 @@ void Compiler::compileRootBlock( )
 	code.append( IN_STOP );
 
 	/* Make the local trees descriptor. */
-	findLocalTrees( block->trees );
-	findLocalIters( block->iters );
+	findLocals( block );
 }
 
 void Compiler::initAllLanguageObjects()
@@ -3248,8 +3290,7 @@ void Compiler::compileUserIter( Function *func )
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
-	findLocalTrees( block->trees );
-	findLocalIters( block->iters );
+	findLocals( block );
 
 	/* FIXME: Need to deal with the freeing of local trees. */
 }
@@ -3318,8 +3359,7 @@ void Compiler::compileFunction( Function *func )
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
-	findLocalTrees( block->trees );
-	findLocalIters( block->iters );
+	findLocals( block );
 }
 
 void Compiler::makeDefaultIterators()

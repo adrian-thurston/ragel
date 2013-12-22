@@ -149,6 +149,37 @@ enum BuiltinMachine
 	BT_Empty
 };
 
+enum LocalType
+{
+	LT_Tree = 1,
+	LT_Iter,
+	LT_RevIter,
+	LT_UserIter
+};
+
+struct LocalLoc
+{
+	LocalLoc( LocalType type, int scope, int offset )
+		: scope(scope), type(type), offset(offset) {}
+
+	int scope;
+	LocalType type;
+	int offset;
+};
+
+struct Locals
+{
+	Vector<LocalLoc> locals;
+
+	void append( const LocalLoc &ll )
+	{
+		int pos = 0;
+		while ( pos < locals.length() && ll.scope >= locals[pos].scope )
+			pos += 1;
+		locals.insert( pos, ll );
+	}
+};
+
 struct IterLoc
 {
 	IterLoc( int scope, int loc )
@@ -3032,6 +3063,7 @@ struct CodeBlock
 	ObjectDef *localFrame;
 	CharSet trees;
 	Iters iters;
+	Locals locals;
 	Context *context;
 
 	/* Each frame has two versions of 
