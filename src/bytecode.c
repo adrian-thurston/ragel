@@ -369,27 +369,6 @@ void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, char *trees, long
 	}
 }
 
-void downrefLocalIters( Program *prg, Tree ***psp, Tree **frame, char *iters, long itersLen )
-{
-	long i;
-	for ( i = itersLen-1; i >= 0; i-- ) {
-		enum IterType *type = (enum IterType*) &frame[(long) iters[i]];
-		debug( prg, REALM_BYTECODE, "local iter downref: %ld %ld\n", (long)iters[i], (long)*type );
-		switch ( *type ) {
-			case IT_Tree: {
-				TreeIter *iter = (TreeIter*) &frame[(long) iters[i]];
-				treeIterDestroy( prg, psp, iter );
-				break;
-			}
-			case IT_RevTree: {
-				RevTreeIter *riter = (RevTreeIter*) &frame[(long) iters[i]];
-				revTreeIterDestroy( prg, psp, riter );
-				break;
-			}
-		}
-	}
-}
-
 void downrefLocals( Program *prg, Tree ***psp, Tree **frame, LocalInfo *locals, long localsLen )
 {
 	long i;
@@ -414,7 +393,9 @@ void downrefLocals( Program *prg, Tree ***psp, Tree **frame, LocalInfo *locals, 
 				break;
 			}
 			case LI_UserIter: {
-				//UserIter *uiter = (UserIter*) frame[locals[i].offset];
+				debug( prg, REALM_BYTECODE, "local user iter downref: %ld\n", (long)locals[i].offset );
+				UserIter *uiter = (UserIter*) frame[locals[i].offset];
+				userIterDestroy2( prg, psp, uiter );
 				break;
 			}
 		}
@@ -491,6 +472,30 @@ void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
 		vm_popn( uiter->yieldSize );
 		vm_popn( sizeof(UserIter) / sizeof(Word) );
 		vm_popn( argSize );
+
+		uiter->type = 0;
+
+		*psp = sp;
+	}
+}
+
+void userIterDestroy2( Program *prg, Tree ***psp, UserIter *uiter )
+{
+	if ( uiter != 0 && (int)uiter->type != 0 ) {
+		Tree **sp = *psp;
+
+		/* We should always be coming from a yield. The current stack size will be
+		 * nonzero and the stack size in the iterator will be correct. */
+		long curStackSize = vm_ssize() - uiter->rootSize;
+		assert( uiter->yieldSize == curStackSize );
+
+		long argSize = uiter->argSize;
+
+		vm_popn( uiter->yieldSize );
+		vm_popn( sizeof(UserIter) / sizeof(Word) );
+		vm_popn( argSize );
+
+		uiter->type = 0;
 
 		*psp = sp;
 	}

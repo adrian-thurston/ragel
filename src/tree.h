@@ -343,6 +343,7 @@ void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
 
 void treeIterDestroy( struct colm_program *prg, Tree ***psp, TreeIter *iter );
 void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *iter );
+void userIterDestroy2( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 
 Tree *castTree( struct colm_program *prg, int langElId, Tree *tree );
 
