@@ -33,6 +33,7 @@ typedef unsigned char Code;
 typedef unsigned long Word;
 typedef unsigned long Half;
 struct Bindings;
+struct _FunctionInfo;
 
 typedef struct colm_location
 {
@@ -334,6 +335,10 @@ void printXmlStdout( struct colm_program *prg, Tree **sp, Tree *tree, int commAt
  * Iterators.
  */
 
+UserIter *uiterCreate( struct colm_program *prg, Tree ***psp, struct _FunctionInfo *fi, long searchId );
+void uiterInit( struct colm_program *prg, Tree **sp, UserIter *uiter, 
+		struct _FunctionInfo *fi, int revertOn );
+
 void initTreeIter( TreeIter *treeIter, Tree **stackRoot, long rootSize,
 		const Ref *rootRef, int searchId );
 void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long rootSize, 
@@ -343,6 +348,7 @@ void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
 
 void treeIterDestroy( struct colm_program *prg, Tree ***psp, TreeIter *iter );
 void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *iter );
+void userIterDestroy( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 void userIterDestroy2( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 
 Tree *castTree( struct colm_program *prg, int langElId, Tree *tree );
