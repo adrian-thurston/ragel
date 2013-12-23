@@ -1,0 +1,925 @@
+##### LM #####
+rl ident
+	/( alpha | '_' ) ( alpha | digit | '_' )*/
+
+rl number
+	/ digit+ /
+
+rl hex_number
+	/ '0x' [0-9a-fA-F]+ /
+
+rl NL / '\n' /
+
+rl c_comment 
+	/ '/*' ( any | NL )* :>> '*/' /
+
+rl cpp_comment
+	/ '//' [^\n]* NL /
+
+rl s_literal
+	/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+
+rl d_literal
+	/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+namespace srlex
+	lex
+		ignore /[\t\n ]+/
+		literal '::', ';', ')'
+		token word /[a-zA-Z_][a-zA-Z0-9_]*/
+	end
+end
+
+namespace c_inline
+	lex 
+		literal 'fpc', 'fc', 'fcurs', 'ftargs',
+			'fentry', 'fhold', 'fexec', 'fgoto', 'fnext',
+			'fcall', 'fret', 'fbreak'
+
+		token ident /ident/
+		token number /digit+/
+		token hex_number /'0x' [0-9a-fA-F]+/
+
+		token comment
+			/ c_comment | cpp_comment /
+
+		token string
+			/ s_literal | d_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		literal '{', '}', '::', '*', ',', '(', ')', ';'
+
+		token c_any / any /
+	end
+
+	def inline_expr
+		[expr_item*]
+
+	def expr_item
+		[expr_any] :ExprAny
+	|	[expr_symbol] :ExprSymbol
+	|	[expr_interpret] :ExprInterpret
+
+	def expr_any
+		[whitespace]
+	|	[comment]
+	|	[string]
+	|	[number]
+	|	[hex_number]
+	|	[ident]
+	|	[c_any]
+
+	def expr_symbol
+		[','] | ['('] | [')'] | ['*'] | ['::']
+
+	def expr_interpret
+		['fpc'] :Fpc
+	|	['fc'] :Fc
+	|	['fcurs'] :Fcurs
+	|	['ftargs']  :Ftargs
+	|	['fentry' '(' state_ref srlex::')'] :Fentry
+
+	def state_ref
+		[opt_name_sep state_ref_names]
+
+	def opt_name_sep
+		[srlex::'::'] :ColonColon
+	|	[] :Empty
+
+	# List of names separated by ::
+	def state_ref_names
+		[state_ref_names srlex::'::' srlex::word] :Rec
+	|	[srlex::word] :Base
+
+	def inline_block
+		[block_item*]
+	
+	def block_item
+		[expr_any] :ExprAny
+	|	[block_symbol] :BlockSymbol
+	|	[block_interpret] :BlockInterpret
+	|	['{' inline_block '}'] :RecBlock
+
+	def block_symbol
+		[','] | [';'] | ['('] | [')'] | ['*'] | ['::']
+
+	def block_interpret
+		[expr_interpret] :ExprInterpret
+	|	['fhold' whitespace? ';'] :Fhold
+	|	['fgoto' whitespace? '*' inline_expr ';'] :FgotoExpr
+	|	['fnext' whitespace? '*' inline_expr ';'] :FnextExpr
+	|	['fcall' whitespace? '*' inline_expr ';'] :FcallExpr
+	|	['fexec' inline_expr ';'] :Fexec
+	|	['fgoto' state_ref srlex::';'] :FgotoSr
+	|	['fnext' state_ref srlex::';'] :FnextSr
+	|	['fcall' state_ref srlex::';'] :FcallSr
+	|	['fret' ';'] :Fret
+	|	['fbreak' ';'] :Fbreak
+end
+
+namespace ragel
+	lex
+		ignore /[\t\n ]+/
+		ignore /'#' any* :> '\n'/
+
+		literal '^', '|', '-', ',', ':', '!', '?', '.'
+		literal '(', ')', '{', '}', '*', '&', '+'
+
+		literal '--', ':>', ':>>', '<:', '->', '**'
+
+		literal '|*', '*|', '=>' 
+
+		literal '@', '>', '<', '%', '$'
+		literal 'from', 'to', 'eof', 'lerr', 'err'
+		literal 'when', 'inwhen', 'outwhen', '>?', '$?', '%?' 
+
+		literal ':=', '=', ';', '..', '::'
+
+		literal '>~', '$~', '%~', '<~', '@~', '<>~' 
+		literal '>*', '$*', '%*', '<*', '@*', '<>*' 
+		literal '>/', '$/', '%/', '</', '@/', '<>/' 
+		literal '>!', '$!', '%!', '<!', '@!', '<>!' 
+		literal '>^', '$^', '%^', '<^', '@^', '<>^' 
+		literal '<>'
+
+		literal 'machine', 'action', 'variable', 'alphtype',
+				'access', 'write', 'getkey', 'export', 'import',
+				'include', 'prepush', 'postpop'
+
+		token string /
+			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
+			"'" ( [^'\\] | '\\' any )* "'" 'i'?
+		/
+
+		token lex_regex_open /'/'/ ni
+		token lex_sqopen_pos /'['/ ni
+		token lex_sqopen_neg /'[^'/ ni
+
+		token word /[a-zA-Z_][a-zA-Z0-9_]*/
+		token uint / number /
+		token hex / hex_number /
+	end 
+
+	lex
+		token re_dot / '.' /
+		token re_star / '*' /
+		token re_char / ^( '\\' | '.' | '*' | '[' | '/' ) | '\\' . any /
+		token re_close / '/' /
+		token re_sqopen_pos /'['/
+		token re_sqopen_neg /'[^'/
+	end
+
+	lex
+		token re_or_dash / '-' /
+		token re_or_char / ^( '\\' | '-' | ']' ) | '\\' . any /
+		token re_or_sqclose / ']' /
+	end
+
+	# Not cannot start with '{', terminated by ';', rewritten into { inline_expr }
+	token _inline_expr_reparse
+		/[^{;] [^;]* ';'/ {
+			R: str = input.pull( match_length - 1 )
+			input.pull( 1 )
+			input.push( "}" )
+			input.push( R )
+			input.push( "{" )
+		}
+
+	token variable_name /ident/
+
+	def inline_expr_reparse
+		[_inline_expr_reparse]
+	|	[action_expr]
+
+	def join
+		[join ',' expression] :Rec
+	|	[expression] :Base
+
+	def expression
+		[term expression_op*]
+
+	def expression_op
+		['|' term] :Or
+	|	['&' term] :And
+	|	['-' term] :Sub
+	|	['--' term] :Ssub
+
+	def term
+		[factor_label term_op_list_short]
+
+	# This list is done manually to get shortest match.
+	def term_op_list_short
+		[] :Empty
+	|	[term_op term_op_list_short] :Terms
+
+	def term_op
+		[factor_label] :None
+	|	['.' factor_label] :Dot
+	|	[':>' factor_label] :ColonLt
+	|	[':>>' factor_label] :ColonLtLt
+	|	['<:' factor_label] :GtColon
+
+	def factor_label
+		[word ':' factor_label] :Label
+	|	[factor_ep] :Ep
+
+	def factor_ep
+		[factor_aug '->' epsilon_target] :Epsilon
+	|	[factor_aug] :Base
+
+	def epsilon_target
+		[epsilon_target '::' word] :Rec
+	|	[word] :Base
+
+	def action_expr
+		['{' c_inline::inline_expr '}']
+
+	def action_block
+		['{' c_inline::inline_block '}']
+
+	def action_ref 
+		[word] :Word
+	|	['(' word ')'] :ParenWord
+	|	[action_block] :Block
+	
+	def priority_aug
+		[uint]
+	|	['+' uint]
+	|	['-' uint]
+
+	def aug_base
+		['@'] :Finish | ['>'] :Enter | ['%'] :Leave | ['$'] :All
+
+	def aug_cond
+		['>?'] :Start1 | ['$?'] :All1 | ['%?'] :Leave1
+	|	['>' 'when'] :Start2 | ['$' 'when'] :All2 | ['%' 'when'] :Leave2
+	|	['inwhen'] :Start3 | ['when'] :All3 | ['outwhen'] :Leave3
+
+	def aug_to_state
+		['>~'] :Start1 | ['<~'] :NotStart1 | ['$~'] :All1
+	|	['%~'] :Final1 | ['@~'] :NotFinal1 | ['<>~'] :Middle1
+	|	['>' 'to'] :Start2 | ['<' 'to'] :NotStart2 | ['$' 'to'] :All2
+	|	['%' 'to'] :Final2 | ['@' 'to'] :NotFinal2 | ['<>' 'to'] :Middle2
+
+	def aug_from_state
+		['>*'] :Start1 | ['<*'] :NotStart1 | ['$*'] :All1
+	|	['%*'] :Final1 | ['@*'] :NotFinal1 | ['<>*'] :Middle1
+	|	['>' 'from'] :Start2 | ['<' 'from'] :NotStart2 | ['$' 'from'] :All2
+	|	['%' 'from'] :Final2 | ['@' 'from'] :NotFinal2 | ['<>' 'from'] :Middle2
+
+	def aug_eof
+		['>/'] :Start1 | ['</'] :NotStart1 | ['$/'] :All1
+	|	['%/'] :Final1 | ['@/'] :NotFinal1 | ['<>/'] :Middle1
+	|	['>' 'eof'] :Start2 | ['<' 'eof'] :NotStart2 | ['$' 'eof'] :All2
+	|	['%' 'eof'] :Final2 | ['@' 'eof'] :NotFinal2 | ['<>' 'eof'] :Middle2
+
+	def aug_gbl_error
+		['>!'] :Start1 | ['<!'] :NotStart1 | ['$!'] :All1
+	|	['%!'] :Final1 | ['@!'] :NotFinal1 | ['<>!'] :Middle1
+	|	['>' 'err'] :Start2 | ['<' 'err'] :NotStart2 | ['$' 'err'] :All2
+	|	['%' 'err'] :Final2 | ['@' 'err'] :NotFinal2 | ['<>' 'err'] :Middle2
+
+	def aug_local_error
+		['>^'] :Start1 | ['<^'] :NotStart1 | ['$^'] :All1
+	|	['%^'] :Final1 | ['@^'] :NotFinal1 | ['<>^'] :Middle1
+	|	['>' 'lerr'] :Start2 | ['<' 'lerr'] :NotStart2 | ['$' 'lerr'] :All2
+	|	['%' 'lerr'] :Final2 | ['@' 'lerr'] :NotFinal2 | ['<>' 'lerr'] :Middle2
+
+	def factor_aug
+		[factor_aug aug_base action_ref] :ActionRef
+	|	[factor_aug aug_base priority_aug] :PriorEmbed
+	|	[factor_aug aug_base '(' word ',' priority_aug ')'] :NamedPriorEmbed
+	|	[factor_aug aug_cond action_ref] :CondEmbed
+	|	[factor_aug aug_cond '!' action_ref] :NegCondEmbed
+	|	[factor_aug aug_to_state action_ref] :ToStateAction
+	|	[factor_aug aug_from_state action_ref] :FromStateAction
+	|	[factor_aug aug_eof action_ref] :EofAction
+	|	[factor_aug aug_gbl_error action_ref] :GblErrorAction
+	|	[factor_aug aug_local_error action_ref] :LocalErrorDef
+	|	[factor_aug aug_local_error '(' word ',' action_ref ')'] :LocalErrorName
+	|	[factor_rep] :Base
+
+	def factor_rep 
+		[factor_neg factor_rep_op*]
+
+	def factor_rep_op
+		['*'] :Star
+	|	['**'] :StarStar
+	|	['?'] :Optional
+	|	['+'] :Plus
+	|	['{' factor_rep_num '}'] :ExactRep
+	|	['{' ',' factor_rep_num '}'] :MaxRep
+	|	['{' factor_rep_num ',' '}'] :MinRep
+	|	['{' LowRep: factor_rep_num ',' HighRep: factor_rep_num '}'] :RangeRep
+
+	def factor_rep_num
+		[uint]
+
+	def factor_neg 
+		['!' factor_neg] :Bang
+	|	['^' factor_neg] :Caret
+	|	[factor] :Base
+
+	def factor 
+		[alphabet_num] :AlphabetNum
+	|	[word] :Word
+	|	[string] :String
+	|	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	|	[lex_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
+	|	[lex_regex_open regex re_close] :Regex
+	|	[RL1: range_lit '..' RL2: range_lit] :Range
+	|	['(' join ')'] :Join
+
+	def regex
+		[reg_item_rep*]
+
+	def reg_item_rep
+		[reg_item re_star] :Star
+	|	[reg_item] :Base
+
+	def reg_item
+		[re_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	|	[re_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
+	|	[re_dot] :Dot
+	|	[re_char] :Char
+
+	def reg_or_data
+		[reg_or_data reg_or_char] :Data
+	|	[] :Base
+
+	def reg_or_char
+		[re_or_char] :Char
+	|	[Low: re_or_char re_or_dash High: re_or_char] :Range
+
+	def range_lit
+		[string] :String
+	|	[alphabet_num] :AN
+
+	def alphabet_num 
+		[uint]
+	|	['-' uint]
+	|	[hex]
+
+	def lm_act
+		['=>' action_ref] :ActionRef
+	|	[action_block] :ActionBlock
+
+	def opt_lm_act
+		[lm_act]
+	|	[]
+
+	def lm_stmt
+		[join opt_lm_act ';'] :LmStmt commit
+	|	[assignment] :Assignment
+	|	[action_spec] :ActionSpec
+
+	def lm_stmt_list
+		[lm_stmt_list lm_stmt] :Rec
+	|	[lm_stmt] :Base
+
+	def lm
+		[join] :Join
+	|	['|*' lm_stmt_list '*|'] :Lm
+
+	def action_spec
+		['action' word action_block] commit
+
+	def assignment
+		[opt_export word '=' join ';'] commit
+
+	def instantiation
+		[opt_export word ':=' lm ';'] commit
+
+	def alphtype_type
+		[W1: word] :One
+	|	[W1: word W2: word] :Two
+
+	def include_spec
+		[word] 
+	|	[string]
+	|	[word string]
+
+	def opt_export
+		['export'] :Export
+	|	[] :Base
+
+	def machine_name
+		['machine' word ';']
+
+	def statement
+		[machine_name] :MachineName commit
+	|	[assignment] :Assignment
+	|	[instantiation] :Instantiation
+	|	[action_spec] :ActionSpec
+	|	['prepush' action_block] :PrePushSpec commit
+	|	['postpop' action_block] :PostPopSpec commit
+	|	['variable' variable_name inline_expr_reparse] :Variable commit
+	|	['alphtype' alphtype_type ';'] :AlphType commit
+	|	['access' inline_expr_reparse] :Access commit
+	|	['write' Cmd: word ArgList: word* ';'] :Write commit
+	|	['getkey' inline_expr_reparse] :GetKey commit
+	|	['import' string ';'] :Import commit
+	|	['include' include_spec ';'] :Include commit
+
+	def ragel_start
+		[statement*]
+end
+
+namespace c_host
+	lex 
+		literal '%%{', '}%%'
+
+		token slr /'%%' [^{] [^\n]* '\n'/
+		{
+			input.pull( 2 )
+			R: str = input.pull( match_length - 3 )
+			input.push( "}%%" )
+			input.push( R )
+			input.push( "%%{" )
+		}
+
+		rl NL / '\n' /
+
+		rl ruby_comment / '#' [^\n]* NL /
+
+		rl s_literal
+			/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+
+		rl d_literal
+			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+		rl host_re_literal
+			/ '/' ([^/\\] | NL | '\\' (any | NL))* '/' /
+
+		token ident /ident/
+		token number /digit+/
+		token hex_number /'0x' [0-9a-fA-F]+/
+
+		token comment
+			/c_comment | cpp_comment/
+
+		token string
+			/ s_literal | d_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		token c_any / any /
+	end
+
+	def tok
+		[ident]
+	|	[number]
+	|	[hex_number]
+	|	[comment]
+	|	[string]
+	|	[whitespace]
+	|	[c_any]
+
+	def section
+		['%%{' ragel::ragel_start '}%%'] :MultiLine
+	|	[tok] :Tok
+end
+
+
+lex 
+	literal '%%{', '}%%'
+
+	literal 'int', 'bool', 'const', 'char', 'ptr', 'printi',
+			'printb', 'prints', 'print_token',
+			'fwrite', 'first_token_char', 'var', 'byte'
+
+	literal ';', '<', '>', '(', ')', '[', ']', '=', '*', '!'
+
+	ignore / ( [ \t] | NL )+ /
+
+	token tk_ident /ident/
+	token tk_number /digit+/
+	token tk_hex_number /'0x' [0-9a-fA-F]+/
+
+	rl INPUT /'_'+ 'INPUT' '_'+/
+	rl OUTPUT /'_'+ 'OUTPUT' '_'+/
+
+	token ifdef_INPUT
+		/ '#ifdef' ' '* INPUT /
+
+	token ifdef_OUTPUT
+		/ '#ifdef' ' '* OUTPUT ' '* '\n' / ni
+
+	token endif
+		/ '#endif' /
+
+	token tk_cpp_comment
+		/ cpp_comment /
+
+	token c_comm_open
+		/ '/*' /
+
+	token string
+		/ s_literal | d_literal /
+
+	token indep_any / any /
+end
+
+lex
+	token output_endif / '#endif\n' /
+	token output_line /[^\n]* '\n'/
+end
+
+
+lex
+	token comm_val /'@' [A-Za-z0-9_]+ ': ' [^\n]+ '\n' /
+	token comm_term /'*/'/
+	token comm_any / any /
+end
+
+def comm_item
+	[comm_val]
+|	[comm_any]
+
+def c_comment
+	[c_comm_open comm_item* comm_term]
+
+def input_string
+	[string]
+
+def input_list
+	[input_list input_string]
+| 	[input_string]
+
+def input
+	[ifdef_INPUT input_list endif]
+
+def output
+	[ifdef_OUTPUT output_line* output_endif]
+
+def tok
+	[tk_ident]
+|	[tk_ident '[' tok ']']
+|	[tk_number]
+|	[tk_hex_number]
+|	[input]
+|	[output]
+|	[tk_cpp_comment]
+|	[c_comment]
+|	[string]
+|	['<' type '>' '(' tok* ')']
+|	['(' type ')' '(' tok* ')']
+|	['(' tok* ')']
+|	['printi' tok ';']
+|	['printb' tok ';']
+|	['prints' tok ';']
+|	['print_token' ';']
+|	['first_token_char']
+|	[';']
+|	['<']
+|	['>']
+|	['[']
+|	[']']
+|	['=']
+|	['!']
+|	['*']
+|	[indep_any]
+
+def section_multiline
+	['%%{' ragel::ragel_start '}%%']
+
+def type
+	['int']
+|	['bool']
+|	['char']
+|	['char' '*']
+|	['const' '(' 'char' ')' '*']
+|	['ptr']
+|	['byte']
+
+def opt_arr
+	['[' tok ']']
+|	[]
+
+def var_decl
+	[type tk_ident opt_arr ';']
+|	['var' tk_ident opt_arr type]
+
+def expr_stmt
+	[tk_ident '=' tok* ';']
+
+def stmt
+	[var_decl]
+|	[expr_stmt]
+
+def section
+	[section_multiline]
+|	[stmt]
+|	[tok]
+
+def start
+	[section*]
+
+namespace c
+	lex 
+		literal '%%{', '}%%'
+
+		literal 'int', 'bool', 'const', 'char', 'ptr',
+				'printf', 'fwrite', 'var', 'byte'
+
+		literal ';', '<', '>', '(', ')', '[', ']', '=', '*', '!'
+
+		ignore / ( [ \t] | NL )+ /
+
+		token tk_ident /ident/
+		token tk_number /digit+/
+		token tk_hex_number /'0x' [0-9a-fA-F]+/
+
+		token string
+			/ s_literal | d_literal /
+
+		token indep_any / any /
+	end
+
+	def tok
+		[tk_ident]
+	|	[tk_ident '[' tok ']']
+	|	[tk_number]
+	|	[tk_hex_number]
+	|	[string]
+	|	['<' type '>' '(' tok* ')']
+	|	['(' type ')' '(' tok* ')']
+	|	['(' tok* ')']
+	|	['printf' '(' tok* ')' ';']
+	|	['fwrite' '(' tok* ')' ';']
+	|	[';']
+	|	['<']
+	|	['>']
+	|	['[']
+	|	[']']
+	|	['=']
+	|	['!']
+	|	['*']
+	|	[indep_any]
+end
+
+OutputFile: str = '/dev/stdout'
+InputFile: str = '/dev/stdin'
+Lang: str = 'c'
+
+Input: stream = open( InputFile "r" )
+Output: stream = open( OutputFile "w" )
+
+RagelTree: start = parse start[ Input ]
+
+if ( !RagelTree ) {
+	print( error '\n' )
+	exit(1)
+}
+
+# Find the machine name.
+MachineName: ragel::machine_name = ragel::machine_name in RagelTree
+
+# Do we need EOF?
+NeedsEof: bool = false
+for CommVal: comm_val in RagelTree {
+	if $CommVal ==
+		'@NEEDS_EOF: yes\n'
+	{
+		NeedsEof = true
+	}
+}
+
+send Output
+	"/*
+	" * @LANG: [Lang]
+	" * @GENERATED: yes
+	" */
+	"
+	"#include <string.h>
+	"#include <stdio.h>
+	"
+
+int indepToHost( Indep: ref<section*> )
+{
+	for Decl: var_decl in Indep {
+		if match Decl
+			"bool [Ident: tk_ident OptArr: opt_arr];
+		{
+			Decl = cons var_decl
+				"int [Ident OptArr];
+		}
+		elsif match Decl
+			"ptr [Ident: tk_ident];
+		{
+			Decl = cons var_decl
+				"char* [Ident];
+		}
+	}
+
+	for Tok: tok in Indep {
+		exit(9)
+	}
+}
+
+for Section: section in RagelTree {
+	if match Section [Decl: var_decl] {
+		cons SectionList: section* [Decl]
+		indepToHost( SectionList )
+		send Output [SectionList]
+	}
+}
+
+for Section: section in RagelTree {
+	if match Section [section_multiline] {
+		for Action: ragel::action_block in Section {
+			# Reparse as lang-independent code.
+			parse SectionList: section*[$Action]
+
+			# Translate to specific language.
+			indepToHost( SectionList )
+
+			# Reparse back to ragel action block.
+			Action = parse ragel::action_block[$SectionList]
+		}
+
+		send Output ["\n" Section "\n"]
+	}
+}
+
+send Output
+	"%% write data;
+	"int cs;
+	"
+	"void init()
+	"{
+
+for Section: section in RagelTree {
+	if match Section [ExprStmt: expr_stmt] {
+		cons SectionList: section* [ExprStmt]
+		indepToHost( SectionList )
+		send Output [SectionList]
+	}
+}
+
+send Output
+	"	%% write init;
+	"}
+	"
+	"void exec( char *data, int len )
+	"{
+	"	char *p = data;
+	"	char *pe = data + len;
+
+if NeedsEof {
+	send Output
+		"	char *eof = pe;
+}
+
+send Output
+	"	%% write exec;
+	"}
+	"
+	"void finish( )
+	"{
+	"	if ( cs >= [$MachineName.word]_first_final )
+	"		printf( \"ACCEPT\\n\" );
+	"	else
+	"		printf( \"FAIL\\n\" );
+	"}
+	"
+
+send Output
+	"char *inp\[\] = {
+
+NR: int = 0
+for InputString: input_string in RagelTree {
+	send Output 
+		[^InputString ",\n"]
+	NR = NR + 1
+}
+
+send Output
+	"};
+	"
+
+send Output
+	"int inplen = [NR];
+	"
+
+send Output
+	"int main( )
+	"{
+	"	int i;
+	"	for ( i = 0; i < inplen; i++ ) {
+	"		init();
+	"		exec( inp\[i\], strlen(inp\[i\]) );
+	"		finish();
+	"	}
+	"	return 0;
+	"}
+	"
+
+send Output "/* _____OUTPUT_____
+for OutputLine: output_line in RagelTree {
+	send Output [OutputLine]
+	exit(1)
+}
+send Output "*/
+
+iter i()
+{
+
+}
+
+for I: any in i() {
+	Int: int = 1
+}
+
+for I: any in rev_child( RagelTree ) {
+	Int: int = 1
+}
+
+#### IN ####
+/*
+ * @LANG: indep
+ */
+bool neg;
+int val;
+
+val = 0;
+neg = false;
+%%{
+	machine AtoI;
+
+	action begin {
+		neg = false;
+		val = 0;
+	}
+
+	action see_neg {
+		neg = true;
+	}
+
+	action add_digit { 
+		val = val * 10 + <int>(fc - 48);
+	}
+
+	action finish {
+		if ( neg != 0 ) {
+			val = -1 * val;
+		}
+	}
+	action print {
+		printi val;
+		prints "\n";
+	}
+
+	atoi = (
+		('-'@see_neg | '+')? (digit @add_digit)+
+	) >begin %finish;
+
+	main := atoi '\n' @print;
+}%%
+
+#ifdef _____INPUT_____
+"1\n"
+"12\n"
+"222222\n"
+"+2123\n"
+"213 3213\n"
+"-12321\n"
+"--123\n"
+"-99\n"
+" -3000\n"
+#endif
+
+#ifdef _____OUTPUT_____
+1
+ACCEPT
+12
+ACCEPT
+222222
+ACCEPT
+2123
+ACCEPT
+FAIL
+-12321
+ACCEPT
+FAIL
+-99
+ACCEPT
+FAIL
+#endif
+#### EXP ####
+/*
+ * @LANG: c
+ * @GENERATED: yes
+ */
+
+#include <string.h>
+#include <stdio.h>
+
+int neg;
+int val;
+
+#### EXIT ####
+9
