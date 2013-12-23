@@ -149,6 +149,7 @@ enum BuiltinMachine
 	BT_Empty
 };
 
+/* Must match the LI defines in pdarun.h. */
 enum LocalType
 {
 	LT_Tree = 1,

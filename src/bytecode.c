@@ -390,6 +390,37 @@ void downrefLocalIters( Program *prg, Tree ***psp, Tree **frame, char *iters, lo
 	}
 }
 
+void downrefLocals( Program *prg, Tree ***psp, Tree **frame, LocalInfo *locals, long localsLen )
+{
+	long i;
+	for ( i = localsLen-1; i >= 0; i-- ) {
+		switch ( locals[i].type ) {
+			case LI_Tree: {
+				debug( prg, REALM_BYTECODE, "local tree downref: %ld\n", (long)locals[i].offset );
+				Tree *tree = (Tree*) frame[(long)locals[i].offset];
+				treeDownref( prg, *psp, tree );
+				break;
+			}
+			case LI_Iter: {
+				debug( prg, REALM_BYTECODE, "local iter downref: %ld\n", (long)locals[i].offset );
+				TreeIter *iter = (TreeIter*) &frame[(long)locals[i].offset];
+				treeIterDestroy( prg, psp, iter );
+				break;
+			}
+			case LI_RevIter: {
+				debug( prg, REALM_BYTECODE, "local rev iter downref: %ld\n", (long)locals[i].offset );
+				RevTreeIter *riter = (RevTreeIter*) &frame[(long)locals[i].offset];
+				revTreeIterDestroy( prg, psp, riter );
+				break;
+			}
+			case LI_UserIter: {
+				//UserIter *uiter = (UserIter*) frame[locals[i].offset];
+				break;
+			}
+		}
+	}
+}
+
 UserIter *uiterCreate( Program *prg, Tree ***psp, FunctionInfo *fi, long searchId )
 {
 	Tree **sp = *psp;
@@ -423,40 +454,46 @@ void uiterInit( Program *prg, Tree **sp, UserIter *uiter,
 
 void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
 {
-	Tree **sp = *psp;
-	long curStackSize = vm_ssize() - iter->rootSize;
-	assert( iter->yieldSize == curStackSize );
-	vm_popn( iter->yieldSize );
-	iter->type = 0;
-	*psp = sp;
+	if ( (int)iter->type != 0 ) {
+		Tree **sp = *psp;
+		long curStackSize = vm_ssize() - iter->rootSize;
+		assert( iter->yieldSize == curStackSize );
+		vm_popn( iter->yieldSize );
+		iter->type = 0;
+		*psp = sp;
+	}
 }
 
 void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *riter )
 {
-	Tree **sp = *psp;
-	long curStackSize = vm_ssize() - riter->rootSize;
-	assert( riter->yieldSize == curStackSize );
-	vm_popn( riter->yieldSize );
-	riter->type = 0;
-	*psp = sp;
+	if ( (int)riter->type != 0 ) {
+		Tree **sp = *psp;
+		long curStackSize = vm_ssize() - riter->rootSize;
+		assert( riter->yieldSize == curStackSize );
+		vm_popn( riter->yieldSize );
+		riter->type = 0;
+		*psp = sp;
+	}
 }
 
 void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
 {
-	Tree **sp = *psp;
+	if ( (int)uiter->type != 0 ) {
+		Tree **sp = *psp;
 
-	/* We should always be coming from a yield. The current stack size will be
-	 * nonzero and the stack size in the iterator will be correct. */
-	long curStackSize = vm_ssize() - uiter->rootSize;
-	assert( uiter->yieldSize == curStackSize );
+		/* We should always be coming from a yield. The current stack size will be
+		 * nonzero and the stack size in the iterator will be correct. */
+		long curStackSize = vm_ssize() - uiter->rootSize;
+		assert( uiter->yieldSize == curStackSize );
 
-	long argSize = uiter->argSize;
+		long argSize = uiter->argSize;
 
-	vm_popn( uiter->yieldSize );
-	vm_popn( sizeof(UserIter) / sizeof(Word) );
-	vm_popn( argSize );
+		vm_popn( uiter->yieldSize );
+		vm_popn( sizeof(UserIter) / sizeof(Word) );
+		vm_popn( argSize );
 
-	*psp = sp;
+		*psp = sp;
+	}
 }
 
 Tree *constructArgv( Program *prg, int argc, const char **argv )
@@ -3653,8 +3690,7 @@ again:
 				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 				int frameId = exec->frameId;
 
-				downrefLocalIters( prg, &sp, exec->framePtr, fi->iters, fi->itersLen );
-				downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
+				downrefLocals( prg, &sp, exec->framePtr, fi->locals, fi->localsLen );
 
 				vm_popn( fi->frameSize );
 
