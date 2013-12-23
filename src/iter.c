@@ -35,6 +35,7 @@ void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long rootSize,
 void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
 		long argSize, long searchId )
 {
+	userIter->type = IT_User;
 	userIter->stackRoot = stackRoot;
 	userIter->argSize = argSize;
 	userIter->yieldSize = 0;
@@ -106,7 +107,7 @@ void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *rit
 
 void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
 {
-	if ( (int)uiter->type != 0 ) {
+	if ( uiter != 0 && (int)uiter->type != 0 ) {
 		Tree **sp = *psp;
 
 		/* We should always be coming from a yield. The current stack size will be
