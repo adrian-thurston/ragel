@@ -19,6 +19,10 @@
 #
 #   expected output
 #
+###### EXIT ######
+#
+#   expected exit value
+#
 
 #######################################
 
@@ -66,12 +70,11 @@ else
 	TEST_PAT='*.lm'
 fi 
 
-function section
+function cat_section
 {
 	local section=$1
 	local nth=$2
 	local in=$3
-	local out=$4
 
 	# Print Nth instance of the section
 	awk -vsection=$section -vnth=$nth '
@@ -102,10 +105,21 @@ function section
 			next;
 		}
 		{ print $0 }
-	' > $out
+	'
+	return ${PIPESTATUS[0]};
+}
+
+function section
+{
+	local section=$1
+	local nth=$2
+	local in=$3
+	local out=$4
+
+	cat_section $section $nth $in > $out
 
 	# Remove the file if no section was found
-	[ ${PIPESTATUS[0]} = 0 ] || rm $out
+	[ $? = 0 ] || rm $out
 }
 
 function runtests()
@@ -149,6 +163,10 @@ function runtests()
 
 			section ARGS $Nth $TST $ARGS
 			section IN $Nth $TST $IN
+			EXIT=`cat_section EXIT $Nth $TST`
+			if [ -z "$EXIT" ]; then
+				EXIT=0
+			fi
 
 			cmdargs=""
 			if [ -f $ARGS ]; then
@@ -180,12 +198,15 @@ function runtests()
 			else
 				${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG
 			fi
-			if [ $? != 0 ]; then
-				echo "FAILED: execution error"
+
+			e=$?
+			if [ $e != "$EXIT" ]; then
+				echo "FAILED: exit value error: got: $e expected: $EXIT"
 				ERRORS=$(( ERRORS + 1 ))
 				Nth=$((Nth + 1))
 				continue
 			fi
+
 
 			# Diff of output
 			diff -u $EXP $OUT > $DIFF
