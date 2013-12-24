@@ -881,57 +881,66 @@ again:
 			break;
 		}
 		case IN_PRINT: {
-			int n;
+			int n, i;
 			read_byte( n );
 			debug( prg, REALM_BYTECODE, "IN_PRINT %d\n", n );
 
-			while ( n-- > 0 ) {
-				Tree *tree = vm_pop();
-				printTreeFile( prg, sp, stdout, tree, false );
-				treeDownref( prg, sp, tree );
+			Tree **arg = vm_ptop();
+			for ( i = n-1; i >= 0; i-- )
+				printTreeFile( prg, sp, stdout, arg[i], false );
+
+			while ( n-- > 0 )
+				treeDownref( prg, sp, vm_pop() );
+			break;
+		}
+		case IN_PRINT_STREAM: {
+			int n, i;
+			read_byte( n );
+			debug( prg, REALM_BYTECODE, "IN_PRINT_STREAM\n" );
+
+			Tree **arg = vm_ptop();
+			Stream *stream = (Stream*)arg[n];
+			for ( i = n-1; i >= 0; i-- ) {
+				if ( stream->in->file != 0 )
+					printTreeFile( prg, sp, stream->in->file, arg[i], false );
+				else
+					printTreeFd( prg, sp, stream->in->fd, arg[i], false );
 			}
+
+			while ( n-- > 0 )
+				treeDownref( prg, sp, vm_pop() );
+			treeDownref( prg, sp, vm_pop() );
 			break;
 		}
 		case IN_PRINT_XML_AC: {
-			int n;
+			int n, i;
 			read_byte( n );
 
 			debug( prg, REALM_BYTECODE, "IN_PRINT_XML_AC %d\n", n );
 
+			Tree **arg = vm_ptop();
+			for ( i = n-1; i >= 0; i-- )
+				printXmlStdout( prg, sp, arg[i], true, true );
+
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				printXmlStdout( prg, sp, tree, true, true );
 				treeDownref( prg, sp, tree );
 			}
 			break;
 		}
 		case IN_PRINT_XML: {
-			int n;
+			int n, i;
 			read_byte( n );
 			debug( prg, REALM_BYTECODE, "IN_PRINT_XML %d", n );
 
-			while ( n-- > 0 ) {
-				Tree *tree = vm_pop();
-				printXmlStdout( prg, sp, tree, false, true );
-				treeDownref( prg, sp, tree );
-			}
-			break;
-		}
-		case IN_PRINT_STREAM: {
-			int n;
-			read_byte( n );
-			debug( prg, REALM_BYTECODE, "IN_PRINT_STREAM\n" );
+			Tree **arg = vm_ptop();
+			for ( i = n-1; i >= 0; i-- )
+				printXmlStdout( prg, sp, arg[i], false, true );
 
-			Stream *stream = (Stream*)vm_pop();
 			while ( n-- > 0 ) {
 				Tree *tree = vm_pop();
-				if ( stream->in->file != 0 )
-					printTreeFile( prg, sp, stream->in->file, tree, false );
-				else
-					printTreeFd( prg, sp, stream->in->fd, tree, false );
 				treeDownref( prg, sp, tree );
 			}
-			treeDownref( prg, sp, (Tree*)stream );
 			break;
 		}
 		case IN_LOAD_CONTEXT_R: {

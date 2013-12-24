@@ -1582,8 +1582,11 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 
 void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 {
+	/* Evaluate the var ref again. The first is returned by the expression. */
+	varRef->evaluate( pd, code );
+
 	/* Go backwards. */
-	for ( ConsItemList::Iter item = parserText->list->last(); item.gtb(); item-- ) {
+	for ( ConsItemList::Iter item = parserText->list->first(); item.lte(); item++ ) {
 		switch ( item->type ) {
 		case ConsItem::FactorType: {
 			String result;
@@ -1617,9 +1620,6 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 		}
 
 	}
-
-	/* Evaluate the var ref again, print, pop the extra var ref. */
-	varRef->evaluate( pd, code );
 
 	code.append( IN_PRINT_STREAM );
 	code.append( parserText->list->length() );
@@ -2350,7 +2350,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			UniqueType **types = new UniqueType*[exprPtrVect->length()];
 			
 			/* Push the args backwards. */
-			for ( CallArgVect::Iter pex = exprPtrVect->last(); pex.gtb(); pex-- )
+			for ( CallArgVect::Iter pex = exprPtrVect->first(); pex.lte(); pex++ )
 				types[pex.pos()] = (*pex)->expr->evaluate( pd, code );
 
 			/* Run the printing forwards. */
