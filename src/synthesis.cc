@@ -1582,11 +1582,10 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 
 void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 {
-	/* Evaluate the var ref again. The first is returned by the expression. */
-	varRef->evaluate( pd, code );
-
-	/* Go backwards. */
 	for ( ConsItemList::Iter item = parserText->list->first(); item.lte(); item++ ) {
+		/* Load a dup of the stream. */
+		code.append( IN_DUP_TOP );
+
 		switch ( item->type ) {
 		case ConsItem::FactorType: {
 			String result;
@@ -1619,10 +1618,10 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 
+		code.append( IN_PRINT_STREAM );
+		code.append( 1 );
 	}
 
-	code.append( IN_PRINT_STREAM );
-	code.append( parserText->list->length() );
 
 	/* Normally we would have to pop the stream var ref that we evaluated
 	 * before all the print arguments (which includes the stream, evaluated
