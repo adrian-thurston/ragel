@@ -3435,7 +3435,7 @@ void Compiler::addStdin()
 void Compiler::addStdout()
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "stdout" );
@@ -3452,7 +3452,7 @@ void Compiler::addStdout()
 void Compiler::addStderr()
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "stderr" );
