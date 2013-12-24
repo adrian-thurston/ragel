@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
+#include <errno.h>
 
 #define true 1
 #define false 0
@@ -1823,10 +1824,10 @@ void appendFile( struct colm_print_args *args, const char *data, int length )
 
 void appendFd( struct colm_print_args *args, const char *data, int length )
 {
-	int res = write( (long)args->arg, data, length );
-	if ( res != 0 ) {
-		message( "write error\n" );
-	}
+	int fd = (long)args->arg;
+	int res = write( fd, data, length );
+	if ( res < 0 )
+		message( "write error on fd: %d: %s\n", fd, strerror(errno) );
 }
 
 Tree *treeTrim( struct colm_program *prg, Tree **sp, Tree *tree )
