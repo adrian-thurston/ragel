@@ -379,9 +379,19 @@ void LangTerm::resolve( Compiler *pd )
 	}
 }
 
-void LangVarRef::resolve( Compiler *pd ) const
+UniqueType *LangVarRef::resolve( Compiler *pd ) const
 {
+	/* Lookup the loadObj. */
+	VarRefLookup lookup = lookupField( pd );
 
+	ObjectField *el = lookup.objField;
+	UniqueType *elUT = el->typeRef->uniqueType;
+
+	/* Deref iterators. */
+	if ( elUT->typeId == TYPE_ITER )
+		elUT = el->typeRef->searchUniqueType;
+
+	return elUT;
 }
 
 void LangExpr::resolve( Compiler *pd ) const

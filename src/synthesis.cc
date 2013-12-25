@@ -1582,6 +1582,10 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 
 void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 {
+	bool resetContiguous = pd->beginContiguous( code, 3 );
+
+	varRef->evaluate( pd, code );
+
 	for ( ConsItemList::Iter item = parserText->list->first(); item.lte(); item++ ) {
 		/* Load a dup of the stream. */
 		code.append( IN_DUP_TOP );
@@ -1627,10 +1631,14 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 	 * before all the print arguments (which includes the stream, evaluated
 	 * last), however we send is part of an expression, and is supposed to
 	 * leave the varref on the stack. */
+
+	pd->endContiguous( code, resetContiguous );
 }
 
 void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
 {
+	varRef->evaluate( pd, code );
+
 	/* Dup for every send. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ )
 		code.append( IN_DUP_TOP );
@@ -1703,23 +1711,19 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
 
 UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 {
-	/* This contiguous call is for the print version. Stream load, dup-top,
-	 * arg. */ 
-	bool resetContiguous = pd->beginContiguous( code, 3 );
-
-	UniqueType *varUt = varRef->evaluate( pd, code );
+	UniqueType *varUt = varRef->resolve( pd );
 
 	if ( varUt == pd->uniqueTypeStream ) {
 		evaluateSendStream( pd, code );
 	}
-	else if ( varUt->langEl->generic != 0 && varUt->langEl->generic->typeId == GEN_PARSER ) {
+	else if ( varUt->langEl->generic != 0 && 
+			varUt->langEl->generic->typeId == GEN_PARSER )
+	{
 		evaluateSendParser( pd, code );
 	}
 	else {
 		error(loc) << "can only send to parsers and streams" << endl;
 	}
-
-	pd->endContiguous( code, resetContiguous );
 
 	return varUt;
 }

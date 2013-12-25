@@ -2465,7 +2465,7 @@ struct LangVarRef
 		return l;
 	}
 
-	void resolve( Compiler *pd ) const;
+	UniqueType *resolve( Compiler *pd ) const;
 
 	UniqueType *loadFieldInstr( Compiler *pd, CodeVect &code, ObjectDef *inObject,
 			ObjectField *el, bool forWriting, bool revert ) const;
