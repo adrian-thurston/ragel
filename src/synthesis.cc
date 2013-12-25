@@ -1703,6 +1703,10 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
 
 UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 {
+	/* This contiguous call is for the print version. Stream load, dup-top,
+	 * arg. */ 
+	bool resetContiguous = pd->beginContiguous( code, 3 );
+
 	UniqueType *varUt = varRef->evaluate( pd, code );
 
 	if ( varUt == pd->uniqueTypeStream ) {
@@ -1714,6 +1718,8 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 	else {
 		error(loc) << "can only send to parsers and streams" << endl;
 	}
+
+	pd->endContiguous( code, resetContiguous );
 
 	return varUt;
 }
