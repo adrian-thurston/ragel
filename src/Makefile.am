@@ -53,7 +53,7 @@ libprog_a_SOURCES = \
 	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
 	redfsm.h rtvector.h tree.h version.h global.h colm.h parser.h cstring.h \
 	\
-	resolve.cc synthesis.cc  parsetree.cc \
+	resolve.cc lookup.cc synthesis.cc parsetree.cc \
 	fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc \
 	fsmgraph.cc pdagraph.cc pdabuild.cc pdacodegen.cc fsmcodegen.cc \
 	redfsm.cc fsmexec.cc redbuild.cc closure.cc fsmap.cc \

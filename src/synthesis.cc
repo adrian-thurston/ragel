@@ -1711,7 +1711,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
 
 UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 {
-	UniqueType *varUt = varRef->resolve( pd );
+	UniqueType *varUt = varRef->lookup( pd );
 
 	if ( varUt == pd->uniqueTypeStream ) {
 		evaluateSendStream( pd, code );
