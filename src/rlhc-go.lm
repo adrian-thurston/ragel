@@ -275,7 +275,7 @@ void go_stmt( Stmt: stmt )
 		['$' string uint '{' TL: host::tok* host::'}$']
 	{
 		go_tok_list( TL )
-		send Output ["\n"]
+		send Output "
 	}
 	else if match Stmt
 		['=' string uint '{' TL: host::tok* host::'}$']
@@ -283,82 +283,71 @@ void go_stmt( Stmt: stmt )
 		go_tok_list( TL )
 	}
 	elsif match Stmt [Array: array] {
-		send Output ['var ' Array.ident ' []']
-		go_type( Array.type )
-		send Output [' = []']
-		go_type( Array.type )
-		send Output [' { ']
-		go_num_list( Array.num_list )
-		send Output [' }\n']
+		send Output
+			"var [Array.ident] \[\] [go_type(Array.type)] = \[\] "
+					"[go_type(Array.type)] { [go_num_list(Array.num_list)] }
 	}
 	elsif match Stmt [Value: value] {
-		send Output ['var ' Value.value_pass.ident ' ']
-		go_type( Value.value_pass.type )
-		send Output ['= ' Value.value_pass.number '\n']
+		send Output
+			"var [Value.value_pass.ident] "
+				"[go_type(Value.value_pass.type)] = [Value.value_pass.number]
 	}
 	elsif match Stmt [
 			'if' O: '(' IfExpr: expr C: ')' IfStmt: stmt
 	] {
 		# if-statements with only the if clause can go out as an if.
-		send Output ['if ' ]
-		go_expr( IfExpr )
-		send Output ['{\n']
-		go_stmt( IfStmt )
-		send Output ['}\n']
+		send Output
+			"if [go_expr(IfExpr)] {
+			"	[go_stmt(IfStmt)]
+			"}
 	}
 	elsif match Stmt [
 			'if' O: '(' IfExpr: expr C: ')' IfStmt: stmt
 			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 	] {
 		# If the if-statement has more than just an if clause it goes out as a switch.
-		send Output ['switch {\n ' ]
-
-		send Output ['case ' ]
-		go_expr( IfExpr )
-		send Output [':\n']
-		go_stmt( IfStmt )
-		send Output ['\n']
+		send Output 
+			"switch {
+			"	case [go_expr( IfExpr )]:
+			"		[go_stmt( IfStmt )]
 
 		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 			match ElseIfClause
 				['else' 'if' '(' ElseIfExpr: expr ')' ElseIfStmt: stmt]
 
-			send Output ['case ']
-			go_expr( ElseIfExpr )
-			send Output [':\n']
-			go_stmt( ElseIfStmt )
-			send Output ['\n']
+			send Output
+				"case [go_expr(ElseIfExpr)]:
+				"	[go_stmt(ElseIfStmt)]
 		}
 
 		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-			send Output ['default:\n']
-			go_stmt( ElseStmt )
-			send Output ['\n']
+			send Output
+				"default:
+				"	[go_stmt(ElseStmt)]
 		}
-		send Output ['}\n']
+		send Output
+			"}
 	}
 	elsif match Stmt ["while ( TRUE )" WhileStmt: stmt] {
-		send Output ['for ']
-		send Output ['{\n']
-		go_stmt( WhileStmt )
-		send Output ['}\n']
+		send Output
+			"for {
+			"	[go_stmt(WhileStmt)]
+			"}
 	}
 	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
-		send Output ['for ']
-		go_expr( WhileExpr )
-		send Output ['{\n']
-		go_stmt( WhileStmt )
-		send Output ['}\n']
+		send Output
+			"for [go_expr(WhileExpr)] {
+			"	[go_stmt(WhileStmt)]
+			"}
 	}
 	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
-		send Output ['switch ']
-		go_expr( SwitchExpr )
-		send Output ['{\n']
-		go_stmt_list( StmtList )
-		send Output ['}\n']
+		send Output
+			"switch [go_expr(SwitchExpr)] {
+			"	[go_stmt_list(StmtList)]
+			"}
 	}
 	elsif match Stmt [ExprExpr: expr Semi: ';'] {
-		send Output 
+		send Output
 			[go_expr(ExprExpr) Semi]
 	}
 	elsif match Stmt [L: '{' TL: stmt* R: '}'] {
@@ -371,7 +360,7 @@ void go_stmt( Stmt: stmt )
 			"var  [D.ident] [go_type(D.type)]"
 
 		if match D.opt_init ['=' Expr: expr] {
-			send Output 
+			send Output
 				"  = [go_expr(Expr)]"
 		}
 		send Output ['\n']
@@ -388,7 +377,7 @@ void go_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [index_stmt]
 	{
-		send Output 
+		send Output
 			"var  [Stmt.index_stmt.ident] int
 	}
 	else {
