@@ -358,36 +358,38 @@ void go_stmt( Stmt: stmt )
 		send Output ['}\n']
 	}
 	elsif match Stmt [ExprExpr: expr Semi: ';'] {
-		go_expr( ExprExpr )
-		send Output [Semi]
+		send Output 
+			[go_expr(ExprExpr) Semi]
 	}
 	elsif match Stmt [L: '{' TL: stmt* R: '}'] {
-		send Output [L]
-		go_stmt_list( TL )
-		send Output [R]
+		send Output
+			[L go_stmt_list(TL) R]
 	}
-	elsif match Stmt [OptConst: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
+	elsif match Stmt [D: declaration]
 	{
-		send Output ['var ' Ident ' ']
-		go_type( Type )
-		if match OptInit [E: '=' expr] {
-			send Output [' ' E]
-			go_expr( OptInit.expr )
+		send Output
+			"var  [D.ident] [go_type(D.type)]"
+
+		if match D.opt_init ['=' Expr: expr] {
+			send Output 
+				"  = [go_expr(Expr)]"
 		}
 		send Output ['\n']
 	}
 	elsif match Stmt [export_stmt]
 	{
-		send Output ['#define ' Stmt.export_stmt.ident Stmt.export_stmt.number '\n' ]
+		send Output
+			"#define  [Stmt.export_stmt.ident] [Stmt.export_stmt.number]
 	}
 	elsif match Stmt ['fallthrough' ';']
 	{
-		send Output "fallthrough\n"
-		# Nothing needed here.
+		send Output
+			"fallthrough
 	}
 	elsif match Stmt [index_stmt]
 	{
-		send Output ['var ' Stmt.index_stmt.ident ' int\n']
+		send Output 
+			"var  [Stmt.index_stmt.ident] int
 	}
 	else {
 		# catches unspecified cases
