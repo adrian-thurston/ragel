@@ -60,7 +60,7 @@ syntax keyword Type
 	\ end
 
 syntax keyword typeKeywords
-	\ int str bool any ref ptr
+	\ int str bool any ref ptr void
 
 syntax keyword Keyword
 	\ reject else elsif return yield for while if
