@@ -1,4 +1,4 @@
-int d_tok_list( TL: host::tok* )
+void d_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
 		if match Tok [host::'${' StmtList: stmt* host::'}$']
@@ -11,7 +11,7 @@ int d_tok_list( TL: host::tok* )
 	}
 }
 
-int d_expr_factor( ExprFactor: expr_factor )
+void d_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
 		['$' string uint '{' TL: host::tok* host::'}$']
@@ -76,7 +76,7 @@ int d_expr_factor( ExprFactor: expr_factor )
 	}
 }
 
-int d_expr_ptr( ExprPtr: expr_ptr )
+void d_expr_ptr( ExprPtr: expr_ptr )
 {
 	if match ExprPtr [expr_ptr Arrow: '->' expr_factor]
 	{
@@ -125,7 +125,7 @@ int d_expr_ptr( ExprPtr: expr_ptr )
 	}
 }
 
-int d_expr_factor_op( ExprFactorOp: expr_factor_op )
+void d_expr_factor_op( ExprFactorOp: expr_factor_op )
 {
 	if match ExprFactorOp [B: '!' expr_factor_op]
 	{
@@ -143,7 +143,7 @@ int d_expr_factor_op( ExprFactorOp: expr_factor_op )
 	}
 }
 
-int d_expr_bitwise( ExprBitwise: expr_bitwise )
+void d_expr_bitwise( ExprBitwise: expr_bitwise )
 {
 	if match ExprBitwise [expr_bitwise A: '&' expr_factor_op]
 	{
@@ -157,7 +157,7 @@ int d_expr_bitwise( ExprBitwise: expr_bitwise )
 	}
 }
 
-int d_expr_mult( ExprMult: expr_mult )
+void d_expr_mult( ExprMult: expr_mult )
 {
 	if match ExprMult [expr_mult T: '*' expr_bitwise]
 	{
@@ -171,7 +171,7 @@ int d_expr_mult( ExprMult: expr_mult )
 	}
 }
 
-int d_expr_add( ExprAdd: expr_add )
+void d_expr_add( ExprAdd: expr_add )
 {
 	if match ExprAdd [expr_add Op: add_op expr_mult]
 	{
@@ -185,7 +185,7 @@ int d_expr_add( ExprAdd: expr_add )
 	}
 }
 
-int d_expr_shift( ExprShift: expr_shift )
+void d_expr_shift( ExprShift: expr_shift )
 {
 	if match ExprShift [expr_shift Op: shift_op expr_add]
 	{
@@ -199,7 +199,7 @@ int d_expr_shift( ExprShift: expr_shift )
 	}
 }
 
-int d_expr_test( ExprTest: expr_test )
+void d_expr_test( ExprTest: expr_test )
 {
 	if match ExprTest [expr_test Op: test_op expr_shift]
 	{
@@ -213,12 +213,12 @@ int d_expr_test( ExprTest: expr_test )
 	}
 }
 
-int d_expr_cond( ExprCond: expr_cond )
+void d_expr_cond( ExprCond: expr_cond )
 {
 	d_expr_test( ExprCond.expr_test )
 }
 
-int d_expr_assign( ExprAssign: expr_assign )
+void d_expr_assign( ExprAssign: expr_assign )
 {
 	if match ExprAssign [expr_assign Op: assign_op expr_cond]
 	{
@@ -232,12 +232,12 @@ int d_expr_assign( ExprAssign: expr_assign )
 	}
 }
 
-int d_expr( Expr: expr )
+void d_expr( Expr: expr )
 {
 	d_expr_assign( Expr.expr_assign )
 }
 
-int d_type( Type: type )
+void d_type( Type: type )
 {
 	if match Type "s8"
 		send Output ['byte ']
@@ -253,7 +253,7 @@ int d_type( Type: type )
 		send Output [Type]
 }
 
-int d_stmt( Stmt: stmt )
+void d_stmt( Stmt: stmt )
 {
 	if match Stmt
 		['$' string uint '{' TL: host::tok* host::'}$']
@@ -364,7 +364,7 @@ int d_stmt( Stmt: stmt )
 	}
 }
 
-int d_stmt_list( StmtList: stmt* )
+void d_stmt_list( StmtList: stmt* )
 {
 	for Stmt: stmt in repeat( StmtList )
 		d_stmt( Stmt )

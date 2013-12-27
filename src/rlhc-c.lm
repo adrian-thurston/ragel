@@ -1,4 +1,4 @@
-int c_tok_list( TL: host::tok* )
+void c_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
 		if match Tok [host::'${' StmtList: stmt* host::'}$']
@@ -11,7 +11,7 @@ int c_tok_list( TL: host::tok* )
 	}
 }
 
-int c_expr_factor( ExprFactor: expr_factor )
+void c_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
 		['$' string uint '{' TL: host::tok* host::'}$']
@@ -74,7 +74,7 @@ int c_expr_factor( ExprFactor: expr_factor )
 	}
 }
 
-int c_expr_ptr( ExprPtr: expr_ptr )
+void c_expr_ptr( ExprPtr: expr_ptr )
 {
 	if match ExprPtr [expr_ptr Arrow: '->' expr_factor]
 	{
@@ -123,7 +123,7 @@ int c_expr_ptr( ExprPtr: expr_ptr )
 	}
 }
 
-int c_expr_factor_op( ExprFactorOp: expr_factor_op )
+void c_expr_factor_op( ExprFactorOp: expr_factor_op )
 {
 	if match ExprFactorOp [B: '!' expr_factor_op]
 	{
@@ -141,7 +141,7 @@ int c_expr_factor_op( ExprFactorOp: expr_factor_op )
 	}
 }
 
-int c_expr_bitwise( ExprBitwise: expr_bitwise )
+void c_expr_bitwise( ExprBitwise: expr_bitwise )
 {
 	if match ExprBitwise [expr_bitwise A: '&' expr_factor_op]
 	{
@@ -155,7 +155,7 @@ int c_expr_bitwise( ExprBitwise: expr_bitwise )
 	}
 }
 
-int c_expr_mult( ExprMult: expr_mult )
+void c_expr_mult( ExprMult: expr_mult )
 {
 	if match ExprMult [expr_mult T: '*' expr_bitwise]
 	{
@@ -169,7 +169,7 @@ int c_expr_mult( ExprMult: expr_mult )
 	}
 }
 
-int c_expr_add( ExprAdd: expr_add )
+void c_expr_add( ExprAdd: expr_add )
 {
 	if match ExprAdd [expr_add Op: add_op expr_mult]
 	{
@@ -183,7 +183,7 @@ int c_expr_add( ExprAdd: expr_add )
 	}
 }
 
-int c_expr_shift( ExprShift: expr_shift )
+void c_expr_shift( ExprShift: expr_shift )
 {
 	if match ExprShift [expr_shift Op: shift_op expr_add]
 	{
@@ -197,7 +197,7 @@ int c_expr_shift( ExprShift: expr_shift )
 	}
 }
 
-int c_expr_test( ExprTest: expr_test )
+void c_expr_test( ExprTest: expr_test )
 {
 	if match ExprTest [expr_test Op: test_op expr_shift]
 	{
@@ -211,12 +211,12 @@ int c_expr_test( ExprTest: expr_test )
 	}
 }
 
-int c_expr_cond( ExprCond: expr_cond )
+void c_expr_cond( ExprCond: expr_cond )
 {
 	c_expr_test( ExprCond.expr_test )
 }
 
-int c_expr_assign( ExprAssign: expr_assign )
+void c_expr_assign( ExprAssign: expr_assign )
 {
 	if match ExprAssign [expr_assign Op: assign_op expr_cond]
 	{
@@ -230,12 +230,12 @@ int c_expr_assign( ExprAssign: expr_assign )
 	}
 }
 
-int c_expr( Expr: expr )
+void c_expr( Expr: expr )
 {
 	c_expr_assign( Expr.expr_assign )
 }
 
-int c_type( Type: type )
+void c_type( Type: type )
 {
 	if match Type "s8"
 		send Output ['char ']
@@ -253,7 +253,7 @@ int c_type( Type: type )
 		send Output [Type]
 }
 
-int c_stmt( Stmt: stmt )
+void c_stmt( Stmt: stmt )
 {
 	if match Stmt
 		['$' string uint '{' TL: host::tok* host::'}$']
@@ -352,7 +352,7 @@ int c_stmt( Stmt: stmt )
 	}
 }
 
-int c_stmt_list( StmtList: stmt* )
+void c_stmt_list( StmtList: stmt* )
 {
 	for Stmt: stmt in repeat( StmtList )
 		c_stmt( Stmt )
