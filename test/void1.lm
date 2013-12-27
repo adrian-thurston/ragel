@@ -1,0 +1,50 @@
+##### LM #####
+
+#
+# Test of stream voids.
+#
+void hello1()
+{
+	send stdout "hello"
+}
+
+send stdout 
+	"
+	"[hello1()]
+	"
+
+#
+# Parser voids
+#
+
+lex 
+	token line /[^\n]* '\n'/
+end
+
+def g
+	[line*]
+
+global P: parser<g>
+
+P = cons parser<g> []
+
+void hello2()
+{
+	send P "hello"
+}
+
+send P
+	"
+	"[hello2()]
+	"
+
+send stdout
+	[P()]
+
+##### EXP #####
+
+hello
+
+
+hello
+
