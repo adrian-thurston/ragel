@@ -299,11 +299,11 @@ if ( !Start ) {
 
 global Output: stream = open( OutputFile "w" )
 if ( Lang == 'c' )
-	c_trans_stmt_list( Start._repeat_stmt )
+	c_stmt_list( Start._repeat_stmt )
 elsif ( Lang == 'd' )
-	d_trans_stmt_list( Start._repeat_stmt )
+	d_stmt_list( Start._repeat_stmt )
 elsif ( Lang == 'go' )
-	go_trans_stmt_list( Start._repeat_stmt )
+	go_stmt_list( Start._repeat_stmt )
 else {
 	print( 'rlhc: unrecognized language: ' Lang '\n' )
 }
