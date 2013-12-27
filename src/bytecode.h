@@ -339,11 +339,12 @@ typedef unsigned char uchar;
 
 /* Known language element ids. */
 #define LEL_ID_PTR          1
-#define LEL_ID_BOOL         2
-#define LEL_ID_INT          3
-#define LEL_ID_STR          4
-#define LEL_ID_STREAM       5
-#define LEL_ID_IGNORE       6
+#define LEL_ID_VOID         2
+#define LEL_ID_BOOL         3
+#define LEL_ID_INT          4
+#define LEL_ID_STR          5
+#define LEL_ID_STREAM       6
+#define LEL_ID_IGNORE       7
 
 /*
  * Flags

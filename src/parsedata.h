@@ -855,6 +855,7 @@ struct Compiler
 	GenericType *anyVector;
 
 	LangEl *ptrLangEl;
+	LangEl *voidLangEl;
 	LangEl *boolLangEl;
 	LangEl *intLangEl;
 	LangEl *strLangEl;
@@ -892,6 +893,7 @@ struct Compiler
 	UniqueType *findUniqueType( int typeId, IterDef *iterDef );
 
 	UniqueType *uniqueTypeNil;
+	UniqueType *uniqueTypeVoid;
 	UniqueType *uniqueTypePtr;
 	UniqueType *uniqueTypeBool;
 	UniqueType *uniqueTypeInt;

@@ -156,7 +156,7 @@ LangEl *findType( Compiler *pd, Namespace *nspace, const String &data )
 
 void Compiler::declareBaseLangEls()
 {
-	/* Order here is important because we make assumptions about the inbuild
+	/* Order here is important because we make assumptions about the inbuilt
 	 * language elements in the runtime. Note tokens are have identifiers set
 	 * in an initial pass. */
 
@@ -168,8 +168,8 @@ void Compiler::declareBaseLangEls()
 	noTokenLangEl = declareLangEl( this, rootNamespace, "_notoken", LangEl::Term );
 	noTokenLangEl->isIgnore = true;
 	
-	/* Make the "stream" language element */
 	ptrLangEl = declareLangEl( this, rootNamespace, "ptr", LangEl::Term );
+	voidLangEl = declareLangEl( this, rootNamespace, "void", LangEl::Term );
 	boolLangEl = declareLangEl( this, rootNamespace, "bool", LangEl::Term );
 	intLangEl = declareLangEl( this, rootNamespace, "int", LangEl::Term );
 	strLangEl = declareLangEl( this, rootNamespace, "str", LangEl::Term );

@@ -33,6 +33,7 @@ using std::endl;
 void Compiler::initUniqueTypes( )
 {
 	uniqueTypeNil = new UniqueType( TYPE_NIL );
+	uniqueTypeVoid = new UniqueType( TYPE_TREE, voidLangEl );
 	uniqueTypePtr = new UniqueType( TYPE_TREE, ptrLangEl );
 	uniqueTypeBool = new UniqueType( TYPE_TREE, boolLangEl );
 	uniqueTypeInt = new UniqueType( TYPE_TREE, intLangEl );
@@ -42,6 +43,7 @@ void Compiler::initUniqueTypes( )
 	uniqueTypeAny = new UniqueType( TYPE_TREE, anyLangEl );
 
 	uniqeTypeMap.insert( uniqueTypeNil );
+	uniqeTypeMap.insert( uniqueTypeVoid );
 	uniqeTypeMap.insert( uniqueTypePtr );
 	uniqeTypeMap.insert( uniqueTypeBool );
 	uniqeTypeMap.insert( uniqueTypeInt );

@@ -234,7 +234,15 @@ void Compiler::refNameSpace( LangEl *lel, Namespace *nspace )
 void Compiler::makeLangElNames()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->id == LEL_ID_INT ) {
+		if ( lel->id == LEL_ID_VOID ) {
+			lel->fullName = "_void";
+			lel->fullLit = "_void";
+			lel->refName = "_void";
+			lel->declName = "_void";
+			lel->xmlTag = "void";
+
+		}
+		else if ( lel->id == LEL_ID_INT ) {
 			lel->fullName = "_int";
 			lel->fullLit = "_int";
 			lel->refName = "_int";
