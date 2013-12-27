@@ -1607,6 +1607,9 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 
 			code.append( IN_LOAD_STR );
 			code.appendWord( mapEl->value );
+
+			code.append( IN_PRINT_STREAM );
+			code.append( 1 );
 			break;
 		}
 		case ConsItem::InputText: {
@@ -1617,15 +1620,25 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 
 			code.append( IN_LOAD_STR );
 			code.appendWord( mapEl->value );
+
+			code.append( IN_PRINT_STREAM );
+			code.append( 1 );
 			break;
 		}
 		case ConsItem::ExprType:
-			item->expr->evaluate( pd, code );
+			UniqueType *ut = item->expr->evaluate( pd, code );
+			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
+				code.append( IN_POP );
+				code.append( IN_POP );
+			}
+			else {
+				code.append( IN_PRINT_STREAM );
+				code.append( 1 );
+			}
+
 			break;
 		}
 
-		code.append( IN_PRINT_STREAM );
-		code.append( 1 );
 	}
 
 
