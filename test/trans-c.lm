@@ -7,7 +7,8 @@ namespace c
 		literal 'int', 'bool', 'const', 'char', 'ptr',
 				'printf', 'fwrite', 'var', 'byte'
 
-		literal ';', '<', '>', '(', ')', '[', ']', '=', '*', '!'
+		literal ';', '<', '>', '(', ')', '[', ']', '=',
+				'*', '!', '{', '}', '+', '-', '==', '!=', ','
 
 		ignore / ( [ \t] | NL )+ /
 
@@ -21,28 +22,28 @@ namespace c
 		token indep_any / any /
 	end
 
-	def tok
+	def factor
 		[tk_ident]
-	|	[tk_ident '[' tok ']']
+	|	[tk_ident '[' expr ']']
 	|	[tk_number]
 	|	[tk_hex_number]
 	|	[string]
-	|	['(' type ')' '(' tok* ')']
-	|	['(' tok* ')']
-	|	['printf' '(' tok* ')' ';']
-	|	['fwrite' '(' tok* ')' ';']
-	|	[';']
-	|	['<']
-	|	['>']
-	|	['[']
-	|	[']']
-	|	['=']
-	|	['!']
-	|	['*']
-	|	[indep_any]
+	|	['(' type ')' '(' expr ')']
+	|	['(' expr ')']
+
+	def op
+		['<'] | ['>'] | ['='] | ['!']
+	|	['+'] | ['-'] | ['*'] | ['!=']
+	|	['=='] | [',']
+
+	def expr_op
+		[op factor]
+
+	def expr
+		[factor expr_op*]
 
 	def opt_arr
-		['[' tok ']']
+		['[' expr ']']
 	|	[]
 
 	def type
@@ -55,7 +56,88 @@ namespace c
 
 	def var_decl
 		[type tk_ident opt_arr ';']
+
+	def print_stmt
+		['printf' '(' expr ')' ';']
+	|	['fwrite' '(' expr ')' ';']
 end
+
+c::factor c_factor( Factor: factor )
+{
+	return cast<c::factor> Factor
+}
+
+c::tk_ident c_ident( Ident: tk_ident )
+{
+	return cast<c::tk_ident> Ident
+}
+
+c::opt_arr c_opt_arr( OptArr: opt_arr )
+{
+	return cast<c::opt_arr> OptArr
+}
+
+c::expr c_expr( Expr: expr )
+{
+	return cast<c::expr> Expr
+}
+
+int c_rewrite( Indep: ref<section*> )
+{
+	for Factor: factor in Indep {
+		if match Factor "true" {
+			Factor = cons factor "1"
+		}
+		elsif match Factor "false" {
+			Factor = cons factor "0"
+		}
+		elsif match Factor 
+				['<' type '>' '(' Expr: expr ')']
+		{
+			Factor = cast<factor> cons c::factor 
+				"( [c_expr(Expr)] )
+		}
+		elsif match Factor ['first_token_char'] {
+			Factor = cast<factor> cons c::factor
+				"ts\[0\]"
+		}
+	}
+
+	for Decl: var_decl in Indep {
+		if match Decl
+			"bool [Ident: tk_ident OptArr: opt_arr];
+		{
+			Decl = cast<var_decl> cons c::var_decl
+				"int [c_ident(Ident)] [c_opt_arr(OptArr)];
+		}
+		elsif match Decl
+			"ptr [Ident: tk_ident];
+		{
+			Decl = cast<var_decl> cons c::var_decl
+				"char* [c_ident(Ident)];
+		}
+	}
+
+	for Stmt: print_stmt in Indep {
+		if match Stmt ['printi' F: factor ';' ] {
+			Stmt = cast<print_stmt> cons c::print_stmt
+				"printf( \"%d\", [c_factor(F)] );"
+		}
+		elsif match Stmt ['printb' F: factor ';' ] {
+			Stmt = cast<print_stmt> cons c::print_stmt
+				"fwrite( [c_factor(F)], 1, pos, stdout );"
+		}
+		elsif match Stmt ['prints' F: factor ';' ] {
+			Stmt = cast<print_stmt> cons c::print_stmt
+				"printf( \"%s\", [c_factor(F)] );"
+		}
+		elsif match Stmt ['print_token' ';' ] {
+			Stmt = cast<print_stmt> cons c::print_stmt
+				"fwrite ( ts , 1 , te - ts , stdout );" 
+		}
+	}
+}
+
 
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
@@ -94,78 +176,10 @@ send Output
 	"#include <stdio.h>
 	"
 
-c::tok c_tok( Tok: tok )
-{
-	return cast<c::tok> Tok
-}
-
-c::tk_ident c_ident( Ident: tk_ident )
-{
-	return cast<c::tk_ident> Ident
-}
-
-c::opt_arr c_opt_arr( OptArr: opt_arr )
-{
-	return cast<c::opt_arr> OptArr
-}
-
-int indepToHost( Indep: ref<section*> )
-{
-	for Decl: var_decl in Indep {
-		if match Decl
-			"bool [Ident: tk_ident OptArr: opt_arr];
-		{
-			Decl = cast<var_decl> cons c::var_decl
-				"int [c_ident(Ident)] [c_opt_arr(OptArr)];
-		}
-		elsif match Decl
-			"ptr [Ident: tk_ident];
-		{
-			Decl = cast<var_decl> cons c::var_decl
-				"char* [c_ident(Ident)];
-		}
-	}
-
-	for Tok: tok in Indep {
-		if match Tok "true" {
-			Tok = cons tok "1"
-		}
-		elsif match Tok "false" {
-			Tok = cons tok "0"
-		}
-		elsif match Tok 
-				['<' type '>' '(' TokList: tok* ')']
-		{
-			Tok = cons tok 
-				['(' TokList ')']
-		}
-		elsif match Tok ['printi' V: tok ';' ] {
-			Tok = cast<tok> cons c::tok
-				"printf( \"%d\", [c_tok(V)] );"
-		}
-		elsif match Tok ['printb' V: tok ';' ] {
-			Tok = cast<tok> cons c::tok
-				"fwrite( [c_tok(V)], 1, pos, stdout );"
-		}
-		elsif match Tok ['prints' V: tok ';' ] {
-			Tok = cast<tok> cons c::tok
-				"printf( \"%s\", [c_tok(V)] );"
-		}
-		elsif match Tok ['print_token' ';' ] {
-			Tok = cast<tok> cons c::tok
-				"fwrite ( ts , 1 , te - ts , stdout );" 
-		}
-		elsif match Tok ['first_token_char'] {
-			Tok = cast<tok> cons c::tok
-				"ts\[0\]"
-		}
-	}
-}
-
 for Section: section in RagelTree {
 	if match Section [Decl: var_decl] {
 		cons SectionList: section* [Decl]
-		indepToHost( SectionList )
+		c_rewrite( SectionList )
 		send Output [SectionList]
 	}
 }
@@ -175,12 +189,20 @@ for Section: section in RagelTree {
 		for Action: ragel::action_block in Section {
 			# Reparse as lang-independent code.
 			parse SectionList: section*[$Action]
+			if ( !SectionList ) {
+				print( error '\n' Action )
+				exit(1)
+			}
 
 			# Translate to specific language.
-			indepToHost( SectionList )
+			c_rewrite( SectionList )
 
 			# Reparse back to ragel action block.
 			Action = parse ragel::action_block[$SectionList]
+			if ( !Action ) {
+				print( error '\n' )
+				exit(1)
+			}
 		}
 
 		send Output ["\n" Section "\n"]
@@ -197,7 +219,7 @@ send Output
 for Section: section in RagelTree {
 	if match Section [ExprStmt: expr_stmt] {
 		cons SectionList: section* [ExprStmt]
-		indepToHost( SectionList )
+		c_rewrite( SectionList )
 		send Output [SectionList]
 	}
 }
