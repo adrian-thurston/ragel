@@ -80,6 +80,11 @@ send Output
 	"#include <stdio.h>
 	"
 
+c::tok c_tok( Tok: tok )
+{
+	return cast<c::tok> Tok
+}
+
 int indepToHost( Indep: ref<section*> )
 {
 	for Decl: var_decl in Indep {
@@ -111,22 +116,24 @@ int indepToHost( Indep: ref<section*> )
 				['(' TokList ')']
 		}
 		elsif match Tok ['printi' V: tok ';' ] {
-			CV: c::tok = cast<c::tok> V
-			Tok = cast<tok> cons c::tok[ "printf( \"%d\", [CV] );"]
+			Tok = cast<tok> cons c::tok
+				[ "printf( \"%d\", [c_tok(V)] );"]
 		}
 		elsif match Tok ['printb' V: tok ';' ] {
-			CV: c::tok = cast<c::tok> V
-			Tok = cast<tok> cons c::tok[ "fwrite( [CV], 1, pos, stdout );"]
+			Tok = cast<tok> cons c::tok
+				[ "fwrite( [c_tok(V)], 1, pos, stdout );"]
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
-			CV: c::tok = cast<c::tok> V
-			Tok = cast<tok> cons c::tok[ "printf( \"%s\", [CV] );"]
+			Tok = cast<tok> cons c::tok
+				[ "printf( \"%s\", [c_tok(V)] );"]
 		}
 		elsif match Tok ['print_token' ';' ] {
-			Tok = cast<tok> cons c::tok[ "fwrite ( ts , 1 , te - ts , stdout );" ]
+			Tok = cast<tok> cons c::tok
+				[ "fwrite ( ts , 1 , te - ts , stdout );" ]
 		}
 		elsif match Tok ['first_token_char'] {
-			Tok = cast<tok> cons c::tok ["ts\[0\]"]
+			Tok = cast<tok> cons c::tok
+				["ts\[0\]"]
 		}
 	}
 }

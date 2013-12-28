@@ -84,6 +84,11 @@ send Output
 	"class [MachineName.word]
 	"{
 
+d::tok d_tok( Tok: tok )
+{
+	return cast<d::tok> Tok
+}
+
 int indepToHost( Indep: ref<section*> )
 {
 	for Decl: var_decl in Indep {
@@ -109,25 +114,28 @@ int indepToHost( Indep: ref<section*> )
 			Tok = cons tok "0"
 		}
 		elsif match Tok ['<' type '>' '(' TokList: tok* ')'] {
-			Tok = cons tok ['(' TokList ')']
+			Tok = cons tok
+				['(' TokList ')']
 		}
 		elsif match Tok ['printi' V: tok ';' ] {
-			DV: d::tok = cast<d::tok> V
-			Tok = cast<tok> cons d::tok[ "printf( \"%d\", [DV] );"]
+			Tok = cast<tok> cons d::tok
+				[ "printf( \"%d\", [d_tok(V)] );"]
 		}
 		elsif match Tok ['printb' V: tok ';' ] {
-			DV: d::tok = cast<d::tok> V
-			Tok = cast<tok> cons d::tok[ "printf( \"%.*s\", [DV]\[0..(pos)\] );"]
+			Tok = cast<tok> cons d::tok
+				[ "printf( \"%.*s\", [d_tok(V)]\[0..(pos)\] );"]
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
-			DV: d::tok = cast<d::tok> V
-			Tok = cast<tok> cons d::tok[ "printf( \"%.*s\", [DV] );"]
+			Tok = cast<tok> cons d::tok
+				[ "printf( \"%.*s\", [d_tok(V)] );"]
 		}
 		elsif match Tok ['print_token' ';' ] {
-			Tok = cast<tok> cons d::tok[ "printf( \"%.*s\", ts\[0..(te - ts)\] );"]
+			Tok = cast<tok> cons d::tok
+				[ "printf( \"%.*s\", ts\[0..(te - ts)\] );"]
 		}
 		elsif match Tok ['first_token_char'] {
-			Tok = cast<tok> cons d::tok ["ts\[0\]"]
+			Tok = cast<tok> cons d::tok
+				["ts\[0\]"]
 		}
 	}
 }
