@@ -285,7 +285,7 @@ void go_stmt( Stmt: stmt )
 	elsif match Stmt [Array: array] {
 		send Output
 			"var [Array.ident] \[\] [go_type(Array.type)] = \[\] "
-					"[go_type(Array.type)] { [go_num_list(Array.num_list)] }
+				"[go_type(Array.type)] { [go_num_list(Array.num_list)] }
 	}
 	elsif match Stmt [Value: value] {
 		send Output
