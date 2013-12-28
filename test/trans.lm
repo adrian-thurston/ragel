@@ -44,7 +44,6 @@ lex
 	token output_line /[^\n]* '\n'/
 end
 
-
 lex
 	token comm_val /'@' [A-Za-z0-9_]+ ': ' [^\n]+ '\n' /
 	token comm_term /'*/'/
@@ -82,7 +81,6 @@ def tok
 |	[c_comment]
 |	[string]
 |	['<' type '>' '(' tok* ')']
-|	['(' type ')' '(' tok* ')']
 |	['(' tok* ')']
 |	['printi' tok ';']
 |	['printb' tok ';']
@@ -99,15 +97,10 @@ def tok
 |	['*']
 |	[indep_any]
 
-def section_multiline
-	['%%{' ragel::ragel_start '}%%']
-
 def type
 	['int']
 |	['bool']
 |	['char']
-|	['char' '*']
-|	['const' '(' 'char' ')' '*']
 |	['ptr']
 |	['byte']
 
@@ -124,6 +117,9 @@ def expr_stmt
 def stmt
 	[var_decl]
 |	[expr_stmt]
+
+def section_multiline
+	['%%{' ragel::ragel_start '}%%']
 
 def section
 	[section_multiline]

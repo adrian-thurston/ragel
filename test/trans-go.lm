@@ -41,9 +41,20 @@ namespace go
 	|	['*']
 	|	[indep_any]
 
+	def opt_arr
+		['[' tok ']']
+	|	[]
+
+	def type
+		['int']
+	|	['bool']
+	|	['char']
+	|	['char' '*']
+	|	['const' '(' 'char' ')' '*']
+	|	['byte']
+
 	def var_decl
-		[type tk_ident opt_arr ';']
-	|	['var' tk_ident opt_arr type]
+		['var' tk_ident opt_arr type]
 end
 
 
@@ -100,6 +111,16 @@ go::opt_arr go_opt_arr( OptArr: opt_arr )
 	return cast<go::opt_arr> OptArr
 }
 
+go::type go_type( Type: type )
+{
+	return cast<go::type> Type
+}
+
+go::tok* go_tok_list( TokList: tok* )
+{
+	return cast<go::tok*> TokList
+}
+
 int indepToHost( Indep: ref<section*> )
 {
 	for Decl: var_decl in Indep {
@@ -136,29 +157,29 @@ int indepToHost( Indep: ref<section*> )
 		elsif match Tok "false" {
 			Tok = cons tok "0"
 		}
-		elsif match Tok ['<' type '>' '(' TokList: tok* ')'] {
-			Tok = cons tok
-				['(' Tok.type ')' '(' TokList ')']
+		elsif match Tok ['<' Type: type '>' '(' TokList: tok* ')'] {
+			Tok = cast<tok> cons go::tok
+				"( [go_type(Type)] ) ( [go_tok_list(TokList)] )"
 		}
 		elsif match Tok ['printi' V: tok ';' ] {
 			Tok = cast<tok> cons go::tok
-				[ "fmt.Print( [go_tok(V)] );"]
+				"fmt.Print( [go_tok(V)] );"
 		}
 		elsif match Tok ['printb' V: tok ';' ] {
 			Tok = cast<tok> cons go::tok
-				[ "fmt.Print( string ( [go_tok(V)]\[:pos\] ));"]
+				"fmt.Print( string ( [go_tok(V)]\[:pos\] ));"
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
 			Tok = cast<tok> cons go::tok
-				[ "fmt.Print( [go_tok(V)] );"]
+				"fmt.Print( [go_tok(V)] );"
 		}
 		elsif match Tok ['print_token' ';' ] {
 			Tok = cast<tok> cons go::tok
-				[ "fmt.Print( data\[ts:te\] );" ]
+				"fmt.Print( data\[ts:te\] );" 
 		}
 		elsif match Tok ['first_token_char'] {
 			Tok = cast<tok> cons go::tok
-				["data\[ts\]"]
+				"data\[ts\]"
 		}
 	}
 }
