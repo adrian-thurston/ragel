@@ -28,7 +28,6 @@ namespace d
 	|	[tk_number]
 	|	[tk_hex_number]
 	|	[string]
-	|	['<' type '>' '(' tok* ')']
 	|	['(' type ')' '(' tok* ')']
 	|	['(' tok* ')']
 	|	['printf' '(' tok* ')' ';']
@@ -42,8 +41,22 @@ namespace d
 	|	['!']
 	|	['*']
 	|	[indep_any]
-end
 
+	def opt_arr
+		['[' tok ']']
+	|	[]
+
+	def type
+		['int']
+	|	['bool']
+	|	['char']
+	|	['char' '*']
+	|	['const' '(' 'char' ')' '*']
+	|	['byte']
+
+	def var_decl
+		[type tk_ident opt_arr ';']
+end
 
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
@@ -89,20 +102,30 @@ d::tok d_tok( Tok: tok )
 	return cast<d::tok> Tok
 }
 
+d::tk_ident d_ident( Ident: tk_ident )
+{
+	return cast<d::tk_ident> Ident
+}
+
+d::opt_arr d_opt_arr( OptArr: opt_arr )
+{
+	return cast<d::opt_arr> OptArr
+}
+
 int indepToHost( Indep: ref<section*> )
 {
 	for Decl: var_decl in Indep {
 		if match Decl
 			"bool [Ident: tk_ident OptArr: opt_arr];
 		{
-			Decl = cons var_decl
-				"int [Ident OptArr];
+			Decl = cast<var_decl> cons d::var_decl
+				"int [d_ident(Ident)] [d_opt_arr(OptArr)];
 		}
 		elsif match Decl
 			"ptr [Ident: tk_ident];
 		{
-			Decl = cons var_decl
-				"const(char) * [Ident];
+			Decl = cast<var_decl> cons d::var_decl
+				"const(char) * [d_ident(Ident)];
 		}
 	}
 
@@ -119,23 +142,23 @@ int indepToHost( Indep: ref<section*> )
 		}
 		elsif match Tok ['printi' V: tok ';' ] {
 			Tok = cast<tok> cons d::tok
-				[ "printf( \"%d\", [d_tok(V)] );"]
+				"printf( \"%d\", [d_tok(V)] );"
 		}
 		elsif match Tok ['printb' V: tok ';' ] {
 			Tok = cast<tok> cons d::tok
-				[ "printf( \"%.*s\", [d_tok(V)]\[0..(pos)\] );"]
+				"printf( \"%.*s\", [d_tok(V)]\[0..(pos)\] );"
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
 			Tok = cast<tok> cons d::tok
-				[ "printf( \"%.*s\", [d_tok(V)] );"]
+				"printf( \"%.*s\", [d_tok(V)] );"
 		}
 		elsif match Tok ['print_token' ';' ] {
 			Tok = cast<tok> cons d::tok
-				[ "printf( \"%.*s\", ts\[0..(te - ts)\] );"]
+				"printf( \"%.*s\", ts\[0..(te - ts)\] );"
 		}
 		elsif match Tok ['first_token_char'] {
 			Tok = cast<tok> cons d::tok
-				["ts\[0\]"]
+				"ts\[0\]"
 		}
 	}
 }

@@ -27,7 +27,6 @@ namespace c
 	|	[tk_number]
 	|	[tk_hex_number]
 	|	[string]
-	|	['<' type '>' '(' tok* ')']
 	|	['(' type ')' '(' tok* ')']
 	|	['(' tok* ')']
 	|	['printf' '(' tok* ')' ';']
@@ -41,6 +40,21 @@ namespace c
 	|	['!']
 	|	['*']
 	|	[indep_any]
+
+	def opt_arr
+		['[' tok ']']
+	|	[]
+
+	def type
+		['int']
+	|	['bool']
+	|	['char']
+	|	['char' '*']
+	|	['const' '(' 'char' ')' '*']
+	|	['byte']
+
+	def var_decl
+		[type tk_ident opt_arr ';']
 end
 
 OutputFile: str = argv.pop()
@@ -85,20 +99,30 @@ c::tok c_tok( Tok: tok )
 	return cast<c::tok> Tok
 }
 
+c::tk_ident c_ident( Ident: tk_ident )
+{
+	return cast<c::tk_ident> Ident
+}
+
+c::opt_arr c_opt_arr( OptArr: opt_arr )
+{
+	return cast<c::opt_arr> OptArr
+}
+
 int indepToHost( Indep: ref<section*> )
 {
 	for Decl: var_decl in Indep {
 		if match Decl
 			"bool [Ident: tk_ident OptArr: opt_arr];
 		{
-			Decl = cons var_decl
-				"int [Ident OptArr];
+			Decl = cast<var_decl> cons c::var_decl
+				"int [c_ident(Ident)] [c_opt_arr(OptArr)];
 		}
 		elsif match Decl
 			"ptr [Ident: tk_ident];
 		{
-			Decl = cons var_decl
-				"char* [Ident];
+			Decl = cast<var_decl> cons c::var_decl
+				"char* [c_ident(Ident)];
 		}
 	}
 
@@ -117,23 +141,23 @@ int indepToHost( Indep: ref<section*> )
 		}
 		elsif match Tok ['printi' V: tok ';' ] {
 			Tok = cast<tok> cons c::tok
-				[ "printf( \"%d\", [c_tok(V)] );"]
+				"printf( \"%d\", [c_tok(V)] );"
 		}
 		elsif match Tok ['printb' V: tok ';' ] {
 			Tok = cast<tok> cons c::tok
-				[ "fwrite( [c_tok(V)], 1, pos, stdout );"]
+				"fwrite( [c_tok(V)], 1, pos, stdout );"
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
 			Tok = cast<tok> cons c::tok
-				[ "printf( \"%s\", [c_tok(V)] );"]
+				"printf( \"%s\", [c_tok(V)] );"
 		}
 		elsif match Tok ['print_token' ';' ] {
 			Tok = cast<tok> cons c::tok
-				[ "fwrite ( ts , 1 , te - ts , stdout );" ]
+				"fwrite ( ts , 1 , te - ts , stdout );" 
 		}
 		elsif match Tok ['first_token_char'] {
 			Tok = cast<tok> cons c::tok
-				["ts\[0\]"]
+				"ts\[0\]"
 		}
 	}
 }
