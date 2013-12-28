@@ -5,7 +5,7 @@ lex
 
 	literal 'int', 'bool', 'const', 'char', 'ptr', 'printi',
 			'printb', 'prints', 'print_token',
-			'fwrite', 'first_token_char', 'var', 'byte'
+			'fwrite', 'first_token_char', 'byte'
 
 	literal ';', '<', '>', '(', ')', '[', ']', '=', '*', '!'
 
@@ -117,7 +117,6 @@ def opt_arr
 
 def var_decl
 	[type tk_ident opt_arr ';']
-|	['var' tk_ident opt_arr type]
 
 def expr_stmt
 	[tk_ident '=' tok* ';']

@@ -40,6 +40,10 @@ namespace go
 	|	['!']
 	|	['*']
 	|	[indep_any]
+
+	def var_decl
+		[type tk_ident opt_arr ';']
+	|	['var' tk_ident opt_arr type]
 end
 
 
@@ -81,32 +85,47 @@ prints( Output
 	"
 )
 
+go::tok go_tok( Tok: tok )
+{
+	return cast<go::tok> Tok
+}
+
+go::tk_ident go_ident( Ident: tk_ident )
+{
+	return cast<go::tk_ident> Ident
+}
+
+go::opt_arr go_opt_arr( OptArr: opt_arr )
+{
+	return cast<go::opt_arr> OptArr
+}
+
 int indepToHost( Indep: ref<section*> )
 {
 	for Decl: var_decl in Indep {
 		if match Decl
 			"bool [Ident: tk_ident OptArr: opt_arr];
 		{
-			Decl = cons var_decl
-				"var [Ident] [OptArr] int
+			Decl = cast<var_decl> cons go::var_decl
+				"var [go_ident(Ident)] [go_opt_arr(OptArr)] int
 		}
 		elsif match Decl
 			"int [Ident: tk_ident OptArr: opt_arr];
 		{
-			Decl = cons var_decl
-				"var [Ident] [OptArr] int
+			Decl = cast<var_decl> cons go::var_decl
+				"var [go_ident(Ident)] [go_opt_arr(OptArr)] int
 		}
 		elsif match Decl
 			"char [Ident: tk_ident OptArr: opt_arr];
 		{
-			Decl = cons var_decl
-				"var [Ident] [OptArr] byte
+			Decl = cast<var_decl> cons go::var_decl
+				"var [go_ident(Ident)] [go_opt_arr(OptArr)] byte
 		}
 		elsif match Decl
 			"ptr [Ident: tk_ident];
 		{
-			Decl = cons var_decl
-				"var [Ident] int
+			Decl = cast<var_decl> cons go::var_decl
+				"var [go_ident(Ident)] int
 		}
 	}
 
@@ -118,25 +137,28 @@ int indepToHost( Indep: ref<section*> )
 			Tok = cons tok "0"
 		}
 		elsif match Tok ['<' type '>' '(' TokList: tok* ')'] {
-			Tok = cons tok ['(' Tok.type ')' '(' TokList ')']
+			Tok = cons tok
+				['(' Tok.type ')' '(' TokList ')']
 		}
 		elsif match Tok ['printi' V: tok ';' ] {
-			GV: go::tok = cast<go::tok> V
-			Tok = cast<tok> cons go::tok[ "fmt.Print( [GV] );"]
+			Tok = cast<tok> cons go::tok
+				[ "fmt.Print( [go_tok(V)] );"]
 		}
 		elsif match Tok ['printb' V: tok ';' ] {
-			GV: go::tok = cast<go::tok> V
-			Tok = cast<tok> cons go::tok[ "fmt.Print( string ( [GV]\[:pos\] ));"]
+			Tok = cast<tok> cons go::tok
+				[ "fmt.Print( string ( [go_tok(V)]\[:pos\] ));"]
 		}
 		elsif match Tok ['prints' V: tok ';' ] {
-			GV: go::tok = cast<go::tok> V
-			Tok = cast<tok> cons go::tok[ "fmt.Print( [GV] );"]
+			Tok = cast<tok> cons go::tok
+				[ "fmt.Print( [go_tok(V)] );"]
 		}
 		elsif match Tok ['print_token' ';' ] {
-			Tok = cast<tok> cons go::tok[ "fmt.Print( data\[ts:te\] );" ]
+			Tok = cast<tok> cons go::tok
+				[ "fmt.Print( data\[ts:te\] );" ]
 		}
 		elsif match Tok ['first_token_char'] {
-			Tok = cast<tok> cons go::tok ["data\[ts\]"]
+			Tok = cast<tok> cons go::tok
+				["data\[ts\]"]
 		}
 	}
 }
