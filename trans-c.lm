@@ -18,8 +18,6 @@ namespace c
 
 		token string
 			/ s_literal | d_literal /
-
-		token indep_any / any /
 	end
 
 	def factor
@@ -82,7 +80,7 @@ c::expr c_expr( Expr: expr )
 	return cast<c::expr> Expr
 }
 
-int c_rewrite( Indep: ref<section*> )
+int c_rewrite( Indep: ref<any> )
 {
 	for Factor: factor in Indep {
 		if match Factor "true" {
@@ -178,9 +176,8 @@ send Output
 
 for Section: section in RagelTree {
 	if match Section [Decl: var_decl] {
-		cons SectionList: section* [Decl]
-		c_rewrite( SectionList )
-		send Output [SectionList]
+		c_rewrite( Decl )
+		send Output [Decl]
 	}
 }
 
@@ -218,9 +215,8 @@ send Output
 
 for Section: section in RagelTree {
 	if match Section [ExprStmt: expr_stmt] {
-		cons SectionList: section* [ExprStmt]
-		c_rewrite( SectionList )
-		send Output [SectionList]
+		c_rewrite( ExprStmt )
+		send Output [ExprStmt]
 	}
 }
 

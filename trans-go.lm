@@ -18,8 +18,6 @@ namespace go
 
 		token string
 			/ s_literal | d_literal /
-
-		token indep_any / any /
 	end
 
 	def factor
@@ -100,7 +98,7 @@ go::factor* go_tok_list( TokList: factor* )
 	return cast<go::factor*> TokList
 }
 
-int indepToHost( Indep: ref<section*> )
+int go_rewrite( Indep: ref<any> )
 {
 	for Factor: factor in Indep {
 		if match Factor "true" {
@@ -207,9 +205,8 @@ prints( Output
 
 for Section: section in RagelTree {
 	if match Section [Decl: var_decl] {
-		cons SectionList: section* [Decl]
-		indepToHost( SectionList )
-		prints( Output SectionList )
+		go_rewrite( Decl )
+		send Output [Decl]
 	}
 }
 
@@ -220,7 +217,7 @@ for Section: section in RagelTree {
 			parse SectionList: section*[$Action]
 
 			# Translate to specific language.
-			indepToHost( SectionList )
+			go_rewrite( SectionList )
 
 			# Reparse back to ragel action block.
 			Action = parse ragel::action_block[$SectionList]
@@ -239,9 +236,8 @@ send Output
 
 for Section: section in RagelTree {
 	if match Section [ExprStmt: expr_stmt] {
-		cons SectionList: section* [ExprStmt]
-		indepToHost( SectionList )
-		prints( Output SectionList )
+		go_rewrite( ExprStmt )
+		send Output [ExprStmt]
 	}
 }
 
