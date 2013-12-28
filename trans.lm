@@ -5,9 +5,13 @@ lex
 
 	literal 'int', 'bool', 'const', 'char', 'ptr', 'printi',
 			'printb', 'prints', 'print_token',
-			'fwrite', 'first_token_char', 'byte'
+			'fwrite', 'first_token_char', 'byte', 'if', 'else'
 
-	literal ';', '<', '>', '(', ')', '[', ']', '=', '*', '!'
+	literal 'fgoto', 'fcall', 'fnext', 'fexec'
+
+	literal ';', '<', '>', '(', ')', '[', ']', '=',
+			'*', '!', '{', '}', '+', '-', '==', '!=',
+			'>=', '<='
 
 	ignore / ( [ \t] | NL )+ /
 
@@ -35,8 +39,6 @@ lex
 
 	token string
 		/ s_literal | d_literal /
-
-	token indep_any / any /
 end
 
 lex
@@ -70,32 +72,28 @@ def input
 def output
 	[ifdef_OUTPUT output_line* output_endif]
 
-def tok
-	[tk_ident]
-|	[tk_ident '[' tok ']']
+def factor
+	['first_token_char']
+|	[tk_ident]
+|	[tk_ident '[' expr ']']
+|	[tk_ident '(' expr ')']
 |	[tk_number]
+|	['-' tk_number]
 |	[tk_hex_number]
-|	[input]
-|	[output]
-|	[tk_cpp_comment]
-|	[c_comment]
 |	[string]
-|	['<' type '>' '(' tok* ')']
-|	['(' tok* ')']
-|	['printi' tok ';']
-|	['printb' tok ';']
-|	['prints' tok ';']
-|	['print_token' ';']
-|	['first_token_char']
-|	[';']
-|	['<']
-|	['>']
-|	['[']
-|	[']']
-|	['=']
-|	['!']
-|	['*']
-|	[indep_any]
+|	['<' type '>' '(' expr ')']
+|	['(' expr ')']
+
+def op
+	['<'] | ['>'] | ['='] | ['!']
+|	['+'] | ['-'] | ['*'] | ['!=']
+|	['=='] | ['<='] | ['>=']
+
+def expr_op
+	[op factor]
+
+def expr
+	[factor expr_op*]
 
 def type
 	['int']
@@ -105,18 +103,51 @@ def type
 |	['byte']
 
 def opt_arr
-	['[' tok ']']
+	['[' expr ']']
 |	[]
 
 def var_decl
 	[type tk_ident opt_arr ';']
 
+def opt_sub
+	[ '[' expr ']' ]
+|	[]
+
 def expr_stmt
-	[tk_ident '=' tok* ';']
+	[tk_ident opt_sub '=' expr ';']
+|	[expr ';']
+
+def if_stmt
+	['if' '(' expr ')' '{' stmt* '}' opt_else]
+
+def opt_else
+	['else' '{' stmt* '}']
+|	[]
+
+def print_stmt
+	['printi' expr ';']
+|	['printb' expr ';']
+|	['prints' expr ';']
+|	['print_token' ';']
 
 def stmt
 	[var_decl]
 |	[expr_stmt]
+|	[if_stmt]
+|	[print_stmt]
+|	['{' stmt* '}']
+|	['{' expr '}']
+|	[input]
+|	[output]
+|	[tk_cpp_comment]
+|	[c_comment]
+|	['fgoto' tk_ident ';']
+|	['fcall' tk_ident ';']
+|	['fnext' tk_ident ';']
+|	['fgoto' '*' expr ';']
+|	['fcall' '*' expr ';']
+|	['fnext' '*' expr ';']
+|	['fexec' expr ';']
 
 def section_multiline
 	['%%{' ragel::ragel_start '}%%']
@@ -124,7 +155,6 @@ def section_multiline
 def section
 	[section_multiline]
 |	[stmt]
-|	[tok]
 
 def start
 	[section*]
