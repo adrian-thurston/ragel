@@ -37,8 +37,7 @@ using std::endl;
 void BaseParser::init()
 {
 	/* Set up the root namespace. */
-	Namespace *rootNamespace = createNamespace(
-			internal, String("___ROOT_NAMESPACE") );
+	Namespace *rootNamespace = createRootNamespace();
 	pd->rootNamespace = rootNamespace;
 
 	/* Set up the global object. */
@@ -121,17 +120,27 @@ void BaseParser::popRegionSet()
 	regionStack.pop();
 }
 
+Namespace *BaseParser::createRootNamespace()
+{
+	/* Gets id of zero and default name. No parent. */
+	Namespace *nspace = new Namespace( internal,
+			String("___ROOT_NAMESPACE"), 0, 0 );
+
+	pd->namespaceList.append( nspace );
+	namespaceStack.push( nspace );
+
+	return nspace;
+}
+
 Namespace *BaseParser::createNamespace( const InputLoc &loc, const String &name )
 {
-	Namespace *parentNamespace = namespaceStack.length() > 0 ?
-			namespaceStack.top() : 0;
+	Namespace *parentNamespace = namespaceStack.top();
 
 	/* Make the new namespace. */
 	Namespace *nspace = new Namespace( loc, name,
 			pd->namespaceList.length(), parentNamespace );
 
-	if ( parentNamespace != 0 )
-		parentNamespace->childNamespaces.append( nspace );
+	parentNamespace->childNamespaces.append( nspace );
 
 	pd->namespaceList.append( nspace );
 	namespaceStack.push( nspace );
