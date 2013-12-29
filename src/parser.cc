@@ -134,15 +134,19 @@ Namespace *BaseParser::createRootNamespace()
 
 Namespace *BaseParser::createNamespace( const InputLoc &loc, const String &name )
 {
-	Namespace *parentNamespace = namespaceStack.top();
+	Namespace *parent = namespaceStack.top();
 
 	/* Make the new namespace. */
-	Namespace *nspace = new Namespace( loc, name,
-			pd->namespaceList.length(), parentNamespace );
+	Namespace *nspace = parent->findNamespace( name );
+	
+	if ( nspace == 0 ) {
+		nspace = new Namespace( loc, name,
+				pd->namespaceList.length(), parent );
 
-	parentNamespace->childNamespaces.append( nspace );
+		parent->childNamespaces.append( nspace );
+		pd->namespaceList.append( nspace );
+	}
 
-	pd->namespaceList.append( nspace );
 	namespaceStack.push( nspace );
 
 	return nspace;
