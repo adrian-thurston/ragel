@@ -606,7 +606,7 @@ PatternItemList *BaseParser::consPatternEl( LangVarRef *varRef, PatternItemList 
 					" redeclared" << endp;
 		}
 
-		TypeRef *typeRef = list->head->factor->typeRef;
+		TypeRef *typeRef = list->head->prodEl->typeRef;
 		ObjectField *objField = ObjectField::cons( InputLoc(), typeRef, varRef->name );
 
 		/* Insert it into the field map. */

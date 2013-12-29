@@ -316,10 +316,10 @@ UniqueType *TypeRef::lookupType( Compiler *pd )
 	return uniqueType;
 }
 
-void Compiler::resolveFactor( ProdEl *fact )
+void Compiler::resolveProdEl( ProdEl *prodEl )
 {
-	fact->typeRef->lookupType( this );
-	fact->langEl = fact->typeRef->uniqueType->langEl;
+	prodEl->typeRef->lookupType( this );
+	prodEl->langEl = prodEl->typeRef->uniqueType->langEl;
 }
 
 void LangTerm::resolve( Compiler *pd )
@@ -630,24 +630,6 @@ void Compiler::resolveParseTree()
 
 }
 
-
-void Compiler::resolveUses()
-{
-	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->objectDefUses != 0 ) {
-			/* Look for the production's associated region. */
-			Namespace *nspace = lel->objectDefUsesQual->getQual( this );
-
-			if ( nspace == 0 )
-				error() << "do not have namespace for resolving reference" << endp;
-	
-			/* Look up the language element in the region. */
-			LangEl *langEl = findType( this, nspace, lel->objectDefUses );
-			lel->objectDef = langEl->objectDef;
-		}
-	}
-}
-
 void Compiler::resolvePatternEls()
 {
 	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
@@ -655,7 +637,7 @@ void Compiler::resolvePatternEls()
 			switch ( item->type ) {
 			case PatternItem::FactorType:
 				/* Use pdaFactor reference resolving. */
-				resolveFactor( item->factor );
+				resolveProdEl( item->prodEl );
 				break;
 			case PatternItem::InputText:
 				/* Nothing to do here. */
@@ -665,14 +647,14 @@ void Compiler::resolvePatternEls()
 	}
 }
 
-void Compiler::resolveReplacementEls()
+void Compiler::resolveConstructorEls()
 {
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
 		for ( ConsItemList::Iter item = *repl->list; item.lte(); item++ ) {
 			switch ( item->type ) {
 			case ConsItem::FactorType:
 				/* Use pdaFactor reference resolving. */
-				resolveFactor( item->factor );
+				resolveProdEl( item->prodEl );
 				break;
 			case ConsItem::InputText:
 			case ConsItem::ExprType:
@@ -688,7 +670,7 @@ void Compiler::resolveParserEls()
 		for ( ConsItemList::Iter item = *accum->list; item.lte(); item++ ) {
 			switch ( item->type ) {
 			case ConsItem::FactorType:
-				resolveFactor( item->factor );
+				resolveProdEl( item->prodEl );
 				break;
 			case ConsItem::InputText:
 			case ConsItem::ExprType:
@@ -704,17 +686,17 @@ void Compiler::resolveProductionEls()
 	/* NOTE: as we process this list it may be growing! */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
 		/* First resolve. */
-		for ( ProdElList::Iter fact = *prod->prodElList; fact.lte(); fact++ )
-			resolveFactor( fact );
+		for ( ProdElList::Iter prodEl = *prod->prodElList; prodEl.lte(); prodEl++ )
+			resolveProdEl( prodEl );
 
 		/* If there is no explicit precdence ... */
 		if ( prod->predOf == 0 )  {
 			/* Compute the precedence of the productions. */
-			for ( ProdElList::Iter fact = prod->prodElList->last(); fact.gtb(); fact-- ) {
+			for ( ProdElList::Iter prodEl = prod->prodElList->last(); prodEl.gtb(); prodEl-- ) {
 				/* Production inherits the precedence of the last terminal with
 				 * precedence. */
-				if ( fact->langEl->predType != PredNone ) {
-					prod->predOf = fact->langEl;
+				if ( prodEl->langEl->predType != PredNone ) {
+					prod->predOf = prodEl->langEl;
 					break;
 				}
 			}
@@ -726,8 +708,6 @@ void Compiler::resolveGenericTypes()
 {
 	for ( NamespaceList::Iter ns = namespaceList; ns.lte(); ns++ ) {
 		for ( GenericList::Iter gen = ns->genericList; gen.lte(); gen++ ) {
-//			cout << __PRETTY_FUNCTION__ << " " << gen->name.data << " " << gen->typeArg << endl;
-
 			gen->utArg = gen->typeArg->lookupType( this );
 
 			if ( gen->typeId == GEN_MAP )
@@ -786,12 +766,9 @@ void Compiler::typeResolve()
 	 * Type Resolving.
 	 */
 
-	/* Resolve uses statements. */
-	resolveUses();
-
 	/* Resolve pattern and replacement elements. */
 	resolvePatternEls();
-	resolveReplacementEls();
+	resolveConstructorEls();
 	resolveParserEls();
 
 	resolveParseTree();

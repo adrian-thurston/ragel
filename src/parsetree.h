@@ -1543,7 +1543,7 @@ struct PatternItem
 	{
 		PatternItem *p = new PatternItem;
 		p->loc = loc;
-		p->factor = 0;
+		p->prodEl = 0;
 		p->data = data;
 		p->type = type;
 		p->region = 0;
@@ -1552,11 +1552,11 @@ struct PatternItem
 		return p;
 	}
 
-	static PatternItem *cons( const InputLoc &loc, ProdEl *factor, Type type )
+	static PatternItem *cons( const InputLoc &loc, ProdEl *prodEl, Type type )
 	{
 		PatternItem *p = new PatternItem;
 		p->loc = loc;
-		p->factor = factor;
+		p->prodEl = prodEl;
 		p->type = type;
 		p->region = 0;
 		p->varRef = 0;
@@ -1565,7 +1565,7 @@ struct PatternItem
 	}
 
 	InputLoc loc;
-	ProdEl *factor;
+	ProdEl *prodEl;
 	String data;
 	Type type;
 	TokenRegion *region;
@@ -1600,7 +1600,7 @@ struct ConsItem
 		type((Type)-1),
 		expr(0),
 		langEl(0),
-		factor(0),
+		prodEl(0),
 		bindId(-1)
 	{
 	}
@@ -1623,13 +1623,13 @@ struct ConsItem
 		return r;
 	}
 
-	static ConsItem *cons( const InputLoc &loc, Type type, ProdEl *factor )
+	static ConsItem *cons( const InputLoc &loc, Type type, ProdEl *prodEl )
 	{
 		ConsItem *r = new ConsItem;
 		r->loc = loc;
 		r->type = type;
 		r->expr = 0;
-		r->factor = factor;
+		r->prodEl = prodEl;
 		return r;
 	}
 
@@ -1638,7 +1638,7 @@ struct ConsItem
 	String data;
 	LangExpr *expr;
 	LangEl *langEl;
-	ProdEl *factor;
+	ProdEl *prodEl;
 	long bindId;
 	ConsItem *prev, *next;
 };

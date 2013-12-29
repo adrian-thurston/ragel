@@ -49,7 +49,7 @@ StreamImpl *newSourceStreamPat( const char *name, Pattern *pattern )
 
 LangEl *inputStreamPatternGetLangEl( StreamImpl *ss, long *bindId, char **data, long *length )
 { 
-	LangEl *klangEl = ss->patItem->factor->langEl;
+	LangEl *klangEl = ss->patItem->prodEl->langEl;
 	*bindId = ss->patItem->bindId;
 	*data = 0;
 	*length = 0;
@@ -248,18 +248,18 @@ StreamImpl *newSourceStreamCons( const char *name, Constructor *constructor )
 LangEl *inputStreamConsGetLangEl( StreamImpl *ss, long *bindId, char **data, long *length )
 { 
 	LangEl *klangEl = ss->consItem->type == ConsItem::ExprType ? 
-			ss->consItem->langEl : ss->consItem->factor->langEl;
+			ss->consItem->langEl : ss->consItem->prodEl->langEl;
 	*bindId = ss->consItem->bindId;
 
 	*data = 0;
 	*length = 0;
 
 	if ( ss->consItem->type == ConsItem::FactorType ) {
-		if ( ss->consItem->factor->typeRef->pdaLiteral != 0 ) {
+		if ( ss->consItem->prodEl->typeRef->pdaLiteral != 0 ) {
 			bool unusedCI;
 			prepareLitString( ss->consItem->data, unusedCI, 
-					ss->consItem->factor->typeRef->pdaLiteral->data,
-					ss->consItem->factor->typeRef->pdaLiteral->loc );
+					ss->consItem->prodEl->typeRef->pdaLiteral->data,
+					ss->consItem->prodEl->typeRef->pdaLiteral->loc );
 
 			*data = ss->consItem->data;
 			*length = ss->consItem->data.length();

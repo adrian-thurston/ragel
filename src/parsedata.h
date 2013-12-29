@@ -281,8 +281,6 @@ struct LangEl : public DListEl<LangEl>
 	CodeBlock *transBlock;
 
 	ObjectDef *objectDef;
-	NamespaceQual *objectDefUsesQual;
-	String objectDefUses;
 
 	long thisSize;
 	long ofiOffset;
@@ -714,10 +712,10 @@ struct Compiler
 			NamespaceQual *nspaceQual, const String &name );
 	LangEl *makeOptProd( const InputLoc &loc, Namespace *nspace, const String &optName,
 			NamespaceQual *nspaceQual, const String &name );
-	void resolveFactor( ProdEl *fact );
+	void resolveProdEl( ProdEl *prodEl );
 	void resolveProductionEls();
 	void resolvePatternEls();
-	void resolveReplacementEls();
+	void resolveConstructorEls();
 	void resolveParserEls();
 
 	void addMatchText( ObjectDef *frame, LangEl *lel );

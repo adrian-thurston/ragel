@@ -1259,7 +1259,7 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 	for ( PatternItemList::Iter item = pattern->list->last(); item.gtb(); item-- ) {
 		if ( item->varRef != 0 ) {
 			/* Compute the unique type. */
-			UniqueType *exprType = pd->findUniqueType( TYPE_TREE, item->factor->langEl );
+			UniqueType *exprType = pd->findUniqueType( TYPE_TREE, item->prodEl->langEl );
 
 			/* Get the type of the variable being assigned to. */
 			VarRefLookup lookup = item->varRef->lookupField( pd );
@@ -1485,8 +1485,8 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
-					item->factor->typeRef->pdaLiteral->data,
-					item->factor->typeRef->pdaLiteral->loc );
+					item->prodEl->typeRef->pdaLiteral->data,
+					item->prodEl->typeRef->pdaLiteral->loc );
 
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;
@@ -1597,8 +1597,8 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
-					item->factor->typeRef->pdaLiteral->data,
-					item->factor->typeRef->pdaLiteral->loc );
+					item->prodEl->typeRef->pdaLiteral->data,
+					item->prodEl->typeRef->pdaLiteral->loc );
 
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;
@@ -1658,8 +1658,8 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
-					item->factor->typeRef->pdaLiteral->data,
-					item->factor->typeRef->pdaLiteral->loc );
+					item->prodEl->typeRef->pdaLiteral->data,
+					item->prodEl->typeRef->pdaLiteral->loc );
 
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;
@@ -1752,8 +1752,8 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
-					item->factor->typeRef->pdaLiteral->data,
-					item->factor->typeRef->pdaLiteral->loc );
+					item->prodEl->typeRef->pdaLiteral->data,
+					item->prodEl->typeRef->pdaLiteral->loc );
 
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;

@@ -1074,8 +1074,8 @@ void Compiler::wrapNonTerminals()
 		rootLangEl->defList.append( lel->rootDef );
 
 		/* First resolve. */
-		for ( ProdElList::Iter fact = *prodElList; fact.lte(); fact++ )
-			resolveFactor( fact );
+		for ( ProdElList::Iter prodEl = *prodElList; prodEl.lte(); prodEl++ )
+			resolveProdEl( prodEl );
 	}
 }
 
