@@ -1592,7 +1592,7 @@ struct ConsItem
 	enum Type { 
 		InputText, 
 		ExprType,
-		FactorType
+		LiteralType
 	};
 
 	ConsItem()

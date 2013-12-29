@@ -1481,7 +1481,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case ConsItem::FactorType: {
+		case ConsItem::LiteralType: {
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
@@ -1593,7 +1593,7 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 		code.append( IN_DUP_TOP );
 
 		switch ( item->type ) {
-		case ConsItem::FactorType: {
+		case ConsItem::LiteralType: {
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
@@ -1654,7 +1654,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case ConsItem::FactorType: {
+		case ConsItem::LiteralType: {
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 
@@ -1748,7 +1748,7 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *consItemList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case ConsItem::FactorType: {
+		case ConsItem::LiteralType: {
 			String result;
 			bool unusedCI;
 			prepareLitString( result, unusedCI, 

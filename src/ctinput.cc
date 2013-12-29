@@ -254,7 +254,7 @@ LangEl *inputStreamConsGetLangEl( StreamImpl *ss, long *bindId, char **data, lon
 	*data = 0;
 	*length = 0;
 
-	if ( ss->consItem->type == ConsItem::FactorType ) {
+	if ( ss->consItem->type == ConsItem::LiteralType ) {
 		if ( ss->consItem->prodEl->typeRef->pdaLiteral != 0 ) {
 			bool unusedCI;
 			prepareLitString( ss->consItem->data, unusedCI, 
@@ -283,7 +283,7 @@ int inputStreamConsGetParseBlock( StreamImpl *ss,
 		if ( buf == 0 )
 			return INPUT_EOD;
 
-		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::FactorType )
+		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::LiteralType )
 			return INPUT_LANG_EL;
 
 		assert ( buf->type == ConsItem::InputText );
@@ -330,7 +330,7 @@ int inputStreamConsGetData( StreamImpl *ss, char *dest, int length )
 		if ( buf == 0 )
 			break;
 
-		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::FactorType )
+		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::LiteralType )
 			break;
 
 		assert ( buf->type == ConsItem::InputText );

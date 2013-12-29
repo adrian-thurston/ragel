@@ -408,24 +408,6 @@ void LangExpr::resolve( Compiler *pd ) const
 	}
 }
 
-void LangStmt::resolveParserItems( Compiler *pd ) const
-{
-	/* Assign bind ids to the variables in the replacement. */
-	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
-		varRef->resolve( pd );
-
-		switch ( item->type ) {
-		case ConsItem::FactorType:
-			break;
-		case ConsItem::InputText:
-			break;
-		case ConsItem::ExprType:
-			item->expr->resolve( pd );
-			break;
-		}
-	}
-}
-
 void LangIterCall::resolve( Compiler *pd ) const
 {
 	switch ( type ) {
@@ -652,7 +634,7 @@ void Compiler::resolveConstructorEls()
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
 		for ( ConsItemList::Iter item = *repl->list; item.lte(); item++ ) {
 			switch ( item->type ) {
-			case ConsItem::FactorType:
+			case ConsItem::LiteralType:
 				/* Use pdaFactor reference resolving. */
 				resolveProdEl( item->prodEl );
 				break;
@@ -669,7 +651,7 @@ void Compiler::resolveParserEls()
 	for ( ParserTextList::Iter accum = parserTextList; accum.lte(); accum++ ) {
 		for ( ConsItemList::Iter item = *accum->list; item.lte(); item++ ) {
 			switch ( item->type ) {
-			case ConsItem::FactorType:
+			case ConsItem::LiteralType:
 				resolveProdEl( item->prodEl );
 				break;
 			case ConsItem::InputText:

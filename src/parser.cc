@@ -716,7 +716,7 @@ ConsItemList *BaseParser::consElLiteral( const InputLoc &loc,
 	PdaLiteral *literal = new PdaLiteral( loc, data );
 	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, literal );
 	ProdEl *prodEl = new ProdEl( ProdEl::LiteralType, loc, 0, false, typeRef, 0 );
-	ConsItem *consItem = ConsItem::cons( loc, ConsItem::FactorType, prodEl );
+	ConsItem *consItem = ConsItem::cons( loc, ConsItem::LiteralType, prodEl );
 	ConsItemList *list = ConsItemList::cons( consItem );
 	return list;
 }
