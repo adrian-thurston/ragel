@@ -360,6 +360,8 @@ struct NamespaceQual
 
 	Namespace *searchFrom( Namespace *from, StringVect::Iter &qualPart );
 	Namespace *getQual( Compiler *pd );
+	bool thisOnly()
+		{ return qualNames.length() != 0; }
 };
 
 struct ReCapture

@@ -51,6 +51,9 @@ UniqueType *TypeRef::lookupTypeName( Compiler *pd )
 			}
 		}
 
+		if ( nspaceQual->thisOnly() )
+			break;
+
 		nspace = nspace->parentNamespace;
 	}
 
@@ -77,6 +80,9 @@ UniqueType *TypeRef::lookupTypeLiteral( Compiler *pd )
 
 		if ( ldel != 0 )
 			return pd->findUniqueType( TYPE_TREE, ldel->value->tokenDef->tdLangEl );
+
+		if ( nspaceQual->thisOnly() )
+			break;
 
 		nspace = nspace->parentNamespace;
 	}
