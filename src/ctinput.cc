@@ -70,10 +70,10 @@ int inputStreamPatternGetParseBlock( StreamImpl *ss, int skip, char **pdp, int *
 		if ( buf == 0 )
 			return INPUT_EOD;
 
-		if ( buf->type == PatternItem::FactorType )
+		if ( buf->form == PatternItem::TypeRef )
 			return INPUT_LANG_EL;
 
-		assert ( buf->type == PatternItem::InputText );
+		assert ( buf->form == PatternItem::InputText );
 		int avail = buf->data.length() - offset;
 
 		if ( avail > 0 ) {
@@ -117,10 +117,10 @@ int inputStreamPatternGetData( StreamImpl *ss, char *dest, int length )
 		if ( buf == 0 )
 			break;
 
-		if ( buf->type == PatternItem::FactorType )
+		if ( buf->form == PatternItem::TypeRef )
 			break;
 
-		assert ( buf->type == PatternItem::InputText );
+		assert ( buf->form == PatternItem::InputText );
 		int avail = buf->data.length() - offset;
 
 		if ( avail > 0 ) {

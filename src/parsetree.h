@@ -1534,40 +1534,40 @@ struct ObjectField;
 
 struct PatternItem
 {
-	enum Type { 
-		FactorType,
+	enum Form { 
+		TypeRef,
 		InputText
 	};
 
-	static PatternItem *cons( const InputLoc &loc, const String &data, Type type )
+	static PatternItem *cons( const InputLoc &loc, const String &data, Form form )
 	{
 		PatternItem *p = new PatternItem;
+		p->form = form;
 		p->loc = loc;
 		p->prodEl = 0;
 		p->data = data;
-		p->type = type;
 		p->region = 0;
 		p->varRef = 0;
 		p->bindId = 0;
 		return p;
 	}
 
-	static PatternItem *cons( const InputLoc &loc, ProdEl *prodEl, Type type )
+	static PatternItem *cons( const InputLoc &loc, ProdEl *prodEl, Form form )
 	{
 		PatternItem *p = new PatternItem;
+		p->form = form;
 		p->loc = loc;
 		p->prodEl = prodEl;
-		p->type = type;
 		p->region = 0;
 		p->varRef = 0;
 		p->bindId = 0;
 		return p;
 	}
 
+	Form form;
 	InputLoc loc;
 	ProdEl *prodEl;
 	String data;
-	Type type;
 	TokenRegion *region;
 	LangVarRef *varRef;
 	long bindId;

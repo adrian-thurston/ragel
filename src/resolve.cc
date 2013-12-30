@@ -616,8 +616,8 @@ void Compiler::resolvePatternEls()
 {
 	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
 		for ( PatternItemList::Iter item = *pat->list; item.lte(); item++ ) {
-			switch ( item->type ) {
-			case PatternItem::FactorType:
+			switch ( item->form ) {
+			case PatternItem::TypeRef:
 				/* Use pdaFactor reference resolving. */
 				resolveProdEl( item->prodEl );
 				break;

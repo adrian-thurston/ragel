@@ -621,7 +621,7 @@ PatternItemList *BaseParser::patternElNamed( const InputLoc &loc,
 {
 	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, data, repeatType );
 	ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef, 0 );
-	PatternItem *patternItem = PatternItem::cons( loc, prodEl, PatternItem::FactorType );
+	PatternItem *patternItem = PatternItem::cons( loc, prodEl, PatternItem::TypeRef );
 	return PatternItemList::cons( patternItem );
 }
 
@@ -632,7 +632,7 @@ PatternItemList *BaseParser::patternElType( const InputLoc &loc,
 	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, literal, repeatType );
 
 	ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef, 0 );
-	PatternItem *patternItem = PatternItem::cons( loc, prodEl, PatternItem::FactorType );
+	PatternItem *patternItem = PatternItem::cons( loc, prodEl, PatternItem::TypeRef );
 	return PatternItemList::cons( patternItem );
 }
 
