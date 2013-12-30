@@ -90,9 +90,9 @@ struct BaseParser
 	LangExpr *parseCmd( const InputLoc &loc, bool stop, ObjectField *objField,
 			TypeRef *typeRef, FieldInitVect *fieldInitVect, ConsItemList *list );
 	PatternItemList *consPatternEl( LangVarRef *varRef, PatternItemList *list );
-	PatternItemList *patternElNamed( const InputLoc &loc, NamespaceQual *nspaceQual,
-			const String &data, RepeatType repeatType );
-	PatternItemList *patternElType( const InputLoc &loc,
+	PatternItemList *patternElNamed( const InputLoc &loc, LangVarRef *varRef,
+			NamespaceQual *nspaceQual, const String &data, RepeatType repeatType );
+	PatternItemList *patternElType( const InputLoc &loc, LangVarRef *varRef,
 			NamespaceQual *nspaceQual, const String &data, RepeatType repeatType );
 	PatternItemList *patListConcat( PatternItemList *list1, PatternItemList *list2 );
 	ConsItemList *consListConcat( ConsItemList *list1, ConsItemList *list2 );
@@ -106,7 +106,7 @@ struct BaseParser
 	ProdEl *prodElLiteral( const InputLoc &loc, const String &data,
 			NamespaceQual *nspaceQual, ObjectField *objField, RepeatType repeatType,
 			bool commit );
-	ConsItemList *consElLiteral( const InputLoc &loc,
+	ConsItemList *consElLiteral( const InputLoc &loc, TypeRef *consTypeRef,
 			const String &data, NamespaceQual *nspaceQual );
 	Production *production( const InputLoc &loc, ProdElList *prodElList,
 			String name, bool commit, CodeBlock *codeBlock, LangEl *predOf );

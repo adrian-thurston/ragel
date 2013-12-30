@@ -298,7 +298,7 @@ struct LoadColm
 			require_pattern require = langStmtList.opt_require_stmt().require_pattern();
 
 			LangVarRef *varRef = walkVarRef( require.var_ref() );
-			PatternItemList *list = walkPattern( require.pattern() );
+			PatternItemList *list = walkPattern( require.pattern(), varRef );
 			LangExpr *expr = match( langStmtList.opt_require_stmt().require_pattern().REQUIRE().loc(), varRef, list );
 
 			StmtList *reqList = walkLangStmtList( langStmtList.opt_require_stmt().lang_stmt_list() );
@@ -400,7 +400,7 @@ struct LoadColm
 		return expr;
 	}
 
-	PatternItemList *walkPatternElTypeOrLit( pattern_el_lel typeOrLit )
+	PatternItemList *walkPatternElTypeOrLit( pattern_el_lel typeOrLit, LangVarRef *patternVarRef )
 	{
 		NamespaceQual *nspaceQual = walkRegionQual( typeOrLit.region_qual() );
 		RepeatType repeatType = walkOptRepeat( typeOrLit.opt_repeat() );
@@ -409,12 +409,12 @@ struct LoadColm
 		switch ( typeOrLit.prodName() ) {
 		case pattern_el_lel::_Id: {
 			String id = typeOrLit.id().data();
-			list = patternElNamed( typeOrLit.id().loc(), nspaceQual, id, repeatType );
+			list = patternElNamed( typeOrLit.id().loc(), patternVarRef, nspaceQual, id, repeatType );
 			break;
 		}
 		case pattern_el_lel::_Lit: {
 			String lit = typeOrLit.lit().data();
-			list = patternElType( typeOrLit.lit().loc(), nspaceQual, lit, repeatType );
+			list = patternElType( typeOrLit.lit().loc(), patternVarRef, nspaceQual, lit, repeatType );
 			break;
 		}}
 		return list;
@@ -430,12 +430,12 @@ struct LoadColm
 		return varRef;
 	}
 
-	PatternItemList *walkPatternEl( pattern_el patternEl )
+	PatternItemList *walkPatternEl( pattern_el patternEl, LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = 0;
 		switch ( patternEl.prodName() ) {
 		case pattern_el::_Dq: {
-			list = walkLitpatElList( patternEl.LitpatElList(), patternEl.dq_lit_term().CONS_NL() );
+			list = walkLitpatElList( patternEl.LitpatElList(), patternEl.dq_lit_term().CONS_NL(), patternVarRef );
 			break;
 		}
 		case pattern_el::_Tilde: {
@@ -447,7 +447,7 @@ struct LoadColm
 			break;
 		}
 		case pattern_el::_PatternEl: {
-			PatternItemList *typeOrLitList = walkPatternElTypeOrLit( patternEl.pattern_el_lel() );
+			PatternItemList *typeOrLitList = walkPatternElTypeOrLit( patternEl.pattern_el_lel(), patternVarRef );
 			LangVarRef *varRef = walkOptLabel( patternEl.opt_label() );
 			list = consPatternEl( varRef, typeOrLitList );
 			break;
@@ -455,7 +455,7 @@ struct LoadColm
 		return list;
 	}
 
-	PatternItemList *walkLitpatEl( litpat_el litpatEl )
+	PatternItemList *walkLitpatEl( litpat_el litpatEl, LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = 0;
 		switch ( litpatEl.prodName() ) {
@@ -467,17 +467,17 @@ struct LoadColm
 			break;
 		}
 		case litpat_el::_SubList: {
-			list = walkPatternElList( litpatEl.PatternElList() );
+			list = walkPatternElList( litpatEl.PatternElList(), patternVarRef );
 			break;
 		}}
 		return list;
 	}
 
-	PatternItemList *walkLitpatElList( _repeat_litpat_el litpatElList, CONS_NL Nl )
+	PatternItemList *walkLitpatElList( _repeat_litpat_el litpatElList, CONS_NL Nl, LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = new PatternItemList;
 		while ( !litpatElList.end() ) {
-			PatternItemList *tail = walkLitpatEl( litpatElList.value() );
+			PatternItemList *tail = walkLitpatEl( litpatElList.value(), patternVarRef );
 			list = patListConcat( list, tail );
 			litpatElList = litpatElList.next();
 		}
@@ -492,23 +492,23 @@ struct LoadColm
 		return list;
 	}
 
-	PatternItemList *walkPatternElList( _repeat_pattern_el patternElList )
+	PatternItemList *walkPatternElList( _repeat_pattern_el patternElList, LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = new PatternItemList;
 		while ( !patternElList.end() ) {
-			PatternItemList *tail = walkPatternEl( patternElList.value() );
+			PatternItemList *tail = walkPatternEl( patternElList.value(), patternVarRef );
 			list = patListConcat( list, tail );
 			patternElList = patternElList.next();
 		}
 		return list;
 	}
 
-	PatternItemList *walkPattternTopEl( pattern_top_el patternTopEl )
+	PatternItemList *walkPattternTopEl( pattern_top_el patternTopEl, LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = 0;
 		switch ( patternTopEl.prodName() ) {
 		case pattern_top_el::_Dq: {
-			list = walkLitpatElList( patternTopEl.LitpatElList(), patternTopEl.dq_lit_term().CONS_NL() );
+			list = walkLitpatElList( patternTopEl.LitpatElList(), patternTopEl.dq_lit_term().CONS_NL(), patternVarRef );
 			break;
 		}
 		case pattern_top_el::_Tilde: {
@@ -520,32 +520,32 @@ struct LoadColm
 			break;
 		}
 		case pattern_top_el::_SubList: {
-			list = walkPatternElList( patternTopEl.PatternElList() );
+			list = walkPatternElList( patternTopEl.PatternElList(), patternVarRef );
 			break;
 		}}
 		return list;
 	}
 
-	PatternItemList *walkPatternList( pattern_list patternList )
+	PatternItemList *walkPatternList( pattern_list patternList, LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = 0;
 		switch ( patternList.prodName() ) {
 		case pattern_list::_List: {
-			PatternItemList *left = walkPatternList( patternList._pattern_list() );
-			PatternItemList *right = walkPattternTopEl( patternList.pattern_top_el() );
+			PatternItemList *left = walkPatternList( patternList._pattern_list(), patternVarRef );
+			PatternItemList *right = walkPattternTopEl( patternList.pattern_top_el(), patternVarRef );
 			list = patListConcat( left, right );
 			break;
 		}
 		case pattern_list::_Base: {
-			list = walkPattternTopEl( patternList.pattern_top_el() );
+			list = walkPattternTopEl( patternList.pattern_top_el(), patternVarRef );
 			break;
 		}}
 		return list;
 	}
 
-	PatternItemList *walkPattern( pattern Pattern )
+	PatternItemList *walkPattern( pattern Pattern, LangVarRef *patternVarRef )
 	{
-		return walkPatternList( Pattern.pattern_list() );
+		return walkPatternList( Pattern.pattern_list(), patternVarRef );
 	}
 
 	LangExpr *walkOptDefInit( opt_def_init optDefInit )
@@ -1164,7 +1164,7 @@ struct LoadColm
 	 * Constructor
 	 */
 
-	ConsItemList *walkLitConsEl( lit_cons_el litConsEl )
+	ConsItemList *walkLitConsEl( lit_cons_el litConsEl, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = 0;
 		switch ( litConsEl.prodName() ) {
@@ -1176,17 +1176,17 @@ struct LoadColm
 			break;
 		}
 		case lit_cons_el::_SubList: {
-			list = walkConsElList( litConsEl.ConsElList() );
+			list = walkConsElList( litConsEl.ConsElList(), consTypeRef );
 			break;
 		}}
 		return list;
 	}
 
-	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList, CONS_NL Nl )
+	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList, CONS_NL Nl, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = new ConsItemList;
 		while ( !litConsElList.end() ) {
-			ConsItemList *extension = walkLitConsEl( litConsElList.value() );
+			ConsItemList *extension = walkLitConsEl( litConsElList.value(), consTypeRef );
 			list = consListConcat( list, extension );
 			litConsElList = litConsElList.next();
 		}
@@ -1201,14 +1201,14 @@ struct LoadColm
 		return list;
 	}
 
-	ConsItemList *walkConsEl( cons_el consEl )
+	ConsItemList *walkConsEl( cons_el consEl, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = 0;
 		switch ( consEl.prodName() ) {
 		case cons_el::_Lit: {
 			NamespaceQual *nspaceQual = walkRegionQual( consEl.region_qual() );
 			String lit = consEl.lit().data();
-			list = consElLiteral( consEl.lit().loc(), lit, nspaceQual );
+			list = consElLiteral( consEl.lit().loc(), consTypeRef, lit, nspaceQual );
 			break;
 		}
 		case cons_el::_Tilde: {
@@ -1226,29 +1226,29 @@ struct LoadColm
 			break;
 		}
 		case cons_el::_Dq: {
-			list = walkLitConsElList( consEl.LitConsElList(), consEl.dq_lit_term().CONS_NL() );
+			list = walkLitConsElList( consEl.LitConsElList(), consEl.dq_lit_term().CONS_NL(), consTypeRef );
 			break;
 		}}
 		return list;
 	}
 
-	ConsItemList *walkConsElList( _repeat_cons_el consElList )
+	ConsItemList *walkConsElList( _repeat_cons_el consElList, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = new ConsItemList;
 		while ( !consElList.end() ) {
-			ConsItemList *extension = walkConsEl( consElList.value() );
+			ConsItemList *extension = walkConsEl( consElList.value(), consTypeRef );
 			list = consListConcat( list, extension );
 			consElList = consElList.next();
 		}
 		return list;
 	}
 
-	ConsItemList *walkConsTopEl( cons_top_el consTopEl )
+	ConsItemList *walkConsTopEl( cons_top_el consTopEl, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = 0;
 		switch ( consTopEl.prodName() ) {
 		case cons_top_el::_Dq: {
-			list = walkLitConsElList( consTopEl.LitConsElList(), consTopEl.dq_lit_term().CONS_NL() );
+			list = walkLitConsElList( consTopEl.LitConsElList(), consTopEl.dq_lit_term().CONS_NL(), consTypeRef );
 			break;
 		}
 		case cons_top_el::_Tilde: {
@@ -1260,27 +1260,27 @@ struct LoadColm
 			break;
 		}
 		case cons_top_el::_SubList: {
-			list = walkConsElList( consTopEl.ConsElList() );
+			list = walkConsElList( consTopEl.ConsElList(), consTypeRef );
 			break;
 		}}
 		return list;
 	}
 
-	ConsItemList *walkConsList( cons_list consList )
+	ConsItemList *walkConsList( cons_list consList, TypeRef *consTypeRef )
 	{
-		ConsItemList *list = walkConsTopEl( consList.cons_top_el() );
+		ConsItemList *list = walkConsTopEl( consList.cons_top_el(), consTypeRef );
 
 		if ( consList._cons_list() != 0 ) {
-			ConsItemList *extension = walkConsList( consList._cons_list() );
+			ConsItemList *extension = walkConsList( consList._cons_list(), consTypeRef );
 			consListConcat( list, extension );
 		}
 
 		return list;
 	}
 
-	ConsItemList *walkConstructor( constructor Constructor )
+	ConsItemList *walkConstructor( constructor Constructor, TypeRef *consTypeRef )
 	{
-		ConsItemList *list = walkConsList( Constructor.cons_list() );
+		ConsItemList *list = walkConsList( Constructor.cons_list(), consTypeRef );
 		return list;
 	}
 
@@ -1597,7 +1597,7 @@ struct LoadColm
 			type_ref typeRefTree = codeFactor.type_ref();
 			TypeRef *typeRef = walkTypeRef( typeRefTree );
 			ObjectField *objField = walkOptCapture( codeFactor.opt_capture() );
-			ConsItemList *list = walkConstructor( codeFactor.constructor() );
+			ConsItemList *list = walkConstructor( codeFactor.constructor(), typeRef );
 			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
 
 			expr = construct( codeFactor.CONS().loc(), objField, list, typeRef, init );
@@ -1636,7 +1636,7 @@ struct LoadColm
 		}
 		case code_factor::_Match: {
 			LangVarRef *varRef = walkVarRef( codeFactor.var_ref() );
-			PatternItemList *list = walkPattern( codeFactor.pattern() );
+			PatternItemList *list = walkPattern( codeFactor.pattern(), varRef );
 			expr = match( codeFactor.loc(), varRef, list );
 			break;
 		}

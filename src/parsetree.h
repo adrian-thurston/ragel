@@ -2007,6 +2007,8 @@ struct TypeRef
 		typeRef1(0),
 		typeRef2(0),
 		repeatType(RepeatNone),
+		parsedVarRef(0),
+		parsedTypeRef(0),
 		nspace(0),
 		uniqueType(0),
 		searchUniqueType(0),
@@ -2035,6 +2037,24 @@ struct TypeRef
 		return t;
 	}
 
+	static TypeRef *cons( const InputLoc &loc, LangVarRef *parsedVarRef,
+			NamespaceQual *nspaceQual, String typeName, RepeatType repeatType )
+	{
+		TypeRef *t = cons( loc, nspaceQual, typeName );
+		t->parsedVarRef = parsedVarRef;
+		t->repeatType = repeatType;
+		return t;
+	}
+
+	static TypeRef *cons( const InputLoc &loc, TypeRef *parsedTypeRef,
+			NamespaceQual *nspaceQual, String typeName, RepeatType repeatType )
+	{
+		TypeRef *t = cons( loc, nspaceQual, typeName );
+		t->parsedTypeRef = parsedTypeRef;
+		t->repeatType = repeatType;
+		return t;
+	}
+
 	/* Qualification and a type name. These require lookup. */
 	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual,
 			PdaLiteral *pdaLiteral )
@@ -2048,11 +2068,37 @@ struct TypeRef
 		return t;
 	}
 
+	static TypeRef *cons( const InputLoc &loc, TypeRef *parsedTypeRef,
+			NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral )
+	{
+		TypeRef *t = cons( loc, nspaceQual, pdaLiteral );
+		t->parsedTypeRef = parsedTypeRef;
+		return t;
+	}
+
 	/* Qualification and a type name. These require lookup. */
 	static TypeRef *cons( const InputLoc &loc, NamespaceQual *nspaceQual,
 			PdaLiteral *pdaLiteral, RepeatType repeatType )
 	{
 		TypeRef *t = cons( loc, nspaceQual, pdaLiteral );
+		t->repeatType = repeatType;
+		return t;
+	}
+
+	static TypeRef *cons( const InputLoc &loc, LangVarRef *parsedVarRef,
+			NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral, RepeatType repeatType )
+	{
+		TypeRef *t = cons( loc, nspaceQual, pdaLiteral );
+		t->parsedVarRef = parsedVarRef;
+		t->repeatType = repeatType;
+		return t;
+	}
+
+	static TypeRef *cons( const InputLoc &loc, TypeRef *parsedTypeRef,
+			NamespaceQual *nspaceQual, PdaLiteral *pdaLiteral, RepeatType repeatType )
+	{
+		TypeRef *t = cons( loc, nspaceQual, pdaLiteral );
+		t->parsedTypeRef = parsedTypeRef;
 		t->repeatType = repeatType;
 		return t;
 	}
@@ -2130,6 +2176,10 @@ struct TypeRef
 	TypeRef *typeRef1;
 	TypeRef *typeRef2;
 	RepeatType repeatType;
+
+	/* For pattern and constructor context. */
+	LangVarRef *parsedVarRef;
+	TypeRef *parsedTypeRef;
 
 	/* Resolved. */
 	Namespace *nspace;

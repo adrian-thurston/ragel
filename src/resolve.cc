@@ -30,6 +30,11 @@ using std::endl;
 
 UniqueType *TypeRef::lookupTypeName( Compiler *pd )
 {
+	if ( parsedTypeRef != 0 ) {
+		std::cerr << "parsed type ref is not null" << std::endl;
+		exit(1);
+	}
+
 	/* Lookup up the qualifiction and then the name. */
 	nspace = nspaceQual->getQual( pd );
 

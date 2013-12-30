@@ -617,19 +617,21 @@ PatternItemList *BaseParser::consPatternEl( LangVarRef *varRef, PatternItemList 
 }
 
 PatternItemList *BaseParser::patternElNamed( const InputLoc &loc,
-		NamespaceQual *nspaceQual, const String &data, RepeatType repeatType )
+		LangVarRef *parsedVarRef, NamespaceQual *nspaceQual, const String &data,
+		RepeatType repeatType )
 {
-	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, data, repeatType );
+	TypeRef *typeRef = TypeRef::cons( loc, parsedVarRef, nspaceQual, data, repeatType );
 	ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef, 0 );
 	PatternItem *patternItem = PatternItem::cons( loc, prodEl, PatternItem::TypeRef );
 	return PatternItemList::cons( patternItem );
 }
 
 PatternItemList *BaseParser::patternElType( const InputLoc &loc,
-		NamespaceQual *nspaceQual, const String &data, RepeatType repeatType )
+		LangVarRef *parsedVarRef, NamespaceQual *nspaceQual, const String &data,
+		RepeatType repeatType )
 {
 	PdaLiteral *literal = new PdaLiteral( loc, data );
-	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, literal, repeatType );
+	TypeRef *typeRef = TypeRef::cons( loc, parsedVarRef, nspaceQual, literal, repeatType );
 
 	ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef, 0 );
 	PatternItem *patternItem = PatternItem::cons( loc, prodEl, PatternItem::TypeRef );
@@ -711,10 +713,10 @@ ProdEl *BaseParser::prodElLiteral( const InputLoc &loc, const String &data,
 }
 
 ConsItemList *BaseParser::consElLiteral( const InputLoc &loc,
-		const String &data, NamespaceQual *nspaceQual )
+		TypeRef *consTypeRef, const String &data, NamespaceQual *nspaceQual )
 {
 	PdaLiteral *literal = new PdaLiteral( loc, data );
-	TypeRef *typeRef = TypeRef::cons( loc, nspaceQual, literal );
+	TypeRef *typeRef = TypeRef::cons( loc, consTypeRef, nspaceQual, literal );
 	ProdEl *prodEl = new ProdEl( ProdEl::LiteralType, loc, 0, false, typeRef, 0 );
 	ConsItem *consItem = ConsItem::cons( loc, ConsItem::LiteralType, prodEl );
 	ConsItemList *list = ConsItemList::cons( consItem );
