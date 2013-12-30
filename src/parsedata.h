@@ -714,9 +714,6 @@ struct Compiler
 			NamespaceQual *nspaceQual, const String &name );
 	void resolveProdEl( ProdEl *prodEl );
 	void resolveProductionEls();
-	void resolvePatternEls();
-	void resolveConstructorEls();
-	void resolveParserEls();
 
 	void addMatchText( ObjectDef *frame, LangEl *lel );
 	void addMatchLength( ObjectDef *frame, LangEl *lel );

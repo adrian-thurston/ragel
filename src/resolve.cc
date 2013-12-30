@@ -333,10 +333,23 @@ void LangTerm::resolve( Compiler *pd )
 		case ConstructType:
 			typeRef->lookupType( pd );
 
-			/* Evaluate the initialization expressions. */
+			/* Initialization expressions. */
 			if ( fieldInitArgs != 0 ) {
 				for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
 					(*pi)->expr->resolve( pd );
+			}
+
+			/* Types in constructor. */
+			for ( ConsItemList::Iter item = *constructor->list; item.lte(); item++ ) {
+				switch ( item->type ) {
+				case ConsItem::LiteralType:
+					/* Use pdaFactor reference resolving. */
+					pd->resolveProdEl( item->prodEl );
+					break;
+				case ConsItem::InputText:
+				case ConsItem::ExprType:
+					break;
+				}
 			}
 			break;
 		case VarRefType:
@@ -353,7 +366,21 @@ void LangTerm::resolve( Compiler *pd )
 
 		case NumberType:
 		case StringType:
+			break;
+
 		case MatchType:
+			for ( PatternItemList::Iter item = *pattern->list; item.lte(); item++ ) {
+				switch ( item->form ) {
+				case PatternItem::TypeRef:
+					/* Use pdaFactor reference resolving. */
+					pd->resolveProdEl( item->prodEl );
+					break;
+				case PatternItem::InputText:
+					/* Nothing to do here. */
+					break;
+				}
+			}
+
 			break;
 		case NewType:
 			expr->resolve( pd );
@@ -376,6 +403,17 @@ void LangTerm::resolve( Compiler *pd )
 			if ( fieldInitArgs != 0 ) {
 				for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
 					(*pi)->expr->resolve( pd );
+			}
+
+			for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+				switch ( item->type ) {
+				case ConsItem::LiteralType:
+					pd->resolveProdEl( item->prodEl );
+					break;
+				case ConsItem::InputText:
+				case ConsItem::ExprType:
+					break;
+				}
 			}
 			break;
 
@@ -617,56 +655,6 @@ void Compiler::resolveParseTree()
 
 }
 
-void Compiler::resolvePatternEls()
-{
-	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
-		for ( PatternItemList::Iter item = *pat->list; item.lte(); item++ ) {
-			switch ( item->form ) {
-			case PatternItem::TypeRef:
-				/* Use pdaFactor reference resolving. */
-				resolveProdEl( item->prodEl );
-				break;
-			case PatternItem::InputText:
-				/* Nothing to do here. */
-				break;
-			}
-		}
-	}
-}
-
-void Compiler::resolveConstructorEls()
-{
-	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
-		for ( ConsItemList::Iter item = *repl->list; item.lte(); item++ ) {
-			switch ( item->type ) {
-			case ConsItem::LiteralType:
-				/* Use pdaFactor reference resolving. */
-				resolveProdEl( item->prodEl );
-				break;
-			case ConsItem::InputText:
-			case ConsItem::ExprType:
-				break;
-			}
-		}
-	}
-}
-
-void Compiler::resolveParserEls()
-{
-	for ( ParserTextList::Iter accum = parserTextList; accum.lte(); accum++ ) {
-		for ( ConsItemList::Iter item = *accum->list; item.lte(); item++ ) {
-			switch ( item->type ) {
-			case ConsItem::LiteralType:
-				resolveProdEl( item->prodEl );
-				break;
-			case ConsItem::InputText:
-			case ConsItem::ExprType:
-				break;
-			}
-		}
-	}
-}
-
 /* Resolves production els and computes the precedence of each prod. */
 void Compiler::resolveProductionEls()
 {
@@ -752,11 +740,6 @@ void Compiler::typeResolve()
 	/*
 	 * Type Resolving.
 	 */
-
-	/* Resolve pattern and replacement elements. */
-	resolvePatternEls();
-	resolveConstructorEls();
-	resolveParserEls();
 
 	resolveParseTree();
 
