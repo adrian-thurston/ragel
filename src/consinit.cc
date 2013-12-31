@@ -746,7 +746,7 @@ void ConsInit::parseInput( StmtList *stmtList )
 	popQual->append( QualItem( QualItem::Dot, internal, String( "argv" ) ) );
 
 	LangVarRef *popRef = LangVarRef::cons( internal,
-			pd->curLocalFrame->curScope, popQual, String("pop") );
+			pd->curLocalFrame->rootScope, popQual, String("pop") );
 	LangExpr *pop = LangExpr::cons( LangTerm::cons( InputLoc(), popRef, popArgs ) );
 
 	/* Construct a literal string 'r', for second arg to open. */
@@ -758,7 +758,7 @@ void ConsInit::parseInput( StmtList *stmtList )
 	/* Call open. */
 	QualItemVect *openQual = new QualItemVect;
 	LangVarRef *openRef = LangVarRef::cons( internal,
-			pd->curLocalFrame->curScope, openQual, String("open") );
+			pd->curLocalFrame->rootScope, openQual, String("open") );
 	CallArgVect *openArgs = new CallArgVect;
 	openArgs->append( new CallArg(pop) );
 	openArgs->append( new CallArg(modeExpr) );
@@ -780,7 +780,7 @@ void ConsInit::parseInput( StmtList *stmtList )
 void ConsInit::exportTree( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, pd->curLocalFrame->curScope, qual, String("P") );
+	LangVarRef *varRef = LangVarRef::cons( internal, pd->curLocalFrame->rootScope, qual, String("P") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
 
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
