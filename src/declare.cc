@@ -24,6 +24,46 @@
 #include <iostream>
 #include <assert.h>
 
+void ObjectDef::iterPushScope()
+{
+	//cout << "iter push scope ";
+	if ( curScope->childIter == 0 ) {
+		curScope->childIter = curScope->children.head;
+	}
+	else {
+		curScope->childIter = curScope->childIter->next;
+		/* Resetting. */
+		if ( curScope->childIter == 0 )
+			curScope ->childIter = curScope->children.head;
+	}
+
+	curScope = curScope->childIter;
+}
+
+void ObjectDef::iterPopScope()
+{
+	//cout << "iter pop scope" << endl;
+	curScope = curScope->parentScope;
+}
+
+void ObjectDef::pushScope()
+{
+	ObjNameScope *newScope = new ObjNameScope;
+	newScope->objFieldMap = new ObjFieldMap;
+
+	newScope->owner = this;
+	newScope->parentScope = curScope;
+	curScope->children.append( newScope );
+
+	curScope = newScope;
+}
+
+void ObjectDef::popScope()
+{
+	curScope = curScope->parentScope;
+}
+
+
 ObjectField *ObjectDef::checkRedecl( const String &name )
 {
 	//cout << "looking for " << name << endl;
@@ -230,7 +270,7 @@ void Compiler::addPushBackLHS( Production *prod, CodeVect &code, long &insertPos
 	 * before it gets modified. We want to avoid this for attribute
 	 * modifications. The computation of dirtyTree should deal with this for
 	 * us. */
-	ObjNameScope *scope = prod->redBlock->localFrame->rootScope;
+	ObjNameScope *scope = block->localFrame->rootScope;
 	ObjectField *lhsField = scope->findField("lhs");
 	assert( lhsField != 0 );
 

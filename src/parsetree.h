@@ -2363,7 +2363,7 @@ struct ObjNameScope
 		return depth;
 	}
 
-	ObjectField *findField( const String &name );
+	ObjectField *findField( const String &name ) const;
 };
 
 struct ObjectDef
@@ -2420,8 +2420,8 @@ struct ObjectDef
 	void initField( Compiler *pd, ObjectField *field );
 	void createCode( Compiler *pd, CodeVect &code );
 	ObjectField *checkRedecl( const String &name );
-	ObjMethod *findMethod( const String &name );
-	ObjectField *findFieldInScope( const String &name, ObjNameScope *inScope );
+	ObjMethod *findMethod( const String &name ) const;
+	ObjectField *findFieldInScope( const String &name, const ObjNameScope *inScope ) const;
 	void insertField( const String &name, ObjectField *value );
 	void resolve( Compiler *pd );
 	ObjectField *findFieldNum( long offset );
@@ -2530,7 +2530,7 @@ struct LangVarRef
 	void setFieldInstr( Compiler *pd, CodeVect &code, ObjectDef *inObject, 
 			ObjectField *el, UniqueType *exprUT, bool revert ) const;
 
-	VarRefLookup lookupMethod( Compiler *pd ) ;
+	VarRefLookup lookupMethod( Compiler *pd ) const;
 	VarRefLookup lookupField( Compiler *pd ) const;
 
 	VarRefLookup lookupQualification( Compiler *pd, ObjectDef *rootDef ) const;

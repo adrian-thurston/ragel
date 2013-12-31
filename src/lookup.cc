@@ -42,7 +42,7 @@ ObjectDef *objDefFromUT( Compiler *pd, UniqueType *ut )
 }
 
 /* Recurisve find through a single object def's scope. */
-ObjectField *ObjectDef::findFieldInScope( const String &name, ObjNameScope *inScope )
+ObjectField *ObjectDef::findFieldInScope( const String &name, const ObjNameScope *inScope ) const
 {
 	ObjFieldMapEl *objDefMapEl = inScope->objFieldMap->find( name );
 	if ( objDefMapEl != 0 )
@@ -52,12 +52,12 @@ ObjectField *ObjectDef::findFieldInScope( const String &name, ObjNameScope *inSc
 	return 0;
 }
 
-ObjectField *ObjNameScope::findField( const String &name )
+ObjectField *ObjNameScope::findField( const String &name ) const
 {
 	return owner->findFieldInScope( name, this );
 }
 
-ObjMethod *ObjectDef::findMethod( const String &name )
+ObjMethod *ObjectDef::findMethod( const String &name ) const
 {
 	ObjMethodMapEl *objMethodMapEl = objMethodMap->find( name );
 	if ( objMethodMapEl != 0 )
@@ -112,6 +112,60 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjectDef *rootDef )
 	return VarRefLookup( lastPtrInQual, firstConstPart, searchObjDef );
 }
 
+bool LangVarRef::isLocalRef( Compiler *pd ) const
+{
+	if ( qual->length() > 0 ) {
+		if ( pd->curLocalFrame->curScope->findField( qual->data[0].data ) != 0 )
+			return true;
+	}
+	else if ( pd->curLocalFrame->curScope->findField( name ) != 0 )
+		return true;
+	else if ( pd->curLocalFrame->findMethod( name ) != 0 )
+		return true;
+
+	return false;
+}
+
+bool LangVarRef::isContextRef( Compiler *pd ) const
+{
+	if ( pd->context != 0 ) {
+		if ( qual->length() > 0 ) {
+			if ( pd->context->contextObjDef->curScope->findField( qual->data[0].data ) != 0 )
+				return true;
+		}
+		else if ( pd->context->contextObjDef->curScope->findField( name ) != 0 )
+			return true;
+		else if ( pd->context->contextObjDef->findMethod( name ) != 0 )
+			return true;
+	}
+
+	return false;
+}
+
+bool LangVarRef::isCustom( Compiler *pd ) const
+{
+	if ( qual->length() > 0 ) {
+		ObjectField *field = pd->curLocalFrame->curScope->findField( qual->data[0].data );
+		if ( field != 0 && field->isCustom )
+			return true;
+	}
+	else {
+		ObjectField *field = pd->curLocalFrame->curScope->findField( name );
+		if ( field != 0 ) {
+			if ( field->isCustom )
+				return true;
+		}
+		else {
+			ObjMethod *method = pd->curLocalFrame->findMethod( name );
+			if ( method != 0 && method->isCustom )
+				return true;
+		}
+	
+	}
+	return false;
+}
+
+
 
 VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 {
@@ -161,7 +215,7 @@ UniqueType *LangVarRef::lookup( Compiler *pd ) const
 }
 
 
-VarRefLookup LangVarRef::lookupMethod( Compiler *pd ) 
+VarRefLookup LangVarRef::lookupMethod( Compiler *pd ) const
 {
 	/* Lookup the object that the field is in. */
 	VarRefLookup lookup = lookupObj( pd );

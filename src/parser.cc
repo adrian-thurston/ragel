@@ -567,8 +567,10 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	
 	/* The parser may be referenced. */
 	LangVarRef *varRef = 0;
-	if ( objField != 0 )
-		varRef = LangVarRef::cons( objField->loc, pd->curLocalFrame->curScope, objField->name );
+	if ( objField != 0 ) {
+		varRef = LangVarRef::cons( objField->loc,
+				pd->curLocalFrame->curScope, objField->name );
+	}
 
 	/* The typeref for the parser. */
 	TypeRef *parserTypeRef = TypeRef::cons( loc,
@@ -764,8 +766,10 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 	pd->replList.append( constructor );
 	
 	LangVarRef *varRef = 0;
-	if ( objField != 0 )
-		varRef = LangVarRef::cons( objField->loc, pd->curLocalFrame->curScope, objField->name );
+	if ( objField != 0 ) {
+		varRef = LangVarRef::cons( objField->loc,
+				pd->curLocalFrame->curScope, objField->name );
+	}
 
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( loc, LangTerm::ConstructType,
 			varRef, objField, typeRef, fieldInitVect, constructor ) );

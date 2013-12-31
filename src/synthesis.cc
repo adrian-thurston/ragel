@@ -222,45 +222,6 @@ UniqueType *Compiler::findUniqueType( int typeId, IterDef *iterDef )
 	return uniqueType;
 }
 
-void ObjectDef::iterPushScope()
-{
-	//cout << "iter push scope ";
-	if ( curScope->childIter == 0 ) {
-		curScope->childIter = curScope->children.head;
-	}
-	else {
-		curScope->childIter = curScope->childIter->next;
-		/* Resetting. */
-		if ( curScope->childIter == 0 )
-			curScope ->childIter = curScope->children.head;
-	}
-
-	curScope = curScope->childIter;
-}
-
-void ObjectDef::iterPopScope()
-{
-	//cout << "iter pop scope" << endl;
-	curScope = curScope->parentScope;
-}
-
-void ObjectDef::pushScope()
-{
-	ObjNameScope *newScope = new ObjNameScope;
-	newScope->objFieldMap = new ObjFieldMap;
-
-	newScope->owner = this;
-	newScope->parentScope = curScope;
-	curScope->children.append( newScope );
-
-	curScope = newScope;
-}
-
-void ObjectDef::popScope()
-{
-	curScope = curScope->parentScope;
-}
-
 void ObjectDef::insertField( const String &name, ObjectField *value )
 {
 	curScope->objFieldMap->insert( name, value );
@@ -570,59 +531,6 @@ void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code,
 {
 	/* Start the search in the local frame. */
 	loadQualification( pd, code, pd->curLocalFrame, lastPtrInQual, forWriting, false );
-}
-
-bool LangVarRef::isLocalRef( Compiler *pd ) const
-{
-	if ( qual->length() > 0 ) {
-		if ( pd->curLocalFrame->curScope->findField( qual->data[0].data ) != 0 )
-			return true;
-	}
-	else if ( pd->curLocalFrame->curScope->findField( name ) != 0 )
-		return true;
-	else if ( pd->curLocalFrame->findMethod( name ) != 0 )
-		return true;
-
-	return false;
-}
-
-bool LangVarRef::isContextRef( Compiler *pd ) const
-{
-	if ( pd->context != 0 ) {
-		if ( qual->length() > 0 ) {
-			if ( pd->context->contextObjDef->curScope->findField( qual->data[0].data ) != 0 )
-				return true;
-		}
-		else if ( pd->context->contextObjDef->curScope->findField( name ) != 0 )
-			return true;
-		else if ( pd->context->contextObjDef->findMethod( name ) != 0 )
-			return true;
-	}
-
-	return false;
-}
-
-bool LangVarRef::isCustom( Compiler *pd ) const
-{
-	if ( qual->length() > 0 ) {
-		ObjectField *field = pd->curLocalFrame->curScope->findField( qual->data[0].data );
-		if ( field != 0 && field->isCustom )
-			return true;
-	}
-	else {
-		ObjectField *field = pd->curLocalFrame->curScope->findField( name );
-		if ( field != 0 ) {
-			if ( field->isCustom )
-				return true;
-		}
-		else {
-			ObjMethod *method = pd->curLocalFrame->findMethod( name );
-			if ( method != 0 && method->isCustom )
-				return true;
-		}
-	
-	}
-	return false;
 }
 
 void LangVarRef::loadObj( Compiler *pd, CodeVect &code, 
