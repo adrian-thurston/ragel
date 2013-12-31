@@ -145,7 +145,6 @@ VarRefLookup LangVarRef::lookupField( Compiler *pd ) const
 	return lookup;
 }
 
-
 UniqueType *LangVarRef::lookup( Compiler *pd ) const
 {
 	/* Lookup the loadObj. */
