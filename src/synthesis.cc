@@ -407,7 +407,7 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code ) const
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field in the current qualification. */
-		ObjectField *el = searchObjDef->findField( qi->data );
+		ObjectField *el = searchObjDef->findField( qi->data, searchObjDef->scope );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -449,7 +449,7 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
-		ObjectField *el = searchObjDef->findField( qi->data );
+		ObjectField *el = searchObjDef->findField( qi->data, searchObjDef->scope );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -574,10 +574,10 @@ void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code,
 bool LangVarRef::isLocalRef( Compiler *pd ) const
 {
 	if ( qual->length() > 0 ) {
-		if ( pd->curLocalFrame->findField( qual->data[0].data ) != 0 )
+		if ( pd->curLocalFrame->findField( qual->data[0].data, pd->curLocalFrame->scope ) != 0 )
 			return true;
 	}
-	else if ( pd->curLocalFrame->findField( name ) != 0 )
+	else if ( pd->curLocalFrame->findField( name, pd->curLocalFrame->scope ) != 0 )
 		return true;
 	else if ( pd->curLocalFrame->findMethod( name ) != 0 )
 		return true;
@@ -589,10 +589,10 @@ bool LangVarRef::isContextRef( Compiler *pd ) const
 {
 	if ( pd->context != 0 ) {
 		if ( qual->length() > 0 ) {
-			if ( pd->context->contextObjDef->findField( qual->data[0].data ) != 0 )
+			if ( pd->context->contextObjDef->findField( qual->data[0].data, pd->context->contextObjDef->scope ) != 0 )
 				return true;
 		}
-		else if ( pd->context->contextObjDef->findField( name ) != 0 )
+		else if ( pd->context->contextObjDef->findField( name, pd->context->contextObjDef->scope ) != 0 )
 			return true;
 		else if ( pd->context->contextObjDef->findMethod( name ) != 0 )
 			return true;
@@ -604,12 +604,12 @@ bool LangVarRef::isContextRef( Compiler *pd ) const
 bool LangVarRef::isCustom( Compiler *pd ) const
 {
 	if ( qual->length() > 0 ) {
-		ObjectField *field = pd->curLocalFrame->findField( qual->data[0].data );
+		ObjectField *field = pd->curLocalFrame->findField( qual->data[0].data, pd->curLocalFrame->scope );
 		if ( field != 0 && field->isCustom )
 			return true;
 	}
 	else {
-		ObjectField *field = pd->curLocalFrame->findField( name );
+		ObjectField *field = pd->curLocalFrame->findField( name, pd->curLocalFrame->scope );
 		if ( field != 0 ) {
 			if ( field->isCustom )
 				return true;
@@ -694,7 +694,7 @@ bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT,
 void LangVarRef::setField( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, UniqueType *exprUT, bool revert ) const
 {
-	ObjectField *el = inObject->findField( name );
+	ObjectField *el = inObject->findField( name, inObject->scope );
 	if ( el == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
@@ -704,7 +704,7 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 void LangVarRef::setFieldIter( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert ) const
 {
-	ObjectField *el = inObject->findField( name );
+	ObjectField *el = inObject->findField( name, inObject->scope );
 	if ( el == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
@@ -3051,7 +3051,7 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
 		paramUTs[paramPos] = param->typeRef->uniqueType;
 
-		if ( func->localFrame->findField( param->name ) != 0 )
+		if ( func->localFrame->findField( param->name, func->localFrame->scope ) != 0 )
 			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
 
 		func->localFrame->insertField( param->name, param );

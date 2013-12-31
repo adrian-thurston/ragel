@@ -2419,7 +2419,7 @@ struct ObjectDef
 	ObjectField *checkRedecl( const String &name );
 	ObjMethod *findMethod( const String &name );
 	ObjectField *findFieldInScope( const String &name, ObjNameScope *inScope );
-	ObjectField *findField( const String &name );
+	ObjectField *findField( const String &name, ObjNameScope *insScope );
 	void insertField( const String &name, ObjectField *value );
 	void resolve( Compiler *pd );
 	ObjectField *findFieldNum( long offset );
