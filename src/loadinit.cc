@@ -285,7 +285,7 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	QualItemVect *popQual = new QualItemVect;
 	popQual->append( QualItem( QualItem::Dot, internal, String( "argv" ) ) );
 
-	LangVarRef *popRef = LangVarRef::cons( internal, pd->curLocalFrame->scope, popQual, String("pop") );
+	LangVarRef *popRef = LangVarRef::cons( internal, pd->curLocalFrame->curScope, popQual, String("pop") );
 	LangExpr *pop = LangExpr::cons( LangTerm::cons( InputLoc(), popRef, popArgs ) );
 
 	/* Construct a literal string 'r', for second arg to open. */
@@ -297,7 +297,7 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	/* Call open. */
 	QualItemVect *openQual = new QualItemVect;
 	LangVarRef *openRef = LangVarRef::cons( internal,
-			pd->curLocalFrame->scope, openQual, String("open") );
+			pd->curLocalFrame->curScope, openQual, String("open") );
 	CallArgVect *openArgs = new CallArgVect;
 	openArgs->append( new CallArg(pop) );
 	openArgs->append( new CallArg(modeExpr) );
@@ -319,7 +319,7 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 void LoadInit::consExportTree( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, pd->curLocalFrame->scope, qual, String("P") );
+	LangVarRef *varRef = LangVarRef::cons( internal, pd->curLocalFrame->curScope, qual, String("P") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
 
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
@@ -332,7 +332,7 @@ void LoadInit::consExportTree( StmtList *stmtList )
 void LoadInit::consExportError( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, pd->curLocalFrame->scope, qual, String("error") );
+	LangVarRef *varRef = LangVarRef::cons( internal, pd->curLocalFrame->curScope, qual, String("error") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
 
 	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );

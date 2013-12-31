@@ -392,7 +392,7 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				pd->curLocalFrame->scope, objField->name );
+				pd->curLocalFrame->curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, 
 				assignType, varRef, expr );
@@ -568,7 +568,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	/* The parser may be referenced. */
 	LangVarRef *varRef = 0;
 	if ( objField != 0 )
-		varRef = LangVarRef::cons( objField->loc, pd->curLocalFrame->scope, objField->name );
+		varRef = LangVarRef::cons( objField->loc, pd->curLocalFrame->curScope, objField->name );
 
 	/* The typeref for the parser. */
 	TypeRef *parserTypeRef = TypeRef::cons( loc,
@@ -765,7 +765,7 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 	
 	LangVarRef *varRef = 0;
 	if ( objField != 0 )
-		varRef = LangVarRef::cons( objField->loc, pd->curLocalFrame->scope, objField->name );
+		varRef = LangVarRef::cons( objField->loc, pd->curLocalFrame->curScope, objField->name );
 
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( loc, LangTerm::ConstructType,
 			varRef, objField, typeRef, fieldInitVect, constructor ) );
@@ -818,7 +818,7 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				pd->curLocalFrame->scope, objField->name );
+				pd->curLocalFrame->curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
@@ -843,7 +843,7 @@ LangStmt *BaseParser::exportStmt( ObjectField *objField, LangStmt::Type assignTy
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc, 
-				pd->curLocalFrame->scope, objField->name );
+				pd->curLocalFrame->curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}

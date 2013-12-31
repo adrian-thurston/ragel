@@ -2389,9 +2389,9 @@ struct ObjectDef
 		o->name = name;
 		o->id = id;
 
-		o->rootScope = o->scope = new ObjNameScope;
-		o->scope->owner = o;
-		o->scope->objFieldMap = new ObjFieldMap;
+		o->rootScope = o->curScope = new ObjNameScope;
+		o->rootScope->owner = o;
+		o->rootScope->objFieldMap = new ObjFieldMap;
 
 		o->objFieldList = new ObjFieldList;
 		o->objMethodMap = new ObjMethodMap;
@@ -2404,9 +2404,8 @@ struct ObjectDef
 	ObjFieldList *objFieldList;
 	ObjMethodMap *objMethodMap;	
 
-	/* Head of stack of name scopes. */
 	ObjNameScope *rootScope;
-	ObjNameScope *scope;
+	ObjNameScope *curScope;
 
 	void pushScope();
 	void popScope();

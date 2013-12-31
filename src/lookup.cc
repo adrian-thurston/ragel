@@ -73,7 +73,7 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjectDef *rootDef )
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
-		ObjectField *el = searchObjDef->scope->findField( qi->data );
+		ObjectField *el = searchObjDef->curScope->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -132,7 +132,7 @@ VarRefLookup LangVarRef::lookupField( Compiler *pd ) const
 	VarRefLookup lookup = lookupObj( pd );
 
 	/* Lookup the field. */
-	ObjectField *field = lookup.inObject->scope->findField( name );
+	ObjectField *field = lookup.inObject->curScope->findField( name );
 	if ( field == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 

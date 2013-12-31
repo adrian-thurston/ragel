@@ -27,7 +27,7 @@
 ObjectField *ObjectDef::checkRedecl( const String &name )
 {
 	//cout << "looking for " << name << endl;
-	ObjFieldMapEl *objDefMapEl = scope->objFieldMap->find( name );
+	ObjFieldMapEl *objDefMapEl = curScope->objFieldMap->find( name );
 	if ( objDefMapEl != 0 )
 		return objDefMapEl->value;
 	return 0;

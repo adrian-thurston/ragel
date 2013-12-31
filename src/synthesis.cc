@@ -225,23 +225,23 @@ UniqueType *Compiler::findUniqueType( int typeId, IterDef *iterDef )
 void ObjectDef::iterPushScope()
 {
 	//cout << "iter push scope ";
-	if ( scope->childIter == 0 ) {
-		scope->childIter = scope->children.head;
+	if ( curScope->childIter == 0 ) {
+		curScope->childIter = curScope->children.head;
 	}
 	else {
-		scope->childIter = scope->childIter->next;
+		curScope->childIter = curScope->childIter->next;
 		/* Resetting. */
-		if ( scope->childIter == 0 )
-			scope ->childIter = scope->children.head;
+		if ( curScope->childIter == 0 )
+			curScope ->childIter = curScope->children.head;
 	}
 
-	scope = scope->childIter;
+	curScope = curScope->childIter;
 }
 
 void ObjectDef::iterPopScope()
 {
 	//cout << "iter pop scope" << endl;
-	scope = scope->parentScope;
+	curScope = curScope->parentScope;
 }
 
 void ObjectDef::pushScope()
@@ -250,22 +250,22 @@ void ObjectDef::pushScope()
 	newScope->objFieldMap = new ObjFieldMap;
 
 	newScope->owner = this;
-	newScope->parentScope = scope;
-	scope->children.append( newScope );
+	newScope->parentScope = curScope;
+	curScope->children.append( newScope );
 
-	scope = newScope;
+	curScope = newScope;
 }
 
 void ObjectDef::popScope()
 {
-	scope = scope->parentScope;
+	curScope = curScope->parentScope;
 }
 
 void ObjectDef::insertField( const String &name, ObjectField *value )
 {
-	scope->objFieldMap->insert( name, value );
+	curScope->objFieldMap->insert( name, value );
 	objFieldList->append( value );
-	value->scope = scope;
+	value->scope = curScope;
 }
 
 
@@ -408,7 +408,7 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code ) const
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field in the current qualification. */
-		ObjectField *el = searchObjDef->scope->findField( qi->data );
+		ObjectField *el = searchObjDef->curScope->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -450,7 +450,7 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
-		ObjectField *el = searchObjDef->scope->findField( qi->data );
+		ObjectField *el = searchObjDef->curScope->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -575,10 +575,10 @@ void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code,
 bool LangVarRef::isLocalRef( Compiler *pd ) const
 {
 	if ( qual->length() > 0 ) {
-		if ( pd->curLocalFrame->scope->findField( qual->data[0].data ) != 0 )
+		if ( pd->curLocalFrame->curScope->findField( qual->data[0].data ) != 0 )
 			return true;
 	}
-	else if ( pd->curLocalFrame->scope->findField( name ) != 0 )
+	else if ( pd->curLocalFrame->curScope->findField( name ) != 0 )
 		return true;
 	else if ( pd->curLocalFrame->findMethod( name ) != 0 )
 		return true;
@@ -590,10 +590,10 @@ bool LangVarRef::isContextRef( Compiler *pd ) const
 {
 	if ( pd->context != 0 ) {
 		if ( qual->length() > 0 ) {
-			if ( pd->context->contextObjDef->scope->findField( qual->data[0].data ) != 0 )
+			if ( pd->context->contextObjDef->curScope->findField( qual->data[0].data ) != 0 )
 				return true;
 		}
-		else if ( pd->context->contextObjDef->scope->findField( name ) != 0 )
+		else if ( pd->context->contextObjDef->curScope->findField( name ) != 0 )
 			return true;
 		else if ( pd->context->contextObjDef->findMethod( name ) != 0 )
 			return true;
@@ -605,12 +605,12 @@ bool LangVarRef::isContextRef( Compiler *pd ) const
 bool LangVarRef::isCustom( Compiler *pd ) const
 {
 	if ( qual->length() > 0 ) {
-		ObjectField *field = pd->curLocalFrame->scope->findField( qual->data[0].data );
+		ObjectField *field = pd->curLocalFrame->curScope->findField( qual->data[0].data );
 		if ( field != 0 && field->isCustom )
 			return true;
 	}
 	else {
-		ObjectField *field = pd->curLocalFrame->scope->findField( name );
+		ObjectField *field = pd->curLocalFrame->curScope->findField( name );
 		if ( field != 0 ) {
 			if ( field->isCustom )
 				return true;
@@ -695,7 +695,7 @@ bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT,
 void LangVarRef::setField( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, UniqueType *exprUT, bool revert ) const
 {
-	ObjectField *el = inObject->scope->findField( name );
+	ObjectField *el = inObject->curScope->findField( name );
 	if ( el == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
@@ -705,7 +705,7 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 void LangVarRef::setFieldIter( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert ) const
 {
-	ObjectField *el = inObject->scope->findField( name );
+	ObjectField *el = inObject->curScope->findField( name );
 	if ( el == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
@@ -3052,7 +3052,7 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
 		paramUTs[paramPos] = param->typeRef->uniqueType;
 
-		if ( func->localFrame->scope->findField( param->name ) != 0 )
+		if ( func->localFrame->curScope->findField( param->name ) != 0 )
 			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
 
 		func->localFrame->insertField( param->name, param );
