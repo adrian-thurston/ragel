@@ -208,7 +208,7 @@ void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 
 void Compiler::addProdLHSLoad( Production *prod, CodeVect &code, long &insertPos )
 {
-	ObjectField *lhsField = prod->redBlock->localFrame->findField("lhs", prod->redBlock->localFrame->scope );
+	ObjectField *lhsField = prod->redBlock->localFrame->scope->findField("lhs");
 	assert( lhsField != 0 );
 
 	CodeVect loads;
@@ -229,7 +229,7 @@ void Compiler::addPushBackLHS( Production *prod, CodeVect &code, long &insertPos
 	 * before it gets modified. We want to avoid this for attribute
 	 * modifications. The computation of dirtyTree should deal with this for
 	 * us. */
-	ObjectField *lhsField = block->localFrame->findField("lhs", block->localFrame->scope );
+	ObjectField *lhsField = block->localFrame->scope->findField("lhs");
 	assert( lhsField != 0 );
 
 	if ( lhsField->beenReferenced ) {

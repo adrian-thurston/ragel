@@ -52,12 +52,9 @@ ObjectField *ObjectDef::findFieldInScope( const String &name, ObjNameScope *inSc
 	return 0;
 }
 
-ObjectField *ObjectDef::findField( const String &name, ObjNameScope *inScope )
+ObjectField *ObjNameScope::findField( const String &name )
 {
-	ObjectField *objField = findFieldInScope( name, inScope );
-	if ( objField != 0 )
-		return objField;
-	return 0;
+	return owner->findFieldInScope( name, this );
 }
 
 ObjMethod *ObjectDef::findMethod( const String &name )
@@ -76,7 +73,7 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjectDef *rootDef )
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
-		ObjectField *el = searchObjDef->findField( qi->data, searchObjDef->scope );
+		ObjectField *el = searchObjDef->scope->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -135,7 +132,7 @@ VarRefLookup LangVarRef::lookupField( Compiler *pd ) const
 	VarRefLookup lookup = lookupObj( pd );
 
 	/* Lookup the field. */
-	ObjectField *field = lookup.inObject->findField( name, lookup.inObject->scope );
+	ObjectField *field = lookup.inObject->scope->findField( name );
 	if ( field == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 

@@ -2362,6 +2362,8 @@ struct ObjNameScope
 		}
 		return depth;
 	}
+
+	ObjectField *findField( const String &name );
 };
 
 struct ObjectDef
@@ -2388,6 +2390,7 @@ struct ObjectDef
 		o->id = id;
 
 		o->scope = new ObjNameScope;
+		o->scope->owner = o;
 		o->scope->objFieldMap = new ObjFieldMap;
 
 		o->objFieldList = new ObjFieldList;
@@ -2419,7 +2422,6 @@ struct ObjectDef
 	ObjectField *checkRedecl( const String &name );
 	ObjMethod *findMethod( const String &name );
 	ObjectField *findFieldInScope( const String &name, ObjNameScope *inScope );
-	ObjectField *findField( const String &name, ObjNameScope *insScope );
 	void insertField( const String &name, ObjectField *value );
 	void resolve( Compiler *pd );
 	ObjectField *findFieldNum( long offset );
