@@ -227,7 +227,8 @@ struct LoadColm
 
 			LangIterCall *iterCall = walkIterCall( Statement.iter_call() );
 
-			stmt = forScope( Statement.id().loc(), forDecl, typeRef, iterCall, stmtList );
+			stmt = forScope( Statement.id().loc(), forDecl,
+					pd->curLocalFrame->scope, typeRef, iterCall, stmtList );
 
 			popScope();
 			break;

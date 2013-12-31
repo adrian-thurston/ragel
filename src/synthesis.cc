@@ -2089,7 +2089,7 @@ void LangStmt::compileForIterBody( Compiler *pd,
 void LangStmt::chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const
 {
 	/* The iterator name. */
-	LangVarRef *callVarRef = LangVarRef::cons( loc, pd->curLocalFrame->scope, "triter" );
+	LangVarRef *callVarRef = LangVarRef::cons( loc, scope, "triter" );
 
 	/* The parameters. */
 	CallArgVect *callExprVect = new CallArgVect;
@@ -2628,7 +2628,7 @@ void Compiler::findLocalTrees( CharSet &trees )
 
 void Compiler::findLocalIters( Iters &iters )
 {
-	/* We exlcude "lhs" from being downrefed because we need to use if after
+	/* We exclude "lhs" from being downrefed because we need to use if after
 	 * the frame is is cleaned and so it must survive. */
 	for ( ObjFieldList::Iter ol = *curLocalFrame->objFieldList; ol.lte(); ol++ ) {
 		ObjectField *el = ol->value;

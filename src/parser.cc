@@ -663,7 +663,7 @@ ConsItemList *BaseParser::consListConcat( ConsItemList *list1,
 }
 
 LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
-		TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList )
+		ObjNameScope *scope, TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList )
 {
 	/* Check for redeclaration. */
 	if ( pd->curLocalFrame->checkRedecl( data ) != 0 )
@@ -676,7 +676,7 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 	pd->curLocalFrame->insertField( data, iterField );
 
 	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
-			iterField, typeRef, iterCall, stmtList );
+			iterField, typeRef, iterCall, stmtList, scope );
 
 	return stmt;
 }

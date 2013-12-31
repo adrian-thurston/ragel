@@ -97,7 +97,7 @@ struct BaseParser
 	PatternItemList *patListConcat( PatternItemList *list1, PatternItemList *list2 );
 	ConsItemList *consListConcat( ConsItemList *list1, ConsItemList *list2 );
 	LangStmt *forScope( const InputLoc &loc, const String &data,
-			TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList );
+			ObjNameScope *scope, TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList );
 	void preEof( const InputLoc &loc, StmtList *stmtList, ObjectDef *localFrame );
 
 	ProdEl *prodElName( const InputLoc &loc, const String &data,

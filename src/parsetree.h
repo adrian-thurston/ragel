@@ -2927,6 +2927,7 @@ struct LangStmt
 		stmtList(0),
 		elsePart(0),
 		iterCall(0),
+		scope(0),
 
 		/* Normally you don't need to initialize double list pointers, however,
 		 * we make use of the next pointer for returning a pair of statements
@@ -3047,7 +3048,7 @@ struct LangStmt
 	}
 
 	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField,
-			TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList )
+			TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList, ObjNameScope *scope )
 	{
 		LangStmt *s = new LangStmt;
 		s->loc = loc;
@@ -3056,6 +3057,7 @@ struct LangStmt
 		s->typeRef = typeRef;
 		s->iterCall = iterCall;
 		s->stmtList = stmtList;
+		s->scope = scope;
 		return s;
 	}
 
@@ -3092,6 +3094,7 @@ struct LangStmt
 	LangStmt *elsePart;
 	String name;
 	LangIterCall *iterCall;
+	ObjNameScope *scope;
 
 	/* Normally you don't need to initialize double list pointers, however, we
 	 * make use of the next pointer for returning a pair of statements using
