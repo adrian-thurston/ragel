@@ -778,7 +778,6 @@ struct Compiler
 	void makeFuncVisible( Function *func, bool isUserIter );
 
 	void resolveFunction( Function *func );
-	void resolveUserIter( Function *func );
 	void resolvePreEof( TokenRegion *region );
 	void resolveRootBlock();
 	void resolveTranslateBlock( LangEl *langEl );
