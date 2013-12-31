@@ -24,6 +24,15 @@
 #include <iostream>
 #include <assert.h>
 
+ObjectField *ObjectDef::checkRedecl( const String &name )
+{
+	//cout << "looking for " << name << endl;
+	ObjFieldMapEl *objDefMapEl = scope->objFieldMap->find( name );
+	if ( objDefMapEl != 0 )
+		return objDefMapEl->value;
+	return 0;
+}
+
 void LexJoin::varDecl( Compiler *pd, TokenDef *tokenDef )
 {
 	expr->varDecl( pd, tokenDef );

@@ -1850,6 +1850,8 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 	IterDef *iterDef;
 };
 
+ObjectDef *objDefFromUT( Compiler *pd, UniqueType *ut );
+
 struct CmpUniqueType
 {
 	static int compare( const UniqueType &ut1, const UniqueType &ut2 );
