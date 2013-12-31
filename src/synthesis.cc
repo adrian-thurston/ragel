@@ -222,13 +222,6 @@ UniqueType *Compiler::findUniqueType( int typeId, IterDef *iterDef )
 	return uniqueType;
 }
 
-void ObjectDef::insertField( const String &name, ObjectField *value )
-{
-	curScope->objFieldMap->insert( name, value );
-	objFieldList->append( value );
-	value->scope = curScope;
-}
-
 
 /* 0-based. */
 ObjectField *ObjectDef::findFieldNum( long offset )
@@ -2960,7 +2953,7 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
 		paramUTs[paramPos] = param->typeRef->uniqueType;
 
-		if ( func->localFrame->curScope->findField( param->name ) != 0 )
+		if ( func->localFrame->rootScope->findField( param->name ) != 0 )
 			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
 
 		func->localFrame->insertField( param->name, param );

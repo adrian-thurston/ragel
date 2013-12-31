@@ -24,6 +24,13 @@
 #include <iostream>
 #include <assert.h>
 
+void ObjectDef::insertField( const String &name, ObjectField *value )
+{
+	curScope->objFieldMap->insert( name, value );
+	objFieldList->append( value );
+	value->scope = curScope;
+}
+
 void ObjectDef::iterPushScope()
 {
 	//cout << "iter push scope ";
