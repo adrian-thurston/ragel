@@ -1130,8 +1130,8 @@ struct LoadColm
 		case qual::_Arrow: {
 			qualItemVect = walkQual( RecQual );
 			String id = Qual.id().data();
-			QualItem::Type type = Qual.DOT() != 0 ? QualItem::Dot : QualItem::Arrow;
-			qualItemVect->append( QualItem( Qual.id().loc(), id, type ) );
+			QualItem::Form form = Qual.DOT() != 0 ? QualItem::Dot : QualItem::Arrow;
+			qualItemVect->append( QualItem( form, Qual.id().loc(), id ) );
 			break;
 		}
 		case qual::_Base: {

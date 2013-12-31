@@ -283,7 +283,7 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	/* Pop argv, this yields the file name . */
 	CallArgVect *popArgs = new CallArgVect;
 	QualItemVect *popQual = new QualItemVect;
-	popQual->append( QualItem( internal, String( "argv" ), QualItem::Dot ) );
+	popQual->append( QualItem( QualItem::Dot, internal, String( "argv" ) ) );
 
 	LangVarRef *popRef = LangVarRef::cons( internal, popQual, String("pop") );
 	LangExpr *pop = LangExpr::cons( LangTerm::cons( InputLoc(), popRef, popArgs ) );

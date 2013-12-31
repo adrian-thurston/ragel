@@ -482,7 +482,7 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code ) const
 		if ( elUT->typeId == TYPE_ITER )
 			elUT = el->typeRef->searchUniqueType;
 		
-		assert( qi->type == QualItem::Dot );
+		assert( qi->form == QualItem::Dot );
 
 		searchObjDef = objDefFromUT( pd, elUT );
 		count += 1;
@@ -528,13 +528,13 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 		UniqueType *qualUT = loadFieldInstr( pd, code, searchObjDef, 
 				el, lfForWriting, lfRevert );
 		
-		if ( qi->type == QualItem::Dot ) {
+		if ( qi->form == QualItem::Dot ) {
 			/* Cannot a reference. Iterator yes (access of the iterator not
 			 * hte current) */
 			if ( qualUT->typeId == TYPE_PTR )
 				error(loc) << "dot cannot be used to access a pointer" << endp;
 		}
-		else if ( qi->type == QualItem::Arrow ) {
+		else if ( qi->form == QualItem::Arrow ) {
 			if ( qualUT->typeId == TYPE_PTR ) {
 				/* Always dereference references when used for qualification. If
 				 * this is the last one then we must start with the reverse
@@ -714,13 +714,13 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjectDef *rootDef )
 		if ( qualUT->typeId == TYPE_PTR )
 			lastPtrInQual = qi.pos();
 
-		if ( qi->type == QualItem::Dot ) {
+		if ( qi->form == QualItem::Dot ) {
 			/* Cannot dot a reference. Iterator yes (access of the iterator
 			 * not the current) */
 			if ( qualUT->typeId == TYPE_PTR )
 				error(loc) << "dot cannot be used to access a pointer" << endp;
 		}
-		else if ( qi->type == QualItem::Arrow ) {
+		else if ( qi->form == QualItem::Arrow ) {
 			if ( qualUT->typeId == TYPE_ITER )
 				qualUT = el->typeRef->searchUniqueType;
 			else if ( qualUT->typeId == TYPE_PTR )
@@ -777,7 +777,7 @@ VarRefLookup LangVarRef::lookupMethod( Compiler *pd )
 	if ( method == 0 ) {
 		/* Not found as a method, try it as an object on which we will call a
 		 * default function. */
-		qual->append( QualItem( loc, name, QualItem::Dot ) );
+		qual->append( QualItem( QualItem::Dot, loc, name ) );
 
 		/* Lookup the object that the field is in. */
 		VarRefLookup lookup = lookupObj( pd );

@@ -2480,14 +2480,14 @@ struct VarRefLookup
 
 struct QualItem
 {
-	enum Type { Dot, Arrow };
+	enum Form { Dot, Arrow };
 
-	QualItem( const InputLoc &loc, const String &data, Type type )
-		: loc(loc), data(data), type(type) {}
+	QualItem( Form form, const InputLoc &loc, const String &data )
+		: form(form), loc(loc), data(data) {}
 
+	Form form;
 	InputLoc loc;
 	String data;
-	Type type;
 };
 
 typedef Vector<QualItem> QualItemVect;

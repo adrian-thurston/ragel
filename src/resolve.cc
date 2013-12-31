@@ -517,7 +517,6 @@ void LangStmt::resolve( Compiler *pd ) const
 		}
 		case AssignType: {
 			/* Evaluate the exrepssion. */
-//			cout << "Assign Type" << endl;
 			expr->resolve( pd );
 			break;
 		}
