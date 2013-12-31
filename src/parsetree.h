@@ -2333,9 +2333,13 @@ struct TemplateType;
 struct ObjNameScope
 {
 	ObjNameScope()
-		: parentScope(0), childIter(0)
+	:
+		owner(0),
+		parentScope(0),
+		childIter(0)
 	{}
 
+	ObjectDef *owner;
 	ObjFieldMap *objFieldMap;	
 
 	ObjNameScope *parentScope;
@@ -2499,22 +2503,19 @@ struct LangVarRef
 		qual(0)
 	{}
 	
-	static LangVarRef *cons( const InputLoc &loc, String name )
+	static LangVarRef *cons( const InputLoc &loc, ObjNameScope *scope, QualItemVect *qual, const String &name )
 	{
 		LangVarRef *l = new LangVarRef;
 		l->loc = loc;
-		l->qual = new QualItemVect;
+		l->scope = scope;
+		l->qual = qual;
 		l->name = name;
 		return l;
 	}
 
-	static LangVarRef *cons( const InputLoc &loc, QualItemVect *qual, String name )
+	static LangVarRef *cons( const InputLoc &loc, ObjNameScope *scope, const String &name )
 	{
-		LangVarRef *l = new LangVarRef;
-		l->loc = loc;
-		l->qual = qual;
-		l->name = name;
-		return l;
+		return cons( loc, scope, new QualItemVect, name );
 	}
 
 	void resolve( Compiler *pd ) const;
@@ -2568,6 +2569,7 @@ struct LangVarRef
 			VarRefLookup &lookup, CallArgVect *args ) const;
 
 	InputLoc loc;
+	ObjNameScope *scope;
 	QualItemVect *qual;
 	String name;
 };

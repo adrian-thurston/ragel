@@ -29,6 +29,26 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+/* Recurisve find through a single object def's scope. */
+ObjectField *ObjectDef::findFieldInScope( const String &name, ObjNameScope *inScope )
+{
+	ObjFieldMapEl *objDefMapEl = inScope->objFieldMap->find( name );
+	if ( objDefMapEl != 0 )
+		return objDefMapEl->value;
+	if ( inScope->parentScope != 0 )
+		return findFieldInScope( name, inScope->parentScope );
+	return 0;
+}
+
+ObjectField *ObjectDef::findField( const String &name )
+{
+	//cout << "looking for " << name << endl;
+	ObjectField *objField = findFieldInScope( name, scope );
+	if ( objField != 0 )
+		return objField;
+	return 0;
+}
+
 UniqueType *LangVarRef::lookup( Compiler *pd ) const
 {
 	/* Lookup the loadObj. */

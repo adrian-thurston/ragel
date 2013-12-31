@@ -267,17 +267,6 @@ void ObjectDef::insertField( const String &name, ObjectField *value )
 	value->scope = scope;
 }
 
-/* Recurisve find through a single object def's scope. */
-ObjectField *ObjectDef::findFieldInScope( const String &name, ObjNameScope *inScope )
-{
-	ObjFieldMapEl *objDefMapEl = inScope->objFieldMap->find( name );
-	if ( objDefMapEl != 0 )
-		return objDefMapEl->value;
-	if ( inScope->parentScope != 0 )
-		return findFieldInScope( name, inScope->parentScope );
-	return 0;
-}
-
 ObjectField *ObjectDef::checkRedecl( const String &name )
 {
 	//cout << "looking for " << name << endl;
@@ -300,15 +289,6 @@ ObjectField *ObjectDef::findFieldNum( long offset )
 	return field->value;
 }
 
-ObjectField *ObjectDef::findField( const String &name )
-{
-	//cout << "looking for " << name << endl;
-	ObjectField *objField = findFieldInScope( name, scope );
-	if ( objField != 0 )
-		return objField;
-	return 0;
-}
- 
 ObjMethod *ObjectDef::findMethod( const String &name )
 {
 	ObjMethodMapEl *objMethodMapEl = objMethodMap->find( name );
@@ -2245,7 +2225,7 @@ void LangStmt::compileForIterBody( Compiler *pd,
 void LangStmt::chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const
 {
 	/* The iterator name. */
-	LangVarRef *callVarRef = LangVarRef::cons( loc, "triter" );
+	LangVarRef *callVarRef = LangVarRef::cons( loc, pd->curLocalFrame->scope, "triter" );
 
 	/* The parameters. */
 	CallArgVect *callExprVect = new CallArgVect;
