@@ -542,7 +542,8 @@ void LangVarRef::loadObj( Compiler *pd, CodeVect &code,
 
 
 void LangVarRef::setFieldInstr( Compiler *pd, CodeVect &code, 
-		ObjectDef *inObject, ObjectField *el, UniqueType *exprUT, bool revert ) const
+		ObjectDef *inObject, ObjectField *el,
+		UniqueType *exprUT, bool revert ) const
 {
 	/* Ensure that the field is referenced. */
 	inObject->referenceField( pd, el );
@@ -594,10 +595,11 @@ bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT,
 	return false;
 }
 
-void LangVarRef::setField( Compiler *pd, CodeVect &code, 
-		ObjectDef *inObject, UniqueType *exprUT, bool revert ) const
+void LangVarRef::setField( Compiler *pd, CodeVect &code,
+		ObjectDef *inObject, ObjNameScope *inScope,
+		UniqueType *exprUT, bool revert ) const
 {
-	ObjectField *el = inObject->curScope->findField( name );
+	ObjectField *el = inScope->findField( name );
 	if ( el == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
@@ -605,9 +607,10 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 }
 
 void LangVarRef::setFieldIter( Compiler *pd, CodeVect &code, 
-		ObjectDef *inObject, UniqueType *objUT, UniqueType *exprType, bool revert ) const
+		ObjectDef *inObject, ObjNameScope *inScope, UniqueType *objUT,
+		UniqueType *exprType, bool revert ) const
 {
-	ObjectField *el = inObject->curScope->findField( name );
+	ObjectField *el = inScope->findField( name );
 	if ( el == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
@@ -1011,7 +1014,7 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 			VarRefLookup lookup = item->varRef->lookupField( pd );
 
 			item->varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-			item->varRef->setField( pd, code, lookup.inObject, exprType, false );
+			item->varRef->setField( pd, code, lookup.inObject, lookup.inObject->curScope, exprType, false );
 		}
 	}
 
@@ -1123,7 +1126,7 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 		VarRefLookup lookup = varRef->lookupField( pd );
 
 		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-		varRef->setField( pd, code, lookup.inObject, replUT, false );
+		varRef->setField( pd, code, lookup.inObject, lookup.inObject->curScope, replUT, false );
 	}
 
 	return replUT;
@@ -1322,7 +1325,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 		VarRefLookup lookup = varRef->lookupField( pd );
 
 		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-		varRef->setField( pd, code, lookup.inObject, targetUT, false );
+		varRef->setField( pd, code, lookup.inObject, lookup.inObject->curScope, targetUT, false );
 	}
 
 	return targetUT;
@@ -1858,9 +1861,9 @@ void LangVarRef::assignValue( Compiler *pd, CodeVect &code,
 	loadObj( pd, code, lookup.lastPtrInQual, true );
 
 	if ( lookup.uniqueType->typeId == TYPE_ITER )
-		setFieldIter( pd, code, lookup.inObject, lookup.uniqueType, exprUT, false );
+		setFieldIter( pd, code, lookup.inObject, lookup.inObject->curScope, lookup.uniqueType, exprUT, false );
 	else
-		setField( pd, code, lookup.inObject, exprUT, revert );
+		setField( pd, code, lookup.inObject, lookup.inObject->curScope, exprUT, revert );
 }
 
 UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
