@@ -2567,7 +2567,7 @@ struct LangVarRef
 	ObjectField *evaluateRef( Compiler *pd, CodeVect &code, long pushCount ) const;
 	ObjectField *preEvaluateRef( Compiler *pd, CodeVect &code ) const;
 	void resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjectField **paramRefs ) const;
-	long loadQualificationRefs( Compiler *pd, CodeVect &code ) const;
+	long loadQualificationRefs( Compiler *pd, CodeVect &code, ObjNameScope *rootScope ) const;
 	void popRefQuals( Compiler *pd, CodeVect &code, 
 			VarRefLookup &lookup, CallArgVect *args ) const;
 

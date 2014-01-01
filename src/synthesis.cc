@@ -352,17 +352,16 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 }
 
 /* The qualification must start at a local frame. There cannot be any pointer. */
-long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code ) const
+long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code, ObjNameScope *rootScope ) const
 {
 	long count = 0;
-	ObjectDef *rootObj = pd->curLocalFrame;
 
 	/* Start the search from the root object. */
-	ObjectDef *searchObjDef = rootObj;
+	ObjNameScope *searchScope = rootScope;
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field in the current qualification. */
-		ObjectField *el = searchObjDef->curScope->findField( qi->data );
+		ObjectField *el = searchScope->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -390,7 +389,9 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code ) const
 		
 		assert( qi->form == QualItem::Dot );
 
-		searchObjDef = objDefFromUT( pd, elUT );
+		ObjectDef *searchObjDef = objDefFromUT( pd, elUT );
+		searchScope = searchObjDef->rootScope;
+
 		count += 1;
 	}
 	return count;
@@ -666,7 +667,7 @@ ObjectField *LangVarRef::preEvaluateRef( Compiler *pd, CodeVect &code ) const
 
 	canTakeRef( pd, lookup );
 
-	loadQualificationRefs( pd, code );
+	loadQualificationRefs( pd, code, pd->curLocalFrame->curScope );
 
 	return lookup.objField;
 }
