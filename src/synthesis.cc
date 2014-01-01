@@ -389,7 +389,7 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code, ObjNameSco
 		
 		assert( qi->form == QualItem::Dot );
 
-		ObjectDef *searchObjDef = objDefFromUT( pd, elUT );
+		ObjectDef *searchObjDef = elUT->objectDef();
 		searchScope = searchObjDef->rootScope;
 
 		count += 1;
@@ -463,7 +463,7 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 			}
 		}
 
-		ObjectDef *searchObjDef = objDefFromUT( pd, qualUT );
+		ObjectDef *searchObjDef = qualUT->objectDef();
 		searchScope = searchObjDef->rootScope;
 	}
 }
@@ -531,11 +531,11 @@ void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code,
 void LangVarRef::loadObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
-	if ( isCustom( pd ) )
+	if ( isCustom() )
 		loadCustom( pd, code, lastPtrInQual, forWriting );
-	else if ( isLocalRef( pd ) )
+	else if ( isLocalRef() )
 		loadLocalObj( pd, code, lastPtrInQual, forWriting );
-	else if ( isContextRef( pd ) )
+	else if ( isContextRef() )
 		loadContextObj( pd, code, lastPtrInQual, forWriting );
 	else
 		loadGlobalObj( pd, code, lastPtrInQual, forWriting );
@@ -628,7 +628,7 @@ bool LangVarRef::canTakeRefTest( Compiler *pd, VarRefLookup &lookup ) const
 	 * via a local and attributes. */
 	if ( lookup.inObject->type == ObjectDef::FrameType )
 		canTake = true;
-	else if ( isLocalRef(pd) && lookup.lastPtrInQual < 0 && lookup.uniqueType->typeId != TYPE_PTR ) 
+	else if ( isLocalRef() && lookup.lastPtrInQual < 0 && lookup.uniqueType->typeId != TYPE_PTR ) 
 		canTake = true;
 
 	return canTake;
@@ -844,7 +844,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 
 	/* Check if we need to revert the function. If it operates on a reference
 	 * or if it is not local then we need to revert it. */
-	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef(pd) || isCustom(pd);
+	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef() || isCustom();
 	
 	/* The call instruction. */
 	if ( pd->revertOn && revert )  {
@@ -1033,7 +1033,7 @@ void LangTerm::assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT
 	 * reverse because the last expression evaluated is at the top of the
 	 * stack. */
 	if ( fieldInitArgs != 0 && fieldInitArgs->length() > 0 ) {
-		ObjectDef *objDef = objDefFromUT( pd, replUT );
+		ObjectDef *objDef = replUT->objectDef();
 		/* Note the reverse traversal. */
 		for ( FieldInitVect::Iter pi = fieldInitArgs->last(); pi.gtb(); pi-- ) {
 			FieldInit *fieldInit = *pi;
@@ -1842,7 +1842,7 @@ void LangVarRef::assignValue( Compiler *pd, CodeVect &code,
 		error(loc) << "type mismatch in assignment" << endp;
 	
 	/* Decide if we need to revert the assignment. */
-	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef(pd);
+	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef();
 
 	/* Load the object and generate the field setting code. */
 	loadObj( pd, code, lookup.lastPtrInQual, true );

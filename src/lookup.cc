@@ -29,16 +29,14 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-ObjectDef *objDefFromUT( Compiler *pd, UniqueType *ut )
+ObjectDef *UniqueType::objectDef()
 {
-	ObjectDef *objDef = 0;
-	if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_REF )
-		objDef = ut->langEl->objectDef;
-	else {
+	if ( typeId != TYPE_TREE && typeId != TYPE_REF ) {
 		/* This should have generated a compiler error. */
 		assert(false);
 	}
-	return objDef;
+
+	return langEl->objectDef;
 }
 
 /* Recurisve find through a single object def's scope. */
@@ -106,14 +104,14 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjNameScope *rootSc
 				qualUT = pd->findUniqueType( TYPE_TREE, qualUT->langEl );
 		}
 
-		ObjectDef *searchObjDef = objDefFromUT( pd, qualUT );
+		ObjectDef *searchObjDef = qualUT->objectDef();
 		searchScope = searchObjDef->rootScope;
 	}
 
 	return VarRefLookup( lastPtrInQual, firstConstPart, searchScope->owner, searchScope );
 }
 
-bool LangVarRef::isLocalRef( Compiler *pd ) const
+bool LangVarRef::isLocalRef() const
 {
 	if ( qual->length() > 0 ) {
 		if ( scope->findField( qual->data[0].data ) != 0 )
@@ -127,7 +125,7 @@ bool LangVarRef::isLocalRef( Compiler *pd ) const
 	return false;
 }
 
-bool LangVarRef::isContextRef( Compiler *pd ) const
+bool LangVarRef::isContextRef() const
 {
 	if ( context != 0 ) {
 		if ( qual->length() > 0 ) {
@@ -143,7 +141,7 @@ bool LangVarRef::isContextRef( Compiler *pd ) const
 	return false;
 }
 
-bool LangVarRef::isCustom( Compiler *pd ) const
+bool LangVarRef::isCustom() const
 {
 	if ( qual->length() > 0 ) {
 		ObjectField *field = scope->findField( qual->data[0].data );
@@ -169,9 +167,9 @@ bool LangVarRef::isCustom( Compiler *pd ) const
 VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 {
 	ObjNameScope *rootScope;
-	if ( isLocalRef( pd ) )
+	if ( isLocalRef() )
 		rootScope = scope;
-	else if ( isContextRef( pd ) )
+	else if ( isContextRef() )
 		rootScope = context->contextObjDef->rootScope;
 	else
 		rootScope = pd->globalObjectDef->rootScope;

@@ -1848,9 +1848,10 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 	int typeId;
 	LangEl *langEl;
 	IterDef *iterDef;
+
+	ObjectDef *objectDef();
 };
 
-ObjectDef *objDefFromUT( Compiler *pd, UniqueType *ut );
 
 struct CmpUniqueType
 {
@@ -2530,9 +2531,9 @@ struct LangVarRef
 	VarRefLookup lookupQualification( Compiler *pd, ObjNameScope *rootScope ) const;
 	VarRefLookup lookupObj( Compiler *pd ) const;
 
-	bool isCustom( Compiler *pd ) const;
-	bool isLocalRef( Compiler *pd ) const;
-	bool isContextRef( Compiler *pd ) const;
+	bool isCustom() const;
+	bool isLocalRef() const;
+	bool isContextRef() const;
 	void loadQualification( Compiler *pd, CodeVect &code, ObjNameScope *rootScope, 
 			int lastPtrInQual, bool forWriting, bool revert ) const;
 	void loadCustom( Compiler *pd, CodeVect &code, 
