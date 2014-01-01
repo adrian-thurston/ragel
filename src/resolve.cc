@@ -477,8 +477,6 @@ void LangStmt::resolve( Compiler *pd ) const
 			break;
 		}
 		case IfType: {
-			pd->curLocalFrame->iterPushScope();
-
 			/* Evaluate the test. */
 			expr->resolve( pd );
 
@@ -486,33 +484,24 @@ void LangStmt::resolve( Compiler *pd ) const
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 				stmt->resolve( pd );
 
-			pd->curLocalFrame->iterPopScope();
-
 			if ( elsePart != 0 )
 				elsePart->resolve( pd );
 
 			break;
 		}
 		case ElseType: {
-			pd->curLocalFrame->iterPushScope();
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 				stmt->resolve( pd );
-
-			pd->curLocalFrame->iterPopScope();
 			break;
 		}
 		case RejectType:
 			break;
 		case WhileType: {
-			pd->curLocalFrame->iterPushScope();
-
 			expr->resolve( pd );
 
 			/* Compute the while block. */
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 				stmt->resolve( pd );
-
-			pd->curLocalFrame->iterPopScope();
 			break;
 		}
 		case AssignType: {
@@ -521,8 +510,6 @@ void LangStmt::resolve( Compiler *pd ) const
 			break;
 		}
 		case ForIterType: {
-			pd->curLocalFrame->iterPushScope();
-
 			typeRef->lookupType( pd );
 
 			/* Evaluate and push the arguments. */
@@ -531,8 +518,6 @@ void LangStmt::resolve( Compiler *pd ) const
 			/* Compile the contents. */
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 				stmt->resolve( pd );
-
-			pd->curLocalFrame->iterPopScope();
 			break;
 		}
 		case ReturnType: {
@@ -573,8 +558,6 @@ void CodeBlock::resolve( Compiler *pd ) const
 
 void Compiler::resolveFunction( Function *func )
 {
-	curLocalFrame = func->codeBlock->localFrame;
-
 	if ( func->typeRef != 0 ) 
 		func->typeRef->lookupType( this );
 
@@ -588,14 +571,11 @@ void Compiler::resolveFunction( Function *func )
 void Compiler::resolvePreEof( TokenRegion *region )
 {
 	CodeBlock *block = region->preEofBlock;
-	curLocalFrame = block->localFrame;
 	block->resolve( this );
 }
 
 void Compiler::resolveRootBlock()
 {
-	curLocalFrame = rootLocalFrame;
-
 	rootLocalFrame->resolve( this );
 
 	CodeBlock *block = rootCodeBlock;
@@ -605,14 +585,12 @@ void Compiler::resolveRootBlock()
 void Compiler::resolveTranslateBlock( LangEl *langEl )
 {
 	CodeBlock *block = langEl->transBlock;
-	curLocalFrame = block->localFrame;
 	block->resolve( this );
 }
 
 void Compiler::resolveReductionCode( Production *prod )
 {
 	CodeBlock *block = prod->redBlock;
-	curLocalFrame = block->localFrame;
 	block->resolve( this );
 }
 

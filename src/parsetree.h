@@ -2409,8 +2409,6 @@ struct ObjectDef
 
 	void pushScope();
 	void popScope();
-	void iterPushScope();
-	void iterPopScope();
 
 	long id;
 	long nextOffset;

@@ -24,33 +24,19 @@
 #include <iostream>
 #include <assert.h>
 
+ObjectField *ObjectDef::checkRedecl( const String &name )
+{
+	ObjFieldMapEl *objDefMapEl = curScope->objFieldMap->find( name );
+	if ( objDefMapEl != 0 )
+		return objDefMapEl->value;
+	return 0;
+}
+
 void ObjectDef::insertField( const String &name, ObjectField *value )
 {
 	curScope->objFieldMap->insert( name, value );
 	objFieldList->append( value );
 	value->scope = curScope;
-}
-
-void ObjectDef::iterPushScope()
-{
-	//cout << "iter push scope ";
-	if ( curScope->childIter == 0 ) {
-		curScope->childIter = curScope->children.head;
-	}
-	else {
-		curScope->childIter = curScope->childIter->next;
-		/* Resetting. */
-		if ( curScope->childIter == 0 )
-			curScope ->childIter = curScope->children.head;
-	}
-
-	curScope = curScope->childIter;
-}
-
-void ObjectDef::iterPopScope()
-{
-	//cout << "iter pop scope" << endl;
-	curScope = curScope->parentScope;
 }
 
 void ObjectDef::pushScope()
@@ -70,15 +56,6 @@ void ObjectDef::popScope()
 	curScope = curScope->parentScope;
 }
 
-
-ObjectField *ObjectDef::checkRedecl( const String &name )
-{
-	//cout << "looking for " << name << endl;
-	ObjFieldMapEl *objDefMapEl = curScope->objFieldMap->find( name );
-	if ( objDefMapEl != 0 )
-		return objDefMapEl->value;
-	return 0;
-}
 
 void LexJoin::varDecl( Compiler *pd, TokenDef *tokenDef )
 {

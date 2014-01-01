@@ -1993,8 +1993,6 @@ void LangStmt::chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const
 
 void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 {
-	pd->curLocalFrame->iterPushScope();
-
 	if ( iterCall->type != LangIterCall::IterCall )
 		chooseDefaultIter( pd, iterCall );
 
@@ -2058,14 +2056,10 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 
 	iterCall->langTerm->varRef->resetActiveRefs( pd, lookup, paramRefs );
 	delete[] paramRefs;
-
-	pd->curLocalFrame->iterPopScope();
 }
 
 void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
 {
-	pd->curLocalFrame->iterPushScope();
-
 	/* Generate code for the while test. Remember the top. */
 	long top = code.length();
 	expr->evaluate( pd, code );
@@ -2095,8 +2089,6 @@ void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
 		code.setHalf( *brk+1, distance );
 	}
 	pd->breakJumps.empty();
-
-	pd->curLocalFrame->iterPopScope();
 }
 
 void LangStmt::compile( Compiler *pd, CodeVect &code ) const
@@ -2142,8 +2134,6 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 		case IfType: {
-			pd->curLocalFrame->iterPushScope();
-
 			long jumpFalse = 0, jumpPastElse = 0, distance = 0;
 
 			/* Evaluate the test. */
@@ -2170,8 +2160,6 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			distance = code.length() - jumpFalse - 3;
 			code.setHalf( jumpFalse+1, distance );
 
-			pd->curLocalFrame->iterPopScope();
-
 			if ( elsePart != 0 ) {
 				/* Compile the else branch. */
 				elsePart->compile( pd, code );
@@ -2184,13 +2172,9 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 		case ElseType: {
-			pd->curLocalFrame->iterPushScope();
-
 			/* Compile the else branch. */
 			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 				stmt->compile( pd, code );
-
-			pd->curLocalFrame->iterPopScope();
 			break;
 		}
 		case RejectType: {
