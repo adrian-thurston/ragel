@@ -488,7 +488,7 @@ void LangVarRef::loadContextObj( Compiler *pd, CodeVect &code,
 		code.append( IN_LOAD_CONTEXT_R );
 	}
 
-	loadQualification( pd, code, rootObj->curScope, lastPtrInQual, forWriting, true );
+	loadQualification( pd, code, rootObj->rootScope, lastPtrInQual, forWriting, true );
 }
 
 void LangVarRef::loadGlobalObj( Compiler *pd, CodeVect &code, 
@@ -511,21 +511,21 @@ void LangVarRef::loadGlobalObj( Compiler *pd, CodeVect &code,
 		code.append( IN_LOAD_GLOBAL_R );
 	}
 
-	loadQualification( pd, code, rootObj->curScope, lastPtrInQual, forWriting, true );
+	loadQualification( pd, code, rootObj->rootScope, lastPtrInQual, forWriting, true );
 }
 
 void LangVarRef::loadCustom( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the local frame. */
-	loadQualification( pd, code, pd->curLocalFrame->curScope, lastPtrInQual, forWriting, pd->revertOn );
+	loadQualification( pd, code, scope, lastPtrInQual, forWriting, pd->revertOn );
 }
 
 void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the local frame. */
-	loadQualification( pd, code, pd->curLocalFrame->curScope, lastPtrInQual, forWriting, false );
+	loadQualification( pd, code, scope, lastPtrInQual, forWriting, false );
 }
 
 void LangVarRef::loadObj( Compiler *pd, CodeVect &code, 
@@ -667,7 +667,7 @@ ObjectField *LangVarRef::preEvaluateRef( Compiler *pd, CodeVect &code ) const
 
 	canTakeRef( pd, lookup );
 
-	loadQualificationRefs( pd, code, pd->curLocalFrame->curScope );
+	loadQualificationRefs( pd, code, scope );
 
 	return lookup.objField;
 }
