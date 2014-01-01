@@ -397,14 +397,14 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code ) const
 }
 
 void LangVarRef::loadQualification( Compiler *pd, CodeVect &code, 
-		ObjectDef *rootObj, int lastPtrInQual, bool forWriting, bool revert ) const
+		ObjNameScope *rootScope, int lastPtrInQual, bool forWriting, bool revert ) const
 {
 	/* Start the search from the root object. */
-	ObjectDef *searchObjDef = rootObj;
+	ObjNameScope *searchScope = rootScope;
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
-		ObjectField *el = searchObjDef->curScope->findField( qi->data );
+		ObjectField *el = searchScope->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -431,7 +431,7 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 			}
 		}
 
-		UniqueType *qualUT = loadFieldInstr( pd, code, searchObjDef, 
+		UniqueType *qualUT = loadFieldInstr( pd, code, searchScope->owner, 
 				el, lfForWriting, lfRevert );
 		
 		if ( qi->form == QualItem::Dot ) {
@@ -462,7 +462,8 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 			}
 		}
 
-		searchObjDef = objDefFromUT( pd, qualUT );
+		ObjectDef *searchObjDef = objDefFromUT( pd, qualUT );
+		searchScope = searchObjDef->rootScope;
 	}
 }
 
@@ -486,7 +487,7 @@ void LangVarRef::loadContextObj( Compiler *pd, CodeVect &code,
 		code.append( IN_LOAD_CONTEXT_R );
 	}
 
-	loadQualification( pd, code, rootObj, lastPtrInQual, forWriting, true );
+	loadQualification( pd, code, rootObj->curScope, lastPtrInQual, forWriting, true );
 }
 
 void LangVarRef::loadGlobalObj( Compiler *pd, CodeVect &code, 
@@ -509,21 +510,21 @@ void LangVarRef::loadGlobalObj( Compiler *pd, CodeVect &code,
 		code.append( IN_LOAD_GLOBAL_R );
 	}
 
-	loadQualification( pd, code, rootObj, lastPtrInQual, forWriting, true );
+	loadQualification( pd, code, rootObj->curScope, lastPtrInQual, forWriting, true );
 }
 
 void LangVarRef::loadCustom( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the local frame. */
-	loadQualification( pd, code, pd->curLocalFrame, lastPtrInQual, forWriting, pd->revertOn );
+	loadQualification( pd, code, pd->curLocalFrame->curScope, lastPtrInQual, forWriting, pd->revertOn );
 }
 
 void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the local frame. */
-	loadQualification( pd, code, pd->curLocalFrame, lastPtrInQual, forWriting, false );
+	loadQualification( pd, code, pd->curLocalFrame->curScope, lastPtrInQual, forWriting, false );
 }
 
 void LangVarRef::loadObj( Compiler *pd, CodeVect &code, 

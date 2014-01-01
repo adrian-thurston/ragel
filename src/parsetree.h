@@ -2533,13 +2533,13 @@ struct LangVarRef
 	VarRefLookup lookupMethod( Compiler *pd ) const;
 	VarRefLookup lookupField( Compiler *pd ) const;
 
-	VarRefLookup lookupQualification( Compiler *pd, ObjectDef *rootDef ) const;
+	VarRefLookup lookupQualification( Compiler *pd, ObjNameScope *rootScope ) const;
 	VarRefLookup lookupObj( Compiler *pd ) const;
 
 	bool isCustom( Compiler *pd ) const;
 	bool isLocalRef( Compiler *pd ) const;
 	bool isContextRef( Compiler *pd ) const;
-	void loadQualification( Compiler *pd, CodeVect &code, ObjectDef *rootObj, 
+	void loadQualification( Compiler *pd, CodeVect &code, ObjNameScope *rootScope, 
 			int lastPtrInQual, bool forWriting, bool revert ) const;
 	void loadCustom( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;

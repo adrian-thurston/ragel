@@ -65,15 +65,15 @@ ObjMethod *ObjectDef::findMethod( const String &name ) const
 	return 0;
 }
 
-VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjectDef *rootDef ) const
+VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjNameScope *rootScope ) const
 {
 	int lastPtrInQual = -1;
-	ObjectDef *searchObjDef = rootDef;
+	ObjNameScope *searchScope = rootScope;
 	int firstConstPart = -1;
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
-		ObjectField *el = searchObjDef->curScope->findField( qi->data );
+		ObjectField *el = searchScope->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -106,10 +106,11 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjectDef *rootDef )
 				qualUT = pd->findUniqueType( TYPE_TREE, qualUT->langEl );
 		}
 
-		searchObjDef = objDefFromUT( pd, qualUT );
+		ObjectDef *searchObjDef = objDefFromUT( pd, qualUT );
+		searchScope = searchObjDef->rootScope;
 	}
 
-	return VarRefLookup( lastPtrInQual, firstConstPart, searchObjDef );
+	return VarRefLookup( lastPtrInQual, firstConstPart, searchScope->owner );
 }
 
 bool LangVarRef::isLocalRef( Compiler *pd ) const
@@ -177,7 +178,7 @@ VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 	else
 		rootDef = pd->globalObjectDef;
 
-	return lookupQualification( pd, rootDef );
+	return lookupQualification( pd, rootDef->curScope );
 }
 
 VarRefLookup LangVarRef::lookupField( Compiler *pd ) const
