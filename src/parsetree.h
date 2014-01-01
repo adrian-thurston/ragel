@@ -2525,10 +2525,8 @@ struct LangVarRef
 	void resolve( Compiler *pd ) const;
 	UniqueType *lookup( Compiler *pd ) const;
 
-	UniqueType *loadFieldInstr( Compiler *pd, CodeVect &code, ObjectDef *inObject,
+	UniqueType *loadField( Compiler *pd, CodeVect &code, ObjectDef *inObject,
 			ObjectField *el, bool forWriting, bool revert ) const;
-	void setFieldInstr( Compiler *pd, CodeVect &code, ObjectDef *inObject,
-			ObjectField *el, UniqueType *exprUT, bool revert ) const;
 
 	VarRefLookup lookupMethod( Compiler *pd ) const;
 	VarRefLookup lookupField( Compiler *pd ) const;
@@ -2553,12 +2551,12 @@ struct LangVarRef
 	bool canTakeRefTest( Compiler *pd, VarRefLookup &lookup ) const;
 
 	void setFieldIter( Compiler *pd, CodeVect &code, ObjectDef *inObject,
-			ObjNameScope *inScope, UniqueType *objUT, UniqueType *exprType,
+			ObjectField *objField, UniqueType *objUT, UniqueType *exprType,
 			bool revert ) const;
 	void setFieldSearch( Compiler *pd, CodeVect &code, 
 			ObjectDef *inObject, UniqueType *exprType ) const;
 	void setField( Compiler *pd, CodeVect &code, ObjectDef *inObject,
-			ObjNameScope *inScope, UniqueType *type, bool revert ) const;
+			ObjectField *el, UniqueType *exprUT, bool revert ) const;
 
 	void assignValue( Compiler *pd, CodeVect &code, UniqueType *exprUT ) const;
 	ObjectField **evaluateArgs( Compiler *pd, CodeVect &code, 
