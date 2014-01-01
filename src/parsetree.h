@@ -2502,24 +2502,20 @@ typedef Vector<QualItem> QualItemVect;
 
 struct LangVarRef
 {
-	LangVarRef()
-	:
-		qual(0)
-	{}
-	
-	static LangVarRef *cons( const InputLoc &loc, ObjNameScope *scope, QualItemVect *qual, const String &name )
+	static LangVarRef *cons( const InputLoc &loc, Context *context, ObjNameScope *scope, QualItemVect *qual, const String &name )
 	{
 		LangVarRef *l = new LangVarRef;
 		l->loc = loc;
+		l->context = context;
 		l->scope = scope;
 		l->qual = qual;
 		l->name = name;
 		return l;
 	}
 
-	static LangVarRef *cons( const InputLoc &loc, ObjNameScope *scope, const String &name )
+	static LangVarRef *cons( const InputLoc &loc, Context *context, ObjNameScope *scope, const String &name )
 	{
-		return cons( loc, scope, new QualItemVect, name );
+		return cons( loc, context, scope, new QualItemVect, name );
 	}
 
 	void resolve( Compiler *pd ) const;
@@ -2572,6 +2568,7 @@ struct LangVarRef
 			VarRefLookup &lookup, CallArgVect *args ) const;
 
 	InputLoc loc;
+	Context *context;
 	ObjNameScope *scope;
 	QualItemVect *qual;
 	String name;
@@ -2926,6 +2923,7 @@ struct LangStmt
 		stmtList(0),
 		elsePart(0),
 		iterCall(0),
+		context(0),
 		scope(0),
 
 		/* Normally you don't need to initialize double list pointers, however,
@@ -3047,7 +3045,8 @@ struct LangStmt
 	}
 
 	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField,
-			TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList, ObjNameScope *scope )
+			TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList,
+			Context *context, ObjNameScope *scope )
 	{
 		LangStmt *s = new LangStmt;
 		s->loc = loc;
@@ -3056,6 +3055,7 @@ struct LangStmt
 		s->typeRef = typeRef;
 		s->iterCall = iterCall;
 		s->stmtList = stmtList;
+		s->context = context;
 		s->scope = scope;
 		return s;
 	}
@@ -3093,6 +3093,7 @@ struct LangStmt
 	LangStmt *elsePart;
 	String name;
 	LangIterCall *iterCall;
+	Context *context;
 	ObjNameScope *scope;
 
 	/* Normally you don't need to initialize double list pointers, however, we

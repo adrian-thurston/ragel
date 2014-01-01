@@ -472,7 +472,7 @@ void LangVarRef::loadContextObj( Compiler *pd, CodeVect &code,
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the global object. */
-	ObjectDef *rootObj = pd->context->contextObjDef;
+	ObjectDef *rootObj = context->contextObjDef;
 
 	if ( forWriting && lastPtrInQual < 0 ) {
 		/* If we are writing an no reference was found in the qualification
@@ -1981,7 +1981,7 @@ void LangStmt::compileForIterBody( Compiler *pd,
 void LangStmt::chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const
 {
 	/* The iterator name. */
-	LangVarRef *callVarRef = LangVarRef::cons( loc, scope, "triter" );
+	LangVarRef *callVarRef = LangVarRef::cons( loc, context, scope, "triter" );
 
 	/* The parameters. */
 	CallArgVect *callExprVect = new CallArgVect;
@@ -3303,44 +3303,29 @@ void Compiler::compileByteCode()
 
 	/* Compile functions. */
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ ) {
-		if ( f->inContext != 0 )
-			context = f->inContext;
 		if ( f->isUserIter )
 			compileUserIter( f );
 		else
 			compileFunction( f );
-		context = 0;
 	}
 
 	/* Compile the reduction code. */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
 		makeProdCopies( prod );
-		if ( prod->redBlock != 0 ) {
-			if ( prod->redBlock->context != 0 )
-				context = prod->redBlock->context;
+		if ( prod->redBlock != 0 )
 			compileReductionCode( prod );
-			context = 0;
-		}
 	}
 
 	/* Compile the token translation code. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->transBlock != 0 ) {
-			if ( lel->transBlock->context != 0 )
-				context = lel->transBlock->context;
+		if ( lel->transBlock != 0 )
 			compileTranslateBlock( lel );
-			context = 0;
-		}
 	}
 
 	/* Compile preeof blocks. */
 	for ( RegionList::Iter r = regionList; r.lte(); r++ ) {
-		if ( r->preEofBlock != 0 ) {
-			if ( r->preEofBlock->context != 0 )
-				context = r->preEofBlock->context;
+		if ( r->preEofBlock != 0 )
 			compilePreEof( r );
-			context = 0;
-		}
 	}
 
 	/* Compile the init code */

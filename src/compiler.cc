@@ -397,7 +397,6 @@ Compiler::Compiler( )
 	predValue(0),
 	nextMatchEndNum(0),
 	argvTypeRef(0),
-	context(0),
 	inContiguous(false),
 	contiguousOffset(0),
 	contiguousStretch(0)

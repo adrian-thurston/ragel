@@ -597,14 +597,8 @@ void Compiler::resolveReductionCode( Production *prod )
 void Compiler::resolveParseTree()
 {
 	/* Compile functions. */
-	for ( FunctionList::Iter f = functionList; f.lte(); f++ ) {
-		if ( f->inContext != 0 )
-			context = f->inContext;
-
+	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
 		resolveFunction( f );
-
-		context = 0;
-	}
 
 	/* Compile the reduction code. */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {

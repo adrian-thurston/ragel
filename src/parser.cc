@@ -376,11 +376,12 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 {
 	LangStmt *stmt = 0;
 
-	ObjectDef *object;
+	Context *context = 0;
+	ObjectDef *object = 0;
 	if ( contextStack.length() == 0 )
 		object = pd->globalObjectDef;
 	else {
-		Context *context = contextStack.top();
+		context = contextStack.top();
 		objField->context = context;
 		object = context->contextObjDef;
 	}
@@ -392,7 +393,7 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				pd->curLocalFrame->curScope, objField->name );
+				context, pd->curLocalFrame->curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, 
 				assignType, varRef, expr );
@@ -556,6 +557,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	LangExpr *expr = 0;
 
 	Namespace *nspace = namespaceStack.top();
+	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 	/* We are constructing a parser, sending it items, then returning it.
 	 * Thisis the constructor for the parser. */
@@ -569,7 +571,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				pd->curLocalFrame->curScope, objField->name );
+				context, pd->curLocalFrame->curScope, objField->name );
 	}
 
 	/* The typeref for the parser. */
@@ -667,6 +669,8 @@ ConsItemList *BaseParser::consListConcat( ConsItemList *list1,
 LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 		ObjNameScope *scope, TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList )
 {
+	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
+
 	/* Check for redeclaration. */
 	if ( pd->curLocalFrame->checkRedecl( data ) != 0 )
 		error( loc ) << "variable " << data << " redeclared" << endp;
@@ -678,7 +682,7 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 	pd->curLocalFrame->insertField( data, iterField );
 
 	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
-			iterField, typeRef, iterCall, stmtList, scope );
+			iterField, typeRef, iterCall, stmtList, context, scope );
 
 	return stmt;
 }
@@ -761,6 +765,8 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 		ConsItemList *list, TypeRef *typeRef, FieldInitVect *fieldInitVect )
 {
 	Namespace *nspace = namespaceStack.top();
+	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
+
 	Constructor *constructor = Constructor::cons( loc, nspace,
 			list, pd->nextPatConsId++ );
 	pd->replList.append( constructor );
@@ -768,7 +774,7 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				pd->curLocalFrame->curScope, objField->name );
+				context, pd->curLocalFrame->curScope, objField->name );
 	}
 
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( loc, LangTerm::ConstructType,
@@ -808,6 +814,7 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 		LangExpr *expr, LangStmt::Type assignType )
 {
 	LangStmt *stmt = 0;
+	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 	/* Check for redeclaration. */
 	if ( pd->curLocalFrame->checkRedecl( objField->name ) != 0 ) {
@@ -822,7 +829,7 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				pd->curLocalFrame->curScope, objField->name );
+				context, pd->curLocalFrame->curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
@@ -847,7 +854,7 @@ LangStmt *BaseParser::exportStmt( ObjectField *objField, LangStmt::Type assignTy
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc, 
-				pd->curLocalFrame->curScope, objField->name );
+				0, pd->curLocalFrame->curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}

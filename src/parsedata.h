@@ -971,8 +971,6 @@ struct Compiler
 
 	TypeRef *argvTypeRef;
 
-	Context *context;
-
 	bool inContiguous;
 	int contiguousOffset;
 	int contiguousStretch;

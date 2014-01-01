@@ -423,11 +423,13 @@ struct LoadColm
 
 	LangVarRef *walkOptLabel( opt_label optLabel )
 	{
+		Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
+
 		LangVarRef *varRef = 0;
 		if ( optLabel.prodName() == opt_label::_Id ) {
 			String id = optLabel.id().data();
 			varRef = LangVarRef::cons( optLabel.id().loc(),
-					pd->curLocalFrame->curScope, id );
+					context, pd->curLocalFrame->curScope, id );
 		}
 		return varRef;
 	}
@@ -1145,11 +1147,13 @@ struct LoadColm
 
 	LangVarRef *walkVarRef( var_ref varRef )
 	{
+		Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
+
 		qual Qual = varRef.qual();
 		QualItemVect *qualItemVect = walkQual( Qual );
 		String id = varRef.id().data();
 		LangVarRef *langVarRef = LangVarRef::cons( varRef.id().loc(),
-				pd->curLocalFrame->curScope, qualItemVect, id );
+				context, pd->curLocalFrame->curScope, qualItemVect, id );
 		return langVarRef;
 	}
 
@@ -1792,6 +1796,8 @@ struct LoadColm
 
 	LangIterCall *walkIterCall( iter_call IterCall )
 	{
+		Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
+
 		LangIterCall *iterCall = 0;
 		switch ( IterCall.prodName() ) {
 		case iter_call::_Call: {
@@ -1804,7 +1810,7 @@ struct LoadColm
 		case iter_call::_Id: {
 			String tree = IterCall.id().data();
 			LangVarRef *varRef = LangVarRef::cons( IterCall.id().loc(),
-					pd->curLocalFrame->curScope, tree );
+					context, pd->curLocalFrame->curScope, tree );
 			LangTerm *langTerm = LangTerm::cons( IterCall.id().loc(),
 					LangTerm::VarRefType, varRef );
 			LangExpr *langExpr = LangExpr::cons( langTerm );
