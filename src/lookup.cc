@@ -110,18 +110,18 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjNameScope *rootSc
 		searchScope = searchObjDef->rootScope;
 	}
 
-	return VarRefLookup( lastPtrInQual, firstConstPart, searchScope->owner );
+	return VarRefLookup( lastPtrInQual, firstConstPart, searchScope->owner, searchScope );
 }
 
 bool LangVarRef::isLocalRef( Compiler *pd ) const
 {
 	if ( qual->length() > 0 ) {
-		if ( pd->curLocalFrame->curScope->findField( qual->data[0].data ) != 0 )
+		if ( scope->findField( qual->data[0].data ) != 0 )
 			return true;
 	}
-	else if ( pd->curLocalFrame->curScope->findField( name ) != 0 )
+	else if ( scope->findField( name ) != 0 )
 		return true;
-	else if ( pd->curLocalFrame->findMethod( name ) != 0 )
+	else if ( scope->owner->findMethod( name ) != 0 )
 		return true;
 
 	return false;
@@ -131,10 +131,10 @@ bool LangVarRef::isContextRef( Compiler *pd ) const
 {
 	if ( pd->context != 0 ) {
 		if ( qual->length() > 0 ) {
-			if ( pd->context->contextObjDef->curScope->findField( qual->data[0].data ) != 0 )
+			if ( pd->context->contextObjDef->rootScope->findField( qual->data[0].data ) != 0 )
 				return true;
 		}
-		else if ( pd->context->contextObjDef->curScope->findField( name ) != 0 )
+		else if ( pd->context->contextObjDef->rootScope->findField( name ) != 0 )
 			return true;
 		else if ( pd->context->contextObjDef->findMethod( name ) != 0 )
 			return true;
@@ -146,18 +146,18 @@ bool LangVarRef::isContextRef( Compiler *pd ) const
 bool LangVarRef::isCustom( Compiler *pd ) const
 {
 	if ( qual->length() > 0 ) {
-		ObjectField *field = pd->curLocalFrame->curScope->findField( qual->data[0].data );
+		ObjectField *field = scope->findField( qual->data[0].data );
 		if ( field != 0 && field->isCustom )
 			return true;
 	}
 	else {
-		ObjectField *field = pd->curLocalFrame->curScope->findField( name );
+		ObjectField *field = scope->findField( name );
 		if ( field != 0 ) {
 			if ( field->isCustom )
 				return true;
 		}
 		else {
-			ObjMethod *method = pd->curLocalFrame->findMethod( name );
+			ObjMethod *method = scope->owner->findMethod( name );
 			if ( method != 0 && method->isCustom )
 				return true;
 		}
@@ -166,19 +166,17 @@ bool LangVarRef::isCustom( Compiler *pd ) const
 	return false;
 }
 
-
-
 VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 {
-	ObjectDef *rootDef;
+	ObjNameScope *rootScope;
 	if ( isLocalRef( pd ) )
-		rootDef = pd->curLocalFrame;
+		rootScope = scope;
 	else if ( isContextRef( pd ) )
-		rootDef = pd->context->contextObjDef;
+		rootScope = pd->context->contextObjDef->rootScope;
 	else
-		rootDef = pd->globalObjectDef;
+		rootScope = pd->globalObjectDef->rootScope;
 
-	return lookupQualification( pd, rootDef->curScope );
+	return lookupQualification( pd, rootScope );
 }
 
 VarRefLookup LangVarRef::lookupField( Compiler *pd ) const
@@ -187,7 +185,7 @@ VarRefLookup LangVarRef::lookupField( Compiler *pd ) const
 	VarRefLookup lookup = lookupObj( pd );
 
 	/* Lookup the field. */
-	ObjectField *field = lookup.inObject->curScope->findField( name );
+	ObjectField *field = lookup.inScope->findField( name );
 	if ( field == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 

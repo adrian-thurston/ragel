@@ -2467,10 +2467,11 @@ typedef Vector<FieldInit*> FieldInitVect;
 
 struct VarRefLookup
 {
-	VarRefLookup( int lastPtrInQual, int firstConstPart, ObjectDef *inObject ) :
+	VarRefLookup( int lastPtrInQual, int firstConstPart, ObjectDef *inObject, ObjNameScope *inScope ) :
 		lastPtrInQual(lastPtrInQual), 
 		firstConstPart(firstConstPart),
 		inObject(inObject),
+		inScope(inScope),
 		objField(0), 
 		objMethod(0), 
 		uniqueType(0),
@@ -2480,6 +2481,7 @@ struct VarRefLookup
 	int lastPtrInQual;
 	int firstConstPart;
 	ObjectDef *inObject;
+	ObjNameScope *inScope;
 	ObjectField *objField;
 	ObjMethod *objMethod;
 	UniqueType *uniqueType;
