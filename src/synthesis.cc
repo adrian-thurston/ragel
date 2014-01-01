@@ -1978,24 +1978,8 @@ void LangStmt::compileForIterBody( Compiler *pd,
 	/* Clean up any prepush args. */
 }
 
-void LangStmt::chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const
-{
-	/* The iterator name. */
-	LangVarRef *callVarRef = LangVarRef::cons( loc, context, scope, "triter" );
-
-	/* The parameters. */
-	CallArgVect *callExprVect = new CallArgVect;
-	callExprVect->append( new CallArg( iterCall->langExpr ) );
-	iterCall->langTerm = LangTerm::cons( InputLoc(), callVarRef, callExprVect );
-	iterCall->langExpr = 0;
-	iterCall->type = LangIterCall::IterCall;
-}
-
 void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 {
-	if ( iterCall->type != LangIterCall::IterCall )
-		chooseDefaultIter( pd, iterCall );
-
 	/* The type we are searching for. */
 	UniqueType *searchUT = typeRef->uniqueType;
 

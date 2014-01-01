@@ -3069,6 +3069,9 @@ struct LangStmt
 		return s;
 	}
 
+	void declareForIter( Compiler *pd ) const;
+
+	void declare( Compiler *pd ) const;
 	void resolve( Compiler *pd ) const;
 	void resolveParserItems( Compiler *pd ) const;
 
@@ -3119,8 +3122,9 @@ struct CodeBlock
 		return c;
 	}
 
-	void compile( Compiler *pd, CodeVect &code ) const;
+	void declare( Compiler *pd ) const;
 	void resolve( Compiler *pd ) const;
+	void compile( Compiler *pd, CodeVect &code ) const;
 
 	long frameId;
 	StmtList *stmtList;

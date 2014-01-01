@@ -777,6 +777,13 @@ struct Compiler
 	void resolveElementOf( ObjectDef *obj );
 	void makeFuncVisible( Function *func, bool isUserIter );
 
+	void declareFunction( Function *func );
+	void declareReductionCode( Production *prod );
+	void declareTranslateBlock( LangEl *langEl );
+	void declarePreEof( TokenRegion *region );
+	void declareRootBlock();
+	void declareByteCode();
+
 	void resolveFunction( Function *func );
 	void resolvePreEof( TokenRegion *region );
 	void resolveRootBlock();

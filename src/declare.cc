@@ -469,6 +469,134 @@ void Compiler::makeIgnoreCollectors()
 	}
 }
 
+void LangStmt::chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const
+{
+	/* The iterator name. */
+	LangVarRef *callVarRef = LangVarRef::cons( loc, context, scope, "triter" );
+
+	/* The parameters. */
+	CallArgVect *callExprVect = new CallArgVect;
+	callExprVect->append( new CallArg( iterCall->langExpr ) );
+	iterCall->langTerm = LangTerm::cons( InputLoc(), callVarRef, callExprVect );
+	iterCall->langExpr = 0;
+	iterCall->type = LangIterCall::IterCall;
+}
+
+
+void LangStmt::declareForIter( Compiler *pd ) const
+{
+	if ( iterCall->type != LangIterCall::IterCall )
+		chooseDefaultIter( pd, iterCall );
+}
+
+void LangStmt::declare( Compiler *pd ) const
+{
+	switch ( type ) {
+		case PrintType: 
+			break;
+		case PrintXMLACType:
+			break;
+		case PrintXMLType:
+			break;
+		case PrintStreamType:
+			break;
+		case ExprType:
+			break;
+		case IfType:
+			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
+				stmt->declare( pd );
+
+			if ( elsePart != 0 )
+				elsePart->declare( pd );
+			break;
+
+		case ElseType:
+			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
+				stmt->declare( pd );
+			break;
+		case RejectType:
+			break;
+		case WhileType:
+			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
+				stmt->declare( pd );
+			break;
+		case AssignType:
+			break;
+		case ForIterType:
+			declareForIter( pd );
+
+			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
+				stmt->declare( pd );
+			break;
+		case ReturnType:
+			break;
+		case BreakType:
+			break;
+		case YieldType:
+			break;
+	}
+}
+
+void CodeBlock::declare( Compiler *pd ) const
+{
+	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
+		stmt->declare( pd );
+}
+
+
+void Compiler::declareFunction( Function *func )
+{
+	CodeBlock *block = func->codeBlock;
+	block->declare( this );
+}
+
+void Compiler::declareReductionCode( Production *prod )
+{
+	CodeBlock *block = prod->redBlock;
+	block->declare( this );
+}
+
+void Compiler::declareTranslateBlock( LangEl *langEl )
+{
+	CodeBlock *block = langEl->transBlock;
+	block->declare( this );
+}
+
+void Compiler::declarePreEof( TokenRegion *region )
+{
+	CodeBlock *block = region->preEofBlock;
+	block->declare( this );
+}
+
+void Compiler::declareRootBlock()
+{
+	CodeBlock *block = rootCodeBlock;
+	block->declare( this );
+}
+
+void Compiler::declareByteCode()
+{
+	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
+		declareFunction( f );
+
+	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
+		if ( prod->redBlock != 0 )
+			declareReductionCode( prod );
+	}
+
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->transBlock != 0 )
+			declareTranslateBlock( lel );
+	}
+
+	for ( RegionList::Iter r = regionList; r.lte(); r++ ) {
+		if ( r->preEofBlock != 0 )
+			declarePreEof( r );
+	}
+
+	declareRootBlock( );
+}
+
 /*
  * Type Declaration Root.
  */
@@ -484,4 +612,6 @@ void Compiler::typeDeclaration()
 	/* Create the default scanner which will return single characters for us
 	 * when we have no other scanner */
 	setPrecedence();
+
+	declareByteCode();
 }
