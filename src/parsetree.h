@@ -2195,11 +2195,34 @@ typedef DList<ObjectField> ParameterList;
 
 struct ObjMethod
 {
+	ObjMethod( TypeRef *returnTypeRef, String name, 
+			int opcodeWV, int opcodeWC, int numParams, 
+			UniqueType **types, ParameterList *paramList, bool isConst )
+	: 
+		returnUT(0),
+		returnTypeRef(returnTypeRef),
+		returnTypeId(0),
+		name(name), 
+		opcodeWV(opcodeWV),
+		opcodeWC(opcodeWC), 
+		numParams(numParams),
+		paramList(paramList), 
+		isConst(isConst),
+		funcId(0), 
+		useFuncId(false),
+		useCallObj(true),
+		isCustom(false),
+		func(0), 
+		iterDef(0)
+	{
+	}
+
 	ObjMethod( UniqueType *returnUT, String name, 
 			int opcodeWV, int opcodeWC, int numParams, 
 			UniqueType **types, ParameterList *paramList, bool isConst )
 	: 
 		returnUT(returnUT),
+		returnTypeRef(0),
 		returnTypeId(0),
 		name(name), 
 		opcodeWV(opcodeWV),
@@ -2219,6 +2242,7 @@ struct ObjMethod
 	}
 
 	UniqueType *returnUT;
+	TypeRef *returnTypeRef;
 	long returnTypeId;
 	String name;
 	long opcodeWV;
@@ -3145,7 +3169,8 @@ struct Function
 	:
 		paramListSize(0),
 		paramUTs(0),
-		inContext(0)
+		inContext(0),
+		objMethod(0)
 	{}
 
 	static Function *cons( TypeRef *typeRef, const String &name, 
@@ -3177,6 +3202,7 @@ struct Function
 	UniqueType **paramUTs;
 	Context *inContext;
 	bool exprt;
+	ObjMethod *objMethod;
 
 	Function *prev, *next;
 };

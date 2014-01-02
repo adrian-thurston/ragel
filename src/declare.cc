@@ -604,6 +604,9 @@ void Compiler::typeDeclaration()
 {
 	makeIgnoreCollectors();
 
+	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
+		makeFuncVisible1( f, f->isUserIter );
+
 	rootNamespace->declare( this );
 
 	/* Fill any empty scanners with a default token. */

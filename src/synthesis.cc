@@ -2902,7 +2902,28 @@ void Compiler::initGenericTypes()
 	}
 }
 
-void Compiler::makeFuncVisible( Function *func, bool isUserIter )
+void Compiler::makeFuncVisible1( Function *func, bool isUserIter )
+{
+	/* Insert the function into the global function map. */
+	ObjMethod *objMethod = new ObjMethod( func->typeRef, func->name, 
+			IN_CALL_WV, IN_CALL_WC, 
+			func->paramList->length(), 0, func->paramList, false );
+	objMethod->funcId = func->funcId;
+	objMethod->useFuncId = true;
+	objMethod->useCallObj = false;
+	objMethod->func = func;
+
+	if ( isUserIter ) {
+		IterDef *uiter = findIterDef( IterDef::User, func );
+		objMethod->iterDef = uiter;
+	}
+
+	globalObjectDef->objMethodMap->insert( func->name, objMethod );
+
+	func->objMethod = objMethod;
+}
+
+void Compiler::makeFuncVisible2( Function *func, bool isUserIter )
 {
 	func->localFrame = func->codeBlock->localFrame;
 
@@ -2951,23 +2972,15 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 	func->paramListSize = paramListSize;
 	func->paramUTs = paramUTs;
 
+	func->objMethod->paramUTs = paramUTs;
+
 	/* Insert the function into the global function map. */
 	UniqueType *returnUT = func->typeRef != 0 ? 
 			func->typeRef->uniqueType : uniqueTypeInt;
-	ObjMethod *objMethod = new ObjMethod( returnUT, func->name, 
-			IN_CALL_WV, IN_CALL_WC, 
-			func->paramList->length(), paramUTs, func->paramList, false );
-	objMethod->funcId = func->funcId;
-	objMethod->useFuncId = true;
-	objMethod->useCallObj = false;
-	objMethod->func = func;
+	func->objMethod->returnUT = returnUT;
 
-	if ( isUserIter ) {
-		IterDef *uiter = findIterDef( IterDef::User, func );
-		objMethod->iterDef = uiter;
-	}
-
-	globalObjectDef->objMethodMap->insert( func->name, objMethod );
+	func->objMethod->paramUTs = new UniqueType*[func->paramList->length()];
+	memcpy( func->objMethod->paramUTs, paramUTs, sizeof(UniqueType*) * func->paramList->length() );
 }
 
 void Compiler::compileUserIter( Function *func, CodeVect &code )
@@ -3280,7 +3293,7 @@ void Compiler::compileByteCode()
 	initGlobalFunctions();
 
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
-		makeFuncVisible( f, f->isUserIter );
+		makeFuncVisible2( f, f->isUserIter );
 
 	/* This may be comment rot: The function info structure relies on functions
 	 * being compiled first, then iterators. */
