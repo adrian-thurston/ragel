@@ -3095,6 +3095,8 @@ struct LangStmt
 	void declareForIter( Compiler *pd ) const;
 
 	void declare( Compiler *pd ) const;
+
+	void resolveForIter( Compiler *pd ) const;
 	void resolve( Compiler *pd ) const;
 	void resolveParserItems( Compiler *pd ) const;
 

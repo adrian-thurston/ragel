@@ -1998,14 +1998,6 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 		resetContiguous = pd->beginContiguous( code, stretch );
 	}
 
-	/* Now that we have done the iterator call lookup we can make the type
-	 * reference for the object field. */
-	UniqueType *iterUniqueType = pd->findUniqueType( TYPE_ITER, lookup.objMethod->iterDef );
-
-	objField->typeRef->iterDef = lookup.objMethod->iterDef;
-	objField->typeRef->uniqueType = iterUniqueType;
-	objField->typeRef->searchUniqueType = searchUT;
-
 	/* Also force the field to be initialized. */
 	pd->curLocalFrame->initField( pd, objField );
 

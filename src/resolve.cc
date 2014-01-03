@@ -459,6 +459,32 @@ void LangIterCall::resolve( Compiler *pd ) const
 	}
 }
 
+void LangStmt::resolveForIter( Compiler *pd ) const
+{
+	UniqueType *searchUT = typeRef->lookupType( pd );
+
+	iterCall->resolve( pd );
+
+	/* Lookup the iterator call. Make sure it is an iterator. */
+	VarRefLookup lookup = iterCall->langTerm->varRef->lookupMethod( pd );
+	if ( lookup.objMethod->iterDef == 0 ) {
+		error(loc) << "attempt to iterate using something "
+				"that is not an iterator" << endp;
+	}
+
+	/* Now that we have done the iterator call lookup we can make the type
+	 * reference for the object field. */
+	UniqueType *iterUniqueType = pd->findUniqueType( TYPE_ITER, lookup.objMethod->iterDef );
+
+	objField->typeRef->iterDef = lookup.objMethod->iterDef;
+	objField->typeRef->uniqueType = iterUniqueType;
+	objField->typeRef->searchUniqueType = searchUT;
+
+	/* Resolve the statements. */
+	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
+		stmt->resolve( pd );
+}
+
 void LangStmt::resolve( Compiler *pd ) const
 {
 	switch ( type ) {
@@ -510,14 +536,7 @@ void LangStmt::resolve( Compiler *pd ) const
 			break;
 		}
 		case ForIterType: {
-			typeRef->lookupType( pd );
-
-			/* Evaluate and push the arguments. */
-			iterCall->resolve( pd );
-
-			/* Compile the contents. */
-			for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
-				stmt->resolve( pd );
+			resolveForIter( pd );
 			break;
 		}
 		case ReturnType: {
