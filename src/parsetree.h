@@ -64,6 +64,7 @@ struct PdaLiteral;
 struct TypeAlias;
 struct RegionSet;
 struct ObjNameScope;
+struct LangIterCall;
 typedef struct _PdaRun PdaRun;
 
 /* 
@@ -2134,16 +2135,13 @@ struct TypeRef
 	/* Resolution not needed. */
 
 	/* Iterator definition. */
-	static TypeRef *cons( const InputLoc &loc, IterDef *iterDef,
-			UniqueType *uniqueType, UniqueType *searchUniqueType )
+	static TypeRef *cons( const InputLoc &loc, LangIterCall *iterCall )
 	{
 		TypeRef *t = new TypeRef;
 		t->type = Iterator;
 		t->loc = loc;
-		t->iterDef = iterDef;
 		t->repeatType = RepeatNone;
-		t->uniqueType = uniqueType;
-		t->searchUniqueType = searchUniqueType;
+		t->iterCall = iterCall;
 		return t;
 	}
 
@@ -2175,6 +2173,7 @@ struct TypeRef
 	NamespaceQual *nspaceQual;
 	String typeName;
 	PdaLiteral *pdaLiteral;
+	LangIterCall *iterCall;
 	IterDef *iterDef;
 	TypeRef *typeRef1;
 	TypeRef *typeRef2;
