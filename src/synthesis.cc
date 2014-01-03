@@ -3105,59 +3105,6 @@ void Compiler::compileFunction( Function *func )
 	findLocals( block );
 }
 
-void Compiler::makeDefaultIterators()
-{
-	/* Tree iterator. */
-	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
-				"triter", IN_HALT, IN_HALT, anyRefUT, true );
-
-		IterDef *triter = findIterDef( IterDef::Tree );
-		objMethod->iterDef = triter;
-	}
-
-	/* Child iterator. */
-	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
-				"child", IN_HALT, IN_HALT, anyRefUT, true );
-
-		IterDef *triter = findIterDef( IterDef::Child );
-		objMethod->iterDef = triter;
-	}
-
-	/* Reverse iterator. */
-	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
-				"rev_child", IN_HALT, IN_HALT, anyRefUT, true );
-
-		IterDef *triter = findIterDef( IterDef::RevChild );
-		objMethod->iterDef = triter;
-	}
-
-	/* Repeat iterator. */
-	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
-				"repeat", IN_HALT, IN_HALT, anyRefUT, true );
-
-		IterDef *triter = findIterDef( IterDef::Repeat );
-		objMethod->iterDef = triter;
-	}
-
-	/* Reverse repeat iterator. */
-	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
-				"rev_repeat", IN_HALT, IN_HALT, anyRefUT, true );
-
-		IterDef *triter = findIterDef( IterDef::RevRepeat );
-		objMethod->iterDef = triter;
-	}
-}
-
 void Compiler::addStdin()
 {
 	/* Make the type ref. */
@@ -3289,7 +3236,6 @@ void Compiler::compileByteCode()
 	initStrObject();
 	initStreamObject();
 	initTokenObjects();
-	makeDefaultIterators();
 	initAllLanguageObjects();
 	initGenericTypes();
 

@@ -1013,4 +1013,12 @@ LangEl *addLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::
 void declareTypeAlias( Compiler *pd, Namespace *nspace, const String &data, TypeRef *typeRef );
 LangEl *findType( Compiler *pd, Namespace *nspace, const String &data );
 
+ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC, bool isConst );
+ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC, UniqueType *arg1, bool isConst );
+ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC, 
+		UniqueType *arg1, UniqueType *arg2, bool isConst );
+
 #endif /* _PARSEDATA_H */
