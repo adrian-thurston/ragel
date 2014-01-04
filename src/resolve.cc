@@ -30,15 +30,18 @@ using std::endl;
 
 Namespace *TypeRef::lookupNspace( Compiler *pd )
 {
-//	if ( parsedVarRef != 0 && !nspaceQual->thisOnly() ) {
-//		std::cerr << "parsed var ref is present" << std:: endl;
-//		UniqueType *ut = parsedVarRef->lookup( pd );
-//		nspace = ut->langEl->nspace;
-//	}
-//	else {
+	if ( parsedVarRef != 0 && !nspaceQual->thisOnly() ) {
+		UniqueType *ut = parsedVarRef->lookup( pd );
+		return ut->langEl->nspace;
+	}
+	else if ( parsedTypeRef != 0 && !nspaceQual->thisOnly() ) {
+		UniqueType *ut = parsedTypeRef->lookupType( pd );
+		return ut->langEl->nspace;
+	}
+	else {
 		/* Lookup up the qualifiction and then the name. */
 		return nspaceQual->getQual( pd );
-//	}
+	}
 }
 
 UniqueType *TypeRef::lookupTypeName( Compiler *pd )
