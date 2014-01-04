@@ -202,7 +202,7 @@ UniqueType *LangVarRef::lookup( Compiler *pd ) const
 	VarRefLookup lookup = lookupField( pd );
 
 	ObjectField *el = lookup.objField;
-	UniqueType *elUT = el->typeRef->uniqueType;
+	UniqueType *elUT = el->typeRef->lookupType( pd );
 
 	/* Deref iterators. */
 	if ( elUT->typeId == TYPE_ITER )

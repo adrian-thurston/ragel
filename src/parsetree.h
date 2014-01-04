@@ -2160,6 +2160,7 @@ struct TypeRef
 
 	void resolveRepeat( Compiler *pd );
 
+	Namespace *lookupNspace( Compiler *pd );
 	UniqueType *lookupIterator( Compiler *pd );
 	UniqueType *lookupTypeName( Compiler *pd );
 	UniqueType *lookupTypeLiteral( Compiler *pd );

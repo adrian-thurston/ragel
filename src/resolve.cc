@@ -28,10 +28,22 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+Namespace *TypeRef::lookupNspace( Compiler *pd )
+{
+//	if ( parsedVarRef != 0 && !nspaceQual->thisOnly() ) {
+//		std::cerr << "parsed var ref is present" << std:: endl;
+//		UniqueType *ut = parsedVarRef->lookup( pd );
+//		nspace = ut->langEl->nspace;
+//	}
+//	else {
+		/* Lookup up the qualifiction and then the name. */
+		return nspaceQual->getQual( pd );
+//	}
+}
+
 UniqueType *TypeRef::lookupTypeName( Compiler *pd )
 {
-	/* Lookup up the qualifiction and then the name. */
-	nspace = nspaceQual->getQual( pd );
+	nspace = lookupNspace( pd );
 
 	if ( nspace == 0 )
 		error(loc) << "do not have region for resolving reference" << endp;
@@ -64,7 +76,7 @@ UniqueType *TypeRef::lookupTypeName( Compiler *pd )
 UniqueType *TypeRef::lookupTypeLiteral( Compiler *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
-	nspace = nspaceQual->getQual( pd );
+	nspace = lookupNspace( pd );
 
 	if ( nspace == 0 )
 		error(loc) << "do not have region for resolving reference" << endp;
@@ -607,8 +619,6 @@ void Compiler::resolvePreEof( TokenRegion *region )
 
 void Compiler::resolveRootBlock()
 {
-	rootLocalFrame->resolve( this );
-
 	CodeBlock *block = rootCodeBlock;
 	block->resolve( this );
 }
@@ -651,6 +661,8 @@ void Compiler::resolveParseTree()
 
 	/* Compile the init code */
 	resolveRootBlock( );
+
+	rootLocalFrame->resolve( this );
 
 	/* Init all user object fields (need consistent size). */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
