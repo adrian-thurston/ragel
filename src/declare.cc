@@ -488,7 +488,7 @@ void LangStmt::declareForIter( Compiler *pd ) const
 	if ( iterCall->type != LangIterCall::IterCall )
 		chooseDefaultIter( pd, iterCall );
 
-	objField->typeRef = TypeRef::cons( loc, iterCall );
+	objField->typeRef = TypeRef::cons( loc, typeRef, iterCall );
 }
 
 void LangStmt::declare( Compiler *pd ) const

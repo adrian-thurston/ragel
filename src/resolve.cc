@@ -272,6 +272,27 @@ void TypeRef::resolveRepeat( Compiler *pd )
 	uniqueType = pd->findUniqueType( TYPE_TREE, uniqueRepeat->declLangEl );
 }
 
+UniqueType *TypeRef::lookupIterator( Compiler *pd )
+{
+	UniqueType *searchUT = searchTypeRef->lookupType( pd );
+
+	/* Lookup the iterator call. Make sure it is an iterator. */
+	VarRefLookup lookup = iterCall->langTerm->varRef->lookupMethod( pd );
+	if ( lookup.objMethod->iterDef == 0 ) {
+		error(loc) << "attempt to iterate using something "
+				"that is not an iterator" << endp;
+	}
+
+	/* Now that we have done the iterator call lookup we can make the type
+	 * reference for the object field. */
+	UniqueType *iterUniqueType = pd->findUniqueType( TYPE_ITER, lookup.objMethod->iterDef );
+
+	iterDef = lookup.objMethod->iterDef;
+	searchUniqueType = searchUT;
+
+	return iterUniqueType;
+}
+
 
 UniqueType *TypeRef::lookupType( Compiler *pd )
 {
@@ -305,6 +326,8 @@ UniqueType *TypeRef::lookupType( Compiler *pd )
 			uniqueType = lookupTypeRef( pd );
 			break;
 		case Iterator:
+			uniqueType = lookupIterator( pd );
+			break;
 		case Unspecified:
 			/* No lookup needed, unique type(s) set when constructed. */
 			break;
@@ -461,24 +484,13 @@ void LangIterCall::resolve( Compiler *pd ) const
 
 void LangStmt::resolveForIter( Compiler *pd ) const
 {
-	UniqueType *searchUT = typeRef->lookupType( pd );
-
 	iterCall->resolve( pd );
 
-	/* Lookup the iterator call. Make sure it is an iterator. */
-	VarRefLookup lookup = iterCall->langTerm->varRef->lookupMethod( pd );
-	if ( lookup.objMethod->iterDef == 0 ) {
-		error(loc) << "attempt to iterate using something "
-				"that is not an iterator" << endp;
-	}
+	/* Search type ref. */
+	typeRef->lookupType( pd );
 
-	/* Now that we have done the iterator call lookup we can make the type
-	 * reference for the object field. */
-	UniqueType *iterUniqueType = pd->findUniqueType( TYPE_ITER, lookup.objMethod->iterDef );
-
-	objField->typeRef->iterDef = lookup.objMethod->iterDef;
-	objField->typeRef->uniqueType = iterUniqueType;
-	objField->typeRef->searchUniqueType = searchUT;
+	/* Iterator type ref. */
+	objField->typeRef->lookupType( pd );
 
 	/* Resolve the statements. */
 	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )

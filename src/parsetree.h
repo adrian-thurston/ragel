@@ -2016,7 +2016,8 @@ struct TypeRef
 		nspace(0),
 		uniqueType(0),
 		searchUniqueType(0),
-		generic(0)
+		generic(0),
+		searchTypeRef(0)
 	{}
 
 	/* Qualification and a type name. These require lookup. */
@@ -2135,13 +2136,14 @@ struct TypeRef
 	/* Resolution not needed. */
 
 	/* Iterator definition. */
-	static TypeRef *cons( const InputLoc &loc, LangIterCall *iterCall )
+	static TypeRef *cons( const InputLoc &loc, TypeRef *typeRef, LangIterCall *iterCall )
 	{
 		TypeRef *t = new TypeRef;
 		t->type = Iterator;
 		t->loc = loc;
 		t->repeatType = RepeatNone;
 		t->iterCall = iterCall;
+		t->searchTypeRef = typeRef;
 		return t;
 	}
 
@@ -2158,6 +2160,7 @@ struct TypeRef
 
 	void resolveRepeat( Compiler *pd );
 
+	UniqueType *lookupIterator( Compiler *pd );
 	UniqueType *lookupTypeName( Compiler *pd );
 	UniqueType *lookupTypeLiteral( Compiler *pd );
 	UniqueType *lookupTypeMap( Compiler *pd );
@@ -2188,6 +2191,7 @@ struct TypeRef
 	UniqueType *uniqueType;
 	UniqueType *searchUniqueType;
 	GenericType *generic;
+	TypeRef *searchTypeRef;
 };
 
 typedef DList<ObjectField> ParameterList; 
