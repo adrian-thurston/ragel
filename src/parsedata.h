@@ -651,8 +651,8 @@ struct Compiler
 	void makeIgnoreCollectors();
 	void setPrecedence();
 
-	void typeDeclaration();
-	void typeResolve();
+	void declarePass();
+	void resolvePass();
 
 	/* Parser generation. */
 	void advanceReductions( PdaGraph *pdaGraph );
@@ -986,7 +986,7 @@ struct Compiler
 	bool beginContiguous( CodeVect &code, int stretch );
 	void endContiguous( CodeVect &code, bool resetContiguous );
 
-	void varDeclaration();
+	void declareReVars();
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

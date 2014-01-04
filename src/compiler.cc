@@ -1119,13 +1119,9 @@ void Compiler::compile()
 	beginProcessing();
 	initKeyOps();
 
-	varDeclaration();
+	declarePass();
 
-	/* Type declaration. */
-	typeDeclaration();
-
-	/* Type resolving. */
-	typeResolve();
+	resolvePass();
 
 	makeTerminalWrappers();
 	makeEofElements();

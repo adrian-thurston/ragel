@@ -110,7 +110,7 @@ void LexFactorAug::varDecl( Compiler *pd, TokenDef *tokenDef )
 	}
 }
 
-void Compiler::varDeclaration()
+void Compiler::declareReVars()
 {
 	for ( NamespaceList::Iter n = namespaceList; n.lte(); n++ ) {
 		for ( TokenDefListNs::Iter tok = n->tokenDefList; tok.lte(); tok++ ) {
@@ -729,13 +729,13 @@ void Compiler::addCtx( ObjectDef *frame )
 	frame->insertField( el->name, el );
 }
 
-
-
 /*
  * Type Declaration Root.
  */
-void Compiler::typeDeclaration()
+void Compiler::declarePass()
 {
+	declareReVars();
+
 	makeDefaultIterators();
 	makeIgnoreCollectors();
 

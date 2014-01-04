@@ -765,7 +765,7 @@ void Compiler::makeEofElements()
 	}
 }
 
-void Compiler::typeResolve()
+void Compiler::resolvePass()
 {
 	/*
 	 * Type Resolving.
