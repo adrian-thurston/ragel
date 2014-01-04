@@ -2775,42 +2775,6 @@ void Compiler::initParserFields( GenericType *gen )
 	initParserField( gen, "error", 1, typeRef );
 }
 
-void Compiler::initGenericTypes()
-{
-	for ( NamespaceList::Iter ns = namespaceList; ns.lte(); ns++ ) {
-		for ( GenericList::Iter gen = ns->genericList; gen.lte(); gen++ ) {
-			gen->utArg = gen->typeArg->uniqueType;
- 
-			if ( gen->typeId == GEN_MAP )
-				gen->keyUT = gen->keyTypeArg->uniqueType; 
-
-			gen->objDef = ObjectDef::cons( ObjectDef::BuiltinType, 
-					gen->name, nextObjectId++ );
-
-			switch ( gen->typeId ) {
-				case GEN_MAP: 
-					initMapFunctions( gen );
-					break;
-				case GEN_LIST:
-					initListFunctions( gen );
-					initListFields( gen );
-					break;
-				case GEN_VECTOR:
-					initVectorFunctions( gen );
-					break;
-				case GEN_PARSER:
-					/* Need to generate a parser for the type. */
-					gen->utArg->langEl->parserId = nextParserId++;
-					initParserFunctions( gen );
-					initParserFields( gen );
-					break;
-			}
-
-			gen->langEl->objectDef = gen->objDef;
-		}
-	}
-}
-
 void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 {
 	func->localFrame = func->codeBlock->localFrame;

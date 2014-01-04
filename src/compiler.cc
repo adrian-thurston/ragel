@@ -1145,7 +1145,6 @@ void Compiler::compile()
 	prepGrammar();
 
 	initAllLanguageObjects();
-	initGenericTypes();
 	initGlobalFunctions();
 
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )

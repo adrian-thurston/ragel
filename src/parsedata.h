@@ -804,7 +804,6 @@ struct Compiler
 	void findLocals( CodeBlock *block );
 	void makeProdCopies( Production *prod );
 	void compileReductionCode( Production *prod );
-	void initGenericTypes();
 	void removeNonUnparsableRepls();
 	void compileByteCode();
 

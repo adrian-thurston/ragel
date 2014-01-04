@@ -331,6 +331,35 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 
 	langEl->generic = this;
 	this->langEl = langEl;
+
+	utArg = typeArg->uniqueType;
+ 
+	if ( typeId == GEN_MAP )
+		keyUT = keyTypeArg->uniqueType; 
+
+	objDef = ObjectDef::cons( ObjectDef::BuiltinType, 
+			name, pd->nextObjectId++ );
+
+	switch ( typeId ) {
+		case GEN_MAP: 
+			pd->initMapFunctions( this );
+			break;
+		case GEN_LIST:
+			pd->initListFunctions( this );
+			pd->initListFields( this );
+			break;
+		case GEN_VECTOR:
+			pd->initVectorFunctions( this );
+			break;
+		case GEN_PARSER:
+			/* Need to generate a parser for the type. */
+			utArg->langEl->parserId = pd->nextParserId++;
+			pd->initParserFunctions( this );
+			pd->initParserFields( this );
+			break;
+	}
+
+	langEl->objectDef = objDef;
 }
 
 void Namespace::declare( Compiler *pd )
