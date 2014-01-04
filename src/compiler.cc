@@ -1121,6 +1121,11 @@ void Compiler::compile()
 
 	declarePass();
 
+	initIntObject();
+	initStrObject();
+	initStreamObject();
+	initTokenObjects();
+
 	/* Fill any empty scanners with a default token. */
 	initEmptyScanners();
 
@@ -1139,10 +1144,6 @@ void Compiler::compile()
 
 	prepGrammar();
 
-	initIntObject();
-	initStrObject();
-	initStreamObject();
-	initTokenObjects();
 	initAllLanguageObjects();
 	initGenericTypes();
 	initGlobalFunctions();
