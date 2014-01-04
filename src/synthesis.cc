@@ -2899,6 +2899,21 @@ void Compiler::initGenericTypes()
 
 void Compiler::makeFuncVisible1( Function *func, bool isUserIter )
 {
+	func->localFrame = func->codeBlock->localFrame;
+
+	/* Set up the parameters. */
+	long paramPos = 0;
+	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
+		if ( func->localFrame->rootScope->findField( param->name ) != 0 )
+			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
+
+		func->localFrame->insertField( param->name, param );
+		param->beenInitialized = true;
+		param->pos = paramPos;
+
+		paramPos += 1;
+	}
+
 	/* Insert the function into the global function map. */
 	ObjMethod *objMethod = new ObjMethod( func->typeRef, func->name, 
 			IN_CALL_WV, IN_CALL_WC, 
@@ -2920,20 +2935,11 @@ void Compiler::makeFuncVisible1( Function *func, bool isUserIter )
 
 void Compiler::makeFuncVisible2( Function *func, bool isUserIter )
 {
-	func->localFrame = func->codeBlock->localFrame;
-
 	/* Set up the parameters. */
 	long paramPos = 0, paramListSize = 0;
 	UniqueType **paramUTs = new UniqueType*[func->paramList->length()];
 	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
 		paramUTs[paramPos] = param->typeRef->uniqueType;
-
-		if ( func->localFrame->rootScope->findField( param->name ) != 0 )
-			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
-
-		func->localFrame->insertField( param->name, param );
-		param->beenInitialized = true;
-		param->pos = paramPos;
 
 		/* Initialize the object field as a local variable. We also want trees
 		 * downreffed. */
