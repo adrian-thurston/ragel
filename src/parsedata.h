@@ -649,7 +649,7 @@ struct Compiler
 	void makeTerminalWrappers();
 	void makeEofElements();
 	void makeIgnoreCollectors();
-	void setPrecedence();
+	void resolvePrecedence();
 
 	void declarePass();
 	void resolvePass();

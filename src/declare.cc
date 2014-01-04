@@ -445,17 +445,6 @@ void Namespace::declare( Compiler *pd )
 		(*c)->declare( pd );
 }
 
-void Compiler::setPrecedence()
-{
-	for ( PredDeclList::Iter predDecl = predDeclList; predDecl != 0; predDecl++ ) {
-		predDecl->typeRef->lookupType( this );
-
-		LangEl *langEl = predDecl->typeRef->uniqueType->langEl;
-		langEl->predType = predDecl->predType;
-		langEl->predValue = predDecl->predValue;
-	}
-}
-
 void Compiler::makeIgnoreCollectors()
 {
 	for ( RegionSetList::Iter regionSet = regionSetList; regionSet.lte(); regionSet++ ) {
@@ -747,9 +736,6 @@ void Compiler::declarePass()
 	/* Fill any empty scanners with a default token. */
 	initEmptyScanners();
 
-	/* Create the default scanner which will return single characters for us
-	 * when we have no other scanner */
-	setPrecedence();
-
 	declareByteCode();
+
 }

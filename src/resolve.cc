@@ -765,11 +765,24 @@ void Compiler::makeEofElements()
 	}
 }
 
+void Compiler::resolvePrecedence()
+{
+	for ( PredDeclList::Iter predDecl = predDeclList; predDecl != 0; predDecl++ ) {
+		predDecl->typeRef->lookupType( this );
+
+		LangEl *langEl = predDecl->typeRef->uniqueType->langEl;
+		langEl->predType = predDecl->predType;
+		langEl->predValue = predDecl->predValue;
+	}
+}
+
 void Compiler::resolvePass()
 {
 	/*
 	 * Type Resolving.
 	 */
+
+	resolvePrecedence();
 
 	resolveParseTree();
 

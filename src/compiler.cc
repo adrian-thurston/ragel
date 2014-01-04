@@ -1121,6 +1121,7 @@ void Compiler::compile()
 
 	declarePass();
 
+
 	resolvePass();
 
 	makeTerminalWrappers();
