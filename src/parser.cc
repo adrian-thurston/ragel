@@ -299,9 +299,12 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 
 	LexJoin *join = literalJoin( loc, data );
 
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, 
+			name, pd->nextObjectId++ );
+
 	/* The token definition. */
 	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
-			0, loc, 0, nspace, regionSet, 0, 0 );
+			0, loc, 0, nspace, regionSet, objectDef, 0 );
 
 	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
