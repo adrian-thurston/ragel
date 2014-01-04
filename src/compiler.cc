@@ -1121,6 +1121,8 @@ void Compiler::compile()
 
 	declarePass();
 
+	/* Fill any empty scanners with a default token. */
+	initEmptyScanners();
 
 	resolvePass();
 

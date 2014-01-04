@@ -733,9 +733,5 @@ void Compiler::declarePass()
 
 	rootNamespace->declare( this );
 
-	/* Fill any empty scanners with a default token. */
-	initEmptyScanners();
-
 	declareByteCode();
-
 }
