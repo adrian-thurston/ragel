@@ -63,7 +63,6 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	lit(name),
 	type(type),
 	id(-1),
-	isUserTerm(false),
 	isContext(false),
 	//displayString(0),
 	numAppearances(0),
@@ -180,7 +179,6 @@ void Compiler::makeLangElIds()
 				lel != errorLangEl &&
 				lel != noTokenLangEl )
 		{
-			lel->isUserTerm = true;
 			lel->id = nextSymbolId++;
 		}
 	}
@@ -1458,8 +1456,7 @@ void Compiler::makeRuntimeData()
 					lel->objectDef == 0 ? 0 : lel->objectDef->id;
 			runtimeData->lelInfo[i].ofiOffset = lel->ofiOffset;
 			runtimeData->lelInfo[i].objectLength = 
-					( lel->objectDef == 0 || lel->objectDef == tokenObj ) ? 0 : 
-					lel->objectDef->size();
+					lel->objectDef != 0 ? lel->objectDef->size() : 0;
 
 //			runtimeData->lelInfo[i].contextTypeId = 0;
 //					lel->context == 0 ? 0 : lel->context->contextObjDef->id;

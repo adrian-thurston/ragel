@@ -249,7 +249,6 @@ struct LangEl : public DListEl<LangEl>
 
 	Type type;
 	long id;
-	bool isUserTerm;
 	bool isContext;
 	String displayString;
 	long numAppearances;
@@ -919,7 +918,6 @@ struct Compiler
 	ObjectDef *intObj;
 	ObjectDef *strObj;
 	ObjectDef *streamObj;
-	ObjectDef *tokenObj;
 
 	FsmTables *fsmTables;
 	RuntimeData *runtimeData;

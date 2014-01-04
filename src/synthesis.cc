@@ -2365,24 +2365,10 @@ ObjectField *Compiler::makeLineEl()
 
 void Compiler::initTokenObjects( )
 {
-	/* Make a default object Production. */
-	tokenObj = ObjectDef::cons( ObjectDef::BuiltinType, "token", nextObjectId++ );
-
-	ObjectField *dataEl = makeDataEl();
-	tokenObj->insertField( dataEl->name, dataEl );
-
-	ObjectField *posEl = makePosEl();
-	tokenObj->insertField( posEl->name, posEl );
-
-	ObjectField *lineEl = makeLineEl();
-	tokenObj->insertField( lineEl->name, lineEl );
-
 	/* Give all user terminals the token object type. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->isUserTerm ) {
-			if ( lel->objectDef == 0 )
-				lel->objectDef = tokenObj;
-			else {
+		if ( lel->type == LangEl::Term ) {
+			if ( lel->objectDef != 0 ) {
 				/* Create the "data" field. */
 				ObjectField *dataEl = makeDataEl();
 				lel->objectDef->insertField( dataEl->name, dataEl );
