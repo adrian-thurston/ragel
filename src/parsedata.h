@@ -706,12 +706,12 @@ struct Compiler
 	void printNonTermFirstSets();
 	void printFirstSets();
 
-	LangEl *makeRepeatProd( const InputLoc &loc, Namespace *nspace, const String &repeatName, 
-			NamespaceQual *nspaceQual, const String &name );
-	LangEl *makeListProd( const InputLoc &loc, Namespace *nspace, const String &listName,
-			NamespaceQual *nspaceQual, const String &name );
-	LangEl *makeOptProd( const InputLoc &loc, Namespace *nspace, const String &optName,
-			NamespaceQual *nspaceQual, const String &name );
+	LangEl *makeRepeatProd( const InputLoc &loc, Namespace *nspace,
+			const String &repeatName, UniqueType *ut );
+	LangEl *makeListProd( const InputLoc &loc, Namespace *nspace,
+			const String &listName, UniqueType *ut );
+	LangEl *makeOptProd( const InputLoc &loc, Namespace *nspace,
+			const String &optName, UniqueType *ut );
 	void resolveProdEl( ProdEl *prodEl );
 	void resolveProductionEls();
 

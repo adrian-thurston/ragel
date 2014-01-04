@@ -748,7 +748,7 @@ FsmGraph *Compiler::makeScanner()
 }
 
 LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
-		const String &repeatName, NamespaceQual *nspaceQual, const String &name )
+		const String &repeatName, UniqueType *ut )
 {
 	LangEl *prodName = addLangEl( this, nspace, repeatName, LangEl::NonTerm );
 	prodName->isRepeat = true;
@@ -756,7 +756,7 @@ LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
 	ProdElList *prodElList1 = new ProdElList;
 
 	/* Build the first production of the repeat. */
-	TypeRef *typeRef1 = TypeRef::cons( loc, nspaceQual, name );
+	TypeRef *typeRef1 = TypeRef::cons( loc, ut );
 	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, InputLoc(), 0, false, typeRef1, 0 );
 
 	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, prodName );
@@ -787,13 +787,13 @@ LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
 }
 
 LangEl *Compiler::makeListProd( const InputLoc &loc, Namespace *nspace,
-		const String &listName, NamespaceQual *nspaceQual, const String &name )
+		const String &listName, UniqueType *ut )
 {
 	LangEl *prodName = addLangEl( this, nspace, listName, LangEl::NonTerm );
 	prodName->isList = true;
 
 	/* Build the first production of the list. */
-	TypeRef *typeRef1 = TypeRef::cons( loc, nspaceQual, name );
+	TypeRef *typeRef1 = TypeRef::cons( loc, ut );
 	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, InputLoc(), 0, false, typeRef1, 0 );
 
 	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, prodName );
@@ -812,7 +812,7 @@ LangEl *Compiler::makeListProd( const InputLoc &loc, Namespace *nspace,
 	prodList.append( newDef1 );
 
 	/* Build the second production of the list. */
-	TypeRef *typeRef3 = TypeRef::cons( loc, nspaceQual, name );
+	TypeRef *typeRef3 = TypeRef::cons( loc, ut );
 	ProdEl *factor3 = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef3, 0 );
 
 	ProdElList *prodElList2 = new ProdElList;
@@ -829,7 +829,7 @@ LangEl *Compiler::makeListProd( const InputLoc &loc, Namespace *nspace,
 }
 
 LangEl *Compiler::makeOptProd( const InputLoc &loc, Namespace *nspace,
-		const String &optName, NamespaceQual *nspaceQual, const String &name )
+		const String &optName, UniqueType *ut )
 {
 	LangEl *prodName = addLangEl( this, nspace, optName, LangEl::NonTerm );
 	prodName->isOpt = true;
@@ -837,7 +837,7 @@ LangEl *Compiler::makeOptProd( const InputLoc &loc, Namespace *nspace,
 	ProdElList *prodElList1 = new ProdElList;
 
 	/* Build the first production of the repeat. */
-	TypeRef *typeRef1 = TypeRef::cons( loc, nspaceQual, name );
+	TypeRef *typeRef1 = TypeRef::cons( loc, ut );
 	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef1, 0 );
 	prodElList1->append( factor1 );
 
