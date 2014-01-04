@@ -561,12 +561,23 @@ void Compiler::declareReductionCode( Production *prod )
 void Compiler::declareTranslateBlock( LangEl *langEl )
 {
 	CodeBlock *block = langEl->transBlock;
+
+	/* References to the reduce item. */
+	addMatchLength( block->localFrame, langEl );
+	addMatchText( block->localFrame, langEl );
+	addInput( block->localFrame );
+	addCtx( block->localFrame );
+
 	block->declare( this );
 }
 
 void Compiler::declarePreEof( TokenRegion *region )
 {
 	CodeBlock *block = region->preEofBlock;
+
+	addInput( block->localFrame );
+	addCtx( block->localFrame );
+
 	block->declare( this );
 }
 
@@ -651,6 +662,73 @@ void Compiler::makeDefaultIterators()
 		objMethod->iterDef = triter;
 	}
 }
+
+void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
+{
+	/* Make the type ref. */
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
+
+	/* Create the field and insert it into the map. */
+	ObjectField *el = ObjectField::cons( InputLoc(), typeRef, "match_length" );
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+	el->isConst = true;
+	el->useOffset = false;
+	el->inGetR    = IN_GET_MATCH_LENGTH_R;
+	frame->insertField( el->name, el );
+}
+
+void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
+{
+	/* Make the type ref. */
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
+
+	/* Create the field and insert it into the map. */
+	ObjectField *el = ObjectField::cons( internal, typeRef, "match_text" );
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+	el->isConst = true;
+	el->useOffset = false;
+	el->inGetR    = IN_GET_MATCH_TEXT_R;
+	frame->insertField( el->name, el );
+}
+
+void Compiler::addInput( ObjectDef *frame )
+{
+	/* Make the type ref. */
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
+
+	/* Create the field and insert it into the map. */
+	ObjectField *el = ObjectField::cons( internal, typeRef, "input" );
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+	el->isConst   = false;
+	el->useOffset = false;
+	el->isCustom  = true;
+	el->inGetR    = IN_LOAD_INPUT_R;
+	el->inGetWV   = IN_LOAD_INPUT_WV;
+	el->inGetWC   = IN_LOAD_INPUT_WC;
+	frame->insertField( el->name, el );
+}
+
+void Compiler::addCtx( ObjectDef *frame )
+{
+	/* Make the type ref. */
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
+
+	/* Create the field and insert it into the map. */
+	ObjectField *el = ObjectField::cons( internal, typeRef, "ctx" );
+	el->beenReferenced = true;
+	el->beenInitialized = true;
+	el->isConst   = false;
+	el->useOffset = false;
+	el->isCustom  = true;
+	el->inGetR    = IN_LOAD_CTX_R;
+	el->inGetWV   = IN_LOAD_CTX_WV;
+	el->inGetWC   = IN_LOAD_CTX_WC;
+	frame->insertField( el->name, el );
+}
+
 
 
 /*
