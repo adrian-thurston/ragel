@@ -729,7 +729,7 @@ void Compiler::declarePass()
 	makeIgnoreCollectors();
 
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
-		makeFuncVisible1( f, f->isUserIter );
+		makeFuncVisible( f, f->isUserIter );
 
 	rootNamespace->declare( this );
 

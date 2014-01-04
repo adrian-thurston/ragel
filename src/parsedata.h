@@ -775,8 +775,8 @@ struct Compiler
 	void resolveListElementOf( ObjectDef *container, ObjectDef *obj, ElementOf *elof );
 	void resolveMapElementOf( ObjectDef *container, ObjectDef *obj, ElementOf *elof );
 	void resolveElementOf( ObjectDef *obj );
-	void makeFuncVisible1( Function *func, bool isUserIter );
-	void makeFuncVisible2( Function *func, bool isUserIter );
+	void makeFuncVisible( Function *func, bool isUserIter );
+	void initUserFunctions( Function *func, bool isUserIter );
 
 	void declareFunction( Function *func );
 	void declareReductionCode( Production *prod );

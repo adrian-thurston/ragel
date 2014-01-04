@@ -1139,6 +1139,17 @@ void Compiler::compile()
 
 	prepGrammar();
 
+	initIntObject();
+	initStrObject();
+	initStreamObject();
+	initTokenObjects();
+	initAllLanguageObjects();
+	initGenericTypes();
+	initGlobalFunctions();
+
+	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
+		initUserFunctions( f, f->isUserIter );
+
 	/* Compile bytecode. */
 	compileByteCode();
 

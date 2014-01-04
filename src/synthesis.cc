@@ -2825,7 +2825,7 @@ void Compiler::initGenericTypes()
 	}
 }
 
-void Compiler::makeFuncVisible1( Function *func, bool isUserIter )
+void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 {
 	func->localFrame = func->codeBlock->localFrame;
 
@@ -2861,7 +2861,7 @@ void Compiler::makeFuncVisible1( Function *func, bool isUserIter )
 	func->objMethod = objMethod;
 }
 
-void Compiler::makeFuncVisible2( Function *func, bool isUserIter )
+void Compiler::initUserFunctions( Function *func, bool isUserIter )
 {
 	/* Set up the parameters. */
 	long paramPos = 0, paramListSize = 0;
@@ -3158,21 +3158,6 @@ void Compiler::removeNonUnparsableRepls()
 
 void Compiler::compileByteCode()
 {
-	initIntObject();
-	initStrObject();
-	initStreamObject();
-	initTokenObjects();
-	initAllLanguageObjects();
-	initGenericTypes();
-
-	initGlobalFunctions();
-
-	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
-		makeFuncVisible2( f, f->isUserIter );
-
-	/* This may be comment rot: The function info structure relies on functions
-	 * being compiled first, then iterators. */
-
 	/* Compile functions. */
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ ) {
 		if ( f->isUserIter )
