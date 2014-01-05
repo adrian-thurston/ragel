@@ -970,5 +970,5 @@ void BaseParser::pushScope()
 
 void BaseParser::popScope()
 {
-	curLocalFrame->popScope();
+	curLocalFrame->curScope = curLocalFrame->curScope->parentScope;
 }

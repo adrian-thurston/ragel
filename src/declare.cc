@@ -75,12 +75,6 @@ void ObjectDef::pushScope()
 	curScope = newScope;
 }
 
-void ObjectDef::popScope()
-{
-	curScope = curScope->parentScope;
-}
-
-
 void LexJoin::varDecl( Compiler *pd, TokenDef *tokenDef )
 {
 	expr->varDecl( pd, tokenDef );

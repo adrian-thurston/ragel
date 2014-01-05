@@ -2437,7 +2437,6 @@ struct ObjectDef
 	ObjNameScope *curScope;
 
 	void pushScope();
-	void popScope();
 
 	long id;
 	long nextOffset;
