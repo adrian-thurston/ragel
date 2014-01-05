@@ -2002,7 +2002,7 @@ struct LoadColm
 	{
 		String name = NamespaceDef.id().data();
 		createNamespace( NamespaceDef.id().loc(), name );
-		walkRootItemList( NamespaceDef.RootItemList() );
+		walkNamespaceItemList( NamespaceDef.ItemList() );
 		namespaceStack.pop();
 	}
 
@@ -2073,6 +2073,55 @@ struct LoadColm
 		}}
 	}
 
+	void walkNamespaceItem( namespace_item item, StmtList *stmtList )
+	{
+		switch ( item.prodName() ) {
+		case namespace_item::_Rl:
+			walkRlDef( item.rl_def() );
+			break;
+		case namespace_item::_Token:
+			walkTokenDef( item.token_def() );
+			break;
+		case namespace_item::_Ignore:
+			walkIgnoreDef( item.ignore_def() );
+			break;
+		case namespace_item::_Literal:
+			walkLiteralDef( item.literal_def() );
+			break;
+		case namespace_item::_Cfl:
+			walkCflDef( item.cfl_def() );
+			break;
+		case namespace_item::_Region:
+			walkLexRegion( item.region_def() );
+			break;
+		case namespace_item::_Context:
+			walkContextDef( item.context_def() );
+			break;
+		case namespace_item::_Namespace:
+			walkNamespaceDef( item.namespace_def() );
+			break;
+		case namespace_item::_Function:
+			walkFunctionDef( item.function_def() );
+			break;
+		case namespace_item::_Iter:
+			walkIterDef( item.iter_def() );
+			break;
+		case namespace_item::_PreEof:
+			walkPreEof( item.pre_eof_def() );
+			break;
+		case namespace_item::_Alias:
+			walkAliasDef( item.alias_def() );
+			break;
+		case namespace_item::_Precedence:
+			walkPrecedenceDef( item.precedence_def() );
+			break;
+		case namespace_item::_Include: {
+			StmtList *includeList = walkInclude( item.include() );
+			stmtList->append( *includeList );
+			break;
+		}}
+	}
+
 	bool walkOptNoIgnore( opt_no_ignore OptNoIngore )
 	{
 		return OptNoIngore.prodName() == opt_no_ignore::_Ni;
@@ -2107,6 +2156,19 @@ struct LoadColm
 	{
 		walkLiteralList( literalDef.literal_list() );
 	}
+
+	StmtList *walkNamespaceItemList( _repeat_namespace_item itemList )
+	{
+		StmtList *stmtList = new StmtList;
+
+		/* Walk the list of items. */
+		while ( !itemList.end() ) {
+			walkNamespaceItem( itemList.value(), stmtList );
+			itemList = itemList.next();
+		}
+		return stmtList;
+	}
+
 
 	StmtList *walkRootItemList( _repeat_root_item rootItemList )
 	{

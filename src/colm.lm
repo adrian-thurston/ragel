@@ -289,7 +289,23 @@ def opt_no_ignore
 |	[]
 
 def namespace_def
-	[NAMESPACE id RootItemList: root_item* END]
+	[NAMESPACE id ItemList: namespace_item* END]
+
+def namespace_item
+	[rl_def] :Rl commit
+|	[literal_def] :Literal commit
+|	[token_def] :Token commit
+|	[ignore_def] :Ignore commit
+|	[cfl_def] :Cfl commit
+|	[region_def] :Region commit
+|	[context_def] :Context commit
+|	[namespace_def] :Namespace commit
+|	[function_def] :Function commit
+|	[iter_def] :Iter commit
+|	[pre_eof_def] :PreEof commit
+|	[precedence_def] :Precedence commit
+|	[alias_def] :Alias commit
+|	[include] :Include commit
 
 def obj_var_list
 	[]
