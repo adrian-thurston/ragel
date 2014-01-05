@@ -40,19 +40,19 @@ ObjectDef *UniqueType::objectDef()
 }
 
 /* Recurisve find through a single object def's scope. */
-ObjectField *ObjectDef::findFieldInScope( const String &name, const ObjNameScope *inScope ) const
+ObjectField *ObjectDef::findFieldInScope( const ObjNameScope *inScope, const String &name ) const
 {
 	ObjFieldMapEl *objDefMapEl = inScope->objFieldMap->find( name );
 	if ( objDefMapEl != 0 )
 		return objDefMapEl->value;
 	if ( inScope->parentScope != 0 )
-		return findFieldInScope( name, inScope->parentScope );
+		return findFieldInScope( inScope->parentScope, name );
 	return 0;
 }
 
 ObjectField *ObjNameScope::findField( const String &name ) const
 {
-	return owner->findFieldInScope( name, this );
+	return owner->findFieldInScope( this, name );
 }
 
 ObjMethod *ObjectDef::findMethod( const String &name ) const

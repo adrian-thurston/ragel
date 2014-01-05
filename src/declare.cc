@@ -47,6 +47,15 @@ void Compiler::initUniqueTypes( )
 	uniqeTypeMap.insert( uniqueTypeAny );
 }
 
+ObjectField *ObjNameScope::checkRedecl( const String &name )
+{
+	return owner->checkRedecl( name );
+}
+
+void ObjNameScope::insertField( const String &name, ObjectField *value )
+{
+	return owner->insertField( name, value );
+}
 
 ObjectField *ObjectDef::checkRedecl( const String &name )
 {

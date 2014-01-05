@@ -2393,6 +2393,9 @@ struct ObjNameScope
 	}
 
 	ObjectField *findField( const String &name ) const;
+
+	ObjectField *checkRedecl( const String &name );
+	void insertField( const String &name, ObjectField *value );
 };
 
 struct ObjectDef
@@ -2442,12 +2445,13 @@ struct ObjectDef
 	long nextOffset;
 	long firstNonTree;
 
+
 	void referenceField( Compiler *pd, ObjectField *field );
 	void initField( Compiler *pd, ObjectField *field );
 	void createCode( Compiler *pd, CodeVect &code );
 	ObjectField *checkRedecl( const String &name );
 	ObjMethod *findMethod( const String &name ) const;
-	ObjectField *findFieldInScope( const String &name, const ObjNameScope *inScope ) const;
+	ObjectField *findFieldInScope( const ObjNameScope *scope, const String &name ) const;
 	void insertField( const String &name, ObjectField *value );
 	void resolve( Compiler *pd );
 	ObjectField *findFieldNum( long offset );
