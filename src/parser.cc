@@ -52,6 +52,7 @@ void BaseParser::init()
 	pd->rootLocalFrame = ObjectDef::cons( ObjectDef::FrameType, 
 				"local", pd->nextObjectId++ );
 	curLocalFrame = pd->rootLocalFrame;
+	curScope = pd->rootLocalFrame->rootScope;
 
 	/* Declarations of internal types. They must be declared now because we use
 	 * them directly, rather than via type lookup. */
@@ -345,12 +346,14 @@ ObjectDef *BaseParser::blockOpen()
 			"local", pd->nextObjectId++ );
 
 	curLocalFrame = frame;
+	curScope = frame->rootScope;
 	return frame;
 }
 
 void BaseParser::blockClose()
 {
 	curLocalFrame = pd->rootLocalFrame;
+	curScope = pd->rootLocalFrame->rootScope;
 }
 
 void BaseParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
@@ -387,14 +390,14 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 		object = context->contextObjDef;
 	}
 
-	if ( object->checkRedecl( objField->name ) != 0 )
+	if ( object->rootScope->checkRedecl( objField->name ) != 0 )
 		error(objField->loc) << "object field renamed" << endp;
 
-	object->insertField( objField->name, objField );
+	object->rootScope->insertField( objField->name, objField );
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				context, curLocalFrame->curScope, objField->name );
+				context, curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, 
 				assignType, varRef, expr );
@@ -418,14 +421,14 @@ void BaseParser::cflDef( NtDef *ntDef, ObjectDef *objectDef, LelDefList *defList
 			/* If there is a capture, create the field. */
 			if ( pel->captureField != 0 ) {
 				/* Might already exist. */
-				ObjectField *newOf = objectDef->checkRedecl( pel->captureField->name );
+				ObjectField *newOf = objectDef->rootScope->checkRedecl( pel->captureField->name );
 				if ( newOf != 0 ) {
 					/* FIXME: check the types are the same. */
 				}
 				else {
 					newOf = pel->captureField;
 					newOf->typeRef = pel->typeRef;
-					objectDef->insertField( newOf->name, newOf );
+					objectDef->rootScope->insertField( newOf->name, newOf );
 				}
 
 				newOf->isRhsGet = true;
@@ -572,7 +575,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				context, curLocalFrame->curScope, objField->name );
+				context, curScope, objField->name );
 	}
 
 	/* The typeref for the parser. */
@@ -588,14 +591,14 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 
 	/* Check for redeclaration. */
 	if ( objField != 0 ) {
-		if ( curLocalFrame->checkRedecl( objField->name ) != 0 ) {
+		if ( curScope->checkRedecl( objField->name ) != 0 ) {
 			error( objField->loc ) << "variable " << objField->name <<
 					" redeclared" << endp;
 		}
 
 		/* Insert it into the field map. */
 		objField->typeRef = typeRef;
-		curLocalFrame->insertField( objField->name, objField );
+		curScope->insertField( objField->name, objField );
 	}
 
 	return expr;
@@ -607,7 +610,7 @@ PatternItemList *BaseParser::consPatternEl( LangVarRef *varRef, PatternItemList 
 	list->head->varRef = varRef;
 
 	if ( varRef != 0 ) {
-		if ( curLocalFrame->checkRedecl( varRef->name ) != 0 ) {
+		if ( curScope->checkRedecl( varRef->name ) != 0 ) {
 			error( varRef->loc ) << "variable " << varRef->name << 
 					" redeclared" << endp;
 		}
@@ -616,7 +619,7 @@ PatternItemList *BaseParser::consPatternEl( LangVarRef *varRef, PatternItemList 
 		ObjectField *objField = ObjectField::cons( InputLoc(), typeRef, varRef->name );
 
 		/* Insert it into the field map. */
-		curLocalFrame->insertField( varRef->name, objField );
+		curScope->insertField( varRef->name, objField );
 	}
 
 	return list;
@@ -673,14 +676,14 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 	/* Check for redeclaration. */
-	if ( curLocalFrame->checkRedecl( data ) != 0 )
+	if ( curScope->checkRedecl( data ) != 0 )
 		error( loc ) << "variable " << data << " redeclared" << endp;
 
 	/* Note that we pass in a null type reference. This type is dependent on
 	 * the result of the iter_call lookup since it must contain a reference to
 	 * the iterator that is called. This lookup is done at compile time. */
 	ObjectField *iterField = ObjectField::cons( loc, (TypeRef*)0, data );
-	curLocalFrame->insertField( data, iterField );
+	curScope->insertField( data, iterField );
 
 	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
 			iterField, typeRef, iterCall, stmtList, context, scope );
@@ -749,10 +752,10 @@ Production *BaseParser::production( const InputLoc &loc, ProdElList *prodElList,
 
 void BaseParser::objVarDef( ObjectDef *objectDef, ObjectField *objField )
 {
-	if ( objectDef->checkRedecl( objField->name ) != 0 )
+	if ( objectDef->rootScope->checkRedecl( objField->name ) != 0 )
 		error() << "object field renamed" << endp;
 
-	objectDef->insertField( objField->name, objField );
+	objectDef->rootScope->insertField( objField->name, objField );
 }
 
 LelDefList *BaseParser::prodAppend( LelDefList *defList, Production *definition )
@@ -775,7 +778,7 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				context, curLocalFrame->curScope, objField->name );
+				context, curScope, objField->name );
 	}
 
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( loc, LangTerm::ConstructType,
@@ -783,14 +786,14 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 
 	/* Check for redeclaration. */
 	if ( objField != 0 ) {
-		if ( curLocalFrame->checkRedecl( objField->name ) != 0 ) {
+		if ( curScope->checkRedecl( objField->name ) != 0 ) {
 			error( objField->loc ) << "variable " << objField->name <<
 					" redeclared" << endp;
 		}
 
 		/* Insert it into the field map. */
 		objField->typeRef = typeRef;
-		curLocalFrame->insertField( objField->name, objField );
+		curScope->insertField( objField->name, objField );
 	}
 
 	return expr;
@@ -818,19 +821,19 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 	/* Check for redeclaration. */
-	if ( curLocalFrame->checkRedecl( objField->name ) != 0 ) {
+	if ( curScope->checkRedecl( objField->name ) != 0 ) {
 		error( objField->loc ) << "variable " << objField->name <<
 				" redeclared" << endp;
 	}
 
 	/* Insert it into the field map. */
-	curLocalFrame->insertField( objField->name, objField );
+	curScope->insertField( objField->name, objField );
 
 	//cout << "var def " << $1->objField->name << endl;
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				context, curLocalFrame->curScope, objField->name );
+				context, curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
@@ -847,15 +850,15 @@ LangStmt *BaseParser::exportStmt( ObjectField *objField, LangStmt::Type assignTy
 
 	ObjectDef *object = pd->globalObjectDef;
 
-	if ( object->checkRedecl( objField->name ) != 0 )
+	if ( object->rootScope->checkRedecl( objField->name ) != 0 )
 		error(objField->loc) << "object field renamed" << endp;
 
-	object->insertField( objField->name, objField );
+	object->rootScope->insertField( objField->name, objField );
 	objField->isExport = true;
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc, 
-				0, curLocalFrame->curScope, objField->name );
+				0, curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
@@ -887,10 +890,10 @@ void BaseParser::contextVarDef( const InputLoc &loc, ObjectField *objField )
 	objField->context = context;
 	object = context->contextObjDef;
 
-	if ( object->checkRedecl( objField->name ) != 0 )
+	if ( object->rootScope->checkRedecl( objField->name ) != 0 )
 		error(objField->loc) << "object field renamed" << endp;
 
-	object->insertField( objField->name, objField );
+	object->rootScope->insertField( objField->name, objField );
 }
 
 void BaseParser::contextHead( const InputLoc &loc, const String &data )
@@ -965,10 +968,10 @@ void BaseParser::precedenceStmt( PredType predType, PredDeclList *predDeclList )
 
 void BaseParser::pushScope()
 {
-	curLocalFrame->pushScope();
+	curScope = curLocalFrame->pushScope( curScope );
 }
 
 void BaseParser::popScope()
 {
-	curLocalFrame->curScope = curLocalFrame->curScope->parentScope;
+	curScope = curScope->parentScope;
 }

@@ -228,7 +228,7 @@ struct LoadColm
 			IterCall *iterCall = walkIterCall( Statement.iter_call() );
 
 			stmt = forScope( Statement.id().loc(), forDecl,
-					curLocalFrame->curScope, typeRef, iterCall, stmtList );
+					curScope, typeRef, iterCall, stmtList );
 
 			popScope();
 			break;
@@ -429,7 +429,7 @@ struct LoadColm
 		if ( optLabel.prodName() == opt_label::_Id ) {
 			String id = optLabel.id().data();
 			varRef = LangVarRef::cons( optLabel.id().loc(),
-					context, curLocalFrame->curScope, id );
+					context, curScope, id );
 		}
 		return varRef;
 	}
@@ -1157,7 +1157,7 @@ struct LoadColm
 		QualItemVect *qualItemVect = walkQual( Qual );
 		String id = varRef.id().data();
 		LangVarRef *langVarRef = LangVarRef::cons( varRef.id().loc(),
-				context, curLocalFrame->curScope, qualItemVect, id );
+				context, curScope, qualItemVect, id );
 		return langVarRef;
 	}
 
@@ -1814,7 +1814,7 @@ struct LoadColm
 		case iter_call::_Id: {
 			String tree = Tree.id().data();
 			LangVarRef *varRef = LangVarRef::cons( Tree.id().loc(),
-					context, curLocalFrame->curScope, tree );
+					context, curScope, tree );
 			LangTerm *langTerm = LangTerm::cons( Tree.id().loc(),
 					LangTerm::VarRefType, varRef );
 			LangExpr *langExpr = LangExpr::cons( langTerm );

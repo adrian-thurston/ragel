@@ -2421,7 +2421,7 @@ struct ObjectDef
 		o->name = name;
 		o->id = id;
 
-		o->rootScope = o->curScope = new ObjNameScope;
+		o->rootScope = new ObjNameScope;
 		o->rootScope->owner = o;
 		o->rootScope->objFieldMap = new ObjFieldMap;
 
@@ -2437,9 +2437,8 @@ struct ObjectDef
 	ObjMethodMap *objMethodMap;	
 
 	ObjNameScope *rootScope;
-	ObjNameScope *curScope;
 
-	void pushScope();
+	ObjNameScope *pushScope( ObjNameScope *curScope );
 
 	long id;
 	long nextOffset;
@@ -2449,10 +2448,10 @@ struct ObjectDef
 	void referenceField( Compiler *pd, ObjectField *field );
 	void initField( Compiler *pd, ObjectField *field );
 	void createCode( Compiler *pd, CodeVect &code );
-	ObjectField *checkRedecl( const String &name );
 	ObjMethod *findMethod( const String &name ) const;
 	ObjectField *findFieldInScope( const ObjNameScope *scope, const String &name ) const;
-	void insertField( const String &name, ObjectField *value );
+	ObjectField *checkRedecl( ObjNameScope *inScope, const String &name );
+	void insertField( ObjNameScope *inScope, const String &name, ObjectField *value );
 	void resolve( Compiler *pd );
 	ObjectField *findFieldNum( long offset );
 

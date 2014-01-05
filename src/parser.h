@@ -43,6 +43,7 @@ struct BaseParser
 	NamespaceVect namespaceStack;
 	ContextStack contextStack;
 	ObjectDef *curLocalFrame;
+	ObjNameScope *curScope;
 
 	bool enterRl;
 

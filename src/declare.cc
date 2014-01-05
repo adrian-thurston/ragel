@@ -49,30 +49,30 @@ void Compiler::initUniqueTypes( )
 
 ObjectField *ObjNameScope::checkRedecl( const String &name )
 {
-	return owner->checkRedecl( name );
+	return owner->checkRedecl( this, name );
 }
 
 void ObjNameScope::insertField( const String &name, ObjectField *value )
 {
-	return owner->insertField( name, value );
+	return owner->insertField( this, name, value );
 }
 
-ObjectField *ObjectDef::checkRedecl( const String &name )
+ObjectField *ObjectDef::checkRedecl( ObjNameScope *inScope, const String &name )
 {
-	ObjFieldMapEl *objDefMapEl = curScope->objFieldMap->find( name );
+	ObjFieldMapEl *objDefMapEl = inScope->objFieldMap->find( name );
 	if ( objDefMapEl != 0 )
 		return objDefMapEl->value;
 	return 0;
 }
 
-void ObjectDef::insertField( const String &name, ObjectField *value )
+void ObjectDef::insertField( ObjNameScope *inScope, const String &name, ObjectField *value )
 {
-	curScope->objFieldMap->insert( name, value );
+	inScope->objFieldMap->insert( name, value );
 	objFieldList->append( value );
-	value->scope = curScope;
+	value->scope = inScope;
 }
 
-void ObjectDef::pushScope()
+ObjNameScope *ObjectDef::pushScope( ObjNameScope *curScope )
 {
 	ObjNameScope *newScope = new ObjNameScope;
 	newScope->objFieldMap = new ObjFieldMap;
@@ -81,7 +81,7 @@ void ObjectDef::pushScope()
 	newScope->parentScope = curScope;
 	curScope->children.append( newScope );
 
-	curScope = newScope;
+	return newScope;
 }
 
 void LexJoin::varDecl( Compiler *pd, TokenDef *tokenDef )
@@ -124,13 +124,13 @@ void LexTerm::varDecl( Compiler *pd, TokenDef *tokenDef )
 void LexFactorAug::varDecl( Compiler *pd, TokenDef *tokenDef )
 {
 	for ( ReCaptureVect::Iter re = reCaptureVect; re.lte(); re++ ) {
-		if ( tokenDef->objectDef->checkRedecl( re->objField->name ) != 0 ) {
+		if ( tokenDef->objectDef->rootScope->checkRedecl( re->objField->name ) != 0 ) {
 			error(re->objField->loc) << "label name \"" <<
 					re->objField->name << "\" already in use" << endp;
 		}
 
 		/* Insert it into the map. */
-		tokenDef->objectDef->insertField( re->objField->name, re->objField );
+		tokenDef->objectDef->rootScope->insertField( re->objField->name, re->objField );
 
 		/* Store it in the TokenDef. */
 		tokenDef->reCaptureVect.append( *re );
@@ -254,7 +254,7 @@ void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 
 	initLocalInstructions( el );
 
-	localFrame->insertField( el->name, el );
+	localFrame->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addProdLHSLoad( Production *prod, CodeVect &code, long &insertPos )
@@ -309,7 +309,7 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 			/* Only ever fetch for reading since they are constant. */
 			el->inGetR = IN_GET_LOCAL_R;
 
-			localFrame->insertField( el->name, el );
+			localFrame->rootScope->insertField( el->name, el );
 		}
 	}
 }
@@ -721,7 +721,7 @@ void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_MATCH_LENGTH_R;
-	frame->insertField( el->name, el );
+	frame->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
@@ -736,7 +736,7 @@ void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_MATCH_TEXT_R;
-	frame->insertField( el->name, el );
+	frame->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addInput( ObjectDef *frame )
@@ -754,7 +754,7 @@ void Compiler::addInput( ObjectDef *frame )
 	el->inGetR    = IN_LOAD_INPUT_R;
 	el->inGetWV   = IN_LOAD_INPUT_WV;
 	el->inGetWC   = IN_LOAD_INPUT_WC;
-	frame->insertField( el->name, el );
+	frame->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addCtx( ObjectDef *frame )
@@ -772,7 +772,7 @@ void Compiler::addCtx( ObjectDef *frame )
 	el->inGetR    = IN_LOAD_CTX_R;
 	el->inGetWV   = IN_LOAD_CTX_WV;
 	el->inGetWC   = IN_LOAD_CTX_WC;
-	frame->insertField( el->name, el );
+	frame->rootScope->insertField( el->name, el );
 }
 
 void Compiler::initIntObject( )
@@ -903,9 +903,8 @@ void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
 	el->useOffset = false;
 	el->inGetR = getLength;
 
-	objDef->insertField( el->name, el );
+	objDef->rootScope->insertField( el->name, el );
 }
-
 
 void Compiler::initTokenObjects( )
 {
@@ -915,15 +914,15 @@ void Compiler::initTokenObjects( )
 			if ( lel->objectDef != 0 ) {
 				/* Create the "data" field. */
 				ObjectField *dataEl = makeDataEl();
-				lel->objectDef->insertField( dataEl->name, dataEl );
+				lel->objectDef->rootScope->insertField( dataEl->name, dataEl );
 
 				/* Create the "pos" field. */
 				ObjectField *posEl = makePosEl();
-				lel->objectDef->insertField( posEl->name, posEl );
+				lel->objectDef->rootScope->insertField( posEl->name, posEl );
 
 				/* Create the "line" field. */
 				ObjectField *lineEl = makeLineEl();
-				lel->objectDef->insertField( lineEl->name, lineEl );
+				lel->objectDef->rootScope->insertField( lineEl->name, lineEl );
 			}
 		}
 	}
@@ -969,7 +968,7 @@ void Compiler::addStdin()
 	el->inGetR     = IN_GET_STDIN;
 	el->inGetWC    = IN_GET_STDIN;
 	el->inGetWV    = IN_GET_STDIN;
-	globalObjectDef->insertField( el->name, el );
+	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addStdout()
@@ -986,7 +985,7 @@ void Compiler::addStdout()
 	el->inGetR    = IN_GET_STDOUT;
 	el->inGetWC    = IN_GET_STDOUT;
 	el->inGetWV    = IN_GET_STDOUT;
-	globalObjectDef->insertField( el->name, el );
+	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addStderr()
@@ -1003,7 +1002,7 @@ void Compiler::addStderr()
 	el->inGetR    = IN_GET_STDERR;
 	el->inGetWC    = IN_GET_STDERR;
 	el->inGetWV    = IN_GET_STDERR;
-	globalObjectDef->insertField( el->name, el );
+	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addArgv()
@@ -1012,7 +1011,7 @@ void Compiler::addArgv()
 	ObjectField *el = ObjectField::cons( internal, argvTypeRef, "argv" );
 	el->isArgv = true;
 	el->isConst = true;
-	globalObjectDef->insertField( el->name, el );
+	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addError()
@@ -1029,7 +1028,7 @@ void Compiler::addError()
 	el->inGetR     = IN_GET_ERROR;
 	el->inGetWC    = IN_GET_ERROR;
 	el->inGetWV    = IN_GET_ERROR;
-	globalObjectDef->insertField( el->name, el );
+	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
 int Compiler::argvOffset()
@@ -1085,7 +1084,7 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 	el->inSetWC = IN_SET_LIST_MEM_WC;
 	el->inSetWV = IN_SET_LIST_MEM_WV;
 
-	gen->objDef->insertField( el->name, el );
+	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = true;
 	el->beenReferenced = true;
@@ -1131,7 +1130,7 @@ void Compiler::initParserField( GenericType *gen, const char *name, int offset, 
 	el->inSetWC = IN_SET_PARSER_MEM_WC;
 	el->inSetWV = IN_SET_PARSER_MEM_WV;
 
-	gen->objDef->insertField( el->name, el );
+	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = true;
 	el->beenReferenced = true;
@@ -1157,7 +1156,7 @@ void Compiler::initCtxField( GenericType *gen )
 	el->inSetWC = IN_SET_PARSER_CTX_WC;
 	el->inSetWV = IN_SET_PARSER_CTX_WV;
 
-	gen->objDef->insertField( el->name, el );
+	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = false;
 	el->beenReferenced = true;
@@ -1189,7 +1188,7 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 		if ( func->localFrame->rootScope->findField( param->name ) != 0 )
 			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
 
-		func->localFrame->insertField( param->name, param );
+		func->localFrame->rootScope->insertField( param->name, param );
 		param->beenInitialized = true;
 		param->pos = paramPos;
 
