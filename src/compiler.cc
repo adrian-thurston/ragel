@@ -1121,13 +1121,6 @@ void Compiler::compile()
 
 	declarePass();
 
-	initIntObject();
-	initStrObject();
-	initStreamObject();
-	initTokenObjects();
-
-	/* Fill any empty scanners with a default token. */
-	initEmptyScanners();
 
 	resolvePass();
 
@@ -1145,7 +1138,6 @@ void Compiler::compile()
 	prepGrammar();
 
 	initAllLanguageObjects();
-	initGlobalFunctions();
 
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
 		initUserFunctions( f, f->isUserIter );

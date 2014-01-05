@@ -763,4 +763,13 @@ void Compiler::declarePass()
 	rootNamespace->declare( this );
 
 	declareByteCode();
+
+	initIntObject();
+	initStrObject();
+	initStreamObject();
+	initTokenObjects();
+	initGlobalFunctions();
+
+	/* Fill any empty scanners with a default token. */
+	initEmptyScanners();
 }
