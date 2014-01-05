@@ -42,6 +42,7 @@ struct BaseParser
 	RegionSetVect regionStack;
 	NamespaceVect namespaceStack;
 	ContextStack contextStack;
+	ObjectDef *curLocalFrame;
 
 	bool enterRl;
 

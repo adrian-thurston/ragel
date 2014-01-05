@@ -886,7 +886,6 @@ struct Compiler
 	ObjectDef *globalObjectDef;
 
 	VectorTypeIdMap vectorTypeIdMap;
-	ObjectDef *curLocalFrame;
 
 	UniqueType *findUniqueType( int typeId );
 	UniqueType *findUniqueType( int typeId, LangEl *langEl );

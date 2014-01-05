@@ -51,7 +51,7 @@ void BaseParser::init()
 
 	pd->rootLocalFrame = ObjectDef::cons( ObjectDef::FrameType, 
 				"local", pd->nextObjectId++ );
-	pd->curLocalFrame = pd->rootLocalFrame;
+	curLocalFrame = pd->rootLocalFrame;
 
 	/* Declarations of internal types. They must be declared now because we use
 	 * them directly, rather than via type lookup. */
@@ -344,13 +344,13 @@ ObjectDef *BaseParser::blockOpen()
 	ObjectDef *frame = ObjectDef::cons( ObjectDef::FrameType, 
 			"local", pd->nextObjectId++ );
 
-	pd->curLocalFrame = frame;
+	curLocalFrame = frame;
 	return frame;
 }
 
 void BaseParser::blockClose()
 {
-	pd->curLocalFrame = pd->rootLocalFrame;
+	curLocalFrame = pd->rootLocalFrame;
 }
 
 void BaseParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
@@ -394,7 +394,7 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				context, pd->curLocalFrame->curScope, objField->name );
+				context, curLocalFrame->curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, 
 				assignType, varRef, expr );
@@ -572,7 +572,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				context, pd->curLocalFrame->curScope, objField->name );
+				context, curLocalFrame->curScope, objField->name );
 	}
 
 	/* The typeref for the parser. */
@@ -588,14 +588,14 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 
 	/* Check for redeclaration. */
 	if ( objField != 0 ) {
-		if ( pd->curLocalFrame->checkRedecl( objField->name ) != 0 ) {
+		if ( curLocalFrame->checkRedecl( objField->name ) != 0 ) {
 			error( objField->loc ) << "variable " << objField->name <<
 					" redeclared" << endp;
 		}
 
 		/* Insert it into the field map. */
 		objField->typeRef = typeRef;
-		pd->curLocalFrame->insertField( objField->name, objField );
+		curLocalFrame->insertField( objField->name, objField );
 	}
 
 	return expr;
@@ -607,7 +607,7 @@ PatternItemList *BaseParser::consPatternEl( LangVarRef *varRef, PatternItemList 
 	list->head->varRef = varRef;
 
 	if ( varRef != 0 ) {
-		if ( pd->curLocalFrame->checkRedecl( varRef->name ) != 0 ) {
+		if ( curLocalFrame->checkRedecl( varRef->name ) != 0 ) {
 			error( varRef->loc ) << "variable " << varRef->name << 
 					" redeclared" << endp;
 		}
@@ -616,7 +616,7 @@ PatternItemList *BaseParser::consPatternEl( LangVarRef *varRef, PatternItemList 
 		ObjectField *objField = ObjectField::cons( InputLoc(), typeRef, varRef->name );
 
 		/* Insert it into the field map. */
-		pd->curLocalFrame->insertField( varRef->name, objField );
+		curLocalFrame->insertField( varRef->name, objField );
 	}
 
 	return list;
@@ -673,14 +673,14 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 	/* Check for redeclaration. */
-	if ( pd->curLocalFrame->checkRedecl( data ) != 0 )
+	if ( curLocalFrame->checkRedecl( data ) != 0 )
 		error( loc ) << "variable " << data << " redeclared" << endp;
 
 	/* Note that we pass in a null type reference. This type is dependent on
 	 * the result of the iter_call lookup since it must contain a reference to
 	 * the iterator that is called. This lookup is done at compile time. */
 	ObjectField *iterField = ObjectField::cons( loc, (TypeRef*)0, data );
-	pd->curLocalFrame->insertField( data, iterField );
+	curLocalFrame->insertField( data, iterField );
 
 	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
 			iterField, typeRef, iterCall, stmtList, context, scope );
@@ -775,7 +775,7 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				context, pd->curLocalFrame->curScope, objField->name );
+				context, curLocalFrame->curScope, objField->name );
 	}
 
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( loc, LangTerm::ConstructType,
@@ -783,14 +783,14 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 
 	/* Check for redeclaration. */
 	if ( objField != 0 ) {
-		if ( pd->curLocalFrame->checkRedecl( objField->name ) != 0 ) {
+		if ( curLocalFrame->checkRedecl( objField->name ) != 0 ) {
 			error( objField->loc ) << "variable " << objField->name <<
 					" redeclared" << endp;
 		}
 
 		/* Insert it into the field map. */
 		objField->typeRef = typeRef;
-		pd->curLocalFrame->insertField( objField->name, objField );
+		curLocalFrame->insertField( objField->name, objField );
 	}
 
 	return expr;
@@ -818,19 +818,19 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 	/* Check for redeclaration. */
-	if ( pd->curLocalFrame->checkRedecl( objField->name ) != 0 ) {
+	if ( curLocalFrame->checkRedecl( objField->name ) != 0 ) {
 		error( objField->loc ) << "variable " << objField->name <<
 				" redeclared" << endp;
 	}
 
 	/* Insert it into the field map. */
-	pd->curLocalFrame->insertField( objField->name, objField );
+	curLocalFrame->insertField( objField->name, objField );
 
 	//cout << "var def " << $1->objField->name << endl;
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				context, pd->curLocalFrame->curScope, objField->name );
+				context, curLocalFrame->curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
@@ -855,7 +855,7 @@ LangStmt *BaseParser::exportStmt( ObjectField *objField, LangStmt::Type assignTy
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc, 
-				0, pd->curLocalFrame->curScope, objField->name );
+				0, curLocalFrame->curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
@@ -965,10 +965,10 @@ void BaseParser::precedenceStmt( PredType predType, PredDeclList *predDeclList )
 
 void BaseParser::pushScope()
 {
-	pd->curLocalFrame->pushScope();
+	curLocalFrame->pushScope();
 }
 
 void BaseParser::popScope()
 {
-	pd->curLocalFrame->popScope();
+	curLocalFrame->popScope();
 }
