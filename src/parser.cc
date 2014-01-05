@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2012 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2006-2014 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -30,8 +30,6 @@
 #include "global.h"
 #include "input.h"
 
-using std::cout;
-using std::cerr;
 using std::endl;
 
 void BaseParser::init()
@@ -630,7 +628,7 @@ PatternItemList *BaseParser::patternElNamed( const InputLoc &loc,
 {
 	TypeRef *typeRef = TypeRef::cons( loc, parsedVarRef, nspaceQual, data, repeatType );
 	ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef, 0 );
-	PatternItem *patternItem = PatternItem::cons( loc, prodEl, PatternItem::TypeRef );
+	PatternItem *patternItem = PatternItem::cons( PatternItem::TypeRefForm, loc, prodEl );
 	return PatternItemList::cons( patternItem );
 }
 
@@ -642,7 +640,7 @@ PatternItemList *BaseParser::patternElType( const InputLoc &loc,
 	TypeRef *typeRef = TypeRef::cons( loc, parsedVarRef, nspaceQual, literal, repeatType );
 
 	ProdEl *prodEl = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef, 0 );
-	PatternItem *patternItem = PatternItem::cons( loc, prodEl, PatternItem::TypeRef );
+	PatternItem *patternItem = PatternItem::cons( PatternItem::TypeRefForm, loc, prodEl );
 	return PatternItemList::cons( patternItem );
 }
 
@@ -670,7 +668,7 @@ ConsItemList *BaseParser::consListConcat( ConsItemList *list1,
 }
 
 LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
-		ObjNameScope *scope, TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList )
+		ObjNameScope *scope, TypeRef *typeRef, IterCall *iterCall, StmtList *stmtList )
 {
 	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 

@@ -225,7 +225,7 @@ struct LoadColm
 			TypeRef *typeRef = walkTypeRef( Statement.type_ref() );
 			StmtList *stmtList = walkBlockOrSingle( Statement.block_or_single() );
 
-			LangIterCall *iterCall = walkIterCall( Statement.iter_call() );
+			IterCall *iterCall = walkIterCall( Statement.iter_call() );
 
 			stmt = forScope( Statement.id().loc(), forDecl,
 					pd->curLocalFrame->curScope, typeRef, iterCall, stmtList );
@@ -439,19 +439,21 @@ struct LoadColm
 		PatternItemList *list = 0;
 		switch ( patternEl.prodName() ) {
 		case pattern_el::_Dq: {
-			list = walkLitpatElList( patternEl.LitpatElList(), patternEl.dq_lit_term().CONS_NL(), patternVarRef );
+			list = walkLitpatElList( patternEl.LitpatElList(),
+					patternEl.dq_lit_term().CONS_NL(), patternVarRef );
 			break;
 		}
 		case pattern_el::_Tilde: {
 			String patternData = patternEl.opt_tilde_data().text().c_str();
 			patternData += '\n';
-			PatternItem *patternItem = PatternItem::cons( patternEl.opt_tilde_data().loc(),
-					patternData, PatternItem::InputText );
+			PatternItem *patternItem = PatternItem::cons( PatternItem::InputTextForm,
+					patternEl.opt_tilde_data().loc(), patternData );
 			list = PatternItemList::cons( patternItem );
 			break;
 		}
 		case pattern_el::_PatternEl: {
-			PatternItemList *typeOrLitList = walkPatternElTypeOrLit( patternEl.pattern_el_lel(), patternVarRef );
+			PatternItemList *typeOrLitList = walkPatternElTypeOrLit(
+					patternEl.pattern_el_lel(), patternVarRef );
 			LangVarRef *varRef = walkOptLabel( patternEl.opt_label() );
 			list = consPatternEl( varRef, typeOrLitList );
 			break;
@@ -465,8 +467,8 @@ struct LoadColm
 		switch ( litpatEl.prodName() ) {
 		case litpat_el::_ConsData: {
 			String consData = unescape( litpatEl.cons_data().text().c_str() );
-			PatternItem *patternItem = PatternItem::cons( litpatEl.cons_data().loc(),
-					consData, PatternItem::InputText );
+			PatternItem *patternItem = PatternItem::cons( PatternItem::InputTextForm,
+					litpatEl.cons_data().loc(), consData );
 			list = PatternItemList::cons( patternItem );
 			break;
 		}
@@ -488,7 +490,8 @@ struct LoadColm
 
 		if ( Nl != 0 ) {
 			String nl = unescape( Nl.data() );
-			PatternItem *patternItem = PatternItem::cons( Nl.loc(), nl, PatternItem::InputText );
+			PatternItem *patternItem = PatternItem::cons( PatternItem::InputTextForm,
+					Nl.loc(), nl );
 			PatternItemList *term = PatternItemList::cons( patternItem );
 			list = patListConcat( list, term );
 		}
@@ -512,14 +515,15 @@ struct LoadColm
 		PatternItemList *list = 0;
 		switch ( patternTopEl.prodName() ) {
 		case pattern_top_el::_Dq: {
-			list = walkLitpatElList( patternTopEl.LitpatElList(), patternTopEl.dq_lit_term().CONS_NL(), patternVarRef );
+			list = walkLitpatElList( patternTopEl.LitpatElList(),
+					patternTopEl.dq_lit_term().CONS_NL(), patternVarRef );
 			break;
 		}
 		case pattern_top_el::_Tilde: {
 			String patternData = patternTopEl.opt_tilde_data().text().c_str();
 			patternData += '\n';
-			PatternItem *patternItem = PatternItem::cons( patternTopEl.opt_tilde_data().loc(),
-					patternData, PatternItem::InputText );
+			PatternItem *patternItem = PatternItem::cons( PatternItem::InputTextForm,
+					patternTopEl.opt_tilde_data().loc(), patternData );
 			list = PatternItemList::cons( patternItem );
 			break;
 		}
@@ -1794,32 +1798,32 @@ struct LoadColm
 		return ObjectField::cons( varDef.id().loc(), typeRef, id );
 	}
 
-	LangIterCall *walkIterCall( iter_call IterCall )
+	IterCall *walkIterCall( iter_call Tree )
 	{
 		Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 
-		LangIterCall *iterCall = 0;
-		switch ( IterCall.prodName() ) {
+		IterCall *iterCall = 0;
+		switch ( Tree.prodName() ) {
 		case iter_call::_Call: {
-			LangVarRef *varRef = walkVarRef( IterCall.var_ref() );
-			CallArgVect *exprVect = walkCodeExprList( IterCall.CodeExprList() );
+			LangVarRef *varRef = walkVarRef( Tree.var_ref() );
+			CallArgVect *exprVect = walkCodeExprList( Tree.CodeExprList() );
 			LangTerm *langTerm = LangTerm::cons( varRef->loc, varRef, exprVect );
-			iterCall = LangIterCall::cons( LangIterCall::IterCall, langTerm );
+			iterCall = IterCall::cons( IterCall::IterCallForm, langTerm );
 			break;
 		}
 		case iter_call::_Id: {
-			String tree = IterCall.id().data();
-			LangVarRef *varRef = LangVarRef::cons( IterCall.id().loc(),
+			String tree = Tree.id().data();
+			LangVarRef *varRef = LangVarRef::cons( Tree.id().loc(),
 					context, pd->curLocalFrame->curScope, tree );
-			LangTerm *langTerm = LangTerm::cons( IterCall.id().loc(),
+			LangTerm *langTerm = LangTerm::cons( Tree.id().loc(),
 					LangTerm::VarRefType, varRef );
 			LangExpr *langExpr = LangExpr::cons( langTerm );
-			iterCall = LangIterCall::cons( LangIterCall::VarRef, langExpr );
+			iterCall = IterCall::cons( IterCall::VarRefForm, langExpr );
 			break;
 		}
 		case iter_call::_Expr: {
-			LangExpr *langExpr = walkCodeExpr( IterCall.code_expr() );
-			iterCall = LangIterCall::cons( LangIterCall::Expr, langExpr );
+			LangExpr *langExpr = walkCodeExpr( Tree.code_expr() );
+			iterCall = IterCall::cons( IterCall::ExprForm, langExpr );
 			break;
 		}}
 		

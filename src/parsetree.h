@@ -64,7 +64,7 @@ struct PdaLiteral;
 struct TypeAlias;
 struct RegionSet;
 struct ObjNameScope;
-struct LangIterCall;
+struct IterCall;
 typedef struct _PdaRun PdaRun;
 
 /* 
@@ -1536,11 +1536,11 @@ struct ObjectField;
 struct PatternItem
 {
 	enum Form { 
-		TypeRef,
-		InputText
+		TypeRefForm,
+		InputTextForm
 	};
 
-	static PatternItem *cons( const InputLoc &loc, const String &data, Form form )
+	static PatternItem *cons( Form form, const InputLoc &loc, const String &data )
 	{
 		PatternItem *p = new PatternItem;
 		p->form = form;
@@ -1553,7 +1553,7 @@ struct PatternItem
 		return p;
 	}
 
-	static PatternItem *cons( const InputLoc &loc, ProdEl *prodEl, Form form )
+	static PatternItem *cons( Form form, const InputLoc &loc, ProdEl *prodEl )
 	{
 		PatternItem *p = new PatternItem;
 		p->form = form;
@@ -2136,7 +2136,7 @@ struct TypeRef
 	/* Resolution not needed. */
 
 	/* Iterator definition. */
-	static TypeRef *cons( const InputLoc &loc, TypeRef *typeRef, LangIterCall *iterCall )
+	static TypeRef *cons( const InputLoc &loc, TypeRef *typeRef, IterCall *iterCall )
 	{
 		TypeRef *t = new TypeRef;
 		t->type = Iterator;
@@ -2177,7 +2177,7 @@ struct TypeRef
 	NamespaceQual *nspaceQual;
 	String typeName;
 	PdaLiteral *pdaLiteral;
-	LangIterCall *iterCall;
+	IterCall *iterCall;
 	IterDef *iterDef;
 	TypeRef *typeRef1;
 	TypeRef *typeRef2;
@@ -2881,39 +2881,39 @@ struct LangExpr
 struct LangStmt;
 typedef DList<LangStmt> StmtList;
 
-struct LangIterCall
+struct IterCall
 {
-	enum Type {
-		VarRef,
-		IterCall,
-		Expr
+	enum Form {
+		VarRefForm,
+		IterCallForm,
+		ExprForm
 	};
 
-	LangIterCall()
+	IterCall()
 	:
 		langTerm(0),
 		langExpr(0)
 	{}
 
-	static LangIterCall *cons( Type type, LangTerm *langTerm )
+	static IterCall *cons( Form form, LangTerm *langTerm )
 	{
-		LangIterCall *iterCall = new LangIterCall;
-		iterCall->type = type;
+		IterCall *iterCall = new IterCall;
+		iterCall->form = form;
 		iterCall->langTerm = langTerm;
 		return iterCall;
 	}
 
-	static LangIterCall *cons( Type type, LangExpr *langExpr )
+	static IterCall *cons( Form form, LangExpr *langExpr )
 	{
-		LangIterCall *iterCall = new LangIterCall;
-		iterCall->type = type;
+		IterCall *iterCall = new IterCall;
+		iterCall->form = form;
 		iterCall->langExpr = langExpr;
 		return iterCall;
 	}
 
 	void resolve( Compiler *pd ) const;
 
-	Type type;
+	Form form;
 	LangTerm *langTerm;
 	LangExpr *langExpr;
 };
@@ -3074,7 +3074,7 @@ struct LangStmt
 	}
 
 	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField,
-			TypeRef *typeRef, LangIterCall *iterCall, StmtList *stmtList,
+			TypeRef *typeRef, IterCall *iterCall, StmtList *stmtList,
 			Context *context, ObjNameScope *scope )
 	{
 		LangStmt *s = new LangStmt;
@@ -3105,7 +3105,7 @@ struct LangStmt
 	void resolve( Compiler *pd ) const;
 	void resolveParserItems( Compiler *pd ) const;
 
-	void chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const;
+	void chooseDefaultIter( Compiler *pd, IterCall *iterCall ) const;
 	void compileWhile( Compiler *pd, CodeVect &code ) const;
 	void compileForIterBody( Compiler *pd, CodeVect &code, UniqueType *iterUT ) const;
 	void compileForIter( Compiler *pd, CodeVect &code ) const;
@@ -3126,7 +3126,7 @@ struct LangStmt
 	/* Either another if, or an else. */
 	LangStmt *elsePart;
 	String name;
-	LangIterCall *iterCall;
+	IterCall *iterCall;
 	Context *context;
 	ObjNameScope *scope;
 

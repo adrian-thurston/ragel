@@ -511,7 +511,7 @@ void Compiler::makeIgnoreCollectors()
 	}
 }
 
-void LangStmt::chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const
+void LangStmt::chooseDefaultIter( Compiler *pd, IterCall *iterCall ) const
 {
 	/* The iterator name. */
 	LangVarRef *callVarRef = LangVarRef::cons( loc, context, scope, "triter" );
@@ -521,13 +521,13 @@ void LangStmt::chooseDefaultIter( Compiler *pd, LangIterCall *iterCall ) const
 	callExprVect->append( new CallArg( iterCall->langExpr ) );
 	iterCall->langTerm = LangTerm::cons( InputLoc(), callVarRef, callExprVect );
 	iterCall->langExpr = 0;
-	iterCall->type = LangIterCall::IterCall;
+	iterCall->form = IterCall::IterCallForm;
 }
 
 
 void LangStmt::declareForIter( Compiler *pd ) const
 {
-	if ( iterCall->type != LangIterCall::IterCall )
+	if ( iterCall->form != IterCall::IterCallForm )
 		chooseDefaultIter( pd, iterCall );
 
 	objField->typeRef = TypeRef::cons( loc, typeRef, iterCall );

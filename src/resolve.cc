@@ -404,11 +404,11 @@ void LangTerm::resolve( Compiler *pd )
 		case MatchType:
 			for ( PatternItemList::Iter item = *pattern->list; item.lte(); item++ ) {
 				switch ( item->form ) {
-				case PatternItem::TypeRef:
+				case PatternItem::TypeRefForm:
 					/* Use pdaFactor reference resolving. */
 					pd->resolveProdEl( item->prodEl );
 					break;
-				case PatternItem::InputText:
+				case PatternItem::InputTextForm:
 					/* Nothing to do here. */
 					break;
 				}
@@ -484,14 +484,14 @@ void LangExpr::resolve( Compiler *pd ) const
 	}
 }
 
-void LangIterCall::resolve( Compiler *pd ) const
+void IterCall::resolve( Compiler *pd ) const
 {
-	switch ( type ) {
-		case IterCall:
+	switch ( form ) {
+		case IterCallForm:
 			langTerm->resolve( pd );
 			break;
-		case VarRef:
-		case Expr:
+		case VarRefForm:
+		case ExprForm:
 			langExpr->resolve( pd );
 			break;
 	}
