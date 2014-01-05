@@ -1976,7 +1976,7 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	}
 
 	/* Also force the field to be initialized. */
-	pd->curLocalFrame->initField( pd, objField );
+	objField->scope->owner->initField( pd, objField );
 
 	/* 
 	 * Create the iterator from the local var.
@@ -2210,11 +2210,11 @@ void CodeBlock::compile( Compiler *pd, CodeVect &code ) const
 }
 
 
-void Compiler::findLocalTrees( CharSet &trees )
+void Compiler::findLocalTrees( ObjectDef *localFrame, CharSet &trees )
 {
 	/* We exlcude "lhs" from being downrefed because we need to use if after
 	 * the frame is is cleaned and so it must survive. */
-	for ( ObjFieldList::Iter ol = *curLocalFrame->objFieldList; ol.lte(); ol++ ) {
+	for ( ObjFieldList::Iter ol = *localFrame->objFieldList; ol.lte(); ol++ ) {
 		ObjectField *el = ol->value;
 		/* FIXME: This test needs to be improved. Match_text was getting
 		 * through before useOffset was tested. What will? */
@@ -2226,11 +2226,11 @@ void Compiler::findLocalTrees( CharSet &trees )
 	}
 }
 
-void Compiler::findLocalIters( Iters &iters )
+void Compiler::findLocalIters( ObjectDef *localFrame, Iters &iters )
 {
 	/* We exclude "lhs" from being downrefed because we need to use if after
 	 * the frame is is cleaned and so it must survive. */
-	for ( ObjFieldList::Iter ol = *curLocalFrame->objFieldList; ol.lte(); ol++ ) {
+	for ( ObjFieldList::Iter ol = *localFrame->objFieldList; ol.lte(); ol++ ) {
 		ObjectField *el = ol->value;
 		if ( el->useOffset ) {
 			UniqueType *ut = el->typeRef->uniqueType;
@@ -2242,14 +2242,14 @@ void Compiler::findLocalIters( Iters &iters )
 	}
 }
 
-void Compiler::findLocals( CodeBlock *block )
+void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 {
-	findLocalTrees( block->trees );
-	findLocalIters( block->iters );
+	findLocalTrees( localFrame, block->trees );
+	findLocalIters( localFrame, block->iters );
 
 	Locals &locals = block->locals;
 
-	for ( ObjFieldList::Iter ol = *curLocalFrame->objFieldList; ol.lte(); ol++ ) {
+	for ( ObjFieldList::Iter ol = *localFrame->objFieldList; ol.lte(); ol++ ) {
 		ObjectField *el = ol->value;
 
 		/* FIXME: This test needs to be improved. Match_text was getting
@@ -2305,7 +2305,6 @@ void Compiler::compileReductionCode( Production *prod )
 
 	/* Init the compilation context. */
 	compileContext = CompileReduction;
-	curLocalFrame = block->localFrame;
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
@@ -2321,7 +2320,7 @@ void Compiler::compileReductionCode( Production *prod )
 	block->compile( this, code );
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
-	long frameSize = curLocalFrame->size();
+	long frameSize = block->localFrame->size();
 	code.setHalf( 1, frameSize );
 
 	/* Might need to load right hand side values. */
@@ -2334,7 +2333,7 @@ void Compiler::compileReductionCode( Production *prod )
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
-	findLocals( block );
+	findLocals( block->localFrame, block );
 }
 
 void Compiler::compileTranslateBlock( LangEl *langEl )
@@ -2343,7 +2342,6 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 
 	/* Set up compilation context. */
 	compileContext = CompileTranslation;
-	curLocalFrame = block->localFrame;
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
@@ -2358,23 +2356,23 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 		code.append( IN_INIT_CAPTURES );
 		code.append( langEl->tokenDef->reCaptureVect.length() );
 
-		ObjFieldList::Iter f = *curLocalFrame->objFieldList;
+		ObjFieldList::Iter f = *block->localFrame->objFieldList;
 		for ( int i = 0; i < langEl->tokenDef->reCaptureVect.length(); i++, f++ )
-			curLocalFrame->referenceField( this, f->value );
+			block->localFrame->referenceField( this, f->value );
 	}
 
 	/* Set the local frame and compile the reduce block. */
 	block->compile( this, code );
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
-	long frameSize = curLocalFrame->size();
+	long frameSize = block->localFrame->size();
 	code.setHalf( 1, frameSize );
 
 	code.append( IN_PCR_RET );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
-	findLocals( block );
+	findLocals( block->localFrame, block );
 }
 
 void Compiler::compilePreEof( TokenRegion *region )
@@ -2383,12 +2381,11 @@ void Compiler::compilePreEof( TokenRegion *region )
 
 	/* Set up compilation context. */
 	compileContext = CompileTranslation;
-	curLocalFrame = region->preEofBlock->localFrame;
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
-	addInput( curLocalFrame );
-	addCtx( curLocalFrame );
+	addInput( block->localFrame );
+	addCtx( block->localFrame );
 
 	CodeVect &code = block->codeWV;
 
@@ -2401,14 +2398,14 @@ void Compiler::compilePreEof( TokenRegion *region )
 	block->compile( this, code );
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
-	long frameSize = curLocalFrame->size();
+	long frameSize = block->localFrame->size();
 	code.setHalf( 1, frameSize );
 
 	code.append( IN_PCR_RET );
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
-	findLocals( block );
+	findLocals( block->localFrame, block );
 }
 
 void Compiler::compileRootBlock( )
@@ -2420,7 +2417,6 @@ void Compiler::compileRootBlock( )
 	/* Set up the compile context. No locals are needed for the root code
 	 * block, but we need an empty local frame for the compile. */
 	compileContext = CompileRoot;
-	curLocalFrame = rootLocalFrame;
 	revertOn = false;
 
 	/* The block needs a frame id. */
@@ -2440,13 +2436,13 @@ void Compiler::compileRootBlock( )
 	block->compile( this, code );
 
 	/* We have the frame size now. Store it in frame init. */
-	long frameSize = curLocalFrame->size();
+	long frameSize = rootLocalFrame->size();
 	code.setHalf( 1, frameSize );
 
 	code.append( IN_STOP );
 
 	/* Make the local trees descriptor. */
-	findLocals( block );
+	findLocals( rootLocalFrame, block );
 }
 
 void Compiler::initAllLanguageObjects()
@@ -2553,9 +2549,6 @@ void Compiler::compileUserIter( Function *func )
 	curFunction = func;
 	block->frameId = nextFrameId++;
 
-	/* Need an object for the local frame. */
-	curLocalFrame = func->codeBlock->localFrame;
-
 	/* Compile for revert and commit. */
 	revertOn = true;
 	compileUserIter( func, block->codeWV );
@@ -2565,7 +2558,7 @@ void Compiler::compileUserIter( Function *func )
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
-	findLocals( block );
+	findLocals( block->localFrame, block );
 
 	/* FIXME: Need to deal with the freeing of local trees. */
 }
@@ -2621,9 +2614,6 @@ void Compiler::compileFunction( Function *func )
 	/* Assign a frame Id. */
 	block->frameId = nextFrameId++;
 
-	/* Need an object for the local frame. */
-	curLocalFrame = func->codeBlock->localFrame;
-
 	/* Compile once for revert. */
 	revertOn = true;
 	compileFunction( func, block->codeWV );
@@ -2634,7 +2624,7 @@ void Compiler::compileFunction( Function *func )
 
 	/* Now that compilation is done variables are referenced. Make the local
 	 * trees descriptor. */
-	findLocals( block );
+	findLocals( block->localFrame, block );
 }
 
 void Compiler::removeNonUnparsableRepls()
