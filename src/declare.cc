@@ -399,18 +399,19 @@ void Namespace::declare( Compiler *pd )
 			}
 			else {
 				/* Original. Create a token for the literal. */
-				LangEl *newLangEl = declareLangEl( pd, this, tokenDef->name, LangEl::Term );
+				LangEl *litEl = declareLangEl( pd, this, tokenDef->name, LangEl::Term );
 
-				newLangEl->lit = tokenDef->literal;
-				newLangEl->isLiteral = true;
-				newLangEl->tokenDef = tokenDef;
+				litEl->lit = tokenDef->literal;
+				litEl->isLiteral = true;
+				litEl->tokenDef = tokenDef;
+				litEl->objectDef = tokenDef->objectDef;
 
-				tokenDef->tdLangEl = newLangEl;
+				tokenDef->tdLangEl = litEl;
 
 				if ( tokenDef->noPreIgnore )
-					newLangEl->noPreIgnore = true;
+					litEl->noPreIgnore = true;
 				if ( tokenDef->noPostIgnore )
-					newLangEl->noPostIgnore = true;
+					litEl->noPostIgnore = true;
 			}
 		}
 	}
