@@ -1,160 +1,163 @@
 include '../src/ragel.lm'
 
-lex 
-	literal '%%{', '}%%'
+namespace indep
+	lex 
+		literal '%%{', '}%%'
 
-	literal 'int', 'bool', 'const', 'char', 'ptr', 'printi',
-			'printb', 'prints', 'print_token',
-			'fwrite', 'first_token_char', 'byte', 'if', 'else'
+		literal 'int', 'bool', 'const', 'char', 'ptr', 'printi',
+				'printb', 'prints', 'print_token',
+				'fwrite', 'first_token_char', 'byte', 'if', 'else'
 
-	literal 'fgoto', 'fcall', 'fnext', 'fexec'
+		literal 'fgoto', 'fcall', 'fnext', 'fexec'
 
-	literal ';', '<', '>', '(', ')', '[', ']', '=',
-			'*', '!', '{', '}', '+', '-', '==', '!=',
-			'>=', '<='
+		literal ';', '<', '>', '(', ')', '[', ']', '=',
+				'*', '!', '{', '}', '+', '-', '==', '!=',
+				'>=', '<='
 
-	ignore / ( [ \t] | NL )+ /
+		ignore / ( [ \t] | NL )+ /
 
-	token tk_ident /ident/
-	token tk_number /digit+/
-	token tk_hex_number /'0x' [0-9a-fA-F]+/
+		token tk_ident /ident/
+		token tk_number /digit+/
+		token tk_hex_number /'0x' [0-9a-fA-F]+/
 
-	rl INPUT /'_'+ 'INPUT' '_'+/
-	rl OUTPUT /'_'+ 'OUTPUT' '_'+/
+		rl INPUT /'_'+ 'INPUT' '_'+/
+		rl OUTPUT /'_'+ 'OUTPUT' '_'+/
 
-	token ifdef_INPUT
-		/ '#ifdef' ' '* INPUT /
+		token ifdef_INPUT
+			/ '#ifdef' ' '* INPUT /
 
-	token ifdef_OUTPUT
-		/ '#ifdef' ' '* OUTPUT ' '* '\n' / ni
+		token ifdef_OUTPUT
+			/ '#ifdef' ' '* OUTPUT ' '* '\n' / ni
 
-	token endif
-		/ '#endif' /
+		token endif
+			/ '#endif' /
 
-	token tk_cpp_comment
-		/ cpp_comment /
+		token tk_cpp_comment
+			/ cpp_comment /
 
-	token c_comm_open
-		/ '/*' /
+		token c_comm_open
+			/ '/*' /
 
-	token string
-		/ s_literal | d_literal /
+		token string
+			/ s_literal | d_literal /
+	end
+
+	lex
+		token output_endif / '#endif\n' /
+		token output_line /[^\n]* '\n'/
+	end
+
+	lex
+		token comm_val /'@' [A-Za-z0-9_]+ ': ' [^\n]+ '\n' /
+		token comm_term /'*/'/
+		token comm_any / any /
+	end
+
+	def comm_item
+		[comm_val]
+	|	[comm_any]
+
+	def c_comment
+		[c_comm_open comm_item* comm_term]
+
+	def input_string
+		[string]
+
+	def input_list
+		[input_list input_string]
+	| 	[input_string]
+
+	def input
+		[ifdef_INPUT input_list endif]
+
+	def output
+		[ifdef_OUTPUT output_line* output_endif]
+
+	def factor
+		['first_token_char']
+	|	[tk_ident]
+	|	[tk_ident '[' expr ']']
+	|	[tk_ident '(' expr ')']
+	|	[tk_number]
+	|	['-' tk_number]
+	|	[tk_hex_number]
+	|	[string]
+	|	['<' type '>' '(' expr ')']
+	|	['(' expr ')']
+
+	def op
+		['<'] | ['>'] | ['='] | ['!']
+	|	['+'] | ['-'] | ['*'] | ['!=']
+	|	['=='] | ['<='] | ['>=']
+
+	def expr_op
+		[op factor]
+
+	def expr
+		[factor expr_op*]
+
+	def type
+		['int']
+	|	['bool']
+	|	['char']
+	|	['ptr']
+	|	['byte']
+
+	def opt_arr
+		['[' expr ']']
+	|	[]
+
+	def var_decl
+		[type tk_ident opt_arr ';']
+
+	def opt_sub
+		[ '[' expr ']' ]
+	|	[]
+
+	def expr_stmt
+		[tk_ident opt_sub '=' expr ';']
+	|	[expr ';']
+
+	def if_stmt
+		['if' '(' expr ')' '{' stmt* '}' opt_else]
+
+	def opt_else
+		['else' '{' stmt* '}']
+	|	[]
+
+	def print_stmt
+		['printi' expr ';']
+	|	['printb' expr ';']
+	|	['prints' expr ';']
+	|	['print_token' ';']
+
+	def stmt
+		[var_decl]
+	|	[expr_stmt]
+	|	[if_stmt]
+	|	[print_stmt]
+	|	['{' stmt* '}']
+	|	['{' expr '}']
+	|	[input]
+	|	[output]
+	|	[tk_cpp_comment]
+	|	[c_comment]
+	|	['fgoto' tk_ident ';']
+	|	['fcall' tk_ident ';']
+	|	['fnext' tk_ident ';']
+	|	['fgoto' '*' expr ';']
+	|	['fcall' '*' expr ';']
+	|	['fnext' '*' expr ';']
+	|	['fexec' expr ';']
+
+	def section_multiline
+		['%%{' ragel::ragel_start '}%%']
+
+	def section
+		[section_multiline]
+	|	[stmt]
+
+	def start
+		[section*]
+
 end
-
-lex
-	token output_endif / '#endif\n' /
-	token output_line /[^\n]* '\n'/
-end
-
-lex
-	token comm_val /'@' [A-Za-z0-9_]+ ': ' [^\n]+ '\n' /
-	token comm_term /'*/'/
-	token comm_any / any /
-end
-
-def comm_item
-	[comm_val]
-|	[comm_any]
-
-def c_comment
-	[c_comm_open comm_item* comm_term]
-
-def input_string
-	[string]
-
-def input_list
-	[input_list input_string]
-| 	[input_string]
-
-def input
-	[ifdef_INPUT input_list endif]
-
-def output
-	[ifdef_OUTPUT output_line* output_endif]
-
-def factor
-	['first_token_char']
-|	[tk_ident]
-|	[tk_ident '[' expr ']']
-|	[tk_ident '(' expr ')']
-|	[tk_number]
-|	['-' tk_number]
-|	[tk_hex_number]
-|	[string]
-|	['<' type '>' '(' expr ')']
-|	['(' expr ')']
-
-def op
-	['<'] | ['>'] | ['='] | ['!']
-|	['+'] | ['-'] | ['*'] | ['!=']
-|	['=='] | ['<='] | ['>=']
-
-def expr_op
-	[op factor]
-
-def expr
-	[factor expr_op*]
-
-def type
-	['int']
-|	['bool']
-|	['char']
-|	['ptr']
-|	['byte']
-
-def opt_arr
-	['[' expr ']']
-|	[]
-
-def var_decl
-	[type tk_ident opt_arr ';']
-
-def opt_sub
-	[ '[' expr ']' ]
-|	[]
-
-def expr_stmt
-	[tk_ident opt_sub '=' expr ';']
-|	[expr ';']
-
-def if_stmt
-	['if' '(' expr ')' '{' stmt* '}' opt_else]
-
-def opt_else
-	['else' '{' stmt* '}']
-|	[]
-
-def print_stmt
-	['printi' expr ';']
-|	['printb' expr ';']
-|	['prints' expr ';']
-|	['print_token' ';']
-
-def stmt
-	[var_decl]
-|	[expr_stmt]
-|	[if_stmt]
-|	[print_stmt]
-|	['{' stmt* '}']
-|	['{' expr '}']
-|	[input]
-|	[output]
-|	[tk_cpp_comment]
-|	[c_comment]
-|	['fgoto' tk_ident ';']
-|	['fcall' tk_ident ';']
-|	['fnext' tk_ident ';']
-|	['fgoto' '*' expr ';']
-|	['fcall' '*' expr ';']
-|	['fnext' '*' expr ';']
-|	['fexec' expr ';']
-
-def section_multiline
-	['%%{' ragel::ragel_start '}%%']
-
-def section
-	[section_multiline]
-|	[stmt]
-
-def start
-	[section*]

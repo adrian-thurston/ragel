@@ -70,6 +70,8 @@ namespace d
 		[type tk_ident opt_arr ';']
 end
 
+namespace indep
+
 d::expr d_expr( Expr: expr )
 {
 	return cast<d::expr> Expr
@@ -151,6 +153,7 @@ int d_rewrite( Indep: ref<any> )
 	}
 }
 
+end
 
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
@@ -159,7 +162,7 @@ Lang: str = argv.pop()
 Input: stream = open( InputFile "r" )
 Output: stream = open( OutputFile "w" )
 
-RagelTree: start = parse start[ Input ]
+RagelTree: indep::start = parse indep::start[ Input ]
 
 if ( !RagelTree ) {
 	print( error '\n' )
@@ -171,7 +174,7 @@ MachineName: ragel::machine_name = ragel::machine_name in RagelTree
 
 # Do we need EOF?
 NeedsEof: bool = false
-for CommVal: comm_val in RagelTree {
+for CommVal: indep::comm_val in RagelTree {
 	if $CommVal ==
 		'@NEEDS_EOF: yes\n'
 	{
@@ -191,18 +194,18 @@ send Output
 	"class [MachineName.word]
 	"{
 
-for Section: section in RagelTree {
+for Section: indep::section in RagelTree {
 	if match Section [Decl: var_decl] {
 		d_rewrite( Decl )
 		send Output [Decl]
 	}
 }
 
-for Section: section in RagelTree {
+for Section: indep::section in RagelTree {
 	if match Section [section_multiline] {
 		for Action: ragel::action_block in Section {
 			# Reparse as lang-independent code.
-			parse SectionList: section*[$Action]
+			parse SectionList: indep::section*[$Action]
 
 			# Translate to specific language.
 			d_rewrite( SectionList )
@@ -222,9 +225,9 @@ send Output
 	"void init()
 	"{
 
-for Section: section in RagelTree {
+for Section: indep::section in RagelTree {
 	if match Section [ExprStmt: expr_stmt] {
-		cons SectionList: section* [ExprStmt]
+		cons SectionList: indep::section* [ExprStmt]
 		d_rewrite( ExprStmt )
 		send Output [ExprStmt]
 	}
@@ -263,7 +266,7 @@ send Output
 	~const char[][] inp = [
 
 NR: int = 0
-for InputString: input_string in RagelTree {
+for InputString: indep::input_string in RagelTree {
 	send Output [^InputString ",\n"]
 	NR = NR + 1
 }
@@ -290,7 +293,7 @@ send Output
 	"
 
 send Output "/* _____OUTPUT_____
-for OutputLine: output_line in RagelTree {
+for OutputLine: indep::output_line in RagelTree {
 	prints( Output OutputLine )
 }
 send Output "*/

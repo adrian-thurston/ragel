@@ -60,6 +60,8 @@ namespace c
 	|	['fwrite' '(' expr ')' ';']
 end
 
+namespace indep
+
 c::factor c_factor( Factor: factor )
 {
 	return cast<c::factor> Factor
@@ -136,6 +138,8 @@ int c_rewrite( Indep: ref<any> )
 	}
 }
 
+end
+
 
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
@@ -144,7 +148,7 @@ Lang: str = argv.pop()
 Input: stream = open( InputFile "r" )
 Output: stream = open( OutputFile "w" )
 
-RagelTree: start = parse start[ Input ]
+RagelTree: indep::start = parse indep::start[ Input ]
 
 if ( !RagelTree ) {
 	print( error '\n' )
@@ -156,7 +160,7 @@ MachineName: ragel::machine_name = ragel::machine_name in RagelTree
 
 # Do we need EOF?
 NeedsEof: bool = false
-for CommVal: comm_val in RagelTree {
+for CommVal: indep::comm_val in RagelTree {
 	if $CommVal ==
 		'@NEEDS_EOF: yes\n'
 	{
@@ -174,18 +178,18 @@ send Output
 	"#include <stdio.h>
 	"
 
-for Section: section in RagelTree {
+for Section: indep::section in RagelTree {
 	if match Section [Decl: var_decl] {
 		c_rewrite( Decl )
 		send Output [Decl]
 	}
 }
 
-for Section: section in RagelTree {
+for Section: indep::section in RagelTree {
 	if match Section [section_multiline] {
 		for Action: ragel::action_block in Section {
 			# Reparse as lang-independent code.
-			parse SectionList: section*[$Action]
+			parse SectionList: indep::section*[$Action]
 			if ( !SectionList ) {
 				print( error '\n' Action )
 				exit(1)
@@ -213,7 +217,7 @@ send Output
 	"void init()
 	"{
 
-for Section: section in RagelTree {
+for Section: indep::section in RagelTree {
 	if match Section [ExprStmt: expr_stmt] {
 		c_rewrite( ExprStmt )
 		send Output [ExprStmt]
@@ -251,7 +255,7 @@ send Output
 	"char *inp\[\] = {
 
 NR: int = 0
-for InputString: input_string in RagelTree {
+for InputString: indep::input_string in RagelTree {
 	send Output 
 		[^InputString ",\n"]
 	NR = NR + 1
@@ -279,7 +283,7 @@ send Output
 	"
 
 send Output "/* _____OUTPUT_____
-for OutputLine: output_line in RagelTree {
+for OutputLine: indep::output_line in RagelTree {
 	send Output [OutputLine]
 }
 send Output "*/
