@@ -701,7 +701,7 @@ struct LoadColm
 			break;
 		}
 		case region_qual::_Base: {
-			qual = NamespaceQual::cons( namespaceStack.top() );
+			qual = NamespaceQual::cons( curNspace() );
 			break;
 		}}
 		return qual;
@@ -1064,7 +1064,7 @@ struct LoadColm
 		LexExpression *expr = walkLexExpr( LexExpr );
 		LexJoin *join = LexJoin::cons( expr );
 
-		addRegularDef( rlDef.id().loc(), namespaceStack.top(), id, join );
+		addRegularDef( rlDef.id().loc(), curNspace(), id, join );
 	}
 
 	void walkLexRegion( region_def regionDef )
@@ -1085,7 +1085,7 @@ struct LoadColm
 
 		bool reduceFirst = cflDef.opt_reduce_first().REDUCEFIRST() != 0;
 
-		NtDef *ntDef = NtDef::cons( name, namespaceStack.top(),
+		NtDef *ntDef = NtDef::cons( name, curNspace(),
 				curContext(), reduceFirst );
 
 		BaseParser::cflDef( ntDef, objectDef, defList );

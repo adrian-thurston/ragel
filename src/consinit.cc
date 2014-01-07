@@ -334,7 +334,7 @@ void ConsInit::keyword( const String &kw )
 ProdEl *ConsInit::prodRefName( const String &name )
 {
 	ProdEl *prodEl = prodElName( internal, name,
-			NamespaceQual::cons(namespaceStack.top()), 0,
+			NamespaceQual::cons( curNspace() ), 0,
 			RepeatNone, false );
 	return prodEl;
 }
@@ -343,7 +343,7 @@ ProdEl *ConsInit::prodRefName( const String &capture, const String &name )
 {
 	ObjectField *captureField = ObjectField::cons( internal, 0, capture );
 	ProdEl *prodEl = prodElName( internal, name,
-			NamespaceQual::cons(namespaceStack.top()), captureField,
+			NamespaceQual::cons( curNspace() ), captureField,
 			RepeatNone, false );
 	return prodEl;
 }
@@ -351,7 +351,7 @@ ProdEl *ConsInit::prodRefName( const String &capture, const String &name )
 ProdEl *ConsInit::prodRefNameRepeat( const String &name )
 {
 	ProdEl *prodEl = prodElName( internal, name,
-			NamespaceQual::cons(namespaceStack.top()), 0,
+			NamespaceQual::cons( curNspace() ), 0,
 			RepeatRepeat, false );
 	return prodEl;
 }
@@ -360,7 +360,7 @@ ProdEl *ConsInit::prodRefNameRepeat( const String &capture, const String &name )
 {
 	ObjectField *captureField = ObjectField::cons( internal, 0, capture );
 	ProdEl *prodEl = prodElName( internal, name,
-			NamespaceQual::cons(namespaceStack.top()), captureField,
+			NamespaceQual::cons( curNspace() ), captureField,
 			RepeatRepeat, false );
 	return prodEl;
 }
@@ -368,7 +368,7 @@ ProdEl *ConsInit::prodRefNameRepeat( const String &capture, const String &name )
 ProdEl *ConsInit::prodRefLit( const String &lit )
 {
 	ProdEl *prodEl = prodElLiteral( internal, lit, 
-			NamespaceQual::cons(namespaceStack.top()), 0,
+			NamespaceQual::cons( curNspace() ), 0,
 			RepeatNone, false );
 	return prodEl;
 }
@@ -451,7 +451,7 @@ void ConsInit::definition( const String &name, Production *prod1, Production *pr
 	prodAppend( defList, prod3 );
 	prodAppend( defList, prod4 );
 
-	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), curContext(), false );
+	NtDef *ntDef = NtDef::cons( name, curNspace(), curContext(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
@@ -463,7 +463,7 @@ void ConsInit::definition( const String &name, Production *prod1, Production *pr
 	prodAppend( defList, prod2 );
 	prodAppend( defList, prod3 );
 
-	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), curContext(), false );
+	NtDef *ntDef = NtDef::cons( name, curNspace(), curContext(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
@@ -474,7 +474,7 @@ void ConsInit::definition( const String &name, Production *prod1, Production *pr
 	prodAppend( defList, prod1 );
 	prodAppend( defList, prod2 );
 
-	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), curContext(), false );
+	NtDef *ntDef = NtDef::cons( name, curNspace(), curContext(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
@@ -484,7 +484,7 @@ void ConsInit::definition( const String &name, Production *prod )
 	LelDefList *defList = new LelDefList;
 	prodAppend( defList, prod );
 
-	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), curContext(), false );
+	NtDef *ntDef = NtDef::cons( name, curNspace(), curContext(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
@@ -737,7 +737,7 @@ void ConsInit::startProd()
 void ConsInit::parseInput( StmtList *stmtList )
 {
 	/* Parse the "start" def. */
-	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
 
 	/* Pop argv, this yields the file name . */
@@ -783,7 +783,7 @@ void ConsInit::exportTree( StmtList *stmtList )
 	LangVarRef *varRef = LangVarRef::cons( internal, 0, curLocalFrame->rootScope, qual, String("P") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
 
-	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
 	ObjectField *program = ObjectField::cons( internal, typeRef, String("ColmTree") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );

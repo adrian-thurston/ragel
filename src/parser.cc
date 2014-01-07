@@ -184,7 +184,7 @@ void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join, O
 	if ( name == 0 )
 		name.setAs( 32, "_ignore_%.4x", pd->nextTokenId );
 
-	Namespace *nspace = namespaceStack.top();
+	Namespace *nspace = curNspace();
 	RegionSet *regionSet = regionStack.top();
 
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
@@ -231,7 +231,7 @@ void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join, O
 	if ( join != 0 ) {
 		/* Create a regular language definition so the token can be used to
 		 * make other tokens */
-		addRegularDef( loc, namespaceStack.top(), name, join );
+		addRegularDef( loc, curNspace(), name, join );
 	}
 }
 
@@ -247,7 +247,7 @@ void BaseParser::zeroDef( const InputLoc &loc, const String &data,
 	String interp("");;
 
 	/* Look for the production's associated region. */
-	Namespace *nspace = namespaceStack.top();
+	Namespace *nspace = curNspace();
 	RegionSet *regionSet = regionStack.top();
 
 	LiteralDictEl *ldel = nspace->literalDict.find( interp );
@@ -289,7 +289,7 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 	prepareLitString( interp, unusedCI, data, loc );
 
 	/* Look for the production's associated region. */
-	Namespace *nspace = namespaceStack.top();
+	Namespace *nspace = curNspace();
 	RegionSet *regionSet = regionStack.top();
 
 	LiteralDictEl *ldel = nspace->literalDict.find( interp );
@@ -408,7 +408,7 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 
 void BaseParser::cflDef( NtDef *ntDef, ObjectDef *objectDef, LelDefList *defList )
 {
-	Namespace *nspace = namespaceStack.top();
+	Namespace *nspace = curNspace();
 
 	ntDef->objectDef = objectDef;
 	ntDef->defList = defList;
@@ -467,7 +467,7 @@ LexFactor *BaseParser::lexRlFactorName( const String &data, const InputLoc &loc 
 {
 	LexFactor *factor = 0;
 	/* Find the named graph. */
-	Namespace *nspace = namespaceStack.top();
+	Namespace *nspace = curNspace();
 
 	while ( nspace != 0 ) {
 		GraphDictEl *gdNode = nspace->rlMap.find( data );
@@ -547,8 +547,7 @@ LexJoin *BaseParser::lexOptJoin( LexJoin *join, LexJoin *context )
 
 LangExpr *BaseParser::send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof )
 {
-	Namespace *nspace = namespaceStack.top();
-	ParserText *parserText = ParserText::cons( loc, nspace, list );
+	ParserText *parserText = ParserText::cons( loc, curNspace(), list );
 	pd->parserTextList.append( parserText );
 
 	return LangExpr::cons( LangTerm::consSend( loc, varRef,
@@ -560,13 +559,11 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 {
 	LangExpr *expr = 0;
 
-	Namespace *nspace = namespaceStack.top();
-
 	/* We are constructing a parser, sending it items, then returning it.
 	 * Thisis the constructor for the parser. */
 	ConsItemList *emptyConsItemList = new ConsItemList;
 
-	Constructor *constructor = Constructor::cons( loc, nspace,
+	Constructor *constructor = Constructor::cons( loc, curNspace(),
 			emptyConsItemList, pd->nextPatConsId++ );
 	pd->replList.append( constructor );
 	
@@ -581,7 +578,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	TypeRef *parserTypeRef = TypeRef::cons( loc,
 			TypeRef::Parser, 0, typeRef, 0 );
 
-	ParserText *parserText = ParserText::cons( loc, nspace, list );
+	ParserText *parserText = ParserText::cons( loc, curNspace(), list );
 	pd->parserTextList.append( parserText );
 
 	expr = LangExpr::cons( LangTerm::cons( loc, 
@@ -765,9 +762,7 @@ LelDefList *BaseParser::prodAppend( LelDefList *defList, Production *definition 
 LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 		ConsItemList *list, TypeRef *typeRef, FieldInitVect *fieldInitVect )
 {
-	Namespace *nspace = namespaceStack.top();
-
-	Constructor *constructor = Constructor::cons( loc, nspace,
+	Constructor *constructor = Constructor::cons( loc, curNspace(),
 			list, pd->nextPatConsId++ );
 	pd->replList.append( constructor );
 	
@@ -798,9 +793,7 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 LangExpr *BaseParser::match( const InputLoc &loc, LangVarRef *varRef,
 		PatternItemList *list )
 {
-	Namespace *nspace = namespaceStack.top();
-
-	Pattern *pattern = Pattern::cons( loc, nspace,
+	Pattern *pattern = Pattern::cons( loc, curNspace(),
 			list, pd->nextPatConsId++ );
 	pd->patternList.append( pattern );
 
@@ -864,9 +857,7 @@ LangStmt *BaseParser::exportStmt( ObjectField *objField, LangStmt::Type assignTy
 LangExpr *BaseParser::require( const InputLoc &loc,
 		LangVarRef *varRef, PatternItemList *list )
 {
-	Namespace *nspace = namespaceStack.top();
-
-	Pattern *pattern = Pattern::cons( loc, nspace,
+	Pattern *pattern = Pattern::cons( loc, curNspace(),
 			list, pd->nextPatConsId++ );
 	pd->patternList.append( pattern );
 
@@ -946,7 +937,7 @@ PredDecl *BaseParser::predTokenLit( const InputLoc &loc, const String &data,
 
 void BaseParser::alias( const InputLoc &loc, const String &data, TypeRef *typeRef )
 {
-	Namespace *nspace = namespaceStack.top();
+	Namespace *nspace = curNspace();
 	TypeAlias *typeAlias = new TypeAlias( loc, nspace, data, typeRef );
 	nspace->typeAliasList.append( typeAlias );
 }

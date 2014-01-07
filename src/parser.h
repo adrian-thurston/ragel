@@ -49,8 +49,12 @@ struct BaseParser
 
 	bool insideRegion()
 		{ return regionStack.length() > 0; }
+
 	Context *curContext()
 		{ return contextStack.length() == 0 ? 0 : contextStack.top(); }
+
+	Namespace *curNspace()
+		{ return namespaceStack.top(); }
 
 	/* Lexical feedback. */
 

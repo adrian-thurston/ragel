@@ -68,7 +68,7 @@ void LoadInit::walkProdElList( String defName, ProdElList *list, prod_el_list &p
 			repeatType = RepeatRepeat;
 
 		ProdEl *prodEl = prodElName( internal, typeName,
-				NamespaceQual::cons(namespaceStack.top()),
+				NamespaceQual::cons( curNspace() ),
 				captureField, repeatType, false );
 
 		appendProdEl( list, prodEl );
@@ -269,7 +269,7 @@ void LoadInit::walkDefinition( item &define )
 	LelDefList *defList = new LelDefList;
 	walkProdList( name, defList, ProdList );
 
-	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), curContext(), false );
+	NtDef *ntDef = NtDef::cons( name, curNspace(), curContext(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
@@ -277,7 +277,7 @@ void LoadInit::walkDefinition( item &define )
 void LoadInit::consParseStmt( StmtList *stmtList )
 {
 	/* Parse the "start" def. */
-	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
 
 	/* Pop argv, this yields the file name . */
@@ -322,7 +322,7 @@ void LoadInit::consExportTree( StmtList *stmtList )
 	LangVarRef *varRef = LangVarRef::cons( internal, 0, curLocalFrame->rootScope, qual, String("P") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
 
-	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
 	ObjectField *program = ObjectField::cons( internal, typeRef, String("ColmTree") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
@@ -335,7 +335,7 @@ void LoadInit::consExportError( StmtList *stmtList )
 	LangVarRef *varRef = LangVarRef::cons( internal, 0, curLocalFrame->rootScope, qual, String("error") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
 
-	NamespaceQual *nspaceQual = NamespaceQual::cons( namespaceStack.top() );
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("str"), RepeatNone );
 	ObjectField *program = ObjectField::cons( internal, typeRef, String("ColmError") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
