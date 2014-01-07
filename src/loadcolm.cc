@@ -294,13 +294,13 @@ struct LoadColm
 			stmtList = stmtList.next();
 		}
 
-		if ( langStmtList.opt_require_stmt().require_pattern() != 0 ) {
+		require_pattern require = langStmtList.opt_require_stmt().require_pattern();
+		if ( require != 0 ) {
 			pushScope();
-			require_pattern require = langStmtList.opt_require_stmt().require_pattern();
 
 			LangVarRef *varRef = walkVarRef( require.var_ref() );
 			PatternItemList *list = walkPattern( require.pattern(), varRef );
-			LangExpr *expr = match( langStmtList.opt_require_stmt().require_pattern().REQUIRE().loc(), varRef, list );
+			LangExpr *expr = match( require.REQUIRE().loc(), varRef, list );
 
 			StmtList *reqList = walkLangStmtList( langStmtList.opt_require_stmt().lang_stmt_list() );
 
@@ -332,7 +332,8 @@ struct LoadColm
 
 		CodeBlock *translate = walkOptTranslate( TokenDef.opt_translate() );
 
-		defineToken( TokenDef.id().loc(), name, join, objectDef, translate, false, niLeft, niRight );
+		defineToken( TokenDef.id().loc(), name, join, objectDef,
+				translate, false, niLeft, niRight );
 	}
 
 	String walkOptId( opt_id optId )
@@ -368,7 +369,8 @@ struct LoadColm
 	void walkIgnoreDef( ignore_def IgnoreDef )
 	{
 		String name = walkOptId( IgnoreDef.opt_id() );
-		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+				name, pd->nextObjectId++ ); 
 
 		LexJoin *join = 0;
 		if ( IgnoreDef.opt_lex_expr().lex_expr() != 0 ) {
@@ -376,7 +378,8 @@ struct LoadColm
 			join = LexJoin::cons( expr );
 		}
 
-		defineToken( IgnoreDef.IGNORE().loc(), name, join, objectDef, 0, true, false, false );
+		defineToken( IgnoreDef.IGNORE().loc(), name, join, objectDef,
+				0, true, false, false );
 	}
 
 	LangExpr *walkCodeMultiplicitive( code_multiplicitive mult )
@@ -401,7 +404,8 @@ struct LoadColm
 		return expr;
 	}
 
-	PatternItemList *walkPatternElTypeOrLit( pattern_el_lel typeOrLit, LangVarRef *patternVarRef )
+	PatternItemList *walkPatternElTypeOrLit( pattern_el_lel typeOrLit,
+			LangVarRef *patternVarRef )
 	{
 		NamespaceQual *nspaceQual = walkRegionQual( typeOrLit.region_qual() );
 		RepeatType repeatType = walkOptRepeat( typeOrLit.opt_repeat() );
@@ -410,12 +414,14 @@ struct LoadColm
 		switch ( typeOrLit.prodName() ) {
 		case pattern_el_lel::_Id: {
 			String id = typeOrLit.id().data();
-			list = patternElNamed( typeOrLit.id().loc(), patternVarRef, nspaceQual, id, repeatType );
+			list = patternElNamed( typeOrLit.id().loc(), patternVarRef,
+					nspaceQual, id, repeatType );
 			break;
 		}
 		case pattern_el_lel::_Lit: {
 			String lit = typeOrLit.lit().data();
-			list = patternElType( typeOrLit.lit().loc(), patternVarRef, nspaceQual, lit, repeatType );
+			list = patternElType( typeOrLit.lit().loc(), patternVarRef,
+					nspaceQual, lit, repeatType );
 			break;
 		}}
 		return list;
@@ -477,7 +483,8 @@ struct LoadColm
 		return list;
 	}
 
-	PatternItemList *walkLitpatElList( _repeat_litpat_el litpatElList, CONS_NL Nl, LangVarRef *patternVarRef )
+	PatternItemList *walkLitpatElList( _repeat_litpat_el litpatElList, CONS_NL Nl,
+			LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = new PatternItemList;
 		while ( !litpatElList.end() ) {
@@ -497,7 +504,8 @@ struct LoadColm
 		return list;
 	}
 
-	PatternItemList *walkPatternElList( _repeat_pattern_el patternElList, LangVarRef *patternVarRef )
+	PatternItemList *walkPatternElList( _repeat_pattern_el patternElList,
+			LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = new PatternItemList;
 		while ( !patternElList.end() ) {
@@ -866,7 +874,8 @@ struct LoadColm
 		CodeBlock *codeBlock = walkOptReduce( Prod.opt_reduce() );
 		bool commit = Prod.opt_commit().prodName() == opt_commit::_Commit;
 
-		Production *prod = BaseParser::production( Prod.SQOPEN().loc(), list, name, commit, codeBlock, 0 );
+		Production *prod = BaseParser::production( Prod.SQOPEN().loc(),
+				list, name, commit, codeBlock, 0 );
 		prodAppend( lelDefList, prod );
 	}
 
@@ -1189,7 +1198,8 @@ struct LoadColm
 		return list;
 	}
 
-	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList, CONS_NL Nl, TypeRef *consTypeRef )
+	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList,
+			CONS_NL Nl, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = new ConsItemList;
 		while ( !litConsElList.end() ) {
@@ -1228,12 +1238,14 @@ struct LoadColm
 		}
 		case cons_el::_CodeExpr: {
 			LangExpr *consExpr = walkCodeExpr( consEl.code_expr() );
-			ConsItem *consItem = ConsItem::cons( consExpr->loc, ConsItem::ExprType, consExpr );
+			ConsItem *consItem = ConsItem::cons( consExpr->loc,
+					ConsItem::ExprType, consExpr );
 			list = ConsItemList::cons( consItem );
 			break;
 		}
 		case cons_el::_Dq: {
-			list = walkLitConsElList( consEl.LitConsElList(), consEl.dq_lit_term().CONS_NL(), consTypeRef );
+			list = walkLitConsElList( consEl.LitConsElList(),
+					consEl.dq_lit_term().CONS_NL(), consTypeRef );
 			break;
 		}}
 		return list;
@@ -1255,7 +1267,8 @@ struct LoadColm
 		ConsItemList *list = 0;
 		switch ( consTopEl.prodName() ) {
 		case cons_top_el::_Dq: {
-			list = walkLitConsElList( consTopEl.LitConsElList(), consTopEl.dq_lit_term().CONS_NL(), consTypeRef );
+			list = walkLitConsElList( consTopEl.LitConsElList(),
+					consTopEl.dq_lit_term().CONS_NL(), consTypeRef );
 			break;
 		}
 		case cons_top_el::_Tilde: {
@@ -1324,7 +1337,8 @@ struct LoadColm
 
 		if ( Nl != 0 ) {
 			String consData = unescape( Nl.data() );
-			ConsItem *consItem = ConsItem::cons( Nl.loc(), ConsItem::InputText, consData );
+			ConsItem *consItem = ConsItem::cons( Nl.loc(),
+					ConsItem::InputText, consData );
 			ConsItemList *term = ConsItemList::cons( consItem );
 			list = consListConcat( list, term );
 		}
@@ -1336,7 +1350,8 @@ struct LoadColm
 		ConsItemList *list = 0;
 		switch ( stringEl.prodName() ) {
 		case string_el::_Dq: {
-			list = walkLitStringElList( stringEl.LitStringElList(), stringEl.dq_lit_term().CONS_NL() );
+			list = walkLitStringElList( stringEl.LitStringElList(),
+					stringEl.dq_lit_term().CONS_NL() );
 			break;
 		}
 		case string_el::_Tilde: {
@@ -1349,7 +1364,8 @@ struct LoadColm
 		}
 		case string_el::_CodeExpr: {
 			LangExpr *consExpr = walkCodeExpr( stringEl.code_expr() );
-			ConsItem *consItem = ConsItem::cons( consExpr->loc, ConsItem::ExprType, consExpr );
+			ConsItem *consItem = ConsItem::cons( consExpr->loc,
+					ConsItem::ExprType, consExpr );
 			list = ConsItemList::cons( consItem );
 			break;
 		}}
@@ -1372,7 +1388,8 @@ struct LoadColm
 		ConsItemList *list = 0;
 		switch ( stringTopEl.prodName() ) {
 		case string_top_el::_Dq: {
-			list = walkLitStringElList( stringTopEl.LitStringElList(), stringTopEl.dq_lit_term().CONS_NL() );
+			list = walkLitStringElList( stringTopEl.LitStringElList(),
+					stringTopEl.dq_lit_term().CONS_NL() );
 			break;
 		}
 		case string_top_el::_Tilde: {
@@ -1454,7 +1471,8 @@ struct LoadColm
 		ConsItemList *list = 0;
 		switch ( accumEl.prodName() ) {
 		case accum_el::_Dq: {
-			list = walkLitAccumElList( accumEl.LitAccumElList(), accumEl.dq_lit_term().CONS_NL() );
+			list = walkLitAccumElList( accumEl.LitAccumElList(),
+					accumEl.dq_lit_term().CONS_NL() );
 			break;
 		}
 		case accum_el::_Tilde: {
@@ -1467,7 +1485,8 @@ struct LoadColm
 		}
 		case accum_el::_CodeExpr: {
 			LangExpr *accumExpr = walkCodeExpr( accumEl.code_expr() );
-			ConsItem *consItem = ConsItem::cons( accumExpr->loc, ConsItem::ExprType, accumExpr );
+			ConsItem *consItem = ConsItem::cons( accumExpr->loc,
+					ConsItem::ExprType, accumExpr );
 			list = ConsItemList::cons( consItem );
 			break;
 		}}
@@ -1490,7 +1509,8 @@ struct LoadColm
 		ConsItemList *list = 0;
 		switch ( accumTopEl.prodName() ) {
 		case accum_top_el::_Dq: {
-			list = walkLitAccumElList( accumTopEl.LitAccumElList(), accumTopEl.dq_lit_term().CONS_NL() );
+			list = walkLitAccumElList( accumTopEl.LitAccumElList(),
+					accumTopEl.dq_lit_term().CONS_NL() );
 			break;
 		}
 		case accum_top_el::_Tilde: {
@@ -1553,7 +1573,8 @@ struct LoadColm
 		switch ( codeFactor.prodName() ) {
 		case code_factor::_VarRef: {
 			LangVarRef *langVarRef = walkVarRef( codeFactor.var_ref() );
-			LangTerm *term = LangTerm::cons( langVarRef->loc, LangTerm::VarRefType, langVarRef );
+			LangTerm *term = LangTerm::cons( langVarRef->loc,
+					LangTerm::VarRefType, langVarRef );
 			expr = LangExpr::cons( term );
 			break;
 		}
@@ -1585,7 +1606,8 @@ struct LoadColm
 			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
-			expr = parseCmd( codeFactor.PARSE().loc(), false, objField, typeRef, init, list );
+			expr = parseCmd( codeFactor.PARSE().loc(), false, objField,
+					typeRef, init, list );
 			break;
 		}
 		case code_factor::_ParseStop: {
@@ -1596,7 +1618,8 @@ struct LoadColm
 			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
-			expr = parseCmd( codeFactor.PARSE_STOP().loc(), true, objField, typeRef, init, list );
+			expr = parseCmd( codeFactor.PARSE_STOP().loc(), true, objField,
+					typeRef, init, list );
 			break;
 		}
 		case code_factor::_Cons: {
