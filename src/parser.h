@@ -49,6 +49,8 @@ struct BaseParser
 
 	bool insideRegion()
 		{ return regionStack.length() > 0; }
+	Context *curContext()
+		{ return contextStack.length() == 0 ? 0 : contextStack.top(); }
 
 	/* Lexical feedback. */
 

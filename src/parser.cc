@@ -188,7 +188,7 @@ void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join, O
 	RegionSet *regionSet = regionStack.top();
 
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
-			transBlock, loc, 0, nspace, regionSet, objectDef, contextStack.top() );
+			transBlock, loc, 0, nspace, regionSet, objectDef, curContext() );
 
 	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
@@ -363,7 +363,7 @@ void BaseParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
 	Function *newFunction = Function::cons( typeRef, name, 
 			paramList, codeBlock, pd->nextFuncId++, false, exprt );
 	pd->functionList.append( newFunction );
-	newFunction->inContext = contextStack.top();
+	newFunction->inContext = curContext();
 }
 
 void BaseParser::iterDef( StmtList *stmtList, ObjectDef *localFrame,
@@ -382,10 +382,10 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 
 	Context *context = 0;
 	ObjectDef *object = 0;
-	if ( contextStack.length() == 0 )
+	if ( curContext() == 0 )
 		object = pd->globalObjectDef;
 	else {
-		context = contextStack.top();
+		context = curContext();
 		objField->context = context;
 		object = context->contextObjDef;
 	}
@@ -561,7 +561,6 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	LangExpr *expr = 0;
 
 	Namespace *nspace = namespaceStack.top();
-	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 	/* We are constructing a parser, sending it items, then returning it.
 	 * Thisis the constructor for the parser. */
@@ -575,7 +574,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				context, curScope, objField->name );
+				curContext(), curScope, objField->name );
 	}
 
 	/* The typeref for the parser. */
@@ -673,8 +672,6 @@ ConsItemList *BaseParser::consListConcat( ConsItemList *list1,
 LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 		ObjNameScope *scope, TypeRef *typeRef, IterCall *iterCall, StmtList *stmtList )
 {
-	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
-
 	/* Check for redeclaration. */
 	if ( curScope->checkRedecl( data ) != 0 )
 		error( loc ) << "variable " << data << " redeclared" << endp;
@@ -686,7 +683,7 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 	curScope->insertField( data, iterField );
 
 	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
-			iterField, typeRef, iterCall, stmtList, context, scope );
+			iterField, typeRef, iterCall, stmtList, curContext(), scope );
 
 	return stmt;
 }
@@ -697,7 +694,7 @@ void BaseParser::preEof( const InputLoc &loc, StmtList *stmtList, ObjectDef *loc
 		error(loc) << "preeof must be used inside an existing region" << endl;
 
 	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
-	codeBlock->context = contextStack.length() == 0 ? 0 : contextStack.top();
+	codeBlock->context = curContext();
 
 	RegionSet *regionSet = regionStack.top();
 	regionSet->tokenIgnore->preEofBlock = codeBlock;
@@ -769,7 +766,6 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 		ConsItemList *list, TypeRef *typeRef, FieldInitVect *fieldInitVect )
 {
 	Namespace *nspace = namespaceStack.top();
-	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 	Constructor *constructor = Constructor::cons( loc, nspace,
 			list, pd->nextPatConsId++ );
@@ -778,7 +774,7 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				context, curScope, objField->name );
+				curContext(), curScope, objField->name );
 	}
 
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( loc, LangTerm::ConstructType,
@@ -818,7 +814,6 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 		LangExpr *expr, LangStmt::Type assignType )
 {
 	LangStmt *stmt = 0;
-	Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
 
 	/* Check for redeclaration. */
 	if ( curScope->checkRedecl( objField->name ) != 0 ) {
@@ -833,7 +828,7 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				context, curScope, objField->name );
+				curContext(), curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
@@ -845,7 +840,7 @@ LangStmt *BaseParser::exportStmt( ObjectField *objField, LangStmt::Type assignTy
 {
 	LangStmt *stmt = 0;
 
-	if ( contextStack.length() != 0 )
+	if ( curContext() != 0 )
 		error(objField->loc) << "cannot export parser context variables" << endp;
 
 	ObjectDef *object = pd->globalObjectDef;
@@ -883,10 +878,10 @@ LangExpr *BaseParser::require( const InputLoc &loc,
 void BaseParser::contextVarDef( const InputLoc &loc, ObjectField *objField )
 {
 	ObjectDef *object;
-	if ( contextStack.length() == 0 )
+	if ( curContext() == 0 )
 		error(loc) << "internal error: no context stack items found" << endp;
 
-	Context *context = contextStack.top();
+	Context *context = curContext();
 	objField->context = context;
 	object = context->contextObjDef;
 

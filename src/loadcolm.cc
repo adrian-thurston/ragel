@@ -423,13 +423,11 @@ struct LoadColm
 
 	LangVarRef *walkOptLabel( opt_label optLabel )
 	{
-		Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
-
 		LangVarRef *varRef = 0;
 		if ( optLabel.prodName() == opt_label::_Id ) {
 			String id = optLabel.id().data();
 			varRef = LangVarRef::cons( optLabel.id().loc(),
-					context, curScope, id );
+					curContext(), curScope, id );
 		}
 		return varRef;
 	}
@@ -594,7 +592,7 @@ struct LoadColm
 			ObjectDef *localFrame = blockOpen();
 			StmtList *stmtList = walkLangStmtList( optTranslate.lang_stmt_list() );
 			block = CodeBlock::cons( stmtList, localFrame );
-			block->context = contextStack.top();
+			block->context = curContext();
 			blockClose();
 		}
 		return block;
@@ -848,7 +846,7 @@ struct LoadColm
 			StmtList *stmtList = walkLangStmtList( OptReduce.lang_stmt_list() );
 
 			block = CodeBlock::cons( stmtList, localFrame );
-			block->context = contextStack.top();
+			block->context = curContext();
 
 			blockClose();
 		}
@@ -1088,7 +1086,7 @@ struct LoadColm
 		bool reduceFirst = cflDef.opt_reduce_first().REDUCEFIRST() != 0;
 
 		NtDef *ntDef = NtDef::cons( name, namespaceStack.top(),
-				contextStack.top(), reduceFirst );
+				curContext(), reduceFirst );
 
 		BaseParser::cflDef( ntDef, objectDef, defList );
 	}
@@ -1151,13 +1149,11 @@ struct LoadColm
 
 	LangVarRef *walkVarRef( var_ref varRef )
 	{
-		Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
-
 		qual Qual = varRef.qual();
 		QualItemVect *qualItemVect = walkQual( Qual );
 		String id = varRef.id().data();
 		LangVarRef *langVarRef = LangVarRef::cons( varRef.id().loc(),
-				context, curScope, qualItemVect, id );
+				curContext(), curScope, qualItemVect, id );
 		return langVarRef;
 	}
 
@@ -1800,8 +1796,6 @@ struct LoadColm
 
 	IterCall *walkIterCall( iter_call Tree )
 	{
-		Context *context = contextStack.length() == 0 ? 0 : contextStack.top();
-
 		IterCall *iterCall = 0;
 		switch ( Tree.prodName() ) {
 		case iter_call::_Call: {
@@ -1814,7 +1808,7 @@ struct LoadColm
 		case iter_call::_Id: {
 			String tree = Tree.id().data();
 			LangVarRef *varRef = LangVarRef::cons( Tree.id().loc(),
-					context, curScope, tree );
+					curContext(), curScope, tree );
 			LangTerm *langTerm = LangTerm::cons( Tree.id().loc(),
 					LangTerm::VarRefType, varRef );
 			LangExpr *langExpr = LangExpr::cons( langTerm );

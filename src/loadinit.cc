@@ -269,7 +269,7 @@ void LoadInit::walkDefinition( item &define )
 	LelDefList *defList = new LelDefList;
 	walkProdList( name, defList, ProdList );
 
-	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), contextStack.top(), false );
+	NtDef *ntDef = NtDef::cons( name, namespaceStack.top(), curContext(), false );
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
