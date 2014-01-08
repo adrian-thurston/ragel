@@ -359,17 +359,20 @@ Tree *getLocalSplit( Program *prg, Tree **frame, long field )
 	return split;
 }
 
-void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, char *trees, long treesLen )
+static void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, LocalInfo *locals, long localsLen )
 {
 	long i;
-	for ( i = 0; i < treesLen; i++ ) {
-		debug( prg, REALM_BYTECODE, "local tree downref: %ld\n", (long)trees[i] );
+	for ( i = localsLen-1; i >= 0; i-- ) {
+		if ( locals[i].type == LI_Tree ) {
+			debug( prg, REALM_BYTECODE, "local tree downref: %ld\n", (long)locals[i].offset );
 
-		treeDownref( prg, sp, frame[((long)trees[i])] );
+			Tree *tree = (Tree*) frame[(long)locals[i].offset];
+			treeDownref( prg, sp, tree );
+		}
 	}
 }
 
-void downrefLocals( Program *prg, Tree ***psp, Tree **frame, LocalInfo *locals, long localsLen )
+static void downrefLocals( Program *prg, Tree ***psp, Tree **frame, LocalInfo *locals, long localsLen )
 {
 	long i;
 	for ( i = localsLen-1; i >= 0; i-- ) {
@@ -2230,7 +2233,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PCR_RET\n" );
 
 			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
+			downrefLocalTrees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
 			debug( prg, REALM_BYTECODE, "RET: %d\n", fi->frameSize );
 			vm_popn( fi->frameSize );
 
@@ -3483,7 +3486,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_RET\n" );
 
 			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
+			downrefLocalTrees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
 			vm_popn( fi->frameSize );
 
 			exec->frameId = (long) vm_pop();
@@ -3631,7 +3634,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_STOP\n" );
 
 			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-			downrefLocalTrees( prg, sp, exec->framePtr, fi->trees, fi->treesLen );
+			downrefLocalTrees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
 			vm_popn( fi->frameSize );
 
 			fflush( stdout );
