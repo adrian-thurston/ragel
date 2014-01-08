@@ -799,8 +799,6 @@ struct Compiler
 	void compilePreEof( TokenRegion *region );
 	void compileRootBlock();
 	void compileTranslateBlock( LangEl *langEl );
-	void findLocalTrees( ObjectDef *localFrame, CharSet &trees );
-	void findLocalIters( ObjectDef *localFrame, Iters &iters );
 	void findLocals( ObjectDef *localFrame, CodeBlock *block );
 	void makeProdCopies( Production *prod );
 	void compileReductionCode( Production *prod );

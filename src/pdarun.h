@@ -217,10 +217,6 @@ typedef struct _FrameInfo
 	long codeLenWV;
 	Code *codeWC;
 	long codeLenWC;
-	char *trees;
-	long treesLen;
-	char *iters;
-	long itersLen;
 	LocalInfo *locals;
 	long localsLen;
 	long argSize;

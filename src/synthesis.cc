@@ -2209,44 +2209,8 @@ void CodeBlock::compile( Compiler *pd, CodeVect &code ) const
 		stmt->compile( pd, code );
 }
 
-
-void Compiler::findLocalTrees( ObjectDef *localFrame, CharSet &trees )
-{
-	/* We exlcude "lhs" from being downrefed because we need to use if after
-	 * the frame is is cleaned and so it must survive. */
-	for ( ObjFieldList::Iter ol = *localFrame->objFieldList; ol.lte(); ol++ ) {
-		ObjectField *el = ol->value;
-		/* FIXME: This test needs to be improved. Match_text was getting
-		 * through before useOffset was tested. What will? */
-		if ( el->useOffset && !el->isLhsEl && ( el->beenReferenced || el->isParam ) ) {
-			UniqueType *ut = el->typeRef->uniqueType;
-			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR )
-				trees.insert( el->offset );
-		}
-	}
-}
-
-void Compiler::findLocalIters( ObjectDef *localFrame, Iters &iters )
-{
-	/* We exclude "lhs" from being downrefed because we need to use if after
-	 * the frame is is cleaned and so it must survive. */
-	for ( ObjFieldList::Iter ol = *localFrame->objFieldList; ol.lte(); ol++ ) {
-		ObjectField *el = ol->value;
-		if ( el->useOffset ) {
-			UniqueType *ut = el->typeRef->uniqueType;
-			if ( ut->typeId == TYPE_ITER ) {
-				int depth = el->scope->depth();
-				iters.append( IterLoc( depth, (int)el->offset ) );
-			}
-		}
-	}
-}
-
 void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 {
-	findLocalTrees( localFrame, block->trees );
-	findLocalIters( localFrame, block->iters );
-
 	Locals &locals = block->locals;
 
 	for ( ObjFieldList::Iter ol = *localFrame->objFieldList; ol.lte(); ol++ ) {

@@ -1321,12 +1321,6 @@ void Compiler::makeRuntimeData()
 	runtimeData->frameInfo[rootCodeBlock->frameId].codeWV = 0;
 	runtimeData->frameInfo[rootCodeBlock->frameId].codeLenWV = 0;
 
-	runtimeData->frameInfo[rootCodeBlock->frameId].trees = rootCodeBlock->trees.data;
-	runtimeData->frameInfo[rootCodeBlock->frameId].treesLen = rootCodeBlock->trees.length();
-
-	runtimeData->frameInfo[rootCodeBlock->frameId].iters = rootCodeBlock->iters.data();
-	runtimeData->frameInfo[rootCodeBlock->frameId].itersLen = rootCodeBlock->iters.length();
-
 	runtimeData->frameInfo[rootCodeBlock->frameId].locals = makeLocalInfo( rootCodeBlock->locals );
 	runtimeData->frameInfo[rootCodeBlock->frameId].localsLen = rootCodeBlock->locals.locals.length();
 
@@ -1353,12 +1347,6 @@ void Compiler::makeRuntimeData()
 			runtimeData->prodInfo[count].frameId = block->frameId;
 			runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
 			runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
-
-			runtimeData->frameInfo[block->frameId].trees = block->trees.data;
-			runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
-
-			runtimeData->frameInfo[block->frameId].iters = block->iters.data();
-			runtimeData->frameInfo[block->frameId].itersLen = block->iters.length();
 
 			runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
 			runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
@@ -1399,12 +1387,6 @@ void Compiler::makeRuntimeData()
 			runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
 			runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
 
-			runtimeData->frameInfo[block->frameId].trees = block->trees.data;
-			runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
-
-			runtimeData->frameInfo[block->frameId].iters = block->iters.data();
-			runtimeData->frameInfo[block->frameId].itersLen = block->iters.length();
-
 			runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
 			runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
 
@@ -1438,12 +1420,6 @@ void Compiler::makeRuntimeData()
 				runtimeData->lelInfo[i].frameId = block->frameId;
 				runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
 				runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
-
-				runtimeData->frameInfo[block->frameId].trees = block->trees.data;
-				runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
-
-				runtimeData->frameInfo[block->frameId].iters = block->iters.data();
-				runtimeData->frameInfo[block->frameId].itersLen = block->iters.length();
 
 				runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
 				runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
@@ -1507,12 +1483,6 @@ void Compiler::makeRuntimeData()
 
 			runtimeData->frameInfo[block->frameId].codeWC = block->codeWC.data;
 			runtimeData->frameInfo[block->frameId].codeLenWC = block->codeWC.length();
-
-			runtimeData->frameInfo[block->frameId].trees = block->trees.data;
-			runtimeData->frameInfo[block->frameId].treesLen = block->trees.length();
-
-			runtimeData->frameInfo[block->frameId].iters = block->iters.data();
-			runtimeData->frameInfo[block->frameId].itersLen = block->iters.length();
 
 			runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
 			runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();

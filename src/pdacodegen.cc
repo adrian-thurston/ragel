@@ -109,38 +109,6 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 			out << "\n};\n\n";
 		}
 
-		if ( runtimeData->frameInfo[i].treesLen > 0 ) {
-			out << "static char trees_" << i << "[] = {\n\t";
-
-			char *block = runtimeData->frameInfo[i].trees;
-			for ( int j = 0; j < runtimeData->frameInfo[i].treesLen; j++ ) {
-				out << (long) block[j];
-
-				if ( j < runtimeData->frameInfo[i].treesLen-1 ) {
-					out << ", ";
-					if ( (j+1) % 8 == 0 )
-						out << "\n\t";
-				}
-			}
-			out << "\n};\n\n";
-		}
-
-		if ( runtimeData->frameInfo[i].itersLen > 0 ) {
-			out << "static char iters_" << i << "[] = {\n\t";
-
-			char *block = runtimeData->frameInfo[i].iters;
-			for ( int j = 0; j < runtimeData->frameInfo[i].itersLen; j++ ) {
-				out << (long) block[j];
-
-				if ( j < runtimeData->frameInfo[i].itersLen-1 ) {
-					out << ", ";
-					if ( (j+1) % 8 == 0 )
-						out << "\n\t";
-				}
-			}
-			out << "\n};\n\n";
-		}
-
 		if ( runtimeData->frameInfo[i].localsLen > 0 ) {
 			out << "static LocalInfo locals_" << i << "[] = {\n\t";
 
@@ -264,22 +232,6 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		else
 			out << "0, ";
 		out << runtimeData->frameInfo[i].codeLenWC << ", ";
-
-		/* trees */
-		if ( runtimeData->frameInfo[i].treesLen > 0 )
-			out << "trees_" << i << ", ";
-		else
-			out << "0, ";
-
-		out << runtimeData->frameInfo[i].treesLen << ", ";
-
-		/* iters. */
-		if ( runtimeData->frameInfo[i].itersLen > 0 )
-			out << "iters_" << i << ", ";
-		else
-			out << "0, ";
-
-		out << runtimeData->frameInfo[i].itersLen << ", ";
 
 		/* locals. */
 		if ( runtimeData->frameInfo[i].localsLen > 0 )

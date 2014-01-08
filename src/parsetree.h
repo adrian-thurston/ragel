@@ -182,33 +182,6 @@ struct Locals
 	}
 };
 
-struct IterLoc
-{
-	IterLoc( int scope, int loc )
-		: scope(scope), loc(loc) {}
-
-	int scope;
-	int loc;
-};
-
-struct Iters
-{
-	Vector<IterLoc> ordered;
-	Vector<char> locs;
-
-	void append( const IterLoc &il )
-	{
-		int pos = 0;
-		while ( pos < ordered.length() && il.scope >= ordered[pos].scope )
-			pos += 1;
-		ordered.insert( pos, il );
-		locs.insert( pos, il.loc );
-	}
-
-	char *data() { return locs.data; }
-	int length() { return locs.length(); }
-};
-
 typedef BstSet<char> CharSet;
 typedef Vector<unsigned char> UnsignedCharVect;
 
@@ -3161,8 +3134,6 @@ struct CodeBlock
 	long frameId;
 	StmtList *stmtList;
 	ObjectDef *localFrame;
-	CharSet trees;
-	Iters iters;
 	Locals locals;
 	Context *context;
 
