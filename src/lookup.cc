@@ -76,6 +76,7 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjNameScope *rootSc
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
 		/* Lookup the type of the field. */
+		el->typeRef->lookupType( pd );
 		UniqueType *qualUT = el->typeRef->uniqueType;
 
 		/* If we are dealing with an iterator then dereference it. */
