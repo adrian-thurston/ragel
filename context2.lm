@@ -8,7 +8,7 @@ context ruby_here
 		ignore /[ \t\n]+/
 		token id /ident_pattern/
 		token number /number_pattern/
-		literal '<<', '*', ',', '(', ')', '!'
+		literal `<< `* `, `( `) `!
 	end
 
 	HereId: str
@@ -59,7 +59,7 @@ context ruby_here
 		[here_line* here_close_id]
 
 	def heredoc
-		['<<' here_id]
+		[`<< here_id]
 
 	def primary
 		[id]
@@ -70,10 +70,10 @@ context ruby_here
 		[primary arglist_more*]
 
 	def arglist_more
-		[',' primary]
+		[`, primary]
 
 	def call
-		[id '(' arglist? ')']
+		[id `( arglist? `)]
 
 	def statement
 		[primary]
@@ -82,7 +82,7 @@ context ruby_here
 	token foobar /any+/
 
 	def item
-		[statement '!']
+		[statement `!]
 	|	[foobar]
 
 	def start 

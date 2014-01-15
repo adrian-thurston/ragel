@@ -9,8 +9,8 @@ end
 lex
 	ignore /[\t ]+/
 	ignore /'#' [^\n]*/
-	literal ';'
-	literal '\n'
+	literal `;
+	token NL /'\n'/
 end
 
 # Required whitespace, but newline is not allowed.
@@ -21,7 +21,7 @@ token ws_no_nl
 	}
 
 def method_call
-	[tIDENTIFIER ws_no_nl tIDENTIFIER ';' '\n']
+	[tIDENTIFIER ws_no_nl tIDENTIFIER `; NL]
 
 parse R: method_call[stdin]
 
@@ -31,5 +31,5 @@ print( '\n' )
 ##### IN #####
 a bc;
 ##### EXP #####
-<method_call><tIDENTIFIER>a</tIDENTIFIER><ws_no_nl> </ws_no_nl><tIDENTIFIER>bc</tIDENTIFIER><_literal_000b>;</_literal_000b><_literal_000d>
-</_literal_000d></method_call>
+<method_call><tIDENTIFIER>a</tIDENTIFIER><ws_no_nl> </ws_no_nl><tIDENTIFIER>bc</tIDENTIFIER><_literal_000b>;</_literal_000b><NL>
+</NL></method_call>

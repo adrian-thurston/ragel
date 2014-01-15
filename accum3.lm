@@ -1,6 +1,6 @@
 ##### LM #####
 lex
-	literal '-'
+	literal `-
 	token file /^('-'|0)(^0)*/
 end
 
@@ -14,8 +14,8 @@ end
 
 def item
 	[file zero]
-|	['-' single* zero]
-|	['-' with_opt zero? word zero]
+|	[`- single* zero]
+|	[`- with_opt zero? word zero]
 
 def args 
 	[word zero item*]

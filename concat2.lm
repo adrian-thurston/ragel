@@ -1,8 +1,7 @@
 ##### LM #####
 
 lex
-
-	literal  'type', 'include'
+	literal  `type `include
 	token id /[A-Za-z_][A-Za-z_0-9]*/
 	ignore /'#' [^\n]* '\n'/
 	ignore /[ \t\r\n]+/
@@ -22,7 +21,7 @@ def ifn_path
 |	[ifn_path_part]
 
 
-literal '%%'
+literal `%%
 
 lex
 	token em_ws /( any - 33..126 )+/
@@ -32,11 +31,11 @@ def em_item
 	[em_ws]
 
 def prelude
-	[em_item* '%%']
+	[em_item* `%%]
 
 def item
-	['include' ifn_path]
-|   ['type' id]
+	[`include ifn_path]
+|   [`type id]
 
 def start
 	[prelude item*]
@@ -68,7 +67,7 @@ item* expandIncludes( ItemList: ref<item*> )
 {
 	for IL: item* in ItemList {
 		if match IL 
-			['include' FN: ifn_path Rest: item*]
+			[`include FN: ifn_path Rest: item*]
 		{
 			S: start = parseTxt( 
 				"
@@ -76,7 +75,7 @@ item* expandIncludes( ItemList: ref<item*> )
 				"
 			)
 
-			match S [em_item* '%%' IncludedItems: item*]
+			match S [em_item* `%% IncludedItems: item*]
 
 			IL = concatItems( IncludedItems Rest )
 		}
@@ -86,7 +85,7 @@ item* expandIncludes( ItemList: ref<item*> )
 int main()
 {
 	S: start = parseStart(stdin)
-	match S [em_item* '%%' ItemList: item*]
+	match S [em_item* `%% ItemList: item*]
 	expandIncludes( ItemList )
 }
 

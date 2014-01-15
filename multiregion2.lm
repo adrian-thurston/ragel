@@ -20,7 +20,8 @@ rl token_char /CHAR - CTL - separators/
 # Literal tokens
 #
 
-literal 'HTTP/', ' ', ':'
+literal `HTTP/ `:
+token SPT /' '/
 token CRLF /CR LF/
 
 #
@@ -34,11 +35,11 @@ token request_uri /(^SP)+/
 token http_number /digit+ '.' digit+/
 
 def http_version 
-	[ 'HTTP/' http_number ]
+	[ `HTTP/ http_number ]
 
 def request_line 
-	[method ' ' request_uri 
-	 ' ' http_version CRLF]
+	[method SPT request_uri 
+	 SPT http_version CRLF]
 
 #
 # Header
@@ -60,7 +61,7 @@ def field_value
 	[fv* fv_term]
 
 def header 
-	[field_name ':' field_value]
+	[field_name `: field_value]
 
 #
 # Request

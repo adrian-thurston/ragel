@@ -1,7 +1,9 @@
 ##### LM #####
 context si
 	lex
-		literal '!', 'a', ';\n'
+		literal `! `a 
+
+		token SEMI_NL /';\n'/
 
 		token id /'a'|'b'/
 		{
@@ -27,7 +29,7 @@ context si
 	def item1 
 		msg: str
 
-		[ e1 '!' 'a' super_id super_id 'a']
+		[ e1 `! `a super_id super_id `a]
 		{
 			lhs.msg = 'this is item1\n'
 		}
@@ -43,15 +45,15 @@ context si
 	def item2 
 		msg: str
 
-		[ e2 '!' 'a' super_id super_id 'a']
+		[ e2 `! `a super_id super_id `a]
 		{
 			lhs.msg = 'this is item2\n'
 		}
 
 
 	def start 
-		[item1 ';\n']
-	|	[item2 ';\n']
+		[item1 SEMI_NL]
+	|	[item2 SEMI_NL]
 		{
 			match lhs [Item2:item2 ';\n']
 			print( Item2.msg )
@@ -70,5 +72,5 @@ new_id = 14
 old_id = NIL
 new_id = 13
 this is item2
-<si::start><si::item2><si::e2></si::e2><si::_literal_0001>!</si::_literal_0001><si::_literal_0003>a</si::_literal_0003><si::super_id>b</si::super_id><si::super_id>b</si::super_id><si::_literal_0003>a</si::_literal_0003></si::item2><si::_literal_0005>;
-</si::_literal_0005></si::start>
+<si::start><si::item2><si::e2></si::e2><si::_literal_0001>!</si::_literal_0001><si::_literal_0003>a</si::_literal_0003><si::super_id>b</si::super_id><si::super_id>b</si::super_id><si::_literal_0003>a</si::_literal_0003></si::item2><si::SEMI_NL>;
+</si::SEMI_NL></si::start>

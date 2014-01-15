@@ -13,7 +13,8 @@ OneParser: accum<one>
 lex
 	ignore /[ \t]+/
 	token id2 /[a-zA-Z_][a-zA-Z_0-9]*/
-	literal '!', ';', '\n'
+	literal `! `;
+	token NL /'\n'/
 
 	def A1 []
 		{ print( "A1\n" ) }
@@ -29,8 +30,8 @@ lex
 		}
 
 	def two 
-		[A1 item2* '!' '\n']
-	|	[A2 item2* ';' '\n']
+		[A1 item2* `! NL]
+	|	[A2 item2* `; NL]
 end
 
 end # accum_bt

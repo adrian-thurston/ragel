@@ -9,34 +9,34 @@ def str_item
 |	[str_chr]
 
 def string 
-	['"' str_item* '"']
+	[`" str_item* `"]
 
 lex
 	token ident /[a-zA-Z_]+/
 	token number /[0-9]+/
 
-	literal '+', '*', ';', '"', '\'', '(', ')'
-	literal '+=', '-=', '*='
+	literal `+ `* `; `" `' `( `)
+	literal `+= `-= `*=
 
 	ignore wp /[ \t\n]+/
 end
 
 def expr 
-	[expr '+' term]
+	[expr `+ term]
 |	[term]
 
 def term 
-	[term '*' primary]
+	[term `* primary]
 |	[primary]
 
 def primary 
 	[number]
 |	[ident]
 |	[string]
-|	['(' expr ')']
+|	[`( expr `)]
 
 def expr_list 
-	[expr_list expr ';']
+	[expr_list expr `;]
 |	[]
 
 def start 

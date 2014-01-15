@@ -24,7 +24,7 @@ end
 #
 
 lex
-	literal '(', ')'
+	literal `( `)
 	token nc_data /[^()]+/
 end
 
@@ -33,7 +33,7 @@ def nc_item
 |	[nested_comment]
 
 def nested_comment 
-	['(' nc_item* ')']
+	[`( nc_item* `)]
 
 def nested [id*]
 

@@ -1,10 +1,10 @@
 ##### LM #####
 lex
 	ignore /[\t\n ]+/
-	literal '^', '|', '-', ',', ':', '!', '?', '.'
-	literal '(', ')', '{', '}', '*', '&', '+'
+	literal `^ `| `- `, `: `! `? `.
+	literal `( `) `{ `} `* `& `+
 
-	literal '--', ':>', ':>>', '<:', '->', '**'
+	literal `-- `:> `:>> `<: `-> `**
 
 	token word /[a-zA-Z_][a-zA-Z0-9_]*/
 	token uint /[0-9]+/
@@ -18,50 +18,50 @@ def start
 	}
 
 def expression 
-	[expression '|' term]
-|	[expression '&' term]
-|	[expression '-' term]
-|	[expression '--' term]
+	[expression `| term]
+|	[expression `& term]
+|	[expression `- term]
+|	[expression `-- term]
 |	[term]
 
 def term 
 	[term factor_with_rep]
 	{
-		if match lhs [term '-' uint]
+		if match lhs [term `- uint]
 			reject
 	}
-|	[term '.' factor_with_rep]
-|	[term ':>' factor_with_rep]
-|	[term ':>>' factor_with_rep]
-|	[term '<:' factor_with_rep]
+|	[term `. factor_with_rep]
+|	[term `:> factor_with_rep]
+|	[term `:>> factor_with_rep]
+|	[term `<: factor_with_rep]
 |	[factor_with_rep]
 
 def factor_with_rep 
-	[factor_with_rep '*']
-|	[factor_with_rep '**']
-|	[factor_with_rep '?']
-|	[factor_with_rep '+']
-|	[factor_with_rep '{' factor_rep_num '}']
-|	[factor_with_rep '{' ',' factor_rep_num '}']
-|	[factor_with_rep '{' factor_rep_num ',' '}']
-|	[factor_with_rep '{' factor_rep_num ',' factor_rep_num '}']
+	[factor_with_rep `*]
+|	[factor_with_rep `**]
+|	[factor_with_rep `?]
+|	[factor_with_rep `+]
+|	[factor_with_rep `{ factor_rep_num `}]
+|	[factor_with_rep `{ `, factor_rep_num `}]
+|	[factor_with_rep `{ factor_rep_num `, `}]
+|	[factor_with_rep `{ factor_rep_num `, factor_rep_num `}]
 |	[factor_with_neg]
 
 def factor_rep_num [uint]
 
 def factor_with_neg 
-	['!' factor_with_neg]
-|	['^' factor_with_neg]
+	[`! factor_with_neg]
+|	[`^ factor_with_neg]
 |	[factor]
 
 def factor 
 	[alphabet_num]
 |	[word]
-|	['(' expression ')']
+|	[`( expression `)]
 
 def alphabet_num 
 	[uint]
-|	['-' uint]
+|	[`- uint]
 
 parse start[ stdin ]
 

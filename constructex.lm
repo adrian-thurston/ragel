@@ -1,18 +1,18 @@
 ##### LM #####
 lex
 	token id /[a-zA-Z_][a-zA-Z0-9_]*/
-	literal '=', '<', '>', '/'
+	literal `= `< `> `/
 	ignore /[ \t\n\r\v]+/
 end
 
 def attr 
-	[id '=' id]
+	[id `= id]
 
 def open_tag 
-	['<' id attr* '>']
+	[`< id attr* `>]
 
 def close_tag
-	['<' '/' id '>']
+	[`< `/ id `>]
 
 def tag 
 	[open_tag item* close_tag]

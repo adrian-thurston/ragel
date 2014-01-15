@@ -16,7 +16,8 @@ context tags
 
 	# Any single character can be a literal
 	lex
-		literal '!\n', ';\n'
+		token BANG_NL /'!\n'/
+		token SEMI_NL /';\n'/
 
 		# Ignore whitespace.
 		ignore /rl_ws/
@@ -67,14 +68,14 @@ context tags
 		[open_tag tag* close_tag]
 
 	def start
-		[tag* ';\n']
+		[tag* SEMI_NL]
 		{
 			print_xml( TS )
 			print_xml( lhs )
 			print( 'got structure\n' )
 		}
 
-	|	[id* ';\n']
+	|	[id* SEMI_NL]
 		{
 			print_xml( TS )
 			print_xml( lhs )
@@ -88,5 +89,5 @@ parse tags::start(Tags)[stdin]
 ##### IN #####
 y y a i i b c c m m n n b a;
 ##### EXP #####
-<tags::tag_stack><tags::id>sentinal</tags::id><tags::tag_stack></tags::tag_stack></tags::tag_stack><tags::start><tags::_repeat_tag><tags::tag><tags::open_tag><tags::id>y</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>y</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>a</tags::id></tags::open_tag><tags::_repeat_tag><tags::tag><tags::open_tag><tags::id>i</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>i</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>b</tags::id></tags::open_tag><tags::_repeat_tag><tags::tag><tags::open_tag><tags::id>c</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>c</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>m</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>m</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>n</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>n</tags::id></tags::close_tag></tags::tag></tags::_repeat_tag><tags::close_tag><tags::id>b</tags::id></tags::close_tag></tags::tag></tags::_repeat_tag><tags::close_tag><tags::id>a</tags::id></tags::close_tag></tags::tag></tags::_repeat_tag><tags::_literal_0003>;
-</tags::_literal_0003></tags::start>got structure
+<tags::tag_stack><tags::id>sentinal</tags::id><tags::tag_stack></tags::tag_stack></tags::tag_stack><tags::start><tags::_repeat_tag><tags::tag><tags::open_tag><tags::id>y</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>y</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>a</tags::id></tags::open_tag><tags::_repeat_tag><tags::tag><tags::open_tag><tags::id>i</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>i</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>b</tags::id></tags::open_tag><tags::_repeat_tag><tags::tag><tags::open_tag><tags::id>c</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>c</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>m</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>m</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>n</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>n</tags::id></tags::close_tag></tags::tag></tags::_repeat_tag><tags::close_tag><tags::id>b</tags::id></tags::close_tag></tags::tag></tags::_repeat_tag><tags::close_tag><tags::id>a</tags::id></tags::close_tag></tags::tag></tags::_repeat_tag><tags::SEMI_NL>;
+</tags::SEMI_NL></tags::start>got structure

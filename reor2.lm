@@ -3,7 +3,8 @@ context undo
 
 	lex
 		ignore /[ ]+/
-		literal ';', '\n'
+		literal `;
+		token NL /'\n'/
 		token id /[a-zA-Z_]+/
 	end
 
@@ -11,8 +12,7 @@ context undo
 		[id]
 
 	def start 
-		[item* ';' '\n']
-
+		[item* `; NL]
 end
 
 cons Undo: undo[]

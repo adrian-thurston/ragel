@@ -24,7 +24,7 @@ end
 #
 
 lex
-	literal '(', ')'
+	literal `( `)
 	token nc_data /[^()]+/
 end
 
@@ -33,7 +33,7 @@ def nc_item
 |	[nested_comment]
 
 def nested_comment 
-	['(' nc_item* ')']
+	[`( nc_item* `)]
 
 def nested [id*]
 
@@ -48,7 +48,8 @@ lex
 	ignore /[ \t]+/
 	token word /[a-zA-Z0-9/*+_\-]+/
 	token stuff /[a-zA-Z0-9()/*+_\- ]+/
-	literal '!', ';', '\n'
+	literal `! `;
+	token NL /'\n'/
 
 end
 
@@ -74,8 +75,8 @@ def item
 	}
 
 def two 
-	[A1 item* '!' '\n']
-|	[A2 item* ';' '\n']
+	[A1 item* `! NL]
+|	[A2 item* `; NL]
 
 end # accum_bt
 

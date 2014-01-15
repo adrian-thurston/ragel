@@ -38,9 +38,9 @@ def c
 	[c_token_list]
 
 lex
-	literal '%%'
-	literal '{', '}'
-	literal 'protocol', 'client', 'server', 'port', 'by', 'tcp', 'udp'
+	literal `%%
+	literal `{ `}
+	literal `protocol `client `server `port `by `tcp `udp
 	token id /[A-Za-z_][A-Za-z_0-9]*/
 	token number /[0-9]+/
 
@@ -49,31 +49,31 @@ lex
 end
 
 def tcp_by_port
-	['tcp' 'by' 'port']
+	[`tcp `by `port]
 
 def udp_by_port
-	['udp' 'by' 'port']
+	[`udp `by `port]
 
 def attribute
-	['client' id]
-|	['server' id]
-|	['port' number]
-|	['udp' id]
+	[`client id]
+|	[`server id]
+|	[`port number]
+|	[`udp id]
 |	[tcp_by_port]
 |	[udp_by_port]
 
 def tcp_protocol
-	['tcp' 'protocol' id '{' attribute* '}']
+	[`tcp `protocol id `{ attribute* `}]
 
 def udp_protocol
-	['udp' 'protocol' id '{' attribute* '}']
+	[`udp `protocol id `{ attribute* `}]
 
 def protocol
 	[tcp_protocol]
 |	[udp_protocol]
 
 def program
-	[c '%%' protocol*]
+	[c `%% protocol*]
 
 alias output parser<c>
 

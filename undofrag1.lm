@@ -1,13 +1,14 @@
 ##### LM #####
+
 lex
 	ignore /space+/
-	literal '#', '{', '}'
+	literal `# `{ `}
 	token id2 /[a-zA-Z_]+/ 
 end
 
 def item2
 	[id2]
-|	['{' item2* '}']
+|	[`{ item2* `}]
 
 def start2
 	[item2*]
@@ -19,13 +20,14 @@ context ctx
 
 	lex
 		ignore /space+/
-		literal '*', '(', ')', '!', ';\n'
+		literal `* `( `) `!
+		token semi_nl /';\n'/
 		token id /[a-zA-Z_]+/ 
 	end
 
 	def item 
 		[id]
-	|	['(' item* ')']
+	|	[`( item* `)]
 
 
 	def A [] {
@@ -39,8 +41,8 @@ context ctx
 	}
 
 	def start1 
-		[A item* '!']
-	|	[B item* ';\n']
+		[A item* `!]
+	|	[B item* semi_nl]
 
 end # ctx
 
@@ -55,6 +57,7 @@ send CTX.SP "{e}f g"
 
 print( Input )
 print( CTX.SP() '\n' )
+
 ##### IN #####
 a b c ( d ) e f g ;
 ##### EXP #####

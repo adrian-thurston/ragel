@@ -98,7 +98,7 @@ context generate
 			}
 		}
 		
-		literal '|'
+		literal `|
 		token char /any/
 
 		preeof {
@@ -129,15 +129,15 @@ context generate
 
 
 	lex
-		literal 'http:'
-		literal 'ftp:'
-		literal 'mailto:'
+		literal `http:
+		literal `ftp:
+		literal `mailto:
 	end
 
 	def el_prefix
-		['http:']
-	|	['ftp:']
-	|	['mailto:']
+		[`http:]
+	|	[`ftp:]
+	|	[`mailto:]
 
 	def external_link
 		[osquare item* csquare1]
@@ -183,7 +183,7 @@ context generate
 	|	[unclosed_curly]
 	|	[stray_close]
 	|	[osquare]
-	|	['|']
+	|	[`|]
 	|	[char]
 
 	def start 

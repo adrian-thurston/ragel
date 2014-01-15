@@ -1,32 +1,30 @@
 ##### LM #####
 lex
-	literal '-', '=', ';', '{', '}', '<', '>', '*', '->'
-	literal 'struct', 'string', 'bytes',
-		'unsigned', 'long', 'int',
-		'list', 'message', 'option'
+	literal `- `= `; `{ `} `< `> `* `->
+	literal `struct `string `bytes
+		`unsigned `long `int
+		`list `message `option
 
 	token id /[A-Za-z_][A-Za-z_0-9]*/
 	token number /[0-9]+/
 
 	ignore /[ \t\r\n]+/
-
-	literal ''
 end
 
 def type
 	[id]
-|	['int']
-|	[id '*']
+|	[`int]
+|	[id `*]
 
 def decl
-	[type id ';']
+	[type id `;]
 
 def struct_def
-	['struct' Id: id '{' decl* '}' ';']
+	[`struct Id: id `{ decl* `} `;]
 
 def message_def
 	ID: int
-	['message' id ';']
+	[`message id `;]
 
 def definition
 	[struct_def]
@@ -52,6 +50,7 @@ cons SQ: shared_queue [
 ]
 
 print( SQ )
+
 ##### EXP #####
 
 struct Signal

@@ -1,6 +1,6 @@
 ##### LM #####
 lex
-	literal '-'
+	literal `-
 	token file /^('-'|0)(^0)*/
 end
 
@@ -8,28 +8,29 @@ lex
 	token single /[qvh]/
 	token with_opt /[oi]/
 	token dash /'-'/
-	literal 'help', 'verbose', 'input', '='
+
+	literal `help `verbose `input `=
 end
 
 def long
-	['help']
-|	['verbose']
+	[`help]
+|	[`verbose]
 
 def long_with_opt
-	['input']
+	[`input]
 
 def long_eqals
-	['=']
+	[`=]
 |	[zero]
 
 token word /(^0)+/
 token zero /0/
 
 def item
-	['-' single* zero]
-|	['-' with_opt zero? word zero]
-|	['-' dash long zero]
-|	['-' dash long_with_opt long_eqals word zero]
+	[`- single* zero]
+|	[`- with_opt zero? word zero]
+|	[`- dash long zero]
+|	[`- dash long_with_opt long_eqals word zero]
 |	[file zero]
 
 def args 
@@ -48,23 +49,23 @@ Args: args = ArgParser()
 # Process the args.
 for Item: item in Args {
 	if match Item 
-			['-' SL: single* zero]
+			[`- SL: single* zero]
 	{
 		for S: single in SL
 			print( "single: [$S]\n" )
 	}
 	elsif match Item 
-			['-' W: with_opt zero? Opt: word zero]
+			[`- W: with_opt zero? Opt: word zero]
 	{
 		print( "with opt: [$W] -> [$Opt]\n" )
 	}
 	elsif match Item
-			['-' dash L: long zero]
+			[`- dash L: long zero]
 	{
 		print("long: [$L]\n" )
 	}
 	elsif match Item
-			['-' dash LO: long_with_opt long_eqals LongOpt: word zero]
+			[`- dash LO: long_with_opt long_eqals LongOpt: word zero]
 	{
 		print("long: [$LO] -> [$LongOpt]\n" )
 	}

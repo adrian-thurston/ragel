@@ -147,26 +147,26 @@ context lookup
 		token TK_SingleLit /( 'L'? "'" ( [^'\\\n] | '\\' any )* "'" )/
 		token TK_DoubleLit /( 'L'? '"' ( [^"\\\n] | '\\' any )* '"' )/
 
-		literal 'extern', 'namespace', 'friend', 'typedef', 'auto', 'register',
-				'static', 'mutable', 'inline', 'virtual', 'explicit', 'const',
-				'volatile', 'restrict', 'class', 'struct', 'union', 'template',
-				'private', 'protected', 'public', 'using', 'void', 'char',
-				'wchar_t', 'bool', 'int', 'float', 'double', 'short', 'long',
-				'signed', 'unsigned', 'enum', 'new', 'delete', 'operator',
-				'typename', 'export', 'throw', 'try', 'catch', 'sizeof',
-				'dynamic_cast', 'static_cast', 'reinterpret_cast', 'const_cast',
-				'typeid', 'this', 'true', 'false', 'switch', 'case', 'default',
-				'if', 'else', 'while', 'do', 'for', 'break', 'continue',
-				'return', 'goto'
+		literal `extern `namespace `friend `typedef `auto `register
+				`static `mutable `inline `virtual `explicit `const
+				`volatile `restrict `class `struct `union `template
+				`private `protected `public `using `void `char
+				`wchar_t `bool `int `float `double `short `long
+				`signed `unsigned `enum `new `delete `operator
+				`typename `export `throw `try `catch `sizeof
+				`dynamic_cast `static_cast `reinterpret_cast `const_cast
+				`typeid `this `true `false `switch `case `default
+				`if `else `while `do `for `break `continue
+				`return `goto
 
 		# Extensions
-		literal '__typeof', '__is_pod', '__is_empty'
+		literal `__typeof `__is_pod `__is_empty
 
-		literal '{', '}', ';', ',', '=', '(', ')', ':', '&', '*', '[', ']', '~', '+', '-',
-			'/', '<', '>', '|', '^', '%', '!', '?', '.'
+		literal `{ `} `; `, `= `( `) `: `& `* `[ `] `~ `+ `-
+			`/ `< `> `| `^ `% `! `? `.
 
-		literal '::', '==', '!=', '&&', '||', '*=', '/=', '%=', '+=', '-=', '&=',
-			'^=', '|=', '++', '--', '->', '->*', '.*', '...', '<<=', '>>='
+		literal `:: `== `!= `&& `|| `*= `/= `%= `+= `-= `&=
+			`^= `|= `++ `-- `-> `->* `.* `... `<<= `>>=
 
 		# Token translation targets.
 		def unknown_id [lookup_id]
@@ -305,17 +305,17 @@ context lookup
 
 	def root_qual_opt 
 		[]
-	|	['::']
+	|	[`::]
 
 	def nested_name_specifier_opt 
-		[nested_name_specifier_opt qualifying_name '::' designated_qualifying_name '::']
-	|	[nested_name_specifier_opt qualifying_name '::']
+		[nested_name_specifier_opt qualifying_name `:: designated_qualifying_name `::]
+	|	[nested_name_specifier_opt qualifying_name `::]
 	|	[]
 
 	def nested_name_specifier 
-		[nested_name_specifier designated_qualifying_name '::']
-	|	[nested_name_specifier qualifying_name '::']
-	|	[qualifying_name '::']
+		[nested_name_specifier designated_qualifying_name `::]
+	|	[nested_name_specifier qualifying_name `::]
+	|	[qualifying_name `::]
 
 	def qualifying_name 
 		[class_name]
@@ -336,13 +336,13 @@ context lookup
 		}
 
 	def designated_qualifying_name 
-		['template' any_id]
+		[`template any_id]
 		{
 			# FIXME: nulling qualNs is not the right thing to do here.
 			qualNs.top = nil
 		}
 
-	|	['template' any_id 
+	|	[`template any_id 
 			templ_arg_open template_argument_list_opt templ_arg_close]
 		{
 			# FIXME: nulling qualNs is not the right thing to do here.
@@ -391,7 +391,7 @@ context lookup
 			lhs.lookupId.qualObj = qualObj
 		}
 
-	|	[root_qual_opt nested_name_specifier_opt '~' class_name]
+	|	[root_qual_opt nested_name_specifier_opt `~ class_name]
 		{
 			lhs.lookupId = r4.lookupId
 		}
@@ -439,13 +439,13 @@ context lookup
 		}
 
 	def templ_arg_open 
-		['<']
+		[`<]
 		{
 			qualNs.push( nil )
 		}
 
 	def templ_arg_close
-		['>']
+		[`>]
 		{
 			qualNs.pop()
 		}
@@ -469,7 +469,7 @@ context lookup
 	|	[using_directive]
 
 	def simple_declaration 
-		[declaration_start simple_declaration_forms declaration_end ';']
+		[declaration_start simple_declaration_forms declaration_end `;]
 
 	# Ordering is important for optimization. The form with the optional
 	# decl_specifier_sing should go second.
@@ -571,23 +571,23 @@ context lookup
 			lhs.lookupId.data = '<simple_type_specifier_kw_seq>'
 		}
 
-	|	['typename' root_qual_opt nested_name_specifier type_name]
+	|	[`typename root_qual_opt nested_name_specifier type_name]
 		{
 			lhs.lookupId = r4.lookupId
 		}
 
-	|	['typename' root_qual_opt nested_name_specifier identifier]
+	|	[`typename root_qual_opt nested_name_specifier identifier]
 		{
 			lhs.lookupId = lookup_id in r4
 		}
 
-	|	['typename' root_qual_opt nested_name_specifier unknown_id]
+	|	[`typename root_qual_opt nested_name_specifier unknown_id]
 		{
 			lhs.lookupId = lookup_id in r4
 		}
 
 		# Extension.
-	|	['__typeof' '(' expression ')']
+	|	[`__typeof `( expression `)]
 		{
 			lhs.lookupId = construct lookup_id ["x"]
 			lhs.lookupId.data = '<simple_type_specifier_kw_seq>'
@@ -606,17 +606,17 @@ context lookup
 	|	[simple_type_specifier_kw]
 
 	def simple_type_specifier_kw 
-		['void']
-	|	['char']
-	|	['wchar_t']
-	|	['bool']
-	|	['int']
-	|	['float']
-	|	['double']
-	|	['short']
-	|	['long']
-	|	['signed']
-	|	['unsigned']
+		[`void]
+	|	[`char]
+	|	[`wchar_t]
+	|	[`bool]
+	|	[`int]
+	|	[`float]
+	|	[`double]
+	|	[`short]
+	|	[`long]
+	|	[`signed]
+	|	[`unsigned]
 
 	def qual_type_name
 		lookupId: lookup_id 
@@ -682,7 +682,7 @@ context lookup
 	|	[class_key nested_name_specifier_opt templ_class_id
 			templ_arg_open template_argument_list_opt templ_arg_close]
 
-	|	['enum' nested_name_specifier_opt enum_head_name]
+	|	[`enum nested_name_specifier_opt enum_head_name]
 		{
 			# TODO: should look for existing enums of the same name.
 			Id: lookup_id = lookup_id in r3
@@ -704,35 +704,35 @@ context lookup
 	|	[storage_class_specifier]
 	|	[function_specifier]
 
-	|	['friend']
+	|	[`friend]
 		{
 			declarationData.top.isFriend = 1
 		}
 
-	|	['typedef']
+	|	[`typedef]
 		{
 			declarationData.top.isTypedef = 1
 		}
 
 	def storage_class_specifier 
-		['auto']
-	|	['register']
-	|	['static']
-	|	['extern']
-	|	['mutable']
+		[`auto]
+	|	[`register]
+	|	[`static]
+	|	[`extern]
+	|	[`mutable]
 
 	def function_specifier 
-		['inline']
-	|	['virtual']
-	|	['explicit']
+		[`inline]
+	|	[`virtual]
+	|	[`explicit]
 
 	def type_specifier_mult 
 		[cv_qualifier]
 
 	def cv_qualifier 
-		['const']
-	|	['volatile']
-	|	['restrict']
+		[`const]
+	|	[`volatile]
+	|	[`restrict]
 
 	def cv_qualifier_rep 
 		[cv_qualifier_rep cv_qualifier]
@@ -751,8 +751,8 @@ context lookup
 	#
 
 	def enum_specifier 
-		['enum' nested_name_specifier_opt 
-				enum_head_name '{' enumerator_list_opt '}']
+		[`enum nested_name_specifier_opt 
+				enum_head_name `{ enumerator_list_opt `}]
 		{
 			# TODO: should look for existing enums of the same name.
 			Id: lookup_id = lookup_id in r3
@@ -761,7 +761,7 @@ context lookup
 			insertObject( declNs.top Id.data enum )
 		}
 
-	|	['enum' '{' enumerator_list_opt '}']
+	|	[`enum `{ enumerator_list_opt `}]
 
 	def enum_head_name
 		[class_id] 
@@ -775,11 +775,11 @@ context lookup
 
 	def enumerator_list_opt 
 		[enumerator_list]
-	|	[enumerator_list ',']
+	|	[enumerator_list `,]
 	|	[]
 
 	def enumerator_list 
-		[enumerator_list ',' enumerator_definition]
+		[enumerator_list `, enumerator_definition]
 	|	[enumerator_definition]
 
 	def enumerator_definition 
@@ -790,7 +790,7 @@ context lookup
 			insertObject( declNs.top Id.data enumId )
 		}
 
-	|	[enumerator_id '=' constant_expression]
+	|	[enumerator_id `= constant_expression]
 		{
 			Id: lookup_id = lookup_id in r1
 			enumId: ptr<lang_object> = createLangObject( IdType Id.data lookupNs.top )
@@ -816,25 +816,25 @@ context lookup
 	|	[]
 
 	def init_declarator_list
-		[init_declarator_list ',' init_declarator]
+		[init_declarator_list `, init_declarator]
 	|	[init_declarator]
 
 	def init_declarator
 		[declarator initializer_opt]
 
 	def initializer_opt
-		['=' initializer_clause]
-	|	['(' expression ')']
+		[`= initializer_clause]
+	|	[`( expression `)]
 	|	[]
 
 	def initializer_clause 
 		[assignment_expression]
-	|	['{' initializer_list '}']
-	|	['{' initializer_list ',' '}']
-	|	['{' '}']
+	|	[`{ initializer_list `}]
+	|	[`{ initializer_list `, `}]
+	|	[`{ `}]
 
 	def initializer_list
-		[initializer_list ',' initializer_clause]
+		[initializer_list `, initializer_clause]
 	|	[initializer_clause]
 
 	#
@@ -842,7 +842,7 @@ context lookup
 	#
 
 	def expression 
-		[expression ',' assignment_expression]
+		[expression `, assignment_expression]
 	|	[assignment_expression]
 
 	def expression_opt
@@ -862,50 +862,50 @@ context lookup
 	|	[throw_expression]
 
 	def assignment_op 
-		['=']
-	|	['*=']
-	|	['/=']
-	|	['%=']
-	|	['+=']
-	|	['-=']
-	|	['>>=']
-	|	['<<=']
-	|	['&=']
-	|	['^=']
-	|	['|=']
+		[`=]
+	|	[`*=]
+	|	[`/=]
+	|	[`%=]
+	|	[`+=]
+	|	[`-=]
+	|	[`>>=]
+	|	[`<<=]
+	|	[`&=]
+	|	[`^=]
+	|	[`|=]
 
 	def conditional_expression 
 		[logical_or_expression]
-	|	[logical_or_expression '?' expression ':' assignment_expression]
+	|	[logical_or_expression `? expression `: assignment_expression]
 
 	def logical_or_expression 
-		[logical_or_expression '||' logical_and_expression]
+		[logical_or_expression `|| logical_and_expression]
 	|	[logical_and_expression]
 
 	def logical_and_expression 
-		[logical_and_expression '&&' inclusive_or_expression]
+		[logical_and_expression `&& inclusive_or_expression]
 	|	[inclusive_or_expression]
 
 	def inclusive_or_expression 
-		[inclusive_or_expression '|' exclusive_or_expression]
+		[inclusive_or_expression `| exclusive_or_expression]
 	|	[exclusive_or_expression]
 
 	def exclusive_or_expression 
-		[exclusive_or_expression '^' and_expression]
+		[exclusive_or_expression `^ and_expression]
 	|	[and_expression]
 
 	def and_expression 
-		[and_expression '&' equality_expression]
+		[and_expression `& equality_expression]
 	|	[equality_expression]
 
 	def equality_expression 
-		[equality_expression '==' relational_expression]
-	|	[equality_expression '!=' relational_expression]
+		[equality_expression `== relational_expression]
+	|	[equality_expression `!= relational_expression]
 	|	[relational_expression]
 
 	def relational_expression 
-		[relational_expression '<' shift_expression]
-	|	[relational_expression '>' shift_expression]
+		[relational_expression `< shift_expression]
+	|	[relational_expression `> shift_expression]
 	|	[relational_expression lt_eq shift_expression]
 	|	[relational_expression gt_eq shift_expression]
 	|	[shift_expression]
@@ -916,39 +916,39 @@ context lookup
 	|	[additive_expression]
 
 	def additive_expression 
-		[additive_expression '+' multiplicative_expression]
-	|	[additive_expression '-' multiplicative_expression]
+		[additive_expression `+ multiplicative_expression]
+	|	[additive_expression `- multiplicative_expression]
 	|	[multiplicative_expression]
 
 	def multiplicative_expression 
-		[multiplicative_expression '*' pm_expression]
-	|	[multiplicative_expression '/' pm_expression]
-	|	[multiplicative_expression '%' pm_expression]
+		[multiplicative_expression `* pm_expression]
+	|	[multiplicative_expression `/ pm_expression]
+	|	[multiplicative_expression `% pm_expression]
 	|	[pm_expression]
 
 	def pm_expression 
-		[pm_expression '->*' cast_expression]
-	|	[pm_expression '.*' cast_expression]
+		[pm_expression `->* cast_expression]
+	|	[pm_expression `.* cast_expression]
 	|	[cast_expression]
 
 	def cast_expression 
 		[unary_expression]
-	|	['(' type_id ')' cast_expression]
+	|	[`( type_id `) cast_expression]
 
 	def delete_expression 
-		[root_qual_opt 'delete' cast_expression]
-	|	[root_qual_opt 'delete' '[' ']' cast_expression]
+		[root_qual_opt `delete cast_expression]
+	|	[root_qual_opt `delete `[ `] cast_expression]
 
 	def new_initializer_opt 
 		[new_initializer]
 	|	[]
 
 	def new_initializer 
-		['(' expression_opt ')']
+		[`( expression_opt `)]
 
 	def direct_new_declarator 
-		['[' expression ']']
-	|	[direct_new_declarator '[' constant_expression ']']
+		[`[ expression `]]
+	|	[direct_new_declarator `[ constant_expression `]]
 
 	def new_declarator_opt 
 		[new_declarator]
@@ -963,29 +963,29 @@ context lookup
 		[necs_type_specifier_seq new_declarator_opt]
 
 	def new_placement 
-		['(' expression ')']
+		[`( expression `)]
 
 	def new_expression 
-		[root_qual_opt 'new' new_type_id new_initializer_opt]
-	|	[root_qual_opt 'new' new_placement new_type_id new_initializer_opt]
-	|	[root_qual_opt 'new' '(' type_id ')' new_initializer_opt]
-	|	[root_qual_opt 'new' new_placement '(' type_id ')' new_initializer_opt]
+		[root_qual_opt `new new_type_id new_initializer_opt]
+	|	[root_qual_opt `new new_placement new_type_id new_initializer_opt]
+	|	[root_qual_opt `new `( type_id `) new_initializer_opt]
+	|	[root_qual_opt `new new_placement `( type_id `) new_initializer_opt]
 
 	def unary_operator 
-		['*']
-	|	['&']
-	|	['+']
-	|	['-']
-	|	['!']
-	|	['~']
+		[`*]
+	|	[`&]
+	|	[`+]
+	|	[`-]
+	|	[`!]
+	|	[`~]
 
 	def unary_expression 
 		[postfix_expression]
-	|	['++' cast_expression]
-	|	['--' cast_expression]
+	|	[`++ cast_expression]
+	|	[`-- cast_expression]
 	|	[unary_operator cast_expression]
-	|	['sizeof' '(' type_id ')']
-	|	['sizeof' unary_expression]
+	|	[`sizeof `( type_id `)]
+	|	[`sizeof unary_expression]
 	|	[new_expression]
 	|	[delete_expression]
 
@@ -995,32 +995,32 @@ context lookup
 
 	def postfix_expression 
 		[primary_expression]
-	|	[postfix_expression '[' expression ']']
-	|	[postfix_expression '(' expression_opt ')']
-	|	[function_style_type_conv '(' expression_opt ')']
+	|	[postfix_expression `[ expression `]]
+	|	[postfix_expression `( expression_opt `)]
+	|	[function_style_type_conv `( expression_opt `)]
 	|	[member_request_expr dot_arrow id_expression]
 	|	[member_request_expr dot_arrow pseudo_destructor_call]
-	|	[postfix_expression '++']
-	|	[postfix_expression '--']
-	|	['dynamic_cast' templ_arg_open type_id templ_arg_close '(' expression ')']
-	|	['static_cast' templ_arg_open type_id templ_arg_close '(' expression ')']
-	|	['reinterpret_cast' templ_arg_open type_id templ_arg_close '(' expression ')']
-	|	['const_cast' templ_arg_open type_id templ_arg_close '(' expression ')']
-	|	['typeid' '(' expression ')']
-	|	['typeid' '(' type_id ')']
+	|	[postfix_expression `++]
+	|	[postfix_expression `--]
+	|	[`dynamic_cast templ_arg_open type_id templ_arg_close `( expression `)]
+	|	[`static_cast templ_arg_open type_id templ_arg_close `( expression `)]
+	|	[`reinterpret_cast templ_arg_open type_id templ_arg_close `( expression `)]
+	|	[`const_cast templ_arg_open type_id templ_arg_close `( expression `)]
+	|	[`typeid `( expression `)]
+	|	[`typeid `( type_id `)]
 
 	def pseudo_destructor_call
-		[root_qual_opt nested_name_specifier_opt '~' pdc_type_name]
+		[root_qual_opt nested_name_specifier_opt `~ pdc_type_name]
 
 	def primary_expression
 		[expr_lit]
-	|	['this']
-	|	['(' expression ')']
+	|	[`this]
+	|	[`( expression `)]
 	|	[id_expression]
 	# GNU extensions
-	|	['(' '{' statement_rep '}' ')']
-	|	['__is_pod' '(' type_id ')']
-	|	['__is_empty' '(' type_id ')']
+	|	[`( `{ statement_rep `} `)]
+	|	[`__is_pod `( type_id `)]
+	|	[`__is_empty `( type_id `)]
 
 	def expr_lit 
 		[TK_IntegerDecimal]
@@ -1029,8 +1029,8 @@ context lookup
 	|	[TK_SingleLit]
 	|	[TK_Float]
 	|	[double_lit_list]
-	|	['true']
-	|	['false']
+	|	[`true]
+	|	[`false]
 
 	def double_lit_list 
 		[TK_DoubleLit double_lit_list]
@@ -1045,8 +1045,8 @@ context lookup
 	#	}
 
 	def dot_arrow 
-		['->']
-	|	['.']
+		[`->]
+	|	[`.]
 
 	def pdc_type_name 
 		[enum_id]
@@ -1071,9 +1071,9 @@ context lookup
 	|	[try_block]
 
 	def labeled_statement 
-		[label_id ':' statement]
-	|	['case' constant_expression ':' statement]
-	|	['default' ':' statement]
+		[label_id `: statement]
+	|	[`case constant_expression `: statement]
+	|	[`default `: statement]
 
 	def label_id 
 		[unknown_id]
@@ -1086,7 +1086,7 @@ context lookup
 	|	[template_id]
 
 	def compound_statement
-		['{' compound_begin statement_rep compound_end '}']
+		[`{ compound_begin statement_rep compound_end `}]
 
 	def compound_begin 
 		[]
@@ -1106,27 +1106,27 @@ context lookup
 		}
 
 	def selection_statement 
-		['if' '(' condition ')' statement elseif_clauses else_clause]
-	|	['switch' '(' condition ')' statement]
+		[`if `( condition `) statement elseif_clauses else_clause]
+	|	[`switch `( condition `) statement]
 
 	def elseif_clauses 
-		[elseif_clauses 'else' 'if' '(' condition ')' statement]
+		[elseif_clauses `else `if `( condition `) statement]
 	|	[]
 
 	def else_clause 
-		['else' statement]
+		[`else statement]
 	|	[]
 
 	def iteration_statement
-		['while' '(' condition ')' statement]
-	|	['do' statement 'while' '(' expression ')' ';']
-	|	['for' '(' for_init_statement condition_opt ';' expression_opt ')' statement]
+		[`while `( condition `) statement]
+	|	[`do statement `while `( expression `) `;]
+	|	[`for `( for_init_statement condition_opt `; expression_opt `) statement]
 
 	def jump_statement 
-		['break' ';']
-	|	['continue' ';']
-	|	['return' expression_opt ';']
-	|	['goto' any_id ';']
+		[`break `;]
+	|	[`continue `;]
+	|	[`return expression_opt `;]
+	|	[`goto any_id `;]
 
 	def any_id
 		[unknown_id]
@@ -1141,25 +1141,25 @@ context lookup
 
 	def for_init_statement 
 		[expression_statement]
-	|	[stmt_block_declaration_forms ';']
+	|	[stmt_block_declaration_forms `;]
 
 	def condition 
 		[expression]
-	|	[type_specifier_seq declarator '=' assignment_expression]
+	|	[type_specifier_seq declarator `= assignment_expression]
 
 	def condition_opt 
 		[condition]
 	|	[]
 
 	def expression_statement 
-		[expression ';']
-	|	[';']
+		[expression `;]
+	|	[`;]
 
 	def declaration_statement 
 		[stmt_block_declaration]
 
 	def stmt_block_declaration 
-		[declaration_start stmt_block_declaration_forms declaration_end ';']
+		[declaration_start stmt_block_declaration_forms declaration_end `;]
 	|	[using_declaration]
 	|	[using_directive]
 
@@ -1180,15 +1180,15 @@ context lookup
 			lhs.lookupObj = r4.lookupObj
 		}
 
-	|	[ptr_operator_seq_opt '(' sub_declarator ')' decl_array_or_param_rep declarator_end]
+	|	[ptr_operator_seq_opt `( sub_declarator `) decl_array_or_param_rep declarator_end]
 		{
 			lhs.lookupObj = r6.lookupObj
 		}
 
 	def sub_declarator 
 		[ptr_operator_seq declarator_id decl_array_or_param_rep]
-	|	[ptr_operator_seq '(' sub_declarator ')' decl_array_or_param_rep]
-	|	['(' sub_declarator ')' decl_array_or_param_rep]
+	|	[ptr_operator_seq `( sub_declarator `) decl_array_or_param_rep]
+	|	[`( sub_declarator `) decl_array_or_param_rep]
 	|	[declarator_id decl_array_or_param_rep]
 
 	def decl_array_or_param_rep 
@@ -1196,8 +1196,8 @@ context lookup
 	|	[]
 
 	def decl_array_or_param 
-		['[' constant_expression_opt ']']
-	|	['(' parameter_declaration_clause ')' cv_qualifier_rep exception_specification_opt]
+		[`[ constant_expression_opt `]]
+	|	[`( parameter_declaration_clause `) cv_qualifier_rep exception_specification_opt]
 
 	def declarator_id
 		[declarator_id_forms]
@@ -1309,16 +1309,16 @@ context lookup
 			lhs.lookupId = r3.lookupId
 		}
 
-	|	[root_qual_opt nested_name_specifier_opt '~' class_id]
+	|	[root_qual_opt nested_name_specifier_opt `~ class_id]
 		{
 			lhs.lookupId = lookup_id in r4
 		}
 
-	|	[root_qual_opt nested_name_specifier_opt '~' templ_class_id]
+	|	[root_qual_opt nested_name_specifier_opt `~ templ_class_id]
 		{
 			lhs.lookupId = lookup_id in r4
 		}
-	|	[root_qual_opt nested_name_specifier_opt '~' unknown_id]
+	|	[root_qual_opt nested_name_specifier_opt `~ unknown_id]
 		{
 			lhs.lookupId = lookup_id in r4
 		}
@@ -1337,18 +1337,18 @@ context lookup
 
 	def abstract_declarator
 		[ptr_operator_seq abstract_noid abstract_decl_array_or_param_seq_opt declarator_end]
-	|	[ptr_operator_seq '(' sub_abstract_declarator ')' 
+	|	[ptr_operator_seq `( sub_abstract_declarator `) 
 			abstract_decl_array_or_param_seq_opt declarator_end]
 	|	[abstract_noid abstract_decl_array_or_param_seq declarator_end]
-	|	['(' sub_abstract_declarator ')' abstract_decl_array_or_param_seq_opt declarator_end]
+	|	[`( sub_abstract_declarator `) abstract_decl_array_or_param_seq_opt declarator_end]
 
 	def sub_abstract_declarator
 		[ptr_operator_seq abstract_noid abstract_decl_array_or_param_seq_opt]
 
-	|	[ptr_operator_seq '(' sub_abstract_declarator ')' 
+	|	[ptr_operator_seq `( sub_abstract_declarator `) 
 			abstract_decl_array_or_param_seq_opt]
 		
-	|	['(' sub_abstract_declarator ')' abstract_decl_array_or_param_seq_opt]
+	|	[`( sub_abstract_declarator `) abstract_decl_array_or_param_seq_opt]
 
 	def abstract_noid 
 		[]
@@ -1366,15 +1366,15 @@ context lookup
 	|	[abstract_decl_array_or_param]
 
 	def abstract_decl_array_or_param
-		['[' constant_expression_opt ']']
-	|	['(' parameter_declaration_clause ')' cv_qualifier_rep 
+		[`[ constant_expression_opt `]]
+	|	[`( parameter_declaration_clause `) cv_qualifier_rep 
 			exception_specification_opt]
 
 	def parameter_declaration_clause
 		[pdc_start parameter_declaration_list]
-	|	[pdc_start parameter_declaration_list '...']
-	|	[pdc_start parameter_declaration_list ',' '...']
-	|	[pdc_start '...']
+	|	[pdc_start parameter_declaration_list `...]
+	|	[pdc_start parameter_declaration_list `, `...]
+	|	[pdc_start `...]
 	|	[pdc_start]
 
 	def pdc_start 
@@ -1393,7 +1393,7 @@ context lookup
 		}
 
 	def parameter_declaration_list 
-		[parameter_declaration_list ',' parameter_declaration]
+		[parameter_declaration_list `, parameter_declaration]
 	|	[parameter_declaration]
 
 	def parameter_declaration 
@@ -1413,12 +1413,12 @@ context lookup
 	|	[]
 
 	def maybe_parameter_init 
-		['=' constant_expression]
+		[`= constant_expression]
 	|	[]
 
 	def ptr_operator 
-		['&']
-	|	[root_qual_opt nested_name_specifier_opt '*' cv_qualifier_rep]
+		[`&]
+	|	[root_qual_opt nested_name_specifier_opt `* cv_qualifier_rep]
 
 	def ptr_operator_seq 
 		[ptr_operator_seq ptr_operator]
@@ -1461,7 +1461,7 @@ context lookup
 		}
 
 	def function_body
-		[function_body_begin '{' statement_rep function_body_end '}']
+		[function_body_begin `{ statement_rep function_body_end `}]
 
 	def function_body_begin 
 		[]
@@ -1501,7 +1501,7 @@ context lookup
 	}
 
 	def class_specifier 
-		[class_head base_clause_opt '{' class_member_rep class_body_end '}']
+		[class_head base_clause_opt `{ class_member_rep class_body_end `}]
 		{
 	# FIXME: reparse not implemented yet
 	# FIXME FIXME: reparse is actually implemented now implemented
@@ -1612,9 +1612,9 @@ context lookup
 	|	[template_id]
 
 	def class_key 
-		['class']
-	|	['struct']
-	|	['union']
+		[`class]
+	|	[`struct]
+	|	[`union]
 
 	def class_member_rep 
 		[class_member_rep class_member]
@@ -1622,10 +1622,10 @@ context lookup
 
 	def class_member 
 		[member_declaration]
-	|	[access_specifier ':']
+	|	[access_specifier `:]
 
 	def member_declaration 
-		[declaration_start member_declaration_forms declaration_end ';']
+		[declaration_start member_declaration_forms declaration_end `;]
 	|	[class_function_definition]
 	|	[using_declaration]
 	|	[template_declaration]
@@ -1672,33 +1672,33 @@ context lookup
 	|	[]
 
 	def member_declarator_list 
-		[member_declarator_list ',' member_declarator]
+		[member_declarator_list `, member_declarator]
 	|	[member_declarator]
 
 	def member_declarator 
 		[declarator]
-	|	[declarator '=' constant_expression]
-	|	[declarator ':' constant_expression]
-	|	[':' constant_expression]
+	|	[declarator `= constant_expression]
+	|	[declarator `: constant_expression]
+	|	[`: constant_expression]
 
 	def access_specifier 
-		['private']
-	|	['protected']
-	|	['public']
+		[`private]
+	|	[`protected]
+	|	[`public]
 
 	def access_specifier_opt 
 		[access_specifier]
 	|	[]
 
 	def using_declaration
-		['using' id_expression ';']
+		[`using id_expression `;]
 		{
 			obj: ptr<lang_object> = r2.lookupId.obj
 			if obj
 				insertObject( declNs.top obj->name obj )
 		}
 
-	|	['using' type_id ';']
+	|	[`using type_id `;]
 		{
 			obj: ptr<lang_object> = r2.lookupId.obj
 			if obj
@@ -1706,8 +1706,8 @@ context lookup
 		}
 
 	def using_directive
-		['using' 'namespace' root_qual_opt nested_name_specifier_opt 
-			namespace_id ';']
+		[`using `namespace root_qual_opt nested_name_specifier_opt 
+			namespace_id `;]
 		{
 			# This uses a simple, incomplete guard against cycles in the graph of
 			# using namespaces. A more sophisticated and complete guard would look
@@ -1729,10 +1729,10 @@ context lookup
 	|	[]
 
 	def base_clause 
-		[':' base_specifier_list]
+		[`: base_specifier_list]
 
 	def base_specifier_list 
-		[base_specifier_list ',' base_specifier]
+		[base_specifier_list `, base_specifier]
 	|	[base_specifier]
 
 	int addBaseSpecifier( inObject: ptr<lang_object> inheritedObject: ptr<lang_object> )
@@ -1750,7 +1750,7 @@ context lookup
 			addBaseSpecifier( declNs.top r3.lookupId.obj )
 		}
 
-	|	['virtual' access_specifier_opt root_qual_opt nested_name_specifier_opt type_name]
+	|	[`virtual access_specifier_opt root_qual_opt nested_name_specifier_opt type_name]
 		{
 			addBaseSpecifier( declNs.top r5.lookupId.obj )
 		}
@@ -1761,7 +1761,7 @@ context lookup
 		}
 
 	def virtual_opt 
-		['virtual']
+		[`virtual]
 	|	[]
 
 	#
@@ -1769,7 +1769,7 @@ context lookup
 	#
 
 	def conversion_function_id 
-		['operator' conversion_type_id]
+		[`operator conversion_type_id]
 
 	def conversion_type_id 
 		[necs_type_specifier_seq ptr_operator_seq_opt]
@@ -1779,14 +1779,14 @@ context lookup
 	|	[]
 
 	def ctor_initializer
-		[':' mem_initializer_list]
+		[`: mem_initializer_list]
 
 	def mem_initializer_list 
-		[mem_initializer_list ',' mem_initializer]
+		[mem_initializer_list `, mem_initializer]
 	|	[mem_initializer]
 
 	def mem_initializer 
-		[mem_initializer_id '(' expression_opt ')']
+		[mem_initializer_id `( expression_opt `)]
 
 	def mem_initializer_id 
 		[root_qual_opt nested_name_specifier_opt unknown_id]
@@ -1799,17 +1799,17 @@ context lookup
 	# Overloading
 	#
 	def operator_function_id 
-		['operator' operator]
+		[`operator operator]
 
 	def operator 
-		['+'] | ['-'] | ['*'] | ['/'] | ['='] | ['<'] | ['>'] | ['&'] | ['|'] |
-		['^'] | ['%'] | ['~'] |	['!'] | ['(' ')'] | ['[' ']'] | ['new'] |
-		['delete'] | ['->'] | ['++'] | ['--'] | ['*='] | ['/='] | ['%='] |
-		['+='] | ['-='] | ['>>='] | ['<<='] | ['&='] | ['^='] | ['|='] | ['=='] |
-		['!='] | ['&&'] | ['||'] | [lt_eq] | [gt_eq] | [shift_left] | [shift_right]
+		[`+] | [`-] | [`*] | [`/] | [`=] | [`<] | [`>] | [`&] | [`|] |
+		[`^] | [`%] | [`~] |	[`!] | [`( `)] | [`[ `]] | [`new] |
+		[`delete] | [`->] | [`++] | [`--] | [`*=] | [`/=] | [`%=] |
+		[`+=] | [`-=] | [`>>=] | [`<<=] | [`&=] | [`^=] | [`|=] | [`==] |
+		[`!=] | [`&&] | [`||] | [lt_eq] | [gt_eq] | [shift_left] | [shift_right]
 
 	def lt_eq 
-		['<' '=']
+		[`< `=]
 	#	try {
 	#		if ( $2->leader != 0 ) {
 	#			#ifdef LOG_REDUCE
@@ -1820,7 +1820,7 @@ context lookup
 	#	};
 
 	def gt_eq 
-		['>' '=']
+		[`> `=]
 	#	try {
 	#		if ( $2->leader != 0 ) {
 	#			#ifdef LOG_REDUCE
@@ -1831,7 +1831,7 @@ context lookup
 	#	};
 
 	def shift_left 
-		['<' '<']
+		[`< `<]
 	#	try {
 	#		if ( $2->leader != 0 ) {
 	#			#ifdef LOG_REDUCE
@@ -1842,7 +1842,7 @@ context lookup
 	#	};
 
 	def shift_right 
-		['>' '>']
+		[`> `>]
 	#	try {
 	#		if ( $2->leader != 0 ) {
 	#			#ifdef LOG_REDUCE
@@ -1864,12 +1864,12 @@ context lookup
 		}
 
 	def template_declaration_params
-		['template' '<' tpl_start template_parameter_list '>']
+		[`template `< tpl_start template_parameter_list `>]
 		{
 			templDecl.push( 1 )
 		}
 
-	|	['export' 'template' '<' tpl_start template_parameter_list '>']
+	|	[`export `template `< tpl_start template_parameter_list `>]
 		{
 			templDecl.push( 1 )
 		}
@@ -1884,7 +1884,7 @@ context lookup
 		}
 
 	def template_parameter_list 
-		[template_parameter_list ',' template_parameter]
+		[template_parameter_list `, template_parameter]
 	|	[template_parameter]
 
 	def template_parameter 
@@ -1916,7 +1916,7 @@ context lookup
 	|	[simple_type_specifier_kw_seq]
 
 	def type_parameter
-		['class' type_param_id type_param_init_opt]
+		[`class type_param_id type_param_init_opt]
 		{
 			Id: lookup_id = lookup_id in r2
 			if Id {
@@ -1927,7 +1927,7 @@ context lookup
 			}
 		}
 
-	|	['typename' type_param_id type_param_init_opt]
+	|	[`typename type_param_id type_param_init_opt]
 		{
 			Id: lookup_id = lookup_id in r2
 			if Id {
@@ -1938,8 +1938,8 @@ context lookup
 			}
 		}
 
-	|	['template' '<' tpl_start template_parameter_list '>'
-				'class' type_param_id templ_type_param_init_opt]
+	|	[`template `< tpl_start template_parameter_list `>
+				`class type_param_id templ_type_param_init_opt]
 		{
 			Id: lookup_id = lookup_id in r7
 			if Id {
@@ -1950,11 +1950,11 @@ context lookup
 		}
 
 	def templ_type_param_init_opt 
-		['=' id_expression]
+		[`= id_expression]
 	|	[]
 
 	def type_param_init_opt 
-		['=' type_id]
+		[`= type_id]
 	|	[]
 
 	def type_param_id 
@@ -1973,7 +1973,7 @@ context lookup
 	|	[]
 
 	def template_argument_list 
-		[template_argument_list ',' template_argument]
+		[template_argument_list `, template_argument]
 	|	[template_argument]
 
 	def template_argument 
@@ -1981,11 +1981,11 @@ context lookup
 	|	[assignment_expression]
 
 	def explicit_instantiation 
-		['template' declaration]
-	|	[declaration_start decl_specifier_mult_seq 'template' declaration declaration_end]
+		[`template declaration]
+	|	[declaration_start decl_specifier_mult_seq `template declaration declaration_end]
 
 	def explicit_specialization 
-		['template' '<' '>' declaration]
+		[`template `< `> declaration]
 
 	## Not sure what this one is about?
 	#explicit_specialization: 
@@ -1998,9 +1998,9 @@ context lookup
 	#
 
 	def original_namespace_definition
-		[orig_namespace_def_name '{' declaration* namespace_end '}']
+		[orig_namespace_def_name `{ declaration* namespace_end `}]
 
-	def orig_namespace_def_name ['namespace' unknown_id]
+	def orig_namespace_def_name [`namespace unknown_id]
 		{
 			match r2 [Id: lookup_id]
 			nspace: ptr<lang_object> = createLangObject(
@@ -2032,9 +2032,9 @@ context lookup
 	#
 
 	def extension_namespace_definition
-		[ext_namespace_def_name '{' declaration* namespace_end '}']
+		[ext_namespace_def_name `{ declaration* namespace_end `}]
 
-	def ext_namespace_def_name ['namespace' namespace_id]
+	def ext_namespace_def_name [`namespace namespace_id]
 		{
 			match r2 [Id: lookup_id]
 			nspace: ptr<lang_object> = Id.obj
@@ -2051,9 +2051,9 @@ context lookup
 	# Unnamed namespace definition
 	#
 	def unnamed_namespace_definition
-		[unnamed_namespace_def_name '{' declaration* namespace_end '}']
+		[unnamed_namespace_def_name `{ declaration* namespace_end `}]
 
-	def unnamed_namespace_def_name ['namespace']
+	def unnamed_namespace_def_name [`namespace]
 		{
 			nspace: ptr<lang_object> = createLangObject(
 					NamespaceType '<unnamed_namespace>'
@@ -2071,46 +2071,46 @@ context lookup
 	# linkage_specification
 	#
 	def linkage_specification 
-		['extern' TK_DoubleLit '{' declaration* '}']
-	|	['extern' TK_DoubleLit declaration]
+		[`extern TK_DoubleLit `{ declaration* `}]
+	|	[`extern TK_DoubleLit declaration]
 
 	#
 	# Exception Handling.
 	#
 
 	def try_block 
-		['try' compound_statement handler_seq]
+		[`try compound_statement handler_seq]
 
 	def handler_seq 
 		[handler_seq handler]
 	|	[handler]
 
 	def handler 
-		['catch' '(' exception_declaration ')' compound_statement]
+		[`catch `( exception_declaration `) compound_statement]
 
 	def exception_declaration 
 		[type_specifier_seq declarator]
 	|	[type_specifier_seq abstract_declarator]
 	|	[type_specifier_seq]
-	|	['...']
+	|	[`...]
 
 	def throw_expression 
-		['throw' assignment_expression]
-	|	['throw']
+		[`throw assignment_expression]
+	|	[`throw]
 
 	def exception_specification_opt 
 		[exception_specification]
 	|	[]
 
 	def exception_specification 
-		['throw' '(' type_id_list_opt ')']
+		[`throw `( type_id_list_opt `)]
 
 	def type_id_list_opt 
 		[type_id_list]
 	|	[]
 
 	def type_id_list 
-		[type_id_list ',' type_id]
+		[type_id_list `, type_id]
 	|	[type_id]
 
 	def start
@@ -2196,7 +2196,7 @@ printObject( '' Lookup.rootNamespace )
 print( '***** UNKNOWN DECLARATORS *****\n' )
 for DI: lookup::declarator_id in S {
 	if match DI 
-		[lookup::root_qual_opt lookup::nested_name_specifier_opt lookup::'~' UID: lookup::unknown_id]
+		[lookup::root_qual_opt lookup::nested_name_specifier_opt lookup::`~ UID: lookup::unknown_id]
 	{
 		print( UID '\n' )
 	}

@@ -22,7 +22,7 @@ context tags
 	lex
 		ignore  /space+/
 		token attr_name /def_name_char+/
-		literal '='
+		literal `=
 	end
 
 	# Scanner for attribute values.
@@ -33,7 +33,7 @@ context tags
 		token unq_val /[^ \t\r\n<>"'] [^ \t\r\n<>]*/
 	end
 
-	literal '>', '/>'
+	literal `> `/>
 
 	#
 	# Tokens
@@ -41,7 +41,7 @@ context tags
 
 	lex
 		ignore /space+/
-		literal '<', '</', '<!DOCTYPE'
+		literal `< `</ `<!DOCTYPE
 		token doc_data /[^<]+/
 		token comment /"<!--" any* :>> "-->"/
 	end
@@ -103,14 +103,14 @@ context tags
 	# covering dt_name
 	lex 
 		ignore /space+/
-		literal 'SYSTEM', 'PUBLIC'
+		literal `SYSTEM `PUBLIC
 	end
 
-	def DOCTYPE ['<!DOCTYPE' dt_name external_id dt_bl? dt_close]
+	def DOCTYPE [`<!DOCTYPE dt_name external_id dt_bl? dt_close]
 
 	def external_id
-		['SYSTEM' dt_literal?]
-	|	['PUBLIC' dt_literal dt_literal?]
+		[`SYSTEM dt_literal?]
+	|	[`PUBLIC dt_literal dt_literal?]
 
 	#
 	# Tags, with optionanal close.
@@ -120,14 +120,14 @@ context tags
 		[open_tag item* opt_close_tag]
 
 	def open_tag 
-		['<' tag_id attr* '>']
+		[`< tag_id attr* `>]
 		{
 			TagStack = construct tag_stack 
 				[r2 TagStack]
 		}
 
 	def opt_close_tag
-		['</' close_id '>']
+		[`</ close_id `>]
 		{
 			match TagStack [Top:tag_id Rest:tag_stack] 
 			if r2.data == Top.data
@@ -146,13 +146,13 @@ context tags
 	# Empty tags
 	#
 	def empty_tag 
-		['<' tag_id attr* '/>']
+		[`< tag_id attr* `/>]
 
 	#
 	# Stray close tags
 	#
 	def stray_close 
-		['</' stray_close_id '>']
+		[`</ stray_close_id `>]
 
 
 	#
@@ -162,7 +162,7 @@ context tags
 	def attr
 		[attr_name eql_attr_val?]
 
-	def eql_attr_val ['=' attr_val]
+	def eql_attr_val [`= attr_val]
 
 	def attr_val
 		[squote_val]
@@ -196,7 +196,7 @@ context tags
 	{
 		for T: open_tag in Start {
 			require T 
-				["<img" AttrList: attr* '>']
+				["<img" AttrList: attr* ">"]
 			
 			haveAlt: bool = false
 			for A: attr in T {

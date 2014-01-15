@@ -16,7 +16,7 @@ context counting
 		# Ignore whitespace.
 		ignore /rl_ws/
 
-		literal ';'
+		literal `;
 
 		# Tokens. 
 		token id /rl_id/

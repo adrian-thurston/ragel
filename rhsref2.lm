@@ -1,8 +1,8 @@
 ##### LM #####
 
 lex
-	literal '-', '=', ';', '*', '->'
-	literal 'option'
+	literal `- `= `; `* `->
+	literal `option
 
 	token id /[A-Za-z_][A-Za-z_0-9]*/
 
@@ -11,8 +11,8 @@ end
 
 def arg_option
 	I: int
-	['option' '-' Short: id '->' Func: id ';']
-|	['option' '-' '-' Long: id '->' Func: id ';']
+	[`option `- Short: id `-> Func: id `;]
+|	[`option `- `- Long: id `-> Func: id `;]
 
 def arg_defs
 	[arg_option+]

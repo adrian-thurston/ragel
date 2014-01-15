@@ -2,7 +2,8 @@
 
 lex
 	ignore /space+/
-	literal '*', '(', ')', '!', ';\n'
+	literal `* `( `) `!
+	token SEMI_NL /';\n'/
 	token id /[a-zA-Z_0-9]+/ 
 end
 
@@ -11,7 +12,7 @@ def item
 	{
 		lhs = cons item ["( " ^r1 " )"]
 	}
-|	['(' item* ')']
+|	[`( item* `)]
 	{
 		lhs = cons item ["( " ^r2 " )"]
 	}
@@ -27,8 +28,8 @@ def B
 	}
 
 def start 
-	[A item* '!']
-|	[B item* ';\n']
+	[A item* `!]
+|	[B item* SEMI_NL]
 
 parse Start: start[ stdin ]
 print( Start "\n" )
