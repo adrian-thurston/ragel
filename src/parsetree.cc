@@ -49,20 +49,27 @@ void prepareLitString( String &result, bool &caseInsensitive,
 	caseInsensitive = false;
 
 	char *src = srcString.data + 1;
-	char *end = srcString.data + srcString.length() - 1;
+	char *end = 0;
 
-	while ( *end != '\'' && *end != '\"' && *end != '\n' ) {
-		if ( *end == 'i' )
-			caseInsensitive = true;
-		else {
-			error( loc ) << "literal string '" << *end << 
-					"' option not supported" << endl;
+	if ( srcString.data[0] != '`' ) {
+		end = srcString.data + srcString.length() - 1;
+
+		while ( *end != '\'' && *end != '\"' && *end != '`' && *end != '\n' ) {
+			if ( *end == 'i' )
+				caseInsensitive = true;
+			else {
+				error( loc ) << "literal string '" << *end << 
+						"' option not supported" << endl;
+			}
+			end -= 1;
 		}
-		end -= 1;
-	}
 
-	if ( *end == '\n' )
-		end++;
+		if ( *end == '\n' )
+			end++;
+	}
+	else {
+		end = srcString.data + srcString.length();
+	}
 
 	char *dest = result.data;
 	int len = 0;

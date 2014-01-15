@@ -68,13 +68,14 @@ lex
 		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
 	/
 
-	token number / ( '0' .. '9' ) + /
+	token number
+		/ ( '0' .. '9' ) + /
 
-	token lit /
-		'\'' . ( ^( '\'' | '\\' ) | '\\' . any )* .  '\''
-	/
+	token backtick_lit
+		/ '`' . ^( ' ' | '\n' | '\t' | ']' )* | '`]' /
 
 	token DQ / '\"' / ni
+	token SQ / '\'' / ni
 	token TILDE / '~' / ni
 
 	token SQOPEN /'['/
@@ -114,12 +115,20 @@ end
 
 lex
 	token CONS_DQ / '\"' /
-	token CONS_NL / '\n' /
+	token CONS_DQ_NL / '\n' /
 	token CONS_SQOPEN / '[' /
 	token CONS_SQCLOSE / ']' /
 
-	token cons_data 
+	token dq_cons_data
 		/ ( ^( '\n' | '\"' | '[' | ']' | '\\' ) | '\\' . any )+ /
+end
+
+lex
+	token CONS_SQ / '\'' /
+	token CONS_SQ_NL / '\n' /
+
+	token sq_cons_data
+		/ ( ^( '\n' | '\'' | '\\' ) | '\\' . any )+ /
 end
 
 lex
@@ -203,7 +212,7 @@ def root_item
 |	[include] :Include commit
 
 def include
-	[INCLUDE lit]
+	[INCLUDE SQ SqConsDataList: sq_cons_data* sq_lit_term]
 
 def precedence_def
 	[pred_type pred_token_list]
@@ -219,7 +228,7 @@ def pred_token_list
 
 def pred_token
 	[region_qual id] :Id
-|	[region_qual lit] :Lit
+|	[region_qual backtick_lit] :Lit
 
 def pre_eof_def
 	[PREEOF COPEN lang_stmt_list CCLOSE]
@@ -249,11 +258,16 @@ def global_def
 	[GLOBAL var_def opt_def_init]
 
 def iter_def
-	[ITER id POPEN ParamVarDefList: param_var_def* PCLOSE
+	[ITER id POPEN ParamVarDefList: param_var_def_list PCLOSE
 		COPEN lang_stmt_list CCLOSE]
 
 def reference_type_ref
 	[REF LT type_ref GT]
+
+def param_var_def_list
+	[param_var_def param_var_def_list]
+|	[param_var_def COMMA param_var_def_list]
+|	[]
 
 def param_var_def
 	[id COLON type_ref] :Type
@@ -265,7 +279,7 @@ def opt_export
 
 def function_def
 	[opt_export type_ref id 
-			POPEN ParamVarDefList: param_var_def* PCLOSE 
+			POPEN ParamVarDefList: param_var_def_list PCLOSE
 			COPEN lang_stmt_list CCLOSE]
 
 def context_var_def
@@ -278,11 +292,11 @@ def literal_def
 	[LITERAL literal_list]
 
 def literal_list
-	[literal_list COMMA literal_item] :Item
+	[literal_list literal_item] :Item
 |	[literal_item] :Base
 
 def literal_item
-	[NiLeft: opt_no_ignore lit NiRight: opt_no_ignore]
+	[NiLeft: opt_no_ignore backtick_lit NiRight: opt_no_ignore]
 
 def opt_no_ignore
 	[NI] :Ni
@@ -350,7 +364,7 @@ def ignore_def
 
 def prod_el
 	[opt_prod_el_name region_qual id opt_repeat] :Id
-|	[opt_prod_el_name region_qual lit opt_repeat] :Lit
+|	[opt_prod_el_name region_qual backtick_lit opt_repeat] :Lit
 
 def opt_prod_el_name
 	[id COLON] :Name
@@ -406,8 +420,13 @@ def optional_else
 	[ELSE block_or_single] :Else
 |	[]
 
+def call_arg_list
+	[code_expr call_arg_list]
+|	[code_expr COMMA call_arg_list]
+|	[]
+
 def iter_call
-	[E1 var_ref POPEN CodeExprList: code_expr* PCLOSE] :Call
+	[E1 var_ref POPEN call_arg_list PCLOSE] :Call
 |	[E2 id] :Id
 |	[E3 code_expr] :Expr
 
@@ -433,10 +452,10 @@ def var_def
 	[id COLON type_ref]
 
 def print_stmt
-	[PRINT POPEN CodeExprList: code_expr* PCLOSE] :Tree
-|	[PRINTS POPEN CodeExprList: code_expr* PCLOSE] :PrintStream
-|	[PRINT_XML POPEN CodeExprList: code_expr* PCLOSE] :Xml
-|	[PRINT_XML_AC POPEN CodeExprList: code_expr* PCLOSE] :XmlAc
+	[PRINT POPEN call_arg_list PCLOSE] :Tree
+|	[PRINTS POPEN call_arg_list PCLOSE] :PrintStream
+|	[PRINT_XML POPEN call_arg_list PCLOSE] :Xml
+|	[PRINT_XML_AC POPEN call_arg_list PCLOSE] :XmlAc
 
 def expr_stmt
 	[code_expr]
@@ -479,8 +498,7 @@ def opt_eos
 
 def code_factor
 	[number] :Number
-|	[lit] :Lit
-|	[var_ref POPEN CodeExprList: code_expr* PCLOSE] :Call
+|	[var_ref POPEN call_arg_list PCLOSE] :Call
 |	[var_ref] :VarRef
 |	[NIL] :Nil
 |	[TRUE] :True
@@ -491,10 +509,10 @@ def code_factor
 |	[PARSE_STOP opt_capture type_ref opt_field_init accumulate] :ParseStop
 |	[CONS opt_capture type_ref opt_field_init constructor] :Cons
 |	[MATCH var_ref pattern] :Match
-|	[cstring] :String
+|	[string] :String
 |	[type_ref IN var_ref] :In
-|	[MAKE_TREE POPEN MakeTreeExprList: code_expr* PCLOSE] :MakeTree
-|	[MAKE_TOKEN POPEN MakeTokenExprList: code_expr* PCLOSE] :MakeToken
+|	[MAKE_TREE POPEN call_arg_list PCLOSE] :MakeTree
+|	[MAKE_TOKEN POPEN call_arg_list PCLOSE] :MakeToken
 |	[TYPEID LT type_ref GT] :TypeId
 |	[NEW code_factor] :New
 |	[CAST LT type_ref GT code_factor] :Cast
@@ -538,7 +556,10 @@ def opt_label
 |	[]
 
 def dq_lit_term
-	[CONS_DQ] | [CONS_NL]
+	[CONS_DQ] | [CONS_DQ_NL]
+
+def sq_lit_term
+	[CONS_SQ] | [CONS_SQ_NL]
 
 def opt_tilde_data
 	[tilde_data]
@@ -546,19 +567,21 @@ def opt_tilde_data
 
 def pattern_el_lel
 	[region_qual id opt_repeat] :Id
-|	[region_qual lit opt_repeat] :Lit
+|	[region_qual backtick_lit opt_repeat] :Lit
 
 def pattern_el
 	[opt_label pattern_el_lel] :PatternEl
 |	[DQ LitpatElList: litpat_el* dq_lit_term] :Dq
+|	[SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
 
 def litpat_el
-	[cons_data] :ConsData
+	[dq_cons_data] :ConsData
 |	[CONS_SQOPEN PatternElList: pattern_el* CONS_SQCLOSE] :SubList
 
 def pattern_top_el
 	[DQ LitpatElList: litpat_el* dq_lit_term] :Dq
+|	[SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[SQOPEN PatternElList: pattern_el* SQCLOSE] :SubList
 
@@ -576,19 +599,22 @@ def pattern
 def E1 []
 def E2 []
 def E3 []
+def E4 []
 
 def cons_el
-	[E1 region_qual lit] :Lit
+	[E1 region_qual backtick_lit] :Lit
 |	[E1 DQ LitConsElList: lit_cons_el* dq_lit_term] :Dq
+|	[E1 SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[E2 code_expr] :CodeExpr
 
 def lit_cons_el
-	[cons_data] :ConsData
+	[dq_cons_data] :ConsData
 |	[CONS_SQOPEN ConsElList: cons_el* CONS_SQCLOSE] :SubList
 
 def cons_top_el
 	[DQ LitConsElList: lit_cons_el* dq_lit_term] :Dq
+|	[SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[SQOPEN ConsElList: cons_el* SQCLOSE] :SubList
 
@@ -605,15 +631,17 @@ def constructor
 
 def accum_el
 	[E1 DQ LitAccumElList: lit_accum_el* dq_lit_term] :Dq
+|	[E1 SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[E2 code_expr] :CodeExpr
 
 def lit_accum_el
-	[cons_data] :ConsData
+	[dq_cons_data] :ConsData
 |	[CONS_SQOPEN AccumElList: accum_el* CONS_SQCLOSE] :SubList
 
 def accum_top_el
 	[DQ LitAccumElList: lit_accum_el* dq_lit_term] :Dq
+|	[SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[SQOPEN AccumElList: accum_el* SQCLOSE] :SubList
 
@@ -630,15 +658,17 @@ def accumulate
 
 def string_el
 	[E1 DQ LitStringElList: lit_string_el* dq_lit_term] :Dq
+|	[E1 SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[E2 code_expr] :CodeExpr
 
 def lit_string_el
-	[cons_data] :ConsData
+	[dq_cons_data] :ConsData
 |	[CONS_SQOPEN StringElList: string_el* CONS_SQCLOSE] :SubList
 
 def string_top_el
 	[DQ LitStringElList: lit_string_el* dq_lit_term] :Dq
+|	[SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[SQOPEN StringElList: string_el* SQCLOSE] :SubList
 
@@ -646,7 +676,7 @@ def string_list
 	[string_top_el string_list] :List
 |	[string_top_el] :Base
 
-def cstring
+def string
 	[string_list]
 
 #

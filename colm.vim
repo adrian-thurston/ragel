@@ -40,6 +40,8 @@ syntax match char "\\." contained
 
 syntax match otLit "\~.*$"
 syntax match otLit "'\(\\.\|[^'\\]\)*\('[i]*\)\?"
+syntax match otLit "`[^ \t\r\]]*"
+syntax match otLit "`\]"
 
 "
 " Other stuff

@@ -1494,6 +1494,20 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 
 	}
 
+	/* If there was nothing loaded, load the empty string. We must produce
+	 * something. */
+	if ( consItemList->length() == 0 ) {
+		String result = "";
+
+		/* Make sure we have this string. */
+		StringMapEl *mapEl = 0;
+		if ( pd->literalStrings.insert( result, &mapEl ) )
+			mapEl->value = pd->literalStrings.length()-1;
+
+		code.append( IN_LOAD_STR );
+		code.appendWord( mapEl->value );
+	}
+
 	long items = consItemList->length();
 	for ( long i = 0; i < items-1; i++ )
 		code.append( IN_CONCAT_STR );
