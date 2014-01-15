@@ -1,8 +1,8 @@
 ##### LM #####
 lex
-	literal 'var', 'if', 'then', 'else', 'while', 'do', 'for', 'read', 'write',
-			'end', 'to', 'goto'
-	literal ':=', '!=', ';', '+', '-', '*', '/', '=', '(', ')', ':'
+	literal `var `if `then `else `while `do `for `read `write
+			`end `to `goto
+	literal `:= `!= `; `+ `- `* `/ `= `( `) `:
 
 	ignore /'//' [^\n]* '\n'/
 	ignore /[\n\t ]+/
@@ -27,65 +27,65 @@ def statement
 |	[goto_statement]
 
 def declaration
-	['var' id ';']
+	[`var id `;]
 
 def assignment_statement
-	[id ':=' expression ';']
+	[id `:= expression `;]
 
 def if_statement
-	['if' expression 'then' statement* opt_else_statement 'end']
+	[`if expression `then statement* opt_else_statement `end]
 
 def opt_else_statement
-	['else' statement*]
+	[`else statement*]
 |	[]
 
 def while_statement
-	['while' expression 'do' statement* 'end']
+	[`while expression `do statement* `end]
 
 def do_statement
-	['do' statement* 'while' expression ';']
+	[`do statement* `while expression `;]
 
 def for_statement
-	['for' id ':=' expression 'to' expression 'do' statement* 'end']
+	[`for id `:= expression `to expression `do statement* `end]
 
 def read_statement
-	['read' id ';']
+	[`read id `;]
 
 def write_statement
-	['write' expression ';']
+	[`write expression `;]
 
 def expression
 	[Term: term]
 |	[expression eqop Term: term]
 
-def eqop ['='] | ['!=']
+def eqop [`=] | [`!=]
 
 def term
 	[Factor: factor]
 |	[term addop Factor: factor]
 
-def addop ['+'] | ['-']
+def addop [`+] | [`-]
 
 def factor
 	[Primary: primary]
 |	[factor mulop Primary: primary]
 
-def mulop ['*'] | ['/']
+def mulop [`*] | [`/]
 
 def primary
 	[id]
 |	[lit]
-|	['(' expression ')']
+|	[`( expression `)]
 
 def lit
 	[integernumber]
 |	[stringlit]
 
 def labelled_statement
-	[id ':' statement] 
+	[id `: statement] 
 
 def goto_statement
-	['goto' id ';']
+	[`goto id `;]
 
 parse P: program[stdin]
 

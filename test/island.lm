@@ -14,7 +14,7 @@ def func_body
 	[func_item*]
 
 def func 
-	[ident '(' ')' '{' func_body func_close ]
+	[ident `( `) `{ func_body func_close ]
 
 lex
 	token ident /[a-zA-Z_]+/
@@ -24,7 +24,7 @@ lex
 	rl d_string / '"' ([^"\\\n] | '\\' any )* '"' /
 	token string /s_string | d_string/
 
-	literal '+', '*', ';', '(', ')', '{', '}'
+	literal `+ `* `; `( `) `{ `}
 
 	ignore wp / [ \t\n]+ /
 end
@@ -32,15 +32,15 @@ end
 def class_item
 	[func]
 |	[class]
-|	[ident ';']
-|	[number ';']
-|	[string ';']
+|	[ident `;]
+|	[number `;]
+|	[string `;]
 
 def class_body 
 	[class_item*]
 
 def class 
-	[ident '{' class_body '}' ]
+	[ident `{ class_body `} ]
 
 def top_item 
 	[func]

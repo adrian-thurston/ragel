@@ -1,7 +1,7 @@
 ##### LM #####
 lex
 	ignore /space+/
-	literal '*', '!', ';'
+	literal `* `! `;
 	token POPEN /'('/ ni
 	token PCLOSE ni /')'/
 	token id /[a-zA-Z_0-9]+/ 
@@ -11,18 +11,18 @@ lex
 	ignore /space+/
 	token inner_t /[a-zA-Z_0-9]+/ 
 
-	literal ''
+	literal `
 end
 
 def inner
-	['' inner_t*]
+	[` inner_t*]
 
 def item 
 	[id]
 |	[POPEN inner PCLOSE]
 
 def start 
-	[item* ';']
+	[item* `;]
 
 parse Start: start[ stdin ]
 

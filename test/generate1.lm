@@ -12,10 +12,10 @@ context generate
 	# Tokens. 
 	lex
 		# Python keywords.
-		literal 'and', 'del', 'from', 'not', 'while', 'as', 'elif', 'global', 'or',
-			'with', 'assert', 'else', 'if', 'pass', 'yield', 'break', 'except',
-			'import', 'print', 'class', 'exec', 'in', 'raise', 'continue',
-			'finally', 'is', 'return', 'def', 'for', 'lambda', 'try'
+		literal `and `del `from `not `while `as `elif `global `or
+			`with `assert `else `if `pass `yield `break `except
+			`import `print `class `exec `in `raise `continue
+			`finally `is `return `def `for `lambda `try
 
 		# Identifiers
 		rl lowercase /'a'..'z'/
@@ -58,15 +58,15 @@ context generate
 		token imagnumber /(floatnumber | intpart) ("j" | "J")/
 
 		# Operators.
-		literal '+', '-', '*', '**', '/', '//', '%', '<<', '>>', '&', '|', '^',
-			'~', '<', '>', '<=', '>=', '==', '!=', '<>'
+		literal `+ `- `* `** `/ `// `% `<< `>> `& `| `^
+			`~ `< `> `<= `>= `== `!= `<>
 		
 		# Delimiters
-		literal '(', ')', '[', ']', '{', '}', '@', ',', ':', '.', '`', '=', ';',
-			'+=', '-=', '*=', '/=', '//=', '%=', '&=', '|=', '^=', '>>=', '<<=',
-			'**='
+		literal `( `) `[ `] `{ `} `@ `, `: `. `` `= `;
+			`+= `-= `*= `/= `//= `%= `&= `|= `^= `>>= `<<=
+			`**=
 		
-		literal '...'
+		literal `...
 
 		# In general whitespace is ignored.
 		ignore WS /' '+/
@@ -152,10 +152,10 @@ context generate
 		[simple_stmt another_stmt* opt_semi]
 
 	def another_stmt 
-		[';' simple_stmt]
+		[`; simple_stmt]
 
 	def opt_semi 
-		[';']
+		[`;]
 	|	[]
 
 	def suite 
@@ -173,29 +173,29 @@ context generate
 	|	[funcdef]
 
 	def if_stmt 
-		['if' expression ':' suite elif_part* opt_else_part]
+		[`if expression `: suite elif_part* opt_else_part]
 
 	def elif_part 
-		['elif' expression ':' suite]
+		[`elif expression `: suite]
 
 	def opt_else_part 
-		['else' ':' suite]
+		[`else `: suite]
 	|	[]
 
 	def while_stmt 
-		['while' expression ':' suite opt_else_part]
+		[`while expression `: suite opt_else_part]
 
 	def for_stmt 
-		['for' target_list 'in' expression_list ':' suite opt_else_part]
+		[`for target_list `in expression_list `: suite opt_else_part]
 
 	def funcdef 
-		['def' funcname '(' opt_parameter_list ')' ':' suite]
+		[`def funcname `( opt_parameter_list `) `: suite]
 
 	def funcname 
 		[identifier]
 
 	def dotted_name 
-		[dotted_name '.' identifier]
+		[dotted_name `. identifier]
 	|	[identifier]
 
 	def opt_parameter_list 
@@ -206,23 +206,23 @@ context generate
 		[defparameter_list defparameter opt_comma]
 
 	def defparameter_list 
-		[defparameter_list defparameter ',']
+		[defparameter_list defparameter `,]
 	|	[]
 	  
 	def defparameter 
 		[parameter]
-	|	[parameter '=' expression]
+	|	[parameter `= expression]
 	  
 	def sublist 
 		[sublist_pl opt_comma]
 
 	def sublist_pl 
-		[sublist_pl ',' parameter]
+		[sublist_pl `, parameter]
 	|	[parameter]
 	  
 	def parameter 
 		[identifier]
-	|	['(' sublist ')']
+	|	[`( sublist `)]
 	  
 	def classname 
 		[identifier]
@@ -243,13 +243,13 @@ context generate
 	|	[target_equals]
 
 	def target_equals 
-		[target_list '=']
+		[target_list `=]
 
 	def target_list 
 		[target_list_core opt_comma]
 
 	def target_list_core 
-		[target_list_core ',' target]
+		[target_list_core `, target]
 	|	[target]
 
 	def target 
@@ -257,8 +257,8 @@ context generate
 
 	def target_atom
 		[identifier]
-	|	['(' target_list ')']
-	|	['[' target_list ']']
+	|	[`( target_list `)]
+	|	[`[ target_list `]]
 
 	def target_ext_rep 
 		[target_ext target_ext_rep]
@@ -270,7 +270,7 @@ context generate
 	|	[slicing]
 
 	def print_stmt 
-		['print' opt_expression_list]
+		[`print opt_expression_list]
 
 	def opt_expression_list 
 		[expression_list]
@@ -280,32 +280,32 @@ context generate
 		[expression_list_core opt_comma]
 
 	def expression_list_core 
-		[expression_list_core ',' expression]
+		[expression_list_core `, expression]
 	|	[expression]
 
 	def opt_comma 
-		[',']
+		[`,]
 	|	[]
 
 	def expression 
-		[or_test 'if' or_test 'else' test]
+		[or_test `if or_test `else test]
 	|	[or_test]
 	|	[lambda_form]
 
 	def or_test 
-		[or_test 'or' and_test]
+		[or_test `or and_test]
 	|	[and_test]
 	  
 	def and_test 
-		[and_test 'and' not_test]
+		[and_test `and not_test]
 	|	[not_test]
 	  
 	def not_test 
 		[comparison]
-	|	['not' not_test]
+	|	[`not not_test]
 
 	def lambda_form 
-		['lambda' opt_parameter_list ':' expression]
+		[`lambda opt_parameter_list `: expression]
 
 	def test 
 		[or_test]
@@ -318,8 +318,8 @@ context generate
 		[comp_operator or_expr]
 
 	def comp_operator 
-		['<'] | ['>'] | ['=='] | ['>='] | ['<='] | ['<>'] | ['!='] | ['is'] |
-		['is' 'not'] | ['in'] | ['not' 'in']
+		[`<] | [`>] | [`==] | [`>=] | [`<=] | [`<>] | [`!=] | [`is] |
+		[`is `not] | [`in] | [`not `in]
 
 	def or_expr 
 		[primary]
@@ -357,10 +357,10 @@ context generate
 	|	[string_conversion]
 
 	def parenth_form 
-		['(' opt_expression_list ')']
+		[`( opt_expression_list `)]
 
 	def list_display 
-		['[' opt_listmaker ']']
+		[`[ opt_listmaker `]]
 
 	def opt_listmaker 
 		[listmaker]
@@ -371,7 +371,7 @@ context generate
 	|	[expression listmaker_ext* opt_comma]
 
 	def listmaker_ext
-		[',' expression]
+		[`, expression]
 
 	def opt_list_iter 
 		[list_iter]
@@ -382,22 +382,22 @@ context generate
 	|	[list_if]
 
 	def list_if 
-		['if' test opt_list_iter]
+		[`if test opt_list_iter]
 
 	def list_for 
-		['for' expression_list 'in' testlist opt_list_iter]
+		[`for expression_list `in testlist opt_list_iter]
 
 	def testlist 
 		[test testlist_ext* opt_comma]
 
 	def testlist_ext 
-		[',' test ]
+		[`, test ]
 
 	def generator_expression 
-		['(' test genexpr_for ')']
+		[`( test genexpr_for `)]
 
 	def genexpr_for 
-		['for' expression_list 'in' test opt_genexpr_iter]
+		[`for expression_list `in test opt_genexpr_iter]
 
 	def opt_genexpr_iter 
 		[genexpr_iter] 
@@ -408,10 +408,10 @@ context generate
 	|	[genexpr_if]
 	  
 	def genexpr_if 
-		['if' test opt_genexpr_iter]
+		[`if test opt_genexpr_iter]
 
 	def dict_display 
-		['\{' opt_key_datum_list '\}']
+		[`{ opt_key_datum_list `}]
 
 	def opt_key_datum_list 
 		[key_datum_list]
@@ -421,19 +421,19 @@ context generate
 		[key_datum key_datum_list_ext* opt_comma]
 
 	def key_datum_list_ext 
-		[',' key_datum]
+		[`, key_datum]
 
 	def key_datum 
-		[expression ':' expression]
+		[expression `: expression]
 
 	def string_conversion 
-		['`' expression_list '`']
+		[`` expression_list ``]
 
 	def attributeref 
-		['.' identifier]
+		[`. identifier]
 
 	def subscription 
-		['[' expression_list ']']
+		[`[ expression_list `]]
 
 	# The natural ordered choice does not suffice here. Must force it.
 
@@ -442,16 +442,16 @@ context generate
 	|	[extended_slicing]
 
 	def simple_slicing 
-		['[' short_slice ']']
+		[`[ short_slice `]]
 
 	def extended_slicing 
-		['[' slice_list ']']
+		[`[ slice_list `]]
 
 	def slice_list 
 		[slice_item slice_list_ext* opt_comma]
 
 	def slice_list_ext 
-		[',' slice_item]
+		[`, slice_item]
 	  
 	def slice_item 
 		[expression]
@@ -463,14 +463,14 @@ context generate
 	|	[long_slice]
 	  
 	def short_slice 
-		[':']
-	|	[':' upper_bound]
-	|	[lower_bound ':']
-	|	[lower_bound ':' upper_bound]
+		[`:]
+	|	[`: upper_bound]
+	|	[lower_bound `:]
+	|	[lower_bound `: upper_bound]
 	  
 	def long_slice 
-		[short_slice ':' stride]
-	|	[short_slice ':']
+		[short_slice `: stride]
+	|	[short_slice `:]
 	  
 	def lower_bound 
 		[expression]
@@ -482,10 +482,10 @@ context generate
 		[expression]
 
 	def ellipsis 
-		['...']
+		[`...]
 
 	def call 
-		['(' opt_argument_list ')']
+		[`( opt_argument_list `)]
 
 	def opt_argument_list 
 		[argument_list opt_comma]
@@ -496,19 +496,19 @@ context generate
 	|	[keyword_arguments]
 
 	def positional_arguments 
-		[positional_arguments ',' expression]
+		[positional_arguments `, expression]
 	|	[expression]
 	  
 	def opt_comma_keyword_arguments 
-		[',' keyword_arguments]
+		[`, keyword_arguments]
 	|	[]
 
 	def keyword_arguments 
-		[keyword_arguments ',' keyword_item]
+		[keyword_arguments `, keyword_item]
 	|	[keyword_item]
 
 	def keyword_item 
-		[identifier '=' expression]
+		[identifier `= expression]
 
 end # generate
 

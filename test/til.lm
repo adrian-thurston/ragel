@@ -1,8 +1,9 @@
 ##### LM #####
 lex
-	literal 'var', 'if', 'then', 'else', 'while', 'do', 'for', 'read', 'write',
-			'end', 'to', 'goto'
-	literal ':=', '!=', ';', '+', '-', '*', '/', '=', '(', ')', ':'
+	literal `var `if `then `else `while `do `for `read `write
+			`end `to `goto
+
+	literal `:= `!= `; `+ `- `* `/ `= `( `) `:
 
 	ignore /'//' [^\n]* '\n'/
 	ignore /[\n\t ]+/
@@ -27,78 +28,78 @@ def statement
 |	[goto_statement]
 
 def declaration
-	['var' id ';']
+	[`var id `;]
 
 def assignment_statement
-	[id ':=' expression ';']
+	[id `:= expression `;]
 
 def if_statement
-	['if' expression 'then' statement* opt_else_statement 'end']
+	[`if expression `then statement* opt_else_statement `end]
 
 def opt_else_statement
-	['else' statement*]
+	[`else statement*]
 |	[]
 
 def while_statement
-	['while' expression 'do' statement* 'end']
+	[`while expression `do statement* `end]
 
 def do_statement
-	['do' statement* 'while' expression ';']
+	[`do statement* `while expression `;]
 
 def for_statement
-	['for' id ':=' expression 'to' expression 'do' statement* 'end']
+	[`for id `:= expression `to expression `do statement* `end]
 
 def read_statement
-	['read' id ';']
+	[`read id `;]
 
 def write_statement
-	['write' expression ';']
+	[`write expression `;]
 
 def expression
 	[term]
 |	[expression eqop term]
 
-def eqop ['='] | ['!=']
+def eqop [`=] | [`!=]
 
 def term
 	[factor]
 |	[term addop factor]
 
-def addop ['+'] | ['-']
+def addop [`+] | [`-]
 
 def factor
 	[primary]
 |	[factor mulop primary]
 
-def mulop ['*'] | ['/']
+def mulop [`*] | [`/]
 
 def primary
 	[id]
 |	[lit]
-|	['(' expression ')']
+|	[`( expression `)]
 
 def lit
 	[integernumber]
 |	[stringlit]
 
 def labelled_statement
-	[id ':' statement] 
+	[id `: statement]
 
 def goto_statement
-	['goto' id ';']
+	[`goto id `;]
 
 parse P: program[stdin]
 
 #for S:statement* in P
 #{
-#	if match S [L0: id ':' 
-#			First: statement 
+#	if match S [L0: id ':'
+#			First: statement
 #			Rest: statement*]
 #	{
 #		for Check: statement* in Rest
 #		{
-#			if match Check 
-#				['if' E: expression 'then' 
+#			if match Check
+#				['if' E: expression 'then'
 #					'goto' Targ: id ';'
 #				'end'
 #				T: statement*]
@@ -122,8 +123,8 @@ parse P: program[stdin]
 
 for S: statement* in P
 {
-    if match S [Label: id ':' 
-            First: statement 
+    if match S [Label: id `:
+            First: statement
             Rest: statement*]
     {
 		Expr: expression
@@ -134,10 +135,10 @@ for S: statement* in P
 		# restricts our search to the same nesting depth as the label.
         for Check: statement* in Rest
         {
-            if match Check 
-                ['if' E: expression 'then' 
-                    'goto' L:id ';'
-                'end'
+            if match Check
+                [`if E: expression `then
+                    `goto L:id `;
+                `end
                 SL: statement*]
             {
 				Expr = E
@@ -153,7 +154,7 @@ for S: statement* in P
 		# If a goto was found, then perform the rewrite.
 		if ( Expr )
 		{
-            # Replace the labelled statement through to the goto 
+            # Replace the labelled statement through to the goto
 			# with a do ... while.
             S = construct statement* [
 				"do

@@ -1,7 +1,7 @@
 ##### LM #####
 lex
 	ignore /space+/
-	literal '*', '(', ')'
+	literal `* `( `)
 	token id /[a-zA-Z_]+/ 
 		{
 			t: str = input.pull( match_length )
@@ -14,7 +14,7 @@ def foo [id]
 def item 
 	[id]
 |	[foo]
-|	['(' item* ')']
+|	[`( item* `)]
 
 def start 
 	[item*]

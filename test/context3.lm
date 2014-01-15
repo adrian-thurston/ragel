@@ -7,7 +7,7 @@ context ctx
 
 	lex
 		ignore /space+/
-		literal '*', '(', ')'
+		literal `* `( `)
 		token id /[a-zA-Z_]+/ 
 	end
 
@@ -21,7 +21,7 @@ context ctx
 	def item 
 		[id]
 	|	[foo]
-	|	['(' item* ')']
+	|	[`( item* `)]
 		{
 			i = 0
 			f()

@@ -1,13 +1,13 @@
 ##### LM #####
 lex
 	ignore /space+/
-	literal '#', '{', '}'
+	literal `# `{ `}
 	token id2 /[a-zA-Z_]+/ 
 end
 
 def item2
 	[id2]
-|	['{' item2* '}']
+|	[`{ item2* `}]
 
 def start2
 	[item2*]
@@ -16,7 +16,8 @@ context ctx
 
 	lex
 		ignore /space+/
-		literal '*', '(', ')', '!', ';\n'
+		literal `* `( `) `!
+		token SEMI_NL /';\n'/
 		token id /[a-zA-Z_0-9]+/ 
 
 		token ddd /'...'/ {
@@ -30,7 +31,7 @@ context ctx
 
 	def item 
 		[id]
-	|	['(' item* ')']
+	|	[`( item* `)]
 
 	def A [] {
 		print( 'A\n' )
@@ -42,8 +43,8 @@ context ctx
 	
 
 	def start 
-		[A item* '!']
-	|	[B item* ';\n']
+		[A item* `!]
+	|	[B item* SEMI_NL]
 
 end # ctx
 

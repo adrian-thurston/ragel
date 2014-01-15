@@ -2,18 +2,18 @@
 # Token names.
 
 lex
-	literal '+', '*'
+	literal `+ `*
 	token number /[0-9]+/
 	ignore ws / [ \t\n]+ /
 end
 
 def F
-	[number '+']
+	[number `+]
 |	[number]
-|	[F '*' number]
+|	[F `* number]
 
 def E
-	[E '+' F]
+	[E `+ F]
 |	[F]
 
 def start 

@@ -1,7 +1,10 @@
 ##### LM #####
 lex
 	ignore /space+/
-	literal '*', '(' ni, ni ')', '!', ';'
+	literal `* 
+	literal `( ni
+	literal ni `)
+	literal `! `;
 	token id /[a-zA-Z_0-9]+/ 
 end
 
@@ -9,18 +12,18 @@ lex
 	ignore /space+/
 	token inner_t /[a-zA-Z_0-9]+/ 
 
-	literal ''
+	literal `
 end
 
 def inner
-	['' inner_t*]
+	[` inner_t*]
 
 def item 
 	[id]
-|	['(' inner ')']
+|	[`( inner `)]
 
 def start 
-	[item* ';']
+	[item* `;]
 
 parse Start: start[ stdin ]
 
@@ -30,8 +33,8 @@ if ( ! Start ) {
 }
 
 for I: item in Start {
-	print( 'item: .' I '.\n' )
-	if match I [ O: '(' Inner: inner C: ')' ]
+	print(  'item: .' , I, '.\n' )
+	if match I [ O: `( Inner: inner C: `) ]
 		print( 'innr: .' O '.' Inner '.' C '.\n' )
 }
 

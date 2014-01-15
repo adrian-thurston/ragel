@@ -7,7 +7,7 @@ k: int
 
 lex
 	ignore /space+/
-	literal '*', '(', ')'
+	literal `* `( `)
 	token id /[a-zA-Z_]+/ 
 end
 
@@ -16,7 +16,7 @@ def foo [id]
 def item 
 	[id]
 |	[foo]
-|	['(' item* ')']
+|	[`( item* `)]
 	{
 		i = 0
 	}

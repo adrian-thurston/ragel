@@ -2,23 +2,23 @@
 namespace r1
 
 	lex
-		literal '!', 'a', 'b'
+		literal `! `a `b
 		ignore /[ \n\t]+/
 	end
 
-	def line [ '!' 'a' 'b' 'b' 'a']
+	def line [ `! `a `b `b `a]
 
 end # r1
 
 namespace r2
 
 	lex
-		literal '!'
+		literal `!
 		token id /[a-zA-Z_]+/
 		ignore /[ \n\t]+/
 	end
 
-	def line [ '!' id ]
+	def line [ `! id ]
 
 end # r2
 

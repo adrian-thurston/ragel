@@ -1,14 +1,14 @@
 ### LM ###
 lex
-	literal 'application'
-	literal ';'
+	literal `application
+	literal `;
 
 	token id /[A-Za-z_][A-Za-z_0-9]*/
 	ignore /[ \t\r\n]+/
 end
 
 def definition
-	['application' id ';']
+	[`application id `;]
 
 def program
 	[definition*]

@@ -1,13 +1,13 @@
 ##### LM #####
 lex
 	ignore /space+/
-	literal '*', '(', ')'
+	literal `* `( `)
 	token id /[a-zA-Z_]+/
 end
 
 def item 
 	[id]
-|	['(' item* ')']
+|	[`( item* `)]
 
 def start 
 	[item*]

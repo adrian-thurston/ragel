@@ -28,10 +28,10 @@ context tags
 	lex
 		ignore  /space+/
 		token attr_name /def_name_char+/
-		literal '='
+		literal `=
 	end
 
-	literal '>', '/>'
+	literal `> `/>
 
 	# Scanner for attribute values.
 	lex 
@@ -48,7 +48,7 @@ context tags
 	lex
 		ignore /space+/
 
-		literal '<', '</', '<!DOCTYPE'
+		literal `< `</ `<!DOCTYPE
 		token close_tag 
 			/'</' [\t ]* [a-zA-Z]+ '>'/
 
@@ -136,14 +136,14 @@ context tags
 	# covering dt_name
 	lex
 		ignore /space+/
-		literal 'SYSTEM', 'PUBLIC'
+		literal `SYSTEM `PUBLIC
 	end
 
-	def DOCTYPE ['<!DOCTYPE' dt_name external_id dt_bl? dt_close]
+	def DOCTYPE [`<!DOCTYPE dt_name external_id dt_bl? dt_close]
 
 	def external_id
-		['SYSTEM' dt_literal?]
-	|	['PUBLIC' dt_literal dt_literal?]
+		[`SYSTEM dt_literal?]
+	|	[`PUBLIC dt_literal dt_literal?]
 
 	#
 	# Tags, with optionanal close.
@@ -156,7 +156,7 @@ context tags
 		[open_tag item* missing_close_id]
 
 	def open_tag 
-		['<' tag_id attr* '>']
+		[`< tag_id attr* `>]
 		{
 			TagStack = construct tag_stack 
 				[r2 TagStack]
@@ -166,7 +166,7 @@ context tags
 	# Empty tags
 	#
 	def empty_tag 
-		['<' tag_id attr* '/>']
+		[`< tag_id attr* `/>]
 
 	#
 	# Stray close tags
@@ -182,7 +182,7 @@ context tags
 	def attr
 		[attr_name eql_attr_val?]
 
-	def eql_attr_val ['=' attr_val]
+	def eql_attr_val [`= attr_val]
 
 	def attr_val
 		[squote_val]

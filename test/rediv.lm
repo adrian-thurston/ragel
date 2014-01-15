@@ -52,7 +52,7 @@ lex
 	token number /[0-9]+/
 	token string /s_string | d_string/
 
-	literal '+', '-', '*', ';', '/'
+	literal `+ `- `* `; `/
 	token slash /'/'/
 	token semi /';'/
 
@@ -63,24 +63,23 @@ def factor
 	[ident]
 |	[number]
 |	[string]
-|	['/' regex_body regex_close]
+|	[`/ regex_body regex_close]
 
 def term 
-	[term '*' factor]
-|	[term '/' factor]
+	[term `* factor]
+|	[term `/ factor]
 |	[factor]
 
 def expr 
-	[expr '+' term]
-|	[expr '-' term]
+	[expr `+ term]
+|	[expr `- term]
 |	[term]
 
 def statement 
-	[expr ';']
+	[expr `;]
 
 def start 
 	[statement*]
-
 
 parse S: start[ stdin ]
 

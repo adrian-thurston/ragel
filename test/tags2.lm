@@ -43,7 +43,7 @@ lex
 
 	# The opening quote belongs to the tag region. 
 	def sq_string 
-		[ '\'' sq_item* sq_close ]
+		[ `' sq_item* sq_close ]
 end
 
 #
@@ -65,14 +65,14 @@ lex
 
 	# The opening quote belongs to the tag region. 
 	def dq_string 
-		[ '"' dq_item* dq_close ]
+		[ `" dq_item* dq_close ]
 end
 
 #
 # Tag elements. 
 #
 lex
-	literal '\'', '\"', '=', '\/'
+	literal `' `" `= `/
 
 	# Within this region whitespace is not significant.
 	ignore xml_space / (0x20 | 0x9 | 0xD | 0xA)+ /
@@ -83,7 +83,7 @@ lex
 	token attr_name / name /
 end
 
-literal '>'
+literal `>
 
 #
 # Top Level
@@ -99,7 +99,7 @@ lex
 
 
 	# Opening a tag.
-	literal '<'
+	literal `<
 
 	#
 	# Character Data
@@ -117,16 +117,16 @@ def attribute_value
 |	[ dq_string ]
 
 def attribute 
-	[ attr_name '=' attribute_value ]
+	[ attr_name `= attribute_value ]
 
 def empty_tag 
-	[ '<' attr_name attribute* '/' '>' ]
+	[ `< attr_name attribute* `/ `> ]
 
 def close_tag 
-	[ '<' '/' attr_name '>' ]
+	[ `< `/ attr_name `> ]
 
 def open_tag 
-	[ '<' attr_name attribute* '>' ]
+	[ `< attr_name attribute* `> ]
 
 def tag 
 	[open_tag content close_tag]

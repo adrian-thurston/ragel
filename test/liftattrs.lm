@@ -11,7 +11,7 @@ rl rl_id /[a-zA-Z_][a-zA-Z0-9_]*/
 #
 
 lex
-	literal '=', '<', '>', '/'
+	literal `= `< `> `/
 
 	# Ignore whitespace.
 	ignore /rl_ws/
@@ -24,17 +24,17 @@ end
 # Productions
 #
 
-def attr [id '=' id]
+def attr [id `= id]
 
 def attr_list 
 	[attr_list attr]
 |	[]
 
 def open_tag 
-	['<' id attr_list '>']
+	[`< id attr_list `>]
 
 def close_tag
-	['<' '/' id '>']
+	[`< `/ id `>]
 
 def tag 
 	[open_tag item_list close_tag]
