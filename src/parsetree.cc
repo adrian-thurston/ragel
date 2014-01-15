@@ -50,11 +50,12 @@ void prepareLitString( String &result, bool &caseInsensitive,
 
 	char *src = srcString.data + 1;
 	char *end = 0;
+	bool backtick = srcString[0] == '`';
 
-	if ( srcString.data[0] != '`' ) {
+	if ( !backtick ) {
 		end = srcString.data + srcString.length() - 1;
 
-		while ( *end != '\'' && *end != '\"' && *end != '`' && *end != '\n' ) {
+		while ( *end != '\'' && *end != '\"' && *end != '\n' ) {
 			if ( *end == 'i' )
 				caseInsensitive = true;
 			else {
@@ -74,7 +75,7 @@ void prepareLitString( String &result, bool &caseInsensitive,
 	char *dest = result.data;
 	int len = 0;
 	while ( src != end ) {
-		if ( *src == '\\' ) {
+		if ( !backtick && *src == '\\' ) {
 			switch ( src[1] ) {
 			case '0': dest[len++] = '\0'; break;
 			case 'a': dest[len++] = '\a'; break;
