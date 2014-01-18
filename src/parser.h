@@ -74,8 +74,7 @@ struct BaseParser
 	void defineToken( const InputLoc &loc, String name, LexJoin *join, ObjectDef *objectDef,
 			CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore );
 
-	void zeroDef( const InputLoc &loc, const String &data,
-			bool noPreIgnore, bool noPostIgnore );
+	void zeroDef( const InputLoc &loc, const String &name );
 	void literalDef( const InputLoc &loc, const String &data,
 			bool noPreIgnore, bool noPostIgnore );
 

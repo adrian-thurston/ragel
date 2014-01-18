@@ -72,7 +72,7 @@ lex
 		/ ( '0' .. '9' ) + /
 
 	token backtick_lit
-		/ '`' . ^( ' ' | '\n' | '\t' | ']' )* | '`]' /
+		/ '`' . ^( ' ' | '\n' | '\t' | ']' )+ | '`]' /
 
 	token DQ / '\"' / ni
 	token SQ / '\'' / ni
@@ -196,6 +196,7 @@ def root_item
 	[rl_def] :Rl commit
 |	[literal_def] :Literal commit
 |	[token_def] :Token commit
+|	[ic_def] :IgnoreCollector commit
 |	[ignore_def] :Ignore commit
 |	[cfl_def] :Cfl commit
 |	[region_def] :Region commit
@@ -241,6 +242,7 @@ def context_item
 |	[literal_def] :Literal commit
 |	[rl_def] :Rl commit
 |	[token_def] :Token commit
+|	[ic_def] :IgnoreCollector commit
 |	[ignore_def] :Ignore commit
 |	[cfl_def] :Cfl commit
 |	[region_def] :Region commit
@@ -309,6 +311,7 @@ def namespace_item
 	[rl_def] :Rl commit
 |	[literal_def] :Literal commit
 |	[token_def] :Token commit
+|	[ic_def] :IgnoreCollector commit
 |	[ignore_def] :Ignore commit
 |	[cfl_def] :Cfl commit
 |	[region_def] :Region commit
@@ -350,6 +353,9 @@ def token_def
 		LEX_FSLASH opt_lex_expr LEX_FSLASH
 		NiRight: opt_no_ignore
 		opt_translate]
+
+def ic_def
+	[TOKEN id MINUS]
 
 def opt_translate
 	[COPEN lang_stmt_list CCLOSE] :Translate

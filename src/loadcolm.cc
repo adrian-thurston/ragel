@@ -336,6 +336,12 @@ struct LoadColm
 				translate, false, niLeft, niRight );
 	}
 
+	void walkIgnoreCollector( ic_def IgnoreCollector )
+	{
+		String id = IgnoreCollector.id().data();
+		zeroDef( IgnoreCollector.id().loc(), id );
+	}
+
 	String walkOptId( opt_id optId )
 	{
 		String name;
@@ -2054,6 +2060,9 @@ struct LoadColm
 		case context_item::_Token:
 			walkTokenDef( contextItem.token_def() );
 			break;
+		case context_item::_IgnoreCollector:
+			walkIgnoreCollector( contextItem.ic_def() );
+			break;
 		case context_item::_Ignore:
 			walkIgnoreDef( contextItem.ignore_def() );
 			break;
@@ -2118,6 +2127,9 @@ struct LoadColm
 			break;
 		case root_item::_Token:
 			walkTokenDef( rootItem.token_def() );
+			break;
+		case root_item::_IgnoreCollector:
+			walkIgnoreCollector( rootItem.ic_def() );
 			break;
 		case root_item::_Ignore:
 			walkIgnoreDef( rootItem.ignore_def() );
@@ -2186,6 +2198,9 @@ struct LoadColm
 		case namespace_item::_Token:
 			walkTokenDef( item.token_def() );
 			break;
+		case root_item::_IgnoreCollector:
+			walkIgnoreCollector( item.ic_def() );
+			break;
 		case namespace_item::_Ignore:
 			walkIgnoreDef( item.ignore_def() );
 			break;
@@ -2243,10 +2258,7 @@ struct LoadColm
 		bool niRight = walkOptNoIgnore( literalItem.NiRight() );
 
 		String lit = literalItem.backtick_lit().data();
-		if ( strcmp( lit, "`" ) == 0 )
-			zeroDef( literalItem.backtick_lit().loc(), lit, niLeft, niRight );
-		else
-			literalDef( literalItem.backtick_lit().loc(), lit, niLeft, niRight );
+		literalDef( literalItem.backtick_lit().loc(), lit, niLeft, niRight );
 	}
 
 	void walkLiteralList( literal_list literalList )

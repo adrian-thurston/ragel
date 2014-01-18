@@ -235,41 +235,25 @@ void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join, O
 	}
 }
 
-void BaseParser::zeroDef( const InputLoc &loc, const String &data,
-		bool noPreIgnore, bool noPostIgnore )
+void BaseParser::zeroDef( const InputLoc &loc, const String &name )
 {
-	/* Create a name for the literal. */
-	String name( 32, "_literal_%.4x", pd->nextTokenId );
-
 	if ( !insideRegion() )
 		error(loc) << "zero token should be inside token" << endp;
 
-	String interp("");;
-
-	/* Look for the production's associated region. */
-	Namespace *nspace = curNspace();
 	RegionSet *regionSet = regionStack.top();
+	Namespace *nspace = curNspace();
 
-	LiteralDictEl *ldel = nspace->literalDict.find( interp );
-	if ( ldel != 0 )
-		error( loc ) << "literal already defined in this namespace" << endp;
+	LexJoin *join = literalJoin( loc, String("`") );
 
-	LexJoin *join = literalJoin( loc, data );
-
-	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
-			0, loc, 0, nspace, regionSet, 0, 0 );
+	TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, join,
+			0, loc, 0, nspace, regionSet, 0, curContext() );
 
 	tokenDef->isZero = true;
 
 	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
 
-	TokenInstance *tokenInstance = TokenInstance::cons( tokenDef, join, 
-			loc, pd->nextTokenId++, nspace, regionSet->tokenIgnore );
-
-	/* Doesn't go into instance list. */
-
-	ldel = nspace->literalDict.insert( interp, tokenInstance );
+	/* No token instance created. */
 }
 
 void BaseParser::literalDef( const InputLoc &loc, const String &data,

@@ -468,6 +468,12 @@ void Namespace::declare( Compiler *pd )
 				tokEl->noPostIgnore = true;
 
 			tokenDef->tdLangEl = tokEl;
+
+			if ( tokenDef->isZero ) {
+				/* Setting zero lel to newly created tokEl. */
+				tokenDef->regionSet->collectIgnore->zeroLel = tokEl;
+				tokEl->isZero = true;
+			}
 		}
 	}
 
@@ -505,13 +511,15 @@ void Namespace::declare( Compiler *pd )
 void Compiler::makeIgnoreCollectors()
 {
 	for ( RegionSetList::Iter regionSet = regionSetList; regionSet.lte(); regionSet++ ) {
-		String name( 128, "_ign_%p", regionSet->tokenIgnore );
-		LangEl *zeroLel = new LangEl( rootNamespace, name, LangEl::Term );
-		langEls.append( zeroLel );
-		zeroLel->isZero = true;
-		zeroLel->regionSet = regionSet;
+		if ( regionSet->collectIgnore->zeroLel == 0 ) {
+			String name( 128, "_ign_%p", regionSet->tokenIgnore );
+			LangEl *zeroLel = new LangEl( rootNamespace, name, LangEl::Term );
+			langEls.append( zeroLel );
+			zeroLel->isZero = true;
+			zeroLel->regionSet = regionSet;
 
-		regionSet->collectIgnore->zeroLel = zeroLel;
+			regionSet->collectIgnore->zeroLel = zeroLel;
+		}
 	}
 }
 
@@ -1222,12 +1230,14 @@ void Compiler::declarePass()
 	declareReVars();
 
 	makeDefaultIterators();
-	makeIgnoreCollectors();
 
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
 		makeFuncVisible( f, f->isUserIter );
 
 	rootNamespace->declare( this );
+
+	/* Will fill in zero lels that were not declared. */
+	makeIgnoreCollectors();
 
 	declareByteCode();
 

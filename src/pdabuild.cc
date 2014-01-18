@@ -488,8 +488,8 @@ void Compiler::addRegion( PdaState *tabState, PdaTrans *tabTrans,
 		/* If it is not the eof, then use the region associated 
 		 * with the token definition. */
 		if ( langEl->isZero ) {
-			region = langEl->regionSet->collectIgnore;
-			regionSet = langEl->regionSet;
+			region = langEl->tokenDef->regionSet->collectIgnore;
+			regionSet = langEl->tokenDef->regionSet;
 		}
 		else if ( !langEl->isEOF && langEl->tokenDef != 0 ) {
 			region = langEl->tokenDef->regionSet->tokenIgnore;
