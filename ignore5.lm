@@ -11,11 +11,11 @@ lex
 	ignore /space+/
 	token inner_t /[a-zA-Z_0-9]+/ 
 
-	literal `
+	token empty -
 end
 
 def inner
-	[` inner_t*]
+	[empty inner_t*]
 
 def item 
 	[id]
