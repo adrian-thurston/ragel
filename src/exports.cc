@@ -84,7 +84,7 @@ void Compiler::generateExports()
 
 	/* Declare. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->isEOF || lel->isZero )
+		if ( lel->isEOF )
 			continue;
 
 		openNameSpace( out, lel->nspace );
@@ -95,7 +95,7 @@ void Compiler::generateExports()
 
 	/* Class definitions. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->isEOF || lel->isZero )
+		if ( lel->isEOF )
 			continue;
 
 		openNameSpace( out, lel->nspace );
