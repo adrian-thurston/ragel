@@ -2,17 +2,17 @@ include '../src/ragel.lm'
 
 namespace indep
 	lex 
-		literal '%%{', '}%%'
+		literal `%%{ `}%%
 
-		literal 'int', 'bool', 'const', 'char', 'ptr', 'printi',
-				'printb', 'prints', 'print_token',
-				'fwrite', 'first_token_char', 'byte', 'if', 'else'
+		literal `int `bool `const `char `ptr `printi
+				`printb `prints `print_token
+				`fwrite `first_token_char `byte `if `else
 
-		literal 'fgoto', 'fcall', 'fnext', 'fexec'
+		literal `fgoto `fcall `fnext `fexec
 
-		literal ';', '<', '>', '(', ')', '[', ']', '=',
-				'*', '!', '{', '}', '+', '-', '==', '!=',
-				'>=', '<='
+		literal `; `< `> `( `) `[ `] `=
+				`* `! `{ `} `+ `- `== `!=
+				`>= `<=
 
 		ignore / ( [ \t] | NL )+ /
 
@@ -27,7 +27,7 @@ namespace indep
 			/ '#ifdef' ' '* INPUT /
 
 		token ifdef_OUTPUT
-			/ '#ifdef' ' '* OUTPUT ' '* '\n' / ni
+			/ '#ifdef' ' '* OUTPUT ' '* '\n' / -ni
 
 		token endif
 			/ '#endif' /
@@ -74,21 +74,21 @@ namespace indep
 		[ifdef_OUTPUT output_line* output_endif]
 
 	def factor
-		['first_token_char']
+		[`first_token_char]
 	|	[tk_ident]
-	|	[tk_ident '[' expr ']']
-	|	[tk_ident '(' expr ')']
+	|	[tk_ident `[ expr `]]
+	|	[tk_ident `( expr `)]
 	|	[tk_number]
-	|	['-' tk_number]
+	|	[`- tk_number]
 	|	[tk_hex_number]
 	|	[string]
-	|	['<' type '>' '(' expr ')']
-	|	['(' expr ')']
+	|	[`< type `> `( expr `)]
+	|	[`( expr `)]
 
 	def op
-		['<'] | ['>'] | ['='] | ['!']
-	|	['+'] | ['-'] | ['*'] | ['!=']
-	|	['=='] | ['<='] | ['>=']
+		[`<] | [`>] | [`=] | [`!]
+	|	[`+] | [`-] | [`*] | [`!=]
+	|	[`==] | [`<=] | [`>=]
 
 	def expr_op
 		[op factor]
@@ -97,61 +97,61 @@ namespace indep
 		[factor expr_op*]
 
 	def type
-		['int']
-	|	['bool']
-	|	['char']
-	|	['ptr']
-	|	['byte']
+		[`int]
+	|	[`bool]
+	|	[`char]
+	|	[`ptr]
+	|	[`byte]
 
 	def opt_arr
-		['[' expr ']']
+		[`[ expr `]]
 	|	[]
 
 	def var_decl
-		[type tk_ident opt_arr ';']
+		[type tk_ident opt_arr `;]
 
 	def opt_sub
-		[ '[' expr ']' ]
+		[ `[ expr `] ]
 	|	[]
 
 	def expr_stmt
-		[tk_ident opt_sub '=' expr ';']
-	|	[expr ';']
+		[tk_ident opt_sub `= expr `;]
+	|	[expr `;]
 
 	def if_stmt
-		['if' '(' expr ')' '{' stmt* '}' opt_else]
+		[`if `( expr `) `{ stmt* `} opt_else]
 
 	def opt_else
-		['else' '{' stmt* '}']
+		[`else `{ stmt* `}]
 	|	[]
 
 	def print_stmt
-		['printi' expr ';']
-	|	['printb' expr ';']
-	|	['prints' expr ';']
-	|	['print_token' ';']
+		[`printi expr `;]
+	|	[`printb expr `;]
+	|	[`prints expr `;]
+	|	[`print_token `;]
 
 	def stmt
 		[var_decl]
 	|	[expr_stmt]
 	|	[if_stmt]
 	|	[print_stmt]
-	|	['{' stmt* '}']
-	|	['{' expr '}']
+	|	[`{ stmt* `}]
+	|	[`{ expr `}]
 	|	[input]
 	|	[output]
 	|	[tk_cpp_comment]
 	|	[c_comment]
-	|	['fgoto' tk_ident ';']
-	|	['fcall' tk_ident ';']
-	|	['fnext' tk_ident ';']
-	|	['fgoto' '*' expr ';']
-	|	['fcall' '*' expr ';']
-	|	['fnext' '*' expr ';']
-	|	['fexec' expr ';']
+	|	[`fgoto tk_ident `;]
+	|	[`fcall tk_ident `;]
+	|	[`fnext tk_ident `;]
+	|	[`fgoto `* expr `;]
+	|	[`fcall `* expr `;]
+	|	[`fnext `* expr `;]
+	|	[`fexec expr `;]
 
 	def section_multiline
-		['%%{' ragel::ragel_start '}%%']
+		[`%%{ ragel::ragel_start `}%%]
 
 	def section
 		[section_multiline]

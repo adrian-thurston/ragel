@@ -1,9 +1,9 @@
 void go_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
-		if match Tok [host::'${' StmtList: stmt* host::'}$']
+		if match Tok [host::`${ StmtList: stmt* host::`}$]
 			go_stmt_list( StmtList )
-		elsif match Tok [host::'={' Expr: expr host::'}=']
+		elsif match Tok [host::`={ Expr: expr host::`}=]
 			go_expr( Expr )
 		else
 			send Output [Tok]
@@ -13,32 +13,32 @@ void go_tok_list( TL: host::tok* )
 void go_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
-		['$' string uint '{' TL: host::tok* host::'}$']
+		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
 		go_tok_list( TL )
 		send Output ["\n"]
 	}
 	elsif match ExprFactor
-		['=' string uint '{' TL: host::tok* host::'}$']
+		[`= string uint `{ TL: host::tok* host::`}$]
 	{
 		go_tok_list( TL )
 	}
 	elsif match ExprFactor
-		[O:'(' TL: expr C: ')']
+		[O:`( TL: expr C: `)]
 	{
 		send Output [O]
 		go_expr( TL )
 		send Output [C]
 	}
 	elsif match ExprFactor
-		[ident O: '[' TL: expr C: ']']
+		[ident O: `[ TL: expr C: `]]
 	{
 		send Output [ExprFactor.ident O]
 		go_expr( TL )
 		send Output [C]
 	}
 	elsif match ExprFactor
-		['offset' '(' ident ',' expr ')']
+		[`offset `( ident `, expr `)]
 	{
 		send Output ['int(']
 		go_expr( ExprFactor.expr )
@@ -52,19 +52,19 @@ void go_expr_factor( ExprFactor: expr_factor )
 		send Output [']']
 	}
 	elsif match ExprFactor
-			[T: 'TRUE']
+			[T: `TRUE]
 	{
 		T.data = 'true'
 		send Output [T]
 	}
 	elsif match ExprFactor
-			[F: 'FALSE']
+			[F: `FALSE]
 	{
 		F.data = '0'
 		send Output [F]
 	}
 	elsif match ExprFactor
-			[N: 'nil']
+			[N: `nil]
 	{
 		N.data = '0'
 		send Output [N]
@@ -77,33 +77,33 @@ void go_expr_factor( ExprFactor: expr_factor )
 
 void go_expr_ptr( ExprPtr: expr_ptr )
 {
-	if match ExprPtr [expr_ptr Arrow: '->' expr_factor]
+	if match ExprPtr [expr_ptr Arrow: `-> expr_factor]
 	{
 		go_expr_ptr( ExprPtr._expr_ptr )
 		send Output [Arrow]
 		go_expr_factor( ExprPtr.expr_factor )
 	}
-	elsif match ExprPtr [Star: '*' expr_ptr]
+	elsif match ExprPtr [Star: `* expr_ptr]
 	{
 		send Output [Star]
 		go_expr_ptr( ExprPtr._expr_ptr )
 	}
-	elsif match ExprPtr [PP: '++' expr_ptr]
+	elsif match ExprPtr [PP: `++ expr_ptr]
 	{
 		send Output [PP]
 		go_expr_ptr( ExprPtr._expr_ptr )
 	}
-	elsif match ExprPtr [MM: '--' expr_ptr]
+	elsif match ExprPtr [MM: `-- expr_ptr]
 	{
 		send Output [MM]
 		go_expr_ptr( ExprPtr._expr_ptr )
 	}
-	elsif match ExprPtr [expr_ptr PP: '++']
+	elsif match ExprPtr [expr_ptr PP: `++]
 	{
 		go_expr_ptr( ExprPtr._expr_ptr )
 		send Output [PP]
 	}
-	elsif match ExprPtr [expr_ptr MM: '--']
+	elsif match ExprPtr [expr_ptr MM: `--]
 	{
 		go_expr_ptr( ExprPtr._expr_ptr )
 		send Output [MM]
@@ -126,12 +126,12 @@ void go_expr_ptr( ExprPtr: expr_ptr )
 
 void go_expr_factor_op( ExprFactorOp: expr_factor_op )
 {
-	if match ExprFactorOp [B: '!' expr_factor_op]
+	if match ExprFactorOp [B: `! expr_factor_op]
 	{
 		send Output [B]
 		go_expr_factor_op( ExprFactorOp._expr_factor_op )
 	}
-	elsif match ExprFactorOp [T: '~' expr_factor_op]
+	elsif match ExprFactorOp [T: `~ expr_factor_op]
 	{
 		send Output ['^']
 		go_expr_factor_op( ExprFactorOp._expr_factor_op )
@@ -144,7 +144,7 @@ void go_expr_factor_op( ExprFactorOp: expr_factor_op )
 
 void go_expr_bitwise( ExprBitwise: expr_bitwise )
 {
-	if match ExprBitwise [expr_bitwise A: '&' expr_factor_op]
+	if match ExprBitwise [expr_bitwise A: `& expr_factor_op]
 	{
 		go_expr_bitwise( ExprBitwise._expr_bitwise )
 		send Output [A]
@@ -158,7 +158,7 @@ void go_expr_bitwise( ExprBitwise: expr_bitwise )
 
 void go_expr_mult( ExprMult: expr_mult )
 {
-	if match ExprMult [expr_mult T: '*' expr_bitwise]
+	if match ExprMult [expr_mult T: `* expr_bitwise]
 	{
 		go_expr_mult( ExprMult._expr_mult )
 		send Output [T]
@@ -272,13 +272,13 @@ void go_num_list( NumList: num_list )
 void go_stmt( Stmt: stmt )
 {
 	if match Stmt
-		['$' string uint '{' TL: host::tok* host::'}$']
+		['$' string uint '{' TL: host::tok* host::`}$]
 	{
 		go_tok_list( TL )
 		send Output "
 	}
 	else if match Stmt
-		['=' string uint '{' TL: host::tok* host::'}$']
+		['=' string uint '{' TL: host::tok* host::`}$]
 	{
 		go_tok_list( TL )
 	}
@@ -293,7 +293,7 @@ void go_stmt( Stmt: stmt )
 				"[go_type(Value.value_pass.type)] = [Value.value_pass.number]
 	}
 	elsif match Stmt [
-			'if' O: '(' IfExpr: expr C: ')' IfStmt: stmt
+			'if' O: `( IfExpr: expr C: `) IfStmt: stmt
 	] {
 		# if-statements with only the if clause can go out as an if.
 		send Output
@@ -302,7 +302,7 @@ void go_stmt( Stmt: stmt )
 			"}
 	}
 	elsif match Stmt [
-			'if' O: '(' IfExpr: expr C: ')' IfStmt: stmt
+			'if' O: `( IfExpr: expr C: `) IfStmt: stmt
 			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 	] {
 		# If the if-statement has more than just an if clause it goes out as a switch.
@@ -313,7 +313,7 @@ void go_stmt( Stmt: stmt )
 
 		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 			match ElseIfClause
-				['else' 'if' '(' ElseIfExpr: expr ')' ElseIfStmt: stmt]
+				['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
 
 			send Output
 				"case [go_expr(ElseIfExpr)]:
@@ -346,11 +346,11 @@ void go_stmt( Stmt: stmt )
 			"	[go_stmt_list(StmtList)]
 			"}
 	}
-	elsif match Stmt [ExprExpr: expr Semi: ';'] {
+	elsif match Stmt [ExprExpr: expr Semi: `;] {
 		send Output
 			[go_expr(ExprExpr) Semi]
 	}
-	elsif match Stmt [L: '{' TL: stmt* R: '}'] {
+	elsif match Stmt [L: `{ TL: stmt* R: `}] {
 		send Output
 			[L go_stmt_list(TL) R]
 	}

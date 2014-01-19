@@ -1,9 +1,9 @@
 void d_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
-		if match Tok [host::'${' StmtList: stmt* host::'}$']
+		if match Tok [host::`${ StmtList: stmt* host::`}$]
 			d_stmt_list( StmtList )
-		elsif match Tok [host::'={' Expr: expr host::'}=']
+		elsif match Tok [host::`={ Expr: expr host::`}=]
 			d_expr( Expr )
 		else {
 			send Output [Tok]
@@ -14,53 +14,53 @@ void d_tok_list( TL: host::tok* )
 void d_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
-		['$' string uint '{' TL: host::tok* host::'}$']
+		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
 		d_tok_list( TL )
 	}
 	elsif match ExprFactor
-		['=' string uint '{' TL: host::tok* host::'}$']
+		[`= string uint `{ TL: host::tok* host::`}$]
 	{
 		d_tok_list( TL )
 	}
 	elsif match ExprFactor
-		[O:'(' TL: expr C: ')']
+		[O:`( TL: expr C: `)]
 	{
 		send Output
 			[O d_expr( TL ) C]
 	}
 	elsif match ExprFactor
-		[ident O: '[' TL: expr C: ']']
+		[ident O: `[ TL: expr C: `]]
 	{
 		send Output
 			[ExprFactor.ident O d_expr(TL) C]
 	}
 	elsif match ExprFactor
-		['offset' '(' ident ',' expr ')']
+		[`offset `( ident `, expr `)]
 	{
 		send Output
 			"& [ExprFactor.ident] \[ [d_expr(ExprFactor.expr)] \]
 	}
 	elsif match ExprFactor
-		['deref' '(' ident ',' expr ')']
+		[`deref `( ident `, expr `)]
 	{
 		send Output
 			"(*( [d_expr(ExprFactor.expr)] ))
 	}
 	elsif match ExprFactor
-			[T: 'TRUE']
+			[T: `TRUE]
 	{
 		T.data = '1'
 		send Output [T]
 	}
 	elsif match ExprFactor
-			[F: 'FALSE']
+			[F: `FALSE]
 	{
 		F.data = '0'
 		send Output [F]
 	}
 	elsif match ExprFactor
-			[N: 'nil']
+			[N: `nil]
 	{
 		N.data = 'null'
 		send Output [N]
@@ -73,38 +73,38 @@ void d_expr_factor( ExprFactor: expr_factor )
 
 void d_expr_ptr( ExprPtr: expr_ptr )
 {
-	if match ExprPtr [expr_ptr Arrow: '->' expr_factor]
+	if match ExprPtr [expr_ptr Arrow: `-> expr_factor]
 	{
 		d_expr_ptr( ExprPtr._expr_ptr )
 		send Output [Arrow]
 		d_expr_factor( ExprPtr.expr_factor )
 	}
-	elsif match ExprPtr [Star: '*' expr_ptr]
+	elsif match ExprPtr [Star: `* expr_ptr]
 	{
 		send Output [Star]
 		d_expr_ptr( ExprPtr._expr_ptr )
 	}
-	elsif match ExprPtr [PP: '++' expr_ptr]
+	elsif match ExprPtr [PP: `++ expr_ptr]
 	{
 		send Output [PP]
 		d_expr_ptr( ExprPtr._expr_ptr )
 	}
-	elsif match ExprPtr [MM: '--' expr_ptr]
+	elsif match ExprPtr [MM: `-- expr_ptr]
 	{
 		send Output [MM]
 		d_expr_ptr( ExprPtr._expr_ptr )
 	}
-	elsif match ExprPtr [expr_ptr PP: '++']
+	elsif match ExprPtr [expr_ptr PP: `++]
 	{
 		d_expr_ptr( ExprPtr._expr_ptr )
 		send Output [PP]
 	}
-	elsif match ExprPtr [expr_ptr MM: '--']
+	elsif match ExprPtr [expr_ptr MM: `--]
 	{
 		d_expr_ptr( ExprPtr._expr_ptr )
 		send Output [MM]
 	}
-	elsif match ExprPtr [Open: '(' Type: type Close: ')' expr_ptr]
+	elsif match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
 	{
 		send Output ['cast' Open]
 		d_type( Type )
@@ -122,12 +122,12 @@ void d_expr_ptr( ExprPtr: expr_ptr )
 
 void d_expr_factor_op( ExprFactorOp: expr_factor_op )
 {
-	if match ExprFactorOp [B: '!' expr_factor_op]
+	if match ExprFactorOp [B: `! expr_factor_op]
 	{
 		send Output [B]
 		d_expr_factor_op( ExprFactorOp._expr_factor_op )
 	}
-	elsif match ExprFactorOp [T: '~' expr_factor_op]
+	elsif match ExprFactorOp [T: `~ expr_factor_op]
 	{
 		send Output [T]
 		d_expr_factor_op( ExprFactorOp._expr_factor_op )
@@ -140,7 +140,7 @@ void d_expr_factor_op( ExprFactorOp: expr_factor_op )
 
 void d_expr_bitwise( ExprBitwise: expr_bitwise )
 {
-	if match ExprBitwise [expr_bitwise A: '&' expr_factor_op]
+	if match ExprBitwise [expr_bitwise A: `& expr_factor_op]
 	{
 		d_expr_bitwise( ExprBitwise._expr_bitwise )
 		send Output [A]
@@ -154,7 +154,7 @@ void d_expr_bitwise( ExprBitwise: expr_bitwise )
 
 void d_expr_mult( ExprMult: expr_mult )
 {
-	if match ExprMult [expr_mult T: '*' expr_bitwise]
+	if match ExprMult [expr_mult T: `* expr_bitwise]
 	{
 		d_expr_mult( ExprMult._expr_mult )
 		send Output [T]
@@ -251,12 +251,12 @@ void d_type( Type: type )
 void d_stmt( Stmt: stmt )
 {
 	if match Stmt
-		['$' string uint '{' TL: host::tok* host::'}$']
+		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
 		d_tok_list( TL )
 	}
 	elsif match Stmt
-		['=' string uint '{' TL: host::tok* host::'}$']
+		[`= string uint `{ TL: host::tok* host::`}$]
 	{
 		d_tok_list( TL )
 	}
@@ -270,7 +270,7 @@ void d_stmt( Stmt: stmt )
 			"static const [Value.value_pass]
 	}
 	elsif match Stmt [
-			'if' O: '(' IfExpr: expr C: ')' IfStmt: stmt
+			`if `( IfExpr: expr `) IfStmt: stmt
 			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 	] {
 		send Output
@@ -279,7 +279,7 @@ void d_stmt( Stmt: stmt )
 
 		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 			match ElseIfClause
-				['else' 'if' O2: '(' ElseIfExpr: expr C2: ')' ElseIfStmt: stmt]
+				[`else `if `( ElseIfExpr: expr `) ElseIfStmt: stmt]
 
 			send Output
 				"else if ( [d_expr(ElseIfExpr)] )
@@ -292,27 +292,27 @@ void d_stmt( Stmt: stmt )
 				"	[d_stmt(ElseStmt)]
 		}
 	}
-	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
+	elsif match Stmt [`while `( WhileExpr: expr `) WhileStmt: stmt] {
 		send Output
 			"while ( [d_expr(WhileExpr)] )
 			"	[d_stmt(WhileStmt)]
 	}
-	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
+	elsif match Stmt [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
 		send Output
 			"switch ( [d_expr(SwitchExpr)] ) {
 			"	[d_stmt_list(StmtList)]
 			"	default: break;
 			"}
 	}
-	elsif match Stmt [ExprExpr: expr Semi: ';'] {
+	elsif match Stmt [ExprExpr: expr Semi: `;] {
 		send Output
 			[d_expr( ExprExpr ) Semi]
 	}
-	elsif match Stmt [L: '{' TL: stmt* R: '}'] {
+	elsif match Stmt [L: `{ TL: stmt* R: `}] {
 		send Output
 			[L d_stmt_list( TL ) R]
 	}
-	elsif match Stmt [OptConst: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: ';']
+	elsif match Stmt [OptConst: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: `;]
 	{
 		if match OptConst ['const'] {
 			send Output
@@ -324,7 +324,7 @@ void d_stmt( Stmt: stmt )
 
 		send Output [OptPtr Ident]
 
-		if match OptInit [E: '=' expr] {
+		if match OptInit [E: `= expr] {
 			send Output
 				[E d_expr(OptInit.expr)]
 		}

@@ -32,7 +32,7 @@ namespace host
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
-		literal '={', '}=', '${', '}$'
+		literal `={ `}= `${ `}$
 
 		token c_any / any /
 	end
@@ -44,8 +44,8 @@ namespace host
 	|	[comment]
 	|	[string]
 	|	[whitespace]
-	|	['${' stmt* '}$']
-	|	['={' expr '}=']
+	|	[`${ stmt* `}$]
+	|	[`={ expr `}=]
 	|	[c_any]
 
 	def out
@@ -67,15 +67,15 @@ lex
 	rl cpp_comment
 		/ '//' [^\n]* NL /
 
-	literal 'array', 'value', 'TRUE', 'FALSE',
-			'while', 'switch', 'case',
-			'if', 'else', 'offset', 'index',
-			'goto', 'deref'
+	literal `array `value `TRUE `FALSE
+			`while `switch `case
+			`if `else `offset `index
+			`goto `deref
 
-	literal 'uint', 'const',
-			's8', 's16', 's32', 's64',
-			's128', 'nil', 'export',
-			'fallthrough', 'u'
+	literal `uint `const
+			`s8 `s16 `s32 `s64
+			`s128 `nil `export
+			`fallthrough `u
 
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -96,87 +96,87 @@ lex
 
 	token pragma /'#' any* :> '\n' /
 
-	literal '$', '{', '}', '=', '[', ']',
-			'-', ',', ';', '(', ')', ':',
-			'?', '*', '+', '>', '<', '&',
-			'~', '!', '!=', '==', '<<', '>>',
-			'+=', '&&', '||', '<=', '>=', '->',
-			'++', '--'
+	literal `$ `{ `} `= `[ `]
+			`- `, `; `( `) `:
+			`? `* `+ `> `< `&
+			`~ `! `!= `== `<< `>>
+			`+= `&& `|| `<= `>= `->
+			`++ `--
 end
 
 def uint
-	[sint 'u']
+	[sint `u]
 |	[sint]
 
 def embedded_host
-	['$' string uint '{' host::tok* host::'}$']
-|	['=' string uint '{' host::tok* host::'}$']
+	[`$ string uint `{ host::tok* host::`}$]
+|	[`= string uint `{ host::tok* host::`}$]
 
 def type
 	[ident]
 |	[ident ident]
-|	['uint']
-|	['s8']
-|	['s16']
-|	['s32']
-|	['s64']
-|	['s128']
+|	[`uint]
+|	[`s8]
+|	[`s16]
+|	[`s32]
+|	[`s64]
+|	[`s128]
 
 def expr_factor
 	[embedded_host]
 |	[ident]
-|	[ident '[' expr ']']
-|	['offset' '(' ident ',' expr ')']
-|	['deref' '(' ident ',' expr ')']
+|	[ident `[ expr `]]
+|	[`offset `( ident `, expr `)]
+|	[`deref `( ident `, expr `)]
 |	[uint]
-|	['-' uint]
-|	['TRUE']
-|	['FALSE']
-|	['nil']
+|	[`- uint]
+|	[`TRUE]
+|	[`FALSE]
+|	[`nil]
 |	[hex_number]
 |	[string]
-|	['(' expr ')']
+|	[`( expr `)]
 
 def expr_ptr
-	[expr_ptr '->' expr_factor]
-|	['*' expr_ptr]
-|	['++' expr_ptr]
-|	['--' expr_ptr]
-|	[expr_ptr '++']
-|	[expr_ptr '--']
-|	['(' type ')' expr_ptr]
+	[expr_ptr `-> expr_factor]
+|	[`* expr_ptr]
+|	[`++ expr_ptr]
+|	[`-- expr_ptr]
+|	[expr_ptr `++]
+|	[expr_ptr `--]
+|	[`( type `) expr_ptr]
 |	[expr_factor]
 
 def expr_factor_op
-	['!' expr_factor_op]
-|	['~' expr_factor_op]
+	[`! expr_factor_op]
+|	[`~ expr_factor_op]
 |	[expr_ptr]
 
 def expr_bitwise
-	[expr_bitwise '&' expr_factor_op]
+	[expr_bitwise `& expr_factor_op]
 |	[expr_factor_op]
 
 def expr_mult
-	[expr_mult '*' expr_bitwise]
+	[expr_mult `* expr_bitwise]
 |	[expr_bitwise]
 
 def add_op
-	['+'] | ['-']
+	[`+] | [`-]
 
 def expr_add
 	[expr_add add_op expr_mult]
 |	[expr_mult]
 
 def shift_op
-	['<<'] | ['>>']
+	[`<<] | [`>>]
 
 def expr_shift
 	[expr_shift shift_op expr_add]
 |	[expr_add]
 
 def test_op
-	['<'] | ['>'] | ['<='] | ['>='] |
-	['=='] | ['!='] | ['&&'] | ['||']
+	[`<] | [`>] | [`<=] | [`>=] |
+	[`==] | [`!=] | [`&&] | [`||]
 
 def expr_test
 	[expr_test test_op expr_shift]
@@ -186,7 +186,7 @@ def expr_cond
 	[expr_test]
 
 def assign_op
-	['='] | ['+=']
+	[`=] | [`+=]
 
 def expr_assign
 	[expr_assign assign_op expr_cond]
@@ -197,67 +197,67 @@ def expr
 
 def number
 	[uint]
-|	['-' uint]
+|	[`- uint]
 
 def comma_num
-	[',' number]
+	[`, number]
 
 def num_list
 	[number comma_num*]
 |	[]
 
 def array
-	['array' type ident '(' number ',' number  ')' '=' '{' num_list '}' ';']
+	[`array type ident `( number `, number  `) `= `{ num_list `} `;]
 
 def value_pass
-	[type ident '=' number ';']
+	[type ident `= number `;]
 
 def value
-	['value' value_pass]
+	[`value value_pass]
 
 def while_stmt
-	['while' '(' expr ')' stmt]
+	[`while `( expr `) stmt]
 
 def else_if_clause
-	['else' 'if' '(' expr ')' stmt]
+	[`else `if `( expr `) stmt]
 
 def else_clause
-	['else' stmt]
+	[`else stmt]
 
 def if_stmt [
-	'if' '(' expr ')' stmt
+	`if `( expr `) stmt
 	else_if_clause* else_clause?
 ]
 
 def switch_stmt
-	['switch' '(' expr ')' '{' stmt* '}']
+	[`switch `( expr `) `{ stmt* `}]
 
 def case_label
-	['case' expr ':']
+	[`case expr `:]
 
 def goto_label
-	[ident ':']
+	[ident `:]
 
 def opt_init
-	['=' expr]
+	[`= expr]
 |	[]
 
 def opt_ptr
-	['*']
+	[`*]
 |	[]
 
 def opt_const
-	['const']
+	[`const]
 |	[]
 
 def declaration
-	[opt_const type opt_ptr ident opt_init ';']
+	[opt_const type opt_ptr ident opt_init `;]
 
 def export_stmt
-	['export' type ident number ';']
+	[`export type ident number `;]
 
 def index_stmt
-	['index' type  ident ';']
+	[`index type  ident `;]
 
 def stmt
 	[embedded_host]
@@ -270,12 +270,12 @@ def stmt
 |	[switch_stmt]
 |	[case_label]
 |	[goto_label]
-|	[expr ';']
+|	[expr `;]
 |	[pragma]
 |	[export_stmt]
-|	['fallthrough' ';']
-|	['goto' ident ';']
-|	['{' stmt* '}']
+|	[`fallthrough `;]
+|	[`goto ident `;]
+|	[`{ stmt* `}]
 
 def start
 	[stmt*]
