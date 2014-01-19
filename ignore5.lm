@@ -2,8 +2,7 @@
 lex
 	ignore /space+/
 	literal `* `! `;
-	token POPEN /'('/ ni
-	token PCLOSE ni /')'/
+	literal `( -ni ni- `)
 	token id /[a-zA-Z_0-9]+/ 
 end
 
@@ -19,7 +18,7 @@ def inner
 
 def item 
 	[id]
-|	[POPEN inner PCLOSE]
+|	[`( inner `)]
 
 def start 
 	[item* `;]
@@ -33,7 +32,7 @@ if ( ! Start ) {
 
 for I: item in Start {
 	print( 'item: .' I '.\n' )
-	if match I [ O: POPEN Inner: inner C: PCLOSE ]
+	if match I [ O: `( Inner: inner C: `) ]
 		print( 'innr: .' O '.' Inner '.' C '.\n' )
 }
 

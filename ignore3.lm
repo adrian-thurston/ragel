@@ -2,15 +2,15 @@
 lex
 	ignore /space+/
 	literal `* 
-	literal `( ni
-	literal ni `)
+	literal `( -ni
+	literal ni- `)
 	literal `! `;
 	token id /[a-zA-Z_0-9]+/ 
 end
 
 lex
 	ignore /space+/
-	token inner_t /[a-zA-Z_0-9]+/ 
+	token inner_t /[a-zA-Z_0-9]+/
 	token empty -
 end
 
