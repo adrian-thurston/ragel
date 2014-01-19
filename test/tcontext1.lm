@@ -1,7 +1,7 @@
 ##### LM #####
 
 lex
-	token tIDENTIFIER /[a-z][a-zA-Z_]*/ ni
+	token tIDENTIFIER /[a-z][a-zA-Z_]*/ -ni
 	ignore /[ \t\n]+/
 	ignore comment /'#' [^\n]* '\n'/
 end

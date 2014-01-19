@@ -153,9 +153,9 @@ namespace ragel
 			"'" ( [^'\\] | '\\' any )* "'" 'i'?
 		/
 
-		token lex_regex_open /'/'/ ni
-		token lex_sqopen_pos /'['/ ni
-		token lex_sqopen_neg /'[^'/ ni
+		token lex_regex_open /'/'/ -ni
+		token lex_sqopen_pos /'['/ -ni
+		token lex_sqopen_neg /'[^'/ -ni
 
 		token word /[a-zA-Z_][a-zA-Z0-9_]*/
 		token uint / number /
@@ -506,7 +506,7 @@ lex
 		/ '#ifdef' ' '* INPUT /
 
 	token ifdef_OUTPUT
-		/ '#ifdef' ' '* OUTPUT ' '* '\n' / ni
+		/ '#ifdef' ' '* OUTPUT ' '* '\n' / -ni
 
 	token endif
 		/ '#endif' /

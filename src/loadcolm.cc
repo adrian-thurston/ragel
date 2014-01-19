@@ -318,8 +318,8 @@ struct LoadColm
 	{
 		String name = TokenDef.id().data();
 
-		bool niLeft = walkOptNoIgnore( TokenDef.NiLeft() );
-		bool niRight = walkOptNoIgnore( TokenDef.NiRight() );
+		bool niLeft = walkNoIgnoreLeft( TokenDef.no_ignore_left() );
+		bool niRight = walkNoIgnoreRight( TokenDef.no_ignore_right() );
 
 		ObjectDef *objectDef = walkVarDefList( TokenDef.VarDefList() );
 		objectDef->name = name;
@@ -2241,9 +2241,14 @@ struct LoadColm
 		}}
 	}
 
-	bool walkOptNoIgnore( opt_no_ignore OptNoIngore )
+	bool walkNoIgnoreLeft( no_ignore_left OptNoIngore )
 	{
-		return OptNoIngore.prodName() == opt_no_ignore::_Ni;
+		return OptNoIngore.prodName() == no_ignore_left::_Ni;
+	}
+
+	bool walkNoIgnoreRight( no_ignore_right OptNoIngore )
+	{
+		return OptNoIngore.prodName() == no_ignore_right::_Ni;
 	}
 
 	bool walkOptEos( opt_eos OptEos )
@@ -2254,8 +2259,8 @@ struct LoadColm
 
 	void walkLiteralItem( literal_item literalItem )
 	{
-		bool niLeft = walkOptNoIgnore( literalItem.NiLeft() );
-		bool niRight = walkOptNoIgnore( literalItem.NiRight() );
+		bool niLeft = walkNoIgnoreLeft( literalItem.no_ignore_left() );
+		bool niRight = walkNoIgnoreRight( literalItem.no_ignore_right() );
 
 		String lit = literalItem.backtick_lit().data();
 		literalDef( literalItem.backtick_lit().loc(), lit, niLeft, niRight );

@@ -298,10 +298,14 @@ def literal_list
 |	[literal_item] :Base
 
 def literal_item
-	[NiLeft: opt_no_ignore backtick_lit NiRight: opt_no_ignore]
+	[no_ignore_left backtick_lit no_ignore_right]
 
-def opt_no_ignore
-	[NI] :Ni
+def no_ignore_left
+	[NI MINUS] :Ni
+|	[]
+
+def no_ignore_right
+	[MINUS NI] :Ni
 |	[]
 
 def namespace_def
@@ -349,9 +353,9 @@ def opt_lex_expr
 
 def token_def
 	[TOKEN id VarDefList: var_def*
-		NiLeft: opt_no_ignore
+		no_ignore_left
 		LEX_FSLASH opt_lex_expr LEX_FSLASH
-		NiRight: opt_no_ignore
+		no_ignore_right
 		opt_translate]
 
 def ic_def
