@@ -2,13 +2,13 @@ include 'trans.lm'
 
 namespace c
 	lex 
-		literal '%%{', '}%%'
+		literal `%%{ `}%%
 
-		literal 'int', 'bool', 'const', 'char', 'ptr',
-				'printf', 'fwrite', 'var', 'byte'
+		literal `int `bool `const `char `ptr
+				`printf `fwrite `var `byte
 
-		literal ';', '<', '>', '(', ')', '[', ']', '=',
-				'*', '!', '{', '}', '+', '-', '==', '!=', ','
+		literal `; `< `> `( `) `[ `] `=
+				`* `! `{ `} `+ `- `== `!= `,
 
 		ignore / ( [ \t] | NL )+ /
 
@@ -22,17 +22,17 @@ namespace c
 
 	def factor
 		[tk_ident]
-	|	[tk_ident '[' expr ']']
+	|	[tk_ident `[ expr `]]
 	|	[tk_number]
 	|	[tk_hex_number]
 	|	[string]
-	|	['(' type ')' '(' expr ')']
-	|	['(' expr ')']
+	|	[`( type `) `( expr `)]
+	|	[`( expr `)]
 
 	def op
-		['<'] | ['>'] | ['='] | ['!']
-	|	['+'] | ['-'] | ['*'] | ['!=']
-	|	['=='] | [',']
+		[`<] | [`>] | [`=] | [`!]
+	|	[`+] | [`-] | [`*] | [`!=]
+	|	[`==] | [`,]
 
 	def expr_op
 		[op factor]
@@ -41,23 +41,23 @@ namespace c
 		[factor expr_op*]
 
 	def opt_arr
-		['[' expr ']']
+		[`[ expr `]]
 	|	[]
 
 	def type
-		['int']
-	|	['bool']
-	|	['char']
-	|	['char' '*']
-	|	['const' '(' 'char' ')' '*']
-	|	['byte']
+		[`int]
+	|	[`bool]
+	|	[`char]
+	|	[`char `*]
+	|	[`const `( `char `) `*]
+	|	[`byte]
 
 	def var_decl
-		[type tk_ident opt_arr ';']
+		[type tk_ident opt_arr `;]
 
 	def print_stmt
-		['printf' '(' expr ')' ';']
-	|	['fwrite' '(' expr ')' ';']
+		[`printf `( expr `) `;]
+	|	[`fwrite `( expr `) `;]
 end
 
 namespace indep

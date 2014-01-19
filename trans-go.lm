@@ -2,13 +2,13 @@ include 'trans.lm'
 
 namespace go
 	lex 
-		literal '%%{', '}%%'
+		literal `%%{ `}%%
 
-		literal 'int', 'bool', 'const', 'char', 'ptr',
-				'var', 'fmt.Print', 'byte'
+		literal `int `bool `const `char `ptr
+				`var `fmt.Print `byte
 
-		literal ';', '<', '>', '(', ')', '[', ']', '=',
-				'*', '!', '{', '}', '+', '-', '==', '!=', ':'
+		literal `; `< `> `( `) `[ `] `=
+				`* `! `{ `} `+ `- `== `!= `:
 
 		ignore / ( [ \t] | NL )+ /
 
@@ -22,24 +22,24 @@ namespace go
 
 	def factor
 		[tk_ident]
-	|	[tk_ident '[' expr ']']
-	|	[tk_ident '(' expr ')']
+	|	[tk_ident `[ expr `]]
+	|	[tk_ident `( expr `)]
 	|	[tk_number]
 	|	[tk_hex_number]
 	|	[string]
-	|	['<' type '>' '(' expr ')']
-	|	['(' type ')' '(' expr ')']
-	|	['(' expr ')']
-	|	[tk_ident ':' tk_ident]
-	|	[':' tk_ident]
+	|	[`< type `> `( expr `)]
+	|	[`( type `) `( expr `)]
+	|	[`( expr `)]
+	|	[tk_ident `: tk_ident]
+	|	[`: tk_ident]
 
 	def print_stmt
-		['fmt.Print' '(' expr ')' ';']
+		[`fmt.Print `( expr `) `;]
 
 	def op
-		['<'] | ['>'] | ['='] | ['!']
-	|	['+'] | ['-'] | ['*'] | ['!=']
-	|	['==']
+		[`<] | [`>] | [`=] | [`!]
+	|	[`+] | [`-] | [`*] | [`!=]
+	|	[`==]
 
 	def expr_op
 		[op factor]
@@ -48,19 +48,19 @@ namespace go
 		[factor expr_op*]
 
 	def opt_arr
-		['[' expr ']']
+		[`[ expr `]]
 	|	[]
 
 	def type
-		['int']
-	|	['bool']
-	|	['char']
-	|	['char' '*']
-	|	['const' '(' 'char' ')' '*']
-	|	['byte']
+		[`int]
+	|	[`bool]
+	|	[`char]
+	|	[`char `*]
+	|	[`const `( `char `) `*]
+	|	[`byte]
 
 	def var_decl
-		['var' tk_ident opt_arr type]
+		[`var tk_ident opt_arr type]
 end
 
 namespace indep
