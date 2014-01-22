@@ -3594,6 +3594,27 @@ again:
 			break;
 		}
 
+		case IN_SYSTEM: {
+			debug( prg, REALM_BYTECODE, "IN_SYSTEM\n" );
+
+			Tree *global = vm_pop();
+			Str *cmd = (Str*)vm_pop();
+
+			char *cmd0 = malloc( cmd->value->length + 1 );
+			memcpy( cmd0, cmd->value->data, cmd->value->length );
+			cmd0[cmd->value->length] = 0;
+
+			int r = system( cmd0 );
+
+			treeDownref( prg, sp, global );
+			treeDownref( prg, sp, (Tree*)cmd );
+
+			Tree *result = constructInteger( prg, r );
+			treeUpref( result );
+			vm_push( result );
+			break;
+		}
+
 		case IN_EXIT: {
 			debug( prg, REALM_BYTECODE, "IN_EXIT\n" );
 

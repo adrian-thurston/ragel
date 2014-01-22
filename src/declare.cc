@@ -955,6 +955,9 @@ void Compiler::initGlobalFunctions()
 	method = initFunction( uniqueTypeInt, globalObjectDef, "exit",
 		IN_EXIT, IN_EXIT, uniqueTypeInt, true );
 
+	method = initFunction( uniqueTypeInt, globalObjectDef, "system",
+		IN_SYSTEM, IN_SYSTEM, uniqueTypeStr, true );
+
 	addStdin();
 	addStdout();
 	addStderr();

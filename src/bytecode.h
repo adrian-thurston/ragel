@@ -322,6 +322,8 @@ typedef unsigned char uchar;
 #define IN_GET_ERROR             0xcc
 #define IN_SET_ERROR             0xe2
 
+#define IN_SYSTEM                0xe5
+
 
 /* Types */
 #define TYPE_NIL          0x01
