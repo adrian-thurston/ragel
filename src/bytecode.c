@@ -3343,6 +3343,7 @@ again:
 			read_half( size );
 			debug( prg, REALM_BYTECODE, "IN_CONTIGUOUS %hd\n", size );
 			vm_contiguous( size );
+			vm_push( 0 );
 			break;
 		}
 		case IN_INIT_LOCALS: {
@@ -3644,6 +3645,7 @@ again:
 				instr = (Code*) vm_pop();
 				Tree *retVal = vm_pop();
 				vm_popn( fi->argSize );
+				vm_pop();
 
 				treeDownref( prg, sp, retVal );
 			}

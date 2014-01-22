@@ -899,7 +899,9 @@ bool Compiler::beginContiguous( CodeVect &code, int stretch )
 	if ( inContiguous )
 		contiguousStretch += stretch;
 	else {
-		contiguousStretch = stretch;
+		/* We add one for the push that always comes with the contiguous
+		 * statement. */
+		contiguousStretch = stretch + 1;
 
 		code.append( IN_CONTIGUOUS );
 		contiguousOffset = code.length();
@@ -917,6 +919,14 @@ void Compiler::endContiguous( CodeVect &code, bool resetContiguous )
 		inContiguous = false; 
 		code.setHalf( contiguousOffset, contiguousStretch );
 		contiguousOffset = 0;
+	}
+}
+
+void Compiler::clearContiguous( CodeVect &code, bool resetContiguous )
+{
+	if ( resetContiguous ) {
+		code.append( IN_TOP_SWAP );
+		code.append( IN_POP );
 	}
 }
 
@@ -944,6 +954,7 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	delete[] paramRefs;
 
 	pd->endContiguous( code, resetContiguous );
+	pd->clearContiguous( code, resetContiguous );
 
 	/* Return the type to the expression. */
 	return lookup.uniqueType;
@@ -1354,6 +1365,7 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 	 * leave the varref on the stack. */
 
 	pd->endContiguous( code, resetContiguous );
+	pd->clearContiguous( code, resetContiguous );
 }
 
 void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
@@ -1873,6 +1885,7 @@ UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 	code.append( args->length() );
 
 	pd->endContiguous( code, resetContiguous );
+	pd->clearContiguous( code, resetContiguous );
 
 	return pd->uniqueTypeAny;
 }
@@ -1903,6 +1916,7 @@ UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 	code.append( args->length() );
 
 	pd->endContiguous( code, resetContiguous );
+	pd->clearContiguous( code, resetContiguous );
 
 	return pd->uniqueTypeAny;
 }
@@ -2002,6 +2016,8 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	ObjectField **paramRefs = iterCall->langTerm->varRef->evaluateArgs(
 			pd, code, lookup, iterCall->langTerm->args );
 
+	pd->endContiguous( code, resetContiguous );
+
 	if ( pd->revertOn )
 		code.append( iterUT->iterDef->inCreateWV );
 	else
@@ -2018,14 +2034,16 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 			code.appendHalf( searchUT->langEl->id );
 	}
 
-	pd->endContiguous( code, resetContiguous );
-
 	compileForIterBody( pd, code, iterUT );
+
 
 	iterCall->langTerm->varRef->popRefQuals( pd, code, lookup, iterCall->langTerm->args );
 
 	iterCall->langTerm->varRef->resetActiveRefs( pd, lookup, paramRefs );
 	delete[] paramRefs;
+
+	if ( resetContiguous )
+		code.append( IN_POP );
 }
 
 void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const

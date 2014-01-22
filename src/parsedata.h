@@ -979,6 +979,7 @@ struct Compiler
 
 	bool beginContiguous( CodeVect &code, int stretch );
 	void endContiguous( CodeVect &code, bool resetContiguous );
+	void clearContiguous( CodeVect &code, bool resetContiguous );
 
 	void declareReVars();
 };
