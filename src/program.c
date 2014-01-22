@@ -145,16 +145,17 @@ Tree **vm_bs_pop( Program *prg, Tree **sp, int n )
 		prg->stackBlock = prg->stackBlock->next;
 		prg->reserve = b;
 
-		/* Setup the bounds. Need to use offset here? Maybe we can grant more
-		 * space in case any push that follows has fewer requirements. */
-		prg->sb_beg = prg->stackBlock->data + prg->stackBlock->offset;
+		/* Setup the bounds. Note that we restore the full block, which is
+		 * necessary to honour any CONTIGUOUS statements that counted on it
+		 * before a subsequent CONTIGUOUS triggered a new block. */
+		prg->sb_beg = prg->stackBlock->data; 
 		prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
 
 		/* Update the total stack usage. */
 		prg->sb_total -= prg->stackBlock->len - prg->stackBlock->offset;
 
 		n -= remaining;
-		sp = prg->sb_beg;
+		sp = prg->stackBlock->data + prg->stackBlock->offset;
 	}
 }
 
