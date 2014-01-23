@@ -1895,8 +1895,8 @@ UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 	long stretch = args->length() + 2;
 	bool resetContiguous = pd->beginContiguous( code, stretch );
 
-	if ( pd->compileContext != Compiler::CompileTranslation )
-		error(loc) << "make_tree can be used only in a translation block" << endp;
+//	if ( pd->compileContext != Compiler::CompileTranslation )
+//		error(loc) << "make_tree can be used only in a translation block" << endp;
 
 	/* Match the number of arguments. */
 	int numArgs = args != 0 ? args->length() : 0;
