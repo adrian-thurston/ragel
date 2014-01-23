@@ -755,12 +755,9 @@ Tree *castTree( Program *prg, int langElId, Tree *tree )
 	return newTree;
 }
 
-Tree *makeTree( Program *prg, Tree **root, long nargs )
+Tree *makeTree( Program *prg, Tree **args, long nargs )
 {
-	Tree **const sp = root;
-	Tree **base = vm_ptop() + nargs;
-
-	Int *idInt = (Int*)base[-1];
+	Int *idInt = (Int*)args[0];
 
 	long id = idInt->value;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
@@ -773,9 +770,9 @@ Tree *makeTree( Program *prg, Tree **root, long nargs )
 	Kid *attrs = allocAttrs( prg, objectLength );
 
 	Kid *last = 0, *child = 0;
-	for ( id = 0; id < nargs-1; id++ ) {
+	for ( id = 1; id < nargs; id++ ) {
 		Kid *kid = kidAllocate( prg );
-		kid->tree = base[-2-id];
+		kid->tree = args[id];
 		treeUpref( kid->tree );
 
 		if ( last == 0 )

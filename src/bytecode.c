@@ -2651,16 +2651,19 @@ again:
 		}
 		case IN_MAKE_TREE: {
 			uchar nargs;
+			int i;
 			read_byte( nargs );
 
 			debug( prg, REALM_BYTECODE, "IN_MAKE_TREE\n" );
 
-			Tree *result = makeTree( prg, sp, nargs );
-			long i;
-			for ( i = 0; i < nargs; i++ ) {
-				Tree *arg = vm_pop();
-				treeDownref( prg, sp, arg );
-			}
+			Tree *arg[nargs];
+			for ( i = nargs-1; i >= 0; i-- )
+				arg[i] = vm_pop();
+
+			Tree *result = makeTree( prg, arg, nargs );
+			for ( i = 0; i < nargs; i++ )
+				treeDownref( prg, sp, arg[i] );
+
 			vm_push( result );
 			break;
 		}

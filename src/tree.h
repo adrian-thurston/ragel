@@ -268,7 +268,7 @@ Tree *constructStream( struct colm_program *prg );
 
 
 int testFalse( struct colm_program *prg, Tree *tree );
-Tree *makeTree( struct colm_program *prg, Tree **root, long nargs );
+Tree *makeTree( struct colm_program *prg, Tree **args, long nargs );
 Stream *openFile( struct colm_program *prg, Tree *name, Tree *mode );
 Stream *openStreamFd( struct colm_program *prg, char *name, long fd );
 Kid *copyIgnoreList( struct colm_program *prg, Kid *ignoreHeader );
