@@ -1,0 +1,13 @@
+##### LM #####
+lex
+	token a /'a'/
+	token b /'b'/
+	token c /'c'/
+end
+
+def A
+	[a b c]
+
+print( make_tree( typeid<A> cons a "a" cons b "b" cons c "c" ) '\n' )
+##### EXP #####
+abc
