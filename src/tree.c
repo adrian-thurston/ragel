@@ -627,13 +627,10 @@ Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat
 	return kid;
 }
 
-Tree *constructToken( Program *prg, Tree **root, long nargs )
+Tree *constructToken( Program *prg, Tree **args, long nargs )
 {
-	Tree **const sp = root;
-	Tree **base = vm_ptop() + nargs;
-
-	Int *idInt = (Int*)base[-1];
-	Str *textStr = (Str*)base[-2];
+	Int *idInt = (Int*)args[0];
+	Str *textStr = (Str*)args[1];
 
 	long id = idInt->value;
 	Head *tokdata = stringCopy( prg, textStr->value );
@@ -649,6 +646,8 @@ Tree *constructToken( Program *prg, Tree **root, long nargs )
 	}
 	else {
 		long objectLength = lelInfo[id].objectLength;
+		assert( nargs-2 <= objectLength );
+
 		Kid *attrs = allocAttrs( prg, objectLength );
 
 		tree = treeAllocate( prg );
@@ -658,11 +657,10 @@ Tree *constructToken( Program *prg, Tree **root, long nargs )
 
 		tree->child = attrs;
 
-		assert( nargs-2 <= objectLength );
-		long id;
-		for ( id = 0; id < nargs-2; id++ ) {
-			setAttr( tree, id, base[-3-id] );
-			treeUpref( colm_get_attr( tree, id) );
+		long i;
+		for ( i = 2; i < nargs; i++ ) {
+			setAttr( tree, i-2, args[i] );
+			treeUpref( colm_get_attr( tree, i-2 ) );
 		}
 	}
 	return tree;
