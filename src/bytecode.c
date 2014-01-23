@@ -888,12 +888,15 @@ again:
 			read_byte( n );
 			debug( prg, REALM_BYTECODE, "IN_PRINT %d\n", n );
 
-			Tree **arg = vm_ptop();
+			Tree *arg[n];
 			for ( i = n-1; i >= 0; i-- )
+				arg[i] = vm_pop();
+
+			for ( i = 0; i < n; i++ )
 				printTreeFile( prg, sp, stdout, arg[i], false );
 
-			while ( n-- > 0 )
-				treeDownref( prg, sp, vm_pop() );
+			for ( i = 0; i < n; i++ )
+				treeDownref( prg, sp, arg[i] );
 			break;
 		}
 		case IN_PRINT_STREAM: {
@@ -901,18 +904,21 @@ again:
 			read_byte( n );
 			debug( prg, REALM_BYTECODE, "IN_PRINT_STREAM\n" );
 
-			Tree **arg = vm_ptop();
-			Stream *stream = (Stream*)arg[n];
-			for ( i = n-1; i >= 0; i-- ) {
+			Tree *arg[n];
+			for ( i = n-1; i >= 0; i-- )
+				arg[i] = vm_pop();
+			Stream *stream = (Stream*)vm_pop();
+
+			for ( i = 0; i < n; i++ ) {
 				if ( stream->in->file != 0 )
 					printTreeFile( prg, sp, stream->in->file, arg[i], false );
 				else
 					printTreeFd( prg, sp, stream->in->fd, arg[i], false );
 			}
 
-			while ( n-- > 0 )
-				treeDownref( prg, sp, vm_pop() );
-			treeDownref( prg, sp, vm_pop() );
+			for ( i = 0; i < n; i++ )
+				treeDownref( prg, sp, arg[i] );
+			treeDownref( prg, sp, (Tree*)stream );
 			break;
 		}
 		case IN_PRINT_XML_AC: {
@@ -921,14 +927,15 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PRINT_XML_AC %d\n", n );
 
-			Tree **arg = vm_ptop();
+			Tree *arg[n];
 			for ( i = n-1; i >= 0; i-- )
+				arg[i] = vm_pop();
+
+			for ( i = 0; i < n; i++ )
 				printXmlStdout( prg, sp, arg[i], true, true );
 
-			while ( n-- > 0 ) {
-				Tree *tree = vm_pop();
-				treeDownref( prg, sp, tree );
-			}
+			for ( i = 0; i < n; i++ )
+				treeDownref( prg, sp, arg[i] );
 			break;
 		}
 		case IN_PRINT_XML: {
@@ -936,14 +943,15 @@ again:
 			read_byte( n );
 			debug( prg, REALM_BYTECODE, "IN_PRINT_XML %d", n );
 
-			Tree **arg = vm_ptop();
+			Tree *arg[n];
 			for ( i = n-1; i >= 0; i-- )
+				arg[i] = vm_pop();
+
+			for ( i = 0; i < n; i++ )
 				printXmlStdout( prg, sp, arg[i], false, true );
 
-			while ( n-- > 0 ) {
-				Tree *tree = vm_pop();
-				treeDownref( prg, sp, tree );
-			}
+			for ( i = 0; i < n; i++ )
+				treeDownref( prg, sp, arg[i] );
 			break;
 		}
 		case IN_LOAD_CONTEXT_R: {
