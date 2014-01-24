@@ -1308,8 +1308,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 
 void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 {
-	bool resetContiguous = pd->beginContiguous( code, 3 );
-
 	varRef->evaluate( pd, code );
 
 	for ( ConsItemList::Iter item = parserText->list->first(); item.lte(); item++ ) {
@@ -1363,9 +1361,6 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 	 * before all the print arguments (which includes the stream, evaluated
 	 * last), however we send is part of an expression, and is supposed to
 	 * leave the varref on the stack. */
-
-	pd->endContiguous( code, resetContiguous );
-	pd->clearContiguous( code, resetContiguous );
 }
 
 void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
@@ -1858,9 +1853,6 @@ void LangVarRef::assignValue( Compiler *pd, CodeVect &code,
 
 UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 {
-	long stretch = args->length() + 2;
-	bool resetContiguous = pd->beginContiguous( code, stretch );
-
 //	if ( pd->compileContext != Compiler::CompileTranslation )
 //		error(loc) << "make_token can be used only in a translation block" << endp;
 
@@ -1884,17 +1876,11 @@ UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 	code.append( IN_MAKE_TOKEN );
 	code.append( args->length() );
 
-	pd->endContiguous( code, resetContiguous );
-	pd->clearContiguous( code, resetContiguous );
-
 	return pd->uniqueTypeAny;
 }
 
 UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 {
-	long stretch = args->length() + 2;
-	bool resetContiguous = pd->beginContiguous( code, stretch );
-
 //	if ( pd->compileContext != Compiler::CompileTranslation )
 //		error(loc) << "make_tree can be used only in a translation block" << endp;
 
@@ -1914,9 +1900,6 @@ UniqueType *LangTerm::evaluateMakeTree( Compiler *pd, CodeVect &code ) const
 	/* The token is now created, send it. */
 	code.append( IN_MAKE_TREE );
 	code.append( args->length() );
-
-	pd->endContiguous( code, resetContiguous );
-	pd->clearContiguous( code, resetContiguous );
 
 	return pd->uniqueTypeAny;
 }
