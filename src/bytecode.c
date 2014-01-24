@@ -3376,7 +3376,7 @@ again:
 
 			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
 
-			debug( prg, REALM_BYTECODE, "IN_CALL_WV %ld\n", fi->name );
+			debug( prg, REALM_BYTECODE, "IN_CALL_WV %s\n", fi->name );
 
 			vm_push( 0 ); /* Return value. */
 			vm_push( (SW)instr );
@@ -3394,7 +3394,7 @@ again:
 
 			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
 
-			debug( prg, REALM_BYTECODE, "IN_CALL_WC %ld\n", fi->name );
+			debug( prg, REALM_BYTECODE, "IN_CALL_WC %s\n", fi->name );
 
 			vm_push( 0 ); /* Return value. */
 			vm_push( (SW)instr );
