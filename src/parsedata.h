@@ -556,6 +556,9 @@ struct Compiler
 	bool precedenceSwap( long action1, long action2, LangEl *l1, LangEl *l2 );
 	bool precedenceRemoveBoth( LangEl *l1, LangEl *l2 );
 
+	void initLocalFrame( ObjectDef *localFrame );
+	void initAllFrameObjects();
+
 	void initKeyOps();
 
 	/*

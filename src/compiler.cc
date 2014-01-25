@@ -1121,7 +1121,6 @@ void Compiler::compile()
 
 	declarePass();
 
-
 	resolvePass();
 
 	makeTerminalWrappers();
@@ -1138,6 +1137,7 @@ void Compiler::compile()
 	prepGrammar();
 
 	initAllLanguageObjects();
+	initAllFrameObjects();
 
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
 		initUserFunctions( f, f->isUserIter );

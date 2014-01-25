@@ -2334,10 +2334,6 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 	if ( langEl->tokenDef->reCaptureVect.length() > 0 ) {
 		code.append( IN_INIT_CAPTURES );
 		code.append( langEl->tokenDef->reCaptureVect.length() );
-
-		ObjFieldList::Iter f = *block->localFrame->objFieldList;
-		for ( int i = 0; i < langEl->tokenDef->reCaptureVect.length(); i++, f++ )
-			block->localFrame->referenceField( this, f->value );
 	}
 
 	/* Set the local frame and compile the reduce block. */
@@ -2441,6 +2437,47 @@ void Compiler::initAllLanguageObjects()
 		globalObjectDef->initField( this, f->value );
 }
 
+void Compiler::initLocalFrame( ObjectDef *localFrame )
+{
+	for ( ObjFieldList::Iter f = *localFrame->objFieldList; f.lte(); f++ )
+		localFrame->initField( this, f->value );
+}
+
+void Compiler::initAllFrameObjects()
+{
+	/* Functions. */
+	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
+		initLocalFrame( f->localFrame );
+
+	/* Reduction code. */
+	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
+		if ( prod->redBlock != 0 )
+			initLocalFrame( prod->redBlock->localFrame );
+	}
+
+	/* Token translation code. */
+	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
+		if ( lel->transBlock != 0 ) {
+			ObjectDef *localFrame = lel->transBlock->localFrame;
+			if ( lel->tokenDef->reCaptureVect.length() > 0 ) {
+				ObjFieldList::Iter f = *localFrame->objFieldList;
+				for ( int i = 0; i < lel->tokenDef->reCaptureVect.length(); i++, f++ )
+					localFrame->initField( this, f->value );
+			}
+
+			initLocalFrame( localFrame );
+		}
+	}
+
+	/* Preeof blocks. */
+	for ( RegionList::Iter r = regionList; r.lte(); r++ ) {
+		if ( r->preEofBlock != 0 )
+			initLocalFrame( r->preEofBlock->localFrame );
+	}
+
+	/* Root code. */
+	initLocalFrame( rootLocalFrame );
+}
 
 void Compiler::initUserFunctions( Function *func, bool isUserIter )
 {

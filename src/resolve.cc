@@ -587,16 +587,16 @@ void ObjectDef::resolve( Compiler *pd )
 	for ( ObjFieldList::Iter fli = *objFieldList; fli.lte(); fli++ ) {
 		ObjectField *field = fli->value;
 
-		if ( field->typeRef != 0 ) {
+		if ( field->typeRef != 0 )
 			field->typeRef->lookupType( pd );
-		}
 	}
 }
 
 void CodeBlock::resolve( Compiler *pd ) const
 {
-	if ( localFrame != 0 )
+	if ( localFrame != 0 ) {
 		localFrame->resolve( pd );
+	}
 
 	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 		stmt->resolve( pd );
@@ -775,6 +775,7 @@ void Compiler::resolvePrecedence()
 		langEl->predValue = predDecl->predValue;
 	}
 }
+
 
 void Compiler::resolvePass()
 {
