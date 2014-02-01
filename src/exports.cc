@@ -123,7 +123,7 @@ void Compiler::generateExports()
 			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
 				ObjectField *field = ofi->value;
 				if ( field->useOffset && field->typeRef != 0  ) {
-					UniqueType *ut = field->typeRef->lookupType( this );
+					UniqueType *ut = field->typeRef->resolveType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 						out << "	" << ut->langEl->refName << " " << field->name << "();\n";
@@ -131,7 +131,7 @@ void Compiler::generateExports()
 				}
 
 				if ( field->isRhsGet ) {
-					UniqueType *ut = field->typeRef->lookupType( this );
+					UniqueType *ut = field->typeRef->resolveType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 						out << "	" << ut->langEl->refName << " " << field->name << "();\n";
@@ -179,7 +179,7 @@ void Compiler::generateExports()
 	for ( ObjFieldList::Iter of = *globalObjectDef->objFieldList; of.lte(); of++ ) {
 		ObjectField *field = of->value;
 		if ( field->isExport ) {
-			UniqueType *ut = field->typeRef->lookupType(this);
+			UniqueType *ut = field->typeRef->resolveType(this);
 			if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 				out << ut->langEl->refName << " " << field->name << "( colm_program *prg );\n";
 			}
@@ -220,7 +220,7 @@ void Compiler::generateExportsImpl()
 			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
 				ObjectField *field = ofi->value;
 				if ( field->useOffset && field->typeRef != 0  ) {
-					UniqueType *ut = field->typeRef->lookupType( this );
+					UniqueType *ut = field->typeRef->resolveType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 						out << ut->langEl->refName << " " << lel->declName << "::" << field->name << 
@@ -230,7 +230,7 @@ void Compiler::generateExportsImpl()
 				}
 
 				if ( field->isRhsGet ) {
-					UniqueType *ut = field->typeRef->lookupType( this );
+					UniqueType *ut = field->typeRef->resolveType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 						out << ut->langEl->refName << " " << lel->declName << "::" << field->name << 
@@ -277,7 +277,7 @@ void Compiler::generateExportsImpl()
 	for ( ObjFieldList::Iter of = *globalObjectDef->objFieldList; of.lte(); of++ ) {
 		ObjectField *field = of->value;
 		if ( field->isExport ) {
-			UniqueType *ut = field->typeRef->lookupType(this);
+			UniqueType *ut = field->typeRef->resolveType(this);
 			if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
 				out << 
 					ut->langEl->refName << " " << field->name << "( colm_program *prg )\n"

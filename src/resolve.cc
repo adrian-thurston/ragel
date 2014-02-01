@@ -28,14 +28,14 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-Namespace *TypeRef::lookupNspace( Compiler *pd )
+Namespace *TypeRef::resolveNspace( Compiler *pd )
 {
 	if ( parsedVarRef != 0 && !nspaceQual->thisOnly() ) {
 		UniqueType *ut = parsedVarRef->lookup( pd );
 		return ut->langEl->nspace;
 	}
 	else if ( parsedTypeRef != 0 && !nspaceQual->thisOnly() ) {
-		UniqueType *ut = parsedTypeRef->lookupType( pd );
+		UniqueType *ut = parsedTypeRef->resolveType( pd );
 		return ut->langEl->nspace;
 	}
 	else {
@@ -44,9 +44,9 @@ Namespace *TypeRef::lookupNspace( Compiler *pd )
 	}
 }
 
-UniqueType *TypeRef::lookupTypeName( Compiler *pd )
+UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 {
-	nspace = lookupNspace( pd );
+	nspace = resolveNspace( pd );
 
 	if ( nspace == 0 )
 		error(loc) << "do not have region for resolving reference" << endp;
@@ -59,7 +59,7 @@ UniqueType *TypeRef::lookupTypeName( Compiler *pd )
 			switch ( inDict->type ) {
 				/* Defer to the typeRef we are an alias of. We need to guard against loops here. */
 				case TypeMapEl::TypeAliasType:
-					return inDict->typeRef->lookupType( pd );
+					return inDict->typeRef->resolveType( pd );
 
 				case TypeMapEl::LangElType:
 					return pd->findUniqueType( TYPE_TREE, inDict->value );
@@ -76,10 +76,10 @@ UniqueType *TypeRef::lookupTypeName( Compiler *pd )
 	return 0;
 }
 
-UniqueType *TypeRef::lookupTypeLiteral( Compiler *pd )
+UniqueType *TypeRef::resolveTypeLiteral( Compiler *pd )
 {
 	/* Lookup up the qualifiction and then the name. */
-	nspace = lookupNspace( pd );
+	nspace = resolveNspace( pd );
 
 	if ( nspace == 0 )
 		error(loc) << "do not have region for resolving reference" << endp;
@@ -106,12 +106,12 @@ UniqueType *TypeRef::lookupTypeLiteral( Compiler *pd )
 	return 0;
 }
 
-UniqueType *TypeRef::lookupTypeMap( Compiler *pd )
+UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
-	UniqueType *utKey = typeRef1->lookupType( pd );	
-	UniqueType *utValue = typeRef2->lookupType( pd );	
+	UniqueType *utKey = typeRef1->resolveType( pd );	
+	UniqueType *utValue = typeRef2->resolveType( pd );	
 
 	UniqueMap searchKey( utKey, utValue );
 	UniqueMap *inMap = pd->uniqueMapMap.find( &searchKey );
@@ -138,11 +138,11 @@ UniqueType *TypeRef::lookupTypeMap( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::lookupTypeList( Compiler *pd )
+UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
-	UniqueType *utValue = typeRef1->lookupType( pd );	
+	UniqueType *utValue = typeRef1->resolveType( pd );	
 
 	UniqueList searchKey( utValue );
 	UniqueList *inMap = pd->uniqueListMap.find( &searchKey );
@@ -168,11 +168,11 @@ UniqueType *TypeRef::lookupTypeList( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::lookupTypeVector( Compiler *pd )
+UniqueType *TypeRef::resolveTypeVector( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
-	UniqueType *utValue = typeRef1->lookupType( pd );	
+	UniqueType *utValue = typeRef1->resolveType( pd );	
 
 	UniqueVector searchKey( utValue );
 	UniqueVector *inMap = pd->uniqueVectorMap.find( &searchKey );
@@ -198,11 +198,11 @@ UniqueType *TypeRef::lookupTypeVector( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::lookupTypeParser( Compiler *pd )
+UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
-	UniqueType *utParse = typeRef1->lookupType( pd );	
+	UniqueType *utParse = typeRef1->resolveType( pd );	
 
 	UniqueParser searchKey( utParse );
 	UniqueParser *inMap = pd->uniqueParserMap.find( &searchKey );
@@ -228,15 +228,15 @@ UniqueType *TypeRef::lookupTypeParser( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::lookupTypePtr( Compiler *pd )
+UniqueType *TypeRef::resolveTypePtr( Compiler *pd )
 {
-	typeRef1->lookupType( pd );
+	typeRef1->resolveType( pd );
 	return pd->findUniqueType( TYPE_PTR, typeRef1->uniqueType->langEl );
 }
 
-UniqueType *TypeRef::lookupTypeRef( Compiler *pd )
+UniqueType *TypeRef::resolveTypeRef( Compiler *pd )
 {
-	typeRef1->lookupType( pd );
+	typeRef1->resolveType( pd );
 	return pd->findUniqueType( TYPE_REF, typeRef1->uniqueType->langEl );
 }
 
@@ -287,9 +287,9 @@ void TypeRef::resolveRepeat( Compiler *pd )
 	uniqueType = pd->findUniqueType( TYPE_TREE, uniqueRepeat->declLangEl );
 }
 
-UniqueType *TypeRef::lookupIterator( Compiler *pd )
+UniqueType *TypeRef::resolveIterator( Compiler *pd )
 {
-	UniqueType *searchUT = searchTypeRef->lookupType( pd );
+	UniqueType *searchUT = searchTypeRef->resolveType( pd );
 
 	/* Lookup the iterator call. Make sure it is an iterator. */
 	VarRefLookup lookup = iterCall->langTerm->varRef->lookupMethod( pd );
@@ -309,7 +309,7 @@ UniqueType *TypeRef::lookupIterator( Compiler *pd )
 }
 
 
-UniqueType *TypeRef::lookupType( Compiler *pd )
+UniqueType *TypeRef::resolveType( Compiler *pd )
 {
 	if ( uniqueType != 0 )
 		return uniqueType;
@@ -317,31 +317,31 @@ UniqueType *TypeRef::lookupType( Compiler *pd )
 	/* Not an iterator. May be a reference. */
 	switch ( type ) {
 		case Name:
-			uniqueType = lookupTypeName( pd );
+			uniqueType = resolveTypeName( pd );
 			break;
 		case Literal:
-			uniqueType = lookupTypeLiteral( pd );
+			uniqueType = resolveTypeLiteral( pd );
 			break;
 		case Map:
-			uniqueType = lookupTypeMap( pd );
+			uniqueType = resolveTypeMap( pd );
 			break;
 		case List:
-			uniqueType = lookupTypeList( pd );
+			uniqueType = resolveTypeList( pd );
 			break;
 		case Vector:
-			uniqueType = lookupTypeVector( pd );
+			uniqueType = resolveTypeVector( pd );
 			break;
 		case Parser:
-			uniqueType = lookupTypeParser( pd );
+			uniqueType = resolveTypeParser( pd );
 			break;
 		case Ptr:
-			uniqueType = lookupTypePtr( pd );
+			uniqueType = resolveTypePtr( pd );
 			break;
 		case Ref:
-			uniqueType = lookupTypeRef( pd );
+			uniqueType = resolveTypeRef( pd );
 			break;
 		case Iterator:
-			uniqueType = lookupIterator( pd );
+			uniqueType = resolveIterator( pd );
 			break;
 		case Unspecified:
 			/* No lookup needed, unique type(s) set when constructed. */
@@ -356,7 +356,7 @@ UniqueType *TypeRef::lookupType( Compiler *pd )
 
 void Compiler::resolveProdEl( ProdEl *prodEl )
 {
-	prodEl->typeRef->lookupType( this );
+	prodEl->typeRef->resolveType( this );
 	prodEl->langEl = prodEl->typeRef->uniqueType->langEl;
 }
 
@@ -364,7 +364,7 @@ void LangTerm::resolve( Compiler *pd )
 {
 	switch ( type ) {
 		case ConstructType:
-			typeRef->lookupType( pd );
+			typeRef->resolveType( pd );
 
 			/* Initialization expressions. */
 			if ( fieldInitArgs != 0 ) {
@@ -419,10 +419,10 @@ void LangTerm::resolve( Compiler *pd )
 			expr->resolve( pd );
 			break;
 		case TypeIdType:
-			typeRef->lookupType( pd );
+			typeRef->resolveType( pd );
 			break;
 		case SearchType:
-			typeRef->lookupType( pd );
+			typeRef->resolveType( pd );
 			break;
 		case NilType:
 		case TrueType:
@@ -431,7 +431,7 @@ void LangTerm::resolve( Compiler *pd )
 
 		case ParseStopType:
 		case ParseType:
-			typeRef->lookupType( pd );
+			typeRef->resolveType( pd );
 			/* Evaluate the initialization expressions. */
 			if ( fieldInitArgs != 0 ) {
 				for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
@@ -455,7 +455,7 @@ void LangTerm::resolve( Compiler *pd )
 		case EmbedStringType:
 			break;
 		case CastType:
-			typeRef->lookupType( pd );
+			typeRef->resolveType( pd );
 			expr->resolve( pd );
 			break;
 	}
@@ -502,10 +502,10 @@ void LangStmt::resolveForIter( Compiler *pd ) const
 	iterCall->resolve( pd );
 
 	/* Search type ref. */
-	typeRef->lookupType( pd );
+	typeRef->resolveType( pd );
 
 	/* Iterator type ref. */
-	objField->typeRef->lookupType( pd );
+	objField->typeRef->resolveType( pd );
 
 	/* Resolve the statements. */
 	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
@@ -588,7 +588,7 @@ void ObjectDef::resolve( Compiler *pd )
 		ObjectField *field = fli->value;
 
 		if ( field->typeRef != 0 )
-			field->typeRef->lookupType( pd );
+			field->typeRef->resolveType( pd );
 	}
 }
 
@@ -605,10 +605,10 @@ void CodeBlock::resolve( Compiler *pd ) const
 void Compiler::resolveFunction( Function *func )
 {
 	if ( func->typeRef != 0 ) 
-		func->typeRef->lookupType( this );
+		func->typeRef->resolveType( this );
 
 	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ )
-		param->typeRef->lookupType( this );
+		param->typeRef->resolveType( this );
 
 	CodeBlock *block = func->codeBlock;
 	block->resolve( this );
@@ -673,14 +673,14 @@ void Compiler::resolveParseTree()
 		if ( objDef != 0 ) {
 			/* Init all fields of the object. */
 			for ( ObjFieldList::Iter f = *objDef->objFieldList; f.lte(); f++ ) {
-				f->value->typeRef->lookupType( this );
+				f->value->typeRef->resolveType( this );
 			}
 		}
 	}
 
 	/* Init all fields of the global object. */
 	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ ) {
-		f->value->typeRef->lookupType( this );
+		f->value->typeRef->resolveType( this );
 	}
 
 }
@@ -713,10 +713,10 @@ void Compiler::resolveGenericTypes()
 {
 	for ( NamespaceList::Iter ns = namespaceList; ns.lte(); ns++ ) {
 		for ( GenericList::Iter gen = ns->genericList; gen.lte(); gen++ ) {
-			gen->utArg = gen->typeArg->lookupType( this );
+			gen->utArg = gen->typeArg->resolveType( this );
 
 			if ( gen->typeId == GEN_MAP )
-				gen->keyUT = gen->keyTypeArg->lookupType( this );
+				gen->keyUT = gen->keyTypeArg->resolveType( this );
 		}
 	}
 }
@@ -768,7 +768,7 @@ void Compiler::makeEofElements()
 void Compiler::resolvePrecedence()
 {
 	for ( PredDeclList::Iter predDecl = predDeclList; predDecl != 0; predDecl++ ) {
-		predDecl->typeRef->lookupType( this );
+		predDecl->typeRef->resolveType( this );
 
 		LangEl *langEl = predDecl->typeRef->uniqueType->langEl;
 		langEl->predType = predDecl->predType;
@@ -789,7 +789,7 @@ void Compiler::resolvePass()
 
 	resolveGenericTypes();
 
-	argvTypeRef->lookupType( this );
+	argvTypeRef->resolveType( this );
 
 	/* We must do this as the last step in the type resolution process because
 	 * all type resolves can cause new language elments with associated

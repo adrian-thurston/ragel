@@ -2133,17 +2133,17 @@ struct TypeRef
 
 	void resolveRepeat( Compiler *pd );
 
-	Namespace *lookupNspace( Compiler *pd );
-	UniqueType *lookupIterator( Compiler *pd );
-	UniqueType *lookupTypeName( Compiler *pd );
-	UniqueType *lookupTypeLiteral( Compiler *pd );
-	UniqueType *lookupTypeMap( Compiler *pd );
-	UniqueType *lookupTypeList( Compiler *pd );
-	UniqueType *lookupTypeVector( Compiler *pd );
-	UniqueType *lookupTypeParser( Compiler *pd );
-	UniqueType *lookupType( Compiler *pd );
-	UniqueType *lookupTypePtr( Compiler *pd );
-	UniqueType *lookupTypeRef( Compiler *pd );
+	Namespace *resolveNspace( Compiler *pd );
+	UniqueType *resolveIterator( Compiler *pd );
+	UniqueType *resolveTypeName( Compiler *pd );
+	UniqueType *resolveTypeLiteral( Compiler *pd );
+	UniqueType *resolveTypeMap( Compiler *pd );
+	UniqueType *resolveTypeList( Compiler *pd );
+	UniqueType *resolveTypeVector( Compiler *pd );
+	UniqueType *resolveTypeParser( Compiler *pd );
+	UniqueType *resolveType( Compiler *pd );
+	UniqueType *resolveTypePtr( Compiler *pd );
+	UniqueType *resolveTypeRef( Compiler *pd );
 
 	Type type;
 	InputLoc loc;

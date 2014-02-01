@@ -76,7 +76,7 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjNameScope *rootSc
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
 		/* Lookup the type of the field. */
-		el->typeRef->lookupType( pd );
+		el->typeRef->resolveType( pd );
 		UniqueType *qualUT = el->typeRef->uniqueType;
 
 		/* If we are dealing with an iterator then dereference it. */
@@ -203,7 +203,7 @@ UniqueType *LangVarRef::lookup( Compiler *pd ) const
 	VarRefLookup lookup = lookupField( pd );
 
 	ObjectField *el = lookup.objField;
-	UniqueType *elUT = el->typeRef->lookupType( pd );
+	UniqueType *elUT = el->typeRef->resolveType( pd );
 
 	/* Deref iterators. */
 	if ( elUT->typeId == TYPE_ITER )
