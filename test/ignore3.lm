@@ -33,7 +33,7 @@ if ( ! Start ) {
 }
 
 for I: item in Start {
-	print(  'item: .' , I, '.\n' )
+	print(  'item: .' I '.\n' )
 	if match I [ O: `( Inner: inner C: `) ]
 		print( 'innr: .' O '.' Inner '.' C '.\n' )
 }

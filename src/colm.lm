@@ -268,7 +268,6 @@ def reference_type_ref
 
 def param_var_def_list
 	[param_var_def param_var_def_list]
-|	[param_var_def COMMA param_var_def_list]
 |	[]
 
 def param_var_def
@@ -432,7 +431,6 @@ def optional_else
 
 def call_arg_list
 	[code_expr call_arg_list]
-|	[code_expr COMMA call_arg_list]
 |	[]
 
 def iter_call
