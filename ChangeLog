@@ -1,3 +1,38 @@
+colm 0.12.0 - Feb 1, 2014
+-------------------------
+	* allow matching against reference types
+	* refcount fixes for setting references
+	* can use 'in' expr to search ref types
+	* can take refs of temps in expresssions
+	* error handling improvements
+	* fixed the colm input open check
+	* added a default capture name to all production definition rhs elements,
+	  defaults to the type name
+	* allow var ref as the target of a send construct
+	* added the cast operator
+	* return nil from open if file open fails
+	* improvements to locals downrefs (large func offset overflow and iters)
+	* fixed the typeref for stdout and stderr, now working
+	* evaluate print arguments left to right
+	* improved separation of declare, resolve/lookup, and compile passes
+	* lookup of types in cons/pats uses the cons type or pattern tree namespace
+	* added the void type, useful for calling func in send expression
+	* can re-enter namespaces that already exist
+	* don't search parent scopes when qualifications are present
+	* added a new syntax for literal tokens; a single backtick is starts the
+	  literal, ends at whitespace or ] in second or greater position
+	* removed comma as separator in literal statement
+	* single-quoted strings are now treated like double-quoted strings; they
+	  may appear in expressions and are concatenated with the other string forms
+	* new syntax for collect-ignore tokens "token <id> -"
+	* added the system function, which calls C's system
+	* fixes for contiguous stack regions that fixes some segfaults
+	* don't use stack top offsets in print instructions
+	* allow make_tree anywhere
+	* don't use sp offset for make_tree, removes need for contiguous
+	* eliminated stack offset from make-token instruction
+	* print function names in call op debug stmts
+
 colm 0.11 - May 26, 2013
 ------------------------
 	* Require <> around ref and ptr type declarations (eg: ptr<type_ref>)
