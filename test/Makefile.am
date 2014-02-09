@@ -22,7 +22,7 @@ COLM = @COLM_FULL@
 
 TESTS = runtests
 
-bin_PROGRAMS = ragel-parse trans-c trans-d trans-go
+bin_PROGRAMS = trans-c trans-d trans-go
 
 ragel-parse: ragel-parse.lm
 	$(COLM) $<
