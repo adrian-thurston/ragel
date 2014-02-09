@@ -62,7 +62,7 @@ dnl
 dnl COLM
 dnl
 
-EXPECTED_COLM_VERSION=0.11
+EXPECTED_COLM_VERSION=0.12
 
 AC_ARG_WITH(colm,
 	[AC_HELP_STRING([--with-colm], [location of colm install])],
