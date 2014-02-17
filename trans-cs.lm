@@ -216,7 +216,6 @@ for Section: indep::section in RagelTree {
 
 send Output
 	"%% write data;
-	"%% alphtype byte;
 	"int cs;
 	"
 	"void init()
