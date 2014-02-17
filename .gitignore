@@ -25,4 +25,5 @@
 /ragel-parse.c
 /trans-c
 /trans-d
+/trans-cs
 /trans-go

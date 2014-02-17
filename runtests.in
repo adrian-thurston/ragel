@@ -204,7 +204,6 @@ for test_case; do
             code_suffix=cs;
             compiler=$csharp_compiler
             cflags=""
-			continue;
         ;;
         go)
 			lang_opt="-Z"
@@ -215,21 +214,39 @@ for test_case; do
 		indep)
 			lang_opt="";
 
-			for lang in c d go; do
+			for lang in c d csharp go; do
 				case $lang in 
-					c) lf="-C";;
-					d) lf="-D";;
-					java) lf="-J";;
-					ruby) lf="-R";;
-                    csharp) lf="-A";;
-					go) lf="-Z";;
+					c)
+						lf="-C"
+						trans=c;
+					;;
+					d)
+						lf="-D"
+						trans=d;
+					;;
+					java)
+						lf="-J"
+						trans=java;
+					;;
+					ruby)
+						lf="-R"
+						trans=ruby;
+					;;
+                    csharp)
+						lf="-A"
+						trans=cs;
+					;;
+					go)
+						lf="-Z"
+						trans=go;
+					;;
 				esac
 
 				echo "$langflags" | grep -e $lf >/dev/null || continue
 
 				targ=${root}_$lang.rl
-				echo "./trans-$lang $lang $test_case $targ"
-				if ! ./trans-$lang $lang $test_case $targ; then
+				echo "./trans-$trans $lang $test_case $targ"
+				if ! ./trans-$trans $lang $test_case $targ; then
 					test_error
 				fi
 				echo "./runtests -g $options $targ"
