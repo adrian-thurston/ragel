@@ -38,7 +38,7 @@ if.cc: parse.c
 ragel-if.$(OBJEXT): if.h if.cc parse.c
 ragel-load.$(OBJEXT): if.h if.cc parse.c
 
-RLHC = rlhc-c.lm rlhc-d.lm rlhc-go.lm
+RLHC = rlhc-c.lm rlhc-d.lm rlhc-go.lm rlhc-cs.lm
 
 rlhc: rlhc.lm $(RLHC)
 	$(COLM) -o $@ $<

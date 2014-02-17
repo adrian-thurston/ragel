@@ -1,0 +1,353 @@
+void cs_tok_list( TL: host::tok* )
+{
+	for Tok: host::tok in repeat(TL) {
+		if match Tok [host::`${ StmtList: stmt* host::`}$]
+			cs_stmt_list( StmtList )
+		elsif match Tok [host::`={ Expr: expr host::`}=]
+			cs_expr( Expr )
+		else {
+			send Output [Tok]
+		}
+	}
+}
+
+void cs_expr_factor( ExprFactor: expr_factor )
+{
+	if match ExprFactor
+		['$' string uint '{' TL: host::tok* host::`}$]
+	{
+		cs_tok_list( TL )
+	}
+	elsif match ExprFactor
+		['=' string uint '{' TL: host::tok* host::`}$]
+	{
+		cs_tok_list( TL )
+	}
+	elsif match ExprFactor
+		[O:`( TL: expr C: `)]
+	{
+		send Output
+			[O cs_expr(TL) C]
+	}
+	elsif match ExprFactor
+		[ident O: `[ TL: expr C: `]]
+	{
+		send Output
+			[ExprFactor.ident O cs_expr( TL ) C]
+	}
+	elsif match ExprFactor
+		['offset' '(' ident ',' expr ')']
+	{
+		send Output
+			[cs_expr( ExprFactor.expr )]
+	}
+	elsif match ExprFactor
+		['deref' '(' ident ',' expr ')']
+	{
+		send Output
+			[ ExprFactor.ident '[' go_expr( ExprFactor.expr ) ']']
+	}
+	elsif match ExprFactor
+			[T: `TRUE]
+	{
+		T.data = 'true'
+		send Output [T]
+	}
+	elsif match ExprFactor
+			[F: `FALSE]
+	{
+		F.data = 'false'
+		send Output [F]
+	}
+	elsif match ExprFactor
+			[N: `nil]
+	{
+		N.data = '0'
+		send Output [N]
+	}
+	else {
+		# Catches cases not specified
+		send Output [ExprFactor]
+	}
+}
+
+void cs_expr_ptr( ExprPtr: expr_ptr )
+{
+	if match ExprPtr [expr_ptr Arrow: `-> expr_factor]
+	{
+		cs_expr_ptr( ExprPtr._expr_ptr )
+		send Output [Arrow]
+		cs_expr_factor( ExprPtr.expr_factor )
+	}
+	elsif match ExprPtr [Star: `* expr_ptr]
+	{
+		send Output [Star]
+		cs_expr_ptr( ExprPtr._expr_ptr )
+	}
+	elsif match ExprPtr [PP: `++ expr_ptr]
+	{
+		send Output [PP]
+		cs_expr_ptr( ExprPtr._expr_ptr )
+	}
+	elsif match ExprPtr [MM: `-- expr_ptr]
+	{
+		send Output [MM]
+		cs_expr_ptr( ExprPtr._expr_ptr )
+	}
+	elsif match ExprPtr [expr_ptr PP: `++]
+	{
+		cs_expr_ptr( ExprPtr._expr_ptr )
+		send Output [PP]
+	}
+	elsif match ExprPtr [expr_ptr MM: `--]
+	{
+		cs_expr_ptr( ExprPtr._expr_ptr )
+		send Output [MM]
+	}
+	elsif match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
+	{
+		send Output [Open]
+		cs_type( Type )
+		send Output [Close]
+		cs_expr_ptr( ExprPtr._expr_ptr )
+	}
+	elsif match ExprPtr [expr_factor]
+	{
+		cs_expr_factor( ExprPtr.expr_factor )
+	}
+	else {
+		send Output [ExprPtr]
+	}
+}
+
+void cs_expr_factor_op( ExprFactorOp: expr_factor_op )
+{
+	if match ExprFactorOp [B: `! expr_factor_op]
+	{
+		send Output [B]
+		cs_expr_factor_op( ExprFactorOp._expr_factor_op )
+	}
+	elsif match ExprFactorOp [T: `~ expr_factor_op]
+	{
+		send Output [T]
+		cs_expr_factor_op( ExprFactorOp._expr_factor_op )
+	}
+	elsif match ExprFactorOp [expr_ptr]
+	{
+		cs_expr_ptr( ExprFactorOp.expr_ptr )
+	}
+}
+
+void cs_expr_bitwise( ExprBitwise: expr_bitwise )
+{
+	if match ExprBitwise [expr_bitwise A: `& expr_factor_op]
+	{
+		cs_expr_bitwise( ExprBitwise._expr_bitwise )
+		send Output [A]
+		cs_expr_factor_op( ExprBitwise.expr_factor_op )
+	}
+	elsif match ExprBitwise [expr_factor_op]
+	{
+		cs_expr_factor_op( ExprBitwise.expr_factor_op )
+	}
+}
+
+void cs_expr_mult( ExprMult: expr_mult )
+{
+	if match ExprMult [expr_mult T: `* expr_bitwise]
+	{
+		cs_expr_mult( ExprMult._expr_mult )
+		send Output [T]
+		cs_expr_bitwise( ExprMult.expr_bitwise )
+	}
+	elsif match ExprMult [expr_bitwise]
+	{
+		cs_expr_bitwise( ExprMult.expr_bitwise )
+	}
+}
+
+void cs_expr_add( ExprAdd: expr_add )
+{
+	if match ExprAdd [expr_add Op: add_op expr_mult]
+	{
+		cs_expr_add( ExprAdd._expr_add )
+		send Output [Op]
+		cs_expr_mult( ExprAdd.expr_mult )
+	}
+	elsif match ExprAdd [expr_mult]
+	{
+		cs_expr_mult( ExprAdd.expr_mult )
+	}
+}
+
+void cs_expr_shift( ExprShift: expr_shift )
+{
+	if match ExprShift [expr_shift Op: shift_op expr_add]
+	{
+		cs_expr_shift( ExprShift._expr_shift )
+		send Output [Op]
+		cs_expr_add( ExprShift.expr_add )
+	}
+	elsif match ExprShift [expr_add]
+	{
+		cs_expr_add( ExprShift.expr_add )
+	}
+}
+
+void cs_expr_test( ExprTest: expr_test )
+{
+	if match ExprTest [expr_test Op: test_op expr_shift]
+	{
+		cs_expr_test( ExprTest._expr_test )
+		send Output [Op]
+		cs_expr_shift( ExprTest.expr_shift )
+	}
+	elsif match ExprTest [expr_shift]
+	{
+		cs_expr_shift( ExprTest.expr_shift )
+	}
+}
+
+void cs_expr_cond( ExprCond: expr_cond )
+{
+	cs_expr_test( ExprCond.expr_test )
+}
+
+void cs_expr_assign( ExprAssign: expr_assign )
+{
+	if match ExprAssign [expr_assign Op: assign_op expr_cond]
+	{
+		cs_expr_assign( ExprAssign._expr_assign )
+		send Output [Op]
+		cs_expr_cond( ExprAssign.expr_cond )
+	}
+	elsif match ExprAssign [expr_cond]
+	{
+		cs_expr_cond( ExprAssign.expr_cond )
+	}
+}
+
+void cs_expr( Expr: expr )
+{
+	cs_expr_assign( Expr.expr_assign )
+}
+
+void cs_type( Type: type )
+{
+	if match Type "s8"
+		send Output ['sbyte ']
+	elsif match Type "s16"
+		send Output ['short ']
+	elsif match Type "s32"
+		send Output ['int ']
+	elsif match Type "s64"
+		send Output ['long ']
+	elsif match Type "s128"
+		send Output ['long long ']
+	elsif match Type "uint"
+		send Output ['uint ']
+	else
+		send Output [Type]
+}
+
+void cs_stmt( Stmt: stmt )
+{
+	if match Stmt
+		['$' string uint '{' TL: host::tok* host::`}$]
+	{
+		cs_tok_list( TL )
+	}
+	elsif match Stmt
+		['=' string uint '{' TL: host::tok* host::`}$]
+	{
+		cs_tok_list( TL )
+	}
+	elsif match Stmt [Array: array] {
+		send Output
+			"static readonly [cs_type(Array.type)] \[\]"
+				"[Array.ident] = { [Array.num_list] };
+	}
+	elsif match Stmt [Value: value] {
+		send Output
+			"static readonly [Value.value_pass]
+	}
+	elsif match Stmt [
+			'if' O: `( IfExpr: expr C: `) IfStmt: stmt
+			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
+	] {
+		send Output
+			"if ( [cs_expr(IfExpr)] )
+			"	[cs_stmt(IfStmt)]
+
+		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
+			match ElseIfClause
+				['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
+
+			send Output
+				"else if ( [cs_expr(ElseIfExpr)] )
+				"	[cs_stmt(ElseIfStmt)]
+		}
+
+		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
+			send Output
+				"else
+				"	[cs_stmt(ElseStmt)]
+		}
+	}
+	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
+		send Output
+			"while ( [cs_expr(WhileExpr)] )
+			"	[cs_stmt(WhileStmt)]
+	}
+	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
+		send Output
+			"switch ( [cs_expr(SwitchExpr)] ) {
+			"	[cs_stmt_list(StmtList)]
+			"}
+	}
+	elsif match Stmt [ExprExpr: expr Semi: `;] {
+		send Output
+			[cs_expr(ExprExpr) Semi]
+	}
+	elsif match Stmt [L: `{ TL: stmt* R: `}] {
+		send Output
+			[L cs_stmt_list(TL) R]
+	}
+	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: `;]
+	{
+		send Output
+			[TypeList cs_type(Type) OptPtr Ident]
+
+		if match OptInit [E: `= expr] {
+			send Output
+				[E cs_expr(OptInit.expr)]
+		}
+
+		send Output
+			[Semi]
+	}
+	elsif match Stmt [Export: export_stmt]
+	{
+		send Output
+			"#define [Export.ident] [Export.number] 
+	}
+	elsif match Stmt ['fallthrough' ';']
+	{
+		# Nothing needed here.
+	}
+	elsif match Stmt [index_stmt]
+	{
+		send Output
+			"int [Stmt.index_stmt.ident];
+	}
+	else {
+		# catches unspecified cases
+		send Output [Stmt]
+	}
+}
+
+void cs_stmt_list( StmtList: stmt* )
+{
+	for Stmt: stmt in repeat( StmtList )
+		cs_stmt( Stmt )
+}

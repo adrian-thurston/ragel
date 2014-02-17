@@ -282,6 +282,7 @@ def start
 
 include 'rlhc-c.lm'
 include 'rlhc-d.lm'
+include 'rlhc-cs.lm'
 include 'rlhc-go.lm'
 
 InputFile: str = argv.pop()
@@ -302,6 +303,8 @@ if ( Lang == 'c' )
 	c_stmt_list( Start._repeat_stmt )
 elsif ( Lang == 'd' )
 	d_stmt_list( Start._repeat_stmt )
+elsif ( Lang == 'csharp' )
+	cs_stmt_list( Start._repeat_stmt )
 elsif ( Lang == 'go' )
 	go_stmt_list( Start._repeat_stmt )
 else {

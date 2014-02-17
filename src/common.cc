@@ -114,7 +114,7 @@ const HostLang hostLangD2 =     { HostLang::D2,     hostTypesD,      9,  hostTyp
 const HostLang hostLangGo =     { HostLang::Go,     hostTypesGo,    10,  hostTypesGo+0,      false, "go" };
 const HostLang hostLangJava =   { HostLang::Java,   hostTypesJava,   4,  hostTypesJava+2,    false, "no-lang"  };
 const HostLang hostLangRuby =   { HostLang::Ruby,   hostTypesRuby,   2,  hostTypesRuby+0,    false, "no-lang"  };
-const HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9,  hostTypesCSharp+4,  true,  "no-lang"  };
+const HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9,  hostTypesCSharp+4,  true,  "csharp"   };
 const HostLang hostLangOCaml =  { HostLang::OCaml,  hostTypesOCaml,  1,  hostTypesOCaml+0,   false, "no-lang"  };
 const HostLang hostLangCrack =  { HostLang::Crack,  hostTypesCrack,  5,  hostTypesCrack+0,   true,  "no-lang"  };
 
