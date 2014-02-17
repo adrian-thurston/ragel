@@ -45,7 +45,7 @@ void cs_expr_factor( ExprFactor: expr_factor )
 		['deref' '(' ident ',' expr ')']
 	{
 		send Output
-			[ ExprFactor.ident '[' go_expr( ExprFactor.expr ) ']']
+			[ ExprFactor.ident '[' cs_expr( ExprFactor.expr ) ']']
 	}
 	elsif match ExprFactor
 			[T: `TRUE]
