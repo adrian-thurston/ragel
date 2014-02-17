@@ -250,6 +250,14 @@ void cs_type( Type: type )
 		send Output [Type]
 }
 
+void cs_num_list( NumList: num_list )
+{
+	for Number: number in NumList {
+		Str: str = $Number
+		send Output "'\\u[sprintf( "%04x" Str.atoi() )]', "
+	}
+}
+
 void cs_stmt( Stmt: stmt )
 {
 	if match Stmt
@@ -263,9 +271,15 @@ void cs_stmt( Stmt: stmt )
 		cs_tok_list( TL )
 	}
 	elsif match Stmt [Array: array] {
-		send Output
-			"static readonly [cs_type(Array.type)] \[\]"
-				"[Array.ident] = { [Array.num_list] };
+		if ( $Array.type == 'char' )
+			send Output
+				"static readonly [cs_type(Array.type)] \[\]"
+					"[Array.ident] = { [cs_num_list( Array.num_list )] '0' };
+		else {
+			send Output
+				"static readonly [cs_type(Array.type)] \[\]"
+					"[Array.ident] = { [Array.num_list] };
+		}
 	}
 	elsif match Stmt [Value: value] {
 		send Output
