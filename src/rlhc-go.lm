@@ -254,7 +254,7 @@ void go_type( Type: type )
 
 void go_num( Number: number )
 {
-	if match Number [sint 'u']
+	if match Number [`u `( sint `) ]
 		send Output [Number.uint.sint]
 	else
 		send Output [Number]

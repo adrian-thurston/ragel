@@ -130,9 +130,10 @@ void TableArray::startGenerate()
 
 void TableArray::valueGenerate( long long v )
 {
-	out << v;
 	if ( !isSigned )
-		out << "u";
+		out << "u(" << v << ")";
+	else
+		out << v;
 	out << ", ";
 }
 
@@ -389,7 +390,7 @@ string CodeGen::KEY( Key key )
 	if ( keyOps->isSigned || !keyOps->hostLang->explicitUnsigned )
 		ret << key.getVal();
 	else
-		ret << (unsigned long) key.getVal() << 'u';
+		ret << "u(" << (unsigned long) key.getVal() << ")";
 	return ret.str();
 }
 

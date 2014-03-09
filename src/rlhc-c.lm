@@ -65,6 +65,11 @@ void c_expr_factor( ExprFactor: expr_factor )
 		N.data = '0'
 		send Output [N]
 	}
+	elsif match ExprFactor
+			[Number: number]
+	{
+		c_number( Number )
+	}
 	else {
 		# Catches cases not specified
 		send Output [ExprFactor]
@@ -250,6 +255,20 @@ void c_type( Type: type )
 		send Output [Type]
 }
 
+void c_number( Number: number )
+{
+	if match Number [`u `( sint `) ]
+		send Output "[Number.uint.sint]u"
+	else
+		send Output [Number]
+}
+
+void c_num_list( NumList: num_list )
+{
+	for Number: number in NumList
+		send Output "[c_number( Number )], "
+}
+
 void c_stmt( Stmt: stmt )
 {
 	if match Stmt
@@ -265,7 +284,7 @@ void c_stmt( Stmt: stmt )
 	elsif match Stmt [Array: array] {
 		send Output
 			"static const [c_type(Array.type)] "
-				"[Array.ident] \[\] = { [Array.num_list] };
+				"[Array.ident] \[\] = { [c_num_list(Array.num_list)] };
 	}
 	elsif match Stmt [Value: value] {
 		send Output
@@ -339,6 +358,11 @@ void c_stmt( Stmt: stmt )
 	{
 		send Output
 			"const [c_type(Index.type)] *[Index.ident];
+	}
+	elsif match Stmt [case_label]
+	{
+		send Output
+			"case [c_expr( Stmt.case_label.expr )]:
 	}
 	else {
 		# catches unspecified cases
