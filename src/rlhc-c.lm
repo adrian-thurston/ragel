@@ -257,8 +257,8 @@ void c_type( Type: type )
 
 void c_number( Number: number )
 {
-	if match Number [`u `( sint `) ]
-		send Output "[Number.uint.sint]u"
+	if match Number [`u `( uint `) ]
+		send Output "[Number.uint]u"
 	else
 		send Output [Number]
 }
@@ -348,7 +348,7 @@ void c_stmt( Stmt: stmt )
 	elsif match Stmt [Export: export_stmt]
 	{
 		send Output
-			"#define [Export.ident] [Export.number] 
+			"#define [Export.ident] [c_number(Export.number)] 
 	}
 	elsif match Stmt ['fallthrough' ';']
 	{

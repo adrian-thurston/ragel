@@ -255,8 +255,8 @@ void d_type( Type: type )
 
 void d_number( Number: number )
 {
-	if match Number [`u `( sint `) ]
-		send Output "[Number.uint.sint]u"
+	if match Number [`u `( uint `) ]
+		send Output "[Number.uint]u"
 	else
 		send Output [Number]
 }
@@ -359,7 +359,7 @@ void d_stmt( Stmt: stmt )
 	{
 		send Output
 			"static const [d_type(Stmt.export_stmt.type)] "
-					"[Stmt.export_stmt.ident] = [Stmt.export_stmt.number];
+					"[Stmt.export_stmt.ident] = [d_number(Stmt.export_stmt.number)];
 	}
 	elsif match Stmt ['fallthrough' ';']
 	{

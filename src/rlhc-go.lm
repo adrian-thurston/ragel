@@ -252,20 +252,20 @@ void go_type( Type: type )
 		send Output [Type]
 }
 
-void go_num( Number: number )
+void go_number( Number: number )
 {
-	if match Number [`u `( sint `) ]
-		send Output [Number.uint.sint]
+	if match Number [`u `( uint `) ]
+		send Output [Number.uint]
 	else
 		send Output [Number]
 }
 
 void go_num_list( NumList: num_list )
 {
-	go_num( NumList.number )
+	go_number( NumList.number )
 	for CommaNum: comma_num in NumList {
 		send Output [', ']
-		go_num( CommaNum.number )
+		go_number( CommaNum.number )
 	}
 }
 
@@ -368,7 +368,7 @@ void go_stmt( Stmt: stmt )
 	elsif match Stmt [export_stmt]
 	{
 		send Output
-			"#define  [Stmt.export_stmt.ident] [Stmt.export_stmt.number]
+			"#define  [Stmt.export_stmt.ident] [go_number(Stmt.export_stmt.number)]
 	}
 	elsif match Stmt ['fallthrough' ';']
 	{
