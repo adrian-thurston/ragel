@@ -56,6 +56,7 @@ TableArray::TableArray( const char *name, CodeGen &codeGen )
 	name(name),
 	width(0),
 	isSigned(true),
+	isChar(false),
 	values(0),
 
 	/*
@@ -130,7 +131,9 @@ void TableArray::startGenerate()
 
 void TableArray::valueGenerate( long long v )
 {
-	if ( !isSigned )
+	if ( isChar )
+		out << "c(" << v << ")";
+	else if ( !isSigned )
 		out << "u(" << v << ")";
 	else
 		out << v;
@@ -139,7 +142,12 @@ void TableArray::valueGenerate( long long v )
 
 void TableArray::finishGenerate()
 {
-	out << "0 };\n\n";
+	if ( isChar )
+		out << "c(0) };\n\n";
+	else if ( !isSigned )
+		out << "u(0) };\n\n";
+	else
+		out << "0 };\n\n";
 }
 
 void TableArray::start()
@@ -387,7 +395,9 @@ string CodeGen::TABS( int level )
 string CodeGen::KEY( Key key )
 {
 	ostringstream ret;
-	if ( keyOps->isSigned || !keyOps->hostLang->explicitUnsigned )
+	if ( keyOps->alphType->isChar )
+		ret << "c(" << (unsigned long) key.getVal() << ")";
+	else if ( keyOps->isSigned || !keyOps->hostLang->explicitUnsigned )
 		ret << key.getVal();
 	else
 		ret << "u(" << (unsigned long) key.getVal() << ")";

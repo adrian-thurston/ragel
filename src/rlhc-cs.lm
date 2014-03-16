@@ -257,13 +257,15 @@ void cs_type( Type: type )
 
 void cs_number( Number: number )
 {
-	if match Number [`u `( uint `) ] {
+	if match Number [`c `( uint `) ] {
 		Str: str = $Number.uint
 		send Output "'\\u[sprintf( "%04x" Str.atoi() )]'"
 	}
+	elsif match Number [`u `( uint `) ] {
+		send Output [$Number.uint]
+	}
 	else {
-		Str: str = $Number.sint
-		send Output "'\\u[sprintf( "%04x" Str.atoi() )]'"
+		send Output [$Number.sint]
 	}
 }
 
@@ -286,15 +288,9 @@ void cs_stmt( Stmt: stmt )
 		cs_tok_list( TL )
 	}
 	elsif match Stmt [Array: array] {
-		if ( $Array.type == 'char' )
-			send Output
-				"static readonly [cs_type(Array.type)] \[\]"
-					"[Array.ident] = { [cs_num_list( Array.num_list )] '0' };
-		else {
-			send Output
-				"static readonly [cs_type(Array.type)] \[\]"
-					"[Array.ident] = { [Array.num_list] };
-		}
+		send Output
+			"static readonly [cs_type(Array.type)] \[\]"
+				"[Array.ident] = { [cs_num_list( Array.num_list )] };
 	}
 	elsif match Stmt [Value: value] {
 		send Output

@@ -75,7 +75,7 @@ lex
 	literal `uint `const
 			`s8 `s16 `s32 `s64
 			`s128 `nil `export
-			`fallthrough `u
+			`fallthrough `u `c
 
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -196,6 +196,7 @@ def sint
 
 def number
 	[`u `( uint `)]
+|	[`c `( uint `)]
 |	[sint]
 
 def comma_num

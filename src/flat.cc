@@ -50,7 +50,7 @@ Flat::Flat( const CodeGenArgs &args )
 
 void Flat::setKeyType()
 {
-	keys.setType( ALPH_TYPE(), keyOps->alphType->size );
+	keys.setType( ALPH_TYPE(), keyOps->alphType->size, keyOps->alphType->isChar );
 	keys.isSigned = keyOps->isSigned;
 }
 
