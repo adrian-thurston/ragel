@@ -189,17 +189,19 @@ for Section: indep::section in RagelTree {
 	if match Section [section_multiline] {
 		for Action: ragel::action_block in Section {
 			# Reparse as lang-independent code.
-			parse SectionList: indep::section*[$Action]
-			if ( !SectionList ) {
+			parse StmtList: indep::stmt*[$Action]
+			if ( !StmtList ) {
 				print( error '\n' Action )
 				exit(1)
 			}
 
 			# Translate to specific language.
-			c_rewrite( SectionList )
+			c_rewrite( StmtList )
+
+			c_rw_stmt_list( StmtList )
 
 			# Reparse back to ragel action block.
-			Action = parse ragel::action_block[$SectionList]
+			Action = parse ragel::action_block[$StmtList]
 			if ( !Action ) {
 				print( error '\n' )
 				exit(1)
@@ -288,4 +290,46 @@ for OutputLine: indep::output_line in RagelTree {
 }
 send Output "*/
 
+c::factor c_rw_factor( Factor: indep::factor )
+{
+	print( Factor '\n' )
+	return nil
+}
 
+c::expr c_rw_expr( Expr: indep::expr )
+{
+	print( "expr\n" )
+	F: c::factor = c_rw_factor( Expr.factor )
+	for ExprOp: indep::expr_op in repeat(Expr._repeat_expr_op) {
+		c_rw_factor( ExprOp.factor )
+	}
+}
+
+int c_rw_stmt( Stmt: indep::stmt )
+{
+	print( "stmt\n" )
+	if match Stmt [`{ stmt* `}] {
+		c_rw_stmt_list( Stmt._repeat_stmt )
+	}
+	else if match Stmt [`{ expr `}] {
+		c_rw_expr( Stmt.expr )
+	}
+	else if match Stmt [expr_stmt]
+	{
+		print( "expr_stmt\n" )
+		c_rw_expr( Stmt.expr_stmt.expr )
+	}
+	else if match Stmt [var_decl]
+	{
+		print( "var_decl\n" )
+		c_rw_expr( Stmt.expr_stmt.expr )
+	}
+}
+
+int c_rw_stmt_list( StmtList: indep::stmt* )
+{
+	print( "stmt_list\n" )
+	for Stmt: indep::stmt in repeat( StmtList ) {
+		c_rw_stmt( Stmt )
+	}
+}
