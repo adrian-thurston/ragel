@@ -159,5 +159,4 @@ namespace indep
 
 	def start
 		[section*]
-
 end
