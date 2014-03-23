@@ -194,40 +194,39 @@ send Output
 	"class [MachineName.word]
 	"{
 
-for Section: indep::section in RagelTree {
-	if match Section [Decl: var_decl] {
+Init: indep::stmt* = RagelTree.Init
+for Stmt: indep::stmt in Init {
+	if match Stmt [Decl: var_decl] {
 		d_rewrite( Decl )
 		send Output [Decl]
 	}
 }
 
-for Section: indep::section in RagelTree {
-	if match Section [section_multiline] {
-		for Action: ragel::action_block in Section {
-			# Reparse as lang-independent code.
-			parse IndepActionBlock: indep::action_block[$Action]
+# Colm bug. 
+Section: indep::section = RagelTree.section
+for Action: ragel::action_block in Section {
+	# Reparse as lang-independent code.
+	parse IndepActionBlock: indep::action_block[$Action]
 
-			# Translate to specific language.
-			d_rewrite( IndepActionBlock )
+	# Translate to specific language.
+	d_rewrite( IndepActionBlock )
 
-			# Reparse back to ragel action block.
-			Action = parse ragel::action_block[$IndepActionBlock]
-		}
-
-		prints( Output '\n' Section '\n' )
-	}
+	# Reparse back to ragel action block.
+	Action = parse ragel::action_block[$IndepActionBlock]
 }
 
-send Output
+send Output 
+	"
+	"[Section]
+	"
 	"%% write data;
 	"int cs;
 	"
 	"void init()
 	"{
 
-for Section: indep::section in RagelTree {
-	if match Section [ExprStmt: expr_stmt] {
-		cons SectionList: indep::section* [ExprStmt]
+for Stmt: indep::stmt in Init {
+	if match Stmt [ExprStmt: expr_stmt] {
 		d_rewrite( ExprStmt )
 		send Output [ExprStmt]
 	}

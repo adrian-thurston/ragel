@@ -1,6 +1,21 @@
 include '../src/ragel.lm'
 
 namespace indep
+	# Opening the test case header.
+	lex
+		ignore / ( [ \t] | NL )+ /
+
+		token c_comm_open
+			/ '/*' /
+	end
+
+	# Contents of test case heaer.
+	lex
+		token comm_val /'@' [A-Za-z0-9_]+ ': ' [^\n]+ '\n' /
+		token comm_term /'*/'/
+		token comm_any / any /
+	end
+
 	lex 
 		literal `%%{ `}%%
 
@@ -32,14 +47,11 @@ namespace indep
 		token endif
 			/ '#endif' /
 
-		token tk_cpp_comment
-			/ cpp_comment /
-
-		token c_comm_open
-			/ '/*' /
-
 		token string
 			/ s_literal | d_literal /
+
+		ignore / cpp_comment /
+		ignore / c_comment /
 	end
 
 	lex
@@ -47,17 +59,11 @@ namespace indep
 		token output_line /[^\n]* '\n'/
 	end
 
-	lex
-		token comm_val /'@' [A-Za-z0-9_]+ ': ' [^\n]+ '\n' /
-		token comm_term /'*/'/
-		token comm_any / any /
-	end
-
 	def comm_item
 		[comm_val]
 	|	[comm_any]
 
-	def c_comment
+	def test_header
 		[c_comm_open comm_item* comm_term]
 
 	def input_string
@@ -145,10 +151,6 @@ namespace indep
 	|	[expr_stmt]
 	|	[if_stmt]
 	|	[print_stmt]
-	|	[input]
-	|	[output]
-	|	[tk_cpp_comment]
-	|	[c_comment]
 	|	[ragel_stmt]
 	|	[action_block]
 
@@ -156,13 +158,73 @@ namespace indep
 		[`{ stmt* `}]
 	|	[`{ expr `}]
 
-	def section_multiline
+	def section
 		[`%%{ ragel::ragel_start `}%%]
 
-	def section
-		[section_multiline]
-	|	[stmt]
-
 	def start
-		[section*]
+		[test_header Init: stmt* section input output]
 end
+
+int rw_factor( Factor: indep::factor )
+{
+	print( Factor '\n' )
+	return nil
+}
+
+int rw_expr( Expr: indep::expr )
+{
+	print( "expr\n" )
+	rw_factor( Expr.factor )
+	for ExprOp: indep::expr_op in repeat(Expr._repeat_expr_op)
+		rw_factor( ExprOp.factor )
+}
+
+int rw_if_stmt( Stmt: indep::if_stmt )
+{
+	print( "if_stmt\n" )
+}
+
+int rw_print_stmt( Stmt: indep::print_stmt )
+{
+	print( "if_stmt\n" )
+}
+
+int rw_stmt( Stmt: indep::stmt )
+{
+	print( "stmt\n" )
+	if match Stmt [expr_stmt]
+	{
+		print( "expr_stmt\n" )
+		rw_expr( Stmt.expr_stmt.expr )
+	}
+	else if match Stmt [var_decl]
+	{
+		print( "var_decl\n" )
+		rw_expr( Stmt.expr_stmt.expr )
+	}
+	else if match Stmt [if_stmt]
+	{
+		rw_if_stmt( Stmt.if_stmt )
+	}
+	else if match Stmt [print_stmt]
+	{
+		rw_print_stmt( Stmt.print_stmt )
+	}
+}
+
+int rw_stmt_list( StmtList: indep::stmt* )
+{
+	print( "stmt_list\n" )
+	for Stmt: indep::stmt in repeat( StmtList )
+		rw_stmt( Stmt )
+}
+
+int rw_action_block( ActionBlock: indep::action_block )
+{
+	if match ActionBlock [`{ stmt* `}] {
+		rw_stmt_list( ActionBlock._repeat_stmt )
+	}
+	else if match ActionBlock [`{ expr `}] {
+		rw_expr( ActionBlock.expr )
+	}
+}

@@ -206,29 +206,27 @@ prints( Output
 	"
 )
 
-for Section: indep::section in RagelTree {
-	if match Section [Decl: var_decl] {
+Init: indep::stmt* = RagelTree.Init
+for Stmt: indep::stmt in Init {
+	if match Stmt [Decl: var_decl] {
 		go_rewrite( Decl )
 		send Output [Decl]
 	}
 }
 
-for Section: indep::section in RagelTree {
-	if match Section [section_multiline] {
-		for Action: ragel::action_block in Section {
-			# Reparse as lang-independent code.
-			parse IndepActionBlock: indep::action_block[$Action]
+Section: indep::section = RagelTree.section
+for Action: ragel::action_block in Section {
+	# Reparse as lang-independent code.
+	parse IndepActionBlock: indep::action_block[$Action]
 
-			# Translate to specific language.
-			go_rewrite( IndepActionBlock )
+	# Translate to specific language.
+	go_rewrite( IndepActionBlock )
 
-			# Reparse back to ragel action block.
-			Action = parse ragel::action_block[$IndepActionBlock]
-		}
-
-		prints( Output '\n' Section '\n' )
-	}
+	# Reparse back to ragel action block.
+	Action = parse ragel::action_block[$IndepActionBlock]
 }
+
+prints( Output '\n' Section '\n' )
 
 send Output
 	"var cs int
@@ -237,8 +235,8 @@ send Output
 	"
 	"func prepare() {
 
-for Section: indep::section in RagelTree {
-	if match Section [ExprStmt: expr_stmt] {
+for Stmt: indep::stmt in Init {
+	if match Stmt [ExprStmt: expr_stmt] {
 		go_rewrite( ExprStmt )
 		send Output [ExprStmt]
 	}
