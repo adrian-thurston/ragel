@@ -131,24 +131,30 @@ namespace indep
 	|	[`prints expr `;]
 	|	[`print_token `;]
 
-	def stmt
-		[var_decl]
-	|	[expr_stmt]
-	|	[if_stmt]
-	|	[print_stmt]
-	|	[`{ stmt* `}]
-	|	[`{ expr `}]
-	|	[input]
-	|	[output]
-	|	[tk_cpp_comment]
-	|	[c_comment]
-	|	[`fgoto tk_ident `;]
+	def ragel_stmt
+		[`fgoto tk_ident `;]
 	|	[`fcall tk_ident `;]
 	|	[`fnext tk_ident `;]
 	|	[`fgoto `* expr `;]
 	|	[`fcall `* expr `;]
 	|	[`fnext `* expr `;]
 	|	[`fexec expr `;]
+
+	def stmt
+		[var_decl]
+	|	[expr_stmt]
+	|	[if_stmt]
+	|	[print_stmt]
+	|	[input]
+	|	[output]
+	|	[tk_cpp_comment]
+	|	[c_comment]
+	|	[ragel_stmt]
+	|	[action_block]
+
+	def action_block
+		[`{ stmt* `}]
+	|	[`{ expr `}]
 
 	def section_multiline
 		[`%%{ ragel::ragel_start `}%%]

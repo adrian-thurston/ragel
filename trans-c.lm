@@ -189,19 +189,19 @@ for Section: indep::section in RagelTree {
 	if match Section [section_multiline] {
 		for Action: ragel::action_block in Section {
 			# Reparse as lang-independent code.
-			parse StmtList: indep::stmt*[$Action]
-			if ( !StmtList ) {
+			parse IndepActionBlock: indep::action_block[$Action]
+			if ( !IndepActionBlock ) {
 				print( error '\n' Action )
 				exit(1)
 			}
 
 			# Translate to specific language.
-			c_rewrite( StmtList )
+			c_rewrite( IndepActionBlock )
 
-			c_rw_stmt_list( StmtList )
+			c_rw_action_block( IndepActionBlock )
 
 			# Reparse back to ragel action block.
-			Action = parse ragel::action_block[$StmtList]
+			Action = parse ragel::action_block[$IndepActionBlock]
 			if ( !Action ) {
 				print( error '\n' )
 				exit(1)
@@ -305,16 +305,20 @@ c::expr c_rw_expr( Expr: indep::expr )
 	}
 }
 
+int c_rw_if_stmt( Stmt: indep::if_stmt )
+{
+	print( "if_stmt\n" )
+}
+
+int c_rw_print_stmt( Stmt: indep::print_stmt )
+{
+	print( "if_stmt\n" )
+}
+
 int c_rw_stmt( Stmt: indep::stmt )
 {
 	print( "stmt\n" )
-	if match Stmt [`{ stmt* `}] {
-		c_rw_stmt_list( Stmt._repeat_stmt )
-	}
-	else if match Stmt [`{ expr `}] {
-		c_rw_expr( Stmt.expr )
-	}
-	else if match Stmt [expr_stmt]
+	if match Stmt [expr_stmt]
 	{
 		print( "expr_stmt\n" )
 		c_rw_expr( Stmt.expr_stmt.expr )
@@ -324,6 +328,14 @@ int c_rw_stmt( Stmt: indep::stmt )
 		print( "var_decl\n" )
 		c_rw_expr( Stmt.expr_stmt.expr )
 	}
+	else if match Stmt [if_stmt]
+	{
+		c_rw_if_stmt( Stmt.if_stmt )
+	}
+	else if match Stmt [print_stmt]
+	{
+		c_rw_print_stmt( Stmt.print_stmt )
+	}
 }
 
 int c_rw_stmt_list( StmtList: indep::stmt* )
@@ -331,5 +343,15 @@ int c_rw_stmt_list( StmtList: indep::stmt* )
 	print( "stmt_list\n" )
 	for Stmt: indep::stmt in repeat( StmtList ) {
 		c_rw_stmt( Stmt )
+	}
+}
+
+int c_rw_action_block( ActionBlock: indep::action_block )
+{
+	if match ActionBlock [`{ stmt* `}] {
+		c_rw_stmt_list( ActionBlock._repeat_stmt )
+	}
+	else if match ActionBlock [`{ expr `}] {
+		c_rw_expr( ActionBlock.expr )
 	}
 }

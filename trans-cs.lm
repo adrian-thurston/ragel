@@ -214,17 +214,17 @@ for Section: indep::section in RagelTree {
 	if match Section [section_multiline] {
 		for Action: ragel::action_block in Section {
 			# Reparse as lang-independent code.
-			parse SectionList: indep::section*[$Action]
-			if ( !SectionList ) {
+			parse IndepActionBlock: indep::action_block[$Action]
+			if ( !IndepActionBlock ) {
 				print( error '\n' Action )
 				exit(1)
 			}
 
 			# Translate to specific language.
-			cs_rewrite( SectionList )
+			cs_rewrite( IndepActionBlock )
 
 			# Reparse back to ragel action block.
-			Action = parse ragel::action_block[$SectionList]
+			Action = parse ragel::action_block[$IndepActionBlock]
 			if ( !Action ) {
 				print( error '\n' )
 				exit(1)
