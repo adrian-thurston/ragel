@@ -178,49 +178,46 @@ send Output
 	"#include <stdio.h>
 	"
 
-for Section: indep::section in RagelTree {
-	if match Section [Decl: var_decl] {
+Init: indep::stmt* = RagelTree.Init
+for Stmt: indep::stmt in Init {
+	if match Stmt [Decl: var_decl] {
 		c_rewrite( Decl )
 		send Output [Decl]
 	}
 }
 
-for Section: indep::section in RagelTree {
-	if match Section [section_multiline] {
-		for Action: ragel::action_block in Section {
-			# Reparse as lang-independent code.
-			parse IndepActionBlock: indep::action_block[$Action]
-			if ( !IndepActionBlock ) {
-				print( error '\n' Action )
-				exit(1)
-			}
+Section: indep::section = RagelTree.section
+for Action: ragel::action_block in Section {
+	# Reparse as lang-independent code.
+	parse IndepActionBlock: indep::action_block[$Action]
+	if ( !IndepActionBlock ) {
+		print( error '\n' Action )
+		exit(1)
+	}
 
-			# Translate to specific language.
-			c_rewrite( IndepActionBlock )
+	# Translate to specific language.
+	c_rewrite( IndepActionBlock )
 
-			c_rw_action_block( IndepActionBlock )
-
-			# Reparse back to ragel action block.
-			Action = parse ragel::action_block[$IndepActionBlock]
-			if ( !Action ) {
-				print( error '\n' )
-				exit(1)
-			}
-		}
-
-		send Output ["\n" Section "\n"]
+	# Reparse back to ragel action block.
+	Action = parse ragel::action_block[$IndepActionBlock]
+	if ( !Action ) {
+		print( error '\n' )
+		exit(1)
 	}
 }
 
 send Output
+	"
+	"[Section]
+	"
 	"%% write data;
 	"int cs;
 	"
 	"void init()
 	"{
 
-for Section: indep::section in RagelTree {
-	if match Section [ExprStmt: expr_stmt] {
+for Stmt: indep::stmt in Init {
+	if match Stmt [ExprStmt: expr_stmt] {
 		c_rewrite( ExprStmt )
 		send Output [ExprStmt]
 	}
@@ -289,69 +286,3 @@ for OutputLine: indep::output_line in RagelTree {
 	send Output [OutputLine]
 }
 send Output "*/
-
-c::factor c_rw_factor( Factor: indep::factor )
-{
-	print( Factor '\n' )
-	return nil
-}
-
-c::expr c_rw_expr( Expr: indep::expr )
-{
-	print( "expr\n" )
-	F: c::factor = c_rw_factor( Expr.factor )
-	for ExprOp: indep::expr_op in repeat(Expr._repeat_expr_op) {
-		c_rw_factor( ExprOp.factor )
-	}
-}
-
-int c_rw_if_stmt( Stmt: indep::if_stmt )
-{
-	print( "if_stmt\n" )
-}
-
-int c_rw_print_stmt( Stmt: indep::print_stmt )
-{
-	print( "if_stmt\n" )
-}
-
-int c_rw_stmt( Stmt: indep::stmt )
-{
-	print( "stmt\n" )
-	if match Stmt [expr_stmt]
-	{
-		print( "expr_stmt\n" )
-		c_rw_expr( Stmt.expr_stmt.expr )
-	}
-	else if match Stmt [var_decl]
-	{
-		print( "var_decl\n" )
-		c_rw_expr( Stmt.expr_stmt.expr )
-	}
-	else if match Stmt [if_stmt]
-	{
-		c_rw_if_stmt( Stmt.if_stmt )
-	}
-	else if match Stmt [print_stmt]
-	{
-		c_rw_print_stmt( Stmt.print_stmt )
-	}
-}
-
-int c_rw_stmt_list( StmtList: indep::stmt* )
-{
-	print( "stmt_list\n" )
-	for Stmt: indep::stmt in repeat( StmtList ) {
-		c_rw_stmt( Stmt )
-	}
-}
-
-int c_rw_action_block( ActionBlock: indep::action_block )
-{
-	if match ActionBlock [`{ stmt* `}] {
-		c_rw_stmt_list( ActionBlock._repeat_stmt )
-	}
-	else if match ActionBlock [`{ expr `}] {
-		c_rw_expr( ActionBlock.expr )
-	}
-}
