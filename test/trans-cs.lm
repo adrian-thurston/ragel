@@ -305,5 +305,3 @@ for OutputLine: indep::output_line in RagelTree {
 	send Output [OutputLine]
 }
 send Output "*/
-
-

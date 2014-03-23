@@ -152,7 +152,6 @@ namespace indep
 	|	[if_stmt]
 	|	[print_stmt]
 	|	[ragel_stmt]
-	|	[action_block]
 
 	def action_block
 		[`{ stmt* `}]
