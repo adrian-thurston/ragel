@@ -140,15 +140,15 @@ int cs_rewrite( Indep: ref<any> )
 	}
 
 	for Stmt: print_stmt in Indep {
-		if match Stmt ['printi' F: factor ';' ] {
+		if match Stmt ['print_int' F: factor ';' ] {
 			Stmt = cast<print_stmt> cons cs::print_stmt
 				"Console.Write( [cs_factor(F)] );"
 		}
-		elsif match Stmt ['printb' F: factor ';' ] {
+		elsif match Stmt ['print_buf' F: factor ',' L: tk_ident ';' ] {
 			Stmt = cast<print_stmt> cons cs::print_stmt
-				"Console.Write( new String( [cs_factor(F)], 0, pos ) );"
+				"Console.Write( new String( [cs_factor(F)], 0, [cs_ident(L)] ) );"
 		}
-		elsif match Stmt ['prints' F: factor ';' ] {
+		elsif match Stmt ['print_str' F: factor ';' ] {
 			Stmt = cast<print_stmt> cons cs::print_stmt
 				"Console.Write( [cs_factor(F)] );"
 		}

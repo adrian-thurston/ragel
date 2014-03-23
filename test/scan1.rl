@@ -15,42 +15,42 @@ int token;
 	# coverage of the scanner action types.
 	main := |*
 		'a' => { 
-			prints "on last     ";
+			print_str "on last     ";
 			if ( p+1 == te ) {
-				prints "yes";
+				print_str "yes";
 			}
-			prints "\n";
+			print_str "\n";
 		};
 
 		'b'+ => {
-			prints "on next     ";
+			print_str "on next     ";
 			if ( p+1 == te ) {
-				prints "yes";
+				print_str "yes";
 			}
-			prints "\n";
+			print_str "\n";
 		};
 
 		'c1' 'dxxx'? => {
-			prints "on lag      ";
+			print_str "on lag      ";
 			if ( p+1 == te ) {
-				prints "yes";
+				print_str "yes";
 			}
-			prints "\n";
+			print_str "\n";
 		};
 
 		'd1' => {
-			prints "lm switch1  ";
+			print_str "lm switch1  ";
 			if ( p+1 == te ) {
-				prints "yes";
+				print_str "yes";
 			}
-			prints "\n";
+			print_str "\n";
 		};
 		'd2' => {
-			prints "lm switch2  ";
+			print_str "lm switch2  ";
 			if ( p+1 == te ) {
-				prints "yes";
+				print_str "yes";
 			}
-			prints "\n";
+			print_str "\n";
 		};
 
 		[d0-9]+ '.';

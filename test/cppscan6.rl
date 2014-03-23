@@ -20,11 +20,11 @@ int token;
 
 	action comment {
 		token = 242;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	}
 
 
@@ -34,31 +34,31 @@ int token;
 	( 'L'? "'" ( [^'\\\n] | '\\' any )* "'" ) 
 		=> { 
 			token = 193;
-			prints "<";
-			printi token;
-			prints "> ";
+			print_str "<";
+			print_int token;
+			print_str "> ";
 			print_token;
-			prints "\n";
+			print_str "\n";
 		};
 	( 'L'? '"' ( [^"\\\n] | '\\' any )* '"' ) 
 		=> { 
 			token = 192;
-			prints "<";
-			printi token;
-			prints "> ";
+			print_str "<";
+			print_int token;
+			print_str "> ";
 			print_token;
-			prints "\n";
+			print_str "\n";
 		};
 
 	# Identifiers
 	( [a-zA-Z_] [a-zA-Z0-9_]* ) 
 		=>{
 			token = 195;
-			prints "<";
-			printi token;
-			prints "> ";
+			print_str "<";
+			print_int token;
+			print_str "> ";
 			print_token;
-			prints "\n";
+			print_str "\n";
 		};
 
 	# Floating literals.
@@ -70,210 +70,210 @@ int token;
 		digit+ exponent float_suffix? ) 
 		=> {
 			token = 194;
-			prints "<";
-			printi token;
-			prints "> ";
+			print_str "<";
+			print_int token;
+			print_str "> ";
 			print_token;
-			prints "\n";
+			print_str "\n";
 		};
 	
 	# Integer decimal. Leading part buffered by float.
 	( ( '0' | [1-9] [0-9]* ) [ulUL]? ) 
 		=> {
 			token = 218;
-			prints "<";
-			printi token;
-			prints "> ";
+			print_str "<";
+			print_int token;
+			print_str "> ";
 			print_token;
-			prints "\n";
+			print_str "\n";
 		};
 
 	# Integer octal. Leading part buffered by float.
 	( '0' [0-9]+ [ulUL]? ) 
 		=> {
 			token = 219;
-			prints "<";
-			printi token;
-			prints "> ";
+			print_str "<";
+			print_int token;
+			print_str "> ";
 			print_token;
-			prints "\n";
+			print_str "\n";
 		};
 
 	# Integer hex. Leading 0 buffered by float.
 	( '0' ( 'x' [0-9a-fA-F]+ [ulUL]? ) ) 
 		=> {
 			token = 220;
-			prints "<";
-			printi token;
-			prints "> ";
+			print_str "<";
+			print_int token;
+			print_str "> ";
 			print_token;
-			prints "\n";
+			print_str "\n";
 		};
 
 	# Only buffer the second item, first buffered by symbol.
 	'::' => {
 		token = 197;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'==' => {
 		token = 223;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'!=' => {
 		token = 224;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'&&' => {
 		token = 225;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'||' => {
 		token = 226;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'*=' => {
 		token = 227;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'/=' => {
 		token = 228;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'%=' => {
 		token = 229;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'+=' => {
 		token = 230;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'-=' => {
 		token = 231;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'&=' => {
 		token = 232;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'^=' => {
 		token = 233;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'|=' => {
 		token = 234;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'++' => {
 		token = 212;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'--' => {
 		token = 213;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'->' => {
 		token = 211;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'->*' => {
 		token = 214;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	'.*' => {
 		token = 215;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 
 	# Three char compounds, first item already buffered.
 	'...' => {
 		token = 240;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 
 	# Single char symbols.
 	( punct - [_"'] ) => {
 		token = <int>(first_token_char);
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 
 	# Comments and whitespace.
@@ -281,11 +281,11 @@ int token;
 	'//' ( any* $0 '\n' @1 ) => comment;
 	( any - 33..126 )+ => { 
 		token = 241;
-		prints "<";
-		printi token;
-		prints "> ";
+		print_str "<";
+		print_int token;
+		print_str "> ";
 		print_token;
-		prints "\n";
+		print_str "\n";
 	};
 	*|;
 }%%

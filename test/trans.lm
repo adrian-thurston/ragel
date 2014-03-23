@@ -19,15 +19,15 @@ namespace indep
 	lex 
 		literal `%%{ `}%%
 
-		literal `int `bool `const `char `ptr `printi
-				`printb `prints `print_token
+		literal `int `bool `const `char `ptr `print_int
+				`print_buf `print_str `print_token
 				`fwrite `first_token_char `byte `if `else
 
 		literal `fgoto `fcall `fnext `fexec
 
 		literal `; `< `> `( `) `[ `] `=
 				`* `! `{ `} `+ `- `== `!=
-				`>= `<=
+				`>= `<= `,
 
 		ignore / ( [ \t] | NL )+ /
 
@@ -132,9 +132,9 @@ namespace indep
 	|	[]
 
 	def print_stmt
-		[`printi expr `;]
-	|	[`printb expr `;]
-	|	[`prints expr `;]
+		[`print_int expr `;]
+	|	[`print_buf expr `, expr `;]
+	|	[`print_str expr `;]
 	|	[`print_token `;]
 
 	def ragel_stmt

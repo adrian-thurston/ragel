@@ -147,15 +147,15 @@ int go_rewrite( Indep: ref<any> )
 	}
 
 	for Stmt: print_stmt in Indep {
-		if match Stmt ['printi' F: factor ';' ] {
+		if match Stmt [`print_int F: factor `; ] {
 			Stmt = cast<print_stmt> cons go::print_stmt
 				"fmt.Print( [go_factor(F)] );"
 		}
-		elsif match Stmt ['printb' I: tk_ident ';' ] {
+		elsif match Stmt ['print_buf' B: tk_ident `, L: tk_ident  ';' ] {
 			Stmt = cast<print_stmt> cons go::print_stmt
-				"fmt.Print( string ( [go_ident(I)]\[:pos\] ));"
+				"fmt.Print( string ( [go_ident(B)]\[:[go_ident(L)]\] ));"
 		}
-		elsif match Stmt ['prints' F: factor ';' ] {
+		elsif match Stmt [`print_str F: factor `; ] {
 			Stmt = cast<print_stmt> cons go::print_stmt
 				"fmt.Print( [go_factor(F)] );"
 		}

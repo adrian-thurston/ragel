@@ -14,15 +14,15 @@ int token;
 	# coverage of the scanner action types.
 	main := |*
         'a' => {
-			prints "pat1\n";
+			print_str "pat1\n";
 		};
 
         [ab]+ . 'c' => {
-			prints "pat2\n";
+			print_str "pat2\n";
 		};
 
         any => {
-			prints "any\n";
+			print_str "any\n";
 		};
 	*|;
 }%%

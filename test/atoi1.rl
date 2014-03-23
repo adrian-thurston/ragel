@@ -28,8 +28,8 @@ neg = false;
 		}
 	}
 	action print {
-		printi val;
-		prints "\n";
+		print_int val;
+		print_str "\n";
 	}
 
 	atoi = (

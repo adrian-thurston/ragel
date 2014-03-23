@@ -7,12 +7,12 @@
 %%{
 	machine state_act;
 
-	action a1 { prints "a1\n"; }
-	action a2 { prints "a2\n"; }
-	action b1 { prints "b1\n"; }
-	action b2 { prints "b2\n"; }
-	action c1 { prints "c1\n"; }
-	action c2 { prints "c2\n"; }
+	action a1 { print_str "a1\n"; }
+	action a2 { print_str "a2\n"; }
+	action b1 { print_str "b1\n"; }
+	action b2 { print_str "b2\n"; }
+	action c1 { print_str "c1\n"; }
+	action c2 { print_str "c2\n"; }
 	action next_again {fnext again;}
 
 	hi = 'hi';

@@ -4,8 +4,8 @@ namespace d
 	lex 
 		literal `%%{ `}%%
 
-		literal `int `bool `const `char `ptr `printi
-				`printb `prints `print_token `printf
+		literal `int `bool `const `char `ptr `print_int
+				`print_buf `print_str `print_token `printf
 				`fwrite `first_token_char `var `byte
 
 		literal `; `< `> `( `) `[ `] `=
@@ -134,15 +134,15 @@ int d_rewrite( Indep: ref<any> )
 	}
 
 	for Stmt: print_stmt in Indep {
-		if match Stmt ['printi' F: factor ';' ] {
+		if match Stmt ['print_int' F: factor ';' ] {
 			Stmt = cast<print_stmt> cons d::print_stmt
 				"printf( \"%d\", [d_factor(F)] );"
 		}
-		elsif match Stmt ['printb' I: tk_ident ';' ] {
+		elsif match Stmt ['print_buf' I: tk_ident ',' L: tk_ident ';' ] {
 			Stmt = cast<print_stmt> cons d::print_stmt
-				"printf( \"%.*s\", [d_ident(I)]\[0..(pos)\] );"
+				"printf( \"%.*s\", [d_ident(I)]\[0..([d_ident(L)])\] );"
 		}
-		elsif match Stmt ['prints' F: factor ';' ] {
+		elsif match Stmt ['print_str' F: factor ';' ] {
 			Stmt = cast<print_stmt> cons d::print_stmt
 				"printf( \"%.*s\", [d_factor(F)] );"
 		}

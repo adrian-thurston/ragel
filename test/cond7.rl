@@ -12,16 +12,16 @@ int c;
 	action inc {
 		i = i - 1;
 		c = <int>(fc);
-		prints "item: ";
-		printi c;
-		prints "\n";
+		print_str "item: ";
+		print_int c;
+		print_str "\n";
 	}
 
 	count = [0-9] @{ 
 		i = <int>(fc - '0');
-		prints "count: ";
-		printi i;
-		prints "\n";
+		print_str "count: ";
+		print_int i;
+		print_str "\n";
 	};
 
     sub = 	

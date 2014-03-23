@@ -20,58 +20,58 @@ line = 1;
 
 	# Functions to dump tokens as they are matched.
 	action ident {
-		prints "ident(";
-		printi line;
-		prints ",";
-		printi pos;
-		prints "): ";
-		printb array;
-		prints "\n";
+		print_str "ident(";
+		print_int line;
+		print_str ",";
+		print_int pos;
+		print_str "): ";
+		print_buf array, pos;
+		print_str "\n";
 	}
 	action literal {
-		prints "literal(";
-		printi line;
-		prints ",";
-		printi pos;
-		prints "): ";
-		printb array;
-		prints "\n";
+		print_str "literal(";
+		print_int line;
+		print_str ",";
+		print_int pos;
+		print_str "): ";
+		print_buf array, pos;
+		print_str "\n";
 	}
 	action float {
-		prints "float(";
-		printi line;
-		prints ",";
-		printi pos;
-		prints "): ";
-		printb array;
-		prints "\n";
+		print_str "float(";
+		print_int line;
+		print_str ",";
+		print_int pos;
+		print_str "): ";
+		print_buf array, pos;
+		print_str "\n";
 	}
 	action integer {
-		prints "int(";
-		printi line;
-		prints ",";
-		printi pos;
-		prints "): ";
-		printb array;
-		prints "\n";
+		print_str "int(";
+		print_int line;
+		print_str ",";
+		print_int pos;
+		print_str "): ";
+		print_buf array, pos;
+		print_str "\n";
 	}
 	action hex {
-		prints "hex(";
-		printi line;
-		prints ",";
-		printi pos;
-		prints "): ";
-		printb array;
-		prints "\n";
+		print_str "hex(";
+		print_int line;
+		print_str ",";
+		print_int pos;
+		print_str "): ";
+		print_buf array, pos;
+		print_str "\n";
 	}
 	action symbol {
-		prints "symbol(";
-		printi line;
-		prints ",";
-		printi pos;
-		prints "): ";
-		printb array;
-		prints "\n";
+		print_str "symbol(";
+		print_int line;
+		print_str ",";
+		print_int pos;
+		print_str "): ";
+		print_buf array, pos;
+		print_str "\n";
 	}
 
 	# Alpha numberic characters or underscore.

@@ -13,9 +13,9 @@ bool k;
 	action c1 {i != 0}
 	action c2 {j != 0}
 	action c3 {k != 0}
-	action one { prints "  one\n";}
-	action two { prints "  two\n";}
-	action three { prints "  three\n";}
+	action one { print_str "  one\n";}
+	action two { print_str "  two\n";}
+	action three { print_str "  three\n";}
 
 	action seti {
 		if ( fc == 48 ) {

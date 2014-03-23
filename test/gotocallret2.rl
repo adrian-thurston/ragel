@@ -17,7 +17,7 @@ int val;
 	sp = ' ';
 
 	handle := any @{ 
-		prints "handle ";
+		print_str "handle ";
 		fhold; 
 		if ( val == 1 ) { fnext *fentry(one); }
 		if ( val == 2 ) { fnext *fentry(two); }
@@ -25,27 +25,27 @@ int val;
 	};
 
 	one := |*
-		'{' => { prints "{ "; fcall *fentry(one); };
-		"[" => { prints "[ "; fcall *fentry(two); };
-		"}" sp* => { prints "} "; fret; };
-		[a-z]+ => { prints "word "; val = 1; fgoto *fentry(handle); };
-		' ' => { prints "space "; };
+		'{' => { print_str "{ "; fcall *fentry(one); };
+		"[" => { print_str "[ "; fcall *fentry(two); };
+		"}" sp* => { print_str "} "; fret; };
+		[a-z]+ => { print_str "word "; val = 1; fgoto *fentry(handle); };
+		' ' => { print_str "space "; };
 	*|;
 
 	two := |*
-		'{' => { prints "{ "; fcall *fentry(one); };
-		"[" => { prints "[ "; fcall *fentry(two); };
-		']' sp* => { prints "] "; fret; };
-		[a-z]+ => { prints "word "; val = 2; fgoto *fentry(handle); };
-		' ' => { prints "space "; };
+		'{' => { print_str "{ "; fcall *fentry(one); };
+		"[" => { print_str "[ "; fcall *fentry(two); };
+		']' sp* => { print_str "] "; fret; };
+		[a-z]+ => { print_str "word "; val = 2; fgoto *fentry(handle); };
+		' ' => { print_str "space "; };
 	*|;
 
 	main := |* 
-		'{' => { prints "{ "; fcall one; };
-		"[" => { prints "[ "; fcall two; };
-		[a-z]+ => { prints "word "; val = 3; fgoto handle; };
-		[a-z] ' foil' => { prints "this is the foil";};
-		' ' => { prints "space "; };
+		'{' => { print_str "{ "; fcall one; };
+		"[" => { print_str "[ "; fcall two; };
+		[a-z]+ => { print_str "word "; val = 3; fgoto handle; };
+		[a-z] ' foil' => { print_str "this is the foil";};
+		' ' => { print_str "space "; };
 		'\n';
 	*|;
 }%%
