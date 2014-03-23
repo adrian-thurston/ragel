@@ -49,7 +49,7 @@ neg = false;
 		)
 	) >begin %finish;
 
-	action oneof { printi val; prints "\n"; }
+	action oneof { print_int val; print_str "\n"; }
 	main := ( atoi '\n' @oneof )*;
 }%%
 

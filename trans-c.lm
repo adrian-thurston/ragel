@@ -119,15 +119,15 @@ int c_rewrite( Indep: ref<any> )
 	}
 
 	for Stmt: print_stmt in Indep {
-		if match Stmt ['printi' F: factor ';' ] {
+		if match Stmt ['print_int' F: factor ';' ] {
 			Stmt = cast<print_stmt> cons c::print_stmt
 				"printf( \"%d\", [c_factor(F)] );"
 		}
-		elsif match Stmt ['printb' F: factor ';' ] {
+		elsif match Stmt ['print_buf' F: factor ',' L: tk_ident ';' ] {
 			Stmt = cast<print_stmt> cons c::print_stmt
-				"fwrite( [c_factor(F)], 1, pos, stdout );"
+				"fwrite( [c_factor(F)], 1, [c_ident(L)], stdout );"
 		}
-		elsif match Stmt ['prints' F: factor ';' ] {
+		elsif match Stmt ['print_str' F: factor ';' ] {
 			Stmt = cast<print_stmt> cons c::print_stmt
 				"printf( \"%s\", [c_factor(F)] );"
 		}

@@ -22,9 +22,9 @@ int stack[32];
 	# A reference to a state in an unused action caused a segfault in 5.8. */
 	action unusedAction { fentry(garble_line); }
 
-	action err_garbling_line { prints "error: garbling line\n"; }
+	action err_garbling_line { print_str "error: garbling line\n"; }
 	action goto_main { fgoto main; }
-	action recovery_failed { prints "error: failed to recover\n"; }
+	action recovery_failed { print_str "error: failed to recover\n"; }
 
 	# Error machine, consumes to end of 
 	# line, then starts the main line over.
@@ -52,7 +52,7 @@ int stack[32];
 	# Specifies command string. Note that the arg is left out.
 	command = (
 		[a-z0-9] @{comm = fc;} ' ' @comm_arg '\n'
-	) @{prints "correct command\n";};
+	) @{print_str "correct command\n";};
 
 	# Any number of commands. If there is an 
 	# error anywhere, garble the line.

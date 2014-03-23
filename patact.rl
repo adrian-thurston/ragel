@@ -15,34 +15,34 @@ int val;
 	machine patact;
 
 	other := |* 
-		[a-z]+ => { prints "word\n"; };
-		[0-9]+ => { prints "num\n"; };
-		[\n ] => { prints "space\n"; };
+		[a-z]+ => { print_str "word\n"; };
+		[0-9]+ => { print_str "num\n"; };
+		[\n ] => { print_str "space\n"; };
 	*|;
 
 	exec_test := |* 
-		[a-z]+ => { prints "word (w/lbh)\n"; fexec te-1; fgoto other; };
-		[a-z]+ ' foil' => { prints "word (c/lbh)\n"; };
-		[\n ] => { prints "space\n"; };
-		'22' => { prints "num (w/switch)\n"; };
-		[0-9]+ => { prints "num (w/switch)\n"; fexec te-1; fgoto other;};
-		[0-9]+ ' foil' => {prints "num (c/switch)\n"; };
-		'!';# => { prints "immdiate\n"; fgoto exec_test; };
+		[a-z]+ => { print_str "word (w/lbh)\n"; fexec te-1; fgoto other; };
+		[a-z]+ ' foil' => { print_str "word (c/lbh)\n"; };
+		[\n ] => { print_str "space\n"; };
+		'22' => { print_str "num (w/switch)\n"; };
+		[0-9]+ => { print_str "num (w/switch)\n"; fexec te-1; fgoto other;};
+		[0-9]+ ' foil' => {print_str "num (c/switch)\n"; };
+		'!';# => { print_str "immdiate\n"; fgoto exec_test; };
 	*|;
 
 	semi := |* 
-		';' => { prints "in semi\n"; fgoto main; };
+		';' => { print_str "in semi\n"; fgoto main; };
 	*|;
 
 	main := |* 
-		[a-z]+ => { prints "word (w/lbh)\n"; fhold; fgoto other; };
-		[a-z]+ ' foil' => { prints "word (c/lbh)\n"; };
-		[\n ] => { prints "space\n"; };
-		'22' => { prints "num (w/switch)\n"; };
-		[0-9]+ => { prints "num (w/switch)\n"; fhold; fgoto other;};
-		[0-9]+ ' foil' => {prints "num (c/switch)\n"; };
-		';' => { prints "going to semi\n"; fhold; fgoto semi;};
-		'!' => { prints "immdiate\n"; fgoto exec_test; };
+		[a-z]+ => { print_str "word (w/lbh)\n"; fhold; fgoto other; };
+		[a-z]+ ' foil' => { print_str "word (c/lbh)\n"; };
+		[\n ] => { print_str "space\n"; };
+		'22' => { print_str "num (w/switch)\n"; };
+		[0-9]+ => { print_str "num (w/switch)\n"; fhold; fgoto other;};
+		[0-9]+ ' foil' => {print_str "num (c/switch)\n"; };
+		';' => { print_str "going to semi\n"; fhold; fgoto semi;};
+		'!' => { print_str "immdiate\n"; fgoto exec_test; };
 	*|;
 }%%
 

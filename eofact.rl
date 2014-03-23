@@ -8,10 +8,10 @@
 %%{
 	machine eofact;
 
-	action a1 { prints "a1\n"; }
-	action a2 { prints "a2\n"; }
-	action a3 { prints "a3\n"; }
-	action a4 { prints "a4\n"; }
+	action a1 { print_str "a1\n"; }
+	action a2 { print_str "a2\n"; }
+	action a3 { print_str "a3\n"; }
+	action a4 { print_str "a4\n"; }
 
 
 	main := (
