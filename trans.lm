@@ -19,9 +19,9 @@ namespace indep
 	lex 
 		literal `%%{ `}%%
 
-		literal `int `bool `const `char `ptr `print_int
-				`print_buf `print_str `print_token
-				`fwrite `first_token_char `byte `if `else
+		literal `int `bool `char `ptr `byte `if `else
+				`print_int `print_buf `print_str `print_token
+				`first_token_char
 
 		literal `fgoto `fcall `fnext `fexec
 

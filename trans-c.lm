@@ -4,8 +4,8 @@ namespace c
 	lex 
 		literal `%%{ `}%%
 
-		literal `int `bool `const `char `ptr
-				`printf `fwrite `var `byte
+		literal `int `bool `const `char 
+				`printf `fwrite
 
 		literal `; `< `> `( `) `[ `] `=
 				`* `! `{ `} `+ `- `== `!= `,
@@ -50,7 +50,6 @@ namespace c
 	|	[`char]
 	|	[`char `*]
 	|	[`const `( `char `) `*]
-	|	[`byte]
 
 	def var_decl
 		[type tk_ident opt_arr `;]

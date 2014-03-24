@@ -5,7 +5,7 @@ namespace cs
 		literal `%%{ `}%%
 
 		literal `int `bool `const `char `ptr
-				`printf `fwrite `var `byte `Console `Write `new
+				`var `Console `Write `new
 
 		literal `; `< `> `( `) `[ `] `=
 				`* `! `{ `} `+ `- `== `!= `, `.
@@ -53,8 +53,6 @@ namespace cs
 	|	[`bool]
 	|	[`char]
 	|	[`char `*]
-	|	[`const `( `char `) `*]
-	|	[`byte]
 
 	def var_decl
 		[type opt_arr tk_ident opt_init `;]
@@ -64,9 +62,7 @@ namespace cs
 	|	[]
 
 	def print_stmt
-		[`printf `( expr `) `;]
-	|	[`fwrite `( expr `) `;]
-	|	[`Console `. `Write `( expr `) `;]
+		[`Console `. `Write `( expr `) `;]
 end
 
 namespace indep
@@ -155,7 +151,6 @@ int cs_rewrite( Indep: ref<any> )
 		elsif match Stmt ['print_token' ';' ] {
 			Stmt = cast<print_stmt> cons cs::print_stmt
 				"Console.Write( new String( data , ts , te - ts ) );
-
 		}
 	}
 }

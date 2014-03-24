@@ -4,8 +4,8 @@ namespace go
 	lex 
 		literal `%%{ `}%%
 
-		literal `int `bool `const `char `ptr
-				`var `fmt.Print `byte
+		literal `int `bool `byte `const `char
+				`var `fmt.Print
 
 		literal `; `< `> `( `) `[ `] `=
 				`* `! `{ `} `+ `- `== `!= `:
