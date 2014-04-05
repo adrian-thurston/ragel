@@ -81,15 +81,23 @@ int rw_c_factor( Factor: indep::factor )
 	}
 	else if match Factor [tk_ident `[ expr `]]
 	{
+		send Out
+			"[$Factor.tk_ident]\[ [rw_c_expr(Factor.expr)] \]
 	}
 	else if match Factor [tk_ident `( expr `)]
 	{
+		send Out
+			"[$Factor.tk_ident]( [rw_c_expr(Factor.expr)] )
 	}
 	elsif match Factor [`< type `> `( expr `)]
 	{
+		send Out
+			"( [rw_c_type(Factor.type)] ) ( [rw_c_expr(Factor.expr)] )
 	}
 	elsif match Factor [`( expr `)]
 	{
+		send Out
+			"( [rw_c_expr(Factor.expr)] )
 	}
 	elsif match Factor ['true']
 	{
@@ -129,17 +137,11 @@ void rw_c_type( Type: indep::type )
 	}
 }
 
-#void rw_c_expr_op( Expr: indep::expr_op )
-#{
-#	if match ExprOp [op expr_op]
-#	elsif match ExprOp [
-#}
-
 void rw_c_expr( Expr: indep::expr )
 {
 	rw_c_factor( Expr.factor )
-#	for ExprOp: indep::expr_op in repeat(Expr.ExprOpList)
-#		rw_c_factor( ExprOp.factor )
+	if ( Expr.op )
+		send Out " [$Expr.op] [rw_c_expr( Expr._expr )]"
 }
 
 void rw_c_opt_array( OptArr: indep::opt_arr )
@@ -155,34 +157,44 @@ int rw_c_var_decl( VarDecl: indep::var_decl )
 		"[rw_c_type( VarDecl.type )] [$VarDecl.tk_ident][rw_c_opt_array(VarDecl.opt_arr)];
 }
 
+void rw_c_opt_sub( OptSub: indep::opt_sub )
+{
+	if ( OptSub.expr ) {
+		send Out "\[[rw_c_expr(OptSub.expr)]\]
+	}
+}
+
 int rw_c_expr_stmt( ExprStmt: indep::expr_stmt )
 {
-#	print( "expr_stmt\n" )
 	if match ExprStmt [tk_ident opt_sub `= expr `;]
 	{
-		send Out "[$ExprStmt.tk_ident] = [rw_c_expr(ExprStmt.expr)];
+		send Out
+			"[$ExprStmt.tk_ident rw_c_opt_sub(ExprStmt.opt_sub)] = [rw_c_expr(ExprStmt.expr)];
 	}
 	else if match ExprStmt [expr `;]
 	{
 	}
 }
 
-int rw_c_if_stmt( ExprStmt: indep::if_stmt )
+int rw_c_if_stmt( IfStmt: indep::if_stmt )
 {
-#	print( "if_stmt\n" )
+	send Out
+		"if ( [rw_c_expr( IfStmt.expr )] ) { [rw_c_stmt_list( IfStmt._repeat_stmt )] } 
 }
 
 int rw_c_print_stmt( Stmt: indep::print_stmt )
 {
-#	print( "print_stmt\n" )
-	if match Stmt [`print_int expr `;]
-	{
+	if match Stmt [`print_int expr `;] {
+		send Out
+			"printf( \"%d\", [rw_c_expr(Stmt.expr)] );
 	}
 	else if match Stmt [`print_buf expr `, expr `;]
 	{
 	}
 	else if match Stmt [`print_str expr `;]
 	{
+		send Out
+			"printf( \"%s\", [rw_c_expr( Stmt.expr )] );
 	}
 	else if match Stmt [`print_token `;]
 	{
@@ -191,7 +203,6 @@ int rw_c_print_stmt( Stmt: indep::print_stmt )
 
 int rw_c_ragel_stmt( Stmt: indep::ragel_stmt )
 {
-#	print( "ragel_stmt\n" )
 	if match Stmt [`fgoto tk_ident `;]
 	{
 	}
@@ -217,36 +228,19 @@ int rw_c_ragel_stmt( Stmt: indep::ragel_stmt )
 
 int rw_stmt( Stmt: indep::stmt )
 {
-#	print( "stmt\n" )
-
 	if match Stmt [var_decl]
-	{
-#		print( "var_decl\n" )
 		rw_c_var_decl( Stmt.var_decl )
-	}
 	else if match Stmt [expr_stmt]
-	{
-#		print( "expr_stmt\n" )
 		rw_c_expr_stmt( Stmt.expr_stmt )
-	}
 	else if match Stmt [if_stmt]
-	{
-#		print( "if_stmt\n" )
 		rw_c_if_stmt( Stmt.if_stmt )
-	}
 	else if match Stmt [print_stmt]
-	{
-#		print( "print_stmt\n" )
 		rw_c_print_stmt( Stmt.print_stmt )
-	}
 	else if	match Stmt [ragel_stmt]
-	{
-#		print( "ragel_stmt\n" )
 		rw_c_ragel_stmt( Stmt.ragel_stmt )
-	}
 }
 
-int rw_c_stmt_list( StmtList: indep::stmt* )
+void rw_c_stmt_list( StmtList: indep::stmt* )
 {
 #	print( "stmt_list\n" )
 	for Stmt: indep::stmt in repeat( StmtList )
@@ -257,10 +251,12 @@ int rw_c_action_block( ActionBlock: indep::action_block )
 {
 	Out = cons parser<out_code::lines> []
 	if match ActionBlock [`{ stmt* `}] {
-		rw_c_stmt_list( ActionBlock._repeat_stmt )
+		send Out
+			"{[rw_c_stmt_list( ActionBlock._repeat_stmt )]}
 	}
 	else if match ActionBlock [`{ expr `}] {
-		rw_c_expr( ActionBlock.expr )
+		send Out
+			"{[rw_c_expr( ActionBlock.expr )]}
 	}
 	send Out [] eos
 }
@@ -402,14 +398,10 @@ for Action: ragel::action_block in Section {
 		exit(1)
 	}
 
-	#rw_c_action_block( IndepActionBlock )
-	#print( Out.tree )
-
-	# Translate to specific language.
-	c_rewrite( IndepActionBlock )
+	rw_c_action_block( IndepActionBlock )
 
 	# Reparse back to ragel action block.
-	Action = parse ragel::action_block[$IndepActionBlock]
+	Action = parse ragel::action_block[$Out.tree]
 	if ( !Action ) {
 		print( error '\n' )
 		exit(1)
