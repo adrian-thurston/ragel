@@ -59,6 +59,204 @@ namespace c
 	|	[`fwrite `( expr `) `;]
 end
 
+namespace out_code
+	lex
+		token line
+			/[^\n]* '\n'/
+	end
+
+	def lines
+		[line*]
+
+	alias line_parser
+		parser<lines>
+end
+
+global Out: parser<out_code::lines> =
+		cons parser<out_code::lines> []
+
+int rw_c_factor( Factor: indep::factor )
+{
+	if match Factor [`first_token_char]
+	{
+	}
+	else if match Factor [tk_ident `[ expr `]]
+	{
+	}
+	else if match Factor [tk_ident `( expr `)]
+	{
+	}
+	elsif match Factor [`< type `> `( expr `)]
+	{
+	}
+	elsif match Factor [`( expr `)]
+	{
+	}
+	else 
+	{
+		send Out [$Factor]
+	}
+}
+
+void rw_c_type( Type: indep::type )
+{
+	if match Type [`int]
+	{
+		send Out "int"
+	}
+	elsif match Type [`bool]
+	{
+		send Out "int"
+	}
+	elsif match Type [`char]
+	{
+		send Out "char"
+	}
+	elsif match Type [`ptr]
+	{
+		send Out "char *"
+	}
+	elsif match Type [`byte]
+	{
+		send Out "unsigned char"
+	}
+}
+
+void rw_c_expr_op( Expr: indep::expr_op )
+{
+#	if match ExprOp [op expr_op]
+#	elsif match ExprOp [
+}
+
+void rw_c_expr( Expr: indep::expr )
+{
+	rw_c_factor( Expr.factor )
+#	for ExprOp: indep::expr_op in repeat(Expr.ExprOpList)
+#		rw_c_factor( ExprOp.factor )
+}
+
+void rw_c_opt_array( OptArr: indep::opt_arr )
+{
+	if OptArr.expr {
+		send Out "\[[$rw_c_expr( OptArr.expr )]\]"
+	}
+}
+
+int rw_c_var_decl( VarDecl: indep::var_decl )
+{
+	send Out
+		"[$rw_c_type( VarDecl.type )] [$VarDecl.tk_ident][$rw_c_opt_array(VarDecl.opt_arr)];
+}
+
+int rw_c_expr_stmt( ExprStmt: indep::expr_stmt )
+{
+#	print( "expr_stmt\n" )
+	if match ExprStmt [tk_ident opt_sub `= expr `;]
+	{
+	}
+	else if match ExprStmt [expr `;]
+	{
+	}
+}
+
+int rw_c_if_stmt( ExprStmt: indep::if_stmt )
+{
+#	print( "if_stmt\n" )
+}
+
+int rw_c_print_stmt( Stmt: indep::print_stmt )
+{
+#	print( "print_stmt\n" )
+	if match Stmt [`print_int expr `;]
+	{
+	}
+	else if match Stmt [`print_buf expr `, expr `;]
+	{
+	}
+	else if match Stmt [`print_str expr `;]
+	{
+	}
+	else if match Stmt [`print_token `;]
+	{
+	}
+}
+
+int rw_c_ragel_stmt( Stmt: indep::ragel_stmt )
+{
+#	print( "ragel_stmt\n" )
+	if match Stmt [`fgoto tk_ident `;]
+	{
+	}
+	else if match Stmt [`fcall tk_ident `;]
+	{
+	}
+	else if match Stmt [`fnext tk_ident `;]
+	{
+	}
+	else if match Stmt [`fgoto `* expr `;]
+	{
+	}
+	else if match Stmt [`fcall `* expr `;]
+	{
+	}
+	else if match Stmt [`fnext `* expr `;]
+	{
+	}
+	else if match Stmt [`fexec expr `;]
+	{
+	}
+}
+
+int rw_stmt( Stmt: indep::stmt )
+{
+#	print( "stmt\n" )
+
+	if match Stmt [var_decl]
+	{
+#		print( "var_decl\n" )
+		rw_c_var_decl( Stmt.var_decl )
+	}
+	else if match Stmt [expr_stmt]
+	{
+#		print( "expr_stmt\n" )
+		rw_c_expr_stmt( Stmt.expr_stmt )
+	}
+	else if match Stmt [if_stmt]
+	{
+#		print( "if_stmt\n" )
+		rw_c_if_stmt( Stmt.if_stmt )
+	}
+	else if match Stmt [print_stmt]
+	{
+#		print( "print_stmt\n" )
+		rw_c_print_stmt( Stmt.print_stmt )
+	}
+	else if	match Stmt [ragel_stmt]
+	{
+#		print( "ragel_stmt\n" )
+		rw_c_ragel_stmt( Stmt.ragel_stmt )
+	}
+}
+
+int rw_c_stmt_list( StmtList: indep::stmt* )
+{
+#	print( "stmt_list\n" )
+	for Stmt: indep::stmt in repeat( StmtList )
+		rw_stmt( Stmt )
+}
+
+int rw_c_action_block( ActionBlock: indep::action_block )
+{
+	Out = cons parser<out_code::lines> []
+	if match ActionBlock [`{ stmt* `}] {
+		rw_c_stmt_list( ActionBlock._repeat_stmt )
+	}
+	else if match ActionBlock [`{ expr `}] {
+		rw_c_expr( ActionBlock.expr )
+	}
+	send Out 'hello\n' eos
+}
+
 namespace indep
 
 c::factor c_factor( Factor: factor )
@@ -180,6 +378,7 @@ send Output
 Init: indep::stmt* = RagelTree.Init
 for Stmt: indep::stmt in Init {
 	if match Stmt [Decl: var_decl] {
+		rw_c_var_decl( Decl )
 		c_rewrite( Decl )
 		send Output [Decl]
 	}
@@ -193,6 +392,9 @@ for Action: ragel::action_block in Section {
 		print( error '\n' Action )
 		exit(1)
 	}
+
+	#rw_c_action_block( IndepActionBlock )
+	#print( Out.tree )
 
 	# Translate to specific language.
 	c_rewrite( IndepActionBlock )
@@ -217,6 +419,7 @@ send Output
 
 for Stmt: indep::stmt in Init {
 	if match Stmt [ExprStmt: expr_stmt] {
+		rw_c_expr_stmt( ExprStmt )
 		c_rewrite( ExprStmt )
 		send Output [ExprStmt]
 	}
