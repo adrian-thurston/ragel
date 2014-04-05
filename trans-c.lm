@@ -91,6 +91,14 @@ int rw_c_factor( Factor: indep::factor )
 	elsif match Factor [`( expr `)]
 	{
 	}
+	elsif match Factor ['true']
+	{
+		send Out '1'
+	}
+	elsif match Factor ['false']
+	{
+		send Out '0'
+	}
 	else 
 	{
 		send Out [$Factor]
@@ -152,6 +160,7 @@ int rw_c_expr_stmt( ExprStmt: indep::expr_stmt )
 #	print( "expr_stmt\n" )
 	if match ExprStmt [tk_ident opt_sub `= expr `;]
 	{
+		send Out "[$ExprStmt.tk_ident] = [rw_c_expr(ExprStmt.expr)];
 	}
 	else if match ExprStmt [expr `;]
 	{
@@ -380,8 +389,6 @@ for Stmt: indep::stmt in Init {
 		Out = cons parser<out_code::lines> []
 		rw_c_var_decl( Decl )
 		send Out [] eos
-		#print( Out.tree )
-		#c_rewrite( Decl )
 		send Output [Out.tree]
 	}
 }
@@ -421,9 +428,10 @@ send Output
 
 for Stmt: indep::stmt in Init {
 	if match Stmt [ExprStmt: expr_stmt] {
+		Out = cons parser<out_code::lines> []
 		rw_c_expr_stmt( ExprStmt )
-		c_rewrite( ExprStmt )
-		send Output [ExprStmt]
+		send Out [] eos
+		send Output [Out.tree]
 	}
 }
 
