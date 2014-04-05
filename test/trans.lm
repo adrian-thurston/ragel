@@ -96,11 +96,9 @@ namespace indep
 	|	[`+] | [`-] | [`*] | [`!=]
 	|	[`==] | [`<=] | [`>=]
 
-	def expr_op
-		[op factor]
-
 	def expr
-		[factor expr_op*]
+		[factor op expr]
+	|	[factor]
 
 	def type
 		[`int]
