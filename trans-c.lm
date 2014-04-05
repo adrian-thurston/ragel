@@ -72,8 +72,7 @@ namespace out_code
 		parser<lines>
 end
 
-global Out: parser<out_code::lines> =
-		cons parser<out_code::lines> []
+global Out: parser<out_code::lines>
 
 int rw_c_factor( Factor: indep::factor )
 {
@@ -122,11 +121,11 @@ void rw_c_type( Type: indep::type )
 	}
 }
 
-void rw_c_expr_op( Expr: indep::expr_op )
-{
+#void rw_c_expr_op( Expr: indep::expr_op )
+#{
 #	if match ExprOp [op expr_op]
 #	elsif match ExprOp [
-}
+#}
 
 void rw_c_expr( Expr: indep::expr )
 {
@@ -138,14 +137,14 @@ void rw_c_expr( Expr: indep::expr )
 void rw_c_opt_array( OptArr: indep::opt_arr )
 {
 	if OptArr.expr {
-		send Out "\[[$rw_c_expr( OptArr.expr )]\]"
+		send Out "\[[rw_c_expr( OptArr.expr )]\]"
 	}
 }
 
 int rw_c_var_decl( VarDecl: indep::var_decl )
 {
 	send Out
-		"[$rw_c_type( VarDecl.type )] [$VarDecl.tk_ident][$rw_c_opt_array(VarDecl.opt_arr)];
+		"[rw_c_type( VarDecl.type )] [$VarDecl.tk_ident][rw_c_opt_array(VarDecl.opt_arr)];
 }
 
 int rw_c_expr_stmt( ExprStmt: indep::expr_stmt )
@@ -254,7 +253,7 @@ int rw_c_action_block( ActionBlock: indep::action_block )
 	else if match ActionBlock [`{ expr `}] {
 		rw_c_expr( ActionBlock.expr )
 	}
-	send Out 'hello\n' eos
+	send Out [] eos
 }
 
 namespace indep
@@ -378,9 +377,12 @@ send Output
 Init: indep::stmt* = RagelTree.Init
 for Stmt: indep::stmt in Init {
 	if match Stmt [Decl: var_decl] {
+		Out = cons parser<out_code::lines> []
 		rw_c_var_decl( Decl )
-		c_rewrite( Decl )
-		send Output [Decl]
+		send Out [] eos
+		#print( Out.tree )
+		#c_rewrite( Decl )
+		send Output [Out.tree]
 	}
 }
 
