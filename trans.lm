@@ -1,5 +1,6 @@
 include '../src/ragel.lm'
 
+
 namespace indep
 	# Opening the test case header.
 	lex
@@ -161,4 +162,19 @@ namespace indep
 	def start
 		[test_header Init: stmt* section input output]
 end
+
+namespace out_code
+	lex
+		token line
+			/[^\n]* '\n'/
+	end
+
+	def lines
+		[line*]
+
+	alias line_parser
+		parser<lines>
+end
+
+global Out: parser<out_code::lines>
 
