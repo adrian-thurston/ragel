@@ -1,20 +1,5 @@
 include 'trans.lm'
 
-namespace out_code
-	lex
-		token line
-			/[^\n]* '\n'/
-	end
-
-	def lines
-		[line*]
-
-	alias line_parser
-		parser<lines>
-end
-
-global Out: parser<out_code::lines>
-
 int rw_c_factor( Factor: indep::factor )
 {
 	if match Factor [`first_token_char]
@@ -96,14 +81,13 @@ void rw_c_opt_array( OptArr: indep::opt_arr )
 int rw_c_var_decl( VarDecl: indep::var_decl )
 {
 	send Out
-		"[rw_c_type( VarDecl.type )] [$VarDecl.tk_ident][rw_c_opt_array(VarDecl.opt_arr)];
+		"[rw_c_type( VarDecl.type )] [$VarDecl.tk_ident] [rw_c_opt_array(VarDecl.opt_arr)];
 }
 
 void rw_c_opt_sub( OptSub: indep::opt_sub )
 {
-	if ( OptSub.expr ) {
-		send Out "\[[rw_c_expr(OptSub.expr)]\]
-	}
+	if ( OptSub.expr )
+		send Out "\[[rw_c_expr(OptSub.expr)]\]"
 }
 
 int rw_c_expr_stmt( ExprStmt: indep::expr_stmt )

@@ -1,156 +1,187 @@
 include 'trans.lm'
 
-namespace d
-	lex 
-		literal `%%{ `}%%
-
-		literal `int `bool `const `char 
-				`printf 
-
-		literal `; `< `> `( `) `[ `] `=
-				`* `! `{ `} `+ `- `== `!=
-				`, `..
-
-		ignore / ( [ \t] | NL )+ /
-
-		token tk_ident /ident/
-		token tk_number /digit+/
-		token tk_hex_number /'0x' [0-9a-fA-F]+/
-
-		token string
-			/ s_literal | d_literal /
-	end
-
-	def factor
-		[tk_ident]
-	|	[tk_ident `[ expr `]]
-	|	[tk_number]
-	|	[tk_hex_number]
-	|	[string]
-	|	[`( type `) `( expr `)]
-	|	[`( expr `)]
-
-	def print_stmt
-		[`printf `( expr `) `;]
-
-	def op
-		[`<]
-	|	[`>]
-	|	[`=]
-	|	[`!]
-	|	[`+]
-	|	[`-]
-	|	[`*]
-	|	[`!=]
-	|	[`==]
-	|	[`,]
-	|	[`..]
-
-	def expr_op
-		[op factor]
-
-	def expr
-		[factor expr_op*]
-
-	def opt_arr
-		[`[ expr `]]
-	|	[]
-
-	def type
-		[`int]
-	|	[`bool]
-	|	[`char]
-	|	[`char `*]
-	|	[`const `( `char `) `*]
-
-	def var_decl
-		[type tk_ident opt_arr `;]
-end
-
-namespace indep
-
-d::expr d_expr( Expr: expr )
+int rw_d_factor( Factor: indep::factor )
 {
-	return cast<d::expr> Expr
-}
-
-d::tk_ident d_ident( Ident: tk_ident )
-{
-	return cast<d::tk_ident> Ident
-}
-
-d::factor d_factor( Factor: factor )
-{
-	return cast<d::factor> Factor
-}
-
-d::tk_ident d_ident( Ident: tk_ident )
-{
-	return cast<d::tk_ident> Ident
-}
-
-d::opt_arr d_opt_arr( OptArr: opt_arr )
-{
-	return cast<d::opt_arr> OptArr
-}
-
-int d_rewrite( Indep: ref<any> )
-{
-	for Factor: factor in Indep {
-		if match Factor "true" {
-			Factor = cons factor "1"
-		}
-		elsif match Factor "false" {
-			Factor = cons factor "0"
-		}
-		elsif match Factor
-				['<' type '>' '(' Expr: expr ')']
-		{
-			Factor = cast<factor> cons d::factor
-				"( [d_expr(Expr)] )
-		}
-		elsif match Factor ['first_token_char'] {
-			Factor = cast<factor> cons d::factor
-				"ts\[0\]"
-		}
+	if match Factor [`first_token_char]
+	{
+		send Out "ts\[0\]"
 	}
-
-	for Decl: var_decl in Indep {
-		if match Decl
-			"bool [Ident: tk_ident OptArr: opt_arr];
-		{
-			Decl = cast<var_decl> cons d::var_decl
-				"int [d_ident(Ident)] [d_opt_arr(OptArr)];
-		}
-		elsif match Decl
-			"ptr [Ident: tk_ident];
-		{
-			Decl = cast<var_decl> cons d::var_decl
-				"const(char) * [d_ident(Ident)];
-		}
+	else if match Factor [tk_ident `[ expr `]]
+	{
+		send Out
+			"[$Factor.tk_ident]\[ [rw_d_expr(Factor.expr)] \]
 	}
-
-	for Stmt: print_stmt in Indep {
-		if match Stmt ['print_int' F: factor ';' ] {
-			Stmt = cast<print_stmt> cons d::print_stmt
-				"printf( \"%d\", [d_factor(F)] );"
-		}
-		elsif match Stmt ['print_buf' I: tk_ident ',' L: tk_ident ';' ] {
-			Stmt = cast<print_stmt> cons d::print_stmt
-				"printf( \"%.*s\", [d_ident(I)]\[0..([d_ident(L)])\] );"
-		}
-		elsif match Stmt ['print_str' F: factor ';' ] {
-			Stmt = cast<print_stmt> cons d::print_stmt
-				"printf( \"%.*s\", [d_factor(F)] );"
-		}
-		elsif match Stmt ['print_token' ';' ] {
-			Stmt = cast<print_stmt> cons d::print_stmt
-				"printf( \"%.*s\", ts\[0..(te - ts)\] );"
-		}
+	else if match Factor [tk_ident `( expr `)]
+	{
+		send Out
+			"[$Factor.tk_ident]( [rw_d_expr(Factor.expr)] )
+	}
+	elsif match Factor [`< type `> `( expr `)]
+	{
+		send Out
+			"cast( [rw_d_type(Factor.type)] ) ( [rw_d_expr(Factor.expr)] )
+	}
+	elsif match Factor [`( expr `)]
+	{
+		send Out
+			"( [rw_d_expr(Factor.expr)] )
+	}
+	elsif match Factor ['true']
+	{
+		send Out '1'
+	}
+	elsif match Factor ['false']
+	{
+		send Out '0'
+	}
+	else 
+	{
+		send Out [$Factor]
 	}
 }
 
-end
+void rw_d_type( Type: indep::type )
+{
+	if match Type [`int]
+	{
+		send Out "int"
+	}
+	elsif match Type [`bool]
+	{
+		send Out "int"
+	}
+	elsif match Type [`char]
+	{
+		send Out "char"
+	}
+	elsif match Type [`ptr]
+	{
+		send Out "const(char) *"
+	}
+	elsif match Type [`byte]
+	{
+		send Out "unsigned char"
+	}
+}
+
+void rw_d_expr( Expr: indep::expr )
+{
+	rw_d_factor( Expr.factor )
+	if ( Expr.op )
+		send Out " [$Expr.op] [rw_d_expr( Expr._expr )]"
+}
+
+void rw_d_opt_array( OptArr: indep::opt_arr )
+{
+	if OptArr.expr {
+		send Out "\[[rw_d_expr( OptArr.expr )]\]"
+	}
+}
+
+int rw_d_var_decl( VarDecl: indep::var_decl )
+{
+	send Out
+		"[rw_d_type( VarDecl.type )] [$VarDecl.tk_ident][rw_d_opt_array(VarDecl.opt_arr)];
+}
+
+void rw_d_opt_sub( OptSub: indep::opt_sub )
+{
+	if ( OptSub.expr )
+		send Out "\[[rw_d_expr(OptSub.expr)]\]"
+}
+
+int rw_d_expr_stmt( ExprStmt: indep::expr_stmt )
+{
+	if match ExprStmt [tk_ident opt_sub `= expr `;]
+	{
+		send Out
+			"[$ExprStmt.tk_ident rw_d_opt_sub(ExprStmt.opt_sub)] = [rw_d_expr(ExprStmt.expr)];
+	}
+	else if match ExprStmt [expr `;]
+	{
+		send Out
+			"[rw_d_expr(ExprStmt.expr)];
+	}
+}
+
+int rw_d_if_stmt( IfStmt: indep::if_stmt )
+{
+	send Out
+		"if ( [rw_d_expr( IfStmt.expr )] )
+		"{
+		"	[rw_d_stmt_list( IfStmt._repeat_stmt )]
+		"} 
+
+	if ( IfStmt.opt_else._repeat_stmt ) {
+		send Out
+			"else {
+			"	[rw_d_stmt_list( IfStmt.opt_else._repeat_stmt )]
+			"}
+	}
+}
+
+int rw_d_print_stmt( Stmt: indep::print_stmt )
+{
+	if match Stmt [`print_int expr `;] {
+		send Out
+			"printf( \"%d\", [rw_d_expr(Stmt.expr)] );
+	}
+	else if match Stmt [`print_buf E1: expr `, E2: expr `;]
+	{
+		send Out
+			"printf( \"%.*s\", [rw_d_expr(E1)]\[0..([rw_d_expr(E2)])\] );"
+	}
+	else if match Stmt [`print_str expr `;]
+	{
+		send Out
+			"printf( \"%.*s\", [rw_d_expr(Stmt.expr)] );"
+	}
+	else if match Stmt [`print_token `;]
+	{
+		send Out
+			"printf( \"%.*s\", ts\[0..(te - ts)\] );"
+	}
+}
+
+int rw_d_ragel_stmt( Stmt: indep::ragel_stmt )
+{
+	send Out
+		[$Stmt]
+}
+
+int rw_stmt( Stmt: indep::stmt )
+{
+	if match Stmt [var_decl]
+		rw_d_var_decl( Stmt.var_decl )
+	else if match Stmt [expr_stmt]
+		rw_d_expr_stmt( Stmt.expr_stmt )
+	else if match Stmt [if_stmt]
+		rw_d_if_stmt( Stmt.if_stmt )
+	else if match Stmt [print_stmt]
+		rw_d_print_stmt( Stmt.print_stmt )
+	else if	match Stmt [ragel_stmt]
+		rw_d_ragel_stmt( Stmt.ragel_stmt )
+}
+
+void rw_d_stmt_list( StmtList: indep::stmt* )
+{
+	for Stmt: indep::stmt in repeat( StmtList )
+		rw_stmt( Stmt )
+}
+
+int rw_d_action_block( ActionBlock: indep::action_block )
+{
+	Out = cons parser<out_code::lines> []
+	if match ActionBlock [`{ stmt* `}] {
+		send Out
+			"{[rw_d_stmt_list( ActionBlock._repeat_stmt )]}
+	}
+	else if match ActionBlock [`{ expr `}] {
+		send Out
+			"{[rw_d_expr( ActionBlock.expr )]}
+	}
+	send Out [] eos
+}
 
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
@@ -194,8 +225,10 @@ send Output
 Init: indep::stmt* = RagelTree.Init
 for Stmt: indep::stmt in Init {
 	if match Stmt [Decl: var_decl] {
-		d_rewrite( Decl )
-		send Output [Decl]
+		Out = cons parser<out_code::lines> []
+		rw_d_var_decl( Decl )
+		send Out [] eos
+		send Output [Out.tree]
 	}
 }
 
@@ -205,11 +238,10 @@ for Action: ragel::action_block in Section {
 	# Reparse as lang-independent code.
 	parse IndepActionBlock: indep::action_block[$Action]
 
-	# Translate to specific language.
-	d_rewrite( IndepActionBlock )
+	rw_d_action_block( IndepActionBlock )
 
 	# Reparse back to ragel action block.
-	Action = parse ragel::action_block[$IndepActionBlock]
+	Action = parse ragel::action_block[$Out.tree]
 }
 
 send Output 
@@ -224,8 +256,10 @@ send Output
 
 for Stmt: indep::stmt in Init {
 	if match Stmt [ExprStmt: expr_stmt] {
-		d_rewrite( ExprStmt )
-		send Output [ExprStmt]
+		Out = cons parser<out_code::lines> []
+		rw_d_expr_stmt( ExprStmt )
+		send Out [] eos
+		send Output [Out.tree]
 	}
 }
 
