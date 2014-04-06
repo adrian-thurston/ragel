@@ -64,13 +64,13 @@
 
 //#include "java/java.h"
 
-#include "go/binloop.h"
-#include "go/binexp.h"
-#include "go/flatloop.h"
-#include "go/flatexp.h"
-#include "go/gotoloop.h"
-#include "go/gotoexp.h"
-#include "go/ipgoto.h"
+//#include "go/binloop.h"
+//#include "go/binexp.h"
+//#include "go/flatloop.h"
+//#include "go/flatexp.h"
+//#include "go/gotoloop.h"
+//#include "go/gotoexp.h"
+//#include "go/ipgoto.h"
 
 //#include "ml/table.h"
 //#include "ml/ftable.h"
