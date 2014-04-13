@@ -292,6 +292,7 @@ void BinaryLooped::writeExec()
 		"	index " << ALPH_TYPE() << " _keys;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _cpc;\n"
+		"	entry {\n"
 		"\n";
 
 	if ( !noEnd ) {
@@ -308,7 +309,7 @@ void BinaryLooped::writeExec()
 			"		goto _out;\n";
 	}
 
-	out << "_resume:\n";
+	out << "label _resume {\n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -328,14 +329,16 @@ void BinaryLooped::writeExec()
 
 	LOCATE_TRANS();
 
-	out << "_match:\n";
+	out << "}\n";
+	out << "label _match {\n";
 
 	if ( useIndicies )
 		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
 
 	LOCATE_COND();
 
-	out << "_match_cond:\n";
+	out << "}\n";
+	out << "label _match_cond {\n";
 	
 	if ( redFsm->anyEofTrans() )
 		out << "_eof_trans:\n";
@@ -367,7 +370,8 @@ void BinaryLooped::writeExec()
 
 //	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 //			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "_again:\n";
+	out << "}\n";
+	out << "label _again {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -404,7 +408,7 @@ void BinaryLooped::writeExec()
 	}
 	
 	if ( testEofUsed )
-		out << "	_test_eof: {}\n";
+		out << "}\n label _test_eof { {}\n";
 	
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
@@ -442,8 +446,12 @@ void BinaryLooped::writeExec()
 	}
 
 	if ( outLabelUsed )
-		out << "	_out: {}\n";
+		out << "} label _out { {}\n";
 
+	/* The entry loop. */
+	out << "}}\n";
+
+	/* The execute block. */
 	out << "	}\n";
 }
 

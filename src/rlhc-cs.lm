@@ -370,6 +370,17 @@ void cs_stmt( Stmt: stmt )
 		send Output
 			"case [cs_expr( Stmt.case_label.expr )]:
 	}
+	elsif match Stmt [label_stmt]
+	{
+		send Output
+			"[Stmt.label_stmt.ident]:
+			"[cs_stmt_list( Stmt.label_stmt._repeat_stmt )]
+	}
+	elsif match Stmt [entry_loop]
+	{
+		send Output
+			[cs_stmt_list( Stmt.entry_loop._repeat_stmt )]
+	}
 	else {
 		# catches unspecified cases
 		send Output [Stmt]

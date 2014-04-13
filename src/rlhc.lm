@@ -70,7 +70,7 @@ lex
 	literal `array `value `TRUE `FALSE
 			`while `switch `case
 			`if `else `offset `index
-			`goto `deref
+			`goto `deref `entry `label
 
 	literal `uint `const
 			`s8 `s16 `s32 `s64
@@ -218,6 +218,13 @@ def value
 def while_stmt
 	[`while `( expr `) stmt]
 
+def entry_loop
+	[`entry `{ stmt* `}]
+
+def label_stmt
+	Id: int
+	[`label ident `{ stmt* `}]
+
 def else_if_clause
 	[`else `if `( expr `) stmt]
 
@@ -259,12 +266,18 @@ def export_stmt
 def index_stmt
 	[`index type  ident `;]
 
+def goto_stmt
+	Id: int
+	[`goto ident `;]
+
 def stmt
 	[embedded_host]
 |	[array]
 |	[value]
 |	[index_stmt]
 |	[declaration]
+|	[entry_loop]
+|	[label_stmt]
 |	[while_stmt]
 |	[if_stmt]
 |	[switch_stmt]
@@ -273,8 +286,8 @@ def stmt
 |	[expr `;]
 |	[pragma]
 |	[export_stmt]
+|	[goto_stmt]
 |	[`fallthrough `;]
-|	[`goto ident `;]
 |	[`{ stmt* `}]
 
 def start
@@ -297,6 +310,25 @@ if ( !Start ) {
 	print( error '\n' )
 	exit(1)
 }
+
+void assign_labels( Prog: ref<any> )
+{
+	N: int = 1
+	cons Map: map<ident label_stmt>[]
+	for LabelStmt: label_stmt in Prog {
+		LabelStmt.Id = N
+		Map.insert( LabelStmt.ident LabelStmt )
+		N = N + 1
+	}
+
+	for GotoStmt: goto_stmt in Prog {
+		LabelStmt: label_stmt = Map.find( GotoStmt.ident )
+		if ( LabelStmt )
+			GotoStmt.Id = LabelStmt.Id
+	}
+}
+
+assign_labels( Start )
 
 global Output: stream = open( OutputFile "w" )
 if ( Lang == 'c' )

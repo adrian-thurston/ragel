@@ -370,6 +370,17 @@ void d_stmt( Stmt: stmt )
 		send Output
 			"const([d_type(Stmt.index_stmt.type)]) *[Stmt.index_stmt.ident];
 	}
+	elsif match Stmt [label_stmt]
+	{
+		send Output
+			"[Stmt.label_stmt.ident]:
+			"[d_stmt_list( Stmt.label_stmt._repeat_stmt )]
+	}
+	elsif match Stmt [entry_loop]
+	{
+		send Output
+			[d_stmt_list( Stmt.entry_loop._repeat_stmt )]
+	}
 	else {
 		# catches unspecified cases
 		send Output [Stmt]
