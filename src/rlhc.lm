@@ -297,6 +297,7 @@ include 'rlhc-c.lm'
 include 'rlhc-d.lm'
 include 'rlhc-cs.lm'
 include 'rlhc-go.lm'
+include 'rlhc-java.lm'
 
 InputFile: str = argv.pop()
 OutputFile: str = argv.pop()
@@ -339,6 +340,8 @@ elsif ( Lang == 'csharp' )
 	cs_stmt_list( Start._repeat_stmt )
 elsif ( Lang == 'go' )
 	go_stmt_list( Start._repeat_stmt )
+elsif ( Lang == 'java' )
+	java_stmt_list( Start._repeat_stmt )
 else {
 	print( 'rlhc: unrecognized language: ' Lang '\n' )
 }
