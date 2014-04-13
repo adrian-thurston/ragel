@@ -190,7 +190,6 @@ for test_case; do
 			code_suffix=java;
 			compiler=$java_compiler
 			cflags=""
-			continue;
 		;;
 		ruby)
 			lang_opt=-R;
