@@ -715,9 +715,9 @@ void Binary::GOTO( ostream &ret, int gotoDest, bool inFinish )
 
 void Binary::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << vCS() << " = (";
+	ret << "${{" << vCS() << " = $\"-\" 1 {(";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << "goto _again;}";
+	ret << ")}$; " << "goto _again;}}$";
 }
 
 void Binary::CURS( ostream &ret, bool inFinish )
@@ -749,8 +749,8 @@ void Binary::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++;" << vCS() << " = " << 
-			callDest << "; " << "goto _again;}";
+	ret << "${{" << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++;" << vCS() << " = " << 
+			callDest << "; " << "goto _again;}}$";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -763,9 +763,9 @@ void Binary::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++;" << vCS() << " = (";
+	ret << "${{" << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++;" << vCS() << " = $ \"-\" 1 {(";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "); " << "goto _again;}";
+	ret << ")}$; " << "goto _again;}}$";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -773,21 +773,21 @@ void Binary::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 
 void Binary::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << TOP() << "--;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
+	ret << "${{" << TOP() << "--;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
 
 	if ( postPopExpr != 0 ) {
-		ret << "{";
+		ret << "$ \"-\" 1{{";
 		INLINE_LIST( ret, postPopExpr, 0, false, false );
-		ret << "}";
+		ret << "}}$";
 	}
 
-	ret << "goto _again;}";
+	ret << "goto _again;}}$";
 }
 
 void Binary::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "{" << P() << "++; " << "goto _out; }";
+	ret << "${{" << P() << "++; " << "goto _out; }}$";
 }
 
 }
