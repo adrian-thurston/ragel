@@ -277,8 +277,8 @@ void BinaryLooped::writeExec()
 		out << "	int _ps;\n";
 
 	out <<
-		"	uint _trans;\n" <<
-		"	uint _cond;\n";
+		"	uint _trans = 0;\n" <<
+		"	uint _cond = 0;\n";
 
 	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 			|| redFsm->anyFromStateActions() )
