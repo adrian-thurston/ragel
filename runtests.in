@@ -196,7 +196,6 @@ for test_case; do
 			code_suffix=rb;
 			compiler=$ruby_engine
 			cflags=""
-			continue;
 		;;
         csharp)
             lang_opt="-A";
