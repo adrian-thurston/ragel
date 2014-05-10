@@ -14,12 +14,17 @@ void java_tok_list( TL: host::tok* )
 void java_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
-		['$' string uint '{' TL: host::tok* host::`}$]
+		[`@ string uint `{ TL: host::tok* host::`}$]
 	{
 		java_tok_list( TL )
 	}
 	elsif match ExprFactor
-		['=' string uint '{' TL: host::tok* host::`}$]
+		[`$ string uint `{ TL: host::tok* host::`}$]
+	{
+		java_tok_list( TL )
+	}
+	elsif match ExprFactor
+		[`= string uint `{ TL: host::tok* host::`}$]
 	{
 		java_tok_list( TL )
 	}
@@ -272,12 +277,17 @@ void java_num_list( NumList: num_list )
 void java_stmt( Stmt: stmt )
 {
 	if match Stmt
-		['$' string uint '{' TL: host::tok* host::`}$]
+		[`@ string uint `{ TL: host::tok* host::`}$]
 	{
 		java_tok_list( TL )
 	}
 	elsif match Stmt
-		['=' string uint '{' TL: host::tok* host::`}$]
+		[`$ string uint `{ TL: host::tok* host::`}$]
+	{
+		java_tok_list( TL )
+	}
+	elsif match Stmt
+		[`= string uint `{ TL: host::tok* host::`}$]
 	{
 		java_tok_list( TL )
 	}

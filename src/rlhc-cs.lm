@@ -14,12 +14,17 @@ void cs_tok_list( TL: host::tok* )
 void cs_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
-		['$' string uint '{' TL: host::tok* host::`}$]
+		[`@ string uint `{ TL: host::tok* host::`}$]
 	{
 		cs_tok_list( TL )
 	}
 	elsif match ExprFactor
-		['=' string uint '{' TL: host::tok* host::`}$]
+		[`$ string uint `{ TL: host::tok* host::`}$]
+	{
+		cs_tok_list( TL )
+	}
+	elsif match ExprFactor
+		[`= string uint `{ TL: host::tok* host::`}$]
 	{
 		cs_tok_list( TL )
 	}
@@ -278,12 +283,17 @@ void cs_num_list( NumList: num_list )
 void cs_stmt( Stmt: stmt )
 {
 	if match Stmt
-		['$' string uint '{' TL: host::tok* host::`}$]
+		[`@ string uint `{ TL: host::tok* host::`}$]
 	{
 		cs_tok_list( TL )
 	}
 	elsif match Stmt
-		['=' string uint '{' TL: host::tok* host::`}$]
+		[`$ string uint `{ TL: host::tok* host::`}$]
+	{
+		cs_tok_list( TL )
+	}
+	elsif match Stmt
+		[`= string uint `{ TL: host::tok* host::`}$]
 	{
 		cs_tok_list( TL )
 	}

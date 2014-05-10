@@ -14,6 +14,11 @@ void d_tok_list( TL: host::tok* )
 void d_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
+		[`@ string uint `{ TL: host::tok* host::`}$]
+	{
+		d_tok_list( TL )
+	}
+	elsif match ExprFactor
 		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
 		d_tok_list( TL )
@@ -270,6 +275,11 @@ void d_num_list( NumList: num_list )
 void d_stmt( Stmt: stmt )
 {
 	if match Stmt
+		[`@ string uint `{ TL: host::tok* host::`}$]
+	{
+		d_tok_list( TL )
+	}
+	elsif match Stmt
 		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
 		d_tok_list( TL )

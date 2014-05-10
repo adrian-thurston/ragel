@@ -14,12 +14,17 @@ void ruby_tok_list( TL: host::tok* )
 void ruby_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
-		['$' string uint '{' TL: host::tok* host::`}$]
+		[`@ string uint `{ TL: host::tok* host::`}$]
 	{
 		ruby_tok_list( TL )
 	}
 	elsif match ExprFactor
-		['=' string uint '{' TL: host::tok* host::`}$]
+		[`$ string uint `{ TL: host::tok* host::`}$]
+	{
+		ruby_tok_list( TL )
+	}
+	elsif match ExprFactor
+		[`= string uint `{ TL: host::tok* host::`}$]
 	{
 		ruby_tok_list( TL )
 	}
@@ -272,12 +277,17 @@ void ruby_num_list( NumList: num_list )
 void ruby_stmt( Stmt: stmt )
 {
 	if match Stmt
-		['$' string uint '{' TL: host::tok* host::`}$]
+		[`@ string uint `{ TL: host::tok* host::`}$]
 	{
 		ruby_tok_list( TL )
 	}
 	elsif match Stmt
-		['=' string uint '{' TL: host::tok* host::`}$]
+		[`$ string uint `{ TL: host::tok* host::`}$]
+	{
+		ruby_tok_list( TL )
+	}
+	elsif match Stmt
+		[`= string uint `{ TL: host::tok* host::`}$]
 	{
 		ruby_tok_list( TL )
 	}

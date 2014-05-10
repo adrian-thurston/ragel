@@ -251,10 +251,11 @@ void InputData::writeOutput()
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
 		if ( ii->type == InputItem::Write ) {
 			CodeGenData *cgd = ii->pd->cgd;
-			cgd->writeStatement( ii->loc, ii->writeArgs.length(), ii->writeArgs.data, generateDot, hostLang );
+			cgd->writeStatement( ii->loc, ii->writeArgs.length(),
+					ii->writeArgs.data, generateDot, hostLang );
 		}
 		else {
-			openHostBlock( '$', this, *outStream, inputFileName, ii->loc.line );
+			openHostBlock( '@', this, *outStream, inputFileName, ii->loc.line );
 			*outStream << ii->data.str();
 			*outStream << "}$";
 		}

@@ -101,11 +101,12 @@ lex
 			`? `* `+ `> `< `&
 			`~ `! `!= `== `<< `>>
 			`+= `&& `|| `<= `>= `->
-			`++ `--
+			`++ `-- `@
 end
 
 def embedded_host
-	[`$ string uint `{ host::tok* host::`}$]
+	[`@ string uint `{ host::tok* host::`}$]
+|	[`$ string uint `{ host::tok* host::`}$]
 |	[`= string uint `{ host::tok* host::`}$]
 
 def type
