@@ -101,7 +101,7 @@ lex
 			`? `* `+ `> `< `&
 			`~ `! `!= `== `<< `>>
 			`+= `&& `|| `<= `>= `->
-			`++ `-- `@
+			`++ `-- `@ `-=
 end
 
 def embedded_host
@@ -182,7 +182,7 @@ def expr_cond
 	[expr_test]
 
 def assign_op
-	[`=] | [`+=]
+	[`=] | [`+=] | [`-=]
 
 def expr_assign
 	[expr_assign assign_op expr_cond]

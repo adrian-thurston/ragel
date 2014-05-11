@@ -750,7 +750,7 @@ void Binary::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	}
 
 	ret << "${{" << STACK() << "[" << TOP() << "] = " <<
-			vCS() << "; " << TOP() << "++;" << vCS() << " = " << 
+			vCS() << "; " << TOP() << " += 1;" << vCS() << " = " << 
 			callDest << "; " << "goto _again;}}$";
 
 	if ( prePushExpr != 0 )
@@ -765,7 +765,7 @@ void Binary::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 	}
 
 	ret << "${{" << STACK() << "[" << TOP() << "] = " <<
-			vCS() << "; " << TOP() << "++;" << vCS() << " = = \"-\" 1 {(";
+			vCS() << "; " << TOP() << " += 1;" << vCS() << " = = \"-\" 1 {(";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
 	ret << ")}$; " << "goto _again;}}$";
 
@@ -775,7 +775,7 @@ void Binary::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 
 void Binary::RET( ostream &ret, bool inFinish )
 {
-	ret << "${{" << TOP() << "--;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
+	ret << "${{" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
 
 	if ( postPopExpr != 0 ) {
 		ret << "$ \"-\" 1{{";
@@ -789,7 +789,7 @@ void Binary::RET( ostream &ret, bool inFinish )
 void Binary::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "${{" << P() << "++; " << "goto _out; }}$";
+	ret << "${{" << P() << "+= 1; " << "goto _out; }}$";
 }
 
 }

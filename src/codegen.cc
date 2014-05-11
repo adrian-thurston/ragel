@@ -538,7 +538,7 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			ret << "={" << GET_KEY() << "}=";
 			break;
 		case GenInlineItem::Hold:
-			ret << P() << "--;";
+			ret << P() << "-= 1;";
 			break;
 		case GenInlineItem::Exec:
 			EXEC( ret, item, targState, inFinish );
