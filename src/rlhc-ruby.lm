@@ -369,11 +369,15 @@ void ruby_stmt( Stmt: stmt )
 	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: `;]
 	{
 		send Output
-			[TypeList ruby_type(Type) OptPtr Ident]
+			[OptPtr Ident]
 
 		if match OptInit [E: `= expr] {
 			send Output
 				[E ruby_expr(OptInit.expr)]
+		}
+		else {
+			send Output
+				"= 0
 		}
 
 		send Output
@@ -391,7 +395,7 @@ void ruby_stmt( Stmt: stmt )
 	elsif match Stmt [Index: index_stmt]
 	{
 		send Output
-			"int [Index.ident];
+			"[Index.ident] = 0;
 	}
 	elsif match Stmt [case_label]
 	{
@@ -416,7 +420,7 @@ void ruby_stmt( Stmt: stmt )
 	elsif match Stmt [entry_loop]
 	{
 		send Output
-			"int _goto_level = 0
+			"_goto_level = 0
 			"while true 
 			"	_trigger_goto = false
 			"	if _goto_level <= 0 
