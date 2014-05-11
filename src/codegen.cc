@@ -609,9 +609,8 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 {
 	ret << '\t';
 	openHostBlock( '$', pd->id, ret, action->loc.fileName, action->loc.line );
-	ret << '{';
 	INLINE_LIST( ret, action->inlineList, targState, inFinish, csForced );
-	ret << "}}$";
+	ret << "}$";
 }
 
 void CodeGen::CONDITION( ostream &ret, GenAction *condition )

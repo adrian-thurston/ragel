@@ -21,7 +21,7 @@ void d_expr_factor( ExprFactor: expr_factor )
 	elsif match ExprFactor
 		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
-		d_tok_list( TL )
+		send Output "{[d_tok_list( TL )]}
 	}
 	elsif match ExprFactor
 		[`= string uint `{ TL: host::tok* host::`}$]
@@ -282,7 +282,7 @@ void d_stmt( Stmt: stmt )
 	elsif match Stmt
 		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
-		d_tok_list( TL )
+		send Output "{[d_tok_list( TL )]}
 	}
 	elsif match Stmt
 		[`= string uint `{ TL: host::tok* host::`}$]

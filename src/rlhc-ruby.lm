@@ -21,7 +21,10 @@ void ruby_expr_factor( ExprFactor: expr_factor )
 	elsif match ExprFactor
 		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
-		ruby_tok_list( TL )
+		send Output
+			"begin
+			"[ruby_tok_list( TL )]
+			"end
 	}
 	elsif match ExprFactor
 		[`= string uint `{ TL: host::tok* host::`}$]
@@ -284,7 +287,10 @@ void ruby_stmt( Stmt: stmt )
 	elsif match Stmt
 		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
-		ruby_tok_list( TL )
+		send Output
+			"begin
+			"[ruby_tok_list( TL )]
+			"end
 	}
 	elsif match Stmt
 		[`= string uint `{ TL: host::tok* host::`}$]

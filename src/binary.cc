@@ -715,7 +715,7 @@ void Binary::GOTO( ostream &ret, int gotoDest, bool inFinish )
 
 void Binary::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "${{" << vCS() << " = $\"-\" 1 {(";
+	ret << "${{" << vCS() << " = =\"-\" 1 {(";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ")}$; " << "goto _again;}}$";
 }
@@ -749,7 +749,8 @@ void Binary::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "${{" << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++;" << vCS() << " = " << 
+	ret << "${{" << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << "++;" << vCS() << " = " << 
 			callDest << "; " << "goto _again;}}$";
 
 	if ( prePushExpr != 0 )
@@ -763,7 +764,8 @@ void Binary::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "${{" << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++;" << vCS() << " = $ \"-\" 1 {(";
+	ret << "${{" << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << "++;" << vCS() << " = = \"-\" 1 {(";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
 	ret << ")}$; " << "goto _again;}}$";
 

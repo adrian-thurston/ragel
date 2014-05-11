@@ -21,8 +21,7 @@ void go_expr_factor( ExprFactor: expr_factor )
 	elsif match ExprFactor
 		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
-		go_tok_list( TL )
-		send Output ["\n"]
+		send Output "{[go_tok_list( TL )]}
 	}
 	elsif match ExprFactor
 		[`= string uint `{ TL: host::tok* host::`}$]
@@ -286,8 +285,7 @@ void go_stmt( Stmt: stmt )
 	elsif match Stmt
 		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
-		go_tok_list( TL )
-		send Output "
+		send Output "{[go_tok_list( TL )]}
 	}
 	else if match Stmt
 		[`= string uint `{ TL: host::tok* host::`}$]

@@ -21,7 +21,7 @@ void cs_expr_factor( ExprFactor: expr_factor )
 	elsif match ExprFactor
 		[`$ string uint `{ TL: host::tok* host::`}$]
 	{
-		cs_tok_list( TL )
+		send Output "{[cs_tok_list( TL )]}
 	}
 	elsif match ExprFactor
 		[`= string uint `{ TL: host::tok* host::`}$]
