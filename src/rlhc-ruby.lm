@@ -329,7 +329,7 @@ void ruby_stmt( Stmt: stmt )
 				['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
 
 			send Output
-				"else if ( [ruby_expr(ElseIfExpr)] )
+				"elsif ( [ruby_expr(ElseIfExpr)] )
 				"	[ruby_stmt(ElseIfStmt)]
 		}
 
@@ -338,11 +338,14 @@ void ruby_stmt( Stmt: stmt )
 				"else
 				"	[ruby_stmt(ElseStmt)]
 		}
+		send Output
+			"end
 	}
 	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
 		send Output
 			"while ( [ruby_expr(WhileExpr)] )
 			"	[ruby_stmt(WhileStmt)]
+			"end
 	}
 	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
 		send Output
