@@ -15,6 +15,9 @@ rl c_comment
 rl cpp_comment
 	/ '//' [^\n]* NL /
 
+rl pound_comment
+	/ '#' [^\n]* NL /
+
 rl s_literal
 	/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
 
@@ -40,7 +43,7 @@ namespace c_inline
 		token hex_number /'0x' [0-9a-fA-F]+/
 
 		token comment
-			/ c_comment | cpp_comment /
+			/ c_comment | cpp_comment | pound_comment /
 
 		token string
 			/ s_literal | d_literal /

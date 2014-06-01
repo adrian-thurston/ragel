@@ -14,6 +14,9 @@ namespace host
 		rl cpp_comment
 			/ '//' [^\n]* NL /
 
+		rl pound_comment
+			/ '#' [^\n]* NL /
+
 		token ident
 			/( alpha | '_' ) ( alpha | digit | '_' )*/
 
@@ -24,7 +27,7 @@ namespace host
 			/ '0x' [0-9a-fA-F]+ /
 
 		token comment
-			/ c_comment | cpp_comment /
+			/ c_comment | cpp_comment | pound_comment /
 
 		token string
 			/ s_literal | d_literal /
