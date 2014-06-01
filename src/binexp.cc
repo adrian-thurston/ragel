@@ -156,7 +156,7 @@ std::ostream &BinaryExpanded::TO_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numToStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\tcase " << redAct->actListId+1 << ":\n";
+			out << "\t case " << redAct->actListId+1 << ": {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
@@ -164,7 +164,7 @@ std::ostream &BinaryExpanded::TO_STATE_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "break;\n";
+			out << "} break;\n";
 		}
 	}
 
@@ -179,7 +179,7 @@ std::ostream &BinaryExpanded::FROM_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numFromStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\tcase " << redAct->actListId+1 << ":\n";
+			out << "\t case " << redAct->actListId+1 << ": {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
@@ -187,7 +187,7 @@ std::ostream &BinaryExpanded::FROM_STATE_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "break;\n";
+			out << "} break;\n";
 		}
 	}
 
@@ -200,7 +200,7 @@ std::ostream &BinaryExpanded::EOF_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numEofRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\tcase " << redAct->actListId+1 << ":\n";
+			out << "\t case " << redAct->actListId+1 << ": {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
@@ -208,7 +208,7 @@ std::ostream &BinaryExpanded::EOF_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "break;\n";
+			out << "} break;\n";
 		}
 	}
 
@@ -223,7 +223,7 @@ std::ostream &BinaryExpanded::ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\tcase " << redAct->actListId+1 << ":\n";
+			out << "\t case " << redAct->actListId+1 << ": {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
@@ -231,7 +231,7 @@ std::ostream &BinaryExpanded::ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "break;\n";
+			out << "} break;\n";
 		}
 	}
 
