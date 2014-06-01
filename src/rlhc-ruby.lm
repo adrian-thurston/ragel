@@ -5,7 +5,10 @@ void ruby_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
 		if match Tok [host::`${ StmtList: stmt* host::`}$]
-			ruby_stmt_list( StmtList )
+			send Output
+				"begin
+				"[ruby_stmt_list( StmtList )]
+				"end
 		elsif match Tok [host::`={ Expr: expr host::`}=]
 			ruby_expr( Expr )
 		else {
@@ -32,7 +35,7 @@ void ruby_expr_factor( ExprFactor: expr_factor )
 	elsif match ExprFactor
 		[`= string uint `{ TL: host::tok* host::`}$]
 	{
-		ruby_tok_list( TL )
+		send Output "([ruby_tok_list( TL )])"
 	}
 	elsif match ExprFactor
 		[O:`( TL: expr C: `)]
@@ -300,7 +303,7 @@ void ruby_stmt( Stmt: stmt )
 	elsif match Stmt
 		[`= string uint `{ TL: host::tok* host::`}$]
 	{
-		ruby_tok_list( TL )
+		send Output "([ruby_tok_list( TL )])"
 	}
 	elsif match Stmt [Array: array] {
 		send Output
