@@ -426,6 +426,7 @@ void ruby_stmt( Stmt: stmt )
 			"	if _goto_level <= 0 
 			"	[ruby_stmt_list( Stmt.entry_loop._repeat_stmt )]
 			"	end
+			"	break
 			"end
 	}
 	elsif match Stmt [label_stmt]
