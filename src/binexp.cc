@@ -298,7 +298,8 @@ void BinaryExpanded::writeExec()
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _cpc;\n"
 		"	uint _trans;\n"
-		"	uint _cond;\n";
+		"	uint _cond;\n"
+		"	entry {\n";
 
 	out << "\n";
 
@@ -316,7 +317,7 @@ void BinaryExpanded::writeExec()
 			"		goto _out;\n";
 	}
 
-	out << "_resume:\n";
+	out << "label _resume { \n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -328,14 +329,16 @@ void BinaryExpanded::writeExec()
 
 	LOCATE_TRANS();
 
-	out << "_match:\n";
+	out << "}\n";
+	out << "label _match {\n";
 
 	if ( useIndicies )
 		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
 
 	LOCATE_COND();
 
-	out << "_match_cond:\n";
+	out << "}\n";
+	out << "label _match_cond {\n";
 
 	if ( redFsm->anyEofTrans() )
 		out << "_eof_trans:\n";
@@ -360,7 +363,8 @@ void BinaryExpanded::writeExec()
 
 //	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 //			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "_again:\n";
+	out << "}\n";
+	out << "label _again {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -390,7 +394,7 @@ void BinaryExpanded::writeExec()
 	}
 
 	if ( testEofUsed )
-		out << "	_test_eof: {}\n";
+		out << "}\n	label _test_eof { {}\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
@@ -420,7 +424,11 @@ void BinaryExpanded::writeExec()
 	}
 
 	if ( outLabelUsed )
-		out << "	_out: {}\n";
+		out << "}\n	label _out { {}\n";
+
+	/* The entry loop. */
+	out << "}}\n";
+
 
 	out << "	}\n";
 }
