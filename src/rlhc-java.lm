@@ -373,6 +373,8 @@ void java_stmt( Stmt: stmt )
 	{
 		send Output
 			"case [java_expr( Stmt.case_label.expr )]:
+			"[java_stmt_list( Stmt.case_label._repeat_stmt )]
+			"break;
 	}
 	elsif match Stmt [goto_label]
 	{

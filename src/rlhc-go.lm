@@ -390,6 +390,13 @@ void go_stmt( Stmt: stmt )
 		send Output
 			"var  [Stmt.index_stmt.ident] int
 	}
+	elsif match Stmt [case_label]
+	{
+		send Output
+			"case [go_expr( Stmt.case_label.expr )]:
+			"[go_stmt_list( Stmt.case_label._repeat_stmt )]
+			"break;
+	}
 	elsif match Stmt [label_stmt]
 	{
 		send Output

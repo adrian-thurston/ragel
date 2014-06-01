@@ -75,7 +75,7 @@ lex
 	literal `uint `const
 			`s8 `s16 `s32 `s64
 			`s128 `nil `export
-			`fallthrough `u `c
+			`fallthrough `u `c `break
 
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -241,7 +241,7 @@ def switch_stmt
 	[`switch `( expr `) `{ stmt* `}]
 
 def case_label
-	[`case expr `:]
+	[`case expr `: `{ stmt* `} `break `; ]
 
 def goto_label
 	[ident `:]
@@ -289,6 +289,7 @@ def stmt
 |	[export_stmt]
 |	[goto_stmt]
 |	[`fallthrough `;]
+|	[`break `;]
 |	[`{ stmt* `}]
 
 def start

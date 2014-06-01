@@ -379,6 +379,8 @@ void cs_stmt( Stmt: stmt )
 	{
 		send Output
 			"case [cs_expr( Stmt.case_label.expr )]:
+			"[cs_stmt_list( Stmt.case_label._repeat_stmt )]
+			"break;
 	}
 	elsif match Stmt [label_stmt]
 	{

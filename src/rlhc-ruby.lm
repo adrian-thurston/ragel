@@ -412,7 +412,7 @@ void ruby_stmt( Stmt: stmt )
 			"end
 			"when [ruby_expr( Stmt.case_label.expr )] then
 			"begin
-			"
+			"[ruby_stmt_list( Stmt.case_label._repeat_stmt )]
 	}
 	elsif match Stmt [goto_label]
 	{
