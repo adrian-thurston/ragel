@@ -1,3 +1,6 @@
+global EntryLoop: int = 0
+global ElCascade: int = 0
+
 void ruby_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
@@ -342,10 +345,16 @@ void ruby_stmt( Stmt: stmt )
 			"end
 	}
 	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
+		ElCascade = ElCascade + 1
 		send Output
 			"while ( [ruby_expr(WhileExpr)] )
 			"	[ruby_stmt(WhileStmt)]
 			"end
+		if EntryLoop {
+			send Output
+				"next if _trigger_goto
+		}
+		ElCascade = ElCascade - 1
 	}
 	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
 		send Output
@@ -411,14 +420,25 @@ void ruby_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [G: goto_stmt]
 	{
-		send Output
-			"begin
-			"	_goto_level = [$G.Id]
-			"	next
-			"end
+		if ( ElCascade ) {
+			send Output
+				"begin
+				"	_trigger_goto = true
+				"	_goto_level = [$G.Id]
+				"	break
+				"end
+		}
+		else {
+			send Output
+				"begin
+				"	_goto_level = [$G.Id]
+				"	next
+				"end
+		}
 	}
 	elsif match Stmt [entry_loop]
 	{
+		EntryLoop = EntryLoop + 1
 		send Output
 			"_goto_level = 0
 			"while true 
@@ -428,6 +448,7 @@ void ruby_stmt( Stmt: stmt )
 			"	end
 			"	break
 			"end
+		EntryLoop = EntryLoop - 1
 	}
 	elsif match Stmt [label_stmt]
 	{
