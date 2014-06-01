@@ -315,11 +315,11 @@ void ruby_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [Value: value] {
 		send Output
-		"class << self
-		"	attr_accessor :[ Value.value_pass.ident ]
-		"end
-		"self.[ Value.value_pass.ident ] = [ Value.value_pass.number ];
-		"
+			"class << self
+			"	attr_accessor :[ Value.value_pass.ident ]
+			"end
+			"self.[ Value.value_pass.ident ] = [ Value.value_pass.number ];
+			"
 	}
 	elsif match Stmt [
 			'if' O: `( IfExpr: expr C: `) IfStmt: stmt
@@ -397,7 +397,11 @@ void ruby_stmt( Stmt: stmt )
 	elsif match Stmt [Export: export_stmt]
 	{
 		send Output
-			"static final char [Export.ident] = [ruby_number(Export.number)];
+			"class << self
+			"	attr_accessor :[ Export.ident ]
+			"end
+			"self.[ Export.ident ] = [ ruby_number(Export.number) ];
+			"
 	}
 	elsif match Stmt ['fallthrough' ';']
 	{
