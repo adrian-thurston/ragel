@@ -57,6 +57,8 @@ void ruby_expr_factor( ExprFactor: expr_factor )
 	{
 		send Output
 			[ ExprFactor.ident '[' ruby_expr( ExprFactor.expr ) ']']
+		if $ExprFactor.ident == 'data'
+			send Output '.ord'
 	}
 	elsif match ExprFactor
 			[T: `TRUE]

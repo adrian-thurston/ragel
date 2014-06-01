@@ -12,7 +12,7 @@
         neg = true;
     }
     action add_digit {
-		val = val * 10 + (fc - "0"[0]);
+		val = val * 10 + (fc - "0"[0].ord);
     }
     action finish {
 		val = -1 * val if neg
