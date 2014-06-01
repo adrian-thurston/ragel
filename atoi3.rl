@@ -18,7 +18,7 @@
 		val = -1 * val if neg
     }
     action print {
-        puts val;
+        print val, "\n"
     }
     atoi = (('-' @ see_neg | '+') ? (digit @ add_digit) +) > begin % finish;
     main := atoi '\n' @ print;
