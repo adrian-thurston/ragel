@@ -383,7 +383,7 @@ void BinaryExpanded::writeExec()
 
 	if ( !noEnd ) {
 		out << 
-			"	" << P() << "++;\n"
+			"	" << P() << " += 1;\n"
 			"	if ( " << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";
 	}
