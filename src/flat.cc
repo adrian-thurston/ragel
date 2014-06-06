@@ -394,8 +394,7 @@ void Flat::LOCATE_TRANS()
 		}
 
 		out << 
-			"		break;\n"
-			"	}\n";
+			"	} break;\n";
 	}
 
 	out << 
