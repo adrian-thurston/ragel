@@ -205,7 +205,8 @@ void FlatLooped::writeExec()
 		"	index " << ARR_TYPE( indicies ) << " _inds;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _klen;\n"
-		"	int _cpc;\n";
+		"	int _cpc;\n"
+		"	entry {\n";
 
 	out << "\n";
 
@@ -223,26 +224,26 @@ void FlatLooped::writeExec()
 			"		goto _out;\n";
 	}
 
-	out << "_resume:\n";
+	out << "label _resume {\n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts ); _acts++;\n"
+			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts ); _acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
-			"		_nacts--;\n"
-			"		_acts++;\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
 			"	}\n"
 			"\n";
 	}
 
 	LOCATE_TRANS();
 
-	out << "_match_cond:\n";
+	out << "} label _match_cond {\n";
 
 	if ( redFsm->anyEofTrans() )
 		out << "_eof_trans:\n";
@@ -261,32 +262,32 @@ void FlatLooped::writeExec()
 			"\n"
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
 			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
-			"	_acts++;\n"
+			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
 			"		{\n";
 			ACTION_SWITCH() <<
 			"		}\n"
-			"		_nacts--;\n"
-			"		_acts++;\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
 			"	}\n"
 			"\n";
 	}
 
 //	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 //			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "_again:\n";
+		out << "} label _again {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) << "[" << vCS() << "]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF ( actions ) << ", _acts ); _acts++;\n"
+			"	_nacts = (uint) deref( " << ARR_REF ( actions ) << ", _acts ); _acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
-			"		_nacts--;\n"
-			"		_acts++;\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
 			"	}\n"
 			"\n";
 	}
@@ -300,7 +301,7 @@ void FlatLooped::writeExec()
 
 	if ( !noEnd ) {
 		out << 
-			"	" << P() << "++;\n"
+			"	" << P() << " += 1;\n"
 			"	if ( " << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";
 	}
@@ -311,7 +312,7 @@ void FlatLooped::writeExec()
 	}
 
 	if ( testEofUsed )
-		out << "	_test_eof: {}\n";
+		out << "} label _test_eof { {}\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
@@ -332,13 +333,13 @@ void FlatLooped::writeExec()
 				"	index " << ARR_TYPE( actions ) << " __acts;\n"
 				"	uint __nacts;\n"
 				"	__acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
-				"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts ); __acts++;\n"
+				"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts ); __acts += 1;\n"
 				"	while ( __nacts > 0 ) {\n"
 				"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
 				EOF_ACTION_SWITCH() <<
 				"		}\n"
-				"		__nacts--;\n"
-				"		__acts++;\n"
+				"		__nacts -= 1;\n"
+				"		__acts += 1;\n"
 				"	}\n";
 		}
 
@@ -348,7 +349,10 @@ void FlatLooped::writeExec()
 	}
 
 	if ( outLabelUsed )
-		out << "	_out: {}\n";
+		out << "} label _out { {}\n";
+
+	/* The entry loop. */
+	out << "}}\n";
 
 	out << "	}\n";
 }

@@ -240,7 +240,8 @@ void FlatExpanded::writeExec()
 		"	index " << ARR_TYPE( indicies ) << " _inds;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _klen;\n"
-		"	int _cpc;\n";
+		"	int _cpc;\n"
+		"	entry {\n";
 
 	if ( !noEnd ) {
 		testEofUsed = true;
@@ -256,7 +257,7 @@ void FlatExpanded::writeExec()
 			"		goto _out;\n";
 	}
 
-	out << "_resume:\n";
+	out << "label _resume {\n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -268,7 +269,7 @@ void FlatExpanded::writeExec()
 
 	LOCATE_TRANS();
 
-	out << "_match_cond:\n";
+	out << "} label _match_cond {\n";
 
 	if ( redFsm->anyEofTrans() )
 		out << "_eof_trans:\n";
@@ -292,7 +293,7 @@ void FlatExpanded::writeExec()
 
 //	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 //			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "_again:\n";
+		out << "} label _again {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -311,7 +312,7 @@ void FlatExpanded::writeExec()
 
 	if ( !noEnd ) {
 		out << 
-			"	" << P() << "++;\n"
+			"	" << P() << "+= 1;\n"
 			"	if ( " << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";
 	}
@@ -322,7 +323,7 @@ void FlatExpanded::writeExec()
 	}
 
 	if ( testEofUsed )
-		out << "	_test_eof: {}\n";
+		out << "} label _test_eof { {}\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
@@ -351,7 +352,10 @@ void FlatExpanded::writeExec()
 	}
 
 	if ( outLabelUsed )
-		out << "	_out: {}\n";
+		out << "} label _out { {}\n";
+
+	/* The entry loop. */
+	out << "}}\n";
 
 	out << "	}\n";
 }
