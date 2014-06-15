@@ -15,7 +15,7 @@ rl c_comment
 rl cpp_comment
 	/ '//' [^\n]* NL /
 
-rl pound_comment
+rl ruby_comment
 	/ '#' [^\n]* NL /
 
 rl s_literal
@@ -23,6 +23,9 @@ rl s_literal
 
 rl d_literal
 	/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+rl host_re_literal
+	/ '/' ([^/\\] | NL | '\\' (any | NL))* '/' /
 
 namespace srlex
 	lex
@@ -43,7 +46,7 @@ namespace c_inline
 		token hex_number /'0x' [0-9a-fA-F]+/
 
 		token comment
-			/ c_comment | cpp_comment | pound_comment /
+			/ c_comment | cpp_comment /
 
 		token string
 			/ s_literal | d_literal /
@@ -122,8 +125,116 @@ namespace c_inline
 	|	[`fbreak `;] :Fbreak
 end
 
+namespace ruby_inline
+	lex 
+		literal `fpc `fc  `fcurs `ftargs
+			`fentry `fhold `fexec `fgoto `fnext
+			`fcall `fret `fbreak
+
+		token ident /ident/
+		token number /digit+/
+		token hex_number /'0x' [0-9a-fA-F]+/
+
+		token comment
+			/ ruby_comment /
+
+		token string
+			/ s_literal | d_literal | host_re_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		literal 
+			`{ `} `:: `* `, `( `) `;
+
+		token ruby_any / any /
+	end
+
+	def inline_expr
+		[expr_item*]
+
+	def expr_item
+		[expr_any] :ExprAny
+	|	[expr_symbol] :ExprSymbol
+	|	[expr_interpret] :ExprInterpret
+
+	def expr_any
+		[whitespace]
+	|	[comment]
+	|	[string]
+	|	[number]
+	|	[hex_number]
+	|	[ident]
+	|	[ruby_any]
+
+	def expr_symbol
+		[`,] | [`(] | [`)] | [`*] | [`::]
+
+	def expr_interpret
+		[`fpc] :Fpc
+	|	[`fc] :Fc
+	|	[`fcurs] :Fcurs
+	|	[`ftargs]  :Ftargs
+	|	[`fentry `( state_ref srlex::`)] :Fentry
+
+	def state_ref
+		[opt_name_sep state_ref_names]
+
+	def opt_name_sep
+		[srlex::`::] :ColonColon
+	|	[] :Empty
+
+	# List of names separated by ::
+	def state_ref_names
+		[state_ref_names srlex::`:: srlex::word] :Rec
+	|	[srlex::word] :Base
+
+	def r_inline_block
+		[block_item*]
+	
+	def block_item
+		[expr_any] :ExprAny
+	|	[block_symbol] :BlockSymbol
+	|	[block_interpret] :BlockInterpret
+	|	[`{ r_inline_block `}] :RecBlock
+
+	def block_symbol
+		[`,] | [`;] | [`(] | [`)] | [`*] | [`::]
+
+	def block_interpret
+		[expr_interpret] :ExprInterpret
+	|	[`fhold whitespace? `;] :Fhold
+	|	[`fgoto whitespace? `* inline_expr `;] :FgotoExpr
+	|	[`fnext whitespace? `* inline_expr `;] :FnextExpr
+	|	[`fcall whitespace? `* inline_expr `;] :FcallExpr
+	|	[`fexec inline_expr `;] :Fexec
+	|	[`fgoto state_ref srlex::`;] :FgotoSr
+	|	[`fnext state_ref srlex::`;] :FnextSr
+	|	[`fcall state_ref srlex::`;] :FcallSr
+	|	[`fret `;] :Fret
+	|	[`fbreak `;] :Fbreak
+end
+
+global Lang: str
+
+lex
+	token select /''/
+	{
+		if Lang == "ruby"
+			input.push( make_token( typeid<ruby_select> '' ) )
+		else
+			input.push( make_token( typeid<c_select> '' ) )
+	}
+
+	token c_select //
+	token ruby_select //
+end
+
+
 namespace ragel
 	lex
+		literal `}%%
+
 		ignore /[\t\n ]+/
 		ignore /'#' any* :> '\n'/
 
@@ -237,10 +348,12 @@ namespace ragel
 	|	[word] :Base
 
 	def action_expr
-		[`{ c_inline::inline_expr `}]
+		[`{ c_select    c_inline::inline_expr `}]
+	|	[`{ ruby_select ruby_inline::inline_expr ruby_inline::`}]
 
 	def action_block
-		[`{ c_inline::inline_block `}]
+		[`{ c_select    CInlineBlock: c_inline::inline_block `}]
+	|	[`{ ruby_select RubyInlineBlock: ruby_inline::r_inline_block ruby_inline::`}]
 
 	def action_ref 
 		[word] :Word
@@ -432,7 +545,7 @@ end
 
 namespace c_host
 	lex 
-		literal `%%{ `}%%
+		literal `%%{
 
 		token slr /'%%' [^{] [^\n]* '\n'/
 		{
@@ -445,16 +558,11 @@ namespace c_host
 
 		rl NL / '\n' /
 
-		rl ruby_comment / '#' [^\n]* NL /
-
 		rl s_literal
 			/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
 
 		rl d_literal
 			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
-
-		rl host_re_literal
-			/ '/' ([^/\\] | NL | '\\' (any | NL))* '/' /
 
 		token ident /ident/
 		token number /digit+/
@@ -482,7 +590,58 @@ namespace c_host
 	|	[c_any]
 
 	def section
-		[`%%{ ragel::ragel_start `}%%] :MultiLine
+		[`%%{ ragel::ragel_start ragel::`}%%] :MultiLine
+	|	[tok] :Tok
+end
+
+namespace ruby_host
+	lex 
+		literal `%%{
+
+		token slr /'%%' [^{] [^\n]* '\n'/
+		{
+			input.pull( 2 )
+			R: str = input.pull( match_length - 3 )
+			input.push( "}%%" )
+			input.push( R )
+			input.push( "%%{" )
+		}
+
+		rl NL / '\n' /
+
+		rl s_literal
+			/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+
+		rl d_literal
+			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+		token ident /ident/
+		token number /digit+/
+		token hex_number /'0x' [0-9a-fA-F]+/
+
+		token comment
+			/ ruby_comment /
+
+		token string
+			/ s_literal | d_literal | host_re_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		token ruby_any / any /
+	end
+
+	def tok
+		[ident]
+	|	[number]
+	|	[hex_number]
+	|	[comment]
+	|	[string]
+	|	[whitespace]
+	|	[ruby_any]
+
+	def section
+		[`%%{ ragel::ragel_start ragel::`}%%] :MultiLine
 	|	[tok] :Tok
 end
 

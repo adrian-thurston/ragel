@@ -1,7 +1,22 @@
 include 'ragel.lm'
 
+lex
+	token selectt /''/
+	{
+		if Lang == "ruby"
+			input.push( make_token( typeid<ruby_selectt> '' ) )
+		else
+			input.push( make_token( typeid<c_selectt> '' ) )
+	}
+
+	token c_selectt //
+	token ruby_selectt //
+end
+
+
 def start
-	[SectionList: c_host::section*]
+	[c_selectt SectionList: c_host::section*]
+|	[ruby_selectt RSectionList: ruby_host::section*]
 
 def import_val
 	[Number: c_host::number] :Number
@@ -13,6 +28,9 @@ def import
 export RagelTree: start
 export RagelError: str
 export RagelImport: import*
+
+# Language
+Lang = argv.pop()
 
 # The open is expected to succeed. The open is tested before
 # the colm program is called.

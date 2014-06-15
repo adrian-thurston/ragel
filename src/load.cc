@@ -120,7 +120,21 @@ struct LoadRagel
 		return new InlineItem( loc, t, InlineItem::Text );
 	}
 
+	InlineItem *loadExprAny( ruby_inline::expr_any ExprAny )
+	{
+		string t = ExprAny.text();
+		InputLoc loc = ExprAny.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
 	InlineItem *loadExprSymbol( c_inline::expr_symbol ExprSymbol )
+	{
+		string t = ExprSymbol.text();
+		InputLoc loc = ExprSymbol.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	InlineItem *loadExprSymbol( ruby_inline::expr_symbol ExprSymbol )
 	{
 		string t = ExprSymbol.text();
 		InputLoc loc = ExprSymbol.loc();
@@ -143,10 +157,34 @@ struct LoadRagel
 		return nameRef;
 	}
 
+	NameRef *loadStateRefNames( ruby_inline::state_ref_names StateRefNames )
+	{
+		NameRef *nameRef = 0;
+		switch ( StateRefNames.prodName() ) {
+			case ruby_inline::state_ref_names::_Rec:
+				nameRef = loadStateRefNames( StateRefNames._state_ref_names() );
+				nameRef->append( StateRefNames.word().text() );
+				break;
+			case ruby_inline::state_ref_names::_Base:
+				nameRef = new NameRef;
+				nameRef->append( StateRefNames.word().text() );
+				break;
+		}
+		return nameRef;
+	}
+
 	NameRef *loadStateRef( c_inline::state_ref StateRef )
 	{
 		NameRef *nameRef = loadStateRefNames( StateRef.state_ref_names() );
 		if ( StateRef.opt_name_sep().prodName() == c_inline::opt_name_sep::_ColonColon )
+			nameRef->prepend( "" );
+		return nameRef;
+	}
+
+	NameRef *loadStateRef( ruby_inline::state_ref StateRef )
+	{
+		NameRef *nameRef = loadStateRefNames( StateRef.state_ref_names() );
+		if ( StateRef.opt_name_sep().prodName() == ruby_inline::opt_name_sep::_ColonColon )
 			nameRef->prepend( "" );
 		return nameRef;
 	}
@@ -177,6 +215,32 @@ struct LoadRagel
 		return inlineItem;
 	}
 
+	InlineItem *loadExprInterpret( ruby_inline::expr_interpret ExprInterpret )
+	{
+		InlineItem *inlineItem = 0;
+		InputLoc loc = ExprInterpret.loc();
+		switch ( ExprInterpret.prodName() ) {
+			case ruby_inline::expr_interpret::_Fpc:
+				inlineItem = new InlineItem( loc, InlineItem::PChar );
+				break;
+			case ruby_inline::expr_interpret::_Fc:
+				inlineItem = new InlineItem( loc, InlineItem::Char );
+				break;
+			case ruby_inline::expr_interpret::_Fcurs:
+				inlineItem = new InlineItem( loc, InlineItem::Curs );
+				break;
+			case ruby_inline::expr_interpret::_Ftargs:
+				inlineItem = new InlineItem( loc, InlineItem::Targs );
+				break;
+			case ruby_inline::expr_interpret::_Fentry: {
+				NameRef *nameRef = loadStateRef( ExprInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Entry );
+				break;
+			}
+		}
+		return inlineItem;
+	}
+
 	InlineItem *loadExprItem( c_inline::expr_item ExprItem )
 	{
 		switch ( ExprItem.prodName() ) {
@@ -190,8 +254,28 @@ struct LoadRagel
 		return 0;
 	}
 
+	InlineItem *loadExprItem( ruby_inline::expr_item ExprItem )
+	{
+		switch ( ExprItem.prodName() ) {
+			case ruby_inline::expr_item::_ExprAny:
+				return loadExprAny( ExprItem.expr_any() );
+			case ruby_inline::expr_item::_ExprSymbol:
+				return loadExprSymbol( ExprItem.expr_symbol() );
+			case ruby_inline::expr_item::_ExprInterpret:
+				return loadExprInterpret( ExprItem.expr_interpret() );
+		}
+		return 0;
+	}
+
 
 	InlineItem *loadBlockSymbol( c_inline::block_symbol BlockSymbol )
+	{
+		string t = BlockSymbol.text();
+		InputLoc loc = BlockSymbol.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	InlineItem *loadBlockSymbol( ruby_inline::block_symbol BlockSymbol )
 	{
 		string t = BlockSymbol.text();
 		InputLoc loc = BlockSymbol.loc();
@@ -251,9 +335,72 @@ struct LoadRagel
 		return inlineItem;
 	}
 
+	InlineItem *loadBlockInterpret( ruby_inline::block_interpret BlockInterpret )
+	{
+		InlineItem *inlineItem = 0;
+		InputLoc loc = BlockInterpret.loc();
+		switch ( BlockInterpret.prodName() ) {
+			case ruby_inline::block_interpret::_ExprInterpret:
+				inlineItem = loadExprInterpret( BlockInterpret.expr_interpret() );
+				break;
+			case ruby_inline::block_interpret::_Fhold:
+				inlineItem = new InlineItem( loc, InlineItem::Hold );
+				break;
+			case ruby_inline::block_interpret::_Fret:
+				inlineItem = new InlineItem( loc, InlineItem::Ret );
+				break;
+			case ruby_inline::block_interpret::_Fbreak:
+				inlineItem = new InlineItem( loc, InlineItem::Break );
+				break;
+
+			case ruby_inline::block_interpret::_FgotoExpr:
+				inlineItem = new InlineItem( loc, InlineItem::GotoExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ruby_inline::block_interpret::_FnextExpr:
+				inlineItem = new InlineItem( loc, InlineItem::NextExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ruby_inline::block_interpret::_FcallExpr:
+				inlineItem = new InlineItem( loc, InlineItem::CallExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ruby_inline::block_interpret::_Fexec:
+				inlineItem = new InlineItem( loc, InlineItem::Exec );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ruby_inline::block_interpret::_FgotoSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Goto );
+				break;
+			}
+			case ruby_inline::block_interpret::_FnextSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Next );
+				break;
+			}
+			case ruby_inline::block_interpret::_FcallSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Call );
+				break;
+			}
+		}
+		return inlineItem;
+	}
+
 	InlineList *loadInlineBlock( InlineList *inlineList, c_inline::inline_block InlineBlock )
 	{
 		c_inline::_repeat_block_item BlockItemList = InlineBlock._repeat_block_item();
+		while ( !BlockItemList.end() ) {
+			loadBlockItem( inlineList, BlockItemList.value() );
+			BlockItemList = BlockItemList.next();
+		}
+		return inlineList;
+	}
+
+	InlineList *loadInlineBlock( InlineList *inlineList, ruby_inline::r_inline_block RubyInlineBlock )
+	{
+		ruby_inline::_repeat_block_item BlockItemList = RubyInlineBlock._repeat_block_item();
 		while ( !BlockItemList.end() ) {
 			loadBlockItem( inlineList, BlockItemList.value() );
 			BlockItemList = BlockItemList.next();
@@ -265,6 +412,12 @@ struct LoadRagel
 	{
 		InlineList *inlineList = new InlineList;
 		return loadInlineBlock( inlineList, InlineBlock );
+	}
+
+	InlineList *loadInlineBlock( ruby_inline::r_inline_block RubyInlineBlock )
+	{
+		InlineList *inlineList = new InlineList;
+		return loadInlineBlock( inlineList, RubyInlineBlock );
 	}
 
 	void loadBlockItem( InlineList *inlineList, c_inline::block_item BlockItem )
@@ -294,6 +447,33 @@ struct LoadRagel
 		}
 	}
 
+	void loadBlockItem( InlineList *inlineList, ruby_inline::block_item BlockItem )
+	{
+		switch ( BlockItem.prodName() ) {
+			case ruby_inline::block_item::_ExprAny: {
+				InlineItem *inlineItem = loadExprAny( BlockItem.expr_any() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case ruby_inline::block_item::_BlockSymbol: {
+				InlineItem *inlineItem = loadBlockSymbol( BlockItem.block_symbol() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case ruby_inline::block_item::_BlockInterpret: {
+				InlineItem *inlineItem = loadBlockInterpret( BlockItem.block_interpret() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case ruby_inline::block_item::_RecBlock:
+				InputLoc loc = BlockItem.loc();
+				inlineList->append( new InlineItem( loc, "{", InlineItem::Text ) );
+				loadInlineBlock( inlineList, BlockItem.r_inline_block() );
+				inlineList->append( new InlineItem( loc, "}", InlineItem::Text ) );
+				break;
+		}
+	}
+
 	InlineList *loadInlineExpr( c_inline::inline_expr InlineExpr )
 	{
 		InlineList *inlineList = new InlineList;
@@ -306,10 +486,26 @@ struct LoadRagel
 		return inlineList;
 	}
 
+	InlineList *loadInlineExpr( ruby_inline::inline_expr InlineExpr )
+	{
+		InlineList *inlineList = new InlineList;
+		ruby_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
+		while ( !ExprItemList.end() ) {
+			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
+			inlineList->append( inlineItem );
+			ExprItemList = ExprItemList.next();
+		}
+		return inlineList;
+	}
+
 	Action *loadActionBlock( string name, ragel::action_block ActionBlock )
 	{
 		InputLoc loc = ActionBlock.loc();
-		InlineList *inlineList = loadInlineBlock( ActionBlock.inline_block() );
+		InlineList *inlineList;
+		if ( ActionBlock.CInlineBlock() )
+			inlineList = loadInlineBlock( ActionBlock.CInlineBlock() );
+		else
+			inlineList = loadInlineBlock( ActionBlock.RubyInlineBlock() );
 
 		/* Add the action to the list of actions. */
 		Action *newAction = new Action( loc, name, 
@@ -346,7 +542,7 @@ struct LoadRagel
 			error(loc) << "pre_push code already defined" << endl;
 		}
 
-		pd->prePushExpr = loadInlineBlock( PrePushBlock.inline_block() );
+		pd->prePushExpr = loadInlineBlock( PrePushBlock.CInlineBlock() );
 	}
 
 	void loadPostPop( ragel::action_block PostPopBlock )
@@ -358,7 +554,7 @@ struct LoadRagel
 			error(loc) << "post_pop code already defined" << endl;
 		}
 
-		pd->postPopExpr = loadInlineBlock( PostPopBlock.inline_block() );
+		pd->postPopExpr = loadInlineBlock( PostPopBlock.CInlineBlock() );
 	}
 
 	void tryMachineDef( InputLoc &loc, std::string name, 
@@ -692,13 +888,18 @@ struct LoadRagel
 				}
 				return action;
 			}
-			case ragel::action_ref::_Block:
-				InlineList *inlineList = loadInlineBlock( ActionRef.action_block().inline_block() );
+			case ragel::action_ref::_Block: {
+				InlineList *inlineList;
+				if ( ActionRef.action_block().CInlineBlock() )
+					inlineList = loadInlineBlock( ActionRef.action_block().CInlineBlock() );
+				else
+					inlineList = loadInlineBlock( ActionRef.action_block().RubyInlineBlock() );
 
 				/* Create the action, add it to the list and pass up. */
 				Action *action = new Action( loc, std::string(), inlineList, pd->nextCondId++ );
 				pd->actionList.append( action );
 				return action;
+			}
 		}
 
 		return 0;
@@ -1510,11 +1711,12 @@ struct LoadRagel
 		const char *argv[3];
 		argv[0] = "import";
 		argv[1] = unescaped;
-		argv[2] = 0;
+		argv[2] = id.hostLang->rlhcArg;
+		argv[3] = 0;
 
 		colm_program *program = colm_new_program( &colm_object );
 		colm_set_debug( program, 0 );
-		colm_run_program( program, 2, argv );
+		colm_run_program( program, 3, argv );
 
 		/* Extract the parse tree. */
 		start Start = RagelTree( program );
@@ -1573,7 +1775,8 @@ struct LoadRagel
 				loadWrite( Statement.Cmd(), Statement.ArgList() );
 				break;
 			case ragel::statement::_Variable:
-				loadVariable( Statement.variable_name(), Statement.inline_expr_reparse().action_expr().inline_expr() );
+				loadVariable( Statement.variable_name(),
+						Statement.inline_expr_reparse().action_expr().inline_expr() );
 				break;
 			case ragel::statement::_GetKey:
 				loadGetKey( Statement.inline_expr_reparse().action_expr().inline_expr() );
@@ -1646,15 +1849,55 @@ struct LoadRagel
 		}
 	}
 
+	void loadSection( ruby_host::section Section, const char *targetMachine,
+			const char *searchMachine )
+	{
+		switch ( Section.prodName() ) {
+			case ruby_host::section::_MultiLine:
+				loadStmtList( Section.ragel_start()._repeat_statement(),
+						targetMachine, searchMachine );
+				break;
+
+			case ruby_host::section::_Tok:
+				if ( id.inputItems.tail->type != InputItem::HostData ) {
+					/* Make the first input item. */
+					InputItem *inputItem = new InputItem;
+					inputItem->type = InputItem::HostData;
+					inputItem->loc = Section.loc();
+					id.inputItems.append( inputItem );
+				}
+
+				/* If no errors and we are at the bottom of the include stack (the
+				 * source file listed on the command line) then write out the data. */
+				if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 ) {
+					string text = Section.tok().text();
+					id.inputItems.tail->data << text;
+				}
+
+				break;
+		}
+	}
+
 	void load( start Start, const char *targetMachine, const char *searchMachine )
 	{
 		InputLoc loc;
 		exportContext.append( false );
 
 		c_host::_repeat_section SectionList = Start.SectionList();
-		while ( !SectionList.end() ) {
-			loadSection( SectionList.value(), targetMachine, searchMachine );
-			SectionList = SectionList.next();
+		if ( SectionList ) {
+			while ( !SectionList.end() ) {
+				loadSection( SectionList.value(), targetMachine, searchMachine );
+				SectionList = SectionList.next();
+			}
+		}
+		else {
+			ruby_host::_repeat_section RSectionList = Start.RSectionList();
+			if ( RSectionList ) {
+				while ( !RSectionList.end() ) {
+					loadSection( RSectionList.value(), targetMachine, searchMachine );
+					RSectionList = RSectionList.next();
+				}
+			}
 		}
 	}
 
@@ -1662,11 +1905,12 @@ struct LoadRagel
 	{
 		const char *argv[2];
 		argv[0] = inputFileName;
-		argv[1] = 0;
+		argv[1] = id.hostLang->rlhcArg;
+		argv[2] = 0;
 
 		colm_program *program = colm_new_program( &colm_object );
 		colm_set_debug( program, 0 );
-		colm_run_program( program, 1, argv );
+		colm_run_program( program, 2, argv );
 
 		/* Extract the parse tree. */
 		start Start = RagelTree( program );
