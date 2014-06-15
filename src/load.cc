@@ -542,7 +542,10 @@ struct LoadRagel
 			error(loc) << "pre_push code already defined" << endl;
 		}
 
-		pd->prePushExpr = loadInlineBlock( PrePushBlock.CInlineBlock() );
+		if ( PrePushBlock.CInlineBlock() )
+			pd->prePushExpr = loadInlineBlock( PrePushBlock.CInlineBlock() );
+		else
+			pd->prePushExpr = loadInlineBlock( PrePushBlock.RubyInlineBlock() );
 	}
 
 	void loadPostPop( ragel::action_block PostPopBlock )
@@ -554,7 +557,10 @@ struct LoadRagel
 			error(loc) << "post_pop code already defined" << endl;
 		}
 
-		pd->postPopExpr = loadInlineBlock( PostPopBlock.CInlineBlock() );
+		if ( PostPopBlock.CInlineBlock() )
+			pd->postPopExpr = loadInlineBlock( PostPopBlock.CInlineBlock() );
+		else
+			pd->postPopExpr = loadInlineBlock( PostPopBlock.RubyInlineBlock() );
 	}
 
 	void tryMachineDef( InputLoc &loc, std::string name, 
