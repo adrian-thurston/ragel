@@ -92,7 +92,7 @@ std::ostream &GotoExpanded::TO_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numToStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\tcase " << redAct->actListId+1 << ":\n";
+			out << "\t casel " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
@@ -113,7 +113,7 @@ std::ostream &GotoExpanded::FROM_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numFromStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\tcase " << redAct->actListId+1 << ":\n";
+			out << "\t casel " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
@@ -132,7 +132,7 @@ std::ostream &GotoExpanded::EOF_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numEofRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\tcase " << redAct->actListId+1 << ":\n";
+			out << "\t casel " << redAct->actListId+1 << ":\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
@@ -152,7 +152,7 @@ std::ostream &GotoExpanded::FINISH_CASES()
 		/* States that are final and have an out action need a case. */
 		if ( st->eofAction != 0 ) {
 			/* Write the case label. */
-			out << "\t\tcase " << st->id << ": ";
+			out << "\t\t casel " << st->id << ": ";
 
 			/* Jump to the func. */
 			out << "goto f" << st->eofAction->actListId << ";\n";
@@ -289,7 +289,7 @@ void GotoExpanded::writeExec()
 			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 				if ( st->eofTrans != 0 ) {
 					RedCondAp *cond = st->eofTrans->outConds.data[0].value;
-					out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
+					out << "	casel " << st->id << ": goto ctr" << cond->id << ";\n";
 				}
 			}
 

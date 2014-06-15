@@ -325,7 +325,7 @@ std::ostream &IpGoto::AGAIN_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		out << 
-			"		case " << st->id << ": goto st" << st->id << ";\n";
+			"		casel " << st->id << ": goto st" << st->id << ";\n";
 	}
 	return out;
 }
@@ -333,7 +333,7 @@ std::ostream &IpGoto::AGAIN_CASES()
 std::ostream &IpGoto::STATE_GOTO_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		out << TABS(1) << "case " << st->id << ":\n";
+		out << TABS(1) << "casel " << st->id << ":\n";
 		out << TABS(2) << "goto st_case_" << st->id << ";\n";
 	}
 	return out;
@@ -381,14 +381,14 @@ std::ostream &IpGoto::FINISH_CASES()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedCondAp *cond = st->eofTrans->outConds.data[0].value;
-			out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
+			out << "	casel " << st->id << ": goto ctr" << cond->id << ";\n";
 		}
 	}
 
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		if ( act->eofRefs != 0 ) {
 			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ ) {
-				out << "	case " << *pst << ": \n";
+				out << "	casel " << *pst << ": \n";
 				if ( ! pst.last() )
 					out << "		fallthrough;\n";
 			}

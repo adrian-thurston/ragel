@@ -96,7 +96,7 @@ std::ostream &Goto::TO_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\tcase " << act->actionId << ":\n";
+			out << "\t casel " << act->actionId << ":\n";
 			ACTION( out, act, 0, false, false );
 			out << "\n\tbreak;\n";
 		}
@@ -112,7 +112,7 @@ std::ostream &Goto::FROM_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\tcase " << act->actionId << ":\n";
+			out << "\t casel " << act->actionId << ":\n";
 			ACTION( out, act, 0, false, false );
 			out << "\n\tbreak;\n";
 		}
@@ -128,7 +128,7 @@ std::ostream &Goto::EOF_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\tcase " << act->actionId << ":\n";
+			out << "\t casel " << act->actionId << ":\n";
 			ACTION( out, act, 0, true, false );
 			out << "\n\tbreak;\n";
 		}
@@ -144,7 +144,7 @@ std::ostream &Goto::ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\tcase " << act->actionId << ":\n";
+			out << "\t casel " << act->actionId << ":\n";
 			ACTION( out, act, 0, false, false );
 			out << "\n\tbreak;\n";
 		}
@@ -175,7 +175,7 @@ void Goto::taActions()
 void Goto::GOTO_HEADER( RedStateAp *state )
 {
 	/* Label the state. */
-	out << "case " << state->id << ":\n";
+	out << "casel " << state->id << ":\n";
 }
 
 
@@ -200,7 +200,7 @@ void Goto::SINGLE_SWITCH( RedStateAp *state )
 
 		/* Write out the single indicies. */
 		for ( int j = 0; j < numSingles; j++ ) {
-			out << "\t\tcase " << KEY(data[j].lowKey) << ": {\n";
+			out << "\t\t casel " << KEY(data[j].lowKey) << ": {\n";
 			TRANS_GOTO(data[j].value, 0) << "\n";
 			out << "\t}\n";
 		}
@@ -415,7 +415,7 @@ void Goto::STATE_GOTO_ERROR()
 	/* Label the state and bail immediately. */
 	outLabelUsed = true;
 	RedStateAp *state = redFsm->errState;
-	out << "case " << state->id << ":\n";
+	out << "casel " << state->id << ":\n";
 	out << "	goto _out;\n";
 }
 
@@ -591,7 +591,7 @@ std::ostream &Goto::FINISH_CASES()
 		/* States that are final and have an out action need a case. */
 		if ( st->eofAction != 0 ) {
 			/* Write the case label. */
-			out << "\t\tcase " << st->id << ": ";
+			out << "\t\t casel " << st->id << ": ";
 
 			/* Write the goto func. */
 			out << "goto f" << st->eofAction->actListId << ";\n";

@@ -197,7 +197,7 @@ void GotoLooped::writeExec()
 			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 				if ( st->eofTrans != 0 ) {
 					RedCondAp *cond = st->eofTrans->outConds.data[0].value;
-					out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
+					out << "	casel " << st->id << ": goto ctr" << cond->id << ";\n";
 				}
 			}
 

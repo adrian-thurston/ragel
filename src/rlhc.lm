@@ -71,7 +71,7 @@ lex
 		/ '//' [^\n]* NL /
 
 	literal `array `value `TRUE `FALSE
-			`while `switch `case
+			`while `switch `case `casel
 			`if `else `offset `index
 			`goto `deref `entry `label
 
@@ -246,6 +246,9 @@ def switch_stmt
 def case_label
 	[`case expr `: `{ stmt* `} `break `; ]
 
+def casel
+	[`casel expr `:]
+
 def goto_label
 	[ident `:]
 
@@ -286,6 +289,7 @@ def stmt
 |	[if_stmt]
 |	[switch_stmt]
 |	[case_label]
+|	[casel]
 |	[goto_label]
 |	[expr `;]
 |	[pragma]
