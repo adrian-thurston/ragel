@@ -248,6 +248,9 @@ char *fileNameFromStem( const char *stemFile, const char *suffix )
 
 void openOutputCompiled()
 {
+	/* Start with the fn given by -o option. */
+	binaryFn = outputFn;
+
 	if ( binaryFn == 0 )
 		binaryFn = fileNameFromStem( inputFn, 0 );
 
