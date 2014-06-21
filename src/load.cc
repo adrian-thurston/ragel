@@ -1706,8 +1706,6 @@ struct LoadRagel
 		InputLoc loc = ImportFn.loc();
 		std::string fileName = ImportFn.text();
 
-		std::cout << "loading " << fileName << endl;
-
 		long length;
 		bool caseInsensitive;
 		char *unescaped = prepareLitString( loc,
