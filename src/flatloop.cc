@@ -245,9 +245,6 @@ void FlatLooped::writeExec()
 
 	out << "} label _match_cond {\n";
 
-	if ( redFsm->anyEofTrans() )
-		out << "_eof_trans:\n";
-
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
@@ -324,7 +321,7 @@ void FlatLooped::writeExec()
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = (int)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
 				"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
-				"		goto _eof_trans;\n"
+				"		goto _match_cond;\n"
 				"	}\n";
 		}
 
