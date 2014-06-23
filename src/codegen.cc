@@ -426,9 +426,9 @@ void CodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFini
 	/* The parser gives fexec two children. The double brackets are for D
 	 * code. If the inline list is a single word it will get interpreted as a
 	 * C-style cast by the D compiler. */
-	ret << "{" << P() << " = ((";
+	ret << "${" << P() << " = ((";
 	INLINE_LIST( ret, item->children, targState, inFinish, false );
-	ret << "))-1;}\n";
+	ret << "))-1;}$\n";
 }
 
 void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
