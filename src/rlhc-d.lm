@@ -1,3 +1,5 @@
+global HasDefault: list<int> = cons list<int>[]
+
 void d_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
@@ -329,10 +331,18 @@ void d_stmt( Stmt: stmt )
 			"	[d_stmt(WhileStmt)]
 	}
 	elsif match Stmt [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
+		HasDefault.push( 0 )
+
 		send Output
 			"switch ( [d_expr(SwitchExpr)] ) {
 			"	[d_stmt_list(StmtList)]
-			"	default: break;
+
+		if ( HasDefault.pop() == 0 ) {
+			send Output
+				"	default: break;
+		}
+
+		send Output
 			"}
 	}
 	elsif match Stmt [ExprExpr: expr Semi: `;] {
