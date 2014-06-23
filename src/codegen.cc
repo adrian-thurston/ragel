@@ -435,31 +435,25 @@ void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 		int targState, int inFinish, bool csForced )
 {
 	ret << 
-		"	switch( " << ACT() << " ) {\n";
+		"${	switch( " << ACT() << " ) {\n";
 
-	bool haveDefault = false;
 	for ( GenInlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
-		if ( lma->lmId < 0 ) {
-			ret << "	default:\n";
-			haveDefault = true;
-		}
+		if ( lma->lmId < 0 )
+			ret << "	default: {\n";
 		else
-			ret << "	case " << lma->lmId << ":\n";
+			ret << "	case " << lma->lmId << ": {\n";
 
 		/* Write the block and close it off. */
-		ret << "	{";
+		ret << "	$ \"-\" 1 {";
 		INLINE_LIST( ret, lma->children, targState, inFinish, csForced );
-		ret << "}\n";
+		ret << "}$\n";
 
-		ret << "	break;\n";
+		ret << "}	break;\n";
 	}
 
-	if ( (keyOps->hostLang->lang == HostLang::D || keyOps->hostLang->lang == HostLang::D2) && !haveDefault )
-		ret << "	default: break;";
-
 	ret << 
-		"	}\n"
+		"	}}$\n"
 		"\t";
 }
 
