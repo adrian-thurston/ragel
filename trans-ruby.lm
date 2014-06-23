@@ -1,0 +1,336 @@
+include 'trans.lm'
+
+int rw_ruby_factor( Factor: indep::factor )
+{
+	if match Factor [`first_token_char]
+	{
+		send Out "data\[ts\].ord"
+	}
+	else if match Factor [tk_ident `[ expr `]]
+	{
+		send Out
+			"[$Factor.tk_ident]\[ [rw_ruby_expr(Factor.expr)] \]
+	}
+	else if match Factor [tk_ident `( expr `)]
+	{
+		send Out
+			"[$Factor.tk_ident]( [rw_ruby_expr(Factor.expr)] )
+	}
+	elsif match Factor [`< type `> `( expr `)]
+	{
+		send Out
+			"( [rw_ruby_expr(Factor.expr)] )
+	}
+	elsif match Factor [`( expr `)]
+	{
+		send Out
+			"( [rw_ruby_expr(Factor.expr)] )
+	}
+	elsif match Factor ['true']
+	{
+		send Out '1'
+	}
+	elsif match Factor ['false']
+	{
+		send Out '0'
+	}
+	elsif match Factor "'0'"
+	{
+		send Out '"0"[0].ord'
+	}
+	elsif match Factor "'a'"
+	{
+		send Out '"a"[0].ord'
+	}
+	else 
+	{
+		send Out [$Factor]
+	}
+}
+
+void rw_ruby_type( Type: indep::type )
+{
+	if match Type [`int]
+	{
+		send Out "int"
+	}
+	elsif match Type [`bool]
+	{
+		send Out "int"
+	}
+	elsif match Type [`char]
+	{
+		send Out "char"
+	}
+	elsif match Type [`ptr]
+	{
+		send Out "char *"
+	}
+	elsif match Type [`byte]
+	{
+		send Out "unsigned char"
+	}
+}
+
+void rw_ruby_expr( Expr: indep::expr )
+{
+	rw_ruby_factor( Expr.factor )
+	if ( Expr.op )
+		send Out " [$Expr.op] [rw_ruby_expr( Expr._expr )]"
+}
+
+void rw_ruby_opt_array( OptArr: indep::opt_arr )
+{
+	if OptArr.expr {
+		send Out "\[[rw_ruby_expr( OptArr.expr )]\]"
+	}
+}
+
+int rw_ruby_var_decl( VarDecl: indep::var_decl )
+{
+	OptArr: indep::opt_arr = VarDecl.opt_arr
+	if OptArr.expr {
+		send Out 
+			"[$VarDecl.tk_ident] = Array.new
+	}
+	else {
+		send Out 
+			"[$VarDecl.tk_ident] = 1
+	}
+}
+
+void rw_ruby_opt_sub( OptSub: indep::opt_sub )
+{
+	if ( OptSub.expr )
+		send Out "\[[rw_ruby_expr(OptSub.expr)]\]"
+}
+
+int rw_ruby_expr_stmt( ExprStmt: indep::expr_stmt )
+{
+	if match ExprStmt [tk_ident opt_sub `= expr `;]
+	{
+		send Out
+			"[$ExprStmt.tk_ident rw_ruby_opt_sub(ExprStmt.opt_sub)] = [rw_ruby_expr(ExprStmt.expr)];
+	}
+	else if match ExprStmt [expr `;]
+	{
+		send Out
+			"[rw_ruby_expr(ExprStmt.expr)];
+	}
+}
+
+int rw_ruby_if_stmt( IfStmt: indep::if_stmt )
+{
+	send Out
+		"if ( [rw_ruby_expr( IfStmt.expr )] )
+		"	[rw_ruby_stmt_list( IfStmt._repeat_stmt )]
+
+	if ( IfStmt.opt_else._repeat_stmt ) {
+		send Out
+			"else 
+			"	[rw_ruby_stmt_list( IfStmt.opt_else._repeat_stmt )]
+	}
+	send Out
+		"end
+}
+
+int rw_ruby_print_stmt( Stmt: indep::print_stmt )
+{
+	if match Stmt [`print_int expr `;] {
+		send Out
+			"print( [rw_ruby_expr(Stmt.expr)] );
+	}
+	else if match Stmt [`print_buf E1: expr `, E2: expr `;]
+	{
+		send Out
+			"_a = [rw_ruby_expr(E1)] \[0..pos-1\] ;
+			"print( _a.pack( \"c*\" )  );
+	}
+	else if match Stmt [`print_str expr `;]
+	{
+		send Out
+			"print( [rw_ruby_expr( Stmt.expr )] );
+	}
+	else if match Stmt [`print_token `;]
+	{
+		send Out
+			"_m = data\[ts..te-1\];
+			"print( _m );
+	}
+}
+
+int rw_ruby_ragel_stmt( Stmt: indep::ragel_stmt )
+{
+	send Out
+		[$Stmt]
+}
+
+int rw_stmt( Stmt: indep::stmt )
+{
+	if match Stmt [var_decl]
+		rw_ruby_var_decl( Stmt.var_decl )
+	else if match Stmt [expr_stmt]
+		rw_ruby_expr_stmt( Stmt.expr_stmt )
+	else if match Stmt [if_stmt]
+		rw_ruby_if_stmt( Stmt.if_stmt )
+	else if match Stmt [print_stmt]
+		rw_ruby_print_stmt( Stmt.print_stmt )
+	else if	match Stmt [ragel_stmt]
+		rw_ruby_ragel_stmt( Stmt.ragel_stmt )
+}
+
+void rw_ruby_stmt_list( StmtList: indep::stmt* )
+{
+	for Stmt: indep::stmt in repeat( StmtList )
+		rw_stmt( Stmt )
+}
+
+int rw_ruby_action_block( ActionBlock: indep::action_block )
+{
+	Out = cons parser<out_code::lines> []
+	if match ActionBlock [`{ stmt* `}] {
+		send Out
+			"{[rw_ruby_stmt_list( ActionBlock._repeat_stmt )]}
+	}
+	else if match ActionBlock [`{ expr `}] {
+		send Out
+			"{[rw_ruby_expr( ActionBlock.expr )]}
+	}
+	send Out [] eos
+}
+
+
+OutputFile: str = argv.pop()
+InputFile: str = argv.pop()
+Lang: str = argv.pop()
+
+Input: stream = open( InputFile "r" )
+Output: stream = open( OutputFile "w" )
+
+RagelTree: indep::start = parse indep::start[ Input ]
+
+if ( !RagelTree ) {
+	print( error '\n' )
+	exit(1)
+}
+
+# Lowercase the machine name
+for MachineName: ragel::machine_name in RagelTree {
+	for Word: ragel::word in MachineName {
+		Word.data = tolower( Word.data )
+	}
+}
+
+# Find the machine name.
+MachineName: ragel::machine_name = ragel::machine_name in RagelTree
+
+# Do we need EOF?
+NeedsEof: bool = false
+for CommVal: indep::comm_val in RagelTree {
+	if $CommVal ==
+		'@NEEDS_EOF: yes\n'
+	{
+		NeedsEof = true
+	}
+}
+
+# Rewrite the action blocks.
+Section: indep::section = RagelTree.section
+for Action: ragel::action_block in Section {
+	# Reparse as lang-independent code.
+	parse IndepActionBlock: indep::action_block[$Action]
+	if ( !IndepActionBlock ) {
+		print( error '\n' Action )
+		exit(1)
+	}
+
+	rw_ruby_action_block( IndepActionBlock )
+
+	# Reparse back to ragel action block.
+	Action = parse ragel::action_block[$Out.tree]
+	if ( !Action ) {
+		print( error '\n' )
+		exit(1)
+	}
+}
+
+
+send Output
+	"#
+	"# @LANG: [Lang]
+	"# @GENERATED: yes
+	"#
+	"
+
+send Output
+	"
+	"[Section]
+	"
+	"%% write data;
+	"
+	"def run_machine( data )
+	"	p = 0
+	"	pe = data.length
+	"	eof = data.length
+	"	cs = 0;
+	"	_m = ""
+	"	_a = ""
+
+Init: indep::stmt* = RagelTree.Init
+for Stmt: indep::stmt in Init {
+	if match Stmt [Decl: var_decl] {
+		Out = cons parser<out_code::lines> []
+		rw_ruby_var_decl( Decl )
+		send Out [] eos
+		send Output [Out.tree]
+	}
+}
+
+for Stmt: indep::stmt in Init {
+	if match Stmt [ExprStmt: expr_stmt] {
+		Out = cons parser<out_code::lines> []
+		rw_ruby_expr_stmt( ExprStmt )
+		send Out [] eos
+		send Output [Out.tree]
+	}
+}
+
+send Output
+	"	%% write init;
+	"	%% write exec;
+	"	if cs >= [MachineName.word]_first_final
+	"		puts \"ACCEPT\"
+	"	else
+	"		puts \"FAIL\"
+	"	end
+	"end
+	"
+
+send Output
+	"inp = \[
+
+NR: int = 0
+for InputString: indep::input_string in RagelTree {
+	send Output 
+		[^InputString ",\n"]
+	NR = NR + 1
+}
+
+send Output
+	"\]
+	"
+
+send Output
+	"inplen = [NR]
+	"
+
+send Output
+	"inp.each { |str| run_machine(str) }
+	"
+
+send Output "=begin _____OUTPUT_____
+
+for OutputLine: indep::output_line in RagelTree {
+	send Output [OutputLine]
+}
+send Output "=end _____OUTPUT_____

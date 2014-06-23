@@ -212,7 +212,7 @@ for test_case; do
 		indep)
 			lang_opt="";
 
-			for lang in c d csharp go java; do
+			for lang in c d csharp go java ruby; do
 				case $lang in 
 					c)
 						lf="-C"
