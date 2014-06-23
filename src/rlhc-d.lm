@@ -369,6 +369,15 @@ void d_stmt( Stmt: stmt )
 			"[d_stmt_list( Stmt.case_label._repeat_stmt )]
 			"break;
 	}
+	elsif match Stmt [default_label]
+	{
+		send Output
+			"default:
+			"[d_stmt_list( Stmt.default_label._repeat_stmt )]
+			"break;
+		HasDefault.pop()
+		HasDefault.push( 1 )
+	}
 	elsif match Stmt [casel]
 	{
 		send Output

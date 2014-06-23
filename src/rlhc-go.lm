@@ -399,6 +399,13 @@ void go_stmt( Stmt: stmt )
 			"[go_stmt_list( Stmt.case_label._repeat_stmt )]
 			"break;
 	}
+	elsif match Stmt [default_label]
+	{
+		send Output
+			"default:
+			"[go_stmt_list( Stmt.default_label._repeat_stmt )]
+			"break;
+	}
 	elsif match Stmt [casel]
 	{
 		send Output

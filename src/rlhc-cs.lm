@@ -384,6 +384,13 @@ void cs_stmt( Stmt: stmt )
 			"[cs_stmt_list( Stmt.case_label._repeat_stmt )]
 			"break;
 	}
+	elsif match Stmt [default_label]
+	{
+		send Output
+			"default:
+			"[cs_stmt_list( Stmt.default_label._repeat_stmt )]
+			"break;
+	}
 	elsif match Stmt [casel]
 	{
 		send Output

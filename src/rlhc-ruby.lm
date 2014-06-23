@@ -433,6 +433,14 @@ void ruby_stmt( Stmt: stmt )
 			"begin
 			"[ruby_stmt_list( Stmt.case_label._repeat_stmt )]
 	}
+	elsif match Stmt [default_label]
+	{
+		send Output
+			"end
+			"else
+			"begin
+			"[ruby_stmt_list( Stmt.default_label._repeat_stmt )]
+	}
 	elsif match Stmt [goto_label]
 	{
 		send Output "{}"
