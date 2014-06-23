@@ -5,10 +5,20 @@ void ruby_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
 		if match Tok [host::`${ StmtList: stmt* host::`}$]
+		{
 			send Output
 				"begin
 				"[ruby_stmt_list( StmtList )]
 				"end
+		}
+		elsif match Tok
+			[`$${ STL: host::tok* host::`}$]
+		{
+			send Output
+				"begin
+				"[ruby_tok_list( STL )]
+				"end
+		}
 		elsif match Tok [host::`={ Expr: expr host::`}=]
 			ruby_expr( Expr )
 		else {

@@ -502,9 +502,9 @@ void CodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "{";
+		ret << "$${";
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-		ret << "}";
+		ret << "}$";
 	}
 }
 

@@ -35,7 +35,7 @@ namespace host
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
-		literal `={ `}= `${ `}$
+		literal `={ `}= `${ `}$ `$${
 
 		token c_any / any /
 	end
@@ -48,6 +48,7 @@ namespace host
 	|	[string]
 	|	[whitespace]
 	|	[`${ stmt* `}$]
+	|	[`$${ tok* `}$]
 	|	[`={ expr `}=]
 	|	[c_any]
 
