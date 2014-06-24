@@ -425,21 +425,21 @@ void ruby_stmt( Stmt: stmt )
 		send Output
 			"[Index.ident] = 0;
 	}
-	elsif match Stmt [case_label]
+	elsif match Stmt [case_block]
 	{
 		send Output
 			"end
-			"when [ruby_expr( Stmt.case_label.expr )] then
+			"when [ruby_expr( Stmt.case_block.expr )] then
 			"begin
-			"[ruby_stmt_list( Stmt.case_label._repeat_stmt )]
+			"[ruby_stmt_list( Stmt.case_block._repeat_stmt )]
 	}
-	elsif match Stmt [default_label]
+	elsif match Stmt [default_block]
 	{
 		send Output
 			"end
 			"else
 			"begin
-			"[ruby_stmt_list( Stmt.default_label._repeat_stmt )]
+			"[ruby_stmt_list( Stmt.default_block._repeat_stmt )]
 	}
 	elsif match Stmt [goto_label]
 	{

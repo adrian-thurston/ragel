@@ -440,9 +440,9 @@ void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 	for ( GenInlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
 		if ( lma->lmId < 0 )
-			ret << "	default: {\n";
+			ret << "	default {\n";
 		else
-			ret << "	case " << lma->lmId << ": {\n";
+			ret << "	case " << lma->lmId << " {\n";
 
 		/* Write the block and close it off. */
 		ret << "	$ \"-\" 1 {";

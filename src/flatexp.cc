@@ -117,7 +117,7 @@ std::ostream &FlatExpanded::TO_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numToStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << ": {\n";
+			out << "\t case " << redAct->actListId+1 << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
@@ -138,7 +138,7 @@ std::ostream &FlatExpanded::FROM_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numFromStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << ": {\n";
+			out << "\t case " << redAct->actListId+1 << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
@@ -157,7 +157,7 @@ std::ostream &FlatExpanded::EOF_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numEofRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << ": {\n";
+			out << "\t case " << redAct->actListId+1 << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
@@ -178,7 +178,7 @@ std::ostream &FlatExpanded::ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << ": {\n";
+			out << "\t case " << redAct->actListId+1 << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )

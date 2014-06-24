@@ -371,18 +371,18 @@ void java_stmt( Stmt: stmt )
 		send Output
 			"int [Index.ident];
 	}
-	elsif match Stmt [case_label]
+	elsif match Stmt [case_block]
 	{
 		send Output
-			"case [java_expr( Stmt.case_label.expr )]:
-			"[java_stmt_list( Stmt.case_label._repeat_stmt )]
+			"case [java_expr( Stmt.case_block.expr )]:
+			"[java_stmt_list( Stmt.case_block._repeat_stmt )]
 			"break;
 	}
-	elsif match Stmt [default_label]
+	elsif match Stmt [default_block]
 	{
 		send Output
 			"default:
-			"[java_stmt_list( Stmt.default_label._repeat_stmt )]
+			"[java_stmt_list( Stmt.default_block._repeat_stmt )]
 			"break;
 	}
 	elsif match Stmt [goto_label]

@@ -377,24 +377,24 @@ void cs_stmt( Stmt: stmt )
 		send Output
 			"int [Stmt.index_stmt.ident];
 	}
+	elsif match Stmt [case_block]
+	{
+		send Output
+			"case [cs_expr( Stmt.case_block.expr )]:
+			"[cs_stmt_list( Stmt.case_block._repeat_stmt )]
+			"break;
+	}
+	elsif match Stmt [default_block]
+	{
+		send Output
+			"default:
+			"[cs_stmt_list( Stmt.default_block._repeat_stmt )]
+			"break;
+	}
 	elsif match Stmt [case_label]
 	{
 		send Output
 			"case [cs_expr( Stmt.case_label.expr )]:
-			"[cs_stmt_list( Stmt.case_label._repeat_stmt )]
-			"break;
-	}
-	elsif match Stmt [default_label]
-	{
-		send Output
-			"default:
-			"[cs_stmt_list( Stmt.default_label._repeat_stmt )]
-			"break;
-	}
-	elsif match Stmt [casel]
-	{
-		send Output
-			"case [cs_expr( Stmt.casel.expr )]:
 	}
 	elsif match Stmt [label_stmt]
 	{

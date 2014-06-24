@@ -372,26 +372,26 @@ void d_stmt( Stmt: stmt )
 
 		send Output [Semi]
 	}
-	elsif match Stmt [case_label]
+	elsif match Stmt [case_block]
 	{
 		send Output
-			"case [d_expr( Stmt.case_label.expr )]:
-			"[d_stmt_list( Stmt.case_label._repeat_stmt )]
+			"case [d_expr( Stmt.case_block.expr )]:
+			"[d_stmt_list( Stmt.case_block._repeat_stmt )]
 			"break;
 	}
-	elsif match Stmt [default_label]
+	elsif match Stmt [default_block]
 	{
 		send Output
 			"default:
-			"[d_stmt_list( Stmt.default_label._repeat_stmt )]
+			"[d_stmt_list( Stmt.default_block._repeat_stmt )]
 			"break;
 		HasDefault.pop()
 		HasDefault.push( 1 )
 	}
-	elsif match Stmt [casel]
+	elsif match Stmt [case_label]
 	{
 		send Output
-			"case [d_expr( Stmt.casel.expr )]:
+			"case [d_expr( Stmt.case_label.expr )]:
 	}
 	elsif match Stmt [export_stmt]
 	{
