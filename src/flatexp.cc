@@ -1,7 +1,5 @@
 /*
- *  Copyright 2004-2006 Adrian Thurston <thurston@complang.org>
- *            2004 Erich Ocean <eric.ocean@ampede.com>
- *            2005 Alan West <alan@alanz.com>
+ *  Copyright 2004-2014 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
