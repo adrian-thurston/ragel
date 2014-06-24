@@ -164,7 +164,7 @@ std::ostream &BinaryExpanded::TO_STATE_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "} break;\n";
+			out << "}\n";
 		}
 	}
 
@@ -187,7 +187,7 @@ std::ostream &BinaryExpanded::FROM_STATE_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "} break;\n";
+			out << "}\n";
 		}
 	}
 
@@ -208,7 +208,7 @@ std::ostream &BinaryExpanded::EOF_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "} break;\n";
+			out << "}\n";
 		}
 	}
 
@@ -231,7 +231,7 @@ std::ostream &BinaryExpanded::ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "} break;\n";
+			out << "}\n";
 		}
 	}
 

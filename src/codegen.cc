@@ -449,7 +449,7 @@ void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 		INLINE_LIST( ret, lma->children, targState, inFinish, csForced );
 		ret << "}$\n";
 
-		ret << "}	break;\n";
+		ret << "}\n";
 	}
 
 	ret << 

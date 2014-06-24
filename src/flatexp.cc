@@ -123,7 +123,7 @@ std::ostream &FlatExpanded::TO_STATE_ACTION_SWITCH()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
-			out << "\n\t} break;\n";
+			out << "\n\t}\n";
 		}
 	}
 
@@ -144,7 +144,7 @@ std::ostream &FlatExpanded::FROM_STATE_ACTION_SWITCH()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
-			out << "\n\t} break;\n";
+			out << "\n\t}\n";
 		}
 	}
 
@@ -163,7 +163,7 @@ std::ostream &FlatExpanded::EOF_ACTION_SWITCH()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, true, false );
 
-			out << "\n\t} break;\n";
+			out << "\n\t}\n";
 		}
 	}
 
@@ -184,7 +184,7 @@ std::ostream &FlatExpanded::ACTION_SWITCH()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, 0, false, false );
 
-			out << "\n\t} break;\n";
+			out << "\n\t}\n";
 		}
 	}
 

@@ -245,10 +245,10 @@ def switch_stmt
 	[`switch `( expr `) `{ stmt* `}]
 
 def case_label
-	[`case expr `: `{ stmt* `} `break `; ]
+	[`case expr `: `{ stmt* `}]
 
 def default_label
-	[`default `: `{ stmt* `} `break `; ]
+	[`default `: `{ stmt* `}]
 
 def casel
 	[`casel expr `:]

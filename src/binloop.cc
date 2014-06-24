@@ -160,7 +160,7 @@ std::ostream &BinaryLooped::TO_STATE_ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t case " << act->actionId << ":{\n";
 			ACTION( out, act, 0, false, false );
-			out << "\n\t}break;\n";
+			out << "\n\t}\n";
 		}
 	}
 
@@ -176,7 +176,7 @@ std::ostream &BinaryLooped::FROM_STATE_ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t case " << act->actionId << ":{\n";
 			ACTION( out, act, 0, false, false );
-			out << "\n\t}break;\n";
+			out << "\n\t}\n";
 		}
 	}
 
@@ -192,7 +192,7 @@ std::ostream &BinaryLooped::EOF_ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t case " << act->actionId << ":{\n";
 			ACTION( out, act, 0, true, false );
-			out << "\n\t}break;\n";
+			out << "\n\t}\n";
 		}
 	}
 
@@ -209,7 +209,7 @@ std::ostream &BinaryLooped::ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t case " << act->actionId << ":{\n";
 			ACTION( out, act, 0, false, false );
-			out << "\n\t}break;\n";
+			out << "\n\t}\n";
 		}
 	}
 
