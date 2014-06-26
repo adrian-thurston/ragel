@@ -105,7 +105,7 @@ lex
 			`? `* `+ `> `< `&
 			`~ `! `!= `== `<< `>>
 			`+= `&& `|| `<= `>= `->
-			`++ `-- `@ `-=
+			`@ `-=
 end
 
 def embedded_host
@@ -140,10 +140,6 @@ def expr_factor
 def expr_ptr
 	[expr_ptr `-> expr_factor]
 |	[`* expr_ptr]
-|	[`++ expr_ptr]
-|	[`-- expr_ptr]
-|	[expr_ptr `++]
-|	[expr_ptr `--]
 |	[`( type `) expr_ptr]
 |	[expr_factor]
 

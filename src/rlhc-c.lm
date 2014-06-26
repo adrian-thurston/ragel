@@ -96,26 +96,6 @@ void c_expr_ptr( ExprPtr: expr_ptr )
 		send Output [Star]
 		c_expr_ptr( ExprPtr._expr_ptr )
 	}
-	elsif match ExprPtr [PP: `++ expr_ptr]
-	{
-		send Output [PP]
-		c_expr_ptr( ExprPtr._expr_ptr )
-	}
-	elsif match ExprPtr [MM: `-- expr_ptr]
-	{
-		send Output [MM]
-		c_expr_ptr( ExprPtr._expr_ptr )
-	}
-	elsif match ExprPtr [expr_ptr PP: `++]
-	{
-		c_expr_ptr( ExprPtr._expr_ptr )
-		send Output [PP]
-	}
-	elsif match ExprPtr [expr_ptr MM: `--]
-	{
-		c_expr_ptr( ExprPtr._expr_ptr )
-		send Output [MM]
-	}
 	elsif match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
 	{
 		send Output [Open]

@@ -76,7 +76,7 @@ void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	}
 
 	ret << "{" << STACK() << "[" << TOP() << "] = " << targState << 
-			"; " << TOP() << "++; " << "goto st" << callDest << ";}";
+			"; " << TOP() << "+= 1; " << "goto st" << callDest << ";}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -89,7 +89,7 @@ void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "] = " << targState << "; " << TOP() << "++;" << vCS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "] = " << targState << "; " << TOP() << "+= 1;" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << "goto _again;}";
 
@@ -99,7 +99,7 @@ void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 
 void IpGoto::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << TOP() << "--;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+	ret << "{" << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
@@ -142,7 +142,7 @@ void IpGoto::TARGS( ostream &ret, bool inFinish, int targState )
 void IpGoto::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "{" << P() << "++; ";
+	ret << "{" << P() << "+= 1; ";
 	if ( !csForced ) 
 		ret << vCS() << " = " << targState << "; ";
 	ret << "goto _out;}";
@@ -210,7 +210,7 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 	if ( state->labelNeeded ) {
 		if ( !noEnd ) {
 			out <<
-				"	" << P() << "++;\n"
+				"	" << P() << "+= 1;\n"
 				"	if ( " << P() << " == " << PE() << " )\n"
 				"		goto _test_eof" << state->id << ";\n";
 		}
@@ -496,7 +496,7 @@ void IpGoto::writeExec()
 		if ( !noEnd ) {
 			testEofUsed = true;
 			out << 
-				"	" << P() << "++;\n"
+				"	" << P() << "+= 1;\n"
 				"	if ( " << P() << " == " << PE() << " )\n"
 				"		goto _test_eof;\n";
 		}

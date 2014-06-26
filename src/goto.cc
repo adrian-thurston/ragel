@@ -484,13 +484,13 @@ std::ostream &Goto::EXEC_FUNCS()
 		"\n"
 		"execFuncs:\n"
 		"	_nacts = (uint)deref( " << ARR_REF( actions ) << ", _acts );\n"
-		"	_acts++;\n"
+		"	_acts += 1;\n"
 		"	while ( _nacts > 0 ) {\n"
 		"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
 		ACTION_SWITCH() << 
 		"		}\n"
-		"		_nacts--;\n"
-		"		_acts++;\n"
+		"		_acts += 1;\n"
+		"		_nacts -= 1;\n"
 		"	}\n"
 		"	goto _again;\n";
 	return out;
@@ -640,7 +640,7 @@ void Goto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++;" << vCS() << " = " << 
+	ret << "{" << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() << " = " << 
 			callDest << "; " << "goto _again;}";
 
 	if ( prePushExpr != 0 )
@@ -654,7 +654,7 @@ void Goto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool i
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "] = " << vCS() << "; "  << TOP() << "++;"<< vCS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "] = " << vCS() << "; "  << TOP() << " += 1;"<< vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
 	ret << "); " << "goto _again;}";
 
@@ -664,7 +664,7 @@ void Goto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool i
 
 void Goto::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << TOP() << "--;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+	ret << "{" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
@@ -678,7 +678,7 @@ void Goto::RET( ostream &ret, bool inFinish )
 void Goto::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "{" << P() << "++; " << "goto _out; }";
+	ret << "{" << P() << " += 1; " << "goto _out; }";
 }
 
 }
