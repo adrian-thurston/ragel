@@ -507,7 +507,7 @@ void CodeGen::HOST_STMT( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "$ \"-\" {";
+		ret << "$ \"-\" 1 {";
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
 		ret << "}$";
 	}
@@ -518,7 +518,7 @@ void CodeGen::HOST_EXPR( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "= \"-\" {";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
 		ret << "}$";
 	}
