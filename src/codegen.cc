@@ -557,17 +557,6 @@ void CodeGen::GEN_EXPR( ostream &ret, GenInlineItem *item,
 	}
 }
 
-void CodeGen::NESTED_HOST( ostream &ret, GenInlineItem *item, 
-		int targState, bool inFinish, bool csForced )
-{
-	if ( item->children->length() > 0 ) {
-		/* Write the block and close it off. */
-		ret << "$ \"-\" 1 {";
-		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-		ret << "}$";
-	}
-}
-
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
 void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
@@ -661,10 +650,6 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			break;
 		case GenInlineItem::GenExpr:
 			GEN_EXPR( ret, item, targState, inFinish, csForced );
-			break;
-		case GenInlineItem::NestedHost:
-			/* Hack, to remove. */
-			NESTED_HOST( ret, item, targState, inFinish, csForced );
 			break;
 		}
 	}

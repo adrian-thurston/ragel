@@ -35,7 +35,7 @@ namespace host
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
-		literal `={ `}= `${ `}$ `$${
+		literal `={ `}= `${ `}$
 
 		token c_any / any /
 	end
@@ -48,8 +48,6 @@ namespace host
 	|	[string]
 	|	[whitespace]
 	|	[`${ stmt* `}$]
-	# Hack to handle improper host/gen nesting
-	|	[`$${ tok* `}$]
 	|	[`={ expr `}=]
 	|	[c_any]
 

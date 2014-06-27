@@ -5,8 +5,6 @@ void d_tok_list( TL: host::tok* )
 	for Tok: host::tok in repeat(TL) {
 		if match Tok [host::`${ StmtList: stmt* host::`}$]
 			send Output "{[d_stmt_list( StmtList )]}"
-		elsif match Tok [host::`$${ STL: host::tok* host::`}$]
-			send Output "{[d_tok_list( STL )]}"
 		elsif match Tok [host::`={ Expr: expr host::`}=]
 			send Output "([d_expr( Expr )])"
 		else {

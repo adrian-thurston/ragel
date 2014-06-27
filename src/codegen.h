@@ -198,7 +198,6 @@ protected:
 	void HOST_TEXT( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
 	void GEN_STMT( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
 	void GEN_EXPR( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
-	void NESTED_HOST( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
 
 	void STATE_IDS();
 

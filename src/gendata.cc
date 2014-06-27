@@ -197,7 +197,7 @@ void CodeGenData::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 	if ( item->longestMatchPart->action != 0 ) {
 		makeSubList( wrapperList, 
 				item->longestMatchPart->action->inlineList, 
-				GenInlineItem::NestedHost );
+				GenInlineItem::HostStmt );
 	}
 
 	outList->append( wrapperItem );
@@ -214,7 +214,7 @@ void CodeGenData::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 	if ( item->longestMatchPart->action != 0 ) {
 		makeSubList( wrapperList, 
 			item->longestMatchPart->action->inlineList,
-			GenInlineItem::NestedHost );
+			GenInlineItem::HostStmt );
 	}
 
 	outList->append( wrapperItem );
@@ -244,7 +244,7 @@ void CodeGenData::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 	if ( item->longestMatchPart->action != 0 ) {
 		makeSubList( wrapperList,
 			item->longestMatchPart->action->inlineList,
-			GenInlineItem::NestedHost );
+			GenInlineItem::HostStmt );
 	}
 
 	outList->append( wrapperItem );
@@ -266,7 +266,7 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 		 * error state. */
 		assert( fsm->errState != 0 );
 
-		GenInlineItem *errCase = new GenInlineItem( InputLoc(), GenInlineItem::NestedHost );
+		GenInlineItem *errCase = new GenInlineItem( InputLoc(), GenInlineItem::HostStmt );
 		errCase->lmId = 0;
 		errCase->children = new GenInlineList;
 
@@ -287,7 +287,7 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 				/* Open the action. Write it with the context that sets up _p 
 				 * when doing control flow changes from inside the machine. */
 				GenInlineItem *lmCase = new GenInlineItem( InputLoc(), 
-						GenInlineItem::NestedHost );
+						GenInlineItem::HostStmt );
 				lmCase->lmId = lmi->longestMatchId;
 				lmCase->children = new GenInlineList;
 
@@ -301,7 +301,7 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 
 	if ( needDefault ) {
 		GenInlineItem *defCase = new GenInlineItem( InputLoc(), 
-				GenInlineItem::NestedHost );
+				GenInlineItem::HostStmt );
 		defCase->lmId = -1;
 		defCase->children = new GenInlineList;
 
