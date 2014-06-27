@@ -635,50 +635,52 @@ void Goto::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 
 void Goto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
+	ret << "${";
+
 	if ( prePushExpr != 0 ) {
-		ret << "{";
+		ret << "$ \"-\" 1 {";
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << "}$ ";
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() << " = " << 
-			callDest << "; " << "goto _again;}";
-
-	if ( prePushExpr != 0 )
-		ret << "}";
+	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " <<
+			TOP() << " += 1;" << vCS() << " = " << 
+			callDest << "; " << "goto _again;}$";
 }
 
 void Goto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
+	ret << "${";
+
 	if ( prePushExpr != 0 ) {
-		ret << "{";
+		ret << "$ \"-\" 1 {";
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << "}$ ";
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "] = " << vCS() << "; "  << TOP() << " += 1;"<< vCS() << " = (";
+	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; "  << TOP() << " += 1;" <<
+			vCS() << " = = \"-\" 1 {";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "); " << "goto _again;}";
-
-	if ( prePushExpr != 0 )
-		ret << "}";
+	ret << "}$; goto _again;}$";
 }
 
 void Goto::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+	ret << "${" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
-		ret << "{";
+		ret << "$ \"-\" 1 {";
 		INLINE_LIST( ret, postPopExpr, 0, false, false );
-		ret << "}";
+		ret << "}$";
 	}
 
-	ret << "goto _again;}";
+	ret << "goto _again;}$";
 }
 
 void Goto::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "{" << P() << " += 1; " << "goto _out; }";
+	ret << "${" << P() << " += 1; " << "goto _out; }$";
 }
 
 }
