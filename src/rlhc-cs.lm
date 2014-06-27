@@ -88,13 +88,7 @@ void cs_expr_ptr( ExprPtr: expr_ptr )
 	if match ExprPtr [expr_ptr Arrow: `-> expr_factor]
 	{
 		cs_expr_ptr( ExprPtr._expr_ptr )
-		send Output [Arrow]
 		cs_expr_factor( ExprPtr.expr_factor )
-	}
-	elsif match ExprPtr [Star: `* expr_ptr]
-	{
-		send Output [Star]
-		cs_expr_ptr( ExprPtr._expr_ptr )
 	}
 	elsif match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
 	{

@@ -87,14 +87,9 @@ void c_expr_ptr( ExprPtr: expr_ptr )
 {
 	if match ExprPtr [expr_ptr Arrow: `-> expr_factor]
 	{
+		# The accessor operator is contained wihtin the lhs.
 		c_expr_ptr( ExprPtr._expr_ptr )
-		send Output [Arrow]
 		c_expr_factor( ExprPtr.expr_factor )
-	}
-	elsif match ExprPtr [Star: `* expr_ptr]
-	{
-		send Output [Star]
-		c_expr_ptr( ExprPtr._expr_ptr )
 	}
 	elsif match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
 	{

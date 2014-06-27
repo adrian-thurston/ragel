@@ -88,13 +88,7 @@ void java_expr_ptr( ExprPtr: expr_ptr )
 	if match ExprPtr [expr_ptr Arrow: `-> expr_factor]
 	{
 		java_expr_ptr( ExprPtr._expr_ptr )
-		send Output [Arrow]
 		java_expr_factor( ExprPtr.expr_factor )
-	}
-	elsif match ExprPtr [Star: `* expr_ptr]
-	{
-		send Output [Star]
-		java_expr_ptr( ExprPtr._expr_ptr )
 	}
 	elsif match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
 	{

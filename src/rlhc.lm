@@ -48,6 +48,7 @@ namespace host
 	|	[string]
 	|	[whitespace]
 	|	[`${ stmt* `}$]
+	# Hack to handle improper host/gen nesting
 	|	[`$${ tok* `}$]
 	|	[`={ expr `}=]
 	|	[c_any]
@@ -139,7 +140,6 @@ def expr_factor
 
 def expr_ptr
 	[expr_ptr `-> expr_factor]
-|	[`* expr_ptr]
 |	[`( type `) expr_ptr]
 |	[expr_factor]
 
