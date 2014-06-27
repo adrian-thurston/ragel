@@ -58,9 +58,10 @@ struct GenInlineItem
 	enum Type 
 	{
 		Text, Goto, Call, Next, GotoExpr, CallExpr, NextExpr, Ret, 
-		PChar, Char, Hold, Exec, Curs, Targs, Entry,
-		LmSwitch, LmSetActId, LmSetTokEnd, LmGetTokEnd, LmInitTokStart,
-		LmInitAct, LmSetTokStart, SubAction, Break
+		PChar, Char, Hold, Curs, Targs, Entry, Exec, Break,
+		LmSwitch, LmSetActId, LmSetTokEnd, LmGetTokEnd,
+		LmInitAct, LmInitTokStart, LmSetTokStart,
+		SubAction,
 	};
 
 	GenInlineItem( const InputLoc &loc, Type type ) : 

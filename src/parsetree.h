@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -730,10 +730,10 @@ struct InlineItem
 {
 	enum Type 
 	{
-		Text, Goto, Call, Next, GotoExpr, CallExpr, NextExpr, Ret, PChar,
-		Char, Hold, Curs, Targs, Entry, Exec, LmSwitch, LmSetActId,
-		LmSetTokEnd, LmOnLast, LmOnNext, LmOnLagBehind, LmInitAct,
-		LmInitTokStart, LmSetTokStart, Break
+		Text, Goto, Call, Next, GotoExpr, CallExpr, NextExpr, Ret,
+		PChar, Char, Hold, Curs, Targs, Entry, Exec, Break,
+		LmSwitch, LmSetActId, LmSetTokEnd, LmOnLast, LmOnNext, LmOnLagBehind,
+		LmInitAct, LmInitTokStart, LmSetTokStart,
 	};
 
 	InlineItem( const InputLoc &loc, std::string data, Type type ) : 
