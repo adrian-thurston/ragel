@@ -238,8 +238,11 @@ string CodeGen::START_STATE_ID()
 string CodeGen::ACCESS()
 {
 	ostringstream ret;
-	if ( accessExpr != 0 )
+	if ( accessExpr != 0 ) {
+		ret << "@ \"-\" 1 {";
 		INLINE_LIST( ret, accessExpr, 0, false, false );
+		ret << "}$ ->";
+	}
 	return ret.str();
 }
 
@@ -250,9 +253,9 @@ string CodeGen::P()
 	if ( pExpr == 0 )
 		ret << "p";
 	else {
-		ret << "(";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, pExpr, 0, false, false );
-		ret << ")";
+		ret << "}$";
 	}
 	return ret.str();
 }
@@ -263,9 +266,9 @@ string CodeGen::PE()
 	if ( peExpr == 0 )
 		ret << "pe";
 	else {
-		ret << "(";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, peExpr, 0, false, false );
-		ret << ")";
+		ret << "}$";
 	}
 	return ret.str();
 }
@@ -276,9 +279,9 @@ string CodeGen::vEOF()
 	if ( eofExpr == 0 )
 		ret << "eof";
 	else {
-		ret << "(";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, eofExpr, 0, false, false );
-		ret << ")";
+		ret << "}$";
 	}
 	return ret.str();
 }
@@ -290,9 +293,9 @@ string CodeGen::vCS()
 		ret << ACCESS() << "cs";
 	else {
 		/* Emit the user supplied method of retrieving the key. */
-		ret << "(";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, csExpr, 0, false, false );
-		ret << ")";
+		ret << "}$";
 	}
 	return ret.str();
 }
@@ -303,9 +306,9 @@ string CodeGen::TOP()
 	if ( topExpr == 0 )
 		ret << ACCESS() + "top";
 	else {
-		ret << "(";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, topExpr, 0, false, false );
-		ret << ")";
+		ret << "}$";
 	}
 	return ret.str();
 }
@@ -316,9 +319,9 @@ string CodeGen::STACK()
 	if ( stackExpr == 0 )
 		ret << ACCESS() + "stack";
 	else {
-		ret << "(";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, stackExpr, 0, false, false );
-		ret << ")";
+		ret << "}$";
 	}
 	return ret.str();
 }
@@ -329,9 +332,9 @@ string CodeGen::ACT()
 	if ( actExpr == 0 )
 		ret << ACCESS() + "act";
 	else {
-		ret << "(";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, actExpr, 0, false, false );
-		ret << ")";
+		ret << "}$";
 	}
 	return ret.str();
 }
@@ -342,9 +345,9 @@ string CodeGen::TOKSTART()
 	if ( tokstartExpr == 0 )
 		ret << ACCESS() + "ts";
 	else {
-		ret << "(";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, tokstartExpr, 0, false, false );
-		ret << ")";
+		ret << "}$";
 	}
 	return ret.str();
 }
@@ -355,9 +358,9 @@ string CodeGen::TOKEND()
 	if ( tokendExpr == 0 )
 		ret << ACCESS() + "te";
 	else {
-		ret << "(";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, tokendExpr, 0, false, false );
-		ret << ")";
+		ret << "}$";
 	}
 	return ret.str();
 }
@@ -367,9 +370,9 @@ string CodeGen::GET_KEY()
 	ostringstream ret;
 	if ( getKeyExpr != 0 ) { 
 		/* Emit the user supplied method of retrieving the key. */
-		ret << "(";
+		ret << "= \"-\" 1 {";
 		INLINE_LIST( ret, getKeyExpr, 0, false, false );
-		ret << ")";
+		ret << "}$";
 	}
 	else {
 		/* Expression for retrieving the key, use simple dereference. */

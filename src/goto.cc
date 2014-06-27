@@ -601,14 +601,14 @@ std::ostream &Goto::FINISH_CASES()
 
 void Goto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << vCS() << " = " << gotoDest << "; " << "goto _again;}";
+	ret << "${" << vCS() << " = " << gotoDest << "; " << "goto _again;}$";
 }
 
 void Goto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << vCS() << " = (";
+	ret << "${" << vCS() << " = = \"-\" 1 {";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << "goto _again;}";
+	ret << "}$; " << "goto _again;}$";
 }
 
 void Goto::CURS( ostream &ret, bool inFinish )
