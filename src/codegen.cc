@@ -458,6 +458,16 @@ void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 		"\t";
 }
 
+void CodeGen::LM_EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
+{
+	/* The parser gives fexec two children. The double brackets are for D
+	 * code. If the inline list is a single word it will get interpreted as a
+	 * C-style cast by the D compiler. This should be in the D code generator. */
+	ret << P() << " = ((";
+	INLINE_LIST( ret, item->children, targState, inFinish, false );
+	ret << "))-1;\n";
+}
+
 void CodeGen::SET_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = " << item->lmId << ";";
@@ -552,7 +562,7 @@ void CodeGen::NESTED_HOST( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "$${";
+		ret << "$ \"-\" 1 {";
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
 		ret << "}$";
 	}
@@ -612,6 +622,9 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			break;
 		case GenInlineItem::LmSwitch:
 			LM_SWITCH( ret, item, targState, inFinish, csForced );
+			break;
+		case GenInlineItem::LmExec:
+			LM_EXEC( ret, item, targState, inFinish );
 			break;
 		case GenInlineItem::LmSetActId:
 			SET_ACT( ret, item );

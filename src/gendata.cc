@@ -189,31 +189,41 @@ void CodeGenData::makeSubList( GenInlineList *outList,
 
 void CodeGenData::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 {
-	makeSetTokend( outList, 1 );
+	GenInlineItem *wrapperItem = new GenInlineItem( InputLoc(), GenInlineItem::GenStmt );
+	GenInlineList *wrapperList = wrapperItem->children = new GenInlineList;
+
+	makeSetTokend( wrapperList, 1 );
 
 	if ( item->longestMatchPart->action != 0 ) {
-		makeSubList( outList, 
+		makeSubList( wrapperList, 
 				item->longestMatchPart->action->inlineList, 
 				GenInlineItem::NestedHost );
 	}
+
+	outList->append( wrapperItem );
 }
 
 void CodeGenData::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 {
-	makeSetTokend( outList, 0 );
-	outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Hold ) );
+	GenInlineItem *wrapperItem = new GenInlineItem( InputLoc(), GenInlineItem::GenStmt );
+	GenInlineList *wrapperList = wrapperItem->children = new GenInlineList;
+
+	makeSetTokend( wrapperList, 0 );
+	wrapperList->append( new GenInlineItem( InputLoc(), GenInlineItem::Hold ) );
 
 	if ( item->longestMatchPart->action != 0 ) {
-		makeSubList( outList, 
+		makeSubList( wrapperList, 
 			item->longestMatchPart->action->inlineList,
 			GenInlineItem::NestedHost );
 	}
+
+	outList->append( wrapperItem );
 }
 
 void CodeGenData::makeExecGetTokend( GenInlineList *outList )
 {
 	/* Make the Exec item. */
-	GenInlineItem *execItem = new GenInlineItem( InputLoc(), GenInlineItem::Exec );
+	GenInlineItem *execItem = new GenInlineItem( InputLoc(), GenInlineItem::LmExec );
 	execItem->children = new GenInlineList;
 
 	/* Make the GetTokEnd */
@@ -225,14 +235,19 @@ void CodeGenData::makeExecGetTokend( GenInlineList *outList )
 
 void CodeGenData::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 {
+	GenInlineItem *wrapperItem = new GenInlineItem( InputLoc(), GenInlineItem::GenStmt );
+	GenInlineList *wrapperList = wrapperItem->children = new GenInlineList;
+
 	/* Jump to the tokend. */
-	makeExecGetTokend( outList );
+	makeExecGetTokend( wrapperList );
 
 	if ( item->longestMatchPart->action != 0 ) {
-		makeSubList( outList,
+		makeSubList( wrapperList,
 			item->longestMatchPart->action->inlineList,
 			GenInlineItem::NestedHost );
 	}
+
+	outList->append( wrapperItem );
 }
 
 void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )

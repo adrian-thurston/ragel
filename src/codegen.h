@@ -185,6 +185,7 @@ protected:
 	void EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );
 	void LM_SWITCH( ostream &ret, GenInlineItem *item, int targState, 
 			int inFinish, bool csForced );
+	void LM_EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );
 	void SET_ACT( ostream &ret, GenInlineItem *item );
 	void INIT_TOKSTART( ostream &ret, GenInlineItem *item );
 	void INIT_ACT( ostream &ret, GenInlineItem *item );

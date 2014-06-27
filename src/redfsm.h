@@ -59,7 +59,7 @@ struct GenInlineItem
 	{
 		Text, Goto, Call, Next, GotoExpr, CallExpr, NextExpr, Ret, 
 		PChar, Char, Hold, Curs, Targs, Entry, Exec, Break,
-		LmSwitch, LmSetActId, LmSetTokEnd, LmGetTokEnd,
+		LmSwitch, LmExec, LmSetActId, LmSetTokEnd, LmGetTokEnd,
 		LmInitAct, LmInitTokStart, LmSetTokStart,
 		HostStmt, HostExpr, HostText,
 		GenStmt, GenExpr, NestedHost
