@@ -194,7 +194,7 @@ void CodeGenData::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 	if ( item->longestMatchPart->action != 0 ) {
 		makeSubList( outList, 
 				item->longestMatchPart->action->inlineList, 
-				GenInlineItem::SubAction );
+				GenInlineItem::NestedHost );
 	}
 }
 
@@ -206,7 +206,7 @@ void CodeGenData::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 	if ( item->longestMatchPart->action != 0 ) {
 		makeSubList( outList, 
 			item->longestMatchPart->action->inlineList,
-			GenInlineItem::SubAction );
+			GenInlineItem::NestedHost );
 	}
 }
 
@@ -231,7 +231,7 @@ void CodeGenData::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 	if ( item->longestMatchPart->action != 0 ) {
 		makeSubList( outList,
 			item->longestMatchPart->action->inlineList,
-			GenInlineItem::SubAction );
+			GenInlineItem::NestedHost );
 	}
 }
 
@@ -251,7 +251,7 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 		 * error state. */
 		assert( fsm->errState != 0 );
 
-		GenInlineItem *errCase = new GenInlineItem( InputLoc(), GenInlineItem::SubAction );
+		GenInlineItem *errCase = new GenInlineItem( InputLoc(), GenInlineItem::NestedHost );
 		errCase->lmId = 0;
 		errCase->children = new GenInlineList;
 
@@ -272,7 +272,7 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 				/* Open the action. Write it with the context that sets up _p 
 				 * when doing control flow changes from inside the machine. */
 				GenInlineItem *lmCase = new GenInlineItem( InputLoc(), 
-						GenInlineItem::SubAction );
+						GenInlineItem::NestedHost );
 				lmCase->lmId = lmi->longestMatchId;
 				lmCase->children = new GenInlineList;
 
@@ -286,7 +286,7 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 
 	if ( needDefault ) {
 		GenInlineItem *defCase = new GenInlineItem( InputLoc(), 
-				GenInlineItem::SubAction );
+				GenInlineItem::NestedHost );
 		defCase->lmId = -1;
 		defCase->children = new GenInlineList;
 

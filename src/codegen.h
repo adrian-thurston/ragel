@@ -191,8 +191,14 @@ protected:
 	void SET_TOKSTART( ostream &ret, GenInlineItem *item );
 	void SET_TOKEND( ostream &ret, GenInlineItem *item );
 	void GET_TOKEND( ostream &ret, GenInlineItem *item );
-	virtual void SUB_ACTION( ostream &ret, GenInlineItem *item, 
-			int targState, bool inFinish, bool csForced );
+
+	void HOST_STMT( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
+	void HOST_EXPR( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
+	void HOST_TEXT( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
+	void GEN_STMT( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
+	void GEN_EXPR( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
+	void NESTED_HOST( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
+
 	void STATE_IDS();
 
 	string ERROR_STATE();

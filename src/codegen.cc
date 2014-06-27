@@ -492,7 +492,62 @@ void CodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
 	ret << TOKSTART() << " = " << P() << ";";
 }
 
-void CodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item, 
+void CodeGen::HOST_STMT( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+		ret << "$ \"-\" {";
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+		ret << "}$";
+	}
+}
+
+void CodeGen::HOST_EXPR( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+		ret << "= \"-\" {";
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+		ret << "}$";
+	}
+}
+
+void CodeGen::HOST_TEXT( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+		ret << "@ \"-\" 1 {";
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+		ret << "}$";
+	}
+}
+
+void CodeGen::GEN_STMT( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+		ret << "${";
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+		ret << "}$";
+	}
+}
+
+void CodeGen::GEN_EXPR( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+		ret << "={";
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+		ret << "}=";
+	}
+}
+
+void CodeGen::NESTED_HOST( ostream &ret, GenInlineItem *item, 
 		int targState, bool inFinish, bool csForced )
 {
 	if ( item->children->length() > 0 ) {
@@ -502,7 +557,6 @@ void CodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item,
 		ret << "}$";
 	}
 }
-
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
@@ -577,11 +631,27 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::LmSetTokStart:
 			SET_TOKSTART( ret, item );
 			break;
-		case GenInlineItem::SubAction:
-			SUB_ACTION( ret, item, targState, inFinish, csForced );
-			break;
 		case GenInlineItem::Break:
 			BREAK( ret, targState, csForced );
+			break;
+		case GenInlineItem::HostStmt:
+			HOST_STMT( ret, item, targState, inFinish, csForced );
+			break;
+		case GenInlineItem::HostExpr:
+			HOST_EXPR( ret, item, targState, inFinish, csForced );
+			break;
+		case GenInlineItem::HostText:
+			HOST_TEXT( ret, item, targState, inFinish, csForced );
+			break;
+		case GenInlineItem::GenStmt:
+			GEN_STMT( ret, item, targState, inFinish, csForced );
+			break;
+		case GenInlineItem::GenExpr:
+			GEN_EXPR( ret, item, targState, inFinish, csForced );
+			break;
+		case GenInlineItem::NestedHost:
+			/* Hack, to remove. */
+			NESTED_HOST( ret, item, targState, inFinish, csForced );
 			break;
 		}
 	}
