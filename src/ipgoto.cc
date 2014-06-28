@@ -174,8 +174,8 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 
 			/* Write each action in the list. */
 			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
-				ACTION( out, item->value, trans->targ->id, false, 
-						trans->action->anyNextStmt() );
+				ACTION( out, item->value, IlOpts( trans->targ->id, false, 
+						trans->action->anyNextStmt() ) );
 				out << "\n";
 			}
 
@@ -204,8 +204,8 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 	if ( state->toStateAction != 0 ) {
 		/* Write every action in the list. */
 		for ( GenActionTable::Iter item = state->toStateAction->key; item.lte(); item++ ) {
-			ACTION( out, item->value, state->id, false, 
-					state->toStateAction->anyNextStmt() );
+			ACTION( out, item->value, IlOpts( state->id, false, 
+					state->toStateAction->anyNextStmt() ) );
 			out << "\n";
 		}
 	}
@@ -230,8 +230,8 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 	if ( state->fromStateAction != 0 ) {
 		/* Write every action in the list. */
 		for ( GenActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ ) {
-			ACTION( out, item->value, state->id, false,
-					state->fromStateAction->anyNextStmt() );
+			ACTION( out, item->value, IlOpts( state->id, false,
+					state->fromStateAction->anyNextStmt() ) );
 			out << "\n";
 		}
 	}
@@ -397,7 +397,7 @@ std::ostream &IpGoto::FINISH_CASES()
 
 			/* Write each action in the eof action list. */
 			for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
-				ACTION( out, item->value, STATE_ERR_STATE, true, false );
+				ACTION( out, item->value, IlOpts( STATE_ERR_STATE, true, false ) );
 			out << "\n\tbreak;\n";
 		}
 	}

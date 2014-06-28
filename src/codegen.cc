@@ -667,12 +667,11 @@ string CodeGen::LDIR_PATH( char *path )
 	return ret.str();
 }
 
-void CodeGen::ACTION( ostream &ret, GenAction *action, int targState, 
-		bool inFinish, bool csForced )
+void CodeGen::ACTION( ostream &ret, GenAction *action, IlOpts opts )
 {
 	ret << '\t';
 	openHostBlock( '$', pd->id, ret, action->loc.fileName, action->loc.line );
-	INLINE_LIST( ret, action->inlineList, targState, inFinish, csForced );
+	INLINE_LIST( ret, action->inlineList, opts.targState, opts.inFinish, opts.csForced );
 	ret << "}$";
 }
 

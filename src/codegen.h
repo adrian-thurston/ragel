@@ -108,6 +108,16 @@ struct TableArray
 	std::ostream &out;
 };
 
+struct IlOpts
+{
+	IlOpts( int targState, bool inFinish, bool csForced )
+		: targState(targState), inFinish(inFinish), csForced(csForced) {}
+
+	int targState;
+	bool inFinish;
+	bool csForced;
+};
+
 
 /*
  * class CodeGen
@@ -135,8 +145,8 @@ protected:
 	string TABS( int level );
 	string KEY( Key key );
 	string LDIR_PATH( char *path );
-	virtual void ACTION( ostream &ret, GenAction *action, int targState, 
-			bool inFinish, bool csForced );
+
+	void ACTION( ostream &ret, GenAction *action, IlOpts opts );
 	void CONDITION( ostream &ret, GenAction *condition );
 	string ALPH_TYPE();
 	string ARRAY_TYPE( unsigned long maxVal );

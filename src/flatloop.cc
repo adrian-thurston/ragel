@@ -84,7 +84,7 @@ std::ostream &FlatLooped::TO_STATE_ACTION_SWITCH()
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break */
 			out << "\t case " << act->actionId << " {\n";
-			ACTION( out, act, 0, false, false );
+			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t}\n";
 		}
 	}
@@ -100,7 +100,7 @@ std::ostream &FlatLooped::FROM_STATE_ACTION_SWITCH()
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break */
 			out << "\t case " << act->actionId << " {\n";
-			ACTION( out, act, 0, false, false );
+			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t}\n";
 		}
 	}
@@ -116,7 +116,7 @@ std::ostream &FlatLooped::EOF_ACTION_SWITCH()
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break */
 			out << "\t case " << act->actionId << " {\n";
-			ACTION( out, act, 0, true, false );
+			ACTION( out, act, IlOpts( 0, true, false ) );
 			out << "\n\t}\n";
 		}
 	}
@@ -132,7 +132,7 @@ std::ostream &FlatLooped::ACTION_SWITCH()
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break */
 			out << "\t case " << act->actionId << " {\n";
-			ACTION( out, act, 0, false, false );
+			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t}\n";
 		}
 	}

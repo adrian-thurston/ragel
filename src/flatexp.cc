@@ -119,7 +119,7 @@ std::ostream &FlatExpanded::TO_STATE_ACTION_SWITCH()
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-				ACTION( out, item->value, 0, false, false );
+				ACTION( out, item->value, IlOpts( 0, false, false ) );
 
 			out << "\n\t}\n";
 		}
@@ -140,7 +140,7 @@ std::ostream &FlatExpanded::FROM_STATE_ACTION_SWITCH()
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-				ACTION( out, item->value, 0, false, false );
+				ACTION( out, item->value, IlOpts( 0, false, false ) );
 
 			out << "\n\t}\n";
 		}
@@ -159,7 +159,7 @@ std::ostream &FlatExpanded::EOF_ACTION_SWITCH()
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-				ACTION( out, item->value, 0, true, false );
+				ACTION( out, item->value, IlOpts( 0, true, false ) );
 
 			out << "\n\t}\n";
 		}
@@ -180,7 +180,7 @@ std::ostream &FlatExpanded::ACTION_SWITCH()
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-				ACTION( out, item->value, 0, false, false );
+				ACTION( out, item->value, IlOpts( 0, false, false ) );
 
 			out << "\n\t}\n";
 		}

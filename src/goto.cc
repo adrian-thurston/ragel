@@ -95,7 +95,7 @@ std::ostream &Goto::TO_STATE_ACTION_SWITCH()
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
 			out << "\t case " << act->actionId << ":\n";
-			ACTION( out, act, 0, false, false );
+			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\tbreak;\n";
 		}
 	}
@@ -111,7 +111,7 @@ std::ostream &Goto::FROM_STATE_ACTION_SWITCH()
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
 			out << "\t case " << act->actionId << ":\n";
-			ACTION( out, act, 0, false, false );
+			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\tbreak;\n";
 		}
 	}
@@ -127,7 +127,7 @@ std::ostream &Goto::EOF_ACTION_SWITCH()
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
 			out << "\t case " << act->actionId << ":\n";
-			ACTION( out, act, 0, true, false );
+			ACTION( out, act, IlOpts( 0, true, false ) );
 			out << "\n\tbreak;\n";
 		}
 	}
@@ -143,7 +143,7 @@ std::ostream &Goto::ACTION_SWITCH()
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
 			out << "\t case " << act->actionId << ":\n";
-			ACTION( out, act, 0, false, false );
+			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\tbreak;\n";
 		}
 	}
