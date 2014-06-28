@@ -35,7 +35,7 @@ namespace host
 		token whitespace
 			/ ( [ \t] | NL )+ /
 
-		literal `={ `}= `${ `}$
+		literal `={ `}= `${ `}$ `@{ `}@
 
 		token c_any / any /
 	end
@@ -74,6 +74,7 @@ lex
 			`while `switch `case
 			`if `else `offset `index
 			`goto `deref `entry `label `default
+			`host
 
 	literal `uint `const
 			`s8 `s16 `s32 `s64
@@ -104,13 +105,13 @@ lex
 			`? `* `+ `> `< `&
 			`~ `! `!= `== `<< `>>
 			`+= `&& `|| `<= `>=
-			`@ `-= `->
+			`@ `-= `-> `={ `${ `@{
 end
 
 def embedded_host
-	[`@ string uint `{ host::tok* host::`}$]
-|	[`$ string uint `{ host::tok* host::`}$]
-|	[`= string uint `{ host::tok* host::`}$]
+	[`host `( string `, uint `) `={ host::tok* host::`}=]
+|	[`host `( string `, uint `) `${ host::tok* host::`}$]
+|	[`host `( string `, uint `) `@{ host::tok* host::`}@]
 
 def type
 	[ident]

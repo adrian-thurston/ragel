@@ -256,8 +256,7 @@ void InputData::writeOutput()
 		}
 		else {
 			openHostBlock( '@', this, *outStream, inputFileName, ii->loc.line );
-			*outStream << ii->data.str();
-			*outStream << "}$";
+			*outStream << ii->data.str() << "}@";
 		}
 	}
 }

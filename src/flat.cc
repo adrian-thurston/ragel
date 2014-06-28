@@ -432,9 +432,9 @@ void Flat::GOTO( ostream &ret, int gotoDest, bool inFinish )
 
 void Flat::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "${" << vCS() << " = =\"-\" 1 {";
+	ret << "${" << vCS() << " = host( \"-\", 1 ) ={";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "}$; " << "goto _again;}$";
+	ret << "}=; " << "goto _again;}$";
 }
 
 void Flat::CURS( ostream &ret, bool inFinish )
@@ -464,7 +464,7 @@ void Flat::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	ret << "${";
 
 	if ( prePushExpr != 0 ) {
-		ret << "$ \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ${";
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 		ret << "}$ ";
 	}
@@ -479,14 +479,15 @@ void Flat::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool i
 	ret << "${";
 
 	if ( prePushExpr != 0 ) {
-		ret << "$ \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ${";
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 		ret << "}$ ";
 	}
 
-	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() << " = = \"-\" 1 {";
+	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() <<
+			" = host( \"-\", 1 ) ={";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "}$; " << "goto _again;}$";
+	ret << "}=; " << "goto _again;}$";
 }
 
 
@@ -495,7 +496,7 @@ void Flat::RET( ostream &ret, bool inFinish )
 	ret << "${" << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
-		ret << "$ \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ${";
 		INLINE_LIST( ret, postPopExpr, 0, false, false );
 		ret << "}$";
 	}

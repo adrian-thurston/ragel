@@ -14,19 +14,22 @@ void java_tok_list( TL: host::tok* )
 void java_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
-		[`@ string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
-		java_tok_list( TL )
+		send Output
+			"([java_tok_list( TL )])"
 	}
 	elsif match ExprFactor
-		[`$ string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 	{
-		send Output "{[java_tok_list( TL )]}
+		send Output 
+			"{[java_tok_list( TL )]}
 	}
 	elsif match ExprFactor
-		[`= string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
-		send Output "([java_tok_list( TL )])"
+		send Output
+			[java_tok_list( TL )]
 	}
 	elsif match ExprFactor
 		[O:`( TL: expr C: `)]
@@ -251,19 +254,22 @@ void java_num_list( NumList: num_list )
 void java_stmt( Stmt: stmt )
 {
 	if match Stmt
-		[`@ string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
-		java_tok_list( TL )
+		send Output
+			"([java_tok_list( TL )])"
 	}
 	elsif match Stmt
-		[`$ string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 	{
-		send Output "{[java_tok_list( TL )]}
+		send Output 
+			"{[java_tok_list( TL )]}
 	}
 	elsif match Stmt
-		[`= string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
-		send Output "([java_tok_list( TL )])"
+		send Output
+			[java_tok_list( TL )]
 	}
 	elsif match Stmt [Array: array] {
 		send Output

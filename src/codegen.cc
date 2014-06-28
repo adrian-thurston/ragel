@@ -239,9 +239,9 @@ string CodeGen::ACCESS()
 {
 	ostringstream ret;
 	if ( accessExpr != 0 ) {
-		ret << "@ \"-\" 1 {";
+		ret << "host( \"-\", 1 ) @{";
 		INLINE_LIST( ret, accessExpr, 0, false, false );
-		ret << "}$ ->";
+		ret << "}@ ->";
 	}
 	return ret.str();
 }
@@ -253,9 +253,9 @@ string CodeGen::P()
 	if ( pExpr == 0 )
 		ret << "p";
 	else {
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, pExpr, 0, false, false );
-		ret << "}$";
+		ret << "}=";
 	}
 	return ret.str();
 }
@@ -266,9 +266,9 @@ string CodeGen::PE()
 	if ( peExpr == 0 )
 		ret << "pe";
 	else {
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, peExpr, 0, false, false );
-		ret << "}$";
+		ret << "}=";
 	}
 	return ret.str();
 }
@@ -279,9 +279,9 @@ string CodeGen::vEOF()
 	if ( eofExpr == 0 )
 		ret << "eof";
 	else {
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, eofExpr, 0, false, false );
-		ret << "}$";
+		ret << "}=";
 	}
 	return ret.str();
 }
@@ -293,9 +293,9 @@ string CodeGen::vCS()
 		ret << ACCESS() << "cs";
 	else {
 		/* Emit the user supplied method of retrieving the key. */
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, csExpr, 0, false, false );
-		ret << "}$";
+		ret << "}=";
 	}
 	return ret.str();
 }
@@ -306,9 +306,9 @@ string CodeGen::TOP()
 	if ( topExpr == 0 )
 		ret << ACCESS() + "top";
 	else {
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, topExpr, 0, false, false );
-		ret << "}$";
+		ret << "}=";
 	}
 	return ret.str();
 }
@@ -319,9 +319,9 @@ string CodeGen::STACK()
 	if ( stackExpr == 0 )
 		ret << ACCESS() + "stack";
 	else {
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, stackExpr, 0, false, false );
-		ret << "}$";
+		ret << "}=";
 	}
 	return ret.str();
 }
@@ -332,9 +332,9 @@ string CodeGen::ACT()
 	if ( actExpr == 0 )
 		ret << ACCESS() + "act";
 	else {
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, actExpr, 0, false, false );
-		ret << "}$";
+		ret << "}=";
 	}
 	return ret.str();
 }
@@ -345,9 +345,9 @@ string CodeGen::TOKSTART()
 	if ( tokstartExpr == 0 )
 		ret << ACCESS() + "ts";
 	else {
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, tokstartExpr, 0, false, false );
-		ret << "}$";
+		ret << "}=";
 	}
 	return ret.str();
 }
@@ -358,9 +358,9 @@ string CodeGen::TOKEND()
 	if ( tokendExpr == 0 )
 		ret << ACCESS() + "te";
 	else {
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, tokendExpr, 0, false, false );
-		ret << "}$";
+		ret << "}=";
 	}
 	return ret.str();
 }
@@ -370,9 +370,9 @@ string CodeGen::GET_KEY()
 	ostringstream ret;
 	if ( getKeyExpr != 0 ) { 
 		/* Emit the user supplied method of retrieving the key. */
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, getKeyExpr, 0, false, false );
-		ret << "}$";
+		ret << "}=";
 	}
 	else {
 		/* Expression for retrieving the key, use simple dereference. */
@@ -446,7 +446,7 @@ void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 			ret << "	case " << lma->lmId << " {\n";
 
 		/* Write the block and close it off. */
-		ret << "	$ \"-\" 1 {";
+		ret << "	host( \"-\", 1 ) ${";
 		INLINE_LIST( ret, lma->children, targState, inFinish, csForced );
 		ret << "}$\n";
 
@@ -507,7 +507,7 @@ void CodeGen::HOST_STMT( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "$ \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ${";
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
 		ret << "}$";
 	}
@@ -518,9 +518,9 @@ void CodeGen::HOST_EXPR( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "= \"-\" 1 {";
+		ret << "host( \"-\", 1 ) ={";
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-		ret << "}$";
+		ret << "}=";
 	}
 }
 
@@ -529,9 +529,9 @@ void CodeGen::HOST_TEXT( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "@ \"-\" 1 {";
+		ret << "host( \"-\", 1 ) @{";
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-		ret << "}$";
+		ret << "}@";
 	}
 }
 
@@ -679,7 +679,7 @@ void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	openHostBlock( '=', pd->id, ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
-	ret << "}$";
+	ret << "}=";
 }
 
 string CodeGen::ERROR_STATE()

@@ -38,14 +38,14 @@ string itoa( int i )
 
 void openHostBlock( char opener, InputData *id, ostream &out, const char *fileName, int line )
 {
-	out << opener << " \"";
+	out << "host( \"";
 	for ( const char *pc = fileName; *pc != 0; pc++ ) {
 		if ( *pc == '\\' )
 			out << "\\\\";
 		else
 			out << *pc;
 	}
-	out << "\" " << line << " {";
+	out << "\", " << line << " ) " << opener << "{";
 }
 
 GenBase::GenBase( std::string fsmName, ParseData *pd, FsmAp *fsm )

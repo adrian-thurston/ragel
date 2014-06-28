@@ -13,20 +13,22 @@ void go_tok_list( TL: host::tok* )
 void go_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
-		[`@ string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
-		go_tok_list( TL )
-		send Output ["\n"]
+		send Output
+			"([go_tok_list( TL )])"
 	}
 	elsif match ExprFactor
-		[`$ string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 	{
-		send Output "{[go_tok_list( TL )]}
+		send Output 
+			"{[go_tok_list( TL )]}
 	}
 	elsif match ExprFactor
-		[`= string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
-		send Output "([go_tok_list( TL )])"
+		send Output
+			[go_tok_list( TL )]
 	}
 	elsif match ExprFactor
 		[O:`( TL: expr C: `)]
@@ -251,20 +253,22 @@ void go_num_list( NumList: num_list )
 void go_stmt( Stmt: stmt )
 {
 	if match Stmt
-		[`@ string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
-		go_tok_list( TL )
-		send Output "
+		send Output
+			"([go_tok_list( TL )])"
 	}
 	elsif match Stmt
-		[`$ string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 	{
-		send Output "{[go_tok_list( TL )]}
+		send Output 
+			"{[go_tok_list( TL )]}
 	}
-	else if match Stmt
-		[`= string uint `{ TL: host::tok* host::`}$]
+	elsif match Stmt
+		[`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
-		send Output "([go_tok_list( TL )])"
+		send Output
+			[go_tok_list( TL )]
 	}
 	elsif match Stmt [Array: array] {
 		send Output

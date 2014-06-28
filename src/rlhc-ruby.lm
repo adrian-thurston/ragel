@@ -22,22 +22,24 @@ void ruby_tok_list( TL: host::tok* )
 void ruby_expr_factor( ExprFactor: expr_factor )
 {
 	if match ExprFactor
-		[`@ string uint `{ TL: host::tok* host::`}$]
-	{
-		ruby_tok_list( TL )
-	}
-	elsif match ExprFactor
-		[`$ string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
 		send Output
+			"([ruby_tok_list( TL )])"
+	}
+	elsif match ExprFactor
+		[`host `( string `, uint `) `${ TL: host::tok* host::`}$]
+	{
+		send Output 
 			"begin
-			"[ruby_tok_list( TL )]
+			"	[ruby_tok_list( TL )]
 			"end
 	}
 	elsif match ExprFactor
-		[`= string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
-		send Output "([ruby_tok_list( TL )])"
+		send Output
+			[ruby_tok_list( TL )]
 	}
 	elsif match ExprFactor
 		[O:`( TL: expr C: `)]
@@ -264,22 +266,24 @@ void ruby_num_list( NumList: num_list )
 void ruby_stmt( Stmt: stmt )
 {
 	if match Stmt
-		[`@ string uint `{ TL: host::tok* host::`}$]
-	{
-		ruby_tok_list( TL )
-	}
-	elsif match Stmt
-		[`$ string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
 		send Output
+			"([ruby_tok_list( TL )])"
+	}
+	elsif match Stmt
+		[`host `( string `, uint `) `${ TL: host::tok* host::`}$]
+	{
+		send Output 
 			"begin
-			"[ruby_tok_list( TL )]
+			"	[ruby_tok_list( TL )]
 			"end
 	}
 	elsif match Stmt
-		[`= string uint `{ TL: host::tok* host::`}$]
+		[`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
-		send Output "([ruby_tok_list( TL )])"
+		send Output
+			[ruby_tok_list( TL )]
 	}
 	elsif match Stmt [Array: array] {
 		send Output
