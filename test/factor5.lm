@@ -1,4 +1,5 @@
 ##### LM #####
+argv.pop()
 print( argv.pop() '\n' )
 ##### ARGS #####
 a

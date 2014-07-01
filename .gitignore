@@ -12,3 +12,5 @@
 /config.log
 /config.status
 /Makefile
+/compile
+/test-driver

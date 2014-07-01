@@ -172,12 +172,18 @@ typedef unsigned char uchar;
 #define IN_MAP_REMOVE_BKT        0x71
 
 #define IN_LIST_LENGTH           0x72
-#define IN_LIST_APPEND_WV        0x73
-#define IN_LIST_APPEND_WC        0x74
-#define IN_LIST_APPEND_BKT       0x75
-#define IN_LIST_REMOVE_END_WV    0x76
-#define IN_LIST_REMOVE_END_WC    0x77
-#define IN_LIST_REMOVE_END_BKT   0x78
+#define IN_LIST_PUSH_TAIL_WV     0x73
+#define IN_LIST_PUSH_TAIL_WC     0x74
+#define IN_LIST_PUSH_TAIL_BKT    0x75
+#define IN_LIST_POP_TAIL_WV      0x76
+#define IN_LIST_POP_TAIL_WC      0x77
+#define IN_LIST_POP_TAIL_BKT     0x78
+#define IN_LIST_PUSH_HEAD_WV     0xe7
+#define IN_LIST_PUSH_HEAD_WC     0xe8
+#define IN_LIST_PUSH_HEAD_BKT    0xe9
+#define IN_LIST_POP_HEAD_WV      0xea
+#define IN_LIST_POP_HEAD_WC      0xeb
+#define IN_LIST_POP_HEAD_BKT     0xec
 
 #define IN_GET_LIST_MEM_R        0x79
 #define IN_GET_LIST_MEM_WC       0x7a

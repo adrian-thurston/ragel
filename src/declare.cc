@@ -1072,15 +1072,23 @@ void Compiler::initListFunctions( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_LIST_LENGTH );
 
-	initFunction( uniqueTypeInt, gen->objDef, "append", 
-			IN_LIST_APPEND_WV, IN_LIST_APPEND_WC, gen->utArg, false );
-	initFunction( uniqueTypeInt, gen->objDef, "push", 
-			IN_LIST_APPEND_WV, IN_LIST_APPEND_WC, gen->utArg, false );
+	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false );
 
-	initFunction( gen->utArg, gen->objDef, "remove_end", 
-			IN_LIST_REMOVE_END_WV, IN_LIST_REMOVE_END_WC, false );
+	initFunction( uniqueTypeInt, gen->objDef, "push_tail", 
+			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->utArg, false );
+
+	initFunction( uniqueTypeInt, gen->objDef, "push", 
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false );
+
+	initFunction( gen->utArg, gen->objDef, "pop_head", 
+			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false );
+
+	initFunction( gen->utArg, gen->objDef, "pop_tail", 
+			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false );
+
 	initFunction( gen->utArg, gen->objDef, "pop", 
-			IN_LIST_REMOVE_END_WV, IN_LIST_REMOVE_END_WC, false );
+			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false );
 }
 
 void Compiler::initListField( GenericType *gen, const char *name, int offset )
@@ -1109,7 +1117,7 @@ void Compiler::initListFields( GenericType *gen )
 {
 	initListField( gen, "head", 0 );
 	initListField( gen, "tail", 1 );
-	initListField( gen, "top", 1 );
+	initListField( gen, "top", 0 );
 }
 
 void Compiler::initVectorFunctions( GenericType *gen )

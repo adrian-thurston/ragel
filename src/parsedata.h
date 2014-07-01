@@ -131,7 +131,7 @@ struct Production
 {
 	Production()
 	: 
-		loc(loc), prodName(0), prodElList(0), prodCommit(false), redBlock(0),
+		prodName(0), prodElList(0), prodCommit(false), redBlock(0),
 		prodId(0), prodNum(0), fsm(0), fsmLength(0), uniqueEmptyLeader(0),
 		isLeftRec(false), localFrame(0), lhsField(0), predOf(0) {}
 

@@ -37,8 +37,8 @@
 
 #define BUFFER_INITIAL_SIZE 4096
 
-void listPrepend( List *list, ListEl *new_el) { listAddBefore(list, list->head, new_el); }
-void listAppend( List *list, ListEl *new_el)  { listAddAfter(list, list->tail, new_el); }
+void listPrepend( List *list, ListEl *newEl ) { listAddBefore(list, list->head, newEl ); }
+void listAppend( List *list, ListEl *newEl )  { listAddAfter(list, list->tail, newEl ); }
 
 ListEl *listDetach( List *list, ListEl *el );
 ListEl *listDetachFirst(List *list )        { return listDetach(list, list->head); }
@@ -1563,7 +1563,7 @@ long mapLength( Map *map )
 	return map->treeSize;
 }
 
-void listAppend2( Program *prg, List *list, Tree *val )
+void listPushTail( Program *prg, List *list, Tree *val )
 {
 	assert( list->refs == 1 );
 	if ( val != 0 )
@@ -1573,10 +1573,27 @@ void listAppend2( Program *prg, List *list, Tree *val )
 	listAppend( list, listEl );
 }
 
+void listPushHead( Program *prg, List *list, Tree *val )
+{
+	assert( list->refs == 1 );
+	if ( val != 0 )
+		assert( val->refs >= 1 );
+	ListEl *listEl = listElAllocate( prg );
+	listEl->value = val;
+	listPrepend( list, listEl );
+}
+
 Tree *listRemoveEnd( Program *prg, List *list )
 {
 	Tree *tree = list->tail->value;
 	listElFree( prg, listDetachLast( list ) );
+	return tree;
+}
+
+Tree *listRemoveHead( Program *prg, List *list )
+{
+	Tree *tree = list->head->value;
+	listElFree( prg, listDetachFirst( list ) );
 	return tree;
 }
 

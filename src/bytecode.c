@@ -414,7 +414,7 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
 		Head *head = stringAllocPointer( prg, argv[i], strlen(argv[i]) );
 		Tree *arg = constructString( prg, head );
 		treeUpref( arg );
-		listAppend2( prg, (List*)list, arg );
+		listPushTail( prg, (List*)list, arg );
 	}
 	return list;
 }
@@ -606,15 +606,28 @@ again:
 			stringFree( prg, head );
 			break;
 		}
-		case IN_LIST_APPEND_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_APPEND_BKT\n" );
+		case IN_LIST_PUSH_HEAD_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
 			break;
 		}
-		case IN_LIST_REMOVE_END_BKT: {
+		case IN_LIST_POP_HEAD_BKT: {
 			Tree *val;
 			read_tree( val );
 
-			debug( prg, REALM_BYTECODE, "IN_LIST_REMOVE_END_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
+
+			treeDownref( prg, sp, val );
+			break;
+		}
+		case IN_LIST_PUSH_TAIL_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
+			break;
+		}
+		case IN_LIST_POP_TAIL_BKT: {
+			Tree *val;
+			read_tree( val );
+
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
 
 			treeDownref( prg, sp, val );
 			break;
@@ -2938,38 +2951,38 @@ again:
 			vm_push( res );
 			break;
 		}
-		case IN_LIST_APPEND_WV: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_APPEND_WV\n" );
+		case IN_LIST_PUSH_TAIL_WV: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WV\n" );
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
 
 			treeDownref( prg, sp, obj );
 
-			listAppend2( prg, (List*)obj, val );
+			listPushTail( prg, (List*)obj, val );
 			treeUpref( prg->trueVal );
 			vm_push( prg->trueVal );
 
 			/* Set up reverse code. Needs no args. */
-			rcodeCode( exec, IN_LIST_APPEND_BKT );
+			rcodeCode( exec, IN_LIST_PUSH_TAIL_BKT );
 			rcodeUnitTerm( exec );
 			break;
 		}
-		case IN_LIST_APPEND_WC: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_APPEND_WC\n" );
+		case IN_LIST_PUSH_TAIL_WC: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
 
 			treeDownref( prg, sp, obj );
 
-			listAppend2( prg, (List*)obj, val );
+			listPushTail( prg, (List*)obj, val );
 			treeUpref( prg->trueVal );
 			vm_push( prg->trueVal );
 			break;
 		}
-		case IN_LIST_APPEND_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_APPEND_BKT\n" );
+		case IN_LIST_PUSH_TAIL_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -2978,8 +2991,8 @@ again:
 			treeDownref( prg, sp, tree );
 			break;
 		}
-		case IN_LIST_REMOVE_END_WC: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_REMOVE_END_WC\n" );
+		case IN_LIST_POP_TAIL_WC: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WC\n" );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -2988,8 +3001,8 @@ again:
 			vm_push( end );
 			break;
 		}
-		case IN_LIST_REMOVE_END_WV: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_REMOVE_END_WV\n" );
+		case IN_LIST_POP_TAIL_WV: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WV\n" );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -3000,13 +3013,13 @@ again:
 			/* Set up reverse. The result comes off the list downrefed.
 			 * Need it up referenced for the reverse code too. */
 			treeUpref( end );
-			rcodeCode( exec, IN_LIST_REMOVE_END_BKT );
+			rcodeCode( exec, IN_LIST_POP_TAIL_BKT );
 			rcodeWord( exec, (Word)end );
 			rcodeUnitTerm( exec );
 			break;
 		}
-		case IN_LIST_REMOVE_END_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_REMOVE_END_BKT\n" );
+		case IN_LIST_POP_TAIL_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
 
 			Tree *val;
 			read_tree( val );
@@ -3014,7 +3027,86 @@ again:
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
 
-			listAppend2( prg, (List*)obj, val );
+			listPushTail( prg, (List*)obj, val );
+			break;
+		}
+		case IN_LIST_PUSH_HEAD_WV: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WV\n" );
+
+			Tree *obj = vm_pop();
+			Tree *val = vm_pop();
+
+			treeDownref( prg, sp, obj );
+
+			listPushHead( prg, (List*)obj, val );
+			treeUpref( prg->trueVal );
+			vm_push( prg->trueVal );
+
+			/* Set up reverse code. Needs no args. */
+			rcodeCode( exec, IN_LIST_PUSH_HEAD_BKT );
+			rcodeUnitTerm( exec );
+			break;
+		}
+		case IN_LIST_PUSH_HEAD_WC: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WC\n" );
+
+			Tree *obj = vm_pop();
+			Tree *val = vm_pop();
+
+			treeDownref( prg, sp, obj );
+
+			listPushHead( prg, (List*)obj, val );
+			treeUpref( prg->trueVal );
+			vm_push( prg->trueVal );
+			break;
+		}
+		case IN_LIST_PUSH_HEAD_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
+
+			Tree *obj = vm_pop();
+			treeDownref( prg, sp, obj );
+
+			Tree *tree = listRemoveHead( prg, (List*)obj );
+			treeDownref( prg, sp, tree );
+			break;
+		}
+		case IN_LIST_POP_HEAD_WC: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WC\n" );
+
+			Tree *obj = vm_pop();
+			treeDownref( prg, sp, obj );
+
+			Tree *end = listRemoveHead( prg, (List*)obj );
+			vm_push( end );
+			break;
+		}
+		case IN_LIST_POP_HEAD_WV: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WV\n" );
+
+			Tree *obj = vm_pop();
+			treeDownref( prg, sp, obj );
+
+			Tree *end = listRemoveHead( prg, (List*)obj );
+			vm_push( end );
+
+			/* Set up reverse. The result comes off the list downrefed.
+			 * Need it up referenced for the reverse code too. */
+			treeUpref( end );
+			rcodeCode( exec, IN_LIST_POP_HEAD_BKT );
+			rcodeWord( exec, (Word)end );
+			rcodeUnitTerm( exec );
+			break;
+		}
+		case IN_LIST_POP_HEAD_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
+
+			Tree *val;
+			read_tree( val );
+
+			Tree *obj = vm_pop();
+			treeDownref( prg, sp, obj );
+
+			listPushHead( prg, (List*)obj, val );
 			break;
 		}
 		case IN_GET_LIST_MEM_R: {

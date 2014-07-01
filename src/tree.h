@@ -299,8 +299,10 @@ Tree *copyRealTree( struct colm_program *prg, Tree *tree, Kid *oldNextDown, Kid 
 void splitIterCur( struct colm_program *prg, Tree ***psp, TreeIter *iter );
 Tree *setListMem( List *list, Half field, Tree *value );
 
-void listAppend2( struct colm_program *prg, List *list, Tree *val );
+void listPushTail( struct colm_program *prg, List *list, Tree *val );
+void listPushHead( struct colm_program *prg, List *list, Tree *val );
 Tree *listRemoveEnd( struct colm_program *prg, List *list );
+Tree *listRemoveHead( struct colm_program *prg, List *list );
 Tree *getListMem( List *list, Word field );
 Tree *getListMemSplit( struct colm_program *prg, List *list, Word field );
 Tree *getParserMem( Parser *parser, Word field );

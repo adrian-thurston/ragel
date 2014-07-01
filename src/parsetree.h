@@ -1042,7 +1042,7 @@ struct LexFactorRep
 		factorRep(0),
 		factorNeg(0),
 		lowerRep(0), 
-		upperRep(upperRep),
+		upperRep(0),
 		type((Type)-1)
 	{ }
 
@@ -1816,7 +1816,7 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 
 	UniqueType( int typeId, IterDef *iterDef ) :
 		typeId(typeId),
-		langEl(langEl),
+		langEl(0),
 		iterDef(iterDef) {}
 
 	int typeId;
