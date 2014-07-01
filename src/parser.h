@@ -94,6 +94,7 @@ struct BaseParser
 			LexFactorAug *factorAug );
 	LexJoin *lexOptJoin( LexJoin *join, LexJoin *context );
 	LangExpr *send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof );
+	LangExpr *sendTree( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof );
 	LangExpr *parseCmd( const InputLoc &loc, bool stop, ObjectField *objField,
 			TypeRef *typeRef, FieldInitVect *fieldInitVect, ConsItemList *list );
 	PatternItemList *consPatternEl( LangVarRef *varRef, PatternItemList *list );

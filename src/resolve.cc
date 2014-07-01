@@ -451,9 +451,10 @@ void LangTerm::resolve( Compiler *pd )
 			break;
 
 		case SendType:
-			break;
+		case SendTreeType:
 		case EmbedStringType:
 			break;
+
 		case CastType:
 			typeRef->resolveType( pd );
 			expr->resolve( pd );

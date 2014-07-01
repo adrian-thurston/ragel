@@ -1733,6 +1733,13 @@ struct LoadColm
 			expr = send( codeFactor.SEND().loc(), varRef, list, eof );
 			break;
 		}
+		case code_factor::_SendTree: {
+			LangVarRef *varRef = walkVarRef( codeFactor.var_ref() );
+			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
+			bool eof = walkOptEos( codeFactor.opt_eos() );
+			expr = sendTree( codeFactor.SEND().loc(), varRef, list, eof );
+			break;
+		}
 		case code_factor::_Nil: {
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.NIL().loc(),
 					LangTerm::NilType ) );

@@ -16,6 +16,7 @@ lex
 	token MATCH / 'match' /
 	token REQUIRE / 'require' /
 	token SEND / 'send' /
+	token SEND_TREE / 'send_tree' /
 	token NAMESPACE / 'namespace' /
 	token FOR / 'for' /
 	token IF / 'if' /
@@ -513,6 +514,7 @@ def code_factor
 |	[FALSE] :False
 |	[POPEN code_expr PCLOSE] :Paren
 |	[SEND var_ref accumulate opt_eos] :Send
+|	[SEND_TREE var_ref accumulate opt_eos] :SendTree
 |	[PARSE opt_capture type_ref opt_field_init accumulate] :Parse
 |	[PARSE_STOP opt_capture type_ref opt_field_init accumulate] :ParseStop
 |	[CONS opt_capture type_ref opt_field_init constructor] :Cons

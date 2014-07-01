@@ -2596,6 +2596,7 @@ struct LangTerm
 		ParseType,
 		ParseStopType,
 		SendType,
+		SendTreeType,
 		MakeTreeType,
 		MakeTokenType,
 		EmbedStringType,
@@ -2766,6 +2767,17 @@ struct LangTerm
 		return s;
 	}
 	
+	static LangTerm *consSendTree( const InputLoc &loc, LangVarRef *varRef, ParserText *parserText, bool eof ) 
+	{
+		LangTerm *s = new LangTerm;
+		s->loc = loc;
+		s->type = SendTreeType;
+		s->varRef = varRef;
+		s->parserText = parserText;
+		s->eof = eof;
+		return s;
+	}
+	
 	void resolve( Compiler *pd );
 
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
@@ -2773,8 +2785,9 @@ struct LangTerm
 	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;
 	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const;
 	void evaluateSendStream( Compiler *pd, CodeVect &code ) const;
-	void evaluateSendParser( Compiler *pd, CodeVect &code ) const;
+	void evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) const;
 	UniqueType *evaluateSend( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateSendTree( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateMatch( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;
 	void assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT ) const;

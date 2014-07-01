@@ -538,6 +538,15 @@ LangExpr *BaseParser::send( const InputLoc &loc, LangVarRef *varRef, ConsItemLis
 			parserText, eof ) );
 }
 
+LangExpr *BaseParser::sendTree( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof )
+{
+	ParserText *parserText = ParserText::cons( loc, curNspace(), list );
+	pd->parserTextList.append( parserText );
+
+	return LangExpr::cons( LangTerm::consSendTree( loc, varRef,
+			parserText, eof ) );
+}
+
 LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *objField,
 		TypeRef *typeRef, FieldInitVect *fieldInitVect, ConsItemList *list )
 {

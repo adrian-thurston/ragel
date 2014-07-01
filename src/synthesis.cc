@@ -1344,11 +1344,11 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 		case ConsItem::ExprType:
 			UniqueType *ut = item->expr->evaluate( pd, code );
 			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
+				/* Clear it away if the the return type is void. */
 				code.append( IN_POP );
 				code.append( IN_POP );
 				continue;
 			}
-
 			break;
 		}
 
@@ -1363,7 +1363,7 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 	 * leave the varref on the stack. */
 }
 
-void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
+void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) const
 {
 	varRef->evaluate( pd, code );
 
@@ -1402,11 +1402,18 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
 		}
 		case ConsItem::ExprType:
 			UniqueType *ut = item->expr->evaluate( pd, code );
-
 			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
+				/* Clear it away if return type is void. */
 				code.append( IN_POP );
 				code.append( IN_POP );
 				continue;
+			}
+
+			if ( strings && ut->typeId == TYPE_TREE &&
+					ut->langEl != pd->strLangEl && ut->langEl != pd->streamLangEl )
+			{
+				/* Convert it to a string. */
+				code.append( IN_TREE_TO_STR_TRIM );
 			}
 			break;
 		}
@@ -1446,22 +1453,31 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code ) const
 UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 {
 	UniqueType *varUt = varRef->lookup( pd );
+	GenericType *generic = varUt->langEl->generic;
 
-	if ( varUt == pd->uniqueTypeStream ) {
+	if ( varUt == pd->uniqueTypeStream )
 		evaluateSendStream( pd, code );
-	}
-	else if ( varUt->langEl->generic != 0 && 
-			varUt->langEl->generic->typeId == GEN_PARSER )
-	{
-		evaluateSendParser( pd, code );
-	}
-	else {
+	else if ( generic != 0 && generic->typeId == GEN_PARSER )
+		evaluateSendParser( pd, code, true );
+	else
 		error(loc) << "can only send to parsers and streams" << endl;
-	}
 
 	return varUt;
 }
 
+
+UniqueType *LangTerm::evaluateSendTree( Compiler *pd, CodeVect &code ) const
+{
+	UniqueType *varUt = varRef->lookup( pd );
+	GenericType *generic = varUt->langEl->generic;
+
+	if ( generic != 0 && generic->typeId == GEN_PARSER )
+		evaluateSendParser( pd, code, false );
+	else
+		error(loc) << "can only send_tree to parsers" << endl;
+
+	return varUt;
+}
 
 UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 {
@@ -1589,6 +1605,8 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 			return evaluateConstruct( pd, code );
 		case SendType:
 			return evaluateSend( pd, code );
+		case SendTreeType:
+			return evaluateSendTree( pd, code );
 		case NewType:
 			return evaluateNew( pd, code );
 		case TypeIdType: {
