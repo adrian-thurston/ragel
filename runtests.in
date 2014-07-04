@@ -243,8 +243,8 @@ for test_case; do
 				echo "$langflags" | grep -e $lf >/dev/null || continue
 
 				targ=${root}_$lang.rl
-				echo "./trans-$trans ${root}_${lang} $lang $test_case $targ"
-				if ! ./trans-$trans ${root}_${lang} $lang $test_case $targ; then
+				echo "./trans-$trans $targ $test_case $lang ${root}_${lang}"
+				if ! ./trans-$trans $targ $test_case $lang ${root}_${lang}; then
 					test_error
 				fi
 				echo "./runtests -g $options $targ"

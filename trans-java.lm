@@ -186,6 +186,7 @@ int rw_java_action_block( ActionBlock: indep::action_block )
 }
 
 
+ProgName: str = argv.pop()
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
 Lang: str = argv.pop()
