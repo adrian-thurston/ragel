@@ -1737,7 +1737,7 @@ struct LoadColm
 			LangVarRef *varRef = walkVarRef( codeFactor.var_ref() );
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 			bool eof = walkOptEos( codeFactor.opt_eos() );
-			expr = sendTree( codeFactor.SEND().loc(), varRef, list, eof );
+			expr = sendTree( codeFactor.SEND_TREE().loc(), varRef, list, eof );
 			break;
 		}
 		case code_factor::_Nil: {
