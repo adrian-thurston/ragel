@@ -1,0 +1,42 @@
+##### LM #####
+lex
+	literal `a `b `+ `-
+	ignore /[ \n]/
+end
+
+def s
+	[`a `+ `b]
+
+cons S: s "a + b
+
+switch S
+case [`a Plus: `+ `b]
+{
+	send stdout '1
+}
+
+switch S
+case [`a Plus: `+ `b]
+{
+	send stdout '2
+}
+default {
+	send stdout '3
+}
+
+switch S
+case [`a Plus: `+ `b]
+	send stdout '4
+case [`a Plus: `+ `b]
+	send stdout '5
+default
+	send stdout '6
+
+switch S
+default
+	send stdout '7
+##### EXP #####
+1
+2
+4
+7
