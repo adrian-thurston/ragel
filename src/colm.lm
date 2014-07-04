@@ -44,6 +44,9 @@ lex
 	token GLOBAL / 'global' /
 	token EOS / 'eos' /
 	token CAST / 'cast' /
+	token SWITCH / 'switch' /
+	token CASE / 'case' /
+	token DEFAULT / 'default' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -406,12 +409,24 @@ def prod_list
 	[prod_list BAR prod] :List
 |	[prod] :Base
 
+def case_clause
+	[CASE pattern block_or_single]
+
+def default_clause
+	[DEFAULT block_or_single]
+
+def case_clause_list
+	[case_clause case_clause_list] :Recursive
+|	[case_clause] :BaseCase
+|	[default_clause] :BaseDefault
+
 def statement
 	[print_stmt] :Print
 |	[expr_stmt] :Expr
 |	[var_def opt_def_init] :VarDef
 |	[FOR id COLON type_ref IN iter_call block_or_single] :For
 |	[IF code_expr block_or_single elsif_list] :If
+|	[SWITCH code_expr case_clause_list] :Switch
 |	[WHILE code_expr block_or_single] :While
 |	[var_ref EQUALS code_expr] :LhsVarRef
 |	[YIELD var_ref] :Yield

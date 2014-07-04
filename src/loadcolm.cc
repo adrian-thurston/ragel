@@ -245,6 +245,12 @@ struct LoadColm
 			stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, elsifList );
 			break;
 		}
+		case statement::_Switch: {
+			pushScope();
+			stmt = walkCaseClauseList( Statement.case_clause_list(), Statement.code_expr() );
+			popScope();
+			break;
+		}
 		case statement::_While: {
 			pushScope();
 			LangExpr *expr = walkCodeExpr( Statement.code_expr() );
@@ -1980,6 +1986,46 @@ struct LoadColm
 			case elsif_list::_OptElse:
 				stmt = walkOptionalElse( elsifList.optional_else() );
 				break;
+		}
+		return stmt;
+	}
+
+	LangStmt *walkCaseClauseList( case_clause_list CaseClauseList, code_expr CodeExpr )
+	{
+		LangStmt *stmt = 0;
+		switch ( CaseClauseList.prodName() ) {
+			case case_clause_list::_Recursive: {
+				pushScope();
+
+				LangExpr *expr = walkCodeExpr( CodeExpr );
+				StmtList *stmtList = walkBlockOrSingle(
+						CaseClauseList.case_clause().block_or_single() );
+
+				popScope();
+
+				LangStmt *recList = walkCaseClauseList(
+						CaseClauseList._case_clause_list(), CodeExpr );
+
+				stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, recList );
+				break;
+			}
+			case case_clause_list::_BaseCase: {
+				pushScope();
+				LangExpr *expr = walkCodeExpr( CodeExpr );
+				StmtList *stmtList = walkBlockOrSingle(
+						CaseClauseList.case_clause().block_or_single() );
+				popScope();
+				stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, 0 );
+				break;
+			}
+			case case_clause_list::_BaseDefault: {
+				pushScope();
+				StmtList *stmtList = walkBlockOrSingle(
+						CaseClauseList.default_clause().block_or_single() );
+				popScope();
+				stmt = LangStmt::cons( LangStmt::ElseType, stmtList );
+				break;
+			}
 		}
 		return stmt;
 	}
