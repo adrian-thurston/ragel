@@ -351,9 +351,9 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	closeOutput();
 
 	string final = dirName + "/rlhc " + 
-			hostLang->rlhcArg + " " + 
 			origOutputFileName + " " +
-			genOutputFileName;
+			genOutputFileName + " " +
+			hostLang->rlhcArg;
 	int res = system( final.c_str() );
 	if ( res != 0 )
 		exit( 1 );

@@ -30,11 +30,11 @@ export RagelError: str
 export RagelImport: import*
 
 # Language
-Lang = argv.pop()
+Lang = argv.pop_tail()
 
 # The open is expected to succeed. The open is tested before
 # the colm program is called.
-FileName: str = argv.pop()
+FileName: str = argv.pop_tail()
 Stream: stream = open( FileName "r" )
 RagelTree = parse start[ Stream ]
 RagelError = error
@@ -84,7 +84,7 @@ import* import( FileName: str Start: start )
 
 # Extra operations.
 if ( argv.length > 0 ) {
-	Cmd: str = argv.pop()
+	Cmd: str = argv.pop_tail()
 	if ( Cmd == 'import' ) {
 		RagelImport = import( FileName RagelTree )
 	}
