@@ -1320,11 +1320,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool tree, bo
 	return targetUT;
 }
 
-void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
+void ConsItemList::evaluateSendStream( Compiler *pd, CodeVect &code )
 {
-	varRef->evaluate( pd, code );
-
-	for ( ConsItemList::Iter item = parserText->list->first(); item.lte(); item++ ) {
+	for ( ConsItemList::Iter item = first(); item.lte(); item++ ) {
 		/* Load a dup of the stream. */
 		code.append( IN_DUP_TOP );
 
@@ -1369,7 +1367,12 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 		code.append( IN_PRINT_STREAM );
 		code.append( 1 );
 	}
+}
 
+void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
+{
+	varRef->evaluate( pd, code );
+	parserText->list->evaluateSendStream( pd, code );
 
 	/* Normally we would have to pop the stream var ref that we evaluated
 	 * before all the print arguments (which includes the stream, evaluated
@@ -2130,6 +2133,12 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 
 			delete[] types;
 
+			break;
+		}
+		case PrintAccum: {
+			code.append( IN_GET_STDOUT );
+			consItemList->evaluateSendStream( pd, code );
+			code.append( IN_POP );
 			break;
 		}
 		case ExprType: {

@@ -481,6 +481,7 @@ def print_stmt
 |	[PRINTS POPEN call_arg_list PCLOSE] :PrintStream
 |	[PRINT_XML POPEN call_arg_list PCLOSE] :Xml
 |	[PRINT_XML_AC POPEN call_arg_list PCLOSE] :XmlAc
+|	[PRINT accumulate] :Accum
 
 def expr_stmt
 	[code_expr]

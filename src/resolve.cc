@@ -526,6 +526,8 @@ void LangStmt::resolve( Compiler *pd ) const
 				(*pex)->expr->resolve( pd );
 			break;
 		}
+		case PrintAccum:
+			break;
 		case ExprType: {
 			/* Evaluate the exrepssion, then pop it immediately. */
 			expr->resolve( pd );

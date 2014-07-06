@@ -1627,6 +1627,8 @@ struct ConsItemList
 		cil->append( ci );
 		return cil;
 	}
+
+	void evaluateSendStream( Compiler *pd, CodeVect &code );
 };
 
 struct Pattern
@@ -2915,6 +2917,7 @@ struct LangStmt
 		PrintXMLACType,
 		PrintXMLType,
 		PrintStreamType,
+		PrintAccum,
 		ExprType,
 		IfType,
 		ElseType,
@@ -2943,10 +2946,12 @@ struct LangStmt
 		iterCall(0),
 		context(0),
 		scope(0),
+		consItemList(0),
 
 		/* Normally you don't need to initialize double list pointers, however,
 		 * we make use of the next pointer for returning a pair of statements
-		 * using one pointer to a LangStmt, so we need to initialize it above. */
+		 * using one pointer to a LangStmt, so we need to initialize the
+		 * pointers. */
 		prev(0),
 		next(0)
 	{}
@@ -3078,6 +3083,14 @@ struct LangStmt
 		return s;
 	}
 
+	static LangStmt *cons( const InputLoc &loc, Type type, ConsItemList *consItemList )
+	{
+		LangStmt *s = new LangStmt;
+		s->loc = loc;
+		s->type = type;
+		s->consItemList = consItemList;
+		return s;
+	}
 
 	static LangStmt *cons( Type type )
 	{
@@ -3118,6 +3131,7 @@ struct LangStmt
 	IterCall *iterCall;
 	Context *context;
 	ObjNameScope *scope;
+	ConsItemList *consItemList;
 
 	/* Normally you don't need to initialize double list pointers, however, we
 	 * make use of the next pointer for returning a pair of statements using

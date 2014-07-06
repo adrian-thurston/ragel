@@ -1190,25 +1190,34 @@ struct LoadColm
 
 	LangStmt *walkPrintStmt( print_stmt &printStmt )
 	{
-		CallArgVect *exprVect = walkCallArgList( printStmt.call_arg_list() );
-
-		LangStmt::Type type = LangStmt::PrintType;
-		switch ( printStmt.prodName() ) {
-		case print_stmt::_Tree:
-			type = LangStmt::PrintType;
-			break;
-		case print_stmt::_PrintStream:
-			type = LangStmt::PrintStreamType;
-			break;
-		case print_stmt::_Xml:
-			type = LangStmt::PrintXMLType;
-			break;
-		case print_stmt::_XmlAc:
-			type = LangStmt::PrintXMLACType;
-			break;
+		if ( printStmt.prodName() == print_stmt::_Accum ) {
+			ConsItemList *list = walkAccumulate( printStmt.accumulate() );
+			return LangStmt::cons( printStmt.PRINT().loc(), LangStmt::PrintAccum, list );
 		}
-			
-		return LangStmt::cons( printStmt.POPEN().loc(), type, exprVect );
+		else {
+			CallArgVect *exprVect = walkCallArgList( printStmt.call_arg_list() );
+
+			LangStmt::Type type = LangStmt::PrintType;
+			switch ( printStmt.prodName() ) {
+			case print_stmt::_Tree:
+				type = LangStmt::PrintType;
+				break;
+			case print_stmt::_PrintStream:
+				type = LangStmt::PrintStreamType;
+				break;
+			case print_stmt::_Xml:
+				type = LangStmt::PrintXMLType;
+				break;
+			case print_stmt::_XmlAc:
+				type = LangStmt::PrintXMLACType;
+				break;
+			case print_stmt::_Accum:
+				/* unreachable (see above) */
+				break;
+			}
+				
+			return LangStmt::cons( printStmt.POPEN().loc(), type, exprVect );
+		}
 	}
 
 	QualItemVect *walkQual( qual &Qual )
