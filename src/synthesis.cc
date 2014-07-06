@@ -1234,6 +1234,13 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 		case ConsItem::ExprType:
 			UniqueType *ut = item->expr->evaluate( pd, code );
 
+			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
+				/* Clear it away if return type is void. */
+				code.append( IN_POP );
+				code.append( IN_POP );
+				continue;
+			}
+
 			if ( ut->typeId == TYPE_TREE &&
 					ut->langEl != pd->strLangEl && ut->langEl != pd->streamLangEl )
 			{
