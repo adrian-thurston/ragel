@@ -1,0 +1,36 @@
+######### LM #########
+lex
+	ignore /space+/
+	literal `* `( `)
+	token id /[a-zA-Z_]+/
+end
+
+def item 
+	[id]
+|	[`( item* `)]
+
+def item2
+	[id]
+|	[`( item2* `)]
+
+def start 
+	[item*]
+
+cons StartParser1: parser<start>[]
+cons StartParser2: parser<start>[]
+
+parse Item2: item2 "b
+
+# Success.
+send StartParser1
+	"a [Item2] c d\n" eos
+
+# Failure.
+send_tree StartParser2
+	"a [Item2] c d\n" eos
+
+print( StartParser1.tree )
+print( StartParser2.tree "\n" )
+######### EXP #########
+a b c d
+NIL
