@@ -2136,6 +2136,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 		case PrintAccum: {
+			code.append( IN_LOAD_GLOBAL_R );
 			code.append( IN_GET_STDOUT );
 			consItemList->evaluateSendStream( pd, code );
 			code.append( IN_POP );
