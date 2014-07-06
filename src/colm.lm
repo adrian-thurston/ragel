@@ -11,6 +11,7 @@ lex
 	token PRINT_XML / 'print_xml' /
 	token PRINT_XML_AC / 'print_xml_ac' /
 	token PARSE / 'parse' /
+	token PARSE_TREE / 'parse_tree' /
 	token PARSE_STOP / 'parse_stop' /
 	token CONS / 'construct' | 'cons' /
 	token MATCH / 'match' /
@@ -531,6 +532,7 @@ def code_factor
 |	[SEND var_ref accumulate opt_eos] :Send
 |	[SEND_TREE var_ref accumulate opt_eos] :SendTree
 |	[PARSE opt_capture type_ref opt_field_init accumulate] :Parse
+|	[PARSE_TREE opt_capture type_ref opt_field_init accumulate] :ParseTree
 |	[PARSE_STOP opt_capture type_ref opt_field_init accumulate] :ParseStop
 |	[CONS opt_capture type_ref opt_field_init constructor] :Cons
 |	[MATCH var_ref pattern] :Match

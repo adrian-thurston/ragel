@@ -772,7 +772,7 @@ void ConsInit::parseInput( StmtList *stmtList )
 	ObjectField *objField = ObjectField::cons( internal, 0, String("P") );
 
 	/* Parse the above list. */
-	LangExpr *parseExpr = parseCmd( internal, false, objField, typeRef, 0, list );
+	LangExpr *parseExpr = parseCmd( internal, false, false, objField, typeRef, 0, list );
 	LangStmt *parseStmt = LangStmt::cons( internal, LangStmt::ExprType, parseExpr );
 	stmtList->append( parseStmt );
 }

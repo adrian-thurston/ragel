@@ -429,8 +429,9 @@ void LangTerm::resolve( Compiler *pd )
 		case FalseType:
 			break;
 
-		case ParseStopType:
 		case ParseType:
+		case ParseTreeType:
+		case ParseStopType:
 			typeRef->resolveType( pd );
 			/* Evaluate the initialization expressions. */
 			if ( fieldInitArgs != 0 ) {

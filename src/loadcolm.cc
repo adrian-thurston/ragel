@@ -1705,7 +1705,19 @@ struct LoadColm
 			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
-			expr = parseCmd( codeFactor.PARSE().loc(), false, objField,
+			expr = parseCmd( codeFactor.PARSE().loc(), false, false, objField,
+					typeRef, init, list );
+			break;
+		}
+		case code_factor::_ParseTree: {
+			/* The type we are parsing. */
+			type_ref typeRefTree = codeFactor.type_ref();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			ObjectField *objField = walkOptCapture( codeFactor.opt_capture() );
+			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
+			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
+
+			expr = parseCmd( codeFactor.PARSE_TREE().loc(), true, false, objField,
 					typeRef, init, list );
 			break;
 		}
@@ -1717,7 +1729,7 @@ struct LoadColm
 			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
-			expr = parseCmd( codeFactor.PARSE_STOP().loc(), true, objField,
+			expr = parseCmd( codeFactor.PARSE_STOP().loc(), false, true, objField,
 					typeRef, init, list );
 			break;
 		}

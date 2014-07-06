@@ -2594,6 +2594,7 @@ struct LangTerm
 		TrueType,
 		FalseType,
 		ParseType,
+		ParseTreeType,
 		ParseStopType,
 		SendType,
 		SendTreeType,
@@ -2783,7 +2784,7 @@ struct LangTerm
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;
-	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const;
+	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool tree, bool stop ) const;
 	void evaluateSendStream( Compiler *pd, CodeVect &code ) const;
 	void evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) const;
 	UniqueType *evaluateSend( Compiler *pd, CodeVect &code ) const;

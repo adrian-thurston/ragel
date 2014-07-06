@@ -547,7 +547,7 @@ LangExpr *BaseParser::sendTree( const InputLoc &loc, LangVarRef *varRef, ConsIte
 			parserText, eof ) );
 }
 
-LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *objField,
+LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop, ObjectField *objField,
 		TypeRef *typeRef, FieldInitVect *fieldInitVect, ConsItemList *list )
 {
 	LangExpr *expr = 0;
@@ -575,7 +575,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool stop, ObjectField *obj
 	pd->parserTextList.append( parserText );
 
 	expr = LangExpr::cons( LangTerm::cons( loc, 
-			stop ? LangTerm::ParseStopType : LangTerm::ParseType,
+			stop ? LangTerm::ParseStopType : ( tree ? LangTerm::ParseTreeType : LangTerm::ParseType ),
 			varRef, objField, parserTypeRef, fieldInitVect, constructor, parserText ) );
 
 	/* Check for redeclaration. */

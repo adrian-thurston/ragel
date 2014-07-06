@@ -1127,7 +1127,7 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 	}
 }
 
-UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) const
+UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool tree, bool stop ) const
 {
 	UniqueType *targetUT = typeRef->uniqueType->langEl->generic->utArg;
 
@@ -1241,7 +1241,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 				continue;
 			}
 
-			if ( ut->typeId == TYPE_TREE &&
+			if ( !tree && ut->typeId == TYPE_TREE &&
 					ut->langEl != pd->strLangEl && ut->langEl != pd->streamLangEl )
 			{
 				/* Convert it to a string. */
@@ -1612,9 +1612,11 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 		case MatchType:
 			return evaluateMatch( pd, code );
 		case ParseType:
-			return evaluateParse( pd, code, false );
+			return evaluateParse( pd, code, false, false );
+		case ParseTreeType:
+			return evaluateParse( pd, code, true, false );
 		case ParseStopType:
-			return evaluateParse( pd, code, true );
+			return evaluateParse( pd, code, false, true );
 		case ConstructType:
 			return evaluateConstruct( pd, code );
 		case SendType:
@@ -2277,7 +2279,7 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 			UniqueType *ut = el->typeRef->uniqueType;
 			if ( ut->typeId == TYPE_ITER ) {
 				int depth = el->scope->depth();
-				LocalType type;
+				LocalType type = LT_Tree;
 				switch ( ut->iterDef->type ) {
 					case IterDef::Tree:
 					case IterDef::Child:
