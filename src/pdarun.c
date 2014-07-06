@@ -1400,6 +1400,10 @@ void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
 	clearParseTree( prg, sp, pdaRun->accumIgnore );
 	pdaRun->accumIgnore = 0;
 
+	/* Clear the input list (scanned tokes, sent trees). */
+	clearParseTree( prg, sp, pdaRun->parseInput );
+	pdaRun->parseInput = 0;
+
 	if ( pdaRun->context != 0 )
 		treeDownref( prg, sp, pdaRun->context );
 
@@ -2177,14 +2181,6 @@ case PcrReverse:
 fail:
 	pdaRun->cs = -1;
 	pdaRun->parseError = 1;
-
-	/* If we failed parsing on tree we must free it. The caller expected us to
-	 * either consume it or send it back to the parseInput. */
-	if ( pdaRun->parseInput != 0 ) {
-		//treeDownref( prg, sp, (Tree*)pdaRun->parseInput->tree );
-		//ptKidFree( prg, pdaRun->parseInput );
-		pdaRun->parseInput = 0;
-	}
 
 	/* FIXME: do we still need to fall through here? A fail is permanent now,
 	 * no longer called into again. */
