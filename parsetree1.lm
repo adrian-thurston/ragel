@@ -1,0 +1,28 @@
+######### LM #########
+lex
+	ignore /space+/
+	literal `* `( `)
+	token id /[a-zA-Z_]+/
+end
+
+def item 
+	[id]
+|	[`( item* `)]
+
+def item2
+	[id]
+|	[`( item2* `)]
+
+def start 
+	[item*]
+
+parse Item2: item2 "b
+
+parse Input1: start "a [Item2] c d
+print( Input1 )
+
+parse_tree Input2: start "a [Item2] c d
+print( Input2 "\n" )
+######### EXP #########
+a b c d
+NIL
