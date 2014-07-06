@@ -1232,7 +1232,14 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool stop ) c
 			break;
 		}
 		case ConsItem::ExprType:
-			item->expr->evaluate( pd, code );
+			UniqueType *ut = item->expr->evaluate( pd, code );
+
+			if ( ut->typeId == TYPE_TREE &&
+					ut->langEl != pd->strLangEl && ut->langEl != pd->streamLangEl )
+			{
+				/* Convert it to a string. */
+				code.append( IN_TREE_TO_STR_TRIM );
+			}
 			break;
 		}
 
