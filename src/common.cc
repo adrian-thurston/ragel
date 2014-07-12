@@ -114,7 +114,7 @@ const HostLang hostLangGo =     { HostLang::Go,     hostTypesGo,    10,  hostTyp
 const HostLang hostLangJava =   { HostLang::Java,   hostTypesJava,   4,  hostTypesJava+2,    false, "java"  };
 const HostLang hostLangRuby =   { HostLang::Ruby,   hostTypesRuby,   2,  hostTypesRuby+0,    false, "ruby"  };
 const HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9,  hostTypesCSharp+4,  true,  "csharp"   };
-const HostLang hostLangOCaml =  { HostLang::OCaml,  hostTypesOCaml,  1,  hostTypesOCaml+0,   false, "no-lang"  };
+const HostLang hostLangOCaml =  { HostLang::OCaml,  hostTypesOCaml,  1,  hostTypesOCaml+0,   false, "ocaml"  };
 const HostLang hostLangCrack =  { HostLang::Crack,  hostTypesCrack,  5,  hostTypesCrack+0,   true,  "no-lang"  };
 
 HostType *findAlphType( const HostLang *hostLang, const char *s1 )

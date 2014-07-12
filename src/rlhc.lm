@@ -308,6 +308,7 @@ include 'rlhc-cs.lm'
 include 'rlhc-go.lm'
 include 'rlhc-java.lm'
 include 'rlhc-ruby.lm'
+include 'rlhc-ml.lm'
 
 ProgName: str = argv.pop()
 OutputFile: str = argv.pop()
@@ -355,6 +356,8 @@ elsif ( Lang == 'java' )
 	java_stmt_list( Start._repeat_stmt )
 elsif ( Lang == 'ruby' )
 	ruby_stmt_list( Start._repeat_stmt )
+elsif ( Lang == 'ocaml' )
+	ml_stmt_list( Start._repeat_stmt )
 else {
 	print( 'rlhc: unrecognized language: ' Lang '\n' )
 }
