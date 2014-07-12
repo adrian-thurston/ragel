@@ -304,9 +304,6 @@ void InputData::parseArgs( int argc, const char **argv )
 			case 'D':
 				hostLang = &hostLangD;
 				break;
-			case 'E':
-				hostLang = &hostLangD2;
-				break;
 			case 'Z':
 				hostLang = &hostLangGo;
 				break;
