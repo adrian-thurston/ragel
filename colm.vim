@@ -59,7 +59,7 @@ syntax keyword Type
 	\ namespace lex reducefirst global include export
 	\ construct cons parse parse_tree parse_stop match require send send_tree
 	\ preeof left right nonassoc prec context alias
-	\ end
+	\ end eos print
 
 syntax keyword typeKeywords
 	\ int str bool any ref ptr void
@@ -67,7 +67,7 @@ syntax keyword typeKeywords
 syntax keyword Keyword
 	\ reject else elsif return yield for while if
 	\ typeid in break 
-	\ new deref ni cast
+	\ new deref ni cast switch case default
 
 syntax match tokenName "[a-zA-Z_][a-zA-Z_0-9]*" contained
 syntax match varCapture "[a-zA-Z_][a-zA-Z_0-9]*:" 
