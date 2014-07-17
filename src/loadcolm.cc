@@ -247,7 +247,7 @@ struct LoadColm
 		}
 		case statement::_Switch: {
 			pushScope();
-			stmt = walkCaseClauseList( Statement.case_clause_list(), Statement.code_expr() );
+			stmt = walkCaseClauseList( Statement.case_clause_list(), Statement.var_ref() );
 			popScope();
 			break;
 		}
@@ -2011,28 +2011,35 @@ struct LoadColm
 		return stmt;
 	}
 
-	LangStmt *walkCaseClauseList( case_clause_list CaseClauseList, code_expr CodeExpr )
+	LangStmt *walkCaseClauseList( case_clause_list CaseClauseList, var_ref VarRef )
 	{
 		LangStmt *stmt = 0;
 		switch ( CaseClauseList.prodName() ) {
 			case case_clause_list::_Recursive: {
 				pushScope();
 
-				LangExpr *expr = walkCodeExpr( CodeExpr );
+				LangVarRef *varRef = walkVarRef( VarRef );
+				PatternItemList *list = walkPattern( CaseClauseList.case_clause().pattern(), varRef );
+				LangExpr *expr = match( CaseClauseList.loc(), varRef, list );
+
 				StmtList *stmtList = walkBlockOrSingle(
 						CaseClauseList.case_clause().block_or_single() );
 
 				popScope();
 
 				LangStmt *recList = walkCaseClauseList(
-						CaseClauseList._case_clause_list(), CodeExpr );
+						CaseClauseList._case_clause_list(), VarRef );
 
 				stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, recList );
 				break;
 			}
 			case case_clause_list::_BaseCase: {
 				pushScope();
-				LangExpr *expr = walkCodeExpr( CodeExpr );
+
+				LangVarRef *varRef = walkVarRef( VarRef );
+				PatternItemList *list = walkPattern( CaseClauseList.case_clause().pattern(), varRef );
+				LangExpr *expr = match( CaseClauseList.loc(), varRef, list );
+
 				StmtList *stmtList = walkBlockOrSingle(
 						CaseClauseList.case_clause().block_or_single() );
 				popScope();

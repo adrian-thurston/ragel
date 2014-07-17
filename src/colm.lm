@@ -427,7 +427,7 @@ def statement
 |	[var_def opt_def_init] :VarDef
 |	[FOR id COLON type_ref IN iter_call block_or_single] :For
 |	[IF code_expr block_or_single elsif_list] :If
-|	[SWITCH code_expr case_clause_list] :Switch
+|	[SWITCH var_ref case_clause_list] :Switch
 |	[WHILE code_expr block_or_single] :While
 |	[var_ref EQUALS code_expr] :LhsVarRef
 |	[YIELD var_ref] :Yield
