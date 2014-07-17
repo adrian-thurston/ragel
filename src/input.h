@@ -94,7 +94,8 @@ struct StreamFuncs
 
 	int (*getData)( StreamImpl *ss, char *dest, int length );
 
-	int (*consumeData)( StreamImpl *ss, int length, struct colm_location *loc );
+	int (*consumeData)( struct colm_program *prg, struct colm_tree **sp, StreamImpl *ss,
+			int length, struct colm_location *loc );
 	int (*undoConsumeData)( StreamImpl *ss, const char *data, int length );
 
 	struct colm_tree *(*consumeTree)( StreamImpl *ss );

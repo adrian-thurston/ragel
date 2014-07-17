@@ -93,7 +93,7 @@ void decrementSteps( PdaRun *pdaRun )
 	//debug( prg, REALM_PARSE, "steps down to %ld\n", pdaRun->steps );
 }
 
-Head *streamPull( Program *prg, PdaRun *pdaRun, StreamImpl *is, long length )
+Head *streamPull( Program *prg, Tree **sp, PdaRun *pdaRun, StreamImpl *is, long length )
 {
 	if ( pdaRun != 0 ) {
 		FsmRun *fsmRun = pdaRun->fsmRun;
@@ -108,7 +108,7 @@ Head *streamPull( Program *prg, PdaRun *pdaRun, StreamImpl *is, long length )
 
 		is->funcs->getData( is, dest, length );
 		Location *loc = locationAllocate( prg );
-		is->funcs->consumeData( is, length, loc );
+		is->funcs->consumeData( prg, sp, is, length, loc );
 
 		runBuf->length += length;
 
@@ -126,7 +126,7 @@ Head *streamPull( Program *prg, PdaRun *pdaRun, StreamImpl *is, long length )
 
 		is->funcs->getData( is, dest, length );
 		Location *loc = locationAllocate( prg );
-		is->funcs->consumeData( is, length, loc );
+		is->funcs->consumeData( prg, sp, is, length, loc );
 		head->location = loc;
 
 		return head;
@@ -721,7 +721,7 @@ void handleError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	}
 }
 
-static Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
+static Head *extractMatch( Program *prg, Tree **sp, FsmRun *fsmRun, StreamImpl *is )
 {
 	long length = fsmRun->toklen;
 
@@ -738,7 +738,7 @@ static Head *extractMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 
 	is->funcs->getData( is, dest, length );
 	Location *location = locationAllocate( prg );
-	is->funcs->consumeData( is, length, location );
+	is->funcs->consumeData( prg, sp, is, length, location );
 
 	runBuf->length += length;
 
@@ -786,12 +786,13 @@ static Head *peekMatch( Program *prg, FsmRun *fsmRun, StreamImpl *is )
 }
 
 
-static void sendIgnore( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+static void sendIgnore( Program *prg, Tree **sp, StreamImpl *is,
+		FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	debug( prg, REALM_PARSE, "ignoring: %s\n", prg->rtd->lelInfo[id].name );
 
 	/* Make the ignore string. */
-	Head *ignoreStr = extractMatch( prg, fsmRun, is );
+	Head *ignoreStr = extractMatch( prg, sp, fsmRun, is );
 
 	debug( prg, REALM_PARSE, "ignoring: %.*s\n", ignoreStr->length, ignoreStr->data );
 
@@ -805,12 +806,13 @@ static void sendIgnore( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun,
 }
 
 
-static void sendToken( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun, long id )
+static void sendToken( Program *prg, Tree **sp, StreamImpl *is,
+		FsmRun *fsmRun, PdaRun *pdaRun, long id )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
 	/* Make the token data. */
-	Head *tokdata = extractMatch( prg, fsmRun, is );
+	Head *tokdata = extractMatch( prg, sp, fsmRun, is );
 
 	debug( prg, REALM_PARSE, "token: %s  text: %.*s\n",
 		prg->rtd->lelInfo[id].name,
@@ -831,7 +833,8 @@ static void sendToken( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, 
 		setRegion( pdaRun, emptyIgnore, parseTree );
 }
 
-static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
+static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun,
+		FsmRun *fsmRun, StreamImpl *is )
 {
 	Kid *input = kidAllocate( prg );
 	input->tree = is->funcs->consumeTree( is );
@@ -846,13 +849,15 @@ static void sendTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, S
 	pdaRun->parseInput = parseTree;
 }
 
-static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
+static void sendIgnoreTree( Program *prg, Tree **sp, PdaRun *pdaRun,
+		FsmRun *fsmRun, StreamImpl *is )
 {
 	Tree *tree = is->funcs->consumeTree( is );
 	ignoreTree2( prg, pdaRun, tree );
 }
 
-static void sendCi( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun, int id )
+static void sendCi( Program *prg, Tree **sp, StreamImpl *is,
+		FsmRun *fsmRun, PdaRun *pdaRun, int id )
 {
 	debug( prg, REALM_PARSE, "token: CI\n" );
 
@@ -885,7 +890,8 @@ static void sendCi( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, Pda
 }
 
 
-static void sendEof( Program *prg, Tree **sp, StreamImpl *is, FsmRun *fsmRun, PdaRun *pdaRun )
+static void sendEof( Program *prg, Tree **sp, StreamImpl *is,
+		FsmRun *fsmRun, PdaRun *pdaRun )
 {
 	debug( prg, REALM_PARSE, "token: _EOF\n" );
 

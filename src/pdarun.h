@@ -437,7 +437,8 @@ long parseToken( struct colm_program *prg, Tree **sp, PdaRun *pdaRun,
 
 long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *inputStream, Tree *tree );
 
-Head *streamPull( struct colm_program *prg, PdaRun *pdaRun, StreamImpl *is, long length );
+Head *streamPull( struct colm_program *prg, struct colm_tree **sp,
+		PdaRun *pdaRun, StreamImpl *is, long length );
 Head *stringAllocPointer( struct colm_program *prg, const char *data, long length );
 
 void streamPushText( StreamImpl *inputStream, const char *data, long length );

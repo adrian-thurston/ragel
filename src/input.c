@@ -248,7 +248,7 @@ int fdGetData( StreamImpl *ss, char *dest, int length )
 	return copied;
 }
 
-int fdConsumeData( StreamImpl *ss, int length, Location *loc )
+int fdConsumeData( Program *prg, Tree **sp, StreamImpl *ss, int length, Location *loc )
 {
 	int consumed = 0;
 
@@ -604,7 +604,7 @@ static int _getData( StreamImpl *is, char *dest, int length )
 	return copied;
 }
 
-static int _consumeData( StreamImpl *is, int length, Location *loc )
+static int _consumeData( Program *prg, Tree **sp, StreamImpl *is, int length, Location *loc )
 {
 	//debug( REALM_INPUT, "consuming %d bytes\n", length );
 
@@ -619,7 +619,7 @@ static int _consumeData( StreamImpl *is, int length, Location *loc )
 
 		if ( buf->type == RunBufSourceType ) {
 			Stream *stream = (Stream*)buf->tree;
-			int slen = stream->in->funcs->consumeData( stream->in, length, loc );
+			int slen = stream->in->funcs->consumeData( prg, sp, stream->in, length, loc );
 			//debug( REALM_INPUT, " got %d bytes from source\n", slen );
 
 			consumed += slen;
@@ -648,6 +648,10 @@ static int _consumeData( StreamImpl *is, int length, Location *loc )
 		}
 
 		RunBuf *runBuf = inputStreamPopHead( is );
+		if ( runBuf->type == RunBufSourceType ) {
+			Stream *stream = (Stream*)runBuf->tree;
+			treeDownref( prg, sp, (Tree*) stream );
+		}
 		free( runBuf );
 	}
 

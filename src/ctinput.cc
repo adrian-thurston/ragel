@@ -178,7 +178,7 @@ void inputStreamPatternUndoConsumeLangEl( StreamImpl *ss )
 	ss->offset = ss->patItem->data.length();
 }
 
-int inputStreamPatternConsumeData( StreamImpl *ss, int length, Location *loc )
+int inputStreamPatternConsumeData( Program *prg, Tree **sp, StreamImpl *ss, int length, Location *loc )
 {
 	//debug( REALM_INPUT, "consuming %ld bytes\n", length );
 
@@ -395,7 +395,8 @@ void inputStreamConsUndoConsumeLangEl( StreamImpl *ss )
 	ss->offset = ss->consItem->data.length();
 }
 
-int inputStreamConsConsumeData( StreamImpl *ss, int length, Location *loc )
+int inputStreamConsConsumeData( Program *prg, Tree **sp,
+		StreamImpl *ss, int length, Location *loc )
 {
 	int consumed = 0;
 
