@@ -44,7 +44,7 @@ while getopts "gcnmleT:F:G:P:CDJRAZ" opt; do
 done
 
 [ -z "$minflags" ] && minflags="-n -m -l -e"
-[ -z "$genflags" ] && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+[ -z "$genflags" ] && genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1 -G2"
 [ -z "$langflags" ] && langflags="-C -D -J -R -A -Z"
 
 shift $((OPTIND - 1));
