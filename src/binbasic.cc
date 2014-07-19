@@ -262,6 +262,121 @@ void BinaryBasic::writeData()
 	STATE_IDS();
 }
 
+void BinaryBasic::LOCATE_TRANS()
+{
+	out <<
+		"	_keys = offset( " << ARR_REF( keys ) << ", " << ARR_REF( keyOffsets ) << "[" << vCS() << "]" << " );\n"
+		"	_trans = (uint)" << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
+		"\n"
+		"	_klen = (int)" << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
+		"	if ( _klen > 0 ) {\n"
+		"		index " << ALPH_TYPE() << " _lower;\n"
+		"		index " << ALPH_TYPE() << " _mid;\n"
+		"		index " << ALPH_TYPE() << " _upper;\n"
+		"		_lower = _keys;\n"
+		"		_upper = _keys + _klen - 1;\n"
+		"		while ( TRUE ) {\n"
+		"			if ( _upper < _lower )\n"
+		"				break;\n"
+		"\n"
+		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
+		"			if ( " << GET_KEY() << " < deref( " << ARR_REF( keys ) << ", _mid ) )\n"
+		"				_upper = _mid - 1;\n"
+		"			else if ( " << GET_KEY() << " > deref( " << ARR_REF( keys ) << ", _mid ) )\n"
+		"				_lower = _mid + 1;\n"
+		"			else {\n"
+		"				_trans += " << "(uint)" << "(_mid - _keys);\n"
+		"				goto _match;\n"
+		"			}\n"
+		"		}\n"
+		"		_keys += _klen;\n"
+		"		_trans += (uint)_klen;\n"
+		"	}\n"
+		"\n"
+		"	_klen = (int)" << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
+		"	if ( _klen > 0 ) {\n"
+		"		index " << ALPH_TYPE() << " _lower;\n"
+		"		index " << ALPH_TYPE() << " _mid;\n"
+		"		index " << ALPH_TYPE() << " _upper;\n"
+		"		_lower = _keys;\n"
+		"		_upper = _keys + (_klen<<1) - 2;\n"
+		"		while ( TRUE ) {\n"
+		"			if ( _upper < _lower )\n"
+		"				break;\n"
+		"\n"
+		"			_mid = _lower + (((_upper-_lower) >> 1) & ~1);\n"
+		"			if ( " << GET_KEY() << " < deref( " << ARR_REF( keys ) << ", _mid ) )\n"
+		"				_upper = _mid - 2;\n"
+		"			else if ( " << GET_KEY() << " > deref( " << ARR_REF( keys ) << ", _mid + 1 ) )\n"
+		"				_lower = _mid + 2;\n"
+		"			else {\n"
+		"				_trans += " << "(uint)" << "((_mid - _keys)>>1);\n"
+		"				goto _match;\n"
+		"			}\n"
+		"		}\n"
+		"		_trans += (uint)_klen;\n"
+		"	}\n"
+		"\n";
+}
+
+void BinaryBasic::LOCATE_COND()
+{
+	out <<
+		"	_ckeys = offset( " << ARR_REF( condKeys ) << ",  " << ARR_REF( transOffsets ) << "[_trans] );\n"
+		"	_klen = (int) " << ARR_REF( transLengths ) << "[_trans];\n"
+		"	_cond = (uint) " << ARR_REF( transOffsets ) << "[_trans];\n"
+		"\n";
+
+	out <<
+		"	_cpc = 0;\n"
+		"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
+		"\n";
+
+	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
+		GenCondSpace *condSpace = csi;
+		out << "	case " << condSpace->condSpaceId << " {\n";
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+			out << TABS(2) << "if ( ";
+			CONDITION( out, *csi );
+			Size condValOffset = (1 << csi.pos());
+			out << " ) _cpc += " << condValOffset << ";\n";
+		}
+
+		out << 
+			"	}\n";
+	}
+
+	out << 
+		"	}\n";
+	
+	out <<
+		"	{\n"
+		"		index " << ARR_TYPE( condKeys ) << " _lower;\n"
+		"		index " << ARR_TYPE( condKeys ) << " _mid;\n"
+		"		index " << ARR_TYPE( condKeys ) << " _upper;\n"
+		"		_lower = _ckeys;\n"
+		"		_upper = _ckeys + _klen - 1;\n"
+		"		while ( TRUE ) {\n"
+		"			if ( _upper < _lower )\n"
+		"				break;\n"
+		"\n"
+		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
+		"			if ( _cpc < (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
+		"				_upper = _mid - 1;\n"
+		"			else if ( _cpc > (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
+		"				_lower = _mid + 1;\n"
+		"			else {\n"
+		"				_cond += (uint)(_mid - _ckeys);\n"
+		"				goto _match_cond;\n"
+		"			}\n"
+		"		}\n"
+		"		" << vCS() << " = " << ERROR_STATE() << ";\n"
+		"		goto _again;\n"
+		"	}\n"
+	;
+}
+
+
 void BinaryBasic::writeExec()
 {
 	testEofUsed = false;
