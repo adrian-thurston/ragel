@@ -370,6 +370,8 @@ void InputData::parseArgs( int argc, const char **argv )
 					codeStyle = GenTables;
 				else if ( pc.paramArg[0] == '1' )
 					codeStyle = GenFTables;
+				else if ( pc.paramArg[0] == '2' )
+					codeStyle = GenBasic;
 				else {
 					error() << "-T" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;

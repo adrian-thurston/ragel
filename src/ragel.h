@@ -44,7 +44,8 @@ enum CodeStyle
 	GenGoto,
 	GenFGoto,
 	GenIpGoto,
-	GenSplit
+	GenSplit,
+	GenBasic
 };
 
 /* To what degree are machine minimized. */

@@ -39,6 +39,7 @@
 #include "gotoloop.h"
 #include "gotoexp.h"
 #include "ipgoto.h"
+#include "binbasic.h"
 
 //#include "c/split.h"
 
@@ -119,6 +120,9 @@ CodeGenData *cMakeCodeGen( const CodeGenArgs &args )
 		break;
 	case GenSplit:
 //		codeGen = new C::SplitGoto(args);
+		break;
+	case GenBasic:
+		codeGen = new C::BinaryBasic(args);
 		break;
 	}
 
