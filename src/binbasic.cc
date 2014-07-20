@@ -419,10 +419,49 @@ void BinaryBasic::writeExec()
 	out << "label _resume {\n";
 
 	if ( !noEnd ) {
-		testEofUsed = true;
 		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
+			"	if ( " << P() << " == " << PE() << " ) {\n";
+
+		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+			out << 
+				"	if ( " << P() << " == " << vEOF() << " )\n"
+				"	{\n";
+
+			if ( redFsm->anyEofTrans() ) {
+				TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
+				out <<
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+					"		_trans = (uint)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+					"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
+					"		goto _match_cond;\n"
+					"	}\n";
+			}
+
+			if ( redFsm->anyEofActions() ) {
+				out <<
+					"	index " << ARR_TYPE( actions ) << " __acts;\n"
+					"	uint __nacts;\n"
+					"	__acts = offset( " << ARR_REF( actions ) << ", " <<
+							ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
+					"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts );\n"
+					"	__acts += 1;\n"
+					"	while ( __nacts > 0 ) {\n"
+					"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
+					EOF_ACTION_SWITCH() <<
+					"		}\n"
+					"		__nacts -= 1;\n"
+					"		__acts += 1;\n"
+					"	}\n";
+			}
+			
+			out << 
+				"	}\n"
+				"\n";
+		}
+		out << 
+			"	goto _out;\n"
+			"	}\n";
+
 	}
 
 	if ( redFsm->anyFromStateActions() ) {
@@ -512,45 +551,6 @@ void BinaryBasic::writeExec()
 	out << 
 		"	" << P() << " += 1;\n"
 		"	goto _resume;\n";
-
-	if ( testEofUsed )
-		out << "}\n label _test_eof { {}\n";
-	
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		out << 
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"	{\n";
-
-		if ( redFsm->anyEofTrans() ) {
-			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
-			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = (uint)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
-				"		goto _match_cond;\n"
-				"	}\n";
-		}
-
-		if ( redFsm->anyEofActions() ) {
-			out <<
-				"	index " << ARR_TYPE( actions ) << " __acts;\n"
-				"	uint __nacts;\n"
-				"	__acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
-				"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts );\n"
-				"	__acts += 1;\n"
-				"	while ( __nacts > 0 ) {\n"
-				"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
-				EOF_ACTION_SWITCH() <<
-				"		}\n"
-				"		__nacts -= 1;\n"
-				"		__acts += 1;\n"
-				"	}\n";
-		}
-		
-		out << 
-			"	}\n"
-			"\n";
-	}
 
 	if ( outLabelUsed )
 		out << "} label _out { {}\n";
