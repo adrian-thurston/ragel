@@ -325,6 +325,7 @@ void BinaryBasic::LOCATE_COND()
 		"	_ckeys = offset( " << ARR_REF( condKeys ) << ",  " << ARR_REF( transOffsets ) << "[_trans] );\n"
 		"	_klen = (int) " << ARR_REF( transLengths ) << "[_trans];\n"
 		"	_cond = (uint) " << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	_have = 0;\n"
 		"\n";
 
 	out <<
@@ -356,10 +357,7 @@ void BinaryBasic::LOCATE_COND()
 		"		index " << ARR_TYPE( condKeys ) << " _upper;\n"
 		"		_lower = _ckeys;\n"
 		"		_upper = _ckeys + _klen - 1;\n"
-		"		while ( TRUE ) {\n"
-		"			if ( _upper < _lower )\n"
-		"				break;\n"
-		"\n"
+		"		while ( _have == 0 && _lower <= _upper ) {\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
 		"			if ( _cpc < (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
 		"				_upper = _mid - 1;\n"
@@ -367,11 +365,13 @@ void BinaryBasic::LOCATE_COND()
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				_cond += (uint)(_mid - _ckeys);\n"
-		"				goto _match_cond;\n"
+		"				_have = 1;\n"
 		"			}\n"
 		"		}\n"
-		"		" << vCS() << " = " << ERROR_STATE() << ";\n"
-		"		goto _out;\n"
+		"		if ( _have == 0 ) {\n"
+		"			" << vCS() << " = " << ERROR_STATE() << ";\n"
+		"			goto _out;\n"
+		"		}\n"
 		"	}\n"
 	;
 	outLabelUsed = true;
@@ -382,6 +382,7 @@ void BinaryBasic::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;
+	matchCondLabelUsed = false;
 
 	out <<
 		"	{\n"
@@ -436,6 +437,7 @@ void BinaryBasic::writeExec()
 					"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
 					"		goto _match_cond;\n"
 					"	}\n";
+					matchCondLabelUsed = true;
 			}
 
 			if ( redFsm->anyEofActions() ) {
@@ -488,8 +490,10 @@ void BinaryBasic::writeExec()
 
 	LOCATE_COND();
 
-	out << "}\n";
-	out << "label _match_cond {\n";
+	if ( matchCondLabelUsed ) {
+		out << "}\n";
+		out << "label _match_cond {\n";
+	}
 	
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";

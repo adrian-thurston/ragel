@@ -221,6 +221,7 @@ protected:
 	bool testEofUsed;
 	bool againLabelUsed;
 	bool useIndicies;
+	bool matchCondLabelUsed;
 
 public:
 	virtual void writeExports();
