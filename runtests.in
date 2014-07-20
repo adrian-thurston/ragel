@@ -281,7 +281,7 @@ for test_case; do
 		# Using genflags, get the allowed gen flags from the test case. If the
 		# test case doesn't specify assume that all gen flags are allowed.
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1 -G2"
 
 		for min_opt in $minflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
@@ -305,7 +305,7 @@ for test_case; do
 		# Using genflags, get the allowed gen flags from the test case. If the
 		# test case doesn't specify assume that all gen flags are allowed.
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1"
+		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -T2 -F0 -F1"
 
 		for min_opt in $minflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
@@ -321,7 +321,7 @@ for test_case; do
 		# Using genflags, get the allowed gen flags from the test case. If the
 		# test case doesn't specify assume that all gen flags are allowed.
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
+		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1"
 
 		for min_opt in $minflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
@@ -336,7 +336,7 @@ for test_case; do
 		# Using genflags, get the allowed gen flags from the test case. If the
 		# test case doesn't specify assume that all gen flags are allowed.
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1 -G2"
 
 		for min_opt in $minflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
