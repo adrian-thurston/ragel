@@ -463,27 +463,28 @@ void BinaryBasic::writeExec()
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
-			"		goto _again;\n"
-			"\n"
-			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
-			"	_acts += 1;\n"
-			"	while ( _nacts > 0 )\n	{\n"
-			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
-			"		{\n";
-			ACTION_SWITCH() <<
-			"		}\n"
-			"		_nacts -= 1;\n"
+			"	if ( " << ARR_REF( condActions ) << "[_cond] != 0 ) {\n"
+			"		_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
+			"		_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"		_acts += 1;\n"
+			"		while ( _nacts > 0 )\n	{\n"
+			"			switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
+			"			{\n";
+			ACTION_SWITCH() <<
+			"			}\n"
+			"			_nacts -= 1;\n"
+			"			_acts += 1;\n"
+			"		}\n"
 			"	}\n"
 			"\n";
 	}
 
-//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-	out << "}\n";
-	out << "label _again {\n";
+	if ( /*redFsm->anyRegActions() || */ redFsm->anyActionGotos() || 
+			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+	{
+		out << "}\n";
+		out << "label _again {\n";
+	}
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
