@@ -408,18 +408,18 @@ void BinaryBasic::writeExec()
 		"	entry {\n"
 		"\n";
 
-	if ( !noEnd ) {
-		testEofUsed = true;
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
-	}
-
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto _out;\n";
+	}
+
+	if ( !noEnd ) {
+		testEofUsed = true;
+		out << 
+			"	if ( " << P() << " == " << PE() << " )\n"
+			"		goto _test_eof;\n";
 	}
 
 	out << "label _resume {\n";
