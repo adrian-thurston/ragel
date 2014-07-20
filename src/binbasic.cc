@@ -267,6 +267,7 @@ void BinaryBasic::LOCATE_TRANS()
 	out <<
 		"	_keys = offset( " << ARR_REF( keys ) << ", " << ARR_REF( keyOffsets ) << "[" << vCS() << "]" << " );\n"
 		"	_trans = (uint)" << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
+		"	_have = 0;\n"
 		"\n"
 		"	_klen = (int)" << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
@@ -275,10 +276,7 @@ void BinaryBasic::LOCATE_TRANS()
 		"		index " << ALPH_TYPE() << " _upper;\n"
 		"		_lower = _keys;\n"
 		"		_upper = _keys + _klen - 1;\n"
-		"		while ( TRUE ) {\n"
-		"			if ( _upper < _lower )\n"
-		"				break;\n"
-		"\n"
+		"		while ( _upper >= _lower && _have == 0 ) {\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
 		"			if ( " << GET_KEY() << " < deref( " << ARR_REF( keys ) << ", _mid ) )\n"
 		"				_upper = _mid - 1;\n"
@@ -286,13 +284,16 @@ void BinaryBasic::LOCATE_TRANS()
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				_trans += " << "(uint)" << "(_mid - _keys);\n"
-		"				goto _match;\n"
+		"				_have = 1;\n"
 		"			}\n"
 		"		}\n"
-		"		_keys += _klen;\n"
-		"		_trans += (uint)_klen;\n"
+		"		if ( _have == 0 ) {\n"
+		"			_keys += _klen;\n"
+		"			_trans += (uint)_klen;\n"
+		"		}\n"
 		"	}\n"
 		"\n"
+		"	if ( _have == 0 ) {\n"
 		"	_klen = (int)" << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		index " << ALPH_TYPE() << " _lower;\n"
@@ -300,10 +301,7 @@ void BinaryBasic::LOCATE_TRANS()
 		"		index " << ALPH_TYPE() << " _upper;\n"
 		"		_lower = _keys;\n"
 		"		_upper = _keys + (_klen<<1) - 2;\n"
-		"		while ( TRUE ) {\n"
-		"			if ( _upper < _lower )\n"
-		"				break;\n"
-		"\n"
+		"		while ( _have == 0 && _lower <= _upper ) {\n"
 		"			_mid = _lower + (((_upper-_lower) >> 1) & ~1);\n"
 		"			if ( " << GET_KEY() << " < deref( " << ARR_REF( keys ) << ", _mid ) )\n"
 		"				_upper = _mid - 2;\n"
@@ -311,10 +309,12 @@ void BinaryBasic::LOCATE_TRANS()
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
 		"				_trans += " << "(uint)" << "((_mid - _keys)>>1);\n"
-		"				goto _match;\n"
+		"				_have = 1;\n"
 		"			}\n"
 		"		}\n"
-		"		_trans += (uint)_klen;\n"
+		"		if ( _have == 0 )\n"
+		"			_trans += (uint)_klen;\n"
+		"	}\n"
 		"	}\n"
 		"\n";
 }
@@ -392,7 +392,8 @@ void BinaryBasic::writeExec()
 
 	out <<
 		"	uint _trans = 0;\n" <<
-		"	uint _cond = 0;\n";
+		"	uint _cond = 0;\n"
+		"	uint _have = 0;\n";
 
 	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 			|| redFsm->anyFromStateActions() )
@@ -481,9 +482,6 @@ void BinaryBasic::writeExec()
 	}
 
 	LOCATE_TRANS();
-
-	out << "}\n";
-	out << "label _match {\n";
 
 	if ( useIndicies )
 		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
