@@ -374,6 +374,7 @@ void BinaryBasic::LOCATE_COND()
 		"		goto _out;\n"
 		"	}\n"
 	;
+	outLabelUsed = true;
 }
 
 
@@ -415,14 +416,14 @@ void BinaryBasic::writeExec()
 			"		goto _out;\n";
 	}
 
+	out << "label _resume {\n";
+
 	if ( !noEnd ) {
 		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
 			"		goto _test_eof;\n";
 	}
-
-	out << "label _resume {\n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -507,18 +508,10 @@ void BinaryBasic::writeExec()
 			"		goto _out;\n";
 	}
 
-	if ( !noEnd ) {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	if ( " << P() << " != " << PE() << " )\n"
-			"		goto _resume;\n";
-	}
-	else {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	goto _resume;\n";
-	}
-	
+	out << 
+		"	" << P() << " += 1;\n"
+		"	goto _resume;\n";
+
 	if ( testEofUsed )
 		out << "}\n label _test_eof { {}\n";
 	
