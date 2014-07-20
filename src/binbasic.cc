@@ -418,7 +418,9 @@ void BinaryBasic::writeExec()
 			"		goto _out;\n";
 	}
 
-	out << "label _resume {\n";
+	out << 
+		"label _resume {\n"
+		"_have = 0;\n";
 
 	if ( !noEnd ) {
 		out << 
@@ -435,10 +437,12 @@ void BinaryBasic::writeExec()
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
 					"		_trans = (uint)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
 					"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
-					"		goto _match_cond;\n"
+					"		_have = 1;\n"
 					"	}\n";
 					matchCondLabelUsed = true;
 			}
+
+			out << "if ( _have == 0 ) {\n";
 
 			if ( redFsm->anyEofActions() ) {
 				out <<
@@ -456,16 +460,22 @@ void BinaryBasic::writeExec()
 					"		__acts += 1;\n"
 					"	}\n";
 			}
+
+			out << "}\n";
 			
 			out << 
 				"	}\n"
 				"\n";
 		}
 		out << 
-			"	goto _out;\n"
+			"	if ( _have == 0 )\n"
+			"		goto _out;\n"
 			"	}\n";
 
 	}
+
+	out << 
+		"	if ( _have == 0 ) {\n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -490,10 +500,7 @@ void BinaryBasic::writeExec()
 
 	LOCATE_COND();
 
-	if ( matchCondLabelUsed ) {
-		out << "}\n";
-		out << "label _match_cond {\n";
-	}
+	out << "}\n";
 	
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
