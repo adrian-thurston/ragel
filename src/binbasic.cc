@@ -370,7 +370,7 @@ void BinaryBasic::LOCATE_COND()
 		"		}\n"
 		"		if ( _have == 0 ) {\n"
 		"			" << vCS() << " = " << ERROR_STATE() << ";\n"
-		"			goto _out;\n"
+		"			_cont = 0;\n"
 		"		}\n"
 		"	}\n"
 	;
@@ -394,7 +394,8 @@ void BinaryBasic::writeExec()
 	out <<
 		"	uint _trans = 0;\n" <<
 		"	uint _cond = 0;\n"
-		"	uint _have = 0;\n";
+		"	uint _have = 0;\n"
+		"	uint _cont = 1;\n";
 
 	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 			|| redFsm->anyFromStateActions() )
@@ -408,18 +409,18 @@ void BinaryBasic::writeExec()
 		"	index " << ALPH_TYPE() << " _keys;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _cpc;\n"
-		"	entry {\n"
+		"	while ( _cont == 1 ) {\n"
 		"\n";
 
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
+			"		_cont = 0;\n";
 	}
 
 	out << 
-		"label _resume {\n"
+//		"label _resume {\n"
 		"_have = 0;\n";
 
 	if ( !noEnd ) {
@@ -467,14 +468,16 @@ void BinaryBasic::writeExec()
 				"	}\n"
 				"\n";
 		}
+
 		out << 
 			"	if ( _have == 0 )\n"
-			"		goto _out;\n"
+			"		_cont = 0;\n"
 			"	}\n";
 
 	}
 
 	out << 
+		"	if ( _cont == 1 ) {\n"
 		"	if ( _have == 0 ) {\n";
 
 	if ( redFsm->anyFromStateActions() ) {
@@ -502,6 +505,8 @@ void BinaryBasic::writeExec()
 
 	out << "}\n";
 	
+	out << "if ( _cont == 1 ) {\n";
+
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
@@ -527,12 +532,12 @@ void BinaryBasic::writeExec()
 			"\n";
 	}
 
-	if ( /*redFsm->anyRegActions() || */ redFsm->anyActionGotos() || 
-			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-	{
-		out << "}\n";
-		out << "label _again {\n";
-	}
+//	if ( /*redFsm->anyRegActions() || */ redFsm->anyActionGotos() || 
+//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+//	{
+//		out << "}\n";
+//		out << "label _again {\n";
+//	}
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -554,18 +559,25 @@ void BinaryBasic::writeExec()
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
+			"		_cont = 0;\n";
 	}
 
 	out << 
-		"	" << P() << " += 1;\n"
-		"	goto _resume;\n";
+		"	if ( _cont == 1 )\n"
+		"		" << P() << " += 1;\n"
+		"\n"
+		/* cont if. */
+		"}}\n";
+//		"	goto _resume;\n";
 
-	if ( outLabelUsed )
-		out << "} label _out { {}\n";
+//	if ( outLabelUsed )
+//		out << "} label _out { {}\n";
 
-	/* The entry loop. */
-	out << "}}\n";
+	/* The loop. */
+	out << "}\n";
+
+//	/* The entry loop. */
+//	out << "}}\n";
 
 	/* The execute block. */
 	out << "	}\n";
