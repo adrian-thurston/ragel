@@ -371,7 +371,7 @@ void BinaryBasic::LOCATE_COND()
 		"			}\n"
 		"		}\n"
 		"		" << vCS() << " = " << ERROR_STATE() << ";\n"
-		"		goto _again;\n"
+		"		goto _out;\n"
 		"	}\n"
 	;
 }
