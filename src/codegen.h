@@ -181,13 +181,18 @@ protected:
 			int targState, bool inFinish, bool csForced );
 	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;
 	virtual void CALL( ostream &ret, int callDest, int targState, bool inFinish ) = 0;
+	virtual void NCALL( ostream &ret, int callDest, int targState, bool inFinish ) = 0;
 	virtual void NEXT( ostream &ret, int nextDest, bool inFinish ) = 0;
 	virtual void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
 	virtual void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
 	virtual void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, 
 			int targState, bool inFinish ) = 0;
+	virtual void NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, 
+			int targState, bool inFinish ) = 0;
 	virtual void RET( ostream &ret, bool inFinish ) = 0;
+	virtual void NRET( ostream &ret, bool inFinish ) = 0;
 	virtual void BREAK( ostream &ret, int targState, bool csForced ) = 0;
+	virtual void NBREAK( ostream &ret, int targState, bool csForced ) = 0;
 	virtual void CURS( ostream &ret, bool inFinish ) = 0;
 	virtual void TARGS( ostream &ret, bool inFinish, int targState ) = 0;
 	void EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );

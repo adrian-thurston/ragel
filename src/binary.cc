@@ -771,6 +771,38 @@ void Binary::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 	ret << "}=; " << "goto _again;}$";
 }
 
+void Binary::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
+{
+	ret << "${";
+
+	if ( prePushExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << "}$ ";
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << " += 1;" << vCS() << " = " << 
+			callDest << "; " << "goto _again;}$";
+}
+
+void Binary::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+{
+	ret << "${";
+
+	if ( prePushExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << "}$ ";
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << " += 1;" << vCS() <<
+			" = host( \"-\", 1 ) ={";
+	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
+	ret << "}=; " << "goto _again;}$";
+}
+
 void Binary::RET( ostream &ret, bool inFinish )
 {
 	ret << "${" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
@@ -784,7 +816,26 @@ void Binary::RET( ostream &ret, bool inFinish )
 	ret << "goto _again;}$";
 }
 
+void Binary::NRET( ostream &ret, bool inFinish )
+{
+	ret << "${" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
+
+	if ( postPopExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, postPopExpr, 0, false, false );
+		ret << "}$";
+	}
+
+	ret << "goto _again;}$";
+}
+
 void Binary::BREAK( ostream &ret, int targState, bool csForced )
+{
+	outLabelUsed = true;
+	ret << "${" << P() << "+= 1; " << "goto _out; }$";
+}
+
+void Binary::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "${" << P() << "+= 1; " << "goto _out; }$";

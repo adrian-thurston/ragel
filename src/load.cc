@@ -296,8 +296,14 @@ struct LoadRagel
 			case c_inline::block_interpret::_Fret:
 				inlineItem = new InlineItem( loc, InlineItem::Ret );
 				break;
+			case c_inline::block_interpret::_Fnret:
+				inlineItem = new InlineItem( loc, InlineItem::Nret );
+				break;
 			case c_inline::block_interpret::_Fbreak:
 				inlineItem = new InlineItem( loc, InlineItem::Break );
+				break;
+			case c_inline::block_interpret::_Fnbreak:
+				inlineItem = new InlineItem( loc, InlineItem::Nbreak );
 				break;
 
 			case c_inline::block_interpret::_FgotoExpr:
@@ -310,6 +316,10 @@ struct LoadRagel
 				break;
 			case c_inline::block_interpret::_FcallExpr:
 				inlineItem = new InlineItem( loc, InlineItem::CallExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case c_inline::block_interpret::_FncallExpr:
+				inlineItem = new InlineItem( loc, InlineItem::NcallExpr );
 				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
 				break;
 			case c_inline::block_interpret::_Fexec:
@@ -331,6 +341,11 @@ struct LoadRagel
 				inlineItem = new InlineItem( loc, nameRef, InlineItem::Call );
 				break;
 			}
+			case c_inline::block_interpret::_FncallSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Ncall );
+				break;
+			}
 		}
 		return inlineItem;
 	}
@@ -349,8 +364,14 @@ struct LoadRagel
 			case ruby_inline::block_interpret::_Fret:
 				inlineItem = new InlineItem( loc, InlineItem::Ret );
 				break;
+			case ruby_inline::block_interpret::_Fnret:
+				inlineItem = new InlineItem( loc, InlineItem::Nret );
+				break;
 			case ruby_inline::block_interpret::_Fbreak:
 				inlineItem = new InlineItem( loc, InlineItem::Break );
+				break;
+			case ruby_inline::block_interpret::_Fnbreak:
+				inlineItem = new InlineItem( loc, InlineItem::Nbreak );
 				break;
 
 			case ruby_inline::block_interpret::_FgotoExpr:
@@ -363,6 +384,10 @@ struct LoadRagel
 				break;
 			case ruby_inline::block_interpret::_FcallExpr:
 				inlineItem = new InlineItem( loc, InlineItem::CallExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ruby_inline::block_interpret::_FncallExpr:
+				inlineItem = new InlineItem( loc, InlineItem::NcallExpr );
 				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
 				break;
 			case ruby_inline::block_interpret::_Fexec:
@@ -382,6 +407,11 @@ struct LoadRagel
 			case ruby_inline::block_interpret::_FcallSr: {
 				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
 				inlineItem = new InlineItem( loc, nameRef, InlineItem::Call );
+				break;
+			}
+			case ruby_inline::block_interpret::_FncallSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Ncall );
 				break;
 			}
 		}

@@ -39,7 +39,7 @@ namespace c_inline
 	lex 
 		literal `fpc `fc  `fcurs `ftargs
 			`fentry `fhold `fexec `fgoto `fnext
-			`fcall `fret `fbreak
+			`fcall `fret `fbreak `fncall `fnret `fnbreak
 
 		token ident /ident/
 		token number /digit+/
@@ -117,19 +117,23 @@ namespace c_inline
 	|	[`fgoto whitespace? `* inline_expr `;] :FgotoExpr
 	|	[`fnext whitespace? `* inline_expr `;] :FnextExpr
 	|	[`fcall whitespace? `* inline_expr `;] :FcallExpr
+	|	[`fncall whitespace? `* inline_expr `;] :FncallExpr
 	|	[`fexec inline_expr `;] :Fexec
 	|	[`fgoto state_ref srlex::`;] :FgotoSr
 	|	[`fnext state_ref srlex::`;] :FnextSr
 	|	[`fcall state_ref srlex::`;] :FcallSr
+	|	[`fncall state_ref srlex::`;] :FncallSr
 	|	[`fret `;] :Fret
+	|	[`fnret `;] :Fnret
 	|	[`fbreak `;] :Fbreak
+	|	[`fnbreak `;] :Fnbreak
 end
 
 namespace ruby_inline
 	lex 
 		literal `fpc `fc  `fcurs `ftargs
 			`fentry `fhold `fexec `fgoto `fnext
-			`fcall `fret `fbreak
+			`fcall `fret `fbreak `fncall `fnret `fnbreak
 
 		token ident /ident/
 		token number /digit+/
@@ -207,12 +211,16 @@ namespace ruby_inline
 	|	[`fgoto whitespace? `* inline_expr `;] :FgotoExpr
 	|	[`fnext whitespace? `* inline_expr `;] :FnextExpr
 	|	[`fcall whitespace? `* inline_expr `;] :FcallExpr
+	|	[`fncall whitespace? `* inline_expr `;] :FncallExpr
 	|	[`fexec inline_expr `;] :Fexec
 	|	[`fgoto state_ref srlex::`;] :FgotoSr
 	|	[`fnext state_ref srlex::`;] :FnextSr
 	|	[`fcall state_ref srlex::`;] :FcallSr
+	|	[`fncall state_ref srlex::`;] :FncallSr
 	|	[`fret `;] :Fret
+	|	[`fnret `;] :Fnret
 	|	[`fbreak `;] :Fbreak
+	|	[`fnbreak `;] :Fnbreak
 end
 
 global Lang: str

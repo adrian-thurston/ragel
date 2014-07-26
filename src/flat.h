@@ -92,14 +92,18 @@ protected:
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
+	void NCALL( ostream &ret, int callDest, int targState, bool inFinish );
 	void NEXT( ostream &ret, int nextDest, bool inFinish );
 	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+	void NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
 	void CURS( ostream &ret, bool inFinish );
 	void TARGS( ostream &ret, bool inFinish, int targState );
 	void RET( ostream &ret, bool inFinish );
+	void NRET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
+	void NBREAK( ostream &ret, int targState, bool csForced );
 
 	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
 	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;

@@ -573,11 +573,17 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::Call:
 			CALL( ret, item->targState->id, targState, inFinish );
 			break;
+		case GenInlineItem::Ncall:
+			NCALL( ret, item->targState->id, targState, inFinish );
+			break;
 		case GenInlineItem::Next:
 			NEXT( ret, item->targState->id, inFinish );
 			break;
 		case GenInlineItem::Ret:
 			RET( ret, inFinish );
+			break;
+		case GenInlineItem::Nret:
+			NRET( ret, inFinish );
 			break;
 		case GenInlineItem::PChar:
 			ret << P();
@@ -605,6 +611,9 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			break;
 		case GenInlineItem::CallExpr:
 			CALL_EXPR( ret, item, targState, inFinish );
+			break;
+		case GenInlineItem::NcallExpr:
+			NCALL_EXPR( ret, item, targState, inFinish );
 			break;
 		case GenInlineItem::NextExpr:
 			NEXT_EXPR( ret, item, inFinish );
@@ -635,6 +644,9 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			break;
 		case GenInlineItem::Break:
 			BREAK( ret, targState, csForced );
+			break;
+		case GenInlineItem::Nbreak:
+			NBREAK( ret, targState, csForced );
 			break;
 		case GenInlineItem::HostStmt:
 			HOST_STMT( ret, item, targState, inFinish, csForced );

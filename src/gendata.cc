@@ -346,6 +346,12 @@ void CodeGenData::makeGenInlineList( GenInlineList *outList, InlineList *inList 
 		case InlineItem::CallExpr:
 			makeSubList( outList, item->children, GenInlineItem::CallExpr );
 			break;
+		case InlineItem::Ncall:
+			makeTargetItem( outList, item->nameTarg, GenInlineItem::Ncall );
+			break;
+		case InlineItem::NcallExpr:
+			makeSubList( outList, item->children, GenInlineItem::NcallExpr );
+			break;
 		case InlineItem::Next:
 			makeTargetItem( outList, item->nameTarg, GenInlineItem::Next );
 			break;
@@ -355,8 +361,14 @@ void CodeGenData::makeGenInlineList( GenInlineList *outList, InlineList *inList 
 		case InlineItem::Break:
 			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Break ) );
 			break;
+		case InlineItem::Nbreak:
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Nbreak ) );
+			break;
 		case InlineItem::Ret: 
 			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Ret ) );
+			break;
+		case InlineItem::Nret: 
+			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Nret ) );
 			break;
 		case InlineItem::PChar:
 			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::PChar ) );
