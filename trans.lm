@@ -12,10 +12,12 @@ namespace indep
 
 	# Contents of test case heaer.
 	lex
-		token comm_val /'@' [A-Za-z0-9_]+ ': ' [^\n]+ '\n' /
+		token comm_name /'@' [A-Za-z0-9_]+ ':' /
 		token comm_term /'*/'/
 		token comm_any / any /
 	end
+
+	token comm_val /[^\n]* '\n' /
 
 	lex 
 		literal `%%{ `}%%
@@ -60,8 +62,11 @@ namespace indep
 		token output_line /[^\n]* '\n'/
 	end
 
+	def comm_def
+		[comm_name comm_val]
+
 	def comm_item
-		[comm_val]
+		[comm_def]
 	|	[comm_any]
 
 	def test_header

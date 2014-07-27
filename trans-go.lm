@@ -202,26 +202,37 @@ if ( !RagelTree ) {
 # Find the machine name.
 MachineName: ragel::machine_name = ragel::machine_name in RagelTree
 
-# Do we need EOF?
 NeedsEof: bool = false
-for CommVal: indep::comm_val in RagelTree {
-	if $CommVal ==
-		'@NEEDS_EOF: yes\n'
+AllowGenflags: str
+for CommDef: indep::comm_def in RagelTree {
+	switch CommDef
+	case "@NEEDS_EOF: yes\n"
 	{
 		NeedsEof = true
 	}
+	case "@ALLOW_GENFLAGS:[CV: comm_val]"
+	{
+		AllowGenflags = $CV
+	}
 }
 
-prints( Output
+
+send Output
 	"/*
 	" * @LANG: go
+
+if AllowGenflags {
+	send Output
+		" * @ALLOW_GENFLAGS:[AllowGenflags]
+}
+
+send Output
 	" * @GENERATED: yes
 	" */
 	"
 	"package main
 	"import \"fmt\"
 	"
-)
 
 Init: indep::stmt* = RagelTree.Init
 for Stmt: indep::stmt in Init {
