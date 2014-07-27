@@ -26,7 +26,7 @@ namespace indep
 				`print_int `print_buf `print_str `print_token
 				`first_token_char
 
-		literal `fgoto `fcall `fnext `fexec
+		literal `fgoto `fcall `fnext `fexec `fncall
 
 		literal `; `< `> `( `) `[ `] `=
 				`* `! `{ `} `+ `- `== `!=
@@ -144,9 +144,11 @@ namespace indep
 	def ragel_stmt
 		[`fgoto tk_ident `;]
 	|	[`fcall tk_ident `;]
+	|	[`fncall tk_ident `;]
 	|	[`fnext tk_ident `;]
 	|	[`fgoto `* expr `;]
 	|	[`fcall `* expr `;]
+	|	[`fncall `* expr `;]
 	|	[`fnext `* expr `;]
 	|	[`fexec expr `;]
 

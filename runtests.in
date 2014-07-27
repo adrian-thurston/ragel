@@ -20,9 +20,9 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-while getopts "gcnmleT:F:G:P:CDJRAZ" opt; do
+while getopts "gcnmleB:T:F:G:P:CDJRAZ" opt; do
 	case $opt in
-		T|F|G|P) 
+		B|T|F|G|P) 
 			genflags="$genflags -$opt$OPTARG"
 			options="$options -$opt$OPTARG"
 			;;
@@ -306,7 +306,7 @@ for test_case; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
-				echo "$java_genflags" | grep -e $min_opt >/dev/null || continue
+				echo "$java_genflags" | grep -e $gen_opt >/dev/null || continue
 				run_test
 			done
 		done
@@ -323,7 +323,7 @@ for test_case; do
 
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
-				echo "$ruby_genflags" | grep -e $min_opt >/dev/null || continue
+				echo "$ruby_genflags" | grep -e $gen_opt >/dev/null || continue
 				run_test
 			done
 		done
@@ -339,6 +339,7 @@ for test_case; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
+				echo "$csharp_genflags" | grep -e $gen_opt >/dev/null || continue
 				run_test
 			done
 		done
