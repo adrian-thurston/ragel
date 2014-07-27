@@ -1,6 +1,6 @@
 /*
  * @LANG: c
- * @ALLOW_GENFLAGS: -T0 -T1 -T2 -F0 -F1
+ * @ALLOW_GENFLAGS: -B0 -T0 -T1 -F0 -F1
  * @ALLOW_MINFLAGS: -n -m -l
  *
  * Test works with split code gen.

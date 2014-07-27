@@ -4,7 +4,7 @@
  *
  * @LANG: c++
  * @ALLOW_MINFLAGS: -l -e
- * @ALLOW_GENFLAGS: -T0 -T1 -T2
+ * @ALLOW_GENFLAGS: -B0 -T0 -T1
  */
 
 #include <iostream>
