@@ -89,6 +89,20 @@ void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 			"; " << TOP() << "+= 1; " << "goto st" << callDest << ";}$";
 }
 
+void IpGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
+{
+	ret << "${";
+
+	if ( prePushExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << "}$ ";
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " << targState << 
+			"; " << TOP() << "+= 1; " << "goto st" << callDest << ";}$";
+}
+
 void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	ret << "${";
@@ -108,7 +122,39 @@ void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 		ret << "}";
 }
 
+void IpGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+{
+	ret << "${";
+
+	if ( prePushExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << "}$ ";
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " << targState << "; " << TOP() << "+= 1;" <<
+			vCS() << " = host( \"-\", 1 ) ={";
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+	ret << "}=; goto _again;}$";
+
+	if ( prePushExpr != 0 )
+		ret << "}";
+}
+
 void IpGoto::RET( ostream &ret, bool inFinish )
+{
+	ret << "${" << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+
+	if ( postPopExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, postPopExpr, 0, false, false );
+		ret << "}$";
+	}
+
+	ret << "goto _again;}$";
+}
+
+void IpGoto::NRET( ostream &ret, bool inFinish )
 {
 	ret << "${" << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
@@ -144,6 +190,15 @@ void IpGoto::TARGS( ostream &ret, bool inFinish, int targState )
 }
 
 void IpGoto::BREAK( ostream &ret, int targState, bool csForced )
+{
+	outLabelUsed = true;
+	ret << "{" << P() << "+= 1; ";
+	if ( !csForced ) 
+		ret << vCS() << " = " << targState << "; ";
+	ret << "goto _out;}";
+}
+
+void IpGoto::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "{" << P() << "+= 1; ";

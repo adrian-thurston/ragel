@@ -276,6 +276,7 @@ void BinaryBasic::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish 
 
 void BinaryBasic::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
+	error() << "cannot use fcall in -B mode" << std::endl;
 	exit(1);
 }
 
@@ -296,6 +297,7 @@ void BinaryBasic::NCALL( ostream &ret, int callDest, int targState, bool inFinis
 
 void BinaryBasic::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
+	error() << "cannot use fcall in -B mode" << std::endl;
 	exit(1);
 }
 
@@ -318,6 +320,7 @@ void BinaryBasic::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState
 
 void BinaryBasic::RET( ostream &ret, bool inFinish )
 {
+	error() << "cannot use fcall in -B mode" << std::endl;
 	exit(1);
 }
 
@@ -336,6 +339,7 @@ void BinaryBasic::NRET( ostream &ret, bool inFinish )
 
 void BinaryBasic::BREAK( ostream &ret, int targState, bool csForced )
 {
+	error() << "cannot use fcall in -B mode" << std::endl;
 	exit(1);
 	outLabelUsed = true;
 	ret << "${" << P() << "+= 1; _cont = 0; }$";
