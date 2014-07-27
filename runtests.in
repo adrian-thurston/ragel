@@ -43,8 +43,14 @@ while getopts "gcnmleT:F:G:P:CDJRAZ" opt; do
 	esac
 done
 
+# Allowed genflags for specific languages.
+all_genflags="-B0 -T0 -T1 -F0 -F1 -G0 -G1 -G2"
+csharp_genflags="-B0 -T0 -T1 -F0 -F1 -G0 -G1"
+java_genflags="-B0 -T0"
+ruby_genflags="-B0 -T0 -T1 -F0 -F1"
+
 [ -z "$minflags" ] && minflags="-n -m -l -e"
-[ -z "$genflags" ] && genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1 -G2"
+[ -z "$genflags" ] && genflags="$all_genflags"
 [ -z "$langflags" ] && langflags="-C -D -J -R -A -Z"
 
 shift $((OPTIND - 1));
@@ -62,12 +68,6 @@ java_compiler="@JAVAC@"
 ruby_engine="@RUBY@"
 csharp_compiler="@GMCS@"
 go_compiler="@GOBIN@ build"
-
-# Allowed genflags for specific languages.
-all_genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1 -G2"
-csharp_genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1"
-java_genflags="-T0 -T2"
-ruby_genflags="-T0 -T1 -T2 -F0 -F1"
 
 function test_error
 {
