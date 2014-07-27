@@ -262,6 +262,120 @@ void BinaryBasic::writeData()
 	STATE_IDS();
 }
 
+void BinaryBasic::GOTO( ostream &ret, int gotoDest, bool inFinish )
+{
+	ret << "${" << vCS() << " = " << gotoDest << ";}$";
+}
+
+void BinaryBasic::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+{
+	ret << "${" << vCS() << " = host( \"-\", 1 ) ={";
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+	ret << "}=;}$";
+}
+
+void BinaryBasic::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+{
+	ret << "${";
+
+	if ( prePushExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << "}$ ";
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << " += 1;" << vCS() << " = " <<
+			callDest << ";}$";
+}
+
+void BinaryBasic::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
+{
+	ret << "${";
+
+	if ( prePushExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << "}$ ";
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << " += 1;" << vCS() << " = " <<
+			callDest << ";}$";
+}
+
+void BinaryBasic::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+{
+	ret << "${";
+
+	if ( prePushExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << "}$ ";
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << " += 1;" << vCS() <<
+			" = host( \"-\", 1 ) ={";
+	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
+	ret << "}=;}$";
+}
+
+void BinaryBasic::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+{
+	ret << "${";
+
+	if ( prePushExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << "}$ ";
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << " += 1;" << vCS() <<
+			" = host( \"-\", 1 ) ={";
+	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
+	ret << "}=;}$";
+}
+
+void BinaryBasic::RET( ostream &ret, bool inFinish )
+{
+	ret << "${" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
+
+	if ( postPopExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, postPopExpr, 0, false, false );
+		ret << "}$";
+	}
+
+	ret << "}$";
+}
+
+void BinaryBasic::NRET( ostream &ret, bool inFinish )
+{
+	ret << "${" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
+
+	if ( postPopExpr != 0 ) {
+		ret << "host( \"-\", 1 ) ${";
+		INLINE_LIST( ret, postPopExpr, 0, false, false );
+		ret << "}$";
+	}
+
+	ret << "}$";
+}
+
+void BinaryBasic::BREAK( ostream &ret, int targState, bool csForced )
+{
+	outLabelUsed = true;
+	ret << "${" << P() << "+= 1; _cont = 0; }$";
+}
+
+void BinaryBasic::NBREAK( ostream &ret, int targState, bool csForced )
+{
+	outLabelUsed = true;
+	ret << "${" << P() << "+= 1; _cont = 0; }$";
+}
+
 void BinaryBasic::LOCATE_TRANS()
 {
 	out <<
