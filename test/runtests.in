@@ -63,6 +63,12 @@ ruby_engine="@RUBY@"
 csharp_compiler="@GMCS@"
 go_compiler="@GOBIN@ build"
 
+# Allowed genflags for specific languages.
+all_genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1 -G2"
+csharp_genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1"
+java_genflags="-T0 -T2"
+ruby_genflags="-T0 -T1 -T2 -F0 -F1"
+
 function test_error
 {
 	exit 1;
@@ -281,7 +287,7 @@ for test_case; do
 		# Using genflags, get the allowed gen flags from the test case. If the
 		# test case doesn't specify assume that all gen flags are allowed.
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1 -G2"
+		[ -z "$allow_genflags" ] && allow_genflags="$all_genflags"
 
 		for min_opt in $minflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
@@ -294,12 +300,13 @@ for test_case; do
 
 	java) 
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T2"
+		[ -z "$allow_genflags" ] && allow_genflags="$java_genflags"
 
 		for min_opt in $minflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
+				echo "$java_genflags" | grep -e $min_opt >/dev/null || continue
 				run_test
 			done
 		done
@@ -309,13 +316,14 @@ for test_case; do
 		# Using genflags, get the allowed gen flags from the test case. If the
 		# test case doesn't specify assume that all gen flags are allowed.
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -T2 -F0 -F1"
+		[ -z "$allow_genflags" ] && allow_genflags="$ruby_genflags"
 
 		for min_opt in $minflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
 
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
+				echo "$ruby_genflags" | grep -e $min_opt >/dev/null || continue
 				run_test
 			done
 		done
@@ -325,7 +333,7 @@ for test_case; do
 		# Using genflags, get the allowed gen flags from the test case. If the
 		# test case doesn't specify assume that all gen flags are allowed.
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1"
+		[ -z "$allow_genflags" ] && allow_genflags="$csharp_genflags"
 
 		for min_opt in $minflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
@@ -340,7 +348,7 @@ for test_case; do
 		# Using genflags, get the allowed gen flags from the test case. If the
 		# test case doesn't specify assume that all gen flags are allowed.
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -T2 -F0 -F1 -G0 -G1 -G2"
+		[ -z "$allow_genflags" ] && allow_genflags="$all_genflags"
 
 		for min_opt in $minflags; do
 			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
