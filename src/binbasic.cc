@@ -276,17 +276,7 @@ void BinaryBasic::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish 
 
 void BinaryBasic::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	ret << "${";
-
-	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
-	}
-
-	ret << STACK() << "[" << TOP() << "] = " <<
-			vCS() << "; " << TOP() << " += 1;" << vCS() << " = " <<
-			callDest << ";}$";
+	exit(1);
 }
 
 void BinaryBasic::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -306,19 +296,7 @@ void BinaryBasic::NCALL( ostream &ret, int callDest, int targState, bool inFinis
 
 void BinaryBasic::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	ret << "${";
-
-	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
-	}
-
-	ret << STACK() << "[" << TOP() << "] = " <<
-			vCS() << "; " << TOP() << " += 1;" << vCS() <<
-			" = host( \"-\", 1 ) ={";
-	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "}=;}$";
+	exit(1);
 }
 
 void BinaryBasic::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
@@ -340,15 +318,7 @@ void BinaryBasic::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState
 
 void BinaryBasic::RET( ostream &ret, bool inFinish )
 {
-	ret << "${" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
-
-	if ( postPopExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
-		INLINE_LIST( ret, postPopExpr, 0, false, false );
-		ret << "}$";
-	}
-
-	ret << "}$";
+	exit(1);
 }
 
 void BinaryBasic::NRET( ostream &ret, bool inFinish )
@@ -366,6 +336,7 @@ void BinaryBasic::NRET( ostream &ret, bool inFinish )
 
 void BinaryBasic::BREAK( ostream &ret, int targState, bool csForced )
 {
+	exit(1);
 	outLabelUsed = true;
 	ret << "${" << P() << "+= 1; _cont = 0; }$";
 }
