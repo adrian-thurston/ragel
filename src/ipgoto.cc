@@ -100,7 +100,7 @@ void IpGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " << targState << 
-			"; " << TOP() << "+= 1; " << "goto st" << callDest << ";}$";
+			"; " << TOP() << "+= 1; " << vCS() << " = " << callDest << "; }$";
 }
 
 void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
@@ -135,7 +135,7 @@ void IpGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, boo
 	ret << STACK() << "[" << TOP() << "] = " << targState << "; " << TOP() << "+= 1;" <<
 			vCS() << " = host( \"-\", 1 ) ={";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "}=; goto _again;}$";
+	ret << "}=; }$";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -164,7 +164,7 @@ void IpGoto::NRET( ostream &ret, bool inFinish )
 		ret << "}$";
 	}
 
-	ret << "goto _again;}$";
+	ret << "}$";
 }
 
 void IpGoto::NEXT( ostream &ret, int nextDest, bool inFinish )

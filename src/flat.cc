@@ -485,7 +485,7 @@ void Flat::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() << " = " << 
-			callDest << "; " << "goto _again;}$";
+			callDest << "; }$";
 }
 
 
@@ -519,7 +519,7 @@ void Flat::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool 
 	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() <<
 			" = host( \"-\", 1 ) ={";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "}=; " << "goto _again;}$";
+	ret << "}=; }$";
 }
 
 
@@ -546,7 +546,7 @@ void Flat::NRET( ostream &ret, bool inFinish )
 		ret << "}$";
 	}
 
-	ret << "goto _again;}$";
+	ret << " }$";
 }
 
 void Flat::BREAK( ostream &ret, int targState, bool csForced )

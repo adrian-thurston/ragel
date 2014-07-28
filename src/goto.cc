@@ -660,7 +660,7 @@ void Goto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 
 	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " <<
 			TOP() << " += 1;" << vCS() << " = " << 
-			callDest << "; " << "goto _again;}$";
+			callDest << "; }$";
 }
 
 void Goto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
@@ -692,7 +692,7 @@ void Goto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool 
 	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; "  << TOP() << " += 1;" <<
 			vCS() << " = host( \"-\", 1 ) ={";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "}=; goto _again;}$";
+	ret << "}=; }$";
 }
 
 void Goto::RET( ostream &ret, bool inFinish )
@@ -718,7 +718,7 @@ void Goto::NRET( ostream &ret, bool inFinish )
 		ret << "}$";
 	}
 
-	ret << "goto _again;}$";
+	ret << "}$";
 }
 
 void Goto::BREAK( ostream &ret, int targState, bool csForced )
