@@ -1194,11 +1194,13 @@ void CodeGenData::analyzeAction( GenAction *act, GenInlineList *inlineList )
 		/* Check for various things in regular actions. */
 		if ( act->numTransRefs > 0 || act->numToStateRefs > 0 || act->numFromStateRefs > 0 ) {
 			/* Any returns in regular actions? */
-			if ( item->type == GenInlineItem::Ret )
+			if ( item->type == GenInlineItem::Ret || item->type == GenInlineItem::Nret )
 				redFsm->bAnyRegActionRets = true;
 
 			/* Any next statements in the regular actions? */
-			if ( item->type == GenInlineItem::Next || item->type == GenInlineItem::NextExpr )
+			if ( item->type == GenInlineItem::Next || item->type == GenInlineItem::NextExpr ||
+					item->type == GenInlineItem::Ncall || item->type == GenInlineItem::NcallExpr ||
+					item->type == GenInlineItem::Nret )
 				redFsm->bAnyRegNextStmt = true;
 
 			/* Any by value control in regular actions? */
@@ -1222,7 +1224,9 @@ void CodeGenData::analyzeActionList( RedAction *redAct, GenInlineList *inlineLis
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		/* Any next statements in the action table? */
-		if ( item->type == GenInlineItem::Next || item->type == GenInlineItem::NextExpr )
+		if ( item->type == GenInlineItem::Next || item->type == GenInlineItem::NextExpr ||
+				item->type == GenInlineItem::Ncall || item->type == GenInlineItem::NcallExpr ||
+				item->type == GenInlineItem::Nret )
 			redAct->bAnyNextStmt = true;
 
 		/* Any references to the current state. */
