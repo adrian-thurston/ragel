@@ -464,7 +464,8 @@ void IpGoto::setLabelsNeeded( GenInlineList *inlineList )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case GenInlineItem::Goto: case GenInlineItem::Call: {
+		case GenInlineItem::Goto: case GenInlineItem::Call:
+		case GenInlineItem::Ncall: {
 			/* Mark the target as needing a label. */
 			item->targState->labelNeeded = true;
 			break;
