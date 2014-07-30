@@ -23,7 +23,7 @@ int stack[32];
 	action unusedAction { fentry(garble_line); }
 
 	action err_garbling_line { print_str "error: garbling line\n"; }
-	action goto_main { fgoto main; }
+	action goto_main { fnext main; }
 	action recovery_failed { print_str "error: failed to recover\n"; }
 
 	# Error machine, consumes to end of 
@@ -51,12 +51,12 @@ int stack[32];
 
 	# Specifies command string. Note that the arg is left out.
 	command = (
-		[a-z0-9] @{comm = fc;} ' ' @comm_arg '\n'
+		[a-z0-9] @{comm = fc;} ' ' @comm_arg @{print_str "prints\n";} '\n'
 	) @{print_str "correct command\n";};
 
 	# Any number of commands. If there is an 
 	# error anywhere, garble the line.
-	main := command* $!{fhold;fgoto garble_line;}; 
+	main := command* $!{fhold;fnext garble_line;}; 
 }%%
 
 #ifdef _____INPUT_____
@@ -94,23 +94,30 @@ error: garbling line
 ACCEPT
 error: garbling line
 ACCEPT
+prints
 error: garbling line
 ACCEPT
 error: garbling line
 ACCEPT
+prints
 error: garbling line
 ACCEPT
 error: garbling line
 ACCEPT
+prints
 correct command
 ACCEPT
+prints
 correct command
 ACCEPT
+prints
 correct command
 ACCEPT
+prints
 correct command
 ACCEPT
 FAIL
+prints
 error: garbling line
 error: failed to recover
 FAIL
