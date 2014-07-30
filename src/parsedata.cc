@@ -1215,8 +1215,11 @@ void ParseData::analyzeAction( Action *action, InlineList *inlineList )
 {
 	/* FIXME: Actions used as conditions should be very constrained. */
 	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
-		if ( item->type == InlineItem::Call || item->type == InlineItem::CallExpr )
+		if ( item->type == InlineItem::Call || item->type == InlineItem::CallExpr ||
+				item->type == InlineItem::Ncall || item->type == InlineItem::NcallExpr )
+		{
 			action->anyCall = true;
+		}
 
 		/* Need to recurse into longest match items. */
 		if ( item->type == InlineItem::LmSwitch ) {
@@ -1272,7 +1275,7 @@ void ParseData::checkAction( Action *action )
 			NameInst *check = *ar;
 			while ( check != 0 ) {
 				if ( check->isLongestMatch ) {
-					error(action->loc) << "within a scanner, fcall is permitted"
+					error(action->loc) << "within a scanner, fcall and fncall are permitted"
 						" only in pattern actions" << endl;
 					break;
 				}
