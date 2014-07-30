@@ -1047,7 +1047,8 @@ void CodeGenData::resolveTargetStates( GenInlineList *inlineList )
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
 		case GenInlineItem::Goto: case GenInlineItem::Call:
-		case GenInlineItem::Next: case GenInlineItem::Entry:
+		case GenInlineItem::Ncall: case GenInlineItem::Next:
+		case GenInlineItem::Entry:
 			item->targState = allStates + item->targId;
 			break;
 		default:

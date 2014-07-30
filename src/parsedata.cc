@@ -737,7 +737,8 @@ void ParseData::resolveNameRefs( InlineList *inlineList, Action *action )
 	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
 			case InlineItem::Entry: case InlineItem::Goto:
-			case InlineItem::Call: case InlineItem::Next: {
+			case InlineItem::Call: case InlineItem::Ncall:
+			case InlineItem::Next: {
 				/* Resolve, pass action for local search. */
 				NameInst *target = resolveStateRef( item->nameRef, item->loc, action );
 
