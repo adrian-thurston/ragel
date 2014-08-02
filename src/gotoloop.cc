@@ -210,9 +210,10 @@ void GotoLooped::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	index " << ARR_TYPE( actions ) << " __acts;\n"
+				"	uint __nacts;\n"
 				"	__acts = offset( " << ARR_REF( actions ) << ", " << 
 						ARR_REF( eofActions ) << "[" << vCS() << "] );\n"
-				"	uint __nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts ); __acts += 1;\n"
+				"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts ); __acts += 1;\n"
 				"	while ( __nacts > 0 ) {\n"
 				"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
 				EOF_ACTION_SWITCH() <<
