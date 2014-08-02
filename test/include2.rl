@@ -28,7 +28,7 @@
 		a1 b1 @NonRef1 
 		a2 b2 @NonRef2 
 		a3 b3 @NonRef3
-		0 @{fbreak;};
+		0 @{fnbreak;};
 }%%
 
 %% write data;

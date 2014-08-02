@@ -495,12 +495,15 @@ struct RedFsmAp
 	bool bAnyEofTrans;
 	bool bAnyActionGotos;
 	bool bAnyActionCalls;
+	bool bAnyActionNcalls;
 	bool bAnyActionRets;
+	bool bAnyActionNrets;
 	bool bAnyRegActionRets;
 	bool bAnyRegActionByValControl;
 	bool bAnyRegNextStmt;
 	bool bAnyRegCurStateRef;
 	bool bAnyRegBreak;
+	bool bAnyRegNbreak;
 	bool bUsingAct;
 
 	int maxState;
@@ -526,14 +529,16 @@ struct RedFsmAp
 	bool anyEofTrans()              { return bAnyEofTrans; }
 	bool anyActionGotos()           { return bAnyActionGotos; }
 	bool anyActionCalls()           { return bAnyActionCalls; }
+	bool anyActionNcalls()          { return bAnyActionNcalls; }
 	bool anyActionRets()            { return bAnyActionRets; }
+	bool anyActionNrets()           { return bAnyActionNrets; }
 	bool anyRegActionRets()         { return bAnyRegActionRets; }
 	bool anyRegActionByValControl() { return bAnyRegActionByValControl; }
 	bool anyRegNextStmt()           { return bAnyRegNextStmt; }
 	bool anyRegCurStateRef()        { return bAnyRegCurStateRef; }
 	bool anyRegBreak()              { return bAnyRegBreak; }
 	bool usingAct()                 { return bUsingAct; }
-
+	bool anyRegNbreak()				{ return bAnyRegNbreak; }
 
 	/* Is is it possible to extend a range by bumping ranges that span only
 	 * one character to the singles array. */

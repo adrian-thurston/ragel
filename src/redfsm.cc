@@ -59,12 +59,15 @@ RedFsmAp::RedFsmAp( KeyOps *keyOps )
 	bAnyEofTrans(false),
 	bAnyActionGotos(false),
 	bAnyActionCalls(false),
+	bAnyActionNcalls(false),
 	bAnyActionRets(false),
+	bAnyActionNrets(false),
 	bAnyRegActionRets(false),
 	bAnyRegActionByValControl(false),
 	bAnyRegNextStmt(false),
 	bAnyRegCurStateRef(false),
 	bAnyRegBreak(false),
+	bAnyRegNbreak(false),
 	bUsingAct(false)
 {
 }

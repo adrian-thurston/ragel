@@ -238,7 +238,12 @@ void FlatExpanded::writeExec()
 		"	index " << ARR_TYPE( indicies ) << " _inds;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _klen;\n"
-		"	int _cpc;\n"
+		"	int _cpc;\n";
+
+	if ( redFsm->anyRegNbreak() )
+		out << "	int _nbreak;\n";
+
+	out <<
 		"	entry {\n";
 
 	if ( !noEnd ) {
@@ -279,10 +284,25 @@ void FlatExpanded::writeExec()
 		out << 
 			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
 			"		goto _again;\n"
-			"\n"
+			"\n";
+
+		if ( redFsm->anyRegNbreak() )
+			out << "	_nbreak = 0;\n";
+
+		out <<
 			"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
 			ACTION_SWITCH() << 
 			"	}\n"
+			"\n";
+
+		if ( redFsm->anyRegNbreak() ) {
+			out <<
+				"	if ( _nbreak == 1 )\n"
+				"		goto _out;\n";
+			outLabelUsed = true;
+		}
+
+		out <<
 			"\n";
 	}
 

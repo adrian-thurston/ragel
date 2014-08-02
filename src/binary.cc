@@ -838,7 +838,7 @@ void Binary::BREAK( ostream &ret, int targState, bool csForced )
 void Binary::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "${" << P() << "+= 1; " << "goto _out; }$";
+	ret << "${" << P() << "+= 1; " << " _nbreak = 1;}$";
 }
 
 }

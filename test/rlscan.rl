@@ -2,6 +2,7 @@
  * Lexes Ragel input files.
  *
  * @LANG: c++
+ * @ALLOW_GENFLAGS: -T0 -T1 -F0 -F1 -G0 -G1 -G2
  *
  * Test works with split code gen.
  */

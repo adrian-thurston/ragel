@@ -275,8 +275,11 @@ void BinaryLooped::writeExec()
 		out << "	int _ps;\n";
 
 	out <<
-		"	uint _trans = 0;\n" <<
+		"	uint _trans = 0;\n"
 		"	uint _cond = 0;\n";
+	
+	if ( redFsm->anyRegNbreak() )
+		out << "	int _nbreak;\n";
 
 	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 			|| redFsm->anyFromStateActions() )
@@ -349,7 +352,12 @@ void BinaryLooped::writeExec()
 		out <<
 			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
 			"		goto _again;\n"
-			"\n"
+			"\n";
+
+		if ( redFsm->anyRegNbreak() )
+			out << "	_nbreak = 0;\n";
+
+		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
 			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
@@ -362,6 +370,14 @@ void BinaryLooped::writeExec()
 			"		_acts += 1;\n"
 			"	}\n"
 			"\n";
+
+		if ( redFsm->anyRegNbreak() ) {
+			out <<
+				"	if ( _nbreak == 1 )\n"
+				"		goto _out;\n";
+			outLabelUsed = true;
+		}
+		out << "\n";
 	}
 
 //	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 

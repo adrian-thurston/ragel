@@ -482,7 +482,12 @@ std::ostream &Goto::EXEC_FUNCS()
 
 	out <<
 		"\n"
-		"execFuncs:\n"
+		"execFuncs:\n";
+
+	if ( redFsm->anyRegNbreak() )
+		out << "	_nbreak = 0;\n";
+
+	out <<
 		"	_nacts = (uint)deref( " << ARR_REF( actions ) << ", _acts );\n"
 		"	_acts += 1;\n"
 		"	while ( _nacts > 0 ) {\n"
@@ -492,6 +497,16 @@ std::ostream &Goto::EXEC_FUNCS()
 		"		_acts += 1;\n"
 		"		_nacts -= 1;\n"
 		"	}\n"
+		"\n";
+
+	if ( redFsm->anyRegNbreak() ) {
+		out <<
+			"	if ( _nbreak == 1 )\n"
+			"		goto _out;\n";
+		outLabelUsed = true;
+	}
+
+	out <<
 		"	goto _again;\n";
 	return out;
 }
@@ -730,7 +745,7 @@ void Goto::BREAK( ostream &ret, int targState, bool csForced )
 void Goto::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "${" << P() << " += 1; " << "goto _out; }$";
+	ret << "${" << P() << " += 1; " << " _nbreak = 1; }$";
 }
 
 }

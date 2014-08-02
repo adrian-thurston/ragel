@@ -1181,8 +1181,13 @@ void CodeGenData::analyzeAction( GenAction *act, GenInlineList *inlineList )
 			else if ( item->type == GenInlineItem::Call || item->type == GenInlineItem::CallExpr ) {
 				redFsm->bAnyActionCalls = true;
 			}
+			else if ( item->type == GenInlineItem::Ncall || item->type == GenInlineItem::NcallExpr ) {
+				redFsm->bAnyActionCalls = true;
+			}
 			else if ( item->type == GenInlineItem::Ret )
 				redFsm->bAnyActionRets = true;
+			else if ( item->type == GenInlineItem::Nret )
+				redFsm->bAnyActionNrets = true;
 			else if ( item->type == GenInlineItem::LmInitAct || 
 					item->type == GenInlineItem::LmSetActId || 
 					item->type == GenInlineItem::LmSwitch )
@@ -1213,6 +1218,9 @@ void CodeGenData::analyzeAction( GenAction *act, GenInlineList *inlineList )
 
 			if ( item->type == GenInlineItem::Break )
 				redFsm->bAnyRegBreak = true;
+
+			if ( item->type == GenInlineItem::Nbreak )
+				redFsm->bAnyRegNbreak = true;
 		}
 
 		if ( item->children != 0 )

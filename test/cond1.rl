@@ -39,7 +39,7 @@ bool k;
 		}
 	}
 
-	action break {fbreak;}
+	action break {fnbreak;}
 
 	one = 'a' 'b' when c1 'c' @one;
 	two = 'a'* 'b' when c2 'c' @two;

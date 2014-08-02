@@ -203,7 +203,12 @@ void FlatLooped::writeExec()
 		"	index " << ARR_TYPE( indicies ) << " _inds;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _klen;\n"
-		"	int _cpc;\n"
+		"	int _cpc;\n";
+
+	if ( redFsm->anyRegNbreak() )
+		out << "	int _nbreak;\n";
+
+	out <<
 		"	entry {\n";
 
 	out << "\n";
@@ -228,7 +233,8 @@ void FlatLooped::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts ); _acts += 1;\n"
+			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
@@ -254,7 +260,12 @@ void FlatLooped::writeExec()
 		out <<
 			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
 			"		goto _again;\n"
-			"\n"
+			"\n";
+
+		if ( redFsm->anyRegNbreak() )
+			out << "	_nbreak = 0;\n";
+
+		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
 			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
@@ -266,6 +277,16 @@ void FlatLooped::writeExec()
 			"		_nacts -= 1;\n"
 			"		_acts += 1;\n"
 			"	}\n"
+			"\n";
+
+		if ( redFsm->anyRegNbreak() ) {
+			out <<
+				"	if ( _nbreak == 1 )\n"
+				"		goto _out;\n";
+			outLabelUsed = true;
+		}
+
+		out <<
 			"\n";
 	}
 

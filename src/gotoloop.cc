@@ -102,6 +102,10 @@ void GotoLooped::writeExec()
 
 	out << "\n";
 
+	if ( redFsm->anyRegNbreak() ) {
+		out << "	int _nbreak;\n";
+	}
+
 	if ( !noEnd ) {
 		testEofUsed = true;
 		out << 

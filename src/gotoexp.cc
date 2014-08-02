@@ -72,9 +72,20 @@ std::ostream &GotoExpanded::EXEC_ACTIONS()
 			/* 	We are at the start of a glob, write the case. */
 			out << "f" << redAct->actListId << ":\n";
 
+			if ( redFsm->anyRegNbreak() )
+				out << "_nbreak = 0;\n";
+
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
+
+			if ( redFsm->anyRegNbreak() ) {
+				out << 
+					"	if ( _nbreak == 1 )\n"
+					"		goto _out;\n";
+				outLabelUsed = true;
+			}
+
 
 			out << "\n\tgoto _again;\n";
 		}
@@ -207,6 +218,11 @@ void GotoExpanded::writeExec()
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";
+
+	if ( redFsm->anyRegNbreak() ) {
+		out << 
+			"	int _nbreak;\n";
+	}
 
 	if ( !noEnd ) {
 		testEofUsed = true;

@@ -296,8 +296,12 @@ void BinaryExpanded::writeExec()
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _cpc;\n"
 		"	uint _trans;\n"
-		"	uint _cond;\n"
-		"	entry {\n";
+		"	uint _cond;\n";
+
+	if ( redFsm->anyRegNbreak() )
+		out << "	int _nbreak;\n";
+
+	out << "	entry {\n";
 
 	out << "\n";
 
@@ -349,11 +353,25 @@ void BinaryExpanded::writeExec()
 		out << 
 			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
 			"		goto _again;\n"
-			"\n"
+			"\n";
+
+		if ( redFsm->anyRegNbreak() )
+			out << "	_nbreak = 0;\n";
+
+		out <<
 			"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
 			ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
+
+		if ( redFsm->anyRegNbreak() ) {
+			out <<
+				"	if ( _nbreak == 1 )\n"
+				"		goto _out;\n";
+			outLabelUsed = true;
+		}
+
+		out << "\n";
 	}
 
 //	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 

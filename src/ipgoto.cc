@@ -204,7 +204,7 @@ void IpGoto::NBREAK( ostream &ret, int targState, bool csForced )
 	ret << "{" << P() << "+= 1; ";
 	if ( !csForced ) 
 		ret << vCS() << " = " << targState << "; ";
-	ret << "goto _out;}";
+	ret << "_nbreak = 1;}";
 }
 
 bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
@@ -227,6 +227,9 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 			if ( trans->action->anyNextStmt() )
 				out << "	" << vCS() << " = " << trans->targ->id << ";\n";
 
+			if ( redFsm->anyRegNbreak() )
+				out << "_nbreak = 0;\n";
+
 			/* Write each action in the list. */
 			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
 				ACTION( out, item->value, IlOpts( trans->targ->id, false, 
@@ -234,6 +237,14 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 				out << "\n";
 			}
 
+			if ( redFsm->anyRegNbreak() ) {
+				out <<
+					"if ( _nbreak == 1 )\n"
+					"	goto _out;\n";
+				outLabelUsed = true;
+			}
+				
+ 
 			/* If the action contains a next then we need to reload, otherwise
 			 * jump directly to the target state. */
 			if ( trans->action->anyNextStmt() )
@@ -532,6 +543,9 @@ void IpGoto::writeExec()
 	outLabelUsed = false;
 
 	out << "	{\n";
+
+	if ( redFsm->anyRegNbreak() )
+		out << "	int _nbreak;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";

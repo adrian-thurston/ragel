@@ -546,7 +546,8 @@ void Flat::NRET( ostream &ret, bool inFinish )
 		ret << "}$";
 	}
 
-	ret << " }$";
+	/* FIXME: ws in front of } will cause rlhc failure. */
+	ret << "}$";
 }
 
 void Flat::BREAK( ostream &ret, int targState, bool csForced )
@@ -558,7 +559,7 @@ void Flat::BREAK( ostream &ret, int targState, bool csForced )
 void Flat::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "${" << P() << " += 1; " << "goto _out; }$";
+	ret << "${" << P() << " += 1; " << " _nbreak = 1; }$";
 }
 
 }
