@@ -218,39 +218,21 @@ for test_case; do
 		indep)
 			lang_opt="";
 
-			for lang in c d csharp go java ruby; do
+			for lang in c d cs go java ruby; do
 				case $lang in 
-					c)
-						lf="-C"
-						trans=c;
-					;;
-					d)
-						lf="-D"
-						trans=d;
-					;;
-					java)
-						lf="-J"
-						trans=java;
-					;;
-					ruby)
-						lf="-R"
-						trans=ruby;
-					;;
-                    csharp)
-						lf="-A"
-						trans=cs;
-					;;
-					go)
-						lf="-Z"
-						trans=go;
-					;;
+					c) lf="-C" ;;
+					d) lf="-D" ;;
+                    cs) lf="-A" ;;
+					go) lf="-Z" ;;
+					java) lf="-J" ;;
+					ruby) lf="-R" ;;
 				esac
 
 				echo "$langflags" | grep -e $lf >/dev/null || continue
 
 				targ=${root}_$lang.rl
-				echo "./trans-$trans $targ $test_case $lang ${root}_${lang}"
-				if ! ./trans-$trans $targ $test_case $lang ${root}_${lang}; then
+				echo "./trans $lang $targ $test_case $lang ${root}_${lang}"
+				if ! ./trans $lang $targ $test_case ${root}_${lang}; then
 					test_error
 				fi
 				echo "./runtests -g $options $targ"
