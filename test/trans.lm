@@ -1,6 +1,5 @@
 include '../src/ragel.lm'
 
-
 namespace indep
 	# Opening the test case header.
 	lex
@@ -185,3 +184,58 @@ end
 
 global Out: parser<out_code::lines>
 
+include 'trans-c.lm'
+include 'trans-d.lm'
+include 'trans-cs.lm'
+include 'trans-go.lm'
+include 'trans-java.lm'
+include 'trans-ruby.lm'
+
+ProgName: str = argv.pop()
+Lang: str = argv.pop()
+OutputFile: str = argv.pop()
+InputFile: str = argv.pop()
+global ClassName: str = argv.pop()
+
+Input: stream = open( InputFile "r" )
+Output: stream = open( OutputFile "w" )
+
+global RagelTree: indep::start = parse indep::start[ Input ]
+
+if ( !RagelTree ) {
+	print( error '\n' )
+	exit(1)
+}
+
+# Find the machine name.
+global MachineName: ragel::machine_name = ragel::machine_name in RagelTree
+
+global NeedsEof: bool = false
+global AllowGenflags: str
+for CommDef: indep::comm_def in RagelTree {
+	switch CommDef
+	case "@NEEDS_EOF: yes\n"
+	{
+		NeedsEof = true
+	}
+	case "@ALLOW_GENFLAGS:[CV: comm_val]"
+	{
+		AllowGenflags = $CV
+	}
+}
+
+if ( Lang == 'c' )
+	rw_c( Output )
+elsif ( Lang == 'd' )
+	rw_d( Output )
+elsif ( Lang == 'cs' )
+	rw_cs( Output )
+elsif ( Lang == 'go' )
+	rw_go( Output )
+elsif ( Lang == 'java' )
+	rw_java( Output )
+elsif ( Lang == 'ruby' )
+	rw_ruby( Output )
+else {
+	print( 'trans: unrecognized language: ' Lang '\n' )
+}

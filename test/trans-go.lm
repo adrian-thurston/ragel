@@ -1,5 +1,3 @@
-include 'trans.lm'
-
 int rw_go_factor( Factor: indep::factor )
 {
 	if match Factor [`first_token_char]
@@ -150,7 +148,7 @@ int rw_go_ragel_stmt( Stmt: indep::ragel_stmt )
 		[$Stmt]
 }
 
-int rw_stmt( Stmt: indep::stmt )
+int rw_go_stmt( Stmt: indep::stmt )
 {
 	if match Stmt [var_decl]
 		rw_go_var_decl( Stmt.var_decl )
@@ -167,7 +165,7 @@ int rw_stmt( Stmt: indep::stmt )
 void rw_go_stmt_list( StmtList: indep::stmt* )
 {
 	for Stmt: indep::stmt in repeat( StmtList )
-		rw_stmt( Stmt )
+		rw_go_stmt( Stmt )
 }
 
 int rw_go_action_block( ActionBlock: indep::action_block )
@@ -184,143 +182,112 @@ int rw_go_action_block( ActionBlock: indep::action_block )
 	send Out [] eos
 }
 
-ProgName: str = argv.pop()
-OutputFile: str = argv.pop()
-InputFile: str = argv.pop()
-Lang: str = argv.pop()
-
-Input: stream = open( InputFile "r" )
-Output: stream = open( OutputFile "w" )
-
-RagelTree: indep::start = parse indep::start[ Input ]
-
-if ( !RagelTree ) {
-	print( error '\n' )
-	exit(1)
-}
-
-# Find the machine name.
-MachineName: ragel::machine_name = ragel::machine_name in RagelTree
-
-NeedsEof: bool = false
-AllowGenflags: str
-for CommDef: indep::comm_def in RagelTree {
-	switch CommDef
-	case "@NEEDS_EOF: yes\n"
-	{
-		NeedsEof = true
-	}
-	case "@ALLOW_GENFLAGS:[CV: comm_val]"
-	{
-		AllowGenflags = $CV
-	}
-}
-
-
-send Output
-	"/*
-	" * @LANG: go
-
-if AllowGenflags {
+void rw_go( Output: stream )
+{
 	send Output
-		" * @ALLOW_GENFLAGS:[AllowGenflags]
-}
+		"/*
+		" * @LANG: go
 
-send Output
-	" * @GENERATED: yes
-	" */
-	"
-	"package main
-	"import \"fmt\"
-	"
-
-Init: indep::stmt* = RagelTree.Init
-for Stmt: indep::stmt in Init {
-	if match Stmt [Decl: var_decl] {
-		Out = cons parser<out_code::lines> []
-		rw_go_var_decl( Decl )
-		send Out [] eos
-		send Output [Out.tree]
+	if AllowGenflags {
+		send Output
+			" * @ALLOW_GENFLAGS:[AllowGenflags]
 	}
-}
 
-Section: indep::section = RagelTree.section
-for Action: ragel::action_block in Section {
-	# Reparse as lang-independent code.
-	parse IndepActionBlock: indep::action_block[$Action]
-
-	# Translate to specific language.
-	rw_go_action_block( IndepActionBlock )
-
-	# Reparse back to ragel action block.
-	Action = parse ragel::action_block[$Out.tree]
-}
-
-prints( Output '\n' Section '\n' )
-
-send Output
-	"var cs int
-	"
-	"%% write data;
-	"
-	"func prepare() {
-
-for Stmt: indep::stmt in Init {
-	if match Stmt [ExprStmt: expr_stmt] {
-		Out = cons parser<out_code::lines> []
-		rw_go_expr_stmt( ExprStmt )
-		send Out [] eos
-		send Output [Out.tree]
-	}
-}
-
-send Output
-	"	%% write init;
-	"}
-	"
-	"func exec(data string) {
-    "	var p int = 0
-    "	var pe int = len(data)
-
-if NeedsEof {
 	send Output
-		"	var eof int = pe
+		" * @GENERATED: yes
+		" */
+		"
+		"package main
+		"import \"fmt\"
+		"
+
+	Init: indep::stmt* = RagelTree.Init
+	for Stmt: indep::stmt in Init {
+		if match Stmt [Decl: var_decl] {
+			Out = cons parser<out_code::lines> []
+			rw_go_var_decl( Decl )
+			send Out [] eos
+			send Output [Out.tree]
+		}
+	}
+
+	Section: indep::section = RagelTree.section
+	for Action: ragel::action_block in Section {
+		# Reparse as lang-independent code.
+		parse IndepActionBlock: indep::action_block[$Action]
+
+		# Translate to specific language.
+		rw_go_action_block( IndepActionBlock )
+
+		# Reparse back to ragel action block.
+		Action = parse ragel::action_block[$Out.tree]
+	}
+
+	prints( Output '\n' Section '\n' )
+
+	send Output
+		"var cs int
+		"
+		"%% write data;
+		"
+		"func prepare() {
+
+	for Stmt: indep::stmt in Init {
+		if match Stmt [ExprStmt: expr_stmt] {
+			Out = cons parser<out_code::lines> []
+			rw_go_expr_stmt( ExprStmt )
+			send Out [] eos
+			send Output [Out.tree]
+		}
+	}
+
+	send Output
+		"	%% write init;
+		"}
+		"
+		"func exec(data string) {
+		"	var p int = 0
+		"	var pe int = len(data)
+
+	if NeedsEof {
+		send Output
+			"	var eof int = pe
+	}
+
+	send Output
+		"	%% write exec;
+		"}
+		"func finish() {
+		"	if cs >= [MachineName.word]_first_final {
+		"		fmt.Println(\"ACCEPT\")
+		"	} else {
+		"		fmt.Println(\"FAIL\")
+		"	}
+		"}
+
+	send Output
+		~var inp []string = []string {
+
+	for InputString: indep::input_string in RagelTree {
+		send Output [^InputString ",\n"]
+	}
+
+	send Output
+		"};
+		"
+
+	send Output
+		"func main() {
+		"	for _, data := range inp {
+		"		prepare()
+		"		exec(data)
+		"		finish()
+		"	}
+		"}
+
+	send Output "/* _____OUTPUT_____
+	for OutputLine: indep::output_line in RagelTree {
+		prints( Output OutputLine )
+	}
+	send Output "*/
 }
-
-send Output
-	"	%% write exec;
-	"}
-	"func finish() {
-	"	if cs >= [MachineName.word]_first_final {
-	"		fmt.Println(\"ACCEPT\")
-	"	} else {
-	"		fmt.Println(\"FAIL\")
-	"	}
-	"}
-
-send Output
-	~var inp []string = []string {
-
-for InputString: indep::input_string in RagelTree {
-	send Output [^InputString ",\n"]
-}
-
-send Output
-	"};
-	"
-
-send Output
-	"func main() {
-	"	for _, data := range inp {
-	"		prepare()
-	"		exec(data)
-	"		finish()
-	"	}
-	"}
-
-send Output "/* _____OUTPUT_____
-for OutputLine: indep::output_line in RagelTree {
-	prints( Output OutputLine )
-}
-send Output "*/
-

@@ -1,5 +1,5 @@
 #
-#   Copyright 2002-2009 Adrian Thurston <thurston@complang.org>
+#   Copyright 2002-2014 Adrian Thurston <thurston@complang.org>
 #
 
 #   This file is part of Ragel.
@@ -22,13 +22,7 @@ COLM = @COLM_FULL@
 
 TESTS = runtests
 
-bin_PROGRAMS = \
-	trans-c \
-	trans-d \
-	trans-go \
-	trans-cs \
-	trans-java \
-	trans-ruby
+bin_PROGRAMS = trans
 
 ragel-parse: ragel-parse.lm
 	$(COLM) $<
@@ -57,20 +51,14 @@ CLEANFILES = \
 	*.out *_c.rl *_d.rl *_java.rl *_ruby.rl *_csharp.rl *.cs \
 	*_go.rl *.go *.exe
 
-trans-c$(EXEEXT): trans-c.lm trans.lm ../src/ragel.lm
-	$(COLM) -o $@ $<
+TRANS_DEPS = \
+	../src/ragel.lm \
+	trans-c.lm \
+	trans-d.lm \
+	trans-cs.lm \
+	trans-go.lm \
+	trans-java.lm \
+	trans-ruby.lm
 
-trans-d$(EXEEXT): trans-d.lm trans.lm ../src/ragel.lm
-	$(COLM) -o $@ $<
-
-trans-cs$(EXEEXT): trans-cs.lm trans.lm ../src/ragel.lm
-	$(COLM) -o $@ $<
-
-trans-go$(EXEEXT): trans-go.lm trans.lm ../src/ragel.lm
-	$(COLM) -o $@ $<
-
-trans-java$(EXEEXT): trans-java.lm trans.lm ../src/ragel.lm
-	$(COLM) -o $@ $<
-
-trans-ruby$(EXEEXT): trans-ruby.lm trans.lm ../src/ragel.lm
+trans$(EXEEXT): trans.lm $(TRANS_DEPS)
 	$(COLM) -o $@ $<

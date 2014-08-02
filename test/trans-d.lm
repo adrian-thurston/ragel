@@ -1,5 +1,3 @@
-include 'trans.lm'
-
 int rw_d_factor( Factor: indep::factor )
 {
 	if match Factor [`first_token_char]
@@ -149,7 +147,7 @@ int rw_d_ragel_stmt( Stmt: indep::ragel_stmt )
 		[$Stmt]
 }
 
-int rw_stmt( Stmt: indep::stmt )
+int rw_d_stmt( Stmt: indep::stmt )
 {
 	if match Stmt [var_decl]
 		rw_d_var_decl( Stmt.var_decl )
@@ -166,7 +164,7 @@ int rw_stmt( Stmt: indep::stmt )
 void rw_d_stmt_list( StmtList: indep::stmt* )
 {
 	for Stmt: indep::stmt in repeat( StmtList )
-		rw_stmt( Stmt )
+		rw_d_stmt( Stmt )
 }
 
 int rw_d_action_block( ActionBlock: indep::action_block )
@@ -183,159 +181,130 @@ int rw_d_action_block( ActionBlock: indep::action_block )
 	send Out [] eos
 }
 
-ProgName: str = argv.pop()
-OutputFile: str = argv.pop()
-InputFile: str = argv.pop()
-Lang: str = argv.pop()
-
-Input: stream = open( InputFile "r" )
-Output: stream = open( OutputFile "w" )
-
-RagelTree: indep::start = parse indep::start[ Input ]
-
-if ( !RagelTree ) {
-	print( error '\n' )
-	exit(1)
-}
-
-# Find the machine name.
-MachineName: ragel::machine_name = ragel::machine_name in RagelTree
-
-NeedsEof: bool = false
-AllowGenflags: str
-for CommDef: indep::comm_def in RagelTree {
-	switch CommDef
-	case "@NEEDS_EOF: yes\n"
-	{
-		NeedsEof = true
-	}
-	case "@ALLOW_GENFLAGS:[CV: comm_val]"
-	{
-		AllowGenflags = $CV
-	}
-}
-
-send Output
-	"/*
-	" * @LANG: d
-
-if AllowGenflags {
+void rw_d( Output: stream )
+{
 	send Output
-		" * @ALLOW_GENFLAGS:[AllowGenflags]
-}
+		"/*
+		" * @LANG: d
 
-send Output
-	" * @GENERATED: yes
-	" */
-	"
-	"import std.stdio;
-	"import std.string;
-	"
-	"class [MachineName.word]
-	"{
-
-Init: indep::stmt* = RagelTree.Init
-for Stmt: indep::stmt in Init {
-	if match Stmt [Decl: var_decl] {
-		Out = cons parser<out_code::lines> []
-		rw_d_var_decl( Decl )
-		send Out [] eos
-		send Output [Out.tree]
+	if AllowGenflags {
+		send Output
+			" * @ALLOW_GENFLAGS:[AllowGenflags]
 	}
-}
 
-# Colm bug. 
-Section: indep::section = RagelTree.section
-for Action: ragel::action_block in Section {
-	# Reparse as lang-independent code.
-	parse IndepActionBlock: indep::action_block[$Action]
-
-	rw_d_action_block( IndepActionBlock )
-
-	# Reparse back to ragel action block.
-	Action = parse ragel::action_block[$Out.tree]
-}
-
-send Output 
-	"
-	"[Section]
-	"
-	"%% write data;
-	"int cs;
-	"
-	"void init()
-	"{
-
-for Stmt: indep::stmt in Init {
-	if match Stmt [ExprStmt: expr_stmt] {
-		Out = cons parser<out_code::lines> []
-		rw_d_expr_stmt( ExprStmt )
-		send Out [] eos
-		send Output [Out.tree]
-	}
-}
-
-send Output
-	"	%% write init;
-	"}
-
-send Output
-	"void exec( const(char) data\[\] )
-	"{
-	"	const(char) *p = data.ptr;
-	"	const(char) *pe = data.ptr + data.length;
-
-if NeedsEof {
 	send Output
-		"	const(char) *eof = pe;
+		" * @GENERATED: yes
+		" */
+		"
+		"import std.stdio;
+		"import std.string;
+		"
+		"class [MachineName.word]
+		"{
+
+	Init: indep::stmt* = RagelTree.Init
+	for Stmt: indep::stmt in Init {
+		if match Stmt [Decl: var_decl] {
+			Out = cons parser<out_code::lines> []
+			rw_d_var_decl( Decl )
+			send Out [] eos
+			send Output [Out.tree]
+		}
+	}
+
+	# Colm bug. 
+	Section: indep::section = RagelTree.section
+	for Action: ragel::action_block in Section {
+		# Reparse as lang-independent code.
+		parse IndepActionBlock: indep::action_block[$Action]
+
+		rw_d_action_block( IndepActionBlock )
+
+		# Reparse back to ragel action block.
+		Action = parse ragel::action_block[$Out.tree]
+	}
+
+	send Output 
+		"
+		"[Section]
+		"
+		"%% write data;
+		"int cs;
+		"
+		"void init()
+		"{
+
+	for Stmt: indep::stmt in Init {
+		if match Stmt [ExprStmt: expr_stmt] {
+			Out = cons parser<out_code::lines> []
+			rw_d_expr_stmt( ExprStmt )
+			send Out [] eos
+			send Output [Out.tree]
+		}
+	}
+
+	send Output
+		"	%% write init;
+		"}
+
+	send Output
+		"void exec( const(char) data\[\] )
+		"{
+		"	const(char) *p = data.ptr;
+		"	const(char) *pe = data.ptr + data.length;
+
+	if NeedsEof {
+		send Output
+			"	const(char) *eof = pe;
+	}
+
+	send Output
+		"	char _s\[\];
+		"
+		"	%% write exec;
+		"}
+		"
+		"void finish( )
+		"{
+		"	if ( cs >= [MachineName.word]_first_final )
+		"		writefln( \"ACCEPT\" );
+		"	else
+		"		writefln( \"FAIL\" );
+		"}
+
+	send Output
+		~const char[][] inp = [
+
+	NR: int = 0
+	for InputString: indep::input_string in RagelTree {
+		send Output [^InputString ",\n"]
+		NR = NR + 1
+	}
+
+	send Output
+		"\];
+		"
+		"int inplen = [NR];
+		"
+		"}
+
+	send Output
+		"int main()
+		"{
+		"	[MachineName.word] m = new [MachineName.word]();
+		"	int i;
+		"	for ( i = 0; i < m.inplen; i++ ) {
+		"		m.init();
+		"		m.exec( m.inp\[i\] );
+		"		m.finish();
+		"	}
+		"	return 0;
+		"}
+		"
+
+	send Output "/* _____OUTPUT_____
+	for OutputLine: indep::output_line in RagelTree {
+		prints( Output OutputLine )
+	}
+	send Output "*/
 }
-
-send Output
-	"	char _s\[\];
-	"
-	"	%% write exec;
-	"}
-	"
-	"void finish( )
-	"{
-	"	if ( cs >= [MachineName.word]_first_final )
-	"		writefln( \"ACCEPT\" );
-	"	else
-	"		writefln( \"FAIL\" );
-	"}
-
-send Output
-	~const char[][] inp = [
-
-NR: int = 0
-for InputString: indep::input_string in RagelTree {
-	send Output [^InputString ",\n"]
-	NR = NR + 1
-}
-
-send Output
-	"\];
-	"
-	"int inplen = [NR];
-	"
-	"}
-
-send Output
-	"int main()
-	"{
-	"	[MachineName.word] m = new [MachineName.word]();
-	"	int i;
-	"	for ( i = 0; i < m.inplen; i++ ) {
-	"		m.init();
-	"		m.exec( m.inp\[i\] );
-	"		m.finish();
-	"	}
-	"	return 0;
-	"}
-	"
-
-send Output "/* _____OUTPUT_____
-for OutputLine: indep::output_line in RagelTree {
-	prints( Output OutputLine )
-}
-send Output "*/

@@ -1,5 +1,3 @@
-include 'trans.lm'
-
 int rw_java_factor( Factor: indep::factor )
 {
 	if match Factor [`first_token_char]
@@ -151,7 +149,7 @@ int rw_java_ragel_stmt( Stmt: indep::ragel_stmt )
 		[$Stmt]
 }
 
-int rw_stmt( Stmt: indep::stmt )
+int rw_java_stmt( Stmt: indep::stmt )
 {
 	if match Stmt [var_decl]
 		rw_java_var_decl( Stmt.var_decl )
@@ -168,7 +166,7 @@ int rw_stmt( Stmt: indep::stmt )
 void rw_java_stmt_list( StmtList: indep::stmt* )
 {
 	for Stmt: indep::stmt in repeat( StmtList )
-		rw_stmt( Stmt )
+		rw_java_stmt( Stmt )
 }
 
 int rw_java_action_block( ActionBlock: indep::action_block )
@@ -185,166 +183,135 @@ int rw_java_action_block( ActionBlock: indep::action_block )
 	send Out [] eos
 }
 
+void rw_java( Output: stream )
+{
+	# Translate action blocks.
+	Section: indep::section = RagelTree.section
+	for Action: ragel::action_block in Section {
+		# Reparse as lang-independent code.
+		parse IndepActionBlock: indep::action_block[$Action]
+		if ( !IndepActionBlock ) {
+			print( error '\n' Action )
+			exit(1)
+		}
 
-ProgName: str = argv.pop()
-OutputFile: str = argv.pop()
-InputFile: str = argv.pop()
-Lang: str = argv.pop()
-ClassName: str = argv.pop()
+		rw_java_action_block( IndepActionBlock )
 
-Input: stream = open( InputFile "r" )
-Output: stream = open( OutputFile "w" )
-
-RagelTree: indep::start = parse indep::start[ Input ]
-
-if ( !RagelTree ) {
-	print( error '\n' )
-	exit(1)
-}
-
-# Find the machine name.
-MachineName: ragel::machine_name = ragel::machine_name in RagelTree
-
-NeedsEof: bool = false
-AllowGenflags: str
-for CommDef: indep::comm_def in RagelTree {
-	switch CommDef
-	case "@NEEDS_EOF: yes\n"
-	{
-		NeedsEof = true
-	}
-	case "@ALLOW_GENFLAGS:[CV: comm_val]"
-	{
-		AllowGenflags = $CV
-	}
-}
-
-# Translate action blocks.
-Section: indep::section = RagelTree.section
-for Action: ragel::action_block in Section {
-	# Reparse as lang-independent code.
-	parse IndepActionBlock: indep::action_block[$Action]
-	if ( !IndepActionBlock ) {
-		print( error '\n' Action )
-		exit(1)
+		# Reparse back to ragel action block.
+		Action = parse ragel::action_block[$Out.tree]
+		if ( !Action ) {
+			print( error '\n' )
+			exit(1)
+		}
 	}
 
-	rw_java_action_block( IndepActionBlock )
-
-	# Reparse back to ragel action block.
-	Action = parse ragel::action_block[$Out.tree]
-	if ( !Action ) {
-		print( error '\n' )
-		exit(1)
-	}
-}
-
-send Output
-	"/*
-	" * @LANG: [Lang]
-	" * @GENERATED: yes
-
-if AllowGenflags {
 	send Output
-		" * @ALLOW_GENFLAGS:[AllowGenflags]
-}
+		"/*
+		" * @LANG: java
+		" * @GENERATED: yes
 
-send Output
-	" */
-	"
-	"
-	"class [ClassName]
-	"{
-
-Init: indep::stmt* = RagelTree.Init
-for Stmt: indep::stmt in Init {
-	if match Stmt [Decl: var_decl] {
-		Out = cons parser<out_code::lines> []
-		rw_java_var_decl( Decl )
-		send Out [] eos
-		send Output [Out.tree]
+	if AllowGenflags {
+		send Output
+			" * @ALLOW_GENFLAGS:[AllowGenflags]
 	}
-}
 
-send Output
-	"
-	"[Section]
-	"
-	"%% write data;
-	"int cs;
-	"
-	"void init()
-	"{
-
-for Stmt: indep::stmt in Init {
-	if match Stmt [ExprStmt: expr_stmt] {
-		Out = cons parser<out_code::lines> []
-		rw_java_expr_stmt( ExprStmt )
-		send Out [] eos
-		send Output [Out.tree]
-	}
-}
-
-send Output
-	"	%% write init;
-	"}
-	"
-	"void exec( char data\[\], int len )
-	"{
-	"	int p = 0;
-	"	int pe = len;
-
-if NeedsEof {
 	send Output
-		"	int eof = len;
+		" */
+		"
+		"
+		"class [ClassName]
+		"{
+
+	Init: indep::stmt* = RagelTree.Init
+	for Stmt: indep::stmt in Init {
+		if match Stmt [Decl: var_decl] {
+			Out = cons parser<out_code::lines> []
+			rw_java_var_decl( Decl )
+			send Out [] eos
+			send Output [Out.tree]
+		}
+	}
+
+	send Output
+		"
+		"[Section]
+		"
+		"%% write data;
+		"int cs;
+		"
+		"void init()
+		"{
+
+	for Stmt: indep::stmt in Init {
+		if match Stmt [ExprStmt: expr_stmt] {
+			Out = cons parser<out_code::lines> []
+			rw_java_expr_stmt( ExprStmt )
+			send Out [] eos
+			send Output [Out.tree]
+		}
+	}
+
+	send Output
+		"	%% write init;
+		"}
+		"
+		"void exec( char data\[\], int len )
+		"{
+		"	int p = 0;
+		"	int pe = len;
+
+	if NeedsEof {
+		send Output
+			"	int eof = len;
+	}
+
+	send Output
+		"	String _s;
+		"	%% write exec;
+		"}
+		"
+		"void finish( )
+		"{
+		"	if ( cs >= [MachineName.word]_first_final )
+		"		System.out.println( \"ACCEPT\" );
+		"	else
+		"		System.out.println( \"FAIL\" );
+		"}
+		"
+
+	send Output
+		"static final String inp\[\] = {
+
+	NR: int = 0
+	for InputString: indep::input_string in RagelTree {
+		send Output 
+			[^InputString ",\n"]
+		NR = NR + 1
+	}
+
+	send Output
+		"};
+		"
+
+	send Output
+		"static final int inplen = [NR];
+		"
+
+	send Output
+		"public static void main (String\[\] args)
+		"{
+		"	[ClassName] machine = new [ClassName]();
+		"	for ( int i = 0; i < inplen; i++ ) {
+		"		machine.init();
+		"		machine.exec( inp\[i\].toCharArray(), inp\[i\].length() );
+		"		machine.finish();
+		"	}
+		"}
+		"}
+
+	send Output "/* _____OUTPUT_____
+	for OutputLine: indep::output_line in RagelTree {
+		send Output [OutputLine]
+	}
+	send Output "*/
 }
-
-send Output
-	"	String _s;
-	"	%% write exec;
-	"}
-	"
-	"void finish( )
-	"{
-	"	if ( cs >= [MachineName.word]_first_final )
-	"		System.out.println( \"ACCEPT\" );
-	"	else
-	"		System.out.println( \"FAIL\" );
-	"}
-	"
-
-send Output
-	"static final String inp\[\] = {
-
-NR: int = 0
-for InputString: indep::input_string in RagelTree {
-	send Output 
-		[^InputString ",\n"]
-	NR = NR + 1
-}
-
-send Output
-	"};
-	"
-
-send Output
-	"static final int inplen = [NR];
-	"
-
-send Output
-	"public static void main (String\[\] args)
-	"{
-	"	[ClassName] machine = new [ClassName]();
-	"	for ( int i = 0; i < inplen; i++ ) {
-	"		machine.init();
-	"		machine.exec( inp\[i\].toCharArray(), inp\[i\].length() );
-	"		machine.finish();
-	"	}
-	"}
-	"}
-
-send Output "/* _____OUTPUT_____
-for OutputLine: indep::output_line in RagelTree {
-	send Output [OutputLine]
-}
-send Output "*/
