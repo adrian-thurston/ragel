@@ -418,26 +418,30 @@ void BinaryBasic::LOCATE_COND()
 		"\n";
 
 	out <<
-		"	_cpc = 0;\n"
-		"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
-		"\n";
+		"	_cpc = 0;\n";
 
-	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
-		GenCondSpace *condSpace = csi;
-		out << "	case " << condSpace->condSpaceId << " {\n";
-		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-			out << TABS(2) << "if ( ";
-			CONDITION( out, *csi );
-			Size condValOffset = (1 << csi.pos());
-			out << " ) _cpc += " << condValOffset << ";\n";
+	if ( condSpaceList.length() > 0 ) {
+		out <<
+			"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
+			"\n";
+
+		for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
+			GenCondSpace *condSpace = csi;
+			out << "	case " << condSpace->condSpaceId << " {\n";
+			for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+				out << TABS(2) << "if ( ";
+				CONDITION( out, *csi );
+				Size condValOffset = (1 << csi.pos());
+				out << " ) _cpc += " << condValOffset << ";\n";
+			}
+
+			out << 
+				"	}\n";
 		}
 
 		out << 
 			"	}\n";
 	}
-
-	out << 
-		"	}\n";
 	
 	out <<
 		"	{\n"
