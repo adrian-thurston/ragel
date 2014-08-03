@@ -3,7 +3,7 @@
  * http://www.jelks.nu/XML/xmlebnf.html
  *
  * @LANG: c++
- * @ALLOW_MINFLAGS: -l -e
+ * @PROHIBIT_MINFLAGS: -m -n
  * @ALLOW_GENFLAGS: -B0 -T0 -T1
  */
 

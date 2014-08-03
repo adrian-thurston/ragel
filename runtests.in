@@ -261,8 +261,7 @@ for test_case; do
 	additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
 	[ -n "$additional_cflags" ] && cflags="$cflags $additional_cflags"
 
-	allow_minflags=`sed '/@ALLOW_MINFLAGS:/s/^.*: *//p;d' $test_case`
-	[ -z "$allow_minflags" ] && allow_minflags="-n -m -l -e"
+	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
 
 	case $lang in
 	c|c++|d)
@@ -272,7 +271,7 @@ for test_case; do
 		[ -z "$allow_genflags" ] && allow_genflags="$all_genflags"
 
 		for min_opt in $minflags; do
-			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
+			echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
 				run_test
@@ -285,7 +284,7 @@ for test_case; do
 		[ -z "$allow_genflags" ] && allow_genflags="$java_genflags"
 
 		for min_opt in $minflags; do
-			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
+			echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
 				echo "$java_genflags" | grep -e $gen_opt >/dev/null || continue
@@ -301,8 +300,7 @@ for test_case; do
 		[ -z "$allow_genflags" ] && allow_genflags="$ruby_genflags"
 
 		for min_opt in $minflags; do
-			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
-
+			echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
 				echo "$ruby_genflags" | grep -e $gen_opt >/dev/null || continue
@@ -318,7 +316,7 @@ for test_case; do
 		[ -z "$allow_genflags" ] && allow_genflags="$csharp_genflags"
 
 		for min_opt in $minflags; do
-			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
+			echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
 				echo "$csharp_genflags" | grep -e $gen_opt >/dev/null || continue
@@ -334,7 +332,7 @@ for test_case; do
 		[ -z "$allow_genflags" ] && allow_genflags="$all_genflags"
 
 		for min_opt in $minflags; do
-			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
+			echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
 			for gen_opt in $genflags; do
 				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
 				run_test
