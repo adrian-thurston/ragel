@@ -24,8 +24,6 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-namespace C {
-
 void FlatLooped::tableDataPass()
 {
 	taActions();
@@ -404,7 +402,4 @@ void FlatLooped::COND_ACTION( RedCondAp *cond )
 	if ( cond->action != 0 )
 		act = cond->action->location+1;
 	condActions.value( act );
-}
-
-
 }

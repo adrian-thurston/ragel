@@ -31,8 +31,6 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-namespace C {
-
 class FlatLooped
 	: public Flat
 {
@@ -56,7 +54,5 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 };
-
-}
 
 #endif

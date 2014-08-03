@@ -25,8 +25,6 @@
 #include "bstmap.h"
 #include "gendata.h"
 
-namespace C {
-
 void GotoLooped::tableDataPass()
 {
 	taActions();
@@ -340,6 +338,4 @@ void GotoLooped::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
-}
-
 }

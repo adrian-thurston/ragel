@@ -32,8 +32,6 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-namespace C {
-
 class BinaryLooped
 	: public Binary
 {
@@ -57,7 +55,5 @@ public:
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
 };
-
-}
 
 #endif

@@ -31,8 +31,6 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-namespace C {
-
 class Binary
 	: public CodeGen
 {
@@ -120,7 +118,5 @@ protected:
 
 	void setTableState( TableArray::State );
 };
-
-}
 
 #endif

@@ -29,8 +29,6 @@
 
 using std::ostringstream;
 
-namespace C {
-
 Goto::Goto( const CodeGenArgs &args ) 
 :
 	CodeGen( args ),
@@ -624,6 +622,4 @@ void Goto::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "${" << P() << " += 1; " << " _nbreak = 1; }$";
-}
-
 }

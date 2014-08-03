@@ -24,8 +24,6 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-namespace C {
-
 Flat::Flat( const CodeGenArgs &args ) 
 :
 	CodeGen( args ),
@@ -564,6 +562,4 @@ void Flat::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "${" << P() << " += 1; " << " _nbreak = 1; }$";
-}
-
 }

@@ -24,8 +24,6 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-namespace C {
-
 void FlatExpanded::tableDataPass()
 {
 	taKeys();
@@ -373,6 +371,4 @@ void FlatExpanded::writeExec()
 	out << "}}\n";
 
 	out << "	}\n";
-}
-
 }

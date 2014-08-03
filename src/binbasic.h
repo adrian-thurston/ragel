@@ -32,8 +32,6 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-namespace C {
-
 class BinaryBasic
 	: public Binary
 {
@@ -71,7 +69,5 @@ public:
 	void NRET( ostream &ret, bool inFinish );
 	void NBREAK( ostream &ret, int targState, bool csForced );
 };
-
-}
 
 #endif

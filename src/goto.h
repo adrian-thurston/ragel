@@ -32,8 +32,6 @@ struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;
 
-namespace C {
-
 /*
  * Goto driven fsm.
  */
@@ -99,7 +97,5 @@ public:
 	virtual void STATE_GOTO_ERROR();
 
 };
-
-}
 
 #endif

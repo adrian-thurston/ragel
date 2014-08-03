@@ -32,8 +32,6 @@ struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;
 
-namespace C {
-
 class GotoLooped
 	: public Goto
 {
@@ -54,7 +52,5 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 };
-
-}
 
 #endif

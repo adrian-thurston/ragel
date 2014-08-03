@@ -24,8 +24,6 @@
 
 #include "ipgoto.h"
 
-namespace C {
-
 class SplitGoto
 	: public IpGoto
 {
@@ -53,7 +51,5 @@ public:
 
 	int currentPartition;
 };
-
-}
 
 #endif

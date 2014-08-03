@@ -28,8 +28,6 @@
 /* Forwards. */
 struct CodeGenData;
 
-namespace C {
-
 class BinaryExpanded : public Binary
 {
 public:
@@ -54,7 +52,5 @@ protected:
 	virtual void COND_ACTION( RedCondAp *cond );
 
 };
-
-}
 
 #endif

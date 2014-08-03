@@ -24,8 +24,6 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-namespace C {
-
 BinaryLooped::BinaryLooped( const CodeGenArgs &args )
 :
 	Binary( args )
@@ -467,6 +465,4 @@ void BinaryLooped::writeExec()
 
 	/* The execute block. */
 	out << "	}\n";
-}
-
 }

@@ -28,8 +28,6 @@
 /* Forwards. */
 struct CodeGenData;
 
-namespace C {
-
 /*
  * class FGotoCodeGen
  */
@@ -80,7 +78,5 @@ protected:
 	void setLabelsNeeded( GenInlineList *inlineList );
 	void setLabelsNeeded();
 };
-
-}
 
 #endif

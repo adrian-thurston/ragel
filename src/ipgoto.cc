@@ -29,8 +29,6 @@
 
 using std::ostringstream;
 
-namespace C {
-
 void IpGoto::genAnalysis()
 {
 	/* For directly executable machines there is no required state
@@ -612,6 +610,4 @@ void IpGoto::writeExec()
 
 	out <<
 		"	}\n";
-}
-
 }

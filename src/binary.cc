@@ -26,8 +26,6 @@
 
 #include <assert.h>
 
-namespace C {
-
 Binary::Binary( const CodeGenArgs &args )
 :
 	CodeGen( args ),
@@ -843,6 +841,4 @@ void Binary::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "${" << P() << "+= 1; " << " _nbreak = 1;}$";
-}
-
 }

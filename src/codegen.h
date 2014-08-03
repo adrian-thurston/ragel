@@ -49,9 +49,6 @@ struct LongestMatchPart;
 
 string itoa( int i );
 
-namespace C
-{
-
 struct TableArray;
 typedef Vector<TableArray*> ArrayVector;
 struct CodeGen;
@@ -231,7 +228,5 @@ protected:
 public:
 	virtual void writeExports();
 };
-
-}
 
 #endif

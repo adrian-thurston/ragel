@@ -28,8 +28,6 @@
 /* Forwards. */
 struct CodeGenData;
 
-namespace C {
-
 /*
  * FlatExpanded
  */
@@ -57,7 +55,5 @@ protected:
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondAp *cond );
 };
-
-}
 
 #endif

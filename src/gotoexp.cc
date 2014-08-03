@@ -25,8 +25,6 @@
 #include "gendata.h"
 #include "bstmap.h"
 
-namespace C {
-
 void GotoExpanded::tableDataPass()
 {
 	taToStateActions();
@@ -310,6 +308,4 @@ void GotoExpanded::writeExec()
 		out << "	_out: {}\n";
 
 	out << "	}\n";
-}
-
 }

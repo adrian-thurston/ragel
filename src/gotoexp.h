@@ -28,8 +28,6 @@
 /* Forwards. */
 struct CodeGenData;
 
-namespace C {
-
 /*
  * class GotoExpanded
  */
@@ -55,7 +53,5 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 };
-
-}
 
 #endif

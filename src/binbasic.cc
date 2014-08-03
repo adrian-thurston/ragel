@@ -24,8 +24,6 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-namespace C {
-
 BinaryBasic::BinaryBasic( const CodeGenArgs &args )
 :
 	Binary( args )
@@ -674,6 +672,4 @@ void BinaryBasic::writeExec()
 
 	/* The execute block. */
 	out << "	}\n";
-}
-
 }

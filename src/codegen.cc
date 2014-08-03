@@ -46,8 +46,6 @@ using std::endl;
 
 extern int numSplitPartitions;
 
-namespace C {
-
 TableArray::TableArray( const char *name, CodeGen &codeGen )
 :
 	state(InitialState),
@@ -816,6 +814,4 @@ ostream &CodeGen::source_error( const InputLoc &loc )
 	gblErrorCount += 1;
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
 	return cerr;
-}
-
 }
