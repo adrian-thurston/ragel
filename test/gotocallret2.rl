@@ -1,7 +1,7 @@
 /*
  * @LANG: indep
  * @NEEDS_EOF: yes
- * @ALLOW_GENFLAGS: -T0 -T1 -F0 -F1 -G0 -G1 -G2
+ * @PROHIBIT_GENFLAGS: -B0
  */
 
 char comm;

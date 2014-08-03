@@ -188,9 +188,9 @@ void rw_go( Output: stream )
 		"/*
 		" * @LANG: go
 
-	if AllowGenflags {
+	if ProhibitGenflags {
 		send Output
-			" * @ALLOW_GENFLAGS:[AllowGenflags]
+			" * @PROHIBIT_GENFLAGS:[ProhibitGenflags]
 	}
 
 	send Output

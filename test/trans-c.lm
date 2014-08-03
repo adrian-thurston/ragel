@@ -188,9 +188,9 @@ void rw_c( Output: stream )
 		" * @LANG: c
 		" * @GENERATED: yes
 
-	if AllowGenflags {
+	if ProhibitGenflags {
 		send Output
-			" * @ALLOW_GENFLAGS:[AllowGenflags]
+			" * @PROHIBIT_GENFLAGS:[ProhibitGenflags]
 	}
 
 	send Output

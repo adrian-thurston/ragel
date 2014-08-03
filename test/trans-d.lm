@@ -187,9 +187,9 @@ void rw_d( Output: stream )
 		"/*
 		" * @LANG: d
 
-	if AllowGenflags {
+	if ProhibitGenflags {
 		send Output
-			" * @ALLOW_GENFLAGS:[AllowGenflags]
+			" * @PROHIBIT_GENFLAGS:[ProhibitGenflags]
 	}
 
 	send Output

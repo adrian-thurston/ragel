@@ -43,14 +43,13 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZ" opt; do
 	esac
 done
 
-# Allowed genflags for specific languages.
-all_genflags="-B0 -T0 -T1 -F0 -F1 -G0 -G1 -G2"
-csharp_genflags="-B0 -T0 -T1 -F0 -F1 -G0 -G1"
-java_genflags="-B0 -T0"
-ruby_genflags="-B0 -T0 -T1 -F0 -F1"
+# Prohibitied genflags for specific languages.
+cs_prohibit_genflags="-G2"
+java_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
+ruby_prohibit_genflags="-G0 -G1 -G2"
 
 [ -z "$minflags" ] && minflags="-n -m -l -e"
-[ -z "$genflags" ] && genflags="$all_genflags"
+[ -z "$genflags" ] && genflags="-B0 -T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$langflags" ] && langflags="-C -D -J -R -A -Z"
 
 shift $((OPTIND - 1));
@@ -262,82 +261,19 @@ for test_case; do
 	[ -n "$additional_cflags" ] && cflags="$cflags $additional_cflags"
 
 	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
+	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
 
 	case $lang in
-	c|c++|d)
-		# Using genflags, get the allowed gen flags from the test case. If the
-		# test case doesn't specify assume that all gen flags are allowed.
-		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="$all_genflags"
-
-		for min_opt in $minflags; do
-			echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
-			for gen_opt in $genflags; do
-				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
-				run_test
-			done
-		done
-	;;
-
-	java) 
-		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="$java_genflags"
-
-		for min_opt in $minflags; do
-			echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
-			for gen_opt in $genflags; do
-				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
-				echo "$java_genflags" | grep -e $gen_opt >/dev/null || continue
-				run_test
-			done
-		done
-	;;
-
-	ruby) 
-		# Using genflags, get the allowed gen flags from the test case. If the
-		# test case doesn't specify assume that all gen flags are allowed.
-		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="$ruby_genflags"
-
-		for min_opt in $minflags; do
-			echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
-			for gen_opt in $genflags; do
-				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
-				echo "$ruby_genflags" | grep -e $gen_opt >/dev/null || continue
-				run_test
-			done
-		done
-	;;
-
-	csharp)
-		# Using genflags, get the allowed gen flags from the test case. If the
-		# test case doesn't specify assume that all gen flags are allowed.
-		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="$csharp_genflags"
-
-		for min_opt in $minflags; do
-			echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
-			for gen_opt in $genflags; do
-				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
-				echo "$csharp_genflags" | grep -e $gen_opt >/dev/null || continue
-				run_test
-			done
-		done
-	;;
-
-	go)
-		# Using genflags, get the allowed gen flags from the test case. If the
-		# test case doesn't specify assume that all gen flags are allowed.
-		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		[ -z "$allow_genflags" ] && allow_genflags="$all_genflags"
-
-		for min_opt in $minflags; do
-			echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
-			for gen_opt in $genflags; do
-				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
-				run_test
-			done
-		done
-	;;
+	cs) prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags";;
+	java) prohibit_genflags="$prohibit_genflags $java_prohibit_genflags";;
+	ruby) prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags";;
 	esac
+
+	for min_opt in $minflags; do
+		echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
+		for gen_opt in $genflags; do
+			echo "" "$prohibit_genflags" | grep -e $gen_opt >/dev/null && continue
+			run_test
+		done
+	done
 done

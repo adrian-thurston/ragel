@@ -194,9 +194,9 @@ void rw_cs( Output: stream )
 		"/*
 		" * @LANG: csharp
 
-	if AllowGenflags {
+	if ProhibitGenflags {
 		send Output
-			" * @ALLOW_GENFLAGS:[AllowGenflags]
+			" * @PROHIBIT_GENFLAGS:[ProhibitGenflags]
 	}
 
 	send Output
