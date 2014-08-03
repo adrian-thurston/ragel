@@ -37,15 +37,14 @@
 /* Target output style. */
 enum CodeStyle
 {
+	GenBasic,
 	GenTables,
 	GenFTables,
 	GenFlat,
 	GenFFlat,
 	GenGoto,
 	GenFGoto,
-	GenIpGoto,
-	GenSplit,
-	GenBasic
+	GenIpGoto
 };
 
 /* To what degree are machine minimized. */

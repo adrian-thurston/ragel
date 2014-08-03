@@ -104,18 +104,14 @@ void usage()
 "   -K                   The host language is Crack\n"
 "line directives: (C/D/Ruby/C#/OCaml)\n"
 "   -L                   Inhibit writing of #line directives\n"
-"code style: (C/D/Java/Ruby/C#/OCaml)\n"
-"   -T0                  Table driven FSM (default)\n"
-"code style: (C/D/Ruby/C#/OCaml)\n"
-"   -T1                  Faster table driven FSM\n"
-"   -F0                  Flat table driven FSM\n"
-"   -F1                  Faster flat table-driven FSM\n"
-"code style: (C/D/C#/OCaml)\n"
-"   -G0                  Goto-driven FSM\n"
-"   -G1                  Faster goto-driven FSM\n"
-"code style: (C/D)\n"
-"   -G2                  Really fast goto-driven FSM\n"
-"   -P<N>                N-Way Split really fast goto-driven FSM\n"
+"code style:\n"
+"   -T0                  Binary search (default)\n"
+"   -T1                  Binary search with expanded actions \n"
+"   -F0                  Flat table\n"
+"   -F1                  Flat table with expanded actions\n"
+"   -G0                  Switch-driven\n"
+"   -G1                  Switch-driven with expanded actions\n"
+"   -G2                  Goto-driven with expanded actions\n"
 	;	
 
 	exit(0);
@@ -195,7 +191,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKvHh?-:sB:T:F:G:P:LpV", argc, argv );
+	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKvHh?-:sB:T:F:G:LpV", argc, argv );
 
 	/* Decide if we were invoked using a path variable, or with an explicit path. */
 	const char *lastSlash = strrchr( argv[0], '/' );
@@ -415,10 +411,6 @@ void InputData::parseArgs( int argc, const char **argv )
 							" is an invalid argument" << endl;
 					exit(1);
 				}
-				break;
-			case 'P':
-				codeStyle = GenSplit;
-				numSplitPartitions = atoi( pc.paramArg );
 				break;
 
 			case 'p':

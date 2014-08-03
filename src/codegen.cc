@@ -44,8 +44,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-extern int numSplitPartitions;
-
 TableArray::TableArray( const char *name, CodeGen &codeGen )
 :
 	state(InitialState),

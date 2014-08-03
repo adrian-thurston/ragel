@@ -71,9 +71,6 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 	case GenIpGoto:
 		codeGen = new IpGoto(args);
 		break;
-	case GenSplit:
-//		codeGen = new SplitGoto(args);
-		break;
 	case GenBasic:
 		codeGen = new BinaryBasic(args);
 		break;
