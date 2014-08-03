@@ -1,6 +1,5 @@
 /* 
  * @LANG: indep
- * @ALLOW_GENFLAGS: -B0 -T0 -T1 -G0 -G1 -G2
  */
 
 bool i;

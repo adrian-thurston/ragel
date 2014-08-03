@@ -211,16 +211,16 @@ if ( !RagelTree ) {
 global MachineName: ragel::machine_name = ragel::machine_name in RagelTree
 
 global NeedsEof: bool = false
-global AllowGenflags: str
+global ProhibitGenflags: str
 for CommDef: indep::comm_def in RagelTree {
 	switch CommDef
 	case "@NEEDS_EOF: yes\n"
 	{
 		NeedsEof = true
 	}
-	case "@ALLOW_GENFLAGS:[CV: comm_val]"
+	case "@PROHIBIT_GENFLAGS:[CV: comm_val]"
 	{
-		AllowGenflags = $CV
+		ProhibitGenflags = $CV
 	}
 }
 
