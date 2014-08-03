@@ -154,23 +154,6 @@ std::ostream &GotoExpanded::EOF_ACTION_SWITCH()
 	return out;
 }
 
-
-std::ostream &GotoExpanded::FINISH_CASES()
-{
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* States that are final and have an out action need a case. */
-		if ( st->eofAction != 0 ) {
-			/* Write the case label. */
-			out << "\t\t case " << st->id << ": ";
-
-			/* Jump to the func. */
-			out << "goto f" << st->eofAction->actListId << ";\n";
-		}
-	}
-
-	return out;
-}
-
 unsigned int GotoExpanded::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;

@@ -82,6 +82,114 @@ void GotoLooped::writeData()
 	STATE_IDS();
 }
 
+std::ostream &GotoLooped::ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numTransRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\t case " << act->actionId << ":\n";
+			ACTION( out, act, IlOpts( 0, false, false ) );
+			out << "\n\tbreak;\n";
+		}
+	}
+
+	return out;
+}
+
+std::ostream &GotoLooped::EOF_ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numEofRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\t case " << act->actionId << ":\n";
+			ACTION( out, act, IlOpts( 0, true, false ) );
+			out << "\n\tbreak;\n";
+		}
+	}
+
+	return out;
+}
+
+std::ostream &GotoLooped::FROM_STATE_ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numFromStateRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\t case " << act->actionId << ":\n";
+			ACTION( out, act, IlOpts( 0, false, false ) );
+			out << "\n\tbreak;\n";
+		}
+	}
+
+	return out;
+}
+
+std::ostream &GotoLooped::TO_STATE_ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numToStateRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\t case " << act->actionId << ":\n";
+			ACTION( out, act, IlOpts( 0, false, false ) );
+			out << "\n\tbreak;\n";
+		}
+	}
+
+	return out;
+}
+
+
+std::ostream &GotoLooped::EXEC_FUNCS()
+{
+	/* Make labels that set acts and jump to execFuncs. Loop func indicies. */
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+		if ( redAct->numTransRefs > 0 ) {
+			out << "	f" << redAct->actListId << ": " <<
+				"_acts = offset( " << ARR_REF( actions ) << ", " << itoa( redAct->location+1 ) << ");"
+				" goto execFuncs;\n";
+		}
+	}
+
+	out <<
+		"\n"
+		"execFuncs:\n";
+
+	if ( redFsm->anyRegNbreak() )
+		out << "	_nbreak = 0;\n";
+
+	out <<
+		"	_nacts = (uint)deref( " << ARR_REF( actions ) << ", _acts );\n"
+		"	_acts += 1;\n"
+		"	while ( _nacts > 0 ) {\n"
+		"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
+		ACTION_SWITCH() << 
+		"		}\n"
+		"		_acts += 1;\n"
+		"		_nacts -= 1;\n"
+		"	}\n"
+		"\n";
+
+	if ( redFsm->anyRegNbreak() ) {
+		out <<
+			"	if ( _nbreak == 1 )\n"
+			"		goto _out;\n";
+		outLabelUsed = true;
+	}
+
+	out <<
+		"	goto _again;\n";
+	return out;
+}
+
+
 void GotoLooped::writeExec()
 {
 	testEofUsed = false;

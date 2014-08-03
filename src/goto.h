@@ -43,13 +43,8 @@ class Goto
 public:
 	Goto( const CodeGenArgs &args );
 
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
 	std::ostream &STATE_GOTOS();
 	std::ostream &TRANSITIONS();
-	std::ostream &EXEC_FUNCS();
 	std::ostream &FINISH_CASES();
 
 	TableArray actions;

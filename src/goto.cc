@@ -87,70 +87,6 @@ std::ostream &Goto::TRANS_GOTO( RedTransAp *trans, int level )
 	return out;
 }
 
-std::ostream &Goto::TO_STATE_ACTION_SWITCH()
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numToStateRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
-			out << "\t case " << act->actionId << ":\n";
-			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\tbreak;\n";
-		}
-	}
-
-	return out;
-}
-
-std::ostream &Goto::FROM_STATE_ACTION_SWITCH()
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numFromStateRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
-			out << "\t case " << act->actionId << ":\n";
-			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\tbreak;\n";
-		}
-	}
-
-	return out;
-}
-
-std::ostream &Goto::EOF_ACTION_SWITCH()
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numEofRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
-			out << "\t case " << act->actionId << ":\n";
-			ACTION( out, act, IlOpts( 0, true, false ) );
-			out << "\n\tbreak;\n";
-		}
-	}
-
-	return out;
-}
-
-std::ostream &Goto::ACTION_SWITCH()
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numTransRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
-			out << "\t case " << act->actionId << ":\n";
-			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\tbreak;\n";
-		}
-	}
-
-	return out;
-}
-
 /* Write out the array of actions. */
 void Goto::taActions()
 {
@@ -469,48 +405,6 @@ std::ostream &Goto::TRANSITIONS()
 	return out;
 }
 
-std::ostream &Goto::EXEC_FUNCS()
-{
-	/* Make labels that set acts and jump to execFuncs. Loop func indicies. */
-	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		if ( redAct->numTransRefs > 0 ) {
-			out << "	f" << redAct->actListId << ": " <<
-				"_acts = offset( " << ARR_REF( actions ) << ", " << itoa( redAct->location+1 ) << ");"
-				" goto execFuncs;\n";
-		}
-	}
-
-	out <<
-		"\n"
-		"execFuncs:\n";
-
-	if ( redFsm->anyRegNbreak() )
-		out << "	_nbreak = 0;\n";
-
-	out <<
-		"	_nacts = (uint)deref( " << ARR_REF( actions ) << ", _acts );\n"
-		"	_acts += 1;\n"
-		"	while ( _nacts > 0 ) {\n"
-		"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
-		ACTION_SWITCH() << 
-		"		}\n"
-		"		_acts += 1;\n"
-		"		_nacts -= 1;\n"
-		"	}\n"
-		"\n";
-
-	if ( redFsm->anyRegNbreak() ) {
-		out <<
-			"	if ( _nbreak == 1 )\n"
-			"		goto _out;\n";
-		outLabelUsed = true;
-	}
-
-	out <<
-		"	goto _again;\n";
-	return out;
-}
-
 unsigned int Goto::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
@@ -596,22 +490,6 @@ void Goto::taEofActions()
 	delete[] vals;
 
 	eofActions.finish();
-}
-
-std::ostream &Goto::FINISH_CASES()
-{
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* States that are final and have an out action need a case. */
-		if ( st->eofAction != 0 ) {
-			/* Write the case label. */
-			out << "\t\t case " << st->id << ": ";
-
-			/* Write the goto func. */
-			out << "goto f" << st->eofAction->actListId << ";\n";
-		}
-	}
-	
-	return out;
 }
 
 void Goto::GOTO( ostream &ret, int gotoDest, bool inFinish )

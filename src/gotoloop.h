@@ -43,6 +43,12 @@ public:
 
 	void tableDataPass();
 
+	std::ostream &ACTION_SWITCH();
+	std::ostream &EXEC_FUNCS();
+	std::ostream &TO_STATE_ACTION_SWITCH();
+	std::ostream &FROM_STATE_ACTION_SWITCH();
+	std::ostream &EOF_ACTION_SWITCH();
+
 	/* Interface. */
 	virtual void genAnalysis();
 	virtual void writeData();
