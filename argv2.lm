@@ -34,7 +34,7 @@ def item
 |	[file zero]
 
 def args 
-	[word zero item*]
+	[item*]
 
 # The argument parser. Using an accumulator so we can send nulls after each
 # arg.
