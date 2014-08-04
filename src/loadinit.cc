@@ -348,12 +348,13 @@ void LoadInit::go( long activeRealm )
 
 	StmtList *stmtList = new StmtList;
 
-	const char *argv[2];
-	argv[0] = inputFileName;
-	argv[1] = 0;
+	const char *argv[3];
+	argv[0] = "load-init";
+	argv[1] = inputFileName;
+	argv[2] = 0;
 
 	colm_program *program = colm_new_program( &colm_object );
-	colm_run_program( program, 1, argv );
+	colm_run_program( program, 2, argv );
 
 	/* Extract the parse tree. */
 	start Start = ColmTree( program );

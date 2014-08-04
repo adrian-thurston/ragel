@@ -769,6 +769,7 @@ struct Compiler
 	void addArgv();
 	void addError();
 	int argvOffset();
+	int argv0_Offset();
 	void initGlobalFunctions();
 	void makeDefaultIterators();
 	void addLengthField( ObjectDef *objDef, Code getLength );

@@ -2449,6 +2449,9 @@ void Compiler::compileRootBlock( )
 	code.append( IN_INIT_LOCALS );
 	code.appendHalf( 0 );
 
+	code.append( IN_LOAD_ARGV0 );
+	code.appendHalf( argv0_Offset() );
+
 	code.append( IN_LOAD_ARGV );
 	code.appendHalf( argvOffset() );
 

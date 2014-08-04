@@ -751,12 +751,13 @@ struct LoadColm
 
 		String file = unescape( lit );
 
-		const char *argv[2];
-		argv[0] = file.data;
-		argv[1] = 0;
+		const char *argv[3];
+		argv[0] = "load-include";
+		argv[1] = file.data;
+		argv[2] = 0;
 
 		colm_program *program = colm_new_program( &colm_object );
-		colm_run_program( program, 1, argv );
+		colm_run_program( program, 2, argv );
 
 		/* Extract the parse tree. */
 		start Start = ColmTree( program );
@@ -2391,13 +2392,14 @@ void LoadColm::go( long activeRealm )
 {
 	LoadColm::init();
 
-	const char *argv[2];
-	argv[0] = inputFileName;
-	argv[1] = 0;
+	const char *argv[3];
+	argv[0] = "load-colm";
+	argv[1] = inputFileName;
+	argv[2] = 0;
 
 	colm_program *program = colm_new_program( &colm_object );
 	colm_set_debug( program, activeRealm );
-	colm_run_program( program, 1, argv );
+	colm_run_program( program, 2, argv );
 
 	/* Extract the parse tree. */
 	start Start = ColmTree( program );

@@ -2266,6 +2266,7 @@ struct ObjectField
 		isConst(false), 
 		isLhsEl(false), isRhsEl(false), 
 		refActive(false),
+		isArgv0(false),
 		isArgv(false),
 		isCustom(false),
 		isParam(false),
@@ -2302,6 +2303,7 @@ struct ObjectField
 	bool isLhsEl;
 	bool isRhsEl;
 	bool refActive;
+	bool isArgv0;
 	bool isArgv;
 	bool isCustom;
 	bool isParam;

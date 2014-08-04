@@ -269,6 +269,7 @@ typedef unsigned char uchar;
 #define IN_GET_STDOUT            0xb6
 #define IN_GET_STDERR            0xb7
 #define IN_LOAD_ARGV             0xb8
+#define IN_LOAD_ARGV0            0xed
 #define IN_TO_UPPER              0xb9
 #define IN_TO_LOWER              0xba
 #define IN_EXIT                  0xbb

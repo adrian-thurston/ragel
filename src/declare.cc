@@ -1023,6 +1023,11 @@ void Compiler::addArgv()
 	el->isArgv = true;
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
+
+	el = ObjectField::cons( internal, argvTypeRef, "argv0" );
+	el->isArgv0 = true;
+	el->isConst = true;
+	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addError()
@@ -1048,6 +1053,19 @@ int Compiler::argvOffset()
 			field.lte(); field++ )
 	{
 		if ( field->value->isArgv ) {
+			globalObjectDef->referenceField( this, field->value );
+			return field->value->offset;
+		}
+	}
+	assert(false);
+}
+
+int Compiler::argv0_Offset()
+{
+	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
+			field.lte(); field++ )
+	{
+		if ( field->value->isArgv0 ) {
 			globalObjectDef->referenceField( this, field->value );
 			return field->value->offset;
 		}

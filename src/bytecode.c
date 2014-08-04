@@ -405,12 +405,23 @@ static void downrefLocals( Program *prg, Tree ***psp, Tree **frame, LocalInfo *l
 	}
 }
 
+Tree *constructArgv0( Program *prg, int argc, const char **argv )
+{
+	Tree *arg = 0;
+	if ( argc > 0 ) {
+		Head *head = stringAllocPointer( prg, argv[0], strlen(argv[0]) );
+		arg = constructString( prg, head );
+		treeUpref( arg );
+	}
+	return arg;
+}
+
 Tree *constructArgv( Program *prg, int argc, const char **argv )
 {
 	Tree *list = createGeneric( prg, prg->rtd->argvGenericId );
 	treeUpref( list );
 	int i;
-	for ( i = 0; i < argc; i++ ) {
+	for ( i = 1; i < argc; i++ ) {
 		Head *head = stringAllocPointer( prg, argv[i], strlen(argv[i]) );
 		Tree *arg = constructString( prg, head );
 		treeUpref( arg );
@@ -3696,6 +3707,17 @@ again:
 
 			/* Tree comes back upreffed. */
 			Tree *tree = constructArgv( prg, prg->argc, prg->argv );
+			setField( prg, prg->global, field, tree );
+			break;
+		}
+
+		case IN_LOAD_ARGV0: {
+			Half field;
+			read_half( field );
+			debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV0 %lu\n", field );
+
+			/* Tree comes back upreffed. */
+			Tree *tree = constructArgv0( prg, prg->argc, prg->argv );
 			setField( prg, prg->global, field, tree );
 			break;
 		}
