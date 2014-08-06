@@ -47,13 +47,13 @@ void ml_expr_factor( ExprFactor: expr_factor )
 		['offset' '(' ident ',' expr ')']
 	{
 		send Output
-			[ExprFactor.ident ' + ' ml_expr( ExprFactor.expr )]
+			[ml_expr( ExprFactor.expr )]
 	}
 	elsif match ExprFactor
 		['deref' '(' ident ',' expr ')']
 	{
 		send Output
-			"(*( [ml_expr(ExprFactor.expr)] ))
+			[ ExprFactor.ident '[' ml_expr( ExprFactor.expr ) ']']
 	}
 	elsif match ExprFactor
 			[T: `TRUE]
@@ -187,7 +187,10 @@ void ml_expr_test( ExprTest: expr_test )
 	if match ExprTest [expr_test Op: test_op expr_shift]
 	{
 		ml_expr_test( ExprTest._expr_test )
-		send Output [Op]
+		if match Op [`==]
+			send Output "= "
+		else
+			send Output [Op]
 		ml_expr_shift( ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_shift]
@@ -288,7 +291,7 @@ void ml_stmt( Stmt: stmt )
 			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 	] {
 		send Output
-			"if ( [ml_expr(IfExpr)] )
+			"if [ml_expr(IfExpr)] then
 			"	[ml_stmt(IfStmt)]
 
 		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
@@ -296,7 +299,7 @@ void ml_stmt( Stmt: stmt )
 				['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
 
 			send Output
-				"else if ( [ml_expr(ElseIfExpr)] )
+				"else if [ml_expr(ElseIfExpr)] then
 				"	[ml_stmt(ElseIfStmt)]
 		}
 
@@ -308,8 +311,9 @@ void ml_stmt( Stmt: stmt )
 	}
 	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
 		send Output
-			"while ( [ml_expr(WhileExpr)] )
+			"while [ml_expr(WhileExpr)] do
 			"	[ml_stmt(WhileStmt)]
+			"done
 	}
 	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
 		send Output
@@ -323,20 +327,26 @@ void ml_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [L: `{ TL: stmt* R: `}] {
 		send Output
-			[L ml_stmt_list(TL) R]
+			"begin
+			"[ml_stmt_list(TL)]
+			"end;
 	}
 	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: `;]
 	{
 		send Output
-			[TypeList ml_type(Type) OptPtr Ident]
+			"let [Ident] : [ml_type(Type)]"
 
 		if match OptInit [E: `= expr] {
 			send Output
-				[E ml_expr(OptInit.expr)]
+				"= [ml_expr(OptInit.expr)]
+		}
+		else {
+			send Output
+				"= 0"
 		}
 
 		send Output
-			[Semi]
+			" in
 	}
 	elsif match Stmt [Export: export_stmt]
 	{
@@ -350,7 +360,7 @@ void ml_stmt( Stmt: stmt )
 	elsif match Stmt [Index: index_stmt]
 	{
 		send Output
-			"const [ml_type(Index.type)] *[Index.ident];
+			"let [Index.ident] = 0 in
 	}
 	elsif match Stmt [case_block]
 	{
