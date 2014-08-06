@@ -2812,6 +2812,36 @@ again:
 			vm_push( (SW)attr_kid );
 			break;
 		}
+		case IN_RHS_REF_FROM_QUAL_REF: {
+			short int back;
+			int i, done = 0;
+			uchar len;
+
+			read_half( back );
+
+			debug( prg, REALM_BYTECODE, "IN_RHS_REF_FROM_QUAL_REF\n" );
+
+			Ref *ref = (Ref*)(sp + back);
+
+			Tree *obj = ref->kid->tree;
+			Kid *attrKid = 0;
+
+			read_byte( len );
+			for ( i = 0; i < len; i++ ) {
+				uchar prodNum, childNum;
+				read_byte( prodNum );
+				read_byte( childNum );
+				if ( !done && obj->prodNum == prodNum ) {
+					attrKid = getRhsElKid( prg, obj, childNum );
+					done = 1;
+				}
+			}
+
+			vm_contiguous( 2 );
+			vm_push( (SW)ref );
+			vm_push( (SW)attrKid );
+			break;
+		}
 		case IN_REF_FROM_BACK: {
 			short int back;
 			read_half( back );

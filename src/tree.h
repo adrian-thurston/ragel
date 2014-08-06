@@ -281,6 +281,7 @@ Tree *getPtrValSplit( struct colm_program *prg, Pointer *ptr );
 Tree *getField( Tree *tree, Word field );
 Tree *getFieldSplit( struct colm_program *prg, Tree *tree, Word field );
 Tree *getRhsEl( struct colm_program *prg, Tree *lhs, long position );
+Kid *getRhsElKid( struct colm_program *prg, Tree *lhs, long position );
 void setField( struct colm_program *prg, Tree *tree, long field, Tree *value );
 
 void setTriterCur( struct colm_program *prg, TreeIter *iter, Tree *tree );

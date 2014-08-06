@@ -343,9 +343,21 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code, ObjNameSco
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
 		if ( qi.pos() > 0 ) {
-			code.append( IN_REF_FROM_QUAL_REF );
-			code.appendHalf( 0 );
-			code.appendHalf( el->offset );
+			if ( el->isRhsGet ) {
+				code.append( IN_RHS_REF_FROM_QUAL_REF );
+				code.appendHalf( 0 );
+
+				code.append( el->rhsVal.length() );
+				for ( Vector<RhsVal>::Iter rg = el->rhsVal; rg.lte(); rg++ ) {
+					code.append( rg->prodEl->production->prodNum );
+					code.append( rg->prodEl->pos );
+				}
+			}
+			else { 
+				code.append( IN_REF_FROM_QUAL_REF );
+				code.appendHalf( 0 );
+				code.appendHalf( el->offset );
+			}
 		}
 		else if ( el->typeRef->iterDef != 0 ) {
 			code.append( el->typeRef->iterDef->inRefFromCur );
@@ -668,9 +680,22 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 	lookup.objField->dirtyTree = true;
 
 	if ( qual->length() > 0 ) {
-		code.append( IN_REF_FROM_QUAL_REF );
-		code.appendHalf( pushCount );
-		code.appendHalf( lookup.objField->offset );
+		if ( lookup.objField->isRhsGet ) {
+			code.append( IN_RHS_REF_FROM_QUAL_REF );
+			code.appendHalf( pushCount );
+
+			ObjectField *el = lookup.objField;
+			code.append( el->rhsVal.length() );
+			for ( Vector<RhsVal>::Iter rg = el->rhsVal; rg.lte(); rg++ ) {
+				code.append( rg->prodEl->production->prodNum );
+				code.append( rg->prodEl->pos );
+			}
+		}
+		else {
+			code.append( IN_REF_FROM_QUAL_REF );
+			code.appendHalf( pushCount );
+			code.appendHalf( lookup.objField->offset );
+		}
 	}
 	else if ( lookup.objField->typeRef->iterDef != 0 ) {
 		code.append( lookup.objField->typeRef->iterDef->inRefFromCur );

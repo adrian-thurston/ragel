@@ -1273,6 +1273,17 @@ Tree *getRhsEl( Program *prg, Tree *lhs, long position )
 	return pos->tree;
 }
 
+Kid *getRhsElKid( Program *prg, Tree *lhs, long position )
+{
+	Kid *pos = treeChild( prg, lhs );
+	while ( position > 0 ) {
+		pos = pos->next;
+		position -= 1;
+	}
+	return pos;
+}
+
+
 Tree *colm_get_rhs_val( Program *prg, Tree *tree, int *a )
 {
 	int i, len = a[0];
