@@ -310,7 +310,6 @@ include 'rlhc-java.lm'
 include 'rlhc-ruby.lm'
 include 'rlhc-ml.lm'
 
-ProgName: str = argv.pop()
 OutputFile: str = argv.pop()
 InputFile: str = argv.pop()
 Lang: str = argv.pop()

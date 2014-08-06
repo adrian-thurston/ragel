@@ -1937,14 +1937,15 @@ struct LoadRagel
 
 	void loadFile( const char *inputFileName, const char *targetMachine, const char *searchMachine )
 	{
-		const char *argv[2];
-		argv[0] = inputFileName;
-		argv[1] = id.hostLang->rlhcArg;
-		argv[2] = 0;
+		const char *argv[4];
+		argv[0] = "load-ragel";
+		argv[1] = inputFileName;
+		argv[2] = id.hostLang->rlhcArg;
+		argv[3] = 0;
 
 		colm_program *program = colm_new_program( &colm_object );
 		colm_set_debug( program, 0 );
-		colm_run_program( program, 2, argv );
+		colm_run_program( program, 3, argv );
 
 		/* Extract the parse tree. */
 		start Start = RagelTree( program );
