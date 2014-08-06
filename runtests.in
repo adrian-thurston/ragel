@@ -269,6 +269,8 @@ for test_case; do
 	ruby) prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags";;
 	esac
 
+	[ $lang == obj-c ] && continue;
+
 	for min_opt in $minflags; do
 		echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
 		for gen_opt in $genflags; do
