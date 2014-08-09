@@ -206,13 +206,19 @@ void ml_expr_cond( ExprCond: expr_cond )
 
 void ml_expr_assign( ExprAssign: expr_assign )
 {
-	if match ExprAssign [expr_assign Op: assign_op expr_cond]
+	switch ExprAssign 
+	case [expr_assign `= expr_cond]
+	{
+		send Output
+			"[ml_expr_assign( ExprAssign._expr_assign )] := [ml_expr_cond( ExprAssign.expr_cond )]
+	}
+	case [expr_assign Op: assign_op expr_cond]
 	{
 		ml_expr_assign( ExprAssign._expr_assign )
 		send Output [Op]
 		ml_expr_cond( ExprAssign.expr_cond )
 	}
-	elsif match ExprAssign [expr_cond]
+	case [expr_cond]
 	{
 		ml_expr_cond( ExprAssign.expr_cond )
 	}
@@ -236,7 +242,7 @@ void ml_type( Type: type )
 	elsif match Type "s128"
 		send Output ['long long ']
 	elsif match Type "uint"
-		send Output ['unsigned int ']
+		send Output ['int ']
 	else
 		send Output [Type]
 }
@@ -277,7 +283,7 @@ void ml_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [Array: array] {
 		send Output
-			"let [Array.ident] : [ml_type(Array.type)] = \[|
+			"let [Array.ident] : int array = \[|
 				"	[ml_num_list(Array.num_list)]
 			"|\]
 	}
