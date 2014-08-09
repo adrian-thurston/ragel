@@ -276,6 +276,18 @@ def goto_stmt
 	Id: int
 	[`goto ident `;]
 
+def fallthrough
+	[`fallthrough `;]
+
+def break_stmt
+	[`break `;]
+
+def block
+	[`{ stmt* `}]
+
+def expr_stmt
+	[expr `;]
+
 def stmt
 	[embedded_host]
 |	[array]
@@ -291,13 +303,13 @@ def stmt
 |	[default_block]
 |	[case_label]
 |	[goto_label]
-|	[expr `;]
+|	[expr_stmt]
 |	[pragma]
 |	[export_stmt]
 |	[goto_stmt]
-|	[`fallthrough `;]
-|	[`break `;]
-|	[`{ stmt* `}]
+|	[fallthrough]
+|	[break_stmt]
+|	[block]
 
 def start
 	[stmt*]
