@@ -66,7 +66,7 @@ d_compiler="@GDC@"
 java_compiler="@JAVAC@"
 ruby_engine="@RUBY@"
 csharp_compiler="@GMCS@"
-go_compiler="@GOBIN@ build"
+go_compiler="@GOBIN@"
 
 function test_error
 {
@@ -90,8 +90,8 @@ function test_error
 #			}'`
 #			part_src=${part_root}.c
 #			part_bin=${part_root}.o
-#			echo "$compiler -c $cflags -o $part_bin $part_src"
-#			if ! $compiler -c $cflags -o $part_bin $part_src; then
+#			echo "$compiler -c $flags -o $part_bin $part_src"
+#			if ! $compiler -c $flags -o $part_bin $part_src; then
 #				test_error;
 #			fi
 #			split_objs="$split_objs $part_bin"
@@ -112,8 +112,8 @@ function run_test()
 
 	# Ruby doesn't need to be compiled.
 	if [ $lang != ruby ]; then
-		echo "$compiler ${cflags} ${out_args} ${code_src}"
-		if ! $compiler ${cflags} ${out_args} ${code_src}; then
+		echo "$compiler ${flags} ${out_args} ${code_src}"
+		if ! $compiler ${flags} ${out_args} ${code_src}; then
 			test_error;
 		fi
 	fi
@@ -170,49 +170,49 @@ for test_case; do
 			lang_opt=-C;
 			code_suffix=cpp;
 			compiler=$cxx_compiler;
-			cflags="-pedantic -ansi -Wall -O3"
+			flags="-pedantic -ansi -Wall -O3"
 		;;
 		d)
 			lang_opt=-D;
 			code_suffix=d;
 			compiler=$d_compiler;
-			cflags="-Wall -O3"
+			flags="-Wall -O3"
 		;;
 		c)
 			lang_opt=-C;
 			code_suffix=c;
 			compiler=$c_compiler;
-			cflags="-pedantic -ansi -Wall -O3"
+			flags="-pedantic -ansi -Wall -O3"
 		;;
 		obj-c)
 			lang_opt=-C;
 			code_suffix=m;
 			compiler=$objc_compiler
-			cflags="-Wall -O3 -fno-strict-aliasing -lobjc"
+			flags="-Wall -O3 -fno-strict-aliasing -lobjc"
 		;;
 		java)
 			lang_opt=-J;
 			code_suffix=java;
 			compiler=$java_compiler
-			cflags=""
+			flags=""
 		;;
 		ruby)
 			lang_opt=-R;
 			code_suffix=rb;
 			compiler=$ruby_engine
-			cflags=""
+			flags=""
 		;;
         csharp)
             lang_opt="-A";
             code_suffix=cs;
             compiler=$csharp_compiler
-            cflags=""
+            flags=""
         ;;
         go)
 			lang_opt="-Z"
 			code_suffix=go
 			compiler=$go_compiler
-			cflags=""
+			flags="build"
 		;;
 		indep)
 			lang_opt="";
@@ -258,7 +258,7 @@ for test_case; do
 	[ -z "$compiler" ] && continue
 
 	additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
-	[ -n "$additional_cflags" ] && cflags="$cflags $additional_cflags"
+	[ -n "$additional_cflags" ] && flags="$flags $additional_cflags"
 
 	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
 	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
