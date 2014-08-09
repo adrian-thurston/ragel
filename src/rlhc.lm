@@ -209,11 +209,8 @@ def num_list
 def array
 	[`array type ident `( number `, number  `) `= `{ num_list `} `;]
 
-def value_pass
-	[type ident `= number `;]
-
 def value
-	[`value value_pass]
+	[`value type ident `= number `;]
 
 def while_stmt
 	[`while `( expr `) stmt]

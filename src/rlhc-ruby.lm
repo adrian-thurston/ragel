@@ -299,9 +299,9 @@ void ruby_stmt( Stmt: stmt )
 	elsif match Stmt [Value: value] {
 		send Output
 			"class << self
-			"	attr_accessor :[ Value.value_pass.ident ]
+			"	attr_accessor :[ Value.ident ]
 			"end
-			"self.[ Value.value_pass.ident ] = [ Value.value_pass.number ];
+			"self.[ Value.ident ] = [ Value.number ];
 			"
 	}
 	elsif match Stmt [

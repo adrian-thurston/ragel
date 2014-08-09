@@ -277,8 +277,7 @@ void go_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [Value: value] {
 		send Output
-			"var [Value.value_pass.ident] "
-				"[go_type(Value.value_pass.type)] = [Value.value_pass.number]
+			"var [Value.ident] [go_type(Value.type)] = [Value.number]
 	}
 	elsif match Stmt [
 			'if' O: `( IfExpr: expr C: `) IfStmt: stmt

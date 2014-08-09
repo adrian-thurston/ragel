@@ -279,7 +279,7 @@ void c_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [Value: value] {
 		send Output
-			"static const [Value.value_pass]
+			"static const [Value.type] [Value.ident] = [Value.number];
 	}
 	elsif match Stmt [
 			'if' O: `( IfExpr: expr C: `) IfStmt: stmt

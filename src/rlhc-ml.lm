@@ -288,9 +288,8 @@ void ml_stmt( Stmt: stmt )
 			"|\]
 	}
 	elsif match Stmt [Value: value] {
-		VP: value_pass = Value.value_pass
 		send Output
-			"let [Value.value_pass.ident] : [Value.value_pass.type] = [Value.value_pass.number]
+			"let [Value.ident] : [Value.type] = [Value.number]
 	}
 	elsif match Stmt [
 			'if' O: `( IfExpr: expr C: `) IfStmt: stmt
