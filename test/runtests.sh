@@ -264,7 +264,7 @@ for test_case; do
 	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
 
 	case $lang in
-	cs) prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags";;
+	csharp) prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags";;
 	java) prohibit_genflags="$prohibit_genflags $java_prohibit_genflags";;
 	ruby) prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags";;
 	esac
