@@ -177,15 +177,12 @@ def expr_test
 	[expr_test test_op expr_shift]
 |	[expr_shift]
 
-def expr_cond
-	[expr_test]
-
 def assign_op
 	[`=] | [`+=] | [`-=]
 
 def expr_assign
-	[expr_assign assign_op expr_cond]
-|	[expr_cond]
+	[expr_assign assign_op expr_test]
+|	[expr_test]
 
 def expr
 	[expr_assign]

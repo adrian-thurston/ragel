@@ -70,7 +70,7 @@ void ml_expr_factor( ExprFactor: expr_factor )
 	}
 	case [I: ident] {
 		send Output
-			"[I].contents"
+			"[^I].contents"
 	}
 	default {
 		# Catches cases not specified
@@ -193,28 +193,23 @@ void ml_expr_test( ExprTest: expr_test )
 	}
 }
 
-void ml_expr_cond( ExprCond: expr_cond )
-{
-	ml_expr_test( ExprCond.expr_test )
-}
-
 void ml_expr_assign( ExprAssign: expr_assign )
 {
 	switch ExprAssign 
-	case [expr_assign `= expr_cond]
+	case [expr_assign `= expr_test]
 	{
 		send Output
-			"[ml_expr_assign( ExprAssign._expr_assign )] := [ml_expr_cond( ExprAssign.expr_cond )]
+			"[ml_expr_assign( ExprAssign._expr_assign )] := [ml_expr_test( ExprAssign.expr_test )]
 	}
-	case [expr_assign Op: assign_op expr_cond]
+	case [expr_assign Op: assign_op expr_test]
 	{
 		ml_expr_assign( ExprAssign._expr_assign )
 		send Output [Op]
-		ml_expr_cond( ExprAssign.expr_cond )
+		ml_expr_test( ExprAssign.expr_test )
 	}
-	case [expr_cond]
+	case [expr_test]
 	{
-		ml_expr_cond( ExprAssign.expr_cond )
+		ml_expr_test( ExprAssign.expr_test )
 	}
 }
 
