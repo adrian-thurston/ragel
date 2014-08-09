@@ -1728,7 +1728,6 @@ struct LoadRagel
 			loadImport( ImportList.value() );
 			ImportList = ImportList.next();
 		}
-		
 	}
 
 	void loadImport( ragel::string ImportFn )
@@ -1742,15 +1741,16 @@ struct LoadRagel
 					fileName.c_str(), fileName.size(),
 					length, caseInsensitive );
 
-		const char *argv[3];
-		argv[0] = "import";
-		argv[1] = unescaped;
-		argv[2] = id.hostLang->rlhcArg;
-		argv[3] = 0;
+		const char *argv[5];
+		argv[0] = "rlparse";
+		argv[1] = "import";
+		argv[2] = unescaped;
+		argv[3] = id.hostLang->rlhcArg;
+		argv[4] = 0;
 
 		colm_program *program = colm_new_program( &colm_object );
 		colm_set_debug( program, 0 );
-		colm_run_program( program, 3, argv );
+		colm_run_program( program, 4, argv );
 
 		/* Extract the parse tree. */
 		start Start = RagelTree( program );
