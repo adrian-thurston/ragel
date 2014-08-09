@@ -22,7 +22,8 @@ COLM = @COLM_FULL@
 
 TESTS = runtests
 
-bin_PROGRAMS = trans
+noinst_SCRIPTS = runtests
+noinst_PROGRAMS = trans
 
 ragel-parse: ragel-parse.lm
 	$(COLM) $<
@@ -59,3 +60,6 @@ TRANS_DEPS = \
 
 trans$(EXEEXT): trans.lm $(TRANS_DEPS)
 	$(COLM) -o $@ $<
+
+runtests: runtests.sh
+	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)

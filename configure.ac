@@ -140,6 +140,19 @@ AC_CHECK_PROG(GMCS, gmcs, gmcs)
 dnl Check for the Go compiler.
 AC_CHECK_PROG(GOBIN, go, go)
 
+SED_SUBST=["\
+	-e 's|@CXX@|${CXX}|g' \
+	-e 's|@CC@|${CC}|g' \
+	-e 's|@GOBJC@|${GOBJC}|g' \
+	-e 's|@GDC@|${GDC}|g' \
+	-e 's|@JAVAC@|${JAVAC}|g' \
+	-e 's|@RUBY@|${RUBY}|g' \
+	-e 's|@GMCS@|${GMCS}|g' \
+	-e 's|@GOBIN@|${GOBIN}|g' \
+"]
+
+AC_SUBST(SED_SUBST)
+
 dnl write output files
 AC_OUTPUT(
 	[
@@ -149,7 +162,7 @@ AC_OUTPUT(
 		doc/Makefile
 		doc/ragel.1
 		contrib/Makefile
-		test/Makefile test/runtests
+		test/Makefile
 		examples/Makefile
 	],
 	[chmod +x test/runtests]
