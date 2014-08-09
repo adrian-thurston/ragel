@@ -13,72 +13,66 @@ void ml_tok_list( TL: host::tok* )
 
 void ml_expr_factor( ExprFactor: expr_factor )
 {
-	if match ExprFactor
-		[`host `( string `, uint `) `={ TL: host::tok* host::`}=]
+	switch ExprFactor
+	case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
 		send Output
 			"([ml_tok_list( TL )])"
 	}
-	elsif match ExprFactor
-		[`host `( string `, uint `) `${ TL: host::tok* host::`}$]
+	case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 	{
 		send Output 
 			"{[ml_tok_list( TL )]}
 	}
-	elsif match ExprFactor
-		[`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
+	case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
 		send Output
 			[ml_tok_list( TL )]
 	}
-	elsif match ExprFactor
-		[O:`( TL: expr C: `)]
+	case [O:`( TL: expr C: `)]
 	{
 		send Output
 			[O ml_expr(TL) C]
 	}
-	elsif match ExprFactor
-		[ident O: `[ TL: expr C: `]]
+	case [ident O: `[ TL: expr C: `]]
 	{
 		send Output
 			[ExprFactor.ident O ml_expr( TL ) C]
 	}
-	elsif match ExprFactor
-		['offset' '(' ident ',' expr ')']
+	case ['offset' '(' ident ',' expr ')']
 	{
 		send Output
 			[ml_expr( ExprFactor.expr )]
 	}
-	elsif match ExprFactor
-		['deref' '(' ident ',' expr ')']
+	case ['deref' '(' ident ',' expr ')']
 	{
 		send Output
 			[ ExprFactor.ident '[' ml_expr( ExprFactor.expr ) ']']
 	}
-	elsif match ExprFactor
-			[T: `TRUE]
+	case [T: `TRUE]
 	{
 		T.data = '1'
 		send Output [T]
 	}
-	elsif match ExprFactor
-			[F: `FALSE]
+	case [F: `FALSE]
 	{
 		F.data = '0'
 		send Output [F]
 	}
-	elsif match ExprFactor
-			[N: `nil]
+	case [N: `nil]
 	{
 		N.data = '0'
 		send Output [N]
 	}
-	elsif match ExprFactor
-			[Number: number]
+	case [Number: number]
 	{
 		ml_number( Number )
 	}
-	else {
+	case [I: ident] {
+		send Output
+			"[I].contents"
+	}
+	default {
 		# Catches cases not specified
 		send Output [ExprFactor]
 	}
@@ -336,18 +330,17 @@ void ml_stmt( Stmt: stmt )
 			"[ml_stmt_list(TL)]
 			"end;
 	}
-	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: `;]
-	{
+	elsif match Stmt [D: declaration] {
 		send Output
-			"let [Ident] : [ml_type(Type)]"
+			"let [D.ident] : [ml_type(D.type)] ref "
 
-		if match OptInit [E: `= expr] {
+		if match D.opt_init [E: `= expr] {
 			send Output
-				"= [ml_expr(OptInit.expr)]
+				"= ref [ml_expr(D.opt_init.expr)]"
 		}
 		else {
 			send Output
-				"= 0"
+				"= ref 0"
 		}
 
 		send Output
@@ -365,7 +358,7 @@ void ml_stmt( Stmt: stmt )
 	elsif match Stmt [Index: index_stmt]
 	{
 		send Output
-			"let [Index.ident] = 0 in
+			"let [Index.ident] : int ref = ref 0 in
 	}
 	elsif match Stmt [case_block]
 	{
