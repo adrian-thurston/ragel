@@ -11,9 +11,9 @@ void ml_tok_list( TL: host::tok* )
 	}
 }
 
-void ml_expr_factor( ExprFactor: expr_factor )
+void ml_embedded_host( EH: embedded_host )
 {
-	switch ExprFactor
+	switch EH
 	case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
 		send Output
@@ -28,6 +28,16 @@ void ml_expr_factor( ExprFactor: expr_factor )
 	{
 		send Output
 			[ml_tok_list( TL )]
+	}
+}
+
+void ml_expr_factor( ExprFactor: expr_factor )
+{
+	switch ExprFactor
+	case [EH: embedded_host]
+	{
+		send Output
+			[ml_embedded_host( EH )]
 	}
 	case [O:`( TL: expr C: `)]
 	{
@@ -253,22 +263,10 @@ void ml_num_list( NumList: num_list )
 void ml_stmt( Stmt: stmt )
 {
 	if match Stmt
-		[`host `( string `, uint `) `={ TL: host::tok* host::`}=]
+		[EH: embedded_host]
 	{
 		send Output
-			"([ml_tok_list( TL )])"
-	}
-	elsif match Stmt
-		[`host `( string `, uint `) `${ TL: host::tok* host::`}$]
-	{
-		send Output 
-			"{[ml_tok_list( TL )]}
-	}
-	elsif match Stmt
-		[`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
-	{
-		send Output
-			[ml_tok_list( TL )]
+			[ml_embedded_host( EH )]
 	}
 	elsif match Stmt [Array: array] {
 		send Output

@@ -19,27 +19,35 @@ void ruby_tok_list( TL: host::tok* )
 	}
 }
 
-void ruby_expr_factor( ExprFactor: expr_factor )
+void ruby_embedded_host( EH: embedded_host )
 {
-	if match ExprFactor
-		[`host `( string `, uint `) `={ TL: host::tok* host::`}=]
+	switch EH
+	case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
 		send Output
 			"([ruby_tok_list( TL )])"
 	}
-	elsif match ExprFactor
-		[`host `( string `, uint `) `${ TL: host::tok* host::`}$]
+	case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 	{
 		send Output 
 			"begin
 			"	[ruby_tok_list( TL )]
 			"end
 	}
-	elsif match ExprFactor
-		[`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
+	case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
 		send Output
 			[ruby_tok_list( TL )]
+	}
+}
+
+void ruby_expr_factor( ExprFactor: expr_factor )
+{
+	if match ExprFactor
+		[EH: embedded_host]
+	{
+		send Output
+			[ruby_embedded_host( EH )]
 	}
 	elsif match ExprFactor
 		[O:`( TL: expr C: `)]
@@ -261,24 +269,10 @@ void ruby_num_list( NumList: num_list )
 void ruby_stmt( Stmt: stmt )
 {
 	if match Stmt
-		[`host `( string `, uint `) `={ TL: host::tok* host::`}=]
+		[EH: embedded_host]
 	{
 		send Output
-			"([ruby_tok_list( TL )])"
-	}
-	elsif match Stmt
-		[`host `( string `, uint `) `${ TL: host::tok* host::`}$]
-	{
-		send Output 
-			"begin
-			"	[ruby_tok_list( TL )]
-			"end
-	}
-	elsif match Stmt
-		[`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
-	{
-		send Output
-			[ruby_tok_list( TL )]
+			[ruby_embedded_host( EH )]
 	}
 	elsif match Stmt [Array: array] {
 		send Output
