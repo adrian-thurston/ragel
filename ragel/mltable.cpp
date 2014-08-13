@@ -1082,7 +1082,7 @@ void OCamlTabCodeGen::writeExec()
 				"	begin\n"
         "   state.trans <- " << CAST(transType) << "(" << AT( ET(), vCS() ) << " - 1);\n"
 				"		raise Goto_eof_trans;\n"
-				"	end\n";
+				"	end;\n";
 		}
 
 		if ( redFsm->anyEofActions() ) {
