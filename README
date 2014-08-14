@@ -7,6 +7,7 @@
 
  * Make
  * g++
+ * colm - http://www.complang.org/colm/
 
 If you would like to modify Ragel and need to build Ragel's scanners and
 parsers from the specifications then set "build_parsers=yes" the DIST file and
