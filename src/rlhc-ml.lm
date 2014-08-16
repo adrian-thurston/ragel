@@ -203,14 +203,9 @@ void ml_expr_test( ExprTest: expr_test )
 	}
 }
 
-void ml_expr_assign( ExprAssign: expr_assign )
-{
-	ml_expr_test( ExprAssign.expr_test )
-}
-
 void ml_expr( Expr: expr )
 {
-	ml_expr_assign( Expr.expr_assign )
+	ml_expr_test( Expr.expr_test )
 }
 
 void ml_type( Type: type )

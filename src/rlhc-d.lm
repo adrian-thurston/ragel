@@ -205,23 +205,9 @@ void d_expr_test( ExprTest: expr_test )
 	}
 }
 
-void d_expr_assign( ExprAssign: expr_assign )
-{
-#	if match ExprAssign [expr_assign Op: assign_op expr_test]
-#	{
-#		d_expr_assign( ExprAssign._expr_assign )
-#		send Output [Op]
-#		d_expr_test( ExprAssign.expr_test )
-#	}
-#	elsif match ExprAssign [expr_test]
-#	{
-		d_expr_test( ExprAssign.expr_test )
-#	}
-}
-
 void d_expr( Expr: expr )
 {
-	d_expr_assign( Expr.expr_assign )
+	d_expr_test( Expr.expr_test )
 }
 
 void d_type( Type: type )

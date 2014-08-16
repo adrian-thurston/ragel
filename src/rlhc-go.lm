@@ -201,14 +201,9 @@ void go_expr_test( ExprTest: expr_test )
 	}
 }
 
-void go_expr_assign( ExprAssign: expr_assign )
-{
-	go_expr_test( ExprAssign.expr_test )
-}
-
 void go_expr( Expr: expr )
 {
-	go_expr_assign( Expr.expr_assign )
+	go_expr_test( Expr.expr_test )
 }
 
 void go_type( Type: type )

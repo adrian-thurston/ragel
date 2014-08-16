@@ -203,23 +203,9 @@ void java_expr_test( ExprTest: expr_test )
 	}
 }
 
-void java_expr_assign( ExprAssign: expr_assign )
-{
-#	if match ExprAssign [expr_assign Op: assign_op expr_test]
-#	{
-#		java_expr_assign( ExprAssign._expr_assign )
-#		send Output [Op]
-#		java_expr_test( ExprAssign.expr_test )
-#	}
-#	elsif match ExprAssign [expr_test]
-#	{
-		java_expr_test( ExprAssign.expr_test )
-#	}
-}
-
 void java_expr( Expr: expr )
 {
-	java_expr_assign( Expr.expr_assign )
+	java_expr_test( Expr.expr_test )
 }
 
 void java_type( Type: type )

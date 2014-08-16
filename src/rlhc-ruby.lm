@@ -215,14 +215,9 @@ void ruby_expr_test( ExprTest: expr_test )
 	}
 }
 
-void ruby_expr_assign( ExprAssign: expr_assign )
-{
-	ruby_expr_test( ExprAssign.expr_test )
-}
-
 void ruby_expr( Expr: expr )
 {
-	ruby_expr_assign( Expr.expr_assign )
+	ruby_expr_test( Expr.expr_test )
 }
 
 void ruby_type( Type: type )

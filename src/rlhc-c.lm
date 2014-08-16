@@ -204,14 +204,9 @@ void c_expr_test( ExprTest: expr_test )
 	}
 }
 
-void c_expr_assign( ExprAssign: expr_assign )
-{
-	c_expr_test( ExprAssign.expr_test )
-}
-
 void c_expr( Expr: expr )
 {
-	c_expr_assign( Expr.expr_assign )
+	c_expr_test( Expr.expr_test )
 }
 
 void c_type( Type: type )
