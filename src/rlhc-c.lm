@@ -360,7 +360,7 @@ void c_stmt( Stmt: stmt )
 	elsif match Stmt [AS: assign_stmt]
 	{
 		send Output
-			"[c_expr(AS.LValue) AS.assign_op c_expr(AS.expr)];
+			"[c_expr_ptr(AS.LValue) AS.assign_op c_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

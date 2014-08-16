@@ -377,7 +377,7 @@ void d_stmt( Stmt: stmt )
 	elsif match Stmt [AS: assign_stmt]
 	{
 		send Output
-			"[d_expr(AS.LValue) AS.assign_op d_expr(AS.expr)];
+			"[d_expr_ptr(AS.LValue) AS.assign_op d_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

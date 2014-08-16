@@ -432,7 +432,7 @@ void ruby_stmt( Stmt: stmt )
 	elsif match Stmt [AS: assign_stmt]
 	{
 		send Output
-			"[ruby_expr(AS.LValue) AS.assign_op ruby_expr(AS.expr)];
+			"[ruby_expr_ptr(AS.LValue) AS.assign_op ruby_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

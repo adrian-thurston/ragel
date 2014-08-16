@@ -279,7 +279,7 @@ def assign_op
 	[`=] | [`+=] | [`-=]
 
 def assign_stmt
-	[LValue: expr assign_op expr `;]
+	[LValue: expr_ptr assign_op expr `;]
 
 def stmt
 	[embedded_host]

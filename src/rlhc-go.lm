@@ -377,7 +377,7 @@ void go_stmt( Stmt: stmt )
 	elsif match Stmt [AS: assign_stmt]
 	{
 		send Output
-			"[go_expr(AS.LValue) AS.assign_op go_expr(AS.expr)];
+			"[go_expr_ptr(AS.LValue) AS.assign_op go_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

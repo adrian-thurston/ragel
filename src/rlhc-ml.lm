@@ -368,11 +368,11 @@ void ml_stmt( Stmt: stmt )
 		if match AS.assign_op [`=]
 		{
 			send Output
-				"[ml_expr(AS.LValue)] := [ml_expr(AS.expr)];
+				"[ml_expr_ptr(AS.LValue)] := [ml_expr(AS.expr)];
 		}
 		else {
 			send Output
-				"[ml_expr(AS.LValue) AS.assign_op ml_expr(AS.expr)];
+				"[ml_expr_ptr(AS.LValue) AS.assign_op ml_expr(AS.expr)];
 		}
 	}
 	else {
