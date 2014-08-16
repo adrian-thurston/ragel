@@ -203,16 +203,7 @@ void go_expr_test( ExprTest: expr_test )
 
 void go_expr_assign( ExprAssign: expr_assign )
 {
-	if match ExprAssign [expr_assign Op: assign_op expr_test]
-	{
-		go_expr_assign( ExprAssign._expr_assign )
-		send Output [Op]
-		go_expr_test( ExprAssign.expr_test )
-	}
-	elsif match ExprAssign [expr_test]
-	{
-		go_expr_test( ExprAssign.expr_test )
-	}
+	go_expr_test( ExprAssign.expr_test )
 }
 
 void go_expr( Expr: expr )
@@ -387,6 +378,11 @@ void go_stmt( Stmt: stmt )
 	{
 		send Output
 			[go_stmt_list( Stmt.entry_loop._repeat_stmt )]
+	}
+	elsif match Stmt [AS: assign_stmt]
+	{
+		send Output
+			"[go_expr(AS.LValue) AS.assign_op go_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

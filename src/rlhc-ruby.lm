@@ -217,16 +217,7 @@ void ruby_expr_test( ExprTest: expr_test )
 
 void ruby_expr_assign( ExprAssign: expr_assign )
 {
-	if match ExprAssign [expr_assign Op: assign_op expr_test]
-	{
-		ruby_expr_assign( ExprAssign._expr_assign )
-		send Output [Op]
-		ruby_expr_test( ExprAssign.expr_test )
-	}
-	elsif match ExprAssign [expr_test]
-	{
-		ruby_expr_test( ExprAssign.expr_test )
-	}
+	ruby_expr_test( ExprAssign.expr_test )
 }
 
 void ruby_expr( Expr: expr )
@@ -442,6 +433,11 @@ void ruby_stmt( Stmt: stmt )
 			"end
 			"if _goto_level <= [Stmt.label_stmt.Id]
 			"[ruby_stmt_list( Stmt.label_stmt._repeat_stmt )]
+	}
+	elsif match Stmt [AS: assign_stmt]
+	{
+		send Output
+			"[ruby_expr(AS.LValue) AS.assign_op ruby_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

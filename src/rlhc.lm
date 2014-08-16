@@ -181,8 +181,7 @@ def assign_op
 	[`=] | [`+=] | [`-=]
 
 def expr_assign
-	[expr_assign assign_op expr_test]
-|	[expr_test]
+	[expr_test]
 
 def expr
 	[expr_assign]
@@ -282,6 +281,9 @@ def block
 def expr_stmt
 	[expr `;]
 
+def assign_stmt
+	[LValue: expr assign_op expr `;]
+
 def stmt
 	[embedded_host]
 |	[array]
@@ -297,6 +299,7 @@ def stmt
 |	[default_block]
 |	[case_label]
 |	[goto_label]
+|	[assign_stmt]
 |	[expr_stmt]
 |	[pragma]
 |	[export_stmt]
