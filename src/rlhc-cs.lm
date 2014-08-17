@@ -86,6 +86,11 @@ void cs_expr_factor( ExprFactor: expr_factor )
 	{
 		cs_number( Number )
 	}
+	elsif match ExprFactor [E1: embedded_host `-> E2: expr_factor]
+	{
+		cs_embedded_host( E1 )
+		cs_expr_factor( E2 )
+	}
 	else {
 		# Catches cases not specified
 		send Output [ExprFactor]
@@ -94,12 +99,7 @@ void cs_expr_factor( ExprFactor: expr_factor )
 
 void cs_expr_ptr( ExprPtr: expr_ptr )
 {
-	if match ExprPtr [E1: embedded_host `-> E2: expr_factor]
-	{
-		cs_embedded_host( E1 )
-		cs_expr_factor( E2 )
-	}
-	elsif match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
+	if match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
 	{
 		send Output [Open]
 		cs_type( Type )

@@ -84,6 +84,11 @@ void go_expr_factor( ExprFactor: expr_factor )
 		N.data = '0'
 		send Output [N]
 	}
+	elsif match ExprFactor [E1: embedded_host `-> E2: expr_factor]
+	{
+		go_embedded_host( E1 )
+		go_expr_factor( E2 )
+	}
 	else {
 		# Catches cases not specified
 		send Output [ExprFactor]
@@ -92,12 +97,7 @@ void go_expr_factor( ExprFactor: expr_factor )
 
 void go_expr_ptr( ExprPtr: expr_ptr )
 {
-	if match ExprPtr [E1: embedded_host `-> E2: expr_factor]
-	{
-		go_embedded_host( E1 )
-		go_expr_factor( E2 )
-	}
-	elsif match ExprPtr ['(' Type: type ')' expr_ptr]
+	if match ExprPtr ['(' Type: type ')' expr_ptr]
 	{
 		go_type( Type )
 		send Output ['(']

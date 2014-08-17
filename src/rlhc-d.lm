@@ -88,6 +88,11 @@ void d_expr_factor( ExprFactor: expr_factor )
 	{
 		d_number( Number )
 	}
+	elsif match ExprFactor [E1: embedded_host `-> E2: expr_factor]
+	{
+		d_embedded_host( E1 )
+		d_expr_factor( E2 )
+	}
 	else {
 		# Catches cases not specified
 		send Output [ExprFactor]
@@ -96,12 +101,7 @@ void d_expr_factor( ExprFactor: expr_factor )
 
 void d_expr_ptr( ExprPtr: expr_ptr )
 {
-	if match ExprPtr [E1: embedded_host `-> E2: expr_factor]
-	{
-		d_embedded_host( E1 )
-		d_expr_factor( E2 )
-	}
-	elsif match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
+	if match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
 	{
 		send Output ['cast' Open]
 		d_type( Type )

@@ -135,11 +135,11 @@ def expr_factor
 |	[`nil]
 |	[hex_number]
 |	[string]
+|	[embedded_host `-> expr_factor]
 |	[`( expr `)]
 
 def expr_ptr
-	[embedded_host `-> expr_factor]
-|	[`( type `) expr_ptr]
+	[`( type `) expr_ptr]
 |	[expr_factor]
 
 def expr_factor_op

@@ -82,6 +82,12 @@ void ml_expr_factor( ExprFactor: expr_factor )
 		send Output
 			"[^I].contents"
 	}
+	case [E1: embedded_host `-> E2: expr_factor]
+	{
+		# The accessor operator is contained wihtin the lhs.
+		ml_embedded_host( E1 )
+		ml_expr_factor( E2 )
+	}
 	default {
 		# Catches cases not specified
 		send Output [ExprFactor]
@@ -90,13 +96,7 @@ void ml_expr_factor( ExprFactor: expr_factor )
 
 void ml_expr_ptr( ExprPtr: expr_ptr )
 {
-	if match ExprPtr [E1: embedded_host `-> E2: expr_factor]
-	{
-		# The accessor operator is contained wihtin the lhs.
-		ml_embedded_host( E1 )
-		ml_expr_factor( E2 )
-	}
-	elsif match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
+	if match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
 	{
 		send Output [Open]
 		ml_type( Type )
