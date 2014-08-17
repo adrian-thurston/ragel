@@ -88,27 +88,16 @@ void ml_expr_factor( ExprFactor: expr_factor )
 		ml_embedded_host( E1 )
 		ml_expr_factor( E2 )
 	}
-	default {
-		# Catches cases not specified
-		send Output [ExprFactor]
-	}
-}
-
-void ml_expr_ptr( ExprPtr: expr_ptr )
-{
-	if match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
+	case [Open: `( Type: type Close: `) expr_factor]
 	{
 		send Output [Open]
 		ml_type( Type )
 		send Output [Close]
-		ml_expr_ptr( ExprPtr._expr_ptr )
+		ml_expr_factor( ExprFactor._expr_factor )
 	}
-	elsif match ExprPtr [expr_factor]
-	{
-		ml_expr_factor( ExprPtr.expr_factor )
-	}
-	else {
-		send Output [ExprPtr]
+	default {
+		# Catches cases not specified
+		send Output [ExprFactor]
 	}
 }
 
@@ -124,9 +113,9 @@ void ml_expr_factor_op( ExprFactorOp: expr_factor_op )
 		send Output [T]
 		ml_expr_factor_op( ExprFactorOp._expr_factor_op )
 	}
-	elsif match ExprFactorOp [expr_ptr]
+	elsif match ExprFactorOp [expr_factor]
 	{
-		ml_expr_ptr( ExprFactorOp.expr_ptr )
+		ml_expr_factor( ExprFactorOp.expr_factor )
 	}
 }
 
@@ -368,11 +357,11 @@ void ml_stmt( Stmt: stmt )
 		if match AS.assign_op [`=]
 		{
 			send Output
-				"[ml_expr_ptr(AS.LValue)] := [ml_expr(AS.expr)];
+				"[ml_expr_factor(AS.LValue)] := [ml_expr(AS.expr)];
 		}
 		else {
 			send Output
-				"[ml_expr_ptr(AS.LValue) AS.assign_op ml_expr(AS.expr)];
+				"[ml_expr_factor(AS.LValue) AS.assign_op ml_expr(AS.expr)];
 		}
 	}
 	else {

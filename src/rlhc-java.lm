@@ -91,27 +91,16 @@ void java_expr_factor( ExprFactor: expr_factor )
 		java_embedded_host( E1 )
 		java_expr_factor( E2 )
 	}
-	else {
-		# Catches cases not specified
-		send Output [ExprFactor]
-	}
-}
-
-void java_expr_ptr( ExprPtr: expr_ptr )
-{
-	if match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
+	elsif match ExprFactor [Open: `( Type: type Close: `) expr_factor]
 	{
 		send Output [Open]
 		java_type( Type )
 		send Output [Close]
-		java_expr_ptr( ExprPtr._expr_ptr )
-	}
-	elsif match ExprPtr [expr_factor]
-	{
-		java_expr_factor( ExprPtr.expr_factor )
+		java_expr_factor( ExprFactor._expr_factor )
 	}
 	else {
-		send Output [ExprPtr]
+		# Catches cases not specified
+		send Output [ExprFactor]
 	}
 }
 
@@ -127,9 +116,9 @@ void java_expr_factor_op( ExprFactorOp: expr_factor_op )
 		send Output [T]
 		java_expr_factor_op( ExprFactorOp._expr_factor_op )
 	}
-	elsif match ExprFactorOp [expr_ptr]
+	elsif match ExprFactorOp [expr_factor]
 	{
-		java_expr_ptr( ExprFactorOp.expr_ptr )
+		java_expr_factor( ExprFactorOp.expr_factor )
 	}
 }
 
@@ -370,7 +359,7 @@ void java_stmt( Stmt: stmt )
 	elsif match Stmt [AS: assign_stmt]
 	{
 		send Output
-			"[java_expr_ptr(AS.LValue) AS.assign_op java_expr(AS.expr)];
+			"[java_expr_factor(AS.LValue) AS.assign_op java_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

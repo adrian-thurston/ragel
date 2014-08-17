@@ -91,27 +91,16 @@ void cs_expr_factor( ExprFactor: expr_factor )
 		cs_embedded_host( E1 )
 		cs_expr_factor( E2 )
 	}
-	else {
-		# Catches cases not specified
-		send Output [ExprFactor]
-	}
-}
-
-void cs_expr_ptr( ExprPtr: expr_ptr )
-{
-	if match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
+	elsif match ExprFactor [Open: `( Type: type Close: `) expr_factor]
 	{
 		send Output [Open]
 		cs_type( Type )
 		send Output [Close]
-		cs_expr_ptr( ExprPtr._expr_ptr )
-	}
-	elsif match ExprPtr [expr_factor]
-	{
-		cs_expr_factor( ExprPtr.expr_factor )
+		cs_expr_factor( ExprFactor._expr_factor )
 	}
 	else {
-		send Output [ExprPtr]
+		# Catches cases not specified
+		send Output [ExprFactor]
 	}
 }
 
@@ -127,9 +116,9 @@ void cs_expr_factor_op( ExprFactorOp: expr_factor_op )
 		send Output [T]
 		cs_expr_factor_op( ExprFactorOp._expr_factor_op )
 	}
-	elsif match ExprFactorOp [expr_ptr]
+	elsif match ExprFactorOp [expr_factor]
 	{
-		cs_expr_ptr( ExprFactorOp.expr_ptr )
+		cs_expr_factor( ExprFactorOp.expr_factor )
 	}
 }
 
@@ -365,7 +354,7 @@ void cs_stmt( Stmt: stmt )
 	elsif match Stmt [AS: assign_stmt]
 	{
 		send Output
-			"[cs_expr_ptr(AS.LValue) AS.assign_op cs_expr(AS.expr)];
+			"[cs_expr_factor(AS.LValue) AS.assign_op cs_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases
