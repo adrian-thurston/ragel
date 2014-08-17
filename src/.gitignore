@@ -28,5 +28,12 @@
 /tmp.go
 /tmp.ps
 /tmp.ml
+/tmp.cmi
 /tmp
 /input
+
+# The ragel frontend doesn't support OCaml lexical rules yet, so a util is
+# needed.
+/util.ml
+/util.cmi
+/util.cmx
