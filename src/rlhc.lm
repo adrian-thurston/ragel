@@ -138,7 +138,7 @@ def expr_factor
 |	[`( expr `)]
 
 def expr_ptr
-	[expr_ptr `-> expr_factor]
+	[embedded_host `-> expr_factor]
 |	[`( type `) expr_ptr]
 |	[expr_factor]
 

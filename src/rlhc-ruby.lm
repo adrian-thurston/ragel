@@ -106,10 +106,10 @@ void ruby_expr_factor( ExprFactor: expr_factor )
 
 void ruby_expr_ptr( ExprPtr: expr_ptr )
 {
-	if match ExprPtr [expr_ptr Arrow: `-> expr_factor]
+	if match ExprPtr [E1: embedded_host `-> E2: expr_factor]
 	{
-		ruby_expr_ptr( ExprPtr._expr_ptr )
-		ruby_expr_factor( ExprPtr.expr_factor )
+		ruby_embedded_host( E1 )
+		ruby_expr_factor( E2 )
 	}
 	elsif match ExprPtr [Open: `( Type: type Close: `) expr_ptr]
 	{
