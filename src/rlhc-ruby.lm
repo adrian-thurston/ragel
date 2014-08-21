@@ -116,7 +116,7 @@ void ruby_expr_factor( ExprFactor: expr_factor )
 	}
 }
 
-void ruby_expr_factor2( ExprFactor: expr_factor2 )
+void ruby_lvalue( ExprFactor: lvalue )
 {
 	if match ExprFactor
 		[EH: embedded_host]
@@ -125,65 +125,15 @@ void ruby_expr_factor2( ExprFactor: expr_factor2 )
 			[ruby_embedded_host( EH )]
 	}
 	elsif match ExprFactor
-		[O:`( TL: expr C: `)]
-	{
-		send Output
-			[O ruby_expr(TL) C]
-	}
-	elsif match ExprFactor
 		[ident O: `[ TL: expr C: `]]
 	{
 		send Output
 			[ExprFactor.ident O ruby_expr( TL ) C]
 	}
-	elsif match ExprFactor
-		['offset' '(' ident ',' expr ')']
-	{
-		send Output
-			[ruby_expr( ExprFactor.expr )]
-	}
-	elsif match ExprFactor
-		['deref' '(' ident ',' expr ')']
-	{
-		send Output
-			[ ExprFactor.ident '[' ruby_expr( ExprFactor.expr ) ']']
-		if $ExprFactor.ident == 'data'
-			send Output '.ord'
-	}
-	elsif match ExprFactor
-			[T: `TRUE]
-	{
-		T.data = 'true'
-		send Output [T]
-	}
-	elsif match ExprFactor
-			[F: `FALSE]
-	{
-		F.data = 'false'
-		send Output [F]
-	}
-	elsif match ExprFactor
-			[N: `nil]
-	{
-		N.data = '0'
-		send Output [N]
-	}
-	elsif match ExprFactor
-			[Number: number]
-	{
-		ruby_number( Number )
-	}
-	elsif match ExprFactor [E1: embedded_host `-> E2: expr_factor]
+	elsif match ExprFactor [E1: embedded_host `-> E2: lvalue]
 	{
 		ruby_embedded_host( E1 )
-		ruby_expr_factor( E2 )
-	}
-	elsif match ExprFactor [Open: `( Type: type Close: `) expr_factor]
-	{
-		#send Output [Open]
-		#ruby_type( Type )
-		#send Output [Close]
-		ruby_expr_factor( ExprFactor.expr_factor )
+		ruby_lvalue( E2 )
 	}
 	else {
 		# Catches cases not specified
@@ -496,7 +446,7 @@ void ruby_stmt( Stmt: stmt )
 	elsif match Stmt [AS: assign_stmt]
 	{
 		send Output
-			"[ruby_expr_factor2(AS.LValue) AS.assign_op ruby_expr(AS.expr)];
+			"[ruby_lvalue(AS.LValue) AS.assign_op ruby_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

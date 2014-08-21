@@ -102,7 +102,7 @@ void go_expr_factor( ExprFactor: expr_factor )
 	}
 }
 
-void go_expr_factor2( ExprFactor: expr_factor2 )
+void go_lvalue( ExprFactor: lvalue )
 {
 	if match ExprFactor
 		[EH: embedded_host]
@@ -111,62 +111,16 @@ void go_expr_factor2( ExprFactor: expr_factor2 )
 			[go_embedded_host(EH)]
 	}
 	elsif match ExprFactor
-		[O:`( TL: expr C: `)]
-	{
-		send Output [O]
-		go_expr( TL )
-		send Output [C]
-	}
-	elsif match ExprFactor
 		[ident O: `[ TL: expr C: `]]
 	{
 		send Output [ExprFactor.ident O]
 		go_expr( TL )
 		send Output [C]
 	}
-	elsif match ExprFactor
-		[`offset `( ident `, expr `)]
-	{
-		send Output ['int(']
-		go_expr( ExprFactor.expr )
-		send Output [')']
-	}
-	elsif match ExprFactor
-		['deref' '(' ident ',' expr ')']
-	{
-		send Output [ ExprFactor.ident '[']
-		go_expr( ExprFactor.expr )
-		send Output [']']
-	}
-	elsif match ExprFactor
-			[T: `TRUE]
-	{
-		T.data = 'true'
-		send Output [T]
-	}
-	elsif match ExprFactor
-			[F: `FALSE]
-	{
-		F.data = '0'
-		send Output [F]
-	}
-	elsif match ExprFactor
-			[N: `nil]
-	{
-		N.data = '0'
-		send Output [N]
-	}
-	elsif match ExprFactor [E1: embedded_host `-> E2: expr_factor]
+	elsif match ExprFactor [E1: embedded_host `-> E2: lvalue]
 	{
 		go_embedded_host( E1 )
-		go_expr_factor( E2 )
-	}
-	elsif match ExprFactor ['(' Type: type ')' expr_factor]
-	{
-		go_type( Type )
-		send Output ['(']
-		go_expr_factor( ExprFactor.expr_factor )
-		send Output [')']
+		go_lvalue( E2 )
 	}
 	else {
 		# Catches cases not specified
@@ -438,7 +392,7 @@ void go_stmt( Stmt: stmt )
 	elsif match Stmt [AS: assign_stmt]
 	{
 		send Output
-			"[go_expr_factor2(AS.LValue) AS.assign_op go_expr(AS.expr)];
+			"[go_lvalue(AS.LValue) AS.assign_op go_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

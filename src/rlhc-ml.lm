@@ -101,7 +101,7 @@ void ml_expr_factor( ExprFactor: expr_factor )
 	}
 }
 
-void ml_expr_factor2( ExprFactor: expr_factor2 )
+void ml_lvalue( ExprFactor: lvalue )
 {
 	switch ExprFactor
 	case [EH: embedded_host]
@@ -109,61 +109,16 @@ void ml_expr_factor2( ExprFactor: expr_factor2 )
 		send Output
 			[ml_embedded_host( EH )]
 	}
-	case [O:`( TL: expr C: `)]
-	{
-		send Output
-			[O ml_expr(TL) C]
-	}
 	case [ident O: `[ TL: expr C: `]]
 	{
 		send Output
 			[ExprFactor.ident O ml_expr( TL ) C]
 	}
-	case ['offset' '(' ident ',' expr ')']
-	{
-		send Output
-			[ml_expr( ExprFactor.expr )]
-	}
-	case ['deref' '(' ident ',' expr ')']
-	{
-		send Output
-			[ ExprFactor.ident '[' ml_expr( ExprFactor.expr ) ']']
-	}
-	case [T: `TRUE]
-	{
-		T.data = '1'
-		send Output [T]
-	}
-	case [F: `FALSE]
-	{
-		F.data = '0'
-		send Output [F]
-	}
-	case [N: `nil]
-	{
-		N.data = '0'
-		send Output [N]
-	}
-	case [Number: number]
-	{
-		ml_number( Number )
-	}
-	case [I: ident] {
-		send Output
-			"[^I].contents"
-	}
-	case [E1: embedded_host `-> E2: expr_factor]
+	case [E1: embedded_host `-> E2: lvalue]
 	{
 		# The accessor operator is contained wihtin the lhs.
 		ml_embedded_host( E1 )
-		ml_expr_factor( E2 )
-	}
-	case [Open: `( Type: type Close: `) expr_factor]
-	{
-		send Output [Open]
-		ml_type( Type )
-		send Output [Close]
-		ml_expr_factor( ExprFactor.expr_factor )
+		ml_lvalue( E2 )
 	}
 	default {
 		# Catches cases not specified
@@ -427,11 +382,11 @@ void ml_stmt( Stmt: stmt )
 		if match AS.assign_op [`=]
 		{
 			send Output
-				"[ml_expr_factor2(AS.LValue)] := [ml_expr(AS.expr)];
+				"[ml_lvalue(AS.LValue)] := [ml_expr(AS.expr)];
 		}
 		else {
 			send Output
-				"[ml_expr_factor2(AS.LValue) AS.assign_op ml_expr(AS.expr)];
+				"[ml_lvalue(AS.LValue) AS.assign_op ml_expr(AS.expr)];
 		}
 	}
 	else {
