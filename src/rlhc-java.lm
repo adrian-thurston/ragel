@@ -104,6 +104,79 @@ void java_expr_factor( ExprFactor: expr_factor )
 	}
 }
 
+void java_expr_factor2( ExprFactor: expr_factor2 )
+{
+	if match ExprFactor
+		[EH: embedded_host]
+	{
+		send Output
+			[java_embedded_host( EH )]
+	}
+	elsif match ExprFactor
+		[O:`( TL: expr C: `)]
+	{
+		send Output
+			[O java_expr(TL) C]
+	}
+	elsif match ExprFactor
+		[ident O: `[ TL: expr C: `]]
+	{
+		send Output
+			[ExprFactor.ident O java_expr( TL ) C]
+	}
+	elsif match ExprFactor
+		['offset' '(' ident ',' expr ')']
+	{
+		send Output
+			[java_expr( ExprFactor.expr )]
+	}
+	elsif match ExprFactor
+		['deref' '(' ident ',' expr ')']
+	{
+		send Output
+			[ ExprFactor.ident '[' java_expr( ExprFactor.expr ) ']']
+	}
+	elsif match ExprFactor
+			[T: `TRUE]
+	{
+		T.data = 'true'
+		send Output [T]
+	}
+	elsif match ExprFactor
+			[F: `FALSE]
+	{
+		F.data = 'false'
+		send Output [F]
+	}
+	elsif match ExprFactor
+			[N: `nil]
+	{
+		N.data = '0'
+		send Output [N]
+	}
+	elsif match ExprFactor
+			[Number: number]
+	{
+		java_number( Number )
+	}
+	elsif match ExprFactor [E1: embedded_host `-> E2: expr_factor]
+	{
+		java_embedded_host( E1 )
+		java_expr_factor( E2 )
+	}
+	elsif match ExprFactor [Open: `( Type: type Close: `) expr_factor]
+	{
+		send Output [Open]
+		java_type( Type )
+		send Output [Close]
+		java_expr_factor( ExprFactor.expr_factor )
+	}
+	else {
+		# Catches cases not specified
+		send Output [ExprFactor]
+	}
+}
+
 void java_expr_factor_op( ExprFactorOp: expr_factor_op )
 {
 	if match ExprFactorOp [B: `! expr_factor_op]
@@ -359,7 +432,7 @@ void java_stmt( Stmt: stmt )
 	elsif match Stmt [AS: assign_stmt]
 	{
 		send Output
-			"[java_expr_factor(AS.LValue) AS.assign_op java_expr(AS.expr)];
+			"[java_expr_factor2(AS.LValue) AS.assign_op java_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

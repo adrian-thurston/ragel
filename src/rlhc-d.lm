@@ -106,6 +106,79 @@ void d_expr_factor( ExprFactor: expr_factor )
 	}
 }
 
+void d_expr_factor2( ExprFactor: expr_factor2 )
+{
+	if match ExprFactor
+		[EH: embedded_host]
+	{
+		send Output
+			[d_embedded_host(EH)]
+	}
+	elsif match ExprFactor
+		[O:`( TL: expr C: `)]
+	{
+		send Output
+			[O d_expr( TL ) C]
+	}
+	elsif match ExprFactor
+		[ident O: `[ TL: expr C: `]]
+	{
+		send Output
+			[ExprFactor.ident O d_expr(TL) C]
+	}
+	elsif match ExprFactor
+		[`offset `( ident `, expr `)]
+	{
+		send Output
+			"& [ExprFactor.ident] \[ [d_expr(ExprFactor.expr)] \]
+	}
+	elsif match ExprFactor
+		[`deref `( ident `, expr `)]
+	{
+		send Output
+			"(*( [d_expr(ExprFactor.expr)] ))
+	}
+	elsif match ExprFactor
+			[T: `TRUE]
+	{
+		T.data = '1'
+		send Output [T]
+	}
+	elsif match ExprFactor
+			[F: `FALSE]
+	{
+		F.data = '0'
+		send Output [F]
+	}
+	elsif match ExprFactor
+			[N: `nil]
+	{
+		N.data = 'null'
+		send Output [N]
+	}
+	elsif match ExprFactor
+			[Number: number]
+	{
+		d_number( Number )
+	}
+	elsif match ExprFactor [E1: embedded_host `-> E2: expr_factor]
+	{
+		d_embedded_host( E1 )
+		d_expr_factor( E2 )
+	}
+	elsif match ExprFactor [Open: `( Type: type Close: `) expr_factor]
+	{
+		send Output ['cast' Open]
+		d_type( Type )
+		send Output [Close]
+		d_expr_factor( ExprFactor.expr_factor )
+	}
+	else {
+		# Catches cases not specified
+		send Output [ExprFactor]
+	}
+}
+
 void d_expr_factor_op( ExprFactorOp: expr_factor_op )
 {
 	if match ExprFactorOp [B: `! expr_factor_op]
@@ -366,7 +439,7 @@ void d_stmt( Stmt: stmt )
 	elsif match Stmt [AS: assign_stmt]
 	{
 		send Output
-			"[d_expr_factor(AS.LValue) AS.assign_op d_expr(AS.expr)];
+			"[d_expr_factor2(AS.LValue) AS.assign_op d_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases

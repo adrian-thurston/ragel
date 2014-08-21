@@ -101,6 +101,76 @@ void ml_expr_factor( ExprFactor: expr_factor )
 	}
 }
 
+void ml_expr_factor2( ExprFactor: expr_factor2 )
+{
+	switch ExprFactor
+	case [EH: embedded_host]
+	{
+		send Output
+			[ml_embedded_host( EH )]
+	}
+	case [O:`( TL: expr C: `)]
+	{
+		send Output
+			[O ml_expr(TL) C]
+	}
+	case [ident O: `[ TL: expr C: `]]
+	{
+		send Output
+			[ExprFactor.ident O ml_expr( TL ) C]
+	}
+	case ['offset' '(' ident ',' expr ')']
+	{
+		send Output
+			[ml_expr( ExprFactor.expr )]
+	}
+	case ['deref' '(' ident ',' expr ')']
+	{
+		send Output
+			[ ExprFactor.ident '[' ml_expr( ExprFactor.expr ) ']']
+	}
+	case [T: `TRUE]
+	{
+		T.data = '1'
+		send Output [T]
+	}
+	case [F: `FALSE]
+	{
+		F.data = '0'
+		send Output [F]
+	}
+	case [N: `nil]
+	{
+		N.data = '0'
+		send Output [N]
+	}
+	case [Number: number]
+	{
+		ml_number( Number )
+	}
+	case [I: ident] {
+		send Output
+			"[^I].contents"
+	}
+	case [E1: embedded_host `-> E2: expr_factor]
+	{
+		# The accessor operator is contained wihtin the lhs.
+		ml_embedded_host( E1 )
+		ml_expr_factor( E2 )
+	}
+	case [Open: `( Type: type Close: `) expr_factor]
+	{
+		send Output [Open]
+		ml_type( Type )
+		send Output [Close]
+		ml_expr_factor( ExprFactor.expr_factor )
+	}
+	default {
+		# Catches cases not specified
+		send Output [ExprFactor]
+	}
+}
+
 void ml_expr_factor_op( ExprFactorOp: expr_factor_op )
 {
 	if match ExprFactorOp [B: `! expr_factor_op]
@@ -357,11 +427,11 @@ void ml_stmt( Stmt: stmt )
 		if match AS.assign_op [`=]
 		{
 			send Output
-				"[ml_expr_factor(AS.LValue)] := [ml_expr(AS.expr)];
+				"[ml_expr_factor2(AS.LValue)] := [ml_expr(AS.expr)];
 		}
 		else {
 			send Output
-				"[ml_expr_factor(AS.LValue) AS.assign_op ml_expr(AS.expr)];
+				"[ml_expr_factor2(AS.LValue) AS.assign_op ml_expr(AS.expr)];
 		}
 	}
 	else {
