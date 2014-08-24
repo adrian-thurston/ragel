@@ -1,3 +1,8 @@
+alias str_map
+	map<str str> 
+
+global StaticVarMap: str_map = cons str_map[]
+
 void ml_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
@@ -39,10 +44,10 @@ void ml_expr_factor( ExprFactor: expr_factor )
 		send Output
 			[ml_embedded_host( EH )]
 	}
-	case [O:`( TL: expr C: `)]
+	case [`( TL: expr `)]
 	{
 		send Output
-			[O ml_expr(TL) C]
+			"( [ ml_expr(TL) ] )"
 	}
 	case [ident O: `[ TL: expr C: `]]
 	{
@@ -79,8 +84,14 @@ void ml_expr_factor( ExprFactor: expr_factor )
 		ml_number( Number )
 	}
 	case [I: ident] {
-		send Output
-			"[^I].contents"
+		if ( StaticVarMap.find( $I ) ) {
+			send Output
+				[^I]
+		}
+		else {
+			send Output
+				"[^I].contents"
+		}
 	}
 	case [E1: embedded_host `-> E2: expr_factor]
 	{
@@ -269,6 +280,8 @@ void ml_stmt( Stmt: stmt )
 			"|\]
 	}
 	elsif match Stmt [Value: value] {
+		StaticVarMap.insert( $Value.ident ' ' )
+
 		send Output
 			"let [Value.ident] : [Value.type] = [Value.number]
 	}
