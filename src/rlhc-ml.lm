@@ -27,7 +27,9 @@ void ml_embedded_host( EH: embedded_host )
 	case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 	{
 		send Output 
-			"{[ml_tok_list( TL )]}
+			"begin
+			"[ml_tok_list( TL )]
+			"end;
 	}
 	case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
@@ -49,20 +51,32 @@ void ml_expr_factor( ExprFactor: expr_factor )
 		send Output
 			"( [ ml_expr(TL) ] )"
 	}
-	case [ident O: `[ TL: expr C: `]]
+	case [I: ident `[ TL: expr `]]
 	{
-		send Output
-			[ExprFactor.ident O ml_expr( TL ) C]
+		if ( StaticVarMap.find( $I ) ) {
+			send Output
+				"[ ExprFactor.ident ].([ ml_expr( TL ) ])"
+		}
+		else {
+			send Output
+				"[ ExprFactor.ident ].\[[ ml_expr( TL ) ]\]"
+		}
 	}
 	case ['offset' '(' ident ',' expr ')']
 	{
 		send Output
 			[ml_expr( ExprFactor.expr )]
 	}
-	case ['deref' '(' ident ',' expr ')']
+	case ['deref' '(' I: ident ',' Expr: expr ')']
 	{
-		send Output
-			[ ExprFactor.ident '[' ml_expr( ExprFactor.expr ) ']']
+		if ( StaticVarMap.find( $I ) ) {
+			send Output
+				"[I].( [ ml_expr( Expr ) ] )"
+		}
+		else {
+			send Output
+				"[I].\[[ ml_expr( Expr ) ]\]"
+		}
 	}
 	case [T: `TRUE]
 	{
@@ -99,12 +113,10 @@ void ml_expr_factor( ExprFactor: expr_factor )
 		ml_embedded_host( E1 )
 		ml_expr_factor( E2 )
 	}
-	case [Open: `( Type: type Close: `) expr_factor]
+	case [`( type `) expr_factor]
 	{
-		send Output [Open]
-		ml_type( Type )
-		send Output [Close]
-		ml_expr_factor( ExprFactor._expr_factor )
+		send Output
+			[ml_expr_factor( ExprFactor._expr_factor )]
 	}
 	default {
 		# Catches cases not specified
@@ -146,7 +158,7 @@ void ml_expr_factor_op( ExprFactorOp: expr_factor_op )
 	}
 	elsif match ExprFactorOp [T: `~ expr_factor_op]
 	{
-		send Output [T]
+		send Output " lnot "
 		ml_expr_factor_op( ExprFactorOp._expr_factor_op )
 	}
 	elsif match ExprFactorOp [expr_factor]
@@ -157,11 +169,10 @@ void ml_expr_factor_op( ExprFactorOp: expr_factor_op )
 
 void ml_expr_bitwise( ExprBitwise: expr_bitwise )
 {
-	if match ExprBitwise [expr_bitwise A: `& expr_factor_op]
+	if match ExprBitwise [L: expr_bitwise `& R: expr_factor_op]
 	{
-		ml_expr_bitwise( ExprBitwise._expr_bitwise )
-		send Output [A]
-		ml_expr_factor_op( ExprBitwise.expr_factor_op )
+		send Output
+			"[ml_expr_bitwise( L )] land [ml_expr_factor_op( R )]"
 	}
 	elsif match ExprBitwise [expr_factor_op]
 	{
@@ -202,7 +213,10 @@ void ml_expr_shift( ExprShift: expr_shift )
 	if match ExprShift [expr_shift Op: shift_op expr_add]
 	{
 		ml_expr_shift( ExprShift._expr_shift )
-		send Output [Op]
+		if match Op [`<<]
+			send Output " lsl "
+		else
+			send Output " asr "
 		ml_expr_add( ExprShift.expr_add )
 	}
 	elsif match ExprShift [expr_add]
@@ -274,6 +288,7 @@ void ml_stmt( Stmt: stmt )
 			[ml_embedded_host( EH )]
 	}
 	elsif match Stmt [Array: array] {
+		StaticVarMap.insert( $Array.ident ' ' )
 		send Output
 			"let [Array.ident] : int array = \[|
 				"	[ml_num_list(Array.num_list)]
@@ -281,7 +296,6 @@ void ml_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [Value: value] {
 		StaticVarMap.insert( $Value.ident ' ' )
-
 		send Output
 			"let [Value.ident] : [Value.type] = [Value.number]
 	}
@@ -291,7 +305,9 @@ void ml_stmt( Stmt: stmt )
 	] {
 		send Output
 			"if [ml_expr(IfExpr)] then
+			"begin
 			"	[ml_stmt(IfStmt)]
+			"end
 
 		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 			match ElseIfClause
@@ -299,26 +315,31 @@ void ml_stmt( Stmt: stmt )
 
 			send Output
 				"else if [ml_expr(ElseIfExpr)] then
+				"begin
 				"	[ml_stmt(ElseIfStmt)]
+				"end
 		}
 
 		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
 			send Output
 				"else
+				"begin
 				"	[ml_stmt(ElseStmt)]
+				"end
 		}
+		send Output ";"
 	}
 	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
 		send Output
 			"while [ml_expr(WhileExpr)] do
 			"	[ml_stmt(WhileStmt)]
-			"done
+			"done;
 	}
 	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
 		send Output
-			"switch ( [ml_expr(SwitchExpr)] ) {
+			"match ( [ml_expr(SwitchExpr)] ) with
 			"	[ml_stmt_list(StmtList)]
-			"}
+			"| _ -> 
 	}
 	elsif match Stmt [ExprExpr: expr Semi: `;] {
 		send Output
@@ -363,16 +384,16 @@ void ml_stmt( Stmt: stmt )
 	elsif match Stmt [case_block]
 	{
 		send Output
-			"case [ml_expr( Stmt.case_block.expr )]:
+			"| [ml_expr( Stmt.case_block.expr )] -> 
+			"begin
 			"[ml_stmt_list( Stmt.case_block._repeat_stmt )]
-			"break;
+			"end;
 	}
 	elsif match Stmt [default_block]
 	{
 		send Output
-			"default:
+			"| _ ->
 			"[ml_stmt_list( Stmt.default_block._repeat_stmt )]
-			"break;
 	}
 	elsif match Stmt [case_label]
 	{
@@ -392,12 +413,25 @@ void ml_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [AS: assign_stmt]
 	{
-		if match AS.assign_op [`=]
+		switch AS.assign_op 
+		case [`=]
 		{
 			send Output
 				"[ml_lvalue(AS.LValue)] := [ml_expr(AS.expr)];
 		}
-		else {
+		case [`+=]
+		{
+			parse RhsAsFactor: expr_factor [$AS.LValue]
+			send Output
+				"[ml_lvalue(AS.LValue)] := [ml_expr_factor(RhsAsFactor)] + [ml_expr(AS.expr)];
+		}
+		case [`-=]
+		{
+			parse RhsAsFactor: expr_factor [$AS.LValue]
+			send Output
+				"[ml_lvalue(AS.LValue)] := [ml_expr_factor(RhsAsFactor)] - [ml_expr(AS.expr)];
+		}
+		default {
 			send Output
 				"[ml_lvalue(AS.LValue) AS.assign_op ml_expr(AS.expr)];
 		}
