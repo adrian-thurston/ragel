@@ -339,10 +339,38 @@ void ml_stmt( Stmt: stmt )
 			"done;
 	}
 	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
+		require StmtList
+			[`case E1: expr `{ Inner: stmt* `} Rest: stmt*]
+
 		send Output
-			"match ( [ml_expr(SwitchExpr)] ) with
-			"	[ml_stmt_list(StmtList)]
-			"| _ -> 
+			"if [ml_expr(SwitchExpr)] = [ml_expr(E1)] then
+			"begin
+			"	[ml_stmt_list(Inner)]
+			"end
+
+		for S: stmt in repeat(Rest) {
+			if match S
+				[`case E1: expr `{ Inner: stmt* `}]
+			{
+				send Output
+					"else if [ml_expr(SwitchExpr)] = [ml_expr(E1)] then
+					"begin
+					"	[ml_stmt_list(Inner)]
+					"end
+			}
+			elsif match S
+				[`default `{ Inner: stmt* `}]
+			{
+				send Output
+					"else [ml_expr(SwitchExpr)] = [ml_expr(E1)] then
+					"begin
+					"	[ml_stmt_list(Inner)]
+					"end
+			}
+		}
+
+		send Output
+			";
 	}
 	elsif match Stmt [ExprExpr: expr Semi: `;] {
 		send Output
