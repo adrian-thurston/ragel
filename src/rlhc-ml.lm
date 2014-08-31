@@ -7,7 +7,10 @@ void ml_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
 		if match Tok [host::`${ StmtList: stmt* host::`}$]
-			send Output "{[ml_stmt_list( StmtList )]}"
+			send Output
+				"begin
+				"[ml_stmt_list( StmtList )]
+				"end
 		elsif match Tok [host::`={ Expr: expr host::`}=]
 			send Output "([ml_expr( Expr )])"
 		else {
