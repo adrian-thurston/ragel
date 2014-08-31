@@ -3,7 +3,7 @@ namespace host
 		rl NL / '\n' /
 
 		rl s_literal
-			/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+			/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
 
 		rl d_literal
 			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
@@ -59,7 +59,7 @@ lex
 	rl NL / '\n' /
 
 	rl s_literal
-		/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+		/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
 
 	rl d_literal
 		/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /

@@ -19,7 +19,7 @@ rl ruby_comment
 	/ '#' [^\n]* NL /
 
 rl s_literal
-	/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+	/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
 
 rl d_literal
 	/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
@@ -567,12 +567,12 @@ namespace c_host
 		rl NL / '\n' /
 
 		rl s_literal
-			/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+			/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
 
 		rl d_literal
 			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
 
-		token ident /ident/
+		token ident /ident "'"?/
 		token number /digit+/
 		token hex_number /'0x' [0-9a-fA-F]+/
 
@@ -618,7 +618,7 @@ namespace ruby_host
 		rl NL / '\n' /
 
 		rl s_literal
-			/ "'" ([^'\\] | NL | '\\' (any | NL))* "'" /
+			/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
 
 		rl d_literal
 			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
