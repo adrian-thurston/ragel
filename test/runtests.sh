@@ -20,7 +20,7 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-while getopts "gcnmleB:T:F:G:P:CDJRAZ" opt; do
+while getopts "gcnmleB:T:F:G:P:CDJRAZO" opt; do
 	case $opt in
 		B|T|F|G|P) 
 			genflags="$genflags -$opt$OPTARG"
@@ -37,7 +37,7 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZ" opt; do
 		g) 
 			allow_generated="true"
 			;;
-		C|D|J|R|A|Z)
+		C|D|J|R|A|Z|O)
 			langflags="$langflags -$opt"
 			;;
 	esac
@@ -47,10 +47,11 @@ done
 cs_prohibit_genflags="-G2"
 java_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
 ruby_prohibit_genflags="-G0 -G1 -G2"
+ocaml_prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 
 [ -z "$minflags" ] && minflags="-n -m -l -e"
 [ -z "$genflags" ] && genflags="-B0 -T0 -T1 -F0 -F1 -G0 -G1 -G2"
-[ -z "$langflags" ] && langflags="-C -D -J -R -A -Z"
+[ -z "$langflags" ] && langflags="-C -D -J -R -A -Z -O"
 
 shift $((OPTIND - 1));
 
@@ -110,8 +111,8 @@ function run_test()
 	[ $lang != java ] && out_args="-o ${binary}";
     [ $lang == csharp ] && out_args="-out:${binary}";
 
-	# Ruby doesn't need to be compiled.
-	if [ $lang != ruby ]; then
+	# Ruby and OCaml don't need to be copiled.
+	if [ $lang != ruby ] && [ $lang != ocaml ]; then
 		echo "$compiler ${flags} ${out_args} ${code_src}"
 		if ! $compiler ${flags} ${out_args} ${code_src}; then
 			test_error;
@@ -125,6 +126,7 @@ function run_test()
 		[ $lang = java ] && exec_cmd="java ${root}"
 		[ $lang = ruby ] && exec_cmd="ruby ${code_src}"
 		[ $lang = csharp ] && [ "$csharp_compiler" = gmcs ] && exec_cmd="mono ${exec_cmd}"
+		[ $lang = ocaml ] && exec_cmd="ocaml ${code_src}"
 
 		$exec_cmd 2>&1 > $output;
 		if diff --strip-trailing-cr $expected_out $output > /dev/null; then
@@ -214,6 +216,12 @@ for test_case; do
 			compiler=$go_compiler
 			flags="build"
 		;;
+        ocaml)
+			lang_opt="-O"
+			code_suffix=ocaml
+			compiler=ocaml
+			flags=""
+		;;
 		indep)
 			lang_opt="";
 
@@ -267,6 +275,7 @@ for test_case; do
 	csharp) prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags";;
 	java) prohibit_genflags="$prohibit_genflags $java_prohibit_genflags";;
 	ruby) prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags";;
+	ocaml) prohibit_genflags="$prohibit_genflags $ocaml_prohibit_genflags";;
 	esac
 
 	[ $lang == obj-c ] && continue;
