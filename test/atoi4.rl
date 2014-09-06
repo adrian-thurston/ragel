@@ -50,6 +50,7 @@ let atoi data =
 
 	!res 
 ;;
+
 let () =
   let t = test atoi in
 	t "7" 7;
