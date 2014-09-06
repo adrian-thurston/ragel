@@ -423,6 +423,9 @@ void CodeGenData::makeGenInlineList( GenInlineList *outList, InlineList *inList 
 			outList->append( new GenInlineItem( InputLoc(), GenInlineItem::LmSetTokStart ) );
 			hasLongestMatch = true;
 			break;
+		case InlineItem::Stmt:
+			makeSubList( outList, item->children, GenInlineItem::GenStmt );
+			break;
 		}
 	}
 }

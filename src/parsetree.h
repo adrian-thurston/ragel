@@ -733,7 +733,7 @@ struct InlineItem
 		Text, Goto, Call, Ncall, Next, GotoExpr, CallExpr, NcallExpr, NextExpr, Ret, Nret,
 		PChar, Char, Hold, Curs, Targs, Entry, Exec, Break, Nbreak,
 		LmSwitch, LmSetActId, LmSetTokEnd, LmOnLast, LmOnNext, LmOnLagBehind,
-		LmInitAct, LmInitTokStart, LmSetTokStart,
+		LmInitAct, LmInitTokStart, LmSetTokStart, Stmt
 	};
 
 	InlineItem( const InputLoc &loc, std::string data, Type type ) : 

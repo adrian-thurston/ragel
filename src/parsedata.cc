@@ -989,25 +989,33 @@ void ParseData::initLongestMatchData()
 	if ( lmList.length() > 0 ) {
 		/* The initTokStart action resets the token start. */
 		InlineList *il1 = new InlineList;
-		il1->append( new InlineItem( InputLoc(), InlineItem::LmInitTokStart ) );
+		il1->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		il1->head->children = new InlineList;
+		il1->head->children->append( new InlineItem( InputLoc(), InlineItem::LmInitTokStart ) );
 		initTokStart = newAction( "initts", il1 );
 		initTokStart->isLmAction = true;
 
 		/* The initActId action gives act a default value. */
 		InlineList *il4 = new InlineList;
-		il4->append( new InlineItem( InputLoc(), InlineItem::LmInitAct ) );
+		il4->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		il4->head->children = new InlineList;
+		il4->head->children->append( new InlineItem( InputLoc(), InlineItem::LmInitAct ) );
 		initActId = newAction( "initact", il4 );
 		initActId->isLmAction = true;
 
 		/* The setTokStart action sets tokstart. */
 		InlineList *il5 = new InlineList;
-		il5->append( new InlineItem( InputLoc(), InlineItem::LmSetTokStart ) );
+		il5->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		il5->head->children = new InlineList;
+		il5->head->children->append( new InlineItem( InputLoc(), InlineItem::LmSetTokStart ) );
 		setTokStart = newAction( "ts", il5 );
 		setTokStart->isLmAction = true;
 
 		/* The setTokEnd action sets tokend. */
 		InlineList *il3 = new InlineList;
-		il3->append( new InlineItem( InputLoc(), InlineItem::LmSetTokEnd ) );
+		il3->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		il3->head->children = new InlineList;
+		il3->head->children->append( new InlineItem( InputLoc(), InlineItem::LmSetTokEnd ) );
 		setTokEnd = newAction( "te", il3 );
 		setTokEnd->isLmAction = true;
 
