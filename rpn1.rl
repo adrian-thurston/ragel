@@ -105,6 +105,6 @@ let rpnFailTests = [
 ]
 
 let () =
-  List.iter (fun (s,x) -> T.test rpn s x) rpnTests;
-  List.iter (fun s -> T.error rpn s) rpnFailTests
+  List.iter (fun (s,x) -> test rpn s x) rpnTests;
+  List.iter (fun s -> error rpn s) rpnFailTests
 
