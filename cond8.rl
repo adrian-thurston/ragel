@@ -17,28 +17,40 @@ let error f x = match try Some (f x) with _ -> None with Some _ -> failed "FAILE
 
 let fail fmt = Printf.ksprintf failwith fmt
 
-let run data =
+let run data n =
   let cs = ref 0 in
   let p = ref 0 in
   let pe = ref (String.length data) in
+  let i = ref 0 in
 
   %%{
-    action rec_num { i = 0; n = getnumber(); }
-    action test_len { i++ < n }
+    action test_len { i < n }
+
     main := (
       "d"
-      [0-9]+ %rec_num
+      [0-9]+
       ":"
-      ( [a-z] when test_len )*
+      ( [a-z] when test_len )* ${ i := i.contents + 1 }
     )**;
 
-	  write init;
+		write init;
 		write exec;
 	}%%
 
 	if !cs < cond_first_final then
-    fail "parsing failed"
+	    print_string "fail\n"
+	else
+		print_string "ok\n"
 
 let () =
-  run "d2:aac"
+  run "d2:abc" ( ref 1 );
+  run "d2:abc" ( ref 2 );
+  run "d2:abc" ( ref 3 );
+  run "d2:abc" ( ref 4 );
 
+(* _____OUTPUT_____
+fail
+fail
+ok
+ok
+_____OUTPUT_____ *)
