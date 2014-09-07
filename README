@@ -1,43 +1,30 @@
+SUPPORTED ON
+============
+
+Colm is supported on Unix-like systems. It depends on GCC at runtime.
+
 BUILDING
 ========
 
-Colm is currently supported only on Unix-like systems. It depends on the mmap
-function and it must be able to find g++ on the path.
+Colm is built in the usual autotool way:
 
-Building Colm from the source repository requires that you have ragel and kelbt
-installed. Building these two packages is straightforward. The usual
-./configure && make should be all that's needed. Alternatively, you may find
-packages for your system.
+$ ./autogen
+$ ./configure
+$ make
+$ make install
 
-http://www.complang.org/ragel/
-http://www.complang.org/kelbt/
+Notes on RUNNING
+================
+
+Colm produces a C program as output, then compiles and links it with a runtime
+library. It will leave the C program behind as an artefact.
+
+To find the includes and the runtime library, colm looks at argv[0] to decide
+if it is running out of the source tree. If it is, then compile and link flags
+are derived from argv[0]. Otherwise, it uses the install location (prefix) to
+construct the flags.
 
 SYNTAX HIGHLIGHTING
 ===================
 
 There is a vim syntax definition file colm.vim
-
-RUNNING
-=======
-
-The colm executable takes a Colm program and generates a .cpp file from it. It
-then compiles this program using g++. The g++ compile phase depends on include
-directories in the colm distribution, as well as a runtime library. Colm finds
-these using argv[0]:
-
-    -I dirname(argv[0])"../aapl"
-    -I dirname(argv[0])"../colm"
-    dirname(argv[0])"../colm/runtime.a"
-
-Therefore it is easiest to just run colm from the place it was built. This is
-temporary. In the future a proper install scheme will be provided.
-
-$ ./colm prog.lm
-
-Will produce:
-    prog.cpp
-    prog.bin
-
-The prog.bin program can then be run on some input:
-
-$ ./prog.bin < inputfile
