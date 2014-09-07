@@ -751,6 +751,10 @@ struct LoadColm
 
 		String file = unescape( lit );
 
+		/* Check if we can open the input file for reading. */
+		if ( ! readCheck( file.data ) )
+			error() << "could not open " << file.data << " for reading" << endp;
+
 		const char *argv[3];
 		argv[0] = "load-include";
 		argv[1] = file.data;

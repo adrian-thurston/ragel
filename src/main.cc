@@ -568,6 +568,19 @@ void processArgs( int argc, const char **argv )
 	}
 }
 
+bool readCheck( const char *fn )
+{
+	int result = true;
+
+	/* Check if we can open the input file for reading. */
+	ifstream *inFile = new ifstream( fn );
+	if ( ! inFile->is_open() )
+		result = false;
+
+	delete inFile;
+	return result;
+}
+
 /* Main, process args and call yyparse to start scanning input. */
 int main(int argc, const char **argv)
 {
@@ -588,18 +601,15 @@ int main(int argc, const char **argv)
 				"\" is the same as the input file" << endl;
 	}
 
-
 #if defined(LOAD_INIT) || defined(LOAD_COLM)
 	/* Open the input file for reading. */
 	if ( inputFn == 0 ) {
 		error() << "colm: no input file given" << endl;
 	}
 	else {
-		/* Open the input file for reading. */
-		ifstream *inFile = new ifstream( inputFn );
-		if ( ! inFile->is_open() )
+		/* Check if we can open the input file for reading. */
+		if ( ! readCheck( inputFn ) )
 			error() << "could not open " << inputFn << " for reading" << endl;
-		delete inFile;
 	}
 #endif
 

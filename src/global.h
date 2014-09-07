@@ -100,5 +100,6 @@ void checkMachines( );
 void xmlEscapeHost( std::ostream &out, char *data, int len );
 void openOutput();
 void escapeLiteralString( std::ostream &out, const char *data );
+bool readCheck( const char *fn );
 
 #endif
