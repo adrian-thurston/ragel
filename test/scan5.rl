@@ -19,37 +19,37 @@ let error f x = match try Some (f x) with _ -> None with Some _ -> failed "FAILE
 	# coverage of the scanner action types.
 	main := |*
 		'a' => { 
-			prints "on last     ";
+			print_string "on last     ";
 			if !p+1 = !te then
-				(on_last := !cnt; incr cnt; prints "yes");
-			prints "\n";
+				(on_last := !cnt; incr cnt; print_string "yes");
+			print_string "\n";
 		};
 
 		'b'+ => {
-			prints "on next     ";
+			print_string "on next     ";
 			if !p+1 = !te then
-				( on_next := !cnt; incr cnt; prints "yes");
-			prints "\n";
+				( on_next := !cnt; incr cnt; print_string "yes");
+			print_string "\n";
 		};
 
 		'c1' 'dxxx'? => {
-			prints "on lag      ";
+			print_string "on lag      ";
 			if !p+1 = !te then
-				( on_lag := !cnt; incr cnt; prints "yes"); 
-			prints "\n";
+				( on_lag := !cnt; incr cnt; print_string "yes"); 
+			print_string "\n";
 		};
 
 		'd1' => {
-			prints "lm switch1  ";
+			print_string "lm switch1  ";
 			if !p+1 = !te then
-				(sw1 := !cnt; incr cnt; prints "yes");
-			prints "\n";
+				(sw1 := !cnt; incr cnt; print_string "yes");
+			print_string "\n";
 		};
 		'd2' => {
-			prints "lm switch2  ";
+			print_string "lm switch2  ";
 			if !p+1 = !te then
-        (sw2 := !cnt; incr cnt; prints "yes");
-			prints "\n";
+        (sw2 := !cnt; incr cnt; print_string "yes");
+			print_string "\n";
 		};
 
 		[d0-9]+ '.';
@@ -61,7 +61,6 @@ let error f x = match try Some (f x) with _ -> None with Some _ -> failed "FAILE
 }%%
 
 let () =
-  let prints (_:string) = () in
   let ts = ref 0 and te = ref 0 and act = ref 0 in
   let data = "abbc1d1d2\n" in
   let cs = ref 0 in
@@ -72,7 +71,7 @@ let () =
   sw1 = ref 0 and sw2 = ref 0 in
   let cnt = ref 1 in
   %% write exec;
-  let t = T.test' (fun x -> string_of_int !x) (!) in
+  let t = test' (fun x -> string_of_int !x) (!) in
   t on_last 1;
   t on_next 2;
   t on_lag 3;
@@ -81,10 +80,10 @@ let () =
   t cnt 6;
   ()
 
-(*
+(* _____OUTPUT_____
 on last     yes
 on next     yes
 on lag      yes
 lm switch1  yes
 lm switch2  yes
-*)
+_____OUTPUT_____ *)

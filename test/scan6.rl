@@ -20,14 +20,17 @@ let error f x = match try Some (f x) with _ -> None with Some _ -> failed "FAILE
 	main := |*
         'a' => {
 			got `Pat1;
+			print_string "got pat1\n";
 		};
 
         [ab]+ . 'c' => {
 			got `Pat2;
+			print_string "got pat2\n";
 		};
 
         any => {
 			got `Any;
+			print_string "got any\n";
 		};
 	*|;
 
@@ -50,3 +53,11 @@ let () =
   %% write exec;
   ()
 
+(* _____OUTPUT_____
+got pat1
+got any
+got pat2
+got any
+got any
+got any
+_____OUTPUT_____ *)
