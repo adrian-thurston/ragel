@@ -185,7 +185,6 @@ struct Locals
 typedef BstSet<char> CharSet;
 typedef Vector<unsigned char> UnsignedCharVect;
 
-
 struct Compiler;
 struct TypeRef;
 
