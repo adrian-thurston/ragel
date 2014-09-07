@@ -442,9 +442,7 @@ void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 			ret << "	case " << lma->lmId << " {\n";
 
 		/* Write the block and close it off. */
-		ret << "	host( \"-\", 1 ) ${";
 		INLINE_LIST( ret, lma->children, targState, inFinish, csForced );
-		ret << "}$\n";
 
 		ret << "}\n";
 	}
@@ -508,6 +506,17 @@ void CodeGen::HOST_STMT( ostream &ret, GenInlineItem *item,
 		ret << "}$";
 	}
 }
+
+#if 0
+void CodeGen::LM_CASE( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+	}
+}
+#endif
 
 void CodeGen::HOST_EXPR( ostream &ret, GenInlineItem *item, 
 		int targState, bool inFinish, bool csForced )
@@ -619,6 +628,9 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			break;
 		case GenInlineItem::LmExec:
 			LM_EXEC( ret, item, targState, inFinish );
+			break;
+		case GenInlineItem::LmCase:
+			/* Not encountered here, in the lm switch. */
 			break;
 		case GenInlineItem::LmSetActId:
 			SET_ACT( ret, item );

@@ -179,7 +179,9 @@ void LongestMatch::makeActions( ParseData *pd )
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = new InlineList;
-		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
+		inlineList->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		inlineList->head->children = new InlineList;
+		inlineList->head->children->append( new InlineItem( lmi->getLoc(), this, lmi, 
 				InlineItem::LmSetActId ) );
 		char *actName = new char[50];
 		sprintf( actName, "store%i", lmi->longestMatchId );
@@ -192,7 +194,9 @@ void LongestMatch::makeActions( ParseData *pd )
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = new InlineList;
-		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
+		inlineList->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		inlineList->head->children = new InlineList;
+		inlineList->head->children->append( new InlineItem( lmi->getLoc(), this, lmi, 
 				InlineItem::LmOnLast ) );
 		char *actName = new char[50];
 		sprintf( actName, "last%i", lmi->longestMatchId );
@@ -206,7 +210,9 @@ void LongestMatch::makeActions( ParseData *pd )
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = new InlineList;
-		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
+		inlineList->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		inlineList->head->children = new InlineList;
+		inlineList->head->children->append( new InlineItem( lmi->getLoc(), this, lmi, 
 				InlineItem::LmOnNext ) );
 		char *actName = new char[50];
 		sprintf( actName, "next%i", lmi->longestMatchId );
@@ -219,7 +225,9 @@ void LongestMatch::makeActions( ParseData *pd )
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
 		InlineList *inlineList = new InlineList;
-		inlineList->append( new InlineItem( lmi->getLoc(), this, lmi, 
+		inlineList->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		inlineList->head->children = new InlineList;
+		inlineList->head->children->append( new InlineItem( lmi->getLoc(), this, lmi, 
 				InlineItem::LmOnLagBehind ) );
 		char *actName = new char[50];
 		sprintf( actName, "lag%i", lmi->longestMatchId );

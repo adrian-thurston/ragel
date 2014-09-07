@@ -189,35 +189,25 @@ void CodeGenData::makeSubList( GenInlineList *outList,
 
 void CodeGenData::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 {
-	GenInlineItem *wrapperItem = new GenInlineItem( InputLoc(), GenInlineItem::GenStmt );
-	GenInlineList *wrapperList = wrapperItem->children = new GenInlineList;
-
-	makeSetTokend( wrapperList, 1 );
+	makeSetTokend( outList, 1 );
 
 	if ( item->longestMatchPart->action != 0 ) {
-		makeSubList( wrapperList, 
+		makeSubList( outList, 
 				item->longestMatchPart->action->inlineList, 
 				GenInlineItem::HostStmt );
 	}
-
-	outList->append( wrapperItem );
 }
 
 void CodeGenData::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 {
-	GenInlineItem *wrapperItem = new GenInlineItem( InputLoc(), GenInlineItem::GenStmt );
-	GenInlineList *wrapperList = wrapperItem->children = new GenInlineList;
-
-	makeSetTokend( wrapperList, 0 );
-	wrapperList->append( new GenInlineItem( InputLoc(), GenInlineItem::Hold ) );
+	makeSetTokend( outList, 0 );
+	outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Hold ) );
 
 	if ( item->longestMatchPart->action != 0 ) {
-		makeSubList( wrapperList, 
+		makeSubList( outList, 
 			item->longestMatchPart->action->inlineList,
 			GenInlineItem::HostStmt );
 	}
-
-	outList->append( wrapperItem );
 }
 
 void CodeGenData::makeExecGetTokend( GenInlineList *outList )
@@ -235,19 +225,14 @@ void CodeGenData::makeExecGetTokend( GenInlineList *outList )
 
 void CodeGenData::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 {
-	GenInlineItem *wrapperItem = new GenInlineItem( InputLoc(), GenInlineItem::GenStmt );
-	GenInlineList *wrapperList = wrapperItem->children = new GenInlineList;
-
 	/* Jump to the tokend. */
-	makeExecGetTokend( wrapperList );
+	makeExecGetTokend( outList );
 
 	if ( item->longestMatchPart->action != 0 ) {
-		makeSubList( wrapperList,
+		makeSubList( outList,
 			item->longestMatchPart->action->inlineList,
 			GenInlineItem::HostStmt );
 	}
-
-	outList->append( wrapperItem );
 }
 
 void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
@@ -270,10 +255,14 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 		errCase->lmId = 0;
 		errCase->children = new GenInlineList;
 
+		GenInlineItem *host = new GenInlineItem( InputLoc(), GenInlineItem::HostStmt );
+		host->children = new GenInlineList;
+		errCase->children->append( host );
+
 		/* Make the item. */
 		GenInlineItem *gotoItem = new GenInlineItem( InputLoc(), GenInlineItem::Goto );
 		gotoItem->targId = fsm->errState->alg.stateNum;
-		errCase->children->append( gotoItem );
+		host->children->append( gotoItem );
 
 		lmList->append( errCase );
 	}
@@ -286,13 +275,16 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 			else {
 				/* Open the action. Write it with the context that sets up _p 
 				 * when doing control flow changes from inside the machine. */
-				GenInlineItem *lmCase = new GenInlineItem( InputLoc(), 
-						GenInlineItem::HostStmt );
+				GenInlineItem *lmCase = new GenInlineItem( InputLoc(), GenInlineItem::LmCase );
 				lmCase->lmId = lmi->longestMatchId;
 				lmCase->children = new GenInlineList;
 
 				makeExecGetTokend( lmCase->children );
-				makeGenInlineList( lmCase->children, lmi->action->inlineList );
+
+				GenInlineItem *subHost = new GenInlineItem( InputLoc(), GenInlineItem::HostStmt );
+				subHost->children = new GenInlineList;
+				makeGenInlineList( subHost->children, lmi->action->inlineList );
+				lmCase->children->append( subHost );
 
 				lmList->append( lmCase );
 			}
@@ -300,8 +292,7 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 	}
 
 	if ( needDefault ) {
-		GenInlineItem *defCase = new GenInlineItem( InputLoc(), 
-				GenInlineItem::HostStmt );
+		GenInlineItem *defCase = new GenInlineItem( InputLoc(), GenInlineItem::HostStmt );
 		defCase->lmId = -1;
 		defCase->children = new GenInlineList;
 
