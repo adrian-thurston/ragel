@@ -1,3 +1,16 @@
+Ragel 6.9 - Oct 13, 2014
+========================
+ -updated command-line synopsis
+ -ocaml: fix missing semicolon
+ -ocaml: support -G1
+ -ocaml: choose a unique name for type state
+ -ruby: reduce the amount of calls to GET_WIDE_KEY()
+ -union test case: warning fix
+ -omit line directives around expression-oriented write statements
+ -use AS_IF and test command to check if the DIST file is present
+ -added missing std:: using
+ -go: added '//line' directive support
+
 Ragel 6.8 - Feb 11, 2013
 ========================
 
