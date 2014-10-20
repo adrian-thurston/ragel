@@ -1066,6 +1066,10 @@ long scanToken( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 			return SCAN_ERROR;
 		}
 
+		/* Check for no match on eof (trailing data that partially matches a token). */
+		if ( fsmRun->eof )
+			return SCAN_ERROR;
+
 		/* Got here because the state machine didn't match a token or encounter
 		 * an error. Must be because we got to the end of the buffer data. */
 		assert( fsmRun->p == fsmRun->pe );
