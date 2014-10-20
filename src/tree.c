@@ -218,6 +218,8 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode )
 		fopenMode = "rb";
 	else if ( memcmp( givenMode, "w", stringLength(headMode) ) == 0 )
 		fopenMode = "wb";
+	else if ( memcmp( givenMode, "a", stringLength(headMode) ) == 0 )
+		fopenMode = "ab";
 	else {
 		fatal( "unknown file open mode: %s\n", givenMode );
 	}
