@@ -2,8 +2,8 @@ dnl
 dnl   Copyright 2001-2013 Adrian Thurston <thurston@complang.org>
 dnl
   
-AC_INIT(ragel, 7.0)
-PUBDATE="Sometime 2014"
+AC_INIT(ragel-c, 7.0.0.1)
+PUBDATE="October 2014"
 
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
