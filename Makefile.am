@@ -13,6 +13,9 @@ ragel-parse: ragel-parse.lm
 	$(COLM) $<
 
 EXTRA_DIST = \
+	ragel-parse.lm  trans-cs.lm  trans-go.lm    trans.lm \
+	trans-c.lm      trans-d.lm   trans-java.lm  trans-ruby.lm \
+	runtests.sh \
 	atoi1.rl clang2.rl cond7.rl element3.rl erract8.rl forder3.rl java1.rl \
 	range.rl scan3.rl xml.rl atoi2.rl clang3.rl cppscan1.rl eofact.rl \
 	erract9.rl gotocallret1.rl java2.rl recdescent1.rl scan4.rl atoi3.rl \
