@@ -3,7 +3,7 @@ SUBDIRS = src doc
 DIST_SUBDIRS = $(SUBDIRS) aapl contrib examples test
 
 dist_doc_DATA = CREDITS ChangeLog
-EXTRA_DIST = ragel.vim
+EXTRA_DIST = ragel.vim sedsubst
 
 # This file is checked for by the configure script and its existence causes the
 # parsers and the manual to not be built when the distribution is built.

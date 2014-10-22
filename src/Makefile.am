@@ -6,7 +6,7 @@ ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 ragel_SOURCES = \
 	buffer.h inputdata.h redfsm.h parsedata.h \
-	dotcodegen.h parsetree.h rlscan.h version.h common.h \
+	parsetree.h rlscan.h version.h common.h \
 	fsmgraph.h pcheck.h gendata.h ragel.h load.h if.h \
 	codegen.h binary.h binloop.h binexp.h flat.h flatloop.h \
 	flatexp.h goto.h gotoloop.h gotoexp.h ipgoto.h xml.h dot.h \
@@ -27,7 +27,17 @@ version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
-EXTRA_DIST = ragel.lm rlparse.lm
+EXTRA_DIST = \
+	ragel.lm \
+	rlhc.lm \
+	rlhc-c.lm \
+	rlhc-d.lm \
+	rlhc-cs.lm \
+	rlhc-go.lm \
+	rlhc-ruby.lm \
+	rlhc-java.lm \
+	rlhc-ml.lm \
+	rlparse.lm
 
 CLEANFILES = parse.c if.h if.cc
 

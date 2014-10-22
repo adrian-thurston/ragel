@@ -2,13 +2,13 @@
 #   Copyright 2002-2009 Adrian Thurston <thurston@complang.org>
 #
 
-RAGEL = ../ragel/ragel
+RAGEL = ../src/ragel
 FLEX = flex
 RE2C = re2c
 
 noinst_PROGRAMS = \
-	atoi awkemu clang concurrent cppscan format gotocallret mailbox params \
-	pullscan rlscan statechart 
+	atoi concurrent cppscan format gotocallret mailbox params \
+	statechart 
 
 EXTRA_DIST = \
 	gotocallret.rl pullscan.rl concurrent.rl rlscan.rl statechart.rl \

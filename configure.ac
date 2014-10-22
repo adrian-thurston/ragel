@@ -138,8 +138,7 @@ SED_SUBST=["\
 AC_SUBST(SED_SUBST)
 
 dnl write output files
-AC_OUTPUT(
-	[
+AC_OUTPUT([
 		Makefile
 		src/Makefile
 		aapl/Makefile 
@@ -148,8 +147,6 @@ AC_OUTPUT(
 		contrib/Makefile
 		test/Makefile
 		examples/Makefile
-	],
-	[chmod +x test/runtests]
-)
+])
 
 echo "configuration of ragel complete"
