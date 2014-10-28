@@ -186,12 +186,17 @@ UniqueType *Compiler::findUniqueType( int typeId, IterDef *iterDef )
 /* 0-based. */
 ObjectField *ObjectDef::findFieldNum( long offset )
 {
+	/* Bounds check. */
+	if ( offset >= objFieldList->length() )
+		return 0;
+
 	int fn = 0;
 	ObjFieldList::Iter field = *objFieldList; 
 	while ( fn < offset ) {
 		fn++;
 		field++;
 	}
+
 	return field->value;
 }
 
