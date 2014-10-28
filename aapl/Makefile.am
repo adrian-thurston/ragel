@@ -5,6 +5,3 @@ noinst_HEADERS = \
 	bsttable.h bubblesort.h compare.h dlcommon.h dlist.h dlistmel.h \
 	dlistval.h insertsort.h mergesort.h quicksort.h resize.h sbstmap.h \
 	sbstset.h sbsttable.h svector.h table.h vector.h
-
-EXTRA_DIST = README COPYING
-
