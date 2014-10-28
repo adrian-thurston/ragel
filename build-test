@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+
+# This should not go into the dist file
+
+git_colm=thurston@complang.org:git/colm.git
+git_ragel=thurston@complang.org:git/ragel.git
+
+dir=`mktemp -d /tmp/test.XXXXXX`
+
+echo ========== STARTING ==========
+echo working in $dir
+echo
+
+cd $dir
+mkdir git
+cd git
+git clone $git_colm
+git clone $git_ragel
+
+cd colm
+./autogen.sh
+./configure --prefix=$dir/i1/colm
+make -j4
+make install
+make dist
+cp *.tar.gz ../
+cd ..
+
+cd ragel
+./autogen.sh
+./configure --prefix=$dir/i1/ragel --with-colm=$dir/i1/colm
+make -j4
+# FIXME
+cd test; make; cd ..
+make install
+make dist
+cp *.tar.gz ../
+cd ..
+
+cd ..
+
+mkdir dist
+cd dist
+for fn in ../git/*.tar.gz; do
+	tar -zxvf $fn;
+done
+
+cd colm-*
+./configure --prefix=$dir/i2/colm
+make -j4
+make install
+cd ..
+
+cd ragel-*
+./configure --prefix=$dir/i2/ragel --with-colm=$dir/i2/colm
+make -j4
+make install
+cd ..
+
+echo ========== DONE ==========
+echo files in $dir
+echo 
