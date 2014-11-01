@@ -532,12 +532,10 @@ void LangStmt::declare( Compiler *pd ) const
 {
 	switch ( type ) {
 		case PrintType: 
-			break;
 		case PrintXMLACType:
-			break;
 		case PrintXMLType:
-			break;
 		case PrintStreamType:
+		case PrintAccum:
 			break;
 		case ExprType:
 			break;
@@ -581,7 +579,6 @@ void CodeBlock::declare( Compiler *pd ) const
 	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 		stmt->declare( pd );
 }
-
 
 void Compiler::declareFunction( Function *func )
 {

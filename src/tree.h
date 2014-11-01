@@ -273,13 +273,15 @@ void refSetValue( struct colm_program *prg, Tree **sp, Ref *ref, Tree *v );
 Tree *treeSearch( struct colm_program *prg, Tree *tree, long id );
 Location *locSearch( struct colm_program *prg, Tree *tree );
 
-int matchPattern( Tree **bindings, struct colm_program *prg, long pat, Kid *kid, int checkNext );
+int matchPattern( Tree **bindings, struct colm_program *prg,
+		long pat, Kid *kid, int checkNext );
 Tree *treeIterDerefCur( TreeIter *iter );
 
 /* For making references of attributes. */
 Kid *getFieldKid( Tree *tree, Word field );
 
-Tree *copyRealTree( struct colm_program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown );
+Tree *copyRealTree( struct colm_program *prg, Tree *tree,
+		Kid *oldNextDown, Kid **newNextDown );
 void splitIterCur( struct colm_program *prg, Tree ***psp, TreeIter *iter );
 Tree *setListMem( List *list, Half field, Tree *value );
 
@@ -312,16 +314,19 @@ void strCollectAppend( StrCollect *collect, const char *data, long len );
 void strCollectClear( StrCollect *collect );
 Tree *treeTrim( struct colm_program *prg, Tree **sp, Tree *tree );
 
-void printTreeCollect( struct colm_program *prg, Tree **sp, StrCollect *collect, Tree *tree, int trim );
+void printTreeCollect( struct colm_program *prg, Tree **sp,
+		StrCollect *collect, Tree *tree, int trim );
 void printTreeFile( struct colm_program *prg, Tree **sp, FILE *out, Tree *tree, int trim );
 void printTreeFd( struct colm_program *prg, Tree **sp, int fd, Tree *tree, int trim );
-void printXmlStdout( struct colm_program *prg, Tree **sp, Tree *tree, int commAttr, int trim );
+void printXmlStdout( struct colm_program *prg, Tree **sp,
+		Tree *tree, int commAttr, int trim );
 
 /*
  * Iterators.
  */
 
-UserIter *uiterCreate( struct colm_program *prg, Tree ***psp, struct _FunctionInfo *fi, long searchId );
+UserIter *uiterCreate( struct colm_program *prg, Tree ***psp,
+		struct _FunctionInfo *fi, long searchId );
 void uiterInit( struct colm_program *prg, Tree **sp, UserIter *uiter, 
 		struct _FunctionInfo *fi, int revertOn );
 
