@@ -19,8 +19,8 @@ def start
 |	[ruby_selectt RSectionList: ruby_host::section*]
 
 def import_val
-	[Number: c_host::number] :Number
-|	[String: c_host::string] :String
+	[c_host::number] :Number
+|	[c_host::string] :String
 
 def import
 	[Name: c_host::ident Val: import_val]
