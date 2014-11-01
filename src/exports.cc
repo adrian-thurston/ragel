@@ -133,7 +133,7 @@ void Compiler::generateExports()
 			out << "	enum prod_name {\n";
 			for ( LelDefList::Iter prod = lel->defList; prod.lte(); prod++ ) {
 				if ( prod->name.length() > 0 )
-					out << "\t\t_" << prod->name << " = " << prod->prodNum << ",\n";
+					out << "\t\t" << prod->name << " = " << prod->prodNum << ",\n";
 			}
 			out << "	};\n";
 			out << "	enum prod_name prodName() " <<
