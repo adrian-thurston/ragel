@@ -872,9 +872,10 @@ struct Compiler
 
 	VectorTypeIdMap vectorTypeIdMap;
 
-	UniqueType *findUniqueType( int typeId );
-	UniqueType *findUniqueType( int typeId, LangEl *langEl );
-	UniqueType *findUniqueType( int typeId, IterDef *iterDef );
+	UniqueType *findUniqueType( enum TYPE typeId );
+	UniqueType *findUniqueType( enum TYPE typeId, LangEl *langEl );
+	UniqueType *findUniqueType( enum TYPE typeId, IterDef *iterDef );
+	UniqueType *findUniqueType( enum TYPE typeId, UniqueList2 *list );
 
 	UniqueType *uniqueTypeNil;
 	UniqueType *uniqueTypeVoid;

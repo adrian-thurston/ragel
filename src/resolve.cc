@@ -156,32 +156,19 @@ UniqueType *TypeRef::resolveTypeList2( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
-	UniqueType *utValue = typeRef1->resolveType( pd );	
+	UniqueType *ut1 = typeRef1->resolveType( pd );	
 
-	UniqueList2 searchKey( utValue );
-	UniqueList2 *inMap = pd->uniqueList2Map.find( &searchKey );
+	UniqueList2 searchKey( ut1 );
+	UniqueList2 *list= pd->uniqueList2Map.find( &searchKey );
 
-	if ( inMap == 0 ) {
+	if ( list == 0 ) {
 		/* Not found. Create. */
-		inMap = new UniqueList2( utValue );
-		pd->uniqueList2Map.insert( inMap );
-
-//		/* FIXME: Need uniqe name allocator for types. */
-//		static int listId = 0;
-//		String name( 36, "__list%d", listId++ );
-//
-//		GenericType *generic = new GenericType( name, GEN_LIST,
-//				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
-//
-//		nspace->genericList.append( generic );
-//
-//		generic->declare( pd, nspace );
-//
-//		inMap->generic = generic;
+		list = new UniqueList2( ut1 );
+		pd->uniqueList2Map.insert( list );
+		cerr << "creating list" << endl;
 	}
 
-	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_LIST2 );
+	return pd->findUniqueType( TYPE_LIST2, list );
 }
 
 UniqueType *TypeRef::resolveTypeVector( Compiler *pd )
@@ -436,6 +423,9 @@ void LangTerm::resolve( Compiler *pd )
 			break;
 		case NewType:
 			expr->resolve( pd );
+			break;
+		case New2Type:
+			typeRef->resolveType( pd );
 			break;
 		case TypeIdType:
 			typeRef->resolveType( pd );

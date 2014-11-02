@@ -149,7 +149,7 @@ IterDef *Compiler::findIterDef( IterDef::Type type )
 	return &el->key;
 }
 
-UniqueType *Compiler::findUniqueType( int typeId )
+UniqueType *Compiler::findUniqueType( enum TYPE typeId )
 {
 	UniqueType searchKey( typeId );
 	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
@@ -160,7 +160,7 @@ UniqueType *Compiler::findUniqueType( int typeId )
 	return uniqueType;
 }
 
-UniqueType *Compiler::findUniqueType( int typeId, LangEl *langEl )
+UniqueType *Compiler::findUniqueType( enum TYPE typeId, LangEl *langEl )
 {
 	UniqueType searchKey( typeId, langEl );
 	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
@@ -171,12 +171,23 @@ UniqueType *Compiler::findUniqueType( int typeId, LangEl *langEl )
 	return uniqueType;
 }
 
-UniqueType *Compiler::findUniqueType( int typeId, IterDef *iterDef )
+UniqueType *Compiler::findUniqueType( enum TYPE typeId, IterDef *iterDef )
 {
 	UniqueType searchKey( typeId, iterDef );
 	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
 	if ( uniqueType == 0 ) {
 		uniqueType = new UniqueType( typeId, iterDef );
+		uniqeTypeMap.insert( uniqueType );
+	}
+	return uniqueType;
+}
+
+UniqueType *Compiler::findUniqueType( enum TYPE typeId, UniqueList2 *list )
+{
+	UniqueType searchKey( typeId, list );
+	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
+	if ( uniqueType == 0 ) {
+		uniqueType = new UniqueType( typeId, list );
 		uniqeTypeMap.insert( uniqueType );
 	}
 	return uniqueType;
@@ -1020,6 +1031,14 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	return pd->findUniqueType( TYPE_PTR, ut->langEl );
 }
 
+UniqueType *LangTerm::evaluateNew2( Compiler *pd, CodeVect &code ) const
+{
+	/* Evaluate the expression. */
+	UniqueType *ut = typeRef->uniqueType;
+	code.append( IN_NEW_LIST );
+	return ut;
+}
+
 UniqueType *LangTerm::evaluateCast( Compiler *pd, CodeVect &code ) const
 {
 	expr->evaluate( pd, code );
@@ -1647,6 +1666,8 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 			return evaluateSendTree( pd, code );
 		case NewType:
 			return evaluateNew( pd, code );
+		case New2Type:
+			return evaluateNew2( pd, code );
 		case TypeIdType: {
 			/* Evaluate the expression. */
 			UniqueType *ut = typeRef->uniqueType;

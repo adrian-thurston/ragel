@@ -42,6 +42,7 @@ lex
 	token ALIAS / 'alias' /
 	token COMMIT / 'commit' /
 	token NEW / 'new' /
+	token NEW2 / 'new2' /
 	token PREEOF / 'preeof' /
 	token GLOBAL / 'global' /
 	token EOS / 'eos' /
@@ -544,6 +545,7 @@ def code_factor
 |	[MAKE_TOKEN POPEN call_arg_list PCLOSE] :MakeToken
 |	[TYPEID LT type_ref GT] :TypeId
 |	[NEW code_factor] :New
+|	[NEW2 type_ref] :New2
 |	[CAST LT type_ref GT code_factor] :Cast
 
 def type_ref

@@ -1762,6 +1762,17 @@ struct colm_location *colm_find_location( Program *prg, Tree *tree )
 	return locSearch( prg, tree );
 }
 
+HeapItem *newList2( Program *prg )
+{
+	HeapItem *hi = (HeapItem *) malloc( sizeof( HeapItem ) );
+	memset( hi, 0, sizeof(*hi) );
+	return hi;
+}
+
+/*
+ * Tree Printing
+ */
+
 void xmlEscapeData( struct colm_print_args *printArgs, const char *data, long len )
 {
 	int i;

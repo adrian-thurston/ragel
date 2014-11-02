@@ -87,24 +87,33 @@ int CmpUniqueType::compare( const UniqueType &ut1, const UniqueType &ut2 )
 		return -1;
 	else if ( ut1.typeId > ut2.typeId )
 		return 1;
-	else if ( ut1.typeId == TYPE_TREE || 
-			ut1.typeId == TYPE_PTR || 
-			ut1.typeId == TYPE_REF )
-	{
-		if ( ut1.langEl < ut2.langEl )
-			return -1;
-		else if ( ut1.langEl > ut2.langEl )
-			return 1;
-	}
-	else if ( ut1.typeId == TYPE_ITER ) {
-		if ( ut1.iterDef < ut2.iterDef )
-			return -1;
-		else if ( ut1.iterDef > ut2.iterDef )
-			return 1;
-	}
-	else {
-		/* Fail on anything unimplemented. */
-		assert( false );
+	switch ( ut1.typeId ) {
+		case TYPE_TREE:
+		case TYPE_PTR:
+		case TYPE_REF:
+		{
+			if ( ut1.langEl < ut2.langEl )
+				return -1;
+			else if ( ut1.langEl > ut2.langEl )
+				return 1;
+			break;
+		}
+		case TYPE_ITER: {
+			if ( ut1.iterDef < ut2.iterDef )
+				return -1;
+			else if ( ut1.iterDef > ut2.iterDef )
+				return 1;
+			break;
+		}
+		case TYPE_LIST2: {
+			if ( ut1.list < ut2.list )
+				return -1;
+			else if ( ut1.list > ut2.list )
+				return 1;
+			break;
+		}
+		case TYPE_NIL:
+			break;
 	}
 
 	return 0;

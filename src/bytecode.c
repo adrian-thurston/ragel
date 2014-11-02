@@ -2689,6 +2689,13 @@ again:
 			vm_push( res );
 			break;
 		}
+		case IN_NEW_LIST: {
+			debug( prg, REALM_BYTECODE, "IN_TREE_NEW \n" );
+
+			HeapItem *hi = newList2( prg );
+			vm_push( (Tree*)hi );
+			break;
+		}
 		case IN_TREE_NEW: {
 			debug( prg, REALM_BYTECODE, "IN_TREE_NEW \n" );
 

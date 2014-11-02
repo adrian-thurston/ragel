@@ -48,6 +48,7 @@ struct TypeAlias;
 struct RegionSet;
 struct ObjNameScope;
 struct IterCall;
+struct UniqueList2;
 typedef struct _PdaRun PdaRun;
 
 /* 
@@ -681,7 +682,6 @@ struct RegionSet
 	TokenRegion *tokenOnly;
 	TokenRegion *ignoreOnly;
 	TokenRegion *collectIgnore;
-
 
 	TokenDefListReg tokenDefList;
 
@@ -1788,24 +1788,38 @@ typedef AvlSetEl<IterDef> IterDefSetEl;
 
 struct UniqueType : public AvlTreeEl<UniqueType>
 {
-	UniqueType( int typeId ) :
+	UniqueType( enum TYPE typeId ) :
 		typeId(typeId), 
 		langEl(0), 
-		iterDef(0) {}
+		iterDef(0),
+		list(0)
+	{}
 
-	UniqueType( int typeId, LangEl *langEl ) :
+	UniqueType( enum TYPE typeId, LangEl *langEl ) :
 		typeId(typeId),
 		langEl(langEl),
-		iterDef(0) {}
+		iterDef(0),
+		list(0)
+	{}
 
-	UniqueType( int typeId, IterDef *iterDef ) :
+	UniqueType( enum TYPE typeId, IterDef *iterDef ) :
 		typeId(typeId),
 		langEl(0),
-		iterDef(iterDef) {}
+		iterDef(iterDef),
+		list(0)
+	{}
 
-	int typeId;
+	UniqueType( enum TYPE typeId, UniqueList2 *list ) :
+		typeId(typeId),
+		langEl(0),
+		iterDef(0),
+		list(list)
+	{}
+
+	enum TYPE typeId;
 	LangEl *langEl;
 	IterDef *iterDef;
+	UniqueList2 *list;
 
 	ObjectDef *objectDef();
 };
@@ -2596,6 +2610,7 @@ struct LangTerm
 		StringType,
 		MatchType,
 		NewType,
+		New2Type,
 		ConstructType,
 		TypeIdType,
 		SearchType,
@@ -2791,6 +2806,7 @@ struct LangTerm
 	void resolve( Compiler *pd );
 
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateNew2( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;
 	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool tree, bool stop ) const;
