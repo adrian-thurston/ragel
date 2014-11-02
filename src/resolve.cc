@@ -151,6 +151,41 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
+/* The non-tree list. */
+UniqueType *TypeRef::resolveTypeList2( Compiler *pd )
+{
+	nspace = pd->rootNamespace;
+
+	UniqueType *utValue = typeRef1->resolveType( pd );	
+
+	UniqueList2 searchKey( utValue );
+	UniqueList2 *inMap = pd->uniqueList2Map.find( &searchKey );
+
+	cerr << "hello dude" << endl;
+
+	if ( inMap == 0 ) {
+		/* Not found. Create. */
+		inMap = new UniqueList2( utValue );
+		pd->uniqueList2Map.insert( inMap );
+
+//		/* FIXME: Need uniqe name allocator for types. */
+//		static int listId = 0;
+//		String name( 36, "__list%d", listId++ );
+//
+//		GenericType *generic = new GenericType( name, GEN_LIST,
+//				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+//
+//		nspace->genericList.append( generic );
+//
+//		generic->declare( pd, nspace );
+//
+//		inMap->generic = generic;
+	}
+
+	generic = inMap->generic;
+	return pd->findUniqueType( TYPE_LIST2 );
+}
+
 UniqueType *TypeRef::resolveTypeVector( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
@@ -310,6 +345,9 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 			break;
 		case List:
 			uniqueType = resolveTypeList( pd );
+			break;
+		case List2:
+			uniqueType = resolveTypeList2( pd );
 			break;
 		case Vector:
 			uniqueType = resolveTypeVector( pd );

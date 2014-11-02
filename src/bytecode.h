@@ -321,6 +321,7 @@ typedef unsigned char uchar;
 #define TYPE_REF          0x03
 #define TYPE_PTR          0x04
 #define TYPE_ITER         0x05
+#define TYPE_LIST2        0x06
 
 /* Types of Generics. */
 #define GEN_LIST      0x10

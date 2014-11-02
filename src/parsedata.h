@@ -890,6 +890,7 @@ struct Compiler
 	UniqueRepeatMap uniqeRepeatMap;
 	UniqueMapMap uniqueMapMap;
 	UniqueListMap uniqueListMap;
+	UniqueList2Map uniqueList2Map;
 	UniqueVectorMap uniqueVectorMap;
 	UniqueParserMap uniqueParserMap;
 

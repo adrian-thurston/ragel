@@ -28,6 +28,7 @@ lex
 	token IN / 'in' /
 	token PARSER / 'parser' | 'accum' /
 	token LIST / 'list' /
+	token LIST2 / 'list2' /
 	token VECTOR / 'vector' /
 	token MAP / 'map' /
 	token PTR / 'ptr' /
@@ -550,6 +551,7 @@ def type_ref
 |	[PTR LT region_qual id opt_repeat GT] :Ptr
 |	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT] :Map
 |	[LIST LT type_ref GT] :List
+|	[LIST2 LT type_ref GT] :List2
 |	[VECTOR LT type_ref GT] :Vector
 |	[PARSER LT type_ref GT] :Parser
 
