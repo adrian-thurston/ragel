@@ -315,13 +315,17 @@ typedef unsigned char uchar;
 
 #define IN_SYSTEM                0xe5
 
+enum TYPE
+{
+	TYPE_NIL =   0x01,
+	TYPE_TREE =  0x02,
+	TYPE_REF =   0x03,
+	TYPE_PTR =   0x04,
+	TYPE_ITER =  0x05,
+	TYPE_LIST2 = 0x06
+};
+
 /* Types */
-#define TYPE_NIL          0x01
-#define TYPE_TREE         0x02
-#define TYPE_REF          0x03
-#define TYPE_PTR          0x04
-#define TYPE_ITER         0x05
-#define TYPE_LIST2        0x06
 
 /* Types of Generics. */
 #define GEN_LIST      0x10

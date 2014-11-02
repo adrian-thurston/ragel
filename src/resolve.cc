@@ -161,8 +161,6 @@ UniqueType *TypeRef::resolveTypeList2( Compiler *pd )
 	UniqueList2 searchKey( utValue );
 	UniqueList2 *inMap = pd->uniqueList2Map.find( &searchKey );
 
-	cerr << "hello dude" << endl;
-
 	if ( inMap == 0 ) {
 		/* Not found. Create. */
 		inMap = new UniqueList2( utValue );
