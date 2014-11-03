@@ -1829,7 +1829,6 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 	ObjectDef *objectDef();
 };
 
-
 struct CmpUniqueType
 {
 	static int compare( const UniqueType &ut1, const UniqueType &ut2 );
@@ -1912,27 +1911,6 @@ struct CmpUniqueList
 typedef AvlBasic< UniqueList, CmpUniqueList > UniqueListMap;
 
 /* 
- * Unique List2 Types
- */
-
-struct UniqueList2
-	: public AvlTreeEl<UniqueList2>
-{
-	UniqueList2( UniqueType *value ) :
-		value(value), generic(0) {}
-
-	UniqueType *value;
-	GenericType *generic;
-};
-
-struct CmpUniqueList2
-{
-	static int compare( const UniqueList2 &ut1, const UniqueList2 &ut2 );
-};
-
-typedef AvlBasic< UniqueList2, CmpUniqueList2 > UniqueList2Map;
-
-/* 
  * Unique Vector Types
  */
 
@@ -1992,6 +1970,7 @@ struct TypeRef
 		Literal,
 		Iterator,
 		Map,
+		Map2,
 		List,
 		List2,
 		Vector,
@@ -2163,6 +2142,7 @@ struct TypeRef
 	UniqueType *resolveTypeName( Compiler *pd );
 	UniqueType *resolveTypeLiteral( Compiler *pd );
 	UniqueType *resolveTypeMap( Compiler *pd );
+	UniqueType *resolveTypeMap2( Compiler *pd );
 	UniqueType *resolveTypeList( Compiler *pd );
 	UniqueType *resolveTypeList2( Compiler *pd );
 	UniqueType *resolveTypeVector( Compiler *pd );

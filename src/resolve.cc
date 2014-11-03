@@ -122,6 +122,12 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
+UniqueType *TypeRef::resolveTypeMap2( Compiler *pd )
+{
+	UniqueType *mapUt = resolveTypeMap( pd );
+	return pd->findUniqueType( TYPE_PTR, mapUt->langEl );
+}
+
 UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
@@ -314,6 +320,9 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 			break;
 		case Map:
 			uniqueType = resolveTypeMap( pd );
+			break;
+		case Map2:
+			uniqueType = resolveTypeMap2( pd );
 			break;
 		case List:
 			uniqueType = resolveTypeList( pd );

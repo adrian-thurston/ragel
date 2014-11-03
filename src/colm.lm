@@ -31,6 +31,7 @@ lex
 	token LIST2 / 'list2' /
 	token VECTOR / 'vector' /
 	token MAP / 'map' /
+	token MAP2 / 'map2' /
 	token PTR / 'ptr' /
 	token ITER / 'iter' /
 	token REF / 'ref' /
@@ -554,6 +555,7 @@ def type_ref
 	[region_qual id opt_repeat] :Id
 |	[PTR LT region_qual id opt_repeat GT] :Ptr
 |	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT] :Map
+|	[MAP2 LT MapKeyType: type_ref MapValueType: type_ref GT] :Map2
 |	[LIST LT type_ref GT] :List
 |	[LIST2 LT type_ref GT] :List2
 |	[VECTOR LT type_ref GT] :Vector

@@ -821,6 +821,12 @@ struct LoadColm
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, key, value );
 			break;
 		}
+		case type_ref::Map2: {
+			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
+			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map2, 0, key, value );
+			break;
+		}
 		case type_ref::List: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
@@ -1822,9 +1828,11 @@ struct LoadColm
 			break;
 		}
 		case code_factor::New2: {
-			TypeRef *listTypeRef = walkTypeRef( codeFactor.type_ref()._type_ref() );
-			TypeRef *typeRef = TypeRef::cons( codeFactor.type_ref().loc(),
-					TypeRef::List, 0, listTypeRef, 0 );
+			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
+			if ( typeRef->type == TypeRef::List2 )
+				typeRef->type = TypeRef::List;
+			else if ( typeRef->type == TypeRef::Map2 )
+				typeRef->type = TypeRef::Map;
 
 			/* Construct an empty constructor list. */
 			ConsItemList *list = ConsItemList::cons();
