@@ -303,7 +303,7 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 void BaseParser::addArgvList()
 {
 	TypeRef *typeRef = TypeRef::cons( internal, pd->uniqueTypeStr );
-	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List, 0, typeRef, 0 );
+	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List2, 0, typeRef, 0 );
 }
 
 ObjectDef *BaseParser::blockOpen()

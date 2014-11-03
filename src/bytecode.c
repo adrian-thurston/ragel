@@ -412,7 +412,10 @@ Tree *constructArgv( Program *prg, int argc, const char **argv )
 		treeUpref( arg );
 		listPushTail( prg, (List*)list, arg );
 	}
-	return list;
+	
+	Tree *listPtr = constructPointer( prg, list );
+	treeUpref( listPtr );
+	return listPtr;
 }
 
 /*

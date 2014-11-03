@@ -726,7 +726,7 @@ void ConsInit::parseInput( StmtList *stmtList )
 	/* Pop argv, this yields the file name . */
 	CallArgVect *popArgs = new CallArgVect;
 	QualItemVect *popQual = new QualItemVect;
-	popQual->append( QualItem( QualItem::Dot, internal, String( "argv" ) ) );
+	popQual->append( QualItem( QualItem::Arrow, internal, String( "argv" ) ) );
 
 	LangVarRef *popRef = LangVarRef::cons( internal,
 			0, curLocalFrame->rootScope, popQual, String("pop") );
