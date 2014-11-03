@@ -2862,7 +2862,8 @@ struct LangExpr
 		TermType
 	};
 
-	static LangExpr *cons( const InputLoc &loc, LangExpr *left, char op, LangExpr *right )
+	static LangExpr *cons( const InputLoc &loc, LangExpr *left,
+			char op, LangExpr *right )
 	{
 		LangExpr *e = new LangExpr;
 		e->loc = loc;
