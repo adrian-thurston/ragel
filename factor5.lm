@@ -1,5 +1,5 @@
 ##### LM #####
-print( argv.pop() '\n' )
+print( argv->pop() '\n' )
 ##### ARGS #####
 a
 ##### EXP #####
