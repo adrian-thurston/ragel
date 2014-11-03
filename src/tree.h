@@ -222,10 +222,10 @@ typedef struct _UserIter
 	long searchId;
 } UserIter;
 
-typedef struct heap_item
+typedef struct object
 {
-	struct heap_item *prev, *next;
-} HeapItem;
+	struct object *prev, *next;
+} Object;
 
 void treeUpref( Tree *tree );
 void treeDownref( struct colm_program *prg, Tree **sp, Tree *tree );
@@ -254,7 +254,7 @@ Tree *createGeneric( struct colm_program *prg, long genericId );
 Tree *constructToken( struct colm_program *prg, Tree **args, long nargs );
 Tree *constructStream( struct colm_program *prg );
 
-HeapItem *newList2( struct colm_program *prg );
+Object *newList2( struct colm_program *prg );
 
 int testFalse( struct colm_program *prg, Tree *tree );
 Tree *makeTree( struct colm_program *prg, Tree **args, long nargs );

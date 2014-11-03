@@ -1082,16 +1082,23 @@ free_tree:
 		}
 	}
 	else {
-		if ( tree->id == LEL_ID_STR ) {
+		switch ( tree->id ) {
+		case LEL_ID_STR: {
 			Str *str = (Str*) tree;
 			stringFree( prg, str->value );
 			treeFree( prg, tree );
+			break;
 		}
-		else if ( tree->id == LEL_ID_BOOL || tree->id == LEL_ID_INT )
+		case LEL_ID_BOOL:
+		case LEL_ID_INT: {
 			treeFree( prg, tree );
-		else if ( tree->id == LEL_ID_PTR )
+			break;
+		}
+		case LEL_ID_PTR: {
 			treeFree( prg, tree );
-		else if ( tree->id == LEL_ID_STREAM ) {
+			break;
+		}
+		case LEL_ID_STREAM: {
 			Stream *stream = (Stream*)tree;
 			clearSourceStream( prg, sp, stream->in );
 			if ( stream->in->file != 0 )
@@ -1100,8 +1107,9 @@ free_tree:
 				close( stream->in->fd );
 			free( stream->in );
 			streamFree( prg, stream );
+			break;
 		}
-		else { 
+		default: { 
 			if ( tree->id != LEL_ID_IGNORE )
 				stringFree( prg, tree->tokdata );
 
@@ -1115,7 +1123,8 @@ free_tree:
 			}
 
 			treeFree( prg, tree );
-		}
+			break;
+		}}
 	}
 
 	/* Any trees to downref? */
@@ -1762,11 +1771,11 @@ struct colm_location *colm_find_location( Program *prg, Tree *tree )
 	return locSearch( prg, tree );
 }
 
-HeapItem *newList2( Program *prg )
+Object *newList2( Program *prg )
 {
-	HeapItem *hi = (HeapItem *) malloc( sizeof( HeapItem ) );
-	memset( hi, 0, sizeof(*hi) );
-	return hi;
+	Object *obj = (Object *) malloc( sizeof( Object ) );
+	memset( obj, 0, sizeof(*obj) );
+	return obj;
 }
 
 /*

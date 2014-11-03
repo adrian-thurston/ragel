@@ -342,7 +342,8 @@ Tree *getLocalSplit( Program *prg, Tree **frame, long field )
 	return split;
 }
 
-static void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, LocalInfo *locals, long localsLen )
+static void downrefLocalTrees( Program *prg, Tree **sp,
+		Tree **frame, LocalInfo *locals, long localsLen )
 {
 	long i;
 	for ( i = localsLen-1; i >= 0; i-- ) {
@@ -355,7 +356,8 @@ static void downrefLocalTrees( Program *prg, Tree **sp, Tree **frame, LocalInfo 
 	}
 }
 
-static void downrefLocals( Program *prg, Tree ***psp, Tree **frame, LocalInfo *locals, long localsLen )
+static void downrefLocals( Program *prg, Tree ***psp,
+		Tree **frame, LocalInfo *locals, long localsLen )
 {
 	long i;
 	for ( i = localsLen-1; i >= 0; i-- ) {
@@ -1159,9 +1161,10 @@ again:
 
 			int i;
 			for ( i = 0; i < lelInfo[exec->parser->pdaRun->tokenId].numCaptureAttr; i++ ) {
-				CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[exec->parser->pdaRun->tokenId].captureAttr + i];
-				Head *data = stringAllocFull( prg, 
-						mark[ca->mark_enter], mark[ca->mark_leave] - mark[ca->mark_enter] );
+				LangElInfo *lei = &lelInfo[exec->parser->pdaRun->tokenId];
+				CaptureAttr *ca = &prg->rtd->captureAttr[lei->captureAttr + i];
+				Head *data = stringAllocFull( prg, mark[ca->mark_enter],
+						mark[ca->mark_leave] - mark[ca->mark_enter] );
 				Tree *string = constructString( prg, data );
 				treeUpref( string );
 				setLocal( exec->framePtr, -1 - i, string );
@@ -2230,7 +2233,8 @@ again:
 			vm_push( (SW)exec->iframePtr );
 			vm_push( (SW)exec->frameId );
 
-			/* Return location one instruction back. Depends on the size of of the frag/finish. */
+			/* Return location one instruction back. Depends on the size of of
+			 * the frag/finish. */
 			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
 			vm_push( (SW)returnTo );
 
@@ -2692,8 +2696,8 @@ again:
 		case IN_NEW_LIST: {
 			debug( prg, REALM_BYTECODE, "IN_TREE_NEW \n" );
 
-			HeapItem *hi = newList2( prg );
-			vm_push( (Tree*)hi );
+			Object *obj = newList2( prg );
+			vm_push( (Tree*)obj );
 			break;
 		}
 		case IN_TREE_NEW: {

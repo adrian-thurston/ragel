@@ -319,30 +319,32 @@ typedef unsigned char uchar;
 
 enum TYPE
 {
-	TYPE_NIL =   0x01,
-	TYPE_TREE =  0x02,
-	TYPE_REF =   0x03,
-	TYPE_PTR =   0x04,
-	TYPE_ITER =  0x05,
+	TYPE_NIL   = 0x01,
+	TYPE_TREE  = 0x02,
+	TYPE_REF   = 0x03,
+	TYPE_PTR   = 0x04,
+	TYPE_ITER  = 0x05,
 	TYPE_LIST2 = 0x06
 };
 
-/* Types */
-
 /* Types of Generics. */
-#define GEN_LIST      0x10
-#define GEN_MAP       0x11
-#define GEN_VECTOR    0x12
-#define GEN_PARSER    0x13
+enum GEN {
+	GEN_LIST     = 0x10,
+	GEN_MAP      = 0x11,
+	GEN_VECTOR   = 0x12,
+	GEN_PARSER   = 0x13
+};
 
 /* Known language element ids. */
-#define LEL_ID_PTR          1
-#define LEL_ID_VOID         2
-#define LEL_ID_BOOL         3
-#define LEL_ID_INT          4
-#define LEL_ID_STR          5
-#define LEL_ID_STREAM       6
-#define LEL_ID_IGNORE       7
+enum LEL_ID {
+	LEL_ID_PTR        = 1,
+	LEL_ID_VOID       = 2,
+	LEL_ID_BOOL       = 3,
+	LEL_ID_INT        = 4,
+	LEL_ID_STR        = 5,
+	LEL_ID_STREAM     = 6,
+	LEL_ID_IGNORE     = 7
+};
 
 /*
  * Flags
