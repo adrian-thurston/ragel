@@ -388,7 +388,8 @@ void BaseParser::cflDef( NtDef *ntDef, ObjectDef *objectDef, LelDefList *defList
 			/* If there is a capture, create the field. */
 			if ( pel->captureField != 0 ) {
 				/* Might already exist. */
-				ObjectField *newOf = objectDef->rootScope->checkRedecl( pel->captureField->name );
+				ObjectField *newOf = objectDef->rootScope->checkRedecl(
+						pel->captureField->name );
 				if ( newOf != 0 ) {
 					/* FIXME: check the types are the same. */
 				}
@@ -477,7 +478,8 @@ int BaseParser::lexFactorRepNum( const InputLoc &loc, const String &data )
 	return rep;
 }
 
-LexFactorAug *BaseParser::lexFactorLabel( const InputLoc &loc, const String &data, LexFactorAug *factorAug )
+LexFactorAug *BaseParser::lexFactorLabel( const InputLoc &loc,
+		const String &data, LexFactorAug *factorAug )
 {
 	/* Create the object field. */
 	TypeRef *typeRef = TypeRef::cons( loc, pd->uniqueTypeStr );
@@ -512,7 +514,8 @@ LexJoin *BaseParser::lexOptJoin( LexJoin *join, LexJoin *context )
 	return join;
 }
 
-LangExpr *BaseParser::send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof )
+LangExpr *BaseParser::send( const InputLoc &loc, LangVarRef *varRef,
+		ConsItemList *list, bool eof )
 {
 	ParserText *parserText = ParserText::cons( loc, curNspace(), list );
 	pd->parserTextList.append( parserText );
@@ -521,7 +524,8 @@ LangExpr *BaseParser::send( const InputLoc &loc, LangVarRef *varRef, ConsItemLis
 			parserText, eof ) );
 }
 
-LangExpr *BaseParser::sendTree( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof )
+LangExpr *BaseParser::sendTree( const InputLoc &loc, LangVarRef *varRef,
+		ConsItemList *list, bool eof )
 {
 	ParserText *parserText = ParserText::cons( loc, curNspace(), list );
 	pd->parserTextList.append( parserText );
@@ -530,8 +534,9 @@ LangExpr *BaseParser::sendTree( const InputLoc &loc, LangVarRef *varRef, ConsIte
 			parserText, eof ) );
 }
 
-LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop, ObjectField *objField,
-		TypeRef *typeRef, FieldInitVect *fieldInitVect, ConsItemList *list )
+LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
+		ObjectField *objField, TypeRef *typeRef, FieldInitVect *fieldInitVect,
+		ConsItemList *list )
 {
 	LangExpr *expr = 0;
 
@@ -557,9 +562,12 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop, Objec
 	ParserText *parserText = ParserText::cons( loc, curNspace(), list );
 	pd->parserTextList.append( parserText );
 
-	expr = LangExpr::cons( LangTerm::cons( loc, 
-			stop ? LangTerm::ParseStopType : ( tree ? LangTerm::ParseTreeType : LangTerm::ParseType ),
-			varRef, objField, parserTypeRef, fieldInitVect, constructor, parserText ) );
+	LangTerm::Type langTermType = stop ? LangTerm::ParseStopType : ( tree ? 
+					LangTerm::ParseTreeType : LangTerm::ParseType );
+
+	expr = LangExpr::cons( LangTerm::cons( loc, langTermType,
+			varRef, objField, parserTypeRef, fieldInitVect, constructor,
+			parserText ) );
 
 	/* Check for redeclaration. */
 	if ( objField != 0 ) {

@@ -40,7 +40,8 @@ UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 
 		if ( inDict != 0 ) {
 			switch ( inDict->type ) {
-				/* Defer to the typeRef we are an alias of. We need to guard against loops here. */
+				/* Defer to the typeRef we are an alias of. We need to guard
+				 * against loops here. */
 				case TypeMapEl::TypeAliasType:
 					return inDict->typeRef->resolveType( pd );
 
@@ -151,24 +152,10 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-/* The non-tree list. */
 UniqueType *TypeRef::resolveTypeList2( Compiler *pd )
 {
-	nspace = pd->rootNamespace;
-
-	UniqueType *ut1 = typeRef1->resolveType( pd );	
-
-	UniqueList2 searchKey( ut1 );
-	UniqueList2 *list= pd->uniqueList2Map.find( &searchKey );
-
-	if ( list == 0 ) {
-		/* Not found. Create. */
-		list = new UniqueList2( ut1 );
-		pd->uniqueList2Map.insert( list );
-		cerr << "creating list" << endl;
-	}
-
-	return pd->findUniqueType( TYPE_LIST2, list );
+	UniqueType *listUt = resolveTypeList( pd );
+	return pd->findUniqueType( TYPE_PTR, listUt->langEl );
 }
 
 UniqueType *TypeRef::resolveTypeVector( Compiler *pd )
@@ -423,9 +410,6 @@ void LangTerm::resolve( Compiler *pd )
 			break;
 		case NewType:
 			expr->resolve( pd );
-			break;
-		case New2Type:
-			typeRef->resolveType( pd );
 			break;
 		case TypeIdType:
 			typeRef->resolveType( pd );

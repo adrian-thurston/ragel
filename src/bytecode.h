@@ -64,8 +64,6 @@ typedef unsigned char uchar;
 #define IN_TREE_NEW              0x24
 #define IN_TREE_CAST             0xe4
 
-#define IN_NEW_LIST              0xef
-
 #define IN_GET_LOCAL_R           0x25
 #define IN_GET_LOCAL_WC          0x26
 #define IN_SET_LOCAL_WC          0x27

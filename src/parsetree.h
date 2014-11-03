@@ -1610,6 +1610,11 @@ struct ConsItemList
 		return cil;
 	}
 
+	static ConsItemList *cons()
+	{
+		return new ConsItemList;
+	}
+
 	void evaluateSendStream( Compiler *pd, CodeVect &code );
 };
 
@@ -2529,7 +2534,8 @@ typedef Vector<QualItem> QualItemVect;
 
 struct LangVarRef
 {
-	static LangVarRef *cons( const InputLoc &loc, Context *context, ObjNameScope *scope, QualItemVect *qual, const String &name )
+	static LangVarRef *cons( const InputLoc &loc, Context *context,
+			ObjNameScope *scope, QualItemVect *qual, const String &name )
 	{
 		LangVarRef *l = new LangVarRef;
 		l->loc = loc;
@@ -2540,7 +2546,8 @@ struct LangVarRef
 		return l;
 	}
 
-	static LangVarRef *cons( const InputLoc &loc, Context *context, ObjNameScope *scope, const String &name )
+	static LangVarRef *cons( const InputLoc &loc, Context *context,
+			ObjNameScope *scope, const String &name )
 	{
 		return cons( loc, context, scope, new QualItemVect, name );
 	}
@@ -2566,7 +2573,8 @@ struct LangVarRef
 			int lastPtrInQual, bool forWriting ) const;
 	void loadLocalObj( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
-	void loadContextObj( Compiler *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
+	void loadContextObj( Compiler *pd, CodeVect &code,
+			int lastPtrInQual, bool forWriting ) const;
 	void loadGlobalObj( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
 	void loadObj( Compiler *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
@@ -2610,7 +2618,6 @@ struct LangTerm
 		StringType,
 		MatchType,
 		NewType,
-		New2Type,
 		ConstructType,
 		TypeIdType,
 		SearchType,
@@ -2692,7 +2699,8 @@ struct LangTerm
 		return t;
 	}
 
-	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef, LangExpr *langExpr )
+	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef,
+			LangExpr *langExpr )
 	{
 		LangTerm *t = new LangTerm;
 		t->loc = loc;
@@ -2703,7 +2711,8 @@ struct LangTerm
 		return t;
 	}
 
-	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, Pattern *pattern )
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef,
+			Pattern *pattern )
 	{
 		LangTerm *t = new LangTerm;
 		t->loc = loc;
@@ -2713,7 +2722,8 @@ struct LangTerm
 		return t;
 	}
 
-	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef, LangVarRef *varRef )
+	static LangTerm *cons( const InputLoc &loc, Type type, TypeRef *typeRef,
+			LangVarRef *varRef )
 	{
 		LangTerm *t = new LangTerm;
 		t->loc = loc;
@@ -2723,8 +2733,9 @@ struct LangTerm
 		return t;
 	}
 
-	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ObjectField *objField,
-			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Constructor *constructor )
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef,
+			ObjectField *objField, TypeRef *typeRef, FieldInitVect *fieldInitArgs,
+			Constructor *constructor )
 	{
 		LangTerm *t = new LangTerm;
 		t->loc = loc;
@@ -2737,9 +2748,9 @@ struct LangTerm
 		return t;
 	}
 
-	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ObjectField *objField,
-			TypeRef *typeRef, FieldInitVect *fieldInitArgs, Constructor *constructor, 
-			ParserText *parserText )
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef,
+			ObjectField *objField, TypeRef *typeRef, FieldInitVect *fieldInitArgs,
+			Constructor *constructor, ParserText *parserText )
 	{
 		LangTerm *t = new LangTerm;
 		t->loc = loc;
@@ -2771,7 +2782,8 @@ struct LangTerm
 		return t;
 	}
 
-	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef, ParserText *parserText ) 
+	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef,
+			ParserText *parserText ) 
 	{
 		LangTerm *s = new LangTerm;
 		s->loc = loc;
@@ -2781,7 +2793,8 @@ struct LangTerm
 		return s;
 	}
 	
-	static LangTerm *consSend( const InputLoc &loc, LangVarRef *varRef, ParserText *parserText, bool eof ) 
+	static LangTerm *consSend( const InputLoc &loc, LangVarRef *varRef,
+			ParserText *parserText, bool eof ) 
 	{
 		LangTerm *s = new LangTerm;
 		s->loc = loc;
@@ -2792,7 +2805,8 @@ struct LangTerm
 		return s;
 	}
 	
-	static LangTerm *consSendTree( const InputLoc &loc, LangVarRef *varRef, ParserText *parserText, bool eof ) 
+	static LangTerm *consSendTree( const InputLoc &loc, LangVarRef *varRef,
+			ParserText *parserText, bool eof ) 
 	{
 		LangTerm *s = new LangTerm;
 		s->loc = loc;
@@ -2806,7 +2820,6 @@ struct LangTerm
 	void resolve( Compiler *pd );
 
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
-	UniqueType *evaluateNew2( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;
 	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool tree, bool stop ) const;

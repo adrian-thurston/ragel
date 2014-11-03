@@ -1822,9 +1822,18 @@ struct LoadColm
 			break;
 		}
 		case code_factor::New2: {
-			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
+			TypeRef *listTypeRef = walkTypeRef( codeFactor.type_ref()._type_ref() );
+			TypeRef *typeRef = TypeRef::cons( codeFactor.type_ref().loc(),
+					TypeRef::List, 0, listTypeRef, 0 );
+
+			/* Construct an empty constructor list. */
+			ConsItemList *list = ConsItemList::cons();
+
+			LangExpr *consExpr = construct( internal, 0, list,
+					typeRef, new FieldInitVect );
+
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
-					LangTerm::New2Type, typeRef ) );
+					LangTerm::NewType, consExpr ) );
 			break;
 		}
 		case code_factor::Cast: {

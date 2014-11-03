@@ -351,7 +351,7 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 			name, pd->nextObjectId++ );
 
 	switch ( typeId ) {
-		case GEN_MAP: 
+		case GEN_MAP:
 			pd->initMapFunctions( this );
 			break;
 		case GEN_LIST:

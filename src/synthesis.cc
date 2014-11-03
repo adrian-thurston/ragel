@@ -1013,7 +1013,8 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 			VarRefLookup lookup = item->varRef->lookupField( pd );
 
 			item->varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-			item->varRef->setField( pd, code, lookup.inObject, lookup.objField, exprType, false );
+			item->varRef->setField( pd, code, lookup.inObject,
+					lookup.objField, exprType, false );
 		}
 	}
 
@@ -1029,14 +1030,6 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 
 	code.append( IN_TREE_NEW );
 	return pd->findUniqueType( TYPE_PTR, ut->langEl );
-}
-
-UniqueType *LangTerm::evaluateNew2( Compiler *pd, CodeVect &code ) const
-{
-	/* Evaluate the expression. */
-	UniqueType *ut = typeRef->uniqueType;
-	code.append( IN_NEW_LIST );
-	return ut;
 }
 
 UniqueType *LangTerm::evaluateCast( Compiler *pd, CodeVect &code ) const
@@ -1666,8 +1659,6 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 			return evaluateSendTree( pd, code );
 		case NewType:
 			return evaluateNew( pd, code );
-		case New2Type:
-			return evaluateNew2( pd, code );
 		case TypeIdType: {
 			/* Evaluate the expression. */
 			UniqueType *ut = typeRef->uniqueType;
