@@ -73,8 +73,6 @@ def protocol
 def program
 	[c `%% protocol*]
 
-alias output accum<c>
-
 def port 
 	Port: int 
 	Protocol: str 
@@ -83,7 +81,7 @@ def port
 # Parse the input.
 parse P: program[ stdin ]
 
-Output: output Output = construct output []
+Output: parser<c> = new parser<c>
 
 # Take off the leading C from the input file and send it out.
 match P [C: c `%% protocol*]
@@ -94,7 +92,7 @@ send Output
 	"
 	eos
 
-print( Output.tree )
+print( Output->tree )
 ##### IN #####
 #include "some_header.h"
 

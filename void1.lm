@@ -26,7 +26,7 @@ def g
 
 global P: parser<g>
 
-P = cons parser<g> []
+P = new parser<g>
 
 void hello2()
 {
@@ -39,7 +39,7 @@ send P
 	"
 
 send stdout
-	[P()]
+	[P->finish()]
 
 ##### EXP #####
 
