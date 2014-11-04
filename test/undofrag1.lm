@@ -48,7 +48,7 @@ end # ctx
 
 
 CTX: ctx = new ctx
-CTX->SP = cons parser<start2> []
+CTX->SP = new parser<start2>
 send CTX->SP "a b{c}"
 
 parse Input: ctx::start1( deref CTX )[stdin]
@@ -56,7 +56,7 @@ parse Input: ctx::start1( deref CTX )[stdin]
 send CTX->SP "{e}f g"
 
 print( Input )
-print( CTX->SP() '\n' )
+print( CTX->SP->finish() '\n' )
 
 ##### IN #####
 a b c ( d ) e f g ;

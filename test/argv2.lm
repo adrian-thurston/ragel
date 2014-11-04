@@ -38,13 +38,13 @@ def args
 
 # The argument parser. Using an accumulator so we can send nulls after each
 # arg.
-cons ArgParser: parser<args>[]
+ArgParser: parser<args> = new parser<args>
 
 # Parse the args and extract the result into Args.
 ArgV: list<str> = argv
 for A: str in deref ArgV
 	send ArgParser [A '\0']
-Args: args = ArgParser()
+Args: args = ArgParser->finish()
 
 # Process the args.
 for Item: item in Args {

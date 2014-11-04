@@ -48,7 +48,6 @@ struct TypeAlias;
 struct RegionSet;
 struct ObjNameScope;
 struct IterCall;
-struct UniqueList2;
 typedef struct _PdaRun PdaRun;
 
 /* 
@@ -1797,35 +1796,24 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 	UniqueType( enum TYPE typeId ) :
 		typeId(typeId), 
 		langEl(0), 
-		iterDef(0),
-		list(0)
+		iterDef(0)
 	{}
 
 	UniqueType( enum TYPE typeId, LangEl *langEl ) :
 		typeId(typeId),
 		langEl(langEl),
-		iterDef(0),
-		list(0)
+		iterDef(0)
 	{}
 
 	UniqueType( enum TYPE typeId, IterDef *iterDef ) :
 		typeId(typeId),
 		langEl(0),
-		iterDef(iterDef),
-		list(0)
-	{}
-
-	UniqueType( enum TYPE typeId, UniqueList2 *list ) :
-		typeId(typeId),
-		langEl(0),
-		iterDef(0),
-		list(list)
+		iterDef(iterDef)
 	{}
 
 	enum TYPE typeId;
 	LangEl *langEl;
 	IterDef *iterDef;
-	UniqueList2 *list;
 
 	ObjectDef *objectDef();
 };
@@ -1976,6 +1964,7 @@ struct TypeRef
 		List2,
 		Vector,
 		Parser,
+		Parser2,
 		Ref,
 		Ptr,
 	};
@@ -2149,6 +2138,7 @@ struct TypeRef
 	UniqueType *resolveTypeList2( Compiler *pd );
 	UniqueType *resolveTypeVector( Compiler *pd );
 	UniqueType *resolveTypeParser( Compiler *pd );
+	UniqueType *resolveTypeParser2( Compiler *pd );
 	UniqueType *resolveType( Compiler *pd );
 	UniqueType *resolveTypePtr( Compiler *pd );
 	UniqueType *resolveTypeRef( Compiler *pd );

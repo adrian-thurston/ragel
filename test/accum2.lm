@@ -28,10 +28,10 @@ end # ctx
 
 
 CTX: ctx = new ctx
-cons SP: parser<ctx::start> []
-SP.ctx = deref CTX
+SP: parser<ctx::start> = new parser<ctx::start>
+SP->ctx = deref CTX
 send SP [stdin]
-Input: ctx::start = SP()
+Input: ctx::start = SP->finish()
 print( Input )
 ##### IN #####
 a b c ( d e f )

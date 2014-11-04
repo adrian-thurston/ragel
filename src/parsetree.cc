@@ -105,13 +105,6 @@ int CmpUniqueType::compare( const UniqueType &ut1, const UniqueType &ut2 )
 				return 1;
 			break;
 		}
-		case TYPE_LIST2: {
-			if ( ut1.list < ut2.list )
-				return -1;
-			else if ( ut1.list > ut2.list )
-				return 1;
-			break;
-		}
 		case TYPE_NIL:
 			break;
 	}

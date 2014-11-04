@@ -47,9 +47,9 @@ start parseStart( InputFile: stream )
 
 start parseTxt( T: str )
 {
-	cons a: accum<start>[]
-	send a [T] eos
-	return a.tree
+	A: parser<start> = new parser<start>
+	send A [T] eos
+	return A->tree
 }
 
 item* concatItems( IL1: item* IL2: item* )

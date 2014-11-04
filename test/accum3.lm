@@ -20,13 +20,13 @@ def item
 def args 
 	[item*]
 
-cons ArgParser: parser<args> []
+ArgParser: parser<args> = new parser<args>
 
 ArgV: list<str> ArgV = argv
 for A: str in deref ArgV 
 	send ArgParser [A '\0']
 
-Args: args = ArgParser() 
+Args: args = ArgParser->finish() 
 
 print_xml( Args )
 print( '\n' )

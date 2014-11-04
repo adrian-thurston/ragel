@@ -14,14 +14,14 @@ def start
 
 parse Input: start[ stdin ]
 
-cons Output: accum<start> []
+Output: parser<start> = new parser<start>
 
 for Id: id in Input {
 	send Output
 		"( [^Id] )
 }
 
-S: start = Output()
+S: start = Output->finish()
 
 print( S )
 ##### IN #####

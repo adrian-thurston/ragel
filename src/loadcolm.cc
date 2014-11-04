@@ -833,7 +833,7 @@ struct LoadColm
 		}
 		case type_ref::Parser: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser2, 0, type, 0 );
 			break;
 		}}
 		return tr;
@@ -1811,7 +1811,6 @@ struct LoadColm
 			break;
 		}
 		case code_factor::New: {
-
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
 
 			/* FIXME: modifying here, kindof a hack. */
@@ -1819,6 +1818,8 @@ struct LoadColm
 				typeRef->type = TypeRef::List;
 			else if ( typeRef->type == TypeRef::Map2 )
 				typeRef->type = TypeRef::Map;
+			else if ( typeRef->type == TypeRef::Parser2 )
+				typeRef->type = TypeRef::Parser;
 			else {
 				typeRef->inNew = true;
 			}

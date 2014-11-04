@@ -238,6 +238,12 @@ UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
+UniqueType *TypeRef::resolveTypeParser2( Compiler *pd )
+{
+	UniqueType *parserUt = resolveTypeParser( pd );
+	return pd->findUniqueType( TYPE_PTR, parserUt->langEl );
+}
+
 UniqueType *TypeRef::resolveTypePtr( Compiler *pd )
 {
 	typeRef1->resolveType( pd );
@@ -349,6 +355,9 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 			break;
 		case Parser:
 			uniqueType = resolveTypeParser( pd );
+			break;
+		case Parser2:
+			uniqueType = resolveTypeParser2( pd );
 			break;
 		case Ptr:
 			uniqueType = resolveTypePtr( pd );

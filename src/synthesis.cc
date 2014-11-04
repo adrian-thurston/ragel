@@ -182,18 +182,6 @@ UniqueType *Compiler::findUniqueType( enum TYPE typeId, IterDef *iterDef )
 	return uniqueType;
 }
 
-UniqueType *Compiler::findUniqueType( enum TYPE typeId, UniqueList2 *list )
-{
-	UniqueType searchKey( typeId, list );
-	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
-	if ( uniqueType == 0 ) {
-		uniqueType = new UniqueType( typeId, list );
-		uniqeTypeMap.insert( uniqueType );
-	}
-	return uniqueType;
-}
-
-
 /* 0-based. */
 ObjectField *ObjectDef::findFieldNum( long offset )
 {
@@ -1408,6 +1396,7 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) const
 {
 	varRef->evaluate( pd, code );
+	code.append( IN_PTR_DEREF_R );
 
 	/* Dup for every send. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ )

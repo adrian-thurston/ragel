@@ -16,8 +16,8 @@ def item2
 def start 
 	[item*]
 
-cons StartParser1: parser<start>[]
-cons StartParser2: parser<start>[]
+StartParser1: parser<start> = new parser<start>
+StartParser2: parser<start> = new parser<start>
 
 parse Item2: item2 "b
 
@@ -29,8 +29,8 @@ send StartParser1
 send_tree StartParser2
 	"a [Item2] c d\n" eos
 
-print [StartParser1.tree]
-print [StartParser2.tree "\n"]
+print [StartParser1->tree]
+print [StartParser2->tree "\n"]
 ######### EXP #########
 a b c d
 NIL
