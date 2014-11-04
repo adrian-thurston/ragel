@@ -15,7 +15,7 @@ context undo
 		[item* `; NL]
 end
 
-Undo: undo = new2 undo
+Undo: undo = new undo
 parse Input: undo::start( deref Undo )[ stdin ]
 print( Input )
 ##### IN #####

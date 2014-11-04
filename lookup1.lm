@@ -257,8 +257,8 @@ context lookup
 				typeId 
 				name
 				nil
-				new2 map<str list<ptr<lang_object>>>
-				new2 list<ptr<lang_object>>
+				new map<str list<ptr<lang_object>>>
+				new list<ptr<lang_object>>
 				lookupParent ) []
 		return obj
 	}
@@ -269,7 +269,7 @@ context lookup
 		ol: list<ptr<lang_object>> = definedIn->objectMap->find( name )
 		if !ol {
 			# Element not in the map already
-			ol = new2 list<ptr<lang_object>>
+			ol = new list<ptr<lang_object>>
 		}
 		ol->push_tail( obj )
 		definedIn->objectMap->store( name ol )
@@ -2144,7 +2144,7 @@ end # lookup
 # Global data declarations
 #
 
-Lookup: lookup = new2 lookup
+Lookup: lookup = new lookup
 
 # Constants for language object types.
 Lookup->NamespaceType = typeid<lookup::namespace_id>
@@ -2157,18 +2157,18 @@ Lookup->TemplateIdType = typeid<lookup::template_id>
 
 
 # Object stacks.
-Lookup->curNamespace = new2 list<ptr<lookup::lang_object>>
-Lookup->declNs = new2 list<ptr<lookup::lang_object>>
-Lookup->lookupNs = new2 list<ptr<lookup::lang_object>>
-Lookup->qualNs = new2 list<ptr<lookup::lang_object>>
-Lookup->templateParamNs = new2 list<ptr<lookup::lang_object>>
+Lookup->curNamespace = new list<ptr<lookup::lang_object>>
+Lookup->declNs = new list<ptr<lookup::lang_object>>
+Lookup->lookupNs = new list<ptr<lookup::lang_object>>
+Lookup->qualNs = new list<ptr<lookup::lang_object>>
+Lookup->templateParamNs = new list<ptr<lookup::lang_object>>
 
 # Declaration, declarator data.
-Lookup->declarationData = new2 list<lookup::declaration_data>
-Lookup->declaratorData = new2 list<lookup::declarator_data>
+Lookup->declarationData = new list<lookup::declaration_data>
+Lookup->declaratorData = new list<lookup::declarator_data>
 
 # Template declarations
-Lookup->templDecl = new2 list<int>
+Lookup->templDecl = new list<int>
 
 # Root namespace object
 Lookup->rootNamespace = createLangObject( Lookup->NamespaceType '<root_namespace>' nil )

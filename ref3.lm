@@ -16,16 +16,18 @@ for Id: id in ((start in S))
 
 print( S )
 
-def on_heap
+context on_heap
 	S: start
-	[]
+end
 
-ptr<on_heap> newHeap( S: start )
+on_heap newHeap( S: start )
 {
-	return new cons on_heap(S)[]
+	OnHeap: on_heap = new on_heap
+	OnHeap->S = S
+	return OnHeap
 }
 
-OnHeap: ptr<on_heap> = newHeap( S )
+OnHeap: on_heap = newHeap( S )
 
 for Id: id in OnHeap->S 
 {
@@ -37,7 +39,8 @@ print( S )
 
 int main( S: start )
 {
-	OnHeap: ptr<on_heap> = new cons on_heap(S)[]
+	OnHeap: on_heap = new on_heap
+	OnHeap->S = S
 
 	for Id: id in OnHeap->S 
 	{

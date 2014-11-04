@@ -91,7 +91,7 @@ context counting
 		}
 end # counting
 
-Counting: counting = new2 counting
+Counting: counting = new counting
 parse counting::start( deref Counting )[ stdin ]
 ##### IN #####
 3 1 b c 1 1 0 3 a b c
