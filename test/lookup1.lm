@@ -74,10 +74,10 @@ context lookup
 	{
 		# LOG print( '  looking in ', obj->name, '\n' )
 
-		ol: list<ptr<lang_object>> = obj->objectMap.find( name )
+		ol: list<ptr<lang_object>> = obj->objectMap->find( name )
 		if ol {
 			# LOG print( '  * found an object: ', ol.head, '\n' )
-			return ol.head
+			return ol->head
 		}
 
 		return nil
@@ -92,7 +92,7 @@ context lookup
 			return found
 
 		localObjInherited: list<ptr<lang_object>> = obj->inherited
-		for II: ptr<lang_object> in localObjInherited {
+		for II: ptr<lang_object> in deref localObjInherited {
 			inh: ptr<lang_object> = II
 
 			# First check if the inherited object is the one we are after.
@@ -116,7 +116,7 @@ context lookup
 
 		# Start with the objects in the templateParamNs.
 		localTemplateParamNs: list<ptr<lang_object>> = templateParamNs
-		for TemplParaObjIter: ptr<lang_object> in rev_child(localTemplateParamNs) {
+		for TemplParaObjIter: ptr<lang_object> in rev_child(deref localTemplateParamNs) {
 			found = lookupWithInheritance( TemplParaObjIter name )
 			if found
 				break
@@ -125,7 +125,7 @@ context lookup
 		if !found {
 			# Iterator over the objects starting at the head of the lookup stack
 			# and going up through the lookup parents.
-			lookupIn: ptr<lang_object> = lookupNs.tail
+			lookupIn: ptr<lang_object> = lookupNs->tail
 			while lookupIn {
 				found = lookupWithInheritance( lookupIn name )
 				if found
@@ -188,12 +188,12 @@ context lookup
 				name: str = match_text
 				found: ptr<lang_object> = nil
 				qualObj: ptr<lang_object> = nil
-				if qualNs.tail {
+				if qualNs->tail {
 					# LOG print( 'qualified lookup of ', name, '\n' )
 
 					# Transfer the qualification to the token and reset it.
-					qualObj = qualNs.tail
-					qualNs.tail = nil
+					qualObj = qualNs->tail
+					qualNs->tail = nil
 
 					# Lookup using the qualification. 
 					found = lookupWithInheritance( qualObj name )
@@ -257,8 +257,8 @@ context lookup
 				typeId 
 				name
 				nil
-				construct map<str list<ptr<lang_object>>> []
-				construct list<ptr<lang_object>> []
+				new2 map<str list<ptr<lang_object>>>
+				new2 list<ptr<lang_object>>
 				lookupParent ) []
 		return obj
 	}
@@ -266,20 +266,20 @@ context lookup
 	# Building the language object tree.
 	int insertObject( definedIn: ptr<lang_object> name: str obj: ptr<lang_object> )
 	{
-		ol: list<ptr<lang_object>> = definedIn->objectMap.find( name )
+		ol: list<ptr<lang_object>> = definedIn->objectMap->find( name )
 		if !ol {
 			# Element not in the map already
-			ol = construct list<ptr<lang_object>> []
+			ol = new2 list<ptr<lang_object>>
 		}
-		ol.push_tail( obj )
-		definedIn->objectMap.store( name ol )
+		ol->push_tail( obj )
+		definedIn->objectMap->store( name ol )
 	}
 
 	ptr<lang_object> findClass( inObj: ptr<lang_object>name: str )
 	{
-		ol: list<ptr<lang_object>> = inObj->objectMap.find( name )
+		ol: list<ptr<lang_object>> = inObj->objectMap->find( name )
 		if ol { 
-			for ObjIter: ptr<lang_object> in ol {
+			for ObjIter: ptr<lang_object> in deref ol {
 				obj: ptr<lang_object> = ObjIter
 				if obj->typeId == ClassType {
 					return obj
@@ -291,9 +291,9 @@ context lookup
 
 	ptr<lang_object> findTemplateClass( inObj: ptr<lang_object> name: str )
 	{
-		ol: list<ptr<lang_object>> = inObj->objectMap.find( name )
+		ol: list<ptr<lang_object>> = inObj->objectMap->find( name )
 		if ol { 
-			for ObjIter: ptr<lang_object> in ol {
+			for ObjIter: ptr<lang_object> in deref ol {
 				obj: ptr<lang_object> = ObjIter
 				if obj->typeId == TemplateClassType
 					return obj
@@ -319,33 +319,33 @@ context lookup
 	def qualifying_name 
 		[class_name]
 		{
-			qualNs.tail = r1.lookupId.obj
+			qualNs->tail = r1.lookupId.obj
 		}
 
 	|	[namespace_id]
 		{
 			match r1 [Id: lookup_id]
-			qualNs.tail = Id.obj
+			qualNs->tail = Id.obj
 		}
 
 	|	[typedef_id]
 		{
 			match r1 [Id: lookup_id]
-			qualNs.tail = Id.obj->typedefOf
+			qualNs->tail = Id.obj->typedefOf
 		}
 
 	def designated_qualifying_name 
 		[`template any_id]
 		{
 			# FIXME: nulling qualNs is not the right thing to do here.
-			qualNs.tail = nil
+			qualNs->tail = nil
 		}
 
 	|	[`template any_id 
 			templ_arg_open template_argument_list_opt templ_arg_close]
 		{
 			# FIXME: nulling qualNs is not the right thing to do here.
-			qualNs.tail = nil
+			qualNs->tail = nil
 		}
 
 	#
@@ -369,8 +369,8 @@ context lookup
 		{
 			# Normally the token translation transfers the qualification. Since
 			# the operator_function_id does not end in a lookup we must do it ourselves.
-			qualObj: ptr<lang_object> = qualNs.tail
-			qualNs.tail = nil
+			qualObj: ptr<lang_object> = qualNs->tail
+			qualNs->tail = nil
 
 			lhs.lookupId = construct lookup_id ["x"]
 			lhs.lookupId.data = '<operator_function_id>'
@@ -381,8 +381,8 @@ context lookup
 		{
 			# Normally the token translation transfers the qualification. Since
 			# the operator_function_id does not } in a lookup we must do it ourselves.
-			qualObj: ptr<lang_object> = qualNs.tail
-			qualNs.tail = nil
+			qualObj: ptr<lang_object> = qualNs->tail
+			qualNs->tail = nil
 
 			# Do we need qual reset here becauase operator_function_id does not do it?
 			lhs.lookupId = construct lookup_id ["x"]
@@ -440,13 +440,13 @@ context lookup
 	def templ_arg_open 
 		[`<]
 		{
-			qualNs.push_tail( nil )
+			qualNs->push_tail( nil )
 		}
 
 	def templ_arg_close
 		[`>]
 		{
-			qualNs.pop_tail()
+			qualNs->pop_tail()
 		}
 
 	def declaration 
@@ -482,19 +482,19 @@ context lookup
 		[]
 		{
 			# LOG print( 'opening new declaration_data with templDecl: ', templDecl.tail, '\n' )
-			declarationData.push_tail( construct declaration_data ( 0 0 0 ) [] )
+			declarationData->push_tail( construct declaration_data ( 0 0 0 ) [] )
 
 			# Transfer the template flag and reset it.
-			declarationData.tail.isTemplate = templDecl.tail
-			templDecl.push_tail( 0 )
+			declarationData->tail.isTemplate = templDecl->tail
+			templDecl->push_tail( 0 )
 		}
 
 	def declaration_end 
 		[]
 		{
 			# LOG print( 'closing declaration_data\n' )
-			declarationData.pop_tail()
-			templDecl.pop_tail()
+			declarationData->pop_tail()
+			templDecl->pop_tail()
 		}
 
 	def decl_specifier_sing 
@@ -502,7 +502,7 @@ context lookup
 		{
 			# Store the object type of the declaration (if any) for use
 			# by typedefs. 
-			declarationData.tail.typeObj = r1.lookupId.obj
+			declarationData->tail.typeObj = r1.lookupId.obj
 		}
 
 	def type_specifier_seq
@@ -652,7 +652,7 @@ context lookup
 			name: str = Id.data
 
 			# Get the ns the class is declared in.
-			parentObj: ptr<lang_object> = declNs.tail
+			parentObj: ptr<lang_object> = declNs->tail
 			if Id.qualObj
 				parentObj = Id.qualObj
 
@@ -667,12 +667,12 @@ context lookup
 				# Class does not exist in the parent scope, create it.
 				nsType: int = declaredClassType()
 
-				declaredClass = createLangObject( nsType name lookupNs.tail )
+				declaredClass = createLangObject( nsType name lookupNs->tail )
 
 				# FIXME: handle friends. Make the class visible only if we are NOT
 				# in a friend declaration.  The new class object is necessary to
 				# properly process the body of the class.
-				if declarationData.tail.isFriend == 0
+				if declarationData->tail.isFriend == 0
 					insertObject( parentObj name declaredClass )
 			}
 		}
@@ -686,8 +686,8 @@ context lookup
 			# TODO: should look for existing enums of the same name.
 			Id: lookup_id = lookup_id in r3
 			# LOG print( 'creating enumeration ' Id.data '\n' )
-			enum: ptr<lang_object> = createLangObject( EnumType Id.data lookupNs.tail )
-			insertObject( declNs.tail Id.data enum )
+			enum: ptr<lang_object> = createLangObject( EnumType Id.data lookupNs->tail )
+			insertObject( declNs->tail Id.data enum )
 		}
 
 	def decl_specifier_mult_seq_opt 
@@ -705,12 +705,12 @@ context lookup
 
 	|	[`friend]
 		{
-			declarationData.tail.isFriend = 1
+			declarationData->tail.isFriend = 1
 		}
 
 	|	[`typedef]
 		{
-			declarationData.tail.isTypedef = 1
+			declarationData->tail.isTypedef = 1
 		}
 
 	def storage_class_specifier 
@@ -756,8 +756,8 @@ context lookup
 			# TODO: should look for existing enums of the same name.
 			Id: lookup_id = lookup_id in r3
 			# LOG print( 'creating enumeration ' Id.data '\n' )
-			enum: ptr<lang_object> = createLangObject( EnumType Id.data lookupNs.tail )
-			insertObject( declNs.tail Id.data enum )
+			enum: ptr<lang_object> = createLangObject( EnumType Id.data lookupNs->tail )
+			insertObject( declNs->tail Id.data enum )
 		}
 
 	|	[`enum `{ enumerator_list_opt `}]
@@ -785,15 +785,15 @@ context lookup
 		[enumerator_id]
 		{
 			Id: lookup_id = lookup_id in r1
-			enumId: ptr<lang_object> = createLangObject( IdType Id.data lookupNs.tail )
-			insertObject( declNs.tail Id.data enumId )
+			enumId: ptr<lang_object> = createLangObject( IdType Id.data lookupNs->tail )
+			insertObject( declNs->tail Id.data enumId )
 		}
 
 	|	[enumerator_id `= constant_expression]
 		{
 			Id: lookup_id = lookup_id in r1
-			enumId: ptr<lang_object> = createLangObject( IdType Id.data lookupNs.tail )
-			insertObject( declNs.tail Id.data enumId )
+			enumId: ptr<lang_object> = createLangObject( IdType Id.data lookupNs->tail )
+			insertObject( declNs->tail Id.data enumId )
 		}
 
 	def enumerator_id
@@ -1090,17 +1090,17 @@ context lookup
 	def compound_begin 
 		[]
 		{
-			newCompound: ptr<lang_object> = createLangObject( 0 '<compound_begin>' lookupNs.tail  )
-			lookupNs.push_tail( newCompound )
-			declNs.push_tail( newCompound )
+			newCompound: ptr<lang_object> = createLangObject( 0 '<compound_begin>' lookupNs->tail  )
+			lookupNs->push_tail( newCompound )
+			declNs->push_tail( newCompound )
 			# LOG print( 'opening <compound>\n' )
 		}
 
 	def compound_end 
 		[]
 		{
-			lookupNs.pop_tail()
-			declNs.pop_tail()
+			lookupNs->pop_tail()
+			declNs->pop_tail()
 			# LOG print( 'closing <compound>\n' )
 		}
 
@@ -1204,7 +1204,7 @@ context lookup
 			name: str = r1.lookupId.data
 			qualObj: ptr<lang_object> = r1.lookupId.qualObj
 
-			parentObj: ptr<lang_object> = declNs.tail
+			parentObj: ptr<lang_object> = declNs->tail
 			if qualObj {
 				parentObj = qualObj
 			}
@@ -1224,29 +1224,29 @@ context lookup
 			}
 
 			obj: ptr<lang_object> = nil
-			if name && !isConstructor && declarationData.tail.isFriend == 0 {
-				if declarationData.tail.isTypedef {
-					obj = createLangObject( TypedefType name lookupNs.tail )
-					obj->typedefOf = declarationData.tail.typeObj
+			if name && !isConstructor && declarationData->tail.isFriend == 0 {
+				if declarationData->tail.isTypedef {
+					obj = createLangObject( TypedefType name lookupNs->tail )
+					obj->typedefOf = declarationData->tail.typeObj
 					insertObject( parentObj name obj )
 
 					# LOG print( 'making declarator ' name ' a typedef\n' )
 				}
 				else {
 					if !qualObj {
-						if declarationData.tail.isTemplate {
+						if declarationData->tail.isTemplate {
 							# If in a template declaration and the name is not qualified then
 							# create the template id.
-							obj = createLangObject( TemplateIdType name lookupNs.tail )
+							obj = createLangObject( TemplateIdType name lookupNs->tail )
 							#object->objType = declarationData.tail.type
-							insertObject( declNs.tail name obj )
+							insertObject( declNs->tail name obj )
 
 							# LOG print( 'making declarator ' name ' a template id\n' )
 						}
 						else {
-							obj = createLangObject( IdType name lookupNs.tail )
+							obj = createLangObject( IdType name lookupNs->tail )
 							#object->objType = declarationData.tail().type;
-							insertObject( declNs.tail name obj )
+							insertObject( declNs->tail name obj )
 
 							# LOG print( 'making declarator ' name ' an id\n' ) 
 						}
@@ -1254,15 +1254,15 @@ context lookup
 				}
 			}
 
-			declaratorData.push_tail( construct declarator_data (
-					qualObj nil lookupNs.tail ) [] )
+			declaratorData->push_tail( construct declarator_data (
+					qualObj nil lookupNs->tail ) [] )
 
 			# If the declarator is qualified, push the qualification to the lookup
 			# stack. Also save it in the declarator data so it can be passed to a
 			# function body if needed.
 			if qualObj {
-				lookupNs.push_tail( qualObj )
-				declaratorData.tail.lookupObj = qualObj
+				lookupNs->push_tail( qualObj )
+				declaratorData->tail.lookupObj = qualObj
 			}
 
 			# LOG print( 'reduced declarator_id: ' name '\n' )
@@ -1276,22 +1276,22 @@ context lookup
 		{
 			# Get the lookupObject from the scope and pass it up. If we are about to
 			# parse a function body it will be needed.
-			lhs.lookupObj = declaratorData.tail.lookupObj
+			lhs.lookupObj = declaratorData->tail.lookupObj
 
-			pdcScope: ptr<lang_object> = declaratorData.tail.pdcScope
-			qualObj: ptr<lang_object> = declaratorData.tail.qualObj
+			pdcScope: ptr<lang_object> = declaratorData->tail.pdcScope
+			qualObj: ptr<lang_object> = declaratorData->tail.qualObj
 
-			declaratorData.pop_tail()
+			declaratorData->pop_tail()
 
 			if pdcScope {
 				# LOG print( 'closing <pdc_scope>\n' )
-				lookupNs.pop_tail()
-				declNs.pop_tail()
+				lookupNs->pop_tail()
+				declNs->pop_tail()
 			}
 
 			if qualObj {
 				# LOG print( 'popping lookupNs\n' )
-				lookupNs.pop_tail()
+				lookupNs->pop_tail()
 			}
 		}
 
@@ -1353,7 +1353,7 @@ context lookup
 		[]
 		{
 			#  Make scope for declarator.
-			declaratorData.push_tail( construct declarator_data [] )
+			declaratorData->push_tail( construct declarator_data [] )
 		}
 
 	def abstract_decl_array_or_param_seq_opt
@@ -1379,14 +1379,14 @@ context lookup
 	def pdc_start 
 		[]
 		{
-			if !declaratorData.tail.pdcScope {
+			if !declaratorData->tail.pdcScope {
 				# We are going to need a scope for the declarator.
-				pdcScope: ptr<lang_object> = createLangObject( 0 '<pdc_scope>' lookupNs.tail )
-				lookupNs.push_tail( pdcScope )
-				declNs.push_tail( pdcScope )
+				pdcScope: ptr<lang_object> = createLangObject( 0 '<pdc_scope>' lookupNs->tail )
+				lookupNs->push_tail( pdcScope )
+				declNs->push_tail( pdcScope )
 
-				declaratorData.tail.pdcScope = pdcScope
-				declaratorData.tail.lookupObj = pdcScope
+				declaratorData->tail.pdcScope = pdcScope
+				declaratorData->tail.lookupObj = pdcScope
 				# LOG print( 'opening <pdc_scope>\n' )
 			}
 		}
@@ -1449,14 +1449,14 @@ context lookup
 			# The lookupObj from the declarator is the deepest lookup object found
 			# while parsing the declarator. Make it visible in the function body.
 			# This could be the args, the qualObj, or the parent to the function.
-			lookupNs.push_tail( r1.lookupObj )
+			lookupNs->push_tail( r1.lookupObj )
 		}
 
 	def function_def_end 
 		[]
 		{
 			# Pop the lookup object.
-			lookupNs.pop_tail()
+			lookupNs->pop_tail()
 		}
 
 	def function_body
@@ -1466,10 +1466,10 @@ context lookup
 		[]
 		{
 			newFunctionBody: ptr<lang_object> = createLangObject( 0 
-					'<function_body_begin>' lookupNs.tail )
-			lookupNs.push_tail( newFunctionBody )
-			declNs.push_tail( newFunctionBody )
-			templDecl.push_tail( 0 )
+					'<function_body_begin>' lookupNs->tail )
+			lookupNs->push_tail( newFunctionBody )
+			declNs->push_tail( newFunctionBody )
+			templDecl->push_tail( 0 )
 			# LOG print( 'opening <function_body>\n' )
 		}
 
@@ -1478,9 +1478,9 @@ context lookup
 		{
 			# First undoes the function body begin work. Then undoes the setup in
 			# function_def_declarator.
-			declNs.pop_tail()
-			lookupNs.pop_tail()
-			templDecl.pop_tail()
+			declNs->pop_tail()
+			lookupNs->pop_tail()
+			templDecl->pop_tail()
 			# LOG print( 'closing <function_body>\n' )
 		}
 
@@ -1492,7 +1492,7 @@ context lookup
 
 	int declaredClassType()
 	{
-		if declarationData.tail.isTemplate {
+		if declarationData->tail.isTemplate {
 			return TemplateClassType
 		} else {
 			return ClassType
@@ -1523,9 +1523,9 @@ context lookup
 
 			# LOG print( 'creating new anonymous class\n' )
 			newClass: ptr<lang_object> = createLangObject( nsType 
-					'<anon_class>' lookupNs.tail )
-			lookupNs.push_tail( newClass )
-			declNs.push_tail( newClass )
+					'<anon_class>' lookupNs->tail )
+			lookupNs->push_tail( newClass )
+			declNs->push_tail( newClass )
 		}
 
 	|	[class_key nested_name_specifier_opt class_head_name]
@@ -1534,7 +1534,7 @@ context lookup
 			name: str = Id.data
 
 			# Get the ns the class is declared in.
-			parentObj: ptr<lang_object> = declNs.tail
+			parentObj: ptr<lang_object> = declNs->tail
 			if Id.qualObj
 				parentObj = Id.qualObj
 
@@ -1549,18 +1549,18 @@ context lookup
 				# Class does not exist in the parent scope, create it.
 				nsType: int = declaredClassType()
 
-				declaredClass = createLangObject( nsType name lookupNs.tail )
+				declaredClass = createLangObject( nsType name lookupNs->tail )
 
 				# FIXME: handle friends. Make the class visible only if we are NOT
 				# in a friend declaration.  The new class object is necessary to
 				# properly process the body of the class.
-				if declarationData.tail.isFriend == 0
+				if declarationData->tail.isFriend == 0
 					insertObject( parentObj name declaredClass )
 			}
 
 			# Push the found/new class.
-			lookupNs.push_tail( declaredClass )
-			declNs.push_tail( declaredClass )
+			lookupNs->push_tail( declaredClass )
+			declNs->push_tail( declaredClass )
 		}
 
 	|	[class_key nested_name_specifier_opt templ_class_id
@@ -1579,23 +1579,23 @@ context lookup
 			if !declaredClass {
 				# LOG print( 'making new template specialization\n' )
 				nsType: int = declaredClassType()
-				declaredClass = createLangObject( nsType id lookupNs.tail )
+				declaredClass = createLangObject( nsType id lookupNs->tail )
 				# LOG print( 'declaredClass: ' declaredClass '\n' )
 				declaredClass->specializationOf = classObj
 				# $$->typeListMapEl = classObj->typeListMap.insert( typeList declaredClass );
 			}
 
 			# Push the found/new class.
-			lookupNs.push_tail( declaredClass )
-			declNs.push_tail( declaredClass )
+			lookupNs->push_tail( declaredClass )
+			declNs->push_tail( declaredClass )
 		}
 
 	def class_body_end 
 		[]
 		{
 			# Pop the class ns.
-			lookupNs.pop_tail()
-			declNs.pop_tail()
+			lookupNs->pop_tail()
+			declNs->pop_tail()
 
 			# LOG print( 'closing off class\n' )
 		}
@@ -1694,14 +1694,14 @@ context lookup
 		{
 			obj: ptr<lang_object> = r2.lookupId.obj
 			if obj
-				insertObject( declNs.tail obj->name obj )
+				insertObject( declNs->tail obj->name obj )
 		}
 
 	|	[`using type_id `;]
 		{
 			obj: ptr<lang_object> = r2.lookupId.obj
 			if obj
-				insertObject( declNs.tail obj->name obj )
+				insertObject( declNs->tail obj->name obj )
 		}
 
 	def using_directive
@@ -1713,9 +1713,9 @@ context lookup
 			# for longer cycles as well. Note that even gcc 3.3.5 does not bother.
 			match r5 [Id: lookup_id]
 			usingObject: ptr<lang_object> = Id.obj
-			inObject: ptr<lang_object> = declNs.tail
+			inObject: ptr<lang_object> = declNs->tail
 			if usingObject != inObject
-				inObject->inherited.push_tail( usingObject )
+				inObject->inherited->push_tail( usingObject )
 		}
 
 
@@ -1740,23 +1740,23 @@ context lookup
 		if inheritedObject->typeId == TypedefType
 			inheritedObject = inheritedObject->typedefOf
 
-		inObject->inherited.push_tail( inheritedObject )
+		inObject->inherited->push_tail( inheritedObject )
 	}
 
 	def base_specifier 
 		[root_qual_opt nested_name_specifier_opt type_name]
 		{
-			addBaseSpecifier( declNs.tail r3.lookupId.obj )
+			addBaseSpecifier( declNs->tail r3.lookupId.obj )
 		}
 
 	|	[`virtual access_specifier_opt root_qual_opt nested_name_specifier_opt type_name]
 		{
-			addBaseSpecifier( declNs.tail r5.lookupId.obj )
+			addBaseSpecifier( declNs->tail r5.lookupId.obj )
 		}
 
 	|	[access_specifier virtual_opt root_qual_opt nested_name_specifier_opt type_name]
 		{
-			addBaseSpecifier( declNs.tail r5.lookupId.obj )
+			addBaseSpecifier( declNs->tail r5.lookupId.obj )
 		}
 
 	def virtual_opt 
@@ -1858,19 +1858,19 @@ context lookup
 	def template_declaration 
 		[template_declaration_params declaration]
 		{
-			templDecl.pop_tail()
-			templateParamNs.pop_tail()
+			templDecl->pop_tail()
+			templateParamNs->pop_tail()
 		}
 
 	def template_declaration_params
 		[`template `< tpl_start template_parameter_list `>]
 		{
-			templDecl.push_tail( 1 )
+			templDecl->push_tail( 1 )
 		}
 
 	|	[`export `template `< tpl_start template_parameter_list `>]
 		{
-			templDecl.push_tail( 1 )
+			templDecl->push_tail( 1 )
 		}
 
 	def tpl_start 
@@ -1878,8 +1878,8 @@ context lookup
 		{
 			# Create a new scope for the template parameters.
 			newTemplateParamScope: ptr<lang_object> = 
-				createLangObject( 0 '<tpl_start>' lookupNs.tail )
-			templateParamNs.push_tail( newTemplateParamScope )
+				createLangObject( 0 '<tpl_start>' lookupNs->tail )
+			templateParamNs->push_tail( newTemplateParamScope )
 		}
 
 	def template_parameter_list 
@@ -1921,8 +1921,8 @@ context lookup
 			if Id {
 				# The lookup ns should be a template param scope.
 				newClass: ptr<lang_object> = 
-					createLangObject( ClassType Id.data lookupNs.tail )
-				insertObject( templateParamNs.tail Id.data newClass )
+					createLangObject( ClassType Id.data lookupNs->tail )
+				insertObject( templateParamNs->tail Id.data newClass )
 			}
 		}
 
@@ -1932,8 +1932,8 @@ context lookup
 			if Id {
 				# The lookup ns should be a template param scope.
 				newClass: ptr<lang_object> = 
-					createLangObject( ClassType Id.data lookupNs.tail )
-				insertObject( templateParamNs.tail Id.data newClass )
+					createLangObject( ClassType Id.data lookupNs->tail )
+				insertObject( templateParamNs->tail Id.data newClass )
 			}
 		}
 
@@ -1943,8 +1943,8 @@ context lookup
 			Id: lookup_id = lookup_id in r7
 			if Id {
 				newClass: ptr<lang_object> = 
-					createLangObject( TemplateClassType Id.data lookupNs.tail )
-				insertObject( templateParamNs.tail Id.data newClass )
+					createLangObject( TemplateClassType Id.data lookupNs->tail )
+				insertObject( templateParamNs->tail Id.data newClass )
 			}
 		}
 
@@ -2003,15 +2003,15 @@ context lookup
 		{
 			match r2 [Id: lookup_id]
 			nspace: ptr<lang_object> = createLangObject(
-					NamespaceType Id.data lookupNs.tail )
+					NamespaceType Id.data lookupNs->tail )
 
 			# Insert the new object into the dictionary of the parent.
-			insertObject( curNamespace.tail Id.data nspace )
+			insertObject( curNamespace->tail Id.data nspace )
 
 			# Push the namespace 
-			curNamespace.push_tail( nspace )
-			declNs.push_tail( nspace )
-			lookupNs.push_tail( nspace )
+			curNamespace->push_tail( nspace )
+			declNs->push_tail( nspace )
+			lookupNs->push_tail( nspace )
 
 			# LOG print( 'created original namespace: ' Id.data '\n' )
 		}
@@ -2019,9 +2019,9 @@ context lookup
 	def namespace_end []
 		{
 			# Pop the namespace.
-			curNamespace.pop_tail()
-			declNs.pop_tail()
-			lookupNs.pop_tail()
+			curNamespace->pop_tail()
+			declNs->pop_tail()
+			lookupNs->pop_tail()
 
 			# LOG print( 'closed namespace\n' )
 		}
@@ -2039,9 +2039,9 @@ context lookup
 			nspace: ptr<lang_object> = Id.obj
 
 			# Push the namespace 
-			curNamespace.push_tail( nspace )
-			declNs.push_tail( nspace )
-			lookupNs.push_tail( nspace )
+			curNamespace->push_tail( nspace )
+			declNs->push_tail( nspace )
+			lookupNs->push_tail( nspace )
 
 			# LOG print( 'found extended namespace: ' Id.data '\n' )
 		}
@@ -2056,12 +2056,12 @@ context lookup
 		{
 			nspace: ptr<lang_object> = createLangObject(
 					NamespaceType '<unnamed_namespace>'
-					lookupNs.tail )
+					lookupNs->tail )
 
 			# Push the namespace 
-			curNamespace.push_tail( nspace )
-			declNs.push_tail( nspace )
-			lookupNs.push_tail( nspace )
+			curNamespace->push_tail( nspace )
+			declNs->push_tail( nspace )
+			lookupNs->push_tail( nspace )
 
 			# LOG print( 'parsed unnamed namespace\n' )
 		}
@@ -2123,16 +2123,16 @@ context lookup
 	{
 		print( indent obj->name )
 		
-		if obj->objectMap.length > 0
+		if obj->objectMap->length > 0
 			print( ' {\n' )
 		
 		ChildNames: map<str list<ptr<lang_object>>> = obj->objectMap
-		for MapEl: list<ptr<lang_object>> in child( ChildNames ) {
-			for Obj: ptr<lang_object> in MapEl
+		for MapEl: list<ptr<lang_object>> in child( deref ChildNames ) {
+			for Obj: ptr<lang_object> in deref MapEl
 				printObject( indent + '  ' Obj )
 		}
 
-		if obj->objectMap.length > 0
+		if obj->objectMap->length > 0
 			print( indent '}' )
 
 		print( '\n' )
@@ -2157,32 +2157,32 @@ Lookup.TemplateIdType = typeid<lookup::template_id>
 
 
 # Object stacks.
-Lookup.curNamespace = construct list<ptr<lookup::lang_object>> []
-Lookup.declNs = construct list<ptr<lookup::lang_object>> []
-Lookup.lookupNs = construct list<ptr<lookup::lang_object>> []
-Lookup.qualNs = construct list<ptr<lookup::lang_object>> []
-Lookup.templateParamNs = construct list<ptr<lookup::lang_object>> []
+Lookup.curNamespace = new2 list<ptr<lookup::lang_object>>
+Lookup.declNs = new2 list<ptr<lookup::lang_object>>
+Lookup.lookupNs = new2 list<ptr<lookup::lang_object>>
+Lookup.qualNs = new2 list<ptr<lookup::lang_object>>
+Lookup.templateParamNs = new2 list<ptr<lookup::lang_object>>
 
 # Declaration, declarator data.
-Lookup.declarationData = construct list<lookup::declaration_data> []
-Lookup.declaratorData = construct list<lookup::declarator_data> []
+Lookup.declarationData = new2 list<lookup::declaration_data>
+Lookup.declaratorData = new2 list<lookup::declarator_data>
 
 # Template declarations
-Lookup.templDecl = construct list<int> []
+Lookup.templDecl = new2 list<int>
 
 # Root namespace object
 Lookup.rootNamespace = createLangObject( Lookup.NamespaceType '<root_namespace>' nil )
 
 # Initialize the namespace and declaration stacks with the root namespace
-Lookup.curNamespace.push_tail( Lookup.rootNamespace )
-Lookup.declNs.push_tail( Lookup.rootNamespace )
-Lookup.lookupNs.push_tail( Lookup.rootNamespace )
+Lookup.curNamespace->push_tail( Lookup.rootNamespace )
+Lookup.declNs->push_tail( Lookup.rootNamespace )
+Lookup.lookupNs->push_tail( Lookup.rootNamespace )
 
 # Start with no qualification (note variables are initialized to zero)
-Lookup.qualNs.push_tail( nil )
+Lookup.qualNs->push_tail( nil )
 
-Lookup.templDecl.push_tail( 0 )
-Lookup.declarationData.push_tail( construct lookup::declaration_data( 0 0 0 ) [] )
+Lookup.templDecl->push_tail( 0 )
+Lookup.declarationData->push_tail( construct lookup::declaration_data( 0 0 0 ) [] )
 
 parse S: lookup::start( Lookup )[ stdin ]
 if ! S {

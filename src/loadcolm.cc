@@ -818,21 +818,10 @@ struct LoadColm
 		case type_ref::Map: {
 			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
 			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, key, value );
-			break;
-		}
-		case type_ref::Map2: {
-			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
-			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map2, 0, key, value );
 			break;
 		}
 		case type_ref::List: {
-			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
-			break;
-		}
-		case type_ref::List2: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::List2, 0, type, 0 );
 			break;

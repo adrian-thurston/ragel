@@ -22,7 +22,7 @@ def args
 
 cons ArgParser: parser<args> []
 
-ArgV: list2<str> ArgV = argv
+ArgV: list<str> ArgV = argv
 for A: str in deref ArgV 
 	send ArgParser [A '\0']
 

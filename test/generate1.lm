@@ -103,20 +103,20 @@ context generate
 				# We have already sent the newline, compute the indentation level.
 				data_length: int = match_length - 1
 
-				if data_length > IndentStack.top {
+				if data_length > IndentStack->top {
 					# The indentation level is more than the level on the top
 					# of the stack. This is an indent event. Send as an INDENT.
 					input.push( make_token( typeid<INDENT> '' ) )
 
 					# Push to the stack as per python manual.
-					IndentStack.push( data_length )
+					IndentStack->push( data_length )
 				} else {
-					while data_length < IndentStack.top {
+					while data_length < IndentStack->top {
 						# The indentation level is less than the level on the top of
 						# the stack. Pop the level and send one dedent. This flow of
 						# control will execute until we find the right indentation level
 						# to match up with.
-						IndentStack.pop()
+						IndentStack->pop()
 
 						# Send as a DEDENT
 						input.push( make_token( typeid<DEDENT> '' ) )
@@ -556,8 +556,8 @@ int print_primary_subscriptions_and_slicings( Start: generate::start )
 cons Generate: generate[]
 
 # List used as a stack of indentations.
-Generate.IndentStack = cons list<int> []
-Generate.IndentStack.push( 0 )
+Generate.IndentStack = new2 list<int>
+Generate.IndentStack->push( 0 )
 
 # Has a newline been sent for this '\n' .. whitespace match. 
 Generate.newline_sent = 0

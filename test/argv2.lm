@@ -41,7 +41,7 @@ def args
 cons ArgParser: parser<args>[]
 
 # Parse the args and extract the result into Args.
-ArgV: list2<str> = argv
+ArgV: list<str> = argv
 for A: str in deref ArgV
 	send ArgParser [A '\0']
 Args: args = ArgParser()
