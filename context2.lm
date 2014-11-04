@@ -90,9 +90,9 @@ context ruby_here
 
 end # ruby_here
 
-CTX: ruby_here = cons ruby_here []
+CTX: ruby_here = new2 ruby_here
 
-parse S: ruby_here::start( CTX ) [ stdin ]
+parse S: ruby_here::start( deref CTX ) [ stdin ]
 print_xml(S)
 print('\n')
 ##### IN #####

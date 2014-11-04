@@ -43,9 +43,9 @@ context heredoc
 		[here_name here_data here_close id nl]
 end # heredoc
 
-cons HereDoc: heredoc[]
+HereDoc: heredoc = new2 heredoc
 
-parse S: heredoc::start(HereDoc)[stdin]
+parse S: heredoc::start(deref HereDoc)[stdin]
 print_xml(S)
 print( '\n' )
 ##### IN #####

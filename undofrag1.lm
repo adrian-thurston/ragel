@@ -47,16 +47,16 @@ context ctx
 end # ctx
 
 
-CTX: ctx = cons ctx []
-CTX.SP = cons parser<start2> []
-send CTX.SP "a b{c}"
+CTX: ctx = new2 ctx
+CTX->SP = cons parser<start2> []
+send CTX->SP "a b{c}"
 
-parse Input: ctx::start1( CTX )[stdin]
+parse Input: ctx::start1( deref CTX )[stdin]
 
-send CTX.SP "{e}f g"
+send CTX->SP "{e}f g"
 
 print( Input )
-print( CTX.SP() '\n' )
+print( CTX->SP() '\n' )
 
 ##### IN #####
 a b c ( d ) e f g ;

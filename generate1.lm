@@ -553,16 +553,16 @@ int print_primary_subscriptions_and_slicings( Start: generate::start )
 	}
 }
 
-cons Generate: generate[]
+Generate: generate = new2 generate
 
 # List used as a stack of indentations.
-Generate.IndentStack = new2 list<int>
-Generate.IndentStack->push( 0 )
+Generate->IndentStack = new2 list<int>
+Generate->IndentStack->push( 0 )
 
 # Has a newline been sent for this '\n' .. whitespace match. 
-Generate.newline_sent = 0
+Generate->newline_sent = 0
 
-parse S: generate::start(Generate)[ stdin ]
+parse S: generate::start(deref Generate)[ stdin ]
 
 print( '*** SUCCESS ***\n' )
 print( ^S '\n' )

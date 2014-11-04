@@ -9,11 +9,11 @@ end
 def attribute
     [`type id]
 
-def struct
+def _struct
     [`struct id `{ attribute* `}]
 
 def program
-    [struct*]
+    [_struct*]
 
 int func( P: program )
 {

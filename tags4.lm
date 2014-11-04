@@ -322,9 +322,9 @@ end # tags
 #    }
 #}
 
-cons Tags: tags[]
-Tags.TagStack = construct tags::tag_stack []
-parse HTML: tags::start(Tags)[ stdin ]
+Tags: tags = new2 tags
+Tags->TagStack = construct tags::tag_stack []
+parse HTML: tags::start(deref Tags)[ stdin ]
 print( HTML )
 
 #print_xml( HTML )

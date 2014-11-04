@@ -93,8 +93,8 @@ context counting
 
 end # counting
 
-cons Counting: counting[]
-parse counting::start(Counting)[ stdin ]
+Counting: counting = new2 counting
+parse counting::start( deref Counting )[ stdin ]
 ##### IN #####
 3 1 b c 1 1 0 3 a b c
 ##### EXP #####

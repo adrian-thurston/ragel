@@ -27,8 +27,9 @@ def start
 end # ctx
 
 
+CTX: ctx = new2 ctx
 cons SP: parser<ctx::start> []
-SP.ctx = cons ctx []
+SP.ctx = deref CTX
 send SP [stdin]
 Input: ctx::start = SP()
 print( Input )

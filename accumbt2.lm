@@ -36,15 +36,15 @@ end
 
 end # accum_bt
 
-AccumBt: accum_bt = cons accum_bt[]
-AccumBt.OneParser = cons parser<accum_bt::one>[]
+AccumBt: accum_bt = new2 accum_bt
+AccumBt->OneParser = cons parser<accum_bt::one>[]
 
-parse Two: accum_bt::two(AccumBt)[ stdin ]
+parse Two: accum_bt::two(deref AccumBt)[ stdin ]
 
-send AccumBt.OneParser ['\n'] eos
+send AccumBt->OneParser ['\n'] eos
 
 print( ^Two )
-print( ^( AccumBt.OneParser.tree ) '\n' )
+print( ^( AccumBt->OneParser.tree ) '\n' )
 ##### IN #####
 a b c d e ;
 ##### EXP #####

@@ -83,9 +83,9 @@ context tags
 		}
 end # tags
 
-cons Tags: tags[]
-Tags.TS = cons tags::tag_stack ["sentinal"]
-parse tags::start(Tags)[stdin]
+Tags: tags = new2 tags
+Tags->TS = cons tags::tag_stack ["sentinal"]
+parse tags::start(deref Tags)[stdin]
 ##### IN #####
 y y a i i b c c m m n n b a;
 ##### EXP #####

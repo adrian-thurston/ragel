@@ -38,10 +38,10 @@ context undo
 
 end # undo
 
-cons Undo: undo[]
-Undo.Out = construct parser<undo::out> []
+Undo: undo = new2 undo
+Undo->Out = construct parser<undo::out> []
 
-parse Input: undo::start(Undo)[ stdin ]
+parse Input: undo::start(deref Undo)[ stdin ]
 print( Input )
 
 ##### IN #####
