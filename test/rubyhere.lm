@@ -88,9 +88,9 @@ context rubyhere
 		[item*]
 end # rubyhere
 
-cons RubyHere: rubyhere[]
+RubyHere: rubyhere = new2 rubyhere
 
-parse S: rubyhere::start(RubyHere)[ stdin ]
+parse S: rubyhere::start(deref RubyHere)[ stdin ]
 
 print_xml(S)
 print('\n')

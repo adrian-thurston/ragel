@@ -2144,54 +2144,54 @@ end # lookup
 # Global data declarations
 #
 
-cons Lookup: lookup[]
+Lookup: lookup = new2 lookup
 
 # Constants for language object types.
-Lookup.NamespaceType = typeid<lookup::namespace_id>
-Lookup.ClassType = typeid<lookup::class_id>
-Lookup.TemplateClassType = typeid<lookup::templ_class_id>
-Lookup.EnumType = typeid<lookup::enum_id>
-Lookup.IdType = typeid<lookup::identifier>
-Lookup.TypedefType = typeid<lookup::typedef_id>
-Lookup.TemplateIdType = typeid<lookup::template_id>
+Lookup->NamespaceType = typeid<lookup::namespace_id>
+Lookup->ClassType = typeid<lookup::class_id>
+Lookup->TemplateClassType = typeid<lookup::templ_class_id>
+Lookup->EnumType = typeid<lookup::enum_id>
+Lookup->IdType = typeid<lookup::identifier>
+Lookup->TypedefType = typeid<lookup::typedef_id>
+Lookup->TemplateIdType = typeid<lookup::template_id>
 
 
 # Object stacks.
-Lookup.curNamespace = new2 list<ptr<lookup::lang_object>>
-Lookup.declNs = new2 list<ptr<lookup::lang_object>>
-Lookup.lookupNs = new2 list<ptr<lookup::lang_object>>
-Lookup.qualNs = new2 list<ptr<lookup::lang_object>>
-Lookup.templateParamNs = new2 list<ptr<lookup::lang_object>>
+Lookup->curNamespace = new2 list<ptr<lookup::lang_object>>
+Lookup->declNs = new2 list<ptr<lookup::lang_object>>
+Lookup->lookupNs = new2 list<ptr<lookup::lang_object>>
+Lookup->qualNs = new2 list<ptr<lookup::lang_object>>
+Lookup->templateParamNs = new2 list<ptr<lookup::lang_object>>
 
 # Declaration, declarator data.
-Lookup.declarationData = new2 list<lookup::declaration_data>
-Lookup.declaratorData = new2 list<lookup::declarator_data>
+Lookup->declarationData = new2 list<lookup::declaration_data>
+Lookup->declaratorData = new2 list<lookup::declarator_data>
 
 # Template declarations
-Lookup.templDecl = new2 list<int>
+Lookup->templDecl = new2 list<int>
 
 # Root namespace object
-Lookup.rootNamespace = createLangObject( Lookup.NamespaceType '<root_namespace>' nil )
+Lookup->rootNamespace = createLangObject( Lookup->NamespaceType '<root_namespace>' nil )
 
 # Initialize the namespace and declaration stacks with the root namespace
-Lookup.curNamespace->push_tail( Lookup.rootNamespace )
-Lookup.declNs->push_tail( Lookup.rootNamespace )
-Lookup.lookupNs->push_tail( Lookup.rootNamespace )
+Lookup->curNamespace->push_tail( Lookup->rootNamespace )
+Lookup->declNs->push_tail( Lookup->rootNamespace )
+Lookup->lookupNs->push_tail( Lookup->rootNamespace )
 
 # Start with no qualification (note variables are initialized to zero)
-Lookup.qualNs->push_tail( nil )
+Lookup->qualNs->push_tail( nil )
 
-Lookup.templDecl->push_tail( 0 )
-Lookup.declarationData->push_tail( construct lookup::declaration_data( 0 0 0 ) [] )
+Lookup->templDecl->push_tail( 0 )
+Lookup->declarationData->push_tail( construct lookup::declaration_data( 0 0 0 ) [] )
 
-parse S: lookup::start( Lookup )[ stdin ]
+parse S: lookup::start( deref Lookup )[ stdin ]
 if ! S {
 	print( error )
 	exit( 1 )
 }
 
 print( '***** NAMSPACES *****\n' )
-printObject( '' Lookup.rootNamespace )
+printObject( '' Lookup->rootNamespace )
 print( '***** UNKNOWN DECLARATORS *****\n' )
 for DI: lookup::declarator_id in S {
 	if match DI 

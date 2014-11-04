@@ -36,8 +36,8 @@ context ctx
 
 end # ctx
 
-CTX: ctx = cons ctx []
-parse Input: ctx::start( CTX ) [stdin]
+CTX: ctx = new2 ctx
+parse Input: ctx::start( deref CTX ) [stdin]
 print( Input )
 
 ##### IN #####

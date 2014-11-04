@@ -80,13 +80,13 @@ def two
 
 end # accum_bt
 
-cons AccumBt: accum_bt[]
-AccumBt.NestedParser = cons parser<nested>[]
+AccumBt: accum_bt = new2 accum_bt
+AccumBt->NestedParser = cons parser<nested>[]
 
-parse Two: accum_bt::two(AccumBt)[ stdin ]
+parse Two: accum_bt::two(deref AccumBt)[ stdin ]
 
-send AccumBt.NestedParser [] eos
-Nested: nested = AccumBt.NestedParser.tree
+send AccumBt->NestedParser [] eos
+Nested: nested = AccumBt->NestedParser.tree
 
 print( '\n------------\n' )
 print( ^Nested '\n' )

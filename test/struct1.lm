@@ -1,5 +1,5 @@
 ##### LM #####
-struct foo
+context foo
 	Int: int
 	D: d
 

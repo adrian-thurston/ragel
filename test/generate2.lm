@@ -15,7 +15,7 @@ context generate
 			input.pull( match_length )
 
 			cons OI: open_item( '{' match_length ) []
-			OpenStack.push( OI )
+			OpenStack->push( OI )
 			i: int = 0
 			while ( i < match_length ) {
 				input.push( make_token( typeid<ocurly> '{' ) )
@@ -30,12 +30,12 @@ context generate
 
 		token tmp1 /'}'+/
 		{
-			if OpenStack.length > 0 && OpenStack.top.type == '{' {
+			if OpenStack->length > 0 && OpenStack->top.type == '{' {
 				length: int = 3
 				if ( length > match_length )
 					length = match_length
 
-				Top: open_item = OpenStack.pop()
+				Top: open_item = OpenStack->pop()
 				if ( length > Top.num )
 					length = Top.num
 
@@ -49,7 +49,7 @@ context generate
 				Top.num = Top.num - length
 
 				if ( Top.num > 0 )
-					OpenStack.push( Top )
+					OpenStack->push( Top )
 			}
 			else {
 				input.push( make_token( typeid<stray_close> input.pull( match_length ) ) )
@@ -60,7 +60,7 @@ context generate
 		{
 			input.pull( match_length )
 			OI: open_item = construct open_item( '[' match_length ) []
-			OpenStack.push( OI )
+			OpenStack->push( OI )
 			i: int = 0
 			while ( i < match_length ) {
 				input.push( make_token( typeid<osquare> '[' ) )
@@ -74,12 +74,12 @@ context generate
 
 		token tmp2 /']'+/
 		{
-			if OpenStack.length > 0 && OpenStack.top.type == '[' {
+			if OpenStack->length > 0 && OpenStack->top.type == '[' {
 				length: int = 2
 				if ( length > match_length )
 					length = match_length
 
-				Top: open_item = OpenStack.pop()
+				Top: open_item = OpenStack->pop()
 				if ( length > Top.num )
 					length = Top.num
 
@@ -91,7 +91,7 @@ context generate
 				Top.num = Top.num - length
 
 				if ( Top.num > 0 )
-					OpenStack.push( Top )
+					OpenStack->push( Top )
 			}
 			else {
 				input.push( make_token( typeid<stray_close> input.pull( match_length ) ) )
@@ -102,8 +102,8 @@ context generate
 		token char /any/
 
 		preeof {
-			while ( OpenStack.length > 0 ) {
-				Top: open_item = OpenStack.pop()
+			while ( OpenStack->length > 0 ) {
+				Top: open_item = OpenStack->pop()
 				i: int
 				if ( Top.type == '{' ) {
 					i = 0
@@ -191,13 +191,13 @@ context generate
 
 end # generate
 
-cons Generate: generate[]
+Generate: generate = new2 generate
 
-Generate.OpenStack = construct list<generate::open_item> []
+Generate->OpenStack = new2 list<generate::open_item>
 Sentinal: generate::open_item = construct generate::open_item( '** SENTINAL **' 1 ) []
-Generate.OpenStack.push( Sentinal )
+Generate->OpenStack->push( Sentinal )
 
-parse S: generate::start(Generate)[stdin]
+parse S: generate::start(deref Generate)[stdin]
 
 if S {
 	for I: generate::external_link in S

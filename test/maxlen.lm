@@ -45,10 +45,10 @@ context maxlen
 		[restricted_list id*]
 end # maxlen
 
-cons MaxLen: maxlen[]
-MaxLen.allow = 3
+MaxLen: maxlen = new2 maxlen
+MaxLen->allow = 3
 
-parse S: maxlen::start(MaxLen)[stdin]
+parse S: maxlen::start(deref MaxLen)[stdin]
 print_xml( S )
 print('\n')
 ##### IN #####

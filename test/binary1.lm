@@ -485,10 +485,10 @@ int print_all_names( s: start )
 
 end # binary
 
-cons Binary: binary[]
-Binary.CL = new2 list<int>
+Binary: binary = new2 binary
+Binary->CL = new2 list<int>
 
-parse S: binary::start(Binary) [ stdin ]
+parse S: binary::start(deref Binary) [ stdin ]
 print_all_names( S )
 print( '*** SUCCESS ***\n' )
 ##### EXP #####

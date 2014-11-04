@@ -298,10 +298,10 @@ context tags
 #	}
 end # tags
 
-cons Tags: tags[]
-Tags.TagStack = construct tags::tag_stack []
+Tags: tags = new2 tags
+Tags->TagStack = construct tags::tag_stack []
 
-parse HTML_P: tags::start(Tags)[ stdin ]
+parse HTML_P: tags::start(deref Tags)[ stdin ]
 HTML: tags::start = HTML_P
 flatten( HTML )
 print_xml( HTML )

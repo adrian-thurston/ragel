@@ -28,8 +28,8 @@ context ctx
 		[item*]
 end # ctx
 
-cons CTX: ctx[]
-parse Input: ctx::start( CTX ) [ stdin ]
+CTX: ctx = new2 ctx
+parse Input: ctx::start( deref CTX ) [ stdin ]
 print( Input )
 
 ##### IN #####
