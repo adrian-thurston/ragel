@@ -1811,12 +1811,6 @@ struct LoadColm
 			break;
 		}
 		case code_factor::New: {
-			LangExpr *newExpr = walkCodeFactor( codeFactor._code_factor() );
-			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
-					LangTerm::NewType, newExpr ) );
-			break;
-		}
-		case code_factor::New2: {
 
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
 

@@ -60,7 +60,7 @@ context si
 		}
 end # si
 
-SuperId: si = new2 si
+SuperId: si = new si
 parse S: si::start(deref SuperId)[stdin]
 print_xml( S )
 print( '\n' )

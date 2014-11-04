@@ -460,7 +460,7 @@ int print_name( n: name m: map<int name> )
 int print_all_names( s: start )
 {
 	for M: message in s {
-		m: map<int name> = new2 map<int name>
+		m: map<int name> = new map<int name>
 
 		O: octet = octet in M
 
@@ -485,8 +485,8 @@ int print_all_names( s: start )
 
 end # binary
 
-Binary: binary = new2 binary
-Binary->CL = new2 list<int>
+Binary: binary = new binary
+Binary->CL = new list<int>
 
 parse S: binary::start(deref Binary) [ stdin ]
 print_all_names( S )

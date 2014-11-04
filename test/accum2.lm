@@ -27,7 +27,7 @@ def start
 end # ctx
 
 
-CTX: ctx = new2 ctx
+CTX: ctx = new ctx
 cons SP: parser<ctx::start> []
 SP.ctx = deref CTX
 send SP [stdin]

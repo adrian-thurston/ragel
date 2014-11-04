@@ -43,7 +43,7 @@ context heredoc
 		[here_name here_data here_close id nl]
 end # heredoc
 
-HereDoc: heredoc = new2 heredoc
+HereDoc: heredoc = new heredoc
 
 parse S: heredoc::start(deref HereDoc)[stdin]
 print_xml(S)

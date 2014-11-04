@@ -48,7 +48,7 @@ context ctx
 
 end # ctx
 
-CTX: ctx = new2 ctx
+CTX: ctx = new ctx
 parse Input: ctx::start( deref CTX ) [ stdin ]
 print( Input )
 

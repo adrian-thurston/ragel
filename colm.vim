@@ -67,7 +67,7 @@ syntax keyword typeKeywords
 syntax keyword Keyword
 	\ reject else elsif return yield for while if
 	\ typeid in break 
-	\ new new2 deref ni cast switch case default
+	\ new deref ni cast switch case default
 
 syntax match tokenName "[a-zA-Z_][a-zA-Z_0-9]*" contained
 syntax match varCapture "[a-zA-Z_][a-zA-Z_0-9]*:" 

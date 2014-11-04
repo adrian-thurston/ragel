@@ -322,7 +322,7 @@ end # tags
 #    }
 #}
 
-Tags: tags = new2 tags
+Tags: tags = new tags
 Tags->TagStack = construct tags::tag_stack []
 parse HTML: tags::start(deref Tags)[ stdin ]
 print( HTML )

@@ -45,7 +45,7 @@ context maxlen
 		[restricted_list id*]
 end # maxlen
 
-MaxLen: maxlen = new2 maxlen
+MaxLen: maxlen = new maxlen
 MaxLen->allow = 3
 
 parse S: maxlen::start(deref MaxLen)[stdin]

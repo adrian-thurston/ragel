@@ -553,10 +553,10 @@ int print_primary_subscriptions_and_slicings( Start: generate::start )
 	}
 }
 
-Generate: generate = new2 generate
+Generate: generate = new generate
 
 # List used as a stack of indentations.
-Generate->IndentStack = new2 list<int>
+Generate->IndentStack = new list<int>
 Generate->IndentStack->push( 0 )
 
 # Has a newline been sent for this '\n' .. whitespace match. 
