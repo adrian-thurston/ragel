@@ -121,26 +121,26 @@ CL: list<int>
 
 int start_list( count: int )
 {
-	CL.push( count )
+	CL->push( count )
 }
 
 def count_inc
 	[]
 	{
-		if CL.top == 0 {
+		if CL->top == 0 {
 			reject
 		} else {
-			CL.top = CL.top - 1
+			CL->top = CL->top - 1
 		}
 	}
 
 def count_end
 	[]
 	{
-		if CL.top != 0 {
+		if CL->top != 0 {
 			reject
 		} else {
-			CL.pop()
+			CL->pop()
 		}
 	}
 
@@ -451,7 +451,7 @@ int print_name( n: name m: map<int name> )
 		if match E [o1:octet o2:octet] {
 			val: int = (o1.data.uord8() - 192) * 256 + o2.data.uord8()
 			print( '[' val ']' )
-			nameInMap: name = m.find( val )
+			nameInMap: name = m->find( val )
 			print_name( nameInMap m )
 		}
 	}
@@ -460,7 +460,7 @@ int print_name( n: name m: map<int name> )
 int print_all_names( s: start )
 {
 	for M: message in s {
-		construct m: map<int name> []
+		m: map<int name> = new2 map<int name>
 
 		O: octet = octet in M
 
@@ -471,7 +471,7 @@ int print_all_names( s: start )
 				if match NP [L: octet nbytes name_part*] {
 					messageOffset: int = L.pos - O.pos
 					construct n: name [NP E]
-					m.insert( messageOffset n )
+					m->insert( messageOffset n )
 				}
 			}
 		}
@@ -486,7 +486,7 @@ int print_all_names( s: start )
 end # binary
 
 cons Binary: binary[]
-Binary.CL = cons list<int> []
+Binary.CL = new2 list<int>
 
 parse S: binary::start(Binary) [ stdin ]
 print_all_names( S )
