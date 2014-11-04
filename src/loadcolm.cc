@@ -1817,11 +1817,17 @@ struct LoadColm
 			break;
 		}
 		case code_factor::New2: {
+
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
+
+			/* FIXME: modifying here, kindof a hack. */
 			if ( typeRef->type == TypeRef::List2 )
 				typeRef->type = TypeRef::List;
 			else if ( typeRef->type == TypeRef::Map2 )
 				typeRef->type = TypeRef::Map;
+			else {
+				typeRef->inNew = true;
+			}
 
 			/* Construct an empty constructor list. */
 			ConsItemList *list = ConsItemList::cons();

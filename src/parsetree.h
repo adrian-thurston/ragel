@@ -563,17 +563,18 @@ struct TypeMapEl
 {
 	enum Type
 	{
-		TypeAliasType = 1,
+		AliasType = 1,
+		StructType,
 		LangElType
 	};
 
 	const String &getKey() { return key; }
 
-	TypeMapEl( const String &key, TypeRef *typeRef )
-		: type(TypeAliasType), key(key), value(0), typeRef(typeRef) {}
+	TypeMapEl( Type type, const String &key, TypeRef *typeRef )
+		: type(type), key(key), value(0), typeRef(typeRef) {}
 
-	TypeMapEl( const String &key, LangEl *value )
-		: type(LangElType), key(key), value(value), typeRef(0) {}
+	TypeMapEl( Type type, const String &key, LangEl *value )
+		: type(type), key(key), value(value), typeRef(0) {}
 
 	Type type;
 	String key;
@@ -1994,7 +1995,8 @@ struct TypeRef
 		uniqueType(0),
 		searchUniqueType(0),
 		generic(0),
-		searchTypeRef(0)
+		searchTypeRef(0),
+		inNew(false)
 	{}
 
 	/* Qualification and a type name. These require lookup. */
@@ -2172,6 +2174,8 @@ struct TypeRef
 	UniqueType *searchUniqueType;
 	GenericType *generic;
 	TypeRef *searchTypeRef;
+
+	bool inNew;
 };
 
 typedef DList<ObjectField> ParameterList; 

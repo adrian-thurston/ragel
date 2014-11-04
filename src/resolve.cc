@@ -42,11 +42,25 @@ UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 			switch ( inDict->type ) {
 				/* Defer to the typeRef we are an alias of. We need to guard
 				 * against loops here. */
-				case TypeMapEl::TypeAliasType:
+				case TypeMapEl::AliasType: {
 					return inDict->typeRef->resolveType( pd );
+				}
 
-				case TypeMapEl::LangElType:
+				case TypeMapEl::StructType: {
+					if ( inNew ) {
+						std::cerr << "resolving struct as tree (for new)" << std::endl;
+						return pd->findUniqueType( TYPE_TREE, inDict->value );
+					}
+					else {
+						std::cerr << "resolving struct as ptr to tree" << std::endl;
+						UniqueType *structUt = pd->findUniqueType( TYPE_TREE, inDict->value );
+						return pd->findUniqueType( TYPE_PTR, structUt->langEl );
+					}
+				}
+
+				case TypeMapEl::LangElType: {
 					return pd->findUniqueType( TYPE_TREE, inDict->value );
+				}
 			}
 		}
 

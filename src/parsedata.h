@@ -991,15 +991,23 @@ struct ColmParser;
 typedef AvlMap<String, ColmParser *, CmpStr> ParserDict;
 typedef AvlMapEl<String, ColmParser *> ParserDictEl;
 
-LangEl *declareLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::Type type );
-LangEl *addLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::Type type );
-void declareTypeAlias( Compiler *pd, Namespace *nspace, const String &data, TypeRef *typeRef );
+LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
+		const String &data, LangEl::Type type );
+LangEl *declareStruct( Compiler *pd, Namespace *nspace,
+		const String &data, LangEl::Type type );
+LangEl *addLangEl( Compiler *pd, Namespace *nspace,
+		const String &data, LangEl::Type type );
+
+void declareTypeAlias( Compiler *pd, Namespace *nspace,
+		const String &data, TypeRef *typeRef );
+
 LangEl *findType( Compiler *pd, Namespace *nspace, const String &data );
 
 ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC, bool isConst );
 ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, UniqueType *arg1, bool isConst );
+		const String &name, int methIdWV, int methIdWC,
+		UniqueType *arg1, bool isConst );
 ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC, 
 		UniqueType *arg1, UniqueType *arg2, bool isConst );

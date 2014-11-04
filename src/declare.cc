@@ -146,7 +146,8 @@ void Compiler::declareReVars()
 #endif
 }
 
-LangEl *declareLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::Type type )
+LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
+		const String &data, LangEl::Type type )
 {
     /* If the id is already in the dict, it will be placed in last found. If
      * it is not there then it will be inserted and last found will be set to it. */
@@ -156,7 +157,25 @@ LangEl *declareLangEl( Compiler *pd, Namespace *nspace, const String &data, Lang
 
 	/* Language element not there. Make the new lang el and insert.. */
 	LangEl *langEl = new LangEl( nspace, data, type );
-	TypeMapEl *typeMapEl = new TypeMapEl( data, langEl );
+	TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::LangElType, data, langEl );
+	nspace->typeMap.insert( typeMapEl );
+	pd->langEls.append( langEl );
+
+	return langEl;
+}
+
+LangEl *declareStruct( Compiler *pd, Namespace *nspace,
+		const String &data, LangEl::Type type )
+{
+	/* If the id is already in the dict, it will be placed in last found. If
+	 * it is not there then it will be inserted and last found will be set to it. */
+	TypeMapEl *inDict = nspace->typeMap.find( data );
+	if ( inDict != 0 )
+		error() << "'" << data << "' already defined as something else" << endp;
+
+	/* Language element not there. Make the new lang el and insert.. */
+	LangEl *langEl = new LangEl( nspace, data, type );
+	TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::StructType, data, langEl );
 	nspace->typeMap.insert( typeMapEl );
 	pd->langEls.append( langEl );
 
@@ -164,14 +183,16 @@ LangEl *declareLangEl( Compiler *pd, Namespace *nspace, const String &data, Lang
 }
 
 /* Does not map the new language element. */
-LangEl *addLangEl( Compiler *pd, Namespace *nspace, const String &data, LangEl::Type type )
+LangEl *addLangEl( Compiler *pd, Namespace *nspace,
+		const String &data, LangEl::Type type )
 {
 	LangEl *langEl = new LangEl( nspace, data, type );
 	pd->langEls.append( langEl );
 	return langEl;
 }
 
-void declareTypeAlias( Compiler *pd, Namespace *nspace, const String &data, TypeRef *typeRef )
+void declareTypeAlias( Compiler *pd, Namespace *nspace,
+		const String &data, TypeRef *typeRef )
 {
     /* If the id is already in the dict, it will be placed in last found. If
      * it is not there then it will be inserted and last found will be set to it. */
@@ -179,8 +200,8 @@ void declareTypeAlias( Compiler *pd, Namespace *nspace, const String &data, Type
 	if ( inDict != 0 )
 		error() << "'" << data << "' already defined as something else" << endp;
 
-	/* Language element not there. Make the new lang el and insert.. */
-	TypeMapEl *typeMapEl = new TypeMapEl( data, typeRef );
+	/* Language element not there. Make the new lang el and insert. */
+	TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::AliasType, data, typeRef );
 	nspace->typeMap.insert( typeMapEl );
 }
 
@@ -403,7 +424,7 @@ void Namespace::declare( Compiler *pd )
 	}
 
 	for ( ContextDefList::Iter c = contextDefList; c.lte(); c++ ) {
-		LangEl *lel = declareLangEl( pd, this, c->name, LangEl::NonTerm );
+		LangEl *lel = declareStruct( pd, this, c->name, LangEl::NonTerm );
 		ProdElList *emptyList = new ProdElList;
 		//addProduction( c->context->loc, c->name, emptyList, false, 0, 0 );
 
@@ -424,7 +445,8 @@ void Namespace::declare( Compiler *pd )
 			if ( strcmp( c->name, this->name ) == 0 ) {
 				/* Insert the name into the top of the region stack after popping the
 				 * region just created. We need it in the parent. */
-				TypeMapEl *typeMapEl = new TypeMapEl( c->name, prodName );
+				TypeMapEl *typeMapEl = new TypeMapEl(
+						TypeMapEl::StructType, c->name, prodName );
 				this->parentNamespace->typeMap.insert( typeMapEl );
 			}
 		}
