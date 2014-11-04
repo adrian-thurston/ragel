@@ -431,7 +431,7 @@ void Namespace::declare( Compiler *pd )
 
 		c->context->lel = lel;
 		lel->contextDef = c->context;
-		lel->objectDef = c->context->contextObjDef;
+		lel->objectDef = c->context->objectDef;
 	}
 
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {

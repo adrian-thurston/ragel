@@ -2192,7 +2192,7 @@ struct LoadColm
 		String name = contextDef.id().data();
 		contextHead( contextDef.id().loc(), name );
 
-		_repeat_context_item contextItemList = contextDef.ContextItemList();
+		_repeat_context_item contextItemList = contextDef.ItemList();
 		while ( !contextItemList.end() ) {
 			walkContextItem( contextItemList.value() );
 			contextItemList = contextItemList.next();

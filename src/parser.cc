@@ -354,7 +354,7 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 	else {
 		context = curContext();
 		objField->context = context;
-		object = context->contextObjDef;
+		object = context->objectDef;
 	}
 
 	if ( object->rootScope->checkRedecl( objField->name ) != 0 )
@@ -858,7 +858,7 @@ void BaseParser::contextVarDef( const InputLoc &loc, ObjectField *objField )
 
 	Context *context = curContext();
 	objField->context = context;
-	object = context->contextObjDef;
+	object = context->objectDef;
 
 	if ( object->rootScope->checkRedecl( objField->name ) != 0 )
 		error(objField->loc) << "object field renamed" << endp;
@@ -877,7 +877,7 @@ void BaseParser::contextHead( const InputLoc &loc, const String &data )
 	ContextDef *contextDef = new ContextDef( data, context, nspace );
 	nspace->contextDefList.append( contextDef );
 
-	context->contextObjDef = ObjectDef::cons( ObjectDef::UserType,
+	context->objectDef = ObjectDef::cons( ObjectDef::UserType,
 			data, pd->nextObjectId++ ); 
 }
 

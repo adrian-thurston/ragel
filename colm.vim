@@ -58,7 +58,7 @@ syntax keyword Type
 	\ commit include literal iter
 	\ namespace lex reducefirst global include export
 	\ construct cons parse parse_tree parse_stop match require send send_tree
-	\ preeof left right nonassoc prec context alias
+	\ preeof left right nonassoc prec context struct alias
 	\ end eos print
 
 syntax keyword typeKeywords

@@ -56,8 +56,9 @@ lex
 
 	token TYPEID / 'typeid' /
 
-	token LITERAL /'literal'/
-	token CONTEXT /'context'/
+	token LITERAL / 'literal' /
+	token CONTEXT / 'context' /
+	token STRUCT / 'struct' /
 	token NI /'ni'/
 
 	token NIL / 'nil' /
@@ -293,8 +294,11 @@ def function_def
 def context_var_def
 	[var_def]
 
+def struct_key
+	[STRUCT] | [CONTEXT]
+
 def context_def
-	[CONTEXT id ContextItemList: context_item* END]
+	[struct_key id ItemList: context_item* END]
 
 def literal_def
 	[LITERAL literal_list]

@@ -460,7 +460,7 @@ void LangVarRef::loadContextObj( Compiler *pd, CodeVect &code,
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the global object. */
-	ObjectDef *rootObj = context->contextObjDef;
+	ObjectDef *rootObj = context->objectDef;
 
 	if ( forWriting && lastPtrInQual < 0 ) {
 		/* If we are writing an no reference was found in the qualification

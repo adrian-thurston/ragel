@@ -113,12 +113,12 @@ bool LangVarRef::isContextRef() const
 {
 	if ( context != 0 ) {
 		if ( qual->length() > 0 ) {
-			if ( context->contextObjDef->rootScope->findField( qual->data[0].data ) != 0 )
+			if ( context->objectDef->rootScope->findField( qual->data[0].data ) != 0 )
 				return true;
 		}
-		else if ( context->contextObjDef->rootScope->findField( name ) != 0 )
+		else if ( context->objectDef->rootScope->findField( name ) != 0 )
 			return true;
-		else if ( context->contextObjDef->findMethod( name ) != 0 )
+		else if ( context->objectDef->findMethod( name ) != 0 )
 			return true;
 	}
 
@@ -154,7 +154,7 @@ VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 	if ( isLocalRef() )
 		rootScope = scope;
 	else if ( isContextRef() )
-		rootScope = context->contextObjDef->rootScope;
+		rootScope = context->objectDef->rootScope;
 	else
 		rootScope = pd->globalObjectDef->rootScope;
 

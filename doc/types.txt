@@ -15,3 +15,5 @@ Reference
   UserClass
 
 Int
+
+* A struct is a collection of vars, a namespace, and a parsing context.

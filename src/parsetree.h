@@ -344,13 +344,13 @@ struct Context
 	Context( const InputLoc &loc, LangEl *lel )
 	:
 		loc(loc),
-		lel(lel)
+		lel(lel),
+		objectDef(0)
 	{}
 
 	InputLoc loc;
 	LangEl *lel;
-
-	ObjectDef *contextObjDef;
+	ObjectDef *objectDef;
 };
 
 typedef Vector<ReCapture> ReCaptureVect;
