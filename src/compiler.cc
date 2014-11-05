@@ -995,7 +995,6 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 void Compiler::parsePatterns()
 {
 	Program *prg = colm_new_program( runtimeData );
-	colm_set_debug( prg, 0x03 );
 
 	/* Turn off context-dependent parsing. */
 	prg->ctxDepParsing = 0;

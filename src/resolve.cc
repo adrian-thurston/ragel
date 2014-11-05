@@ -48,11 +48,9 @@ UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 
 				case TypeMapEl::StructType: {
 					if ( inNew ) {
-						std::cerr << "resolving struct as tree (for new)" << std::endl;
 						return pd->findUniqueType( TYPE_TREE, inDict->value );
 					}
 					else {
-						std::cerr << "resolving struct as ptr to tree" << std::endl;
 						UniqueType *structUt = pd->findUniqueType( TYPE_TREE, inDict->value );
 						return pd->findUniqueType( TYPE_PTR, structUt->langEl );
 					}
@@ -60,11 +58,8 @@ UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 
 				case TypeMapEl::LangElType: {
 					UniqueType *ut = pd->findUniqueType( TYPE_TREE, inDict->value );
-					if ( ut == pd->uniqueTypeStream ) {
-						std::cerr << "resolving langEl as ptr to tree because"
-								" it is a stream" << std::endl;
+					if ( ut == pd->uniqueTypeStream )
 						return pd->findUniqueType( TYPE_PTR, ut->langEl );
-					}
 					return ut;
 				}
 			}
