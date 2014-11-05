@@ -753,6 +753,7 @@ void Compiler::addInput( ObjectDef *frame )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
+	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "input" );
@@ -942,7 +943,9 @@ void Compiler::initGlobalFunctions()
 {
 	ObjMethod *method;
 
-	method = initFunction( uniqueTypeStream, globalObjectDef, "open",
+	UniqueType *streamPtrUt = findUniqueType( TYPE_PTR, streamLangEl );
+
+	method = initFunction( streamPtrUt, globalObjectDef, "open",
 		IN_OPEN_FILE, IN_OPEN_FILE, uniqueTypeStr, uniqueTypeStr, true );
 	method->useCallObj = false;
 
@@ -971,6 +974,7 @@ void Compiler::addStdin()
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
+	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "stdin" );
@@ -988,6 +992,7 @@ void Compiler::addStdout()
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
+	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "stdout" );
@@ -1005,6 +1010,7 @@ void Compiler::addStderr()
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
+	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "stderr" );

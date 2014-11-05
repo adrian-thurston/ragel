@@ -155,7 +155,7 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, StreamImpl *is )
 		length = collect.length;
 		strCollectDestroy( &collect );
 	}
-	else if ( input->id == LEL_ID_STREAM ) {
+	else if ( input->id == LEL_ID_PTR ) {
 		treeUpref( input );
 		is->funcs->appendStream( is, input );
 	}
@@ -167,6 +167,23 @@ Word streamAppend( Program *prg, Tree **sp, Tree *input, StreamImpl *is )
 	return length;
 }
 
+void undoStreamAppend( Program *prg, Tree **sp, StreamImpl *is, Tree *input, long length )
+{
+	if ( input->id == LEL_ID_STR )
+		is->funcs->undoAppendData( is, length );
+	else if ( input->id == LEL_ID_PTR )
+		is->funcs->undoAppendStream( is );
+	else {
+		Tree *tree = is->funcs->undoAppendTree( is );
+		treeDownref( prg, sp, tree );
+	}
+}
+
+StreamImpl *streamToImpl( Stream *ptr )
+{
+	return ((Stream*) ((Pointer*)ptr)->value->tree)->in;
+}
+
 long parseFrag( Program *prg, Tree **sp, Parser *parser, long stopId, long entry )
 {
 switch ( entry ) {
@@ -175,7 +192,8 @@ case PcrStart:
 	if ( ! parser->pdaRun->parseError ) {
 		parser->pdaRun->stopTarget = stopId;
 
-		long pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
+		long pcr = parseLoop( prg, sp, parser->pdaRun, 
+				streamToImpl( parser->input ), entry );
 
 		while ( pcr != PcrDone ) {
 
@@ -185,7 +203,8 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-			pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
+			pcr = parseLoop( prg, sp, parser->pdaRun, 
+					streamToImpl( parser->input ), entry );
 		}
 	}
 
@@ -198,14 +217,17 @@ break; }
 long parseFinish( Tree **result, Program *prg, Tree **sp,
 		Parser *parser, int revertOn, long entry )
 {
+	StreamImpl *si;
 switch ( entry ) {
 case PcrStart:
 
 	if ( parser->pdaRun->stopTarget <= 0 ) {
-		parser->input->in->funcs->setEof( parser->input->in );
+		si = streamToImpl( parser->input );
+		si->funcs->setEof( si );
 
 		if ( ! parser->pdaRun->parseError ) {
-			long pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
+			si = streamToImpl( parser->input );
+			long pcr = parseLoop( prg, sp, parser->pdaRun, si, entry );
 
 		 	while ( pcr != PcrDone ) {
 
@@ -215,7 +237,8 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-				pcr = parseLoop( prg, sp, parser->pdaRun, parser->input->in, entry );
+				si = streamToImpl( parser->input );
+				pcr = parseLoop( prg, sp, parser->pdaRun, si, entry );
 			}
 		}
 	}
@@ -223,7 +246,7 @@ case PcrReverse:
 	/* FIXME: need something here to check that we are not stopped waiting for
 	 * more data when we are actually expected to finish. This check doesn't
 	 * work (at time of writing). */
-	//assert( (parser->pdaRun->stopTarget > 0 && parser->pdaRun->stopParsing) || parser->input->in->eofSent );
+	//assert( (parser->pdaRun->stopTarget > 0 && parser->pdaRun->stopParsing) || streamToImpl( parser->input )->eofSent );
 
 	if ( !revertOn )
 		commitFull( prg, sp, parser->pdaRun, 0 );
@@ -241,7 +264,6 @@ break; }
 
 long undoParseFrag( Program *prg, Tree **sp, Parser *parser, long steps, long entry )
 {
-	StreamImpl *is = parser->input->in;
 	PdaRun *pdaRun = parser->pdaRun;
 
 	debug( prg, REALM_PARSE, "undo parse frag, target steps: %ld, pdarun steps: %ld\n", steps, pdaRun->steps );
@@ -259,7 +281,7 @@ case PcrStart:
 		pdaRun->triggerUndo = 1;
 
 		/* The parse loop will recognise the situation. */
-		long pcr = parseLoop( prg, sp, pdaRun, is, entry );
+		long pcr = parseLoop( prg, sp, pdaRun, streamToImpl(parser->input), entry );
 		while ( pcr != PcrDone ) {
 
 return pcr;
@@ -268,7 +290,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-			pcr = parseLoop( prg, sp, pdaRun, is, entry );
+			pcr = parseLoop( prg, sp, pdaRun, streamToImpl(parser->input), entry );
 		}
 
 		/* Reset environment. */
@@ -919,18 +941,19 @@ again:
 			Tree *arg[n];
 			for ( i = n-1; i >= 0; i-- )
 				arg[i] = vm_pop();
-			Stream *stream = (Stream*)vm_pop();
+			Pointer *ptr = (Pointer*)vm_pop();
+			StreamImpl *si = streamToImpl( (Stream*)ptr );
 
 			for ( i = 0; i < n; i++ ) {
-				if ( stream->in->file != 0 )
-					printTreeFile( prg, sp, stream->in->file, arg[i], false );
+				if ( si->file != 0 )
+					printTreeFile( prg, sp, si->file, arg[i], false );
 				else
-					printTreeFd( prg, sp, stream->in->fd, arg[i], false );
+					printTreeFd( prg, sp, si->fd, arg[i], false );
 			}
 
 			for ( i = 0; i < n; i++ )
 				treeDownref( prg, sp, arg[i] );
-			treeDownref( prg, sp, (Tree*)stream );
+			treeDownref( prg, sp, (Tree*)ptr );
 			break;
 		}
 		case IN_PRINT_XML_AC: {
@@ -2125,27 +2148,31 @@ again:
 		case IN_INPUT_APPEND_WC: {
 			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_WC \n" );
 
-			Stream *accumStream = (Stream*)vm_pop();
+			Pointer *sptr = (Pointer*) vm_pop();
 			Tree *input = vm_pop();
-			streamAppend( prg, sp, input, accumStream->in );
 
-			vm_push( (Tree*)accumStream );
+			StreamImpl *si = streamToImpl( (Stream*)sptr );
+			streamAppend( prg, sp, input, si );
+
+			vm_push( (Tree*)sptr );
 			treeDownref( prg, sp, input );
 			break;
 		}
 		case IN_INPUT_APPEND_WV: {
 			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_WV \n" );
 
-			Stream *accumStream = (Stream*)vm_pop();
+			Pointer *sptr = (Pointer*) vm_pop();
 			Tree *input = vm_pop();
-			Word len = streamAppend( prg, sp, input, accumStream->in );
 
-			treeUpref( (Tree*)accumStream );
-			vm_push( (Tree*)accumStream );
+			StreamImpl *si = streamToImpl( (Stream*)sptr );
+			Word len = streamAppend( prg, sp, input, si );
+
+			treeUpref( (Tree*)sptr );
+			vm_push( (Tree*)sptr );
 
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_INPUT_APPEND_BKT );
-			rcodeWord( exec, (Word) accumStream );
+			rcodeWord( exec, (Word) sptr );
 			rcodeWord( exec, (Word) input );
 			rcodeWord( exec, (Word) len );
 			rcodeUnitTerm( exec );
@@ -2153,17 +2180,19 @@ again:
 		}
 
 		case IN_INPUT_APPEND_BKT: {
-			Tree *accumStream;
+			Tree *sptr;
 			Tree *input;
 			Word len;
-			read_tree( accumStream );
+			read_tree( sptr );
 			read_tree( input );
 			read_word( len );
 
 			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_BKT\n" );
 
-			undoStreamAppend( prg, sp, ((Stream*)accumStream)->in, input, len );
-			treeDownref( prg, sp, accumStream );
+			StreamImpl *si = streamToImpl( (Stream*)sptr );
+			undoStreamAppend( prg, sp, si, input, len );
+
+			treeDownref( prg, sp, sptr );
 			treeDownref( prg, sp, input );
 			break;
 		}
@@ -2474,7 +2503,8 @@ again:
 			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*)vm_pop();
 
-			parser->input->in->funcs->unsetEof( parser->input->in );
+			StreamImpl *si = streamToImpl( parser->input );
+			si->funcs->unsetEof( si );
 			treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
@@ -2612,7 +2642,9 @@ again:
 
 			Tree *input = constructStream( prg );
 			treeUpref( input );
-			vm_push( input );
+			Tree *ptr = constructPointer( prg, input );
+			treeUpref( ptr );
+			vm_push( ptr );
 			break;
 		}
 		case IN_GET_INPUT: {
@@ -2628,11 +2660,11 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_SET_INPUT\n" );
 
 			Parser *parser = (Parser*)vm_pop();
-			Stream *accumStream = (Stream*)vm_pop();
-			parser->input = accumStream;
-			treeUpref( (Tree*)accumStream );
+			Stream *stream = (Stream*)vm_pop();
+			parser->input = stream;
+			treeUpref( (Tree*)stream );
 			treeDownref( prg, sp, (Tree*)parser );
-			treeDownref( prg, sp, (Tree*)accumStream );
+			treeDownref( prg, sp, (Tree*)stream );
 			break;
 		}
 		case IN_CONSTRUCT_TERM: {
@@ -3682,7 +3714,9 @@ again:
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
 			if ( prg->stdinVal == 0 ) {
-				prg->stdinVal = openStreamFd( prg, "<stdin>", 0 );
+				Tree *val = (Tree*)openStreamFd( prg, "<stdin>", 0 );
+				treeUpref( val );
+				prg->stdinVal = (Stream*)constructPointer( prg, val );
 				treeUpref( (Tree*)prg->stdinVal );
 			}
 
@@ -3697,7 +3731,9 @@ again:
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
 			if ( prg->stdoutVal == 0 ) {
-				prg->stdoutVal = openStreamFd( prg, "<stdout>", 1 );
+				Tree *val = (Tree*)openStreamFd( prg, "<stdout>", 1 );
+				treeUpref( val );
+				prg->stdoutVal = (Stream*)constructPointer( prg, val );
 				treeUpref( (Tree*)prg->stdoutVal );
 			}
 
@@ -3712,7 +3748,9 @@ again:
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
 			if ( prg->stderrVal == 0 ) {
-				prg->stderrVal = openStreamFd( prg, "<stderr>", 2 );
+				Tree *val = (Tree*)openStreamFd( prg, "<stderr>", 2 );
+				treeUpref( val );
+				prg->stderrVal = (Stream*)constructPointer( prg, val );
 				treeUpref( (Tree*)prg->stderrVal );
 			}
 

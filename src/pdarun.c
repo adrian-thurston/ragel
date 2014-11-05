@@ -149,18 +149,6 @@ void undoStreamPush( Program *prg, Tree **sp, StreamImpl *is, long length )
 	}
 }
 
-void undoStreamAppend( Program *prg, Tree **sp, StreamImpl *is, Tree *input, long length )
-{
-	if ( input->id == LEL_ID_STR )
-		is->funcs->undoAppendData( is, length );
-	else if ( input->id == LEL_ID_STREAM )
-		is->funcs->undoAppendStream( is );
-	else {
-		Tree *tree = is->funcs->undoAppendTree( is );
-		treeDownref( prg, sp, tree );
-	}
-}
-
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back data, or we move to
  * a previous buffer and slide back data. */

@@ -47,6 +47,7 @@ struct Constructor;
 struct ConsItem;
 struct _FsmRun;
 struct colm_tree;
+struct colm_stream;
 struct colm_location;
 struct colm_program;
 

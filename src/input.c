@@ -424,8 +424,8 @@ static void _setEof( StreamImpl *is )
 static void _unsetEof( StreamImpl *is )
 {
 	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		stream->in->eof = false;
+		StreamImpl *si = streamToImpl( (Stream*)is->queue->tree );
+		si->eof = false;
 	}
 	else {
 		is->eof = false;
@@ -447,11 +447,11 @@ static int _getParseBlock( StreamImpl *is, int skip, char **pdp, int *copied )
 		}
 
 		if ( buf->type == RunBufSourceType ) {
-			Stream *stream = (Stream*)buf->tree;
-			int type = stream->in->funcs->getParseBlock( stream->in, skip, pdp, copied );
+			StreamImpl *si = streamToImpl( (Stream*)buf->tree );
+			int type = si->funcs->getParseBlock( si, skip, pdp, copied );
 
-//			if ( type == INPUT_EOD && !stream->in->eosSent ) {
-//				stream->in->eosSent = 1;
+//			if ( type == INPUT_EOD && !si->eosSent ) {
+//				si->eosSent = 1;
 //				ret = INPUT_EOS;
 //				continue;
 //			}
@@ -544,8 +544,8 @@ static int _getData( StreamImpl *is, char *dest, int length )
 		}
 
 		if ( buf->type == RunBufSourceType ) {
-			Stream *stream = (Stream*)buf->tree;
-			int glen = stream->in->funcs->getData( stream->in, dest+copied, length );
+			StreamImpl *si = streamToImpl( (Stream*)buf->tree );
+			int glen = si->funcs->getData( si, dest+copied, length );
 
 			if ( glen == 0 ) {
 				//debug( REALM_INPUT, "skipping over input\n" );
@@ -601,8 +601,8 @@ static int _consumeData( Program *prg, Tree **sp, StreamImpl *is, int length, Lo
 			break;
 
 		if ( buf->type == RunBufSourceType ) {
-			Stream *stream = (Stream*)buf->tree;
-			int slen = stream->in->funcs->consumeData( prg, sp, stream->in, length, loc );
+			StreamImpl *si = streamToImpl( (Stream*)buf->tree );
+			int slen = si->funcs->consumeData( prg, sp, si, length, loc );
 			//debug( REALM_INPUT, " got %d bytes from source\n", slen );
 
 			consumed += slen;
@@ -646,8 +646,8 @@ static int _undoConsumeData( StreamImpl *is, const char *data, int length )
 	//debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
 	if ( is->consumed == 0 && isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		int len = stream->in->funcs->undoConsumeData( stream->in, data, length );
+		StreamImpl *si = streamToImpl( (Stream*)is->queue->tree );
+		int len = si->funcs->undoConsumeData( si, data, length );
 		return len;
 	}
 	else {
@@ -694,8 +694,8 @@ static void _undoConsumeTree( StreamImpl *is, Tree *tree, int ignore )
 static struct LangEl *_consumeLangEl( StreamImpl *is, long *bindId, char **data, long *length )
 {
 	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->consumeLangEl( stream->in, bindId, data, length );
+		StreamImpl *si = streamToImpl( (Stream*)is->queue->tree );
+		return si->funcs->consumeLangEl( si, bindId, data, length );
 	}
 	else {
 		assert( false );
@@ -705,8 +705,8 @@ static struct LangEl *_consumeLangEl( StreamImpl *is, long *bindId, char **data,
 static void _undoConsumeLangEl( StreamImpl *is )
 {
 	if ( isSourceStream( is ) ) {
-		Stream *stream = (Stream*)is->queue->tree;
-		return stream->in->funcs->undoConsumeLangEl( stream->in );
+		StreamImpl *si = streamToImpl( (Stream*)is->queue->tree );
+		return si->funcs->undoConsumeLangEl( si );
 	}
 	else {
 		assert( false );
@@ -715,10 +715,8 @@ static void _undoConsumeLangEl( StreamImpl *is )
 
 static void _prependData( StreamImpl *is, const char *data, long length )
 {
-	if ( isSourceStream( is ) && ((Stream*)is->queue->tree)->in->funcs == &streamFuncs ) {
-		Stream *stream = (Stream*)is->queue->tree;
-
-		_prependData( stream->in, data, length );
+	if ( isSourceStream( is ) && streamToImpl( (Stream*)is->queue->tree)->funcs == &streamFuncs ) {
+		_prependData( streamToImpl( (Stream*)is->queue->tree ), data, length );
 	}
 	else {
 		/* Create a new buffer for the data. This is the easy implementation.
@@ -770,8 +768,8 @@ static int _undoPrependData( StreamImpl *is, int length )
 			break;
 
 		if ( buf->type == RunBufSourceType ) {
-			Stream *stream = (Stream*)buf->tree;
-			int slen = stream->in->funcs->undoPrependData( stream->in, length );
+			StreamImpl *si = streamToImpl( (Stream*)buf->tree );
+			int slen = si->funcs->undoPrependData( si, length );
 
 			consumed += slen;
 			length -= slen;

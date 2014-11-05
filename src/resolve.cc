@@ -59,7 +59,13 @@ UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 				}
 
 				case TypeMapEl::LangElType: {
-					return pd->findUniqueType( TYPE_TREE, inDict->value );
+					UniqueType *ut = pd->findUniqueType( TYPE_TREE, inDict->value );
+					if ( ut == pd->uniqueTypeStream ) {
+						std::cerr << "resolving langEl as ptr to tree because"
+								" it is a stream" << std::endl;
+						return pd->findUniqueType( TYPE_PTR, ut->langEl );
+					}
+					return ut;
 				}
 			}
 		}

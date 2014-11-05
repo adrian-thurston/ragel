@@ -349,6 +349,7 @@ void userIterDestroy( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 void userIterDestroy2( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 
 Tree *castTree( struct colm_program *prg, int langElId, Tree *tree );
+StreamImpl *streamToImpl( Stream *ptr );
 
 #if defined(__cplusplus)
 }

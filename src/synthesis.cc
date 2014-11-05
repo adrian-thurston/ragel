@@ -528,6 +528,11 @@ bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT,
 	if ( destUT->typeId == TYPE_TREE && destUT->langEl == pd->anyLangEl &&
 			srcUT->typeId == TYPE_TREE )
 		return true;
+
+	/* Casting pointers to any. */
+	if ( destUT->typeId == TYPE_TREE && destUT->langEl == pd->anyLangEl &&
+			srcUT->typeId == TYPE_PTR )
+		return true;
 	
 	/* Setting a reference from a tree. */
 	if ( destUT->typeId == TYPE_REF && srcUT->typeId == TYPE_TREE &&
@@ -1254,8 +1259,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool tree, bo
 				continue;
 			}
 
+			UniqueType *streamPtrUt = pd->findUniqueType( TYPE_PTR, pd->streamLangEl );
 			if ( !tree && ut->typeId == TYPE_TREE &&
-					ut->langEl != pd->strLangEl && ut->langEl != pd->streamLangEl )
+					ut->langEl != pd->strLangEl && ut != streamPtrUt )
 			{
 				/* Convert it to a string. */
 				code.append( IN_TREE_TO_STR_TRIM );
@@ -1440,8 +1446,9 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 				continue;
 			}
 
+			UniqueType *streamPtrUt = pd->findUniqueType( TYPE_PTR, pd->streamLangEl );
 			if ( strings && ut->typeId == TYPE_TREE &&
-					ut->langEl != pd->strLangEl && ut->langEl != pd->streamLangEl )
+					ut->langEl != pd->strLangEl && ut != streamPtrUt )
 			{
 				/* Convert it to a string. */
 				code.append( IN_TREE_TO_STR_TRIM );
@@ -1486,7 +1493,9 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 	UniqueType *varUt = varRef->lookup( pd );
 	GenericType *generic = varUt->langEl->generic;
 
-	if ( varUt == pd->uniqueTypeStream )
+	UniqueType *streamPtrUt = pd->findUniqueType( TYPE_PTR, pd->streamLangEl );
+
+	if ( varUt == streamPtrUt )
 		evaluateSendStream( pd, code );
 	else if ( generic != 0 && generic->typeId == GEN_PARSER )
 		evaluateSendParser( pd, code, true );
@@ -1541,17 +1550,18 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 			code.appendWord( mapEl->value );
 			break;
 		}
-		case ConsItem::ExprType:
+		case ConsItem::ExprType: {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 
+			UniqueType *streamPtrUt = pd->findUniqueType( TYPE_PTR, pd->streamLangEl );
 			if ( ut->typeId == TYPE_TREE &&
-					ut->langEl != pd->strLangEl && ut->langEl != pd->streamLangEl )
+					ut->langEl != pd->strLangEl && ut != streamPtrUt )
 			{
 				/* Convert it to a string. */
 				code.append( IN_TREE_TO_STR_TRIM );
 			}
 			break;
-		}
+		}}
 	}
 
 	/* If there was nothing loaded, load the empty string. We must produce

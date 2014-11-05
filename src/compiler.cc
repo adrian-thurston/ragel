@@ -964,7 +964,10 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	Stream *res = streamAllocate( prg );
 	res->id = LEL_ID_STREAM;
 	res->in = sourceStream;
-	in->funcs->appendStream( in, (Tree*)res );
+
+	Tree *ptr = constructPointer( prg, (Tree*)res );
+
+	in->funcs->appendStream( in, ptr );
 	in->funcs->setEof( in );
 
 	long pcr = parseLoop( prg, sp, pdaRun, in, PcrStart );
@@ -992,6 +995,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 void Compiler::parsePatterns()
 {
 	Program *prg = colm_new_program( runtimeData );
+	colm_set_debug( prg, 0x03 );
 
 	/* Turn off context-dependent parsing. */
 	prg->ctxDepParsing = 0;
