@@ -134,6 +134,10 @@ context generate
 	# Blank lines or comment lines at the beginning of the file.
 	token LEADER / ( [ \t]* ('#' [^\n]*)? '\n' )* /
 
+	# Ordering productions for resolving ambiguities.
+	def O1 []
+	def O2 []
+
 	def start 
 		[file_input]
 
@@ -266,8 +270,8 @@ context generate
 
 	def target_ext
 		[attributeref]
-	|	[subscription]
-	|	[slicing]
+	|	[O1 subscription]
+	|	[O2 slicing]
 
 	def print_stmt 
 		[`print opt_expression_list]
@@ -338,8 +342,8 @@ context generate
 
 	def primary_ext
 		[attributeref]
-	|	[subscription]
-	|	[slicing]
+	|	[O1 subscription]
+	|	[O2 slicing]
 	|	[call]
 
 	def pyliteral 
