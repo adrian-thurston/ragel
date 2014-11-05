@@ -91,9 +91,9 @@ token item
 	S: sub
 	/[0-9]+/
 	{
-		M: str = input.pull(match_length)
+		M: str = input->pull(match_length)
 		parse_stop S: sub[input]
-		input.push( make_token( typeid<item> M S ) )
+		input->push( make_token( typeid<item> M S ) )
 	}
 
 def stuff

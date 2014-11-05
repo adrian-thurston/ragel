@@ -7,7 +7,7 @@ context si
 
 		token id /'a'|'b'/
 		{
-			input.push( make_token( trans_id_to input.pull(match_length) ) )
+			input->push( make_token( trans_id_to input->pull(match_length) ) )
 		}
 		
 		token super_id //

@@ -93,19 +93,19 @@ context tags
 				TagStack = Rest
 				while ( Top.data != match_text ) {
 					print( 'SENDING missing close\n' )
-					input.push( make_token( typeid<missing_close_id> '' ) )
+					input->push( make_token( typeid<missing_close_id> '' ) )
 					match TagStack [Top2:tag_id Rest2:tag_stack] 
 					Top = Top2
 					TagStack = Rest2
 				}
 
 				print( 'SENDING close\n' )
-				input.push( make_token( typeid<close_id> input.pull( match_length ) ) )
+				input->push( make_token( typeid<close_id> input->pull( match_length ) ) )
 			}
 			else {
 				print( 'CLOSE \'' match_text '\' NOT IN TAG STACK\n' )
 				# The tag is not in the tag stack so send the id as a stray close.
-				input.push( make_token( typeid<stray_close> input.pull( match_length ) ) )
+				input->push( make_token( typeid<stray_close> input->pull( match_length ) ) )
 			}
 		}
 	end

@@ -1,6 +1,6 @@
 ##### LM #####
 Stream: stream = open( 'working/pull2.in' ('r') )
-String: str = Stream.pull( 10 )
+String: str = Stream->pull( 10 )
 print( String '\n' )
 ##### IN #####
 this is input for a non-parse pull

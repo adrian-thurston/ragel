@@ -180,11 +180,11 @@ namespace ragel
 	# Not cannot start with '{', terminated by ';', rewritten into { inline_expr }
 	token _inline_expr_reparse
 		/[^{;] [^;]* ';'/ {
-			R: str = input.pull( match_length - 1 )
-			input.pull( 1 )
-			input.push( "}" )
-			input.push( R )
-			input.push( "{" )
+			R: str = input->pull( match_length - 1 )
+			input->pull( 1 )
+			input->push( "}" )
+			input->push( R )
+			input->push( "{" )
 		}
 
 	token variable_name /ident/
@@ -433,11 +433,11 @@ namespace c_host
 
 		token slr /'%%' [^{] [^\n]* '\n'/
 		{
-			input.pull( 2 )
-			R: str = input.pull( match_length - 3 )
-			input.push( "}%%" )
-			input.push( R )
-			input.push( "%%{" )
+			input->pull( 2 )
+			R: str = input->pull( match_length - 3 )
+			input->push( "}%%" )
+			input->push( R )
+			input->push( "%%{" )
 		}
 
 		rl NL / '\n' /
