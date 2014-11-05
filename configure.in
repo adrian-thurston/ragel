@@ -21,8 +21,8 @@ AM_CONDITIONAL(BUILD_MANUAL, [test "x$build_manual" = "xyes"])
 
 AC_CHECK_SIZEOF([long])
 
-CFLAGS="$CFLAGS -Wall"
-CXXFLAGS="$CFLAGS -Wall"
+: ${CFLAGS="-Wall -g"}
+: ${CXXFLAGS="-Wall -g"}
 
 dnl Set to true if build system should generate parsers from ragel, kelbt, and
 dnl gperf sources. Set to false if generated files are included and not to be
