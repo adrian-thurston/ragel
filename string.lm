@@ -1,4 +1,3 @@
-##### LM #####
 lex
 	token str_escape /'\\' any/
 	token str_chr /[^\\"]+/

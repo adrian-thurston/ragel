@@ -1,4 +1,3 @@
-##### LM #####
 lex
 	token id /[a-z]+/
 	ignore /[ \t]+/

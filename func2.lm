@@ -1,4 +1,3 @@
-##### LM #####
 int f( I: int Str: str )
 {
 	print( I ' ' Str '\n' )

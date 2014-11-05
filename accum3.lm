@@ -1,4 +1,3 @@
-##### LM #####
 lex
 	literal `-
 	token file /^('-'|0)(^0)*/

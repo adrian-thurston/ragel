@@ -1,5 +1,3 @@
-##### LM #####
-
 # Token names.
 lex
 	token number /[0-9]+/

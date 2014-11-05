@@ -1,4 +1,3 @@
-##### LM #####
 
 lex
 	token tIDENTIFIER /[a-z][a-zA-Z_]*/ -ni

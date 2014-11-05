@@ -1,4 +1,3 @@
-##### LM #####
 lex
 	token a /'a'/
 	token b /'b'/

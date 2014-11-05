@@ -1,4 +1,3 @@
-##### LM #####
 context generate
 	def open_item
 		type: str

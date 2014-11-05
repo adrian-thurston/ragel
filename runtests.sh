@@ -1,9 +1,10 @@
 #!/bin/bash
 #
 
-# Test cases contain sections giving the program, input and expected output.
+# Test cases contain sections which specify the program, the input and the
+# expected output. The first section has no header and is always the colm
+# program. The sections afterwards can be in any order.
 
-###### LM #####
 #
 #   colm program
 #
@@ -78,6 +79,13 @@ function cat_section
 
 	# Print Nth instance of the section
 	awk -vsection=$section -vnth=$nth '
+		BEGIN {
+			if ( section == "LM" ) {
+				found = 1
+				in_section = 1;
+			}
+		}
+
 		/#+ *[a-zA-Z]+ *#+/ {
 			gsub( "[ #\n]", "", $0 );
 			in_section = 0

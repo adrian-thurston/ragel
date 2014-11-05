@@ -1,4 +1,3 @@
-##### LM #####
 
 lex
 	token c_single_lit /( 'L'? "'" ( [^'\\\n] | '\\' any )* "'" )/

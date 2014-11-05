@@ -1,4 +1,3 @@
-##### LM #####
 include 'include1a.lmi'
 print( ' world\n' )
 ##### EXP #####

@@ -1,4 +1,3 @@
-##### LM #####
 
 lex
 	token func_chr /[^{}]+/

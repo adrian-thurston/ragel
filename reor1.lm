@@ -1,4 +1,3 @@
-##### LM #####
 lex 
 	token id / [abcdef] /
 	token number / [0-9] /
