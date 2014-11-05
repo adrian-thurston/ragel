@@ -106,7 +106,6 @@ long listLength(List *list);
 
 typedef struct _FunctionInfo
 {
-	const char *name;
 	long frameId;
 	long argSize;
 	long frameSize;
@@ -196,6 +195,7 @@ typedef struct _LocalInfo
 
 typedef struct _FrameInfo
 {
+	const char *name;
 	Code *codeWV;
 	long codeLenWV;
 	Code *codeWC;

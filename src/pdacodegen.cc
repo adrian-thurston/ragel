@@ -204,6 +204,12 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	for ( int i = 0; i < runtimeData->numFrames; i++ ) {
 		out << "\t{ ";
 
+		/* The Name. */
+		if ( runtimeData->frameInfo[i].name )
+			out << "\"" << runtimeData->frameInfo[i].name << "\", ";
+		else 
+			out << "\"\", ";
+
 		if ( runtimeData->frameInfo[i].codeLenWV > 0 )
 			out << "code_" << i << "_wv, ";
 		else
@@ -308,7 +314,6 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	out << "static FunctionInfo " << functionInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numFunctions; i++ ) {
 		out << "\t{ " <<
-				"\"" << runtimeData->functionInfo[i].name << "\", " <<
 				runtimeData->functionInfo[i].frameId << ", " <<
 				runtimeData->functionInfo[i].argSize << ", " <<
 				runtimeData->functionInfo[i].frameSize;

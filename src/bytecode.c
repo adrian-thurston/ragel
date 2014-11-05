@@ -3550,15 +3550,16 @@ again:
 			read_half( funcId );
 
 			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
+			FrameInfo *fr = &prg->rtd->frameInfo[fi->frameId];
 
-			debug( prg, REALM_BYTECODE, "IN_CALL_WV %s\n", fi->name );
+			debug( prg, REALM_BYTECODE, "IN_CALL_WV %s\n", fr->name );
 
 			vm_push( 0 ); /* Return value. */
 			vm_push( (SW)instr );
 			vm_push( (SW)exec->framePtr );
 			vm_push( (SW)exec->frameId );
 
-			instr = prg->rtd->frameInfo[fi->frameId].codeWV;
+			instr = fr->codeWV;
 			exec->framePtr = vm_ptop();
 			exec->frameId = fi->frameId;
 			break;
@@ -3568,15 +3569,16 @@ again:
 			read_half( funcId );
 
 			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
+			FrameInfo *fr = &prg->rtd->frameInfo[fi->frameId];
 
-			debug( prg, REALM_BYTECODE, "IN_CALL_WC %s\n", fi->name );
+			debug( prg, REALM_BYTECODE, "IN_CALL_WC %s\n", fr->name );
 
 			vm_push( 0 ); /* Return value. */
 			vm_push( (SW)instr );
 			vm_push( (SW)exec->framePtr );
 			vm_push( (SW)exec->frameId );
 
-			instr = prg->rtd->frameInfo[fi->frameId].codeWC;
+			instr = fr->codeWC;
 			exec->framePtr = vm_ptop();
 			exec->frameId = fi->frameId;
 			break;
@@ -3672,7 +3674,6 @@ again:
 			break;
 		}
 		case IN_RET: {
-			debug( prg, REALM_BYTECODE, "IN_RET\n" );
 
 			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 			downrefLocalTrees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
@@ -3684,6 +3685,9 @@ again:
 			Tree *retVal = vm_pop();
 			vm_popn( fi->argSize );
 			vm_push( retVal );
+
+			fi = &prg->rtd->frameInfo[exec->frameId];
+			debug( prg, REALM_BYTECODE, "IN_RET %s\n", fi->name );
 
 			/* This if for direct calls of functions. */
 			if ( instr == 0 ){

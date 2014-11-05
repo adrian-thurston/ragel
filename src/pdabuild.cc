@@ -1454,22 +1454,27 @@ void Compiler::makeRuntimeData()
 	runtimeData->numFunctions = count;
 	memset( runtimeData->functionInfo, 0, sizeof(FunctionInfo)*count );
 	for ( FunctionList::Iter func = functionList; func.lte(); func++ ) {
-		runtimeData->functionInfo[func->funcId].name = func->name;
+
 		runtimeData->functionInfo[func->funcId].frameId = -1;
 
 		CodeBlock *block = func->codeBlock;
 		if ( block != 0 ) {
 			runtimeData->functionInfo[func->funcId].frameId = block->frameId;
 
+			/* Name. */
+			runtimeData->frameInfo[block->frameId].name = func->name;
+
+			/* Code. */
 			runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
 			runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
-
 			runtimeData->frameInfo[block->frameId].codeWC = block->codeWC.data;
 			runtimeData->frameInfo[block->frameId].codeLenWC = block->codeWC.length();
 
+			/* Locals. */
 			runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
 			runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
 
+			/* Meta. */
 			runtimeData->frameInfo[block->frameId].frameSize = func->localFrame->size();
 			runtimeData->frameInfo[block->frameId].argSize = func->paramListSize;
 		}
