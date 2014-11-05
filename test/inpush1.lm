@@ -63,7 +63,7 @@ namespace lang
 						print( 'ERROR: failed to open ' FN '\n' )
 						exit(1)
 					}
-					input.push( IS )
+					input->push( IS )
 				}
 			}
 			else {

@@ -4,8 +4,8 @@ lex
 	literal `* `( `)
 	token id /[a-zA-Z_]+/ 
 		{
-			t: str = input.pull( match_length )
-			input.push( make_token( typeid<id> t ) )
+			t: str = input->pull( match_length )
+			input->push( make_token( typeid<id> t ) )
 		}
 end
 

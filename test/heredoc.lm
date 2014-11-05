@@ -11,12 +11,12 @@ context heredoc
 			/ident_char+/
 			{
 				if HereId && HereId == match_text {
-					input.push( make_token( 
+					input->push( make_token( 
 						typeid<here_close>
-						input.pull(match_length - 1) ) )
+						input->pull(match_length - 1) ) )
 				}
 				else {
-					input.push( make_token( typeid<id> input.pull(match_length) ) )
+					input->push( make_token( typeid<id> input->pull(match_length) ) )
 				}
 			}
 

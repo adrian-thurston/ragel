@@ -72,7 +72,7 @@ context tags
 				}
 			}
 
-			input.push( make_token( send_id input.pull(match_length) ) )
+			input->push( make_token( send_id input->pull(match_length) ) )
 		}
 	end
 

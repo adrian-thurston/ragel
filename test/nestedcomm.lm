@@ -15,7 +15,7 @@ lex
 	{
 		parse_stop NC: nested_comment[ stdin ]
 		print( %NC '\n' )
-		input.push_ignore( NC )
+		input->push_ignore( NC )
 	}
 end
 
