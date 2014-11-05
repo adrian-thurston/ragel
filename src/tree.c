@@ -286,7 +286,8 @@ static Kid *constructIgnoreList( Program *prg, long ignoreInd )
 
 	Kid *first = 0, *last = 0;
 	while ( ignoreInd >= 0 ) {
-		Head *ignoreData = stringAllocPointer( prg, nodes[ignoreInd].data, nodes[ignoreInd].length );
+		Head *ignoreData = stringAllocPointer( prg, nodes[ignoreInd].data,
+				nodes[ignoreInd].length );
 
 		Tree *ignTree = treeAllocate( prg );
 		ignTree->refs = 1;
@@ -1106,7 +1107,7 @@ free_tree:
 			clearSourceStream( prg, sp, stream->in );
 			if ( stream->in->file != 0 )
 				fclose( stream->in->file );
-			else if ( stream->in->fd > 0 )
+			else if ( stream->in->fd >= 0 )
 				close( stream->in->fd );
 			free( stream->in );
 			streamFree( prg, stream );

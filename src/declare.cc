@@ -824,6 +824,8 @@ void Compiler::initStreamObject( )
 			IN_INPUT_PUSH_WV, IN_INPUT_PUSH_WV, uniqueTypeAny, false );
 	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
 			IN_INPUT_PUSH_IGNORE_WV, IN_INPUT_PUSH_IGNORE_WV, uniqueTypeAny, false );
+	initFunction( uniqueTypeVoid, streamObj, "close",
+			IN_INPUT_CLOSE_WC, IN_INPUT_CLOSE_WC, false );
 }
 
 ObjectField *Compiler::makeDataEl()

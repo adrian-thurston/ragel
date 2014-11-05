@@ -10,7 +10,7 @@ int testAppend( Fn: str Mode: str )
 	S: stream = open( Fn Mode )
 	send S
 		"colm networks
-		eos
+	S->close()
 }
 
 testAppend( 'working/open2.w' ('w') )

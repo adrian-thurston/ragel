@@ -14,6 +14,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
@@ -2146,7 +2147,7 @@ again:
 //			break;
 
 		case IN_INPUT_APPEND_WC: {
-			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_WC \n" );
+			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_WC\n" );
 
 			Pointer *sptr = (Pointer*) vm_pop();
 			Tree *input = vm_pop();
@@ -2159,7 +2160,7 @@ again:
 			break;
 		}
 		case IN_INPUT_APPEND_WV: {
-			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_WV \n" );
+			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_WV\n" );
 
 			Pointer *sptr = (Pointer*) vm_pop();
 			Tree *input = vm_pop();
@@ -2194,6 +2195,25 @@ again:
 
 			treeDownref( prg, sp, sptr );
 			treeDownref( prg, sp, input );
+			break;
+		}
+
+		case IN_INPUT_CLOSE_WC: {
+			debug( prg, REALM_BYTECODE, "IN_INPUT_CLOSE_WC\n" );
+
+			Stream *stream = (Stream*) vm_pop();
+			StreamImpl *si = stream->in;
+
+			if ( si->file != 0 ) {
+				fclose( si->file );
+				si->file = 0;
+			}
+			else if ( si->fd >= 0 ) {
+				close( si->fd );
+				si->fd = -1;
+			}
+
+			vm_push( (Tree*)stream );
 			break;
 		}
 

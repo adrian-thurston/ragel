@@ -218,6 +218,8 @@ typedef unsigned char uchar;
 #define IN_INPUT_PULL_WC         0xe1
 #define IN_INPUT_PULL_BKT        0x9f
 
+#define IN_INPUT_CLOSE_WC        0xef
+
 #define IN_PARSE_SAVE_STEPS      0xa0
 #define IN_PARSE_INIT_BKT        0xa1
 
