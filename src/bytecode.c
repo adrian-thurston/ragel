@@ -338,7 +338,7 @@ static long streamPush( Program *prg, Tree **sp, StreamImpl *in, Tree *tree, int
 
 		return length;
 	}
-	else if ( tree->id == LEL_ID_STREAM ) {
+	else if ( tree->id == LEL_ID_PTR ) {
 		treeUpref( tree );
 		streamPushStream( in, tree );
 		return -1;
