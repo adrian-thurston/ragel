@@ -1,4 +1,3 @@
-##### LM #####
 # Or-literal scanner
 lex
 	token orlit_dash /'-' /

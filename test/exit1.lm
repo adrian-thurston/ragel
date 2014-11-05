@@ -1,4 +1,3 @@
-##### LM #####
 
 print( 'before\n' )
 exit( 0 )

@@ -1,4 +1,3 @@
-##### LM #####
 context tags
 	# Open and close tags by rewriting to generic close tags. Won't work if
 	# interested in unclosed tags because a token can start as not close_id, but

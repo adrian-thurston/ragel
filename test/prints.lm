@@ -1,4 +1,3 @@
-##### LM #####
 lex
 	token word /[a-z]+/
 	ignore /[\t\n ]+/

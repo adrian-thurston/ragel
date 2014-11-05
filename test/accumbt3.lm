@@ -1,8 +1,6 @@
-##### LM #####
 #
 # Tokens
 #
-
 
 # Any single character can be a literal
 lex

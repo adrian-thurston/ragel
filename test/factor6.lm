@@ -1,4 +1,3 @@
-##### LM #####
 if ( 1 )
 	print( 'a\n' )
 if ( nil )

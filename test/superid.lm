@@ -1,4 +1,3 @@
-##### LM #####
 context si
 	lex
 		literal `! `a 

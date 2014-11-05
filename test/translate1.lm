@@ -1,4 +1,3 @@
-##### LM #####
 lex
 	ignore /space+/
 	literal `* `( `)

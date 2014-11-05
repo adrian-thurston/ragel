@@ -1,4 +1,3 @@
-##### LM #####
 lex
 	literal `var `if `then `else `while `do `for `read `write
 			`end `to `goto

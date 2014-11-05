@@ -1,5 +1,3 @@
-##### LM #####
-
 print_xml( argv0 deref argv )
 print( '\n' )
 ##### ARGS #####

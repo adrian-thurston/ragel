@@ -1,4 +1,3 @@
-##### LM #####
 context heredoc
 	rl ident_char /[a-zA-Z_]/
 
