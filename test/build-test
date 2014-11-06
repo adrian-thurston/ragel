@@ -8,6 +8,8 @@ git_ragel=thurston@complang.org:git/ragel.git
 
 dir=`mktemp -d /tmp/test.XXXXXX`
 
+set -e
+
 echo ========== STARTING ==========
 echo working in $dir
 echo
@@ -22,6 +24,7 @@ cd colm
 ./autogen.sh
 ./configure --prefix=$dir/i1/colm
 make -j4
+make check
 make install
 make dist
 cp *.tar.gz ../
@@ -31,8 +34,7 @@ cd ragel
 ./autogen.sh
 ./configure --prefix=$dir/i1/ragel --with-colm=$dir/i1/colm
 make -j4
-# FIXME
-cd test; make; cd ..
+make check
 make install
 make dist
 cp *.tar.gz ../
@@ -49,12 +51,14 @@ done
 cd colm-*
 ./configure --prefix=$dir/i2/colm
 make -j4
+make check
 make install
 cd ..
 
 cd ragel-*
 ./configure --prefix=$dir/i2/ragel --with-colm=$dir/i2/colm
 make -j4
+make check
 make install
 cd ..
 

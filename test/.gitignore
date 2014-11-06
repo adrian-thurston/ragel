@@ -25,3 +25,7 @@
 /ragel-parse
 /ragel-parse.c
 /trans
+/runtests.log
+/runtests.trs
+/test-suite.log
+
