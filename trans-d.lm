@@ -169,7 +169,7 @@ void rw_d_stmt_list( StmtList: indep::stmt* )
 
 int rw_d_action_block( ActionBlock: indep::action_block )
 {
-	Out = cons parser<out_code::lines> []
+	Out = new parser<out_code::lines>
 	if match ActionBlock [`{ stmt* `}] {
 		send Out
 			"{[rw_d_stmt_list( ActionBlock._repeat_stmt )]}
@@ -205,10 +205,10 @@ void rw_d( Output: stream )
 	Init: indep::stmt* = RagelTree.Init
 	for Stmt: indep::stmt in Init {
 		if match Stmt [Decl: var_decl] {
-			Out = cons parser<out_code::lines> []
+			Out = new parser<out_code::lines>
 			rw_d_var_decl( Decl )
 			send Out [] eos
-			send Output [Out.tree]
+			send Output [Out->tree]
 		}
 	}
 
@@ -221,7 +221,7 @@ void rw_d( Output: stream )
 		rw_d_action_block( IndepActionBlock )
 
 		# Reparse back to ragel action block.
-		Action = parse ragel::action_block[$Out.tree]
+		Action = parse ragel::action_block[$Out->tree]
 	}
 
 	send Output 
@@ -236,10 +236,10 @@ void rw_d( Output: stream )
 
 	for Stmt: indep::stmt in Init {
 		if match Stmt [ExprStmt: expr_stmt] {
-			Out = cons parser<out_code::lines> []
+			Out = new parser<out_code::lines>
 			rw_d_expr_stmt( ExprStmt )
 			send Out [] eos
-			send Output [Out.tree]
+			send Output [Out->tree]
 		}
 	}
 

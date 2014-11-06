@@ -191,10 +191,10 @@ include 'trans-go.lm'
 include 'trans-java.lm'
 include 'trans-ruby.lm'
 
-Lang: str = argv.pop()
-OutputFile: str = argv.pop()
-InputFile: str = argv.pop()
-global ClassName: str = argv.pop()
+Lang: str = argv->pop()
+OutputFile: str = argv->pop()
+InputFile: str = argv->pop()
+global ClassName: str = argv->pop()
 
 Input: stream = open( InputFile "r" )
 Output: stream = open( OutputFile "w" )
