@@ -1,6 +1,6 @@
 
-SUBDIRS = src doc
-DIST_SUBDIRS = $(SUBDIRS) aapl contrib examples test
+SUBDIRS = src doc test
+DIST_SUBDIRS = $(SUBDIRS) aapl contrib examples
 
 dist_doc_DATA = CREDITS ChangeLog
 EXTRA_DIST = ragel.vim sedsubst
