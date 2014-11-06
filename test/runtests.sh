@@ -52,6 +52,7 @@ java_compiler="@JAVAC@"
 ruby_engine="@RUBY@"
 csharp_compiler="@GMCS@"
 go_compiler="@GOBIN@"
+ocaml_compiler="@OCAML@"
 
 function test_error
 {
@@ -203,7 +204,7 @@ for test_case; do
         ocaml)
 			lang_opt="-O"
 			code_suffix=ocaml
-			compiler=ocaml
+			compiler=$ocaml_compiler
 			flags=""
 		;;
 		indep)

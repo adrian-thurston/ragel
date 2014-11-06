@@ -127,6 +127,9 @@ AC_CHECK_PROG(GMCS, gmcs, gmcs)
 dnl Check for the Go compiler.
 AC_CHECK_PROG(GOBIN, go, go)
 
+dnl Check for the ocaml compiler.
+AC_CHECK_PROG(OCAML, ocaml, ocaml)
+
 SED_SUBST=["\
 	-e 's|@CXX@|${CXX}|g' \
 	-e 's|@CC@|${CC}|g' \
@@ -136,6 +139,7 @@ SED_SUBST=["\
 	-e 's|@RUBY@|${RUBY}|g' \
 	-e 's|@GMCS@|${GMCS}|g' \
 	-e 's|@GOBIN@|${GOBIN}|g' \
+	-e 's|@OCAML@|${OCAML}|g' \
 "]
 
 AC_SUBST(SED_SUBST)
