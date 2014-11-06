@@ -19,8 +19,6 @@ ragel_SOURCES = \
 	binexp.cc flat.cc flatloop.cc flatexp.cc goto.cc \
 	gotoloop.cc gotoexp.cc ipgoto.cc xml.cc dot.cc binbasic.cc
 
-ragel_CXXFLAGS = -Wall
-
 BUILT_SOURCES = version.h
 
 version.h: Makefile

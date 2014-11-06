@@ -9,6 +9,9 @@ AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
 AC_CONFIG_HEADER(src/config.h)
 
+: ${CFLAGS="-Wall -g"}
+: ${CXXFLAGS="-Wall -g"}
+
 dnl Choose defaults for the build_manual var. If the dist file is present in the
 dnl root then default to no, otherwise go for it.
 AS_IF([test -r $srcdir/DIST], [. $srcdir/DIST], [build_manual=yes])
