@@ -32,7 +32,8 @@ extern struct StreamFuncs fileFuncs;
 extern struct StreamFuncs fdFuncs;
 extern struct StreamFuncs streamFuncs;
 
-void clearSourceStream( struct colm_program *prg, Tree **sp, StreamImpl *sourceStream )
+void clearSourceStream( struct colm_program *prg,
+		Tree **sp, StreamImpl *sourceStream )
 {
 	RunBuf *buf = sourceStream->queue;
 	while ( buf != 0 ) {
@@ -587,7 +588,8 @@ static int _getData( StreamImpl *is, char *dest, int length )
 	return copied;
 }
 
-static int _consumeData( Program *prg, Tree **sp, StreamImpl *is, int length, Location *loc )
+static int _consumeData( Program *prg, Tree **sp, StreamImpl *is,
+		int length, Location *loc )
 {
 	//debug( REALM_INPUT, "consuming %d bytes\n", length );
 
@@ -663,12 +665,16 @@ static int _undoConsumeData( StreamImpl *is, const char *data, int length )
 
 static Tree *_consumeTree( StreamImpl *is )
 {
-	while ( is->queue != 0 && is->queue->type == RunBufDataType && is->queue->offset == is->queue->length ) {
+	while ( is->queue != 0 && is->queue->type == RunBufDataType && 
+			is->queue->offset == is->queue->length )
+	{
 		RunBuf *runBuf = inputStreamPopHead( is );
 		free( runBuf );
 	}
 
-	if ( is->queue != 0 && (is->queue->type == RunBufTokenType || is->queue->type == RunBufIgnoreType) ) {
+	if ( is->queue != 0 && (is->queue->type == RunBufTokenType || 
+			is->queue->type == RunBufIgnoreType) )
+	{
 		RunBuf *runBuf = inputStreamPopHead( is );
 
 		/* FIXME: using runbufs here for this is a poor use of memory. */
@@ -691,7 +697,8 @@ static void _undoConsumeTree( StreamImpl *is, Tree *tree, int ignore )
 	inputStreamPrepend( is, newBuf );
 }
 
-static struct LangEl *_consumeLangEl( StreamImpl *is, long *bindId, char **data, long *length )
+static struct LangEl *_consumeLangEl( StreamImpl *is, long *bindId,
+		char **data, long *length )
 {
 	if ( isSourceStream( is ) ) {
 		StreamImpl *si = streamToImpl( (Stream*)is->queue->tree );
@@ -715,7 +722,9 @@ static void _undoConsumeLangEl( StreamImpl *is )
 
 static void _prependData( StreamImpl *is, const char *data, long length )
 {
-	if ( isSourceStream( is ) && streamToImpl( (Stream*)is->queue->tree)->funcs == &streamFuncs ) {
+	if ( isSourceStream( is ) && 
+			streamToImpl((Stream*)is->queue->tree)->funcs == &streamFuncs )
+	{
 		_prependData( streamToImpl( (Stream*)is->queue->tree ), data, length );
 	}
 	else {
@@ -802,12 +811,16 @@ static int _undoPrependData( StreamImpl *is, int length )
 
 static Tree *_undoPrependTree( StreamImpl *is )
 {
-	while ( is->queue != 0 && is->queue->type == RunBufDataType && is->queue->offset == is->queue->length ) {
+	while ( is->queue != 0 && is->queue->type == RunBufDataType &&
+			is->queue->offset == is->queue->length )
+	{
 		RunBuf *runBuf = inputStreamPopHead( is );
 		free( runBuf );
 	}
 
-	if ( is->queue != 0 && (is->queue->type == RunBufTokenType || is->queue->type == RunBufIgnoreType) ) {
+	if ( is->queue != 0 && (is->queue->type == RunBufTokenType ||
+			is->queue->type == RunBufIgnoreType) )
+	{
 		RunBuf *runBuf = inputStreamPopHead( is );
 
 		/* FIXME: using runbufs here for this is a poor use of memory. */

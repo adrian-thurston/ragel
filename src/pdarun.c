@@ -199,7 +199,8 @@ static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsm
 	}
 
 	if ( pdaRun->steps == pdaRun->targetSteps ) {
-		debug( prg, REALM_PARSE, "trigger parse stop, steps = target = %d\n", pdaRun->targetSteps );
+		debug( prg, REALM_PARSE, "trigger parse stop, steps = "
+				"target = %d\n", pdaRun->targetSteps );
 		pdaRun->stop = true;
 	}
 }
@@ -224,7 +225,8 @@ void resetToken( PdaRun *pdaRun )
 static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, 
 		StreamImpl *is, ParseTree *parseTree )
 {
-	debug( prg, REALM_PARSE, "sending back: %s\n", prg->rtd->lelInfo[parseTree->id].name );
+	debug( prg, REALM_PARSE, "sending back: %s\n",
+			prg->rtd->lelInfo[parseTree->id].name );
 
 	if ( parseTree->flags & PF_NAMED ) {
 		/* Send the named lang el back first, then send back any leading
@@ -268,7 +270,8 @@ static void sendBack( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 	}
 
 	if ( pdaRun->steps == pdaRun->targetSteps ) {
-		debug( prg, REALM_PARSE, "trigger parse stop, steps = target = %d\n", pdaRun->targetSteps );
+		debug( prg, REALM_PARSE, "trigger parse stop, "
+				"steps = target = %d\n", pdaRun->targetSteps );
 		pdaRun->stop = true;
 	}
 
@@ -399,7 +402,8 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 		errorHead->location->column = 1;
 	}
 	else {
-		debug( prg, REALM_PARSE, "deepest location byte: %d\n", deepest->location->byte );
+		debug( prg, REALM_PARSE, "deepest location byte: %d\n",
+				deepest->location->byte );
 
 		const char *name = deepest->location->name;
 		long line = deepest->location->line;
@@ -437,12 +441,15 @@ static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
 	treeUpref( pdaRun->parseErrorText );
 }
 
-static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
+static void attachRightIgnore( Program *prg, Tree **sp,
+		PdaRun *pdaRun, ParseTree *parseTree )
 {
 	if ( pdaRun->accumIgnore == 0 )
 		return;
 
-	if ( pdaRun->stackTop->id > 0 && pdaRun->stackTop->id < prg->rtd->firstNonTermId ) {
+	if ( pdaRun->stackTop->id > 0 && 
+			pdaRun->stackTop->id < prg->rtd->firstNonTermId )
+	{
 		/* OK, do it */
 		debug( prg, REALM_PARSE, "attaching right ignore\n" );
 
@@ -519,7 +526,8 @@ static void attachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 	}
 }
 
-static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
+static void attachLeftIgnore( Program *prg, Tree **sp,
+		PdaRun *pdaRun, ParseTree *parseTree )
 {
 	/* Reset. */
 	assert( ! ( parseTree->flags & PF_LEFT_IL_ATTACHED ) );
@@ -574,7 +582,8 @@ static void attachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree
 }
 
 /* Not currently used. Need to revive this. WARNING: untested changes here */
-static void detachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTree *parseTree )
+static void detachRightIgnore( Program *prg, Tree **sp,
+		PdaRun *pdaRun, ParseTree *parseTree )
 {
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
@@ -626,7 +635,8 @@ static void detachRightIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, ParseTre
 	}
 }
 
-static void detachLeftIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, ParseTree *parseTree )
+static void detachLeftIgnore( Program *prg, Tree **sp,
+		PdaRun *pdaRun, FsmRun *fsmRun, ParseTree *parseTree )
 {
 	/* Detach left. */
 	Tree *leftIgnore = 0;
@@ -1091,7 +1101,8 @@ case PcrStart:
 				( prg->rtd->regionInfo[fsmRun->region].ciLelId > 0 ) )
 		{
 			debug( prg, REALM_PARSE, "sending a collect ignore\n" );
-			sendCi( prg, sp, is, fsmRun, pdaRun, prg->rtd->regionInfo[fsmRun->region].ciLelId );
+			sendCi( prg, sp, is, fsmRun, pdaRun,
+					prg->rtd->regionInfo[fsmRun->region].ciLelId );
 			goto yes;
 		}
 
@@ -1221,9 +1232,11 @@ yes:
 			transferReverseCode( pdaRun, pdaRun->parseInput );
 
 		if ( pdaRun->parseInput != 0 ) {
-			/* If it's a nonterminal with a termdup then flip the parse tree to the terminal. */
+			/* If it's a nonterminal with a termdup then flip the parse tree to
+			 * the terminal. */
 			if ( pdaRun->parseInput->id >= prg->rtd->firstNonTermId ) {
-				pdaRun->parseInput->id = prg->rtd->lelInfo[pdaRun->parseInput->id].termDupId;
+				pdaRun->parseInput->id =
+						prg->rtd->lelInfo[pdaRun->parseInput->id].termDupId;
 				pdaRun->parseInput->flags |= PF_TERM_DUP;
 			}
 		}
@@ -1466,9 +1479,11 @@ long stackTopTarget( Program *prg, PdaRun *pdaRun )
 	if ( pdaRun->stackTop->state < 0 )
 		state = prg->rtd->startStates[pdaRun->parserId];
 	else {
-		state = pdaRun->tables->targs[(int)pdaRun->tables->indicies[pdaRun->tables->offsets[
-				pdaRun->stackTop->state] + 
-				(pdaRun->stackTop->id - pdaRun->tables->keys[pdaRun->stackTop->state<<1])]];
+		unsigned shift = pdaRun->stackTop->id - 
+				pdaRun->tables->keys[pdaRun->stackTop->state<<1];
+		unsigned offset = pdaRun->tables->offsets[pdaRun->stackTop->state] + shift;
+		int index = pdaRun->tables->indicies[offset];
+		state = pdaRun->tables->targs[index];
 	}
 	return state;
 }
@@ -1503,7 +1518,8 @@ Code *backupOverRcode( Code *rcode )
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-void commitKid( Program *prg, PdaRun *pdaRun, Tree **root, ParseTree *lel, Code **rcode, long *causeReduce )
+void commitKid( Program *prg, PdaRun *pdaRun, Tree **root,
+		ParseTree *lel, Code **rcode, long *causeReduce )
 {
 	ParseTree *tree = 0;
 	Tree **sp = root;
@@ -1556,7 +1572,8 @@ head:
 		*causeReduce -= 1;
 
 		if ( *causeReduce == 0 ) {
-			debug( prg, REALM_PARSE, "commit: causeReduce dropped to zero, backing up over rcode\n" );
+			debug( prg, REALM_PARSE, "commit: causeReduce dropped to zero, "
+					"backing up over rcode\n" );
 
 			/* Cause reduce just dropped down to zero. */
 			*rcode = backupOverRcode( *rcode );
@@ -1682,7 +1699,8 @@ again:
 	pdaRun->curState = pdaRun->cs;
 
 	if ( pdaRun->lel->id < pdaRun->tables->keys[pdaRun->curState<<1] ||
-			pdaRun->lel->id > pdaRun->tables->keys[(pdaRun->curState<<1)+1] ) {
+			pdaRun->lel->id > pdaRun->tables->keys[(pdaRun->curState<<1)+1] )
+	{
 		debug( prg, REALM_PARSE, "parse error, no transition 1\n" );
 		pushBtPoint( prg, pdaRun );
 		goto parseError;
@@ -1876,7 +1894,8 @@ case PcrReduction:
 			 * copy above. */
 			if ( pdaRun->parsed != 0 ) {
 				if ( pdaRun->parsed != pdaRun->redLel->shadow->tree ) {
-					debug( prg, REALM_PARSE, "lhs tree was modified, adding a restore instruction\n" );
+					debug( prg, REALM_PARSE, "lhs tree was modified, "
+							"adding a restore instruction\n" );
 //
 //					/* Make it into a parse tree. */
 //					Tree *newPt = prepParseTree( prg, sp, pdaRun->redLel->tree );
@@ -1964,7 +1983,8 @@ case PcrReverse:
 			pdaRun->checkStop = false;
 
 			if ( pdaRun->stop ) {
-				debug( prg, REALM_PARSE, "stopping the backtracking, steps is %d\n", pdaRun->steps );
+				debug( prg, REALM_PARSE, "stopping the backtracking, "
+						"steps is %d\n", pdaRun->steps );
 
 				pdaRun->cs = stackTopTarget( prg, pdaRun );
 				goto _out;
