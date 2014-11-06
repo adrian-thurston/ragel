@@ -319,9 +319,9 @@ include 'rlhc-java.lm'
 include 'rlhc-ruby.lm'
 include 'rlhc-ml.lm'
 
-OutputFile: str = argv.pop()
-InputFile: str = argv.pop()
-Lang: str = argv.pop()
+OutputFile: str = argv->pop()
+InputFile: str = argv->pop()
+Lang: str = argv->pop()
 
 Input: stream = open( InputFile "r" )
 
@@ -335,15 +335,15 @@ if ( !Start ) {
 void assign_labels( Prog: ref<any> )
 {
 	N: int = 1
-	cons Map: map<ident label_stmt>[]
+	Map: map<ident label_stmt> = new map<ident label_stmt>
 	for LabelStmt: label_stmt in Prog {
 		LabelStmt.Id = N
-		Map.insert( LabelStmt.ident LabelStmt )
+		Map->insert( LabelStmt.ident LabelStmt )
 		N = N + 1
 	}
 
 	for GotoStmt: goto_stmt in Prog {
-		LabelStmt: label_stmt = Map.find( GotoStmt.ident )
+		LabelStmt: label_stmt = Map->find( GotoStmt.ident )
 		if ( LabelStmt )
 			GotoStmt.Id = LabelStmt.Id
 	}

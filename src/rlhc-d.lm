@@ -1,4 +1,4 @@
-global HasDefault: list<int> = cons list<int>[]
+global HasDefault: list<int> = new list<int>
 
 void d_tok_list( TL: host::tok* )
 {
@@ -300,13 +300,13 @@ void d_stmt( Stmt: stmt )
 			"	[d_stmt(WhileStmt)]
 	}
 	elsif match Stmt [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
-		HasDefault.push( 0 )
+		HasDefault->push( 0 )
 
 		send Output
 			"switch ( [d_expr(SwitchExpr)] ) {
 			"	[d_stmt_list(StmtList)]
 
-		if ( HasDefault.pop() == 0 ) {
+		if ( HasDefault->pop() == 0 ) {
 			send Output
 				"	default: break;
 		}
@@ -354,8 +354,8 @@ void d_stmt( Stmt: stmt )
 			"default:
 			"[d_stmt_list( Stmt.default_block._repeat_stmt )]
 			"break;
-		HasDefault.pop()
-		HasDefault.push( 1 )
+		HasDefault->pop()
+		HasDefault->push( 1 )
 	}
 	elsif match Stmt [case_label]
 	{
