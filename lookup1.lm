@@ -2366,16 +2366,32 @@ int C::f()
   }
   C {
     D
-    I
-    f
-    g
-    i
-    j
-    find
   }
   C
   C
   C
+  C {
+    j
+  }
+  C
+  C
+  C
+  C {
+    D
+    I
+    i
+  }
+  C {
+    find
+  }
+  C {
+    D
+    g
+  }
+  C {
+    D
+    f
+  }
   D
   E
   E
