@@ -609,7 +609,8 @@ bool LangVarRef::canTakeRefTest( Compiler *pd, VarRefLookup &lookup ) const
 	 * via a local and attributes. */
 	if ( lookup.inObject->type == ObjectDef::FrameType )
 		canTake = true;
-	else if ( isLocalRef() && lookup.lastPtrInQual < 0 && lookup.uniqueType->typeId != TYPE_PTR ) 
+	else if ( isLocalRef() && lookup.lastPtrInQual < 0 && 
+				lookup.uniqueType->typeId != TYPE_PTR ) 
 		canTake = true;
 
 	return canTake;
@@ -637,6 +638,7 @@ bool LangExpr::canTakeRefTest( Compiler *pd ) const
 		if ( term->varRef->canTakeRefTest( pd, lookup ) )
 			canTake = true;
 	}
+
 	return canTake;
 }
 
@@ -707,7 +709,7 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 
 
 ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
-		VarRefLookup &lookup, CallArgVect *args ) const
+		VarRefLookup &lookup, CallArgVect *args )
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
 	 * will be null. */
@@ -727,6 +729,7 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 		/* We use this only if there is a paramter list. */
 		ParameterList::Iter p;
 		long size = 0;
+		long tempPops = 0;
 
 		/* First pass we need to allocate and evaluate temporaries. */
 		paramList != 0 && ( p = *paramList );
@@ -744,6 +747,7 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 
 					size += 1;
 					(*pe)->offTmp = size;
+					tempPops += 1;
 				}
 			}
 
@@ -786,7 +790,8 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 					/* Lookup the field. */
 					LangVarRef *varRef = expression->term->varRef;
 
-					ObjectField *refOf = varRef->evaluateRef( pd, code, (size - (*pe)->offQualRef) );
+					ObjectField *refOf = varRef->evaluateRef( pd, code,
+							(size - (*pe)->offQualRef) );
 					paramRefs[pe.pos()] = refOf;
 
 					size += 2;
@@ -810,6 +815,8 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 			/* Advance the parameter list iterator if we have it. */
 			paramList != 0 && p.increment();
 		}
+
+		argSize = tempPops;
 	}
 
 	return paramRefs;
@@ -871,7 +878,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 }
 
 void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code, 
-		VarRefLookup &lookup, CallArgVect *args ) const
+		VarRefLookup &lookup, CallArgVect *args, bool temps ) const
 {
 	long popCount = 0;
 
@@ -895,17 +902,18 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 			code.appendHalf( (short)popCount );
 		}
 
-		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
-			/* Get the expression and the UT for the arg. */
-			LangExpr *expression = (*pe)->expr;
-			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
+		if ( temps ) {
+			for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
+				/* Get the expression and the UT for the arg. */
+				LangExpr *expression = (*pe)->expr;
+				UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
-			if ( paramUT->typeId == TYPE_REF ) {
-				if ( ! expression->canTakeRefTest( pd ) )
-					code.append( IN_POP );
+				if ( paramUT->typeId == TYPE_REF ) {
+					if ( ! expression->canTakeRefTest( pd ) )
+						code.append( IN_POP );
+				}
 			}
 		}
-
 	}
 }
 
@@ -965,7 +973,7 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	/* Write the call opcode. */
 	callOperation( pd, code, lookup );
 
-	popRefQuals( pd, code, lookup, args );
+	popRefQuals( pd, code, lookup, args, true );
 
 	resetActiveRefs( pd, lookup, paramRefs);
 	delete[] paramRefs;
@@ -2074,9 +2082,14 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 		code.append( iterUT->iterDef->inCreateWC );
 
 	code.appendHalf( objField->offset );
+
+	/* Arg size (or func id for user iters). */
 	if ( lookup.objMethod->func != 0 )
 		code.appendHalf( lookup.objMethod->func->funcId );
+	else
+		code.appendHalf( iterCall->langTerm->varRef->argSize );
 
+	/* Search type. */
 	if ( iterUT->iterDef->useSearchUT ) {
 		if ( searchUT->typeId == TYPE_PTR )
 			code.appendHalf( pd->uniqueTypePtr->langEl->id );
@@ -2086,8 +2099,8 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 
 	compileForIterBody( pd, code, iterUT );
 
-
-	iterCall->langTerm->varRef->popRefQuals( pd, code, lookup, iterCall->langTerm->args );
+	iterCall->langTerm->varRef->popRefQuals( pd, code, lookup,
+			iterCall->langTerm->args, false );
 
 	iterCall->langTerm->varRef->resetActiveRefs( pd, lookup, paramRefs );
 	delete[] paramRefs;
@@ -2262,7 +2275,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			if ( pd->loopCleanup != 0 )
 				code.append( *pd->loopCleanup );
 
-			/* Jump to the return label. The distnacnce will be filled in
+			/* Jump to the return label. The distance will be filled in
 			 * later. */
 			pd->returnJumps.append( code.length() );
 			code.append( IN_JMP );

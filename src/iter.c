@@ -10,7 +10,8 @@
 #define true 1
 #define false 0
 
-void initTreeIter( TreeIter *treeIter, Tree **stackRoot, long rootSize,
+void initTreeIter( TreeIter *treeIter, Tree **stackRoot,
+		long argSize, long rootSize,
 		const Ref *rootRef, int searchId )
 {
 	treeIter->type = IT_Tree;
@@ -21,9 +22,11 @@ void initTreeIter( TreeIter *treeIter, Tree **stackRoot, long rootSize,
 	treeIter->rootSize = rootSize;
 	treeIter->ref.kid = 0;
 	treeIter->ref.next = 0;
+	treeIter->argSize = argSize;
 }
 
-void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long rootSize,
+void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot,
+		long argSize, long rootSize,
 		const Ref *rootRef, int searchId, int children )
 {
 	revTriter->type = IT_RevTree;
@@ -36,6 +39,7 @@ void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long rootSize,
 	revTriter->children = children;
 	revTriter->ref.kid = 0;
 	revTriter->ref.next = 0;
+	revTriter->argSize = argSize;
 }
 
 void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
@@ -90,10 +94,13 @@ void uiterInit( Program *prg, Tree **sp, UserIter *uiter,
 void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
 {
 	if ( (int)iter->type != 0 ) {
+		int i;
 		Tree **sp = *psp;
 		long curStackSize = vm_ssize() - iter->rootSize;
 		assert( iter->yieldSize == curStackSize );
 		vm_popn( iter->yieldSize );
+		for ( i = 0; i < iter->argSize; i++ )
+			treeDownref( prg, sp, vm_pop() );
 		iter->type = 0;
 		*psp = sp;
 	}
@@ -102,10 +109,13 @@ void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
 void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *riter )
 {
 	if ( (int)riter->type != 0 ) {
+		int i;
 		Tree **sp = *psp;
 		long curStackSize = vm_ssize() - riter->rootSize;
 		assert( riter->yieldSize == curStackSize );
 		vm_popn( riter->yieldSize );
+		for ( i = 0; i < riter->argSize; i++ )
+			treeDownref( prg, sp, vm_pop() );
 		riter->type = 0;
 		*psp = sp;
 	}

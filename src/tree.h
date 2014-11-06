@@ -187,6 +187,7 @@ typedef struct _TreeIter
 	Ref ref;
 	long searchId;
 	Tree **stackRoot;
+	long argSize;
 	long yieldSize;
 	long rootSize;
 } TreeIter;
@@ -199,6 +200,7 @@ typedef struct _RevTreeIter
 	Ref ref;
 	long searchId;
 	Tree **stackRoot;
+	long argSize;
 	long yieldSize;
 	long rootSize;
 
@@ -336,9 +338,9 @@ UserIter *uiterCreate( struct colm_program *prg, Tree ***psp,
 void uiterInit( struct colm_program *prg, Tree **sp, UserIter *uiter, 
 		struct _FunctionInfo *fi, int revertOn );
 
-void initTreeIter( TreeIter *treeIter, Tree **stackRoot, long rootSize,
+void initTreeIter( TreeIter *treeIter, Tree **stackRoot, long argSize, long rootSize,
 		const Ref *rootRef, int searchId );
-void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long rootSize, 
+void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long argSize, long rootSize, 
 		const Ref *rootRef, int searchId, int children );
 void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
 		long argSize, long searchId );

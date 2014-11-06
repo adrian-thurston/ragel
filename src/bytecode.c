@@ -371,7 +371,8 @@ static void downrefLocalTrees( Program *prg, Tree **sp,
 	long i;
 	for ( i = localsLen-1; i >= 0; i-- ) {
 		if ( locals[i].type == LI_Tree ) {
-			debug( prg, REALM_BYTECODE, "local tree downref: %ld\n", (long)locals[i].offset );
+			debug( prg, REALM_BYTECODE, "local tree downref: %ld\n",
+					(long)locals[i].offset );
 
 			Tree *tree = (Tree*) frame[(long)locals[i].offset];
 			treeDownref( prg, sp, tree );
@@ -386,25 +387,29 @@ static void downrefLocals( Program *prg, Tree ***psp,
 	for ( i = localsLen-1; i >= 0; i-- ) {
 		switch ( locals[i].type ) {
 			case LI_Tree: {
-				debug( prg, REALM_BYTECODE, "local tree downref: %ld\n", (long)locals[i].offset );
+				debug( prg, REALM_BYTECODE, "local tree downref: %ld\n",
+						(long)locals[i].offset );
 				Tree *tree = (Tree*) frame[(long)locals[i].offset];
 				treeDownref( prg, *psp, tree );
 				break;
 			}
 			case LI_Iter: {
-				debug( prg, REALM_BYTECODE, "local iter downref: %ld\n", (long)locals[i].offset );
+				debug( prg, REALM_BYTECODE, "local iter downref: %ld\n",
+						(long)locals[i].offset );
 				TreeIter *iter = (TreeIter*) &frame[(long)locals[i].offset];
 				treeIterDestroy( prg, psp, iter );
 				break;
 			}
 			case LI_RevIter: {
-				debug( prg, REALM_BYTECODE, "local rev iter downref: %ld\n", (long)locals[i].offset );
+				debug( prg, REALM_BYTECODE, "local rev iter downref: %ld\n",
+						(long)locals[i].offset );
 				RevTreeIter *riter = (RevTreeIter*) &frame[(long)locals[i].offset];
 				revTreeIterDestroy( prg, psp, riter );
 				break;
 			}
 			case LI_UserIter: {
-				debug( prg, REALM_BYTECODE, "local user iter downref: %ld\n", (long)locals[i].offset );
+				debug( prg, REALM_BYTECODE, "local user iter downref: %ld\n",
+						(long)locals[i].offset );
 				UserIter *uiter = (UserIter*) frame[locals[i].offset];
 				userIterDestroy2( prg, psp, uiter );
 				break;
@@ -1899,11 +1904,14 @@ again:
 		}
 		case IN_TRITER_FROM_REF: {
 			short field;
+			Half argSize;
 			Half searchTypeId;
 			read_half( field );
+			read_half( argSize );
 			read_half( searchTypeId );
 
-			debug( prg, REALM_BYTECODE, "IN_TRITER_FROM_REF\n" );
+			debug( prg, REALM_BYTECODE, "IN_TRITER_FROM_REF "
+					"%hd %hd %hd\n", field, argSize, searchTypeId );
 
 			Ref rootRef;
 			rootRef.kid = (Kid*)vm_pop();
@@ -1913,26 +1921,29 @@ again:
 			Tree **stackRoot = vm_ptop();
 			long rootSize = vm_ssize();
 
-			initTreeIter( (TreeIter*)mem, stackRoot, rootSize, &rootRef, searchTypeId );
+			initTreeIter( (TreeIter*)mem, stackRoot,
+					argSize, rootSize, &rootRef, searchTypeId );
 			break;
 		}
 		case IN_TRITER_DESTROY: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_TRITER_DESTROY\n" );
-
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			debug( prg, REALM_BYTECODE, "IN_TRITER_DESTROY %d\n", iter->yieldSize );
 			treeIterDestroy( prg, &sp, iter );
 			break;
 		}
 		case IN_REV_TRITER_FROM_REF: {
 			short field;
+			Half argSize;
 			Half searchTypeId;
 			read_half( field );
+			read_half( argSize );
 			read_half( searchTypeId );
 
-			debug( prg, REALM_BYTECODE, "IN_REV_TRITER_FROM_REF\n" );
+			debug( prg, REALM_BYTECODE, "IN_REV_TRITER_FROM_REF "
+					"%hd %hd %hd\n", field, argSize, searchTypeId );
 
 			Ref rootRef;
 			rootRef.kid = (Kid*)vm_pop();
@@ -1950,7 +1961,8 @@ again:
 			}
 
 			void *mem = vm_plocal(field);
-			initRevTreeIter( (RevTreeIter*)mem, stackRoot, rootSize, &rootRef, searchTypeId, children );
+			initRevTreeIter( (RevTreeIter*)mem, stackRoot,
+					argSize, rootSize, &rootRef, searchTypeId, children );
 			break;
 		}
 		case IN_REV_TRITER_DESTROY: {

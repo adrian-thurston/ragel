@@ -2565,7 +2565,7 @@ struct LangVarRef
 
 	void assignValue( Compiler *pd, CodeVect &code, UniqueType *exprUT ) const;
 	ObjectField **evaluateArgs( Compiler *pd, CodeVect &code, 
-			VarRefLookup &lookup, CallArgVect *args ) const;
+			VarRefLookup &lookup, CallArgVect *args );
 	void callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const;
 	UniqueType *evaluateCall( Compiler *pd, CodeVect &code, CallArgVect *args );
 	UniqueType *evaluate( Compiler *pd, CodeVect &code, bool forWriting = false ) const;
@@ -2574,13 +2574,14 @@ struct LangVarRef
 	void resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjectField **paramRefs ) const;
 	long loadQualificationRefs( Compiler *pd, CodeVect &code, ObjNameScope *rootScope ) const;
 	void popRefQuals( Compiler *pd, CodeVect &code, 
-			VarRefLookup &lookup, CallArgVect *args ) const;
+			VarRefLookup &lookup, CallArgVect *args, bool temps ) const;
 
 	InputLoc loc;
 	Context *context;
 	ObjNameScope *scope;
 	QualItemVect *qual;
 	String name;
+	long argSize;
 };
 
 struct LangTerm
