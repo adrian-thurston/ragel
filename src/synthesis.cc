@@ -1110,13 +1110,6 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	if ( replUT->typeId != TYPE_TREE )
 		error(loc) << "don't know how to construct this type" << endp;
 	
-	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
-		code.append( IN_DUP_TOP );
-		code.append( IN_CONSTRUCT_INPUT );
-		code.append( IN_TOP_SWAP );
-		code.append( IN_SET_INPUT );
-	}
-	
 	constructor->langEl = replUT->langEl;
 	assignFieldArgs( pd, code, replUT );
 
@@ -1137,32 +1130,6 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 {
 	/* What is being newstructed. */
 	UniqueType *replUT = typeRef->uniqueType;
-
-	/* Evaluate the initialization expressions. */
-	if ( fieldInitArgs != 0 && fieldInitArgs->length() > 0 ) {
-		for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ ) {
-			FieldInit *fieldInit = *pi;
-			fieldInit->exprUT = fieldInit->expr->evaluate( pd, code );
-		}
-	}
-
-	/* Assign bind ids to the variables in the replacement. */
-	for ( ConsItemList::Iter item = *constructor->list; item.lte(); item++ ) {
-		if ( item->expr != 0 )
-			item->bindId = constructor->nextBindId++;
-	}
-
-	/* Evaluate variable references. */
-	for ( ConsItemList::Iter item = constructor->list->last(); item.gtb(); item-- ) {
-		if ( item->type == ConsItem::ExprType ) {
-			UniqueType *ut = item->expr->evaluate( pd, code );
-		
-			if ( ut->typeId != TYPE_TREE )
-				error() << "variables used in replacements must be trees" << endp;
-
-			item->langEl = ut->langEl;
-		}
-	}
 
 	if ( replUT->langEl->generic != 0 ) {
 		/* Use the new generic. */
@@ -1188,7 +1155,6 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 	}
 	
 	constructor->langEl = replUT->langEl;
-	assignFieldArgs( pd, code, replUT );
 
 	if ( varRef != 0 ) {
 		code.append( IN_DUP_TOP );
