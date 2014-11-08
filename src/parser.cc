@@ -303,7 +303,7 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 void BaseParser::addArgvList()
 {
 	TypeRef *typeRef = TypeRef::cons( internal, pd->uniqueTypeStr );
-	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List2, 0, typeRef, 0 );
+	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List, 0, typeRef, 0 );
 }
 
 ObjectDef *BaseParser::blockOpen()
@@ -557,7 +557,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 
 	/* The typeref for the parser. */
 	TypeRef *parserTypeRef = TypeRef::cons( loc,
-			TypeRef::Parser, 0, typeRef, 0 );
+			TypeRef::ParserObj, 0, typeRef, 0 );
 
 	ParserText *parserText = ParserText::cons( loc, curNspace(), list );
 	pd->parserTextList.append( parserText );

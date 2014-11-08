@@ -339,25 +339,25 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 		case Literal:
 			uniqueType = resolveTypeLiteral( pd );
 			break;
-		case Map:
+		case MapObj:
 			uniqueType = resolveTypeMap( pd );
 			break;
-		case Map2:
+		case ListObj:
+			uniqueType = resolveTypeList( pd );
+			break;
+		case VectorObj:
+			uniqueType = resolveTypeVector( pd );
+			break;
+		case ParserObj:
+			uniqueType = resolveTypeParser( pd );
+			break;
+		case Map:
 			uniqueType = resolveTypeMap2( pd );
 			break;
 		case List:
-			uniqueType = resolveTypeList( pd );
-			break;
-		case List2:
 			uniqueType = resolveTypeList2( pd );
 			break;
-		case Vector:
-			uniqueType = resolveTypeVector( pd );
-			break;
 		case Parser:
-			uniqueType = resolveTypeParser( pd );
-			break;
-		case Parser2:
 			uniqueType = resolveTypeParser2( pd );
 			break;
 		case Ptr:

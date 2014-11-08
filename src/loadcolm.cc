@@ -811,29 +811,30 @@ struct LoadColm
 			NamespaceQual *nspaceQual = walkRegionQual( typeRef.region_qual() );
 			String id = typeRef.id().data();
 			RepeatType repeatType = walkOptRepeat( typeRef.opt_repeat() );
-			TypeRef *inner = TypeRef::cons( typeRef.id().loc(), nspaceQual, id, repeatType );
+			TypeRef *inner = TypeRef::cons( typeRef.id().loc(), nspaceQual,
+					id, repeatType );
 			tr = TypeRef::cons( typeRef.id().loc(), TypeRef::Ptr, inner );
 			break;
 		}
 		case type_ref::Map: {
 			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
 			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map2, 0, key, value );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, key, value );
 			break;
 		}
 		case type_ref::List: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::List2, 0, type, 0 );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
 			break;
 		}
 		case type_ref::Vector: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::Vector, 0, type, 0 );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::VectorObj, 0, type, 0 );
 			break;
 		}
 		case type_ref::Parser: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser2, 0, type, 0 );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );
 			break;
 		}}
 		return tr;
@@ -1814,12 +1815,12 @@ struct LoadColm
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
 
 			/* FIXME: modifying here, kindof a hack. */
-			if ( typeRef->type == TypeRef::List2 )
-				typeRef->type = TypeRef::List;
-			else if ( typeRef->type == TypeRef::Map2 )
-				typeRef->type = TypeRef::Map;
-			else if ( typeRef->type == TypeRef::Parser2 )
-				typeRef->type = TypeRef::Parser;
+			if ( typeRef->type == TypeRef::List )
+				typeRef->type = TypeRef::ListObj;
+			else if ( typeRef->type == TypeRef::Map )
+				typeRef->type = TypeRef::MapObj;
+			else if ( typeRef->type == TypeRef::Parser )
+				typeRef->type = TypeRef::ParserObj;
 			else {
 				typeRef->inNew = true;
 			}
