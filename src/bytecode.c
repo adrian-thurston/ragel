@@ -2641,29 +2641,18 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_NEWSTRUCT\n" );
 
-			int rootNode = prg->rtd->patReplInfo[patternId].offset;
-
-			/* Note that bindIds are indexed at one. Add one spot for them. */
-			int numBindings = prg->rtd->patReplInfo[patternId].numBindings;
-			Tree *bindings[1+numBindings];
-
-			int b;
-			for ( b = 1; b <= numBindings; b++ ) {
-				bindings[b] = vm_pop();
-				assert( bindings[b] != 0 );
-			}
-
-			Tree *replTree = 0;
 			PatConsNode *nodes = prg->rtd->patReplNodes;
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
+			int rootNode = prg->rtd->patReplInfo[patternId].offset;
+
+			Tree *replTree = 0;
 			long genericId = lelInfo[nodes[rootNode].id].genericId;
 			if ( genericId > 0 ) {
 				replTree = createGeneric( prg, genericId );
 				treeUpref( replTree );
 			}
 			else {
-				replTree = constructReplacementTree( 0, bindings, 
-						prg, rootNode );
+				replTree = constructReplacementTree( 0, 0, prg, rootNode );
 			}
 
 			vm_push( replTree );
@@ -2675,6 +2664,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CONSTRUCT\n" );
 
+			LangElInfo *lelInfo = prg->rtd->lelInfo;
+			PatConsNode *nodes = prg->rtd->patReplNodes;
 			int rootNode = prg->rtd->patReplInfo[patternId].offset;
 
 			/* Note that bindIds are indexed at one. Add one spot for them. */
@@ -2687,18 +2678,7 @@ again:
 				assert( bindings[b] != 0 );
 			}
 
-			Tree *replTree = 0;
-			PatConsNode *nodes = prg->rtd->patReplNodes;
-			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			long genericId = lelInfo[nodes[rootNode].id].genericId;
-			if ( genericId > 0 ) {
-				replTree = createGeneric( prg, genericId );
-				treeUpref( replTree );
-			}
-			else {
-				replTree = constructReplacementTree( 0, bindings, 
-						prg, rootNode );
-			}
+			Tree *replTree = constructReplacementTree( 0, bindings, prg, rootNode );
 
 			vm_push( replTree );
 			break;

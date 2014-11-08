@@ -379,11 +379,7 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 			pd->initListFunctions( this );
 			pd->initListFields( this );
 			break;
-		case GEN_VECTOR:
-			pd->initVectorFunctions( this );
-			break;
 		case GEN_PARSER:
-			/* Need to generate a parser for the type. */
 			utArg->langEl->parserId = pd->nextParserId++;
 			pd->initParserFunctions( this );
 			pd->initParserFields( this );
@@ -1146,15 +1142,6 @@ void Compiler::initListFields( GenericType *gen )
 	initListField( gen, "head", 0 );
 	initListField( gen, "tail", 1 );
 	initListField( gen, "top", 0 );
-}
-
-void Compiler::initVectorFunctions( GenericType *gen )
-{
-	addLengthField( gen->objDef, IN_VECTOR_LENGTH );
-	initFunction( uniqueTypeInt, gen->objDef, "append", 
-			IN_VECTOR_APPEND_WV, IN_VECTOR_APPEND_WC, gen->utArg, false );
-	initFunction( uniqueTypeInt, gen->objDef, "insert", 
-			IN_VECTOR_INSERT_WV, IN_VECTOR_INSERT_WC, uniqueTypeInt, gen->utArg, false );
 }
 
 void Compiler::initParserFunctions( GenericType *gen )

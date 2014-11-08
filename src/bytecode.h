@@ -331,7 +331,6 @@ enum TYPE
 enum GEN {
 	GEN_LIST     = 0x10,
 	GEN_MAP      = 0x11,
-	GEN_VECTOR   = 0x12,
 	GEN_PARSER   = 0x13
 };
 
