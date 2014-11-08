@@ -179,36 +179,6 @@ UniqueType *TypeRef::resolveTypeList2( Compiler *pd )
 	return pd->findUniqueType( TYPE_PTR, listUt->langEl );
 }
 
-UniqueType *TypeRef::resolveTypeVector( Compiler *pd )
-{
-	nspace = pd->rootNamespace;
-
-	UniqueType *utValue = typeRef1->resolveType( pd );	
-
-	UniqueVector searchKey( utValue );
-	UniqueVector *inMap = pd->uniqueVectorMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueVector( utValue );
-		pd->uniqueVectorMap.insert( inMap );
-
-		/* FIXME: Need uniqe name allocator for types. */
-		static int vectorId = 0;
-		String name( 36, "__vector%d", vectorId++ );
-
-		GenericType *generic = new GenericType( name, GEN_VECTOR,
-				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
-
-		nspace->genericList.append( generic );
-
-		generic->declare( pd, nspace );
-
-		inMap->generic = generic;
-	}
-
-	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
-}
-
 UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
@@ -344,9 +314,6 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 			break;
 		case ListObj:
 			uniqueType = resolveTypeList( pd );
-			break;
-		case VectorObj:
-			uniqueType = resolveTypeVector( pd );
 			break;
 		case ParserObj:
 			uniqueType = resolveTypeParser( pd );

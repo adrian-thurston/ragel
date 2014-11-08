@@ -827,11 +827,6 @@ struct LoadColm
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
 			break;
 		}
-		case type_ref::Vector: {
-			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::VectorObj, 0, type, 0 );
-			break;
-		}
 		case type_ref::Parser: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );

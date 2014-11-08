@@ -1960,7 +1960,6 @@ struct TypeRef
 		Iterator,
 		MapObj,
 		ListObj,
-		VectorObj,
 		ParserObj,
 		Map,
 		List,
@@ -2136,7 +2135,6 @@ struct TypeRef
 	UniqueType *resolveTypeMap2( Compiler *pd );
 	UniqueType *resolveTypeList( Compiler *pd );
 	UniqueType *resolveTypeList2( Compiler *pd );
-	UniqueType *resolveTypeVector( Compiler *pd );
 	UniqueType *resolveTypeParser( Compiler *pd );
 	UniqueType *resolveTypeParser2( Compiler *pd );
 	UniqueType *resolveType( Compiler *pd );
