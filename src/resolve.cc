@@ -47,13 +47,8 @@ UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 				}
 
 				case TypeMapEl::StructType: {
-					if ( inNew ) {
-						return pd->findUniqueType( TYPE_TREE, inDict->value );
-					}
-					else {
-						UniqueType *structUt = pd->findUniqueType( TYPE_TREE, inDict->value );
-						return pd->findUniqueType( TYPE_PTR, structUt->langEl );
-					}
+					UniqueType *structUt = pd->findUniqueType( TYPE_TREE, inDict->value );
+					return pd->findUniqueType( TYPE_PTR, structUt->langEl );
 				}
 
 				case TypeMapEl::LangElType: {

@@ -375,10 +375,10 @@ struct TokenDef
 		noPostIgnore(false), noPreIgnore(false), isZero(false)
 	{}
 
-	static TokenDef *cons( const String &name, const String &literal, bool isLiteral, bool isIgnore,
-		LexJoin *join, CodeBlock *codeBlock, const InputLoc &semiLoc, 
-		int longestMatchId, Namespace *nspace, RegionSet *regionSet,
-		ObjectDef *objectDef, Context *contextIn )
+	static TokenDef *cons( const String &name, const String &literal,
+		bool isLiteral, bool isIgnore, LexJoin *join, CodeBlock *codeBlock,
+		const InputLoc &semiLoc, int longestMatchId, Namespace *nspace,
+		RegionSet *regionSet, ObjectDef *objectDef, Context *contextIn )
 	{ 
 		TokenDef *t = new TokenDef;
 
@@ -1980,8 +1980,7 @@ struct TypeRef
 		uniqueType(0),
 		searchUniqueType(0),
 		generic(0),
-		searchTypeRef(0),
-		inNew(false)
+		searchTypeRef(0)
 	{}
 
 	/* Qualification and a type name. These require lookup. */
@@ -2159,8 +2158,6 @@ struct TypeRef
 	UniqueType *searchUniqueType;
 	GenericType *generic;
 	TypeRef *searchTypeRef;
-
-	bool inNew;
 };
 
 typedef DList<ObjectField> ParameterList; 
