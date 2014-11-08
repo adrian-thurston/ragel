@@ -1809,17 +1809,6 @@ struct LoadColm
 		case code_factor::New: {
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
 
-			/* FIXME: modifying here, kindof a hack. */
-			if ( typeRef->type == TypeRef::List )
-				typeRef->type = TypeRef::ListObj;
-			else if ( typeRef->type == TypeRef::Map )
-				typeRef->type = TypeRef::MapObj;
-			else if ( typeRef->type == TypeRef::Parser )
-				typeRef->type = TypeRef::ParserObj;
-			else {
-				typeRef->inNew = true;
-			}
-
 			/* Construct an empty constructor list. */
 			ConsItemList *list = ConsItemList::cons();
 

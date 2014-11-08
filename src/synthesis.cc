@@ -1026,8 +1026,6 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 {
 	/* Evaluate the expression. */
 	UniqueType *ut = expr->term->evaluateNewstruct( pd, code );
-	if ( ut->typeId != TYPE_TREE )
-		error() << "new can only be applied to tree types" << endp;
 
 	code.append( IN_TREE_NEW );
 	return pd->findUniqueType( TYPE_PTR, ut->langEl );
@@ -1141,11 +1139,6 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 		code.append( IN_CONS_OBJECT );
 		code.appendHalf( constructor->patRepId );
 	}
-
-	/* Lookup the type of the replacement and store it in the replacement
-	 * object so that replacement parsing has a target. */
-	if ( replUT->typeId != TYPE_TREE )
-		error(loc) << "don't know how to construct this type" << endp;
 
 	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
 		code.append( IN_DUP_TOP );
