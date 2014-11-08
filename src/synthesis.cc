@@ -1025,7 +1025,7 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 {
 	/* Evaluate the expression. */
-	UniqueType *ut = expr->evaluate( pd, code );
+	UniqueType *ut = expr->term->evaluateNewstruct( pd, code );
 	if ( ut->typeId != TYPE_TREE )
 		error() << "new can only be applied to tree types" << endp;
 
@@ -1132,6 +1132,69 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 
 	return replUT;
 }
+
+UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
+{
+	/* Evaluate the initialization expressions. */
+	if ( fieldInitArgs != 0 && fieldInitArgs->length() > 0 ) {
+		for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ ) {
+			FieldInit *fieldInit = *pi;
+			fieldInit->exprUT = fieldInit->expr->evaluate( pd, code );
+		}
+	}
+
+	/* Assign bind ids to the variables in the replacement. */
+	for ( ConsItemList::Iter item = *constructor->list; item.lte(); item++ ) {
+		if ( item->expr != 0 )
+			item->bindId = constructor->nextBindId++;
+	}
+
+	/* Evaluate variable references. */
+	for ( ConsItemList::Iter item = constructor->list->last(); item.gtb(); item-- ) {
+		if ( item->type == ConsItem::ExprType ) {
+			UniqueType *ut = item->expr->evaluate( pd, code );
+		
+			if ( ut->typeId != TYPE_TREE )
+				error() << "variables used in replacements must be trees" << endp;
+
+			item->langEl = ut->langEl;
+		}
+	}
+
+	/* Construct the tree using the tree information stored in the compiled
+	 * code. */
+	code.append( IN_NEWSTRUCT );
+	code.appendHalf( constructor->patRepId );
+
+	/* Lookup the type of the replacement and store it in the replacement
+	 * object so that replacement parsing has a target. */
+	UniqueType *replUT = typeRef->uniqueType;
+	if ( replUT->typeId != TYPE_TREE )
+		error(loc) << "don't know how to construct this type" << endp;
+	
+	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
+		code.append( IN_DUP_TOP );
+		code.append( IN_CONSTRUCT_INPUT );
+		code.append( IN_TOP_SWAP );
+		code.append( IN_SET_INPUT );
+	}
+	
+	constructor->langEl = replUT->langEl;
+	assignFieldArgs( pd, code, replUT );
+
+	if ( varRef != 0 ) {
+		code.append( IN_DUP_TOP );
+
+		/* Get the type of the variable being assigned to. */
+		VarRefLookup lookup = varRef->lookupField( pd );
+
+		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
+		varRef->setField( pd, code, lookup.inObject, lookup.objField, replUT, false );
+	}
+
+	return replUT;
+}
+
 
 void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 {

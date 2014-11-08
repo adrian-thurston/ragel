@@ -61,6 +61,7 @@ typedef unsigned char uchar;
 #define IN_REJECT                0x21
 #define IN_MATCH                 0x22
 #define IN_CONSTRUCT             0x23
+#define IN_NEWSTRUCT             0xf0
 #define IN_TREE_NEW              0x24
 #define IN_TREE_CAST             0xe4
 

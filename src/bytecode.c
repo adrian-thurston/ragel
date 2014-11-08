@@ -2635,6 +2635,40 @@ again:
 			treeDownref( prg, sp, (Tree*)input );
 			break;
 		}
+		case IN_NEWSTRUCT: {
+			Half patternId;
+			read_half( patternId );
+
+			debug( prg, REALM_BYTECODE, "IN_NEWSTRUCT\n" );
+
+			int rootNode = prg->rtd->patReplInfo[patternId].offset;
+
+			/* Note that bindIds are indexed at one. Add one spot for them. */
+			int numBindings = prg->rtd->patReplInfo[patternId].numBindings;
+			Tree *bindings[1+numBindings];
+
+			int b;
+			for ( b = 1; b <= numBindings; b++ ) {
+				bindings[b] = vm_pop();
+				assert( bindings[b] != 0 );
+			}
+
+			Tree *replTree = 0;
+			PatConsNode *nodes = prg->rtd->patReplNodes;
+			LangElInfo *lelInfo = prg->rtd->lelInfo;
+			long genericId = lelInfo[nodes[rootNode].id].genericId;
+			if ( genericId > 0 ) {
+				replTree = createGeneric( prg, genericId );
+				treeUpref( replTree );
+			}
+			else {
+				replTree = constructReplacementTree( 0, bindings, 
+						prg, rootNode );
+			}
+
+			vm_push( replTree );
+			break;
+		}
 		case IN_CONSTRUCT: {
 			Half patternId;
 			read_half( patternId );
