@@ -1133,6 +1133,13 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 		/* Use the new generic. */
 		code.append( IN_CONS_GENERIC );
 		code.appendHalf( replUT->langEl->generic->id );
+
+		if ( replUT->langEl->generic->typeId == GEN_PARSER ) {
+			code.append( IN_DUP_TOP );
+			code.append( IN_CONSTRUCT_INPUT );
+			code.append( IN_TOP_SWAP );
+			code.append( IN_SET_INPUT );
+		}
 	}
 	else {
 		/* New object (tree-based). */
@@ -1140,13 +1147,6 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 		code.appendHalf( constructor->patRepId );
 	}
 
-	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
-		code.append( IN_DUP_TOP );
-		code.append( IN_CONSTRUCT_INPUT );
-		code.append( IN_TOP_SWAP );
-		code.append( IN_SET_INPUT );
-	}
-	
 	constructor->langEl = replUT->langEl;
 
 	if ( varRef != 0 ) {
