@@ -1251,9 +1251,8 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool tree, bo
 		}
 	}
 
-	/* Construct the tree using the tree information stored in the compiled
-	 * code. */
-	code.append( IN_CONSTRUCT );
+	/* Construct the parser. */
+	code.append( IN_NEWSTRUCT );
 	code.appendHalf( constructor->patRepId );
 
 	/* Dup for the finish operation. */
