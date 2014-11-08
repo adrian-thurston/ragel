@@ -1135,6 +1135,9 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 
 UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 {
+	/* What is being newstructed. */
+	UniqueType *replUT = typeRef->uniqueType;
+
 	/* Evaluate the initialization expressions. */
 	if ( fieldInitArgs != 0 && fieldInitArgs->length() > 0 ) {
 		for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ ) {
@@ -1161,17 +1164,22 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 		}
 	}
 
-	/* Construct the tree using the tree information stored in the compiled
-	 * code. */
-	code.append( IN_NEWSTRUCT );
-	code.appendHalf( constructor->patRepId );
+	if ( replUT->langEl->generic != 0 ) {
+		/* Use the new generic. */
+		code.append( IN_CONS_GENERIC );
+		code.appendHalf( replUT->langEl->generic->id );
+	}
+	else {
+		/* New object (tree-based). */
+		code.append( IN_CONS_OBJECT );
+		code.appendHalf( constructor->patRepId );
+	}
 
 	/* Lookup the type of the replacement and store it in the replacement
 	 * object so that replacement parsing has a target. */
-	UniqueType *replUT = typeRef->uniqueType;
 	if ( replUT->typeId != TYPE_TREE )
 		error(loc) << "don't know how to construct this type" << endp;
-	
+
 	if ( replUT->langEl->generic != 0 && replUT->langEl->generic->typeId == GEN_PARSER ) {
 		code.append( IN_DUP_TOP );
 		code.append( IN_CONSTRUCT_INPUT );
@@ -1218,7 +1226,8 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 
 UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool tree, bool stop ) const
 {
-	UniqueType *targetUT = typeRef->uniqueType->langEl->generic->utArg;
+	UniqueType *parserUT = typeRef->uniqueType;
+	UniqueType *targetUT = parserUT->langEl->generic->utArg;
 
 	/* If this is a parse stop then we need to verify that the type is
 	 * compatible with parse stop. */
@@ -1252,8 +1261,8 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool tree, bo
 	}
 
 	/* Construct the parser. */
-	code.append( IN_NEWSTRUCT );
-	code.appendHalf( constructor->patRepId );
+	code.append( IN_CONS_GENERIC );
+	code.appendHalf( parserUT->langEl->generic->id );
 
 	/* Dup for the finish operation. */
 	code.append( IN_DUP_TOP );
@@ -1277,7 +1286,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool tree, bo
 	}
 
 	/* For access to the replacement pattern. */
-	UniqueType *parserUT = typeRef->uniqueType;
 	constructor->langEl = parserUT->langEl;
 	
 	/*****************************/
