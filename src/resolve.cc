@@ -105,7 +105,7 @@ UniqueType *TypeRef::resolveTypeLiteral( Compiler *pd )
 	return 0;
 }
 
-UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
+UniqueType *TypeRef::resolveTypeMapObj( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
@@ -137,13 +137,13 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::resolveTypeMap2( Compiler *pd )
+UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 {
-	UniqueType *mapUt = resolveTypeMap( pd );
+	UniqueType *mapUt = resolveTypeMapObj( pd );
 	return pd->findUniqueType( TYPE_PTR, mapUt->langEl );
 }
 
-UniqueType *TypeRef::resolveTypeList( Compiler *pd )
+UniqueType *TypeRef::resolveTypeListObj( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
@@ -173,13 +173,13 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::resolveTypeList2( Compiler *pd )
+UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 {
-	UniqueType *listUt = resolveTypeList( pd );
+	UniqueType *listUt = resolveTypeListObj( pd );
 	return pd->findUniqueType( TYPE_PTR, listUt->langEl );
 }
 
-UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
+UniqueType *TypeRef::resolveTypeParserObj( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
@@ -209,9 +209,9 @@ UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
 }
 
-UniqueType *TypeRef::resolveTypeParser2( Compiler *pd )
+UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 {
-	UniqueType *parserUt = resolveTypeParser( pd );
+	UniqueType *parserUt = resolveTypeParserObj( pd );
 	return pd->findUniqueType( TYPE_PTR, parserUt->langEl );
 }
 
@@ -309,23 +309,14 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 		case Literal:
 			uniqueType = resolveTypeLiteral( pd );
 			break;
-		case MapObj:
+		case Map:
 			uniqueType = resolveTypeMap( pd );
 			break;
-		case ListObj:
+		case List:
 			uniqueType = resolveTypeList( pd );
 			break;
-		case ParserObj:
-			uniqueType = resolveTypeParser( pd );
-			break;
-		case Map:
-			uniqueType = resolveTypeMap2( pd );
-			break;
-		case List:
-			uniqueType = resolveTypeList2( pd );
-			break;
 		case Parser:
-			uniqueType = resolveTypeParser2( pd );
+			uniqueType = resolveTypeParser( pd );
 			break;
 		case Ptr:
 			uniqueType = resolveTypePtr( pd );

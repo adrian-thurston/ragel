@@ -557,7 +557,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 
 	/* The typeref for the parser. */
 	TypeRef *parserTypeRef = TypeRef::cons( loc,
-			TypeRef::ParserObj, 0, typeRef, 0 );
+			TypeRef::Parser, 0, typeRef, 0 );
 
 	ParserText *parserText = ParserText::cons( loc, curNspace(), list );
 	pd->parserTextList.append( parserText );

@@ -1958,9 +1958,6 @@ struct TypeRef
 		Name,
 		Literal,
 		Iterator,
-		MapObj,
-		ListObj,
-		ParserObj,
 		Map,
 		List,
 		Parser,
@@ -2131,12 +2128,12 @@ struct TypeRef
 	UniqueType *resolveIterator( Compiler *pd );
 	UniqueType *resolveTypeName( Compiler *pd );
 	UniqueType *resolveTypeLiteral( Compiler *pd );
+	UniqueType *resolveTypeMapObj( Compiler *pd );
 	UniqueType *resolveTypeMap( Compiler *pd );
-	UniqueType *resolveTypeMap2( Compiler *pd );
+	UniqueType *resolveTypeListObj( Compiler *pd );
 	UniqueType *resolveTypeList( Compiler *pd );
-	UniqueType *resolveTypeList2( Compiler *pd );
+	UniqueType *resolveTypeParserObj( Compiler *pd );
 	UniqueType *resolveTypeParser( Compiler *pd );
-	UniqueType *resolveTypeParser2( Compiler *pd );
 	UniqueType *resolveType( Compiler *pd );
 	UniqueType *resolveTypePtr( Compiler *pd );
 	UniqueType *resolveTypeRef( Compiler *pd );
