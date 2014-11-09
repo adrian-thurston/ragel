@@ -965,18 +965,8 @@ Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 	long genericId = lelInfo[tree->id].genericId;
-	if ( genericId > 0 ) {
-		GenericInfo *generic = &prg->rtd->genericInfo[genericId];
-		if ( generic->type == GEN_LIST )
-			tree = (Tree*) copyList( prg, (List*) tree, oldNextDown, newNextDown );
-		else if ( generic->type == GEN_MAP )
-			tree = (Tree*) copyMap( prg, (Map*) tree, oldNextDown, newNextDown );
-		else if ( generic->type == GEN_PARSER ) {
-			/* Need to figure out the semantics here. */
-			fatal( "ATTEMPT TO COPY PARSER\n" );
-			assert(false);
-		}
-	}
+	if ( genericId > 0 )
+		assert(false);
 	else if ( tree->id == LEL_ID_PTR )
 		assert(false);
 	else if ( tree->id == LEL_ID_BOOL )
