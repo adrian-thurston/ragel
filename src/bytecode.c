@@ -431,8 +431,7 @@ Tree *constructArgv0( Program *prg, int argc, const char **argv )
 
 Tree *constructArgv( Program *prg, int argc, const char **argv )
 {
-	Tree *list = createGeneric( prg, prg->rtd->argvGenericId );
-	treeUpref( list );
+	Tree *list = constructGeneric( prg, prg->rtd->argvGenericId );
 	int i;
 	for ( i = 1; i < argc; i++ ) {
 		Head *head = stringAllocPointer( prg, argv[i], strlen(argv[i]) );
@@ -2641,8 +2640,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CONS_GENERIC %hd\n", genericId );
 
-			Tree *replTree = createGeneric( prg, genericId );
-			treeUpref( replTree );
+			Tree *replTree = constructGeneric( prg, genericId );
 			vm_push( replTree );
 			break;
 		}

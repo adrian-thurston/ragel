@@ -1007,7 +1007,7 @@ Tree *splitTree( Program *prg, Tree *tree )
 	return tree;
 }
 
-Tree *createGeneric( Program *prg, long genericId )
+Tree *constructGeneric( Program *prg, long genericId )
 {
 	GenericInfo *genericInfo = &prg->rtd->genericInfo[genericId];
 	Tree *newGeneric = 0;
@@ -1044,6 +1044,7 @@ Tree *createGeneric( Program *prg, long genericId )
 			return 0;
 	}
 
+	treeUpref( newGeneric );
 	return newGeneric;
 }
 

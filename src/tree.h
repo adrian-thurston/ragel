@@ -256,7 +256,7 @@ Tree *constructTree( struct colm_program *prg, Kid *kid,
 		Tree **bindings, long pat );
 Tree *constructObject( struct colm_program *prg, Kid *kid,
 		Tree **bindings, long langElId );
-Tree *createGeneric( struct colm_program *prg, long genericId );
+Tree *constructGeneric( struct colm_program *prg, long genericId );
 Tree *constructToken( struct colm_program *prg, Tree **args, long nargs );
 Tree *constructStream( struct colm_program *prg );
 
