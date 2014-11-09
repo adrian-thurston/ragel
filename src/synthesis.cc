@@ -1144,7 +1144,7 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 	else {
 		/* New object (tree-based). */
 		code.append( IN_CONS_OBJECT );
-		code.appendHalf( constructor->patRepId );
+		code.appendHalf( replUT->langEl->id );
 	}
 
 	constructor->langEl = replUT->langEl;

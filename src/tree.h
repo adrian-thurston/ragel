@@ -235,8 +235,10 @@ long cmpTree( struct colm_program *prg, const Tree *tree1, const Tree *tree2 );
 
 Tree *pushRightIgnore( struct colm_program *prg, Tree *pushTo, Tree *rightIgnore );
 Tree *pushLeftIgnore( struct colm_program *prg, Tree *pushTo, Tree *leftIgnore );
-Tree *popRightIgnore( struct colm_program *prg, Tree **sp, Tree *popFrom, Tree **rightIgnore );
-Tree *popLeftIgnore( struct colm_program *prg, Tree **sp, Tree *popFrom, Tree **leftIgnore );
+Tree *popRightIgnore( struct colm_program *prg, Tree **sp,
+		Tree *popFrom, Tree **rightIgnore );
+Tree *popLeftIgnore( struct colm_program *prg, Tree **sp,
+		Tree *popFrom, Tree **leftIgnore );
 Tree *treeLeftIgnore( struct colm_program *prg, Tree *tree );
 Tree *treeRightIgnore( struct colm_program *prg, Tree *tree );
 Kid *treeLeftIgnoreKid( struct colm_program *prg, Tree *tree );
@@ -250,8 +252,10 @@ Kid *reverseKidList( Kid *kid );
 Tree *constructInteger( struct colm_program *prg, long i );
 Tree *constructPointer( struct colm_program *prg, Tree *tree );
 Tree *constructTerm( struct colm_program *prg, Word id, Head *tokdata );
-Tree *constructReplacementTree( Kid *kid, Tree **bindings,
-		struct colm_program *prg, long pat );
+Tree *constructTree( struct colm_program *prg, Kid *kid,
+		Tree **bindings, long pat );
+Tree *constructObject( struct colm_program *prg, Kid *kid,
+		Tree **bindings, long langElId );
 Tree *createGeneric( struct colm_program *prg, long genericId );
 Tree *constructToken( struct colm_program *prg, Tree **args, long nargs );
 Tree *constructStream( struct colm_program *prg );
@@ -265,7 +269,8 @@ Stream *openStreamFd( struct colm_program *prg, char *name, long fd );
 Kid *copyIgnoreList( struct colm_program *prg, Kid *ignoreHeader );
 Kid *copyKidList( struct colm_program *prg, Kid *kidList );
 void streamFree( struct colm_program *prg, Stream *s );
-Tree *copyTree( struct colm_program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown );
+Tree *copyTree( struct colm_program *prg, Tree *tree,
+		Kid *oldNextDown, Kid **newNextDown );
 
 Tree *getPtrVal( Pointer *ptr );
 Tree *getPtrValSplit( struct colm_program *prg, Pointer *ptr );

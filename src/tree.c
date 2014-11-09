@@ -278,7 +278,7 @@ Tree *constructStream( Program *prg )
 	return (Tree*)input;
 }
 
-Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat );
+Kid *constructKid( Program *prg, Tree **bindings, Kid *prev, long pat );
 
 static Kid *constructIgnoreList( Program *prg, long ignoreInd )
 {
@@ -494,10 +494,30 @@ Tree *popLeftIgnore( Program *prg, Tree **sp, Tree *popFrom, Tree **leftIgnore )
 	return popFrom;
 }
 
+Tree *constructObject( Program *prg, Kid *kid, Tree **bindings, long langElId )
+{
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	Tree *tree = 0;
+
+	tree = treeAllocate( prg );
+	tree->id = langElId;
+	tree->refs = 1;
+	tree->tokdata = 0;
+	tree->prodNum = 0;
+
+	int objectLength = lelInfo[tree->id].objectLength;
+
+	Kid *attrs = allocAttrs( prg, objectLength );
+	Kid *child = 0;
+
+	tree->child = kidListConcat( attrs, child );
+
+	return tree;
+}
 
 /* Returns an uprefed tree. Saves us having to downref and bindings to zero to
  * return a zero-ref tree. */
-Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pat )
+Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 {
 	PatConsNode *nodes = prg->rtd->patReplNodes;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
@@ -543,7 +563,7 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 		int objectLength = lelInfo[tree->id].objectLength;
 
 		Kid *attrs = allocAttrs( prg, objectLength );
-		Kid *child = constructReplacementKid( bindings, prg, 
+		Kid *child = constructKid( prg, bindings,
 				0, nodes[pat].child );
 
 		tree->child = kidListConcat( attrs, child );
@@ -597,17 +617,17 @@ Tree *constructReplacementTree( Kid *kid, Tree **bindings, Program *prg, long pa
 	return tree;
 }
 
-Kid *constructReplacementKid( Tree **bindings, Program *prg, Kid *prev, long pat )
+Kid *constructKid( Program *prg, Tree **bindings, Kid *prev, long pat )
 {
 	PatConsNode *nodes = prg->rtd->patReplNodes;
 	Kid *kid = 0;
 
 	if ( pat != -1 ) {
 		kid = kidAllocate( prg );
-		kid->tree = constructReplacementTree( kid, bindings, prg, pat );
+		kid->tree = constructTree( prg, kid, bindings, pat );
 
 		/* Recurse down next. */
-		Kid *next = constructReplacementKid( bindings, prg, 
+		Kid *next = constructKid( prg, bindings,
 				kid, nodes[pat].next );
 
 		kid->next = next;

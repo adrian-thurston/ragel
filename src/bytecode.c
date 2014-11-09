@@ -2639,7 +2639,7 @@ again:
 			Half genericId;
 			read_half( genericId );
 
-			debug( prg, REALM_BYTECODE, "IN_CONS_GENERIC %d\n", genericId );
+			debug( prg, REALM_BYTECODE, "IN_CONS_GENERIC %hd\n", genericId );
 
 			Tree *replTree = createGeneric( prg, genericId );
 			treeUpref( replTree );
@@ -2647,14 +2647,12 @@ again:
 			break;
 		}
 		case IN_CONS_OBJECT: {
-			Half patternId;
-			read_half( patternId );
+			Half langElId;
+			read_half( langElId );
 
-			debug( prg, REALM_BYTECODE, "IN_CONS_OBJECT\n" );
+			debug( prg, REALM_BYTECODE, "IN_CONS_OBJECT %hd\n", langElId );
 
-			int rootNode = prg->rtd->patReplInfo[patternId].offset;
-			Tree *replTree = constructReplacementTree( 0, 0, prg, rootNode );
-
+			Tree *replTree = constructObject( prg, 0, 0, langElId );
 			vm_push( replTree );
 			break;
 		}
@@ -2678,7 +2676,7 @@ again:
 				assert( bindings[b] != 0 );
 			}
 
-			Tree *replTree = constructReplacementTree( 0, bindings, prg, rootNode );
+			Tree *replTree = constructTree( prg, 0, bindings, rootNode );
 
 			vm_push( replTree );
 			break;
