@@ -1221,6 +1221,8 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	/* Construct the parser. */
 	code.append( IN_CONS_GENERIC );
 	code.appendHalf( parserUT->langEl->generic->id );
+	code.append( IN_TREE_NEW );
+	code.append( IN_PTR_DEREF_R );
 
 	/* Dup for the finish operation. */
 	code.append( IN_DUP_TOP );
