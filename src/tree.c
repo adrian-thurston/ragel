@@ -1061,32 +1061,18 @@ free_tree:
 	lelInfo = prg->rtd->lelInfo;
 	genericId = lelInfo[tree->id].genericId;
 	assert( genericId == 0 );
+	assert( tree->id != LEL_ID_STREAM );
 
 	switch ( tree->id ) {
+	case LEL_ID_BOOL:
+	case LEL_ID_INT:
+	case LEL_ID_PTR:
+		treeFree( prg, tree );
+		break;
 	case LEL_ID_STR: {
 		Str *str = (Str*) tree;
 		stringFree( prg, str->value );
 		treeFree( prg, tree );
-		break;
-	}
-	case LEL_ID_BOOL:
-	case LEL_ID_INT: {
-		treeFree( prg, tree );
-		break;
-	}
-	case LEL_ID_PTR: {
-		treeFree( prg, tree );
-		break;
-	}
-	case LEL_ID_STREAM: {
-		Stream *stream = (Stream*)tree;
-		clearSourceStream( prg, sp, stream->in );
-		if ( stream->in->file != 0 )
-			fclose( stream->in->file );
-		else if ( stream->in->fd >= 0 )
-			close( stream->in->fd );
-		free( stream->in );
-		streamFree( prg, stream );
 		break;
 	}
 	default: { 
