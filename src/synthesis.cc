@@ -1025,7 +1025,7 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 {
 	/* Evaluate the expression. */
-	UniqueType *ut = expr->term->evaluateNewstruct( pd, code );
+	UniqueType *ut = evaluateNewstruct( pd, code );
 
 	code.append( IN_TREE_NEW );
 	return pd->findUniqueType( TYPE_PTR, ut->langEl );
@@ -1147,8 +1147,6 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 		code.appendHalf( replUT->langEl->id );
 	}
 
-	constructor->langEl = replUT->langEl;
-
 	if ( varRef != 0 ) {
 		code.append( IN_DUP_TOP );
 
@@ -1183,7 +1181,8 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 	}
 }
 
-UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code, bool tree, bool stop ) const
+UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
+		bool tree, bool stop ) const
 {
 	UniqueType *parserUT = typeRef->uniqueType;
 	UniqueType *targetUT = parserUT->langEl->generic->utArg;

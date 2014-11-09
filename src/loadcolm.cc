@@ -1809,14 +1809,8 @@ struct LoadColm
 		case code_factor::New: {
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
 
-			/* Construct an empty constructor list. */
-			ConsItemList *list = ConsItemList::cons();
-
-			LangExpr *consExpr = construct( internal, 0, list,
-					typeRef, new FieldInitVect );
-
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
-					LangTerm::NewType, consExpr ) );
+					LangTerm::NewType, typeRef ) );
 			break;
 		}
 		case code_factor::Cast: {

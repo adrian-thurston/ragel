@@ -395,7 +395,7 @@ void LangTerm::resolve( Compiler *pd )
 
 			break;
 		case NewType:
-			expr->term->typeRef->resolveType( pd );
+			typeRef->resolveType( pd );
 			break;
 		case TypeIdType:
 			typeRef->resolveType( pd );
