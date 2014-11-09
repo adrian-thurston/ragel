@@ -233,7 +233,8 @@ void colm_run_program( Program *prg, int argc, const char **argv )
 	prg->argv = 0;
 }
 
-Tree *colm_run_func( struct colm_program *prg, int frameId, const char **params, int paramCount )
+Tree *colm_run_func( struct colm_program *prg, int frameId,
+		const char **params, int paramCount )
 {
 	/* Make the arguments available to the program. */
 	prg->argc = 0;
@@ -282,6 +283,18 @@ Tree *colm_run_func( struct colm_program *prg, int frameId, const char **params,
 	return prg->returnVal;
 };
 
+static void colm_clear_heap( Program *prg, Tree **sp )
+{
+	/* Clear the heap. */
+	Kid *a = prg->heap;
+	while ( a != 0 ) {
+		Kid *next = a->next;
+		objectDownref( prg, sp, a->tree );
+		kidFree( prg, a );
+		a = next;
+	}
+}
+
 int colm_delete_program( Program *prg )
 {
 	Tree **sp = prg->stackRoot;
@@ -289,15 +302,7 @@ int colm_delete_program( Program *prg )
 
 	treeDownref( prg, sp, prg->returnVal );
 	clearGlobal( prg, sp );
-
-	/* Clear the heap. */
-	Kid *a = prg->heap;
-	while ( a != 0 ) {
-		Kid *next = a->next;
-		treeDownref( prg, sp, a->tree );
-		kidFree( prg, a );
-		a = next;
-	}
+	colm_clear_heap( prg, sp );
 
 	treeDownref( prg, sp, prg->trueVal );
 	treeDownref( prg, sp, prg->falseVal );
