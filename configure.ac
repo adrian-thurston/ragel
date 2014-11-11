@@ -2,7 +2,7 @@ dnl
 dnl   Copyright 2006-2012 Adrian Thurston <thurston@complang.org>
 dnl
   
-AC_INIT(colm-c, 0.13.0.2)
+AC_INIT(colm, 0.13.0.2)
 PUBDATE="Oct 2014"
 
 AM_INIT_AUTOMAKE([foreign])
