@@ -53,17 +53,17 @@ bootstrap0_LDADD = libprog.a libcolmd.a
 bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_INIT
 bootstrap1_CFLAGS = $(common_CFLAGS)
 bootstrap1_SOURCES = \
-	loadinit.h loadinit.cc \
-	if1.h if1.cc parse1.c \
-	main.cc
+	loadinit.h loadinit.cc main.cc
+nodist_bootstrap1_SOURCES = \
+	if1.h if1.cc parse1.c
 bootstrap1_LDADD = libprog.a libcolmd.a
 
 colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 colm_CFLAGS = $(common_CFLAGS)
 colm_SOURCES = \
-	loadcolm.h loadcolm.cc \
-	if2.h if2.cc parse2.c \
-	main.cc
+	loadcolm.h loadcolm.cc main.cc
+nodist_colm_SOURCES = \
+	if2.h if2.cc parse2.c
 colm_LDADD = libprog.a libcolmd.a
 
 colmincdir = $(includedir)/colm
