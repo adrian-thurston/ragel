@@ -28,8 +28,9 @@
 #######################################
 
 WORKING=working
-COLM=../src/colm
 ERRORS=0
+
+test -z "$COLM" && COLM=../src/colm
 
 cd `dirname $0`
 test -d $WORKING || mkdir $WORKING
