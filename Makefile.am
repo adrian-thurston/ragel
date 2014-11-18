@@ -1,5 +1,5 @@
 
-SUBDIRS = src doc test
+SUBDIRS = src doc
 DIST_SUBDIRS = $(SUBDIRS) aapl contrib examples
 
 dist_doc_DATA = CREDITS ChangeLog

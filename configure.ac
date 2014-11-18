@@ -152,7 +152,6 @@ AC_OUTPUT([
 		doc/Makefile
 		doc/ragel.1
 		contrib/Makefile
-		test/Makefile
 		examples/Makefile
 ])
 
