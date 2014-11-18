@@ -48,5 +48,5 @@ TRANS_DEPS = \
 trans$(EXEEXT): trans.lm $(TRANS_DEPS)
 	$(COLM) -o $@ $<
 
-runtests: runtests.sh
+runtests: runtests.sh Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
