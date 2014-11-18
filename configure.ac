@@ -151,8 +151,6 @@ AC_OUTPUT([
 		aapl/Makefile 
 		doc/Makefile
 		doc/ragel.1
-		contrib/Makefile
-		examples/Makefile
 ])
 
 echo "configuration of ragel complete"
