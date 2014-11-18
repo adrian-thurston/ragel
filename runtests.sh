@@ -41,8 +41,7 @@ shift $((OPTIND - 1));
 
 [ -z "$*" ] && set -- *.rl
 
-config=../src/config.h
-ragel=../src/ragel
+ragel="@RAGEL@"
 
 cxx_compiler="@CXX@"
 c_compiler="@CC@"
