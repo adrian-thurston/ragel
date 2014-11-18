@@ -56,5 +56,7 @@ RLHC = \
 	rlhc-ruby.lm \
 	rlhc-ml.lm
 
+rlhc_SOURCES =
+
 rlhc$(EXEEXT): rlhc.lm $(RLHC)
 	$(COLM) -o $@ $<
