@@ -52,6 +52,10 @@ AC_ARG_ENABLE(debug,
 		AC_DEFINE([DEBUG], [1], [enable debug statements]))
 
 dnl write output files
-AC_OUTPUT(Makefile src/Makefile aapl/Makefile test/Makefile)
+AC_OUTPUT([
+	Makefile
+	src/Makefile
+	aapl/Makefile
+])
 
 echo "configuration of colm complete"

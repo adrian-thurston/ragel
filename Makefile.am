@@ -2,7 +2,7 @@
 #   Copyright 2010-2012 Adrian Thurston <thurston@complang.org>
 #
 
-SUBDIRS = src test
+SUBDIRS = src
 DIST_SUBDIRS = $(SUBDIRS) aapl
 
 dist_doc_DATA =  colm.vim
