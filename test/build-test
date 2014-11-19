@@ -59,7 +59,7 @@ cd ../test
 ./configure \
 		--prefix=$dir/i2/ragel-test-suite \
 		--with-colm=$dir/i2/colm \
-		--with-ragel-to-test=$dir/i2/ragel
+		--with-subject=$dir/i2/ragel
 make
 ./runtests
 cd ../../..
