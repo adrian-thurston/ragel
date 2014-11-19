@@ -6,7 +6,7 @@ ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 ragel_SOURCES = \
 	buffer.h inputdata.h redfsm.h parsedata.h \
-	parsetree.h rlscan.h version.h common.h \
+	parsetree.h rlscan.h common.h \
 	fsmgraph.h pcheck.h gendata.h ragel.h load.h if.h \
 	codegen.h binary.h binloop.h binexp.h flat.h flatloop.h \
 	flatexp.h goto.h gotoloop.h gotoexp.h ipgoto.h xml.h dot.h \
@@ -18,6 +18,8 @@ ragel_SOURCES = \
 	load.cc parse.c if.cc codegen.cc binary.cc binloop.cc \
 	binexp.cc flat.cc flatloop.cc flatexp.cc goto.cc \
 	gotoloop.cc gotoexp.cc ipgoto.cc xml.cc dot.cc binbasic.cc
+
+nodist_ragel_SOURCES = version.h
 
 BUILT_SOURCES = version.h
 
