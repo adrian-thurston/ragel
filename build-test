@@ -58,8 +58,8 @@ cd ../test
 ./autogen.sh
 ./configure \
 		--prefix=$dir/i2/ragel-test-suite \
-		--with-ragel=$dir/i2/ragel \
-		--with-colm=$dir/i2/colm
+		--with-colm=$dir/i2/colm \
+		--with-ragel-to-test=$dir/i2/ragel
 make
 ./runtests
 cd ../../..
