@@ -15,7 +15,6 @@ AC_CONFIG_HEADER(config.h)
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
-AC_CHECK_TOOL(AR, ar)
 AC_PROG_RANLIB
 
 dnl Set test on c++ compiler.
@@ -27,12 +26,12 @@ AC_PROG_MAKE_SET
 dnl
 dnl Which colm are we testing. Default is the one in parent's source dir.
 dnl
-AC_ARG_WITH(ragel,
-	[AC_HELP_STRING([--with-ragel], [location of ragel to test])],
-		[RAGEL="$withval/bin/ragel"],
-		[RAGEL="../src/ragel"] )
+AC_ARG_WITH(subject,
+	[AC_HELP_STRING([--with-subject], [location of ragel to test])],
+		[SUBJECT="$withval/bin/ragel"],
+		[SUBJECT="../src/ragel"] )
 
-AC_SUBST(RAGEL)
+AC_SUBST(SUBJECT)
 
 dnl
 dnl COLM
@@ -99,7 +98,7 @@ dnl Check for the ocaml compiler.
 AC_CHECK_PROG(OCAML, ocaml, ocaml)
 
 SED_SUBST=["\
-	-e 's|@RAGEL@|${RAGEL}|g' \
+	-e 's|@SUBJECT@|${SUBJECT}|g' \
 	-e 's|@CXX@|${CXX}|g' \
 	-e 's|@CC@|${CC}|g' \
 	-e 's|@GOBJC@|${GOBJC}|g' \

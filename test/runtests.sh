@@ -41,7 +41,7 @@ shift $((OPTIND - 1));
 
 [ -z "$*" ] && set -- *.rl
 
-ragel="@RAGEL@"
+ragel="@SUBJECT@"
 
 cxx_compiler="@CXX@"
 c_compiler="@CC@"
