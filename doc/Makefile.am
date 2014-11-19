@@ -16,7 +16,7 @@ EXTRA_DIST = ragel-guide.tex \
 
 if BUILD_MANUAL
 
-dist_doc_DATA = ragel-guide.pdf
+doc_DATA = ragel-guide.pdf
 
 .fig.pdf:
 	fig2dev -L pdf $< $@
