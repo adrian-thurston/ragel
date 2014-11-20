@@ -30,7 +30,7 @@
 WORKING=working
 ERRORS=0
 
-test -z "$COLM" && COLM=../src/colm
+COLM=@SUBJECT@
 
 cd `dirname $0`
 test -d $WORKING || mkdir $WORKING
@@ -154,6 +154,7 @@ function runtests()
 		fi
 
 		# Compilation.
+		echo $COLM $TST
 		$COLM $LM &> $LOG 
 		if [ $? != 0 ]; then
 			echo "ERROR: $TST cannot be run: compilation error"
@@ -183,11 +184,6 @@ function runtests()
 			fi
 
 			echo -n "running test $TST ($Nth)... "
-
-			if [ "$verbose" = true ]; then
-				echo
-				echo $COLM $TST
-			fi
 
 			if [ '!' -f $IN ] && [ -f $ROOT.in ]; then
 				IN=$ROOT.in;

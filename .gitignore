@@ -1,3 +1,10 @@
 /Makefile.in
 /Makefile
 /working
+
+/aclocal.m4
+/autom4te.cache/
+/config.log
+/config.status
+/configure
+/runtests
