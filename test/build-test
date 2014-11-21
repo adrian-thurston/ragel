@@ -3,81 +3,52 @@
 
 # This should not go into the dist file
 
-git_colm=ssh://git@git.in.colm.net/colm.git
-git_ragel=ssh://git@git.in.colm.net/ragel.git
-
-dir=`mktemp -d /tmp/test.XXXXXX`
+working=`mktemp -d /tmp/test.XXXXXX`
 
 set -e
 
 echo ========== STARTING ==========
-echo working in $dir
+echo working in $working
 echo
 
+# Go to the working directory, create the git dir.
 set -x
-cd $dir
-
-# Checkout colm and ragel.
+cd $working
 mkdir git
-cd git
-git clone $git_colm
-git clone $git_ragel
-cd ..
 
-#
-# Build and install colm from dist, test the install.
-#
+for package in colm ragel; do
+	#
+	# Make the dist, build and and install from the dist, then test the
+	# install. Loop starts from working dir.
+	#
 
-cd git/colm
-./autogen.sh
-./configure \
-		--prefix=$dir/no-install \
-		--with-deps=$dir/targ
-make dist
-tar -zxvf colm-*.tar.gz
-cd colm-*
-./configure \
-		--prefix=$dir/targ \
-		--with-deps=$dir/targ
-make -j4
-make install
-cd ../test
-./autogen.sh
-./configure \
-		--prefix=$dir/no-install \
-		--with-deps=$dir/targ \
-		--with-subject=$dir/targ
-make
-./runtests
-cd ../../..
+	cd git
+	git clone ssh://git@git.in.colm.net/$package.git
 
-#
-# Build and install ragel from dist, test the install.
-#
-
-cd git/ragel
-./autogen.sh
-./configure \
-		--prefix=$dir/no-install \
-		--with-deps=$dir/targ
-make dist
-tar -zxvf ragel-*.tar.gz
-cd ragel-*
-./configure \
-		--prefix=$dir/targ \
-		--with-deps=$dir/targ
-make -j4
-make install
-cd ../test
-./autogen.sh
-./configure \
-		--prefix=$dir/no-install \
-		--with-deps=$dir/targ \
-		--with-subject=$dir/targ
-make
-./runtests
-cd ../../..
+	cd $package
+	./autogen.sh
+	./configure \
+			--prefix=$working/no-install \
+			--with-deps=$working/targ
+	make dist
+	tar -zxvf $package-*.tar.gz
+	cd $package-*
+	./configure \
+			--prefix=$working/targ \
+			--with-deps=$working/targ
+	make -j4
+	make install
+	cd ../test
+	./autogen.sh
+	./configure \
+			--prefix=$working/no-install \
+			--with-deps=$working/targ \
+			--with-subject=$working/targ
+	make
+	./runtests
+	cd ../../..
+done
 
 echo ========== DONE ==========
-echo files in $dir
+echo files in $working
 echo 
