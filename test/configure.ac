@@ -1,6 +1,13 @@
 AC_INIT([colm-suite], [1.0.1])
 AM_INIT_AUTOMAKE
 
+dnl Generic dependency specification.
+AC_ARG_WITH(deps,
+	[AC_HELP_STRING([--with-deps], [generic dependency location])],
+	[DEPS="$withval"],
+	[DEPS="/opt/colm"]
+)
+
 dnl
 dnl Which colm are we testing. Default is the one in parent's source dir.
 dnl
