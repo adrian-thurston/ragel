@@ -30,18 +30,23 @@ cd ..
 
 cd git/colm
 ./autogen.sh
-./configure --prefix=$dir/i1/colm
+./configure \
+		--prefix=$dir/no-install \
+		--with-deps=$dir/targ
 make dist
 tar -zxvf colm-*.tar.gz
 cd colm-*
-./configure --prefix=$dir/i2/colm
+./configure \
+		--prefix=$dir/targ \
+		--with-deps=$dir/targ
 make -j4
 make install
 cd ../test
 ./autogen.sh
 ./configure \
-		--prefix=$dir/i2/ragel-suite \
-		--with-subject=$dir/i2/colm
+		--prefix=$dir/no-install \
+		--with-deps=$dir/targ \
+		--with-subject=$dir/targ
 make
 ./runtests
 cd ../../..
@@ -52,19 +57,23 @@ cd ../../..
 
 cd git/ragel
 ./autogen.sh
-./configure --prefix=$dir/i1/ragel --with-colm=$dir/i2/colm
+./configure \
+		--prefix=$dir/no-install \
+		--with-deps=$dir/targ
 make dist
 tar -zxvf ragel-*.tar.gz
 cd ragel-*
-./configure --prefix=$dir/i2/ragel --with-colm=$dir/i2/colm
+./configure \
+		--prefix=$dir/targ \
+		--with-deps=$dir/targ
 make -j4
 make install
 cd ../test
 ./autogen.sh
 ./configure \
-		--prefix=$dir/i2/ragel-suite \
-		--with-colm=$dir/i2/colm \
-		--with-subject=$dir/i2/ragel
+		--prefix=$dir/no-install \
+		--with-deps=$dir/targ \
+		--with-subject=$dir/targ
 make
 ./runtests
 cd ../../..
