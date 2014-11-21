@@ -49,6 +49,10 @@ function sig_exit()
 	exit 1;
 }
 
+trap sig_exit SIGINT
+trap sig_exit SIGQUIT
+trap sig_exit SIGTERM
+
 # Parse args.
 while getopts vdm opt; do
 	case $opt in

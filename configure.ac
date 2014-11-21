@@ -7,6 +7,8 @@ PUBDATE="Oct 2014"
 
 AM_INIT_AUTOMAKE([foreign])
 
+AC_CONFIG_MACRO_DIR([m4])
+
 AC_SUBST(PUBDATE)
 AC_CONFIG_HEADER([src/config.h src/defs.h])
 
