@@ -24,6 +24,13 @@ AC_CHECK_SIZEOF([long])
 : ${CFLAGS="-Wall -g"}
 : ${CXXFLAGS="-Wall -g"}
 
+dnl Generic dependency specification.
+AC_ARG_WITH(deps,
+	[AC_HELP_STRING([--with-deps], [generic dependency location])],
+	[DEPS="$withval"],
+	[DEPS="/opt/colm"]
+)
+
 dnl Set to true if build system should generate parsers from ragel, kelbt, and
 dnl gperf sources. Set to false if generated files are included and not to be
 dnl built (production).
