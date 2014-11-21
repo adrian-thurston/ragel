@@ -2,7 +2,7 @@
 #   Copyright 2002-2014 Adrian Thurston <thurston@complang.org>
 #
 
-COLM = @COLM_FULL@
+COLM = @COLM@
 
 TESTS = runtests
 
