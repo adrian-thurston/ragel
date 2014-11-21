@@ -4,6 +4,17 @@
 #   Copyright 2006-2009 Adrian Thurston <thurston@complang.org>
 #
 
+function sig_exit()
+{
+	echo
+	exit 1;
+}
+
+trap sig_exit SIGINT
+trap sig_exit SIGQUIT
+trap sig_exit SIGTERM
+
+
 while getopts "gcnmleB:T:F:G:P:CDJRAZO" opt; do
 	case $opt in
 		B|T|F|G|P) 
