@@ -1,4 +1,4 @@
-COLM = @COLM_FULL@
+COLM = @COLM@
 
 bin_PROGRAMS = ragel rlhc
 
@@ -20,6 +20,8 @@ ragel_SOURCES = \
 	gotoloop.cc gotoexp.cc ipgoto.cc xml.cc dot.cc binbasic.cc
 
 nodist_ragel_SOURCES = version.h
+
+ragel_LDADD = -lcolmd
 
 BUILT_SOURCES = version.h
 

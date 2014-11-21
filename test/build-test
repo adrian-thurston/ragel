@@ -38,7 +38,12 @@ cd colm-*
 make -j4
 make install
 cd ../test
-COLM=$dir/i2/colm/bin/colm ./runtests.sh
+./autogen.sh
+./configure \
+		--prefix=$dir/i2/ragel-suite \
+		--with-subject=$dir/i2/colm
+make
+./runtests
 cd ../../..
 
 #
@@ -57,7 +62,7 @@ make install
 cd ../test
 ./autogen.sh
 ./configure \
-		--prefix=$dir/i2/ragel-test-suite \
+		--prefix=$dir/i2/ragel-suite \
 		--with-colm=$dir/i2/colm \
 		--with-subject=$dir/i2/ragel
 make

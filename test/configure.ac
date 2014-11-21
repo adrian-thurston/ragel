@@ -2,8 +2,11 @@ dnl
 dnl   Copyright 2001-2013 Adrian Thurston <thurston@complang.org>
 dnl
   
-AC_INIT(ragel-test-suite, 1.0.1)
+AC_INIT(ragel-suite, 1.0.1)
 PUBDATE="November 2014"
+
+AC_CONFIG_MACRO_DIR([../m4])
+m4_include([../m4/ragel.m4])
 
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
@@ -24,7 +27,7 @@ dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
 dnl
-dnl Which colm are we testing. Default is the one in parent's source dir.
+dnl Which ragel are we testing. Default is the one in parent's source dir.
 dnl
 AC_ARG_WITH(subject,
 	[AC_HELP_STRING([--with-subject], [location of ragel to test])],
@@ -33,37 +36,8 @@ AC_ARG_WITH(subject,
 
 AC_SUBST(SUBJECT)
 
-dnl
-dnl COLM
-dnl
-
-COLM_EXPECTED=0.13.0.2
-
-AC_ARG_WITH(colm,
-	[AC_HELP_STRING([--with-colm], [location of colm install])],
-		[COLM="$withval/bin/colm"],
-		[COLM=`which colm`] )
-
-if test -z "$COLM"; then
-	AC_ERROR([colm is required to build ragel])
-fi
-
-dnl extract the first two precision points from the version
-COLM_INSTALLED=`$COLM -v | sed -n '1{s/^.*version //; s/ .*$//; p}'`
-if test "$COLM_INSTALLED" != $COLM_EXPECTED; then
-	AC_ERROR([expected colm version $COLM_EXPECTED, but $COLM_INSTALLED is installed])
-fi
-
-COLM_FULL=[$COLM]
-COLM_INCLUDE=[`dirname $COLM_FULL`/../include]
-COLM_LIB=[`dirname $COLM_FULL`/../lib]
-
-CPPFLAGS="$CPPFLAGS -I$COLM_INCLUDE"
-LDFLAGS="$LDFLAGS -L$COLM_LIB"
-
-AC_CHECK_HEADER([colm/colm.h], [], [AC_ERROR([colm.h not found])])
-AC_CHECK_LIB([colmd], [colm_new_program])
-AC_SUBST(COLM_FULL)
+dnl Check for colm.
+AC_CHECK_COLM([0.13.0.2])
 
 dnl Check for the D compiler
 AC_CHECK_PROG(GDC, gdc, gdc)

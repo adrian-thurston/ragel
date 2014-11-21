@@ -34,7 +34,7 @@ ragel-guide.tex: generate ragel-guide.txt
 	./generate < ragel-guide.txt > ragel-guide.tex
 	
 generate: generate.lm
-	$(COLM_FULL) $<
+	$(COLM) $<
 
 ragel-guide.pdf: version.tex
 
