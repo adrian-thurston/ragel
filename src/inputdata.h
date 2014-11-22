@@ -48,7 +48,7 @@ struct InputData
 		outStream(0),
 		outFilter(0),
 		hostLang(&hostLangC),
-		codeStyle(GenBinaryGotoLoop),
+		codeStyle(GenBinaryLoop),
 		machineSpec(0),
 		machineName(0),
 		minimizeLevel(MinimizePartition2),

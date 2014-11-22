@@ -207,7 +207,6 @@ void InputData::prepareAllMachines()
 	}
 }
 
-
 void InputData::generateReduced( bool printStatistics )
 {
 	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {

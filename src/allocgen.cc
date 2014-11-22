@@ -27,35 +27,65 @@
 using std::cerr;
 using std::endl;
 
+bool langSupportsGoto( const HostLang *hostLang )
+{
+	if ( hostLang->lang == HostLang::Ruby || hostLang->lang == HostLang::OCaml )
+		return false;
+	
+	return true;
+}
+
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
 
 	switch ( args.codeStyle ) {
-	case GenBinaryGotoLoop:
-		codeGen = new BinaryGotoLoop(args);
+
+	case GenBinaryLoop:
+		if ( langSupportsGoto( hostLang ) )
+			codeGen = new BinaryGotoLoop(args);
+		else
+			codeGen = new BinaryVarLoop(args);
 		break;
-	case GenBinaryGotoExp:
-		codeGen = new BinaryGotoExp(args);
+	case GenBinaryExp:
+		if ( langSupportsGoto( hostLang ) )
+			codeGen = new BinaryGotoExp(args);
+		else
+			std::cerr << "unsupported lang/style combination" << endp;
 		break;
-	case GenBinaryVarLoop:
-		codeGen = new BinaryVarLoop(args);
+
+	case GenFlatLoop:
+		if ( langSupportsGoto( hostLang ) )
+			codeGen = new FlatGotoLoop(args);
+		else
+			std::cerr << "unsupported lang/style combination" << endp;
 		break;
-	case GenFlatGotoLoop:
-		codeGen = new FlatGotoLoop(args);
+	case GenFlatExp:
+		if ( langSupportsGoto( hostLang ) )
+			codeGen = new FlatGotoExp(args);
+		else
+			std::cerr << "unsupported lang/style combination" << endp;
 		break;
-	case GenFlatGotoExp:
-		codeGen = new FlatGotoExp(args);
+
+	case GenSwitchLoop:
+		if ( langSupportsGoto( hostLang ) )
+			codeGen = new SwitchGotoLoop(args);
+		else
+			std::cerr << "unsupported lang/style combination" << endp;
 		break;
-	case GenSwitchGotoLoop:
-		codeGen = new SwitchGotoLoop(args);
+	case GenSwitchExp:
+		if ( langSupportsGoto( hostLang ) )
+			codeGen = new SwitchGotoExp(args);
+		else
+			std::cerr << "unsupported lang/style combination" << endp;
 		break;
-	case GenSwitchGotoExp:
-		codeGen = new SwitchGotoExp(args);
-		break;
+
 	case GenIpGoto:
-		codeGen = new IpGoto(args);
+		if ( langSupportsGoto( hostLang ) )
+			codeGen = new IpGoto(args);
+		else
+			std::cerr << "unsupported lang/style combination" << endp;
 		break;
 	}
 
