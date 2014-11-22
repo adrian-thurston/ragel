@@ -41,11 +41,11 @@ done
 # Prohibitied genflags for specific languages.
 cs_prohibit_genflags="-G2"
 java_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
-ruby_prohibit_genflags="-G0 -G1 -G2"
-ocaml_prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+ruby_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
+ocaml_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
 
 [ -z "$minflags" ] && minflags="-n -m -l -e"
-[ -z "$genflags" ] && genflags="-B0 -T0 -T1 -F0 -F1 -G0 -G1 -G2"
+[ -z "$genflags" ] && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$langflags" ] && langflags="-C -D -J -R -A -Z -O"
 
 shift $((OPTIND - 1));
