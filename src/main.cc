@@ -62,6 +62,7 @@ void usage()
 "   -d                   Do not remove duplicates from action lists\n"
 "   -I <dir>             Add <dir> to the list of directories to search\n"
 "                        for included an imported files\n"
+"   --rlhc               display rlhc command\n"
 "error reporting format:\n"
 "   --error-format=gnu   file:line:column: message (default)\n"
 "   --error-format=msvc  file(line,column): message\n"
@@ -335,6 +336,8 @@ void InputData::parseArgs( int argc, const char **argv )
 				}
 				else if ( strcmp( arg, "rbx" ) == 0 )
 					rubyImpl = Rubinius;
+				else if ( strcmp( arg, "rlhc" ) == 0 )
+					rlhcShowCmd = true;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

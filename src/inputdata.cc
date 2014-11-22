@@ -331,11 +331,15 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	writeOutput();
 	closeOutput();
 
-	string final = dirName + "/rlhc " + 
+	string rlhc = dirName + "/rlhc " + 
 			origOutputFileName + " " +
 			genOutputFileName + " " +
 			hostLang->rlhcArg;
-	int res = system( final.c_str() );
+
+	if ( rlhcShowCmd )
+		std::cout << rlhc << std::endl;
+
+	int res = system( rlhc.c_str() );
 	if ( res != 0 )
 		exit( 1 );
 	//unlink( genOutputFileName.c_str() );

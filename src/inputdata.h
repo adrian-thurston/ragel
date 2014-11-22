@@ -61,7 +61,8 @@ struct InputData
 		displayPrintables(false),
 		maxTransitions(LONG_MAX),
 		numSplitPartitions(0),
-		rubyImpl(MRI)
+		rubyImpl(MRI),
+		rlhcShowCmd(false)
 	{}
 
 	std::string dirName;
@@ -108,6 +109,8 @@ struct InputData
 
 	/* Target ruby impl */
 	RubyImplEnum rubyImpl;
+
+	bool rlhcShowCmd;
 
 	void verifyWritesHaveData();
 
