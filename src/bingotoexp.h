@@ -2,24 +2,19 @@
  *  Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
  */
 
-#ifndef _C_BINLOOP_H
-#define _C_BINLOOP_H
+#ifndef BIN_GOTO_EXP_H
+#define BIN_GOTO_EXP_H
 
 #include <iostream>
 #include "binary.h"
-#include "vector.h"
 
 /* Forwards. */
 struct CodeGenData;
-struct NameInst;
-struct RedTransAp;
-struct RedStateAp;
 
-class BinaryLooped
-	: public Binary
+class BinaryGotoExp : public Binary
 {
 public:
-	BinaryLooped( const CodeGenArgs &args );
+	BinaryGotoExp( const CodeGenArgs &args );
 
 	void calcIndexSize();
 	void tableDataPass();
@@ -28,15 +23,17 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 
+protected:
+	std::ostream &TO_STATE_ACTION_SWITCH();
+	std::ostream &FROM_STATE_ACTION_SWITCH();
+	std::ostream &EOF_ACTION_SWITCH();
+	std::ostream &ACTION_SWITCH();
+
 	virtual void TO_STATE_ACTION( RedStateAp *state );
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondAp *cond );
 
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
 };
 
 #endif

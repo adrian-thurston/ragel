@@ -2,8 +2,8 @@
  *  Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
  */
 
-#ifndef _CDIPGOTO_H
-#define _CDIPGOTO_H
+#ifndef IPGOTO_H
+#define IPGOTO_H
 
 #include <iostream>
 #include "goto.h"

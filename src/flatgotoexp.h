@@ -2,8 +2,8 @@
  *  Copyright 2004-2014 Adrian Thurston <thurston@complang.org>
  */
 
-#ifndef _C_FLATEXP_H
-#define _C_FLATEXP_H
+#ifndef FLAT_GOTO_EXP_H
+#define FLAT_GOTO_EXP_H
 
 #include <iostream>
 #include "flat.h"
@@ -12,13 +12,13 @@
 struct CodeGenData;
 
 /*
- * FlatExpanded
+ * FlatGotoExp
  */
-class FlatExpanded
+class FlatGotoExp
 	: public Flat
 {
 public:
-	FlatExpanded( const CodeGenArgs &args ) 
+	FlatGotoExp( const CodeGenArgs &args ) 
 		: Flat(args) {}
 
 	void tableDataPass();

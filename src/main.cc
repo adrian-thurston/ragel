@@ -349,7 +349,7 @@ void InputData::parseArgs( int argc, const char **argv )
 			/* Passthrough args. */
 			case 'B': 
 				if ( pc.paramArg[0] == '0' )
-					codeStyle = GenBasic;
+					codeStyle = GenBinaryVarLoop;
 				else {
 					error() << "-B" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
@@ -360,11 +360,11 @@ void InputData::parseArgs( int argc, const char **argv )
 			/* Passthrough args. */
 			case 'T': 
 				if ( pc.paramArg[0] == '0' )
-					codeStyle = GenTables;
+					codeStyle = GenBinaryGotoLoop;
 				else if ( pc.paramArg[0] == '1' )
-					codeStyle = GenFTables;
+					codeStyle = GenBinaryGotoExp;
 				else if ( pc.paramArg[0] == '2' )
-					codeStyle = GenBasic;
+					codeStyle = GenBinaryVarLoop;
 				else {
 					error() << "-T" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
@@ -373,9 +373,9 @@ void InputData::parseArgs( int argc, const char **argv )
 				break;
 			case 'F': 
 				if ( pc.paramArg[0] == '0' )
-					codeStyle = GenFlat;
+					codeStyle = GenFlatGotoLoop;
 				else if ( pc.paramArg[0] == '1' )
-					codeStyle = GenFFlat;
+					codeStyle = GenFlatGotoExp;
 				else {
 					error() << "-F" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
@@ -384,9 +384,9 @@ void InputData::parseArgs( int argc, const char **argv )
 				break;
 			case 'G': 
 				if ( pc.paramArg[0] == '0' )
-					codeStyle = GenGoto;
+					codeStyle = GenSwitchGotoLoop;
 				else if ( pc.paramArg[0] == '1' )
-					codeStyle = GenFGoto;
+					codeStyle = GenSwitchGotoExp;
 				else if ( pc.paramArg[0] == '2' )
 					codeStyle = GenIpGoto;
 				else if ( pc.paramArg[0] == 'T' && pc.paramArg[1] == '2' ) {

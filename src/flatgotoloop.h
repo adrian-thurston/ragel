@@ -1,29 +1,26 @@
 /*
- *  Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2004-2014 Adrian Thurston <thurston@complang.org>
  */
 
-#ifndef _C_BINEXP_H
-#define _C_BINEXP_H
+#ifndef FLAT_GOTO_LOOP_H
+#define FLAT_GOTO_LOOP_H
 
 #include <iostream>
-#include "binary.h"
+#include "flat.h"
 
 /* Forwards. */
 struct CodeGenData;
+struct NameInst;
+struct RedTransAp;
+struct RedStateAp;
 
-class BinaryExpanded : public Binary
+class FlatGotoLoop
+	: public Flat
 {
 public:
-	BinaryExpanded( const CodeGenArgs &args );
+	FlatGotoLoop( const CodeGenArgs &args )
+		: Flat(args) {}
 
-	void calcIndexSize();
-	void tableDataPass();
-
-	virtual void genAnalysis();
-	virtual void writeData();
-	virtual void writeExec();
-
-protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
@@ -34,6 +31,11 @@ protected:
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondAp *cond );
 
+	void tableDataPass();
+
+	virtual void genAnalysis();
+	virtual void writeData();
+	virtual void writeExec();
 };
 
 #endif

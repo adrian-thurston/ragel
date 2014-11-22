@@ -15,11 +15,11 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-class BinaryBasic
+class BinaryVarLoop
 	: public Binary
 {
 public:
-	BinaryBasic( const CodeGenArgs &args );
+	BinaryVarLoop( const CodeGenArgs &args );
 
 	void calcIndexSize();
 	void tableDataPass();

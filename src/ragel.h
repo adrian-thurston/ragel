@@ -20,13 +20,13 @@
 /* Target output style. */
 enum CodeStyle
 {
-	GenBasic,
-	GenTables,
-	GenFTables,
-	GenFlat,
-	GenFFlat,
-	GenGoto,
-	GenFGoto,
+	GenBinaryVarLoop,
+	GenBinaryGotoLoop,
+	GenBinaryGotoExp,
+	GenFlatGotoLoop,
+	GenFlatGotoExp,
+	GenSwitchGotoLoop,
+	GenSwitchGotoExp,
 	GenIpGoto
 };
 

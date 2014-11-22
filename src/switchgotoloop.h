@@ -2,8 +2,8 @@
  *  Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
  */
 
-#ifndef _C_GOTOLOOP_H
-#define _C_GOTOLOOP_H
+#ifndef SWITCH_GOTO_LOOP_H
+#define SWITCH_GOTO_LOOP_H
 
 #include <iostream>
 #include "goto.h"
@@ -15,11 +15,11 @@ struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;
 
-class GotoLooped
+class SwitchGotoLoop
 	: public Goto
 {
 public:
-	GotoLooped( const CodeGenArgs &args ) 
+	SwitchGotoLoop( const CodeGenArgs &args ) 
 		: Goto(args) {}
 
 	void tableDataPass();

@@ -2,8 +2,8 @@
  *  Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
  */
 
-#ifndef _C_GOTOEXP_H
-#define _C_GOTOEXP_H
+#ifndef SWITCH_GOTO_EXP_H
+#define SWITCH_GOTO_EXP_H
 
 #include <iostream>
 #include "goto.h"
@@ -12,13 +12,13 @@
 struct CodeGenData;
 
 /*
- * class GotoExpanded
+ * class SwitchGotoExp
  */
-class GotoExpanded
+class SwitchGotoExp
 	: public Goto
 {
 public:
-	GotoExpanded( const CodeGenArgs &args )
+	SwitchGotoExp( const CodeGenArgs &args )
 		: Goto(args) {}
 
 	std::ostream &EXEC_ACTIONS();

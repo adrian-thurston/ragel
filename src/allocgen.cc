@@ -14,14 +14,15 @@
  */
 #include "xml.h"
 
-#include "binloop.h"
-#include "binexp.h"
-#include "flatloop.h"
-#include "flatexp.h"
-#include "gotoloop.h"
-#include "gotoexp.h"
+#include "bingotoloop.h"
+#include "bingotoexp.h"
+#include "flatgotoloop.h"
+#include "flatgotoexp.h"
+#include "switchgotoloop.h"
+#include "switchgotoexp.h"
 #include "ipgoto.h"
-#include "binbasic.h"
+
+#include "binvarloop.h"
 
 using std::cerr;
 using std::endl;
@@ -32,29 +33,29 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 	CodeGenData *codeGen = 0;
 
 	switch ( args.codeStyle ) {
-	case GenTables:
-		codeGen = new BinaryLooped(args);
+	case GenBinaryGotoLoop:
+		codeGen = new BinaryGotoLoop(args);
 		break;
-	case GenFTables:
-		codeGen = new BinaryExpanded(args);
+	case GenBinaryGotoExp:
+		codeGen = new BinaryGotoExp(args);
 		break;
-	case GenFlat:
-		codeGen = new FlatLooped(args);
+	case GenBinaryVarLoop:
+		codeGen = new BinaryVarLoop(args);
 		break;
-	case GenFFlat:
-		codeGen = new FlatExpanded(args);
+	case GenFlatGotoLoop:
+		codeGen = new FlatGotoLoop(args);
 		break;
-	case GenGoto:
-		codeGen = new GotoLooped(args);
+	case GenFlatGotoExp:
+		codeGen = new FlatGotoExp(args);
 		break;
-	case GenFGoto:
-		codeGen = new GotoExpanded(args);
+	case GenSwitchGotoLoop:
+		codeGen = new SwitchGotoLoop(args);
+		break;
+	case GenSwitchGotoExp:
+		codeGen = new SwitchGotoExp(args);
 		break;
 	case GenIpGoto:
 		codeGen = new IpGoto(args);
-		break;
-	case GenBasic:
-		codeGen = new BinaryBasic(args);
 		break;
 	}
 

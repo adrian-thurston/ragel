@@ -1,79 +1,42 @@
 /*
- *  Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2004-2014 Adrian Thurston <thurston@complang.org>
  */
 
 #include "ragel.h"
-#include "binloop.h"
+#include "flatgotoloop.h"
 #include "redfsm.h"
 #include "gendata.h"
 
-BinaryLooped::BinaryLooped( const CodeGenArgs &args )
-:
-	Binary( args )
-{}
-
-/* Determine if we should use indicies or not. */
-void BinaryLooped::calcIndexSize()
-{
-//	long long sizeWithInds =
-//		indicies.size() +
-//		transCondSpacesWi.size() +
-//		transOffsetsWi.size() +
-//		transLengthsWi.size();
-
-//	long long sizeWithoutInds =
-//		transCondSpaces.size() +
-//		transOffsets.size() +
-//		transLengths.size();
-
-	//std::cerr << "sizes: " << sizeWithInds << " " << sizeWithoutInds << std::endl;
-
-	///* If using indicies reduces the size, use them. */
-	//useIndicies = sizeWithInds < sizeWithoutInds;
-	useIndicies = false;
-}
-
-
-void BinaryLooped::tableDataPass()
+void FlatGotoLoop::tableDataPass()
 {
 	taActions();
-	taKeyOffsets();
-	taSingleLens();
-	taRangeLens();
-	taIndexOffsets();
+	taKeys();
+	taKeySpans();
+	taFlatIndexOffset();
+
 	taIndicies();
-
-	taTransCondSpacesWi();
-	taTransOffsetsWi();
-	taTransLengthsWi();
-
 	taTransCondSpaces();
 	taTransOffsets();
 	taTransLengths();
-
+	taCondKeys();
 	taCondTargs();
 	taCondActions();
 
 	taToStateActions();
 	taFromStateActions();
 	taEofActions();
-
-	taEofTransDirect();
-	taEofTransIndexed();
-
-	taKeys();
-	taCondKeys();
+	taEofTrans();
 }
 
-void BinaryLooped::genAnalysis()
+void FlatGotoLoop::genAnalysis()
 {
 	redFsm->sortByStateId();
 
 	/* Choose default transitions and the single transition. */
 	redFsm->chooseDefaultSpan();
 		
-	/* Choose the singles. */
-	redFsm->chooseSingle();
+	/* Do flat expand. */
+	redFsm->makeFlat();
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
@@ -90,53 +53,17 @@ void BinaryLooped::genAnalysis()
 	setTableState( TableArray::AnalyzePass );
 	tableDataPass();
 
-	/* Determine if we should use indicies. */
-	calcIndexSize();
-
 	/* Switch the tables over to the code gen mode. */
 	setTableState( TableArray::GeneratePass );
 }
 
-
-void BinaryLooped::COND_ACTION( RedCondAp *cond )
-{
-	int act = 0;
-	if ( cond->action != 0 )
-		act = cond->action->location+1;
-	condActions.value( act );
-}
-
-void BinaryLooped::TO_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->toStateAction != 0 )
-		act = state->toStateAction->location+1;
-	toStateActions.value( act );
-}
-
-void BinaryLooped::FROM_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->fromStateAction != 0 )
-		act = state->fromStateAction->location+1;
-	fromStateActions.value( act );
-}
-
-void BinaryLooped::EOF_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->eofAction != 0 )
-		act = state->eofAction->location+1;
-	eofActions.value( act );
-}
-
-std::ostream &BinaryLooped::TO_STATE_ACTION_SWITCH()
+std::ostream &FlatGotoLoop::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
+			/* Write the case label, the action and the case break */
 			out << "\t case " << act->actionId << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t}\n";
@@ -146,13 +73,13 @@ std::ostream &BinaryLooped::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinaryLooped::FROM_STATE_ACTION_SWITCH()
+std::ostream &FlatGotoLoop::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
+			/* Write the case label, the action and the case break */
 			out << "\t case " << act->actionId << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t}\n";
@@ -162,13 +89,13 @@ std::ostream &BinaryLooped::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinaryLooped::EOF_ACTION_SWITCH()
+std::ostream &FlatGotoLoop::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
+			/* Write the case label, the action and the case break */
 			out << "\t case " << act->actionId << " {\n";
 			ACTION( out, act, IlOpts( 0, true, false ) );
 			out << "\n\t}\n";
@@ -178,14 +105,13 @@ std::ostream &BinaryLooped::EOF_ACTION_SWITCH()
 	return out;
 }
 
-
-std::ostream &BinaryLooped::ACTION_SWITCH()
+std::ostream &FlatGotoLoop::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
+			/* Write the case label, the action and the case break */
 			out << "\t case " << act->actionId << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t}\n";
@@ -195,34 +121,22 @@ std::ostream &BinaryLooped::ACTION_SWITCH()
 	return out;
 }
 
-
-void BinaryLooped::writeData()
+void FlatGotoLoop::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
 	if ( redFsm->anyActions() )
 		taActions();
 
-	taKeyOffsets();
 	taKeys();
-	taSingleLens();
-	taRangeLens();
-	taIndexOffsets();
+	taKeySpans();
+	taFlatIndexOffset();
 
-	if ( useIndicies ) {
-		taIndicies();
-		taTransCondSpacesWi();
-		taTransOffsetsWi();
-		taTransLengthsWi();
-	}
-	else {
-		taTransCondSpaces();
-		taTransOffsets();
-		taTransLengths();
-	}
-
+	taIndicies();
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
 	taCondKeys();
-
 	taCondTargs();
 	taCondActions();
 
@@ -235,47 +149,50 @@ void BinaryLooped::writeData()
 	if ( redFsm->anyEofActions() )
 		taEofActions();
 
-	if ( redFsm->anyEofTrans() ) {
-		taEofTransIndexed();
-		taEofTransDirect();
-	}
+	if ( redFsm->anyEofTrans() )
+		taEofTrans();
 
 	STATE_IDS();
 }
 
-void BinaryLooped::writeExec()
+void FlatGotoLoop::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;
 
-	out <<
+	out << 
 		"	{\n"
-		"	int _klen;\n";
+		"	int _slen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
 
-	out <<
-		"	uint _trans = 0;\n"
-		"	uint _cond = 0;\n";
-	
-	if ( redFsm->anyRegNbreak() )
-		out << "	int _nbreak;\n";
+	out << 
+		"	int _trans;\n"
+		"	uint _cond;\n";
 
-	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
-			|| redFsm->anyFromStateActions() )
+	if ( redFsm->anyToStateActions() || 
+			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
 	{
 		out << 
 			"	index " << ARR_TYPE( actions ) << " _acts;\n"
-			"	uint _nacts;\n";
+			"	uint _nacts;\n"; 
 	}
 
 	out <<
 		"	index " << ALPH_TYPE() << " _keys;\n"
+		"	index " << ARR_TYPE( indicies ) << " _inds;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
-		"	int _cpc;\n"
-		"	entry {\n"
-		"\n";
+		"	int _klen;\n"
+		"	int _cpc;\n";
+
+	if ( redFsm->anyRegNbreak() )
+		out << "	int _nbreak;\n";
+
+	out <<
+		"	entry {\n";
+
+	out << "\n";
 
 	if ( !noEnd ) {
 		testEofUsed = true;
@@ -311,22 +228,13 @@ void BinaryLooped::writeExec()
 
 	LOCATE_TRANS();
 
-	out << "}\n";
-	out << "label _match {\n";
+	out << "} label _match_cond {\n";
 
-	if ( useIndicies )
-		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
-
-	LOCATE_COND();
-
-	out << "}\n";
-	out << "label _match_cond {\n";
-	
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = (int)" << ARR_REF( condTargs ) << "[_cond];\n"
+		"	" << vCS() << " = (int) " << ARR_REF( condTargs ) << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -342,7 +250,7 @@ void BinaryLooped::writeExec()
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
 			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
-			"	while ( _nacts > 0 )\n	{\n"
+			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
 			"		{\n";
 			ACTION_SWITCH() <<
@@ -358,20 +266,19 @@ void BinaryLooped::writeExec()
 				"		goto _out;\n";
 			outLabelUsed = true;
 		}
-		out << "\n";
+
+		out <<
+			"\n";
 	}
 
 //	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 //			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-	out << "}\n";
-	out << "label _again {\n";
+		out << "} label _again {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) <<
-					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
-			"	_acts += 1;\n"
+			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) << "[" << vCS() << "]" << " );\n"
+			"	_nacts = (uint) deref( " << ARR_REF ( actions ) << ", _acts ); _acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
@@ -400,20 +307,19 @@ void BinaryLooped::writeExec()
 			"	" << P() << " += 1;\n"
 			"	goto _resume;\n";
 	}
-	
+
 	if ( testEofUsed )
-		out << "}\n label _test_eof { {}\n";
-	
+		out << "} label _test_eof { {}\n";
+
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
-			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = (uint)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_trans = (int)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
 				"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _match_cond;\n"
 				"	}\n";
@@ -424,8 +330,7 @@ void BinaryLooped::writeExec()
 				"	index " << ARR_TYPE( actions ) << " __acts;\n"
 				"	uint __nacts;\n"
 				"	__acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
-				"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts );\n"
-				"	__acts += 1;\n"
+				"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts ); __acts += 1;\n"
 				"	while ( __nacts > 0 ) {\n"
 				"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
 				EOF_ACTION_SWITCH() <<
@@ -434,8 +339,8 @@ void BinaryLooped::writeExec()
 				"		__acts += 1;\n"
 				"	}\n";
 		}
-		
-		out << 
+
+		out <<
 			"	}\n"
 			"\n";
 	}
@@ -446,6 +351,38 @@ void BinaryLooped::writeExec()
 	/* The entry loop. */
 	out << "}}\n";
 
-	/* The execute block. */
 	out << "	}\n";
+}
+
+void FlatGotoLoop::TO_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->toStateAction != 0 )
+		act = state->toStateAction->location+1;
+	toStateActions.value( act );
+}
+
+void FlatGotoLoop::FROM_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->fromStateAction != 0 )
+		act = state->fromStateAction->location+1;
+	fromStateActions.value( act );
+}
+
+void FlatGotoLoop::EOF_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->eofAction != 0 )
+		act = state->eofAction->location+1;
+	eofActions.value( act );
+}
+
+void FlatGotoLoop::COND_ACTION( RedCondAp *cond )
+{
+	/* If there are actions, emit them. Otherwise emit zero. */
+	int act = 0;
+	if ( cond->action != 0 )
+		act = cond->action->location+1;
+	condActions.value( act );
 }
