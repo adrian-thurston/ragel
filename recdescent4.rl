@@ -1,5 +1,6 @@
 /*
  * @LANG: c
+ *
  * Test growable stack.
  */
 

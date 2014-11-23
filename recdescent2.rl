@@ -1,6 +1,5 @@
 /*
  * @LANG: java
- * @PROHIBIT_GENFLAGS: -B0
  */
 
 class recdescent2
