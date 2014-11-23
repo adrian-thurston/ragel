@@ -5,18 +5,22 @@ lex
 	{
 		if Lang == "ruby"
 			input->push( make_token( typeid<ruby_selectt> '' ) )
+		elsif Lang == "ocaml"
+			input->push( make_token( typeid<ocaml_selectt> '' ) )
 		else
 			input->push( make_token( typeid<c_selectt> '' ) )
 	}
 
 	token c_selectt //
 	token ruby_selectt //
+	token ocaml_selectt //
 end
 
 
 def start
 	[c_selectt SectionList: c_host::section*]
 |	[ruby_selectt RSectionList: ruby_host::section*]
+|	[ocaml_selectt OSectionList: ocaml_host::section*]
 
 def import_val
 	[c_host::number] :Number

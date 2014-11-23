@@ -113,12 +113,9 @@ struct LoadRagel
 		pd = pdEl->value;
 	}
 
-	InlineItem *loadExprAny( c_inline::expr_any ExprAny )
-	{
-		string t = ExprAny.text();
-		InputLoc loc = ExprAny.loc();
-		return new InlineItem( loc, t, InlineItem::Text );
-	}
+	/*
+	 * Ruby Inline Loading.
+	 */
 
 	InlineItem *loadExprAny( ruby_inline::expr_any ExprAny )
 	{
@@ -127,14 +124,430 @@ struct LoadRagel
 		return new InlineItem( loc, t, InlineItem::Text );
 	}
 
-	InlineItem *loadExprSymbol( c_inline::expr_symbol ExprSymbol )
+	InlineItem *loadExprSymbol( ruby_inline::expr_symbol ExprSymbol )
 	{
 		string t = ExprSymbol.text();
 		InputLoc loc = ExprSymbol.loc();
 		return new InlineItem( loc, t, InlineItem::Text );
 	}
 
-	InlineItem *loadExprSymbol( ruby_inline::expr_symbol ExprSymbol )
+	NameRef *loadStateRefNames( ruby_inline::state_ref_names StateRefNames )
+	{
+		NameRef *nameRef = 0;
+		switch ( StateRefNames.prodName() ) {
+			case ruby_inline::state_ref_names::Rec:
+				nameRef = loadStateRefNames( StateRefNames._state_ref_names() );
+				nameRef->append( StateRefNames.word().text() );
+				break;
+			case ruby_inline::state_ref_names::Base:
+				nameRef = new NameRef;
+				nameRef->append( StateRefNames.word().text() );
+				break;
+		}
+		return nameRef;
+	}
+
+	NameRef *loadStateRef( ruby_inline::state_ref StateRef )
+	{
+		NameRef *nameRef = loadStateRefNames( StateRef.state_ref_names() );
+		if ( StateRef.opt_name_sep().prodName() == ruby_inline::opt_name_sep::ColonColon )
+			nameRef->prepend( "" );
+		return nameRef;
+	}
+
+	InlineItem *loadExprInterpret( ruby_inline::expr_interpret ExprInterpret )
+	{
+		InlineItem *inlineItem = 0;
+		InputLoc loc = ExprInterpret.loc();
+		switch ( ExprInterpret.prodName() ) {
+			case ruby_inline::expr_interpret::Fpc:
+				inlineItem = new InlineItem( loc, InlineItem::PChar );
+				break;
+			case ruby_inline::expr_interpret::Fc:
+				inlineItem = new InlineItem( loc, InlineItem::Char );
+				break;
+			case ruby_inline::expr_interpret::Fcurs:
+				inlineItem = new InlineItem( loc, InlineItem::Curs );
+				break;
+			case ruby_inline::expr_interpret::Ftargs:
+				inlineItem = new InlineItem( loc, InlineItem::Targs );
+				break;
+			case ruby_inline::expr_interpret::Fentry: {
+				NameRef *nameRef = loadStateRef( ExprInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Entry );
+				break;
+			}
+		}
+		return inlineItem;
+	}
+
+	InlineItem *loadExprItem( ruby_inline::expr_item ExprItem )
+	{
+		switch ( ExprItem.prodName() ) {
+			case ruby_inline::expr_item::ExprAny:
+				return loadExprAny( ExprItem.expr_any() );
+			case ruby_inline::expr_item::ExprSymbol:
+				return loadExprSymbol( ExprItem.expr_symbol() );
+			case ruby_inline::expr_item::ExprInterpret:
+				return loadExprInterpret( ExprItem.expr_interpret() );
+		}
+		return 0;
+	}
+
+	InlineItem *loadBlockSymbol( ruby_inline::block_symbol BlockSymbol )
+	{
+		string t = BlockSymbol.text();
+		InputLoc loc = BlockSymbol.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	InlineItem *loadBlockInterpret( ruby_inline::block_interpret BlockInterpret )
+	{
+		InlineItem *inlineItem = 0;
+		InputLoc loc = BlockInterpret.loc();
+		switch ( BlockInterpret.prodName() ) {
+			case ruby_inline::block_interpret::ExprInterpret:
+				inlineItem = loadExprInterpret( BlockInterpret.expr_interpret() );
+				break;
+			case ruby_inline::block_interpret::Fhold:
+				inlineItem = new InlineItem( loc, InlineItem::Hold );
+				break;
+			case ruby_inline::block_interpret::Fret:
+				inlineItem = new InlineItem( loc, InlineItem::Ret );
+				break;
+			case ruby_inline::block_interpret::Fnret:
+				inlineItem = new InlineItem( loc, InlineItem::Nret );
+				break;
+			case ruby_inline::block_interpret::Fbreak:
+				inlineItem = new InlineItem( loc, InlineItem::Break );
+				break;
+			case ruby_inline::block_interpret::Fnbreak:
+				inlineItem = new InlineItem( loc, InlineItem::Nbreak );
+				break;
+
+			case ruby_inline::block_interpret::FgotoExpr:
+				inlineItem = new InlineItem( loc, InlineItem::GotoExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ruby_inline::block_interpret::FnextExpr:
+				inlineItem = new InlineItem( loc, InlineItem::NextExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ruby_inline::block_interpret::FcallExpr:
+				inlineItem = new InlineItem( loc, InlineItem::CallExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ruby_inline::block_interpret::FncallExpr:
+				inlineItem = new InlineItem( loc, InlineItem::NcallExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ruby_inline::block_interpret::Fexec:
+				inlineItem = new InlineItem( loc, InlineItem::Exec );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ruby_inline::block_interpret::FgotoSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Goto );
+				break;
+			}
+			case ruby_inline::block_interpret::FnextSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Next );
+				break;
+			}
+			case ruby_inline::block_interpret::FcallSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Call );
+				break;
+			}
+			case ruby_inline::block_interpret::FncallSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Ncall );
+				break;
+			}
+		}
+		return inlineItem;
+	}
+
+	InlineList *loadInlineBlock( InlineList *inlineList, ruby_inline::inline_block RubyInlineBlock )
+	{
+		ruby_inline::_repeat_block_item BlockItemList = RubyInlineBlock._repeat_block_item();
+		while ( !BlockItemList.end() ) {
+			loadBlockItem( inlineList, BlockItemList.value() );
+			BlockItemList = BlockItemList.next();
+		}
+		return inlineList;
+	}
+
+	InlineList *loadInlineBlock( ruby_inline::inline_block RubyInlineBlock )
+	{
+		InlineList *inlineList = new InlineList;
+		return loadInlineBlock( inlineList, RubyInlineBlock );
+	}
+
+	void loadBlockItem( InlineList *inlineList, ruby_inline::block_item BlockItem )
+	{
+		switch ( BlockItem.prodName() ) {
+			case ruby_inline::block_item::ExprAny: {
+				InlineItem *inlineItem = loadExprAny( BlockItem.expr_any() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case ruby_inline::block_item::BlockSymbol: {
+				InlineItem *inlineItem = loadBlockSymbol( BlockItem.block_symbol() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case ruby_inline::block_item::BlockInterpret: {
+				InlineItem *inlineItem = loadBlockInterpret( BlockItem.block_interpret() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case ruby_inline::block_item::RecBlock:
+				InputLoc loc = BlockItem.loc();
+				inlineList->append( new InlineItem( loc, "{", InlineItem::Text ) );
+				loadInlineBlock( inlineList, BlockItem.inline_block() );
+				inlineList->append( new InlineItem( loc, "}", InlineItem::Text ) );
+				break;
+		}
+	}
+
+	InlineList *loadInlineExpr( ruby_inline::inline_expr InlineExpr )
+	{
+		InlineList *inlineList = new InlineList;
+		ruby_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
+		while ( !ExprItemList.end() ) {
+			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
+			inlineList->append( inlineItem );
+			ExprItemList = ExprItemList.next();
+		}
+		return inlineList;
+	}
+
+	/*
+	 * OCaml Inline Loading.
+	 */
+
+	InlineItem *loadExprAny( ocaml_inline::expr_any ExprAny )
+	{
+		string t = ExprAny.text();
+		InputLoc loc = ExprAny.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	InlineItem *loadExprSymbol( ocaml_inline::expr_symbol ExprSymbol )
+	{
+		string t = ExprSymbol.text();
+		InputLoc loc = ExprSymbol.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	NameRef *loadStateRefNames( ocaml_inline::state_ref_names StateRefNames )
+	{
+		NameRef *nameRef = 0;
+		switch ( StateRefNames.prodName() ) {
+			case ocaml_inline::state_ref_names::Rec:
+				nameRef = loadStateRefNames( StateRefNames._state_ref_names() );
+				nameRef->append( StateRefNames.word().text() );
+				break;
+			case ocaml_inline::state_ref_names::Base:
+				nameRef = new NameRef;
+				nameRef->append( StateRefNames.word().text() );
+				break;
+		}
+		return nameRef;
+	}
+
+	NameRef *loadStateRef( ocaml_inline::state_ref StateRef )
+	{
+		NameRef *nameRef = loadStateRefNames( StateRef.state_ref_names() );
+		if ( StateRef.opt_name_sep().prodName() == ocaml_inline::opt_name_sep::ColonColon )
+			nameRef->prepend( "" );
+		return nameRef;
+	}
+
+	InlineItem *loadExprInterpret( ocaml_inline::expr_interpret ExprInterpret )
+	{
+		InlineItem *inlineItem = 0;
+		InputLoc loc = ExprInterpret.loc();
+		switch ( ExprInterpret.prodName() ) {
+			case ocaml_inline::expr_interpret::Fpc:
+				inlineItem = new InlineItem( loc, InlineItem::PChar );
+				break;
+			case ocaml_inline::expr_interpret::Fc:
+				inlineItem = new InlineItem( loc, InlineItem::Char );
+				break;
+			case ocaml_inline::expr_interpret::Fcurs:
+				inlineItem = new InlineItem( loc, InlineItem::Curs );
+				break;
+			case ocaml_inline::expr_interpret::Ftargs:
+				inlineItem = new InlineItem( loc, InlineItem::Targs );
+				break;
+			case ocaml_inline::expr_interpret::Fentry: {
+				NameRef *nameRef = loadStateRef( ExprInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Entry );
+				break;
+			}
+		}
+		return inlineItem;
+	}
+
+	InlineItem *loadExprItem( ocaml_inline::expr_item ExprItem )
+	{
+		switch ( ExprItem.prodName() ) {
+			case ocaml_inline::expr_item::ExprAny:
+				return loadExprAny( ExprItem.expr_any() );
+			case ocaml_inline::expr_item::ExprSymbol:
+				return loadExprSymbol( ExprItem.expr_symbol() );
+			case ocaml_inline::expr_item::ExprInterpret:
+				return loadExprInterpret( ExprItem.expr_interpret() );
+		}
+		return 0;
+	}
+
+	InlineItem *loadBlockSymbol( ocaml_inline::block_symbol BlockSymbol )
+	{
+		string t = BlockSymbol.text();
+		InputLoc loc = BlockSymbol.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	InlineItem *loadBlockInterpret( ocaml_inline::block_interpret BlockInterpret )
+	{
+		InlineItem *inlineItem = 0;
+		InputLoc loc = BlockInterpret.loc();
+		switch ( BlockInterpret.prodName() ) {
+			case ocaml_inline::block_interpret::ExprInterpret:
+				inlineItem = loadExprInterpret( BlockInterpret.expr_interpret() );
+				break;
+			case ocaml_inline::block_interpret::Fhold:
+				inlineItem = new InlineItem( loc, InlineItem::Hold );
+				break;
+			case ocaml_inline::block_interpret::Fret:
+				inlineItem = new InlineItem( loc, InlineItem::Ret );
+				break;
+			case ocaml_inline::block_interpret::Fnret:
+				inlineItem = new InlineItem( loc, InlineItem::Nret );
+				break;
+			case ocaml_inline::block_interpret::Fbreak:
+				inlineItem = new InlineItem( loc, InlineItem::Break );
+				break;
+			case ocaml_inline::block_interpret::Fnbreak:
+				inlineItem = new InlineItem( loc, InlineItem::Nbreak );
+				break;
+
+			case ocaml_inline::block_interpret::FgotoExpr:
+				inlineItem = new InlineItem( loc, InlineItem::GotoExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ocaml_inline::block_interpret::FnextExpr:
+				inlineItem = new InlineItem( loc, InlineItem::NextExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ocaml_inline::block_interpret::FcallExpr:
+				inlineItem = new InlineItem( loc, InlineItem::CallExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ocaml_inline::block_interpret::FncallExpr:
+				inlineItem = new InlineItem( loc, InlineItem::NcallExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ocaml_inline::block_interpret::Fexec:
+				inlineItem = new InlineItem( loc, InlineItem::Exec );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case ocaml_inline::block_interpret::FgotoSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Goto );
+				break;
+			}
+			case ocaml_inline::block_interpret::FnextSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Next );
+				break;
+			}
+			case ocaml_inline::block_interpret::FcallSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Call );
+				break;
+			}
+			case ocaml_inline::block_interpret::FncallSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Ncall );
+				break;
+			}
+		}
+		return inlineItem;
+	}
+
+	InlineList *loadInlineBlock( InlineList *inlineList, ocaml_inline::inline_block OCamlInlineBlock )
+	{
+		ocaml_inline::_repeat_block_item BlockItemList = OCamlInlineBlock._repeat_block_item();
+		while ( !BlockItemList.end() ) {
+			loadBlockItem( inlineList, BlockItemList.value() );
+			BlockItemList = BlockItemList.next();
+		}
+		return inlineList;
+	}
+
+	InlineList *loadInlineBlock( ocaml_inline::inline_block OCamlInlineBlock )
+	{
+		InlineList *inlineList = new InlineList;
+		return loadInlineBlock( inlineList, OCamlInlineBlock );
+	}
+
+	void loadBlockItem( InlineList *inlineList, ocaml_inline::block_item BlockItem )
+	{
+		switch ( BlockItem.prodName() ) {
+			case ocaml_inline::block_item::ExprAny: {
+				InlineItem *inlineItem = loadExprAny( BlockItem.expr_any() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case ocaml_inline::block_item::BlockSymbol: {
+				InlineItem *inlineItem = loadBlockSymbol( BlockItem.block_symbol() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case ocaml_inline::block_item::BlockInterpret: {
+				InlineItem *inlineItem = loadBlockInterpret( BlockItem.block_interpret() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case ocaml_inline::block_item::RecBlock:
+				InputLoc loc = BlockItem.loc();
+				inlineList->append( new InlineItem( loc, "{", InlineItem::Text ) );
+				loadInlineBlock( inlineList, BlockItem.inline_block() );
+				inlineList->append( new InlineItem( loc, "}", InlineItem::Text ) );
+				break;
+		}
+	}
+
+	InlineList *loadInlineExpr( ocaml_inline::inline_expr InlineExpr )
+	{
+		InlineList *inlineList = new InlineList;
+		ocaml_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
+		while ( !ExprItemList.end() ) {
+			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
+			inlineList->append( inlineItem );
+			ExprItemList = ExprItemList.next();
+		}
+		return inlineList;
+	}
+
+
+	/*
+	 * C Inline Loading
+	 */
+
+	InlineItem *loadExprAny( c_inline::expr_any ExprAny )
+	{
+		string t = ExprAny.text();
+		InputLoc loc = ExprAny.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	InlineItem *loadExprSymbol( c_inline::expr_symbol ExprSymbol )
 	{
 		string t = ExprSymbol.text();
 		InputLoc loc = ExprSymbol.loc();
@@ -157,34 +570,10 @@ struct LoadRagel
 		return nameRef;
 	}
 
-	NameRef *loadStateRefNames( ruby_inline::state_ref_names StateRefNames )
-	{
-		NameRef *nameRef = 0;
-		switch ( StateRefNames.prodName() ) {
-			case ruby_inline::state_ref_names::Rec:
-				nameRef = loadStateRefNames( StateRefNames._state_ref_names() );
-				nameRef->append( StateRefNames.word().text() );
-				break;
-			case ruby_inline::state_ref_names::Base:
-				nameRef = new NameRef;
-				nameRef->append( StateRefNames.word().text() );
-				break;
-		}
-		return nameRef;
-	}
-
 	NameRef *loadStateRef( c_inline::state_ref StateRef )
 	{
 		NameRef *nameRef = loadStateRefNames( StateRef.state_ref_names() );
 		if ( StateRef.opt_name_sep().prodName() == c_inline::opt_name_sep::ColonColon )
-			nameRef->prepend( "" );
-		return nameRef;
-	}
-
-	NameRef *loadStateRef( ruby_inline::state_ref StateRef )
-	{
-		NameRef *nameRef = loadStateRefNames( StateRef.state_ref_names() );
-		if ( StateRef.opt_name_sep().prodName() == ruby_inline::opt_name_sep::ColonColon )
 			nameRef->prepend( "" );
 		return nameRef;
 	}
@@ -215,32 +604,6 @@ struct LoadRagel
 		return inlineItem;
 	}
 
-	InlineItem *loadExprInterpret( ruby_inline::expr_interpret ExprInterpret )
-	{
-		InlineItem *inlineItem = 0;
-		InputLoc loc = ExprInterpret.loc();
-		switch ( ExprInterpret.prodName() ) {
-			case ruby_inline::expr_interpret::Fpc:
-				inlineItem = new InlineItem( loc, InlineItem::PChar );
-				break;
-			case ruby_inline::expr_interpret::Fc:
-				inlineItem = new InlineItem( loc, InlineItem::Char );
-				break;
-			case ruby_inline::expr_interpret::Fcurs:
-				inlineItem = new InlineItem( loc, InlineItem::Curs );
-				break;
-			case ruby_inline::expr_interpret::Ftargs:
-				inlineItem = new InlineItem( loc, InlineItem::Targs );
-				break;
-			case ruby_inline::expr_interpret::Fentry: {
-				NameRef *nameRef = loadStateRef( ExprInterpret.state_ref() );
-				inlineItem = new InlineItem( loc, nameRef, InlineItem::Entry );
-				break;
-			}
-		}
-		return inlineItem;
-	}
-
 	InlineItem *loadExprItem( c_inline::expr_item ExprItem )
 	{
 		switch ( ExprItem.prodName() ) {
@@ -254,28 +617,8 @@ struct LoadRagel
 		return 0;
 	}
 
-	InlineItem *loadExprItem( ruby_inline::expr_item ExprItem )
-	{
-		switch ( ExprItem.prodName() ) {
-			case ruby_inline::expr_item::ExprAny:
-				return loadExprAny( ExprItem.expr_any() );
-			case ruby_inline::expr_item::ExprSymbol:
-				return loadExprSymbol( ExprItem.expr_symbol() );
-			case ruby_inline::expr_item::ExprInterpret:
-				return loadExprInterpret( ExprItem.expr_interpret() );
-		}
-		return 0;
-	}
-
 
 	InlineItem *loadBlockSymbol( c_inline::block_symbol BlockSymbol )
-	{
-		string t = BlockSymbol.text();
-		InputLoc loc = BlockSymbol.loc();
-		return new InlineItem( loc, t, InlineItem::Text );
-	}
-
-	InlineItem *loadBlockSymbol( ruby_inline::block_symbol BlockSymbol )
 	{
 		string t = BlockSymbol.text();
 		InputLoc loc = BlockSymbol.loc();
@@ -350,87 +693,9 @@ struct LoadRagel
 		return inlineItem;
 	}
 
-	InlineItem *loadBlockInterpret( ruby_inline::block_interpret BlockInterpret )
-	{
-		InlineItem *inlineItem = 0;
-		InputLoc loc = BlockInterpret.loc();
-		switch ( BlockInterpret.prodName() ) {
-			case ruby_inline::block_interpret::ExprInterpret:
-				inlineItem = loadExprInterpret( BlockInterpret.expr_interpret() );
-				break;
-			case ruby_inline::block_interpret::Fhold:
-				inlineItem = new InlineItem( loc, InlineItem::Hold );
-				break;
-			case ruby_inline::block_interpret::Fret:
-				inlineItem = new InlineItem( loc, InlineItem::Ret );
-				break;
-			case ruby_inline::block_interpret::Fnret:
-				inlineItem = new InlineItem( loc, InlineItem::Nret );
-				break;
-			case ruby_inline::block_interpret::Fbreak:
-				inlineItem = new InlineItem( loc, InlineItem::Break );
-				break;
-			case ruby_inline::block_interpret::Fnbreak:
-				inlineItem = new InlineItem( loc, InlineItem::Nbreak );
-				break;
-
-			case ruby_inline::block_interpret::FgotoExpr:
-				inlineItem = new InlineItem( loc, InlineItem::GotoExpr );
-				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
-				break;
-			case ruby_inline::block_interpret::FnextExpr:
-				inlineItem = new InlineItem( loc, InlineItem::NextExpr );
-				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
-				break;
-			case ruby_inline::block_interpret::FcallExpr:
-				inlineItem = new InlineItem( loc, InlineItem::CallExpr );
-				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
-				break;
-			case ruby_inline::block_interpret::FncallExpr:
-				inlineItem = new InlineItem( loc, InlineItem::NcallExpr );
-				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
-				break;
-			case ruby_inline::block_interpret::Fexec:
-				inlineItem = new InlineItem( loc, InlineItem::Exec );
-				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
-				break;
-			case ruby_inline::block_interpret::FgotoSr: {
-				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
-				inlineItem = new InlineItem( loc, nameRef, InlineItem::Goto );
-				break;
-			}
-			case ruby_inline::block_interpret::FnextSr: {
-				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
-				inlineItem = new InlineItem( loc, nameRef, InlineItem::Next );
-				break;
-			}
-			case ruby_inline::block_interpret::FcallSr: {
-				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
-				inlineItem = new InlineItem( loc, nameRef, InlineItem::Call );
-				break;
-			}
-			case ruby_inline::block_interpret::FncallSr: {
-				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
-				inlineItem = new InlineItem( loc, nameRef, InlineItem::Ncall );
-				break;
-			}
-		}
-		return inlineItem;
-	}
-
 	InlineList *loadInlineBlock( InlineList *inlineList, c_inline::inline_block InlineBlock )
 	{
 		c_inline::_repeat_block_item BlockItemList = InlineBlock._repeat_block_item();
-		while ( !BlockItemList.end() ) {
-			loadBlockItem( inlineList, BlockItemList.value() );
-			BlockItemList = BlockItemList.next();
-		}
-		return inlineList;
-	}
-
-	InlineList *loadInlineBlock( InlineList *inlineList, ruby_inline::r_inline_block RubyInlineBlock )
-	{
-		ruby_inline::_repeat_block_item BlockItemList = RubyInlineBlock._repeat_block_item();
 		while ( !BlockItemList.end() ) {
 			loadBlockItem( inlineList, BlockItemList.value() );
 			BlockItemList = BlockItemList.next();
@@ -442,12 +707,6 @@ struct LoadRagel
 	{
 		InlineList *inlineList = new InlineList;
 		return loadInlineBlock( inlineList, InlineBlock );
-	}
-
-	InlineList *loadInlineBlock( ruby_inline::r_inline_block RubyInlineBlock )
-	{
-		InlineList *inlineList = new InlineList;
-		return loadInlineBlock( inlineList, RubyInlineBlock );
 	}
 
 	void loadBlockItem( InlineList *inlineList, c_inline::block_item BlockItem )
@@ -477,32 +736,6 @@ struct LoadRagel
 		}
 	}
 
-	void loadBlockItem( InlineList *inlineList, ruby_inline::block_item BlockItem )
-	{
-		switch ( BlockItem.prodName() ) {
-			case ruby_inline::block_item::ExprAny: {
-				InlineItem *inlineItem = loadExprAny( BlockItem.expr_any() );
-				inlineList->append( inlineItem );
-				break;
-			}
-			case ruby_inline::block_item::BlockSymbol: {
-				InlineItem *inlineItem = loadBlockSymbol( BlockItem.block_symbol() );
-				inlineList->append( inlineItem );
-				break;
-			}
-			case ruby_inline::block_item::BlockInterpret: {
-				InlineItem *inlineItem = loadBlockInterpret( BlockItem.block_interpret() );
-				inlineList->append( inlineItem );
-				break;
-			}
-			case ruby_inline::block_item::RecBlock:
-				InputLoc loc = BlockItem.loc();
-				inlineList->append( new InlineItem( loc, "{", InlineItem::Text ) );
-				loadInlineBlock( inlineList, BlockItem.r_inline_block() );
-				inlineList->append( new InlineItem( loc, "}", InlineItem::Text ) );
-				break;
-		}
-	}
 
 	InlineList *loadInlineExpr( c_inline::inline_expr InlineExpr )
 	{
@@ -516,26 +749,20 @@ struct LoadRagel
 		return inlineList;
 	}
 
-	InlineList *loadInlineExpr( ruby_inline::inline_expr InlineExpr )
-	{
-		InlineList *inlineList = new InlineList;
-		ruby_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
-		while ( !ExprItemList.end() ) {
-			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
-			inlineList->append( inlineItem );
-			ExprItemList = ExprItemList.next();
-		}
-		return inlineList;
-	}
+	/*
+	 * End Inline Loading
+	 */
 
 	Action *loadActionBlock( string name, ragel::action_block ActionBlock )
 	{
 		InputLoc loc = ActionBlock.loc();
 		InlineList *inlineList;
-		if ( ActionBlock.CInlineBlock() )
-			inlineList = loadInlineBlock( ActionBlock.CInlineBlock() );
-		else
+		if ( ActionBlock.RubyInlineBlock() )
 			inlineList = loadInlineBlock( ActionBlock.RubyInlineBlock() );
+		else if ( ActionBlock.OCamlInlineBlock() )
+			inlineList = loadInlineBlock( ActionBlock.OCamlInlineBlock() );
+		else
+			inlineList = loadInlineBlock( ActionBlock.CInlineBlock() );
 
 		/* Add the action to the list of actions. */
 		Action *newAction = new Action( loc, name, 
@@ -572,10 +799,12 @@ struct LoadRagel
 			error(loc) << "pre_push code already defined" << endl;
 		}
 
-		if ( PrePushBlock.CInlineBlock() )
-			pd->prePushExpr = loadInlineBlock( PrePushBlock.CInlineBlock() );
-		else
+		if ( PrePushBlock.RubyInlineBlock() )
 			pd->prePushExpr = loadInlineBlock( PrePushBlock.RubyInlineBlock() );
+		else if ( PrePushBlock.OCamlInlineBlock() )
+			pd->prePushExpr = loadInlineBlock( PrePushBlock.OCamlInlineBlock() );
+		else
+			pd->prePushExpr = loadInlineBlock( PrePushBlock.CInlineBlock() );
 	}
 
 	void loadPostPop( ragel::action_block PostPopBlock )
@@ -587,10 +816,12 @@ struct LoadRagel
 			error(loc) << "post_pop code already defined" << endl;
 		}
 
-		if ( PostPopBlock.CInlineBlock() )
-			pd->postPopExpr = loadInlineBlock( PostPopBlock.CInlineBlock() );
-		else
+		if ( PostPopBlock.RubyInlineBlock() )
 			pd->postPopExpr = loadInlineBlock( PostPopBlock.RubyInlineBlock() );
+		else if ( PostPopBlock.OCamlInlineBlock() )
+			pd->postPopExpr = loadInlineBlock( PostPopBlock.OCamlInlineBlock() );
+		else
+			pd->postPopExpr = loadInlineBlock( PostPopBlock.CInlineBlock() );
 	}
 
 	void tryMachineDef( InputLoc &loc, std::string name, 
@@ -926,10 +1157,12 @@ struct LoadRagel
 			}
 			case ragel::action_ref::Block: {
 				InlineList *inlineList;
-				if ( ActionRef.action_block().CInlineBlock() )
-					inlineList = loadInlineBlock( ActionRef.action_block().CInlineBlock() );
-				else
+				if ( ActionRef.action_block().RubyInlineBlock() )
 					inlineList = loadInlineBlock( ActionRef.action_block().RubyInlineBlock() );
+				else if ( ActionRef.action_block().OCamlInlineBlock() )
+					inlineList = loadInlineBlock( ActionRef.action_block().OCamlInlineBlock() );
+				else
+					inlineList = loadInlineBlock( ActionRef.action_block().CInlineBlock() );
 
 				/* Create the action, add it to the list and pass up. */
 				Action *action = new Action( loc, std::string(), inlineList, pd->nextCondId++ );
@@ -1912,6 +2145,36 @@ struct LoadRagel
 		}
 	}
 
+	void loadSection( ocaml_host::section Section, const char *targetMachine,
+			const char *searchMachine )
+	{
+		switch ( Section.prodName() ) {
+			case ocaml_host::section::MultiLine:
+				loadStmtList( Section.ragel_start()._repeat_statement(),
+						targetMachine, searchMachine );
+				break;
+
+			case ocaml_host::section::Tok:
+				if ( id.inputItems.tail->type != InputItem::HostData ) {
+					/* Make the first input item. */
+					InputItem *inputItem = new InputItem;
+					inputItem->type = InputItem::HostData;
+					inputItem->loc = Section.loc();
+					id.inputItems.append( inputItem );
+				}
+
+				/* If no errors and we are at the bottom of the include stack (the
+				 * source file listed on the command line) then write out the data. */
+				if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 ) {
+					string text = Section.tok().text();
+					id.inputItems.tail->data << text;
+				}
+
+				break;
+		}
+	}
+
+
 	void load( start Start, const char *targetMachine, const char *searchMachine )
 	{
 		InputLoc loc;
@@ -1924,12 +2187,21 @@ struct LoadRagel
 				SectionList = SectionList.next();
 			}
 		}
-		else {
+		else if ( Start.RSectionList() ) {
 			ruby_host::_repeat_section RSectionList = Start.RSectionList();
 			if ( RSectionList ) {
 				while ( !RSectionList.end() ) {
 					loadSection( RSectionList.value(), targetMachine, searchMachine );
 					RSectionList = RSectionList.next();
+				}
+			}
+		}
+		else {
+			ocaml_host::_repeat_section OSectionList = Start.OSectionList();
+			if ( OSectionList ) {
+				while ( !OSectionList.end() ) {
+					loadSection( OSectionList.value(), targetMachine, searchMachine );
+					OSectionList = OSectionList.next();
 				}
 			}
 		}
