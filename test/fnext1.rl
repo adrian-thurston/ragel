@@ -1,6 +1,5 @@
 /*
  * @LANG: c
- * @PROHIBIT_GENFLAGS: -B0
  *
  * Tests fnext in combination with fbreak.
  */

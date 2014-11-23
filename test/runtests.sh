@@ -162,6 +162,10 @@ for test_case; do
 		exit 1;
 	fi
 
+	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
+	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
+	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
+
 	case $lang in
 		c++)
 			lang_opt=-C;
@@ -230,7 +234,8 @@ for test_case; do
 					ruby) lf="-R" ;;
 				esac
 
-				echo "$langflags" | grep -e $lf >/dev/null || continue
+				echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
+				echo "$langflags" | grep -qe $lf || continue
 
 				targ=${root}_$lang.rl
 				echo "./trans $lang $targ $test_case $lang ${root}_${lang}"
@@ -262,9 +267,6 @@ for test_case; do
 
 	additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
 	[ -n "$additional_cflags" ] && flags="$flags $additional_cflags"
-
-	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
-	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
 
 	case $lang in
 	csharp) prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags";;

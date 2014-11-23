@@ -1,6 +1,6 @@
 /*
  * @LANG: indep
- * @PROHIBIT_GENFLAGS: -B0
+ * @PROHIBIT_LANGUAGES: ruby
  * @NEEDS_EOF: yes
  */
 

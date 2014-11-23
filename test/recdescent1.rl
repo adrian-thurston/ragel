@@ -1,6 +1,6 @@
 /*
  * @LANG: c
- * @PROHIBIT_GENFLAGS: -B0
+ *
  * Test growable stack.
  */
 

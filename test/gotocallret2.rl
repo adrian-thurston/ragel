@@ -1,7 +1,7 @@
 /*
  * @LANG: indep
  * @NEEDS_EOF: yes
- * @PROHIBIT_GENFLAGS: -B0
+ * @PROHIBIT_LANGUAGES: ruby
  */
 
 char comm;
