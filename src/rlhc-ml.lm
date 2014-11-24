@@ -7,7 +7,7 @@ void ml_tok_list( TL: host::tok* )
 			send Output
 				"begin
 				"[ml_stmt_list( StmtList )]
-				"end
+				"end;
 		elsif match Tok [host::`={ Expr: expr host::`}=]
 			send Output "([ml_expr( Expr )])"
 		else {
@@ -330,7 +330,9 @@ void ml_stmt( Stmt: stmt )
 				"	[ml_stmt(ElseStmt)]
 				"end
 		}
-		send Output ";"
+
+		send Output
+			";"
 	}
 	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
 		send Output
