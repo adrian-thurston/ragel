@@ -149,6 +149,8 @@ int rw_ocaml_if_stmt( IfStmt: indep::if_stmt )
 			"	[rw_ocaml_stmt_list( IfStmt.opt_else._repeat_stmt )]
 			"end
 	}
+	send Out
+		";
 }
 
 int rw_ocaml_print_stmt( Stmt: indep::print_stmt )
