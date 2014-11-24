@@ -714,7 +714,7 @@ void Binary::TARGS( ostream &ret, bool inFinish, int targState )
 
 void Binary::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << vCS() << " = " << nextDest << ";";
+	ret << "${ " << vCS() << " = " << nextDest << "; }$";
 }
 
 void Binary::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )

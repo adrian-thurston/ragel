@@ -20,6 +20,7 @@
 /*_ruby.rl
 /*_cs.rl
 /*_go.rl
+/*_ocaml.rl
 /cur-tests
 /.deps
 /ragel-parse

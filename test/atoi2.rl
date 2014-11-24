@@ -3,17 +3,17 @@
  * This implementes an atoi machine using the statechart paradigm.
  */
 bool neg;
-int val;
+int value;
 
-val = 0;
+value = 0;
 neg = false;
 
 %%{
-	machine StateChart;
+	machine state_chart;
 
 	action begin {
 		neg = false;
-		val = 0;
+		value = 0;
 	}
 
 	action see_neg {
@@ -21,12 +21,12 @@ neg = false;
 	}
 
 	action add_digit { 
-		val = val * 10 + <int>(fc - 48);
+		value = value * 10 + <int>(fc - 48);
 	}
 
 	action finish {
 		if ( neg != 0 ) {
-			val = -1 * val;
+			value = -1 * value;
 		}
 	}
 
@@ -49,7 +49,7 @@ neg = false;
 		)
 	) >begin %finish;
 
-	action oneof { print_int val; print_str "\n"; }
+	action oneof { print_int value; print_str "\n"; }
 	main := ( atoi '\n' @oneof )*;
 }%%
 

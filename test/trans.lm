@@ -190,6 +190,7 @@ include 'trans-cs.lm'
 include 'trans-go.lm'
 include 'trans-java.lm'
 include 'trans-ruby.lm'
+include 'trans-ocaml.lm'
 
 Lang: str = argv->pop()
 OutputFile: str = argv->pop()
@@ -235,6 +236,8 @@ elsif ( Lang == 'java' )
 	rw_java( Output )
 elsif ( Lang == 'ruby' )
 	rw_ruby( Output )
+elsif ( Lang == 'ocaml' )
+	rw_ocaml( Output )
 else {
 	print( 'trans: unrecognized language: ' Lang '\n' )
 }

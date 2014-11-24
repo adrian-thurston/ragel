@@ -53,7 +53,7 @@ void ml_expr_factor( ExprFactor: expr_factor )
 	}
 	case [I: ident `[ TL: expr `]]
 	{
-		if ( StaticVarMap->find( $I ) ) {
+		if ( StaticVarMap->find( $I ) || $I == 'stack' ) {
 			send Output
 				"[ ExprFactor.ident ].([ ml_expr( TL ) ])"
 		}
@@ -362,7 +362,7 @@ void ml_stmt( Stmt: stmt )
 				[`default `{ Inner: stmt* `}]
 			{
 				send Output
-					"else [ml_expr(SwitchExpr)] = [ml_expr(E1)] then
+					"else
 					"begin
 					"	[ml_stmt_list(Inner)]
 					"end
@@ -447,8 +447,13 @@ void ml_stmt( Stmt: stmt )
 		switch AS.assign_op 
 		case [`=]
 		{
-			send Output
-				"[ml_lvalue(AS.LValue)] := [ml_expr(AS.expr)];
+			if match AS.LValue "stack\[[expr]\]" {
+				send Output "Array.set stack top.contents [ml_expr(AS.expr)];"
+			}
+			else {
+				send Output
+					"[ml_lvalue(AS.LValue)] := [ml_expr(AS.expr)];
+			}
 		}
 		case [`+=]
 		{

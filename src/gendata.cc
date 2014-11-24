@@ -184,7 +184,7 @@ void CodeGenData::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 void CodeGenData::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 {
 	makeSetTokend( outList, 0 );
-	outList->append( new GenInlineItem( InputLoc(), GenInlineItem::Hold ) );
+	outList->append( new GenInlineItem( InputLoc(), GenInlineItem::LmHold ) );
 
 	if ( item->longestMatchPart->action != 0 ) {
 		makeSubList( outList, 

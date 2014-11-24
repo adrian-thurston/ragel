@@ -9,7 +9,7 @@ int stack[32];
 ptr ts;
 ptr te;
 int act;
-int val;
+int value;
 
 %%{
 	machine patact;

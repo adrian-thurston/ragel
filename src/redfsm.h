@@ -46,7 +46,7 @@ struct GenInlineItem
 		LmSwitch, LmExec, LmSetActId, LmSetTokEnd, LmGetTokEnd,
 		LmInitAct, LmInitTokStart, LmSetTokStart,
 		HostStmt, HostExpr, HostText,
-		GenStmt, GenExpr, LmCase
+		GenStmt, GenExpr, LmCase, LmHold
 	};
 
 	GenInlineItem( const InputLoc &loc, Type type ) : 

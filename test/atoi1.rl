@@ -2,16 +2,16 @@
  * @LANG: indep
  */
 bool neg;
-int val;
+int value;
 
-val = 0;
+value = 0;
 neg = false;
 %%{
-	machine AtoI;
+	machine atoi;
 
 	action begin {
 		neg = false;
-		val = 0;
+		value = 0;
 	}
 
 	action see_neg {
@@ -19,16 +19,16 @@ neg = false;
 	}
 
 	action add_digit { 
-		val = val * 10 + <int>(fc - 48);
+		value = value * 10 + <int>(fc - 48);
 	}
 
 	action finish {
 		if ( neg != 0 ) {
-			val = -1 * val;
+			value = -1 * value;
 		}
 	}
 	action print {
-		print_int val;
+		print_int value;
 		print_str "\n";
 	}
 

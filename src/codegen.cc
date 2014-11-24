@@ -580,7 +580,10 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			ret << "={" << GET_KEY() << "}=";
 			break;
 		case GenInlineItem::Hold:
-			ret << P() << "-= 1;";
+			ret << "${ " << P() << " = " << P() << " - 1; }$";
+			break;
+		case GenInlineItem::LmHold:
+			ret << P() << " = " << P() << " - 1;";
 			break;
 		case GenInlineItem::Exec:
 			EXEC( ret, item, targState, inFinish );

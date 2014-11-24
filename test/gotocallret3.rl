@@ -17,7 +17,7 @@ int top;
 int stack[32];
 
 %%{
-	machine GotoCallRet;
+	machine gotocallret;
 
 	# A reference to a state in an unused action caused a segfault in 5.8. */
 	action unusedAction { fentry(garble_line); }

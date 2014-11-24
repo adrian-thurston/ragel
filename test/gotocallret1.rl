@@ -1,6 +1,6 @@
 /*
  * @LANG: indep
- * @PROHIBIT_LANGUAGES: ruby
+ * @PROHIBIT_LANGUAGES: ruby ocaml
  * @NEEDS_EOF: yes
  */
 
