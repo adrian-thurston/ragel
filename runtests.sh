@@ -224,7 +224,7 @@ for test_case; do
 		indep)
 			lang_opt="";
 
-			for lang in c d cs go java ruby; do
+			for lang in c d cs go java ruby ocaml; do
 				case $lang in 
 					c) lf="-C" ;;
 					d) lf="-D" ;;
@@ -232,6 +232,7 @@ for test_case; do
 					go) lf="-Z" ;;
 					java) lf="-J" ;;
 					ruby) lf="-R" ;;
+					ocaml) lf="-O" ;;
 				esac
 
 				echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;

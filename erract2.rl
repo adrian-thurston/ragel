@@ -6,7 +6,7 @@
  */
 
 %%{
-	machine ErrAct;
+	machine erract;
 
 	action err_start { print_str "err_start\n"; }
 	action err_all { print_str "err_all\n"; }

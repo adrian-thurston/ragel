@@ -1,7 +1,7 @@
 /*
  * @LANG: indep
  * @NEEDS_EOF: yes
- * @PROHIBIT_LANGUAGES: ruby
+ * @PROHIBIT_LANGUAGES: ruby ocaml
  */
 
 char comm;
