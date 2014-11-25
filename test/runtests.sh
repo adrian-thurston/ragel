@@ -217,7 +217,7 @@ for test_case; do
 		;;
         ocaml)
 			lang_opt="-O"
-			code_suffix=ocaml
+			code_suffix=ml
 			compiler=$ocaml_compiler
 			flags=""
 		;;
