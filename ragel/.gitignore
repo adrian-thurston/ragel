@@ -12,3 +12,5 @@
 /.deps
 /stamp-h1
 /*.o
+/tmp.rl
+/tmp.c
