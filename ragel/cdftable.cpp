@@ -191,10 +191,7 @@ void FTabCodeGen::writeData()
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
 		COND_KEYS();
-		CLOSE_ARRAY() <<
-		"\n";
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
 		COND_SPACES();

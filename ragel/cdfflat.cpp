@@ -152,10 +152,7 @@ std::ostream &FFlatCodeGen::ACTION_SWITCH()
 void FFlatCodeGen::writeData()
 {
 	if ( redFsm->anyConditions() ) {
-		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
 		COND_KEYS();
-		CLOSE_ARRAY() <<
-		"\n";
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpan), CSP() );
 		COND_KEY_SPANS();

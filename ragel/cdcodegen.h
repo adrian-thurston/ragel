@@ -72,6 +72,8 @@ struct TableArray
 	void VAL( unsigned short us )      { out << us; }
 	void VAL( unsigned char uc )       { out << uc; }
 
+	void KEY( Key key );
+
 	const char *name;
 	FsmCodeGen &codeGen;
 	ostream &out;

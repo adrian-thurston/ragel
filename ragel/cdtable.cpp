@@ -353,6 +353,8 @@ std::ostream &TabCodeGen::EOF_TRANS()
 
 std::ostream &TabCodeGen::COND_KEYS()
 {
+	OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
+
 	out << '\t';
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -373,6 +375,10 @@ std::ostream &TabCodeGen::COND_KEYS()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	out << 0 << "\n";
+
+	CLOSE_ARRAY() <<
+	"\n";
+
 	return out;
 }
 
@@ -766,10 +772,7 @@ void TabCodeGen::writeData()
 		CLOSE_ARRAY() <<
 		"\n";
 
-		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
 		COND_KEYS();
-		CLOSE_ARRAY() <<
-		"\n";
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
 		COND_SPACES();

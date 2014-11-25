@@ -255,19 +255,27 @@ std::ostream &FlatCodeGen::EOF_TRANS()
 
 std::ostream &FlatCodeGen::COND_KEYS()
 {
+	OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
+
 	out << '\t';
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit just cond low key and cond high key. */
-		out << KEY( st->condLowKey ) << ", ";
-		out << KEY( st->condHighKey ) << ", ";
+		taCK.KEY( st->condLowKey );
+		out << ", ";
+		taCK.KEY( st->condHighKey );
+		out << ", ";
 		if ( ++totalTrans % IALL == 0 )
 			out << "\n\t";
 	}
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taCK.KEY ( 0 );
+	out << "\n";
+
+	CLOSE_ARRAY() <<
+	"\n";
 	return out;
 }
 
@@ -545,10 +553,7 @@ void FlatCodeGen::writeData()
 		ACTIONS_ARRAY();
 
 	if ( redFsm->anyConditions() ) {
-		OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
 		COND_KEYS();
-		CLOSE_ARRAY() <<
-		"\n";
 
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpan), CSP() );
 		COND_KEY_SPANS();

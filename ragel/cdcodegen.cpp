@@ -87,6 +87,14 @@ void TableArray::OPEN( string type )
 	codeGen.OPEN_ARRAY( type, ref() );
 }
 
+void TableArray::KEY( Key key )
+{
+	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
+		out << key.getVal();
+	else
+		out << (unsigned long) key.getVal() << 'u';
+}
+
 void TableArray::CLOSE()
 {
 	codeGen.CLOSE_ARRAY();
