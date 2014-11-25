@@ -626,12 +626,8 @@ void GotoCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 
 void GotoCodeGen::writeData()
 {
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
+	if ( redFsm->anyActions() )
 		ACTIONS_ARRAY();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
 	if ( redFsm->anyToStateActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );

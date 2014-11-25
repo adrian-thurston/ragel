@@ -53,9 +53,12 @@ string itoa( int i );
 
 struct TableArray
 {
-	TableArray( const char *name, const FsmCodeGen &codeGen );
+	TableArray( const char *name, FsmCodeGen &codeGen );
 
 	std::string ref();
+
+	void OPEN( string type );
+	void CLOSE();
 
 	void VAL( long long ll ) { out << ll; }
 	void VAL( long l )       { out << l; }
@@ -70,7 +73,7 @@ struct TableArray
 	void VAL( unsigned char uc )       { out << uc; }
 
 	const char *name;
-	const FsmCodeGen &codeGen;
+	FsmCodeGen &codeGen;
 	ostream &out;
 };
 
@@ -92,7 +95,7 @@ public:
 protected:
 	friend TableArray;
 
-	string FSM_NAME() const;
+	string FSM_NAME();
 	string START_STATE_ID();
 	ostream &ACTIONS_ARRAY();
 	string GET_WIDE_KEY();
@@ -131,7 +134,7 @@ protected:
 	string TOKEND();
 	string ACT();
 
-	string DATA_PREFIX() const;
+	string DATA_PREFIX();
 	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }
 	string C() { return "_" + DATA_PREFIX() + "cond_spaces"; }
 	string CK() { return "_" + DATA_PREFIX() + "cond_keys"; }

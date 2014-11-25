@@ -752,12 +752,8 @@ void TabCodeGen::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActArrItem), A() );
+	if ( redFsm->anyActions() )
 		ACTIONS_ARRAY();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
 	if ( redFsm->anyConditions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );

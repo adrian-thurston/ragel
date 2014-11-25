@@ -69,7 +69,7 @@ void cdLineDirective( ostream &out, const char *fileName, int line )
 	out << '\n';
 }
 
-TableArray::TableArray( const char *name, const FsmCodeGen &codeGen )
+TableArray::TableArray( const char *name, FsmCodeGen &codeGen )
 :
 	name(name),
 	codeGen(codeGen),
@@ -80,6 +80,16 @@ TableArray::TableArray( const char *name, const FsmCodeGen &codeGen )
 std::string TableArray::ref()
 {
 	return std::string("_") + codeGen.DATA_PREFIX() + name;
+}
+
+void TableArray::OPEN( string type )
+{
+	codeGen.OPEN_ARRAY( type, ref() );
+}
+
+void TableArray::CLOSE()
+{
+	codeGen.CLOSE_ARRAY();
 }
 
 void FsmCodeGen::genLineDirective( ostream &out )
@@ -136,7 +146,7 @@ string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
 
 
 /* Write out the fsm name. */
-string FsmCodeGen::FSM_NAME() const
+string FsmCodeGen::FSM_NAME()
 {
 	return fsmName;
 }
@@ -152,17 +162,23 @@ string FsmCodeGen::START_STATE_ID()
 /* Write out the array of actions. */
 std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 {
-	out << "\t0, ";
+	taA.OPEN( ARRAY_TYPE(redFsm->maxActArrItem) );
+
+	out << "\t";
+	taA.VAL( 0 );
+	out << ", ";
 	int totalActions = 1;
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
-		out << act->key.length() << ", ";
+		taA.VAL( act->key.length() );
+		out << ", ";
+
 		/* Put in a line break every 8 */
 		if ( totalActions++ % 8 == 7 )
 			out << "\n\t";
 
 		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
-			out << item->value->actionId;
+			taA.VAL( item->value->actionId );
 			if ( ! (act.last() && item.last()) )
 				out << ", ";
 
@@ -171,7 +187,12 @@ std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 				out << "\n\t";
 		}
 	}
+
 	out << "\n";
+
+	taA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
@@ -633,7 +654,7 @@ void FsmCodeGen::writeInit()
 	out << "	}\n";
 }
 
-string FsmCodeGen::DATA_PREFIX() const
+string FsmCodeGen::DATA_PREFIX()
 {
 	if ( !noPrefix )
 		return FSM_NAME() + "_";
