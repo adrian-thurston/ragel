@@ -47,8 +47,32 @@ struct GenInlineList;
 struct RedAction;
 struct LongestMatch;
 struct LongestMatchPart;
+struct FsmCodeGen;
 
 string itoa( int i );
+
+struct TableArray
+{
+	TableArray( const char *name, const FsmCodeGen &codeGen );
+
+	std::string ref();
+
+	void VAL( long long ll ) { out << ll; }
+	void VAL( long l )       { out << l; }
+	void VAL( int i )        { out << i; }
+	void VAL( short s )      { out << s; }
+	void VAL( char c )       { out << c; }
+
+	void VAL( unsigned long long ull ) { out << ull; }
+	void VAL( unsigned long ul )       { out << ul; }
+	void VAL( unsigned int ui )        { out << ui; }
+	void VAL( unsigned short us )      { out << us; }
+	void VAL( unsigned char uc )       { out << uc; }
+
+	const char *name;
+	const FsmCodeGen &codeGen;
+	ostream &out;
+};
 
 /*
  * class FsmCodeGen
@@ -66,7 +90,9 @@ public:
 	virtual void writeError();
 
 protected:
-	string FSM_NAME();
+	friend TableArray;
+
+	string FSM_NAME() const;
 	string START_STATE_ID();
 	ostream &ACTIONS_ARRAY();
 	string GET_WIDE_KEY();
@@ -105,7 +131,7 @@ protected:
 	string TOKEND();
 	string ACT();
 
-	string DATA_PREFIX();
+	string DATA_PREFIX() const;
 	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }
 	string C() { return "_" + DATA_PREFIX() + "cond_spaces"; }
 	string CK() { return "_" + DATA_PREFIX() + "cond_keys"; }
@@ -130,6 +156,22 @@ protected:
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 	string CTXDATA() { return DATA_PREFIX() + "ctxdata"; }
+
+	TableArray taA;
+	TableArray taCK;
+	TableArray taCSP;
+	TableArray taC;
+	TableArray taCO;
+	TableArray taK;
+	TableArray taSP;
+	TableArray taIO;
+	TableArray taI;
+	TableArray taTT;
+	TableArray taTA;
+	TableArray taTSA;
+	TableArray taFSA;
+	TableArray taEA;
+	TableArray taET;
 
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );

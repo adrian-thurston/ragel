@@ -69,6 +69,19 @@ void cdLineDirective( ostream &out, const char *fileName, int line )
 	out << '\n';
 }
 
+TableArray::TableArray( const char *name, const FsmCodeGen &codeGen )
+:
+	name(name),
+	codeGen(codeGen),
+	out(codeGen.out)
+{
+}
+
+std::string TableArray::ref()
+{
+	return std::string("_") + codeGen.DATA_PREFIX() + name;
+}
+
 void FsmCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
@@ -76,11 +89,26 @@ void FsmCodeGen::genLineDirective( ostream &out )
 	cdLineDirective( out, filter->fileName, filter->line + 1 );
 }
 
-
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( ostream &out )
 :
-	CodeGenData(out)
+	CodeGenData( out ),
+
+	taA(    "actions",              *this ),
+	taCK(   "cond_keys",            *this ),
+	taCSP(  "cond_key_spans",       *this ),
+	taC(    "cond_spaces",          *this ),
+	taCO(   "cond_offsets",         *this ),
+	taK(    "trans_keys",           *this ),
+	taSP(   "key_spans",            *this ),
+	taIO(   "index_offsets",        *this ),
+	taI(    "indicies",             *this ),
+	taTT(   "trans_targs",          *this ),
+	taTA(   "trans_actions",        *this ),
+	taTSA(  "to_state_actions",     *this ),
+	taFSA(  "from_state_actions",   *this ),
+	taEA(   "eof_actions",          *this ),
+	taET(   "eof_trans",            *this )
 {
 }
 
@@ -108,7 +136,7 @@ string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
 
 
 /* Write out the fsm name. */
-string FsmCodeGen::FSM_NAME()
+string FsmCodeGen::FSM_NAME() const
 {
 	return fsmName;
 }
@@ -605,7 +633,7 @@ void FsmCodeGen::writeInit()
 	out << "	}\n";
 }
 
-string FsmCodeGen::DATA_PREFIX()
+string FsmCodeGen::DATA_PREFIX() const
 {
 	if ( !noPrefix )
 		return FSM_NAME() + "_";
