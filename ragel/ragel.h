@@ -116,5 +116,6 @@ extern CodeStyle codeStyle;
 
 extern int numSplitPartitions;
 extern bool noLineDirectives;
+extern bool stringTables;
 
 #endif

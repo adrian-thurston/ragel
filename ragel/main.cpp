@@ -91,6 +91,9 @@ bool displayPrintables = false;
 /* Target ruby impl */
 RubyImplEnum rubyImpl = MRI;
 
+/* Use strings to initialize static tables. */
+bool stringTables = false;
+
 /* Print a summary of the options. */
 void usage()
 {
@@ -369,6 +372,8 @@ void processArgs( int argc, const char **argv, InputData &id )
 				}
 				else if ( strcmp( arg, "rbx" ) == 0 )
 					rubyImpl = Rubinius;
+				else if ( strcmp( arg, "string-tables" ) == 0 )
+					stringTables = true;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
