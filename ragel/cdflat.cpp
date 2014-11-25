@@ -281,6 +281,8 @@ std::ostream &FlatCodeGen::COND_KEYS()
 
 std::ostream &FlatCodeGen::COND_KEY_SPANS()
 {
+	taCSP.OPEN( ARRAY_TYPE(redFsm->maxCondSpan) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -288,7 +290,7 @@ std::ostream &FlatCodeGen::COND_KEY_SPANS()
 		unsigned long long span = 0;
 		if ( st->condList != 0 )
 			span = keyOps->span( st->condLowKey, st->condHighKey );
-		out << span;
+		taCSP.VAL( span );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -296,11 +298,16 @@ std::ostream &FlatCodeGen::COND_KEY_SPANS()
 		}
 	}
 	out << "\n";
+
+	taCSP.CLOSE();
+	out << "\n";
 	return out;
 }
 
 std::ostream &FlatCodeGen::CONDS()
 {
+	taC.OPEN( ARRAY_TYPE(redFsm->maxCond) );
+
 	int totalTrans = 0;
 	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -308,10 +315,14 @@ std::ostream &FlatCodeGen::CONDS()
 			/* Walk the singles. */
 			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
 			for ( unsigned long long pos = 0; pos < span; pos++ ) {
-				if ( st->condList[pos] != 0 )
-					out << st->condList[pos]->condSpaceId + 1 << ", ";
-				else
-					out << "0, ";
+				if ( st->condList[pos] != 0 ) {
+					taC.VAL( st->condList[pos]->condSpaceId + 1 );
+					out << ", ";
+				}
+				else {
+					taC.VAL( 0 );
+					out << ", ";
+				}
 				if ( ++totalTrans % IALL == 0 )
 					out << "\n\t";
 			}
@@ -320,17 +331,23 @@ std::ostream &FlatCodeGen::CONDS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taC.VAL( 0 );
+	out << "\n";
+
+	taC.CLOSE();
+	out << "\n";
 	return out;
 }
 
 std::ostream &FlatCodeGen::COND_INDEX_OFFSET()
 {
+	taCO.OPEN( ARRAY_TYPE(redFsm->maxCondIndexOffset) );
+
 	out << "\t";
 	int totalStateNum = 0, curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the index offset. */
-		out << curIndOffset;
+		taCO.VAL( curIndOffset );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -341,6 +358,9 @@ std::ostream &FlatCodeGen::COND_INDEX_OFFSET()
 		if ( st->condList != 0 )
 			curIndOffset += keyOps->span( st->condLowKey, st->condHighKey );
 	}
+	out << "\n";
+
+	taCO.CLOSE();
 	out << "\n";
 	return out;
 }
@@ -554,21 +574,9 @@ void FlatCodeGen::writeData()
 
 	if ( redFsm->anyConditions() ) {
 		COND_KEYS();
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpan), CSP() );
 		COND_KEY_SPANS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCond), C() );
 		CONDS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondIndexOffset), CO() );
 		COND_INDEX_OFFSET();
-		CLOSE_ARRAY() <<
-		"\n";
 	}
 
 	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );

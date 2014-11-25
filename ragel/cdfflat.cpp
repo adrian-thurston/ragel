@@ -153,21 +153,9 @@ void FFlatCodeGen::writeData()
 {
 	if ( redFsm->anyConditions() ) {
 		COND_KEYS();
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpan), CSP() );
 		COND_KEY_SPANS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCond), C() );
 		CONDS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondIndexOffset), CO() );
 		COND_INDEX_OFFSET();
-		CLOSE_ARRAY() <<
-		"\n";
 	}
 
 	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
