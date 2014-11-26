@@ -68,22 +68,28 @@ void cdLineDirective( ostream &out, const char *fileName, int line )
 	out << '\n';
 }
 
-TableArray::TableArray( FsmCodeGen &codeGen, std::string type, std::string name )
+TableArray::TableArray( FsmCodeGen &codeGen, std::string type,
+		std::string name, bool format )
 :
 	codeGen(codeGen),
 	type(type),
 	name(name),
-	out(codeGen.out)
+	out(codeGen.out),
+	format(format),
+	first(true),
+	ln(0)
 {
 }
 
 void TableArray::OPEN()
 {
 	codeGen.OPEN_ARRAY( type, name );
+	if ( format ) out << "\t";
 }
 
 void TableArray::KEY( Key key )
 {
+	fmt();
 	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
 		out << key.getVal();
 	else

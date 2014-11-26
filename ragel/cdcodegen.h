@@ -53,22 +53,40 @@ string itoa( int i );
 
 struct TableArray
 {
-	TableArray( FsmCodeGen &codeGen, std::string type, std::string name );
+	TableArray( FsmCodeGen &codeGen, std::string type,
+			std::string name, bool format = false );
 
 	void OPEN();
 	void CLOSE();
 
-	void VAL( long long ll ) { out << ll; }
-	void VAL( long l )       { out << l; }
-	void VAL( int i )        { out << i; }
-	void VAL( short s )      { out << s; }
-	void VAL( char c )       { out << c; }
+	void fmt()
+	{
+		if ( !format )
+			return;
 
-	void VAL( unsigned long long ull ) { out << ull; }
-	void VAL( unsigned long ul )       { out << ul; }
-	void VAL( unsigned int ui )        { out << ui; }
-	void VAL( unsigned short us )      { out << us; }
-	void VAL( unsigned char uc )       { out << uc; }
+		if ( ! first ) {
+			out << ", ";
+
+			if ( ++ln % IALL == 0 ) {
+				out << "\n\t";
+				ln = 0;
+			}
+		}
+
+		first = false;
+	}
+
+	void VAL( long long ll ) { fmt(); out << ll; }
+	void VAL( long l )       { fmt(); out << l; }
+	void VAL( int i )        { fmt(); out << i; }
+	void VAL( short s )      { fmt(); out << s; }
+	void VAL( char c )       { fmt(); out << c; }
+
+	void VAL( unsigned long long ull ) { fmt(); out << ull; }
+	void VAL( unsigned long ul )       { fmt(); out << ul; }
+	void VAL( unsigned int ui )        { fmt(); out << ui; }
+	void VAL( unsigned short us )      { fmt(); out << us; }
+	void VAL( unsigned char uc )       { fmt(); out << uc; }
 
 	void KEY( Key key );
 
@@ -76,6 +94,9 @@ struct TableArray
 	std::string type;
 	std::string name;
 	ostream &out;
+	bool format;
+	bool first;
+	long ln;
 };
 
 /*

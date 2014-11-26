@@ -163,20 +163,14 @@ std::ostream &TabCodeGen::ACTION_SWITCH()
 
 std::ostream &TabCodeGen::COND_OFFSETS()
 {
-	TableArray taCO( *this, ARRAY_TYPE(redFsm->maxCondOffset), CO() );
+	TableArray taCO( *this, ARRAY_TYPE(redFsm->maxCondOffset), CO(), true );
 
 	taCO.OPEN();
 
-	out << "\t";
 	int totalStateNum = 0, curKeyOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the key offset. */
 		taCO.VAL( curKeyOffset );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 
 		/* Move the key offset ahead. */
 		curKeyOffset += st->stateCondList.length();
@@ -189,20 +183,14 @@ std::ostream &TabCodeGen::COND_OFFSETS()
 
 std::ostream &TabCodeGen::KEY_OFFSETS()
 {
-	TableArray taKO( *this, ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
+	TableArray taKO( *this, ARRAY_TYPE(redFsm->maxKeyOffset), KO(), true );
 
 	taKO.OPEN();
 
-	out << "\t";
 	int totalStateNum = 0, curKeyOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the key offset. */
 		taKO.VAL( curKeyOffset );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 
 		/* Move the key offset ahead. */
 		curKeyOffset += st->outSingle.length() + st->outRange.length()*2;
