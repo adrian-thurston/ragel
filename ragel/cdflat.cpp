@@ -135,11 +135,13 @@ std::ostream &FlatCodeGen::ACTION_SWITCH()
 
 std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 {
+	taIO.OPEN( ARRAY_TYPE(redFsm->maxFlatIndexOffset) );
+
 	out << "\t";
 	int totalStateNum = 0, curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the index offset. */
-		out << curIndOffset;
+		taIO.VAL( curIndOffset );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -154,11 +156,17 @@ std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 			curIndOffset += 1;
 	}
 	out << "\n";
+
+	taIO.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &FlatCodeGen::KEY_SPANS()
 {
+	taSP.OPEN( ARRAY_TYPE(redFsm->maxSpan) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -166,7 +174,7 @@ std::ostream &FlatCodeGen::KEY_SPANS()
 		unsigned long long span = 0;
 		if ( st->transList != 0 )
 			span = keyOps->span( st->lowKey, st->highKey );
-		out << span;
+		taSP.VAL( span );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -174,6 +182,10 @@ std::ostream &FlatCodeGen::KEY_SPANS()
 		}
 	}
 	out << "\n";
+
+	taSP.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
@@ -368,24 +380,35 @@ std::ostream &FlatCodeGen::COND_INDEX_OFFSET()
 
 std::ostream &FlatCodeGen::KEYS()
 {
+	taK.OPEN( WIDE_ALPH_TYPE() );
+
 	out << '\t';
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit just low key and high key. */
-		out << KEY( st->lowKey ) << ", ";
-		out << KEY( st->highKey ) << ", ";
+		taK.KEY( st->lowKey );
+		out << ", ";
+		taK.KEY( st->highKey );
+		out << ", ";
 		if ( ++totalTrans % IALL == 0 )
 			out << "\n\t";
 	}
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taK.KEY( 0 );
+	out << "\n";
+
+	taK.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &FlatCodeGen::INDICIES()
 {
+	taI.OPEN( ARRAY_TYPE(redFsm->maxIndex) );
+
 	int totalTrans = 0;
 	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -393,15 +416,18 @@ std::ostream &FlatCodeGen::INDICIES()
 			/* Walk the singles. */
 			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
 			for ( unsigned long long pos = 0; pos < span; pos++ ) {
-				out << st->transList[pos]->id << ", ";
+				taI.VAL( st->transList[pos]->id );
+				out << ", ";
 				if ( ++totalTrans % IALL == 0 )
 					out << "\n\t";
 			}
 		}
 
 		/* The state's default index goes next. */
-		if ( st->defTrans != 0 )
-			out << st->defTrans->id << ", ";
+		if ( st->defTrans != 0 ) {
+			taI.VAL( st->defTrans->id );
+			out << ", ";
+		}
 
 		if ( ++totalTrans % IALL == 0 )
 			out << "\n\t";
@@ -409,12 +435,19 @@ std::ostream &FlatCodeGen::INDICIES()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taI.VAL( 0 );
+	out << "\n";
+
+	taI.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &FlatCodeGen::TRANS_TARGS()
 {
+	taTT.OPEN( ARRAY_TYPE(redFsm->maxState) );
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
@@ -429,7 +462,7 @@ std::ostream &FlatCodeGen::TRANS_TARGS()
 		trans->pos = t;
 
 		/* Write out the target state. */
-		out << trans->targ->id;
+		taTT.VAL( trans->targ->id );
 		if ( t < redFsm->transSet.length()-1 ) {
 			out << ", ";
 			if ( ++totalStates % IALL == 0 )
@@ -438,6 +471,10 @@ std::ostream &FlatCodeGen::TRANS_TARGS()
 	}
 	out << "\n";
 	delete[] transPtrs;
+
+	taTT.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
@@ -579,30 +616,15 @@ void FlatCodeGen::writeData()
 		COND_INDEX_OFFSET();
 	}
 
-	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
 	KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSpan), SP() );
 	KEY_SPANS();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
 	FLAT_INDEX_OFFSET();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
 	INDICIES();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 	TRANS_TARGS();
-	CLOSE_ARRAY() <<
-	"\n";
 
 	if ( redFsm->anyActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );

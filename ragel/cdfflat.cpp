@@ -158,30 +158,15 @@ void FFlatCodeGen::writeData()
 		COND_INDEX_OFFSET();
 	}
 
-	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
 	KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSpan), SP() );
 	KEY_SPANS();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
 	FLAT_INDEX_OFFSET();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
 	INDICIES();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 	TRANS_TARGS();
-	CLOSE_ARRAY() <<
-	"\n";
 
 	if ( redFsm->anyActions() ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), TA() );
