@@ -152,7 +152,9 @@ unsigned int FGotoCodeGen::EOF_ACTION( RedStateAp *state )
 
 std::ostream &FGotoCodeGen::TO_STATE_ACTIONS()
 {
-	taTSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+	TableArray taTSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+
+	taTSA.OPEN();
 
 	/* Take one off for the psuedo start state. */
 	int numStates = redFsm->stateList.length();
@@ -165,7 +167,7 @@ std::ostream &FGotoCodeGen::TO_STATE_ACTIONS()
 	out << "\t";
 	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
 		/* Write any eof action. */
-		out << vals[st];
+		taTSA.VAL( vals[st] );
 		if ( st < numStates-1 ) {
 			out << ", ";
 			if ( (st+1) % IALL == 0 )
@@ -183,7 +185,9 @@ std::ostream &FGotoCodeGen::TO_STATE_ACTIONS()
 
 std::ostream &FGotoCodeGen::FROM_STATE_ACTIONS()
 {
-	taFSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+	TableArray taFSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+
+	taFSA.OPEN();
 
 	/* Take one off for the psuedo start state. */
 	int numStates = redFsm->stateList.length();
@@ -196,7 +200,7 @@ std::ostream &FGotoCodeGen::FROM_STATE_ACTIONS()
 	out << "\t";
 	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
 		/* Write any eof action. */
-		out << vals[st];
+		taFSA.VAL( vals[st] );
 		if ( st < numStates-1 ) {
 			out << ", ";
 			if ( (st+1) % IALL == 0 )
@@ -214,7 +218,9 @@ std::ostream &FGotoCodeGen::FROM_STATE_ACTIONS()
 
 std::ostream &FGotoCodeGen::EOF_ACTIONS()
 {
-	taEA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+	TableArray taEA( *this, ARRAY_TYPE(redFsm->maxActionLoc), EA() );
+
+	taEA.OPEN();
 
 	/* Take one off for the psuedo start state. */
 	int numStates = redFsm->stateList.length();
@@ -227,7 +233,7 @@ std::ostream &FGotoCodeGen::EOF_ACTIONS()
 	out << "\t";
 	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
 		/* Write any eof action. */
-		out << vals[st];
+		taEA.VAL( vals[st] );
 		if ( st < numStates-1 ) {
 			out << ", ";
 			if ( (st+1) % IALL == 0 )

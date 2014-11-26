@@ -72,10 +72,10 @@ protected:
 	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 
-	std::ostream &TO_STATE_ACTION( RedStateAp *state );
-	std::ostream &FROM_STATE_ACTION( RedStateAp *state );
-	std::ostream &EOF_ACTION( RedStateAp *state );
-	std::ostream &TRANS_ACTION( RedTransAp *trans );
+	std::ostream &TO_STATE_ACTION( TableArray &taTSA, RedStateAp *state );
+	std::ostream &FROM_STATE_ACTION( TableArray &taFSA, RedStateAp *state );
+	std::ostream &EOF_ACTION( TableArray &taEA, RedStateAp *state );
+	std::ostream &TRANS_ACTION( TableArray &taTA, RedTransAp *trans );
 
 	std::ostream &TRANS_ACTIONS();
 	std::ostream &TO_STATE_ACTIONS();

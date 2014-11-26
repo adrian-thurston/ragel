@@ -26,7 +26,7 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-std::ostream &FFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
+std::ostream &FFlatCodeGen::TO_STATE_ACTION( TableArray &taTSA, RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -35,7 +35,7 @@ std::ostream &FFlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FFlatCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+std::ostream &FFlatCodeGen::FROM_STATE_ACTION( TableArray &taFSA, RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -44,7 +44,7 @@ std::ostream &FFlatCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &FFlatCodeGen::EOF_ACTION( RedStateAp *state )
+std::ostream &FFlatCodeGen::EOF_ACTION( TableArray &taEA, RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -54,7 +54,7 @@ std::ostream &FFlatCodeGen::EOF_ACTION( RedStateAp *state )
 }
 
 /* Write out the function for a transition. */
-std::ostream &FFlatCodeGen::TRANS_ACTION( RedTransAp *trans )
+std::ostream &FFlatCodeGen::TRANS_ACTION( TableArray &taTA, RedTransAp *trans )
 {
 	int action = 0;
 	if ( trans->action != 0 )
@@ -151,7 +151,9 @@ std::ostream &FFlatCodeGen::ACTION_SWITCH()
 
 std::ostream &FFlatCodeGen::TRANS_ACTIONS()
 {
-	taTA.OPEN( ARRAY_TYPE(redFsm->maxActListId) );
+	TableArray taTA( *this, ARRAY_TYPE(redFsm->maxActListId), TA() );
+
+	taTA.OPEN();
 
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
@@ -164,7 +166,7 @@ std::ostream &FFlatCodeGen::TRANS_ACTIONS()
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
 		RedTransAp *trans = transPtrs[t];
-		TRANS_ACTION( trans );
+		TRANS_ACTION( taTA, trans );
 		if ( t < redFsm->transSet.length()-1 ) {
 			out << ", ";
 			if ( ++totalAct % IALL == 0 )
@@ -182,13 +184,15 @@ std::ostream &FFlatCodeGen::TRANS_ACTIONS()
 
 std::ostream &FFlatCodeGen::TO_STATE_ACTIONS()
 {
-	taTSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+	TableArray taTSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+
+	taTSA.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		TO_STATE_ACTION(st);
+		TO_STATE_ACTION( taTSA, st );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -205,13 +209,15 @@ std::ostream &FFlatCodeGen::TO_STATE_ACTIONS()
 
 std::ostream &FFlatCodeGen::FROM_STATE_ACTIONS()
 {
-	taFSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+	TableArray taFSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+
+	taFSA.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		FROM_STATE_ACTION(st);
+		FROM_STATE_ACTION( taFSA, st );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -228,13 +234,15 @@ std::ostream &FFlatCodeGen::FROM_STATE_ACTIONS()
 
 std::ostream &FFlatCodeGen::EOF_ACTIONS()
 {
-	taEA.OPEN( ARRAY_TYPE(redFsm->maxActListId) );
+	TableArray taEA( *this, ARRAY_TYPE(redFsm->maxActListId), EA() );
+
+	taEA.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		EOF_ACTION(st);
+		EOF_ACTION( taEA, st );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )

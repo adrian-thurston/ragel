@@ -53,11 +53,9 @@ string itoa( int i );
 
 struct TableArray
 {
-	TableArray( const char *name, FsmCodeGen &codeGen );
+	TableArray( FsmCodeGen &codeGen, std::string type, std::string name );
 
-	std::string ref();
-
-	void OPEN( string type );
+	void OPEN();
 	void CLOSE();
 
 	void VAL( long long ll ) { out << ll; }
@@ -74,8 +72,9 @@ struct TableArray
 
 	void KEY( Key key );
 
-	const char *name;
 	FsmCodeGen &codeGen;
+	std::string type;
+	std::string name;
 	ostream &out;
 };
 
@@ -161,26 +160,6 @@ protected:
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 	string CTXDATA() { return DATA_PREFIX() + "ctxdata"; }
-
-	TableArray taA;
-	TableArray taCK;
-	TableArray taCL;
-	TableArray taCSP;
-	TableArray taC;
-	TableArray taCO;
-	TableArray taK;
-	TableArray taKO;
-	TableArray taSP;
-	TableArray taIO;
-	TableArray taSL;
-	TableArray taRL;
-	TableArray taI;
-	TableArray taTT;
-	TableArray taTA;
-	TableArray taTSA;
-	TableArray taFSA;
-	TableArray taEA;
-	TableArray taET;
 
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );

@@ -54,7 +54,7 @@ void TabCodeGen::calcIndexSize()
 	useIndicies = sizeWithInds < sizeWithoutInds;
 }
 
-std::ostream &TabCodeGen::TO_STATE_ACTION( RedStateAp *state )
+std::ostream &TabCodeGen::TO_STATE_ACTION( TableArray &taTSA, RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -63,7 +63,7 @@ std::ostream &TabCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &TabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+std::ostream &TabCodeGen::FROM_STATE_ACTION( TableArray &taFSA, RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -72,7 +72,7 @@ std::ostream &TabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	return out;
 }
 
-std::ostream &TabCodeGen::EOF_ACTION( RedStateAp *state )
+std::ostream &TabCodeGen::EOF_ACTION( TableArray &taEA, RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -82,7 +82,7 @@ std::ostream &TabCodeGen::EOF_ACTION( RedStateAp *state )
 }
 
 
-std::ostream &TabCodeGen::TRANS_ACTION( RedTransAp *trans )
+std::ostream &TabCodeGen::TRANS_ACTION( TableArray &taTA, RedTransAp *trans )
 {
 	/* If there are actions, emit them. Otherwise emit zero. */
 	int act = 0;
@@ -163,7 +163,9 @@ std::ostream &TabCodeGen::ACTION_SWITCH()
 
 std::ostream &TabCodeGen::COND_OFFSETS()
 {
-	taCO.OPEN( ARRAY_TYPE(redFsm->maxCondOffset) );
+	TableArray taCO( *this, ARRAY_TYPE(redFsm->maxCondOffset), CO() );
+
+	taCO.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0, curKeyOffset = 0;
@@ -189,7 +191,9 @@ std::ostream &TabCodeGen::COND_OFFSETS()
 
 std::ostream &TabCodeGen::KEY_OFFSETS()
 {
-	taKO.OPEN( ARRAY_TYPE(redFsm->maxKeyOffset) );
+	TableArray taKO( *this, ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
+
+	taKO.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0, curKeyOffset = 0;
@@ -216,7 +220,9 @@ std::ostream &TabCodeGen::KEY_OFFSETS()
 
 std::ostream &TabCodeGen::INDEX_OFFSETS()
 {
-	taIO.OPEN( ARRAY_TYPE(redFsm->maxIndexOffset) );
+	TableArray taIO( *this, ARRAY_TYPE(redFsm->maxIndexOffset), IO() );
+
+	taIO.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0, curIndOffset = 0;
@@ -244,7 +250,9 @@ std::ostream &TabCodeGen::INDEX_OFFSETS()
 
 std::ostream &TabCodeGen::COND_LENS()
 {
-	taCL.OPEN( ARRAY_TYPE(redFsm->maxCondLen) );
+	TableArray taCL( *this, ARRAY_TYPE(redFsm->maxCondLen), CL() );
+
+	taCL.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0;
@@ -267,7 +275,9 @@ std::ostream &TabCodeGen::COND_LENS()
 
 std::ostream &TabCodeGen::SINGLE_LENS()
 {
-	taSL.OPEN( ARRAY_TYPE(redFsm->maxSingleLen) );
+	TableArray taSL( *this, ARRAY_TYPE(redFsm->maxSingleLen), SL() );
+
+	taSL.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0;
@@ -288,7 +298,9 @@ std::ostream &TabCodeGen::SINGLE_LENS()
 
 std::ostream &TabCodeGen::RANGE_LENS()
 {
-	taRL.OPEN( ARRAY_TYPE(redFsm->maxRangeLen) );
+	TableArray taRL( *this, ARRAY_TYPE(redFsm->maxRangeLen), RL() );
+
+	taRL.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0;
@@ -311,13 +323,15 @@ std::ostream &TabCodeGen::RANGE_LENS()
 
 std::ostream &TabCodeGen::TO_STATE_ACTIONS()
 {
-	taTSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+	TableArray taTSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+
+	taTSA.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		TO_STATE_ACTION(st);
+		TO_STATE_ACTION( taTSA, st );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -334,13 +348,15 @@ std::ostream &TabCodeGen::TO_STATE_ACTIONS()
 
 std::ostream &TabCodeGen::FROM_STATE_ACTIONS()
 {
-	taFSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+	TableArray taFSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+
+	taFSA.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		FROM_STATE_ACTION(st);
+		FROM_STATE_ACTION( taFSA, st );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -357,13 +373,15 @@ std::ostream &TabCodeGen::FROM_STATE_ACTIONS()
 
 std::ostream &TabCodeGen::EOF_ACTIONS()
 {
-	taEA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+	TableArray taEA( *this, ARRAY_TYPE(redFsm->maxActionLoc), EA() );
+
+	taEA.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-		EOF_ACTION(st);
+		EOF_ACTION( taEA, st );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -380,7 +398,9 @@ std::ostream &TabCodeGen::EOF_ACTIONS()
 
 std::ostream &TabCodeGen::EOF_TRANS()
 {
-	taET.OPEN( ARRAY_TYPE(redFsm->maxIndexOffset+1) );
+	TableArray taET( *this, ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
+
+	taET.OPEN();
 
 	out << "\t";
 	int totalStateNum = 0;
@@ -409,7 +429,9 @@ std::ostream &TabCodeGen::EOF_TRANS()
 
 std::ostream &TabCodeGen::COND_KEYS()
 {
-	taCK.OPEN( WIDE_ALPH_TYPE() );
+	TableArray taCK( *this, WIDE_ALPH_TYPE(), CK() );
+
+	taCK.OPEN();
 
 	out << '\t';
 	int totalTrans = 0;
@@ -443,7 +465,9 @@ std::ostream &TabCodeGen::COND_KEYS()
 
 std::ostream &TabCodeGen::COND_SPACES()
 {
-	taC.OPEN( ARRAY_TYPE(redFsm->maxCondSpaceId) );
+	TableArray taC( *this, ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
+
+	taC.OPEN();
 
 	out << '\t';
 	int totalTrans = 0;
@@ -470,7 +494,9 @@ std::ostream &TabCodeGen::COND_SPACES()
 
 std::ostream &TabCodeGen::KEYS()
 {
-	taK.OPEN( WIDE_ALPH_TYPE() );
+	TableArray taK( *this, WIDE_ALPH_TYPE(), K() );
+
+	taK.OPEN();
 	out << '\t';
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -511,7 +537,9 @@ std::ostream &TabCodeGen::KEYS()
 
 std::ostream &TabCodeGen::INDICIES()
 {
-	taI.OPEN( ARRAY_TYPE(redFsm->maxIndex) );
+	TableArray taI( *this, ARRAY_TYPE(redFsm->maxIndex), I() );
+
+	taI.OPEN();
 
 	int totalTrans = 0;
 	out << '\t';
@@ -553,7 +581,9 @@ std::ostream &TabCodeGen::INDICIES()
 
 std::ostream &TabCodeGen::TRANS_TARGS()
 {
-	taTT.OPEN( ARRAY_TYPE(redFsm->maxState) );
+	TableArray taTT( *this, ARRAY_TYPE(redFsm->maxState), TT() );
+
+	taTT.OPEN();
 
 	int totalTrans = 0;
 	out << '\t';
@@ -612,7 +642,9 @@ std::ostream &TabCodeGen::TRANS_TARGS()
 
 std::ostream &TabCodeGen::TRANS_ACTIONS()
 {
-	taTA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+	TableArray taTA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+
+	taTA.OPEN();
 
 	int totalTrans = 0;
 	out << '\t';
@@ -620,7 +652,7 @@ std::ostream &TabCodeGen::TRANS_ACTIONS()
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			TRANS_ACTION( trans ) << ", ";
+			TRANS_ACTION( taTA, trans ) << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -628,7 +660,7 @@ std::ostream &TabCodeGen::TRANS_ACTIONS()
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			TRANS_ACTION( trans ) << ", ";
+			TRANS_ACTION( taTA, trans ) << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -636,7 +668,7 @@ std::ostream &TabCodeGen::TRANS_ACTIONS()
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			TRANS_ACTION( trans ) << ", ";
+			TRANS_ACTION( taTA, trans ) << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -646,7 +678,7 @@ std::ostream &TabCodeGen::TRANS_ACTIONS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
-			TRANS_ACTION( trans ) << ", ";
+			TRANS_ACTION( taTA, trans ) << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -665,7 +697,9 @@ std::ostream &TabCodeGen::TRANS_ACTIONS()
 
 std::ostream &TabCodeGen::TRANS_TARGS_WI()
 {
-	taTT.OPEN( ARRAY_TYPE(redFsm->maxState) );
+	TableArray taTT( *this, ARRAY_TYPE(redFsm->maxState), TT() );
+
+	taTT.OPEN();
 
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
@@ -700,7 +734,9 @@ std::ostream &TabCodeGen::TRANS_TARGS_WI()
 
 std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
 {
-	taTA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+	TableArray taTA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+
+	taTA.OPEN();
 
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
@@ -713,7 +749,7 @@ std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
 		RedTransAp *trans = transPtrs[t];
-		TRANS_ACTION( trans );
+		TRANS_ACTION( taTA, trans );
 		if ( t < redFsm->transSet.length()-1 ) {
 			out << ", ";
 			if ( ++totalAct % IALL == 0 )

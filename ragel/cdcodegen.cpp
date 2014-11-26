@@ -44,7 +44,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-
 extern int numSplitPartitions;
 extern bool noLineDirectives;
 
@@ -69,22 +68,18 @@ void cdLineDirective( ostream &out, const char *fileName, int line )
 	out << '\n';
 }
 
-TableArray::TableArray( const char *name, FsmCodeGen &codeGen )
+TableArray::TableArray( FsmCodeGen &codeGen, std::string type, std::string name )
 :
-	name(name),
 	codeGen(codeGen),
+	type(type),
+	name(name),
 	out(codeGen.out)
 {
 }
 
-std::string TableArray::ref()
+void TableArray::OPEN()
 {
-	return std::string("_") + codeGen.DATA_PREFIX() + name;
-}
-
-void TableArray::OPEN( string type )
-{
-	codeGen.OPEN_ARRAY( type, ref() );
+	codeGen.OPEN_ARRAY( type, name );
 }
 
 void TableArray::KEY( Key key )
@@ -110,27 +105,7 @@ void FsmCodeGen::genLineDirective( ostream &out )
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( ostream &out )
 :
-	CodeGenData( out ),
-
-	taA(    "actions",              *this ),
-	taCK(   "cond_keys",            *this ),
-	taCL(   "cond_lengths",         *this ),
-	taCSP(  "cond_key_spans",       *this ),
-	taC(    "cond_spaces",          *this ),
-	taCO(   "cond_offsets",         *this ),
-	taK(    "trans_keys",           *this ),
-	taKO(   "key_offsets",          *this ),
-	taSP(   "key_spans",            *this ),
-	taIO(   "index_offsets",        *this ),
-	taSL(   "single_lengths",       *this ),
-	taRL(   "range_lengths",        *this ),
-	taI(    "indicies",             *this ),
-	taTT(   "trans_targs",          *this ),
-	taTA(   "trans_actions",        *this ),
-	taTSA(  "to_state_actions",     *this ),
-	taFSA(  "from_state_actions",   *this ),
-	taEA(   "eof_actions",          *this ),
-	taET(   "eof_trans",            *this )
+	CodeGenData( out )
 {
 }
 
@@ -174,7 +149,9 @@ string FsmCodeGen::START_STATE_ID()
 /* Write out the array of actions. */
 std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 {
-	taA.OPEN( ARRAY_TYPE(redFsm->maxActArrItem) );
+	TableArray taA( *this, ARRAY_TYPE(redFsm->maxActArrItem), A() );
+
+	taA.OPEN();
 
 	out << "\t";
 	taA.VAL( 0 );
