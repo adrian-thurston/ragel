@@ -44,9 +44,14 @@ public:
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &FINISH_CASES();
 	std::ostream &EOF_ACTION_SWITCH();
+
 	unsigned int TO_STATE_ACTION( RedStateAp *state );
 	unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	unsigned int EOF_ACTION( RedStateAp *state );
+
+	std::ostream &TO_STATE_ACTIONS();
+	std::ostream &FROM_STATE_ACTIONS();
+	std::ostream &EOF_ACTIONS();
 
 	virtual void writeData();
 	virtual void writeExec();

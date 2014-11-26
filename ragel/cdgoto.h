@@ -61,9 +61,9 @@ public:
 	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 
-	virtual unsigned int TO_STATE_ACTION( RedStateAp *state );
-	virtual unsigned int FROM_STATE_ACTION( RedStateAp *state );
-	virtual unsigned int EOF_ACTION( RedStateAp *state );
+	unsigned int TO_STATE_ACTION( RedStateAp *state );
+	unsigned int FROM_STATE_ACTION( RedStateAp *state );
+	unsigned int EOF_ACTION( RedStateAp *state );
 
 	std::ostream &TO_STATE_ACTIONS();
 	std::ostream &FROM_STATE_ACTIONS();

@@ -178,6 +178,132 @@ std::ostream &FTabCodeGen::ACTION_SWITCH()
 	return out;
 }
 
+std::ostream &FTabCodeGen::TRANS_ACTIONS()
+{
+	int totalTrans = 0;
+	out << '\t';
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Walk the singles. */
+		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
+			RedTransAp *trans = stel->value;
+			TRANS_ACTION( trans ) << ", ";
+			if ( ++totalTrans % IALL == 0 )
+				out << "\n\t";
+		}
+
+		/* Walk the ranges. */
+		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
+			RedTransAp *trans = rtel->value;
+			TRANS_ACTION( trans ) << ", ";
+			if ( ++totalTrans % IALL == 0 )
+				out << "\n\t";
+		}
+
+		/* The state's default index goes next. */
+		if ( st->defTrans != 0 ) {
+			RedTransAp *trans = st->defTrans;
+			TRANS_ACTION( trans ) << ", ";
+			if ( ++totalTrans % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+
+	/* Add any eof transitions that have not yet been written out above. */
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 ) {
+			RedTransAp *trans = st->eofTrans;
+			TRANS_ACTION( trans ) << ", ";
+			if ( ++totalTrans % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+
+
+	/* Output one last number so we don't have to figure out when the last
+	 * entry is and avoid writing a comma. */
+	out << 0 << "\n";
+	return out;
+}
+
+std::ostream &FTabCodeGen::TRANS_ACTIONS_WI()
+{
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	/* Keep a count of the num of items in the array written. */
+	out << '\t';
+	int totalAct = 0;
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Write the function for the transition. */
+		RedTransAp *trans = transPtrs[t];
+		TRANS_ACTION( trans );
+		if ( t < redFsm->transSet.length()-1 ) {
+			out << ", ";
+			if ( ++totalAct % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	delete[] transPtrs;
+	return out;
+}
+
+
+std::ostream &FTabCodeGen::TO_STATE_ACTIONS()
+{
+	out << "\t";
+	int totalStateNum = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Write any eof action. */
+		TO_STATE_ACTION(st);
+		if ( !st.last() ) {
+			out << ", ";
+			if ( ++totalStateNum % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+std::ostream &FTabCodeGen::FROM_STATE_ACTIONS()
+{
+	out << "\t";
+	int totalStateNum = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Write any eof action. */
+		FROM_STATE_ACTION(st);
+		if ( !st.last() ) {
+			out << ", ";
+			if ( ++totalStateNum % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+std::ostream &FTabCodeGen::EOF_ACTIONS()
+{
+	out << "\t";
+	int totalStateNum = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Write any eof action. */
+		EOF_ACTION(st);
+		if ( !st.last() ) {
+			out << ", ";
+			if ( ++totalStateNum % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+
+
 void FTabCodeGen::writeData()
 {
 	if ( redFsm->anyConditions() ) {

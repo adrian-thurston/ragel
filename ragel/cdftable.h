@@ -44,10 +44,17 @@ protected:
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
 
-	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &EOF_ACTION( RedStateAp *state );
-	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
+	std::ostream &TO_STATE_ACTION( RedStateAp *state );
+	std::ostream &FROM_STATE_ACTION( RedStateAp *state );
+	std::ostream &EOF_ACTION( RedStateAp *state );
+	std::ostream &TRANS_ACTION( RedTransAp *trans );
+
+	std::ostream &TRANS_ACTIONS();
+	std::ostream &TRANS_ACTIONS_WI();
+	std::ostream &TO_STATE_ACTIONS();
+	std::ostream &FROM_STATE_ACTIONS();
+	std::ostream &EOF_ACTIONS();
+
 	virtual void writeData();
 	virtual void writeExec();
 	virtual void calcIndexSize();

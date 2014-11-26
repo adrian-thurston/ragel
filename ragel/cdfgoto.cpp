@@ -150,6 +150,82 @@ unsigned int FGotoCodeGen::EOF_ACTION( RedStateAp *state )
 	return act;
 }
 
+std::ostream &FGotoCodeGen::TO_STATE_ACTIONS()
+{
+	/* Take one off for the psuedo start state. */
+	int numStates = redFsm->stateList.length();
+	unsigned int *vals = new unsigned int[numStates];
+	memset( vals, 0, sizeof(unsigned int)*numStates );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
+		vals[st->id] = TO_STATE_ACTION(st);
+
+	out << "\t";
+	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
+		/* Write any eof action. */
+		out << vals[st];
+		if ( st < numStates-1 ) {
+			out << ", ";
+			if ( (st+1) % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	delete[] vals;
+	return out;
+}
+
+std::ostream &FGotoCodeGen::FROM_STATE_ACTIONS()
+{
+	/* Take one off for the psuedo start state. */
+	int numStates = redFsm->stateList.length();
+	unsigned int *vals = new unsigned int[numStates];
+	memset( vals, 0, sizeof(unsigned int)*numStates );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
+		vals[st->id] = FROM_STATE_ACTION(st);
+
+	out << "\t";
+	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
+		/* Write any eof action. */
+		out << vals[st];
+		if ( st < numStates-1 ) {
+			out << ", ";
+			if ( (st+1) % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	delete[] vals;
+	return out;
+}
+
+std::ostream &FGotoCodeGen::EOF_ACTIONS()
+{
+	/* Take one off for the psuedo start state. */
+	int numStates = redFsm->stateList.length();
+	unsigned int *vals = new unsigned int[numStates];
+	memset( vals, 0, sizeof(unsigned int)*numStates );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
+		vals[st->id] = EOF_ACTION(st);
+
+	out << "\t";
+	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
+		/* Write any eof action. */
+		out << vals[st];
+		if ( st < numStates-1 ) {
+			out << ", ";
+			if ( (st+1) % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	delete[] vals;
+	return out;
+}
+
+
 void FGotoCodeGen::writeData()
 {
 	if ( redFsm->anyToStateActions() ) {

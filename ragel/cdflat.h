@@ -51,12 +51,8 @@ protected:
 	std::ostream &INDICIES();
 	std::ostream &FLAT_INDEX_OFFSET();
 	std::ostream &KEY_SPANS();
-	std::ostream &TO_STATE_ACTIONS();
-	std::ostream &FROM_STATE_ACTIONS();
-	std::ostream &EOF_ACTIONS();
 	std::ostream &EOF_TRANS();
 	std::ostream &TRANS_TARGS();
-	std::ostream &TRANS_ACTIONS();
 	void LOCATE_TRANS();
 
 	std::ostream &COND_INDEX_OFFSET();
@@ -76,10 +72,15 @@ protected:
 	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 
-	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &EOF_ACTION( RedStateAp *state );
-	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
+	std::ostream &TO_STATE_ACTION( RedStateAp *state );
+	std::ostream &FROM_STATE_ACTION( RedStateAp *state );
+	std::ostream &EOF_ACTION( RedStateAp *state );
+	std::ostream &TRANS_ACTION( RedTransAp *trans );
+
+	std::ostream &TRANS_ACTIONS();
+	std::ostream &TO_STATE_ACTIONS();
+	std::ostream &FROM_STATE_ACTIONS();
+	std::ostream &EOF_ACTIONS();
 
 	virtual void writeData();
 	virtual void writeExec();

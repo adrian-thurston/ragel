@@ -60,14 +60,9 @@ protected:
 	std::ostream &COND_LENS();
 	std::ostream &SINGLE_LENS();
 	std::ostream &RANGE_LENS();
-	std::ostream &TO_STATE_ACTIONS();
-	std::ostream &FROM_STATE_ACTIONS();
-	std::ostream &EOF_ACTIONS();
 	std::ostream &EOF_TRANS();
 	std::ostream &TRANS_TARGS();
-	std::ostream &TRANS_ACTIONS();
 	std::ostream &TRANS_TARGS_WI();
-	std::ostream &TRANS_ACTIONS_WI();
 	void LOCATE_TRANS();
 
 	void COND_TRANSLATE();
@@ -83,10 +78,17 @@ protected:
 	void RET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 
-	virtual std::ostream &TO_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &FROM_STATE_ACTION( RedStateAp *state );
-	virtual std::ostream &EOF_ACTION( RedStateAp *state );
-	virtual std::ostream &TRANS_ACTION( RedTransAp *trans );
+	std::ostream &TRANS_ACTION( RedTransAp *trans );
+	std::ostream &TO_STATE_ACTION( RedStateAp *state );
+	std::ostream &FROM_STATE_ACTION( RedStateAp *state );
+	std::ostream &EOF_ACTION( RedStateAp *state );
+
+	std::ostream &TRANS_ACTIONS();
+	std::ostream &TRANS_ACTIONS_WI();
+	std::ostream &TO_STATE_ACTIONS();
+	std::ostream &FROM_STATE_ACTIONS();
+	std::ostream &EOF_ACTIONS();
+
 	virtual void calcIndexSize();
 };
 

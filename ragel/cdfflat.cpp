@@ -149,6 +149,83 @@ std::ostream &FFlatCodeGen::ACTION_SWITCH()
 	return out;
 }
 
+std::ostream &FFlatCodeGen::TRANS_ACTIONS()
+{
+	/* Transitions must be written ordered by their id. */
+	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+		transPtrs[trans->id] = trans;
+
+	/* Keep a count of the num of items in the array written. */
+	out << '\t';
+	int totalAct = 0;
+	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
+		/* Write the function for the transition. */
+		RedTransAp *trans = transPtrs[t];
+		TRANS_ACTION( trans );
+		if ( t < redFsm->transSet.length()-1 ) {
+			out << ", ";
+			if ( ++totalAct % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	delete[] transPtrs;
+	return out;
+}
+
+std::ostream &FFlatCodeGen::TO_STATE_ACTIONS()
+{
+	out << "\t";
+	int totalStateNum = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Write any eof action. */
+		TO_STATE_ACTION(st);
+		if ( !st.last() ) {
+			out << ", ";
+			if ( ++totalStateNum % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+std::ostream &FFlatCodeGen::FROM_STATE_ACTIONS()
+{
+	out << "\t";
+	int totalStateNum = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Write any eof action. */
+		FROM_STATE_ACTION(st);
+		if ( !st.last() ) {
+			out << ", ";
+			if ( ++totalStateNum % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+std::ostream &FFlatCodeGen::EOF_ACTIONS()
+{
+	out << "\t";
+	int totalStateNum = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Write any eof action. */
+		EOF_ACTION(st);
+		if ( !st.last() ) {
+			out << ", ";
+			if ( ++totalStateNum % IALL == 0 )
+				out << "\n\t";
+		}
+	}
+	out << "\n";
+	return out;
+}
+
+
 void FFlatCodeGen::writeData()
 {
 	if ( redFsm->anyConditions() ) {
