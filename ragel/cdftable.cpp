@@ -181,48 +181,17 @@ std::ostream &FTabCodeGen::ACTION_SWITCH()
 void FTabCodeGen::writeData()
 {
 	if ( redFsm->anyConditions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );
 		COND_OFFSETS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondLen), CL() );
 		COND_LENS();
-		CLOSE_ARRAY() <<
-		"\n";
-
 		COND_KEYS();
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
 		COND_SPACES();
-		CLOSE_ARRAY() <<
-		"\n";
 	}
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
 	KEY_OFFSETS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
 	KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSingleLen), SL() );
 	SINGLE_LENS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxRangeLen), RL() );
 	RANGE_LENS();
-	CLOSE_ARRAY() <<
-	"\n";
-
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset), IO() );
 	INDEX_OFFSETS();
-	CLOSE_ARRAY() <<
-	"\n";
 
 	if ( useIndicies ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );

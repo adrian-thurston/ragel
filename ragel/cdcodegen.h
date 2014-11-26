@@ -164,12 +164,16 @@ protected:
 
 	TableArray taA;
 	TableArray taCK;
+	TableArray taCL;
 	TableArray taCSP;
 	TableArray taC;
 	TableArray taCO;
 	TableArray taK;
+	TableArray taKO;
 	TableArray taSP;
 	TableArray taIO;
+	TableArray taSL;
+	TableArray taRL;
 	TableArray taI;
 	TableArray taTT;
 	TableArray taTA;

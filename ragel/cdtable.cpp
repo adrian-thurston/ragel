@@ -163,11 +163,13 @@ std::ostream &TabCodeGen::ACTION_SWITCH()
 
 std::ostream &TabCodeGen::COND_OFFSETS()
 {
+	taCO.OPEN( ARRAY_TYPE(redFsm->maxCondOffset) );
+
 	out << "\t";
 	int totalStateNum = 0, curKeyOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the key offset. */
-		out << curKeyOffset;
+		taCO.VAL( curKeyOffset );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -178,16 +180,22 @@ std::ostream &TabCodeGen::COND_OFFSETS()
 		curKeyOffset += st->stateCondList.length();
 	}
 	out << "\n";
+
+	taCO.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &TabCodeGen::KEY_OFFSETS()
 {
+	taKO.OPEN( ARRAY_TYPE(redFsm->maxKeyOffset) );
+
 	out << "\t";
 	int totalStateNum = 0, curKeyOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the key offset. */
-		out << curKeyOffset;
+		taKO.VAL( curKeyOffset );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -198,17 +206,23 @@ std::ostream &TabCodeGen::KEY_OFFSETS()
 		curKeyOffset += st->outSingle.length() + st->outRange.length()*2;
 	}
 	out << "\n";
+
+	taKO.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 
 std::ostream &TabCodeGen::INDEX_OFFSETS()
 {
+	taIO.OPEN( ARRAY_TYPE(redFsm->maxIndexOffset) );
+
 	out << "\t";
 	int totalStateNum = 0, curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the index offset. */
-		out << curIndOffset;
+		taIO.VAL( curIndOffset );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -221,22 +235,31 @@ std::ostream &TabCodeGen::INDEX_OFFSETS()
 			curIndOffset += 1;
 	}
 	out << "\n";
+
+	taIO.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &TabCodeGen::COND_LENS()
 {
+	taCL.OPEN( ARRAY_TYPE(redFsm->maxCondLen) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
-		out << st->stateCondList.length();
+		taCL.VAL( st->stateCondList.length() );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
 				out << "\n\t";
 		}
 	}
+	out << "\n";
+
+	taCL.CLOSE();
 	out << "\n";
 	return out;
 }
@@ -244,28 +267,34 @@ std::ostream &TabCodeGen::COND_LENS()
 
 std::ostream &TabCodeGen::SINGLE_LENS()
 {
+	taSL.OPEN( ARRAY_TYPE(redFsm->maxSingleLen) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
-		out << st->outSingle.length();
+		taSL.VAL( st->outSingle.length() );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
 				out << "\n\t";
 		}
 	}
+	out << "\n";
+	taSL.CLOSE();
 	out << "\n";
 	return out;
 }
 
 std::ostream &TabCodeGen::RANGE_LENS()
 {
+	taRL.OPEN( ARRAY_TYPE(redFsm->maxRangeLen) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit length of range index. */
-		out << st->outRange.length();
+		taRL.VAL( st->outRange.length() );
 		if ( !st.last() ) {
 			out << ", ";
 			if ( ++totalStateNum % IALL == 0 )
@@ -273,6 +302,10 @@ std::ostream &TabCodeGen::RANGE_LENS()
 		}
 	}
 	out << "\n";
+
+	taRL.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
@@ -353,7 +386,7 @@ std::ostream &TabCodeGen::EOF_TRANS()
 
 std::ostream &TabCodeGen::COND_KEYS()
 {
-	OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
+	taCK.OPEN( WIDE_ALPH_TYPE() );
 
 	out << '\t';
 	int totalTrans = 0;
@@ -361,12 +394,14 @@ std::ostream &TabCodeGen::COND_KEYS()
 		/* Loop the state's transitions. */
 		for ( GenStateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
 			/* Lower key. */
-			out << KEY( sc->lowKey ) << ", ";
+			taCK.KEY( sc->lowKey );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 
 			/* Upper key. */
-			out << KEY( sc->highKey ) << ", ";
+			taCK.KEY( sc->highKey );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -374,23 +409,27 @@ std::ostream &TabCodeGen::COND_KEYS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taCK.KEY( 0 );
+	out << "\n";
 
-	CLOSE_ARRAY() <<
-	"\n";
+	taCK.CLOSE();
+	out << "\n";
 
 	return out;
 }
 
 std::ostream &TabCodeGen::COND_SPACES()
 {
+	taC.OPEN( ARRAY_TYPE(redFsm->maxCondSpaceId) );
+
 	out << '\t';
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the state's transitions. */
 		for ( GenStateCondList::Iter sc = st->stateCondList; sc.lte(); sc++ ) {
 			/* Cond Space id. */
-			out << sc->condSpace->condSpaceId << ", ";
+			taC.VAL( sc->condSpace->condSpaceId );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -398,18 +437,24 @@ std::ostream &TabCodeGen::COND_SPACES()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taC.VAL( 0 );
+	out << "\n";
+
+	taC.CLOSE();
+	out << "\n";
 	return out;
 }
 
 std::ostream &TabCodeGen::KEYS()
 {
+	taK.OPEN( WIDE_ALPH_TYPE() );
 	out << '\t';
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
-			out << KEY( stel->lowKey ) << ", ";
+			taK.KEY( stel->lowKey );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -417,12 +462,14 @@ std::ostream &TabCodeGen::KEYS()
 		/* Loop the state's transitions. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			/* Lower key. */
-			out << KEY( rtel->lowKey ) << ", ";
+			taK.KEY( rtel->lowKey );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 
 			/* Upper key. */
-			out << KEY( rtel->highKey ) << ", ";
+			taK.KEY( rtel->highKey );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -430,7 +477,12 @@ std::ostream &TabCodeGen::KEYS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taK.KEY( 0 );
+	out << "\n";
+
+	taK.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
@@ -762,48 +814,21 @@ void TabCodeGen::writeData()
 		ACTIONS_ARRAY();
 
 	if ( redFsm->anyConditions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondOffset), CO() );
 		COND_OFFSETS();
-		CLOSE_ARRAY() <<
-		"\n";
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondLen), CL() );
 		COND_LENS();
-		CLOSE_ARRAY() <<
-		"\n";
-
 		COND_KEYS();
-
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
 		COND_SPACES();
-		CLOSE_ARRAY() <<
-		"\n";
 	}
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
 	KEY_OFFSETS();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( WIDE_ALPH_TYPE(), K() );
 	KEYS();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxSingleLen), SL() );
 	SINGLE_LENS();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxRangeLen), RL() );
 	RANGE_LENS();
-	CLOSE_ARRAY() <<
-	"\n";
 
-	OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset), IO() );
 	INDEX_OFFSETS();
-	CLOSE_ARRAY() <<
-	"\n";
 
 	if ( useIndicies ) {
 		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
