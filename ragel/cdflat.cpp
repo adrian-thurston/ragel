@@ -157,10 +157,8 @@ std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 		if ( st->defTrans != 0 )
 			curIndOffset += 1;
 	}
-	out << "\n";
 
 	taIO.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -185,10 +183,8 @@ std::ostream &FlatCodeGen::KEY_SPANS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taSP.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -210,10 +206,8 @@ std::ostream &FlatCodeGen::TO_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taTSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -235,10 +229,8 @@ std::ostream &FlatCodeGen::FROM_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taFSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -260,10 +252,8 @@ std::ostream &FlatCodeGen::EOF_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taEA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -292,10 +282,8 @@ std::ostream &FlatCodeGen::EOF_TRANS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taET.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -322,10 +310,8 @@ std::ostream &FlatCodeGen::COND_KEYS()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	taCK.KEY ( 0 );
-	out << "\n";
 
 	taCK.CLOSE();
-	out << "\n";
 	return out;
 }
 
@@ -349,10 +335,8 @@ std::ostream &FlatCodeGen::COND_KEY_SPANS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taCSP.CLOSE();
-	out << "\n";
 	return out;
 }
 
@@ -386,10 +370,8 @@ std::ostream &FlatCodeGen::CONDS()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	taC.VAL( 0 );
-	out << "\n";
 
 	taC.CLOSE();
-	out << "\n";
 	return out;
 }
 
@@ -414,10 +396,8 @@ std::ostream &FlatCodeGen::COND_INDEX_OFFSET()
 		if ( st->condList != 0 )
 			curIndOffset += keyOps->span( st->condLowKey, st->condHighKey );
 	}
-	out << "\n";
 
 	taCO.CLOSE();
-	out << "\n";
 	return out;
 }
 
@@ -443,10 +423,8 @@ std::ostream &FlatCodeGen::KEYS()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	taK.KEY( 0 );
-	out << "\n";
 
 	taK.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -484,10 +462,8 @@ std::ostream &FlatCodeGen::INDICIES()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	taI.VAL( 0 );
-	out << "\n";
 
 	taI.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -519,11 +495,9 @@ std::ostream &FlatCodeGen::TRANS_TARGS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] transPtrs;
 
 	taTT.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -553,11 +527,9 @@ std::ostream &FlatCodeGen::TRANS_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] transPtrs;
 
 	taTA.CLOSE();
-	out << "\n";
 
 	return out;
 }

@@ -181,10 +181,8 @@ std::ostream &TabCodeGen::COND_OFFSETS()
 		/* Move the key offset ahead. */
 		curKeyOffset += st->stateCondList.length();
 	}
-	out << "\n";
 
 	taCO.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -209,10 +207,8 @@ std::ostream &TabCodeGen::KEY_OFFSETS()
 		/* Move the key offset ahead. */
 		curKeyOffset += st->outSingle.length() + st->outRange.length()*2;
 	}
-	out << "\n";
 
 	taKO.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -240,10 +236,8 @@ std::ostream &TabCodeGen::INDEX_OFFSETS()
 		if ( st->defTrans != 0 )
 			curIndOffset += 1;
 	}
-	out << "\n";
 
 	taIO.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -265,10 +259,8 @@ std::ostream &TabCodeGen::COND_LENS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taCL.CLOSE();
-	out << "\n";
 	return out;
 }
 
@@ -290,9 +282,8 @@ std::ostream &TabCodeGen::SINGLE_LENS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
+
 	taSL.CLOSE();
-	out << "\n";
 	return out;
 }
 
@@ -313,11 +304,8 @@ std::ostream &TabCodeGen::RANGE_LENS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taRL.CLOSE();
-	out << "\n";
-
 	return out;
 }
 
@@ -338,11 +326,8 @@ std::ostream &TabCodeGen::TO_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taTSA.CLOSE();
-	out << "\n";
-
 	return out;
 }
 
@@ -363,10 +348,8 @@ std::ostream &TabCodeGen::FROM_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taFSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -388,10 +371,8 @@ std::ostream &TabCodeGen::EOF_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taEA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -419,10 +400,8 @@ std::ostream &TabCodeGen::EOF_TRANS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taET.CLOSE();
-	out << "\n";
 	return out;
 }
 
@@ -455,10 +434,8 @@ std::ostream &TabCodeGen::COND_KEYS()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	taCK.KEY( 0 );
-	out << "\n";
 
 	taCK.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -485,10 +462,8 @@ std::ostream &TabCodeGen::COND_SPACES()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	taC.VAL( 0 );
-	out << "\n";
 
 	taC.CLOSE();
-	out << "\n";
 	return out;
 }
 
@@ -527,10 +502,8 @@ std::ostream &TabCodeGen::KEYS()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	taK.KEY( 0 );
-	out << "\n";
 
 	taK.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -572,10 +545,8 @@ std::ostream &TabCodeGen::INDICIES()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	taI.VAL( 0 );
-	out << "\n";
 
 	taI.CLOSE();
-	out << "\n";
 	return out;
 }
 
@@ -631,10 +602,8 @@ std::ostream &TabCodeGen::TRANS_TARGS()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	taTT.VAL( 0 );
-	out << "\n";
 
 	taTT.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -687,10 +656,9 @@ std::ostream &TabCodeGen::TRANS_ACTIONS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taTA.VAL( 0 );
 
 	taTA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -722,11 +690,9 @@ std::ostream &TabCodeGen::TRANS_TARGS_WI()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] transPtrs;
 
 	taTT.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -756,11 +722,9 @@ std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] transPtrs;
 
 	taTA.CLOSE();
-	out << "\n";
 
 	return out;
 }

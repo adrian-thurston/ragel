@@ -173,11 +173,9 @@ std::ostream &FFlatCodeGen::TRANS_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] transPtrs;
 
 	taTA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -199,10 +197,8 @@ std::ostream &FFlatCodeGen::TO_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taTSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -224,10 +220,8 @@ std::ostream &FFlatCodeGen::FROM_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taFSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -249,10 +243,8 @@ std::ostream &FFlatCodeGen::EOF_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taEA.CLOSE();
-	out << "\n";
 
 	return out;
 }

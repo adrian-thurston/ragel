@@ -474,11 +474,9 @@ std::ostream &GotoCodeGen::TO_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] vals;
 
 	taTSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -507,11 +505,9 @@ std::ostream &GotoCodeGen::FROM_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] vals;
 
 	taFSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -540,11 +536,9 @@ std::ostream &GotoCodeGen::EOF_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] vals;
 
 	taEA.CLOSE();
-	out << "\n";
 
 	return out;
 }

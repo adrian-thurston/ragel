@@ -92,7 +92,9 @@ void TableArray::KEY( Key key )
 
 void TableArray::CLOSE()
 {
+	out << "\n";
 	codeGen.CLOSE_ARRAY();
+	out << "\n";
 }
 
 void FsmCodeGen::genLineDirective( ostream &out )
@@ -177,11 +179,7 @@ std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 		}
 	}
 
-	out << "\n";
-
 	taA.CLOSE();
-	out << "\n";
-
 	return out;
 }
 

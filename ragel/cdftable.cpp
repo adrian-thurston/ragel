@@ -226,10 +226,8 @@ std::ostream &FTabCodeGen::TRANS_ACTIONS()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	taTA.VAL( 0 );
-	out << "\n";
 
 	taTA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -258,11 +256,9 @@ std::ostream &FTabCodeGen::TRANS_ACTIONS_WI()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] transPtrs;
 
 	taTA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -285,10 +281,8 @@ std::ostream &FTabCodeGen::TO_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taTSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -310,10 +304,8 @@ std::ostream &FTabCodeGen::FROM_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taFSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -335,10 +327,8 @@ std::ostream &FTabCodeGen::EOF_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 
 	taEA.CLOSE();
-	out << "\n";
 
 	return out;
 }

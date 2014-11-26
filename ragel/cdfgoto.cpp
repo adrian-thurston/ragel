@@ -174,11 +174,9 @@ std::ostream &FGotoCodeGen::TO_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] vals;
 
 	taTSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -207,11 +205,9 @@ std::ostream &FGotoCodeGen::FROM_STATE_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] vals;
 
 	taFSA.CLOSE();
-	out << "\n";
 
 	return out;
 }
@@ -240,11 +236,9 @@ std::ostream &FGotoCodeGen::EOF_ACTIONS()
 				out << "\n\t";
 		}
 	}
-	out << "\n";
 	delete[] vals;
 
 	taEA.CLOSE();
-	out << "\n";
 
 	return out;
 }
