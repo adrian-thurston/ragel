@@ -59,7 +59,7 @@ std::ostream &FTabCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	int act = 0;
 	if ( state->toStateAction != 0 )
 		act = state->toStateAction->actListId+1;
-	out << act;
+	taTSA.VAL( act );
 	return out;
 }
 
@@ -68,7 +68,7 @@ std::ostream &FTabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	int act = 0;
 	if ( state->fromStateAction != 0 )
 		act = state->fromStateAction->actListId+1;
-	out << act;
+	taFSA.VAL( act );
 	return out;
 }
 
@@ -77,7 +77,7 @@ std::ostream &FTabCodeGen::EOF_ACTION( RedStateAp *state )
 	int act = 0;
 	if ( state->eofAction != 0 )
 		act = state->eofAction->actListId+1;
-	out << act;
+	taEA.VAL( act );
 	return out;
 }
 
@@ -88,7 +88,7 @@ std::ostream &FTabCodeGen::TRANS_ACTION( RedTransAp *trans )
 	int action = 0;
 	if ( trans->action != 0 )
 		action = trans->action->actListId+1;
-	out << action;
+	taTA.VAL( action );
 	return out;
 }
 
@@ -180,6 +180,8 @@ std::ostream &FTabCodeGen::ACTION_SWITCH()
 
 std::ostream &FTabCodeGen::TRANS_ACTIONS()
 {
+	taTA.OPEN( ARRAY_TYPE(redFsm->maxActListId) );
+
 	int totalTrans = 0;
 	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -221,12 +223,19 @@ std::ostream &FTabCodeGen::TRANS_ACTIONS()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taTA.VAL( 0 );
+	out << "\n";
+
+	taTA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &FTabCodeGen::TRANS_ACTIONS_WI()
 {
+	taTA.OPEN( ARRAY_TYPE(redFsm->maxActListId) );
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
@@ -247,12 +256,18 @@ std::ostream &FTabCodeGen::TRANS_ACTIONS_WI()
 	}
 	out << "\n";
 	delete[] transPtrs;
+
+	taTA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 
 std::ostream &FTabCodeGen::TO_STATE_ACTIONS()
 {
+	taTSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -265,11 +280,17 @@ std::ostream &FTabCodeGen::TO_STATE_ACTIONS()
 		}
 	}
 	out << "\n";
+
+	taTSA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &FTabCodeGen::FROM_STATE_ACTIONS()
 {
+	taFSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -282,11 +303,17 @@ std::ostream &FTabCodeGen::FROM_STATE_ACTIONS()
 		}
 	}
 	out << "\n";
+
+	taFSA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &FTabCodeGen::EOF_ACTIONS()
 {
+	taEA.OPEN( ARRAY_TYPE(redFsm->maxActListId) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -299,6 +326,10 @@ std::ostream &FTabCodeGen::EOF_ACTIONS()
 		}
 	}
 	out << "\n";
+
+	taEA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
@@ -320,64 +351,31 @@ void FTabCodeGen::writeData()
 	INDEX_OFFSETS();
 
 	if ( useIndicies ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
 		INDICIES();
-		CLOSE_ARRAY() <<
-		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 		TRANS_TARGS_WI();
-		CLOSE_ARRAY() <<
-		"\n";
 
-		if ( redFsm->anyActions() ) {
-			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), TA() );
+		if ( redFsm->anyActions() )
 			TRANS_ACTIONS_WI();
-			CLOSE_ARRAY() <<
-			"\n";
-		}
 	}
 	else {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 		TRANS_TARGS();
-		CLOSE_ARRAY() <<
-		"\n";
 
-		if ( redFsm->anyActions() ) {
-			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), TA() );
+		if ( redFsm->anyActions() )
 			TRANS_ACTIONS();
-			CLOSE_ARRAY() <<
-			"\n";
-		}
 	}
 
-	if ( redFsm->anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+	if ( redFsm->anyToStateActions() )
 		TO_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
-	if ( redFsm->anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+	if ( redFsm->anyFromStateActions() )
 		FROM_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
-	if ( redFsm->anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActListId), EA() );
+	if ( redFsm->anyEofActions() )
 		EOF_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
-	if ( redFsm->anyEofTrans() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
+	if ( redFsm->anyEofTrans() )
 		EOF_TRANS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
 	STATE_IDS();
 }

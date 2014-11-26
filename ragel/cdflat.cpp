@@ -31,7 +31,7 @@ std::ostream &FlatCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	int act = 0;
 	if ( state->toStateAction != 0 )
 		act = state->toStateAction->location+1;
-	out << act;
+	taTSA.VAL( act );
 	return out;
 }
 
@@ -40,7 +40,7 @@ std::ostream &FlatCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	int act = 0;
 	if ( state->fromStateAction != 0 )
 		act = state->fromStateAction->location+1;
-	out << act;
+	taFSA.VAL( act );
 	return out;
 }
 
@@ -49,7 +49,7 @@ std::ostream &FlatCodeGen::EOF_ACTION( RedStateAp *state )
 	int act = 0;
 	if ( state->eofAction != 0 )
 		act = state->eofAction->location+1;
-	out << act;
+	taEA.VAL( act );
 	return out;
 }
 
@@ -59,7 +59,7 @@ std::ostream &FlatCodeGen::TRANS_ACTION( RedTransAp *trans )
 	int act = 0;
 	if ( trans->action != 0 )
 		act = trans->action->location+1;
-	out << act;
+	taTA.VAL( act );
 	return out;
 }
 
@@ -191,6 +191,8 @@ std::ostream &FlatCodeGen::KEY_SPANS()
 
 std::ostream &FlatCodeGen::TO_STATE_ACTIONS()
 {
+	taTSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -203,11 +205,17 @@ std::ostream &FlatCodeGen::TO_STATE_ACTIONS()
 		}
 	}
 	out << "\n";
+
+	taTSA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &FlatCodeGen::FROM_STATE_ACTIONS()
 {
+	taFSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -220,11 +228,17 @@ std::ostream &FlatCodeGen::FROM_STATE_ACTIONS()
 		}
 	}
 	out << "\n";
+
+	taFSA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &FlatCodeGen::EOF_ACTIONS()
 {
+	taEA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -237,11 +251,17 @@ std::ostream &FlatCodeGen::EOF_ACTIONS()
 		}
 	}
 	out << "\n";
+
+	taEA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &FlatCodeGen::EOF_TRANS()
 {
+	taET.OPEN( ARRAY_TYPE(redFsm->maxIndexOffset+1) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -252,7 +272,7 @@ std::ostream &FlatCodeGen::EOF_TRANS()
 			assert( st->eofTrans->pos >= 0 );
 			trans = st->eofTrans->pos+1;
 		}
-		out << trans;
+		taET.VAL( trans );
 
 		if ( !st.last() ) {
 			out << ", ";
@@ -261,13 +281,17 @@ std::ostream &FlatCodeGen::EOF_TRANS()
 		}
 	}
 	out << "\n";
+
+	taET.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 
 std::ostream &FlatCodeGen::COND_KEYS()
 {
-	OPEN_ARRAY( WIDE_ALPH_TYPE(), CK() );
+	taCK.OPEN( WIDE_ALPH_TYPE() );
 
 	out << '\t';
 	int totalTrans = 0;
@@ -286,8 +310,8 @@ std::ostream &FlatCodeGen::COND_KEYS()
 	taCK.KEY ( 0 );
 	out << "\n";
 
-	CLOSE_ARRAY() <<
-	"\n";
+	taCK.CLOSE();
+	out << "\n";
 	return out;
 }
 
@@ -481,6 +505,8 @@ std::ostream &FlatCodeGen::TRANS_TARGS()
 
 std::ostream &FlatCodeGen::TRANS_ACTIONS()
 {
+	taTA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
@@ -501,6 +527,10 @@ std::ostream &FlatCodeGen::TRANS_ACTIONS()
 	}
 	out << "\n";
 	delete[] transPtrs;
+
+	taTA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
@@ -626,40 +656,20 @@ void FlatCodeGen::writeData()
 
 	TRANS_TARGS();
 
-	if ( redFsm->anyActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+	if ( redFsm->anyActions() )
 		TRANS_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
-	if ( redFsm->anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+	if ( redFsm->anyToStateActions() )
 		TO_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
-	if ( redFsm->anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+	if ( redFsm->anyFromStateActions() )
 		FROM_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
-	if ( redFsm->anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
+	if ( redFsm->anyEofActions() )
 		EOF_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
-	if ( redFsm->anyEofTrans() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
+	if ( redFsm->anyEofTrans() )
 		EOF_TRANS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
 	STATE_IDS();
 }

@@ -59,7 +59,7 @@ std::ostream &TabCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	int act = 0;
 	if ( state->toStateAction != 0 )
 		act = state->toStateAction->location+1;
-	out << act;
+	taTSA.VAL( act );
 	return out;
 }
 
@@ -68,7 +68,7 @@ std::ostream &TabCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	int act = 0;
 	if ( state->fromStateAction != 0 )
 		act = state->fromStateAction->location+1;
-	out << act;
+	taFSA.VAL( act );
 	return out;
 }
 
@@ -77,7 +77,7 @@ std::ostream &TabCodeGen::EOF_ACTION( RedStateAp *state )
 	int act = 0;
 	if ( state->eofAction != 0 )
 		act = state->eofAction->location+1;
-	out << act;
+	taEA.VAL( act );
 	return out;
 }
 
@@ -88,7 +88,7 @@ std::ostream &TabCodeGen::TRANS_ACTION( RedTransAp *trans )
 	int act = 0;
 	if ( trans->action != 0 )
 		act = trans->action->location+1;
-	out << act;
+	taTA.VAL( act );
 	return out;
 }
 
@@ -311,6 +311,8 @@ std::ostream &TabCodeGen::RANGE_LENS()
 
 std::ostream &TabCodeGen::TO_STATE_ACTIONS()
 {
+	taTSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -323,11 +325,17 @@ std::ostream &TabCodeGen::TO_STATE_ACTIONS()
 		}
 	}
 	out << "\n";
+
+	taTSA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &TabCodeGen::FROM_STATE_ACTIONS()
 {
+	taFSA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -340,11 +348,17 @@ std::ostream &TabCodeGen::FROM_STATE_ACTIONS()
 		}
 	}
 	out << "\n";
+
+	taFSA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &TabCodeGen::EOF_ACTIONS()
 {
+	taEA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -357,11 +371,17 @@ std::ostream &TabCodeGen::EOF_ACTIONS()
 		}
 	}
 	out << "\n";
+
+	taEA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &TabCodeGen::EOF_TRANS()
 {
+	taET.OPEN( ARRAY_TYPE(redFsm->maxIndexOffset+1) );
+
 	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -379,6 +399,9 @@ std::ostream &TabCodeGen::EOF_TRANS()
 				out << "\n\t";
 		}
 	}
+	out << "\n";
+
+	taET.CLOSE();
 	out << "\n";
 	return out;
 }
@@ -488,26 +511,31 @@ std::ostream &TabCodeGen::KEYS()
 
 std::ostream &TabCodeGen::INDICIES()
 {
+	taI.OPEN( ARRAY_TYPE(redFsm->maxIndex) );
+
 	int totalTrans = 0;
 	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
-			out << stel->value->id << ", ";
+			taI.VAL( stel->value->id );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
-			out << rtel->value->id << ", ";
+			taI.VAL( rtel->value->id );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
-			out << st->defTrans->id << ", ";
+			taI.VAL( st->defTrans->id );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -515,19 +543,26 @@ std::ostream &TabCodeGen::INDICIES()
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taI.VAL( 0 );
+	out << "\n";
+
+	taI.CLOSE();
+	out << "\n";
 	return out;
 }
 
 std::ostream &TabCodeGen::TRANS_TARGS()
 {
+	taTT.OPEN( ARRAY_TYPE(redFsm->maxState) );
+
 	int totalTrans = 0;
 	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			out << trans->targ->id << ", ";
+			taTT.VAL( trans->targ->id );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -535,7 +570,8 @@ std::ostream &TabCodeGen::TRANS_TARGS()
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			out << trans->targ->id << ", ";
+			taTT.VAL( trans->targ->id );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -543,7 +579,8 @@ std::ostream &TabCodeGen::TRANS_TARGS()
 		/* The state's default target state. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			out << trans->targ->id << ", ";
+			taTT.VAL( trans->targ->id );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
@@ -554,22 +591,29 @@ std::ostream &TabCodeGen::TRANS_TARGS()
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
 			trans->pos = totalTrans;
-			out << trans->targ->id << ", ";
+			taTT.VAL( trans->targ->id );
+			out << ", ";
 			if ( ++totalTrans % IALL == 0 )
 				out << "\n\t";
 		}
 	}
 
-
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
-	out << 0 << "\n";
+	taTT.VAL( 0 );
+	out << "\n";
+
+	taTT.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 
 std::ostream &TabCodeGen::TRANS_ACTIONS()
 {
+	taTA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	int totalTrans = 0;
 	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -612,11 +656,17 @@ std::ostream &TabCodeGen::TRANS_ACTIONS()
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
 	out << 0 << "\n";
+
+	taTA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 std::ostream &TabCodeGen::TRANS_TARGS_WI()
 {
+	taTT.OPEN( ARRAY_TYPE(redFsm->maxState) );
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
@@ -631,7 +681,7 @@ std::ostream &TabCodeGen::TRANS_TARGS_WI()
 		trans->pos = t;
 
 		/* Write out the target state. */
-		out << trans->targ->id;
+		taTT.VAL( trans->targ->id );
 		if ( t < redFsm->transSet.length()-1 ) {
 			out << ", ";
 			if ( ++totalStates % IALL == 0 )
@@ -640,12 +690,18 @@ std::ostream &TabCodeGen::TRANS_TARGS_WI()
 	}
 	out << "\n";
 	delete[] transPtrs;
+
+	taTT.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
 
 std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
 {
+	taTA.OPEN( ARRAY_TYPE(redFsm->maxActionLoc) );
+
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
@@ -666,6 +722,10 @@ std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
 	}
 	out << "\n";
 	delete[] transPtrs;
+
+	taTA.CLOSE();
+	out << "\n";
+
 	return out;
 }
 
@@ -831,64 +891,31 @@ void TabCodeGen::writeData()
 	INDEX_OFFSETS();
 
 	if ( useIndicies ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndex), I() );
 		INDICIES();
-		CLOSE_ARRAY() <<
-		"\n";
 
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 		TRANS_TARGS_WI();
-		CLOSE_ARRAY() <<
-		"\n";
 
-		if ( redFsm->anyActions() ) {
-			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+		if ( redFsm->anyActions() )
 			TRANS_ACTIONS_WI();
-			CLOSE_ARRAY() <<
-			"\n";
-		}
 	}
 	else {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxState), TT() );
 		TRANS_TARGS();
-		CLOSE_ARRAY() <<
-		"\n";
 
-		if ( redFsm->anyActions() ) {
-			OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+		if ( redFsm->anyActions() )
 			TRANS_ACTIONS();
-			CLOSE_ARRAY() <<
-			"\n";
-		}
 	}
 
-	if ( redFsm->anyToStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+	if ( redFsm->anyToStateActions() )
 		TO_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
-	if ( redFsm->anyFromStateActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+	if ( redFsm->anyFromStateActions() )
 		FROM_STATE_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
-	if ( redFsm->anyEofActions() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxActionLoc), EA() );
+	if ( redFsm->anyEofActions() )
 		EOF_ACTIONS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
-	if ( redFsm->anyEofTrans() ) {
-		OPEN_ARRAY( ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
+	if ( redFsm->anyEofTrans() )
 		EOF_TRANS();
-		CLOSE_ARRAY() <<
-		"\n";
-	}
 
 	STATE_IDS();
 }
