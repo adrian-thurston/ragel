@@ -184,31 +184,23 @@ std::ostream &FTabCodeGen::TRANS_ACTIONS()
 
 	taTA.OPEN();
 
-	int totalTrans = 0;
-	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			TRANS_ACTION( taTA, trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			TRANS_ACTION( taTA, trans );
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			TRANS_ACTION( taTA, trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			TRANS_ACTION( taTA, trans );
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			TRANS_ACTION( taTA, trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			TRANS_ACTION( taTA, trans );
 		}
 	}
 
@@ -216,12 +208,9 @@ std::ostream &FTabCodeGen::TRANS_ACTIONS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
-			TRANS_ACTION( taTA, trans ) << ", ";
-			if ( ++totalTrans % IALL == 0 )
-				out << "\n\t";
+			TRANS_ACTION( taTA, trans );
 		}
 	}
-
 
 	/* Output one last number so we don't have to figure out when the last
 	 * entry is and avoid writing a comma. */
@@ -244,17 +233,10 @@ std::ostream &FTabCodeGen::TRANS_ACTIONS_WI()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
-	int totalAct = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
 		RedTransAp *trans = transPtrs[t];
 		TRANS_ACTION( taTA, trans );
-		if ( t < redFsm->transSet.length()-1 ) {
-			out << ", ";
-			if ( ++totalAct % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 	delete[] transPtrs;
 
@@ -270,16 +252,9 @@ std::ostream &FTabCodeGen::TO_STATE_ACTIONS()
 
 	taTSA.OPEN();
 
-	out << "\t";
-	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		TO_STATE_ACTION( taTSA, st );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 
 	taTSA.CLOSE();
@@ -293,16 +268,9 @@ std::ostream &FTabCodeGen::FROM_STATE_ACTIONS()
 
 	taFSA.OPEN();
 
-	out << "\t";
-	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		FROM_STATE_ACTION( taFSA, st );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 
 	taFSA.CLOSE();
@@ -316,24 +284,15 @@ std::ostream &FTabCodeGen::EOF_ACTIONS()
 
 	taEA.OPEN();
 
-	out << "\t";
-	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		EOF_ACTION( taEA, st );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 
 	taEA.CLOSE();
 
 	return out;
 }
-
-
 
 void FTabCodeGen::writeData()
 {

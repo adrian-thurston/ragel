@@ -464,15 +464,9 @@ std::ostream &GotoCodeGen::TO_STATE_ACTIONS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 		vals[st->id] = TO_STATE_ACTION(st);
 
-	out << "\t";
 	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
 		/* Write any eof action. */
 		taTSA.VAL( vals[st] );
-		if ( st < numStates-1 ) {
-			out << ", ";
-			if ( (st+1) % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 	delete[] vals;
 
@@ -495,15 +489,9 @@ std::ostream &GotoCodeGen::FROM_STATE_ACTIONS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 		vals[st->id] = FROM_STATE_ACTION(st);
 
-	out << "\t";
 	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
 		/* Write any eof action. */
 		taFSA.VAL( vals[st] );
-		if ( st < numStates-1 ) {
-			out << ", ";
-			if ( (st+1) % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 	delete[] vals;
 
@@ -526,15 +514,9 @@ std::ostream &GotoCodeGen::EOF_ACTIONS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 		vals[st->id] = EOF_ACTION(st);
 
-	out << "\t";
 	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
 		/* Write any eof action. */
 		taEA.VAL( vals[st] );
-		if ( st < numStates-1 ) {
-			out << ", ";
-			if ( (st+1) % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 	delete[] vals;
 

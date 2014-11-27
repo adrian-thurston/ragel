@@ -139,16 +139,10 @@ std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 
 	taIO.OPEN();
 
-	out << "\t";
 	int totalStateNum = 0, curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the index offset. */
 		taIO.VAL( curIndOffset );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 		
 		/* Move the index offset ahead. */
 		if ( st->transList != 0 )
@@ -169,7 +163,6 @@ std::ostream &FlatCodeGen::KEY_SPANS()
 
 	taSP.OPEN();
 
-	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
@@ -177,11 +170,6 @@ std::ostream &FlatCodeGen::KEY_SPANS()
 		if ( st->transList != 0 )
 			span = keyOps->span( st->lowKey, st->highKey );
 		taSP.VAL( span );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 
 	taSP.CLOSE();
@@ -195,16 +183,10 @@ std::ostream &FlatCodeGen::TO_STATE_ACTIONS()
 
 	taTSA.OPEN();
 
-	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		TO_STATE_ACTION( taTSA, st );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 
 	taTSA.CLOSE();
@@ -218,16 +200,10 @@ std::ostream &FlatCodeGen::FROM_STATE_ACTIONS()
 
 	taFSA.OPEN();
 
-	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		FROM_STATE_ACTION( taFSA, st );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 
 	taFSA.CLOSE();
@@ -241,16 +217,10 @@ std::ostream &FlatCodeGen::EOF_ACTIONS()
 
 	taEA.OPEN();
 
-	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		EOF_ACTION( taEA, st );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 
 	taEA.CLOSE();
@@ -264,23 +234,15 @@ std::ostream &FlatCodeGen::EOF_TRANS()
 
 	taET.OPEN();
 
-	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
-
 		long trans = 0;
 		if ( st->eofTrans != 0 ) {
 			assert( st->eofTrans->pos >= 0 );
 			trans = st->eofTrans->pos+1;
 		}
 		taET.VAL( trans );
-
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 
 	taET.CLOSE();
@@ -295,16 +257,11 @@ std::ostream &FlatCodeGen::COND_KEYS()
 
 	taCK.OPEN();
 
-	out << '\t';
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit just cond low key and cond high key. */
 		taCK.KEY( st->condLowKey );
-		out << ", ";
 		taCK.KEY( st->condHighKey );
-		out << ", ";
-		if ( ++totalTrans % IALL == 0 )
-			out << "\n\t";
 	}
 
 	/* Output one last number so we don't have to figure out when the last
@@ -321,7 +278,6 @@ std::ostream &FlatCodeGen::COND_KEY_SPANS()
 
 	taCSP.OPEN();
 
-	out << "\t";
 	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write singles length. */
@@ -329,11 +285,6 @@ std::ostream &FlatCodeGen::COND_KEY_SPANS()
 		if ( st->condList != 0 )
 			span = keyOps->span( st->condLowKey, st->condHighKey );
 		taCSP.VAL( span );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 
 	taCSP.CLOSE();
@@ -347,7 +298,6 @@ std::ostream &FlatCodeGen::CONDS()
 	taC.OPEN();
 
 	int totalTrans = 0;
-	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->condList != 0 ) {
 			/* Walk the singles. */
@@ -355,14 +305,10 @@ std::ostream &FlatCodeGen::CONDS()
 			for ( unsigned long long pos = 0; pos < span; pos++ ) {
 				if ( st->condList[pos] != 0 ) {
 					taC.VAL( st->condList[pos]->condSpaceId + 1 );
-					out << ", ";
 				}
 				else {
 					taC.VAL( 0 );
-					out << ", ";
 				}
-				if ( ++totalTrans % IALL == 0 )
-					out << "\n\t";
 			}
 		}
 	}
@@ -381,16 +327,10 @@ std::ostream &FlatCodeGen::COND_INDEX_OFFSET()
 
 	taCO.OPEN();
 
-	out << "\t";
 	int totalStateNum = 0, curIndOffset = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write the index offset. */
 		taCO.VAL( curIndOffset );
-		if ( !st.last() ) {
-			out << ", ";
-			if ( ++totalStateNum % IALL == 0 )
-				out << "\n\t";
-		}
 		
 		/* Move the index offset ahead. */
 		if ( st->condList != 0 )
@@ -408,16 +348,11 @@ std::ostream &FlatCodeGen::KEYS()
 
 	taK.OPEN();
 
-	out << '\t';
 	int totalTrans = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Emit just low key and high key. */
 		taK.KEY( st->lowKey );
-		out << ", ";
 		taK.KEY( st->highKey );
-		out << ", ";
-		if ( ++totalTrans % IALL == 0 )
-			out << "\n\t";
 	}
 
 	/* Output one last number so we don't have to figure out when the last
@@ -436,27 +371,17 @@ std::ostream &FlatCodeGen::INDICIES()
 	taI.OPEN();
 
 	int totalTrans = 0;
-	out << '\t';
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList != 0 ) {
 			/* Walk the singles. */
 			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
-			for ( unsigned long long pos = 0; pos < span; pos++ ) {
+			for ( unsigned long long pos = 0; pos < span; pos++ )
 				taI.VAL( st->transList[pos]->id );
-				out << ", ";
-				if ( ++totalTrans % IALL == 0 )
-					out << "\n\t";
-			}
 		}
 
 		/* The state's default index goes next. */
-		if ( st->defTrans != 0 ) {
+		if ( st->defTrans != 0 )
 			taI.VAL( st->defTrans->id );
-			out << ", ";
-		}
-
-		if ( ++totalTrans % IALL == 0 )
-			out << "\n\t";
 	}
 
 	/* Output one last number so we don't have to figure out when the last
@@ -480,7 +405,6 @@ std::ostream &FlatCodeGen::TRANS_TARGS()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
 	int totalStates = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
@@ -489,11 +413,6 @@ std::ostream &FlatCodeGen::TRANS_TARGS()
 
 		/* Write out the target state. */
 		taTT.VAL( trans->targ->id );
-		if ( t < redFsm->transSet.length()-1 ) {
-			out << ", ";
-			if ( ++totalStates % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 	delete[] transPtrs;
 
@@ -515,17 +434,11 @@ std::ostream &FlatCodeGen::TRANS_ACTIONS()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	out << '\t';
 	int totalAct = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
 		RedTransAp *trans = transPtrs[t];
 		TRANS_ACTION( taTA, trans );
-		if ( t < redFsm->transSet.length()-1 ) {
-			out << ", ";
-			if ( ++totalAct % IALL == 0 )
-				out << "\n\t";
-		}
 	}
 	delete[] transPtrs;
 

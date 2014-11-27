@@ -68,14 +68,12 @@ void cdLineDirective( ostream &out, const char *fileName, int line )
 	out << '\n';
 }
 
-TableArray::TableArray( FsmCodeGen &codeGen, std::string type,
-		std::string name, bool format )
+TableArray::TableArray( FsmCodeGen &codeGen, std::string type, std::string name )
 :
 	codeGen(codeGen),
 	type(type),
 	name(name),
 	out(codeGen.out),
-	format(format),
 	first(true),
 	ln(0)
 {
@@ -84,7 +82,7 @@ TableArray::TableArray( FsmCodeGen &codeGen, std::string type,
 void TableArray::OPEN()
 {
 	codeGen.OPEN_ARRAY( type, name );
-	if ( format ) out << "\t";
+	out << "\t";
 }
 
 void TableArray::KEY( Key key )
@@ -161,27 +159,14 @@ std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 
 	taA.OPEN();
 
-	out << "\t";
 	taA.VAL( 0 );
-	out << ", ";
 	int totalActions = 1;
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
 		taA.VAL( act->key.length() );
-		out << ", ";
-
-		/* Put in a line break every 8 */
-		if ( totalActions++ % 8 == 7 )
-			out << "\n\t";
 
 		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
 			taA.VAL( item->value->actionId );
-			if ( ! (act.last() && item.last()) )
-				out << ", ";
-
-			/* Put in a line break every 8 */
-			if ( totalActions++ % 8 == 7 )
-				out << "\n\t";
 		}
 	}
 

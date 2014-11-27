@@ -53,17 +53,13 @@ string itoa( int i );
 
 struct TableArray
 {
-	TableArray( FsmCodeGen &codeGen, std::string type,
-			std::string name, bool format = false );
+	TableArray( FsmCodeGen &codeGen, std::string type, std::string name );
 
 	void OPEN();
 	void CLOSE();
 
 	void fmt()
 	{
-		if ( !format )
-			return;
-
 		if ( ! first ) {
 			out << ", ";
 
@@ -94,7 +90,6 @@ struct TableArray
 	std::string type;
 	std::string name;
 	ostream &out;
-	bool format;
 	bool first;
 	long ln;
 };
