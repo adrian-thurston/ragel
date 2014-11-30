@@ -53,7 +53,7 @@ string itoa( int i );
 
 struct TableArray
 {
-	TableArray( FsmCodeGen &codeGen, std::string type, std::string name );
+	TableArray( FsmCodeGen &codeGen, HostType *hostType, std::string name );
 
 	void OPEN();
 	void CLOSE();
@@ -87,7 +87,7 @@ struct TableArray
 	void KEY( Key key );
 
 	FsmCodeGen &codeGen;
-	std::string type;
+	HostType *hostType;
 	std::string name;
 	ostream &out;
 	bool first;
@@ -225,6 +225,10 @@ protected:
 	bool useIndicies;
 
 	void genLineDirective( ostream &out );
+
+	/* Return types in HostType form. */
+	HostType *wideAlphType();
+	HostType *arrayType( unsigned long maxVal );
 
 public:
 	/* Determine if we should use indicies. */

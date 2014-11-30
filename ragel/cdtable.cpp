@@ -163,7 +163,7 @@ std::ostream &TabCodeGen::ACTION_SWITCH()
 
 std::ostream &TabCodeGen::COND_OFFSETS()
 {
-	TableArray taCO( *this, ARRAY_TYPE(redFsm->maxCondOffset), CO() );
+	TableArray taCO( *this, arrayType(redFsm->maxCondOffset), CO() );
 
 	taCO.OPEN();
 
@@ -183,7 +183,7 @@ std::ostream &TabCodeGen::COND_OFFSETS()
 
 std::ostream &TabCodeGen::KEY_OFFSETS()
 {
-	TableArray taKO( *this, ARRAY_TYPE(redFsm->maxKeyOffset), KO() );
+	TableArray taKO( *this, arrayType(redFsm->maxKeyOffset), KO() );
 
 	taKO.OPEN();
 
@@ -204,7 +204,7 @@ std::ostream &TabCodeGen::KEY_OFFSETS()
 
 std::ostream &TabCodeGen::INDEX_OFFSETS()
 {
-	TableArray taIO( *this, ARRAY_TYPE(redFsm->maxIndexOffset), IO() );
+	TableArray taIO( *this, arrayType(redFsm->maxIndexOffset), IO() );
 
 	taIO.OPEN();
 
@@ -226,7 +226,7 @@ std::ostream &TabCodeGen::INDEX_OFFSETS()
 
 std::ostream &TabCodeGen::COND_LENS()
 {
-	TableArray taCL( *this, ARRAY_TYPE(redFsm->maxCondLen), CL() );
+	TableArray taCL( *this, arrayType(redFsm->maxCondLen), CL() );
 
 	taCL.OPEN();
 
@@ -242,7 +242,7 @@ std::ostream &TabCodeGen::COND_LENS()
 
 std::ostream &TabCodeGen::SINGLE_LENS()
 {
-	TableArray taSL( *this, ARRAY_TYPE(redFsm->maxSingleLen), SL() );
+	TableArray taSL( *this, arrayType(redFsm->maxSingleLen), SL() );
 
 	taSL.OPEN();
 
@@ -257,7 +257,7 @@ std::ostream &TabCodeGen::SINGLE_LENS()
 
 std::ostream &TabCodeGen::RANGE_LENS()
 {
-	TableArray taRL( *this, ARRAY_TYPE(redFsm->maxRangeLen), RL() );
+	TableArray taRL( *this, arrayType(redFsm->maxRangeLen), RL() );
 
 	taRL.OPEN();
 
@@ -272,7 +272,7 @@ std::ostream &TabCodeGen::RANGE_LENS()
 
 std::ostream &TabCodeGen::TO_STATE_ACTIONS()
 {
-	TableArray taTSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+	TableArray taTSA( *this, arrayType(redFsm->maxActionLoc), TSA() );
 
 	taTSA.OPEN();
 
@@ -287,7 +287,7 @@ std::ostream &TabCodeGen::TO_STATE_ACTIONS()
 
 std::ostream &TabCodeGen::FROM_STATE_ACTIONS()
 {
-	TableArray taFSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+	TableArray taFSA( *this, arrayType(redFsm->maxActionLoc), FSA() );
 
 	taFSA.OPEN();
 
@@ -303,7 +303,7 @@ std::ostream &TabCodeGen::FROM_STATE_ACTIONS()
 
 std::ostream &TabCodeGen::EOF_ACTIONS()
 {
-	TableArray taEA( *this, ARRAY_TYPE(redFsm->maxActionLoc), EA() );
+	TableArray taEA( *this, arrayType(redFsm->maxActionLoc), EA() );
 
 	taEA.OPEN();
 
@@ -319,7 +319,7 @@ std::ostream &TabCodeGen::EOF_ACTIONS()
 
 std::ostream &TabCodeGen::EOF_TRANS()
 {
-	TableArray taET( *this, ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
+	TableArray taET( *this, arrayType(redFsm->maxIndexOffset+1), ET() );
 
 	taET.OPEN();
 
@@ -340,7 +340,7 @@ std::ostream &TabCodeGen::EOF_TRANS()
 
 std::ostream &TabCodeGen::COND_KEYS()
 {
-	TableArray taCK( *this, WIDE_ALPH_TYPE(), CK() );
+	TableArray taCK( *this, wideAlphType(), CK() );
 
 	taCK.OPEN();
 
@@ -366,7 +366,7 @@ std::ostream &TabCodeGen::COND_KEYS()
 
 std::ostream &TabCodeGen::COND_SPACES()
 {
-	TableArray taC( *this, ARRAY_TYPE(redFsm->maxCondSpaceId), C() );
+	TableArray taC( *this, arrayType(redFsm->maxCondSpaceId), C() );
 
 	taC.OPEN();
 
@@ -388,7 +388,7 @@ std::ostream &TabCodeGen::COND_SPACES()
 
 std::ostream &TabCodeGen::KEYS()
 {
-	TableArray taK( *this, WIDE_ALPH_TYPE(), K() );
+	TableArray taK( *this, wideAlphType(), K() );
 
 	taK.OPEN();
 
@@ -419,7 +419,7 @@ std::ostream &TabCodeGen::KEYS()
 
 std::ostream &TabCodeGen::INDICIES()
 {
-	TableArray taI( *this, ARRAY_TYPE(redFsm->maxIndex), I() );
+	TableArray taI( *this, arrayType(redFsm->maxIndex), I() );
 
 	taI.OPEN();
 
@@ -450,7 +450,7 @@ std::ostream &TabCodeGen::INDICIES()
 
 std::ostream &TabCodeGen::TRANS_TARGS()
 {
-	TableArray taTT( *this, ARRAY_TYPE(redFsm->maxState), TT() );
+	TableArray taTT( *this, arrayType(redFsm->maxState), TT() );
 
 	taTT.OPEN();
 
@@ -500,7 +500,7 @@ std::ostream &TabCodeGen::TRANS_TARGS()
 
 std::ostream &TabCodeGen::TRANS_ACTIONS()
 {
-	TableArray taTA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+	TableArray taTA( *this, arrayType(redFsm->maxActionLoc), TA() );
 
 	taTA.OPEN();
 
@@ -543,7 +543,7 @@ std::ostream &TabCodeGen::TRANS_ACTIONS()
 
 std::ostream &TabCodeGen::TRANS_TARGS_WI()
 {
-	TableArray taTT( *this, ARRAY_TYPE(redFsm->maxState), TT() );
+	TableArray taTT( *this, arrayType(redFsm->maxState), TT() );
 
 	taTT.OPEN();
 
@@ -571,7 +571,7 @@ std::ostream &TabCodeGen::TRANS_TARGS_WI()
 
 std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
 {
-	TableArray taTA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+	TableArray taTA( *this, arrayType(redFsm->maxActionLoc), TA() );
 
 	taTA.OPEN();
 

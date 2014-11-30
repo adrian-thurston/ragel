@@ -452,7 +452,7 @@ unsigned int GotoCodeGen::EOF_ACTION( RedStateAp *state )
 
 std::ostream &GotoCodeGen::TO_STATE_ACTIONS()
 {
-	TableArray taTSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+	TableArray taTSA( *this, arrayType(redFsm->maxActionLoc), TSA() );
 
 	taTSA.OPEN();
 
@@ -477,7 +477,7 @@ std::ostream &GotoCodeGen::TO_STATE_ACTIONS()
 
 std::ostream &GotoCodeGen::FROM_STATE_ACTIONS()
 {
-	TableArray taFSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+	TableArray taFSA( *this, arrayType(redFsm->maxActionLoc), FSA() );
 
 	taFSA.OPEN();
 
@@ -502,7 +502,7 @@ std::ostream &GotoCodeGen::FROM_STATE_ACTIONS()
 
 std::ostream &GotoCodeGen::EOF_ACTIONS()
 {
-	TableArray taEA( *this, ARRAY_TYPE(redFsm->maxActionLoc), EA() );
+	TableArray taEA( *this, arrayType(redFsm->maxActionLoc), EA() );
 
 	taEA.OPEN();
 

@@ -68,10 +68,10 @@ void cdLineDirective( ostream &out, const char *fileName, int line )
 	out << '\n';
 }
 
-TableArray::TableArray( FsmCodeGen &codeGen, std::string type, std::string name )
+TableArray::TableArray( FsmCodeGen &codeGen, HostType *hostType, std::string name )
 :
 	codeGen(codeGen),
-	type(type),
+	hostType(hostType),
 	name(name),
 	out(codeGen.out),
 	first(true),
@@ -81,7 +81,7 @@ TableArray::TableArray( FsmCodeGen &codeGen, std::string type, std::string name 
 
 void TableArray::OPEN()
 {
-	codeGen.OPEN_ARRAY( type, name );
+	codeGen.OPEN_ARRAY( hostType->TYPE(), name );
 	out << "\t";
 }
 
@@ -137,6 +137,11 @@ string FsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
 	return ret;
 }
 
+HostType *FsmCodeGen::arrayType( unsigned long maxVal )
+{
+	long long maxValLL = (long long) maxVal;
+	return keyOps->typeSubsumes( maxValLL );
+}
 
 /* Write out the fsm name. */
 string FsmCodeGen::FSM_NAME()
@@ -155,7 +160,7 @@ string FsmCodeGen::START_STATE_ID()
 /* Write out the array of actions. */
 std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 {
-	TableArray taA( *this, ARRAY_TYPE(redFsm->maxActArrItem), A() );
+	TableArray taA( *this, arrayType(redFsm->maxActArrItem), A() );
 
 	taA.OPEN();
 
@@ -667,6 +672,16 @@ string FsmCodeGen::WIDE_ALPH_TYPE()
 		}
 	}
 	return ret;
+}
+
+HostType *FsmCodeGen::wideAlphType()
+{
+	if ( redFsm->maxKey <= keyOps->maxKey )
+		return keyOps->alphType;
+	else {
+		long long maxKeyVal = redFsm->maxKey.getLongLong();
+		return keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
+	}
 }
 
 void FsmCodeGen::STATE_IDS()

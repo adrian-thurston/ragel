@@ -135,7 +135,7 @@ std::ostream &FlatCodeGen::ACTION_SWITCH()
 
 std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 {
-	TableArray taIO( *this, ARRAY_TYPE(redFsm->maxFlatIndexOffset), IO() );
+	TableArray taIO( *this, arrayType(redFsm->maxFlatIndexOffset), IO() );
 
 	taIO.OPEN();
 
@@ -159,7 +159,7 @@ std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 
 std::ostream &FlatCodeGen::KEY_SPANS()
 {
-	TableArray taSP( *this, ARRAY_TYPE(redFsm->maxSpan), SP() );
+	TableArray taSP( *this, arrayType(redFsm->maxSpan), SP() );
 
 	taSP.OPEN();
 
@@ -178,7 +178,7 @@ std::ostream &FlatCodeGen::KEY_SPANS()
 
 std::ostream &FlatCodeGen::TO_STATE_ACTIONS()
 {
-	TableArray taTSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+	TableArray taTSA( *this, arrayType(redFsm->maxActionLoc), TSA() );
 
 	taTSA.OPEN();
 
@@ -194,7 +194,7 @@ std::ostream &FlatCodeGen::TO_STATE_ACTIONS()
 
 std::ostream &FlatCodeGen::FROM_STATE_ACTIONS()
 {
-	TableArray taFSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+	TableArray taFSA( *this, arrayType(redFsm->maxActionLoc), FSA() );
 
 	taFSA.OPEN();
 
@@ -210,7 +210,7 @@ std::ostream &FlatCodeGen::FROM_STATE_ACTIONS()
 
 std::ostream &FlatCodeGen::EOF_ACTIONS()
 {
-	TableArray taEA( *this, ARRAY_TYPE(redFsm->maxActionLoc), EA() );
+	TableArray taEA( *this, arrayType(redFsm->maxActionLoc), EA() );
 
 	taEA.OPEN();
 
@@ -226,7 +226,7 @@ std::ostream &FlatCodeGen::EOF_ACTIONS()
 
 std::ostream &FlatCodeGen::EOF_TRANS()
 {
-	TableArray taET( *this, ARRAY_TYPE(redFsm->maxIndexOffset+1), ET() );
+	TableArray taET( *this, arrayType(redFsm->maxIndexOffset+1), ET() );
 
 	taET.OPEN();
 
@@ -248,7 +248,7 @@ std::ostream &FlatCodeGen::EOF_TRANS()
 
 std::ostream &FlatCodeGen::COND_KEYS()
 {
-	TableArray taCK( *this, WIDE_ALPH_TYPE(), CK() );
+	TableArray taCK( *this, wideAlphType(), CK() );
 
 	taCK.OPEN();
 
@@ -268,7 +268,7 @@ std::ostream &FlatCodeGen::COND_KEYS()
 
 std::ostream &FlatCodeGen::COND_KEY_SPANS()
 {
-	TableArray taCSP( *this, ARRAY_TYPE(redFsm->maxCondSpan), CSP() );
+	TableArray taCSP( *this, arrayType(redFsm->maxCondSpan), CSP() );
 
 	taCSP.OPEN();
 
@@ -286,7 +286,7 @@ std::ostream &FlatCodeGen::COND_KEY_SPANS()
 
 std::ostream &FlatCodeGen::CONDS()
 {
-	TableArray taC( *this, ARRAY_TYPE(redFsm->maxCond), C() );
+	TableArray taC( *this, arrayType(redFsm->maxCond), C() );
 
 	taC.OPEN();
 
@@ -315,7 +315,7 @@ std::ostream &FlatCodeGen::CONDS()
 
 std::ostream &FlatCodeGen::COND_INDEX_OFFSET()
 {
-	TableArray taCO( *this, ARRAY_TYPE(redFsm->maxCondIndexOffset), CO() );
+	TableArray taCO( *this, arrayType(redFsm->maxCondIndexOffset), CO() );
 
 	taCO.OPEN();
 
@@ -336,7 +336,7 @@ std::ostream &FlatCodeGen::COND_INDEX_OFFSET()
 
 std::ostream &FlatCodeGen::KEYS()
 {
-	TableArray taK( *this, WIDE_ALPH_TYPE(), K() );
+	TableArray taK( *this, wideAlphType(), K() );
 
 	taK.OPEN();
 
@@ -357,7 +357,7 @@ std::ostream &FlatCodeGen::KEYS()
 
 std::ostream &FlatCodeGen::INDICIES()
 {
-	TableArray taI( *this, ARRAY_TYPE(redFsm->maxIndex), I() );
+	TableArray taI( *this, arrayType(redFsm->maxIndex), I() );
 
 	taI.OPEN();
 
@@ -385,7 +385,7 @@ std::ostream &FlatCodeGen::INDICIES()
 
 std::ostream &FlatCodeGen::TRANS_TARGS()
 {
-	TableArray taTT( *this, ARRAY_TYPE(redFsm->maxState), TT() );
+	TableArray taTT( *this, arrayType(redFsm->maxState), TT() );
 
 	taTT.OPEN();
 
@@ -413,7 +413,7 @@ std::ostream &FlatCodeGen::TRANS_TARGS()
 
 std::ostream &FlatCodeGen::TRANS_ACTIONS()
 {
-	TableArray taTA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TA() );
+	TableArray taTA( *this, arrayType(redFsm->maxActionLoc), TA() );
 
 	taTA.OPEN();
 

@@ -180,7 +180,7 @@ std::ostream &FTabCodeGen::ACTION_SWITCH()
 
 std::ostream &FTabCodeGen::TRANS_ACTIONS()
 {
-	TableArray taTA( *this, ARRAY_TYPE(redFsm->maxActListId), TA() );
+	TableArray taTA( *this, arrayType(redFsm->maxActListId), TA() );
 
 	taTA.OPEN();
 
@@ -223,7 +223,7 @@ std::ostream &FTabCodeGen::TRANS_ACTIONS()
 
 std::ostream &FTabCodeGen::TRANS_ACTIONS_WI()
 {
-	TableArray taTA( *this, ARRAY_TYPE(redFsm->maxActListId), TA() );
+	TableArray taTA( *this, arrayType(redFsm->maxActListId), TA() );
 
 	taTA.OPEN();
 
@@ -248,7 +248,7 @@ std::ostream &FTabCodeGen::TRANS_ACTIONS_WI()
 
 std::ostream &FTabCodeGen::TO_STATE_ACTIONS()
 {
-	TableArray taTSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), TSA() );
+	TableArray taTSA( *this, arrayType(redFsm->maxActionLoc), TSA() );
 
 	taTSA.OPEN();
 
@@ -264,7 +264,7 @@ std::ostream &FTabCodeGen::TO_STATE_ACTIONS()
 
 std::ostream &FTabCodeGen::FROM_STATE_ACTIONS()
 {
-	TableArray taFSA( *this, ARRAY_TYPE(redFsm->maxActionLoc), FSA() );
+	TableArray taFSA( *this, arrayType(redFsm->maxActionLoc), FSA() );
 
 	taFSA.OPEN();
 
@@ -280,7 +280,7 @@ std::ostream &FTabCodeGen::FROM_STATE_ACTIONS()
 
 std::ostream &FTabCodeGen::EOF_ACTIONS()
 {
-	TableArray taEA( *this, ARRAY_TYPE(redFsm->maxActListId), EA() );
+	TableArray taEA( *this, arrayType(redFsm->maxActListId), EA() );
 
 	taEA.OPEN();
 

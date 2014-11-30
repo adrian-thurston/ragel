@@ -119,6 +119,16 @@ struct HostType
 	long long minVal;
 	long long maxVal;
 	unsigned int size;
+
+	std::string TYPE()
+	{
+		std::string ret = data1;
+		if ( data2 != 0 ) {
+			ret += " ";
+			ret += + data2;
+		}
+		return ret;
+	}
 };
 
 struct HostLang
