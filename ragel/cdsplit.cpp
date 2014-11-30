@@ -294,7 +294,7 @@ std::ostream &SplitCodeGen::PART_MAP()
 		out << partMap[i];
 		if ( i != redFsm->stateList.length() - 1 ) {
 			out << ", ";
-			if ( ++totalItem % IALL == 0 )
+			if ( ++totalItem % IALL_INTEGRAL == 0 )
 				out << "\n\t";
 		}
 	}

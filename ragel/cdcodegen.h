@@ -36,7 +36,8 @@ using std::string;
 using std::ostream;
 
 /* Integer array line length. */
-#define IALL 8
+#define IALL_INTEGRAL 8
+#define IALL_STRING 128
 
 /* Forwards. */
 struct RedFsmAp;
@@ -62,24 +63,23 @@ struct TableArray
 
 	void fmt()
 	{
-		if ( str ) {
-			if ( ! first ) {
-				if ( ++ln % IALL == 0 ) {
+		if ( ! first ) {
+			if ( str ) {
+				if ( ln % iall == 0 ) {
 					out << "\"\n\t\"";
 					ln = 0;
 				}
 			}
-		}
-		else {
-			if ( ! first ) {
+			else {
 				out << ", ";
 
-				if ( ++ln % IALL == 0 ) {
+				if ( ln % iall == 0 ) {
 					out << "\n\t";
 					ln = 0;
 				}
 			}
 		}
+		ln += 1;
 		first = false;
 	}
 
@@ -156,6 +156,7 @@ struct TableArray
 	HostType *hostType;
 	std::string name;
 	ostream &out;
+	int iall;
 	bool first;
 	long ln;
 	bool str;

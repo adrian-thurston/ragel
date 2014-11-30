@@ -74,11 +74,11 @@ TableArray::TableArray( FsmCodeGen &codeGen, HostType *hostType, std::string nam
 	hostType(hostType),
 	name(name),
 	out(codeGen.out),
+	iall(stringTables ? IALL_STRING : IALL_INTEGRAL ),
 	first(true),
 	ln(0),
 	str(stringTables)
-{
-}
+{}
 
 void TableArray::OPEN()
 {
