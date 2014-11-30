@@ -160,7 +160,6 @@ std::ostream &FsmCodeGen::ACTIONS_ARRAY()
 	taA.OPEN();
 
 	taA.VAL( 0 );
-	int totalActions = 1;
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		/* Write out the length, which will never be the last character. */
 		taA.VAL( act->key.length() );

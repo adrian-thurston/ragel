@@ -581,7 +581,6 @@ std::ostream &TabCodeGen::TRANS_ACTIONS_WI()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	int totalAct = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
 		RedTransAp *trans = transPtrs[t];

@@ -161,7 +161,6 @@ std::ostream &FFlatCodeGen::TRANS_ACTIONS()
 		transPtrs[trans->id] = trans;
 
 	/* Keep a count of the num of items in the array written. */
-	int totalAct = 0;
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Write the function for the transition. */
 		RedTransAp *trans = transPtrs[t];
@@ -180,7 +179,6 @@ std::ostream &FFlatCodeGen::TO_STATE_ACTIONS()
 
 	taTSA.OPEN();
 
-	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		TO_STATE_ACTION( taTSA, st );
@@ -197,7 +195,6 @@ std::ostream &FFlatCodeGen::FROM_STATE_ACTIONS()
 
 	taFSA.OPEN();
 
-	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		FROM_STATE_ACTION( taFSA, st );
@@ -214,7 +211,6 @@ std::ostream &FFlatCodeGen::EOF_ACTIONS()
 
 	taEA.OPEN();
 
-	int totalStateNum = 0;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Write any eof action. */
 		EOF_ACTION( taEA, st );
