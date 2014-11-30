@@ -75,30 +75,34 @@ TableArray::TableArray( FsmCodeGen &codeGen, HostType *hostType, std::string nam
 	name(name),
 	out(codeGen.out),
 	first(true),
-	ln(0)
+	ln(0),
+	str(stringTables)
 {
 }
 
 void TableArray::OPEN()
 {
-	codeGen.OPEN_ARRAY( hostType->TYPE(), name );
-	out << "\t";
-}
-
-void TableArray::KEY( Key key )
-{
-	fmt();
-	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
-		out << key.getVal();
-	else
-		out << (unsigned long) key.getVal() << 'u';
+	if ( str ) {
+		out << "static const char S_" << name << "[] __attribute__((aligned (16))) = \n\t\"";
+	}
+	else {
+		codeGen.OPEN_ARRAY( hostType->TYPE(), name );
+		out << "\t";
+	}
 }
 
 void TableArray::CLOSE()
 {
-	out << "\n";
-	codeGen.CLOSE_ARRAY();
-	out << "\n";
+	if ( str ) {
+		string type = hostType->TYPE();
+		out << "\";\nstatic const " << type << " *" << name << 
+				" = (const " << type << "*) S_" << name << ";\n\n";
+	}
+	else {
+		out << "\n";
+		codeGen.CLOSE_ARRAY();
+		out << "\n";
+	}
 }
 
 void FsmCodeGen::genLineDirective( ostream &out )

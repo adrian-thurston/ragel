@@ -26,9 +26,11 @@
 
 #include <iostream>
 #include <string>
+#include <iomanip>
 #include <stdio.h>
 #include "common.h"
 #include "gendata.h"
+#include "ragel.h"
 
 using std::string;
 using std::ostream;
@@ -60,31 +62,95 @@ struct TableArray
 
 	void fmt()
 	{
-		if ( ! first ) {
-			out << ", ";
-
-			if ( ++ln % IALL == 0 ) {
-				out << "\n\t";
-				ln = 0;
+		if ( str ) {
+			if ( ! first ) {
+				if ( ++ln % IALL == 0 ) {
+					out << "\"\n\t\"";
+					ln = 0;
+				}
 			}
 		}
+		else {
+			if ( ! first ) {
+				out << ", ";
 
+				if ( ++ln % IALL == 0 ) {
+					out << "\n\t";
+					ln = 0;
+				}
+			}
+		}
 		first = false;
 	}
 
-	void VAL( long long ll ) { fmt(); out << ll; }
-	void VAL( long l )       { fmt(); out << l; }
-	void VAL( int i )        { fmt(); out << i; }
-	void VAL( short s )      { fmt(); out << s; }
-	void VAL( char c )       { fmt(); out << c; }
+	void SVAL( long long value )
+	{
+		char c;
+		short h;
+		int i;
+		long l;
+		unsigned char *p = 0;
+		int n = 0;
+		switch ( hostType->size ) {
+			case sizeof( char ):
+				c = value;
+				p = (unsigned char *)&c;
+				n = sizeof(char);
+				break;
+			case sizeof( short ):
+				h = value;
+				p = (unsigned char *)&h;
+				n = sizeof(short);
+				break;
+			case sizeof( int ):
+				i = value;
+				p = (unsigned char *)&i;
+				n = sizeof(int);
+				break;
+			case sizeof( long ):
+				l = value;
+				p = (unsigned char *)&l;
+				n = sizeof(long);
+				break;
+		}
 
-	void VAL( unsigned long long ull ) { fmt(); out << ull; }
-	void VAL( unsigned long ul )       { fmt(); out << ul; }
-	void VAL( unsigned int ui )        { fmt(); out << ui; }
-	void VAL( unsigned short us )      { fmt(); out << us; }
-	void VAL( unsigned char uc )       { fmt(); out << uc; }
+		std::ios_base::fmtflags prevFlags = out.flags( std::ios::hex );
+		int prevFill = out.fill( '0' );    
 
-	void KEY( Key key );
+		while ( n-- > 0 ) {
+			out << '\\';
+			out << 'x';
+			out << std::setw(2) << (unsigned int) *p++;
+		}
+
+		out.flags( prevFlags );
+		out.fill( prevFill );
+	}
+
+	void VAL( long long ll ) { fmt(); if (str) SVAL(ll); else out << ll; }
+	void VAL( long l )       { fmt(); if (str) SVAL(l);  else out << l; }
+	void VAL( int i )        { fmt(); if (str) SVAL(i);  else out << i; }
+	void VAL( short s )      { fmt(); if (str) SVAL(s);  else out << s; }
+	void VAL( char c )       { fmt(); if (str) SVAL(c);  else out << c; }
+
+	void VAL( unsigned long long ull ) { fmt(); if (str) SVAL(ull); else out << ull; }
+	void VAL( unsigned long ul )       { fmt(); if (str) SVAL(ul);  else out << ul; }
+	void VAL( unsigned int ui )        { fmt(); if (str) SVAL(ui);  else out << ui; }
+	void VAL( unsigned short us )      { fmt(); if (str) SVAL(us);  else out << us; }
+	void VAL( unsigned char uc )       { fmt(); if (str) SVAL(uc);  else out << uc; }
+
+	void KEY( Key key )
+	{
+		fmt();
+		if ( str )
+			SVAL( key.getVal() );
+		else {
+			if ( keyOps->isSigned || !hostLang->explicitUnsigned )
+				out << key.getVal();
+			else
+				out << (unsigned long) key.getVal() << 'u';
+		}
+	}
 
 	FsmCodeGen &codeGen;
 	HostType *hostType;
@@ -92,6 +158,7 @@ struct TableArray
 	ostream &out;
 	bool first;
 	long ln;
+	bool str;
 };
 
 /*
