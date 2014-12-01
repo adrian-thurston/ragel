@@ -29,7 +29,6 @@
 #include <string>
 #include <assert.h>
 
-
 using std::ostream;
 using std::ostringstream;
 using std::string;
@@ -77,7 +76,8 @@ TableArray::TableArray( FsmCodeGen &codeGen, HostType *hostType, std::string nam
 	iall(stringTables ? IALL_STRING : IALL_INTEGRAL ),
 	first(true),
 	ln(0),
-	str(stringTables)
+	str(stringTables),
+	count(0)
 {}
 
 void TableArray::OPEN()
@@ -103,6 +103,19 @@ void TableArray::CLOSE()
 		codeGen.CLOSE_ARRAY();
 		out << "\n";
 	}
+
+	if ( printStatistics ) {
+		cout << name << "\t" << count << "\t" <<
+				( count * hostType->size ) << "\t" << hostType->TYPE() << endl;
+	}
+
+	codeGen.tableData += count * hostType->size ;
+}
+
+void FsmCodeGen::statsSummary()
+{
+	if ( printStatistics )
+		cout << "table-data\t" << tableData << endl << endl;
 }
 
 void FsmCodeGen::genLineDirective( ostream &out )
@@ -115,7 +128,8 @@ void FsmCodeGen::genLineDirective( ostream &out )
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( ostream &out )
 :
-	CodeGenData( out )
+	CodeGenData( out ),
+	tableData( 0 )
 {
 }
 

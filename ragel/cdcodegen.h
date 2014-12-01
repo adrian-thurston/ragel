@@ -81,6 +81,7 @@ struct TableArray
 		}
 		ln += 1;
 		first = false;
+		count += 1;
 	}
 
 	void SVAL( long long value )
@@ -160,6 +161,7 @@ struct TableArray
 	bool first;
 	long ln;
 	bool str;
+	long long count;
 };
 
 /*
@@ -176,6 +178,8 @@ public:
 	virtual void writeStart();
 	virtual void writeFirstFinal();
 	virtual void writeError();
+
+	virtual void statsSummary();
 
 protected:
 	friend TableArray;
@@ -291,6 +295,7 @@ protected:
 	bool testEofUsed;
 	bool againLabelUsed;
 	bool useIndicies;
+	long long tableData;
 
 	void genLineDirective( ostream &out );
 

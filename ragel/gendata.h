@@ -72,6 +72,8 @@ struct CodeGenData
 	virtual void writeFirstFinal() {};
 	virtual void writeError() {};
 
+	virtual void statsSummary();
+
 	/* This can also be overwridden to modify the processing of write
 	 * statements. */
 	virtual bool writeStatement( InputLoc &loc, int nargs, char **args );

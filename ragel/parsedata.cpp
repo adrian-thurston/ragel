@@ -1439,12 +1439,6 @@ void ParseData::generateReduced( InputData &inputData )
 
 	/* Write out with it. */
 	backendGen.makeBackend();
-
-	if ( printStatistics ) {
-		cerr << "fsm name  : " << sectionName << endl;
-		cerr << "num states: " << sectionGraph->stateList.length() << endl;
-		cerr << endl;
-	}
 }
 
 void ParseData::generateXML( ostream &out )
@@ -1456,11 +1450,5 @@ void ParseData::generateXML( ostream &out )
 
 	/* Write out with it. */
 	codeGen.writeXML();
-
-	if ( printStatistics ) {
-		cerr << "fsm name  : " << sectionName << endl;
-		cerr << "num states: " << sectionGraph->stateList.length() << endl;
-		cerr << endl;
-	}
 }
 

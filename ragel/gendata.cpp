@@ -1062,6 +1062,12 @@ void CodeGenData::write_option_error( InputLoc &loc, char *arg )
 	source_warning(loc) << "unrecognized write option \"" << arg << "\"" << endl;
 }
 
+void CodeGenData::statsSummary()
+{
+	if ( printStatistics )
+		cout << endl;
+}
+
 /* returns true if the following section should generate line directives. */
 bool CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 {
@@ -1082,7 +1088,14 @@ bool CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 			else
 				write_option_error( loc, args[i] );
 		}
+
+		if ( printStatistics ) {
+			cout << "fsm-name\t" << fsmName << endl;
+			cout << "fsm-states\t" << redFsm->stateList.length() << endl;
+		}
+
 		writeData();
+		statsSummary();
 	}
 	else if ( strcmp( args[0], "init" ) == 0 ) {
 		out << '\n';
@@ -1155,5 +1168,3 @@ ostream &CodeGenData::source_error( const InputLoc &loc )
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
 	return cerr;
 }
-
-
