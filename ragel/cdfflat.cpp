@@ -238,6 +238,7 @@ void FFlatCodeGen::writeData()
 	FLAT_INDEX_OFFSET();
 
 	INDICIES();
+	INDEX_OWNERS();
 	INDEX_DEFAULTS();
 
 	TRANS_TARGS();
@@ -282,7 +283,10 @@ void FFlatCodeGen::writeExec()
 
 	out <<
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_keys;\n"
-		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) << PTR_CONST_END() << POINTER() << "_inds;\n";
+		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) <<
+					PTR_CONST_END() << POINTER() << "_inds;\n"
+		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxState) <<
+					PTR_CONST_END() << POINTER() << "_owns;\n";
 
 	if ( redFsm->anyConditions() ) {
 		out << 

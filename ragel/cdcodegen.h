@@ -229,6 +229,7 @@ protected:
 	string CK() { return "_" + DATA_PREFIX() + "cond_keys"; }
 	string K() { return "_" + DATA_PREFIX() + "trans_keys"; }
 	string I() { return "_" + DATA_PREFIX() + "indicies"; }
+	string IW() { return "_" + DATA_PREFIX() + "index_owners"; }
 	string ID() { return "_" + DATA_PREFIX() + "index_defaults"; }
 	string CO() { return "_" + DATA_PREFIX() + "cond_offsets"; }
 	string KO() { return "_" + DATA_PREFIX() + "key_offsets"; }

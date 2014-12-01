@@ -50,6 +50,7 @@ protected:
 	std::ostream &KEYS();
 	std::ostream &INDICIES();
 	std::ostream &INDEX_DEFAULTS();
+	std::ostream &INDEX_OWNERS();
 	std::ostream &FLAT_INDEX_OFFSET();
 	std::ostream &KEY_SPANS();
 	std::ostream &EOF_TRANS();

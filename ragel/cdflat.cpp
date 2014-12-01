@@ -367,11 +367,31 @@ std::ostream &FlatCodeGen::INDICIES()
 		}
 	}
 
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
 	taI.VAL( 0 );
 
 	taI.CLOSE();
+
+	return out;
+}
+
+std::ostream &FlatCodeGen::INDEX_OWNERS()
+{
+	TableArray taIW( *this, arrayType(redFsm->maxState), IW() );
+
+	taIW.OPEN();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->transList != 0 ) {
+			/* Walk the singles. */
+			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
+			for ( unsigned long long pos = 0; pos < span; pos++ )
+				taIW.VAL( st->id );
+		}
+	}
+
+	taIW.VAL( 0 );
+
+	taIW.CLOSE();
 
 	return out;
 }
@@ -449,11 +469,13 @@ void FlatCodeGen::LOCATE_TRANS()
 	out <<
 		"	_keys = " << ARR_OFF( K(), "(" + vCS() + "<<1)" ) << ";\n"
 		"	_inds = " << ARR_OFF( I(), IO() + "[" + vCS() + "]" ) << ";\n"
+		"	_owns = " << ARR_OFF( IW(), IO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
 		"	_slen = " << SP() << "[" << vCS() << "];\n"
-		"	_trans = _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
-		"		" << GET_WIDE_KEY() << " <= _keys[1] ?\n"
-		"		_inds[" << GET_WIDE_KEY() << " - _keys[0]]:\n"
+		"	_trans = ( _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
+		"      " << GET_WIDE_KEY() << " <= _keys[1] && \n"
+		"      _owns[" << GET_WIDE_KEY() << " - _keys[0]] == " << vCS() << " ) ?\n"
+		"      _inds[" << GET_WIDE_KEY() << " - _keys[0]] :\n"
 		"      " << ID() << "[" << vCS() << "];\n"
 		"\n";
 }
@@ -564,6 +586,7 @@ void FlatCodeGen::writeData()
 	FLAT_INDEX_OFFSET();
 
 	INDICIES();
+	INDEX_OWNERS();
 	INDEX_DEFAULTS();
 
 	TRANS_TARGS();
@@ -657,7 +680,10 @@ void FlatCodeGen::writeExec()
 
 	out <<
 		"	" << PTR_CONST() << WIDE_ALPH_TYPE() << PTR_CONST_END() << POINTER() << "_keys;\n"
-		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) << PTR_CONST_END() << POINTER() << "_inds;\n";
+		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxIndex) <<
+					PTR_CONST_END() << POINTER() << "_inds;\n"
+		"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxState) <<
+					PTR_CONST_END() << POINTER() << "_owns;\n";
 
 	if ( redFsm->anyConditions() ) {
 		out << 
