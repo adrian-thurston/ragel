@@ -49,6 +49,7 @@ protected:
 	std::ostream &ACTION_SWITCH();
 	std::ostream &KEYS();
 	std::ostream &INDICIES();
+	std::ostream &INDEX_DEFAULTS();
 	std::ostream &FLAT_INDEX_OFFSET();
 	std::ostream &KEY_SPANS();
 	std::ostream &EOF_TRANS();
