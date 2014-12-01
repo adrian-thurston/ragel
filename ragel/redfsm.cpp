@@ -24,6 +24,7 @@
 #include "mergesort.h"
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 using std::ostringstream;
 
@@ -435,6 +436,63 @@ void RedFsmAp::chooseDefaultSpan()
 			moveToDefault( defTrans, st );
 		}
 	}
+}
+
+void RedFsmAp::percentageDefault()
+{
+	/* Flat Tables: how much of the index space is is not covered my non-default
+	 * transitions. Runs only if stats are requested. */
+	Size uncovered = 0;
+
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->outRange.length() == 0 ) {
+			uncovered += keyOps->alphSize();
+		}
+		else {
+			/* Count span before first. */
+			RedTransList::Iter rtel = st->outRange;
+			if ( keyOps->minKey < rtel->lowKey ) {
+				/* High is one below the first range. */
+				Key highGap = rtel->lowKey;
+				highGap.decrement();
+				uncovered += keyOps->span( keyOps->minKey, highGap );
+			}
+
+			/* Count the transition if it goes to default. */
+			if ( rtel->value == st->defTrans )
+				uncovered += keyOps->span( rtel->lowKey, rtel->highKey );
+
+			/* Count gaps. */
+			rtel.increment();
+			for ( ; rtel.lte(); rtel++ ) {
+				/* Low is one above the previous' high. */
+				Key lowKey = rtel[-1].highKey;
+				lowKey.increment();
+				if ( lowKey < rtel->lowKey )
+					uncovered += keyOps->span( lowKey, rtel->lowKey );
+
+				/* Count the transition if it goes to default. */
+				if ( rtel->value == st->defTrans )
+					uncovered += keyOps->span( rtel->lowKey, rtel->highKey );
+			}
+
+			/* Count the span after the last. */
+			RedTransList::Iter last = st->outRange.last();
+			if ( last->highKey < keyOps->maxKey ) {
+				Key lowGap = last->lowKey;
+				lowGap.increment();
+				uncovered += keyOps->span( lowGap, keyOps->maxKey );
+			}
+		}
+	}
+
+	long long total = keyOps->alphSize() * stateList.length();
+	double percentage = 100.0 * ( (double)uncovered / (double)total );
+
+	std::cout << "default-indicies\t" << uncovered << std::endl;
+	std::cout << "total-indicies\t" << total << std::endl;
+	std::cout << "percentage-default\t" << std::setprecision( 6 ) <<
+			percentage << "%" << std::endl;
 }
 
 RedTransAp *RedFsmAp::chooseDefaultGoto( RedStateAp *state )

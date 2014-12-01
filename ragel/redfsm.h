@@ -489,6 +489,8 @@ struct RedFsmAp
 	RedTransAp *chooseDefaultGoto( RedStateAp *state );
 	void chooseDefaultGoto();
 
+	void percentageDefault();
+
 	/* Ordering states by transition connections. */
 	void optimizeStateOrdering( RedStateAp *state );
 	void optimizeStateOrdering();

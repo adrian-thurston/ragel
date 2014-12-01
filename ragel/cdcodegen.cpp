@@ -1030,6 +1030,12 @@ void FsmCodeGen::finishRagelDef()
 	else
 		redFsm->chooseSingle();
 
+	if ( printStatistics ) {
+		std::cout << "fsm-name\t" << fsmName << std::endl;
+		redFsm->percentageDefault();
+		std::cout << std::endl;
+	}
+
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
 		return;
