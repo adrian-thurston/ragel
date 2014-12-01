@@ -147,9 +147,6 @@ std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 		/* Move the index offset ahead. */
 		if ( st->transList != 0 )
 			curIndOffset += keyOps->span( st->lowKey, st->highKey );
-
-		if ( st->defTrans != 0 )
-			curIndOffset += 1;
 	}
 
 	taIO.CLOSE();
@@ -368,10 +365,6 @@ std::ostream &FlatCodeGen::INDICIES()
 			for ( unsigned long long pos = 0; pos < span; pos++ )
 				taI.VAL( st->transList[pos]->id );
 		}
-
-		/* The state's default index goes next. */
-		if ( st->defTrans != 0 )
-			taI.VAL( st->defTrans->id );
 	}
 
 	/* Output one last number so we don't have to figure out when the last
@@ -379,6 +372,22 @@ std::ostream &FlatCodeGen::INDICIES()
 	taI.VAL( 0 );
 
 	taI.CLOSE();
+
+	return out;
+}
+
+std::ostream &FlatCodeGen::INDEX_DEFAULTS()
+{
+	TableArray taID( *this, arrayType(redFsm->maxIndex), ID() );
+
+	taID.OPEN();
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->defTrans != 0 )
+			taID.VAL( st->defTrans->id );
+		else
+			taID.VAL( 0 );
+	}
+	taID.CLOSE();
 
 	return out;
 }
@@ -442,9 +451,10 @@ void FlatCodeGen::LOCATE_TRANS()
 		"	_inds = " << ARR_OFF( I(), IO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
 		"	_slen = " << SP() << "[" << vCS() << "];\n"
-		"	_trans = _inds[ _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
+		"	_trans = _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
 		"		" << GET_WIDE_KEY() << " <= _keys[1] ?\n"
-		"		" << GET_WIDE_KEY() << " - _keys[0] : _slen ];\n"
+		"		_inds[" << GET_WIDE_KEY() << " - _keys[0]]:\n"
+		"      " << ID() << "[" << vCS() << "];\n"
 		"\n";
 }
 
@@ -554,6 +564,7 @@ void FlatCodeGen::writeData()
 	FLAT_INDEX_OFFSET();
 
 	INDICIES();
+	INDEX_DEFAULTS();
 
 	TRANS_TARGS();
 

@@ -877,3 +877,5 @@ void FsmAp::leaveFsmCondition( Action *condAction, bool sense )
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ )
 		(*state)->outCondSet.insert( OutCond( condAction, sense ) );
 }
+
+
