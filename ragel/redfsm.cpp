@@ -22,6 +22,7 @@
 #include "redfsm.h"
 #include "avlmap.h"
 #include "mergesort.h"
+#include "ragel.h"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -283,6 +284,85 @@ void RedFsmAp::chooseSingle()
 		 * transtions. */
 		moveTransToSingle( st );
 	}
+}
+
+void RedFsmAp::computeInterleave()
+{
+	int state = 0;
+	long long total = stateList.length() * keyOps->alphSize();
+	interleaveIndicies = new RedTransAp*[ total ];
+	interleaveOwners = new RedStateAp*[ total ];
+	memset( interleaveIndicies, 0, sizeof(RedTransAp*) * total );
+	memset( interleaveOwners, 0, sizeof(RedStateAp*) * total );
+	long long end = 0;
+	long long next = 0;
+	int roll = 0;
+
+	std::cerr << "starting interleaving" << std::endl;
+
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		/* Find a starting point with no conflict. */
+
+		if ( st->outRange.length() == 0 )
+			continue;
+
+		double progress = 100.0 * ( (double)state / (double)stateList.length() );
+
+		unsigned long long start = next;
+		unsigned long long span = keyOps->span( st->lowKey, st->highKey );
+
+		while ( true ) {
+			bool usable = true;
+			unsigned long long to;
+
+			/* Can we get through the trans list with no conflicts. */
+			for ( unsigned long long pos = 0; pos < span; pos++ ) {
+				/* If it is default, we can ignore it. */
+				if ( st->transList[pos] != st->defTrans ) {
+					/* Cannot be any current Otherwise there must be no owner. */
+					if ( interleaveOwners[start+pos] != 0 ) {
+						usable = false;
+						to = pos;
+						break;
+					}
+
+					interleaveIndicies[start+pos] = st->transList[pos];
+					interleaveOwners[start+pos] = st;
+				}
+			}
+
+			if ( usable ) {
+				end = start+span;
+				break;
+			}
+
+			/* Need to reset what we claimed. */
+			for ( unsigned long long pos = 0; pos < to; pos++ ) {
+				if ( st->transList[pos] != st->defTrans ) {
+					interleaveIndicies[start+pos] = 0;
+					interleaveOwners[start+pos] = 0;
+				}
+			}
+			start += 1;
+		}
+
+		state++;
+		roll++;
+
+		double rollp = 100.0 * ( (double)roll / (double)stateList.length() );
+		if ( rollp > 1 ) {
+			next = end;
+			roll = 0;
+
+			std::cerr << "completed " << std::setprecision( 4 ) <<
+					progress << " percent" << std::endl;
+		}
+	}
+
+	std::cerr << "finished interleaving" << std::endl;
+
+	if ( printStatistics )
+		std::cout << "interleave-items\t" << end << std::endl;
 }
 
 void RedFsmAp::makeFlat()

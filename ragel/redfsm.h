@@ -413,6 +413,9 @@ struct RedFsmAp
 	int numFinStates;
 	int nParts;
 
+	RedTransAp **interleaveIndicies;
+	RedStateAp **interleaveOwners;
+
 	bool bAnyToStateActions;
 	bool bAnyFromStateActions;
 	bool bAnyRegActions;
@@ -472,6 +475,7 @@ struct RedFsmAp
 	void moveTransToSingle( RedStateAp *state );
 	void chooseSingle();
 
+	void computeInterleave();
 	void makeFlat();
 
 	/* Move a selected transition from ranges to default. */
