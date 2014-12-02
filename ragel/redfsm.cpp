@@ -336,6 +336,78 @@ void RedFsmAp::makeFlat()
 	}
 }
 
+void RedFsmAp::characterClass( const char *fsmName )
+{
+	std::cerr << "starting character class " << fsmName << std::endl;
+
+	Key lowKey = keyOps->maxKey;
+	Key highKey = keyOps->minKey;
+
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->outRange.length() == 0 )
+			continue;
+
+		if ( st->lowKey < lowKey )
+			lowKey = st->lowKey;
+
+		if ( st->highKey > highKey )
+			highKey = st->highKey;
+
+	}
+
+	/* Will likely crash if there are no transitions in the FSM. */
+
+	long long maxSpan = keyOps->span( lowKey, highKey );
+	long long *dest = new long long[maxSpan];
+	memset( dest, 0, sizeof(long long) * maxSpan );
+
+	long long nextTarg = 0;
+
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->outRange.length() == 0 )
+			continue;
+
+		nextTarg += 1;
+
+		long long span = keyOps->span( st->lowKey, st->highKey );
+
+		Key key = st->lowKey;
+		long long pos = 0;
+
+		long long *src = new long long[span];
+		memset( src, 0, sizeof(long long) * span );
+		src[0] = nextTarg;
+
+		key.increment();
+		pos++;
+
+		while ( pos < span ) {
+
+			if ( st->transList[pos] != st->transList[pos-1] )
+				nextTarg += 1;
+
+			src[pos] = nextTarg;
+
+			key.increment();
+			pos++;
+		}
+		
+		long long off = keyOps->span( lowKey, st->lowKey );
+		off -= 1;
+
+		for ( long long pos = 0; pos < span; )
+			dest[off++] += src[pos++];
+
+		delete[] src;
+	}
+		
+	for ( long long pos = 0; pos < maxSpan; pos++ )
+		std::cerr << "group: " << dest[pos] << " " << lowKey.getVal() + pos << std::endl;
+
+	std::cerr << "maxSpan: " << maxSpan << std::endl;
+	std::cerr << std::endl;
+}
+
 
 /* A default transition has been picked, move it from the outRange to the
  * default pointer. */

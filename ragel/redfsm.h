@@ -472,6 +472,7 @@ struct RedFsmAp
 	void moveTransToSingle( RedStateAp *state );
 	void chooseSingle();
 
+	void characterClass( const char *fsmName );
 	void makeFlat();
 
 	/* Move a selected transition from ranges to default. */
