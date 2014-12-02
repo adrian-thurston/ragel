@@ -1030,6 +1030,9 @@ void FsmCodeGen::finishRagelDef()
 	else
 		redFsm->chooseSingle();
 
+	if ( printStatistics )
+		redFsm->analyzeInterleave( fsmName );
+
 	if ( printStatistics ) {
 		std::cout << "fsm-name\t" << fsmName << std::endl;
 		redFsm->percentageDefault();

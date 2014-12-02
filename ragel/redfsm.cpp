@@ -365,6 +365,53 @@ void RedFsmAp::computeInterleave()
 		std::cout << "interleave-items\t" << end << std::endl;
 }
 
+void RedFsmAp::analyzeInterleave( const char *fsmName )
+{
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		unsigned long long span = 0;
+		long long nondef = 0;
+		if ( st->transList != 0 ) {
+			span = keyOps->span( st->lowKey, st->highKey );
+			for ( unsigned long long pos = 0; pos < span; pos++ ) {
+				if ( st->transList[pos] != st->defTrans )
+					nondef++;
+			}
+		}
+
+		unsigned long long condSpan = 0;
+		if ( st->condList != 0 )
+			condSpan = keyOps->span( st->condLowKey, st->condHighKey );
+
+		std::cout << "span-" << fsmName << "\t" << span << "\t" <<
+			nondef << "\t" << st->lowKey.getVal() << "\t" <<
+			st->highKey.getVal() << "\t" << condSpan << "\t|\t";
+
+		if ( st->transList != 0 ) {
+			span = keyOps->span( st->lowKey, st->highKey );
+			long gap = 0;
+			long val = 0;
+			for ( unsigned long long pos = 0; pos < span; pos++ ) {
+				if ( st->transList[pos] == st->defTrans ) {
+					gap++;
+
+					if ( val )
+						std::cout << "\t+ " << val;
+					val = 0;
+				}
+				else {
+					val++;
+
+					if ( gap )
+						std::cout << "\t- " << gap;
+					gap = 0;
+				}
+			}
+		}
+
+		std::cout << std::endl;
+	}
+}
+
 void RedFsmAp::makeFlat()
 {
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {

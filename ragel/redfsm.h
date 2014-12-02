@@ -475,6 +475,7 @@ struct RedFsmAp
 	void moveTransToSingle( RedStateAp *state );
 	void chooseSingle();
 
+	void analyzeInterleave( const char *fsmName );
 	void computeInterleave();
 	void makeFlat();
 
