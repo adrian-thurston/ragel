@@ -439,7 +439,6 @@ std::ostream &FlatCodeGen::TRANS_TARGS()
 	return out;
 }
 
-
 std::ostream &FlatCodeGen::TRANS_ACTIONS()
 {
 	TableArray taTA( *this, arrayType(redFsm->maxActionLoc), TA() );

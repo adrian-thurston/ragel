@@ -1031,7 +1031,9 @@ void FsmCodeGen::finishRagelDef()
 		redFsm->chooseSingle();
 
 	if ( printStatistics )
-		redFsm->analyzeInterleave( fsmName );
+
+	if ( codeStyle == GenFlat || codeStyle == GenFFlat )
+		redFsm->computeInterleave( fsmName );
 
 	if ( printStatistics ) {
 		std::cout << "fsm-name\t" << fsmName << std::endl;

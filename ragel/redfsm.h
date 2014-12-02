@@ -380,6 +380,7 @@ struct RedStateAp
 
 	RedTransAp **inTrans;
 	int numInTrans;
+	int gapiness;
 };
 
 /* List of states. */
@@ -475,8 +476,10 @@ struct RedFsmAp
 	void moveTransToSingle( RedStateAp *state );
 	void chooseSingle();
 
+	void gapinessSort( const char *fsmName );
 	void analyzeInterleave( const char *fsmName );
-	void computeInterleave();
+	void postSortInterleave( const char *fsmName );
+	void computeInterleave( const char *fsmName );
 	void makeFlat();
 
 	/* Move a selected transition from ranges to default. */

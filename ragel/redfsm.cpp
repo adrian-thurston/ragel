@@ -286,7 +286,7 @@ void RedFsmAp::chooseSingle()
 	}
 }
 
-void RedFsmAp::computeInterleave()
+void RedFsmAp::postSortInterleave( const char *fsmName )
 {
 	int state = 0;
 	long long total = stateList.length() * keyOps->alphSize();
@@ -297,10 +297,11 @@ void RedFsmAp::computeInterleave()
 	long long end = 0;
 	long long next = 0;
 	int roll = 0;
+	long long full = 0;
 
 	std::cerr << "starting interleaving" << std::endl;
 
-	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+	for ( RedStateList::Iter st = stateList; st.lte(); /* in-loop */ ) {
 		/* Find a starting point with no conflict. */
 
 		if ( st->outRange.length() == 0 )
@@ -331,10 +332,8 @@ void RedFsmAp::computeInterleave()
 				}
 			}
 
-			if ( usable ) {
-				end = start+span;
+			if ( usable )
 				break;
-			}
 
 			/* Need to reset what we claimed. */
 			for ( unsigned long long pos = 0; pos < to; pos++ ) {
@@ -346,16 +345,27 @@ void RedFsmAp::computeInterleave()
 			start += 1;
 		}
 
+		long long tail = start+span;
+		if ( tail > end )
+			end = tail;
+
+		full += span;
+
+		double thresh = 0.005 * st->gapiness;
+
 		state++;
+		st++;
 		roll++;
 
 		double rollp = 100.0 * ( (double)roll / (double)stateList.length() );
-		if ( rollp > 1 ) {
+		if ( rollp > thresh ) {
 			next = end;
 			roll = 0;
 
-			std::cerr << "completed " << std::setprecision( 4 ) <<
-					progress << " percent" << std::endl;
+			double score = 100.0 * ( (double)end / (double)full );
+
+			std::cerr << "percent completed: " << std::setprecision( 4 ) <<
+					progress << " score: " << score << std::endl;
 		}
 	}
 
@@ -365,15 +375,65 @@ void RedFsmAp::computeInterleave()
 		std::cout << "interleave-items\t" << end << std::endl;
 }
 
+void RedFsmAp::computeInterleave( const char *fsmName )
+{
+	analyzeInterleave( fsmName );
+	gapinessSort( fsmName );
+	postSortInterleave( fsmName );
+}
+
+struct CmpGapiness
+{
+	static inline long compare( RedStateAp *s1, RedStateAp *s2 )
+	{
+		long s1s = s1->gapiness;
+		long s2s = s2->gapiness;
+
+		if ( s1s > s2s )
+			return -1;
+		else if ( s1s < s2s )
+			return 1;
+		else
+			return 0;
+	}
+};
+
+void RedFsmAp::gapinessSort( const char *fsmName )
+{
+	int numStates = stateList.length();
+	RedStateAp **states = new RedStateAp*[numStates];
+
+	int d = 0;
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
+		states[d++] = st;
+
+	MergeSort<RedStateAp*, CmpGapiness> gapinessSort;
+	gapinessSort.sort( states, stateList.length() );
+
+	stateList.abandon();
+	for ( int s = 0; s < numStates; s++ )
+		stateList.append( states[s] );
+
+	delete[] states;
+
+	if ( printStatistics ) {
+		for ( RedStateList::Iter st = stateList; st.lte(); st++ )
+			std::cout << "gapiness-" << fsmName << "\t" << st->gapiness << std::endl;
+	}
+}
+
 void RedFsmAp::analyzeInterleave( const char *fsmName )
 {
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		unsigned long long span = 0;
 		long long nondef = 0;
+		long long def = 0;
 		if ( st->transList != 0 ) {
 			span = keyOps->span( st->lowKey, st->highKey );
 			for ( unsigned long long pos = 0; pos < span; pos++ ) {
-				if ( st->transList[pos] != st->defTrans )
+				if ( st->transList[pos] == st->defTrans )
+					def++;
+				else
 					nondef++;
 			}
 		}
@@ -382,8 +442,14 @@ void RedFsmAp::analyzeInterleave( const char *fsmName )
 		if ( st->condList != 0 )
 			condSpan = keyOps->span( st->condLowKey, st->condHighKey );
 
+		long long gapiness = 0;
+		if ( span > 0 )
+			gapiness = ( def * 1000 ) / span;
+
+		st->gapiness = gapiness;
+
 		std::cout << "span-" << fsmName << "\t" << span << "\t" <<
-			nondef << "\t" << st->lowKey.getVal() << "\t" <<
+			nondef << "\t" << gapiness << "\t" << st->lowKey.getVal() << "\t" <<
 			st->highKey.getVal() << "\t" << condSpan << "\t|\t";
 
 		if ( st->transList != 0 ) {
