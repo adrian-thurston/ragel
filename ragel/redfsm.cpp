@@ -490,14 +490,39 @@ void RedFsmAp::characterClassRange( const char *fsmName )
 		equiv.transfer( newList );
 	}
 
-	std::cerr << fsmName << std::endl;
+	/* Produce Flat indicies. */
+	makeFlat();
+
+	/* Build the map and emit arrays from the range-based equiv classes. Will
+	 * likely crash if there are no transitions in the FSM. */
+	long long maxSpan = keyOps->span( lowKey, highKey );
+	long long *dest = new long long[maxSpan];
+	memset( dest, 0, sizeof(long long) * maxSpan );
+
+	long long *emit = new long long[maxSpan];
+	memset( emit, 0, sizeof(long long) * maxSpan );
+
+	long long targ = 0;
+	long long d = 0;
 	for ( EquivClass *c = equiv.head; c != 0; c = c->next ) {
-		std::cerr << "  class: " << c->lowKey.getVal() <<
-				" " << c->highKey.getVal() << std::endl;
+		long long span = keyOps->span( c->lowKey, c->highKey );
+
+		dest[d] = targ;
+		emit[d] = 1;
+		d += 1;
+		for ( long long s = 1; s < span; s++ ) {
+			dest[d] = targ;
+			emit[d] = 0;
+			d += 1;
+		}
+		targ += 1;
 	}
 
 	this->lowKey = lowKey;
 	this->highKey = highKey;
+	this->classMap = dest;
+	this->classEmit = emit;
+
 	equiv.empty();
 }
 
