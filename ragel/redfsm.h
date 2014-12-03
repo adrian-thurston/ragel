@@ -472,6 +472,13 @@ struct RedFsmAp
 	void moveTransToSingle( RedStateAp *state );
 	void chooseSingle();
 
+	/* All-state low/high, class map */
+	Key lowKey;
+	Key highKey;
+
+	long long *classMap;
+	long long *classEmit;
+
 	void characterClass( const char *fsmName );
 	void makeFlat();
 

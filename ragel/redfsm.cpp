@@ -356,56 +356,83 @@ void RedFsmAp::characterClass( const char *fsmName )
 	}
 
 	/* Will likely crash if there are no transitions in the FSM. */
-
 	long long maxSpan = keyOps->span( lowKey, highKey );
 	long long *dest = new long long[maxSpan];
 	memset( dest, 0, sizeof(long long) * maxSpan );
 
-	long long nextTarg = 0;
+	long long *emit = new long long[maxSpan];
+	memset( emit, 0, sizeof(long long) * maxSpan );
+
+	long long targ = 0;
 
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->outRange.length() == 0 )
 			continue;
 
-		nextTarg += 1;
-
 		long long span = keyOps->span( st->lowKey, st->highKey );
 
-		Key key = st->lowKey;
-		long long pos = 0;
+		/* Destination offset. */
+		long long off = keyOps->span( lowKey, st->lowKey ) - 1;
 
-		long long *src = new long long[span];
-		memset( src, 0, sizeof(long long) * span );
-		src[0] = nextTarg;
+		long long prev, pos = 0;
 
-		key.increment();
+		/* First dest always jumps. First char must start a class. */
+		targ += 1;
+		prev = dest[off];
+		dest[off] = targ;
+
 		pos++;
+		off++;
 
 		while ( pos < span ) {
-
+			/* If either the dest changes or the src changes, then we are
+			 * changing classes. */
 			if ( st->transList[pos] != st->transList[pos-1] )
-				nextTarg += 1;
+				targ += 1;
+			else if ( dest[off] != prev )
+				targ += 1;
 
-			src[pos] = nextTarg;
+			prev = dest[off];
+			dest[off] = targ;
 
-			key.increment();
 			pos++;
+			off++;
 		}
-		
-		long long off = keyOps->span( lowKey, st->lowKey );
-		off -= 1;
+	}
 
-		for ( long long pos = 0; pos < span; )
-			dest[off++] += src[pos++];
-
-		delete[] src;
+	/* Reduce to sequential. */
+	long long prev = dest[0];
+	targ = 0;
+	dest[0] = targ;
+	emit[0] = 1;
+	for ( long long pos = 1; pos < maxSpan; pos++ ) {
+		bool change = 0;
+		if ( dest[pos] != prev ) {
+			change = 1;
+			targ += 1;;
+		}
+		prev = dest[pos];
+		dest[pos] = targ;
+		emit[pos] = change;
 	}
 		
-	for ( long long pos = 0; pos < maxSpan; pos++ )
-		std::cerr << "group: " << dest[pos] << " " << lowKey.getVal() + pos << std::endl;
+	for ( long long pos = 0; pos < maxSpan; pos++ ) {
+		std::cerr << "group: " << lowKey.getVal() + pos <<
+				" -> " << dest[pos] << std::endl;
+	}
+
+	for ( long long pos = 0; pos < maxSpan; pos++ ) {
+		std::cerr << "emit: " << lowKey.getVal() + pos <<
+				" -> " << emit[pos] << std::endl;
+	}
 
 	std::cerr << "maxSpan: " << maxSpan << std::endl;
 	std::cerr << std::endl;
+
+	this->lowKey = lowKey;
+	this->highKey = highKey;
+	this->classMap = dest;
+	this->classEmit = emit;
 }
 
 
