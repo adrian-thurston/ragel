@@ -480,6 +480,7 @@ struct RedFsmAp
 	long long *classEmit;
 
 	void characterClass( const char *fsmName );
+	void characterClassRange( const char *fsmName );
 	void makeFlat();
 
 	/* Move a selected transition from ranges to default. */

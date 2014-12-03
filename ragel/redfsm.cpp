@@ -22,6 +22,7 @@
 #include "redfsm.h"
 #include "avlmap.h"
 #include "mergesort.h"
+#include "fsmgraph.h"
 #include <iostream>
 #include <sstream>
 
@@ -420,6 +421,85 @@ void RedFsmAp::characterClass( const char *fsmName )
 	this->classEmit = emit;
 }
 
+struct EquivClass
+{
+	EquivClass( Key lowKey, Key highKey )
+		: lowKey(lowKey), highKey(highKey) {}
+
+	Key lowKey, highKey;
+	EquivClass *prev, *next;
+};
+
+typedef DList<EquivClass> EquivList;
+
+void RedFsmAp::characterClassRange( const char *fsmName )
+{
+	/* Find the global low and high keys. */
+	Key lowKey = keyOps->maxKey;
+	Key highKey = keyOps->minKey;
+
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->outRange.length() == 0 )
+			continue;
+
+		st->lowKey = st->outRange[0].lowKey;
+		st->highKey = st->outRange[st->outRange.length()-1].highKey;
+
+		if ( st->lowKey < lowKey )
+			lowKey = st->lowKey;
+
+		if ( st->highKey > highKey )
+			highKey = st->highKey;
+	}
+
+	EquivList equiv;
+	equiv.append( new EquivClass( lowKey, highKey ) );
+
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->outRange.length() == 0 )
+			continue;
+
+		EquivList trans;
+		EquivList newList;
+
+		/* Need to alloc these because pair iter doesn't support vectors. */
+		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ )
+			trans.append( new EquivClass( rtel->lowKey, rtel->highKey ) );
+
+		PairIter<EquivClass> pair( equiv.head, trans.head );
+		for ( ; !pair.end(); pair++ ) {
+			switch ( pair.userState ) {
+
+			case RangeOverlap:
+			case RangeInS1:
+				newList.append( new EquivClass( pair.s1Tel.lowKey, pair.s1Tel.highKey ) );
+				break;
+
+			case RangeInS2:
+				newList.append( new EquivClass( pair.s2Tel.lowKey, pair.s2Tel.highKey ) );
+				break;
+
+			case BreakS1:
+			case BreakS2:
+				break;
+			}
+		}
+
+		trans.empty();
+		equiv.empty();
+		equiv.transfer( newList );
+	}
+
+	std::cerr << fsmName << std::endl;
+	for ( EquivClass *c = equiv.head; c != 0; c = c->next ) {
+		std::cerr << "  class: " << c->lowKey.getVal() <<
+				" " << c->highKey.getVal() << std::endl;
+	}
+
+	this->lowKey = lowKey;
+	this->highKey = highKey;
+	equiv.empty();
+}
 
 /* A default transition has been picked, move it from the outRange to the
  * default pointer. */
