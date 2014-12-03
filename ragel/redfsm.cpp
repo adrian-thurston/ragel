@@ -24,8 +24,11 @@
 #include "mergesort.h"
 #include "ragel.h"
 #include <iostream>
+#include <stdlib.h>
 #include <sstream>
 #include <iomanip>
+
+#define GAPINESS 0
 
 using std::ostringstream;
 
@@ -358,7 +361,7 @@ void RedFsmAp::postSortInterleave( const char *fsmName )
 		roll++;
 
 		double rollp = 100.0 * ( (double)roll / (double)stateList.length() );
-		if ( rollp > thresh ) {
+		if ( rollp > ( GAPINESS ? thresh : 5 ) ) {
 			next = end;
 			roll = 0;
 
@@ -398,32 +401,9 @@ struct CmpGapiness
 	}
 };
 
-void RedFsmAp::gapinessSort( const char *fsmName )
-{
-	int numStates = stateList.length();
-	RedStateAp **states = new RedStateAp*[numStates];
-
-	int d = 0;
-	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
-		states[d++] = st;
-
-	MergeSort<RedStateAp*, CmpGapiness> gapinessSort;
-	gapinessSort.sort( states, stateList.length() );
-
-	stateList.abandon();
-	for ( int s = 0; s < numStates; s++ )
-		stateList.append( states[s] );
-
-	delete[] states;
-
-	if ( printStatistics ) {
-		for ( RedStateList::Iter st = stateList; st.lte(); st++ )
-			std::cout << "gapiness-" << fsmName << "\t" << st->gapiness << std::endl;
-	}
-}
-
 void RedFsmAp::analyzeInterleave( const char *fsmName )
 {
+	srand( time( 0 ) );
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		unsigned long long span = 0;
 		long long nondef = 0;
@@ -446,7 +426,7 @@ void RedFsmAp::analyzeInterleave( const char *fsmName )
 		if ( span > 0 )
 			gapiness = ( def * 1000 ) / span;
 
-		st->gapiness = gapiness;
+		st->gapiness = GAPINESS ? gapiness : rand();
 
 		std::cout << "span-" << fsmName << "\t" << span << "\t" <<
 			nondef << "\t" << gapiness << "\t" << st->lowKey.getVal() << "\t" <<
@@ -477,6 +457,31 @@ void RedFsmAp::analyzeInterleave( const char *fsmName )
 		std::cout << std::endl;
 	}
 }
+
+void RedFsmAp::gapinessSort( const char *fsmName )
+{
+	int numStates = stateList.length();
+	RedStateAp **states = new RedStateAp*[numStates];
+
+	int d = 0;
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
+		states[d++] = st;
+
+	MergeSort<RedStateAp*, CmpGapiness> gapinessSort;
+	gapinessSort.sort( states, stateList.length() );
+
+	stateList.abandon();
+	for ( int s = 0; s < numStates; s++ )
+		stateList.append( states[s] );
+
+	delete[] states;
+
+	if ( printStatistics ) {
+		for ( RedStateList::Iter st = stateList; st.lte(); st++ )
+			std::cout << "gapiness-" << fsmName << "\t" << st->gapiness << std::endl;
+	}
+}
+
 
 void RedFsmAp::makeFlat()
 {
