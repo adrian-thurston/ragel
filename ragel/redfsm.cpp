@@ -388,34 +388,15 @@ bool RedFsmAp::alphabetCovered( RedTransList &outRange )
 
 RedTransAp *RedFsmAp::chooseDefaultSpan( RedStateAp *state )
 {
-	/* Make a set of transitions from the outRange. */
-	RedTransSet stateTransSet;
-	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ )
-		stateTransSet.insert( rtel->value );
-	
-	/* For each transition in the find how many alphabet characters the
-	 * transition spans. */
-	unsigned long long *span = new unsigned long long[stateTransSet.length()];
-	memset( span, 0, sizeof(unsigned long long) * stateTransSet.length() );
-	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
-		/* Lookup the transition in the set. */
-		RedTransAp **inSet = stateTransSet.find( rtel->value );
-		int pos = inSet - stateTransSet.data;
-		span[pos] += keyOps->span( rtel->lowKey, rtel->highKey );
-	}
+	long long span1 = keyOps->span( state->outRange[0].lowKey,
+			state->outRange[0].lowKey );
 
-	/* Find the max span, choose it for making the default. */
-	RedTransAp *maxTrans = 0;
-	unsigned long long maxSpan = 0;
-	for ( RedTransSet::Iter rtel = stateTransSet; rtel.lte(); rtel++ ) {
-		if ( span[rtel.pos()] > maxSpan ) {
-			maxSpan = span[rtel.pos()];
-			maxTrans = *rtel;
-		}
-	}
+	long long span2 = keyOps->span( state->outRange[state->outRange.length()-1].lowKey,
+			state->outRange[state->outRange.length()-1].lowKey );
 
-	delete[] span;
-	return maxTrans;
+	return span1 > span2 ? 
+		state->outRange[0].value :
+		state->outRange[state->outRange.length()-1].value;
 }
 
 /* Pick default transitions from ranges for the states. */
