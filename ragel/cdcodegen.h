@@ -228,6 +228,7 @@ protected:
 	string C() { return "_" + DATA_PREFIX() + "cond_spaces"; }
 	string CK() { return "_" + DATA_PREFIX() + "cond_keys"; }
 	string K() { return "_" + DATA_PREFIX() + "trans_keys"; }
+	string AC() { return "_" + DATA_PREFIX() + "alph_class"; }
 	string I() { return "_" + DATA_PREFIX() + "indicies"; }
 	string ID() { return "_" + DATA_PREFIX() + "index_defaults"; }
 	string CO() { return "_" + DATA_PREFIX() + "cond_offsets"; }

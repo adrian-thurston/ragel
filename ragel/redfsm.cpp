@@ -338,8 +338,6 @@ void RedFsmAp::makeFlat()
 
 void RedFsmAp::characterClass( const char *fsmName )
 {
-	std::cerr << "starting character class " << fsmName << std::endl;
-
 	Key lowKey = keyOps->maxKey;
 	Key highKey = keyOps->minKey;
 
@@ -415,19 +413,6 @@ void RedFsmAp::characterClass( const char *fsmName )
 		dest[pos] = targ;
 		emit[pos] = change;
 	}
-		
-	for ( long long pos = 0; pos < maxSpan; pos++ ) {
-		std::cerr << "group: " << lowKey.getVal() + pos <<
-				" -> " << dest[pos] << std::endl;
-	}
-
-	for ( long long pos = 0; pos < maxSpan; pos++ ) {
-		std::cerr << "emit: " << lowKey.getVal() + pos <<
-				" -> " << emit[pos] << std::endl;
-	}
-
-	std::cerr << "maxSpan: " << maxSpan << std::endl;
-	std::cerr << std::endl;
 
 	this->lowKey = lowKey;
 	this->highKey = highKey;

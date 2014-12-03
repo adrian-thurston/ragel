@@ -237,7 +237,10 @@ void FFlatCodeGen::writeData()
 
 	FLAT_INDEX_OFFSET();
 
+	ALPH_CLASS();
+
 	INDICIES();
+
 	INDEX_DEFAULTS();
 
 	TRANS_TARGS();

@@ -145,8 +145,19 @@ std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 		taIO.VAL( curIndOffset );
 		
 		/* Move the index offset ahead. */
-		if ( st->transList != 0 )
-			curIndOffset += keyOps->span( st->lowKey, st->highKey );
+		if ( st->transList != 0 ) {
+			long long off = keyOps->span( redFsm->lowKey, st->lowKey ) - 1;
+
+			/* Walk the singles. */
+			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
+			for ( unsigned long long pos = 0; pos < span; ) {
+				if ( redFsm->classEmit[off] )
+					curIndOffset += 1;
+
+				pos++;
+				off++;
+			}
+		}
 	}
 
 	taIO.CLOSE();
@@ -338,9 +349,18 @@ std::ostream &FlatCodeGen::KEYS()
 	taK.OPEN();
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Emit just low key and high key. */
-		taK.KEY( st->lowKey );
-		taK.KEY( st->highKey );
+		if ( st->transList ) {
+			long long loff = keyOps->span( redFsm->lowKey, st->lowKey ) - 1;
+			long long hoff = keyOps->span( redFsm->lowKey, st->highKey ) - 1;
+
+			/* Emit just low key and high key. */
+			taK.KEY( redFsm->classMap[loff] );
+			taK.KEY( redFsm->classMap[hoff] );
+		}
+		else {
+			taK.KEY( 0 );
+			taK.KEY( 0 );
+		}
 	}
 
 	/* Output one last number so we don't have to figure out when the last
@@ -352,6 +372,20 @@ std::ostream &FlatCodeGen::KEYS()
 	return out;
 }
 
+std::ostream &FlatCodeGen::ALPH_CLASS()
+{
+	TableArray taAC( *this, arrayType(redFsm->maxSpan), AC() );
+	taAC.OPEN();
+
+	long long maxSpan = keyOps->span( redFsm->lowKey, redFsm->highKey );
+
+	for ( long long pos = 0; pos < maxSpan; pos++ )
+		taAC.VAL( redFsm->classMap[pos] );
+
+	taAC.CLOSE();
+	return out;
+}
+
 std::ostream &FlatCodeGen::INDICIES()
 {
 	TableArray taI( *this, arrayType(redFsm->maxIndex), I() );
@@ -360,10 +394,17 @@ std::ostream &FlatCodeGen::INDICIES()
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList != 0 ) {
+			long long off = keyOps->span( redFsm->lowKey, st->lowKey ) - 1;
+
 			/* Walk the singles. */
 			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
-			for ( unsigned long long pos = 0; pos < span; pos++ )
-				taI.VAL( st->transList[pos]->id );
+			for ( unsigned long long pos = 0; pos < span; ) {
+				if ( redFsm->classEmit[off] )
+					taI.VAL( st->transList[pos]->id );
+
+				pos++;
+				off++;
+			}
 		}
 	}
 
@@ -446,14 +487,20 @@ std::ostream &FlatCodeGen::TRANS_ACTIONS()
 
 void FlatCodeGen::LOCATE_TRANS()
 {
+	long lowKey = redFsm->lowKey.getVal();
+	long highKey = redFsm->highKey.getVal();
+
 	out <<
 		"	_keys = " << ARR_OFF( K(), "(" + vCS() + "<<1)" ) << ";\n"
 		"	_inds = " << ARR_OFF( I(), IO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
 		"	_slen = " << SP() << "[" << vCS() << "];\n"
-		"	_trans = _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
-		"		" << GET_WIDE_KEY() << " <= _keys[1] ?\n"
-		"		_inds[" << GET_WIDE_KEY() << " - _keys[0]]:\n"
+		"	_trans = _slen > 0 && " <<
+				lowKey << " <= " << GET_WIDE_KEY() << " &&" <<
+				GET_WIDE_KEY() << " <= " << highKey << " &&\n"
+		"		_keys[0] <= " << AC() << "[" << GET_WIDE_KEY() << " - " << lowKey << "] &&\n" 
+		"		" << AC() << "[" << GET_WIDE_KEY() << " - " << lowKey << "] <= _keys[1] ?\n" 
+		"		_inds[" << AC() << "[" << GET_WIDE_KEY() << " - " << lowKey << "] - _keys[0] ] :\n"
 		"      " << ID() << "[" << vCS() << "];\n"
 		"\n";
 }
@@ -563,7 +610,10 @@ void FlatCodeGen::writeData()
 
 	FLAT_INDEX_OFFSET();
 
+	ALPH_CLASS();
+
 	INDICIES();
+
 	INDEX_DEFAULTS();
 
 	TRANS_TARGS();
