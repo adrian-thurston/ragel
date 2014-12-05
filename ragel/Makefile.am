@@ -1,3 +1,5 @@
+RAGEL = @RAGEL@
+KELBT = @KELBT@
 
 INCLUDES = -I$(top_srcdir)/aapl
 
@@ -43,16 +45,16 @@ CLEANFILES = \
 	rlscan.cpp rlparse.h rlparse.cpp
 
 rlparse.h: rlparse.kh
-	kelbt -o $@ $<
+	$(KELBT) -o $@ $<
 
 rlparse.cpp: rlparse.kl rlparse.kh
-	kelbt -o $@ $<
+	$(KELBT) -o $@ $<
 
 # This dependency comes from the import of the parser defines
 # into the scanner.
 rlscan.cpp: rlparse.h
 
 rlscan.cpp: rlscan.rl
-	ragel -G2 -I$(builddir) -o $@ $<
+	$(RAGEL) -G2 -I$(builddir) -o $@ $<
 
 endif
