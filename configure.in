@@ -79,7 +79,7 @@ AC_ARG_WITH(ragel,
 		)
 	],
 	[
-		AC_CHECK_PROG(RAGEL, ragel, ragel)
+		AC_PATH_PROG(RAGEL, ragel, ragel)
 		if test -z "$RAGEL"; then
 			echo
 			echo "error: ragel is required to build the parsers"
@@ -99,7 +99,7 @@ AC_ARG_WITH(kelbt,
 		)
 	],
 	[
-		AC_CHECK_PROG(KELBT, kelbt, kelbt)
+		AC_PATH_PROG(KELBT, kelbt, kelbt)
 		if test -z "$KELBT"; then
 			echo
 			echo "error: kelbt is required to build the parsers"
