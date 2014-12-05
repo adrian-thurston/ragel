@@ -45,6 +45,7 @@ done
 
 [ -z "$minflags" ] && minflags="-n -m -l -e"
 [ -z "$genflags" ] && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+[ -z "$encflags" ] && encflags="--integral-tables --string-tables"
 [ -z "$langflags" ] && langflags="-C -D -J -R -A -Z"
 
 shift $((OPTIND - 1));
@@ -52,7 +53,7 @@ shift $((OPTIND - 1));
 [ -z "$*" ] && set -- *.rl
 
 config=../src/config.h
-ragel=../ragel/ragel --string-tables
+ragel=../ragel/ragel
 
 cxx_compiler="@CXX@"
 c_compiler="@CC@"
@@ -97,8 +98,8 @@ function test_error
 
 function run_test()
 {
-	echo "$ragel $lang_opt $min_opt $gen_opt -o $code_src $test_case"
-	if ! $ragel $lang_opt $min_opt $gen_opt -o $code_src $test_case; then
+	echo "$ragel $lang_opt $min_opt $gen_opt $enc_opt -o $code_src $test_case"
+	if ! $ragel $lang_opt $min_opt $gen_opt $enc_opt -o $code_src $test_case; then
 		test_error;
 	fi
 
@@ -262,7 +263,24 @@ for test_case; do
 	[ -z "$allow_minflags" ] && allow_minflags="-n -m -l -e"
 
 	case $lang in
-	c|c++|d)
+	c|c++)
+		# Using genflags, get the allowed gen flags from the test case. If the
+		# test case doesn't specify assume that all gen flags are allowed.
+		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`
+		[ -z "$allow_genflags" ] && allow_genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+
+		for min_opt in $minflags; do
+			echo "$allow_minflags" | grep -e $min_opt >/dev/null || continue
+			for gen_opt in $genflags; do
+				echo "$allow_genflags" | grep -e $gen_opt >/dev/null || continue
+				for enc_opt in $encflags; do
+					run_test
+				done
+			done
+		done
+	;;
+
+	d)
 		# Using genflags, get the allowed gen flags from the test case. If the
 		# test case doesn't specify assume that all gen flags are allowed.
 		allow_genflags=`sed '/@ALLOW_GENFLAGS:/s/^.*: *//p;d' $test_case`

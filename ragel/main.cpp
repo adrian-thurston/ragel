@@ -374,6 +374,8 @@ void processArgs( int argc, const char **argv, InputData &id )
 					rubyImpl = Rubinius;
 				else if ( strcmp( arg, "string-tables" ) == 0 )
 					stringTables = true;
+				else if ( strcmp( arg, "integral-tables" ) == 0 )
+					stringTables = false;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
