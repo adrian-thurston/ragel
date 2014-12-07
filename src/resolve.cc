@@ -468,11 +468,10 @@ void LangExpr::resolve( Compiler *pd ) const
 void IterCall::resolve( Compiler *pd ) const
 {
 	switch ( form ) {
-		case IterCallForm:
+		case Call:
 			langTerm->resolve( pd );
 			break;
-		case VarRefForm:
-		case ExprForm:
+		case Expr:
 			langExpr->resolve( pd );
 			break;
 	}

@@ -709,7 +709,7 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 
 
 ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
-		VarRefLookup &lookup, CallArgVect *args )
+		VarRefLookup &lookup, CallArgVect *args, bool derefGenerics )
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
 	 * will be null. */
@@ -724,100 +724,125 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 	ObjectField **paramRefs = new ObjectField*[numArgs];
 	memset( paramRefs, 0, sizeof(ObjectField*) * numArgs );
 
-	/* Evaluate and push the args. */
-	if ( args != 0 ) {
-		/* We use this only if there is a paramter list. */
-		ParameterList::Iter p;
-		long size = 0;
-		long tempPops = 0;
+	bool *derefs = new bool[numArgs];
+	memset( derefs, 0, sizeof(bool)*numArgs );
 
+	/* Done now if there are no args. */
+	if ( args == 0 )
+		return paramRefs;
+
+	/* We use this only if there is a paramter list. */
+	ParameterList::Iter p;
+	long size = 0;
+	long tempPops = 0;
+
+	if ( derefGenerics ) {
 		/* First pass we need to allocate and evaluate temporaries. */
 		paramList != 0 && ( p = *paramList );
 		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
-			/* Get the expression and the UT for the arg. */
-			LangExpr *expression = (*pe)->expr;
-			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
-
-			if ( paramUT->typeId == TYPE_REF ) {
-				/* Make sure we are dealing with a variable reference. */
-				if ( ! expression->canTakeRefTest( pd ) ) {
-					/* Evaluate the expression. */
-					UniqueType *exprUT = expression->evaluate( pd, code );
-					(*pe)->exprUT = exprUT;
-
-					size += 1;
-					(*pe)->offTmp = size;
-					tempPops += 1;
-				}
+			CodeVect unused;
+			UniqueType *ut = (*pe)->expr->evaluate( pd, unused );
+			if ( ut->typeId == TYPE_PTR && ut->langEl->generic != 0 &&
+					( ut->langEl->generic->typeId == GEN_LIST ||
+					ut->langEl->generic->typeId == GEN_MAP ) )
+			{
+				derefs[pe.pos()] = true;
 			}
-
-			/* Advance the parameter list iterator if we have it. */
-			paramList != 0 && p.increment();
 		}
+	}
 
+	/* First pass we need to allocate and evaluate temporaries. */
+	paramList != 0 && ( p = *paramList );
+	for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
+		/* Get the expression and the UT for the arg. */
+		LangExpr *expression = (*pe)->expr;
+		UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
-		/* Second pass we need to push object loads for reference parameters. */
-		paramList != 0 && ( p = *paramList );
-		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
-			/* Get the expression and the UT for the arg. */
-			LangExpr *expression = (*pe)->expr;
-			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
-
-			if ( paramUT->typeId == TYPE_REF ) {
-				if ( expression->canTakeRefTest( pd ) ) {
-					/* Lookup the field. */
-					LangVarRef *varRef = expression->term->varRef;
-					ObjectField *refOf = varRef->preEvaluateRef( pd, code );
-					paramRefs[pe.pos()] = refOf;
-
-					size += varRef->qual->length() * 2;
-					(*pe)->offQualRef = size;
-				}
-			}
-
-			/* Advance the parameter list iterator if we have it. */
-			paramList != 0 && p.increment();
-		}
-
-		paramList != 0 && ( p = *paramList );
-		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
-			/* Get the expression and the UT for the arg. */
-			LangExpr *expression = (*pe)->expr;
-			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
-
-			if ( paramUT->typeId == TYPE_REF ) {
-				if ( expression->canTakeRefTest( pd ) ) {
-					/* Lookup the field. */
-					LangVarRef *varRef = expression->term->varRef;
-
-					ObjectField *refOf = varRef->evaluateRef( pd, code,
-							(size - (*pe)->offQualRef) );
-					paramRefs[pe.pos()] = refOf;
-
-					size += 2;
-				}
-				else {
-					code.append( IN_REF_FROM_BACK );
-					code.appendHalf( size - (*pe)->offTmp );
-
-					size += 2;
-				}
-			}
-			else {
+		if ( paramUT->typeId == TYPE_REF ) {
+			/* Make sure we are dealing with a variable reference. */
+			if ( derefs[pe.pos()] || ! expression->canTakeRefTest( pd ) ) {
+				/* Evaluate the expression. */
 				UniqueType *exprUT = expression->evaluate( pd, code );
 
-				if ( !castAssignment( pd, code, paramUT, 0, exprUT ) )
-					error(loc) << "arg " << pe.pos()+1 << " is of the wrong type" << endp;
+				if ( derefs[pe.pos()] ) {
+					code.append( IN_PTR_DEREF_R );
+					exprUT = pd->findUniqueType( TYPE_TREE, exprUT->langEl );
+				}
+
+				(*pe)->exprUT = exprUT;
 
 				size += 1;
+				(*pe)->offTmp = size;
+				tempPops += 1;
 			}
-
-			/* Advance the parameter list iterator if we have it. */
-			paramList != 0 && p.increment();
 		}
 
-		argSize = tempPops;
+		/* Advance the parameter list iterator if we have it. */
+		paramList != 0 && p.increment();
 	}
+
+
+	/* Second pass we need to push object loads for reference parameters. */
+	paramList != 0 && ( p = *paramList );
+	for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
+		/* Get the expression and the UT for the arg. */
+		LangExpr *expression = (*pe)->expr;
+		UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
+
+		if ( paramUT->typeId == TYPE_REF ) {
+			if ( ! derefs[pe.pos()] && expression->canTakeRefTest( pd ) ) {
+				/* Lookup the field. */
+				LangVarRef *varRef = expression->term->varRef;
+				ObjectField *refOf = varRef->preEvaluateRef( pd, code );
+				paramRefs[pe.pos()] = refOf;
+
+				size += varRef->qual->length() * 2;
+				(*pe)->offQualRef = size;
+			}
+		}
+
+		/* Advance the parameter list iterator if we have it. */
+		paramList != 0 && p.increment();
+	}
+
+	paramList != 0 && ( p = *paramList );
+	for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
+		/* Get the expression and the UT for the arg. */
+		LangExpr *expression = (*pe)->expr;
+		UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
+
+		if ( paramUT->typeId == TYPE_REF ) {
+			if ( ! derefs[pe.pos()] && expression->canTakeRefTest( pd ) ) {
+				/* Lookup the field. */
+				LangVarRef *varRef = expression->term->varRef;
+
+				ObjectField *refOf = varRef->evaluateRef( pd, code,
+						(size - (*pe)->offQualRef) );
+				paramRefs[pe.pos()] = refOf;
+
+				size += 2;
+			}
+			else {
+				code.append( IN_REF_FROM_BACK );
+				code.appendHalf( size - (*pe)->offTmp );
+
+				size += 2;
+			}
+		}
+		else {
+			UniqueType *exprUT = expression->evaluate( pd, code );
+
+			if ( !castAssignment( pd, code, paramUT, 0, exprUT ) )
+				error(loc) << "arg " << pe.pos()+1 << " is of the wrong type" << endp;
+
+			size += 1;
+		}
+
+		/* Advance the parameter list iterator if we have it. */
+		paramList != 0 && p.increment();
+	}
+
+	argSize = tempPops;
 
 	return paramRefs;
 }
@@ -2102,7 +2127,8 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 
 	/* Evaluate and push the arguments. */
 	ObjectField **paramRefs = iterCall->langTerm->varRef->evaluateArgs(
-			pd, code, lookup, iterCall->langTerm->args );
+			pd, code, lookup, iterCall->langTerm->args,
+			( iterCall->wasExpr ? true : false ) );
 
 	pd->endContiguous( code, resetContiguous );
 

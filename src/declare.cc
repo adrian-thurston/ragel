@@ -534,13 +534,13 @@ void LangStmt::chooseDefaultIter( Compiler *pd, IterCall *iterCall ) const
 	callExprVect->append( new CallArg( iterCall->langExpr ) );
 	iterCall->langTerm = LangTerm::cons( InputLoc(), callVarRef, callExprVect );
 	iterCall->langExpr = 0;
-	iterCall->form = IterCall::IterCallForm;
+	iterCall->form = IterCall::Call;
+	iterCall->wasExpr = true;
 }
-
 
 void LangStmt::declareForIter( Compiler *pd ) const
 {
-	if ( iterCall->form != IterCall::IterCallForm )
+	if ( iterCall->form != IterCall::Call )
 		chooseDefaultIter( pd, iterCall );
 
 	objField->typeRef = TypeRef::cons( loc, typeRef, iterCall );

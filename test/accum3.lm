@@ -22,7 +22,7 @@ def args
 ArgParser: parser<args> = new parser<args>
 
 ArgV: list<str> ArgV = argv
-for A: str in deref ArgV 
+for A: str in ArgV 
 	send ArgParser [A '\0']
 
 Args: args = ArgParser->finish() 

@@ -1970,6 +1970,7 @@ struct TypeRef
 		type((Type)-1),
 		nspaceQual(0),
 		pdaLiteral(0),
+		iterCall(0),
 		iterDef(0),
 		typeRef1(0),
 		typeRef2(0),
@@ -2463,7 +2464,9 @@ typedef Vector<FieldInit*> FieldInitVect;
 
 struct VarRefLookup
 {
-	VarRefLookup( int lastPtrInQual, int firstConstPart, ObjectDef *inObject, ObjNameScope *inScope ) :
+	VarRefLookup( int lastPtrInQual, int firstConstPart,
+			ObjectDef *inObject, ObjNameScope *inScope )
+	:
 		lastPtrInQual(lastPtrInQual), 
 		firstConstPart(firstConstPart),
 		inObject(inObject),
@@ -2556,8 +2559,11 @@ struct LangVarRef
 			ObjectField *el, UniqueType *exprUT, bool revert ) const;
 
 	void assignValue( Compiler *pd, CodeVect &code, UniqueType *exprUT ) const;
+
+	/* The deref generics value is for iterator calls with lists and maps as args. */
 	ObjectField **evaluateArgs( Compiler *pd, CodeVect &code, 
-			VarRefLookup &lookup, CallArgVect *args );
+			VarRefLookup &lookup, CallArgVect *args, bool derefGenerics = false );
+
 	void callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const;
 	UniqueType *evaluateCall( Compiler *pd, CodeVect &code, CallArgVect *args );
 	UniqueType *evaluate( Compiler *pd, CodeVect &code, bool forWriting = false ) const;
@@ -2880,15 +2886,15 @@ typedef DList<LangStmt> StmtList;
 struct IterCall
 {
 	enum Form {
-		VarRefForm,
-		IterCallForm,
-		ExprForm
+		Call,
+		Expr
 	};
 
 	IterCall()
 	:
 		langTerm(0),
-		langExpr(0)
+		langExpr(0),
+		wasExpr(false)
 	{}
 
 	static IterCall *cons( Form form, LangTerm *langTerm )
@@ -2912,6 +2918,7 @@ struct IterCall
 	Form form;
 	LangTerm *langTerm;
 	LangExpr *langExpr;
+	bool wasExpr;
 };
 
 struct LangStmt

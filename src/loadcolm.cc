@@ -1942,7 +1942,7 @@ struct LoadColm
 			LangVarRef *varRef = walkVarRef( Tree.var_ref() );
 			CallArgVect *exprVect = walkCallArgList( Tree.call_arg_list() );
 			LangTerm *langTerm = LangTerm::cons( varRef->loc, varRef, exprVect );
-			iterCall = IterCall::cons( IterCall::IterCallForm, langTerm );
+			iterCall = IterCall::cons( IterCall::Call, langTerm );
 			break;
 		}
 		case iter_call::Id: {
@@ -1952,12 +1952,12 @@ struct LoadColm
 			LangTerm *langTerm = LangTerm::cons( Tree.id().loc(),
 					LangTerm::VarRefType, varRef );
 			LangExpr *langExpr = LangExpr::cons( langTerm );
-			iterCall = IterCall::cons( IterCall::VarRefForm, langExpr );
+			iterCall = IterCall::cons( IterCall::Expr, langExpr );
 			break;
 		}
 		case iter_call::Expr: {
 			LangExpr *langExpr = walkCodeExpr( Tree.code_expr() );
-			iterCall = IterCall::cons( IterCall::ExprForm, langExpr );
+			iterCall = IterCall::cons( IterCall::Expr, langExpr );
 			break;
 		}}
 		
