@@ -831,7 +831,28 @@ struct LoadColm
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );
 			break;
-		}}
+		}
+		case type_ref::List2El: {
+			TypeRef *type = walkTypeRef( typeRef._type_ref() );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::List2El, 0, type, 0 );
+			break;
+		}
+		case type_ref::List2: {
+			TypeRef *type = walkTypeRef( typeRef._type_ref() );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::List2, 0, type, 0 );
+			break;
+		}
+		case type_ref::Map2El: {
+			TypeRef *type = walkTypeRef( typeRef._type_ref() );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map2El, 0, type, 0 );
+			break;
+		}
+		case type_ref::Map2: {
+			TypeRef *type = walkTypeRef( typeRef._type_ref() );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map2, 0, type, 0 );
+			break;
+		}
+		}
 		return tr;
 	}
 

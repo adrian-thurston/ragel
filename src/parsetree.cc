@@ -154,6 +154,46 @@ int CmpUniqueList::compare( const UniqueList &ut1, const UniqueList &ut2 )
 	return 0;
 }
 
+int CmpUniqueList2El::compare( const UniqueList2El &ut1, const UniqueList2El &ut2 )
+{
+	if ( ut1.value < ut2.value )
+		return -1;
+	else if ( ut1.value > ut2.value )
+		return 1;
+
+	return 0;
+}
+
+int CmpUniqueList2::compare( const UniqueList2 &ut1, const UniqueList2 &ut2 )
+{
+	if ( ut1.value < ut2.value )
+		return -1;
+	else if ( ut1.value > ut2.value )
+		return 1;
+
+	return 0;
+}
+
+int CmpUniqueMap2El::compare( const UniqueMap2El &ut1, const UniqueMap2El &ut2 )
+{
+	if ( ut1.value < ut2.value )
+		return -1;
+	else if ( ut1.value > ut2.value )
+		return 1;
+
+	return 0;
+}
+
+int CmpUniqueMap2::compare( const UniqueMap2 &ut1, const UniqueMap2 &ut2 )
+{
+	if ( ut1.value < ut2.value )
+		return -1;
+	else if ( ut1.value > ut2.value )
+		return 1;
+
+	return 0;
+}
+
 int CmpUniqueVector::compare( const UniqueVector &ut1, const UniqueVector &ut2 )
 {
 	if ( ut1.value < ut2.value )

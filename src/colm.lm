@@ -28,7 +28,11 @@ lex
 	token IN / 'in' /
 	token PARSER / 'parser' | 'accum' /
 	token LIST / 'list' /
+	token LIST2 / 'list2' /
+	token LIST2EL / 'list2el' /
 	token MAP / 'map' /
+	token MAP2 / 'map2' /
+	token MAP2EL / 'map2el' /
 	token PTR / 'ptr' /
 	token ITER / 'iter' /
 	token REF / 'ref' /
@@ -553,9 +557,13 @@ def code_factor
 def type_ref
 	[region_qual id opt_repeat] :Id
 |	[PTR LT region_qual id opt_repeat GT] :Ptr
-|	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT] :Map
 |	[LIST LT type_ref GT] :List
+|	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT] :Map
 |	[PARSER LT type_ref GT] :Parser
+|	[LIST2EL LT type_ref GT] :List2El
+|	[LIST2 LT type_ref GT] :List2
+|	[MAP2EL LT type_ref GT] :Map2El
+|	[MAP2 LT type_ref GT] :Map2
 
 def region_qual
 	[region_qual id DOUBLE_COLON] :Qual

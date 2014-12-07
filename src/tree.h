@@ -300,6 +300,7 @@ Tree *setListMem( List *list, Half field, Tree *value );
 
 void listPushTail( struct colm_program *prg, List *list, Tree *val );
 void listPushHead( struct colm_program *prg, List *list, Tree *val );
+void list2PushTail( struct colm_program *prg, Tree **sp, List *list, Tree *val );
 Tree *listRemoveEnd( struct colm_program *prg, List *list );
 Tree *listRemoveHead( struct colm_program *prg, List *list );
 Tree *getListMem( List *list, Word field );

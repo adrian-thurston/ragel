@@ -210,6 +210,157 @@ UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 	return pd->findUniqueType( TYPE_PTR, parserUt->langEl );
 }
 
+/*
+ * Object-based list/map
+ */
+UniqueType *TypeRef::resolveTypeList2ElObj( Compiler *pd )
+{
+	nspace = pd->rootNamespace;
+
+	UniqueType *utValue = typeRef1->resolveType( pd );	
+
+	UniqueList2El searchKey( utValue );
+	UniqueList2El *inMap = pd->uniqueList2ElMap.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueList2El( utValue );
+		pd->uniqueList2ElMap.insert( inMap );
+
+		/* FIXME: Need uniqe name allocator for types. */
+		static int listId = 0;
+		String name( 36, "__list2el%d", listId++ );
+
+		GenericType *generic = new GenericType( name, GEN_LIST2EL,
+				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+
+		nspace->genericList.append( generic );
+
+		generic->declare( pd, nspace );
+
+		inMap->generic = generic;
+	}
+
+	generic = inMap->generic;
+	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
+}
+
+UniqueType *TypeRef::resolveTypeList2El( Compiler *pd )
+{
+	UniqueType *listUt = resolveTypeList2ElObj( pd );
+	return pd->findUniqueType( TYPE_PTR, listUt->langEl );
+}
+
+UniqueType *TypeRef::resolveTypeList2Obj( Compiler *pd )
+{
+	nspace = pd->rootNamespace;
+
+	UniqueType *utValue = typeRef1->resolveType( pd );	
+
+	UniqueList2 searchKey( utValue );
+	UniqueList2 *inMap = pd->uniqueList2Map.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueList2( utValue );
+		pd->uniqueList2Map.insert( inMap );
+
+		/* FIXME: Need uniqe name allocator for types. */
+		static int listId = 0;
+		String name( 36, "__list2%d", listId++ );
+
+		GenericType *generic = new GenericType( name, GEN_LIST2,
+				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+
+		nspace->genericList.append( generic );
+
+		generic->declare( pd, nspace );
+
+		inMap->generic = generic;
+	}
+
+	generic = inMap->generic;
+	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
+}
+
+UniqueType *TypeRef::resolveTypeList2( Compiler *pd )
+{
+	UniqueType *listUt = resolveTypeList2Obj( pd );
+	return pd->findUniqueType( TYPE_PTR, listUt->langEl );
+}
+
+UniqueType *TypeRef::resolveTypeMap2ElObj( Compiler *pd )
+{
+	nspace = pd->rootNamespace;
+
+	UniqueType *utValue = typeRef1->resolveType( pd );	
+
+	UniqueMap2El searchKey( utValue );
+	UniqueMap2El *inMap = pd->uniqueMap2ElMap.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueMap2El( utValue );
+		pd->uniqueMap2ElMap.insert( inMap );
+
+		/* FIXME: Need uniqe name allocator for types. */
+		static int listId = 0;
+		String name( 36, "__map2el%d", listId++ );
+
+		GenericType *generic = new GenericType( name, GEN_MAP2EL,
+				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+
+		nspace->genericList.append( generic );
+
+		generic->declare( pd, nspace );
+
+		inMap->generic = generic;
+	}
+
+	generic = inMap->generic;
+	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
+}
+
+UniqueType *TypeRef::resolveTypeMap2El( Compiler *pd )
+{
+	UniqueType *listUt = resolveTypeMap2ElObj( pd );
+	return pd->findUniqueType( TYPE_PTR, listUt->langEl );
+}
+
+UniqueType *TypeRef::resolveTypeMap2Obj( Compiler *pd )
+{
+	nspace = pd->rootNamespace;
+
+	UniqueType *utValue = typeRef1->resolveType( pd );	
+
+	UniqueMap2 searchKey( utValue );
+	UniqueMap2 *inMap = pd->uniqueMap2Map.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueMap2( utValue );
+		pd->uniqueMap2Map.insert( inMap );
+
+		/* FIXME: Need uniqe name allocator for types. */
+		static int listId = 0;
+		String name( 36, "__map2%d", listId++ );
+
+		GenericType *generic = new GenericType( name, GEN_MAP2,
+				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+
+		nspace->genericList.append( generic );
+
+		generic->declare( pd, nspace );
+
+		inMap->generic = generic;
+	}
+
+	generic = inMap->generic;
+	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
+}
+
+UniqueType *TypeRef::resolveTypeMap2( Compiler *pd )
+{
+	UniqueType *listUt = resolveTypeMap2Obj( pd );
+	return pd->findUniqueType( TYPE_PTR, listUt->langEl );
+}
+
+/*
+ * End object based list/map
+ */
+
 UniqueType *TypeRef::resolveTypePtr( Compiler *pd )
 {
 	typeRef1->resolveType( pd );
@@ -321,6 +472,18 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 			break;
 		case Iterator:
 			uniqueType = resolveIterator( pd );
+			break;
+		case List2El:
+			uniqueType = resolveTypeList2El( pd );
+			break;
+		case List2:
+			uniqueType = resolveTypeList2( pd );
+			break;
+		case Map2El:
+			uniqueType = resolveTypeMap2El( pd );
+			break;
+		case Map2:
+			uniqueType = resolveTypeMap2( pd );
 			break;
 		case Unspecified:
 			/* No lookup needed, unique type(s) set when constructed. */

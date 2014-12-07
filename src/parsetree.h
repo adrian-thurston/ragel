@@ -1941,6 +1941,91 @@ struct CmpUniqueParser
 
 typedef AvlBasic< UniqueParser, CmpUniqueParser > UniqueParserMap;
 
+/* 
+ * Unique List2El Types
+ */
+
+struct UniqueList2El
+	: public AvlTreeEl<UniqueList2El>
+{
+	UniqueList2El( UniqueType *value ) :
+		value(value), generic(0) {}
+
+	UniqueType *value;
+	GenericType *generic;
+};
+
+struct CmpUniqueList2El
+{
+	static int compare( const UniqueList2El &ut1, const UniqueList2El &ut2 );
+};
+
+typedef AvlBasic< UniqueList2El, CmpUniqueList2El > UniqueList2ElMap;
+
+/* 
+ * Unique List2 Types
+ */
+
+struct UniqueList2
+	: public AvlTreeEl<UniqueList2>
+{
+	UniqueList2( UniqueType *value ) :
+		value(value), generic(0) {}
+
+	UniqueType *value;
+	GenericType *generic;
+};
+
+struct CmpUniqueList2
+{
+	static int compare( const UniqueList2 &ut1, const UniqueList2 &ut2 );
+};
+
+typedef AvlBasic< UniqueList2, CmpUniqueList2 > UniqueList2Map;
+
+
+/* 
+ * Unique Map2El Types
+ */
+
+struct UniqueMap2El
+	: public AvlTreeEl<UniqueMap2El>
+{
+	UniqueMap2El( UniqueType *value ) :
+		value(value), generic(0) {}
+
+	UniqueType *value;
+	GenericType *generic;
+};
+
+struct CmpUniqueMap2El
+{
+	static int compare( const UniqueMap2El &ut1, const UniqueMap2El &ut2 );
+};
+
+typedef AvlBasic< UniqueMap2El, CmpUniqueMap2El > UniqueMap2ElMap;
+
+/* 
+ * Unique Map2 Types
+ */
+
+struct UniqueMap2
+	: public AvlTreeEl<UniqueMap2>
+{
+	UniqueMap2( UniqueType *value ) :
+		value(value), generic(0) {}
+
+	UniqueType *value;
+	GenericType *generic;
+};
+
+struct CmpUniqueMap2
+{
+	static int compare( const UniqueMap2 &ut1, const UniqueMap2 &ut2 );
+};
+
+typedef AvlBasic< UniqueMap2, CmpUniqueMap2 > UniqueMap2Map;
+
 /*
  *
  */
@@ -1958,11 +2043,15 @@ struct TypeRef
 		Name,
 		Literal,
 		Iterator,
-		Map,
 		List,
+		Map,
 		Parser,
 		Ref,
 		Ptr,
+		List2El,
+		List2,
+		Map2El,
+		Map2,
 	};
 
 	TypeRef()
@@ -2137,6 +2226,15 @@ struct TypeRef
 	UniqueType *resolveType( Compiler *pd );
 	UniqueType *resolveTypePtr( Compiler *pd );
 	UniqueType *resolveTypeRef( Compiler *pd );
+
+	UniqueType *resolveTypeList2ElObj( Compiler *pd );
+	UniqueType *resolveTypeList2El( Compiler *pd );
+	UniqueType *resolveTypeList2Obj( Compiler *pd );
+	UniqueType *resolveTypeList2( Compiler *pd );
+	UniqueType *resolveTypeMap2ElObj( Compiler *pd );
+	UniqueType *resolveTypeMap2El( Compiler *pd );
+	UniqueType *resolveTypeMap2Obj( Compiler *pd );
+	UniqueType *resolveTypeMap2( Compiler *pd );
 
 	Type type;
 	InputLoc loc;

@@ -3096,6 +3096,34 @@ again:
 			treeDownref( prg, sp, tree );
 			break;
 		}
+		case IN_LIST2_PUSH_TAIL_WC: {
+			debug( prg, REALM_BYTECODE, "IN_LIST2_PUSH_TAIL_WC\n" );
+
+			Tree *obj = vm_pop();
+			Tree *val = vm_pop();
+
+			treeDownref( prg, sp, obj );
+			list2PushTail( prg, sp, (List*)obj, val );
+
+			treeUpref( prg->trueVal );
+			vm_push( prg->trueVal );
+			break;
+		}
+		case IN_GET_LIST2EL_MEM_R: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_LIST2EL_MEM_R\n" );
+
+			Tree *obj = vm_pop();
+
+			Tree *val = colm_get_attr( obj, 1 );
+
+			treeUpref( val );
+			vm_push( val );
+			break;
+			
+		}
 		case IN_LIST_POP_TAIL_WC: {
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WC\n" );
 
@@ -3224,6 +3252,20 @@ again:
 			treeDownref( prg, sp, obj );
 
 			Tree *val = getListMem( (List*)obj, field );
+			treeUpref( val );
+			vm_push( val );
+			break;
+		}
+		case IN_GET_LIST2_MEM_R: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_LIST2_MEM_R\n" );
+
+			Tree *obj = vm_pop();
+			treeDownref( prg, sp, obj );
+
+			Tree *val = (Tree*)((List*)obj)->head;
 			treeUpref( val );
 			vm_push( val );
 			break;

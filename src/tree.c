@@ -1039,6 +1039,22 @@ Tree *constructGeneric( Program *prg, long genericId )
 			newGeneric = (Tree*) parser;
 			break;
 		}
+		case GEN_LIST2EL: {
+			break;
+		}
+		case GEN_LIST2: {
+			List *list = (List*)mapElAllocate( prg );
+			list->id = genericInfo->langElId;
+			list->genericInfo = genericInfo;
+			newGeneric = (Tree*) list;
+			break;
+		}
+		case GEN_MAP2EL: {
+			break;
+		}
+		case GEN_MAP2: {
+			break;
+		}
 		default:
 			assert(false);
 			return 0;
@@ -1162,6 +1178,26 @@ free_tree:
 			free( parser->pdaRun );
 			treeDownref( prg, sp, (Tree*)parser->input );
 			mapElFree( prg, (MapEl*)parser );
+		}
+		else if ( generic->type == GEN_LIST2EL ) {
+
+		}
+		else if ( generic->type == GEN_LIST2 ) {
+			List *list = (List*) tree;
+//			ListEl *el = list->head;
+//			while ( el != 0 ) {
+//				ListEl *next = el->next;
+//				vm_push( el->value );
+//				listElFree( prg, el );
+//				el = next;
+//			}
+			mapElFree( prg, (MapEl*)list );
+		}
+		else if ( generic->type == GEN_MAP2EL ) {
+
+		}
+		else if ( generic->type == GEN_MAP2 ) {
+
 		}
 		else {
 			assert(false);
@@ -1656,6 +1692,51 @@ void listPushTail( Program *prg, List *list, Tree *val )
 	ListEl *listEl = listElAllocate( prg );
 	listEl->value = val;
 	listAppend( list, listEl );
+}
+
+void list2PushTail( Program *prg, Tree **sp, List *list, Tree *val )
+{
+	/* Deref the object we are pushing. */
+	val = ((Pointer*)val)->value->tree;
+
+	/* Make sure val has an element tree. */
+	Tree *el = colm_get_attr( val, 0 );
+	if ( el == 0 ) {
+		el = treeAllocate( prg );
+		el->id = 0;
+		el->refs = 1;
+		el->child = allocAttrs( prg, 2 );
+		setAttr( val, 0, constructPointer( prg, el ) );
+	}
+	else {
+		/* Deref the list element (must be a pointer too for time being) */
+		el = ((Pointer*)el)->value->tree;
+	}
+
+	/* val->prev = list->tail */
+	/* val->next = 0 */
+	setAttr( el, 0, (Tree*)list->tail );
+	setAttr( el, 1, 0 );
+
+//	if list->tail == 0
+//		list->tail = list->tail = val
+//	else
+//		list->tail->next = val
+//		list->tail = val
+
+	Tree *pval = constructPointer( prg, val );
+
+	pval->refs += 100;
+	val->refs += 100;
+
+	if ( list->tail == 0 ) {
+		list->head = list->tail = (ListEl*)pval;
+	}
+	else {
+		Tree *tel = colm_get_attr( ((Pointer*)list->tail)->value->tree, 0 );
+		setAttr( ((Pointer*)tel)->value->tree, 1, pval );
+		list->tail = (ListEl*)pval;
+	}
 }
 
 void listPushHead( Program *prg, List *list, Tree *val )

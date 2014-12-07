@@ -171,6 +171,12 @@ typedef unsigned char uchar;
 #define IN_LIST_POP_HEAD_WC      0xeb
 #define IN_LIST_POP_HEAD_BKT     0xec
 
+#define IN_LIST2_PUSH_TAIL_WV    0xf2
+#define IN_LIST2_PUSH_TAIL_WC    0xf3
+#define IN_LIST2_PUSH_TAIL_BKT   0xf4
+#define IN_GET_LIST2EL_MEM_R     0xf5
+#define IN_GET_LIST2_MEM_R       0xf6
+
 #define IN_GET_LIST_MEM_R        0x79
 #define IN_GET_LIST_MEM_WC       0x7a
 #define IN_GET_LIST_MEM_WV       0x7b
@@ -332,7 +338,11 @@ enum TYPE
 enum GEN {
 	GEN_LIST     = 0x10,
 	GEN_MAP      = 0x11,
-	GEN_PARSER   = 0x13
+	GEN_PARSER   = 0x13,
+	GEN_LIST2EL  = 0x14,
+	GEN_LIST2    = 0x15,
+	GEN_MAP2EL   = 0x16,
+	GEN_MAP2     = 0x17,
 };
 
 /* Known language element ids. */
