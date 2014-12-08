@@ -2140,6 +2140,42 @@ struct LoadColm
 		blockClose();
 	}
 
+	void walkListElDef( list_el_def Def )
+	{
+		/*
+		 * The unique type. This is a def with a single empty form.
+		 */
+		String name = Def.id().data();
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+				name, pd->nextObjectId++ ); 
+
+		LelDefList *defList = new LelDefList;
+
+		Production *prod = BaseParser::production( InputLoc(),
+				new ProdElList, String(), false, 0, 0 );
+		prodAppend( defList, prod );
+
+		NtDef *ntDef = NtDef::cons( name, curNspace(), curContext(), false );
+		BaseParser::cflDef( ntDef, objectDef, defList );
+
+		/*
+		 * List element with the same name as containing context.
+		 */
+		NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+		String id = curContext()->objectDef->name;
+		RepeatType repeatType = RepeatNone;
+		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, repeatType );
+		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::List2El, 0, objTr, 0 );
+
+		ObjectField *of = ObjectField::cons( InputLoc(), elTr, name );
+		contextVarDef( InputLoc(), of );
+	}
+
+	void walkMapElDef( map_el_def Def )
+	{
+
+	}
+
 	void walkContextItem( context_item contextItem )
 	{
 		switch ( contextItem.prodName() ) {
@@ -2184,6 +2220,12 @@ struct LoadColm
 			break;
 		case context_item::Precedence:
 			walkPrecedenceDef( contextItem.precedence_def() );
+			break;
+		case context_item::ListEl:
+			walkListElDef( contextItem.list_el_def() );
+			break;
+		case context_item::MapEl:
+			walkMapElDef( contextItem.map_el_def() );
 			break;
 		}
 	}
