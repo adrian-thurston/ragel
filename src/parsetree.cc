@@ -170,6 +170,12 @@ int CmpUniqueList2::compare( const UniqueList2 &ut1, const UniqueList2 &ut2 )
 		return -1;
 	else if ( ut1.value > ut2.value )
 		return 1;
+	else {
+		if ( ut1.attrOff < ut2.attrOff )
+			return -1;
+		else if ( ut1.attrOff > ut2.attrOff )
+			return 1;
+	}
 
 	return 0;
 }

@@ -131,6 +131,7 @@ typedef struct _GenericInfo
 	long keyType;
 	long langElId;
 	long parserId;
+	long elOffset;
 } GenericInfo;
 
 typedef struct _List

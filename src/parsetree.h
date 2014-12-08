@@ -704,8 +704,7 @@ struct GenericType
 	:
 		name(name), typeId(typeId), id(id), langEl(langEl),
 		typeArg(typeArg), keyTypeArg(0), 
-		utArg(0), keyUT(0),
-		objDef(0)
+		utArg(0), keyUT(0), objDef(0), elOffset(0)
 	{}
 
 	const String &getKey() const 
@@ -721,8 +720,8 @@ struct GenericType
 	TypeRef *keyTypeArg;
 	UniqueType *utArg;
 	UniqueType *keyUT;
-
 	ObjectDef *objDef;
+	long elOffset;
 };
 
 typedef DList<GenericType> GenericList;
@@ -1969,10 +1968,11 @@ typedef AvlBasic< UniqueList2El, CmpUniqueList2El > UniqueList2ElMap;
 struct UniqueList2
 	: public AvlTreeEl<UniqueList2>
 {
-	UniqueList2( UniqueType *value ) :
-		value(value), generic(0) {}
+	UniqueList2( UniqueType *value, int attrOff ) :
+		value(value), attrOff(attrOff), generic(0) {}
 
 	UniqueType *value;
+	int attrOff;
 	GenericType *generic;
 };
 

@@ -1700,13 +1700,13 @@ void list2PushTail( Program *prg, Tree **sp, List *list, Tree *val )
 	val = ((Pointer*)val)->value->tree;
 
 	/* Make sure val has an element tree. */
-	Tree *el = colm_get_attr( val, 0 );
+	Tree *el = colm_get_attr( val, list->genericInfo->elOffset );
 	if ( el == 0 ) {
 		el = treeAllocate( prg );
 		el->id = 0;
 		el->refs = 1;
 		el->child = allocAttrs( prg, 2 );
-		setAttr( val, 0, constructPointer( prg, el ) );
+		setAttr( val, list->genericInfo->elOffset, constructPointer( prg, el ) );
 	}
 	else {
 		/* Deref the list element (must be a pointer too for time being) */
@@ -1718,22 +1718,20 @@ void list2PushTail( Program *prg, Tree **sp, List *list, Tree *val )
 	setAttr( el, 0, (Tree*)list->tail );
 	setAttr( el, 1, 0 );
 
-//	if list->tail == 0
-//		list->tail = list->tail = val
-//	else
-//		list->tail->next = val
-//		list->tail = val
-
 	Tree *pval = constructPointer( prg, val );
 
 	pval->refs += 100;
 	val->refs += 100;
 
 	if ( list->tail == 0 ) {
+		/* list->tail = list->tail = val */
 		list->head = list->tail = (ListEl*)pval;
 	}
 	else {
-		Tree *tel = colm_get_attr( ((Pointer*)list->tail)->value->tree, 0 );
+		/* list->tail->next = val */
+		/* list->tail = val */
+		Tree *tel = colm_get_attr( ((Pointer*)list->tail)->value->tree,
+				list->genericInfo->elOffset );
 		setAttr( ((Pointer*)tel)->value->tree, 1, pval );
 		list->tail = (ListEl*)pval;
 	}

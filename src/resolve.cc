@@ -255,10 +255,27 @@ UniqueType *TypeRef::resolveTypeList2Obj( Compiler *pd )
 
 	UniqueType *utValue = typeRef1->resolveType( pd );	
 
-	UniqueList2 searchKey( utValue );
+	/* Find the offset of the list element. */
+	int off = 0;
+	bool found = false;
+	ObjFieldList *elFieldList = utValue->langEl->objectDef->objFieldList;
+	for ( ObjFieldList::Iter f = *elFieldList; f.lte(); f++, off++ ) {
+		UniqueType *fUT = f->value->typeRef->resolveType( pd );
+		if ( fUT->langEl->generic != 0 &&
+				fUT->langEl->generic->typeId == GEN_LIST2EL )
+		{
+			found = true;
+			break;
+		}
+	}
+
+	if ( !found )
+		error( loc ) << "cound not find list element in type ref" << endp;
+
+	UniqueList2 searchKey( utValue, off );
 	UniqueList2 *inMap = pd->uniqueList2Map.find( &searchKey );
 	if ( inMap == 0 ) {
-		inMap = new UniqueList2( utValue );
+		inMap = new UniqueList2( utValue, off );
 		pd->uniqueList2Map.insert( inMap );
 
 		/* FIXME: Need uniqe name allocator for types. */
@@ -268,10 +285,9 @@ UniqueType *TypeRef::resolveTypeList2Obj( Compiler *pd )
 		GenericType *generic = new GenericType( name, GEN_LIST2,
 				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
 
+		generic->elOffset = off;
 		nspace->genericList.append( generic );
-
 		generic->declare( pd, nspace );
-
 		inMap->generic = generic;
 	}
 
