@@ -1027,6 +1027,7 @@ void FsmCodeGen::finishRagelDef()
 	/* Maybe do flat expand, otherwise choose single. */
 	if ( codeStyle == GenFlat || codeStyle == GenFFlat ) {
 		redFsm->characterClassRange( fsmName );
+		redFsm->makeFlatClass();
 	}
 	else {
 		redFsm->chooseSingle();

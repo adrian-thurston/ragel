@@ -421,16 +421,66 @@ void RedFsmAp::characterClass( const char *fsmName )
 	this->classEmit = emit;
 }
 
-struct EquivClass
+
+void RedFsmAp::makeFlatClass()
 {
-	EquivClass( Key lowKey, Key highKey )
-		: lowKey(lowKey), highKey(highKey) {}
+	/* Expand the conditions. */
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->stateCondList.length() == 0 ) {
+			st->condLowKey = 0;
+			st->condHighKey = 0;
+		}
+		else {
+			st->condLowKey = st->stateCondList.head->lowKey;
+			st->condHighKey = st->stateCondList.tail->highKey;
 
-	Key lowKey, highKey;
-	EquivClass *prev, *next;
-};
+			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
+			st->condList = new GenCondSpace*[ span ];
+			memset( st->condList, 0, sizeof(GenCondSpace*)*span );
 
-typedef DList<EquivClass> EquivList;
+			for ( GenStateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ ) {
+				unsigned long long base, trSpan;
+				base = keyOps->span( st->condLowKey, sci->lowKey )-1;
+				trSpan = keyOps->span( sci->lowKey, sci->highKey );
+				for ( unsigned long long pos = 0; pos < trSpan; pos++ )
+					st->condList[base+pos] = sci->condSpace;
+			}
+		}
+	}
+
+	/* Expand the transitions. This uses the equivalence classes. */
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->outRange.length() == 0 ) {
+			st->lowKey = st->highKey = 0;
+			st->transList = 0;
+		}
+		else {
+			st->lowKey = st->outRange[0].lowKey;
+			st->highKey = st->outRange[st->outRange.length()-1].highKey;
+
+			long long low = classMap[st->lowKey.getVal() - lowKey.getVal()];
+			long long high = classMap[st->highKey.getVal() - lowKey.getVal()];
+			long long span = high - low + 1;
+
+			st->transList = new RedTransAp*[ span ];
+			memset( st->transList, 0, sizeof(RedTransAp*)*span );
+			
+			for ( RedTransList::Iter trans = st->outRange; trans.lte(); trans++ ) {
+				long long base = keyOps->span( lowKey, trans->lowKey ) - 1;
+				long long trSpan = keyOps->span( trans->lowKey, trans->highKey );
+				for ( long long pos = 0; pos < trSpan; pos++ )
+					st->transList[ classMap[base+pos] - low] = trans->value;
+			}
+
+			/* Fill in the gaps with the default transition. */
+			for ( long long pos = 0; pos < span; pos++ ) {
+				if ( st->transList[pos] == 0 )
+					st->transList[pos] = st->defTrans;
+			}
+		}
+	}
+}
+
 
 void RedFsmAp::characterClassRange( const char *fsmName )
 {
@@ -490,8 +540,6 @@ void RedFsmAp::characterClassRange( const char *fsmName )
 		equiv.transfer( newList );
 	}
 
-	/* Produce Flat indicies. */
-	makeFlat();
 
 	/* Build the map and emit arrays from the range-based equiv classes. Will
 	 * likely crash if there are no transitions in the FSM. */

@@ -479,8 +479,20 @@ struct RedFsmAp
 	long long *classMap;
 	long long *classEmit;
 
+	struct EquivClass
+	{
+		EquivClass( Key lowKey, Key highKey )
+			: lowKey(lowKey), highKey(highKey) {}
+
+		Key lowKey, highKey;
+		EquivClass *prev, *next;
+	};
+
+	typedef DList<EquivClass> EquivList;
+
 	void characterClass( const char *fsmName );
 	void characterClassRange( const char *fsmName );
+	void makeFlatClass();
 	void makeFlat();
 
 	/* Move a selected transition from ranges to default. */

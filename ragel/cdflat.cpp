@@ -146,17 +146,12 @@ std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 		
 		/* Move the index offset ahead. */
 		if ( st->transList != 0 ) {
-			long long off = keyOps->span( redFsm->lowKey, st->lowKey ) - 1;
+			long long low = redFsm->classMap[st->lowKey.getVal() - redFsm->lowKey.getVal()];
+			long long high = redFsm->classMap[st->highKey.getVal() - redFsm->lowKey.getVal()];
+			long long span = high - low + 1;
 
-			/* Walk the singles. */
-			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
-			for ( unsigned long long pos = 0; pos < span; ) {
-				if ( redFsm->classEmit[off] )
-					curIndOffset += 1;
-
-				pos++;
-				off++;
-			}
+			for ( long long pos = 0; pos < span; pos++ )
+				curIndOffset += 1;
 		}
 	}
 
@@ -394,22 +389,16 @@ std::ostream &FlatCodeGen::INDICIES()
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList != 0 ) {
-			long long off = keyOps->span( redFsm->lowKey, st->lowKey ) - 1;
+			long long low = redFsm->classMap[st->lowKey.getVal() - redFsm->lowKey.getVal()];
+			long long high = redFsm->classMap[st->highKey.getVal() - redFsm->lowKey.getVal()];
+			long long span = high - low + 1;
 
-			/* Walk the singles. */
-			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
-			for ( unsigned long long pos = 0; pos < span; ) {
-				if ( redFsm->classEmit[off] )
-					taI.VAL( st->transList[pos]->id );
-
-				pos++;
-				off++;
-			}
+			for ( long long pos = 0; pos < span; pos++ )
+				taI.VAL( st->transList[pos]->id );
 		}
 	}
 
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
+	/* Originally here for formatting reasons. Likely can be removed. */
 	taI.VAL( 0 );
 
 	taI.CLOSE();
