@@ -350,8 +350,13 @@ struct RedStateAp
 	Key condLowKey, condHighKey;
 	GenCondSpace **condList;
 
-	/* For flat keys. */
+	/* For flat tables, in key space. */
 	Key lowKey, highKey;
+
+	/* Low/high in class space. */
+	long long low, high;
+
+	/* Indicies in class space. */
 	RedTransAp **transList;
 
 	/* The list of states that transitions from this state go to. */
@@ -472,28 +477,33 @@ struct RedFsmAp
 	void moveTransToSingle( RedStateAp *state );
 	void chooseSingle();
 
-	/* All-state low/high, class map */
+	/* State low/high, in key space and class space. */
 	Key lowKey;
 	Key highKey;
+	long long low;
+	long long high;
 
 	long long *classMap;
-	long long *classEmit;
 
 	struct EquivClass
 	{
-		EquivClass( Key lowKey, Key highKey )
-			: lowKey(lowKey), highKey(highKey) {}
+		EquivClass( Key lowKey, Key highKey, long long value )
+			: lowKey(lowKey), highKey(highKey), value(value) {}
 
 		Key lowKey, highKey;
+		long long value;
 		EquivClass *prev, *next;
 	};
 
 	typedef DList<EquivClass> EquivList;
 
-	void characterClass( const char *fsmName );
-	void characterClassRange( const char *fsmName );
+	typedef BstMap<RedTransAp*, int> EquivAlloc;
+	typedef BstMapEl<RedTransAp*, int> EquivAllocEl;
+
+	void makeFlatCond();
+	void makeFlatDirect();
+	void characterClass();
 	void makeFlatClass();
-	void makeFlat();
 
 	/* Move a selected transition from ranges to default. */
 	void moveToDefault( RedTransAp *defTrans, RedStateAp *state );

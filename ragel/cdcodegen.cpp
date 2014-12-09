@@ -1025,18 +1025,14 @@ void FsmCodeGen::finishRagelDef()
 	redFsm->chooseDefaultSpan();
 		
 	/* Maybe do flat expand, otherwise choose single. */
-	if ( codeStyle == GenFlat || codeStyle == GenFFlat ) {
-		redFsm->characterClassRange( fsmName );
+	if ( codeStyle == GenFlat || codeStyle == GenFFlat )
 		redFsm->makeFlatClass();
-	}
-	else {
+	else
 		redFsm->chooseSingle();
-	}
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
 		return;
-
 	
 	if ( codeStyle == GenSplit )
 		redFsm->partitionFsm( numSplitPartitions );

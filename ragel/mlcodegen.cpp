@@ -705,7 +705,7 @@ void OCamlCodeGen::finishRagelDef()
 		
 	/* Maybe do flat expand, otherwise choose single. */
 	if ( codeStyle == GenFlat || codeStyle == GenFFlat )
-		redFsm->makeFlat();
+		redFsm->makeFlatDirect();
 	else
 		redFsm->chooseSingle();
 

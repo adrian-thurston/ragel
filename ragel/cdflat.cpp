@@ -146,10 +146,7 @@ std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 		
 		/* Move the index offset ahead. */
 		if ( st->transList != 0 ) {
-			long long low = redFsm->classMap[st->lowKey.getVal() - redFsm->lowKey.getVal()];
-			long long high = redFsm->classMap[st->highKey.getVal() - redFsm->lowKey.getVal()];
-			long long span = high - low + 1;
-
+			long long span = st->high - st->low + 1;
 			for ( long long pos = 0; pos < span; pos++ )
 				curIndOffset += 1;
 		}
@@ -345,12 +342,9 @@ std::ostream &FlatCodeGen::KEYS()
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList ) {
-			long long loff = keyOps->span( redFsm->lowKey, st->lowKey ) - 1;
-			long long hoff = keyOps->span( redFsm->lowKey, st->highKey ) - 1;
-
 			/* Emit just low key and high key. */
-			taK.KEY( redFsm->classMap[loff] );
-			taK.KEY( redFsm->classMap[hoff] );
+			taK.KEY( st->low );
+			taK.KEY( st->high );
 		}
 		else {
 			taK.KEY( 0 );
@@ -389,10 +383,7 @@ std::ostream &FlatCodeGen::INDICIES()
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList != 0 ) {
-			long long low = redFsm->classMap[st->lowKey.getVal() - redFsm->lowKey.getVal()];
-			long long high = redFsm->classMap[st->highKey.getVal() - redFsm->lowKey.getVal()];
-			long long span = high - low + 1;
-
+			long long span = st->high - st->low + 1;
 			for ( long long pos = 0; pos < span; pos++ )
 				taI.VAL( st->transList[pos]->id );
 		}

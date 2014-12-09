@@ -285,7 +285,9 @@ void RedFsmAp::chooseSingle()
 	}
 }
 
-void RedFsmAp::makeFlat()
+/* Make the flat indicies for conditions. This is the same for direct and
+ * class-based indicies. */
+void RedFsmAp::makeFlatCond()
 {
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->stateCondList.length() == 0 ) {
@@ -308,7 +310,14 @@ void RedFsmAp::makeFlat()
 					st->condList[base+pos] = sci->condSpace;
 			}
 		}
+	}
+}
 
+void RedFsmAp::makeFlatDirect()
+{
+	makeFlatCond();
+
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->outRange.length() == 0 ) {
 			st->lowKey = st->highKey = 0;
 			st->transList = 0;
@@ -337,157 +346,38 @@ void RedFsmAp::makeFlat()
 	}
 }
 
-void RedFsmAp::characterClass( const char *fsmName )
+struct F
 {
-	Key lowKey = keyOps->maxKey;
-	Key highKey = keyOps->minKey;
+	F( long long k1, long long k2 )
+		: k1(k1), k2(k2) {}
 
-	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		if ( st->outRange.length() == 0 )
-			continue;
+	long long k1;
+	long long k2;
+};
 
-		if ( st->lowKey < lowKey )
-			lowKey = st->lowKey;
-
-		if ( st->highKey > highKey )
-			highKey = st->highKey;
-
-	}
-
-	/* Will likely crash if there are no transitions in the FSM. */
-	long long maxSpan = keyOps->span( lowKey, highKey );
-	long long *dest = new long long[maxSpan];
-	memset( dest, 0, sizeof(long long) * maxSpan );
-
-	long long *emit = new long long[maxSpan];
-	memset( emit, 0, sizeof(long long) * maxSpan );
-
-	long long targ = 0;
-
-	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		if ( st->outRange.length() == 0 )
-			continue;
-
-		long long span = keyOps->span( st->lowKey, st->highKey );
-
-		/* Destination offset. */
-		long long off = keyOps->span( lowKey, st->lowKey ) - 1;
-
-		long long prev, pos = 0;
-
-		/* First dest always jumps. First char must start a class. */
-		targ += 1;
-		prev = dest[off];
-		dest[off] = targ;
-
-		pos++;
-		off++;
-
-		while ( pos < span ) {
-			/* If either the dest changes or the src changes, then we are
-			 * changing classes. */
-			if ( st->transList[pos] != st->transList[pos-1] )
-				targ += 1;
-			else if ( dest[off] != prev )
-				targ += 1;
-
-			prev = dest[off];
-			dest[off] = targ;
-
-			pos++;
-			off++;
-		}
-	}
-
-	/* Reduce to sequential. */
-	long long prev = dest[0];
-	targ = 0;
-	dest[0] = targ;
-	emit[0] = 1;
-	for ( long long pos = 1; pos < maxSpan; pos++ ) {
-		bool change = 0;
-		if ( dest[pos] != prev ) {
-			change = 1;
-			targ += 1;;
-		}
-		prev = dest[pos];
-		dest[pos] = targ;
-		emit[pos] = change;
-	}
-
-	this->lowKey = lowKey;
-	this->highKey = highKey;
-	this->classMap = dest;
-	this->classEmit = emit;
-}
-
-
-void RedFsmAp::makeFlatClass()
+struct CmpF
 {
-	/* Expand the conditions. */
-	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		if ( st->stateCondList.length() == 0 ) {
-			st->condLowKey = 0;
-			st->condHighKey = 0;
-		}
-		else {
-			st->condLowKey = st->stateCondList.head->lowKey;
-			st->condHighKey = st->stateCondList.tail->highKey;
-
-			unsigned long long span = keyOps->span( st->condLowKey, st->condHighKey );
-			st->condList = new GenCondSpace*[ span ];
-			memset( st->condList, 0, sizeof(GenCondSpace*)*span );
-
-			for ( GenStateCondList::Iter sci = st->stateCondList; sci.lte(); sci++ ) {
-				unsigned long long base, trSpan;
-				base = keyOps->span( st->condLowKey, sci->lowKey )-1;
-				trSpan = keyOps->span( sci->lowKey, sci->highKey );
-				for ( unsigned long long pos = 0; pos < trSpan; pos++ )
-					st->condList[base+pos] = sci->condSpace;
-			}
-		}
+	static inline long compare( const F &k1, const F &k2 )
+	{
+		if ( k1.k1 < k2.k1 )
+			return -1;
+		else if ( k1.k1 > k2.k1 )
+			return 1;
+		if ( k1.k2 < k2.k2 )
+			return -1;
+		else if ( k1.k2 > k2.k2 )
+			return 1;
+		else
+			return 0;
 	}
-
-	/* Expand the transitions. This uses the equivalence classes. */
-	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		if ( st->outRange.length() == 0 ) {
-			st->lowKey = st->highKey = 0;
-			st->transList = 0;
-		}
-		else {
-			st->lowKey = st->outRange[0].lowKey;
-			st->highKey = st->outRange[st->outRange.length()-1].highKey;
-
-			long long low = classMap[st->lowKey.getVal() - lowKey.getVal()];
-			long long high = classMap[st->highKey.getVal() - lowKey.getVal()];
-			long long span = high - low + 1;
-
-			st->transList = new RedTransAp*[ span ];
-			memset( st->transList, 0, sizeof(RedTransAp*)*span );
-			
-			for ( RedTransList::Iter trans = st->outRange; trans.lte(); trans++ ) {
-				long long base = keyOps->span( lowKey, trans->lowKey ) - 1;
-				long long trSpan = keyOps->span( trans->lowKey, trans->highKey );
-				for ( long long pos = 0; pos < trSpan; pos++ )
-					st->transList[ classMap[base+pos] - low] = trans->value;
-			}
-
-			/* Fill in the gaps with the default transition. */
-			for ( long long pos = 0; pos < span; pos++ ) {
-				if ( st->transList[pos] == 0 )
-					st->transList[pos] = st->defTrans;
-			}
-		}
-	}
-}
+};
 
 
-void RedFsmAp::characterClassRange( const char *fsmName )
+void RedFsmAp::characterClass()
 {
 	/* Find the global low and high keys. */
 	Key lowKey = keyOps->maxKey;
 	Key highKey = keyOps->minKey;
-
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->outRange.length() == 0 )
 			continue;
@@ -503,8 +393,14 @@ void RedFsmAp::characterClassRange( const char *fsmName )
 	}
 
 	EquivList equiv;
-	equiv.append( new EquivClass( lowKey, highKey ) );
+	long long next = 1;
+	equiv.append( new EquivClass( lowKey, highKey, next++ ) );
 
+
+	/* Start with a single equivalence class and break it up using range
+	 * boundaries of each state. This will tell us what the equivalence class
+	 * ranges are. These are the ranges that always go to the same state,
+	 * across all states. */
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->outRange.length() == 0 )
 			continue;
@@ -512,22 +408,57 @@ void RedFsmAp::characterClassRange( const char *fsmName )
 		EquivList trans;
 		EquivList newList;
 
-		/* Need to alloc these because pair iter doesn't support vectors. */
-		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ )
-			trans.append( new EquivClass( rtel->lowKey, rtel->highKey ) );
+		/* What is the set of unique transitions (*for this state) */
+		EquivAlloc uniqTrans;
+		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
+			if ( ! uniqTrans.find( rtel->value ) )
+				uniqTrans.insert( rtel->value, next++ );
+		}
 
+		/* Alloc equiv classes for the ranges out of the state, respecting dups. */
+		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
+			EquivAllocEl *el = uniqTrans.find( rtel->value );
+			EquivClass *equivClass = new EquivClass(
+					rtel->lowKey, rtel->highKey, el->value );
+			trans.append( equivClass );
+		}
+
+		BstMap<F, long long, CmpF> uniqPairs;
+
+		/* Merge with whole-machine equiv classes. */
 		PairIter<EquivClass> pair( equiv.head, trans.head );
 		for ( ; !pair.end(); pair++ ) {
 			switch ( pair.userState ) {
 
-			case RangeOverlap:
-			case RangeInS1:
-				newList.append( new EquivClass( pair.s1Tel.lowKey, pair.s1Tel.highKey ) );
-				break;
+			case RangeOverlap: {
+				F f( pair.s1Tel.trans->value, pair.s2Tel.trans->value );
+				BstMapEl<F, long long> *el = uniqPairs.find( f );
+				if ( ! el ) 
+					el = uniqPairs.insert( f, next++ );
 
-			case RangeInS2:
-				newList.append( new EquivClass( pair.s2Tel.lowKey, pair.s2Tel.highKey ) );
+				/* Can't use either equiv classes, find uniques. */
+				EquivClass *equivClass = new EquivClass(
+						pair.s1Tel.lowKey, pair.s1Tel.highKey,
+						el->value );
+				newList.append( equivClass );
 				break;
+			}
+
+			case RangeInS1: {
+				EquivClass *equivClass = new EquivClass(
+						pair.s1Tel.lowKey, pair.s1Tel.highKey,
+						pair.s1Tel.trans->value );
+				newList.append( equivClass );
+				break;
+			}
+
+			case RangeInS2: {
+				EquivClass *equivClass = new EquivClass(
+						pair.s2Tel.lowKey, pair.s2Tel.highKey,
+						pair.s2Tel.trans->value );
+				newList.append( equivClass );
+				break;
+			}
 
 			case BreakS1:
 			case BreakS2:
@@ -539,7 +470,21 @@ void RedFsmAp::characterClassRange( const char *fsmName )
 		equiv.empty();
 		equiv.transfer( newList );
 	}
+	
+	/* Reduce to sequential. */
+	next = 0;
+	BstMap<long long, long long> map;
+	for ( EquivClass *c = equiv.head; c != 0; c = c->next ) {
+		BstMapEl<long long, long long> *el = map.find( c->value );
+		if ( ! el ) 
+			el = map.insert( c->value, next++ );
+		c->value = el->value;
+	}
 
+	// for ( EquivClass *c = equiv.head; c != 0; c = c->next ) {
+	//	std::cout << c->lowKey.getVal() << " " <<
+	//			c->highKey.getVal() << " -> " << c->value << std::endl;
+	// }
 
 	/* Build the map and emit arrays from the range-based equiv classes. Will
 	 * likely crash if there are no transitions in the FSM. */
@@ -547,32 +492,76 @@ void RedFsmAp::characterClassRange( const char *fsmName )
 	long long *dest = new long long[maxSpan];
 	memset( dest, 0, sizeof(long long) * maxSpan );
 
-	long long *emit = new long long[maxSpan];
-	memset( emit, 0, sizeof(long long) * maxSpan );
-
-	long long targ = 0;
-	long long d = 0;
 	for ( EquivClass *c = equiv.head; c != 0; c = c->next ) {
+		long long base = keyOps->span( lowKey, c->lowKey ) - 1;
 		long long span = keyOps->span( c->lowKey, c->highKey );
-
-		dest[d] = targ;
-		emit[d] = 1;
-		d += 1;
-		for ( long long s = 1; s < span; s++ ) {
-			dest[d] = targ;
-			emit[d] = 0;
-			d += 1;
-		}
-		targ += 1;
+		for ( long long s = 0; s < span; s++ )
+			dest[base + s] = c->value;
 	}
 
 	this->lowKey = lowKey;
 	this->highKey = highKey;
 	this->classMap = dest;
-	this->classEmit = emit;
 
 	equiv.empty();
 }
+
+void RedFsmAp::makeFlatClass()
+{
+	characterClass();
+	makeFlatCond();
+
+	/* Expand the transitions. This uses the equivalence classes. */
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->outRange.length() == 0 ) {
+			st->lowKey = st->highKey = 0;
+			st->low = st->high = 0;
+			st->transList = 0;
+		}
+		else {
+			st->lowKey = st->outRange[0].lowKey;
+			st->highKey = st->outRange[st->outRange.length()-1].highKey;
+
+			/* Compute low and high in class space. */
+			RedTransList::Iter trans = st->outRange;
+			long long low = classMap[trans->lowKey.getVal() - lowKey.getVal()];
+			long long high = classMap[trans->lowKey.getVal() - lowKey.getVal()];
+			for ( RedTransList::Iter trans = st->outRange; trans.lte(); trans++ ) {
+				long long base = keyOps->span( lowKey, trans->lowKey ) - 1;
+				long long span = keyOps->span( trans->lowKey, trans->highKey );
+				for ( long long s = 0; s < span; s++ ) {
+					if ( classMap[base + s] < low )
+						low = classMap[base + s];
+					if ( classMap[base + s] > high )
+						high = classMap[base + s];
+				}
+			}
+			st->low = low;
+			st->high = high;
+
+			// std::cerr << "s" << st->id << ": " << low << " - " << high << std::endl;
+
+			long long span = high - low + 1;
+
+			st->transList = new RedTransAp*[ span ];
+			memset( st->transList, 0, sizeof(RedTransAp*)*span );
+			
+			for ( RedTransList::Iter trans = st->outRange; trans.lte(); trans++ ) {
+				long long base = keyOps->span( lowKey, trans->lowKey ) - 1;
+				long long trSpan = keyOps->span( trans->lowKey, trans->highKey );
+				for ( long long pos = 0; pos < trSpan; pos++ )
+					st->transList[ classMap[base+pos] - low ] = trans->value;
+			}
+
+			/* Fill in the gaps with the default transition. */
+			for ( long long pos = 0; pos < span; pos++ ) {
+				if ( st->transList[pos] == 0 )
+					st->transList[pos] = st->defTrans;
+			}
+		}
+	}
+}
+
 
 /* A default transition has been picked, move it from the outRange to the
  * default pointer. */
