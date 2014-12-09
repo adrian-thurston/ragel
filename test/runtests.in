@@ -52,7 +52,7 @@ shift $((OPTIND - 1));
 [ -z "$*" ] && set -- *.rl
 
 config=../src/config.h
-ragel=../ragel/ragel --string-tables
+ragel=../ragel/ragel
 
 cxx_compiler="@CXX@"
 c_compiler="@CC@"
