@@ -1,0 +1,39 @@
+#!/bin/bash
+#
+
+set -e
+set -x
+
+ori=../src/ragel
+new=../src/ragel
+
+CFLAGS="-O3 -Wall -Wno-unused-but-set-variable"
+
+tc()
+{
+	ragel=$1
+	cc=$2
+	seconds=$3
+	root=$4
+
+	$ragel -F1 -o $root.cpp $root.rl
+	$cc $CFLAGS -DPERF_TEST -I../aapl -DS=${seconds}ll -o $root.bin $root.cpp
+	time ./$root.bin
+}
+
+targ_time=60
+
+tc $ori g++ $targ_time mailbox1
+tc $new g++ $targ_time mailbox1
+
+tc $ori g++ $targ_time strings1
+tc $new g++ $targ_time strings1
+
+tc $ori g++ $targ_time strings2
+tc $new g++ $targ_time strings2
+
+tc $ori g++ $targ_time rlscan
+tc $new g++ $targ_time rlscan
+
+tc $ori g++ $targ_time cppscan1
+tc $new g++ $targ_time cppscan1
