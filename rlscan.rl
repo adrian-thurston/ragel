@@ -11,16 +11,32 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef PERF_TEST
+
+/* initially calibrated 60s on yoho. */
+#define perf_iters ( 95502709ll * S / 60ll )
+
+int _perf_dummy = 0;
+#define perf_cout(...) ( _perf_dummy += 1 )
+#define perf_loop long _pi; for ( _pi = 0; _pi < perf_iters; _pi++ )
+
+#else
+
+#define perf_cout(...) __VA_ARGS__
+#define perf_loop
+
+#endif
+
 using namespace std;
 
 void escapeXML( const char *data )
 {
 	while ( *data != 0 ) {
 		switch ( *data ) {
-			case '<': cout << "&lt;"; break;
-			case '>': cout << "&gt;"; break;
-			case '&': cout << "&amp;"; break;
-			default: cout << *data; break;
+			case '<': perf_cout( cout << "&lt;" ); break;
+			case '>': perf_cout( cout << "&gt;" ); break;
+			case '&': perf_cout( cout << "&amp;" ); break;
+			default: perf_cout( cout << *data ); break;
 		}
 		data += 1;
 	}
@@ -29,10 +45,10 @@ void escapeXML( const char *data )
 void escapeXML( char c )
 {
 	switch ( c ) {
-		case '<': cout << "&lt;"; break;
-		case '>': cout << "&gt;"; break;
-		case '&': cout << "&amp;"; break;
-		default: cout << c; break;
+		case '<': perf_cout( cout << "&lt;" ); break;
+		case '>': perf_cout( cout << "&gt;" ); break;
+		case '&': perf_cout( cout << "&amp;" ); break;
+		default: perf_cout( cout << c ); break;
 	}
 }
 
@@ -40,27 +56,27 @@ void escapeXML( const char *data, int len )
 {
 	for ( const char *end = data + len; data != end; data++  ) {
 		switch ( *data ) {
-			case '<': cout << "&lt;"; break;
-			case '>': cout << "&gt;"; break;
-			case '&': cout << "&amp;"; break;
-			default: cout << *data; break;
+			case '<': perf_cout( cout << "&lt;" ); break;
+			case '>': perf_cout( cout << "&gt;" ); break;
+			case '&': perf_cout( cout << "&amp;" ); break;
+			default: perf_cout( cout << *data ); break;
 		}
 	}
 }
 
 inline void write( const char *data )
 {
-	cout << data;
+	perf_cout( cout << data );
 }
 
 inline void write( char c )
 {
-	cout << c;
+	perf_cout( cout << c );
 }
 
 inline void write( const char *data, int len )
 {
-	cout.write( data, len );
+	perf_cout( cout.write( data, len ) );
 }
 
 
@@ -246,25 +262,30 @@ void test( const char *data )
 {
 	std::ios::sync_with_stdio(false);
 
-	int cs;
-	const char *ts, *te;
-	int stack[1], top;
-	stack[0] = 0;
+	int cs, act;
+	perf_loop
+	{
+		int len = strlen( data );
+		const char *ts, *te;
+		int stack[1], top;
+		memset( stack, 0, sizeof(stack) );
 
-	bool single_line = false;
-	int inline_depth = 0;
+		bool single_line = false;
+		int inline_depth = 0;
 
-	%% write init;
+		%% write init;
 
-	/* Read in a block. */
-	const char *p = data;
-	const char *pe = data + strlen( data );
-	const char *eof = pe;
-	%% write exec;
+		/* Read in a block. */
+		const char *p = data;
+		const char *pe = data + len;
+		const char *eof = pe;
+
+		%% write exec;
+	}
 
 	if ( cs == RagelScan_error ) {
 		/* Machine failed before finding a token. */
-		cerr << "PARSE ERROR" << endl;
+		perf_cout( cerr << "PARSE ERROR" << endl );
 		exit(1);
 	}
 }
@@ -275,7 +296,15 @@ int main()
 {
 	std::ios::sync_with_stdio(false);
 
-	test("hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n");
+	test(
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+	);
 
 	return 0;
 }
