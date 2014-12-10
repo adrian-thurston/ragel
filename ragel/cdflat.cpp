@@ -475,13 +475,17 @@ void FlatCodeGen::LOCATE_TRANS()
 		"	_inds = " << ARR_OFF( I(), IO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
 		"	_slen = " << SP() << "[" << vCS() << "];\n"
-		"	_trans = _slen > 0 && " <<
-				lowKey << " <= " << GET_WIDE_KEY() << " &&" <<
-				GET_WIDE_KEY() << " <= " << highKey << " &&\n"
-		"		_keys[0] <= " << AC() << "[" << GET_WIDE_KEY() << " - " << lowKey << "] &&\n" 
-		"		" << AC() << "[" << GET_WIDE_KEY() << " - " << lowKey << "] <= _keys[1] ?\n" 
-		"		_inds[" << AC() << "[" << GET_WIDE_KEY() << " - " << lowKey << "] - _keys[0] ] :\n"
-		"      " << ID() << "[" << vCS() << "];\n"
+		"	if ( _slen > 0 && " <<
+					GET_WIDE_KEY() << " <= " << highKey << " &&" <<
+					lowKey << " <= " << GET_WIDE_KEY() << " ) {\n"
+		"		long _ic = " << AC() << "[" << GET_WIDE_KEY() << " - " << lowKey << "];\n" 
+		"		_trans = \n"
+		"			_ic <= _keys[1] && _keys[0] <= _ic ?\n" 
+		"			_inds[ _ic - _keys[0] ] :\n"
+		"			" << ID() << "[" << vCS() << "];\n"
+		"	} else {\n"
+		"		_trans = " << ID() << "[" << vCS() << "];\n"
+		"	}\n"
 		"\n";
 }
 
