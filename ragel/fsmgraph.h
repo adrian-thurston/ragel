@@ -863,8 +863,8 @@ template <class ItemIter1, class ItemIter2 = ItemIter1> struct PairIter
 	NextTrans<ItemIter1> s1Tel;
 	NextTrans<ItemIter2> s2Tel;
 	Key bottomLow, bottomHigh;
-	typename ItemIter1::ItemType *bottomTrans1;
-	typename ItemIter2::ItemType *bottomTrans2;
+	ItemIter1 bottomTrans1;
+	ItemIter2 bottomTrans2;
 
 private:
 	void findNext();
