@@ -769,11 +769,33 @@ struct StateAp
 	LmItemSet lmItemSet;
 };
 
-template <class ListItem> struct NextTrans
+template <class Item> struct PiList
+{
+	/* Don't need the length. */
+	PiList() {}
+	PiList( Item *ptr )
+		: ptr(ptr) {}
+
+	PiList operator=( Item *ptr )
+	{
+		this->ptr = ptr;
+		return *this;
+	}
+
+	operator Item *() const   { return ptr; }
+	Item &operator *() const  { return *ptr; }
+	Item *operator->() const  { return ptr; }
+
+	typedef Item ItemType;
+
+	Item *ptr;
+};
+
+template <class ItemIter> struct NextTrans
 {
 	Key lowKey, highKey;
-	ListItem *trans;
-	ListItem *next;
+	ItemIter trans;
+	ItemIter next;
 
 	void load() {
 		if ( trans == 0 )
@@ -785,7 +807,7 @@ template <class ListItem> struct NextTrans
 		}
 	}
 
-	void set( ListItem *t ) {
+	void set( typename ItemIter::ItemType *t ) {
 		trans = t;
 		load();
 	}
@@ -805,7 +827,7 @@ enum PairIterUserState
 	BreakS1, BreakS2
 };
 
-template <class ListItem1, class ListItem2 = ListItem1> struct PairIter
+template <class ItemIter1, class ItemIter2 = ItemIter1> struct PairIter
 {
 	/* Encodes the different states that an fsm iterator can be in. */
 	enum IterState {
@@ -819,7 +841,7 @@ template <class ListItem1, class ListItem2 = ListItem1> struct PairIter
 		ExactOverlap,   End
 	};
 
-	PairIter( ListItem1 *list1, ListItem2 *list2 );
+	PairIter( typename ItemIter1::ItemType *list1, typename ItemIter2::ItemType *list2 );
 	
 	/* Query iterator. */
 	bool lte() { return itState != End; }
@@ -828,24 +850,24 @@ template <class ListItem1, class ListItem2 = ListItem1> struct PairIter
 	void operator++()    { findNext(); }
 
 	/* Iterator state. */
-	ListItem1 *list1;
-	ListItem2 *list2;
+	typename ItemIter1::ItemType *list1;
+	typename ItemIter2::ItemType *list2;
 	IterState itState;
 	PairIterUserState userState;
 
-	NextTrans<ListItem1> s1Tel;
-	NextTrans<ListItem2> s2Tel;
+	NextTrans<ItemIter1> s1Tel;
+	NextTrans<ItemIter2> s2Tel;
 	Key bottomLow, bottomHigh;
-	ListItem1 *bottomTrans1;
-	ListItem2 *bottomTrans2;
+	typename ItemIter1::ItemType *bottomTrans1;
+	typename ItemIter2::ItemType *bottomTrans2;
 
 private:
 	void findNext();
 };
 
 /* Init the iterator by advancing to the first item. */
-template <class ListItem1, class ListItem2> PairIter<ListItem1, ListItem2>::PairIter( 
-		ListItem1 *list1, ListItem2 *list2 )
+template <class ItemIter1, class ItemIter2> PairIter<ItemIter1, ItemIter2>::PairIter( 
+		typename ItemIter1::ItemType *list1, typename ItemIter2::ItemType *list2 )
 :
 	list1(list1),
 	list2(list2),
@@ -871,7 +893,7 @@ template <class ListItem1, class ListItem2> PairIter<ListItem1, ListItem2>::Pair
 
 /* Advance to the next transition. When returns, trans points to the next
  * transition, unless there are no more, in which case end() returns true. */
-template <class ListItem1, class ListItem2> void PairIter<ListItem1, ListItem2>::findNext()
+template <class ItemIter1, class ItemIter2> void PairIter<ItemIter1, ItemIter2>::findNext()
 {
 	/* Jump into the iterator routine base on the iterator state. */
 	switch ( itState ) {

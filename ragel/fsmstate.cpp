@@ -195,7 +195,8 @@ int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 		return compareRes;
 
 	/* Use a pair iterator to get the transition pairs. */
-	PairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
+	PairIter< PiList<TransAp> > outPair(
+			state1->outList.head, state2->outList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
@@ -257,7 +258,8 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 		return compareRes;
 
 	/* Use a pair iterator to test the condition pairs. */
-	PairIter<StateCond> condPair( state1->stateCondList.head, state2->stateCondList.head );
+	PairIter< PiList<StateCond> > condPair(
+			state1->stateCondList.head, state2->stateCondList.head );
 	for ( ; !condPair.end(); condPair++ ) {
 		switch ( condPair.userState ) {
 		case RangeInS1:
@@ -281,7 +283,8 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 	}
 
 	/* Use a pair iterator to test the transition pairs. */
-	PairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
+	PairIter< PiList<TransAp> > outPair(
+			state1->outList.head, state2->outList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
@@ -319,7 +322,8 @@ int PartitionCompare::compare( const StateAp *state1, const StateAp *state2 )
 	int compareRes;
 
 	/* Use a pair iterator to get the transition pairs. */
-	PairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
+	PairIter< PiList<TransAp> > outPair(
+			state1->outList.head, state2->outList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
@@ -369,7 +373,8 @@ bool MarkCompare::shouldMark( MarkIndex &markIndex, const StateAp *state1,
 			const StateAp *state2 )
 {
 	/* Use a pair iterator to get the transition pairs. */
-	PairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
+	PairIter< PiList<TransAp> > outPair(
+			state1->outList.head, state2->outList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 

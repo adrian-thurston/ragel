@@ -426,7 +426,7 @@ void RedFsmAp::characterClass()
 		BstMap<F, long long, CmpF> uniqPairs;
 
 		/* Merge with whole-machine equiv classes. */
-		PairIter<EquivClass> pair( equiv.head, trans.head );
+		PairIter< PiList<EquivClass> > pair( equiv.head, trans.head );
 		for ( ; !pair.end(); pair++ ) {
 			switch ( pair.userState ) {
 

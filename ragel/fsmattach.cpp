@@ -345,7 +345,7 @@ void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
 	TransList destList;
 
 	/* Set up an iterator to stop at breaks. */
-	PairIter<TransAp> outPair( dest->outList.head, srcList );
+	PairIter< PiList<TransAp> > outPair( dest->outList.head, srcList );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 		case RangeInS1: {
