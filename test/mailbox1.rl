@@ -13,8 +13,8 @@
 
 #ifdef PERF_TEST
 
-/* initially calibrated 60s on yoho. */
-#define perf_iters ( 8064516ll * S / 60ll )
+/* Calibrated to 1s on yoho. */
+#define perf_iters ( 134408ll * S )
 
 int _perf_dummy = 0;
 #define perf_printf(...) ( _perf_dummy += 1 )
