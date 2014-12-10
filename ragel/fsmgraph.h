@@ -846,7 +846,7 @@ template <class ItemIter1, class ItemIter2 = ItemIter1> struct PairIter
 		ExactOverlap,   End
 	};
 
-	PairIter( typename ItemIter1::ItemType *list1, typename ItemIter2::ItemType *list2 );
+	PairIter( const ItemIter1 &list1, const ItemIter2 &list2 );
 	
 	/* Query iterator. */
 	bool lte() { return itState != End; }
@@ -855,8 +855,8 @@ template <class ItemIter1, class ItemIter2 = ItemIter1> struct PairIter
 	void operator++()    { findNext(); }
 
 	/* Iterator state. */
-	typename ItemIter1::ItemType *list1;
-	typename ItemIter2::ItemType *list2;
+	ItemIter1 list1;
+	ItemIter2 list2;
 	IterState itState;
 	PairIterUserState userState;
 
@@ -871,8 +871,9 @@ private:
 };
 
 /* Init the iterator by advancing to the first item. */
-template <class ItemIter1, class ItemIter2> PairIter<ItemIter1, ItemIter2>::PairIter( 
-		typename ItemIter1::ItemType *list1, typename ItemIter2::ItemType *list2 )
+template <class ItemIter1, class ItemIter2>
+		PairIter< ItemIter1, ItemIter2 >::PairIter( 
+			const ItemIter1 &list1, const ItemIter2 &list2 )
 :
 	list1(list1),
 	list2(list2),
