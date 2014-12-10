@@ -303,12 +303,46 @@ int main()
 		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
 		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
 		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
-		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
 	);
 
 	return 0;
 }
 #ifdef _____OUTPUT_____
+hi <section>
+<re_lit>/'}%%'/</re_lit>
+<inline>{ /*{*/ {} }</inline>
+<symbol>+</symbol>
+<single_lit>'\''</single_lit>
+</section>
+there
+hi <section>
+<re_lit>/'}%%'/</re_lit>
+<inline>{ /*{*/ {} }</inline>
+<symbol>+</symbol>
+<single_lit>'\''</single_lit>
+</section>
+there
+hi <section>
+<re_lit>/'}%%'/</re_lit>
+<inline>{ /*{*/ {} }</inline>
+<symbol>+</symbol>
+<single_lit>'\''</single_lit>
+</section>
+there
+hi <section>
+<re_lit>/'}%%'/</re_lit>
+<inline>{ /*{*/ {} }</inline>
+<symbol>+</symbol>
+<single_lit>'\''</single_lit>
+</section>
+there
+hi <section>
+<re_lit>/'}%%'/</re_lit>
+<inline>{ /*{*/ {} }</inline>
+<symbol>+</symbol>
+<single_lit>'\''</single_lit>
+</section>
+there
 hi <section>
 <re_lit>/'}%%'/</re_lit>
 <inline>{ /*{*/ {} }</inline>
