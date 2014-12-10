@@ -771,16 +771,9 @@ struct StateAp
 
 template <class Item> struct PiList
 {
-	/* Don't need the length. */
 	PiList() {}
 	PiList( Item *ptr )
 		: ptr(ptr) {}
-
-	PiList operator=( Item *ptr )
-	{
-		this->ptr = ptr;
-		return *this;
-	}
 
 	operator Item *() const   { return ptr; }
 	Item *operator->() const  { return ptr; }
@@ -793,7 +786,34 @@ template <class Item> struct PiList
 
 	typedef Item ItemType;
 
+	PiList next()
+		{ return PiList( ptr->next ); }
+
 	Item *ptr;
+};
+
+template <class Item> struct PiVector
+{
+	PiVector() {}
+	PiVector( Item *ptr, long length )
+		: ptr(ptr), length(length) {}
+
+	operator Item *() const   { return ptr; }
+	Item *operator->() const  { return ptr; }
+
+	bool end()
+		{ return length == 0; }
+
+	void clear()
+		{ ptr = 0; length = 0; }
+
+	typedef Item ItemType;
+
+	PiVector next()
+		{ return PiVector( ptr + 1, length - 1 ); }
+
+	Item *ptr;
+	long length;
 };
 
 template <class ItemIter> struct NextTrans
@@ -806,13 +826,13 @@ template <class ItemIter> struct NextTrans
 		if ( trans.end() )
 			next.clear();
 		else {
-			next = trans->next;
+			next = trans.next();
 			lowKey = trans->lowKey;
 			highKey = trans->highKey;
 		}
 	}
 
-	void set( typename ItemIter::ItemType *t ) {
+	void set( const ItemIter &t ) {
 		trans = t;
 		load();
 	}

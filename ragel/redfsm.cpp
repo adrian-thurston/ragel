@@ -346,18 +346,18 @@ void RedFsmAp::makeFlatDirect()
 	}
 }
 
-struct F
+struct PairKey
 {
-	F( long long k1, long long k2 )
+	PairKey( long long k1, long long k2 )
 		: k1(k1), k2(k2) {}
 
 	long long k1;
 	long long k2;
 };
 
-struct CmpF
+struct PairKeyCmp
 {
-	static inline long compare( const F &k1, const F &k2 )
+	static inline long compare( const PairKey &k1, const PairKey &k2 )
 	{
 		if ( k1.k1 < k2.k1 )
 			return -1;
@@ -372,6 +372,8 @@ struct CmpF
 	}
 };
 
+typedef BstMap< PairKey, long long, PairKeyCmp > PairKeyMap;
+typedef BstMapEl< PairKey, long long > PairKeyMapEl;
 
 void RedFsmAp::characterClass()
 {
@@ -405,8 +407,8 @@ void RedFsmAp::characterClass()
 		if ( st->outRange.length() == 0 )
 			continue;
 
-		EquivList trans;
 		EquivList newList;
+		PairKeyMap uniqPairs;
 
 		/* What is the set of unique transitions (*for this state) */
 		EquivAlloc uniqTrans;
@@ -415,31 +417,26 @@ void RedFsmAp::characterClass()
 				uniqTrans.insert( rtel->value, next++ );
 		}
 
-		/* Alloc equiv classes for the ranges out of the state, respecting dups. */
-		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
-			EquivAllocEl *el = uniqTrans.find( rtel->value );
-			EquivClass *equivClass = new EquivClass(
-					rtel->lowKey, rtel->highKey, el->value );
-			trans.append( equivClass );
-		}
-
-		BstMap<F, long long, CmpF> uniqPairs;
 
 		/* Merge with whole-machine equiv classes. */
-		PairIter< PiList<EquivClass> > pair( equiv.head, trans.head );
+		PairIter< PiList<EquivClass>, PiVector<RedTransEl> > pair( equiv.head,
+				PiVector<RedTransEl>( st->outRange.data, st->outRange.length() ) );
 		for ( ; !pair.end(); pair++ ) {
 			switch ( pair.userState ) {
 
 			case RangeOverlap: {
-				F f( pair.s1Tel.trans->value, pair.s2Tel.trans->value );
-				BstMapEl<F, long long> *el = uniqPairs.find( f );
-				if ( ! el ) 
-					el = uniqPairs.insert( f, next++ );
+				/* Look up the char for s2. */
+				EquivAllocEl *s2El = uniqTrans.find( pair.s2Tel.trans->value );
 
 				/* Can't use either equiv classes, find uniques. */
+				PairKey pairKey( pair.s1Tel.trans->value, s2El->value );
+				PairKeyMapEl *pairEl = uniqPairs.find( pairKey );
+				if ( ! pairEl ) 
+					pairEl = uniqPairs.insert( pairKey, next++ );
+
 				EquivClass *equivClass = new EquivClass(
 						pair.s1Tel.lowKey, pair.s1Tel.highKey,
-						el->value );
+						pairEl->value );
 				newList.append( equivClass );
 				break;
 			}
@@ -453,9 +450,12 @@ void RedFsmAp::characterClass()
 			}
 
 			case RangeInS2: {
+				/* Look up the char for s2. */
+				EquivAllocEl *s2El = uniqTrans.find( pair.s2Tel.trans->value );
+
 				EquivClass *equivClass = new EquivClass(
 						pair.s2Tel.lowKey, pair.s2Tel.highKey,
-						pair.s2Tel.trans->value );
+						s2El->value );
 				newList.append( equivClass );
 				break;
 			}
@@ -466,7 +466,6 @@ void RedFsmAp::characterClass()
 			}
 		}
 
-		trans.empty();
 		equiv.empty();
 		equiv.transfer( newList );
 	}
