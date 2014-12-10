@@ -4,7 +4,8 @@
 set -e
 set -x
 
-ori=../src/ragel
+orig=../src/ragel-orig
+cc=../src/ragel-cc
 new=../src/ragel
 
 CFLAGS="-O3 -Wall -Wno-unused-but-set-variable"
@@ -21,19 +22,19 @@ tc()
 	time ./$root.bin
 }
 
-targ_time=60
 
-tc $ori g++ $targ_time mailbox1
-tc $new g++ $targ_time mailbox1
+t1=$cc
+t2=$new
 
-tc $ori g++ $targ_time strings1
-tc $new g++ $targ_time strings1
+cases="mailbox1 strings1 strings2 rlscan cppscan1"
 
-tc $ori g++ $targ_time strings2
-tc $new g++ $targ_time strings2
+targ_time=10
 
-tc $ori g++ $targ_time rlscan
-tc $new g++ $targ_time rlscan
+for c in $cases; do
+	( set +x; echo ---------------------------- )
+	tc $t1 g++ $targ_time $c
+	tc $t2 g++ $targ_time $c
+	( set +x; echo )
+	( set +x; echo )
+done
 
-tc $ori g++ $targ_time cppscan1
-tc $new g++ $targ_time cppscan1
