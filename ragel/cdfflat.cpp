@@ -269,13 +269,14 @@ void FFlatCodeGen::writeExec()
 	outLabelUsed = false;
 
 	out << 
-		"	{\n"
-		"	int _slen";
+		"	{\n";
+
+	if ( redFsm->anyConditions() )
+		out << "	int _slen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << ", _ps";
-	
-	out << ";\n";
+		out << "	int _ps;\n";
+
 	out << "	int _trans";
 
 	if ( redFsm->anyConditions() )

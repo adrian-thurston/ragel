@@ -347,7 +347,9 @@ std::ostream &FlatCodeGen::KEYS()
 			taK.KEY( st->high );
 		}
 		else {
-			taK.KEY( 0 );
+			/* Low > high, this ensures that now keys[] range test can succeed,
+			 * regardless of the value of the equiv-space key. */
+			taK.KEY( 1 );
 			taK.KEY( 0 );
 		}
 	}
@@ -474,8 +476,7 @@ void FlatCodeGen::LOCATE_TRANS()
 		"	_keys = " << ARR_OFF( K(), "(" + vCS() + "<<1)" ) << ";\n"
 		"	_inds = " << ARR_OFF( I(), IO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
-		"	_slen = " << SP() << "[" << vCS() << "];\n"
-		"	if ( _slen > 0 && " <<
+		"	if ( " <<
 					GET_WIDE_KEY() << " <= " << highKey << " &&" <<
 					GET_WIDE_KEY() << " - " << lowKey << " >= 0 ) {\n"
 		"		long _ic = " << AC() << "[" << GET_WIDE_KEY() << " - " << lowKey << "];\n" 
@@ -667,14 +668,15 @@ void FlatCodeGen::writeExec()
 	outLabelUsed = false;
 
 	out << 
-		"	{\n"
-		"	int _slen";
+		"	{\n";
+
+	if ( redFsm->anyConditions() )
+		out << "	int _slen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << ", _ps";
+		out << "	int _ps;\n";
 
 	out << 
-		";\n"
 		"	int _trans";
 
 	if ( redFsm->anyConditions() )
