@@ -783,8 +783,13 @@ template <class Item> struct PiList
 	}
 
 	operator Item *() const   { return ptr; }
-	Item &operator *() const  { return *ptr; }
 	Item *operator->() const  { return ptr; }
+
+	bool end()
+		{ return ptr == 0; }
+
+	void clear()
+		{ ptr = 0; }
 
 	typedef Item ItemType;
 
@@ -798,8 +803,8 @@ template <class ItemIter> struct NextTrans
 	ItemIter next;
 
 	void load() {
-		if ( trans == 0 )
-			next = 0;
+		if ( trans.end() )
+			next.clear();
 		else {
 			next = trans->next;
 			lowKey = trans->lowKey;
@@ -921,20 +926,20 @@ entryBegin:
 
 	/* Concurrently scan both out ranges. */
 	while ( true ) {
-		if ( s1Tel.trans == 0 ) {
+		if ( s1Tel.trans.end() ) {
 			/* We are at the end of state1's ranges. Process the rest of
 			 * state2's ranges. */
-			while ( s2Tel.trans != 0 ) {
+			while ( !s2Tel.trans.end() ) {
 				/* Range is only in s2. */
 				CO_RETURN2( ConsumeS2Range, RangeInS2 );
 				s2Tel.increment();
 			}
 			break;
 		}
-		else if ( s2Tel.trans == 0 ) {
+		else if ( s2Tel.trans.end() ) {
 			/* We are at the end of state2's ranges. Process the rest of
 			 * state1's ranges. */
-			while ( s1Tel.trans != 0 ) {
+			while ( !s1Tel.trans.end() ) {
 				/* Range is only in s1. */
 				CO_RETURN2( ConsumeS1Range, RangeInS1 );
 				s1Tel.increment();
