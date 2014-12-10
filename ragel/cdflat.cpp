@@ -477,10 +477,10 @@ void FlatCodeGen::LOCATE_TRANS()
 		"	_slen = " << SP() << "[" << vCS() << "];\n"
 		"	if ( _slen > 0 && " <<
 					GET_WIDE_KEY() << " <= " << highKey << " &&" <<
-					lowKey << " <= " << GET_WIDE_KEY() << " ) {\n"
+					GET_WIDE_KEY() << " - " << lowKey << " >= 0 ) {\n"
 		"		long _ic = " << AC() << "[" << GET_WIDE_KEY() << " - " << lowKey << "];\n" 
 		"		_trans = \n"
-		"			_ic <= _keys[1] && _keys[0] <= _ic ?\n" 
+		"			_ic <= _keys[1] && _ic - _keys[0] >= 0 ?\n" 
 		"			_inds[ _ic - _keys[0] ] :\n"
 		"			" << ID() << "[" << vCS() << "];\n"
 		"	} else {\n"
