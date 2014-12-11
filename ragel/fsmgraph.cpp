@@ -966,9 +966,8 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 			(lowKey - keyOps->minKey);
 	searchTrans.highKey = fromCondSpace->baseKey + fromVals * keyOps->alphSize() + 
 			(highKey - keyOps->minKey);
-	searchTrans.prev = searchTrans.next = 0;
 
-	for ( PairIter< PiList<TransAp> >
+	for ( PairIter< PiList<TransAp>, PiSingle<TransAp> >
 			pairIter( state->outList, &searchTrans );
 			!pairIter.end(); pairIter++ )
 	{
@@ -1102,10 +1101,9 @@ void FsmAp::doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1
 			removal.highKey = exp->fromCondSpace->baseKey + 
 				exp->fromVals * keyOps->alphSize() + (exp->highKey - keyOps->minKey);
 		}
-		removal.next = 0;
 
 		TransList destList;
-		for ( PairIter< PiList<TransAp>, PiList<Removal> >
+		for ( PairIter< PiList<TransAp>, PiSingle<Removal> >
 				pairIter( destState->outList, &removal );
 				!pairIter.end(); pairIter++ )
 		{

@@ -783,16 +783,32 @@ template <class Item> struct PiList
 	operator Item *() const   { return ptr; }
 	Item *operator->() const  { return ptr; }
 
-	bool end()
-		{ return ptr == 0; }
-
-	void clear()
-		{ ptr = 0; }
-
-	typedef Item ItemType;
+	bool end()   { return ptr == 0; }
+	void clear() { ptr = 0; }
 
 	PiList next()
 		{ return PiList( ptr->next ); }
+
+	Item *ptr;
+};
+
+template <class Item> struct PiSingle
+{
+	PiSingle()
+		: ptr(0) {}
+
+	PiSingle( Item *ptr )
+		: ptr(ptr) {}
+
+	operator Item *() const   { return ptr; }
+	Item *operator->() const  { return ptr; }
+
+	bool end()   { return ptr == 0; }
+	void clear() { ptr = 0; }
+
+	/* Next is always nil. */
+	PiSingle next()
+		{ return PiSingle( 0 ); }
 
 	Item *ptr;
 };
@@ -811,13 +827,8 @@ template <class Item> struct PiVector
 	operator Item *() const   { return ptr; }
 	Item *operator->() const  { return ptr; }
 
-	bool end()
-		{ return length == 0; }
-
-	void clear()
-		{ ptr = 0; length = 0; }
-
-	typedef Item ItemType;
+	bool end()   { return length == 0; }
+	void clear() { ptr = 0; length = 0; }
 
 	PiVector next()
 		{ return PiVector( ptr + 1, length - 1 ); }
