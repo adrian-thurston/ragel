@@ -771,7 +771,12 @@ struct StateAp
 
 template <class Item> struct PiList
 {
-	PiList() {}
+	PiList()
+		: ptr(0) {}
+
+	PiList( const DList<Item> &l )
+		: ptr(l.head) {}
+
 	PiList( Item *ptr )
 		: ptr(ptr) {}
 
@@ -794,7 +799,12 @@ template <class Item> struct PiList
 
 template <class Item> struct PiVector
 {
-	PiVector() {}
+	PiVector()
+		: ptr(0), length(0) {}
+
+	PiVector( const Vector<Item> &v )
+		: ptr(v.data), length(v.length()) {}
+
 	PiVector( Item *ptr, long length )
 		: ptr(ptr), length(length) {}
 

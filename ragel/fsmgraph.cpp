@@ -929,9 +929,10 @@ void logNewExpansion( Expansion *exp )
 void FsmAp::findTransExpansions( ExpansionList &expansionList, 
 		StateAp *destState, StateAp *srcState )
 {
-	PairIter< PiList<TransAp>, PiList<StateCond> >
-			transCond( destState->outList.head, srcState->stateCondList.head );
-	for ( ; !transCond.end(); transCond++ ) {
+	for ( PairIter< PiList<TransAp>, PiList<StateCond> >
+			transCond( destState->outList, srcState->stateCondList );
+			!transCond.end(); transCond++ )
+	{
 		if ( transCond.userState == RangeOverlap ) {
 			Expansion *expansion = new Expansion( transCond.s1Tel.lowKey, 
 					transCond.s1Tel.highKey );
@@ -967,8 +968,10 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 			(highKey - keyOps->minKey);
 	searchTrans.prev = searchTrans.next = 0;
 
-	PairIter< PiList<TransAp> > pairIter( state->outList.head, &searchTrans );
-	for ( ; !pairIter.end(); pairIter++ ) {
+	for ( PairIter< PiList<TransAp> >
+			pairIter( state->outList, &searchTrans );
+			!pairIter.end(); pairIter++ )
+	{
 		if ( pairIter.userState == RangeOverlap ) {
 			/* Need to make character-space low and high keys from the range
 			 * overlap for the expansion object. */
@@ -997,9 +1000,10 @@ void FsmAp::findCondExpInTrans( ExpansionList &expansionList, StateAp *state,
 void FsmAp::findCondExpansions( ExpansionList &expansionList, 
 		StateAp *destState, StateAp *srcState )
 {
-	PairIter< PiList<StateCond>, PiList<StateCond> >
-			condCond( destState->stateCondList.head, srcState->stateCondList.head );
-	for ( ; !condCond.end(); condCond++ ) {
+	for ( PairIter< PiList<StateCond>, PiList<StateCond> >
+			condCond( destState->stateCondList, srcState->stateCondList );
+			!condCond.end(); condCond++ )
+	{
 		if ( condCond.userState == RangeOverlap ) {
 			/* Loop over all existing condVals . */
 			CondSet &destCS = condCond.s1Tel.trans->condSpace->condSet;
@@ -1101,9 +1105,10 @@ void FsmAp::doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1
 		removal.next = 0;
 
 		TransList destList;
-		PairIter< PiList<TransAp>, PiList<Removal> >
-				pairIter( destState->outList.head, &removal );
-		for ( ; !pairIter.end(); pairIter++ ) {
+		for ( PairIter< PiList<TransAp>, PiList<Removal> >
+				pairIter( destState->outList, &removal );
+				!pairIter.end(); pairIter++ )
+		{
 			switch ( pairIter.userState ) {
 			case RangeInS1: {
 				TransAp *destTrans = pairIter.s1Tel.trans;
@@ -1136,9 +1141,10 @@ void FsmAp::doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1
 void FsmAp::mergeStateConds( StateAp *destState, StateAp *srcState )
 {
 	StateCondList destList;
-	PairIter< PiList<StateCond> > pairIter( destState->stateCondList.head,
-			srcState->stateCondList.head );
-	for ( ; !pairIter.end(); pairIter++ ) {
+	for ( PairIter< PiList<StateCond> >
+			pairIter( destState->stateCondList, srcState->stateCondList );
+			!pairIter.end(); pairIter++ )
+	{
 		switch ( pairIter.userState ) {
 		case RangeInS1: {
 			StateCond *destCond = pairIter.s1Tel.trans;
@@ -1295,9 +1301,10 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 		StateAp *destState, Action *condAction, bool sense )
 {
 	StateCondList destList;
-	PairIter< PiList<TransAp>, PiList<StateCond> >
-			transCond( destState->outList.head, destState->stateCondList.head );
-	for ( ; !transCond.end(); transCond++ ) {
+	for ( PairIter< PiList<TransAp>, PiList<StateCond> >
+			transCond( destState->outList, destState->stateCondList );
+			!transCond.end(); transCond++ )
+	{
 		switch ( transCond.userState ) {
 			case RangeInS1: {
 				if ( transCond.s1Tel.lowKey <= keyOps->maxKey ) {

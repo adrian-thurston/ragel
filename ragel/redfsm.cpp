@@ -386,11 +386,10 @@ void RedFsmAp::characterClass( EquivList &equiv )
 				uniqTrans.insert( rtel->value, next++ );
 		}
 
-
 		/* Merge with whole-machine equiv classes. */
-		PairIter< PiList<EquivClass>, PiVector<RedTransEl> > pair( equiv.head,
-				PiVector<RedTransEl>( st->outRange.data, st->outRange.length() ) );
-		for ( ; !pair.end(); pair++ ) {
+		for ( PairIter< PiList<EquivClass>, PiVector<RedTransEl> >
+				pair( equiv, st->outRange ); !pair.end(); pair++ )
+		{
 			switch ( pair.userState ) {
 
 			case RangeOverlap: {
@@ -477,7 +476,6 @@ void RedFsmAp::characterClass( EquivList &equiv )
 void RedFsmAp::makeFlatClass()
 {
 	EquivList equiv;
-
 	characterClass( equiv );
 	makeFlatCond();
 
@@ -497,9 +495,8 @@ void RedFsmAp::makeFlatClass()
 			 * alphabet. */
 			st->low = nextClass;
 			st->high = -1;
-			for ( PairIter< PiList<EquivClass>, PiVector<RedTransEl> > pair( equiv.head,
-						PiVector<RedTransEl>( st->outRange.data, st->outRange.length() ) );
-						!pair.end(); pair++ )
+			for ( PairIter< PiList<EquivClass>, PiVector<RedTransEl> >
+					pair( equiv, st->outRange ); !pair.end(); pair++ )
 			{
 				if ( pair.userState == RangeOverlap || pair.userState == RangeInS2 ) {
 					long long off = keyOps->span( lowKey, pair.s2Tel.lowKey ) - 1;
@@ -514,9 +511,8 @@ void RedFsmAp::makeFlatClass()
 			st->transList = new RedTransAp*[ span ];
 			memset( st->transList, 0, sizeof(RedTransAp*)*span );
 			
-			for ( PairIter< PiList<EquivClass>, PiVector<RedTransEl> > pair( equiv.head,
-						PiVector<RedTransEl>( st->outRange.data, st->outRange.length() ) );
-						!pair.end(); pair++ )
+			for ( PairIter< PiList<EquivClass>, PiVector<RedTransEl> >
+					pair( equiv, st->outRange ); !pair.end(); pair++ )
 			{
 				if ( pair.userState == RangeOverlap || pair.userState == RangeInS2 ) {
 					long long off = keyOps->span( lowKey, pair.s2Tel.lowKey ) - 1;
