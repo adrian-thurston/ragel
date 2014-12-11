@@ -480,11 +480,11 @@ struct RedFsmAp
 	/* State low/high, in key space and class space. */
 	Key lowKey;
 	Key highKey;
-	long long low;
-	long long high;
+	long long nextClass;
 
 	long long *classMap;
 
+	/* Support structs for equivalence class computation. */
 	struct EquivClass
 	{
 		EquivClass( Key lowKey, Key highKey, long long value )
@@ -496,13 +496,41 @@ struct RedFsmAp
 	};
 
 	typedef DList<EquivClass> EquivList;
-
 	typedef BstMap<RedTransAp*, int> EquivAlloc;
 	typedef BstMapEl<RedTransAp*, int> EquivAllocEl;
 
+	struct PairKey
+	{
+		PairKey( long long k1, long long k2 )
+			: k1(k1), k2(k2) {}
+
+		long long k1;
+		long long k2;
+	};
+
+	struct PairKeyCmp
+	{
+		static inline long compare( const PairKey &k1, const PairKey &k2 )
+		{
+			if ( k1.k1 < k2.k1 )
+				return -1;
+			else if ( k1.k1 > k2.k1 )
+				return 1;
+			if ( k1.k2 < k2.k2 )
+				return -1;
+			else if ( k1.k2 > k2.k2 )
+				return 1;
+			else
+				return 0;
+		}
+	};
+
+	typedef BstMap< PairKey, long long, PairKeyCmp > PairKeyMap;
+	typedef BstMapEl< PairKey, long long > PairKeyMapEl;
+
 	void makeFlatCond();
 	void makeFlatDirect();
-	void characterClass();
+	void characterClass( EquivList &equivList );
 	void makeFlatClass();
 
 	/* Move a selected transition from ranges to default. */

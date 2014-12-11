@@ -346,36 +346,7 @@ void RedFsmAp::makeFlatDirect()
 	}
 }
 
-struct PairKey
-{
-	PairKey( long long k1, long long k2 )
-		: k1(k1), k2(k2) {}
-
-	long long k1;
-	long long k2;
-};
-
-struct PairKeyCmp
-{
-	static inline long compare( const PairKey &k1, const PairKey &k2 )
-	{
-		if ( k1.k1 < k2.k1 )
-			return -1;
-		else if ( k1.k1 > k2.k1 )
-			return 1;
-		if ( k1.k2 < k2.k2 )
-			return -1;
-		else if ( k1.k2 > k2.k2 )
-			return 1;
-		else
-			return 0;
-	}
-};
-
-typedef BstMap< PairKey, long long, PairKeyCmp > PairKeyMap;
-typedef BstMapEl< PairKey, long long > PairKeyMapEl;
-
-void RedFsmAp::characterClass()
+void RedFsmAp::characterClass( EquivList &equiv )
 {
 	/* Find the global low and high keys. */
 	Key lowKey = keyOps->maxKey;
@@ -394,10 +365,8 @@ void RedFsmAp::characterClass()
 			highKey = st->highKey;
 	}
 
-	EquivList equiv;
 	long long next = 1;
 	equiv.append( new EquivClass( lowKey, highKey, next++ ) );
-
 
 	/* Start with a single equivalence class and break it up using range
 	 * boundaries of each state. This will tell us what the equivalence class
@@ -501,13 +470,15 @@ void RedFsmAp::characterClass()
 	this->lowKey = lowKey;
 	this->highKey = highKey;
 	this->classMap = dest;
+	this->nextClass = next;
 
-	equiv.empty();
 }
 
 void RedFsmAp::makeFlatClass()
 {
-	characterClass();
+	EquivList equiv;
+
+	characterClass( equiv );
 	makeFlatCond();
 
 	/* Expand the transitions. This uses the equivalence classes. */
@@ -521,35 +492,36 @@ void RedFsmAp::makeFlatClass()
 			st->lowKey = st->outRange[0].lowKey;
 			st->highKey = st->outRange[st->outRange.length()-1].highKey;
 
-			/* Compute low and high in class space. */
-			RedTransList::Iter trans = st->outRange;
-			long long low = classMap[trans->lowKey.getVal() - lowKey.getVal()];
-			long long high = classMap[trans->lowKey.getVal() - lowKey.getVal()];
-			for ( RedTransList::Iter trans = st->outRange; trans.lte(); trans++ ) {
-				long long base = keyOps->span( lowKey, trans->lowKey ) - 1;
-				long long span = keyOps->span( trans->lowKey, trans->highKey );
-				for ( long long s = 0; s < span; s++ ) {
-					if ( classMap[base + s] < low )
-						low = classMap[base + s];
-					if ( classMap[base + s] > high )
-						high = classMap[base + s];
+			/* Compute low and high in class space. Use a pair iter to find all
+			 * the clases. Alleviates the need to iterate the whole input
+			 * alphabet. */
+			st->low = nextClass;
+			st->high = -1;
+			for ( PairIter< PiList<EquivClass>, PiVector<RedTransEl> > pair( equiv.head,
+						PiVector<RedTransEl>( st->outRange.data, st->outRange.length() ) );
+						!pair.end(); pair++ )
+			{
+				if ( pair.userState == RangeOverlap || pair.userState == RangeInS2 ) {
+					long long off = keyOps->span( lowKey, pair.s2Tel.lowKey ) - 1;
+					if ( classMap[off] < st->low )
+						st->low = classMap[off];
+					if ( classMap[off] > st->high )
+						st->high = classMap[off];
 				}
 			}
-			st->low = low;
-			st->high = high;
 
-			// std::cerr << "s" << st->id << ": " << low << " - " << high << std::endl;
-
-			long long span = high - low + 1;
-
+			long long span = st->high - st->low + 1;
 			st->transList = new RedTransAp*[ span ];
 			memset( st->transList, 0, sizeof(RedTransAp*)*span );
 			
-			for ( RedTransList::Iter trans = st->outRange; trans.lte(); trans++ ) {
-				long long base = keyOps->span( lowKey, trans->lowKey ) - 1;
-				long long trSpan = keyOps->span( trans->lowKey, trans->highKey );
-				for ( long long pos = 0; pos < trSpan; pos++ )
-					st->transList[ classMap[base+pos] - low ] = trans->value;
+			for ( PairIter< PiList<EquivClass>, PiVector<RedTransEl> > pair( equiv.head,
+						PiVector<RedTransEl>( st->outRange.data, st->outRange.length() ) );
+						!pair.end(); pair++ )
+			{
+				if ( pair.userState == RangeOverlap || pair.userState == RangeInS2 ) {
+					long long off = keyOps->span( lowKey, pair.s2Tel.lowKey ) - 1;
+					st->transList[ classMap[off] - st->low ] = pair.s2Tel.trans->value;
+				}
 			}
 
 			/* Fill in the gaps with the default transition. */
@@ -559,6 +531,8 @@ void RedFsmAp::makeFlatClass()
 			}
 		}
 	}
+
+	equiv.empty();
 }
 
 
