@@ -681,7 +681,6 @@ void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( InputLoc(), typeRef, "match_length" );
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
 	el->useOffset = false;
@@ -696,7 +695,6 @@ void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "match_text" );
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
 	el->useOffset = false;
@@ -712,7 +710,6 @@ void Compiler::addInput( ObjectDef *frame )
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "input" );
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst   = false;
 	el->useOffset = false;
@@ -730,7 +727,6 @@ void Compiler::addCtx( ObjectDef *frame )
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "ctx" );
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst   = false;
 	el->useOffset = false;
@@ -789,10 +785,6 @@ ObjectField *Compiler::makeDataEl()
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 	ObjectField *el = ObjectField::cons( internal, typeRef, "data" );
 
-	/* Setting beenReferenced to true prevents us from assigning instructions
-	 * and an offset to the field. */
-
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->useOffset = false;
 	el->inGetR = IN_GET_TOKEN_DATA_R;
@@ -807,11 +799,7 @@ ObjectField *Compiler::makePosEl()
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
 	ObjectField *el = ObjectField::cons( internal, typeRef, "pos" );
 
-	/* Setting beenReferenced to true prevents us from assigning instructions
-	 * and an offset to the field. */
-
 	el->isConst = true;
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->useOffset = false;
 	el->inGetR = IN_GET_TOKEN_POS_R;
@@ -824,11 +812,7 @@ ObjectField *Compiler::makeLineEl()
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
 	ObjectField *el = ObjectField::cons( internal, typeRef, "line" );
 
-	/* Setting beenReferenced to true prevents us from assigning instructions
-	 * and an offset to the field. */
-
 	el->isConst = true;
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->useOffset = false;
 	el->inGetR = IN_GET_TOKEN_LINE_R;
@@ -875,7 +859,6 @@ void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
 	/* Create the "length" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
 	ObjectField *el = ObjectField::cons( internal, typeRef, "length" );
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
 	el->useOffset = false;
@@ -945,7 +928,6 @@ void Compiler::addStdin()
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "stdin" );
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
 	el->useOffset = false;
@@ -963,7 +945,6 @@ void Compiler::addStdout()
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "stdout" );
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
 	el->useOffset = false;
@@ -981,7 +962,6 @@ void Compiler::addStderr()
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "stderr" );
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
 	el->useOffset = false;
@@ -1012,7 +992,6 @@ void Compiler::addError()
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal, typeRef, "error" );
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 	el->isConst = true;
 	el->useOffset = false;
@@ -1022,31 +1001,6 @@ void Compiler::addError()
 	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
-int Compiler::argvOffset()
-{
-	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
-			field.lte(); field++ )
-	{
-		if ( field->value->isArgv ) {
-			globalObjectDef->referenceField( this, field->value );
-			return field->value->offset;
-		}
-	}
-	assert(false);
-}
-
-int Compiler::argv0_Offset()
-{
-	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
-			field.lte(); field++ )
-	{
-		if ( field->value->isArgv0 ) {
-			globalObjectDef->referenceField( this, field->value );
-			return field->value->offset;
-		}
-	}
-	assert(false);
-}
 
 void Compiler::initMapFunctions( GenericType *gen )
 {
@@ -1122,7 +1076,6 @@ void Compiler::initList2Field( GenericType *gen, const char *name, int offset )
 	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = true;
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 
 	/* Zero for head, One for tail. */
@@ -1152,7 +1105,6 @@ void Compiler::initList2ElField( GenericType *gen, const char *name, int offset 
 	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = true;
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 
 	/* Zero for head, One for tail. */
@@ -1194,7 +1146,6 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = true;
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 
 	/* Zero for head, One for tail. */
@@ -1231,7 +1182,6 @@ void Compiler::initParserField( GenericType *gen, const char *name, int offset, 
 	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = true;
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 
 	/* Zero for head, One for tail. */
@@ -1257,7 +1207,6 @@ void Compiler::initCtxField( GenericType *gen )
 	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = false;
-	el->beenReferenced = true;
 	el->beenInitialized = true;
 }
 

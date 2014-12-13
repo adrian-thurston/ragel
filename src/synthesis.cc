@@ -2576,6 +2576,32 @@ void Compiler::compilePreEof( TokenRegion *region )
 	findLocals( block->localFrame, block );
 }
 
+int Compiler::argvOffset()
+{
+	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
+			field.lte(); field++ )
+	{
+		if ( field->value->isArgv ) {
+			globalObjectDef->referenceField( this, field->value );
+			return field->value->offset;
+		}
+	}
+	assert(false);
+}
+
+int Compiler::argv0_Offset()
+{
+	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
+			field.lte(); field++ )
+	{
+		if ( field->value->isArgv0 ) {
+			globalObjectDef->referenceField( this, field->value );
+			return field->value->offset;
+		}
+	}
+	assert(false);
+}
+
 void Compiler::compileRootBlock( )
 {
 	CodeBlock *block = rootCodeBlock;
