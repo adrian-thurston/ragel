@@ -2111,9 +2111,6 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 		resetContiguous = pd->beginContiguous( code, stretch );
 	}
 
-	/* Also force the field to be initialized. */
-	objField->scope->owner->initField( pd, objField );
-
 	/* 
 	 * Create the iterator from the local var.
 	 */
