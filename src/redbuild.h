@@ -8,7 +8,7 @@
 #include <iostream>
 #include "avltree.h"
 #include "fsmgraph.h"
-#include "parsedata.h"
+#include "compiler.h"
 
 /* Forwards. */
 struct FsmTrans;

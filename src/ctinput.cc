@@ -2,7 +2,7 @@
  *  Copyright 2007-2012 Adrian Thurston <thurston@complang.org>
  */
 
-#include "parsedata.h"
+#include "compiler.h"
 #include "parsetree.h"
 #include "input.h"
 #include "debug.h"

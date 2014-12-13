@@ -3,7 +3,7 @@
  */
 
 #include "bytecode.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include <iostream>
 #include <assert.h>
 

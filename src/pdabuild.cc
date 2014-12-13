@@ -11,7 +11,7 @@
 
 /* Parsing. */
 #include "global.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "pdacodegen.h"
 #include "pdarun.h"
 #include "redfsm.h"

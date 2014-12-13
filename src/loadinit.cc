@@ -9,7 +9,7 @@
 #include "parser.h"
 #include "config.h"
 #include "avltree.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "parser.h"
 #include "global.h"
 #include "input.h"

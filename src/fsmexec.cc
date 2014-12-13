@@ -8,7 +8,7 @@
 #include "config.h"
 #include "defs.h"
 #include "redfsm.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "parsetree.h"
 #include "pdarun.h"
 #include "global.h"

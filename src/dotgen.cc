@@ -3,7 +3,7 @@
  */
 
 #include "global.h"
-#include "parsedata.h"
+#include "compiler.h"
 
 using namespace std;
 

@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include "avltree.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "parser.h"
 
 #define PROPERTY_REDUCE_FIRST 0x1

@@ -11,7 +11,7 @@
 
 #include "global.h"
 #include "lmparse.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "avltree.h"
 #include "vector.h"
 #include "buffer.h"

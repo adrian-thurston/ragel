@@ -3,7 +3,7 @@
  */
 
 #include "bytecode.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "pdarun.h"
 #include "input.h"
 #include <iostream>

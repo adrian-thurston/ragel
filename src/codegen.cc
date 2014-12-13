@@ -2,7 +2,7 @@
  *  Copyright 2006-2012 Adrian Thurston <thurston@complang.org>
  */
 
-#include "parsedata.h"
+#include "compiler.h"
 #include "fsmcodegen.h"
 #include "redfsm.h"
 #include "bstmap.h"

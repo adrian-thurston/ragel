@@ -11,9 +11,8 @@
 
 #include "global.h"
 #include "avltree.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "parser.h"
-#include "parsedata.h"
 #include "parsetree.h"
 #include "mergesort.h"
 #include "redbuild.h"

@@ -7,7 +7,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include "global.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "avlmap.h"
 #include "avlbasic.h"
 #include "avlset.h"

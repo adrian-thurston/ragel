@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include "avltree.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "parser.h"
 
 struct lex_factor;

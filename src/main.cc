@@ -19,7 +19,7 @@
 #include "vector.h"
 #include "version.h"
 #include "keyops.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "vector.h"
 #include "version.h"
 #include "fsmcodegen.h"

@@ -9,7 +9,7 @@
 #include <string>
 #include <stdio.h>
 #include "keyops.h"
-#include "parsedata.h"
+#include "compiler.h"
 #include "redfsm.h"
 
 using std::string;
