@@ -239,26 +239,27 @@ void ObjectDef::referenceField( Compiler *pd, ObjectField *field )
 
 void ObjectDef::initField( Compiler *pd, ObjectField *field )
 {
-	if ( !field->beenInitialized ) {
-		field->beenInitialized = true;
-		UniqueType *fieldUT = field->typeRef->uniqueType;
+	if ( field->beenInitialized )
+		return;
+	
+	field->beenInitialized = true;
+	UniqueType *fieldUT = field->typeRef->uniqueType;
 
-		if ( type == FrameType ) {
-			nextOffset += sizeOfField( fieldUT );
-			field->offset = -nextOffset;
+	if ( type == FrameType ) {
+		nextOffset += sizeOfField( fieldUT );
+		field->offset = -nextOffset;
 
-			pd->initLocalInstructions( field );
-		}
-		else if ( field->isRhsGet ) {
-			pd->initRhsGetInstructions( field );
-		}
-		else {
-			field->offset = nextOffset;
-			nextOffset += sizeOfField( fieldUT );
+		pd->initLocalInstructions( field );
+	}
+	else if ( field->isRhsGet ) {
+		pd->initRhsGetInstructions( field );
+	}
+	else {
+		field->offset = nextOffset;
+		nextOffset += sizeOfField( fieldUT );
 
-			/* Initialize the instructions. */
-			pd->initFieldInstructions( field );
-		}
+		/* Initialize the instructions. */
+		pd->initFieldInstructions( field );
 	}
 }
 

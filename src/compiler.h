@@ -761,7 +761,6 @@ struct Compiler
 	void addError();
 	int argvOffset();
 	int argv0_Offset();
-	void initGlobalFunctions();
 	void makeDefaultIterators();
 	void addLengthField( ObjectDef *objDef, Code getLength );
 	ObjectDef *findObject( const String &name );
@@ -906,10 +905,11 @@ struct Compiler
 	UniqueMap2ElMap   uniqueMap2ElMap;
 	UniqueMap2Map     uniqueMap2Map;
 
-	void initStrObject();
-	void initStreamObject();
-	void initIntObject();
-	void initTokenObjects();
+	void declareGlobalFields();
+	void declareStrFields();
+	void declareStreamFields();
+	void declareIntFields();
+	void declareTokenFields();
 
 	ObjectDef *intObj;
 	ObjectDef *strObj;

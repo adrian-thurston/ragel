@@ -741,7 +741,7 @@ void Compiler::addCtx( ObjectDef *frame )
 	frame->rootScope->insertField( el->name, el );
 }
 
-void Compiler::initIntObject( )
+void Compiler::declareIntFields( )
 {
 	intObj = ObjectDef::cons( ObjectDef::BuiltinType, "int", nextObjectId++ );
 	intLangEl->objectDef = intObj;
@@ -749,7 +749,7 @@ void Compiler::initIntObject( )
 	initFunction( uniqueTypeStr, intObj, "to_string", IN_INT_TO_STR, IN_INT_TO_STR, true );
 }
 
-void Compiler::initStrObject( )
+void Compiler::declareStrFields( )
 {
 	strObj = ObjectDef::cons( ObjectDef::BuiltinType, "str", nextObjectId++ );
 	strLangEl->objectDef = strObj;
@@ -767,7 +767,7 @@ void Compiler::initStrObject( )
 			IN_SPRINTF, IN_SPRINTF, uniqueTypeStr, uniqueTypeInt, true );
 }
 
-void Compiler::initStreamObject( )
+void Compiler::declareStreamFields( )
 {
 	streamObj = ObjectDef::cons( ObjectDef::BuiltinType,
 			"stream", nextObjectId++ );
@@ -884,7 +884,7 @@ void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
 	objDef->rootScope->insertField( el->name, el );
 }
 
-void Compiler::initTokenObjects( )
+void Compiler::declareTokenFields( )
 {
 	/* Give all user terminals the token object type. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
@@ -906,7 +906,7 @@ void Compiler::initTokenObjects( )
 	}
 }
 
-void Compiler::initGlobalFunctions()
+void Compiler::declareGlobalFields()
 {
 	ObjMethod *method;
 
@@ -1331,11 +1331,11 @@ void Compiler::declarePass()
 
 	declareByteCode();
 
-	initIntObject();
-	initStrObject();
-	initStreamObject();
-	initTokenObjects();
-	initGlobalFunctions();
+	declareIntFields();
+	declareStrFields();
+	declareStreamFields();
+	declareTokenFields();
+	declareGlobalFields();
 
 	/* Fill any empty scanners with a default token. */
 	initEmptyScanners();
