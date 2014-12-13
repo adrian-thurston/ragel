@@ -1149,7 +1149,8 @@ free_tree:
 	genericId = lelInfo[tree->id].genericId;
 	if ( genericId > 0 ) {
 		GenericInfo *generic = &prg->rtd->genericInfo[genericId];
-		if ( generic->type == GEN_LIST ) {
+		switch ( generic->type ) {
+		case GEN_LIST: {
 			List *list = (List*) tree;
 			ListEl *el = list->head;
 			while ( el != 0 ) {
@@ -1159,8 +1160,9 @@ free_tree:
 				el = next;
 			}
 			mapElFree( prg, (MapEl*)list );
+			break;
 		}
-		else if ( generic->type == GEN_MAP ) {
+		case GEN_MAP: {
 			Map *map = (Map*)tree;
 			MapEl *el = map->head;
 			while ( el != 0 ) {
@@ -1171,18 +1173,20 @@ free_tree:
 				el = next;
 			}
 			mapElFree( prg, (MapEl*)map );
+			break;
 		}
-		else if ( generic->type == GEN_PARSER ) {
+		case GEN_PARSER: {
 			Parser *parser = (Parser*)tree;
 			clearPdaRun( prg, sp, parser->pdaRun );
 			free( parser->pdaRun );
 			treeDownref( prg, sp, (Tree*)parser->input );
 			mapElFree( prg, (MapEl*)parser );
+			break;
 		}
-		else if ( generic->type == GEN_LIST2EL ) {
-
+		case GEN_LIST2EL: {
+			break;
 		}
-		else if ( generic->type == GEN_LIST2 ) {
+		case GEN_LIST2: {
 			List *list = (List*) tree;
 //			ListEl *el = list->head;
 //			while ( el != 0 ) {
@@ -1192,15 +1196,11 @@ free_tree:
 //				el = next;
 //			}
 			mapElFree( prg, (MapEl*)list );
+			break;
 		}
-		else if ( generic->type == GEN_MAP2EL ) {
-
-		}
-		else if ( generic->type == GEN_MAP2 ) {
-
-		}
-		else {
-			assert(false);
+		case GEN_MAP2EL:
+		case GEN_MAP2:
+			break;
 		}
 	}
 	else {
