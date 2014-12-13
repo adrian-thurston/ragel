@@ -235,7 +235,6 @@ long sizeOfField( UniqueType *fieldUT )
 void ObjectDef::referenceField( Compiler *pd, ObjectField *field )
 {
 	field->beenReferenced = true;
-	initField( pd, field );
 }
 
 void ObjectDef::initField( Compiler *pd, ObjectField *field )
