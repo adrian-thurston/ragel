@@ -196,7 +196,8 @@ struct LoadColm
 			break;
 		}
 		case statement::VarDef: {
-			ObjectField *objField = walkVarDef( Statement.var_def() );
+			ObjectField *objField = walkVarDef( Statement.var_def(),
+					ObjectField::UserLocalType );
 			LangExpr *expr = walkOptDefInit( Statement.opt_def_init() );
 			stmt = varDef( objField, expr, LangStmt::AssignType );
 			break;
@@ -345,7 +346,8 @@ struct LoadColm
 				String(), pd->nextObjectId++ ); 
 
 		while ( !varDefList.end() ) {
-			ObjectField *varDef = walkVarDef( varDefList.value() );
+			ObjectField *varDef = walkVarDef( varDefList.value(),
+					ObjectField::UserFieldType );
 			objVarDef( objectDef, varDef );
 			varDefList = varDefList.next();
 		}
@@ -626,7 +628,8 @@ struct LoadColm
 
 	LangStmt *walkExportDef( export_def exportDef )
 	{
-		ObjectField *objField = walkVarDef( exportDef.var_def() );
+		ObjectField *objField = walkVarDef( exportDef.var_def(),
+				ObjectField::UserFieldType );
 		LangExpr *expr = walkOptDefInit( exportDef.opt_def_init() );
 
 		return exportStmt( objField, LangStmt::AssignType, expr );
@@ -634,7 +637,8 @@ struct LoadColm
 
 	LangStmt *walkGlobalDef( global_def GlobalDef )
 	{
-		ObjectField *objField = walkVarDef( GlobalDef.var_def() );
+		ObjectField *objField = walkVarDef( GlobalDef.var_def(),
+				ObjectField::UserFieldType );
 		LangExpr *expr = walkOptDefInit( GlobalDef.opt_def_init() );
 
 		return globalDef( objField, expr, LangStmt::AssignType );
@@ -879,7 +883,8 @@ struct LoadColm
 		ObjectField *captureField = 0;
 		if ( El.opt_prod_el_name().prodName() == opt_prod_el_name::Name ) {
 			String fieldName = El.opt_prod_el_name().id().data();
-			captureField = ObjectField::cons( El.opt_prod_el_name().id().loc(), 0, fieldName );
+			captureField = ObjectField::cons( El.opt_prod_el_name().id().loc(),
+				ObjectField::RhsElType, 0, fieldName );
 		}
 		else {
 			/* default the prod name. */
@@ -894,7 +899,8 @@ struct LoadColm
 					fieldName = "_opt_" + fieldName;
 				else if ( strcmp( fieldName, defName ) == 0 )
 					fieldName = "_" + fieldName;
-				captureField = ObjectField::cons( El.id().loc(), 0, fieldName );
+				captureField = ObjectField::cons( El.id().loc(),
+						ObjectField::RhsElType, 0, fieldName );
 			}
 		}
 
@@ -1260,7 +1266,8 @@ struct LoadColm
 		ObjectField *objField = 0;
 		if ( optCapture.prodName() == opt_capture::Id ) {
 			String id = optCapture.id().data();
-			objField = ObjectField::cons( optCapture.id().loc(), 0, id );
+			objField = ObjectField::cons( optCapture.id().loc(),
+					ObjectField::UserLocalType, 0, id );
 		}
 		return objField;
 	}
@@ -1948,11 +1955,11 @@ struct LoadColm
 		return stmt;
 	}
 
-	ObjectField *walkVarDef( var_def varDef )
+	ObjectField *walkVarDef( var_def varDef, ObjectField::Type type )
 	{
 		String id = varDef.id().data();
 		TypeRef *typeRef = walkTypeRef( varDef.type_ref() );
-		return ObjectField::cons( varDef.id().loc(), typeRef, id );
+		return ObjectField::cons( varDef.id().loc(), type, typeRef, id );
 	}
 
 	IterCall *walkIterCall( iter_call Tree )
@@ -2071,7 +2078,8 @@ struct LoadColm
 
 	void walkContextVarDef( context_var_def ContextVarDef )
 	{
-		ObjectField *objField = walkVarDef( ContextVarDef.var_def() );
+		ObjectField *objField = walkVarDef( ContextVarDef.var_def(),
+				ObjectField::UserFieldType );
 		contextVarDef( objField->loc, objField );
 	}
 
@@ -2085,17 +2093,20 @@ struct LoadColm
 	{
 		String id = paramVarDef.id().data();
 		TypeRef *typeRef = 0;
+		ObjectField::Type type;
 
 		switch ( paramVarDef.prodName() ) {
 		case param_var_def::Type: 
 			typeRef = walkTypeRef( paramVarDef.type_ref() );
+			type = ObjectField::ParamValType;
 			break;
 		case param_var_def::Ref:
 			typeRef = walkReferenceTypeRef( paramVarDef.reference_type_ref() );
+			type = ObjectField::ParamRefType;
 			break;
 		}
 		
-		return addParam( paramVarDef.id().loc(), typeRef, id );
+		return addParam( paramVarDef.id().loc(), type, typeRef, id );
 	}
 
 	ParameterList *walkParamVarDefList( param_var_def_list paramVarDefList )
@@ -2167,7 +2178,8 @@ struct LoadColm
 		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, repeatType );
 		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::List2El, 0, objTr, 0 );
 
-		ObjectField *of = ObjectField::cons( InputLoc(), elTr, name );
+		ObjectField *of = ObjectField::cons( InputLoc(),
+				ObjectField::UserFieldType, elTr, name );
 		contextVarDef( InputLoc(), of );
 	}
 

@@ -483,7 +483,8 @@ LexFactorAug *BaseParser::lexFactorLabel( const InputLoc &loc,
 {
 	/* Create the object field. */
 	TypeRef *typeRef = TypeRef::cons( loc, pd->uniqueTypeStr );
-	ObjectField *objField = ObjectField::cons( loc, typeRef, data );
+	ObjectField *objField = ObjectField::cons( loc,
+			ObjectField::LexSubstrType, typeRef, data );
 
 	/* Create the enter and leaving actions that will mark the substring. */
 	Action *enter = Action::cons( MarkMark, pd->nextMatchEndNum++ );
@@ -596,7 +597,8 @@ PatternItemList *BaseParser::consPatternEl( LangVarRef *varRef, PatternItemList 
 		}
 
 		TypeRef *typeRef = list->head->prodEl->typeRef;
-		ObjectField *objField = ObjectField::cons( InputLoc(), typeRef, varRef->name );
+		ObjectField *objField = ObjectField::cons( InputLoc(),
+				ObjectField::UserLocalType, typeRef, varRef->name );
 
 		/* Insert it into the field map. */
 		curScope->insertField( varRef->name, objField );
@@ -660,7 +662,8 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 	/* Note that we pass in a null type reference. This type is dependent on
 	 * the result of the iter_call lookup since it must contain a reference to
 	 * the iterator that is called. This lookup is done at compile time. */
-	ObjectField *iterField = ObjectField::cons( loc, (TypeRef*)0, data );
+	ObjectField *iterField = ObjectField::cons( loc,
+			ObjectField::UserLocalType, (TypeRef*)0, data );
 	curScope->insertField( data, iterField );
 
 	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
@@ -894,10 +897,10 @@ ParameterList *BaseParser::appendParam( ParameterList *paramList, ObjectField *o
 	return paramList;
 }
 
-ObjectField *BaseParser::addParam( const InputLoc &loc, TypeRef *typeRef,
-		const String &name )
+ObjectField *BaseParser::addParam( const InputLoc &loc,
+		ObjectField::Type type, TypeRef *typeRef, const String &name )
 {
-	ObjectField *objField = ObjectField::cons( loc, typeRef, name );
+	ObjectField *objField = ObjectField::cons( loc, type, typeRef, name );
 	objField->isParam = true;
 	return objField;
 }

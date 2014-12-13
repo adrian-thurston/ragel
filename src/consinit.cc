@@ -106,7 +106,8 @@ LexFactorAug *starFactorAug( LexExpression *expr )
 	LexFactor *factor = LexFactor::cons( join );
 	LexFactorNeg *factorNeg = LexFactorNeg::cons( factor );
 	LexFactorRep *factorRep = LexFactorRep::cons( factorNeg );
-	LexFactorRep *staredRep = LexFactorRep::cons( internal, factorRep, 0, 0, LexFactorRep::StarType );
+	LexFactorRep *staredRep = LexFactorRep::cons( internal,
+			factorRep, 0, 0, LexFactorRep::StarType );
 	LexFactorAug *factorAug = LexFactorAug::cons( staredRep );
 	return factorAug;
 }
@@ -324,7 +325,8 @@ ProdEl *ConsInit::prodRefName( const String &name )
 
 ProdEl *ConsInit::prodRefName( const String &capture, const String &name )
 {
-	ObjectField *captureField = ObjectField::cons( internal, 0, capture );
+	ObjectField *captureField = ObjectField::cons( internal,
+			ObjectField::RhsNameType, 0, capture );
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons( curNspace() ), captureField,
 			RepeatNone, false );
@@ -341,7 +343,8 @@ ProdEl *ConsInit::prodRefNameRepeat( const String &name )
 
 ProdEl *ConsInit::prodRefNameRepeat( const String &capture, const String &name )
 {
-	ObjectField *captureField = ObjectField::cons( internal, 0, capture );
+	ObjectField *captureField = ObjectField::cons( internal,
+			ObjectField::RhsNameType, 0, capture );
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons( curNspace() ), captureField,
 			RepeatRepeat, false );
@@ -752,7 +755,8 @@ void ConsInit::parseInput( StmtList *stmtList )
 	ConsItemList *list = ConsItemList::cons( consItem );
 
 	/* Will capture the parser to "P" */
-	ObjectField *objField = ObjectField::cons( internal, 0, String("P") );
+	ObjectField *objField = ObjectField::cons( internal,
+			ObjectField::UserLocalType, 0, String("P") );
 
 	/* Parse the above list. */
 	LangExpr *parseExpr = parseCmd( internal, false, false, objField, typeRef, 0, list );
@@ -763,12 +767,15 @@ void ConsInit::parseInput( StmtList *stmtList )
 void ConsInit::exportTree( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, 0, curLocalFrame->rootScope, qual, String("P") );
-	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+	LangVarRef *varRef = LangVarRef::cons( internal, 0,
+			curLocalFrame->rootScope, qual, String("P") );
+	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal,
+			LangTerm::VarRefType, varRef ) );
 
 	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
-	ObjectField *program = ObjectField::cons( internal, typeRef, String("ColmTree") );
+	ObjectField *program = ObjectField::cons( internal,
+			ObjectField::UserLocalType, typeRef, String("ColmTree") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
 	stmtList->append( programExport );
 }

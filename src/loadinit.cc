@@ -36,14 +36,16 @@ void LoadInit::walkProdElList( String defName, ProdElList *list, prod_el_list &p
 		if ( El.OptName().Name() != 0 ) {
 			/* Has a capture. */
 			String fieldName = El.OptName().Name().text().c_str();
-			captureField = ObjectField::cons( internal, 0, fieldName );
+			captureField = ObjectField::cons( internal,
+					ObjectField::RhsNameType, 0, fieldName );
 		}
 		else {
 			/* Default the capture to the name of the type. */
 			String fieldName = typeName;
 			if ( strcmp( fieldName, defName ) == 0 )
 				fieldName = "_" + defName;
-			captureField = ObjectField::cons( internal, 0, fieldName );
+			captureField = ObjectField::cons( internal,
+					ObjectField::RhsNameType, 0, fieldName );
 		}
 
 		RepeatType repeatType = RepeatNone;
@@ -292,7 +294,8 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	ConsItemList *list = ConsItemList::cons( consItem );
 
 	/* Will capture the parser to "P" */
-	ObjectField *objField = ObjectField::cons( internal, 0, String("P") );
+	ObjectField *objField = ObjectField::cons( internal,
+			ObjectField::UserLocalType, 0, String("P") );
 
 	/* Parse the above list. */
 	LangExpr *parseExpr = parseCmd( internal, false, false, objField, typeRef, 0, list );
@@ -303,12 +306,15 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 void LoadInit::consExportTree( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, 0, curLocalFrame->rootScope, qual, String("P") );
-	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+	LangVarRef *varRef = LangVarRef::cons( internal, 0,
+			curLocalFrame->rootScope, qual, String("P") );
+	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal,
+			LangTerm::VarRefType, varRef ) );
 
 	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
-	ObjectField *program = ObjectField::cons( internal, typeRef, String("ColmTree") );
+	ObjectField *program = ObjectField::cons( internal,
+			ObjectField::UserLocalType, typeRef, String("ColmTree") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
 	stmtList->append( programExport );
 }
@@ -316,12 +322,15 @@ void LoadInit::consExportTree( StmtList *stmtList )
 void LoadInit::consExportError( StmtList *stmtList )
 {
 	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, 0, curLocalFrame->rootScope, qual, String("error") );
-	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal, LangTerm::VarRefType, varRef ) );
+	LangVarRef *varRef = LangVarRef::cons( internal, 0,
+			curLocalFrame->rootScope, qual, String("error") );
+	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal,
+			LangTerm::VarRefType, varRef ) );
 
 	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("str"), RepeatNone );
-	ObjectField *program = ObjectField::cons( internal, typeRef, String("ColmError") );
+	ObjectField *program = ObjectField::cons( internal,
+			ObjectField::UserLocalType, typeRef, String("ColmError") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
 	stmtList->append( programExport );
 }

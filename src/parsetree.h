@@ -2342,6 +2342,20 @@ struct RhsVal
 
 struct ObjectField
 {
+	enum Type
+	{
+		UserLocalType = 1,
+		UserFieldType,
+		LhsElType,
+		RhsElType,
+		InbuiltFieldType,
+		RhsNameType,
+		LexSubstrType,
+		ArgvType,
+		ParamValType,
+		ParamRefType
+	};
+
 	ObjectField()
 	: 
 		typeRef(0),
@@ -2370,16 +2384,19 @@ struct ObjectField
 		inSetWV( IN_HALT )
 	{}
 
-	static ObjectField *cons( const InputLoc &loc, TypeRef *typeRef, const String &name )
+	static ObjectField *cons( const InputLoc &loc,
+			Type type, TypeRef *typeRef, const String &name )
 	{
 		ObjectField *c = new ObjectField;
 		c->loc = loc;
+		c->type = type;
 		c->typeRef = typeRef;
 		c->name = name;
 		return c;
 	}
 	
 	InputLoc loc;
+	Type type;
 	TypeRef *typeRef;
 	String name;
 	Context *context;

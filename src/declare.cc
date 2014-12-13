@@ -252,7 +252,8 @@ void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 {
 	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, nonTerm );
 	TypeRef *typeRef = TypeRef::cons( internal, prodNameUT );
-	ObjectField *el = ObjectField::cons( internal, typeRef, "lhs" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::LhsElType, typeRef, "lhs" );
 
 	el->isLhsEl = true;
 
@@ -269,7 +270,8 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 			/* Use an offset of zero. For frame objects we compute the offset on
 			 * demand. */
 			String name( 8, "r%d", position );
-			ObjectField *el = ObjectField::cons( InputLoc(), rhsEl->typeRef, name );
+			ObjectField *el = ObjectField::cons( InputLoc(),
+					ObjectField::RhsElType, rhsEl->typeRef, name );
 			rhsEl->rhsElField = el;
 
 			/* Right hand side elements are constant. */
@@ -680,7 +682,8 @@ void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
 
 	/* Create the field and insert it into the map. */
-	ObjectField *el = ObjectField::cons( InputLoc(), typeRef, "match_length" );
+	ObjectField *el = ObjectField::cons( InputLoc(),
+			ObjectField::InbuiltFieldType, typeRef, "match_length" );
 	el->beenInitialized = true;
 	el->beenPlaced = true;
 	el->isConst = true;
@@ -695,7 +698,8 @@ void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 
 	/* Create the field and insert it into the map. */
-	ObjectField *el = ObjectField::cons( internal, typeRef, "match_text" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "match_text" );
 	el->beenInitialized = true;
 	el->beenPlaced = true;
 	el->isConst = true;
@@ -711,7 +715,8 @@ void Compiler::addInput( ObjectDef *frame )
 	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
-	ObjectField *el = ObjectField::cons( internal, typeRef, "input" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "input" );
 	el->beenInitialized = true;
 	el->beenPlaced = true;
 	el->isConst   = false;
@@ -729,7 +734,8 @@ void Compiler::addCtx( ObjectDef *frame )
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
 
 	/* Create the field and insert it into the map. */
-	ObjectField *el = ObjectField::cons( internal, typeRef, "ctx" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "ctx" );
 	el->beenInitialized = true;
 	el->beenPlaced = true;
 	el->isConst   = false;
@@ -787,7 +793,8 @@ ObjectField *Compiler::makeDataEl()
 {
 	/* Create the "data" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
-	ObjectField *el = ObjectField::cons( internal, typeRef, "data" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "data" );
 
 	el->beenInitialized = true;
 	el->beenPlaced = true;
@@ -802,7 +809,8 @@ ObjectField *Compiler::makePosEl()
 {
 	/* Create the "data" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
-	ObjectField *el = ObjectField::cons( internal, typeRef, "pos" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "pos" );
 
 	el->isConst = true;
 	el->beenInitialized = true;
@@ -816,7 +824,8 @@ ObjectField *Compiler::makeLineEl()
 {
 	/* Create the "data" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
-	ObjectField *el = ObjectField::cons( internal, typeRef, "line" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "line" );
 
 	el->isConst = true;
 	el->beenInitialized = true;
@@ -865,7 +874,8 @@ void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
 {
 	/* Create the "length" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
-	ObjectField *el = ObjectField::cons( internal, typeRef, "length" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "length" );
 	el->beenInitialized = true;
 	el->beenPlaced = true;
 	el->isConst = true;
@@ -935,7 +945,8 @@ void Compiler::addStdin()
 	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
-	ObjectField *el = ObjectField::cons( internal, typeRef, "stdin" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "stdin" );
 	el->beenInitialized = true;
 	el->beenPlaced = true;
 	el->isConst = true;
@@ -953,7 +964,8 @@ void Compiler::addStdout()
 	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
-	ObjectField *el = ObjectField::cons( internal, typeRef, "stdout" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "stdout" );
 	el->beenInitialized = true;
 	el->beenPlaced = true;
 	el->isConst = true;
@@ -971,7 +983,8 @@ void Compiler::addStderr()
 	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
-	ObjectField *el = ObjectField::cons( internal, typeRef, "stderr" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "stderr" );
 	el->beenInitialized = true;
 	el->beenPlaced = true;
 	el->isConst = true;
@@ -985,12 +998,14 @@ void Compiler::addStderr()
 void Compiler::addArgv()
 {
 	/* Create the field and insert it into the map. */
-	ObjectField *el = ObjectField::cons( internal, argvTypeRef, "argv" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::ArgvType, argvTypeRef, "argv" );
 	el->isArgv = true;
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
 
-	el = ObjectField::cons( internal, argvTypeRef, "argv0" );
+	el = ObjectField::cons( internal,
+			ObjectField::ArgvType, argvTypeRef, "argv0" );
 	el->isArgv0 = true;
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
@@ -1002,7 +1017,8 @@ void Compiler::addError()
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 
 	/* Create the field and insert it into the map. */
-	ObjectField *el = ObjectField::cons( internal, typeRef, "error" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "error" );
 	el->beenInitialized = true;
 	el->beenPlaced = true;
 	el->isConst = true;
@@ -1077,7 +1093,8 @@ void Compiler::initList2Field( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
-	ObjectField *el = ObjectField::cons( internal, typeRef, name );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, name );
 
 	el->inGetR =  IN_GET_LIST2_MEM_R;
 //	el->inGetWC = IN_GET_LIST2_MEM_WC;
@@ -1107,7 +1124,7 @@ void Compiler::initList2ElField( GenericType *gen, const char *name, int offset 
 {
 	/* Make the type ref and create the field. */
 	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
-	ObjectField *el = ObjectField::cons( internal, typeRef, name );
+	ObjectField *el = ObjectField::cons( internal, ObjectField::InbuiltFieldType, typeRef, name );
 
 	el->inGetR =  IN_GET_LIST2EL_MEM_R;
 //	el->inGetWC = IN_GET_LIST2EL_MEM_WC;
@@ -1149,7 +1166,7 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
-	ObjectField *el = ObjectField::cons( internal, typeRef, name );
+	ObjectField *el = ObjectField::cons( internal, ObjectField::InbuiltFieldType, typeRef, name );
 
 	el->inGetR =  IN_GET_LIST_MEM_R;
 	el->inGetWC = IN_GET_LIST_MEM_WC;
@@ -1186,7 +1203,8 @@ void Compiler::initParserFunctions( GenericType *gen )
 void Compiler::initParserField( GenericType *gen, const char *name, int offset, TypeRef *typeRef )
 {
 	/* Make the type ref and create the field. */
-	ObjectField *el = ObjectField::cons( internal, typeRef, name );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, name );
 
 	el->inGetR =  IN_GET_PARSER_MEM_R;
 	el->inGetWC = IN_GET_PARSER_MEM_WC;
@@ -1212,7 +1230,8 @@ void Compiler::initCtxField( GenericType *gen )
 	/* Make the type ref and create the field. */
 	UniqueType *ctxUT = findUniqueType( TYPE_TREE, context->lel );
 	TypeRef *typeRef = TypeRef::cons( internal, ctxUT );
-	ObjectField *el = ObjectField::cons( internal, typeRef, "ctx" );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "ctx" );
 
 	el->inGetR =  IN_GET_PARSER_CTX_R;
 	el->inGetWC = IN_GET_PARSER_CTX_WC;

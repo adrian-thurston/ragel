@@ -117,7 +117,8 @@ struct BaseParser
 	void contextHead( const InputLoc &loc, const String &data );
 	StmtList *appendStatement( StmtList *stmtList, LangStmt *stmt );
 	ParameterList *appendParam( ParameterList *paramList, ObjectField *objField );
-	ObjectField *addParam( const InputLoc &loc, TypeRef *typeRef, const String &name );
+	ObjectField *addParam( const InputLoc &loc,
+			ObjectField::Type type, TypeRef *typeRef, const String &name );
 	PredDecl *predTokenName( const InputLoc &loc, NamespaceQual *qual, const String &data );
 	PredDecl *predTokenLit( const InputLoc &loc, const String &data,
 			NamespaceQual *nspaceQual );
