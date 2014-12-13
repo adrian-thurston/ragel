@@ -243,23 +243,30 @@ void ObjectDef::initField( Compiler *pd, ObjectField *field )
 		return;
 	
 	field->beenInitialized = true;
+
+	if ( type == FrameType )
+		pd->initLocalInstructions( field );
+	else if ( field->isRhsGet )
+		pd->initRhsGetInstructions( field );
+	else
+		pd->initFieldInstructions( field );
+}
+
+void ObjectDef::placeField( Compiler *pd, ObjectField *field )
+{
+	if ( field->beenPlaced )
+		return;
+	
+	field->beenPlaced = true;
 	UniqueType *fieldUT = field->typeRef->uniqueType;
 
 	if ( type == FrameType ) {
 		nextOffset += sizeOfField( fieldUT );
 		field->offset = -nextOffset;
-
-		pd->initLocalInstructions( field );
 	}
-	else if ( field->isRhsGet ) {
-		pd->initRhsGetInstructions( field );
-	}
-	else {
+	else if ( !field->isRhsGet ) {
 		field->offset = nextOffset;
 		nextOffset += sizeOfField( fieldUT );
-
-		/* Initialize the instructions. */
-		pd->initFieldInstructions( field );
 	}
 }
 
@@ -2646,20 +2653,26 @@ void Compiler::initAllLanguageObjects()
 		ObjectDef *objDef = lel->objectDef;
 		if ( objDef != 0 ) {
 			/* Init all fields of the object. */
-			for ( ObjFieldList::Iter f = *objDef->objFieldList; f.lte(); f++ )
+			for ( ObjFieldList::Iter f = *objDef->objFieldList; f.lte(); f++ ) {
 				objDef->initField( this, f->value );
+				objDef->placeField( this, f->value );
+			}
 		}
 	}
 
 	/* Init all fields of the global object. */
-	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ )
+	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ ) {
 		globalObjectDef->initField( this, f->value );
+		globalObjectDef->placeField( this, f->value );
+	}
 }
 
 void Compiler::initLocalFrame( ObjectDef *localFrame )
 {
-	for ( ObjFieldList::Iter f = *localFrame->objFieldList; f.lte(); f++ )
+	for ( ObjFieldList::Iter f = *localFrame->objFieldList; f.lte(); f++ ) {
 		localFrame->initField( this, f->value );
+		localFrame->placeField( this, f->value );
+	}
 }
 
 void Compiler::initAllFrameObjects()
@@ -2680,8 +2693,10 @@ void Compiler::initAllFrameObjects()
 			ObjectDef *localFrame = lel->transBlock->localFrame;
 			if ( lel->tokenDef->reCaptureVect.length() > 0 ) {
 				ObjFieldList::Iter f = *localFrame->objFieldList;
-				for ( int i = 0; i < lel->tokenDef->reCaptureVect.length(); i++, f++ )
+				for ( int i = 0; i < lel->tokenDef->reCaptureVect.length(); i++, f++ ) {
 					localFrame->initField( this, f->value );
+					localFrame->placeField( this, f->value );
+				}
 			}
 
 			initLocalFrame( localFrame );

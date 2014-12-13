@@ -2351,6 +2351,7 @@ struct ObjectField
 		offset(0),
 		beenReferenced(false),
 		beenInitialized(false),
+		beenPlaced(false),
 		useOffset(true),
 		isConst(false), 
 		isLhsEl(false), isRhsEl(false), 
@@ -2387,6 +2388,7 @@ struct ObjectField
 	long offset;
 	bool beenReferenced;
 	bool beenInitialized;
+	bool beenPlaced;
 	bool useOffset;
 	bool isConst;
 	bool isLhsEl;
@@ -2513,6 +2515,7 @@ struct ObjectDef
 
 	void referenceField( Compiler *pd, ObjectField *field );
 	void initField( Compiler *pd, ObjectField *field );
+	void placeField( Compiler *pd, ObjectField *field );
 	void createCode( Compiler *pd, CodeVect &code );
 	ObjMethod *findMethod( const String &name ) const;
 	ObjectField *findFieldInScope( const ObjNameScope *scope, const String &name ) const;
