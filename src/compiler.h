@@ -735,6 +735,7 @@ struct Compiler
 	void initFieldInstructions( ObjectField *el );
 	void initLocalInstructions( ObjectField *el );
 	void initLocalRefInstructions( ObjectField *el );
+	void initRhsGetInstructions( ObjectField *el );
 
 	void initMapFunctions( GenericType *gen );
 	void initListField( GenericType *gen, const char *name, int offset );

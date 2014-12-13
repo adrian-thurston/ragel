@@ -261,40 +261,6 @@ void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 	localFrame->rootScope->insertField( el->name, el );
 }
 
-void Compiler::addProdLHSLoad( Production *prod, CodeVect &code, long &insertPos )
-{
-	ObjNameScope *scope = prod->redBlock->localFrame->rootScope;
-	ObjectField *lhsField = scope->findField("lhs");
-	assert( lhsField != 0 );
-
-	CodeVect loads;
-	if ( lhsField->beenReferenced ) {
-		loads.append( IN_INIT_LHS_EL );
-		loads.appendHalf( lhsField->offset );
-	}
-
-	code.insert( insertPos, loads );
-	insertPos += loads.length();
-}
-
-void Compiler::addPushBackLHS( Production *prod, CodeVect &code, long &insertPos )
-{
-	CodeBlock *block = prod->redBlock;
-
-	/* If the lhs tree is dirty then we will need to save off the old lhs
-	 * before it gets modified. We want to avoid this for attribute
-	 * modifications. The computation of dirtyTree should deal with this for
-	 * us. */
-	ObjNameScope *scope = block->localFrame->rootScope;
-	ObjectField *lhsField = scope->findField("lhs");
-	assert( lhsField != 0 );
-
-	if ( lhsField->beenReferenced ) {
-		code.append( IN_STORE_LHS_EL );
-		code.appendHalf( lhsField->offset );
-	}
-}
-
 void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 {
 	long position = 1;
@@ -316,25 +282,6 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 			localFrame->rootScope->insertField( el->name, el );
 		}
 	}
-}
-
-void Compiler::addProdRHSLoads( Production *prod, CodeVect &code, long &insertPos )
-{
-	CodeVect loads;
-	long elPos = 0;
-	for ( ProdElList::Iter rhsEl = *prod->prodElList; rhsEl.lte(); rhsEl++, elPos++ ) {
-		if ( rhsEl->type == ProdEl::ReferenceType ) {
-			if ( rhsEl->rhsElField->beenReferenced ) {
-				loads.append ( IN_INIT_RHS_EL );
-				loads.appendHalf( elPos );
-				loads.appendHalf( rhsEl->rhsElField->offset );
-			}
-		}
-	}
-
-	/* Insert and update the insert position. */
-	code.insert( insertPos, loads );
-	insertPos += loads.length();
 }
 
 void GenericType::declare( Compiler *pd, Namespace *nspace )
@@ -909,6 +856,16 @@ void Compiler::initLocalRefInstructions( ObjectField *el )
 	el->inGetR =   IN_GET_LOCAL_REF_R;
 	el->inGetWC =  IN_GET_LOCAL_REF_WC;
 	el->inSetWC =  IN_SET_LOCAL_REF_WC;
+}
+
+void Compiler::initRhsGetInstructions( ObjectField *el )
+{
+	el->useOffset = false;
+	el->inGetR =   IN_GET_RHS_VAL_R;
+	el->inGetWC =  IN_GET_RHS_VAL_WC;
+	el->inGetWV =  IN_GET_RHS_VAL_WV;
+	el->inSetWC =  IN_SET_RHS_VAL_WC;
+	el->inSetWV =  IN_SET_RHS_VAL_WC;
 }
 
 /* Add a constant length field to the object. 
