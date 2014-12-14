@@ -255,8 +255,6 @@ void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::LhsElType, typeRef, "lhs" );
 
-	el->isLhsEl = true;
-
 	localFrame->rootScope->insertField( el->name, el );
 }
 
@@ -938,15 +936,15 @@ void Compiler::addArgv()
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::ArgvType, argvTypeRef, "argv" );
-	el->isArgv = true;
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
+	argvList = el;
 
 	el = ObjectField::cons( internal,
 			ObjectField::ArgvType, argvTypeRef, "argv0" );
-	el->isArgv0 = true;
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
+	argv0 = el;
 }
 
 void Compiler::addError()

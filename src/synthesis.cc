@@ -2343,7 +2343,9 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 
 		/* FIXME: This test needs to be improved. Match_text was getting
 		 * through before useOffset was tested. What will? */
-		if ( el->useOffset && !el->isLhsEl && ( el->beenReferenced || el->isParam ) ) {
+		if ( el->useOffset && el->type != ObjectField::LhsElType &&
+				( el->beenReferenced || el->isParam ) )
+		{
 			UniqueType *ut = el->typeRef->uniqueType;
 			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR ) {
 				int depth = el->scope->depth();
@@ -2548,30 +2550,16 @@ void Compiler::compilePreEof( TokenRegion *region )
 	findLocals( block->localFrame, block );
 }
 
-int Compiler::argvOffset()
-{
-	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
-			field.lte(); field++ )
-	{
-		if ( field->value->isArgv ) {
-			globalObjectDef->referenceField( this, field->value );
-			return field->value->offset;
-		}
-	}
-	assert(false);
-}
-
 int Compiler::argv0_Offset()
 {
-	for ( ObjFieldList::Iter field = *globalObjectDef->objFieldList;
-			field.lte(); field++ )
-	{
-		if ( field->value->isArgv0 ) {
-			globalObjectDef->referenceField( this, field->value );
-			return field->value->offset;
-		}
-	}
-	assert(false);
+	globalObjectDef->referenceField( this, argv0 );
+	return argv0->offset;
+}
+
+int Compiler::argvOffset()
+{
+	globalObjectDef->referenceField( this, argvList );
+	return argvList->offset;
 }
 
 void Compiler::compileRootBlock( )

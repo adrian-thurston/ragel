@@ -674,7 +674,8 @@ struct Compiler
 	bool makeFirstSetProd( Production *prod, PdaState *state );
 	void makeFirstSets();
 
-	int findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &currLen );
+	int findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph,
+			PdaState *state, int &currLen );
 	void trySetTime( PdaTrans *trans, long code, long &time );
 	void addRegion( PdaState *tabState, PdaTrans *pdaTrans, long pdaKey,
 			bool noPreIgnore, bool noPostIgnore );
@@ -872,6 +873,8 @@ struct Compiler
 	ParserTextList parserTextList;
 
 	ObjectDef *globalObjectDef;
+	ObjectField *argv0;
+	ObjectField *argvList;
 
 	VectorTypeIdMap vectorTypeIdMap;
 

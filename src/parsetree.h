@@ -2365,10 +2365,7 @@ struct ObjectField
 		beenReferenced(false),
 		useOffset(true),
 		isConst(false), 
-		isLhsEl(false),
 		refActive(false),
-		isArgv0(false),
-		isArgv(false),
 		isCustom(false),
 		isParam(false),
 		isRhsGet(false),
@@ -2405,10 +2402,7 @@ struct ObjectField
 	bool beenReferenced;
 	bool useOffset;
 	bool isConst;
-	bool isLhsEl;
 	bool refActive;
-	bool isArgv0;
-	bool isArgv;
 	bool isCustom;
 	bool isParam;
 	bool isRhsGet;
