@@ -30,35 +30,35 @@ void Compiler::initUniqueTypes( )
 	uniqeTypeMap.insert( uniqueTypeAny );
 }
 
-ObjectField *ObjNameScope::checkRedecl( const String &name )
+ObjectField *NameScope::checkRedecl( const String &name )
 {
 	return owner->checkRedecl( this, name );
 }
 
-void ObjNameScope::insertField( const String &name, ObjectField *value )
+void NameScope::insertField( const String &name, ObjectField *value )
 {
 	return owner->insertField( this, name, value );
 }
 
-ObjectField *ObjectDef::checkRedecl( ObjNameScope *inScope, const String &name )
+ObjectField *ObjectDef::checkRedecl( NameScope *inScope, const String &name )
 {
-	ObjFieldMapEl *objDefMapEl = inScope->objFieldMap->find( name );
+	FieldMapEl *objDefMapEl = inScope->fieldMap->find( name );
 	if ( objDefMapEl != 0 )
 		return objDefMapEl->value;
 	return 0;
 }
 
-void ObjectDef::insertField( ObjNameScope *inScope, const String &name, ObjectField *value )
+void ObjectDef::insertField( NameScope *inScope, const String &name, ObjectField *value )
 {
-	inScope->objFieldMap->insert( name, value );
-	objFieldList->append( value );
+	inScope->fieldMap->insert( name, value );
+	fieldList->append( value );
 	value->scope = inScope;
 }
 
-ObjNameScope *ObjectDef::pushScope( ObjNameScope *curScope )
+NameScope *ObjectDef::pushScope( NameScope *curScope )
 {
-	ObjNameScope *newScope = new ObjNameScope;
-	newScope->objFieldMap = new ObjFieldMap;
+	NameScope *newScope = new NameScope;
+	newScope->fieldMap = new FieldMap;
 
 	newScope->owner = this;
 	newScope->parentScope = curScope;
@@ -619,7 +619,7 @@ void Compiler::makeDefaultIterators()
 	/* Tree iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"triter", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::Tree );
@@ -629,7 +629,7 @@ void Compiler::makeDefaultIterators()
 	/* Child iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"child", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::Child );
@@ -639,7 +639,7 @@ void Compiler::makeDefaultIterators()
 	/* Reverse iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"rev_child", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::RevChild );
@@ -649,7 +649,7 @@ void Compiler::makeDefaultIterators()
 	/* Repeat iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"repeat", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::Repeat );
@@ -659,7 +659,7 @@ void Compiler::makeDefaultIterators()
 	/* Reverse repeat iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"rev_repeat", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::RevRepeat );
@@ -702,7 +702,6 @@ void Compiler::addInput( ObjectDef *frame )
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltObjectType, typeRef, "input" );
-	el->isConst   = false;
 	el->inGetR    = IN_LOAD_INPUT_R;
 	el->inGetWV   = IN_LOAD_INPUT_WV;
 	el->inGetWC   = IN_LOAD_INPUT_WC;
@@ -717,7 +716,6 @@ void Compiler::addCtx( ObjectDef *frame )
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltObjectType, typeRef, "ctx" );
-	el->isConst   = false;
 	el->inGetR    = IN_LOAD_CTX_R;
 	el->inGetWV   = IN_LOAD_CTX_WV;
 	el->inGetWC   = IN_LOAD_CTX_WC;
@@ -841,7 +839,7 @@ void Compiler::declareTokenFields( )
 
 void Compiler::declareGlobalFields()
 {
-	ObjMethod *method;
+	ObjectMethod *method;
 
 	UniqueType *streamPtrUt = findUniqueType( TYPE_PTR, streamLangEl );
 
@@ -1176,7 +1174,7 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 	}
 
 	/* Insert the function into the global function map. */
-	ObjMethod *objMethod = new ObjMethod( func->typeRef, func->name, 
+	ObjectMethod *objMethod = new ObjectMethod( func->typeRef, func->name, 
 			IN_CALL_WV, IN_CALL_WC, 
 			func->paramList->length(), 0, func->paramList, false );
 	objMethod->funcId = func->funcId;
@@ -1189,7 +1187,7 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 		objMethod->iterDef = uiter;
 	}
 
-	globalObjectDef->objMethodMap->insert( func->name, objMethod );
+	globalObjectDef->methodMap->insert( func->name, objMethod );
 
 	func->objMethod = objMethod;
 }

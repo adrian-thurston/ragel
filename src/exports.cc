@@ -101,9 +101,9 @@ void Compiler::generateExports()
 		out << "	" << lel->fullName <<
 				"( colm_program *prg, colm_tree *tree ) : __prg(prg), __tree(tree) {}\n";
 
-		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
-			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
-			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
+		if ( lel->objectDef != 0 && lel->objectDef->fieldList != 0 ) {
+			FieldList *fieldList = lel->objectDef->fieldList;
+			for ( FieldList::Iter ofi = *fieldList; ofi.lte(); ofi++ ) {
 				ObjectField *field = ofi->value;
 				if ( ( field->useOffset() && field->typeRef != 0 ) || field->isRhsGet() ) {
 					UniqueType *ut = field->typeRef->resolveType( this );
@@ -150,7 +150,7 @@ void Compiler::generateExports()
 		out << "\n";
 	}
 
-	for ( ObjFieldList::Iter of = *globalObjectDef->objFieldList; of.lte(); of++ ) {
+	for ( FieldList::Iter of = *globalObjectDef->fieldList; of.lte(); of++ ) {
 		ObjectField *field = of->value;
 		if ( field->isExport ) {
 			UniqueType *ut = field->typeRef->resolveType(this);
@@ -189,9 +189,9 @@ void Compiler::generateExportsImpl()
 
 	/* Function implementations. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->objectDef != 0 && lel->objectDef->objFieldList != 0 ) {
-			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
-			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
+		if ( lel->objectDef != 0 && lel->objectDef->fieldList != 0 ) {
+			FieldList *fieldList = lel->objectDef->fieldList;
+			for ( FieldList::Iter ofi = *fieldList; ofi.lte(); ofi++ ) {
 				ObjectField *field = ofi->value;
 				if ( field->useOffset() && field->typeRef != 0  ) {
 					UniqueType *ut = field->typeRef->resolveType( this );
@@ -248,7 +248,7 @@ void Compiler::generateExportsImpl()
 
 	out << "\n";
 
-	for ( ObjFieldList::Iter of = *globalObjectDef->objFieldList; of.lte(); of++ ) {
+	for ( FieldList::Iter of = *globalObjectDef->fieldList; of.lte(); of++ ) {
 		ObjectField *field = of->value;
 		if ( field->isExport ) {
 			UniqueType *ut = field->typeRef->resolveType(this);

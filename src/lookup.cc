@@ -23,9 +23,10 @@ ObjectDef *UniqueType::objectDef()
 }
 
 /* Recurisve find through a single object def's scope. */
-ObjectField *ObjectDef::findFieldInScope( const ObjNameScope *inScope, const String &name ) const
+ObjectField *ObjectDef::findFieldInScope( const NameScope *inScope,
+		const String &name ) const
 {
-	ObjFieldMapEl *objDefMapEl = inScope->objFieldMap->find( name );
+	FieldMapEl *objDefMapEl = inScope->fieldMap->find( name );
 	if ( objDefMapEl != 0 )
 		return objDefMapEl->value;
 	if ( inScope->parentScope != 0 )
@@ -33,23 +34,23 @@ ObjectField *ObjectDef::findFieldInScope( const ObjNameScope *inScope, const Str
 	return 0;
 }
 
-ObjectField *ObjNameScope::findField( const String &name ) const
+ObjectField *NameScope::findField( const String &name ) const
 {
 	return owner->findFieldInScope( this, name );
 }
 
-ObjMethod *ObjectDef::findMethod( const String &name ) const
+ObjectMethod *ObjectDef::findMethod( const String &name ) const
 {
-	ObjMethodMapEl *objMethodMapEl = objMethodMap->find( name );
-	if ( objMethodMapEl != 0 )
-		return objMethodMapEl->value;
+	MethodMapEl *methodMapEl = methodMap->find( name );
+	if ( methodMapEl != 0 )
+		return methodMapEl->value;
 	return 0;
 }
 
-VarRefLookup LangVarRef::lookupQualification( Compiler *pd, ObjNameScope *rootScope ) const
+VarRefLookup LangVarRef::lookupQualification( Compiler *pd, NameScope *rootScope ) const
 {
 	int lastPtrInQual = -1;
-	ObjNameScope *searchScope = rootScope;
+	NameScope *searchScope = rootScope;
 	int firstConstPart = -1;
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
@@ -144,7 +145,7 @@ bool LangVarRef::isInbuiltObject() const
 
 VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 {
-	ObjNameScope *rootScope;
+	NameScope *rootScope;
 	if ( isLocalRef() )
 		rootScope = scope;
 	else if ( isContextRef() )
@@ -196,8 +197,8 @@ VarRefLookup LangVarRef::lookupMethod( Compiler *pd ) const
 	VarRefLookup lookup = lookupObj( pd );
 
 	/* Find the method. */
-	assert( lookup.inObject->objMethodMap != 0 );
-	ObjMethod *method = lookup.inObject->findMethod( name );
+	assert( lookup.inObject->methodMap != 0 );
+	ObjectMethod *method = lookup.inObject->findMethod( name );
 	if ( method == 0 ) {
 		/* Not found as a method, try it as an object on which we will call a
 		 * default function. */
@@ -207,7 +208,7 @@ VarRefLookup LangVarRef::lookupMethod( Compiler *pd ) const
 		VarRefLookup lookup = lookupObj( pd );
 
 		/* Find the method. */
-		assert( lookup.inObject->objMethodMap != 0 );
+		assert( lookup.inObject->methodMap != 0 );
 		method = lookup.inObject->findMethod( "finish" );
 		if ( method == 0 )
 			error(loc) << "cannot find " << name << "(...) in object" << endp;

@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007-2012 Adrian Thurston <thurston@complang.org>
+MethodMapEl*  Copyright 2007-2012 Adrian Thurston <thurston@complang.org>
  */
 
 #include "bytecode.h"
@@ -103,33 +103,33 @@ IterDef::IterDef( Type type, Function *func ) :
 	inRefFromCur(IN_UITER_REF_FROM_CUR)
 {}
 
-ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
+ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC, bool isConst )
 {
-	ObjMethod *objMethod = new ObjMethod( retType, name, 
+	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 0, 0, 0, isConst );
-	obj->objMethodMap->insert( name, objMethod );
+	obj->methodMap->insert( name, objMethod );
 	return objMethod;
 }
 
-ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
+ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC, UniqueType *arg1, bool isConst )
 {
 	UniqueType *args[] = { arg1 };
-	ObjMethod *objMethod = new ObjMethod( retType, name, 
+	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 1, args, 0, isConst );
-	obj->objMethodMap->insert( name, objMethod );
+	obj->methodMap->insert( name, objMethod );
 	return objMethod;
 }
 
-ObjMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
+ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC, 
 		UniqueType *arg1, UniqueType *arg2, bool isConst )
 {
 	UniqueType *args[] = { arg1, arg2 };
-	ObjMethod *objMethod = new ObjMethod( retType, name, 
+	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 2, args, 0, isConst );
-	obj->objMethodMap->insert( name, objMethod );
+	obj->methodMap->insert( name, objMethod );
 	return objMethod;
 }
 
@@ -186,11 +186,11 @@ UniqueType *Compiler::findUniqueType( enum TYPE typeId, IterDef *iterDef )
 ObjectField *ObjectDef::findFieldNum( long offset )
 {
 	/* Bounds check. */
-	if ( offset >= objFieldList->length() )
+	if ( offset >= fieldList->length() )
 		return 0;
 
 	int fn = 0;
-	ObjFieldList::Iter field = *objFieldList; 
+	FieldList::Iter field = *fieldList; 
 	while ( fn < offset ) {
 		fn++;
 		field++;
@@ -286,12 +286,12 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 
 /* The qualification must start at a local frame. There cannot be any pointer. */
 long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code,
-		ObjNameScope *rootScope ) const
+		NameScope *rootScope ) const
 {
 	long count = 0;
 
 	/* Start the search from the root object. */
-	ObjNameScope *searchScope = rootScope;
+	NameScope *searchScope = rootScope;
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field in the current qualification. */
@@ -344,10 +344,10 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code,
 }
 
 void LangVarRef::loadQualification( Compiler *pd, CodeVect &code, 
-		ObjNameScope *rootScope, int lastPtrInQual, bool forWriting, bool revert ) const
+		NameScope *rootScope, int lastPtrInQual, bool forWriting, bool revert ) const
 {
 	/* Start the search from the root object. */
-	ObjNameScope *searchScope = rootScope;
+	NameScope *searchScope = rootScope;
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
 		/* Lookup the field int the current qualification. */
@@ -2339,7 +2339,7 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 {
 	Locals &locals = block->locals;
 
-	for ( ObjFieldList::Iter ol = *localFrame->objFieldList; ol.lte(); ol++ ) {
+	for ( FieldList::Iter ol = *localFrame->fieldList; ol.lte(); ol++ ) {
 		ObjectField *el = ol->value;
 
 		/* FIXME: This test needs to be improved. Match_text was getting
@@ -2382,7 +2382,7 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 
 void Compiler::addProdLHSLoad( Production *prod, CodeVect &code, long &insertPos )
 {
-	ObjNameScope *scope = prod->redBlock->localFrame->rootScope;
+	NameScope *scope = prod->redBlock->localFrame->rootScope;
 	ObjectField *lhsField = scope->findField("lhs");
 	assert( lhsField != 0 );
 
@@ -2404,7 +2404,7 @@ void Compiler::addPushBackLHS( Production *prod, CodeVect &code, long &insertPos
 	 * before it gets modified. We want to avoid this for attribute
 	 * modifications. The computation of dirtyTree should deal with this for
 	 * us. */
-	ObjNameScope *scope = block->localFrame->rootScope;
+	NameScope *scope = block->localFrame->rootScope;
 	ObjectField *lhsField = scope->findField("lhs");
 	assert( lhsField != 0 );
 
@@ -2692,19 +2692,19 @@ void Compiler::placeAllLanguageObjects()
 		ObjectDef *objDef = lel->objectDef;
 		if ( objDef != 0 ) {
 			/* Init all fields of the object. */
-			for ( ObjFieldList::Iter f = *objDef->objFieldList; f.lte(); f++ )
+			for ( FieldList::Iter f = *objDef->fieldList; f.lte(); f++ )
 				objDef->placeField( this, f->value );
 		}
 	}
 
 	/* Init all fields of the global object. */
-	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ )
+	for ( FieldList::Iter f = *globalObjectDef->fieldList; f.lte(); f++ )
 		globalObjectDef->placeField( this, f->value );
 }
 
 void Compiler::placeFrameFields( ObjectDef *localFrame )
 {
-	for ( ObjFieldList::Iter f = *localFrame->objFieldList; f.lte(); f++ )
+	for ( FieldList::Iter f = *localFrame->fieldList; f.lte(); f++ )
 		localFrame->placeField( this, f->value );
 }
 
@@ -2725,7 +2725,7 @@ void Compiler::placeAllFrameObjects()
 		if ( lel->transBlock != 0 ) {
 			ObjectDef *localFrame = lel->transBlock->localFrame;
 			if ( lel->tokenDef->reCaptureVect.length() > 0 ) {
-				ObjFieldList::Iter f = *localFrame->objFieldList;
+				FieldList::Iter f = *localFrame->fieldList;
 				for ( int i = 0; i < lel->tokenDef->reCaptureVect.length(); i++, f++ )
 					localFrame->placeField( this, f->value );
 			}

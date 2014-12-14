@@ -26,7 +26,7 @@ struct BaseParser
 	NamespaceVect namespaceStack;
 	ContextStack contextStack;
 	ObjectDef *curLocalFrame;
-	ObjNameScope *curScope;
+	NameScope *curScope;
 
 	bool enterRl;
 
@@ -77,7 +77,8 @@ struct BaseParser
 			LexFactorAug *factorAug );
 	LexJoin *lexOptJoin( LexJoin *join, LexJoin *context );
 	LangExpr *send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof );
-	LangExpr *sendTree( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof );
+	LangExpr *sendTree( const InputLoc &loc, LangVarRef *varRef,
+			ConsItemList *list, bool eof );
 	LangExpr *parseCmd( const InputLoc &loc, bool tree, bool stop, ObjectField *objField,
 			TypeRef *typeRef, FieldInitVect *fieldInitVect, ConsItemList *list );
 	PatternItemList *consPatternEl( LangVarRef *varRef, PatternItemList *list );
@@ -88,7 +89,7 @@ struct BaseParser
 	PatternItemList *patListConcat( PatternItemList *list1, PatternItemList *list2 );
 	ConsItemList *consListConcat( ConsItemList *list1, ConsItemList *list2 );
 	LangStmt *forScope( const InputLoc &loc, const String &data,
-			ObjNameScope *scope, TypeRef *typeRef, IterCall *iterCall, StmtList *stmtList );
+			NameScope *scope, TypeRef *typeRef, IterCall *iterCall, StmtList *stmtList );
 	void preEof( const InputLoc &loc, StmtList *stmtList, ObjectDef *localFrame );
 
 	ProdEl *prodElName( const InputLoc &loc, const String &data,

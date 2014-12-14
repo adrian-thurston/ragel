@@ -258,8 +258,8 @@ UniqueType *TypeRef::resolveTypeList2Obj( Compiler *pd )
 	/* Find the offset of the list element. */
 	int off = 0;
 	bool found = false;
-	ObjFieldList *elFieldList = utValue->langEl->objectDef->objFieldList;
-	for ( ObjFieldList::Iter f = *elFieldList; f.lte(); f++, off++ ) {
+	FieldList *fieldList = utValue->langEl->objectDef->fieldList;
+	for ( FieldList::Iter f = *fieldList; f.lte(); f++, off++ ) {
 		UniqueType *fUT = f->value->typeRef->resolveType( pd );
 		if ( fUT->langEl->generic != 0 &&
 				fUT->langEl->generic->typeId == GEN_LIST2EL )
@@ -745,7 +745,7 @@ void LangStmt::resolve( Compiler *pd ) const
 
 void ObjectDef::resolve( Compiler *pd )
 {
-	for ( ObjFieldList::Iter fli = *objFieldList; fli.lte(); fli++ ) {
+	for ( FieldList::Iter fli = *fieldList; fli.lte(); fli++ ) {
 		ObjectField *field = fli->value;
 
 		if ( field->typeRef != 0 )
@@ -833,14 +833,14 @@ void Compiler::resolveParseTree()
 		ObjectDef *objDef = lel->objectDef;
 		if ( objDef != 0 ) {
 			/* Init all fields of the object. */
-			for ( ObjFieldList::Iter f = *objDef->objFieldList; f.lte(); f++ ) {
+			for ( FieldList::Iter f = *objDef->fieldList; f.lte(); f++ ) {
 				f->value->typeRef->resolveType( this );
 			}
 		}
 	}
 
 	/* Init all fields of the global object. */
-	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ ) {
+	for ( FieldList::Iter f = *globalObjectDef->fieldList; f.lte(); f++ ) {
 		f->value->typeRef->resolveType( this );
 	}
 

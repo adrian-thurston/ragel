@@ -46,7 +46,7 @@ struct CodeBlock;
 struct PdaLiteral;
 struct TypeAlias;
 struct RegionSet;
-struct ObjNameScope;
+struct NameScope;
 struct IterCall;
 typedef struct _PdaRun PdaRun;
 
@@ -2261,9 +2261,9 @@ struct TypeRef
 
 typedef DList<ObjectField> ParameterList; 
 
-struct ObjMethod
+struct ObjectMethod
 {
-	ObjMethod( TypeRef *returnTypeRef, String name, 
+	ObjectMethod( TypeRef *returnTypeRef, String name, 
 			int opcodeWV, int opcodeWC, int numParams, 
 			UniqueType **types, ParameterList *paramList, bool isConst )
 	: 
@@ -2284,7 +2284,7 @@ struct ObjMethod
 	{
 	}
 
-	ObjMethod( UniqueType *returnUT, String name, 
+	ObjectMethod( UniqueType *returnUT, String name, 
 			int opcodeWV, int opcodeWC, int numParams, 
 			UniqueType **types, ParameterList *paramList, bool isConst )
 	: 
@@ -2324,8 +2324,8 @@ struct ObjMethod
 	IterDef *iterDef;
 };
 
-typedef AvlMap<String, ObjMethod*, CmpStr> ObjMethodMap;
-typedef AvlMapEl<String, ObjMethod*> ObjMethodMapEl;
+typedef AvlMap<String, ObjectMethod*, CmpStr> MethodMap;
+typedef AvlMapEl<String, ObjectMethod*> MethodMapEl;
 
 struct RhsVal
 {
@@ -2410,7 +2410,7 @@ struct ObjectField
 	TypeRef *typeRef;
 	String name;
 	Context *context;
-	ObjNameScope *scope;
+	NameScope *scope;
 	long offset;
 	bool beenReferenced;
 	bool isConst;
@@ -2434,10 +2434,10 @@ struct ObjectField
 	ObjectField *prev, *next;
 };
 
-typedef AvlMap<String, ObjectField*, CmpStr> ObjFieldMap;
-typedef AvlMapEl<String, ObjectField*> ObjFieldMapEl;
+typedef AvlMap<String, ObjectField*, CmpStr> FieldMap;
+typedef AvlMapEl<String, ObjectField*> FieldMapEl;
 
-typedef DListVal<ObjectField*> ObjFieldList;
+typedef DListVal<ObjectField*> FieldList;
 
 typedef DList<ObjectField> ParameterList; 
 
@@ -2445,9 +2445,9 @@ struct TemplateType;
 
 /* Tree of name scopes for an object def. All of the object fields inside this
  * tree live in one object def. This is used for scoping names in functions. */
-struct ObjNameScope
+struct NameScope
 {
-	ObjNameScope()
+	NameScope()
 	:
 		owner(0),
 		parentScope(0),
@@ -2455,20 +2455,20 @@ struct ObjNameScope
 	{}
 
 	ObjectDef *owner;
-	ObjFieldMap *objFieldMap;	
+	FieldMap *fieldMap;	
 
-	ObjNameScope *parentScope;
-	DList<ObjNameScope> children;
+	NameScope *parentScope;
+	DList<NameScope> children;
 
 	/* For iteration after declaration. */
-	ObjNameScope *childIter;
+	NameScope *childIter;
 
-	ObjNameScope *prev, *next;
+	NameScope *prev, *next;
 
 	int depth()
 	{
 		int depth = 0;
-		ObjNameScope *scope = this;
+		NameScope *scope = this;
 		while ( scope != 0 ) {
 			depth += 1;
 			scope = scope->parentScope;
@@ -2505,24 +2505,24 @@ struct ObjectDef
 		o->name = name;
 		o->id = id;
 
-		o->rootScope = new ObjNameScope;
+		o->rootScope = new NameScope;
 		o->rootScope->owner = o;
-		o->rootScope->objFieldMap = new ObjFieldMap;
+		o->rootScope->fieldMap = new FieldMap;
 
-		o->objFieldList = new ObjFieldList;
-		o->objMethodMap = new ObjMethodMap;
+		o->fieldList = new FieldList;
+		o->methodMap = new MethodMap;
 
 		return o;
 	}
 
 	Type type;
 	String name;
-	ObjFieldList *objFieldList;
-	ObjMethodMap *objMethodMap;	
+	FieldList *fieldList;
+	MethodMap *methodMap;	
 
-	ObjNameScope *rootScope;
+	NameScope *rootScope;
 
-	ObjNameScope *pushScope( ObjNameScope *curScope );
+	NameScope *pushScope( NameScope *curScope );
 
 	long id;
 	long nextOffset;
@@ -2532,10 +2532,10 @@ struct ObjectDef
 	void referenceField( Compiler *pd, ObjectField *field );
 	void placeField( Compiler *pd, ObjectField *field );
 	void createCode( Compiler *pd, CodeVect &code );
-	ObjMethod *findMethod( const String &name ) const;
-	ObjectField *findFieldInScope( const ObjNameScope *scope, const String &name ) const;
-	ObjectField *checkRedecl( ObjNameScope *inScope, const String &name );
-	void insertField( ObjNameScope *inScope, const String &name, ObjectField *value );
+	ObjectMethod *findMethod( const String &name ) const;
+	ObjectField *findFieldInScope( const NameScope *scope, const String &name ) const;
+	ObjectField *checkRedecl( NameScope *inScope, const String &name );
+	void insertField( NameScope *inScope, const String &name, ObjectField *value );
 	void resolve( Compiler *pd );
 	ObjectField *findFieldNum( long offset );
 
@@ -2581,7 +2581,7 @@ typedef Vector<FieldInit*> FieldInitVect;
 struct VarRefLookup
 {
 	VarRefLookup( int lastPtrInQual, int firstConstPart,
-			ObjectDef *inObject, ObjNameScope *inScope )
+			ObjectDef *inObject, NameScope *inScope )
 	:
 		lastPtrInQual(lastPtrInQual), 
 		firstConstPart(firstConstPart),
@@ -2596,9 +2596,9 @@ struct VarRefLookup
 	int lastPtrInQual;
 	int firstConstPart;
 	ObjectDef *inObject;
-	ObjNameScope *inScope;
+	NameScope *inScope;
 	ObjectField *objField;
-	ObjMethod *objMethod;
+	ObjectMethod *objMethod;
 	UniqueType *uniqueType;
 	UniqueType *iterSearchUT;
 };
@@ -2620,7 +2620,7 @@ typedef Vector<QualItem> QualItemVect;
 struct LangVarRef
 {
 	static LangVarRef *cons( const InputLoc &loc, Context *context,
-			ObjNameScope *scope, QualItemVect *qual, const String &name )
+			NameScope *scope, QualItemVect *qual, const String &name )
 	{
 		LangVarRef *l = new LangVarRef;
 		l->loc = loc;
@@ -2632,7 +2632,7 @@ struct LangVarRef
 	}
 
 	static LangVarRef *cons( const InputLoc &loc, Context *context,
-			ObjNameScope *scope, const String &name )
+			NameScope *scope, const String &name )
 	{
 		return cons( loc, context, scope, new QualItemVect, name );
 	}
@@ -2646,13 +2646,13 @@ struct LangVarRef
 	VarRefLookup lookupMethod( Compiler *pd ) const;
 	VarRefLookup lookupField( Compiler *pd ) const;
 
-	VarRefLookup lookupQualification( Compiler *pd, ObjNameScope *rootScope ) const;
+	VarRefLookup lookupQualification( Compiler *pd, NameScope *rootScope ) const;
 	VarRefLookup lookupObj( Compiler *pd ) const;
 
 	bool isInbuiltObject() const;
 	bool isLocalRef() const;
 	bool isContextRef() const;
-	void loadQualification( Compiler *pd, CodeVect &code, ObjNameScope *rootScope, 
+	void loadQualification( Compiler *pd, CodeVect &code, NameScope *rootScope, 
 			int lastPtrInQual, bool forWriting, bool revert ) const;
 	void loadInbuiltObject( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
@@ -2686,13 +2686,13 @@ struct LangVarRef
 	ObjectField *evaluateRef( Compiler *pd, CodeVect &code, long pushCount ) const;
 	ObjectField *preEvaluateRef( Compiler *pd, CodeVect &code ) const;
 	void resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjectField **paramRefs ) const;
-	long loadQualificationRefs( Compiler *pd, CodeVect &code, ObjNameScope *rootScope ) const;
+	long loadQualificationRefs( Compiler *pd, CodeVect &code, NameScope *rootScope ) const;
 	void popRefQuals( Compiler *pd, CodeVect &code, 
 			VarRefLookup &lookup, CallArgVect *args, bool temps ) const;
 
 	InputLoc loc;
 	Context *context;
-	ObjNameScope *scope;
+	NameScope *scope;
 	QualItemVect *qual;
 	String name;
 	long argSize;
@@ -3197,7 +3197,7 @@ struct LangStmt
 
 	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField,
 			TypeRef *typeRef, IterCall *iterCall, StmtList *stmtList,
-			Context *context, ObjNameScope *scope )
+			Context *context, NameScope *scope )
 	{
 		LangStmt *s = new LangStmt;
 		s->loc = loc;
@@ -3258,7 +3258,7 @@ struct LangStmt
 	String name;
 	IterCall *iterCall;
 	Context *context;
-	ObjNameScope *scope;
+	NameScope *scope;
 	ConsItemList *consItemList;
 
 	/* Normally you don't need to initialize double list pointers, however, we
@@ -3337,7 +3337,7 @@ struct Function
 	UniqueType **paramUTs;
 	Context *inContext;
 	bool exprt;
-	ObjMethod *objMethod;
+	ObjectMethod *objMethod;
 
 	Function *prev, *next;
 };

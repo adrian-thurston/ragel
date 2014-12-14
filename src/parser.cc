@@ -652,7 +652,7 @@ ConsItemList *BaseParser::consListConcat( ConsItemList *list1,
 }
 
 LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
-		ObjNameScope *scope, TypeRef *typeRef, IterCall *iterCall, StmtList *stmtList )
+		NameScope *scope, TypeRef *typeRef, IterCall *iterCall, StmtList *stmtList )
 {
 	/* Check for redeclaration. */
 	if ( curScope->checkRedecl( data ) != 0 )
@@ -815,7 +815,8 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 	return stmt;
 }
 
-LangStmt *BaseParser::exportStmt( ObjectField *objField, LangStmt::Type assignType, LangExpr *expr )
+LangStmt *BaseParser::exportStmt( ObjectField *objField,
+		LangStmt::Type assignType, LangExpr *expr )
 {
 	LangStmt *stmt = 0;
 
