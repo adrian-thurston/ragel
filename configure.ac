@@ -3,7 +3,7 @@ dnl   Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
 dnl
   
 AC_INIT(ragel, 7.0.0.1)
-PUBDATE="November 2014"
+PUBDATE="December 2014"
 
 AC_CONFIG_MACRO_DIR([m4])
 m4_include([m4/ragel.m4])
