@@ -2055,7 +2055,8 @@ struct LoadColm
 				pushScope();
 
 				LangVarRef *varRef = walkVarRef( VarRef );
-				PatternItemList *list = walkPattern( CaseClauseList.case_clause().pattern(), varRef );
+				PatternItemList *list = walkPattern(
+						CaseClauseList.case_clause().pattern(), varRef );
 				LangExpr *expr = match( CaseClauseList.loc(), varRef, list );
 
 				StmtList *stmtList = walkBlockOrSingle(
@@ -2078,8 +2079,12 @@ struct LoadColm
 
 	void walkContextVarDef( context_var_def ContextVarDef )
 	{
-		ObjectField *objField = walkVarDef( ContextVarDef.var_def(),
-				ObjectField::UserFieldType );
+		ObjectDef *contextObj = curContext()->objectDef;
+
+		ObjectField::Type type = contextObj->type == ObjectDef::StructType ?
+				ObjectField::StructFieldType : ObjectField::UserFieldType;
+
+		ObjectField *objField = walkVarDef( ContextVarDef.var_def(), type );
 		contextVarDef( objField->loc, objField );
 	}
 
@@ -2244,8 +2249,11 @@ struct LoadColm
 
 	void walkContextDef( context_def contextDef )
 	{
+		ObjectDef::Type objectType = contextDef.struct_key().STRUCT() ?
+				ObjectDef::StructType : ObjectDef::UserType;
+
 		String name = contextDef.id().data();
-		contextHead( contextDef.id().loc(), name );
+		contextHead( contextDef.id().loc(), name, objectType );
 
 		_repeat_context_item contextItemList = contextDef.ItemList();
 		while ( !contextItemList.end() ) {

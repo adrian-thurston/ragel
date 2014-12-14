@@ -2629,6 +2629,15 @@ void ObjectField::initField()
 			inSetWV =  IN_SET_FIELD_WV;
 			break;
 
+		case StructFieldType:
+			inGetR  =  IN_GET_STRUCT_FIELD_R;
+			inGetWC =  IN_GET_STRUCT_FIELD_WC;
+			inGetWV =  IN_GET_STRUCT_FIELD_WV;
+			inSetWC =  IN_SET_STRUCT_FIELD_WC;
+			inSetWV =  IN_SET_STRUCT_FIELD_WV;
+			break;
+
+
 		case RhsNameType:
 			inGetR  =  IN_GET_RHS_VAL_R;
 			inGetWC =  IN_GET_RHS_VAL_WC;
@@ -2669,6 +2678,11 @@ void ObjectDef::placeField( Compiler *pd, ObjectField *field )
 
 			/* Tree object frame fields. Record the position, then move the
 			 * running offset. */
+			field->offset = nextOffset;
+			nextOffset += sizeOfField( fieldUT );
+			break;
+
+		case ObjectField::StructFieldType:
 			field->offset = nextOffset;
 			nextOffset += sizeOfField( fieldUT );
 			break;

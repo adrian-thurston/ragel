@@ -869,7 +869,8 @@ void BaseParser::contextVarDef( const InputLoc &loc, ObjectField *objField )
 	object->rootScope->insertField( objField->name, objField );
 }
 
-void BaseParser::contextHead( const InputLoc &loc, const String &data )
+void BaseParser::contextHead( const InputLoc &loc, const String &data,
+		ObjectDef::Type objectType )
 {
 	/* Make the new namespace. */
 	Namespace *nspace = createNamespace( loc, data );
@@ -880,7 +881,7 @@ void BaseParser::contextHead( const InputLoc &loc, const String &data )
 	ContextDef *contextDef = new ContextDef( data, context, nspace );
 	nspace->contextDefList.append( contextDef );
 
-	context->objectDef = ObjectDef::cons( ObjectDef::UserType,
+	context->objectDef = ObjectDef::cons( objectType,
 			data, pd->nextObjectId++ ); 
 }
 

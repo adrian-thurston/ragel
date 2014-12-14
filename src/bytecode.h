@@ -325,6 +325,14 @@ typedef unsigned char uchar;
 
 #define IN_SYSTEM                0xe5
 
+#define IN_GET_STRUCT_FIELD_R    0xf7
+#define IN_GET_STRUCT_FIELD_WC   0xf8
+#define IN_GET_STRUCT_FIELD_WV   0xf9
+#define IN_GET_STRUCT_FIELD_BKT  0xfa
+#define IN_SET_STRUCT_FIELD_WC   0xfb
+#define IN_SET_STRUCT_FIELD_WV   0xfc
+#define IN_SET_STRUCT_FIELD_BKT  0xfd
+
 enum TYPE
 {
 	TYPE_NIL   = 0x01,

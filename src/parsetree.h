@@ -2343,6 +2343,7 @@ struct ObjectField
 	{
 		UserLocalType = 1,
 		UserFieldType,
+		StructFieldType,
 		LhsElType,
 		RedRhsType,
 		InbuiltFieldType,
@@ -2488,7 +2489,8 @@ struct ObjectDef
 		UserType,
 		FrameType,
 		IterType,
-		BuiltinType
+		BuiltinType,
+		StructType
 	};
 
 	ObjectDef()

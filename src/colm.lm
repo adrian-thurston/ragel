@@ -46,6 +46,7 @@ lex
 	token ALIAS / 'alias' /
 	token COMMIT / 'commit' /
 	token NEW / 'new' /
+	token NEW2 / 'new2' /
 	token PREEOF / 'preeof' /
 	token GLOBAL / 'global' /
 	token EOS / 'eos' /
