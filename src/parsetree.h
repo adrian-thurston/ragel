@@ -2347,6 +2347,7 @@ struct ObjectField
 		RedRhsType,
 		InbuiltFieldType,
 		InbuiltOffType,
+		InbuiltObjectType,
 		RhsNameType,
 		ParamValType,
 		ParamRefType,
@@ -2362,7 +2363,6 @@ struct ObjectField
 		beenReferenced(false),
 		isConst(false), 
 		refActive(false),
-		isCustom(false),
 		isExport(false),
 		dirtyTree(false),
 		inGetR( IN_HALT ),
@@ -2396,7 +2396,14 @@ struct ObjectField
 		{ return type == RhsNameType; }
 
 	bool useOffset()
-		{ return type != RhsNameType && type != InbuiltFieldType; }
+	{
+		return type != RhsNameType &&
+				type != InbuiltFieldType &&
+				type != InbuiltObjectType;
+	}
+
+	bool isInbuiltObject()
+		{ return type == InbuiltObjectType; }
 	
 	InputLoc loc;
 	Type type;
@@ -2408,7 +2415,6 @@ struct ObjectField
 	bool beenReferenced;
 	bool isConst;
 	bool refActive;
-	bool isCustom;
 	bool isExport;
 	
 	/* True if some aspect of the tree has possibly been written to. This does
@@ -2643,12 +2649,12 @@ struct LangVarRef
 	VarRefLookup lookupQualification( Compiler *pd, ObjNameScope *rootScope ) const;
 	VarRefLookup lookupObj( Compiler *pd ) const;
 
-	bool isCustom() const;
+	bool isInbuiltObject() const;
 	bool isLocalRef() const;
 	bool isContextRef() const;
 	void loadQualification( Compiler *pd, CodeVect &code, ObjNameScope *rootScope, 
 			int lastPtrInQual, bool forWriting, bool revert ) const;
-	void loadCustom( Compiler *pd, CodeVect &code, 
+	void loadInbuiltObject( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
 	void loadLocalObj( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;

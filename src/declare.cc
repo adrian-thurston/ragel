@@ -701,9 +701,8 @@ void Compiler::addInput( ObjectDef *frame )
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltFieldType, typeRef, "input" );
+			ObjectField::InbuiltObjectType, typeRef, "input" );
 	el->isConst   = false;
-	el->isCustom  = true;
 	el->inGetR    = IN_LOAD_INPUT_R;
 	el->inGetWV   = IN_LOAD_INPUT_WV;
 	el->inGetWC   = IN_LOAD_INPUT_WC;
@@ -717,9 +716,8 @@ void Compiler::addCtx( ObjectDef *frame )
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltFieldType, typeRef, "ctx" );
+			ObjectField::InbuiltObjectType, typeRef, "ctx" );
 	el->isConst   = false;
-	el->isCustom  = true;
 	el->inGetR    = IN_LOAD_CTX_R;
 	el->inGetWV   = IN_LOAD_CTX_WV;
 	el->inGetWC   = IN_LOAD_CTX_WC;

@@ -125,17 +125,17 @@ bool LangVarRef::isContextRef() const
 	return false;
 }
 
-bool LangVarRef::isCustom() const
+bool LangVarRef::isInbuiltObject() const
 {
 	if ( qual->length() > 0 ) {
 		ObjectField *field = scope->findField( qual->data[0].data );
-		if ( field != 0 && field->isCustom )
+		if ( field != 0 && field->isInbuiltObject() )
 			return true;
 	}
 	else {
 		ObjectField *field = scope->findField( name );
 		if ( field != 0 ) {
-			if ( field->isCustom )
+			if ( field->isInbuiltObject() )
 				return true;
 		}
 	}

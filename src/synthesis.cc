@@ -460,7 +460,7 @@ void LangVarRef::loadGlobalObj( Compiler *pd, CodeVect &code,
 	loadQualification( pd, code, rootObj->rootScope, lastPtrInQual, forWriting, true );
 }
 
-void LangVarRef::loadCustom( Compiler *pd, CodeVect &code, 
+void LangVarRef::loadInbuiltObject( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the local frame. */
@@ -477,8 +477,8 @@ void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code,
 void LangVarRef::loadObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
-	if ( isCustom() )
-		loadCustom( pd, code, lastPtrInQual, forWriting );
+	if ( isInbuiltObject() )
+		loadInbuiltObject( pd, code, lastPtrInQual, forWriting );
 	else if ( isLocalRef() )
 		loadLocalObj( pd, code, lastPtrInQual, forWriting );
 	else if ( isContextRef() )
@@ -817,7 +817,8 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 	return paramRefs;
 }
 
-void LangVarRef::resetActiveRefs( Compiler *pd, VarRefLookup &lookup, ObjectField **paramRefs ) const
+void LangVarRef::resetActiveRefs( Compiler *pd, VarRefLookup &lookup,
+		ObjectField **paramRefs ) const
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
 	 * will be null. */
@@ -840,7 +841,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 
 	/* Check if we need to revert the function. If it operates on a reference
 	 * or if it is not local then we need to revert it. */
-	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef() || isCustom();
+	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef() || isInbuiltObject();
 	
 	/* The call instruction. */
 	if ( pd->revertOn && revert )  {
@@ -2639,6 +2640,7 @@ void ObjectField::initField()
 		/* Inbuilts have instructions intialized outside the cons, at place of
 		 * call. */
 		case InbuiltFieldType:
+		case InbuiltObjectType:
 		case InbuiltOffType:
 			break;
 
@@ -2673,6 +2675,7 @@ void ObjectDef::placeField( Compiler *pd, ObjectField *field )
 
 		case ObjectField::InbuiltFieldType:
 		case ObjectField::InbuiltOffType:
+		case ObjectField::InbuiltObjectType:
 		case ObjectField::RhsNameType:
 		case ObjectField::LexSubstrType:
 

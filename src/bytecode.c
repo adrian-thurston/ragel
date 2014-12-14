@@ -1127,8 +1127,6 @@ again:
 		case IN_LOAD_INPUT_WC: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_WC\n" );
 
-			/* This is identical to the _R version, but using it for writing
-			 * would be confusing. */
 			assert( exec->parser != 0 );
 			treeUpref( (Tree*)exec->parser->input );
 			vm_push( (Tree*)exec->parser->input );
