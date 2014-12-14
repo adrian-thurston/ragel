@@ -257,8 +257,6 @@ void Compiler::addProdRedObjectVar( ObjectDef *localFrame, LangEl *nonTerm )
 
 	el->isLhsEl = true;
 
-	initLocalInstructions( el );
-
 	localFrame->rootScope->insertField( el->name, el );
 }
 
@@ -276,11 +274,6 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 
 			/* Right hand side elements are constant. */
 			el->isConst = true;
-			el->isRhsEl = true;
-
-			/* Only ever fetch for reading since they are constant. */
-			el->inGetR = IN_GET_LOCAL_R;
-
 			localFrame->rootScope->insertField( el->name, el );
 		}
 	}
@@ -684,8 +677,6 @@ void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( InputLoc(),
 			ObjectField::InbuiltFieldType, typeRef, "match_length" );
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_MATCH_LENGTH_R;
@@ -700,8 +691,6 @@ void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "match_text" );
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_MATCH_TEXT_R;
@@ -717,8 +706,6 @@ void Compiler::addInput( ObjectDef *frame )
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "input" );
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->isConst   = false;
 	el->useOffset = false;
 	el->isCustom  = true;
@@ -736,8 +723,6 @@ void Compiler::addCtx( ObjectDef *frame )
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "ctx" );
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->isConst   = false;
 	el->useOffset = false;
 	el->isCustom  = true;
@@ -796,8 +781,6 @@ ObjectField *Compiler::makeDataEl()
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "data" );
 
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->useOffset = false;
 	el->inGetR = IN_GET_TOKEN_DATA_R;
 	el->inSetWC = IN_SET_TOKEN_DATA_WC;
@@ -813,8 +796,6 @@ ObjectField *Compiler::makePosEl()
 			ObjectField::InbuiltFieldType, typeRef, "pos" );
 
 	el->isConst = true;
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->useOffset = false;
 	el->inGetR = IN_GET_TOKEN_POS_R;
 	return el;
@@ -828,44 +809,9 @@ ObjectField *Compiler::makeLineEl()
 			ObjectField::InbuiltFieldType, typeRef, "line" );
 
 	el->isConst = true;
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->useOffset = false;
 	el->inGetR = IN_GET_TOKEN_LINE_R;
 	return el;
-}
-
-void Compiler::initFieldInstructions( ObjectField *el )
-{
-	el->inGetR =   IN_GET_FIELD_R;
-	el->inGetWC =  IN_GET_FIELD_WC;
-	el->inGetWV =  IN_GET_FIELD_WV;
-	el->inSetWC =  IN_SET_FIELD_WC;
-	el->inSetWV =  IN_SET_FIELD_WV;
-}
-
-void Compiler::initLocalInstructions( ObjectField *el )
-{
-	el->inGetR =   IN_GET_LOCAL_R;
-	el->inGetWC =  IN_GET_LOCAL_WC;
-	el->inSetWC =  IN_SET_LOCAL_WC;
-}
-
-void Compiler::initLocalRefInstructions( ObjectField *el )
-{
-	el->inGetR =   IN_GET_LOCAL_REF_R;
-	el->inGetWC =  IN_GET_LOCAL_REF_WC;
-	el->inSetWC =  IN_SET_LOCAL_REF_WC;
-}
-
-void Compiler::initRhsGetInstructions( ObjectField *el )
-{
-	el->useOffset = false;
-	el->inGetR =   IN_GET_RHS_VAL_R;
-	el->inGetWC =  IN_GET_RHS_VAL_WC;
-	el->inGetWV =  IN_GET_RHS_VAL_WV;
-	el->inSetWC =  IN_SET_RHS_VAL_WC;
-	el->inSetWV =  IN_SET_RHS_VAL_WC;
 }
 
 /* Add a constant length field to the object. 
@@ -876,8 +822,6 @@ void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "length" );
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR = getLength;
@@ -947,8 +891,6 @@ void Compiler::addStdin()
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stdin" );
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR     = IN_GET_STDIN;
@@ -966,8 +908,6 @@ void Compiler::addStdout()
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stdout" );
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDOUT;
@@ -985,8 +925,6 @@ void Compiler::addStderr()
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stderr" );
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR    = IN_GET_STDERR;
@@ -1019,8 +957,6 @@ void Compiler::addError()
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "error" );
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 	el->isConst = true;
 	el->useOffset = false;
 	el->inGetR     = IN_GET_ERROR;
@@ -1105,8 +1041,6 @@ void Compiler::initList2Field( GenericType *gen, const char *name, int offset )
 	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = true;
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
@@ -1135,8 +1069,6 @@ void Compiler::initList2ElField( GenericType *gen, const char *name, int offset 
 	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = true;
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
@@ -1166,7 +1098,8 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
-	ObjectField *el = ObjectField::cons( internal, ObjectField::InbuiltFieldType, typeRef, name );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, name );
 
 	el->inGetR =  IN_GET_LIST_MEM_R;
 	el->inGetWC = IN_GET_LIST_MEM_WC;
@@ -1177,8 +1110,6 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = true;
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
@@ -1200,7 +1131,8 @@ void Compiler::initParserFunctions( GenericType *gen )
 			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
 }
 
-void Compiler::initParserField( GenericType *gen, const char *name, int offset, TypeRef *typeRef )
+void Compiler::initParserField( GenericType *gen, const char *name,
+		int offset, TypeRef *typeRef )
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
@@ -1215,8 +1147,6 @@ void Compiler::initParserField( GenericType *gen, const char *name, int offset, 
 	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = true;
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
@@ -1242,8 +1172,6 @@ void Compiler::initCtxField( GenericType *gen )
 	gen->objDef->rootScope->insertField( el->name, el );
 
 	el->useOffset = false;
-	el->beenInitialized = true;
-	el->beenPlaced = true;
 }
 
 void Compiler::initParserFields( GenericType *gen )
@@ -1266,17 +1194,11 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 	func->localFrame = func->codeBlock->localFrame;
 
 	/* Set up the parameters. */
-	long paramPos = 0;
 	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
 		if ( func->localFrame->rootScope->findField( param->name ) != 0 )
 			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
 
 		func->localFrame->rootScope->insertField( param->name, param );
-		param->beenInitialized = true;
-		param->beenPlaced = true;
-		param->pos = paramPos;
-
-		paramPos += 1;
 	}
 
 	/* Insert the function into the global function map. */

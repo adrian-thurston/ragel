@@ -884,7 +884,7 @@ struct LoadColm
 		if ( El.opt_prod_el_name().prodName() == opt_prod_el_name::Name ) {
 			String fieldName = El.opt_prod_el_name().id().data();
 			captureField = ObjectField::cons( El.opt_prod_el_name().id().loc(),
-				ObjectField::RhsElType, 0, fieldName );
+				ObjectField::RhsNameType, 0, fieldName );
 		}
 		else {
 			/* default the prod name. */
@@ -900,7 +900,7 @@ struct LoadColm
 				else if ( strcmp( fieldName, defName ) == 0 )
 					fieldName = "_" + fieldName;
 				captureField = ObjectField::cons( El.id().loc(),
-						ObjectField::RhsElType, 0, fieldName );
+						ObjectField::RhsNameType, 0, fieldName );
 			}
 		}
 

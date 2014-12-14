@@ -539,8 +539,11 @@ struct Compiler
 	bool precedenceSwap( long action1, long action2, LangEl *l1, LangEl *l2 );
 	bool precedenceRemoveBoth( LangEl *l1, LangEl *l2 );
 
-	void initLocalFrame( ObjectDef *localFrame );
-	void initAllFrameObjects();
+	void placeFrameFields( ObjectDef *localFrame );
+	void placeUserFunction( Function *func, bool isUserIter );
+	void placeAllLanguageObjects();
+	void placeAllFrameObjects();
+	void placeAllFunctions();
 
 	void initKeyOps();
 
@@ -732,11 +735,6 @@ struct Compiler
 	void verifyParseStopGrammar( LangEl *langEl, PdaGraph *pdaGraph );
 	void computeAdvanceReductions( LangEl *langEl, PdaGraph *pdaGraph );
 
-	void initFieldInstructions( ObjectField *el );
-	void initLocalInstructions( ObjectField *el );
-	void initLocalRefInstructions( ObjectField *el );
-	void initRhsGetInstructions( ObjectField *el );
-
 	void initMapFunctions( GenericType *gen );
 	void initListField( GenericType *gen, const char *name, int offset );
 	void initListFields( GenericType *gen );
@@ -764,12 +762,10 @@ struct Compiler
 	void makeDefaultIterators();
 	void addLengthField( ObjectDef *objDef, Code getLength );
 	ObjectDef *findObject( const String &name );
-	void initAllLanguageObjects();
 	void resolveListElementOf( ObjectDef *container, ObjectDef *obj, ElementOf *elof );
 	void resolveMapElementOf( ObjectDef *container, ObjectDef *obj, ElementOf *elof );
 	void resolveElementOf( ObjectDef *obj );
 	void makeFuncVisible( Function *func, bool isUserIter );
-	void initUserFunctions( Function *func, bool isUserIter );
 
 	void declareFunction( Function *func );
 	void declareReductionCode( Production *prod );

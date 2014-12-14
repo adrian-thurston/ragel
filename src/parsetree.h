@@ -2361,14 +2361,11 @@ struct ObjectField
 		typeRef(0),
 		context(0),
 		scope(0),
-		pos(0),
 		offset(0),
 		beenReferenced(false),
-		beenInitialized(false),
-		beenPlaced(false),
 		useOffset(true),
 		isConst(false), 
-		isLhsEl(false), isRhsEl(false), 
+		isLhsEl(false),
 		refActive(false),
 		isArgv0(false),
 		isArgv(false),
@@ -2392,8 +2389,11 @@ struct ObjectField
 		c->type = type;
 		c->typeRef = typeRef;
 		c->name = name;
+		c->initField( );
 		return c;
 	}
+
+	void initField();
 	
 	InputLoc loc;
 	Type type;
@@ -2401,15 +2401,11 @@ struct ObjectField
 	String name;
 	Context *context;
 	ObjNameScope *scope;
-	long pos;
 	long offset;
 	bool beenReferenced;
-	bool beenInitialized;
-	bool beenPlaced;
 	bool useOffset;
 	bool isConst;
 	bool isLhsEl;
-	bool isRhsEl;
 	bool refActive;
 	bool isArgv0;
 	bool isArgv;
@@ -2531,7 +2527,6 @@ struct ObjectDef
 
 
 	void referenceField( Compiler *pd, ObjectField *field );
-	void initField( Compiler *pd, ObjectField *field );
 	void placeField( Compiler *pd, ObjectField *field );
 	void createCode( Compiler *pd, CodeVect &code );
 	ObjMethod *findMethod( const String &name ) const;

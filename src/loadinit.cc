@@ -314,7 +314,7 @@ void LoadInit::consExportTree( StmtList *stmtList )
 	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
 	ObjectField *program = ObjectField::cons( internal,
-			ObjectField::UserLocalType, typeRef, String("ColmTree") );
+			ObjectField::UserFieldType, typeRef, String("ColmTree") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
 	stmtList->append( programExport );
 }
@@ -330,7 +330,7 @@ void LoadInit::consExportError( StmtList *stmtList )
 	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("str"), RepeatNone );
 	ObjectField *program = ObjectField::cons( internal,
-			ObjectField::UserLocalType, typeRef, String("ColmError") );
+			ObjectField::UserFieldType, typeRef, String("ColmError") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
 	stmtList->append( programExport );
 }

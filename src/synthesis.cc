@@ -237,39 +237,6 @@ void ObjectDef::referenceField( Compiler *pd, ObjectField *field )
 	field->beenReferenced = true;
 }
 
-void ObjectDef::initField( Compiler *pd, ObjectField *field )
-{
-	if ( field->beenInitialized )
-		return;
-	
-	field->beenInitialized = true;
-
-	if ( type == FrameType )
-		pd->initLocalInstructions( field );
-	else if ( field->isRhsGet )
-		pd->initRhsGetInstructions( field );
-	else
-		pd->initFieldInstructions( field );
-}
-
-void ObjectDef::placeField( Compiler *pd, ObjectField *field )
-{
-	if ( field->beenPlaced )
-		return;
-	
-	field->beenPlaced = true;
-	UniqueType *fieldUT = field->typeRef->uniqueType;
-
-	if ( type == FrameType ) {
-		nextOffset += sizeOfField( fieldUT );
-		field->offset = -nextOffset;
-	}
-	else if ( !field->isRhsGet ) {
-		field->offset = nextOffset;
-		nextOffset += sizeOfField( fieldUT );
-	}
-}
-
 UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code, 
 		ObjectDef *inObject, ObjectField *el, bool forWriting, bool revert ) const
 {
@@ -318,7 +285,8 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 }
 
 /* The qualification must start at a local frame. There cannot be any pointer. */
-long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code, ObjNameScope *rootScope ) const
+long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code,
+		ObjNameScope *rootScope ) const
 {
 	long count = 0;
 
@@ -2646,45 +2614,119 @@ void Compiler::compileRootBlock( )
 	findLocals( rootLocalFrame, block );
 }
 
-void Compiler::initAllLanguageObjects()
+void ObjectField::initField()
+{
+	switch ( type ) {
+		case UserLocalType:
+		case LhsElType:
+		case ParamValType:
+		case RhsElType:
+			inGetR  =  IN_GET_LOCAL_R;
+			inGetWC =  IN_GET_LOCAL_WC;
+			inSetWC =  IN_SET_LOCAL_WC;
+			break;
+
+		case ParamRefType:
+			inGetR  =  IN_GET_LOCAL_REF_R;
+			inGetWC =  IN_GET_LOCAL_REF_WC;
+			inSetWC =  IN_SET_LOCAL_REF_WC;
+			break;
+
+		case ArgvType:
+		case UserFieldType:
+			inGetR  =  IN_GET_FIELD_R;
+			inGetWC =  IN_GET_FIELD_WC;
+			inGetWV =  IN_GET_FIELD_WV;
+			inSetWC =  IN_SET_FIELD_WC;
+			inSetWV =  IN_SET_FIELD_WV;
+			break;
+
+		case RhsNameType:
+			useOffset = false;
+			inGetR  =  IN_GET_RHS_VAL_R;
+			inGetWC =  IN_GET_RHS_VAL_WC;
+			inGetWV =  IN_GET_RHS_VAL_WV;
+			inSetWC =  IN_SET_RHS_VAL_WC;
+			inSetWV =  IN_SET_RHS_VAL_WC;
+			break;
+
+		/* Done outside the cons, at place of call. */
+		case InbuiltFieldType:
+			break;
+
+		/* Out of date impl. */
+		case LexSubstrType:
+			break;
+	}
+}
+
+void ObjectDef::placeField( Compiler *pd, ObjectField *field )
+{
+	UniqueType *fieldUT = field->typeRef->uniqueType;
+
+	switch ( field->type ) {
+		case ObjectField::LhsElType:
+		case ObjectField::UserLocalType:
+		case ObjectField::RhsElType:
+
+			/* Local frame fields. Move the running offset first since this is
+			 * a negative off from the end. */
+			nextOffset += sizeOfField( fieldUT );
+			field->offset = -nextOffset;
+			break;
+
+		case ObjectField::UserFieldType:
+		case ObjectField::ArgvType:
+
+			/* Tree object frame fields. Record the position, then move the
+			 * running offset. */
+			field->offset = nextOffset;
+			nextOffset += sizeOfField( fieldUT );
+			break;
+
+		case ObjectField::InbuiltFieldType:
+		case ObjectField::RhsNameType:
+		case ObjectField::LexSubstrType:
+
+		case ObjectField::ParamValType:
+		case ObjectField::ParamRefType:
+			break;
+	}
+}
+
+void Compiler::placeAllLanguageObjects()
 {
 	/* Init all user object fields (need consistent size). */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		ObjectDef *objDef = lel->objectDef;
 		if ( objDef != 0 ) {
 			/* Init all fields of the object. */
-			for ( ObjFieldList::Iter f = *objDef->objFieldList; f.lte(); f++ ) {
-				objDef->initField( this, f->value );
+			for ( ObjFieldList::Iter f = *objDef->objFieldList; f.lte(); f++ )
 				objDef->placeField( this, f->value );
-			}
 		}
 	}
 
 	/* Init all fields of the global object. */
-	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ ) {
-		globalObjectDef->initField( this, f->value );
+	for ( ObjFieldList::Iter f = *globalObjectDef->objFieldList; f.lte(); f++ )
 		globalObjectDef->placeField( this, f->value );
-	}
 }
 
-void Compiler::initLocalFrame( ObjectDef *localFrame )
+void Compiler::placeFrameFields( ObjectDef *localFrame )
 {
-	for ( ObjFieldList::Iter f = *localFrame->objFieldList; f.lte(); f++ ) {
-		localFrame->initField( this, f->value );
+	for ( ObjFieldList::Iter f = *localFrame->objFieldList; f.lte(); f++ )
 		localFrame->placeField( this, f->value );
-	}
 }
 
-void Compiler::initAllFrameObjects()
+void Compiler::placeAllFrameObjects()
 {
 	/* Functions. */
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
-		initLocalFrame( f->localFrame );
+		placeFrameFields( f->localFrame );
 
 	/* Reduction code. */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
 		if ( prod->redBlock != 0 )
-			initLocalFrame( prod->redBlock->localFrame );
+			placeFrameFields( prod->redBlock->localFrame );
 	}
 
 	/* Token translation code. */
@@ -2693,52 +2735,42 @@ void Compiler::initAllFrameObjects()
 			ObjectDef *localFrame = lel->transBlock->localFrame;
 			if ( lel->tokenDef->reCaptureVect.length() > 0 ) {
 				ObjFieldList::Iter f = *localFrame->objFieldList;
-				for ( int i = 0; i < lel->tokenDef->reCaptureVect.length(); i++, f++ ) {
-					localFrame->initField( this, f->value );
+				for ( int i = 0; i < lel->tokenDef->reCaptureVect.length(); i++, f++ )
 					localFrame->placeField( this, f->value );
-				}
 			}
 
-			initLocalFrame( localFrame );
+			placeFrameFields( localFrame );
 		}
 	}
 
 	/* Preeof blocks. */
 	for ( RegionList::Iter r = regionList; r.lte(); r++ ) {
 		if ( r->preEofBlock != 0 )
-			initLocalFrame( r->preEofBlock->localFrame );
+			placeFrameFields( r->preEofBlock->localFrame );
 	}
 
 	/* Root code. */
-	initLocalFrame( rootLocalFrame );
+	placeFrameFields( rootLocalFrame );
 }
 
-void Compiler::initUserFunctions( Function *func, bool isUserIter )
+void Compiler::placeUserFunction( Function *func, bool isUserIter )
 {
 	/* Set up the parameters. */
-	long paramPos = 0, paramListSize = 0;
+	long paramPos = 0, paramListSize = 0, paramOffset = 0;
 	UniqueType **paramUTs = new UniqueType*[func->paramList->length()];
-	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
+	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++, paramPos++ ) {
 		paramUTs[paramPos] = param->typeRef->uniqueType;
-
-		/* Initialize the object field as a local variable. We also want trees
-		 * downreffed. */
-		if ( paramUTs[paramPos]->typeId == TYPE_REF )
-			initLocalRefInstructions( param );
-		else
-			initLocalInstructions( param );
-
 		paramListSize += sizeOfField( paramUTs[paramPos] );
-		paramPos += 1;
 	}
 
 	/* Param offset is relative to one past the last item in the array of
 	 * words containing the args. */
-	long paramOffset = 0;
-	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
+	paramOffset = 0;
+	paramPos = 0;
+	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++, paramPos++ ) {
 		/* Moving downward, and need the offset to point to the lower half of
 		 * the argument. */
-		paramOffset -= sizeOfField( paramUTs[param->pos] );
+		paramOffset -= sizeOfField( paramUTs[paramPos] );
 
 		/* How much space do we need to make for call overhead. */
 		long frameAfterArgs = isUserIter ? IFR_AA : FR_AA;
@@ -2761,8 +2793,16 @@ void Compiler::initUserFunctions( Function *func, bool isUserIter )
 	func->objMethod->returnUT = returnUT;
 
 	func->objMethod->paramUTs = new UniqueType*[func->paramList->length()];
-	memcpy( func->objMethod->paramUTs, paramUTs, sizeof(UniqueType*) * func->paramList->length() );
+	memcpy( func->objMethod->paramUTs, paramUTs,
+			sizeof(UniqueType*) * func->paramList->length() );
 }
+
+void Compiler::placeAllFunctions()
+{
+	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
+		placeUserFunction( f, f->isUserIter );
+}
+
 
 void Compiler::compileUserIter( Function *func, CodeVect &code )
 {
