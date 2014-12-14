@@ -105,7 +105,7 @@ void Compiler::generateExports()
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
 			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
 				ObjectField *field = ofi->value;
-				if ( ( field->useOffset && field->typeRef != 0 ) || field->isRhsGet() ) {
+				if ( ( field->useOffset() && field->typeRef != 0 ) || field->isRhsGet() ) {
 					UniqueType *ut = field->typeRef->resolveType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  )
@@ -193,7 +193,7 @@ void Compiler::generateExportsImpl()
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
 			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
 				ObjectField *field = ofi->value;
-				if ( field->useOffset && field->typeRef != 0  ) {
+				if ( field->useOffset() && field->typeRef != 0  ) {
 					UniqueType *ut = field->typeRef->resolveType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {

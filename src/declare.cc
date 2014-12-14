@@ -676,7 +676,6 @@ void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
 	ObjectField *el = ObjectField::cons( InputLoc(),
 			ObjectField::InbuiltFieldType, typeRef, "match_length" );
 	el->isConst = true;
-	el->useOffset = false;
 	el->inGetR    = IN_GET_MATCH_LENGTH_R;
 	frame->rootScope->insertField( el->name, el );
 }
@@ -690,7 +689,6 @@ void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "match_text" );
 	el->isConst = true;
-	el->useOffset = false;
 	el->inGetR    = IN_GET_MATCH_TEXT_R;
 	frame->rootScope->insertField( el->name, el );
 }
@@ -705,7 +703,6 @@ void Compiler::addInput( ObjectDef *frame )
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "input" );
 	el->isConst   = false;
-	el->useOffset = false;
 	el->isCustom  = true;
 	el->inGetR    = IN_LOAD_INPUT_R;
 	el->inGetWV   = IN_LOAD_INPUT_WV;
@@ -722,7 +719,6 @@ void Compiler::addCtx( ObjectDef *frame )
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "ctx" );
 	el->isConst   = false;
-	el->useOffset = false;
 	el->isCustom  = true;
 	el->inGetR    = IN_LOAD_CTX_R;
 	el->inGetWV   = IN_LOAD_CTX_WV;
@@ -779,7 +775,6 @@ ObjectField *Compiler::makeDataEl()
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "data" );
 
-	el->useOffset = false;
 	el->inGetR = IN_GET_TOKEN_DATA_R;
 	el->inSetWC = IN_SET_TOKEN_DATA_WC;
 	el->inSetWV = IN_SET_TOKEN_DATA_WV;
@@ -794,7 +789,6 @@ ObjectField *Compiler::makePosEl()
 			ObjectField::InbuiltFieldType, typeRef, "pos" );
 
 	el->isConst = true;
-	el->useOffset = false;
 	el->inGetR = IN_GET_TOKEN_POS_R;
 	return el;
 }
@@ -807,7 +801,6 @@ ObjectField *Compiler::makeLineEl()
 			ObjectField::InbuiltFieldType, typeRef, "line" );
 
 	el->isConst = true;
-	el->useOffset = false;
 	el->inGetR = IN_GET_TOKEN_LINE_R;
 	return el;
 }
@@ -821,7 +814,6 @@ void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "length" );
 	el->isConst = true;
-	el->useOffset = false;
 	el->inGetR = getLength;
 
 	objDef->rootScope->insertField( el->name, el );
@@ -890,7 +882,6 @@ void Compiler::addStdin()
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stdin" );
 	el->isConst = true;
-	el->useOffset = false;
 	el->inGetR     = IN_GET_STDIN;
 	el->inGetWC    = IN_GET_STDIN;
 	el->inGetWV    = IN_GET_STDIN;
@@ -907,7 +898,6 @@ void Compiler::addStdout()
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stdout" );
 	el->isConst = true;
-	el->useOffset = false;
 	el->inGetR    = IN_GET_STDOUT;
 	el->inGetWC    = IN_GET_STDOUT;
 	el->inGetWV    = IN_GET_STDOUT;
@@ -924,7 +914,6 @@ void Compiler::addStderr()
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stderr" );
 	el->isConst = true;
-	el->useOffset = false;
 	el->inGetR    = IN_GET_STDERR;
 	el->inGetWC    = IN_GET_STDERR;
 	el->inGetWV    = IN_GET_STDERR;
@@ -935,13 +924,13 @@ void Compiler::addArgv()
 {
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::ArgvType, argvTypeRef, "argv" );
+			ObjectField::UserFieldType, argvTypeRef, "argv" );
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
 	argvList = el;
 
 	el = ObjectField::cons( internal,
-			ObjectField::ArgvType, argvTypeRef, "argv0" );
+			ObjectField::UserFieldType, argvTypeRef, "argv0" );
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
 	argv0 = el;
@@ -956,7 +945,6 @@ void Compiler::addError()
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "error" );
 	el->isConst = true;
-	el->useOffset = false;
 	el->inGetR     = IN_GET_ERROR;
 	el->inGetWC    = IN_GET_ERROR;
 	el->inGetWV    = IN_GET_ERROR;
@@ -1028,7 +1016,7 @@ void Compiler::initList2Field( GenericType *gen, const char *name, int offset )
 	/* Make the type ref and create the field. */
 	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltFieldType, typeRef, name );
+			ObjectField::InbuiltOffType, typeRef, name );
 
 	el->inGetR =  IN_GET_LIST2_MEM_R;
 //	el->inGetWC = IN_GET_LIST2_MEM_WC;
@@ -1037,8 +1025,6 @@ void Compiler::initList2Field( GenericType *gen, const char *name, int offset )
 //	el->inSetWV = IN_SET_LIST2_MEM_WV;
 
 	gen->objDef->rootScope->insertField( el->name, el );
-
-	el->useOffset = true;
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
@@ -1056,7 +1042,7 @@ void Compiler::initList2ElField( GenericType *gen, const char *name, int offset 
 {
 	/* Make the type ref and create the field. */
 	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
-	ObjectField *el = ObjectField::cons( internal, ObjectField::InbuiltFieldType, typeRef, name );
+	ObjectField *el = ObjectField::cons( internal, ObjectField::InbuiltOffType, typeRef, name );
 
 	el->inGetR =  IN_GET_LIST2EL_MEM_R;
 //	el->inGetWC = IN_GET_LIST2EL_MEM_WC;
@@ -1065,8 +1051,6 @@ void Compiler::initList2ElField( GenericType *gen, const char *name, int offset 
 //	el->inSetWV = IN_SET_LIST2EL_MEM_WV;
 
 	gen->objDef->rootScope->insertField( el->name, el );
-
-	el->useOffset = true;
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
@@ -1097,7 +1081,7 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 	/* Make the type ref and create the field. */
 	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltFieldType, typeRef, name );
+			ObjectField::InbuiltOffType, typeRef, name );
 
 	el->inGetR =  IN_GET_LIST_MEM_R;
 	el->inGetWC = IN_GET_LIST_MEM_WC;
@@ -1106,8 +1090,6 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 	el->inSetWV = IN_SET_LIST_MEM_WV;
 
 	gen->objDef->rootScope->insertField( el->name, el );
-
-	el->useOffset = true;
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
@@ -1134,7 +1116,7 @@ void Compiler::initParserField( GenericType *gen, const char *name,
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltFieldType, typeRef, name );
+			ObjectField::InbuiltOffType, typeRef, name );
 
 	el->inGetR =  IN_GET_PARSER_MEM_R;
 	el->inGetWC = IN_GET_PARSER_MEM_WC;
@@ -1143,8 +1125,6 @@ void Compiler::initParserField( GenericType *gen, const char *name,
 	el->inSetWV = IN_SET_PARSER_MEM_WV;
 
 	gen->objDef->rootScope->insertField( el->name, el );
-
-	el->useOffset = true;
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
@@ -1168,8 +1148,6 @@ void Compiler::initCtxField( GenericType *gen )
 	el->inSetWV = IN_SET_PARSER_CTX_WV;
 
 	gen->objDef->rootScope->insertField( el->name, el );
-
-	el->useOffset = false;
 }
 
 void Compiler::initParserFields( GenericType *gen )

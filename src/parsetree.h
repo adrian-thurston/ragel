@@ -2349,11 +2349,11 @@ struct ObjectField
 		LhsElType,
 		RedRhsType,
 		InbuiltFieldType,
+		InbuiltOffType,
 		RhsNameType,
-		LexSubstrType,
-		ArgvType,
 		ParamValType,
-		ParamRefType
+		ParamRefType,
+		LexSubstrType
 	};
 
 	ObjectField()
@@ -2363,7 +2363,6 @@ struct ObjectField
 		scope(0),
 		offset(0),
 		beenReferenced(false),
-		useOffset(true),
 		isConst(false), 
 		refActive(false),
 		isCustom(false),
@@ -2398,6 +2397,9 @@ struct ObjectField
 
 	bool isRhsGet()
 		{ return type == RhsNameType; }
+
+	bool useOffset()
+		{ return type != RhsNameType && type != InbuiltFieldType; }
 	
 	InputLoc loc;
 	Type type;
@@ -2407,7 +2409,6 @@ struct ObjectField
 	ObjNameScope *scope;
 	long offset;
 	bool beenReferenced;
-	bool useOffset;
 	bool isConst;
 	bool refActive;
 	bool isCustom;

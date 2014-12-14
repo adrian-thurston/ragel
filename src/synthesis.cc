@@ -263,7 +263,7 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 			code.append( el->inGetR );
 	}
 
-	if ( el->useOffset ) {
+	if ( el->useOffset() ) {
 		/* Gets of locals and fields require offsets. Fake vars like token
 		 * data and lhs don't require it. */
 		code.appendHalf( el->offset );
@@ -551,7 +551,7 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 		code.append( el->inSetWC );
 
 	/* Maybe write out an offset. */
-	if ( el->useOffset )
+	if ( el->useOffset() )
 		code.appendHalf( el->offset );
 }
 
@@ -2343,7 +2343,7 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 
 		/* FIXME: This test needs to be improved. Match_text was getting
 		 * through before useOffset was tested. What will? */
-		if ( el->useOffset && !el->isLhsEl() &&
+		if ( el->useOffset() && !el->isLhsEl() &&
 				( el->beenReferenced || el->isParam() ) )
 		{
 			UniqueType *ut = el->typeRef->uniqueType;
@@ -2353,7 +2353,7 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 			}
 		}
 
-		if ( el->useOffset ) {
+		if ( el->useOffset() ) {
 			UniqueType *ut = el->typeRef->uniqueType;
 			if ( ut->typeId == TYPE_ITER ) {
 				int depth = el->scope->depth();
@@ -2620,7 +2620,6 @@ void ObjectField::initField()
 			inSetWC =  IN_SET_LOCAL_REF_WC;
 			break;
 
-		case ArgvType:
 		case UserFieldType:
 			inGetR  =  IN_GET_FIELD_R;
 			inGetWC =  IN_GET_FIELD_WC;
@@ -2630,7 +2629,6 @@ void ObjectField::initField()
 			break;
 
 		case RhsNameType:
-			useOffset = false;
 			inGetR  =  IN_GET_RHS_VAL_R;
 			inGetWC =  IN_GET_RHS_VAL_WC;
 			inGetWV =  IN_GET_RHS_VAL_WV;
@@ -2638,8 +2636,10 @@ void ObjectField::initField()
 			inSetWV =  IN_SET_RHS_VAL_WC;
 			break;
 
-		/* Done outside the cons, at place of call. */
+		/* Inbuilts have instructions intialized outside the cons, at place of
+		 * call. */
 		case InbuiltFieldType:
+		case InbuiltOffType:
 			break;
 
 		/* Out of date impl. */
@@ -2664,7 +2664,6 @@ void ObjectDef::placeField( Compiler *pd, ObjectField *field )
 			break;
 
 		case ObjectField::UserFieldType:
-		case ObjectField::ArgvType:
 
 			/* Tree object frame fields. Record the position, then move the
 			 * running offset. */
@@ -2673,6 +2672,7 @@ void ObjectDef::placeField( Compiler *pd, ObjectField *field )
 			break;
 
 		case ObjectField::InbuiltFieldType:
+		case ObjectField::InbuiltOffType:
 		case ObjectField::RhsNameType:
 		case ObjectField::LexSubstrType:
 
