@@ -37,7 +37,7 @@ AC_ARG_WITH(subject,
 AC_SUBST(SUBJECT)
 
 dnl Check for colm.
-AC_CHECK_COLM([0.13.0.2])
+AC_CHECK_COLM([0.13.0.1])
 
 dnl Check for the D compiler
 AC_CHECK_PROG(GDC, gdc, gdc)
