@@ -9,8 +9,8 @@ ragel_SOURCES = \
 	parsetree.h rlscan.h common.h \
 	fsmgraph.h pcheck.h gendata.h ragel.h load.h if.h codegen.h \
 	binary.h bingotoloop.h bingotoexp.h binvarloop.h \
-	flat.h flatloop.h flatexp.h \
-	goto.h gotoloop.h gotoexp.h \
+	flat.h flatgotoloop.h flatgotoexp.h \
+	goto.h switchgotoloop.h switchgotoexp.h \
 	ipgoto.h xml.h dot.h \
 	\
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
