@@ -33,7 +33,7 @@ common_CFLAGS = \
 
 libprog_a_SOURCES = \
 	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
-	input.h keyops.h map.h parsedata.h \
+	input.h keyops.h map.h compiler.h \
 	parsetree.h pcheck.h pdacodegen.h pdagraph.h pdarun.h pool.h redbuild.h \
 	redfsm.h rtvector.h tree.h version.h global.h colm.h parser.h cstring.h \
 	\
