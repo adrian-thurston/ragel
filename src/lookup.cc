@@ -138,12 +138,6 @@ bool LangVarRef::isCustom() const
 			if ( field->isCustom )
 				return true;
 		}
-		else {
-			ObjMethod *method = scope->owner->findMethod( name );
-			if ( method != 0 && method->isCustom )
-				return true;
-		}
-	
 	}
 	return false;
 }

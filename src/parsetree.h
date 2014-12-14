@@ -2279,7 +2279,6 @@ struct ObjMethod
 		funcId(0), 
 		useFuncId(false),
 		useCallObj(true),
-		isCustom(false),
 		func(0), 
 		iterDef(0)
 	{
@@ -2301,7 +2300,6 @@ struct ObjMethod
 		funcId(0), 
 		useFuncId(false),
 		useCallObj(true),
-		isCustom(false),
 		func(0), 
 		iterDef(0)
 	{
@@ -2322,7 +2320,6 @@ struct ObjMethod
 	long funcId;
 	bool useFuncId;
 	bool useCallObj;
-	bool isCustom;
 	Function *func;
 	IterDef *iterDef;
 };
