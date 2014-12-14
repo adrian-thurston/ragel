@@ -399,7 +399,6 @@ void BaseParser::cflDef( NtDef *ntDef, ObjectDef *objectDef, LelDefList *defList
 					objectDef->rootScope->insertField( newOf->name, newOf );
 				}
 
-				newOf->isRhsGet = true;
 				newOf->rhsVal.append( RhsVal( pel ) );
 			}
 		}
@@ -901,7 +900,6 @@ ObjectField *BaseParser::addParam( const InputLoc &loc,
 		ObjectField::Type type, TypeRef *typeRef, const String &name )
 {
 	ObjectField *objField = ObjectField::cons( loc, type, typeRef, name );
-	objField->isParam = true;
 	return objField;
 }
 

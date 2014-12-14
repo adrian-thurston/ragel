@@ -2347,7 +2347,7 @@ struct ObjectField
 		UserLocalType = 1,
 		UserFieldType,
 		LhsElType,
-		RhsElType,
+		RedRhsType,
 		InbuiltFieldType,
 		RhsNameType,
 		LexSubstrType,
@@ -2367,8 +2367,6 @@ struct ObjectField
 		isConst(false), 
 		refActive(false),
 		isCustom(false),
-		isParam(false),
-		isRhsGet(false),
 		isExport(false),
 		dirtyTree(false),
 		inGetR( IN_HALT ),
@@ -2391,6 +2389,15 @@ struct ObjectField
 	}
 
 	void initField();
+
+	bool isParam()
+		{ return type == ParamValType || type == ParamRefType; }
+
+	bool isLhsEl()
+		{ return type == LhsElType; }
+
+	bool isRhsGet()
+		{ return type == RhsNameType; }
 	
 	InputLoc loc;
 	Type type;
@@ -2404,8 +2411,6 @@ struct ObjectField
 	bool isConst;
 	bool refActive;
 	bool isCustom;
-	bool isParam;
-	bool isRhsGet;
 	bool isExport;
 	
 	/* True if some aspect of the tree has possibly been written to. This does

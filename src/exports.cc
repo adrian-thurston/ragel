@@ -105,20 +105,11 @@ void Compiler::generateExports()
 			ObjFieldList *objFieldList = lel->objectDef->objFieldList;
 			for ( ObjFieldList::Iter ofi = *objFieldList; ofi.lte(); ofi++ ) {
 				ObjectField *field = ofi->value;
-				if ( field->useOffset && field->typeRef != 0  ) {
+				if ( ( field->useOffset && field->typeRef != 0 ) || field->isRhsGet() ) {
 					UniqueType *ut = field->typeRef->resolveType( this );
 
-					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
+					if ( ut != 0 && ut->typeId == TYPE_TREE  )
 						out << "	" << ut->langEl->refName << " " << field->name << "();\n";
-					}
-				}
-
-				if ( field->isRhsGet ) {
-					UniqueType *ut = field->typeRef->resolveType( this );
-
-					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
-						out << "	" << ut->langEl->refName << " " << field->name << "();\n";
-					}
 				}
 			}
 		}
@@ -206,18 +197,19 @@ void Compiler::generateExportsImpl()
 					UniqueType *ut = field->typeRef->resolveType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
-						out << ut->langEl->refName << " " << lel->declName << "::" << field->name << 
-							"() { return " << ut->langEl->refName << 
-							"( __prg, colm_get_attr( __tree, " << field->offset << ") ); }\n";
+						out << ut->langEl->refName << " " << lel->declName <<
+							"::" << field->name << "() { return " <<
+							ut->langEl->refName << "( __prg, colm_get_attr( __tree, " <<
+							field->offset << ") ); }\n";
 					}
 				}
 
-				if ( field->isRhsGet ) {
+				if ( field->isRhsGet() ) {
 					UniqueType *ut = field->typeRef->resolveType( this );
 
 					if ( ut != 0 && ut->typeId == TYPE_TREE  ) {
-						out << ut->langEl->refName << " " << lel->declName << "::" << field->name << 
-							"() { static int a[] = {"; 
+						out << ut->langEl->refName << " " << lel->declName <<
+							"::" << field->name << "() { static int a[] = {"; 
 
 						/* Need to place the array computing the val. */
 						out << field->rhsVal.length();
@@ -241,7 +233,6 @@ void Compiler::generateExportsImpl()
 			out << lel->repeatOf->refName << " " << lel->declName << "::" << " value"
 				"() { return " << lel->repeatOf->refName << 
 				"( __prg, colm_get_repeat_val( __tree ) ); }\n";
-
 		}
 
 		if ( lel->isList ) {

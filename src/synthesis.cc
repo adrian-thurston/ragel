@@ -268,7 +268,7 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 		 * data and lhs don't require it. */
 		code.appendHalf( el->offset );
 	}
-	else if ( el->isRhsGet ) {
+	else if ( el->isRhsGet() ) {
 		/* Need to place the array computing the val. */
 		code.append( el->rhsVal.length() );
 		for ( Vector<RhsVal>::Iter rg = el->rhsVal; rg.lte(); rg++ ) {
@@ -300,7 +300,7 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code,
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
 		if ( qi.pos() > 0 ) {
-			if ( el->isRhsGet ) {
+			if ( el->isRhsGet() ) {
 				code.append( IN_RHS_REF_FROM_QUAL_REF );
 				code.appendHalf( 0 );
 
@@ -644,7 +644,7 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 	lookup.objField->dirtyTree = true;
 
 	if ( qual->length() > 0 ) {
-		if ( lookup.objField->isRhsGet ) {
+		if ( lookup.objField->isRhsGet() ) {
 			code.append( IN_RHS_REF_FROM_QUAL_REF );
 			code.appendHalf( pushCount );
 
@@ -2343,8 +2343,8 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 
 		/* FIXME: This test needs to be improved. Match_text was getting
 		 * through before useOffset was tested. What will? */
-		if ( el->useOffset && el->type != ObjectField::LhsElType &&
-				( el->beenReferenced || el->isParam ) )
+		if ( el->useOffset && !el->isLhsEl() &&
+				( el->beenReferenced || el->isParam() ) )
 		{
 			UniqueType *ut = el->typeRef->uniqueType;
 			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR ) {
@@ -2608,7 +2608,7 @@ void ObjectField::initField()
 		case UserLocalType:
 		case LhsElType:
 		case ParamValType:
-		case RhsElType:
+		case RedRhsType:
 			inGetR  =  IN_GET_LOCAL_R;
 			inGetWC =  IN_GET_LOCAL_WC;
 			inSetWC =  IN_SET_LOCAL_WC;
@@ -2655,7 +2655,7 @@ void ObjectDef::placeField( Compiler *pd, ObjectField *field )
 	switch ( field->type ) {
 		case ObjectField::LhsElType:
 		case ObjectField::UserLocalType:
-		case ObjectField::RhsElType:
+		case ObjectField::RedRhsType:
 
 			/* Local frame fields. Move the running offset first since this is
 			 * a negative off from the end. */

@@ -267,7 +267,7 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 			 * demand. */
 			String name( 8, "r%d", position );
 			ObjectField *el = ObjectField::cons( InputLoc(),
-					ObjectField::RhsElType, rhsEl->typeRef, name );
+					ObjectField::RedRhsType, rhsEl->typeRef, name );
 			rhsEl->rhsElField = el;
 
 			/* Right hand side elements are constant. */
