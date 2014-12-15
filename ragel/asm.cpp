@@ -705,23 +705,36 @@ HostType *AsmFsmCodeGen::wideAlphType()
 	}
 }
 
+void AsmFsmCodeGen::STATIC_CONST_INT( const string &name, const string &value )
+{
+	out <<
+		"	.align	4\n"
+		"	.type	" << name << ", @object\n"
+		"	.size	" << name << ", 4\n" <<
+		name << ":\n"
+		"	.long	" << value << "\n";
+}
+
 void AsmFsmCodeGen::STATE_IDS()
 {
 	if ( redFsm->startState != 0 )
-		STATIC_VAR( "int", START() ) << " = " << START_STATE_ID() << ";\n";
+		STATIC_CONST_INT( START(), START_STATE_ID() );
 
 	if ( !noFinal )
-		STATIC_VAR( "int" , FIRST_FINAL() ) << " = " << FIRST_FINAL_STATE() << ";\n";
+		STATIC_CONST_INT( FIRST_FINAL(), FIRST_FINAL_STATE() );
 
 	if ( !noError )
-		STATIC_VAR( "int", ERROR() ) << " = " << ERROR_STATE() << ";\n";
+		STATIC_CONST_INT( ERROR(), ERROR_STATE() );
 
 	out << "\n";
 
 	if ( entryPointNames.length() > 0 ) {
 		for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
-			STATIC_VAR( "int", DATA_PREFIX() + "en_" + *en ) << 
-					" = " << entryPointIds[en.pos()] << ";\n";
+			ostringstream ret;
+			ret << redFsm->startState->id;
+
+			STATIC_CONST_INT( string( DATA_PREFIX() + "en_" + *en ),
+					ret.str() );
 		}
 		out << "\n";
 	}
@@ -1470,166 +1483,6 @@ void AsmGotoCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
-}
-
-void AsmGotoCodeGen::writeData()
-{
-	if ( redFsm->anyActions() )
-		ACTIONS_ARRAY();
-
-	if ( redFsm->anyToStateActions() )
-		TO_STATE_ACTIONS();
-
-	if ( redFsm->anyFromStateActions() )
-		FROM_STATE_ACTIONS();
-
-	if ( redFsm->anyEofActions() )
-		EOF_ACTIONS();
-
-	STATE_IDS();
-}
-
-void AsmGotoCodeGen::writeExec()
-{
-	testEofUsed = false;
-	outLabelUsed = false;
-
-	out << "	{\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps = 0;\n";
-
-	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
-			|| redFsm->anyFromStateActions() )
-	{
-		out << 
-			"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << PTR_CONST_END() << POINTER() << "_acts;\n"
-			"	" << UINT() << " _nacts;\n";
-	}
-
-	if ( redFsm->anyConditions() )
-		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
-
-	out << "\n";
-
-	if ( !noEnd ) {
-		testEofUsed = true;
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
-	}
-
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
-	}
-
-	out << "_resume:\n";
-
-	if ( redFsm->anyFromStateActions() ) {
-		out <<
-			"	_acts = " << ARR_OFF( A(), FSA() + "[" + vCS() + "]" ) << ";\n"
-			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
-			"	while ( _nacts-- > 0 ) {\n"
-			"		switch ( *_acts++ ) {\n";
-			FROM_STATE_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
-			"		}\n"
-			"	}\n"
-			"\n";
-	}
-
-	out <<
-		"	switch ( " << vCS() << " ) {\n";
-		STATE_GOTOS();
-		SWITCH_DEFAULT() <<
-		"	}\n"
-		"\n";
-		TRANSITIONS() <<
-		"\n";
-
-	if ( redFsm->anyRegActions() )
-		EXEC_FUNCS() << "\n";
-
-	out << "_again:\n";
-
-	if ( redFsm->anyToStateActions() ) {
-		out <<
-			"	_acts = " << ARR_OFF( A(), TSA() + "[" + vCS() + "]" ) << ";\n"
-			"	_nacts = " << CAST(UINT()) << " *_acts++;\n"
-			"	while ( _nacts-- > 0 ) {\n"
-			"		switch ( *_acts++ ) {\n";
-			TO_STATE_ACTION_SWITCH();
-			SWITCH_DEFAULT() <<
-			"		}\n"
-			"	}\n"
-			"\n";
-	}
-
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
-	}
-
-	if ( !noEnd ) {
-		out << 
-			"	if ( ++" << P() << " != " << PE() << " )\n"
-			"		goto _resume;\n";
-	}
-	else {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	goto _resume;\n";
-	}
-
-	if ( testEofUsed )
-		out << "	_test_eof: {}\n";
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		out << 
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"	{\n";
-
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"	switch ( " << vCS() << " ) {\n";
-
-			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-				if ( st->eofTrans != 0 )
-					out << "	case " << st->id << ": goto tr" << st->eofTrans->id << ";\n";
-			}
-
-			SWITCH_DEFAULT() <<
-				"	}\n";
-		}
-
-		if ( redFsm->anyEofActions() ) {
-			out <<
-				"	" << PTR_CONST() << ARRAY_TYPE(redFsm->maxActArrItem) << PTR_CONST_END() << 
-						POINTER() << "__acts = " << 
-						ARR_OFF( A(), EA() + "[" + vCS() + "]" ) << ";\n"
-				"	" << UINT() << " __nacts = " << CAST(UINT()) << " *__acts++;\n"
-				"	while ( __nacts-- > 0 ) {\n"
-				"		switch ( *__acts++ ) {\n";
-				EOF_ACTION_SWITCH();
-				SWITCH_DEFAULT() <<
-				"		}\n"
-				"	}\n";
-		}
-
-		out <<
-			"	}\n"
-			"\n";
-	}
-
-	if ( outLabelUsed )
-		out << "	_out: {}\n";
-
-	out << "	}\n";
 }
 
 bool AsmIpGotoCodeGen::useAgainLabel()

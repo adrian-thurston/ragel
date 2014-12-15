@@ -277,6 +277,7 @@ protected:
 	void GET_TOKEND( ostream &ret, GenInlineItem *item );
 	virtual void SUB_ACTION( ostream &ret, GenInlineItem *item, 
 			int targState, bool inFinish, bool csForced );
+	void STATIC_CONST_INT( const string &name, const string &val );
 	void STATE_IDS();
 
 	string ERROR_STATE();
@@ -378,9 +379,6 @@ public:
 	/* Called from STATE_GOTOS just before writing the gotos */
 	virtual void GOTO_HEADER( RedStateAp *state );
 	virtual void STATE_GOTO_ERROR();
-
-	virtual void writeData();
-	virtual void writeExec();
 };
 
 
