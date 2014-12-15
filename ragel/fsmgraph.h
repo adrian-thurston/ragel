@@ -769,23 +769,91 @@ struct StateAp
 	LmItemSet lmItemSet;
 };
 
-template <class ListItem> struct NextTrans
+template <class Item> struct PiList
+{
+	PiList()
+		: ptr(0) {}
+
+	PiList( const DList<Item> &l )
+		: ptr(l.head) {}
+
+	PiList( Item *ptr )
+		: ptr(ptr) {}
+
+	operator Item *() const   { return ptr; }
+	Item *operator->() const  { return ptr; }
+
+	bool end()   { return ptr == 0; }
+	void clear() { ptr = 0; }
+
+	PiList next()
+		{ return PiList( ptr->next ); }
+
+	Item *ptr;
+};
+
+template <class Item> struct PiSingle
+{
+	PiSingle()
+		: ptr(0) {}
+
+	PiSingle( Item *ptr )
+		: ptr(ptr) {}
+
+	operator Item *() const   { return ptr; }
+	Item *operator->() const  { return ptr; }
+
+	bool end()   { return ptr == 0; }
+	void clear() { ptr = 0; }
+
+	/* Next is always nil. */
+	PiSingle next()
+		{ return PiSingle( 0 ); }
+
+	Item *ptr;
+};
+
+template <class Item> struct PiVector
+{
+	PiVector()
+		: ptr(0), length(0) {}
+
+	PiVector( const Vector<Item> &v )
+		: ptr(v.data), length(v.length()) {}
+
+	PiVector( Item *ptr, long length )
+		: ptr(ptr), length(length) {}
+
+	operator Item *() const   { return ptr; }
+	Item *operator->() const  { return ptr; }
+
+	bool end()   { return length == 0; }
+	void clear() { ptr = 0; length = 0; }
+
+	PiVector next()
+		{ return PiVector( ptr + 1, length - 1 ); }
+
+	Item *ptr;
+	long length;
+};
+
+template <class ItemIter> struct NextTrans
 {
 	Key lowKey, highKey;
-	ListItem *trans;
-	ListItem *next;
+	ItemIter trans;
+	ItemIter next;
 
 	void load() {
-		if ( trans == 0 )
-			next = 0;
+		if ( trans.end() )
+			next.clear();
 		else {
-			next = trans->next;
+			next = trans.next();
 			lowKey = trans->lowKey;
 			highKey = trans->highKey;
 		}
 	}
 
-	void set( ListItem *t ) {
+	void set( const ItemIter &t ) {
 		trans = t;
 		load();
 	}
@@ -805,7 +873,7 @@ enum PairIterUserState
 	BreakS1, BreakS2
 };
 
-template <class ListItem1, class ListItem2 = ListItem1> struct PairIter
+template <class ItemIter1, class ItemIter2 = ItemIter1> struct PairIter
 {
 	/* Encodes the different states that an fsm iterator can be in. */
 	enum IterState {
@@ -819,7 +887,7 @@ template <class ListItem1, class ListItem2 = ListItem1> struct PairIter
 		ExactOverlap,   End
 	};
 
-	PairIter( ListItem1 *list1, ListItem2 *list2 );
+	PairIter( const ItemIter1 &list1, const ItemIter2 &list2 );
 	
 	/* Query iterator. */
 	bool lte() { return itState != End; }
@@ -828,24 +896,25 @@ template <class ListItem1, class ListItem2 = ListItem1> struct PairIter
 	void operator++()    { findNext(); }
 
 	/* Iterator state. */
-	ListItem1 *list1;
-	ListItem2 *list2;
+	ItemIter1 list1;
+	ItemIter2 list2;
 	IterState itState;
 	PairIterUserState userState;
 
-	NextTrans<ListItem1> s1Tel;
-	NextTrans<ListItem2> s2Tel;
+	NextTrans<ItemIter1> s1Tel;
+	NextTrans<ItemIter2> s2Tel;
 	Key bottomLow, bottomHigh;
-	ListItem1 *bottomTrans1;
-	ListItem2 *bottomTrans2;
+	ItemIter1 bottomTrans1;
+	ItemIter2 bottomTrans2;
 
 private:
 	void findNext();
 };
 
 /* Init the iterator by advancing to the first item. */
-template <class ListItem1, class ListItem2> PairIter<ListItem1, ListItem2>::PairIter( 
-		ListItem1 *list1, ListItem2 *list2 )
+template <class ItemIter1, class ItemIter2>
+		PairIter< ItemIter1, ItemIter2 >::PairIter( 
+			const ItemIter1 &list1, const ItemIter2 &list2 )
 :
 	list1(list1),
 	list2(list2),
@@ -871,7 +940,7 @@ template <class ListItem1, class ListItem2> PairIter<ListItem1, ListItem2>::Pair
 
 /* Advance to the next transition. When returns, trans points to the next
  * transition, unless there are no more, in which case end() returns true. */
-template <class ListItem1, class ListItem2> void PairIter<ListItem1, ListItem2>::findNext()
+template <class ItemIter1, class ItemIter2> void PairIter<ItemIter1, ItemIter2>::findNext()
 {
 	/* Jump into the iterator routine base on the iterator state. */
 	switch ( itState ) {
@@ -899,20 +968,20 @@ entryBegin:
 
 	/* Concurrently scan both out ranges. */
 	while ( true ) {
-		if ( s1Tel.trans == 0 ) {
+		if ( s1Tel.trans.end() ) {
 			/* We are at the end of state1's ranges. Process the rest of
 			 * state2's ranges. */
-			while ( s2Tel.trans != 0 ) {
+			while ( !s2Tel.trans.end() ) {
 				/* Range is only in s2. */
 				CO_RETURN2( ConsumeS2Range, RangeInS2 );
 				s2Tel.increment();
 			}
 			break;
 		}
-		else if ( s2Tel.trans == 0 ) {
+		else if ( s2Tel.trans.end() ) {
 			/* We are at the end of state2's ranges. Process the rest of
 			 * state1's ranges. */
-			while ( s1Tel.trans != 0 ) {
+			while ( !s1Tel.trans.end() ) {
 				/* Range is only in s1. */
 				CO_RETURN2( ConsumeS1Range, RangeInS1 );
 				s1Tel.increment();

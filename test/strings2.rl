@@ -11,6 +11,23 @@
 
 #include "strings2.h"
 
+#ifdef PERF_TEST
+
+/* Calibrated to 1s on yoho. */
+#define perf_iters ( 4081632ll * S )
+
+int _perf_dummy = 0;
+#define perf_printf(...) ( _perf_dummy += 1 )
+#define perf_loop long _pi; for ( _pi = 0; _pi < perf_iters; _pi++ )
+
+#else
+
+#define perf_printf(...) printf( __VA_ARGS__ )
+#define perf_loop
+
+#endif
+
+
 %%{
 	machine strs;
 	variable cs fsm->cs;
@@ -1310,19 +1327,24 @@
 %% write data;
 struct strs the_fsm;
 
-void test( char *buf )
+void test( const char *buf )
 {
+	int len = strlen( buf );
 	struct strs *fsm = &the_fsm;
-	char *p = buf;
-	char *pe = buf + strlen( buf );
 
-	%% write init;
-	%% write exec;
+	perf_loop
+	{
+		const char *p = buf;
+		const char *pe = buf + len;
+
+		%% write init;
+		%% write exec;
+	}
 
 	if ( fsm->cs >= strs_first_final )
-		printf("ACCEPT\n");
+		perf_printf("ACCEPT\n");
 	else
-		printf("FAIL\n");
+		perf_printf("FAIL\n");
 }
 
 

@@ -350,8 +350,13 @@ struct RedStateAp
 	Key condLowKey, condHighKey;
 	GenCondSpace **condList;
 
-	/* For flat keys. */
+	/* For flat tables, in key space. */
 	Key lowKey, highKey;
+
+	/* Low/high in class space. */
+	long long low, high;
+
+	/* Indicies in class space. */
 	RedTransAp **transList;
 
 	/* The list of states that transitions from this state go to. */
@@ -472,7 +477,61 @@ struct RedFsmAp
 	void moveTransToSingle( RedStateAp *state );
 	void chooseSingle();
 
-	void makeFlat();
+	/* State low/high, in key space and class space. */
+	Key lowKey;
+	Key highKey;
+	long long nextClass;
+
+	long long *classMap;
+
+	/* Support structs for equivalence class computation. */
+	struct EquivClass
+	{
+		EquivClass( Key lowKey, Key highKey, long long value )
+			: lowKey(lowKey), highKey(highKey), value(value) {}
+
+		Key lowKey, highKey;
+		long long value;
+		EquivClass *prev, *next;
+	};
+
+	typedef DList<EquivClass> EquivList;
+	typedef BstMap<RedTransAp*, int> EquivAlloc;
+	typedef BstMapEl<RedTransAp*, int> EquivAllocEl;
+
+	struct PairKey
+	{
+		PairKey( long long k1, long long k2 )
+			: k1(k1), k2(k2) {}
+
+		long long k1;
+		long long k2;
+	};
+
+	struct PairKeyCmp
+	{
+		static inline long compare( const PairKey &k1, const PairKey &k2 )
+		{
+			if ( k1.k1 < k2.k1 )
+				return -1;
+			else if ( k1.k1 > k2.k1 )
+				return 1;
+			if ( k1.k2 < k2.k2 )
+				return -1;
+			else if ( k1.k2 > k2.k2 )
+				return 1;
+			else
+				return 0;
+		}
+	};
+
+	typedef BstMap< PairKey, long long, PairKeyCmp > PairKeyMap;
+	typedef BstMapEl< PairKey, long long > PairKeyMapEl;
+
+	void makeFlatCond();
+	void makeFlatDirect();
+	void characterClass( EquivList &equivList );
+	void makeFlatClass();
 
 	/* Move a selected transition from ranges to default. */
 	void moveToDefault( RedTransAp *defTrans, RedStateAp *state );

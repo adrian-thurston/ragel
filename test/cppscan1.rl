@@ -6,6 +6,22 @@
 
 #include "cppscan1.h"
 
+#ifdef PERF_TEST
+
+/* Calibrated to 1s on yoho. */
+#define perf_iters ( 158428ll * S )
+
+int _perf_dummy = 0;
+#define perf_printf(...) ( _perf_dummy += 1 )
+#define perf_loop long _pi; for ( _pi = 0; _pi < perf_iters; _pi++ )
+
+#else
+
+#define perf_printf(...) printf( __VA_ARGS__ )
+#define perf_loop
+
+#endif
+
 %%{
 	machine Scanner;
 	access fsm->;
@@ -97,7 +113,9 @@
 	action onEOFChar { 
 		/* On EOF char, write out the non token buffer. */
 		fsm->nonTokBuf.append(0);
+#ifndef PERF_TEST
 		cout << fsm->nonTokBuf.data;
+#endif
 		fsm->nonTokBuf.clear();
 	}
 
@@ -121,24 +139,28 @@
 
 void Scanner::init( )
 {
-	Scanner *fsm = this;
-	/* A count of the number of characters in 
-	 * a token. Used for % sequences. */
-	count = 0;
-	line = 1;
-	col = 1;
-
-	%% write init;
 }
 
 int Scanner::execute( const char *data, int len )
 {
-	Scanner *fsm = this;
-	const char *p = data;
-	const char *pe = data + len;
-	const char *eof = pe;
+	perf_loop
+	{
+		Scanner *fsm = this;
 
-	%% write exec;
+		/* A count of the number of characters in 
+		 * a token. Used for % sequences. */
+		count = 0;
+		line = 1;
+		col = 1;
+
+		%% write init;
+		const char *p = data;
+		const char *pe = data + len;
+		const char *eof = pe;
+
+		%% write exec;
+	}
+
 	if ( cs == Scanner_error )
 		return -1;
 	if ( cs >= Scanner_first_final )
@@ -160,13 +182,17 @@ void Scanner::token( int id )
 	/* Leader. */
 	if ( nonTokBuf.length > 0 ) {
 		nonTokBuf.append(0);
+#ifndef PERF_TEST
 		cout << nonTokBuf.data;
+#endif
 		nonTokBuf.clear();
 	}
 
 	/* Token data. */
 	tokBuf.append(0);
+#ifndef PERF_TEST
 	cout << '<' << id << '>' << tokBuf.data;
+#endif
 	tokBuf.clear();
 }
 
@@ -193,17 +219,20 @@ void Buffer::upAllocate( int len )
 void test( const char *buf )
 {
 	Scanner scanner(cout);
-	scanner.init();
 	scanner.execute( buf, strlen(buf) );
 
 	/* The last token is ignored (because there is no next token). Send
 	 * trailing null to force the last token into whitespace. */
 	char eof = 0;
 	if ( scanner.execute( &eof, 1 ) <= 0 ) {
+#ifndef PERF_TEST
 		cerr << "cppscan: scan failed" << endl;
+#endif
 		return;
 	}
+#ifndef PERF_TEST
 	cout.flush();
+#endif
 }
 
 int main()

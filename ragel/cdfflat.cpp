@@ -237,7 +237,11 @@ void FFlatCodeGen::writeData()
 
 	FLAT_INDEX_OFFSET();
 
+	ALPH_CLASS();
+
 	INDICIES();
+
+	INDEX_DEFAULTS();
 
 	TRANS_TARGS();
 
@@ -265,13 +269,14 @@ void FFlatCodeGen::writeExec()
 	outLabelUsed = false;
 
 	out << 
-		"	{\n"
-		"	int _slen";
+		"	{\n";
+
+	if ( redFsm->anyConditions() )
+		out << "	int _slen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << ", _ps";
-	
-	out << ";\n";
+		out << "	int _ps;\n";
+
 	out << "	int _trans";
 
 	if ( redFsm->anyConditions() )

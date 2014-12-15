@@ -163,23 +163,23 @@ for test_case; do
 	fi
 
 	case $lang in
+		c)
+			lang_opt=-C;
+			code_suffix=c;
+			compiler=$c_compiler;
+			cflags="-pedantic -ansi -Wall -O3 -Wno-variadic-macros -Wno-unused-but-set-variable"
+		;;
 		c++)
 			lang_opt=-C;
 			code_suffix=cpp;
 			compiler=$cxx_compiler;
-			cflags="-pedantic -ansi -Wall -O3"
+			cflags="-pedantic -ansi -Wall -O3 -Wno-variadic-macros -Wno-unused-but-set-variable"
 		;;
 		d)
 			lang_opt=-D;
 			code_suffix=d;
 			compiler=$d_compiler;
 			cflags="-Wall -O3"
-		;;
-		c)
-			lang_opt=-C;
-			code_suffix=c;
-			compiler=$c_compiler;
-			cflags="-pedantic -ansi -Wall -O3"
 		;;
 		obj-c)
 			lang_opt=-C;

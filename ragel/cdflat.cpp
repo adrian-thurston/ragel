@@ -145,11 +145,11 @@ std::ostream &FlatCodeGen::FLAT_INDEX_OFFSET()
 		taIO.VAL( curIndOffset );
 		
 		/* Move the index offset ahead. */
-		if ( st->transList != 0 )
-			curIndOffset += keyOps->span( st->lowKey, st->highKey );
-
-		if ( st->defTrans != 0 )
-			curIndOffset += 1;
+		if ( st->transList != 0 ) {
+			long long span = st->high - st->low + 1;
+			for ( long long pos = 0; pos < span; pos++ )
+				curIndOffset += 1;
+		}
 	}
 
 	taIO.CLOSE();
@@ -341,9 +341,17 @@ std::ostream &FlatCodeGen::KEYS()
 	taK.OPEN();
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Emit just low key and high key. */
-		taK.KEY( st->lowKey );
-		taK.KEY( st->highKey );
+		if ( st->transList ) {
+			/* Emit just low key and high key. */
+			taK.KEY( st->low );
+			taK.KEY( st->high );
+		}
+		else {
+			/* Low > high, this ensures that now keys[] range test can succeed,
+			 * regardless of the value of the equiv-space key. */
+			taK.KEY( 1 );
+			taK.KEY( 0 );
+		}
 	}
 
 	/* Output one last number so we don't have to figure out when the last
@@ -355,6 +363,20 @@ std::ostream &FlatCodeGen::KEYS()
 	return out;
 }
 
+std::ostream &FlatCodeGen::ALPH_CLASS()
+{
+	TableArray taAC( *this, arrayType(redFsm->maxSpan), AC() );
+	taAC.OPEN();
+
+	long long maxSpan = keyOps->span( redFsm->lowKey, redFsm->highKey );
+
+	for ( long long pos = 0; pos < maxSpan; pos++ )
+		taAC.VAL( redFsm->classMap[pos] );
+
+	taAC.CLOSE();
+	return out;
+}
+
 std::ostream &FlatCodeGen::INDICIES()
 {
 	TableArray taI( *this, arrayType(redFsm->maxIndex), I() );
@@ -363,22 +385,32 @@ std::ostream &FlatCodeGen::INDICIES()
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList != 0 ) {
-			/* Walk the singles. */
-			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
-			for ( unsigned long long pos = 0; pos < span; pos++ )
+			long long span = st->high - st->low + 1;
+			for ( long long pos = 0; pos < span; pos++ )
 				taI.VAL( st->transList[pos]->id );
 		}
-
-		/* The state's default index goes next. */
-		if ( st->defTrans != 0 )
-			taI.VAL( st->defTrans->id );
 	}
 
-	/* Output one last number so we don't have to figure out when the last
-	 * entry is and avoid writing a comma. */
+	/* Originally here for formatting reasons. Likely can be removed. */
 	taI.VAL( 0 );
 
 	taI.CLOSE();
+
+	return out;
+}
+
+std::ostream &FlatCodeGen::INDEX_DEFAULTS()
+{
+	TableArray taID( *this, arrayType(redFsm->maxIndex), ID() );
+
+	taID.OPEN();
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->defTrans != 0 )
+			taID.VAL( st->defTrans->id );
+		else
+			taID.VAL( 0 );
+	}
+	taID.CLOSE();
 
 	return out;
 }
@@ -437,14 +469,24 @@ std::ostream &FlatCodeGen::TRANS_ACTIONS()
 
 void FlatCodeGen::LOCATE_TRANS()
 {
+	long lowKey = redFsm->lowKey.getVal();
+	long highKey = redFsm->highKey.getVal();
+
 	out <<
 		"	_keys = " << ARR_OFF( K(), "(" + vCS() + "<<1)" ) << ";\n"
 		"	_inds = " << ARR_OFF( I(), IO() + "[" + vCS() + "]" ) << ";\n"
 		"\n"
-		"	_slen = " << SP() << "[" << vCS() << "];\n"
-		"	_trans = _inds[ _slen > 0 && _keys[0] <=" << GET_WIDE_KEY() << " &&\n"
-		"		" << GET_WIDE_KEY() << " <= _keys[1] ?\n"
-		"		" << GET_WIDE_KEY() << " - _keys[0] : _slen ];\n"
+		"	if ( " <<
+					GET_WIDE_KEY() << " <= " << highKey << " &&" <<
+					GET_WIDE_KEY() << " - " << lowKey << " >= 0 ) {\n"
+		"		long _ic = " << AC() << "[" << GET_WIDE_KEY() << " - " << lowKey << "];\n" 
+		"		_trans = \n"
+		"			_ic <= _keys[1] && _ic - _keys[0] >= 0 ?\n" 
+		"			_inds[ _ic - _keys[0] ] :\n"
+		"			" << ID() << "[" << vCS() << "];\n"
+		"	} else {\n"
+		"		_trans = " << ID() << "[" << vCS() << "];\n"
+		"	}\n"
 		"\n";
 }
 
@@ -553,7 +595,11 @@ void FlatCodeGen::writeData()
 
 	FLAT_INDEX_OFFSET();
 
+	ALPH_CLASS();
+
 	INDICIES();
+
+	INDEX_DEFAULTS();
 
 	TRANS_TARGS();
 
@@ -622,14 +668,15 @@ void FlatCodeGen::writeExec()
 	outLabelUsed = false;
 
 	out << 
-		"	{\n"
-		"	int _slen";
+		"	{\n";
+
+	if ( redFsm->anyConditions() )
+		out << "	int _slen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << ", _ps";
+		out << "	int _ps;\n";
 
 	out << 
-		";\n"
 		"	int _trans";
 
 	if ( redFsm->anyConditions() )

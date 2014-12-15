@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+
+set -e
+
+ragel1=$1
+ragel2=$2
+targ_time=$3
+shift 3
+
+cases="$@"
+if test -z "$cases"; then
+	cases="mailbox1 strings1 strings2 rlscan cppscan1"
+fi
+
+CFLAGS="-O3 -Wall -Wno-unused-but-set-variable"
+
+tc()
+{
+	ragel=$1
+	compiler=$2
+	seconds=$3
+	root=$4
+
+	$ragel -F1 -o $root.cpp $root.rl
+	$compiler $CFLAGS -DPERF_TEST -I../aapl -DS=${seconds}ll -o $root.bin $root.cpp
+	( time ./$root.bin ) 2>&1 | \
+		awk '/user/ { split( $2, a, "[ms]" ); printf( "%.3f\n", a[1] * 60 + a[2] ); }'
+}
+
+for c in $cases; do
+	time1=`tc $ragel1 g++ $targ_time $c`
+	time2=`tc $ragel2 g++ $targ_time $c`
+	speedup=`awk "BEGIN { printf( \"%.5f\n\", $time1 / $time2 ); }"`
+
+	echo -e "$c\t$time1 -> $time2\t$speedup" | expand -12,30
+done
+

@@ -5,6 +5,22 @@
 #include <string.h>
 #include <stdio.h>
 
+#ifdef PERF_TEST
+
+/* Calibrated to 1s on yoho. */
+#define perf_iters ( 3448275ll * S )
+
+int _perf_dummy = 0;
+#define perf_printf(...) ( _perf_dummy += 1 )
+#define perf_loop long _pi; for ( _pi = 0; _pi < perf_iters; _pi++ )
+
+#else
+
+#define perf_printf(...) printf( __VA_ARGS__ )
+#define perf_loop
+
+#endif
+
 struct strs
 {
 	int cs;
@@ -12,7 +28,6 @@ struct strs
 
 %%{
 	machine strs;
-	variable cs fsm->cs;
 
 	main := 
 		"__gmon_start__\n" |
@@ -135,38 +150,31 @@ struct strs
 
 %% write data;
 
-void strs_init( struct strs *fsm )
+void strs_run( const char *_data, int _len )
 {
-	%% write init;
+	perf_loop
+	{
+		struct strs fsm;
+		const char *p = _data;
+		const char *pe = _data + _len;
+
+		%% variable cs fsm.cs;
+		%% write init;
+		%% write exec;
+
+		if ( fsm.cs >= strs_first_final ) {
+			perf_printf("ACCEPT\n");
+		}
+		else {
+			perf_printf("FAIL\n");
+		}
+	}
 }
 
-void strs_execute( struct strs *fsm, const char *_data, int _len )
-{
-	const char *p = _data;
-	const char *pe = _data+_len;
-
-	%% write exec;
-}
-
-int strs_finish( struct strs *fsm )
-{
-	if ( fsm->cs == strs_error )
-		return -1;
-	if ( fsm->cs >= strs_first_final )
-		return 1;
-	return 0;
-}
-
-struct strs fsm;
-void test( char *buf )
+void test( const char *buf )
 {
 	int len = strlen( buf );
-	strs_init( &fsm );
-	strs_execute( &fsm, buf, len );
-	if ( strs_finish( &fsm ) > 0 )
-		printf("ACCEPT\n");
-	else
-		printf("FAIL\n");
+	strs_run( buf, len );
 }
 
 

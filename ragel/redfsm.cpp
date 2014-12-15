@@ -22,6 +22,7 @@
 #include "redfsm.h"
 #include "avlmap.h"
 #include "mergesort.h"
+#include "fsmgraph.h"
 #include <iostream>
 #include <sstream>
 
@@ -284,7 +285,9 @@ void RedFsmAp::chooseSingle()
 	}
 }
 
-void RedFsmAp::makeFlat()
+/* Make the flat indicies for conditions. This is the same for direct and
+ * class-based indicies. */
+void RedFsmAp::makeFlatCond()
 {
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->stateCondList.length() == 0 ) {
@@ -307,7 +310,14 @@ void RedFsmAp::makeFlat()
 					st->condList[base+pos] = sci->condSpace;
 			}
 		}
+	}
+}
 
+void RedFsmAp::makeFlatDirect()
+{
+	makeFlatCond();
+
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->outRange.length() == 0 ) {
 			st->lowKey = st->highKey = 0;
 			st->transList = 0;
@@ -334,6 +344,191 @@ void RedFsmAp::makeFlat()
 			}
 		}
 	}
+}
+
+void RedFsmAp::characterClass( EquivList &equiv )
+{
+	/* Find the global low and high keys. */
+	Key lowKey = keyOps->maxKey;
+	Key highKey = keyOps->minKey;
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->outRange.length() == 0 )
+			continue;
+
+		st->lowKey = st->outRange[0].lowKey;
+		st->highKey = st->outRange[st->outRange.length()-1].highKey;
+
+		if ( st->lowKey < lowKey )
+			lowKey = st->lowKey;
+
+		if ( st->highKey > highKey )
+			highKey = st->highKey;
+	}
+
+	long long next = 1;
+	equiv.append( new EquivClass( lowKey, highKey, next++ ) );
+
+	/* Start with a single equivalence class and break it up using range
+	 * boundaries of each state. This will tell us what the equivalence class
+	 * ranges are. These are the ranges that always go to the same state,
+	 * across all states. */
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->outRange.length() == 0 )
+			continue;
+
+		EquivList newList;
+		PairKeyMap uniqPairs;
+
+		/* What is the set of unique transitions (*for this state) */
+		EquivAlloc uniqTrans;
+		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
+			if ( ! uniqTrans.find( rtel->value ) )
+				uniqTrans.insert( rtel->value, next++ );
+		}
+
+		/* Merge with whole-machine equiv classes. */
+		for ( PairIter< PiList<EquivClass>, PiVector<RedTransEl> >
+				pair( equiv, st->outRange ); !pair.end(); pair++ )
+		{
+			switch ( pair.userState ) {
+
+			case RangeOverlap: {
+				/* Look up the char for s2. */
+				EquivAllocEl *s2El = uniqTrans.find( pair.s2Tel.trans->value );
+
+				/* Can't use either equiv classes, find uniques. */
+				PairKey pairKey( pair.s1Tel.trans->value, s2El->value );
+				PairKeyMapEl *pairEl = uniqPairs.find( pairKey );
+				if ( ! pairEl ) 
+					pairEl = uniqPairs.insert( pairKey, next++ );
+
+				EquivClass *equivClass = new EquivClass(
+						pair.s1Tel.lowKey, pair.s1Tel.highKey,
+						pairEl->value );
+				newList.append( equivClass );
+				break;
+			}
+
+			case RangeInS1: {
+				EquivClass *equivClass = new EquivClass(
+						pair.s1Tel.lowKey, pair.s1Tel.highKey,
+						pair.s1Tel.trans->value );
+				newList.append( equivClass );
+				break;
+			}
+
+			case RangeInS2: {
+				/* Look up the char for s2. */
+				EquivAllocEl *s2El = uniqTrans.find( pair.s2Tel.trans->value );
+
+				EquivClass *equivClass = new EquivClass(
+						pair.s2Tel.lowKey, pair.s2Tel.highKey,
+						s2El->value );
+				newList.append( equivClass );
+				break;
+			}
+
+			case BreakS1:
+			case BreakS2:
+				break;
+			}
+		}
+
+		equiv.empty();
+		equiv.transfer( newList );
+	}
+	
+	/* Reduce to sequential. */
+	next = 0;
+	BstMap<long long, long long> map;
+	for ( EquivClass *c = equiv.head; c != 0; c = c->next ) {
+		BstMapEl<long long, long long> *el = map.find( c->value );
+		if ( ! el ) 
+			el = map.insert( c->value, next++ );
+		c->value = el->value;
+	}
+
+	// for ( EquivClass *c = equiv.head; c != 0; c = c->next ) {
+	//	std::cout << c->lowKey.getVal() << " " <<
+	//			c->highKey.getVal() << " -> " << c->value << std::endl;
+	// }
+
+	/* Build the map and emit arrays from the range-based equiv classes. Will
+	 * likely crash if there are no transitions in the FSM. */
+	long long maxSpan = keyOps->span( lowKey, highKey );
+	long long *dest = new long long[maxSpan];
+	memset( dest, 0, sizeof(long long) * maxSpan );
+
+	for ( EquivClass *c = equiv.head; c != 0; c = c->next ) {
+		long long base = keyOps->span( lowKey, c->lowKey ) - 1;
+		long long span = keyOps->span( c->lowKey, c->highKey );
+		for ( long long s = 0; s < span; s++ )
+			dest[base + s] = c->value;
+	}
+
+	this->lowKey = lowKey;
+	this->highKey = highKey;
+	this->classMap = dest;
+	this->nextClass = next;
+
+}
+
+void RedFsmAp::makeFlatClass()
+{
+	EquivList equiv;
+	characterClass( equiv );
+	makeFlatCond();
+
+	/* Expand the transitions. This uses the equivalence classes. */
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->outRange.length() == 0 ) {
+			st->lowKey = st->highKey = 0;
+			st->low = st->high = 0;
+			st->transList = 0;
+		}
+		else {
+			st->lowKey = st->outRange[0].lowKey;
+			st->highKey = st->outRange[st->outRange.length()-1].highKey;
+
+			/* Compute low and high in class space. Use a pair iter to find all
+			 * the clases. Alleviates the need to iterate the whole input
+			 * alphabet. */
+			st->low = nextClass;
+			st->high = -1;
+			for ( PairIter< PiList<EquivClass>, PiVector<RedTransEl> >
+					pair( equiv, st->outRange ); !pair.end(); pair++ )
+			{
+				if ( pair.userState == RangeOverlap || pair.userState == RangeInS2 ) {
+					long long off = keyOps->span( lowKey, pair.s2Tel.lowKey ) - 1;
+					if ( classMap[off] < st->low )
+						st->low = classMap[off];
+					if ( classMap[off] > st->high )
+						st->high = classMap[off];
+				}
+			}
+
+			long long span = st->high - st->low + 1;
+			st->transList = new RedTransAp*[ span ];
+			memset( st->transList, 0, sizeof(RedTransAp*)*span );
+			
+			for ( PairIter< PiList<EquivClass>, PiVector<RedTransEl> >
+					pair( equiv, st->outRange ); !pair.end(); pair++ )
+			{
+				if ( pair.userState == RangeOverlap || pair.userState == RangeInS2 ) {
+					long long off = keyOps->span( lowKey, pair.s2Tel.lowKey ) - 1;
+					st->transList[ classMap[off] - st->low ] = pair.s2Tel.trans->value;
+				}
+			}
+
+			/* Fill in the gaps with the default transition. */
+			for ( long long pos = 0; pos < span; pos++ ) {
+				if ( st->transList[pos] == 0 )
+					st->transList[pos] = st->defTrans;
+			}
+		}
+	}
+
+	equiv.empty();
 }
 
 

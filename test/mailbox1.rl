@@ -11,36 +11,52 @@
 
 #include "mailbox1.h"
 
+#ifdef PERF_TEST
+
+/* Calibrated to 1s on yoho. */
+#define perf_iters ( 134408ll * S )
+
+int _perf_dummy = 0;
+#define perf_printf(...) ( _perf_dummy += 1 )
+#define perf_loop long _pi; for ( _pi = 0; _pi < perf_iters; _pi++ )
+
+#else
+
+#define perf_printf(...) printf( __VA_ARGS__ )
+#define perf_loop
+
+#endif
+
 %%{
 	machine MBox;
 
 	# Buffer the header names.
-	action bufHeadName { fsm->headName.append(fc); }
+	action bufHeadName { headName.append(fc); }
 
 	# Buffer the header content.
-	action bufHeadContent { fsm->headContent.append(fc); }
+	action bufHeadContent { headContent.append(fc); }
 
 	# Terminate a header. If it is an interesting header then prints it.
 	action finBufHeadContent {
 		/* Terminate the buffers. */
-		fsm->headName.append(0);
-		fsm->headContent.append(0);
+		headName.append(0);
+		headContent.append(0);
 
 		/* Print the header. Interesting headers. */
-		printf("%s:%s\n", fsm->headName.data, fsm->headContent.data);
+		perf_printf("%s:%s\n", headName.data, headContent.data);
 		
 		/* Clear for the next time we use them. */
-		fsm->headName.empty();
-		fsm->headContent.empty();
+		headName.empty();
+		headContent.empty();
 	}
 
 	action msgstart{
-		printf("NEW MESSAGE\n");
+		perf_printf("NEW MESSAGE\n");
 	}
 
 	# Prints a blank line after the end of the headers of each message.
 	action blankLine {
-		printf("\n");
+		perf_printf("\n");
 	}
 	
 	# Helpers we will use in matching the date section of the from line.
@@ -93,21 +109,18 @@
 
 %% write data;
 
-void MBox::init( )
-{
-	MBox *fsm = this;
-	%% write init;
-}
-
 void MBox::execute( const char *data, int len )
 {
-	MBox *fsm = this;
-	const char *p = data;
-	const char *pe = data + len;
-	%%{
-		access fsm->;
-		write exec;
-	}%%
+	perf_loop
+	{
+		const char *p = data;
+		const char *pe = data + len;
+		%%{
+			access this->;
+			write init;
+			write exec;
+		}%%
+	}
 }
 
 int MBox::finish( )
@@ -124,12 +137,13 @@ MBox mbox;
 void test( const char *buf )
 {
 	int len = strlen( buf );
-	mbox.init();
 	mbox.execute( buf, len );
-	if ( mbox.finish() > 0 )
-		printf("ACCEPT\n");
-	else
-		printf("FAIL\n");
+	if ( mbox.finish() > 0 ) {
+		perf_printf("ACCEPT\n");
+	}
+	else {
+		perf_printf("FAIL\n");
+	}
 }
 
 

@@ -195,8 +195,10 @@ int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 		return compareRes;
 
 	/* Use a pair iterator to get the transition pairs. */
-	PairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
-	for ( ; !outPair.end(); outPair++ ) {
+	for ( PairIter< PiList<TransAp> >
+			outPair( state1->outList, state2->outList );
+			!outPair.end(); outPair++ )
+	{
 		switch ( outPair.userState ) {
 
 		case RangeInS1:
@@ -257,8 +259,10 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 		return compareRes;
 
 	/* Use a pair iterator to test the condition pairs. */
-	PairIter<StateCond> condPair( state1->stateCondList.head, state2->stateCondList.head );
-	for ( ; !condPair.end(); condPair++ ) {
+	for ( PairIter< PiList<StateCond> >
+			condPair( state1->stateCondList, state2->stateCondList );
+			!condPair.end(); condPair++ )
+	{
 		switch ( condPair.userState ) {
 		case RangeInS1:
 			return 1;
@@ -281,8 +285,10 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 	}
 
 	/* Use a pair iterator to test the transition pairs. */
-	PairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
-	for ( ; !outPair.end(); outPair++ ) {
+	for ( PairIter< PiList<TransAp> >
+			outPair( state1->outList, state2->outList );
+			!outPair.end(); outPair++ )
+	{
 		switch ( outPair.userState ) {
 
 		case RangeInS1:
@@ -319,8 +325,10 @@ int PartitionCompare::compare( const StateAp *state1, const StateAp *state2 )
 	int compareRes;
 
 	/* Use a pair iterator to get the transition pairs. */
-	PairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
-	for ( ; !outPair.end(); outPair++ ) {
+	for ( PairIter< PiList<TransAp> >
+			outPair( state1->outList, state2->outList );
+			!outPair.end(); outPair++ )
+	{
 		switch ( outPair.userState ) {
 
 		case RangeInS1:
@@ -369,8 +377,10 @@ bool MarkCompare::shouldMark( MarkIndex &markIndex, const StateAp *state1,
 			const StateAp *state2 )
 {
 	/* Use a pair iterator to get the transition pairs. */
-	PairIter<TransAp> outPair( state1->outList.head, state2->outList.head );
-	for ( ; !outPair.end(); outPair++ ) {
+	for ( PairIter< PiList<TransAp> >
+			outPair( state1->outList, state2->outList );
+			!outPair.end(); outPair++ )
+	{
 		switch ( outPair.userState ) {
 
 		case RangeInS1:
