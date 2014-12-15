@@ -1825,14 +1825,39 @@ void AsmIpGotoCodeGen::writeData()
 
 void AsmIpGotoCodeGen::writeExec()
 {
+	out << "# WRITE EXEC BEGIN\n";
+
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */
 	setLabelsNeeded();
 	testEofUsed = false;
 	outLabelUsed = false;
 
-	out << "	{\n";
+	/* Data arrives in %rdi, length in %esi */
 
+	/* p  : %r12 */
+	/* pe : %r13 */
+
+	out << 
+		"	push	%r12\n"
+		"	push	%r13\n"
+		"	movq	%rdi, %r12\n"
+		"	movslq	%esi, %r13\n"
+		"	addq	%rdi, %r13\n"
+		".AGAIN:\n"
+		"	cmpq	%r12, %r13\n"
+		"	je      .DONE\n"
+		"	movsbl  (%r12), %edi\n"
+		"	call	putchar\n"
+		"	addq	$1, %r12\n"
+		"	jmp		.AGAIN\n"
+		".DONE:\n"
+		"	pop		%r13\n"
+		"	pop		%r12\n"
+	;
+	
+
+#if 0
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";
 
@@ -1894,9 +1919,10 @@ void AsmIpGotoCodeGen::writeExec()
 			"\n";
 	}
 
-	if ( outLabelUsed ) 
-		out << "	_out: {}\n";
+#endif
 
-	out <<
-		"	}\n";
+	if ( outLabelUsed ) 
+		out << ".L_out:\n";
+
+	out << "# WRITE EXEC END\n";
 }
