@@ -133,6 +133,7 @@ HostLang hostLangJava =   { HostLang::Java,   hostTypesJava,   4,  hostTypesJava
 HostLang hostLangRuby =   { HostLang::Ruby,   hostTypesRuby,   2,  hostTypesRuby+0,    false };
 HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9,  hostTypesCSharp+4,  true };
 HostLang hostLangOCaml =  { HostLang::OCaml,  hostTypesOCaml,  1,  hostTypesOCaml+0,   false };
+HostLang hostLangAsm =    { HostLang::Asm,    hostTypesC,      8,  hostTypesC+0,       true };
 
 HostLang *hostLang = &hostLangC;
 
