@@ -13,7 +13,7 @@ using std::endl;
 
 %%{
 
-parser Parser;
+parser Parser6;
 
 include "rlparse.kh";
 
@@ -171,7 +171,7 @@ action_spec:
 # semi-colon.
 alphtype_spec:
 	KW_AlphType TK_Word TK_Word ';' final {
-		if ( ! pd->setAlphType( $1->loc, $2->data, $3->data ) ) {
+		if ( ! pd->setAlphType( $1->loc, hostLang, $2->data, $3->data ) ) {
 			// Recover by ignoring the alphtype statement.
 			error($2->loc) << "\"" << $2->data << 
 					" " << $3->data << "\" is not a valid alphabet type" << endl;
@@ -180,7 +180,7 @@ alphtype_spec:
 
 alphtype_spec:
 	KW_AlphType TK_Word ';' final {
-		if ( ! pd->setAlphType( $1->loc, $2->data ) ) {
+		if ( ! pd->setAlphType( $1->loc, hostLang, $2->data ) ) {
 			// Recover by ignoring the alphtype statement.
 			error($2->loc) << "\"" << $2->data << 
 					"\" is not a valid alphabet type" << endl;
@@ -427,7 +427,7 @@ nonterm factor_with_ep
 factor_with_ep: 
 	factor_with_ep TK_Arrow local_state_ref final { 
 		/* Add the target to the list and return the factor object. */
-		$1->factorWithAug->epsilonLinks.append( EpsilonLink( $2->loc, nameRef ) );
+		$1->factorWithAug->epsilonLinks.append( EpsilonLink( $2->loc, new NameRef(nameRef) ) );
 		$$->factorWithAug = $1->factorWithAug; 
 	};
 factor_with_ep: 
@@ -526,7 +526,7 @@ factor_with_aug:
 
 type aug_type
 {
-	InputLoc loc;
+	ParserLoc loc;
 	AugType augType;
 };
 
@@ -1430,18 +1430,18 @@ state_ref_names:
 	write data;
 }%%
 
-void Parser::init()
+void Parser6::init()
 {
 	%% write init;
 }
 
-int Parser::parseLangEl( int type, const Token *token )
+int Parser6::parseLangEl( int type, const Token *token )
 {
 	%% write exec;
 	return errCount == 0 ? 0 : -1;
 }
 
-void Parser::tryMachineDef( InputLoc &loc, char *name, 
+void Parser6::tryMachineDef( const InputLoc &loc, char *name, 
 		MachineDef *machineDef, bool isInstance )
 {
 	GraphDictEl *newEl = pd->graphDict.insert( name );
@@ -1462,7 +1462,7 @@ void Parser::tryMachineDef( InputLoc &loc, char *name,
 	}
 }
 
-ostream &Parser::parse_error( int tokId, Token &token )
+ostream &Parser6::parse_error( int tokId, Token &token )
 {
 	/* Maintain the error count. */
 	gblErrorCount += 1;
@@ -1470,9 +1470,9 @@ ostream &Parser::parse_error( int tokId, Token &token )
 	cerr << token.loc << ": ";
 	cerr << "at token ";
 	if ( tokId < 128 )
-		cerr << "\"" << Parser_lelNames[tokId] << "\"";
+		cerr << "\"" << Parser6_lelNames[tokId] << "\"";
 	else 
-		cerr << Parser_lelNames[tokId];
+		cerr << Parser6_lelNames[tokId];
 	if ( token.data != 0 )
 		cerr << " with data \"" << token.data << "\"";
 	cerr << ": ";
@@ -1480,12 +1480,14 @@ ostream &Parser::parse_error( int tokId, Token &token )
 	return cerr;
 }
 
-int Parser::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
+int Parser6::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
 {
 	Token token;
 	token.data = tokstart;
 	token.length = toklen;
-	token.loc = loc;
+	token.loc.fileName = loc.fileName;
+	token.loc.line = loc.line;
+	token.loc.col = loc.col;
 	int res = parseLangEl( tokId, &token );
 	if ( res < 0 ) {
 		parse_error(tokId, token) << "parse error" << endl;

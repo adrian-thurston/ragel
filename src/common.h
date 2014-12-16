@@ -38,12 +38,26 @@ struct colm_location;
 #define U64BIT_MIN 0
 #define U64BIT_MAX 18446744073709551615ULL
 
+struct ParserLoc
+{
+	const char *fileName;
+	int line;
+	int col;
+};
+
 /* Location in an input file. */
 struct InputLoc
 {
 	InputLoc( colm_location *pcloc );
 
 	InputLoc() : fileName(0), line(-1), col(-1)  {}
+
+	InputLoc( const ParserLoc loc )
+	{
+		fileName = loc.fileName;
+		line = loc.line;
+		col = loc.col;
+	}
 
 	InputLoc( const InputLoc &loc )
 	{

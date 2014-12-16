@@ -75,4 +75,6 @@ extern int gblErrorCount;
 
 std::ostream &error();
 
+extern const char mainMachine[];
+
 #endif

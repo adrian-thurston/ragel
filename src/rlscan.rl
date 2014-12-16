@@ -131,7 +131,7 @@ void Scanner::flushImport()
 	}
 }
 
-void Scanner::directToParser( Parser *toParser, const char *tokFileName, int tokLine, 
+void Scanner::directToParser( Parser6 *toParser, const char *tokFileName, int tokLine, 
 		int tokColumn, int type, char *tokdata, int toklen )
 {
 	InputLoc loc;
@@ -185,7 +185,7 @@ void Scanner::pass()
 
 	/* If no errors and we are at the bottom of the include stack (the
 	 * source file listed on the command line) then write out the data. */
-	if ( includeDepth == 0 && machineSpec == 0 && machineName == 0 )
+	if ( includeDepth == 0 && id.machineSpec == 0 && id.machineName == 0 )
 		id.inputItems.tail->data.write( ts, te-ts );
 }
 
@@ -265,7 +265,8 @@ void Scanner::handleMachine()
 		ParserDictEl *pdEl = id.parserDict.find( machine );
 		if ( pdEl == 0 ) {
 			pdEl = new ParserDictEl( machine );
-			pdEl->value = new Parser( fileName, machine, sectionLoc );
+			pdEl->value = new Parser6( &id, fileName, machine, sectionLoc,
+					id.hostLang, id.minimizeLevel, id.minimizeOpt );
 			pdEl->value->init();
 			id.parserDict.insert( pdEl );
 			id.parserList.append( pdEl->value );
@@ -393,7 +394,7 @@ void Scanner::handleImport()
 
 	action write_command
 	{
-		if ( active() && machineSpec == 0 && machineName == 0 ) {
+		if ( active() && id.machineSpec == 0 && id.machineName == 0 ) {
 			InputItem *inputItem = new InputItem;
 			inputItem->type = InputItem::Write;
 			inputItem->loc.fileName = fileName;
@@ -407,13 +408,13 @@ void Scanner::handleImport()
 
 	action write_arg
 	{
-		if ( active() && machineSpec == 0 && machineName == 0 )
+		if ( active() && id.machineSpec == 0 && id.machineName == 0 )
 			id.inputItems.tail->writeArgs.append( strdup(tokdata) );
 	}
 
 	action write_close
 	{
-		if ( active() && machineSpec == 0 && machineName == 0 )
+		if ( active() && id.machineSpec == 0 && id.machineName == 0 )
 			id.inputItems.tail->writeArgs.append( 0 );
 	}
 
@@ -515,7 +516,7 @@ void Scanner::endSection( )
 	}
 
 	if ( includeDepth == 0 ) {
-		if ( machineSpec == 0 && machineName == 0 ) {
+		if ( id.machineSpec == 0 && id.machineName == 0 ) {
 			/* The end section may include a newline on the end, so
 			 * we use the last line, which will count the newline. */
 			InputItem *inputItem = new InputItem;
@@ -949,7 +950,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		'getkey' => { 
 			token( KW_GetKey );
 			inlineBlockType = SemiTerminated;
-			if ( hostLang->lang == HostLang::Ruby )
+			if ( id.hostLang->lang == HostLang::Ruby )
 				fcall inline_code_ruby;
 			else
 				fcall inline_code;
@@ -957,7 +958,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		'access' => { 
 			token( KW_Access );
 			inlineBlockType = SemiTerminated;
-			if ( hostLang->lang == HostLang::Ruby )
+			if ( id.hostLang->lang == HostLang::Ruby )
 				fcall inline_code_ruby;
 			else
 				fcall inline_code;
@@ -965,7 +966,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		'variable' => { 
 			token( KW_Variable );
 			inlineBlockType = SemiTerminated;
-			if ( hostLang->lang == HostLang::Ruby )
+			if ( id.hostLang->lang == HostLang::Ruby )
 				fcall inline_code_ruby;
 			else
 				fcall inline_code;
@@ -1089,7 +1090,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 				token( '{' );
 				curly_count = 1; 
 				inlineBlockType = CurlyDelimited;
-				if ( hostLang->lang == HostLang::Ruby )
+				if ( id.hostLang->lang == HostLang::Ruby )
 					fcall inline_code_ruby;
 				else
 					fcall inline_code;
@@ -1179,7 +1180,7 @@ void Scanner::do_scan()
 	/* Set up the start state. FIXME: After 5.20 is released the nocs write
 	 * init option should be used, the main machine eliminated and this statement moved
 	 * above the write init. */
-	if ( hostLang->lang == HostLang::Ruby )
+	if ( id.hostLang->lang == HostLang::Ruby )
 		cs = rlscan_en_main_ruby;
 	else
 		cs = rlscan_en_main;

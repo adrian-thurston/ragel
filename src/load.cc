@@ -84,7 +84,8 @@ struct LoadRagel
 	/* Should this go in the parse data? Probably. */
 	Vector<bool> exportContext;
 
-	void loadMachineStmt( ragel::word MachineName, const char *targetMachine, const char *searchMachine )
+	void loadMachineStmt( ragel::word MachineName,
+			const char *targetMachine, const char *searchMachine )
 	{
 		InputLoc sectionLoc;
 		string fileName = "input.rl";
@@ -105,7 +106,8 @@ struct LoadRagel
 		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
 			pdEl = new ParseDataDictEl( machine );
-			pdEl->value = new ParseData( &id, fileName, machine, sectionLoc, hostLang, minimizeLevel, minimizeOpt );
+			pdEl->value = new ParseData( &id, fileName, machine,
+					sectionLoc, hostLang, minimizeLevel, minimizeOpt );
 			id.parseDataDict.insert( pdEl );
 			id.parseDataList.append( pdEl->value );
 		}
@@ -1920,7 +1922,9 @@ struct LoadRagel
 			case import_val::String: {
 				string s = Import.Val().string().text();
 				Token tok;
-				tok.loc = loc;
+				tok.loc.fileName = loc.fileName;
+				tok.loc.line = loc.line;
+				tok.loc.col = loc.col;
 				tok.set( s.c_str(), s.size() );
 				literal = new Literal( tok, Literal::LitString );
 				break;
@@ -1929,7 +1933,9 @@ struct LoadRagel
 			case import_val::Number: {
 				string s = Import.Val().number().text();
 				Token tok;
-				tok.loc = loc;
+				tok.loc.fileName = loc.fileName;
+				tok.loc.line = loc.line;
+				tok.loc.col = loc.col;
 				tok.set( s.c_str(), s.size() );
 				literal = new Literal( tok, Literal::Number );
 				break;

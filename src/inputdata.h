@@ -10,6 +10,7 @@
 #include <sstream>
 
 struct ParseData;
+struct Parser6;
 struct CondSpace;
 struct CondAp;
 struct ActionTable;
@@ -35,6 +36,12 @@ struct InputItem
 typedef AvlMap<std::string, ParseData*, CmpString> ParseDataDict;
 typedef AvlMapEl<std::string, ParseData*> ParseDataDictEl;
 typedef DList<ParseData> ParseDataList;
+
+/* This exists for ragel-6 parsing. */
+typedef AvlMap<const char*, Parser6*, CmpStr> ParserDict;
+typedef AvlMapEl<const char*, Parser6*> ParserDictEl;
+typedef DList<Parser6> ParserList;
+
 
 typedef DList<InputItem> InputItemList;
 typedef Vector<const char *> ArgsVector;
@@ -83,6 +90,10 @@ struct InputData
 	ParseDataDict parseDataDict;
 	ParseDataList parseDataList;
 	InputItemList inputItems;
+
+	/* Ragel-6 frontend. */
+	ParserDict parserDict;
+	ParserList parserList;
 
 	ArgsVector includePaths;
 

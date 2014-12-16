@@ -28,10 +28,10 @@ struct IncludeHistoryItem
 
 typedef Vector<IncludeHistoryItem> IncludeHistory;
 
-struct Parser
+struct Parser6
 {
 %%{
-	parser Parser;
+	parser Parser6;
 
 	# General tokens.
 	token TK_Word, TK_Literal, TK_Number, TK_EndSection, TK_UInt, TK_Hex,
@@ -89,17 +89,21 @@ struct Parser
 	void init();
 	int parseLangEl( int type, const Token *token );
 
-	Parser( const char *fileName, char *sectionName, InputLoc &sectionLoc )
-		: sectionName(sectionName)
+	Parser6( InputData *id, const char *fileName, char *sectionName, const InputLoc &sectionLoc,
+			const HostLang *hostLang, MinimizeLevel minimizeLevel,
+			MinimizeOpt minimizeOpt )
+	:
+		sectionName(sectionName)
 	{
-		pd = new ParseData( fileName, sectionName, sectionLoc );
+		pd = new ParseData( id, std::string(fileName), std::string(sectionName),
+				sectionLoc, hostLang, minimizeLevel, minimizeOpt );
 		exportContext.append( false );
 		includeHistory.append( IncludeHistoryItem( 
 				fileName, sectionName ) );
 	}
 
 	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
-	void tryMachineDef( InputLoc &loc, char *name, 
+	void tryMachineDef( const InputLoc &loc, char *name, 
 		MachineDef *machineDef, bool isInstance );
 
 	/* Report an error encountered by the parser. */
@@ -109,6 +113,7 @@ struct Parser
 
 	/* The name of the root section, this does not change during an include. */
 	char *sectionName;
+	const HostLang *hostLang;
 
 	NameRef nameRef;
 	NameRefList nameRefList;
@@ -116,7 +121,7 @@ struct Parser
 	Vector<bool> exportContext;
 	IncludeHistory includeHistory;
 
-	Parser *prev, *next;
+	Parser6 *prev, *next;
 };
 
 %% write token_defs;
