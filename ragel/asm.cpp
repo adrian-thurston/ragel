@@ -868,41 +868,10 @@ std::ostream &AsmCodeGen::ACTION_SWITCH()
 	return out;
 }
 
-void AsmCodeGen::emitSingleSwitch( RedStateAp *state )
-{
-	/* Load up the singles. */
-	int numSingles = state->outSingle.length();
-	RedTransEl *data = state->outSingle.data;
-
-	if ( numSingles == 1 ) {
-		/* If there is a single single key then write it out as an if. */
-		out << "\tif ( " << GET_WIDE_KEY(state) << " == " << 
-				WIDE_KEY(state, data[0].lowKey) << " )\n\t\t"; 
-
-		/* Virtual function for writing the target of the transition. */
-		TRANS_GOTO(data[0].value, 0);
-	}
-	else if ( numSingles > 1 ) {
-		/* Write out single keys in a switch if there is more than one. */
-		out << "\tswitch( " << GET_WIDE_KEY(state) << " ) {\n";
-
-		/* Write out the single indicies. */
-		for ( int j = 0; j < numSingles; j++ ) {
-			out << "\t\tcase " << WIDE_KEY(state, data[j].lowKey) << ": ";
-			TRANS_GOTO(data[j].value, 0);
-		}
-		
-		/* Emits a default case for D code. */
-		SWITCH_DEFAULT();
-
-		/* Close off the transition switch. */
-		out << "\t}\n";
-	}
-}
-
 void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int high )
 {
 	static int nl = 1;
+
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
 	RedTransEl *data = state->outRange.data;
@@ -914,10 +883,19 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 	/* Determine if the keys at mid are the limits of the alphabet. */
 	bool limitLow = data[mid].lowKey == keyOps->minKey;
 	bool limitHigh = data[mid].highKey == keyOps->maxKey;
+	
+//	string nf = TRANS_GOTO_TARG( state->defTrans );
+
+	/* For some reason the hop is faster and results in smaller code. Not sure
+	 * why. */
+	std::stringstream nfss;
+	nfss << ".L_nf_" << state->id;
+	string nf = nfss.str();
 
 	if ( anyLower && anyHigher ) {
 		int l1 = nl++;
-		int l2 = nl++;
+		// int l2 = nl++;
+		string targ = TRANS_GOTO_TARG( data[mid].value );
 
 		// out << "if ( " << GET_WIDE_KEY(state) << " < " << 
 		//		WIDE_KEY(state, data[mid].lowKey) << " ) {\n";
@@ -925,30 +903,38 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		/* Can go lower and higher than mid. */
 		out <<
 			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
-			"	jge	.nl" << l1 << "\n";
+			"	jge	.L_nl" << l1 << "\n";
 			
 		
 		emitRangeBSearch( state, level+1, low, mid-1 );
 
 		out <<
-			".nl" << l1 << ":\n"
-			"	cmpb	" << KEY ( data[mid].highKey ) << ", %r14b\n"
-			"	jle	.nl" << l2 << "\n";
+			".L_nl" << l1 << ":\n";
+
+		if ( data[mid].lowKey != data[mid].highKey ) {
+			out <<
+				"	cmpb	" << KEY ( data[mid].highKey ) << ", %r14b\n";
+		}
+
+		out <<
+			"	jle	" << targ << "\n";
 
 		// out << "} else if ( " << GET_WIDE_KEY(state) << " > " << 
 		//		WIDE_KEY(state, data[mid].highKey) << " ) {\n";
 
 		emitRangeBSearch( state, level+1, mid+1, high );
-
-		// out << "} else\n";
-
-		out <<
-			".nl" << l2 << ":\n";
-
-		TRANS_GOTO(data[mid].value, level+1);
 	}
 	else if ( anyLower && !anyHigher ) {
-		int l1 = nl++;
+
+		string targ;
+		if ( limitHigh ) {
+			targ = TRANS_GOTO_TARG( data[mid].value );
+		}
+		else {
+			std::stringstream s;
+			s << ".L_nl" << nl++;
+			targ = s.str();
+		}
 
 		/* Can go lower than mid but not higher. */
 		// out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " < " << 
@@ -956,7 +942,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 		out <<
 			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
-			"	jge	.nl" << l1 << "\n";
+			"	jge	" << targ << "\n";
 
 		emitRangeBSearch( state, level+1, low, mid-1 );
 
@@ -964,28 +950,43 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		 * sense testing it. */
 		if ( limitHigh ) {
 
-			// out << TABS(level) << "} else\n";
-
-			out <<
-				".nl" << l1 << ":\n";
-			TRANS_GOTO(data[mid].value, level+1);
+//			// out << TABS(level) << "} else\n";
+//
+//			out <<
+//				".L_nl" << l1 << ":\n";
+//
+//			TRANS_GOTO(data[mid].value, level+1);
 		}
 		else {
 
 			// out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " <= " << 
 			//		WIDE_KEY(state, data[mid].highKey) << " )\n";
 
+			out <<
+				targ << ":\n";
+
+			if ( data[mid].lowKey != data[mid].highKey ) {
+				out <<
+					"	cmpb	" << KEY ( data[mid].highKey ) << ", %r14b\n";
+			}
 
 			out <<
-				".nl" << l1 << ":\n"
-				"	cmpb	" << KEY ( data[mid].highKey ) << ", %r14b\n"
-				"	jg	.nf" << state->id << "\n";
+				"	jg	" << nf << "\n";
 
 			TRANS_GOTO(data[mid].value, level+1);
 		}
 	}
 	else if ( !anyLower && anyHigher ) {
-		int l1 = nl++;
+		string targ;
+		if ( limitHigh ) {
+			targ = TRANS_GOTO_TARG( data[mid].value );
+		}
+		else {
+			std::stringstream s;
+			s << ".L_nl" << nl++;
+			targ = s.str();
+		}
+
 
 		/* Can go higher than mid but not lower. */
 		// out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " > " << 
@@ -993,28 +994,34 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 		out <<
 			"	cmpb	" << KEY( data[mid].highKey ) << ", %r14b\n"
-			"	jle	.nl" << l1 << "\n";
+			"	jle	" << targ << "\n";
 
 		emitRangeBSearch( state, level+1, mid+1, high );
 
 		/* If the lower end is the lowest in the alphabet then there is no
 		 * sense testing it. */
 		if ( limitLow ) {
-			// out << TABS(level) << "} else\n";
-
-			out <<
-				".nl" << l1 << ":\n";
-
-			TRANS_GOTO(data[mid].value, level+1);
+//			// out << TABS(level) << "} else\n";
+//
+//			out <<
+//				".L_nl" << l1 << ":\n";
+//
+//			TRANS_GOTO(data[mid].value, level+1);
 		}
 		else {
 			// out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " >= " << 
 			//		WIDE_KEY(state, data[mid].lowKey) << " )\n";
 
 			out <<
-				".nl" << l1 << ":\n"
-				"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
-				"	jl	.nf" << state->id << "\n";
+				targ << ":\n";
+
+			if ( data[mid].lowKey != data[mid].highKey ) {
+				out <<
+					"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n";
+			}
+
+			out <<
+				"	jl	" << nf << "\n";
 
 			TRANS_GOTO(data[mid].value, level+1);
 		}
@@ -1027,11 +1034,18 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 			//		GET_WIDE_KEY(state) << " && " << GET_WIDE_KEY(state) << " <= " << 
 			//		WIDE_KEY(state, data[mid].highKey) << " )\n";
 
-			out <<
-				"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
-				"	jl	.nf" << state->id << "\n"
-				"	cmpb	" << KEY( data[mid].highKey ) << ", %r14b\n"
-				"	jg	.nf" << state->id << "\n";
+			if ( data[mid].lowKey != data[mid].highKey ) {
+				out <<
+					"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
+					"	jl	" << nf << "\n"
+					"	cmpb	" << KEY( data[mid].highKey ) << ", %r14b\n"
+					"	jg	" << nf << "\n";
+			}
+			else {
+				out <<
+					"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
+					"	jne	" << nf << "\n";
+			}
 
 			TRANS_GOTO(data[mid].value, level+1);
 		}
@@ -1041,7 +1055,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 			out <<
 				"	cmpb	" << KEY( data[mid].highKey ) << ", %r14b\n"
-				"	jg	.nf" << state->id << "\n";
+				"	jg	" << nf << "\n";
 
 			TRANS_GOTO(data[mid].value, level+1);
 		}
@@ -1051,7 +1065,8 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 			out <<
 				"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
-				"	jl	.nf" << state->id << "\n";
+				"	jl	" << nf << "\n";
+
 			TRANS_GOTO(data[mid].value, level+1);
 		}
 		else {
@@ -1185,10 +1200,6 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 //				emitCondBSearch( st, 1, 0, st->stateCondVect.length() - 1 );
 //			}
 
-//			/* Try singles. */
-//			if ( st->outSingle.length() > 0 )
-//				emitSingleSwitch( st );
-
 			/* Default case is to binary search for the ranges, if that fails then */
 			if ( st->outRange.length() > 0 ) {
 				out << "	movb	(%r12), %r14b\n";
@@ -1196,7 +1207,7 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 			}
 
 			/* Write the default transition. */
-			out << ".nf" << st->id << ":\n";
+			out << ".L_nf_" << st->id << ":\n";
 			TRANS_GOTO( st->defTrans, 1 );
 		}
 	}
@@ -1382,7 +1393,7 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 			anyWritten = true;
 
 			/* Write the label for the transition so it can be jumped to. */
-			out << ".tr" << trans->id << ":\n";
+			out << ".L_tr_" << trans->id << ":\n";
 
 //			/* If the action contains a next, then we must preload the current
 //			 * state since the action may or may not set it. */
@@ -1402,7 +1413,7 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 			if ( trans->action->anyNextStmt() )
 				out << "	jmp .L_again\n";
 			else
-				out << "	jmp .L_st" << trans->targ->id << "\n";
+				out << "	jmp .L_st_" << trans->targ->id << "\n";
 		}
 	}
 
@@ -1414,7 +1425,7 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 	/* bool anyWritten = */ IN_TRANS_ACTIONS( state );
 
 	if ( state->labelNeeded ) 
-		out << ".L_st" << state->id << ":\n";
+		out << ".L_st_" << state->id << ":\n";
 
 #if 0
 	if ( state->toStateAction != 0 ) {
@@ -1436,7 +1447,7 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 			out <<
 				"	addq	$1, %r12\n"
 				"	cmpq	%r12, %r13\n"
-				"	je	.L_test_eof" << state->id << "\n";
+				"	je	.L_test_eof_" << state->id << "\n";
 		}
 		else {
 			// out << 
@@ -1447,7 +1458,7 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 	}
 
 	/* This is the entry label for starting a run. */
-	out << ".L_en" << state->id << ":\n";
+	out << ".L_en_" << state->id << ":\n";
 
 #if 0
 	if ( state->fromStateAction != 0 ) {
@@ -1480,7 +1491,7 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 //		genLineDirective( out );
 
 	if ( state->labelNeeded ) 
-		out << ".L_st" << state->id << ":\n";
+		out << ".L_st_" << state->id << ":\n";
 
 	/* Break out here. */
 	outLabelUsed = true;
@@ -1489,6 +1500,25 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 }
 
 
+std::string AsmCodeGen::TRANS_GOTO_TARG( RedTransAp *trans )
+{
+	std::stringstream s;
+	if ( trans->action != 0 ) {
+		/* Go to the transition which will go to the state. */
+		// out << TABS(level) << "goto tr" << trans->id << ";";
+
+		s << ".L_tr_" << trans->id;
+	}
+	else {
+		/* Go directly to the target state. */
+		//out << TABS(level) << "goto st" << trans->targ->id << ";";
+
+		s << ".L_st_" << trans->targ->id;
+	}
+
+	return s.str();
+}
+
 /* Emit the goto to take for a given transition. */
 std::ostream &AsmCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
@@ -1496,13 +1526,13 @@ std::ostream &AsmCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 		/* Go to the transition which will go to the state. */
 		// out << TABS(level) << "goto tr" << trans->id << ";";
 
-		out << "	jmp	.tr" << trans->id << "\n";
+		out << "	jmp	.L_tr_" << trans->id << "\n";
 	}
 	else {
 		/* Go directly to the target state. */
 		//out << TABS(level) << "goto st" << trans->targ->id << ";";
 
-		out << "	jmp	.L_st" << trans->targ->id << "\n";
+		out << "	jmp	.L_st_" << trans->targ->id << "\n";
 	}
 	return out;
 }
@@ -1517,7 +1547,7 @@ std::ostream &AsmCodeGen::EXIT_STATES()
 			//		st->id << "; goto _test_eof; \n";
 
 			out << 
-				".L_test_eof" << st->id << ":\n"
+				".L_test_eof_" << st->id << ":\n"
 				"	movl	$" << st->id << ", cs(%rip)\n"
 				"	jmp .L_test_eof\n";
 		}
@@ -1706,7 +1736,7 @@ void AsmCodeGen::writeExec()
 
 	/* One shot, for now. */
 	out <<
-		"	jmp	.L_en" << redFsm->startState->id << "\n";
+		"	jmp	.L_en_" << redFsm->startState->id << "\n";
 
 	STATE_GOTOS();
 	EXIT_STATES() << "\n";

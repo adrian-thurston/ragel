@@ -202,6 +202,7 @@ public:
 	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
 
 	std::ostream &EXIT_STATES();
+	std::string TRANS_GOTO_TARG( RedTransAp *trans );
 	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
 	std::ostream &AGAIN_CASES();
 	std::ostream &FINISH_CASES();
