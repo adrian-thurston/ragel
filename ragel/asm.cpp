@@ -374,10 +374,12 @@ string AsmFsmCodeGen::TABS( int level )
 string AsmFsmCodeGen::KEY( Key key )
 {
 	ostringstream ret;
-	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
-		ret << key.getVal();
-	else
-		ret << (unsigned long) key.getVal() << 'u';
+//	ostringstream ret;
+//	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
+//		ret << key.getVal();
+//	else
+//		ret << (unsigned long) key.getVal() << 'u';
+	ret << "$" << key.getVal();
 	return ret.str();
 }
 
@@ -605,9 +607,9 @@ void AsmFsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 	asmLineDirective( ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
-	ret << "\t{";
+	// ret << "\t{";
 	INLINE_LIST( ret, action->inlineList, targState, inFinish, csForced );
-	ret << "}\n";
+	// ret << "}\n";
 }
 
 void AsmFsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
@@ -828,7 +830,6 @@ void AsmCodeGen::writeExports()
 	}
 }
 
-
 void AsmFsmCodeGen::finishRagelDef()
 {
 	/* For directly executable machines there is no required state
@@ -866,14 +867,6 @@ ostream &AsmFsmCodeGen::source_error( const InputLoc &loc )
 	assert( sourceFileName != 0 );
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
 	return cerr;
-}
-
-
-/* Emit the goto to take for a given transition. */
-std::ostream &AsmGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
-{
-	out << TABS(level) << "goto tr" << trans->id << ";";
-	return out;
 }
 
 std::ostream &AsmGotoCodeGen::TO_STATE_ACTION_SWITCH()
@@ -944,14 +937,8 @@ std::ostream &AsmGotoCodeGen::ACTION_SWITCH()
 	return out;
 }
 
-void AsmGotoCodeGen::GOTO_HEADER( RedStateAp *state )
-{
-	/* Label the state. */
-	out << "case " << state->id << ":\n";
-}
 
-
-void AsmGotoCodeGen::emitSingleSwitch( RedStateAp *state )
+void AsmIpGotoCodeGen::emitSingleSwitch( RedStateAp *state )
 {
 	/* Load up the singles. */
 	int numSingles = state->outSingle.length();
@@ -963,7 +950,7 @@ void AsmGotoCodeGen::emitSingleSwitch( RedStateAp *state )
 				WIDE_KEY(state, data[0].lowKey) << " )\n\t\t"; 
 
 		/* Virtual function for writing the target of the transition. */
-		TRANS_GOTO(data[0].value, 0) << "\n";
+		TRANS_GOTO(data[0].value, 0);
 	}
 	else if ( numSingles > 1 ) {
 		/* Write out single keys in a switch if there is more than one. */
@@ -972,7 +959,7 @@ void AsmGotoCodeGen::emitSingleSwitch( RedStateAp *state )
 		/* Write out the single indicies. */
 		for ( int j = 0; j < numSingles; j++ ) {
 			out << "\t\tcase " << WIDE_KEY(state, data[j].lowKey) << ": ";
-			TRANS_GOTO(data[j].value, 0) << "\n";
+			TRANS_GOTO(data[j].value, 0);
 		}
 		
 		/* Emits a default case for D code. */
@@ -983,8 +970,9 @@ void AsmGotoCodeGen::emitSingleSwitch( RedStateAp *state )
 	}
 }
 
-void AsmGotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int high )
+void AsmIpGotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int high )
 {
+	static int nl = 1;
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
 	RedTransEl *data = state->outRange.data;
@@ -998,85 +986,149 @@ void AsmGotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, in
 	bool limitHigh = data[mid].highKey == keyOps->maxKey;
 
 	if ( anyLower && anyHigher ) {
+		int l1 = nl++;
+		int l2 = nl++;
+
+		// out << "if ( " << GET_WIDE_KEY(state) << " < " << 
+		//		WIDE_KEY(state, data[mid].lowKey) << " ) {\n";
+
 		/* Can go lower and higher than mid. */
-		out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " < " << 
-				WIDE_KEY(state, data[mid].lowKey) << " ) {\n";
+		out <<
+			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
+			"	jge	.nl" << l1 << "\n";
+			
+		
 		emitRangeBSearch( state, level+1, low, mid-1 );
-		out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " > " << 
-				WIDE_KEY(state, data[mid].highKey) << " ) {\n";
+
+		out <<
+			".nl" << l1 << ":\n"
+			"	cmpb	" << KEY ( data[mid].highKey ) << ", %r14b\n"
+			"	jle	.nl" << l2 << "\n";
+
+		// out << "} else if ( " << GET_WIDE_KEY(state) << " > " << 
+		//		WIDE_KEY(state, data[mid].highKey) << " ) {\n";
+
 		emitRangeBSearch( state, level+1, mid+1, high );
-		out << TABS(level) << "} else\n";
-		TRANS_GOTO(data[mid].value, level+1) << "\n";
+
+		// out << "} else\n";
+
+		out <<
+			".nl" << l2 << ":\n";
+
+		TRANS_GOTO(data[mid].value, level+1);
 	}
 	else if ( anyLower && !anyHigher ) {
+		int l1 = nl++;
+
 		/* Can go lower than mid but not higher. */
-		out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " < " << 
-				WIDE_KEY(state, data[mid].lowKey) << " ) {\n";
+		// out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " < " << 
+		//		WIDE_KEY(state, data[mid].lowKey) << " ) {\n";
+
+		out <<
+			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
+			"	jge	.nl" << l1 << "\n";
+
 		emitRangeBSearch( state, level+1, low, mid-1 );
 
 		/* if the higher is the highest in the alphabet then there is no
 		 * sense testing it. */
 		if ( limitHigh ) {
-			out << TABS(level) << "} else\n";
-			TRANS_GOTO(data[mid].value, level+1) << "\n";
+
+			// out << TABS(level) << "} else\n";
+
+			out <<
+				".nl" << l1 << ":\n";
+			TRANS_GOTO(data[mid].value, level+1);
 		}
 		else {
-			out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " <= " << 
-					WIDE_KEY(state, data[mid].highKey) << " )\n";
-			TRANS_GOTO(data[mid].value, level+1) << "\n";
+
+			// out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " <= " << 
+			//		WIDE_KEY(state, data[mid].highKey) << " )\n";
+
+
+			out <<
+				".nl" << l1 << ":\n"
+				"	cmpb	" << KEY ( data[mid].highKey ) << ", %r14b\n"
+				"	jg	.nf" << state->id << "\n";
+
+			TRANS_GOTO(data[mid].value, level+1);
 		}
 	}
 	else if ( !anyLower && anyHigher ) {
+		int l1 = nl++;
+
 		/* Can go higher than mid but not lower. */
-		out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " > " << 
-				WIDE_KEY(state, data[mid].highKey) << " ) {\n";
+		// out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " > " << 
+		//		WIDE_KEY(state, data[mid].highKey) << " ) {\n";
+
+		out <<
+			"	cmpb	" << KEY( data[mid].highKey ) << ", %r14b\n"
+			"	jle	.nl" << l1 << "\n";
+
 		emitRangeBSearch( state, level+1, mid+1, high );
 
 		/* If the lower end is the lowest in the alphabet then there is no
 		 * sense testing it. */
 		if ( limitLow ) {
-			out << TABS(level) << "} else\n";
-			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			// out << TABS(level) << "} else\n";
+
+			out <<
+				".nl" << l1 << ":\n";
+
+			TRANS_GOTO(data[mid].value, level+1);
 		}
 		else {
-			out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " >= " << 
-					WIDE_KEY(state, data[mid].lowKey) << " )\n";
-			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			// out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " >= " << 
+			//		WIDE_KEY(state, data[mid].lowKey) << " )\n";
+
+			out <<
+				".nl" << l1 << ":\n"
+				"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
+				"	jl	.nf" << state->id << "\n";
+
+			TRANS_GOTO(data[mid].value, level+1);
 		}
 	}
 	else {
 		/* Cannot go higher or lower than mid. It's mid or bust. What
 		 * tests to do depends on limits of alphabet. */
 		if ( !limitLow && !limitHigh ) {
-			out << TABS(level) << "if ( " << WIDE_KEY(state, data[mid].lowKey) << " <= " << 
-					GET_WIDE_KEY(state) << " && " << GET_WIDE_KEY(state) << " <= " << 
-					WIDE_KEY(state, data[mid].highKey) << " )\n";
-			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			//out << TABS(level) << "if ( " << WIDE_KEY(state, data[mid].lowKey) << " <= " << 
+			//		GET_WIDE_KEY(state) << " && " << GET_WIDE_KEY(state) << " <= " << 
+			//		WIDE_KEY(state, data[mid].highKey) << " )\n";
+
+			out <<
+				"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
+				"	jl	.nf" << state->id << "\n"
+				"	cmpb	" << KEY( data[mid].highKey ) << ", %r14b\n"
+				"	jg	.nf" << state->id << "\n";
+
+			TRANS_GOTO(data[mid].value, level+1);
 		}
 		else if ( limitLow && !limitHigh ) {
-			out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " <= " << 
-					WIDE_KEY(state, data[mid].highKey) << " )\n";
-			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			//out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " <= " << 
+			//		WIDE_KEY(state, data[mid].highKey) << " )\n";
+
+			out <<
+				"	cmpb	" << KEY( data[mid].highKey ) << ", %r14b\n"
+				"	jg	.nf" << state->id << "\n";
+
+			TRANS_GOTO(data[mid].value, level+1);
 		}
 		else if ( !limitLow && limitHigh ) {
-			out << TABS(level) << "if ( " << WIDE_KEY(state, data[mid].lowKey) << " <= " << 
-					GET_WIDE_KEY(state) << " )\n";
-			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			//out << TABS(level) << "if ( " << WIDE_KEY(state, data[mid].lowKey) << " <= " << 
+			//		GET_WIDE_KEY(state) << " )\n";
+
+			out <<
+				"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
+				"	jl	.nf" << state->id << "\n";
+			TRANS_GOTO(data[mid].value, level+1);
 		}
 		else {
 			/* Both high and low are at the limit. No tests to do. */
-			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			TRANS_GOTO(data[mid].value, level+1);
 		}
 	}
-}
-
-void AsmGotoCodeGen::STATE_GOTO_ERROR()
-{
-	/* Label the state and bail immediately. */
-	outLabelUsed = true;
-	RedStateAp *state = redFsm->errState;
-	out << "case " << state->id << ":\n";
-	out << "	goto _out;\n";
 }
 
 void AsmGotoCodeGen::COND_TRANSLATE( GenStateCond *stateCond, int level )
@@ -1094,7 +1146,7 @@ void AsmGotoCodeGen::COND_TRANSLATE( GenStateCond *stateCond, int level )
 	}
 }
 
-void AsmGotoCodeGen::emitCondBSearch( RedStateAp *state, int level, int low, int high )
+void AsmIpGotoCodeGen::emitCondBSearch( RedStateAp *state, int level, int low, int high )
 {
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
@@ -1189,7 +1241,7 @@ void AsmGotoCodeGen::emitCondBSearch( RedStateAp *state, int level, int low, int
 	}
 }
 
-std::ostream &AsmGotoCodeGen::STATE_GOTOS()
+std::ostream &AsmIpGotoCodeGen::STATE_GOTOS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st == redFsm->errState )
@@ -1198,21 +1250,24 @@ std::ostream &AsmGotoCodeGen::STATE_GOTOS()
 			/* Writing code above state gotos. */
 			GOTO_HEADER( st );
 
-			if ( st->stateCondVect.length() > 0 ) {
-				out << "	_widec = " << GET_KEY() << ";\n";
-				emitCondBSearch( st, 1, 0, st->stateCondVect.length() - 1 );
-			}
+//			if ( st->stateCondVect.length() > 0 ) {
+//				out << "	_widec = " << GET_KEY() << ";\n";
+//				emitCondBSearch( st, 1, 0, st->stateCondVect.length() - 1 );
+//			}
 
-			/* Try singles. */
-			if ( st->outSingle.length() > 0 )
-				emitSingleSwitch( st );
+//			/* Try singles. */
+//			if ( st->outSingle.length() > 0 )
+//				emitSingleSwitch( st );
 
 			/* Default case is to binary search for the ranges, if that fails then */
-			if ( st->outRange.length() > 0 )
+			if ( st->outRange.length() > 0 ) {
+				out << "	movb	(%r12), %r14b\n";
 				emitRangeBSearch( st, 1, 0, st->outRange.length() - 1 );
+			}
 
 			/* Write the default transition. */
-			TRANS_GOTO( st->defTrans, 1 ) << "\n";
+			out << ".nf" << st->id << ":\n";
+			TRANS_GOTO( st->defTrans, 1 );
 		}
 	}
 	return out;
@@ -1571,12 +1626,12 @@ bool AsmIpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 			anyWritten = true;
 
 			/* Write the label for the transition so it can be jumped to. */
-			out << "tr" << trans->id << ":\n";
+			out << ".tr" << trans->id << ":\n";
 
-			/* If the action contains a next, then we must preload the current
-			 * state since the action may or may not set it. */
-			if ( trans->action->anyNextStmt() )
-				out << "	" << vCS() << " = " << trans->targ->id << ";\n";
+//			/* If the action contains a next, then we must preload the current
+//			 * state since the action may or may not set it. */
+//			if ( trans->action->anyNextStmt() )
+//				out << "	" << vCS() << " = " << trans->targ->id << ";\n";
 
 			/* Write each action in the list. */
 			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
@@ -1584,27 +1639,26 @@ bool AsmIpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 						trans->action->anyNextStmt() );
 			}
 
-			/* If the action contains a next then we need to reload, otherwise
-			 * jump directly to the target state. */
-			if ( trans->action->anyNextStmt() )
-				out << "\tgoto _again;\n";
-			else
-				out << "\tgoto st" << trans->targ->id << ";\n";
+//			/* If the action contains a next then we need to reload, otherwise
+//			 * jump directly to the target state. */
+//			if ( trans->action->anyNextStmt() )
+//				out << "\tgoto _again;\n";
+//			else
+				out << "\njmp .st" << trans->targ->id << "\n";
 		}
 	}
 
 	return anyWritten;
 }
 
-/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for each
- * state. */
 void AsmIpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 {
-	bool anyWritten = IN_TRANS_ACTIONS( state );
+	/* bool anyWritten = */ IN_TRANS_ACTIONS( state );
 
 	if ( state->labelNeeded ) 
-		out << "st" << state->id << ":\n";
+		out << ".st" << state->id << ":\n";
 
+#if 0
 	if ( state->toStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
 		anyWritten = true;
@@ -1613,23 +1667,29 @@ void AsmIpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 					state->toStateAction->anyNextStmt() );
 		}
 	}
+#endif
 
 	/* Advance and test buffer pos. */
 	if ( state->labelNeeded ) {
-		if ( !noEnd ) {
+//		if ( !noEnd ) {
 			out <<
-				"	if ( ++" << P() << " == " << PE() << " )\n"
-				"		goto _test_eof" << state->id << ";\n";
-		}
-		else {
-			out << 
-				"	" << P() << " += 1;\n";
-		}
+				"	addq	$1, %r12\n"
+				"	cmpq	%r12, %r13\n"
+				"	je	.done" << state->id << "\n";
+
+//				"	if ( ++" << P() << " == " << PE() << " )\n"
+//				"		goto _test_eof" << state->id << ";\n";
+//		}
+//		else {
+//			out << 
+//				"	" << P() << " += 1;\n";
+//		}
 	}
 
-	/* Give the state a switch case. */
-	out << "case " << state->id << ":\n";
+	/* This is the entry label for starting a run. */
+	out << ".en" << state->id << ":\n";
 
+#if 0
 	if ( state->fromStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
 		anyWritten = true;
@@ -1645,6 +1705,7 @@ void AsmIpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 	/* Record the prev state if necessary. */
 	if ( state->anyRegCurStateRef() )
 		out << "	_ps = " << state->id << ";\n";
+#endif
 }
 
 void AsmIpGotoCodeGen::STATE_GOTO_ERROR()
@@ -1652,25 +1713,26 @@ void AsmIpGotoCodeGen::STATE_GOTO_ERROR()
 	/* In the error state we need to emit some stuff that usually goes into
 	 * the header. */
 	RedStateAp *state = redFsm->errState;
-	bool anyWritten = IN_TRANS_ACTIONS( state );
+	/* bool anyWritten = */ IN_TRANS_ACTIONS( state );
 
-	/* No case label needed since we don't switch on the error state. */
-	if ( anyWritten )
-		genLineDirective( out );
+//	/* No case label needed since we don't switch on the error state. */
+//	if ( anyWritten )
+//		genLineDirective( out );
 
 	if ( state->labelNeeded ) 
-		out << "st" << state->id << ":\n";
+		out << ".st" << state->id << ":\n";
 
-	/* Break out here. */
-	outLabelUsed = true;
-	out << vCS() << " = " << state->id << ";\n";
-	out << "	goto _out;\n";
+//	/* Break out here. */
+//	outLabelUsed = true;
+	out << "	movl	$" << state->id << ", cs(%rip)\n";
+	out << "	jmp .done\n";
 }
 
 
 /* Emit the goto to take for a given transition. */
 std::ostream &AsmIpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
+#if 0
 	if ( trans->action != 0 ) {
 		/* Go to the transition which will go to the state. */
 		out << TABS(level) << "goto tr" << trans->id << ";";
@@ -1679,6 +1741,11 @@ std::ostream &AsmIpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 		/* Go directly to the target state. */
 		out << TABS(level) << "goto st" << trans->targ->id << ";";
 	}
+#endif
+	if ( trans->action != 0 )
+		out << "	jmp	.tr" << trans->id << "\n";
+	else
+		out << "	jmp	.st" << trans->targ->id << "\n";
 	return out;
 }
 
@@ -1687,8 +1754,12 @@ std::ostream &AsmIpGotoCodeGen::EXIT_STATES()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->outNeeded ) {
 			testEofUsed = true;
-			out << "	_test_eof" << st->id << ": " << vCS() << " = " << 
-					st->id << "; goto _test_eof; \n";
+//			out << "_test_eof" << st->id << ": " << vCS() << " = " << 
+//					st->id << "; goto _test_eof; \n";
+			out << 
+				".done" << st->id << ":\n"
+				"	movl	$" << st->id << ", cs(%rip)\n"
+				"	jmp .done\n";
 		}
 	}
 	return out;
@@ -1818,23 +1889,15 @@ void AsmIpGotoCodeGen::writeExec()
 
 	/* p  : %r12 */
 	/* pe : %r13 */
+	/* pc : %r14b */
 
 	out << 
 		"	push	%r12\n"
 		"	push	%r13\n"
+		"	push	%r14\n"
 		"	movq	%rdi, %r12\n"
 		"	movslq	%esi, %r13\n"
 		"	addq	%rdi, %r13\n"
-		".AGAIN:\n"
-		"	cmpq	%r12, %r13\n"
-		"	je      .DONE\n"
-		"	movsbl  (%r12), %edi\n"
-		"	call	putchar\n"
-		"	addq	$1, %r12\n"
-		"	jmp		.AGAIN\n"
-		".DONE:\n"
-		"	pop		%r13\n"
-		"	pop		%r12\n"
 	;
 	
 
@@ -1877,14 +1940,19 @@ void AsmIpGotoCodeGen::writeExec()
 		out << "_resume:\n";
 	}
 
-	out << 
-		"	switch ( " << vCS() << " )\n	{\n";
-		STATE_GOTOS();
-		SWITCH_DEFAULT() <<
-		"	}\n";
-		EXIT_STATES() << 
-		"\n";
+#endif
 
+//	out << "	switch ( " << vCS() << " )\n	{\n";
+
+	/* One shot, for now. */
+	out << "	jmp	.en" << redFsm->startState->id << "\n";
+	STATE_GOTOS();
+
+//	out << "	}\n";
+
+	EXIT_STATES() << "\n";
+
+#if 0
 	if ( testEofUsed ) 
 		out << "	_test_eof: {}\n";
 
@@ -1904,6 +1972,13 @@ void AsmIpGotoCodeGen::writeExec()
 
 	if ( outLabelUsed ) 
 		out << ".L_out:\n";
+
+	out << 
+		".done:\n"
+		"	pop	%r14\n"
+		"	pop	%r13\n"
+		"	pop	%r12\n"
+	;
 
 	out << "# WRITE EXEC END\n";
 }

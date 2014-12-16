@@ -343,7 +343,6 @@ public:
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
-	std::ostream &STATE_GOTOS();
 	std::ostream &TRANSITIONS();
 	std::ostream &EXEC_FUNCS();
 	std::ostream &FINISH_CASES();
@@ -368,17 +367,8 @@ public:
 	std::ostream &EOF_ACTIONS();
 
 	void COND_TRANSLATE( GenStateCond *stateCond, int level );
-	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
 	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
 
-	virtual std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
-
-	void emitSingleSwitch( RedStateAp *state );
-	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
-
-	/* Called from STATE_GOTOS just before writing the gotos */
-	virtual void GOTO_HEADER( RedStateAp *state );
-	virtual void STATE_GOTO_ERROR();
 };
 
 
@@ -414,6 +404,11 @@ protected:
 	bool IN_TRANS_ACTIONS( RedStateAp *state );
 	void GOTO_HEADER( RedStateAp *state );
 	void STATE_GOTO_ERROR();
+	std::ostream &STATE_GOTOS();
+
+	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
+	void emitSingleSwitch( RedStateAp *state );
+	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
 
 	/* Set up labelNeeded flag for each state. */
 	void setLabelsNeeded( GenInlineList *inlineList );
