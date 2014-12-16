@@ -1397,12 +1397,14 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 						trans->action->anyNextStmt() );
 			}
 
-//			/* If the action contains a next then we need to reload, otherwise
-//			 * jump directly to the target state. */
-//			if ( trans->action->anyNextStmt() )
-//				out << "\tgoto _again;\n";
-//			else
-				out << "\njmp .st" << trans->targ->id << "\n";
+			out << "\n";
+
+			/* If the action contains a next then we need to reload, otherwise
+			 * jump directly to the target state. */
+			if ( trans->action->anyNextStmt() )
+				out << "	jmp .L_again\n";
+			else
+				out << "	jmp .L_st" << trans->targ->id << "\n";
 		}
 	}
 
@@ -1414,7 +1416,7 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 	/* bool anyWritten = */ IN_TRANS_ACTIONS( state );
 
 	if ( state->labelNeeded ) 
-		out << ".st" << state->id << ":\n";
+		out << ".L_st" << state->id << ":\n";
 
 #if 0
 	if ( state->toStateAction != 0 ) {
@@ -1429,23 +1431,25 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 
 	/* Advance and test buffer pos. */
 	if ( state->labelNeeded ) {
-//		if ( !noEnd ) {
+		if ( !noEnd ) {
+			// out <<
+			//	"	if ( ++" << P() << " == " << PE() << " )\n"
+			//	"		goto _test_eof" << state->id << ";\n";
 			out <<
 				"	addq	$1, %r12\n"
 				"	cmpq	%r12, %r13\n"
-				"	je	.done" << state->id << "\n";
-
-//				"	if ( ++" << P() << " == " << PE() << " )\n"
-//				"		goto _test_eof" << state->id << ";\n";
-//		}
-//		else {
-//			out << 
-//				"	" << P() << " += 1;\n";
-//		}
+				"	je	.L_test_eof" << state->id << "\n";
+		}
+		else {
+			// out << 
+			//	"	" << P() << " += 1;\n";
+			out <<
+				"	addq	$1, %r12\n";
+		}
 	}
 
 	/* This is the entry label for starting a run. */
-	out << ".en" << state->id << ":\n";
+	out << ".L_en" << state->id << ":\n";
 
 #if 0
 	if ( state->fromStateAction != 0 ) {
@@ -1478,32 +1482,30 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 //		genLineDirective( out );
 
 	if ( state->labelNeeded ) 
-		out << ".st" << state->id << ":\n";
+		out << ".L_st" << state->id << ":\n";
 
-//	/* Break out here. */
-//	outLabelUsed = true;
+	/* Break out here. */
+	outLabelUsed = true;
 	out << "	movl	$" << state->id << ", cs(%rip)\n";
-	out << "	jmp .done\n";
+	out << "	jmp .L_out\n";
 }
 
 
 /* Emit the goto to take for a given transition. */
 std::ostream &AsmCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
-#if 0
 	if ( trans->action != 0 ) {
 		/* Go to the transition which will go to the state. */
-		out << TABS(level) << "goto tr" << trans->id << ";";
+		// out << TABS(level) << "goto tr" << trans->id << ";";
+
+		out << "	jmp	.tr" << trans->id << "\n";
 	}
 	else {
 		/* Go directly to the target state. */
-		out << TABS(level) << "goto st" << trans->targ->id << ";";
+		//out << TABS(level) << "goto st" << trans->targ->id << ";";
+
+		out << "	jmp	.L_st" << trans->targ->id << "\n";
 	}
-#endif
-	if ( trans->action != 0 )
-		out << "	jmp	.tr" << trans->id << "\n";
-	else
-		out << "	jmp	.st" << trans->targ->id << "\n";
 	return out;
 }
 
@@ -1512,12 +1514,14 @@ std::ostream &AsmCodeGen::EXIT_STATES()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->outNeeded ) {
 			testEofUsed = true;
-//			out << "_test_eof" << st->id << ": " << vCS() << " = " << 
-//					st->id << "; goto _test_eof; \n";
+
+			// out << "_test_eof" << st->id << ": " << vCS() << " = " << 
+			//		st->id << "; goto _test_eof; \n";
+
 			out << 
-				".done" << st->id << ":\n"
+				".L_test_eof" << st->id << ":\n"
 				"	movl	$" << st->id << ", cs(%rip)\n"
-				"	jmp .done\n";
+				"	jmp .L_test_eof\n";
 		}
 	}
 	return out;
@@ -1703,17 +1707,16 @@ void AsmCodeGen::writeExec()
 //	out << "	switch ( " << vCS() << " )\n	{\n";
 
 	/* One shot, for now. */
-	out << "	jmp	.en" << redFsm->startState->id << "\n";
+	out <<
+		"	jmp	.L_en" << redFsm->startState->id << "\n";
+
 	STATE_GOTOS();
-
-//	out << "	}\n";
-
 	EXIT_STATES() << "\n";
 
-#if 0
 	if ( testEofUsed ) 
-		out << "	_test_eof: {}\n";
+		out << ".L_test_eof:\n";
 
+#if 0
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
 			"	if ( " << P() << " == " << vEOF() << " )\n"
@@ -1732,7 +1735,6 @@ void AsmCodeGen::writeExec()
 		out << ".L_out:\n";
 
 	out << 
-		".done:\n"
 		"	pop	%r14\n"
 		"	pop	%r13\n"
 		"	pop	%r12\n"
