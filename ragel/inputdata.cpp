@@ -54,6 +54,12 @@ void InputData::cdDefaultFileName( const char *inputFile )
 	}
 }
 
+void InputData::asmDefaultFileName( const char *inputFile )
+{
+	if ( outputFileName == 0 )
+		outputFileName = fileNameFromStem( inputFile, ".s" );
+}
+
 /* Invoked by the parser when the root element is opened. */
 void InputData::goDefaultFileName( const char *inputFile )
 {
@@ -127,6 +133,9 @@ void InputData::makeOutputStream()
 				break;
 			case HostLang::OCaml:
 				ocamlDefaultFileName( inputFileName );
+				break;
+			case HostLang::Asm:
+				asmDefaultFileName( inputFileName );
 				break;
 		}
 	}

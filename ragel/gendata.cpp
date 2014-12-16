@@ -71,6 +71,8 @@
 #include "rubyfflat.h"
 #include "rbxgoto.h"
 
+#include "asm.h"
+
 string itoa( int i )
 {
 	char buf[16];
@@ -382,6 +384,12 @@ CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, ostre
 		cgd = csharpMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangOCaml )
 		cgd = ocamlMakeCodeGen( sourceFileName, fsmName, out );
+	else if ( hostLang == &hostLangAsm ) {
+		cgd = new AsmCodeGen( out );
+		cgd->sourceFileName = sourceFileName;
+		cgd->fsmName = fsmName;
+	}
+
 	return cgd;
 }
 

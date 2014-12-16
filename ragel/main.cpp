@@ -376,6 +376,8 @@ void processArgs( int argc, const char **argv, InputData &id )
 					stringTables = true;
 				else if ( strcmp( arg, "integral-tables" ) == 0 )
 					stringTables = false;
+				else if ( strcmp( arg, "asm" ) == 0 )
+					hostLang = &hostLangAsm;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

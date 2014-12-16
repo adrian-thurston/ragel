@@ -17,6 +17,7 @@ ragel_SOURCES = \
 	csgoto.h gendata.h ragel.h rubyfflat.h \
 	gocodegen.h gotable.h goftable.h goflat.h gofflat.h gogoto.h gofgoto.h \
 	goipgoto.h gotablish.h \
+	asm.h \
 	mlcodegen.h mltable.h mlftable.h mlflat.h mlfflat.h mlgoto.h mlfgoto.h \
 	main.cpp parsetree.cpp parsedata.cpp fsmstate.cpp fsmbase.cpp \
 	fsmattach.cpp fsmmin.cpp fsmgraph.cpp fsmap.cpp rlscan.cpp rlparse.cpp \
@@ -28,7 +29,8 @@ ragel_SOURCES = \
 	csipgoto.cpp cssplit.cpp dotcodegen.cpp xmlcodegen.cpp \
 	gocodegen.cpp gotable.cpp goftable.cpp goflat.cpp gofflat.cpp gogoto.cpp gofgoto.cpp \
 	goipgoto.cpp gotablish.cpp \
-	mlcodegen.cpp mltable.cpp mlftable.cpp mlflat.cpp mlfflat.cpp mlgoto.cpp mlfgoto.cpp
+	mlcodegen.cpp mltable.cpp mlftable.cpp mlflat.cpp mlfflat.cpp mlgoto.cpp mlfgoto.cpp \
+	asm.cpp
 
 BUILT_SOURCES = \
 	rlscan.cpp rlparse.h rlparse.cpp version.h
