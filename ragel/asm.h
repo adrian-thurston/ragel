@@ -1,7 +1,5 @@
 /*
- *  Copyright 2001-2006 Adrian Thurston <thurston@complang.org>
- *            2004 Erich Ocean <eric.ocean@ampede.com>
- *            2005 Alan West <alan@alanz.com>
+ *  Copyright 2014-2015 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -94,13 +92,6 @@ protected:
 	bool isAlphTypeSigned();
 	bool isWideAlphTypeSigned();
 
-//	virtual string ARR_OFF( string ptr, string offset ) = 0;
-//	virtual string CAST( string type ) = 0;
-//	virtual string UINT() = 0;
-//	virtual string NULL_ITEM() = 0;
-//	virtual string POINTER() = 0;
-//	virtual ostream &SWITCH_DEFAULT() = 0;
-
 	string GET_KEY();
 
 	string P();
@@ -143,17 +134,6 @@ protected:
 
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );
-//	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;
-//	virtual void CALL( ostream &ret, int callDest, int targState, bool inFinish ) = 0;
-//	virtual void NEXT( ostream &ret, int nextDest, bool inFinish ) = 0;
-//	virtual void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
-//	virtual void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
-//	virtual void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, 
-//			int targState, bool inFinish ) = 0;
-//	virtual void RET( ostream &ret, bool inFinish ) = 0;
-//	virtual void BREAK( ostream &ret, int targState, bool csForced ) = 0;
-//	virtual void CURS( ostream &ret, bool inFinish ) = 0;
-//	virtual void TARGS( ostream &ret, bool inFinish, int targState ) = 0;
 	void EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );
 	void LM_SWITCH( ostream &ret, GenInlineItem *item, int targState, 
 			int inFinish, bool csForced );
@@ -170,13 +150,6 @@ protected:
 
 	string ERROR_STATE();
 	string FIRST_FINAL_STATE();
-
-//	virtual string PTR_CONST() = 0;
-//	virtual string PTR_CONST_END() = 0;
-//	virtual ostream &OPEN_ARRAY( string type, string name ) = 0;
-//	virtual ostream &CLOSE_ARRAY() = 0;
-//	virtual ostream &STATIC_VAR( string type, string name ) = 0;
-//	virtual string CTRL_FLOW() = 0;
 
 	ostream &source_warning(const InputLoc &loc);
 	ostream &source_error(const InputLoc &loc);
