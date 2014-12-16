@@ -51,131 +51,21 @@ struct GenInlineList;
 struct RedAction;
 struct LongestMatch;
 struct LongestMatchPart;
-struct AsmFsmCodeGen;
+struct AsmCodeGen;
 struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;
 
 string itoa( int i );
 
-struct AsmTableArray
-{
-	AsmTableArray( AsmFsmCodeGen &codeGen, HostType *hostType, std::string name );
-
-	void OPEN();
-	void CLOSE();
-
-	void fmt()
-	{
-		if ( ! first ) {
-			if ( str ) {
-				if ( ln % iall == 0 ) {
-					out << "\"\n\t\"";
-					ln = 0;
-				}
-			}
-			else {
-				out << ", ";
-
-				if ( ln % iall == 0 ) {
-					out << "\n\t";
-					ln = 0;
-				}
-			}
-		}
-		ln += 1;
-		first = false;
-		count += 1;
-	}
-
-	void SVAL( long long value )
-	{
-		char c;
-		short h;
-		int i;
-		long l;
-		unsigned char *p = 0;
-		int n = 0;
-		switch ( hostType->size ) {
-			case sizeof( char ):
-				c = value;
-				p = (unsigned char *)&c;
-				n = sizeof(char);
-				break;
-			case sizeof( short ):
-				h = value;
-				p = (unsigned char *)&h;
-				n = sizeof(short);
-				break;
-			case sizeof( int ):
-				i = value;
-				p = (unsigned char *)&i;
-				n = sizeof(int);
-				break;
-			case sizeof( long ):
-				l = value;
-				p = (unsigned char *)&l;
-				n = sizeof(long);
-				break;
-		}
-
-		std::ios_base::fmtflags prevFlags = out.flags( std::ios::hex );
-		int prevFill = out.fill( '0' );    
-
-		while ( n-- > 0 ) {
-			out << '\\';
-			out << 'x';
-			out << std::setw(2) << (unsigned int) *p++;
-		}
-
-		out.flags( prevFlags );
-		out.fill( prevFill );
-	}
-
-	void VAL( long long ll ) { fmt(); if (str) SVAL(ll); else out << ll; }
-	void VAL( long l )       { fmt(); if (str) SVAL(l);  else out << l; }
-	void VAL( int i )        { fmt(); if (str) SVAL(i);  else out << i; }
-	void VAL( short s )      { fmt(); if (str) SVAL(s);  else out << s; }
-	void VAL( char c )       { fmt(); if (str) SVAL(c);  else out << c; }
-
-	void VAL( unsigned long long ull ) { fmt(); if (str) SVAL(ull); else out << ull; }
-	void VAL( unsigned long ul )       { fmt(); if (str) SVAL(ul);  else out << ul; }
-	void VAL( unsigned int ui )        { fmt(); if (str) SVAL(ui);  else out << ui; }
-	void VAL( unsigned short us )      { fmt(); if (str) SVAL(us);  else out << us; }
-	void VAL( unsigned char uc )       { fmt(); if (str) SVAL(uc);  else out << uc; }
-
-	void KEY( Key key )
-	{
-		fmt();
-		if ( str )
-			SVAL( key.getVal() );
-		else {
-			if ( keyOps->isSigned || !hostLang->explicitUnsigned )
-				out << key.getVal();
-			else
-				out << (unsigned long) key.getVal() << 'u';
-		}
-	}
-
-	AsmFsmCodeGen &codeGen;
-	HostType *hostType;
-	std::string name;
-	ostream &out;
-	int iall;
-	bool first;
-	long ln;
-	bool str;
-	long long count;
-};
-
 /*
- * class AsmFsmCodeGen
+ * class AsmCodeGen
  */
-class AsmFsmCodeGen : public CodeGenData
+class AsmCodeGen : public CodeGenData
 {
 public:
-	AsmFsmCodeGen( ostream &out );
-	virtual ~AsmFsmCodeGen() {}
+	AsmCodeGen( ostream &out );
+	virtual ~AsmCodeGen() {}
 
 	virtual void finishRagelDef();
 	virtual void writeInit();
@@ -186,11 +76,8 @@ public:
 	virtual void statsSummary();
 
 protected:
-	friend AsmTableArray;
-
 	string FSM_NAME();
 	string START_STATE_ID();
-	ostream &ACTIONS_ARRAY();
 	string GET_WIDE_KEY();
 	string GET_WIDE_KEY( RedStateAp *state );
 	string TABS( int level );
@@ -207,13 +94,14 @@ protected:
 	bool isAlphTypeSigned();
 	bool isWideAlphTypeSigned();
 
-	virtual string ARR_OFF( string ptr, string offset ) = 0;
-	virtual string CAST( string type ) = 0;
-	virtual string UINT() = 0;
-	virtual string NULL_ITEM() = 0;
-	virtual string POINTER() = 0;
-	virtual string GET_KEY();
-	virtual ostream &SWITCH_DEFAULT() = 0;
+//	virtual string ARR_OFF( string ptr, string offset ) = 0;
+//	virtual string CAST( string type ) = 0;
+//	virtual string UINT() = 0;
+//	virtual string NULL_ITEM() = 0;
+//	virtual string POINTER() = 0;
+//	virtual ostream &SWITCH_DEFAULT() = 0;
+
+	string GET_KEY();
 
 	string P();
 	string PE();
@@ -255,17 +143,17 @@ protected:
 
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );
-	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;
-	virtual void CALL( ostream &ret, int callDest, int targState, bool inFinish ) = 0;
-	virtual void NEXT( ostream &ret, int nextDest, bool inFinish ) = 0;
-	virtual void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
-	virtual void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
-	virtual void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, 
-			int targState, bool inFinish ) = 0;
-	virtual void RET( ostream &ret, bool inFinish ) = 0;
-	virtual void BREAK( ostream &ret, int targState, bool csForced ) = 0;
-	virtual void CURS( ostream &ret, bool inFinish ) = 0;
-	virtual void TARGS( ostream &ret, bool inFinish, int targState ) = 0;
+//	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;
+//	virtual void CALL( ostream &ret, int callDest, int targState, bool inFinish ) = 0;
+//	virtual void NEXT( ostream &ret, int nextDest, bool inFinish ) = 0;
+//	virtual void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
+//	virtual void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
+//	virtual void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, 
+//			int targState, bool inFinish ) = 0;
+//	virtual void RET( ostream &ret, bool inFinish ) = 0;
+//	virtual void BREAK( ostream &ret, int targState, bool csForced ) = 0;
+//	virtual void CURS( ostream &ret, bool inFinish ) = 0;
+//	virtual void TARGS( ostream &ret, bool inFinish, int targState ) = 0;
 	void EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );
 	void LM_SWITCH( ostream &ret, GenInlineItem *item, int targState, 
 			int inFinish, bool csForced );
@@ -283,13 +171,12 @@ protected:
 	string ERROR_STATE();
 	string FIRST_FINAL_STATE();
 
-	virtual string PTR_CONST() = 0;
-	virtual string PTR_CONST_END() = 0;
-	virtual ostream &OPEN_ARRAY( string type, string name ) = 0;
-	virtual ostream &CLOSE_ARRAY() = 0;
-	virtual ostream &STATIC_VAR( string type, string name ) = 0;
-
-	virtual string CTRL_FLOW() = 0;
+//	virtual string PTR_CONST() = 0;
+//	virtual string PTR_CONST_END() = 0;
+//	virtual ostream &OPEN_ARRAY( string type, string name ) = 0;
+//	virtual ostream &CLOSE_ARRAY() = 0;
+//	virtual ostream &STATIC_VAR( string type, string name ) = 0;
+//	virtual string CTRL_FLOW() = 0;
 
 	ostream &source_warning(const InputLoc &loc);
 	ostream &source_error(const InputLoc &loc);
@@ -311,12 +198,6 @@ protected:
 public:
 	/* Determine if we should use indicies. */
 	virtual void calcIndexSize() {}
-};
-
-class AsmCodeGen : public AsmFsmCodeGen
-{
-public:
-	AsmCodeGen( ostream &out ) : AsmFsmCodeGen(out) {}
 
 	virtual string NULL_ITEM();
 	virtual string POINTER();
@@ -332,55 +213,25 @@ public:
 	virtual string CTRL_FLOW();
 
 	virtual void writeExports();
-};
 
-
-class AsmGotoCodeGen : public AsmCodeGen
-{
-public:
-	AsmGotoCodeGen( ostream &out ) : AsmCodeGen(out) {}
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
 	std::ostream &TRANSITIONS();
 	std::ostream &EXEC_FUNCS();
-	std::ostream &FINISH_CASES();
-
-	void GOTO( ostream &ret, int gotoDest, bool inFinish );
-	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
-	void NEXT( ostream &ret, int nextDest, bool inFinish );
-	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
-	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
-	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
-	void CURS( ostream &ret, bool inFinish );
-	void TARGS( ostream &ret, bool inFinish, int targState );
-	void RET( ostream &ret, bool inFinish );
-	void BREAK( ostream &ret, int targState, bool csForced );
 
 	unsigned int TO_STATE_ACTION( RedStateAp *state );
 	unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	unsigned int EOF_ACTION( RedStateAp *state );
 
-	std::ostream &TO_STATE_ACTIONS();
-	std::ostream &FROM_STATE_ACTIONS();
-	std::ostream &EOF_ACTIONS();
-
 	void COND_TRANSLATE( GenStateCond *stateCond, int level );
 	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
 
-};
-
-
-class AsmIpGotoCodeGen : public AsmGotoCodeGen
-{
-public:
-	AsmIpGotoCodeGen( ostream &out ) : AsmGotoCodeGen(out) {}
-
 	std::ostream &EXIT_STATES();
 	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
-	std::ostream &FINISH_CASES();
 	std::ostream &AGAIN_CASES();
+	std::ostream &FINISH_CASES();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
@@ -396,7 +247,6 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 
-protected:
 	bool useAgainLabel();
 
 	/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for

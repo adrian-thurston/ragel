@@ -385,7 +385,7 @@ CodeGenData *makeCodeGen( const char *sourceFileName, const char *fsmName, ostre
 	else if ( hostLang == &hostLangOCaml )
 		cgd = ocamlMakeCodeGen( sourceFileName, fsmName, out );
 	else if ( hostLang == &hostLangAsm ) {
-		cgd = new AsmIpGotoCodeGen( out );
+		cgd = new AsmCodeGen( out );
 		cgd->sourceFileName = sourceFileName;
 		cgd->fsmName = fsmName;
 	}

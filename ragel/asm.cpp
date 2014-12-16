@@ -70,58 +70,13 @@ void asmLineDirective( ostream &out, const char *fileName, int line )
 	out << '\n';
 }
 
-AsmTableArray::AsmTableArray( AsmFsmCodeGen &codeGen, HostType *hostType, std::string name )
-:
-	codeGen(codeGen),
-	hostType(hostType),
-	name(name),
-	out(codeGen.out),
-	iall(stringTables ? IALL_STRING : IALL_INTEGRAL ),
-	first(true),
-	ln(0),
-	str(stringTables),
-	count(0)
-{}
-
-void AsmTableArray::OPEN()
-{
-	if ( str ) {
-		out << "static const char S_" << name << "[] __attribute__((aligned (16))) = \n\t\"";
-	}
-	else {
-		codeGen.OPEN_ARRAY( hostType->TYPE(), name );
-		out << "\t";
-	}
-}
-
-void AsmTableArray::CLOSE()
-{
-	if ( str ) {
-		string type = hostType->TYPE();
-		out << "\";\nstatic const " << type << " *" << name << 
-				" = (const " << type << "*) S_" << name << ";\n\n";
-	}
-	else {
-		out << "\n";
-		codeGen.CLOSE_ARRAY();
-		out << "\n";
-	}
-
-	if ( printStatistics ) {
-		cout << name << "\t" << count << "\t" <<
-				( count * hostType->size ) << "\t" << hostType->TYPE() << endl;
-	}
-
-	codeGen.tableData += count * hostType->size ;
-}
-
-void AsmFsmCodeGen::statsSummary()
+void AsmCodeGen::statsSummary()
 {
 	if ( printStatistics )
 		cout << "table-data\t" << tableData << endl << endl;
 }
 
-void AsmFsmCodeGen::genLineDirective( ostream &out )
+void AsmCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
@@ -129,14 +84,14 @@ void AsmFsmCodeGen::genLineDirective( ostream &out )
 }
 
 /* Init code gen with in parameters. */
-AsmFsmCodeGen::AsmFsmCodeGen( ostream &out )
+AsmCodeGen::AsmCodeGen( ostream &out )
 :
 	CodeGenData( out ),
 	tableData( 0 )
 {
 }
 
-unsigned int AsmFsmCodeGen::arrayTypeSize( unsigned long maxVal )
+unsigned int AsmCodeGen::arrayTypeSize( unsigned long maxVal )
 {
 	long long maxValLL = (long long) maxVal;
 	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
@@ -144,7 +99,7 @@ unsigned int AsmFsmCodeGen::arrayTypeSize( unsigned long maxVal )
 	return arrayType->size;
 }
 
-string AsmFsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
+string AsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
 {
 	long long maxValLL = (long long) maxVal;
 	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
@@ -158,49 +113,27 @@ string AsmFsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
 	return ret;
 }
 
-HostType *AsmFsmCodeGen::arrayType( unsigned long maxVal )
+HostType *AsmCodeGen::arrayType( unsigned long maxVal )
 {
 	long long maxValLL = (long long) maxVal;
 	return keyOps->typeSubsumes( maxValLL );
 }
 
 /* Write out the fsm name. */
-string AsmFsmCodeGen::FSM_NAME()
+string AsmCodeGen::FSM_NAME()
 {
 	return fsmName;
 }
 
 /* Emit the offset of the start state as a decimal integer. */
-string AsmFsmCodeGen::START_STATE_ID()
+string AsmCodeGen::START_STATE_ID()
 {
 	ostringstream ret;
 	ret << redFsm->startState->id;
 	return ret.str();
 };
 
-/* Write out the array of actions. */
-std::ostream &AsmFsmCodeGen::ACTIONS_ARRAY()
-{
-	AsmTableArray taA( *this, arrayType(redFsm->maxActArrItem), A() );
-
-	taA.OPEN();
-
-	taA.VAL( 0 );
-	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
-		/* Write out the length, which will never be the last character. */
-		taA.VAL( act->key.length() );
-
-		for ( GenActionTable::Iter item = act->key; item.lte(); item++ ) {
-			taA.VAL( item->value->actionId );
-		}
-	}
-
-	taA.CLOSE();
-	return out;
-}
-
-
-string AsmFsmCodeGen::ACCESS()
+string AsmCodeGen::ACCESS()
 {
 	ostringstream ret;
 	if ( accessExpr != 0 )
@@ -209,7 +142,7 @@ string AsmFsmCodeGen::ACCESS()
 }
 
 
-string AsmFsmCodeGen::P()
+string AsmCodeGen::P()
 { 
 	ostringstream ret;
 	if ( pExpr == 0 )
@@ -222,7 +155,7 @@ string AsmFsmCodeGen::P()
 	return ret.str();
 }
 
-string AsmFsmCodeGen::PE()
+string AsmCodeGen::PE()
 {
 	ostringstream ret;
 	if ( peExpr == 0 )
@@ -235,7 +168,7 @@ string AsmFsmCodeGen::PE()
 	return ret.str();
 }
 
-string AsmFsmCodeGen::vEOF()
+string AsmCodeGen::vEOF()
 {
 	ostringstream ret;
 	if ( eofExpr == 0 )
@@ -248,7 +181,7 @@ string AsmFsmCodeGen::vEOF()
 	return ret.str();
 }
 
-string AsmFsmCodeGen::vCS()
+string AsmCodeGen::vCS()
 {
 	ostringstream ret;
 	if ( csExpr == 0 )
@@ -262,7 +195,7 @@ string AsmFsmCodeGen::vCS()
 	return ret.str();
 }
 
-string AsmFsmCodeGen::TOP()
+string AsmCodeGen::TOP()
 {
 	ostringstream ret;
 	if ( topExpr == 0 )
@@ -275,7 +208,7 @@ string AsmFsmCodeGen::TOP()
 	return ret.str();
 }
 
-string AsmFsmCodeGen::STACK()
+string AsmCodeGen::STACK()
 {
 	ostringstream ret;
 	if ( stackExpr == 0 )
@@ -288,7 +221,7 @@ string AsmFsmCodeGen::STACK()
 	return ret.str();
 }
 
-string AsmFsmCodeGen::ACT()
+string AsmCodeGen::ACT()
 {
 	ostringstream ret;
 	if ( actExpr == 0 )
@@ -301,7 +234,7 @@ string AsmFsmCodeGen::ACT()
 	return ret.str();
 }
 
-string AsmFsmCodeGen::TOKSTART()
+string AsmCodeGen::TOKSTART()
 {
 	ostringstream ret;
 	if ( tokstartExpr == 0 )
@@ -314,7 +247,7 @@ string AsmFsmCodeGen::TOKSTART()
 	return ret.str();
 }
 
-string AsmFsmCodeGen::TOKEND()
+string AsmCodeGen::TOKEND()
 {
 	ostringstream ret;
 	if ( tokendExpr == 0 )
@@ -327,7 +260,7 @@ string AsmFsmCodeGen::TOKEND()
 	return ret.str();
 }
 
-string AsmFsmCodeGen::GET_WIDE_KEY()
+string AsmCodeGen::GET_WIDE_KEY()
 {
 	if ( redFsm->anyConditions() ) 
 		return "_widec";
@@ -335,7 +268,7 @@ string AsmFsmCodeGen::GET_WIDE_KEY()
 		return GET_KEY();
 }
 
-string AsmFsmCodeGen::GET_WIDE_KEY( RedStateAp *state )
+string AsmCodeGen::GET_WIDE_KEY( RedStateAp *state )
 {
 	if ( state->stateCondList.length() > 0 )
 		return "_widec";
@@ -343,7 +276,7 @@ string AsmFsmCodeGen::GET_WIDE_KEY( RedStateAp *state )
 		return GET_KEY();
 }
 
-string AsmFsmCodeGen::GET_KEY()
+string AsmCodeGen::GET_KEY()
 {
 	ostringstream ret;
 	if ( getKeyExpr != 0 ) { 
@@ -361,7 +294,7 @@ string AsmFsmCodeGen::GET_KEY()
 
 /* Write out level number of tabs. Makes the nested binary search nice
  * looking. */
-string AsmFsmCodeGen::TABS( int level )
+string AsmCodeGen::TABS( int level )
 {
 	string result;
 	while ( level-- > 0 )
@@ -371,7 +304,7 @@ string AsmFsmCodeGen::TABS( int level )
 
 /* Write out a key from the fsm code gen. Depends on wether or not the key is
  * signed. */
-string AsmFsmCodeGen::KEY( Key key )
+string AsmCodeGen::KEY( Key key )
 {
 	ostringstream ret;
 //	ostringstream ret;
@@ -383,12 +316,12 @@ string AsmFsmCodeGen::KEY( Key key )
 	return ret.str();
 }
 
-bool AsmFsmCodeGen::isAlphTypeSigned()
+bool AsmCodeGen::isAlphTypeSigned()
 {
 	return keyOps->isSigned;
 }
 
-bool AsmFsmCodeGen::isWideAlphTypeSigned()
+bool AsmCodeGen::isWideAlphTypeSigned()
 {
 	string ret;
 	if ( redFsm->maxKey <= keyOps->maxKey )
@@ -400,7 +333,7 @@ bool AsmFsmCodeGen::isWideAlphTypeSigned()
 	}
 }
 
-string AsmFsmCodeGen::WIDE_KEY( RedStateAp *state, Key key )
+string AsmCodeGen::WIDE_KEY( RedStateAp *state, Key key )
 {
 	if ( state->stateCondList.length() > 0 ) {
 		ostringstream ret;
@@ -417,7 +350,7 @@ string AsmFsmCodeGen::WIDE_KEY( RedStateAp *state, Key key )
 
 
 
-void AsmFsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
+void AsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
 {
 	/* The parser gives fexec two children. The double brackets are for D
 	 * code. If the inline list is a single word it will get interpreted as a
@@ -427,7 +360,7 @@ void AsmFsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int 
 	ret << "))-1;}";
 }
 
-void AsmFsmCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
+void AsmCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
 		int targState, int inFinish, bool csForced )
 {
 	ret << 
@@ -459,12 +392,12 @@ void AsmFsmCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 		"\t";
 }
 
-void AsmFsmCodeGen::SET_ACT( ostream &ret, GenInlineItem *item )
+void AsmCodeGen::SET_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = " << item->lmId << ";";
 }
 
-void AsmFsmCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
+void AsmCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	/* The tokend action sets tokend. */
 	ret << TOKEND() << " = " << P();
@@ -473,27 +406,27 @@ void AsmFsmCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 	out << ";";
 }
 
-void AsmFsmCodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
+void AsmCodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKEND();
 }
 
-void AsmFsmCodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
+void AsmCodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKSTART() << " = " << NULL_ITEM() << ";";
 }
 
-void AsmFsmCodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
+void AsmCodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
 {
 	ret << ACT() << " = 0;";
 }
 
-void AsmFsmCodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
+void AsmCodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret << TOKSTART() << " = " << P() << ";";
 }
 
-void AsmFsmCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item, 
+void AsmCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item, 
 		int targState, bool inFinish, bool csForced )
 {
 	if ( item->children->length() > 0 ) {
@@ -507,7 +440,7 @@ void AsmFsmCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item,
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
-void AsmFsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
+void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 		int targState, bool inFinish, bool csForced )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
@@ -588,7 +521,7 @@ void AsmFsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 	}
 }
 /* Write out paths in line directives. Escapes any special characters. */
-string AsmFsmCodeGen::LDIR_PATH( char *path )
+string AsmCodeGen::LDIR_PATH( char *path )
 {
 	ostringstream ret;
 	for ( char *pc = path; *pc != 0; pc++ ) {
@@ -600,7 +533,7 @@ string AsmFsmCodeGen::LDIR_PATH( char *path )
 	return ret.str();
 }
 
-void AsmFsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState, 
+void AsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState, 
 		bool inFinish, bool csForced )
 {
 	/* Write the preprocessor line info for going into the source file. */
@@ -612,14 +545,14 @@ void AsmFsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 	// ret << "}\n";
 }
 
-void AsmFsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
+void AsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
 	ret << "\n";
 	asmLineDirective( ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 }
 
-string AsmFsmCodeGen::ERROR_STATE()
+string AsmCodeGen::ERROR_STATE()
 {
 	ostringstream ret;
 	if ( redFsm->errState != 0 )
@@ -629,7 +562,7 @@ string AsmFsmCodeGen::ERROR_STATE()
 	return ret.str();
 }
 
-string AsmFsmCodeGen::FIRST_FINAL_STATE()
+string AsmCodeGen::FIRST_FINAL_STATE()
 {
 	ostringstream ret;
 	if ( redFsm->firstFinState != 0 )
@@ -639,7 +572,7 @@ string AsmFsmCodeGen::FIRST_FINAL_STATE()
 	return ret.str();
 }
 
-void AsmFsmCodeGen::writeInit()
+void AsmCodeGen::writeInit()
 {
 	out << "	{\n";
 
@@ -659,7 +592,7 @@ void AsmFsmCodeGen::writeInit()
 	out << "	}\n";
 }
 
-string AsmFsmCodeGen::DATA_PREFIX()
+string AsmCodeGen::DATA_PREFIX()
 {
 	if ( !noPrefix )
 		return FSM_NAME() + "_";
@@ -667,7 +600,7 @@ string AsmFsmCodeGen::DATA_PREFIX()
 }
 
 /* Emit the alphabet data type. */
-string AsmFsmCodeGen::ALPH_TYPE()
+string AsmCodeGen::ALPH_TYPE()
 {
 	string ret = keyOps->alphType->data1;
 	if ( keyOps->alphType->data2 != 0 ) {
@@ -678,7 +611,7 @@ string AsmFsmCodeGen::ALPH_TYPE()
 }
 
 /* Emit the alphabet data type. */
-string AsmFsmCodeGen::WIDE_ALPH_TYPE()
+string AsmCodeGen::WIDE_ALPH_TYPE()
 {
 	string ret;
 	if ( redFsm->maxKey <= keyOps->maxKey )
@@ -697,7 +630,7 @@ string AsmFsmCodeGen::WIDE_ALPH_TYPE()
 	return ret;
 }
 
-HostType *AsmFsmCodeGen::wideAlphType()
+HostType *AsmCodeGen::wideAlphType()
 {
 	if ( redFsm->maxKey <= keyOps->maxKey )
 		return keyOps->alphType;
@@ -707,7 +640,7 @@ HostType *AsmFsmCodeGen::wideAlphType()
 	}
 }
 
-void AsmFsmCodeGen::STATIC_CONST_INT( const string &name, const string &value )
+void AsmCodeGen::STATIC_CONST_INT( const string &name, const string &value )
 {
 	out <<
 		"	.align	4\n"
@@ -717,7 +650,7 @@ void AsmFsmCodeGen::STATIC_CONST_INT( const string &name, const string &value )
 		"	.long	" << value << "\n";
 }
 
-void AsmFsmCodeGen::STATE_IDS()
+void AsmCodeGen::STATE_IDS()
 {
 	if ( redFsm->startState != 0 )
 		STATIC_CONST_INT( START(), START_STATE_ID() );
@@ -742,17 +675,17 @@ void AsmFsmCodeGen::STATE_IDS()
 	}
 }
 
-void AsmFsmCodeGen::writeStart()
+void AsmCodeGen::writeStart()
 {
 	out << START_STATE_ID();
 }
 
-void AsmFsmCodeGen::writeFirstFinal()
+void AsmCodeGen::writeFirstFinal()
 {
 	out << FIRST_FINAL_STATE();
 }
 
-void AsmFsmCodeGen::writeError()
+void AsmCodeGen::writeError()
 {
 	out << ERROR_STATE();
 }
@@ -830,7 +763,7 @@ void AsmCodeGen::writeExports()
 	}
 }
 
-void AsmFsmCodeGen::finishRagelDef()
+void AsmCodeGen::finishRagelDef()
 {
 	/* For directly executable machines there is no required state
 	 * ordering. Choose a depth-first ordering to increase the
@@ -855,13 +788,13 @@ void AsmFsmCodeGen::finishRagelDef()
 	calcIndexSize();
 }
 
-ostream &AsmFsmCodeGen::source_warning( const InputLoc &loc )
+ostream &AsmCodeGen::source_warning( const InputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
 	return cerr;
 }
 
-ostream &AsmFsmCodeGen::source_error( const InputLoc &loc )
+ostream &AsmCodeGen::source_error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
 	assert( sourceFileName != 0 );
@@ -869,7 +802,7 @@ ostream &AsmFsmCodeGen::source_error( const InputLoc &loc )
 	return cerr;
 }
 
-std::ostream &AsmGotoCodeGen::TO_STATE_ACTION_SWITCH()
+std::ostream &AsmCodeGen::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -886,7 +819,7 @@ std::ostream &AsmGotoCodeGen::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &AsmGotoCodeGen::FROM_STATE_ACTION_SWITCH()
+std::ostream &AsmCodeGen::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -903,7 +836,7 @@ std::ostream &AsmGotoCodeGen::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &AsmGotoCodeGen::EOF_ACTION_SWITCH()
+std::ostream &AsmCodeGen::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -920,7 +853,7 @@ std::ostream &AsmGotoCodeGen::EOF_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &AsmGotoCodeGen::ACTION_SWITCH()
+std::ostream &AsmCodeGen::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -937,8 +870,7 @@ std::ostream &AsmGotoCodeGen::ACTION_SWITCH()
 	return out;
 }
 
-
-void AsmIpGotoCodeGen::emitSingleSwitch( RedStateAp *state )
+void AsmCodeGen::emitSingleSwitch( RedStateAp *state )
 {
 	/* Load up the singles. */
 	int numSingles = state->outSingle.length();
@@ -970,7 +902,7 @@ void AsmIpGotoCodeGen::emitSingleSwitch( RedStateAp *state )
 	}
 }
 
-void AsmIpGotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int high )
+void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int high )
 {
 	static int nl = 1;
 	/* Get the mid position, staying on the lower end of the range. */
@@ -1131,7 +1063,7 @@ void AsmIpGotoCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, 
 	}
 }
 
-void AsmGotoCodeGen::COND_TRANSLATE( GenStateCond *stateCond, int level )
+void AsmCodeGen::COND_TRANSLATE( GenStateCond *stateCond, int level )
 {
 	GenCondSpace *condSpace = stateCond->condSpace;
 	out << TABS(level) << "_widec = " << CAST(WIDE_ALPH_TYPE()) << "(" <<
@@ -1146,7 +1078,7 @@ void AsmGotoCodeGen::COND_TRANSLATE( GenStateCond *stateCond, int level )
 	}
 }
 
-void AsmIpGotoCodeGen::emitCondBSearch( RedStateAp *state, int level, int low, int high )
+void AsmCodeGen::emitCondBSearch( RedStateAp *state, int level, int low, int high )
 {
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
@@ -1241,7 +1173,7 @@ void AsmIpGotoCodeGen::emitCondBSearch( RedStateAp *state, int level, int low, i
 	}
 }
 
-std::ostream &AsmIpGotoCodeGen::STATE_GOTOS()
+std::ostream &AsmCodeGen::STATE_GOTOS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st == redFsm->errState )
@@ -1273,7 +1205,7 @@ std::ostream &AsmIpGotoCodeGen::STATE_GOTOS()
 	return out;
 }
 
-std::ostream &AsmGotoCodeGen::TRANSITIONS()
+std::ostream &AsmCodeGen::TRANSITIONS()
 {
 	/* Emit any transitions that have functions and that go to 
 	 * this state. */
@@ -1298,7 +1230,7 @@ std::ostream &AsmGotoCodeGen::TRANSITIONS()
 	return out;
 }
 
-std::ostream &AsmGotoCodeGen::EXEC_FUNCS()
+std::ostream &AsmCodeGen::EXEC_FUNCS()
 {
 	/* Make labels that set acts and jump to execFuncs. Loop func indicies. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -1323,7 +1255,7 @@ std::ostream &AsmGotoCodeGen::EXEC_FUNCS()
 	return out;
 }
 
-unsigned int AsmGotoCodeGen::TO_STATE_ACTION( RedStateAp *state )
+unsigned int AsmCodeGen::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -1331,7 +1263,7 @@ unsigned int AsmGotoCodeGen::TO_STATE_ACTION( RedStateAp *state )
 	return act;
 }
 
-unsigned int AsmGotoCodeGen::FROM_STATE_ACTION( RedStateAp *state )
+unsigned int AsmCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -1339,7 +1271,7 @@ unsigned int AsmGotoCodeGen::FROM_STATE_ACTION( RedStateAp *state )
 	return act;
 }
 
-unsigned int AsmGotoCodeGen::EOF_ACTION( RedStateAp *state )
+unsigned int AsmCodeGen::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -1347,193 +1279,19 @@ unsigned int AsmGotoCodeGen::EOF_ACTION( RedStateAp *state )
 	return act;
 }
 
-std::ostream &AsmGotoCodeGen::TO_STATE_ACTIONS()
-{
-	AsmTableArray taTSA( *this, arrayType(redFsm->maxActionLoc), TSA() );
-
-	taTSA.OPEN();
-
-	/* Take one off for the psuedo start state. */
-	int numStates = redFsm->stateList.length();
-	unsigned int *vals = new unsigned int[numStates];
-	memset( vals, 0, sizeof(unsigned int)*numStates );
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
-		vals[st->id] = TO_STATE_ACTION(st);
-
-	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
-		/* Write any eof action. */
-		taTSA.VAL( vals[st] );
-	}
-	delete[] vals;
-
-	taTSA.CLOSE();
-
-	return out;
-}
-
-std::ostream &AsmGotoCodeGen::FROM_STATE_ACTIONS()
-{
-	AsmTableArray taFSA( *this, arrayType(redFsm->maxActionLoc), FSA() );
-
-	taFSA.OPEN();
-
-	/* Take one off for the psuedo start state. */
-	int numStates = redFsm->stateList.length();
-	unsigned int *vals = new unsigned int[numStates];
-	memset( vals, 0, sizeof(unsigned int)*numStates );
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
-		vals[st->id] = FROM_STATE_ACTION(st);
-
-	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
-		/* Write any eof action. */
-		taFSA.VAL( vals[st] );
-	}
-	delete[] vals;
-
-	taFSA.CLOSE();
-
-	return out;
-}
-
-std::ostream &AsmGotoCodeGen::EOF_ACTIONS()
-{
-	AsmTableArray taEA( *this, arrayType(redFsm->maxActionLoc), EA() );
-
-	taEA.OPEN();
-
-	/* Take one off for the psuedo start state. */
-	int numStates = redFsm->stateList.length();
-	unsigned int *vals = new unsigned int[numStates];
-	memset( vals, 0, sizeof(unsigned int)*numStates );
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
-		vals[st->id] = EOF_ACTION(st);
-
-	for ( int st = 0; st < redFsm->nextStateId; st++ ) {
-		/* Write any eof action. */
-		taEA.VAL( vals[st] );
-	}
-	delete[] vals;
-
-	taEA.CLOSE();
-
-	return out;
-}
-
-std::ostream &AsmGotoCodeGen::FINISH_CASES()
-{
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* States that are final and have an out action need a case. */
-		if ( st->eofAction != 0 ) {
-			/* Write the case label. */
-			out << "\t\tcase " << st->id << ": ";
-
-			/* Write the goto func. */
-			out << "goto f" << st->eofAction->actListId << ";\n";
-		}
-	}
-	
-	return out;
-}
-
-void AsmGotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
-{
-	ret << "{" << vCS() << " = " << gotoDest << "; " << 
-			CTRL_FLOW() << "goto _again;}";
-}
-
-void AsmGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
-{
-	ret << "{" << vCS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
-}
-
-void AsmGotoCodeGen::CURS( ostream &ret, bool inFinish )
-{
-	ret << "(_ps)";
-}
-
-void AsmGotoCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
-{
-	ret << "(" << vCS() << ")";
-}
-
-void AsmGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
-{
-	ret << vCS() << " = " << nextDest << ";";
-}
-
-void AsmGotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
-{
-	ret << vCS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << ");";
-}
-
-void AsmGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
-{
-	if ( prePushExpr != 0 ) {
-		ret << "{";
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
-	}
-
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
-			callDest << "; " << CTRL_FLOW() << "goto _again;}";
-
-	if ( prePushExpr != 0 )
-		ret << "}";
-}
-
-void AsmGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
-{
-	if ( prePushExpr != 0 ) {
-		ret << "{";
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
-	}
-
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
-	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
-
-	if ( prePushExpr != 0 )
-		ret << "}";
-}
-
-void AsmGotoCodeGen::RET( ostream &ret, bool inFinish )
-{
-	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
-
-	if ( postPopExpr != 0 ) {
-		ret << "{";
-		INLINE_LIST( ret, postPopExpr, 0, false, false );
-		ret << "}";
-	}
-
-	ret << CTRL_FLOW() << "goto _again;}";
-}
-
-void AsmGotoCodeGen::BREAK( ostream &ret, int targState, bool csForced )
-{
-	outLabelUsed = true;
-	ret << "{" << P() << "++; " << CTRL_FLOW() << "goto _out; }";
-}
-
-bool AsmIpGotoCodeGen::useAgainLabel()
+bool AsmCodeGen::useAgainLabel()
 {
 	return redFsm->anyRegActionRets() || 
 			redFsm->anyRegActionByValControl() || 
 			redFsm->anyRegNextStmt();
 }
 
-void AsmIpGotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
+void AsmCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << "{" << CTRL_FLOW() << "goto st" << gotoDest << ";}";
 }
 
-void AsmIpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+void AsmCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -1547,7 +1305,7 @@ void AsmIpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inF
 		ret << "}";
 }
 
-void AsmIpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void AsmCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 ) {
 		ret << "{";
@@ -1562,7 +1320,7 @@ void AsmIpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targS
 		ret << "}";
 }
 
-void AsmIpGotoCodeGen::RET( ostream &ret, bool inFinish )
+void AsmCodeGen::RET( ostream &ret, bool inFinish )
 {
 	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
 
@@ -1575,36 +1333,36 @@ void AsmIpGotoCodeGen::RET( ostream &ret, bool inFinish )
 	ret << CTRL_FLOW() << "goto _again;}";
 }
 
-void AsmIpGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void AsmCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
 
-void AsmIpGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
+void AsmCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
 	ret << vCS() << " = " << nextDest << ";";
 }
 
-void AsmIpGotoCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void AsmCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ");";
 }
 
-void AsmIpGotoCodeGen::CURS( ostream &ret, bool inFinish )
+void AsmCodeGen::CURS( ostream &ret, bool inFinish )
 {
 	ret << "(_ps)";
 }
 
-void AsmIpGotoCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
+void AsmCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
 	ret << targState;
 }
 
-void AsmIpGotoCodeGen::BREAK( ostream &ret, int targState, bool csForced )
+void AsmCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "{" << P() << "++; ";
@@ -1613,7 +1371,7 @@ void AsmIpGotoCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 	ret << CTRL_FLOW() << "goto _out;}";
 }
 
-bool AsmIpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
+bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 {
 	bool anyWritten = false;
 
@@ -1651,7 +1409,7 @@ bool AsmIpGotoCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 	return anyWritten;
 }
 
-void AsmIpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
+void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 {
 	/* bool anyWritten = */ IN_TRANS_ACTIONS( state );
 
@@ -1708,7 +1466,7 @@ void AsmIpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 #endif
 }
 
-void AsmIpGotoCodeGen::STATE_GOTO_ERROR()
+void AsmCodeGen::STATE_GOTO_ERROR()
 {
 	/* In the error state we need to emit some stuff that usually goes into
 	 * the header. */
@@ -1730,7 +1488,7 @@ void AsmIpGotoCodeGen::STATE_GOTO_ERROR()
 
 
 /* Emit the goto to take for a given transition. */
-std::ostream &AsmIpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
+std::ostream &AsmCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 {
 #if 0
 	if ( trans->action != 0 ) {
@@ -1749,7 +1507,7 @@ std::ostream &AsmIpGotoCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 	return out;
 }
 
-std::ostream &AsmIpGotoCodeGen::EXIT_STATES()
+std::ostream &AsmCodeGen::EXIT_STATES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->outNeeded ) {
@@ -1765,7 +1523,7 @@ std::ostream &AsmIpGotoCodeGen::EXIT_STATES()
 	return out;
 }
 
-std::ostream &AsmIpGotoCodeGen::AGAIN_CASES()
+std::ostream &AsmCodeGen::AGAIN_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		out << 
@@ -1774,7 +1532,7 @@ std::ostream &AsmIpGotoCodeGen::AGAIN_CASES()
 	return out;
 }
 
-std::ostream &AsmIpGotoCodeGen::FINISH_CASES()
+std::ostream &AsmCodeGen::FINISH_CASES()
 {
 	bool anyWritten = false;
 
@@ -1812,7 +1570,7 @@ std::ostream &AsmIpGotoCodeGen::FINISH_CASES()
 	return out;
 }
 
-void AsmIpGotoCodeGen::setLabelsNeeded( GenInlineList *inlineList )
+void AsmCodeGen::setLabelsNeeded( GenInlineList *inlineList )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -1830,7 +1588,7 @@ void AsmIpGotoCodeGen::setLabelsNeeded( GenInlineList *inlineList )
 }
 
 /* Set up labelNeeded flag for each state. */
-void AsmIpGotoCodeGen::setLabelsNeeded()
+void AsmCodeGen::setLabelsNeeded()
 {
 	/* If we use the _again label, then we the _again switch, which uses all
 	 * labels. */
@@ -1870,12 +1628,12 @@ void AsmIpGotoCodeGen::setLabelsNeeded()
 	}
 }
 
-void AsmIpGotoCodeGen::writeData()
+void AsmCodeGen::writeData()
 {
 	STATE_IDS();
 }
 
-void AsmIpGotoCodeGen::writeExec()
+void AsmCodeGen::writeExec()
 {
 	out << "# WRITE EXEC BEGIN\n";
 
