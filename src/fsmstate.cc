@@ -391,12 +391,7 @@ int FsmAp::comparePart( TransAp *trans1, TransAp *trans2 )
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
-		}
-
-		case ValPairIter<CondAp>::BreakS1:
-		case ValPairIter<CondAp>::BreakS2:
-			break;
-		}
+		}}
 	}
 
 	return 0;

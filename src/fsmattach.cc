@@ -497,18 +497,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 			newTrans->key = outPair.s1Tel.key;
 			destList.append( newTrans );
 			break;
-		}
-		case ValPairIter<CondAp>::BreakS1: {
-//			/* Since we are always writing to the dest trans, the dest needs
-//			 * to be copied when it is broken. The copy goes into the first
-//			 * half of the break to "break it off". */
-//			outPair.s1Tel.trans = dupTrans( dest, outPair.s1Tel.trans );
-			assert( false );
-			break;
-		}
-		case ValPairIter<CondAp>::BreakS2:
-			break;
-		}
+		}}
 	}
 
 	/* Abandon the old outList and transfer destList into it. */

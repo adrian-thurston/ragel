@@ -787,7 +787,6 @@ template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
 	{
 		RangeInS1, RangeInS2,
 		RangeOverlap,
-		BreakS1, BreakS2
 	};
 
 	/* Encodes the different states that an fsm iterator can be in. */
@@ -861,7 +860,8 @@ template <class ListItem1, class ListItem2> ValPairIter<ListItem1, ListItem2>::
 
 /* Advance to the next transition. When returns, trans points to the next
  * transition, unless there are no more, in which case end() returns true. */
-template <class ListItem1, class ListItem2> void ValPairIter<ListItem1, ListItem2>::findNext()
+template <class ListItem1, class ListItem2>
+	void ValPairIter<ListItem1, ListItem2>::findNext()
 {
 	/* Jump into the iterator routine base on the iterator state. */
 	switch ( itState ) {
@@ -1016,7 +1016,8 @@ template <class ListItem1, class ListItem2> RangePairIter<ListItem1, ListItem2>:
 
 /* Advance to the next transition. When returns, trans points to the next
  * transition, unless there are no more, in which case end() returns true. */
-template <class ListItem1, class ListItem2> void RangePairIter<ListItem1, ListItem2>::findNext()
+template <class ListItem1, class ListItem2>
+		void RangePairIter<ListItem1, ListItem2>::findNext()
 {
 	/* Jump into the iterator routine base on the iterator state. */
 	switch ( itState ) {
@@ -1418,7 +1419,8 @@ struct FsmAp
 	CondAp *fsmAttachStates( MergeData &md, StateAp *from,
 			CondAp *destTrans, CondAp *srcTrans );
 
-	void expandConds( StateAp *fromState, TransAp *trans, const CondSet &origSet, const CondSet &mergedCS );
+	void expandConds( StateAp *fromState, TransAp *trans,
+			const CondSet &origSet, const CondSet &mergedCS );
 	void expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans );
 	TransAp *copyTransForExpanision( StateAp *fromState, TransAp *srcTrans );
 	void freeEffectiveTrans( TransAp *srcTrans );
