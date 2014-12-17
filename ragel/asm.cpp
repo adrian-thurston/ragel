@@ -770,6 +770,7 @@ void AsmCodeGen::finishRagelDef()
 
 	/* Choose default transitions and the single transition. */
 	redFsm->chooseDefaultSpan();
+	redFsm->chooseSingle();
 		
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
@@ -867,6 +868,24 @@ std::ostream &AsmCodeGen::ACTION_SWITCH()
 	genLineDirective( out );
 	return out;
 }
+
+void AsmCodeGen::emitSingleSwitch( RedStateAp *state )
+{
+	/* Load up the singles. */
+	int numSingles = state->outSingle.length();
+	RedTransEl *data = state->outSingle.data;
+
+	/* Write out the single indicies. */
+	for ( int j = 0; j < numSingles; j++ ) {
+		//out << "\t\tcase " << WIDE_KEY(state, data[j].lowKey) << ": ";
+		//TRANS_GOTO(data[j].value, 0) << "\n";
+
+		out <<
+			"	cmpb	" << KEY( data[j].lowKey ) << ", %r14b\n"
+			"	je	" << TRANS_GOTO_TARG( data[j].value ) << "\n";
+	}
+}
+
 
 void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int high )
 {
@@ -1200,11 +1219,16 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 //				emitCondBSearch( st, 1, 0, st->stateCondVect.length() - 1 );
 //			}
 
-			/* Default case is to binary search for the ranges, if that fails then */
-			if ( st->outRange.length() > 0 ) {
+			if ( st->outSingle.length() > 0 || st->outRange.length() > 0 )
 				out << "	movb	(%r12), %r14b\n";
+
+			/* Try singles. */
+			if ( st->outSingle.length() > 0 )
+				emitSingleSwitch( st );
+
+			/* Default case is to binary search for the ranges, if that fails then */
+			if ( st->outRange.length() > 0 )
 				emitRangeBSearch( st, 1, 0, st->outRange.length() - 1 );
-			}
 
 			/* Write the default transition. */
 			out << ".L_nf_" << st->id << ":\n";
