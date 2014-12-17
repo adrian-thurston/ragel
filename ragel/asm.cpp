@@ -869,7 +869,7 @@ std::ostream &AsmCodeGen::ACTION_SWITCH()
 	return out;
 }
 
-void AsmCodeGen::emitSingleSwitch( RedStateAp *state )
+void AsmCodeGen::emitSingleIfElseIf( RedStateAp *state )
 {
 	/* Load up the singles. */
 	int numSingles = state->outSingle.length();
@@ -884,6 +884,54 @@ void AsmCodeGen::emitSingleSwitch( RedStateAp *state )
 			"	cmpb	" << KEY( data[j].lowKey ) << ", %r14b\n"
 			"	je	" << TRANS_GOTO_TARG( data[j].value ) << "\n";
 	}
+}
+
+void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
+{
+	static int l = 1;
+	int table = l++;
+	int failed = l++;
+	int numSingles = state->outSingle.length();
+	RedTransEl *data = state->outSingle.data;
+
+	long long low = data[0].lowKey.getVal();
+	long long high = data[numSingles-1].lowKey.getVal();
+
+	if ( def.size() == 0 ) {
+		std::stringstream s;
+		s << ".L_sjt_" << failed;
+		def = s.str();
+	}
+
+	out <<
+		"	cmpb	$" << low << ", %r14b\n"
+		"	jl	" << def << "\n"
+		"	cmpb	$" << high << ", %r14b\n"
+		"	jg	" << def << "\n"
+		"	movzbq	%r14b, %rax\n"
+		"	subq	$" << low << ", %rax\n"
+		"	jmp	*.L_sjt_" << table << "(,%rax,8)\n"
+		"	.section .rodata\n"
+		"	.align 8\n"
+		".L_sjt_" << table << ":\n";
+
+	for ( long long j = 0; j < numSingles; j++ ) {
+		/* Fill in gap between prev and this. */
+		if ( j > 0 ){
+			long long span = keyOps->span( data[j-1].lowKey, data[j].lowKey ) - 2;
+			for ( long long k = 0; k < span; k++ ) {
+				out <<
+					"	.quad	" << def << "\n";
+			}
+		}
+
+		out <<
+			"	.quad	" << TRANS_GOTO_TARG( data[j].value ) << "\n";
+	}
+
+	out <<
+		"	.text\n"
+		".L_sjt_" << failed << ":\n";
 }
 
 
@@ -1223,8 +1271,16 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 				out << "	movb	(%r12), %r14b\n";
 
 			/* Try singles. */
-			if ( st->outSingle.length() > 0 )
-				emitSingleSwitch( st );
+			if ( st->outSingle.length() > 0 ) {
+				if ( st->outSingle.length() <= 4 )
+					emitSingleIfElseIf( st );
+				else {
+					string def;
+					if ( st->outRange.length() == 0 )
+						def = TRANS_GOTO_TARG( st->defTrans );
+					emitSingleJumpTable( st, def );
+				}
+			}
 
 			/* Default case is to binary search for the ranges, if that fails then */
 			if ( st->outRange.length() > 0 )

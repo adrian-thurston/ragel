@@ -231,7 +231,8 @@ public:
 	std::ostream &STATE_GOTOS();
 
 	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
-	void emitSingleSwitch( RedStateAp *state );
+	void emitSingleIfElseIf( RedStateAp *state );
+	void emitSingleJumpTable( RedStateAp *state, std::string def );
 	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
 
 	/* Set up labelNeeded flag for each state. */
