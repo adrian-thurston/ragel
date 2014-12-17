@@ -48,6 +48,12 @@ typedef Vector<const char *> ArgsVector;
 
 struct InputData
 {
+	enum RagelFrontend
+	{
+		KelbtBased,
+		ColmBased
+	};
+
 	InputData() : 
 		inputFileName(0),
 		outputFileName(0),
@@ -69,7 +75,8 @@ struct InputData
 		maxTransitions(LONG_MAX),
 		numSplitPartitions(0),
 		rubyImpl(MRI),
-		rlhcShowCmd(false)
+		rlhcShowCmd(false),
+		ragelFrontend(ColmBased)
 	{}
 
 	std::string dirName;
@@ -80,7 +87,6 @@ struct InputData
 
 	std::string origOutputFileName;
 	std::string genOutputFileName;
-
 
 	/* Io globals. */
 	std::istream *inStream;
@@ -123,6 +129,8 @@ struct InputData
 
 	bool rlhcShowCmd;
 
+	RagelFrontend ragelFrontend;
+
 	void verifyWritesHaveData();
 
 	void makeFirstInputItem();
@@ -154,6 +162,7 @@ struct InputData
 
 	void parseArgs( int argc, const char **argv );
 	void checkArgs();
+	void terminateAllParsers();
 
 	void process();
 };

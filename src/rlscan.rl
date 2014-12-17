@@ -270,6 +270,12 @@ void Scanner::handleMachine()
 			pdEl->value->init();
 			id.parserDict.insert( pdEl );
 			id.parserList.append( pdEl->value );
+
+			/* Also into the parse data dict. This is the new style. */
+			ParseDataDictEl *pddEl = new ParseDataDictEl( machine );
+			pddEl->value = pdEl->value->pd;
+			id.parseDataDict.insert( pddEl );
+			id.parseDataList.append( pddEl->value );
 		}
 
 		parser = pdEl->value;
@@ -414,8 +420,8 @@ void Scanner::handleImport()
 
 	action write_close
 	{
-		if ( active() && id.machineSpec == 0 && id.machineName == 0 )
-			id.inputItems.tail->writeArgs.append( 0 );
+		/* if ( active() && id.machineSpec == 0 && id.machineName == 0 )
+		 *	id.inputItems.tail->writeArgs.append( 0 ); */
 	}
 
 	write_stmt =

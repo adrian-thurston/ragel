@@ -769,7 +769,7 @@ nonterm action_embed_block uses action_ref;
 action_embed_block:
 	'{' inline_block '}' final {
 		/* Create the action, add it to the list and pass up. */
-		Action *newAction = new Action( $1->loc, 0, $2->inlineList, pd->nextCondId++ );
+		Action *newAction = new Action( $1->loc, std::string(), $2->inlineList, pd->nextCondId++ );
 		pd->actionList.append( newAction );
 		$$->action = newAction;
 	};

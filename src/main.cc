@@ -338,6 +338,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					rubyImpl = Rubinius;
 				else if ( strcmp( arg, "rlhc" ) == 0 )
 					rlhcShowCmd = true;
+				else if ( strcmp( arg, "frontend-kelbt" ) == 0 )
+					ragelFrontend = KelbtBased;
+				else if ( strcmp( arg, "frontend-colm" ) == 0 )
+					ragelFrontend = ColmBased;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
