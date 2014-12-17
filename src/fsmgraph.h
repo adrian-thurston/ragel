@@ -1411,14 +1411,12 @@ struct FsmAp
 			StateAp *to, CondKey onChar );
 
 	/* Attach with an existing transition that already in an out list. */
-	void attachTrans( StateAp *from, StateAp *to, TransAp *trans );
 	void attachTrans( StateAp *from, StateAp *to, CondAp *trans );
 	
 	/* Redirect a transition away from error and towards some state. */
 	void redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans );
 
 	/* Detach a transition from a target state. */
-	void detachTrans( StateAp *from, StateAp *to, TransAp *trans );
 	void detachCondTrans( StateAp *from, StateAp *to, CondAp *trans );
 
 	/* Detach a state from the graph. */
@@ -1500,7 +1498,6 @@ struct FsmAp
 	 */
 
 	/* Add in the properties of srcTrans into this. */
-	void addInTrans( TransAp *destTrans, TransAp *srcTrans );
 	void addInTrans( CondAp *destTrans, CondAp *srcTrans );
 
 	/* Compare states on data stored in the states. */

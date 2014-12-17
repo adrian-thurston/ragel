@@ -110,26 +110,6 @@ TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key high
 /* Attach for range lists or for the default transition.  This attach should
  * be used when a transition already is allocated and must be attached to a
  * target state.  Does not handle adding the transition into the out list. */
-void FsmAp::attachTrans( StateAp *from, StateAp *to, TransAp *trans )
-{
-	cerr << "FIXME: " << __PRETTY_FUNCTION__ << endl;
-
-	assert( tai(trans)->condList.head->fromState == 0 && 
-			tai(trans)->condList.head->toState == 0 );
-
-	tai(trans)->condList.head->fromState = from;
-	tai(trans)->condList.head->toState = to;
-
-	if ( to != 0 ) {
-		/* For now always attache the one and only condList element. */
-		attachToInList( from, to, to->inList.head, 
-				tai(trans)->condList.head );
-	}
-}
-
-/* Attach for range lists or for the default transition.  This attach should
- * be used when a transition already is allocated and must be attached to a
- * target state.  Does not handle adding the transition into the out list. */
 void FsmAp::attachTrans( StateAp *from, StateAp *to, CondAp *trans )
 {
 	assert( trans->fromState == 0 && trans->toState == 0 );
@@ -154,22 +134,6 @@ void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans )
 	if ( to != 0 ) {
 		/* Attach using the inList pointer as the head pointer. */
 		attachToInList( from, to, to->inList.head, trans );
-	}
-}
-
-/* Detach for out/in lists or for default transition. */
-void FsmAp::detachTrans( StateAp *from, StateAp *to, TransAp *trans )
-{
-	cerr << "FIXME: " << __PRETTY_FUNCTION__ << endl;
-
-	assert( tai(trans)->condList.head->fromState == from && 
-			tai(trans)->condList.head->toState == to );
-
-	tai(trans)->condList.head->fromState = 0;
-	tai(trans)->condList.head->toState = 0;
-
-	if ( to != 0 ) {
-		detachFromInList( from, to, to->inList.head, tai(trans)->condList.head );
 	}
 }
 

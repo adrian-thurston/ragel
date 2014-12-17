@@ -833,36 +833,6 @@ int FsmAp::compareCondData( CondAp *trans1, CondAp *trans2 )
  * that will be a duplicate of another transition or a combination of several
  * other transitions. AddInTrans will be called for each transition that the
  * new transition is to represent. */
-void FsmAp::addInTrans( TransAp *destTrans, TransAp *srcTrans )
-{
-	cerr << "FIXME: " << __PRETTY_FUNCTION__ << endl;
-
-	/* Protect against adding in from ourselves. */
-	if ( srcTrans == destTrans ) {
-		/* Adding in ourselves, need to make a copy of the source transitions.
-		 * The priorities are not copied in as that would have no effect. */
-		tai(destTrans)->condList.head->lmActionTable.setActions(
-				LmActionTable(tai(srcTrans)->condList.head->lmActionTable) );
-		tai(destTrans)->condList.head->actionTable.setActions(
-				ActionTable(tai(srcTrans)->condList.head->actionTable) );
-	}
-	else {
-		/* Not a copy of ourself, get the functions and priorities. */
-		tai(destTrans)->condList.head->lmActionTable.setActions(
-				tai(srcTrans)->condList.head->lmActionTable );
-		tai(destTrans)->condList.head->actionTable.setActions(
-				tai(srcTrans)->condList.head->actionTable );
-		tai(destTrans)->condList.head->priorTable.setPriors(
-				tai(srcTrans)->condList.head->priorTable );
-	}
-}
-
-/* Callback invoked when another trans (or possibly this) is added into this
- * transition during the merging process.  Draw in any properties of srcTrans
- * into this transition. AddInTrans is called when a new transitions is made
- * that will be a duplicate of another transition or a combination of several
- * other transitions. AddInTrans will be called for each transition that the
- * new transition is to represent. */
 void FsmAp::addInTrans( CondAp *destTrans, CondAp *srcTrans )
 {
 	/* Protect against adding in from ourselves. */
