@@ -31,8 +31,12 @@ enum CodeStyle
 
 /* To what degree are machine minimized. */
 enum MinimizeLevel {
+	#ifdef TO_UPGRADE_CONDS
 	MinimizeApprox,
+	#endif
+	#ifdef TO_UPGRADE_CONDS
 	MinimizeStable,
+	#endif
 	MinimizePartition1,
 	MinimizePartition2
 };

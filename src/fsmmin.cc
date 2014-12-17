@@ -376,6 +376,7 @@ void FsmAp::initialMarkRound( MarkIndex &markIndex )
 	}
 }
 
+#ifdef TO_UPGRADE_CONDS
 bool FsmAp::markRound( MarkIndex &markIndex )
 {
 	/* P an q for walking pairs. Take note if any pair gets marked. */
@@ -405,8 +406,9 @@ bool FsmAp::markRound( MarkIndex &markIndex )
 
 	return pairWasMarked;
 }
+#endif
 
-
+#ifdef TO_UPGRADE_CONDS
 /**
  * \brief Minimize by pair marking.
  *
@@ -434,7 +436,9 @@ void FsmAp::minimizeStable()
 	/* Merge pairs that are unmarked. */
 	fuseUnmarkedPairs( markIndex );
 }
+#endif
 
+#ifdef TO_UPGRADE_CONDS
 bool FsmAp::minimizeRound()
 {
 	/* Nothing to do if there are no states. */
@@ -478,7 +482,9 @@ bool FsmAp::minimizeRound()
 	delete[] statePtrs;
 	return modified;
 }
+#endif
 
+#ifdef TO_UPGRADE_CONDS
 /**
  * \brief Minmimize by an approximation.
  *
@@ -496,6 +502,7 @@ void FsmAp::minimizeApproximate()
 			break;
 	}
 }
+#endif
 
 
 /* Remove states that have no path to them from the start state. Recursively

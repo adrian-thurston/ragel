@@ -233,10 +233,18 @@ void InputData::parseArgs( int argc, const char **argv )
 				minimizeOpt = MinimizeEveryOp;
 				break;
 			case 'a':
+			#ifdef TO_UPGRADE_CONDS
 				minimizeLevel = MinimizeApprox;
+			#else
+				error() << "minimize approx (-a) unsupported in this version" << endp;
+			#endif
 				break;
 			case 'b':
+			#ifdef TO_UPGRADE_CONDS
 				minimizeLevel = MinimizeStable;
+			#else
+				error() << "minimize stable (-b) unsupported in this version" << endp;
+			#endif
 				break;
 			case 'j':
 				minimizeLevel = MinimizePartition1;

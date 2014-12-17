@@ -53,18 +53,22 @@ void afterOpMinimize( FsmAp *fsm, bool lastInSeq )
 		fsm->removeUnreachableStates();
 
 		switch ( fsm->ctx->minimizeLevel ) {
+			#ifdef TO_UPGRADE_CONDS
 			case MinimizeApprox:
 				fsm->minimizeApproximate();
 				break;
+			#endif
 			case MinimizePartition1:
 				fsm->minimizePartition1();
 				break;
 			case MinimizePartition2:
 				fsm->minimizePartition2();
 				break;
+			#ifdef TO_UPGRADE_CONDS
 			case MinimizeStable:
 				fsm->minimizeStable();
 				break;
+			#endif
 		}
 	}
 }
@@ -1094,12 +1098,16 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 		/* Minimize here even if we minimized at every op. Now that function
 		 * keys have been cleared we may get a more minimal fsm. */
 		switch ( graph->ctx->minimizeLevel ) {
+			#ifdef TO_UPGRADE_CONDS
 			case MinimizeApprox:
 				graph->minimizeApproximate();
 				break;
+			#endif
+			#ifdef TO_UPGRADE_CONDS
 			case MinimizeStable:
 				graph->minimizeStable();
 				break;
+			#endif
 			case MinimizePartition1:
 				graph->minimizePartition1();
 				break;

@@ -156,6 +156,7 @@ StateAp::~StateAp()
 		delete stateDictEl;
 }
 
+#ifdef TO_UPGRADE_CONDS
 /* Compare two states using pointers to the states. With the approximate
  * compare, the idea is that if the compare finds them the same, they can
  * immediately be merged. */
@@ -219,6 +220,7 @@ int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 	/* Got through the entire state comparison, deem them equal. */
 	return 0;
 }
+#endif
 
 /* Compare class used in the initial partition. */
 int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2 )
@@ -326,6 +328,7 @@ int PartitionCompare::compare( const StateAp *state1, const StateAp *state2 )
 	return 0;
 }
 
+#ifdef TO_UPGRADE_CONDS
 /* Compare class for the sort that does the partitioning. */
 bool MarkCompare::shouldMark( MarkIndex &markIndex, const StateAp *state1, 
 			const StateAp *state2 )
@@ -359,6 +362,7 @@ bool MarkCompare::shouldMark( MarkIndex &markIndex, const StateAp *state1,
 
 	return false;
 }
+#endif
 
 /*
  * Transition Comparison.
@@ -462,6 +466,7 @@ int FsmAp::compareCondDataPtr( CondAp *trans1, CondAp *trans2 )
 	return 0;
 }
 
+#ifdef TO_UPGRADE_CONDS
 /* Compares two transitions according to target state, priority and functions.
  * Does not consider from state. Either of the pointers may be null. */
 int FsmAp::compareFullPtr( TransAp *trans1, TransAp *trans2 )
@@ -491,8 +496,9 @@ int FsmAp::compareFullPtr( TransAp *trans1, TransAp *trans2 )
 	}
 	return 0;
 }
+#endif
 
-
+#ifdef TO_UPGRADE_CONDS
 bool FsmAp::shouldMarkPtr( MarkIndex &markIndex, TransAp *trans1, 
 				TransAp *trans2 )
 {
@@ -513,5 +519,4 @@ bool FsmAp::shouldMarkPtr( MarkIndex &markIndex, TransAp *trans1,
 	/* Neither of the transitiosn are set. */
 	return false;
 }
-
-
+#endif
