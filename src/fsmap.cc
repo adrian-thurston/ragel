@@ -99,7 +99,7 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 
 	/* Walk all transitions out of the start state. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+		for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 			if ( cond->toState != 0 )
 				cond->priorTable.setPrior( ordering, prior );
 		}
@@ -120,7 +120,7 @@ void FsmAp::allTransPrior( int ordering, PriorDesc *prior )
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out list of the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+			for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 				if ( cond->toState != 0 )
 					cond->priorTable.setPrior( ordering, prior );
 			}
@@ -167,7 +167,7 @@ void FsmAp::startFsmAction( int ordering, Action *action )
 
 	/* Walk the start state's transitions, setting functions. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+		for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 			if ( cond->toState != 0 )
 				cond->actionTable.setAction( ordering, action );
 		}
@@ -188,7 +188,7 @@ void FsmAp::allTransAction( int ordering, Action *action )
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out list of the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+			for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 				if ( cond->toState != 0 )
 					cond->actionTable.setAction( ordering, action );
 			}
@@ -297,7 +297,7 @@ void FsmAp::fillGaps( StateAp *state )
 	 */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
 		CondList srcList;
-		srcList.transfer( trans->condList );
+		srcList.transfer( tai(trans)->condList );
 
 		CondList::Iter cond = srcList, next;
 
@@ -307,7 +307,7 @@ void FsmAp::fillGaps( StateAp *state )
 		}
 
 		next = cond.next();
-		trans->condList.append( cond );
+		tai(trans)->condList.append( cond );
 
 		CondKey lastKey = cond->key;
 
@@ -323,7 +323,7 @@ void FsmAp::fillGaps( StateAp *state )
 			}
 
 			next = cond.next();
-			trans->condList.append( cond );
+			tai(trans)->condList.append( cond );
 
 			lastKey = cond->key;
 		}
@@ -349,7 +349,7 @@ void FsmAp::setErrorActions( StateAp *state, const ActionTable &other )
 
 	/* Set error transitions in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+		for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 			if ( cond->toState == 0 )
 				cond->actionTable.setActions( other );
 		}
@@ -363,7 +363,7 @@ void FsmAp::setErrorAction( StateAp *state, int ordering, Action *action )
 
 	/* Set error transitions in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+		for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 			if ( cond->toState == 0 )
 				cond->actionTable.setAction( ordering, action );
 		}
@@ -380,7 +380,7 @@ void FsmAp::setErrorTarget( StateAp *state, StateAp *target, int *orderings,
 
 	/* Set error target in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+		for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 			if ( cond->toState == 0 ) {
 				/* The trans goes to error, redirect it. */
 				redirectErrorTrans( cond->fromState, target, cond );
@@ -633,7 +633,7 @@ int FsmAp::shiftStartActionOrder( int fromOrder )
 
 	/* Walk the start state's transitions, shifting function ordering. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+		for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 			/* Walk the function data for the transition and set the keys to
 			 * increasing values starting at fromOrder. */
 			int curFromOrder = fromOrder;
@@ -659,7 +659,7 @@ void FsmAp::clearAllPriorities()
 
 		/* Clear transition data from the out transitions. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ )
+			for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ )
 				cond->priorTable.empty();
 		}
 	}
@@ -675,7 +675,7 @@ void FsmAp::nullActionKeys( )
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the transitions for the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+			for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 				/* Walk the action table for the transition. */
 				for ( ActionTable::Iter action = cond->actionTable;
 						action.lte(); action++ )
@@ -777,7 +777,7 @@ int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 	else if ( trans2->condSpace < trans1->condSpace )
 		return 1;
 
-	ValPairIter<CondAp> outPair( trans1->condList.head, trans2->condList.head );
+	ValPairIter<CondAp> outPair( tai(trans1)->condList.head, tai(trans2)->condList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 		case ValPairIter<CondAp>::RangeInS1: {
@@ -841,14 +841,19 @@ void FsmAp::addInTrans( TransAp *destTrans, TransAp *srcTrans )
 	if ( srcTrans == destTrans ) {
 		/* Adding in ourselves, need to make a copy of the source transitions.
 		 * The priorities are not copied in as that would have no effect. */
-		destTrans->condList.head->lmActionTable.setActions( LmActionTable(srcTrans->condList.head->lmActionTable) );
-		destTrans->condList.head->actionTable.setActions( ActionTable(srcTrans->condList.head->actionTable) );
+		tai(destTrans)->condList.head->lmActionTable.setActions(
+				LmActionTable(tai(srcTrans)->condList.head->lmActionTable) );
+		tai(destTrans)->condList.head->actionTable.setActions(
+				ActionTable(tai(srcTrans)->condList.head->actionTable) );
 	}
 	else {
 		/* Not a copy of ourself, get the functions and priorities. */
-		destTrans->condList.head->lmActionTable.setActions( srcTrans->condList.head->lmActionTable );
-		destTrans->condList.head->actionTable.setActions( srcTrans->condList.head->actionTable );
-		destTrans->condList.head->priorTable.setPriors( srcTrans->condList.head->priorTable );
+		tai(destTrans)->condList.head->lmActionTable.setActions(
+				tai(srcTrans)->condList.head->lmActionTable );
+		tai(destTrans)->condList.head->actionTable.setActions(
+				tai(srcTrans)->condList.head->actionTable );
+		tai(destTrans)->condList.head->priorTable.setPriors(
+				tai(srcTrans)->condList.head->priorTable );
 	}
 }
 

@@ -312,6 +312,8 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 
 	makeOutputStream();
 
+//return;
+
 	/* Generates the reduced machine, which we use to write output. */
 	generateReduced( printStatistics );
 

@@ -733,12 +733,12 @@ void FsmAp::compressTransitions()
 					if ( trans->condSpace == 0 &&
 							next->condSpace == 0 )
 					{
-						assert( trans->condList.length() == 1 );
-						assert( next->condList.length() == 1 );
+						assert( tai(trans)->condList.length() == 1 );
+						assert( tai(next)->condList.length() == 1 );
 
 						/* Check the condition target and action data. */
-						CondAp *cond = trans->condList.head;
-						CondAp *nextCond = next->condList.head;
+						CondAp *cond = tai(trans)->condList.head;
+						CondAp *nextCond = tai(next)->condList.head;
 
 						if ( cond->toState == nextCond->toState &&
 								CmpActionTable::compare( cond->actionTable, 
@@ -752,8 +752,8 @@ void FsmAp::compressTransitions()
 				if ( merge ) {
 					trans->highKey = next->highKey;
 					st->outList.detach( next );
-					detachCondTrans( next->condList.head->fromState,
-							next->condList.head->toState, next->condList.head );
+					detachCondTrans( tai(next)->condList.head->fromState,
+							tai(next)->condList.head->toState, tai(next)->condList.head );
 					delete next;
 					next = trans.next();
 				}

@@ -23,7 +23,7 @@ long TransAp::condFullSize()
 void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
 {
 	/* Need to transform condition element to the merged set. */
-	for ( CondList::Iter cti = trans->condList; cti.lte(); cti++ ) {
+	for ( CondList::Iter cti = tai(trans)->condList; cti.lte(); cti++ ) {
 		long origVal = cti->key.getVal();
 		long newVal = 0;
 
@@ -50,7 +50,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 		Action **cim = fromCS.find( *csi );
 		if ( cim == 0 ) {
 			CondList newItems;
-			for ( CondList::Iter cti = trans->condList; cti.lte(); cti++ ) {
+			for ( CondList::Iter cti = tai(trans)->condList; cti.lte(); cti++ ) {
 				/* Sub-transition for conditions. */
 				CondAp *cond = new CondAp( trans );
 
@@ -68,7 +68,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 
 			/* Merge newItems in. Both the condList and newItems are sorted. Make
 			 * a sorted list out of them. */
-			CondAp *dest = trans->condList.head;
+			CondAp *dest = tai(trans)->condList.head;
 			while ( dest != 0 && newItems.head != 0 ) { 
 				if ( newItems.head->key.getVal() > dest->key.getVal() ) {
 					dest = dest->next;
@@ -76,17 +76,18 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 				else {
 					/* Pop the item for insertion. */
 					CondAp *ins = newItems.detachFirst();
-					trans->condList.addBefore( dest, ins );
+					tai(trans)->condList.addBefore( dest, ins );
 				}
 			}
 
 			/* Append the rest of the items. */
-			trans->condList.append( newItems );
+			tai(trans)->condList.append( newItems );
 		}
 	}
 }
 
-void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans )
+void FsmAp::expandCondTransitions( StateAp *fromState,
+		TransAp *destTrans, TransAp *srcTrans )
 {
 	CondSet destCS, srcCS;
 	CondSet mergedCS;
@@ -138,7 +139,7 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 
 		/* Translate original condition values, making space for the new bit
 		 * (possibly) introduced by the condition embedding. */
-		for ( CondList::Iter cti = tr->condList; cti.lte(); cti++ ) {
+		for ( CondList::Iter cti = tai(tr)->condList; cti.lte(); cti++ ) {
 			long origVal = cti->key.getVal();
 			long newVal = 0;
 

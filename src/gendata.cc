@@ -44,7 +44,7 @@ GenBase::GenBase( std::string fsmName, ParseData *pd, FsmAp *fsm )
 void GenBase::appendTrans( TransListVect &outList, Key lowKey, 
 		Key highKey, TransAp *trans )
 {
-	for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+	for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 		if ( cond->toState != 0 || cond->actionTable.length() > 0 ) {
 			outList.append( TransEl( lowKey, highKey, trans ) );
 			break;
@@ -78,7 +78,7 @@ void GenBase::reduceActionTables()
 
 		/* Loop the transitions and reduce their actions. */
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+			for ( CondList::Iter cond = tai(trans)->condList; cond.lte(); cond++ ) {
 				if ( cond->actionTable.length() > 0 ) {
 					if ( actionTableMap.insert( cond->actionTable, &actionTable ) )
 						actionTable->id = nextActionTableId++;
@@ -588,7 +588,7 @@ void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
 	RedCondList redCondList;
 
-	for ( CondList::Iter cti = trans->condList; cti.lte(); cti++ ) {
+	for ( CondList::Iter cti = tai(trans)->condList; cti.lte(); cti++ ) {
 		long targ = -1;
 		long action = -1;
 
@@ -606,7 +606,7 @@ void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 		newCondTrans( redCondList, curState, cti->key, targ, action );
 	}
 
-	GenCondSpace *gcs = trans->condSpace != 0 ?
+	GenCondSpace *gcs = tai(trans)->condSpace != 0 ?
 			allCondSpaces + trans->condSpace->condSpaceId : 0;
 	
 	newTrans( curState, curTrans++, lowKey, highKey, gcs, redCondList );

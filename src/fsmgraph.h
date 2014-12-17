@@ -448,8 +448,7 @@ struct TransAp
 	:
 		lowKey(other.lowKey),
 		highKey(other.highKey),
-		condSpace(other.condSpace),
-		condList()
+		condSpace(other.condSpace)
 	{
 	}
 
@@ -466,12 +465,30 @@ struct TransAp
 	/* Which conditions are tested on this range. */
 	CondSpace *condSpace;
 
-	/* Cond trans list. */
-	CondList condList;
-
 	/* Pointers for outlist. */
 	TransAp *prev, *next;
 };
+
+struct TransApI
+	: public TransAp
+{
+	TransApI() 
+	:
+		TransAp()
+	{}
+
+	TransApI( const TransApI &other )
+	:
+		TransAp( other ),
+		condList()
+	{}
+
+	/* Cond trans list. */
+	CondList condList;
+};
+
+inline TransApI *tai( TransAp *trans )
+		{ return static_cast<TransApI*>( trans ); }
 
 typedef DList<TransAp> TransList;
 
@@ -1421,8 +1438,9 @@ struct FsmAp
 
 	void expandConds( StateAp *fromState, TransAp *trans,
 			const CondSet &origSet, const CondSet &mergedCS );
-	void expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans );
-	TransAp *copyTransForExpanision( StateAp *fromState, TransAp *srcTrans );
+	void expandCondTransitions( StateAp *fromState,
+			TransAp *destTrans, TransAp *srcTrans );
+	TransAp *copyTransForExpansion( StateAp *fromState, TransAp *srcTrans );
 	void freeEffectiveTrans( TransAp *srcTrans );
 
 	/* Two transitions are to be crossed, handle the possibility of either
