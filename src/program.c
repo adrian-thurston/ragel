@@ -295,6 +295,16 @@ static void colm_clear_heap( Program *prg, Tree **sp )
 	}
 }
 
+static void colm_clear_heap2( Program *prg, Tree **sp )
+{
+	HeapItem *hi = prg->heapHead;
+	while ( hi != 0 ) {
+		HeapItem *next = hi->next;
+		free( hi );
+		hi = next;
+	}
+}
+
 int colm_delete_program( Program *prg )
 {
 	Tree **sp = prg->stackRoot;
@@ -303,6 +313,7 @@ int colm_delete_program( Program *prg )
 	treeDownref( prg, sp, prg->returnVal );
 	clearGlobal( prg, sp );
 	colm_clear_heap( prg, sp );
+	colm_clear_heap2( prg, sp );
 
 	treeDownref( prg, sp, prg->trueVal );
 	treeDownref( prg, sp, prg->falseVal );
