@@ -32,7 +32,7 @@ AC_DEFUN([AC_CHECK_COLM], [
 	)
 	AC_SUBST(COLM)
 
-	INSTALLED_VER=`$COLM -v | sed -n '1{s/^.*version //; s/ .*$//; p}'`
+	INSTALLED_VER=`$COLM -v | sed -n -e '1 { s/^.*version //; s/ .*$//; p; }'`
 	if test "x$INSTALLED_VER" != "x$EXPECTED_VER"; then
 		AC_ERROR( [check colm: expected version $EXPECTED_VER, but $INSTALLED_VER is installed] )
 	fi
