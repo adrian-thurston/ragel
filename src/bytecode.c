@@ -1308,15 +1308,9 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_R %hd\n", field );
 
-			if ( field > 48 ) {
-				Tree *val = vm_local(-field - 64);
-				vm_push( val );
-			}
-			else {
-				Tree *val = vm_local(field);
-				treeUpref( val );
-				vm_push( val );
-			}
+			Tree *val = vm_local(field);
+			treeUpref( val );
+			vm_push( val );
 			break;
 		}
 		case IN_GET_LOCAL_WC: {
@@ -1325,15 +1319,9 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_WC %hd\n", field );
 
-			if ( field > 48 ) {
-				Tree *val = exec->framePtr[-field - 64];
-				vm_push( val );
-			}
-			else {
-				Tree *split = getLocalSplit( prg, exec->framePtr, field );
-				treeUpref( split );
-				vm_push( split );
-			}
+			Tree *split = getLocalSplit( prg, exec->framePtr, field );
+			treeUpref( split );
+			vm_push( split );
 			break;
 		}
 		case IN_SET_LOCAL_WC: {
@@ -1342,13 +1330,27 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_SET_LOCAL_WC %hd\n", field );
 
 			Tree *val = vm_pop();
-			if ( field > 48 ) {
-				exec->framePtr[-field - 64] = val;
-			}
-			else {
-				treeDownref( prg, sp, vm_local(field) );
-				setLocal( exec->framePtr, field, val );
-			}
+			treeDownref( prg, sp, vm_local(field) );
+			setLocal( exec->framePtr, field, val );
+			break;
+		}
+		case IN_GET_LOCAL_VAL: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_VAL %hd\n", field );
+
+			Tree *val = vm_local(field);
+			vm_push( val );
+			break;
+		}
+		case IN_SET_LOCAL_VAL: {
+			short field;
+			read_half( field );
+			debug( prg, REALM_BYTECODE, "IN_SET_LOCAL_VAL %hd\n", field );
+
+			Tree *val = vm_pop();
+			vm_local(field) = val;
 			break;
 		}
 		case IN_SAVE_RET: {

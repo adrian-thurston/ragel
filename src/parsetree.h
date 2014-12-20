@@ -2491,6 +2491,8 @@ struct ObjectField
 	Code inGetWV;
 	Code inSetWC;
 	Code inSetWV;
+	Code inGetVal;
+	Code inSetVal;
 
 	ObjectField *prev, *next;
 };

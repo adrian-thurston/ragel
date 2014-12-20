@@ -261,33 +261,33 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 
 	UniqueType *elUT = el->typeRef->uniqueType;
 
-	/* If it's a reference then we load it read always. */
-	if ( forWriting ) {
-		/* The instruction, depends on whether or not we are reverting. */
-		if ( elUT->typeId == TYPE_ITER )
-			code.append( elUT->iterDef->inGetCurWC );
-		else if ( pd->revertOn && revert )
-			code.append( el->inGetWV );
-		else
-			code.append( el->inGetWC );
+	if ( elUT->typeId == TYPE_STRUCT ) {
+		code.append( el->inGetVal );
 	}
 	else {
-		/* Loading something for writing */
-		if ( elUT->typeId == TYPE_ITER )
-			code.append( elUT->iterDef->inGetCurR );
-		else
-			code.append( el->inGetR );
+		/* If it's a reference then we load it read always. */
+		if ( forWriting ) {
+			/* The instruction, depends on whether or not we are reverting. */
+			if ( elUT->typeId == TYPE_ITER )
+				code.append( elUT->iterDef->inGetCurWC );
+			else if ( pd->revertOn && revert )
+				code.append( el->inGetWV );
+			else
+				code.append( el->inGetWC );
+		}
+		else {
+			/* Loading something for writing */
+			if ( elUT->typeId == TYPE_ITER )
+				code.append( elUT->iterDef->inGetCurR );
+			else
+				code.append( el->inGetR );
+		}
 	}
 
 	if ( el->useOffset() ) {
-		if ( elUT->typeId == TYPE_STRUCT ) {
-			code.appendHalf( -el->offset + 64 );
-		}
-		else {
-			/* Gets of locals and fields require offsets. Fake vars like token
-			 * data and lhs don't require it. */
-			code.appendHalf( el->offset );
-		}
+		/* Gets of locals and fields require offsets. Fake vars like token
+		 * data and lhs don't require it. */
+		code.appendHalf( el->offset );
 	}
 	else if ( el->isRhsGet() ) {
 		/* Need to place the array computing the val. */
@@ -569,18 +569,16 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 	/* Ensure that the field is referenced. */
 	inObject->referenceField( pd, el );
 
-	if ( pd->revertOn && revert )
+	if ( exprUT->typeId == TYPE_STRUCT )
+		code.append( el->inSetVal );
+	else if ( pd->revertOn && revert )
 		code.append( el->inSetWV );
 	else
 		code.append( el->inSetWC );
 
 	/* Maybe write out an offset. */
-	if ( el->useOffset() ) {
-		if ( exprUT->typeId == TYPE_STRUCT )
-			code.appendHalf( -el->offset + 64 );
-		else
-			code.appendHalf( el->offset );
-	}
+	if ( el->useOffset() )
+		code.appendHalf( el->offset );
 }
 
 
@@ -2660,9 +2658,11 @@ void ObjectField::initField()
 		case LhsElType:
 		case ParamValType:
 		case RedRhsType:
-			inGetR  =  IN_GET_LOCAL_R;
-			inGetWC =  IN_GET_LOCAL_WC;
-			inSetWC =  IN_SET_LOCAL_WC;
+			inGetR   =  IN_GET_LOCAL_R;
+			inGetWC  =  IN_GET_LOCAL_WC;
+			inSetWC  =  IN_SET_LOCAL_WC;
+			inGetVal =  IN_GET_LOCAL_VAL;
+			inSetVal =  IN_SET_LOCAL_VAL;
 			break;
 
 		case ParamRefType:
