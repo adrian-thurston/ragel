@@ -337,7 +337,6 @@ struct ContextStack
 		{ return length() > 0 ? Vector<Context*>::top() : 0; }
 };
 
-
 struct Context
 {
 	Context( const InputLoc &loc, LangEl *lel )
@@ -351,6 +350,19 @@ struct Context
 	LangEl *lel;
 	ObjectDef *objectDef;
 };
+
+struct Struct
+{
+	Struct( const InputLoc &loc, ObjectDef *objectDef )
+	:
+		loc(loc),
+		objectDef(objectDef)
+	{}
+
+	InputLoc loc;
+	ObjectDef *objectDef;
+};
+
 
 typedef Vector<ReCapture> ReCaptureVect;
 
@@ -557,28 +569,61 @@ struct ContextDef
 
 struct ContextDefList : DList<ContextDef> {};
 
+struct StructEl
+{
+	StructEl( Namespace *nspace, const String &name )
+		: nspace(nspace), name(name), context(0) {}
+
+	Namespace *nspace;
+	String name;
+	Context *context;
+
+	StructEl *prev, *next;
+};
+
+typedef DList<StructEl> StructElList;
+
+struct StructDef
+{
+	StructDef( const String &name, Context *context, Namespace *nspace )
+		: name(name), context(context), nspace(nspace) {}
+
+	String name;
+	Context *context;
+	Namespace *nspace;
+
+	StructDef *prev, *next;
+};
+
+struct StructDefList : DList<StructDef> {};
+
 struct TypeMapEl
 	: public AvlTreeEl<TypeMapEl>
 {
 	enum Type
 	{
 		AliasType = 1,
-		StructType,
-		LangElType
+		ContextType,
+		LangElType,
+		StructType
 	};
 
 	const String &getKey() { return key; }
 
 	TypeMapEl( Type type, const String &key, TypeRef *typeRef )
-		: type(type), key(key), value(0), typeRef(typeRef) {}
+		: type(type), key(key), value(0), typeRef(typeRef), structEl(0) {}
 
 	TypeMapEl( Type type, const String &key, LangEl *value )
-		: type(type), key(key), value(value), typeRef(0) {}
+		: type(type), key(key), value(value), typeRef(0), structEl(0) {}
+
+	TypeMapEl( Type type, const String &key, StructEl *structEl )
+		: type(type), key(key), value(0), typeRef(0), structEl(structEl) {}
 
 	Type type;
 	String key;
 	LangEl *value;
 	TypeRef *typeRef;
+	StructEl *structEl;
 	
 	TypeMapEl *prev, *next;
 };
@@ -801,8 +846,8 @@ struct Namespace
 	/* List of nonterminal defs in the namespace. */
 	NtDefList ntDefList;
 
-	/* List of context definitions for encapsulating the data of a parser. */
 	ContextDefList contextDefList;
+	StructDefList structDefList;
 
 	/* Dictionary of symbols within the region. */
 	TypeMap typeMap;
@@ -1795,24 +1840,35 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 	UniqueType( enum TYPE typeId ) :
 		typeId(typeId), 
 		langEl(0), 
-		iterDef(0)
+		iterDef(0),
+		structEl(0)
 	{}
 
 	UniqueType( enum TYPE typeId, LangEl *langEl ) :
 		typeId(typeId),
 		langEl(langEl),
-		iterDef(0)
+		iterDef(0),
+		structEl(0)
 	{}
 
 	UniqueType( enum TYPE typeId, IterDef *iterDef ) :
 		typeId(typeId),
 		langEl(0),
-		iterDef(iterDef)
+		iterDef(iterDef),
+		structEl(0)
+	{}
+
+	UniqueType( enum TYPE typeId, StructEl *structEl ) :
+		typeId(typeId),
+		langEl(0),
+		iterDef(0),
+		structEl(structEl)
 	{}
 
 	enum TYPE typeId;
 	LangEl *langEl;
 	IterDef *iterDef;
+	StructEl *structEl;
 
 	ObjectDef *objectDef();
 };
@@ -2530,7 +2586,6 @@ struct ObjectDef
 	long nextOffset;
 	long firstNonTree;
 
-
 	void referenceField( Compiler *pd, ObjectField *field );
 	void placeField( Compiler *pd, ObjectField *field );
 	void createCode( Compiler *pd, CodeVect &code );
@@ -2709,6 +2764,7 @@ struct LangTerm
 		StringType,
 		MatchType,
 		NewType,
+		New2Type,
 		ConstructType,
 		TypeIdType,
 		SearchType,
@@ -2911,6 +2967,7 @@ struct LangTerm
 	void resolve( Compiler *pd );
 
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateNew2( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateNewstruct( Compiler *pd, CodeVect &code ) const;
 	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;

@@ -253,6 +253,24 @@ Tree *constructPointer( Program *prg, Tree *tree )
 	return (Tree*)pointer;
 }
 
+HeapItem *newStruct( Program *prg, int size )
+{
+	HeapItem *hi = (HeapItem*) malloc( sizeof(Tree*) * ( 2 + size ) );
+
+	if ( prg->heapHead == 0 ) {
+		prg->heapHead = prg->heapTail = hi;
+		hi->prev = hi->next = 0;
+	}
+	else {
+		hi->prev = prg->heapTail;
+		hi->next = 0;
+		prg->heapTail->next = hi;
+		prg->heapTail = hi;
+	}
+	
+	return hi;
+}
+
 Tree *constructTerm( Program *prg, Word id, Head *tokdata )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;

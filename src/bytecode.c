@@ -1307,9 +1307,15 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_R %hd\n", field );
 
-			Tree *val = vm_local(field);
-			treeUpref( val );
-			vm_push( val );
+			if ( field > 48 ) {
+				Tree *val = vm_local(-field - 64);
+				vm_push( val );
+			}
+			else {
+				Tree *val = vm_local(field);
+				treeUpref( val );
+				vm_push( val );
+			}
 			break;
 		}
 		case IN_GET_LOCAL_WC: {
@@ -1318,20 +1324,30 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_WC %hd\n", field );
 
-			Tree *split = getLocalSplit( prg, exec->framePtr, field );
-			treeUpref( split );
-			vm_push( split );
+			if ( field > 48 ) {
+				Tree *val = exec->framePtr[-field - 64];
+				vm_push( val );
+			}
+			else {
+				Tree *split = getLocalSplit( prg, exec->framePtr, field );
+				treeUpref( split );
+				vm_push( split );
+			}
 			break;
 		}
 		case IN_SET_LOCAL_WC: {
 			short field;
 			read_half( field );
-
 			debug( prg, REALM_BYTECODE, "IN_SET_LOCAL_WC %hd\n", field );
 
 			Tree *val = vm_pop();
-			treeDownref( prg, sp, vm_local(field) );
-			setLocal( exec->framePtr, field, val );
+			if ( field > 48 ) {
+				exec->framePtr[-field - 64] = val;
+			}
+			else {
+				treeDownref( prg, sp, vm_local(field) );
+				setLocal( exec->framePtr, field, val );
+			}
 			break;
 		}
 		case IN_SAVE_RET: {
@@ -1516,6 +1532,15 @@ again:
 			vm_push( obj );
 			break;
 		}
+		case IN_NEW_STRUCT: {
+			short size;
+			read_half( size );
+
+			debug( prg, REALM_BYTECODE, "IN_NEW_STRUCT %hd\n", size );
+			HeapItem *item = newStruct( prg, size );
+			vm_push( (Tree*)item );
+			break;
+		}
 		case IN_GET_STRUCT_FIELD_R: {
 			short field;
 			read_half( field );
@@ -1523,9 +1548,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_FIELD_R %d\n", field );
 
 			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
 
-			Tree *val = getField( obj, field );
+			Tree *val = ((Tree**)obj)[2+field];
 			treeUpref( val );
 			vm_push( val );
 			break;
@@ -1584,13 +1608,10 @@ again:
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
-			treeDownref( prg, sp, obj );
 
 			/* Downref the old value. */
-			Tree *prev = getField( obj, field );
-			treeDownref( prg, sp, prev );
-
-			setField( prg, obj, field, val );
+			treeDownref( prg, sp, ((Tree**)obj)[2+field] );
+			((Tree**)obj)[2+field] = val;
 			break;
 		}
 		case IN_SET_STRUCT_FIELD_WV: {

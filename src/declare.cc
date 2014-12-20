@@ -164,7 +164,7 @@ LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
 	return langEl;
 }
 
-LangEl *declareStruct( Compiler *pd, Namespace *nspace,
+LangEl *declareContext( Compiler *pd, Namespace *nspace,
 		const String &data, LangEl::Type type )
 {
 	/* If the id is already in the dict, it will be placed in last found. If
@@ -175,11 +175,28 @@ LangEl *declareStruct( Compiler *pd, Namespace *nspace,
 
 	/* Language element not there. Make the new lang el and insert.. */
 	LangEl *langEl = new LangEl( nspace, data, type );
-	TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::StructType, data, langEl );
-	nspace->typeMap.insert( typeMapEl );
 	pd->langEls.append( langEl );
 
+	TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::ContextType, data, langEl );
+	nspace->typeMap.insert( typeMapEl );
+
 	return langEl;
+}
+
+StructEl *declareStruct( Compiler *pd, Namespace *nspace,
+		const String &data, Context *context )
+{
+	TypeMapEl *inDict = nspace->typeMap.find( data );
+	if ( inDict != 0 )
+		error() << "'" << data << "' already defined as something else" << endp;
+	
+	StructEl *structEl = new StructEl( nspace, data );
+	pd->structEls.append( structEl );
+
+	TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::StructType, data, structEl );
+	nspace->typeMap.insert( typeMapEl );
+
+	return structEl;
 }
 
 /* Does not map the new language element. */
@@ -372,7 +389,7 @@ void Namespace::declare( Compiler *pd )
 	}
 
 	for ( ContextDefList::Iter c = contextDefList; c.lte(); c++ ) {
-		LangEl *lel = declareStruct( pd, this, c->name, LangEl::NonTerm );
+		LangEl *lel = declareContext( pd, this, c->name, LangEl::NonTerm );
 		ProdElList *emptyList = new ProdElList;
 		//addProduction( c->context->loc, c->name, emptyList, false, 0, 0 );
 
@@ -394,7 +411,7 @@ void Namespace::declare( Compiler *pd )
 				/* Insert the name into the top of the region stack after popping the
 				 * region just created. We need it in the parent. */
 				TypeMapEl *typeMapEl = new TypeMapEl(
-						TypeMapEl::StructType, c->name, prodName );
+						TypeMapEl::ContextType, c->name, prodName );
 				this->parentNamespace->typeMap.insert( typeMapEl );
 			}
 		}
@@ -402,6 +419,21 @@ void Namespace::declare( Compiler *pd )
 		c->context->lel = lel;
 		lel->contextDef = c->context;
 		lel->objectDef = c->context->objectDef;
+	}
+
+	for ( StructDefList::Iter c = structDefList; c.lte(); c++ ) {
+		StructEl *sel = declareStruct( pd, this, c->name, c->context );
+		sel->context = c->context;
+
+		/* If the token has the same name as the region it is in, then also
+		 * insert it into the symbol map for the parent region. */
+		if ( strcmp( c->name, this->name ) == 0 ) {
+			/* Insert the name into the top of the region stack after popping the
+			 * region just created. We need it in the parent. */
+			TypeMapEl *typeMapEl = new TypeMapEl(
+					TypeMapEl::StructType, c->name, sel );
+			this->parentNamespace->typeMap.insert( typeMapEl );
+		}
 	}
 
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {

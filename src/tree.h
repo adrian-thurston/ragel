@@ -360,6 +360,8 @@ void userIterDestroy2( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 Tree *castTree( struct colm_program *prg, int langElId, Tree *tree );
 StreamImpl *streamToImpl( Stream *ptr );
 
+struct colm_heap_item *newStruct( struct colm_program *prg, int size );
+
 #if defined(__cplusplus)
 }
 #endif

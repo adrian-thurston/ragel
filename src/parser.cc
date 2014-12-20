@@ -885,6 +885,22 @@ void BaseParser::contextHead( const InputLoc &loc, const String &data,
 			data, pd->nextObjectId++ ); 
 }
 
+void BaseParser::structHead( const InputLoc &loc, const String &data,
+		ObjectDef::Type objectType )
+{
+	/* Make the new namespace. */
+	Namespace *nspace = createNamespace( loc, data );
+
+	Context *context = new Context( loc, 0 );
+	contextStack.push( context );
+
+	StructDef *structDef = new StructDef( data, context, nspace );
+	nspace->structDefList.append( structDef );
+
+	context->objectDef = ObjectDef::cons( objectType,
+			data, pd->nextObjectId++ ); 
+}
+
 StmtList *BaseParser::appendStatement( StmtList *stmtList, LangStmt *stmt )
 {
 	if ( stmt != 0 )

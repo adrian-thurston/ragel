@@ -80,6 +80,10 @@ typedef struct colm_sections
 
 } RuntimeData;
 
+typedef struct colm_heap_item
+{
+	struct colm_heap_item *prev, *next;
+} HeapItem;
 
 typedef struct colm_program
 {
@@ -106,6 +110,8 @@ typedef struct colm_program
 	Tree *falseVal;
 
 	Kid *heap;
+
+	struct colm_heap_item *heapHead, *heapTail;
 
 	Stream *stdinVal;
 	Stream *stdoutVal;

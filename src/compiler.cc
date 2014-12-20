@@ -743,11 +743,13 @@ LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
 
 	/* Build the first production of the repeat. */
 	TypeRef *typeRef1 = TypeRef::cons( loc, ut );
-	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType, InputLoc(), 0, false, typeRef1, 0 );
+	ProdEl *factor1 = new ProdEl( ProdEl::ReferenceType,
+			InputLoc(), 0, false, typeRef1, 0 );
 
 	UniqueType *prodNameUT = findUniqueType( TYPE_TREE, prodName );
 	TypeRef *typeRef2 = TypeRef::cons( loc, prodNameUT );
-	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType, InputLoc(), 0, false, typeRef2, 0 );
+	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType,
+			InputLoc(), 0, false, typeRef2, 0 );
 
 	prodElList1->append( factor1 );
 	prodElList1->append( factor2 );
@@ -1126,6 +1128,7 @@ void Compiler::compile()
 	prepGrammar();
 
 	placeAllLanguageObjects();
+	placeAllStructObjects();
 	placeAllFrameObjects();
 	placeAllFunctions();
 

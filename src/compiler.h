@@ -541,6 +541,7 @@ struct Compiler
 
 	void placeFrameFields( ObjectDef *localFrame );
 	void placeUserFunction( Function *func, bool isUserIter );
+	void placeAllStructObjects();
 	void placeAllLanguageObjects();
 	void placeAllFrameObjects();
 	void placeAllFunctions();
@@ -821,6 +822,7 @@ struct Compiler
 	 */
 
 	LelList langEls;
+	StructElList structEls;
 	DefList prodList;
 
 	/* Dumping. */
@@ -881,6 +883,7 @@ struct Compiler
 	UniqueType *findUniqueType( enum TYPE typeId );
 	UniqueType *findUniqueType( enum TYPE typeId, LangEl *langEl );
 	UniqueType *findUniqueType( enum TYPE typeId, IterDef *iterDef );
+	UniqueType *findUniqueType( enum TYPE typeId, StructEl *structEl );
 
 	UniqueType *uniqueTypeNil;
 	UniqueType *uniqueTypeVoid;
@@ -1004,7 +1007,7 @@ typedef AvlMapEl<String, ColmParser *> ParserDictEl;
 
 LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
 		const String &data, LangEl::Type type );
-LangEl *declareStruct( Compiler *pd, Namespace *nspace,
+LangEl *declareContext( Compiler *pd, Namespace *nspace,
 		const String &data, LangEl::Type type );
 LangEl *addLangEl( Compiler *pd, Namespace *nspace,
 		const String &data, LangEl::Type type );

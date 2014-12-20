@@ -1841,6 +1841,13 @@ struct LoadColm
 					LangTerm::NewType, typeRef ) );
 			break;
 		}
+		case code_factor::New2: {
+			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
+
+			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
+					LangTerm::New2Type, typeRef ) );
+			break;
+		}
 		case code_factor::Cast: {
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
 			LangExpr *castExpr = walkCodeFactor( codeFactor._code_factor() );
@@ -2080,7 +2087,6 @@ struct LoadColm
 	void walkContextVarDef( context_var_def ContextVarDef )
 	{
 		ObjectDef *contextObj = curContext()->objectDef;
-
 		ObjectField::Type type = contextObj->type == ObjectDef::StructType ?
 				ObjectField::StructFieldType : ObjectField::UserFieldType;
 
@@ -2249,11 +2255,14 @@ struct LoadColm
 
 	void walkContextDef( context_def contextDef )
 	{
-		ObjectDef::Type objectType = contextDef.struct_key().STRUCT() ?
-				ObjectDef::StructType : ObjectDef::UserType;
-
-		String name = contextDef.id().data();
-		contextHead( contextDef.id().loc(), name, objectType );
+		if ( contextDef.struct_key().STRUCT() ) {
+			String name = contextDef.id().data();
+			structHead( contextDef.id().loc(), name, ObjectDef::StructType );
+		}
+		else {
+			String name = contextDef.id().data();
+			contextHead( contextDef.id().loc(), name, ObjectDef::UserType );
+		}
 
 		_repeat_context_item contextItemList = contextDef.ItemList();
 		while ( !contextItemList.end() ) {

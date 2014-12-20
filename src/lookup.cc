@@ -14,12 +14,15 @@ using std::endl;
 
 ObjectDef *UniqueType::objectDef()
 {
-	if ( typeId != TYPE_TREE && typeId != TYPE_REF ) {
-		/* This should have generated a compiler error. */
-		assert(false);
+	if ( typeId == TYPE_TREE || typeId == TYPE_REF ) {
+		return langEl->objectDef;
+	}
+	else if ( typeId == TYPE_STRUCT ) {
+		return structEl->context->objectDef;
 	}
 
-	return langEl->objectDef;
+	/* This should have generated a compiler error. */
+	assert( false );
 }
 
 /* Recurisve find through a single object def's scope. */

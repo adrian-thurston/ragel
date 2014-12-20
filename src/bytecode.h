@@ -332,14 +332,16 @@ typedef unsigned char uchar;
 #define IN_SET_STRUCT_FIELD_WC   0xfb
 #define IN_SET_STRUCT_FIELD_WV   0xfc
 #define IN_SET_STRUCT_FIELD_BKT  0xfd
+#define IN_NEW_STRUCT            0xfe
 
 enum TYPE
 {
-	TYPE_NIL   = 0x01,
-	TYPE_TREE  = 0x02,
-	TYPE_REF   = 0x03,
-	TYPE_PTR   = 0x04,
-	TYPE_ITER  = 0x05
+	TYPE_NIL    = 0x01,
+	TYPE_TREE   = 0x02,
+	TYPE_REF    = 0x03,
+	TYPE_PTR    = 0x04,
+	TYPE_ITER   = 0x05,
+	TYPE_STRUCT = 0x06,
 };
 
 /* Types of Generics. */

@@ -182,6 +182,17 @@ UniqueType *Compiler::findUniqueType( enum TYPE typeId, IterDef *iterDef )
 	return uniqueType;
 }
 
+UniqueType *Compiler::findUniqueType( enum TYPE typeId, StructEl *structEl )
+{
+	UniqueType searchKey( typeId, structEl );
+	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
+	if ( uniqueType == 0 ) {
+		uniqueType = new UniqueType( typeId, structEl );
+		uniqeTypeMap.insert( uniqueType );
+	}
+	return uniqueType;
+}
+
 /* 0-based. */
 ObjectField *ObjectDef::findFieldNum( long offset )
 {
@@ -264,9 +275,14 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 	}
 
 	if ( el->useOffset() ) {
-		/* Gets of locals and fields require offsets. Fake vars like token
-		 * data and lhs don't require it. */
-		code.appendHalf( el->offset );
+		if ( elUT->typeId == TYPE_STRUCT ) {
+			code.appendHalf( -el->offset + 64 );
+		}
+		else {
+			/* Gets of locals and fields require offsets. Fake vars like token
+			 * data and lhs don't require it. */
+			code.appendHalf( el->offset );
+		}
 	}
 	else if ( el->isRhsGet() ) {
 		/* Need to place the array computing the val. */
@@ -403,6 +419,9 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 				}
 
 				qualUT = pd->findUniqueType( TYPE_TREE, qualUT->langEl );
+			}
+			else if ( qualUT->typeId == TYPE_STRUCT ) {
+				
 			}
 			else {
 				error(loc) << "arrow operator cannot be used to access this type" << endp;
@@ -551,8 +570,12 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 		code.append( el->inSetWC );
 
 	/* Maybe write out an offset. */
-	if ( el->useOffset() )
-		code.appendHalf( el->offset );
+	if ( el->useOffset() ) {
+		if ( exprUT->typeId == TYPE_STRUCT )
+			code.appendHalf( -el->offset + 64 );
+		else
+			code.appendHalf( el->offset );
+	}
 }
 
 
@@ -1027,6 +1050,19 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	return pd->findUniqueType( TYPE_PTR, ut->langEl );
 }
 
+UniqueType *LangTerm::evaluateNew2( Compiler *pd, CodeVect &code ) const
+{
+	/* What is being newstructed. */
+	UniqueType *replUT = typeRef->uniqueType;
+
+	if ( replUT->typeId != TYPE_STRUCT )
+		error(loc) << "can only new2 a struct" << endp;
+
+	code.append( IN_NEW_STRUCT );
+	code.appendHalf( replUT->structEl->context->objectDef->size() );
+	return replUT;
+}
+
 UniqueType *LangTerm::evaluateCast( Compiler *pd, CodeVect &code ) const
 {
 	expr->evaluate( pd, code );
@@ -1124,6 +1160,9 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 {
 	/* What is being newstructed. */
 	UniqueType *replUT = typeRef->uniqueType;
+
+	if ( replUT->typeId == TYPE_STRUCT )
+		error(loc) << "cannot new a struct, use new2" << endp;
 
 	if ( replUT->langEl->generic != 0 ) {
 		/* Use the new generic. */
@@ -1692,6 +1731,8 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 			return evaluateSendTree( pd, code );
 		case NewType:
 			return evaluateNew( pd, code );
+		case New2Type:
+			return evaluateNew2( pd, code );
 		case TypeIdType: {
 			/* Evaluate the expression. */
 			UniqueType *ut = typeRef->uniqueType;
@@ -2714,6 +2755,15 @@ void Compiler::placeAllLanguageObjects()
 	/* Init all fields of the global object. */
 	for ( FieldList::Iter f = *globalObjectDef->fieldList; f.lte(); f++ )
 		globalObjectDef->placeField( this, f->value );
+}
+
+void Compiler::placeAllStructObjects()
+{
+	for ( StructElList::Iter s = structEls; s.lte(); s++ ) {
+		ObjectDef *objectDef = s->context->objectDef;
+		for ( FieldList::Iter f = *objectDef->fieldList; f.lte(); f++ )
+			objectDef->placeField( this, f->value );
+	}
 }
 
 void Compiler::placeFrameFields( ObjectDef *localFrame )

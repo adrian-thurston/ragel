@@ -46,7 +46,7 @@ UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 					return inDict->typeRef->resolveType( pd );
 				}
 
-				case TypeMapEl::StructType: {
+				case TypeMapEl::ContextType: {
 					UniqueType *structUt = pd->findUniqueType( TYPE_TREE, inDict->value );
 					return pd->findUniqueType( TYPE_PTR, structUt->langEl );
 				}
@@ -55,6 +55,10 @@ UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 					UniqueType *ut = pd->findUniqueType( TYPE_TREE, inDict->value );
 					if ( ut == pd->uniqueTypeStream )
 						return pd->findUniqueType( TYPE_PTR, ut->langEl );
+					return ut;
+				}
+				case TypeMapEl::StructType: {
+					UniqueType *ut = pd->findUniqueType( TYPE_STRUCT, inDict->structEl );
 					return ut;
 				}
 			}
@@ -576,6 +580,9 @@ void LangTerm::resolve( Compiler *pd )
 		case NewType:
 			typeRef->resolveType( pd );
 			break;
+		case New2Type:
+			typeRef->resolveType( pd );
+			break;
 		case TypeIdType:
 			typeRef->resolveType( pd );
 			break;
@@ -839,11 +846,16 @@ void Compiler::resolveParseTree()
 		}
 	}
 
+	for ( StructElList::Iter sel = structEls; sel.lte(); sel++ ) {
+		ObjectDef *objDef = sel->context->objectDef;
+		for ( FieldList::Iter f = *objDef->fieldList; f.lte(); f++ )
+			f->value->typeRef->resolveType( this );
+	}
+
 	/* Init all fields of the global object. */
 	for ( FieldList::Iter f = *globalObjectDef->fieldList; f.lte(); f++ ) {
 		f->value->typeRef->resolveType( this );
 	}
-
 }
 
 /* Resolves production els and computes the precedence of each prod. */
