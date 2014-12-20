@@ -14,7 +14,7 @@ RUNTIME_SRC = \
 
 RUNTIME_HDR = \
 	bytecode.h config.h defs.h debug.h pool.h input.h \
-	pdarun.h map.h tree.h program.h colm.h
+	pdarun.h map.h tree.h struct.h program.h colm.h
 
 lib_LIBRARIES = libcolmp.a libcolmd.a
 

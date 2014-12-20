@@ -2685,8 +2685,10 @@ void ObjectField::initField()
 			inGetWV =  IN_GET_STRUCT_FIELD_WV;
 			inSetWC =  IN_SET_STRUCT_FIELD_WC;
 			inSetWV =  IN_SET_STRUCT_FIELD_WV;
-			break;
 
+			inGetVal = IN_GET_STRUCT_FIELD_VAL;
+			inSetVal = IN_SET_STRUCT_FIELD_VAL;
+			break;
 
 		case RhsNameType:
 			inGetR  =  IN_GET_RHS_VAL_R;

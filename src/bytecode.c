@@ -8,6 +8,7 @@
 #include <colm/pool.h>
 #include <colm/debug.h>
 #include <colm/config.h>
+#include <colm/struct.h>
 
 #include <alloca.h>
 #include <sys/mman.h>
@@ -1552,8 +1553,19 @@ again:
 
 			Tree *obj = vm_pop();
 
-			Tree *val = ((Tree**)(((HeapItem*)obj)+1))[field];
+			Tree *val = colm_struct_val( obj, field );
 			treeUpref( val );
+			vm_push( val );
+			break;
+		}
+		case IN_GET_STRUCT_FIELD_VAL: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_FIELD_VAL %d\n", field );
+
+			Tree *obj = vm_pop();
+			Tree *val = colm_struct_val( obj, field );
 			vm_push( val );
 			break;
 		}
@@ -1613,8 +1625,20 @@ again:
 			Tree *val = vm_pop();
 
 			/* Downref the old value. */
-			treeDownref( prg, sp, ((Tree**)(((HeapItem*)obj)+1))[field] );
-			((Tree**)(((HeapItem*)obj)+1))[field] = val;
+			treeDownref( prg, sp, colm_struct_val( obj, field ) );
+			colm_struct_val( obj, field ) = val;
+			break;
+		}
+		case IN_SET_STRUCT_FIELD_VAL: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_FIELD_VAL %d\n", field );
+
+			Tree *obj = vm_pop();
+			Tree *val = vm_pop();
+
+			colm_struct_val( obj, field ) = val;
 			break;
 		}
 		case IN_SET_STRUCT_FIELD_WV: {

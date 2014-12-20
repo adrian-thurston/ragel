@@ -259,6 +259,7 @@ HeapItem *newStruct( Program *prg, int id )
 	size_t memsize = sizeof(HeapItem) + ( sizeof(Tree*) * structSize );
 	HeapItem *item = (HeapItem*) malloc( memsize );
 	memset( item, 0, memsize );
+	item->id = id;
 
 	if ( prg->heapHead == 0 ) {
 		prg->heapHead = prg->heapTail = item;

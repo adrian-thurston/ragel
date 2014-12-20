@@ -151,44 +151,33 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	 */
 	out << "static LangElInfo " << lelInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numLangEls; i++ ) {
+		LangElInfo *el = &runtimeData->lelInfo[i];
 		out << "\t{";
 		
 		/* Name. */
 		out << " \"";
-		escapeLiteralString( out, runtimeData->lelInfo[i].name );
+		escapeLiteralString( out, el->name );
 		out << "\", ";
 
 		/* Name. */
 		out << " \"";
-		escapeLiteralString( out, runtimeData->lelInfo[i].xmlTag );
+		escapeLiteralString( out, el->xmlTag );
 		out << "\", ";
 		
 		/* Repeat, literal, ignore flags. */
-		out << (int)runtimeData->lelInfo[i].repeat << ", " << 
-				(int)runtimeData->lelInfo[i].list << ", " <<
-				(int)runtimeData->lelInfo[i].literal << ", " <<
-				(int)runtimeData->lelInfo[i].ignore << ", ";
-
-		out << runtimeData->lelInfo[i].frameId << ", ";
-
-		out << runtimeData->lelInfo[i].objectTypeId << ", ";
-
-		out << runtimeData->lelInfo[i].ofiOffset << ", ";
-
-		out << runtimeData->lelInfo[i].objectLength << ", ";
-
-//		out << runtimeData->lelInfo[i].contextTypeId << ", ";
-//		out << runtimeData->lelInfo[i].contextLength << ", ";
-
-		out << runtimeData->lelInfo[i].termDupId << ", ";
-
-		out << runtimeData->lelInfo[i].genericId << ", ";
-
-		out << runtimeData->lelInfo[i].markId << ", ";
-
-		out << runtimeData->lelInfo[i].captureAttr << ", ";
-
-		out << runtimeData->lelInfo[i].numCaptureAttr;
+		out << (int)el->repeat << ", ";
+		out << (int)el->list << ", ";
+		out << (int)el->literal << ", ";
+		out << (int)el->ignore << ", ";
+		out << el->frameId << ", ";
+		out << el->objectTypeId << ", ";
+		out << el->ofiOffset << ", ";
+		out << el->objectLength << ", ";
+		out << el->termDupId << ", ";
+		out << el->genericId << ", ";
+		out << el->markId << ", ";
+		out << el->captureAttr << ", ";
+		out << el->numCaptureAttr;
 
 		out << " }";
 
@@ -199,11 +188,12 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 
 
 	for ( int i = 0; i < runtimeData->numStructEls; i++ ) {
-		if ( runtimeData->selInfo[i].treesLen > 0 ) {
+		StructElInfo *el = &runtimeData->selInfo[i];
+		if ( el->treesLen > 0 ) {
 			out << "static short struct_trees_" << i << "[] = {\n\t";
 
-			short *ti = runtimeData->selInfo[i].trees;
-			for ( int j = 0; j < runtimeData->selInfo[i].treesLen; j++ )
+			short *ti = el->trees;
+			for ( int j = 0; j < el->treesLen; j++ )
 				out << ti[j] << ", ";
 			out << "\n};\n\n";
 		}
@@ -214,17 +204,18 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	 */
 	out << "static StructElInfo " << selInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numStructEls; i++ ) {
+		StructElInfo *el = &runtimeData->selInfo[i];
 		out << "\t{ ";
-		out << runtimeData->selInfo[i].size << ", ";
+		out << el->size << ", ";
 
 		/* trees. */
-		if ( runtimeData->selInfo[i].treesLen > 0 )
+		if ( el->treesLen > 0 )
 			out << "struct_trees_" << i << ", ";
 		else
 			out << "0, ";
-		out << runtimeData->selInfo[i].treesLen << ", ";
+		out << el->treesLen << ", ";
 
-		out << " }";
+		out << " },\n";
 	}
 	out << "\n};\n\n";
 

@@ -326,6 +326,8 @@ typedef unsigned char uchar;
 #define IN_SET_STRUCT_FIELD_WC   0xfb
 #define IN_SET_STRUCT_FIELD_WV   0xfc
 #define IN_SET_STRUCT_FIELD_BKT  0xfd
+#define IN_GET_STRUCT_FIELD_VAL  0x93
+#define IN_SET_STRUCT_FIELD_VAL  0x94
 #define IN_NEW_STRUCT            0xfe
 
 #define IN_GET_LOCAL_VAL         0x91
