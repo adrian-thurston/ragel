@@ -1552,7 +1552,7 @@ again:
 
 			Tree *obj = vm_pop();
 
-			Tree *val = ((Tree**)obj)[2+field];
+			Tree *val = ((Tree**)(((HeapItem*)obj)+1))[field];
 			treeUpref( val );
 			vm_push( val );
 			break;
@@ -1613,8 +1613,8 @@ again:
 			Tree *val = vm_pop();
 
 			/* Downref the old value. */
-			treeDownref( prg, sp, ((Tree**)obj)[2+field] );
-			((Tree**)obj)[2+field] = val;
+			treeDownref( prg, sp, ((Tree**)(((HeapItem*)obj)+1))[field] );
+			((Tree**)(((HeapItem*)obj)+1))[field] = val;
 			break;
 		}
 		case IN_SET_STRUCT_FIELD_WV: {

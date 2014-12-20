@@ -1087,6 +1087,7 @@ void Compiler::prepGrammar()
 	wrapNonTerminals();
 
 	makeLangElIds();
+	makeStructElIds();
 	makeLangElNames();
 	makeDefinitionNames();
 	noUndefindLangEls();

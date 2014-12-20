@@ -20,6 +20,9 @@ typedef struct colm_sections
 	LangElInfo *lelInfo;
 	long numLangEls;
 
+	StructElInfo *selInfo;
+	long numStructEls;
+
 	ProdInfo *prodInfo;
 	long numProds;
 
@@ -82,7 +85,9 @@ typedef struct colm_sections
 
 typedef struct colm_heap_item
 {
-	struct colm_heap_item *prev, *next;
+	short id;
+	struct colm_heap_item *prev;
+	struct colm_heap_item *next;
 } HeapItem;
 
 typedef struct colm_program

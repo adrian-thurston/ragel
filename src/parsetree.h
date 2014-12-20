@@ -572,11 +572,12 @@ struct ContextDefList : DList<ContextDef> {};
 struct StructEl
 {
 	StructEl( Namespace *nspace, const String &name )
-		: nspace(nspace), name(name), context(0) {}
+		: nspace(nspace), name(name), context(0), id(-1) {}
 
 	Namespace *nspace;
 	String name;
 	Context *context;
+	int id;
 
 	StructEl *prev, *next;
 };

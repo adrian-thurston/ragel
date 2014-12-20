@@ -164,6 +164,11 @@ typedef struct _LangElInfo
 	long numCaptureAttr;
 } LangElInfo;
 
+typedef struct _StructElInfo
+{
+	long size;
+} StructElInfo;
+
 typedef struct _ObjFieldInfo
 {
 	int typeId;

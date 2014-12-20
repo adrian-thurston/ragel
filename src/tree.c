@@ -253,22 +253,25 @@ Tree *constructPointer( Program *prg, Tree *tree )
 	return (Tree*)pointer;
 }
 
-HeapItem *newStruct( Program *prg, int size )
+HeapItem *newStruct( Program *prg, int id )
 {
-	HeapItem *hi = (HeapItem*) malloc( sizeof(Tree*) * ( 2 + size ) );
+	int structSize = prg->rtd->selInfo[id].size;
+	size_t memsize = sizeof(HeapItem) + ( sizeof(Tree*) * structSize );
+	HeapItem *item = (HeapItem*) malloc( memsize );
+	memset( item, 0, memsize );
 
 	if ( prg->heapHead == 0 ) {
-		prg->heapHead = prg->heapTail = hi;
-		hi->prev = hi->next = 0;
+		prg->heapHead = prg->heapTail = item;
+		item->prev = item->next = 0;
 	}
 	else {
-		hi->prev = prg->heapTail;
-		hi->next = 0;
-		prg->heapTail->next = hi;
-		prg->heapTail = hi;
+		item->prev = prg->heapTail;
+		item->next = 0;
+		prg->heapTail->next = item;
+		prg->heapTail = item;
 	}
 	
-	return hi;
+	return item;
 }
 
 Tree *constructTerm( Program *prg, Word id, Head *tokdata )

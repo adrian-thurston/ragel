@@ -46,6 +46,7 @@ struct PdaCodeGen
 	String prodLhsIds() { return PARSER() + "prodLhsIds"; }
 	String prodNames() { return PARSER() + "prodNames"; }
 	String lelInfo() { return PARSER() + "lelInfo"; }
+	String selInfo() { return PARSER() + "selInfo"; }
 	String prodInfo() { return PARSER() + "prodInfo"; }
 	String tokenRegionInds() { return PARSER() + "tokenRegionInds"; }
 	String tokenRegions() { return PARSER() + "tokenRegions"; }

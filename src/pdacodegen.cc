@@ -198,6 +198,17 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	out << "\n};\n\n";
 
 	/*
+	 * selInfo
+	 */
+	out << "static StructElInfo " << selInfo() << "[] = {\n";
+	for ( int i = 0; i < runtimeData->numStructEls; i++ ) {
+		out << "\t{ ";
+		out << runtimeData->selInfo[i].size << ", ";
+		out << " }";
+	}
+	out << "\n};\n\n";
+
+	/*
 	 * frameInfo
 	 */
 	out << "static FrameInfo " << frameInfo() << "[] = {\n";
@@ -409,6 +420,9 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		"{\n"
 		"	" << lelInfo() << ",\n"
 		"	" << runtimeData->numLangEls << ",\n"
+		"\n"
+		"	" << selInfo() << ",\n"
+		"	" << runtimeData->numStructEls << ",\n"
 		"\n"
 		"	" << prodInfo() << ",\n"
 		"	" << runtimeData->numProds << ",\n"

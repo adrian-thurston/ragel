@@ -1066,7 +1066,7 @@ UniqueType *LangTerm::evaluateNew2( Compiler *pd, CodeVect &code ) const
 		error(loc) << "can only new2 a struct" << endp;
 
 	code.append( IN_NEW_STRUCT );
-	code.appendHalf( replUT->structEl->context->objectDef->size() );
+	code.appendHalf( replUT->structEl->id );
 	return replUT;
 }
 

@@ -634,6 +634,7 @@ struct Compiler
 	void noUndefindLangEls();
 	void declareBaseLangEls();
 	void makeLangElIds();
+	void makeStructElIds();
 	void makeLangElNames();
 	void makeTerminalWrappers();
 	void makeEofElements();

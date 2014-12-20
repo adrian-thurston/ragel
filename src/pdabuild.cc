@@ -199,6 +199,13 @@ void Compiler::makeLangElIds()
 	assert( ignoreLangEl->id == LEL_ID_IGNORE );
 }
 
+void Compiler::makeStructElIds()
+{
+	int nextId = 0;
+	for ( StructElList::Iter sel = structEls; sel.lte(); sel++ )
+		sel->id = nextId++;
+}
+
 void Compiler::refNameSpace( LangEl *lel, Namespace *nspace )
 {
 	if ( nspace == rootNamespace ) {
@@ -1443,6 +1450,19 @@ void Compiler::makeRuntimeData()
 			runtimeData->lelInfo[i].xmlTag = "__UNUSED";
 			runtimeData->lelInfo[i].frameId = -1;
 		}
+	}
+
+	/*
+	 * selInfo
+	 */
+
+	count = structEls.length();
+	runtimeData->selInfo = new StructElInfo[count];
+	runtimeData->numStructEls = count;
+	memset( runtimeData->selInfo, 0, sizeof(StructElInfo)*count );
+	StructElList::Iter sel = structEls;
+	for ( int i = 0; i < count; i++, sel++ ) {
+		runtimeData->selInfo[i].size = sel->context->objectDef->size();
 	}
 
 	/*
