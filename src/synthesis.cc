@@ -262,7 +262,7 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 	UniqueType *elUT = el->typeRef->uniqueType;
 
 	if ( elUT->typeId == TYPE_STRUCT ) {
-		code.append( el->inGetVal );
+		code.append( el->inGetValR );
 	}
 	else {
 		/* If it's a reference then we load it read always. */
@@ -569,12 +569,18 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 	/* Ensure that the field is referenced. */
 	inObject->referenceField( pd, el );
 
-	if ( exprUT->typeId == TYPE_STRUCT )
-		code.append( el->inSetVal );
-	else if ( pd->revertOn && revert )
-		code.append( el->inSetWV );
-	else
-		code.append( el->inSetWC );
+	if ( exprUT->typeId == TYPE_STRUCT ) {
+		if ( pd->revertOn && revert )
+			code.append( el->inSetValWV );
+		else
+			code.append( el->inSetValWC );
+	}
+	else {
+		if ( pd->revertOn && revert )
+			code.append( el->inSetWV );
+		else
+			code.append( el->inSetWC );
+	}
 
 	/* Maybe write out an offset. */
 	if ( el->useOffset() )
@@ -2661,8 +2667,8 @@ void ObjectField::initField()
 			inGetR   =  IN_GET_LOCAL_R;
 			inGetWC  =  IN_GET_LOCAL_WC;
 			inSetWC  =  IN_SET_LOCAL_WC;
-			inGetVal =  IN_GET_LOCAL_VAL;
-			inSetVal =  IN_SET_LOCAL_VAL;
+			inGetValR =  IN_GET_LOCAL_VAL_R;
+			inSetValWC =  IN_SET_LOCAL_VAL_WC;
 			break;
 
 		case ParamRefType:
@@ -2680,14 +2686,14 @@ void ObjectField::initField()
 			break;
 
 		case StructFieldType:
-			inGetR  =  IN_GET_STRUCT_FIELD_R;
-			inGetWC =  IN_GET_STRUCT_FIELD_WC;
-			inGetWV =  IN_GET_STRUCT_FIELD_WV;
-			inSetWC =  IN_SET_STRUCT_FIELD_WC;
-			inSetWV =  IN_SET_STRUCT_FIELD_WV;
-
-			inGetVal = IN_GET_STRUCT_FIELD_VAL;
-			inSetVal = IN_SET_STRUCT_FIELD_VAL;
+			inGetR  =  IN_GET_STRUCT_R;
+			inGetWC =  IN_GET_STRUCT_WC;
+			inGetWV =  IN_GET_STRUCT_WV;
+			inSetWC =  IN_SET_STRUCT_WC;
+			inSetWV =  IN_SET_STRUCT_WV;
+			inGetValR  = IN_GET_STRUCT_VAL_R;
+			inSetValWC = IN_SET_STRUCT_VAL_WC;
+			inSetValWV = IN_SET_STRUCT_VAL_WV;
 			break;
 
 		case RhsNameType:

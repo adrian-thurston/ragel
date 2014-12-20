@@ -1335,20 +1335,20 @@ again:
 			setLocal( exec->framePtr, field, val );
 			break;
 		}
-		case IN_GET_LOCAL_VAL: {
+		case IN_GET_LOCAL_VAL_R: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_VAL %hd\n", field );
+			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_VAL_R %hd\n", field );
 
 			Tree *val = vm_local(field);
 			vm_push( val );
 			break;
 		}
-		case IN_SET_LOCAL_VAL: {
+		case IN_SET_LOCAL_VAL_WC: {
 			short field;
 			read_half( field );
-			debug( prg, REALM_BYTECODE, "IN_SET_LOCAL_VAL %hd\n", field );
+			debug( prg, REALM_BYTECODE, "IN_SET_LOCAL_VAL_WC %hd\n", field );
 
 			Tree *val = vm_pop();
 			vm_local(field) = val;
@@ -1545,11 +1545,11 @@ again:
 			vm_push( (Tree*)item );
 			break;
 		}
-		case IN_GET_STRUCT_FIELD_R: {
+		case IN_GET_STRUCT_R: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_FIELD_R %d\n", field );
+			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_R %d\n", field );
 
 			Tree *obj = vm_pop();
 
@@ -1558,11 +1558,11 @@ again:
 			vm_push( val );
 			break;
 		}
-		case IN_GET_STRUCT_FIELD_WC: {
+		case IN_GET_STRUCT_WC: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_FIELD_WC %d\n", field );
+			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_WC %d\n", field );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1572,11 +1572,11 @@ again:
 			vm_push( split );
 			break;
 		}
-		case IN_GET_STRUCT_FIELD_WV: {
+		case IN_GET_STRUCT_WV: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_FIELD_WV\n" );
+			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_WV\n" );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1590,11 +1590,11 @@ again:
 			rcodeHalf( exec, field );
 			break;
 		}
-		case IN_GET_STRUCT_FIELD_BKT: {
+		case IN_GET_STRUCT_BKT: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_FIELD_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_BKT\n" );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1604,22 +1604,11 @@ again:
 			vm_push( split );
 			break;
 		}
-		case IN_GET_STRUCT_FIELD_VAL: {
+		case IN_SET_STRUCT_WC: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_FIELD_VAL %d\n", field );
-
-			Tree *obj = vm_pop();
-			Tree *val = colm_struct_val( obj, field );
-			vm_push( val );
-			break;
-		}
-		case IN_SET_STRUCT_FIELD_WC: {
-			short field;
-			read_half( field );
-
-			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_FIELD_WC %d\n", field );
+			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_WC %d\n", field );
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
@@ -1629,11 +1618,11 @@ again:
 			colm_struct_val( obj, field ) = val;
 			break;
 		}
-		case IN_SET_STRUCT_FIELD_WV: {
+		case IN_SET_STRUCT_WV: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_FIELD_WV %d\n", field );
+			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_WV %d\n", field );
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
@@ -1650,13 +1639,13 @@ again:
 			rcodeUnitTerm( exec );
 			break;
 		}
-		case IN_SET_STRUCT_FIELD_BKT: {
+		case IN_SET_STRUCT_BKT: {
 			short field;
 			Tree *val;
 			read_half( field );
 			read_tree( val );
 
-			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_FIELD_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_BKT\n" );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1668,15 +1657,39 @@ again:
 			setField( prg, obj, field, val );
 			break;
 		}
-		case IN_SET_STRUCT_FIELD_VAL: {
+		case IN_GET_STRUCT_VAL_R: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_FIELD_VAL %d\n", field );
+			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_VAL_R %d\n", field );
+
+			Tree *obj = vm_pop();
+			Tree *val = colm_struct_val( obj, field );
+			vm_push( val );
+			break;
+		}
+		case IN_SET_STRUCT_VAL_WC: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_VAL_WC %d\n", field );
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
 
+			colm_struct_val( obj, field ) = val;
+			break;
+		}
+		case IN_SET_STRUCT_VAL_WV: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_VAL_WV %d\n", field );
+
+			Tree *obj = vm_pop();
+			Tree *val = vm_pop();
+
+			/* FIXME: save val here. */
 			colm_struct_val( obj, field ) = val;
 			break;
 		}

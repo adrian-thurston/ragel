@@ -2431,7 +2431,10 @@ struct ObjectField
 		inGetWC( IN_HALT ),
 		inGetWV( IN_HALT ),
 		inSetWC( IN_HALT ),
-		inSetWV( IN_HALT )
+		inSetWV( IN_HALT ),
+		inGetValR( IN_HALT ),
+		inSetValWC( IN_HALT ),
+		inSetValWV( IN_HALT )
 	{}
 
 	static ObjectField *cons( const InputLoc &loc,
@@ -2492,8 +2495,9 @@ struct ObjectField
 	Code inGetWV;
 	Code inSetWC;
 	Code inSetWV;
-	Code inGetVal;
-	Code inSetVal;
+	Code inGetValR;
+	Code inSetValWC;
+	Code inSetValWV;
 
 	ObjectField *prev, *next;
 };

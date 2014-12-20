@@ -319,19 +319,20 @@ typedef unsigned char uchar;
 
 #define IN_SYSTEM                0xe5
 
-#define IN_GET_STRUCT_FIELD_R    0xf7
-#define IN_GET_STRUCT_FIELD_WC   0xf8
-#define IN_GET_STRUCT_FIELD_WV   0xf9
-#define IN_GET_STRUCT_FIELD_BKT  0xfa
-#define IN_SET_STRUCT_FIELD_WC   0xfb
-#define IN_SET_STRUCT_FIELD_WV   0xfc
-#define IN_SET_STRUCT_FIELD_BKT  0xfd
-#define IN_GET_STRUCT_FIELD_VAL  0x93
-#define IN_SET_STRUCT_FIELD_VAL  0x94
+#define IN_GET_STRUCT_R          0xf7
+#define IN_GET_STRUCT_WC         0xf8
+#define IN_GET_STRUCT_WV         0xf9
+#define IN_GET_STRUCT_BKT        0xfa
+#define IN_SET_STRUCT_WC         0xfb
+#define IN_SET_STRUCT_WV         0xfc
+#define IN_SET_STRUCT_BKT        0xfd
+#define IN_GET_STRUCT_VAL_R      0x93
+#define IN_SET_STRUCT_VAL_WV     0x94
+#define IN_SET_STRUCT_VAL_WC     0x95
 #define IN_NEW_STRUCT            0xfe
 
-#define IN_GET_LOCAL_VAL         0x91
-#define IN_SET_LOCAL_VAL         0x92
+#define IN_GET_LOCAL_VAL_R       0x91
+#define IN_SET_LOCAL_VAL_WC      0x92
 
 /* IN_FN instructions. */
 #define IN_FN                    0xff
