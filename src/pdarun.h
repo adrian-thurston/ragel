@@ -167,6 +167,8 @@ typedef struct _LangElInfo
 typedef struct _StructElInfo
 {
 	long size;
+	short *trees;
+	long treesLen;
 } StructElInfo;
 
 typedef struct _ObjFieldInfo

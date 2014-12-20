@@ -809,6 +809,7 @@ struct Compiler
 	void generateExportsImpl();
 
 	LocalInfo *makeLocalInfo( Locals &locals );
+	short *makeTrees( ObjectDef *objectDef, int &numTrees );
 
 	/* 
 	 * Graphviz Generation

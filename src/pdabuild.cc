@@ -1278,6 +1278,32 @@ LocalInfo *Compiler::makeLocalInfo( Locals &locals )
 	return localInfo;
 }
 
+short *Compiler::makeTrees( ObjectDef *objectDef, int &numTrees )
+{
+	numTrees = 0;
+	for ( FieldList::Iter of = *objectDef->fieldList; of.lte(); of++ ) {
+		UniqueType *ut = of->value->typeRef->resolveType( this );
+		if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR )
+			numTrees += 1;
+	}
+
+	short *trees = new short[numTrees];
+	memset( trees, 0, sizeof(short) * numTrees );
+
+	short pos = 0, fieldPos = 0;;
+	for ( FieldList::Iter of = *objectDef->fieldList; of.lte(); of++ ) {
+		UniqueType *ut = of->value->typeRef->resolveType( this );
+		if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR ) {
+			trees[pos] = fieldPos;
+			pos += 1;
+		}
+		fieldPos += 1;
+	}
+
+	return trees;
+}
+
+
 void Compiler::makeRuntimeData()
 {
 	long count = 0;
@@ -1462,7 +1488,10 @@ void Compiler::makeRuntimeData()
 	memset( runtimeData->selInfo, 0, sizeof(StructElInfo)*count );
 	StructElList::Iter sel = structEls;
 	for ( int i = 0; i < count; i++, sel++ ) {
+		int treesLen;
 		runtimeData->selInfo[i].size = sel->context->objectDef->size();
+		runtimeData->selInfo[i].trees = makeTrees( sel->context->objectDef, treesLen );
+		runtimeData->selInfo[i].treesLen = treesLen;
 	}
 
 	/*

@@ -300,6 +300,10 @@ static void colm_clear_heap2( Program *prg, Tree **sp )
 	HeapItem *hi = prg->heapHead;
 	while ( hi != 0 ) {
 		HeapItem *next = hi->next;
+		short *t = prg->rtd->selInfo[hi->id].trees;
+		int i, len = prg->rtd->selInfo[hi->id].treesLen;
+		for ( i = 0; i < len; i++ )
+			treeDownref( prg, sp, ((Tree**)(hi+1))[t[i]] );
 		free( hi );
 		hi = next;
 	}

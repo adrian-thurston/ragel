@@ -197,6 +197,18 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	}
 	out << "\n};\n\n";
 
+
+	for ( int i = 0; i < runtimeData->numStructEls; i++ ) {
+		if ( runtimeData->selInfo[i].treesLen > 0 ) {
+			out << "static short struct_trees_" << i << "[] = {\n\t";
+
+			short *ti = runtimeData->selInfo[i].trees;
+			for ( int j = 0; j < runtimeData->selInfo[i].treesLen; j++ )
+				out << ti[j] << ", ";
+			out << "\n};\n\n";
+		}
+	}
+
 	/*
 	 * selInfo
 	 */
@@ -204,6 +216,14 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	for ( int i = 0; i < runtimeData->numStructEls; i++ ) {
 		out << "\t{ ";
 		out << runtimeData->selInfo[i].size << ", ";
+
+		/* trees. */
+		if ( runtimeData->selInfo[i].treesLen > 0 )
+			out << "struct_trees_" << i << ", ";
+		else
+			out << "0, ";
+		out << runtimeData->selInfo[i].treesLen << ", ";
+
 		out << " }";
 	}
 	out << "\n};\n\n";
