@@ -1018,12 +1018,14 @@ void declareTypeAlias( Compiler *pd, Namespace *nspace,
 LangEl *findType( Compiler *pd, Namespace *nspace, const String &data );
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, bool isConst );
+		const String &name, int methIdWV, int methIdWC,
+		bool isConst, bool useFnInstr = false );
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC,
-		UniqueType *arg1, bool isConst );
+		UniqueType *arg1, bool isConst, bool useFnInstr = false );
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC, 
-		UniqueType *arg1, UniqueType *arg2, bool isConst );
+		UniqueType *arg1, UniqueType *arg2, bool isConst,
+		bool useFnInstr = false );
 
 #endif /* _PARSEDATA_H */

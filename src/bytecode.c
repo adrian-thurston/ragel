@@ -877,7 +877,8 @@ again:
 			Tree *tree;
 			read_tree( tree );
 			vm_push( tree );
-			debug( prg, REALM_BYTECODE, "IN_LOAD_TREE %p id: %d refs: %d\n", tree, tree->id, tree->refs );
+			debug( prg, REALM_BYTECODE, "IN_LOAD_TREE %p id: %d refs: %d\n",
+					tree, tree->id, tree->refs );
 			break;
 		}
 		case IN_LOAD_WORD: {
@@ -1707,17 +1708,6 @@ again:
 			treeDownref( prg, sp, format );
 			break;
 		}
-		case IN_STR_ATOI: {
-			debug( prg, REALM_BYTECODE, "IN_STR_ATOI\n" );
-
-			Str *str = (Str*)vm_pop();
-			Word res = strAtoi( str->value );
-			Tree *integer = constructInteger( prg, res );
-			treeUpref( integer );
-			vm_push( integer );
-			treeDownref( prg, sp, (Tree*)str );
-			break;
-		}
 		case IN_INT_TO_STR: {
 			debug( prg, REALM_BYTECODE, "IN_INT_TO_STR\n" );
 
@@ -1770,28 +1760,6 @@ again:
 			treeDownref( prg, sp, (Tree*)s1 );
 			treeDownref( prg, sp, (Tree*)s2 );
 			vm_push( str );
-			break;
-		}
-		case IN_STR_UORD8: {
-			debug( prg, REALM_BYTECODE, "IN_STR_UORD8\n" );
-
-			Str *str = (Str*)vm_pop();
-			Word res = strUord8( str->value );
-			Tree *tree = constructInteger( prg, res );
-			treeUpref( tree );
-			vm_push( tree );
-			treeDownref( prg, sp, (Tree*)str );
-			break;
-		}
-		case IN_STR_UORD16: {
-			debug( prg, REALM_BYTECODE, "IN_STR_UORD16\n" );
-
-			Str *str = (Str*)vm_pop();
-			Word res = strUord16( str->value );
-			Tree *tree = constructInteger( prg, res );
-			treeUpref( tree );
-			vm_push( tree );
-			treeDownref( prg, sp, (Tree*)str );
 			break;
 		}
 
@@ -4021,6 +3989,46 @@ again:
 			Tree *result = constructInteger( prg, r );
 			treeUpref( result );
 			vm_push( result );
+			break;
+		}
+
+		case IN_FN: {
+			c = *instr++;
+			switch ( c ) {
+				case IN_STR_ATOI: {
+					debug( prg, REALM_BYTECODE, "IN_STR_ATOI\n" );
+
+					Str *str = (Str*)vm_pop();
+					Word res = strAtoi( str->value );
+					Tree *integer = constructInteger( prg, res );
+					treeUpref( integer );
+					vm_push( integer );
+					treeDownref( prg, sp, (Tree*)str );
+					break;
+				}
+				case IN_STR_UORD8: {
+					debug( prg, REALM_BYTECODE, "IN_STR_UORD8\n" );
+
+					Str *str = (Str*)vm_pop();
+					Word res = strUord8( str->value );
+					Tree *tree = constructInteger( prg, res );
+					treeUpref( tree );
+					vm_push( tree );
+					treeDownref( prg, sp, (Tree*)str );
+					break;
+				}
+				case IN_STR_UORD16: {
+					debug( prg, REALM_BYTECODE, "IN_STR_UORD16\n" );
+
+					Str *str = (Str*)vm_pop();
+					Word res = strUord16( str->value );
+					Tree *tree = constructInteger( prg, res );
+					treeUpref( tree );
+					vm_push( tree );
+					treeDownref( prg, sp, (Tree*)str );
+					break;
+				}
+			}
 			break;
 		}
 

@@ -104,31 +104,36 @@ IterDef::IterDef( Type type, Function *func ) :
 {}
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, bool isConst )
+		const String &name, int methIdWV, int methIdWC, bool isConst,
+		bool useFnInstr )
 {
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 0, 0, 0, isConst );
+	objMethod->useFnInstr = useFnInstr;
 	obj->methodMap->insert( name, objMethod );
 	return objMethod;
 }
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, UniqueType *arg1, bool isConst )
+		const String &name, int methIdWV, int methIdWC, UniqueType *arg1,
+		bool isConst, bool useFnInstr )
 {
 	UniqueType *args[] = { arg1 };
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 1, args, 0, isConst );
+	objMethod->useFnInstr = useFnInstr;
 	obj->methodMap->insert( name, objMethod );
 	return objMethod;
 }
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC, 
-		UniqueType *arg1, UniqueType *arg2, bool isConst )
+		UniqueType *arg1, UniqueType *arg2, bool isConst, bool useFnInstr )
 {
 	UniqueType *args[] = { arg1, arg2 };
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 2, args, 0, isConst );
+	objMethod->useFnInstr = useFnInstr;
 	obj->methodMap->insert( name, objMethod );
 	return objMethod;
 }
@@ -876,6 +881,8 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 			code.append( IN_PARSE_FINISH_EXIT_WV );
 		}
 		else {
+			if ( lookup.objMethod->useFnInstr )
+				code.append( IN_FN );
 			code.append( lookup.objMethod->opcodeWV );
 		}
 	}
@@ -888,6 +895,8 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 			code.append( IN_PARSE_FINISH_EXIT_WC );
 		}
 		else {
+			if ( lookup.objMethod->useFnInstr )
+				code.append( IN_FN );
 			code.append( lookup.objMethod->opcodeWC );
 		}
 	}

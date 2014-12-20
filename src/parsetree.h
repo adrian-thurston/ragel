@@ -2336,13 +2336,15 @@ struct ObjectMethod
 		useFuncId(false),
 		useCallObj(true),
 		func(0), 
-		iterDef(0)
+		iterDef(0),
+		useFnInstr(false)
 	{
 	}
 
 	ObjectMethod( UniqueType *returnUT, String name, 
 			int opcodeWV, int opcodeWC, int numParams, 
-			UniqueType **types, ParameterList *paramList, bool isConst )
+			UniqueType **types, ParameterList *paramList,
+			bool isConst )
 	: 
 		returnUT(returnUT),
 		returnTypeRef(0),
@@ -2357,7 +2359,8 @@ struct ObjectMethod
 		useFuncId(false),
 		useCallObj(true),
 		func(0), 
-		iterDef(0)
+		iterDef(0),
+		useFnInstr(false)
 	{
 		this->paramUTs = new UniqueType*[numParams];
 		memcpy( this->paramUTs, types, sizeof(UniqueType*)*numParams );
@@ -2378,6 +2381,7 @@ struct ObjectMethod
 	bool useCallObj;
 	Function *func;
 	IterDef *iterDef;
+	bool useFnInstr;
 };
 
 typedef AvlMap<String, ObjectMethod*, CmpStr> MethodMap;

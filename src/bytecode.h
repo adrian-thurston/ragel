@@ -206,12 +206,6 @@ typedef unsigned char uchar;
 #define IN_YIELD                 0x8f
 #define IN_STOP                  0x90
 
-#define IN_STR_UORD8             0x91
-#define IN_STR_SORD8             0x92
-#define IN_STR_UORD16            0x93
-#define IN_STR_SORD16            0x94
-#define IN_STR_UORD32            0x95
-#define IN_STR_SORD32            0x96
 
 #define IN_INT_TO_STR            0x97
 #define IN_TREE_TO_STR           0x98
@@ -333,6 +327,18 @@ typedef unsigned char uchar;
 #define IN_SET_STRUCT_FIELD_WV   0xfc
 #define IN_SET_STRUCT_FIELD_BKT  0xfd
 #define IN_NEW_STRUCT            0xfe
+
+#define IN_GET_LOCAL_VAL         0x91
+#define IN_SET_LOCAL_VAL         0x92
+
+/* IN_FN instructions. */
+#define IN_FN                    0xff
+#define IN_STR_UORD8             0x01
+#define IN_STR_SORD8             0x02
+#define IN_STR_UORD16            0x03
+#define IN_STR_SORD16            0x04
+#define IN_STR_UORD32            0x05
+#define IN_STR_SORD32            0x06
 
 enum TYPE
 {
