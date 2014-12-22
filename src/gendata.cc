@@ -44,10 +44,16 @@ GenBase::GenBase( std::string fsmName, ParseData *pd, FsmAp *fsm )
 void GenBase::appendTrans( TransListVect &outList, Key lowKey, 
 		Key highKey, TransAp *trans )
 {
-	for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-		if ( cond->toState != 0 || cond->actionTable.length() > 0 ) {
+	if ( trans->plain() ) {
+		if ( trans->tdap()->toState != 0 || trans->tdap()->actionTable.length() > 0 )
 			outList.append( TransEl( lowKey, highKey, trans ) );
-			break;
+	}
+	else {
+		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+			if ( cond->toState != 0 || cond->actionTable.length() > 0 ) {
+				outList.append( TransEl( lowKey, highKey, trans ) );
+				break;
+			}
 		}
 	}
 }
@@ -78,10 +84,18 @@ void GenBase::reduceActionTables()
 
 		/* Loop the transitions and reduce their actions. */
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-				if ( cond->actionTable.length() > 0 ) {
-					if ( actionTableMap.insert( cond->actionTable, &actionTable ) )
+			if ( trans->plain() ) {
+				if ( trans->tdap()->actionTable.length() > 0 ) {
+					if ( actionTableMap.insert( trans->tdap()->actionTable, &actionTable ) )
 						actionTable->id = nextActionTableId++;
+				}
+			}
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+					if ( cond->actionTable.length() > 0 ) {
+						if ( actionTableMap.insert( cond->actionTable, &actionTable ) )
+							actionTable->id = nextActionTableId++;
+					}
 				}
 			}
 		}
@@ -588,22 +602,41 @@ void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
 	RedCondList redCondList;
 
-	for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
+	if ( trans->plain() ) {
 		long targ = -1;
 		long action = -1;
 
 		/* First reduce the action. */
 		RedActionTable *actionTable = 0;
-		if ( cti->actionTable.length() > 0 )
-			actionTable = actionTableMap.find( cti->actionTable );
+		if ( trans->tdap()->actionTable.length() > 0 )
+			actionTable = actionTableMap.find( trans->tdap()->actionTable );
 
-		if ( cti->toState != 0 )
-			targ = cti->toState->alg.stateNum;
+		if ( trans->tdap()->toState != 0 )
+			targ = trans->tdap()->toState->alg.stateNum;
 
 		if ( actionTable != 0 )
 			action = actionTable->id;
 
-		newCondTrans( redCondList, curState, cti->key, targ, action );
+		newCondTrans( redCondList, curState, 0, targ, action );
+	}
+	else {
+		for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
+			long targ = -1;
+			long action = -1;
+
+			/* First reduce the action. */
+			RedActionTable *actionTable = 0;
+			if ( cti->actionTable.length() > 0 )
+				actionTable = actionTableMap.find( cti->actionTable );
+
+			if ( cti->toState != 0 )
+				targ = cti->toState->alg.stateNum;
+
+			if ( actionTable != 0 )
+				action = actionTable->id;
+
+			newCondTrans( redCondList, curState, cti->key, targ, action );
+		}
 	}
 
 	GenCondSpace *gcs = trans->condSpace != 0 ?

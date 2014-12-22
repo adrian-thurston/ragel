@@ -59,7 +59,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 				attachTrans( fromState, cti->toState, cond );
 				
 				/* Call the user callback to add in the original source transition. */
-				addInTrans( cond, cti );
+				addInTrans( cond, cti.ptr );
 
 				cond->key = cti->key.getVal() | (1 << csi.pos());
 
@@ -133,7 +133,7 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 		mergedCS.insert( origCS );
 		mergedCS.insert( condAction );
 
-		/* Allocate a cond space for the merged spet. */
+		/* Allocate a cond space for the merged set. */
 		CondSpace *mergedCondSpace = addCondSpace( mergedCS );
 		tr->condSpace = mergedCondSpace;
 

@@ -80,14 +80,26 @@ FsmAp::FsmAp( const FsmAp &graph )
 	/* Derefernce all the state maps. */
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
+			if ( trans->plain() ) {
 				/* The points to the original in the src machine. The taget's duplicate
 				 * is in the statemap. */
-				StateAp *toState = cti->toState != 0 ? cti->toState->alg.stateMap : 0;
+				StateAp *toState = trans->tdap()->toState != 0 ? trans->tdap()->toState->alg.stateMap : 0;
 
 				/* Attach The transition to the duplicate. */
-				cti->toState = 0;
-				attachTrans( state, toState, cti );
+				trans->tdap()->toState = 0;
+				attachTrans( state, toState, trans->tdap() );
+
+			}
+			else {
+				for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
+					/* The points to the original in the src machine. The taget's duplicate
+					 * is in the statemap. */
+					StateAp *toState = cti->toState != 0 ? cti->toState->alg.stateMap : 0;
+
+					/* Attach The transition to the duplicate. */
+					cti->toState = 0;
+					attachTrans( state, toState, cti );
+				}
 			}
 		}
 
@@ -347,9 +359,15 @@ void FsmAp::markReachableFromHere( StateAp *state )
 
 	/* Recurse on all out transitions. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-			if ( cond->toState != 0 )
-				markReachableFromHere( cond->toState );
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 )
+				markReachableFromHere( trans->tdap()->toState );
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					markReachableFromHere( cond->toState );
+			}
 		}
 	}
 }
@@ -503,9 +521,15 @@ void FsmAp::depthFirstOrdering( StateAp *state )
 	
 	/* Recurse on everything ranges. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-			if ( cond->toState != 0 )
-				depthFirstOrdering( cond->toState );
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 )
+				depthFirstOrdering( trans->tdap()->toState );
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					depthFirstOrdering( cond->toState );
+			}
 		}
 	}
 }

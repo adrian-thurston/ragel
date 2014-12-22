@@ -131,22 +131,32 @@ StateAp::StateAp(const StateAp &other)
 {
 	/* Duplicate all the transitions. */
 	for ( TransList::Iter trans = other.outList; trans.lte(); trans++ ) {
-		/* Duplicate and store the orginal target in the transition. This will
-		 * be corrected once all the states have been created. */
-		TransAp *newTrans = new TransCondAp( *trans->tcap() );
-
-		for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
-			CondAp *newCondTrans = new CondAp( *cti, newTrans );
-			newCondTrans->key = cti->key;
-
-			newTrans->tcap()->condList.append( newCondTrans );
-
-			assert( cti->lmActionTable.length() == 0 );
-
-			newCondTrans->toState = cti->toState;
+		if ( trans->plain() ) {
+			/* Duplicate and store the orginal target in the transition. This will
+			 * be corrected once all the states have been created. */
+			TransDataAp *newTrans = new TransDataAp( *trans->tdap() );
+			assert( trans->tdap()->lmActionTable.length() == 0 );
+			newTrans->toState = trans->tdap()->toState;
+			outList.append( newTrans );
 		}
+		else {
+			/* Duplicate and store the orginal target in the transition. This will
+			 * be corrected once all the states have been created. */
+			TransAp *newTrans = new TransCondAp( *trans->tcap() );
 
-		outList.append( newTrans );
+			for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
+				CondAp *newCondTrans = new CondAp( *cti, newTrans );
+				newCondTrans->key = cti->key;
+
+				newTrans->tcap()->condList.append( newCondTrans );
+
+				assert( cti->lmActionTable.length() == 0 );
+
+				newCondTrans->toState = cti->toState;
+			}
+
+			outList.append( newTrans );
+		}
 	}
 }
 
@@ -372,33 +382,40 @@ bool MarkCompare::shouldMark( MarkIndex &markIndex, const StateAp *state1,
 
 int FsmAp::comparePart( TransAp *trans1, TransAp *trans2 )
 {
-	/* Use a pair iterator to get the transition pairs. */
-	ValPairIter<CondAp> outPair( trans1->tcap()->condList.head,
-			trans2->tcap()->condList.head );
-	for ( ; !outPair.end(); outPair++ ) {
-		switch ( outPair.userState ) {
+	if ( trans1->plain() ) {
+		int compareRes = FsmAp::compareCondPartPtr( trans1->tdap(), trans2->tdap() );
+		if ( compareRes != 0 )
+			return compareRes;
+	}
+	else { 
+		/* Use a pair iterator to get the transition pairs. */
+		ValPairIter<CondAp> outPair( trans1->tcap()->condList.head,
+				trans2->tcap()->condList.head );
+		for ( ; !outPair.end(); outPair++ ) {
+			switch ( outPair.userState ) {
 
-		case ValPairIter<CondAp>::RangeInS1: {
-			int compareRes = FsmAp::compareCondPartPtr( outPair.s1Tel.trans, 0 );
-			if ( compareRes != 0 )
-				return compareRes;
-			break;
+			case ValPairIter<CondAp>::RangeInS1: {
+				int compareRes = FsmAp::compareCondPartPtr<CondAp>( outPair.s1Tel.trans, 0 );
+				if ( compareRes != 0 )
+					return compareRes;
+				break;
+			}
+
+			case ValPairIter<CondAp>::RangeInS2: {
+				int compareRes = FsmAp::compareCondPartPtr<CondAp>( 0, outPair.s2Tel.trans );
+				if ( compareRes != 0 )
+					return compareRes;
+				break;
+			}
+
+			case ValPairIter<CondAp>::RangeOverlap: {
+				int compareRes = FsmAp::compareCondPartPtr( 
+						outPair.s1Tel.trans, outPair.s2Tel.trans );
+				if ( compareRes != 0 )
+					return compareRes;
+				break;
+			}}
 		}
-
-		case ValPairIter<CondAp>::RangeInS2: {
-			int compareRes = FsmAp::compareCondPartPtr( 0, outPair.s2Tel.trans );
-			if ( compareRes != 0 )
-				return compareRes;
-			break;
-		}
-
-		case ValPairIter<CondAp>::RangeOverlap: {
-			int compareRes = FsmAp::compareCondPartPtr( 
-					outPair.s1Tel.trans, outPair.s2Tel.trans );
-			if ( compareRes != 0 )
-				return compareRes;
-			break;
-		}}
 	}
 
 	return 0;
@@ -416,7 +433,7 @@ int FsmAp::compareTransPartPtr( TransAp *trans1, TransAp *trans2 )
 	return 0;
 }
 
-int FsmAp::compareCondPartPtr( CondAp *trans1, CondAp *trans2 )
+template< class Trans > int FsmAp::compareCondPartPtr( Trans *trans1, Trans *trans2 )
 {
 	if ( trans1 != 0 ) {
 		/* If trans1 is set then so should trans2. The initial partitioning
@@ -446,23 +463,6 @@ int FsmAp::compareTransDataPtr( TransAp *trans1, TransAp *trans2 )
 	else if ( trans1 != 0 ) {
 		/* Both of the transition pointers are set. */
 		int compareRes = compareTransData( trans1, trans2 );
-		if ( compareRes != 0 )
-			return compareRes;
-	}
-	return 0;
-}
-
-/* Compares two transition pointers according to priority and functions.
- * Either pointer may be null. Does not consider to state or from state. */
-int FsmAp::compareCondDataPtr( CondAp *trans1, CondAp *trans2 )
-{
-	if ( trans1 == 0 && trans2 != 0 )
-		return -1;
-	else if ( trans1 != 0 && trans2 == 0 )
-		return 1;
-	else if ( trans1 != 0 ) {
-		/* Both of the transition pointers are set. */
-		int compareRes = compareCondData( trans1, trans2 );
 		if ( compareRes != 0 )
 			return compareRes;
 	}

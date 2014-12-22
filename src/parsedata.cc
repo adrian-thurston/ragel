@@ -949,8 +949,12 @@ void ParseData::removeActionDups( FsmAp *graph )
 	for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
 		/* Loop all transitions. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ )
-				removeDups( cond->actionTable );
+			if ( trans->plain() )
+				removeDups( trans->tdap()->actionTable );
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ )
+					removeDups( cond->actionTable );
+			}
 		}
 		removeDups( state->toStateActionTable );
 		removeDups( state->fromStateActionTable );
@@ -1301,9 +1305,15 @@ void ParseData::analyzeGraph( FsmAp *graph )
 					(*sci)->numCondRefs += 1;
 			}
 
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) { 
-				for ( ActionTable::Iter at = cond->actionTable; at.lte(); at++ )
+			if ( trans->plain() ) {
+				for ( ActionTable::Iter at = trans->tdap()->actionTable; at.lte(); at++ )
 					at->value->numTransRefs += 1;
+			}
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) { 
+					for ( ActionTable::Iter at = cond->actionTable; at.lte(); at++ )
+						at->value->numTransRefs += 1;
+				}
 			}
 		}
 

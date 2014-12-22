@@ -169,9 +169,15 @@ void FsmAp::startFsmAction( int ordering, Action *action )
 
 	/* Walk the start state's transitions, setting functions. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-			if ( cond->toState != 0 )
-				cond->actionTable.setAction( ordering, action );
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 )
+				trans->tdap()->actionTable.setAction( ordering, action );
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					cond->actionTable.setAction( ordering, action );
+			}
 		}
 	}
 
@@ -190,9 +196,15 @@ void FsmAp::allTransAction( int ordering, Action *action )
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out list of the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-				if ( cond->toState != 0 )
-					cond->actionTable.setAction( ordering, action );
+			if ( trans->plain() ) {
+				if ( trans->tdap()->toState != 0 )
+					trans->tdap()->actionTable.setAction( ordering, action );
+			}
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+					if ( cond->toState != 0 )
+						cond->actionTable.setAction( ordering, action );
+				}
 			}
 		}
 	}
@@ -639,17 +651,29 @@ int FsmAp::shiftStartActionOrder( int fromOrder )
 
 	/* Walk the start state's transitions, shifting function ordering. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-			/* Walk the function data for the transition and set the keys to
-			 * increasing values starting at fromOrder. */
+		if ( trans->plain() ) {
 			int curFromOrder = fromOrder;
-			ActionTable::Iter action = cond->actionTable;
+			ActionTable::Iter action = trans->tdap()->actionTable;
 			for ( ; action.lte(); action++ ) 
 				action->key = curFromOrder++;
-		
+			
 			/* Keep track of the max number of orders used. */
 			if ( curFromOrder - fromOrder > maxUsed )
 				maxUsed = curFromOrder - fromOrder;
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				/* Walk the function data for the transition and set the keys to
+				 * increasing values starting at fromOrder. */
+				int curFromOrder = fromOrder;
+				ActionTable::Iter action = cond->actionTable;
+				for ( ; action.lte(); action++ ) 
+					action->key = curFromOrder++;
+			
+				/* Keep track of the max number of orders used. */
+				if ( curFromOrder - fromOrder > maxUsed )
+					maxUsed = curFromOrder - fromOrder;
+			}
 		}
 	}
 	
@@ -665,8 +689,12 @@ void FsmAp::clearAllPriorities()
 
 		/* Clear transition data from the out transitions. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ )
-				cond->priorTable.empty();
+			if ( trans->plain() )
+				trans->tdap()->priorTable.empty();
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ )
+					cond->priorTable.empty();
+			}
 		}
 	}
 }
@@ -681,16 +709,29 @@ void FsmAp::nullActionKeys( )
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the transitions for the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+			if ( trans->plain() ) {
 				/* Walk the action table for the transition. */
-				for ( ActionTable::Iter action = cond->actionTable;
+				for ( ActionTable::Iter action = trans->tdap()->actionTable;
 						action.lte(); action++ )
 					action->key = 0;
 
 				/* Walk the action table for the transition. */
-				for ( LmActionTable::Iter action = cond->lmActionTable;
+				for ( LmActionTable::Iter action = trans->tdap()->lmActionTable;
 						action.lte(); action++ )
 					action->key = 0;
+			}
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+					/* Walk the action table for the transition. */
+					for ( ActionTable::Iter action = cond->actionTable;
+							action.lte(); action++ )
+						action->key = 0;
+
+					/* Walk the action table for the transition. */
+					for ( LmActionTable::Iter action = cond->lmActionTable;
+							action.lte(); action++ )
+						action->key = 0;
+				}
 			}
 		}
 
@@ -783,29 +824,36 @@ int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 	else if ( trans2->condSpace < trans1->condSpace )
 		return 1;
 
-	ValPairIter<CondAp> outPair( trans1->tcap()->condList.head,
-			trans2->tcap()->condList.head );
-	for ( ; !outPair.end(); outPair++ ) {
-		switch ( outPair.userState ) {
-		case ValPairIter<CondAp>::RangeInS1: {
-			int compareRes = FsmAp::compareCondDataPtr( outPair.s1Tel.trans, 0 );
-			if ( compareRes != 0 )
-				return compareRes;
-			break;
+	if ( trans1->plain() ) {
+		int compareRes = FsmAp::compareCondDataPtr( trans1->tdap(), trans2->tdap() );
+		if ( compareRes != 0 )
+			return compareRes;
+	}
+	else {
+		ValPairIter<CondAp> outPair( trans1->tcap()->condList.head,
+				trans2->tcap()->condList.head );
+		for ( ; !outPair.end(); outPair++ ) {
+			switch ( outPair.userState ) {
+			case ValPairIter<CondAp>::RangeInS1: {
+				int compareRes = FsmAp::compareCondDataPtr<CondAp>( outPair.s1Tel.trans, 0 );
+				if ( compareRes != 0 )
+					return compareRes;
+				break;
+			}
+			case ValPairIter<CondAp>::RangeInS2: {
+				int compareRes = FsmAp::compareCondDataPtr<CondAp>( 0, outPair.s2Tel.trans );
+				if ( compareRes != 0 )
+					return compareRes;
+				break;
+			}
+			case ValPairIter<CondAp>::RangeOverlap: {
+				int compareRes = FsmAp::compareCondDataPtr( 
+						outPair.s1Tel.trans, outPair.s2Tel.trans );
+				if ( compareRes != 0 )
+					return compareRes;
+				break;
+			}}
 		}
-		case ValPairIter<CondAp>::RangeInS2: {
-			int compareRes = FsmAp::compareCondDataPtr( 0, outPair.s2Tel.trans );
-			if ( compareRes != 0 )
-				return compareRes;
-			break;
-		}
-		case ValPairIter<CondAp>::RangeOverlap: {
-			int compareRes = FsmAp::compareCondDataPtr( 
-					outPair.s1Tel.trans, outPair.s2Tel.trans );
-			if ( compareRes != 0 )
-				return compareRes;
-			break;
-		}}
 	}
 	return 0;
 }
@@ -815,7 +863,7 @@ int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
  * transitions according to the data contained in the transitions.  Data means
  * any properties added to user transitions that may differentiate them. Since
  * the base transition has no data, the default is to return equal. */
-int FsmAp::compareCondData( CondAp *trans1, CondAp *trans2 )
+template< class Trans > int FsmAp::compareCondData( Trans *trans1, Trans *trans2 )
 {
 	/* Compare the prior table. */
 	int cmpRes = CmpPriorTable::compare( trans1->priorTable, 
@@ -832,29 +880,6 @@ int FsmAp::compareCondData( CondAp *trans1, CondAp *trans2 )
 	/* Compare action tables. */
 	return CmpActionTable::compare(trans1->actionTable, 
 			trans2->actionTable);
-}
-
-/* Callback invoked when another trans (or possibly this) is added into this
- * transition during the merging process.  Draw in any properties of srcTrans
- * into this transition. AddInTrans is called when a new transitions is made
- * that will be a duplicate of another transition or a combination of several
- * other transitions. AddInTrans will be called for each transition that the
- * new transition is to represent. */
-void FsmAp::addInTrans( CondAp *destTrans, CondAp *srcTrans )
-{
-	/* Protect against adding in from ourselves. */
-	if ( srcTrans == destTrans ) {
-		/* Adding in ourselves, need to make a copy of the source transitions.
-		 * The priorities are not copied in as that would have no effect. */
-		destTrans->lmActionTable.setActions( LmActionTable(srcTrans->lmActionTable) );
-		destTrans->actionTable.setActions( ActionTable(srcTrans->actionTable) );
-	}
-	else {
-		/* Not a copy of ourself, get the functions and priorities. */
-		destTrans->lmActionTable.setActions( srcTrans->lmActionTable );
-		destTrans->actionTable.setActions( srcTrans->actionTable );
-		destTrans->priorTable.setPriors( srcTrans->priorTable );
-	}
 }
 
 /* Compare the properties of states that are embedded by users. Compares out

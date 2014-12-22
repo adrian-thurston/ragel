@@ -284,7 +284,7 @@ void LongestMatch::restart( FsmAp *graph, TransAp *trans )
 {
 	for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
 		StateAp *fromState = cti->fromState;
-		graph->detachCondTrans( fromState, cti->toState, cti );
+		graph->detachTrans( fromState, cti->toState, cti );
 		graph->attachTrans( fromState, graph->startState, cti );
 	}
 }

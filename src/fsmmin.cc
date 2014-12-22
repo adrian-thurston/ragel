@@ -647,7 +647,7 @@ void FsmAp::fuseEquivStates( StateAp *dest, StateAp *src )
 	assert( dest != src );
 
 	/* Cur is a duplicate. We can merge it with trail. */
-	inTransMove( dest, src );
+	moveInwardTrans( dest, src );
 
 	detachState( src );
 	stateList.detach( src );
@@ -767,7 +767,7 @@ void FsmAp::compressTransitions()
 				if ( merge ) {
 					trans->highKey = next->highKey;
 					st->outList.detach( next );
-					detachCondTrans( next->tcap()->condList.head->fromState,
+					detachTrans( next->tcap()->condList.head->fromState,
 							next->tcap()->condList.head->toState,
 							next->tcap()->condList.head );
 					delete next;
