@@ -1451,8 +1451,10 @@ struct FsmAp
 	 */
 
 	/* Common to attaching/detaching list and default. */
-	void attachToInList( StateAp *from, StateAp *to, CondAp *&head, CondAp *trans );
-	void detachFromInList( StateAp *from, StateAp *to, CondAp *&head, CondAp *trans );
+	template < class Head > void attachToInList( StateAp *from,
+			StateAp *to, Head *&head, Head *trans );
+	template < class Head > void detachFromInList( StateAp *from,
+			StateAp *to, Head *&head, Head *trans );
 
 	/* Attach with a new transition. */
 	TransAp *attachNewTrans( StateAp *from, StateAp *to,
@@ -1461,12 +1463,14 @@ struct FsmAp
 			StateAp *to, CondKey onChar );
 
 	/* Attach with an existing transition that already in an out list. */
+	void attachTrans( StateAp *from, StateAp *to, TransDataAp *trans );
 	void attachTrans( StateAp *from, StateAp *to, CondAp *trans );
 	
 	/* Redirect a transition away from error and towards some state. */
 	void redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans );
 
 	/* Detach a transition from a target state. */
+	void detachTrans( StateAp *from, StateAp *to, TransDataAp *trans );
 	void detachCondTrans( StateAp *from, StateAp *to, CondAp *trans );
 
 	/* Detach a state from the graph. */

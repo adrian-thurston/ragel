@@ -9,8 +9,8 @@
 #include <iostream>
 using namespace std;
 
-void FsmAp::attachToInList( StateAp *from, StateAp *to, 
-		CondAp *&head, CondAp *trans )
+template< class Head > void FsmAp::attachToInList( StateAp *from,
+		StateAp *to, Head *&head, Head *trans )
 {
 	trans->ilnext = head;
 	trans->ilprev = 0;
@@ -36,8 +36,8 @@ void FsmAp::attachToInList( StateAp *from, StateAp *to,
 };
 
 /* Detach a transition from an inlist. The head of the inlist must be supplied. */
-void FsmAp::detachFromInList( StateAp *from, StateAp *to, 
-		CondAp *&head, CondAp *trans )
+template< class Head > void FsmAp::detachFromInList( StateAp *from, StateAp *to, 
+		Head *&head, Head *trans )
 {
 	/* Detach in the inTransList. */
 	if ( trans->ilprev == 0 ) 
@@ -110,6 +110,19 @@ TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key high
 /* Attach for range lists or for the default transition.  This attach should
  * be used when a transition already is allocated and must be attached to a
  * target state.  Does not handle adding the transition into the out list. */
+void FsmAp::attachTrans( StateAp *from, StateAp *to, TransDataAp *trans )
+{
+	assert( trans->fromState == 0 && trans->toState == 0 );
+
+	trans->fromState = from;
+	trans->toState = to;
+
+	if ( to != 0 ) {
+		/* For now always attache the one and only condList element. */
+		attachToInList( from, to, to->inTrans.head, trans );
+	}
+}
+
 void FsmAp::attachTrans( StateAp *from, StateAp *to, CondAp *trans )
 {
 	assert( trans->fromState == 0 && trans->toState == 0 );
@@ -138,6 +151,18 @@ void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans )
 }
 
 /* Detach for out/in lists or for default transition. */
+void FsmAp::detachTrans( StateAp *from, StateAp *to, TransDataAp *trans )
+{
+	assert( trans->fromState == from && trans->toState == to );
+
+	trans->fromState = 0;
+	trans->toState = 0;
+
+	if ( to != 0 ) {
+		detachFromInList( from, to, to->inTrans.head, trans );
+	}
+}
+
 void FsmAp::detachCondTrans( StateAp *from, StateAp *to, CondAp *trans )
 {
 	assert( trans->fromState == from && trans->toState == to );
@@ -550,6 +575,17 @@ void FsmAp::inTransMove( StateAp *dest, StateAp *src )
 	 * state is detached, the entry points to src will be removed. */
 	for ( EntryIdSet::Iter enId = src->entryIds; enId.lte(); enId++ )
 		changeEntry( *enId, dest, src );
+
+	/* Move the transitions in inList. */
+	while ( src->inTrans.head != 0 ) {
+		/* Get trans and from state. */
+		TransDataAp *trans = src->inTrans.head;
+		StateAp *fromState = trans->fromState;
+
+		/* Detach from src, reattach to dest. */
+		detachTrans( fromState, src, trans );
+		attachTrans( fromState, dest, trans );
+	}
 
 	/* Move the transitions in inList. */
 	while ( src->inCond.head != 0 ) {
