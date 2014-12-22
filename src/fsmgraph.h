@@ -356,9 +356,9 @@ typedef CmpTable< int, CmpOrd<int> > TransFuncListCompare;
 /* In transition list. Like DList except only has head pointers, which is all
  * that is required. Insertion and deletion is handled by the graph. This class
  * provides the iterator of a single list. */
-template <class Element> struct TransInList
+template <class Element> struct InList
 {
-	TransInList() : head(0) { }
+	InList() : head(0) { }
 
 	Element *head;
 
@@ -368,8 +368,8 @@ template <class Element> struct TransInList
 		Iter() : ptr(0) { }
 
 		/* Construct, assign from a list. */
-		Iter( const TransInList &il )  : ptr(il.head) { }
-		Iter &operator=( const TransInList &dl ) { ptr = dl.head; return *this; }
+		Iter( const InList &il )  : ptr(il.head) { }
+		Iter &operator=( const InList &dl ) { ptr = dl.head; return *this; }
 
 		/* At the end */
 		bool lte() const    { return ptr != 0; }
@@ -455,6 +455,7 @@ struct CondAp
 typedef DList<CondAp> CondList;
 
 struct TransCondAp;
+struct TransDataAp;
 
 /* Transition class that implements actions and priorities. */
 struct TransAp 
@@ -476,7 +477,11 @@ struct TransAp
 		//	condList.abandon();
 	}
 
+	bool condList()
+		{ return condSpace != 0; }
+
 	TransCondAp *tcap();
+	TransDataAp *tdap();
 
 	long condFullSize();
 
@@ -507,8 +512,30 @@ struct TransCondAp
 	CondList condList;
 };
 
+struct TransDataAp
+	: public TransAp, public TransData
+{
+	TransDataAp() 
+	:
+		TransAp(),
+		TransData()
+	{}
+
+	TransDataAp( const TransDataAp &other )
+	:
+		TransAp( other ),
+		TransData( other )
+	{}
+
+	/* Pointers for in-list. */
+	TransDataAp *ilprev, *ilnext;
+};
+
 inline TransCondAp *TransAp::tcap()
 		{ return static_cast<TransCondAp*>( this ); }
+
+inline TransDataAp *TransAp::tdap()
+		{ return static_cast<TransDataAp*>( this ); }
 
 typedef DList<TransAp> TransList;
 
@@ -698,6 +725,8 @@ struct FsmCtx
 	MinimizeOpt minimizeOpt;
 };
 
+typedef InList<CondAp> CondInList;
+typedef InList<TransDataAp> TransInList;
 
 /* State class that implements actions and priorities. */
 struct StateAp 
@@ -713,7 +742,8 @@ struct StateAp
 	TransList outList;
 
 	/* In transition Lists. */
-	TransInList<CondAp> inList;
+	TransInList inTrans;
+	CondInList inCond;
 
 	/* Set only during scanner construction when actions are added. NFA to DFA
 	 * code can ignore this. */

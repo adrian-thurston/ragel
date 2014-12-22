@@ -56,7 +56,8 @@ StateAp::StateAp()
 :
 	/* No out or in transitions. */
 	outList(),
-	inList(),
+	inTrans(),
+	inCond(),
 
 	/* No EOF target. */
 	eofTarget(0),
@@ -95,7 +96,8 @@ StateAp::StateAp(const StateAp &other)
 	/* All lists are cleared. They will be filled in when the
 	 * individual transitions are duplicated and attached. */
 	outList(),
-	inList(),
+	inTrans(),
+	inCond(),
 
 	/* Set this using the original state's eofTarget. It will get mapped back
 	 * to the new machine in the Fsm copy constructor. */

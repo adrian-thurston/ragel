@@ -73,7 +73,7 @@ CondAp *FsmAp::attachNewTrans( TransAp *trans, StateAp *from, StateAp *to, CondK
 
 	/* Attach in list. */
 	if ( to != 0 )
-		attachToInList( from, to, to->inList.head, condAp );
+		attachToInList( from, to, to->inCond.head, condAp );
 
 	return condAp;
 }
@@ -102,7 +102,7 @@ TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key high
 
 	/* Attach in list. */
 	if ( to != 0 )
-		attachToInList( from, to, to->inList.head, condAp );
+		attachToInList( from, to, to->inCond.head, condAp );
 
 	return retVal;
 }
@@ -119,7 +119,7 @@ void FsmAp::attachTrans( StateAp *from, StateAp *to, CondAp *trans )
 
 	if ( to != 0 ) {
 		/* For now always attache the one and only condList element. */
-		attachToInList( from, to, to->inList.head, trans );
+		attachToInList( from, to, to->inCond.head, trans );
 	}
 }
 
@@ -133,7 +133,7 @@ void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans )
 
 	if ( to != 0 ) {
 		/* Attach using the inList pointer as the head pointer. */
-		attachToInList( from, to, to->inList.head, trans );
+		attachToInList( from, to, to->inCond.head, trans );
 	}
 }
 
@@ -146,7 +146,7 @@ void FsmAp::detachCondTrans( StateAp *from, StateAp *to, CondAp *trans )
 	trans->toState = 0;
 
 	if ( to != 0 ) {
-		detachFromInList( from, to, to->inList.head, trans );
+		detachFromInList( from, to, to->inCond.head, trans );
 	}
 }
 
@@ -157,9 +157,9 @@ void FsmAp::detachCondTrans( StateAp *from, StateAp *to, CondAp *trans )
 void FsmAp::detachState( StateAp *state )
 {
 	/* Detach the in transitions from the inList list of transitions. */
-	while ( state->inList.head != 0 ) {
+	while ( state->inCond.head != 0 ) {
 		/* Get pointers to the trans and the state. */
-		CondAp *condAp = state->inList.head;
+		CondAp *condAp = state->inCond.head;
 		TransAp *trans = condAp->transAp;
 
 		StateAp *fromState = condAp->fromState;
@@ -552,9 +552,9 @@ void FsmAp::inTransMove( StateAp *dest, StateAp *src )
 		changeEntry( *enId, dest, src );
 
 	/* Move the transitions in inList. */
-	while ( src->inList.head != 0 ) {
+	while ( src->inCond.head != 0 ) {
 		/* Get trans and from state. */
-		CondAp *trans = src->inList.head;
+		CondAp *trans = src->inCond.head;
 		StateAp *fromState = trans->fromState;
 
 		/* Detach from src, reattach to dest. */
