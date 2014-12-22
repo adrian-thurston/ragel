@@ -23,7 +23,7 @@ long TransAp::condFullSize()
 void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
 {
 	/* Need to transform condition element to the merged set. */
-	for ( CondList::Iter cti = tai(trans)->condList; cti.lte(); cti++ ) {
+	for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
 		long origVal = cti->key.getVal();
 		long newVal = 0;
 
@@ -50,7 +50,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 		Action **cim = fromCS.find( *csi );
 		if ( cim == 0 ) {
 			CondList newItems;
-			for ( CondList::Iter cti = tai(trans)->condList; cti.lte(); cti++ ) {
+			for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
 				/* Sub-transition for conditions. */
 				CondAp *cond = new CondAp( trans );
 
@@ -68,7 +68,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 
 			/* Merge newItems in. Both the condList and newItems are sorted. Make
 			 * a sorted list out of them. */
-			CondAp *dest = tai(trans)->condList.head;
+			CondAp *dest = trans->tcap()->condList.head;
 			while ( dest != 0 && newItems.head != 0 ) { 
 				if ( newItems.head->key.getVal() > dest->key.getVal() ) {
 					dest = dest->next;
@@ -76,12 +76,12 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 				else {
 					/* Pop the item for insertion. */
 					CondAp *ins = newItems.detachFirst();
-					tai(trans)->condList.addBefore( dest, ins );
+					trans->tcap()->condList.addBefore( dest, ins );
 				}
 			}
 
 			/* Append the rest of the items. */
-			tai(trans)->condList.append( newItems );
+			trans->tcap()->condList.append( newItems );
 		}
 	}
 }
@@ -139,7 +139,7 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 
 		/* Translate original condition values, making space for the new bit
 		 * (possibly) introduced by the condition embedding. */
-		for ( CondList::Iter cti = tai(tr)->condList; cti.lte(); cti++ ) {
+		for ( CondList::Iter cti = tr->tcap()->condList; cti.lte(); cti++ ) {
 			long origVal = cti->key.getVal();
 			long newVal = 0;
 

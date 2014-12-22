@@ -131,7 +131,7 @@ void GraphvizDotGen::transList( StateAp *state )
 	/* Build the set of unique transitions out of this state. */
 	RedTransSet stTransSet;
 	for ( TransList::Iter tel = state->outList; tel.lte(); tel++ ) {
-		for ( CondList::Iter ctel = tai(tel)->condList; ctel.lte(); ctel++ ) {
+		for ( CondList::Iter ctel = tel->tcap()->condList; ctel.lte(); ctel++ ) {
 			/* Write out the from and to states. */
 			out << "\t" << state->alg.stateNum << " -> ";
 
@@ -200,7 +200,7 @@ void GraphvizDotGen::write( )
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		bool needsErr = false;
 		for ( TransList::Iter tel = st->outList; tel.lte(); tel++ ) {
-			for ( CondList::Iter ctel = tai(tel)->condList; ctel.lte(); ctel++ ) {
+			for ( CondList::Iter ctel = tel->tcap()->condList; ctel.lte(); ctel++ ) {
 				if ( ctel->toState == 0 ) {
 					needsErr = true;
 					break;

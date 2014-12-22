@@ -131,13 +131,13 @@ StateAp::StateAp(const StateAp &other)
 	for ( TransList::Iter trans = other.outList; trans.lte(); trans++ ) {
 		/* Duplicate and store the orginal target in the transition. This will
 		 * be corrected once all the states have been created. */
-		TransAp *newTrans = new TransApI( *tai(trans) );
+		TransAp *newTrans = new TransCondAp( *trans->tcap() );
 
-		for ( CondList::Iter cti = tai(trans)->condList; cti.lte(); cti++ ) {
+		for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
 			CondAp *newCondTrans = new CondAp( *cti, newTrans );
 			newCondTrans->key = cti->key;
 
-			tai(newTrans)->condList.append( newCondTrans );
+			newTrans->tcap()->condList.append( newCondTrans );
 
 			assert( cti->lmActionTable.length() == 0 );
 
@@ -371,7 +371,8 @@ bool MarkCompare::shouldMark( MarkIndex &markIndex, const StateAp *state1,
 int FsmAp::comparePart( TransAp *trans1, TransAp *trans2 )
 {
 	/* Use a pair iterator to get the transition pairs. */
-	ValPairIter<CondAp> outPair( tai(trans1)->condList.head, tai(trans2)->condList.head );
+	ValPairIter<CondAp> outPair( trans1->tcap()->condList.head,
+			trans2->tcap()->condList.head );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
@@ -483,11 +484,11 @@ int FsmAp::compareFullPtr( TransAp *trans1, TransAp *trans2 )
 	else if ( trans1 != 0 ) {
 		/* Both of the transition pointers are set. Test target state,
 		 * priority and funcs. */
-		if ( tai(trans1)->condList.head->toState < tai(trans2)->condList.head->toState )
+		if ( tai(trans1)->tcap()->condList.head->toState < tai(trans2)->tcap()->condList.head->toState )
 			return -1;
-		else if ( tai(trans1)->condList.head->toState > tai(trans2)->condList.head->toState )
+		else if ( tai(trans1)->tcap()->condList.head->toState > tai(trans2)->tcap()->condList.head->toState )
 			return 1;
-		else if ( tai(trans1)->condList.head->toState != 0 ) {
+		else if ( tai(trans1)->tcap()->condList.head->toState != 0 ) {
 			/* Test transition data. */
 			int compareRes = compareTransData( trans1, trans2 );
 			if ( compareRes != 0 )
@@ -512,8 +513,8 @@ bool FsmAp::shouldMarkPtr( MarkIndex &markIndex, TransAp *trans1,
 	else if ( trans1 != 0 ) {
 		/* Both of the transitions are set. If the target pair is marked, then
 		 * the pair we are considering gets marked. */
-		return markIndex.isPairMarked( tai(trans1)->condList.head->toState->alg.stateNum, 
-				tai(trans2)->condList.head->toState->alg.stateNum );
+		return markIndex.isPairMarked( tai(trans1)->tcap()->condList.head->toState->alg.stateNum, 
+				tai(trans2)->tcap()->condList.head->toState->alg.stateNum );
 	}
 
 	/* Neither of the transitiosn are set. */

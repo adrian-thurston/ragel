@@ -393,32 +393,21 @@ template <class Element> struct TransInList
 	};
 };
 
-
-/* The element for the sub-list within a TransAp. These specify the transitions
- * and are keyed by the condition expressions. */
-struct CondAp
+struct TransData
 {
-	CondAp( TransAp *transAp ) 
+	TransData() 
 	:
-		transAp(transAp), 
-		key(0), fromState(0), toState(0) 
+		fromState(0), toState(0) 
 	{}
 
-	CondAp( const CondAp &other, TransAp *transAp )
+	TransData( const TransData &other )
 	:
-		transAp(transAp),
-		key(other.key),
 		fromState(0), toState(0),
 		actionTable(other.actionTable),
 		priorTable(other.priorTable),
 		lmActionTable(other.lmActionTable)
 	{
 	}
-
-	/* Owning transition. */
-	TransAp *transAp;
-
-	CondKey key;
 
 	StateAp *fromState;
 	StateAp *toState;
@@ -428,6 +417,33 @@ struct CondAp
 	PriorTable priorTable;
 
 	LmActionTable lmActionTable;
+};
+
+
+/* The element for the sub-list within a TransAp. These specify the transitions
+ * and are keyed by the condition expressions. */
+struct CondAp
+	: public TransData
+{
+	CondAp( TransAp *transAp ) 
+	:
+		TransData(),
+		transAp(transAp), 
+		key(0)
+	{}
+
+	CondAp( const CondAp &other, TransAp *transAp )
+	:
+		TransData( other ),
+		transAp(transAp),
+		key(other.key)
+	{
+	}
+
+	/* Owning transition. */
+	TransAp *transAp;
+
+	CondKey key;
 
 	/* Pointers for outlist. */
 	CondAp *prev, *next;
@@ -437,6 +453,8 @@ struct CondAp
 };
 
 typedef DList<CondAp> CondList;
+
+struct TransCondAp;
 
 /* Transition class that implements actions and priorities. */
 struct TransAp 
@@ -458,6 +476,8 @@ struct TransAp
 		//	condList.abandon();
 	}
 
+	TransCondAp *tcap();
+
 	long condFullSize();
 
 	Key lowKey, highKey;
@@ -469,15 +489,15 @@ struct TransAp
 	TransAp *prev, *next;
 };
 
-struct TransApI
+struct TransCondAp
 	: public TransAp
 {
-	TransApI() 
+	TransCondAp() 
 	:
 		TransAp()
 	{}
 
-	TransApI( const TransApI &other )
+	TransCondAp( const TransCondAp &other )
 	:
 		TransAp( other ),
 		condList()
@@ -487,8 +507,8 @@ struct TransApI
 	CondList condList;
 };
 
-inline TransApI *tai( TransAp *trans )
-		{ return static_cast<TransApI*>( trans ); }
+inline TransCondAp *TransAp::tcap()
+		{ return static_cast<TransCondAp*>( this ); }
 
 typedef DList<TransAp> TransList;
 

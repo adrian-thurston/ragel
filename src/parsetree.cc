@@ -282,7 +282,7 @@ void LongestMatch::resolveNameRefs( ParseData *pd )
 
 void LongestMatch::restart( FsmAp *graph, TransAp *trans )
 {
-	for ( CondList::Iter cti = tai(trans)->condList; cti.lte(); cti++ ) {
+	for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
 		StateAp *fromState = cti->fromState;
 		graph->detachCondTrans( fromState, cti->toState, cti );
 		graph->attachTrans( fromState, graph->startState, cti );
@@ -305,9 +305,9 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	 * next pass we have the item set entries from all lmAction tables. */
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			if ( tai(trans)->condList.head->lmActionTable.length() > 0 ) {
-				LmActionTableEl *lmAct = tai(trans)->condList.head->lmActionTable.data;
-				StateAp *toState = tai(trans)->condList.head->toState;
+			if ( trans->tcap()->condList.head->lmActionTable.length() > 0 ) {
+				LmActionTableEl *lmAct = trans->tcap()->condList.head->lmActionTable.data;
+				StateAp *toState = trans->tcap()->condList.head->toState;
 				assert( toState );
 
 				/* Can only optimize this if there are no transitions out.
@@ -366,9 +366,9 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	 * id and set the token ending. */
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			if ( tai(trans)->condList.head->lmActionTable.length() > 0 ) {
-				LmActionTableEl *lmAct = tai(trans)->condList.head->lmActionTable.data;
-				StateAp *toState = tai(trans)->condList.head->toState;
+			if ( trans->tcap()->condList.head->lmActionTable.length() > 0 ) {
+				LmActionTableEl *lmAct = trans->tcap()->condList.head->lmActionTable.data;
+				StateAp *toState = trans->tcap()->condList.head->toState;
 				assert( toState );
 
 				/* Can only optimize this if there are no transitions out.
@@ -383,7 +383,7 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 					 * actions then it will fail because the out action will
 					 * have been transferred to an error transition, which
 					 * makes the outlist non-empty. */
-					tai(trans)->condList.head->actionTable.setAction( lmAct->key, 
+					trans->tcap()->condList.head->actionTable.setAction( lmAct->key, 
 							lmAct->value->actOnLast );
 					restartTrans.append( trans );
 				}
@@ -412,13 +412,13 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 					 * because the error action that matches the token will
 					 * require it. */
 					if ( nonFinalNonEmptyItemSet || maxItemSetLength > 1 )
-						tai(trans)->condList.head->actionTable.setAction( pd->setTokEndOrd, pd->setTokEnd );
+						trans->tcap()->condList.head->actionTable.setAction( pd->setTokEndOrd, pd->setTokEnd );
 
 					/* Some states may not know which longest match item to
 					 * execute, must set it. */
 					if ( maxItemSetLength > 1 ) {
 						/* There are transitions out, another match may come. */
-						tai(trans)->condList.head->actionTable.setAction( lmAct->key, 
+						trans->tcap()->condList.head->actionTable.setAction( lmAct->key, 
 								lmAct->value->setActId );
 					}
 				}
