@@ -387,6 +387,8 @@ void FsmAp::markReachableFromHereReverse( StateAp *state )
 	state->stateBits |= STB_ISMARKED;
 
 	/* Recurse on all items in transitions. */
+	for ( TransInList::Iter t = state->inTrans; t.lte(); t++ )
+		markReachableFromHereReverse( t->fromState );
 	for ( CondInList::Iter t = state->inCond; t.lte(); t++ )
 		markReachableFromHereReverse( t->fromState );
 }
@@ -397,6 +399,8 @@ void FsmAp::markReachableFromHereReverse( StateAp *state )
 bool FsmAp::isStartStateIsolated()
 {
 	/* If there are any in transitions then the state is not isolated. */
+	if ( startState->inTrans.head != 0 )
+		return false;
 	if ( startState->inCond.head != 0 )
 		return false;
 
@@ -445,6 +449,9 @@ void FsmAp::verifyIntegrity()
 		}
 
 		/* Walk the inlist and assert toState is correct. */
+		for ( TransInList::Iter t = state->inTrans; t.lte(); t++ ) {
+			assert( t->toState == state );
+		}
 		for ( CondInList::Iter t = state->inCond; t.lte(); t++ ) {
 			assert( t->toState == state );
 		}
