@@ -898,14 +898,14 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 		return;
 
 	RedTransAp *trans = redFsm->allocateTrans( gcs );
-	trans->outConds = outConds;
-	trans->numConds = numConds;
+	trans->v.outConds = outConds;
+	trans->v.numConds = numConds;
 
 	RedTransEl transEl( lowKey, highKey, trans );
 
 	/* If the cond list is not full then. */
 	if ( gcs != 0 && numConds < ( 1 << gcs->condSet.length() ) )
-		trans->errCond = redFsm->getErrorCond();
+		trans->v.errCond = redFsm->getErrorCond();
 
 	/* Reduced machines are complete. We need to fill any gaps with the error
 	 * transitions. */
@@ -1059,10 +1059,10 @@ void CodeGenData::setEofTrans( int snum, long eofTarget, long actId )
 	curState->eofTrans = redFsm->allocateTrans( 0 );
 	RedCondAp *cond = redFsm->allocateCond( targState, eofAct );
 
-	curState->eofTrans->outConds = new RedCondEl[1];
-	curState->eofTrans->outConds[0].key = 0;
-	curState->eofTrans->outConds[0].value = cond;
-	curState->eofTrans->numConds = 1;
+	curState->eofTrans->v.outConds = new RedCondEl[1];
+	curState->eofTrans->v.outConds[0].key = 0;
+	curState->eofTrans->v.outConds[0].value = cond;
+	curState->eofTrans->v.numConds = 1;
 
 }
 
@@ -1141,10 +1141,10 @@ void CodeGenData::actionActionRefs( RedAction *action )
 
 void CodeGenData::transActionRefs( RedTransAp *trans )
 {
-	for ( int c = 0; c < trans->numConds; c++ ) {
-		RedCondEl *cond = &trans->outConds[c];
-		if ( cond->value->action != 0 )
-			actionActionRefs( cond->value->action );
+	for ( int c = 0; c < trans->numConds(); c++ ) {
+		RedCondAp *cond = trans->outCondAp(c);
+		if ( cond->action != 0 )
+			actionActionRefs( cond->action );
 	}
 }
 
@@ -1396,9 +1396,9 @@ void CodeGenData::analyzeMachine()
 		/* Check any actions out of outSinge. */
 		for ( RedTransList::Iter rtel = st->outSingle; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			for ( int c = 0; c < trans->numConds; c++ ) {
-				RedCondEl *cond = &trans->outConds[c];
-				if ( cond->value->action != 0 && cond->value->action->anyCurStateRef() )
+			for ( int c = 0; c < trans->numConds(); c++ ) {
+				RedCondAp *cond = trans->outCondAp(c);
+				if ( cond->action != 0 && cond->action->anyCurStateRef() )
 					st->bAnyRegCurStateRef = true;
 			}
 		}
@@ -1406,9 +1406,9 @@ void CodeGenData::analyzeMachine()
 		/* Check any actions out of outRange. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			for ( int c = 0; c < trans->numConds; c++ ) {
-				RedCondEl *cond = &trans->outConds[c];
-				if ( cond->value->action != 0 && cond->value->action->anyCurStateRef() )
+			for ( int c = 0; c < trans->numConds(); c++ ) {
+				RedCondAp *cond = trans->outCondAp(c);
+				if ( cond->action != 0 && cond->action->anyCurStateRef() )
 					st->bAnyRegCurStateRef = true;
 			}
 		}
@@ -1416,9 +1416,9 @@ void CodeGenData::analyzeMachine()
 		/* Check any action out of default. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			for ( int c = 0; c < trans->numConds; c++ ) {
-				RedCondEl *cond = &trans->outConds[c];
-				if ( cond->value->action != 0 && cond->value->action->anyCurStateRef() )
+			for ( int c = 0; c < trans->numConds(); c++ ) {
+				RedCondAp *cond = trans->outCondAp(c);
+				if ( cond->action != 0 && cond->action->anyCurStateRef() )
 					st->bAnyRegCurStateRef = true;
 			}
 		}

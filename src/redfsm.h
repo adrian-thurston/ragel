@@ -190,6 +190,7 @@ struct RedAction
 	bool bAnyBreakStmt;
 	bool bUsingAct;
 };
+
 typedef AvlTree<RedAction, GenActionTable, CmpGenActionTable> GenActionTableMap;
 
 struct RedCondAp
@@ -243,8 +244,15 @@ struct GenCondSpace
 
 	GenCondSpace *next, *prev;
 };
+
 typedef DList<GenCondSpace> CondSpaceList;
 
+struct RedCondVect
+{
+	RedCondEl *outConds;
+	int numConds;
+	RedCondAp *errCond;
+};
 
 /* Reduced transition. */
 struct RedTransAp
@@ -255,11 +263,12 @@ struct RedTransAp
 	:
 		id(id),
 		labelNeeded(true),
-		condSpace(0),
-		outConds(0),
-		numConds(0),
-		errCond(0)
-	{ }
+		condSpace(0)
+	{
+		v.outConds = 0;
+		v.numConds = 0;
+		v.errCond = 0;
+	}
 
 	long condFullSize() 
 		{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
@@ -269,9 +278,14 @@ struct RedTransAp
 	bool labelNeeded;
 
 	GenCondSpace *condSpace;
-	RedCondEl *outConds;
-	int numConds;
-	RedCondAp *errCond;
+
+	RedCondVect v;
+
+	CondKey outCondKey( int off )     { return v.outConds[off].key; }
+	RedCondAp *outCondAp( int off )   { return v.outConds[off].value; }
+
+	int numConds()          { return v.numConds; }
+	RedCondAp *errCond()    { return v.errCond; }
 };
 
 /* Compare of transitions for the final reduction of transitions. Comparison
@@ -286,14 +300,14 @@ struct CmpRedTransAp
 		else if ( t1.condSpace > t2.condSpace )
 			return 1;
 		else {
-			if ( t1.numConds < t2.numConds )
+			if ( t1.v.numConds < t2.v.numConds )
 				return -1;
-			else if ( t1.numConds > t2.numConds )
+			else if ( t1.v.numConds > t2.v.numConds )
 				return 1;
 			else
 			{
-				RedCondEl *i1 = t1.outConds, *i2 = t2.outConds;
-				long len = t1.numConds, cmpResult;
+				RedCondEl *i1 = t1.v.outConds, *i2 = t2.v.outConds;
+				long len = t1.v.numConds, cmpResult;
 				for ( long pos = 0; pos < len;
 						pos += 1, i1 += 1, i2 += 1 )
 				{

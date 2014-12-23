@@ -287,7 +287,7 @@ void SwitchGotoLoop::writeExec()
 
 			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 				if ( st->eofTrans != 0 ) {
-					RedCondAp *cond = st->eofTrans->outConds[0].value;
+					RedCondAp *cond = st->eofTrans->outCondAp( 0 );
 					out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
 				}
 			}
