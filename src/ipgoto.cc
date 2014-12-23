@@ -311,8 +311,8 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 {
 	if ( trans->condSpace == 0 || trans->condSpace->condSet.length() == 0 ) {
 		/* Existing. */
-		assert( trans->outConds.length() == 1 );
-		RedCondAp *cond = trans->outConds.data[0].value;
+		assert( trans->numConds == 1 );
+		RedCondAp *cond = trans->outConds[0].value;
 		if ( cond->action != 0 ) {
 			/* Go to the transition which will go to the state. */
 			out << TABS(level) << "goto ctr" << cond->id << ";";
@@ -332,7 +332,7 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 		}
 		CondKey lower = 0;
 		CondKey upper = trans->condFullSize() - 1;
-		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->outConds.length()-1 );
+		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->numConds-1 );
 
 		if ( trans->errCond != 0 ) {
 			COND_GOTO( trans->errCond, level+1 ) << "\n";
@@ -429,7 +429,7 @@ std::ostream &IpGoto::FINISH_CASES()
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
-			RedCondAp *cond = st->eofTrans->outConds.data[0].value;
+			RedCondAp *cond = st->eofTrans->outConds[0].value;
 			out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
 		}
 	}

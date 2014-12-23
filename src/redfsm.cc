@@ -77,9 +77,10 @@ void RedFsmAp::depthFirstOrdering( RedStateAp *state )
 
 	/* Recurse on everything ranges. */
 	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
-		for ( RedCondList::Iter c = rtel->value->outConds; c.lte(); c++ ) {
-			if ( c->value->targ != 0 )
-				depthFirstOrdering( c->value->targ );
+		for ( int c = 0; c < rtel->value->numConds; c++ ) {
+			RedCondEl *cond = &rtel->value->outConds[c];
+			if ( cond->value->targ != 0 )
+				depthFirstOrdering( cond->value->targ );
 		}
 	}
 }
@@ -413,7 +414,8 @@ RedTransAp *RedFsmAp::chooseDefaultGoto( RedStateAp *state )
 	/* Make a set of transitions from the outRange. */
 	RedTransSet stateTransSet;
 	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
-		for ( RedCondList::Iter cond = rtel->value->outConds; cond.lte(); cond++ ) {
+		for ( int c = 0; c < rtel->value->numConds; c++ ) {
+			RedCondEl *cond = &rtel->value->outConds[c];
 			if ( cond->value->targ == state->next )
 				return rtel->value;
 		}
@@ -502,7 +504,10 @@ RedTransAp *RedFsmAp::getErrorTrans()
 
 		/* Give it a cond transition. */
 		RedCondAp *errCond = getErrorCond();
-		errTrans->outConds.append( RedCondEl( 0, errCond ) );
+		errTrans->outConds = new RedCondEl[1];
+		errTrans->outConds[0].key = 0;
+		errTrans->outConds[0].value = errCond;
+		errTrans->numConds = 1;
 	}
 	return errTrans;
 }

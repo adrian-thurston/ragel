@@ -219,7 +219,7 @@ void Flat::taTransOffsets()
 
 		transOffsets.value( curOffset );
 
-		curOffset += trans->outConds.length();
+		curOffset += trans->numConds;
 	}
 
 	delete[] transPtrs;
@@ -241,7 +241,7 @@ void Flat::taTransLengths()
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
-		transLengths.value( trans->outConds.length() );
+		transLengths.value( trans->numConds );
 	}
 	delete[] transPtrs;
 
@@ -262,8 +262,10 @@ void Flat::taCondKeys()
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
 
-		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+		for ( int c = 0; c < trans->numConds; c++ ) {
+			RedCondEl *cond = &trans->outConds[c];
 			condKeys.value( cond->key.getVal() );
+		}
 	}
 	delete[] transPtrs;
 
@@ -284,9 +286,9 @@ void Flat::taCondTargs()
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
 
-		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-			RedCondAp *c = cond->value;
-			condTargs.value( c->targ->id );
+		for ( int c = 0; c < trans->numConds; c++ ) {
+			RedCondEl *cond = &trans->outConds[c];
+			condTargs.value( cond->value->targ->id );
 		}
 	}
 	delete[] transPtrs;
@@ -308,9 +310,9 @@ void Flat::taCondActions()
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
 
-		for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-			RedCondAp *c = cond->value;
-			COND_ACTION( c );
+		for ( int c = 0; c < trans->numConds; c++ ) {
+			RedCondEl *cond = &trans->outConds[c];
+			COND_ACTION( cond->value );
 		}
 	}
 	delete[] transPtrs;

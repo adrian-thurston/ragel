@@ -42,8 +42,8 @@ std::ostream &Goto::TRANS_GOTO( RedTransAp *trans, int level )
 {
 	if ( trans->condSpace == 0 || trans->condSpace->condSet.length() == 0 ) {
 		/* Existing. */
-		assert( trans->outConds.length() == 1 );
-		RedCondAp *cond = trans->outConds.data[0].value;
+		assert( trans->numConds == 1 );
+		RedCondAp *cond = trans->outConds[0].value;
 
 		/* Go to the transition which will go to the state. */
 		out << TABS(level) << "goto ctr" << cond->id << ";";
@@ -58,7 +58,7 @@ std::ostream &Goto::TRANS_GOTO( RedTransAp *trans, int level )
 		}
 		CondKey lower = 0;
 		CondKey upper = trans->condFullSize() - 1;
-		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->outConds.length()-1 );
+		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->numConds-1 );
 
 		if ( trans->errCond != 0 ) {
 			COND_GOTO( trans->errCond, level+1 ) << "\n";
@@ -235,7 +235,7 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey u
 {
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
-	RedCondEl *data = trans->outConds.data;
+	RedCondEl *data = trans->outConds;
 
 	/* Determine if we need to look higher or lower. */
 	bool anyLower = mid > low;

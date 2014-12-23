@@ -253,10 +253,12 @@ public:
 	void setId( int snum, int id );
 	void setFinal( int snum );
 	void initTransList( int snum, unsigned long length );
+
 	void newTrans( int snum, int tnum, Key lowKey, Key highKey,
-			GenCondSpace *gcs, RedCondList &outConds );
-	void newCondTrans( RedCondList &outConds, 
-			int snum, CondKey key, long targ, long act );
+			GenCondSpace *gcs, RedCondEl *outConds, int numConds );
+	void newCondTrans( RedCondEl *redCondEl, int snum,
+			CondKey key, long targ, long act );
+
 	void finishTransList( int snum );
 	void setStateActions( int snum, long toStateAction, 
 			long fromStateAction, long eofAction );

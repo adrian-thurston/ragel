@@ -209,15 +209,9 @@ struct RedCondAp
 
 struct RedCondEl
 {
-	/* Constructors. */
-	RedCondEl( CondKey key, RedCondAp *value ) 
-		: key(key), value(value) { }
-
 	CondKey key;
 	RedCondAp *value;
 };
-
-typedef Vector<RedCondEl> RedCondList;
 
 struct CmpRedCondEl
 {
@@ -262,18 +256,21 @@ struct RedTransAp
 		id(id),
 		labelNeeded(true),
 		condSpace(0),
+		outConds(0),
+		numConds(0),
 		errCond(0)
 	{ }
+
+	long condFullSize() 
+		{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
 
 	int id;
 	bool partitionBoundary;
 	bool labelNeeded;
 
-	long condFullSize() 
-		{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
-
 	GenCondSpace *condSpace;
-	RedCondList outConds;
+	RedCondEl *outConds;
+	int numConds;
 	RedCondAp *errCond;
 };
 
@@ -289,8 +286,23 @@ struct CmpRedTransAp
 		else if ( t1.condSpace > t2.condSpace )
 			return 1;
 		else {
-			return CmpTable<RedCondEl, CmpRedCondEl>::compare(
-					t1.outConds, t2.outConds );
+			if ( t1.numConds < t2.numConds )
+				return -1;
+			else if ( t1.numConds > t2.numConds )
+				return 1;
+			else
+			{
+				RedCondEl *i1 = t1.outConds, *i2 = t2.outConds;
+				long len = t1.numConds, cmpResult;
+				for ( long pos = 0; pos < len;
+						pos += 1, i1 += 1, i2 += 1 )
+				{
+					cmpResult = CmpRedCondEl::compare(*i1, *i2);
+					if ( cmpResult != 0 )
+						return cmpResult;
+				}
+				return 0;
+			}
 		}
 	}
 };

@@ -283,21 +283,21 @@ void Binary::taTransOffsets()
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
 			transOffsets.value( curOffset );
-			curOffset += trans->outConds.length();
+			curOffset += trans->numConds;
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
 			transOffsets.value( curOffset );
-			curOffset += trans->outConds.length();
+			curOffset += trans->numConds;
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
 			transOffsets.value( curOffset );
-			curOffset += trans->outConds.length();
+			curOffset += trans->numConds;
 		}
 	}
 
@@ -306,7 +306,7 @@ void Binary::taTransOffsets()
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
 			transOffsets.value( curOffset );
-			curOffset += trans->outConds.length();
+			curOffset += trans->numConds;
 		}
 	}
 
@@ -321,19 +321,19 @@ void Binary::taTransLengths()
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			transLengths.value( trans->outConds.length() );
+			transLengths.value( trans->numConds );
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			transLengths.value( trans->outConds.length() );
+			transLengths.value( trans->numConds );
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			transLengths.value( trans->outConds.length() );
+			transLengths.value( trans->numConds );
 		}
 	}
 
@@ -341,7 +341,7 @@ void Binary::taTransLengths()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
-			transLengths.value( trans->outConds.length() );
+			transLengths.value( trans->numConds );
 		}
 	}
 
@@ -374,7 +374,7 @@ void Binary::taTransOffsetsWi()
 		TransApSet::Iter next = trans;
 		next.increment();
 
-		curOffset += trans->outConds.length();
+		curOffset += trans->numConds;
 	}
 
 	transOffsetsWi.finish();
@@ -385,7 +385,7 @@ void Binary::taTransLengthsWi()
 	transLengthsWi.start();
 
 	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
-		transLengthsWi.value( trans->outConds.length() );
+		transLengthsWi.value( trans->numConds );
 
 		TransApSet::Iter next = trans;
 		next.increment();
@@ -402,22 +402,28 @@ void Binary::taCondKeys()
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
 				condKeys.value( cond->key.getVal() );
+			}
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
 				condKeys.value( cond->key.getVal() );
+			}
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
 				condKeys.value( cond->key.getVal() );
+			}
 		}
 	}
 
@@ -425,8 +431,10 @@ void Binary::taCondKeys()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ )
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
 				condKeys.value( cond->key.getVal() );
+			}
 		}
 	}
 
@@ -441,27 +449,27 @@ void Binary::taCondTargs()
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				RedCondAp *c = cond->value;
-				condTargs.value( c->targ->id );
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
+				condTargs.value( cond->value->targ->id );
 			}
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				RedCondAp *c = cond->value;
-				condTargs.value( c->targ->id );
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
+				condTargs.value( cond->value->targ->id );
 			}
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				RedCondAp *c = cond->value;
-				condTargs.value( c->targ->id );
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
+				condTargs.value( cond->value->targ->id );
 			}
 		}
 	}
@@ -470,9 +478,9 @@ void Binary::taCondTargs()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				RedCondAp *c = cond->value;
-				condTargs.value( c->targ->id );
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
+				condTargs.value( cond->value->targ->id );
 			}
 		}
 	}
@@ -488,27 +496,27 @@ void Binary::taCondActions()
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				RedCondAp *c = cond->value;
-				COND_ACTION( c );
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
+				COND_ACTION( cond->value );
 			}
 		}
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				RedCondAp *c = cond->value;
-				COND_ACTION( c );
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
+				COND_ACTION( cond->value );
 			}
 		}
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				RedCondAp *c = cond->value;
-				COND_ACTION( c );
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
+				COND_ACTION( cond->value );
 			}
 		}
 	}
@@ -517,9 +525,9 @@ void Binary::taCondActions()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
-			for ( RedCondList::Iter cond = trans->outConds; cond.lte(); cond++ ) {
-				RedCondAp *c = cond->value;
-				COND_ACTION( c );
+			for ( int c = 0; c < trans->numConds; c++ ) {
+				RedCondEl *cond = &trans->outConds[c];
+				COND_ACTION( cond->value );
 			}
 		}
 	}
