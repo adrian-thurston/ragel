@@ -741,36 +741,29 @@ void FsmAp::compressTransitions()
 				/* Require there be no conditions in either of the merge
 				 * candidates. */
 				bool merge = false;
-				if ( trans->condSpace == 0 && 
-						next->condSpace == 0 && 
+				TransDataAp *td;
+				TransDataAp *tn;
+
+				if ( trans->plain() && 
+						next->plain() && 
 						ctx->keyOps->eq( trans->highKey, nextLow ) )
 				{
-					if ( trans->condSpace == 0 &&
-							next->condSpace == 0 )
+					td = trans->tdap();
+					tn = next->tdap();
+
+					/* Check the condition target and action data. */
+					if ( td->toState == tn->toState && CmpActionTable::compare(
+							td->actionTable, tn->actionTable ) == 0 )
 					{
-						assert( trans->tcap()->condList.length() == 1 );
-						assert( next->tcap()->condList.length() == 1 );
-
-						/* Check the condition target and action data. */
-						CondAp *cond = trans->tcap()->condList.head;
-						CondAp *nextCond = next->tcap()->condList.head;
-
-						if ( cond->toState == nextCond->toState &&
-								CmpActionTable::compare( cond->actionTable, 
-								nextCond->actionTable ) == 0 )
-						{
-							merge = true;
-						}
+						merge = true;
 					}
 				}
 
 				if ( merge ) {
 					trans->highKey = next->highKey;
-					st->outList.detach( next );
-					detachTrans( next->tcap()->condList.head->fromState,
-							next->tcap()->condList.head->toState,
-							next->tcap()->condList.head );
-					delete next;
+					st->outList.detach( tn );
+					detachTrans( tn->fromState, tn->toState, tn );
+					delete tn;
 					next = trans.next();
 				}
 				else {

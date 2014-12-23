@@ -120,9 +120,15 @@ void FsmAp::allTransPrior( int ordering, PriorDesc *prior )
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out list of the state. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-				if ( cond->toState != 0 )
-					cond->priorTable.setPrior( ordering, prior );
+			if ( trans->plain() ) {
+				if ( trans->tdap()->toState != 0 )
+					trans->tdap()->priorTable.setPrior( ordering, prior );
+			}
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+					if ( cond->toState != 0 )
+						cond->priorTable.setPrior( ordering, prior );
+				}
 			}
 		}
 	}

@@ -611,14 +611,20 @@ bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 			return true; 
 	}
 
-	/* Check for gaps in the condition list. */
-	if ( trans->tcap()->condList.length() < trans->condFullSize() )
-		return true;
-
-	/* Check all destinations. */
-	for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
-		if ( checkErrTrans( state, cti ) )
+	if ( trans->plain() ) {
+		if ( trans->tdap()->toState == 0 )
 			return true;
+	}
+	else {
+		/* Check for gaps in the condition list. */
+		if ( trans->tcap()->condList.length() < trans->condFullSize() )
+			return true;
+
+		/* Check all destinations. */
+		for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
+			if ( checkErrTrans( state, cti ) )
+				return true;
+		}
 	}
 
 	return false;
