@@ -198,12 +198,11 @@ struct RedCondAp
 	public AvlTreeEl<RedCondAp>
 {
 	RedCondAp( RedStateAp *targ, RedAction *action, int id )
-		: targ(targ), action(action), id(id), pos(-1) { }
+		: id(id), targ(targ), action(action) { }
 
+	int id;
 	RedStateAp *targ;
 	RedAction *action;
-	int id;
-	int pos;
 };
 
 struct RedCondEl
