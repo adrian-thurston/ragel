@@ -121,8 +121,46 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 
 void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense )
 {
-	for ( TransList::Iter tr = state->outList; tr.lte(); tr++ ) {
+	/* First replace TransDataAp with cond versions. */
+	TransList destList;
+	for ( TransList::Iter tr = state->outList; tr.lte(); ) {
+		TransList::Iter next = tr.next();
+		if ( tr->plain() ) {
+			TransDataAp *trans = tr->tdap();
 
+			/* Detach in list. */
+
+			TransCondAp *newTrans = new TransCondAp();
+			newTrans->lowKey = trans->lowKey;
+			newTrans->highKey = trans->highKey;
+			newTrans->condSpace = tr->condSpace;
+
+			CondAp *newCond = new CondAp( newTrans );
+			newCond->key = 0;
+			newTrans->condList.append( newCond );
+
+			newCond->lmActionTable.setActions( trans->lmActionTable );
+			newCond->actionTable.setActions( trans->actionTable );
+			newCond->priorTable.setPriors( trans->priorTable );
+
+			attachTrans( state, trans->toState, newCond );
+
+			detachTrans( state, trans->toState, trans );
+			delete trans;
+
+			destList.append( newTrans );
+		}
+		else {
+			destList.append( tr );
+		}
+
+		tr = next;
+	}
+
+	state->outList.abandon();
+	state->outList.transfer( destList );
+
+	for ( TransList::Iter tr = state->outList; tr.lte(); tr++ ) {
 		/* The original cond set. */
 		CondSet origCS;
 		if ( tr->condSpace != 0 )
