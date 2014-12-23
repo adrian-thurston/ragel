@@ -195,7 +195,7 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 	/* Emit any transitions that have actions and that go to this state. */
 	for ( int it = 0; it < state->numInConds; it++ ) {
 		RedCondAp *trans = state->inConds[it];
-		if ( trans->action != 0 && trans->labelNeeded ) {
+		if ( trans->action != 0 ) {
 			/* Remember that we wrote an action so we know to write the
 			 * line directive for going back to the output. */
 			anyWritten = true;

@@ -198,14 +198,13 @@ struct RedCondAp
 	public AvlTreeEl<RedCondAp>
 {
 	RedCondAp( RedStateAp *targ, RedAction *action, int id )
-		: targ(targ), action(action), id(id), pos(-1), labelNeeded(true) { }
+		: targ(targ), action(action), id(id), pos(-1) { }
 
 	RedStateAp *targ;
 	RedAction *action;
 	int id;
 	int pos;
 	bool partitionBoundary;
-	bool labelNeeded;
 };
 
 struct RedCondEl
@@ -262,7 +261,6 @@ struct RedTransAp
 	RedTransAp( int id )
 	:
 		id(id),
-		labelNeeded(true),
 		condSpace(0)
 	{
 		v.outConds = 0;
@@ -275,7 +273,6 @@ struct RedTransAp
 
 	int id;
 	bool partitionBoundary;
-	bool labelNeeded;
 
 	GenCondSpace *condSpace;
 
