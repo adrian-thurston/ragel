@@ -99,9 +99,15 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 
 	/* Walk all transitions out of the start state. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-			if ( cond->toState != 0 )
-				cond->priorTable.setPrior( ordering, prior );
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 )
+				trans->tdap()->priorTable.setPrior( ordering, prior );
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					cond->priorTable.setPrior( ordering, prior );
+			}
 		}
 	}
 
