@@ -265,14 +265,25 @@ struct RedTransAp
 :
 	public AvlTreeEl<RedTransAp>
 {
-	RedTransAp( int id )
+	RedTransAp( int id, GenCondSpace *condSpace,
+			RedCondEl *outConds, int numConds, RedCondAp *errCond )
+	:
+		id(id),
+		condSpace(condSpace)
+	{
+		v.outConds = outConds;
+		v.numConds = numConds;
+		v.errCond = errCond;
+	}
+
+	RedTransAp( int id, int condId, RedStateAp *targ, RedAction *action )
 	:
 		id(id),
 		condSpace(0)
 	{
-		v.outConds = 0;
-		v.numConds = 0;
-		v.errCond = 0;
+		p.id = condId;
+		p.targ = targ;
+		p.action = action;
 	}
 
 	long condFullSize() 
@@ -301,9 +312,11 @@ struct RedTransAp
 	}
 
 	int id;
-
 	GenCondSpace *condSpace;
-	union {
+
+	/* Either a pair or a vector of conds. */
+	union
+	{
 		RedCondPair p;
 		RedCondVect v;
 	};
@@ -641,7 +654,10 @@ struct RedFsmAp
 	/* Is every char in the alphabet covered? */
 	bool alphabetCovered( RedTransList &outRange );
 
-	RedTransAp *allocateTrans( GenCondSpace *condSpace );
+	RedTransAp *allocateTrans( RedStateAp *targ, RedAction *action );
+	RedTransAp *allocateTrans( GenCondSpace *condSpace,
+			RedCondEl *outConds, int numConds, RedCondAp *errCond );
+
 	RedCondAp *allocateCond( RedStateAp *targState, RedAction *actionTable );
 
 	void partitionFsm( int nParts );

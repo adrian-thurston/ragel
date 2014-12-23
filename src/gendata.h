@@ -162,11 +162,11 @@ private:
 	void makeEofTrans( StateAp *state );
 	void makeTransList( StateAp *state );
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
+	void newTrans( RedStateAp *state, Key lowKey, Key highKey, RedTransAp *trans );
 
 	/* Collected during parsing. */
 	int curAction;
 	int curActionTable;
-	int curTrans;
 	int curState;
 
 public:

@@ -498,14 +498,10 @@ RedTransAp *RedFsmAp::getErrorTrans()
 	if ( errTrans == 0 ) {
 		/* This insert should always succeed. No transition created by the user
 		 * can point to the error state. */
-		errTrans = new RedTransAp( nextTransId++ );
+		errTrans = new RedTransAp( nextTransId++, nextCondId++, getErrorState(), 0 );
 		RedTransAp *inTransSet = transSet.insert( errTrans );
 		assert( inTransSet != 0 );
 
-		/* Give it a cond transition. */
-		errTrans->p.id = nextCondId++;
-		errTrans->p.targ = getErrorState();
-		errTrans->p.action = 0;
 	}
 	return errTrans;
 }
@@ -518,15 +514,28 @@ RedStateAp *RedFsmAp::getErrorState()
 	return errState;
 }
 
-RedTransAp *RedFsmAp::allocateTrans( GenCondSpace *condSpace )
+/* Makes a plain transition. */
+RedTransAp *RedFsmAp::allocateTrans( RedStateAp *targ, RedAction *action )
 {
 	/* Create a reduced trans and look for it in the transiton set. */
-	RedTransAp redTrans( 0 );
-	redTrans.condSpace = condSpace;
+	RedTransAp redTrans( 0, 0, targ, action );
 	RedTransAp *inDict = transSet.find( &redTrans );
 	if ( inDict == 0 ) {
-		inDict = new RedTransAp( nextTransId++ );
-		inDict->condSpace = condSpace;
+		inDict = new RedTransAp( nextTransId++, nextCondId++, targ, action );
+		transSet.insert( inDict );
+	}
+	return inDict;
+}
+
+/* Makes a cond list transition. */
+RedTransAp *RedFsmAp::allocateTrans( GenCondSpace *condSpace,
+		RedCondEl *outConds, int numConds, RedCondAp *errCond )
+{
+	/* Create a reduced trans and look for it in the transiton set. */
+	RedTransAp redTrans( 0, condSpace, outConds, numConds, errCond );
+	RedTransAp *inDict = transSet.find( &redTrans );
+	if ( inDict == 0 ) {
+		inDict = new RedTransAp( nextTransId++, condSpace, outConds, numConds, errCond );
 		transSet.insert( inDict );
 	}
 	return inDict;

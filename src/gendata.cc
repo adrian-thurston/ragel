@@ -624,15 +624,8 @@ void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 		RedStateAp *targState = targ >= 0 ? (allStates + targ) : redFsm->getErrorState();
 		RedAction *at = action >= 0 ? (allActionTables + action) : 0;
 
-		GenCondSpace *gcs = trans->condSpace != 0 ?
-			allCondSpaces + trans->condSpace->condSpaceId : 0;
-
-		RedTransAp *trans = redFsm->allocateTrans( gcs );
-		trans->p.id = redFsm->nextCondId++;
-		trans->p.targ = targState;
-		trans->p.action = at;
-
-		newTrans( curState, curTrans++, lowKey, highKey, gcs, trans );
+		RedTransAp *trans = redFsm->allocateTrans( targState, at );
+		newTrans( allStates + curState, lowKey, highKey, trans );
 	}
 	else {
 		numConds = trans->tcap()->condList.length();
@@ -662,20 +655,22 @@ void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 			outConds[pos].value = cond;
 		}
 
-		GenCondSpace *gcs = trans->condSpace != 0 ?
-				allCondSpaces + trans->condSpace->condSpaceId : 0;
+		GenCondSpace *condSpace = allCondSpaces + trans->condSpace->condSpaceId;
+
+		/* If the cond list is not full then we need an error cond. */
+		RedCondAp *errCond = 0;
+		if ( numConds < ( 1 << condSpace->condSet.length() ) )
+			errCond = redFsm->getErrorCond();
 		
-		RedTransAp *trans = redFsm->allocateTrans( gcs );
+		RedTransAp *trans = redFsm->allocateTrans(
+				condSpace, outConds, numConds, errCond  );
+
 		trans->v.outConds = outConds;
 		trans->v.numConds = numConds;
+		trans->v.errCond = errCond;
 
-		/* If the cond list is not full then. */
-		if ( gcs != 0 && numConds < ( 1 << gcs->condSet.length() ) )
-			trans->v.errCond = redFsm->getErrorCond();
-
-		newTrans( curState, curTrans++, lowKey, highKey, gcs, trans );
+		newTrans( allStates + curState, lowKey, highKey, trans );
 	}
-
 }
 
 void CodeGenData::makeTransList( StateAp *state )
@@ -692,7 +687,6 @@ void CodeGenData::makeTransList( StateAp *state )
 	}
 
 	initTransList( curState, outList.length() );
-	curTrans = 0;
 
 	for ( TransListVect::Iter tvi = outList; tvi.lte(); tvi++ )
 		makeTrans( tvi->lowKey, tvi->highKey, tvi->value );
@@ -914,14 +908,10 @@ void CodeGenData::initTransList( int snum, unsigned long length )
 	 * nothing. */
 }
 
-void CodeGenData::newTrans( int snum, int tnum, Key lowKey, 
-		Key highKey, GenCondSpace *gcs, RedTransAp *trans )
+void CodeGenData::newTrans( RedStateAp *state, Key lowKey, Key highKey, RedTransAp *trans )
 {
 	/* Get the current state and range. */
-	RedStateAp *curState = allStates + snum;
-	RedTransList &destRange = curState->outRange;
-
-	RedTransEl transEl( lowKey, highKey, trans );
+	RedTransList &destRange = state->outRange;
 
 	/* Reduced machines are complete. We need to fill any gaps with the error
 	 * transitions. */
@@ -1023,7 +1013,7 @@ void CodeGenData::setEofTrans( int snum, long eofTarget, long actId )
 	RedStateAp *targState = allStates + eofTarget;
 	RedAction *eofAct = allActionTables + actId;
 
-	RedTransAp *trans = redFsm->allocateTrans( 0 );
+	RedTransAp *trans = redFsm->allocateTrans( targState, eofAct );
 
 	trans->condSpace = 0;
 	trans->p.id = redFsm->nextCondId++;
