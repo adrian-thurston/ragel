@@ -312,8 +312,6 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 
 	makeOutputStream();
 
-//return;
-
 	/* Generates the reduced machine, which we use to write output. */
 	generateReduced( printStatistics );
 
@@ -333,18 +331,20 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	writeOutput();
 	closeOutput();
 
-	string rlhc = dirName + "/rlhc " + 
-			origOutputFileName + " " +
-			genOutputFileName + " " +
-			hostLang->rlhcArg;
+	if ( !noIntermediate ) {
+		string rlhc = dirName + "/rlhc " + 
+				origOutputFileName + " " +
+				genOutputFileName + " " +
+				hostLang->rlhcArg;
 
-	if ( rlhcShowCmd )
-		std::cout << rlhc << std::endl;
+		if ( rlhcShowCmd )
+			std::cout << rlhc << std::endl;
 
-	int res = system( rlhc.c_str() );
-	if ( res != 0 )
-		exit( 1 );
-	//unlink( genOutputFileName.c_str() );
+		int res = system( rlhc.c_str() );
+		if ( res != 0 )
+			exit( 1 );
+		//unlink( genOutputFileName.c_str() );
+	}
 }
 
 void InputData::makeFirstInputItem()

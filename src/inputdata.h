@@ -76,6 +76,7 @@ struct InputData
 		numSplitPartitions(0),
 		rubyImpl(MRI),
 		rlhcShowCmd(false),
+		noIntermediate(false),
 		ragelFrontend(ColmBased)
 	{}
 
@@ -128,6 +129,7 @@ struct InputData
 	RubyImplEnum rubyImpl;
 
 	bool rlhcShowCmd;
+	bool noIntermediate;
 
 	RagelFrontend ragelFrontend;
 
