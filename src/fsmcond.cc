@@ -118,8 +118,7 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 	return condSpace;
 }
 
-
-void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense )
+void FsmAp::convertToCondAp( StateAp *state )
 {
 	/* First replace TransDataAp with cond versions. */
 	TransList destList;
@@ -159,6 +158,11 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 
 	state->outList.abandon();
 	state->outList.transfer( destList );
+}
+
+void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense )
+{
+	convertToCondAp( state );
 
 	for ( TransList::Iter tr = state->outList; tr.lte(); tr++ ) {
 		/* The original cond set. */

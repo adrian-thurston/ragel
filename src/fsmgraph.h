@@ -1370,6 +1370,7 @@ struct FsmAp
 	/* Set conditions. */
 	CondSpace *addCondSpace( const CondSet &condSet );
 
+	void convertToCondAp( StateAp *state );
 	void embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense );
 	void embedCondition( StateAp *state, Action *condAction, bool sense );
 
