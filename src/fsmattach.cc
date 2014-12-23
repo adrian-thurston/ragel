@@ -378,7 +378,7 @@ template< class Trans > Trans *FsmAp::fsmAttachStates( MergeData &md, StateAp *f
 
 /* Two transitions are to be crossed, handle the possibility of either going
  * to the error state. */
-template< class Trans > Trans *FsmAp::mergeTrans( MergeData &md, StateAp *from,
+template < class Trans > Trans *FsmAp::mergeTrans( MergeData &md, StateAp *from,
 			Trans *destTrans, Trans *srcTrans )
 {
 	Trans *retTrans = 0;
@@ -436,23 +436,42 @@ CondAp *FsmAp::crossCondTransitions( MergeData &md, StateAp *from, TransAp *dest
 	return retTrans;
 }
 
-TransAp *FsmAp::copyTransForExpansion( StateAp *fromState, TransAp *srcTrans )
+TransAp *FsmAp::copyTransForExpansion( StateAp *from, TransAp *srcTrans )
 {
 	/* This is the dup without the attach. */
-	TransAp *newTrans = new TransCondAp();
+	TransCondAp *newTrans = new TransCondAp();
 	newTrans->condSpace = srcTrans->condSpace;
 
-	for ( CondList::Iter sc = srcTrans->tcap()->condList; sc.lte(); sc++ ) {
-		/* Sub-transition for conditions. */
+	if ( srcTrans->plain() ) {
+		TransDataAp *srcData = srcTrans->tdap();
 		CondAp *newCond = new CondAp( newTrans );
-		newCond->key = sc->key;
+		newCond->key = 0;
 
-		attachTrans( sc->fromState, sc->toState, newCond );
-			
+		attachTrans( srcData->fromState, srcData->toState, newCond );
+				
 		/* Call the user callback to add in the original source transition. */
-		addInTrans( newCond, sc.ptr );
+		//addInTrans( newCond, srcData );
 
-		newTrans->tcap()->condList.append( newCond );
+		/* Not a copy of ourself, get the functions and priorities. */
+		newCond->lmActionTable.setActions( srcData->lmActionTable );
+		newCond->actionTable.setActions( srcData->actionTable );
+		newCond->priorTable.setPriors( srcData->priorTable );
+
+		newTrans->condList.append( newCond );
+	}
+	else {
+		for ( CondList::Iter sc = srcTrans->tcap()->condList; sc.lte(); sc++ ) {
+			/* Sub-transition for conditions. */
+			CondAp *newCond = new CondAp( newTrans );
+			newCond->key = sc->key;
+
+			attachTrans( sc->fromState, sc->toState, newCond );
+					
+			/* Call the user callback to add in the original source transition. */
+			addInTrans( newCond, sc.ptr );
+
+			newTrans->condList.append( newCond );
+		}
 	}
 
 	/* Set up the transition's keys and append to the dest list. */
@@ -473,69 +492,99 @@ void FsmAp::freeEffectiveTrans( TransAp *trans )
 	delete trans;
 }
 
+TransDataAp *FsmAp::crossTransitionsBothPlain( MergeData &md, StateAp *from,
+		TransDataAp *destTrans, TransDataAp *srcTrans )
+{
+	/* Neither have cond space and no expansion took place. Cross them. */
+	TransDataAp *retTrans;
+
+	/* Compare the priority of the dest and src transitions. */
+	int compareRes = comparePrior( destTrans->priorTable, srcTrans->priorTable );
+	if ( compareRes < 0 ) {
+		/* Src trans has a higher priority than dest, src overwrites dest.
+		 * Detach dest and return a copy of src. */
+		detachTrans( from, destTrans->toState, destTrans );
+		retTrans = dupTransData( from, srcTrans );
+	}
+	else if ( compareRes > 0 ) {
+		/* The dest trans has a higher priority, use dest. */
+		retTrans = destTrans;
+	}
+	else {
+		/* Src trans and dest trans have the same priority, they must be merged. */
+		retTrans = mergeTrans( md, from, destTrans, srcTrans );
+	}
+
+	/* Return the transition that resulted from the cross. */
+	return retTrans;
+}
+
 /* Find the trans with the higher priority. If src is lower priority then dest then
  * src is ignored. If src is higher priority than dest, then src overwrites dest. If
  * the priorities are equal, then they are merged. */
 TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 		TransAp *destTrans, TransAp *srcTrans )
 {
-	TransAp *effectiveSrcTrans = srcTrans;
+	// cerr << __PRETTY_FUNCTION__ << endl;
 
-	if ( destTrans->condSpace != srcTrans->condSpace ) {
-		effectiveSrcTrans = copyTransForExpansion( from, srcTrans );
-		expandCondTransitions( from, destTrans, effectiveSrcTrans );
-	}
-
-	if ( destTrans->plain() ) {
-		/* Neither have cond space and no expansion took place. Cross them. */
-		TransDataAp *srcData = srcTrans->tdap();
-		TransDataAp *destData = destTrans->tdap();
-		TransDataAp *retTrans;
-
-		/* Compare the priority of the dest and src transitions. */
-		int compareRes = comparePrior( destData->priorTable, srcData->priorTable );
-		if ( compareRes < 0 ) {
-			/* Src trans has a higher priority than dest, src overwrites dest.
-			 * Detach dest and return a copy of src. */
-			detachTrans( from, destData->toState, destData );
-			retTrans = dupTransData( from, srcData );
-		}
-		else if ( compareRes > 0 ) {
-			/* The dest trans has a higher priority, use dest. */
-			retTrans = destData;
-		}
-		else {
-			/* Src trans and dest trans have the same priority, they must be merged. */
-			retTrans = mergeTrans( md, from, destData, srcData );
-		}
-
+	if ( destTrans->plain() && srcTrans->plain() ) {
 		/* Return the transition that resulted from the cross. */
-		return retTrans;
+		return crossTransitionsBothPlain( md, from,
+				destTrans->tdap(), srcTrans->tdap() );
 	}
 	else {
+		/* At least one is non-empty. Target is non-empty. Need to work in
+		 * condition spaced. */
+		CondSpace *mergedSpace = expandCondSpace( destTrans, srcTrans );
+
+		/* If the dest state cond space does not equal the merged, we have to
+		 * rewrite it. If the src state cond space does not equal, we have to
+		 * copy it. */
+
+		TransAp *effSrcTrans = srcTrans;
+		
+		if ( srcTrans->condSpace != mergedSpace ) {
+			effSrcTrans = copyTransForExpansion( from, srcTrans );
+			CondSpace *orig = effSrcTrans->condSpace;
+			effSrcTrans->condSpace = mergedSpace;
+			expandConds( from, effSrcTrans, orig, mergedSpace );
+		}
+
+		if ( destTrans->condSpace != mergedSpace ) {
+			/* Make the transition into a conds transition. If dest is a plain
+			 * transition, we have to replace it with a conds transition. */
+			if ( destTrans->plain() )
+				destTrans = convertToCondAp( from, destTrans->tdap() );
+
+			/* Now expand the dest. */
+			CondSpace *orig = destTrans->condSpace;
+			destTrans->condSpace = mergedSpace;
+			expandConds( from, destTrans, orig, mergedSpace );
+		}
+
 		/* The destination list. */
 		CondList destList;
 
 		/* Set up an iterator to stop at breaks. */
 		ValPairIter<CondAp> outPair( destTrans->tcap()->condList.head,
-				effectiveSrcTrans->tcap()->condList.head );
+				effSrcTrans->tcap()->condList.head );
 		for ( ; !outPair.end(); outPair++ ) {
 			switch ( outPair.userState ) {
 			case ValPairIter<CondAp>::RangeInS1: {
 				/* The pair iter is the authority on the keys. It may have needed
 				 * to break the dest range. */
-				CondAp *destTrans = outPair.s1Tel.trans;
-				destTrans->key = outPair.s1Tel.key;
-				destList.append( destTrans );
+				CondAp *destCond = outPair.s1Tel.trans;
+				destCond->key = outPair.s1Tel.key;
+				destList.append( destCond );
 				break;
 			}
 			case ValPairIter<CondAp>::RangeInS2: {
 				/* Src range may get crossed with dest's default transition. */
-				CondAp *newTrans = dupCondTrans( from, destTrans, outPair.s2Tel.trans );
+				CondAp *newCond = dupCondTrans( from, destTrans, outPair.s2Tel.trans );
 
 				/* Set up the transition's keys and append to the dest list. */
-				newTrans->key = outPair.s2Tel.key;
-				destList.append( newTrans );
+				newCond->key = outPair.s2Tel.key;
+				destList.append( newCond );
 				break;
 			}
 			case ValPairIter<CondAp>::RangeOverlap: {
@@ -554,8 +603,8 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 		destTrans->tcap()->condList.transfer( destList );
 
 		/* Delete the duplicate. Don't detach anything. */
-		if ( srcTrans != effectiveSrcTrans )
-			freeEffectiveTrans( effectiveSrcTrans );
+		if ( srcTrans != effSrcTrans )
+			freeEffectiveTrans( effSrcTrans );
 
 		return destTrans;
 	}

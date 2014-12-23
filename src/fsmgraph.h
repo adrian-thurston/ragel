@@ -477,7 +477,7 @@ struct TransAp
 		//	condList.abandon();
 	}
 
-	bool plain()
+	bool plain() const
 		{ return condSpace == 0; }
 
 	TransCondAp *tcap();
@@ -1491,9 +1491,7 @@ struct FsmAp
 			Trans *destTrans, Trans *srcTrans );
 
 	void expandConds( StateAp *fromState, TransAp *trans,
-			const CondSet &origSet, const CondSet &mergedCS );
-	void expandCondTransitions( StateAp *fromState,
-			TransAp *destTrans, TransAp *srcTrans );
+			CondSpace *fromSpace, CondSpace *mergedSpace );
 	TransAp *copyTransForExpansion( StateAp *fromState, TransAp *srcTrans );
 	void freeEffectiveTrans( TransAp *srcTrans );
 
@@ -1506,8 +1504,12 @@ struct FsmAp
 	int comparePrior( const PriorTable &priorTable1, const PriorTable &priorTable2 );
 
 	/* Cross a src transition with one that is already occupying a spot. */
+	TransCondAp *convertToCondAp( StateAp *state, TransDataAp *trans );
+	CondSpace *expandCondSpace( TransAp *destTrans, TransAp *srcTrans );
 	TransAp *crossTransitions( MergeData &md, StateAp *from,
 			TransAp *destTrans, TransAp *srcTrans );
+	TransDataAp *crossTransitionsBothPlain( MergeData &md, StateAp *from,
+			TransDataAp *destTrans, TransDataAp *srcTrans );
 	CondAp *crossCondTransitions( MergeData &md, StateAp *from,
 			TransAp *destParent, CondAp *destTrans, CondAp *srcTrans );
 
