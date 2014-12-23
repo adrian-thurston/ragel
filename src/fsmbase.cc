@@ -384,10 +384,18 @@ void FsmAp::markReachableFromHereStopFinal( StateAp *state )
 
 	/* Recurse on all out transitions. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-			StateAp *toState = cond->toState;
+		if ( trans->plain() ) {
+			StateAp *toState = trans->tdap()->toState;
 			if ( toState != 0 && !toState->isFinState() )
 				markReachableFromHereStopFinal( toState );
+
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				StateAp *toState = cond->toState;
+				if ( toState != 0 && !toState->isFinState() )
+					markReachableFromHereStopFinal( toState );
+			}
 		}
 	}
 }
