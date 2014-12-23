@@ -58,6 +58,7 @@ protected:
 	void STATE_GOTO_ERROR();
 
 	/* Set up labelNeeded flag for each state. */
+	void setLabelsNeeded( RedCondPair *pair );
 	void setLabelsNeeded( GenInlineList *inlineList );
 	void setLabelsNeeded();
 };

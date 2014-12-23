@@ -255,9 +255,7 @@ public:
 	void initTransList( int snum, unsigned long length );
 
 	void newTrans( int snum, int tnum, Key lowKey, Key highKey,
-			GenCondSpace *gcs, RedCondEl *outConds, int numConds );
-	void newCondTrans( RedCondEl *redCondEl, int snum,
-			CondKey key, long targ, long act );
+			GenCondSpace *gcs, RedTransAp *trans );
 
 	void finishTransList( int snum );
 	void setStateActions( int snum, long toStateAction, 

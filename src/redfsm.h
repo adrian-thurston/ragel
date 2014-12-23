@@ -255,8 +255,8 @@ typedef DList<GenCondSpace> CondSpaceList;
 
 struct RedCondVect
 {
-	RedCondEl *outConds;
 	int numConds;
+	RedCondEl *outConds;
 	RedCondAp *errCond;
 };
 
@@ -276,17 +276,37 @@ struct RedTransAp
 	}
 
 	long condFullSize() 
-		{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
+	{
+		return condSpace == 0 ? 1 : condSpace->fullSize();
+	}
 
-	CondKey outCondKey( int off )     { return v.outConds[off].key; }
-	RedCondPair *outCond( int off )   { return &v.outConds[off].value->p; }
-	int numConds()                    { return v.numConds; }
-	RedCondPair *errCond()            { return v.errCond != 0 ? &v.errCond->p : 0; }
+	CondKey outCondKey( int off )
+	{
+		return condSpace == 0 ? CondKey(0) : v.outConds[off].key;
+	}
+
+	RedCondPair *outCond( int off )
+	{
+		return condSpace == 0 ? &p : &v.outConds[off].value->p;
+	}
+
+	int numConds()
+	{
+		return condSpace == 0 ? 1 : v.numConds;
+	}
+
+	RedCondPair *errCond()
+	{
+		return condSpace == 0 ? 0 : ( v.errCond != 0 ? &v.errCond->p : 0 );
+	}
 
 	int id;
 
 	GenCondSpace *condSpace;
-	RedCondVect v;
+	union {
+		RedCondPair p;
+		RedCondVect v;
+	};
 };
 
 /* Compare of transitions for the final reduction of transitions. Comparison
@@ -301,22 +321,37 @@ struct CmpRedTransAp
 		else if ( t1.condSpace > t2.condSpace )
 			return 1;
 		else {
-			if ( t1.v.numConds < t2.v.numConds )
-				return -1;
-			else if ( t1.v.numConds > t2.v.numConds )
-				return 1;
-			else
-			{
-				RedCondEl *i1 = t1.v.outConds, *i2 = t2.v.outConds;
-				long len = t1.v.numConds, cmpResult;
-				for ( long pos = 0; pos < len;
-						pos += 1, i1 += 1, i2 += 1 )
+			if ( t1.condSpace == 0 ) {
+				if ( t1.p.targ < t2.p.targ )
+					return -1;
+				else if ( t1.p.targ > t2.p.targ )
+					return 1;
+				else if ( t1.p.action < t2.p.action )
+					return -1;
+				else if ( t1.p.action > t2.p.action )
+					return 1;
+				else
+					return 0;
+
+			}
+			else {
+				if ( t1.v.numConds < t2.v.numConds )
+					return -1;
+				else if ( t1.v.numConds > t2.v.numConds )
+					return 1;
+				else
 				{
-					cmpResult = CmpRedCondEl::compare(*i1, *i2);
-					if ( cmpResult != 0 )
-						return cmpResult;
+					RedCondEl *i1 = t1.v.outConds, *i2 = t2.v.outConds;
+					long len = t1.v.numConds, cmpResult;
+					for ( long pos = 0; pos < len;
+							pos += 1, i1 += 1, i2 += 1 )
+					{
+						cmpResult = CmpRedCondEl::compare(*i1, *i2);
+						if ( cmpResult != 0 )
+							return cmpResult;
+					}
+					return 0;
 				}
-				return 0;
 			}
 		}
 	}

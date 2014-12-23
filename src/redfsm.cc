@@ -503,11 +503,9 @@ RedTransAp *RedFsmAp::getErrorTrans()
 		assert( inTransSet != 0 );
 
 		/* Give it a cond transition. */
-		RedCondAp *errCond = getErrorCond();
-		errTrans->v.outConds = new RedCondEl[1];
-		errTrans->v.outConds[0].key = 0;
-		errTrans->v.outConds[0].value = errCond;
-		errTrans->v.numConds = 1;
+		errTrans->p.id = nextCondId++;
+		errTrans->p.targ = getErrorState();
+		errTrans->p.action = 0;
 	}
 	return errTrans;
 }
@@ -519,7 +517,6 @@ RedStateAp *RedFsmAp::getErrorState()
 	assert( errState != 0 );
 	return errState;
 }
-
 
 RedTransAp *RedFsmAp::allocateTrans( GenCondSpace *condSpace )
 {
@@ -577,6 +574,11 @@ void RedFsmAp::setInTrans()
 	for ( CondApSet::Iter trans = condSet; trans.lte(); trans++ )
 		trans->p.targ->numInConds += 1;
 
+	for ( TransApSet::Iter trans = transSet; trans.lte(); trans++ ) {
+		if ( trans->condSpace == 0 ) 
+			trans->p.targ->numInConds += 1;
+	}
+
 	/* Pass over states to allocate the needed memory. Reset the counts so we
 	 * can use them as the current size. */
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
@@ -586,4 +588,9 @@ void RedFsmAp::setInTrans()
 
 	for ( CondApSet::Iter trans = condSet; trans.lte(); trans++ )
 		trans->p.targ->inConds[trans->p.targ->numInConds++] = &trans->p;
+
+	for ( TransApSet::Iter trans = transSet; trans.lte(); trans++ ) {
+		if ( trans->condSpace == 0 ) 
+			trans->p.targ->inConds[trans->p.targ->numInConds++] = &trans->p;
+	}
 }

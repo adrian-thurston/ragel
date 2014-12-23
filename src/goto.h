@@ -24,6 +24,8 @@ class Goto
 public:
 	Goto( const CodeGenArgs &args );
 
+	std::ostream &TRANSITION( RedCondPair *pair );
+
 	std::ostream &STATE_GOTOS();
 	std::ostream &TRANSITIONS();
 	std::ostream &FINISH_CASES();

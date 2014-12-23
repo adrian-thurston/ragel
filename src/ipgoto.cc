@@ -470,6 +470,24 @@ void IpGoto::setLabelsNeeded( GenInlineList *inlineList )
 	}
 }
 
+void IpGoto::setLabelsNeeded( RedCondPair *pair )
+{
+	/* If there is no action with a next statement, then the label will be
+	 * needed. */
+	if ( pair->action == 0 || !pair->action->anyNextStmt() )
+		pair->targ->labelNeeded = true;
+
+	/* Need labels for states that have goto or calls in action code
+	 * invoked on characters (ie, not from out action code). */
+	if ( pair->action != 0 ) {
+		/* Loop the actions. */
+		for ( GenActionTable::Iter act = pair->action->key; act.lte(); act++ ) {
+			/* Get the action and walk it's tree. */
+			setLabelsNeeded( act->value->inlineList );
+		}
+	}
+}
+
 /* Set up labelNeeded flag for each state. */
 void IpGoto::setLabelsNeeded()
 {
@@ -484,22 +502,13 @@ void IpGoto::setLabelsNeeded()
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 			st->labelNeeded = false;
 
-		for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ ) {
-			/* If there is no action with a next statement, then the label will be
-			 * needed. */
-			if ( cond->p.action == 0 || !cond->p.action->anyNextStmt() )
-				cond->p.targ->labelNeeded = true;
-
-			/* Need labels for states that have goto or calls in action code
-			 * invoked on characters (ie, not from out action code). */
-			if ( cond->p.action != 0 ) {
-				/* Loop the actions. */
-				for ( GenActionTable::Iter act = cond->p.action->key; act.lte(); act++ ) {
-					/* Get the action and walk it's tree. */
-					setLabelsNeeded( act->value->inlineList );
-				}
-			}
+		for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
+			if ( trans->condSpace == 0 )
+				setLabelsNeeded( &trans->p );
 		}
+
+		for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ )
+			setLabelsNeeded( &cond->p );
 	}
 
 	if ( !noEnd ) {

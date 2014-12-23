@@ -366,26 +366,36 @@ std::ostream &Goto::STATE_GOTOS()
 	return out;
 }
 
+std::ostream &Goto::TRANSITION( RedCondPair *pair )
+{
+	/* Write the label for the transition so it can be jumped to. */
+	out << "	ctr" << pair->id << ": ";
+
+	/* Destination state. */
+	if ( pair->action != 0 && pair->action->anyCurStateRef() )
+		out << "_ps = " << vCS() << ";";
+	out << vCS() << " = " << pair->targ->id << "; ";
+
+	if ( pair->action != 0 ) {
+		/* Write out the transition func. */
+		out << "goto f" << pair->action->actListId << ";\n";
+	}
+	else {
+		/* No code to execute, just loop around. */
+		out << "goto _again;\n";
+	}
+}
+
 std::ostream &Goto::TRANSITIONS()
 {
-	for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ ) {
-		/* Write the label for the transition so it can be jumped to. */
-		out << "	ctr" << cond->p.id << ": ";
-
-		/* Destination state. */
-		if ( cond->p.action != 0 && cond->p.action->anyCurStateRef() )
-			out << "_ps = " << vCS() << ";";
-		out << vCS() << " = " << cond->p.targ->id << "; ";
-
-		if ( cond->p.action != 0 ) {
-			/* Write out the transition func. */
-			out << "goto f" << cond->p.action->actListId << ";\n";
-		}
-		else {
-			/* No code to execute, just loop around. */
-			out << "goto _again;\n";
-		}
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
+		if ( trans->condSpace == 0 )
+			TRANSITION( &trans->p );
 	}
+
+	for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ )
+		TRANSITION( &cond->p );
+
 	return out;
 }
 
