@@ -60,7 +60,7 @@ template< class Head > void FsmAp::detachFromInList( StateAp *from, StateAp *to,
 	}
 }
 
-CondAp *FsmAp::attachNewTrans( TransAp *trans, StateAp *from, StateAp *to, CondKey onChar )
+CondAp *FsmAp::attachNewCond( TransAp *trans, StateAp *from, StateAp *to, CondKey onChar )
 {
 	/* Sub-transition for conditions. */
 	CondAp *condAp = new CondAp( trans );
@@ -131,6 +131,17 @@ void FsmAp::attachTrans( StateAp *from, StateAp *to, CondAp *trans )
 /* Redirect a transition away from error and towards some state. This is just
  * like attachTrans except it requires fromState to be set and does not touch
  * it. */
+void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, TransDataAp *trans )
+{
+	assert( trans->fromState != 0 && trans->toState == 0 );
+	trans->toState = to;
+
+	if ( to != 0 ) {
+		/* Attach using the inList pointer as the head pointer. */
+		attachToInList( from, to, to->inTrans.head, trans );
+	}
+}
+
 void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans )
 {
 	assert( trans->fromState != 0 && trans->toState == 0 );

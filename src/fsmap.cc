@@ -326,14 +326,18 @@ void FsmAp::fillGaps( StateAp *state )
 	 * Second pass fills in gaps in condition lists.
 	 */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		if ( trans->plain() )
+			continue;
+
 		CondList srcList;
 		srcList.transfer( trans->tcap()->condList );
 
 		CondList::Iter cond = srcList, next;
 
+		/* Check for gap at the beginning. */
 		if ( cond->key > 0 ) {
 			for ( CondKey key = 0; key < cond->key; key.increment() )
-				attachNewTrans( trans, state, 0, key );
+				attachNewCond( trans, state, 0, key );
 		}
 
 		next = cond.next();
@@ -349,7 +353,7 @@ void FsmAp::fillGaps( StateAp *state )
 			/* Check for a gap from last up to here. */
 			if ( nextKey < cond->key ) {
 				for ( CondKey key = nextKey; key < cond->key; key.increment() )
-					attachNewTrans( trans, state, 0, key );
+					attachNewCond( trans, state, 0, key );
 			}
 
 			next = cond.next();
@@ -367,7 +371,7 @@ void FsmAp::fillGaps( StateAp *state )
 			lastKey.increment();
 
 			for ( CondKey key = lastKey; key < high; key.increment() )
-				attachNewTrans( trans, state, 0, key );
+				attachNewCond( trans, state, 0, key );
 		}
 	}
 }
@@ -393,9 +397,15 @@ void FsmAp::setErrorAction( StateAp *state, int ordering, Action *action )
 
 	/* Set error transitions in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-			if ( cond->toState == 0 )
-				cond->actionTable.setAction( ordering, action );
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState == 0 )
+				trans->tdap()->actionTable.setAction( ordering, action );
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState == 0 )
+					cond->actionTable.setAction( ordering, action );
+			}
 		}
 	}
 }
@@ -410,11 +420,20 @@ void FsmAp::setErrorTarget( StateAp *state, StateAp *target, int *orderings,
 
 	/* Set error target in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-			if ( cond->toState == 0 ) {
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState == 0 ) {
 				/* The trans goes to error, redirect it. */
-				redirectErrorTrans( cond->fromState, target, cond );
-				cond->actionTable.setActions( orderings, actions, nActs );
+				redirectErrorTrans( trans->tdap()->fromState, target, trans->tdap() );
+				trans->tdap()->actionTable.setActions( orderings, actions, nActs );
+			}
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState == 0 ) {
+					/* The trans goes to error, redirect it. */
+					redirectErrorTrans( cond->fromState, target, cond );
+					cond->actionTable.setActions( orderings, actions, nActs );
+				}
 			}
 		}
 	}

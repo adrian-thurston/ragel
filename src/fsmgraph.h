@@ -1458,16 +1458,17 @@ struct FsmAp
 			StateAp *to, Head *&head, Head *trans );
 
 	/* Attach with a new transition. */
+	CondAp *attachNewCond( TransAp *trans, StateAp *from,
+			StateAp *to, CondKey onChar );
 	TransAp *attachNewTrans( StateAp *from, StateAp *to,
 			Key onChar1, Key onChar2 );
-	CondAp *attachNewTrans( TransAp *trans, StateAp *from,
-			StateAp *to, CondKey onChar );
 
 	/* Attach with an existing transition that already in an out list. */
 	void attachTrans( StateAp *from, StateAp *to, TransDataAp *trans );
 	void attachTrans( StateAp *from, StateAp *to, CondAp *trans );
 	
 	/* Redirect a transition away from error and towards some state. */
+	void redirectErrorTrans( StateAp *from, StateAp *to, TransDataAp *trans );
 	void redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans );
 
 	/* Detach a transition from a target state. */
