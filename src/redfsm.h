@@ -204,7 +204,6 @@ struct RedCondAp
 	RedAction *action;
 	int id;
 	int pos;
-	bool partitionBoundary;
 };
 
 struct RedCondEl
@@ -272,7 +271,6 @@ struct RedTransAp
 		{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
 
 	int id;
-	bool partitionBoundary;
 
 	GenCondSpace *condSpace;
 
