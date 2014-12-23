@@ -98,7 +98,7 @@ void BinaryGotoLoop::genAnalysis()
 }
 
 
-void BinaryGotoLoop::COND_ACTION( RedCondAp *cond )
+void BinaryGotoLoop::COND_ACTION( RedCondPair *cond )
 {
 	int act = 0;
 	if ( cond->action != 0 )

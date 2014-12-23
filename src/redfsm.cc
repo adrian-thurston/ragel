@@ -78,7 +78,7 @@ void RedFsmAp::depthFirstOrdering( RedStateAp *state )
 	/* Recurse on everything ranges. */
 	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
 		for ( int c = 0; c < rtel->value->numConds(); c++ ) {
-			RedCondAp *cond = rtel->value->outCondAp(c);
+			RedCondPair *cond = rtel->value->outCond( c );
 			if ( cond->targ != 0 )
 				depthFirstOrdering( cond->targ );
 		}
@@ -415,7 +415,7 @@ RedTransAp *RedFsmAp::chooseDefaultGoto( RedStateAp *state )
 	RedTransSet stateTransSet;
 	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
 		for ( int c = 0; c < rtel->value->numConds(); c++ ) {
-			RedCondAp *cond = rtel->value->outCondAp(c);
+			RedCondPair *cond = rtel->value->outCond(c);
 			if ( cond->targ == state->next )
 				return rtel->value;
 		}
@@ -575,15 +575,15 @@ void RedFsmAp::setInTrans()
 {
 	/* First pass counts the number of transitions. */
 	for ( CondApSet::Iter trans = condSet; trans.lte(); trans++ )
-		trans->targ->numInConds += 1;
+		trans->p.targ->numInConds += 1;
 
 	/* Pass over states to allocate the needed memory. Reset the counts so we
 	 * can use them as the current size. */
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		st->inConds = new RedCondAp*[st->numInConds];
+		st->inConds = new RedCondPair*[st->numInConds];
 		st->numInConds = 0;
 	}
 
 	for ( CondApSet::Iter trans = condSet; trans.lte(); trans++ )
-		trans->targ->inConds[trans->targ->numInConds++] = trans;
+		trans->p.targ->inConds[trans->p.targ->numInConds++] = &trans->p;
 }

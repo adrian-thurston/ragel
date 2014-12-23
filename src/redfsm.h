@@ -193,16 +193,25 @@ struct RedAction
 
 typedef AvlTree<RedAction, GenActionTable, CmpGenActionTable> GenActionTableMap;
 
+struct RedCondPair
+{
+	int id;
+	RedStateAp *targ;
+	RedAction *action;
+};
+
 struct RedCondAp
 :
 	public AvlTreeEl<RedCondAp>
 {
 	RedCondAp( RedStateAp *targ, RedAction *action, int id )
-		: id(id), targ(targ), action(action) { }
+	{
+		p.id = id;
+		p.targ = targ;
+		p.action = action;
+	}
 
-	int id;
-	RedStateAp *targ;
-	RedAction *action;
+	RedCondPair p;
 };
 
 struct RedCondEl
@@ -269,17 +278,15 @@ struct RedTransAp
 	long condFullSize() 
 		{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
 
+	CondKey outCondKey( int off )     { return v.outConds[off].key; }
+	RedCondPair *outCond( int off )   { return &v.outConds[off].value->p; }
+	int numConds()                    { return v.numConds; }
+	RedCondPair *errCond()            { return v.errCond != 0 ? &v.errCond->p : 0; }
+
 	int id;
 
 	GenCondSpace *condSpace;
-
 	RedCondVect v;
-
-	CondKey outCondKey( int off )     { return v.outConds[off].key; }
-	RedCondAp *outCondAp( int off )   { return v.outConds[off].value; }
-
-	int numConds()          { return v.numConds; }
-	RedCondAp *errCond()    { return v.errCond; }
 };
 
 /* Compare of transitions for the final reduction of transitions. Comparison
@@ -319,13 +326,13 @@ struct CmpRedCondAp
 {
 	static int compare( const RedCondAp &t1, const RedCondAp &t2 )
 	{
-		if ( t1.targ < t2.targ )
+		if ( t1.p.targ < t2.p.targ )
 			return -1;
-		else if ( t1.targ > t2.targ )
+		else if ( t1.p.targ > t2.p.targ )
 			return 1;
-		else if ( t1.action < t2.action )
+		else if ( t1.p.action < t2.p.action )
 			return -1;
-		else if ( t1.action > t2.action )
+		else if ( t1.p.action > t2.p.action )
 			return 1;
 		else
 			return 0;
@@ -451,7 +458,7 @@ struct RedStateAp
 	int partition;
 	bool partitionBoundary;
 
-	RedCondAp **inConds;
+	RedCondPair **inConds;
 	int numInConds;
 };
 

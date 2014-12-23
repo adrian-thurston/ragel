@@ -287,7 +287,7 @@ void Flat::taCondTargs()
 		RedTransAp *trans = transPtrs[t];
 
 		for ( int c = 0; c < trans->numConds(); c++ ) {
-			RedCondAp *cond = trans->outCondAp( c );
+			RedCondPair *cond = trans->outCond( c );
 			condTargs.value( cond->targ->id );
 		}
 	}
@@ -311,7 +311,7 @@ void Flat::taCondActions()
 		RedTransAp *trans = transPtrs[t];
 
 		for ( int c = 0; c < trans->numConds(); c++ ) {
-			RedCondAp *cond = trans->outCondAp( c );
+			RedCondPair *cond = trans->outCond( c );
 			COND_ACTION( cond );
 		}
 	}

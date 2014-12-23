@@ -31,7 +31,7 @@ void Goto::setTableState( TableArray::State state )
 
 
 /* Emit the goto to take for a given transition. */
-std::ostream &Goto::COND_GOTO( RedCondAp *cond, int level )
+std::ostream &Goto::COND_GOTO( RedCondPair *cond, int level )
 {
 	out << TABS(level) << "goto ctr" << cond->id << ";";
 	return out;
@@ -43,7 +43,7 @@ std::ostream &Goto::TRANS_GOTO( RedTransAp *trans, int level )
 	if ( trans->condSpace == 0 || trans->condSpace->condSet.length() == 0 ) {
 		/* Existing. */
 		assert( trans->numConds() == 1 );
-		RedCondAp *cond = trans->outCondAp( 0 );
+		RedCondPair *cond = trans->outCond( 0 );
 
 		/* Go to the transition which will go to the state. */
 		out << TABS(level) << "goto ctr" << cond->id << ";";
@@ -242,7 +242,7 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey u
 	bool anyHigher = mid < high;
 
 	CondKey midKey = trans->outCondKey( mid );
-	RedCondAp *midTrans = trans->outCondAp( mid );
+	RedCondPair *midTrans = trans->outCond( mid );
 
 	/* Determine if the keys at mid are the limits of the alphabet. */
 	bool limitLow = midKey == lower;
@@ -370,16 +370,16 @@ std::ostream &Goto::TRANSITIONS()
 {
 	for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ ) {
 		/* Write the label for the transition so it can be jumped to. */
-		out << "	ctr" << cond->id << ": ";
+		out << "	ctr" << cond->p.id << ": ";
 
 		/* Destination state. */
-		if ( cond->action != 0 && cond->action->anyCurStateRef() )
+		if ( cond->p.action != 0 && cond->p.action->anyCurStateRef() )
 			out << "_ps = " << vCS() << ";";
-		out << vCS() << " = " << cond->targ->id << "; ";
+		out << vCS() << " = " << cond->p.targ->id << "; ";
 
-		if ( cond->action != 0 ) {
+		if ( cond->p.action != 0 ) {
 			/* Write out the transition func. */
-			out << "goto f" << cond->action->actListId << ";\n";
+			out << "goto f" << cond->p.action->actListId << ";\n";
 		}
 		else {
 			/* No code to execute, just loop around. */

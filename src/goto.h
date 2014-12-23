@@ -65,7 +65,7 @@ public:
 
 	void setTableState( TableArray::State );
 
-	virtual std::ostream &COND_GOTO( RedCondAp *trans, int level );
+	virtual std::ostream &COND_GOTO( RedCondPair *trans, int level );
 
 	string CKEY( CondKey key );
 	void COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey upper, int low, int high);

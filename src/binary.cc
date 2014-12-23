@@ -450,7 +450,7 @@ void Binary::taCondTargs()
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
 			for ( int c = 0; c < trans->numConds(); c++ ) {
-				RedCondAp *cond = trans->outCondAp( c );
+				RedCondPair *cond = trans->outCond( c );
 				condTargs.value( cond->targ->id );
 			}
 		}
@@ -459,7 +459,7 @@ void Binary::taCondTargs()
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
 			for ( int c = 0; c < trans->numConds(); c++ ) {
-				RedCondAp *cond = trans->outCondAp( c );
+				RedCondPair *cond = trans->outCond( c );
 				condTargs.value( cond->targ->id );
 			}
 		}
@@ -468,7 +468,7 @@ void Binary::taCondTargs()
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
 			for ( int c = 0; c < trans->numConds(); c++ ) {
-				RedCondAp *cond = trans->outCondAp( c );
+				RedCondPair *cond = trans->outCond( c );
 				condTargs.value( cond->targ->id );
 			}
 		}
@@ -479,7 +479,7 @@ void Binary::taCondTargs()
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
 			for ( int c = 0; c < trans->numConds(); c++ ) {
-				RedCondAp *cond = trans->outCondAp( c );
+				RedCondPair *cond = trans->outCond( c );
 				condTargs.value( cond->targ->id );
 			}
 		}
@@ -497,7 +497,7 @@ void Binary::taCondActions()
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
 			RedTransAp *trans = stel->value;
 			for ( int c = 0; c < trans->numConds(); c++ ) {
-				RedCondAp *cond = trans->outCondAp( c );
+				RedCondPair *cond = trans->outCond( c );
 				COND_ACTION( cond );
 			}
 		}
@@ -506,7 +506,7 @@ void Binary::taCondActions()
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			RedTransAp *trans = rtel->value;
 			for ( int c = 0; c < trans->numConds(); c++ ) {
-				RedCondAp *cond = trans->outCondAp( c );
+				RedCondPair *cond = trans->outCond( c );
 				COND_ACTION( cond );
 			}
 		}
@@ -515,7 +515,7 @@ void Binary::taCondActions()
 		if ( st->defTrans != 0 ) {
 			RedTransAp *trans = st->defTrans;
 			for ( int c = 0; c < trans->numConds(); c++ ) {
-				RedCondAp *cond = trans->outCondAp(c);
+				RedCondPair *cond = trans->outCond(c);
 				COND_ACTION( cond );
 			}
 		}
@@ -526,7 +526,7 @@ void Binary::taCondActions()
 		if ( st->eofTrans != 0 ) {
 			RedTransAp *trans = st->eofTrans;
 			for ( int c = 0; c < trans->numConds(); c++ ) {
-				RedCondAp *cond = trans->outCondAp(c);
+				RedCondPair *cond = trans->outCond(c);
 				COND_ACTION( cond );
 			}
 		}

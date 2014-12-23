@@ -266,7 +266,7 @@ void SwitchGotoExp::writeExec()
 
 			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 				if ( st->eofTrans != 0 ) {
-					RedCondAp *cond = st->eofTrans->outCondAp( 0 );
+					RedCondPair *cond = st->eofTrans->outCond( 0 );
 					out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
 				}
 			}
