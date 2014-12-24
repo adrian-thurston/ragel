@@ -71,6 +71,31 @@ void asmLineDirective( ostream &out, const char *fileName, int line )
 #endif
 }
 
+void AsmCodeGen::genAnalysis()
+{
+	/* For directly executable machines there is no required state
+	 * ordering. Choose a depth-first ordering to increase the
+	 * potential for fall-throughs. */
+	redFsm->depthFirstOrdering();
+
+	/* Choose default transitions and the single transition. */
+	redFsm->chooseDefaultSpan();
+		
+	/* Choose single. */
+	redFsm->chooseSingle();
+
+	/* If any errors have occured in the input file then don't write anything. */
+	if ( gblErrorCount > 0 )
+		return;
+	
+	redFsm->setInTrans();
+
+	/* Anlayze Machine will find the final action reference counts, among other
+	 * things. We will use these in reporting the usage of fsm directives in
+	 * action code. */
+	analyzeMachine();
+}
+
 void AsmCodeGen::statsSummary()
 {
 //	if ( printStatistics )

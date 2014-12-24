@@ -86,6 +86,7 @@ void usage()
 "   -A                   The host language is C#\n"
 "   -O                   The host language is OCaml\n"
 "   -K                   The host language is Crack\n"
+"   --asm                The host language is x86 64 GASM\n"
 "line directives: (C/D/Ruby/C#/OCaml)\n"
 "   -L                   Inhibit writing of #line directives\n"
 "code style:\n"
@@ -352,6 +353,8 @@ void InputData::parseArgs( int argc, const char **argv )
 					ragelFrontend = KelbtBased;
 				else if ( strcmp( arg, "frontend-colm" ) == 0 )
 					ragelFrontend = ColmBased;
+				else if ( strcmp( arg, "asm" ) == 0 )
+					hostLang = &hostLangAsm;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

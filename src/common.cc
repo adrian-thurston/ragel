@@ -99,6 +99,7 @@ const HostLang hostLangRuby =   { HostLang::Ruby,   hostTypesRuby,   2,  hostTyp
 const HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9,  hostTypesCSharp+4,  true,  "csharp"   };
 const HostLang hostLangOCaml =  { HostLang::OCaml,  hostTypesOCaml,  1,  hostTypesOCaml+0,   false, "ocaml"  };
 const HostLang hostLangCrack =  { HostLang::Crack,  hostTypesCrack,  5,  hostTypesCrack+0,   true,  "no-lang"  };
+const HostLang hostLangAsm =    { HostLang::Asm,    hostTypesC,      8,  hostTypesC+0,       true,  "asm"  };
 
 HostType *findAlphType( const HostLang *hostLang, const char *s1 )
 {

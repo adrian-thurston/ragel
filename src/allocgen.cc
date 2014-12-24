@@ -14,6 +14,7 @@
  */
 #include "xml.h"
 
+#include "binvarloop.h"
 #include "bingotoloop.h"
 #include "bingotoexp.h"
 #include "flatgotoloop.h"
@@ -21,8 +22,7 @@
 #include "switchgotoloop.h"
 #include "switchgotoexp.h"
 #include "ipgoto.h"
-
-#include "binvarloop.h"
+#include "asm.h"
 
 using std::cerr;
 using std::endl;
@@ -40,53 +40,58 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
 
-	switch ( args.codeStyle ) {
+	if ( hostLang->lang == HostLang::Asm ) {
+		codeGen = new AsmCodeGen( args );
+	}
+	else {
+		switch ( args.codeStyle ) {
 
-	case GenBinaryLoop:
-		if ( langSupportsGoto( hostLang ) )
-			codeGen = new BinaryGotoLoop(args);
-		else
-			codeGen = new BinaryVarLoop(args);
-		break;
-	case GenBinaryExp:
-		if ( langSupportsGoto( hostLang ) )
-			codeGen = new BinaryGotoExp(args);
-		else
-			std::cerr << "unsupported lang/style combination" << endp;
-		break;
+		case GenBinaryLoop:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new BinaryGotoLoop(args);
+			else
+				codeGen = new BinaryVarLoop(args);
+			break;
+		case GenBinaryExp:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new BinaryGotoExp(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
 
-	case GenFlatLoop:
-		if ( langSupportsGoto( hostLang ) )
-			codeGen = new FlatGotoLoop(args);
-		else
-			std::cerr << "unsupported lang/style combination" << endp;
-		break;
-	case GenFlatExp:
-		if ( langSupportsGoto( hostLang ) )
-			codeGen = new FlatGotoExp(args);
-		else
-			std::cerr << "unsupported lang/style combination" << endp;
-		break;
+		case GenFlatLoop:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new FlatGotoLoop(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
+		case GenFlatExp:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new FlatGotoExp(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
 
-	case GenSwitchLoop:
-		if ( langSupportsGoto( hostLang ) )
-			codeGen = new SwitchGotoLoop(args);
-		else
-			std::cerr << "unsupported lang/style combination" << endp;
-		break;
-	case GenSwitchExp:
-		if ( langSupportsGoto( hostLang ) )
-			codeGen = new SwitchGotoExp(args);
-		else
-			std::cerr << "unsupported lang/style combination" << endp;
-		break;
+		case GenSwitchLoop:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new SwitchGotoLoop(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
+		case GenSwitchExp:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new SwitchGotoExp(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
 
-	case GenIpGoto:
-		if ( langSupportsGoto( hostLang ) )
-			codeGen = new IpGoto(args);
-		else
-			std::cerr << "unsupported lang/style combination" << endp;
-		break;
+		case GenIpGoto:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new IpGoto(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
+		}
 	}
 
 	return codeGen;

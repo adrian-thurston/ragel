@@ -72,6 +72,7 @@ public:
 	virtual void writeError();
 
 	virtual void statsSummary();
+	virtual void genAnalysis();
 
 protected:
 	string FSM_NAME();

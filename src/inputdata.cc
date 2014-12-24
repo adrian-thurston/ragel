@@ -99,6 +99,11 @@ void InputData::crackDefaultFileName( const char *inputFile )
 		outputFileName = fileNameFromStem( inputFile, ".crk" );
 }
 
+void InputData::asmDefaultFileName( const char *inputFile )
+{
+    if ( outputFileName == 0 )
+        outputFileName = fileNameFromStem( inputFile, ".s" );
+}
 
 void InputData::makeDefaultFileName()
 {
@@ -125,7 +130,9 @@ void InputData::makeDefaultFileName()
 		case HostLang::Crack:
 			crackDefaultFileName( inputFileName );
 			break;
-
+		case HostLang::Asm:
+			asmDefaultFileName( inputFileName );
+			break;
 	}
 }
 
@@ -306,9 +313,13 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 
 	makeDefaultFileName();
 
-	origOutputFileName = outputFileName;
-	genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
-	outputFileName = genOutputFileName.c_str();
+	if ( hostLang->lang == HostLang::Asm ) {
+	}
+	else {
+		origOutputFileName = outputFileName;
+		genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
+		outputFileName = genOutputFileName.c_str();
+	}
 
 	makeOutputStream();
 
@@ -331,19 +342,23 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	writeOutput();
 	closeOutput();
 
-	if ( !noIntermediate ) {
-		string rlhc = dirName + "/rlhc " + 
-				origOutputFileName + " " +
-				genOutputFileName + " " +
-				hostLang->rlhcArg;
+	if ( hostLang->lang == HostLang::Asm ) {
+	}
+	else {
+		if ( !noIntermediate ) {
+			string rlhc = dirName + "/rlhc " + 
+					origOutputFileName + " " +
+					genOutputFileName + " " +
+					hostLang->rlhcArg;
 
-		if ( rlhcShowCmd )
-			std::cout << rlhc << std::endl;
+			if ( rlhcShowCmd )
+				std::cout << rlhc << std::endl;
 
-		int res = system( rlhc.c_str() );
-		if ( res != 0 )
-			exit( 1 );
-		//unlink( genOutputFileName.c_str() );
+			int res = system( rlhc.c_str() );
+			if ( res != 0 )
+				exit( 1 );
+			//unlink( genOutputFileName.c_str() );
+		}
 	}
 }
 
