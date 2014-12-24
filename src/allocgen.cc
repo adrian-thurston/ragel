@@ -36,7 +36,7 @@ bool langSupportsGoto( const HostLang *hostLang )
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args, bool directBackend )
+CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
 

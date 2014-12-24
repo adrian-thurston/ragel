@@ -49,6 +49,8 @@ using std::endl;
 using std::ios;
 using std::streamsize;
 
+bool directBackend = false;
+
 /* Print a summary of the options. */
 void usage()
 {

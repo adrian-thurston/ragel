@@ -27,8 +27,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-bool directBackend;
-
 TableArray::TableArray( const char *name, CodeGen &codeGen )
 :
 	state(InitialState),
@@ -104,37 +102,72 @@ void TableArray::finishAnalyze()
 
 void TableArray::startGenerate()
 {
-	out << "array " << type << " " << 
-		"_" << codeGen.DATA_PREFIX() << name << 
-		"( " << min << ", " << max << " ) = {\n\t";
+	if ( directBackend ) {
+		out << "static const " << type << " " << 
+			"_" << codeGen.DATA_PREFIX() << name << 
+			"[] = {\n\t";
+	}
+	else {
+		out << "array " << type << " " << 
+			"_" << codeGen.DATA_PREFIX() << name << 
+			"( " << min << ", " << max << " ) = {\n\t";
+	}
 }
 
 void TableArray::valueGenerate( long long v )
 {
-	if ( isChar )
-		out << "c(" << v << ")";
-	else if ( !isSigned )
-		out << "u(" << v << ")";
-	else
-		out << v;
+	if ( directBackend ) {
+		if ( isChar )
+			out << "c(" << v << ")";
+		else if ( !isSigned )
+			out << v << "u";
+		else
+			out << v;
 
-	if ( ( ++ln % IALL ) == 0 ) {
-		out << ",\n\t";
-		ln = 0;
+		if ( ( ++ln % IALL ) == 0 ) {
+			out << ",\n\t";
+			ln = 0;
+		}
+		else {
+			out << ", ";
+		}
 	}
 	else {
-		out << ", ";
+		if ( isChar )
+			out << "c(" << v << ")";
+		else if ( !isSigned )
+			out << "u(" << v << ")";
+		else
+			out << v;
+
+		if ( ( ++ln % IALL ) == 0 ) {
+			out << ",\n\t";
+			ln = 0;
+		}
+		else {
+			out << ", ";
+		}
 	}
 }
 
 void TableArray::finishGenerate()
 {
-	if ( isChar )
-		out << "c(0)\n};\n\n";
-	else if ( !isSigned )
-		out << "u(0)\n};\n\n";
-	else
-		out << "0\n};\n\n";
+	if ( directBackend ) {
+		if ( isChar )
+			out << "c(0)\n};\n\n";
+		else if ( !isSigned )
+			out << "0u\n};\n\n";
+		else
+			out << "0\n};\n\n";
+	}
+	else {
+		if ( isChar )
+			out << "c(0)\n};\n\n";
+		else if ( !isSigned )
+			out << "u(0)\n};\n\n";
+		else
+			out << "0\n};\n\n";
+	}
 }
 
 void TableArray::start()

@@ -1436,7 +1436,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 			this, sectionGraph, codeStyle, out );
 
 	/* Write out with it. */
-	cgd = makeCodeGen( hostLang, args, id->directBackend );
+	cgd = makeCodeGen( hostLang, args );
 
 	cgd->make( hostLang );
 

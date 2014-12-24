@@ -46,6 +46,8 @@ typedef DList<Parser6> ParserList;
 typedef DList<InputItem> InputItemList;
 typedef Vector<const char *> ArgsVector;
 
+extern bool directBackend;
+
 struct InputData
 {
 	enum RagelFrontend
@@ -77,8 +79,7 @@ struct InputData
 		rubyImpl(MRI),
 		rlhcShowCmd(false),
 		noIntermediate(false),
-		ragelFrontend(ColmBased),
-		directBackend(false)
+		ragelFrontend(ColmBased)
 	{}
 
 	std::string dirName;
@@ -133,7 +134,6 @@ struct InputData
 	bool noIntermediate;
 
 	RagelFrontend ragelFrontend;
-	bool directBackend;
 
 	void verifyWritesHaveData();
 
