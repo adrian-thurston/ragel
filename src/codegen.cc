@@ -254,9 +254,10 @@ string CodeGen::ACCESS()
 {
 	ostringstream ret;
 	if ( accessExpr != 0 ) {
-		ret << "host( \"-\", 1 ) @{";
+		ret << OPEN_HOST_PLAIN();
 		INLINE_LIST( ret, accessExpr, 0, false, false );
-		ret << "}@ ->";
+		ret << CLOSE_HOST_PLAIN();
+		ret << ACCESS_OPER();
 	}
 	return ret.str();
 }
@@ -268,9 +269,9 @@ string CodeGen::P()
 	if ( pExpr == 0 )
 		ret << "p";
 	else {
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, pExpr, 0, false, false );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
 }
@@ -281,9 +282,9 @@ string CodeGen::PE()
 	if ( peExpr == 0 )
 		ret << "pe";
 	else {
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, peExpr, 0, false, false );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
 }
@@ -294,9 +295,9 @@ string CodeGen::vEOF()
 	if ( eofExpr == 0 )
 		ret << "eof";
 	else {
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, eofExpr, 0, false, false );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
 }
@@ -308,9 +309,9 @@ string CodeGen::vCS()
 		ret << ACCESS() << "cs";
 	else {
 		/* Emit the user supplied method of retrieving the key. */
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, csExpr, 0, false, false );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
 }
@@ -321,9 +322,9 @@ string CodeGen::TOP()
 	if ( topExpr == 0 )
 		ret << ACCESS() + "top";
 	else {
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, topExpr, 0, false, false );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
 }
@@ -334,9 +335,9 @@ string CodeGen::STACK()
 	if ( stackExpr == 0 )
 		ret << ACCESS() + "stack";
 	else {
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, stackExpr, 0, false, false );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
 }
@@ -347,9 +348,9 @@ string CodeGen::ACT()
 	if ( actExpr == 0 )
 		ret << ACCESS() + "act";
 	else {
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, actExpr, 0, false, false );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
 }
@@ -360,9 +361,9 @@ string CodeGen::TOKSTART()
 	if ( tokstartExpr == 0 )
 		ret << ACCESS() + "ts";
 	else {
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, tokstartExpr, 0, false, false );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
 }
@@ -373,9 +374,9 @@ string CodeGen::TOKEND()
 	if ( tokendExpr == 0 )
 		ret << ACCESS() + "te";
 	else {
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, tokendExpr, 0, false, false );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
 }
@@ -385,9 +386,9 @@ string CodeGen::GET_KEY()
 	ostringstream ret;
 	if ( getKeyExpr != 0 ) { 
 		/* Emit the user supplied method of retrieving the key. */
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, getKeyExpr, 0, false, false );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 	else {
 		/* Expression for retrieving the key, use simple dereference. */

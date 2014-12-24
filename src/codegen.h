@@ -36,6 +36,8 @@ struct TableArray;
 typedef Vector<TableArray*> ArrayVector;
 struct CodeGen;
 
+extern bool directBackend;
+
 struct TableArray
 {
 	enum State {
@@ -193,7 +195,6 @@ protected:
 	void GEN_STMT( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
 	void GEN_EXPR( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
 
-	void VALUE( string type, string name, string value );
 
 	void STATE_IDS();
 
@@ -213,6 +214,48 @@ protected:
 	bool againLabelUsed;
 	bool useIndicies;
 	bool matchCondLabelUsed;
+
+	void VALUE( string type, string name, string value );
+
+	string ACCESS_OPER()
+		{ return directBackend ? "" : " -> "; }
+
+	string OPEN_HOST_EXPR()
+		{ return directBackend ? "(" : "host( \"-\", 1 ) ={"; }
+
+	string CLOSE_HOST_EXPR()
+		{ return directBackend ? ")" : "}="; }
+
+	string OPEN_HOST_BLOCK()
+		{ return directBackend ? "{" : "host( \"-\", 1 ) ${"; }
+
+	string CLOSE_HOST_BLOCK()
+		{ return directBackend ? "}" : "}$"; }
+
+	string OPEN_HOST_PLAIN()
+		{ return directBackend ? "" : "host( \"-\", 1 ) @{"; }
+
+	string CLOSE_HOST_PLAIN()
+		{ return directBackend ? "" : "}@"; }
+
+	string OPEN_GEN_EXPR()
+		{ return directBackend ? "(" : "={"; }
+
+	string CLOSE_GEN_EXPR()
+		{ return directBackend ? ")" : "}="; }
+
+	string OPEN_GEN_BLOCK()
+		{ return directBackend ? "{" : "${"; }
+
+	string CLOSE_GEN_BLOCK()
+		{ return directBackend ? "}" : "}$"; }
+
+	string OPEN_GEN_PLAIN()
+		{ return directBackend ? "" : "@{"; }
+
+	string CLOSE_GEN_PLAIN()
+		{ return directBackend ? "" : "}@"; }
+
 
 public:
 	virtual void writeExports();
