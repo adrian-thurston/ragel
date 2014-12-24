@@ -243,8 +243,14 @@ void InputData::writeOutput()
 					ii->writeArgs.data, generateDot, hostLang );
 		}
 		else {
-			openHostBlock( '@', this, *outStream, inputFileName, ii->loc.line );
-			*outStream << ii->data.str() << "}@";
+			if ( hostLang->lang == HostLang::Asm ) {
+				*outStream << ii->data.str();
+			}
+			else {
+				openHostBlock( '@', this, *outStream, inputFileName, ii->loc.line );
+				*outStream << ii->data.str();
+				*outStream << "}@";
+			}
 		}
 	}
 }
