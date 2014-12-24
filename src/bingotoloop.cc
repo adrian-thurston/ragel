@@ -137,7 +137,7 @@ std::ostream &BinaryGotoLoop::TO_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t " << CASE( TO_STR( act->actionId ) ) << " {\n";
+			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t" << CEND() << "}\n";
 		}
@@ -153,7 +153,7 @@ std::ostream &BinaryGotoLoop::FROM_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t " << CASE( TO_STR( act->actionId ) ) << " {\n";
+			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t" << CEND() << "}\n";
 		}
@@ -169,7 +169,7 @@ std::ostream &BinaryGotoLoop::EOF_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t " << CASE( TO_STR( act->actionId ) ) << " {\n";
+			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, true, false ) );
 			out << "\n\t" << CEND() << "}\n";
 		}
@@ -186,7 +186,7 @@ std::ostream &BinaryGotoLoop::ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t " << CASE( TO_STR( act->actionId ) ) << " {\n";
+			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t" << CEND() << "}\n";
 		}
@@ -266,13 +266,13 @@ void BinaryGotoLoop::writeExec()
 			|| redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << "\n"
+			"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
 			"	" << UINT() << " _nacts;\n";
 	}
 
 	out <<
-		"	" << INDEX( ALPH_TYPE(),  "_keys" ) << "\n"
-		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << "\n"
+		"	" << INDEX( ALPH_TYPE(),  "_keys" ) << ";\n"
+		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
 		"	int _cpc;\n"
 		"	" << ENTRY() << " {\n"
 		"\n";
@@ -421,7 +421,7 @@ void BinaryGotoLoop::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << "\n"
+				"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
 				"	" << UINT() << " __nacts;\n"
 				"	__acts = " << OFFSET( ARR_REF( actions ), ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
 				"	__nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "__acts" ) << ";\n"

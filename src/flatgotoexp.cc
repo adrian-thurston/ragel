@@ -96,13 +96,13 @@ std::ostream &FlatGotoExp::TO_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numToStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << " {\n";
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
 
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -117,13 +117,13 @@ std::ostream &FlatGotoExp::FROM_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numFromStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << " {\n";
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
 
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -136,13 +136,13 @@ std::ostream &FlatGotoExp::EOF_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numEofRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << " {\n";
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, true, false ) );
 
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -157,13 +157,13 @@ std::ostream &FlatGotoExp::ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << " {\n";
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
 
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -215,9 +215,9 @@ void FlatGotoExp::writeExec()
 	out << "	" << UINT() << " _cond;\n";
 
 	out <<
-		"	index " << ALPH_TYPE() << " _keys;\n"
-		"	index " << ARR_TYPE( indicies ) << " _inds;\n"
-		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
+		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+		"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n"
+		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
 		"	int _klen;\n"
 		"	int _cpc;\n";
 
@@ -241,7 +241,7 @@ void FlatGotoExp::writeExec()
 			"		goto _out;\n";
 	}
 
-	out << "label _resume {\n";
+	out << LABEL( "_resume" ) << " {\n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -253,7 +253,7 @@ void FlatGotoExp::writeExec()
 
 	LOCATE_TRANS();
 
-	out << "} label _match_cond {\n";
+	out << "} " << LABEL( "_match_cond" ) << " {\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
@@ -289,7 +289,7 @@ void FlatGotoExp::writeExec()
 
 //	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 //			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "} label _again {\n";
+		out << "} " << LABEL( "_again" ) << " {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -319,7 +319,7 @@ void FlatGotoExp::writeExec()
 	}
 
 	if ( testEofUsed )
-		out << "} label _test_eof { {}\n";
+		out << "} " << LABEL( "_test_eof" ) << " { {}\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
@@ -348,7 +348,7 @@ void FlatGotoExp::writeExec()
 	}
 
 	if ( outLabelUsed )
-		out << "} label _out { {}\n";
+		out << "} " << LABEL( "_out" ) << " { {}\n";
 
 	/* The entry loop. */
 	out << "}}\n";

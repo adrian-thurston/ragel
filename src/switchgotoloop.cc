@@ -134,7 +134,7 @@ std::ostream &SwitchGotoLoop::EXEC_FUNCS()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			out << "	f" << redAct->actListId << ": " <<
-				"_acts = offset( " << ARR_REF( actions ) << ", " << itoa( redAct->location+1 ) << ");"
+				"_acts = " << OFFSET( ARR_REF( actions ), itoa( redAct->location+1 ) ) << ";"
 				" goto execFuncs;\n";
 		}
 	}
@@ -147,10 +147,10 @@ std::ostream &SwitchGotoLoop::EXEC_FUNCS()
 		out << "	_nbreak = 0;\n";
 
 	out <<
-		"	_nacts = (" << UINT() << ")deref( " << ARR_REF( actions ) << ", _acts );\n"
+		"	_nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
 		"	_acts += 1;\n"
 		"	while ( _nacts > 0 ) {\n"
-		"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
+		"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 		ACTION_SWITCH() << 
 		"		}\n"
 		"		_acts += 1;\n"
@@ -185,7 +185,7 @@ void SwitchGotoLoop::writeExec()
 			|| redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	index " << ARR_TYPE( actions ) << " _acts;\n"
+			"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
 			"	" << UINT() << " _nacts;\n";
 	}
 
@@ -213,11 +213,11 @@ void SwitchGotoLoop::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = offset( " << ARR_REF( actions ) << ", " <<
-					ARR_REF( fromStateActions ) << "[" << vCS() << "] );\n"
-			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts ); _acts += 1;\n"
+			"	_acts = " << OFFSET( ARR_REF( actions ),
+					ARR_REF( fromStateActions ) + "[" + vCS() + "]" ) << ";\n"
+			"	_nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "_acts" ) << "; _acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
-			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		_acts += 1;\n"
@@ -241,11 +241,11 @@ void SwitchGotoLoop::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = offset( " << ARR_REF( actions ) << ", " <<
-					ARR_REF( toStateActions ) << "[" << vCS() << "] );\n"
-			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts ); _acts += 1;\n"
+			"	_acts = " << OFFSET( ARR_REF( actions ),
+					ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
+			"	_nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "_acts" ) << "; _acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
-			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		_acts += 1;\n"
@@ -298,13 +298,13 @@ void SwitchGotoLoop::writeExec()
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	index " << ARR_TYPE( actions ) << " __acts;\n"
+				"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
 				"	" << UINT() << " __nacts;\n"
-				"	__acts = offset( " << ARR_REF( actions ) << ", " << 
-						ARR_REF( eofActions ) << "[" << vCS() << "] );\n"
-				"	__nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", __acts ); __acts += 1;\n"
+				"	__acts = " << OFFSET( ARR_REF( actions ), 
+						ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
+				"	__nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "__acts" ) << "; __acts += 1;\n"
 				"	while ( __nacts > 0 ) {\n"
-				"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
+				"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
 				EOF_ACTION_SWITCH() <<
 				"		}\n"
 				"		__acts += 1;\n"

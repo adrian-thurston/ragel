@@ -588,9 +588,9 @@ void Binary::LOCATE_TRANS()
 		"\n"
 		"	_klen = (int)" << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
-		"		" << INDEX( ALPH_TYPE(), "_lower" ) << "\n"
-		"		" << INDEX( ALPH_TYPE(), "_mid" ) << "\n"
-		"		" << INDEX( ALPH_TYPE(), "_upper" ) << "\n"
+		"		" << INDEX( ALPH_TYPE(), "_lower" ) << ";\n"
+		"		" << INDEX( ALPH_TYPE(), "_mid" ) << ";\n"
+		"		" << INDEX( ALPH_TYPE(), "_upper" ) << ";\n"
 		"		_lower = _keys;\n"
 		"		_upper = _keys + _klen - 1;\n"
 		"		while ( " << TRUE() << " ) {\n"
@@ -613,9 +613,9 @@ void Binary::LOCATE_TRANS()
 		"\n"
 		"	_klen = (int)" << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
-		"		" << INDEX( ALPH_TYPE(), "_lower" ) << "\n"
-		"		" << INDEX( ALPH_TYPE(), "_mid" ) << "\n"
-		"		" << INDEX( ALPH_TYPE(), "_upper" ) << "\n"
+		"		" << INDEX( ALPH_TYPE(), "_lower" ) << ";\n"
+		"		" << INDEX( ALPH_TYPE(), "_mid" ) << ";\n"
+		"		" << INDEX( ALPH_TYPE(), "_upper" ) << ";\n"
 		"		_lower = _keys;\n"
 		"		_upper = _keys + (_klen<<1) - 2;\n"
 		"		while ( " << TRUE() << " ) {\n"
@@ -655,7 +655,7 @@ void Binary::LOCATE_COND()
 
 		for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 			GenCondSpace *condSpace = csi;
-			out << "	" << CASE( TO_STR( condSpace->condSpaceId ) ) << " {\n";
+			out << "	" << CASE( STR( condSpace->condSpaceId ) ) << " {\n";
 			for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 				out << TABS(2) << "if ( ";
 				CONDITION( out, *csi );
@@ -673,9 +673,9 @@ void Binary::LOCATE_COND()
 	
 	out <<
 		"	{\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_lower" ) << "\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_mid" ) << "\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_upper" ) << "\n"
+		"		" << INDEX( ARR_TYPE( condKeys ), "_lower" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( condKeys ), "_mid" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( condKeys ), "_upper" ) << ";\n"
 		"		_lower = _ckeys;\n"
 		"		_upper = _ckeys + _klen - 1;\n"
 		"		while ( " << TRUE() << " ) {\n"

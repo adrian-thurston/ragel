@@ -195,14 +195,12 @@ protected:
 	void GEN_STMT( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
 	void GEN_EXPR( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
 
-
 	void STATE_IDS();
-
 
 	string ERROR_STATE();
 	string FIRST_FINAL_STATE();
 
-	string TO_STR( int v );
+	string STR( int v );
 
 	ostream &source_warning(const InputLoc &loc);
 	ostream &source_error(const InputLoc &loc);
@@ -231,7 +229,7 @@ protected:
 
 	string OPEN_HOST_BLOCK( string fileName, int line )
 	{ 
-		return directBackend ? "{" : "host( \"" + fileName + "\", " + TO_STR(line) + " ) ${";
+		return directBackend ? "{" : "host( \"" + fileName + "\", " + STR(line) + " ) ${";
 	}
 
 	string CLOSE_HOST_BLOCK()
@@ -267,9 +265,9 @@ protected:
 	string INDEX( string type, string name )
 	{
 		if ( directBackend )
-			return "const " + type + " *" + name + ";";
+			return "const " + type + " *" + name;
 		else
-			return "index " + type + " " + name + ";";
+			return "index " + type + " " + name;
 	}
 
 	string ENTRY()

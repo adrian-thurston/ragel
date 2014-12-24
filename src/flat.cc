@@ -343,18 +343,18 @@ void Flat::taActions()
 void Flat::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = offset( " << ARR_REF( keys ) << ", " << "(" << vCS() << "<<1)" << " );\n"
-		"	_inds = offset( " << ARR_REF( indicies ) << ", " << ARR_REF( flatIndexOffset ) << "[" << vCS() << "]" << " );\n"
+		"	_keys = " << OFFSET( ARR_REF( keys ), "(" + vCS() + "<<1)" ) << ";\n"
+		"	_inds = " << OFFSET( ARR_REF( indicies ), ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
 		"\n"
 		"	_slen = (int)" << ARR_REF( keySpans ) << "[" << vCS() << "];\n"
-		"	if ( _slen > 0 && deref( " << ARR_REF( keys ) << ", _keys ) <=" << GET_KEY() << " && " << GET_KEY() << " <= deref( " << ARR_REF( keys ) << ", _keys+1 ) )\n"
-		"		_trans = (int)deref( " << ARR_REF( indicies ) << ", _inds + (int)( " << GET_KEY() << " - deref( " << ARR_REF( keys ) << ", _keys ) ) );\n"
+		"	if ( _slen > 0 && " << DEREF( ARR_REF( keys ), "_keys" ) << " <= " << GET_KEY() << " && " << GET_KEY() << " <= " << DEREF( ARR_REF( keys ), "_keys+1" ) << " )\n"
+		"		_trans = (int)" << DEREF( ARR_REF( indicies ), "_inds + (int)( " + GET_KEY() + " - " + DEREF( ARR_REF( keys ), "_keys" ) + " ) " ) << ";\n"
 		"	else\n"
-		"		_trans = (int)deref( " << ARR_REF( indicies ) << ", _inds + _slen );\n"
+		"		_trans = (int)" << DEREF( ARR_REF( indicies ), "_inds + _slen" ) << ";\n"
 		"\n";
 
 	out <<
-		"	_ckeys = offset( " << ARR_REF( condKeys ) << ", " << ARR_REF( transOffsets ) << "[_trans] );\n"
+		"	_ckeys = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[_trans]" ) << ";\n"
 		"	_klen = (int)" << ARR_REF( transLengths ) << "[_trans];\n"
 		"	_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
 		"\n";
@@ -387,19 +387,19 @@ void Flat::LOCATE_TRANS()
 	
 	out <<
 		"	{\n"
-		"		index " << ARR_TYPE( condKeys ) << " _lower;\n"
-		"		index " << ARR_TYPE( condKeys ) << " _mid;\n"
-		"		index " << ARR_TYPE( condKeys ) << " _upper;\n"
+		"		" << INDEX( ARR_TYPE( condKeys ), "_lower" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( condKeys ), "_mid" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( condKeys ), "_upper" ) << ";\n"
 		"		_lower = _ckeys;\n"
 		"		_upper = _ckeys + _klen - 1;\n"
-		"		while ( TRUE ) {\n"
+		"		while ( " << TRUE() << " ) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
 		"\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( _cpc < (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
+		"			if ( _cpc < (int)" << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
 		"				_upper = _mid - 1;\n"
-		"			else if ( _cpc > (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
+		"			else if ( _cpc > (int)" << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				_cond += (" << UINT() << ")(_mid - _ckeys);\n"

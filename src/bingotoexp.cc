@@ -158,7 +158,7 @@ std::ostream &BinaryGotoExp::FROM_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numFromStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << " {\n";
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
@@ -166,7 +166,7 @@ std::ostream &BinaryGotoExp::FROM_STATE_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "}\n";
+			out << CEND() << "}\n";
 		}
 	}
 
@@ -179,7 +179,7 @@ std::ostream &BinaryGotoExp::EOF_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numEofRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << " {\n";
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
@@ -187,7 +187,7 @@ std::ostream &BinaryGotoExp::EOF_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "}\n";
+			out << CEND() << "}\n";
 		}
 	}
 
@@ -202,7 +202,7 @@ std::ostream &BinaryGotoExp::ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << " {\n";
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
@@ -210,7 +210,7 @@ std::ostream &BinaryGotoExp::ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "}\n";
+			out << CEND() << "}\n";
 		}
 	}
 
@@ -273,8 +273,8 @@ void BinaryGotoExp::writeExec()
 		out << "	int _ps;\n";
 
 	out <<
-		"	index " << ALPH_TYPE() << " _keys;\n"
-		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
+		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
 		"	int _cpc;\n"
 		"	" << UINT() << " _trans;\n"
 		"	" << UINT() << " _cond;\n";
@@ -300,7 +300,7 @@ void BinaryGotoExp::writeExec()
 			"		goto _out;\n";
 	}
 
-	out << "label _resume { \n";
+	out << LABEL( "_resume" ) << " { \n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -313,7 +313,7 @@ void BinaryGotoExp::writeExec()
 	LOCATE_TRANS();
 
 	out << "}\n";
-	out << "label _match {\n";
+	out << LABEL( "_match" ) << " {\n";
 
 	if ( useIndicies )
 		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
@@ -321,7 +321,7 @@ void BinaryGotoExp::writeExec()
 	LOCATE_COND();
 
 	out << "}\n";
-	out << "label _match_cond {\n";
+	out << LABEL( "_match_cond" ) << " {\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
@@ -358,7 +358,7 @@ void BinaryGotoExp::writeExec()
 //	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 //			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 	out << "}\n";
-	out << "label _again {\n";
+	out << LABEL( "_again" ) << " {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -388,7 +388,7 @@ void BinaryGotoExp::writeExec()
 	}
 
 	if ( testEofUsed )
-		out << "}\n	label _test_eof { {}\n";
+		out << "}\n	" << LABEL( "_test_eof" ) << " { {}\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
@@ -418,7 +418,7 @@ void BinaryGotoExp::writeExec()
 	}
 
 	if ( outLabelUsed )
-		out << "}\n	label _out { {}\n";
+		out << "}\n	" << LABEL( "_out" ) << " { {}\n";
 
 	/* The entry loop. */
 	out << "}}\n";

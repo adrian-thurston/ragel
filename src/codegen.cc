@@ -438,14 +438,26 @@ string CodeGen::TABS( int level )
  * signed. */
 string CodeGen::KEY( Key key )
 {
-	ostringstream ret;
-	if ( keyOps->alphType->isChar )
-		ret << "c(" << (unsigned long) key.getVal() << ")";
-	else if ( keyOps->isSigned || !keyOps->hostLang->explicitUnsigned )
-		ret << key.getVal();
-	else
-		ret << "u(" << (unsigned long) key.getVal() << ")";
-	return ret.str();
+	if ( directBackend ) {
+		ostringstream ret;
+		if ( keyOps->alphType->isChar )
+			ret << "c(" << (unsigned long) key.getVal() << ")";
+		else if ( keyOps->isSigned || !keyOps->hostLang->explicitUnsigned )
+			ret << key.getVal();
+		else
+			ret << (unsigned long) key.getVal() << "u";
+		return ret.str();
+	}
+	else {
+		ostringstream ret;
+		if ( keyOps->alphType->isChar )
+			ret << "c(" << (unsigned long) key.getVal() << ")";
+		else if ( keyOps->isSigned || !keyOps->hostLang->explicitUnsigned )
+			ret << key.getVal();
+		else
+			ret << "u(" << (unsigned long) key.getVal() << ")";
+		return ret.str();
+	}
 }
 
 bool CodeGen::isAlphTypeSigned()
@@ -822,7 +834,7 @@ void CodeGen::VALUE( string type, string name, string value )
 		out << "value " << type << " " << name << " = " << value << ";\n";
 }
 
-string CodeGen::TO_STR( int v )
+string CodeGen::STR( int v )
 {
 	ostringstream s;
 	s << v;
@@ -845,7 +857,7 @@ void CodeGen::STATE_IDS()
 	if ( entryPointNames.length() > 0 ) {
 		for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
 			string name = DATA_PREFIX() + "en_" + *en;
-			VALUE( "int", name, TO_STR( entryPointIds[en.pos()] ) );
+			VALUE( "int", name, STR( entryPointIds[en.pos()] ) );
 		}
 		out << "\n";
 	}
