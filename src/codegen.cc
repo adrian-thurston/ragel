@@ -75,27 +75,54 @@ void TableArray::valueAnalyze( long long v )
 
 void TableArray::finishAnalyze()
 {
-	/* Calculate the type if it is not already set. */
-	if ( type.empty() ) {
-		if ( min >= S8BIT_MIN && max <= S8BIT_MAX ) {
-			type = "s8";
-			width = sizeof(char);
+	if ( directBackend ) {
+		/* Calculate the type if it is not already set. */
+		if ( type.empty() ) {
+			if ( min >= S8BIT_MIN && max <= S8BIT_MAX ) {
+				type = "char";
+				width = sizeof(char);
+			}
+			else if ( min >= S16BIT_MIN && max <= S16BIT_MAX ) {
+				type = "short";
+				width = sizeof(short);
+			}
+			else if ( min >= S32BIT_MIN && max <= S32BIT_MAX ) {
+				type = "int";
+				width = sizeof(int);
+			}
+			else if ( min >= S64BIT_MAX && max <= S64BIT_MAX ) {
+				type = "long";
+				width = sizeof(long);
+			}
+			else  {
+				type = "long long";
+				width = sizeof(long long);
+			}
 		}
-		else if ( min >= S16BIT_MIN && max <= S16BIT_MAX ) {
-			type = "s16";
-			width = sizeof(short);
-		}
-		else if ( min >= S32BIT_MIN && max <= S32BIT_MAX ) {
-			type = "s32";
-			width = sizeof(int);
-		}
-		else if ( min >= S64BIT_MAX && max <= S64BIT_MAX ) {
-			type = "s64";
-			width = sizeof(long);
-		}
-		else  {
-			type = "s128";
-			width = sizeof(long long);
+	}
+	else {
+		/* Calculate the type if it is not already set. */
+		if ( type.empty() ) {
+			if ( min >= S8BIT_MIN && max <= S8BIT_MAX ) {
+				type = "s8";
+				width = sizeof(char);
+			}
+			else if ( min >= S16BIT_MIN && max <= S16BIT_MAX ) {
+				type = "s16";
+				width = sizeof(short);
+			}
+			else if ( min >= S32BIT_MIN && max <= S32BIT_MAX ) {
+				type = "s32";
+				width = sizeof(int);
+			}
+			else if ( min >= S64BIT_MAX && max <= S64BIT_MAX ) {
+				type = "s64";
+				width = sizeof(long);
+			}
+			else  {
+				type = "s128";
+				width = sizeof(long long);
+			}
 		}
 	}
 }
