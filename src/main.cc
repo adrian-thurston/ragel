@@ -233,10 +233,18 @@ void InputData::parseArgs( int argc, const char **argv )
 				minimizeOpt = MinimizeEveryOp;
 				break;
 			case 'a':
+			#ifdef TO_UPGRADE_CONDS
 				minimizeLevel = MinimizeApprox;
+			#else
+				error() << "minimize approx (-a) unsupported in this version" << endp;
+			#endif
 				break;
 			case 'b':
+			#ifdef TO_UPGRADE_CONDS
 				minimizeLevel = MinimizeStable;
+			#else
+				error() << "minimize stable (-b) unsupported in this version" << endp;
+			#endif
 				break;
 			case 'j':
 				minimizeLevel = MinimizePartition1;
@@ -338,6 +346,12 @@ void InputData::parseArgs( int argc, const char **argv )
 					rubyImpl = Rubinius;
 				else if ( strcmp( arg, "rlhc" ) == 0 )
 					rlhcShowCmd = true;
+				else if ( strcmp( arg, "no-intermediate" ) == 0 )
+					noIntermediate = true;
+				else if ( strcmp( arg, "frontend-kelbt" ) == 0 )
+					ragelFrontend = KelbtBased;
+				else if ( strcmp( arg, "frontend-colm" ) == 0 )
+					ragelFrontend = ColmBased;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

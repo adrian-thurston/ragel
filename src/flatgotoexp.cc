@@ -80,7 +80,7 @@ void FlatGotoExp::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-void FlatGotoExp::COND_ACTION( RedCondAp *cond )
+void FlatGotoExp::COND_ACTION( RedCondPair *cond )
 {
 	int action = 0;
 	if ( cond->action != 0 )

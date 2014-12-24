@@ -264,7 +264,15 @@ int FsmAp::splitCandidates( StateAp **statePtrs, MinPartition *parts, int numPar
 			for ( ; state.lte(); state++ ) {
 				/* Walk all transition into the state and put the partition
 				 * that the from state is in onto the splittable list. */
-				for ( TransInList<CondAp>::Iter t = state->inList; t.lte(); t++ ) {
+				for ( TransInList::Iter t = state->inTrans; t.lte(); t++ ) {
+					MinPartition *fromPart = t->fromState->alg.partition;
+					if ( ! fromPart->active ) {
+						fromPart->active = true;
+						partList.detach( fromPart );
+						splittable.append( fromPart );
+					}
+				}
+				for ( CondInList::Iter t = state->inCond; t.lte(); t++ ) {
 					MinPartition *fromPart = t->fromState->alg.partition;
 					if ( ! fromPart->active ) {
 						fromPart->active = true;
@@ -376,6 +384,7 @@ void FsmAp::initialMarkRound( MarkIndex &markIndex )
 	}
 }
 
+#ifdef TO_UPGRADE_CONDS
 bool FsmAp::markRound( MarkIndex &markIndex )
 {
 	/* P an q for walking pairs. Take note if any pair gets marked. */
@@ -405,8 +414,9 @@ bool FsmAp::markRound( MarkIndex &markIndex )
 
 	return pairWasMarked;
 }
+#endif
 
-
+#ifdef TO_UPGRADE_CONDS
 /**
  * \brief Minimize by pair marking.
  *
@@ -434,7 +444,9 @@ void FsmAp::minimizeStable()
 	/* Merge pairs that are unmarked. */
 	fuseUnmarkedPairs( markIndex );
 }
+#endif
 
+#ifdef TO_UPGRADE_CONDS
 bool FsmAp::minimizeRound()
 {
 	/* Nothing to do if there are no states. */
@@ -478,7 +490,9 @@ bool FsmAp::minimizeRound()
 	delete[] statePtrs;
 	return modified;
 }
+#endif
 
+#ifdef TO_UPGRADE_CONDS
 /**
  * \brief Minmimize by an approximation.
  *
@@ -496,6 +510,7 @@ void FsmAp::minimizeApproximate()
 			break;
 	}
 }
+#endif
 
 
 /* Remove states that have no path to them from the start state. Recursively
@@ -632,7 +647,7 @@ void FsmAp::fuseEquivStates( StateAp *dest, StateAp *src )
 	assert( dest != src );
 
 	/* Cur is a duplicate. We can merge it with trail. */
-	inTransMove( dest, src );
+	moveInwardTrans( dest, src );
 
 	detachState( src );
 	stateList.detach( src );
@@ -726,35 +741,29 @@ void FsmAp::compressTransitions()
 				/* Require there be no conditions in either of the merge
 				 * candidates. */
 				bool merge = false;
-				if ( trans->condSpace == 0 && 
-						next->condSpace == 0 && 
+				TransDataAp *td;
+				TransDataAp *tn;
+
+				if ( trans->plain() && 
+						next->plain() && 
 						ctx->keyOps->eq( trans->highKey, nextLow ) )
 				{
-					if ( trans->condSpace == 0 &&
-							next->condSpace == 0 )
+					td = trans->tdap();
+					tn = next->tdap();
+
+					/* Check the condition target and action data. */
+					if ( td->toState == tn->toState && CmpActionTable::compare(
+							td->actionTable, tn->actionTable ) == 0 )
 					{
-						assert( trans->condList.length() == 1 );
-						assert( next->condList.length() == 1 );
-
-						/* Check the condition target and action data. */
-						CondAp *cond = trans->condList.head;
-						CondAp *nextCond = next->condList.head;
-
-						if ( cond->toState == nextCond->toState &&
-								CmpActionTable::compare( cond->actionTable, 
-								nextCond->actionTable ) == 0 )
-						{
-							merge = true;
-						}
+						merge = true;
 					}
 				}
 
 				if ( merge ) {
 					trans->highKey = next->highKey;
-					st->outList.detach( next );
-					detachCondTrans( next->condList.head->fromState,
-							next->condList.head->toState, next->condList.head );
-					delete next;
+					st->outList.detach( tn );
+					detachTrans( tn->fromState, tn->toState, tn );
+					delete tn;
 					next = trans.next();
 				}
 				else {

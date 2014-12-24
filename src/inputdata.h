@@ -10,6 +10,7 @@
 #include <sstream>
 
 struct ParseData;
+struct Parser6;
 struct CondSpace;
 struct CondAp;
 struct ActionTable;
@@ -36,11 +37,23 @@ typedef AvlMap<std::string, ParseData*, CmpString> ParseDataDict;
 typedef AvlMapEl<std::string, ParseData*> ParseDataDictEl;
 typedef DList<ParseData> ParseDataList;
 
+/* This exists for ragel-6 parsing. */
+typedef AvlMap<const char*, Parser6*, CmpStr> ParserDict;
+typedef AvlMapEl<const char*, Parser6*> ParserDictEl;
+typedef DList<Parser6> ParserList;
+
+
 typedef DList<InputItem> InputItemList;
 typedef Vector<const char *> ArgsVector;
 
 struct InputData
 {
+	enum RagelFrontend
+	{
+		KelbtBased,
+		ColmBased
+	};
+
 	InputData() : 
 		inputFileName(0),
 		outputFileName(0),
@@ -62,7 +75,9 @@ struct InputData
 		maxTransitions(LONG_MAX),
 		numSplitPartitions(0),
 		rubyImpl(MRI),
-		rlhcShowCmd(false)
+		rlhcShowCmd(false),
+		noIntermediate(false),
+		ragelFrontend(ColmBased)
 	{}
 
 	std::string dirName;
@@ -74,7 +89,6 @@ struct InputData
 	std::string origOutputFileName;
 	std::string genOutputFileName;
 
-
 	/* Io globals. */
 	std::istream *inStream;
 	std::ostream *outStream;
@@ -83,6 +97,10 @@ struct InputData
 	ParseDataDict parseDataDict;
 	ParseDataList parseDataList;
 	InputItemList inputItems;
+
+	/* Ragel-6 frontend. */
+	ParserDict parserDict;
+	ParserList parserList;
 
 	ArgsVector includePaths;
 
@@ -111,6 +129,9 @@ struct InputData
 	RubyImplEnum rubyImpl;
 
 	bool rlhcShowCmd;
+	bool noIntermediate;
+
+	RagelFrontend ragelFrontend;
 
 	void verifyWritesHaveData();
 
@@ -143,6 +164,7 @@ struct InputData
 
 	void parseArgs( int argc, const char **argv );
 	void checkArgs();
+	void terminateAllParsers();
 
 	void process();
 };

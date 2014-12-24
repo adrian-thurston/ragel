@@ -181,7 +181,7 @@ struct Token
 {
 	char *data;
 	int length;
-	InputLoc loc;
+	ParserLoc loc;
 
 	void append( const Token &other );
 	void set( const char *str, int len );
@@ -249,7 +249,7 @@ struct VarDef
 struct LongestMatchPart
 {
 	LongestMatchPart( Join *join, Action *action, 
-			InputLoc &semiLoc, int longestMatchId )
+			const InputLoc &semiLoc, int longestMatchId )
 	: 
 		join(join), action(action), semiLoc(semiLoc), 
 		longestMatchId(longestMatchId), inLmSelect(false) { }

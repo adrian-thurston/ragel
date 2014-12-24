@@ -169,13 +169,24 @@ void FsmAp::emptyFsm( )
 void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 {
 	for ( TransList::Iter trans = destState->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
-			if ( cond->toState != 0 ) {
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 ) {
 				/* Get the actions data from the outActionTable. */
-				cond->actionTable.setActions( srcState->outActionTable );
+				trans->tdap()->actionTable.setActions( srcState->outActionTable );
 
 				/* Get the priorities from the outPriorTable. */
-				cond->priorTable.setPriors( srcState->outPriorTable );
+				trans->tdap()->priorTable.setPriors( srcState->outPriorTable );
+			}
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 ) {
+					/* Get the actions data from the outActionTable. */
+					cond->actionTable.setActions( srcState->outActionTable );
+
+					/* Get the priorities from the outPriorTable. */
+					cond->priorTable.setPriors( srcState->outPriorTable );
+				}
 			}
 		}
 	}

@@ -98,7 +98,7 @@ void BinaryVarLoop::genAnalysis()
 }
 
 
-void BinaryVarLoop::COND_ACTION( RedCondAp *cond )
+void BinaryVarLoop::COND_ACTION( RedCondPair *cond )
 {
 	int act = 0;
 	if ( cond->action != 0 )

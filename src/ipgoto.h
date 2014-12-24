@@ -23,7 +23,7 @@ public:
 
 	std::ostream &EXIT_STATES();
 	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
-	std::ostream &COND_GOTO( RedCondAp *trans, int level );
+	std::ostream &COND_GOTO( RedCondPair *trans, int level );
 	std::ostream &FINISH_CASES();
 	std::ostream &AGAIN_CASES();
 	std::ostream &STATE_GOTOS();
@@ -58,6 +58,7 @@ protected:
 	void STATE_GOTO_ERROR();
 
 	/* Set up labelNeeded flag for each state. */
+	void setLabelsNeeded( RedCondPair *pair );
 	void setLabelsNeeded( GenInlineList *inlineList );
 	void setLabelsNeeded();
 };

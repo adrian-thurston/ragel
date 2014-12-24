@@ -152,8 +152,9 @@ struct ParseData
 {
 	/* Create a new parse data object. This is done at the beginning of every
 	 * fsm specification. */
-	ParseData( InputData *id, std::string fileName, std::string sectionName, const InputLoc &sectionLoc,
-			const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
+	ParseData( InputData *id, std::string fileName, std::string sectionName,
+			const InputLoc &sectionLoc, const HostLang *hostLang,
+			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
 	~ParseData();
 
 	/*

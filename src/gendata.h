@@ -162,11 +162,11 @@ private:
 	void makeEofTrans( StateAp *state );
 	void makeTransList( StateAp *state );
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
+	void newTrans( RedStateAp *state, Key lowKey, Key highKey, RedTransAp *trans );
 
 	/* Collected during parsing. */
 	int curAction;
 	int curActionTable;
-	int curTrans;
 	int curState;
 
 public:
@@ -253,10 +253,10 @@ public:
 	void setId( int snum, int id );
 	void setFinal( int snum );
 	void initTransList( int snum, unsigned long length );
+
 	void newTrans( int snum, int tnum, Key lowKey, Key highKey,
-			GenCondSpace *gcs, RedCondList &outConds );
-	void newCondTrans( RedCondList &outConds, 
-			int snum, CondKey key, long targ, long act );
+			GenCondSpace *gcs, RedTransAp *trans );
+
 	void finishTransList( int snum );
 	void setStateActions( int snum, long toStateAction, 
 			long fromStateAction, long eofAction );

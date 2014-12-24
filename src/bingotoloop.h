@@ -31,7 +31,7 @@ public:
 	virtual void TO_STATE_ACTION( RedStateAp *state );
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
 	virtual void EOF_ACTION( RedStateAp *state );
-	virtual void COND_ACTION( RedCondAp *cond );
+	virtual void COND_ACTION( RedCondPair *cond );
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

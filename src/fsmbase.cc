@@ -80,14 +80,26 @@ FsmAp::FsmAp( const FsmAp &graph )
 	/* Derefernce all the state maps. */
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cti = trans->condList; cti.lte(); cti++ ) {
+			if ( trans->plain() ) {
 				/* The points to the original in the src machine. The taget's duplicate
 				 * is in the statemap. */
-				StateAp *toState = cti->toState != 0 ? cti->toState->alg.stateMap : 0;
+				StateAp *toState = trans->tdap()->toState != 0 ? trans->tdap()->toState->alg.stateMap : 0;
 
 				/* Attach The transition to the duplicate. */
-				cti->toState = 0;
-				attachTrans( state, toState, cti );
+				trans->tdap()->toState = 0;
+				attachTrans( state, toState, trans->tdap() );
+
+			}
+			else {
+				for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
+					/* The points to the original in the src machine. The taget's duplicate
+					 * is in the statemap. */
+					StateAp *toState = cti->toState != 0 ? cti->toState->alg.stateMap : 0;
+
+					/* Attach The transition to the duplicate. */
+					cti->toState = 0;
+					attachTrans( state, toState, cti );
+				}
 			}
 		}
 
@@ -347,9 +359,15 @@ void FsmAp::markReachableFromHere( StateAp *state )
 
 	/* Recurse on all out transitions. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
-			if ( cond->toState != 0 )
-				markReachableFromHere( cond->toState );
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 )
+				markReachableFromHere( trans->tdap()->toState );
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					markReachableFromHere( cond->toState );
+			}
 		}
 	}
 }
@@ -366,10 +384,18 @@ void FsmAp::markReachableFromHereStopFinal( StateAp *state )
 
 	/* Recurse on all out transitions. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
-			StateAp *toState = cond->toState;
+		if ( trans->plain() ) {
+			StateAp *toState = trans->tdap()->toState;
 			if ( toState != 0 && !toState->isFinState() )
 				markReachableFromHereStopFinal( toState );
+
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				StateAp *toState = cond->toState;
+				if ( toState != 0 && !toState->isFinState() )
+					markReachableFromHereStopFinal( toState );
+			}
 		}
 	}
 }
@@ -387,7 +413,9 @@ void FsmAp::markReachableFromHereReverse( StateAp *state )
 	state->stateBits |= STB_ISMARKED;
 
 	/* Recurse on all items in transitions. */
-	for ( TransInList<CondAp>::Iter t = state->inList; t.lte(); t++ )
+	for ( TransInList::Iter t = state->inTrans; t.lte(); t++ )
+		markReachableFromHereReverse( t->fromState );
+	for ( CondInList::Iter t = state->inCond; t.lte(); t++ )
 		markReachableFromHereReverse( t->fromState );
 }
 
@@ -397,7 +425,9 @@ void FsmAp::markReachableFromHereReverse( StateAp *state )
 bool FsmAp::isStartStateIsolated()
 {
 	/* If there are any in transitions then the state is not isolated. */
-	if ( startState->inList.head != 0 )
+	if ( startState->inTrans.head != 0 )
+		return false;
+	if ( startState->inCond.head != 0 )
 		return false;
 
 	/* If there are any entry points then isolated. */
@@ -439,13 +469,16 @@ void FsmAp::verifyIntegrity()
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out transitions and assert fromState is correct. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
 				assert( cond->fromState == state );
 			}
 		}
 
 		/* Walk the inlist and assert toState is correct. */
-		for ( TransInList<CondAp>::Iter t = state->inList; t.lte(); t++ ) {
+		for ( TransInList::Iter t = state->inTrans; t.lte(); t++ ) {
+			assert( t->toState == state );
+		}
+		for ( CondInList::Iter t = state->inCond; t.lte(); t++ ) {
 			assert( t->toState == state );
 		}
 	}
@@ -495,10 +528,16 @@ void FsmAp::depthFirstOrdering( StateAp *state )
 	stateList.append( state );
 	
 	/* Recurse on everything ranges. */
-	for ( TransList::Iter tel = state->outList; tel.lte(); tel++ ) {
-		for ( CondList::Iter cond = tel->condList; cond.lte(); cond++ ) {
-			if ( cond->toState != 0 )
-				depthFirstOrdering( cond->toState );
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 )
+				depthFirstOrdering( trans->tdap()->toState );
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					depthFirstOrdering( cond->toState );
+			}
 		}
 	}
 }
@@ -580,14 +619,20 @@ bool FsmAp::checkErrTrans( StateAp *state, TransAp *trans )
 			return true; 
 	}
 
-	/* Check for gaps in the condition list. */
-	if ( trans->condList.length() < trans->condFullSize() )
-		return true;
-
-	/* Check all destinations. */
-	for ( CondList::Iter cti = trans->condList; cti.lte(); cti++ ) {
-		if ( checkErrTrans( state, cti ) )
+	if ( trans->plain() ) {
+		if ( trans->tdap()->toState == 0 )
 			return true;
+	}
+	else {
+		/* Check for gaps in the condition list. */
+		if ( trans->tcap()->condList.length() < trans->condFullSize() )
+			return true;
+
+		/* Check all destinations. */
+		for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
+			if ( checkErrTrans( state, cti ) )
+				return true;
+		}
 	}
 
 	return false;

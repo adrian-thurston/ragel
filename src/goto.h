@@ -24,6 +24,8 @@ class Goto
 public:
 	Goto( const CodeGenArgs &args );
 
+	std::ostream &TRANSITION( RedCondPair *pair );
+
 	std::ostream &STATE_GOTOS();
 	std::ostream &TRANSITIONS();
 	std::ostream &FINISH_CASES();
@@ -65,7 +67,7 @@ public:
 
 	void setTableState( TableArray::State );
 
-	virtual std::ostream &COND_GOTO( RedCondAp *trans, int level );
+	virtual std::ostream &COND_GOTO( RedCondPair *trans, int level );
 
 	string CKEY( CondKey key );
 	void COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey upper, int low, int high);

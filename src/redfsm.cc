@@ -77,9 +77,10 @@ void RedFsmAp::depthFirstOrdering( RedStateAp *state )
 
 	/* Recurse on everything ranges. */
 	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
-		for ( RedCondList::Iter c = rtel->value->outConds; c.lte(); c++ ) {
-			if ( c->value->targ != 0 )
-				depthFirstOrdering( c->value->targ );
+		for ( int c = 0; c < rtel->value->numConds(); c++ ) {
+			RedCondPair *cond = rtel->value->outCond( c );
+			if ( cond->targ != 0 )
+				depthFirstOrdering( cond->targ );
 		}
 	}
 }
@@ -413,8 +414,9 @@ RedTransAp *RedFsmAp::chooseDefaultGoto( RedStateAp *state )
 	/* Make a set of transitions from the outRange. */
 	RedTransSet stateTransSet;
 	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
-		for ( RedCondList::Iter cond = rtel->value->outConds; cond.lte(); cond++ ) {
-			if ( cond->value->targ == state->next )
+		for ( int c = 0; c < rtel->value->numConds(); c++ ) {
+			RedCondPair *cond = rtel->value->outCond(c);
+			if ( cond->targ == state->next )
 				return rtel->value;
 		}
 	}
@@ -496,13 +498,10 @@ RedTransAp *RedFsmAp::getErrorTrans()
 	if ( errTrans == 0 ) {
 		/* This insert should always succeed. No transition created by the user
 		 * can point to the error state. */
-		errTrans = new RedTransAp( nextTransId++ );
+		errTrans = new RedTransAp( nextTransId++, nextCondId++, getErrorState(), 0 );
 		RedTransAp *inTransSet = transSet.insert( errTrans );
 		assert( inTransSet != 0 );
 
-		/* Give it a cond transition. */
-		RedCondAp *errCond = getErrorCond();
-		errTrans->outConds.append( RedCondEl( 0, errCond ) );
 	}
 	return errTrans;
 }
@@ -515,16 +514,28 @@ RedStateAp *RedFsmAp::getErrorState()
 	return errState;
 }
 
-
-RedTransAp *RedFsmAp::allocateTrans( GenCondSpace *condSpace )
+/* Makes a plain transition. */
+RedTransAp *RedFsmAp::allocateTrans( RedStateAp *targ, RedAction *action )
 {
 	/* Create a reduced trans and look for it in the transiton set. */
-	RedTransAp redTrans( 0 );
-	redTrans.condSpace = condSpace;
+	RedTransAp redTrans( 0, 0, targ, action );
 	RedTransAp *inDict = transSet.find( &redTrans );
 	if ( inDict == 0 ) {
-		inDict = new RedTransAp( nextTransId++ );
-		inDict->condSpace = condSpace;
+		inDict = new RedTransAp( nextTransId++, nextCondId++, targ, action );
+		transSet.insert( inDict );
+	}
+	return inDict;
+}
+
+/* Makes a cond list transition. */
+RedTransAp *RedFsmAp::allocateTrans( GenCondSpace *condSpace,
+		RedCondEl *outConds, int numConds, RedCondAp *errCond )
+{
+	/* Create a reduced trans and look for it in the transiton set. */
+	RedTransAp redTrans( 0, condSpace, outConds, numConds, errCond );
+	RedTransAp *inDict = transSet.find( &redTrans );
+	if ( inDict == 0 ) {
+		inDict = new RedTransAp( nextTransId++, condSpace, outConds, numConds, errCond );
 		transSet.insert( inDict );
 	}
 	return inDict;
@@ -570,15 +581,25 @@ void RedFsmAp::setInTrans()
 {
 	/* First pass counts the number of transitions. */
 	for ( CondApSet::Iter trans = condSet; trans.lte(); trans++ )
-		trans->targ->numInConds += 1;
+		trans->p.targ->numInConds += 1;
+
+	for ( TransApSet::Iter trans = transSet; trans.lte(); trans++ ) {
+		if ( trans->condSpace == 0 ) 
+			trans->p.targ->numInConds += 1;
+	}
 
 	/* Pass over states to allocate the needed memory. Reset the counts so we
 	 * can use them as the current size. */
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		st->inConds = new RedCondAp*[st->numInConds];
+		st->inConds = new RedCondPair*[st->numInConds];
 		st->numInConds = 0;
 	}
 
 	for ( CondApSet::Iter trans = condSet; trans.lte(); trans++ )
-		trans->targ->inConds[trans->targ->numInConds++] = trans;
+		trans->p.targ->inConds[trans->p.targ->numInConds++] = &trans->p;
+
+	for ( TransApSet::Iter trans = transSet; trans.lte(); trans++ ) {
+		if ( trans->condSpace == 0 ) 
+			trans->p.targ->inConds[trans->p.targ->numInConds++] = &trans->p;
+	}
 }

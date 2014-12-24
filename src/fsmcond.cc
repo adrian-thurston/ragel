@@ -20,10 +20,19 @@
 long TransAp::condFullSize() 
 	{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
 
-void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &fromCS, const CondSet &mergedCS )
+void FsmAp::expandConds( StateAp *fromState, TransAp *trans,
+		CondSpace *fromSpace, CondSpace *mergedSpace )
 {
+	CondSet fromCS, mergedCS;
+
+	if ( fromSpace != 0 )
+		fromCS.insert( fromSpace->condSet );
+
+	if ( mergedSpace != 0 )
+		mergedCS.insert( mergedSpace->condSet );
+	
 	/* Need to transform condition element to the merged set. */
-	for ( CondList::Iter cti = trans->condList; cti.lte(); cti++ ) {
+	for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
 		long origVal = cti->key.getVal();
 		long newVal = 0;
 
@@ -50,7 +59,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 		Action **cim = fromCS.find( *csi );
 		if ( cim == 0 ) {
 			CondList newItems;
-			for ( CondList::Iter cti = trans->condList; cti.lte(); cti++ ) {
+			for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
 				/* Sub-transition for conditions. */
 				CondAp *cond = new CondAp( trans );
 
@@ -59,7 +68,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 				attachTrans( fromState, cti->toState, cond );
 				
 				/* Call the user callback to add in the original source transition. */
-				addInTrans( cond, cti );
+				addInTrans( cond, cti.ptr );
 
 				cond->key = cti->key.getVal() | (1 << csi.pos());
 
@@ -68,7 +77,7 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 
 			/* Merge newItems in. Both the condList and newItems are sorted. Make
 			 * a sorted list out of them. */
-			CondAp *dest = trans->condList.head;
+			CondAp *dest = trans->tcap()->condList.head;
 			while ( dest != 0 && newItems.head != 0 ) { 
 				if ( newItems.head->key.getVal() > dest->key.getVal() ) {
 					dest = dest->next;
@@ -76,17 +85,17 @@ void FsmAp::expandConds( StateAp *fromState, TransAp *trans, const CondSet &from
 				else {
 					/* Pop the item for insertion. */
 					CondAp *ins = newItems.detachFirst();
-					trans->condList.addBefore( dest, ins );
+					trans->tcap()->condList.addBefore( dest, ins );
 				}
 			}
 
 			/* Append the rest of the items. */
-			trans->condList.append( newItems );
+			trans->tcap()->condList.append( newItems );
 		}
 	}
 }
 
-void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans )
+CondSpace *FsmAp::expandCondSpace( TransAp *destTrans, TransAp *srcTrans )
 {
 	CondSet destCS, srcCS;
 	CondSet mergedCS;
@@ -100,11 +109,7 @@ void FsmAp::expandCondTransitions( StateAp *fromState, TransAp *destTrans, Trans
 	mergedCS.insert( destCS );
 	mergedCS.insert( srcCS );
 
-	expandConds( fromState, destTrans, destCS, mergedCS );
-	expandConds( fromState, srcTrans, srcCS, mergedCS );
-
-	CondSpace *mergedCondSpace = addCondSpace( mergedCS );
-	destTrans->condSpace = mergedCondSpace;
+	return addCondSpace( mergedCS );
 }
 
 CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
@@ -117,11 +122,58 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 	return condSpace;
 }
 
+TransCondAp *FsmAp::convertToCondAp( StateAp *from, TransDataAp *trans )
+{
+//	std::cerr << __PRETTY_FUNCTION__ << std::endl;
+
+	TransCondAp *newTrans = new TransCondAp();
+	newTrans->lowKey = trans->lowKey;
+	newTrans->highKey = trans->highKey;
+	newTrans->condSpace = trans->condSpace;
+
+	CondAp *newCond = new CondAp( newTrans );
+	newCond->key = 0;
+	newTrans->condList.append( newCond );
+
+	newCond->lmActionTable.setActions( trans->lmActionTable );
+	newCond->actionTable.setActions( trans->actionTable );
+	newCond->priorTable.setPriors( trans->priorTable );
+
+	attachTrans( from, trans->toState, newCond );
+
+	/* Detach in list. */
+	detachTrans( from, trans->toState, trans );
+	delete trans;
+
+	return newTrans;
+}
+
+void FsmAp::convertToCondAp( StateAp *state )
+{
+	/* First replace TransDataAp with cond versions. */
+	TransList destList;
+	for ( TransList::Iter tr = state->outList; tr.lte(); ) {
+		TransList::Iter next = tr.next();
+		if ( tr->plain() ) {
+			TransCondAp *newTrans = convertToCondAp( state, tr->tdap() );
+			destList.append( newTrans );
+		}
+		else {
+			destList.append( tr );
+		}
+
+		tr = next;
+	}
+
+	state->outList.abandon();
+	state->outList.transfer( destList );
+}
 
 void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense )
 {
-	for ( TransList::Iter tr = state->outList; tr.lte(); tr++ ) {
+	convertToCondAp( state );
 
+	for ( TransList::Iter tr = state->outList; tr.lte(); tr++ ) {
 		/* The original cond set. */
 		CondSet origCS;
 		if ( tr->condSpace != 0 )
@@ -132,13 +184,13 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 		mergedCS.insert( origCS );
 		mergedCS.insert( condAction );
 
-		/* Allocate a cond space for the merged spet. */
+		/* Allocate a cond space for the merged set. */
 		CondSpace *mergedCondSpace = addCondSpace( mergedCS );
 		tr->condSpace = mergedCondSpace;
 
 		/* Translate original condition values, making space for the new bit
 		 * (possibly) introduced by the condition embedding. */
-		for ( CondList::Iter cti = tr->condList; cti.lte(); cti++ ) {
+		for ( CondList::Iter cti = tr->tcap()->condList; cti.lte(); cti++ ) {
 			long origVal = cti->key.getVal();
 			long newVal = 0;
 

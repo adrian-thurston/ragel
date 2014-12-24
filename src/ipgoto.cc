@@ -194,8 +194,8 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 
 	/* Emit any transitions that have actions and that go to this state. */
 	for ( int it = 0; it < state->numInConds; it++ ) {
-		RedCondAp *trans = state->inConds[it];
-		if ( trans->action != 0 && trans->labelNeeded ) {
+		RedCondPair *trans = state->inConds[it];
+		if ( trans->action != 0 ) {
 			/* Remember that we wrote an action so we know to write the
 			 * line directive for going back to the output. */
 			anyWritten = true;
@@ -311,8 +311,8 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 {
 	if ( trans->condSpace == 0 || trans->condSpace->condSet.length() == 0 ) {
 		/* Existing. */
-		assert( trans->outConds.length() == 1 );
-		RedCondAp *cond = trans->outConds.data[0].value;
+		assert( trans->numConds() == 1 );
+		RedCondPair *cond = trans->outCond( 0 );
 		if ( cond->action != 0 ) {
 			/* Go to the transition which will go to the state. */
 			out << TABS(level) << "goto ctr" << cond->id << ";";
@@ -332,10 +332,10 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 		}
 		CondKey lower = 0;
 		CondKey upper = trans->condFullSize() - 1;
-		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->outConds.length()-1 );
+		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->numConds() - 1 );
 
-		if ( trans->errCond != 0 ) {
-			COND_GOTO( trans->errCond, level+1 ) << "\n";
+		if ( trans->errCond() != 0 ) {
+			COND_GOTO( trans->errCond(), level+1 ) << "\n";
 		}
 	}
 
@@ -343,7 +343,7 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 }
 
 /* Emit the goto to take for a given transition. */
-std::ostream &IpGoto::COND_GOTO( RedCondAp *cond, int level )
+std::ostream &IpGoto::COND_GOTO( RedCondPair *cond, int level )
 {
 	/* Existing. */
 	if ( cond->action != 0 ) {
@@ -429,7 +429,7 @@ std::ostream &IpGoto::FINISH_CASES()
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
-			RedCondAp *cond = st->eofTrans->outConds.data[0].value;
+			RedCondPair *cond = st->eofTrans->outCond( 0 );
 			out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
 		}
 	}
@@ -470,6 +470,24 @@ void IpGoto::setLabelsNeeded( GenInlineList *inlineList )
 	}
 }
 
+void IpGoto::setLabelsNeeded( RedCondPair *pair )
+{
+	/* If there is no action with a next statement, then the label will be
+	 * needed. */
+	if ( pair->action == 0 || !pair->action->anyNextStmt() )
+		pair->targ->labelNeeded = true;
+
+	/* Need labels for states that have goto or calls in action code
+	 * invoked on characters (ie, not from out action code). */
+	if ( pair->action != 0 ) {
+		/* Loop the actions. */
+		for ( GenActionTable::Iter act = pair->action->key; act.lte(); act++ ) {
+			/* Get the action and walk it's tree. */
+			setLabelsNeeded( act->value->inlineList );
+		}
+	}
+}
+
 /* Set up labelNeeded flag for each state. */
 void IpGoto::setLabelsNeeded()
 {
@@ -484,22 +502,13 @@ void IpGoto::setLabelsNeeded()
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 			st->labelNeeded = false;
 
-		for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ ) {
-			/* If there is no action with a next statement, then the label will be
-			 * needed. */
-			if ( cond->action == 0 || !cond->action->anyNextStmt() )
-				cond->targ->labelNeeded = true;
-
-			/* Need labels for states that have goto or calls in action code
-			 * invoked on characters (ie, not from out action code). */
-			if ( cond->action != 0 ) {
-				/* Loop the actions. */
-				for ( GenActionTable::Iter act = cond->action->key; act.lte(); act++ ) {
-					/* Get the action and walk it's tree. */
-					setLabelsNeeded( act->value->inlineList );
-				}
-			}
+		for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
+			if ( trans->condSpace == 0 )
+				setLabelsNeeded( &trans->p );
 		}
+
+		for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ )
+			setLabelsNeeded( &cond->p );
 	}
 
 	if ( !noEnd ) {

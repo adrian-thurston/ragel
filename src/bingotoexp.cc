@@ -95,7 +95,7 @@ void BinaryGotoExp::genAnalysis()
 }
 
 
-void BinaryGotoExp::COND_ACTION( RedCondAp *cond )
+void BinaryGotoExp::COND_ACTION( RedCondPair *cond )
 {
 	int action = 0;
 	if ( cond->action != 0 )

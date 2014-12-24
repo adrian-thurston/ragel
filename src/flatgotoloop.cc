@@ -378,7 +378,7 @@ void FlatGotoLoop::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-void FlatGotoLoop::COND_ACTION( RedCondAp *cond )
+void FlatGotoLoop::COND_ACTION( RedCondPair *cond )
 {
 	/* If there are actions, emit them. Otherwise emit zero. */
 	int act = 0;

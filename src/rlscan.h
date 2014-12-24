@@ -2,8 +2,6 @@
  *  Copyright 2007 Adrian Thurston <thurston@complang.org>
  */
 
-#error "header deprecated"
-
 #ifndef _RLSCAN_H
 #define _RLSCAN_H
 
@@ -23,7 +21,7 @@ extern char *Parser_lelNames[];
 struct Scanner
 {
 	Scanner( InputData &id, const char *fileName, istream &input,
-			Parser *inclToParser, char *inclSectionTarg,
+			Parser6 *inclToParser, char *inclSectionTarg,
 			int includeDepth, bool importMachines )
 	: 
 		id(id), fileName(fileName), 
@@ -55,7 +53,7 @@ struct Scanner
 	void token( int type, char c );
 	void token( int type );
 	void processToken( int type, char *tokdata, int toklen );
-	void directToParser( Parser *toParser, const char *tokFileName, int tokLine, 
+	void directToParser( Parser6 *toParser, const char *tokFileName, int tokLine, 
 		int tokColumn, int type, char *tokdata, int toklen );
 	void flushImport( );
 	void importToken( int type, char *start, char *end );
@@ -71,7 +69,7 @@ struct Scanner
 	InputData &id;
 	const char *fileName;
 	istream &input;
-	Parser *inclToParser;
+	Parser6 *inclToParser;
 	char *inclSectionTarg;
 	int includeDepth;
 	bool importMachines;
@@ -99,7 +97,7 @@ struct Scanner
 
 	/* Set by machine statements, these persist from section to section
 	 * allowing for unnamed sections. */
-	Parser *parser;
+	Parser6 *parser;
 	bool ignoreSection;
 
 	/* This is set if ragel has already emitted an error stating that

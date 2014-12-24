@@ -190,34 +190,35 @@ struct RedAction
 	bool bAnyBreakStmt;
 	bool bUsingAct;
 };
+
 typedef AvlTree<RedAction, GenActionTable, CmpGenActionTable> GenActionTableMap;
+
+struct RedCondPair
+{
+	int id;
+	RedStateAp *targ;
+	RedAction *action;
+};
 
 struct RedCondAp
 :
 	public AvlTreeEl<RedCondAp>
 {
 	RedCondAp( RedStateAp *targ, RedAction *action, int id )
-		: targ(targ), action(action), id(id), pos(-1), labelNeeded(true) { }
+	{
+		p.id = id;
+		p.targ = targ;
+		p.action = action;
+	}
 
-	RedStateAp *targ;
-	RedAction *action;
-	int id;
-	int pos;
-	bool partitionBoundary;
-	bool labelNeeded;
+	RedCondPair p;
 };
 
 struct RedCondEl
 {
-	/* Constructors. */
-	RedCondEl( CondKey key, RedCondAp *value ) 
-		: key(key), value(value) { }
-
 	CondKey key;
 	RedCondAp *value;
 };
-
-typedef Vector<RedCondEl> RedCondList;
 
 struct CmpRedCondEl
 {
@@ -249,32 +250,76 @@ struct GenCondSpace
 
 	GenCondSpace *next, *prev;
 };
+
 typedef DList<GenCondSpace> CondSpaceList;
 
+struct RedCondVect
+{
+	int numConds;
+	RedCondEl *outConds;
+	RedCondAp *errCond;
+};
 
 /* Reduced transition. */
 struct RedTransAp
 :
 	public AvlTreeEl<RedTransAp>
 {
-	RedTransAp( int id )
+	RedTransAp( int id, GenCondSpace *condSpace,
+			RedCondEl *outConds, int numConds, RedCondAp *errCond )
 	:
 		id(id),
-		labelNeeded(true),
-		condSpace(0),
-		errCond(0)
-	{ }
+		condSpace(condSpace)
+	{
+		v.outConds = outConds;
+		v.numConds = numConds;
+		v.errCond = errCond;
+	}
 
-	int id;
-	bool partitionBoundary;
-	bool labelNeeded;
+	RedTransAp( int id, int condId, RedStateAp *targ, RedAction *action )
+	:
+		id(id),
+		condSpace(0)
+	{
+		p.id = condId;
+		p.targ = targ;
+		p.action = action;
+	}
 
 	long condFullSize() 
-		{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
+	{
+		return condSpace == 0 ? 1 : condSpace->fullSize();
+	}
 
+	CondKey outCondKey( int off )
+	{
+		return condSpace == 0 ? CondKey(0) : v.outConds[off].key;
+	}
+
+	RedCondPair *outCond( int off )
+	{
+		return condSpace == 0 ? &p : &v.outConds[off].value->p;
+	}
+
+	int numConds()
+	{
+		return condSpace == 0 ? 1 : v.numConds;
+	}
+
+	RedCondPair *errCond()
+	{
+		return condSpace == 0 ? 0 : ( v.errCond != 0 ? &v.errCond->p : 0 );
+	}
+
+	int id;
 	GenCondSpace *condSpace;
-	RedCondList outConds;
-	RedCondAp *errCond;
+
+	/* Either a pair or a vector of conds. */
+	union
+	{
+		RedCondPair p;
+		RedCondVect v;
+	};
 };
 
 /* Compare of transitions for the final reduction of transitions. Comparison
@@ -289,8 +334,38 @@ struct CmpRedTransAp
 		else if ( t1.condSpace > t2.condSpace )
 			return 1;
 		else {
-			return CmpTable<RedCondEl, CmpRedCondEl>::compare(
-					t1.outConds, t2.outConds );
+			if ( t1.condSpace == 0 ) {
+				if ( t1.p.targ < t2.p.targ )
+					return -1;
+				else if ( t1.p.targ > t2.p.targ )
+					return 1;
+				else if ( t1.p.action < t2.p.action )
+					return -1;
+				else if ( t1.p.action > t2.p.action )
+					return 1;
+				else
+					return 0;
+
+			}
+			else {
+				if ( t1.v.numConds < t2.v.numConds )
+					return -1;
+				else if ( t1.v.numConds > t2.v.numConds )
+					return 1;
+				else
+				{
+					RedCondEl *i1 = t1.v.outConds, *i2 = t2.v.outConds;
+					long len = t1.v.numConds, cmpResult;
+					for ( long pos = 0; pos < len;
+							pos += 1, i1 += 1, i2 += 1 )
+					{
+						cmpResult = CmpRedCondEl::compare(*i1, *i2);
+						if ( cmpResult != 0 )
+							return cmpResult;
+					}
+					return 0;
+				}
+			}
 		}
 	}
 };
@@ -299,13 +374,13 @@ struct CmpRedCondAp
 {
 	static int compare( const RedCondAp &t1, const RedCondAp &t2 )
 	{
-		if ( t1.targ < t2.targ )
+		if ( t1.p.targ < t2.p.targ )
 			return -1;
-		else if ( t1.targ > t2.targ )
+		else if ( t1.p.targ > t2.p.targ )
 			return 1;
-		else if ( t1.action < t2.action )
+		else if ( t1.p.action < t2.p.action )
 			return -1;
-		else if ( t1.action > t2.action )
+		else if ( t1.p.action > t2.p.action )
 			return 1;
 		else
 			return 0;
@@ -431,7 +506,7 @@ struct RedStateAp
 	int partition;
 	bool partitionBoundary;
 
-	RedCondAp **inConds;
+	RedCondPair **inConds;
 	int numInConds;
 };
 
@@ -579,7 +654,10 @@ struct RedFsmAp
 	/* Is every char in the alphabet covered? */
 	bool alphabetCovered( RedTransList &outRange );
 
-	RedTransAp *allocateTrans( GenCondSpace *condSpace );
+	RedTransAp *allocateTrans( RedStateAp *targ, RedAction *action );
+	RedTransAp *allocateTrans( GenCondSpace *condSpace,
+			RedCondEl *outConds, int numConds, RedCondAp *errCond );
+
 	RedCondAp *allocateCond( RedStateAp *targState, RedAction *actionTable );
 
 	void partitionFsm( int nParts );

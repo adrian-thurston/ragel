@@ -44,10 +44,16 @@ GenBase::GenBase( std::string fsmName, ParseData *pd, FsmAp *fsm )
 void GenBase::appendTrans( TransListVect &outList, Key lowKey, 
 		Key highKey, TransAp *trans )
 {
-	for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
-		if ( cond->toState != 0 || cond->actionTable.length() > 0 ) {
+	if ( trans->plain() ) {
+		if ( trans->tdap()->toState != 0 || trans->tdap()->actionTable.length() > 0 )
 			outList.append( TransEl( lowKey, highKey, trans ) );
-			break;
+	}
+	else {
+		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+			if ( cond->toState != 0 || cond->actionTable.length() > 0 ) {
+				outList.append( TransEl( lowKey, highKey, trans ) );
+				break;
+			}
 		}
 	}
 }
@@ -78,10 +84,18 @@ void GenBase::reduceActionTables()
 
 		/* Loop the transitions and reduce their actions. */
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) {
-				if ( cond->actionTable.length() > 0 ) {
-					if ( actionTableMap.insert( cond->actionTable, &actionTable ) )
+			if ( trans->plain() ) {
+				if ( trans->tdap()->actionTable.length() > 0 ) {
+					if ( actionTableMap.insert( trans->tdap()->actionTable, &actionTable ) )
 						actionTable->id = nextActionTableId++;
+				}
+			}
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+					if ( cond->actionTable.length() > 0 ) {
+						if ( actionTableMap.insert( cond->actionTable, &actionTable ) )
+							actionTable->id = nextActionTableId++;
+					}
 				}
 			}
 		}
@@ -586,30 +600,77 @@ void CodeGenData::makeEofTrans( StateAp *state )
 
 void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
-	RedCondList redCondList;
+	RedCondEl *outConds;
+	int numConds;
 
-	for ( CondList::Iter cti = trans->condList; cti.lte(); cti++ ) {
+	assert( ( allStates + curState ) != redFsm->errState );
+
+	if ( trans->plain() ) {
 		long targ = -1;
 		long action = -1;
 
 		/* First reduce the action. */
 		RedActionTable *actionTable = 0;
-		if ( cti->actionTable.length() > 0 )
-			actionTable = actionTableMap.find( cti->actionTable );
+		if ( trans->tdap()->actionTable.length() > 0 )
+			actionTable = actionTableMap.find( trans->tdap()->actionTable );
 
-		if ( cti->toState != 0 )
-			targ = cti->toState->alg.stateNum;
+		if ( trans->tdap()->toState != 0 )
+			targ = trans->tdap()->toState->alg.stateNum;
 
 		if ( actionTable != 0 )
 			action = actionTable->id;
 
-		newCondTrans( redCondList, curState, cti->key, targ, action );
-	}
+		/* Make the new transitions. */
+		RedStateAp *targState = targ >= 0 ? (allStates + targ) : redFsm->getErrorState();
+		RedAction *at = action >= 0 ? (allActionTables + action) : 0;
 
-	GenCondSpace *gcs = trans->condSpace != 0 ?
-			allCondSpaces + trans->condSpace->condSpaceId : 0;
-	
-	newTrans( curState, curTrans++, lowKey, highKey, gcs, redCondList );
+		RedTransAp *trans = redFsm->allocateTrans( targState, at );
+		newTrans( allStates + curState, lowKey, highKey, trans );
+	}
+	else {
+		numConds = trans->tcap()->condList.length();
+		outConds = new RedCondEl[numConds];
+		int pos = 0;
+		for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++, pos++ ) {
+			long targ = -1;
+			long action = -1;
+
+			/* First reduce the action. */
+			RedActionTable *actionTable = 0;
+			if ( cti->actionTable.length() > 0 )
+				actionTable = actionTableMap.find( cti->actionTable );
+
+			if ( cti->toState != 0 )
+				targ = cti->toState->alg.stateNum;
+
+			if ( actionTable != 0 )
+				action = actionTable->id;
+
+			/* Make the new transitions. */
+			RedStateAp *targState = targ >= 0 ? (allStates + targ) : redFsm->getErrorState();
+			RedAction *at = action >= 0 ? (allActionTables + action) : 0;
+			RedCondAp *cond = redFsm->allocateCond( targState, at );
+
+			outConds[pos].key = cti->key;
+			outConds[pos].value = cond;
+		}
+
+		GenCondSpace *condSpace = allCondSpaces + trans->condSpace->condSpaceId;
+
+		/* If the cond list is not full then we need an error cond. */
+		RedCondAp *errCond = 0;
+		if ( numConds < ( 1 << condSpace->condSet.length() ) )
+			errCond = redFsm->getErrorCond();
+		
+		RedTransAp *trans = redFsm->allocateTrans(
+				condSpace, outConds, numConds, errCond  );
+
+		trans->v.outConds = outConds;
+		trans->v.numConds = numConds;
+		trans->v.errCond = errCond;
+
+		newTrans( allStates + curState, lowKey, highKey, trans );
+	}
 }
 
 void CodeGenData::makeTransList( StateAp *state )
@@ -626,7 +687,6 @@ void CodeGenData::makeTransList( StateAp *state )
 	}
 
 	initTransList( curState, outList.length() );
-	curTrans = 0;
 
 	for ( TransListVect::Iter tvi = outList; tvi.lte(); tvi++ )
 		makeTrans( tvi->lowKey, tvi->highKey, tvi->value );
@@ -848,23 +908,10 @@ void CodeGenData::initTransList( int snum, unsigned long length )
 	 * nothing. */
 }
 
-void CodeGenData::newTrans( int snum, int tnum, Key lowKey, 
-		Key highKey, GenCondSpace *gcs, RedCondList &outConds )
+void CodeGenData::newTrans( RedStateAp *state, Key lowKey, Key highKey, RedTransAp *trans )
 {
 	/* Get the current state and range. */
-	RedStateAp *curState = allStates + snum;
-	RedTransList &destRange = curState->outRange;
-
-	if ( curState == redFsm->errState )
-		return;
-
-	RedTransAp *trans = redFsm->allocateTrans( gcs );
-	trans->outConds.transfer( outConds );
-	RedTransEl transEl( lowKey, highKey, trans );
-
-	/* If the cond list is not full then. */
-	if ( gcs != 0 && outConds.length() < ( 1 << gcs->condSet.length() ) )
-		trans->errCond = redFsm->getErrorCond();
+	RedTransList &destRange = state->outRange;
 
 	/* Reduced machines are complete. We need to fill any gaps with the error
 	 * transitions. */
@@ -876,7 +923,8 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 			keyOps->decrement( fillHighKey );
 
 			/* Create the filler with the state's error transition. */
-			RedTransEl newTel( pd->fsmCtx->keyOps->minKey, fillHighKey, redFsm->getErrorTrans() );
+			RedTransEl newTel( pd->fsmCtx->keyOps->minKey, fillHighKey,
+					redFsm->getErrorTrans() );
 			destRange.append( newTel );
 		}
 	}
@@ -900,58 +948,6 @@ void CodeGenData::newTrans( int snum, int tnum, Key lowKey,
 	destRange.append( RedTransEl( lowKey, highKey, trans ) );
 }
 
-void CodeGenData::newCondTrans( RedCondList &outConds,
-		int snum, CondKey key,
-		long targ, long action )
-{
-	/* Get the current state and range. */
-	RedStateAp *curState = allStates + snum;
-
-	if ( curState == redFsm->errState )
-		return;
-
-	/* Make the new transitions. */
-	RedStateAp *targState = targ >= 0 ? (allStates + targ) : redFsm->getErrorState();
-	RedAction *actionTable = action >= 0 ? (allActionTables + action) : 0;
-	RedCondAp *cond = redFsm->allocateCond( targState, actionTable );
-	RedCondEl transEl( key, cond );
-
-#if 0
-	/* Reduced machines are complete. We need to fill any gaps with the error
-	 * transitions. */
-	if ( outConds.length() == 0 ) {
-		/* Range is currently empty. */
-		if ( 0 < key.getVal() ) {
-			/* The first range doesn't start at the low end. */
-			CondKey fillHighKey = key;
-			fillHighKey.decrement();
-
-			/* Create the filler with the state's error transition. */
-			//RedCondEl newTel( 0, redFsm->getErrorTrans() );
-			//outConds.append( newTel );
-		}
-	}
-	else {
-		/* The range list is not empty, get the the last range. */
-		RedCondEl *last = &outConds[outConds.length()-1];
-		CondKey nextKey = last->key;
-		nextKey.increment();
-		if ( nextKey < key ) {
-			/* There is a gap to fill. Make the high key. */
-			CondKey fillHighKey = key;
-			fillHighKey.decrement();
-
-			/* Create the filler with the state's error transtion. */
-			//RedCondEl newTel( nextKey, fillHighKey, redFsm->getErrorTrans() );
-			//outConds.append( newTel );
-		}
-	}
-#endif
-
-	/* Filler taken care of. Append the range. */
-	outConds.append( RedCondEl( key, cond ) );
-}
-
 void CodeGenData::finishTransList( int snum )
 {
 	/* Get the current state and range. */
@@ -966,7 +962,8 @@ void CodeGenData::finishTransList( int snum )
 	if ( destRange.length() == 0 ) {
 		/* Fill with the whole alphabet. */
 		/* Add the range on the lower and upper bound. */
-		RedTransEl newTel( pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey, redFsm->getErrorTrans() );
+		RedTransEl newTel( pd->fsmCtx->keyOps->minKey,
+				pd->fsmCtx->keyOps->maxKey, redFsm->getErrorTrans() );
 		destRange.append( newTel );
 	}
 	else {
@@ -978,7 +975,8 @@ void CodeGenData::finishTransList( int snum )
 			keyOps->increment( fillLowKey );
 
 			/* Create the new range with the error trans and append it. */
-			RedTransEl newTel( fillLowKey, pd->fsmCtx->keyOps->maxKey, redFsm->getErrorTrans() );
+			RedTransEl newTel( fillLowKey, pd->fsmCtx->keyOps->maxKey,
+					redFsm->getErrorTrans() );
 			destRange.append( newTel );
 		}
 	}
@@ -1014,9 +1012,15 @@ void CodeGenData::setEofTrans( int snum, long eofTarget, long actId )
 	RedStateAp *curState = allStates + snum;
 	RedStateAp *targState = allStates + eofTarget;
 	RedAction *eofAct = allActionTables + actId;
-	curState->eofTrans = redFsm->allocateTrans( 0 );
-	RedCondAp *cond = redFsm->allocateCond( targState, eofAct );
-	curState->eofTrans->outConds.append( RedCondEl( 0, cond ) );
+
+	RedTransAp *trans = redFsm->allocateTrans( targState, eofAct );
+
+	trans->condSpace = 0;
+	trans->p.id = redFsm->nextCondId++;
+	trans->p.targ = targState;
+	trans->p.action = eofAct;
+
+	curState->eofTrans = trans;
 }
 
 void CodeGenData::resolveTargetStates( GenInlineList *inlineList )
@@ -1094,9 +1098,10 @@ void CodeGenData::actionActionRefs( RedAction *action )
 
 void CodeGenData::transActionRefs( RedTransAp *trans )
 {
-	for ( RedCondList::Iter rtc = trans->outConds; rtc.lte(); rtc++ ) {
-		if ( rtc->value->action != 0 )
-			actionActionRefs( rtc->value->action );
+	for ( int c = 0; c < trans->numConds(); c++ ) {
+		RedCondPair *cond = trans->outCond(c);
+		if ( cond->action != 0 )
+			actionActionRefs( cond->action );
 	}
 }
 
@@ -1347,24 +1352,30 @@ void CodeGenData::analyzeMachine()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Check any actions out of outSinge. */
 		for ( RedTransList::Iter rtel = st->outSingle; rtel.lte(); rtel++ ) {
-			for ( RedCondList::Iter cond = rtel->value->outConds; cond.lte(); cond++ ) {
-				if ( cond->value->action != 0 && cond->value->action->anyCurStateRef() )
+			RedTransAp *trans = rtel->value;
+			for ( int c = 0; c < trans->numConds(); c++ ) {
+				RedCondPair *cond = trans->outCond(c);
+				if ( cond->action != 0 && cond->action->anyCurStateRef() )
 					st->bAnyRegCurStateRef = true;
 			}
 		}
 
 		/* Check any actions out of outRange. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
-			for ( RedCondList::Iter cond = rtel->value->outConds; cond.lte(); cond++ ) {
-				if ( cond->value->action != 0 && cond->value->action->anyCurStateRef() )
+			RedTransAp *trans = rtel->value;
+			for ( int c = 0; c < trans->numConds(); c++ ) {
+				RedCondPair *cond = trans->outCond(c);
+				if ( cond->action != 0 && cond->action->anyCurStateRef() )
 					st->bAnyRegCurStateRef = true;
 			}
 		}
 
 		/* Check any action out of default. */
 		if ( st->defTrans != 0 ) {
-			for ( RedCondList::Iter cond = st->defTrans->outConds; cond.lte(); cond++ ) {
-				if ( cond->value->action != 0 && cond->value->action->anyCurStateRef() )
+			RedTransAp *trans = st->defTrans;
+			for ( int c = 0; c < trans->numConds(); c++ ) {
+				RedCondPair *cond = trans->outCond(c);
+				if ( cond->action != 0 && cond->action->anyCurStateRef() )
 					st->bAnyRegCurStateRef = true;
 			}
 		}

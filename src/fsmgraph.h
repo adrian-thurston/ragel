@@ -356,9 +356,9 @@ typedef CmpTable< int, CmpOrd<int> > TransFuncListCompare;
 /* In transition list. Like DList except only has head pointers, which is all
  * that is required. Insertion and deletion is handled by the graph. This class
  * provides the iterator of a single list. */
-template <class Element> struct TransInList
+template <class Element> struct InList
 {
-	TransInList() : head(0) { }
+	InList() : head(0) { }
 
 	Element *head;
 
@@ -368,8 +368,8 @@ template <class Element> struct TransInList
 		Iter() : ptr(0) { }
 
 		/* Construct, assign from a list. */
-		Iter( const TransInList &il )  : ptr(il.head) { }
-		Iter &operator=( const TransInList &dl ) { ptr = dl.head; return *this; }
+		Iter( const InList &il )  : ptr(il.head) { }
+		Iter &operator=( const InList &dl ) { ptr = dl.head; return *this; }
 
 		/* At the end */
 		bool lte() const    { return ptr != 0; }
@@ -393,32 +393,21 @@ template <class Element> struct TransInList
 	};
 };
 
-
-/* The element for the sub-list within a TransAp. These specify the transitions
- * and are keyed by the condition expressions. */
-struct CondAp
+struct TransData
 {
-	CondAp( TransAp *transAp ) 
+	TransData() 
 	:
-		transAp(transAp), 
-		key(0), fromState(0), toState(0) 
+		fromState(0), toState(0) 
 	{}
 
-	CondAp( const CondAp &other, TransAp *transAp )
+	TransData( const TransData &other )
 	:
-		transAp(transAp),
-		key(other.key),
 		fromState(0), toState(0),
 		actionTable(other.actionTable),
 		priorTable(other.priorTable),
 		lmActionTable(other.lmActionTable)
 	{
 	}
-
-	/* Owning transition. */
-	TransAp *transAp;
-
-	CondKey key;
 
 	StateAp *fromState;
 	StateAp *toState;
@@ -428,6 +417,33 @@ struct CondAp
 	PriorTable priorTable;
 
 	LmActionTable lmActionTable;
+};
+
+
+/* The element for the sub-list within a TransAp. These specify the transitions
+ * and are keyed by the condition expressions. */
+struct CondAp
+	: public TransData
+{
+	CondAp( TransAp *transAp ) 
+	:
+		TransData(),
+		transAp(transAp), 
+		key(0)
+	{}
+
+	CondAp( const CondAp &other, TransAp *transAp )
+	:
+		TransData( other ),
+		transAp(transAp),
+		key(other.key)
+	{
+	}
+
+	/* Owning transition. */
+	TransAp *transAp;
+
+	CondKey key;
 
 	/* Pointers for outlist. */
 	CondAp *prev, *next;
@@ -437,6 +453,9 @@ struct CondAp
 };
 
 typedef DList<CondAp> CondList;
+
+struct TransCondAp;
+struct TransDataAp;
 
 /* Transition class that implements actions and priorities. */
 struct TransAp 
@@ -448,8 +467,7 @@ struct TransAp
 	:
 		lowKey(other.lowKey),
 		highKey(other.highKey),
-		condSpace(other.condSpace),
-		condList()
+		condSpace(other.condSpace)
 	{
 	}
 
@@ -459,6 +477,12 @@ struct TransAp
 		//	condList.abandon();
 	}
 
+	bool plain() const
+		{ return condSpace == 0; }
+
+	TransCondAp *tcap();
+	TransDataAp *tdap();
+
 	long condFullSize();
 
 	Key lowKey, highKey;
@@ -466,12 +490,52 @@ struct TransAp
 	/* Which conditions are tested on this range. */
 	CondSpace *condSpace;
 
-	/* Cond trans list. */
-	CondList condList;
-
 	/* Pointers for outlist. */
 	TransAp *prev, *next;
 };
+
+struct TransCondAp
+	: public TransAp
+{
+	TransCondAp() 
+	:
+		TransAp()
+	{}
+
+	TransCondAp( const TransCondAp &other )
+	:
+		TransAp( other ),
+		condList()
+	{}
+
+	/* Cond trans list. */
+	CondList condList;
+};
+
+struct TransDataAp
+	: public TransAp, public TransData
+{
+	TransDataAp() 
+	:
+		TransAp(),
+		TransData()
+	{}
+
+	TransDataAp( const TransDataAp &other )
+	:
+		TransAp( other ),
+		TransData( other )
+	{}
+
+	/* Pointers for in-list. */
+	TransDataAp *ilprev, *ilnext;
+};
+
+inline TransCondAp *TransAp::tcap()
+		{ return this->condSpace != 0 ? static_cast<TransCondAp*>( this ) : 0; }
+
+inline TransDataAp *TransAp::tdap()
+		{ return this->condSpace == 0 ? static_cast<TransDataAp*>( this ) : 0; }
 
 typedef DList<TransAp> TransList;
 
@@ -661,6 +725,8 @@ struct FsmCtx
 	MinimizeOpt minimizeOpt;
 };
 
+typedef InList<CondAp> CondInList;
+typedef InList<TransDataAp> TransInList;
 
 /* State class that implements actions and priorities. */
 struct StateAp 
@@ -676,7 +742,8 @@ struct StateAp
 	TransList outList;
 
 	/* In transition Lists. */
-	TransInList<CondAp> inList;
+	TransInList inTrans;
+	CondInList inCond;
 
 	/* Set only during scanner construction when actions are added. NFA to DFA
 	 * code can ignore this. */
@@ -787,7 +854,6 @@ template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
 	{
 		RangeInS1, RangeInS2,
 		RangeOverlap,
-		BreakS1, BreakS2
 	};
 
 	/* Encodes the different states that an fsm iterator can be in. */
@@ -861,7 +927,8 @@ template <class ListItem1, class ListItem2> ValPairIter<ListItem1, ListItem2>::
 
 /* Advance to the next transition. When returns, trans points to the next
  * transition, unless there are no more, in which case end() returns true. */
-template <class ListItem1, class ListItem2> void ValPairIter<ListItem1, ListItem2>::findNext()
+template <class ListItem1, class ListItem2>
+	void ValPairIter<ListItem1, ListItem2>::findNext()
 {
 	/* Jump into the iterator routine base on the iterator state. */
 	switch ( itState ) {
@@ -1016,7 +1083,8 @@ template <class ListItem1, class ListItem2> RangePairIter<ListItem1, ListItem2>:
 
 /* Advance to the next transition. When returns, trans points to the next
  * transition, unless there are no more, in which case end() returns true. */
-template <class ListItem1, class ListItem2> void RangePairIter<ListItem1, ListItem2>::findNext()
+template <class ListItem1, class ListItem2>
+		void RangePairIter<ListItem1, ListItem2>::findNext()
 {
 	/* Jump into the iterator routine base on the iterator state. */
 	switch ( itState ) {
@@ -1302,6 +1370,7 @@ struct FsmAp
 	/* Set conditions. */
 	CondSpace *addCondSpace( const CondSet &condSet );
 
+	void convertToCondAp( StateAp *state );
 	void embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense );
 	void embedCondition( StateAp *state, Action *condAction, bool sense );
 
@@ -1383,25 +1452,28 @@ struct FsmAp
 	 */
 
 	/* Common to attaching/detaching list and default. */
-	void attachToInList( StateAp *from, StateAp *to, CondAp *&head, CondAp *trans );
-	void detachFromInList( StateAp *from, StateAp *to, CondAp *&head, CondAp *trans );
+	template < class Head > void attachToInList( StateAp *from,
+			StateAp *to, Head *&head, Head *trans );
+	template < class Head > void detachFromInList( StateAp *from,
+			StateAp *to, Head *&head, Head *trans );
 
 	/* Attach with a new transition. */
+	CondAp *attachNewCond( TransAp *trans, StateAp *from,
+			StateAp *to, CondKey onChar );
 	TransAp *attachNewTrans( StateAp *from, StateAp *to,
 			Key onChar1, Key onChar2 );
-	CondAp *attachNewTrans( TransAp *trans, StateAp *from,
-			StateAp *to, CondKey onChar );
 
 	/* Attach with an existing transition that already in an out list. */
-	void attachTrans( StateAp *from, StateAp *to, TransAp *trans );
+	void attachTrans( StateAp *from, StateAp *to, TransDataAp *trans );
 	void attachTrans( StateAp *from, StateAp *to, CondAp *trans );
 	
 	/* Redirect a transition away from error and towards some state. */
+	void redirectErrorTrans( StateAp *from, StateAp *to, TransDataAp *trans );
 	void redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans );
 
 	/* Detach a transition from a target state. */
-	void detachTrans( StateAp *from, StateAp *to, TransAp *trans );
-	void detachCondTrans( StateAp *from, StateAp *to, CondAp *trans );
+	void detachTrans( StateAp *from, StateAp *to, TransDataAp *trans );
+	void detachTrans( StateAp *from, StateAp *to, CondAp *trans );
 
 	/* Detach a state from the graph. */
 	void detachState( StateAp *state );
@@ -1411,29 +1483,34 @@ struct FsmAp
 	 */
 
 	/* Duplicate a transition that will dropin to a free spot. */
+	TransDataAp *dupTransData( StateAp *from, TransDataAp *srcTrans );
 	TransAp *dupTrans( StateAp *from, TransAp *srcTrans );
 	CondAp *dupCondTrans( StateAp *from, TransAp *destParent, CondAp *srcTrans );
 
 	/* In crossing, two transitions both go to real states. */
-	CondAp *fsmAttachStates( MergeData &md, StateAp *from,
-			CondAp *destTrans, CondAp *srcTrans );
+	template< class Trans > Trans *fsmAttachStates( MergeData &md, StateAp *from,
+			Trans *destTrans, Trans *srcTrans );
 
-	void expandConds( StateAp *fromState, TransAp *trans, const CondSet &origSet, const CondSet &mergedCS );
-	void expandCondTransitions( StateAp *fromState, TransAp *destTrans, TransAp *srcTrans );
-	TransAp *copyTransForExpanision( StateAp *fromState, TransAp *srcTrans );
+	void expandConds( StateAp *fromState, TransAp *trans,
+			CondSpace *fromSpace, CondSpace *mergedSpace );
+	TransAp *copyTransForExpansion( StateAp *fromState, TransAp *srcTrans );
 	void freeEffectiveTrans( TransAp *srcTrans );
 
 	/* Two transitions are to be crossed, handle the possibility of either
 	 * going to the error state. */
-	CondAp *mergeTrans( MergeData &md, StateAp *from,
-			CondAp *destTrans, CondAp *srcTrans );
+	template< class Trans > Trans *mergeTrans( MergeData &md, StateAp *from,
+			Trans *destTrans, Trans *srcTrans );
 
 	/* Compare deterimne relative priorities of two transition tables. */
 	int comparePrior( const PriorTable &priorTable1, const PriorTable &priorTable2 );
 
 	/* Cross a src transition with one that is already occupying a spot. */
+	TransCondAp *convertToCondAp( StateAp *state, TransDataAp *trans );
+	CondSpace *expandCondSpace( TransAp *destTrans, TransAp *srcTrans );
 	TransAp *crossTransitions( MergeData &md, StateAp *from,
 			TransAp *destTrans, TransAp *srcTrans );
+	TransDataAp *crossTransitionsBothPlain( MergeData &md, StateAp *from,
+			TransDataAp *destTrans, TransDataAp *srcTrans );
 	CondAp *crossCondTransitions( MergeData &md, StateAp *from,
 			TransAp *destParent, CondAp *destTrans, CondAp *srcTrans );
 
@@ -1456,18 +1533,18 @@ struct FsmAp
 
 	/* Compare priority and function table of transitions. */
 	static int compareTransData( TransAp *trans1, TransAp *trans2 );
-	static int compareCondData( CondAp *trans1, CondAp *trans2 );
+	template< class Trans > static int compareCondData( Trans *trans1, Trans *trans2 );
 
 	/* Compare transition data. Either of the pointers may be null. */
 	static int compareTransDataPtr( TransAp *trans1, TransAp *trans2 );
-	static int compareCondDataPtr( CondAp *trans1, CondAp *trans2 );
+	template< class Trans > static int compareCondDataPtr( Trans *trans1, Trans *trans2 );
 
 	/* Compare target state and transition data. Either pointer may be null. */
 	static int compareFullPtr( TransAp *trans1, TransAp *trans2 );
 
 	/* Compare target partitions. Either pointer may be null. */
 	static int compareTransPartPtr( TransAp *trans1, TransAp *trans2 );
-	static int compareCondPartPtr( CondAp *trans1, CondAp *trans2 );
+	template< class Trans > static int compareCondPartPtr( Trans *trans1, Trans *trans2 );
 
 	static int comparePart( TransAp *trans1, TransAp *trans2 );
 
@@ -1480,8 +1557,7 @@ struct FsmAp
 	 */
 
 	/* Add in the properties of srcTrans into this. */
-	void addInTrans( TransAp *destTrans, TransAp *srcTrans );
-	void addInTrans( CondAp *destTrans, CondAp *srcTrans );
+	template< class Trans > void addInTrans( Trans *destTrans, Trans *srcTrans );
 
 	/* Compare states on data stored in the states. */
 	static int compareStateData( const StateAp *state1, const StateAp *state2 );
@@ -1656,7 +1732,7 @@ struct FsmAp
 	bool markRound( MarkIndex &markIndex );
 
 	/* Move the in trans into src into dest. */
-	void inTransMove(StateAp *dest, StateAp *src);
+	void moveInwardTrans(StateAp *dest, StateAp *src);
 	
 	/* Make state src and dest the same state. */
 	void fuseEquivStates(StateAp *dest, StateAp *src);
@@ -1680,5 +1756,46 @@ struct FsmAp
 	 * validating ranges and machines to export. */
 	bool checkSingleCharMachine( );
 };
+
+/* Callback invoked when another trans (or possibly this) is added into this
+ * transition during the merging process.  Draw in any properties of srcTrans
+ * into this transition. AddInTrans is called when a new transitions is made
+ * that will be a duplicate of another transition or a combination of several
+ * other transitions. AddInTrans will be called for each transition that the
+ * new transition is to represent. */
+template< class Trans > void FsmAp::addInTrans( Trans *destTrans, Trans *srcTrans )
+{
+	/* Protect against adding in from ourselves. */
+	if ( srcTrans == destTrans ) {
+		/* Adding in ourselves, need to make a copy of the source transitions.
+		 * The priorities are not copied in as that would have no effect. */
+		destTrans->lmActionTable.setActions( LmActionTable(srcTrans->lmActionTable) );
+		destTrans->actionTable.setActions( ActionTable(srcTrans->actionTable) );
+	}
+	else {
+		/* Not a copy of ourself, get the functions and priorities. */
+		destTrans->lmActionTable.setActions( srcTrans->lmActionTable );
+		destTrans->actionTable.setActions( srcTrans->actionTable );
+		destTrans->priorTable.setPriors( srcTrans->priorTable );
+	}
+}
+
+/* Compares two transition pointers according to priority and functions.
+ * Either pointer may be null. Does not consider to state or from state. */
+template< class Trans > int FsmAp::compareCondDataPtr( Trans *trans1, Trans *trans2 )
+{
+	if ( trans1 == 0 && trans2 != 0 )
+		return -1;
+	else if ( trans1 != 0 && trans2 == 0 )
+		return 1;
+	else if ( trans1 != 0 ) {
+		/* Both of the transition pointers are set. */
+		int compareRes = compareCondData( trans1, trans2 );
+		if ( compareRes != 0 )
+			return compareRes;
+	}
+	return 0;
+}
+
 
 #endif

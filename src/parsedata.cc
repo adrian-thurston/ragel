@@ -53,18 +53,22 @@ void afterOpMinimize( FsmAp *fsm, bool lastInSeq )
 		fsm->removeUnreachableStates();
 
 		switch ( fsm->ctx->minimizeLevel ) {
+			#ifdef TO_UPGRADE_CONDS
 			case MinimizeApprox:
 				fsm->minimizeApproximate();
 				break;
+			#endif
 			case MinimizePartition1:
 				fsm->minimizePartition1();
 				break;
 			case MinimizePartition2:
 				fsm->minimizePartition2();
 				break;
+			#ifdef TO_UPGRADE_CONDS
 			case MinimizeStable:
 				fsm->minimizeStable();
 				break;
+			#endif
 		}
 	}
 }
@@ -945,8 +949,12 @@ void ParseData::removeActionDups( FsmAp *graph )
 	for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
 		/* Loop all transitions. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ )
-				removeDups( cond->actionTable );
+			if ( trans->plain() )
+				removeDups( trans->tdap()->actionTable );
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ )
+					removeDups( cond->actionTable );
+			}
 		}
 		removeDups( state->toStateActionTable );
 		removeDups( state->fromStateActionTable );
@@ -974,7 +982,8 @@ void ParseData::initLongestMatchData()
 		InlineList *il1 = new InlineList;
 		il1->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
 		il1->head->children = new InlineList;
-		il1->head->children->append( new InlineItem( InputLoc(), InlineItem::LmInitTokStart ) );
+		il1->head->children->append( new InlineItem( InputLoc(),
+				InlineItem::LmInitTokStart ) );
 		initTokStart = newAction( "initts", il1 );
 		initTokStart->isLmAction = true;
 
@@ -1032,9 +1041,17 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 		StateSet states;
 		for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
 			for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-				for ( ActionTable::Iter ati = trans->condList.head->actionTable; ati.lte(); ati++ ) {
-					if ( ati->value->anyCall && trans->condList.head->toState != 0 )
-						states.insert( trans->condList.head->toState );
+				if ( trans->plain() ) {
+					for ( ActionTable::Iter ati = trans->tdap()->actionTable; ati.lte(); ati++ ) {
+						if ( ati->value->anyCall && trans->tdap()->toState != 0 )
+							states.insert( trans->tdap()->toState );
+					}
+				}
+				else {
+					for ( ActionTable::Iter ati = trans->tcap()->condList.head->actionTable; ati.lte(); ati++ ) {
+						if ( ati->value->anyCall && trans->tcap()->condList.head->toState != 0 )
+							states.insert( trans->tcap()->condList.head->toState );
+					}
 				}
 			}
 		}
@@ -1094,12 +1111,16 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 		/* Minimize here even if we minimized at every op. Now that function
 		 * keys have been cleared we may get a more minimal fsm. */
 		switch ( graph->ctx->minimizeLevel ) {
+			#ifdef TO_UPGRADE_CONDS
 			case MinimizeApprox:
 				graph->minimizeApproximate();
 				break;
+			#endif
+			#ifdef TO_UPGRADE_CONDS
 			case MinimizeStable:
 				graph->minimizeStable();
 				break;
+			#endif
 			case MinimizePartition1:
 				graph->minimizePartition1();
 				break;
@@ -1292,9 +1313,15 @@ void ParseData::analyzeGraph( FsmAp *graph )
 					(*sci)->numCondRefs += 1;
 			}
 
-			for ( CondList::Iter cond = trans->condList; cond.lte(); cond++ ) { 
-				for ( ActionTable::Iter at = cond->actionTable; at.lte(); at++ )
+			if ( trans->plain() ) {
+				for ( ActionTable::Iter at = trans->tdap()->actionTable; at.lte(); at++ )
 					at->value->numTransRefs += 1;
+			}
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) { 
+					for ( ActionTable::Iter at = cond->actionTable; at.lte(); at++ )
+						at->value->numTransRefs += 1;
+				}
 			}
 		}
 

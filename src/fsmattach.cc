@@ -9,8 +9,8 @@
 #include <iostream>
 using namespace std;
 
-void FsmAp::attachToInList( StateAp *from, StateAp *to, 
-		CondAp *&head, CondAp *trans )
+template< class Head > void FsmAp::attachToInList( StateAp *from,
+		StateAp *to, Head *&head, Head *trans )
 {
 	trans->ilnext = head;
 	trans->ilprev = 0;
@@ -36,10 +36,9 @@ void FsmAp::attachToInList( StateAp *from, StateAp *to,
 };
 
 /* Detach a transition from an inlist. The head of the inlist must be supplied. */
-void FsmAp::detachFromInList( StateAp *from, StateAp *to, 
-		CondAp *&head, CondAp *trans )
+template< class Head > void FsmAp::detachFromInList( StateAp *from, StateAp *to, 
+		Head *&head, Head *trans )
 {
-	/* Detach in the inTransList. */
 	if ( trans->ilprev == 0 ) 
 		head = trans->ilnext; 
 	else
@@ -61,30 +60,27 @@ void FsmAp::detachFromInList( StateAp *from, StateAp *to,
 	}
 }
 
-CondAp *FsmAp::attachNewTrans( TransAp *trans, StateAp *from, StateAp *to, CondKey onChar )
+CondAp *FsmAp::attachNewCond( TransAp *trans, StateAp *from, StateAp *to, CondKey onChar )
 {
 	/* Sub-transition for conditions. */
 	CondAp *condAp = new CondAp( trans );
 	condAp->key = onChar;
-	trans->condList.append( condAp );
+	trans->tcap()->condList.append( condAp );
 
 	condAp->fromState = from;
 	condAp->toState = to;
 
 	/* Attach in list. */
 	if ( to != 0 )
-		attachToInList( from, to, to->inList.head, condAp );
+		attachToInList( from, to, to->inCond.head, condAp );
 
 	return condAp;
 }
 
-/* Attach states on the default transition, range list or on out/in list key.
- * First makes a new transition. If there is already a transition out from
- * fromState on the default, then will assertion fail. */
 TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key highKey )
 {
 	/* Make the new transition. */
-	TransAp *retVal = new TransAp();
+	TransDataAp *retVal = new TransDataAp();
 
 	/* Make the entry in the out list for the transitions. */
 	from->outList.append( retVal );
@@ -93,16 +89,12 @@ TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key high
 	retVal->lowKey = lowKey;
 	retVal->highKey = highKey;
 
-	/* Sub-transition for conditions. */
-	CondAp *condAp = new CondAp( retVal );
-	retVal->condList.append( condAp );
-
-	condAp->fromState = from;
-	condAp->toState = to;
+	retVal->fromState = from;
+	retVal->toState = to;
 
 	/* Attach in list. */
 	if ( to != 0 )
-		attachToInList( from, to, to->inList.head, condAp );
+		attachToInList( from, to, to->inTrans.head, retVal );
 
 	return retVal;
 }
@@ -110,26 +102,19 @@ TransAp *FsmAp::attachNewTrans( StateAp *from, StateAp *to, Key lowKey, Key high
 /* Attach for range lists or for the default transition.  This attach should
  * be used when a transition already is allocated and must be attached to a
  * target state.  Does not handle adding the transition into the out list. */
-void FsmAp::attachTrans( StateAp *from, StateAp *to, TransAp *trans )
+void FsmAp::attachTrans( StateAp *from, StateAp *to, TransDataAp *trans )
 {
-	cerr << "FIXME: " << __PRETTY_FUNCTION__ << endl;
+	assert( trans->fromState == 0 && trans->toState == 0 );
 
-	assert( trans->condList.head->fromState == 0 && 
-			trans->condList.head->toState == 0 );
-
-	trans->condList.head->fromState = from;
-	trans->condList.head->toState = to;
+	trans->fromState = from;
+	trans->toState = to;
 
 	if ( to != 0 ) {
 		/* For now always attache the one and only condList element. */
-		attachToInList( from, to, to->inList.head, 
-				trans->condList.head );
+		attachToInList( from, to, to->inTrans.head, trans );
 	}
 }
 
-/* Attach for range lists or for the default transition.  This attach should
- * be used when a transition already is allocated and must be attached to a
- * target state.  Does not handle adding the transition into the out list. */
 void FsmAp::attachTrans( StateAp *from, StateAp *to, CondAp *trans )
 {
 	assert( trans->fromState == 0 && trans->toState == 0 );
@@ -139,13 +124,24 @@ void FsmAp::attachTrans( StateAp *from, StateAp *to, CondAp *trans )
 
 	if ( to != 0 ) {
 		/* For now always attache the one and only condList element. */
-		attachToInList( from, to, to->inList.head, trans );
+		attachToInList( from, to, to->inCond.head, trans );
 	}
 }
 
 /* Redirect a transition away from error and towards some state. This is just
  * like attachTrans except it requires fromState to be set and does not touch
  * it. */
+void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, TransDataAp *trans )
+{
+	assert( trans->fromState != 0 && trans->toState == 0 );
+	trans->toState = to;
+
+	if ( to != 0 ) {
+		/* Attach using the inList pointer as the head pointer. */
+		attachToInList( from, to, to->inTrans.head, trans );
+	}
+}
+
 void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans )
 {
 	assert( trans->fromState != 0 && trans->toState == 0 );
@@ -153,28 +149,12 @@ void FsmAp::redirectErrorTrans( StateAp *from, StateAp *to, CondAp *trans )
 
 	if ( to != 0 ) {
 		/* Attach using the inList pointer as the head pointer. */
-		attachToInList( from, to, to->inList.head, trans );
+		attachToInList( from, to, to->inCond.head, trans );
 	}
 }
 
 /* Detach for out/in lists or for default transition. */
-void FsmAp::detachTrans( StateAp *from, StateAp *to, TransAp *trans )
-{
-	cerr << "FIXME: " << __PRETTY_FUNCTION__ << endl;
-
-	assert( trans->condList.head->fromState == from && 
-			trans->condList.head->toState == to );
-
-	trans->condList.head->fromState = 0;
-	trans->condList.head->toState = 0;
-
-	if ( to != 0 ) {
-		detachFromInList( from, to, to->inList.head, trans->condList.head );
-	}
-}
-
-/* Detach for out/in lists or for default transition. */
-void FsmAp::detachCondTrans( StateAp *from, StateAp *to, CondAp *trans )
+void FsmAp::detachTrans( StateAp *from, StateAp *to, TransDataAp *trans )
 {
 	assert( trans->fromState == from && trans->toState == to );
 
@@ -182,7 +162,19 @@ void FsmAp::detachCondTrans( StateAp *from, StateAp *to, CondAp *trans )
 	trans->toState = 0;
 
 	if ( to != 0 ) {
-		detachFromInList( from, to, to->inList.head, trans );
+		detachFromInList( from, to, to->inTrans.head, trans );
+	}
+}
+
+void FsmAp::detachTrans( StateAp *from, StateAp *to, CondAp *trans )
+{
+	assert( trans->fromState == from && trans->toState == to );
+
+	trans->fromState = 0;
+	trans->toState = 0;
+
+	if ( to != 0 ) {
+		detachFromInList( from, to, to->inCond.head, trans );
 	}
 }
 
@@ -192,21 +184,33 @@ void FsmAp::detachCondTrans( StateAp *from, StateAp *to, CondAp *trans )
  * state set. A detached state becomes useless and should be deleted. */
 void FsmAp::detachState( StateAp *state )
 {
-	/* Detach the in transitions from the inList list of transitions. */
-	while ( state->inList.head != 0 ) {
+	while ( state->inTrans.head != 0 ) {
 		/* Get pointers to the trans and the state. */
-		CondAp *condAp = state->inList.head;
+		TransDataAp *trans = state->inTrans.head;
+
+		StateAp *fromState = trans->fromState;
+
+		/* Detach the transitions from the source state. */
+		detachTrans( fromState, state, trans );
+		fromState->outList.detach( trans );
+		delete trans;
+	}
+
+	/* Detach the in transitions from the inList list of transitions. */
+	while ( state->inCond.head != 0 ) {
+		/* Get pointers to the trans and the state. */
+		CondAp *condAp = state->inCond.head;
 		TransAp *trans = condAp->transAp;
 
 		StateAp *fromState = condAp->fromState;
 
 		/* Detach the transitions from the source state. */
-		detachCondTrans( fromState, state, condAp );
+		detachTrans( fromState, state, condAp );
 
-		trans->condList.detach( condAp );
+		trans->tcap()->condList.detach( condAp );
 		delete condAp;
 
-		if ( trans->condList.length() == 0 ) {
+		if ( trans->tcap()->condList.length() == 0 ) {
 			/* Ok to delete the transition. */
 			fromState->outList.detach( trans );
 			delete trans;
@@ -220,11 +224,16 @@ void FsmAp::detachState( StateAp *state )
 	/* Detach out range transitions. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); ) {
 		TransList::Iter next = trans.next();
-		for ( CondList::Iter cond = trans->condList; cond.lte(); ) {
-			CondList::Iter next = cond.next();
-			detachCondTrans( state, cond->toState, cond );
-			delete cond;
-			cond = next;
+		if ( trans->plain() ) {
+			detachTrans( state, trans->tdap()->toState, trans->tdap() );
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); ) {
+				CondList::Iter next = cond.next();
+				detachTrans( state, cond->toState, cond );
+				delete cond;
+				cond = next;
+			}
 		}
 		delete trans;
 		trans = next;
@@ -238,6 +247,18 @@ void FsmAp::detachState( StateAp *state )
 		finStateSet.remove( state );
 }
 
+TransDataAp *FsmAp::dupTransData( StateAp *from, TransDataAp *srcTrans )
+{
+	/* Make a new transition. */
+	TransDataAp *newTrans = new TransDataAp();
+	newTrans->condSpace = srcTrans->condSpace;
+
+	attachTrans( from, srcTrans->tdap()->toState, newTrans );
+	addInTrans( newTrans, srcTrans->tdap() );
+
+	return newTrans;
+}
+
 
 /* Duplicate a transition. Makes a new transition that is attached to the same
  * dest as srcTrans. The new transition has functions and priority taken from
@@ -246,24 +267,36 @@ void FsmAp::detachState( StateAp *state )
  * not be crossed. Returns the new transition. */
 TransAp *FsmAp::dupTrans( StateAp *from, TransAp *srcTrans )
 {
-	/* Make a new transition. */
-	TransAp *newTrans = new TransAp();
-	newTrans->condSpace = srcTrans->condSpace;
+	if ( srcTrans->plain() ) {
+		/* Make a new transition. */
+		TransDataAp *newTrans = new TransDataAp();
+		newTrans->condSpace = srcTrans->condSpace;
 
-	for ( CondList::Iter sc = srcTrans->condList; sc.lte(); sc++ ) {
-		/* Sub-transition for conditions. */
-		CondAp *newCond = new CondAp( newTrans );
-		newCond->key = sc->key;
-		newTrans->condList.append( newCond );
+		attachTrans( from, srcTrans->tdap()->toState, newTrans );
+		addInTrans( newTrans, srcTrans->tdap() );
 
-		/* We can attach the transition, one does not exist. */
-		attachTrans( from, sc->toState, newCond );
-			
-		/* Call the user callback to add in the original source transition. */
-		addInTrans( newCond, sc );
+		return newTrans;
 	}
+	else {
+		/* Make a new transition. */
+		TransAp *newTrans = new TransCondAp();
+		newTrans->condSpace = srcTrans->condSpace;
 
-	return newTrans;
+		for ( CondList::Iter sc = srcTrans->tcap()->condList; sc.lte(); sc++ ) {
+			/* Sub-transition for conditions. */
+			CondAp *newCond = new CondAp( newTrans );
+			newCond->key = sc->key;
+			newTrans->tcap()->condList.append( newCond );
+
+			/* We can attach the transition, one does not exist. */
+			attachTrans( from, sc->toState, newCond );
+				
+			/* Call the user callback to add in the original source transition. */
+			addInTrans( newCond, sc.ptr );
+		}
+
+		return newTrans;
+	}
 }
 
 /* Duplicate a transition. Makes a new transition that is attached to the same
@@ -287,8 +320,8 @@ CondAp *FsmAp::dupCondTrans( StateAp *from, TransAp *destParent, CondAp *srcTran
 
 /* In crossing, src trans and dest trans both go to existing states. Make one
  * state from the sets of states that src and dest trans go to. */
-CondAp *FsmAp::fsmAttachStates( MergeData &md, StateAp *from,
-			CondAp *destTrans, CondAp *srcTrans )
+template< class Trans > Trans *FsmAp::fsmAttachStates( MergeData &md, StateAp *from,
+			Trans *destTrans, Trans *srcTrans )
 {
 	/* The priorities are equal. We must merge the transitions. Does the
 	 * existing trans go to the state we are to attach to? ie, are we to
@@ -340,7 +373,7 @@ CondAp *FsmAp::fsmAttachStates( MergeData &md, StateAp *from,
 		StateAp *targ = lastFound->targState;
 
 		/* Detach the state from existing state. */
-		detachCondTrans( from, existingState, destTrans );
+		detachTrans( from, existingState, destTrans );
 
 		/* Re-attach to the new target. */
 		attachTrans( from, targ, destTrans );
@@ -356,10 +389,10 @@ CondAp *FsmAp::fsmAttachStates( MergeData &md, StateAp *from,
 
 /* Two transitions are to be crossed, handle the possibility of either going
  * to the error state. */
-CondAp *FsmAp::mergeTrans( MergeData &md, StateAp *from,
-			CondAp *destTrans, CondAp *srcTrans )
+template < class Trans > Trans *FsmAp::mergeTrans( MergeData &md, StateAp *from,
+			Trans *destTrans, Trans *srcTrans )
 {
-	CondAp *retTrans = 0;
+	Trans *retTrans = 0;
 	if ( destTrans->toState == 0 && srcTrans->toState == 0 ) {
 		/* Error added into error. */
 		addInTrans( destTrans, srcTrans );
@@ -367,7 +400,7 @@ CondAp *FsmAp::mergeTrans( MergeData &md, StateAp *from,
 	}
 	else if ( destTrans->toState == 0 && srcTrans->toState != 0 ) {
 		/* Non error added into error we need to detach and reattach, */
-		detachCondTrans( from, destTrans->toState, destTrans );
+		detachTrans( from, destTrans->toState, destTrans );
 		attachTrans( from, srcTrans->toState, destTrans );
 		addInTrans( destTrans, srcTrans );
 		retTrans = destTrans;
@@ -398,7 +431,7 @@ CondAp *FsmAp::crossCondTransitions( MergeData &md, StateAp *from, TransAp *dest
 	if ( compareRes < 0 ) {
 		/* Src trans has a higher priority than dest, src overwrites dest.
 		 * Detach dest and return a copy of src. */
-		detachCondTrans( from, destTrans->toState, destTrans );
+		detachTrans( from, destTrans->toState, destTrans );
 		retTrans = dupCondTrans( from, destParent, srcTrans );
 	}
 	else if ( compareRes > 0 ) {
@@ -414,23 +447,42 @@ CondAp *FsmAp::crossCondTransitions( MergeData &md, StateAp *from, TransAp *dest
 	return retTrans;
 }
 
-TransAp *FsmAp::copyTransForExpanision( StateAp *fromState, TransAp *srcTrans )
+TransAp *FsmAp::copyTransForExpansion( StateAp *from, TransAp *srcTrans )
 {
 	/* This is the dup without the attach. */
-	TransAp *newTrans = new TransAp();
+	TransCondAp *newTrans = new TransCondAp();
 	newTrans->condSpace = srcTrans->condSpace;
 
-	for ( CondList::Iter sc = srcTrans->condList; sc.lte(); sc++ ) {
-		/* Sub-transition for conditions. */
+	if ( srcTrans->plain() ) {
+		TransDataAp *srcData = srcTrans->tdap();
 		CondAp *newCond = new CondAp( newTrans );
-		newCond->key = sc->key;
+		newCond->key = 0;
 
-		attachTrans( sc->fromState, sc->toState, newCond );
-			
+		attachTrans( srcData->fromState, srcData->toState, newCond );
+				
 		/* Call the user callback to add in the original source transition. */
-		addInTrans( newCond, sc );
+		//addInTrans( newCond, srcData );
+
+		/* Not a copy of ourself, get the functions and priorities. */
+		newCond->lmActionTable.setActions( srcData->lmActionTable );
+		newCond->actionTable.setActions( srcData->actionTable );
+		newCond->priorTable.setPriors( srcData->priorTable );
 
 		newTrans->condList.append( newCond );
+	}
+	else {
+		for ( CondList::Iter sc = srcTrans->tcap()->condList; sc.lte(); sc++ ) {
+			/* Sub-transition for conditions. */
+			CondAp *newCond = new CondAp( newTrans );
+			newCond->key = sc->key;
+
+			attachTrans( sc->fromState, sc->toState, newCond );
+					
+			/* Call the user callback to add in the original source transition. */
+			addInTrans( newCond, sc.ptr );
+
+			newTrans->condList.append( newCond );
+		}
 	}
 
 	/* Set up the transition's keys and append to the dest list. */
@@ -442,13 +494,40 @@ TransAp *FsmAp::copyTransForExpanision( StateAp *fromState, TransAp *srcTrans )
 
 void FsmAp::freeEffectiveTrans( TransAp *trans )
 {
-	for ( CondList::Iter sc = trans->condList; sc.lte(); ) {
+	for ( CondList::Iter sc = trans->tcap()->condList; sc.lte(); ) {
 		CondList::Iter next = sc.next();
-		detachCondTrans( sc->fromState, sc->toState, sc );
+		detachTrans( sc->fromState, sc->toState, sc );
 		delete sc;
 		sc = next;
 	}
 	delete trans;
+}
+
+TransDataAp *FsmAp::crossTransitionsBothPlain( MergeData &md, StateAp *from,
+		TransDataAp *destTrans, TransDataAp *srcTrans )
+{
+	/* Neither have cond space and no expansion took place. Cross them. */
+	TransDataAp *retTrans;
+
+	/* Compare the priority of the dest and src transitions. */
+	int compareRes = comparePrior( destTrans->priorTable, srcTrans->priorTable );
+	if ( compareRes < 0 ) {
+		/* Src trans has a higher priority than dest, src overwrites dest.
+		 * Detach dest and return a copy of src. */
+		detachTrans( from, destTrans->toState, destTrans );
+		retTrans = dupTransData( from, srcTrans );
+	}
+	else if ( compareRes > 0 ) {
+		/* The dest trans has a higher priority, use dest. */
+		retTrans = destTrans;
+	}
+	else {
+		/* Src trans and dest trans have the same priority, they must be merged. */
+		retTrans = mergeTrans( md, from, destTrans, srcTrans );
+	}
+
+	/* Return the transition that resulted from the cross. */
+	return retTrans;
 }
 
 /* Find the trans with the higher priority. If src is lower priority then dest then
@@ -457,68 +536,89 @@ void FsmAp::freeEffectiveTrans( TransAp *trans )
 TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 		TransAp *destTrans, TransAp *srcTrans )
 {
-	TransAp *effectiveSrcTrans = srcTrans;
+	// cerr << __PRETTY_FUNCTION__ << endl;
 
-	if ( destTrans->condSpace != srcTrans->condSpace ) {
-		effectiveSrcTrans = copyTransForExpanision( from, srcTrans );
-		expandCondTransitions( from, destTrans, effectiveSrcTrans );
+	if ( destTrans->plain() && srcTrans->plain() ) {
+		/* Return the transition that resulted from the cross. */
+		return crossTransitionsBothPlain( md, from,
+				destTrans->tdap(), srcTrans->tdap() );
 	}
+	else {
+		/* At least one is non-empty. Target is non-empty. Need to work in
+		 * condition spaced. */
+		CondSpace *mergedSpace = expandCondSpace( destTrans, srcTrans );
 
-	/* The destination list. */
-	CondList destList;
+		/* If the dest state cond space does not equal the merged, we have to
+		 * rewrite it. If the src state cond space does not equal, we have to
+		 * copy it. */
 
-	/* Set up an iterator to stop at breaks. */
-	ValPairIter<CondAp> outPair( destTrans->condList.head, effectiveSrcTrans->condList.head );
-	for ( ; !outPair.end(); outPair++ ) {
-		switch ( outPair.userState ) {
-		case ValPairIter<CondAp>::RangeInS1: {
-			/* The pair iter is the authority on the keys. It may have needed
-			 * to break the dest range. */
-			CondAp *destTrans = outPair.s1Tel.trans;
-			destTrans->key = outPair.s1Tel.key;
-			destList.append( destTrans );
-			break;
+		TransAp *effSrcTrans = srcTrans;
+		
+		if ( srcTrans->condSpace != mergedSpace ) {
+			effSrcTrans = copyTransForExpansion( from, srcTrans );
+			CondSpace *orig = effSrcTrans->condSpace;
+			effSrcTrans->condSpace = mergedSpace;
+			expandConds( from, effSrcTrans, orig, mergedSpace );
 		}
-		case ValPairIter<CondAp>::RangeInS2: {
-			/* Src range may get crossed with dest's default transition. */
-			CondAp *newTrans = dupCondTrans( from, destTrans, outPair.s2Tel.trans );
 
-			/* Set up the transition's keys and append to the dest list. */
-			newTrans->key = outPair.s2Tel.key;
-			destList.append( newTrans );
-			break;
-		}
-		case ValPairIter<CondAp>::RangeOverlap: {
-			/* Exact overlap, cross them. */
-			CondAp *newTrans = crossCondTransitions( md, from, destTrans,
-					outPair.s1Tel.trans, outPair.s2Tel.trans );
+		if ( destTrans->condSpace != mergedSpace ) {
+			/* Make the transition into a conds transition. If dest is a plain
+			 * transition, we have to replace it with a conds transition. */
+			if ( destTrans->plain() )
+				destTrans = convertToCondAp( from, destTrans->tdap() );
 
-			/* Set up the transition's keys and append to the dest list. */
-			newTrans->key = outPair.s1Tel.key;
-			destList.append( newTrans );
-			break;
+			/* Now expand the dest. */
+			CondSpace *orig = destTrans->condSpace;
+			destTrans->condSpace = mergedSpace;
+			expandConds( from, destTrans, orig, mergedSpace );
 		}
-		case ValPairIter<CondAp>::BreakS1: {
-//			/* Since we are always writing to the dest trans, the dest needs
-//			 * to be copied when it is broken. The copy goes into the first
-//			 * half of the break to "break it off". */
-//			outPair.s1Tel.trans = dupTrans( dest, outPair.s1Tel.trans );
-			assert( false );
-			break;
+
+		/* The destination list. */
+		CondList destList;
+
+		/* Set up an iterator to stop at breaks. */
+		ValPairIter<CondAp> outPair( destTrans->tcap()->condList.head,
+				effSrcTrans->tcap()->condList.head );
+		for ( ; !outPair.end(); outPair++ ) {
+			switch ( outPair.userState ) {
+			case ValPairIter<CondAp>::RangeInS1: {
+				/* The pair iter is the authority on the keys. It may have needed
+				 * to break the dest range. */
+				CondAp *destCond = outPair.s1Tel.trans;
+				destCond->key = outPair.s1Tel.key;
+				destList.append( destCond );
+				break;
+			}
+			case ValPairIter<CondAp>::RangeInS2: {
+				/* Src range may get crossed with dest's default transition. */
+				CondAp *newCond = dupCondTrans( from, destTrans, outPair.s2Tel.trans );
+
+				/* Set up the transition's keys and append to the dest list. */
+				newCond->key = outPair.s2Tel.key;
+				destList.append( newCond );
+				break;
+			}
+			case ValPairIter<CondAp>::RangeOverlap: {
+				/* Exact overlap, cross them. */
+				CondAp *newTrans = crossCondTransitions( md, from, destTrans,
+						outPair.s1Tel.trans, outPair.s2Tel.trans );
+
+				/* Set up the transition's keys and append to the dest list. */
+				newTrans->key = outPair.s1Tel.key;
+				destList.append( newTrans );
+				break;
+			}}
 		}
-		case ValPairIter<CondAp>::BreakS2:
-			break;
-		}
+
+		/* Abandon the old outList and transfer destList into it. */
+		destTrans->tcap()->condList.transfer( destList );
+
+		/* Delete the duplicate. Don't detach anything. */
+		if ( srcTrans != effSrcTrans )
+			freeEffectiveTrans( effSrcTrans );
+
+		return destTrans;
 	}
-
-	/* Abandon the old outList and transfer destList into it. */
-	destTrans->condList.transfer( destList );
-
-	/* Delete the duplicate. Don't detach anything. */
-	if ( srcTrans != effectiveSrcTrans )
-		freeEffectiveTrans( effectiveSrcTrans );
-
-	return destTrans;
 }
 
 /* Copy the transitions in srcList to the outlist of dest. The srcList should
@@ -579,9 +679,8 @@ void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
 	dest->outList.transfer( destList );
 }
 
-
 /* Move all the transitions that go into src so that they go into dest.  */
-void FsmAp::inTransMove( StateAp *dest, StateAp *src )
+void FsmAp::moveInwardTrans( StateAp *dest, StateAp *src )
 {
 	/* Do not try to move in trans to and from the same state. */
 	assert( dest != src );
@@ -598,13 +697,24 @@ void FsmAp::inTransMove( StateAp *dest, StateAp *src )
 		changeEntry( *enId, dest, src );
 
 	/* Move the transitions in inList. */
-	while ( src->inList.head != 0 ) {
+	while ( src->inTrans.head != 0 ) {
 		/* Get trans and from state. */
-		CondAp *trans = src->inList.head;
+		TransDataAp *trans = src->inTrans.head;
 		StateAp *fromState = trans->fromState;
 
 		/* Detach from src, reattach to dest. */
-		detachCondTrans( fromState, src, trans );
+		detachTrans( fromState, src, trans );
+		attachTrans( fromState, dest, trans );
+	}
+
+	/* Move the transitions in inList. */
+	while ( src->inCond.head != 0 ) {
+		/* Get trans and from state. */
+		CondAp *trans = src->inCond.head;
+		StateAp *fromState = trans->fromState;
+
+		/* Detach from src, reattach to dest. */
+		detachTrans( fromState, src, trans );
 		attachTrans( fromState, dest, trans );
 	}
 }

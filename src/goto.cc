@@ -31,7 +31,7 @@ void Goto::setTableState( TableArray::State state )
 
 
 /* Emit the goto to take for a given transition. */
-std::ostream &Goto::COND_GOTO( RedCondAp *cond, int level )
+std::ostream &Goto::COND_GOTO( RedCondPair *cond, int level )
 {
 	out << TABS(level) << "goto ctr" << cond->id << ";";
 	return out;
@@ -42,8 +42,8 @@ std::ostream &Goto::TRANS_GOTO( RedTransAp *trans, int level )
 {
 	if ( trans->condSpace == 0 || trans->condSpace->condSet.length() == 0 ) {
 		/* Existing. */
-		assert( trans->outConds.length() == 1 );
-		RedCondAp *cond = trans->outConds.data[0].value;
+		assert( trans->numConds() == 1 );
+		RedCondPair *cond = trans->outCond( 0 );
 
 		/* Go to the transition which will go to the state. */
 		out << TABS(level) << "goto ctr" << cond->id << ";";
@@ -58,10 +58,10 @@ std::ostream &Goto::TRANS_GOTO( RedTransAp *trans, int level )
 		}
 		CondKey lower = 0;
 		CondKey upper = trans->condFullSize() - 1;
-		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->outConds.length()-1 );
+		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->numConds()-1 );
 
-		if ( trans->errCond != 0 ) {
-			COND_GOTO( trans->errCond, level+1 ) << "\n";
+		if ( trans->errCond() != 0 ) {
+			COND_GOTO( trans->errCond(), level+1 ) << "\n";
 		}
 	}
 
@@ -235,65 +235,68 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey u
 {
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
-	RedCondEl *data = trans->outConds.data;
+//	RedCondEl *data = trans->outCond(0);
 
 	/* Determine if we need to look higher or lower. */
 	bool anyLower = mid > low;
 	bool anyHigher = mid < high;
 
+	CondKey midKey = trans->outCondKey( mid );
+	RedCondPair *midTrans = trans->outCond( mid );
+
 	/* Determine if the keys at mid are the limits of the alphabet. */
-	bool limitLow = data[mid].key == lower;
-	bool limitHigh = data[mid].key == upper;
+	bool limitLow = midKey == lower;
+	bool limitHigh = midKey == upper;
 
 	if ( anyLower && anyHigher ) {
 		/* Can go lower and higher than mid. */
 		out << TABS(level) << "if ( " << "ck" << " < " << 
-				CKEY(data[mid].key) << " ) {\n";
-		COND_B_SEARCH( trans, level+1, lower, data[mid].key-1, low, mid-1 );
+				CKEY(midKey) << " ) {\n";
+		COND_B_SEARCH( trans, level+1, lower, midKey-1, low, mid-1 );
 		out << TABS(level) << "} else if ( " << "ck" << " > " << 
-				CKEY(data[mid].key) << " ) {\n";
-		COND_B_SEARCH( trans, level+1, data[mid].key+1, upper, mid+1, high );
+				CKEY(midKey) << " ) {\n";
+		COND_B_SEARCH( trans, level+1, midKey+1, upper, mid+1, high );
 		out << TABS(level) << "} else {\n";
-		COND_GOTO(data[mid].value, level+1) << "\n";
+		COND_GOTO(midTrans, level+1) << "\n";
 		out << TABS(level) << "}\n";
 	}
 	else if ( anyLower && !anyHigher ) {
 		/* Can go lower than mid but not higher. */
 		out << TABS(level) << "if ( " << "ck" << " < " << 
-				CKEY(data[mid].key) << " ) {\n";
-		COND_B_SEARCH( trans, level+1, lower, data[mid].key-1, low, mid-1);
+				CKEY(midKey) << " ) {\n";
+		COND_B_SEARCH( trans, level+1, lower, midKey-1, low, mid-1);
 
 		/* if the higher is the highest in the alphabet then there is no
 		 * sense testing it. */
 		if ( limitHigh ) {
 			out << TABS(level) << "} else {\n";
-			COND_GOTO(data[mid].value, level+1) << "\n";
+			COND_GOTO(midTrans, level+1) << "\n";
 			out << TABS(level) << "}\n";
 		}
 		else {
 			out << TABS(level) << "} else if ( " << "ck" << " <= " << 
-					CKEY(data[mid].key) << " ) {\n";
-			COND_GOTO(data[mid].value, level+1) << "\n";
+					CKEY(midKey) << " ) {\n";
+			COND_GOTO(midTrans, level+1) << "\n";
 			out << TABS(level) << "}\n";
 		}
 	}
 	else if ( !anyLower && anyHigher ) {
 		/* Can go higher than mid but not lower. */
 		out << TABS(level) << "if ( " << "ck" << " > " << 
-				CKEY(data[mid].key) << " ) {\n";
-		COND_B_SEARCH( trans, level+1, data[mid].key+1, upper, mid+1, high );
+				CKEY(midKey) << " ) {\n";
+		COND_B_SEARCH( trans, level+1, midKey+1, upper, mid+1, high );
 
 		/* If the lower end is the lowest in the alphabet then there is no
 		 * sense testing it. */
 		if ( limitLow ) {
 			out << TABS(level) << "} else {\n";
-			COND_GOTO(data[mid].value, level+1) << "\n";
+			COND_GOTO(midTrans, level+1) << "\n";
 			out << TABS(level) << "}\n";
 		}
 		else {
 			out << TABS(level) << "} else if ( " << "ck" << " >= " << 
-					CKEY(data[mid].key) << " ) {\n";
-			COND_GOTO(data[mid].value, level+1) << "\n";
+					CKEY(midKey) << " ) {\n";
+			COND_GOTO(midTrans, level+1) << "\n";
 			out << TABS(level) << "}\n";
 		}
 	}
@@ -302,25 +305,25 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey u
 		 * tests to do depends on limits of alphabet. */
 		if ( !limitLow && !limitHigh ) {
 			out << TABS(level) << "if ( ck" << " == " << 
-					CKEY(data[mid].key) << " ) {\n";
-			COND_GOTO(data[mid].value, level+1) << "\n";
+					CKEY(midKey) << " ) {\n";
+			COND_GOTO(midTrans, level+1) << "\n";
 			out << TABS(level) << "}\n";
 		}
 		else if ( limitLow && !limitHigh ) {
 			out << TABS(level) << "if ( " << "ck" << " <= " << 
-					CKEY(data[mid].key) << " ) {\n";
-			COND_GOTO(data[mid].value, level+1) << "\n";
+					CKEY(midKey) << " ) {\n";
+			COND_GOTO(midTrans, level+1) << "\n";
 			out << TABS(level) << "}\n";
 		}
 		else if ( !limitLow && limitHigh ) {
-			out << TABS(level) << "if ( " << CKEY(data[mid].key) << " <= " << 
+			out << TABS(level) << "if ( " << CKEY(midKey) << " <= " << 
 					"ck" << " )\n {";
-			COND_GOTO(data[mid].value, level+1) << "\n";
+			COND_GOTO(midTrans, level+1) << "\n";
 			out << TABS(level) << "}\n";
 		}
 		else {
 			/* Both high and low are at the limit. No tests to do. */
-			COND_GOTO(data[mid].value, level) << "\n";
+			COND_GOTO(midTrans, level) << "\n";
 		}
 	}
 }
@@ -363,26 +366,36 @@ std::ostream &Goto::STATE_GOTOS()
 	return out;
 }
 
+std::ostream &Goto::TRANSITION( RedCondPair *pair )
+{
+	/* Write the label for the transition so it can be jumped to. */
+	out << "	ctr" << pair->id << ": ";
+
+	/* Destination state. */
+	if ( pair->action != 0 && pair->action->anyCurStateRef() )
+		out << "_ps = " << vCS() << ";";
+	out << vCS() << " = " << pair->targ->id << "; ";
+
+	if ( pair->action != 0 ) {
+		/* Write out the transition func. */
+		out << "goto f" << pair->action->actListId << ";\n";
+	}
+	else {
+		/* No code to execute, just loop around. */
+		out << "goto _again;\n";
+	}
+}
+
 std::ostream &Goto::TRANSITIONS()
 {
-	for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ ) {
-		/* Write the label for the transition so it can be jumped to. */
-		out << "	ctr" << cond->id << ": ";
-
-		/* Destination state. */
-		if ( cond->action != 0 && cond->action->anyCurStateRef() )
-			out << "_ps = " << vCS() << ";";
-		out << vCS() << " = " << cond->targ->id << "; ";
-
-		if ( cond->action != 0 ) {
-			/* Write out the transition func. */
-			out << "goto f" << cond->action->actListId << ";\n";
-		}
-		else {
-			/* No code to execute, just loop around. */
-			out << "goto _again;\n";
-		}
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
+		if ( trans->condSpace == 0 )
+			TRANSITION( &trans->p );
 	}
+
+	for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ )
+		TRANSITION( &cond->p );
+
 	return out;
 }
 
