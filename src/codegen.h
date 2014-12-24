@@ -275,6 +275,46 @@ protected:
 			return "entry";
 	}
 
+	string LABEL( string name )
+	{
+		if ( directBackend )
+			return name + ": ";
+		else
+			return "label " + name;
+	}
+
+	string OFFSET( string arr, string off )
+	{
+		if ( directBackend )
+			return "( " + arr + " + " + off + " )";
+		else
+			return "offset( " + arr + ", " + off + " )";
+	}
+
+	string TRUE()
+	{
+		if ( directBackend )
+			return "1";
+		else
+			return "TRUE";
+	}
+
+	string DEREF( string arr, string off )
+	{
+		if ( directBackend )
+			return "(*( " + off + "))";
+		else
+			return "deref( " + arr + ", " + off + " )";
+	}
+	
+	string CASE( string val )
+	{
+		if ( directBackend )
+			return "case " + val + ": ";
+		else
+			return "case " + val;
+	}
+
 public:
 	virtual void writeExports();
 };
