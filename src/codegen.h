@@ -84,6 +84,7 @@ struct TableArray
 	long long max;
 	CodeGen &codeGen;
 	std::ostream &out;
+	int ln;
 };
 
 struct IlOpts

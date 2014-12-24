@@ -44,7 +44,8 @@ TableArray::TableArray( const char *name, CodeGen &codeGen )
 	max(0),
 
 	codeGen(codeGen),
-	out(codeGen.out)
+	out(codeGen.out),
+	ln(0)
 {
 	codeGen.arrayVector.append( this );
 }
@@ -103,7 +104,7 @@ void TableArray::startGenerate()
 {
 	out << "array " << type << " " << 
 		"_" << codeGen.DATA_PREFIX() << name << 
-		"( " << min << ", " << max << " ) = { ";
+		"( " << min << ", " << max << " ) = {\n\t";
 }
 
 void TableArray::valueGenerate( long long v )
@@ -114,17 +115,24 @@ void TableArray::valueGenerate( long long v )
 		out << "u(" << v << ")";
 	else
 		out << v;
-	out << ", ";
+
+	if ( ( ++ln % IALL ) == 0 ) {
+		out << ",\n\t";
+		ln = 0;
+	}
+	else {
+		out << ", ";
+	}
 }
 
 void TableArray::finishGenerate()
 {
 	if ( isChar )
-		out << "c(0) };\n\n";
+		out << "c(0)\n};\n\n";
 	else if ( !isSigned )
-		out << "u(0) };\n\n";
+		out << "u(0)\n};\n\n";
 	else
-		out << "0 };\n\n";
+		out << "0\n};\n\n";
 }
 
 void TableArray::start()
