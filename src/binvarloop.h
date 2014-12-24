@@ -53,4 +53,17 @@ public:
 	void NBREAK( ostream &ret, int targState, bool csForced );
 };
 
+namespace C
+{
+	class BinaryVarLoop
+	:
+		public ::BinaryVarLoop
+	{
+	public:
+		BinaryVarLoop( const CodeGenArgs &args )
+			: ::BinaryVarLoop( args )
+		{}
+	};
+}
+
 #endif

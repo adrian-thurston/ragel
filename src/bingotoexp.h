@@ -36,4 +36,17 @@ protected:
 
 };
 
+namespace C
+{
+	class BinaryGotoExp
+	:
+		public ::BinaryGotoExp
+	{
+	public:
+		BinaryGotoExp( const CodeGenArgs &args )
+			: ::BinaryGotoExp( args )
+		{}
+	};
+}
+
 #endif

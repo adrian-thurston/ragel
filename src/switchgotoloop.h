@@ -36,4 +36,17 @@ public:
 	virtual void writeExec();
 };
 
+namespace C
+{
+	class SwitchGotoLoop
+	:
+		public ::SwitchGotoLoop
+	{
+	public:
+		SwitchGotoLoop( const CodeGenArgs &args )
+			: ::SwitchGotoLoop( args )
+		{}
+	};
+}
+
 #endif

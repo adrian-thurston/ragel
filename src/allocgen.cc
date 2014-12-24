@@ -36,12 +36,61 @@ bool langSupportsGoto( const HostLang *hostLang )
 }
 
 /* Invoked by the parser when a ragel definition is opened. */
-CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
+CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args, bool directBackend )
 {
 	CodeGenData *codeGen = 0;
 
 	if ( hostLang->lang == HostLang::Asm ) {
 		codeGen = new AsmCodeGen( args );
+	}
+	else if ( directBackend ) {
+		switch ( args.codeStyle ) {
+		case GenBinaryLoop:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new C::BinaryGotoLoop(args);
+			else
+				codeGen = new C::BinaryVarLoop(args);
+			break;
+		case GenBinaryExp:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new C::BinaryGotoExp(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
+
+		case GenFlatLoop:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new C::FlatGotoLoop(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
+		case GenFlatExp:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new C::FlatGotoExp(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
+
+		case GenSwitchLoop:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new C::SwitchGotoLoop(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
+		case GenSwitchExp:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new C::SwitchGotoExp(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
+
+		case GenIpGoto:
+			if ( langSupportsGoto( hostLang ) )
+				codeGen = new C::IpGoto(args);
+			else
+				std::cerr << "unsupported lang/style combination" << endp;
+			break;
+		}
 	}
 	else {
 		switch ( args.codeStyle ) {

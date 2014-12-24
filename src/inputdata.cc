@@ -243,7 +243,7 @@ void InputData::writeOutput()
 					ii->writeArgs.data, generateDot, hostLang );
 		}
 		else {
-			if ( hostLang->lang == HostLang::Asm ) {
+			if ( hostLang->lang == HostLang::Asm || directBackend ) {
 				*outStream << ii->data.str();
 			}
 			else {
@@ -319,7 +319,7 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 
 	makeDefaultFileName();
 
-	if ( hostLang->lang == HostLang::Asm ) {
+	if ( hostLang->lang == HostLang::Asm || directBackend ) {
 	}
 	else {
 		origOutputFileName = outputFileName;
@@ -348,7 +348,7 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	writeOutput();
 	closeOutput();
 
-	if ( hostLang->lang == HostLang::Asm ) {
+	if ( hostLang->lang == HostLang::Asm || directBackend ) {
 	}
 	else {
 		if ( !noIntermediate ) {

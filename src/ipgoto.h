@@ -63,4 +63,17 @@ protected:
 	void setLabelsNeeded();
 };
 
+namespace C
+{
+	class IpGoto
+	:
+		public ::IpGoto
+	{
+	public:
+		IpGoto( const CodeGenArgs &args )
+			: ::IpGoto( args )
+		{}
+	};
+}
+
 #endif

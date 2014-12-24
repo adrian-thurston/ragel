@@ -19,7 +19,6 @@
 using namespace std;
 
 const char mainMachine[] = "main";
-CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
 
 void Token::set( const char *str, int len )
 {
@@ -1437,7 +1436,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 			this, sectionGraph, codeStyle, out );
 
 	/* Write out with it. */
-	cgd = makeCodeGen( hostLang, args );
+	cgd = makeCodeGen( hostLang, args, id->directBackend );
 
 	cgd->make( hostLang );
 

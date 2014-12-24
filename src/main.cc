@@ -355,6 +355,8 @@ void InputData::parseArgs( int argc, const char **argv )
 					ragelFrontend = ColmBased;
 				else if ( strcmp( arg, "asm" ) == 0 )
 					hostLang = &hostLangAsm;
+				else if ( strcmp( arg, "direct" ) == 0 )
+					directBackend = true;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

@@ -39,4 +39,17 @@ protected:
 	virtual void COND_ACTION( RedCondPair *cond );
 };
 
+namespace C
+{
+	class FlatGotoExp
+	:
+		public ::FlatGotoExp
+	{
+	public:
+		FlatGotoExp( const CodeGenArgs &args )
+			: ::FlatGotoExp( args )
+		{}
+	};
+}
+
 #endif

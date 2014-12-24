@@ -100,8 +100,9 @@ void openHostBlock( char opener, InputData *id, ostream &out, const char *fileNa
 
 string itoa( int i );
 
-CodeGenData *makeCodeGen( InputData &inputData, char *fsmName, ParseData *pd, FsmAp *fsm );
 struct CodeGenArgs;
+CodeGenData *makeCodeGen( const HostLang *hostLang,
+		const CodeGenArgs &args, bool directBackend );
 
 
 /*********************************/

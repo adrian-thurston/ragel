@@ -38,4 +38,17 @@ public:
 	virtual void writeExec();
 };
 
+namespace C
+{
+	class FlatGotoLoop
+	:
+		public ::FlatGotoLoop
+	{
+	public:
+		FlatGotoLoop( const CodeGenArgs &args )
+			: ::FlatGotoLoop( args )
+		{}
+	};
+}
+
 #endif

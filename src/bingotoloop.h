@@ -39,4 +39,17 @@ public:
 	std::ostream &ACTION_SWITCH();
 };
 
+namespace C
+{
+	class BinaryGotoLoop
+	:
+		public ::BinaryGotoLoop
+	{
+	public:
+		BinaryGotoLoop( const CodeGenArgs &args )
+			: ::BinaryGotoLoop( args )
+		{}
+	};
+}
+
 #endif

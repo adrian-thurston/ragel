@@ -27,6 +27,8 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+bool directBackend;
+
 TableArray::TableArray( const char *name, CodeGen &codeGen )
 :
 	state(InitialState),
