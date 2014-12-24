@@ -11,7 +11,7 @@ ragel_SOURCES = \
 	binary.h bingotoloop.h bingotoexp.h binvarloop.h \
 	flat.h flatgotoloop.h flatgotoexp.h \
 	goto.h switchgotoloop.h switchgotoexp.h \
-	ipgoto.h xml.h dot.h \
+	ipgoto.h xml.h dot.h asm.h \
 	\
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc \
@@ -20,7 +20,7 @@ ragel_SOURCES = \
 	binary.cc bingotoloop.cc bingotoexp.cc binvarloop.cc \
 	flat.cc flatgotoloop.cc flatgotoexp.cc \
 	goto.cc switchgotoloop.cc switchgotoexp.cc \
-	ipgoto.cc xml.cc dot.cc 
+	ipgoto.cc xml.cc dot.cc asm.cc
 
 nodist_ragel_SOURCES = version.h
 
