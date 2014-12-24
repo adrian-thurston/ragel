@@ -212,7 +212,7 @@ void FlatGotoExp::writeExec()
 		out << "	int _ps;\n";
 	
 	out << "	int _trans;\n";
-	out << "	uint _cond;\n";
+	out << "	" << UINT() << " _cond;\n";
 
 	out <<
 		"	index " << ALPH_TYPE() << " _keys;\n"
@@ -225,7 +225,7 @@ void FlatGotoExp::writeExec()
 		out << "	int _nbreak;\n";
 
 	out <<
-		"	entry {\n";
+		"	" << ENTRY() << " {\n";
 
 	if ( !noEnd ) {
 		testEofUsed = true;
@@ -330,7 +330,7 @@ void FlatGotoExp::writeExec()
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = (int)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _match_cond;\n"
 				"	}\n";
 		}

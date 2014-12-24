@@ -384,6 +384,7 @@ std::ostream &Goto::TRANSITION( RedCondPair *pair )
 		/* No code to execute, just loop around. */
 		out << "goto _again;\n";
 	}
+	return out;
 }
 
 std::ostream &Goto::TRANSITIONS()

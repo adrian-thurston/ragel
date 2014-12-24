@@ -584,7 +584,7 @@ void Binary::LOCATE_TRANS()
 {
 	out <<
 		"	_keys = offset( " << ARR_REF( keys ) << ", " << ARR_REF( keyOffsets ) << "[" << vCS() << "]" << " );\n"
-		"	_trans = (uint)" << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
+		"	_trans = (" << UINT() << ")" << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
 		"\n"
 		"	_klen = (int)" << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
@@ -603,12 +603,12 @@ void Binary::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > deref( " << ARR_REF( keys ) << ", _mid ) )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_trans += " << "(uint)" << "(_mid - _keys);\n"
+		"				_trans += " << "(" << UINT() << ")" << "(_mid - _keys);\n"
 		"				goto _match;\n"
 		"			}\n"
 		"		}\n"
 		"		_keys += _klen;\n"
-		"		_trans += (uint)_klen;\n"
+		"		_trans += (" << UINT() << ")_klen;\n"
 		"	}\n"
 		"\n"
 		"	_klen = (int)" << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
@@ -628,11 +628,11 @@ void Binary::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > deref( " << ARR_REF( keys ) << ", _mid + 1 ) )\n"
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
-		"				_trans += " << "(uint)" << "((_mid - _keys)>>1);\n"
+		"				_trans += " << "(" << UINT() << ")" << "((_mid - _keys)>>1);\n"
 		"				goto _match;\n"
 		"			}\n"
 		"		}\n"
-		"		_trans += (uint)_klen;\n"
+		"		_trans += (" << UINT() << ")_klen;\n"
 		"	}\n"
 		"\n";
 }
@@ -642,7 +642,7 @@ void Binary::LOCATE_COND()
 	out <<
 		"	_ckeys = offset( " << ARR_REF( condKeys ) << ",  " << ARR_REF( transOffsets ) << "[_trans] );\n"
 		"	_klen = (int) " << ARR_REF( transLengths ) << "[_trans];\n"
-		"	_cond = (uint) " << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	_cond = (" << UINT() << ") " << ARR_REF( transOffsets ) << "[_trans];\n"
 		"\n";
 
 	out <<
@@ -688,7 +688,7 @@ void Binary::LOCATE_COND()
 		"			else if ( _cpc > (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_cond += (uint)(_mid - _ckeys);\n"
+		"				_cond += (" << UINT() << ")(_mid - _ckeys);\n"
 		"				goto _match_cond;\n"
 		"			}\n"
 		"		}\n"

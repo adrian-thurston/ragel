@@ -336,7 +336,7 @@ void BinaryVarLoop::LOCATE_TRANS()
 {
 	out <<
 		"	_keys = offset( " << ARR_REF( keys ) << ", " << ARR_REF( keyOffsets ) << "[" << vCS() << "]" << " );\n"
-		"	_trans = (uint)" << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
+		"	_trans = (" << UINT() << ")" << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
 		"	_have = 0;\n"
 		"\n"
 		"	_klen = (int)" << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
@@ -353,13 +353,13 @@ void BinaryVarLoop::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > deref( " << ARR_REF( keys ) << ", _mid ) )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_trans += " << "(uint)" << "(_mid - _keys);\n"
+		"				_trans += " << "(" << UINT() << ")" << "(_mid - _keys);\n"
 		"				_have = 1;\n"
 		"			}\n"
 		"		}\n"
 		"		if ( _have == 0 ) {\n"
 		"			_keys += _klen;\n"
-		"			_trans += (uint)_klen;\n"
+		"			_trans += (" << UINT() << ")_klen;\n"
 		"		}\n"
 		"	}\n"
 		"\n"
@@ -378,12 +378,12 @@ void BinaryVarLoop::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > deref( " << ARR_REF( keys ) << ", _mid + 1 ) )\n"
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
-		"				_trans += " << "(uint)" << "((_mid - _keys)>>1);\n"
+		"				_trans += " << "(" << UINT() << ")" << "((_mid - _keys)>>1);\n"
 		"				_have = 1;\n"
 		"			}\n"
 		"		}\n"
 		"		if ( _have == 0 )\n"
-		"			_trans += (uint)_klen;\n"
+		"			_trans += (" << UINT() << ")_klen;\n"
 		"	}\n"
 		"	}\n"
 		"\n";
@@ -394,7 +394,7 @@ void BinaryVarLoop::LOCATE_COND()
 	out <<
 		"	_ckeys = offset( " << ARR_REF( condKeys ) << ",  " << ARR_REF( transOffsets ) << "[_trans] );\n"
 		"	_klen = (int) " << ARR_REF( transLengths ) << "[_trans];\n"
-		"	_cond = (uint) " << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	_cond = (" << UINT() << ") " << ARR_REF( transOffsets ) << "[_trans];\n"
 		"	_have = 0;\n"
 		"\n";
 
@@ -438,7 +438,7 @@ void BinaryVarLoop::LOCATE_COND()
 		"			else if ( _cpc > (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_cond += (uint)(_mid - _ckeys);\n"
+		"				_cond += (" << UINT() << ")(_mid - _ckeys);\n"
 		"				_have = 1;\n"
 		"			}\n"
 		"		}\n"
@@ -466,17 +466,17 @@ void BinaryVarLoop::writeExec()
 		out << "	int _ps;\n";
 
 	out <<
-		"	uint _trans = 0;\n" <<
-		"	uint _cond = 0;\n"
-		"	uint _have = 0;\n"
-		"	uint _cont = 1;\n";
+		"	" << UINT() << " _trans = 0;\n" <<
+		"	" << UINT() << " _cond = 0;\n"
+		"	" << UINT() << " _have = 0;\n"
+		"	" << UINT() << " _cont = 1;\n";
 
 	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 			|| redFsm->anyFromStateActions() )
 	{
 		out << 
 			"	index " << ARR_TYPE( actions ) << " _acts;\n"
-			"	uint _nacts;\n";
+			"	" << UINT() << " _nacts;\n";
 	}
 
 	out <<
@@ -510,8 +510,8 @@ void BinaryVarLoop::writeExec()
 				TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 				out <<
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = (uint)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-					"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
+					"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+					"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
 					"		_have = 1;\n"
 					"	}\n";
 					matchCondLabelUsed = true;
@@ -522,10 +522,10 @@ void BinaryVarLoop::writeExec()
 			if ( redFsm->anyEofActions() ) {
 				out <<
 					"	index " << ARR_TYPE( actions ) << " __acts;\n"
-					"	uint __nacts;\n"
+					"	" << UINT() << " __nacts;\n"
 					"	__acts = offset( " << ARR_REF( actions ) << ", " <<
 							ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
-					"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts );\n"
+					"	__nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", __acts );\n"
 					"	__acts += 1;\n"
 					"	while ( __nacts > 0 ) {\n"
 					"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
@@ -558,7 +558,7 @@ void BinaryVarLoop::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
@@ -592,7 +592,7 @@ void BinaryVarLoop::writeExec()
 		out <<
 			"	if ( " << ARR_REF( condActions ) << "[_cond] != 0 ) {\n"
 			"		_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
-			"		_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"		_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"		_acts += 1;\n"
 			"		while ( _nacts > 0 )\n	{\n"
 			"			switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
@@ -617,7 +617,7 @@ void BinaryVarLoop::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";

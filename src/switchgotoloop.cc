@@ -147,7 +147,7 @@ std::ostream &SwitchGotoLoop::EXEC_FUNCS()
 		out << "	_nbreak = 0;\n";
 
 	out <<
-		"	_nacts = (uint)deref( " << ARR_REF( actions ) << ", _acts );\n"
+		"	_nacts = (" << UINT() << ")deref( " << ARR_REF( actions ) << ", _acts );\n"
 		"	_acts += 1;\n"
 		"	while ( _nacts > 0 ) {\n"
 		"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
@@ -186,7 +186,7 @@ void SwitchGotoLoop::writeExec()
 	{
 		out << 
 			"	index " << ARR_TYPE( actions ) << " _acts;\n"
-			"	uint _nacts;\n";
+			"	" << UINT() << " _nacts;\n";
 	}
 
 	out << "\n";
@@ -215,7 +215,7 @@ void SwitchGotoLoop::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " <<
 					ARR_REF( fromStateActions ) << "[" << vCS() << "] );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts ); _acts += 1;\n"
+			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts ); _acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
@@ -243,7 +243,7 @@ void SwitchGotoLoop::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " <<
 					ARR_REF( toStateActions ) << "[" << vCS() << "] );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts ); _acts += 1;\n"
+			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts ); _acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
@@ -299,10 +299,10 @@ void SwitchGotoLoop::writeExec()
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	index " << ARR_TYPE( actions ) << " __acts;\n"
-				"	uint __nacts;\n"
+				"	" << UINT() << " __nacts;\n"
 				"	__acts = offset( " << ARR_REF( actions ) << ", " << 
 						ARR_REF( eofActions ) << "[" << vCS() << "] );\n"
-				"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts ); __acts += 1;\n"
+				"	__nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", __acts ); __acts += 1;\n"
 				"	while ( __nacts > 0 ) {\n"
 				"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
 				EOF_ACTION_SWITCH() <<

@@ -256,8 +256,8 @@ void BinaryGotoLoop::writeExec()
 		out << "	int _ps;\n";
 
 	out <<
-		"	uint _trans = 0;\n"
-		"	uint _cond = 0;\n";
+		"	" << UINT() << " _trans = 0;\n"
+		"	" << UINT() << " _cond = 0;\n";
 	
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
@@ -266,15 +266,15 @@ void BinaryGotoLoop::writeExec()
 			|| redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	index " << ARR_TYPE( actions ) << " _acts;\n"
-			"	uint _nacts;\n";
+			"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << "\n"
+			"	" << UINT() << " _nacts;\n";
 	}
 
 	out <<
-		"	index " << ALPH_TYPE() << " _keys;\n"
-		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
+		"	" << INDEX( ALPH_TYPE(),  "_keys" ) << "\n"
+		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << "\n"
 		"	int _cpc;\n"
-		"	entry {\n"
+		"	" << ENTRY() << " {\n"
 		"\n";
 
 	if ( !noEnd ) {
@@ -297,7 +297,7 @@ void BinaryGotoLoop::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
@@ -340,7 +340,7 @@ void BinaryGotoLoop::writeExec()
 
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 )\n	{\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
@@ -370,7 +370,7 @@ void BinaryGotoLoop::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (uint) deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
@@ -413,18 +413,18 @@ void BinaryGotoLoop::writeExec()
 			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = (uint)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _match_cond;\n"
 				"	}\n";
 		}
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
-				"	index " << ARR_TYPE( actions ) << " __acts;\n"
-				"	uint __nacts;\n"
+				"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << "\n"
+				"	" << UINT() << " __nacts;\n"
 				"	__acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
-				"	__nacts = (uint) deref( " << ARR_REF( actions ) << ", __acts );\n"
+				"	__nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", __acts );\n"
 				"	__acts += 1;\n"
 				"	while ( __nacts > 0 ) {\n"
 				"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";

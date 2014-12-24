@@ -276,13 +276,13 @@ void BinaryGotoExp::writeExec()
 		"	index " << ALPH_TYPE() << " _keys;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
 		"	int _cpc;\n"
-		"	uint _trans;\n"
-		"	uint _cond;\n";
+		"	" << UINT() << " _trans;\n"
+		"	" << UINT() << " _cond;\n";
 
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
 
-	out << "	entry {\n";
+	out << "	" << ENTRY() << " {\n";
 
 	out << "\n";
 
@@ -399,8 +399,8 @@ void BinaryGotoExp::writeExec()
 			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = (uint)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = (uint)" << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _match_cond;\n"
 				"	}\n";
 		}

@@ -255,7 +255,25 @@ protected:
 
 	string CLOSE_GEN_PLAIN()
 		{ return directBackend ? "" : "}@"; }
+	
+	string UINT()
+		{ return directBackend ? "unsigned int" : "uint"; }
 
+	string INDEX( string type, string name )
+	{
+		if ( directBackend )
+			return "const " + type + " *" + name + ";";
+		else
+			return "index " + type + " " + name + ";";
+	}
+
+	string ENTRY()
+	{
+		if ( directBackend )
+			return "";
+		else
+			return "entry";
+	}
 
 public:
 	virtual void writeExports();
