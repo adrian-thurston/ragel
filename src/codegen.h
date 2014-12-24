@@ -229,6 +229,11 @@ protected:
 	string OPEN_HOST_BLOCK()
 		{ return directBackend ? "{" : "host( \"-\", 1 ) ${"; }
 
+	string OPEN_HOST_BLOCK( string fileName, int line )
+	{ 
+		return directBackend ? "{" : "host( \"" + fileName + "\", " + TO_STR(line) + " ) ${";
+	}
+
 	string CLOSE_HOST_BLOCK()
 		{ return directBackend ? "}" : "}$"; }
 
@@ -286,7 +291,7 @@ protected:
 	string OFFSET( string arr, string off )
 	{
 		if ( directBackend )
-			return "( " + arr + " + " + off + " )";
+			return "( " + arr + " + (" + off + "))";
 		else
 			return "offset( " + arr + ", " + off + " )";
 	}
@@ -313,6 +318,14 @@ protected:
 			return "case " + val + ": ";
 		else
 			return "case " + val;
+	}
+
+	string CEND( )
+	{
+		if ( directBackend )
+			return " break; ";
+		else
+			return " ";
 	}
 
 public:

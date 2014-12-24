@@ -664,7 +664,7 @@ void Binary::LOCATE_COND()
 			}
 
 			out << 
-				"	}\n";
+				"	" << CEND() << "}\n";
 		}
 
 		out << 

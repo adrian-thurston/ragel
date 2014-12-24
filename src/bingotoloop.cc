@@ -139,7 +139,7 @@ std::ostream &BinaryGotoLoop::TO_STATE_ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t " << CASE( TO_STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -155,7 +155,7 @@ std::ostream &BinaryGotoLoop::FROM_STATE_ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t " << CASE( TO_STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -171,7 +171,7 @@ std::ostream &BinaryGotoLoop::EOF_ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t " << CASE( TO_STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, true, false ) );
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -188,7 +188,7 @@ std::ostream &BinaryGotoLoop::ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t " << CASE( TO_STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 

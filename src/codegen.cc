@@ -641,10 +641,10 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			ret << P();
 			break;
 		case GenInlineItem::Char:
-			ret << "={" << GET_KEY() << "}=";
+			ret << OPEN_GEN_EXPR() << GET_KEY() << CLOSE_GEN_EXPR();
 			break;
 		case GenInlineItem::Hold:
-			ret << "${ " << P() << " = " << P() << " - 1; }$";
+			ret << OPEN_GEN_BLOCK() << P() << " = " << P() << " - 1; " << CLOSE_GEN_BLOCK();
 			break;
 		case GenInlineItem::LmHold:
 			ret << P() << " = " << P() << " - 1;";
@@ -740,9 +740,9 @@ string CodeGen::LDIR_PATH( char *path )
 void CodeGen::ACTION( ostream &ret, GenAction *action, IlOpts opts )
 {
 	ret << '\t';
-	openHostBlock( '$', pd->id, ret, action->loc.fileName, action->loc.line );
+	ret << OPEN_HOST_BLOCK( action->loc.fileName, action->loc.line );
 	INLINE_LIST( ret, action->inlineList, opts.targState, opts.inFinish, opts.csForced );
-	ret << "}$";
+	ret << CLOSE_HOST_BLOCK();
 }
 
 void CodeGen::CONDITION( ostream &ret, GenAction *condition )
