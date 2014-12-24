@@ -110,7 +110,7 @@ void TableArray::startGenerate()
 	else {
 		out << "array " << type << " " << 
 			"_" << codeGen.DATA_PREFIX() << name << 
-			"( " << min << ", " << max << " ) = {\n\t";
+			"( " << min << ", " << max << " ) = { ";
 	}
 }
 
@@ -139,14 +139,7 @@ void TableArray::valueGenerate( long long v )
 			out << "u(" << v << ")";
 		else
 			out << v;
-
-		if ( ( ++ln % IALL ) == 0 ) {
-			out << ",\n\t";
-			ln = 0;
-		}
-		else {
-			out << ", ";
-		}
+		out << ", ";
 	}
 }
 
@@ -162,11 +155,11 @@ void TableArray::finishGenerate()
 	}
 	else {
 		if ( isChar )
-			out << "c(0)\n};\n\n";
+			out << "c(0) };\n\n";
 		else if ( !isSigned )
-			out << "u(0)\n};\n\n";
+			out << "u(0) };\n\n";
 		else
-			out << "0\n};\n\n";
+			out << "0 };\n\n";
 	}
 }
 
@@ -793,23 +786,38 @@ string CodeGen::ALPH_TYPE()
 	return ret;
 }
 
+void CodeGen::VALUE( string type, string name, string value )
+{
+	if ( directBackend )
+		out << "static const " << type << " " << name << " = " << value << ";\n";
+	else
+		out << "value " << type << " " << name << " = " << value << ";\n";
+}
+
+string CodeGen::TO_STR( int v )
+{
+	ostringstream s;
+	s << v;
+	return s.str();
+}
+
 void CodeGen::STATE_IDS()
 {
 	if ( redFsm->startState != 0 )
-		out << "value int " << START() << " = " << START_STATE_ID() << ";\n";
+		VALUE( "int",  START(), START_STATE_ID() );
 
 	if ( !noFinal )
-		out << "value int " << FIRST_FINAL() << " = " << FIRST_FINAL_STATE() << ";\n";
+		VALUE( "int", FIRST_FINAL(), FIRST_FINAL_STATE() );
 
 	if ( !noError )
-		out << "value int " << ERROR() << " = " << ERROR_STATE() << ";\n";
+		VALUE( "int", ERROR(), ERROR_STATE() );
 
 	out << "\n";
 
 	if ( entryPointNames.length() > 0 ) {
 		for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
-			out << "value int " << DATA_PREFIX() + "en_" + *en << 
-					" = " << entryPointIds[en.pos()] << ";\n";
+			string name = DATA_PREFIX() + "en_" + *en;
+			VALUE( "int", name, TO_STR( entryPointIds[en.pos()] ) );
 		}
 		out << "\n";
 	}

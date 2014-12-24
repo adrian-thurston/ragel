@@ -193,10 +193,15 @@ protected:
 	void GEN_STMT( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
 	void GEN_EXPR( ostream &ret, GenInlineItem *item, int targState, bool inFinish, bool csForced );
 
+	void VALUE( string type, string name, string value );
+
 	void STATE_IDS();
+
 
 	string ERROR_STATE();
 	string FIRST_FINAL_STATE();
+
+	string TO_STR( int v );
 
 	ostream &source_warning(const InputLoc &loc);
 	ostream &source_error(const InputLoc &loc);
