@@ -266,9 +266,9 @@ void BinaryVarLoop::NCALL( ostream &ret, int callDest, int targState, bool inFin
 	ret << "${";
 
 	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " <<
@@ -287,9 +287,9 @@ void BinaryVarLoop::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targSta
 	ret << "${";
 
 	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " <<
@@ -310,12 +310,12 @@ void BinaryVarLoop::NRET( ostream &ret, bool inFinish )
 	ret << "${" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
 
 	if ( postPopExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, postPopExpr, 0, false, false );
-		ret << "}$";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
-	ret << "}$";
+	ret << CLOSE_HOST_BLOCK();
 }
 
 void BinaryVarLoop::BREAK( ostream &ret, int targState, bool csForced )

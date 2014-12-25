@@ -221,6 +221,9 @@ protected:
 	string OPEN_HOST_EXPR()
 		{ return directBackend ? "(" : "host( \"-\", 1 ) ={"; }
 
+	string OPEN_HOST_EXPR( string fileName, int line )
+		{ return directBackend ? "(" : "host( \"" + fileName + "\", " + STR(line) + " ) ={"; }
+
 	string CLOSE_HOST_EXPR()
 		{ return directBackend ? ")" : "}="; }
 
@@ -318,6 +321,14 @@ protected:
 			return "case " + val;
 	}
 
+	string DEFAULT()
+	{
+		if ( directBackend )
+			return "default:";
+		else
+			return "default";
+	}
+
 	string CEND( )
 	{
 		if ( directBackend )
@@ -325,6 +336,31 @@ protected:
 		else
 			return " ";
 	}
+
+	string FALLTHROUGH()
+	{
+		if ( directBackend )
+			return " ";
+		else
+			return "fallthrough;";
+	}
+
+	string NIL()
+	{
+		if ( directBackend )
+			return "0";
+		else
+			return "nil;";
+	}
+
+	string EXPORT( string type, string name, string value )
+	{
+		if ( directBackend )
+			return "#define " + name + " " + value;
+		else
+			return "export " + type + " " + name + " " + value + ";";
+	}
+
 
 public:
 	virtual void writeExports();

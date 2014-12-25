@@ -46,106 +46,102 @@ bool IpGoto::useAgainLabel()
 
 void IpGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "${" << "goto st" << gotoDest << ";}$";
+	ret << OPEN_GEN_BLOCK() << "goto st" << gotoDest << ";" << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "${" << vCS() << " = host( \"-\", 1 ) ={";
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "}=; " << "goto _again;}$";
+	ret << CLOSE_HOST_EXPR() << "; " << "goto _again;" << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	ret << "${";
+	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " << targState << 
-			"; " << TOP() << "+= 1; " << "goto st" << callDest << ";}$";
+			"; " << TOP() << "+= 1; " << "goto st" << callDest << ";" <<
+			CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	ret << "${";
+	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " << targState << 
-			"; " << TOP() << "+= 1; " << vCS() << " = " << callDest << "; }$";
+			"; " << TOP() << "+= 1; " << vCS() << " = " << callDest << "; " <<
+			CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	ret << "${";
+	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " << targState << "; " << TOP() << "+= 1;" <<
-			vCS() << " = host( \"-\", 1 ) ={";
+			vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "}=; goto _again;}$";
-
-	if ( prePushExpr != 0 )
-		ret << "}";
+	ret << CLOSE_HOST_EXPR() << "; goto _again;" << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	ret << "${";
+	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " << targState << "; " << TOP() << "+= 1;" <<
-			vCS() << " = host( \"-\", 1 ) ={";
+			vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "}=; }$";
-
-	if ( prePushExpr != 0 )
-		ret << "}";
+	ret << CLOSE_HOST_EXPR() << "; " << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::RET( ostream &ret, bool inFinish )
 {
-	ret << "${" << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, postPopExpr, 0, false, false );
-		ret << "}$";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
-	ret << "goto _again;}$";
+	ret << "goto _again;" << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::NRET( ostream &ret, bool inFinish )
 {
-	ret << "${" << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, postPopExpr, 0, false, false );
-		ret << "}$";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
-	ret << "}$";
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::NEXT( ostream &ret, int nextDest, bool inFinish )
@@ -439,7 +435,7 @@ std::ostream &IpGoto::FINISH_CASES()
 			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ ) {
 				out << "	case " << *pst << ": \n";
 				if ( ! pst.last() )
-					out << "		fallthrough;\n";
+					out << "		" << FALLTHROUGH() << "\n";
 			}
 
 			/* Write each action in the eof action list. */

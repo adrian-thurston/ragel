@@ -135,7 +135,7 @@ std::ostream &BinaryGotoExp::TO_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numToStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << " {\n";
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
@@ -143,7 +143,7 @@ std::ostream &BinaryGotoExp::TO_STATE_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "}\n";
+			out << CEND() << "}\n";
 		}
 	}
 

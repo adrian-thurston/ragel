@@ -482,32 +482,32 @@ void CodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFini
 	/* The parser gives fexec two children. The double brackets are for D
 	 * code. If the inline list is a single word it will get interpreted as a
 	 * C-style cast by the D compiler. */
-	ret << "${" << P() << " = ((";
+	ret << OPEN_GEN_BLOCK() << P() << " = ((";
 	INLINE_LIST( ret, item->children, targState, inFinish, false );
-	ret << "))-1;}$\n";
+	ret << "))-1;" << CLOSE_GEN_BLOCK() << "\n";
 }
 
 void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
 		int targState, int inFinish, bool csForced )
 {
 	ret << 
-		"${	switch( " << ACT() << " ) {\n";
+		OPEN_GEN_BLOCK() << "switch( " << ACT() << " ) {\n";
 
 	for ( GenInlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
 		/* Write the case label, the action and the case break. */
 		if ( lma->lmId < 0 )
-			ret << "	default {\n";
+			ret << "	" << DEFAULT() << " {\n";
 		else
-			ret << "	case " << lma->lmId << " {\n";
+			ret << "	" << CASE( STR(lma->lmId) ) << " {\n";
 
 		/* Write the block and close it off. */
 		INLINE_LIST( ret, lma->children, targState, inFinish, csForced );
 
-		ret << "}\n";
+		ret << CEND() << "}\n";
 	}
 
 	ret << 
-		"	}}$\n"
+		"	}" << CLOSE_GEN_BLOCK() << "\n"
 		"\t";
 }
 
@@ -542,7 +542,7 @@ void CodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 
 void CodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
 {
-	ret << TOKSTART() << " = nil;";
+	ret << TOKSTART() << " = " << NIL() << ";";
 }
 
 void CodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
@@ -560,9 +560,9 @@ void CodeGen::HOST_STMT( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-		ret << "}$";
+		ret << CLOSE_HOST_BLOCK();
 	}
 }
 
@@ -582,9 +582,9 @@ void CodeGen::HOST_EXPR( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "host( \"-\", 1 ) ={";
+		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-		ret << "}=";
+		ret << CLOSE_HOST_EXPR();
 	}
 }
 
@@ -593,9 +593,9 @@ void CodeGen::HOST_TEXT( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "host( \"-\", 1 ) @{";
+		ret << OPEN_HOST_PLAIN();
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-		ret << "}@";
+		ret << CLOSE_HOST_PLAIN();
 	}
 }
 
@@ -604,9 +604,9 @@ void CodeGen::GEN_STMT( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "${";
+		ret << OPEN_GEN_BLOCK();
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-		ret << "}$";
+		ret << CLOSE_GEN_BLOCK();
 	}
 }
 
@@ -615,9 +615,9 @@ void CodeGen::GEN_EXPR( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << "={";
+		ret << OPEN_GEN_EXPR();
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-		ret << "}=";
+		ret << CLOSE_GEN_EXPR();
 	}
 }
 
@@ -759,9 +759,9 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, IlOpts opts )
 
 void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 {
-	openHostBlock( '=', pd->id, ret, condition->loc.fileName, condition->loc.line );
+	ret << OPEN_HOST_EXPR( condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
-	ret << "}=";
+	ret << CLOSE_HOST_EXPR();
 }
 
 string CodeGen::ERROR_STATE()
@@ -797,8 +797,8 @@ void CodeGen::writeInit()
 
 	if ( hasLongestMatch ) {
 		out << 
-			"	" << TOKSTART() << " = nil;\n"
-			"	" << TOKEND() << " = nil;\n";
+			"	" << TOKSTART() << " = " << NIL() << ";\n"
+			"	" << TOKEND() << " = " << NIL() << ";\n";
 
 		if ( redFsm->usingAct() ) {
 			out << 
@@ -882,9 +882,8 @@ void CodeGen::writeExports()
 {
 	if ( exportList.length() > 0 ) {
 		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
-			out << "export " << ALPH_TYPE() << " " << 
-					DATA_PREFIX() << "ex_" << ex->name << " " << 
-					KEY(ex->key) << ";\n";
+			out << EXPORT( ALPH_TYPE(), 
+				DATA_PREFIX() + "ex_" + ex->name, KEY(ex->key) ) << "\n";
 		}
 		out << "\n";
 	}

@@ -369,7 +369,7 @@ void Flat::LOCATE_TRANS()
 
 		for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 			GenCondSpace *condSpace = csi;
-			out << "	case " << condSpace->condSpaceId << " {\n";
+			out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
 			for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 				out << TABS(2) << "if ( ";
 				CONDITION( out, *csi );
@@ -378,7 +378,7 @@ void Flat::LOCATE_TRANS()
 			}
 
 			out << 
-				"	}\n";
+				"	" << CEND() << "}\n";
 		}
 
 		out << 
@@ -414,14 +414,14 @@ void Flat::LOCATE_TRANS()
 
 void Flat::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "${" << vCS() << " = " << gotoDest << "; " << "goto _again;}$";
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest << "; " << "goto _again;" << CLOSE_GEN_BLOCK();
 }
 
 void Flat::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "${" << vCS() << " = host( \"-\", 1 ) ={";
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "}=; " << "goto _again;}$";
+	ret << CLOSE_HOST_EXPR() << "; " << "goto _again;" << CLOSE_GEN_BLOCK();
 }
 
 void Flat::CURS( ostream &ret, bool inFinish )
@@ -448,103 +448,104 @@ void Flat::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 
 void Flat::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	ret << "${";
+	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() << " = " << 
-			callDest << "; " << "goto _again;}$";
+			callDest << "; " << "goto _again;" << CLOSE_GEN_BLOCK();
 }
 
 
 void Flat::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	ret << "${";
+	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
-	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() << " = " << 
-			callDest << "; }$";
+	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " <<
+			TOP() << " += 1;" << vCS() << " = " << 
+			callDest << "; " << CLOSE_GEN_BLOCK();
 }
 
 
 void Flat::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	ret << "${";
+	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
-	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() <<
-			" = host( \"-\", 1 ) ={";
+	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " <<
+			TOP() << " += 1;" << vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "}=; " << "goto _again;}$";
+	ret << CLOSE_HOST_EXPR() << "; " << "goto _again;" << CLOSE_GEN_BLOCK();
 }
 
 
 void Flat::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	ret << "${";
+	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
-		ret << "}$ ";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() <<
-			" = host( \"-\", 1 ) ={";
+			" = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "}=; }$";
+	ret << CLOSE_HOST_EXPR() << "; " << CLOSE_GEN_BLOCK();
 }
 
 
 void Flat::RET( ostream &ret, bool inFinish )
 {
-	ret << "${" << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, postPopExpr, 0, false, false );
-		ret << "}$";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
-	ret << "goto _again;}$";
+	ret << "goto _again;" << CLOSE_GEN_BLOCK();
 }
 
 void Flat::NRET( ostream &ret, bool inFinish )
 {
-	ret << "${" << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
-		ret << "host( \"-\", 1 ) ${";
+		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, postPopExpr, 0, false, false );
-		ret << "}$";
+		ret << CLOSE_HOST_BLOCK();
 	}
 
 	/* FIXME: ws in front of } will cause rlhc failure. */
-	ret << "}$";
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void Flat::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "${" << P() << " += 1; " << "goto _out; }$";
+	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _out; " << CLOSE_GEN_BLOCK();
 }
 
 void Flat::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "${" << P() << " += 1; " << " _nbreak = 1; }$";
+	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << " _nbreak = 1; " << CLOSE_GEN_BLOCK();
 }
