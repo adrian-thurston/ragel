@@ -2468,6 +2468,20 @@ struct ObjectField
 
 	bool isInbuiltObject()
 		{ return type == InbuiltObjectType; }
+
+	bool exists()
+	{
+		switch ( type ) {
+			case ObjectField::LhsElType:
+			case ObjectField::UserLocalType:
+			case ObjectField::RedRhsType:
+			case ObjectField::UserFieldType:
+			case ObjectField::StructFieldType:
+				return true;
+			default:
+				return false;
+		}
+	}
 	
 	InputLoc loc;
 	Type type;

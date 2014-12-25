@@ -1282,22 +1282,25 @@ short *Compiler::makeTrees( ObjectDef *objectDef, int &numTrees )
 {
 	numTrees = 0;
 	for ( FieldList::Iter of = *objectDef->fieldList; of.lte(); of++ ) {
-		UniqueType *ut = of->value->typeRef->resolveType( this );
-		if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR )
-			numTrees += 1;
+		if ( of->value->exists() ) {
+			UniqueType *ut = of->value->typeRef->resolveType( this );
+			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR )
+				numTrees += 1;
+		}
 	}
 
 	short *trees = new short[numTrees];
 	memset( trees, 0, sizeof(short) * numTrees );
 
-	short pos = 0, fieldPos = 0;;
+	short pos = 0;
 	for ( FieldList::Iter of = *objectDef->fieldList; of.lte(); of++ ) {
-		UniqueType *ut = of->value->typeRef->resolveType( this );
-		if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR ) {
-			trees[pos] = fieldPos;
-			pos += 1;
+		if ( of->value->exists() ) {
+			UniqueType *ut = of->value->typeRef->resolveType( this );
+			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR ) {
+				trees[pos] = of->value->offset;
+				pos += 1;
+			}
 		}
-		fieldPos += 1;
 	}
 
 	return trees;

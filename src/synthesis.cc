@@ -218,7 +218,8 @@ ObjectField *ObjectDef::findFieldNum( long offset )
 long sizeOfField( UniqueType *fieldUT )
 {
 	long size = 0;
-	if ( fieldUT->typeId == TYPE_ITER ) {
+	switch ( fieldUT->typeId ) {
+	case TYPE_ITER:
 		/* Select on the iterator type. */
 		switch ( fieldUT->iterDef->type ) {
 			case IterDef::Tree:
@@ -239,11 +240,14 @@ long sizeOfField( UniqueType *fieldUT )
 				size = 1;
 				break;
 		}
-	}
-	else if ( fieldUT->typeId == TYPE_REF )
+		break;
+	case TYPE_REF:
 		size = 2;
-	else
+		break;
+	default:
 		size = 1;
+		break;
+	}
 
 	return size;
 }
@@ -2768,10 +2772,6 @@ void Compiler::placeAllLanguageObjects()
 				objDef->placeField( this, f->value );
 		}
 	}
-
-	/* Init all fields of the global object. */
-	for ( FieldList::Iter f = *globalObjectDef->fieldList; f.lte(); f++ )
-		globalObjectDef->placeField( this, f->value );
 }
 
 void Compiler::placeAllStructObjects()
