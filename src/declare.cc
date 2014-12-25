@@ -955,13 +955,13 @@ void Compiler::addArgv()
 {
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::UserFieldType, argvTypeRef, "argv" );
+			ObjectField::StructFieldType, argvTypeRef, "argv" );
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
 	argvList = el;
 
 	el = ObjectField::cons( internal,
-			ObjectField::UserFieldType, argvTypeRef, "argv0" );
+			ObjectField::StructFieldType, argvTypeRef, "argv0" );
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
 	argv0 = el;

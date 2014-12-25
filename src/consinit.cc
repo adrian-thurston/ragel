@@ -777,7 +777,7 @@ void ConsInit::exportTree( StmtList *stmtList )
 	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
 	ObjectField *program = ObjectField::cons( internal,
-			ObjectField::UserFieldType, typeRef, String("ColmTree") );
+			ObjectField::StructFieldType, typeRef, String("ColmTree") );
 	LangStmt *programExport = exportStmt( program, LangStmt::AssignType, expr );
 	stmtList->append( programExport );
 }

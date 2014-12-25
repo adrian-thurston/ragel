@@ -35,7 +35,9 @@ void colm_struct_delete( Program *prg, Tree **sp, struct colm_struct *el )
 {
 	short *t = prg->rtd->selInfo[el->id].trees;
 	int i, len = prg->rtd->selInfo[el->id].treesLen;
-	for ( i = 0; i < len; i++ )
-		treeDownref( prg, sp, ((Tree**)(el+1))[t[i]] );
+	for ( i = 0; i < len; i++ ) {
+		Tree *tree = colm_struct_get_field( el, t[i] );
+		treeDownref( prg, sp, tree );
+	}
 	free( el );
 }

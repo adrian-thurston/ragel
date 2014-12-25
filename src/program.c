@@ -24,12 +24,6 @@ static void colm_alloc_global( Program *prg )
 	prg->global = colm_struct_new( prg, prg->rtd->globalId ) ;
 }
 
-static void colm_clear_global( Program *prg, Tree **sp )
-{
-	colm_struct_delete( prg, sp, prg->global );
-	prg->global = 0;
-}
-
 void vm_init( Program *prg )
 {
 	StackBlock *b = malloc( sizeof(StackBlock) );
@@ -300,7 +294,6 @@ int colm_delete_program( Program *prg )
 	int exitStatus = prg->exitStatus;
 
 	treeDownref( prg, sp, prg->returnVal );
-	colm_clear_global( prg, sp );
 	colm_clear_orig_heap( prg, sp );
 	colm_clear_heap( prg, sp );
 
