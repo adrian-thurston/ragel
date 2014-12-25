@@ -580,9 +580,6 @@ void LangTerm::resolve( Compiler *pd )
 		case NewType:
 			typeRef->resolveType( pd );
 			break;
-		case New2Type:
-			typeRef->resolveType( pd );
-			break;
 		case TypeIdType:
 			typeRef->resolveType( pd );
 			break;

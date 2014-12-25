@@ -1056,15 +1056,6 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 
 UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 {
-	/* Evaluate the expression. */
-	UniqueType *ut = evaluateNewstruct( pd, code );
-
-	code.append( IN_TREE_NEW );
-	return pd->findUniqueType( TYPE_PTR, ut->langEl );
-}
-
-UniqueType *LangTerm::evaluateNew2( Compiler *pd, CodeVect &code ) const
-{
 	/* What is being newstructed. */
 	UniqueType *replUT = typeRef->uniqueType;
 
@@ -1744,8 +1735,6 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 			return evaluateSendTree( pd, code );
 		case NewType:
 			return evaluateNew( pd, code );
-		case New2Type:
-			return evaluateNew2( pd, code );
 		case TypeIdType: {
 			/* Evaluate the expression. */
 			UniqueType *ut = typeRef->uniqueType;

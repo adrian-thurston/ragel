@@ -2775,7 +2775,6 @@ struct LangTerm
 		StringType,
 		MatchType,
 		NewType,
-		New2Type,
 		ConstructType,
 		TypeIdType,
 		SearchType,
@@ -2978,7 +2977,6 @@ struct LangTerm
 	void resolve( Compiler *pd );
 
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
-	UniqueType *evaluateNew2( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateNewstruct( Compiler *pd, CodeVect &code ) const;
 	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;

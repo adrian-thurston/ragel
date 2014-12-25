@@ -32,7 +32,6 @@ InputLoc::InputLoc( colm_location *pcloc )
 	}
 }
 
-
 String unescape( const String &s )
 {
 	String out( String::Fresh(), s.length() );
@@ -1839,13 +1838,6 @@ struct LoadColm
 
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::NewType, typeRef ) );
-			break;
-		}
-		case code_factor::New2: {
-			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
-
-			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
-					LangTerm::New2Type, typeRef ) );
 			break;
 		}
 		case code_factor::Cast: {
