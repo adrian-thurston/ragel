@@ -21,7 +21,7 @@
 static void colm_alloc_global( Program *prg )
 {
 	/* Alloc the global. */
-	prg->global = (Tree*) colm_new_struct( prg, prg->rtd->globalId ) ;
+	prg->global = colm_new_struct( prg, prg->rtd->globalId ) ;
 }
 
 static void colm_clear_global( Program *prg, Tree **sp )

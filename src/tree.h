@@ -275,11 +275,11 @@ Tree *copyTree( struct colm_program *prg, Tree *tree,
 
 Tree *getPtrVal( Pointer *ptr );
 Tree *getPtrValSplit( struct colm_program *prg, Pointer *ptr );
-Tree *getField( Tree *tree, Word field );
+Tree *colm_tree_get_field( Tree *tree, Word field );
 Tree *getFieldSplit( struct colm_program *prg, Tree *tree, Word field );
 Tree *getRhsEl( struct colm_program *prg, Tree *lhs, long position );
 Kid *getRhsElKid( struct colm_program *prg, Tree *lhs, long position );
-void setField( struct colm_program *prg, Tree *tree, long field, Tree *value );
+void colm_tree_set_field( struct colm_program *prg, Tree *tree, long field, Tree *value );
 
 void setTriterCur( struct colm_program *prg, TreeIter *iter, Tree *tree );
 void setUiterCur( struct colm_program *prg, UserIter *uiter, Tree *tree );

@@ -61,7 +61,7 @@ void freeKidList( Program *prg, Kid *kid )
 	}
 }
 
-void setAttr( Tree *tree, long pos, Tree *val )
+static void colm_tree_set_attr( Tree *tree, long pos, Tree *val )
 {
 	long i;
 	Kid *kid = tree->child;
@@ -75,9 +75,6 @@ void setAttr( Tree *tree, long pos, Tree *val )
 		kid = kid->next;
 	kid->tree = val;
 }
-
-Tree *colm_get_global( Program *prg, long pos )
-	{ return colm_get_attr( prg->global, pos ); }
 
 Tree *colm_get_attr( Tree *tree, long pos )
 {
@@ -610,7 +607,7 @@ Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 					stringAllocPointer( prg, 
 					nodes[ci].data, nodes[ci].length );
 
-			setAttr( tree, ca->offset, attr );
+			colm_tree_set_attr( tree, ca->offset, attr );
 		}
 	}
 
@@ -668,7 +665,7 @@ Tree *constructToken( Program *prg, Tree **args, long nargs )
 
 		long i;
 		for ( i = 2; i < nargs; i++ ) {
-			setAttr( tree, i-2, args[i] );
+			colm_tree_set_attr( tree, i-2, args[i] );
 			treeUpref( colm_get_attr( tree, i-2 ) );
 		}
 	}
@@ -1406,15 +1403,15 @@ Tree *colm_get_rhs_val( Program *prg, Tree *tree, int *a )
 	return 0;
 }
 
-void setField( Program *prg, Tree *tree, long field, Tree *value )
+void colm_tree_set_field( Program *prg, Tree *tree, long field, Tree *value )
 {
 	assert( tree->refs == 1 );
 	if ( value != 0 )
 		assert( value->refs >= 1 );
-	setAttr( tree, field, value );
+	colm_tree_set_attr( tree, field, value );
 }
 
-Tree *getField( Tree *tree, Word field )
+Tree *colm_tree_get_field( Tree *tree, Word field )
 {
 	return colm_get_attr( tree, field );
 }
@@ -1428,7 +1425,7 @@ Tree *getFieldSplit( Program *prg, Tree *tree, Word field )
 {
 	Tree *val = colm_get_attr( tree, field );
 	Tree *split = splitTree( prg, val );
-	setAttr( tree, field, split );
+	colm_tree_set_attr( tree, field, split );
 	return split;
 }
 
@@ -1706,7 +1703,7 @@ void list2PushTail( Program *prg, Tree **sp, List *list, Tree *val )
 		el->id = 0;
 		el->refs = 1;
 		el->child = allocAttrs( prg, 2 );
-		setAttr( val, list->genericInfo->elOffset, constructPointer( prg, el ) );
+		colm_tree_set_attr( val, list->genericInfo->elOffset, constructPointer( prg, el ) );
 	}
 	else {
 		/* Deref the list element (must be a pointer too for time being) */
@@ -1715,8 +1712,8 @@ void list2PushTail( Program *prg, Tree **sp, List *list, Tree *val )
 
 	/* val->prev = list->tail */
 	/* val->next = 0 */
-	setAttr( el, 0, (Tree*)list->tail );
-	setAttr( el, 1, 0 );
+	colm_tree_set_attr( el, 0, (Tree*)list->tail );
+	colm_tree_set_attr( el, 1, 0 );
 
 	Tree *pval = constructPointer( prg, val );
 
@@ -1732,7 +1729,7 @@ void list2PushTail( Program *prg, Tree **sp, List *list, Tree *val )
 		/* list->tail = val */
 		Tree *tel = colm_get_attr( ((Pointer*)list->tail)->value->tree,
 				list->genericInfo->elOffset );
-		setAttr( ((Pointer*)tel)->value->tree, 1, pval );
+		colm_tree_set_attr( ((Pointer*)tel)->value->tree, 1, pval );
 		list->tail = (ListEl*)pval;
 	}
 }

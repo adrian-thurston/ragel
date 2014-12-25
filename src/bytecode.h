@@ -540,7 +540,6 @@ void reverseExecution( Execution *exec, Tree **sp, RtCodeVect *allRev );
 
 Kid *allocAttrs( struct colm_program *prg, long length );
 void freeAttrs( struct colm_program *prg, Kid *attrs );
-void setAttr( Tree *tree, long pos, Tree *val );
 Kid *getAttrKid( Tree *tree, long pos );
 
 Tree *splitTree( struct colm_program *prg, Tree *t );

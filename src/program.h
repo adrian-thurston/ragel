@@ -106,7 +106,7 @@ typedef struct colm_program
 
 	unsigned char ctxDepParsing;
 	RuntimeData *rtd;
-	Tree *global;
+	struct colm_struct *global;
 	int induceExit;
 	int exitStatus;
 

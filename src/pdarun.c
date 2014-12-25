@@ -361,7 +361,7 @@ Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun,
 					- fsmRun->mark[ca->mark_enter] );
 			Tree *string = constructString( prg, data );
 			treeUpref( string );
-			setAttr( input->tree, ca->offset, string );
+			colm_tree_set_field( prg, input->tree, ca->offset, string );
 		}
 	}
 

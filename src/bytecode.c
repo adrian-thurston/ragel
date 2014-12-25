@@ -1158,7 +1158,7 @@ again:
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
 
-			Tree *val = getField( obj, field );
+			Tree *val = colm_tree_get_field( obj, field );
 			treeUpref( val );
 			vm_push( val );
 			break;
@@ -1220,10 +1220,10 @@ again:
 			treeDownref( prg, sp, obj );
 
 			/* Downref the old value. */
-			Tree *prev = getField( obj, field );
+			Tree *prev = colm_tree_get_field( obj, field );
 			treeDownref( prg, sp, prev );
 
-			setField( prg, obj, field, val );
+			colm_tree_set_field( prg, obj, field, val );
 			break;
 		}
 		case IN_SET_FIELD_WV: {
@@ -1237,8 +1237,8 @@ again:
 			treeDownref( prg, sp, obj );
 
 			/* Save the old value, then set the field. */
-			Tree *prev = getField( obj, field );
-			setField( prg, obj, field, val );
+			Tree *prev = colm_tree_get_field( obj, field );
+			colm_tree_set_field( prg, obj, field, val );
 
 			/* Set up the reverse instruction. */
 			rcodeCode( exec, IN_SET_FIELD_BKT );
@@ -1259,10 +1259,10 @@ again:
 			treeDownref( prg, sp, obj );
 
 			/* Downref the old value. */
-			Tree *prev = getField( obj, field );
+			Tree *prev = colm_tree_get_field( obj, field );
 			treeDownref( prg, sp, prev );
 
-			setField( prg, obj, field, val );
+			colm_tree_set_field( prg, obj, field, val );
 			break;
 		}
 		case IN_SET_FIELD_LEAVE_WC: {
@@ -1277,11 +1277,11 @@ again:
 			Tree *val = vm_pop();
 
 			/* Downref the old value. */
-			Tree *prev = getField( obj, field );
+			Tree *prev = colm_tree_get_field( obj, field );
 			treeDownref( prg, sp, prev );
 
 			/* Set the field. */
-			setField( prg, obj, field, val );
+			colm_tree_set_field( prg, obj, field, val );
 
 			/* Leave the object on the top of the stack. */
 			vm_push( obj );
@@ -1380,8 +1380,8 @@ again:
 			treeDownref( prg, sp, obj );
 
 			/* Save the old value, then set the field. */
-			Tree *prev = getField( obj, field );
-			setField( prg, obj, field, val );
+			Tree *prev = colm_tree_get_field( obj, field );
+			colm_tree_set_field( prg, obj, field, val );
 
 			/* Set up the reverse instruction. */
 			rcodeCode( exec, IN_SET_FIELD_BKT );
@@ -1402,10 +1402,10 @@ again:
 			treeDownref( prg, sp, obj );
 
 			/* Downref the old value. */
-			Tree *prev = getField( obj, field );
+			Tree *prev = colm_tree_get_field( obj, field );
 			treeDownref( prg, sp, prev );
 
-			setField( prg, obj, field, val );
+			colm_tree_set_field( prg, obj, field, val );
 			break;
 		}
 		case IN_GET_STRUCT_VAL_R: {
@@ -3792,7 +3792,8 @@ again:
 
 				/* Tree comes back upreffed. */
 				Tree *tree = constructArgv0( prg, prg->argc, prg->argv );
-				setField( prg, prg->global, field, tree );
+				treeDownref( prg, sp, colm_struct_val( prg->global, field ) );
+				colm_struct_val( prg->global, field ) = tree;
 				break;
 			}
 			case IN_LOAD_ARGV: {
@@ -3802,7 +3803,8 @@ again:
 
 				/* Tree comes back upreffed. */
 				Tree *tree = constructArgv( prg, prg->argc, prg->argv );
-				setField( prg, prg->global, field, tree );
+				treeDownref( prg, sp, colm_struct_val( prg->global, field ) );
+				colm_struct_val( prg->global, field ) = tree;
 				break;
 			}
 			case IN_INIT_LOCALS: {

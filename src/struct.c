@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct colm_tree *colm_get_global( Program *prg, long pos )
+{
+	return colm_struct_val( prg->global, pos );
+}
+
 struct colm_struct *colm_new_struct( Program *prg, int id )
 {
 	int structSize = prg->rtd->selInfo[id].size;
