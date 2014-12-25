@@ -21,12 +21,12 @@
 static void colm_alloc_global( Program *prg )
 {
 	/* Alloc the global. */
-	prg->global = colm_new_struct( prg, prg->rtd->globalId ) ;
+	prg->global = colm_struct_new( prg, prg->rtd->globalId ) ;
 }
 
 static void colm_clear_global( Program *prg, Tree **sp )
 {
-	colm_delete_struct( prg, sp, prg->global );
+	colm_struct_delete( prg, sp, prg->global );
 	prg->global = 0;
 }
 
@@ -289,7 +289,7 @@ static void colm_clear_heap( Program *prg, Tree **sp )
 	struct colm_struct *hi = prg->heap.head;
 	while ( hi != 0 ) {
 		struct colm_struct *next = hi->next;
-		colm_delete_struct( prg, sp, hi );
+		colm_struct_delete( prg, sp, hi );
 		hi = next;
 	}
 }

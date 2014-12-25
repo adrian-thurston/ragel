@@ -6,10 +6,10 @@
 
 struct colm_tree *colm_get_global( Program *prg, long pos )
 {
-	return colm_struct_val( prg->global, pos );
+	return colm_struct_get_field( prg->global, pos );
 }
 
-struct colm_struct *colm_new_struct( Program *prg, int id )
+struct colm_struct *colm_struct_new( Program *prg, int id )
 {
 	int structSize = prg->rtd->selInfo[id].size;
 	size_t memsize = sizeof(struct colm_struct) + ( sizeof(Tree*) * structSize );
@@ -31,7 +31,7 @@ struct colm_struct *colm_new_struct( Program *prg, int id )
 	return item;
 }
 
-void colm_delete_struct( Program *prg, Tree **sp, struct colm_struct *el )
+void colm_struct_delete( Program *prg, Tree **sp, struct colm_struct *el )
 {
 	short *t = prg->rtd->selInfo[el->id].trees;
 	int i, len = prg->rtd->selInfo[el->id].treesLen;

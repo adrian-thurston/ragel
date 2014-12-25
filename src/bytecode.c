@@ -1292,7 +1292,7 @@ again:
 			read_half( size );
 
 			debug( prg, REALM_BYTECODE, "IN_NEW_STRUCT %hd\n", size );
-			Struct *item = colm_new_struct( prg, size );
+			Struct *item = colm_struct_new( prg, size );
 			vm_push( (Tree*)item );
 			break;
 		}
@@ -1304,7 +1304,7 @@ again:
 
 			Tree *obj = vm_pop();
 
-			Tree *val = colm_struct_val( obj, field );
+			Tree *val = colm_struct_get_field( obj, field );
 			treeUpref( val );
 			vm_push( val );
 			break;
@@ -1365,8 +1365,9 @@ again:
 			Tree *val = vm_pop();
 
 			/* Downref the old value. */
-			treeDownref( prg, sp, colm_struct_val( obj, field ) );
-			colm_struct_val( obj, field ) = val;
+			Tree *prev = colm_struct_get_field( obj, field );
+			treeDownref( prg, sp, prev );
+			colm_struct_set_field( obj, field, val );
 			break;
 		}
 		case IN_SET_STRUCT_WV: {
@@ -1415,7 +1416,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_VAL_R %d\n", field );
 
 			Tree *obj = vm_pop();
-			Tree *val = colm_struct_val( obj, field );
+			Tree *val = colm_struct_get_field( obj, field );
 			vm_push( val );
 			break;
 		}
@@ -1428,7 +1429,7 @@ again:
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
 
-			colm_struct_val( obj, field ) = val;
+			colm_struct_set_field( obj, field, val );
 			break;
 		}
 		case IN_SET_STRUCT_VAL_WV: {
@@ -1441,7 +1442,7 @@ again:
 			Tree *val = vm_pop();
 
 			/* FIXME: save val here. */
-			colm_struct_val( obj, field ) = val;
+			colm_struct_set_field( obj, field, val );
 			break;
 		}
 		case IN_GET_RHS_VAL_R: {
@@ -3792,8 +3793,9 @@ again:
 
 				/* Tree comes back upreffed. */
 				Tree *tree = constructArgv0( prg, prg->argc, prg->argv );
-				treeDownref( prg, sp, colm_struct_val( prg->global, field ) );
-				colm_struct_val( prg->global, field ) = tree;
+				Tree *prev = colm_struct_get_field( prg->global, field );
+				treeDownref( prg, sp, prev );
+				colm_struct_set_field( prg->global, field, tree );
 				break;
 			}
 			case IN_LOAD_ARGV: {
@@ -3803,8 +3805,9 @@ again:
 
 				/* Tree comes back upreffed. */
 				Tree *tree = constructArgv( prg, prg->argc, prg->argv );
-				treeDownref( prg, sp, colm_struct_val( prg->global, field ) );
-				colm_struct_val( prg->global, field ) = tree;
+				Tree *prev = colm_struct_get_field( prg->global, field );
+				treeDownref( prg, sp, prev );
+				colm_struct_set_field( prg->global, field, tree );
 				break;
 			}
 			case IN_INIT_LOCALS: {
