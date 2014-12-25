@@ -586,12 +586,11 @@ typedef DList<StructEl> StructElList;
 
 struct StructDef
 {
-	StructDef( const String &name, Context *context, Namespace *nspace )
-		: name(name), context(context), nspace(nspace) {}
+	StructDef( const String &name, Context *context )
+		: name(name), context(context) {}
 
 	String name;
 	Context *context;
-	Namespace *nspace;
 
 	StructDef *prev, *next;
 };

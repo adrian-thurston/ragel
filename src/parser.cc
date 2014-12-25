@@ -18,13 +18,17 @@ using std::endl;
 void BaseParser::init()
 {
 	/* Set up the root namespace. */
-	Namespace *rootNamespace = createRootNamespace();
-	pd->rootNamespace = rootNamespace;
+	pd->rootNamespace = createRootNamespace();
 
 	/* Set up the global object. */
 	String global = "global";
 	pd->globalObjectDef = ObjectDef::cons( ObjectDef::UserType,
 			global, pd->nextObjectId++ ); 
+
+	Context *context = new Context( internal, 0 );
+	pd->global = new StructDef( global, context );
+	pd->rootNamespace->structDefList.append( pd->global );
+	context->objectDef = pd->globalObjectDef;
 	
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the
@@ -894,7 +898,7 @@ void BaseParser::structHead( const InputLoc &loc, const String &data,
 	Context *context = new Context( loc, 0 );
 	contextStack.push( context );
 
-	StructDef *structDef = new StructDef( data, context, nspace );
+	StructDef *structDef = new StructDef( data, context );
 	nspace->structDefList.append( structDef );
 
 	context->objectDef = ObjectDef::cons( objectType,

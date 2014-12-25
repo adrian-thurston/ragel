@@ -876,6 +876,8 @@ struct Compiler
 	ConsList replList;
 	ParserTextList parserTextList;
 
+	StructDef *global;
+	StructEl *globalSel;
 	ObjectDef *globalObjectDef;
 	ObjectField *argv0;
 	ObjectField *argvList;

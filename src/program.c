@@ -8,6 +8,7 @@
 #include <colm/pool.h>
 #include <colm/debug.h>
 #include <colm/config.h>
+#include <colm/struct.h>
 
 #include <alloca.h>
 #include <sys/mman.h>
@@ -17,28 +18,16 @@
 
 #define VM_STACK_SIZE (8192)
 
-static void colm_clear_global( Program *prg, Tree **sp )
-{
-	/* Downref all the fields in the global object. */
-	int g;
-	for ( g = 0; g < prg->rtd->globalSize; g++ ) {
-		//assert( colm_get_attr( global, g )->refs == 1 );
-		treeDownref( prg, sp, colm_get_attr( prg->global, g ) );
-	}
-
-	/* Free the global object. */
-	if ( prg->rtd->globalSize > 0 )
-		freeAttrs( prg, prg->global->child );
-	treeFree( prg, prg->global );
-}
-
 static void colm_alloc_global( Program *prg )
 {
 	/* Alloc the global. */
-	Tree *tree = treeAllocate( prg );
-	tree->child = allocAttrs( prg, prg->rtd->globalSize );
-	tree->refs = 1;
-	prg->global = tree;
+	prg->global = (Tree*) colm_new_struct( prg, prg->rtd->globalId ) ;
+}
+
+static void colm_clear_global( Program *prg, Tree **sp )
+{
+	colm_delete_struct( prg, sp, prg->global );
+	prg->global = 0;
 }
 
 void vm_init( Program *prg )
@@ -300,11 +289,7 @@ static void colm_clear_heap( Program *prg, Tree **sp )
 	struct colm_struct *hi = prg->heap.head;
 	while ( hi != 0 ) {
 		struct colm_struct *next = hi->next;
-		short *t = prg->rtd->selInfo[hi->id].trees;
-		int i, len = prg->rtd->selInfo[hi->id].treesLen;
-		for ( i = 0; i < len; i++ )
-			treeDownref( prg, sp, ((Tree**)(hi+1))[t[i]] );
-		free( hi );
+		colm_delete_struct( prg, sp, hi );
 		hi = next;
 	}
 }

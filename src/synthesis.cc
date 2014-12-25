@@ -2502,7 +2502,9 @@ void Compiler::compileReductionCode( Production *prod )
 
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
+	code.append( IN_FN );
 	code.append( IN_INIT_LOCALS );
+	int fsLoc = code.length();
 	code.appendHalf( 0 );
 	long afterInit = code.length();
 
@@ -2511,7 +2513,7 @@ void Compiler::compileReductionCode( Production *prod )
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	long frameSize = block->localFrame->size();
-	code.setHalf( 1, frameSize );
+	code.setHalf( fsLoc, frameSize );
 
 	/* Might need to load right hand side values. */
 	addProdRHSLoads( prod, code, afterInit );
@@ -2539,7 +2541,9 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
+	code.append( IN_FN );
 	code.append( IN_INIT_LOCALS );
+	int fsLoc = code.length();
 	code.appendHalf( 0 );
 
 	if ( langEl->tokenDef->reCaptureVect.length() > 0 ) {
@@ -2552,7 +2556,7 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	long frameSize = block->localFrame->size();
-	code.setHalf( 1, frameSize );
+	code.setHalf( fsLoc, frameSize );
 
 	code.append( IN_PCR_RET );
 
@@ -2577,7 +2581,9 @@ void Compiler::compilePreEof( TokenRegion *region )
 
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
+	code.append( IN_FN );
 	code.append( IN_INIT_LOCALS );
+	int fsLoc = code.length();
 	code.appendHalf( 0 );
 
 	/* Set the local frame and compile the reduce block. */
@@ -2585,7 +2591,7 @@ void Compiler::compilePreEof( TokenRegion *region )
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	long frameSize = block->localFrame->size();
-	code.setHalf( 1, frameSize );
+	code.setHalf( fsLoc, frameSize );
 
 	code.append( IN_PCR_RET );
 
@@ -2625,12 +2631,16 @@ void Compiler::compileRootBlock( )
 
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
+	code.append( IN_FN );
 	code.append( IN_INIT_LOCALS );
+	int fsLoc = code.length();
 	code.appendHalf( 0 );
 
+	code.append( IN_FN );
 	code.append( IN_LOAD_ARGV0 );
 	code.appendHalf( argv0_Offset() );
 
+	code.append( IN_FN );
 	code.append( IN_LOAD_ARGV );
 	code.appendHalf( argvOffset() );
 
@@ -2638,8 +2648,9 @@ void Compiler::compileRootBlock( )
 
 	/* We have the frame size now. Store it in frame init. */
 	long frameSize = rootLocalFrame->size();
-	code.setHalf( 1, frameSize );
+	code.setHalf( fsLoc, frameSize );
 
+	code.append( IN_FN );
 	code.append( IN_STOP );
 
 	/* Make the local trees descriptor. */
@@ -2871,7 +2882,9 @@ void Compiler::compileUserIter( Function *func, CodeVect &code )
 
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
+	code.append( IN_FN );
 	code.append( IN_INIT_LOCALS );
+	int fsLoc = code.length();
 	code.appendHalf( 0 );
 
 	/* Compile the block. */
@@ -2879,7 +2892,7 @@ void Compiler::compileUserIter( Function *func, CodeVect &code )
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	int frameSize = func->localFrame->size();
-	code.setHalf( 1, frameSize );
+	code.setHalf( fsLoc, frameSize );
 
 	/* Check for a return statement. */
 	if ( block->stmtList->length() == 0 ||
@@ -2921,7 +2934,9 @@ void Compiler::compileFunction( Function *func, CodeVect &code )
 
 	/* Add the alloc frame opcode. We don't have the right 
 	 * frame size yet. We will fill it in later. */
+	code.append( IN_FN );
 	code.append( IN_INIT_LOCALS );
+	int fsLoc = code.length();
 	code.appendHalf( 0 );
 
 	/* Compile the block. */
@@ -2929,7 +2944,7 @@ void Compiler::compileFunction( Function *func, CodeVect &code )
 
 	/* We have the frame size now. Set in the alloc frame instruction. */
 	int frameSize = func->localFrame->size();
-	code.setHalf( 1, frameSize );
+	code.setHalf( fsLoc, frameSize );
 
 	/* Check for a return statement. */
 	if ( block->stmtList->length() == 0 ||

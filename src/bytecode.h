@@ -19,6 +19,14 @@ extern "C" {
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
+/*
+ * 0x1c
+ * 0x8b
+ * 0x90
+ * 0xb8
+ * 0xed
+ */
+
 #define IN_LOAD_INT              0x01
 #define IN_LOAD_STR              0x02
 #define IN_LOAD_NIL              0x03
@@ -52,7 +60,6 @@ typedef unsigned char uchar;
 #define IN_CONCAT_STR            0x1a
 #define IN_TREE_TRIM             0x1b
 
-#define IN_INIT_LOCALS           0x1c
 #define IN_POP                   0x1d
 #define IN_POP_N_WORDS           0x1e
 #define IN_DUP_TOP               0x1f
@@ -198,13 +205,12 @@ typedef unsigned char uchar;
 #define IN_PRINT_XML             0x89
 #define IN_PRINT_STREAM          0x8a
 
-#define IN_HALT                  0x8b
 
 #define IN_CALL_WC               0x8c
 #define IN_CALL_WV               0x8d
 #define IN_RET                   0x8e
 #define IN_YIELD                 0x8f
-#define IN_STOP                  0x90
+#define IN_HALT                  0x8b
 
 
 #define IN_INT_TO_STR            0x97
@@ -256,8 +262,6 @@ typedef unsigned char uchar;
 #define IN_GET_STDIN             0xb5
 #define IN_GET_STDOUT            0xb6
 #define IN_GET_STDERR            0xb7
-#define IN_LOAD_ARGV             0xb8
-#define IN_LOAD_ARGV0            0xed
 #define IN_TO_UPPER              0xb9
 #define IN_TO_LOWER              0xba
 #define IN_EXIT                  0xbb
@@ -342,6 +346,11 @@ typedef unsigned char uchar;
 #define IN_STR_SORD16            0x04
 #define IN_STR_UORD32            0x05
 #define IN_STR_SORD32            0x06
+#define IN_LOAD_ARGV             0x07
+#define IN_LOAD_ARGV0            0x08
+#define IN_INIT_LOCALS           0x09
+#define IN_STOP                  0x0a
+
 
 enum TYPE
 {
@@ -445,14 +454,23 @@ enum LEL_ID {
 #define IFR_RFR 0    /* return frame pointer */
 
 /* Exported to modules other than bytecode.c */
-#define vm_push(i)      ( ( sp == prg->sb_beg ? (sp = vm_bs_add(prg, sp, 1)) : 0 ), (*(--sp) = (i)) )
-#define vm_pushn(n)     ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_bs_add(prg, sp, n)) : 0 ), (sp -= (n)) )
+#define vm_push(i) \
+	( ( sp == prg->sb_beg ? (sp = vm_bs_add(prg, sp, 1)) : 0 ), (*(--sp) = (i)) )
 
-#define vm_pop()        ({ SW r = *sp; (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); r; })
-#define vm_pop_ignore() ({ (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); })
-#define vm_popn(n)      ({ (sp+(n)) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, n)) : (sp += (n)); })
+#define vm_pushn(n) \
+	( ( (sp-(n)) < prg->sb_beg ? (sp = vm_bs_add(prg, sp, n)) : 0 ), (sp -= (n)) )
 
-#define vm_contiguous(n) ( ( (sp-(n)) < prg->sb_beg ? (sp = vm_bs_add(prg, sp, n)) : 0 ) )
+#define vm_pop() \
+	({ SW r = *sp; (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); r; })
+
+#define vm_pop_ignore() \
+	({ (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); })
+
+#define vm_popn(n) \
+	({ (sp+(n)) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, n)) : (sp += (n)); })
+
+#define vm_contiguous(n) \
+	( ( (sp-(n)) < prg->sb_beg ? (sp = vm_bs_add(prg, sp, n)) : 0 ) )
 
 #define vm_top() (*sp)
 #define vm_ptop() (sp)
@@ -463,6 +481,9 @@ enum LEL_ID {
 #define vm_plocal(o) (&exec->framePtr[o])
 #define vm_local_iframe(o) (exec->iframePtr[o])
 #define vm_plocal_iframe(o) (&exec->iframePtr[o])
+
+#define vm_push_val(i) \
+	vm_push( ((Tree*)i) )
 
 void vm_init( struct colm_program * );
 Tree** vm_bs_add( struct colm_program *, Tree **, int );

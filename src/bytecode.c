@@ -780,18 +780,20 @@ again:
 			vm_push( exec->parser->pdaRun->context );
 			break;
 		}
+
+		/*
+		 * LOAD_GLOBAL
+		 */
 		case IN_LOAD_GLOBAL_R: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_GLOBAL_R\n" );
 
-			treeUpref( prg->global );
-			vm_push( prg->global );
+			vm_push_val( prg->global );
 			break;
 		}
 		case IN_LOAD_GLOBAL_WV: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_GLOBAL_WV\n" );
 
-			treeUpref( prg->global );
-			vm_push( prg->global );
+			vm_push_val( prg->global );
 
 			/* Set up the reverse instruction. */
 			rcodeUnitStart( exec );
@@ -803,17 +805,16 @@ again:
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			treeUpref( prg->global );
-			vm_push( prg->global );
+			vm_push_val( prg->global );
 			break;
 		}
 		case IN_LOAD_GLOBAL_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_GLOBAL_BKT\n" );
 
-			treeUpref( prg->global );
-			vm_push( prg->global );
+			vm_push_val( prg->global );
 			break;
 		}
+
 		case IN_LOAD_PARSER_R: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_R\n" );
 
@@ -3490,17 +3491,6 @@ again:
 			vm_push( 0 );
 			break;
 		}
-		case IN_INIT_LOCALS: {
-			Half size;
-			read_half( size );
-
-			debug( prg, REALM_BYTECODE, "IN_INIT_LOCALS %hd\n", size );
-
-			exec->framePtr = vm_ptop();
-			vm_pushn( size );
-			memset( vm_ptop(), 0, sizeof(Word) * size );
-			break;
-		}
 		case IN_CALL_WV: {
 			Half funcId;
 			read_half( funcId );
@@ -3738,28 +3728,6 @@ again:
 			vm_push( (Tree*)prg->stderrVal );
 			break;
 		}
-		case IN_LOAD_ARGV: {
-			Half field;
-			read_half( field );
-			debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
-
-			/* Tree comes back upreffed. */
-			Tree *tree = constructArgv( prg, prg->argc, prg->argv );
-			setField( prg, prg->global, field, tree );
-			break;
-		}
-
-		case IN_LOAD_ARGV0: {
-			Half field;
-			read_half( field );
-			debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV0 %lu\n", field );
-
-			/* Tree comes back upreffed. */
-			Tree *tree = constructArgv0( prg, prg->argc, prg->argv );
-			setField( prg, prg->global, field, tree );
-			break;
-		}
-
 		case IN_SYSTEM: {
 			debug( prg, REALM_BYTECODE, "IN_SYSTEM\n" );
 
@@ -3784,39 +3752,80 @@ again:
 		case IN_FN: {
 			c = *instr++;
 			switch ( c ) {
-				case IN_STR_ATOI: {
-					debug( prg, REALM_BYTECODE, "IN_STR_ATOI\n" );
+			case IN_STR_ATOI: {
+				debug( prg, REALM_BYTECODE, "IN_STR_ATOI\n" );
 
-					Str *str = (Str*)vm_pop();
-					Word res = strAtoi( str->value );
-					Tree *integer = constructInteger( prg, res );
-					treeUpref( integer );
-					vm_push( integer );
-					treeDownref( prg, sp, (Tree*)str );
-					break;
-				}
-				case IN_STR_UORD8: {
-					debug( prg, REALM_BYTECODE, "IN_STR_UORD8\n" );
+				Str *str = (Str*)vm_pop();
+				Word res = strAtoi( str->value );
+				Tree *integer = constructInteger( prg, res );
+				treeUpref( integer );
+				vm_push( integer );
+				treeDownref( prg, sp, (Tree*)str );
+				break;
+			}
+			case IN_STR_UORD8: {
+				debug( prg, REALM_BYTECODE, "IN_STR_UORD8\n" );
 
-					Str *str = (Str*)vm_pop();
-					Word res = strUord8( str->value );
-					Tree *tree = constructInteger( prg, res );
-					treeUpref( tree );
-					vm_push( tree );
-					treeDownref( prg, sp, (Tree*)str );
-					break;
-				}
-				case IN_STR_UORD16: {
-					debug( prg, REALM_BYTECODE, "IN_STR_UORD16\n" );
+				Str *str = (Str*)vm_pop();
+				Word res = strUord8( str->value );
+				Tree *tree = constructInteger( prg, res );
+				treeUpref( tree );
+				vm_push( tree );
+				treeDownref( prg, sp, (Tree*)str );
+				break;
+			}
+			case IN_STR_UORD16: {
+				debug( prg, REALM_BYTECODE, "IN_STR_UORD16\n" );
 
-					Str *str = (Str*)vm_pop();
-					Word res = strUord16( str->value );
-					Tree *tree = constructInteger( prg, res );
-					treeUpref( tree );
-					vm_push( tree );
-					treeDownref( prg, sp, (Tree*)str );
-					break;
-				}
+				Str *str = (Str*)vm_pop();
+				Word res = strUord16( str->value );
+				Tree *tree = constructInteger( prg, res );
+				treeUpref( tree );
+				vm_push( tree );
+				treeDownref( prg, sp, (Tree*)str );
+				break;
+			}
+			case IN_LOAD_ARGV0: {
+				Half field;
+				read_half( field );
+				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV0 %lu\n", field );
+
+				/* Tree comes back upreffed. */
+				Tree *tree = constructArgv0( prg, prg->argc, prg->argv );
+				setField( prg, prg->global, field, tree );
+				break;
+			}
+			case IN_LOAD_ARGV: {
+				Half field;
+				read_half( field );
+				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
+
+				/* Tree comes back upreffed. */
+				Tree *tree = constructArgv( prg, prg->argc, prg->argv );
+				setField( prg, prg->global, field, tree );
+				break;
+			}
+			case IN_INIT_LOCALS: {
+				Half size;
+				read_half( size );
+
+				debug( prg, REALM_BYTECODE, "IN_INIT_LOCALS %hd\n", size );
+
+				exec->framePtr = vm_ptop();
+				vm_pushn( size );
+				memset( vm_ptop(), 0, sizeof(Word) * size );
+				break;
+			}
+			case IN_STOP: {
+				debug( prg, REALM_BYTECODE, "IN_STOP\n" );
+
+				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
+				downrefLocalTrees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
+				vm_popn( fi->frameSize );
+
+				fflush( stdout );
+				goto out;
+			}
 			}
 			break;
 		}
@@ -3858,16 +3867,6 @@ again:
 			goto out;
 		}
 
-		case IN_STOP: {
-			debug( prg, REALM_BYTECODE, "IN_STOP\n" );
-
-			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-			downrefLocalTrees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
-			vm_popn( fi->frameSize );
-
-			fflush( stdout );
-			goto out;
-		}
 
 		/* Halt is a default instruction given by the compiler when it is
 		 * asked to generate and instruction it doesn't have. It is deliberate

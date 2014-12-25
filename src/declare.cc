@@ -421,19 +421,22 @@ void Namespace::declare( Compiler *pd )
 		lel->objectDef = c->context->objectDef;
 	}
 
-	for ( StructDefList::Iter c = structDefList; c.lte(); c++ ) {
-		StructEl *sel = declareStruct( pd, this, c->name, c->context );
-		sel->context = c->context;
+	for ( StructDefList::Iter s = structDefList; s.lte(); s++ ) {
+		StructEl *sel = declareStruct( pd, this, s->name, s->context );
+		sel->context = s->context;
 
 		/* If the token has the same name as the region it is in, then also
 		 * insert it into the symbol map for the parent region. */
-		if ( strcmp( c->name, this->name ) == 0 ) {
+		if ( strcmp( s->name, this->name ) == 0 ) {
 			/* Insert the name into the top of the region stack after popping the
 			 * region just created. We need it in the parent. */
 			TypeMapEl *typeMapEl = new TypeMapEl(
-					TypeMapEl::StructType, c->name, sel );
+					TypeMapEl::StructType, s->name, sel );
 			this->parentNamespace->typeMap.insert( typeMapEl );
 		}
+
+		if ( s == pd->global )
+			pd->globalSel = sel;
 	}
 
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {

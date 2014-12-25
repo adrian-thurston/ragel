@@ -1642,11 +1642,13 @@ void Compiler::makeRuntimeData()
 	runtimeData->anyId = anyLangEl->id;
 	runtimeData->eofId = 0; //eofLangEl->id;
 	runtimeData->noTokenId = noTokenLangEl->id;
+	runtimeData->globalId = globalSel->id;
 
 	runtimeData->fsmExecute = &internalFsmExecute;
 	runtimeData->sendNamedLangEl = &internalSendNamedLangEl;
 	runtimeData->initBindings = &internalInitBindings;
 	runtimeData->popBinding = &internalPopBinding;
+
 }
 
 /* Borrow alg->state for mapsTo. */

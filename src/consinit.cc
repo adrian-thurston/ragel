@@ -766,12 +766,14 @@ void ConsInit::parseInput( StmtList *stmtList )
 
 void ConsInit::exportTree( StmtList *stmtList )
 {
+	/* reference P */
 	QualItemVect *qual = new QualItemVect;
 	LangVarRef *varRef = LangVarRef::cons( internal, 0,
 			curLocalFrame->rootScope, qual, String("P") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal,
 			LangTerm::VarRefType, varRef ) );
 
+	/* Assign P to ColmTree */
 	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
 	ObjectField *program = ObjectField::cons( internal,

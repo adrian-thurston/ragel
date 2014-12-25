@@ -360,6 +360,8 @@ Compiler::Compiler( )
 	firstNonTermId(0),
 	prodIdIndex(0),
 
+	global(0),
+	globalSel(0),
 	globalObjectDef(0),
 	argv0(0),
 	argvList(0),
