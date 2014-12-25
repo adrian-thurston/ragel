@@ -979,7 +979,6 @@ void Compiler::addError()
 	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
-
 void Compiler::initMapFunctions( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_MAP_LENGTH );

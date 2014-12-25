@@ -10,7 +10,7 @@ noinst_PROGRAMS = bootstrap0 bootstrap1
 RUNTIME_SRC = \
 	map.c pdarun.c list.c input.c debug.c \
 	codevect.c pool.c string.c tree.c iter.c \
-	bytecode.c program.c
+	bytecode.c program.c struct.c
 
 RUNTIME_HDR = \
 	bytecode.h config.h defs.h debug.h pool.h input.h \

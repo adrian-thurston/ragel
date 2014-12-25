@@ -17,7 +17,7 @@
 
 #define VM_STACK_SIZE (8192)
 
-void clearGlobal( Program *prg, Tree **sp )
+static void colm_clear_global( Program *prg, Tree **sp )
 {
 	/* Downref all the fields in the global object. */
 	int g;
@@ -32,7 +32,7 @@ void clearGlobal( Program *prg, Tree **sp )
 	treeFree( prg, prg->global );
 }
 
-void allocGlobal( Program *prg )
+static void colm_alloc_global( Program *prg )
 {
 	/* Alloc the global. */
 	Tree *tree = treeAllocate( prg );
@@ -206,7 +206,7 @@ Program *colm_new_program( RuntimeData *rtd )
 	prg->falseVal = (Tree*)falseInt;
 
 	/* Allocate the global variable. */
-	allocGlobal( prg );
+	colm_alloc_global( prg );
 
 	/* Allocate the VM stack. */
 	vm_init( prg );
@@ -283,10 +283,10 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 	return prg->returnVal;
 };
 
-static void colm_clear_heap( Program *prg, Tree **sp )
+static void colm_clear_orig_heap( Program *prg, Tree **sp )
 {
 	/* Clear the heap. */
-	Kid *a = prg->heap;
+	Kid *a = prg->origHeap;
 	while ( a != 0 ) {
 		Kid *next = a->next;
 		objectDownref( prg, sp, a->tree );
@@ -295,11 +295,11 @@ static void colm_clear_heap( Program *prg, Tree **sp )
 	}
 }
 
-static void colm_clear_heap2( Program *prg, Tree **sp )
+static void colm_clear_heap( Program *prg, Tree **sp )
 {
-	HeapItem *hi = prg->heapHead;
+	struct colm_struct *hi = prg->heap.head;
 	while ( hi != 0 ) {
-		HeapItem *next = hi->next;
+		struct colm_struct *next = hi->next;
 		short *t = prg->rtd->selInfo[hi->id].trees;
 		int i, len = prg->rtd->selInfo[hi->id].treesLen;
 		for ( i = 0; i < len; i++ )
@@ -315,9 +315,9 @@ int colm_delete_program( Program *prg )
 	int exitStatus = prg->exitStatus;
 
 	treeDownref( prg, sp, prg->returnVal );
-	clearGlobal( prg, sp );
+	colm_clear_global( prg, sp );
+	colm_clear_orig_heap( prg, sp );
 	colm_clear_heap( prg, sp );
-	colm_clear_heap2( prg, sp );
 
 	treeDownref( prg, sp, prg->trueVal );
 	treeDownref( prg, sp, prg->falseVal );

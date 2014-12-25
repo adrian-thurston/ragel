@@ -83,12 +83,18 @@ typedef struct colm_sections
 
 } RuntimeData;
 
-typedef struct colm_heap_item
+struct colm_struct
 {
 	short id;
-	struct colm_heap_item *prev;
-	struct colm_heap_item *next;
-} HeapItem;
+	struct colm_struct *prev;
+	struct colm_struct *next;
+};
+
+typedef struct colm_heap_list
+{
+	struct colm_struct *head;
+	struct colm_struct *tail;
+} HeapList;
 
 typedef struct colm_program
 {
@@ -114,9 +120,9 @@ typedef struct colm_program
 	Tree *trueVal;
 	Tree *falseVal;
 
-	Kid *heap;
+	Kid *origHeap;
 
-	struct colm_heap_item *heapHead, *heapTail;
+	struct colm_heap_list heap;
 
 	Stream *stdinVal;
 	Stream *stdoutVal;

@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+typedef struct colm_struct Struct;
+
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
 #endif
@@ -468,258 +470,6 @@ void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *rev )
 		/* Backup over it. */
 		rev->tabLen -= len + SIZEOF_WORD;
 	}
-}
-
-void rcodeDownref( Program *prg, Tree **sp, Code *instr )
-{
-again:
-	switch ( *instr++ ) {
-		case IN_PARSE_SAVE_STEPS: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
-			break;
-		}
-		case IN_PARSE_INIT_BKT: {
-			Tree *parser;
-			Word pcr;
-			Word steps;
-
-			debug( prg, REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
-
-			read_tree( parser );
-			read_word( pcr );
-			read_word( steps );
-
-			treeDownref( prg, sp, (Tree*)parser );
-			break;
-		}
-
-		case IN_LOAD_TREE: {
-			Word w;
-			read_word( w );
-			debug( prg, REALM_BYTECODE, "IN_LOAD_TREE %p\n", (Tree*)w );
-			treeDownref( prg, sp, (Tree*)w );
-			break;
-		}
-		case IN_LOAD_WORD: {
-			Word w;
-			read_word( w );
-			debug( prg, REALM_BYTECODE, "IN_LOAD_WORD\n" );
-			break;
-		}
-		case IN_RESTORE_LHS: {
-			Tree *restore;
-			read_tree( restore );
-			debug( prg, REALM_BYTECODE, "IN_RESTORE_LHS\n" );
-			treeDownref( prg, sp, restore );
-			break;
-		}
-
-		case IN_PARSE_FRAG_BKT: {
-			Half stopId;
-			read_half( stopId );
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
-			break;
-		}
-		case IN_PARSE_FRAG_EXIT_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
-			break;
-		}
-		case IN_PARSE_FINISH_BKT: {
-			Half stopId;
-			read_half( stopId );
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
-			break;
-		}
-		case IN_PARSE_FINISH_EXIT_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_BKT\n" );
-			break;
-		}
-		case IN_PCR_CALL: {
-			debug( prg, REALM_BYTECODE, "IN_PCR_CALL\n" );
-			break;
-		}
-		case IN_PCR_RET: {
-			debug( prg, REALM_BYTECODE, "IN_PCR_RET\n" );
-			return;
-		}
-		case IN_PCR_END_DECK: {
-			debug( prg, REALM_BYTECODE, "IN_PCR_END_DECK\n" );
-			return;
-		}
-		case IN_INPUT_APPEND_BKT: {
-			Tree *parser;
-			Tree *input;
-			Word len;
-			read_tree( parser );
-			read_tree( input );
-			read_word( len );
-
-			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_BKT\n" ); 
-
-			treeDownref( prg, sp, parser );
-			treeDownref( prg, sp, input );
-			break;
-		}
-		case IN_INPUT_PULL_BKT: {
-			Tree *string;
-			read_tree( string );
-
-			debug( prg, REALM_BYTECODE, "IN_INPUT_PULL_BKT\n" );
-
-			treeDownref( prg, sp, string );
-			break;
-		}
-		case IN_INPUT_PUSH_BKT: {
-			Word len;
-			read_word( len );
-
-			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_BKT\n" );
-			break;
-		}
-		case IN_LOAD_GLOBAL_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_GLOBAL_BKT\n" );
-			break;
-		}
-		case IN_LOAD_CONTEXT_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_BKT\n" );
-			break;
-		}
-		case IN_LOAD_PARSER_BKT: {
-			/* Tree *parser; */
-			consume_word();
-			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_BKT\n" );
-			break;
-		}
-		case IN_LOAD_INPUT_BKT: {
-			/* Tree *input; */
-			consume_word();
-			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_BKT\n" );
-			break;
-		}
-		case IN_GET_FIELD_BKT: {
-			short field;
-			read_half( field );
-
-			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_BKT %hd\n", field );
-			break;
-		}
-		case IN_SET_FIELD_BKT: {
-			short field;
-			Tree *val;
-			read_half( field );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_BKT %hd\n", field );
-
-			treeDownref( prg, sp, val );
-			break;
-		}
-		case IN_PTR_DEREF_BKT: {
-			Tree *ptr;
-			read_tree( ptr );
-
-			debug( prg, REALM_BYTECODE, "IN_PTR_DEREF_BKT\n" );
-
-			treeDownref( prg, sp, ptr );
-			break;
-		}
-		case IN_SET_TOKEN_DATA_BKT: {
-			Word oldval;
-			read_word( oldval );
-
-			debug( prg, REALM_BYTECODE, "IN_SET_TOKEN_DATA_BKT\n" );
-
-			Head *head = (Head*)oldval;
-			stringFree( prg, head );
-			break;
-		}
-		case IN_LIST_PUSH_HEAD_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
-			break;
-		}
-		case IN_LIST_POP_HEAD_BKT: {
-			Tree *val;
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
-
-			treeDownref( prg, sp, val );
-			break;
-		}
-		case IN_LIST_PUSH_TAIL_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
-			break;
-		}
-		case IN_LIST_POP_TAIL_BKT: {
-			Tree *val;
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
-
-			treeDownref( prg, sp, val );
-			break;
-		}
-		case IN_GET_LIST_MEM_BKT: {
-			short field;
-			read_half( field );
-
-			debug( prg, REALM_BYTECODE, "IN_GET_LIST_MEM_BKT %hd\n", field );
-			break;
-		}
-		case IN_SET_LIST_MEM_BKT: {
-			Half field;
-			Tree *val;
-			read_half( field );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_SET_LIST_MEM_BKT %hd\n", field );
-
-			treeDownref( prg, sp, val );
-			break;
-		}
-		case IN_MAP_INSERT_BKT: {
-			/* uchar inserted; */
-			Tree *key;
-			consume_byte();
-			read_tree( key );
-
-			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT\n" );
-			
-			treeDownref( prg, sp, key );
-			break;
-		}
-		case IN_MAP_STORE_BKT: {
-			Tree *key, *val;
-			read_tree( key );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE,"IN_MAP_STORE_BKT\n" );
-
-			treeDownref( prg, sp, key );
-			treeDownref( prg, sp, val );
-			break;
-		}
-		case IN_MAP_REMOVE_BKT: {
-			Tree *key, *val;
-			read_tree( key );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_MAP_REMOVE_BKT\n" );
-
-			treeDownref( prg, sp, key );
-			treeDownref( prg, sp, val );
-			break;
-		}
-		case IN_STOP: {
-			return;
-		}
-		default: {
-			fatal( "UNKNOWN INSTRUCTION 0x%2x: -- reverse code downref\n", *(instr-1));
-			assert(false);
-			break;
-		}
-	}
-	goto again;
 }
 
 void mainExecution( Program *prg, Execution *exec, Code *code )
@@ -1541,7 +1291,7 @@ again:
 			read_half( size );
 
 			debug( prg, REALM_BYTECODE, "IN_NEW_STRUCT %hd\n", size );
-			HeapItem *item = newStruct( prg, size );
+			Struct *item = colm_new_struct( prg, size );
 			vm_push( (Tree*)item );
 			break;
 		}
@@ -4141,4 +3891,260 @@ out:
 		assert( sp == root );
 	return sp;
 }
+
+/*
+ * Deleteing rcode required downreffing any trees held by it.
+ */
+void rcodeDownref( Program *prg, Tree **sp, Code *instr )
+{
+again:
+	switch ( *instr++ ) {
+		case IN_PARSE_SAVE_STEPS: {
+			debug( prg, REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
+			break;
+		}
+		case IN_PARSE_INIT_BKT: {
+			Tree *parser;
+			Word pcr;
+			Word steps;
+
+			debug( prg, REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
+
+			read_tree( parser );
+			read_word( pcr );
+			read_word( steps );
+
+			treeDownref( prg, sp, (Tree*)parser );
+			break;
+		}
+
+		case IN_LOAD_TREE: {
+			Word w;
+			read_word( w );
+			debug( prg, REALM_BYTECODE, "IN_LOAD_TREE %p\n", (Tree*)w );
+			treeDownref( prg, sp, (Tree*)w );
+			break;
+		}
+		case IN_LOAD_WORD: {
+			Word w;
+			read_word( w );
+			debug( prg, REALM_BYTECODE, "IN_LOAD_WORD\n" );
+			break;
+		}
+		case IN_RESTORE_LHS: {
+			Tree *restore;
+			read_tree( restore );
+			debug( prg, REALM_BYTECODE, "IN_RESTORE_LHS\n" );
+			treeDownref( prg, sp, restore );
+			break;
+		}
+
+		case IN_PARSE_FRAG_BKT: {
+			Half stopId;
+			read_half( stopId );
+			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
+			break;
+		}
+		case IN_PARSE_FRAG_EXIT_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
+			break;
+		}
+		case IN_PARSE_FINISH_BKT: {
+			Half stopId;
+			read_half( stopId );
+			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
+			break;
+		}
+		case IN_PARSE_FINISH_EXIT_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_BKT\n" );
+			break;
+		}
+		case IN_PCR_CALL: {
+			debug( prg, REALM_BYTECODE, "IN_PCR_CALL\n" );
+			break;
+		}
+		case IN_PCR_RET: {
+			debug( prg, REALM_BYTECODE, "IN_PCR_RET\n" );
+			return;
+		}
+		case IN_PCR_END_DECK: {
+			debug( prg, REALM_BYTECODE, "IN_PCR_END_DECK\n" );
+			return;
+		}
+		case IN_INPUT_APPEND_BKT: {
+			Tree *parser;
+			Tree *input;
+			Word len;
+			read_tree( parser );
+			read_tree( input );
+			read_word( len );
+
+			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_BKT\n" ); 
+
+			treeDownref( prg, sp, parser );
+			treeDownref( prg, sp, input );
+			break;
+		}
+		case IN_INPUT_PULL_BKT: {
+			Tree *string;
+			read_tree( string );
+
+			debug( prg, REALM_BYTECODE, "IN_INPUT_PULL_BKT\n" );
+
+			treeDownref( prg, sp, string );
+			break;
+		}
+		case IN_INPUT_PUSH_BKT: {
+			Word len;
+			read_word( len );
+
+			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_BKT\n" );
+			break;
+		}
+		case IN_LOAD_GLOBAL_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LOAD_GLOBAL_BKT\n" );
+			break;
+		}
+		case IN_LOAD_CONTEXT_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_BKT\n" );
+			break;
+		}
+		case IN_LOAD_PARSER_BKT: {
+			/* Tree *parser; */
+			consume_word();
+			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_BKT\n" );
+			break;
+		}
+		case IN_LOAD_INPUT_BKT: {
+			/* Tree *input; */
+			consume_word();
+			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_BKT\n" );
+			break;
+		}
+		case IN_GET_FIELD_BKT: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_BKT %hd\n", field );
+			break;
+		}
+		case IN_SET_FIELD_BKT: {
+			short field;
+			Tree *val;
+			read_half( field );
+			read_tree( val );
+
+			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_BKT %hd\n", field );
+
+			treeDownref( prg, sp, val );
+			break;
+		}
+		case IN_PTR_DEREF_BKT: {
+			Tree *ptr;
+			read_tree( ptr );
+
+			debug( prg, REALM_BYTECODE, "IN_PTR_DEREF_BKT\n" );
+
+			treeDownref( prg, sp, ptr );
+			break;
+		}
+		case IN_SET_TOKEN_DATA_BKT: {
+			Word oldval;
+			read_word( oldval );
+
+			debug( prg, REALM_BYTECODE, "IN_SET_TOKEN_DATA_BKT\n" );
+
+			Head *head = (Head*)oldval;
+			stringFree( prg, head );
+			break;
+		}
+		case IN_LIST_PUSH_HEAD_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
+			break;
+		}
+		case IN_LIST_POP_HEAD_BKT: {
+			Tree *val;
+			read_tree( val );
+
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
+
+			treeDownref( prg, sp, val );
+			break;
+		}
+		case IN_LIST_PUSH_TAIL_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
+			break;
+		}
+		case IN_LIST_POP_TAIL_BKT: {
+			Tree *val;
+			read_tree( val );
+
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
+
+			treeDownref( prg, sp, val );
+			break;
+		}
+		case IN_GET_LIST_MEM_BKT: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_LIST_MEM_BKT %hd\n", field );
+			break;
+		}
+		case IN_SET_LIST_MEM_BKT: {
+			Half field;
+			Tree *val;
+			read_half( field );
+			read_tree( val );
+
+			debug( prg, REALM_BYTECODE, "IN_SET_LIST_MEM_BKT %hd\n", field );
+
+			treeDownref( prg, sp, val );
+			break;
+		}
+		case IN_MAP_INSERT_BKT: {
+			/* uchar inserted; */
+			Tree *key;
+			consume_byte();
+			read_tree( key );
+
+			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT\n" );
+			
+			treeDownref( prg, sp, key );
+			break;
+		}
+		case IN_MAP_STORE_BKT: {
+			Tree *key, *val;
+			read_tree( key );
+			read_tree( val );
+
+			debug( prg, REALM_BYTECODE,"IN_MAP_STORE_BKT\n" );
+
+			treeDownref( prg, sp, key );
+			treeDownref( prg, sp, val );
+			break;
+		}
+		case IN_MAP_REMOVE_BKT: {
+			Tree *key, *val;
+			read_tree( key );
+			read_tree( val );
+
+			debug( prg, REALM_BYTECODE, "IN_MAP_REMOVE_BKT\n" );
+
+			treeDownref( prg, sp, key );
+			treeDownref( prg, sp, val );
+			break;
+		}
+		case IN_STOP: {
+			return;
+		}
+		default: {
+			fatal( "UNKNOWN INSTRUCTION 0x%2x: -- reverse code downref\n", *(instr-1));
+			assert(false);
+			break;
+		}
+	}
+	goto again;
+}
+
 
