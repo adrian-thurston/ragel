@@ -637,7 +637,7 @@ struct LoadColm
 	LangStmt *walkGlobalDef( global_def GlobalDef )
 	{
 		ObjectField *objField = walkVarDef( GlobalDef.var_def(),
-				ObjectField::UserFieldType );
+				ObjectField::StructFieldType );
 		LangExpr *expr = walkOptDefInit( GlobalDef.opt_def_init() );
 
 		return globalDef( objField, expr, LangStmt::AssignType );
