@@ -1378,14 +1378,13 @@ again:
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
-			treeDownref( prg, sp, obj );
 
 			/* Save the old value, then set the field. */
-			Tree *prev = colm_tree_get_field( obj, field );
-			colm_tree_set_field( prg, obj, field, val );
+			Tree *prev = colm_struct_get_field( obj, field );
+			colm_struct_set_field( obj, field, val );
 
 			/* Set up the reverse instruction. */
-			rcodeCode( exec, IN_SET_FIELD_BKT );
+			rcodeCode( exec, IN_SET_STRUCT_BKT );
 			rcodeHalf( exec, field );
 			rcodeWord( exec, (Word)prev );
 			rcodeUnitTerm( exec );
@@ -1400,13 +1399,12 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_BKT\n" );
 
 			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
 
 			/* Downref the old value. */
-			Tree *prev = colm_tree_get_field( obj, field );
+			Tree *prev = colm_struct_get_field( obj, field );
 			treeDownref( prg, sp, prev );
 
-			colm_tree_set_field( prg, obj, field, val );
+			colm_struct_set_field( obj, field, val );
 			break;
 		}
 		case IN_GET_STRUCT_VAL_R: {
@@ -4037,6 +4035,17 @@ again:
 			read_tree( val );
 
 			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_BKT %hd\n", field );
+
+			treeDownref( prg, sp, val );
+			break;
+		}
+		case IN_SET_STRUCT_BKT: {
+			short field;
+			Tree *val;
+			read_half( field );
+			read_tree( val );
+
+			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_BKT %hd\n", field );
 
 			treeDownref( prg, sp, val );
 			break;
