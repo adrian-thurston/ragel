@@ -2135,8 +2135,6 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_ERROR\n" );
 
 			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
-
 			treeUpref( (Tree*)prg->error );
 			vm_push( (Tree*)prg->error );
 			break;
