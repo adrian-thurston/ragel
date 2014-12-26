@@ -3679,7 +3679,6 @@ again:
 
 			/* Pop the root object. */
 			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
 			if ( prg->stdinVal == 0 ) {
 				Tree *val = (Tree*)openStreamFd( prg, "<stdin>", 0 );
 				treeUpref( val );
@@ -3696,7 +3695,6 @@ again:
 
 			/* Pop the root object. */
 			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
 			if ( prg->stdoutVal == 0 ) {
 				Tree *val = (Tree*)openStreamFd( prg, "<stdout>", 1 );
 				treeUpref( val );
@@ -3713,7 +3711,6 @@ again:
 
 			/* Pop the root object. */
 			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
 			if ( prg->stderrVal == 0 ) {
 				Tree *val = (Tree*)openStreamFd( prg, "<stderr>", 2 );
 				treeUpref( val );
@@ -3838,7 +3835,6 @@ again:
 			Int *status = (Int*)vm_pop();
 			prg->exitStatus = status->value;
 			prg->induceExit = 1;
-			treeDownref( prg, sp, global );
 			treeDownref( prg, sp, (Tree*)status );
 
 			while ( true ) {

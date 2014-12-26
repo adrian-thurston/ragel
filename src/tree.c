@@ -170,54 +170,6 @@ Kid *kidListConcat( Kid *list1, Kid *list2 )
 }
 
 
-Stream *openStreamFile( Program *prg, char *name, FILE *file )
-{
-	Stream *res = (Stream*)mapElAllocate( prg );
-	res->id = LEL_ID_STREAM;
-	res->in = newSourceStreamFile( name, file );
-	return res;
-}
-
-Stream *openStreamFd( Program *prg, char *name, long fd )
-{
-	Stream *res = (Stream*)mapElAllocate( prg );
-	res->id = LEL_ID_STREAM;
-	res->in = newSourceStreamFd( name, fd );
-	return res;
-}
-
-Stream *openFile( Program *prg, Tree *name, Tree *mode )
-{
-	Head *headName = ((Str*)name)->value;
-	Head *headMode = ((Str*)mode)->value;
-	Stream *stream = 0;
-
-	const char *givenMode = stringData(headMode);
-	const char *fopenMode = 0;
-	if ( memcmp( givenMode, "r", stringLength(headMode) ) == 0 )
-		fopenMode = "rb";
-	else if ( memcmp( givenMode, "w", stringLength(headMode) ) == 0 )
-		fopenMode = "wb";
-	else if ( memcmp( givenMode, "a", stringLength(headMode) ) == 0 )
-		fopenMode = "ab";
-	else {
-		fatal( "unknown file open mode: %s\n", givenMode );
-	}
-	
-	/* Need to make a C-string (null terminated). */
-	char *fileName = (char*)malloc(stringLength(headName)+1);
-	memcpy( fileName, stringData(headName), stringLength(headName) );
-	fileName[stringLength(headName)] = 0;
-	FILE *file = fopen( fileName, fopenMode );
-	if ( file != 0 ) {
-		stream = openStreamFile( prg, fileName, file );
-		treeUpref( (Tree*)stream );
-		stream = (Stream*)constructPointer( prg, (Tree*)stream );
-	}
-
-	return stream;
-}
-
 Tree *constructInteger( Program *prg, long i )
 {
 	Int *integer = (Int*) treeAllocate( prg );
