@@ -437,6 +437,8 @@ void Namespace::declare( Compiler *pd )
 
 		if ( s == pd->global )
 			pd->globalSel = sel;
+		if ( s == pd->stream )
+			pd->streamSel = sel;
 	}
 
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {

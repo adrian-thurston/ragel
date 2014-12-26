@@ -366,6 +366,9 @@ Compiler::Compiler( )
 	argv0(0),
 	argvList(0),
 
+	stream(0),
+	streamSel(0),
+
 	uniqueTypeNil(0),
 	uniqueTypePtr(0),
 	uniqueTypeBool(0),
@@ -968,13 +971,9 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	PdaRun *pdaRun = new PdaRun;
 	initPdaRun( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
 
-	Stream *res = streamAllocate( prg );
-	res->id = LEL_ID_STREAM;
-	res->in = sourceStream;
+	Tree *stream = constructStream( prg );
 
-	Tree *ptr = constructPointer( prg, (Tree*)res );
-
-	in->funcs->appendStream( in, ptr );
+	in->funcs->appendStream( in, stream );
 	in->funcs->setEof( in );
 
 	long pcr = parseLoop( prg, sp, pdaRun, in, PcrStart );
@@ -997,7 +996,6 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 
 	return pdaRun;
 }
-
 
 void Compiler::parsePatterns()
 {

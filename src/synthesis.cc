@@ -1303,6 +1303,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		bool isStream = false;
 		switch ( item->type ) {
 		case ConsItem::LiteralType: {
 			String result;
@@ -1341,6 +1342,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			}
 
 			UniqueType *streamPtrUt = pd->findUniqueType( TYPE_PTR, pd->streamLangEl );
+			if ( ut == streamPtrUt )
+				isStream = true;
+
 			if ( !tree && ut->typeId == TYPE_TREE &&
 					ut->langEl != pd->strLangEl && ut != streamPtrUt )
 			{
@@ -1354,10 +1358,19 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 		/* Not a stream. Get the input first. */
 		code.append( IN_GET_INPUT );
-		if ( pd->revertOn )
-			code.append( IN_INPUT_APPEND_WV );
-		else
-			code.append( IN_INPUT_APPEND_WC );
+
+		if ( isStream ) {
+			if ( pd->revertOn )
+				code.append( IN_INPUT_APPEND_STREAM_WV );
+			else
+				code.append( IN_INPUT_APPEND_STREAM_WC );
+		}
+		else {
+			if ( pd->revertOn )
+				code.append( IN_INPUT_APPEND_WV );
+			else
+				code.append( IN_INPUT_APPEND_WC );
+		}
 		code.append( IN_POP );
 
 		code.append( IN_DUP_TOP );
@@ -1541,10 +1554,12 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 
 		/* Not a stream. Get the input first. */
 		code.append( IN_GET_INPUT );
+
 		if ( pd->revertOn )
 			code.append( IN_INPUT_APPEND_WV );
 		else
 			code.append( IN_INPUT_APPEND_WC );
+
 		code.append( IN_POP );
 
 		code.append( IN_DUP_TOP );

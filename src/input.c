@@ -9,6 +9,7 @@
 #include <colm/tree.h>
 #include <colm/bytecode.h>
 #include <colm/pool.h>
+#include <colm/struct.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,8 +47,9 @@ void clearSourceStream( struct colm_program *prg,
 
 			case RunBufTokenType:
 			case RunBufIgnoreType:
-			case RunBufSourceType:
 				treeDownref( prg, sp, buf->tree );
+				break;
+			case RunBufSourceType:
 				break;
 		}
 
@@ -349,8 +351,10 @@ void clearStreamImpl( struct colm_program *prg, Tree **sp, StreamImpl *inputStre
 
 			case RunBufTokenType:
 			case RunBufIgnoreType:
-			case RunBufSourceType:
 				treeDownref( prg, sp, buf->tree );
+				break;
+
+			case RunBufSourceType:
 				break;
 		}
 
@@ -636,10 +640,10 @@ static int _consumeData( Program *prg, Tree **sp, StreamImpl *is,
 		}
 
 		RunBuf *runBuf = inputStreamPopHead( is );
-		if ( runBuf->type == RunBufSourceType ) {
-			Stream *stream = (Stream*)runBuf->tree;
-			treeDownref( prg, sp, (Tree*) stream );
-		}
+		//if ( runBuf->type == RunBufSourceType ) {
+		//	Stream *stream = (Stream*)runBuf->tree;
+		//	treeDownref( prg, sp, (Tree*) stream );
+		//}
 		free( runBuf );
 	}
 
@@ -1007,18 +1011,20 @@ StreamImpl *newSourceStreamGeneric( const char *name )
 
 Stream *openStreamFile( Program *prg, char *name, FILE *file )
 {
-	Stream *res = (Stream*)mapElAllocate( prg );
-	res->id = LEL_ID_STREAM;
-	res->in = newSourceStreamFile( name, file );
-	return res;
+	StreamImpl *impl = newSourceStreamFile( name, file );
+
+	struct colm_struct *s = colm_struct_inbuilt( prg, 16, 0 );
+	colm_struct_set_field( s, 15, (Tree*)impl );
+	return (Stream*) s;
 }
 
 Stream *openStreamFd( Program *prg, char *name, long fd )
 {
-	Stream *res = (Stream*)mapElAllocate( prg );
-	res->id = LEL_ID_STREAM;
-	res->in = newSourceStreamFd( name, fd );
-	return res;
+	StreamImpl *impl = newSourceStreamFd( name, fd );
+
+	struct colm_struct *s = colm_struct_inbuilt( prg, 16, 0 );
+	colm_struct_set_field( s, 15, (Tree*)impl );
+	return (Stream*) s;
 }
 
 Stream *openFile( Program *prg, Tree *name, Tree *mode )
@@ -1044,11 +1050,27 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode )
 	memcpy( fileName, stringData(headName), stringLength(headName) );
 	fileName[stringLength(headName)] = 0;
 	FILE *file = fopen( fileName, fopenMode );
-	if ( file != 0 ) {
+	if ( file != 0 )
 		stream = openStreamFile( prg, fileName, file );
-		treeUpref( (Tree*)stream );
-		stream = (Stream*)constructPointer( prg, (Tree*)stream );
-	}
 
 	return stream;
+}
+
+Tree *constructStream( Program *prg )
+{
+	StreamImpl *impl = newSourceStreamGeneric( "<internal>" );
+
+	struct colm_struct *s = colm_struct_inbuilt( prg, 16, 0 );
+	colm_struct_set_field( s, 15, (Tree*)impl );
+	return (Tree*) s;
+}
+
+StreamImpl *colm_stream_impl( struct colm_struct *s )
+{
+	return (StreamImpl*) colm_struct_get_field( s, 15 );
+}
+
+StreamImpl *streamToImpl( Stream *ptr )
+{
+	return (StreamImpl*) colm_struct_get_field( ((struct colm_struct*)ptr), 15 );
 }

@@ -217,15 +217,6 @@ Tree *constructTerm( Program *prg, Word id, Head *tokdata )
 	return tree;
 }
 
-Tree *constructStream( Program *prg )
-{
-	Stream *input = streamAllocate( prg );
-	input->refs = 0;
-	input->id = LEL_ID_STREAM;
-
-	input->in = newSourceStreamGeneric( "<internal>" );
-	return (Tree*)input;
-}
 
 Kid *constructKid( Program *prg, Tree **bindings, Kid *prev, long pat );
 

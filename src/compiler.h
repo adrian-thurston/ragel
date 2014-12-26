@@ -882,6 +882,9 @@ struct Compiler
 	ObjectField *argv0;
 	ObjectField *argvList;
 
+	StructDef *stream;
+	StructEl *streamSel;
+
 	VectorTypeIdMap vectorTypeIdMap;
 
 	UniqueType *findUniqueType( enum TYPE typeId );

@@ -50,6 +50,7 @@ struct colm_tree;
 struct colm_stream;
 struct colm_location;
 struct colm_program;
+struct colm_struct;
 
 enum RunBufType {
 	RunBufDataType = 0,
@@ -152,6 +153,8 @@ StreamImpl *newSourceStreamGeneric( const char *name );
 
 void updatePosition( StreamImpl *inputStream, const char *data, long length );
 void undoPosition( StreamImpl *inputStream, const char *data, long length );
+
+StreamImpl *colm_stream_impl( struct colm_struct *s );
 
 #ifdef __cplusplus
 }

@@ -20,9 +20,7 @@ typedef unsigned long ulong;
 typedef unsigned char uchar;
 
 /*
- * 0x1c
  * 0x8b
- * 0x90
  * 0xb8
  * 0xed
  */
@@ -243,6 +241,10 @@ typedef unsigned char uchar;
 #define IN_INPUT_APPEND_WC       0xa8
 #define IN_INPUT_APPEND_WV       0xa9
 #define IN_INPUT_APPEND_BKT      0xaa
+
+#define IN_INPUT_APPEND_STREAM_WC  0x96
+#define IN_INPUT_APPEND_STREAM_WV  0x90
+#define IN_INPUT_APPEND_STREAM_BKT 0x1c
 
 #define IN_PARSE_FINISH_WC       0xab
 #define IN_PARSE_FINISH_EXIT_WC  0xac
