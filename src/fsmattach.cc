@@ -577,8 +577,8 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 		CondList destList;
 
 		/* Set up an iterator to stop at breaks. */
-		ValPairIter<CondAp> outPair( destTrans->tcap()->condList.head,
-				effSrcTrans->tcap()->condList.head );
+		ValPairIter< PiList<CondAp> > outPair( destTrans->tcap()->condList,
+				effSrcTrans->tcap()->condList );
 		for ( ; !outPair.end(); outPair++ ) {
 			switch ( outPair.userState ) {
 			case ValPairIter<CondAp>::RangeInS1: {
@@ -630,7 +630,7 @@ void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
 	TransList destList;
 
 	/* Set up an iterator to stop at breaks. */
-	RangePairIter<TransAp> outPair( ctx, dest->outList.head, srcList );
+	RangePairIter< PiList<TransAp> > outPair( ctx, dest->outList, srcList );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 		case RangePairIter<TransAp>::RangeInS1: {

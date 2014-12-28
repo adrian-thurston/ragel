@@ -861,8 +861,8 @@ int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 			return compareRes;
 	}
 	else {
-		ValPairIter<CondAp> outPair( trans1->tcap()->condList.head,
-				trans2->tcap()->condList.head );
+		ValPairIter< PiList<CondAp> > outPair( trans1->tcap()->condList,
+				trans2->tcap()->condList );
 		for ( ; !outPair.end(); outPair++ ) {
 			switch ( outPair.userState ) {
 			case ValPairIter<CondAp>::RangeInS1: {
@@ -878,7 +878,7 @@ int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 				break;
 			}
 			case ValPairIter<CondAp>::RangeOverlap: {
-				int compareRes = FsmAp::compareCondDataPtr( 
+				int compareRes = FsmAp::compareCondDataPtr<CondAp>( 
 						outPair.s1Tel.trans, outPair.s2Tel.trans );
 				if ( compareRes != 0 )
 					return compareRes;

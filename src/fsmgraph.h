@@ -847,7 +847,76 @@ struct StateAp
 	return; \
 	entry##label: {}
 
-template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
+template <class Item> struct PiList
+{
+	PiList()
+		: ptr(0) {}
+
+	PiList( const DList<Item> &l )
+		: ptr(l.head) {}
+
+	PiList( Item *ptr )
+		: ptr(ptr) {}
+
+	operator Item *() const   { return ptr; }
+	Item *operator->() const  { return ptr; }
+
+	bool end()   { return ptr == 0; }
+	void clear() { ptr = 0; }
+
+	PiList next()
+		{ return PiList( ptr->next ); }
+
+	Item *ptr;
+};
+
+template <class Item> struct PiSingle
+{
+	PiSingle()
+		: ptr(0) {}
+
+	PiSingle( Item *ptr )
+		: ptr(ptr) {}
+
+	operator Item *() const   { return ptr; }
+	Item *operator->() const  { return ptr; }
+
+	bool end()   { return ptr == 0; }
+	void clear() { ptr = 0; }
+
+	/* Next is always nil. */
+	PiSingle next()
+		{ return PiSingle( 0 ); }
+
+	Item *ptr;
+};
+
+template <class Item> struct PiVector
+{
+	PiVector()
+		: ptr(0), length(0) {}
+
+	PiVector( const Vector<Item> &v )
+		: ptr(v.data), length(v.length()) {}
+
+	PiVector( Item *ptr, long length )
+		: ptr(ptr), length(length) {}
+
+	operator Item *() const   { return ptr; }
+	Item *operator->() const  { return ptr; }
+
+	bool end()   { return length == 0; }
+	void clear() { ptr = 0; length = 0; }
+
+	PiVector next()
+		{ return PiVector( ptr + 1, length - 1 ); }
+
+	Item *ptr;
+	long length;
+};
+
+
+template <class ItemIter1, class ItemIter2 = ItemIter1> struct ValPairIter
 {
 	/* Encodes the states that are meaningful to the of caller the iterator. */
 	enum UserState
@@ -864,13 +933,13 @@ template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
 		ExactOverlap,   End
 	};
 
-	ValPairIter( ListItem1 *list1, ListItem2 *list2 );
+	ValPairIter( const ItemIter1 &list1, const ItemIter2 &list2 );
 
-	template <class ListItem> struct NextTrans
+	template <class ItemIter> struct NextTrans
 	{
 		CondKey key;
-		ListItem *trans;
-		ListItem *next;
+		ItemIter trans;
+		ItemIter next;
 
 		void load() {
 			if ( trans == 0 )
@@ -881,7 +950,7 @@ template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
 			}
 		}
 
-		void set( ListItem *t ) {
+		void set( const ItemIter &t ) {
 			trans = t;
 			load();
 		}
@@ -899,24 +968,25 @@ template <class ListItem1, class ListItem2 = ListItem1> struct ValPairIter
 	void operator++()    { findNext(); }
 
 	/* Iterator state. */
-	ListItem1 *list1;
-	ListItem2 *list2;
+	ItemIter1 list1;
+	ItemIter2 list2;
 	IterState itState;
 	UserState userState;
 
-	NextTrans<ListItem1> s1Tel;
-	NextTrans<ListItem2> s2Tel;
+	NextTrans<ItemIter1> s1Tel;
+	NextTrans<ItemIter2> s2Tel;
 	Key bottomLow, bottomHigh;
-	ListItem1 *bottomTrans1;
-	ListItem2 *bottomTrans2;
+	ItemIter1 *bottomTrans1;
+	ItemIter2 *bottomTrans2;
 
 private:
 	void findNext();
 };
 
 /* Init the iterator by advancing to the first item. */
-template <class ListItem1, class ListItem2> ValPairIter<ListItem1, ListItem2>::
-		ValPairIter( ListItem1 *list1, ListItem2 *list2 )
+template <class ItemIter1, class ItemIter2>
+		ValPairIter<ItemIter1, ItemIter2>::
+		ValPairIter( const ItemIter1 &list1, const ItemIter2 &list2 )
 :
 	list1(list1),
 	list2(list2),
@@ -927,8 +997,8 @@ template <class ListItem1, class ListItem2> ValPairIter<ListItem1, ListItem2>::
 
 /* Advance to the next transition. When returns, trans points to the next
  * transition, unless there are no more, in which case end() returns true. */
-template <class ListItem1, class ListItem2>
-	void ValPairIter<ListItem1, ListItem2>::findNext()
+template <class ItemIter1, class ItemIter2>
+	void ValPairIter<ItemIter1, ItemIter2>::findNext()
 {
 	/* Jump into the iterator routine base on the iterator state. */
 	switch ( itState ) {
@@ -994,7 +1064,7 @@ entryBegin:
 	CO_RETURN( End );
 }
 
-template <class ListItem1, class ListItem2 = ListItem1> struct RangePairIter
+template <class ItemIter1, class ItemIter2 = ItemIter1> struct RangePairIter
 {
 	/* Encodes the states that are meaningful to the of caller the iterator. */
 	enum UserState
@@ -1016,13 +1086,13 @@ template <class ListItem1, class ListItem2 = ListItem1> struct RangePairIter
 		ExactOverlap,   End
 	};
 
-	RangePairIter( FsmCtx *ctx, ListItem1 *list1, ListItem2 *list2 );
+	RangePairIter( FsmCtx *ctx, const ItemIter1 &list1, const ItemIter2 &list2 );
 
-	template <class ListItem> struct NextTrans
+	template <class ItemIter> struct NextTrans
 	{
 		Key lowKey, highKey;
-		ListItem *trans;
-		ListItem *next;
+		ItemIter trans;
+		ItemIter next;
 
 		void load() {
 			if ( trans == 0 )
@@ -1034,7 +1104,7 @@ template <class ListItem1, class ListItem2 = ListItem1> struct RangePairIter
 			}
 		}
 
-		void set( ListItem *t ) {
+		void set( const ItemIter &t ) {
 			trans = t;
 			load();
 		}
@@ -1054,24 +1124,24 @@ template <class ListItem1, class ListItem2 = ListItem1> struct RangePairIter
 	FsmCtx *ctx;
 
 	/* Iterator state. */
-	ListItem1 *list1;
-	ListItem2 *list2;
+	ItemIter1 list1;
+	ItemIter2 list2;
 	IterState itState;
 	UserState userState;
 
-	NextTrans<ListItem1> s1Tel;
-	NextTrans<ListItem2> s2Tel;
+	NextTrans<ItemIter1> s1Tel;
+	NextTrans<ItemIter2> s2Tel;
 	Key bottomLow, bottomHigh;
-	ListItem1 *bottomTrans1;
-	ListItem2 *bottomTrans2;
+	ItemIter1 bottomTrans1;
+	ItemIter2 bottomTrans2;
 
 private:
 	void findNext();
 };
 
 /* Init the iterator by advancing to the first item. */
-template <class ListItem1, class ListItem2> RangePairIter<ListItem1, ListItem2>::
-		RangePairIter( FsmCtx *ctx, ListItem1 *list1, ListItem2 *list2 )
+template <class ItemIter1, class ItemIter2> RangePairIter<ItemIter1, ItemIter2>::
+		RangePairIter( FsmCtx *ctx, const ItemIter1 &list1, const ItemIter2 &list2 )
 :
 	ctx(ctx),
 	list1(list1),
@@ -1083,8 +1153,8 @@ template <class ListItem1, class ListItem2> RangePairIter<ListItem1, ListItem2>:
 
 /* Advance to the next transition. When returns, trans points to the next
  * transition, unless there are no more, in which case end() returns true. */
-template <class ListItem1, class ListItem2>
-		void RangePairIter<ListItem1, ListItem2>::findNext()
+template <class ItemIter1, class ItemIter2>
+		void RangePairIter<ItemIter1, ItemIter2>::findNext()
 {
 	/* Jump into the iterator routine base on the iterator state. */
 	switch ( itState ) {
