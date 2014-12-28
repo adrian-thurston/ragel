@@ -351,10 +351,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					rlhcShowCmd = true;
 				else if ( strcmp( arg, "no-intermediate" ) == 0 )
 					noIntermediate = true;
-				else if ( strcmp( arg, "frontend-kelbt" ) == 0 )
-					ragelFrontend = KelbtBased;
-				else if ( strcmp( arg, "frontend-colm" ) == 0 )
-					ragelFrontend = ColmBased;
+				else if ( strcmp( arg, "kelbt-frontend" ) == 0 )
+					frontend = KelbtBased;
+				else if ( strcmp( arg, "colm-frontend" ) == 0 )
+					frontend = ColmBased;
 				else if ( strcmp( arg, "asm" ) == 0 )
 					hostLang = &hostLangAsm;
 				else if ( strcmp( arg, "direct" ) == 0 )

@@ -79,7 +79,7 @@ struct InputData
 		rubyImpl(MRI),
 		rlhcShowCmd(false),
 		noIntermediate(false),
-		ragelFrontend(ColmBased)
+		frontend(ColmBased)
 	{}
 
 	std::string dirName;
@@ -133,7 +133,7 @@ struct InputData
 	bool rlhcShowCmd;
 	bool noIntermediate;
 
-	RagelFrontend ragelFrontend;
+	RagelFrontend frontend;
 
 	void verifyWritesHaveData();
 

@@ -396,7 +396,7 @@ void InputData::process()
 {
 	ifstream *inFile;
 
-	switch ( ragelFrontend ) {
+	switch ( frontend ) {
 	case KelbtBased: {
 		/*
 		 * Ragel Parser from ragel 6.
