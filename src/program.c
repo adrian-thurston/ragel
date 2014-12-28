@@ -300,10 +300,6 @@ int colm_delete_program( Program *prg )
 	treeDownref( prg, sp, prg->trueVal );
 	treeDownref( prg, sp, prg->falseVal );
 
-	treeDownref( prg, sp, (Tree*)prg->stdinVal );
-	treeDownref( prg, sp, (Tree*)prg->stdoutVal );
-	treeDownref( prg, sp, (Tree*)prg->stderrVal );
-
 	treeDownref( prg, sp, prg->error );
 
 #if DEBUG
