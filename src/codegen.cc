@@ -250,7 +250,7 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 void CodeGen::statsSummary()
 {
 	if ( pd->id->printStatistics )
-		cout << "table-data\t" << tableData << endl << endl;
+		cout << "table-data\t\t" << tableData << endl << endl;
 }
 
 unsigned int CodeGen::arrayTypeSize( unsigned long maxVal )
