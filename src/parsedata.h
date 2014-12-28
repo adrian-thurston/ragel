@@ -214,8 +214,9 @@ struct ParseData
 	void makeExports();
 
 	void prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang );
-	void generateXML( ostream &out, bool printStatistics );
-	void generateReduced( const char *inputFileName, CodeStyle codeStyle, std::ostream &out, bool printStatistics, const HostLang *hostLang );
+	void generateXML( ostream &out );
+	void generateReduced( const char *inputFileName, CodeStyle codeStyle,
+			std::ostream &out, const HostLang *hostLang );
 	FsmAp *sectionGraph;
 	bool generatingSectionSubset;
 

@@ -114,6 +114,7 @@ public:
 	virtual void writeStart();
 	virtual void writeFirstFinal();
 	virtual void writeError();
+	virtual void statsSummary();
 
 protected:
 	friend class TableArray;
@@ -134,6 +135,7 @@ protected:
 
 	bool isAlphTypeSigned();
 	bool isWideAlphTypeSigned();
+	long long tableData;
 
 	virtual string GET_KEY();
 

@@ -143,7 +143,7 @@ struct InputData
 	void makeOutputStream();
 	void openOutput();
 	void closeOutput();
-	void generateReduced( bool printStatistics );
+	void generateReduced();
 	void prepareSingleMachine();
 	void prepareAllMachines();
 
@@ -162,7 +162,7 @@ struct InputData
 
 	void processXML();
 	void processDot();
-	void processCode( bool generateDot, bool printStatistics );
+	void processCode( bool generateDot );
 
 	void writeDot( std::ostream &out );
 

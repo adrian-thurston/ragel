@@ -1430,7 +1430,8 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hos
 	sectionGraph->setStateNumbers( 0 );
 }
 
-void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle, std::ostream &out, bool printStatistics, const HostLang *hostLang )
+void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
+		std::ostream &out, const HostLang *hostLang )
 {
 	CodeGenArgs args( inputFileName, sectionName,
 			this, sectionGraph, codeStyle, out );
@@ -1439,26 +1440,13 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 	cgd = makeCodeGen( hostLang, args );
 
 	cgd->make( hostLang );
-
-	if ( printStatistics ) {
-		cerr << "fsm name  : " << sectionName << endl;
-		cerr << "num states: " << sectionGraph->stateList.length() << endl;
-		cerr << endl;
-	}
 }
 
-void ParseData::generateXML( ostream &out, bool printStatistics )
+void ParseData::generateXML( ostream &out )
 {
 	/* Make the generator. */
 	XMLCodeGen codeGen( sectionName, this, sectionGraph, out );
 
 	/* Write out with it. */
 	codeGen.writeXML();
-
-	if ( printStatistics ) {
-		cerr << "fsm name  : " << sectionName << endl;
-		cerr << "num states: " << sectionGraph->stateList.length() << endl;
-		cerr << endl;
-	}
 }
-

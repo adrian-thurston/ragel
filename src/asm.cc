@@ -98,8 +98,8 @@ void AsmCodeGen::genAnalysis()
 
 void AsmCodeGen::statsSummary()
 {
-//	if ( printStatistics )
-//		cout << "table-data\t" << tableData << endl << endl;
+	if ( printStatistics )
+		cout << "table-data\t" << tableData << endl << endl;
 }
 
 void AsmCodeGen::genLineDirective( ostream &out )

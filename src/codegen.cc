@@ -188,6 +188,13 @@ void TableArray::finishGenerate()
 		else
 			out << "0 };\n\n";
 	}
+
+	if ( codeGen.pd->id->printStatistics ) {
+		cout << name << "\t" << values << "\t" <<
+			size() << "\t" << endl;
+	}
+
+	codeGen.tableData += size();
 }
 
 void TableArray::start()
@@ -235,8 +242,15 @@ void TableArray::finish()
 /* Init code gen with in parameters. */
 CodeGen::CodeGen( const CodeGenArgs &args )
 :
-	CodeGenData(args)
+	CodeGenData( args ),
+	tableData( 0 )
 {
+}
+
+void CodeGen::statsSummary()
+{
+	if ( pd->id->printStatistics )
+		cout << "table-data\t" << tableData << endl << endl;
 }
 
 unsigned int CodeGen::arrayTypeSize( unsigned long maxVal )

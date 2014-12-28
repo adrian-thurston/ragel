@@ -186,6 +186,9 @@ public:
 	virtual void writeFirstFinal() {};
 	virtual void writeError() {};
 
+	/* Show some stats after a write data. */
+	virtual void statsSummary() = 0;
+
 	/* This can also be overridden to modify the processing of write
 	 * statements. */
 	virtual void writeStatement( InputLoc &loc, int nargs, std::string *args, bool generateDot, const HostLang *hostLang );

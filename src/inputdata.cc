@@ -215,12 +215,12 @@ void InputData::prepareAllMachines()
 	}
 }
 
-void InputData::generateReduced( bool printStatistics )
+void InputData::generateReduced()
 {
 	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
 		ParseData *pd = pdel->value;
 		if ( pd->instanceList.length() > 0 )
-			pd->generateReduced( inputFileName, codeStyle, *outStream, printStatistics, hostLang );
+			pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
 	}
 }
 
@@ -309,7 +309,7 @@ void InputData::processDot()
 	closeOutput();
 }
 
-void InputData::processCode( bool generateDot, bool printStatistics )
+void InputData::processCode( bool generateDot )
 {
 	/* Compiles machines. */
 	prepareAllMachines();
@@ -330,7 +330,7 @@ void InputData::processCode( bool generateDot, bool printStatistics )
 	makeOutputStream();
 
 	/* Generates the reduced machine, which we use to write output. */
-	generateReduced( printStatistics );
+	generateReduced();
 
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -458,7 +458,7 @@ void InputData::process()
 	else if ( generateDot )
 		processDot();
 	else 
-		processCode( generateDot, printStatistics );
+		processCode( generateDot );
 
 	assert( gblErrorCount == 0 );
 }

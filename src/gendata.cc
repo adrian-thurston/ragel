@@ -1396,7 +1396,8 @@ void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 	source_warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
 }
 
-void CodeGenData::writeStatement( InputLoc &loc, int nargs, std::string *args, bool generateDot, const HostLang *hostLang )
+void CodeGenData::writeStatement( InputLoc &loc, int nargs,
+		std::string *args, bool generateDot, const HostLang *hostLang )
 {
 	/* Start write generation on a fresh line. */
 	out << '\n';
@@ -1412,7 +1413,14 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs, std::string *args, b
 			else
 				write_option_error( loc, args[i] );
 		}
+
+		if ( pd->id->printStatistics ) {
+			std::cout << "fsm-name\t" << fsmName << std::endl;
+			std::cout << "fsm-states\t" << redFsm->stateList.length() << std::endl;
+		}
+
 		writeData();
+		statsSummary();
 	}
 	else if ( args[0] == "init" ) {
 		for ( int i = 1; i < nargs; i++ ) {
