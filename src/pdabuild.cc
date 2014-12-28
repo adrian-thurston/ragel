@@ -195,7 +195,6 @@ void Compiler::makeLangElIds()
 	assert( boolLangEl->id == LEL_ID_BOOL );
 	assert( intLangEl->id == LEL_ID_INT );
 	assert( strLangEl->id == LEL_ID_STR );
-	assert( streamLangEl->id == LEL_ID_STREAM );
 	assert( ignoreLangEl->id == LEL_ID_IGNORE );
 }
 

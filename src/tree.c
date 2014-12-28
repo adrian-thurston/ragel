@@ -915,8 +915,8 @@ Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
 		assert(false);
 	else if ( tree->id == LEL_ID_STR )
 		assert(false);
-	else if ( tree->id == LEL_ID_STREAM )
-		assert(false);
+//	else if ( tree->id == LEL_ID_STREAM )
+//		assert(false);
 	else {
 		tree = copyRealTree( prg, tree, oldNextDown, newNextDown );
 	}
@@ -1017,7 +1017,6 @@ free_tree:
 	lelInfo = prg->rtd->lelInfo;
 	genericId = lelInfo[tree->id].genericId;
 	assert( genericId == 0 );
-	assert( tree->id != LEL_ID_STREAM );
 
 	switch ( tree->id ) {
 	case LEL_ID_BOOL:
@@ -1160,17 +1159,17 @@ free_tree:
 			treeFree( prg, tree );
 			break;
 		}
-		case LEL_ID_STREAM: {
-			Stream *stream = (Stream*)tree;
-			clearSourceStream( prg, sp, stream->in );
-			if ( stream->in->file != 0 )
-				fclose( stream->in->file );
-			else if ( stream->in->fd >= 0 )
-				close( stream->in->fd );
-			free( stream->in );
-			streamFree( prg, stream );
-			break;
-		}
+//		case LEL_ID_STREAM: {
+//			Stream *stream = (Stream*)tree;
+//			clearSourceStream( prg, sp, stream->in );
+//			if ( stream->in->file != 0 )
+//				fclose( stream->in->file );
+//			else if ( stream->in->fd >= 0 )
+//				close( stream->in->fd );
+//			free( stream->in );
+//			streamFree( prg, stream );
+//			break;
+//		}
 		default: { 
 			if ( tree->id != LEL_ID_IGNORE )
 				stringFree( prg, tree->tokdata );
@@ -2264,12 +2263,12 @@ void colm_print_term_tree( Program *prg, Tree **sp, struct colm_print_args *prin
 	else if ( kid->tree->id == LEL_ID_STR ) {
 		printStr( printArgs, ((Str*)kid->tree)->value );
 	}
-	else if ( kid->tree->id == LEL_ID_STREAM ) {
-		char buf[INT_SZ];
-		printArgs->out( printArgs, "#", 1 );
-		sprintf( buf, "%p", (void*) ((Stream*)kid->tree)->in->file );
-		printArgs->out( printArgs, buf, strlen(buf) );
-	}
+//	else if ( kid->tree->id == LEL_ID_STREAM ) {
+//		char buf[INT_SZ];
+//		printArgs->out( printArgs, "#", 1 );
+//		sprintf( buf, "%p", (void*) ((Stream*)kid->tree)->in->file );
+//		printArgs->out( printArgs, buf, strlen(buf) );
+//	}
 	else if ( kid->tree->tokdata != 0 && 
 			stringLength( kid->tree->tokdata ) > 0 )
 	{

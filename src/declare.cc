@@ -15,9 +15,10 @@ void Compiler::initUniqueTypes( )
 	uniqueTypeBool = new UniqueType( TYPE_TREE, boolLangEl );
 	uniqueTypeInt = new UniqueType( TYPE_TREE, intLangEl );
 	uniqueTypeStr = new UniqueType( TYPE_TREE, strLangEl );
-	uniqueTypeStream = new UniqueType( TYPE_TREE, streamLangEl );
 	uniqueTypeIgnore = new UniqueType( TYPE_TREE, ignoreLangEl );
 	uniqueTypeAny = new UniqueType( TYPE_TREE, anyLangEl );
+
+	uniqueTypeStream = new UniqueType( TYPE_STRUCT, streamSel );
 
 	uniqeTypeMap.insert( uniqueTypeNil );
 	uniqeTypeMap.insert( uniqueTypeVoid );
@@ -25,9 +26,10 @@ void Compiler::initUniqueTypes( )
 	uniqeTypeMap.insert( uniqueTypeBool );
 	uniqeTypeMap.insert( uniqueTypeInt );
 	uniqeTypeMap.insert( uniqueTypeStr );
-	uniqeTypeMap.insert( uniqueTypeStream );
 	uniqeTypeMap.insert( uniqueTypeIgnore );
 	uniqeTypeMap.insert( uniqueTypeAny );
+
+	uniqeTypeMap.insert( uniqueTypeStream );
 }
 
 ObjectField *NameScope::checkRedecl( const String &name )
@@ -254,7 +256,6 @@ void Compiler::declareBaseLangEls()
 	boolLangEl = declareLangEl( this, rootNamespace, "bool", LangEl::Term );
 	intLangEl = declareLangEl( this, rootNamespace, "int", LangEl::Term );
 	strLangEl = declareLangEl( this, rootNamespace, "str", LangEl::Term );
-	streamLangEl = declareLangEl( this, rootNamespace, "stream", LangEl::Term );
 	ignoreLangEl = declareLangEl( this, rootNamespace, "il", LangEl::Term );
 
 	/* Make the EOF language element. */
@@ -422,23 +423,25 @@ void Namespace::declare( Compiler *pd )
 	}
 
 	for ( StructDefList::Iter s = structDefList; s.lte(); s++ ) {
-		StructEl *sel = declareStruct( pd, this, s->name, s->context );
-		sel->context = s->context;
+		if ( s != pd->stream ) {
+			StructEl *sel = declareStruct( pd, this, s->name, s->context );
+			sel->context = s->context;
 
-		/* If the token has the same name as the region it is in, then also
-		 * insert it into the symbol map for the parent region. */
-		if ( strcmp( s->name, this->name ) == 0 ) {
-			/* Insert the name into the top of the region stack after popping the
-			 * region just created. We need it in the parent. */
-			TypeMapEl *typeMapEl = new TypeMapEl(
-					TypeMapEl::StructType, s->name, sel );
-			this->parentNamespace->typeMap.insert( typeMapEl );
+			/* If the token has the same name as the region it is in, then also
+			 * insert it into the symbol map for the parent region. */
+			if ( strcmp( s->name, this->name ) == 0 ) {
+				/* Insert the name into the top of the region stack after popping the
+				 * region just created. We need it in the parent. */
+				TypeMapEl *typeMapEl = new TypeMapEl(
+						TypeMapEl::StructType, s->name, sel );
+				this->parentNamespace->typeMap.insert( typeMapEl );
+			}
+
+			if ( s == pd->global )
+				pd->globalSel = sel;
+			if ( s == pd->stream )
+				pd->streamSel = sel;
 		}
-
-		if ( s == pd->global )
-			pd->globalSel = sel;
-		if ( s == pd->stream )
-			pd->streamSel = sel;
 	}
 
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {
@@ -713,7 +716,8 @@ void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )
 	ObjectField *el = ObjectField::cons( InputLoc(),
 			ObjectField::InbuiltFieldType, typeRef, "match_length" );
 	el->isConst = true;
-	el->inGetR    = IN_GET_MATCH_LENGTH_R;
+	el->inGetR      = IN_GET_MATCH_LENGTH_R;
+	el->inGetValR   = IN_GET_MATCH_LENGTH_R;
 	frame->rootScope->insertField( el->name, el );
 }
 
@@ -726,7 +730,8 @@ void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "match_text" );
 	el->isConst = true;
-	el->inGetR    = IN_GET_MATCH_TEXT_R;
+	el->inGetR      = IN_GET_MATCH_TEXT_R;
+	el->inGetValR   = IN_GET_MATCH_TEXT_R;
 	frame->rootScope->insertField( el->name, el );
 }
 
@@ -734,14 +739,14 @@ void Compiler::addInput( ObjectDef *frame )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
-	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltObjectType, typeRef, "input" );
-	el->inGetR    = IN_LOAD_INPUT_R;
-	el->inGetWV   = IN_LOAD_INPUT_WV;
-	el->inGetWC   = IN_LOAD_INPUT_WC;
+	el->inGetR     = IN_LOAD_INPUT_R;
+	el->inGetWV    = IN_LOAD_INPUT_WV;
+	el->inGetWC    = IN_LOAD_INPUT_WC;
+	el->inGetValR  = IN_LOAD_INPUT_WC;
 	frame->rootScope->insertField( el->name, el );
 }
 
@@ -753,9 +758,10 @@ void Compiler::addCtx( ObjectDef *frame )
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltObjectType, typeRef, "ctx" );
-	el->inGetR    = IN_LOAD_CTX_R;
-	el->inGetWV   = IN_LOAD_CTX_WV;
-	el->inGetWC   = IN_LOAD_CTX_WC;
+	el->inGetR     = IN_LOAD_CTX_R;
+	el->inGetWV    = IN_LOAD_CTX_WV;
+	el->inGetWC    = IN_LOAD_CTX_WC;
+	el->inGetValR  = IN_LOAD_CTX_WC;
 	frame->rootScope->insertField( el->name, el );
 }
 
@@ -787,9 +793,10 @@ void Compiler::declareStrFields( )
 
 void Compiler::declareStreamFields( )
 {
-	streamObj = ObjectDef::cons( ObjectDef::BuiltinType,
-			"stream", nextObjectId++ );
-	streamLangEl->objectDef = streamObj;
+	streamObj = streamSel->context->objectDef; //
+//	ObjectDef::cons( ObjectDef::BuiltinType,
+//			"stream", nextObjectId++ );
+//	streamLangEl->objectDef = streamObj;
 
 	initFunction( uniqueTypeStr, streamObj, "pull",  
 			IN_INPUT_PULL_WV, IN_INPUT_PULL_WC, uniqueTypeInt, false );
@@ -878,9 +885,7 @@ void Compiler::declareGlobalFields()
 {
 	ObjectMethod *method;
 
-	UniqueType *streamPtrUt = findUniqueType( TYPE_PTR, streamLangEl );
-
-	method = initFunction( streamPtrUt, globalObjectDef, "open",
+	method = initFunction( uniqueTypeStream, globalObjectDef, "open",
 		IN_OPEN_FILE, IN_OPEN_FILE, uniqueTypeStr, uniqueTypeStr, true );
 	method->useCallObj = false;
 
@@ -909,7 +914,6 @@ void Compiler::addStdin()
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
-	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
@@ -918,6 +922,7 @@ void Compiler::addStdin()
 	el->inGetR     = IN_GET_STDIN;
 	el->inGetWC    = IN_GET_STDIN;
 	el->inGetWV    = IN_GET_STDIN;
+	el->inGetValR  = IN_GET_STDIN;
 	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
@@ -925,15 +930,15 @@ void Compiler::addStdout()
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
-	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stdout" );
 	el->isConst = true;
-	el->inGetR    = IN_GET_STDOUT;
+	el->inGetR     = IN_GET_STDOUT;
 	el->inGetWC    = IN_GET_STDOUT;
 	el->inGetWV    = IN_GET_STDOUT;
+	el->inGetValR  = IN_GET_STDOUT;
 	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
@@ -941,15 +946,15 @@ void Compiler::addStderr()
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
-	typeRef = TypeRef::cons( internal, TypeRef::Ptr, typeRef );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stderr" );
 	el->isConst = true;
-	el->inGetR    = IN_GET_STDERR;
+	el->inGetR     = IN_GET_STDERR;
 	el->inGetWC    = IN_GET_STDERR;
 	el->inGetWV    = IN_GET_STDERR;
+	el->inGetValR  = IN_GET_STDERR;
 	globalObjectDef->rootScope->insertField( el->name, el );
 }
 

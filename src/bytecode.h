@@ -382,8 +382,7 @@ enum LEL_ID {
 	LEL_ID_BOOL       = 3,
 	LEL_ID_INT        = 4,
 	LEL_ID_STR        = 5,
-	LEL_ID_STREAM     = 6,
-	LEL_ID_IGNORE     = 7
+	LEL_ID_IGNORE     = 6
 };
 
 /*

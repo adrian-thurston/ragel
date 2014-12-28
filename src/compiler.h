@@ -852,7 +852,6 @@ struct Compiler
 	LangEl *boolLangEl;
 	LangEl *intLangEl;
 	LangEl *strLangEl;
-	LangEl *streamLangEl;
 	LangEl *anyLangEl;
 	LangEl *rootLangEl;
 	LangEl *noTokenLangEl;
@@ -898,9 +897,10 @@ struct Compiler
 	UniqueType *uniqueTypeBool;
 	UniqueType *uniqueTypeInt;
 	UniqueType *uniqueTypeStr;
-	UniqueType *uniqueTypeStream;
 	UniqueType *uniqueTypeIgnore;
 	UniqueType *uniqueTypeAny;
+
+	UniqueType *uniqueTypeStream;
 
 	UniqueTypeMap uniqeTypeMap;
 	UniqueRepeatMap uniqeRepeatMap;
@@ -1034,5 +1034,8 @@ ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj,
 		const String &name, int methIdWV, int methIdWC, 
 		UniqueType *arg1, UniqueType *arg2, bool isConst,
 		bool useFnInstr = false );
+
+StructEl *declareStruct( Compiler *pd, Namespace *nspace,
+		const String &data, Context *context );
 
 #endif /* _PARSEDATA_H */

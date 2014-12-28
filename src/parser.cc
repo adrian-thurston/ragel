@@ -20,7 +20,7 @@ void BaseParser::init()
 	/* Set up the root namespace. */
 	pd->rootNamespace = createRootNamespace();
 
-	/* Set up the global object. */
+	/* Setup the global object. */
 	String global = "global";
 	pd->globalObjectDef = ObjectDef::cons( ObjectDef::UserType,
 			global, pd->nextObjectId++ ); 
@@ -29,6 +29,26 @@ void BaseParser::init()
 	pd->global = new StructDef( global, context );
 	pd->rootNamespace->structDefList.append( pd->global );
 	context->objectDef = pd->globalObjectDef;
+
+	/* Setup the stream object. */
+	global = "stream";
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::BuiltinType,
+			global, pd->nextObjectId++ ); 
+
+	context = new Context( internal, 0 );
+	pd->stream = new StructDef( global, context );
+	context->objectDef = objectDef;
+
+	StructEl *sel = declareStruct( pd, pd->rootNamespace,
+			pd->stream->name, pd->stream->context );
+	sel->context = pd->stream->context;
+
+	/* Insert the name into the top of the region stack after popping the
+	 * region just created. We need it in the parent. */
+	TypeMapEl *typeMapEl = new TypeMapEl(
+				TypeMapEl::StructType, pd->stream->name, sel );
+	pd->rootNamespace->typeMap.insert( typeMapEl );
+	pd->streamSel = sel;
 	
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the
@@ -40,6 +60,7 @@ void BaseParser::init()
 				"local", pd->nextObjectId++ );
 	curLocalFrame = pd->rootLocalFrame;
 	curScope = pd->rootLocalFrame->rootScope;
+
 
 	/* Declarations of internal types. They must be declared now because we use
 	 * them directly, rather than via type lookup. */

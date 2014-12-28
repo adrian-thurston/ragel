@@ -430,6 +430,7 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 				qualUT = pd->findUniqueType( TYPE_TREE, qualUT->langEl );
 			}
 			else if ( qualUT->typeId == TYPE_STRUCT ) {
+				/* No deref. */
 				
 			}
 			else {
@@ -1341,12 +1342,11 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 				continue;
 			}
 
-			UniqueType *streamPtrUt = pd->findUniqueType( TYPE_PTR, pd->streamLangEl );
-			if ( ut == streamPtrUt )
+			if ( ut == pd->uniqueTypeStream )
 				isStream = true;
 
 			if ( !tree && ut->typeId == TYPE_TREE &&
-					ut->langEl != pd->strLangEl && ut != streamPtrUt )
+					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
 			{
 				/* Convert it to a string. */
 				code.append( IN_TREE_TO_STR_TRIM );
@@ -1540,9 +1540,8 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 				continue;
 			}
 
-			UniqueType *streamPtrUt = pd->findUniqueType( TYPE_PTR, pd->streamLangEl );
 			if ( strings && ut->typeId == TYPE_TREE &&
-					ut->langEl != pd->strLangEl && ut != streamPtrUt )
+					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
 			{
 				/* Convert it to a string. */
 				code.append( IN_TREE_TO_STR_TRIM );
@@ -1589,9 +1588,7 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 	UniqueType *varUt = varRef->lookup( pd );
 	GenericType *generic = varUt->langEl->generic;
 
-	UniqueType *streamPtrUt = pd->findUniqueType( TYPE_PTR, pd->streamLangEl );
-
-	if ( varUt == streamPtrUt )
+	if ( varUt == pd->uniqueTypeStream )
 		evaluateSendStream( pd, code );
 	else if ( generic != 0 && generic->typeId == GEN_PARSER )
 		evaluateSendParser( pd, code, true );
@@ -1649,9 +1646,8 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 		case ConsItem::ExprType: {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 
-			UniqueType *streamPtrUt = pd->findUniqueType( TYPE_PTR, pd->streamLangEl );
 			if ( ut->typeId == TYPE_TREE &&
-					ut->langEl != pd->strLangEl && ut != streamPtrUt )
+					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
 			{
 				/* Convert it to a string. */
 				code.append( IN_TREE_TO_STR_TRIM );
