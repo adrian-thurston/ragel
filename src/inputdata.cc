@@ -396,6 +396,11 @@ void InputData::process()
 {
 	ifstream *inFile;
 
+	/* If the host lang is C, then default to the direct code generator.
+	 * Otherwise use rlhc. */
+	if ( hostLang->lang == HostLang::C )
+		directBackend = true;
+
 	switch ( frontend ) {
 	case KelbtBased: {
 		/*
