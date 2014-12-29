@@ -31,8 +31,6 @@ protected:
 	TableArray indicies;
 	TableArray transCondSpaces;
 	TableArray transOffsets;
-	TableArray transLengths;
-	TableArray condKeys;
 	TableArray condTargs;
 	TableArray condActions;
 	TableArray toStateActions;
@@ -48,8 +46,6 @@ protected:
 	void taIndicies();
 	void taTransCondSpaces();
 	void taTransOffsets();
-	void taTransLengths();
-	void taCondKeys();
 	void taCondTargs();
 	void taCondActions();
 	void taToStateActions();

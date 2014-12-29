@@ -17,8 +17,6 @@ void FlatGotoExp::tableDataPass()
 	taIndicies();
 	taTransCondSpaces();
 	taTransOffsets();
-	taTransLengths();
-	taCondKeys();
 	taCondTargs();
 	taCondActions();
 
@@ -181,8 +179,6 @@ void FlatGotoExp::writeData()
 	taIndicies();
 	taTransCondSpaces();
 	taTransOffsets();
-	taTransLengths();
-	taCondKeys();
 	taCondTargs();
 	taCondActions();
 
@@ -219,8 +215,6 @@ void FlatGotoExp::writeExec()
 	out <<
 		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
 		"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n"
-		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
-		"	int _klen;\n"
 		"	int _cpc;\n";
 
 	if ( redFsm->anyRegNbreak() )

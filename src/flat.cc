@@ -18,8 +18,6 @@ Flat::Flat( const CodeGenArgs &args )
 	indicies(         "indicies",            *this ),
 	transCondSpaces(  "trans_cond_spaces",   *this ),
 	transOffsets(     "trans_offsets",       *this ),
-	transLengths(     "trans_lengths",       *this ),
-	condKeys(         "cond_keys",           *this ),
 	condTargs(        "cond_targs",          *this ),
 	condActions(      "cond_actions",        *this ),
 	toStateActions(   "to_state_actions",    *this ),
@@ -237,57 +235,12 @@ void Flat::taTransOffsets()
 
 		transOffsets.value( curOffset );
 
-		curOffset += trans->numConds();
+		curOffset += trans->condFullSize();
 	}
 
 	delete[] transPtrs;
 
 	transOffsets.finish();
-}
-
-void Flat::taTransLengths()
-{
-	transLengths.start();
-
-	/* Transitions must be written ordered by their id. */
-	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPtrs[trans->id] = trans;
-
-	/* Keep a count of the num of items in the array written. */
-
-	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Save the position. Needed for eofTargs. */
-		RedTransAp *trans = transPtrs[t];
-		transLengths.value( trans->numConds() );
-	}
-	delete[] transPtrs;
-
-	transLengths.finish();
-}
-
-void Flat::taCondKeys()
-{
-	condKeys.start();
-
-	/* Transitions must be written ordered by their id. */
-	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPtrs[trans->id] = trans;
-
-	/* Keep a count of the num of items in the array written. */
-	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {
-		/* Save the position. Needed for eofTargs. */
-		RedTransAp *trans = transPtrs[t];
-
-		for ( int c = 0; c < trans->numConds(); c++ ) {
-			CondKey key = trans->outCondKey( c );
-			condKeys.value( key.getVal() );
-		}
-	}
-	delete[] transPtrs;
-
-	condKeys.finish();
 }
 
 void Flat::taCondTargs()
@@ -304,10 +257,20 @@ void Flat::taCondTargs()
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
 
-		for ( int c = 0; c < trans->numConds(); c++ ) {
-			RedCondPair *cond = trans->outCond( c );
+		long fullSize = trans->condFullSize();
+		RedCondPair **fullPairs = new RedCondPair*[fullSize];
+		for ( long k = 0; k < fullSize; k++ )
+			fullPairs[k] = trans->errCond();
+
+		for ( int c = 0; c < trans->numConds(); c++ )
+			fullPairs[trans->outCondKey( c ).getVal()] = trans->outCond( c );
+
+		for ( int k = 0; k < fullSize; k++ ) {
+			RedCondPair *cond = fullPairs[k];
 			condTargs.value( cond->targ->id );
 		}
+
+		delete[] fullPairs;
 	}
 	delete[] transPtrs;
 
@@ -328,8 +291,16 @@ void Flat::taCondActions()
 		/* Save the position. Needed for eofTargs. */
 		RedTransAp *trans = transPtrs[t];
 
-		for ( int c = 0; c < trans->numConds(); c++ ) {
-			RedCondPair *cond = trans->outCond( c );
+		long fullSize = trans->condFullSize();
+		RedCondPair **fullPairs = new RedCondPair*[fullSize];
+		for ( long k = 0; k < fullSize; k++ )
+			fullPairs[k] = trans->errCond();
+
+		for ( int c = 0; c < trans->numConds(); c++ )
+			fullPairs[trans->outCondKey( c ).getVal()] = trans->outCond( c );
+
+		for ( int k = 0; k < fullSize; k++ ) {
+			RedCondPair *cond = fullPairs[k];
 			COND_ACTION( cond );
 		}
 	}
@@ -387,8 +358,6 @@ void Flat::LOCATE_TRANS()
 		"\n";
 
 	out <<
-		"	_ckeys = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[_trans]" ) << ";\n"
-		"	_klen = (int)" << ARR_REF( transLengths ) << "[_trans];\n"
 		"	_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
 		"\n";
 
@@ -419,29 +388,8 @@ void Flat::LOCATE_TRANS()
 	}
 	
 	out <<
-		"	{\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_lower" ) << ";\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_mid" ) << ";\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_upper" ) << ";\n"
-		"		_lower = _ckeys;\n"
-		"		_upper = _ckeys + _klen - 1;\n"
-		"		while ( " << TRUE() << " ) {\n"
-		"			if ( _upper < _lower )\n"
-		"				break;\n"
-		"\n"
-		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( _cpc < (int)" << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
-		"				_upper = _mid - 1;\n"
-		"			else if ( _cpc > (int)" << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
-		"				_lower = _mid + 1;\n"
-		"			else {\n"
-		"				_cond += (" << UINT() << ")(_mid - _ckeys);\n"
-		"				goto _match_cond;\n"
-		"			}\n"
-		"		}\n"
-		"		" << vCS() << " = " << ERROR_STATE() << ";\n"
-		"		goto _again;\n"
-		"	}\n"
+		"	_cond += _cpc;\n"
+		"	goto _match_cond;\n"
 	;
 }
 
