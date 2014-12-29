@@ -25,6 +25,7 @@ public:
 protected:
 	TableArray actions;
 	TableArray keys;
+	TableArray charClass;
 	TableArray keySpans;
 	TableArray flatIndexOffset;
 	TableArray indicies;
@@ -41,6 +42,7 @@ protected:
 
 	void taKeys();
 	void taKeySpans();
+	void taCharClass();
 	void taActions();
 	void taFlatIndexOffset();
 	void taIndicies();

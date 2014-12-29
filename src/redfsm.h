@@ -32,6 +32,7 @@ using std::string;
 struct RedStateAp;
 struct GenInlineList;
 struct GenAction;
+struct FsmCtx;
 
 /*
  * Inline code tree
@@ -483,6 +484,7 @@ struct RedStateAp
 	/* For flat keys. */
 	Key lowKey, highKey;
 	RedTransAp **transList;
+	long long low, high;
 
 	/* The list of states that transitions from this state go to. */
 	RedStateVect targStates;
@@ -496,6 +498,7 @@ struct RedStateAp
 	RedAction *eofAction;
 	RedTransAp *eofTrans;
 	int id;
+
 
 	/* Pointers for the list of states. */
 	RedStateAp *prev, *next;
@@ -519,9 +522,10 @@ typedef BstSet< RedTransAp*, CmpOrd<RedTransAp*> > RedTransSet;
 /* Next version of the fsm machine. */
 struct RedFsmAp
 {
-	RedFsmAp( KeyOps *keyOps );
+	RedFsmAp( FsmCtx *fsmCtx );
 
 	KeyOps *keyOps;
+	FsmCtx *fsmCtx;
 
 	bool forcedErrorState;
 
@@ -607,6 +611,59 @@ struct RedFsmAp
 	void chooseSingle();
 
 	void makeFlat();
+
+	/* State low/high, in key space and class space. */
+	Key lowKey;
+	Key highKey;
+	long long nextClass;
+	long long *classMap;
+
+	/* Support structs for equivalence class computation. */
+	struct EquivClass
+	{
+		EquivClass( Key lowKey, Key highKey, long long value )
+			: lowKey(lowKey), highKey(highKey), value(value) {}
+
+		Key lowKey, highKey;
+		long long value;
+		EquivClass *prev, *next;
+	};
+
+	typedef DList<EquivClass> EquivList;
+	typedef BstMap<RedTransAp*, int> EquivAlloc;
+	typedef BstMapEl<RedTransAp*, int> EquivAllocEl;
+
+	struct PairKey
+	{
+		PairKey( long long k1, long long k2 )
+			: k1(k1), k2(k2) {}
+
+		long long k1;
+		long long k2;
+	};
+
+	struct PairKeyCmp
+	{
+		static inline long compare( const PairKey &k1, const PairKey &k2 )
+		{
+			if ( k1.k1 < k2.k1 )
+				return -1;
+			else if ( k1.k1 > k2.k1 )
+				return 1;
+			if ( k1.k2 < k2.k2 )
+				return -1;
+			else if ( k1.k2 > k2.k2 )
+				return 1;
+			else
+				return 0;
+		}
+	};
+
+	typedef BstMap< PairKey, long long, PairKeyCmp > PairKeyMap;
+	typedef BstMapEl< PairKey, long long > PairKeyMapEl;
+
+	void characterClass( EquivList &equiv );
+	void makeFlatClass();
 
 	/* Move a selected transition from ranges to default. */
 	void moveToDefault( RedTransAp *defTrans, RedStateAp *state );

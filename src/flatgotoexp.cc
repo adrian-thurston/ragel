@@ -11,6 +11,7 @@ void FlatGotoExp::tableDataPass()
 {
 	taKeys();
 	taKeySpans();
+	taCharClass();
 	taFlatIndexOffset();
 
 	taIndicies();
@@ -35,7 +36,7 @@ void FlatGotoExp::genAnalysis()
 	redFsm->chooseDefaultSpan();
 		
 	/* Do flat expand. */
-	redFsm->makeFlat();
+	redFsm->makeFlatClass();
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
@@ -174,6 +175,7 @@ void FlatGotoExp::writeData()
 {
 	taKeys();
 	taKeySpans();
+	taCharClass();
 	taFlatIndexOffset();
 
 	taIndicies();

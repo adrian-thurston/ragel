@@ -12,6 +12,7 @@ Flat::Flat( const CodeGenArgs &args )
 	CodeGen( args ),
 	actions(          "actions",             *this ),
 	keys(             "trans_keys",          *this ),
+	charClass(        "char_class",          *this ),
 	keySpans(         "key_spans",           *this ),
 	flatIndexOffset(  "index_offsets",       *this ),
 	indicies(         "indicies",            *this ),
@@ -53,7 +54,7 @@ void Flat::taFlatIndexOffset()
 		
 		/* Move the index offset ahead. */
 		if ( st->transList != 0 )
-			curIndOffset += keyOps->span( st->lowKey, st->highKey );
+			curIndOffset += ( st->high - st->low + 1 );
 
 		if ( st->defTrans != 0 )
 			curIndOffset += 1;
@@ -69,12 +70,24 @@ void Flat::taKeySpans()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		unsigned long long span = 0;
 		if ( st->transList != 0 )
-			span = keyOps->span( st->lowKey, st->highKey );
+			span = st->high - st->low + 1;
 
 		keySpans.value( span );
 	}
 
 	keySpans.finish();
+}
+
+void Flat::taCharClass()
+{
+	charClass.start();
+
+    long long maxSpan = keyOps->span( redFsm->lowKey, redFsm->highKey );
+
+    for ( long long pos = 0; pos < maxSpan; pos++ )
+        charClass.value( redFsm->classMap[pos] );
+
+	charClass.finish();
 }
 
 void Flat::taToStateActions()
@@ -149,9 +162,15 @@ void Flat::taKeys()
 	keys.start();
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		/* Emit just low key and high key. */
-		keys.value( st->lowKey.getVal() );
-		keys.value( st->highKey.getVal() );
+		if ( st->transList ) {
+			/* Emit just low key and high key. */
+			keys.value( st->low );
+			keys.value( st->high );
+		}
+		else {
+			keys.value( 1 );
+			keys.value( 0 );
+		}
 	}
 
 	keys.finish();
@@ -163,9 +182,8 @@ void Flat::taIndicies()
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList != 0 ) {
-			/* Walk the singles. */
-			unsigned long long span = keyOps->span( st->lowKey, st->highKey );
-			for ( unsigned long long pos = 0; pos < span; pos++ )
+			long long span = st->high - st->low + 1;
+			for ( long long pos = 0; pos < span; pos++ )
 				indicies.value( st->transList[pos]->id );
 		}
 
@@ -342,15 +360,30 @@ void Flat::taActions()
 
 void Flat::LOCATE_TRANS()
 {
+	long lowKey = redFsm->lowKey.getVal();
+	long highKey = redFsm->highKey.getVal();
+
 	out <<
 		"	_keys = " << OFFSET( ARR_REF( keys ), "(" + vCS() + "<<1)" ) << ";\n"
 		"	_inds = " << OFFSET( ARR_REF( indicies ), ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
 		"\n"
 		"	_slen = (int)" << ARR_REF( keySpans ) << "[" << vCS() << "];\n"
-		"	if ( _slen > 0 && " << DEREF( ARR_REF( keys ), "_keys" ) << " <= " << GET_KEY() << " && " << GET_KEY() << " <= " << DEREF( ARR_REF( keys ), "_keys+1" ) << " )\n"
-		"		_trans = (int)" << DEREF( ARR_REF( indicies ), "_inds + (int)( " + GET_KEY() + " - " + DEREF( ARR_REF( keys ), "_keys" ) + " ) " ) << ";\n"
-		"	else\n"
+		"	if ( _slen > 0 && " << lowKey << " <= " << GET_KEY() << " && "
+					<< GET_KEY() << " <= " << highKey << " )\n"
+		"	{\n"
+		"       int _ic = " << ARR_REF( charClass ) << "[" << GET_KEY() << " - " << lowKey << "];\n"
+		"		if ( " << DEREF( ARR_REF( keys ), "_keys" ) << " <= _ic && "
+					"_ic <= " << DEREF( ARR_REF( keys ), "_keys+1" ) << " )\n"
+		"		{\n"
+		"			_trans = (int)" << DEREF( ARR_REF( indicies ), "_inds + (int)( _ic - " + DEREF( ARR_REF( keys ), "_keys" ) + " ) " ) << ";\n"
+		"		}\n"
+		"		else {\n"
+		"			_trans = (int)" << DEREF( ARR_REF( indicies ), "_inds + _slen" ) << ";\n"
+		"		}\n"
+		"	}\n"
+		"	else {\n"
 		"		_trans = (int)" << DEREF( ARR_REF( indicies ), "_inds + _slen" ) << ";\n"
+		"	}\n"
 		"\n";
 
 	out <<
