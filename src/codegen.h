@@ -16,7 +16,11 @@ using std::string;
 using std::ostream;
 
 /* Integer array line length. */
-#define IALL 8
+//#define IALL 8
+
+#define IALL_INTEGRAL 8
+#define IALL_STRING 128
+
 
 /* Forwards. */
 struct RedFsmAp;
@@ -36,7 +40,6 @@ struct TableArray;
 typedef Vector<TableArray*> ArrayVector;
 struct CodeGen;
 
-extern bool directBackend;
 
 struct TableArray
 {
@@ -65,6 +68,7 @@ struct TableArray
 
 	void valueAnalyze( long long v );
 	void valueGenerate( long long v );
+	void stringGenerate( long long value );
 
 	void finish();
 	void finishAnalyze();
@@ -81,6 +85,8 @@ struct TableArray
 	int width;
 	bool isSigned;
 	bool isChar;
+	bool stringTables;
+	int iall;
 	long long values;
 	long long min;
 	long long max;
@@ -136,6 +142,8 @@ protected:
 	bool isAlphTypeSigned();
 	bool isWideAlphTypeSigned();
 	long long tableData;
+	bool directBackend;
+	bool stringTables;
 
 	virtual string GET_KEY();
 

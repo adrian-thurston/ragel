@@ -49,8 +49,6 @@ using std::endl;
 using std::ios;
 using std::streamsize;
 
-bool directBackend = false;
-
 /* Print a summary of the options. */
 void usage()
 {
@@ -359,6 +357,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					hostLang = &hostLangAsm;
 				else if ( strcmp( arg, "direct" ) == 0 )
 					directBackend = true;
+				else if ( strcmp( arg, "string-tables" ) == 0 )
+					stringTables = true;
+				else if ( strcmp( arg, "integral-tables" ) == 0 )
+					stringTables = false;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

@@ -42,11 +42,8 @@ typedef AvlMap<const char*, Parser6*, CmpStr> ParserDict;
 typedef AvlMapEl<const char*, Parser6*> ParserDictEl;
 typedef DList<Parser6> ParserList;
 
-
 typedef DList<InputItem> InputItemList;
 typedef Vector<const char *> ArgsVector;
-
-extern bool directBackend;
 
 struct InputData
 {
@@ -74,6 +71,8 @@ struct InputData
 		wantDupsRemoved(true),
 		noLineDirectives(false),
 		displayPrintables(false),
+		directBackend(false),
+		stringTables(false),
 		maxTransitions(LONG_MAX),
 		numSplitPartitions(0),
 		rubyImpl(MRI),
@@ -123,6 +122,8 @@ struct InputData
 	bool wantDupsRemoved;
 	bool noLineDirectives;
 	bool displayPrintables;
+	bool directBackend;
+	bool stringTables;
 
 	long maxTransitions;
 	int numSplitPartitions;

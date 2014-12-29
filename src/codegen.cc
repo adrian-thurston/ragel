@@ -11,6 +11,7 @@
 #include <sstream>
 #include <string>
 #include <assert.h>
+#include <iomanip>
 
 
 using std::ostream;
@@ -34,6 +35,8 @@ TableArray::TableArray( const char *name, CodeGen &codeGen )
 	width(0),
 	isSigned(true),
 	isChar(false),
+	stringTables( codeGen.stringTables ),
+	iall( codeGen.stringTables ? IALL_STRING : IALL_INTEGRAL ),
 	values(0),
 
 	/*
@@ -75,7 +78,7 @@ void TableArray::valueAnalyze( long long v )
 
 void TableArray::finishAnalyze()
 {
-	if ( directBackend ) {
+	if ( codeGen.directBackend ) {
 		/* Calculate the type if it is not already set. */
 		if ( type.empty() ) {
 			if ( min >= S8BIT_MIN && max <= S8BIT_MAX ) {
@@ -129,10 +132,16 @@ void TableArray::finishAnalyze()
 
 void TableArray::startGenerate()
 {
-	if ( directBackend ) {
-		out << "static const " << type << " " << 
-			"_" << codeGen.DATA_PREFIX() << name << 
-			"[] = {\n\t";
+	if ( codeGen.directBackend ) {
+		if ( stringTables ) {
+			out << "static const char S_" << codeGen.DATA_PREFIX() << name <<
+				"[] __attribute__((aligned (16))) = \n\t\"";
+		}
+		else {
+			out << "static const " << type << " " << 
+				"_" << codeGen.DATA_PREFIX() << name << 
+				"[] = {\n\t";
+		}
 	}
 	else {
 		out << "array " << type << " " << 
@@ -141,22 +150,76 @@ void TableArray::startGenerate()
 	}
 }
 
+void TableArray::stringGenerate( long long value )
+{
+	char c; 
+	short h;
+	int i;
+	long l;
+	unsigned char *p = 0;
+	int n = 0;
+	switch ( width ) {
+		case sizeof( char ):
+			c = value;
+			p = (unsigned char *)&c;
+			n = sizeof(char);
+			break;
+		case sizeof( short ):
+			h = value;
+			p = (unsigned char *)&h;
+			n = sizeof(short);
+			break;
+		case sizeof( int ):
+			i = value;
+			p = (unsigned char *)&i;
+			n = sizeof(int);
+			break;
+		case sizeof( long ):
+			l = value;
+			p = (unsigned char *)&l;
+			n = sizeof(long);
+			break;
+	}
+
+	std::ios_base::fmtflags prevFlags = out.flags( std::ios::hex );
+	int prevFill = out.fill( '0' );
+
+	while ( n-- > 0 ) {
+		out << '\\';
+		out << 'x';
+		out << std::setw(2) << (unsigned int) *p++;
+	}
+
+	out.flags( prevFlags );
+	out.fill( prevFill );
+}
+
 void TableArray::valueGenerate( long long v )
 {
-	if ( directBackend ) {
-		if ( isChar )
-			out << "c(" << v << ")";
-		else if ( !isSigned )
-			out << v << "u";
-		else
-			out << v;
+	if ( codeGen.directBackend ) {
+		if ( stringTables ) {
+			stringGenerate( v );
 
-		if ( ( ++ln % IALL ) == 0 ) {
-			out << ",\n\t";
-			ln = 0;
+			if ( ++ln % iall == 0 ) {
+				out << "\"\n\t\"";
+				ln = 0;
+			}
 		}
 		else {
-			out << ", ";
+			if ( isChar )
+				out << "c(" << v << ")";
+			else if ( !isSigned )
+				out << v << "u";
+			else
+				out << v;
+
+			if ( ( ++ln % iall ) == 0 ) {
+				out << ",\n\t";
+				ln = 0;
+			}
+			else {
+				out << ", ";
+			}
 		}
 	}
 	else {
@@ -172,13 +235,20 @@ void TableArray::valueGenerate( long long v )
 
 void TableArray::finishGenerate()
 {
-	if ( directBackend ) {
-		if ( isChar )
-			out << "c(0)\n};\n\n";
-		else if ( !isSigned )
-			out << "0u\n};\n\n";
-		else
-			out << "0\n};\n\n";
+	if ( codeGen.directBackend ) {
+		if ( stringTables ) {
+	        out << "\";\nconst " << type << " *_" << codeGen.DATA_PREFIX() << name <<
+	                " = (const " << type << "*) S_" << codeGen.DATA_PREFIX() << name << ";\n\n";
+
+		}
+		else {
+			if ( isChar )
+				out << "c(0)\n};\n\n";
+			else if ( !isSigned )
+				out << "0u\n};\n\n";
+			else
+				out << "0\n};\n\n";
+		}
 	}
 	else {
 		if ( isChar )
@@ -243,7 +313,9 @@ void TableArray::finish()
 CodeGen::CodeGen( const CodeGenArgs &args )
 :
 	CodeGenData( args ),
-	tableData( 0 )
+	tableData( 0 ),
+	directBackend( args.pd->id->directBackend ),
+	stringTables( args.pd->id->stringTables )
 {
 }
 
