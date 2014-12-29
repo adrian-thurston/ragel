@@ -65,6 +65,8 @@ public:
 	AsmCodeGen( const CodeGenArgs &args );
 	virtual ~AsmCodeGen() {}
 
+	int mn;
+
 	virtual void finishRagelDef();
 	virtual void writeInit();
 	virtual void writeStart();

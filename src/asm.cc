@@ -115,6 +115,8 @@ AsmCodeGen::AsmCodeGen( const CodeGenArgs &args )
 	CodeGenData( args )
 //,	tableData( 0 )
 {
+	static int gmn = 1;
+	mn = gmn++;
 }
 
 unsigned int AsmCodeGen::arrayTypeSize( unsigned long maxVal )
@@ -927,7 +929,7 @@ void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 
 	if ( def.size() == 0 ) {
 		std::stringstream s;
-		s << ".L_sjt_" << failed;
+		s << ".L" << mn << "_sjt_" << failed;
 		def = s.str();
 	}
 
@@ -938,10 +940,10 @@ void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 		"	jg	" << def << "\n"
 		"	movzbq	%r14b, %rax\n"
 		"	subq	$" << low << ", %rax\n"
-		"	jmp	*.L_sjt_" << table << "(,%rax,8)\n"
+		"	jmp	*.L" << mn << "_sjt_" << table << "(,%rax,8)\n"
 		"	.section .rodata\n"
 		"	.align 8\n"
-		".L_sjt_" << table << ":\n";
+		".L" << mn << "_sjt_" << table << ":\n";
 
 	for ( long long j = 0; j < numSingles; j++ ) {
 		/* Fill in gap between prev and this. */
@@ -959,7 +961,7 @@ void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 
 	out <<
 		"	.text\n"
-		".L_sjt_" << failed << ":\n";
+		".L" << mn << "_sjt_" << failed << ":\n";
 }
 
 
@@ -984,7 +986,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 	/* For some reason the hop is faster and results in smaller code. Not sure
 	 * why. */
 	std::stringstream nfss;
-	nfss << ".L_nf_" << state->id;
+	nfss << ".L" << mn << "_nf_" << state->id;
 	string nf = nfss.str();
 
 	if ( anyLower && anyHigher ) {
@@ -998,13 +1000,13 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		/* Can go lower and higher than mid. */
 		out <<
 			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
-			"	jge	.L_nl" << l1 << "\n";
+			"	jge	.L" << mn << "_nl" << l1 << "\n";
 			
 		
 		emitRangeBSearch( state, level+1, low, mid-1 );
 
 		out <<
-			".L_nl" << l1 << ":\n";
+			".L" << mn << "_nl" << l1 << ":\n";
 
 		if ( !keyOps->eq( data[mid].lowKey, data[mid].highKey ) ) {
 			out <<
@@ -1027,7 +1029,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		}
 		else {
 			std::stringstream s;
-			s << ".L_nl" << nl++;
+			s << ".L" << mn << "_nl" << nl++;
 			targ = s.str();
 		}
 
@@ -1048,7 +1050,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 //			// out << TABS(level) << "} else\n";
 //
 //			out <<
-//				".L_nl" << l1 << ":\n";
+//				".L" << mn << "_nl" << l1 << ":\n";
 //
 //			TRANS_GOTO(data[mid].value, level+1);
 		}
@@ -1078,7 +1080,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		}
 		else {
 			std::stringstream s;
-			s << ".L_nl" << nl++;
+			s << ".L" << mn << "_nl" << nl++;
 			targ = s.str();
 		}
 
@@ -1099,7 +1101,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 //			// out << TABS(level) << "} else\n";
 //
 //			out <<
-//				".L_nl" << l1 << ":\n";
+//				".L" << mn << "_nl" << l1 << ":\n";
 //
 //			TRANS_GOTO(data[mid].value, level+1);
 		}
@@ -1317,7 +1319,7 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 				emitRangeBSearch( st, 1, 0, st->outRange.length() - 1 );
 
 			/* Write the default transition. */
-			out << ".L_nf_" << st->id << ":\n";
+			out << ".L" << mn << "_nf_" << st->id << ":\n";
 			TRANS_GOTO( st->defTrans, 1 );
 		}
 	}
@@ -1503,7 +1505,7 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 			anyWritten = true;
 
 			/* Write the label for the transition so it can be jumped to. */
-			out << ".L_tr_" << trans->id << ":\n";
+			out << ".L" << mn << "_tr_" << trans->id << ":\n";
 
 //			/* If the action contains a next, then we must preload the current
 //			 * state since the action may or may not set it. */
@@ -1514,16 +1516,16 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
 				ACTION( out, item->value, trans->targ->id, false, 
 						trans->action->anyNextStmt() );
+				out << "\n";
 			}
 
-			out << "\n";
 
 			/* If the action contains a next then we need to reload, otherwise
 			 * jump directly to the target state. */
 			if ( trans->action->anyNextStmt() )
-				out << "	jmp .L_again\n";
+				out << "	jmp .L" << mn << "_again\n";
 			else
-				out << "	jmp .L_st_" << trans->targ->id << "\n";
+				out << "	jmp .L" << mn << "_st_" << trans->targ->id << "\n";
 		}
 	}
 
@@ -1535,7 +1537,7 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 	/* bool anyWritten = */ IN_TRANS_ACTIONS( state );
 
 	if ( state->labelNeeded ) 
-		out << ".L_st_" << state->id << ":\n";
+		out << ".L" << mn << "_st_" << state->id << ":\n";
 
 #if 0
 	if ( state->toStateAction != 0 ) {
@@ -1557,7 +1559,7 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 			out <<
 				"	addq	$1, %r12\n"
 				"	cmpq	%r12, %r13\n"
-				"	je	.L_test_eof_" << state->id << "\n";
+				"	je	.L" << mn << "_test_eof_" << state->id << "\n";
 		}
 		else {
 			// out << 
@@ -1568,7 +1570,7 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 	}
 
 	/* This is the entry label for starting a run. */
-	out << ".L_en_" << state->id << ":\n";
+	out << ".L" << mn << "_en_" << state->id << ":\n";
 
 #if 0
 	if ( state->fromStateAction != 0 ) {
@@ -1601,12 +1603,12 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 //		genLineDirective( out );
 
 	if ( state->labelNeeded ) 
-		out << ".L_st_" << state->id << ":\n";
+		out << ".L" << mn << "_st_" << state->id << ":\n";
 
 	/* Break out here. */
 	outLabelUsed = true;
 	out << "	movl	$" << state->id << ", cs(%rip)\n";
-	out << "	jmp .L_out\n";
+	out << "	jmp .L" << mn << "_out\n";
 }
 
 
@@ -1617,13 +1619,13 @@ std::string AsmCodeGen::TRANS_GOTO_TARG( RedTransAp *trans )
 		/* Go to the transition which will go to the state. */
 		// out << TABS(level) << "goto tr" << trans->id << ";";
 
-		s << ".L_tr_" << trans->p.id;
+		s << ".L" << mn << "_tr_" << trans->p.id;
 	}
 	else {
 		/* Go directly to the target state. */
 		//out << TABS(level) << "goto st" << trans->targ->id << ";";
 
-		s << ".L_st_" << trans->p.targ->id;
+		s << ".L" << mn << "_st_" << trans->p.targ->id;
 	}
 
 	return s.str();
@@ -1636,13 +1638,13 @@ std::ostream &AsmCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
 		/* Go to the transition which will go to the state. */
 		// out << TABS(level) << "goto tr" << trans->id << ";";
 
-		out << "	jmp	.L_tr_" << trans->p.id << "\n";
+		out << "	jmp	.L" << mn << "_tr_" << trans->p.id << "\n";
 	}
 	else {
 		/* Go directly to the target state. */
 		//out << TABS(level) << "goto st" << trans->targ->id << ";";
 
-		out << "	jmp	.L_st_" << trans->p.targ->id << "\n";
+		out << "	jmp	.L" << mn << "_st_" << trans->p.targ->id << "\n";
 	}
 	return out;
 }
@@ -1657,9 +1659,9 @@ std::ostream &AsmCodeGen::EXIT_STATES()
 			//		st->id << "; goto _test_eof; \n";
 
 			out << 
-				".L_test_eof_" << st->id << ":\n"
+				".L" << mn << "_test_eof_" << st->id << ":\n"
 				"	movl	$" << st->id << ", cs(%rip)\n"
-				"	jmp .L_test_eof\n";
+				"	jmp .L" << mn << "_test_eof\n";
 		}
 	}
 	return out;
@@ -1747,14 +1749,15 @@ void AsmCodeGen::setLabelsNeeded()
 		for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
 			/* If there is no action with a next statement, then the label will be
 			 * needed. */
-			if ( trans->p.action == 0 || !trans->p.action->anyNextStmt() )
-				trans->p.targ->labelNeeded = true;
+			RedCondPair *pair = trans->outCond( 0 );
+			if ( pair->action == 0 || !pair->action->anyNextStmt() )
+				pair->targ->labelNeeded = true;
 
 			/* Need labels for states that have goto or calls in action code
 			 * invoked on characters (ie, not from out action code). */
-			if ( trans->p.action != 0 ) {
+			if ( pair->action != 0 ) {
 				/* Loop the actions. */
-				for ( GenActionTable::Iter act = trans->p.action->key; act.lte(); act++ ) {
+				for ( GenActionTable::Iter act = pair->action->key; act.lte(); act++ ) {
 					/* Get the action and walk it's tree. */
 					setLabelsNeeded( act->value->inlineList );
 				}
@@ -1846,13 +1849,13 @@ void AsmCodeGen::writeExec()
 
 	/* One shot, for now. */
 	out <<
-		"	jmp	.L_en_" << redFsm->startState->id << "\n";
+		"	jmp	.L" << mn << "_en_" << redFsm->startState->id << "\n";
 
 	STATE_GOTOS();
 	EXIT_STATES() << "\n";
 
 	if ( testEofUsed ) 
-		out << ".L_test_eof:\n";
+		out << ".L" << mn << "_test_eof:\n";
 
 #if 0
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
@@ -1870,7 +1873,7 @@ void AsmCodeGen::writeExec()
 #endif
 
 	if ( outLabelUsed ) 
-		out << ".L_out:\n";
+		out << ".L" << mn << "_out:\n";
 
 	out << 
 		"	pop	%r14\n"
