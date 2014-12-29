@@ -11,7 +11,6 @@ void FlatGotoLoop::tableDataPass()
 {
 	taActions();
 	taKeys();
-	taKeySpans();
 	taCharClass();
 	taFlatIndexOffset();
 
@@ -129,7 +128,6 @@ void FlatGotoLoop::writeData()
 		taActions();
 
 	taKeys();
-	taKeySpans();
 	taCharClass();
 	taFlatIndexOffset();
 
@@ -161,8 +159,7 @@ void FlatGotoLoop::writeExec()
 	outLabelUsed = false;
 
 	out << 
-		"	{\n"
-		"	int _slen;\n";
+		"	{\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";

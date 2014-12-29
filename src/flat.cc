@@ -13,7 +13,6 @@ Flat::Flat( const CodeGenArgs &args )
 	actions(          "actions",             *this ),
 	keys(             "trans_keys",          *this ),
 	charClass(        "char_class",          *this ),
-	keySpans(         "key_spans",           *this ),
 	flatIndexOffset(  "index_offsets",       *this ),
 	indicies(         "indicies",            *this ),
 	indexDefaults(    "indexDefaults",       *this ),
@@ -57,21 +56,6 @@ void Flat::taFlatIndexOffset()
 	}
 
 	flatIndexOffset.finish();
-}
-
-void Flat::taKeySpans()
-{
-	keySpans.start();
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		unsigned long long span = 0;
-		if ( st->transList != 0 )
-			span = st->high - st->low + 1;
-
-		keySpans.value( span );
-	}
-
-	keySpans.finish();
 }
 
 void Flat::taCharClass()
@@ -164,6 +148,7 @@ void Flat::taKeys()
 			keys.value( st->high );
 		}
 		else {
+			/* Emit an impossible range so the driver fails the lookup. */
 			keys.value( 1 );
 			keys.value( 0 );
 		}
@@ -346,8 +331,7 @@ void Flat::LOCATE_TRANS()
 		"	_keys = " << OFFSET( ARR_REF( keys ), "(" + vCS() + "<<1)" ) << ";\n"
 		"	_inds = " << OFFSET( ARR_REF( indicies ), ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
 		"\n"
-		"	_slen = (int)" << ARR_REF( keySpans ) << "[" << vCS() << "];\n"
-		"	if ( _slen > 0 && " << lowKey << " <= " << GET_KEY() << " && "
+		"	if ( " << lowKey << " <= " << GET_KEY() << " && "
 					<< GET_KEY() << " <= " << highKey << " )\n"
 		"	{\n"
 		"       int _ic = " << ARR_REF( charClass ) << "[" << GET_KEY() << " - " << lowKey << "];\n"

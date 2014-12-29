@@ -26,7 +26,6 @@ protected:
 	TableArray actions;
 	TableArray keys;
 	TableArray charClass;
-	TableArray keySpans;
 	TableArray flatIndexOffset;
 	TableArray indicies;
 	TableArray indexDefaults;

@@ -10,7 +10,6 @@
 void FlatGotoExp::tableDataPass()
 {
 	taKeys();
-	taKeySpans();
 	taCharClass();
 	taFlatIndexOffset();
 
@@ -173,7 +172,6 @@ std::ostream &FlatGotoExp::ACTION_SWITCH()
 void FlatGotoExp::writeData()
 {
 	taKeys();
-	taKeySpans();
 	taCharClass();
 	taFlatIndexOffset();
 
@@ -205,8 +203,7 @@ void FlatGotoExp::writeExec()
 	outLabelUsed = false;
 
 	out << 
-		"	{\n"
-		"	int _slen;\n";
+		"	{\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
