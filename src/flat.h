@@ -29,6 +29,7 @@ protected:
 	TableArray keySpans;
 	TableArray flatIndexOffset;
 	TableArray indicies;
+	TableArray indexDefaults;
 	TableArray transCondSpaces;
 	TableArray transOffsets;
 	TableArray condTargs;
@@ -44,6 +45,7 @@ protected:
 	void taActions();
 	void taFlatIndexOffset();
 	void taIndicies();
+	void taIndexDefaults();
 	void taTransCondSpaces();
 	void taTransOffsets();
 	void taCondTargs();

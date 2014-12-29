@@ -16,6 +16,7 @@ void FlatGotoLoop::tableDataPass()
 	taFlatIndexOffset();
 
 	taIndicies();
+	taIndexDefaults();
 	taTransCondSpaces();
 	taTransOffsets();
 	taCondTargs();
@@ -133,6 +134,7 @@ void FlatGotoLoop::writeData()
 	taFlatIndexOffset();
 
 	taIndicies();
+	taIndexDefaults();
 	taTransCondSpaces();
 	taTransOffsets();
 	taCondTargs();

@@ -15,6 +15,7 @@ void FlatGotoExp::tableDataPass()
 	taFlatIndexOffset();
 
 	taIndicies();
+	taIndexDefaults();
 	taTransCondSpaces();
 	taTransOffsets();
 	taCondTargs();
@@ -177,6 +178,7 @@ void FlatGotoExp::writeData()
 	taFlatIndexOffset();
 
 	taIndicies();
+	taIndexDefaults();
 	taTransCondSpaces();
 	taTransOffsets();
 	taCondTargs();

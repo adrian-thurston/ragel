@@ -16,6 +16,7 @@ Flat::Flat( const CodeGenArgs &args )
 	keySpans(         "key_spans",           *this ),
 	flatIndexOffset(  "index_offsets",       *this ),
 	indicies(         "indicies",            *this ),
+	indexDefaults(    "indexDefaults",       *this ),
 	transCondSpaces(  "trans_cond_spaces",   *this ),
 	transOffsets(     "trans_offsets",       *this ),
 	condTargs(        "cond_targs",          *this ),
@@ -53,9 +54,6 @@ void Flat::taFlatIndexOffset()
 		/* Move the index offset ahead. */
 		if ( st->transList != 0 )
 			curIndOffset += ( st->high - st->low + 1 );
-
-		if ( st->defTrans != 0 )
-			curIndOffset += 1;
 	}
 
 	flatIndexOffset.finish();
@@ -184,15 +182,26 @@ void Flat::taIndicies()
 			for ( long long pos = 0; pos < span; pos++ )
 				indicies.value( st->transList[pos]->id );
 		}
-
-		/* The state's default index goes next. */
-		if ( st->defTrans != 0 )
-			indicies.value( st->defTrans->id );
-
 	}
 
 	indicies.finish();
 }
+
+void Flat::taIndexDefaults()
+{
+	indexDefaults.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* The state's default index goes next. */
+		if ( st->defTrans != 0 )
+			indexDefaults.value( st->defTrans->id );
+		else
+			indexDefaults.value( 0 );
+	}
+
+	indexDefaults.finish();
+}
+
 
 void Flat::taTransCondSpaces()
 {
@@ -328,7 +337,6 @@ void Flat::taActions()
 	actions.finish();
 }
 
-
 void Flat::LOCATE_TRANS()
 {
 	long lowKey = redFsm->lowKey.getVal();
@@ -349,11 +357,11 @@ void Flat::LOCATE_TRANS()
 		"			_trans = (int)" << DEREF( ARR_REF( indicies ), "_inds + (int)( _ic - " + DEREF( ARR_REF( keys ), "_keys" ) + " ) " ) << ";\n"
 		"		}\n"
 		"		else {\n"
-		"			_trans = (int)" << DEREF( ARR_REF( indicies ), "_inds + _slen" ) << ";\n"
+		"			_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
 		"		}\n"
 		"	}\n"
 		"	else {\n"
-		"		_trans = (int)" << DEREF( ARR_REF( indicies ), "_inds + _slen" ) << ";\n"
+		"		_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
 		"	}\n"
 		"\n";
 
