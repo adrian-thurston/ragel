@@ -78,7 +78,7 @@ struct InputData
 		rubyImpl(MRI),
 		rlhcShowCmd(false),
 		noIntermediate(false),
-		frontend(ColmBased)
+		frontend(KelbtBased)
 	{}
 
 	std::string dirName;
