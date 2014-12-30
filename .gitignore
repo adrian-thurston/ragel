@@ -14,6 +14,7 @@
 /*.class
 /*.ml
 /*.go
+/*.s
 /*_c.rl
 /*_d.rl
 /*_java.rl
@@ -29,6 +30,7 @@
 /runtests.log
 /runtests.trs
 /test-suite.log
+/working
 
 /aclocal.m4
 /autom4te.cache/
@@ -39,3 +41,4 @@
 /config.status
 /configure
 /stamp-h1
+

@@ -14,27 +14,36 @@ trap sig_exit SIGINT
 trap sig_exit SIGQUIT
 trap sig_exit SIGTERM
 
+WORKING=working
+test -d $WORKING || mkdir $WORKING
 
-while getopts "gcnmleB:T:F:G:P:CDJRAZO" opt; do
+while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 	case $opt in
 		B|T|F|G|P) 
 			genflags="$genflags -$opt$OPTARG"
 			options="$options -$opt$OPTARG"
-			;;
+		;;
 		n|m|l|e) 
 			minflags="$minflags -$opt"
 			options="$options -$opt"
-			;;
+		;;
 		c) 
 			compile_only="true"
 			options="$options -$opt"
-			;;
+		;;
 		g) 
 			allow_generated="true"
-			;;
+		;;
 		C|D|J|R|A|Z|O)
 			langflags="$langflags -$opt"
-			;;
+		;;
+		-)
+			case $OPTARG in
+				asm)
+					langflags="$langflags --asm"
+				;;
+			esac
+		;;
 	esac
 done
 
@@ -43,10 +52,11 @@ cs_prohibit_genflags="-G2"
 java_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
 ruby_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
 ocaml_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
+asm_prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
 
 [ -z "$minflags" ] && minflags="-n -m -l -e"
 [ -z "$genflags" ] && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
-[ -z "$langflags" ] && langflags="-C -D -J -R -A -Z -O"
+[ -z "$langflags" ] && langflags="-C -D -J -R -A -Z -O --asm"
 
 shift $((OPTIND - 1));
 
@@ -98,7 +108,7 @@ function test_error
 function run_test()
 {
 	echo "$ragel $lang_opt $min_opt $gen_opt -o $code_src $test_case"
-	if ! $ragel $lang_opt $min_opt $gen_opt -o $code_src $test_case; then
+	if ! $ragel $lang_opt $min_opt $gen_opt -o $code_src $WORKING/$test_case; then
 		test_error;
 	fi
 
@@ -124,7 +134,10 @@ function run_test()
 		[ $lang = ocaml ] && exec_cmd="ocaml ${code_src}"
 
 		$exec_cmd 2>&1 > $output;
-		if diff --strip-trailing-cr $expected_out $output > /dev/null; then
+		EXIT_STATUS=$?
+		if test $EXIT_STATUS = 0 && \
+				diff --strip-trailing-cr $expected_out $output > /dev/null;
+		then
 			echo "passed";
 		else
 			echo "FAILED";
@@ -154,6 +167,7 @@ for test_case; do
 	fi
 
 	expected_out=$root.exp;
+	sed '/_____OUTPUT_____/,$d' $test_case > $WORKING/$test_case
 	sed '1,/_____OUTPUT_____/d;$d' $test_case > $expected_out
 
 	lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
@@ -221,6 +235,12 @@ for test_case; do
 			compiler=$ocaml_compiler
 			flags=""
 		;;
+		asm)
+			lang_opt="--asm"
+			code_suffix=s
+			compiler="gcc"
+			flags=""
+		;;
 		indep)
 			lang_opt="";
 
@@ -274,6 +294,7 @@ for test_case; do
 	java) prohibit_genflags="$prohibit_genflags $java_prohibit_genflags";;
 	ruby) prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags";;
 	ocaml) prohibit_genflags="$prohibit_genflags $ocaml_prohibit_genflags";;
+	asm) prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags";;
 	esac
 
 	[ $lang == obj-c ] && continue;
