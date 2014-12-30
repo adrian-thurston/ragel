@@ -329,19 +329,23 @@ void Flat::LOCATE_TRANS()
 
 	out <<
 		"	_keys = " << OFFSET( ARR_REF( keys ), "(" + vCS() + "<<1)" ) << ";\n"
-		"	_inds = " << OFFSET( ARR_REF( indicies ), ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
+		"	_inds = " << OFFSET( ARR_REF( indicies ),
+				ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
 		"\n"
 		"	if ( " <<
 				GET_KEY() << " <= " << highKey << " && " <<
-				GET_KEY() << " - " << lowKey << " >= 0 )\n"
+				GET_KEY() << " >= " << lowKey << " )\n"
 		"	{\n"
-		"       int _ic = " << ARR_REF( charClass ) << "[" << GET_KEY() << " - " << lowKey << "];\n"
-		"		_trans = " <<
-					"_ic <= " << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
-					"_ic - " << DEREF( ARR_REF( keys ), "_keys" ) << " >= 0 ? "
-					"(int)" << DEREF( ARR_REF( indicies ), "_inds + (int)( _ic - " +
-							DEREF( ARR_REF( keys ), "_keys" ) + " ) " ) << " : \n"
-					"(int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
+		"       int _ic = (int)" << ARR_REF( charClass ) << "[" << GET_KEY() <<
+						" - " << lowKey << "];\n"
+		"		if ( _ic <= (int)" << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
+					"_ic >= (int)" << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
+		"			_trans = (int)" << DEREF( ARR_REF( indicies ),
+							"_inds + (int)( _ic - (int)" + DEREF( ARR_REF( keys ),
+							"_keys" ) + " ) " ) << "; \n"
+		"		else\n"
+		"			_trans = (int)" << ARR_REF( indexDefaults ) <<
+							"[" << vCS() << "]" << ";\n"
 		"	}\n"
 		"	else {\n"
 		"		_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
