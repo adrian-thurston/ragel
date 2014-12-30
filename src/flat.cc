@@ -379,7 +379,7 @@ void Flat::LOCATE_TRANS()
 	}
 	
 	out <<
-		"	_cond += _cpc;\n"
+		"	_cond += (" << UINT() << ")_cpc;\n"
 		"	goto _match_cond;\n"
 	;
 }
