@@ -120,7 +120,8 @@ void IpGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, boo
 
 void IpGoto::RET( ostream &ret, bool inFinish )
 {
-	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = "
+			<< STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << OPEN_HOST_BLOCK();
@@ -133,7 +134,8 @@ void IpGoto::RET( ostream &ret, bool inFinish )
 
 void IpGoto::NRET( ostream &ret, bool inFinish )
 {
-	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = "
+			<< STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
 		ret << OPEN_HOST_BLOCK();

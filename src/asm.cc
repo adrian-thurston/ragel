@@ -1316,6 +1316,7 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 //				emitCondBSearch( st, 1, 0, st->stateCondVect.length() - 1 );
 //			}
 
+			/* Load *p. */
 			if ( st->outSingle.length() > 0 || st->outRange.length() > 0 )
 				out << "	movb	(%r12), %r14b\n";
 
@@ -1551,61 +1552,47 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 
 void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 {
-	/* bool anyWritten = */ IN_TRANS_ACTIONS( state );
+	IN_TRANS_ACTIONS( state );
 
 	if ( state->labelNeeded ) 
 		out << ".L" << mn << "_st_" << state->id << ":\n";
 
-#if 0
 	if ( state->toStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
-		anyWritten = true;
 		for ( GenActionTable::Iter item = state->toStateAction->key; item.lte(); item++ ) {
 			ACTION( out, item->value, state->id, false, 
 					state->toStateAction->anyNextStmt() );
+			out << "\n";
 		}
 	}
-#endif
 
 	/* Advance and test buffer pos. */
 	if ( state->labelNeeded ) {
+		out <<
+			"	addq	$1, %r12\n";
+
 		if ( !noEnd ) {
-			// out <<
-			//	"	if ( ++" << P() << " == " << PE() << " )\n"
-			//	"		goto _test_eof" << state->id << ";\n";
 			out <<
-				"	addq	$1, %r12\n"
 				"	cmpq	%r12, %r13\n"
 				"	je	.L" << mn << "_test_eof_" << state->id << "\n";
-		}
-		else {
-			// out << 
-			//	"	" << P() << " += 1;\n";
-			out <<
-				"	addq	$1, %r12\n";
 		}
 	}
 
 	/* This is the entry label for starting a run. */
 	out << ".L" << mn << "_en_" << state->id << ":\n";
 
-#if 0
 	if ( state->fromStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
-		anyWritten = true;
 		for ( GenActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ ) {
 			ACTION( out, item->value, state->id, false,
 					state->fromStateAction->anyNextStmt() );
+			out << "\n";
 		}
 	}
-
-	if ( anyWritten )
-		genLineDirective( out );
 
 	/* Record the prev state if necessary. */
 	if ( state->anyRegCurStateRef() )
 		out << "	_ps = " << state->id << ";\n";
-#endif
 }
 
 void AsmCodeGen::STATE_GOTO_ERROR()
@@ -1613,11 +1600,7 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 	/* In the error state we need to emit some stuff that usually goes into
 	 * the header. */
 	RedStateAp *state = redFsm->errState;
-	/* bool anyWritten = */ IN_TRANS_ACTIONS( state );
-
-//	/* No case label needed since we don't switch on the error state. */
-//	if ( anyWritten )
-//		genLineDirective( out );
+	IN_TRANS_ACTIONS( state );
 
 	out << ".L" << mn << "_en_" << state->id << ":\n";
 	if ( state->labelNeeded ) 
@@ -1820,14 +1803,10 @@ void AsmCodeGen::writeExec()
 		"	movslq	%esi, %r13\n"
 		"	addq	%rdi, %r13\n"
 	;
-	
 
 #if 0
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";
-
-	if ( redFsm->anyConditions() )
-		out << "	" << WIDE_ALPH_TYPE() << " _widec;\n";
 
 	if ( !noEnd ) {
 		testEofUsed = true;
@@ -1862,8 +1841,6 @@ void AsmCodeGen::writeExec()
 	}
 
 #endif
-
-//	out << "	switch ( " << vCS() << " )\n	{\n";
 
 	/* Jump into the machine based on the curren state. */
 	out <<
