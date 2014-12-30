@@ -1340,8 +1340,9 @@ test:
 	.cfi_def_cfa_register 6
 	subq	$16, %rsp
 	movq	%rdi, -8(%rbp)
-	movl	$1, %eax
-	movl	%eax, cs(%rip)
+
+%% write init;
+
 	movq	-8(%rbp), %rax
 	movq	%rax, %rdi
 	call	strlen

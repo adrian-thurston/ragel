@@ -616,22 +616,25 @@ string AsmCodeGen::FIRST_FINAL_STATE()
 
 void AsmCodeGen::writeInit()
 {
-	out << "	{\n";
+//	out << "	{\n";
 
-	if ( !noCS )
-		out << "\t" << vCS() << " = " << START() << ";\n";
-	
-	/* If there are any calls, then the stack top needs initialization. */
-	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "\t" << TOP() << " = 0;\n";
-
-	if ( hasLongestMatch ) {
-		out << 
-			"	" << TOKSTART() << " = " << NULL_ITEM() << ";\n"
-			"	" << TOKEND() << " = " << NULL_ITEM() << ";\n"
-			"	" << ACT() << " = 0;\n";
+	if ( !noCS ) {
+		// out << "\t" << vCS() << " = " << START() << ";\n";
+		out <<
+			"	movl		$" << redFsm->startState->id << ", cs(%rip)\n";
 	}
-	out << "	}\n";
+	
+//	/* If there are any calls, then the stack top needs initialization. */
+//	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )
+//		out << "\t" << TOP() << " = 0;\n";
+
+//	if ( hasLongestMatch ) {
+//		out << 
+//			"	" << TOKSTART() << " = " << NULL_ITEM() << ";\n"
+//			"	" << TOKEND() << " = " << NULL_ITEM() << ";\n"
+//			"	" << ACT() << " = 0;\n";
+//	}
+//	out << "	}\n";
 }
 
 string AsmCodeGen::DATA_PREFIX()
@@ -1616,6 +1619,7 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 //	if ( anyWritten )
 //		genLineDirective( out );
 
+	out << ".L" << mn << "_en_" << state->id << ":\n";
 	if ( state->labelNeeded ) 
 		out << ".L" << mn << "_st_" << state->id << ":\n";
 
@@ -1861,9 +1865,21 @@ void AsmCodeGen::writeExec()
 
 //	out << "	switch ( " << vCS() << " )\n	{\n";
 
-	/* One shot, for now. */
+	/* Jump into the machine based on the curren state. */
 	out <<
-		"	jmp	.L" << mn << "_en_" << redFsm->startState->id << "\n";
+		"	movq	cs(%rip), %rax\n"
+		"	jmp		*.L" << mn << "_entry_jmp(,%rax,8)\n"
+		"	.section .rodata\n"
+		"	.align 8\n"
+		".L" << mn << "_entry_jmp:\n";
+
+	for ( int stId = 0; stId < redFsm->stateList.length(); stId++ ) {
+		out <<
+			"	.quad	.L" << mn << "_en_" << stId << "\n";
+	}
+
+	out <<
+		"	.text\n";
 
 	STATE_GOTOS();
 	EXIT_STATES() << "\n";

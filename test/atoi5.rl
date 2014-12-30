@@ -84,8 +84,9 @@ init:
 	.cfi_def_cfa_register 6
 	movl	$0, val(%rip)
 	movl	$0, neg(%rip)
-	movl	$1, %eax
-	movl	%eax, cs(%rip)
+
+%% write init;
+
 	popq	%rbp
 	.cfi_def_cfa 7, 8
 	ret
