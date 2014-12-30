@@ -695,6 +695,19 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 			whitespaceOn = false; 
 			token( KW_Break );
 		};
+		"fncall" => { 
+			whitespaceOn = false; 
+			token( KW_Ncall );
+		};
+		"fnret" => { 
+			whitespaceOn = false; 
+			token( KW_Nret );
+		};
+		"fnbreak" => { 
+			whitespaceOn = false; 
+			token( KW_Nbreak );
+		};
+
 
 		ident => { token( TK_Word, ts, te ); };
 
@@ -797,6 +810,18 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		"fbreak" => { 
 			whitespaceOn = false; 
 			token( KW_Break );
+		};
+		"fncall" => { 
+			whitespaceOn = false; 
+			token( KW_Ncall );
+		};
+		"fnret" => { 
+			whitespaceOn = false; 
+			token( KW_Nret );
+		};
+		"fnbreak" => { 
+			whitespaceOn = false; 
+			token( KW_Nbreak );
 		};
 
 		ident => { token( TK_Word, ts, te ); };

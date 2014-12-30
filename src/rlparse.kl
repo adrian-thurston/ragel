@@ -1299,6 +1299,25 @@ inline_block_interpret:
 	KW_Break ';' final {
 		$$->inlineItem = new InlineItem( $1->loc, InlineItem::Break );
 	};
+inline_block_interpret:
+	KW_Ncall state_ref ';' final {
+		$$->inlineItem = new InlineItem( $1->loc, new NameRef(nameRef),
+				InlineItem::Ncall );
+	};
+inline_block_interpret:
+	KW_Ncall '*' inline_expr ';' final {
+		$$->inlineItem = new InlineItem( $1->loc, InlineItem::NcallExpr );
+		$$->inlineItem->children = $3->inlineList;
+	};
+inline_block_interpret:
+	KW_Nret ';' final {
+		$$->inlineItem = new InlineItem( $1->loc, InlineItem::Nret );
+	};
+inline_block_interpret:
+	KW_Nbreak ';' final {
+		$$->inlineItem = new InlineItem( $1->loc, InlineItem::Nbreak );
+	};
+
 
 nonterm inline_expr uses inline_list;
 
