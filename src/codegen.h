@@ -360,7 +360,7 @@ protected:
 		if ( directBackend )
 			return "0";
 		else
-			return "nil;";
+			return "nil";
 	}
 
 	string EXPORT( string type, string name, string value )
