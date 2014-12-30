@@ -108,30 +108,31 @@ function test_error
 function run_test()
 {
 	echo "$ragel $lang_opt $min_opt $gen_opt -o $code_src $test_case"
-	if ! $ragel $lang_opt $min_opt $gen_opt -o $wk/$code_src $wk/$case_rl; then
+	if ! $ragel -I. $lang_opt $min_opt $gen_opt -o $wk/$code_src $wk/$case_rl; then
 		test_error;
 	fi
 
 	out_args=""
-	[ $lang != java ] && out_args="-o ${wk}/${binary}";
-	[ $lang == csharp ] && out_args="-out:${wk}/${binary}";
+	[ $lang != java ] && out_args="-o $wk/$binary";
+	[ $lang == csharp ] && out_args="-out:$wk/$binary";
 
 	# Ruby and OCaml don't need to be copiled.
 	if [ $lang != ruby ] && [ $lang != ocaml ]; then
-		echo "$compiler ${flags} ${out_args} ${code_src}"
-		if ! $compiler ${flags} ${out_args} ${wk}/${code_src}; then
+		echo "$compiler $flags $out_args $wk/$code_src"
+		if ! $compiler $flags $out_args $wk/$code_src; then
 			test_error;
 		fi
 	fi
 
 	if [ "$compile_only" != "true" ]; then
-		echo -n "running $root ... ";
 		
 		exec_cmd=./$wk/$binary
 		[ $lang = java ] && exec_cmd="java -classpath $wk $root"
 		[ $lang = ruby ] && exec_cmd="ruby $wk/$code_src"
 		[ $lang = csharp ] && exec_cmd="mono $wk/$binary"
 		[ $lang = ocaml ] && exec_cmd="ocaml $wk/$code_src"
+
+		echo -n "running $exec_cmd ... ";
 
 		$exec_cmd 2>&1 > $wk/$output;
 		EXIT_STATUS=$?
@@ -183,29 +184,29 @@ for test_case; do
 	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
 
 	case $lang in
-		c++)
-			lang_opt=-C;
-			code_suffix=cpp;
-			compiler=$cxx_compiler;
-			flags="-pedantic -ansi -Wall -O3"
-		;;
-		d)
-			lang_opt=-D;
-			code_suffix=d;
-			compiler=$d_compiler;
-			flags="-Wall -O3"
-		;;
 		c)
 			lang_opt=-C;
 			code_suffix=c;
 			compiler=$c_compiler;
-			flags="-pedantic -ansi -Wall -O3"
+			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
+		;;
+		c++)
+			lang_opt=-C;
+			code_suffix=cpp;
+			compiler=$cxx_compiler;
+			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
 		;;
 		obj-c)
 			lang_opt=-C;
 			code_suffix=m;
 			compiler=$objc_compiler
 			flags="-Wall -O3 -fno-strict-aliasing -lobjc"
+		;;
+		d)
+			lang_opt=-D;
+			code_suffix=d;
+			compiler=$d_compiler;
+			flags="-Wall -O3"
 		;;
 		java)
 			lang_opt=-J;
