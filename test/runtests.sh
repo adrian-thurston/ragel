@@ -40,7 +40,13 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 		-)
 			case $OPTARG in
 				asm)
-					langflags="$langflags --asm"
+					langflags="$langflags --$OPTARG"
+				;;
+				integral-tables)
+					encflags="$encflags --$OPTARG"
+				;;
+				string-tables)
+					encflags="$encflags --$OPTARG"
 				;;
 			esac
 		;;
@@ -56,6 +62,7 @@ asm_prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
 
 [ -z "$minflags" ] && minflags="-n -m -l -e"
 [ -z "$genflags" ] && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+[ -z "$encflags" ] && encflags="--integral-tables --string-tables"
 [ -z "$langflags" ] && langflags="-C -D -J -R -A -Z -O --asm"
 
 shift $((OPTIND - 1));
@@ -107,8 +114,8 @@ function test_error
 
 function run_test()
 {
-	echo "$ragel $lang_opt $min_opt $gen_opt -o $code_src $test_case"
-	if ! $ragel -I. $lang_opt $min_opt $gen_opt -o $wk/$code_src $wk/$case_rl; then
+	echo "$ragel $lang_opt $min_opt $gen_opt $enc_opt -o $code_src $test_case"
+	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $wk/$case_rl; then
 		test_error;
 	fi
 
@@ -300,13 +307,21 @@ for test_case; do
 	asm) prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags";;
 	esac
 
+	if [ $lang != c ] && [ $lang != c++ ]; then
+		prohibit_encflags="--string-tables"
+	fi
+
+	# Eh, need to remove this.
 	[ $lang == obj-c ] && continue;
 
 	for min_opt in $minflags; do
 		echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
 		for gen_opt in $genflags; do
 			echo "" "$prohibit_genflags" | grep -e $gen_opt >/dev/null && continue
-			run_test
+			for enc_opt in $encflags; do
+				echo "" "$prohibit_encflags" | grep -e $enc_opt >/dev/null && continue
+				run_test
+			done
 		done
 	done
 done
