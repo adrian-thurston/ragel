@@ -45,7 +45,7 @@
 	action print {
 		#printf ("%i", val);
 		#fputs ("\n", stdout);
-		movl	$.fmt_i_nl, %edi
+		movl	$.L_fmt_i_nl, %edi
 		movl	val(%rip), %esi
 		movl	$0, %eax
 		call	printf
@@ -66,9 +66,9 @@
 
 %% write data;
 
-.fmt_i_nl:
+.L_fmt_i_nl:
 	.string "%i\n"
-.marker:
+.L_marker:
 	.string "marker\n"
 
 	.text
