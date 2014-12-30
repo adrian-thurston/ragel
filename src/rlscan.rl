@@ -636,6 +636,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 
 	# Identifiers, numbers, commetns, and other common things.
 	ident = ( alpha | '_' ) ( alpha |digit |'_' )*;
+	ocaml_ident = ( alpha | '_' ) ( alpha |digit |'_' )* "'"?;
 	number = digit+;
 	hex_number = '0x' [0-9a-fA-F]+;
 
@@ -708,7 +709,6 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 			token( KW_Nbreak );
 		};
 
-
 		ident => { token( TK_Word, ts, te ); };
 
 		number => { token( TK_UInt, ts, te ); };
@@ -772,6 +772,119 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		any => { token( IL_Symbol, ts, te ); };
 	*|;
 
+	# An inline block of code for ocaml.
+	inline_code_ocaml := |*
+		# Inline expression keywords.
+		"fpc" => { token( KW_PChar ); };
+		"fc" => { token( KW_Char ); };
+		"fcurs" => { token( KW_CurState ); };
+		"ftargs" => { token( KW_TargState ); };
+		"fentry" => { 
+			whitespaceOn = false; 
+			token( KW_Entry );
+		};
+
+		# Inline statement keywords.
+		"fhold" => { 
+			whitespaceOn = false; 
+			token( KW_Hold );
+		};
+		"fexec" => { token( KW_Exec, 0, 0 ); };
+		"fgoto" => { 
+			whitespaceOn = false; 
+			token( KW_Goto );
+		};
+		"fnext" => { 
+			whitespaceOn = false; 
+			token( KW_Next );
+		};
+		"fcall" => { 
+			whitespaceOn = false; 
+			token( KW_Call );
+		};
+		"fret" => { 
+			whitespaceOn = false; 
+			token( KW_Ret );
+		};
+		"fbreak" => { 
+			whitespaceOn = false; 
+			token( KW_Break );
+		};
+		"fncall" => { 
+			whitespaceOn = false; 
+			token( KW_Ncall );
+		};
+		"fnret" => { 
+			whitespaceOn = false; 
+			token( KW_Nret );
+		};
+		"fnbreak" => { 
+			whitespaceOn = false; 
+			token( KW_Nbreak );
+		};
+
+		ocaml_ident => { token( TK_Word, ts, te ); };
+
+		number => { token( TK_UInt, ts, te ); };
+		hex_number => { token( TK_Hex, ts, te ); };
+
+		( s_literal | d_literal ) 
+			=> { token( IL_Literal, ts, te ); };
+
+		whitespace+ => { 
+			if ( whitespaceOn ) 
+				token( IL_WhiteSpace, ts, te );
+		};
+
+		c_cpp_comment => { token( IL_Comment, ts, te ); };
+
+		"::" => { token( TK_NameSep, ts, te ); };
+
+		# Some symbols need to go to the parser as with their cardinal value as
+		# the token type (as opposed to being sent as anonymous symbols)
+		# because they are part of the sequences which we interpret. The * ) ;
+		# symbols cause whitespace parsing to come back on. This gets turned
+		# off by some keywords.
+
+		";" => {
+			whitespaceOn = true;
+			token( *ts, ts, te );
+			if ( inlineBlockType == SemiTerminated )
+				fret;
+		};
+
+		[*)] => { 
+			whitespaceOn = true;
+			token( *ts, ts, te );
+		};
+
+		[,(] => { token( *ts, ts, te ); };
+
+		'{' => { 
+			token( IL_Symbol, ts, te );
+			curly_count += 1; 
+		};
+
+		'}' => { 
+			if ( --curly_count == 0 && inlineBlockType == CurlyDelimited ) {
+				/* Inline code block ends. */
+				token( '}' );
+				fret;
+			}
+			else {
+				/* Either a semi terminated inline block or only the closing
+				 * brace of some inner scope, not the block's closing brace. */
+				token( IL_Symbol, ts, te );
+			}
+		};
+
+		EOF => {
+			scan_error() << "unterminated code block" << endl;
+		};
+
+		# Send every other character as a symbol.
+		any => { token( IL_Symbol, ts, te ); };
+	*|;
 
 	# An inline block of code for languages other than Ruby.
 	inline_code := |*
@@ -983,6 +1096,8 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 			inlineBlockType = SemiTerminated;
 			if ( id.hostLang->lang == HostLang::Ruby )
 				fcall inline_code_ruby;
+			else if ( id.hostLang->lang == HostLang::OCaml )
+				fcall inline_code_ocaml;
 			else
 				fcall inline_code;
 		};
@@ -991,6 +1106,8 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 			inlineBlockType = SemiTerminated;
 			if ( id.hostLang->lang == HostLang::Ruby )
 				fcall inline_code_ruby;
+			else if ( id.hostLang->lang == HostLang::OCaml )
+				fcall inline_code_ocaml;
 			else
 				fcall inline_code;
 		};
@@ -999,6 +1116,8 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 			inlineBlockType = SemiTerminated;
 			if ( id.hostLang->lang == HostLang::Ruby )
 				fcall inline_code_ruby;
+			else if ( id.hostLang->lang == HostLang::OCaml )
+				fcall inline_code_ocaml;
 			else
 				fcall inline_code;
 		};
@@ -1123,6 +1242,8 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 				inlineBlockType = CurlyDelimited;
 				if ( id.hostLang->lang == HostLang::Ruby )
 					fcall inline_code_ruby;
+				else if ( id.hostLang->lang == HostLang::OCaml )
+					fcall inline_code_ocaml;
 				else
 					fcall inline_code;
 			}
@@ -1142,6 +1263,31 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		ruby_comment => { pass(); };
 		( s_literal | d_literal | host_re_literal ) 
 			=> { pass( IMP_Literal, ts, te ); };
+
+		'%%{' => { 
+			updateCol();
+			singleLineSpec = false;
+			startSection();
+			fcall parser_def;
+		};
+		'%%' => { 
+			updateCol();
+			singleLineSpec = true;
+			startSection();
+			fcall parser_def;
+		};
+		whitespace+ => { pass(); };
+		EOF;
+		any => { pass( *ts, 0, 0 ); };
+	*|;
+
+	# Outside code scanner. These tokens get passed through.
+	main_ocaml := |*
+		'define' => { pass( IMP_Define, 0, 0 ); };
+		ocaml_ident => { pass( IMP_Word, ts, te ); };
+		number => { pass( IMP_UInt, ts, te ); };
+		c_cpp_comment => { pass(); };
+		( s_literal | d_literal ) => { pass( IMP_Literal, ts, te ); };
 
 		'%%{' => { 
 			updateCol();
@@ -1213,6 +1359,8 @@ void Scanner::do_scan()
 	 * above the write init. */
 	if ( id.hostLang->lang == HostLang::Ruby )
 		cs = rlscan_en_main_ruby;
+	else if ( id.hostLang->lang == HostLang::OCaml )
+		cs = rlscan_en_main_ocaml;
 	else
 		cs = rlscan_en_main;
 	
