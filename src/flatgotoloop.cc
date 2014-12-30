@@ -265,8 +265,8 @@ void FlatGotoLoop::writeExec()
 			"\n";
 	}
 
-//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
+			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "} " << LABEL( "_again" ) << " {\n";
 
 	if ( redFsm->anyToStateActions() ) {
