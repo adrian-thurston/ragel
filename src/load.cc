@@ -1587,7 +1587,7 @@ struct LoadRagel
 			ragel::term_op TermOp = TermOpList.term_op();
 			FactorWithAug *factorWithAug = loadFactorLabel( TermOp.factor_label() );
 
-			Term::Type type;
+			Term::Type type = Term::ConcatType;
 			switch ( TermOp.prodName() ) {
 				case ragel::term_op::None:
 				case ragel::term_op::Dot:

@@ -545,6 +545,20 @@ void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::Break:
 			BREAK( ret, targState, csForced );
 			break;
+		/* Stubbed. */
+		case GenInlineItem::Ncall:
+		case GenInlineItem::NcallExpr:
+		case GenInlineItem::Nret:
+		case GenInlineItem::Nbreak:
+		case GenInlineItem::LmExec:
+		case GenInlineItem::HostStmt:
+		case GenInlineItem::HostExpr:
+		case GenInlineItem::HostText:
+		case GenInlineItem::GenStmt:
+		case GenInlineItem::GenExpr:
+		case GenInlineItem::LmCase:
+		case GenInlineItem::LmHold:
+			break;
 		}
 	}
 }

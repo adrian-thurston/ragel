@@ -375,6 +375,14 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList )
 		case InlineItem::LmSetTokStart:
 			out << "<set_tokstart></set_tokstart>";
 			break;
+
+		/* Stubbed. */
+		case InlineItem::Ncall:
+		case InlineItem::NcallExpr:
+		case InlineItem::Nret:
+		case InlineItem::Nbreak:
+		case InlineItem::Stmt:
+			break;
 		}
 	}
 }
@@ -681,6 +689,7 @@ void InputData::writeLanguage( std::ostream &out )
 		case HostLang::CSharp: out << "C#"; break;
 		case HostLang::OCaml: out << "OCaml"; break;
 		case HostLang::Crack: out << "Crack"; break;
+		case HostLang::Asm: out << "ASM"; break;
 	}
 	out << "\"";
 }
