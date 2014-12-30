@@ -14,8 +14,8 @@ trap sig_exit SIGINT
 trap sig_exit SIGQUIT
 trap sig_exit SIGTERM
 
-WORKING=working
-test -d $WORKING || mkdir $WORKING
+wk=wk
+test -d $wk || mkdir $wk
 
 while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 	case $opt in
@@ -108,18 +108,18 @@ function test_error
 function run_test()
 {
 	echo "$ragel $lang_opt $min_opt $gen_opt -o $code_src $test_case"
-	if ! $ragel $lang_opt $min_opt $gen_opt -o $code_src $WORKING/$test_case; then
+	if ! $ragel $lang_opt $min_opt $gen_opt -o $wk/$code_src $wk/$case_rl; then
 		test_error;
 	fi
 
 	out_args=""
-	[ $lang != java ] && out_args="-o ${binary}";
-    [ $lang == csharp ] && out_args="-out:${binary}";
+	[ $lang != java ] && out_args="-o ${wk}/${binary}";
+	[ $lang == csharp ] && out_args="-out:${wk}/${binary}";
 
 	# Ruby and OCaml don't need to be copiled.
 	if [ $lang != ruby ] && [ $lang != ocaml ]; then
 		echo "$compiler ${flags} ${out_args} ${code_src}"
-		if ! $compiler ${flags} ${out_args} ${code_src}; then
+		if ! $compiler ${flags} ${out_args} ${wk}/${code_src}; then
 			test_error;
 		fi
 	fi
@@ -127,16 +127,16 @@ function run_test()
 	if [ "$compile_only" != "true" ]; then
 		echo -n "running $root ... ";
 		
-		exec_cmd=./$binary
-		[ $lang = java ] && exec_cmd="java ${root}"
-		[ $lang = ruby ] && exec_cmd="ruby ${code_src}"
-		[ $lang = csharp ] && [ "$csharp_compiler" = gmcs ] && exec_cmd="mono ${exec_cmd}"
-		[ $lang = ocaml ] && exec_cmd="ocaml ${code_src}"
+		exec_cmd=./$wk/$binary
+		[ $lang = java ] && exec_cmd="java -classpath $wk $root"
+		[ $lang = ruby ] && exec_cmd="ruby $wk/$code_src"
+		[ $lang = csharp ] && exec_cmd="mono $wk/$binary"
+		[ $lang = ocaml ] && exec_cmd="ocaml $wk/$code_src"
 
-		$exec_cmd 2>&1 > $output;
+		$exec_cmd 2>&1 > $wk/$output;
 		EXIT_STATUS=$?
 		if test $EXIT_STATUS = 0 && \
-				diff --strip-trailing-cr $expected_out $output > /dev/null;
+				diff --strip-trailing-cr $wk/$expected_out $wk/$output > /dev/null;
 		then
 			echo "passed";
 		else
@@ -147,7 +147,8 @@ function run_test()
 }
 
 for test_case; do
-	root=${test_case%.rl};
+	root=`basename $test_case`
+	root=${root%.rl};
 
 	if ! [ -f "$test_case" ]; then
 		echo "runtests: not a file: $test_case"; >&2
@@ -167,8 +168,9 @@ for test_case; do
 	fi
 
 	expected_out=$root.exp;
-	sed '/_____OUTPUT_____/,$d' $test_case > $WORKING/$test_case
-	sed '1,/_____OUTPUT_____/d;$d' $test_case > $expected_out
+	case_rl=${root}_rl.rl
+	sed '/_____OUTPUT_____/,$d' $test_case > $wk/$case_rl
+	sed '1,/_____OUTPUT_____/d;$d' $test_case > $wk/$expected_out
 
 	lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
 	if [ -z "$lang" ]; then
@@ -259,12 +261,12 @@ for test_case; do
 				echo "$langflags" | grep -qe $lf || continue
 
 				targ=${root}_$lang.rl
-				echo "./trans $lang $targ $test_case $lang ${root}_${lang}"
-				if ! ./trans $lang $targ $test_case ${root}_${lang}; then
+				echo "./trans $lang $wk/$targ $test_case ${root}_${lang}"
+				if ! ./trans $lang $wk/$targ $test_case ${root}_${lang}; then
 					test_error
 				fi
-				echo "./runtests -g $options $targ"
-				if !  ./runtests -g $options $targ; then
+				echo "./runtests -g $options $wk/$targ"
+				if !  ./runtests -g $options $wk/$targ; then
 					test_error
 				fi
 			done
