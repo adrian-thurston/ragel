@@ -14,22 +14,22 @@ trap sig_exit SIGINT
 trap sig_exit SIGQUIT
 trap sig_exit SIGTERM
 
-wk=wk
+wk=working
 test -d $wk || mkdir $wk
 
 while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 	case $opt in
 		B|T|F|G|P) 
 			genflags="$genflags -$opt$OPTARG"
-			options="$options -$opt$OPTARG"
+			gen_opts="$gen_opts -$opt$OPTARG"
 		;;
 		n|m|l|e) 
 			minflags="$minflags -$opt"
-			options="$options -$opt"
+			gen_opts="$gen_opts -$opt"
 		;;
 		c) 
 			compile_only="true"
-			options="$options -$opt"
+			gen_opts="$gen_opts -$opt"
 		;;
 		g) 
 			allow_generated="true"
@@ -41,12 +41,19 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 			case $OPTARG in
 				asm)
 					langflags="$langflags --$OPTARG"
+					gen_opts="$gen_opts --$OPTARG"
 				;;
 				integral-tables)
 					encflags="$encflags --$OPTARG"
+					gen_opts="$gen_opts --$OPTARG"
 				;;
 				string-tables)
 					encflags="$encflags --$OPTARG"
+					gen_opts="$gen_opts --$OPTARG"
+				;;
+				*)
+					echo "$0: unrecognized option --$OPTARG" >&2
+					exit 1
 				;;
 			esac
 		;;
@@ -273,8 +280,8 @@ for test_case; do
 				if ! ./trans $lang $wk/$targ $test_case ${root}_${lang}; then
 					test_error
 				fi
-				echo "./runtests -g $options $wk/$targ"
-				if !  ./runtests -g $options $wk/$targ; then
+				echo "./runtests -g $gen_opts $wk/$targ"
+				if !  ./runtests -g $gen_opts $wk/$targ; then
 					test_error
 				fi
 			done
