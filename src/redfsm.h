@@ -473,7 +473,9 @@ struct RedStateAp
 		bAnyRegCurStateRef(false),
 		partitionBoundary(false),
 		inConds(0),
-		numInConds(0)
+		numInConds(0),
+		inCondTests(0),
+		numInCondTests(0)
 	{ }
 
 	/* Transitions out. */
@@ -511,6 +513,9 @@ struct RedStateAp
 
 	RedCondPair **inConds;
 	int numInConds;
+
+	RedTransAp **inCondTests;
+	int numInCondTests;
 };
 
 /* List of states. */

@@ -776,20 +776,38 @@ void RedFsmAp::setInTrans()
 	for ( TransApSet::Iter trans = transSet; trans.lte(); trans++ ) {
 		if ( trans->condSpace == 0 ) 
 			trans->p.targ->numInConds += 1;
+		else {
+			/* We have a placement choice here, but associate it with the
+			 * first. */
+			RedCondPair *pair = trans->outCond( 0 );
+			pair->targ->numInCondTests += 1;
+		}
 	}
 
-	/* Pass over states to allocate the needed memory. Reset the counts so we
-	 * can use them as the current size. */
+	/* Allocate. Reset the counts so we can use them as the current size. */
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		st->inConds = new RedCondPair*[st->numInConds];
 		st->numInConds = 0;
+
+		st->inCondTests = new RedTransAp*[st->numInCondTests];
+		st->numInCondTests = 0;
 	}
 
-	for ( CondApSet::Iter trans = condSet; trans.lte(); trans++ )
-		trans->p.targ->inConds[trans->p.targ->numInConds++] = &trans->p;
+	/* Fill the arrays. */
+	for ( CondApSet::Iter trans = condSet; trans.lte(); trans++ ) {
+		RedStateAp *targ = trans->p.targ;
+		targ->inConds[targ->numInConds++] = &trans->p;
+	}
 
 	for ( TransApSet::Iter trans = transSet; trans.lte(); trans++ ) {
-		if ( trans->condSpace == 0 ) 
-			trans->p.targ->inConds[trans->p.targ->numInConds++] = &trans->p;
+		if ( trans->condSpace == 0 ) {
+			RedStateAp *targ = trans->p.targ;
+			targ->inConds[targ->numInConds++] = &trans->p;
+		}
+		else {
+			RedCondPair *pair = trans->outCond( 0 );
+			RedStateAp *targ = pair->targ;
+			targ->inCondTests[targ->numInCondTests++] = trans;
+		}
 	}
 }

@@ -83,6 +83,7 @@ protected:
 	string GET_WIDE_KEY( RedStateAp *state );
 	string TABS( int level );
 	string KEY( Key key );
+	string COND_KEY( CondKey key );
 	string WIDE_KEY( RedStateAp *state, Key key );
 	string LDIR_PATH( char *path );
 	virtual void ACTION( ostream &ret, GenAction *action, int targState, 
@@ -199,6 +200,7 @@ public:
 
 	std::ostream &EXIT_STATES();
 	std::string TRANS_GOTO_TARG( RedTransAp *trans );
+	std::string TRANS_GOTO_TARG( RedCondPair *pair );
 	std::ostream &TRANS_GOTO( RedTransAp *trans );
 	std::ostream &AGAIN_CASES();
 	std::ostream &FINISH_CASES();
@@ -232,6 +234,7 @@ public:
 	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
 
 	/* Set up labelNeeded flag for each state. */
+	void setLabelsNeeded( RedCondPair *pair );
 	void setLabelsNeeded( GenInlineList *inlineList );
 	void setLabelsNeeded();
 };

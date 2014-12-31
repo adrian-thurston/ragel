@@ -330,6 +330,19 @@ string AsmCodeGen::TABS( int level )
 	return result;
 }
 
+string AsmCodeGen::COND_KEY( CondKey key )
+{
+	ostringstream ret;
+//	ostringstream ret;
+//	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
+//		ret << key.getVal();
+//	else
+//		ret << (unsigned long) key.getVal() << 'u';
+	ret << "$" << key.getVal();
+	return ret.str();
+}
+
+
 /* Write out a key from the fsm code gen. Depends on wether or not the key is
  * signed. */
 string AsmCodeGen::KEY( Key key )
@@ -1345,37 +1358,76 @@ void AsmCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 {
 	bool anyWritten = false;
+	static int skip = 1;
+
+	/* Emit any transitions that have actions and that go to this state. */
+	for ( int it = 0; it < state->numInCondTests; it++ ) {
+		/* Write the label for the transition so it can be jumped to. */
+		RedTransAp *trans = state->inCondTests[it];
+		out << ".L" << mn << "_ctr_" << trans->id << ":\n";
+
+		/* Using EBX. This is callee-save. */
+		out << "	movl	$0, %ebx\n";
+
+		for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
+			int l = skip++;
+			Size condValOffset = (1 << csi.pos());
+			CONDITION( out, *csi );
+			out << 
+				"\n"
+				"	cmpl	$0, %eax\n"
+				"	je		.L" << mn << "_skip_" << l << "\n"
+				"	movl	$" << condValOffset << ", %eax\n"
+				"	addl	%eax, %ebx\n"
+				".L" << mn << "_skip_" << l << ":\n";
+		}
+
+		for ( int c = 0; c < trans->numConds(); c++ ) {
+			CondKey key = trans->outCondKey( c );
+			RedCondPair *pair = trans->outCond( c );
+			out <<
+				"	cmpl	" << COND_KEY( key ) << ", %ebx\n"
+				"	je	" << TRANS_GOTO_TARG( pair ) << "\n";
+
+		}
+
+		RedCondPair *err = trans->errCond();
+		if ( err != 0 ) {
+			out <<
+				"	jmp	" << TRANS_GOTO_TARG( err ) << "\n";
+		}
+	}
 
 	/* Emit any transitions that have actions and that go to this state. */
 	for ( int it = 0; it < state->numInConds; it++ ) {
-		RedCondPair *trans = state->inConds[it];
-		if ( trans->action != 0 /* && trans->labelNeeded */ ) {
+		RedCondPair *pair = state->inConds[it];
+		if ( pair->action != 0 /* && pair->labelNeeded */ ) {
 			/* Remember that we wrote an action so we know to write the
 			 * line directive for going back to the output. */
 			anyWritten = true;
 
 			/* Write the label for the transition so it can be jumped to. */
-			out << ".L" << mn << "_tr_" << trans->id << ":\n";
+			out << ".L" << mn << "_tr_" << pair->id << ":\n";
 
 //			/* If the action contains a next, then we must preload the current
 //			 * state since the action may or may not set it. */
-//			if ( trans->action->anyNextStmt() )
-//				out << "	" << vCS() << " = " << trans->targ->id << ";\n";
+//			if ( pair->action->anyNextStmt() )
+//				out << "	" << vCS() << " = " << pair->targ->id << ";\n";
 
 			/* Write each action in the list. */
-			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
-				ACTION( out, item->value, trans->targ->id, false, 
-						trans->action->anyNextStmt() );
+			for ( GenActionTable::Iter item = pair->action->key; item.lte(); item++ ) {
+				ACTION( out, item->value, pair->targ->id, false, 
+						pair->action->anyNextStmt() );
 				out << "\n";
 			}
 
 
 			/* If the action contains a next then we need to reload, otherwise
 			 * jump directly to the target state. */
-			if ( trans->action->anyNextStmt() )
+			if ( pair->action->anyNextStmt() )
 				out << "	jmp .L" << mn << "_again\n";
 			else
-				out << "	jmp .L" << mn << "_st_" << trans->targ->id << "\n";
+				out << "	jmp .L" << mn << "_st_" << pair->targ->id << "\n";
 		}
 	}
 
@@ -1444,24 +1496,35 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 	out << "	jmp .L" << mn << "_out\n";
 }
 
-
-std::string AsmCodeGen::TRANS_GOTO_TARG( RedTransAp *trans )
+std::string AsmCodeGen::TRANS_GOTO_TARG( RedCondPair *pair )
 {
 	std::stringstream s;
-	if ( trans->p.action != 0 ) {
+	if ( pair->action != 0 ) {
 		/* Go to the transition which will go to the state. */
 		// out << TABS(level) << "goto tr" << trans->id << ";";
 
-		s << ".L" << mn << "_tr_" << trans->p.id;
+		s << ".L" << mn << "_tr_" << pair->id;
 	}
 	else {
 		/* Go directly to the target state. */
 		//out << TABS(level) << "goto st" << trans->targ->id << ";";
 
-		s << ".L" << mn << "_st_" << trans->p.targ->id;
+		s << ".L" << mn << "_st_" << pair->targ->id;
 	}
-
 	return s.str();
+}
+
+std::string AsmCodeGen::TRANS_GOTO_TARG( RedTransAp *trans )
+{
+	if ( trans->condSpace != 0 ) {
+		std::stringstream s;
+		/* Need to jump to the trans since there are conditions. */
+		s << ".L" << mn << "_ctr_" << trans->id;
+		return s.str();
+	}
+	else {
+		return TRANS_GOTO_TARG( &trans->p );
+	}
 }
 
 /* Emit the goto to take for a given transition. */
@@ -1553,6 +1616,24 @@ void AsmCodeGen::setLabelsNeeded( GenInlineList *inlineList )
 	}
 }
 
+void AsmCodeGen::setLabelsNeeded( RedCondPair *pair )
+{
+	/* If there is no action with a next statement, then the label will be
+	 * needed. */
+	if ( pair->action == 0 || !pair->action->anyNextStmt() )
+		pair->targ->labelNeeded = true;
+
+	/* Need labels for states that have goto or calls in action code
+	 * invoked on characters (ie, not from out action code). */
+	if ( pair->action != 0 ) {
+		/* Loop the actions. */
+		for ( GenActionTable::Iter act = pair->action->key; act.lte(); act++ ) {
+			/* Get the action and walk it's tree. */
+			setLabelsNeeded( act->value->inlineList );
+		}
+	}
+}
+
 /* Set up labelNeeded flag for each state. */
 void AsmCodeGen::setLabelsNeeded()
 {
@@ -1567,24 +1648,13 @@ void AsmCodeGen::setLabelsNeeded()
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 			st->labelNeeded = false;
 
-		/* Walk all transitions and set only those that have targs. */
 		for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
-			/* If there is no action with a next statement, then the label will be
-			 * needed. */
-			RedCondPair *pair = trans->outCond( 0 );
-			if ( pair->action == 0 || !pair->action->anyNextStmt() )
-				pair->targ->labelNeeded = true;
-
-			/* Need labels for states that have goto or calls in action code
-			 * invoked on characters (ie, not from out action code). */
-			if ( pair->action != 0 ) {
-				/* Loop the actions. */
-				for ( GenActionTable::Iter act = pair->action->key; act.lte(); act++ ) {
-					/* Get the action and walk it's tree. */
-					setLabelsNeeded( act->value->inlineList );
-				}
-			}
+			if ( trans->condSpace == 0 )
+				setLabelsNeeded( &trans->p );
 		}
+
+		for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ )
+			setLabelsNeeded( &cond->p );
 	}
 
 	if ( !noEnd ) {

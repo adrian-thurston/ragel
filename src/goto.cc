@@ -231,7 +231,8 @@ string Goto::CKEY( CondKey key )
 	return ret.str();
 }
 
-void Goto::COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey upper, int low, int high )
+void Goto::COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower,
+		CondKey upper, int low, int high )
 {
 	/* Get the mid position, staying on the lower end of the range. */
 	int mid = (low + high) >> 1;
