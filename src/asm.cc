@@ -929,7 +929,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 	}
 	else if ( !anyLower && anyHigher ) {
 		string targ;
-		if ( limitHigh ) {
+		if ( limitLow ) {
 			targ = TRANS_GOTO_TARG( data[mid].value );
 		}
 		else {
