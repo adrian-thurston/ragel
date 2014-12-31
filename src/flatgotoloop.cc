@@ -9,7 +9,8 @@
 
 void FlatGotoLoop::tableDataPass()
 {
-	taActions();
+	if ( redFsm->anyActions() )
+		taActions();
 	taKeys();
 	taCharClass();
 	taFlatIndexOffset();
@@ -17,7 +18,8 @@ void FlatGotoLoop::tableDataPass()
 	taIndicies();
 	taIndexDefaults();
 	taTransCondSpaces();
-	taTransOffsets();
+	if ( condSpaceList.length() > 0 )
+		taTransOffsets();
 	taCondTargs();
 	taCondActions();
 
@@ -134,7 +136,8 @@ void FlatGotoLoop::writeData()
 	taIndicies();
 	taIndexDefaults();
 	taTransCondSpaces();
-	taTransOffsets();
+	if ( condSpaceList.length() > 0 )
+		taTransOffsets();
 	taCondTargs();
 	taCondActions();
 
@@ -165,8 +168,12 @@ void FlatGotoLoop::writeExec()
 		out << "	int _ps;\n";
 
 	out << 
-		"	int _trans;\n"
-		"	" << UINT() << " _cond;\n";
+		"	int _trans;\n";
+
+	if ( condSpaceList.length() > 0 ) {
+		out <<
+			"	" << UINT() << " _cond;\n";
+	}
 
 	if ( redFsm->anyToStateActions() || 
 			redFsm->anyRegActions() || redFsm->anyFromStateActions() )
@@ -178,8 +185,10 @@ void FlatGotoLoop::writeExec()
 
 	out <<
 		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-		"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n"
-		"	int _cpc;\n";
+		"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
+
+	if ( condSpaceList.length() > 0 )
+		out << "	int _cpc;\n";
 
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
@@ -222,18 +231,22 @@ void FlatGotoLoop::writeExec()
 
 	LOCATE_TRANS();
 
+	string cond = "_cond";
+	if ( condSpaceList.length() == 0 )
+		cond = "_trans";
+
 	out << "} " << LABEL( "_match_cond" ) << " {\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = (int) " << ARR_REF( condTargs ) << "[_cond];\n"
+		"	" << vCS() << " = (int) " << ARR_REF( condTargs ) << "[" << cond << "];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
+			"	if ( " << ARR_REF( condActions ) << "[" << cond << "] == 0 )\n"
 			"		goto _again;\n"
 			"\n";
 
@@ -241,7 +254,7 @@ void FlatGotoLoop::writeExec()
 			out << "	_nbreak = 0;\n";
 
 		out <<
-			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[_cond]" ) << ";\n"
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[" + cond + "]" ) << ";\n"
 			"	_nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
@@ -313,8 +326,14 @@ void FlatGotoLoop::writeExec()
 		if ( redFsm->anyEofTrans() ) {
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = (int)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		_trans = (int)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+			if ( condSpaceList.length() > 0 ) {
+				out <<
+					"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n";
+			}
+
+			out << 
 				"		goto _match_cond;\n"
 				"	}\n";
 		}

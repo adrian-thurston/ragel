@@ -352,14 +352,15 @@ void Flat::LOCATE_TRANS()
 		"	}\n"
 		"\n";
 
-	out <<
-		"	_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
-		"\n";
-
-	out <<
-		"	_cpc = 0;\n";
 
 	if ( condSpaceList.length() > 0 ) {
+		out <<
+			"	_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
+			"\n";
+
+		out <<
+			"	_cpc = 0;\n";
+
 		out <<
 			"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
 			"\n";
@@ -379,11 +380,11 @@ void Flat::LOCATE_TRANS()
 		}
 
 		out << 
-			"	}\n";
+			"	}\n"
+			"	_cond += (" << UINT() << ")_cpc;\n";
 	}
 	
 	out <<
-		"	_cond += (" << UINT() << ")_cpc;\n"
 		"	goto _match_cond;\n"
 	;
 }
