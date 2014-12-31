@@ -13,7 +13,7 @@ if test -z "$cases"; then
 	cases="mailbox1 strings1 strings2 rlscan cppscan1"
 fi
 
-CFLAGS="-O3 -Wall -Wno-unused-but-set-variable"
+CFLAGS="-O3 -Wall -Wno-unused-but-set-variable -Wno-unused-variable"
 
 tc()
 {
