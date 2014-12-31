@@ -842,78 +842,9 @@ ostream &AsmCodeGen::source_warning( const InputLoc &loc )
 
 ostream &AsmCodeGen::source_error( const InputLoc &loc )
 {
-//	gblErrorCount += 1;
-//	assert( sourceFileName != 0 );
-//	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
+	gblErrorCount += 1;
+	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
 	return cerr;
-}
-
-std::ostream &AsmCodeGen::TO_STATE_ACTION_SWITCH()
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numToStateRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
-			out << "\tcase " << act->actionId << ":\n";
-			ACTION( out, act, 0, false, false );
-			out << "\tbreak;\n";
-		}
-	}
-
-	genLineDirective( out );
-	return out;
-}
-
-std::ostream &AsmCodeGen::FROM_STATE_ACTION_SWITCH()
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numFromStateRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
-			out << "\tcase " << act->actionId << ":\n";
-			ACTION( out, act, 0, false, false );
-			out << "\tbreak;\n";
-		}
-	}
-
-	genLineDirective( out );
-	return out;
-}
-
-std::ostream &AsmCodeGen::EOF_ACTION_SWITCH()
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numEofRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
-			out << "\tcase " << act->actionId << ":\n";
-			ACTION( out, act, 0, true, false );
-			out << "\tbreak;\n";
-		}
-	}
-
-	genLineDirective( out );
-	return out;
-}
-
-std::ostream &AsmCodeGen::ACTION_SWITCH()
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numTransRefs > 0 ) {
-			/* Write the case label, the action and the case break. */
-			out << "\tcase " << act->actionId << ":\n";
-			ACTION( out, act, 0, false, false );
-			out << "\tbreak;\n";
-		}
-	}
-
-	genLineDirective( out );
-	return out;
 }
 
 void AsmCodeGen::emitSingleIfElseIf( RedStateAp *state )
@@ -924,9 +855,6 @@ void AsmCodeGen::emitSingleIfElseIf( RedStateAp *state )
 
 	/* Write out the single indicies. */
 	for ( int j = 0; j < numSingles; j++ ) {
-		//out << "\t\tcase " << WIDE_KEY(state, data[j].lowKey) << ": ";
-		//TRANS_GOTO(data[j].value, 0) << "\n";
-
 		out <<
 			"	cmpb	" << KEY( data[j].lowKey ) << ", %r14b\n"
 			"	je	" << TRANS_GOTO_TARG( data[j].value ) << "\n";
@@ -1008,11 +936,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 	if ( anyLower && anyHigher ) {
 		int l1 = nl++;
-		// int l2 = nl++;
 		string targ = TRANS_GOTO_TARG( data[mid].value );
-
-		// out << "if ( " << GET_WIDE_KEY(state) << " < " << 
-		//		WIDE_KEY(state, data[mid].lowKey) << " ) {\n";
 
 		/* Can go lower and higher than mid. */
 		out <<
@@ -1033,9 +957,6 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		out <<
 			"	jle	" << targ << "\n";
 
-		// out << "} else if ( " << GET_WIDE_KEY(state) << " > " << 
-		//		WIDE_KEY(state, data[mid].highKey) << " ) {\n";
-
 		emitRangeBSearch( state, level+1, mid+1, high );
 	}
 	else if ( anyLower && !anyHigher ) {
@@ -1051,8 +972,6 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		}
 
 		/* Can go lower than mid but not higher. */
-		// out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " < " << 
-		//		WIDE_KEY(state, data[mid].lowKey) << " ) {\n";
 
 		out <<
 			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
@@ -1060,21 +979,9 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 		emitRangeBSearch( state, level+1, low, mid-1 );
 
-		/* if the higher is the highest in the alphabet then there is no
-		 * sense testing it. */
-		if ( limitHigh ) {
-
-//			// out << TABS(level) << "} else\n";
-//
-//			out <<
-//				".L" << mn << "_nl" << l1 << ":\n";
-//
-//			TRANS_GOTO(data[mid].value, level+1);
-		}
-		else {
-
-			// out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " <= " << 
-			//		WIDE_KEY(state, data[mid].highKey) << " )\n";
+		/* If the higher is the highest in the alphabet then there is no sense
+		 * testing it. */
+		if ( !limitHigh ) {
 
 			out <<
 				targ << ":\n";
@@ -1087,7 +994,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 			out <<
 				"	jg	" << nf << "\n";
 
-			TRANS_GOTO(data[mid].value, level+1);
+			TRANS_GOTO( data[mid].value );
 		}
 	}
 	else if ( !anyLower && anyHigher ) {
@@ -1101,10 +1008,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 			targ = s.str();
 		}
 
-
 		/* Can go higher than mid but not lower. */
-		// out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " > " << 
-		//		WIDE_KEY(state, data[mid].highKey) << " ) {\n";
 
 		out <<
 			"	cmpb	" << KEY( data[mid].highKey ) << ", %r14b\n"
@@ -1114,17 +1018,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 		/* If the lower end is the lowest in the alphabet then there is no
 		 * sense testing it. */
-		if ( limitLow ) {
-//			// out << TABS(level) << "} else\n";
-//
-//			out <<
-//				".L" << mn << "_nl" << l1 << ":\n";
-//
-//			TRANS_GOTO(data[mid].value, level+1);
-		}
-		else {
-			// out << TABS(level) << "} else if ( " << GET_WIDE_KEY(state) << " >= " << 
-			//		WIDE_KEY(state, data[mid].lowKey) << " )\n";
+		if ( !limitLow ) {
 
 			out <<
 				targ << ":\n";
@@ -1137,16 +1031,13 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 			out <<
 				"	jl	" << nf << "\n";
 
-			TRANS_GOTO(data[mid].value, level+1);
+			TRANS_GOTO( data[mid].value );
 		}
 	}
 	else {
 		/* Cannot go higher or lower than mid. It's mid or bust. What
 		 * tests to do depends on limits of alphabet. */
 		if ( !limitLow && !limitHigh ) {
-			//out << TABS(level) << "if ( " << WIDE_KEY(state, data[mid].lowKey) << " <= " << 
-			//		GET_WIDE_KEY(state) << " && " << GET_WIDE_KEY(state) << " <= " << 
-			//		WIDE_KEY(state, data[mid].highKey) << " )\n";
 
 			if ( !keyOps->eq( data[mid].lowKey, data[mid].highKey ) ) {
 				out <<
@@ -1161,31 +1052,27 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 					"	jne	" << nf << "\n";
 			}
 
-			TRANS_GOTO(data[mid].value, level+1);
+			TRANS_GOTO( data[mid].value );
 		}
 		else if ( limitLow && !limitHigh ) {
-			//out << TABS(level) << "if ( " << GET_WIDE_KEY(state) << " <= " << 
-			//		WIDE_KEY(state, data[mid].highKey) << " )\n";
 
 			out <<
 				"	cmpb	" << KEY( data[mid].highKey ) << ", %r14b\n"
 				"	jg	" << nf << "\n";
 
-			TRANS_GOTO(data[mid].value, level+1);
+			TRANS_GOTO( data[mid].value );
 		}
 		else if ( !limitLow && limitHigh ) {
-			//out << TABS(level) << "if ( " << WIDE_KEY(state, data[mid].lowKey) << " <= " << 
-			//		GET_WIDE_KEY(state) << " )\n";
 
 			out <<
 				"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
 				"	jl	" << nf << "\n";
 
-			TRANS_GOTO(data[mid].value, level+1);
+			TRANS_GOTO( data[mid].value );
 		}
 		else {
 			/* Both high and low are at the limit. No tests to do. */
-			TRANS_GOTO(data[mid].value, level+1);
+			TRANS_GOTO( data[mid].value );
 		}
 	}
 }
@@ -1311,11 +1198,6 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 			/* Writing code above state gotos. */
 			GOTO_HEADER( st );
 
-//			if ( st->stateCondVect.length() > 0 ) {
-//				out << "	_widec = " << GET_KEY() << ";\n";
-//				emitCondBSearch( st, 1, 0, st->stateCondVect.length() - 1 );
-//			}
-
 			/* Load *p. */
 			if ( st->outSingle.length() > 0 || st->outRange.length() > 0 )
 				out << "	movb	(%r12), %r14b\n";
@@ -1338,59 +1220,9 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 
 			/* Write the default transition. */
 			out << ".L" << mn << "_nf_" << st->id << ":\n";
-			TRANS_GOTO( st->defTrans, 1 );
+			TRANS_GOTO( st->defTrans );
 		}
 	}
-	return out;
-}
-
-std::ostream &AsmCodeGen::TRANSITIONS()
-{
-	/* Emit any transitions that have functions and that go to 
-	 * this state. */
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
-		/* Write the label for the transition so it can be jumped to. */
-		out << "	tr" << trans->id << ": ";
-
-		/* Destination state. */
-		if ( trans->p.action != 0 && trans->p.action->anyCurStateRef() )
-			out << "_ps = " << vCS() << ";";
-		out << vCS() << " = " << trans->p.targ->id << "; ";
-
-		if ( trans->p.action != 0 ) {
-			/* Write out the transition func. */
-			out << "goto f" << trans->p.action->actListId << ";\n";
-		}
-		else {
-			/* No code to execute, just loop around. */
-			out << "goto _again;\n";
-		}
-	}
-	return out;
-}
-
-std::ostream &AsmCodeGen::EXEC_FUNCS()
-{
-	/* Make labels that set acts and jump to execFuncs. Loop func indicies. */
-	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		if ( redAct->numTransRefs > 0 ) {
-			out << "	f" << redAct->actListId << ": " <<
-				"_acts = " << ARR_OFF(A(), itoa( redAct->location+1 ) ) << ";"
-				" goto execFuncs;\n";
-		}
-	}
-
-	out <<
-		"\n"
-		"execFuncs:\n"
-		"	_nacts = *_acts++;\n"
-		"	while ( _nacts-- > 0 ) {\n"
-		"		switch ( *_acts++ ) {\n";
-		ACTION_SWITCH();
-		SWITCH_DEFAULT() <<
-		"		}\n"
-		"	}\n"
-		"	goto _again;\n";
 	return out;
 }
 
@@ -1633,20 +1465,9 @@ std::string AsmCodeGen::TRANS_GOTO_TARG( RedTransAp *trans )
 }
 
 /* Emit the goto to take for a given transition. */
-std::ostream &AsmCodeGen::TRANS_GOTO( RedTransAp *trans, int level )
+std::ostream &AsmCodeGen::TRANS_GOTO( RedTransAp *trans )
 {
-	if ( trans->p.action != 0 ) {
-		/* Go to the transition which will go to the state. */
-		// out << TABS(level) << "goto tr" << trans->id << ";";
-
-		out << "	jmp	.L" << mn << "_tr_" << trans->p.id << "\n";
-	}
-	else {
-		/* Go directly to the target state. */
-		//out << TABS(level) << "goto st" << trans->targ->id << ";";
-
-		out << "	jmp	.L" << mn << "_st_" << trans->p.targ->id << "\n";
-	}
+	out << "	jmp	" << TRANS_GOTO_TARG( trans ) << "\n";
 	return out;
 }
 

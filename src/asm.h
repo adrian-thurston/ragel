@@ -190,13 +190,6 @@ public:
 
 	virtual void writeExports();
 
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
-	std::ostream &TRANSITIONS();
-	std::ostream &EXEC_FUNCS();
-
 	unsigned int TO_STATE_ACTION( RedStateAp *state );
 	unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	unsigned int EOF_ACTION( RedStateAp *state );
@@ -206,7 +199,7 @@ public:
 
 	std::ostream &EXIT_STATES();
 	std::string TRANS_GOTO_TARG( RedTransAp *trans );
-	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
+	std::ostream &TRANS_GOTO( RedTransAp *trans );
 	std::ostream &AGAIN_CASES();
 	std::ostream &FINISH_CASES();
 
