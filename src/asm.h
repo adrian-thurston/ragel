@@ -73,24 +73,20 @@ public:
 	virtual void writeFirstFinal();
 	virtual void writeError();
 
-	virtual void statsSummary();
+	virtual void statsSummary() {}
 	virtual void genAnalysis();
 
 protected:
 	string FSM_NAME();
 	string START_STATE_ID();
-	string GET_WIDE_KEY();
-	string GET_WIDE_KEY( RedStateAp *state );
 	string TABS( int level );
 	string KEY( Key key );
 	string COND_KEY( CondKey key );
-	string WIDE_KEY( RedStateAp *state, Key key );
 	string LDIR_PATH( char *path );
 	virtual void ACTION( ostream &ret, GenAction *action, int targState, 
 			bool inFinish, bool csForced );
 	void CONDITION( ostream &ret, GenAction *condition );
 	string ALPH_TYPE();
-	string WIDE_ALPH_TYPE();
 	string ARRAY_TYPE( unsigned long maxVal );
 
 	bool isAlphTypeSigned();
@@ -147,8 +143,6 @@ protected:
 	void SET_TOKSTART( ostream &ret, GenInlineItem *item );
 	void SET_TOKEND( ostream &ret, GenInlineItem *item );
 	void GET_TOKEND( ostream &ret, GenInlineItem *item );
-	virtual void SUB_ACTION( ostream &ret, GenInlineItem *item, 
-			int targState, bool inFinish, bool csForced );
 	void STATIC_CONST_INT( const string &name, const string &val );
 	void STATE_IDS();
 
@@ -164,12 +158,10 @@ protected:
 	bool testEofUsed;
 	bool againLabelUsed;
 	bool useIndicies;
-	long long tableData;
 
 	void genLineDirective( ostream &out );
 
 	/* Return types in HostType form. */
-	HostType *wideAlphType();
 	HostType *arrayType( unsigned long maxVal );
 
 public:
@@ -228,7 +220,6 @@ public:
 	void STATE_GOTO_ERROR();
 	std::ostream &STATE_GOTOS();
 
-	void emitCondBSearch( RedStateAp *state, int level, int low, int high );
 	void emitSingleIfElseIf( RedStateAp *state );
 	void emitSingleJumpTable( RedStateAp *state, std::string def );
 	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );

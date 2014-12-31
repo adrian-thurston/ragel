@@ -96,12 +96,6 @@ void AsmCodeGen::genAnalysis()
 	analyzeMachine();
 }
 
-void AsmCodeGen::statsSummary()
-{
-	if ( printStatistics )
-		cout << "table-data\t" << tableData << endl << endl;
-}
-
 void AsmCodeGen::genLineDirective( ostream &out )
 {
 	std::streambuf *sbuf = out.rdbuf();
@@ -113,7 +107,6 @@ void AsmCodeGen::genLineDirective( ostream &out )
 AsmCodeGen::AsmCodeGen( const CodeGenArgs &args )
 :
 	CodeGenData( args )
-//,	tableData( 0 )
 {
 	static int gmn = 1;
 	mn = gmn++;
@@ -288,22 +281,6 @@ string AsmCodeGen::TOKEND()
 	return ret.str();
 }
 
-string AsmCodeGen::GET_WIDE_KEY()
-{
-//	if ( redFsm->anyConditions() ) 
-//		return "_widec";
-//	else
-		return GET_KEY();
-}
-
-string AsmCodeGen::GET_WIDE_KEY( RedStateAp *state )
-{
-//	if ( state->stateCondList.length() > 0 )
-//		return "_widec";
-//	else
-		return GET_KEY();
-}
-
 string AsmCodeGen::GET_KEY()
 {
 	ostringstream ret;
@@ -371,21 +348,6 @@ bool AsmCodeGen::isWideAlphTypeSigned()
 //		long long maxKeyVal = redFsm->maxKey.getLongLong();
 //		HostType *wideType = keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
 //		return wideType->isSigned;
-//	}
-}
-
-string AsmCodeGen::WIDE_KEY( RedStateAp *state, Key key )
-{
-//	if ( state->stateCondList.length() > 0 ) {
-//		ostringstream ret;
-//		if ( isWideAlphTypeSigned() )
-//			ret << key.getVal();
-//		else
-//			ret << (unsigned long) key.getVal() << 'u';
-//		return ret.str();
-//	}
-//	else {
-		return KEY( key );
 //	}
 }
 
@@ -467,18 +429,6 @@ void AsmCodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
 	ret << TOKSTART() << " = " << P() << ";";
 }
 
-void AsmCodeGen::SUB_ACTION( ostream &ret, GenInlineItem *item, 
-		int targState, bool inFinish, bool csForced )
-{
-	if ( item->children->length() > 0 ) {
-		/* Write the block and close it off. */
-		ret << "{";
-		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-		ret << "}";
-	}
-}
-
-
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
 void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
@@ -552,9 +502,6 @@ void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::LmSetTokStart:
 			SET_TOKSTART( ret, item );
 			break;
-//		case GenInlineItem::SubAction:
-//			SUB_ACTION( ret, item, targState, inFinish, csForced );
-//			break;
 		case GenInlineItem::Break:
 			BREAK( ret, targState, csForced );
 			break;
@@ -666,36 +613,6 @@ string AsmCodeGen::ALPH_TYPE()
 		ret += + keyOps->alphType->data2;
 	}
 	return ret;
-}
-
-/* Emit the alphabet data type. */
-string AsmCodeGen::WIDE_ALPH_TYPE()
-{
-	string ret;
-//	if ( redFsm->maxKey <= keyOps->maxKey )
-		ret = ALPH_TYPE();
-//	else {
-//		long long maxKeyVal = redFsm->maxKey.getLongLong();
-//		HostType *wideType = keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
-//		assert( wideType != 0 );
-//
-//		ret = wideType->data1;
-//		if ( wideType->data2 != 0 ) {
-//			ret += " ";
-//			ret += wideType->data2;
-//		}
-//	}
-	return ret;
-}
-
-HostType *AsmCodeGen::wideAlphType()
-{
-//	if ( redFsm->maxKey <= keyOps->maxKey )
-		return keyOps->alphType;
-//	else {
-//		long long maxKeyVal = redFsm->maxKey.getLongLong();
-//		return keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
-//	}
 }
 
 void AsmCodeGen::STATIC_CONST_INT( const string &name, const string &value )
@@ -1088,118 +1005,6 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 			TRANS_GOTO( data[mid].value );
 		}
 	}
-}
-
-void AsmCodeGen::COND_TRANSLATE( GenStateCond *stateCond, int level )
-{
-	GenCondSpace *condSpace = stateCond->condSpace;
-	out << TABS(level) << "_widec = " << CAST(WIDE_ALPH_TYPE()) << "(" <<
-			KEY(condSpace->baseKey) << " + (" << GET_KEY() << 
-			" - " << KEY(keyOps->minKey) << "));\n";
-
-	for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-		out << TABS(level) << "if ( ";
-		CONDITION( out, *csi );
-		Size condValOffset = ((1 << csi.pos()) * keyOps->alphSize());
-		out << " ) _widec += " << condValOffset << ";\n";
-	}
-}
-
-void AsmCodeGen::emitCondBSearch( RedStateAp *state, int level, int low, int high )
-{
-#if 0
-	/* Get the mid position, staying on the lower end of the range. */
-	int mid = (low + high) >> 1;
-	GenStateCond **data = state->stateCondVect.data;
-
-	/* Determine if we need to look higher or lower. */
-	bool anyLower = mid > low;
-	bool anyHigher = mid < high;
-
-	/* Determine if the keys at mid are the limits of the alphabet. */
-	bool limitLow = data[mid]->lowKey == keyOps->minKey;
-	bool limitHigh = data[mid]->highKey == keyOps->maxKey;
-
-	if ( anyLower && anyHigher ) {
-		/* Can go lower and higher than mid. */
-		out << TABS(level) << "if ( " << GET_KEY() << " < " << 
-				KEY(data[mid]->lowKey) << " ) {\n";
-		emitCondBSearch( state, level+1, low, mid-1 );
-		out << TABS(level) << "} else if ( " << GET_KEY() << " > " << 
-				KEY(data[mid]->highKey) << " ) {\n";
-		emitCondBSearch( state, level+1, mid+1, high );
-		out << TABS(level) << "} else {\n";
-		COND_TRANSLATE(data[mid], level+1);
-		out << TABS(level) << "}\n";
-	}
-	else if ( anyLower && !anyHigher ) {
-		/* Can go lower than mid but not higher. */
-		out << TABS(level) << "if ( " << GET_KEY() << " < " << 
-				KEY(data[mid]->lowKey) << " ) {\n";
-		emitCondBSearch( state, level+1, low, mid-1 );
-
-		/* if the higher is the highest in the alphabet then there is no
-		 * sense testing it. */
-		if ( limitHigh ) {
-			out << TABS(level) << "} else {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-		else {
-			out << TABS(level) << "} else if ( " << GET_KEY() << " <= " << 
-					KEY(data[mid]->highKey) << " ) {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-	}
-	else if ( !anyLower && anyHigher ) {
-		/* Can go higher than mid but not lower. */
-		out << TABS(level) << "if ( " << GET_KEY() << " > " << 
-				KEY(data[mid]->highKey) << " ) {\n";
-		emitCondBSearch( state, level+1, mid+1, high );
-
-		/* If the lower end is the lowest in the alphabet then there is no
-		 * sense testing it. */
-		if ( limitLow ) {
-			out << TABS(level) << "} else {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-		else {
-			out << TABS(level) << "} else if ( " << GET_KEY() << " >= " << 
-					KEY(data[mid]->lowKey) << " ) {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-	}
-	else {
-		/* Cannot go higher or lower than mid. It's mid or bust. What
-		 * tests to do depends on limits of alphabet. */
-		if ( !limitLow && !limitHigh ) {
-			out << TABS(level) << "if ( " << KEY(data[mid]->lowKey) << " <= " << 
-					GET_KEY() << " && " << GET_KEY() << " <= " << 
-					KEY(data[mid]->highKey) << " ) {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-		else if ( limitLow && !limitHigh ) {
-			out << TABS(level) << "if ( " << GET_KEY() << " <= " << 
-					KEY(data[mid]->highKey) << " ) {\n";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-		else if ( !limitLow && limitHigh ) {
-			out << TABS(level) << "if ( " << KEY(data[mid]->lowKey) << " <= " << 
-					GET_KEY() << " )\n {";
-			COND_TRANSLATE(data[mid], level+1);
-			out << TABS(level) << "}\n";
-		}
-		else {
-			/* Both high and low are at the limit. No tests to do. */
-			COND_TRANSLATE(data[mid], level);
-		}
-	}
-#endif
 }
 
 std::ostream &AsmCodeGen::STATE_GOTOS()
