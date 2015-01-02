@@ -444,20 +444,18 @@ Tree *constructArgv0( Program *prg, int argc, const char **argv )
 	return arg;
 }
 
-Tree *constructArgv( Program *prg, int argc, const char **argv )
+List *constructArgv( Program *prg, int argc, const char **argv )
 {
-	Tree *list = constructGeneric( prg, prg->rtd->argvGenericId );
+	List *list = (List*)constructGeneric( prg, prg->rtd->argvGenericId );
 	int i;
 	for ( i = 1; i < argc; i++ ) {
 		Head *head = stringAllocPointer( prg, argv[i], strlen(argv[i]) );
 		Tree *arg = constructString( prg, head );
 		treeUpref( arg );
-		listPushTail( prg, (List*)list, arg );
+		listPushTail( prg, list, arg );
 	}
 	
-	Tree *listPtr = constructPointer( prg, list );
-	treeUpref( listPtr );
-	return listPtr;
+	return list;
 }
 
 /*
@@ -3860,10 +3858,7 @@ again:
 				read_half( field );
 				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
 
-				/* Tree comes back upreffed. */
-				Tree *tree = constructArgv( prg, prg->argc, prg->argv );
-				Tree *prev = colm_struct_get_field( prg->global, field );
-				treeDownref( prg, sp, prev );
+				List *tree = constructArgv( prg, prg->argc, prg->argv );
 				colm_struct_set_field( prg->global, field, tree );
 				break;
 			}

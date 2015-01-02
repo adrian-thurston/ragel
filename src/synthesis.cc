@@ -414,18 +414,18 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 		}
 		else if ( qi->form == QualItem::Arrow ) {
 			if ( qualUT->typeId == TYPE_PTR ) {
-				/* Always dereference references when used for qualification. If
-				 * this is the last one then we must start with the reverse
-				 * execution business. */
-				if ( pd->revertOn && qi.pos() == lastPtrInQual && forWriting ) {
-					/* This is like a global load. */
-					code.append( IN_PTR_DEREF_WV );
-				}
-				else {
-					/* If reading or not yet the last in ref then we only need a
-					 * reading deref. */
-					code.append( IN_PTR_DEREF_R );
-				}
+//				/* Always dereference references when used for qualification. If
+//				 * this is the last one then we must start with the reverse
+//				 * execution business. */
+//				if ( pd->revertOn && qi.pos() == lastPtrInQual && forWriting ) {
+//					/* This is like a global load. */
+//					code.append( IN_PTR_DEREF_WV );
+//				}
+//				else {
+//					/* If reading or not yet the last in ref then we only need a
+//					 * reading deref. */
+//					code.append( IN_PTR_DEREF_R );
+//				}
 
 				qualUT = pd->findUniqueType( TYPE_TREE, qualUT->langEl );
 			}
@@ -1065,7 +1065,7 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	UniqueType *replUT = typeRef->uniqueType;
 
 	if ( replUT->typeId != TYPE_STRUCT )
-		error(loc) << "can only new2 a struct" << endp;
+		error(loc) << "can only new a struct" << endp;
 
 	code.append( IN_NEW_STRUCT );
 	code.appendHalf( replUT->structEl->id );
@@ -1265,8 +1265,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	/* Construct the parser. */
 	code.append( IN_CONS_GENERIC );
 	code.appendHalf( parserUT->langEl->generic->id );
-	code.append( IN_TREE_NEW );
-	code.append( IN_PTR_DEREF_R );
 
 	/* Dup for the finish operation. */
 	code.append( IN_DUP_TOP );
