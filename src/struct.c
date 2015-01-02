@@ -88,7 +88,7 @@ Parser *colm_parser_new( Program *prg, GenericInfo *gi )
 	colm_struct_add( prg, (struct colm_struct*) parser );
 
 	parser->id = STRUCT_INBUILT_ID;
-	parser->destructor = colm_parser_destroy;
+	parser->destructor = &colm_parser_destroy;
 	parser->pdaRun = pdaRun;
 
 	return parser;
@@ -102,4 +102,52 @@ Stream *colm_stream_new2( Program *prg )
 	colm_struct_add( prg, (struct colm_struct *)stream );
 	stream->id = STRUCT_INBUILT_ID;
 	return stream;
+}
+
+void colm_list_destroy( Program *prg, Tree **sp, struct colm_struct *s )
+{
+	struct colm_list *list = (struct colm_list*) s;
+
+	ListEl *el = list->head;
+	while ( el != 0 ) {
+		ListEl *next = el->next;
+		treeDownref( prg, sp, el->value );
+		listElFree( prg, el );
+		el = next;
+	}
+}
+
+List *colm_list_new( struct colm_program *prg )
+{
+	size_t memsize = sizeof(struct colm_list);
+	struct colm_list *list = (struct colm_list*) malloc( memsize );
+	memset( list, 0, memsize );
+	colm_struct_add( prg, (struct colm_struct *)list );
+	list->id = STRUCT_INBUILT_ID;
+	list->destructor = &colm_list_destroy;
+	return list;
+}
+
+void colm_map_destroy( Program *prg, Tree **sp, struct colm_struct *s )
+{
+	struct colm_map *map = (struct colm_map*) s;
+
+	MapEl *el = map->head;
+	while ( el != 0 ) {
+		MapEl *next = el->next;
+		treeDownref( prg, sp, el->key );
+		treeDownref( prg, sp, el->tree );
+		mapElFree( prg, el );
+		el = next;
+	}
+}
+
+Map *colm_map_new( struct colm_program *prg )
+{
+	size_t memsize = sizeof(struct colm_map);
+	struct colm_map *map = (struct colm_map*) malloc( memsize );
+	memset( map, 0, memsize );
+	colm_struct_add( prg, (struct colm_struct *)map );
+	map->id = STRUCT_INBUILT_ID;
+	return map;
 }

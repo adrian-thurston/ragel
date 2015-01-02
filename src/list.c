@@ -3,6 +3,7 @@
  */
 
 #include <colm/pdarun.h>
+#include <colm/struct.h>
 
 void listAddAfter( List *list, ListEl *prev_el, ListEl *new_el )
 {

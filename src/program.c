@@ -159,8 +159,6 @@ Program *colm_new_program( RuntimeData *rtd )
 	assert( sizeof(Int)      <= sizeof(Tree) );
 	assert( sizeof(Str)      <= sizeof(Tree) );
 	assert( sizeof(Pointer)  <= sizeof(Tree) );
-	assert( sizeof(Map)      <= sizeof(MapEl) );
-	assert( sizeof(List)     <= sizeof(MapEl) );
 
 	prg->rtd = rtd;
 	prg->ctxDepParsing = 1;
@@ -264,18 +262,6 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 	return prg->returnVal;
 };
 
-static void colm_clear_orig_heap( Program *prg, Tree **sp )
-{
-	/* Clear the heap. */
-	Kid *a = prg->origHeap;
-	while ( a != 0 ) {
-		Kid *next = a->next;
-		objectDownref( prg, sp, a->tree );
-		kidFree( prg, a );
-		a = next;
-	}
-}
-
 static void colm_clear_heap( Program *prg, Tree **sp )
 {
 	struct colm_struct *hi = prg->heap.head;
@@ -292,7 +278,6 @@ int colm_delete_program( Program *prg )
 	int exitStatus = prg->exitStatus;
 
 	treeDownref( prg, sp, prg->returnVal );
-	colm_clear_orig_heap( prg, sp );
 	colm_clear_heap( prg, sp );
 
 	treeDownref( prg, sp, prg->trueVal );

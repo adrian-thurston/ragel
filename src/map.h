@@ -10,32 +10,8 @@ extern "C" {
 #endif
 
 #include <colm/program.h>
+#include <colm/struct.h>
 
-typedef struct _MapEl
-{
-	/* Must overlay Kid. */
-	Tree *tree;
-	struct _MapEl *next;
-	struct _MapEl *prev;
-
-	struct _MapEl *left, *right, *parent;
-	long height;
-	Tree *key;
-} MapEl;
-
-typedef struct _Map
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	MapEl *head;
-
-	MapEl *tail;
-	MapEl *root;
-	long treeSize;
-	GenericInfo *genericInfo;
-} Map;
 
 void mapListAbandon( Map *map );
 

@@ -955,15 +955,13 @@ Tree *constructGeneric( Program *prg, long genericId )
 	Tree *newGeneric = 0;
 	switch ( genericInfo->type ) {
 		case GEN_MAP: {
-			Map *map = (Map*)mapElAllocate( prg );
-			map->id = genericInfo->langElId;
+			Map *map = colm_map_new( prg );
 			map->genericInfo = genericInfo;
 			newGeneric = (Tree*) map;
 			break;
 		}
 		case GEN_LIST: {
-			List *list = (List*)mapElAllocate( prg );
-			list->id = genericInfo->langElId;
+			List *list = colm_list_new( prg );
 			list->genericInfo = genericInfo;
 			newGeneric = (Tree*) list;
 			break;
@@ -994,7 +992,6 @@ Tree *constructGeneric( Program *prg, long genericId )
 			return 0;
 	}
 
-	treeUpref( newGeneric );
 	return newGeneric;
 }
 
@@ -1083,54 +1080,16 @@ free_tree:
 	if ( genericId > 0 ) {
 		GenericInfo *generic = &prg->rtd->genericInfo[genericId];
 		switch ( generic->type ) {
-		case GEN_LIST: {
-			List *list = (List*) tree;
-			ListEl *el = list->head;
-			while ( el != 0 ) {
-				ListEl *next = el->next;
-				vm_push( el->value );
-				listElFree( prg, el );
-				el = next;
-			}
-			mapElFree( prg, (MapEl*)list );
+		case GEN_LIST:
 			break;
-		}
-		case GEN_MAP: {
-			Map *map = (Map*)tree;
-			MapEl *el = map->head;
-			while ( el != 0 ) {
-				MapEl *next = el->next;
-				vm_push( el->key );
-				vm_push( el->tree );
-				mapElFree( prg, el );
-				el = next;
-			}
-			mapElFree( prg, (MapEl*)map );
+		case GEN_MAP:
 			break;
-		}
-//		case GEN_PARSER: {
-//			Parser *parser = (Parser*)tree;
-//			clearPdaRun( prg, sp, parser->pdaRun );
-//			free( parser->pdaRun );
-//			treeDownref( prg, sp, (Tree*)parser->input );
-//			mapElFree( prg, (MapEl*)parser );
-//			break;
-//		}
-		case GEN_LIST2EL: {
+		case GEN_PARSER:
 			break;
-		}
-		case GEN_LIST2: {
-			List *list = (List*) tree;
-//			ListEl *el = list->head;
-//			while ( el != 0 ) {
-//				ListEl *next = el->next;
-//				vm_push( el->value );
-//				listElFree( prg, el );
-//				el = next;
-//			}
-			mapElFree( prg, (MapEl*)list );
+		case GEN_LIST2EL:
 			break;
-		}
+		case GEN_LIST2:
+			break;
 		case GEN_MAP2EL:
 		case GEN_MAP2:
 			break;
@@ -1555,7 +1514,6 @@ void splitRef( Program *prg, Tree ***psp, Ref *fromRef )
 
 Tree *setListMem( List *list, Half field, Tree *value )
 {
-	assert( list->refs == 1 );
 	if ( value != 0 )
 		assert( value->refs >= 1 );
 
@@ -1619,7 +1577,6 @@ long mapLength( Map *map )
 
 void listPushTail( Program *prg, List *list, Tree *val )
 {
-	assert( list->refs == 1 );
 	if ( val != 0 )
 		assert( val->refs >= 1 );
 	ListEl *listEl = listElAllocate( prg );
@@ -1672,7 +1629,6 @@ void list2PushTail( Program *prg, Tree **sp, List *list, Tree *val )
 
 void listPushHead( Program *prg, List *list, Tree *val )
 {
-	assert( list->refs == 1 );
 	if ( val != 0 )
 		assert( val->refs >= 1 );
 	ListEl *listEl = listElAllocate( prg );

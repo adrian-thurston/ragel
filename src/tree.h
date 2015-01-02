@@ -20,6 +20,7 @@ struct _FunctionInfo;
 
 typedef struct colm_stream Stream;
 typedef struct colm_parser Parser;
+typedef struct colm_list List;
 
 typedef struct colm_location
 {
@@ -136,20 +137,6 @@ typedef struct _GenericInfo
 	long parserId;
 	long elOffset;
 } GenericInfo;
-
-typedef struct _List
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	ListEl *head;
-
-	ListEl *tail;
-	long listLen;
-	GenericInfo *genericInfo;
-
-} List;
 
 enum IterType
 {
