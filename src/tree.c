@@ -1716,13 +1716,11 @@ Tree *getParserMem( Parser *parser, Word field )
 	Tree *result = 0;
 	switch ( field ) {
 		case 0: {
-			result = colm_struct_get_field_type(
-					(struct colm_struct*)parser, Tree *, 8 );
+			result = parser->result;
 			break;
 		}
 		case 1: {
-			PdaRun *pdaRun = colm_struct_get_field_type(
-					(struct colm_struct*)parser, PdaRun *, 6 );
+			PdaRun *pdaRun = parser->pdaRun;
 			result = pdaRun->parseErrorText;
 			break;
 		}

@@ -1371,7 +1371,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			else
 				code.append( IN_INPUT_APPEND_WC );
 		}
-		code.append( IN_POP );
 
 		code.append( IN_DUP_TOP );
 
@@ -1558,8 +1557,6 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 			code.append( IN_INPUT_APPEND_WV );
 		else
 			code.append( IN_INPUT_APPEND_WC );
-
-		code.append( IN_POP );
 
 		code.append( IN_DUP_TOP );
 

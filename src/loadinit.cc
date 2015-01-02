@@ -347,7 +347,7 @@ void LoadInit::go( long activeRealm )
 	argv[2] = 0;
 
 	colm_program *program = colm_new_program( &colm_object );
-	colm_set_debug( program, 0 );
+	colm_set_debug( program, 0x3 );
 	colm_run_program( program, 2, argv );
 
 	/* Extract the parse tree. */

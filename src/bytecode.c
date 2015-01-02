@@ -2069,7 +2069,7 @@ again:
 			StreamImpl *si = streamToImpl( (Stream*)sptr );
 			streamAppend( prg, sp, input, si );
 
-			vm_push( (Tree*)sptr );
+			//vm_push( (Tree*)sptr );
 			treeDownref( prg, sp, input );
 			break;
 		}
@@ -2082,8 +2082,8 @@ again:
 			StreamImpl *si = streamToImpl( (Stream*)sptr );
 			Word len = streamAppend( prg, sp, input, si );
 
-			treeUpref( (Tree*)sptr );
-			vm_push( (Tree*)sptr );
+//			treeUpref( (Tree*)sptr );
+//			vm_push( (Tree*)sptr );
 
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_INPUT_APPEND_BKT );
@@ -2121,8 +2121,8 @@ again:
 			StreamImpl *si = streamToImpl( (Stream*)sptr );
 			streamAppendStream( prg, sp, si, input );
 
-			vm_push( (Tree*)sptr );
-			treeDownref( prg, sp, input );
+			//vm_push( (Tree*)sptr );
+			//treeDownref( prg, sp, input );
 			break;
 		}
 		case IN_INPUT_APPEND_STREAM_WV: {
@@ -2134,8 +2134,8 @@ again:
 			StreamImpl *si = streamToImpl( (Stream*)sptr );
 			Word len = streamAppendStream( prg, sp, si, input );
 
-			treeUpref( (Tree*)sptr );
-			vm_push( (Tree*)sptr );
+			//treeUpref( (Tree*)sptr );
+			//vm_push( (Tree*)sptr );
 
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_INPUT_APPEND_STREAM_BKT );
@@ -2204,8 +2204,8 @@ again:
 		case IN_PARSE_SAVE_STEPS: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
 
-			Struct *parser = (Struct*)vm_pop();
-			PdaRun *pdaRun = colm_struct_get_field_type( parser, PdaRun*, 6 );
+			Parser *parser = (Parser*)vm_pop();
+			PdaRun *pdaRun = parser->pdaRun;
 			long steps = pdaRun->steps;
 
 			vm_push( (SW)exec->parser );
@@ -2297,10 +2297,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WC %hd\n", stopId );
 
-
-			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
-			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
-			exec->pcr = parseFrag( prg, sp, pdaRun, input, stopId, exec->pcr );
+			exec->pcr = parseFrag( prg, sp, exec->parser->pdaRun,
+					exec->parser->input, stopId, exec->pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
@@ -2332,10 +2330,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WV %hd\n", stopId );
 
-			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
-			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
-
-			exec->pcr = parseFrag( prg, sp, pdaRun, input, stopId, exec->pcr );
+			exec->pcr = parseFrag( prg, sp, exec->parser->pdaRun,
+					exec->parser->input, stopId, exec->pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
@@ -2405,13 +2401,12 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WC %hd\n", stopId );
 
-			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
-			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
 			Tree *result = 0;
 
-			exec->pcr = parseFinish( &result, prg, sp, pdaRun, input, false, exec->pcr );
+			exec->pcr = parseFinish( &result, prg, sp,
+					exec->parser->pdaRun, exec->parser->input, false, exec->pcr );
 
-			colm_struct_set_field_type( exec->parser, Tree*, 8, result );
+			exec->parser->result = result;
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
@@ -2659,8 +2654,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_INPUT\n" );
 
 			Parser *parser = (Parser*)vm_pop();
-			Stream *stream = colm_struct_get_field_type(
-					(struct colm_struct *)parser, Stream*, 7 );
+			Stream *stream = parser->input;
 			vm_push( (Tree*)stream );
 
 			//treeDownref( prg, sp, (Tree*)parser );
@@ -2671,8 +2665,7 @@ again:
 
 			Parser *parser = (Parser*)vm_pop();
 			Stream *stream = (Stream*)vm_pop();
-			colm_struct_set_field_type( (struct colm_struct *)parser,
-					Stream*, 7, stream );
+			parser->input = stream;
 			break;
 		}
 		case IN_CONSTRUCT_TERM: {

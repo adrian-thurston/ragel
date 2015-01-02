@@ -31,6 +31,8 @@ typedef struct colm_parser
 	struct colm_struct *prev, *next;
 	colm_destructor_t destructor;
 
+	void *buffer[10];
+
 	struct _PdaRun *pdaRun;
 	struct colm_stream *input;
 	Tree *result;
@@ -44,9 +46,10 @@ typedef struct colm_stream
 	struct colm_struct *prev, *next;
 	colm_destructor_t destructor;
 
+	void *buffer[8];
+
 	StreamImpl *impl;
 } Stream;
-
 
 struct colm_struct *colm_struct_new( struct colm_program *prg, int id );
 void colm_struct_delete( struct colm_program *prg, struct colm_tree **sp,
@@ -71,6 +74,7 @@ struct colm_struct *colm_struct_inbuilt( Program *prg, int size,
 
 Parser *colm_parser_new( struct colm_program *prg, GenericInfo *gi );
 Stream *colm_stream_new( struct colm_program *prg );
+Stream *colm_stream_new2( struct colm_program *prg );
 
 #if defined(__cplusplus)
 }

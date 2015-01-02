@@ -3,18 +3,17 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+
+#define STRUCT_INBUILT_ID -1
 
 struct colm_tree *colm_get_global( Program *prg, long pos )
 {
 	return colm_struct_get_field( prg->global, pos );
 }
 
-static struct colm_struct *colm_struct_new_size( Program *prg, int size )
+static void colm_struct_add( Program *prg, struct colm_struct *item )
 {
-	size_t memsize = sizeof(struct colm_struct) + ( sizeof(Tree*) * size );
-	struct colm_struct *item = (struct colm_struct*) malloc( memsize );
-	memset( item, 0, memsize );
-
 	if ( prg->heap.head == 0 ) {
 		prg->heap.head = prg->heap.tail = item;
 		item->prev = item->next = 0;
@@ -25,7 +24,15 @@ static struct colm_struct *colm_struct_new_size( Program *prg, int size )
 		prg->heap.tail->next = item;
 		prg->heap.tail = item;
 	}
-	
+}
+
+static struct colm_struct *colm_struct_new_size( Program *prg, int size )
+{
+	size_t memsize = sizeof(struct colm_struct) + ( sizeof(Tree*) * size );
+	struct colm_struct *item = (struct colm_struct*) malloc( memsize );
+	memset( item, 0, memsize );
+
+	colm_struct_add( prg, item );
 	return item;
 }
 
@@ -36,21 +43,10 @@ struct colm_struct *colm_struct_new( Program *prg, int id )
 	return s;
 }
 
-struct colm_struct *colm_struct_inbuilt( Program *prg, int size,
-	colm_destructor_t destructor )
-{
-	struct colm_struct *s = colm_struct_new_size( prg, size + 1 );
-	s->id = -1;
-	colm_struct_set_field_type( s, colm_destructor_t, 0, destructor );
-	return s;
-}
-
 void colm_struct_delete( Program *prg, Tree **sp, struct colm_struct *el )
 {
-	if ( el->id == -1 ) {
-		colm_destructor_t destructor = colm_struct_get_field_type(
-				el, colm_destructor_t, 0 );
-
+	if ( el->id == STRUCT_INBUILT_ID ) {
+		colm_destructor_t destructor = ((struct colm_inbuilt*)el)->destructor;
 		if ( destructor != 0 )
 			(*destructor)( prg, sp, el );
 	}
@@ -66,16 +62,16 @@ void colm_struct_delete( Program *prg, Tree **sp, struct colm_struct *el )
 	free( el );
 }
 
-void colm_parser_destroy( Program *prg, Tree **sp, struct colm_struct *parser )
+void colm_parser_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 {
-	/* Free the PDA run. */
-	PdaRun *pdaRun = colm_struct_get_field_type( parser, PdaRun *, 6 );
-	clearPdaRun( prg, sp, pdaRun );
-	free( pdaRun );
+	struct colm_parser *parser = (struct colm_parser*) s;
 
-	/* Free the result. */
-	Tree *result = colm_struct_get_field_type( parser, Tree *, 8 );
-	treeDownref( prg, sp, result );
+	/* Free the PDA run. */
+	clearPdaRun( prg, sp, parser->pdaRun );
+	free( parser->pdaRun );
+
+//	/* Free the result. */
+//	treeDownref( prg, sp, parser->result );
 }
 
 Parser *colm_parser_new( Program *prg, GenericInfo *gi )
@@ -86,9 +82,24 @@ Parser *colm_parser_new( Program *prg, GenericInfo *gi )
 	colm_pda_init( prg, pdaRun, prg->rtd->pdaTables, 
 			gi->parserId, 0, 0, 0 );
 	
-	struct colm_struct *s = colm_struct_inbuilt( prg, 16, colm_parser_destroy );
-	colm_struct_set_field_type( s, PdaRun*, 6, pdaRun );
+	size_t memsize = sizeof(struct colm_parser);
+	struct colm_parser *parser = (struct colm_parser*) malloc( memsize );
+	memset( parser, 0, memsize );
+	colm_struct_add( prg, (struct colm_struct*) parser );
 
-	return (Parser*) s;
+	parser->id = STRUCT_INBUILT_ID;
+	parser->destructor = colm_parser_destroy;
+	parser->pdaRun = pdaRun;
+
+	return parser;
 }
 
+Stream *colm_stream_new2( Program *prg )
+{
+	size_t memsize = sizeof(struct colm_stream);
+	struct colm_stream *stream = (struct colm_stream*) malloc( memsize );
+	memset( stream, 0, memsize );
+	colm_struct_add( prg, (struct colm_struct *)stream );
+	stream->id = STRUCT_INBUILT_ID;
+	return stream;
+}

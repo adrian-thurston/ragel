@@ -161,8 +161,6 @@ Program *colm_new_program( RuntimeData *rtd )
 	assert( sizeof(Pointer)  <= sizeof(Tree) );
 	assert( sizeof(Map)      <= sizeof(MapEl) );
 	assert( sizeof(List)     <= sizeof(MapEl) );
-	assert( sizeof(Stream)   <= sizeof(MapEl) );
-	assert( sizeof(Parser)   <= sizeof(MapEl) );
 
 	prg->rtd = rtd;
 	prg->ctxDepParsing = 1;

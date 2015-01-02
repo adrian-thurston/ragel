@@ -1013,18 +1013,18 @@ Stream *openStreamFile( Program *prg, char *name, FILE *file )
 {
 	StreamImpl *impl = newSourceStreamFile( name, file );
 
-	struct colm_struct *s = colm_struct_inbuilt( prg, 16, 0 );
-	colm_struct_set_field( s, 15, (Tree*)impl );
-	return (Stream*) s;
+	struct colm_stream *s = colm_stream_new2( prg );
+	s->impl = impl;
+	return s;
 }
 
 Stream *openStreamFd( Program *prg, char *name, long fd )
 {
 	StreamImpl *impl = newSourceStreamFd( name, fd );
 
-	struct colm_struct *s = colm_struct_inbuilt( prg, 16, 0 );
-	colm_struct_set_field( s, 15, (Tree*)impl );
-	return (Stream*) s;
+	struct colm_stream *s = colm_stream_new2( prg );
+	s->impl = impl;
+	return s;
 }
 
 Stream *openFile( Program *prg, Tree *name, Tree *mode )
@@ -1060,17 +1060,17 @@ Stream *colm_stream_new( Program *prg )
 {
 	StreamImpl *impl = newSourceStreamGeneric( "<internal>" );
 
-	struct colm_struct *s = colm_struct_inbuilt( prg, 16, 0 );
-	colm_struct_set_field( s, 15, (Tree*)impl );
-	return (Stream*) s;
+	struct colm_stream *stream = colm_stream_new2( prg );
+	stream->impl = impl;
+	return stream;
 }
 
 StreamImpl *colm_stream_impl( struct colm_struct *s )
 {
-	return (StreamImpl*) colm_struct_get_field( s, 15 );
+	return ((Stream*)s)->impl;
 }
 
 StreamImpl *streamToImpl( Stream *ptr )
 {
-	return (StreamImpl*) colm_struct_get_field( ((struct colm_struct*)ptr), 15 );
+	return ptr->impl;
 }
