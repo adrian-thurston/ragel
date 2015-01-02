@@ -949,6 +949,18 @@ Tree *splitTree( Program *prg, Tree *tree )
 	return tree;
 }
 
+void colm_parser_destroy( Program *prg, Tree **sp, struct colm_struct *parser )
+{
+	/* Free the PDA run. */
+	PdaRun *pdaRun = colm_struct_get_field_type( parser, PdaRun *, 6 );
+	clearPdaRun( prg, sp, pdaRun );
+	free( pdaRun );
+
+	/* Free the result. */
+	Tree *result = colm_struct_get_field_type( parser, Tree *, 8 );
+	treeDownref( prg, sp, result );
+}
+
 Parser *colm_parser_construct( Program *prg, GenericInfo *gi )
 {
 	PdaRun *pdaRun = malloc( sizeof(PdaRun) );
@@ -957,7 +969,7 @@ Parser *colm_parser_construct( Program *prg, GenericInfo *gi )
 	colm_pda_init( prg, pdaRun, prg->rtd->pdaTables, 
 			gi->parserId, false, false, 0 );
 	
-	struct colm_struct *s = colm_struct_inbuilt( prg, 16, 0 );
+	struct colm_struct *s = colm_struct_inbuilt( prg, 16, colm_parser_destroy );
 	colm_struct_set_field_type( s, PdaRun*, 6, pdaRun );
 
 	return (Parser*) s;

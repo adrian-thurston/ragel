@@ -36,15 +36,25 @@ struct colm_struct *colm_struct_new( Program *prg, int id )
 	return s;
 }
 
-struct colm_struct *colm_struct_inbuilt( Program *prg, int size, void *destructor )
+struct colm_struct *colm_struct_inbuilt( Program *prg, int size,
+	colm_destructor_t destructor )
 {
-	struct colm_struct *s = colm_struct_new_size( prg, size );
+	struct colm_struct *s = colm_struct_new_size( prg, size + 1 );
 	s->id = -1;
+	colm_struct_set_field_type( s, colm_destructor_t, 0, destructor );
 	return s;
 }
 
 void colm_struct_delete( Program *prg, Tree **sp, struct colm_struct *el )
 {
+	if ( el->id == -1 ) {
+		colm_destructor_t destructor = colm_struct_get_field_type(
+				el, colm_destructor_t, 0 );
+
+		if ( destructor != 0 )
+			(*destructor)( prg, sp, el );
+	}
+
 	if ( el->id >= 0 ) { 
 		short *t = prg->rtd->selInfo[el->id].trees;
 		int i, len = prg->rtd->selInfo[el->id].treesLen;
