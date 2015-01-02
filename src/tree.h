@@ -18,6 +18,9 @@ typedef unsigned long Half;
 struct Bindings;
 struct _FunctionInfo;
 
+typedef struct colm_stream Stream;
+typedef struct colm_parser Parser;
+
 typedef struct colm_location
 {
 	const char *name;
@@ -148,32 +151,6 @@ typedef struct _List
 
 } List;
 
-typedef struct _Stream
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	StreamImpl *in;
-} Stream;
-
-typedef struct _Parser
-{
-	/* Must overlay Tree. */
-	short id;
-	unsigned short flags;
-	long refs;
-	Kid *child;
-
-	GenericInfo *genericInfo;
-
-	struct _PdaRun *pdaRun;
-	struct _Stream *input;
-	Tree *result;
-} Parser;
-
 enum IterType
 {
 	IT_Tree = 1,
@@ -259,7 +236,6 @@ Tree *constructObject( struct colm_program *prg, Kid *kid,
 		Tree **bindings, long langElId );
 Tree *constructGeneric( struct colm_program *prg, long genericId );
 Tree *constructToken( struct colm_program *prg, Tree **args, long nargs );
-Tree *constructStream( struct colm_program *prg );
 
 Object *newList2( struct colm_program *prg );
 

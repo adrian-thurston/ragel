@@ -2168,7 +2168,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_INPUT_CLOSE_WC\n" );
 
 			Stream *stream = (Stream*) vm_pop();
-			StreamImpl *si = stream->in;
+			StreamImpl *si = stream->impl;
 
 			if ( si->file != 0 ) {
 				fclose( si->file );
@@ -2651,7 +2651,7 @@ again:
 		case IN_CONSTRUCT_INPUT: {
 			debug( prg, REALM_BYTECODE, "IN_CONSTRUCT_INPUT\n" );
 
-			Tree *input = constructStream( prg );
+			Tree *input = (Tree*)colm_stream_new( prg );
 			vm_push( input );
 			break;
 		}

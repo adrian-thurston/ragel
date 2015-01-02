@@ -1056,13 +1056,13 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode )
 	return stream;
 }
 
-Tree *constructStream( Program *prg )
+Stream *colm_stream_new( Program *prg )
 {
 	StreamImpl *impl = newSourceStreamGeneric( "<internal>" );
 
 	struct colm_struct *s = colm_struct_inbuilt( prg, 16, 0 );
 	colm_struct_set_field( s, 15, (Tree*)impl );
-	return (Tree*) s;
+	return (Stream*) s;
 }
 
 StreamImpl *colm_stream_impl( struct colm_struct *s )

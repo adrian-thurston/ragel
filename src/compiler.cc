@@ -21,6 +21,7 @@
 #include "pdarun.h"
 #include "colm.h"
 #include "pool.h"
+#include "struct.h"
 
 using std::ostringstream;
 using std::cout;
@@ -970,7 +971,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	PdaRun *pdaRun = new PdaRun;
 	colm_pda_init( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
 
-	Tree *stream = constructStream( prg );
+	Tree *stream = (Tree*)colm_stream_new( prg );
 
 	in->funcs->appendStream( in, stream );
 	in->funcs->setEof( in );

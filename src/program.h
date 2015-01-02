@@ -84,13 +84,6 @@ typedef struct colm_sections
 
 } RuntimeData;
 
-struct colm_struct
-{
-	short id;
-	struct colm_struct *prev;
-	struct colm_struct *next;
-};
-
 typedef struct colm_heap_list
 {
 	struct colm_struct *head;

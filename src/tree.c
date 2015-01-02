@@ -949,32 +949,6 @@ Tree *splitTree( Program *prg, Tree *tree )
 	return tree;
 }
 
-void colm_parser_destroy( Program *prg, Tree **sp, struct colm_struct *parser )
-{
-	/* Free the PDA run. */
-	PdaRun *pdaRun = colm_struct_get_field_type( parser, PdaRun *, 6 );
-	clearPdaRun( prg, sp, pdaRun );
-	free( pdaRun );
-
-	/* Free the result. */
-	Tree *result = colm_struct_get_field_type( parser, Tree *, 8 );
-	treeDownref( prg, sp, result );
-}
-
-Parser *colm_parser_construct( Program *prg, GenericInfo *gi )
-{
-	PdaRun *pdaRun = malloc( sizeof(PdaRun) );
-
-	/* Start off the parsing process. */
-	colm_pda_init( prg, pdaRun, prg->rtd->pdaTables, 
-			gi->parserId, false, false, 0 );
-	
-	struct colm_struct *s = colm_struct_inbuilt( prg, 16, colm_parser_destroy );
-	colm_struct_set_field_type( s, PdaRun*, 6, pdaRun );
-
-	return (Parser*) s;
-}
-
 Tree *constructGeneric( Program *prg, long genericId )
 {
 	GenericInfo *genericInfo = &prg->rtd->genericInfo[genericId];
@@ -995,7 +969,7 @@ Tree *constructGeneric( Program *prg, long genericId )
 			break;
 		}
 		case GEN_PARSER: {
-			Parser *parser = colm_parser_construct( prg, genericInfo );
+			Parser *parser = colm_parser_new( prg, genericInfo );
 			newGeneric = (Tree*) parser;
 			break;
 		}
@@ -1134,14 +1108,14 @@ free_tree:
 			mapElFree( prg, (MapEl*)map );
 			break;
 		}
-		case GEN_PARSER: {
-			Parser *parser = (Parser*)tree;
-			clearPdaRun( prg, sp, parser->pdaRun );
-			free( parser->pdaRun );
-			treeDownref( prg, sp, (Tree*)parser->input );
-			mapElFree( prg, (MapEl*)parser );
-			break;
-		}
+//		case GEN_PARSER: {
+//			Parser *parser = (Parser*)tree;
+//			clearPdaRun( prg, sp, parser->pdaRun );
+//			free( parser->pdaRun );
+//			treeDownref( prg, sp, (Tree*)parser->input );
+//			mapElFree( prg, (MapEl*)parser );
+//			break;
+//		}
 		case GEN_LIST2EL: {
 			break;
 		}
