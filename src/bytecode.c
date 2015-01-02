@@ -192,21 +192,23 @@ void undoStreamAppend( Program *prg, Tree **sp, StreamImpl *is, Tree *input, lon
 	}
 }
 
-void undoStreamAppendStream( Program *prg, Tree **sp, StreamImpl *is, Tree *input, long length )
+void undoStreamAppendStream( Program *prg, Tree **sp, StreamImpl *is,
+		Tree *input, long length )
 {
 	is->funcs->undoAppendStream( is );
 }
 
-long parseFrag( Program *prg, Tree **sp, Parser *parser, long stopId, long entry )
+long parseFrag( Program *prg, Tree **sp, PdaRun *pdaRun,
+		Stream *input, long stopId, long entry )
 {
 switch ( entry ) {
 case PcrStart:
 
-	if ( ! parser->pdaRun->parseError ) {
-		parser->pdaRun->stopTarget = stopId;
+	if ( ! pdaRun->parseError ) {
+		pdaRun->stopTarget = stopId;
 
-		long pcr = parseLoop( prg, sp, parser->pdaRun, 
-				streamToImpl( parser->input ), entry );
+		long pcr = parseLoop( prg, sp, pdaRun, 
+				streamToImpl( input ), entry );
 
 		while ( pcr != PcrDone ) {
 
@@ -216,8 +218,8 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-			pcr = parseLoop( prg, sp, parser->pdaRun, 
-					streamToImpl( parser->input ), entry );
+			pcr = parseLoop( prg, sp, pdaRun, 
+					streamToImpl( input ), entry );
 		}
 	}
 
@@ -228,19 +230,19 @@ break; }
 }
 
 long parseFinish( Tree **result, Program *prg, Tree **sp,
-		Parser *parser, int revertOn, long entry )
+		PdaRun *pdaRun, Stream *input , int revertOn, long entry )
 {
 	StreamImpl *si;
 switch ( entry ) {
 case PcrStart:
 
-	if ( parser->pdaRun->stopTarget <= 0 ) {
-		si = streamToImpl( parser->input );
+	if ( pdaRun->stopTarget <= 0 ) {
+		si = streamToImpl( input );
 		si->funcs->setEof( si );
 
-		if ( ! parser->pdaRun->parseError ) {
-			si = streamToImpl( parser->input );
-			long pcr = parseLoop( prg, sp, parser->pdaRun, si, entry );
+		if ( ! pdaRun->parseError ) {
+			si = streamToImpl( input );
+			long pcr = parseLoop( prg, sp, pdaRun, si, entry );
 
 		 	while ( pcr != PcrDone ) {
 
@@ -250,8 +252,8 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-				si = streamToImpl( parser->input );
-				pcr = parseLoop( prg, sp, parser->pdaRun, si, entry );
+				si = streamToImpl( input );
+				pcr = parseLoop( prg, sp, pdaRun, si, entry );
 			}
 		}
 	}
@@ -259,12 +261,12 @@ case PcrReverse:
 	/* FIXME: need something here to check that we are not stopped waiting for
 	 * more data when we are actually expected to finish. This check doesn't
 	 * work (at time of writing). */
-	//assert( (parser->pdaRun->stopTarget > 0 && parser->pdaRun->stopParsing) || streamToImpl( parser->input )->eofSent );
+	//assert( (pdaRun->stopTarget > 0 && pdaRun->stopParsing) || streamToImpl( input )->eofSent );
 
 	if ( !revertOn )
-		commitFull( prg, sp, parser->pdaRun, 0 );
+		commitFull( prg, sp, pdaRun, 0 );
 	
-	Tree *tree = getParsedRoot( parser->pdaRun, parser->pdaRun->stopTarget > 0 );
+	Tree *tree = getParsedRoot( pdaRun, pdaRun->stopTarget > 0 );
 	treeUpref( tree );
 
 	*result = tree;
@@ -275,11 +277,12 @@ break; }
 	return PcrDone;
 }
 
-long undoParseFrag( Program *prg, Tree **sp, Parser *parser, long steps, long entry )
+long undoParseFrag( Program *prg, Tree **sp, PdaRun *pdaRun,
+		Stream *input, long steps, long entry )
 {
-	PdaRun *pdaRun = parser->pdaRun;
-
-	debug( prg, REALM_PARSE, "undo parse frag, target steps: %ld, pdarun steps: %ld\n", steps, pdaRun->steps );
+	debug( prg, REALM_PARSE,
+			"undo parse frag, target steps: %ld, pdarun steps: %ld\n",
+			steps, pdaRun->steps );
 
 	resetToken( pdaRun );
 
@@ -294,7 +297,7 @@ case PcrStart:
 		pdaRun->triggerUndo = 1;
 
 		/* The parse loop will recognise the situation. */
-		long pcr = parseLoop( prg, sp, pdaRun, streamToImpl(parser->input), entry );
+		long pcr = parseLoop( prg, sp, pdaRun, streamToImpl(input), entry );
 		while ( pcr != PcrDone ) {
 
 return pcr;
@@ -303,7 +306,7 @@ case PcrGeneration:
 case PcrPreEof:
 case PcrReverse:
 
-			pcr = parseLoop( prg, sp, pdaRun, streamToImpl(parser->input), entry );
+			pcr = parseLoop( prg, sp, pdaRun, streamToImpl(input), entry );
 		}
 
 		/* Reset environment. */
@@ -2201,14 +2204,15 @@ again:
 		case IN_PARSE_SAVE_STEPS: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
 
-			Parser *parser = (Parser*)vm_pop();
-			long steps = parser->pdaRun->steps;
+			Struct *parser = (Struct*)vm_pop();
+			PdaRun *pdaRun = colm_struct_get_field_type( parser, PdaRun*, 6 );
+			long steps = pdaRun->steps;
 
 			vm_push( (SW)exec->parser );
 			vm_push( (SW)exec->pcr );
 			vm_push( (SW)exec->steps );
 
-			exec->parser = parser;
+			exec->parser = (Parser*)parser;
 			exec->steps = steps;
 			exec->pcr = PcrStart;
 			break;
@@ -2293,7 +2297,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WC %hd\n", stopId );
 
-			exec->pcr = parseFrag( prg, sp, exec->parser, stopId, exec->pcr );
+
+			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
+			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
+			exec->pcr = parseFrag( prg, sp, pdaRun, input, stopId, exec->pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
@@ -2325,7 +2332,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WV %hd\n", stopId );
 
-			exec->pcr = parseFrag( prg, sp, exec->parser, stopId, exec->pcr );
+			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
+			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
+
+			exec->pcr = parseFrag( prg, sp, pdaRun, input, stopId, exec->pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
@@ -2366,7 +2376,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT %hd\n", stopId );
 
-			exec->pcr = undoParseFrag( prg, sp, exec->parser, exec->steps, exec->pcr );
+			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
+			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
+
+			exec->pcr = undoParseFrag( prg, sp, pdaRun, input, exec->steps, exec->pcr );
 
 			if ( exec->pcr == PcrDone )
 				instr += SIZEOF_CODE;
@@ -2392,8 +2405,13 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WC %hd\n", stopId );
 
-			exec->parser->result = 0;
-			exec->pcr = parseFinish( &exec->parser->result, prg, sp, exec->parser, false, exec->pcr );
+			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
+			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
+			Tree *result = 0;
+
+			exec->pcr = parseFinish( &result, prg, sp, pdaRun, input, false, exec->pcr );
+
+			colm_struct_set_field_type( exec->parser, Tree*, 8, result );
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
@@ -2425,8 +2443,12 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WV %hd\n", stopId );
 
-			exec->parser->result = 0;
-			exec->pcr = parseFinish( &exec->parser->result, prg, sp, exec->parser, true, exec->pcr );
+			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
+			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
+			Tree *result = 0;
+
+			exec->pcr = parseFinish( &result, prg, sp, pdaRun, input, true, exec->pcr );
+			colm_struct_set_field_type( exec->parser, Tree*, 8, result );
 
 			if ( exec->pcr == PcrDone )
 				instr += SIZEOF_CODE;
@@ -2468,7 +2490,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT %hd\n", stopId );
 
-			exec->pcr = undoParseFrag( prg, sp, exec->parser, exec->steps, exec->pcr );
+			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
+			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
+
+			exec->pcr = undoParseFrag( prg, sp, pdaRun, input, exec->steps, exec->pcr );
 
 			if ( exec->pcr == PcrDone )
 				instr += SIZEOF_CODE;
@@ -2634,8 +2659,11 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_INPUT\n" );
 
 			Parser *parser = (Parser*)vm_pop();
-			vm_push( (Tree*)parser->input );
-			treeDownref( prg, sp, (Tree*)parser );
+			Stream *stream = colm_struct_get_field_type(
+					(struct colm_struct *)parser, Stream*, 7 );
+			vm_push( (Tree*)stream );
+
+			//treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
 		case IN_SET_INPUT: {
@@ -2643,8 +2671,8 @@ again:
 
 			Parser *parser = (Parser*)vm_pop();
 			Stream *stream = (Stream*)vm_pop();
-			parser->input = stream;
-			treeDownref( prg, sp, (Tree*)parser );
+			colm_struct_set_field_type( (struct colm_struct *)parser,
+					Stream*, 7, stream );
 			break;
 		}
 		case IN_CONSTRUCT_TERM: {

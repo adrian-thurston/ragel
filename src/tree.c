@@ -8,6 +8,8 @@
 #include <colm/bytecode.h>
 #include <colm/debug.h>
 #include <colm/map.h>
+#include <colm/struct.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -947,6 +949,20 @@ Tree *splitTree( Program *prg, Tree *tree )
 	return tree;
 }
 
+Parser *colm_parser_construct( Program *prg, GenericInfo *gi )
+{
+	PdaRun *pdaRun = malloc( sizeof(PdaRun) );
+
+	/* Start off the parsing process. */
+	colm_pda_init( prg, pdaRun, prg->rtd->pdaTables, 
+			gi->parserId, false, false, 0 );
+	
+	struct colm_struct *s = colm_struct_inbuilt( prg, 16, 0 );
+	colm_struct_set_field_type( s, PdaRun*, 6, pdaRun );
+
+	return (Parser*) s;
+}
+
 Tree *constructGeneric( Program *prg, long genericId )
 {
 	GenericInfo *genericInfo = &prg->rtd->genericInfo[genericId];
@@ -967,15 +983,7 @@ Tree *constructGeneric( Program *prg, long genericId )
 			break;
 		}
 		case GEN_PARSER: {
-			Parser *parser = (Parser*)mapElAllocate( prg );
-			parser->id = genericInfo->langElId;
-			parser->genericInfo = genericInfo;
-			parser->pdaRun = malloc( sizeof(PdaRun) );
-
-			/* Start off the parsing process. */
-			initPdaRun( prg, parser->pdaRun, prg->rtd->pdaTables, 
-					genericInfo->parserId, false, false, 0 );
-
+			Parser *parser = colm_parser_construct( prg, genericInfo );
 			newGeneric = (Tree*) parser;
 			break;
 		}
@@ -1721,15 +1729,21 @@ Tree *getParserMem( Parser *parser, Word field )
 {
 	Tree *result = 0;
 	switch ( field ) {
-		case 0:
-			result = parser->result;
+		case 0: {
+			result = colm_struct_get_field_type(
+					(struct colm_struct*)parser, Tree *, 8 );
 			break;
-		case 1:
-			result = parser->pdaRun->parseErrorText;
+		}
+		case 1: {
+			PdaRun *pdaRun = colm_struct_get_field_type(
+					(struct colm_struct*)parser, PdaRun *, 6 );
+			result = pdaRun->parseErrorText;
 			break;
-		default:
+		}
+		default: {
 			assert( false );
 			break;
+		}
 	}
 	return result;
 }

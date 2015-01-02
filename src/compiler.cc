@@ -968,7 +968,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	StreamImpl *in = newSourceStreamGeneric( "<internal>" );
 
 	PdaRun *pdaRun = new PdaRun;
-	initPdaRun( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
+	colm_pda_init( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
 
 	Tree *stream = constructStream( prg );
 

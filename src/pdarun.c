@@ -1417,7 +1417,7 @@ int isParserStopFinished( PdaRun *pdaRun )
 	return done;
 }
 
-void initPdaRun( Program *prg, PdaRun *pdaRun, PdaTables *tables,
+void colm_pda_init( Program *prg, PdaRun *pdaRun, PdaTables *tables,
 		int parserId, long stopTarget, int revertOn, Tree *context )
 {
 	memset( pdaRun, 0, sizeof(PdaRun) );
