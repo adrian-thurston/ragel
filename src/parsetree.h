@@ -2100,14 +2100,12 @@ struct TypeRef
 		Literal,
 		Iterator,
 		List,
+		ListEl,
 		Map,
+		MapEl,
 		Parser,
 		Ref,
 		Ptr,
-		List2El,
-		List2,
-		Map2El,
-		Map2,
 	};
 
 	TypeRef()
@@ -2273,24 +2271,20 @@ struct TypeRef
 	UniqueType *resolveIterator( Compiler *pd );
 	UniqueType *resolveTypeName( Compiler *pd );
 	UniqueType *resolveTypeLiteral( Compiler *pd );
-	UniqueType *resolveTypeMapObj( Compiler *pd );
-	UniqueType *resolveTypeMap( Compiler *pd );
 	UniqueType *resolveTypeListObj( Compiler *pd );
 	UniqueType *resolveTypeList( Compiler *pd );
+	UniqueType *resolveTypeListElObj( Compiler *pd );
+	UniqueType *resolveTypeListEl( Compiler *pd );
+	UniqueType *resolveTypeMapObj( Compiler *pd );
+	UniqueType *resolveTypeMap( Compiler *pd );
+	UniqueType *resolveTypeMapElObj( Compiler *pd );
+	UniqueType *resolveTypeMapEl( Compiler *pd );
 	UniqueType *resolveTypeParserObj( Compiler *pd );
 	UniqueType *resolveTypeParser( Compiler *pd );
 	UniqueType *resolveType( Compiler *pd );
 	UniqueType *resolveTypePtr( Compiler *pd );
 	UniqueType *resolveTypeRef( Compiler *pd );
 
-	UniqueType *resolveTypeList2ElObj( Compiler *pd );
-	UniqueType *resolveTypeList2El( Compiler *pd );
-	UniqueType *resolveTypeList2Obj( Compiler *pd );
-	UniqueType *resolveTypeList2( Compiler *pd );
-	UniqueType *resolveTypeMap2ElObj( Compiler *pd );
-	UniqueType *resolveTypeMap2El( Compiler *pd );
-	UniqueType *resolveTypeMap2Obj( Compiler *pd );
-	UniqueType *resolveTypeMap2( Compiler *pd );
 
 	Type type;
 	InputLoc loc;
