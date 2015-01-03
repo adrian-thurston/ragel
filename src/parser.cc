@@ -26,7 +26,7 @@ void BaseParser::init()
 			global, pd->nextObjectId++ ); 
 
 	pd->global = new Context( internal, global, pd->globalObjectDef );
-	pd->rootNamespace->structDefList.append( pd->global );
+	pd->globalSel = declareStruct( pd, 0, global, pd->global );
 
 	/* Setup the stream object. */
 	global = "stream";
@@ -35,15 +35,8 @@ void BaseParser::init()
 
 	pd->stream = new Context( internal, global, objectDef );
 
-	StructEl *sel = declareStruct( pd, pd->rootNamespace,
+	pd->streamSel = declareStruct( pd, pd->rootNamespace,
 			pd->stream->name, pd->stream );
-
-	/* Insert the name into the top of the region stack after popping the
-	 * region just created. We need it in the parent. */
-	TypeMapEl *typeMapEl = new TypeMapEl(
-				TypeMapEl::StructType, pd->stream->name, sel );
-	pd->rootNamespace->typeMap.insert( typeMapEl );
-	pd->streamSel = sel;
 	
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the
@@ -889,11 +882,10 @@ void BaseParser::contextVarDef( const InputLoc &loc, ObjectField *objField )
 	object->rootScope->insertField( objField->name, objField );
 }
 
-void BaseParser::structHead( const InputLoc &loc, const String &data,
-		ObjectDef::Type objectType )
+void BaseParser::structHead( const InputLoc &loc,
+		const String &data, ObjectDef::Type objectType )
 {
-	/* Make the new namespace. */
-	Namespace *nspace = createNamespace( loc, data );
+	Namespace *inNspace = curNspace();
 
 	ObjectDef *objectDef = ObjectDef::cons( objectType,
 			data, pd->nextObjectId++ ); 
@@ -901,7 +893,10 @@ void BaseParser::structHead( const InputLoc &loc, const String &data,
 	Context *context = new Context( loc, data, objectDef );
 	contextStack.push( context );
 
-	nspace->structDefList.append( context );
+	inNspace->structDefList.append( context );
+
+	/* Make the namespace for the struct. */
+	Namespace *structNspace = createNamespace( loc, data );
 }
 
 StmtList *BaseParser::appendStatement( StmtList *stmtList, LangStmt *stmt )

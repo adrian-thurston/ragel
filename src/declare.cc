@@ -166,29 +166,31 @@ LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
 	return langEl;
 }
 
-StructEl *declareStruct( Compiler *pd, Namespace *nspace,
+StructEl *declareStruct( Compiler *pd, Namespace *inNspace,
 		const String &data, Context *context )
 {
-	TypeMapEl *inDict = nspace->typeMap.find( data );
-	if ( inDict != 0 )
-		error() << "'" << data << "' already defined as something else" << endp;
+	if ( inNspace != 0 ) {
+		TypeMapEl *inDict = inNspace->typeMap.find( data );
+		if ( inDict != 0 )
+			error() << "'" << data << "' already defined as something else" << endp;
+	}
 	
-	StructEl *structEl = new StructEl( nspace, data );
+	StructEl *structEl = new StructEl( data, context );
 	pd->structEls.append( structEl );
 
-	TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::StructType, data, structEl );
-	nspace->typeMap.insert( typeMapEl );
-
-	structEl->context = context;
+	if ( inNspace ) {
+		TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::StructType, data, structEl );
+		inNspace->typeMap.insert( typeMapEl );
+	}
 
 	return structEl;
 }
 
 /* Does not map the new language element. */
-LangEl *addLangEl( Compiler *pd, Namespace *nspace,
+LangEl *addLangEl( Compiler *pd, Namespace *inNspace,
 		const String &data, LangEl::Type type )
 {
-	LangEl *langEl = new LangEl( nspace, data, type );
+	LangEl *langEl = new LangEl( inNspace, data, type );
 	pd->langEls.append( langEl );
 	return langEl;
 }
@@ -372,24 +374,8 @@ void Namespace::declare( Compiler *pd )
 		}
 	}
 
-	for ( StructDefList::Iter s = structDefList; s.lte(); s++ ) {
-		if ( s != pd->stream ) {
-			StructEl *sel = declareStruct( pd, this, s->name, s );
-
-			/* If the token has the same name as the region it is in, then also
-			 * insert it into the symbol map for the parent region. */
-			if ( strcmp( s->name, this->name ) == 0 ) {
-				/* Insert the name into the top of the region stack after popping the
-				 * region just created. We need it in the parent. */
-				TypeMapEl *typeMapEl = new TypeMapEl(
-						TypeMapEl::StructType, s->name, sel );
-				this->parentNamespace->typeMap.insert( typeMapEl );
-			}
-
-			if ( s == pd->global )
-				pd->globalSel = sel;
-		}
-	}
+	for ( StructDefList::Iter s = structDefList; s.lte(); s++ )
+		StructEl *sel = declareStruct( pd, this, s->name, s );
 
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {
 		/* Literals already taken care of. */

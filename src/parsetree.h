@@ -547,10 +547,9 @@ struct Context
 
 struct StructEl
 {
-	StructEl( Namespace *nspace, const String &name )
-		: nspace(nspace), name(name), context(0), id(-1) {}
+	StructEl( const String &name, Context *context )
+		: name(name), context(context), id(-1) {}
 
-	Namespace *nspace;
 	String name;
 	Context *context;
 	int id;
