@@ -330,37 +330,6 @@ struct ReCapture
 	ObjectField *objField;
 };
 
-struct ContextStack
-	: public Vector<Context*>
-{
-	Context *top()
-		{ return length() > 0 ? Vector<Context*>::top() : 0; }
-};
-
-struct Context
-{
-	Context( const InputLoc &loc, ObjectDef *objectDef )
-	:
-		loc(loc),
-		objectDef(objectDef)
-	{}
-
-	InputLoc loc;
-	ObjectDef *objectDef;
-};
-
-struct Struct
-{
-	Struct( const InputLoc &loc, ObjectDef *objectDef )
-	:
-		loc(loc),
-		objectDef(objectDef)
-	{}
-
-	InputLoc loc;
-	ObjectDef *objectDef;
-};
-
 
 typedef Vector<ReCapture> ReCaptureVect;
 
@@ -553,6 +522,29 @@ struct TokenInstanceListReg : DListMel<TokenInstance, TokenInstancePtr> {};
 struct TokenDefListReg : DListMel<TokenDef, TokenDefPtr1> {};
 struct TokenDefListNs : DListMel<TokenDef, TokenDefPtr2> {};
 
+struct ContextStack
+	: public Vector<Context*>
+{
+	Context *top()
+		{ return length() > 0 ? Vector<Context*>::top() : 0; }
+};
+
+struct Context
+{
+	Context( const InputLoc &loc, const String &name, ObjectDef *objectDef )
+	:
+		loc(loc),
+		name(name),
+		objectDef(objectDef)
+	{}
+
+	InputLoc loc;
+	String name;
+	ObjectDef *objectDef;
+
+	Context *prev, *next;
+};
+
 struct StructEl
 {
 	StructEl( Namespace *nspace, const String &name )
@@ -567,19 +559,7 @@ struct StructEl
 };
 
 typedef DList<StructEl> StructElList;
-
-struct StructDef
-{
-	StructDef( const String &name, Context *context )
-		: name(name), context(context) {}
-
-	String name;
-	Context *context;
-
-	StructDef *prev, *next;
-};
-
-struct StructDefList : DList<StructDef> {};
+struct StructDefList : DList<Context> {};
 
 struct TypeMapEl
 	: public AvlTreeEl<TypeMapEl>

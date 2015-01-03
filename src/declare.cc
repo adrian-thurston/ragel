@@ -374,7 +374,7 @@ void Namespace::declare( Compiler *pd )
 
 	for ( StructDefList::Iter s = structDefList; s.lte(); s++ ) {
 		if ( s != pd->stream ) {
-			StructEl *sel = declareStruct( pd, this, s->name, s->context );
+			StructEl *sel = declareStruct( pd, this, s->name, s );
 
 			/* If the token has the same name as the region it is in, then also
 			 * insert it into the symbol map for the parent region. */
@@ -388,8 +388,6 @@ void Namespace::declare( Compiler *pd )
 
 			if ( s == pd->global )
 				pd->globalSel = sel;
-			if ( s == pd->stream )
-				pd->streamSel = sel;
 		}
 	}
 

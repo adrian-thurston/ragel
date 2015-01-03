@@ -25,8 +25,7 @@ void BaseParser::init()
 	pd->globalObjectDef = ObjectDef::cons( ObjectDef::UserType,
 			global, pd->nextObjectId++ ); 
 
-	Context *context = new Context( internal, pd->globalObjectDef );
-	pd->global = new StructDef( global, context );
+	pd->global = new Context( internal, global, pd->globalObjectDef );
 	pd->rootNamespace->structDefList.append( pd->global );
 
 	/* Setup the stream object. */
@@ -34,12 +33,10 @@ void BaseParser::init()
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::BuiltinType,
 			global, pd->nextObjectId++ ); 
 
-	context = new Context( internal, objectDef );
-	pd->stream = new StructDef( global, context );
+	pd->stream = new Context( internal, global, objectDef );
 
 	StructEl *sel = declareStruct( pd, pd->rootNamespace,
-			pd->stream->name, pd->stream->context );
-	sel->context = pd->stream->context;
+			pd->stream->name, pd->stream );
 
 	/* Insert the name into the top of the region stack after popping the
 	 * region just created. We need it in the parent. */
@@ -901,12 +898,10 @@ void BaseParser::structHead( const InputLoc &loc, const String &data,
 	ObjectDef *objectDef = ObjectDef::cons( objectType,
 			data, pd->nextObjectId++ ); 
 
-	Context *context = new Context( loc, objectDef );
+	Context *context = new Context( loc, data, objectDef );
 	contextStack.push( context );
 
-	StructDef *structDef = new StructDef( data, context );
-	nspace->structDefList.append( structDef );
-
+	nspace->structDefList.append( context );
 }
 
 StmtList *BaseParser::appendStatement( StmtList *stmtList, LangStmt *stmt )
