@@ -339,10 +339,10 @@ struct ContextStack
 
 struct Context
 {
-	Context( const InputLoc &loc )
+	Context( const InputLoc &loc, ObjectDef *objectDef )
 	:
 		loc(loc),
-		objectDef(0)
+		objectDef(objectDef)
 	{}
 
 	InputLoc loc;
@@ -552,18 +552,6 @@ struct TokenInstanceListReg : DListMel<TokenInstance, TokenInstancePtr> {};
 /* Declare a new type so that ptreetypes.h need not include dlist.h. */
 struct TokenDefListReg : DListMel<TokenDef, TokenDefPtr1> {};
 struct TokenDefListNs : DListMel<TokenDef, TokenDefPtr2> {};
-
-struct ContextDef
-{
-	ContextDef( const String &name, Context *context, Namespace *nspace )
-		: name(name), context(context), nspace(nspace) {}
-
-	String name;
-	Context *context;
-	Namespace *nspace;
-
-	ContextDef *prev, *next;
-};
 
 struct StructEl
 {

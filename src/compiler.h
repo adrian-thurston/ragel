@@ -1014,10 +1014,11 @@ typedef AvlMapEl<String, ColmParser *> ParserDictEl;
 
 LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
 		const String &data, LangEl::Type type );
-LangEl *declareContext( Compiler *pd, Namespace *nspace,
-		const String &data, LangEl::Type type );
 LangEl *addLangEl( Compiler *pd, Namespace *nspace,
 		const String &data, LangEl::Type type );
+
+StructEl *declareStruct( Compiler *pd, Namespace *nspace,
+		const String &data, Context *context );
 
 void declareTypeAlias( Compiler *pd, Namespace *nspace,
 		const String &data, TypeRef *typeRef );
@@ -1035,7 +1036,5 @@ ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj,
 		UniqueType *arg1, UniqueType *arg2, bool isConst,
 		bool useFnInstr = false );
 
-StructEl *declareStruct( Compiler *pd, Namespace *nspace,
-		const String &data, Context *context );
 
 #endif /* _PARSEDATA_H */

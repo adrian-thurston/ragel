@@ -166,25 +166,6 @@ LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
 	return langEl;
 }
 
-LangEl *declareContext( Compiler *pd, Namespace *nspace,
-		const String &data, LangEl::Type type )
-{
-	/* If the id is already in the dict, it will be placed in last found. If
-	 * it is not there then it will be inserted and last found will be set to it. */
-	TypeMapEl *inDict = nspace->typeMap.find( data );
-	if ( inDict != 0 )
-		error() << "'" << data << "' already defined as something else" << endp;
-
-	/* Language element not there. Make the new lang el and insert.. */
-	LangEl *langEl = new LangEl( nspace, data, type );
-	pd->langEls.append( langEl );
-
-	TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::ContextType, data, langEl );
-	nspace->typeMap.insert( typeMapEl );
-
-	return langEl;
-}
-
 StructEl *declareStruct( Compiler *pd, Namespace *nspace,
 		const String &data, Context *context )
 {
@@ -197,6 +178,8 @@ StructEl *declareStruct( Compiler *pd, Namespace *nspace,
 
 	TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::StructType, data, structEl );
 	nspace->typeMap.insert( typeMapEl );
+
+	structEl->context = context;
 
 	return structEl;
 }
@@ -392,7 +375,6 @@ void Namespace::declare( Compiler *pd )
 	for ( StructDefList::Iter s = structDefList; s.lte(); s++ ) {
 		if ( s != pd->stream ) {
 			StructEl *sel = declareStruct( pd, this, s->name, s->context );
-			sel->context = s->context;
 
 			/* If the token has the same name as the region it is in, then also
 			 * insert it into the symbol map for the parent region. */

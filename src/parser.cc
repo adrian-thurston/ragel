@@ -25,19 +25,17 @@ void BaseParser::init()
 	pd->globalObjectDef = ObjectDef::cons( ObjectDef::UserType,
 			global, pd->nextObjectId++ ); 
 
-	Context *context = new Context( internal );
+	Context *context = new Context( internal, pd->globalObjectDef );
 	pd->global = new StructDef( global, context );
 	pd->rootNamespace->structDefList.append( pd->global );
-	context->objectDef = pd->globalObjectDef;
 
 	/* Setup the stream object. */
 	global = "stream";
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::BuiltinType,
 			global, pd->nextObjectId++ ); 
 
-	context = new Context( internal );
+	context = new Context( internal, objectDef );
 	pd->stream = new StructDef( global, context );
-	context->objectDef = objectDef;
 
 	StructEl *sel = declareStruct( pd, pd->rootNamespace,
 			pd->stream->name, pd->stream->context );
@@ -900,14 +898,15 @@ void BaseParser::structHead( const InputLoc &loc, const String &data,
 	/* Make the new namespace. */
 	Namespace *nspace = createNamespace( loc, data );
 
-	Context *context = new Context( loc );
+	ObjectDef *objectDef = ObjectDef::cons( objectType,
+			data, pd->nextObjectId++ ); 
+
+	Context *context = new Context( loc, objectDef );
 	contextStack.push( context );
 
 	StructDef *structDef = new StructDef( data, context );
 	nspace->structDefList.append( structDef );
 
-	context->objectDef = ObjectDef::cons( objectType,
-			data, pd->nextObjectId++ ); 
 }
 
 StmtList *BaseParser::appendStatement( StmtList *stmtList, LangStmt *stmt )
