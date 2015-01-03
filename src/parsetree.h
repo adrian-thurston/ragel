@@ -339,15 +339,13 @@ struct ContextStack
 
 struct Context
 {
-	Context( const InputLoc &loc, LangEl *lel )
+	Context( const InputLoc &loc )
 	:
 		loc(loc),
-		lel(lel),
 		objectDef(0)
 	{}
 
 	InputLoc loc;
-	LangEl *lel;
 	ObjectDef *objectDef;
 };
 
@@ -566,8 +564,6 @@ struct ContextDef
 
 	ContextDef *prev, *next;
 };
-
-struct ContextDefList : DList<ContextDef> {};
 
 struct StructEl
 {
@@ -846,7 +842,6 @@ struct Namespace
 	/* List of nonterminal defs in the namespace. */
 	NtDefList ntDefList;
 
-	ContextDefList contextDefList;
 	StructDefList structDefList;
 
 	/* Dictionary of symbols within the region. */

@@ -2194,14 +2194,8 @@ struct LoadColm
 
 	void walkContextDef( context_def contextDef )
 	{
-		if ( contextDef.struct_key().STRUCT() ) {
-			String name = contextDef.id().data();
-			structHead( contextDef.id().loc(), name, ObjectDef::StructType );
-		}
-		else {
-			String name = contextDef.id().data();
-			contextHead( contextDef.id().loc(), name, ObjectDef::UserType );
-		}
+		String name = contextDef.id().data();
+		structHead( contextDef.id().loc(), name, ObjectDef::StructType );
 
 		_repeat_context_item contextItemList = contextDef.ItemList();
 		while ( !contextItemList.end() ) {

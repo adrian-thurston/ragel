@@ -115,7 +115,6 @@ struct BaseParser
 
 	LangExpr *require( const InputLoc &loc, LangVarRef *varRef, PatternItemList *list );
 	void contextVarDef( const InputLoc &loc, ObjectField *objField );
-	void contextHead( const InputLoc &loc, const String &data, ObjectDef::Type objectType );
 	void structHead( const InputLoc &loc, const String &data, ObjectDef::Type objectType );
 	StmtList *appendStatement( StmtList *stmtList, LangStmt *stmt );
 	ParameterList *appendParam( ParameterList *paramList, ObjectField *objField );

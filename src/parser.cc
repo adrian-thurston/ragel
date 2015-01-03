@@ -25,7 +25,7 @@ void BaseParser::init()
 	pd->globalObjectDef = ObjectDef::cons( ObjectDef::UserType,
 			global, pd->nextObjectId++ ); 
 
-	Context *context = new Context( internal, 0 );
+	Context *context = new Context( internal );
 	pd->global = new StructDef( global, context );
 	pd->rootNamespace->structDefList.append( pd->global );
 	context->objectDef = pd->globalObjectDef;
@@ -35,7 +35,7 @@ void BaseParser::init()
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::BuiltinType,
 			global, pd->nextObjectId++ ); 
 
-	context = new Context( internal, 0 );
+	context = new Context( internal );
 	pd->stream = new StructDef( global, context );
 	context->objectDef = objectDef;
 
@@ -894,29 +894,13 @@ void BaseParser::contextVarDef( const InputLoc &loc, ObjectField *objField )
 	object->rootScope->insertField( objField->name, objField );
 }
 
-void BaseParser::contextHead( const InputLoc &loc, const String &data,
-		ObjectDef::Type objectType )
-{
-	/* Make the new namespace. */
-	Namespace *nspace = createNamespace( loc, data );
-
-	Context *context = new Context( loc, 0 );
-	contextStack.push( context );
-
-	ContextDef *contextDef = new ContextDef( data, context, nspace );
-	nspace->contextDefList.append( contextDef );
-
-	context->objectDef = ObjectDef::cons( objectType,
-			data, pd->nextObjectId++ ); 
-}
-
 void BaseParser::structHead( const InputLoc &loc, const String &data,
 		ObjectDef::Type objectType )
 {
 	/* Make the new namespace. */
 	Namespace *nspace = createNamespace( loc, data );
 
-	Context *context = new Context( loc, 0 );
+	Context *context = new Context( loc );
 	contextStack.push( context );
 
 	StructDef *structDef = new StructDef( data, context );

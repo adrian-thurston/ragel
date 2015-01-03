@@ -389,39 +389,6 @@ void Namespace::declare( Compiler *pd )
 		}
 	}
 
-	for ( ContextDefList::Iter c = contextDefList; c.lte(); c++ ) {
-		LangEl *lel = declareContext( pd, this, c->name, LangEl::NonTerm );
-		ProdElList *emptyList = new ProdElList;
-		//addProduction( c->context->loc, c->name, emptyList, false, 0, 0 );
-
-		{
-			LangEl *prodName = lel;
-			assert( prodName->type == LangEl::NonTerm );
-
-			Production *newDef = Production::cons( loc, prodName, 
-				emptyList, String(), false, 0,
-				pd->prodList.length(), prodName->defList.length() );
-			
-			prodName->defList.append( newDef );
-			pd->prodList.append( newDef );
-			newDef->predOf = 0;
-
-			/* If the token has the same name as the region it is in, then also
-			 * insert it into the symbol map for the parent region. */
-			if ( strcmp( c->name, this->name ) == 0 ) {
-				/* Insert the name into the top of the region stack after popping the
-				 * region just created. We need it in the parent. */
-				TypeMapEl *typeMapEl = new TypeMapEl(
-						TypeMapEl::ContextType, c->name, prodName );
-				this->parentNamespace->typeMap.insert( typeMapEl );
-			}
-		}
-
-		c->context->lel = lel;
-		lel->contextDef = c->context;
-		lel->objectDef = c->context->objectDef;
-	}
-
 	for ( StructDefList::Iter s = structDefList; s.lte(); s++ ) {
 		if ( s != pd->stream ) {
 			StructEl *sel = declareStruct( pd, this, s->name, s->context );
@@ -1169,6 +1136,7 @@ void Compiler::initParserField( GenericType *gen, const char *name,
 
 void Compiler::initCtxField( GenericType *gen )
 {
+#if 0
 	LangEl *langEl = gen->utArg->langEl;
 	Context *context = langEl->contextIn;
 
@@ -1185,6 +1153,7 @@ void Compiler::initCtxField( GenericType *gen )
 	el->inSetWV = IN_SET_PARSER_CTX_WV;
 
 	gen->objDef->rootScope->insertField( el->name, el );
+#endif
 }
 
 void Compiler::initParserFields( GenericType *gen )
