@@ -742,18 +742,14 @@ struct Compiler
 	void initListField( GenericType *gen, const char *name, int offset );
 	void initListFields( GenericType *gen );
 	void initListFunctions( GenericType *gen );
+	void initListElFields( GenericType *gen );
+	void initListElField( GenericType *gen, const char *name, int offset );
 	void initVectorFunctions( GenericType *gen );
-	void initParserField( GenericType *gen, const char *name, int offset, TypeRef *typeRef );
+	void initParserField( GenericType *gen, const char *name,
+			int offset, TypeRef *typeRef );
 	void initParserFunctions( GenericType *gen );
 	void initParserFields( GenericType *gen );
 	void initCtxField( GenericType *gen );
-
-	void initList2Field( GenericType *gen, const char *name, int offset );
-	void initList2ElFields( GenericType *gen );
-	void initList2ElField( GenericType *gen, const char *name, int offset );
-	void initList2Functions( GenericType *gen );
-	void initList2Fields( GenericType *gen );
-	void initMap2Functions( GenericType *gen );
 
 	void addStdin();
 	void addStdout();

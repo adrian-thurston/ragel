@@ -708,9 +708,9 @@ struct GenericType
 	: public DListEl<GenericType>
 {
 	GenericType( const String &name, long typeId, long id, 
-			LangEl *langEl, TypeRef *typeArg )
+			TypeRef *typeArg )
 	:
-		name(name), typeId(typeId), id(id), langEl(langEl),
+		name(name), typeId(typeId), id(id), langEl(0),
 		typeArg(typeArg), keyTypeArg(0), 
 		utArg(0), keyUT(0), objDef(0), elOffset(0)
 	{}

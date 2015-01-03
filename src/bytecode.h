@@ -367,12 +367,10 @@ enum TYPE
 /* Types of Generics. */
 enum GEN {
 	GEN_LIST     = 0x10,
-	GEN_MAP      = 0x11,
-	GEN_PARSER   = 0x13,
-	GEN_LIST2EL  = 0x14,
-	GEN_LIST2    = 0x15,
-	GEN_MAP2EL   = 0x16,
-	GEN_MAP2     = 0x17,
+	GEN_LIST_EL  = 0x11,
+	GEN_MAP      = 0x12,
+	GEN_MAP_EL   = 0x13,
+	GEN_PARSER   = 0x14,
 };
 
 /* Known language element ids. */

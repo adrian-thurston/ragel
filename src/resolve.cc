@@ -121,7 +121,7 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 		String name( 36, "__list%d", listId++ );
 
 		GenericType *generic = new GenericType( name, GEN_LIST,
-				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+				pd->nextGenericId++, typeRef1 );
 
 		nspace->genericList.append( generic );
 
@@ -150,8 +150,8 @@ UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 		static int listId = 0;
 		String name( 36, "__list2el%d", listId++ );
 
-		GenericType *generic = new GenericType( name, GEN_LIST2EL,
-				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+		GenericType *generic = new GenericType( name, GEN_LIST_EL,
+				pd->nextGenericId++, typeRef1 );
 
 		nspace->genericList.append( generic );
 
@@ -182,7 +182,7 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 		String name( 36, "__map%d", mapId++ );
 
 		GenericType *generic = new GenericType( name, GEN_MAP,
-				pd->nextGenericId++, 0/*langEl*/, typeRef2 );
+				pd->nextGenericId++, typeRef2 );
 		generic->keyTypeArg = typeRef1;
 
 		nspace->genericList.append( generic );
@@ -212,8 +212,8 @@ UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
 		static int listId = 0;
 		String name( 36, "__map2el%d", listId++ );
 
-		GenericType *generic = new GenericType( name, GEN_MAP2EL,
-				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+		GenericType *generic = new GenericType( name, GEN_MAP_EL,
+				pd->nextGenericId++, typeRef1 );
 
 		nspace->genericList.append( generic );
 
@@ -243,7 +243,7 @@ UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 		String name( 36, "__accum%d", accumId++ );
 
 		GenericType *generic = new GenericType( name, GEN_PARSER,
-				pd->nextGenericId++, 0/*langEl*/, typeRef1 );
+				pd->nextGenericId++, typeRef1 );
 
 		nspace->genericList.append( generic );
 

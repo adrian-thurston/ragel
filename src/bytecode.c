@@ -3858,8 +3858,8 @@ again:
 				read_half( field );
 				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
 
-				List *tree = constructArgv( prg, prg->argc, prg->argv );
-				colm_struct_set_field( prg->global, field, tree );
+				List *list = constructArgv( prg, prg->argc, prg->argv );
+				colm_struct_set_field_type( prg->global, List*, field, list );
 				break;
 			}
 			case IN_INIT_LOCALS: {

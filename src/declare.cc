@@ -322,22 +322,15 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 			pd->initListFunctions( this );
 			pd->initListFields( this );
 			break;
+		case GEN_LIST_EL:
+			pd->initListElFields( this );
+			break;
 		case GEN_PARSER:
 			utArg->langEl->parserId = pd->nextParserId++;
 			pd->initParserFunctions( this );
 			pd->initParserFields( this );
 			break;
-		case GEN_LIST2EL:
-			pd->initList2ElFields( this );
-			break;
-		case GEN_LIST2:
-			pd->initList2Functions( this );
-			pd->initList2Fields( this );
-			break;
-		case GEN_MAP2EL:
-			break;
-		case GEN_MAP2:
-			pd->initMap2Functions( this );
+		case GEN_MAP_EL:
 			break;
 	}
 
@@ -375,7 +368,7 @@ void Namespace::declare( Compiler *pd )
 	}
 
 	for ( StructDefList::Iter s = structDefList; s.lte(); s++ )
-		StructEl *sel = declareStruct( pd, this, s->name, s );
+		declareStruct( pd, this, s->name, s );
 
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {
 		/* Literals already taken care of. */
@@ -958,61 +951,12 @@ void Compiler::initListFunctions( GenericType *gen )
 			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false );
 }
 
-void Compiler::initList2Functions( GenericType *gen )
-{
-//	addLengthField( gen->objDef, IN_LIST_LENGTH );
-//
-//	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
-//			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false );
-
-	initFunction( uniqueTypeInt, gen->objDef, "push_tail", 
-			IN_LIST2_PUSH_TAIL_WV, IN_LIST2_PUSH_TAIL_WC, gen->utArg, false );
-
-//	initFunction( uniqueTypeInt, gen->objDef, "push", 
-//			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false );
-//
-//	initFunction( gen->utArg, gen->objDef, "pop_head", 
-//			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false );
-//
-//	initFunction( gen->utArg, gen->objDef, "pop_tail", 
-//			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false );
-//
-//	initFunction( gen->utArg, gen->objDef, "pop", 
-//			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false );
-}
-
-void Compiler::initList2Field( GenericType *gen, const char *name, int offset )
+void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltOffType, typeRef, name );
-
-	el->inGetR =  IN_GET_LIST2_MEM_R;
-//	el->inGetWC = IN_GET_LIST2_MEM_WC;
-//	el->inGetWV = IN_GET_LIST2_MEM_WV;
-//	el->inSetWC = IN_SET_LIST2_MEM_WC;
-//	el->inSetWV = IN_SET_LIST2_MEM_WV;
-
-	gen->objDef->rootScope->insertField( el->name, el );
-
-	/* Zero for head, One for tail. */
-	el->offset = offset;
-}
-
-
-void Compiler::initList2Fields( GenericType *gen )
-{
-	initList2Field( gen, "head", 0 );
-//	initListField( gen, "tail", 1 );
-//	initListField( gen, "top", 0 );
-}
-
-void Compiler::initList2ElField( GenericType *gen, const char *name, int offset )
-{
-	/* Make the type ref and create the field. */
-	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
-	ObjectField *el = ObjectField::cons( internal, ObjectField::InbuiltOffType, typeRef, name );
 
 	el->inGetR =  IN_GET_LIST2EL_MEM_R;
 //	el->inGetWC = IN_GET_LIST2EL_MEM_WC;
@@ -1027,23 +971,9 @@ void Compiler::initList2ElField( GenericType *gen, const char *name, int offset 
 }
 
 
-void Compiler::initList2ElFields( GenericType *gen )
+void Compiler::initListElFields( GenericType *gen )
 {
-	initList2ElField( gen, "next", 0 );
-}
-
-void Compiler::initMap2Functions( GenericType *gen )
-{
-//	addLengthField( gen->objDef, IN_MAP_LENGTH );
-//
-//	initFunction( gen->utArg, gen->objDef, "find", 
-//			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUT, true );
-//	initFunction( uniqueTypeInt, gen->objDef, "insert", 
-//			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->keyUT, gen->utArg, false );
-//	initFunction( uniqueTypeInt, gen->objDef, "store", 
-//			IN_MAP_STORE_WV,  IN_MAP_STORE_WC, gen->keyUT, gen->utArg, false );
-//	initFunction( gen->utArg, gen->objDef, "remove", 
-//			IN_MAP_REMOVE_WV, IN_MAP_REMOVE_WC, gen->keyUT, false );
+	initListElField( gen, "next", 0 );
 }
 
 void Compiler::initListField( GenericType *gen, const char *name, int offset )

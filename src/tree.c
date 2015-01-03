@@ -960,31 +960,21 @@ Tree *constructGeneric( Program *prg, long genericId )
 			newGeneric = (Tree*) map;
 			break;
 		}
+		case GEN_MAP_EL: {
+			break;
+		}
 		case GEN_LIST: {
 			List *list = colm_list_new( prg );
 			list->genericInfo = genericInfo;
 			newGeneric = (Tree*) list;
 			break;
 		}
+		case GEN_LIST_EL: {
+			break;
+		}
 		case GEN_PARSER: {
 			Parser *parser = colm_parser_new( prg, genericInfo );
 			newGeneric = (Tree*) parser;
-			break;
-		}
-		case GEN_LIST2EL: {
-			break;
-		}
-		case GEN_LIST2: {
-			List *list = (List*)mapElAllocate( prg );
-			list->id = genericInfo->langElId;
-			list->genericInfo = genericInfo;
-			newGeneric = (Tree*) list;
-			break;
-		}
-		case GEN_MAP2EL: {
-			break;
-		}
-		case GEN_MAP2: {
 			break;
 		}
 		default:
@@ -1082,16 +1072,13 @@ free_tree:
 		switch ( generic->type ) {
 		case GEN_LIST:
 			break;
+		case GEN_LIST_EL:
+			break;
 		case GEN_MAP:
 			break;
+		case GEN_MAP_EL:
+			break;
 		case GEN_PARSER:
-			break;
-		case GEN_LIST2EL:
-			break;
-		case GEN_LIST2:
-			break;
-		case GEN_MAP2EL:
-		case GEN_MAP2:
 			break;
 		}
 	}
