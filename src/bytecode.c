@@ -1312,7 +1312,6 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_R %d\n", field );
 
 			Tree *obj = vm_pop();
-
 			Tree *val = colm_struct_get_field( obj, field );
 			treeUpref( val );
 			vm_push( val );
@@ -1325,11 +1324,10 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_WC %d\n", field );
 
 			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
+			Tree *val = colm_struct_get_field( obj, field );
+			treeUpref( val );
+			vm_push( val );
 
-			Tree *split = getFieldSplit( prg, obj, field );
-			treeUpref( split );
-			vm_push( split );
 			break;
 		}
 		case IN_GET_STRUCT_WV: {
@@ -1339,14 +1337,12 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_WV\n" );
 
 			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
-
-			Tree *split = getFieldSplit( prg, obj, field );
-			treeUpref( split );
-			vm_push( split );
+			Tree *val = colm_struct_get_field( obj, field );
+			treeUpref( val );
+			vm_push( val );
 
 			/* Set up the reverse instruction. */
-			rcodeCode( exec, IN_GET_FIELD_BKT );
+			rcodeCode( exec, IN_GET_STRUCT_BKT );
 			rcodeHalf( exec, field );
 			break;
 		}

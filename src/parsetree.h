@@ -710,7 +710,7 @@ struct GenericType
 	GenericType( const String &name, long typeId, long id, 
 			TypeRef *typeArg )
 	:
-		name(name), typeId(typeId), id(id), langEl(0),
+		name(name), typeId(typeId), id(id), /*langEl(0),*/
 		typeArg(typeArg), keyTypeArg(0), 
 		utArg(0), keyUT(0), objDef(0), elOffset(0)
 	{}
@@ -723,7 +723,6 @@ struct GenericType
 	String name;
 	long typeId;
 	long id;
-	LangEl *langEl;
 	TypeRef *typeArg;
 	TypeRef *keyTypeArg;
 	UniqueType *utArg;
@@ -1803,34 +1802,47 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 		typeId(typeId), 
 		langEl(0), 
 		iterDef(0),
-		structEl(0)
+		structEl(0),
+		generic(0)
 	{}
 
 	UniqueType( enum TYPE typeId, LangEl *langEl ) :
 		typeId(typeId),
 		langEl(langEl),
 		iterDef(0),
-		structEl(0)
+		structEl(0),
+		generic(0)
 	{}
 
 	UniqueType( enum TYPE typeId, IterDef *iterDef ) :
 		typeId(typeId),
 		langEl(0),
 		iterDef(iterDef),
-		structEl(0)
+		structEl(0),
+		generic(0)
 	{}
 
 	UniqueType( enum TYPE typeId, StructEl *structEl ) :
 		typeId(typeId),
 		langEl(0),
 		iterDef(0),
-		structEl(structEl)
+		structEl(structEl),
+		generic(0)
+	{}
+
+	UniqueType( enum TYPE typeId, GenericType *generic ) :
+		typeId(typeId),
+		langEl(0),
+		iterDef(0),
+		structEl(0),
+		generic(generic)
 	{}
 
 	enum TYPE typeId;
 	LangEl *langEl;
 	IterDef *iterDef;
 	StructEl *structEl;
+	GenericType *generic;
 
 	ObjectDef *objectDef();
 };

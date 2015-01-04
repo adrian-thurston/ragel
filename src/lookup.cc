@@ -20,6 +20,9 @@ ObjectDef *UniqueType::objectDef()
 	else if ( typeId == TYPE_STRUCT ) {
 		return structEl->context->objectDef;
 	}
+	else if ( typeId == TYPE_GENERIC ) {
+		return generic->objDef;
+	}
 
 	/* This should have generated a compiler error. */
 	assert( false );

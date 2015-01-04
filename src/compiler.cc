@@ -1007,8 +1007,10 @@ void Compiler::parsePatterns()
 	Tree **sp = prg->stackRoot;
 
 	for ( ConsList::Iter cons = replList; cons.lte(); cons++ ) {
-		StreamImpl *in = newSourceStreamCons( "<internal>", cons );
-		cons->pdaRun = parsePattern( prg, sp, cons->loc, cons->langEl->parserId, in );
+		if ( cons->langEl != 0 ) {
+			StreamImpl *in = newSourceStreamCons( "<internal>", cons );
+			cons->pdaRun = parsePattern( prg, sp, cons->loc, cons->langEl->parserId, in );
+		}
 	}
 
 	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
@@ -1040,14 +1042,16 @@ void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
 	}
 
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
-		/* We assume the reduction action compilation phase was run before
-		 * replacement parsing decorated the replacement with the target type. */
-		assert( repl->langEl != 0 );
+		/* FIXME: should be able to remove this test. */
+		if ( repl->langEl != 0 ) {
+			/* We need the the language element from the compilation process. */
+			assert( repl->langEl != 0 );
 
-		if ( repl->langEl->parserId < 0 ) {
-			/* Make a parser for the language element. */
-			parserEls.insert( repl->langEl );
-			repl->langEl->parserId = nextParserId++;
+			if ( repl->langEl->parserId < 0 ) {
+				/* Make a parser for the language element. */
+				parserEls.insert( repl->langEl );
+				repl->langEl->parserId = nextParserId++;
+			}
 		}
 	}
 

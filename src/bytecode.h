@@ -362,6 +362,7 @@ enum TYPE
 	TYPE_PTR    = 0x04,
 	TYPE_ITER   = 0x05,
 	TYPE_STRUCT = 0x06,
+	TYPE_GENERIC = 0x07,
 };
 
 /* Types of Generics. */

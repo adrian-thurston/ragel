@@ -284,27 +284,27 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 {
 	//std::cout << "generic " << g->name << std::endl;
 
-	LangEl *langEl = declareLangEl( pd, nspace, name, LangEl::NonTerm );
+//	LangEl *langEl = declareLangEl( pd, nspace, name, LangEl::NonTerm );
 
-	/* Add one empty production. */
-	ProdElList *emptyList = new ProdElList;
-	//addProduction( g->loc, langEl, emptyList, false, 0, 0 );
-
-	{
-		LangEl *prodName = langEl;
-		assert( prodName->type == LangEl::NonTerm );
-
-		Production *newDef = Production::cons( InputLoc(), prodName, 
-			emptyList, String(), false, 0,
-			pd->prodList.length(), prodName->defList.length() );
-			
-		prodName->defList.append( newDef );
-		pd->prodList.append( newDef );
-		newDef->predOf = 0;
-	}
-
-	langEl->generic = this;
-	this->langEl = langEl;
+//	/* Add one empty production. */
+//	ProdElList *emptyList = new ProdElList;
+//	//addProduction( g->loc, langEl, emptyList, false, 0, 0 );
+//
+//	{
+//		LangEl *prodName = langEl;
+//		assert( prodName->type == LangEl::NonTerm );
+//
+//		Production *newDef = Production::cons( InputLoc(), prodName, 
+//			emptyList, String(), false, 0,
+//			pd->prodList.length(), prodName->defList.length() );
+//			
+//		prodName->defList.append( newDef );
+//		pd->prodList.append( newDef );
+//		newDef->predOf = 0;
+//	}
+//
+//	langEl->generic = this;
+//	this->langEl = langEl;
 
 	utArg = typeArg->uniqueType;
  
@@ -334,7 +334,7 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 			break;
 	}
 
-	langEl->objectDef = objDef;
+//	langEl->objectDef = objDef;
 }
 
 void Namespace::declare( Compiler *pd )

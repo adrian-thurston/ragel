@@ -198,6 +198,17 @@ UniqueType *Compiler::findUniqueType( enum TYPE typeId, StructEl *structEl )
 	return uniqueType;
 }
 
+UniqueType *Compiler::findUniqueType( enum TYPE typeId, GenericType *generic )
+{
+	UniqueType searchKey( typeId, generic );
+	UniqueType *uniqueType = uniqeTypeMap.find( &searchKey );
+	if ( uniqueType == 0 ) {
+		uniqueType = new UniqueType( typeId, generic );
+		uniqeTypeMap.insert( uniqueType );
+	}
+	return uniqueType;
+}
+
 /* 0-based. */
 ObjectField *ObjectDef::findFieldNum( long offset )
 {
@@ -429,12 +440,14 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 
 				qualUT = pd->findUniqueType( TYPE_TREE, qualUT->langEl );
 			}
-			else if ( qualUT->typeId == TYPE_STRUCT ) {
+			else if ( qualUT->typeId == TYPE_STRUCT ||
+					qualUT->typeId == TYPE_GENERIC )
+			{
 				/* No deref. */
-				
 			}
 			else {
-				error(loc) << "arrow operator cannot be used to access this type" << endp;
+				error(loc) << "arrow operator cannot be used to "
+						"access this type" << endp;
 			}
 		}
 
@@ -1229,7 +1242,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		bool tree, bool stop ) const
 {
 	UniqueType *parserUT = typeRef->uniqueType;
-	UniqueType *targetUT = parserUT->langEl->generic->utArg;
+	UniqueType *targetUT = parserUT->generic->utArg;
 
 	/* If this is a parse stop then we need to verify that the type is
 	 * compatible with parse stop. */
@@ -1264,7 +1277,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 	/* Construct the parser. */
 	code.append( IN_CONS_GENERIC );
-	code.appendHalf( parserUT->langEl->generic->id );
+	code.appendHalf( parserUT->generic->id );
 
 	/* Dup for the finish operation. */
 	code.append( IN_DUP_TOP );

@@ -131,7 +131,7 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 	}
 
 	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_PTR, pd->findUniqueType( TYPE_TREE, inMap->generic->langEl )->langEl );
+	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
 
 UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
@@ -161,7 +161,7 @@ UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 	}
 
 	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
+	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
 
 UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
@@ -193,7 +193,7 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 	}
 
 	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_PTR, pd->findUniqueType( TYPE_TREE, inMap->generic->langEl )->langEl );
+	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
 
 UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
@@ -223,7 +223,7 @@ UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
 	}
 
 	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_TREE, inMap->generic->langEl );
+	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
 
 UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
@@ -253,7 +253,7 @@ UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 	}
 
 	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_PTR, pd->findUniqueType( TYPE_TREE, inMap->generic->langEl )->langEl );
+	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
 
 

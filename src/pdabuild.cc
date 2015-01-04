@@ -1564,7 +1564,7 @@ void Compiler::makeRuntimeData()
 			runtimeData->genericInfo[gen->id].keyType = gen->keyUT != 0 ? 
 					gen->keyUT->typeId : 0;
 			runtimeData->genericInfo[gen->id].keyOffset = 0;
-			runtimeData->genericInfo[gen->id].langElId = gen->langEl->id;
+			runtimeData->genericInfo[gen->id].langElId = -1; // gen->langEl->id;
 			runtimeData->genericInfo[gen->id].parserId = gen->utArg->langEl->parserId;
 			runtimeData->genericInfo[gen->id].elOffset = gen->elOffset;
 		}
@@ -1810,9 +1810,11 @@ void Compiler::fillInPatterns( Program *prg )
 	}
 
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
-		countNodes( prg, count, 
-				repl->pdaRun->stackTop->next,
-				repl->pdaRun->stackTop->next->shadow );
+		if ( repl->langEl != 0 ) {
+			countNodes( prg, count, 
+					repl->pdaRun->stackTop->next,
+					repl->pdaRun->stackTop->next->shadow );
+		}
 	}
 	
 	runtimeData->patReplNodes = new PatConsNode[count];
@@ -1838,19 +1840,21 @@ void Compiler::fillInPatterns( Program *prg )
 	}
 
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
-		int ind = nextAvail++;
-		runtimeData->patReplInfo[repl->patRepId].offset = ind;
+		if ( repl->langEl != 0 ) {
+			int ind = nextAvail++;
+			runtimeData->patReplInfo[repl->patRepId].offset = ind;
 
-		/* BindIds are indexed base one. */
-		runtimeData->patReplInfo[repl->patRepId].numBindings = 
-				repl->pdaRun->bindings->length() - 1;
+			/* BindIds are indexed base one. */
+			runtimeData->patReplInfo[repl->patRepId].numBindings = 
+					repl->pdaRun->bindings->length() - 1;
 
-		long bindId = 1;
-		fillNodes( prg, nextAvail, repl->pdaRun->bindings, bindId,
-				runtimeData->patReplNodes, 
-				repl->pdaRun->stackTop->next,
-				repl->pdaRun->stackTop->next->shadow, 
-				ind );
+			long bindId = 1;
+			fillNodes( prg, nextAvail, repl->pdaRun->bindings, bindId,
+					runtimeData->patReplNodes, 
+					repl->pdaRun->stackTop->next,
+					repl->pdaRun->stackTop->next->shadow, 
+					ind );
+		}
 	}
 
 	assert( nextAvail == count );

@@ -886,6 +886,7 @@ struct Compiler
 	UniqueType *findUniqueType( enum TYPE typeId, LangEl *langEl );
 	UniqueType *findUniqueType( enum TYPE typeId, IterDef *iterDef );
 	UniqueType *findUniqueType( enum TYPE typeId, StructEl *structEl );
+	UniqueType *findUniqueType( enum TYPE typeId, GenericType *generic );
 
 	UniqueType *uniqueTypeNil;
 	UniqueType *uniqueTypeVoid;
