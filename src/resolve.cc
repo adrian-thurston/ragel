@@ -110,17 +110,13 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 
 	UniqueType *utValue = typeRef1->resolveType( pd );	
 
-	UniqueList searchKey( utValue );
-	UniqueList *inMap = pd->uniqueListMap.find( &searchKey );
+	UniqueGeneric searchKey( UniqueGeneric::List, utValue );
+	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
 	if ( inMap == 0 ) {
-		inMap = new UniqueList( utValue );
-		pd->uniqueListMap.insert( inMap );
+		inMap = new UniqueGeneric( searchKey );
+		pd->uniqueGenericMap.insert( inMap );
 
-		/* FIXME: Need uniqe name allocator for types. */
-		static int listId = 0;
-		String name( 36, "__list%d", listId++ );
-
-		GenericType *generic = new GenericType( name, GEN_LIST,
+		GenericType *generic = new GenericType( GEN_LIST,
 				pd->nextGenericId++, typeRef1 );
 
 		nspace->genericList.append( generic );
@@ -140,17 +136,13 @@ UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 
 	UniqueType *utValue = typeRef1->resolveType( pd );	
 
-	UniqueList2El searchKey( utValue );
-	UniqueList2El *inMap = pd->uniqueList2ElMap.find( &searchKey );
+	UniqueGeneric searchKey( UniqueGeneric::ListEl, utValue );
+	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
 	if ( inMap == 0 ) {
-		inMap = new UniqueList2El( utValue );
-		pd->uniqueList2ElMap.insert( inMap );
+		inMap = new UniqueGeneric( searchKey );
+		pd->uniqueGenericMap.insert( inMap );
 
-		/* FIXME: Need uniqe name allocator for types. */
-		static int listId = 0;
-		String name( 36, "__list2el%d", listId++ );
-
-		GenericType *generic = new GenericType( name, GEN_LIST_EL,
+		GenericType *generic = new GenericType( GEN_LIST_EL,
 				pd->nextGenericId++, typeRef1 );
 
 		nspace->genericList.append( generic );
@@ -171,17 +163,13 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 	UniqueType *utKey = typeRef1->resolveType( pd );	
 	UniqueType *utValue = typeRef2->resolveType( pd );	
 
-	UniqueMap searchKey( utKey, utValue );
-	UniqueMap *inMap = pd->uniqueMapMap.find( &searchKey );
+	UniqueGeneric searchKey( UniqueGeneric::Map, utKey, utValue );
+	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
 	if ( inMap == 0 ) {
-		inMap = new UniqueMap( utKey, utValue );
-		pd->uniqueMapMap.insert( inMap );
+		inMap = new UniqueGeneric( searchKey );
+		pd->uniqueGenericMap.insert( inMap );
 
-		/* FIXME: Need uniqe name allocator for types. */
-		static int mapId = 0;
-		String name( 36, "__map%d", mapId++ );
-
-		GenericType *generic = new GenericType( name, GEN_MAP,
+		GenericType *generic = new GenericType( GEN_MAP,
 				pd->nextGenericId++, typeRef2 );
 		generic->keyTypeArg = typeRef1;
 
@@ -200,19 +188,16 @@ UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
-	UniqueType *utValue = typeRef1->resolveType( pd );	
+	UniqueType *utKey = typeRef1->resolveType( pd );	
+	UniqueType *utValue = typeRef2->resolveType( pd );	
 
-	UniqueMap2El searchKey( utValue );
-	UniqueMap2El *inMap = pd->uniqueMap2ElMap.find( &searchKey );
+	UniqueGeneric searchKey( UniqueGeneric::MapEl, utKey, utValue );
+	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
 	if ( inMap == 0 ) {
-		inMap = new UniqueMap2El( utValue );
-		pd->uniqueMap2ElMap.insert( inMap );
+		inMap = new UniqueGeneric( searchKey );
+		pd->uniqueGenericMap.insert( inMap );
 
-		/* FIXME: Need uniqe name allocator for types. */
-		static int listId = 0;
-		String name( 36, "__map2el%d", listId++ );
-
-		GenericType *generic = new GenericType( name, GEN_MAP_EL,
+		GenericType *generic = new GenericType( GEN_MAP_EL,
 				pd->nextGenericId++, typeRef1 );
 
 		nspace->genericList.append( generic );
@@ -232,17 +217,13 @@ UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 
 	UniqueType *utParse = typeRef1->resolveType( pd );	
 
-	UniqueParser searchKey( utParse );
-	UniqueParser *inMap = pd->uniqueParserMap.find( &searchKey );
+	UniqueGeneric searchKey( UniqueGeneric::Parser, utParse );
+	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
 	if ( inMap == 0 ) {
-		inMap = new UniqueParser( utParse );
-		pd->uniqueParserMap.insert( inMap );
+		inMap = new UniqueGeneric( searchKey );
+		pd->uniqueGenericMap.insert( inMap );
 
-		/* FIXME: Need uniqe name allocator for types. */
-		static int accumId = 0;
-		String name( 36, "__accum%d", accumId++ );
-
-		GenericType *generic = new GenericType( name, GEN_PARSER,
+		GenericType *generic = new GenericType( GEN_PARSER,
 				pd->nextGenericId++, typeRef1 );
 
 		nspace->genericList.append( generic );

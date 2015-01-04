@@ -707,20 +707,16 @@ typedef Vector<Namespace*> NamespaceVect;
 struct GenericType 
 	: public DListEl<GenericType>
 {
-	GenericType( const String &name, long typeId, long id, 
+	GenericType( long typeId, long id, 
 			TypeRef *typeArg )
 	:
-		name(name), typeId(typeId), id(id), /*langEl(0),*/
+		typeId(typeId), id(id),
 		typeArg(typeArg), keyTypeArg(0), 
 		utArg(0), keyUT(0), objDef(0), elOffset(0)
 	{}
 
-	const String &getKey() const 
-		{ return name; };
-
 	void declare( Compiler *pd, Namespace *nspace );
 
-	String name;
 	long typeId;
 	long id;
 	TypeRef *typeArg;
@@ -1885,176 +1881,41 @@ struct CmpUniqueRepeat
 typedef AvlBasic< UniqueRepeat, CmpUniqueRepeat > UniqueRepeatMap;
 
 /* 
- * Unique Map Types
+ * Unique Generics
  */
 
-struct UniqueMap
-	: public AvlTreeEl<UniqueMap>
+struct UniqueGeneric
+	: public AvlTreeEl<UniqueGeneric>
 {
-	UniqueMap( UniqueType *key, UniqueType *value ) :
-		key(key), value(value), generic(0) {}
+	enum Type
+	{
+		List,
+		ListEl,
+		Map,
+		MapEl,
+		Parser
+	};
 
+	UniqueGeneric( Type type, UniqueType *key, UniqueType *value ) :
+		type(type), key(key), value(value), generic(0) {}
+
+	UniqueGeneric( Type type, UniqueType *value ) :
+		type(type), key(0), value(value), generic(0) {}
+
+	Type type;
 	UniqueType *key;
 	UniqueType *value;
-
 	GenericType *generic;
 };
 
-struct CmpUniqueMap
+struct CmpUniqueGeneric
 {
-	static int compare( const UniqueMap &ut1, const UniqueMap &ut2 );
+	static int compare( const UniqueGeneric &ut1,
+			const UniqueGeneric &ut2 );
 };
 
-typedef AvlBasic< UniqueMap, CmpUniqueMap > UniqueMapMap;
+typedef AvlBasic< UniqueGeneric, CmpUniqueGeneric > UniqueGenericMap;
 
-/* 
- * Unique List Types
- */
-
-struct UniqueList
-	: public AvlTreeEl<UniqueList>
-{
-	UniqueList( UniqueType *value ) :
-		value(value), generic(0) {}
-
-	UniqueType *value;
-	GenericType *generic;
-};
-
-struct CmpUniqueList
-{
-	static int compare( const UniqueList &ut1, const UniqueList &ut2 );
-};
-
-typedef AvlBasic< UniqueList, CmpUniqueList > UniqueListMap;
-
-/* 
- * Unique Vector Types
- */
-
-struct UniqueVector
-	: public AvlTreeEl<UniqueVector>
-{
-	UniqueVector( UniqueType *value ) :
-		value(value), generic(0) {}
-
-	UniqueType *value;
-	GenericType *generic;
-};
-
-struct CmpUniqueVector
-{
-	static int compare( const UniqueVector &ut1, const UniqueVector &ut2 );
-};
-
-typedef AvlBasic< UniqueVector, CmpUniqueVector > UniqueVectorMap;
-
-/* 
- * Unique Parser Types
- */
-
-struct UniqueParser
-	: public AvlTreeEl<UniqueParser>
-{
-	UniqueParser( UniqueType *parseType ) :
-		parseType(parseType), generic(0) {}
-
-	UniqueType *parseType;
-	GenericType *generic;
-};
-
-struct CmpUniqueParser
-{
-	static int compare( const UniqueParser &ut1, const UniqueParser &ut2 );
-};
-
-typedef AvlBasic< UniqueParser, CmpUniqueParser > UniqueParserMap;
-
-/* 
- * Unique List2El Types
- */
-
-struct UniqueList2El
-	: public AvlTreeEl<UniqueList2El>
-{
-	UniqueList2El( UniqueType *value ) :
-		value(value), generic(0) {}
-
-	UniqueType *value;
-	GenericType *generic;
-};
-
-struct CmpUniqueList2El
-{
-	static int compare( const UniqueList2El &ut1, const UniqueList2El &ut2 );
-};
-
-typedef AvlBasic< UniqueList2El, CmpUniqueList2El > UniqueList2ElMap;
-
-/* 
- * Unique List2 Types
- */
-
-struct UniqueList2
-	: public AvlTreeEl<UniqueList2>
-{
-	UniqueList2( UniqueType *value, int attrOff ) :
-		value(value), attrOff(attrOff), generic(0) {}
-
-	UniqueType *value;
-	int attrOff;
-	GenericType *generic;
-};
-
-struct CmpUniqueList2
-{
-	static int compare( const UniqueList2 &ut1, const UniqueList2 &ut2 );
-};
-
-typedef AvlBasic< UniqueList2, CmpUniqueList2 > UniqueList2Map;
-
-
-/* 
- * Unique Map2El Types
- */
-
-struct UniqueMap2El
-	: public AvlTreeEl<UniqueMap2El>
-{
-	UniqueMap2El( UniqueType *value ) :
-		value(value), generic(0) {}
-
-	UniqueType *value;
-	GenericType *generic;
-};
-
-struct CmpUniqueMap2El
-{
-	static int compare( const UniqueMap2El &ut1, const UniqueMap2El &ut2 );
-};
-
-typedef AvlBasic< UniqueMap2El, CmpUniqueMap2El > UniqueMap2ElMap;
-
-/* 
- * Unique Map2 Types
- */
-
-struct UniqueMap2
-	: public AvlTreeEl<UniqueMap2>
-{
-	UniqueMap2( UniqueType *value ) :
-		value(value), generic(0) {}
-
-	UniqueType *value;
-	GenericType *generic;
-};
-
-struct CmpUniqueMap2
-{
-	static int compare( const UniqueMap2 &ut1, const UniqueMap2 &ut2 );
-};
-
-typedef AvlBasic< UniqueMap2, CmpUniqueMap2 > UniqueMap2Map;
 
 /*
  *

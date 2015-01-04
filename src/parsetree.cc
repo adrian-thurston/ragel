@@ -140,95 +140,32 @@ int CmpUniqueRepeat::compare( const UniqueRepeat &ut1, const UniqueRepeat &ut2 )
 	return 0;
 }
 
-int CmpUniqueMap::compare( const UniqueMap &ut1, const UniqueMap &ut2 )
+int CmpUniqueGeneric::compare( const UniqueGeneric &ut1, const UniqueGeneric &ut2 )
 {
-	if ( ut1.key < ut2.key )
+	if ( ut1.type < ut2.type )
 		return -1;
-	else if ( ut1.key > ut2.key )
+	else if ( ut1.type > ut2.type )
 		return 1;
-	else {
-		if ( ut1.value < ut2.value )
-			return -1;
-		else if ( ut1.value > ut2.value )
-			return 1;
-	}
-
-	return 0;
-}
-
-int CmpUniqueList::compare( const UniqueList &ut1, const UniqueList &ut2 )
-{
-	if ( ut1.value < ut2.value )
-		return -1;
-	else if ( ut1.value > ut2.value )
-		return 1;
-
-	return 0;
-}
-
-int CmpUniqueList2El::compare( const UniqueList2El &ut1, const UniqueList2El &ut2 )
-{
-	if ( ut1.value < ut2.value )
-		return -1;
-	else if ( ut1.value > ut2.value )
-		return 1;
-
-	return 0;
-}
-
-int CmpUniqueList2::compare( const UniqueList2 &ut1, const UniqueList2 &ut2 )
-{
-	if ( ut1.value < ut2.value )
+	else if ( ut1.value < ut2.value )
 		return -1;
 	else if ( ut1.value > ut2.value )
 		return 1;
 	else {
-		if ( ut1.attrOff < ut2.attrOff )
-			return -1;
-		else if ( ut1.attrOff > ut2.attrOff )
-			return 1;
+		switch ( ut1.type ) {
+		case UniqueGeneric::List:
+		case UniqueGeneric::ListEl:
+		case UniqueGeneric::Parser:
+			break;
+
+		case UniqueGeneric::Map:
+		case UniqueGeneric::MapEl:
+			if ( ut1.key < ut2.key )
+				return -1;
+			else if ( ut1.key > ut2.key )
+				return 1;
+			break;
+		}
 	}
-
-	return 0;
-}
-
-int CmpUniqueMap2El::compare( const UniqueMap2El &ut1, const UniqueMap2El &ut2 )
-{
-	if ( ut1.value < ut2.value )
-		return -1;
-	else if ( ut1.value > ut2.value )
-		return 1;
-
-	return 0;
-}
-
-int CmpUniqueMap2::compare( const UniqueMap2 &ut1, const UniqueMap2 &ut2 )
-{
-	if ( ut1.value < ut2.value )
-		return -1;
-	else if ( ut1.value > ut2.value )
-		return 1;
-
-	return 0;
-}
-
-int CmpUniqueVector::compare( const UniqueVector &ut1, const UniqueVector &ut2 )
-{
-	if ( ut1.value < ut2.value )
-		return -1;
-	else if ( ut1.value > ut2.value )
-		return 1;
-
-	return 0;
-}
-
-int CmpUniqueParser::compare( const UniqueParser &ut1, const UniqueParser &ut2 )
-{
-	if ( ut1.parseType < ut2.parseType )
-		return -1;
-	else if ( ut1.parseType > ut2.parseType )
-		return 1;
-
 	return 0;
 }
 

@@ -888,6 +888,11 @@ struct Compiler
 	UniqueType *findUniqueType( enum TYPE typeId, StructEl *structEl );
 	UniqueType *findUniqueType( enum TYPE typeId, GenericType *generic );
 
+	UniqueGeneric *findUniqueGeneric( UniqueGeneric::Type type,
+			UniqueType *utKey, UniqueType *utValue );
+	UniqueGeneric *findUniqueGeneric( UniqueGeneric::Type type,
+			UniqueType *utValue );
+
 	UniqueType *uniqueTypeNil;
 	UniqueType *uniqueTypeVoid;
 	UniqueType *uniqueTypePtr;
@@ -901,15 +906,7 @@ struct Compiler
 
 	UniqueTypeMap uniqeTypeMap;
 	UniqueRepeatMap uniqeRepeatMap;
-	UniqueMapMap uniqueMapMap;
-	UniqueListMap uniqueListMap;
-	UniqueVectorMap uniqueVectorMap;
-	UniqueParserMap uniqueParserMap;
-
-	UniqueList2ElMap  uniqueList2ElMap;
-	UniqueList2Map    uniqueList2Map;
-	UniqueMap2ElMap   uniqueMap2ElMap;
-	UniqueMap2Map     uniqueMap2Map;
+	UniqueGenericMap uniqueGenericMap;
 
 	void declareGlobalFields();
 	void declareStrFields();

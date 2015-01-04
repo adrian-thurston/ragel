@@ -858,6 +858,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDow
 
 List *copyList( Program *prg, List *list, Kid *oldNextDown, Kid **newNextDown )
 {
+#if 0
 	/* Not a need copy. */
 	List *newList = (List*)mapElAllocate( prg );
 	newList->id = list->genericInfo->langElId;
@@ -879,10 +880,12 @@ List *copyList( Program *prg, List *list, Kid *oldNextDown, Kid **newNextDown )
 	}
 
 	return newList;
+#endif
 }
 	
 Map *copyMap( Program *prg, Map *map, Kid *oldNextDown, Kid **newNextDown )
 {
+#if 0
 	Map *newMap = (Map*)mapElAllocate( prg );
 	newMap->id = map->genericInfo->langElId;
 	newMap->genericInfo = map->genericInfo;
@@ -901,6 +904,7 @@ Map *copyMap( Program *prg, Map *map, Kid *oldNextDown, Kid **newNextDown )
 	}
 
 	return newMap;
+#endif
 }
 
 Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
