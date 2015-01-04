@@ -110,6 +110,23 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 
 	UniqueType *utValue = typeRef1->resolveType( pd );	
 
+	/* Find the offset of the list element. */
+	int off = 0;
+	bool found = false;
+	FieldList *fieldList = utValue->structEl->context->objectDef->fieldList;
+	for ( FieldList::Iter f = *fieldList; f.lte(); f++, off++ ) {
+		UniqueType *fUT = f->value->typeRef->resolveType( pd );
+		if ( fUT->typeId == TYPE_GENERIC && fUT->generic != 0 &&
+				fUT->generic->typeId == GEN_LIST_EL )
+		{
+			found = true;
+			break;
+		}
+	}
+
+	if ( !found )
+		error( loc ) << "could not find list element in type ref" << endp;
+
 	UniqueGeneric searchKey( UniqueGeneric::List, utValue );
 	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
 	if ( inMap == 0 ) {

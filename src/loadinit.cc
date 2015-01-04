@@ -262,11 +262,6 @@ void LoadInit::walkDefinition( item &define )
 
 void LoadInit::consParseStmt( StmtList *stmtList )
 {
-	/* Parse the "start" def. */
-	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
-	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual,
-			String("start"), RepeatNone );
-
 	/* Pop argv, this yields the file name . */
 	CallArgVect *popArgs = new CallArgVect;
 	QualItemVect *popQual = new QualItemVect;
@@ -276,19 +271,35 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 			curLocalFrame->rootScope, popQual, String("pop") );
 	LangExpr *pop = LangExpr::cons( LangTerm::cons( InputLoc(), popRef, popArgs ) );
 
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, "argv_el", RepeatNone );
+	ObjectField *objField = ObjectField::cons( internal,
+			ObjectField::UserLocalType, typeRef, "A" );
+
+	LangStmt *stmt = varDef( objField, pop, LangStmt::AssignType );
+	stmtList->append( stmt );
+
 	/* Construct a literal string 'r', for second arg to open. */
 	ConsItem *modeConsItem = ConsItem::cons( internal,
 			ConsItem::InputText, String("r") );
 	ConsItemList *modeCons = new ConsItemList;
 	modeCons->append( modeConsItem );
 	LangExpr *modeExpr = LangExpr::cons( LangTerm::cons( internal, modeCons ) );
+
+	/* Reference A->value */
+	QualItemVect *qual = new QualItemVect;
+	qual->append( QualItem( QualItem::Arrow, internal, "A" ) );
+	LangVarRef *varRef = LangVarRef::cons( internal, 0,
+			curLocalFrame->rootScope, qual, String("value") );
+	LangExpr *Avalue = LangExpr::cons( LangTerm::cons( internal,
+			LangTerm::VarRefType, varRef ) );
 	
 	/* Call open. */
 	QualItemVect *openQual = new QualItemVect;
 	LangVarRef *openRef = LangVarRef::cons( internal,
 			0, curLocalFrame->rootScope, openQual, String("open") );
 	CallArgVect *openArgs = new CallArgVect;
-	openArgs->append( new CallArg(pop) );
+	openArgs->append( new CallArg(Avalue) );
 	openArgs->append( new CallArg(modeExpr) );
 	LangExpr *open = LangExpr::cons( LangTerm::cons( InputLoc(), openRef, openArgs ) );
 
@@ -297,8 +308,13 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	ConsItemList *list = ConsItemList::cons( consItem );
 
 	/* Will capture the parser to "P" */
-	ObjectField *objField = ObjectField::cons( internal,
+	objField = ObjectField::cons( internal,
 			ObjectField::UserLocalType, 0, String("P") );
+
+	/* Ref the start def. */
+	nspaceQual = NamespaceQual::cons( curNspace() );
+	typeRef = TypeRef::cons( internal, nspaceQual,
+			String("start"), RepeatNone );
 
 	/* Parse the above list. */
 	LangExpr *parseExpr = parseCmd( internal, false, false, objField, typeRef, 0, list );

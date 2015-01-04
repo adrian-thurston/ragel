@@ -245,6 +245,12 @@ def pre_eof_def
 def alias_def
 	[ALIAS id type_ref]
 
+def list_el_def
+	[LIST_EL id]
+
+def map_el_def
+	[MAP_EL id]
+
 def struct_item
 	[context_var_def] :ContextVar commit
 |	[literal_def] :Literal commit
@@ -260,6 +266,8 @@ def struct_item
 |	[export_def] :Export commit
 |	[pre_eof_def] :PreEof commit
 |	[precedence_def] :Precedence commit
+|	[list_el_def] :ListEl commit
+|	[map_el_def] :MapEl commit
 
 def export_def
 	[EXPORT var_def opt_def_init]

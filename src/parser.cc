@@ -15,6 +15,58 @@
 
 using std::endl;
 
+void BaseParser::listElDef( String name )
+{
+	/*
+	 * The unique type. This is a def with a single empty form.
+	 */
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+			name, pd->nextObjectId++ );
+
+	LelDefList *defList = new LelDefList;
+
+	Production *prod = BaseParser::production( InputLoc(),
+			new ProdElList, String(), false, 0, 0 );
+	prodAppend( defList, prod );
+
+	NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
+	BaseParser::cflDef( ntDef, objectDef, defList );
+
+	/*
+	 * List element with the same name as containing context.
+	 */
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+	String id = curStruct()->objectDef->name;
+	RepeatType repeatType = RepeatNone;
+	TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, repeatType );
+	TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListEl, 0, objTr, 0 );
+
+	ObjectField *of = ObjectField::cons( InputLoc(),
+			ObjectField::UserFieldType, elTr, name );
+	contextVarDef( InputLoc(), of );
+}
+
+void BaseParser::argvDecl()
+{
+	String structName = "argv_el";
+	structHead( internal, structName, ObjectDef::StructType );
+
+	/* First the argv value. */
+	String name = "value";
+	String type = "str";
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, type, RepeatNone );
+	ObjectField *objField = ObjectField::cons( internal,
+			ObjectField::StructFieldType, typeRef, name );
+	contextVarDef( objField->loc, objField );
+
+	/* Now the list element. */
+	listElDef( "el" );
+
+	structStack.pop();
+	namespaceStack.pop();
+}
+
 void BaseParser::init()
 {
 	/* Set up the root namespace. */
@@ -54,6 +106,8 @@ void BaseParser::init()
 	 * them directly, rather than via type lookup. */
 	pd->declareBaseLangEls();
 	pd->initUniqueTypes();
+
+	argvDecl();
 
 	/* Internal variables. */
 	addArgvList();
@@ -315,7 +369,8 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 
 void BaseParser::addArgvList()
 {
-	TypeRef *typeRef = TypeRef::cons( internal, pd->uniqueTypeStr );
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, "argv_el", RepeatNone );
 	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List, 0, typeRef, 0 );
 }
 

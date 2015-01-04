@@ -1080,8 +1080,14 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	if ( replUT->typeId != TYPE_STRUCT && replUT->typeId != TYPE_GENERIC )
 		error(loc) << "can only new a struct or generic" << endp;
 
-	code.append( IN_NEW_STRUCT );
-	code.appendHalf( replUT->structEl->id );
+	if ( replUT->typeId == TYPE_GENERIC ) {
+		code.append( IN_CONS_GENERIC );
+		code.appendHalf( replUT->generic->id );
+	}
+	else {
+		code.append( IN_NEW_STRUCT );
+		code.appendHalf( replUT->structEl->id );
+	}
 	return replUT;
 }
 

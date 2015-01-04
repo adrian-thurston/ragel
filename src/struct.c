@@ -196,7 +196,7 @@ struct colm_list_el *colm_list_el_new( struct colm_program *prg )
 	struct colm_list_el *el = (struct colm_list_el*) malloc( memsize );
 	memset( el, 0, memsize );
 	colm_struct_add( prg, (struct colm_struct *)el );
-	el->id = STRUCT_INBUILT_ID;
+	el->id = -22; //STRUCT_INBUILT_ID;
 	return el;
 }
 

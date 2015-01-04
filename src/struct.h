@@ -57,10 +57,10 @@ typedef struct colm_list_el
 {
 	short id;
 	struct colm_struct *prev, *next;
-	colm_destructor_t destructor;
-
-	void *buffer[8];
-
+//	colm_destructor_t destructor;
+//
+//	void *buffer[8];
+//
 	Tree *value;
 	struct colm_list_el *list_next;
 	struct colm_list_el *list_prev;

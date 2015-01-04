@@ -721,9 +721,47 @@ struct LoadColm
 	void walkPrecedenceDef( precedence_def precedenceDef )
 	{
 		PredType predType = walkPredType( precedenceDef.pred_type() );
-		PredDeclList *predDeclList = walkPredTokenList( precedenceDef.pred_token_list() );
+		PredDeclList *predDeclList = walkPredTokenList(
+				precedenceDef.pred_token_list() );
 		precedenceStmt( predType, predDeclList );
 	}
+
+	void walkListElDef( list_el_def Def )
+	{
+		/*
+		 * The unique type. This is a def with a single empty form.
+		 */
+		String name = Def.id().data();
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+				name, pd->nextObjectId++ );
+
+		LelDefList *defList = new LelDefList;
+
+		Production *prod = BaseParser::production( InputLoc(),
+				new ProdElList, String(), false, 0, 0 );
+		prodAppend( defList, prod );
+
+		NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
+		BaseParser::cflDef( ntDef, objectDef, defList );
+
+		/*
+		 * List element with the same name as containing context.
+		 */
+		NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+		String id = curStruct()->objectDef->name;
+		RepeatType repeatType = RepeatNone;
+		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, repeatType );
+		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListEl, 0, objTr, 0 );
+
+		ObjectField *of = ObjectField::cons( InputLoc(),
+				ObjectField::UserFieldType, elTr, name );
+		contextVarDef( InputLoc(), of );
+	}
+
+	void walkMapElDef( map_el_def Def )
+	{
+	}
+
 
 	StmtList *walkInclude( include Include )
 	{
@@ -824,22 +862,22 @@ struct LoadColm
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
 			break;
 		}
-		case type_ref::ListEl: {
-			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::ListEl, 0, type, 0 );
-			break;
-		}
+//		case type_ref::ListEl: {
+//			TypeRef *type = walkTypeRef( typeRef._type_ref() );
+//			tr = TypeRef::cons( typeRef.loc(), TypeRef::ListEl, 0, type, 0 );
+//			break;
+//		}
 		case type_ref::Map: {
 			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
 			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, key, value );
 			break;
 		}
-		case type_ref::MapEl: {
-			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::MapEl, 0, type, 0 );
-			break;
-		}
+//		case type_ref::MapEl: {
+//			TypeRef *type = walkTypeRef( typeRef._type_ref() );
+//			tr = TypeRef::cons( typeRef.loc(), TypeRef::MapEl, 0, type, 0 );
+//			break;
+//		}
 		case type_ref::Parser: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );
@@ -2188,6 +2226,12 @@ struct LoadColm
 			break;
 		case struct_item::Precedence:
 			walkPrecedenceDef( structItem.precedence_def() );
+			break;
+		case struct_item::ListEl:
+			walkListElDef( structItem.list_el_def() );
+			break;
+		case struct_item::MapEl:
+			walkMapElDef( structItem.map_el_def() );
 			break;
 		}
 	}

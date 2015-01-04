@@ -927,6 +927,7 @@ void Compiler::initListFunctions( GenericType *gen )
 
 void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 {
+#if 0
 	TypeRef *typeRef = TypeRef::cons(
 			internal, TypeRef::ListEl, 0, gen->typeArg, 0 );
 
@@ -947,6 +948,7 @@ void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
+#endif
 }
 
 
@@ -958,6 +960,7 @@ void Compiler::initListElFields( GenericType *gen )
 
 void Compiler::initListField( GenericType *gen, const char *name, int offset )
 {
+#if 0
 	/* Type reference for the list element. */
 	TypeRef *typeRef = TypeRef::cons(
 			internal, TypeRef::ListEl, 0, gen->typeArg, 0 );
@@ -980,6 +983,7 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
+#endif
 }
 
 void Compiler::initListFields( GenericType *gen )

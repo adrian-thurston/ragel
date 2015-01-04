@@ -1638,7 +1638,7 @@ Tree *listRemoveEnd( Program *prg, List *list )
 
 Tree *listRemoveHead( Program *prg, List *list )
 {
-	Tree *tree = list->head->value;
+	Tree *tree = list->head;
 	listDetachFirst( list );
 	return tree;
 }
