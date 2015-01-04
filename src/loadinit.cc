@@ -255,7 +255,8 @@ void LoadInit::walkDefinition( item &define )
 	walkProdList( name, defList, ProdList );
 
 	NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name,
+			pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
 
@@ -263,7 +264,8 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 {
 	/* Parse the "start" def. */
 	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
-	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, String("start"), RepeatNone );
+	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual,
+			String("start"), RepeatNone );
 
 	/* Pop argv, this yields the file name . */
 	CallArgVect *popArgs = new CallArgVect;
@@ -275,7 +277,8 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	LangExpr *pop = LangExpr::cons( LangTerm::cons( InputLoc(), popRef, popArgs ) );
 
 	/* Construct a literal string 'r', for second arg to open. */
-	ConsItem *modeConsItem = ConsItem::cons( internal, ConsItem::InputText, String("r") );
+	ConsItem *modeConsItem = ConsItem::cons( internal,
+			ConsItem::InputText, String("r") );
 	ConsItemList *modeCons = new ConsItemList;
 	modeCons->append( modeConsItem );
 	LangExpr *modeExpr = LangExpr::cons( LangTerm::cons( internal, modeCons ) );
@@ -347,7 +350,7 @@ void LoadInit::go( long activeRealm )
 	argv[2] = 0;
 
 	colm_program *program = colm_new_program( &colm_object );
-	colm_set_debug( program, 0 );
+	colm_set_debug( program, 0x1 );
 	colm_run_program( program, 2, argv );
 
 	/* Extract the parse tree. */

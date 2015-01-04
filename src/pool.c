@@ -190,7 +190,7 @@ ListEl *listElAllocate( Program *prg )
 
 void listElFree( Program *prg, ListEl *el )
 {
-	poolAllocFree( &prg->listElPool, el );
+	//poolAllocFree( &prg->listElPool, el );
 }
 
 void listElClear( Program *prg )

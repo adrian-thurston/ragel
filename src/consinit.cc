@@ -438,11 +438,13 @@ void ConsInit::definition( const String &name, Production *prod1, Production *pr
 	prodAppend( defList, prod4 );
 
 	NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+			name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
 
-void ConsInit::definition( const String &name, Production *prod1, Production *prod2, Production *prod3 )
+void ConsInit::definition( const String &name, Production *prod1,
+		Production *prod2, Production *prod3 )
 {
 	LelDefList *defList = new LelDefList;
 	prodAppend( defList, prod1 );
@@ -450,7 +452,8 @@ void ConsInit::definition( const String &name, Production *prod1, Production *pr
 	prodAppend( defList, prod3 );
 
 	NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+			name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
 
@@ -461,7 +464,8 @@ void ConsInit::definition( const String &name, Production *prod1, Production *pr
 	prodAppend( defList, prod2 );
 
 	NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+			name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
 
@@ -471,7 +475,8 @@ void ConsInit::definition( const String &name, Production *prod )
 	prodAppend( defList, prod );
 
 	NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType, name, pd->nextObjectId++ ); 
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+			name, pd->nextObjectId++ ); 
 	cflDef( ntDef, objectDef, defList );
 }
 

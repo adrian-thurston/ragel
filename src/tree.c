@@ -1572,8 +1572,7 @@ void listPushTail( Program *prg, List *list, Tree *val )
 {
 	if ( val != 0 )
 		assert( val->refs >= 1 );
-	ListEl *listEl = malloc(sizeof(ListEl));
-	memset( listEl, 0, sizeof(ListEl));
+	ListEl *listEl = colm_list_el_new( prg );
 	listEl->value = val;
 	listAppend( list, listEl );
 }
@@ -1640,7 +1639,7 @@ Tree *listRemoveEnd( Program *prg, List *list )
 Tree *listRemoveHead( Program *prg, List *list )
 {
 	Tree *tree = list->head->value;
-	listElFree( prg, listDetachFirst( list ) );
+	listDetachFirst( list );
 	return tree;
 }
 

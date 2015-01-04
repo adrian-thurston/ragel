@@ -52,12 +52,18 @@ typedef struct colm_stream
 	StreamImpl *impl;
 } Stream;
 
+/* Must overlay colm_inbuilt. */
 typedef struct colm_list_el
 {
+	short id;
+	struct colm_struct *prev, *next;
+	colm_destructor_t destructor;
+
 	void *buffer[8];
+
 	Tree *value;
-	struct colm_list_el *next;
-	struct colm_list_el *prev;
+	struct colm_list_el *list_next;
+	struct colm_list_el *list_prev;
 } ListEl;
 
 /* Must overlay colm_inbuilt. */
@@ -128,6 +134,7 @@ Stream *colm_stream_new2( struct colm_program *prg );
 List *colm_list_new( struct colm_program *prg );
 Tree *colm_list_get( List *list, Word field );
 Tree *colm_list_el_get( ListEl *listEl, Word field );
+ListEl *colm_list_el_new( struct colm_program *prg );
 
 Map *colm_map_new( struct colm_program *prg );
 

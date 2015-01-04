@@ -3156,7 +3156,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WC\n" );
 
 			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
+			//treeDownref( prg, sp, obj );
 
 			Tree *end = listRemoveHead( prg, (List*)obj );
 			vm_push( end );
