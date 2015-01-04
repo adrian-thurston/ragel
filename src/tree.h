@@ -116,14 +116,6 @@ typedef struct _Str
 	Head *value;
 } Str;
 
-typedef struct _ListEl
-{
-	/* Must overlay kid. */
-	Tree *value;
-	struct _ListEl *next;
-	struct _ListEl *prev;
-} ListEl;
-
 /*
  * Maps
  */
@@ -266,7 +258,6 @@ void listPushHead( struct colm_program *prg, List *list, Tree *val );
 void list2PushTail( struct colm_program *prg, Tree **sp, List *list, Tree *val );
 Tree *listRemoveEnd( struct colm_program *prg, List *list );
 Tree *listRemoveHead( struct colm_program *prg, List *list );
-Tree *getListMem( List *list, Word field );
 Tree *getListMemSplit( struct colm_program *prg, List *list, Word field );
 Tree *getParserMem( Parser *parser, Word field );
 

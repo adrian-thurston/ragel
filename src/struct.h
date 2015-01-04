@@ -52,6 +52,14 @@ typedef struct colm_stream
 	StreamImpl *impl;
 } Stream;
 
+typedef struct colm_list_el
+{
+	void *buffer[8];
+	Tree *value;
+	struct colm_list_el *next;
+	struct colm_list_el *prev;
+} ListEl;
+
 /* Must overlay colm_inbuilt. */
 typedef struct colm_list
 {
@@ -116,7 +124,11 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 Parser *colm_parser_new( struct colm_program *prg, GenericInfo *gi );
 Stream *colm_stream_new( struct colm_program *prg );
 Stream *colm_stream_new2( struct colm_program *prg );
+
 List *colm_list_new( struct colm_program *prg );
+Tree *colm_list_get( List *list, Word field );
+Tree *colm_list_el_get( ListEl *listEl, Word field );
+
 Map *colm_map_new( struct colm_program *prg );
 
 #if defined(__cplusplus)

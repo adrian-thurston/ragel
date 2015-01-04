@@ -276,7 +276,7 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 
 	UniqueType *elUT = el->typeRef->uniqueType;
 
-	if ( elUT->typeId == TYPE_STRUCT ) {
+	if ( elUT->typeId == TYPE_STRUCT || elUT->typeId == TYPE_GENERIC ) {
 		code.append( el->inGetValR );
 	}
 	else {
@@ -587,7 +587,7 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 	/* Ensure that the field is referenced. */
 	inObject->referenceField( pd, el );
 
-	if ( exprUT->typeId == TYPE_STRUCT ) {
+	if ( exprUT->typeId == TYPE_STRUCT || exprUT->typeId == TYPE_GENERIC ) {
 		if ( pd->revertOn && revert )
 			code.append( el->inSetValWV );
 		else
@@ -1077,8 +1077,8 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	/* What is being newstructed. */
 	UniqueType *replUT = typeRef->uniqueType;
 
-	if ( replUT->typeId != TYPE_STRUCT )
-		error(loc) << "can only new a struct" << endp;
+	if ( replUT->typeId != TYPE_STRUCT && replUT->typeId != TYPE_GENERIC )
+		error(loc) << "can only new a struct or generic" << endp;
 
 	code.append( IN_NEW_STRUCT );
 	code.appendHalf( replUT->structEl->id );

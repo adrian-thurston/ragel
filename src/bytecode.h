@@ -179,7 +179,7 @@ typedef unsigned char uchar;
 #define IN_LIST2_PUSH_TAIL_WV    0xf2
 #define IN_LIST2_PUSH_TAIL_WC    0xf3
 #define IN_LIST2_PUSH_TAIL_BKT   0xf4
-#define IN_GET_LIST2EL_MEM_R     0xf5
+#define IN_GET_LIST_EL_MEM_R     0xf5
 #define IN_GET_LIST2_MEM_R       0xf6
 
 #define IN_GET_LIST_MEM_R        0x79

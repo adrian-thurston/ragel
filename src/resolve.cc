@@ -146,10 +146,10 @@ UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 				pd->nextGenericId++, typeRef1 );
 
 		nspace->genericList.append( generic );
-
-		generic->declare( pd, nspace );
-
 		inMap->generic = generic;
+
+		/* Note this is recurse, all of above must complete. */
+		generic->declare( pd, nspace );
 	}
 
 	generic = inMap->generic;

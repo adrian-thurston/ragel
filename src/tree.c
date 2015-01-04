@@ -22,8 +22,10 @@
 
 #define BUFFER_INITIAL_SIZE 4096
 
-void listPrepend( List *list, ListEl *newEl ) { listAddBefore(list, list->head, newEl ); }
-void listAppend( List *list, ListEl *newEl )  { listAddAfter(list, list->tail, newEl ); }
+void listPrepend( List *list, ListEl *newEl )
+		{ listAddBefore( list, list->head, newEl ); }
+void listAppend( List *list, ListEl *newEl )
+		{ listAddAfter( list, list->tail, newEl ); }
 
 ListEl *listDetach( List *list, ListEl *el );
 ListEl *listDetachFirst(List *list )        { return listDetach(list, list->head); }
@@ -1570,7 +1572,8 @@ void listPushTail( Program *prg, List *list, Tree *val )
 {
 	if ( val != 0 )
 		assert( val->refs >= 1 );
-	ListEl *listEl = listElAllocate( prg );
+	ListEl *listEl = malloc(sizeof(ListEl));
+	memset( listEl, 0, sizeof(ListEl));
 	listEl->value = val;
 	listAppend( list, listEl );
 }
@@ -1639,23 +1642,6 @@ Tree *listRemoveHead( Program *prg, List *list )
 	Tree *tree = list->head->value;
 	listElFree( prg, listDetachFirst( list ) );
 	return tree;
-}
-
-Tree *getListMem( List *list, Word field )
-{
-	Tree *result = 0;
-	switch ( field ) {
-		case 0: 
-			result = list->head->value;
-			break;
-		case 1: 
-			result = list->tail->value;
-			break;
-		default:
-			assert( false );
-			break;
-	}
-	return result;
 }
 
 Tree *getParserMem( Parser *parser, Word field )

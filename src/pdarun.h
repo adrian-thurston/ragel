@@ -8,6 +8,7 @@
 #include <colm/input.h>
 #include <colm/defs.h>
 #include <colm/tree.h>
+#include <colm/struct.h>
 
 #ifdef __cplusplus
 extern "C" {

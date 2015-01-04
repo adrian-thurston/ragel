@@ -112,7 +112,7 @@ void colm_list_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 	while ( el != 0 ) {
 		ListEl *next = el->next;
 		treeDownref( prg, sp, el->value );
-		listElFree( prg, el );
+		//listElFree( prg, el );
 		el = next;
 	}
 }
@@ -151,3 +151,42 @@ Map *colm_map_new( struct colm_program *prg )
 	map->id = STRUCT_INBUILT_ID;
 	return map;
 }
+
+Tree *colm_list_get( List *list, Word field )
+{
+	Tree *result = 0;
+	switch ( field ) {
+		case 0: 
+			result = list->head;
+			break;
+		case 1: 
+			result = list->tail;
+			break;
+		default:
+			assert( 0 );
+			break;
+	}
+	return result;
+}
+
+Tree *colm_list_el_get( ListEl *listEl, Word field )
+{
+	Tree *result = 0;
+	switch ( field ) {
+		case 0: 
+			result = listEl->prev;
+			break;
+		case 1: 
+			result = listEl->next;
+			break;
+		case 2: 
+			result = listEl->value;
+			treeUpref( result );
+			break;
+//		default:
+//			assert( false );
+//			break;
+	}
+	return result;
+}
+

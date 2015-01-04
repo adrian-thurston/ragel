@@ -927,12 +927,17 @@ void Compiler::initListFunctions( GenericType *gen )
 
 void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 {
+	TypeRef *typeRef = TypeRef::cons(
+			internal, TypeRef::ListEl, 0, gen->typeArg, 0 );
+
+	typeRef->resolveType( this );
+
 	/* Make the type ref and create the field. */
-	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltOffType, typeRef, name );
 
-	el->inGetR =  IN_GET_LIST2EL_MEM_R;
+	el->inGetR =  IN_GET_LIST_EL_MEM_R;
+	el->inGetValR =  IN_GET_LIST_EL_MEM_R;
 //	el->inGetWC = IN_GET_LIST2EL_MEM_WC;
 //	el->inGetWV = IN_GET_LIST2EL_MEM_WV;
 //	el->inSetWC = IN_SET_LIST2EL_MEM_WC;
@@ -948,12 +953,18 @@ void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 void Compiler::initListElFields( GenericType *gen )
 {
 	initListElField( gen, "next", 0 );
+	initListElField( gen, "value", 2 );
 }
 
 void Compiler::initListField( GenericType *gen, const char *name, int offset )
 {
+	/* Type reference for the list element. */
+	TypeRef *typeRef = TypeRef::cons(
+			internal, TypeRef::ListEl, 0, gen->typeArg, 0 );
+
+	typeRef->resolveType( this );
+
 	/* Make the type ref and create the field. */
-	TypeRef *typeRef = TypeRef::cons( internal, gen->utArg );
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltOffType, typeRef, name );
 
@@ -962,6 +973,8 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 	el->inGetWV = IN_GET_LIST_MEM_WV;
 	el->inSetWC = IN_SET_LIST_MEM_WC;
 	el->inSetWV = IN_SET_LIST_MEM_WV;
+
+	el->inGetValR =  IN_GET_LIST_MEM_R;
 
 	gen->objDef->rootScope->insertField( el->name, el );
 
