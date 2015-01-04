@@ -2776,6 +2776,8 @@ struct LangTerm
 	LangTerm()
 	:
 		generic(0),
+		constructor(0),
+		consItemList(0),
 		parserText(0)
 	{}
 
@@ -2888,7 +2890,7 @@ struct LangTerm
 
 	static LangTerm *cons( const InputLoc &loc, Type type, LangVarRef *varRef,
 			ObjectField *objField, TypeRef *typeRef, FieldInitVect *fieldInitArgs,
-			Constructor *constructor, ParserText *parserText )
+			ConsItemList *consItemList, ParserText *parserText )
 	{
 		LangTerm *t = new LangTerm;
 		t->loc = loc;
@@ -2897,7 +2899,7 @@ struct LangTerm
 		t->objField = objField;
 		t->typeRef = typeRef;
 		t->fieldInitArgs = fieldInitArgs;
-		t->constructor = constructor;
+		t->consItemList = consItemList;
 		t->parserText = parserText;
 		return t;
 	}
@@ -2987,9 +2989,9 @@ struct LangTerm
 	FieldInitVect *fieldInitArgs;
 	GenericType *generic;
 	Constructor *constructor;
+	ConsItemList *consItemList;
 	ParserText *parserText;
 	LangExpr *expr;
-	ConsItemList *consItemList;
 	bool eof;
 };
 

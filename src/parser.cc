@@ -553,13 +553,8 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 {
 	LangExpr *expr = 0;
 
-	/* We are constructing a parser, sending it items, then returning it.
-	 * Thisis the constructor for the parser. */
-	ConsItemList *emptyConsItemList = new ConsItemList;
-
-	Constructor *constructor = Constructor::cons( loc, curNspace(),
-			emptyConsItemList, pd->nextPatConsId++ );
-	pd->replList.append( constructor );
+	/* Item list for what we are sending to the parser. */
+	ConsItemList *consItemList = new ConsItemList;
 	
 	/* The parser may be referenced. */
 	LangVarRef *varRef = 0;
@@ -579,7 +574,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 					LangTerm::ParseTreeType : LangTerm::ParseType );
 
 	expr = LangExpr::cons( LangTerm::cons( loc, langTermType,
-			varRef, objField, parserTypeRef, fieldInitVect, constructor,
+			varRef, objField, parserTypeRef, fieldInitVect, consItemList,
 			parserText ) );
 
 	/* Check for redeclaration. */
@@ -896,7 +891,7 @@ void BaseParser::structHead( const InputLoc &loc,
 	inNspace->structDefList.append( context );
 
 	/* Make the namespace for the struct. */
-	Namespace *structNspace = createNamespace( loc, data );
+	createNamespace( loc, data );
 }
 
 StmtList *BaseParser::appendStatement( StmtList *stmtList, LangStmt *stmt )

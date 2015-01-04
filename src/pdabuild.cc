@@ -1810,11 +1810,9 @@ void Compiler::fillInPatterns( Program *prg )
 	}
 
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
-		if ( repl->langEl != 0 ) {
-			countNodes( prg, count, 
-					repl->pdaRun->stackTop->next,
-					repl->pdaRun->stackTop->next->shadow );
-		}
+		countNodes( prg, count, 
+				repl->pdaRun->stackTop->next,
+				repl->pdaRun->stackTop->next->shadow );
 	}
 	
 	runtimeData->patReplNodes = new PatConsNode[count];
@@ -1840,21 +1838,19 @@ void Compiler::fillInPatterns( Program *prg )
 	}
 
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
-		if ( repl->langEl != 0 ) {
-			int ind = nextAvail++;
-			runtimeData->patReplInfo[repl->patRepId].offset = ind;
+		int ind = nextAvail++;
+		runtimeData->patReplInfo[repl->patRepId].offset = ind;
 
-			/* BindIds are indexed base one. */
-			runtimeData->patReplInfo[repl->patRepId].numBindings = 
-					repl->pdaRun->bindings->length() - 1;
+		/* BindIds are indexed base one. */
+		runtimeData->patReplInfo[repl->patRepId].numBindings = 
+				repl->pdaRun->bindings->length() - 1;
 
-			long bindId = 1;
-			fillNodes( prg, nextAvail, repl->pdaRun->bindings, bindId,
-					runtimeData->patReplNodes, 
-					repl->pdaRun->stackTop->next,
-					repl->pdaRun->stackTop->next->shadow, 
-					ind );
-		}
+		long bindId = 1;
+		fillNodes( prg, nextAvail, repl->pdaRun->bindings, bindId,
+				runtimeData->patReplNodes, 
+				repl->pdaRun->stackTop->next,
+				repl->pdaRun->stackTop->next->shadow, 
+				ind );
 	}
 
 	assert( nextAvail == count );

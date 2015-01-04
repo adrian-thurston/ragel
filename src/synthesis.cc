@@ -1257,14 +1257,8 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		context = true;
 	}
 
-	/* Assign bind ids to the variables in the replacement. */
-	for ( ConsItemList::Iter item = *constructor->list; item.lte(); item++ ) {
-		if ( item->expr != 0 )
-			item->bindId = constructor->nextBindId++;
-	}
-
 	/* Evaluate variable references. */
-	for ( ConsItemList::Iter item = constructor->list->last(); item.gtb(); item-- ) {
+	for ( ConsItemList::Iter item = consItemList->last(); item.gtb(); item-- ) {
 		if ( item->type == ConsItem::ExprType ) {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 		
@@ -1300,9 +1294,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		code.append( IN_SET_PARSER_CTX_WC );
 	}
 
-	/* For access to the replacement pattern. */
-	constructor->langEl = parserUT->langEl;
-	
 	/*****************************/
 
 	code.append( IN_DUP_TOP );

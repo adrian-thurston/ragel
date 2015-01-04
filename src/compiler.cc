@@ -1042,16 +1042,13 @@ void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
 	}
 
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
-		/* FIXME: should be able to remove this test. */
-		if ( repl->langEl != 0 ) {
-			/* We need the the language element from the compilation process. */
-			assert( repl->langEl != 0 );
+		/* We need the the language element from the compilation process. */
+		assert( repl->langEl != 0 );
 
-			if ( repl->langEl->parserId < 0 ) {
-				/* Make a parser for the language element. */
-				parserEls.insert( repl->langEl );
-				repl->langEl->parserId = nextParserId++;
-			}
+		if ( repl->langEl->parserId < 0 ) {
+			/* Make a parser for the language element. */
+			parserEls.insert( repl->langEl );
+			repl->langEl->parserId = nextParserId++;
 		}
 	}
 
