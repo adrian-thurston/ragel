@@ -1513,12 +1513,12 @@ Tree *setListMem( List *list, Half field, Tree *value )
 	Tree *existing = 0;
 	switch ( field ) {
 		case 0:
-			existing = list->head->value;
-			list->head->value = value;
+//			existing = list->head->value;
+//			list->head->value = value;
 			break;
 		case 1:
-			existing = list->tail->value;
-			list->tail->value = value;
+//			existing = list->tail->value;
+//			list->tail->value = value;
 			break;
 		default:
 			assert( false );
@@ -1570,11 +1570,11 @@ long mapLength( Map *map )
 
 void listPushTail( Program *prg, List *list, Tree *val )
 {
-	if ( val != 0 )
-		assert( val->refs >= 1 );
-	ListEl *listEl = colm_list_el_new( prg );
-	listEl->value = val;
-	listAppend( list, listEl );
+//	if ( val != 0 )
+//		assert( val->refs >= 1 );
+//	ListEl *listEl = colm_list_el_new( prg );
+//	listEl->value = val;
+//	listAppend( list, listEl );
 }
 
 void list2PushTail( Program *prg, Tree **sp, List *list, Tree *val )
@@ -1622,18 +1622,19 @@ void list2PushTail( Program *prg, Tree **sp, List *list, Tree *val )
 
 void listPushHead( Program *prg, List *list, Tree *val )
 {
-	if ( val != 0 )
-		assert( val->refs >= 1 );
-	ListEl *listEl = listElAllocate( prg );
-	listEl->value = val;
-	listPrepend( list, listEl );
+//	if ( val != 0 )
+//		assert( val->refs >= 1 );
+//	ListEl *listEl = listElAllocate( prg );
+//	listEl->value = val;
+//	listPrepend( list, listEl );
 }
 
 Tree *listRemoveEnd( Program *prg, List *list )
 {
-	Tree *tree = list->tail->value;
-	listElFree( prg, listDetachLast( list ) );
-	return tree;
+//	Tree *tree = list->tail->value;
+//	listElFree( prg, listDetachLast( list ) );
+//	return tree;
+	return 0;
 }
 
 Tree *listRemoveHead( Program *prg, List *list )
@@ -1669,12 +1670,12 @@ Tree *getListMemSplit( Program *prg, List *list, Word field )
 	Tree *sv = 0;
 	switch ( field ) {
 		case 0: 
-			sv = splitTree( prg, list->head->value );
-			list->head->value = sv; 
+//			sv = splitTree( prg, list->head->value );
+//			list->head->value = sv; 
 			break;
 		case 1: 
-			sv = splitTree( prg, list->tail->value );
-			list->tail->value = sv; 
+//			sv = splitTree( prg, list->tail->value );
+//			list->tail->value = sv; 
 			break;
 		default:
 			assert( false );

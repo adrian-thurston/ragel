@@ -1566,7 +1566,8 @@ void Compiler::makeRuntimeData()
 			runtimeData->genericInfo[gen->id].keyOffset = 0;
 			runtimeData->genericInfo[gen->id].parserId =
 					gen->typeId == GEN_PARSER ? gen->utArg->langEl->parserId : -1;
-			runtimeData->genericInfo[gen->id].elOffset = gen->elOffset;
+			runtimeData->genericInfo[gen->id].elOffset =
+					gen->el != 0 ? gen->el->offset : -1;
 		}
 	}
 

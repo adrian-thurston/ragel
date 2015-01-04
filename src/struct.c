@@ -26,7 +26,7 @@ static void colm_struct_add( Program *prg, struct colm_struct *item )
 	}
 }
 
-static struct colm_struct *colm_struct_new_size( Program *prg, int size )
+struct colm_struct *colm_struct_new_size( Program *prg, int size )
 {
 	size_t memsize = sizeof(struct colm_struct) + ( sizeof(Tree*) * size );
 	struct colm_struct *item = (struct colm_struct*) malloc( memsize );
@@ -111,7 +111,7 @@ void colm_list_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 	ListEl *el = list->head;
 	while ( el != 0 ) {
 		ListEl *next = el->list_next;
-		treeDownref( prg, sp, el->value );
+//		treeDownref( prg, sp, el->value );
 		//listElFree( prg, el );
 		el = next;
 	}
@@ -174,29 +174,19 @@ Tree *colm_list_el_get( ListEl *listEl, Word field )
 	Tree *result = 0;
 	switch ( field ) {
 		case 0: 
-			result = listEl->list_prev;
+			result = (Tree*)listEl->list_prev;
 			break;
 		case 1: 
-			result = listEl->list_next;
+			result = (Tree*)listEl->list_next;
 			break;
 		case 2: 
-			result = listEl->value;
-			treeUpref( result );
+//			result = listEl->value;
+//			treeUpref( result );
 			break;
 //		default:
 //			assert( false );
 //			break;
 	}
 	return result;
-}
-
-struct colm_list_el *colm_list_el_new( struct colm_program *prg )
-{
-	size_t memsize = sizeof(struct colm_list_el);
-	struct colm_list_el *el = (struct colm_list_el*) malloc( memsize );
-	memset( el, 0, memsize );
-	colm_struct_add( prg, (struct colm_struct *)el );
-	el->id = -22; //STRUCT_INBUILT_ID;
-	return el;
 }
 

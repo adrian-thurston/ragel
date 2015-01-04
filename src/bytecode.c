@@ -452,7 +452,11 @@ List *constructArgv( Program *prg, int argc, const char **argv )
 		Head *head = stringAllocPointer( prg, argv[i], strlen(argv[i]) );
 		Tree *arg = constructString( prg, head );
 		treeUpref( arg );
-		listPushTail( prg, list, arg );
+
+		Struct *s = colm_struct_new_size( prg, 3 );
+		colm_struct_set_field( s, 0, arg );
+		ListEl *listEl = (ListEl*)colm_struct_get_addr( s, 1 );
+		listAppend( list, listEl );
 	}
 	
 	return list;
@@ -1297,12 +1301,12 @@ again:
 			break;
 		}
 		case IN_NEW_STRUCT: {
-			short size;
-			read_half( size );
+			short id;
+			read_half( id );
 
-			debug( prg, REALM_BYTECODE, "IN_NEW_STRUCT %hd\n", size );
-			Struct *item = colm_struct_new( prg, size );
-			vm_push( (Tree*)item );
+			debug( prg, REALM_BYTECODE, "IN_NEW_STRUCT %hd\n", id );
+			Struct *item = colm_struct_new( prg, id );
+			vm_push_type( Struct*, item );
 			break;
 		}
 		case IN_GET_STRUCT_R: {
@@ -3153,11 +3157,12 @@ again:
 		case IN_LIST_POP_HEAD_WC: {
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WC\n" );
 
-			Tree *obj = vm_pop();
+			List *list = vm_pop_type( List * );
 			//treeDownref( prg, sp, obj );
 
-			Tree *end = listRemoveHead( prg, (List*)obj );
-			vm_push( end );
+			Tree *end = listRemoveHead( prg, list );
+			Struct *s = ((void*)end) - sizeof(Tree*) - sizeof(struct colm_struct);
+			vm_push_type( Struct *, s );
 			break;
 		}
 		case IN_LIST_POP_HEAD_WV: {

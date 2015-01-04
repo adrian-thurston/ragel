@@ -454,9 +454,9 @@ enum LEL_ID {
 #define IFR_RFR 0    /* return frame pointer */
 
 /* Exported to modules other than bytecode.c */
-#define vm_push(i) vm_push_type(i, Tree*)
+#define vm_push(i) vm_push_type(Tree*, i)
 
-#define vm_push_type(i, type) \
+#define vm_push_type(type, i) \
 	( ( sp == prg->sb_beg ? (sp = vm_bs_add(prg, sp, 1)) : 0 ), (*((type*)(--sp)) = (i)) )
 
 #define vm_pushn(n) \

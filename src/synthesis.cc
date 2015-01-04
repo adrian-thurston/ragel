@@ -255,6 +255,16 @@ long sizeOfField( UniqueType *fieldUT )
 	case TYPE_REF:
 		size = 2;
 		break;
+	case TYPE_GENERIC:
+		switch ( fieldUT->generic->typeId ) {
+		case GEN_LIST_EL:
+			size = 2;
+			break;
+		default:
+			size = 1;
+			break;
+		}
+		break;
 	default:
 		size = 1;
 		break;
