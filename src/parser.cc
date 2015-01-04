@@ -184,7 +184,7 @@ void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join, O
 	RegionSet *regionSet = regionStack.top();
 
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
-			transBlock, loc, 0, nspace, regionSet, objectDef, curContext() );
+			transBlock, loc, 0, nspace, regionSet, objectDef, curStruct() );
 
 	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
@@ -242,7 +242,7 @@ void BaseParser::zeroDef( const InputLoc &loc, const String &name )
 	LexJoin *join = literalJoin( loc, String("`") );
 
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, false, join,
-			0, loc, 0, nspace, regionSet, 0, curContext() );
+			0, loc, 0, nspace, regionSet, 0, curStruct() );
 
 	tokenDef->isZero = true;
 
@@ -343,7 +343,7 @@ void BaseParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
 	Function *newFunction = Function::cons( typeRef, name, 
 			paramList, codeBlock, pd->nextFuncId++, false, exprt );
 	pd->functionList.append( newFunction );
-	newFunction->inContext = curContext();
+	newFunction->inContext = curStruct();
 }
 
 void BaseParser::iterDef( StmtList *stmtList, ObjectDef *localFrame,
@@ -362,10 +362,10 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 
 	Context *context = 0;
 	ObjectDef *object = 0;
-	if ( curContext() == 0 )
+	if ( curStruct() == 0 )
 		object = pd->globalObjectDef;
 	else {
-		context = curContext();
+		context = curStruct();
 		objField->context = context;
 		object = context->objectDef;
 	}
@@ -560,7 +560,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				curContext(), curScope, objField->name );
+				curStruct(), curScope, objField->name );
 	}
 
 	/* The typeref for the parser. */
@@ -674,7 +674,7 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 	curScope->insertField( data, iterField );
 
 	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
-			iterField, typeRef, iterCall, stmtList, curContext(), scope );
+			iterField, typeRef, iterCall, stmtList, curStruct(), scope );
 
 	return stmt;
 }
@@ -685,7 +685,7 @@ void BaseParser::preEof( const InputLoc &loc, StmtList *stmtList, ObjectDef *loc
 		error(loc) << "preeof must be used inside an existing region" << endl;
 
 	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
-	codeBlock->context = curContext();
+	codeBlock->context = curStruct();
 
 	RegionSet *regionSet = regionStack.top();
 	regionSet->tokenIgnore->preEofBlock = codeBlock;
@@ -763,7 +763,7 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				curContext(), curScope, objField->name );
+				curStruct(), curScope, objField->name );
 	}
 
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( loc, LangTerm::ConstructType,
@@ -815,7 +815,7 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				curContext(), curScope, objField->name );
+				curStruct(), curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
@@ -828,7 +828,7 @@ LangStmt *BaseParser::exportStmt( ObjectField *objField,
 {
 	LangStmt *stmt = 0;
 
-	if ( curContext() != 0 )
+	if ( curStruct() != 0 )
 		error(objField->loc) << "cannot export parser context variables" << endp;
 
 	ObjectDef *object = pd->globalObjectDef;
@@ -864,10 +864,10 @@ LangExpr *BaseParser::require( const InputLoc &loc,
 void BaseParser::contextVarDef( const InputLoc &loc, ObjectField *objField )
 {
 	ObjectDef *object;
-	if ( curContext() == 0 )
+	if ( curStruct() == 0 )
 		error(loc) << "internal error: no context stack items found" << endp;
 
-	Context *context = curContext();
+	Context *context = curStruct();
 	objField->context = context;
 	object = context->objectDef;
 
@@ -886,7 +886,7 @@ void BaseParser::structHead( const InputLoc &loc,
 			data, pd->nextObjectId++ ); 
 
 	Context *context = new Context( loc, data, objectDef );
-	contextStack.push( context );
+	structStack.push( context );
 
 	inNspace->structDefList.append( context );
 

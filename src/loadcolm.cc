@@ -430,7 +430,7 @@ struct LoadColm
 		if ( optLabel.prodName() == opt_label::Id ) {
 			String id = optLabel.id().data();
 			varRef = LangVarRef::cons( optLabel.id().loc(),
-					curContext(), curScope, id );
+					curStruct(), curScope, id );
 		}
 		return varRef;
 	}
@@ -657,7 +657,7 @@ struct LoadColm
 			ObjectDef *localFrame = blockOpen();
 			StmtList *stmtList = walkLangStmtList( optTranslate.lang_stmt_list() );
 			block = CodeBlock::cons( stmtList, localFrame );
-			block->context = curContext();
+			block->context = curStruct();
 			blockClose();
 		}
 		return block;
@@ -930,7 +930,7 @@ struct LoadColm
 			StmtList *stmtList = walkLangStmtList( OptReduce.lang_stmt_list() );
 
 			block = CodeBlock::cons( stmtList, localFrame );
-			block->context = curContext();
+			block->context = curStruct();
 
 			blockClose();
 		}
@@ -1171,7 +1171,7 @@ struct LoadColm
 		bool reduceFirst = cflDef.opt_reduce_first().REDUCEFIRST() != 0;
 
 		NtDef *ntDef = NtDef::cons( name, curNspace(),
-				curContext(), reduceFirst );
+				curStruct(), reduceFirst );
 
 		BaseParser::cflDef( ntDef, objectDef, defList );
 	}
@@ -1246,7 +1246,7 @@ struct LoadColm
 		QualItemVect *qualItemVect = walkQual( Qual );
 		String id = varRef.id().data();
 		LangVarRef *langVarRef = LangVarRef::cons( varRef.id().loc(),
-				curContext(), curScope, qualItemVect, id );
+				curStruct(), curScope, qualItemVect, id );
 		return langVarRef;
 	}
 
@@ -1965,7 +1965,7 @@ struct LoadColm
 		case iter_call::Id: {
 			String tree = Tree.id().data();
 			LangVarRef *varRef = LangVarRef::cons( Tree.id().loc(),
-					curContext(), curScope, tree );
+					curStruct(), curScope, tree );
 			LangTerm *langTerm = LangTerm::cons( Tree.id().loc(),
 					LangTerm::VarRefType, varRef );
 			LangExpr *langExpr = LangExpr::cons( langTerm );
@@ -2068,7 +2068,7 @@ struct LoadColm
 
 	void walkContextVarDef( context_var_def ContextVarDef )
 	{
-		ObjectDef *contextObj = curContext()->objectDef;
+		ObjectDef *contextObj = curStruct()->objectDef;
 		ObjectField::Type type = contextObj->type == ObjectDef::StructType ?
 				ObjectField::StructFieldType : ObjectField::UserFieldType;
 
@@ -2144,66 +2144,66 @@ struct LoadColm
 		blockClose();
 	}
 
-	void walkContextItem( context_item contextItem )
+	void walkContextItem( struct_item structItem )
 	{
-		switch ( contextItem.prodName() ) {
-		case context_item::Rl:
-			walkRlDef( contextItem.rl_def() );
+		switch ( structItem.prodName() ) {
+		case struct_item::Rl:
+			walkRlDef( structItem.rl_def() );
 			break;
-		case context_item::ContextVar:
-			walkContextVarDef( contextItem.context_var_def() );
+		case struct_item::ContextVar:
+			walkContextVarDef( structItem.context_var_def() );
 			break;
-		case context_item::Token:
-			walkTokenDef( contextItem.token_def() );
+		case struct_item::Token:
+			walkTokenDef( structItem.token_def() );
 			break;
-		case context_item::IgnoreCollector:
-			walkIgnoreCollector( contextItem.ic_def() );
+		case struct_item::IgnoreCollector:
+			walkIgnoreCollector( structItem.ic_def() );
 			break;
-		case context_item::Ignore:
-			walkIgnoreDef( contextItem.ignore_def() );
+		case struct_item::Ignore:
+			walkIgnoreDef( structItem.ignore_def() );
 			break;
-		case context_item::Literal:
-			walkLiteralDef( contextItem.literal_def() );
+		case struct_item::Literal:
+			walkLiteralDef( structItem.literal_def() );
 			break;
-		case context_item::Cfl:
-			walkCflDef( contextItem.cfl_def() );
+		case struct_item::Cfl:
+			walkCflDef( structItem.cfl_def() );
 			break;
-		case context_item::Region:
-			walkLexRegion( contextItem.region_def() );
+		case struct_item::Region:
+			walkLexRegion( structItem.region_def() );
 			break;
-		case context_item::Context:
-			walkContextDef( contextItem.context_def() );
+		case struct_item::Struct:
+			walkStructDef( structItem.struct_def() );
 			break;
-		case context_item::Function:
-			walkFunctionDef( contextItem.function_def() );
+		case struct_item::Function:
+			walkFunctionDef( structItem.function_def() );
 			break;
-		case context_item::Iter:
-			walkIterDef( contextItem.iter_def() );
+		case struct_item::Iter:
+			walkIterDef( structItem.iter_def() );
 			break;
-		case context_item::PreEof:
-			walkPreEof( contextItem.pre_eof_def() );
+		case struct_item::PreEof:
+			walkPreEof( structItem.pre_eof_def() );
 			break;
-		case context_item::Export:
-			walkExportDef( contextItem.export_def() );
+		case struct_item::Export:
+			walkExportDef( structItem.export_def() );
 			break;
-		case context_item::Precedence:
-			walkPrecedenceDef( contextItem.precedence_def() );
+		case struct_item::Precedence:
+			walkPrecedenceDef( structItem.precedence_def() );
 			break;
 		}
 	}
 
-	void walkContextDef( context_def contextDef )
+	void walkStructDef( struct_def structDef )
 	{
-		String name = contextDef.id().data();
-		structHead( contextDef.id().loc(), name, ObjectDef::StructType );
+		String name = structDef.id().data();
+		structHead( structDef.id().loc(), name, ObjectDef::StructType );
 
-		_repeat_context_item contextItemList = contextDef.ItemList();
-		while ( !contextItemList.end() ) {
-			walkContextItem( contextItemList.value() );
-			contextItemList = contextItemList.next();
+		_repeat_struct_item structItemList = structDef.ItemList();
+		while ( !structItemList.end() ) {
+			walkContextItem( structItemList.value() );
+			structItemList = structItemList.next();
 		}
 
-		contextStack.pop();
+		structStack.pop();
 		namespaceStack.pop();
 	}
 
@@ -2245,8 +2245,8 @@ struct LoadColm
 				stmtList->append( stmt );
 			break;
 		}
-		case root_item::Context:
-			walkContextDef( rootItem.context_def() );
+		case root_item::Struct:
+			walkStructDef( rootItem.struct_def() );
 			break;
 		case root_item::Namespace:
 			walkNamespaceDef( rootItem.namespace_def() );
@@ -2309,8 +2309,8 @@ struct LoadColm
 		case namespace_item::Region:
 			walkLexRegion( item.region_def() );
 			break;
-		case namespace_item::Context:
-			walkContextDef( item.context_def() );
+		case namespace_item::Struct:
+			walkStructDef( item.struct_def() );
 			break;
 		case namespace_item::Namespace:
 			walkNamespaceDef( item.namespace_def() );

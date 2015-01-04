@@ -208,7 +208,7 @@ def root_item
 |	[ignore_def] :Ignore commit
 |	[cfl_def] :Cfl commit
 |	[region_def] :Region commit
-|	[context_def] :Context commit
+|	[struct_def] :Struct commit
 |	[namespace_def] :Namespace commit
 |	[function_def] :Function commit
 |	[iter_def] :Iter commit
@@ -245,7 +245,7 @@ def pre_eof_def
 def alias_def
 	[ALIAS id type_ref]
 
-def context_item
+def struct_item
 	[context_var_def] :ContextVar commit
 |	[literal_def] :Literal commit
 |	[rl_def] :Rl commit
@@ -254,7 +254,7 @@ def context_item
 |	[ignore_def] :Ignore commit
 |	[cfl_def] :Cfl commit
 |	[region_def] :Region commit
-|	[context_def] :Context commit
+|	[struct_def] :Struct commit
 |	[function_def] :Function commit
 |	[iter_def] :Iter commit
 |	[export_def] :Export commit
@@ -297,8 +297,8 @@ def context_var_def
 def struct_key
 	[STRUCT] | [CONTEXT]
 
-def context_def
-	[struct_key id ItemList: context_item* END]
+def struct_def
+	[struct_key id ItemList: struct_item* END]
 
 def literal_def
 	[LITERAL literal_list]
@@ -329,7 +329,7 @@ def namespace_item
 |	[ignore_def] :Ignore commit
 |	[cfl_def] :Cfl commit
 |	[region_def] :Region commit
-|	[context_def] :Context commit
+|	[struct_def] :Struct commit
 |	[namespace_def] :Namespace commit
 |	[function_def] :Function commit
 |	[iter_def] :Iter commit

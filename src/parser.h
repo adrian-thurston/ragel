@@ -24,7 +24,7 @@ struct BaseParser
 
 	RegionSetVect regionStack;
 	NamespaceVect namespaceStack;
-	ContextStack contextStack;
+	ContextStack structStack;
 	ObjectDef *curLocalFrame;
 	NameScope *curScope;
 
@@ -33,8 +33,8 @@ struct BaseParser
 	bool insideRegion()
 		{ return regionStack.length() > 0; }
 
-	Context *curContext()
-		{ return contextStack.length() == 0 ? 0 : contextStack.top(); }
+	Context *curStruct()
+		{ return structStack.length() == 0 ? 0 : structStack.top(); }
 
 	Namespace *curNspace()
 		{ return namespaceStack.top(); }
@@ -50,12 +50,14 @@ struct BaseParser
 	void pushRegionSet( const InputLoc &loc );
 	void popRegionSet();
 	void addProduction( const InputLoc &loc, const String &name, 
-			ProdElList *prodElList, bool commit, CodeBlock *redBlock, LangEl *predOf );
+			ProdElList *prodElList, bool commit,
+			CodeBlock *redBlock, LangEl *predOf );
 	void addArgvList();
 	LexJoin *literalJoin( const InputLoc &loc, const String &data );
 
-	void defineToken( const InputLoc &loc, String name, LexJoin *join, ObjectDef *objectDef,
-			CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore );
+	void defineToken( const InputLoc &loc, String name, LexJoin *join,
+			ObjectDef *objectDef, CodeBlock *transBlock,
+			bool ignore, bool noPreIgnore, bool noPostIgnore );
 
 	void zeroDef( const InputLoc &loc, const String &name );
 	void literalDef( const InputLoc &loc, const String &data,
@@ -64,10 +66,12 @@ struct BaseParser
 	ObjectDef *blockOpen();
 	void blockClose();
 	void functionDef( StmtList *stmtList, ObjectDef *localFrame,
-			ParameterList *paramList, TypeRef *typeRef, const String &name, bool exprt );
+			ParameterList *paramList, TypeRef *typeRef,
+			const String &name, bool exprt );
 	void iterDef( StmtList *stmtList, ObjectDef *localFrame,
 			ParameterList *paramList, const String &name );
-	LangStmt *globalDef( ObjectField *objField, LangExpr *expr, LangStmt::Type assignType );
+	LangStmt *globalDef( ObjectField *objField, LangExpr *expr,
+			LangStmt::Type assignType );
 	void cflDef( NtDef *ntDef, ObjectDef *objectDef, LelDefList *defList );
 	ReOrBlock *lexRegularExprData( ReOrBlock *reOrBlock, ReOrItem *reOrItem );
 
