@@ -3012,12 +3012,11 @@ again:
 		case IN_LIST_PUSH_TAIL_WV: {
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WV\n" );
 
-			Tree *obj = vm_pop();
-			Tree *val = vm_pop();
+			List *list = vm_pop_type(List*);
+			ListEl *listEl = vm_pop_type(ListEl*);
 
-			treeDownref( prg, sp, obj );
+			listAppend( list, listEl );
 
-			listPushTail( prg, (List*)obj, val );
 			treeUpref( prg->trueVal );
 			vm_push( prg->trueVal );
 
@@ -3029,12 +3028,11 @@ again:
 		case IN_LIST_PUSH_TAIL_WC: {
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
 
-			Tree *obj = vm_pop();
-			Tree *val = vm_pop();
+			List *list = vm_pop_type(List*);
+			ListEl *listEl = vm_pop_type(ListEl*);
 
-			treeDownref( prg, sp, obj );
+			listAppend( list, listEl );
 
-			listPushTail( prg, (List*)obj, val );
 			treeUpref( prg->trueVal );
 			vm_push( prg->trueVal );
 			break;
