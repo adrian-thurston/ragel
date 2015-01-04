@@ -960,16 +960,15 @@ void Compiler::initListElFields( GenericType *gen )
 
 void Compiler::initListField( GenericType *gen, const char *name, int offset )
 {
-#if 0
-	/* Type reference for the list element. */
-	TypeRef *typeRef = TypeRef::cons(
-			internal, TypeRef::ListEl, 0, gen->typeArg, 0 );
-
-	typeRef->resolveType( this );
+//	/* Type reference for the list element. */
+//	TypeRef *typeRef = TypeRef::cons(
+//			internal, TypeRef::ListEl, 0, gen->typeArg, 0 );
+//
+//	typeRef->resolveType( this );
 
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltOffType, typeRef, name );
+			ObjectField::InbuiltOffType, gen->typeArg, name );
 
 	el->inGetR =  IN_GET_LIST_MEM_R;
 	el->inGetWC = IN_GET_LIST_MEM_WC;
@@ -983,7 +982,6 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;
-#endif
 }
 
 void Compiler::initListFields( GenericType *gen )
