@@ -912,10 +912,10 @@ Map *copyMap( Program *prg, Map *map, Kid *oldNextDown, Kid **newNextDown )
 Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
 {
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
-	long genericId = lelInfo[tree->id].genericId;
-	if ( genericId > 0 )
-		assert(false);
-	else if ( tree->id == LEL_ID_PTR )
+//	long genericId = lelInfo[tree->id].genericId;
+//	if ( genericId > 0 )
+//		assert(false);
+	if ( tree->id == LEL_ID_PTR )
 		assert(false);
 	else if ( tree->id == LEL_ID_BOOL )
 		assert(false);
@@ -1002,8 +1002,8 @@ void treeFreeRec( Program *prg, Tree **sp, Tree *tree )
 
 free_tree:
 	lelInfo = prg->rtd->lelInfo;
-	genericId = lelInfo[tree->id].genericId;
-	assert( genericId == 0 );
+//	genericId = lelInfo[tree->id].genericId;
+//	assert( genericId == 0 );
 
 	switch ( tree->id ) {
 	case LEL_ID_BOOL:
@@ -1072,67 +1072,50 @@ void objectFreeRec( Program *prg, Tree **sp, Tree *tree )
 
 free_tree:
 	lelInfo = prg->rtd->lelInfo;
-	genericId = lelInfo[tree->id].genericId;
-	if ( genericId > 0 ) {
-		GenericInfo *generic = &prg->rtd->genericInfo[genericId];
-		switch ( generic->type ) {
-		case GEN_LIST:
-			break;
-		case GEN_LIST_EL:
-			break;
-		case GEN_MAP:
-			break;
-		case GEN_MAP_EL:
-			break;
-		case GEN_PARSER:
-			break;
-		}
-	}
-	else {
-		switch ( tree->id ) {
-		case LEL_ID_STR: {
-			Str *str = (Str*) tree;
-			stringFree( prg, str->value );
-			treeFree( prg, tree );
-			break;
-		}
-		case LEL_ID_BOOL:
-		case LEL_ID_INT: {
-			treeFree( prg, tree );
-			break;
-		}
-		case LEL_ID_PTR: {
-			treeFree( prg, tree );
-			break;
-		}
-//		case LEL_ID_STREAM: {
-//			Stream *stream = (Stream*)tree;
-//			clearSourceStream( prg, sp, stream->in );
-//			if ( stream->in->file != 0 )
-//				fclose( stream->in->file );
-//			else if ( stream->in->fd >= 0 )
-//				close( stream->in->fd );
-//			free( stream->in );
-//			streamFree( prg, stream );
-//			break;
-//		}
-		default: { 
-			if ( tree->id != LEL_ID_IGNORE )
-				stringFree( prg, tree->tokdata );
 
-			/* Attributes and grammar-based children. */
-			Kid *child = tree->child;
-			while ( child != 0 ) {
-				Kid *next = child->next;
-				vm_push( child->tree );
-				kidFree( prg, child );
-				child = next;
-			}
-
-			treeFree( prg, tree );
-			break;
-		}}
+	switch ( tree->id ) {
+	case LEL_ID_STR: {
+		Str *str = (Str*) tree;
+		stringFree( prg, str->value );
+		treeFree( prg, tree );
+		break;
 	}
+	case LEL_ID_BOOL:
+	case LEL_ID_INT: {
+		treeFree( prg, tree );
+		break;
+	}
+	case LEL_ID_PTR: {
+		treeFree( prg, tree );
+		break;
+	}
+//	case LEL_ID_STREAM: {
+//		Stream *stream = (Stream*)tree;
+//		clearSourceStream( prg, sp, stream->in );
+//		if ( stream->in->file != 0 )
+//			fclose( stream->in->file );
+//		else if ( stream->in->fd >= 0 )
+//			close( stream->in->fd );
+//		free( stream->in );
+//		streamFree( prg, stream );
+//		break;
+//	}
+	default: { 
+		if ( tree->id != LEL_ID_IGNORE )
+			stringFree( prg, tree->tokdata );
+
+		/* Attributes and grammar-based children. */
+		Kid *child = tree->child;
+		while ( child != 0 ) {
+			Kid *next = child->next;
+			vm_push( child->tree );
+			kidFree( prg, child );
+			child = next;
+		}
+
+		treeFree( prg, tree );
+		break;
+	}}
 
 	/* Any trees to downref? */
 	while ( sp != top ) {

@@ -232,7 +232,6 @@ struct LangEl : public DListEl<LangEl>
 
 	Type type;
 	long id;
-	bool isContext;
 	String displayString;
 	long numAppearances;
 	bool commit;
@@ -266,8 +265,6 @@ struct LangEl : public DListEl<LangEl>
 
 	long thisSize;
 	long ofiOffset;
-
-	GenericType *generic;
 
 	long parserId;
 

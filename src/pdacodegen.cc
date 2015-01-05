@@ -174,7 +174,6 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		out << el->ofiOffset << ", ";
 		out << el->objectLength << ", ";
 		out << el->termDupId << ", ";
-		out << el->genericId << ", ";
 		out << el->markId << ", ";
 		out << el->captureAttr << ", ";
 		out << el->numCaptureAttr;

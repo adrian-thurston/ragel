@@ -155,11 +155,7 @@ typedef struct _LangElInfo
 	long ofiOffset;
 	long objectLength;
 
-//	long contextTypeId;
-//	long contextLength;
-
 	long termDupId;
-	long genericId;
 	long markId;
 	long captureAttr;
 	long numCaptureAttr;

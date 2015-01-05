@@ -46,8 +46,6 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	lit(name),
 	type(type),
 	id(-1),
-	isContext(false),
-	//displayString(0),
 	numAppearances(0),
 	commit(false),
 	isIgnore(false),
@@ -69,7 +67,6 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	objectDef(0),
 	thisSize(0),
 	ofiOffset(0),
-	generic(0),
 	parserId(-1),
 	predType(PredNone),
 	predValue(0),
@@ -1462,7 +1459,6 @@ void Compiler::makeRuntimeData()
 //			}
 
 			runtimeData->lelInfo[i].termDupId = lel->termDup == 0 ? 0 : lel->termDup->id;
-			runtimeData->lelInfo[i].genericId = lel->generic == 0 ? 0 : lel->generic->id;
 
 			if ( lel->tokenDef != 0 && lel->tokenDef->join != 0 && 
 					lel->tokenDef->join->context != 0 )
