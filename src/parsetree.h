@@ -2190,7 +2190,9 @@ struct ObjectMethod
 		useCallObj(true),
 		func(0), 
 		iterDef(0),
-		useFnInstr(false)
+		useFnInstr(false),
+		useGenericId(false),
+		generic(0)
 	{
 		this->paramUTs = new UniqueType*[numParams];
 		memcpy( this->paramUTs, types, sizeof(UniqueType*)*numParams );
@@ -2212,6 +2214,9 @@ struct ObjectMethod
 	Function *func;
 	IterDef *iterDef;
 	bool useFnInstr;
+
+	bool useGenericId;
+	GenericType *generic;
 };
 
 typedef AvlMap<String, ObjectMethod*, CmpStr> MethodMap;
@@ -2255,6 +2260,8 @@ struct ObjectField
 		isConst(false), 
 		refActive(false),
 		isExport(false),
+		useGenericId(false),
+		generic(0),
 		dirtyTree(false),
 		inGetR( IN_HALT ),
 		inGetWC( IN_HALT ),
@@ -2324,6 +2331,9 @@ struct ObjectField
 	bool isConst;
 	bool refActive;
 	bool isExport;
+
+	bool useGenericId;
+	GenericType *generic;
 	
 	/* True if some aspect of the tree has possibly been written to. This does
 	 * not include attributes. This is here so we can optimize the storage of

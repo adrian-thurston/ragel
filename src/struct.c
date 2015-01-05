@@ -152,8 +152,10 @@ Map *colm_map_new( struct colm_program *prg )
 	return map;
 }
 
-struct colm_struct *colm_list_get( List *list, Word field )
+struct colm_struct *colm_list_get( struct colm_program *prg,
+		List *list, Word genId, Word field )
 {
+	GenericInfo *genericInfo = &prg->rtd->genericInfo[genId];
 	ListEl *result = 0;
 	switch ( field ) {
 		case 0: 
@@ -168,13 +170,15 @@ struct colm_struct *colm_list_get( List *list, Word field )
 	}
 
 	struct colm_struct *s = result != 0 ?
-			((void*)result) - sizeof(Tree*) - sizeof(struct colm_struct)
-			: 0;
+			((void*)result) - (genericInfo->elOffset * sizeof(Tree*)) -
+			sizeof(struct colm_struct) : 0;
 	return s;
 }
 
-struct colm_struct *colm_list_el_get( ListEl *listEl, Word field )
+struct colm_struct *colm_list_el_get( struct colm_program *prg,
+		ListEl *listEl, Word genId, Word field )
 {
+	GenericInfo *genericInfo = &prg->rtd->genericInfo[genId];
 	ListEl *result = 0;
 	switch ( field ) {
 		case 0: 
@@ -193,8 +197,8 @@ struct colm_struct *colm_list_el_get( ListEl *listEl, Word field )
 	}
 
 	struct colm_struct *s = result != 0 ?
-			((void*)result) - sizeof(Tree*) - sizeof(struct colm_struct)
-			: 0;
+			((void*)result) - (genericInfo->elOffset * sizeof(Tree*)) -
+			sizeof(struct colm_struct) : 0;
 	return s;
 }
 

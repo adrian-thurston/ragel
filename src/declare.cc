@@ -908,22 +908,22 @@ void Compiler::initListFunctions( GenericType *gen )
 	addLengthField( gen->objDef, IN_LIST_LENGTH );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false );
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, false, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push_tail", 
-			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->utArg, false );
+			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->utArg, false, false, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false );
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, false, gen );
 
 	initFunction( gen->utArg, gen->objDef, "pop_head", 
-			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false );
+			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, false, gen );
 
 	initFunction( gen->utArg, gen->objDef, "pop_tail", 
-			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false );
+			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, false, gen );
 
 	initFunction( gen->utArg, gen->objDef, "pop", 
-			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false );
+			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, false, gen );
 }
 
 void Compiler::initListElField( GenericType *gen, const char *name, int offset )
@@ -944,11 +944,13 @@ void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 //	el->inSetWC = IN_SET_LIST2EL_MEM_WC;
 //	el->inSetWV = IN_SET_LIST2EL_MEM_WV;
 
+	el->useGenericId = true;
+	el->generic = gen;
+
 	/* Zero for head, One for tail. */
 	el->offset = offset;
 
 	gen->utArg->structEl->context->objectDef->rootScope->insertField( el->name, el );
-
 }
 
 
@@ -973,6 +975,9 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 	el->inGetValR =  IN_GET_LIST_MEM_R;
 
 	gen->objDef->rootScope->insertField( el->name, el );
+
+	el->useGenericId = true;
+	el->generic = gen;
 
 	/* Zero for head, One for tail. */
 	el->offset = offset;

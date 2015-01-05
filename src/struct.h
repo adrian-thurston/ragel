@@ -130,8 +130,10 @@ Stream *colm_stream_new( struct colm_program *prg );
 Stream *colm_stream_new2( struct colm_program *prg );
 
 List *colm_list_new( struct colm_program *prg );
-struct colm_struct *colm_list_get( List *list, Word field );
-struct colm_struct *colm_list_el_get( ListEl *listEl, Word field );
+struct colm_struct *colm_list_get( struct colm_program *prg, List *list,
+		Word genId, Word field );
+struct colm_struct *colm_list_el_get( struct colm_program *prg,
+		ListEl *listEl, Word genId, Word field );
 ListEl *colm_list_detach_head( List *list );
 long colm_list_length( List *list );
 

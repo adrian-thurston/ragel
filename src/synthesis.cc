@@ -105,36 +105,54 @@ IterDef::IterDef( Type type, Function *func ) :
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC, bool isConst,
-		bool useFnInstr )
+		bool useFnInstr, GenericType *useGeneric )
 {
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 0, 0, 0, isConst );
 	objMethod->useFnInstr = useFnInstr;
 	obj->methodMap->insert( name, objMethod );
+	
+	if ( useGeneric ) {
+		objMethod->useGenericId = true;
+		objMethod->generic = useGeneric;
+	}
 	return objMethod;
 }
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC, UniqueType *arg1,
-		bool isConst, bool useFnInstr )
+		bool isConst, bool useFnInstr, GenericType *useGeneric )
 {
 	UniqueType *args[] = { arg1 };
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 1, args, 0, isConst );
 	objMethod->useFnInstr = useFnInstr;
 	obj->methodMap->insert( name, objMethod );
+
+	if ( useGeneric ) {
+		objMethod->useGenericId = true;
+		objMethod->generic = useGeneric;
+	}
+
 	return objMethod;
 }
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
 		const String &name, int methIdWV, int methIdWC, 
-		UniqueType *arg1, UniqueType *arg2, bool isConst, bool useFnInstr )
+		UniqueType *arg1, UniqueType *arg2,
+		bool isConst, bool useFnInstr, GenericType *useGeneric )
 {
 	UniqueType *args[] = { arg1, arg2 };
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 2, args, 0, isConst );
 	objMethod->useFnInstr = useFnInstr;
 	obj->methodMap->insert( name, objMethod );
+
+	if ( useGeneric ) {
+		objMethod->useGenericId = true;
+		objMethod->generic = useGeneric;
+	}
+
 	return objMethod;
 }
 
@@ -308,6 +326,9 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 				code.append( el->inGetR );
 		}
 	}
+
+	if ( el->useGenericId )
+		code.appendHalf( el->generic->id );
 
 	if ( el->useOffset() ) {
 		/* Gets of locals and fields require offsets. Fake vars like token
@@ -935,6 +956,9 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	
 	if ( lookup.objMethod->useFuncId )
 		code.appendHalf( lookup.objMethod->funcId );
+
+	if ( lookup.objMethod->useGenericId )
+		code.appendHalf( lookup.objMethod->generic->id );
 }
 
 void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code, 

@@ -3015,11 +3015,15 @@ again:
 			break;
 		}
 		case IN_LIST_PUSH_HEAD_WC: {
+			short genId;
+			read_half( genId );
+
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WC\n" );
 
 			List *list = vm_pop_type( List* );
 			Struct *s = vm_pop_type( Struct* );
-			ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
+			ListEl *listEl = colm_struct_get_addr_type( s, ListEl,
+					prg->rtd->genericInfo[genId].elOffset );
 
 			colm_list_prepend( list, listEl );
 
@@ -3028,11 +3032,15 @@ again:
 			break;
 		}
 		case IN_LIST_PUSH_HEAD_WV: {
+			short genId;
+			read_half( genId );
+
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WV\n" );
 
 			List *list = vm_pop_type(List*);
 			Struct *s = vm_pop_type(Struct*);
-			ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
+			ListEl *listEl = colm_struct_get_addr_type( s, ListEl,
+					prg->rtd->genericInfo[genId].elOffset );
 
 			colm_list_prepend( list, listEl );
 
@@ -3052,11 +3060,15 @@ again:
 			break;
 		}
 		case IN_LIST_PUSH_TAIL_WC: {
+			short genId;
+			read_half( genId );
+
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
 
 			List *list = vm_pop_type(List*);
 			Struct *s = vm_pop_type(Struct*);
-			ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
+			ListEl *listEl = colm_struct_get_addr_type( s, ListEl,
+					prg->rtd->genericInfo[genId].elOffset );
 
 			colm_list_append( list, listEl );
 
@@ -3065,11 +3077,15 @@ again:
 			break;
 		}
 		case IN_LIST_PUSH_TAIL_WV: {
+			short genId;
+			read_half( genId );
+
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WV\n" );
 
 			List *list = vm_pop_type(List*);
 			Struct *s = vm_pop_type(Struct*);
-			ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
+			ListEl *listEl = colm_struct_get_addr_type( s, ListEl,
+					prg->rtd->genericInfo[genId].elOffset );
 
 			colm_list_append( list, listEl );
 
@@ -3089,18 +3105,23 @@ again:
 			break;
 		}
 		case IN_GET_LIST_EL_MEM_R: {
-			short field;
+			short genId, field;
+			read_half( genId );
 			read_half( field );
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LIST_EL_MEM_R\n" );
 
 			Struct *s = vm_pop_type( Struct * );
-			ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
-			Struct *val = colm_list_el_get( listEl, field );
+			ListEl *listEl = colm_struct_get_addr_type( s, ListEl,
+					prg->rtd->genericInfo[genId].elOffset );
+			Struct *val = colm_list_el_get( prg, listEl, genId, field );
 			vm_push_type( Struct *, val );
 			break;
 		}
 		case IN_LIST_POP_TAIL_WC: {
+			short genId;
+			read_half( genId );
+
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WC\n" );
 
 			Tree *obj = vm_pop();
@@ -3111,6 +3132,9 @@ again:
 			break;
 		}
 		case IN_LIST_POP_TAIL_WV: {
+			short genId;
+			read_half( genId );
+
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WV\n" );
 
 			Tree *obj = vm_pop();
@@ -3128,6 +3152,9 @@ again:
 			break;
 		}
 		case IN_LIST_POP_TAIL_BKT: {
+			short genId;
+			read_half( genId );
+
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
 
 			Tree *val;
@@ -3140,6 +3167,9 @@ again:
 			break;
 		}
 		case IN_LIST_POP_HEAD_WC: {
+			short genId;
+			read_half( genId );
+
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WC\n" );
 
 			List *list = vm_pop_type( List * );
@@ -3147,11 +3177,14 @@ again:
 
 			ListEl *head = list->head;
 			colm_list_detach_head( list );
-			Struct *s = ((void*)head) - sizeof(Tree*) - sizeof(struct colm_struct);
+			Struct *s = ((void*)head) - (prg->rtd->genericInfo[genId].elOffset * sizeof(Tree*)) - sizeof(struct colm_struct);
 			vm_push_type( Struct *, s );
 			break;
 		}
 		case IN_LIST_POP_HEAD_WV: {
+			short genId;
+			read_half( genId );
+
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WV\n" );
 
 			Tree *obj = vm_pop();
@@ -3169,6 +3202,9 @@ again:
 			break;
 		}
 		case IN_LIST_POP_HEAD_BKT: {
+			short genId;
+			read_half( genId );
+
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
 
 			Tree *val;
@@ -3181,13 +3217,15 @@ again:
 			break;
 		}
 		case IN_GET_LIST_MEM_R: {
-			short field;
+			short genId, field;
+			read_half( genId );
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_LIST_MEM_R\n" );
+			debug( prg, REALM_BYTECODE, 
+					"IN_GET_LIST_MEM_R %hd %hd\n", genId, field );
 
 			List *list = vm_pop_type( List* );
-			Struct *val = colm_list_get( list, field );
+			Struct *val = colm_list_get( prg, list, genId, field );
 			vm_push_type( Struct *, val );
 			break;
 		}
