@@ -252,7 +252,7 @@ def map_el_def
 	[MAP_EL id]
 
 def struct_item
-	[context_var_def] :ContextVar commit
+	[struct_var_def] :StructVar commit
 |	[literal_def] :Literal commit
 |	[rl_def] :Rl commit
 |	[token_def] :Token commit
@@ -299,7 +299,7 @@ def function_def
 			POPEN ParamVarDefList: param_var_def_list PCLOSE
 			COPEN lang_stmt_list CCLOSE]
 
-def context_var_def
+def struct_var_def
 	[var_def]
 
 def struct_key
@@ -564,9 +564,7 @@ def type_ref
 	[region_qual id opt_repeat] :Id
 |	[PTR LT region_qual id opt_repeat GT] :Ptr
 |	[LIST LT type_ref GT] :List
-|	[LIST_EL LT type_ref GT] :ListEl
 |	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT] :Map
-|	[MAP_EL LT type_ref GT] :MapEl
 |	[PARSER LT type_ref GT] :Parser
 
 def region_qual

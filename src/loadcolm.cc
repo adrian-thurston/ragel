@@ -755,7 +755,7 @@ struct LoadColm
 
 		ObjectField *of = ObjectField::cons( InputLoc(),
 				ObjectField::UserFieldType, elTr, name );
-		contextVarDef( InputLoc(), of );
+		structVarDef( InputLoc(), of );
 	}
 
 	void walkMapElDef( map_el_def Def )
@@ -862,22 +862,12 @@ struct LoadColm
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
 			break;
 		}
-//		case type_ref::ListEl: {
-//			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-//			tr = TypeRef::cons( typeRef.loc(), TypeRef::ListEl, 0, type, 0 );
-//			break;
-//		}
 		case type_ref::Map: {
 			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
 			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, key, value );
 			break;
 		}
-//		case type_ref::MapEl: {
-//			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-//			tr = TypeRef::cons( typeRef.loc(), TypeRef::MapEl, 0, type, 0 );
-//			break;
-//		}
 		case type_ref::Parser: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );
@@ -2104,14 +2094,11 @@ struct LoadColm
 		return stmt;
 	}
 
-	void walkContextVarDef( context_var_def ContextVarDef )
+	void walkStructVarDef( struct_var_def StructVarDef )
 	{
-		ObjectDef *contextObj = curStruct()->objectDef;
-		ObjectField::Type type = contextObj->type == ObjectDef::StructType ?
-				ObjectField::StructFieldType : ObjectField::UserFieldType;
-
-		ObjectField *objField = walkVarDef( ContextVarDef.var_def(), type );
-		contextVarDef( objField->loc, objField );
+		ObjectField *objField = walkVarDef( StructVarDef.var_def(), 
+				ObjectField::StructFieldType );
+		structVarDef( objField->loc, objField );
 	}
 
 	TypeRef *walkReferenceTypeRef( reference_type_ref ReferenceTypeRef )
@@ -2182,14 +2169,14 @@ struct LoadColm
 		blockClose();
 	}
 
-	void walkContextItem( struct_item structItem )
+	void walkStructItem( struct_item structItem )
 	{
 		switch ( structItem.prodName() ) {
 		case struct_item::Rl:
 			walkRlDef( structItem.rl_def() );
 			break;
-		case struct_item::ContextVar:
-			walkContextVarDef( structItem.context_var_def() );
+		case struct_item::StructVar:
+			walkStructVarDef( structItem.struct_var_def() );
 			break;
 		case struct_item::Token:
 			walkTokenDef( structItem.token_def() );
@@ -2243,7 +2230,7 @@ struct LoadColm
 
 		_repeat_struct_item structItemList = structDef.ItemList();
 		while ( !structItemList.end() ) {
-			walkContextItem( structItemList.value() );
+			walkStructItem( structItemList.value() );
 			structItemList = structItemList.next();
 		}
 

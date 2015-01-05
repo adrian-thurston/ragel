@@ -43,7 +43,7 @@ void BaseParser::listElDef( String name )
 
 	ObjectField *of = ObjectField::cons( InputLoc(),
 			ObjectField::UserFieldType, elTr, name );
-	contextVarDef( InputLoc(), of );
+	structVarDef( InputLoc(), of );
 }
 
 void BaseParser::argvDecl()
@@ -58,7 +58,7 @@ void BaseParser::argvDecl()
 	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, type, RepeatNone );
 	ObjectField *objField = ObjectField::cons( internal,
 			ObjectField::StructFieldType, typeRef, name );
-	contextVarDef( objField->loc, objField );
+	structVarDef( objField->loc, objField );
 
 	/* Now the list element. */
 	listElDef( "el" );
@@ -916,7 +916,7 @@ LangExpr *BaseParser::require( const InputLoc &loc,
 	return expr;
 }
 
-void BaseParser::contextVarDef( const InputLoc &loc, ObjectField *objField )
+void BaseParser::structVarDef( const InputLoc &loc, ObjectField *objField )
 {
 	ObjectDef *object;
 	if ( curStruct() == 0 )
