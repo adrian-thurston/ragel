@@ -23,6 +23,10 @@ typedef unsigned char uchar;
  * 0x8b
  * 0xb8
  * 0xed
+ *
+ * 0xf2
+ * 0xf3
+ * 0xf4
  */
 
 #define IN_LOAD_INT              0x01
@@ -176,12 +180,6 @@ typedef unsigned char uchar;
 #define IN_LIST_POP_HEAD_WC      0xeb
 #define IN_LIST_POP_HEAD_BKT     0xec
 
-#define IN_LIST2_PUSH_TAIL_WV    0xf2
-#define IN_LIST2_PUSH_TAIL_WC    0xf3
-#define IN_LIST2_PUSH_TAIL_BKT   0xf4
-#define IN_GET_LIST_EL_MEM_R     0xf5
-#define IN_GET_LIST2_MEM_R       0xf6
-
 #define IN_GET_LIST_MEM_R        0x79
 #define IN_GET_LIST_MEM_WC       0x7a
 #define IN_GET_LIST_MEM_WV       0x7b
@@ -189,6 +187,8 @@ typedef unsigned char uchar;
 #define IN_SET_LIST_MEM_WV       0x7d
 #define IN_SET_LIST_MEM_WC       0x7e
 #define IN_SET_LIST_MEM_BKT      0x7f
+
+#define IN_GET_LIST_EL_MEM_R     0xf5
 
 #define IN_VECTOR_LENGTH         0x80
 #define IN_VECTOR_APPEND_WV      0x81
@@ -202,7 +202,6 @@ typedef unsigned char uchar;
 #define IN_PRINT_XML_AC          0x88
 #define IN_PRINT_XML             0x89
 #define IN_PRINT_STREAM          0x8a
-
 
 #define IN_CALL_WC               0x8c
 #define IN_CALL_WV               0x8d

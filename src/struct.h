@@ -110,14 +110,17 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 #define colm_struct_get_field( obj, field ) \
 	((struct colm_tree**)(((struct colm_struct*)obj)+1))[field]
 
+#define colm_struct_get_field_type( obj, type, field ) \
+	((type*)(((struct colm_struct*)obj)+1))[field]
+
 #define colm_struct_get_addr( obj, field ) \
-	&(((struct colm_tree**)(((struct colm_struct*)obj)+1))[field])
+	&(((void **)(((struct colm_struct*)obj)+1))[field])
+
+#define colm_struct_get_addr_type( obj, type, field ) \
+	(type*)(&(((void **)(((struct colm_struct*)obj)+1))[field]))
 
 #define colm_struct_set_field( obj, field, val ) \
 	((struct colm_tree**)(((struct colm_struct*)obj)+1))[field] = val
-
-#define colm_struct_get_field_type( obj, type, field ) \
-	((type*)(((struct colm_struct*)obj)+1))[field]
 
 #define colm_struct_set_field_type( obj, type, field, val ) \
 	((type*)(((struct colm_struct*)obj)+1))[field] = val
@@ -130,7 +133,8 @@ Stream *colm_stream_new2( struct colm_program *prg );
 List *colm_list_new( struct colm_program *prg );
 Tree *colm_list_get( List *list, Word field );
 Tree *colm_list_el_get( ListEl *listEl, Word field );
-ListEl *colm_list_el_new( struct colm_program *prg );
+ListEl *colm_list_detach_head( List *list );
+long colm_list_length( List *list );
 
 Map *colm_map_new( struct colm_program *prg );
 

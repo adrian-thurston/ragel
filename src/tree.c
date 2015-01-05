@@ -22,18 +22,6 @@
 
 #define BUFFER_INITIAL_SIZE 4096
 
-void listPrepend( List *list, ListEl *newEl )
-		{ listAddBefore( list, list->head, newEl ); }
-void listAppend( List *list, ListEl *newEl )
-		{ listAddAfter( list, list->tail, newEl ); }
-
-ListEl *listDetach( List *list, ListEl *el );
-ListEl *listDetachFirst(List *list )        { return listDetach(list, list->head); }
-ListEl *listDetachLast(List *list )         { return listDetach(list, list->tail); }
-
-long listLength(List *list)
-	{ return list->listLen; }
-
 Kid *allocAttrs( Program *prg, long length )
 {
 	Kid *cur = 0;
@@ -1560,49 +1548,6 @@ void listPushTail( Program *prg, List *list, Tree *val )
 //	listAppend( list, listEl );
 }
 
-void list2PushTail( Program *prg, Tree **sp, List *list, Tree *val )
-{
-	/* Deref the object we are pushing. */
-	val = ((Pointer*)val)->value->tree;
-
-	/* Make sure val has an element tree. */
-	Tree *el = colm_get_attr( val, list->genericInfo->elOffset );
-	if ( el == 0 ) {
-		el = treeAllocate( prg );
-		el->id = 0;
-		el->refs = 1;
-		el->child = allocAttrs( prg, 2 );
-		colm_tree_set_attr( val, list->genericInfo->elOffset, constructPointer( prg, el ) );
-	}
-	else {
-		/* Deref the list element (must be a pointer too for time being) */
-		el = ((Pointer*)el)->value->tree;
-	}
-
-	/* val->prev = list->tail */
-	/* val->next = 0 */
-	colm_tree_set_attr( el, 0, (Tree*)list->tail );
-	colm_tree_set_attr( el, 1, 0 );
-
-	Tree *pval = constructPointer( prg, val );
-
-	pval->refs += 100;
-	val->refs += 100;
-
-	if ( list->tail == 0 ) {
-		/* list->tail = list->tail = val */
-		list->head = list->tail = (ListEl*)pval;
-	}
-	else {
-		/* list->tail->next = val */
-		/* list->tail = val */
-		Tree *tel = colm_get_attr( ((Pointer*)list->tail)->value->tree,
-				list->genericInfo->elOffset );
-		colm_tree_set_attr( ((Pointer*)tel)->value->tree, 1, pval );
-		list->tail = (ListEl*)pval;
-	}
-}
-
 void listPushHead( Program *prg, List *list, Tree *val )
 {
 //	if ( val != 0 )
@@ -1622,9 +1567,10 @@ Tree *listRemoveEnd( Program *prg, List *list )
 
 Tree *listRemoveHead( Program *prg, List *list )
 {
-	Tree *tree = list->head;
-	listDetachFirst( list );
-	return tree;
+//	Tree *tree = list->head;
+//	listDetachFirst( list );
+//	return tree;
+	return 0;
 }
 
 Tree *getParserMem( Parser *parser, Word field )

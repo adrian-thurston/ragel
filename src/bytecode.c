@@ -455,8 +455,8 @@ List *constructArgv( Program *prg, int argc, const char **argv )
 
 		Struct *s = colm_struct_new_size( prg, 3 );
 		colm_struct_set_field( s, 0, arg );
-		ListEl *listEl = (ListEl*)colm_struct_get_addr( s, 1 );
-		listAppend( list, listEl );
+		ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
+		colm_list_append( list, listEl );
 	}
 	
 	return list;
@@ -2988,7 +2988,8 @@ again:
 		case IN_GET_MATCH_LENGTH_R: {
 			debug( prg, REALM_BYTECODE, "IN_GET_MATCH_LENGTH_R\n" );
 
-			Tree *integer = constructInteger( prg, stringLength(exec->parser->pdaRun->tokdata) );
+			Tree *integer = constructInteger( prg, 
+					stringLength(exec->parser->pdaRun->tokdata) );
 			treeUpref( integer );
 			vm_push( integer );
 			break;
@@ -3006,11 +3007,23 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LIST_LENGTH\n" );
 
 			List *list = (List*) vm_pop();
-			long len = listLength( list );
+			long len = colm_list_length( list );
 			Tree *res = constructInteger( prg, len );
 			treeDownref( prg, sp, (Tree*)list );
 			treeUpref( res );
 			vm_push( res );
+			break;
+		}
+		case IN_LIST_PUSH_TAIL_WC: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
+
+			List *list = vm_pop_type(List*);
+			ListEl *listEl = vm_pop_type(ListEl*);
+
+			colm_list_append( list, listEl );
+
+			treeUpref( prg->trueVal );
+			vm_push( prg->trueVal );
 			break;
 		}
 		case IN_LIST_PUSH_TAIL_WV: {
@@ -3019,7 +3032,7 @@ again:
 			List *list = vm_pop_type(List*);
 			ListEl *listEl = vm_pop_type(ListEl*);
 
-			listAppend( list, listEl );
+			colm_list_append( list, listEl );
 
 			treeUpref( prg->trueVal );
 			vm_push( prg->trueVal );
@@ -3029,39 +3042,11 @@ again:
 			rcodeUnitTerm( exec );
 			break;
 		}
-		case IN_LIST_PUSH_TAIL_WC: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
-
-			List *list = vm_pop_type(List*);
-			ListEl *listEl = vm_pop_type(ListEl*);
-
-			listAppend( list, listEl );
-
-			treeUpref( prg->trueVal );
-			vm_push( prg->trueVal );
-			break;
-		}
 		case IN_LIST_PUSH_TAIL_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
 
-			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
-
-			Tree *tree = listRemoveEnd( prg, (List*)obj );
-			treeDownref( prg, sp, tree );
-			break;
-		}
-		case IN_LIST2_PUSH_TAIL_WC: {
-			debug( prg, REALM_BYTECODE, "IN_LIST2_PUSH_TAIL_WC\n" );
-
-			Tree *obj = vm_pop();
-			Tree *val = vm_pop();
-
-			treeDownref( prg, sp, obj );
-			list2PushTail( prg, sp, (List*)obj, val );
-
-			treeUpref( prg->trueVal );
-			vm_push( prg->trueVal );
+			List *list = vm_pop_type(List*);
+			colm_list_detach_tail( prg, list );
 			break;
 		}
 		case IN_GET_LIST_EL_MEM_R: {
@@ -3160,8 +3145,9 @@ again:
 			List *list = vm_pop_type( List * );
 			//treeDownref( prg, sp, obj );
 
-			Tree *end = listRemoveHead( prg, list );
-			Struct *s = ((void*)end) - sizeof(Tree*) - sizeof(struct colm_struct);
+			ListEl *head = list->head;
+			colm_list_detach_head( list );
+			Struct *s = ((void*)head) - sizeof(Tree*) - sizeof(struct colm_struct);
 			vm_push_type( Struct *, s );
 			break;
 		}
@@ -3202,20 +3188,6 @@ again:
 
 			Tree *obj = vm_pop();
 			Tree *val = colm_list_get( (List*)obj, field );
-			vm_push( val );
-			break;
-		}
-		case IN_GET_LIST2_MEM_R: {
-			short field;
-			read_half( field );
-
-			debug( prg, REALM_BYTECODE, "IN_GET_LIST2_MEM_R\n" );
-
-			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
-
-			Tree *val = (Tree*)((List*)obj)->head;
-			treeUpref( val );
 			vm_push( val );
 			break;
 		}

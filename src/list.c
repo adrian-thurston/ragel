@@ -5,7 +5,37 @@
 #include <colm/pdarun.h>
 #include <colm/struct.h>
 
-void listAddAfter( List *list, ListEl *prev_el, ListEl *new_el )
+static void colm_list_add_after( List *list, ListEl *prev_el, ListEl *new_el );
+static void colm_list_add_before( List *list, ListEl *next_el, ListEl *new_el);
+
+void colm_list_prepend( List *list, ListEl *newEl )
+{
+	colm_list_add_before( list, list->head, newEl );
+}
+
+void colm_list_append( List *list, ListEl *newEl )
+{
+	colm_list_add_after( list, list->tail, newEl );
+}
+
+ListEl *colm_list_detach( List *list, ListEl *el );
+
+ListEl *colm_list_detach_head( List *list )
+{
+	return colm_list_detach( list, list->head );
+}
+
+ListEl *colm_list_detach_tail( List *list )
+{
+	return colm_list_detach( list, list->tail );
+}
+
+long colm_list_length( List *list )
+{
+	return list->listLen;
+}
+
+static void colm_list_add_after( List *list, ListEl *prev_el, ListEl *new_el )
 {
 	/* Set the previous pointer of new_el to prev_el. We do
 	 * this regardless of the state of the list. */
@@ -37,7 +67,7 @@ void listAddAfter( List *list, ListEl *prev_el, ListEl *new_el )
 	list->listLen++;
 }
 
-void listAddBefore( List *list, ListEl *next_el, ListEl *new_el)
+static void colm_list_add_before( List *list, ListEl *next_el, ListEl *new_el)
 {
 	/* Set the next pointer of the new element to next_el. We do
 	 * this regardless of the state of the list. */
@@ -68,7 +98,7 @@ void listAddBefore( List *list, ListEl *next_el, ListEl *new_el)
 	list->listLen++;
 }
 
-ListEl *listDetach( List *list, ListEl *el )
+ListEl *colm_list_detach( List *list, ListEl *el )
 {
 	/* Set forward pointers to skip over el. */
 	if (el->list_prev == 0) 
@@ -86,4 +116,3 @@ ListEl *listDetach( List *list, ListEl *el )
 	list->listLen--;
 	return el;
 }
-
