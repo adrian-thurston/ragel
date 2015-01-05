@@ -77,7 +77,7 @@ void BaseParser::init()
 	pd->globalObjectDef = ObjectDef::cons( ObjectDef::UserType,
 			global, pd->nextObjectId++ ); 
 
-	pd->global = new Context( internal, global, pd->globalObjectDef );
+	pd->global = new StructDef( internal, global, pd->globalObjectDef );
 	pd->globalSel = declareStruct( pd, 0, global, pd->global );
 
 	/* Setup the stream object. */
@@ -85,8 +85,7 @@ void BaseParser::init()
 	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::BuiltinType,
 			global, pd->nextObjectId++ ); 
 
-	pd->stream = new Context( internal, global, objectDef );
-
+	pd->stream = new StructDef( internal, global, objectDef );
 	pd->streamSel = declareStruct( pd, pd->rootNamespace,
 			pd->stream->name, pd->stream );
 	
@@ -415,7 +414,7 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 {
 	LangStmt *stmt = 0;
 
-	Context *context = 0;
+	StructDef *context = 0;
 	ObjectDef *object = 0;
 	if ( curStruct() == 0 )
 		object = pd->globalObjectDef;
@@ -922,7 +921,7 @@ void BaseParser::structVarDef( const InputLoc &loc, ObjectField *objField )
 	if ( curStruct() == 0 )
 		error(loc) << "internal error: no context stack items found" << endp;
 
-	Context *context = curStruct();
+	StructDef *context = curStruct();
 	objField->context = context;
 	object = context->objectDef;
 
@@ -940,7 +939,7 @@ void BaseParser::structHead( const InputLoc &loc,
 	ObjectDef *objectDef = ObjectDef::cons( objectType,
 			data, pd->nextObjectId++ ); 
 
-	Context *context = new Context( loc, data, objectDef );
+	StructDef *context = new StructDef( loc, data, objectDef );
 	structStack.push( context );
 
 	inNspace->structDefList.append( context );

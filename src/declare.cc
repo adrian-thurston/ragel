@@ -167,7 +167,7 @@ LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
 }
 
 StructEl *declareStruct( Compiler *pd, Namespace *inNspace,
-		const String &data, Context *context )
+		const String &data, StructDef *context )
 {
 	if ( inNspace != 0 ) {
 		TypeMapEl *inDict = inNspace->typeMap.find( data );
@@ -1023,7 +1023,7 @@ void Compiler::initCtxField( GenericType *gen )
 {
 #if 0
 	LangEl *langEl = gen->utArg->langEl;
-	Context *context = langEl->contextIn;
+	StructDef *context = langEl->contextIn;
 
 	/* Make the type ref and create the field. */
 	UniqueType *ctxUT = findUniqueType( TYPE_TREE, context->lel );

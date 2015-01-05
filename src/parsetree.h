@@ -187,7 +187,7 @@ struct JoinOrLm;
 struct RegionJoinOrLm;
 struct TokenRegion;
 struct Namespace;
-struct Context;
+struct StructDef;
 struct TokenDef;
 struct TokenDefListReg;
 struct TokenDefListNs;
@@ -357,7 +357,7 @@ struct TokenDef
 	static TokenDef *cons( const String &name, const String &literal,
 		bool isLiteral, bool isIgnore, LexJoin *join, CodeBlock *codeBlock,
 		const InputLoc &semiLoc, int longestMatchId, Namespace *nspace,
-		RegionSet *regionSet, ObjectDef *objectDef, Context *contextIn )
+		RegionSet *regionSet, ObjectDef *objectDef, StructDef *contextIn )
 	{ 
 		TokenDef *t = new TokenDef;
 
@@ -406,7 +406,7 @@ struct TokenDef
 	RegionSet *regionSet;
 	ReCaptureVect reCaptureVect;
 	ObjectDef *objectDef;
-	Context *contextIn;
+	StructDef *contextIn;
 
 	TokenDef *dupOf;
 	bool noPostIgnore;
@@ -474,7 +474,7 @@ struct NtDef
 {
 	static NtDef *cons( const String &name, Namespace *nspace,
 		LelDefList *defList, ObjectDef *objectDef,
-		Context *contextIn, bool reduceFirst )
+		StructDef *contextIn, bool reduceFirst )
 	{ 
 		NtDef *nt = new NtDef;
 
@@ -489,7 +489,7 @@ struct NtDef
 	}
 
 	static NtDef *cons( const String &name, Namespace *nspace,
-		Context *contextIn, bool reduceFirst )
+		StructDef *contextIn, bool reduceFirst )
 	{ 
 		NtDef *nt = new NtDef;
 
@@ -507,7 +507,7 @@ struct NtDef
 	Namespace *nspace;
 	LelDefList *defList;
 	ObjectDef *objectDef;
-	Context *contextIn;
+	StructDef *contextIn;
 	bool reduceFirst;
 
 	NtDef *prev, *next;
@@ -522,16 +522,16 @@ struct TokenInstanceListReg : DListMel<TokenInstance, TokenInstancePtr> {};
 struct TokenDefListReg : DListMel<TokenDef, TokenDefPtr1> {};
 struct TokenDefListNs : DListMel<TokenDef, TokenDefPtr2> {};
 
-struct ContextStack
-	: public Vector<Context*>
+struct StructStack
+	: public Vector<StructDef*>
 {
-	Context *top()
-		{ return length() > 0 ? Vector<Context*>::top() : 0; }
+	StructDef *top()
+		{ return length() > 0 ? Vector<StructDef*>::top() : 0; }
 };
 
-struct Context
+struct StructDef
 {
-	Context( const InputLoc &loc, const String &name, ObjectDef *objectDef )
+	StructDef( const InputLoc &loc, const String &name, ObjectDef *objectDef )
 	:
 		loc(loc),
 		name(name),
@@ -542,23 +542,23 @@ struct Context
 	String name;
 	ObjectDef *objectDef;
 
-	Context *prev, *next;
+	StructDef *prev, *next;
 };
 
 struct StructEl
 {
-	StructEl( const String &name, Context *context )
+	StructEl( const String &name, StructDef *context )
 		: name(name), context(context), id(-1) {}
 
 	String name;
-	Context *context;
+	StructDef *context;
 	int id;
 
 	StructEl *prev, *next;
 };
 
 typedef DList<StructEl> StructElList;
-struct StructDefList : DList<Context> {};
+struct StructDefList : DList<StructDef> {};
 
 struct TypeMapEl
 	: public AvlTreeEl<TypeMapEl>
@@ -2317,7 +2317,7 @@ struct ObjectField
 	Type type;
 	TypeRef *typeRef;
 	String name;
-	Context *context;
+	StructDef *context;
 	NameScope *scope;
 	long offset;
 	bool beenReferenced;
@@ -2530,7 +2530,7 @@ typedef Vector<QualItem> QualItemVect;
 
 struct LangVarRef
 {
-	static LangVarRef *cons( const InputLoc &loc, Context *context,
+	static LangVarRef *cons( const InputLoc &loc, StructDef *context,
 			NameScope *scope, QualItemVect *qual, const String &name )
 	{
 		LangVarRef *l = new LangVarRef;
@@ -2542,7 +2542,7 @@ struct LangVarRef
 		return l;
 	}
 
-	static LangVarRef *cons( const InputLoc &loc, Context *context,
+	static LangVarRef *cons( const InputLoc &loc, StructDef *context,
 			NameScope *scope, const String &name )
 	{
 		return cons( loc, context, scope, new QualItemVect, name );
@@ -2602,7 +2602,7 @@ struct LangVarRef
 			VarRefLookup &lookup, CallArgVect *args, bool temps ) const;
 
 	InputLoc loc;
-	Context *context;
+	StructDef *context;
 	NameScope *scope;
 	QualItemVect *qual;
 	String name;
@@ -3110,7 +3110,7 @@ struct LangStmt
 
 	static LangStmt *cons( const InputLoc &loc, Type type, ObjectField *objField,
 			TypeRef *typeRef, IterCall *iterCall, StmtList *stmtList,
-			Context *context, NameScope *scope )
+			StructDef *context, NameScope *scope )
 	{
 		LangStmt *s = new LangStmt;
 		s->loc = loc;
@@ -3170,7 +3170,7 @@ struct LangStmt
 	LangStmt *elsePart;
 	String name;
 	IterCall *iterCall;
-	Context *context;
+	StructDef *context;
 	NameScope *scope;
 	ConsItemList *consItemList;
 
@@ -3204,7 +3204,7 @@ struct CodeBlock
 	StmtList *stmtList;
 	ObjectDef *localFrame;
 	Locals locals;
-	Context *context;
+	StructDef *context;
 
 	/* Each frame has two versions of 
 	 * the code: revert and commit. */
@@ -3248,7 +3248,7 @@ struct Function
 	bool isUserIter;
 	long paramListSize;
 	UniqueType **paramUTs;
-	Context *inContext;
+	StructDef *inContext;
 	bool exprt;
 	ObjectMethod *objMethod;
 

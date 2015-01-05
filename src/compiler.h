@@ -271,8 +271,8 @@ struct LangEl : public DListEl<LangEl>
 	PredType predType;
 	long predValue;
 
-	Context *contextDef;
-	Context *contextIn;
+	StructDef *contextDef;
+	StructDef *contextIn;
 	bool noPreIgnore;
 	bool noPostIgnore;
 	bool isZero;
@@ -868,13 +868,13 @@ struct Compiler
 	ConsList replList;
 	ParserTextList parserTextList;
 
-	Context *global;
+	StructDef *global;
 	StructEl *globalSel;
 	ObjectDef *globalObjectDef;
 	ObjectField *argv0;
 	ObjectField *argvList;
 
-	Context *stream;
+	StructDef *stream;
 	StructEl *streamSel;
 
 	VectorTypeIdMap vectorTypeIdMap;
@@ -1009,7 +1009,7 @@ LangEl *addLangEl( Compiler *pd, Namespace *nspace,
 		const String &data, LangEl::Type type );
 
 StructEl *declareStruct( Compiler *pd, Namespace *nspace,
-		const String &data, Context *context );
+		const String &data, StructDef *context );
 
 void declareTypeAlias( Compiler *pd, Namespace *nspace,
 		const String &data, TypeRef *typeRef );

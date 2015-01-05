@@ -24,7 +24,7 @@ struct BaseParser
 
 	RegionSetVect regionStack;
 	NamespaceVect namespaceStack;
-	ContextStack structStack;
+	StructStack structStack;
 	ObjectDef *curLocalFrame;
 	NameScope *curScope;
 
@@ -33,7 +33,7 @@ struct BaseParser
 	bool insideRegion()
 		{ return regionStack.length() > 0; }
 
-	Context *curStruct()
+	StructDef *curStruct()
 		{ return structStack.length() == 0 ? 0 : structStack.top(); }
 
 	Namespace *curNspace()
