@@ -3014,11 +3014,49 @@ again:
 			vm_push( res );
 			break;
 		}
+		case IN_LIST_PUSH_HEAD_WC: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WC\n" );
+
+			List *list = vm_pop_type( List* );
+			Struct *s = vm_pop_type( Struct* );
+			ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
+
+			colm_list_prepend( list, listEl );
+
+			treeUpref( prg->trueVal );
+			vm_push( prg->trueVal );
+			break;
+		}
+		case IN_LIST_PUSH_HEAD_WV: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WV\n" );
+
+			List *list = vm_pop_type(List*);
+			Struct *s = vm_pop_type(Struct*);
+			ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
+
+			colm_list_prepend( list, listEl );
+
+			treeUpref( prg->trueVal );
+			vm_push( prg->trueVal );
+
+			/* Set up reverse code. Needs no args. */
+			rcodeCode( exec, IN_LIST_PUSH_HEAD_BKT );
+			rcodeUnitTerm( exec );
+			break;
+		}
+		case IN_LIST_PUSH_HEAD_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
+
+			List *list = vm_pop_type(List*);
+			colm_list_detach_head( list );
+			break;
+		}
 		case IN_LIST_PUSH_TAIL_WC: {
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
 
 			List *list = vm_pop_type(List*);
-			ListEl *listEl = vm_pop_type(ListEl*);
+			Struct *s = vm_pop_type(Struct*);
+			ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
 
 			colm_list_append( list, listEl );
 
@@ -3030,7 +3068,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WV\n" );
 
 			List *list = vm_pop_type(List*);
-			ListEl *listEl = vm_pop_type(ListEl*);
+			Struct *s = vm_pop_type(Struct*);
+			ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
 
 			colm_list_append( list, listEl );
 
@@ -3055,9 +3094,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LIST_EL_MEM_R\n" );
 
-			Tree *obj = vm_pop();
-			Tree *val = colm_list_el_get( (ListEl*)obj, field );
-			vm_push( val );
+			Struct *s = vm_pop_type( Struct * );
+			ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
+			Struct *val = colm_list_el_get( listEl, field );
+			vm_push_type( Struct *, val );
 			break;
 		}
 		case IN_LIST_POP_TAIL_WC: {
@@ -3097,46 +3137,6 @@ again:
 			treeDownref( prg, sp, obj );
 
 			listPushTail( prg, (List*)obj, val );
-			break;
-		}
-		case IN_LIST_PUSH_HEAD_WV: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WV\n" );
-
-			Tree *obj = vm_pop();
-			Tree *val = vm_pop();
-
-			treeDownref( prg, sp, obj );
-
-			listPushHead( prg, (List*)obj, val );
-			treeUpref( prg->trueVal );
-			vm_push( prg->trueVal );
-
-			/* Set up reverse code. Needs no args. */
-			rcodeCode( exec, IN_LIST_PUSH_HEAD_BKT );
-			rcodeUnitTerm( exec );
-			break;
-		}
-		case IN_LIST_PUSH_HEAD_WC: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WC\n" );
-
-			Tree *obj = vm_pop();
-			Tree *val = vm_pop();
-
-			treeDownref( prg, sp, obj );
-
-			listPushHead( prg, (List*)obj, val );
-			treeUpref( prg->trueVal );
-			vm_push( prg->trueVal );
-			break;
-		}
-		case IN_LIST_PUSH_HEAD_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
-
-			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
-
-			Tree *tree = listRemoveHead( prg, (List*)obj );
-			treeDownref( prg, sp, tree );
 			break;
 		}
 		case IN_LIST_POP_HEAD_WC: {
@@ -3186,9 +3186,9 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LIST_MEM_R\n" );
 
-			Tree *obj = vm_pop();
-			Tree *val = colm_list_get( (List*)obj, field );
-			vm_push( val );
+			List *list = vm_pop_type( List* );
+			Struct *val = colm_list_get( list, field );
+			vm_push_type( Struct *, val );
 			break;
 		}
 		case IN_GET_LIST_MEM_WC: {

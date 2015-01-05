@@ -43,6 +43,7 @@ void BaseParser::listElDef( String name )
 
 	ObjectField *of = ObjectField::cons( InputLoc(),
 			ObjectField::UserFieldType, elTr, name );
+
 	structVarDef( InputLoc(), of );
 }
 

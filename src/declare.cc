@@ -297,9 +297,10 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 		case GEN_LIST:
 			pd->initListFunctions( this );
 			pd->initListFields( this );
+			pd->initListElFields( this );
 			break;
 		case GEN_LIST_EL:
-			pd->initListElFields( this );
+//			pd->initListElFields( this );
 			break;
 		case GEN_PARSER:
 			utArg->langEl->parserId = pd->nextParserId++;
@@ -927,15 +928,14 @@ void Compiler::initListFunctions( GenericType *gen )
 
 void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 {
-#if 0
-	TypeRef *typeRef = TypeRef::cons(
-			internal, TypeRef::ListEl, 0, gen->typeArg, 0 );
-
-	typeRef->resolveType( this );
+//	TypeRef *typeRef = TypeRef::cons(
+//			internal, TypeRef::ListEl, 0, gen->typeArg, 0 );
+//
+//	typeRef->resolveType( this );
 
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltOffType, typeRef, name );
+			ObjectField::InbuiltOffType, gen->typeArg, name );
 
 	el->inGetR =  IN_GET_LIST_EL_MEM_R;
 	el->inGetValR =  IN_GET_LIST_EL_MEM_R;
@@ -944,28 +944,22 @@ void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 //	el->inSetWC = IN_SET_LIST2EL_MEM_WC;
 //	el->inSetWV = IN_SET_LIST2EL_MEM_WV;
 
-	gen->objDef->rootScope->insertField( el->name, el );
-
 	/* Zero for head, One for tail. */
 	el->offset = offset;
-#endif
+
+	gen->utArg->structEl->context->objectDef->rootScope->insertField( el->name, el );
+
 }
 
 
 void Compiler::initListElFields( GenericType *gen )
 {
-	initListElField( gen, "next", 0 );
-	initListElField( gen, "value", 2 );
+	initListElField( gen, "prev", 0 );
+	initListElField( gen, "next", 1 );
 }
 
 void Compiler::initListField( GenericType *gen, const char *name, int offset )
 {
-//	/* Type reference for the list element. */
-//	TypeRef *typeRef = TypeRef::cons(
-//			internal, TypeRef::ListEl, 0, gen->typeArg, 0 );
-//
-//	typeRef->resolveType( this );
-
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltOffType, gen->typeArg, name );

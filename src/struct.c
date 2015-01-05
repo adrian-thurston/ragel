@@ -109,12 +109,12 @@ void colm_list_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 	struct colm_list *list = (struct colm_list*) s;
 
 	ListEl *el = list->head;
-	while ( el != 0 ) {
-		ListEl *next = el->list_next;
+//	while ( el != 0 ) {
+//		ListEl *next = el->list_next;
 //		treeDownref( prg, sp, el->value );
-		//listElFree( prg, el );
-		el = next;
-	}
+//		//listElFree( prg, el );
+//		el = next;
+//	}
 }
 
 List *colm_list_new( struct colm_program *prg )
@@ -152,41 +152,49 @@ Map *colm_map_new( struct colm_program *prg )
 	return map;
 }
 
-Tree *colm_list_get( List *list, Word field )
+struct colm_struct *colm_list_get( List *list, Word field )
 {
-	Tree *result = 0;
+	ListEl *result = 0;
 	switch ( field ) {
 		case 0: 
-			result = (Tree*)list->head;
+			result = list->head;
 			break;
 		case 1: 
-			result = (Tree*)list->tail;
+			result = list->tail;
 			break;
 		default:
 			assert( 0 );
 			break;
 	}
-	return result;
+
+	struct colm_struct *s = result != 0 ?
+			((void*)result) - sizeof(Tree*) - sizeof(struct colm_struct)
+			: 0;
+	return s;
 }
 
-Tree *colm_list_el_get( ListEl *listEl, Word field )
+struct colm_struct *colm_list_el_get( ListEl *listEl, Word field )
 {
-	Tree *result = 0;
+	ListEl *result = 0;
 	switch ( field ) {
 		case 0: 
-			result = (Tree*)listEl->list_prev;
+			result = listEl->list_prev;
 			break;
 		case 1: 
-			result = (Tree*)listEl->list_next;
+			result = listEl->list_next;
 			break;
-		case 2: 
+//		case 2: 
 //			result = listEl->value;
 //			treeUpref( result );
-			break;
-//		default:
-//			assert( false );
 //			break;
+		default:
+			assert( 0 );
+			break;
 	}
-	return result;
+
+	struct colm_struct *s = result != 0 ?
+			((void*)result) - sizeof(Tree*) - sizeof(struct colm_struct)
+			: 0;
+	return s;
 }
 

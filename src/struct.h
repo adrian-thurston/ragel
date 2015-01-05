@@ -125,14 +125,13 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 #define colm_struct_set_field_type( obj, type, field, val ) \
 	((type*)(((struct colm_struct*)obj)+1))[field] = val
 
-
 Parser *colm_parser_new( struct colm_program *prg, GenericInfo *gi );
 Stream *colm_stream_new( struct colm_program *prg );
 Stream *colm_stream_new2( struct colm_program *prg );
 
 List *colm_list_new( struct colm_program *prg );
-Tree *colm_list_get( List *list, Word field );
-Tree *colm_list_el_get( ListEl *listEl, Word field );
+struct colm_struct *colm_list_get( List *list, Word field );
+struct colm_struct *colm_list_el_get( ListEl *listEl, Word field );
 ListEl *colm_list_detach_head( List *list );
 long colm_list_length( List *list );
 
