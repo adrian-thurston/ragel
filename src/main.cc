@@ -86,7 +86,9 @@ void usage()
 "   -A                   The host language is C#\n"
 "   -O                   The host language is OCaml\n"
 "   -K                   The host language is Crack\n"
-"   --asm                The host language is x86 64 GASM\n"
+"   --asm\n"
+"   --gnu-asm-x86-64-sys-v\n"
+"                        The host language is x86_64 GASM, System V ABI''\n"
 "line directives: (C/D/Ruby/C#/OCaml)\n"
 "   -L                   Inhibit writing of #line directives\n"
 "code style:\n"
@@ -106,7 +108,7 @@ void usage()
 void version()
 {
 	cout << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
-			"Copyright (c) 2001-2013 by Adrian Thurston" << endl;
+			"Copyright (c) 2001-2015 by Adrian Thurston" << endl;
 	exit(0);
 }
 
@@ -354,6 +356,8 @@ void InputData::parseArgs( int argc, const char **argv )
 				else if ( strcmp( arg, "colm-frontend" ) == 0 )
 					frontend = ColmBased;
 				else if ( strcmp( arg, "asm" ) == 0 )
+					hostLang = &hostLangAsm;
+				else if ( strcmp( arg, "gnu-asm-x86-64-sys-v" ) == 0 )
 					hostLang = &hostLangAsm;
 				else if ( strcmp( arg, "direct" ) == 0 )
 					directBackend = true;

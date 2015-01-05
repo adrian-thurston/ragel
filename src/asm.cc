@@ -1272,7 +1272,9 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 
 	if ( state->fromStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
-		for ( GenActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ ) {
+		for ( GenActionTable::Iter item = state->fromStateAction->key;
+				item.lte(); item++ )
+		{
 			ACTION( out, item->value, state->id, false,
 					state->fromStateAction->anyNextStmt() );
 			out << "\n";
@@ -1538,7 +1540,7 @@ void AsmCodeGen::writeExec()
 
 #endif
 
-	/* Jump into the machine based on the curren state. */
+	/* Jump into the machine based on the current state. */
 	out <<
 		"	movq	cs(%rip), %rax\n"
 		"	jmp		*.L" << mn << "_entry_jmp(,%rax,8)\n"
