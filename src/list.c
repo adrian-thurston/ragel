@@ -3,7 +3,11 @@
  */
 
 #include <colm/pdarun.h>
+#include <colm/program.h>
 #include <colm/struct.h>
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 
 static void colm_list_add_after( List *list, ListEl *prev_el, ListEl *new_el );
 static void colm_list_add_before( List *list, ListEl *next_el, ListEl *new_el);
@@ -115,4 +119,67 @@ ListEl *colm_list_detach( List *list, ListEl *el )
 	/* Update List length and return element we detached. */
 	list->listLen--;
 	return el;
+}
+
+void colm_list_destroy( struct colm_program *prg, Tree **sp, struct colm_struct *s )
+{
+}
+
+List *colm_list_new( struct colm_program *prg )
+{
+	size_t memsize = sizeof(struct colm_list);
+	struct colm_list *list = (struct colm_list*) malloc( memsize );
+	memset( list, 0, memsize );
+	colm_struct_add( prg, (struct colm_struct *)list );
+	list->id = STRUCT_INBUILT_ID;
+	list->destructor = &colm_list_destroy;
+	return list;
+}
+
+struct colm_struct *colm_list_get( struct colm_program *prg,
+		List *list, Word genId, Word field )
+{
+	GenericInfo *gi = &prg->rtd->genericInfo[genId];
+	ListEl *result = 0;
+	switch ( field ) {
+		case 0: 
+			result = list->head;
+			break;
+		case 1: 
+			result = list->tail;
+			break;
+		default:
+			assert( 0 );
+			break;
+	}
+
+	struct colm_struct *s = result != 0 ?
+			colm_struct_container( result, gi->elOffset ) : 0;
+	return s;
+}
+
+struct colm_struct *colm_list_el_get( struct colm_program *prg,
+		ListEl *listEl, Word genId, Word field )
+{
+	GenericInfo *gi = &prg->rtd->genericInfo[genId];
+	ListEl *result = 0;
+	switch ( field ) {
+		case 0: 
+			result = listEl->list_prev;
+			break;
+		case 1: 
+			result = listEl->list_next;
+			break;
+//		case 2: 
+//			result = listEl->value;
+//			treeUpref( result );
+//			break;
+		default:
+			assert( 0 );
+			break;
+	}
+
+	struct colm_struct *s = result != 0 ?
+			colm_struct_container( result, gi->elOffset ) : 0;
+	return s;
 }

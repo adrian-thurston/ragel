@@ -5,14 +5,12 @@
 #include <string.h>
 #include <assert.h>
 
-#define STRUCT_INBUILT_ID -1
-
 struct colm_tree *colm_get_global( Program *prg, long pos )
 {
-	return colm_struct_get_field( prg->global, pos );
+	return colm_struct_get_field( prg->global, Tree*, pos );
 }
 
-static void colm_struct_add( Program *prg, struct colm_struct *item )
+void colm_struct_add( Program *prg, struct colm_struct *item )
 {
 	if ( prg->heap.head == 0 ) {
 		prg->heap.head = prg->heap.tail = item;
@@ -55,7 +53,7 @@ void colm_struct_delete( Program *prg, Tree **sp, struct colm_struct *el )
 		short *t = prg->rtd->selInfo[el->id].trees;
 		int i, len = prg->rtd->selInfo[el->id].treesLen;
 		for ( i = 0; i < len; i++ ) {
-			Tree *tree = colm_struct_get_field( el, t[i] );
+			Tree *tree = colm_struct_get_field( el, Tree*, t[i] );
 			treeDownref( prg, sp, tree );
 		}
 	}
@@ -104,29 +102,6 @@ Stream *colm_stream_new2( Program *prg )
 	return stream;
 }
 
-void colm_list_destroy( Program *prg, Tree **sp, struct colm_struct *s )
-{
-	struct colm_list *list = (struct colm_list*) s;
-
-	ListEl *el = list->head;
-//	while ( el != 0 ) {
-//		ListEl *next = el->list_next;
-//		treeDownref( prg, sp, el->value );
-//		//listElFree( prg, el );
-//		el = next;
-//	}
-}
-
-List *colm_list_new( struct colm_program *prg )
-{
-	size_t memsize = sizeof(struct colm_list);
-	struct colm_list *list = (struct colm_list*) malloc( memsize );
-	memset( list, 0, memsize );
-	colm_struct_add( prg, (struct colm_struct *)list );
-	list->id = STRUCT_INBUILT_ID;
-	list->destructor = &colm_list_destroy;
-	return list;
-}
 
 void colm_map_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 {
@@ -150,55 +125,5 @@ Map *colm_map_new( struct colm_program *prg )
 	colm_struct_add( prg, (struct colm_struct *)map );
 	map->id = STRUCT_INBUILT_ID;
 	return map;
-}
-
-struct colm_struct *colm_list_get( struct colm_program *prg,
-		List *list, Word genId, Word field )
-{
-	GenericInfo *genericInfo = &prg->rtd->genericInfo[genId];
-	ListEl *result = 0;
-	switch ( field ) {
-		case 0: 
-			result = list->head;
-			break;
-		case 1: 
-			result = list->tail;
-			break;
-		default:
-			assert( 0 );
-			break;
-	}
-
-	struct colm_struct *s = result != 0 ?
-			((void*)result) - (genericInfo->elOffset * sizeof(Tree*)) -
-			sizeof(struct colm_struct) : 0;
-	return s;
-}
-
-struct colm_struct *colm_list_el_get( struct colm_program *prg,
-		ListEl *listEl, Word genId, Word field )
-{
-	GenericInfo *genericInfo = &prg->rtd->genericInfo[genId];
-	ListEl *result = 0;
-	switch ( field ) {
-		case 0: 
-			result = listEl->list_prev;
-			break;
-		case 1: 
-			result = listEl->list_next;
-			break;
-//		case 2: 
-//			result = listEl->value;
-//			treeUpref( result );
-//			break;
-		default:
-			assert( 0 );
-			break;
-	}
-
-	struct colm_struct *s = result != 0 ?
-			((void*)result) - (genericInfo->elOffset * sizeof(Tree*)) -
-			sizeof(struct colm_struct) : 0;
-	return s;
 }
 

@@ -454,8 +454,8 @@ List *constructArgv( Program *prg, int argc, const char **argv )
 		treeUpref( arg );
 
 		Struct *s = colm_struct_new_size( prg, 3 );
-		colm_struct_set_field( s, 0, arg );
-		ListEl *listEl = colm_struct_get_addr_type( s, ListEl, 1 );
+		colm_struct_set_field( s, Tree*, 0, arg );
+		ListEl *listEl = colm_struct_get_addr( s, ListEl*, 1 );
 		colm_list_append( list, listEl );
 	}
 	
@@ -1316,7 +1316,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_R %d\n", field );
 
 			Tree *obj = vm_pop();
-			Tree *val = colm_struct_get_field( obj, field );
+			Tree *val = colm_struct_get_field( obj, Tree*, field );
 			treeUpref( val );
 			vm_push( val );
 			break;
@@ -1328,7 +1328,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_WC %d\n", field );
 
 			Tree *obj = vm_pop();
-			Tree *val = colm_struct_get_field( obj, field );
+			Tree *val = colm_struct_get_field( obj, Tree*, field );
 			treeUpref( val );
 			vm_push( val );
 
@@ -1341,7 +1341,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_WV\n" );
 
 			Tree *obj = vm_pop();
-			Tree *val = colm_struct_get_field( obj, field );
+			Tree *val = colm_struct_get_field( obj, Tree*, field );
 			treeUpref( val );
 			vm_push( val );
 
@@ -1374,9 +1374,9 @@ again:
 			Tree *val = vm_pop();
 
 			/* Downref the old value. */
-			Tree *prev = colm_struct_get_field( obj, field );
+			Tree *prev = colm_struct_get_field( obj, Tree*, field );
 			treeDownref( prg, sp, prev );
-			colm_struct_set_field( obj, field, val );
+			colm_struct_set_field( obj, Tree*, field, val );
 			break;
 		}
 		case IN_SET_STRUCT_WV: {
@@ -1389,8 +1389,8 @@ again:
 			Tree *val = vm_pop();
 
 			/* Save the old value, then set the field. */
-			Tree *prev = colm_struct_get_field( obj, field );
-			colm_struct_set_field( obj, field, val );
+			Tree *prev = colm_struct_get_field( obj, Tree*, field );
+			colm_struct_set_field( obj, Tree*, field, val );
 
 			/* Set up the reverse instruction. */
 			rcodeCode( exec, IN_SET_STRUCT_BKT );
@@ -1410,10 +1410,10 @@ again:
 			Tree *obj = vm_pop();
 
 			/* Downref the old value. */
-			Tree *prev = colm_struct_get_field( obj, field );
+			Tree *prev = colm_struct_get_field( obj, Tree*, field );
 			treeDownref( prg, sp, prev );
 
-			colm_struct_set_field( obj, field, val );
+			colm_struct_set_field( obj, Tree*, field, val );
 			break;
 		}
 		case IN_GET_STRUCT_VAL_R: {
@@ -1423,7 +1423,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_VAL_R %d\n", field );
 
 			Tree *obj = vm_pop();
-			Tree *val = colm_struct_get_field( obj, field );
+			Tree *val = colm_struct_get_field( obj, Tree*, field );
 			vm_push( val );
 			break;
 		}
@@ -1436,7 +1436,7 @@ again:
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
 
-			colm_struct_set_field( obj, field, val );
+			colm_struct_set_field( obj, Tree*, field, val );
 			break;
 		}
 		case IN_SET_STRUCT_VAL_WV: {
@@ -1449,7 +1449,7 @@ again:
 			Tree *val = vm_pop();
 
 			/* FIXME: save val here. */
-			colm_struct_set_field( obj, field, val );
+			colm_struct_set_field( obj, Tree*, field, val );
 			break;
 		}
 		case IN_GET_RHS_VAL_R: {
@@ -2370,8 +2370,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT %hd\n", stopId );
 
-			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
-			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
+			PdaRun *pdaRun = colm_struct_get_field( exec->parser, PdaRun *, 6 );
+			Stream *input = colm_struct_get_field( exec->parser, Stream *, 7 );
 
 			exec->pcr = undoParseFrag( prg, sp, pdaRun, input, exec->steps, exec->pcr );
 
@@ -2436,12 +2436,12 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WV %hd\n", stopId );
 
-			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
-			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
+			PdaRun *pdaRun = colm_struct_get_field( exec->parser, PdaRun *, 6 );
+			Stream *input = colm_struct_get_field( exec->parser, Stream *, 7 );
 			Tree *result = 0;
 
 			exec->pcr = parseFinish( &result, prg, sp, pdaRun, input, true, exec->pcr );
-			colm_struct_set_field_type( exec->parser, Tree*, 8, result );
+			colm_struct_set_field( exec->parser, Tree*, 8, result );
 
 			if ( exec->pcr == PcrDone )
 				instr += SIZEOF_CODE;
@@ -2483,8 +2483,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT %hd\n", stopId );
 
-			PdaRun *pdaRun = colm_struct_get_field_type( exec->parser, PdaRun *, 6 );
-			Stream *input = colm_struct_get_field_type( exec->parser, Stream *, 7 );
+			PdaRun *pdaRun = colm_struct_get_field( exec->parser, PdaRun *, 6 );
+			Stream *input = colm_struct_get_field( exec->parser, Stream *, 7 );
 
 			exec->pcr = undoParseFrag( prg, sp, pdaRun, input, exec->steps, exec->pcr );
 
@@ -3022,8 +3022,8 @@ again:
 
 			List *list = vm_pop_type( List* );
 			Struct *s = vm_pop_type( Struct* );
-			ListEl *listEl = colm_struct_get_addr_type( s, ListEl,
-					prg->rtd->genericInfo[genId].elOffset );
+			GenericInfo *gi = &prg->rtd->genericInfo[genId];
+			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
 
 			colm_list_prepend( list, listEl );
 
@@ -3039,8 +3039,8 @@ again:
 
 			List *list = vm_pop_type(List*);
 			Struct *s = vm_pop_type(Struct*);
-			ListEl *listEl = colm_struct_get_addr_type( s, ListEl,
-					prg->rtd->genericInfo[genId].elOffset );
+			GenericInfo *gi = &prg->rtd->genericInfo[genId];
+			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
 
 			colm_list_prepend( list, listEl );
 
@@ -3067,8 +3067,8 @@ again:
 
 			List *list = vm_pop_type(List*);
 			Struct *s = vm_pop_type(Struct*);
-			ListEl *listEl = colm_struct_get_addr_type( s, ListEl,
-					prg->rtd->genericInfo[genId].elOffset );
+			GenericInfo *gi = &prg->rtd->genericInfo[genId];
+			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
 
 			colm_list_append( list, listEl );
 
@@ -3084,8 +3084,8 @@ again:
 
 			List *list = vm_pop_type(List*);
 			Struct *s = vm_pop_type(Struct*);
-			ListEl *listEl = colm_struct_get_addr_type( s, ListEl,
-					prg->rtd->genericInfo[genId].elOffset );
+			GenericInfo *gi = &prg->rtd->genericInfo[genId];
+			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
 
 			colm_list_append( list, listEl );
 
@@ -3112,8 +3112,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_LIST_EL_MEM_R\n" );
 
 			Struct *s = vm_pop_type( Struct * );
-			ListEl *listEl = colm_struct_get_addr_type( s, ListEl,
-					prg->rtd->genericInfo[genId].elOffset );
+			GenericInfo *gi = &prg->rtd->genericInfo[genId];
+			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
 			Struct *val = colm_list_el_get( prg, listEl, genId, field );
 			vm_push_type( Struct *, val );
 			break;
@@ -3177,7 +3177,8 @@ again:
 
 			ListEl *head = list->head;
 			colm_list_detach_head( list );
-			Struct *s = ((void*)head) - (prg->rtd->genericInfo[genId].elOffset * sizeof(Tree*)) - sizeof(struct colm_struct);
+			GenericInfo *gi = &prg->rtd->genericInfo[genId];
+			Struct *s = colm_struct_container( head, gi->elOffset );
 			vm_push_type( Struct *, s );
 			break;
 		}
@@ -3850,9 +3851,9 @@ again:
 
 				/* Tree comes back upreffed. */
 				Tree *tree = constructArgv0( prg, prg->argc, prg->argv );
-				Tree *prev = colm_struct_get_field( prg->global, field );
+				Tree *prev = colm_struct_get_field( prg->global, Tree*, field );
 				treeDownref( prg, sp, prev );
-				colm_struct_set_field( prg->global, field, tree );
+				colm_struct_set_field( prg->global, Tree*, field, tree );
 				break;
 			}
 			case IN_LOAD_ARGV: {
@@ -3861,7 +3862,7 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
 
 				List *list = constructArgv( prg, prg->argc, prg->argv );
-				colm_struct_set_field_type( prg->global, List*, field, list );
+				colm_struct_set_field( prg->global, List*, field, list );
 				break;
 			}
 			case IN_INIT_LOCALS: {

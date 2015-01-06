@@ -101,29 +101,24 @@ typedef struct colm_map
 
 struct colm_struct *colm_struct_new_size( struct colm_program *prg, int size );
 struct colm_struct *colm_struct_new( struct colm_program *prg, int id );
+void colm_struct_add( struct colm_program *prg, struct colm_struct *item );
 void colm_struct_delete( struct colm_program *prg, struct colm_tree **sp,
 		struct colm_struct *el );
 
 struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 		colm_destructor_t destructor );
 
-#define colm_struct_get_field( obj, field ) \
-	((struct colm_tree**)(((struct colm_struct*)obj)+1))[field]
+#define colm_struct_get_field( obj, type, field ) \
+	(type)(((void**)(((struct colm_struct*)obj)+1))[field])
 
-#define colm_struct_get_field_type( obj, type, field ) \
-	((type*)(((struct colm_struct*)obj)+1))[field]
-
-#define colm_struct_get_addr( obj, field ) \
-	&(((void **)(((struct colm_struct*)obj)+1))[field])
-
-#define colm_struct_get_addr_type( obj, type, field ) \
-	(type*)(&(((void **)(((struct colm_struct*)obj)+1))[field]))
-
-#define colm_struct_set_field( obj, field, val ) \
-	((struct colm_tree**)(((struct colm_struct*)obj)+1))[field] = val
-
-#define colm_struct_set_field_type( obj, type, field, val ) \
+#define colm_struct_set_field( obj, type, field, val ) \
 	((type*)(((struct colm_struct*)obj)+1))[field] = val
+
+#define colm_struct_get_addr( obj, type, field ) \
+	(type)(&(((void **)(((struct colm_struct*)obj)+1))[field]))
+
+#define colm_struct_container( el, field ) \
+	((void*)el) - (field * sizeof(void*)) - sizeof(struct colm_struct)
 
 Parser *colm_parser_new( struct colm_program *prg, GenericInfo *gi );
 Stream *colm_stream_new( struct colm_program *prg );
@@ -138,6 +133,8 @@ ListEl *colm_list_detach_head( List *list );
 long colm_list_length( List *list );
 
 Map *colm_map_new( struct colm_program *prg );
+
+#define STRUCT_INBUILT_ID -1
 
 #if defined(__cplusplus)
 }
