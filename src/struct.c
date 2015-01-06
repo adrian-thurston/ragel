@@ -92,7 +92,7 @@ Parser *colm_parser_new( Program *prg, GenericInfo *gi )
 	return parser;
 }
 
-Stream *colm_stream_new2( Program *prg )
+Stream *colm_stream_new_struct( Program *prg )
 {
 	size_t memsize = sizeof(struct colm_stream);
 	struct colm_stream *stream = (struct colm_stream*) malloc( memsize );
@@ -101,7 +101,6 @@ Stream *colm_stream_new2( Program *prg )
 	stream->id = STRUCT_INBUILT_ID;
 	return stream;
 }
-
 
 void colm_map_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 {
@@ -126,4 +125,3 @@ Map *colm_map_new( struct colm_program *prg )
 	map->id = STRUCT_INBUILT_ID;
 	return map;
 }
-

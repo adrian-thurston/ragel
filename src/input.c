@@ -1013,7 +1013,7 @@ Stream *openStreamFile( Program *prg, char *name, FILE *file )
 {
 	StreamImpl *impl = newSourceStreamFile( name, file );
 
-	struct colm_stream *s = colm_stream_new2( prg );
+	struct colm_stream *s = colm_stream_new_struct( prg );
 	s->impl = impl;
 	return s;
 }
@@ -1022,7 +1022,7 @@ Stream *openStreamFd( Program *prg, char *name, long fd )
 {
 	StreamImpl *impl = newSourceStreamFd( name, fd );
 
-	struct colm_stream *s = colm_stream_new2( prg );
+	struct colm_stream *s = colm_stream_new_struct( prg );
 	s->impl = impl;
 	return s;
 }
@@ -1060,7 +1060,7 @@ Stream *colm_stream_new( Program *prg )
 {
 	StreamImpl *impl = newSourceStreamGeneric( "<internal>" );
 
-	struct colm_stream *stream = colm_stream_new2( prg );
+	struct colm_stream *stream = colm_stream_new_struct( prg );
 	stream->impl = impl;
 	return stream;
 }

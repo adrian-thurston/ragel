@@ -122,7 +122,7 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 
 Parser *colm_parser_new( struct colm_program *prg, GenericInfo *gi );
 Stream *colm_stream_new( struct colm_program *prg );
-Stream *colm_stream_new2( struct colm_program *prg );
+Stream *colm_stream_new_struct( struct colm_program *prg );
 
 List *colm_list_new( struct colm_program *prg );
 struct colm_struct *colm_list_get( struct colm_program *prg, List *list,
