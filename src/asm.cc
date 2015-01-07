@@ -1487,7 +1487,7 @@ void AsmCodeGen::writeExec()
 	testEofUsed = false;
 	outLabelUsed = false;
 
-	/* Data arrives in %rdi, length in %esi */
+	/* p arrives in %rdi, pe in %rsi */
 
 	/* p  : %r12 */
 	/* pe : %r13 */
@@ -1498,8 +1498,7 @@ void AsmCodeGen::writeExec()
 		"	push	%r13\n"
 		"	push	%r14\n"
 		"	movq	%rdi, %r12\n"
-		"	movslq	%esi, %r13\n"
-		"	addq	%rdi, %r13\n"
+		"	movq	%rsi, %r13\n"
 	;
 
 #if 0
