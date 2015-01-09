@@ -1502,6 +1502,7 @@ void AsmCodeGen::writeExec()
 		"	push	%r12\n"
 		"	push	%r13\n"
 		"	push	%r14\n"
+		"	push	%rbx\n"
 		"	movq	%rdi, %r12\n"
 		"	movq	%rsi, %r13\n"
 	;
@@ -1585,6 +1586,7 @@ void AsmCodeGen::writeExec()
 		out << ".L" << mn << "_out:\n";
 
 	out << 
+		"	pop	%rbx\n"
 		"	pop	%r14\n"
 		"	pop	%r13\n"
 		"	pop	%r12\n"
