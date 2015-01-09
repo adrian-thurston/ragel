@@ -1517,7 +1517,13 @@ void AsmCodeGen::writeExec()
 			"	if ( " << P() << " == " << PE() << " )\n"
 			"		goto _test_eof;\n";
 	}
+#endif
 
+	out <<
+		"	cmpq	%r12, %r13\n"
+		"	je	.L" << mn << "_test_eof\n";
+
+#if 0
 	if ( useAgainLabel() ) {
 		out << 
 			"	goto _resume;\n"
