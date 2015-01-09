@@ -581,7 +581,8 @@ void AsmCodeGen::writeInit()
 	if ( !noCS ) {
 		// out << "\t" << vCS() << " = " << START() << ";\n";
 		out <<
-			"	movl		$" << redFsm->startState->id << ", cs(%rip)\n";
+			"	movq	cs@GOTPCREL(%rip), %rax\n"
+			"	movl	$" << redFsm->startState->id << ", (%rax)\n";
 	}
 	
 //	/* If there are any calls, then the stack top needs initialization. */
@@ -1299,8 +1300,11 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 
 	/* Break out here. */
 	outLabelUsed = true;
-	out << "	movl	$" << state->id << ", cs(%rip)\n";
-	out << "	jmp .L" << mn << "_out\n";
+
+	out << 
+		"	movq	cs@GOTPCREL(%rip), %rax\n"
+		"	movl	$" << state->id << ", (%rax)\n"
+		"	jmp		.L" << mn << "_out\n";
 }
 
 std::string AsmCodeGen::TRANS_GOTO_TARG( RedCondPair *pair )
@@ -1352,8 +1356,9 @@ std::ostream &AsmCodeGen::EXIT_STATES()
 
 			out << 
 				".L" << mn << "_test_eof_" << st->id << ":\n"
-				"	movl	$" << st->id << ", cs(%rip)\n"
-				"	jmp .L" << mn << "_test_eof\n";
+				"	movq	cs@GOTPCREL(%rip), %rax\n"
+				"	movl	$" << st->id << ", (%rax)\n"
+				"	jmp		.L" << mn << "_test_eof\n";
 		}
 	}
 	return out;
