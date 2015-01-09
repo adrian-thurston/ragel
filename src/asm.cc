@@ -1555,8 +1555,11 @@ void AsmCodeGen::writeExec()
 
 	/* Jump into the machine based on the current state. */
 	out <<
-		"	movq	cs(%rip), %rax\n"
-		"	jmp		*.L" << mn << "_entry_jmp(,%rax,8)\n"
+		"	movq	cs@GOTPCREL(%rip), %rax\n"
+		"	movslq	(%rax), %rax\n"
+		"	leaq	.L" << mn << "_entry_jmp(%rip), %rcx\n"
+		"	movq	(%rcx,%rax,8), %rcx\n"
+		"	jmp		*%rcx\n"
 		"	.section .rodata\n"
 		"	.align 8\n"
 		".L" << mn << "_entry_jmp:\n";
