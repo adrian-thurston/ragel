@@ -132,7 +132,8 @@ finish:
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
-	movl	cs(%rip), %edx
+	movq	cs@GOTPCREL (%rip), %rdx
+	movl	(%rdx), %edx
 	movl	$4, %eax
 	cmpl	%eax, %edx
 	jl	.L36
@@ -216,7 +217,8 @@ main:
 	movl	-4(%rbp), %eax
 	cltq
 	movq	inp(,%rax,8), %rax
-	movl	%edx, %esi
+	movslq	%edx, %rsi
+	addq	%rax, %rsi
 	movq	%rax, %rdi
 	call	exec
 	movl	$0, %eax

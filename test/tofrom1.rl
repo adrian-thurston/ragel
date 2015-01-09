@@ -233,7 +233,8 @@ main:
 	movl	-4(%rbp), %eax
 	cltq
 	movq	inp(,%rax,8), %rax
-	movl	%edx, %esi
+	movslq	%edx, %rsi
+	addq	%rax, %rsi
 	movq	%rax, %rdi
 	call	exec
 	movl	$0, %eax
