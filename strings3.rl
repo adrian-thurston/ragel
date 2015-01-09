@@ -1348,7 +1348,8 @@ test:
 	call	strlen
 	movl	%eax, %edx
 	movq	-8(%rbp), %rax
-	movl	%edx, %esi
+	movslq	%edx, %rsi
+	addq	%rax, %rsi
 	movq	%rax, %rdi
 	call	exec
 	movl	cs(%rip), %edx
