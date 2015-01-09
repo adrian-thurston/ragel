@@ -816,7 +816,9 @@ void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 		"	jg	" << def << "\n"
 		"	movzbq	%r14b, %rax\n"
 		"	subq	$" << low << ", %rax\n"
-		"	jmp	*.L" << mn << "_sjt_" << table << "(,%rax,8)\n"
+		"	leaq	.L" << mn << "_sjt_" << table << "(%rip), %rcx\n"
+		"	movq    (%rcx,%rax,8), %rcx\n"
+		"	jmp     *%rcx\n"
 		"	.section .rodata\n"
 		"	.align 8\n"
 		".L" << mn << "_sjt_" << table << ":\n";
