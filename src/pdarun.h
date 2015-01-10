@@ -344,7 +344,7 @@ typedef struct _PdaRun
 } PdaRun;
 
 void colm_pda_init( struct colm_program *prg, PdaRun *pdaRun, PdaTables *tables,
-		int parserId, long stopTarget, int revertOn, Tree *context );
+		int parserId, long stopTarget, int revertOn, struct colm_struct *context );
 void clearPdaRun( struct colm_program *prg, struct colm_tree **sp, PdaRun *pdaRun );
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
 void rtCodeVectEmpty( RtCodeVect *vect );

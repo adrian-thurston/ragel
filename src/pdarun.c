@@ -9,6 +9,8 @@
 #include "tree.h"
 #include "pool.h"
 
+#include "internal.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -37,7 +39,7 @@
 	i = (Tree*)w; \
 } while(0)
 
-static void initFsmRun( Program *prg, FsmRun *fsmRun )
+static void init_fsm_run( Program *prg, FsmRun *fsmRun )
 {
 	fsmRun->tables = prg->rtd->fsmTables;
 
@@ -50,7 +52,7 @@ static void initFsmRun( Program *prg, FsmRun *fsmRun )
 	fsmRun->preRegion = -1;
 }
 
-void clearFsmRun( Program *prg, FsmRun *fsmRun )
+static void clear_fsm_run( Program *prg, FsmRun *fsmRun )
 {
 	if ( fsmRun->consumeBuf != 0 ) {
 		/* Transfer the run buf list to the program */
@@ -1365,7 +1367,7 @@ free_tree:
 
 void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
 {
-	clearFsmRun( prg, pdaRun->fsmRun );
+	clear_fsm_run( prg, pdaRun->fsmRun );
 
 	/* Remaining stack and parse trees underneath. */
 	clearParseTree( prg, sp, pdaRun->stackTop );
@@ -1398,9 +1400,6 @@ void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
 	clearParseTree( prg, sp, pdaRun->parseInput );
 	pdaRun->parseInput = 0;
 
-	if ( pdaRun->context != 0 )
-		treeDownref( prg, sp, pdaRun->context );
-
 	rcodeDownrefAll( prg, sp, &pdaRun->reverseCode );
 	rtCodeVectEmpty( &pdaRun->reverseCode );
 	rtCodeVectEmpty( &pdaRun->rcodeCollect );
@@ -1418,7 +1417,7 @@ int isParserStopFinished( PdaRun *pdaRun )
 }
 
 void colm_pda_init( Program *prg, PdaRun *pdaRun, PdaTables *tables,
-		int parserId, long stopTarget, int revertOn, Tree *context )
+		int parserId, long stopTarget, int revertOn, Struct *context )
 {
 	memset( pdaRun, 0, sizeof(PdaRun) );
 
@@ -1455,7 +1454,7 @@ void colm_pda_init( Program *prg, PdaRun *pdaRun, PdaTables *tables,
 	initRtCodeVect( &pdaRun->reverseCode );
 	initRtCodeVect( &pdaRun->rcodeCollect );
 
-	pdaRun->context = splitTree( prg, context );
+	pdaRun->context = context;
 	pdaRun->parseError = 0;
 	pdaRun->parseInput = 0;
 	pdaRun->triggerUndo = 0;
@@ -1469,7 +1468,7 @@ void colm_pda_init( Program *prg, PdaRun *pdaRun, PdaTables *tables,
 	pdaRun->rcBlockCount = 0;
 
 	pdaRun->fsmRun = &pdaRun->_fsmRun;
-	initFsmRun( prg, pdaRun->fsmRun );
+	init_fsm_run( prg, pdaRun->fsmRun );
 	newToken( prg, pdaRun, pdaRun->fsmRun );
 }
 

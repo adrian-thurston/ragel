@@ -762,15 +762,13 @@ again:
 		case IN_LOAD_CONTEXT_R: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_R\n" );
 
-			treeUpref( exec->parser->pdaRun->context );
-			vm_push( exec->parser->pdaRun->context );
+			vm_push_type( Struct*, exec->parser->pdaRun->context );
 			break;
 		}
 		case IN_LOAD_CONTEXT_WV: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WV\n" );
 
-			treeUpref( exec->parser->pdaRun->context );
-			vm_push( exec->parser->pdaRun->context );
+			vm_push_type( Struct *, exec->parser->pdaRun->context );
 
 			/* Set up the reverse instruction. */
 			rcodeUnitStart( exec );
@@ -782,15 +780,13 @@ again:
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			treeUpref( exec->parser->pdaRun->context );
-			vm_push( exec->parser->pdaRun->context );
+			vm_push_type( Struct *, exec->parser->pdaRun->context );
 			break;
 		}
 		case IN_LOAD_CONTEXT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_BKT\n" );
 
-			treeUpref( exec->parser->pdaRun->context );
-			vm_push( exec->parser->pdaRun->context );
+			vm_push_type( Struct *, exec->parser->pdaRun->context );
 			break;
 		}
 
@@ -831,7 +827,6 @@ again:
 		case IN_LOAD_PARSER_R: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_R\n" );
 
-			treeUpref( (Tree*)exec->parser );
 			vm_push( (Tree*)exec->parser );
 			assert( exec->parser != 0 );
 			break;
@@ -839,7 +834,6 @@ again:
 		case IN_LOAD_PARSER_WV: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_WV\n" );
 
-			treeUpref( (Tree*)exec->parser );
 			vm_push( (Tree*)exec->parser );
 			assert( exec->parser != 0 );
 
@@ -854,7 +848,6 @@ again:
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			treeUpref( (Tree*)exec->parser );
 			vm_push( (Tree*)exec->parser );
 			assert( exec->parser != 0 );
 			break;
@@ -865,7 +858,6 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_BKT\n" );
 
-			treeUpref( parser );
 			vm_push( parser );
 			break;
 		}
@@ -873,7 +865,6 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_R\n" );
 
 			assert( exec->parser != 0 );
-			//treeUpref( (Tree*)exec->parser->input );
 			vm_push( (Tree*)exec->parser->input );
 			break;
 		}
@@ -881,7 +872,6 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_WV\n" );
 
 			assert( exec->parser != 0 );
-			//treeUpref( (Tree*)exec->parser->input );
 			vm_push( (Tree*)exec->parser->input );
 
 			/* Set up the reverse instruction. */
@@ -894,7 +884,6 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_WC\n" );
 
 			assert( exec->parser != 0 );
-			//treeUpref( (Tree*)exec->parser->input );
 			vm_push( (Tree*)exec->parser->input );
 			break;
 		}
@@ -911,15 +900,13 @@ again:
 		case IN_LOAD_CTX_R: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CTX_R\n" );
 
-			treeUpref( exec->parser->pdaRun->context );
-			vm_push( exec->parser->pdaRun->context );
+			vm_push_type( Struct *, exec->parser->pdaRun->context );
 			break;
 		}
 		case IN_LOAD_CTX_WV: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CTX_WV\n" );
 
-			treeUpref( exec->parser->pdaRun->context );
-			vm_push( exec->parser->pdaRun->context );
+			vm_push_type( Struct*, exec->parser->pdaRun->context );
 
 			/* Set up the reverse instruction. */
 			rcodeUnitStart( exec );
@@ -932,15 +919,13 @@ again:
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			treeUpref( exec->parser->pdaRun->context );
-			vm_push( exec->parser->pdaRun->context );
+			vm_push_type( Struct *, exec->parser->pdaRun->context );
 			break;
 		}
 		case IN_LOAD_CTX_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CTX_BKT\n" );
 
-			treeUpref( exec->parser->pdaRun->context );
-			vm_push( exec->parser->pdaRun->context );
+			vm_push_type( Struct *, exec->parser->pdaRun->context );
 			break;
 		}
 		case IN_INIT_CAPTURES: {
@@ -1385,7 +1370,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_WV %d\n", field );
 
-			Tree *obj = vm_pop();
+			Struct *obj = vm_pop_type(Struct*);
 			Tree *val = vm_pop();
 
 			/* Save the old value, then set the field. */
@@ -2063,11 +2048,9 @@ again:
 		case IN_GET_PARSER_CTX_R: {
 			debug( prg, REALM_BYTECODE, "IN_GET_PARSER_CTX_R\n" );
 
-			Tree *obj = vm_pop();
-			Tree *ctx = ((Parser*)obj)->pdaRun->context;
-			treeUpref( ctx );
-			vm_push( ctx );
-			treeDownref( prg, sp, obj );
+			Parser *parser = vm_pop_type( Parser * );
+			Struct *ctx = parser->pdaRun->context;
+			vm_push_type( Struct *, ctx );
 			break;
 		}
 
@@ -2077,7 +2060,6 @@ again:
 			Parser *parser = vm_pop_type( Parser * );
 			Struct *strct = vm_pop_type( Struct * );
 			colm_parser_set_context( prg, sp, parser, strct );
-			treeDownref( prg, sp, parser );
 			break;
 		}
 
@@ -2348,8 +2330,6 @@ again:
 			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*) vm_pop();
 
-			treeDownref( prg, sp, (Tree*)parser );
-
 			if ( prg->induceExit )
 				goto out;
 
@@ -2423,7 +2403,6 @@ again:
 			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*)vm_pop();
 
-			treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
 
@@ -2457,7 +2436,6 @@ again:
 			exec->parser = (Parser*)vm_pop();
 
 			vm_push( parser->result );
-			treeDownref( prg, sp, (Tree*)parser );
 			if ( prg->induceExit )
 				goto out;
 
@@ -2538,7 +2516,6 @@ again:
 
 			StreamImpl *si = streamToImpl( parser->input );
 			si->funcs->unsetEof( si );
-			treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
 
@@ -3993,7 +3970,6 @@ again:
 			read_word( pcr );
 			read_word( steps );
 
-			treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
 
@@ -4060,8 +4036,6 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_BKT\n" ); 
 
-			treeDownref( prg, sp, parser );
-			treeDownref( prg, sp, input );
 			break;
 		}
 		case IN_INPUT_APPEND_STREAM_BKT: {
