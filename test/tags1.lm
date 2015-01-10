@@ -84,7 +84,7 @@ end # tags
 
 Tags: tags = new tags
 Tags->TS = cons tags::tag_stack ["sentinal"]
-parse tags::start(deref Tags)[stdin]
+parse tags::start(Tags)[stdin]
 ##### IN #####
 y y a i i b c c m m n n b a;
 ##### EXP #####

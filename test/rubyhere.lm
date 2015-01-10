@@ -89,7 +89,7 @@ end # rubyhere
 
 RubyHere: rubyhere = new rubyhere
 
-parse S: rubyhere::start(deref RubyHere)[ stdin ]
+parse S: rubyhere::start(RubyHere)[ stdin ]
 
 print_xml(S)
 print('\n')

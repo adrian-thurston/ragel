@@ -15,7 +15,7 @@ context undo
 end
 
 Undo: undo = new undo
-parse Input: undo::start( deref Undo )[ stdin ]
+parse Input: undo::start( Undo )[ stdin ]
 print( Input )
 ##### IN #####
 a b;
