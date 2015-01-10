@@ -110,6 +110,9 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 
 	UniqueType *utValue = typeRef1->resolveType( pd );	
 
+	if ( utValue->typeId != TYPE_STRUCT )
+		error( loc ) << "only structs can be list elements" << endp;
+
 	/* Find the offset of the list element. */
 	int off = 0;
 	ObjectField *listEl = 0;

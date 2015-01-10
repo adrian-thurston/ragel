@@ -725,7 +725,7 @@ void Compiler::declareStreamFields( )
 			IN_INPUT_PUSH_IGNORE_WV, IN_INPUT_PUSH_IGNORE_WV, uniqueTypeAny, false );
 
 	initFunction( uniqueTypeStr, streamObj, "push_stream",  
-			IN_INPUT_PUSH_STREAM_WV, IN_INPUT_PUSH_STREAM_WV, uniqueTypeStream, false );
+		IN_INPUT_PUSH_STREAM_WV, IN_INPUT_PUSH_STREAM_WV, uniqueTypeStream, false );
 
 	initFunction( uniqueTypeVoid, streamObj, "close",
 			IN_INPUT_CLOSE_WC, IN_INPUT_CLOSE_WC, false );

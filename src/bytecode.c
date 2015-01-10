@@ -2608,7 +2608,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_STREAM_WV\n" );
 
 			Stream *input = vm_pop_stream();
-			Stream *toPush = vm_pop();
+			Stream *toPush = vm_pop_stream();
 			long len = stream_push_stream( prg, sp, streamToImpl( input ), toPush );
 			vm_push( 0 );
 
@@ -3202,8 +3202,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WC\n" );
 
-			List *list = vm_pop_type( List * );
-			//treeDownref( prg, sp, obj );
+			List *list = vm_pop_type(List*);
 
 			ListEl *head = list->head;
 			colm_list_detach_head( list );
@@ -3218,17 +3217,18 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WV\n" );
 
-			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
+			List *list = vm_pop_type(List*);
 
-			Tree *end = listRemoveHead( prg, (List*)obj );
-			vm_push( end );
+			ListEl *head = list->head;
+			colm_list_detach_head( list );
+			GenericInfo *gi = &prg->rtd->genericInfo[genId];
+			Struct *s = colm_struct_container( head, gi->elOffset );
+			vm_push_type( Struct *, s );
 
 			/* Set up reverse. The result comes off the list downrefed.
 			 * Need it up referenced for the reverse code too. */
-			treeUpref( end );
 			rcodeCode( exec, IN_LIST_POP_HEAD_BKT );
-			rcodeWord( exec, (Word)end );
+			rcodeWord( exec, (Word)s );
 			rcodeUnitTerm( exec );
 			break;
 		}
