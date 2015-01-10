@@ -1117,6 +1117,13 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	if ( replUT->typeId == TYPE_GENERIC ) {
 		code.append( IN_CONS_GENERIC );
 		code.appendHalf( replUT->generic->id );
+
+		if ( replUT->generic->typeId == GEN_PARSER ) {
+			code.append( IN_DUP_VAL );
+			code.append( IN_CONSTRUCT_INPUT );
+			code.append( IN_TOP_SWAP );
+			code.append( IN_SET_INPUT );
+		}
 	}
 	else {
 		code.append( IN_NEW_STRUCT );
@@ -1206,7 +1213,7 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	assignFieldArgs( pd, code, replUT );
 
 	if ( varRef != 0 ) {
-		code.append( IN_DUP_TOP );
+		code.append( IN_DUP_TREE );
 
 		/* Get the type of the variable being assigned to. */
 		VarRefLookup lookup = varRef->lookupField( pd );
@@ -1232,7 +1239,7 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 //		code.appendHalf( replUT->langEl->generic->id );
 //
 //		if ( replUT->langEl->generic->typeId == GEN_PARSER ) {
-//			code.append( IN_DUP_TOP );
+//			code.append( IN_DUP_TREE );
 //			code.append( IN_CONSTRUCT_INPUT );
 //			code.append( IN_TOP_SWAP );
 //			code.append( IN_SET_INPUT );
@@ -1245,7 +1252,7 @@ UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
 //	}
 
 	if ( varRef != 0 ) {
-		code.append( IN_DUP_TOP );
+		code.append( IN_DUP_TREE );
 
 		/* Get the type of the variable being assigned to. */
 		VarRefLookup lookup = varRef->lookupField( pd );
@@ -1314,14 +1321,14 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	code.appendHalf( parserUT->generic->id );
 
 	/* Dup for the finish operation. */
-	code.append( IN_DUP_TOP );
+	code.append( IN_DUP_TREE );
 
 	/*
 	 * First load the context into the parser.
 	 */
 	if ( context ) {
 		/* Dup the parser. */
-		code.append( IN_DUP_TOP );
+		code.append( IN_DUP_TREE );
 
 		/* Eval the context. */
 		UniqueType *argUT = fieldInitArgs->data[0]->expr->evaluate( pd, code );
@@ -1336,13 +1343,13 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 	/*****************************/
 
-	code.append( IN_DUP_TOP );
+	code.append( IN_DUP_TREE );
 	code.append( IN_CONSTRUCT_INPUT );
 	code.append( IN_TOP_SWAP );
 	code.append( IN_SET_INPUT );
 
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ )
-		code.append( IN_DUP_TOP );
+		code.append( IN_DUP_TREE );
 	
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
@@ -1414,7 +1421,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 				code.append( IN_INPUT_APPEND_WC );
 		}
 
-		code.append( IN_DUP_TOP );
+		code.append( IN_DUP_TREE );
 
 		/* Parse instruction, dependent on whether or not we are producing
 		 * revert or commit code. */
@@ -1449,7 +1456,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	/* Parser is on the top of the stack. */
 
 	/* Pull out the error and save it off. */
-	code.append( IN_DUP_TOP );
+	code.append( IN_DUP_TREE );
 	code.append( IN_GET_PARSER_MEM_R );
 	code.appendHalf( 1 );
 	code.append( IN_SET_ERROR );
@@ -1462,7 +1469,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	 * Capture to the local var.
 	 */
 	if ( varRef != 0 ) {
-		code.append( IN_DUP_TOP );
+		code.append( IN_DUP_TREE );
 
 		/* Get the type of the variable being assigned to. */
 		VarRefLookup lookup = varRef->lookupField( pd );
@@ -1478,7 +1485,7 @@ void ConsItemList::evaluateSendStream( Compiler *pd, CodeVect &code )
 {
 	for ( ConsItemList::Iter item = first(); item.lte(); item++ ) {
 		/* Load a dup of the stream. */
-		code.append( IN_DUP_TOP );
+		code.append( IN_DUP_VAL );
 
 		switch ( item->type ) {
 		case ConsItem::LiteralType: {
@@ -1537,11 +1544,10 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) const
 {
 	varRef->evaluate( pd, code );
-	code.append( IN_PTR_DEREF_R );
 
 	/* Dup for every send. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ )
-		code.append( IN_DUP_TOP );
+		code.append( IN_DUP_VAL );
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
@@ -1600,7 +1606,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 		else
 			code.append( IN_INPUT_APPEND_WC );
 
-		code.append( IN_DUP_TOP );
+		code.append( IN_DUP_TREE );
 
 		parseFrag( pd, code, 0 );
 	}
@@ -1624,33 +1630,29 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 
 UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 {
-//	UniqueType *varUt = varRef->lookup( pd );
-//	GenericType *generic = varUt->langEl->generic;
-//
-//	if ( varUt == pd->uniqueTypeStream )
-//		evaluateSendStream( pd, code );
-//	else if ( generic != 0 && generic->typeId == GEN_PARSER )
-//		evaluateSendParser( pd, code, true );
-//	else
-//		error(loc) << "can only send to parsers and streams" << endl;
-//
-//	return varUt;
-	return 0;
+	UniqueType *varUt = varRef->lookup( pd );
+
+	if ( varUt == pd->uniqueTypeStream )
+		evaluateSendStream( pd, code );
+	else if ( varUt->parser() )
+		evaluateSendParser( pd, code, true );
+	else
+		error(loc) << "can only send to parsers and streams" << endl;
+
+	return varUt;
 }
 
 
 UniqueType *LangTerm::evaluateSendTree( Compiler *pd, CodeVect &code ) const
 {
-//	UniqueType *varUt = varRef->lookup( pd );
-//	GenericType *generic = varUt->langEl->generic;
-//
-//	if ( generic != 0 && generic->typeId == GEN_PARSER )
-//		evaluateSendParser( pd, code, false );
-//	else
-//		error(loc) << "can only send_tree to parsers" << endl;
-//
-//	return varUt;
-	return 0;
+	UniqueType *varUt = varRef->lookup( pd );
+
+	if ( varUt->parser() )
+		evaluateSendParser( pd, code, false );
+	else
+		error(loc) << "can only send_tree to parsers" << endl;
+
+	return varUt;
 }
 
 UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
@@ -1922,7 +1924,7 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 				case OP_LogicalAnd: {
 					/* Evaluate the left and duplicate it. */
 					UniqueType *lut = left->evaluate( pd, code );
-					code.append( IN_DUP_TOP );
+					code.append( IN_DUP_TREE );
 
 					/* Jump over the right if false, leaving the original left
 					 * result on the top of the stack. We don't know the
@@ -1945,7 +1947,7 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 				case OP_LogicalOr: {
 					/* Evaluate the left and duplicate it. */
 					UniqueType *lut = left->evaluate( pd, code );
-					code.append( IN_DUP_TOP );
+					code.append( IN_DUP_TREE );
 
 					/* Jump over the right if true, leaving the original left
 					 * result on the top of the stack. We don't know the

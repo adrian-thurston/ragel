@@ -20,7 +20,6 @@ typedef unsigned long ulong;
 typedef unsigned char uchar;
 
 /*
- * 0xf2
  * 0xf3
  * 0xf4
  */
@@ -62,7 +61,8 @@ typedef unsigned char uchar;
 
 #define IN_POP                   0x1d
 #define IN_POP_N_WORDS           0x1e
-#define IN_DUP_TOP               0x1f
+#define IN_DUP_VAL               0x1f
+#define IN_DUP_TREE              0xf2
 #define IN_TOP_SWAP              0x20
 
 #define IN_REJECT                0x21

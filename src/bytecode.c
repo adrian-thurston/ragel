@@ -707,13 +707,13 @@ again:
 		case IN_PRINT_STREAM: {
 			int n, i;
 			read_byte( n );
-			debug( prg, REALM_BYTECODE, "IN_PRINT_STREAM\n" );
+			debug( prg, REALM_BYTECODE, "IN_PRINT_STREAM %d\n", n );
 
 			Tree *arg[n];
 			for ( i = n-1; i >= 0; i-- )
 				arg[i] = vm_pop();
-			Pointer *ptr = (Pointer*)vm_pop();
-			StreamImpl *si = streamToImpl( (Stream*)ptr );
+			Stream *stream = vm_pop_type( Stream *);
+			StreamImpl *si = streamToImpl( stream );
 
 			for ( i = 0; i < n; i++ ) {
 				if ( si->file != 0 )
@@ -1816,8 +1816,15 @@ again:
 			vm_push( v2 );
 			break;
 		}
-		case IN_DUP_TOP: {
-			debug( prg, REALM_BYTECODE, "IN_DUP_TOP\n" );
+		case IN_DUP_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_DUP_VAL\n" );
+
+			Word val = (Word)vm_top();
+			vm_push_type( Word, val );
+			break;
+		}
+		case IN_DUP_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_DUP_TREE\n" );
 
 			Tree *val = vm_top();
 			treeUpref( val );
@@ -2673,18 +2680,16 @@ again:
 		case IN_GET_INPUT: {
 			debug( prg, REALM_BYTECODE, "IN_GET_INPUT\n" );
 
-			Parser *parser = (Parser*)vm_pop();
+			Parser *parser = vm_pop_type( Parser * );
 			Stream *stream = parser->input;
 			vm_push( (Tree*)stream );
-
-			//treeDownref( prg, sp, (Tree*)parser );
 			break;
 		}
 		case IN_SET_INPUT: {
 			debug( prg, REALM_BYTECODE, "IN_SET_INPUT\n" );
 
-			Parser *parser = (Parser*)vm_pop();
-			Stream *stream = (Stream*)vm_pop();
+			Parser *parser = vm_pop_type( Parser * );
+			Stream *stream = vm_pop_type( Stream * );
 			parser->input = stream;
 			break;
 		}
@@ -3774,7 +3779,7 @@ again:
 			if ( prg->stdinVal == 0 )
 				prg->stdinVal = openStreamFd( prg, "<stdin>", 0 );
 
-			vm_push( (Tree*)prg->stdinVal );
+			vm_push_type( Stream*, prg->stdinVal );
 			break;
 		}
 		case IN_GET_STDOUT: {
@@ -3782,15 +3787,10 @@ again:
 
 			/* Pop the root object. */
 			Tree *obj = vm_pop();
-			if ( prg->stdoutVal == 0 ) {
-				Tree *val = (Tree*)openStreamFd( prg, "<stdout>", 1 );
-				treeUpref( val );
-				prg->stdoutVal = (Stream*)constructPointer( prg, val );
-				treeUpref( (Tree*)prg->stdoutVal );
-			}
+			if ( prg->stdoutVal == 0 )
+				prg->stdoutVal = openStreamFd( prg, "<stdout>", 1 );
 
-			treeUpref( (Tree*)prg->stdoutVal );
-			vm_push( (Tree*)prg->stdoutVal );
+			vm_push_type( Stream*, prg->stdoutVal );
 			break;
 		}
 		case IN_GET_STDERR: {
@@ -3798,15 +3798,10 @@ again:
 
 			/* Pop the root object. */
 			Tree *obj = vm_pop();
-			if ( prg->stderrVal == 0 ) {
-				Tree *val = (Tree*)openStreamFd( prg, "<stderr>", 2 );
-				treeUpref( val );
-				prg->stderrVal = (Stream*)constructPointer( prg, val );
-				treeUpref( (Tree*)prg->stderrVal );
-			}
+			if ( prg->stderrVal == 0 )
+				prg->stderrVal = openStreamFd( prg, "<stderr>", 2 );
 
-			treeUpref( (Tree*)prg->stderrVal );
-			vm_push( (Tree*)prg->stderrVal );
+			vm_push_type( Stream*, prg->stderrVal );
 			break;
 		}
 		case IN_SYSTEM: {

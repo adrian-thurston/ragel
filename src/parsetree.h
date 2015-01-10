@@ -1845,6 +1845,9 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 
 	bool tree()
 		{ return typeId == TYPE_TREE; }
+	
+	bool parser()
+		{ return typeId == TYPE_GENERIC && generic->typeId == GEN_PARSER; }
 };
 
 struct CmpUniqueType
