@@ -91,7 +91,7 @@ end # ruby_here
 
 CTX: ruby_here = new ruby_here
 
-parse S: ruby_here::start( deref CTX ) [ stdin ]
+parse S: ruby_here::start( CTX ) [ stdin ]
 print_xml(S)
 print('\n')
 ##### IN #####
