@@ -716,7 +716,7 @@ struct GenericType
 	:
 		typeId(typeId), id(id),
 		typeArg(typeArg), keyTypeArg(0), 
-		utArg(0), keyUT(0), objDef(0), elOffset(0)
+		utArg(0), keyUT(0), objDef(0), el(0), elOffset(0)
 	{}
 
 	void declare( Compiler *pd, Namespace *nspace );
@@ -2177,7 +2177,9 @@ struct ObjectMethod
 		useCallObj(true),
 		func(0), 
 		iterDef(0),
-		useFnInstr(false)
+		useFnInstr(false),
+		useGenericId(false),
+		generic(0)
 	{
 	}
 
@@ -2279,6 +2281,8 @@ struct ObjectField
 		inSetWC( IN_HALT ),
 		inSetWV( IN_HALT ),
 		inGetValR( IN_HALT ),
+		inGetValWC( IN_HALT ),
+		inGetValWV( IN_HALT ),
 		inSetValWC( IN_HALT ),
 		inSetValWV( IN_HALT )
 	{}
@@ -2359,6 +2363,8 @@ struct ObjectField
 	Code inSetWC;
 	Code inSetWV;
 	Code inGetValR;
+	Code inGetValWC;
+	Code inGetValWV;
 	Code inSetValWC;
 	Code inSetValWV;
 

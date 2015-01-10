@@ -648,7 +648,9 @@ void Compiler::addInput( ObjectDef *frame )
 	el->inGetR     = IN_LOAD_INPUT_R;
 	el->inGetWV    = IN_LOAD_INPUT_WV;
 	el->inGetWC    = IN_LOAD_INPUT_WC;
-	el->inGetValR  = IN_LOAD_INPUT_WC;
+	el->inGetValR   = IN_LOAD_INPUT_R;
+	el->inGetValWC  = IN_LOAD_INPUT_WC;
+	el->inGetValWV  = IN_LOAD_INPUT_WV;
 	frame->rootScope->insertField( el->name, el );
 }
 
@@ -663,7 +665,9 @@ void Compiler::addCtx( ObjectDef *frame )
 	el->inGetR     = IN_LOAD_CTX_R;
 	el->inGetWV    = IN_LOAD_CTX_WV;
 	el->inGetWC    = IN_LOAD_CTX_WC;
-	el->inGetValR  = IN_LOAD_CTX_WC;
+	el->inGetValR   = IN_LOAD_CTX_R;
+	el->inGetValWC  = IN_LOAD_CTX_WC;
+	el->inGetValWV  = IN_LOAD_CTX_WV;
 	frame->rootScope->insertField( el->name, el );
 }
 
@@ -824,7 +828,9 @@ void Compiler::addStdin()
 	el->inGetR     = IN_GET_STDIN;
 	el->inGetWC    = IN_GET_STDIN;
 	el->inGetWV    = IN_GET_STDIN;
-	el->inGetValR  = IN_GET_STDIN;
+	el->inGetValR   = IN_GET_STDIN;
+	el->inGetValWC  = IN_GET_STDIN;
+	el->inGetValWV  = IN_GET_STDIN;
 	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
@@ -840,7 +846,10 @@ void Compiler::addStdout()
 	el->inGetR     = IN_GET_STDOUT;
 	el->inGetWC    = IN_GET_STDOUT;
 	el->inGetWV    = IN_GET_STDOUT;
-	el->inGetValR  = IN_GET_STDOUT;
+
+	el->inGetValR   = IN_GET_STDOUT;
+	el->inGetValWC  = IN_GET_STDOUT;
+	el->inGetValWV  = IN_GET_STDOUT;
 	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
@@ -856,7 +865,10 @@ void Compiler::addStderr()
 	el->inGetR     = IN_GET_STDERR;
 	el->inGetWC    = IN_GET_STDERR;
 	el->inGetWV    = IN_GET_STDERR;
-	el->inGetValR  = IN_GET_STDERR;
+
+	el->inGetValR   = IN_GET_STDERR;
+	el->inGetValWC  = IN_GET_STDERR;
+	el->inGetValWV  = IN_GET_STDERR;
 	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
@@ -973,7 +985,9 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 	el->inSetWC = IN_SET_LIST_MEM_WC;
 	el->inSetWV = IN_SET_LIST_MEM_WV;
 
-	el->inGetValR =  IN_GET_LIST_MEM_R;
+	el->inGetValR  =  IN_GET_LIST_MEM_R;
+	el->inGetValWC =  IN_GET_LIST_MEM_WC;
+	el->inGetValWV =  IN_GET_LIST_MEM_WV;
 
 	gen->objDef->rootScope->insertField( el->name, el );
 
@@ -1038,7 +1052,7 @@ void Compiler::initCtxField( GenericType *gen )
 
 	el->inGetValR =  IN_GET_PARSER_CTX_R;
 	el->inSetValWC = IN_SET_PARSER_CTX_WC;
-	el->inSetValWV = IN_SET_PARSER_CTX_WC;
+	el->inSetValWV = IN_SET_PARSER_CTX_WV;
 
 	gen->objDef->rootScope->insertField( el->name, el );
 }

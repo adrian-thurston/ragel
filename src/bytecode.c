@@ -872,7 +872,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_WV\n" );
 
 			assert( exec->parser != 0 );
-			vm_push( (Tree*)exec->parser->input );
+			vm_push_stream( exec->parser->input );
 
 			/* Set up the reverse instruction. */
 			rcodeUnitStart( exec );
@@ -2591,10 +2591,9 @@ again:
 			Word len;
 			read_word( len );
 
-			Stream *input = (Stream*)vm_pop();
+			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_BKT %d\n", len );
 
-			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_BKT\n" );
-
+			Stream *input = vm_pop_stream();
 			undoStreamPush( prg, sp, streamToImpl( input ), len );
 			break;
 		}

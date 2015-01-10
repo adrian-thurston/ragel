@@ -38,7 +38,7 @@ end # accum_bt
 AccumBt: accum_bt = new accum_bt
 AccumBt->OneParser = new parser<accum_bt::one>
 
-parse Two: accum_bt::two(deref AccumBt)[ stdin ]
+parse Two: accum_bt::two(AccumBt)[ stdin ]
 
 send AccumBt->OneParser ['\n'] eos
 

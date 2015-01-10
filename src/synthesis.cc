@@ -305,7 +305,17 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 	UniqueType *elUT = el->typeRef->uniqueType;
 
 	if ( elUT->typeId == TYPE_STRUCT || elUT->typeId == TYPE_GENERIC ) {
-		code.append( el->inGetValR );
+		if ( forWriting ) {
+			/* The instruction, depends on whether or not we are reverting. */
+			if ( pd->revertOn && revert )
+				code.append( el->inGetValWV );
+			else
+				code.append( el->inGetValWC );
+		}
+		else {
+			/* Loading for writing */
+			code.append( el->inGetValR );
+		}
 	}
 	else {
 		/* If it's a reference then we load it read always. */
@@ -319,7 +329,7 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 				code.append( el->inGetWC );
 		}
 		else {
-			/* Loading something for writing */
+			/* Loading something for reading */
 			if ( elUT->typeId == TYPE_ITER )
 				code.append( elUT->iterDef->inGetCurR );
 			else
@@ -2703,7 +2713,9 @@ void ObjectField::initField()
 			inGetR   =  IN_GET_LOCAL_R;
 			inGetWC  =  IN_GET_LOCAL_WC;
 			inSetWC  =  IN_SET_LOCAL_WC;
-			inGetValR =  IN_GET_LOCAL_VAL_R;
+			inGetValR   =  IN_GET_LOCAL_VAL_R;
+			inGetValWC  =  IN_GET_LOCAL_VAL_R;
+			inGetValWV  =  IN_GET_LOCAL_VAL_R;
 			inSetValWC =  IN_SET_LOCAL_VAL_WC;
 			break;
 
@@ -2728,6 +2740,8 @@ void ObjectField::initField()
 			inSetWC =  IN_SET_STRUCT_WC;
 			inSetWV =  IN_SET_STRUCT_WV;
 			inGetValR  = IN_GET_STRUCT_VAL_R;
+			inGetValWC = IN_GET_STRUCT_VAL_R;
+			inGetValWV = IN_GET_STRUCT_VAL_R;
 			inSetValWC = IN_SET_STRUCT_VAL_WC;
 			inSetValWV = IN_SET_STRUCT_VAL_WV;
 			break;
