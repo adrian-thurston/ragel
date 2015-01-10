@@ -971,9 +971,10 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	PdaRun *pdaRun = new PdaRun;
 	colm_pda_init( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
 
-	Tree *stream = (Tree*)colm_stream_new( prg );
+	Stream *stream = colm_stream_new_struct( prg );
+	stream->impl = sourceStream;
 
-	in->funcs->appendStream( in, stream );
+	in->funcs->appendStream( in, (Tree*)stream );
 	in->funcs->setEof( in );
 
 	long pcr = parseLoop( prg, sp, pdaRun, in, PcrStart );

@@ -1333,7 +1333,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		/* Eval the context. */
 		UniqueType *argUT = fieldInitArgs->data[0]->expr->evaluate( pd, code );
 
-		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_TREE )
+		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_STRUCT )
 			error(loc) << "context argument must be a stream or a tree" << endp;
 
 		/* Store the context. */
