@@ -1921,14 +1921,15 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 				}
 				case OP_LogicalAnd: {
 					/* Evaluate the left and duplicate it. */
-					left->evaluate( pd, code );
+					UniqueType *lut = left->evaluate( pd, code );
 					code.append( IN_DUP_TOP );
 
 					/* Jump over the right if false, leaving the original left
 					 * result on the top of the stack. We don't know the
 					 * distance yet so record the position of the jump. */
 					long jump = code.length();
-					code.append( IN_JMP_FALSE );
+					Half jinstr = lut->tree() ? IN_JMP_FALSE_TREE : IN_JMP_FALSE_VAL;
+					code.append( jinstr );
 					code.appendHalf( 0 );
 
 					/* Evauluate the right, add the test. Store it separately. */
@@ -1943,14 +1944,15 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 				}
 				case OP_LogicalOr: {
 					/* Evaluate the left and duplicate it. */
-					left->evaluate( pd, code );
+					UniqueType *lut = left->evaluate( pd, code );
 					code.append( IN_DUP_TOP );
 
 					/* Jump over the right if true, leaving the original left
 					 * result on the top of the stack. We don't know the
 					 * distance yet so record the position of the jump. */
 					long jump = code.length();
-					code.append( IN_JMP_TRUE );
+					Half jinstr = lut->tree() ? IN_JMP_TRUE_TREE : IN_JMP_TRUE_VAL;
+					code.append( jinstr );
 					code.appendHalf( 0 );
 
 					/* Evauluate the right, add the test. */
@@ -2117,7 +2119,7 @@ void LangStmt::compileForIterBody( Compiler *pd,
 	/* Test: jump past the while block if false. Note that we don't have the
 	 * distance yet. */
 	long jumpFalse = code.length();
-	code.append( IN_JMP_FALSE );
+	code.append( IN_JMP_FALSE_TREE );
 	code.appendHalf( 0 );
 
 	/*
@@ -2236,12 +2238,13 @@ void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
 {
 	/* Generate code for the while test. Remember the top. */
 	long top = code.length();
-	expr->evaluate( pd, code );
+	UniqueType *eut = expr->evaluate( pd, code );
 
 	/* Jump past the while block if false. Note that we don't have the
 	 * distance yet. */
 	long jumpFalse = code.length();
-	code.append( IN_JMP_FALSE );
+	Half jinstr = eut->tree() ? IN_JMP_FALSE_TREE : IN_JMP_FALSE_VAL;
+	code.append( jinstr );
 	code.appendHalf( 0 );
 
 	/* Compute the while block. */
@@ -2318,12 +2321,14 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			long jumpFalse = 0, jumpPastElse = 0, distance = 0;
 
 			/* Evaluate the test. */
-			expr->evaluate( pd, code );
+			UniqueType *eut = expr->evaluate( pd, code );
 
 			/* Jump past the if block if false. We don't know the distance
 			 * yet so store the location of the jump. */
 			jumpFalse = code.length();
-			code.append( IN_JMP_FALSE );
+			Half jinstr = eut->tree() ? IN_JMP_FALSE_TREE : IN_JMP_FALSE_VAL;
+
+			code.append( jinstr );
 			code.appendHalf( 0 );
 
 			/* Compile the if true branch. */

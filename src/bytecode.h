@@ -20,10 +20,6 @@ typedef unsigned long ulong;
 typedef unsigned char uchar;
 
 /*
- * 0x8b
- * 0xb8
- * 0xed
- *
  * 0xf2
  * 0xf3
  * 0xf4
@@ -54,8 +50,10 @@ typedef unsigned char uchar;
 #define IN_NOT                   0x14
 
 #define IN_JMP                   0x15
-#define IN_JMP_FALSE             0x16
-#define IN_JMP_TRUE              0x17
+#define IN_JMP_FALSE_TREE        0x16
+#define IN_JMP_TRUE_TREE         0x17
+#define IN_JMP_FALSE_VAL         0xb8
+#define IN_JMP_TRUE_VAL          0xed
 
 #define IN_STR_ATOI              0x18
 #define IN_STR_LENGTH            0x19
@@ -355,12 +353,12 @@ typedef unsigned char uchar;
 
 enum TYPE
 {
-	TYPE_NIL    = 0x01,
-	TYPE_TREE   = 0x02,
-	TYPE_REF    = 0x03,
-	TYPE_PTR    = 0x04,
-	TYPE_ITER   = 0x05,
-	TYPE_STRUCT = 0x06,
+	TYPE_NIL     = 0x01,
+	TYPE_TREE    = 0x02,
+	TYPE_REF     = 0x03,
+	TYPE_PTR     = 0x04,
+	TYPE_ITER    = 0x05,
+	TYPE_STRUCT  = 0x06,
 	TYPE_GENERIC = 0x07,
 };
 

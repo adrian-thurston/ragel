@@ -1572,11 +1572,11 @@ again:
 			treeDownref( prg, sp, (Tree*)str );
 			break;
 		}
-		case IN_JMP_FALSE: {
+		case IN_JMP_FALSE_TREE: {
 			short dist;
 			read_half( dist );
 
-			debug( prg, REALM_BYTECODE, "IN_JMP_FALSE %d\n", dist );
+			debug( prg, REALM_BYTECODE, "IN_JMP_FALSE_TREE %d\n", dist );
 
 			Tree *tree = vm_pop();
 			if ( testFalse( prg, tree ) )
@@ -1584,16 +1584,38 @@ again:
 			treeDownref( prg, sp, tree );
 			break;
 		}
-		case IN_JMP_TRUE: {
+		case IN_JMP_TRUE_TREE: {
 			short dist;
 			read_half( dist );
 
-			debug( prg, REALM_BYTECODE, "IN_JMP_TRUE %d\n", dist );
+			debug( prg, REALM_BYTECODE, "IN_JMP_TRUE_TREE %d\n", dist );
 
 			Tree *tree = vm_pop();
 			if ( !testFalse( prg, tree ) )
 				instr += dist;
 			treeDownref( prg, sp, tree );
+			break;
+		}
+		case IN_JMP_FALSE_VAL: {
+			short dist;
+			read_half( dist );
+
+			debug( prg, REALM_BYTECODE, "IN_JMP_FALSE_VAL %d\n", dist );
+
+			Tree *tree = vm_pop();
+			if ( tree == 0 )
+				instr += dist;
+			break;
+		}
+		case IN_JMP_TRUE_VAL: {
+			short dist;
+			read_half( dist );
+
+			debug( prg, REALM_BYTECODE, "IN_JMP_TRUE_VAL %d\n", dist );
+
+			Tree *tree = vm_pop();
+			if ( !tree != 0 )
+				instr += dist;
 			break;
 		}
 		case IN_JMP: {

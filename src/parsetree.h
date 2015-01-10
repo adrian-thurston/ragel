@@ -1842,6 +1842,9 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 	GenericType *generic;
 
 	ObjectDef *objectDef();
+
+	bool tree()
+		{ return typeId == TYPE_TREE; }
 };
 
 struct CmpUniqueType
