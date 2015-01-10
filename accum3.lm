@@ -21,9 +21,11 @@ def args
 
 ArgParser: parser<args> = new parser<args>
 
-ArgV: list<str> ArgV = argv
-for A: str in ArgV 
-	send ArgParser [A '\0']
+A: argv_el = argv->head
+while ( A ) {
+	send ArgParser [A->value '\0']
+	A = A->next
+}
 
 Args: args = ArgParser->finish() 
 

@@ -116,11 +116,19 @@ def count
 # end
 #
 
-CL: list<int>
+struct int_el
+	Int: int
+
+	list_el el
+end
+
+CL: list<int_el>
 
 int start_list( count: int )
 {
-	CL->push( count )
+	IntEl: int_el = new int_el
+	IntEl->Int = count
+	CL->push( IntEl )
 }
 
 def count_inc
@@ -485,9 +493,9 @@ int print_all_names( s: start )
 end # binary
 
 Binary: binary = new binary
-Binary->CL = new list<int>
+Binary->CL = new list<int_el>
 
-parse S: binary::start(deref Binary) [ stdin ]
+parse S: binary::start(Binary) [ stdin ]
 print_all_names( S )
 print( '*** SUCCESS ***\n' )
 ##### EXP #####
