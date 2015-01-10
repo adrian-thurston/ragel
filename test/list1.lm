@@ -1,0 +1,58 @@
+lex
+	ignore /space+/
+	literal `* `( `)
+	token id /[a-zA-Z_]+/
+end
+
+def item 
+	[id]
+|	[`( item* `)]
+
+def start 
+	[item*]
+
+parse S: start[ stdin ]
+
+struct start_el
+	B0: start
+	S: start
+	B1: start
+	B2: start
+	B3: start
+	list_el el
+end
+
+L: list<start_el> = new list<start_el>
+
+E: start_el = new start_el
+E->S = S
+L->push_head( E )
+
+E = new start_el
+E->S = S
+L->push_head( E )
+
+E = L->head
+while ( E ) {
+	print( E->S )
+	E = E->next
+}
+
+#Arg: list_el<str> = argv->head
+#while ( Arg ) {
+
+#
+#new start_el
+#
+#Arg: list_el<str> = argv->head
+#while ( Arg ) {
+#	print( Arg->value "\n" )
+#	Arg = Arg->next
+#}
+#print( E->S )
+
+##### IN ######
+a b c ( chocolate fudge ) d e
+##### EXP ######
+a b c ( chocolate fudge ) d e
+a b c ( chocolate fudge ) d e
