@@ -38,19 +38,6 @@ while ( E ) {
 	E = E->next
 }
 
-#Arg: list_el<str> = argv->head
-#while ( Arg ) {
-
-#
-#new start_el
-#
-#Arg: list_el<str> = argv->head
-#while ( Arg ) {
-#	print( Arg->value "\n" )
-#	Arg = Arg->next
-#}
-#print( E->S )
-
 ##### IN ######
 a b c ( chocolate fudge ) d e
 ##### EXP ######
