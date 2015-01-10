@@ -60,16 +60,16 @@ context si
 end # si
 
 SuperId: si = new si
-parse S: si::start(deref SuperId)[stdin]
+parse S: si::start(SuperId)[stdin]
 print_xml( S )
 print( '\n' )
 ##### IN #####
 !a b b a;
 ##### EXP #####
 old_id = NIL
-new_id = 13
-old_id = NIL
 new_id = 12
+old_id = NIL
+new_id = 11
 this is item2
 <si::start><si::item2><si::e2></si::e2><si::_literal_0001>!</si::_literal_0001><si::_literal_0003>a</si::_literal_0003><si::super_id>b</si::super_id><si::super_id>b</si::super_id><si::_literal_0003>a</si::_literal_0003></si::item2><si::SEMI_NL>;
 </si::SEMI_NL></si::start>

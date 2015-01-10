@@ -300,7 +300,7 @@ end # tags
 Tags: tags = new tags
 Tags->TagStack = construct tags::tag_stack []
 
-parse HTML_P: tags::start(deref Tags)[ stdin ]
+parse HTML_P: tags::start(Tags)[ stdin ]
 HTML: tags::start = HTML_P
 flatten( HTML )
 print_xml( HTML )

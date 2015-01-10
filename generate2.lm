@@ -196,7 +196,7 @@ Generate->OpenStack = new list<generate::open_item>
 Sentinal: generate::open_item = construct generate::open_item( '** SENTINAL **' 1 ) []
 Generate->OpenStack->push( Sentinal )
 
-parse S: generate::start(deref Generate)[stdin]
+parse S: generate::start(Generate)[stdin]
 
 if S {
 	for I: generate::external_link in S

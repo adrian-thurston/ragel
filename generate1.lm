@@ -565,7 +565,7 @@ Generate->IndentStack->push( 0 )
 # Has a newline been sent for this '\n' .. whitespace match. 
 Generate->newline_sent = 0
 
-parse S: generate::start(deref Generate)[ stdin ]
+parse S: generate::start(Generate)[ stdin ]
 
 print( '*** SUCCESS ***\n' )
 print( ^S '\n' )

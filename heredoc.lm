@@ -44,7 +44,7 @@ end # heredoc
 
 HereDoc: heredoc = new heredoc
 
-parse S: heredoc::start(deref HereDoc)[stdin]
+parse S: heredoc::start(HereDoc)[stdin]
 print_xml(S)
 print( '\n' )
 ##### IN #####
