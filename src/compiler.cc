@@ -363,8 +363,8 @@ Compiler::Compiler( )
 	global(0),
 	globalSel(0),
 	globalObjectDef(0),
-	argv0(0),
-	argvList(0),
+	arg0(0),
+	argv(0),
 
 	stream(0),
 	streamSel(0),

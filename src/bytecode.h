@@ -346,7 +346,7 @@ typedef unsigned char uchar;
 #define IN_STR_UORD32            0x05
 #define IN_STR_SORD32            0x06
 #define IN_LOAD_ARGV             0x07
-#define IN_LOAD_ARGV0            0x08
+#define IN_LOAD_ARG0             0x08
 #define IN_INIT_LOCALS           0x09
 #define IN_STOP                  0x0a
 
@@ -542,7 +542,7 @@ Head *intToStr( struct colm_program *prg, Word i );
 
 Tree *constructString( struct colm_program *prg, Head *s );
 
-void mainExecution( struct colm_program *prg, Execution *exec, Code *code );
+void colm_execute( struct colm_program *prg, Execution *exec, Code *code );
 void reductionExecution( Execution *exec, Tree **sp );
 void generationExecution( Execution *exec, Tree **sp );
 void reverseExecution( Execution *exec, Tree **sp, RtCodeVect *allRev );

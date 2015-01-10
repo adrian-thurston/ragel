@@ -205,7 +205,7 @@ void colm_run_program( Program *prg, int argc, const char **argv )
 	memset( &execution, 0, sizeof(execution) );
 	execution.frameId = prg->rtd->rootFrameId;
 
-	mainExecution( prg, &execution, prg->rtd->rootCode );
+	colm_execute( prg, &execution, prg->rtd->rootCode );
 
 	/* Clear the arg and stack. */
 	prg->argc = 0;

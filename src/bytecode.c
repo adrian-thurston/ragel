@@ -433,18 +433,18 @@ static void downrefLocals( Program *prg, Tree ***psp,
 	}
 }
 
-Tree *constructArgv0( Program *prg, int argc, const char **argv )
+static Tree *construct_arg0( Program *prg, int argc, const char **argv )
 {
-	Tree *arg = 0;
+	Tree *arg0 = 0;
 	if ( argc > 0 ) {
 		Head *head = stringAllocPointer( prg, argv[0], strlen(argv[0]) );
-		arg = constructString( prg, head );
-		treeUpref( arg );
+		arg0 = constructString( prg, head );
+		treeUpref( arg0 );
 	}
-	return arg;
+	return arg0;
 }
 
-List *constructArgv( Program *prg, int argc, const char **argv )
+static List *construct_argv( Program *prg, int argc, const char **argv )
 {
 	List *list = (List*)constructGeneric( prg, prg->rtd->argvGenericId );
 	int i;
@@ -486,7 +486,7 @@ void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *rev )
 	}
 }
 
-void mainExecution( Program *prg, Execution *exec, Code *code )
+void colm_execute( Program *prg, Execution *exec, Code *code )
 {
 	Tree **sp = prg->stackRoot;
 
@@ -3736,9 +3736,8 @@ again:
 
 			Tree *mode = vm_pop();
 			Tree *name = vm_pop();
-			Tree *res = (Tree*)openFile( prg, name, mode );
-			treeUpref( res );
-			vm_push( res );
+			Stream *res = openFile( prg, name, mode );
+			vm_push_stream( res );
 			treeDownref( prg, sp, name );
 			treeDownref( prg, sp, mode );
 			break;
@@ -3833,13 +3832,13 @@ again:
 				treeDownref( prg, sp, (Tree*)str );
 				break;
 			}
-			case IN_LOAD_ARGV0: {
+			case IN_LOAD_ARG0: {
 				Half field;
 				read_half( field );
-				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV0 %lu\n", field );
+				debug( prg, REALM_BYTECODE, "IN_LOAD_ARG0 %lu\n", field );
 
 				/* Tree comes back upreffed. */
-				Tree *tree = constructArgv0( prg, prg->argc, prg->argv );
+				Tree *tree = construct_arg0( prg, prg->argc, prg->argv );
 				Tree *prev = colm_struct_get_field( prg->global, Tree*, field );
 				treeDownref( prg, sp, prev );
 				colm_struct_set_field( prg->global, Tree*, field, tree );
@@ -3850,7 +3849,7 @@ again:
 				read_half( field );
 				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
 
-				List *list = constructArgv( prg, prg->argc, prg->argv );
+				List *list = construct_argv( prg, prg->argc, prg->argv );
 				colm_struct_set_field( prg->global, List*, field, list );
 				break;
 			}

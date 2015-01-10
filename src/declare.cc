@@ -879,13 +879,15 @@ void Compiler::addArgv()
 			ObjectField::StructFieldType, argvTypeRef, "argv" );
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
-	argvList = el;
+	argv = el;
+
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 
 	el = ObjectField::cons( internal,
-			ObjectField::StructFieldType, argvTypeRef, "argv0" );
+			ObjectField::StructFieldType, typeRef, "arg0" );
 	el->isConst = true;
 	globalObjectDef->rootScope->insertField( el->name, el );
-	argv0 = el;
+	arg0 = el;
 }
 
 void Compiler::addError()
@@ -941,17 +943,12 @@ void Compiler::initListFunctions( GenericType *gen )
 
 void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 {
-//	TypeRef *typeRef = TypeRef::cons(
-//			internal, TypeRef::ListEl, 0, gen->typeArg, 0 );
-//
-//	typeRef->resolveType( this );
-
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltOffType, gen->typeArg, name );
 
-	el->inGetR =  IN_GET_LIST_EL_MEM_R;
-	el->inGetValR =  IN_GET_LIST_EL_MEM_R;
+	el->inGetR    = IN_GET_LIST_EL_MEM_R;
+	el->inGetValR = IN_GET_LIST_EL_MEM_R;
 //	el->inGetWC = IN_GET_LIST2EL_MEM_WC;
 //	el->inGetWV = IN_GET_LIST2EL_MEM_WV;
 //	el->inSetWC = IN_SET_LIST2EL_MEM_WC;

@@ -754,7 +754,7 @@ struct Compiler
 	void addArgv();
 	void addError();
 	int argvOffset();
-	int argv0_Offset();
+	int arg0Offset();
 	void makeDefaultIterators();
 	void addLengthField( ObjectDef *objDef, Code getLength );
 	ObjectDef *findObject( const String &name );
@@ -871,8 +871,8 @@ struct Compiler
 	StructDef *global;
 	StructEl *globalSel;
 	ObjectDef *globalObjectDef;
-	ObjectField *argv0;
-	ObjectField *argvList;
+	ObjectField *arg0;
+	ObjectField *argv;
 
 	StructDef *stream;
 	StructEl *streamSel;

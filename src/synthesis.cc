@@ -2646,16 +2646,16 @@ void Compiler::compilePreEof( TokenRegion *region )
 	findLocals( block->localFrame, block );
 }
 
-int Compiler::argv0_Offset()
+int Compiler::arg0Offset()
 {
-	globalObjectDef->referenceField( this, argv0 );
-	return argv0->offset;
+	globalObjectDef->referenceField( this, arg0 );
+	return arg0->offset;
 }
 
 int Compiler::argvOffset()
 {
-	globalObjectDef->referenceField( this, argvList );
-	return argvList->offset;
+	globalObjectDef->referenceField( this, argv );
+	return argv->offset;
 }
 
 void Compiler::compileRootBlock( )
@@ -2683,8 +2683,8 @@ void Compiler::compileRootBlock( )
 	code.appendHalf( 0 );
 
 	code.append( IN_FN );
-	code.append( IN_LOAD_ARGV0 );
-	code.appendHalf( argv0_Offset() );
+	code.append( IN_LOAD_ARG0 );
+	code.appendHalf( arg0Offset() );
 
 	code.append( IN_FN );
 	code.append( IN_LOAD_ARGV );
