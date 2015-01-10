@@ -1,4 +1,4 @@
-print_xml( argv0 )
+print_xml( arg0 )
 
 A: argv_el = argv->head
 while ( A ) {
