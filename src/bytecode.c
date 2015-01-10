@@ -2124,14 +2124,11 @@ again:
 		case IN_INPUT_APPEND_STREAM_WC: {
 			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_STREAM_WC\n" );
 
-			Pointer *sptr = (Pointer*) vm_pop();
+			Stream *sptr = vm_pop_type( Stream * );
 			Tree *input = vm_pop();
 
-			StreamImpl *si = streamToImpl( (Stream*)sptr );
+			StreamImpl *si = streamToImpl( sptr );
 			streamAppendStream( prg, sp, si, input );
-
-			//vm_push( (Tree*)sptr );
-			//treeDownref( prg, sp, input );
 			break;
 		}
 		case IN_INPUT_APPEND_STREAM_WV: {
@@ -2384,10 +2381,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT %hd\n", stopId );
 
-			PdaRun *pdaRun = colm_struct_get_field( exec->parser, PdaRun *, 6 );
-			Stream *input = colm_struct_get_field( exec->parser, Stream *, 7 );
-
-			exec->pcr = undoParseFrag( prg, sp, pdaRun, input, exec->steps, exec->pcr );
+			exec->pcr = undoParseFrag( prg, sp, exec->parser->pdaRun,
+					exec->parser->input, exec->steps, exec->pcr );
 
 			if ( exec->pcr == PcrDone )
 				instr += SIZEOF_CODE;
@@ -2413,7 +2408,6 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WC %hd\n", stopId );
 
 			Tree *result = 0;
-
 			exec->pcr = parseFinish( &result, prg, sp,
 					exec->parser->pdaRun, exec->parser->input, false, exec->pcr );
 
@@ -2448,12 +2442,11 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WV %hd\n", stopId );
 
-			PdaRun *pdaRun = colm_struct_get_field( exec->parser, PdaRun *, 6 );
-			Stream *input = colm_struct_get_field( exec->parser, Stream *, 7 );
 			Tree *result = 0;
+			exec->pcr = parseFinish( &result, prg, sp, exec->parser->pdaRun,
+					exec->parser->input, true, exec->pcr );
 
-			exec->pcr = parseFinish( &result, prg, sp, pdaRun, input, true, exec->pcr );
-			colm_struct_set_field( exec->parser, Tree*, 8, result );
+			exec->parser->result = result;
 
 			if ( exec->pcr == PcrDone )
 				instr += SIZEOF_CODE;
@@ -2495,10 +2488,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT %hd\n", stopId );
 
-			PdaRun *pdaRun = colm_struct_get_field( exec->parser, PdaRun *, 6 );
-			Stream *input = colm_struct_get_field( exec->parser, Stream *, 7 );
-
-			exec->pcr = undoParseFrag( prg, sp, pdaRun, input, exec->steps, exec->pcr );
+			exec->pcr = undoParseFrag( prg, sp, exec->parser->pdaRun,
+					exec->parser->input, exec->steps, exec->pcr );
 
 			if ( exec->pcr == PcrDone )
 				instr += SIZEOF_CODE;
@@ -2662,9 +2653,9 @@ again:
 		case IN_GET_INPUT: {
 			debug( prg, REALM_BYTECODE, "IN_GET_INPUT\n" );
 
-			Parser *parser = vm_pop_type( Parser * );
+			Parser *parser = vm_pop_parser();
 			Stream *stream = parser->input;
-			vm_push( (Tree*)stream );
+			vm_push_stream( stream );
 			break;
 		}
 		case IN_SET_INPUT: {

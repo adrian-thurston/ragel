@@ -18,7 +18,7 @@ ObjectDef *UniqueType::objectDef()
 		return langEl->objectDef;
 	}
 	else if ( typeId == TYPE_STRUCT ) {
-		return structEl->context->objectDef;
+		return structEl->structDef->objectDef;
 	}
 	else if ( typeId == TYPE_GENERIC ) {
 		return generic->objDef;

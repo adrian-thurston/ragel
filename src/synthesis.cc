@@ -1512,6 +1512,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		bool isStream = false;
 		switch ( item->type ) {
 		case ConsItem::LiteralType: {
 			String result;
@@ -1548,6 +1549,9 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 				continue;
 			}
 
+			if ( ut == pd->uniqueTypeStream )
+				isStream = true;
+
 			if ( strings && ut->typeId == TYPE_TREE &&
 					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
 			{
@@ -1562,10 +1566,18 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 		/* Not a stream. Get the input first. */
 		code.append( IN_GET_INPUT );
 
-		if ( pd->revertOn )
-			code.append( IN_INPUT_APPEND_WV );
-		else
-			code.append( IN_INPUT_APPEND_WC );
+		if ( isStream ) {
+			if ( pd->revertOn )
+				code.append( IN_INPUT_APPEND_STREAM_WV );
+			else
+				code.append( IN_INPUT_APPEND_STREAM_WC );
+		}
+		else {
+			if ( pd->revertOn )
+				code.append( IN_INPUT_APPEND_WV );
+			else
+				code.append( IN_INPUT_APPEND_WC );
+		}
 
 		code.append( IN_DUP_TREE );
 
@@ -2797,7 +2809,7 @@ void Compiler::placeAllLanguageObjects()
 void Compiler::placeAllStructObjects()
 {
 	for ( StructElList::Iter s = structEls; s.lte(); s++ ) {
-		ObjectDef *objectDef = s->context->objectDef;
+		ObjectDef *objectDef = s->structDef->objectDef;
 		for ( FieldList::Iter f = *objectDef->fieldList; f.lte(); f++ )
 			objectDef->placeField( this, f->value );
 	}

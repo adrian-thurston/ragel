@@ -26,9 +26,8 @@ def start
 end # ctx
 
 
-CTX: ctx = new ctx
 SP: parser<ctx::start> = new parser<ctx::start>
-SP->ctx = deref CTX
+SP->ctx = new ctx
 send SP [stdin]
 Input: ctx::start = SP->finish()
 print( Input )

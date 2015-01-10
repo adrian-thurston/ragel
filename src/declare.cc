@@ -167,7 +167,7 @@ LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
 }
 
 StructEl *declareStruct( Compiler *pd, Namespace *inNspace,
-		const String &data, StructDef *context )
+		const String &data, StructDef *structDef )
 {
 	if ( inNspace != 0 ) {
 		TypeMapEl *inDict = inNspace->typeMap.find( data );
@@ -175,8 +175,9 @@ StructEl *declareStruct( Compiler *pd, Namespace *inNspace,
 			error() << "'" << data << "' already defined as something else" << endp;
 	}
 	
-	StructEl *structEl = new StructEl( data, context );
+	StructEl *structEl = new StructEl( data, structDef );
 	pd->structEls.append( structEl );
+	structDef->structEl = structEl;
 
 	if ( inNspace ) {
 		TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::StructType, data, structEl );
@@ -694,7 +695,7 @@ void Compiler::declareStrFields( )
 
 void Compiler::declareStreamFields( )
 {
-	streamObj = streamSel->context->objectDef; //
+	streamObj = streamSel->structDef->objectDef; //
 //	ObjectDef::cons( ObjectDef::BuiltinType,
 //			"stream", nextObjectId++ );
 //	streamLangEl->objectDef = streamObj;
@@ -950,7 +951,7 @@ void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 	/* Zero for head, One for tail. */
 	el->offset = offset;
 
-	gen->utArg->structEl->context->objectDef->rootScope->insertField( el->name, el );
+	gen->utArg->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
 }
 
 
@@ -1020,12 +1021,11 @@ void Compiler::initParserField( GenericType *gen, const char *name,
 
 void Compiler::initCtxField( GenericType *gen )
 {
-#if 0
 	LangEl *langEl = gen->utArg->langEl;
-	StructDef *context = langEl->contextIn;
+	StructDef *structDef = langEl->contextIn;
 
 	/* Make the type ref and create the field. */
-	UniqueType *ctxUT = findUniqueType( TYPE_TREE, context->lel );
+	UniqueType *ctxUT = findUniqueType( TYPE_STRUCT, structDef->structEl );
 	TypeRef *typeRef = TypeRef::cons( internal, ctxUT );
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "ctx" );
@@ -1036,8 +1036,11 @@ void Compiler::initCtxField( GenericType *gen )
 	el->inSetWC = IN_SET_PARSER_CTX_WC;
 	el->inSetWV = IN_SET_PARSER_CTX_WV;
 
+	el->inGetValR =  IN_GET_PARSER_CTX_R;
+	el->inSetValWC = IN_SET_PARSER_CTX_WC;
+	el->inSetValWV = IN_SET_PARSER_CTX_WC;
+
 	gen->objDef->rootScope->insertField( el->name, el );
-#endif
 }
 
 void Compiler::initParserFields( GenericType *gen )

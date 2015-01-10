@@ -529,29 +529,33 @@ struct StructStack
 		{ return length() > 0 ? Vector<StructDef*>::top() : 0; }
 };
 
+struct StructEl;
+
 struct StructDef
 {
 	StructDef( const InputLoc &loc, const String &name, ObjectDef *objectDef )
 	:
 		loc(loc),
 		name(name),
-		objectDef(objectDef)
+		objectDef(objectDef),
+		structEl(0)
 	{}
 
 	InputLoc loc;
 	String name;
 	ObjectDef *objectDef;
+	StructEl *structEl;
 
 	StructDef *prev, *next;
 };
 
 struct StructEl
 {
-	StructEl( const String &name, StructDef *context )
-		: name(name), context(context), id(-1) {}
+	StructEl( const String &name, StructDef *structDef )
+		: name(name), structDef(structDef), id(-1) {}
 
 	String name;
-	StructDef *context;
+	StructDef *structDef;
 	int id;
 
 	StructEl *prev, *next;

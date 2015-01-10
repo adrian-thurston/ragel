@@ -1487,8 +1487,8 @@ void Compiler::makeRuntimeData()
 	StructElList::Iter sel = structEls;
 	for ( int i = 0; i < count; i++, sel++ ) {
 		int treesLen;
-		runtimeData->selInfo[i].size = sel->context->objectDef->size();
-		runtimeData->selInfo[i].trees = makeTrees( sel->context->objectDef, treesLen );
+		runtimeData->selInfo[i].size = sel->structDef->objectDef->size();
+		runtimeData->selInfo[i].trees = makeTrees( sel->structDef->objectDef, treesLen );
 		runtimeData->selInfo[i].treesLen = treesLen;
 	}
 

@@ -113,7 +113,7 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 	/* Find the offset of the list element. */
 	int off = 0;
 	ObjectField *listEl = 0;
-	FieldList *fieldList = utValue->structEl->context->objectDef->fieldList;
+	FieldList *fieldList = utValue->structEl->structDef->objectDef->fieldList;
 	for ( FieldList::Iter f = *fieldList; f.lte(); f++, off++ ) {
 		UniqueType *fUT = f->value->typeRef->resolveType( pd );
 		if ( fUT->typeId == TYPE_GENERIC && fUT->generic != 0 &&
@@ -717,7 +717,7 @@ void Compiler::resolveParseTree()
 	}
 
 	for ( StructElList::Iter sel = structEls; sel.lte(); sel++ ) {
-		ObjectDef *objDef = sel->context->objectDef;
+		ObjectDef *objDef = sel->structDef->objectDef;
 		for ( FieldList::Iter f = *objDef->fieldList; f.lte(); f++ )
 			f->value->typeRef->resolveType( this );
 	}
