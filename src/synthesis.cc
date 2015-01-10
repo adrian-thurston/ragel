@@ -1225,45 +1225,6 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	return replUT;
 }
 
-UniqueType *LangTerm::evaluateNewstruct( Compiler *pd, CodeVect &code ) const
-{
-	/* What is being newstructed. */
-	UniqueType *replUT = typeRef->uniqueType;
-
-	if ( replUT->typeId == TYPE_STRUCT )
-		error(loc) << "cannot new a struct, use new2" << endp;
-
-//	if ( replUT->langEl->generic != 0 ) {
-//		/* Use the new generic. */
-//		code.append( IN_CONS_GENERIC );
-//		code.appendHalf( replUT->langEl->generic->id );
-//
-//		if ( replUT->langEl->generic->typeId == GEN_PARSER ) {
-//			code.append( IN_DUP_TREE );
-//			code.append( IN_CONSTRUCT_INPUT );
-//			code.append( IN_TOP_SWAP );
-//			code.append( IN_SET_INPUT );
-//		}
-//	}
-//	else {
-		/* New object (tree-based). */
-		code.append( IN_CONS_OBJECT );
-		code.appendHalf( replUT->langEl->id );
-//	}
-
-	if ( varRef != 0 ) {
-		code.append( IN_DUP_TREE );
-
-		/* Get the type of the variable being assigned to. */
-		VarRefLookup lookup = varRef->lookupField( pd );
-
-		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-		varRef->setField( pd, code, lookup.inObject, lookup.objField, replUT, false );
-	}
-
-	return replUT;
-}
-
 
 void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 {
@@ -1321,14 +1282,14 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	code.appendHalf( parserUT->generic->id );
 
 	/* Dup for the finish operation. */
-	code.append( IN_DUP_TREE );
+	code.append( IN_DUP_VAL );
 
 	/*
 	 * First load the context into the parser.
 	 */
 	if ( context ) {
 		/* Dup the parser. */
-		code.append( IN_DUP_TREE );
+		code.append( IN_DUP_VAL );
 
 		/* Eval the context. */
 		UniqueType *argUT = fieldInitArgs->data[0]->expr->evaluate( pd, code );

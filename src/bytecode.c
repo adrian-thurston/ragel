@@ -123,9 +123,9 @@ typedef struct colm_struct Struct;
 	i |= ((Word) *instr++) << 8; \
 } while(0)
 
-void parserSetContext( Program *prg, Tree **sp, Parser *parser, Tree *val )
+void colm_parser_set_context( Program *prg, Tree **sp, Parser *parser, Struct *val )
 {
-	parser->pdaRun->context = splitTree( prg, val );
+	parser->pdaRun->context = val;
 }
 
 static Head *treeToStr( Program *prg, Tree **sp, Tree *tree, int trim )
@@ -380,7 +380,7 @@ Tree *getLocalSplit( Program *prg, Tree **frame, long field )
 	return split;
 }
 
-static void downrefLocalTrees( Program *prg, Tree **sp,
+static void downref_local_trees( Program *prg, Tree **sp,
 		Tree **frame, LocalInfo *locals, long localsLen )
 {
 	long i;
@@ -2074,9 +2074,9 @@ again:
 		case IN_SET_PARSER_CTX_WC: {
 			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_CTX_WC\n" );
 
-			Tree *parser = vm_pop();
-			Tree *val = vm_pop();
-			parserSetContext( prg, sp, (Parser*)parser, val );
+			Parser *parser = vm_pop_type( Parser * );
+			Struct *strct = vm_pop_type( Struct * );
+			colm_parser_set_context( prg, sp, parser, strct );
 			treeDownref( prg, sp, parser );
 			break;
 		}
@@ -2296,7 +2296,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PCR_RET\n" );
 
 			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-			downrefLocalTrees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
+			downref_local_trees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
 			debug( prg, REALM_BYTECODE, "RET: %d\n", fi->frameSize );
 			vm_popn( fi->frameSize );
 
@@ -3716,7 +3716,7 @@ again:
 		case IN_RET: {
 
 			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-			downrefLocalTrees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
+			downref_local_trees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
 			vm_popn( fi->frameSize );
 
 			exec->frameId = (long) vm_pop();
@@ -3897,7 +3897,7 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_STOP\n" );
 
 				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-				downrefLocalTrees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
+				downref_local_trees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
 				vm_popn( fi->frameSize );
 
 				fflush( stdout );

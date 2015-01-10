@@ -295,7 +295,7 @@ typedef struct _PdaRun
 
 	int revertOn;
 
-	Tree *context;
+	struct colm_struct *context;
 
 	int stop;
 	int parseError;
