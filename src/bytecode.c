@@ -2269,9 +2269,11 @@ again:
 		case IN_PCR_CALL: {
 			debug( prg, REALM_BYTECODE, "IN_PCR_CALL\n" );
 
-			FrameInfo *fi = &prg->rtd->frameInfo[exec->parser->pdaRun->frameId];
-			long stretch = fi->argSize + 4 + fi->frameSize;
-			vm_contiguous( stretch );
+			if ( exec->parser->pdaRun->frameId >= 0 )  {
+				FrameInfo *fi = &prg->rtd->frameInfo[exec->parser->pdaRun->frameId];
+				long stretch = fi->argSize + 4 + fi->frameSize;
+				vm_contiguous( stretch );
+			}
 
 			vm_push( (SW)exec->framePtr );
 			vm_push( (SW)exec->iframePtr );
@@ -2295,10 +2297,13 @@ again:
 		case IN_PCR_RET: {
 			debug( prg, REALM_BYTECODE, "IN_PCR_RET\n" );
 
-			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-			downref_local_trees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
-			debug( prg, REALM_BYTECODE, "RET: %d\n", fi->frameSize );
-			vm_popn( fi->frameSize );
+			if ( exec->frameId >= 0 ) {
+				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
+				downref_local_trees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
+				debug( prg, REALM_BYTECODE, "RET: %d\n", fi->frameSize );
+
+				vm_popn( fi->frameSize );
+			}
 
 			instr = (Code*) vm_pop();
 			exec->frameId = ( long ) vm_pop();
