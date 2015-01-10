@@ -19,11 +19,6 @@ extern "C" {
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
-/*
- * 0xf3
- * 0xf4
- */
-
 #define IN_LOAD_INT              0x01
 #define IN_LOAD_STR              0x02
 #define IN_LOAD_NIL              0x03
@@ -278,6 +273,9 @@ typedef unsigned char uchar;
 #define IN_INPUT_PUSH_WV         0xc5
 #define IN_INPUT_PUSH_BKT        0xc6
 #define IN_INPUT_PUSH_IGNORE_WV  0xc7
+
+#define IN_INPUT_PUSH_STREAM_WV  0xf3
+#define IN_INPUT_PUSH_STREAM_BKT 0xf4
 
 #define IN_LOAD_CONTEXT_R        0xc8
 #define IN_LOAD_CONTEXT_WV       0xc9

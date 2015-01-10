@@ -684,13 +684,27 @@ void Compiler::declareStrFields( )
 	strObj = ObjectDef::cons( ObjectDef::BuiltinType, "str", nextObjectId++ );
 	strLangEl->objectDef = strObj;
 
-	initFunction( uniqueTypeInt, strObj, "atoi",   IN_STR_ATOI,   IN_STR_ATOI, true, true );
-	initFunction( uniqueTypeInt, strObj, "uord8",  IN_STR_UORD8,  IN_STR_UORD8, true, true );
-	initFunction( uniqueTypeInt, strObj, "sord8",  IN_STR_SORD8,  IN_STR_SORD8, true, true );
-	initFunction( uniqueTypeInt, strObj, "uord16", IN_STR_UORD16, IN_STR_UORD16, true, true );
-	initFunction( uniqueTypeInt, strObj, "sord16", IN_STR_SORD16, IN_STR_SORD16, true, true );
-	initFunction( uniqueTypeInt, strObj, "uord32", IN_STR_UORD32, IN_STR_UORD32, true, true );
-	initFunction( uniqueTypeInt, strObj, "sord32", IN_STR_SORD32, IN_STR_SORD32, true, true );
+	initFunction( uniqueTypeInt, strObj, "atoi",
+			IN_STR_ATOI,   IN_STR_ATOI, true, true );
+
+	initFunction( uniqueTypeInt, strObj, "uord8",
+			IN_STR_UORD8,  IN_STR_UORD8, true, true );
+
+	initFunction( uniqueTypeInt, strObj, "sord8",
+			IN_STR_SORD8,  IN_STR_SORD8, true, true );
+
+	initFunction( uniqueTypeInt, strObj, "uord16",
+			IN_STR_UORD16, IN_STR_UORD16, true, true );
+
+	initFunction( uniqueTypeInt, strObj, "sord16",
+			IN_STR_SORD16, IN_STR_SORD16, true, true );
+
+	initFunction( uniqueTypeInt, strObj, "uord32",
+			IN_STR_UORD32, IN_STR_UORD32, true, true );
+
+	initFunction( uniqueTypeInt, strObj, "sord32",
+			IN_STR_SORD32, IN_STR_SORD32, true, true );
+
 	addLengthField( strObj, IN_STR_LENGTH );
 
 	initFunction( uniqueTypeStr, globalObjectDef, "sprintf", 
@@ -699,17 +713,20 @@ void Compiler::declareStrFields( )
 
 void Compiler::declareStreamFields( )
 {
-	streamObj = streamSel->structDef->objectDef; //
-//	ObjectDef::cons( ObjectDef::BuiltinType,
-//			"stream", nextObjectId++ );
-//	streamLangEl->objectDef = streamObj;
+	streamObj = streamSel->structDef->objectDef;
 
 	initFunction( uniqueTypeStr, streamObj, "pull",  
 			IN_INPUT_PULL_WV, IN_INPUT_PULL_WC, uniqueTypeInt, false );
+
 	initFunction( uniqueTypeStr, streamObj, "push",  
 			IN_INPUT_PUSH_WV, IN_INPUT_PUSH_WV, uniqueTypeAny, false );
+
 	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
 			IN_INPUT_PUSH_IGNORE_WV, IN_INPUT_PUSH_IGNORE_WV, uniqueTypeAny, false );
+
+	initFunction( uniqueTypeStr, streamObj, "push_stream",  
+			IN_INPUT_PUSH_STREAM_WV, IN_INPUT_PUSH_STREAM_WV, uniqueTypeStream, false );
+
 	initFunction( uniqueTypeVoid, streamObj, "close",
 			IN_INPUT_CLOSE_WC, IN_INPUT_CLOSE_WC, false );
 }

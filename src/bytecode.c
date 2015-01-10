@@ -335,7 +335,7 @@ void undoPull( Program *prg, StreamImpl *in, Tree *str )
 	undoStreamPull( in, data, length );
 }
 
-static long streamPush( Program *prg, Tree **sp, StreamImpl *in, Tree *tree, int ignore )
+static long stream_push( Program *prg, Tree **sp, StreamImpl *in, Tree *tree, int ignore )
 {
 	if ( tree->id == LEL_ID_STR ) {
 		/* This should become a compile error. If it's text, it's up to the
@@ -363,6 +363,13 @@ static long streamPush( Program *prg, Tree **sp, StreamImpl *in, Tree *tree, int
 		streamPushTree( in, tree, ignore );
 		return -1;
 	}
+}
+
+static long stream_push_stream( Program *prg, Tree **sp,
+		StreamImpl *in, Stream *stream )
+{
+	streamPushStream( in, (Tree*)stream );
+	return -1;
 }
 
 void setLocal( Tree **frame, long field, Tree *tree )
@@ -2560,7 +2567,7 @@ again:
 
 			Stream *input = (Stream*)vm_pop();
 			Tree *tree = vm_pop();
-			long len = streamPush( prg, sp, streamToImpl( input ), tree, false );
+			long len = stream_push( prg, sp, streamToImpl( input ), tree, false );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2576,7 +2583,7 @@ again:
 
 			Stream *input = (Stream*)vm_pop();
 			Tree *tree = vm_pop();
-			long len = streamPush( prg, sp, streamToImpl( input ), tree, true );
+			long len = stream_push( prg, sp, streamToImpl( input ), tree, true );
 			vm_push( 0 );
 
 			/* Single unit. */
@@ -2592,6 +2599,30 @@ again:
 			read_word( len );
 
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_BKT %d\n", len );
+
+			Stream *input = vm_pop_stream();
+			undoStreamPush( prg, sp, streamToImpl( input ), len );
+			break;
+		}
+		case IN_INPUT_PUSH_STREAM_WV: {
+			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_STREAM_WV\n" );
+
+			Stream *input = vm_pop_stream();
+			Stream *toPush = vm_pop();
+			long len = stream_push_stream( prg, sp, streamToImpl( input ), toPush );
+			vm_push( 0 );
+
+			/* Single unit. */
+			rcodeCode( exec, IN_INPUT_PUSH_BKT );
+			rcodeWord( exec, len );
+			rcodeUnitTerm( exec );
+			break;
+		}
+		case IN_INPUT_PUSH_STREAM_BKT: {
+			Word len;
+			read_word( len );
+
+			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_STREAM_BKT %d\n", len );
 
 			Stream *input = vm_pop_stream();
 			undoStreamPush( prg, sp, streamToImpl( input ), len );
