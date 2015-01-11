@@ -474,7 +474,7 @@ static List *construct_argv( Program *prg, int argc, const char **argv )
  * Execution environment
  */
 
-void rcodeDownrefAll( Program *prg, Tree **sp, RtCodeVect *rev )
+void colm_rcode_downref_all( Program *prg, Tree **sp, RtCodeVect *rev )
 {
 	while ( rev->tabLen > 0 ) {
 		/* Read the length */
@@ -520,7 +520,7 @@ void colm_execute( Program *prg, Execution *exec, Code *code )
 	prg->stackRoot = sp;
 }
 
-int makeReverseCode( PdaRun *pdaRun )
+int colm_make_reverse_code( PdaRun *pdaRun )
 {
 	RtCodeVect *reverseCode = &pdaRun->reverseCode;
 	RtCodeVect *rcodeCollect = &pdaRun->rcodeCollect;
@@ -566,7 +566,7 @@ int makeReverseCode( PdaRun *pdaRun )
 	return true;
 }
 
-void transferReverseCode( PdaRun *pdaRun, ParseTree *parseTree )
+void colm_transfer_reverse_code( PdaRun *pdaRun, ParseTree *parseTree )
 {
 	if ( pdaRun->rcBlockCount > 0 ) {
 		//debug( REALM_PARSE, "attaching reverse code to token\n" );

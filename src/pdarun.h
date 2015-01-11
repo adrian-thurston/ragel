@@ -393,9 +393,6 @@ inline static void appendWord( RtCodeVect *vect, Word word )
 void incrementSteps( PdaRun *pdaRun );
 void decrementSteps( PdaRun *pdaRun );
 
-int makeReverseCode( PdaRun *pdaRun );
-void transferReverseCode( PdaRun *pdaRun, ParseTree *tree );
-
 void clearStreamImpl( struct colm_program *prg, Tree **sp, StreamImpl *inputStream );
 void initSourceStream( StreamImpl *in );
 void clearSourceStream( struct colm_program *prg, Tree **sp, StreamImpl *sourceStream );

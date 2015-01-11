@@ -306,7 +306,7 @@ void ignoreTree( Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree )
 	parseTree->next = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = parseTree;
 
-	transferReverseCode( pdaRun, parseTree );
+	colm_transfer_reverse_code( pdaRun, parseTree );
 
 	if ( fsmRun->preRegion >= 0 )
 		parseTree->flags |= PF_RIGHT_IGNORE;
@@ -328,7 +328,7 @@ void ignoreTree2( Program *prg, PdaRun *pdaRun, Tree *tree )
 	parseTree->next = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = parseTree;
 
-	transferReverseCode( pdaRun, parseTree );
+	colm_transfer_reverse_code( pdaRun, parseTree );
 
 	setRegion( pdaRun, emptyIgnore, pdaRun->accumIgnore );
 }
@@ -1131,7 +1131,7 @@ case PcrStart:
 
 return PcrPreEof;
 case PcrPreEof:
-				makeReverseCode( pdaRun );
+				colm_make_reverse_code( pdaRun );
 			}
 		}
 		else if ( pdaRun->tokenId == SCAN_UNDO ) {
@@ -1206,7 +1206,7 @@ case PcrPreEof:
 return PcrGeneration;
 case PcrGeneration:
 
-			makeReverseCode( pdaRun );
+			colm_make_reverse_code( pdaRun );
 
 			/* Finished with the match text. */
 			stringFree( prg, pdaRun->tokdata );
@@ -1231,7 +1231,7 @@ case PcrGeneration:
 yes:
 
 		if ( pdaRun->parseInput != 0 )
-			transferReverseCode( pdaRun, pdaRun->parseInput );
+			colm_transfer_reverse_code( pdaRun, pdaRun->parseInput );
 
 		if ( pdaRun->parseInput != 0 ) {
 			/* If it's a nonterminal with a termdup then flip the parse tree to
@@ -1400,7 +1400,7 @@ void clearPdaRun( Program *prg, Tree **sp, PdaRun *pdaRun )
 	clearParseTree( prg, sp, pdaRun->parseInput );
 	pdaRun->parseInput = 0;
 
-	rcodeDownrefAll( prg, sp, &pdaRun->reverseCode );
+	colm_rcode_downref_all( prg, sp, &pdaRun->reverseCode );
 	rtCodeVectEmpty( &pdaRun->reverseCode );
 	rtCodeVectEmpty( &pdaRun->rcodeCollect );
 
@@ -1650,7 +1650,7 @@ void commitFull( Program *prg, Tree **sp, PdaRun *pdaRun, long causeReduce )
 	/* We cannot always clear all the rcode here. We may need to backup over
 	 * the parse statement. We depend on the context flag. */
 	if ( !pdaRun->revertOn )
-		rcodeDownrefAll( prg, sp, &pdaRun->reverseCode );
+		colm_rcode_downref_all( prg, sp, &pdaRun->reverseCode );
 }
 
 /*
@@ -1917,8 +1917,8 @@ case PcrReduction:
 			}
 
 			/* Pull out the reverse code, if any. */
-			makeReverseCode( pdaRun );
-			transferReverseCode( pdaRun, pdaRun->redLel );
+			colm_make_reverse_code( pdaRun );
+			colm_transfer_reverse_code( pdaRun, pdaRun->redLel );
 
 			/* Perhaps the execution environment is telling us we need to
 			 * reject the reduction. */
