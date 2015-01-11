@@ -1,4 +1,24 @@
-global HasDefault: list<int> = new list<int>
+struct has_def_list_el
+	HasDefault: int
+	list_el el
+end
+
+global HasDefault: list<has_def_list_el> = new list<has_def_list_el>
+
+void pushHasDef( H: int )
+{
+	El: has_def_list_el = new has_def_list_el
+	El->HasDefault = H
+	HasDefault->push( El )
+}
+
+int popHasDef()
+{
+	El: has_def_list_el = HasDefault->pop()
+	return El->HasDefault
+}
+
+
 
 void d_tok_list( TL: host::tok* )
 {
@@ -300,13 +320,13 @@ void d_stmt( Stmt: stmt )
 			"	[d_stmt(WhileStmt)]
 	}
 	elsif match Stmt [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
-		HasDefault->push( 0 )
+		pushHasDef( 0 )
 
 		send Output
 			"switch ( [d_expr(SwitchExpr)] ) {
 			"	[d_stmt_list(StmtList)]
 
-		if ( HasDefault->pop() == 0 ) {
+		if ( popHasDef() == 0 ) {
 			send Output
 				"	default: break;
 		}
@@ -354,8 +374,9 @@ void d_stmt( Stmt: stmt )
 			"default:
 			"[d_stmt_list( Stmt.default_block._repeat_stmt )]
 			"break;
-		HasDefault->pop()
-		HasDefault->push( 1 )
+
+		popHasDef()
+		pushHasDef( 1 )
 	}
 	elsif match Stmt [case_label]
 	{
