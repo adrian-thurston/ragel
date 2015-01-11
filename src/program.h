@@ -90,7 +90,7 @@ typedef struct colm_heap_list
 	struct colm_struct *tail;
 } HeapList;
 
-typedef struct colm_program
+struct colm_program
 {
 	long activeRealm;
 
@@ -137,6 +137,6 @@ typedef struct colm_program
 
 	/* Returned value for main program and any exported functions. */
 	Tree *returnVal;
-} Program;
+};
 
 #endif

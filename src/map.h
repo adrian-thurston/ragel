@@ -11,7 +11,7 @@ extern "C" {
 
 #include <colm/program.h>
 #include <colm/struct.h>
-
+#include "internal.h"
 
 void mapListAbandon( Map *map );
 

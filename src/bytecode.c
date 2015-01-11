@@ -460,7 +460,7 @@ static List *construct_argv( Program *prg, int argc, const char **argv )
 		Tree *arg = constructString( prg, head );
 		treeUpref( arg );
 
-		Struct *s = colm_struct_new_size( prg, 3 );
+		Struct *s = colm_struct_new_size( prg, 16 );
 		colm_struct_set_field( s, Tree*, 0, arg );
 		ListEl *listEl = colm_struct_get_addr( s, ListEl*, 1 );
 		colm_list_append( list, listEl );
@@ -3036,7 +3036,7 @@ again:
 		case IN_LIST_LENGTH: {
 			debug( prg, REALM_BYTECODE, "IN_LIST_LENGTH\n" );
 
-			List *list = (List*) vm_pop();
+			List *list = vm_pop_type( List* );
 			long len = colm_list_length( list );
 			Tree *res = constructInteger( prg, len );
 			treeDownref( prg, sp, (Tree*)list );
@@ -3152,32 +3152,35 @@ again:
 			short genId;
 			read_half( genId );
 
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WC\n" );
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WC\n" );
 
-			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
+			List *list = vm_pop_type(List*);
 
-			Tree *end = listRemoveEnd( prg, (List*)obj );
-			vm_push( end );
+			ListEl *head = list->head;
+			colm_list_detach_tail( list );
+			GenericInfo *gi = &prg->rtd->genericInfo[genId];
+			Struct *s = colm_struct_container( head, gi->elOffset );
+			vm_push_type( Struct *, s );
 			break;
 		}
 		case IN_LIST_POP_TAIL_WV: {
 			short genId;
 			read_half( genId );
 
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WV\n" );
+			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WV\n" );
 
-			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
+			List *list = vm_pop_type(List*);
 
-			Tree *end = listRemoveEnd( prg, (List*)obj );
-			vm_push( end );
+			ListEl *head = list->head;
+			colm_list_detach_tail( list );
+			GenericInfo *gi = &prg->rtd->genericInfo[genId];
+			Struct *s = colm_struct_container( head, gi->elOffset );
+			vm_push_type( Struct *, s );
 
 			/* Set up reverse. The result comes off the list downrefed.
 			 * Need it up referenced for the reverse code too. */
-			treeUpref( end );
 			rcodeCode( exec, IN_LIST_POP_TAIL_BKT );
-			rcodeWord( exec, (Word)end );
+			rcodeWord( exec, (Word)s );
 			rcodeUnitTerm( exec );
 			break;
 		}

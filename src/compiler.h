@@ -26,6 +26,7 @@
 #include "pdarun.h"
 #include "bytecode.h"
 #include "program.h"
+#include "internal.h"
 
 using std::ostream;
 

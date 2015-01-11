@@ -6,6 +6,7 @@
 #include <colm/bytecode.h>
 #include <colm/program.h>
 #include <assert.h>
+#include "internal.h"
 
 #define true 1
 #define false 0
