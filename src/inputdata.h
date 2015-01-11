@@ -50,7 +50,9 @@ struct InputData
 	enum RagelFrontend
 	{
 		KelbtBased,
+#ifdef WITH_COLM
 		ColmBased
+#endif
 	};
 
 	InputData() : 
@@ -78,7 +80,11 @@ struct InputData
 		rubyImpl(MRI),
 		rlhcShowCmd(false),
 		noIntermediate(false),
+#ifdef WITH_COLM
+		frontend(ColmBased)
+#else
 		frontend(KelbtBased)
+#endif
 	{}
 
 	std::string dirName;

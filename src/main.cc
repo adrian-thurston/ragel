@@ -353,8 +353,14 @@ void InputData::parseArgs( int argc, const char **argv )
 					noIntermediate = true;
 				else if ( strcmp( arg, "kelbt-frontend" ) == 0 )
 					frontend = KelbtBased;
-				else if ( strcmp( arg, "colm-frontend" ) == 0 )
+				else if ( strcmp( arg, "colm-frontend" ) == 0 ) {
+#ifdef WITH_COLM
 					frontend = ColmBased;
+#else
+					error() << "--colm-frontend specified but, "
+							"ragel not built with colm support" << endp;
+#endif
+				}
 				else if ( strcmp( arg, "asm" ) == 0 )
 					hostLang = &hostLangAsm;
 				else if ( strcmp( arg, "gnu-asm-x86-64-sys-v" ) == 0 )

@@ -402,57 +402,60 @@ void InputData::process()
 		directBackend = true;
 
 	switch ( frontend ) {
-	case KelbtBased: {
-		/*
-		 * Ragel Parser from ragel 6.
-		 */
+		case KelbtBased: {
+			/*
+			 * Ragel Parser from ragel 6.
+			 */
 
-		/* Open the input file for reading. */
-		assert( inputFileName != 0 );
-		inFile = new ifstream( inputFileName );
-		if ( ! inFile->is_open() )
-			error() << "could not open " << inputFileName << " for reading" << endp;
+			/* Open the input file for reading. */
+			assert( inputFileName != 0 );
+			inFile = new ifstream( inputFileName );
+			if ( ! inFile->is_open() )
+				error() << "could not open " << inputFileName << " for reading" << endp;
 
-		/* Used for just a few things. */
-		std::ostringstream hostData;
+			/* Used for just a few things. */
+			std::ostringstream hostData;
 
-		/* Make the first input item. */
-		InputItem *firstInputItem = new InputItem;
-		firstInputItem->type = InputItem::HostData;
-		firstInputItem->loc.fileName = inputFileName;
-		firstInputItem->loc.line = 1;
-		firstInputItem->loc.col = 1;
-		inputItems.append( firstInputItem );
+			/* Make the first input item. */
+			InputItem *firstInputItem = new InputItem;
+			firstInputItem->type = InputItem::HostData;
+			firstInputItem->loc.fileName = inputFileName;
+			firstInputItem->loc.line = 1;
+			firstInputItem->loc.col = 1;
+			inputItems.append( firstInputItem );
 
-		Scanner scanner( *this, inputFileName, *inFile, 0, 0, 0, false );
-		scanner.do_scan();
+			Scanner scanner( *this, inputFileName, *inFile, 0, 0, 0, false );
+			scanner.do_scan();
 
-		/* Finished, final check for errors.. */
-		if ( gblErrorCount > 0 )
-			exit(1);
+			/* Finished, final check for errors.. */
+			if ( gblErrorCount > 0 )
+				exit(1);
 
-		/* Now send EOF to all parsers. */
-		terminateAllParsers();
-		break;
+			/* Now send EOF to all parsers. */
+			terminateAllParsers();
+			break;
 	}
-	case ColmBased: {
-		/*
-		 * Ragel parser introduced in ragel 7. Uses more memory.
-		 */
+#ifdef WITH_COLM
+		case ColmBased: {
+			/*
+			 * Ragel parser introduced in ragel 7. Uses more memory.
+			 */
 
-		/* Check input file. */
-		inFile = new ifstream( inputFileName );
-		if ( ! inFile->is_open() )
-			error() << "could not open " << inputFileName << " for reading" << endp;
-		delete inFile;
+			/* Check input file. */
+			inFile = new ifstream( inputFileName );
+			if ( ! inFile->is_open() )
+				error() << "could not open " << inputFileName << " for reading" << endp;
+			delete inFile;
 
-		makeFirstInputItem();
+			makeFirstInputItem();
 
-		LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
-		loadRagel( lr, inputFileName );
-		deleteLoadRagel( lr );
-		break;
-	}}
+			LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
+			loadRagel( lr, inputFileName );
+			deleteLoadRagel( lr );
+			break;
+		}
+#endif
+	}
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )

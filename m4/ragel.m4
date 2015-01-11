@@ -17,24 +17,25 @@ AC_DEFUN([AC_CHECK_COLM], [
 			CPPFLAGS="${CPPFLAGS} -I$withval/include"
 			LDFLAGS="${LDFLAGS} -L$withval/lib"
 			COLM="$withval/bin/colm"
+
+			AC_CHECK_FILES(
+				[$COLM],
+				[],
+				[AC_ERROR([--with-colm was specified, but binary was not found])]
+			)
+
+			INSTALLED_VER=`$COLM -v | sed -n -e '1 { s/^.*version //; s/ .*$//; p; }'`
+			if test "x$INSTALLED_VER" != "x$EXPECTED_VER"; then
+				AC_ERROR( [check colm: expected version $EXPECTED_VER,]
+						[ but $INSTALLED_VER is installed] )
+			fi
+
+			AC_DEFINE([WITH_COLM], [1], [colm is available])
 		],
-		[
-			CPPFLAGS="${CPPFLAGS} -I$DEPS/include"
-			LDFLAGS="${LDFLAGS} -L$DEPS/lib"
-			COLM="$DEPS/bin/colm"
-		]
+		[]
 	)
 
-	AC_CHECK_FILES(
-		[$COLM],
-		[],
-		[AC_ERROR([colm is required to build this package])]
-	)
 	AC_SUBST(COLM)
-
-	INSTALLED_VER=`$COLM -v | sed -n -e '1 { s/^.*version //; s/ .*$//; p; }'`
-	if test "x$INSTALLED_VER" != "x$EXPECTED_VER"; then
-		AC_ERROR( [check colm: expected version $EXPECTED_VER, but $INSTALLED_VER is installed] )
-	fi
+	AM_CONDITIONAL([WITH_COLM], [test x$COLM != x])
 ])
 
