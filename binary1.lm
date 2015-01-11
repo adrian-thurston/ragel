@@ -134,17 +134,19 @@ int start_list( count: int )
 def count_inc
 	[]
 	{
-		if CL->top == 0 {
+		if top( CL ) == 0 {
 			reject
 		} else {
-			CL->top = CL->top - 1
+			Int: int = pop( CL )
+			Int = Int - 1
+			push( CL Int )
 		}
 	}
 
 def count_end
 	[]
 	{
-		if CL->top != 0 {
+		if top( CL ) != 0 {
 			reject
 		} else {
 			CL->pop()
@@ -493,7 +495,26 @@ int print_all_names( s: start )
 end # binary
 
 Binary: binary = new binary
-Binary->CL = new list<int_el>
+Binary->CL = new list<binary::int_el>
+
+int top( L: list<binary::int_el> )
+{
+	Top: binary::int_el = L->top
+	return Top->Int
+}
+
+int pop( L: list<binary::int_el> )
+{
+	Top: binary::int_el = L->pop()
+	return Top->Int
+}
+
+int push( L: list<binary::int_el> Int: int )
+{
+	Top: binary::int_el = new binary::int_el
+	Top->Int = Int
+	L->push( Top )
+}
 
 parse S: binary::start(Binary) [ stdin ]
 print_all_names( S )
