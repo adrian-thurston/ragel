@@ -1280,7 +1280,7 @@ short *Compiler::makeTrees( ObjectDef *objectDef, int &numTrees )
 	for ( FieldList::Iter of = *objectDef->fieldList; of.lte(); of++ ) {
 		if ( of->value->exists() ) {
 			UniqueType *ut = of->value->typeRef->resolveType( this );
-			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR )
+			if ( ut->typeId == TYPE_TREE )
 				numTrees += 1;
 		}
 	}
@@ -1292,7 +1292,7 @@ short *Compiler::makeTrees( ObjectDef *objectDef, int &numTrees )
 	for ( FieldList::Iter of = *objectDef->fieldList; of.lte(); of++ ) {
 		if ( of->value->exists() ) {
 			UniqueType *ut = of->value->typeRef->resolveType( this );
-			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR ) {
+			if ( ut->typeId == TYPE_TREE ) {
 				trees[pos] = of->value->offset;
 				pos += 1;
 			}

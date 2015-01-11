@@ -89,22 +89,18 @@ int CmpUniqueType::compare( const UniqueType &ut1, const UniqueType &ut2 )
 		return 1;
 	switch ( ut1.typeId ) {
 		case TYPE_TREE:
-		case TYPE_PTR:
 		case TYPE_REF:
-		{
 			if ( ut1.langEl < ut2.langEl )
 				return -1;
 			else if ( ut1.langEl > ut2.langEl )
 				return 1;
 			break;
-		}
-		case TYPE_ITER: {
+		case TYPE_ITER:
 			if ( ut1.iterDef < ut2.iterDef )
 				return -1;
 			else if ( ut1.iterDef > ut2.iterDef )
 				return 1;
 			break;
-		}
 		case TYPE_NIL:
 			break;
 		case TYPE_STRUCT:

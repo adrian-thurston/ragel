@@ -91,8 +91,6 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, NameScope *rootScope
 		else if ( qi->form == QualItem::Arrow ) {
 			if ( qualUT->typeId == TYPE_ITER )
 				qualUT = el->typeRef->searchUniqueType;
-			else if ( qualUT->typeId == TYPE_PTR )
-				qualUT = pd->findUniqueType( TYPE_TREE, qualUT->langEl );
 		}
 
 		ObjectDef *searchObjDef = qualUT->objectDef();
