@@ -45,7 +45,7 @@ dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
 dnl Check for colm.
-AC_CHECK_COLM([0.13.0.1])
+AC_CHECK_COLM([0.13.0.2])
 
 dnl Checks to carry out if we are building the manual.
 if test "x$build_manual" = "xyes"; then
