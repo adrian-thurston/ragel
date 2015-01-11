@@ -46,15 +46,8 @@ UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 					return inDict->typeRef->resolveType( pd );
 				}
 
-				case TypeMapEl::ContextType: {
-					UniqueType *structUt = pd->findUniqueType( TYPE_TREE, inDict->value );
-					return pd->findUniqueType( TYPE_PTR, structUt->langEl );
-				}
-
 				case TypeMapEl::LangElType: {
 					UniqueType *ut = pd->findUniqueType( TYPE_TREE, inDict->value );
-					if ( ut == pd->uniqueTypeStream )
-						return pd->findUniqueType( TYPE_PTR, ut->langEl );
 					return ut;
 				}
 				case TypeMapEl::StructType: {
@@ -263,11 +256,6 @@ UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
  * End object based list/map
  */
 
-UniqueType *TypeRef::resolveTypePtr( Compiler *pd )
-{
-	typeRef1->resolveType( pd );
-	return pd->findUniqueType( TYPE_PTR, typeRef1->uniqueType->langEl );
-}
 
 UniqueType *TypeRef::resolveTypeRef( Compiler *pd )
 {
@@ -371,9 +359,6 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 			break;
 		case Parser:
 			uniqueType = resolveTypeParser( pd );
-			break;
-		case Ptr:
-			uniqueType = resolveTypePtr( pd );
 			break;
 		case Ref:
 			uniqueType = resolveTypeRef( pd );

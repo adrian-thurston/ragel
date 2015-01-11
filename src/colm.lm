@@ -562,7 +562,6 @@ def code_factor
 
 def type_ref
 	[region_qual id opt_repeat] :Id
-|	[PTR LT region_qual id opt_repeat GT] :Ptr
 |	[LIST LT type_ref GT] :List
 |	[MAP LT MapKeyType: type_ref MapValueType: type_ref GT] :Map
 |	[PARSER LT type_ref GT] :Parser

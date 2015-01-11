@@ -848,15 +848,6 @@ struct LoadColm
 			tr = TypeRef::cons( typeRef.id().loc(), nspaceQual, id, repeatType );
 			break;
 		}
-		case type_ref::Ptr: {
-			NamespaceQual *nspaceQual = walkRegionQual( typeRef.region_qual() );
-			String id = typeRef.id().data();
-			RepeatType repeatType = walkOptRepeat( typeRef.opt_repeat() );
-			TypeRef *inner = TypeRef::cons( typeRef.id().loc(), nspaceQual,
-					id, repeatType );
-			tr = TypeRef::cons( typeRef.id().loc(), TypeRef::Ptr, inner );
-			break;
-		}
 		case type_ref::List: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );

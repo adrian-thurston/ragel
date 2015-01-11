@@ -570,7 +570,6 @@ struct TypeMapEl
 	enum Type
 	{
 		AliasType = 1,
-		ContextType,
 		LangElType,
 		StructType
 	};
@@ -1951,7 +1950,6 @@ struct TypeRef
 		MapEl,
 		Parser,
 		Ref,
-		Ptr,
 	};
 
 	TypeRef()
@@ -2128,7 +2126,6 @@ struct TypeRef
 	UniqueType *resolveTypeParserObj( Compiler *pd );
 	UniqueType *resolveTypeParser( Compiler *pd );
 	UniqueType *resolveType( Compiler *pd );
-	UniqueType *resolveTypePtr( Compiler *pd );
 	UniqueType *resolveTypeRef( Compiler *pd );
 
 
