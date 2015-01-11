@@ -319,9 +319,16 @@ include 'rlhc-java.lm'
 include 'rlhc-ruby.lm'
 include 'rlhc-ml.lm'
 
-OutputFile: str = argv->pop()
-InputFile: str = argv->pop()
-Lang: str = argv->pop()
+A: argv_el
+str argvPop()
+{
+	A: argv_el = argv->pop()
+	return A->value
+}
+
+OutputFile: str = argvPop()
+InputFile: str = argvPop()
+Lang: str = argvPop()
 
 Input: stream = open( InputFile "r" )
 

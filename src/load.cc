@@ -2213,7 +2213,8 @@ struct LoadRagel
 		}
 	}
 
-	void loadFile( const char *inputFileName, const char *targetMachine, const char *searchMachine )
+	void loadFile( const char *inputFileName, const char *targetMachine,
+			const char *searchMachine )
 	{
 		const char *argv[4];
 		argv[0] = "load-ragel";
