@@ -343,8 +343,12 @@ void Namespace::declare( Compiler *pd )
 		}
 	}
 
-	for ( StructDefList::Iter s = structDefList; s.lte(); s++ )
-		declareStruct( pd, this, s->name, s );
+	for ( StructDefList::Iter s = structDefList; s.lte(); s++ ) {
+		StructEl *sel = declareStruct( pd, this, s->name, s );
+		if ( s == pd->argvEl )
+			pd->argvElSel = sel;
+			
+	}
 
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {
 		/* Literals already taken care of. */

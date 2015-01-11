@@ -460,9 +460,10 @@ static List *construct_argv( Program *prg, int argc, const char **argv )
 		Tree *arg = constructString( prg, head );
 		treeUpref( arg );
 
-		Struct *s = colm_struct_new_size( prg, 16 );
-		colm_struct_set_field( s, Tree*, 0, arg );
-		ListEl *listEl = colm_struct_get_addr( s, ListEl*, 1 );
+		Struct *strct = colm_struct_new_size( prg, 16 );
+		strct->id = prg->rtd->argvElId;
+		colm_struct_set_field( strct, Tree*, 0, arg );
+		ListEl *listEl = colm_struct_get_addr( strct, ListEl*, 1 );
 		colm_list_append( list, listEl );
 	}
 	

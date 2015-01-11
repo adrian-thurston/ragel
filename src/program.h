@@ -75,6 +75,7 @@ typedef struct colm_sections
 	long eofId;
 	long noTokenId;
 	long globalId;
+	long argvElId;
 
 	void (*fsmExecute)( struct _FsmRun *fsmRun, struct _StreamImpl *inputStream );
 	void (*sendNamedLangEl)( struct colm_program *prg, Tree **tree, struct _PdaRun *pdaRun,

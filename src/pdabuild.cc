@@ -1642,6 +1642,7 @@ void Compiler::makeRuntimeData()
 	runtimeData->eofId = 0; //eofLangEl->id;
 	runtimeData->noTokenId = noTokenLangEl->id;
 	runtimeData->globalId = globalSel->id;
+	runtimeData->argvElId = argvElSel->id;
 
 	runtimeData->fsmExecute = &internalFsmExecute;
 	runtimeData->sendNamedLangEl = &internalSendNamedLangEl;

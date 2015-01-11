@@ -61,6 +61,8 @@ void BaseParser::argvDecl()
 			ObjectField::StructFieldType, typeRef, name );
 	structVarDef( objField->loc, objField );
 
+	pd->argvEl = objField->context;
+
 	/* Now the list element. */
 	listElDef( "el" );
 
@@ -922,9 +924,9 @@ void BaseParser::structVarDef( const InputLoc &loc, ObjectField *objField )
 	if ( curStruct() == 0 )
 		error(loc) << "internal error: no context stack items found" << endp;
 
-	StructDef *context = curStruct();
-	objField->context = context;
-	object = context->objectDef;
+	StructDef *structDef = curStruct();
+	objField->context = structDef;
+	object = structDef->objectDef;
 
 	if ( object->rootScope->checkRedecl( objField->name ) != 0 )
 		error(objField->loc) << "object field renamed" << endp;

@@ -874,6 +874,8 @@ struct Compiler
 	ObjectDef *globalObjectDef;
 	ObjectField *arg0;
 	ObjectField *argv;
+	StructDef *argvEl;
+	StructEl *argvElSel;
 
 	StructDef *stream;
 	StructEl *streamSel;
