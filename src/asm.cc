@@ -781,12 +781,10 @@ void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 	}
 
 	out <<
-		"	cmpb	$" << low << ", %r14b\n"
-		"	jl	" << def << "\n"
-		"	cmpb	$" << high << ", %r14b\n"
-		"	jg	" << def << "\n"
 		"	movzbq	%r14b, %rax\n"
 		"	subq	$" << low << ", %rax\n"
+		"	cmpq	$" << (high - low) << ", %rax\n"
+		"	ja		" << def << "\n"
 		"	leaq	.L" << mn << "_sjt_" << state->id << "(%rip), %rcx\n"
 		"	movq    (%rcx,%rax,8), %rcx\n"
 		"	jmp     *%rcx\n"
