@@ -739,32 +739,6 @@ void AsmCodeGen::writeExports()
 	}
 }
 
-void AsmCodeGen::finishRagelDef()
-{
-	/* For directly executable machines there is no required state
-	 * ordering. Choose a depth-first ordering to increase the
-	 * potential for fall-throughs. */
-	redFsm->depthFirstOrdering();
-
-	/* Choose default transitions and the single transition. */
-	redFsm->chooseDefaultSpan();
-	redFsm->chooseSingle();
-		
-	/* If any errors have occured in the input file then don't write anything. */
-	if ( gblErrorCount > 0 )
-		return;
-	
-	redFsm->setInTrans();
-
-	/* Anlayze Machine will find the final action reference counts, among
-	 * other things. We will use these in reporting the usage
-	 * of fsm directives in action code. */
-	analyzeMachine();
-
-	/* Determine if we should use indicies. */
-	calcIndexSize();
-}
-
 ostream &AsmCodeGen::source_warning( const InputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
@@ -1166,7 +1140,6 @@ void AsmCodeGen::BREAK( ostream &ret, int targState, bool csForced )
 bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 {
 	bool anyWritten = false;
-	static int skip = 1;
 
 	/* Emit any transitions that have actions and that go to this state. */
 	for ( int it = 0; it < state->numInCondTests; it++ ) {
@@ -1174,35 +1147,63 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 		RedTransAp *trans = state->inCondTests[it];
 		out << ".L" << mn << "_ctr_" << trans->id << ":\n";
 
-		/* Using EBX. This is callee-save. */
-		out << "	movl	$0, %ebx\n";
-
-		for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
-			int l = skip++;
-			Size condValOffset = (1 << csi.pos());
+		if ( trans->condSpace->condSet.length() == 1 ) {
+			RedCondPair *tp, *fp;
+			if ( trans->numConds() == 1 ) {
+				/* The single condition is either false or true, errCond is the
+				 * opposite. */
+				if ( trans->outCondKey(0) == 0 ) {
+					fp = trans->outCond(0);
+					tp = trans->errCond();
+				}
+				else {
+					tp = trans->outCond(0);
+					fp = trans->errCond();
+				}
+			}
+			else {
+				/* Full list, goes false, then true. */
+				fp = trans->outCond(0);
+				tp = trans->outCond(1);
+			}
+			
+			GenCondSet::Iter csi = trans->condSpace->condSet;
 			CONDITION( out, *csi );
-			out << 
-				"\n"
-				"	cmpl	$0, %eax\n"
-				"	je		.L" << mn << "_skip_" << l << "\n"
-				"	movl	$" << condValOffset << ", %eax\n"
-				"	addl	%eax, %ebx\n"
-				".L" << mn << "_skip_" << l << ":\n";
-		}
 
-		for ( int c = 0; c < trans->numConds(); c++ ) {
-			CondKey key = trans->outCondKey( c );
-			RedCondPair *pair = trans->outCond( c );
 			out <<
-				"	cmpl	" << COND_KEY( key ) << ", %ebx\n"
-				"	je	" << TRANS_GOTO_TARG( pair ) << "\n";
-
+				"	test	%eax, %eax\n"
+				"	je		" << TRANS_GOTO_TARG( fp ) << "\n"
+				"	jmp		" << TRANS_GOTO_TARG( tp ) << "\n";
 		}
+		else {
+			/* Using EBX. This is callee-save. */
+			out << "	movl	$0, %rbx\n";
 
-		RedCondPair *err = trans->errCond();
-		if ( err != 0 ) {
-			out <<
-				"	jmp	" << TRANS_GOTO_TARG( err ) << "\n";
+			for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
+				CONDITION( out, *csi );
+				out << 
+					"\n"
+					"	test	%eax, %eax\n"
+					"	setne   %cl\n"
+					"	movsbq	%cl, %rcx\n"
+					"	sall	$" << csi.pos() << ", %rcx\n"
+					"	add		%rcx, %rbx\n";
+			}
+
+			for ( int c = 0; c < trans->numConds(); c++ ) {
+				CondKey key = trans->outCondKey( c );
+				RedCondPair *pair = trans->outCond( c );
+				out <<
+					"	cmpl	" << COND_KEY( key ) << ", %rbx\n"
+					"	je	" << TRANS_GOTO_TARG( pair ) << "\n";
+
+			}
+
+			RedCondPair *err = trans->errCond();
+			if ( err != 0 ) {
+				out <<
+					"	jmp	" << TRANS_GOTO_TARG( err ) << "\n";
+			}
 		}
 	}
 

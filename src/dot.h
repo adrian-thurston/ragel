@@ -18,7 +18,6 @@ public:
 	void writeTransList( RedStateAp *state );
 	void writeDotFile( );
 
-	virtual void finishRagelDef();
 	virtual void writeStatement( InputLoc &, int, std::string * );
 
 private:

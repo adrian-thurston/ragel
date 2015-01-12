@@ -67,7 +67,6 @@ public:
 
 	int mn;
 
-	virtual void finishRagelDef();
 	virtual void writeInit();
 	virtual void writeStart();
 	virtual void writeFirstFinal();
