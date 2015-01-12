@@ -65,7 +65,6 @@ public:
 	AsmCodeGen( const CodeGenArgs &args );
 	virtual ~AsmCodeGen() {}
 
-	int mn;
 
 	virtual void writeInit();
 	virtual void writeStart();
@@ -130,6 +129,8 @@ protected:
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 	string CTXDATA() { return DATA_PREFIX() + "ctxdata"; }
+
+	string LABEL( const char *type, long i );
 
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );

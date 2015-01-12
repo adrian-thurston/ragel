@@ -92,17 +92,7 @@ struct Parser6
 	Parser6( InputData *id, const char *fileName, char *sectionName,
 			const InputLoc &sectionLoc, const HostLang *hostLang,
 			MinimizeLevel minimizeLevel,
-			MinimizeOpt minimizeOpt )
-	:
-		sectionName(sectionName),
-		hostLang(hostLang)
-	{
-		pd = new ParseData( id, std::string(fileName), std::string(sectionName),
-				sectionLoc, hostLang, minimizeLevel, minimizeOpt );
-		exportContext.append( false );
-		includeHistory.append( IncludeHistoryItem( 
-				fileName, sectionName ) );
-	}
+			MinimizeOpt minimizeOpt );
 
 	int token( InputLoc &loc, int tokId, char *tokstart, int toklen );
 	void tryMachineDef( const InputLoc &loc, char *name, 

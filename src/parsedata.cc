@@ -404,7 +404,7 @@ bool NameInst::anyRefsRec()
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
 ParseData::ParseData( InputData *id, std::string fileName, string sectionName, 
-		const InputLoc &sectionLoc, const HostLang *hostLang,
+		int machineId, const InputLoc &sectionLoc, const HostLang *hostLang,
 		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 :	
 	sectionGraph(0),
@@ -434,6 +434,7 @@ ParseData::ParseData( InputData *id, std::string fileName, string sectionName,
 	id(id),
 	fileName(fileName),
 	sectionName(sectionName),
+	machineId(machineId),
 	sectionLoc(sectionLoc),
 	curActionOrd(0),
 	curPriorOrd(0),
@@ -1433,7 +1434,7 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hos
 void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 		std::ostream &out, const HostLang *hostLang )
 {
-	CodeGenArgs args( inputFileName, sectionName,
+	CodeGenArgs args( inputFileName, sectionName, machineId,
 			this, sectionGraph, codeStyle, out );
 
 	/* Write out with it. */
@@ -1445,7 +1446,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 void ParseData::generateXML( ostream &out )
 {
 	/* Make the generator. */
-	XMLCodeGen codeGen( sectionName, this, sectionGraph, out );
+	XMLCodeGen codeGen( sectionName, machineId, this, sectionGraph, out );
 
 	/* Write out with it. */
 	codeGen.writeXML();

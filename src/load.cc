@@ -107,7 +107,8 @@ struct LoadRagel
 		if ( pdEl == 0 ) {
 			pdEl = new ParseDataDictEl( machine );
 			pdEl->value = new ParseData( &id, fileName, machine,
-					sectionLoc, hostLang, minimizeLevel, minimizeOpt );
+					id.nextMachineId++, sectionLoc, hostLang,
+					minimizeLevel, minimizeOpt );
 			id.parseDataDict.insert( pdEl );
 			id.parseDataList.append( pdEl->value );
 		}

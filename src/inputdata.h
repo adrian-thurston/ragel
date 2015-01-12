@@ -55,9 +55,11 @@ struct InputData
 #endif
 	};
 
-	InputData() : 
+	InputData()
+	: 
 		inputFileName(0),
 		outputFileName(0),
+		nextMachineId(0),
 		inStream(0),
 		outStream(0),
 		outFilter(0),
@@ -92,6 +94,8 @@ struct InputData
 	/* The name of the root section, this does not change during an include. */
 	const char *inputFileName;
 	const char *outputFileName;
+
+	int nextMachineId;
 
 	std::string origOutputFileName;
 	std::string genOutputFileName;

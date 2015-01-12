@@ -31,9 +31,10 @@ void openHostBlock( char opener, InputData *id, ostream &out, const char *fileNa
 	out << "\", " << line << " ) " << opener << "{";
 }
 
-GenBase::GenBase( std::string fsmName, ParseData *pd, FsmAp *fsm )
+GenBase::GenBase( std::string fsmName, int machineId, ParseData *pd, FsmAp *fsm )
 :
 	fsmName(fsmName),
+	machineId(machineId),
 	pd(pd),
 	fsm(fsm),
 	keyOps(pd->fsmCtx->keyOps),
@@ -108,7 +109,7 @@ void GenBase::reduceActionTables()
 
 CodeGenData::CodeGenData( const CodeGenArgs &args )
 :
-	GenBase(args.fsmName, args.pd, args.fsm),
+	GenBase(args.fsmName, args.machineId, args.pd, args.fsm),
 
 	sourceFileName(args.sourceFileName),
 	fsmName(args.fsmName), 
