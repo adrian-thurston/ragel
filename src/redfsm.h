@@ -612,8 +612,11 @@ struct RedFsmAp
 	bool canExtend( const RedTransList &list, int pos );
 
 	/* Pick single transitions from the ranges. */
-	void moveTransToSingle( RedStateAp *state );
-	void chooseSingle();
+	void moveSelectTransToSingle( RedStateAp *state );
+	void moveAllTransToSingle( RedStateAp *state );
+
+	void moveSelectTransToSingle();
+	void moveAllTransToSingle();
 
 	void makeFlat();
 

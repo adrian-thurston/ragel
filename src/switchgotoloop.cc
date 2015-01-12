@@ -27,7 +27,7 @@ void SwitchGotoLoop::genAnalysis()
 	redFsm->chooseDefaultSpan();
 		
 	/* Choose single. */
-	redFsm->chooseSingle();
+	redFsm->moveSelectTransToSingle();
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )

@@ -237,8 +237,9 @@ bool RedFsmAp::canExtend( const RedTransList &list, int pos )
 	return false;
 }
 
-/* Move ranges to the singles list. */
-void RedFsmAp::moveTransToSingle( RedStateAp *state )
+/* Move ranges to the singles list if it means we can extend some ranges, or if
+ * the spans are of length one. */
+void RedFsmAp::moveSelectTransToSingle( RedStateAp *state )
 {
 	RedTransList &range = state->outRange;
 	RedTransList &single = state->outSingle;
@@ -251,7 +252,7 @@ void RedFsmAp::moveTransToSingle( RedStateAp *state )
 				single.append( range[rpos+1] );
 				range.remove( rpos+1 );
 			}
-			
+
 			/* Extend. */
 			range[rpos].highKey = range[rpos+1].highKey;
 			range.remove( rpos+1 );
@@ -268,14 +269,43 @@ void RedFsmAp::moveTransToSingle( RedStateAp *state )
 	}
 }
 
+void RedFsmAp::moveAllTransToSingle( RedStateAp *state )
+{
+	RedTransList &range = state->outRange;
+	RedTransList &single = state->outSingle;
+	for ( int rpos = 0; rpos < range.length(); rpos++ ) {
+
+		RedTransEl el = range[rpos];
+		unsigned long long span = keyOps->span( el.lowKey, el.highKey );
+
+		Key key = el.lowKey;
+		for ( unsigned long long pos = 0; pos < span; pos++ ) {
+			el.lowKey = el.highKey = key;
+			single.append( el );
+			keyOps->increment( key );
+		}
+	}
+	range.empty();
+}
+
 /* Look through ranges and choose suitable single character transitions. */
-void RedFsmAp::chooseSingle()
+void RedFsmAp::moveSelectTransToSingle()
 {
 	/* Loop the states. */
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		/* Rewrite the transition list taking out the suitable single
 		 * transtions. */
-		moveTransToSingle( st );
+		moveSelectTransToSingle( st );
+	}
+}
+
+void RedFsmAp::moveAllTransToSingle()
+{
+	/* Loop the states. */
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		/* Rewrite the transition list taking out the suitable single
+		 * transtions. */
+		moveAllTransToSingle( st );
 	}
 }
 
