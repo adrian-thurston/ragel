@@ -768,9 +768,6 @@ void AsmCodeGen::emitSingleIfElseIf( RedStateAp *state )
 
 void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 {
-	static int l = 1;
-	int table = l++;
-	int failed = l++;
 	int numSingles = state->outSingle.length();
 	RedTransEl *data = state->outSingle.data;
 
@@ -779,7 +776,7 @@ void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 
 	if ( def.size() == 0 ) {
 		std::stringstream s;
-		s << ".L" << mn << "_sjt_" << failed;
+		s << ".L" << mn << "_sjf_" << state->id;
 		def = s.str();
 	}
 
@@ -790,12 +787,12 @@ void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 		"	jg	" << def << "\n"
 		"	movzbq	%r14b, %rax\n"
 		"	subq	$" << low << ", %rax\n"
-		"	leaq	.L" << mn << "_sjt_" << table << "(%rip), %rcx\n"
+		"	leaq	.L" << mn << "_sjt_" << state->id << "(%rip), %rcx\n"
 		"	movq    (%rcx,%rax,8), %rcx\n"
 		"	jmp     *%rcx\n"
 		"	.section .rodata\n"
 		"	.align 8\n"
-		".L" << mn << "_sjt_" << table << ":\n";
+		".L" << mn << "_sjt_" << state->id << ":\n";
 
 	for ( long long j = 0; j < numSingles; j++ ) {
 		/* Fill in gap between prev and this. */
@@ -813,7 +810,7 @@ void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 
 	out <<
 		"	.text\n"
-		".L" << mn << "_sjt_" << failed << ":\n";
+		".L" << mn << "_sjf_" << state->id << ":\n";
 }
 
 
@@ -848,13 +845,13 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		/* Can go lower and higher than mid. */
 		out <<
 			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r14b\n"
-			"	jge	.L" << mn << "_nl" << l1 << "\n";
+			"	jge	.L" << mn << "_nl_" << l1 << "\n";
 			
 		
 		emitRangeBSearch( state, level+1, low, mid-1 );
 
 		out <<
-			".L" << mn << "_nl" << l1 << ":\n";
+			".L" << mn << "_nl_" << l1 << ":\n";
 
 		if ( !keyOps->eq( data[mid].lowKey, data[mid].highKey ) ) {
 			out <<
@@ -874,7 +871,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		}
 		else {
 			std::stringstream s;
-			s << ".L" << mn << "_nl" << nl++;
+			s << ".L" << mn << "_nl_" << nl++;
 			targ = s.str();
 		}
 
@@ -911,7 +908,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		}
 		else {
 			std::stringstream s;
-			s << ".L" << mn << "_nl" << nl++;
+			s << ".L" << mn << "_nl_" << nl++;
 			targ = s.str();
 		}
 
