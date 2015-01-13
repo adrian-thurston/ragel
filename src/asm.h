@@ -131,6 +131,7 @@ protected:
 	string CTXDATA() { return DATA_PREFIX() + "ctxdata"; }
 
 	string LABEL( const char *type, long i );
+	string LABEL( const char *name );
 
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );
