@@ -23,7 +23,7 @@
 		# val = val * 10 + (fc - 48);
 		movl	val(%rip), %eax
 		imul	$10, %eax
-		movsbl	%r14b, %ecx
+		movsbl	(%r12), %ecx
 		subl	$48, %ecx
 		add		%ecx, %eax
 		movl	%eax, val(%rip)
