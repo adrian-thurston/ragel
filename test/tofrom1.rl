@@ -104,6 +104,8 @@ init:
 
 %% write init;
 
+	movq    %r11, cs(%rip)
+
 	popq	%rbp
 	.cfi_def_cfa 7, 8
 	ret
@@ -125,7 +127,13 @@ exec:
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
 	subq	$32, %rsp
+
+	movq    cs(%rip), %r11
+
 %% write exec;
+
+	movq    %r11, cs(%rip)
+
 .LRET:
 	leave
 	.cfi_def_cfa 7, 8

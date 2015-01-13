@@ -579,8 +579,7 @@ void AsmCodeGen::writeInit()
 	if ( !noCS ) {
 		// out << "\t" << vCS() << " = " << START() << ";\n";
 		out <<
-			"	movq	cs@GOTPCREL(%rip), %rax\n"
-			"	movl	$" << redFsm->startState->id << ", (%rax)\n";
+			"	movq	$" << redFsm->startState->id << ", %r11\n";
 	}
 	
 //	/* If there are any calls, then the stack top needs initialization. */
@@ -1300,8 +1299,7 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 	outLabelUsed = true;
 
 	out << 
-		"	movq	cs@GOTPCREL(%rip), %rax\n"
-		"	movl	$" << state->id << ", (%rax)\n"
+		"	movq	$" << state->id << ", %r11\n"
 		"	jmp		" << LABEL( "out" ) << "\n";
 }
 
@@ -1352,8 +1350,7 @@ std::ostream &AsmCodeGen::EXIT_STATES()
 
 			out << 
 				LABEL( "test_eof", st->id ) << ":\n"
-				"	movq	cs@GOTPCREL(%rip), %rax\n"
-				"	movl	$" << st->id << ", (%rax)\n"
+				"	movq	$" << st->id << ", %r11\n"
 				"	jmp		" << LABEL( "test_eof" ) << "\n";
 		}
 	}
@@ -1492,6 +1489,7 @@ void AsmCodeGen::writeExec()
 
 	/*
 	 * pc : %r10b -- caller-save
+	 * cs : %r11  -- caller-save
 	 * p  : %r12  -- callee-save
 	 * pe : %r13  -- callee-save
 	 */
@@ -1550,10 +1548,8 @@ void AsmCodeGen::writeExec()
 
 	/* Jump into the machine based on the current state. */
 	out <<
-		"	movq	cs@GOTPCREL(%rip), %rax\n"
-		"	movslq	(%rax), %rax\n"
 		"	leaq	" << LABEL( "entry_jmp" ) << "(%rip), %rcx\n"
-		"	movq	(%rcx,%rax,8), %rcx\n"
+		"	movq	(%rcx,%r11,8), %rcx\n"
 		"	jmp		*%rcx\n"
 		"	.section .rodata\n"
 		"	.align 8\n"
