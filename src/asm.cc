@@ -773,7 +773,7 @@ void AsmCodeGen::emitSingleIfElseIf( RedStateAp *state )
 	/* Write out the single indicies. */
 	for ( int j = 0; j < numSingles; j++ ) {
 		out <<
-			"	cmpb	" << KEY( data[j].lowKey ) << ", %r11b\n"
+			"	cmpb	" << KEY( data[j].lowKey ) << ", %r10b\n"
 			"	je	" << TRANS_GOTO_TARG( data[j].value ) << "\n";
 	}
 }
@@ -790,7 +790,7 @@ void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 		def = LABEL( "sjf", state->id );
 
 	out <<
-		"	movzbq	%r11b, %rax\n"
+		"	movzbq	%r10b, %rax\n"
 		"	subq	$" << low << ", %rax\n"
 		"	cmpq	$" << (high - low) << ", %rax\n"
 		"	ja		" << def << "\n"
@@ -850,7 +850,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 		/* Can go lower and higher than mid. */
 		out <<
-			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r11b\n"
+			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r10b\n"
 			"	jge	" << LABEL( "nl", l1 ) << "\n";
 			
 		
@@ -861,7 +861,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 		if ( !keyOps->eq( data[mid].lowKey, data[mid].highKey ) ) {
 			out <<
-				"	cmpb	" << KEY ( data[mid].highKey ) << ", %r11b\n";
+				"	cmpb	" << KEY ( data[mid].highKey ) << ", %r10b\n";
 		}
 
 		out <<
@@ -880,7 +880,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		/* Can go lower than mid but not higher. */
 
 		out <<
-			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r11b\n"
+			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r10b\n"
 			"	jge	" << targ << "\n";
 
 		emitRangeBSearch( state, level+1, low, mid-1 );
@@ -894,7 +894,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 			if ( ! keyOps->eq( data[mid].lowKey, data[mid].highKey ) ) {
 				out <<
-					"	cmpb	" << KEY ( data[mid].highKey ) << ", %r11b\n";
+					"	cmpb	" << KEY ( data[mid].highKey ) << ", %r10b\n";
 			}
 
 			out <<
@@ -913,7 +913,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		/* Can go higher than mid but not lower. */
 
 		out <<
-			"	cmpb	" << KEY( data[mid].highKey ) << ", %r11b\n"
+			"	cmpb	" << KEY( data[mid].highKey ) << ", %r10b\n"
 			"	jle	" << targ << "\n";
 
 		emitRangeBSearch( state, level+1, mid+1, high );
@@ -927,7 +927,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 			if ( !keyOps->eq( data[mid].lowKey, data[mid].highKey ) ) {
 				out <<
-					"	cmpb	" << KEY( data[mid].lowKey ) << ", %r11b\n";
+					"	cmpb	" << KEY( data[mid].lowKey ) << ", %r10b\n";
 			}
 
 			out <<
@@ -943,14 +943,14 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 
 			if ( !keyOps->eq( data[mid].lowKey, data[mid].highKey ) ) {
 				out <<
-					"	cmpb	" << KEY( data[mid].lowKey ) << ", %r11b\n"
+					"	cmpb	" << KEY( data[mid].lowKey ) << ", %r10b\n"
 					"	jl	" << nf << "\n"
-					"	cmpb	" << KEY( data[mid].highKey ) << ", %r11b\n"
+					"	cmpb	" << KEY( data[mid].highKey ) << ", %r10b\n"
 					"	jg	" << nf << "\n";
 			}
 			else {
 				out <<
-					"	cmpb	" << KEY( data[mid].lowKey ) << ", %r11b\n"
+					"	cmpb	" << KEY( data[mid].lowKey ) << ", %r10b\n"
 					"	jne	" << nf << "\n";
 			}
 
@@ -959,7 +959,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		else if ( limitLow && !limitHigh ) {
 
 			out <<
-				"	cmpb	" << KEY( data[mid].highKey ) << ", %r11b\n"
+				"	cmpb	" << KEY( data[mid].highKey ) << ", %r10b\n"
 				"	jg	" << nf << "\n";
 
 			TRANS_GOTO( data[mid].value );
@@ -967,7 +967,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		else if ( !limitLow && limitHigh ) {
 
 			out <<
-				"	cmpb	" << KEY( data[mid].lowKey ) << ", %r11b\n"
+				"	cmpb	" << KEY( data[mid].lowKey ) << ", %r10b\n"
 				"	jl	" << nf << "\n";
 
 			TRANS_GOTO( data[mid].value );
@@ -990,7 +990,7 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 
 			/* Load *p. */
 			if ( st->outSingle.length() > 0 || st->outRange.length() > 0 )
-				out << "	movb	(%r12), %r11b\n";
+				out << "	movb	(%r12), %r10b\n";
 
 			/* Try singles. */
 			if ( st->outSingle.length() > 0 ) {
@@ -1490,9 +1490,11 @@ void AsmCodeGen::writeExec()
 
 	/* p arrives in %rdi, pe in %rsi */
 
-	/* p  : %r12 */
-	/* pe : %r13 */
-	/* pc : %r11b */
+	/*
+	 * pc : %r10b -- caller-save
+	 * p  : %r12  -- callee-save
+	 * pe : %r13  -- callee-save
+	 */
 
 	out << 
 		"	push	%r12\n"
