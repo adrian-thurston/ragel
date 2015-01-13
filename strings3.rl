@@ -1315,7 +1315,11 @@ exec:
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
 
+	movq    cs(%rip), %r11
+
 %% write exec;
+
+	movq    %r11, cs(%rip)
 
 	popq	%rbp
 	ret
@@ -1342,6 +1346,8 @@ test:
 	movq	%rdi, -8(%rbp)
 
 %% write init;
+
+	movq    %r11, cs(%rip)
 
 	movq	-8(%rbp), %rax
 	movq	%rax, %rdi
