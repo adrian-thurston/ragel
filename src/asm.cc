@@ -1175,7 +1175,7 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 		}
 		else {
 			/* Using EBX. This is callee-save. */
-			out << "	movl	$0, %rbx\n";
+			out << "	movq	$0, %rbx\n";
 
 			for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
 				CONDITION( out, *csi );
@@ -1184,15 +1184,15 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 					"	test	%eax, %eax\n"
 					"	setne   %cl\n"
 					"	movsbq	%cl, %rcx\n"
-					"	sall	$" << csi.pos() << ", %rcx\n"
-					"	add		%rcx, %rbx\n";
+					"	salq	$" << csi.pos() << ", %rcx\n"
+					"	addq	%rcx, %rbx\n";
 			}
 
 			for ( int c = 0; c < trans->numConds(); c++ ) {
 				CondKey key = trans->outCondKey( c );
 				RedCondPair *pair = trans->outCond( c );
 				out <<
-					"	cmpl	" << COND_KEY( key ) << ", %rbx\n"
+					"	cmpq	" << COND_KEY( key ) << ", %rbx\n"
 					"	je	" << TRANS_GOTO_TARG( pair ) << "\n";
 
 			}
