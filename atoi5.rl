@@ -111,11 +111,19 @@ exec:
 	.cfi_def_cfa_register 6
 	subq	$32, %rsp
 
+	pushq   %r12
+	pushq   %r13
+
 	movq    cs(%rip), %r11
+	movq    %rdi, %r12
+	movq    %rsi, %r13
 
 %% write exec;
 
 	movq    %r11, cs(%rip)
+
+	popq	%r13
+	popq	%r12
 
 .LRET:
 	leave
