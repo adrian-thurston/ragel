@@ -1495,11 +1495,7 @@ void AsmCodeGen::writeExec()
 	 */
 
 	out << 
-		"	push	%r12\n"
-		"	push	%r13\n"
 		"	push	%rbx\n"
-		"	movq	%rdi, %r12\n"
-		"	movq	%rsi, %r13\n"
 	;
 
 #if 0
@@ -1589,8 +1585,6 @@ void AsmCodeGen::writeExec()
 
 	out << 
 		"	pop	%rbx\n"
-		"	pop	%r13\n"
-		"	pop	%r12\n"
 	;
 
 	out << "# WRITE EXEC END\n";
