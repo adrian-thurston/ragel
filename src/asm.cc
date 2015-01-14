@@ -1171,7 +1171,7 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 		}
 		else {
 			/* Using EBX. This is callee-save. */
-			out << "	movq	$0, %rbx\n";
+			out << "	movq	$0, %r14\n";
 
 			for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
 				CONDITION( out, *csi );
@@ -1181,14 +1181,14 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 					"	setne   %cl\n"
 					"	movsbq	%cl, %rcx\n"
 					"	salq	$" << csi.pos() << ", %rcx\n"
-					"	addq	%rcx, %rbx\n";
+					"	addq	%rcx, %r14\n";
 			}
 
 			for ( int c = 0; c < trans->numConds(); c++ ) {
 				CondKey key = trans->outCondKey( c );
 				RedCondPair *pair = trans->outCond( c );
 				out <<
-					"	cmpq	" << COND_KEY( key ) << ", %rbx\n"
+					"	cmpq	" << COND_KEY( key ) << ", %r14\n"
 					"	je	" << TRANS_GOTO_TARG( pair ) << "\n";
 
 			}
@@ -1494,8 +1494,10 @@ void AsmCodeGen::writeExec()
 	 * pe : %r13  -- callee-save
 	 */
 
+	/* We are going to use r14 in condition evaluation and need to preserve it
+	 * across calls to condition code. */
 	out << 
-		"	push	%rbx\n"
+		"	push	%r14\n"
 	;
 
 #if 0
@@ -1584,7 +1586,7 @@ void AsmCodeGen::writeExec()
 		out << LABEL( "out" ) << ":\n";
 
 	out << 
-		"	pop	%rbx\n"
+		"	pop	%r14\n"
 	;
 
 	out << "# WRITE EXEC END\n";
