@@ -1171,9 +1171,12 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 		}
 		else {
 			/* Using EBX. This is callee-save. */
-			out << "	movq	$0, %r14\n";
+			out << "	movq	$0, %r9\n";
 
 			for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
+				out <<
+					"	pushq	%r9\n";
+
 				CONDITION( out, *csi );
 				out << 
 					"\n"
@@ -1181,14 +1184,15 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 					"	setne   %cl\n"
 					"	movsbq	%cl, %rcx\n"
 					"	salq	$" << csi.pos() << ", %rcx\n"
-					"	addq	%rcx, %r14\n";
+					"	popq	%r9\n"
+					"	addq	%rcx, %r9\n";
 			}
 
 			for ( int c = 0; c < trans->numConds(); c++ ) {
 				CondKey key = trans->outCondKey( c );
 				RedCondPair *pair = trans->outCond( c );
 				out <<
-					"	cmpq	" << COND_KEY( key ) << ", %r14\n"
+					"	cmpq	" << COND_KEY( key ) << ", %r9\n"
 					"	je	" << TRANS_GOTO_TARG( pair ) << "\n";
 
 			}
@@ -1223,7 +1227,6 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 						pair->action->anyNextStmt() );
 				out << "\n";
 			}
-
 
 			/* If the action contains a next then we need to reload, otherwise
 			 * jump directly to the target state. */
@@ -1488,17 +1491,12 @@ void AsmCodeGen::writeExec()
 	/* p arrives in %rdi, pe in %rsi */
 
 	/*
-	 * pc : %r10b -- caller-save
-	 * cs : %r11  -- caller-save
-	 * p  : %r12  -- callee-save
-	 * pe : %r13  -- callee-save
+	 * cv : %r9   -- caller-save, used internally
+	 * pc : %r10b -- caller-save, used internally
+	 * cs : %r11  -- caller-save, interface, valid only after init/exer
+	 * p  : %r12  -- callee-save, interface, persistent
+	 * pe : %r13  -- callee-save, interface, persistent
 	 */
-
-	/* We are going to use r14 in condition evaluation and need to preserve it
-	 * across calls to condition code. */
-	out << 
-		"	push	%r14\n"
-	;
 
 #if 0
 	if ( redFsm->anyRegCurStateRef() )
@@ -1584,10 +1582,6 @@ void AsmCodeGen::writeExec()
 
 	if ( outLabelUsed ) 
 		out << LABEL( "out" ) << ":\n";
-
-	out << 
-		"	pop	%r14\n"
-	;
 
 	out << "# WRITE EXEC END\n";
 }
