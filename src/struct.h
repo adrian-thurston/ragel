@@ -120,6 +120,12 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 #define colm_struct_container( el, field ) \
 	((void*)el) - (field * sizeof(void*)) - sizeof(struct colm_struct)
 
+#define colm_list_el_container( prg, el, genId ) \
+	colm_struct_container( el, prg->rtd->genericInfo[genId].elOffset )
+
+#define colm_struct_to_list_el( prg, obj, genId ) \
+	colm_struct_get_addr( obj, ListEl*, prg->rtd->genericInfo[genId].elOffset )
+
 Parser *colm_parser_new( struct colm_program *prg, GenericInfo *gi );
 Stream *colm_stream_new( struct colm_program *prg );
 Stream *colm_stream_new_struct( struct colm_program *prg );

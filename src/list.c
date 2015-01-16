@@ -170,10 +170,6 @@ struct colm_struct *colm_list_el_get( struct colm_program *prg,
 		case 1: 
 			result = listEl->list_next;
 			break;
-//		case 2: 
-//			result = listEl->value;
-//			treeUpref( result );
-//			break;
 		default:
 			assert( 0 );
 			break;

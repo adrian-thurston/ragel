@@ -720,7 +720,7 @@ again:
 			Tree *arg[n];
 			for ( i = n-1; i >= 0; i-- )
 				arg[i] = vm_pop();
-			Stream *stream = vm_pop_type( Stream *);
+			Stream *stream = vm_pop_stream();
 			StreamImpl *si = streamToImpl( stream );
 
 			for ( i = 0; i < n; i++ ) {
@@ -1378,7 +1378,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_WV %d\n", field );
 
-			Struct *obj = vm_pop_type(Struct*);
+			Struct *obj = vm_pop_struct();
 			Tree *val = vm_pop();
 
 			/* Save the old value, then set the field. */
@@ -2056,7 +2056,7 @@ again:
 		case IN_GET_PARSER_CTX_R: {
 			debug( prg, REALM_BYTECODE, "IN_GET_PARSER_CTX_R\n" );
 
-			Parser *parser = vm_pop_type( Parser * );
+			Parser *parser = vm_pop_parser();
 			Struct *ctx = parser->pdaRun->context;
 			vm_push_type( Struct *, ctx );
 			break;
@@ -2065,8 +2065,8 @@ again:
 		case IN_SET_PARSER_CTX_WC: {
 			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_CTX_WC\n" );
 
-			Parser *parser = vm_pop_type( Parser * );
-			Struct *strct = vm_pop_type( Struct * );
+			Parser *parser = vm_pop_parser();
+			Struct *strct = vm_pop_struct();
 			colm_parser_set_context( prg, sp, parser, strct );
 			break;
 		}
@@ -2132,7 +2132,7 @@ again:
 		case IN_INPUT_APPEND_STREAM_WC: {
 			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_STREAM_WC\n" );
 
-			Stream *sptr = vm_pop_type( Stream * );
+			Stream *sptr = vm_pop_stream();
 			Tree *input = vm_pop();
 
 			StreamImpl *si = streamToImpl( sptr );
@@ -2142,18 +2142,15 @@ again:
 		case IN_INPUT_APPEND_STREAM_WV: {
 			debug( prg, REALM_BYTECODE, "IN_INPUT_APPEND_STREAM_WV\n" );
 
-			Pointer *sptr = (Pointer*) vm_pop();
+			Stream *stream = vm_pop_stream();
 			Tree *input = vm_pop();
 
-			StreamImpl *si = streamToImpl( (Stream*)sptr );
+			StreamImpl *si = streamToImpl( stream );
 			Word len = streamAppendStream( prg, sp, si, input );
-
-			//treeUpref( (Tree*)sptr );
-			//vm_push( (Tree*)sptr );
 
 			rcodeUnitStart( exec );
 			rcodeCode( exec, IN_INPUT_APPEND_STREAM_BKT );
-			rcodeWord( exec, (Word) sptr );
+			rcodeWord( exec, (Word) stream );
 			rcodeWord( exec, (Word) input );
 			rcodeWord( exec, (Word) len );
 			rcodeUnitTerm( exec );
@@ -2566,7 +2563,7 @@ again:
 		case IN_INPUT_PUSH_WV: {
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_WV\n" );
 
-			Stream *input = vm_pop_type( Stream * );
+			Stream *input = vm_pop_stream();
 			Tree *tree = vm_pop();
 			long len = stream_push( prg, sp, streamToImpl( input ), tree, false );
 			vm_push( 0 );
@@ -2692,8 +2689,8 @@ again:
 		case IN_SET_INPUT: {
 			debug( prg, REALM_BYTECODE, "IN_SET_INPUT\n" );
 
-			Parser *parser = vm_pop_type( Parser * );
-			Stream *stream = vm_pop_type( Stream * );
+			Parser *parser = vm_pop_parser();
+			Stream *stream = vm_pop_stream();
 			parser->input = stream;
 			break;
 		}
@@ -2770,8 +2767,8 @@ again:
 		case IN_PTR_ACCESS_WV: {
 			debug( prg, REALM_BYTECODE, "IN_PTR_ACCESS_WV\n" );
 
-			Struct *ptr = vm_pop_type( Struct * );
-			vm_push_type( Struct *, ptr );
+			Struct *ptr = vm_pop_struct();
+			vm_push_struct( ptr );
 
 			/* This is an initial global load. Need to reverse execute it. */
 			rcodeUnitStart( exec );
@@ -3005,7 +3002,7 @@ again:
 		case IN_LIST_LENGTH: {
 			debug( prg, REALM_BYTECODE, "IN_LIST_LENGTH\n" );
 
-			List *list = vm_pop_type( List* );
+			List *list = vm_pop_list();
 			long len = colm_list_length( list );
 			Tree *res = constructInteger( prg, len );
 			treeDownref( prg, sp, (Tree*)list );
@@ -3019,11 +3016,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WC\n" );
 
-			List *list = vm_pop_type( List* );
-			Struct *s = vm_pop_type( Struct* );
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
+			List *list = vm_pop_list();
+			Struct *s = vm_pop_struct();
 
+			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 			colm_list_prepend( list, listEl );
 
 			treeUpref( prg->trueVal );
@@ -3036,11 +3032,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WV\n" );
 
-			List *list = vm_pop_type(List*);
-			Struct *s = vm_pop_type(Struct*);
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
+			List *list = vm_pop_list();
+			Struct *s = vm_pop_struct();
 
+			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 			colm_list_prepend( list, listEl );
 
 			treeUpref( prg->trueVal );
@@ -3054,7 +3049,7 @@ again:
 		case IN_LIST_PUSH_HEAD_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
 
-			List *list = vm_pop_type(List*);
+			List *list = vm_pop_list();
 			colm_list_detach_head( list );
 			break;
 		}
@@ -3064,11 +3059,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
 
-			List *list = vm_pop_type(List*);
-			Struct *s = vm_pop_type(Struct*);
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
+			List *list = vm_pop_list();
+			Struct *s = vm_pop_struct();
 
+			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 			colm_list_append( list, listEl );
 
 			treeUpref( prg->trueVal );
@@ -3081,11 +3075,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WV\n" );
 
-			List *list = vm_pop_type(List*);
-			Struct *s = vm_pop_type(Struct*);
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
+			List *list = vm_pop_list();
+			Struct *s = vm_pop_struct();
 
+			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 			colm_list_append( list, listEl );
 
 			treeUpref( prg->trueVal );
@@ -3099,7 +3092,7 @@ again:
 		case IN_LIST_PUSH_TAIL_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
 
-			List *list = vm_pop_type(List*);
+			List *list = vm_pop_list();
 			colm_list_detach_tail( prg, list );
 			break;
 		}
@@ -3110,11 +3103,11 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LIST_EL_MEM_R\n" );
 
-			Struct *s = vm_pop_type( Struct * );
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
+			Struct *s = vm_pop_struct();
+
+			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 			Struct *val = colm_list_el_get( prg, listEl, genId, field );
-			vm_push_type( Struct *, val );
+			vm_push_struct( val );
 			break;
 		}
 		case IN_LIST_POP_TAIL_WC: {
@@ -3123,13 +3116,13 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WC\n" );
 
-			List *list = vm_pop_type(List*);
+			List *list = vm_pop_list();
 
-			ListEl *head = list->head;
+			ListEl *tail = list->tail;
 			colm_list_detach_tail( list );
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			Struct *s = colm_struct_container( head, gi->elOffset );
-			vm_push_type( Struct *, s );
+			Struct *s = colm_list_el_container( prg, tail, genId );
+
+			vm_push_struct( s );
 			break;
 		}
 		case IN_LIST_POP_TAIL_WV: {
@@ -3138,13 +3131,13 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WV\n" );
 
-			List *list = vm_pop_type(List*);
+			List *list = vm_pop_list();
 
-			ListEl *head = list->head;
+			ListEl *tail = list->tail;
 			colm_list_detach_tail( list );
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			Struct *s = colm_struct_container( head, gi->elOffset );
-			vm_push_type( Struct *, s );
+			Struct *s = colm_list_el_container( prg, tail, genId );
+
+			vm_push_struct( s );
 
 			/* Set up reverse. The result comes off the list downrefed.
 			 * Need it up referenced for the reverse code too. */
@@ -3162,11 +3155,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
 
-			List *list = vm_pop_type( List* );
+			List *list = vm_pop_list();
 			Struct *s = (Struct*) val;
 
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
+			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 
 			colm_list_append( list, listEl );
 			break;
@@ -3177,13 +3169,13 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WC\n" );
 
-			List *list = vm_pop_type(List*);
+			List *list = vm_pop_list();
 
 			ListEl *head = list->head;
 			colm_list_detach_head( list );
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			Struct *s = colm_struct_container( head, gi->elOffset );
-			vm_push_type( Struct *, s );
+			Struct *s = colm_list_el_container( prg, head, genId );
+
+			vm_push_struct( s );
 			break;
 		}
 		case IN_LIST_POP_HEAD_WV: {
@@ -3192,13 +3184,13 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WV\n" );
 
-			List *list = vm_pop_type(List*);
+			List *list = vm_pop_list();
 
 			ListEl *head = list->head;
 			colm_list_detach_head( list );
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			Struct *s = colm_struct_container( head, gi->elOffset );
-			vm_push_type( Struct *, s );
+			Struct *s = colm_list_el_container( prg, head, genId );
+
+			vm_push_struct( s );
 
 			/* Set up reverse. The result comes off the list downrefed.
 			 * Need it up referenced for the reverse code too. */
@@ -3216,11 +3208,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
 
-			List *list = vm_pop_type( List* );
+			List *list = vm_pop_list();
 			Struct *s = (Struct*) val;
 
-			GenericInfo *gi = &prg->rtd->genericInfo[genId];
-			ListEl *listEl = colm_struct_get_addr( s, ListEl*, gi->elOffset );
+			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 
 			colm_list_prepend( list, listEl );
 			break;
@@ -3233,9 +3224,9 @@ again:
 			debug( prg, REALM_BYTECODE, 
 					"IN_GET_LIST_MEM_R %hd %hd\n", genId, field );
 
-			List *list = vm_pop_type( List* );
+			List *list = vm_pop_list();
 			Struct *val = colm_list_get( prg, list, genId, field );
-			vm_push_type( Struct *, val );
+			vm_push_struct( val );
 			break;
 		}
 		case IN_GET_LIST_MEM_WC: {
@@ -3759,7 +3750,7 @@ again:
 			if ( prg->stdinVal == 0 )
 				prg->stdinVal = openStreamFd( prg, "<stdin>", 0 );
 
-			vm_push_type( Stream*, prg->stdinVal );
+			vm_push_stream( prg->stdinVal );
 			break;
 		}
 		case IN_GET_STDOUT: {
@@ -3770,7 +3761,7 @@ again:
 			if ( prg->stdoutVal == 0 )
 				prg->stdoutVal = openStreamFd( prg, "<stdout>", 1 );
 
-			vm_push_type( Stream*, prg->stdoutVal );
+			vm_push_stream( prg->stdoutVal );
 			break;
 		}
 		case IN_GET_STDERR: {
@@ -3781,7 +3772,7 @@ again:
 			if ( prg->stderrVal == 0 )
 				prg->stderrVal = openStreamFd( prg, "<stderr>", 2 );
 
-			vm_push_type( Stream*, prg->stderrVal );
+			vm_push_stream( prg->stderrVal );
 			break;
 		}
 		case IN_SYSTEM: {

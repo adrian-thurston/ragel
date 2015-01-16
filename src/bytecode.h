@@ -467,6 +467,7 @@ enum LEL_ID {
 #define vm_pop_stream() vm_pop_type(Stream*)
 #define vm_pop_struct() vm_pop_type(Struct*)
 #define vm_pop_parser() vm_pop_type(Parser*)
+#define vm_pop_list()   vm_pop_type(List*)
 
 #define vm_pop_ignore() \
 	({ (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); })
