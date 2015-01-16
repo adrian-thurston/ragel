@@ -2597,8 +2597,9 @@ struct LangVarRef
 	void loadGlobalObj( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
 	void loadObj( Compiler *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
-	void canTakeRef( Compiler *pd, VarRefLookup &lookup ) const;
-	bool canTakeRefTest( Compiler *pd, VarRefLookup &lookup ) const;
+
+	void verifyRefPossible( Compiler *pd, VarRefLookup &lookup ) const;
+	bool canTakeRef( Compiler *pd, VarRefLookup &lookup ) const;
 
 	void setFieldIter( Compiler *pd, CodeVect &code, ObjectDef *inObject,
 			ObjectField *objField, UniqueType *objUT, UniqueType *exprType,
@@ -2612,7 +2613,7 @@ struct LangVarRef
 
 	/* The deref generics value is for iterator calls with lists and maps as args. */
 	ObjectField **evaluateArgs( Compiler *pd, CodeVect &code, 
-			VarRefLookup &lookup, CallArgVect *args, bool derefGenerics = false );
+			VarRefLookup &lookup, CallArgVect *args );
 
 	void callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const;
 	UniqueType *evaluateCall( Compiler *pd, CodeVect &code, CallArgVect *args );
@@ -2921,7 +2922,7 @@ struct LangExpr
 	void resolve( Compiler *pd ) const;
 
 	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;
-	bool canTakeRefTest( Compiler *pd ) const;
+	bool canTakeRef( Compiler *pd ) const;
 
 	InputLoc loc;
 	Type type;

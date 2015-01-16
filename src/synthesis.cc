@@ -662,7 +662,7 @@ UniqueType *LangVarRef::evaluate( Compiler *pd, CodeVect &code, bool forWriting 
 	return ut;
 }
 
-bool LangVarRef::canTakeRefTest( Compiler *pd, VarRefLookup &lookup ) const
+bool LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
 {
 	bool canTake = false;
 
@@ -677,9 +677,9 @@ bool LangVarRef::canTakeRefTest( Compiler *pd, VarRefLookup &lookup ) const
 	return canTake;
 }
 
-void LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
+void LangVarRef::verifyRefPossible( Compiler *pd, VarRefLookup &lookup ) const
 {
-	bool canTake = canTakeRefTest( pd, lookup );
+	bool canTake = canTakeRef( pd, lookup );
 
 	if ( !canTake ) {
 		error(loc) << "can only take references of locals or "
@@ -690,13 +690,13 @@ void LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
 		error(loc) << "reference currently active, cannot take another" << endp;
 }
 
-bool LangExpr::canTakeRefTest( Compiler *pd ) const
+bool LangExpr::canTakeRef( Compiler *pd ) const
 {
 	bool canTake = false;
 
 	if ( type == LangExpr::TermType && term->type == LangTerm::VarRefType ) {
 		VarRefLookup lookup = term->varRef->lookupField( pd );
-		if ( term->varRef->canTakeRefTest( pd, lookup ) )
+		if ( term->varRef->canTakeRef( pd, lookup ) )
 			canTake = true;
 	}
 
@@ -709,7 +709,7 @@ ObjectField *LangVarRef::preEvaluateRef( Compiler *pd, CodeVect &code ) const
 {
 	VarRefLookup lookup = lookupField( pd );
 
-	canTakeRef( pd, lookup );
+	verifyRefPossible( pd, lookup );
 
 	loadQualificationRefs( pd, code, scope );
 
@@ -721,7 +721,7 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 {
 	VarRefLookup lookup = lookupField( pd );
 
-	canTakeRef( pd, lookup );
+	verifyRefPossible( pd, lookup );
 
 	/* Ensure that the field is referenced. */
 	lookup.inObject->referenceField( pd, lookup.objField );
@@ -770,7 +770,7 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 
 
 ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
-		VarRefLookup &lookup, CallArgVect *args, bool derefGenerics )
+		VarRefLookup &lookup, CallArgVect *args )
 {
 	/* Parameter list is given only for user defined methods. Otherwise it
 	 * will be null. */
@@ -785,9 +785,6 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 	ObjectField **paramRefs = new ObjectField*[numArgs];
 	memset( paramRefs, 0, sizeof(ObjectField*) * numArgs );
 
-	bool *derefs = new bool[numArgs];
-	memset( derefs, 0, sizeof(bool)*numArgs );
-
 	/* Done now if there are no args. */
 	if ( args == 0 )
 		return paramRefs;
@@ -796,21 +793,6 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 	ParameterList::Iter p;
 	long size = 0;
 	long tempPops = 0;
-
-	if ( derefGenerics ) {
-		/* First pass we need to allocate and evaluate temporaries. */
-		paramList != 0 && ( p = *paramList );
-		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
-			CodeVect unused;
-			UniqueType *ut = (*pe)->expr->evaluate( pd, unused );
-			if ( ut->typeId == TYPE_PTR /* && ut->langEl->generic != 0 &&
-					( ut->langEl->generic->typeId == GEN_LIST ||
-					ut->langEl->generic->typeId == GEN_MAP ) */ )
-			{
-				derefs[pe.pos()] = true;
-			}
-		}
-	}
 
 	/* First pass we need to allocate and evaluate temporaries. */
 	paramList != 0 && ( p = *paramList );
@@ -821,14 +803,9 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 
 		if ( paramUT->typeId == TYPE_REF ) {
 			/* Make sure we are dealing with a variable reference. */
-			if ( derefs[pe.pos()] || ! expression->canTakeRefTest( pd ) ) {
+			if ( ! expression->canTakeRef( pd ) ) {
 				/* Evaluate the expression. */
 				UniqueType *exprUT = expression->evaluate( pd, code );
-
-				if ( derefs[pe.pos()] ) {
-					code.append( IN_PTR_DEREF_R );
-					exprUT = pd->findUniqueType( TYPE_TREE, exprUT->langEl );
-				}
 
 				(*pe)->exprUT = exprUT;
 
@@ -851,7 +828,7 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 		UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 		if ( paramUT->typeId == TYPE_REF ) {
-			if ( ! derefs[pe.pos()] && expression->canTakeRefTest( pd ) ) {
+			if ( expression->canTakeRef( pd ) ) {
 				/* Lookup the field. */
 				LangVarRef *varRef = expression->term->varRef;
 				ObjectField *refOf = varRef->preEvaluateRef( pd, code );
@@ -873,7 +850,7 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 		UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 		if ( paramUT->typeId == TYPE_REF ) {
-			if ( ! derefs[pe.pos()] && expression->canTakeRefTest( pd ) ) {
+			if ( expression->canTakeRef( pd ) ) {
 				/* Lookup the field. */
 				LangVarRef *varRef = expression->term->varRef;
 
@@ -984,7 +961,7 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 			if ( paramUT->typeId == TYPE_REF ) {
-				if ( expression->canTakeRefTest( pd ) ) {
+				if ( expression->canTakeRef( pd ) ) {
 					LangVarRef *varRef = expression->term->varRef;
 					popCount += varRef->qual->length() * 2;
 				}
@@ -1003,7 +980,7 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 				UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 				if ( paramUT->typeId == TYPE_REF ) {
-					if ( ! expression->canTakeRefTest( pd ) )
+					if ( ! expression->canTakeRef( pd ) )
 						code.append( IN_POP );
 				}
 			}
@@ -2181,8 +2158,7 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 
 	/* Evaluate and push the arguments. */
 	ObjectField **paramRefs = iterCall->langTerm->varRef->evaluateArgs(
-			pd, code, lookup, iterCall->langTerm->args,
-			( iterCall->wasExpr ? true : false ) );
+			pd, code, lookup, iterCall->langTerm->args );
 
 	pd->endContiguous( code, resetContiguous );
 
