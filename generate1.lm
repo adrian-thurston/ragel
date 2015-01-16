@@ -117,7 +117,7 @@ context generate
 					IntEl->Int = data_length
 					IndentStack->push( IntEl )
 				} else {
-					while data_length < IndentStack->top {
+					while data_length < Top->Int {
 						# The indentation level is less than the level on the top of
 						# the stack. Pop the level and send one dedent. This flow of
 						# control will execute until we find the right indentation level
@@ -126,6 +126,8 @@ context generate
 
 						# Send as a DEDENT
 						input->push( make_token( typeid<DEDENT> '' ) )
+
+						Top = IndentStack->top
 					}
 				}
 
