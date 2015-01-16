@@ -134,10 +134,8 @@ typedef unsigned char uchar;
 #define IN_LOAD_GLOBAL_WC        0x57
 #define IN_LOAD_GLOBAL_BKT       0x58
 
-#define IN_PTR_DEREF_R           0x59
-#define IN_PTR_DEREF_WV          0x5a
-#define IN_PTR_DEREF_WC          0x60
-#define IN_PTR_DEREF_BKT         0x61
+#define IN_PTR_ACCESS_WV         0x5a
+#define IN_PTR_ACCESS_BKT        0x61
 
 #define IN_REF_FROM_LOCAL        0x62
 #define IN_REF_FROM_REF          0x63

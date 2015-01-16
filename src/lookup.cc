@@ -79,13 +79,13 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, NameScope *rootScope
 
 		/* Check for references. When loop is done we will have the last one
 		 * present, if any. */
-		if ( qualUT->typeId == TYPE_PTR )
+		if ( qualUT->ptr() )
 			lastPtrInQual = qi.pos();
 
 		if ( qi->form == QualItem::Dot ) {
 			/* Cannot dot a reference. Iterator yes (access of the iterator
 			 * not the current) */
-			if ( qualUT->typeId == TYPE_PTR )
+			if ( qualUT->ptr() )
 				error(loc) << "dot cannot be used to access a pointer" << endp;
 		}
 		else if ( qi->form == QualItem::Arrow ) {

@@ -49,7 +49,6 @@ lex
 	token SWITCH / 'switch' /
 	token CASE / 'case' /
 	token DEFAULT / 'default' /
-	token DEREF / 'deref' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -558,7 +557,6 @@ def code_factor
 |	[TYPEID LT type_ref GT] :TypeId
 |	[NEW type_ref] :New
 |	[CAST LT type_ref GT code_factor] :Cast
-|	[DEREF code_factor] :Deref
 
 def type_ref
 	[region_qual id opt_repeat] :Id

@@ -2566,7 +2566,7 @@ again:
 		case IN_INPUT_PUSH_WV: {
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_WV\n" );
 
-			Stream *input = (Stream*)vm_pop();
+			Stream *input = vm_pop_type( Stream * );
 			Tree *tree = vm_pop();
 			long len = stream_push( prg, sp, streamToImpl( input ), tree, false );
 			vm_push( 0 );
@@ -2767,58 +2767,26 @@ again:
 			vm_push( res );
 			break;
 		}
-		case IN_PTR_DEREF_R: {
-			debug( prg, REALM_BYTECODE, "IN_PTR_DEREF_R\n" );
+		case IN_PTR_ACCESS_WV: {
+			debug( prg, REALM_BYTECODE, "IN_PTR_ACCESS_WV\n" );
 
-			Pointer *ptr = (Pointer*)vm_pop();
-			treeDownref( prg, sp, (Tree*)ptr );
-
-			Tree *dval = getPtrVal( ptr );
-			treeUpref( dval );
-			vm_push( dval );
-			break;
-		}
-		case IN_PTR_DEREF_WC: {
-			debug( prg, REALM_BYTECODE, "IN_PTR_DEREF_WC\n" );
-
-			Pointer *ptr = (Pointer*)vm_pop();
-			treeDownref( prg, sp, (Tree*)ptr );
-
-			Tree *dval = getPtrValSplit( prg, ptr );
-			treeUpref( dval );
-			vm_push( dval );
-			break;
-		}
-		case IN_PTR_DEREF_WV: {
-			debug( prg, REALM_BYTECODE, "IN_PTR_DEREF_WV\n" );
-
-			Pointer *ptr = (Pointer*)vm_pop();
-			/* Don't downref the pointer since it is going into the reverse
-			 * instruction. */
-
-			Tree *dval = getPtrValSplit( prg, ptr );
-			treeUpref( dval );
-			vm_push( dval );
+			Struct *ptr = vm_pop_type( Struct * );
+			vm_push_type( Struct *, ptr );
 
 			/* This is an initial global load. Need to reverse execute it. */
 			rcodeUnitStart( exec );
-			rcodeCode( exec, IN_PTR_DEREF_BKT );
+			rcodeCode( exec, IN_PTR_ACCESS_BKT );
 			rcodeWord( exec, (Word) ptr );
 			break;
 		}
-		case IN_PTR_DEREF_BKT: {
+		case IN_PTR_ACCESS_BKT: {
 			Word p;
 			read_word( p );
 
-			debug( prg, REALM_BYTECODE, "IN_PTR_DEREF_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_PTR_ACCESS_BKT\n" );
 
-			Pointer *ptr = (Pointer*)p;
-
-			Tree *dval = getPtrValSplit( prg, ptr );
-			treeUpref( dval );
-			vm_push( dval );
-
-			treeDownref( prg, sp, (Tree*)ptr );
+			Struct *ptr = (Struct*)p;
+			vm_push_type( Struct *, ptr );
 			break;
 		}
 		case IN_REF_FROM_LOCAL: {
@@ -4141,13 +4109,11 @@ again:
 			treeDownref( prg, sp, val );
 			break;
 		}
-		case IN_PTR_DEREF_BKT: {
+		case IN_PTR_ACCESS_BKT: {
 			Tree *ptr;
 			read_tree( ptr );
 
-			debug( prg, REALM_BYTECODE, "IN_PTR_DEREF_BKT\n" );
-
-			treeDownref( prg, sp, ptr );
+			debug( prg, REALM_BYTECODE, "IN_PTR_ACCESS_BKT\n" );
 			break;
 		}
 		case IN_SET_TOKEN_DATA_BKT: {

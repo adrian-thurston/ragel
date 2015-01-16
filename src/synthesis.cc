@@ -465,26 +465,13 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 				error(loc) << "dot cannot be used to access a pointer" << endp;
 		}
 		else if ( qi->form == QualItem::Arrow ) {
-			if ( qualUT->typeId == TYPE_PTR ) {
-//				/* Always dereference references when used for qualification. If
-//				 * this is the last one then we must start with the reverse
-//				 * execution business. */
-//				if ( pd->revertOn && qi.pos() == lastPtrInQual && forWriting ) {
-//					/* This is like a global load. */
-//					code.append( IN_PTR_DEREF_WV );
-//				}
-//				else {
-//					/* If reading or not yet the last in ref then we only need a
-//					 * reading deref. */
-//					code.append( IN_PTR_DEREF_R );
-//				}
-
-				qualUT = pd->findUniqueType( TYPE_TREE, qualUT->langEl );
-			}
-			else if ( qualUT->typeId == TYPE_STRUCT ||
-					qualUT->typeId == TYPE_GENERIC )
-			{
-				/* No deref. */
+			if ( qualUT->ptr() ) {
+				/* This deref instruction exists to capture the pointer reverse
+				 * execution purposes. */
+				if ( pd->revertOn && qi.pos() == lastPtrInQual && forWriting ) {
+					/* This is like a global load. */
+					code.append( IN_PTR_ACCESS_WV );
+				}
 			}
 			else {
 				error(loc) << "arrow operator cannot be used to "
@@ -670,9 +657,12 @@ bool LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
 	 * via a local and attributes. */
 	if ( lookup.inObject->type == ObjectDef::FrameType )
 		canTake = true;
-	else if ( isLocalRef() && lookup.lastPtrInQual < 0 && 
-				lookup.uniqueType->typeId != TYPE_PTR ) 
-		canTake = true;
+	else if ( isLocalRef() )
+	{
+		cerr << "lastPtrInQual: " << lookup.lastPtrInQual << endl;
+		if ( lookup.lastPtrInQual < 0 && ! lookup.uniqueType->ptr() ) 
+			canTake = true;
+	}
 
 	return canTake;
 }
@@ -1955,15 +1945,6 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					UniqueType *rt = right->evaluate( pd, code );
 					code.append( IN_TREE_TRIM );
 					return rt;
-				}
-				case OP_Deref: {
-					UniqueType *ut = right->evaluate( pd, code );
-					if ( ut->typeId != TYPE_PTR )
-						error(loc) << "can only dereference pointers" << endl;
-
-					code.append( IN_PTR_DEREF_R );
-					ut = pd->findUniqueType( TYPE_TREE, ut->langEl );
-					return ut;
 				}
 				default: 
 					assert(false);
