@@ -52,6 +52,7 @@ typedef struct colm_stream
 	StreamImpl *impl;
 } Stream;
 
+#define COLM_LIST_EL_SIZE 2
 typedef struct colm_list_el
 {
 	struct colm_list_el *list_next;
@@ -72,14 +73,15 @@ typedef struct colm_list
 	GenericInfo *genericInfo;
 } List;
 
-typedef struct _MapEl
+#define COLM_MAP_EL_SIZE 6
+typedef struct colm_map_el
 {
 	/* Must overlay Kid. */
 	Tree *tree;
-	struct _MapEl *next;
-	struct _MapEl *prev;
+	struct colm_map_el *next;
+	struct colm_map_el *prev;
 
-	struct _MapEl *left, *right, *parent;
+	struct colm_map_el *left, *right, *parent;
 	long height;
 	Tree *key;
 } MapEl;

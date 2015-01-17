@@ -193,22 +193,8 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 		}
 	}
 
-	/* Find the key field (named Key). */
-	ObjectField *keyEl = 0;
-	fieldList = utEl->structEl->structDef->objectDef->fieldList;
-	for ( FieldList::Iter f = *fieldList; f.lte(); f++ ) {
-		UniqueType *fUT = f->value->typeRef->resolveType( pd );
-		if ( fUT->typeId == TYPE_TREE && strcmp( f->value->name, "Key" ) == 0 ) {
-			keyEl = f->value;
-			break;
-		}
-	}
-
 	if ( !mapEl )
 		error( loc ) << "could not find list element in type ref" << endp;
-
-	if ( !keyEl )
-		error( loc ) << "could not find Key in type ref" << endp;
 
 	UniqueGeneric searchKey( UniqueGeneric::Map, utKey, utEl );
 	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
@@ -220,7 +206,6 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 				pd->nextGenericId++, typeRef2 );
 		generic->keyTypeArg = typeRef1;
 		generic->el = mapEl;
-		generic->keyEl = mapEl;
 
 		nspace->genericList.append( generic );
 
@@ -774,6 +759,7 @@ void Compiler::resolveProductionEls()
 	}
 }
 
+/* Is this necessary? */
 void Compiler::resolveGenericTypes()
 {
 	for ( NamespaceList::Iter ns = namespaceList; ns.lte(); ns++ ) {
@@ -851,8 +837,6 @@ void Compiler::resolvePass()
 	resolvePrecedence();
 
 	resolveParseTree();
-
-	resolveGenericTypes();
 
 	argvTypeRef->resolveType( this );
 

@@ -728,7 +728,6 @@ struct GenericType
 	UniqueType *keyUT;
 	ObjectDef *objDef;
 	ObjectField *el;
-	ObjectField *keyEl;
 	long elOffset;
 };
 
@@ -1910,11 +1909,11 @@ struct UniqueGeneric
 		Parser
 	};
 
-	UniqueGeneric( Type type, UniqueType *key, UniqueType *value ) :
-		type(type), key(key), value(value), generic(0) {}
-
 	UniqueGeneric( Type type, UniqueType *value ) :
 		type(type), key(0), value(value), generic(0) {}
+
+	UniqueGeneric( Type type, UniqueType *key, UniqueType *value ) :
+		type(type), key(key), value(value), generic(0) {}
 
 	Type type;
 	UniqueType *key;

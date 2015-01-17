@@ -248,7 +248,7 @@ def list_el_def
 	[LIST_EL id]
 
 def map_el_def
-	[MAP_EL id]
+	[MAP_EL LT type_ref GT id]
 
 def struct_item
 	[struct_var_def] :StructVar commit

@@ -293,21 +293,19 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 
 	switch ( typeId ) {
 		case GEN_MAP:
-			pd->initMapFunctions( this );
+			pd->initMapFields( this );
 			break;
 		case GEN_LIST:
 			pd->initListFunctions( this );
 			pd->initListFields( this );
 			pd->initListElFields( this );
 			break;
-		case GEN_LIST_EL:
-//			pd->initListElFields( this );
-			break;
 		case GEN_PARSER:
 			utArg->langEl->parserId = pd->nextParserId++;
 			pd->initParserFunctions( this );
 			pd->initParserFields( this );
 			break;
+		case GEN_LIST_EL:
 		case GEN_MAP_EL:
 			break;
 	}
@@ -926,9 +924,10 @@ void Compiler::addError()
 	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
-void Compiler::initMapFunctions( GenericType *gen )
+void Compiler::initMapFields( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_MAP_LENGTH );
+
 	initFunction( gen->utArg, gen->objDef, "find", 
 			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUT, true );
 	initFunction( uniqueTypeInt, gen->objDef, "insert", 

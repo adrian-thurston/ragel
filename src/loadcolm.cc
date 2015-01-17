@@ -759,6 +759,9 @@ struct LoadColm
 
 	void walkMapElDef( map_el_def Def )
 	{
+		/* Pull out the key type. */
+		TypeRef *keyTr = walkTypeRef( Def.type_ref() );
+
 		/*
 		 * The unique type. This is a def with a single empty form.
 		 */
@@ -781,11 +784,12 @@ struct LoadColm
 		NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 		String id = curStruct()->objectDef->name;
 		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, RepeatNone );
-		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapEl, 0, objTr, 0 );
+		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapEl, 0, objTr, keyTr );
 
 		ObjectField *of = ObjectField::cons( InputLoc(),
 				ObjectField::UserFieldType, elTr, name );
 		structVarDef( InputLoc(), of );
+
 	}
 
 

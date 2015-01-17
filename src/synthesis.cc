@@ -276,7 +276,10 @@ long sizeOfField( UniqueType *fieldUT )
 	case TYPE_GENERIC:
 		switch ( fieldUT->generic->typeId ) {
 		case GEN_LIST_EL:
-			size = 2;
+			size = COLM_LIST_EL_SIZE;
+			break;
+		case GEN_MAP_EL:
+			size = COLM_MAP_EL_SIZE;
 			break;
 		default:
 			size = 1;
