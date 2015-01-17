@@ -11,6 +11,31 @@
 #define true 1
 #define false 0
 
+struct colm_struct *colm_map_el_get( struct colm_program *prg,
+		MapEl *mapEl, Word genId, Word field )
+{
+	GenericInfo *gi = &prg->rtd->genericInfo[genId];
+	ListEl *result = 0;
+	switch ( field ) {
+		case 0: 
+//			result = listEl->list_prev;
+			break;
+		case 1: 
+//			result = listEl->list_next;
+			break;
+		case 2: 
+//			result = listEl->list_next;
+			break;
+		default:
+			assert( 0 );
+			break;
+	}
+
+	struct colm_struct *s = result != 0 ?
+			colm_struct_container( result, gi->elOffset ) : 0;
+	return s;
+}
+
 void mapListAbandon( Map *map )
 {
 	map->head = map->tail = 0;
@@ -544,7 +569,6 @@ MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound )
 			 * and rebalance. */
 			MapEl *element = mapElAllocate( prg );
 			element->key = key;
-			element->tree = 0;
 			mapAttachRebal( map, element, parentEl, lastLess );
 
 			if ( lastFound != 0 )
@@ -573,6 +597,15 @@ MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound )
 	}
 }
 
+void colm_map_insert( Program *prg, Map *map, MapEl *mapEl )
+{
+	mapInsertEl( prg, map, mapEl, 0 );
+}
+
+MapEl *colm_map_find( Program *prg, Map *map, Tree *key )
+{
+	return mapImplFind( prg, map, key );
+}
 
 /**
  * \brief Find a element in the tree with the given key.

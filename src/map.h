@@ -47,6 +47,8 @@ void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element );
 Tree *mapUninsert( Program *prg, Map *map, Tree *key );
 Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element );
 
+void colm_map_insert( Program *prg, Map *map, MapEl *mapEl );
+MapEl *colm_map_find( Program *prg, Map *map, Tree *key );
 
 
 #if defined(__cplusplus)

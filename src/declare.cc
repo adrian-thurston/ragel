@@ -293,7 +293,9 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 
 	switch ( typeId ) {
 		case GEN_MAP:
+			pd->initMapFunctions( this );
 			pd->initMapFields( this );
+			pd->initMapElFields( this );
 			break;
 		case GEN_LIST:
 			pd->initListFunctions( this );
@@ -924,18 +926,48 @@ void Compiler::addError()
 	globalObjectDef->rootScope->insertField( el->name, el );
 }
 
+void Compiler::initMapFunctions( GenericType *gen )
+{
+	initFunction( gen->utArg, gen->objDef, "find", 
+			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUT, true, false, gen );
+
+	initFunction( uniqueTypeInt, gen->objDef, "insert", 
+			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->utArg, false, false, gen );
+
+	initFunction( gen->utArg, gen->objDef, "detach", 
+			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->utArg, false, false, gen );
+}
+
 void Compiler::initMapFields( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_MAP_LENGTH );
+}
 
-	initFunction( gen->utArg, gen->objDef, "find", 
-			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUT, true );
-	initFunction( uniqueTypeInt, gen->objDef, "insert", 
-			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->keyUT, gen->utArg, false );
-	initFunction( uniqueTypeInt, gen->objDef, "store", 
-			IN_MAP_STORE_WV,  IN_MAP_STORE_WC, gen->keyUT, gen->utArg, false );
-	initFunction( gen->utArg, gen->objDef, "remove", 
-			IN_MAP_REMOVE_WV, IN_MAP_REMOVE_WC, gen->keyUT, false );
+void Compiler::initMapElField( GenericType *gen, const char *name, int offset )
+{
+	/* Make the type ref and create the field. */
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltOffType, gen->typeArg, name );
+
+	el->inGetR    = IN_GET_MAP_EL_MEM_R;
+	el->inGetValR = IN_GET_MAP_EL_MEM_R;
+//	el->inGetWC = IN_GET_LIST2EL_MEM_WC;
+//	el->inGetWV = IN_GET_LIST2EL_MEM_WV;
+//	el->inSetWC = IN_SET_LIST2EL_MEM_WC;
+//	el->inSetWV = IN_SET_LIST2EL_MEM_WV;
+
+	el->useGenericId = true;
+	el->generic = gen;
+
+	/* Zero for head, One for tail. */
+	el->offset = offset;
+
+	gen->utArg->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
+}
+
+void Compiler::initMapElFields( GenericType *gen )
+{
+	initMapElField( gen, "key", 0 );
 }
 
 void Compiler::initListFunctions( GenericType *gen )

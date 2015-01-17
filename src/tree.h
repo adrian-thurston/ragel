@@ -21,6 +21,7 @@ struct _FunctionInfo;
 typedef struct colm_stream Stream;
 typedef struct colm_parser Parser;
 typedef struct colm_list List;
+typedef struct colm_map Map;
 
 typedef struct colm_location
 {

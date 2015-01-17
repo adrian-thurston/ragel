@@ -145,17 +145,16 @@ typedef unsigned char uchar;
 #define IN_TRITER_REF_FROM_CUR   0x65
 #define IN_UITER_REF_FROM_CUR    0x66
 
+#define IN_GET_MAP_EL_MEM_R      0x6c
+
 #define IN_MAP_LENGTH            0x67
 #define IN_MAP_FIND              0x68
 #define IN_MAP_INSERT_WV         0x69
 #define IN_MAP_INSERT_WC         0x6a
 #define IN_MAP_INSERT_BKT        0x6b
-#define IN_MAP_STORE_WV          0x6c
-#define IN_MAP_STORE_WC          0x6d
-#define IN_MAP_STORE_BKT         0x6e
-#define IN_MAP_REMOVE_WV         0x6f
-#define IN_MAP_REMOVE_WC         0x70
-#define IN_MAP_REMOVE_BKT        0x71
+#define IN_MAP_DETACH_WV         0x6f
+#define IN_MAP_DETACH_WC         0x70
+#define IN_MAP_DETACH_BKT        0x71
 
 #define IN_LIST_LENGTH           0x72
 #define IN_LIST_PUSH_TAIL_WV     0x73
@@ -468,6 +467,7 @@ enum LEL_ID {
 #define vm_pop_struct() vm_pop_type(Struct*)
 #define vm_pop_parser() vm_pop_type(Parser*)
 #define vm_pop_list()   vm_pop_type(List*)
+#define vm_pop_map()    vm_pop_type(Map*)
 
 #define vm_pop_ignore() \
 	({ (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); })

@@ -3120,7 +3120,7 @@ again:
 
 			ListEl *tail = list->tail;
 			colm_list_detach_tail( list );
-			Struct *s = colm_list_el_container( prg, tail, genId );
+			Struct *s = colm_generic_el_container( prg, tail, genId );
 
 			vm_push_struct( s );
 			break;
@@ -3135,7 +3135,7 @@ again:
 
 			ListEl *tail = list->tail;
 			colm_list_detach_tail( list );
-			Struct *s = colm_list_el_container( prg, tail, genId );
+			Struct *s = colm_generic_el_container( prg, tail, genId );
 
 			vm_push_struct( s );
 
@@ -3173,7 +3173,7 @@ again:
 
 			ListEl *head = list->head;
 			colm_list_detach_head( list );
-			Struct *s = colm_list_el_container( prg, head, genId );
+			Struct *s = colm_generic_el_container( prg, head, genId );
 
 			vm_push_struct( s );
 			break;
@@ -3188,7 +3188,7 @@ again:
 
 			ListEl *head = list->head;
 			colm_list_detach_head( list );
-			Struct *s = colm_list_el_container( prg, head, genId );
+			Struct *s = colm_generic_el_container( prg, head, genId );
 
 			vm_push_struct( s );
 
@@ -3339,6 +3339,52 @@ again:
 			vm_push( val );
 			break;
 		}
+//			short genId;
+//			read_half( genId );
+//
+//			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
+//
+//			List *list = vm_pop_list();
+//			Struct *s = vm_pop_struct();
+//
+//			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
+//			colm_list_append( list, listEl );
+//
+//			treeUpref( prg->trueVal );
+//			vm_push( prg->trueVal );
+//			break;
+
+		case IN_GET_MAP_EL_MEM_R: {
+			short genId, field;
+			read_half( genId );
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_MAP_EL_MEM_R\n" );
+
+			Struct *strct = vm_pop_struct();
+
+			MapEl *mapEl = colm_struct_to_map_el( prg, strct, genId );
+			Struct *val = colm_map_el_get( prg, mapEl, genId, field );
+			vm_push_struct( val );
+			break;
+		}
+		case IN_MAP_INSERT_WC: {
+			short genId;
+			read_half( genId );
+
+			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_WC %hd\n", genId );
+
+			Map *map = vm_pop_map();
+			Struct *s = vm_pop_struct();
+
+			MapEl *mapEl = colm_struct_to_map_el( prg, s, genId );
+
+			colm_map_insert( prg, map, mapEl );
+
+			treeUpref( prg->trueVal );
+			vm_push( prg->trueVal );
+			break;
+		}
 		case IN_MAP_INSERT_WV: {
 			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_WV\n" );
 
@@ -3370,26 +3416,7 @@ again:
 			}
 			break;
 		}
-		case IN_MAP_INSERT_WC: {
-			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_WC\n" );
 
-			Tree *obj = vm_pop();
-			Tree *val = vm_pop();
-			Tree *key = vm_pop();
-
-			treeDownref( prg, sp, obj );
-
-			int inserted = mapInsert( prg, (Map*)obj, key, val );
-			Tree *result = inserted ? prg->trueVal : prg->falseVal;
-			treeUpref( result );
-			vm_push( result );
-
-			if ( ! inserted ) {
-				treeDownref( prg, sp, key );
-				treeDownref( prg, sp, val );
-			}
-			break;
-		}
 		case IN_MAP_INSERT_BKT: {
 			uchar inserted;
 			Tree *key;
@@ -3409,72 +3436,72 @@ again:
 			treeDownref( prg, sp, key );
 			break;
 		}
-		case IN_MAP_STORE_WC: {
-			debug( prg, REALM_BYTECODE, "IN_MAP_STORE_WC\n" );
-
-			Tree *obj = vm_pop();
-			Tree *element = vm_pop();
-			Tree *key = vm_pop();
-
-			Tree *existing = mapStore( prg, (Map*)obj, key, element );
-			Tree *result = existing == 0 ? prg->trueVal : prg->falseVal;
-			treeUpref( result );
-			vm_push( result );
-
-			treeDownref( prg, sp, obj );
-			if ( existing != 0 ) {
-				treeDownref( prg, sp, key );
-				treeDownref( prg, sp, existing );
-			}
-			break;
-		}
-		case IN_MAP_STORE_WV: {
-			debug( prg, REALM_BYTECODE, "IN_MAP_STORE_WV\n" );
-
-			Tree *obj = vm_pop();
-			Tree *element = vm_pop();
-			Tree *key = vm_pop();
-
-			Tree *existing = mapStore( prg, (Map*)obj, key, element );
-			Tree *result = existing == 0 ? prg->trueVal : prg->falseVal;
-			treeUpref( result );
-			vm_push( result );
-
-			/* Set up the reverse instruction. */
-			treeUpref( key );
-			treeUpref( existing );
-			rcodeCode( exec, IN_MAP_STORE_BKT );
-			rcodeWord( exec, (Word)key );
-			rcodeWord( exec, (Word)existing );
-			rcodeUnitTerm( exec );
-
-			treeDownref( prg, sp, obj );
-			if ( existing != 0 ) {
-				treeDownref( prg, sp, key );
-				treeDownref( prg, sp, existing );
-			}
-			break;
-		}
-		case IN_MAP_STORE_BKT: {
-			Tree *key, *val;
-			read_tree( key );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_MAP_STORE_BKT\n" );
-
-			Tree *obj = vm_pop();
-			Tree *stored = mapUnstore( prg, (Map*)obj, key, val );
-
-			treeDownref( prg, sp, stored );
-			if ( val == 0 )
-				treeDownref( prg, sp, key );
-
-			treeDownref( prg, sp, obj );
-			treeDownref( prg, sp, key );
-			break;
-		}
-		case IN_MAP_REMOVE_WC: {
-			debug( prg, REALM_BYTECODE, "IN_MAP_REMOVE_WC\n" );
+//		case IN_MAP_STORE_WC: {
+//			debug( prg, REALM_BYTECODE, "IN_MAP_STORE_WC\n" );
+//
+//			Tree *obj = vm_pop();
+//			Tree *element = vm_pop();
+//			Tree *key = vm_pop();
+//
+//			Tree *existing = mapStore( prg, (Map*)obj, key, element );
+//			Tree *result = existing == 0 ? prg->trueVal : prg->falseVal;
+//			treeUpref( result );
+//			vm_push( result );
+//
+//			treeDownref( prg, sp, obj );
+//			if ( existing != 0 ) {
+//				treeDownref( prg, sp, key );
+//				treeDownref( prg, sp, existing );
+//			}
+//			break;
+//		}
+//		case IN_MAP_STORE_WV: {
+//			debug( prg, REALM_BYTECODE, "IN_MAP_STORE_WV\n" );
+//
+//			Tree *obj = vm_pop();
+//			Tree *element = vm_pop();
+//			Tree *key = vm_pop();
+//
+//			Tree *existing = mapStore( prg, (Map*)obj, key, element );
+//			Tree *result = existing == 0 ? prg->trueVal : prg->falseVal;
+//			treeUpref( result );
+//			vm_push( result );
+//
+//			/* Set up the reverse instruction. */
+//			treeUpref( key );
+//			treeUpref( existing );
+//			rcodeCode( exec, IN_MAP_STORE_BKT );
+//			rcodeWord( exec, (Word)key );
+//			rcodeWord( exec, (Word)existing );
+//			rcodeUnitTerm( exec );
+//
+//			treeDownref( prg, sp, obj );
+//			if ( existing != 0 ) {
+//				treeDownref( prg, sp, key );
+//				treeDownref( prg, sp, existing );
+//			}
+//			break;
+//		}
+//		case IN_MAP_STORE_BKT: {
+//			Tree *key, *val;
+//			read_tree( key );
+//			read_tree( val );
+//
+//			debug( prg, REALM_BYTECODE, "IN_MAP_STORE_BKT\n" );
+//
+//			Tree *obj = vm_pop();
+//			Tree *stored = mapUnstore( prg, (Map*)obj, key, val );
+//
+//			treeDownref( prg, sp, stored );
+//			if ( val == 0 )
+//				treeDownref( prg, sp, key );
+//
+//			treeDownref( prg, sp, obj );
+//			treeDownref( prg, sp, key );
+//			break;
+//		}
+		case IN_MAP_DETACH_WC: {
+			debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_WC\n" );
 
 			Tree *obj = vm_pop();
 			Tree *key = vm_pop();
@@ -3487,8 +3514,8 @@ again:
 			treeDownref( prg, sp, pair.key );
 			break;
 		}
-		case IN_MAP_REMOVE_WV: {
-			debug( prg, REALM_BYTECODE, "IN_MAP_REMOVE_WV\n" );
+		case IN_MAP_DETACH_WV: {
+			debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_WV\n" );
 
 			Tree *obj = vm_pop();
 			Tree *key = vm_pop();
@@ -3498,7 +3525,7 @@ again:
 			vm_push( pair.val );
 
 			/* Reverse instruction. */
-			rcodeCode( exec, IN_MAP_REMOVE_BKT );
+			rcodeCode( exec, IN_MAP_DETACH_BKT );
 			rcodeWord( exec, (Word)pair.key );
 			rcodeWord( exec, (Word)pair.val );
 			rcodeUnitTerm( exec );
@@ -3507,12 +3534,12 @@ again:
 			treeDownref( prg, sp, key );
 			break;
 		}
-		case IN_MAP_REMOVE_BKT: {
+		case IN_MAP_DETACH_BKT: {
 			Tree *key, *val;
 			read_tree( key );
 			read_tree( val );
 
-			debug( prg, REALM_BYTECODE, "IN_MAP_REMOVE_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_BKT\n" );
 
 			/* Either both or neither. */
 			assert( ( key == 0 ) ^ ( val != 0 ) );
@@ -3537,16 +3564,20 @@ again:
 			break;
 		}
 		case IN_MAP_FIND: {
-			debug( prg, REALM_BYTECODE, "IN_MAP_FIND\n" );
+			short genId;
+			read_half( genId );
 
-			Tree *obj = vm_pop();
+			debug( prg, REALM_BYTECODE, "IN_MAP_FIND %hd\n", genId );
+
+			Map *map = vm_pop_map();
 			Tree *key = vm_pop();
-			Tree *result = mapFind( prg, (Map*)obj, key );
-			treeUpref( result );
-			vm_push( result );
 
-			treeDownref( prg, sp, obj );
-			treeDownref( prg, sp, key );
+			MapEl *mapEl = colm_map_find( prg, map, key );
+
+			struct colm_struct *strct = mapEl != 0 ?
+				colm_generic_el_container( prg, mapEl, genId ) : 0;
+
+			vm_push_struct( strct );
 			break;
 		}
 		case IN_CONTIGUOUS: {
@@ -4180,23 +4211,23 @@ again:
 			treeDownref( prg, sp, key );
 			break;
 		}
-		case IN_MAP_STORE_BKT: {
+//		case IN_MAP_STORE_BKT: {
+//			Tree *key, *val;
+//			read_tree( key );
+//			read_tree( val );
+//
+//			debug( prg, REALM_BYTECODE,"IN_MAP_STORE_BKT\n" );
+//
+//			treeDownref( prg, sp, key );
+//			treeDownref( prg, sp, val );
+//			break;
+//		}
+		case IN_MAP_DETACH_BKT: {
 			Tree *key, *val;
 			read_tree( key );
 			read_tree( val );
 
-			debug( prg, REALM_BYTECODE,"IN_MAP_STORE_BKT\n" );
-
-			treeDownref( prg, sp, key );
-			treeDownref( prg, sp, val );
-			break;
-		}
-		case IN_MAP_REMOVE_BKT: {
-			Tree *key, *val;
-			read_tree( key );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_MAP_REMOVE_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_BKT\n" );
 
 			treeDownref( prg, sp, key );
 			treeDownref( prg, sp, val );

@@ -1505,7 +1505,6 @@ TreePair mapRemove( Program *prg, Map *map, Tree *key )
 	if ( mapEl != 0 ) {
 		mapDetach( prg, map, mapEl );
 		result.key = mapEl->key;
-		result.val = mapEl->tree;
 		mapElFree( prg, mapEl );
 	}
 
@@ -1517,21 +1516,22 @@ Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
 	Tree *stored = 0;
 	if ( existing == 0 ) {
 		MapEl *mapEl = mapDetachByKey( prg, map, key );
-		stored = mapEl->tree;
+		// stored = mapEl->tree;
 		mapElFree( prg, mapEl );
 	}
 	else {
 		MapEl *mapEl = mapImplFind( prg, map, key );
-		stored = mapEl->tree;
-		mapEl->tree = existing;
+		// stored = mapEl->tree;
+		//mapEl->tree = existing;
 	}
 	return stored;
 }
 
 Tree *mapFind( Program *prg, Map *map, Tree *key )
 {
-	MapEl *mapEl = mapImplFind( prg, map, key );
-	return mapEl == 0 ? 0 : mapEl->tree;
+//	MapEl *mapEl = mapImplFind( prg, map, key );
+//	return mapEl == 0 ? 0 : mapEl->tree;
+	return 0;
 }
 
 long mapLength( Map *map )
@@ -1619,7 +1619,7 @@ int mapInsert( Program *prg, Map *map, Tree *key, Tree *element )
 	MapEl *mapEl = mapInsertKey( prg, map, key, 0 );
 
 	if ( mapEl != 0 ) {
-		mapEl->tree = element;
+		//mapEl->tree = element;
 		return true;
 	}
 
@@ -1630,15 +1630,16 @@ void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element )
 {
 	MapEl *mapEl = mapInsertKey( prg, map, key, 0 );
 	assert( mapEl != 0 );
-	mapEl->tree = element;
+	//mapEl->tree = element;
 }
 
 Tree *mapUninsert( Program *prg, Map *map, Tree *key )
 {
 	MapEl *el = mapDetachByKey( prg, map, key );
-	Tree *val = el->tree;
+//	Tree *val = el->tree;
 	mapElFree( prg, el );
-	return val;
+//	return val;
+	return 0;
 }
 
 Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element )
@@ -1647,13 +1648,13 @@ Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element )
 	MapEl *elInTree = 0;
 	MapEl *mapEl = mapInsertKey( prg, map, key, &elInTree );
 
-	if ( mapEl != 0 )
-		mapEl->tree = element;
-	else {
-		/* Element with key exists. Overwriting the value. */
-		oldTree = elInTree->tree;
-		elInTree->tree = element;
-	}
+//	if ( mapEl != 0 )
+//		mapEl->tree = element;
+//	else {
+//		/* Element with key exists. Overwriting the value. */
+//		oldTree = elInTree->tree;
+//		elInTree->tree = element;
+//	}
 
 	return oldTree;
 }

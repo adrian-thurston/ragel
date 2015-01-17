@@ -73,18 +73,17 @@ typedef struct colm_list
 	GenericInfo *genericInfo;
 } List;
 
-#define COLM_MAP_EL_SIZE 6
 typedef struct colm_map_el
 {
-	/* Must overlay Kid. */
-	Tree *tree;
-	struct colm_map_el *next;
-	struct colm_map_el *prev;
+	Tree *key;
 
 	struct colm_map_el *left, *right, *parent;
 	long height;
-	Tree *key;
+
+	struct colm_map_el *next, *prev;
 } MapEl;
+
+#define COLM_MAP_EL_SIZE ( sizeof(colm_map_el) / sizeof(void*) )
 
 typedef struct colm_map
 {
@@ -94,9 +93,7 @@ typedef struct colm_map
 
 	void *buffer[8];
 
-	MapEl *head;
-	MapEl *tail;
-	MapEl *root;
+	struct colm_map_el *head, *tail, *root;
 	long treeSize;
 	GenericInfo *genericInfo;
 } Map;
@@ -122,11 +119,14 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 #define colm_struct_container( el, field ) \
 	((void*)el) - (field * sizeof(void*)) - sizeof(struct colm_struct)
 
-#define colm_list_el_container( prg, el, genId ) \
+#define colm_generic_el_container( prg, el, genId ) \
 	colm_struct_container( el, prg->rtd->genericInfo[genId].elOffset )
 
 #define colm_struct_to_list_el( prg, obj, genId ) \
 	colm_struct_get_addr( obj, ListEl*, prg->rtd->genericInfo[genId].elOffset )
+
+#define colm_struct_to_map_el( prg, obj, genId ) \
+	colm_struct_get_addr( obj, MapEl*, prg->rtd->genericInfo[genId].elOffset )
 
 Parser *colm_parser_new( struct colm_program *prg, GenericInfo *gi );
 Stream *colm_stream_new( struct colm_program *prg );
@@ -141,6 +141,8 @@ ListEl *colm_list_detach_head( List *list );
 long colm_list_length( List *list );
 
 Map *colm_map_new( struct colm_program *prg );
+struct colm_struct *colm_map_el_get( struct colm_program *prg,
+		MapEl *mapEl, Word genId, Word field );
 
 #define STRUCT_INBUILT_ID -1
 
