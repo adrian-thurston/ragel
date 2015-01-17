@@ -175,9 +175,42 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 	nspace = pd->rootNamespace;
 
 	UniqueType *utKey = typeRef1->resolveType( pd );	
-	UniqueType *utValue = typeRef2->resolveType( pd );	
+	UniqueType *utEl = typeRef2->resolveType( pd );	
 
-	UniqueGeneric searchKey( UniqueGeneric::Map, utKey, utValue );
+	if ( utEl->typeId != TYPE_STRUCT )
+		error( loc ) << "only structs can be map elements" << endp;
+
+	/* Find the list element. */
+	ObjectField *mapEl = 0;
+	FieldList *fieldList = utEl->structEl->structDef->objectDef->fieldList;
+	for ( FieldList::Iter f = *fieldList; f.lte(); f++ ) {
+		UniqueType *fUT = f->value->typeRef->resolveType( pd );
+		if ( fUT->typeId == TYPE_GENERIC && fUT->generic != 0 &&
+				fUT->generic->typeId == GEN_MAP_EL )
+		{
+			mapEl = f->value;
+			break;
+		}
+	}
+
+	/* Find the key field (named Key). */
+	ObjectField *keyEl = 0;
+	fieldList = utEl->structEl->structDef->objectDef->fieldList;
+	for ( FieldList::Iter f = *fieldList; f.lte(); f++ ) {
+		UniqueType *fUT = f->value->typeRef->resolveType( pd );
+		if ( fUT->typeId == TYPE_TREE && strcmp( f->value->name, "Key" ) == 0 ) {
+			keyEl = f->value;
+			break;
+		}
+	}
+
+	if ( !mapEl )
+		error( loc ) << "could not find list element in type ref" << endp;
+
+	if ( !keyEl )
+		error( loc ) << "could not find Key in type ref" << endp;
+
+	UniqueGeneric searchKey( UniqueGeneric::Map, utKey, utEl );
 	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
 	if ( inMap == 0 ) {
 		inMap = new UniqueGeneric( searchKey );
@@ -186,6 +219,8 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 		GenericType *generic = new GenericType( GEN_MAP,
 				pd->nextGenericId++, typeRef2 );
 		generic->keyTypeArg = typeRef1;
+		generic->el = mapEl;
+		generic->keyEl = mapEl;
 
 		nspace->genericList.append( generic );
 
@@ -202,10 +237,9 @@ UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
-	UniqueType *utKey = typeRef1->resolveType( pd );	
-	UniqueType *utValue = typeRef2->resolveType( pd );	
+	UniqueType *utValue = typeRef1->resolveType( pd );	
 
-	UniqueGeneric searchKey( UniqueGeneric::MapEl, utKey, utValue );
+	UniqueGeneric searchKey( UniqueGeneric::MapEl, utValue );
 	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
 	if ( inMap == 0 ) {
 		inMap = new UniqueGeneric( searchKey );

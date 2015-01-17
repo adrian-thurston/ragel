@@ -749,8 +749,7 @@ struct LoadColm
 		 */
 		NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 		String id = curStruct()->objectDef->name;
-		RepeatType repeatType = RepeatNone;
-		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, repeatType );
+		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, RepeatNone );
 		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListEl, 0, objTr, 0 );
 
 		ObjectField *of = ObjectField::cons( InputLoc(),
@@ -760,6 +759,33 @@ struct LoadColm
 
 	void walkMapElDef( map_el_def Def )
 	{
+		/*
+		 * The unique type. This is a def with a single empty form.
+		 */
+		String name = Def.id().data();
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+				name, pd->nextObjectId++ );
+
+		LelDefList *defList = new LelDefList;
+
+		Production *prod = BaseParser::production( InputLoc(),
+				new ProdElList, String(), false, 0, 0 );
+		prodAppend( defList, prod );
+
+		NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
+		BaseParser::cflDef( ntDef, objectDef, defList );
+
+		/*
+		 * List element with the same name as containing context.
+		 */
+		NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+		String id = curStruct()->objectDef->name;
+		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, RepeatNone );
+		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapEl, 0, objTr, 0 );
+
+		ObjectField *of = ObjectField::cons( InputLoc(),
+				ObjectField::UserFieldType, elTr, name );
+		structVarDef( InputLoc(), of );
 	}
 
 
@@ -848,23 +874,22 @@ struct LoadColm
 			tr = TypeRef::cons( typeRef.id().loc(), nspaceQual, id, repeatType );
 			break;
 		}
+		case type_ref::Parser: {
+			TypeRef *type = walkTypeRef( typeRef._type_ref() );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );
+			break;
+		}
 		case type_ref::List: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
 			break;
 		}
 		case type_ref::Map: {
-			TypeRef *key = walkTypeRef( typeRef.MapKeyType() );
-			TypeRef *value = walkTypeRef( typeRef.MapValueType() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, key, value );
+			TypeRef *keyType = walkTypeRef( typeRef.KeyType() );
+			TypeRef *elType = walkTypeRef( typeRef.ElType() );
+			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, keyType, elType );
 			break;
-		}
-		case type_ref::Parser: {
-			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );
-			break;
-		}
-		}
+		}}
 		return tr;
 	}
 

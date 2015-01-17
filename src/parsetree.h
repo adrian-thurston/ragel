@@ -728,6 +728,7 @@ struct GenericType
 	UniqueType *keyUT;
 	ObjectDef *objDef;
 	ObjectField *el;
+	ObjectField *keyEl;
 	long elOffset;
 };
 
