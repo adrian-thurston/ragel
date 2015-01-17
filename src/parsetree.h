@@ -2259,7 +2259,9 @@ struct ObjectField
 		RhsNameType,
 		ParamValType,
 		ParamRefType,
-		LexSubstrType
+		LexSubstrType,
+		GenericElementType,
+		GenericDependentType
 	};
 
 	ObjectField()
@@ -2274,6 +2276,7 @@ struct ObjectField
 		isExport(false),
 		useGenericId(false),
 		generic(0),
+		mapKeyField(0),
 		dirtyTree(false),
 		inGetR( IN_HALT ),
 		inGetWC( IN_HALT ),
@@ -2348,6 +2351,8 @@ struct ObjectField
 
 	bool useGenericId;
 	GenericType *generic;
+
+	ObjectField *mapKeyField;
 	
 	/* True if some aspect of the tree has possibly been written to. This does
 	 * not include attributes. This is here so we can optimize the storage of

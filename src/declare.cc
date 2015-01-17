@@ -943,24 +943,17 @@ void Compiler::initMapFields( GenericType *gen )
 	addLengthField( gen->objDef, IN_MAP_LENGTH );
 }
 
+
 void Compiler::initMapElField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltOffType, gen->typeArg, name );
-
-	el->inGetR    = IN_GET_MAP_EL_MEM_R;
-	el->inGetValR = IN_GET_MAP_EL_MEM_R;
-//	el->inGetWC = IN_GET_LIST2EL_MEM_WC;
-//	el->inGetWV = IN_GET_LIST2EL_MEM_WV;
-//	el->inSetWC = IN_SET_LIST2EL_MEM_WC;
-//	el->inSetWV = IN_SET_LIST2EL_MEM_WV;
-
-	el->useGenericId = true;
-	el->generic = gen;
-
-	/* Zero for head, One for tail. */
-	el->offset = offset;
+			ObjectField::GenericDependentType, gen->keyTypeArg, name );
+	
+	gen->el->mapKeyField = el;
+	
+	/* Offset will be computed when the offset of the owning map element field
+	 * is computed. */
 
 	gen->utArg->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
 }

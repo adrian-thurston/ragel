@@ -753,7 +753,7 @@ struct LoadColm
 		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListEl, 0, objTr, 0 );
 
 		ObjectField *of = ObjectField::cons( InputLoc(),
-				ObjectField::UserFieldType, elTr, name );
+				ObjectField::GenericElementType, elTr, name );
 		structVarDef( InputLoc(), of );
 	}
 
@@ -787,9 +787,8 @@ struct LoadColm
 		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapEl, 0, objTr, keyTr );
 
 		ObjectField *of = ObjectField::cons( InputLoc(),
-				ObjectField::UserFieldType, elTr, name );
+				ObjectField::GenericElementType, elTr, name );
 		structVarDef( InputLoc(), of );
-
 	}
 
 

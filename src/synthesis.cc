@@ -2693,6 +2693,8 @@ void ObjectField::initField()
 			inSetWV =  IN_SET_FIELD_WV;
 			break;
 
+		case GenericElementType:
+		case GenericDependentType:
 		case StructFieldType:
 			inGetR  =  IN_GET_STRUCT_R;
 			inGetWC =  IN_GET_STRUCT_WC;
@@ -2742,6 +2744,22 @@ void ObjectDef::placeField( Compiler *pd, ObjectField *field )
 			field->offset = -nextOffset;
 			break;
 
+
+		case ObjectField::GenericElementType: {
+
+			/* Tree object frame fields. Record the position, then move the
+			 * running offset. */
+			field->offset = nextOffset;
+			nextOffset += sizeOfField( fieldUT );
+
+			if ( fieldUT->generic->typeId == GEN_MAP_EL ) {
+				if ( field->mapKeyField != 0 )
+					field->mapKeyField->offset = field->offset;
+			}
+
+			break;
+		}
+
 		case ObjectField::UserFieldType:
 
 			/* Tree object frame fields. Record the position, then move the
@@ -2754,6 +2772,10 @@ void ObjectDef::placeField( Compiler *pd, ObjectField *field )
 			field->offset = nextOffset;
 			nextOffset += sizeOfField( fieldUT );
 			break;
+
+		case ObjectField::GenericDependentType:
+			/* There is an object field that this type depends on. When it is
+			 * placed, this one will be placed as well. Nothing to do now. */
 
 		case ObjectField::InbuiltFieldType:
 		case ObjectField::InbuiltOffType:
