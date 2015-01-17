@@ -174,11 +174,13 @@ typedef unsigned char uchar;
 #define IN_GET_LIST_MEM_WC       0x7a
 #define IN_GET_LIST_MEM_WV       0x7b
 #define IN_GET_LIST_MEM_BKT      0x7c
-#define IN_SET_LIST_MEM_WV       0x7d
-#define IN_SET_LIST_MEM_WC       0x7e
-#define IN_SET_LIST_MEM_BKT      0x7f
 
 #define IN_GET_LIST_EL_MEM_R     0xf5
+
+#define IN_GET_MAP_MEM_R         0x6d
+#define IN_GET_MAP_MEM_WV        0x7d
+#define IN_GET_MAP_MEM_WC        0x7e
+#define IN_GET_MAP_MEM_BKT       0x7f
 
 #define IN_VECTOR_LENGTH         0x80
 #define IN_VECTOR_APPEND_WV      0x81

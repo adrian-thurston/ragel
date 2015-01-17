@@ -15,16 +15,35 @@ struct colm_struct *colm_map_el_get( struct colm_program *prg,
 		MapEl *mapEl, Word genId, Word field )
 {
 	GenericInfo *gi = &prg->rtd->genericInfo[genId];
-	ListEl *result = 0;
+	MapEl *result = 0;
 	switch ( field ) {
 		case 0: 
-//			result = listEl->list_prev;
+			result = mapEl->prev;
 			break;
 		case 1: 
-//			result = listEl->list_next;
+			result = mapEl->next;
 			break;
-		case 2: 
-//			result = listEl->list_next;
+		default:
+			assert( 0 );
+			break;
+	}
+
+	struct colm_struct *s = result != 0 ?
+			colm_struct_container( result, gi->elOffset ) : 0;
+	return s;
+}
+
+struct colm_struct *colm_map_get( struct colm_program *prg,
+		Map *map, Word genId, Word field )
+{
+	GenericInfo *gi = &prg->rtd->genericInfo[genId];
+	MapEl *result = 0;
+	switch ( field ) {
+		case 0: 
+			result = map->head;
+			break;
+		case 1: 
+			result = map->tail;
 			break;
 		default:
 			assert( 0 );

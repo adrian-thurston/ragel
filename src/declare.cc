@@ -938,13 +938,40 @@ void Compiler::initMapFunctions( GenericType *gen )
 			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->utArg, false, false, gen );
 }
 
+void Compiler::initMapField( GenericType *gen, const char *name, int offset )
+{
+	/* Make the type ref and create the field. */
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltOffType, gen->typeArg, name );
+
+	el->inGetR =  IN_GET_MAP_MEM_R;
+	el->inGetWC = IN_GET_MAP_MEM_WC;
+	el->inGetWV = IN_GET_MAP_MEM_WV;
+//	el->inSetWC = IN_SET_MAP_MEM_WC;
+//	el->inSetWV = IN_SET_MAP_MEM_WV;
+
+	el->inGetValR  =  IN_GET_MAP_MEM_R;
+	el->inGetValWC =  IN_GET_MAP_MEM_WC;
+	el->inGetValWV =  IN_GET_MAP_MEM_WV;
+
+	gen->objDef->rootScope->insertField( el->name, el );
+
+	el->useGenericId = true;
+	el->generic = gen;
+
+	/* Zero for head, One for tail. */
+	el->offset = offset;
+}
+
 void Compiler::initMapFields( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_MAP_LENGTH );
+
+	initMapField( gen, "head", 0 );
+	initMapField( gen, "tail", 1 );
 }
 
-
-void Compiler::initMapElField( GenericType *gen, const char *name, int offset )
+void Compiler::initMapElKey( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
@@ -958,14 +985,38 @@ void Compiler::initMapElField( GenericType *gen, const char *name, int offset )
 	gen->utArg->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
 }
 
+void Compiler::initMapElField( GenericType *gen, const char *name, int offset )
+{
+	/* Make the type ref and create the field. */
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltOffType, gen->typeArg, name );
+
+	el->inGetR    = IN_GET_MAP_EL_MEM_R;
+	el->inGetValR = IN_GET_MAP_EL_MEM_R;
+//	el->inGetWC = IN_GET_LIST2EL_MEM_WC;
+//	el->inGetWV = IN_GET_LIST2EL_MEM_WV;
+//	el->inSetWC = IN_SET_LIST2EL_MEM_WC;
+//	el->inSetWV = IN_SET_LIST2EL_MEM_WV;
+
+	el->useGenericId = true;
+	el->generic = gen;
+
+	/* Zero for head, One for tail. */
+	el->offset = offset;
+
+	gen->utArg->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
+}
+
 void Compiler::initMapElFields( GenericType *gen )
 {
-	initMapElField( gen, "key", 0 );
+	initMapElKey( gen, "key", 0 );
+
+	initMapElField( gen, "prev", 0 );
+	initMapElField( gen, "next", 1 );
 }
 
 void Compiler::initListFunctions( GenericType *gen )
 {
-	addLengthField( gen->objDef, IN_LIST_LENGTH );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
 			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, false, gen );
@@ -1011,6 +1062,8 @@ void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 
 void Compiler::initListElFields( GenericType *gen )
 {
+	addLengthField( gen->objDef, IN_LIST_LENGTH );
+
 	initListElField( gen, "prev", 0 );
 	initListElField( gen, "next", 1 );
 }
@@ -1024,8 +1077,8 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 	el->inGetR =  IN_GET_LIST_MEM_R;
 	el->inGetWC = IN_GET_LIST_MEM_WC;
 	el->inGetWV = IN_GET_LIST_MEM_WV;
-	el->inSetWC = IN_SET_LIST_MEM_WC;
-	el->inSetWV = IN_SET_LIST_MEM_WV;
+//	el->inSetWC = IN_SET_LIST_MEM_WC;
+//	el->inSetWV = IN_SET_LIST_MEM_WV;
 
 	el->inGetValR  =  IN_GET_LIST_MEM_R;
 	el->inGetValWC =  IN_GET_LIST_MEM_WC;

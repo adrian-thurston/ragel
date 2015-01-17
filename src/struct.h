@@ -143,6 +143,8 @@ long colm_list_length( List *list );
 Map *colm_map_new( struct colm_program *prg );
 struct colm_struct *colm_map_el_get( struct colm_program *prg,
 		MapEl *mapEl, Word genId, Word field );
+struct colm_struct *colm_map_get( struct colm_program *prg, Map *map,
+		Word genId, Word field );
 
 #define STRUCT_INBUILT_ID -1
 
