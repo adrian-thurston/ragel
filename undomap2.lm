@@ -1,0 +1,65 @@
+context undo
+
+	lex
+		ignore /( ' ' | '\t')+/
+		literal `* `( `) `^ `;
+		token NL /'\n'/
+		token id /[a-zA-Z_]+/
+	end
+
+	struct item_el
+		map_el<item> el
+	end
+
+	Map: map<item item_el>
+
+	def item 
+		[id]
+		{
+			E: item_el = new item_el
+			E->key = lhs
+			Map->insert( E )
+		}
+	|	[`( item* `)]
+		{
+			E: item_el = new item_el
+			E->key = lhs
+			Map->insert( E )
+		}
+
+	def no_accum_item 
+		[id]
+	|	[`( no_accum_item* `)]
+
+
+	def A1 []
+	def A2 []
+
+	def start 
+		[A1 item* `^]
+	|	[A2 no_accum_item* `; NL]
+	{
+		E: item_el = Map->head
+		while ( E ) {
+			print "map el: [E->key]
+			E = E->next
+		}
+	}
+
+end
+
+Undo: undo = new undo
+Undo->Map = new map<undo::item undo::item_el>
+
+E: undo::item_el = new undo::item_el
+E->key = cons undo::item "a"
+Undo->Map->insert( E )
+
+parse Input: undo::start(Undo)[ stdin ]
+print( Input )
+
+###### IN #######
+a a a ( a a ) a;
+###### EXP #######
+map el: a
+a a a ( a a ) a;
