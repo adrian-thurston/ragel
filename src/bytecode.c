@@ -3275,56 +3275,6 @@ again:
 			vm_push( res );
 			break;
 		}
-#if 0
-		case IN_SET_LIST_MEM_WC: {
-			Half field;
-			read_half( field );
-
-			debug( prg, REALM_BYTECODE, "IN_SET_LIST_MEM_WC\n" );
-
-			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
-
-			Tree *val = vm_pop();
-			Tree *existing = setListMem( (List*)obj, field, val );
-			treeDownref( prg, sp, existing );
-			break;
-		}
-		case IN_SET_LIST_MEM_WV: {
-			Half field;
-			read_half( field );
-
-			debug( prg, REALM_BYTECODE, "IN_SET_LIST_MEM_WV\n" );
-
-			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
-
-			Tree *val = vm_pop();
-			Tree *existing = setListMem( (List*)obj, field, val );
-
-			/* Set up the reverse instruction. */
-			rcodeCode( exec, IN_SET_LIST_MEM_BKT );
-			rcodeHalf( exec, field );
-			rcodeWord( exec, (Word)existing );
-			rcodeUnitTerm( exec );
-			break;
-		}
-		case IN_SET_LIST_MEM_BKT: {
-			Half field;
-			Tree *val;
-			read_half( field );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_SET_LIST_MEM_BKT\n" );
-
-			Tree *obj = vm_pop();
-			treeDownref( prg, sp, obj );
-
-			Tree *undid = setListMem( (List*)obj, field, val );
-			treeDownref( prg, sp, undid );
-			break;
-		}
-#endif
 		case IN_GET_PARSER_MEM_R: {
 			short field;
 			read_half( field );
@@ -3374,6 +3324,7 @@ again:
 			break;
 		}
 		case IN_MAP_INSERT_WV: {
+#if 0
 			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_WV\n" );
 
 			Tree *obj = vm_pop();
@@ -3403,25 +3354,44 @@ again:
 				treeDownref( prg, sp, val );
 			}
 			break;
+#endif
+
+			short genId;
+			read_half( genId );
+
+			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_WV %hd\n", genId );
+
+			Map *map = vm_pop_map();
+			Struct *s = vm_pop_struct();
+
+			MapEl *mapEl = colm_struct_to_map_el( prg, s, genId );
+
+			colm_map_insert( prg, map, mapEl );
+
+			treeUpref( prg->trueVal );
+			vm_push( prg->trueVal );
+
+			rcodeCode( exec, IN_MAP_INSERT_BKT );
+			rcodeHalf( exec, genId );
+			rcodeWord( exec, (Word)mapEl );
+			rcodeUnitTerm( exec );
+			break;
 		}
 
 		case IN_MAP_INSERT_BKT: {
-			uchar inserted;
-			Tree *key;
-			read_byte( inserted );
-			read_tree( key );
+			short genId;
+			Word wmapEl;
+
+			read_half( genId );
+			read_word( wmapEl );
+
+			MapEl *mapEl = (MapEl*)wmapEl;
 
 			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT\n" );
-			
-			Tree *obj = vm_pop();
-			if ( inserted ) {
-				Tree *val = mapUninsert( prg, (Map*)obj, key );
-				treeDownref( prg, sp, key );
-				treeDownref( prg, sp, val );
-			}
 
-			treeDownref( prg, sp, obj );
-			treeDownref( prg, sp, key );
+			Map *map = vm_pop_map();
+
+			colm_map_detach( prg, map, mapEl );
 			break;
 		}
 		case IN_MAP_DETACH_WC: {
@@ -4175,28 +4145,14 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_LIST_MEM_BKT %hd\n", field );
 			break;
 		}
-#if 0
-		case IN_SET_LIST_MEM_BKT: {
-			Half field;
-			Tree *val;
-			read_half( field );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_SET_LIST_MEM_BKT %hd\n", field );
-
-			treeDownref( prg, sp, val );
-			break;
-		}
-#endif
 		case IN_MAP_INSERT_BKT: {
-			/* uchar inserted; */
-			Tree *key;
-			consume_byte();
-			read_tree( key );
+			short genId;
+			Word wmapEl;
+
+			read_half( genId );
+			read_word( wmapEl );
 
 			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT\n" );
-			
-			treeDownref( prg, sp, key );
 			break;
 		}
 		case IN_MAP_DETACH_BKT: {
