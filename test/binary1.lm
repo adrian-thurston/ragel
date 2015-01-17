@@ -449,7 +449,12 @@ int print_RR_A( s: start )
 	}
 }
 
-int print_name( n: name m: map<int name> )
+struct name_map_el
+	Name: name
+	map_el<int> el
+end
+
+int print_name( n: name m: map<int name_map_el> )
 {
 	for P: name_part in n {
 		match P [part_len D:nbytes]
@@ -460,8 +465,8 @@ int print_name( n: name m: map<int name> )
 		if match E [o1:octet o2:octet] {
 			val: int = (o1.data.uord8() - 192) * 256 + o2.data.uord8()
 			print( '[' val ']' )
-			nameInMap: name = m->find( val )
-			print_name( nameInMap m )
+			nameInMap: name_map_el = m->find( val )
+			print_name( nameInMap->Name m )
 		}
 	}
 }
@@ -469,7 +474,7 @@ int print_name( n: name m: map<int name> )
 int print_all_names( s: start )
 {
 	for M: message in s {
-		m: map<int name> = new map<int name>
+		m: map<int name_map_el> = new map<int name_map_el>
 
 		O: octet = octet in M
 
@@ -480,7 +485,10 @@ int print_all_names( s: start )
 				if match NP [L: octet nbytes name_part*] {
 					messageOffset: int = L.pos - O.pos
 					construct n: name [NP E]
-					m->insert( messageOffset n )
+					El: name_map_el = new name_map_el
+					El->key = messageOffset
+					El->Name = n
+					m->insert( El )
 				}
 			}
 		}

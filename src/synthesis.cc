@@ -1171,8 +1171,10 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 		if ( item->type == ConsItem::ExprType ) {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 		
-			if ( ut->typeId != TYPE_TREE )
-				error() << "variables used in replacements must be trees" << endp;
+			if ( ut->typeId != TYPE_TREE ) {
+				error(constructor->loc) << "variables used in "
+						"replacements must be trees" << endp;
+			}
 
 			item->langEl = ut->langEl;
 		}
