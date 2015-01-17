@@ -3324,38 +3324,6 @@ again:
 			break;
 		}
 		case IN_MAP_INSERT_WV: {
-#if 0
-			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_WV\n" );
-
-			Tree *obj = vm_pop();
-			Tree *val = vm_pop();
-			Tree *key = vm_pop();
-
-			treeDownref( prg, sp, obj );
-
-			int inserted = mapInsert( prg, (Map*)obj, key, val );
-			Tree *result = inserted ? prg->trueVal : prg->falseVal;
-			treeUpref( result );
-			vm_push( result );
-
-			/* Set up the reverse instruction. If the insert fails still need
-			 * to pop the loaded map object. Just use the reverse instruction
-			 * since it's nice to see it in the logs. */
-
-			/* Need to upref key for storage in reverse code. */
-			treeUpref( key );
-			rcodeCode( exec, IN_MAP_INSERT_BKT );
-			rcodeCode( exec, inserted );
-			rcodeWord( exec, (Word)key );
-			rcodeUnitTerm( exec );
-
-			if ( ! inserted ) {
-				treeDownref( prg, sp, key );
-				treeDownref( prg, sp, val );
-			}
-			break;
-#endif
-
 			short genId;
 			read_half( genId );
 
@@ -3366,13 +3334,14 @@ again:
 
 			MapEl *mapEl = colm_struct_to_map_el( prg, s, genId );
 
-			colm_map_insert( prg, map, mapEl );
+			MapEl *inserted = colm_map_insert( prg, map, mapEl );
 
 			treeUpref( prg->trueVal );
 			vm_push( prg->trueVal );
 
 			rcodeCode( exec, IN_MAP_INSERT_BKT );
 			rcodeHalf( exec, genId );
+			rcodeCode( exec, inserted != 0 ? 1 : 0 );
 			rcodeWord( exec, (Word)mapEl );
 			rcodeUnitTerm( exec );
 			break;
@@ -3380,18 +3349,21 @@ again:
 
 		case IN_MAP_INSERT_BKT: {
 			short genId;
+			uchar inserted;
 			Word wmapEl;
 
 			read_half( genId );
+			read_byte( inserted );
 			read_word( wmapEl );
 
 			MapEl *mapEl = (MapEl*)wmapEl;
 
-			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT %d\n", (int)inserted );
 
 			Map *map = vm_pop_map();
 
-			colm_map_detach( prg, map, mapEl );
+			if ( inserted ) 
+				colm_map_detach( prg, map, mapEl );
 			break;
 		}
 		case IN_MAP_DETACH_WC: {
@@ -4147,12 +4119,14 @@ again:
 		}
 		case IN_MAP_INSERT_BKT: {
 			short genId;
+			uchar inserted;
 			Word wmapEl;
 
 			read_half( genId );
+			read_byte( inserted );
 			read_word( wmapEl );
 
-			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT %d\n", (int)inserted );
 			break;
 		}
 		case IN_MAP_DETACH_BKT: {
