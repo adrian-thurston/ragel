@@ -3093,7 +3093,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
 
 			List *list = vm_pop_list();
-			colm_list_detach_tail( prg, list );
+			colm_list_detach_tail( list );
 			break;
 		}
 		case IN_GET_LIST_EL_MEM_R: {

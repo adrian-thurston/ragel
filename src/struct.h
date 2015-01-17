@@ -138,6 +138,7 @@ struct colm_struct *colm_list_get( struct colm_program *prg, List *list,
 struct colm_struct *colm_list_el_get( struct colm_program *prg,
 		ListEl *listEl, Word genId, Word field );
 ListEl *colm_list_detach_head( List *list );
+ListEl *colm_list_detach_tail( List *list );
 long colm_list_length( List *list );
 
 Map *colm_map_new( struct colm_program *prg );
