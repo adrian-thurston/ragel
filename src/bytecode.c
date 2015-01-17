@@ -3501,17 +3501,33 @@ again:
 //			break;
 //		}
 		case IN_MAP_DETACH_WC: {
-			debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_WC\n" );
+//			debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_WC\n" );
+//
+//			Tree *obj = vm_pop();
+//			Tree *key = vm_pop();
+//			TreePair pair = mapRemove( prg, (Map*)obj, key );
+//
+//			vm_push( pair.val );
+//
+//			treeDownref( prg, sp, obj );
+//			treeDownref( prg, sp, key );
+//			treeDownref( prg, sp, pair.key );
+//			break;
 
-			Tree *obj = vm_pop();
-			Tree *key = vm_pop();
-			TreePair pair = mapRemove( prg, (Map*)obj, key );
+			short genId;
+			read_half( genId );
 
-			vm_push( pair.val );
+			debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_WC %hd\n", genId );
 
-			treeDownref( prg, sp, obj );
-			treeDownref( prg, sp, key );
-			treeDownref( prg, sp, pair.key );
+			Map *map = vm_pop_map();
+			Struct *s = vm_pop_struct();
+
+			MapEl *mapEl = colm_struct_to_map_el( prg, s, genId );
+
+			colm_map_detach( prg, map, mapEl );
+
+			treeUpref( prg->trueVal );
+			vm_push( prg->trueVal );
 			break;
 		}
 		case IN_MAP_DETACH_WV: {

@@ -602,6 +602,12 @@ void colm_map_insert( Program *prg, Map *map, MapEl *mapEl )
 	mapInsertEl( prg, map, mapEl, 0 );
 }
 
+void colm_map_detach( Program *prg, Map *map, MapEl *mapEl )
+{
+	mapDetach( prg, map, mapEl );
+}
+
+
 MapEl *colm_map_find( Program *prg, Map *map, Tree *key )
 {
 	return mapImplFind( prg, map, key );
