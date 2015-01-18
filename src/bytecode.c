@@ -1305,7 +1305,7 @@ again:
 			Tree *ptr = colm_tree_get_field( obj, field );
 			Tree *dval = 0;
 			if ( ptr )
-				dval = getPtrVal( ptr );
+				dval = (Tree*)colm_get_pointer_val( (Pointer*)ptr );
 			vm_push( dval );
 			break;
 		}
@@ -1326,7 +1326,7 @@ again:
 			/* Make it into a pointer. */
 			Tree *pointer = 0;
 			if ( strct != 0 ) {
-				pointer = constructPointer( prg, (Tree*)strct );
+				pointer = (Tree*) colm_construct_pointer( prg, (Value)strct );
 				treeUpref( pointer );
 			}
 
@@ -2837,7 +2837,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_TREE_NEW \n" );
 
 			Tree *tree = vm_pop();
-			Tree *res = constructPointer( prg, tree );
+			Tree *res = (Tree*) colm_construct_pointer( prg, (Value)tree );
 			treeUpref( res );
 			vm_push( res );
 			break;

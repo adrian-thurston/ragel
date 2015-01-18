@@ -180,10 +180,10 @@ Tree *constructString( Program *prg, Head *s )
 	return (Tree*)str;
 }
 
-Tree *constructPointer( Program *prg, Tree *tree )
+Pointer *colm_construct_pointer( Program *prg, Value value )
 {
 	Kid *kid = kidAllocate( prg );
-	kid->tree = tree;
+	kid->tree = value;
 	kid->next = prg->origHeap;
 	prg->origHeap = kid;
 
@@ -191,7 +191,7 @@ Tree *constructPointer( Program *prg, Tree *tree )
 	pointer->id = LEL_ID_PTR;
 	pointer->value = kid;
 	
-	return (Tree*)pointer;
+	return pointer;
 }
 
 Tree *constructTerm( Program *prg, Word id, Head *tokdata )
@@ -1288,7 +1288,7 @@ Tree *getFieldSplit( Program *prg, Tree *tree, Word field )
 	return split;
 }
 
-Tree *getPtrVal( Pointer *ptr )
+Tree *colm_get_pointer_val( Pointer *ptr )
 {
 	return ptr->value->tree;
 }

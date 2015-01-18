@@ -13,6 +13,8 @@ struct colm_sections;
 struct colm_tree;
 struct colm_location;
 
+typedef unsigned long colm_value_t;
+
 struct colm_tree
 {
 	/* First four will be overlaid in other structures. */

@@ -19,6 +19,8 @@ extern "C" {
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
+typedef unsigned long colm_value_t;
+
 /* 
  * 0x6e
  * 0xbc
