@@ -19,6 +19,12 @@ extern "C" {
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
+/* 
+ * 0x60
+ * 0x5e
+ * 0x5f
+ */
+
 #define IN_LOAD_INT              0x01
 #define IN_LOAD_STR              0x02
 #define IN_LOAD_NIL              0x03
@@ -329,6 +335,7 @@ typedef unsigned char uchar;
 #define IN_GET_STRUCT_VAL_R      0x93
 #define IN_SET_STRUCT_VAL_WV     0x94
 #define IN_SET_STRUCT_VAL_WC     0x95
+#define IN_SET_STRUCT_VAL_BKT    0x5d
 #define IN_NEW_STRUCT            0xfe
 
 #define IN_GET_LOCAL_VAL_R       0x91

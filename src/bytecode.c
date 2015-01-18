@@ -1426,10 +1426,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_VAL_WC %d\n", field );
 
-			Tree *obj = vm_pop();
+			Struct *strct = vm_pop_struct();
 			Tree *val = vm_pop();
 
-			colm_struct_set_field( obj, Tree*, field, val );
+			colm_struct_set_field( strct, Tree*, field, val );
 			break;
 		}
 		case IN_SET_STRUCT_VAL_WV: {
@@ -1438,10 +1438,28 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_VAL_WV %d\n", field );
 
-			Tree *obj = vm_pop();
+			Struct *strct = vm_pop_struct();
 			Tree *val = vm_pop();
 
-			/* FIXME: save val here. */
+			Tree *prev = colm_struct_get_field( strct, Tree*, field );
+			colm_struct_set_field( strct, Tree*, field, val );
+
+			rcodeCode( exec, IN_SET_STRUCT_VAL_BKT );
+			rcodeHalf( exec, field );
+			rcodeWord( exec, (Word)prev );
+			rcodeUnitTerm( exec );
+			break;
+		}
+		case IN_SET_STRUCT_VAL_BKT: {
+			short field;
+			Tree *val;
+			read_half( field );
+			read_tree( val );
+
+			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_VAL_BKT\n" );
+
+			Tree *obj = vm_pop();
+
 			colm_struct_set_field( obj, Tree*, field, val );
 			break;
 		}
@@ -2518,7 +2536,7 @@ again:
 		case IN_INPUT_PULL_WV: {
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PULL_WV\n" );
 
-			Stream *obj = (Stream*)vm_pop();
+			Stream *obj = vm_pop_stream();
 			Tree *len = vm_pop();
 			PdaRun *pdaRun = exec->parser != 0 ? exec->parser->pdaRun : 0;
 			Tree *string = streamPullBc( prg, sp, pdaRun, streamToImpl( obj ), len );
@@ -2552,7 +2570,7 @@ again:
 			Tree *string;
 			read_tree( string );
 
-			Stream *obj = (Stream*)vm_pop();
+			Stream *obj = vm_pop_stream();
 
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PULL_BKT\n" );
 
@@ -4063,6 +4081,15 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_BKT %hd\n", field );
 
 			treeDownref( prg, sp, val );
+			break;
+		}
+		case IN_SET_STRUCT_VAL_BKT: {
+			short field;
+			Tree *val;
+			read_half( field );
+			read_tree( val );
+
+			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_VAL_BKT\n" );
 			break;
 		}
 		case IN_PTR_ACCESS_BKT: {
