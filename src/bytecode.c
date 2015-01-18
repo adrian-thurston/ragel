@@ -1302,11 +1302,11 @@ again:
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
 
-			Tree *ptr = colm_tree_get_field( obj, field );
-			Tree *dval = 0;
-			if ( ptr )
-				dval = (Tree*)colm_get_pointer_val( (Pointer*)ptr );
-			vm_push( dval );
+			Tree *pointer = colm_tree_get_field( obj, field );
+			Value value = 0;
+			if ( pointer != 0 )
+				value = colm_get_pointer_val( pointer );
+			vm_push_value( value );
 			break;
 		}
 		case IN_SET_FIELD_VAL_WC: {
@@ -1316,7 +1316,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_VAL_WC %d\n", field );
 
 			Tree *obj = vm_pop();
-			Struct *strct = vm_pop_struct();
+			Value value = vm_pop_value();
 			treeDownref( prg, sp, obj );
 
 			/* Downref the old value. */
@@ -1324,11 +1324,8 @@ again:
 			treeDownref( prg, sp, prev );
 
 			/* Make it into a pointer. */
-			Tree *pointer = 0;
-			if ( strct != 0 ) {
-				pointer = (Tree*) colm_construct_pointer( prg, (Value)strct );
-				treeUpref( pointer );
-			}
+			Tree *pointer = colm_construct_pointer( prg, value );
+			treeUpref( pointer );
 
 			colm_tree_set_field( prg, obj, field, pointer );
 			break;
@@ -2830,15 +2827,6 @@ again:
 			Tree *res = castTree( prg, langElId, tree );
 			treeUpref( res );
 			treeDownref( prg, sp, tree );
-			vm_push( res );
-			break;
-		}
-		case IN_TREE_NEW: {
-			debug( prg, REALM_BYTECODE, "IN_TREE_NEW \n" );
-
-			Tree *tree = vm_pop();
-			Tree *res = (Tree*) colm_construct_pointer( prg, (Value)tree );
-			treeUpref( res );
 			vm_push( res );
 			break;
 		}

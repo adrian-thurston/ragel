@@ -115,8 +115,6 @@ struct colm_program
 	Tree *trueVal;
 	Tree *falseVal;
 
-	Kid *origHeap;
-
 	struct colm_heap_list heap;
 
 	Stream *stdinVal;

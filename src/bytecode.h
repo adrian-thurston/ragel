@@ -22,6 +22,7 @@ typedef unsigned char uchar;
 typedef unsigned long colm_value_t;
 
 /* 
+ * 0x24
  * 0x6e
  * 0xbc
  * 0xe6
@@ -77,7 +78,6 @@ typedef unsigned long colm_value_t;
 #define IN_CONSTRUCT             0x23
 #define IN_CONS_OBJECT           0xf0
 #define IN_CONS_GENERIC          0xf1
-#define IN_TREE_NEW              0x24
 #define IN_TREE_CAST             0xe4
 
 #define IN_GET_LOCAL_R           0x25
@@ -480,12 +480,14 @@ enum LEL_ID {
 #define vm_push_stream(i) vm_push_type(Stream*, i)
 #define vm_push_struct(i) vm_push_type(Struct*, i)
 #define vm_push_parser(i) vm_push_type(Parser*, i)
+#define vm_push_value(i)  vm_push_type(Value, i)
 
 #define vm_pop_stream() vm_pop_type(Stream*)
 #define vm_pop_struct() vm_pop_type(Struct*)
 #define vm_pop_parser() vm_pop_type(Parser*)
 #define vm_pop_list()   vm_pop_type(List*)
 #define vm_pop_map()    vm_pop_type(Map*)
+#define vm_pop_value()  vm_pop_type(Value)
 
 #define vm_pop_ignore() \
 	({ (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); })

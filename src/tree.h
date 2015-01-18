@@ -103,7 +103,7 @@ typedef struct _Pointer
 	long refs;
 	Kid *child;
 
-	Kid *value;
+	colm_value_t value;
 } Pointer;
 
 typedef struct _Str
@@ -207,7 +207,7 @@ Kid *treeExtractChild( struct colm_program *prg, Tree *tree );
 Kid *reverseKidList( Kid *kid );
 
 Tree *constructInteger( struct colm_program *prg, long i );
-Pointer *colm_construct_pointer( struct colm_program *prg, colm_value_t value );
+Tree *colm_construct_pointer( struct colm_program *prg, colm_value_t value );
 Tree *constructTerm( struct colm_program *prg, Word id, Head *tokdata );
 Tree *constructTree( struct colm_program *prg, Kid *kid,
 		Tree **bindings, long pat );
@@ -228,8 +228,7 @@ void streamFree( struct colm_program *prg, Stream *s );
 Tree *copyTree( struct colm_program *prg, Tree *tree,
 		Kid *oldNextDown, Kid **newNextDown );
 
-Tree *colm_get_pointer_val( Pointer *ptr );
-Tree *getPtrValSplit( struct colm_program *prg, Pointer *ptr );
+colm_value_t colm_get_pointer_val( Tree *pointer );
 Tree *colm_tree_get_field( Tree *tree, Word field );
 Tree *getFieldSplit( struct colm_program *prg, Tree *tree, Word field );
 Tree *getRhsEl( struct colm_program *prg, Tree *lhs, long position );
