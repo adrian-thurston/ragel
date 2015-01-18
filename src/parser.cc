@@ -42,7 +42,7 @@ void BaseParser::listElDef( String name )
 	TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListEl, 0, objTr, 0 );
 
 	ObjectField *of = ObjectField::cons( InputLoc(),
-			ObjectField::UserFieldType, elTr, name );
+			ObjectField::GenericElementType, elTr, name );
 
 	structVarDef( InputLoc(), of );
 }

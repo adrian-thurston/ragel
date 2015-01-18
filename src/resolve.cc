@@ -111,12 +111,14 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 	ObjectField *listEl = 0;
 	FieldList *fieldList = utValue->structEl->structDef->objectDef->fieldList;
 	for ( FieldList::Iter f = *fieldList; f.lte(); f++, off++ ) {
-		UniqueType *fUT = f->value->typeRef->resolveType( pd );
-		if ( fUT->typeId == TYPE_GENERIC && fUT->generic != 0 &&
-				fUT->generic->typeId == GEN_LIST_EL )
-		{
-			listEl = f->value;
-			break;
+		if ( f->value->type == ObjectField::GenericElementType ) {
+			UniqueType *fUT = f->value->typeRef->resolveType( pd );
+			if ( fUT->typeId == TYPE_GENERIC && fUT->generic != 0 &&
+					fUT->generic->typeId == GEN_LIST_EL )
+			{
+				listEl = f->value;
+				break;
+			}
 		}
 	}
 
