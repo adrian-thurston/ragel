@@ -600,6 +600,12 @@ bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT,
 	if ( destUT->typeId == TYPE_PTR && srcUT->typeId == TYPE_NIL )
 		return true;
 
+	if ( destUT->typeId == TYPE_STRUCT && srcUT->typeId == TYPE_NIL )
+		return true;
+
+	if ( destUT->typeId == TYPE_GENERIC && srcUT->typeId == TYPE_NIL )
+		return true;
+
 	return false;
 }
 
