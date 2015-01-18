@@ -2234,6 +2234,9 @@ struct LoadColm
 		case struct_item::MapEl:
 			walkMapElDef( structItem.map_el_def() );
 			break;
+		case struct_item::Alias:
+			walkAliasDef( structItem.alias_def() );
+			break;
 		}
 	}
 

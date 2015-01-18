@@ -267,6 +267,7 @@ def struct_item
 |	[precedence_def] :Precedence commit
 |	[list_el_def] :ListEl commit
 |	[map_el_def] :MapEl commit
+|	[alias_def] :Alias commit
 
 def export_def
 	[EXPORT var_def opt_def_init]
