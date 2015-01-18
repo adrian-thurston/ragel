@@ -88,15 +88,15 @@ typedef unsigned char uchar;
 
 #define IN_SAVE_RET              0x2b
 
-#define IN_GET_FIELD_R           0x2c
-#define IN_GET_FIELD_WC          0x2d
-#define IN_GET_FIELD_WV          0x2e
-#define IN_GET_FIELD_BKT         0x2f
+#define IN_GET_FIELD_TREE_R         0x2c
+#define IN_GET_FIELD_TREE_WC        0x2d
+#define IN_GET_FIELD_TREE_WV        0x2e
+#define IN_GET_FIELD_TREE_BKT       0x2f
 
-#define IN_SET_FIELD_WV          0x30
-#define IN_SET_FIELD_WC          0x31
-#define IN_SET_FIELD_BKT         0x32
-#define IN_SET_FIELD_LEAVE_WC    0x33
+#define IN_SET_FIELD_TREE_WV        0x30
+#define IN_SET_FIELD_TREE_WC        0x31
+#define IN_SET_FIELD_TREE_BKT       0x32
+#define IN_SET_FIELD_TREE_LEAVE_WC  0x33
 
 #define IN_GET_FIELD_VAL_R       0x5e
 #define IN_SET_FIELD_VAL_WC      0x60

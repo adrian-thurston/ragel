@@ -1155,11 +1155,11 @@ again:
 			refSetValue( prg, sp, ref, val );
 			break;
 		}
-		case IN_GET_FIELD_R: {
+		case IN_GET_FIELD_TREE_R: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_R %d\n", field );
+			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_TREE_R %d\n", field );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1169,11 +1169,11 @@ again:
 			vm_push( val );
 			break;
 		}
-		case IN_GET_FIELD_WC: {
+		case IN_GET_FIELD_TREE_WC: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_WC %d\n", field );
+			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_TREE_WC %d\n", field );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1183,11 +1183,11 @@ again:
 			vm_push( split );
 			break;
 		}
-		case IN_GET_FIELD_WV: {
+		case IN_GET_FIELD_TREE_WV: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_WV\n" );
+			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_TREE_WV\n" );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1197,15 +1197,15 @@ again:
 			vm_push( split );
 
 			/* Set up the reverse instruction. */
-			rcodeCode( exec, IN_GET_FIELD_BKT );
+			rcodeCode( exec, IN_GET_FIELD_TREE_BKT );
 			rcodeHalf( exec, field );
 			break;
 		}
-		case IN_GET_FIELD_BKT: {
+		case IN_GET_FIELD_TREE_BKT: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_TREE_BKT\n" );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1215,11 +1215,11 @@ again:
 			vm_push( split );
 			break;
 		}
-		case IN_SET_FIELD_WC: {
+		case IN_SET_FIELD_TREE_WC: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_WC %d\n", field );
+			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_TREE_WC %d\n", field );
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
@@ -1232,11 +1232,11 @@ again:
 			colm_tree_set_field( prg, obj, field, val );
 			break;
 		}
-		case IN_SET_FIELD_WV: {
+		case IN_SET_FIELD_TREE_WV: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_WV %d\n", field );
+			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_TREE_WV %d\n", field );
 
 			Tree *obj = vm_pop();
 			Tree *val = vm_pop();
@@ -1247,19 +1247,19 @@ again:
 			colm_tree_set_field( prg, obj, field, val );
 
 			/* Set up the reverse instruction. */
-			rcodeCode( exec, IN_SET_FIELD_BKT );
+			rcodeCode( exec, IN_SET_FIELD_TREE_BKT );
 			rcodeHalf( exec, field );
 			rcodeWord( exec, (Word)prev );
 			rcodeUnitTerm( exec );
 			break;
 		}
-		case IN_SET_FIELD_BKT: {
+		case IN_SET_FIELD_TREE_BKT: {
 			short field;
 			Tree *val;
 			read_half( field );
 			read_tree( val );
 
-			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_TREE_BKT\n" );
 
 			Tree *obj = vm_pop();
 			treeDownref( prg, sp, obj );
@@ -1271,11 +1271,11 @@ again:
 			colm_tree_set_field( prg, obj, field, val );
 			break;
 		}
-		case IN_SET_FIELD_LEAVE_WC: {
+		case IN_SET_FIELD_TREE_LEAVE_WC: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_LEAVE_WC\n" );
+			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_TREE_LEAVE_WC\n" );
 
 			/* Note that we don't downref the object here because we are
 			 * leaving it on the stack. */
@@ -4114,20 +4114,20 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_BKT\n" );
 			break;
 		}
-		case IN_GET_FIELD_BKT: {
+		case IN_GET_FIELD_TREE_BKT: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_BKT %hd\n", field );
+			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_TREE_BKT %hd\n", field );
 			break;
 		}
-		case IN_SET_FIELD_BKT: {
+		case IN_SET_FIELD_TREE_BKT: {
 			short field;
 			Tree *val;
 			read_half( field );
 			read_tree( val );
 
-			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_BKT %hd\n", field );
+			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_TREE_BKT %hd\n", field );
 
 			treeDownref( prg, sp, val );
 			break;

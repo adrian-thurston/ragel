@@ -1160,7 +1160,7 @@ void LangTerm::assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT
 
 			/* The set field instruction must leave the object on the top of
 			 * the stack. */
-			code.append( IN_SET_FIELD_LEAVE_WC );
+			code.append( IN_SET_FIELD_TREE_LEAVE_WC );
 			code.appendHalf( field->offset );
 		}
 	}
@@ -2711,11 +2711,11 @@ void ObjectField::initField()
 			break;
 
 		case UserFieldType:
-			inGetR  =  IN_GET_FIELD_R;
-			inGetWC =  IN_GET_FIELD_WC;
-			inGetWV =  IN_GET_FIELD_WV;
-			inSetWC =  IN_SET_FIELD_WC;
-			inSetWV =  IN_SET_FIELD_WV;
+			inGetR  =  IN_GET_FIELD_TREE_R;
+			inGetWC =  IN_GET_FIELD_TREE_WC;
+			inGetWV =  IN_GET_FIELD_TREE_WV;
+			inSetWC =  IN_SET_FIELD_TREE_WC;
+			inSetWV =  IN_SET_FIELD_TREE_WV;
 
 			//inGetValR;
 			inGetValR  = IN_GET_FIELD_VAL_R;
