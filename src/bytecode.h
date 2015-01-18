@@ -20,7 +20,10 @@ typedef unsigned long ulong;
 typedef unsigned char uchar;
 
 /* 
- * 0x5f
+ * 0x6e
+ * 0xbc
+ * 0xe6
+ * 0xf6
  */
 
 #define IN_LOAD_INT              0x01
@@ -36,8 +39,11 @@ typedef unsigned char uchar;
 #define IN_MULT_INT              0x0a
 #define IN_DIV_INT               0x0b
 
+#define IN_TST_EQL_TREE          0x0c
+#define IN_TST_EQL_VAL           0x59
 #define IN_TST_EQL               0x0c
-#define IN_TST_NOT_EQL           0x0d
+#define IN_TST_NOT_EQL_TREE      0x0d
+#define IN_TST_NOT_EQL_VAL       0x5f
 #define IN_TST_LESS              0x0e
 #define IN_TST_GRTR              0x0f
 #define IN_TST_LESS_EQL          0x10

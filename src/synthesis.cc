@@ -611,6 +611,10 @@ bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT,
 
 	if ( destUT->typeId == TYPE_STRUCT && srcUT->typeId == TYPE_PTR )
 		return true;
+	
+	if ( destUT->typeId == TYPE_TREE && srcUT->typeId == TYPE_TREE &&
+			srcUT->langEl == pd->anyLangEl )
+		return true;
 
 	return false;
 }
@@ -1847,7 +1851,10 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					if ( lt != rt )
 						error(loc) << "comparison of different types" << endp;
 						
-					code.append( IN_TST_EQL );
+					if ( lt->ptr() )
+						code.append( IN_TST_EQL_VAL );
+					else
+						code.append( IN_TST_EQL_TREE );
 					return pd->uniqueTypeBool;
 				}
 				case OP_NotEql: {
@@ -1857,7 +1864,11 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					if ( lt != rt )
 						error(loc) << "comparison of different types" << endp;
 
-					code.append( IN_TST_NOT_EQL );
+					if ( lt->ptr() )
+						code.append( IN_TST_NOT_EQL_VAL );
+					else
+						code.append( IN_TST_NOT_EQL_TREE );
+
 					return pd->uniqueTypeBool;
 				}
 				case '<': {

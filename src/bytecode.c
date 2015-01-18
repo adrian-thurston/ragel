@@ -1687,8 +1687,8 @@ again:
 		/*
 		 * Binary comparison operators.
 		 */
-		case IN_TST_EQL: {
-			debug( prg, REALM_BYTECODE, "IN_TST_EQL\n" );
+		case IN_TST_EQL_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_TST_EQL_TREE\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -1700,8 +1700,18 @@ again:
 			treeDownref( prg, sp, o2 );
 			break;
 		}
-		case IN_TST_NOT_EQL: {
-			debug( prg, REALM_BYTECODE, "IN_TST_NOT_EQL\n" );
+		case IN_TST_EQL_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_TST_EQL_VAL\n" );
+
+			Tree *o2 = vm_pop();
+			Tree *o1 = vm_pop();
+			Tree *val = o1 == o2 ? prg->trueVal : prg->falseVal;
+			treeUpref( val );
+			vm_push( val );
+			break;
+		}
+		case IN_TST_NOT_EQL_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_TST_NOT_EQL_TREE\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -1711,6 +1721,16 @@ again:
 			vm_push( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
+			break;
+		}
+		case IN_TST_NOT_EQL_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_TST_NOT_EQL_VAL\n" );
+
+			Tree *o2 = vm_pop();
+			Tree *o1 = vm_pop();
+			Tree *val = o1 != o2 ? prg->trueVal : prg->falseVal;
+			treeUpref( val );
+			vm_push( val );
 			break;
 		}
 		case IN_TST_LESS: {
