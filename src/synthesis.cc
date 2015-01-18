@@ -606,6 +606,12 @@ bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT,
 	if ( destUT->typeId == TYPE_GENERIC && srcUT->typeId == TYPE_NIL )
 		return true;
 
+	if ( destUT->typeId == TYPE_PTR && srcUT->typeId == TYPE_STRUCT )
+		return true;
+
+	if ( destUT->typeId == TYPE_STRUCT && srcUT->typeId == TYPE_PTR )
+		return true;
+
 	return false;
 }
 
@@ -2678,13 +2684,13 @@ void ObjectField::initField()
 		case LhsElType:
 		case ParamValType:
 		case RedRhsType:
-			inGetR   =  IN_GET_LOCAL_R;
-			inGetWC  =  IN_GET_LOCAL_WC;
-			inSetWC  =  IN_SET_LOCAL_WC;
+			inGetR      =  IN_GET_LOCAL_R;
+			inGetWC     =  IN_GET_LOCAL_WC;
+			inSetWC     =  IN_SET_LOCAL_WC;
 			inGetValR   =  IN_GET_LOCAL_VAL_R;
 			inGetValWC  =  IN_GET_LOCAL_VAL_R;
 			inGetValWV  =  IN_GET_LOCAL_VAL_R;
-			inSetValWC =  IN_SET_LOCAL_VAL_WC;
+			inSetValWC  =  IN_SET_LOCAL_VAL_WC;
 			break;
 
 		case ParamRefType:
@@ -2699,6 +2705,13 @@ void ObjectField::initField()
 			inGetWV =  IN_GET_FIELD_WV;
 			inSetWC =  IN_SET_FIELD_WC;
 			inSetWV =  IN_SET_FIELD_WV;
+
+			//inGetValR;
+			inGetValR  = IN_GET_FIELD_VAL_R;
+			//inGetValWC = IN_GET_FIELD_VAL_WC;
+			//inGetValWV;
+			inSetValWC = IN_SET_FIELD_VAL_WC;
+			//inSetValWV;
 			break;
 
 		case GenericElementType:

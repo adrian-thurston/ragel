@@ -1293,6 +1293,46 @@ again:
 			vm_push( obj );
 			break;
 		}
+		case IN_GET_FIELD_VAL_R: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_FIELD_VAL_R %d\n", field );
+
+			Tree *obj = vm_pop();
+			treeDownref( prg, sp, obj );
+
+			Tree *ptr = colm_tree_get_field( obj, field );
+			Tree *dval = 0;
+			if ( ptr )
+				dval = getPtrVal( ptr );
+			vm_push( dval );
+			break;
+		}
+		case IN_SET_FIELD_VAL_WC: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_SET_FIELD_VAL_WC %d\n", field );
+
+			Tree *obj = vm_pop();
+			Struct *strct = vm_pop_struct();
+			treeDownref( prg, sp, obj );
+
+			/* Downref the old value. */
+			Tree *prev = colm_tree_get_field( obj, field );
+			treeDownref( prg, sp, prev );
+
+			/* Make it into a pointer. */
+			Tree *pointer = 0;
+			if ( strct != 0 ) {
+				pointer = constructPointer( prg, (Tree*)strct );
+				treeUpref( pointer );
+			}
+
+			colm_tree_set_field( prg, obj, field, pointer );
+			break;
+		}
 		case IN_NEW_STRUCT: {
 			short id;
 			read_half( id );

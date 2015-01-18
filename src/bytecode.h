@@ -20,8 +20,6 @@ typedef unsigned long ulong;
 typedef unsigned char uchar;
 
 /* 
- * 0x60
- * 0x5e
  * 0x5f
  */
 
@@ -93,6 +91,9 @@ typedef unsigned char uchar;
 #define IN_SET_FIELD_WC          0x31
 #define IN_SET_FIELD_BKT         0x32
 #define IN_SET_FIELD_LEAVE_WC    0x33
+
+#define IN_GET_FIELD_VAL_R       0x5e
+#define IN_SET_FIELD_VAL_WC      0x60
 
 #define IN_GET_MATCH_LENGTH_R    0x34
 #define IN_GET_MATCH_TEXT_R      0x35

@@ -719,9 +719,8 @@ void Compiler::resolveParseTree()
 		ObjectDef *objDef = lel->objectDef;
 		if ( objDef != 0 ) {
 			/* Init all fields of the object. */
-			for ( FieldList::Iter f = *objDef->fieldList; f.lte(); f++ ) {
+			for ( FieldList::Iter f = *objDef->fieldList; f.lte(); f++ )
 				f->value->typeRef->resolveType( this );
-			}
 		}
 	}
 
