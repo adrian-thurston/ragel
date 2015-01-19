@@ -189,6 +189,7 @@ end
 global Out: parser<out_code::lines>
 
 include 'trans-c.lm'
+include 'trans-asm.lm'
 include 'trans-d.lm'
 include 'trans-cs.lm'
 include 'trans-go.lm'
@@ -236,6 +237,8 @@ for CommDef: indep::comm_def in RagelTree {
 
 if ( Lang == 'c' )
 	rw_c( Output )
+elsif ( Lang == 'asm' )
+	rw_asm( Output )
 elsif ( Lang == 'd' )
 	rw_d( Output )
 elsif ( Lang == 'cs' )

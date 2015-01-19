@@ -39,6 +39,7 @@ CLEANFILES = \
 TRANS_DEPS = \
 	../src/ragel.lm \
 	trans-c.lm \
+	trans-asm.lm \
 	trans-d.lm \
 	trans-cs.lm \
 	trans-go.lm \
