@@ -169,14 +169,25 @@ void rw_asm_stmt_list( StmtList: indep::stmt* )
 
 int rw_asm_action_block( ActionBlock: indep::action_block )
 {
+#	Out = new parser<out_code::lines>
+#	if match ActionBlock [`{ stmt* `}] {
+#		send Out
+#			"{[rw_asm_stmt_list( ActionBlock._repeat_stmt )]}
+#	}
+#	else if match ActionBlock [`{ expr `}] {
+#		send Out
+#			"{[rw_asm_expr( ActionBlock.expr )]}
+#	}
+#	send Out [] eos
+
 	Out = new parser<out_code::lines>
 	if match ActionBlock [`{ stmt* `}] {
 		send Out
-			"{[rw_asm_stmt_list( ActionBlock._repeat_stmt )]}
+			"{}
 	}
 	else if match ActionBlock [`{ expr `}] {
 		send Out
-			"{[rw_asm_expr( ActionBlock.expr )]}
+			"{}
 	}
 	send Out [] eos
 }
@@ -196,7 +207,6 @@ void rw_asm( Output: stream )
 	send Output
 		"#
 		"
-#
 #	Init: indep::stmt* = RagelTree.Init
 #	for Stmt: indep::stmt in Init {
 #		if match Stmt [Decl: var_decl] {
@@ -206,36 +216,60 @@ void rw_asm( Output: stream )
 #			send Output [Out->tree]
 #		}
 #	}
-#
-#	Section: indep::section = RagelTree.section
-#	for Action: ragel::action_block in Section {
-#		# Reparse as lang-independent code.
-#		parse IndepActionBlock: indep::action_block[$Action]
-#		if ( !IndepActionBlock ) {
-#			print( error '\n' Action )
-#			exit(1)
-#		}
-#
-#		rw_asm_action_block( IndepActionBlock )
-#
-#		# Reparse back to ragel action block.
-#		Action = parse ragel::action_block[$Out->tree]
-#		if ( !Action ) {
-#			print( error '\n' )
-#			exit(1)
-#		}
+
+	Section: indep::section = RagelTree.section
+	for Action: ragel::action_block in Section {
+		# Reparse as lang-independent code.
+		parse IndepActionBlock: indep::action_block[$Action]
+		if ( !IndepActionBlock ) {
+			print( error '\n' Action )
+			exit(1)
+		}
+
+		rw_asm_action_block( IndepActionBlock )
+
+		# Reparse back to ragel action block.
+		Action = parse ragel::action_block[$Out->tree]
+		if ( !Action ) {
+			print( error '\n' )
+			exit(1)
+		}
+	}
+
+	send Output
+		"
+		"[Section]
+		"
+		"	.section .rodata
+		"
+		".L_str_accept:
+		"	.string \"ACCEPT\"
+		".L_str_fail:
+		"	.string \"FAIL\"
+		"
+		"	%% write data;
+		"
+		"	.text
+		"exec:
+		"	pushq	%rbp
+		"	movq	%rsp, %rbp
+		"
+		"	pushq	%r12
+		"	pushq	%r13
+		"	movq	%rdi, %r12
+
+#	if NeedsEof {
+#		send Output
+#			"	char *eof = pe;
 #	}
-#
-#	send Output
-#		"
-#		"[Section]
-#		"
-#		"%% write data;
-#		"int cs;
-#		"
-#		"void init()
-#		"{
-#
+
+		"
+		"	# Get the length.
+		"	call	strlen
+		"	movq	%r12, %r13
+		"	movslq	%eax, %rax
+		"	addq	%rax, %r13
+
 #	for Stmt: indep::stmt in Init {
 #		if match Stmt [ExprStmt: expr_stmt] {
 #			Out = new parser<out_code::lines>
@@ -244,34 +278,26 @@ void rw_asm( Output: stream )
 #			send Output [Out->tree]
 #		}
 #	}
-#
-#	send Output
-#		"	%% write init;
-#		"}
-#		"
-#		"void exec( char *data, int len )
-#		"{
-#		"	char *p = data;
-#		"	char *pe = data + len;
-#
-#	if NeedsEof {
-#		send Output
-#			"	char *eof = pe;
-#	}
-#
-#	send Output
-#		"	%% write exec;
-#		"}
-#		"
-#		"void finish( )
-#		"{
-#		"	if ( cs >= [$MachineName.word]_first_final )
-#		"		printf( \"ACCEPT\\n\" );
-#		"	else
-#		"		printf( \"FAIL\\n\" );
-#		"}
-#		"
-#
+		"
+		"	%% write init;
+		"	%% write exec;
+		"
+		"	# current state is in r11.
+		"	movq	[MachineName.word]_first_final(%rip), %rax
+		"	cmpq	%rax, %r11
+		"	jl		.L_exec_fail
+		"	movq	$.L_str_accept, %rdi
+		"	call	puts
+		"	jmp		.L_exec_done
+		".L_exec_fail:
+		"	movq	$.L_str_fail, %rdi
+		"	call	puts
+		".L_exec_done:
+		"	popq	%r13
+		"	popq	%r12
+		"	leave
+		"	ret
+
 	send Output
 		"	.section	.rodata
 
@@ -318,7 +344,7 @@ void rw_asm( Output: stream )
 		"	cmpq	%r12, %rax
 		"	je		.L_done
 		"	movq	inp(,%r12,8), %rdi
-		"	call	puts
+		"	call	exec
 		"	incq	%r12
 		"	jmp		.L_again
 		".L_done:
