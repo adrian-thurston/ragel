@@ -21,7 +21,7 @@
 
 }%%
 
-#ifdef _____INPUT_____
+##### INPUT #####
 ""
 "h"
 "hell"
@@ -31,9 +31,7 @@
 "ther"
 "there"
 "friend"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 a1
 a3
 FAIL
@@ -51,4 +49,3 @@ FAIL
 a4
 ACCEPT
 FAIL
-#endif

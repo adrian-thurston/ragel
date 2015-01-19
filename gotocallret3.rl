@@ -59,7 +59,7 @@ int stack[32];
 	main := command* $!{fhold;fnext garble_line;}; 
 }%%
 
-#ifdef _____INPUT_____
+##### INPUT #####
 "lkajsdf\n"
 "2134\n"
 "(\n"
@@ -77,9 +77,7 @@ int stack[32];
 "a abcdef\n"
 "h"
 "a aa1"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 error: garbling line
 ACCEPT
 error: garbling line
@@ -121,4 +119,3 @@ prints
 error: garbling line
 error: failed to recover
 FAIL
-#endif

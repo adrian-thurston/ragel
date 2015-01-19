@@ -26,12 +26,9 @@ int token;
 	*|;
 }%%
 
-#ifdef _____INPUT_____
+##### INPUT #####
 "ba a"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 pat1
 pat1
 ACCEPT
-#endif

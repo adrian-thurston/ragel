@@ -152,12 +152,10 @@ line = 1;
 	main := clang_main & newline;
 }%%
 
-#ifdef _____INPUT_____
+##### INPUT #####
 "999 0xaAFF99 99.99 /!\n!/ 'lksdj' //\n\"\n\nliteral\n\n\n\"0x00aba foobardd.ddsf 0x0.9\n"
 "wordwithnum00asdf\n000wordfollowsnum,makes new symbol\n\nfinishing early /! unfinished ...\n"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 int(1,3): 999
 hex(1,6): aAFF99
 float(1,5): 99.99
@@ -186,4 +184,3 @@ ident(2,6): symbol
 ident(4,9): finishing
 ident(4,5): early
 FAIL
-#endif

@@ -37,17 +37,14 @@ namespace indep
 		token tk_number /digit+/
 		token tk_hex_number /'0x' [0-9a-fA-F]+/
 
-		rl INPUT /'_'+ 'INPUT' '_'+/
-		rl OUTPUT /'_'+ 'OUTPUT' '_'+/
+		rl INPUT /'INPUT'/
+		rl OUTPUT /'OUTPUT'/
 
-		token ifdef_INPUT
-			/ '#ifdef' ' '* INPUT /
+		token sect_INPUT
+			/ '#'+ ' '* INPUT ' '* '#'+ '\n' /
 
-		token ifdef_OUTPUT
-			/ '#ifdef' ' '* OUTPUT ' '* '\n' / -ni
-
-		token endif
-			/ '#endif' /
+		token sect_OUTPUT
+			/ '#'+ ' '* OUTPUT ' '* '#'+ '\n' / -ni
 
 		token string
 			/ s_literal | d_literal /
@@ -57,7 +54,6 @@ namespace indep
 	end
 
 	lex
-		token output_endif / '#endif\n' /
 		token output_line /[^\n]* '\n'/
 	end
 
@@ -79,10 +75,10 @@ namespace indep
 	| 	[input_string]
 
 	def input
-		[ifdef_INPUT input_list endif]
+		[input_list]
 
 	def output
-		[ifdef_OUTPUT output_line* output_endif]
+		[output_line*]
 
 	def factor
 		[`first_token_char]
@@ -166,7 +162,15 @@ namespace indep
 		[`%%{ ragel::ragel_start `}%%]
 
 	def start
-		[test_header Init: stmt* section input output]
+		[
+			test_header
+			Init: stmt*
+			section
+			sect_INPUT
+			input
+			sect_OUTPUT
+			output
+		]
 end
 
 namespace out_code

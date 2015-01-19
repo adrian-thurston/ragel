@@ -46,7 +46,7 @@ int value;
 	*|;
 }%%
 
-#ifdef _____INPUT_____
+##### INPUT #####
 "abcd foix\n"
 "abcd\nanother\n"
 "123 foix\n"
@@ -54,9 +54,7 @@ int value;
 "!abcd\nanother\n"
 "!123 foix\n"
 ";"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 word (w/lbh)
 word
 space
@@ -99,4 +97,3 @@ ACCEPT
 going to semi
 in semi
 ACCEPT
-#endif
