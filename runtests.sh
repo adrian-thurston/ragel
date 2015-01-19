@@ -266,9 +266,10 @@ for test_case; do
 		indep)
 			lang_opt="";
 
-			for lang in c d cs go java ruby ocaml; do
+			for lang in c asm d cs go java ruby ocaml; do
 				case $lang in 
 					c) lf="-C" ;;
+					asm) lf="--asm" ;;
 					d) lf="-D" ;;
                     cs) lf="-A" ;;
 					go) lf="-Z" ;;
