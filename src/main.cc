@@ -79,6 +79,8 @@ void usage()
 "   -M <machine>         Machine definition/instantiation to output (for graphviz output)\n"
 "host language:\n"
 "   -C                   The host language is C, C++, Obj-C or Obj-C++ (default)\n"
+"   --gas-x86-64-sys-v\n"
+"   --asm                The host language is GNU AS, x86_64, System V ABI''\n"
 "   -D                   The host language is D\n"
 "   -Z                   The host language is Go\n"
 "   -J                   The host language is Java\n"
@@ -86,9 +88,6 @@ void usage()
 "   -A                   The host language is C#\n"
 "   -O                   The host language is OCaml\n"
 "   -K                   The host language is Crack\n"
-"   --asm\n"
-"   --gnu-asm-x86-64-sys-v\n"
-"                        The host language is x86_64 GASM, System V ABI''\n"
 "line directives: (C/D/Ruby/C#/OCaml)\n"
 "   -L                   Inhibit writing of #line directives\n"
 "code style:\n"
@@ -101,7 +100,7 @@ void usage()
 "   -G2                  Goto-driven with expanded actions\n"
 	;	
 
-	exit(0);
+	exit( 0 );
 }
 
 /* Print version information and exit. */
@@ -109,6 +108,38 @@ void version()
 {
 	cout << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
 			"Copyright (c) 2001-2015 by Adrian Thurston" << endl;
+	exit( 0 );
+}
+
+void showHostLangNames()
+{
+	for ( int i = 0; i < numHostLangs; i++ ) {
+		if ( i > 0 )
+			cout << " ";
+#ifdef WITH_COLM
+		cout << hostLangs[i]->name;
+#else
+		if ( !hostLangs[i]->rlhcRequired )
+			cout << hostLangs[i]->name;
+#endif
+	}
+	cout << endl;
+	exit(0);
+}
+
+void showHostLangArgs()
+{
+	for ( int i = 0; i < numHostLangs; i++ ) {
+		if ( i > 0 )
+			cout << " ";
+#ifdef WITH_COLM
+		cout << hostLangs[i]->arg;
+#else
+		if ( !hostLangs[i]->rlhcRequired )
+			cout << hostLangs[i]->arg;
+#endif
+	}
+	cout << endl;
 	exit(0);
 }
 
@@ -371,6 +402,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					stringTables = true;
 				else if ( strcmp( arg, "integral-tables" ) == 0 )
 					stringTables = false;
+				else if ( strcmp( arg, "host-lang-names" ) == 0 )
+					showHostLangNames();
+				else if ( strcmp( arg, "host-lang-args" ) == 0 )
+					showHostLangArgs();
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
@@ -466,6 +501,13 @@ void InputData::checkArgs()
 		error() << "output file \"" << outputFileName  << 
 				"\" is the same as the input file" << endp;
 	}
+
+#ifndef WITH_COLM
+	if ( hostLang->rlhcRequired ) {
+		error() << "host language " << hostLang->name <<
+				" requires building ragel with Colm support" << endp;
+	}
+#endif
 }
 
 /* Main, process args and call yyparse to start scanning input. */

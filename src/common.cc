@@ -87,19 +87,122 @@ HostType hostTypesCSharp[] =
 
 HostType hostTypesOCaml[] =
 {
-//	{ "char",   0,  "char",     false,  true,  false, 0,          UCHAR_MAX,  1 },
-	{ "int",    0,  "int",      true,   true,  false, S31BIT_MIN, S31BIT_MAX, 4 },
+	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  4 },
 };
 
-const HostLang hostLangC =      { HostLang::C,      hostTypesC,      8,  hostTypesC+0,       true,  "c"  };
-const HostLang hostLangD =      { HostLang::D,      hostTypesD,      9,  hostTypesD+2,       true,  "d"  };
-const HostLang hostLangGo =     { HostLang::Go,     hostTypesGo,    10,  hostTypesGo+0,      false, "go" };
-const HostLang hostLangJava =   { HostLang::Java,   hostTypesJava,   4,  hostTypesJava+2,    false, "java"  };
-const HostLang hostLangRuby =   { HostLang::Ruby,   hostTypesRuby,   2,  hostTypesRuby+0,    false, "ruby"  };
-const HostLang hostLangCSharp = { HostLang::CSharp, hostTypesCSharp, 9,  hostTypesCSharp+4,  true,  "csharp"   };
-const HostLang hostLangOCaml =  { HostLang::OCaml,  hostTypesOCaml,  1,  hostTypesOCaml+0,   false, "ocaml"  };
-const HostLang hostLangCrack =  { HostLang::Crack,  hostTypesCrack,  5,  hostTypesCrack+0,   true,  "no-lang"  };
-const HostLang hostLangAsm =    { HostLang::Asm,    hostTypesC,      8,  hostTypesC+0,       true,  "asm"  };
+const HostLang hostLangC = {
+	"C",
+	"-C",
+	HostLang::C,
+	hostTypesC, 8,
+	hostTypesC+0,
+	true,
+	false,
+	"c"
+};
+
+const HostLang hostLangAsm = {
+	"ASM",
+	"--asm",
+	HostLang::Asm,
+	hostTypesC, 8,
+	hostTypesC+0,
+	true,
+	false,
+	"no-lang"
+};
+
+const HostLang hostLangD = {
+	"D",
+	"-D",
+	HostLang::D,
+	hostTypesD, 9,
+	hostTypesD+2,
+	true,
+	true,
+	"d"
+};
+
+const HostLang hostLangGo = {
+	"Go",
+	"Z",
+	HostLang::Go,
+	hostTypesGo, 10,
+	hostTypesGo+0,
+	false,
+	true,
+	"go"
+};
+
+const HostLang hostLangJava = {
+	"Java",
+	"-J",
+	HostLang::Java,
+	hostTypesJava, 4,
+	hostTypesJava+2,
+	false,
+	true,
+	"java"
+};
+
+const HostLang hostLangRuby = {
+	"Ruby",
+	"-R",
+	HostLang::Ruby,
+	hostTypesRuby, 2,
+	hostTypesRuby+0,
+	false,
+	true,
+	"ruby"
+};
+
+const HostLang hostLangCSharp = {
+	"C#",
+	"-A",
+	HostLang::CSharp,
+	hostTypesCSharp, 9,
+	hostTypesCSharp+4,
+	true,
+	true,
+	"csharp"
+};
+
+const HostLang hostLangOCaml = {
+	"OCaml",
+	"-O",
+	HostLang::OCaml,
+	hostTypesOCaml, 1,
+	hostTypesOCaml+0,
+	false,
+	true,
+	"ocaml"
+};
+
+const HostLang hostLangCrack = {
+	"Crack",
+	"-K",
+	HostLang::Crack,
+	hostTypesCrack, 5,
+	hostTypesCrack+0,
+	true,
+	true,
+	"no-lang"
+};
+
+const HostLang *hostLangs[] = {
+	&hostLangC,
+	&hostLangAsm,
+	&hostLangD,
+	&hostLangGo,
+	&hostLangJava,
+	&hostLangRuby,
+	&hostLangCSharp,
+	&hostLangOCaml,
+};
+
+//	&hostLangCrack,
+
+const int numHostLangs = 8;
 
 HostType *findAlphType( const HostLang *hostLang, const char *s1 )
 {

@@ -351,6 +351,7 @@ void InputData::processCode( bool generateDot )
 	if ( hostLang->lang == HostLang::Asm || directBackend ) {
 	}
 	else {
+#ifdef WITH_COLM
 		if ( !noIntermediate ) {
 			string rlhc = dirName + "/rlhc " + 
 					origOutputFileName + " " +
@@ -365,6 +366,9 @@ void InputData::processCode( bool generateDot )
 				exit( 1 );
 			//unlink( genOutputFileName.c_str() );
 		}
+#else
+		error() << "colm-based codegen not available" << endp;
+#endif
 	}
 }
 

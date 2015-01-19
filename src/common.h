@@ -156,7 +156,6 @@ inline CondKey operator-(const CondKey key1, const CondKey key2)
 	return CondKey( key1.key - key2.key );
 }
 
-
 struct HostType
 {
 	const char *data1;
@@ -186,11 +185,14 @@ struct HostLang
 		Asm
 	};
 
+	const char *name;
+	const char *arg;
 	Lang lang;
 	HostType *hostTypes;
 	int numHostTypes;
 	HostType *defaultAlphType;
 	bool explicitUnsigned;
+	bool rlhcRequired;
 	const char *rlhcArg;
 };
 
@@ -203,6 +205,9 @@ extern const HostLang hostLangCSharp;
 extern const HostLang hostLangOCaml;
 extern const HostLang hostLangCrack;
 extern const HostLang hostLangAsm;
+
+extern const HostLang *hostLangs[];
+extern const int numHostLangs;
 
 HostType *findAlphType( const HostLang *hostLang, const char *s1 );
 HostType *findAlphType( const HostLang *hostLang, const char *s1, const char *s2 );

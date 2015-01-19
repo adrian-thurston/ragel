@@ -88,6 +88,11 @@ csharp_compiler="@GMCS@"
 go_compiler="@GOBIN@"
 ocaml_compiler="@OCAML@"
 
+#
+# Remove any unsupported host languages.
+#
+supported_host_langs=`$ragel --host-lang-args`
+
 function test_error
 {
 	exit 1;
@@ -274,6 +279,7 @@ for test_case; do
 
 				echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
 				echo "$langflags" | grep -qe $lf || continue
+				echo "$supported_host_langs" | grep -qe $lf || continue
 
 				targ=${root}_$lang.rl
 				echo "./trans $lang $wk/$targ $test_case ${root}_${lang}"
@@ -294,7 +300,10 @@ for test_case; do
 	esac
 
 	# Make sure that we are interested in the host language.
-	echo "$langflags" | grep -e $lang_opt >/dev/null || continue
+	echo "$langflags" | grep -qe $lang_opt || continue
+
+	# Make sure that ragel supports the host language
+	echo "$supported_host_langs" | grep -qe $lang_opt || continue
 
 	code_src=$root.$code_suffix;
 	binary=$root.bin;
