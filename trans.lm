@@ -192,10 +192,16 @@ include 'trans-java.lm'
 include 'trans-ruby.lm'
 include 'trans-ocaml.lm'
 
-Lang: str = argv->pop()
-OutputFile: str = argv->pop()
-InputFile: str = argv->pop()
-global ClassName: str = argv->pop()
+str argvPop()
+{
+	AE: argv_el = argv->pop()
+	return AE->value
+}
+
+Lang: str = argvPop()
+OutputFile: str = argvPop()
+InputFile: str = argvPop()
+global ClassName: str = argvPop()
 
 Input: stream = open( InputFile "r" )
 Output: stream = open( OutputFile "w" )
