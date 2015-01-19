@@ -30,11 +30,11 @@
 			>from a2;
 }%%
 
-#ifdef _____INPUT_____
-"hi\nhi\n"
-#endif
+##### INPUT #####
 
-#ifdef _____OUTPUT_____
+"hi\nhi\n"
+
+##### OUTPUT #####
 a2
 b2
 c1
@@ -45,4 +45,3 @@ c1
 c2
 b1
 FAIL
-#endif

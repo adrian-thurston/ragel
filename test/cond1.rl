@@ -52,7 +52,7 @@ bool k;
 	
 }%%
 
-#ifdef _____INPUT_____ 
+##### INPUT #####
 "000abc\n"
 "100abc\n"
 "010abc\n"
@@ -61,9 +61,7 @@ bool k;
 "101abc\n"
 "011abc\n"
 "111abc\n"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 FAIL
   one
 ACCEPT
@@ -84,4 +82,3 @@ ACCEPT
   two
   three
 ACCEPT
-#endif

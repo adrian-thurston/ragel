@@ -290,13 +290,11 @@ int token;
 	*|;
 }%%
 
-#ifdef _____INPUT_____
+##### INPUT #####
 "\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22"
 "'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/"
 "'\n'\n"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 <192> "\"hi"
 <241>  
 <242> /!
@@ -359,4 +357,3 @@ ACCEPT
 <242> /! * !/
 ACCEPT
 FAIL
-#endif

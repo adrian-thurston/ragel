@@ -39,7 +39,7 @@ neg = false;
 	main := atoi '\n' @print;
 }%%
 
-#ifdef _____INPUT_____
+##### INPUT #####
 "1\n"
 "12\n"
 "222222\n"
@@ -49,9 +49,7 @@ neg = false;
 "--123\n"
 "-99\n"
 " -3000\n"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 1
 ACCEPT
 12
@@ -67,4 +65,3 @@ FAIL
 -99
 ACCEPT
 FAIL
-#endif

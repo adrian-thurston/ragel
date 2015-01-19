@@ -24,7 +24,7 @@
 		) '\n';
 }%%
 
-#ifdef _____INPUT_____
+##### INPUT #####
 ""
 "h"
 "x"
@@ -38,9 +38,7 @@
 "hellx"
 "hello\n"
 "hellox"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 err_start
 eof_start
 err_all
@@ -90,4 +88,3 @@ ACCEPT
 err_all
 err_out
 FAIL
-#endif

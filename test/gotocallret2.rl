@@ -51,7 +51,7 @@ int val;
 	*|;
 }%%
 
-#ifdef _____INPUT_____
+##### INPUT #####
 "{a{b[c d]d}c}\n"
 "[a{b[c d]d}c}\n"
 "[a[b]c]d{ef{g{h}i}j}l\n"
@@ -63,9 +63,7 @@ int val;
 "{{}\n"
 "[[[[[[]]]]]]\n"
 "[[[[[[]]}]]]\n"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 { word handle { word handle [ word handle space word handle ] word handle } word handle } ACCEPT
 [ word handle { word handle [ word handle space word handle ] word handle } word handle FAIL
 [ word handle [ word handle ] word handle ] word handle { word handle { word handle { word handle } word handle } word handle } word handle ACCEPT
@@ -77,4 +75,3 @@ word handle space word handle space word handle ACCEPT
 { { } FAIL
 [ [ [ [ [ [ ] ] ] ] ] ] ACCEPT
 [ [ [ [ [ [ ] ] FAIL
-#endif

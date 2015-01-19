@@ -31,7 +31,7 @@ int c;
     main := sub sub '\n';
 }%%
 
-#ifdef _____INPUT_____ 
+##### INPUT #####
 "00\n"
 "019\n"
 "190\n"
@@ -39,9 +39,7 @@ int c;
 "1040000\n"
 "104000a\n"
 "104000\n"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 count: 0
 count: 0
 ACCEPT
@@ -80,4 +78,3 @@ item: 48
 item: 48
 item: 48
 FAIL
-#endif

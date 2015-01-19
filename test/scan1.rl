@@ -59,15 +59,12 @@ int token;
 	*|;
 }%%
 
-#ifdef _____INPUT_____
+##### INPUT #####
 "abbc1d1d2\n"
-#endif
-
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 on last     yes
 on next     yes
 on lag      yes
 lm switch1  yes
 lm switch2  yes
 ACCEPT
-#endif
