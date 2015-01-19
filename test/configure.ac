@@ -5,12 +5,15 @@ dnl
 AC_INIT(ragel-suite, 1.0.1)
 PUBDATE="November 2014"
 
+EXPECTED_VER=0.13.0.2
+
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
 AC_CONFIG_HEADER(config.h)
 
 : ${CFLAGS="-Wall -g"}
 : ${CXXFLAGS="-Wall -g"}
+
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -34,7 +37,6 @@ AC_ARG_WITH(subject,
 AC_SUBST(SUBJECT)
 
 dnl Check for colm.
-EXPECTED_VER=0.13.0.1
 if test -z "$EXPECTED_VER"; then
 	AC_ERROR( [check colm: expected version not passed in] )
 fi
