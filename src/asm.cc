@@ -1480,21 +1480,24 @@ void AsmCodeGen::writeData()
 
 void AsmCodeGen::writeExec()
 {
-	out << "# WRITE EXEC BEGIN\n";
-
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */
 	setLabelsNeeded();
 	testEofUsed = false;
 	outLabelUsed = false;
 
-	/* p arrives in %rdi, pe in %rsi */
-
 	/*
-	 * cv : %r9   -- caller-save, used internally
-	 * pc : %r10b -- caller-save, used internally
-	 * cs : %r11  -- caller-save, interface, valid only after init/exer
+	 * cv : %r9   -- caller-save, used internally, condition char, undefined in
+	 *               conditions and actions, can use
+	 *
+	 * pc : %r10b -- caller-save, used internally, undefined in conditions
+	 *               actions, can use
+	 *
+	 * cs : %r11  -- caller-save, written by write init, read and
+	 *               written by exec, undefined in conditions and actions
+	 *
 	 * p  : %r12  -- callee-save, interface, persistent
+	 *
 	 * pe : %r13  -- callee-save, interface, persistent
 	 */
 
