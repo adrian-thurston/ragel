@@ -5,8 +5,7 @@ dnl
 AC_INIT(ragel, 7.0.0.1)
 PUBDATE="December 2014"
 
-AC_CONFIG_MACRO_DIR([m4])
-m4_include([m4/ragel.m4])
+EXPECTED_COLM=0.13.0.2
 
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
@@ -45,7 +44,32 @@ dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
 dnl Check for colm.
-AC_CHECK_COLM([0.13.0.2])
+AC_ARG_WITH(colm,
+	[AC_HELP_STRING([--with-colm], [location of colm install])],
+	[
+		CPPFLAGS="${CPPFLAGS} -I$withval/include"
+		LDFLAGS="${LDFLAGS} -L$withval/lib"
+		COLM="$withval/bin/colm"
+
+		AC_CHECK_FILES(
+			[$COLM],
+			[],
+			[AC_ERROR([--with-colm was specified, but binary was not found])]
+		)
+
+		INSTALLED_VER=`$COLM -v | sed -n -e '1 { s/^.*version //; s/ .*$//; p; }'`
+		if test "x$INSTALLED_VER" != "x$EXPECTED_COLM"; then
+			AC_ERROR( [check colm: expected version $EXPECTED_COLM,]
+					[ but $INSTALLED_VER is installed] )
+		fi
+
+		AC_DEFINE([WITH_COLM], [1], [colm is available])
+	],
+	[]
+)
+
+AC_SUBST(COLM)
+AM_CONDITIONAL([WITH_COLM], [test x$COLM != x])
 
 dnl Checks to carry out if we are building the manual.
 if test "x$build_manual" = "xyes"; then
