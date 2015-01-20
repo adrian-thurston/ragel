@@ -1,4 +1,23 @@
-out_code::lines rw_asm_action_block( ActionBlock: indep::action_block ActionNum: int )
+out_code::lines rw_asm_c_action_block( ActionBlock: indep::action_block )
+{
+	Out = new parser<out_code::lines>
+	if match ActionBlock [`{ stmt* `}] {
+		send Out
+			"{
+			"	[rw_c_stmt_list( ActionBlock._repeat_stmt )]
+			"}
+	}
+	else if match ActionBlock [`{ expr `}] {
+		send Out
+			"{
+			"	return [rw_c_expr( ActionBlock.expr )];
+			"}
+	}
+	send Out [] eos
+	return Out->tree
+}
+
+out_code::lines rw_asm_asm_action_block( ActionBlock: indep::action_block ActionNum: int )
 {
 	Out = new parser<out_code::lines>
 	if match ActionBlock [`{ stmt* `}] {
@@ -70,10 +89,10 @@ void rw_asm( Output: stream )
 		}
 
 		Lines: out_code::lines =
-				rw_c_action_block( IndepActionBlock )
+				rw_asm_c_action_block( IndepActionBlock )
 
 		send Output	
-			"void action_[ActionNum]( const char *p )
+			"long action_[ActionNum]( const char *p )
 			"{
 			"	char fc = *p;
 			"[Lines]
@@ -109,7 +128,7 @@ void rw_asm( Output: stream )
 		}
 
 		Lines: out_code::lines =
-				rw_asm_action_block( IndepActionBlock ActionNum )
+				rw_asm_asm_action_block( IndepActionBlock ActionNum )
 
 		# Reparse back to ragel action block.
 		Action = parse ragel::action_block[Lines]
