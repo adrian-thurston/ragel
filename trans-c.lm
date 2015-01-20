@@ -167,7 +167,7 @@ void rw_c_stmt_list( StmtList: indep::stmt* )
 		rw_c_stmt( Stmt )
 }
 
-int rw_c_action_block( ActionBlock: indep::action_block )
+out_code::lines rw_c_action_block( ActionBlock: indep::action_block )
 {
 	Out = new parser<out_code::lines>
 	if match ActionBlock [`{ stmt* `}] {
@@ -179,6 +179,7 @@ int rw_c_action_block( ActionBlock: indep::action_block )
 			"{[rw_c_expr( ActionBlock.expr )]}
 	}
 	send Out [] eos
+	return Out->tree
 }
 
 void rw_c( Output: stream )
@@ -219,10 +220,11 @@ void rw_c( Output: stream )
 			exit(1)
 		}
 
-		rw_c_action_block( IndepActionBlock )
+		Lines: out_code::lines =
+				rw_c_action_block( IndepActionBlock )
 
 		# Reparse back to ragel action block.
-		Action = parse ragel::action_block[$Out->tree]
+		Action = parse ragel::action_block[Lines]
 		if ( !Action ) {
 			print( error '\n' )
 			exit(1)
