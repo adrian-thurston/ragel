@@ -155,7 +155,7 @@ int rw_go_print_stmt( Stmt: indep::print_stmt )
 int rw_go_ragel_stmt( Stmt: indep::ragel_stmt )
 {
 	send Out
-		[$Stmt]
+		"[Stmt]
 }
 
 int rw_go_stmt( Stmt: indep::stmt )

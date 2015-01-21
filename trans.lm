@@ -25,7 +25,9 @@ namespace indep
 				`print_int `print_buf `print_str `print_token
 				`first_token_char
 
-		literal `fgoto `fcall `fnext `fexec `fncall
+		literal `fpc `fc `fcurs `ftargs `fentry
+				`fhold `fexec `fgoto `fnext `fcall
+				`fret `fbreak `fncall `fnret `fnbreak
 
 		literal `; `< `> `( `) `[ `] `=
 				`* `! `{ `} `+ `- `== `!=
@@ -91,6 +93,11 @@ namespace indep
 	|	[string]
 	|	[`< type `> `( expr `)]
 	|	[`( expr `)]
+	|	[ragel_factor]
+
+	def ragel_factor
+		[`fentry `( expr `)]
+	|	[`fc]
 
 	def mult_op
 		[`*]
@@ -222,6 +229,11 @@ namespace indep
 	|	[`fncall `* expr `;]
 	|	[`fnext `* expr `;]
 	|	[`fexec expr `;]
+	|	[`fhold `;]
+	|	[`fbreak `;]
+	|	[`fnbreak `;]
+	|	[`fret `;]
+	|	[`fnret `;]
 
 	def stmt
 		[var_decl]

@@ -1,59 +1,55 @@
 int rw_ocaml_factor( Factor: indep::factor )
 {
-	if match Factor [`first_token_char]
-	{
-		send Out "( Char.code data.\[ts.contents\] )"
+	switch Factor
+	case [`first_token_char] {
+		send Out
+			"( Char.code data.\[ts.contents\] )"
 	}
-	else if match Factor [tk_ident `[ expr `]]
-	{
+	case [tk_ident `[ expr `]] {
 		send Out
 			"[$Factor.tk_ident]\[ [rw_ocaml_expr(Factor.expr)] \]
 	}
-	elsif match Factor "fentry[ `( expr `)]
-	{
+	case [ `fentry `( expr `)] {
 		send Out
 			"[Factor.tk_ident]( [Factor.expr] )
 	}
-	elsif match Factor [tk_ident `( expr `)]
-	{
+	case [tk_ident `( expr `)] {
 		send Out
 			"[$Factor.tk_ident]( [rw_ocaml_expr(Factor.expr)] )
 	}
-	elsif match Factor [`< type `> `( expr `)]
-	{
+	case [`< type `> `( expr `)] {
 		send Out
 			"( [rw_ocaml_expr(Factor.expr)] )
 	}
-	elsif match Factor [`( expr `)]
-	{
+	case [`( expr `)] {
 		send Out
 			"( [rw_ocaml_expr(Factor.expr)] )
 	}
-	elsif match Factor ['true']
-	{
+	case ['true'] {
 		send Out '1'
 	}
-	elsif match Factor ['false']
-	{
+	case ['false'] {
 		send Out '0'
 	}
-	elsif match Factor "'0'"
-		send Out "( Char.code '0' )"
-	elsif match Factor "'a'"
-		send Out "( Char.code 'a' )"
-	elsif match Factor "fc"
-		send Out [Factor.tk_ident]
-	elsif match Factor "fhold"
-		send Out [Factor.tk_ident]
-	elsif match Factor "fnbreak"
-		send Out [Factor.tk_ident]
-	elsif match Factor "fnret"
-		send Out [Factor.tk_ident]
-	elsif match Factor [tk_ident]
-		send Out "[Factor.tk_ident].contents"
-	else 
-	{
-		send Out [$Factor]
+	case "'0'" {
+		send Out
+			"( Char.code '0' )"
+	}
+	case "'a'" {
+		send Out
+			"( Char.code 'a' )"
+	}
+	case [`fc] {
+		send Out
+			"fc"
+	}
+	case [tk_ident] {
+		send Out
+			"[Factor.tk_ident].contents"
+	}
+	default {
+		send Out
+			[Factor]
 	}
 }
 
@@ -189,7 +185,7 @@ int rw_ocaml_print_stmt( Stmt: indep::print_stmt )
 int rw_ocaml_ragel_stmt( Stmt: indep::ragel_stmt )
 {
 	send Out
-		[$Stmt]
+		[Stmt]
 }
 
 int rw_ocaml_stmt( Stmt: indep::stmt )
