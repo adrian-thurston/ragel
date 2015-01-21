@@ -1,3 +1,167 @@
+int rw_asm_factor( Factor: indep::factor )
+{
+	switch Factor
+	#if match Factor [`first_token_char]
+	#{
+	#	send Out "ts\[0\]"
+	#}
+	#else if match Factor [tk_ident `[ expr `]]
+	#{
+	#	send Out
+	#		"[$Factor.tk_ident]\[ [rw_c_expr(Factor.expr)] \]
+	#}
+	#else if match Factor [tk_ident `( expr `)]
+	#{
+	#	send Out
+	#		"[$Factor.tk_ident]( [rw_c_expr(Factor.expr)] )
+	#}
+	case [`< type `> `( expr `)] {
+		rw_asm_expr( Factor.expr )
+	}
+	case [`( expr `)] {
+		rw_asm_expr( Factor.expr )
+	}
+	case ['true'] {
+		send Out
+			"	movq	$1, %rax
+			"	pushq	%rax
+	}
+	case ['false'] {
+		send Out
+			"	movq	$0, %rax
+			"	pushq	%rax
+	}
+	case [Ident: tk_ident] {
+		if ( Ident.data == 'fc' ) {
+			send Out
+				"	movsbq	(fpc), %rax
+				"	pushq	%rax
+		}
+		else {
+			send Out
+				"	movq	[Ident](%rip), %rax
+				"	pushq	%rax
+		}
+	}
+	case [Number: tk_number] {
+		send Out
+			"	movq	$[Number], %rax
+			"	pushq	%rax
+	}
+	default {
+		send Out
+			"die die die
+	}
+	#else 
+	#{
+	#	send Out [$Factor]
+	#}
+}
+
+void rw_asm_expr( Expr: indep::expr )
+{
+	rw_asm_factor( Expr.factor )
+
+	if Expr.op {
+		rw_asm_expr( Expr._expr )
+
+		send Out
+			"	popq	%rcx
+			"	popq	%rax
+
+		switch Expr.op
+		case [`+] {
+			send Out
+				"	addq	%rcx, %rax
+		}
+		case [`-] {
+			send Out
+				"	subq	%rcx, %rax
+		}
+		case [`*] {
+			send Out
+				"	imul	%rcx, %rax
+		}
+
+		send Out
+				"	pushq	%rax
+	}
+
+	#if ( Expr.op ) {
+	#	send Out
+	#		"	[$Expr.op] [rw_c_expr( Expr._expr )]"
+	#}
+}
+
+int rw_asm_print_stmt( Stmt: indep::print_stmt )
+{
+	switch Stmt
+	case [`print_int expr `;] {
+		rw_asm_expr( Stmt.expr )
+
+		send Out
+			"	movq	$.L_fmt_int, %rdi
+			"	popq	%rsi
+			"	movq	$0, %rax
+			"	call	printf
+	}
+	case [`print_buf E1: expr `, E2: expr `;] {
+		#send Out
+		#	"fwrite( [rw_c_expr(E1)], 1, [rw_c_expr(E2)], stdout );"
+	}
+	case [`print_str expr `;] {
+		#send Out
+		#	"printf( \"%s\", [rw_c_expr( Stmt.expr )] );
+	}
+	case [`print_token `;] {
+		#send Out
+		#	"fwrite ( ts , 1 , te - ts , stdout );" 
+	}
+}
+
+int rw_asm_expr_stmt( ExprStmt: indep::expr_stmt )
+{
+	switch ExprStmt
+	case [tk_ident opt_sub `= expr `;]
+	{
+		rw_asm_expr( ExprStmt.expr )
+
+		send Out
+			"	popq	%rax
+			"	movq	%rax, [ExprStmt.tk_ident](%rip)
+	}
+	case [expr `;]
+	{
+		rw_asm_expr( ExprStmt.expr )
+		send Out
+			"	popq	%rax
+	}
+}
+
+int rw_asm_stmt( Stmt: indep::stmt )
+{
+	switch Stmt
+	case [var_decl] {
+		#rw_c_var_decl( Stmt.var_decl )
+	}
+	case [expr_stmt]
+		rw_asm_expr_stmt( Stmt.expr_stmt )
+	case [if_stmt] {
+		#rw_c_if_stmt( Stmt.if_stmt )
+	}
+	case [print_stmt]
+		rw_asm_print_stmt( Stmt.print_stmt )
+	case [ragel_stmt] {
+		#rw_c_ragel_stmt( Stmt.ragel_stmt )
+	}
+}
+
+void rw_asm_stmt_list( StmtList: indep::stmt* )
+{
+	for Stmt: indep::stmt in repeat( StmtList )
+		rw_asm_stmt( Stmt )
+}
+
 out_code::lines rw_asm_c_action_block( ActionBlock: indep::action_block )
 {
 	Out = new parser<out_code::lines>
@@ -23,8 +187,7 @@ out_code::lines rw_asm_asm_action_block( ActionBlock: indep::action_block Action
 	if match ActionBlock [`{ stmt* `}] {
 		send Out
 			"{
-			"	movq %r12, %rdi
-			"	call action_[ActionNum]
+			"	[rw_asm_stmt_list( ActionBlock._repeat_stmt )]
 			"}
 	}
 	else if match ActionBlock [`{ expr `}] {
@@ -38,6 +201,15 @@ out_code::lines rw_asm_asm_action_block( ActionBlock: indep::action_block Action
 	return Out->tree
 }
 
+int rw_asm_var_decl( VarDecl: indep::var_decl )
+{
+	send Out
+		".section	.data
+		"	.comm	[VarDecl.tk_ident],8,8
+		".text
+}
+
+
 void rw_asm( Output: stream )
 {
 	send Output
@@ -46,60 +218,6 @@ void rw_asm( Output: stream )
 		~ * The C component of the test case.
 		~ */
 		~
-		~#include <string.h>
-		~#include <stdio.h>
-		~
-
-	Init: indep::stmt* = RagelTree.Init
-	for Stmt: indep::stmt in Init {
-		if match Stmt [Decl: var_decl] {
-			Out = new parser<out_code::lines>
-			rw_c_var_decl( Decl )
-			send Out [] eos
-
-			send Output
-				[Out->tree]
-		}
-	}
-
-	send Output
-		"void init()
-		"{
-
-	for Stmt: indep::stmt in Init {
-		if match Stmt [ExprStmt: expr_stmt] {
-			Out = new parser<out_code::lines>
-			rw_c_expr_stmt( ExprStmt )
-			send Out [] eos
-			send Output [Out->tree]
-		}
-	}
-
-	send Output
-		"}
-
-	ActionNum: int = 0
-	Section: indep::section = RagelTree.section
-	for Action: ragel::action_block in Section {
-		# Reparse as lang-independent code.
-		parse IndepActionBlock: indep::action_block[$Action]
-		if ( !IndepActionBlock ) {
-			print( error '\n' Action )
-			exit(1)
-		}
-
-		Lines: out_code::lines =
-				rw_asm_c_action_block( IndepActionBlock )
-
-		send Output	
-			"long action_[ActionNum]( const char *p )
-			"{
-			"	char fc = *p;
-			"[Lines]
-			"}
-
-		ActionNum = ActionNum + 1
-	}
 	
 	send Output
 		"#################### DRIVER SPLIT ####################
@@ -117,8 +235,20 @@ void rw_asm( Output: stream )
 		"#
 		"
 
-	ActionNum = 0
-	Section = RagelTree.section
+	Init: indep::stmt* = RagelTree.Init
+	for Stmt: indep::stmt in Init {
+		if match Stmt [Decl: var_decl] {
+			Out = new parser<out_code::lines>
+			rw_asm_var_decl( Decl )
+			send Out [] eos
+
+			send Output
+				[Out->tree]
+		}
+	}
+
+	ActionNum: int = 0
+	Section: indep::section = RagelTree.section
 	for Action: ragel::action_block in Section {
 		# Reparse as lang-independent code.
 		parse IndepActionBlock: indep::action_block[$Action]
@@ -150,6 +280,8 @@ void rw_asm( Output: stream )
 		"	.string \"ACCEPT\"
 		".L_str_fail:
 		"	.string \"FAIL\"
+		".L_fmt_int:
+		"	.string \"%ld\"
 		"
 		"	%% write data;
 		"
@@ -167,6 +299,16 @@ void rw_asm( Output: stream )
 #			"	char *eof = pe;
 #	}
 
+	for Stmt: indep::stmt in Init {
+		if match Stmt [ExprStmt: expr_stmt] {
+			Out = new parser<out_code::lines>
+			rw_asm_expr_stmt( ExprStmt )
+			send Out [] eos
+			send Output [Out->tree]
+		}
+	}
+
+	send Output
 		"	# initialize the action data
 		"	call	init
 		"
