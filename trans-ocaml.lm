@@ -81,11 +81,21 @@ void rw_ocaml_type( Type: indep::type )
 	}
 }
 
+void rw_ocaml_abs_expr( Expr: indep::abs_expr )
+{
+	if ( Expr.Op ) {
+		send Out
+			"[rw_ocaml_abs_expr(Expr.E1)] [$Expr.Op] [rw_ocaml_abs_expr( Expr.E2 )]"
+	}
+	else {
+		rw_ocaml_factor( Expr.factor )
+	}
+}
+
 void rw_ocaml_expr( Expr: indep::expr )
 {
-	rw_ocaml_factor( Expr.factor )
-	if ( Expr.op )
-		send Out " [$Expr.op] [rw_ocaml_expr( Expr._expr )]"
+	AbsExpr: indep::abs_expr = abs_comparative( Expr.comparative )
+	rw_ocaml_abs_expr( AbsExpr )
 }
 
 void rw_ocaml_opt_array( OptArr: indep::opt_arr )
