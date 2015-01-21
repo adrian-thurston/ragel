@@ -106,7 +106,8 @@ void AsmCodeGen::genLineDirective( ostream &out )
 /* Init code gen with in parameters. */
 AsmCodeGen::AsmCodeGen( const CodeGenArgs &args )
 :
-	CodeGenData( args )
+	CodeGenData( args ),
+	nextLmSwitchLabel( 1 )
 {
 }
 
@@ -167,9 +168,7 @@ string AsmCodeGen::P()
 	if ( pExpr == 0 )
 		ret << "%r12";
 	else {
-		ret << "(";
 		INLINE_LIST( ret, pExpr, 0, false, false );
-		ret << ")";
 	}
 	return ret.str();
 }
@@ -178,11 +177,9 @@ string AsmCodeGen::PE()
 {
 	ostringstream ret;
 	if ( peExpr == 0 )
-		ret << "pe";
+		ret << "%r13";
 	else {
-		ret << "(";
 		INLINE_LIST( ret, peExpr, 0, false, false );
-		ret << ")";
 	}
 	return ret.str();
 }
@@ -240,28 +237,13 @@ string AsmCodeGen::STACK()
 	return ret.str();
 }
 
-string AsmCodeGen::ACT()
-{
-	ostringstream ret;
-	if ( actExpr == 0 )
-		ret << ACCESS() + "act";
-	else {
-		ret << "(";
-		INLINE_LIST( ret, actExpr, 0, false, false );
-		ret << ")";
-	}
-	return ret.str();
-}
-
 string AsmCodeGen::TOKSTART()
 {
 	ostringstream ret;
 	if ( tokstartExpr == 0 )
-		ret << ACCESS() + "ts";
+		ret << "-8(%rbp)";
 	else {
-		ret << "(";
 		INLINE_LIST( ret, tokstartExpr, 0, false, false );
-		ret << ")";
 	}
 	return ret.str();
 }
@@ -270,11 +252,20 @@ string AsmCodeGen::TOKEND()
 {
 	ostringstream ret;
 	if ( tokendExpr == 0 )
-		ret << ACCESS() + "te";
+		ret << "-16(%rbp)";
 	else {
-		ret << "(";
 		INLINE_LIST( ret, tokendExpr, 0, false, false );
-		ret << ")";
+	}
+	return ret.str();
+}
+
+string AsmCodeGen::ACT()
+{
+	ostringstream ret;
+	if ( actExpr == 0 )
+		ret << "-24(%rbp)";
+	else {
+		INLINE_LIST( ret, actExpr, 0, false, false );
 	}
 	return ret.str();
 }
@@ -362,49 +353,53 @@ void AsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inF
 void AsmCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
 		int targState, int inFinish, bool csForced )
 {
-#if 0
-	ret << 
-		"	switch( " << ACT() << " ) {\n";
+	long done = nextLmSwitchLabel++;
 
-	bool haveDefault = false;
+	ret << 
+		"	movq	" << ACT() << ", %rax\n";
+
 	for ( GenInlineList::Iter lma = *item->children; lma.lte(); lma++ ) {
+		long l = nextLmSwitchLabel++;
+
 		/* Write the case label, the action and the case break. */
 		if ( lma->lmId < 0 ) {
-			ret << "	default:\n";
-			haveDefault = true;
 		}
-		else
-			ret << "	case " << lma->lmId << ":\n";
+		else {
+			ret <<
+				"	cmpq	$" << lma->lmId << ", %rax\n"
+				"	jne		" << LABEL( "lm_switch_next", l ) << "\n";
+		}
 
-		/* Write the block and close it off. */
-		ret << "	{";
 		INLINE_LIST( ret, lma->children, targState, inFinish, csForced );
-		ret << "}\n";
 
-		ret << "	break;\n";
+		ret <<
+			"	jmp		" << LABEL( "lm_done", done ) << "\n"
+			"" << LABEL( "lm_switch_next", l ) << ":\n";
 	}
 
-	if ( (hostLang->lang == HostLang::D || hostLang->lang == HostLang::D2) && !haveDefault )
-		ret << "	default: break;";
-
 	ret << 
-		"	}\n"
-		"\t";
-#endif
+		"" << LABEL( "lm_done", done ) << ":\n";
 }
 
 void AsmCodeGen::SET_ACT( ostream &ret, GenInlineItem *item )
 {
-	ret << ACT() << " = " << item->lmId << ";";
+	ret <<
+		"	movq	$" << item->lmId << ", " << ACT() << "\n";
 }
 
 void AsmCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 {
-	/* The tokend action sets tokend. */
-	ret << TOKEND() << " = " << P();
-	if ( item->offset != 0 ) 
-		out << "+" << item->offset;
-	out << ";";
+	/* Sets tokend, there may be an offset. */
+	ret <<
+		"	movq	$" << item->lmId << ", %rax\n";
+
+	if ( item->offset != 0 ) {
+		out <<
+			"	addq	$" << item->offset << ", %rax\n";
+	}
+
+	out <<
+		"	movq	%rax, " << TOKEND() << "\n";
 }
 
 void AsmCodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
@@ -414,17 +409,75 @@ void AsmCodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 
 void AsmCodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
 {
-	ret << TOKSTART() << " = " << NULL_ITEM() << ";";
+	ret <<
+		"	movq	$0, " << TOKSTART() << "\n";
 }
 
 void AsmCodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
 {
-	ret << ACT() << " = 0;";
+	ret <<
+		"	movq	$0, " << ACT() << "\n";
 }
 
 void AsmCodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
 {
-	ret << TOKSTART() << " = " << P() << ";";
+	ret <<
+		"	movq	%r12, " << TOKSTART() << "\n";
+}
+
+void AsmCodeGen::HOST_STMT( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+//		ret << OPEN_HOST_BLOCK();
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+//		ret << CLOSE_HOST_BLOCK();
+	}
+}
+
+void AsmCodeGen::HOST_EXPR( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+//		ret << OPEN_HOST_EXPR();
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+//		ret << CLOSE_HOST_EXPR();
+	}
+}
+
+void AsmCodeGen::HOST_TEXT( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+//		ret << OPEN_HOST_PLAIN();
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+//		ret << CLOSE_HOST_PLAIN();
+	}
+}
+
+void AsmCodeGen::GEN_STMT( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+//		ret << OPEN_GEN_BLOCK();
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+//		ret << CLOSE_GEN_BLOCK();
+	}
+}
+
+void AsmCodeGen::GEN_EXPR( ostream &ret, GenInlineItem *item, 
+		int targState, bool inFinish, bool csForced )
+{
+	if ( item->children->length() > 0 ) {
+		/* Write the block and close it off. */
+//		ret << OPEN_GEN_EXPR();
+		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
+//		ret << CLOSE_GEN_EXPR();
+	}
 }
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
@@ -509,13 +562,24 @@ void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::Nret:
 		case GenInlineItem::Nbreak:
 		case GenInlineItem::LmExec:
-		case GenInlineItem::HostStmt:
-		case GenInlineItem::HostExpr:
-		case GenInlineItem::HostText:
-		case GenInlineItem::GenStmt:
-		case GenInlineItem::GenExpr:
 		case GenInlineItem::LmCase:
 		case GenInlineItem::LmHold:
+			break;
+
+		case GenInlineItem::HostStmt:
+			HOST_STMT( ret, item, targState, inFinish, csForced );
+			break;
+		case GenInlineItem::HostExpr:
+			HOST_EXPR( ret, item, targState, inFinish, csForced );
+			break;
+		case GenInlineItem::HostText:
+			HOST_TEXT( ret, item, targState, inFinish, csForced );
+			break;
+		case GenInlineItem::GenStmt:
+			GEN_STMT( ret, item, targState, inFinish, csForced );
+			break;
+		case GenInlineItem::GenExpr:
+			GEN_EXPR( ret, item, targState, inFinish, csForced );
 			break;
 		}
 	}
@@ -574,8 +638,6 @@ string AsmCodeGen::FIRST_FINAL_STATE()
 
 void AsmCodeGen::writeInit()
 {
-//	out << "	{\n";
-
 	if ( !noCS ) {
 		// out << "\t" << vCS() << " = " << START() << ";\n";
 		out <<
@@ -586,13 +648,13 @@ void AsmCodeGen::writeInit()
 //	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )
 //		out << "\t" << TOP() << " = 0;\n";
 
-//	if ( hasLongestMatch ) {
-//		out << 
-//			"	" << TOKSTART() << " = " << NULL_ITEM() << ";\n"
-//			"	" << TOKEND() << " = " << NULL_ITEM() << ";\n"
-//			"	" << ACT() << " = 0;\n";
-//	}
-//	out << "	}\n";
+	if ( hasLongestMatch ) {
+		out << 
+			"	movq	$0, " << TOKSTART() << "\n"
+			"	movq	$0, " << TOKEND() << "\n"
+			"	movq	$0, " << ACT() << "\n";
+	}
+
 }
 
 string AsmCodeGen::DATA_PREFIX()
@@ -1499,6 +1561,10 @@ void AsmCodeGen::writeExec()
 	 * p  : %r12  -- callee-save, interface, persistent
 	 *
 	 * pe : %r13  -- callee-save, interface, persistent
+	 *
+	 * ts:  -8(%rbp)    -- tokstart
+	 * te:  -16(%rbp)   -- tokend
+	 * act: -24(%rbp)   -- act
 	 */
 
 #if 0

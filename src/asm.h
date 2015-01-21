@@ -159,11 +159,23 @@ protected:
 	bool testEofUsed;
 	bool againLabelUsed;
 	bool useIndicies;
+	long nextLmSwitchLabel;
 
 	void genLineDirective( ostream &out );
 
 	/* Return types in HostType form. */
 	HostType *arrayType( unsigned long maxVal );
+
+	void HOST_STMT( ostream &ret, GenInlineItem *item, 
+			int targState, bool inFinish, bool csForced );
+	void HOST_EXPR( ostream &ret, GenInlineItem *item, 
+			int targState, bool inFinish, bool csForced );
+	void HOST_TEXT( ostream &ret, GenInlineItem *item, 
+			int targState, bool inFinish, bool csForced );
+	void GEN_STMT( ostream &ret, GenInlineItem *item, 
+			int targState, bool inFinish, bool csForced );
+	void GEN_EXPR( ostream &ret, GenInlineItem *item, 
+			int targState, bool inFinish, bool csForced );
 
 public:
 	/* Determine if we should use indicies. */
