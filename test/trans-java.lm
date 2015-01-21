@@ -62,11 +62,21 @@ void rw_java_type( Type: indep::type )
 	}
 }
 
+void rw_java_abs_expr( Expr: indep::abs_expr )
+{
+	if ( Expr.Op ) {
+		send Out
+			"[rw_java_abs_expr(Expr.E1)] [$Expr.Op] [rw_java_abs_expr( Expr.E2 )]"
+	}
+	else {
+		rw_java_factor( Expr.factor )
+	}
+}
+
 void rw_java_expr( Expr: indep::expr )
 {
-	rw_java_factor( Expr.factor )
-	if ( Expr.op )
-		send Out " [$Expr.op] [rw_java_expr( Expr._expr )]"
+	AbsExpr: indep::abs_expr = abs_comparative( Expr.comparative )
+	rw_java_abs_expr( AbsExpr )
 }
 
 void rw_java_opt_array( OptArr: indep::opt_arr Type: indep::type )

@@ -70,11 +70,21 @@ void rw_ruby_type( Type: indep::type )
 	}
 }
 
+void rw_ruby_abs_expr( Expr: indep::abs_expr )
+{
+	if ( Expr.Op ) {
+		send Out
+			"[rw_ruby_abs_expr(Expr.E1)] [$Expr.Op] [rw_ruby_abs_expr( Expr.E2 )]"
+	}
+	else {
+		rw_ruby_factor( Expr.factor )
+	}
+}
+
 void rw_ruby_expr( Expr: indep::expr )
 {
-	rw_ruby_factor( Expr.factor )
-	if ( Expr.op )
-		send Out " [$Expr.op] [rw_ruby_expr( Expr._expr )]"
+	AbsExpr: indep::abs_expr = abs_comparative( Expr.comparative )
+	rw_ruby_abs_expr( AbsExpr )
 }
 
 void rw_ruby_opt_array( OptArr: indep::opt_arr )

@@ -58,18 +58,17 @@ int rw_asm_factor( Factor: indep::factor )
 	#}
 }
 
-void rw_asm_expr( Expr: indep::expr )
+void rw_asm_abs_expr( Expr: indep::abs_expr )
 {
-	rw_asm_factor( Expr.factor )
-
-	if Expr.op {
-		rw_asm_expr( Expr._expr )
+	if ( Expr.Op ) {
+		rw_asm_abs_expr( Expr.E1 )
+		rw_asm_abs_expr( Expr.E2 )
 
 		send Out
 			"	popq	%rcx
 			"	popq	%rax
 
-		switch Expr.op
+		switch Expr.Op
 		case [`+] {
 			send Out
 				"	addq	%rcx, %rax
@@ -86,11 +85,15 @@ void rw_asm_expr( Expr: indep::expr )
 		send Out
 				"	pushq	%rax
 	}
+	else {
+		rw_asm_factor( Expr.factor )
+	}
+}
 
-	#if ( Expr.op ) {
-	#	send Out
-	#		"	[$Expr.op] [rw_c_expr( Expr._expr )]"
-	#}
+void rw_asm_expr( Expr: indep::expr )
+{
+	AbsExpr: indep::abs_expr = abs_comparative( Expr.comparative )
+	rw_asm_abs_expr( AbsExpr )
 }
 
 int rw_asm_print_stmt( Stmt: indep::print_stmt )
@@ -309,8 +312,8 @@ void rw_asm( Output: stream )
 	}
 
 	send Output
-		"	# initialize the action data
-		"	call	init
+#		"	# initialize the action data
+#		"	call	init
 		"
 		"	# Get the length.
 		"	movq	%r12, %rdi

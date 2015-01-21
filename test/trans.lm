@@ -93,13 +93,100 @@ namespace indep
 	|	[`( expr `)]
 
 	def op
-		[`<] | [`>] | [`=] | [`!]
-	|	[`+] | [`-] | [`*] | [`!=]
-	|	[`==] | [`<=] | [`>=]
+		[`+]
+	|	[`-]
+	|	[`*]
+	|	[`<]
+	|	[`>]
+	|	[`!=]
+	|	[`==]
+	|	[`<=]
+	|	[`>=]
+
+	def mult_op
+		[`*]
+
+	def add_op
+		[`+]
+	|	[`-]
+
+	def cmp_op
+		[`<]
+	|	[`>]
+	|	[`!=]
+	|	[`==]
+	|	[`<=]
+	|	[`>=]
+
+	def abs_op
+		[mult_op]
+	|	[add_op]
+	|	[cmp_op]
+
+	abs_expr abs_multiplicative( Expr: indep::multiplicative )
+	{
+		if ( !Expr.Op ) {
+			return cons abs_expr [Expr.factor]
+		}
+		else {
+			return cons abs_expr [
+				abs_multiplicative( Expr._multiplicative )
+				Expr.Op
+				Expr.factor
+			]
+		}
+	}
+
+	abs_expr abs_additive( Expr: indep::additive )
+	{
+		if ( !Expr.Op ) {
+			return cons abs_expr [
+				abs_multiplicative( Expr.multiplicative )
+			]
+		}
+		else {
+			return cons abs_expr [
+				abs_additive( Expr._additive )
+				Expr.Op
+				abs_multiplicative( Expr.multiplicative )
+			]
+		}
+	}
+
+	abs_expr abs_comparative( Expr: indep::comparative )
+	{
+		if ( !Expr.Op ) {
+			return cons abs_expr [
+				abs_additive( Expr.additive )
+			]
+		}
+		else {
+			return cons abs_expr [
+				abs_comparative( Expr._comparative )
+				Expr.Op
+				abs_additive( Expr.additive )
+			]
+		}
+	}
+
+	def multiplicative
+		[multiplicative Op: mult_op factor]
+	|	[factor]
+
+	def additive
+		[additive Op: add_op multiplicative]
+	|	[multiplicative]
+
+	def comparative
+		[comparative Op: cmp_op additive]
+	|	[additive]
+
+	def abs_expr
+		[E1: abs_expr Op: abs_op E2: abs_expr]
+	|	[factor]
 
 	def expr
-		[factor op expr]
-	|	[factor]
+		[comparative]
 
 	def type
 		[`int]
