@@ -33,17 +33,15 @@ int rw_asm_factor( Factor: indep::factor )
 			"	movq	$0, %rax
 			"	pushq	%rax
 	}
+	case [`fc] {
+		send Out
+			"	movsbq	(%r12), %rax
+			"	pushq	%rax
+	}
 	case [Ident: tk_ident] {
-		if ( Ident.data == 'fc' ) {
-			send Out
-				"	movsbq	(fpc), %rax
-				"	pushq	%rax
-		}
-		else {
-			send Out
-				"	movq	[Ident](%rip), %rax
-				"	pushq	%rax
-		}
+		send Out
+			"	movq	[Ident](%rip), %rax
+			"	pushq	%rax
 	}
 	case [Number: tk_number] {
 		send Out
@@ -68,7 +66,7 @@ int rw_asm_factor( Factor: indep::factor )
 	}
 	default {
 		send Out
-			"die die die
+			"NOT IMPELMENTED
 	}
 	#else 
 	#{
@@ -222,25 +220,6 @@ void rw_asm_stmt_list( StmtList: indep::stmt* )
 		rw_asm_stmt( Stmt )
 }
 
-out_code::lines rw_asm_c_action_block( ActionBlock: indep::action_block )
-{
-	Out = new parser<out_code::lines>
-	if match ActionBlock [`{ stmt* `}] {
-		send Out
-			"{
-			"	[rw_c_stmt_list( ActionBlock._repeat_stmt )]
-			"}
-	}
-	else if match ActionBlock [`{ expr `}] {
-		send Out
-			"{
-			"	return [rw_c_expr( ActionBlock.expr )];
-			"}
-	}
-	send Out [] eos
-	return Out->tree
-}
-
 out_code::lines rw_asm_asm_action_block( ActionBlock: indep::action_block ActionNum: int )
 {
 	Out = new parser<out_code::lines>
@@ -253,8 +232,8 @@ out_code::lines rw_asm_asm_action_block( ActionBlock: indep::action_block Action
 	else if match ActionBlock [`{ expr `}] {
 		send Out
 			"{
-			"	movq %r12, %rdi
-			"	call action_[ActionNum]
+#			"	movq %r12, %rdi
+#			"	call action_[ActionNum]
 			"}
 	}
 	send Out [] eos
@@ -323,7 +302,7 @@ void rw_asm( Output: stream )
 		# Reparse back to ragel action block.
 		Action = parse ragel::action_block[Lines]
 		if ( !Action ) {
-			print( error '\n' )
+			print( error ': could not reparse action: ' Lines '\n' )
 			exit(1)
 		}
 
