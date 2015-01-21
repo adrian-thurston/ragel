@@ -125,7 +125,7 @@ const HostLang hostLangD = {
 
 const HostLang hostLangGo = {
 	"Go",
-	"Z",
+	"-Z",
 	HostLang::Go,
 	hostTypesGo, 10,
 	hostTypesGo+0,
