@@ -50,13 +50,19 @@ int rw_asm_factor( Factor: indep::factor )
 			"	movq	$[Number], %rax
 			"	pushq	%rax
 	}
+	case [`- Number: tk_number] {
+		send Out
+			"	movq	$-[Number], %rax
+			"	pushq	%rax
+
+	}
 	case [String: string] {
 		send Out
 			"	.section	.rodata
-			".L_[Label]:
+			"[Label]:
 			"	.string		[String]
 			"	.text
-			"	movq	$.L_[Label], %rax
+			"	movq	$[Label]b, %rax
 			"	pushq	%rax
 		Label = Label + 1
 	}
@@ -158,6 +164,41 @@ int rw_asm_expr_stmt( ExprStmt: indep::expr_stmt )
 	}
 }
 
+int rw_asm_if_stmt( IfStmt: indep::if_stmt )
+{
+	L1: int = Label
+	Label = Label + 1
+
+	L2: int = Label
+	Label = Label + 1
+
+	rw_asm_expr( IfStmt.expr )
+
+
+	send Out
+		"	popq	%rax
+		"	test	%rax, %rax
+		"	jz		[L1]f
+
+	rw_asm_stmt_list( IfStmt._repeat_stmt )
+
+	if ( IfStmt.opt_else._repeat_stmt ) {
+		send Out
+			"	jmp		[L2]f
+			"[L1]:
+
+		rw_asm_stmt_list( IfStmt.opt_else._repeat_stmt )
+
+		send Out
+			"[L2]:
+	}
+	else {
+		send Out
+			"[L1]:
+	}
+
+}
+
 int rw_asm_stmt( Stmt: indep::stmt )
 {
 	switch Stmt
@@ -166,9 +207,8 @@ int rw_asm_stmt( Stmt: indep::stmt )
 	}
 	case [expr_stmt]
 		rw_asm_expr_stmt( Stmt.expr_stmt )
-	case [if_stmt] {
-		#rw_c_if_stmt( Stmt.if_stmt )
-	}
+	case [if_stmt]
+		rw_asm_if_stmt( Stmt.if_stmt )
 	case [print_stmt]
 		rw_asm_print_stmt( Stmt.print_stmt )
 	case [ragel_stmt] {
