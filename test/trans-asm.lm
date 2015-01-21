@@ -1,3 +1,5 @@
+global Label: int = 1
+
 int rw_asm_factor( Factor: indep::factor )
 {
 	switch Factor
@@ -47,6 +49,16 @@ int rw_asm_factor( Factor: indep::factor )
 		send Out
 			"	movq	$[Number], %rax
 			"	pushq	%rax
+	}
+	case [String: string] {
+		send Out
+			"	.section	.rodata
+			".L_[Label]:
+			"	.string		[String]
+			"	.text
+			"	movq	$.L_[Label], %rax
+			"	pushq	%rax
+		Label = Label + 1
 	}
 	default {
 		send Out
@@ -113,8 +125,13 @@ int rw_asm_print_stmt( Stmt: indep::print_stmt )
 		#	"fwrite( [rw_c_expr(E1)], 1, [rw_c_expr(E2)], stdout );"
 	}
 	case [`print_str expr `;] {
-		#send Out
-		#	"printf( \"%s\", [rw_c_expr( Stmt.expr )] );
+		rw_asm_expr( Stmt.expr )
+
+		send Out
+			"	movq	$.L_fmt_str, %rdi
+			"	popq	%rsi
+			"	movq	$0, %rax
+			"	call	printf
 	}
 	case [`print_token `;] {
 		#send Out
@@ -207,9 +224,9 @@ out_code::lines rw_asm_asm_action_block( ActionBlock: indep::action_block Action
 int rw_asm_var_decl( VarDecl: indep::var_decl )
 {
 	send Out
-		".section	.data
+		"	.section	.data
 		"	.comm	[VarDecl.tk_ident],8,8
-		".text
+		"	.text
 }
 
 
@@ -285,6 +302,8 @@ void rw_asm( Output: stream )
 		"	.string \"FAIL\"
 		".L_fmt_int:
 		"	.string \"%ld\"
+		".L_fmt_str:
+		"	.string \"%s\"
 		"
 		"	%% write data;
 		"
