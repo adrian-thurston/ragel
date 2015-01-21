@@ -165,7 +165,7 @@ string AsmCodeGen::P()
 { 
 	ostringstream ret;
 	if ( pExpr == 0 )
-		ret << "p";
+		ret << "%r12";
 	else {
 		ret << "(";
 		INLINE_LIST( ret, pExpr, 0, false, false );
@@ -290,7 +290,7 @@ string AsmCodeGen::GET_KEY()
 	}
 	else {
 		/* Expression for retrieving the key, use simple dereference. */
-		ret << "(*" << P() << ")";
+		ret << "(" << P() << ")";
 	}
 	return ret.str();
 }
