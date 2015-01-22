@@ -32,6 +32,11 @@ int rw_cs_factor( Factor: indep::factor )
 	{
 		send Out '0'
 	}
+	elsif match Factor [`buffer]
+	{
+		send Out
+			"new String( buffer, 0, blen )
+	}
 	else 
 	{
 		send Out [$Factor]
@@ -158,6 +163,20 @@ int rw_cs_print_stmt( Stmt: indep::print_stmt )
 	}
 }
 
+void rw_cs_buf_stmt( BufStmt: indep::buf_stmt )
+{
+	switch BufStmt
+	case [`buf_clear `( `) `;] {
+		send Out
+			"	blen = 0;
+	}
+	case [`buf_append `( `) `;] {
+		send Out
+			"	buffer\[blen++\] = fc;
+	}
+}
+
+
 int rw_cs_ragel_stmt( Stmt: indep::ragel_stmt )
 {
 	send Out
@@ -174,6 +193,8 @@ int rw_cs_stmt( Stmt: indep::stmt )
 		rw_cs_if_stmt( Stmt.if_stmt )
 	else if match Stmt [print_stmt]
 		rw_cs_print_stmt( Stmt.print_stmt )
+	else if match Stmt [buf_stmt]
+		rw_cs_buf_stmt( Stmt.buf_stmt )
 	else if	match Stmt [ragel_stmt]
 		rw_cs_ragel_stmt( Stmt.ragel_stmt )
 }
@@ -279,6 +300,8 @@ void rw_cs( Output: stream )
 		"	int pe = len;
 		"	int eof = len;
 		"	string _s;
+		"	char \[\] buffer = new char \[1024\];
+		"	int blen = 0;
 		"	%% write exec;
 		"}
 		"

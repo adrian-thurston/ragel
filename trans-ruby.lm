@@ -1,47 +1,42 @@
 int rw_ruby_factor( Factor: indep::factor )
 {
-	if match Factor [`first_token_char]
-	{
+	switch Factor
+	case [`first_token_char] {
 		send Out "data\[ts\].ord"
 	}
-	else if match Factor [tk_ident `[ expr `]]
-	{
+	case [tk_ident `[ expr `]] {
 		send Out
 			"[$Factor.tk_ident]\[ [rw_ruby_expr(Factor.expr)] \]
 	}
-	else if match Factor [tk_ident `( expr `)]
-	{
+	case [tk_ident `( expr `)] {
 		send Out
 			"[$Factor.tk_ident]( [rw_ruby_expr(Factor.expr)] )
 	}
-	elsif match Factor [`< type `> `( expr `)]
-	{
+	case [`< type `> `( expr `)] {
 		send Out
 			"( [rw_ruby_expr(Factor.expr)] )
 	}
-	elsif match Factor [`( expr `)]
-	{
+	case [`( expr `)] {
 		send Out
 			"( [rw_ruby_expr(Factor.expr)] )
 	}
-	elsif match Factor ['true']
-	{
+	case ['true'] {
 		send Out '1'
 	}
-	elsif match Factor ['false']
-	{
+	case ['false'] {
 		send Out '0'
 	}
-	elsif match Factor "'0'"
-	{
+	case "'0'" {
 		send Out '"0"[0].ord'
 	}
-	elsif match Factor "'a'"
-	{
+	case "'a'" {
 		send Out '"a"[0].ord'
 	}
-	else 
-	{
+	case [`buffer] {
+		send Out
+			"buffer\[0..blen-1\].pack( \"c*\" )"
+	}
+	default {
 		send Out [$Factor]
 	}
 }
@@ -173,17 +168,34 @@ int rw_ruby_ragel_stmt( Stmt: indep::ragel_stmt )
 		[$Stmt]
 }
 
+void rw_ruby_buf_stmt( BufStmt: indep::buf_stmt )
+{
+	switch BufStmt
+	case [`buf_clear `( `) `;] {
+		send Out
+			"	blen = 0;
+	}
+	case [`buf_append `( `) `;] {
+		send Out
+			"	buffer\[blen\] = fc;
+			"	blen += 1;
+	}
+}
+
 int rw_ruby_stmt( Stmt: indep::stmt )
 {
-	if match Stmt [var_decl]
+	switch Stmt
+	case [var_decl]
 		rw_ruby_var_decl( Stmt.var_decl )
-	else if match Stmt [expr_stmt]
+	case [expr_stmt]
 		rw_ruby_expr_stmt( Stmt.expr_stmt )
-	else if match Stmt [if_stmt]
+	case [if_stmt]
 		rw_ruby_if_stmt( Stmt.if_stmt )
-	else if match Stmt [print_stmt]
+	case [print_stmt]
 		rw_ruby_print_stmt( Stmt.print_stmt )
-	else if	match Stmt [ragel_stmt]
+	case [buf_stmt]
+		rw_ruby_buf_stmt( Stmt.buf_stmt )
+	case [ragel_stmt]
 		rw_ruby_ragel_stmt( Stmt.ragel_stmt )
 }
 
@@ -267,6 +279,8 @@ void rw_ruby( Output: stream )
 		"	cs = 0;
 		"	_m = ""
 		"	_a = ""
+		"	buffer = Array.new
+		"	blen = 0
 
 	Init: indep::stmt* = RagelTree.Init
 	for Stmt: indep::stmt in Init {

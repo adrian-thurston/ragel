@@ -32,6 +32,11 @@ int rw_java_factor( Factor: indep::factor )
 	{
 		send Out '0'
 	}
+	elsif match Factor [`buffer]
+	{
+		send Out
+			"new String( buffer, 0, blen )"
+	}
 	else 
 	{
 		send Out [$Factor]
@@ -153,6 +158,21 @@ int rw_java_print_stmt( Stmt: indep::print_stmt )
 	}
 }
 
+void rw_java_buf_stmt( BufStmt: indep::buf_stmt )
+{
+	switch BufStmt
+	case [`buf_clear `( `) `;] {
+		send Out
+			"	blen = 0;
+	}
+	case [`buf_append `( `) `;] {
+		send Out
+			"	buffer\[blen\] = fc;
+			"	blen += 1;
+	}
+}
+
+
 int rw_java_ragel_stmt( Stmt: indep::ragel_stmt )
 {
 	send Out
@@ -169,6 +189,8 @@ int rw_java_stmt( Stmt: indep::stmt )
 		rw_java_if_stmt( Stmt.if_stmt )
 	else if match Stmt [print_stmt]
 		rw_java_print_stmt( Stmt.print_stmt )
+	else if match Stmt [buf_stmt]
+		rw_java_buf_stmt( Stmt.buf_stmt )
 	else if	match Stmt [ragel_stmt]
 		rw_java_ragel_stmt( Stmt.ragel_stmt )
 }
@@ -267,8 +289,11 @@ void rw_java( Output: stream )
 		"
 		"void exec( char data\[\], int len )
 		"{
+		"	char buffer \[\] = new char\[1024\];
+		"	int blen = 0;
 		"	int p = 0;
 		"	int pe = len;
+		"
 
 	if NeedsEof {
 		send Output
