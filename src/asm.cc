@@ -1171,7 +1171,8 @@ void AsmCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 
 void AsmCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << vCS() << " = " << nextDest << ";";
+	ret <<
+		"	movq	$" << nextDest << ", " << vCS() << "\n";
 }
 
 void AsmCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
@@ -1431,10 +1432,23 @@ std::ostream &AsmCodeGen::EXIT_STATES()
 
 std::ostream &AsmCodeGen::AGAIN_CASES()
 {
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		out << 
-			"		case " << st->id << ": goto st" << st->id << ";\n";
+	/* Jump into the machine based on the current state. */
+	out <<
+		"	leaq	" << LABEL( "again_jmp" ) << "(%rip), %rcx\n"
+		"	movq	(%rcx," << vCS() << ",8), %rcx\n"
+		"	jmp		*%rcx\n"
+		"	.section .rodata\n"
+		"	.align 8\n"
+		<< LABEL( "again_jmp" ) << ":\n";
+
+	for ( int stId = 0; stId < redFsm->stateList.length(); stId++ ) {
+		out <<
+			"	.quad	" << LABEL( "st", stId ) << "\n";
 	}
+
+	out <<
+		"	.text\n";
+
 	return out;
 }
 
@@ -1599,18 +1613,14 @@ void AsmCodeGen::writeExec()
 			"	je	" << LABEL( "test_eof" ) << "\n";
 	}
 
-#if 0
 	if ( useAgainLabel() ) {
 		out << 
-			"	goto _resume;\n"
-			"\n"
-			"_again:\n"
-			"	switch ( " << vCS() << " ) {\n";
-			AGAIN_CASES() <<
-			"	default: break;\n"
-			"	}\n"
-			"\n";
+			"	jmp		" << LABEL( "resume" ) << "\n"
+			<< LABEL( "again" ) << ":\n";
 
+		AGAIN_CASES();
+
+#if 0
 		if ( !noEnd ) {
 			testEofUsed = true;
 			out << 
@@ -1621,11 +1631,11 @@ void AsmCodeGen::writeExec()
 			out << 
 				"	" << P() << " += 1;\n";
 		}
+#endif
 
-		out << "_resume:\n";
+		out << LABEL( "resume" ) << ":\n";
 	}
 
-#endif
 
 	/* Jump into the machine based on the current state. */
 	out <<
