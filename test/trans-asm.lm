@@ -64,6 +64,16 @@ int rw_asm_factor( Factor: indep::factor )
 			"	pushq	%rax
 		Label = Label + 1
 	}
+	case [`buffer] {
+		send Out
+			"	movq	$buf, %rax
+			"	push	%rax
+	}
+	case [`blen] {
+		send Out
+			"	movq	bpos(%rip), %rax
+			"	push	%rax
+	}
 	default {
 		send Out
 			"NOT IMPELMENTED
@@ -197,6 +207,24 @@ int rw_asm_if_stmt( IfStmt: indep::if_stmt )
 
 }
 
+void rw_asm_buf_stmt( BufStmt: indep::buf_stmt )
+{
+	switch BufStmt
+	case [`buf_clear `( `) `;] {
+		send Out
+			"	movq	$0, bpos(%rip)
+	}
+	case [`buf_append `( `) `;] {
+		send Out
+			"	movq	bpos(%rip), %rax
+			"	movb	(%r12), %cl
+			'	movb	%cl, buf(%rax)
+			"	addq	$1, %rax
+			"	movb	$0,	buf(%rax)
+			"	movq	%rax, bpos(%rip)
+	}
+}
+
 int rw_asm_ragel_stmt( Stmt: indep::ragel_stmt )
 {
 	send Out
@@ -215,6 +243,8 @@ int rw_asm_stmt( Stmt: indep::stmt )
 		rw_asm_if_stmt( Stmt.if_stmt )
 	case [print_stmt]
 		rw_asm_print_stmt( Stmt.print_stmt )
+	case [buf_stmt]
+		rw_asm_buf_stmt( Stmt.buf_stmt )
 	case [ragel_stmt]
 		rw_asm_ragel_stmt( Stmt.ragel_stmt )
 }
@@ -318,7 +348,10 @@ void rw_asm( Output: stream )
 		"
 		"[Section]
 		"
-		"	.section .rodata
+		"	.text
+		"	.comm		buf, 1024, 32
+		"	.comm		bpos, 8, 8
+		"	.section	.rodata
 		"
 		".L_str_accept:
 		"	.string \"ACCEPT\"
@@ -359,6 +392,8 @@ void rw_asm( Output: stream )
 		"	movq	%r12, %r13
 		"	movslq	%eax, %rax
 		"	addq	%rax, %r13
+		"
+		"	movq	$0,	bpos(%rip)
 
 	if NeedsEof {
 		send Output

@@ -13,64 +13,66 @@ line = 1;
 	machine clang;
 
 	# Function to buffer a character.
-	action bufChar { array[pos] = fc; pos = pos + 1; }
+	action bufChar { buf_append(); }
 
 	# Function to clear the buffer.
-	action clearBuf { pos = 0; }
+	action clearBuf { buf_clear(); }
+
+	action incLine { line = line + 1; }
 
 	# Functions to dump tokens as they are matched.
 	action ident {
 		print_str "ident(";
 		print_int line;
 		print_str ",";
-		print_int pos;
+		print_int blen;
 		print_str "): ";
-		print_buf array, pos;
+		print_str buffer;
 		print_str "\n";
 	}
 	action literal {
 		print_str "literal(";
 		print_int line;
 		print_str ",";
-		print_int pos;
+		print_int blen;
 		print_str "): ";
-		print_buf array, pos;
+		print_str buffer;
 		print_str "\n";
 	}
 	action float {
 		print_str "float(";
 		print_int line;
 		print_str ",";
-		print_int pos;
+		print_int blen;
 		print_str "): ";
-		print_buf array, pos;
+		print_str buffer;
 		print_str "\n";
 	}
 	action integer {
 		print_str "int(";
 		print_int line;
 		print_str ",";
-		print_int pos;
+		print_int blen;
 		print_str "): ";
-		print_buf array, pos;
+		print_str buffer;
 		print_str "\n";
 	}
 	action hex {
 		print_str "hex(";
 		print_int line;
 		print_str ",";
-		print_int pos;
+		print_int blen;
 		print_str "): ";
-		print_buf array, pos;
+		print_str buffer;
 		print_str "\n";
 	}
 	action symbol {
 		print_str "symbol(";
 		print_int line;
 		print_str ",";
-		print_int pos;
+		print_int blen;
 		print_str "): ";
-		print_buf array, pos;
+		print_str buffer;
 		print_str "\n";
 	}
 
@@ -143,7 +145,7 @@ line = 1;
 	clang_main = ( fin $1 %0 )*;
 
 	# This machine matches everything, taking note of newlines.
-	newline = ( any | '\n' @{ line = line + 1; } )*;
+	newline = ( any | '\n' @incLine )*;
 
 	# The final fsm is the lexer intersected with the newline machine which
 	# will count lines for us. Since the newline machine accepts everything,
