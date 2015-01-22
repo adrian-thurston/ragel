@@ -386,7 +386,7 @@ void AsmCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	/* Sets tokend, there may be an offset. */
 	ret <<
-		"	movq	%r12, %rax\n";
+		"	movq	" << P() << ", %rax\n";
 
 	if ( item->offset != 0 ) {
 		out <<
@@ -418,7 +418,7 @@ void AsmCodeGen::INIT_ACT( ostream &ret, GenInlineItem *item )
 void AsmCodeGen::SET_TOKSTART( ostream &ret, GenInlineItem *item )
 {
 	ret <<
-		"	movq	%r12, " << TOKSTART() << "\n";
+		"	movq	" << P() << ", " << TOKSTART() << "\n";
 }
 
 void AsmCodeGen::HOST_STMT( ostream &ret, GenInlineItem *item, 
@@ -476,8 +476,8 @@ void AsmCodeGen::LM_EXEC( ostream &ret, GenInlineItem *item, int targState, int 
 	INLINE_LIST( ret, item->children, targState, inFinish, false );
 
 	ret <<
-		"	movq	%rax, %r12\n"
-		"	subq	$1, %r12\n";
+		"	movq	%rax, " << P() << "\n"
+		"	subq	$1, " << P() << "\n";
 }
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
@@ -570,7 +570,7 @@ void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 
 		case GenInlineItem::LmHold:
 			ret <<
-				"	subq	$1, %r12\n";
+				"	subq	$1, " << P() << "\n";
 			break;
 
 		case GenInlineItem::HostStmt:
@@ -648,7 +648,7 @@ void AsmCodeGen::writeInit()
 	if ( !noCS ) {
 		// out << "\t" << vCS() << " = " << START() << ";\n";
 		out <<
-			"	movq	$" << redFsm->startState->id << ", %r11\n";
+			"	movq	$" << redFsm->startState->id << ", " << vCS() << "\n";
 	}
 	
 //	/* If there are any calls, then the stack top needs initialization. */
@@ -1058,7 +1058,7 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 
 			/* Load *p. */
 			if ( st->outSingle.length() > 0 || st->outRange.length() > 0 )
-				out << "	movb	(%r12), %r10b\n";
+				out << "	movb	(" << P() << "), %r10b\n";
 
 			/* Try singles. */
 			if ( st->outSingle.length() > 0 ) {
@@ -1328,11 +1328,11 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 	/* Advance and test buffer pos. */
 	if ( state->labelNeeded ) {
 		out <<
-			"	addq	$1, %r12\n";
+			"	addq	$1, " << P() << "\n";
 
 		if ( !noEnd ) {
 			out <<
-				"	cmpq	%r12, %r13\n"
+				"	cmpq	" << P() << ", " << PE() << "\n"
 				"	je	" << LABEL( "test_eof", state->id ) << "\n";
 		}
 	}
@@ -1371,7 +1371,7 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 	outLabelUsed = true;
 
 	out << 
-		"	movq	$" << state->id << ", %r11\n"
+		"	movq	$" << state->id << ", " << vCS() << "\n"
 		"	jmp		" << LABEL( "out" ) << "\n";
 }
 
@@ -1422,7 +1422,7 @@ std::ostream &AsmCodeGen::EXIT_STATES()
 
 			out << 
 				LABEL( "test_eof", st->id ) << ":\n"
-				"	movq	$" << st->id << ", %r11\n"
+				"	movq	$" << st->id << ", " << vCS() << "\n"
 				"	jmp		" << LABEL( "test_eof" ) << "\n";
 		}
 	}
@@ -1595,7 +1595,7 @@ void AsmCodeGen::writeExec()
 
 	if ( !noEnd ) {
 		out <<
-			"	cmpq	%r12, %r13\n"
+			"	cmpq	" << P() << ", " << PE() << "\n"
 			"	je	" << LABEL( "test_eof" ) << "\n";
 	}
 
@@ -1630,7 +1630,7 @@ void AsmCodeGen::writeExec()
 	/* Jump into the machine based on the current state. */
 	out <<
 		"	leaq	" << LABEL( "entry_jmp" ) << "(%rip), %rcx\n"
-		"	movq	(%rcx,%r11,8), %rcx\n"
+		"	movq	(%rcx," << vCS() << ",8), %rcx\n"
 		"	jmp		*%rcx\n"
 		"	.section .rodata\n"
 		"	.align 8\n"
@@ -1652,7 +1652,7 @@ void AsmCodeGen::writeExec()
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"	cmpq	%r12, " << vEOF() << "\n"
+			"	cmpq	" << P() << ", " << vEOF() << "\n"
 			"	jne		" << LABEL( "eof_trans" ) << "\n"
 			"	movq	" << vCS() << ", %rax\n";
 			FINISH_CASES() <<
