@@ -197,6 +197,12 @@ int rw_asm_if_stmt( IfStmt: indep::if_stmt )
 
 }
 
+int rw_asm_ragel_stmt( Stmt: indep::ragel_stmt )
+{
+	send Out
+		"[Stmt]
+}
+
 int rw_asm_stmt( Stmt: indep::stmt )
 {
 	switch Stmt
@@ -209,9 +215,8 @@ int rw_asm_stmt( Stmt: indep::stmt )
 		rw_asm_if_stmt( Stmt.if_stmt )
 	case [print_stmt]
 		rw_asm_print_stmt( Stmt.print_stmt )
-	case [ragel_stmt] {
-		#rw_c_ragel_stmt( Stmt.ragel_stmt )
-	}
+	case [ragel_stmt]
+		rw_asm_ragel_stmt( Stmt.ragel_stmt )
 }
 
 void rw_asm_stmt_list( StmtList: indep::stmt* )
