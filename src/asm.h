@@ -220,6 +220,7 @@ public:
 	void CURS( ostream &ret, bool inFinish );
 	void TARGS( ostream &ret, bool inFinish, int targState );
 	void BREAK( ostream &ret, int targState, bool csForced );
+	void LM_EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );
 
 	virtual void writeData();
 	virtual void writeExec();

@@ -391,7 +391,7 @@ void AsmCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 {
 	/* Sets tokend, there may be an offset. */
 	ret <<
-		"	movq	$" << item->lmId << ", %rax\n";
+		"	movq	%r12, %rax\n";
 
 	if ( item->offset != 0 ) {
 		out <<
@@ -404,7 +404,8 @@ void AsmCodeGen::SET_TOKEND( ostream &ret, GenInlineItem *item )
 
 void AsmCodeGen::GET_TOKEND( ostream &ret, GenInlineItem *item )
 {
-	ret << TOKEND();
+	ret <<
+		"	movq	" << TOKEND() << ", " << "%rax\n";
 }
 
 void AsmCodeGen::INIT_TOKSTART( ostream &ret, GenInlineItem *item )
@@ -430,9 +431,7 @@ void AsmCodeGen::HOST_STMT( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-//		ret << OPEN_HOST_BLOCK();
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-//		ret << CLOSE_HOST_BLOCK();
 	}
 }
 
@@ -441,9 +440,7 @@ void AsmCodeGen::HOST_EXPR( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-//		ret << OPEN_HOST_EXPR();
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-//		ret << CLOSE_HOST_EXPR();
 	}
 }
 
@@ -452,9 +449,7 @@ void AsmCodeGen::HOST_TEXT( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-//		ret << OPEN_HOST_PLAIN();
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-//		ret << CLOSE_HOST_PLAIN();
 	}
 }
 
@@ -463,9 +458,7 @@ void AsmCodeGen::GEN_STMT( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-//		ret << OPEN_GEN_BLOCK();
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-//		ret << CLOSE_GEN_BLOCK();
 	}
 }
 
@@ -474,10 +467,22 @@ void AsmCodeGen::GEN_EXPR( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-//		ret << OPEN_GEN_EXPR();
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
-//		ret << CLOSE_GEN_EXPR();
 	}
+}
+
+void AsmCodeGen::LM_EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
+{
+	/* The parser gives fexec two children. The double brackets are for D code.
+	 * If the inline list is a single word it will get interpreted as a C-style
+	 * cast by the D compiler. This should be in the D code generator. */
+	ret << "# inline list\n";
+
+	INLINE_LIST( ret, item->children, targState, inFinish, false );
+
+	ret <<
+		"	movq	%rax, %r12\n"
+		"	subq	$1, %r12\n";
 }
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
@@ -561,9 +566,16 @@ void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::NcallExpr:
 		case GenInlineItem::Nret:
 		case GenInlineItem::Nbreak:
-		case GenInlineItem::LmExec:
 		case GenInlineItem::LmCase:
+			break;
+
+		case GenInlineItem::LmExec:
+			LM_EXEC( ret, item, targState, inFinish );
+			break;
+
 		case GenInlineItem::LmHold:
+			ret <<
+				"	subq	$1, %r12\n";
 			break;
 
 		case GenInlineItem::HostStmt:
