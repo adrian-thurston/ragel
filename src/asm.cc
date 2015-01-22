@@ -184,29 +184,13 @@ string AsmCodeGen::PE()
 	return ret.str();
 }
 
-string AsmCodeGen::vEOF()
-{
-	ostringstream ret;
-	if ( eofExpr == 0 )
-		ret << "eof";
-	else {
-		ret << "(";
-		INLINE_LIST( ret, eofExpr, 0, false, false );
-		ret << ")";
-	}
-	return ret.str();
-}
-
 string AsmCodeGen::vCS()
 {
 	ostringstream ret;
 	if ( csExpr == 0 )
-		ret << ACCESS() << "cs";
+		ret << "%r11";
 	else {
-		/* Emit the user supplied method of retrieving the key. */
-		ret << "(";
 		INLINE_LIST( ret, csExpr, 0, false, false );
-		ret << ")";
 	}
 	return ret.str();
 }
@@ -237,11 +221,22 @@ string AsmCodeGen::STACK()
 	return ret.str();
 }
 
+string AsmCodeGen::vEOF()
+{
+	ostringstream ret;
+	if ( eofExpr == 0 )
+		ret << "-8(%rbp)";
+	else {
+		INLINE_LIST( ret, eofExpr, 0, false, false );
+	}
+	return ret.str();
+}
+
 string AsmCodeGen::TOKSTART()
 {
 	ostringstream ret;
 	if ( tokstartExpr == 0 )
-		ret << "-8(%rbp)";
+		ret << "-16(%rbp)";
 	else {
 		INLINE_LIST( ret, tokstartExpr, 0, false, false );
 	}
@@ -252,7 +247,7 @@ string AsmCodeGen::TOKEND()
 {
 	ostringstream ret;
 	if ( tokendExpr == 0 )
-		ret << "-16(%rbp)";
+		ret << "-24(%rbp)";
 	else {
 		INLINE_LIST( ret, tokendExpr, 0, false, false );
 	}
@@ -263,7 +258,7 @@ string AsmCodeGen::ACT()
 {
 	ostringstream ret;
 	if ( actExpr == 0 )
-		ret << "-24(%rbp)";
+		ret << "-32(%rbp)";
 	else {
 		INLINE_LIST( ret, actExpr, 0, false, false );
 	}
@@ -1445,7 +1440,8 @@ std::ostream &AsmCodeGen::AGAIN_CASES()
 
 std::ostream &AsmCodeGen::FINISH_CASES()
 {
-	bool anyWritten = false;
+	/* The current state is in %rax. */
+	long done = nextLmSwitchLabel++;
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofAction != 0 ) {
@@ -1456,28 +1452,39 @@ std::ostream &AsmCodeGen::FINISH_CASES()
 	}
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->eofTrans != 0 )
-			out << "	case " << st->id << ": goto tr" << st->eofTrans->id << ";\n";
+		if ( st->eofTrans != 0 ) {
+			long l = nextLmSwitchLabel++;
+			
+			out <<
+				"	cmpq	$" << st->id << ", %rax\n"
+				"	jne		" << LABEL( "finish_next", l ) << "\n"
+				"	jmp		" << TRANS_GOTO_TARG( st->eofTrans ) << "\n"
+				"" << LABEL( "finish_next", l ) << ":\n";
+		}
 	}
 
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		if ( act->eofRefs != 0 ) {
-			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ )
-				out << "	case " << *pst << ": \n";
+			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ ) {
+				long l = nextLmSwitchLabel++;
+				out <<
+					"	cmpq	$" << *pst << ", %rax\n"
+					"	jne		" << LABEL( "finish_next", l ) << "\n";
 
-			/* Remember that we wrote a trans so we know to write the
-			 * line directive for going back to the output. */
-			anyWritten = true;
+				/* Write each action in the eof action list. */
+				for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
+					ACTION( out, item->value, STATE_ERR_STATE, true, false );
 
-			/* Write each action in the eof action list. */
-			for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
-				ACTION( out, item->value, STATE_ERR_STATE, true, false );
-			out << "\tbreak;\n";
+				out <<
+					"	jmp		" << LABEL( "finish_done", done ) << "\n"
+					"" << LABEL( "finish_next", l ) << ":\n";
+			}
 		}
 	}
 
-	if ( anyWritten )
-		genLineDirective( out );
+	out << 
+		"" << LABEL( "finish_done", done ) << ":\n";
+
 	return out;
 }
 
@@ -1574,9 +1581,10 @@ void AsmCodeGen::writeExec()
 	 *
 	 * pe : %r13  -- callee-save, interface, persistent
 	 *
-	 * ts:  -8(%rbp)    -- tokstart
-	 * te:  -16(%rbp)   -- tokend
-	 * act: -24(%rbp)   -- act
+	 * ts:  -8(%rbp)    -- eof
+	 * ts:  -16(%rbp)   -- tokstart
+	 * te:  -24(%rbp)   -- tokend
+	 * act: -32(%rbp)   -- act
 	 */
 
 #if 0
@@ -1646,20 +1654,15 @@ void AsmCodeGen::writeExec()
 	if ( testEofUsed ) 
 		out << LABEL( "test_eof" ) << ":\n";
 
-#if 0
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"	{\n"
-			"	switch ( " << vCS() << " ) {\n";
-			FINISH_CASES();
-			SWITCH_DEFAULT() <<
-			"	}\n"
-			"	}\n"
-			"\n";
+			"	cmpq	%r12, " << vEOF() << "\n"
+			"	jne		" << LABEL( "eof_trans" ) << "\n"
+			"	movq	" << vCS() << ", %rax\n";
+			FINISH_CASES() <<
+			"" << LABEL( "eof_trans" ) << ":\n";
 	}
 
-#endif
 
 	if ( outLabelUsed ) 
 		out << LABEL( "out" ) << ":\n";
