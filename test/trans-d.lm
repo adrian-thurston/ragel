@@ -151,6 +151,20 @@ int rw_d_print_stmt( Stmt: indep::print_stmt )
 	}
 }
 
+void rw_d_buf_stmt( BufStmt: indep::buf_stmt )
+{
+	switch BufStmt
+	case [`buf_clear `( `) `;] {
+		send Out
+			"	blen = 0;
+	}
+	case [`buf_append `( `) `;] {
+		send Out
+			"	buffer\[blen++\] = *p;
+			"	buffer\[blen\] = 0;
+	}
+}
+
 int rw_d_ragel_stmt( Stmt: indep::ragel_stmt )
 {
 	send Out
@@ -167,6 +181,8 @@ int rw_d_stmt( Stmt: indep::stmt )
 		rw_d_if_stmt( Stmt.if_stmt )
 	else if match Stmt [print_stmt]
 		rw_d_print_stmt( Stmt.print_stmt )
+	else if match Stmt [buf_stmt]
+		rw_d_buf_stmt( Stmt.buf_stmt )
 	else if	match Stmt [ragel_stmt]
 		rw_d_ragel_stmt( Stmt.ragel_stmt )
 }
@@ -240,6 +256,8 @@ void rw_d( Output: stream )
 		"
 		"%% write data;
 		"int cs;
+		"int blen;
+		"char buffer\[1024\];
 		"
 		"void init()
 		"{

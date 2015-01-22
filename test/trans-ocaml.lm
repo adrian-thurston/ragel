@@ -47,6 +47,16 @@ int rw_ocaml_factor( Factor: indep::factor )
 		send Out
 			"[Factor.tk_ident].contents"
 	}
+	case [`buffer]
+	{
+		send Out
+			"String.sub buffer 0 blen.contents"
+	}
+	case [`blen]
+	{
+		send Out
+			"blen.contents"
+	}
 	default {
 		send Out
 			[Factor]
@@ -182,6 +192,24 @@ int rw_ocaml_print_stmt( Stmt: indep::print_stmt )
 	}
 }
 
+void rw_ocaml_buf_stmt( BufStmt: indep::buf_stmt )
+{
+	switch BufStmt
+	case [`buf_clear `( `) `;] {
+		send Out
+			"begin
+			"	blen := 0;
+			"end
+	}
+	case [`buf_append `( `) `;] {
+		send Out
+			"	begin
+			"	String.set buffer blen.contents data.\[p.contents\];
+			"	blen := blen.contents + 1;
+			"	end
+	}
+}
+
 int rw_ocaml_ragel_stmt( Stmt: indep::ragel_stmt )
 {
 	send Out
@@ -198,6 +226,8 @@ int rw_ocaml_stmt( Stmt: indep::stmt )
 		rw_ocaml_if_stmt( Stmt.if_stmt )
 	else if match Stmt [print_stmt]
 		rw_ocaml_print_stmt( Stmt.print_stmt )
+	else if match Stmt [buf_stmt]
+		rw_ocaml_buf_stmt( Stmt.buf_stmt )
 	else if	match Stmt [ragel_stmt]
 		rw_ocaml_ragel_stmt( Stmt.ragel_stmt )
 }
@@ -272,9 +302,12 @@ void rw_ocaml( Output: stream )
 		"
 		"[Section]
 		"
+		"
 		"%% write data;
 		"
 		"let exec data = 
+		"  let buffer = String.create(1024) in 
+		"  let blen :int ref = ref 0 in
 		"  let cs = ref 0 in
 		"  let p = ref 0 in
 		"  let pe = ref (String.length data) in

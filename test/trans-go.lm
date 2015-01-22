@@ -32,7 +32,12 @@ int rw_go_factor( Factor: indep::factor )
 	{
 		send Out '0'
 	}
-	else 
+	elsif match Factor [`buffer]
+	{
+		send Out
+			"string ( buffer\[:blen\] )"
+	}
+	else
 	{
 		send Out [$Factor]
 	}
@@ -158,6 +163,22 @@ int rw_go_ragel_stmt( Stmt: indep::ragel_stmt )
 		"[Stmt]
 }
 
+void rw_go_buf_stmt( BufStmt: indep::buf_stmt )
+{
+	switch BufStmt
+	case [`buf_clear `( `) `;] {
+		send Out
+			"	blen = 0;
+	}
+	case [`buf_append `( `) `;] {
+		send Out
+			"	buffer\[blen\] = fc;
+			"	blen += 1;
+			"	buffer\[blen\] = 0;
+	}
+}
+
+
 int rw_go_stmt( Stmt: indep::stmt )
 {
 	if match Stmt [var_decl]
@@ -168,6 +189,8 @@ int rw_go_stmt( Stmt: indep::stmt )
 		rw_go_if_stmt( Stmt.if_stmt )
 	else if match Stmt [print_stmt]
 		rw_go_print_stmt( Stmt.print_stmt )
+	else if match Stmt [buf_stmt]
+		rw_go_buf_stmt( Stmt.buf_stmt )
 	else if	match Stmt [ragel_stmt]
 		rw_go_ragel_stmt( Stmt.ragel_stmt )
 }
@@ -236,7 +259,9 @@ void rw_go( Output: stream )
 	prints( Output '\n' Section '\n' )
 
 	send Output
-		"var cs int
+		"var cs int;
+		"var blen int;
+		"var buffer \[1024\] byte;
 		"
 		"%% write data;
 		"

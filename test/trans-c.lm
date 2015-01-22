@@ -157,17 +157,35 @@ int rw_c_ragel_stmt( Stmt: indep::ragel_stmt )
 		[$Stmt]
 }
 
+void rw_c_buf_stmt( BufStmt: indep::buf_stmt )
+{
+	switch BufStmt
+	case [`buf_clear `( `) `;] {
+		send Out
+			"	blen = 0;
+	}
+	case [`buf_append `( `) `;] {
+		send Out
+			"	buffer\[blen++\] = *p;
+			"	buffer\[blen\] = 0;
+	}
+}
+
+
 int rw_c_stmt( Stmt: indep::stmt )
 {
-	if match Stmt [var_decl]
+	switch Stmt
+	case [var_decl]
 		rw_c_var_decl( Stmt.var_decl )
-	else if match Stmt [expr_stmt]
+	case [expr_stmt]
 		rw_c_expr_stmt( Stmt.expr_stmt )
-	else if match Stmt [if_stmt]
+	case [if_stmt]
 		rw_c_if_stmt( Stmt.if_stmt )
-	else if match Stmt [print_stmt]
+	case [print_stmt]
 		rw_c_print_stmt( Stmt.print_stmt )
-	else if	match Stmt [ragel_stmt]
+	case [buf_stmt]
+		rw_c_buf_stmt( Stmt.buf_stmt )
+	case [ragel_stmt]
 		rw_c_ragel_stmt( Stmt.ragel_stmt )
 }
 
@@ -247,6 +265,8 @@ void rw_c( Output: stream )
 		"
 		"%% write data;
 		"int cs;
+		"int blen;
+		"char buffer\[1024\];
 		"
 		"void init()
 		"{
