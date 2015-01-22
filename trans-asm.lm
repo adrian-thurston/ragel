@@ -330,16 +330,12 @@ void rw_asm( Output: stream )
 		"exec:
 		"	pushq	%rbp
 		"	movq	%rsp, %rbp
-		"	subq	$24, %rsp
+		"	subq	$32, %rsp
 		"
 		"	pushq	%r12
 		"	pushq	%r13
 		"	movq	%rdi, %r12
 
-#	if NeedsEof {
-#		send Output
-#			"	char *eof = pe;
-#	}
 
 	for Stmt: indep::stmt in Init {
 		if match Stmt [ExprStmt: expr_stmt] {
@@ -351,8 +347,6 @@ void rw_asm( Output: stream )
 	}
 
 	send Output
-#		"	# initialize the action data
-#		"	call	init
 		"
 		"	# Get the length.
 		"	movq	%r12, %rdi
@@ -361,6 +355,12 @@ void rw_asm( Output: stream )
 		"	movslq	%eax, %rax
 		"	addq	%rax, %r13
 
+	if NeedsEof {
+		send Output
+			"	movq	%r13, -8(%rbp)
+	}
+
+	send Output
 		"
 		"	%% write init;
 		"	%% write exec;
