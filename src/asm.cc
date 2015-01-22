@@ -1591,17 +1591,13 @@ void AsmCodeGen::writeExec()
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps = 0;\n";
 
-	if ( !noEnd ) {
-		testEofUsed = true;
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
-	}
 #endif
 
-	out <<
-		"	cmpq	%r12, %r13\n"
-		"	je	" << LABEL( "test_eof" ) << "\n";
+	if ( !noEnd ) {
+		out <<
+			"	cmpq	%r12, %r13\n"
+			"	je	" << LABEL( "test_eof" ) << "\n";
+	}
 
 #if 0
 	if ( useAgainLabel() ) {
