@@ -114,32 +114,6 @@ function test_error
 	exit 1;
 }
 
-#	split_objs=""
-#	if test $split_iters != "$gen_opt"; then
-#		n=0;
-#		while test $n -lt $split_iters; do
-#			part_root=${root}_`awk 'BEGIN {
-#				width = 0;
-#				high = '$split_iters' - 1;
-#				while ( high > 0 ) {
-#					width = width + 1;
-#					high = int(high / 10);
-#				}
-#				suffFormat = "%" width "." width "d\n";
-#				printf( suffFormat, '$n' );
-#				exit 0;
-#			}'`
-#			part_src=${part_root}.c
-#			part_bin=${part_root}.o
-#			echo "$compiler -c $flags -o $part_bin $part_src"
-#			if ! $compiler -c $flags -o $part_bin $part_src; then
-#				test_error;
-#			fi
-#			split_objs="$split_objs $part_bin"
-#			n=$((n+1))
-#		done
-#	fi
-
 function run_test()
 {
 	if [ $lang == asm ]; then
@@ -196,6 +170,36 @@ function run_test()
 			test_error;
 		fi;
 	fi
+}
+
+indep_test_case()
+{
+	for lang in c asm d cs go java ruby ocaml; do
+		case $lang in 
+			c) lf="-C" ;;
+			asm) lf="--asm" ;;
+			d) lf="-D" ;;
+			cs) lf="-A" ;;
+			go) lf="-Z" ;;
+			java) lf="-J" ;;
+			ruby) lf="-R" ;;
+			ocaml) lf="-O" ;;
+		esac
+
+		echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
+		echo "$langflags" | grep -qe $lf || continue
+		echo "$supported_host_langs" | grep -qe $lf || continue
+
+		targ=${root}_$lang.rl
+		echo "./trans $lang $wk/$targ $test_case ${root}_${lang}"
+		if ! ./trans $lang $wk/$targ $test_case ${root}_${lang}; then
+			test_error
+		fi
+		echo "./runtests -g $gen_opts $wk/$targ"
+		if !  ./runtests -g $gen_opts $wk/$targ; then
+			test_error
+		fi
+	done
 }
 
 for test_case; do
@@ -297,33 +301,7 @@ for test_case; do
 		;;
 		indep)
 			lang_opt="";
-
-			for lang in c asm d cs go java ruby ocaml; do
-				case $lang in 
-					c) lf="-C" ;;
-					asm) lf="--asm" ;;
-					d) lf="-D" ;;
-                    cs) lf="-A" ;;
-					go) lf="-Z" ;;
-					java) lf="-J" ;;
-					ruby) lf="-R" ;;
-					ocaml) lf="-O" ;;
-				esac
-
-				echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
-				echo "$langflags" | grep -qe $lf || continue
-				echo "$supported_host_langs" | grep -qe $lf || continue
-
-				targ=${root}_$lang.rl
-				echo "./trans $lang $wk/$targ $test_case ${root}_${lang}"
-				if ! ./trans $lang $wk/$targ $test_case ${root}_${lang}; then
-					test_error
-				fi
-				echo "./runtests -g $gen_opts $wk/$targ"
-				if !  ./runtests -g $gen_opts $wk/$targ; then
-					test_error
-				fi
-			done
+			indep_test_case;
 			continue;
 		;;
 		*)
