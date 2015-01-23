@@ -389,10 +389,9 @@ enum TYPE
 	TYPE_NIL     = 0x01,
 	TYPE_TREE    = 0x02,
 	TYPE_REF     = 0x03,
-	TYPE_PTR     = 0x04,
-	TYPE_ITER    = 0x05,
-	TYPE_STRUCT  = 0x06,
-	TYPE_GENERIC = 0x07,
+	TYPE_ITER    = 0x04,
+	TYPE_STRUCT  = 0x05,
+	TYPE_GENERIC = 0x06,
 };
 
 /* Types of Generics. */

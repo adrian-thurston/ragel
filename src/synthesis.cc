@@ -428,7 +428,7 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 		if ( qi->form == QualItem::Dot ) {
 			/* Cannot a reference. Iterator yes (access of the iterator not
 			 * hte current) */
-			if ( qualUT->typeId == TYPE_PTR )
+			if ( qualUT->ptr() )
 				error(loc) << "dot cannot be used to access a pointer" << endp;
 		}
 		else if ( qi->form == QualItem::Arrow ) {
@@ -536,11 +536,6 @@ bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT,
 			srcUT->typeId == TYPE_TREE )
 		return true;
 
-	/* Casting pointers to any. */
-	if ( destUT->typeId == TYPE_TREE && destUT->langEl == pd->anyLangEl &&
-			srcUT->typeId == TYPE_PTR )
-		return true;
-	
 	/* Setting a reference from a tree. */
 	if ( destUT->typeId == TYPE_REF && srcUT->typeId == TYPE_TREE &&
 			destUT->langEl == srcUT->langEl )
@@ -560,22 +555,12 @@ bool castAssignment( Compiler *pd, CodeVect &code, UniqueType *destUT,
 	if ( destUT->typeId == TYPE_TREE && srcUT->typeId == TYPE_NIL )
 		return true;
 
-	/* Assigning nil to a pointer. */
-	if ( destUT->typeId == TYPE_PTR && srcUT->typeId == TYPE_NIL )
-		return true;
-
 	if ( destUT->typeId == TYPE_STRUCT && srcUT->typeId == TYPE_NIL )
 		return true;
 
 	if ( destUT->typeId == TYPE_GENERIC && srcUT->typeId == TYPE_NIL )
 		return true;
 
-	if ( destUT->typeId == TYPE_PTR && srcUT->typeId == TYPE_STRUCT )
-		return true;
-
-	if ( destUT->typeId == TYPE_STRUCT && srcUT->typeId == TYPE_PTR )
-		return true;
-	
 	if ( destUT->typeId == TYPE_TREE && srcUT->typeId == TYPE_TREE &&
 			srcUT->langEl == pd->anyLangEl )
 		return true;
@@ -2149,12 +2134,8 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 		code.appendHalf( iterCall->langTerm->varRef->argSize );
 
 	/* Search type. */
-	if ( iterUT->iterDef->useSearchUT ) {
-		if ( searchUT->typeId == TYPE_PTR )
-			code.appendHalf( pd->uniqueTypePtr->langEl->id );
-		else
-			code.appendHalf( searchUT->langEl->id );
-	}
+	if ( iterUT->iterDef->useSearchUT )
+		code.appendHalf( searchUT->langEl->id );
 
 	compileForIterBody( pd, code, iterUT );
 
@@ -2386,7 +2367,7 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 				( el->beenReferenced || el->isParam() ) )
 		{
 			UniqueType *ut = el->typeRef->uniqueType;
-			if ( ut->typeId == TYPE_TREE || ut->typeId == TYPE_PTR ) {
+			if ( ut->tree() ) {
 				int depth = el->scope->depth();
 				locals.append( LocalLoc( LT_Tree, depth, el->offset ) );
 			}
