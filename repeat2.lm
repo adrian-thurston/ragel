@@ -2,6 +2,7 @@
 #   Copyright 2012 Adrian Thurston <thurston@complang.org>
 #
 
+
 lex
 	token word  /( [^. \t\n]+  | '.' )/
 	token lws /[ \t]+/
