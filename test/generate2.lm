@@ -1,0 +1,223 @@
+context generate
+	struct open_item
+		type: str
+		num: int
+
+		list_el el
+	end
+
+	open_item new_open_item( type: str num: int )
+	{
+		OI: open_item = new open_item
+		OI->type = type
+		OI->num = num
+		return OI
+	}
+
+	OpenStack: list<open_item> 
+
+	lex
+		token stray_close //
+
+		token ocurly /'{'+/
+		{
+			input->pull( match_length )
+
+			OI: open_item = new_open_item( '{' match_length )
+			OpenStack->push( OI )
+			i: int = 0
+			while ( i < match_length ) {
+				input->push( make_token( typeid<ocurly> '{' ) )
+				i = i + 1
+			}
+		}
+
+		token ccurly1 //
+		token ccurly2 //
+		token ccurly3 //
+		token missing_curly //
+
+		token tmp1 /'}'+/
+		{
+			if OpenStack->length > 0 && OpenStack->top->type == '{' {
+				length: int = 3
+				if ( length > match_length )
+					length = match_length
+
+				Top: open_item = OpenStack->pop()
+				if ( length > Top->num )
+					length = Top->num
+
+				if ( length == 1 )
+					input->push( make_token( typeid<ccurly1> input->pull( 1 ) ) )
+				else if ( length == 2 )
+					input->push( make_token( typeid<ccurly2> input->pull( 2 ) ) )
+				else if ( length == 3 )
+					input->push( make_token( typeid<ccurly3> input->pull( 3 ) ) )
+
+				Top->num = Top->num - length
+
+				if ( Top->num > 0 )
+					OpenStack->push( Top )
+			}
+			else {
+				input->push( make_token( typeid<stray_close> input->pull( match_length ) ) )
+			}
+		}
+		
+		token osquare /'['+/
+		{
+			input->pull( match_length )
+			OI: open_item = new_open_item( '[' match_length )
+			OpenStack->push( OI )
+			i: int = 0
+			while ( i < match_length ) {
+				input->push( make_token( typeid<osquare> '[' ) )
+				i = i + 1
+			}
+		}
+
+		token csquare1 //
+		token csquare2 //
+		token missing_square //
+
+		token tmp2 /']'+/
+		{
+			if OpenStack->length > 0 && OpenStack->top->type == '[' {
+				length: int = 2
+				if ( length > match_length )
+					length = match_length
+
+				Top: open_item = OpenStack->pop()
+				if ( length > Top->num )
+					length = Top->num
+
+				if ( length == 1 )
+					input->push( make_token( typeid<csquare1> input->pull( 1 ) ) )
+				else if ( length == 2 )
+					input->push( make_token( typeid<csquare2> input->pull( 2 ) ) )
+
+				Top->num = Top->num - length
+
+				if ( Top->num > 0 )
+					OpenStack->push( Top )
+			}
+			else {
+				input->push( make_token( typeid<stray_close> input->pull( match_length ) ) )
+			}
+		}
+		
+		literal `|
+		token char /any/
+
+		preeof {
+			while ( OpenStack->length > 0 ) {
+				Top: open_item = OpenStack->pop()
+				i: int
+				if ( Top->type == '{' ) {
+					i = 0
+					while ( i < Top->num ) {
+						input->push( make_token( typeid<missing_curly> '}' ) )
+						i = i + 1
+					}
+				}
+				else if ( Top->type == '[' ) {
+					i = 0
+					while ( i < Top->num ) {
+						input->push( make_token( typeid<missing_square> ']' ) )
+						i = i + 1
+					}
+				}
+			}
+		}
+	end
+
+	#
+	# Internal Links
+	#
+
+
+	lex
+		literal `http:
+		literal `ftp:
+		literal `mailto:
+	end
+
+	def el_prefix
+		[`http:]
+	|	[`ftp:]
+	|	[`mailto:]
+
+	def external_link
+		[osquare item* csquare1]
+
+	def internal_link
+		[osquare osquare item* csquare2]
+
+	def unclosed_square
+		[osquare item* missing_square]
+
+	#
+	# Templates
+	#
+
+	def sing_template
+		[ocurly item* ccurly1]
+
+	def template
+		[ocurly ocurly item* ccurly2]
+
+	def parameter
+		[ocurly ocurly ocurly item* ccurly3] 
+
+	def unclosed_curly
+		[ocurly item* missing_curly]
+
+	#
+	# Template Parameters
+	#
+
+
+	def U1 []
+	def U2 []
+	def U3 []
+
+	def item
+		[external_link]
+	|	[internal_link]
+	|	[unclosed_curly]
+	|	[sing_template]
+	|	[template]
+	|	[parameter]
+	|	[unclosed_curly]
+	|	[stray_close]
+	|	[osquare]
+	|	[`|]
+	|	[char]
+
+	def start 
+		[item*]
+
+end # generate
+
+Generate: generate = new generate
+
+Generate->OpenStack = new list<generate::open_item>
+Sentinal: generate::open_item = new_open_item( '** SENTINAL **' 1 )
+Generate->OpenStack->push( Sentinal )
+
+parse S: generate::start(Generate)[stdin]
+
+if S {
+	for I: generate::external_link in S
+		print( 'EXTERNAL LINK: ' I  '\n' )
+
+	for I: generate::internal_link in S
+		print( 'INTERNAL LINK: ' I  '\n' )
+}
+##### IN #####
+[external]
+[[internal]]
+##### EXP #####
+EXTERNAL LINK: [external]
+INTERNAL LINK: [[internal]]
