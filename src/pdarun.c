@@ -1977,7 +1977,7 @@ parseError:
 			debug( prg, REALM_BYTECODE, "dropping out for reverse code call\n" );
 
 			pdaRun->frameId = -1;
-			pdaRun->code = popReverseCode( &pdaRun->reverseCode );
+			pdaRun->code = colm_pop_reverse_code( &pdaRun->reverseCode );
 
 return PcrReverse;
 case PcrReverse: 

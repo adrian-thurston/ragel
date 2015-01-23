@@ -598,9 +598,9 @@ Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 void splitRef( struct colm_program *prg, Tree ***sp, Ref *fromRef );
 
 void allocGlobal( struct colm_program *prg );
-Tree **executeCode( struct colm_program *prg, Execution *exec, Tree **sp, Code *instr );
-void rcodeDownref( struct colm_program *prg, Tree **sp, Code *instr );
-Code *popReverseCode( RtCodeVect *allRev );
+Tree **colm_execute_code( struct colm_program *prg,
+	Execution *exec, Tree **sp, Code *instr );
+Code *colm_pop_reverse_code( RtCodeVect *allRev );
 
 #ifdef __cplusplus
 }

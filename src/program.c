@@ -269,7 +269,7 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 	execution.frameId = frameId;
 
 	/* Execution loop. */
-	sp = executeCode( prg, &execution, sp, code );
+	sp = colm_execute_code( prg, &execution, sp, code );
 	
 	treeDownref( prg, sp, prg->returnVal );
 	prg->returnVal = vm_pop();
