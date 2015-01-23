@@ -3093,92 +3093,6 @@ again:
 			vm_push( res );
 			break;
 		}
-		case IN_LIST_PUSH_HEAD_WC: {
-			short genId;
-			read_half( genId );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WC\n" );
-
-			List *list = vm_pop_list();
-			Struct *s = vm_pop_struct();
-
-			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
-			colm_list_prepend( list, listEl );
-
-			treeUpref( prg->trueVal );
-			vm_push( prg->trueVal );
-			break;
-		}
-		case IN_LIST_PUSH_HEAD_WV: {
-			short genId;
-			read_half( genId );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WV\n" );
-
-			List *list = vm_pop_list();
-			Struct *s = vm_pop_struct();
-
-			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
-			colm_list_prepend( list, listEl );
-
-			treeUpref( prg->trueVal );
-			vm_push( prg->trueVal );
-
-			/* Set up reverse code. Needs no args. */
-			rcodeCode( exec, IN_LIST_PUSH_HEAD_BKT );
-			rcodeUnitTerm( exec );
-			break;
-		}
-		case IN_LIST_PUSH_HEAD_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
-
-			List *list = vm_pop_list();
-			colm_list_detach_head( list );
-			break;
-		}
-		case IN_LIST_PUSH_TAIL_WC: {
-			short genId;
-			read_half( genId );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
-
-			List *list = vm_pop_list();
-			Struct *s = vm_pop_struct();
-
-			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
-			colm_list_append( list, listEl );
-
-			treeUpref( prg->trueVal );
-			vm_push( prg->trueVal );
-			break;
-		}
-		case IN_LIST_PUSH_TAIL_WV: {
-			short genId;
-			read_half( genId );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WV\n" );
-
-			List *list = vm_pop_list();
-			Struct *s = vm_pop_struct();
-
-			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
-			colm_list_append( list, listEl );
-
-			treeUpref( prg->trueVal );
-			vm_push( prg->trueVal );
-
-			/* Set up reverse code. Needs no args. */
-			rcodeCode( exec, IN_LIST_PUSH_TAIL_BKT );
-			rcodeUnitTerm( exec );
-			break;
-		}
-		case IN_LIST_PUSH_TAIL_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
-
-			List *list = vm_pop_list();
-			colm_list_detach_tail( list );
-			break;
-		}
 		case IN_GET_LIST_EL_MEM_R: {
 			short genId, field;
 			read_half( genId );
@@ -3191,112 +3105,6 @@ again:
 			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 			Struct *val = colm_list_el_get( prg, listEl, genId, field );
 			vm_push_struct( val );
-			break;
-		}
-		case IN_LIST_POP_TAIL_WC: {
-			short genId;
-			read_half( genId );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WC\n" );
-
-			List *list = vm_pop_list();
-
-			ListEl *tail = list->tail;
-			colm_list_detach_tail( list );
-			Struct *s = colm_generic_el_container( prg, tail, genId );
-
-			vm_push_struct( s );
-			break;
-		}
-		case IN_LIST_POP_TAIL_WV: {
-			short genId;
-			read_half( genId );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WV\n" );
-
-			List *list = vm_pop_list();
-
-			ListEl *tail = list->tail;
-			colm_list_detach_tail( list );
-			Struct *s = colm_generic_el_container( prg, tail, genId );
-
-			vm_push_struct( s );
-
-			/* Set up reverse. The result comes off the list downrefed.
-			 * Need it up referenced for the reverse code too. */
-			rcodeCode( exec, IN_LIST_POP_TAIL_BKT );
-			rcodeHalf( exec, genId );
-			rcodeWord( exec, (Word)s );
-			rcodeUnitTerm( exec );
-			break;
-		}
-		case IN_LIST_POP_TAIL_BKT: {
-			short genId;
-			Tree *val;
-			read_half( genId );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
-
-			List *list = vm_pop_list();
-			Struct *s = (Struct*) val;
-
-			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
-
-			colm_list_append( list, listEl );
-			break;
-		}
-		case IN_LIST_POP_HEAD_WC: {
-			short genId;
-			read_half( genId );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WC\n" );
-
-			List *list = vm_pop_list();
-
-			ListEl *head = list->head;
-			colm_list_detach_head( list );
-			Struct *s = colm_generic_el_container( prg, head, genId );
-
-			vm_push_struct( s );
-			break;
-		}
-		case IN_LIST_POP_HEAD_WV: {
-			short genId;
-			read_half( genId );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WV\n" );
-
-			List *list = vm_pop_list();
-
-			ListEl *head = list->head;
-			colm_list_detach_head( list );
-			Struct *s = colm_generic_el_container( prg, head, genId );
-
-			vm_push_struct( s );
-
-			/* Set up reverse. The result comes off the list downrefed.
-			 * Need it up referenced for the reverse code too. */
-			rcodeCode( exec, IN_LIST_POP_HEAD_BKT );
-			rcodeHalf( exec, genId );
-			rcodeWord( exec, (Word)s );
-			rcodeUnitTerm( exec );
-			break;
-		}
-		case IN_LIST_POP_HEAD_BKT: {
-			short genId;
-			Tree *val;
-			read_half( genId );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
-
-			List *list = vm_pop_list();
-			Struct *s = (Struct*) val;
-
-			ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
-
-			colm_list_prepend( list, listEl );
 			break;
 		}
 		case IN_GET_LIST_MEM_R: {
@@ -3916,7 +3724,203 @@ again:
 				fflush( stdout );
 				goto out;
 			}
+
+			case IN_LIST_PUSH_HEAD_WC: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WC\n" );
+
+				List *list = vm_pop_list();
+				Struct *s = vm_pop_struct();
+
+				ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
+				colm_list_prepend( list, listEl );
+
+				treeUpref( prg->trueVal );
+				vm_push( prg->trueVal );
+				break;
 			}
+			case IN_LIST_PUSH_HEAD_WV: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WV\n" );
+
+				List *list = vm_pop_list();
+				Struct *s = vm_pop_struct();
+
+				ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
+				colm_list_prepend( list, listEl );
+
+				treeUpref( prg->trueVal );
+				vm_push( prg->trueVal );
+
+				/* Set up reverse code. Needs no args. */
+				rcodeCode( exec, IN_FN );
+				rcodeCode( exec, IN_LIST_PUSH_HEAD_BKT );
+				rcodeUnitTerm( exec );
+				break;
+			}
+			case IN_LIST_PUSH_HEAD_BKT: {
+				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
+
+				List *list = vm_pop_list();
+				colm_list_detach_head( list );
+				break;
+			}
+			case IN_LIST_PUSH_TAIL_WC: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
+
+				List *list = vm_pop_list();
+				Struct *s = vm_pop_struct();
+
+				ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
+				colm_list_append( list, listEl );
+
+				treeUpref( prg->trueVal );
+				vm_push( prg->trueVal );
+				break;
+			}
+			case IN_LIST_PUSH_TAIL_WV: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WV\n" );
+
+				List *list = vm_pop_list();
+				Struct *s = vm_pop_struct();
+
+				ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
+				colm_list_append( list, listEl );
+
+				treeUpref( prg->trueVal );
+				vm_push( prg->trueVal );
+
+				/* Set up reverse code. Needs no args. */
+				rcodeCode( exec, IN_FN );
+				rcodeCode( exec, IN_LIST_PUSH_TAIL_BKT );
+				rcodeUnitTerm( exec );
+				break;
+			}
+			case IN_LIST_PUSH_TAIL_BKT: {
+				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
+
+				List *list = vm_pop_list();
+				colm_list_detach_tail( list );
+				break;
+			}
+			case IN_LIST_POP_TAIL_WC: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WC\n" );
+
+				List *list = vm_pop_list();
+
+				ListEl *tail = list->tail;
+				colm_list_detach_tail( list );
+				Struct *s = colm_generic_el_container( prg, tail, genId );
+
+				vm_push_struct( s );
+				break;
+			}
+			case IN_LIST_POP_TAIL_WV: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WV\n" );
+
+				List *list = vm_pop_list();
+
+				ListEl *tail = list->tail;
+				colm_list_detach_tail( list );
+				Struct *s = colm_generic_el_container( prg, tail, genId );
+
+				vm_push_struct( s );
+
+				/* Set up reverse. The result comes off the list downrefed.
+				 * Need it up referenced for the reverse code too. */
+				rcodeCode( exec, IN_FN );
+				rcodeCode( exec, IN_LIST_POP_TAIL_BKT );
+				rcodeHalf( exec, genId );
+				rcodeWord( exec, (Word)s );
+				rcodeUnitTerm( exec );
+				break;
+			}
+			case IN_LIST_POP_TAIL_BKT: {
+				short genId;
+				Tree *val;
+				read_half( genId );
+				read_tree( val );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
+
+				List *list = vm_pop_list();
+				Struct *s = (Struct*) val;
+
+				ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
+
+				colm_list_append( list, listEl );
+				break;
+			}
+			case IN_LIST_POP_HEAD_WC: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WC\n" );
+
+				List *list = vm_pop_list();
+
+				ListEl *head = list->head;
+				colm_list_detach_head( list );
+				Struct *s = colm_generic_el_container( prg, head, genId );
+
+				vm_push_struct( s );
+				break;
+			}
+			case IN_LIST_POP_HEAD_WV: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WV\n" );
+
+				List *list = vm_pop_list();
+
+				ListEl *head = list->head;
+				colm_list_detach_head( list );
+				Struct *s = colm_generic_el_container( prg, head, genId );
+
+				vm_push_struct( s );
+
+				/* Set up reverse. The result comes off the list downrefed.
+				 * Need it up referenced for the reverse code too. */
+				rcodeCode( exec, IN_FN );
+				rcodeCode( exec, IN_LIST_POP_HEAD_BKT );
+				rcodeHalf( exec, genId );
+				rcodeWord( exec, (Word)s );
+				rcodeUnitTerm( exec );
+				break;
+			}
+			case IN_LIST_POP_HEAD_BKT: {
+				short genId;
+				Tree *val;
+				read_half( genId );
+				read_tree( val );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
+
+				List *list = vm_pop_list();
+				Struct *s = (Struct*) val;
+
+				ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
+
+				colm_list_prepend( list, listEl );
+				break;
+			}}
 			break;
 		}
 
@@ -4174,34 +4178,6 @@ again:
 			stringFree( prg, head );
 			break;
 		}
-		case IN_LIST_PUSH_HEAD_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
-			break;
-		}
-		case IN_LIST_POP_HEAD_BKT: {
-			short genId;
-			Tree *val;
-			read_half( genId );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
-
-			break;
-		}
-		case IN_LIST_PUSH_TAIL_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
-			break;
-		}
-		case IN_LIST_POP_TAIL_BKT: {
-			short genId;
-			Tree *val;
-			read_half( genId );
-			read_tree( val );
-
-			debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
-
-			break;
-		}
 		case IN_GET_LIST_MEM_BKT: {
 			short field;
 			read_half( field );
@@ -4241,6 +4217,38 @@ again:
 		}
 		case IN_STOP: {
 			return;
+		}
+		case IN_FN: {
+			switch ( *instr++ ) {
+			case IN_LIST_PUSH_HEAD_BKT: {
+				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
+				break;
+			}
+			case IN_LIST_POP_HEAD_BKT: {
+				short genId;
+				Tree *val;
+				read_half( genId );
+				read_tree( val );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
+
+				break;
+			}
+			case IN_LIST_PUSH_TAIL_BKT: {
+				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
+				break;
+			}
+			case IN_LIST_POP_TAIL_BKT: {
+				short genId;
+				Tree *val;
+				read_half( genId );
+				read_tree( val );
+
+				debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
+
+				break;
+			}}
+			break;
 		}
 		default: {
 			fatal( "UNKNOWN INSTRUCTION 0x%2x: -- reverse code downref\n", *(instr-1));

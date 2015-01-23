@@ -120,59 +120,6 @@ IterDef::IterDef( Type type, Function *func ) :
 	inRefFromCur(IN_UITER_REF_FROM_CUR)
 {}
 
-ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, bool isConst,
-		bool useFnInstr, GenericType *useGeneric )
-{
-	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
-			methIdWV, methIdWC, 0, 0, 0, isConst );
-	objMethod->useFnInstr = useFnInstr;
-	obj->methodMap->insert( name, objMethod );
-	
-	if ( useGeneric ) {
-		objMethod->useGenericId = true;
-		objMethod->generic = useGeneric;
-	}
-	return objMethod;
-}
-
-ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, UniqueType *arg1,
-		bool isConst, bool useFnInstr, GenericType *useGeneric )
-{
-	UniqueType *args[] = { arg1 };
-	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
-			methIdWV, methIdWC, 1, args, 0, isConst );
-	objMethod->useFnInstr = useFnInstr;
-	obj->methodMap->insert( name, objMethod );
-
-	if ( useGeneric ) {
-		objMethod->useGenericId = true;
-		objMethod->generic = useGeneric;
-	}
-
-	return objMethod;
-}
-
-ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, 
-		UniqueType *arg1, UniqueType *arg2,
-		bool isConst, bool useFnInstr, GenericType *useGeneric )
-{
-	UniqueType *args[] = { arg1, arg2 };
-	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
-			methIdWV, methIdWC, 2, args, 0, isConst );
-	objMethod->useFnInstr = useFnInstr;
-	obj->methodMap->insert( name, objMethod );
-
-	if ( useGeneric ) {
-		objMethod->useGenericId = true;
-		objMethod->generic = useGeneric;
-	}
-
-	return objMethod;
-}
-
 IterDef *Compiler::findIterDef( IterDef::Type type, Function *func )
 {
 	IterDefSetEl *el = iterDefSet.find( IterDef( type, func ) );

@@ -79,7 +79,6 @@ typedef unsigned long colm_value_t;
 #define IN_JMP_FALSE_VAL         0xb8
 #define IN_JMP_TRUE_VAL          0xed
 
-#define IN_STR_ATOI              0x18
 #define IN_STR_LENGTH            0x19
 #define IN_CONCAT_STR            0x1a
 #define IN_TREE_TRIM             0x1b
@@ -189,18 +188,6 @@ typedef unsigned long colm_value_t;
 #define IN_MAP_DETACH_BKT        0x71
 
 #define IN_LIST_LENGTH           0x72
-#define IN_LIST_PUSH_TAIL_WV     0x73
-#define IN_LIST_PUSH_TAIL_WC     0x74
-#define IN_LIST_PUSH_TAIL_BKT    0x75
-#define IN_LIST_POP_TAIL_WV      0x76
-#define IN_LIST_POP_TAIL_WC      0x77
-#define IN_LIST_POP_TAIL_BKT     0x78
-#define IN_LIST_PUSH_HEAD_WV     0xe7
-#define IN_LIST_PUSH_HEAD_WC     0xe8
-#define IN_LIST_PUSH_HEAD_BKT    0xe9
-#define IN_LIST_POP_HEAD_WV      0xea
-#define IN_LIST_POP_HEAD_WC      0xeb
-#define IN_LIST_POP_HEAD_BKT     0xec
 
 #define IN_GET_LIST_MEM_R        0x79
 #define IN_GET_LIST_MEM_WC       0x7a
@@ -367,8 +354,11 @@ typedef unsigned long colm_value_t;
 #define IN_GET_LOCAL_VAL_R       0x91
 #define IN_SET_LOCAL_VAL_WC      0x92
 
-/* IN_FN instructions. */
+/*
+ * IN_FN instructions.
+ */
 #define IN_FN                    0xff
+#define IN_STR_ATOI              0x1d
 #define IN_STR_UORD8             0x01
 #define IN_STR_SORD8             0x02
 #define IN_STR_UORD16            0x03
@@ -379,6 +369,19 @@ typedef unsigned long colm_value_t;
 #define IN_LOAD_ARG0             0x08
 #define IN_INIT_LOCALS           0x09
 #define IN_STOP                  0x0a
+
+#define IN_LIST_PUSH_TAIL_WV     0x11
+#define IN_LIST_PUSH_TAIL_WC     0x12
+#define IN_LIST_PUSH_TAIL_BKT    0x13
+#define IN_LIST_POP_TAIL_WV      0x14
+#define IN_LIST_POP_TAIL_WC      0x15
+#define IN_LIST_POP_TAIL_BKT     0x16
+#define IN_LIST_PUSH_HEAD_WV     0x17
+#define IN_LIST_PUSH_HEAD_WC     0x18
+#define IN_LIST_PUSH_HEAD_BKT    0x19
+#define IN_LIST_POP_HEAD_WV      0x1a
+#define IN_LIST_POP_HEAD_WC      0x1b
+#define IN_LIST_POP_HEAD_BKT     0x1c
 
 
 enum TYPE

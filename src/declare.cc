@@ -49,6 +49,60 @@ void Compiler::initUniqueTypes( )
 	uniqeTypeMap.insert( uniqueTypeStream );
 }
 
+ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC, bool isConst,
+		bool useFnInstr, GenericType *useGeneric )
+{
+	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
+			methIdWV, methIdWC, 0, 0, 0, isConst );
+	objMethod->useFnInstr = useFnInstr;
+	obj->methodMap->insert( name, objMethod );
+	
+	if ( useGeneric ) {
+		objMethod->useGenericId = true;
+		objMethod->generic = useGeneric;
+	}
+	return objMethod;
+}
+
+ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC, UniqueType *arg1,
+		bool isConst, bool useFnInstr, GenericType *useGeneric )
+{
+	UniqueType *args[] = { arg1 };
+	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
+			methIdWV, methIdWC, 1, args, 0, isConst );
+	objMethod->useFnInstr = useFnInstr;
+	obj->methodMap->insert( name, objMethod );
+
+	if ( useGeneric ) {
+		objMethod->useGenericId = true;
+		objMethod->generic = useGeneric;
+	}
+
+	return objMethod;
+}
+
+ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC, 
+		UniqueType *arg1, UniqueType *arg2,
+		bool isConst, bool useFnInstr, GenericType *useGeneric )
+{
+	UniqueType *args[] = { arg1, arg2 };
+	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
+			methIdWV, methIdWC, 2, args, 0, isConst );
+	objMethod->useFnInstr = useFnInstr;
+	obj->methodMap->insert( name, objMethod );
+
+	if ( useGeneric ) {
+		objMethod->useGenericId = true;
+		objMethod->generic = useGeneric;
+	}
+
+	return objMethod;
+}
+
+
 ObjectField *NameScope::checkRedecl( const String &name )
 {
 	return owner->checkRedecl( this, name );
@@ -1036,22 +1090,22 @@ void Compiler::initListFunctions( GenericType *gen )
 {
 
 	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, false, gen );
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push_tail", 
-			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->utArg, false, false, gen );
+			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->utArg, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, false, gen );
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, true, gen );
 
 	initFunction( gen->utArg, gen->objDef, "pop_head", 
-			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, false, gen );
+			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
 
 	initFunction( gen->utArg, gen->objDef, "pop_tail", 
-			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, false, gen );
+			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, true, gen );
 
 	initFunction( gen->utArg, gen->objDef, "pop", 
-			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, false, gen );
+			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
 }
 
 void Compiler::initListElField( GenericType *gen, const char *name, int offset )
@@ -1075,7 +1129,6 @@ void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 
 	gen->utArg->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
 }
-
 
 void Compiler::initListElFields( GenericType *gen )
 {
