@@ -1000,13 +1000,13 @@ void Compiler::addError()
 void Compiler::initMapFunctions( GenericType *gen )
 {
 	initFunction( gen->utArg, gen->objDef, "find", 
-			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUT, true, false, gen );
+			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUT, true, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "insert", 
-			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->utArg, false, false, gen );
+			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->utArg, false, true, gen );
 
 	initFunction( gen->utArg, gen->objDef, "detach", 
-			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->utArg, false, false, gen );
+			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->utArg, false, true, gen );
 }
 
 void Compiler::initMapField( GenericType *gen, const char *name, int offset )

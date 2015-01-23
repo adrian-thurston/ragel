@@ -179,13 +179,6 @@ typedef unsigned long colm_value_t;
 #define IN_GET_MAP_EL_MEM_R      0x6c
 
 #define IN_MAP_LENGTH            0x67
-#define IN_MAP_FIND              0x68
-#define IN_MAP_INSERT_WV         0x69
-#define IN_MAP_INSERT_WC         0x6a
-#define IN_MAP_INSERT_BKT        0x6b
-#define IN_MAP_DETACH_WV         0x6f
-#define IN_MAP_DETACH_WC         0x70
-#define IN_MAP_DETACH_BKT        0x71
 
 #define IN_LIST_LENGTH           0x72
 
@@ -383,6 +376,13 @@ typedef unsigned long colm_value_t;
 #define IN_LIST_POP_HEAD_WC      0x1b
 #define IN_LIST_POP_HEAD_BKT     0x1c
 
+#define IN_MAP_FIND              0x24
+#define IN_MAP_INSERT_WV         0x1e
+#define IN_MAP_INSERT_WC         0x1f
+#define IN_MAP_INSERT_BKT        0x20
+#define IN_MAP_DETACH_WV         0x21
+#define IN_MAP_DETACH_WC         0x22
+#define IN_MAP_DETACH_BKT        0x23
 
 enum TYPE
 {
