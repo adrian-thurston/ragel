@@ -1311,22 +1311,17 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			break;
 		}
 
-		code.append( IN_TOP_SWAP );
-
-		/* Not a stream. Get the input first. */
-		code.append( IN_GET_INPUT );
-
 		if ( isStream ) {
 			if ( pd->revertOn )
-				code.append( IN_INPUT_APPEND_STREAM_WV );
+				code.append( IN_PARSER_APPEND_STREAM_WV );
 			else
-				code.append( IN_INPUT_APPEND_STREAM_WC );
+				code.append( IN_PARSER_APPEND_STREAM_WC );
 		}
 		else {
 			if ( pd->revertOn )
-				code.append( IN_INPUT_APPEND_WV );
+				code.append( IN_PARSER_APPEND_WV );
 			else
-				code.append( IN_INPUT_APPEND_WC );
+				code.append( IN_PARSER_APPEND_WC );
 		}
 
 		code.append( IN_DUP_TREE );
@@ -1508,22 +1503,17 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 			break;
 		}
 
-		code.append( IN_TOP_SWAP );
-
-		/* Not a stream. Get the input first. */
-		code.append( IN_GET_INPUT );
-
 		if ( isStream ) {
 			if ( pd->revertOn )
-				code.append( IN_INPUT_APPEND_STREAM_WV );
+				code.append( IN_PARSER_APPEND_STREAM_WV );
 			else
-				code.append( IN_INPUT_APPEND_STREAM_WC );
+				code.append( IN_PARSER_APPEND_STREAM_WC );
 		}
 		else {
 			if ( pd->revertOn )
-				code.append( IN_INPUT_APPEND_WV );
+				code.append( IN_PARSER_APPEND_WV );
 			else
-				code.append( IN_INPUT_APPEND_WC );
+				code.append( IN_PARSER_APPEND_WC );
 		}
 
 		code.append( IN_DUP_TREE );
