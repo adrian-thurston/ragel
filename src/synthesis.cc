@@ -1313,15 +1313,15 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 		if ( isStream ) {
 			if ( pd->revertOn )
-				code.append( IN_PARSER_APPEND_STREAM_WV );
+				code.append( IN_PARSE_APPEND_STREAM_WV );
 			else
-				code.append( IN_PARSER_APPEND_STREAM_WC );
+				code.append( IN_PARSE_APPEND_STREAM_WC );
 		}
 		else {
 			if ( pd->revertOn )
-				code.append( IN_PARSER_APPEND_WV );
+				code.append( IN_PARSE_APPEND_WV );
 			else
-				code.append( IN_PARSER_APPEND_WC );
+				code.append( IN_PARSE_APPEND_WC );
 		}
 
 		code.append( IN_DUP_TREE );
@@ -1505,15 +1505,15 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 
 		if ( isStream ) {
 			if ( pd->revertOn )
-				code.append( IN_PARSER_APPEND_STREAM_WV );
+				code.append( IN_PARSE_APPEND_STREAM_WV );
 			else
-				code.append( IN_PARSER_APPEND_STREAM_WC );
+				code.append( IN_PARSE_APPEND_STREAM_WC );
 		}
 		else {
 			if ( pd->revertOn )
-				code.append( IN_PARSER_APPEND_WV );
+				code.append( IN_PARSE_APPEND_WV );
 			else
-				code.append( IN_PARSER_APPEND_WC );
+				code.append( IN_PARSE_APPEND_WC );
 		}
 
 		code.append( IN_DUP_TREE );
