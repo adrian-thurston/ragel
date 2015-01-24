@@ -229,7 +229,7 @@ typedef unsigned long colm_value_t;
 
 #define IN_INPUT_CLOSE_WC        0xef
 
-#define IN_PARSE_SAVE_STEPS      0xa0
+#define IN_PARSE_LOAD            0xa0
 #define IN_PARSE_INIT_BKT        0xa1
 
 #define IN_PARSE_FRAG_WC         0xa2

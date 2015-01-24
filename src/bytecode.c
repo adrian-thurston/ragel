@@ -2305,10 +2305,10 @@ again:
 			break;
 		}
 
-		case IN_PARSE_SAVE_STEPS: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
+		case IN_PARSE_LOAD: {
+			debug( prg, REALM_BYTECODE, "IN_PARSE_LOAD\n" );
 
-			Parser *parser = (Parser*)vm_pop();
+			Parser *parser = vm_pop_parser();
 			PdaRun *pdaRun = parser->pdaRun;
 			long steps = pdaRun->steps;
 
@@ -2316,7 +2316,7 @@ again:
 			vm_push( (SW)exec->pcr );
 			vm_push( (SW)exec->steps );
 
-			exec->parser = (Parser*)parser;
+			exec->parser = parser;
 			exec->steps = steps;
 			exec->pcr = PcrStart;
 			break;
@@ -3995,8 +3995,8 @@ static void rcode_downref( Program *prg, Tree **sp, Code *instr )
 {
 again:
 	switch ( *instr++ ) {
-		case IN_PARSE_SAVE_STEPS: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_SAVE_STEPS\n" );
+		case IN_PARSE_LOAD: {
+			debug( prg, REALM_BYTECODE, "IN_PARSE_LOAD\n" );
 			break;
 		}
 		case IN_PARSE_INIT_BKT: {
