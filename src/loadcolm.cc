@@ -1732,17 +1732,20 @@ struct LoadColm
 		list->append( init );
 	}
 
+	FieldInitVect *walkFieldInit( _repeat_field_init fieldInitList )
+	{
+		FieldInitVect *list = new FieldInitVect;
+		while ( !fieldInitList.end() ) {
+			walkFieldInit( list, fieldInitList.value() );
+			fieldInitList = fieldInitList.next();
+		}
+		return list;
+	}
 	FieldInitVect *walkOptFieldInit( opt_field_init optFieldInit )
 	{
 		FieldInitVect *list = 0;
-		if ( optFieldInit.prodName() == opt_field_init::Init ) {
-			list = new FieldInitVect;
-			_repeat_field_init fieldInitList = optFieldInit.FieldInitList();
-			while ( !fieldInitList.end() ) {
-				walkFieldInit( list, fieldInitList.value() );
-				fieldInitList = fieldInitList.next();
-			}
-		}
+		if ( optFieldInit.prodName() == opt_field_init::Init )
+			list = walkFieldInit( optFieldInit.FieldInitList() );
 		return list;
 	}
 
@@ -1891,6 +1894,7 @@ struct LoadColm
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
 
 			ObjectField *captureField = walkOptCapture( codeFactor.opt_capture() );
+			FieldInitVect *init = walkFieldInit( codeFactor.FieldInitList() );
 
 			LangVarRef *captureVarRef = 0;
 			if ( captureField != 0 ) {
@@ -1899,7 +1903,7 @@ struct LoadColm
 			}
 
 			expr = LangExpr::cons( LangTerm::consNew(
-					codeFactor.loc(), typeRef, captureVarRef ) );
+					codeFactor.loc(), typeRef, captureVarRef, init ) );
 
 			/* Check for redeclaration. */
 			if ( captureField != 0 ) {

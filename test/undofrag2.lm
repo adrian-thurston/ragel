@@ -38,9 +38,9 @@ context undo
 end # undo
 
 Undo: undo = new undo()
-Undo->Out = new parser<undo::out>()
+Undo->Out = new parser<undo::out>( Undo )
 
-parse Input: undo::start(Undo)[ stdin ]
+parse Input: undo::start( Undo )[ stdin ]
 print( Input )
 
 ##### IN #####

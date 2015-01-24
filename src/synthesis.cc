@@ -1068,23 +1068,55 @@ void LangTerm::evaluateCapture( Compiler *pd, CodeVect &code, UniqueType *valUt 
 UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 {
 	/* What is being newstructed. */
-	UniqueType *replUT = typeRef->uniqueType;
+	UniqueType *newUT = typeRef->uniqueType;
 
-	if ( replUT->typeId != TYPE_STRUCT && replUT->typeId != TYPE_GENERIC )
+	if ( newUT->typeId != TYPE_STRUCT && newUT->typeId != TYPE_GENERIC )
 		error(loc) << "can only new a struct or generic" << endp;
 
-	if ( replUT->typeId == TYPE_GENERIC ) {
+	bool context = false;
+	if ( newUT->typeId == TYPE_GENERIC &&
+			newUT->generic->typeId == GEN_PARSER &&
+			newUT->generic->utArg->langEl->contextIn != 0 )
+	{
+		if ( fieldInitArgs == 0 || fieldInitArgs->length() != 1 )
+			error(loc) << "parse command requires just input" << endp;
+		context = true;
+	}
+
+	if ( newUT->typeId == TYPE_GENERIC ) {
 		code.append( IN_CONS_GENERIC );
-		code.appendHalf( replUT->generic->id );
+		code.appendHalf( newUT->generic->id );
+
+		if ( newUT->generic->typeId == GEN_PARSER ) {
+
+		}
 	}
 	else {
 		code.append( IN_NEW_STRUCT );
-		code.appendHalf( replUT->structEl->id );
+		code.appendHalf( newUT->structEl->id );
 	}
 
-	evaluateCapture( pd, code, replUT );
+	/*
+	 * First load the context into the parser.
+	 */
+	if ( context ) {
+		/* Dup the parser. */
+		code.append( IN_DUP_VAL );
 
-	return replUT;
+		/* Eval the context. */
+		UniqueType *argUT = fieldInitArgs->data[0]->expr->evaluate( pd, code );
+
+		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_STRUCT )
+			error(loc) << "context argument must be a stream or a tree" << endp;
+
+		/* Store the context. */
+		code.append( IN_TOP_SWAP );
+		code.append( IN_SET_PARSER_CTX_WC );
+	}
+
+	evaluateCapture( pd, code, newUT );
+
+	return newUT;
 }
 
 UniqueType *LangTerm::evaluateCast( Compiler *pd, CodeVect &code ) const

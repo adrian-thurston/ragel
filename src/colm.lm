@@ -556,7 +556,7 @@ def code_factor
 |	[MAKE_TREE POPEN call_arg_list PCLOSE] :MakeTree
 |	[MAKE_TOKEN POPEN call_arg_list PCLOSE] :MakeToken
 |	[TYPEID LT type_ref GT] :TypeId
-|	[NEW opt_capture type_ref POPEN call_arg_list PCLOSE] :New
+|	[NEW opt_capture type_ref POPEN FieldInitList: field_init* PCLOSE] :New
 |	[CAST LT type_ref GT code_factor] :Cast
 
 def type_ref

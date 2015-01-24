@@ -421,17 +421,22 @@ void Compiler::resolveProdEl( ProdEl *prodEl )
 	prodEl->langEl = prodEl->typeRef->uniqueType->langEl;
 }
 
+void LangTerm::resolveFieldArgs( Compiler *pd )
+{
+	/* Initialization expressions. */
+	if ( fieldInitArgs != 0 ) {
+		for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
+			(*pi)->expr->resolve( pd );
+	}
+}
+
 void LangTerm::resolve( Compiler *pd )
 {
 	switch ( type ) {
 		case ConstructType:
 			typeRef->resolveType( pd );
 
-			/* Initialization expressions. */
-			if ( fieldInitArgs != 0 ) {
-				for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
-					(*pi)->expr->resolve( pd );
-			}
+			resolveFieldArgs( pd );
 
 			/* Types in constructor. */
 			for ( ConsItemList::Iter item = *constructor->list; item.lte(); item++ ) {
@@ -477,6 +482,8 @@ void LangTerm::resolve( Compiler *pd )
 
 			break;
 		case NewType:
+			/* Init args, then the new type. */
+			resolveFieldArgs( pd );
 			typeRef->resolveType( pd );
 			break;
 		case TypeIdType:
@@ -494,11 +501,8 @@ void LangTerm::resolve( Compiler *pd )
 		case ParseTreeType:
 		case ParseStopType:
 			typeRef->resolveType( pd );
-			/* Evaluate the initialization expressions. */
-			if ( fieldInitArgs != 0 ) {
-				for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ )
-					(*pi)->expr->resolve( pd );
-			}
+
+			resolveFieldArgs( pd );
 
 			for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 				switch ( item->type ) {

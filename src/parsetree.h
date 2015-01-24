@@ -2869,16 +2869,18 @@ struct LangTerm
 	}
 
 	static LangTerm *consNew( const InputLoc &loc, TypeRef *typeRef,
-			LangVarRef *captureVarRef )
+			LangVarRef *captureVarRef, FieldInitVect *fieldInitArgs )
 	{
 		LangTerm *s = new LangTerm;
 		s->type = NewType;
 		s->loc = loc;
 		s->typeRef = typeRef;
 		s->varRef = captureVarRef;
+		s->fieldInitArgs = fieldInitArgs;
 		return s;
 	}
 	
+	void resolveFieldArgs( Compiler *pd );
 	void resolve( Compiler *pd );
 
 	void evaluateCapture( Compiler *pd, CodeVect &code, UniqueType *valUt ) const;
@@ -2899,6 +2901,7 @@ struct LangTerm
 	UniqueType *evaluateEmbedString( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateSearch( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateCast( Compiler *pd, CodeVect &code ) const;
+	void resolveFieldArgs( Compiler *pd ) const;
 
 	InputLoc loc;
 	Type type;
