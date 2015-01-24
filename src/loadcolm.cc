@@ -1890,8 +1890,28 @@ struct LoadColm
 		case code_factor::New: {
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
 
-			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
-					LangTerm::NewType, typeRef ) );
+			ObjectField *captureField = walkOptCapture( codeFactor.opt_capture() );
+
+			LangVarRef *captureVarRef = 0;
+			if ( captureField != 0 ) {
+				captureVarRef = LangVarRef::cons( captureField->loc,
+						curStruct(), curScope, captureField->name );
+			}
+
+			expr = LangExpr::cons( LangTerm::consNew(
+					codeFactor.loc(), typeRef, captureVarRef ) );
+
+			/* Check for redeclaration. */
+			if ( captureField != 0 ) {
+				if ( curScope->checkRedecl( captureField->name ) != 0 ) {
+					error( captureField->loc ) << "variable " <<
+							captureField->name << " redeclared" << endp;
+				}
+
+				/* Insert it into the field map. */
+				captureField->typeRef = typeRef;
+				curScope->insertField( captureField->name, captureField );
+			}
 			break;
 		}
 		case code_factor::Cast: {

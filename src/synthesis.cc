@@ -1067,6 +1067,17 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 		code.append( IN_NEW_STRUCT );
 		code.appendHalf( replUT->structEl->id );
 	}
+
+	if ( varRef != 0 ) {
+		code.append( IN_DUP_VAL );
+
+		/* Get the type of the variable being assigned to. */
+		VarRefLookup lookup = varRef->lookupField( pd );
+
+		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
+		varRef->setField( pd, code, lookup.inObject, lookup.objField, replUT, false );
+	}
+
 	return replUT;
 }
 

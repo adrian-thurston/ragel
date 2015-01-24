@@ -2867,6 +2867,17 @@ struct LangTerm
 		s->eof = eof;
 		return s;
 	}
+
+	static LangTerm *consNew( const InputLoc &loc, TypeRef *typeRef,
+			LangVarRef *captureVarRef )
+	{
+		LangTerm *s = new LangTerm;
+		s->type = NewType;
+		s->loc = loc;
+		s->typeRef = typeRef;
+		s->varRef = captureVarRef;
+		return s;
+	}
 	
 	void resolve( Compiler *pd );
 
