@@ -46,8 +46,8 @@ context ctx
 end # ctx
 
 
-CTX: ctx = new ctx
-CTX->SP = new parser<start2>
+CTX: ctx = new ctx()
+CTX->SP = new parser<start2>()
 send CTX->SP "a b{c}"
 
 parse Input: ctx::start1( CTX )[stdin]

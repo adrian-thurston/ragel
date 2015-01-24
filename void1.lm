@@ -25,7 +25,7 @@ def g
 
 global P: parser<g>
 
-P = new parser<g>
+P = new parser<g>()
 
 void hello2()
 {

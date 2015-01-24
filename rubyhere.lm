@@ -87,7 +87,7 @@ context rubyhere
 		[item*]
 end # rubyhere
 
-RubyHere: rubyhere = new rubyhere
+RubyHere: rubyhere = new rubyhere()
 
 parse S: rubyhere::start(RubyHere)[ stdin ]
 

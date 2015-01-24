@@ -5,7 +5,7 @@ context foo
 	def d []
 end
 
-Foo: foo = new foo
+Foo: foo = new foo()
 
 Foo->Int = 1
 Foo->D = construct foo::d[]

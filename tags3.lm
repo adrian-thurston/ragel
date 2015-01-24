@@ -297,7 +297,7 @@ context tags
 #	}
 end # tags
 
-Tags: tags = new tags
+Tags: tags = new tags()
 Tags->TagStack = construct tags::tag_stack []
 
 parse HTML_P: tags::start(Tags)[ stdin ]

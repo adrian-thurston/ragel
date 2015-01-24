@@ -126,7 +126,7 @@ CL: list<int_el>
 
 int start_list( count: int )
 {
-	IntEl: int_el = new int_el
+	IntEl: int_el = new int_el()
 	IntEl->Int = count
 	CL->push( IntEl )
 }
@@ -474,7 +474,7 @@ int print_name( n: name m: map<int name_map_el> )
 int print_all_names( s: start )
 {
 	for M: message in s {
-		m: map<int name_map_el> = new map<int name_map_el>
+		m: map<int name_map_el> = new map<int name_map_el>()
 
 		O: octet = octet in M
 
@@ -485,7 +485,7 @@ int print_all_names( s: start )
 				if match NP [L: octet nbytes name_part*] {
 					messageOffset: int = L.pos - O.pos
 					construct n: name [NP E]
-					El: name_map_el = new name_map_el
+					El: name_map_el = new name_map_el()
 					El->key = messageOffset
 					El->Name = n
 					m->insert( El )
@@ -502,8 +502,8 @@ int print_all_names( s: start )
 
 end # binary
 
-Binary: binary = new binary
-Binary->CL = new list<binary::int_el>
+Binary: binary = new binary()
+Binary->CL = new list<binary::int_el>()
 
 int top( L: list<binary::int_el> )
 {
@@ -519,7 +519,7 @@ int pop( L: list<binary::int_el> )
 
 int push( L: list<binary::int_el> Int: int )
 {
-	Top: binary::int_el = new binary::int_el
+	Top: binary::int_el = new binary::int_el()
 	Top->Int = Int
 	L->push( Top )
 }

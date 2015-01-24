@@ -113,7 +113,7 @@ context generate
 					input->push( make_token( typeid<INDENT> '' ) )
 
 					# Push to the stack as per python manual.
-					IntEl: int_el = new int_el
+					IntEl: int_el = new int_el()
 					IntEl->Int = data_length
 					IndentStack->push( IntEl )
 				} else {
@@ -565,11 +565,11 @@ int print_primary_subscriptions_and_slicings( Start: generate::start )
 	}
 }
 
-Generate: generate = new generate
+Generate: generate = new generate()
 
 # List used as a stack of indentations.
-Generate->IndentStack = new list<generate::int_el>
-IntEl: generate::int_el = new generate::int_el
+Generate->IndentStack = new list<generate::int_el>()
+IntEl: generate::int_el = new generate::int_el()
 IntEl->Int = 0
 Generate->IndentStack->push( IntEl )
 

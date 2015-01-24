@@ -15,8 +15,8 @@ def item2
 def start 
 	[item*]
 
-StartParser1: parser<start> = new parser<start>
-StartParser2: parser<start> = new parser<start>
+StartParser1: parser<start> = new parser<start>()
+StartParser2: parser<start> = new parser<start>()
 
 parse Item2: item2 "b
 
