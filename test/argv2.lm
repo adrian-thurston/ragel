@@ -37,7 +37,7 @@ def args
 
 # The argument parser. Using an accumulator so we can send nulls after each
 # arg.
-ArgParser: parser<args> = new parser<args>
+ArgParser: parser<args> = new parser<args>()
 
 # Parse the args and extract the result into Args.
 A: argv_el = argv->head

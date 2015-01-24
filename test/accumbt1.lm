@@ -21,7 +21,7 @@ def choice2
 def start 
 	[prefix choice1 choice2 string id id]
 
-I: parser<start> = new parser<start>
+I: parser<start> = new parser<start>()
 
 send I " id "
 send I " 77 "

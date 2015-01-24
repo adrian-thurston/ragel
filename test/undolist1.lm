@@ -17,13 +17,13 @@ context undo
 	def item 
 		[id]
 		{
-			E: item_el = new item_el
+			E: item_el = new item_el()
 			E->Item = lhs
 			List->push_tail( E )
 		}
 	|	[`( item* `)]
 		{
-			E: item_el = new item_el
+			E: item_el = new item_el()
 			E->Item = lhs
 			List->push_tail( E )
 		}
@@ -44,8 +44,8 @@ context undo
 
 end
 
-Undo: undo = new undo
-Undo->List = new list<undo::item_el>
+Undo: undo = new undo()
+Undo->List = new list<undo::item_el>()
 
 parse Input: undo::start(Undo)[ stdin ]
 print( Input )

@@ -19,7 +19,7 @@ def item
 def args 
 	[item*]
 
-ArgParser: parser<args> = new parser<args>
+ArgParser: parser<args> = new parser<args>()
 
 A: argv_el = argv->head
 while ( A ) {

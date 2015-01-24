@@ -46,7 +46,7 @@ start parseStart( InputFile: stream )
 
 start parseTxt( T: str )
 {
-	A: parser<start> = new parser<start>
+	A: parser<start> = new parser<start>()
 	send A [T] eos
 	return A->tree
 }

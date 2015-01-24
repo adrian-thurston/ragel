@@ -59,7 +59,7 @@ context si
 		}
 end # si
 
-SuperId: si = new si
+SuperId: si = new si()
 parse S: si::start(SuperId)[stdin]
 print_xml( S )
 print( '\n' )

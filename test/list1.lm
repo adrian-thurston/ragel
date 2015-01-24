@@ -22,13 +22,13 @@ struct start_el
 	list_el el
 end
 
-L: list<start_el> = new list<start_el>
+L: list<start_el> = new list<start_el>()
 
-E: start_el = new start_el
+E: start_el = new start_el()
 E->S = S
 L->push_head( E )
 
-E = new start_el
+E = new start_el()
 E->S = S
 L->push_head( E )
 

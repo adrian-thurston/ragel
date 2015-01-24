@@ -21,11 +21,11 @@ struct undo
 
 end
 
-Undo: undo = new undo
+Undo: undo = new undo()
 
 parse Input: undo::start(Undo)[ stdin ]
 
-Input.Foo = new undo::foo
+Input.Foo = new undo::foo()
 Input.Foo->Start = Input
 print( Input.Foo->Start )
 ###### IN ######

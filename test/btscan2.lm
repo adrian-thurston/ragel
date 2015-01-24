@@ -28,7 +28,7 @@ def item
 def btscan 
 	[item*]
 
-Parser: parser<btscan> = new parser<btscan>
+Parser: parser<btscan> = new parser<btscan>()
 
 send Parser "!ab"
 send Parser "b "

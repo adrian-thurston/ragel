@@ -21,7 +21,7 @@ end
 
 on_heap newHeap( S: start )
 {
-	OnHeap: on_heap = new on_heap
+	OnHeap: on_heap = new on_heap()
 	OnHeap->S = S
 	return OnHeap
 }
@@ -38,7 +38,7 @@ print( S )
 
 int main( S: start )
 {
-	OnHeap: on_heap = new on_heap
+	OnHeap: on_heap = new on_heap()
 	OnHeap->S = S
 
 	for Id: id in OnHeap->S 

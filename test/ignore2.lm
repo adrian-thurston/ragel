@@ -13,7 +13,7 @@ def start
 
 parse Input: start[ stdin ]
 
-Output: accum<start> = new accum<start>
+Output: accum<start> = new accum<start>()
 
 for Id: id in Input {
 	send Output

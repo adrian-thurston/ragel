@@ -82,7 +82,7 @@ context tags
 		}
 end # tags
 
-Tags: tags = new tags
+Tags: tags = new tags()
 Tags->TS = cons tags::tag_stack ["sentinal"]
 parse tags::start(Tags)[stdin]
 ##### IN #####

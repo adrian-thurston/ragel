@@ -82,7 +82,7 @@ def port
 # Parse the input.
 parse P: program[ stdin ]
 
-Output: parser<c> = new parser<c>
+Output: parser<c> = new parser<c>()
 
 # Take off the leading C from the input file and send it out.
 match P [C: c '%%' protocol*]

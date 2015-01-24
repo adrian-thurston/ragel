@@ -16,13 +16,13 @@ context undo
 	def item 
 		[id]
 		{
-			E: item_el = new item_el
+			E: item_el = new item_el()
 			E->key = lhs
 			Map->insert( E )
 		}
 	|	[`( item* `)]
 		{
-			E: item_el = new item_el
+			E: item_el = new item_el()
 			E->key = lhs
 			Map->insert( E )
 		}
@@ -43,8 +43,8 @@ context undo
 
 end
 
-Undo: undo = new undo
-Undo->Map = new map<undo::item undo::item_el>
+Undo: undo = new undo()
+Undo->Map = new map<undo::item undo::item_el>()
 
 parse Input: undo::start(Undo)[ stdin ]
 print( Input )

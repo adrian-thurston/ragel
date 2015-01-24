@@ -27,7 +27,7 @@ context ctx
 		[item*]
 end # ctx
 
-CTX: ctx = new ctx
+CTX: ctx = new ctx()
 parse Input: ctx::start( CTX ) [ stdin ]
 print( Input )
 
