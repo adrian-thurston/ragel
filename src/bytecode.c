@@ -2764,29 +2764,6 @@ again:
 			vm_push( replTree );
 			break;
 		}
-		case IN_CONSTRUCT_INPUT: {
-			debug( prg, REALM_BYTECODE, "IN_CONSTRUCT_INPUT\n" );
-
-			Tree *input = (Tree*)colm_stream_new( prg );
-			vm_push( input );
-			break;
-		}
-		case IN_GET_INPUT: {
-			debug( prg, REALM_BYTECODE, "IN_GET_INPUT\n" );
-
-			Parser *parser = vm_pop_parser();
-			Stream *stream = parser->input;
-			vm_push_stream( stream );
-			break;
-		}
-		case IN_SET_INPUT: {
-			debug( prg, REALM_BYTECODE, "IN_SET_INPUT\n" );
-
-			Parser *parser = vm_pop_parser();
-			Stream *stream = vm_pop_stream();
-			parser->input = stream;
-			break;
-		}
 		case IN_CONSTRUCT_TERM: {
 			Half tokenId;
 			read_half( tokenId );

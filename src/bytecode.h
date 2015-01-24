@@ -39,11 +39,6 @@ typedef unsigned char uchar;
 typedef unsigned long colm_value_t;
 
 /* 
- * 0x24
- * 0x6e
- * 0xbc
- * 0xe6
- * 0xf6
  */
 
 #define IN_LOAD_INT              0x01
@@ -313,10 +308,6 @@ typedef unsigned long colm_value_t;
 #define IN_SET_RHS_VAL_WC        0xdb
 #define IN_SET_RHS_VAL_WV        0xdc
 #define IN_SET_RHS_VAL_BKT       0xdd
-
-#define IN_CONSTRUCT_INPUT       0xde
-#define IN_SET_INPUT             0xdf
-#define IN_GET_INPUT             0xe0
 
 #define IN_GET_PARSER_MEM_R      0x5b
 #define IN_GET_PARSER_MEM_WC     0x00

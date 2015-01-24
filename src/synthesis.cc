@@ -1062,13 +1062,6 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	if ( replUT->typeId == TYPE_GENERIC ) {
 		code.append( IN_CONS_GENERIC );
 		code.appendHalf( replUT->generic->id );
-
-		if ( replUT->generic->typeId == GEN_PARSER ) {
-			code.append( IN_DUP_VAL );
-			code.append( IN_CONSTRUCT_INPUT );
-			code.append( IN_TOP_SWAP );
-			code.append( IN_SET_INPUT );
-		}
 	}
 	else {
 		code.append( IN_NEW_STRUCT );
@@ -1250,11 +1243,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	}
 
 	/*****************************/
-
-	code.append( IN_DUP_TREE );
-	code.append( IN_CONSTRUCT_INPUT );
-	code.append( IN_TOP_SWAP );
-	code.append( IN_SET_INPUT );
 
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ )
 		code.append( IN_DUP_TREE );

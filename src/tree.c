@@ -986,6 +986,7 @@ Tree *constructGeneric( Program *prg, long genericId )
 		}
 		case GEN_PARSER: {
 			Parser *parser = colm_parser_new( prg, genericInfo );
+			parser->input = (Tree*)colm_stream_new( prg );
 			newGeneric = (Tree*) parser;
 			break;
 		}
