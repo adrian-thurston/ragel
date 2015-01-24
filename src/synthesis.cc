@@ -1051,6 +1051,20 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 	return ut;
 }
 
+void LangTerm::evaluateCapture( Compiler *pd, CodeVect &code, UniqueType *valUt ) const
+{
+	if ( varRef != 0 ) {
+		/* Get the type of the variable being assigned to. */
+		VarRefLookup lookup = varRef->lookupField( pd );
+
+		/* Need a copy of the tree. */
+		code.append( lookup.uniqueType->tree() ? IN_DUP_TREE : IN_DUP_VAL );
+
+		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
+		varRef->setField( pd, code, lookup.inObject, lookup.objField, valUt, false );
+	}
+}
+
 UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 {
 	/* What is being newstructed. */
@@ -1068,15 +1082,7 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 		code.appendHalf( replUT->structEl->id );
 	}
 
-	if ( varRef != 0 ) {
-		code.append( IN_DUP_VAL );
-
-		/* Get the type of the variable being assigned to. */
-		VarRefLookup lookup = varRef->lookupField( pd );
-
-		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-		varRef->setField( pd, code, lookup.inObject, lookup.objField, replUT, false );
-	}
+	evaluateCapture( pd, code, replUT );
 
 	return replUT;
 }
@@ -1163,15 +1169,7 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 	constructor->langEl = replUT->langEl;
 	assignFieldArgs( pd, code, replUT );
 
-	if ( varRef != 0 ) {
-		code.append( IN_DUP_TREE );
-
-		/* Get the type of the variable being assigned to. */
-		VarRefLookup lookup = varRef->lookupField( pd );
-
-		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-		varRef->setField( pd, code, lookup.inObject, lookup.objField, replUT, false );
-	}
+	evaluateCapture( pd, code, replUT );
 
 	return replUT;
 }
@@ -1367,18 +1365,8 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	code.append( IN_GET_PARSER_MEM_R );
 	code.appendHalf( 0 );
 
-	/*
-	 * Capture to the local var.
-	 */
-	if ( varRef != 0 ) {
-		code.append( IN_DUP_TREE );
-
-		/* Get the type of the variable being assigned to. */
-		VarRefLookup lookup = varRef->lookupField( pd );
-
-		varRef->loadObj( pd, code, lookup.lastPtrInQual, false );
-		varRef->setField( pd, code, lookup.inObject, lookup.objField, targetUT, false );
-	}
+	/* Capture to the local var. */
+	evaluateCapture( pd, code, targetUT );
 
 	return targetUT;
 }

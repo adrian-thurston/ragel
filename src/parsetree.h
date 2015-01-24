@@ -2881,6 +2881,8 @@ struct LangTerm
 	
 	void resolve( Compiler *pd );
 
+	void evaluateCapture( Compiler *pd, CodeVect &code, UniqueType *valUt ) const;
+	void evaluateCapture( Compiler *pd, CodeVect &code, bool isTree ) const;
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;
