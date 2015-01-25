@@ -1,5 +1,5 @@
 /*
-MethodMapEl*  Copyright 2007-2012 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2012 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.

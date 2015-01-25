@@ -737,12 +737,12 @@ void Compiler::addThis( ObjectDef *frame )
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltObjectType, typeRef, "this" );
-	el->inGetR     = IN_LOAD_CTX_R;
-	el->inGetWV    = IN_LOAD_CTX_WV;
-	el->inGetWC    = IN_LOAD_CTX_WC;
-	el->inGetValR   = IN_LOAD_CTX_R;
-	el->inGetValWC  = IN_LOAD_CTX_WC;
-	el->inGetValWV  = IN_LOAD_CTX_WV;
+	el->inGetR     = IN_LOAD_CONTEXT_R;
+	el->inGetWV    = IN_LOAD_CONTEXT_WV;
+	el->inGetWC    = IN_LOAD_CONTEXT_WC;
+	el->inGetValR   = IN_LOAD_CONTEXT_R;
+	el->inGetValWC  = IN_LOAD_CONTEXT_WC;
+	el->inGetValWV  = IN_LOAD_CONTEXT_WV;
 	frame->rootScope->insertField( el->name, el );
 }
 

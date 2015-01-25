@@ -266,11 +266,6 @@ typedef unsigned long colm_value_t;
 #define IN_TO_LOWER              0xba
 #define IN_EXIT                  0xbb
 
-#define IN_LOAD_PARSER_R         0xbd
-#define IN_LOAD_PARSER_WV        0xbe
-#define IN_LOAD_PARSER_WC        0xbf
-#define IN_LOAD_PARSER_BKT       0xc0
-
 #define IN_LOAD_INPUT_R          0xc1
 #define IN_LOAD_INPUT_WV         0xc2
 #define IN_LOAD_INPUT_WC         0xc3
@@ -288,16 +283,7 @@ typedef unsigned long colm_value_t;
 #define IN_LOAD_CONTEXT_WC       0xca
 #define IN_LOAD_CONTEXT_BKT      0xcb
 
-#define IN_GET_PARSER_CTX_R      0xcd
-#define IN_GET_PARSER_CTX_WC     0xce
-#define IN_GET_PARSER_CTX_WV     0xcf
 #define IN_SET_PARSER_CTX_WC     0xd0
-#define IN_SET_PARSER_CTX_WV     0xd1
-
-#define IN_LOAD_CTX_R            0xd2
-#define IN_LOAD_CTX_WC           0xd3
-#define IN_LOAD_CTX_WV           0xd4
-#define IN_LOAD_CTX_BKT          0xd5
 
 #define IN_SPRINTF               0xd6
 

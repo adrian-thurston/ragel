@@ -790,36 +790,6 @@ again:
 				treeDownref( prg, sp, arg[i] );
 			break;
 		}
-		case IN_LOAD_CONTEXT_R: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_R\n" );
-
-			vm_push_type( Struct*, exec->parser->pdaRun->context );
-			break;
-		}
-		case IN_LOAD_CONTEXT_WV: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WV\n" );
-
-			vm_push_type( Struct *, exec->parser->pdaRun->context );
-
-			/* Set up the reverse instruction. */
-			rcode_unit_start( exec );
-			rcode_code( exec, IN_LOAD_CONTEXT_BKT );
-			break;
-		}
-		case IN_LOAD_CONTEXT_WC: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WC\n" );
-
-			/* This is identical to the _R version, but using it for writing
-			 * would be confusing. */
-			vm_push_type( Struct *, exec->parser->pdaRun->context );
-			break;
-		}
-		case IN_LOAD_CONTEXT_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_BKT\n" );
-
-			vm_push_type( Struct *, exec->parser->pdaRun->context );
-			break;
-		}
 
 		/*
 		 * LOAD_GLOBAL
@@ -855,43 +825,6 @@ again:
 			break;
 		}
 
-		case IN_LOAD_PARSER_R: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_R\n" );
-
-			vm_push( (Tree*)exec->parser );
-			assert( exec->parser != 0 );
-			break;
-		}
-		case IN_LOAD_PARSER_WV: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_WV\n" );
-
-			vm_push( (Tree*)exec->parser );
-			assert( exec->parser != 0 );
-
-			/* Set up the reverse instruction. */
-			rcode_unit_start( exec );
-			rcode_code( exec, IN_LOAD_PARSER_BKT );
-			rcode_word( exec, (Word)exec->parser );
-			break;
-		}
-		case IN_LOAD_PARSER_WC: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_WC\n" );
-
-			/* This is identical to the _R version, but using it for writing
-			 * would be confusing. */
-			vm_push( (Tree*)exec->parser );
-			assert( exec->parser != 0 );
-			break;
-		}
-		case IN_LOAD_PARSER_BKT: {
-			Tree *parser;
-			read_tree( parser );
-
-			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_BKT\n" );
-
-			vm_push( parser );
-			break;
-		}
 		case IN_LOAD_INPUT_R: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_R\n" );
 
@@ -928,37 +861,48 @@ again:
 			vm_push( accumStream );
 			break;
 		}
-		case IN_LOAD_CTX_R: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CTX_R\n" );
 
-			vm_push_type( Struct *, exec->parser->pdaRun->context );
-			break;
-		}
-		case IN_LOAD_CTX_WV: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CTX_WV\n" );
+		case IN_LOAD_CONTEXT_R: {
+			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_R\n" );
 
 			vm_push_type( Struct*, exec->parser->pdaRun->context );
+			break;
+		}
+		case IN_LOAD_CONTEXT_WV: {
+			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WV\n" );
+
+			vm_push_type( Struct *, exec->parser->pdaRun->context );
 
 			/* Set up the reverse instruction. */
 			rcode_unit_start( exec );
-			rcode_code( exec, IN_LOAD_PARSER_BKT );
-			rcode_word( exec, (Word)exec->parser );
+			rcode_code( exec, IN_LOAD_CONTEXT_BKT );
 			break;
 		}
-		case IN_LOAD_CTX_WC: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CTX_WC\n" );
+		case IN_LOAD_CONTEXT_WC: {
+			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WC\n" );
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
 			vm_push_type( Struct *, exec->parser->pdaRun->context );
 			break;
 		}
-		case IN_LOAD_CTX_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CTX_BKT\n" );
+		case IN_LOAD_CONTEXT_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_BKT\n" );
 
 			vm_push_type( Struct *, exec->parser->pdaRun->context );
 			break;
 		}
+
+		case IN_SET_PARSER_CTX_WC: {
+			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_CTX_WC\n" );
+
+			Parser *parser = vm_pop_parser();
+			Struct *strct = vm_pop_struct();
+			colm_parser_set_context( prg, sp, parser, strct );
+			break;
+		}
+
+
 		case IN_INIT_CAPTURES: {
 			/* uchar ncaps; */
 			consume_byte();
@@ -2151,30 +2095,6 @@ again:
 			break;
 		}
 
-		case IN_GET_PARSER_CTX_R: {
-			debug( prg, REALM_BYTECODE, "IN_GET_PARSER_CTX_R\n" );
-
-			Parser *parser = vm_pop_parser();
-			Struct *ctx = parser->pdaRun->context;
-			vm_push_type( Struct *, ctx );
-			break;
-		}
-
-		case IN_SET_PARSER_CTX_WC: {
-			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_CTX_WC\n" );
-
-			Parser *parser = vm_pop_parser();
-			Struct *strct = vm_pop_struct();
-			colm_parser_set_context( prg, sp, parser, strct );
-			break;
-		}
-
-//		case IN_GET_PARSER_CTX_WC:
-//		case IN_GET_PARSER_CTX_WV:
-//		case IN_SET_PARSER_CTX_WC:
-//		case IN_SET_PARSER_CTX_WV:
-//			break;
-
 		case IN_PARSE_APPEND_WC: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_WC\n" );
 
@@ -2188,6 +2108,7 @@ again:
 			treeDownref( prg, sp, input );
 			break;
 		}
+
 		case IN_PARSE_APPEND_WV: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_WV\n" );
 
@@ -4091,12 +4012,6 @@ again:
 		}
 		case IN_LOAD_CONTEXT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_BKT\n" );
-			break;
-		}
-		case IN_LOAD_PARSER_BKT: {
-			/* Tree *parser; */
-			consume_word();
-			debug( prg, REALM_BYTECODE, "IN_LOAD_PARSER_BKT\n" );
 			break;
 		}
 		case IN_LOAD_INPUT_BKT: {
