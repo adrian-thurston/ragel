@@ -1,4 +1,25 @@
-global StaticVarMap: map<str str> = new map<str str>
+struct static_var_map_el
+	map_el<str> el
+	value: str
+end
+
+global StaticVarMap: map<str static_var_map_el> = new map<str static_var_map_el>()
+
+void staticVarMapInsert( Key: str Value: str)
+{
+	new El: static_var_map_el()
+	El->key = Key
+	El->value = Value
+	StaticVarMap->insert( El )
+}
+
+str staticVarMapFind( Str: str )
+{
+	El: static_var_map_el = StaticVarMap->find( Str )
+	if El
+		return El->value
+	return nil
+}
 
 void ml_tok_list( TL: host::tok* )
 {
@@ -53,7 +74,7 @@ void ml_expr_factor( ExprFactor: expr_factor )
 	}
 	case [I: ident `[ TL: expr `]]
 	{
-		if ( StaticVarMap->find( $I ) || $I == 'stack' ) {
+		if ( staticVarMapFind( $I ) || $I == 'stack' ) {
 			send Output
 				"[ ExprFactor.ident ].([ ml_expr( TL ) ])"
 		}
@@ -72,7 +93,7 @@ void ml_expr_factor( ExprFactor: expr_factor )
 		if ( $I == 'data' )
 			send Output 'Char.code '
 
-		if ( StaticVarMap->find( $I ) ) {
+		if ( staticVarMapFind( $I ) ) {
 			send Output
 				"[I].( [ ml_expr( Expr ) ] )"
 		}
@@ -101,7 +122,7 @@ void ml_expr_factor( ExprFactor: expr_factor )
 		ml_number( Number )
 	}
 	case [I: ident] {
-		if ( StaticVarMap->find( $I ) ) {
+		if ( staticVarMapFind( $I ) ) {
 			send Output
 				[^I]
 		}
@@ -291,14 +312,14 @@ void ml_stmt( Stmt: stmt )
 			[ml_embedded_host( EH )]
 	}
 	elsif match Stmt [Array: array] {
-		StaticVarMap->insert( $Array.ident ' ' )
+		staticVarMapInsert( $Array.ident ' ' )
 		send Output
 			"let [Array.ident] : int array = \[|
 				"	[ml_num_list(Array.num_list)]
 			"|\]
 	}
 	elsif match Stmt [Value: value] {
-		StaticVarMap->insert( $Value.ident ' ' )
+		staticVarMapInsert( $Value.ident ' ' )
 		send Output
 			"let [Value.ident] : [Value.type] = [Value.number]
 	}

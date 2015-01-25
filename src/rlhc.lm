@@ -339,18 +339,39 @@ if ( !Start ) {
 	exit(1)
 }
 
+struct ident_map_el
+	map_el<ident> el
+	value: label_stmt
+end
+
+void ident_map_insert( M: map<ident ident_map_el> K: ident V: label_stmt )
+{
+	new El: ident_map_el()
+	El->key = K
+	El->value = V
+	M->insert( El )
+}
+
+label_stmt ident_map_find( M: map<ident ident_map_el> K: ident )
+{
+	El: ident_map_el = M->find( K )
+	if El
+		return El->value
+	return nil
+}
+
 void assign_labels( Prog: ref<any> )
 {
 	N: int = 1
-	Map: map<ident label_stmt> = new map<ident label_stmt>
+	new Map: map<ident ident_map_el>()
 	for LabelStmt: label_stmt in Prog {
 		LabelStmt.Id = N
-		Map->insert( LabelStmt.ident LabelStmt )
+		ident_map_insert( Map LabelStmt.ident LabelStmt )
 		N = N + 1
 	}
 
 	for GotoStmt: goto_stmt in Prog {
-		LabelStmt: label_stmt = Map->find( GotoStmt.ident )
+		LabelStmt: label_stmt = ident_map_find( Map GotoStmt.ident )
 		if ( LabelStmt )
 			GotoStmt.Id = LabelStmt.Id
 	}
