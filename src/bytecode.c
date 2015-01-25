@@ -893,15 +893,17 @@ again:
 			break;
 		}
 
-		case IN_SET_PARSER_CTX_WC: {
+		case IN_SET_PARSER_CONTEXT: {
 			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_CTX_WC\n" );
 
-			Parser *parser = vm_pop_parser();
 			Struct *strct = vm_pop_struct();
+			Parser *parser = vm_pop_parser();
+
 			colm_parser_set_context( prg, sp, parser, strct );
+
+			vm_push_parser( parser );
 			break;
 		}
-
 
 		case IN_INIT_CAPTURES: {
 			/* uchar ncaps; */

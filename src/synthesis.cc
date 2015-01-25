@@ -1100,18 +1100,14 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	 * First load the context into the parser.
 	 */
 	if ( context ) {
-		/* Dup the parser. */
-		code.append( IN_DUP_VAL );
-
 		/* Eval the context. */
 		UniqueType *argUT = fieldInitArgs->data[0]->expr->evaluate( pd, code );
 
 		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_STRUCT )
 			error(loc) << "context argument must be a stream or a tree" << endp;
 
-		/* Store the context. */
-		code.append( IN_TOP_SWAP );
-		code.append( IN_SET_PARSER_CTX_WC );
+		/* Store the context. Leaves the parser on the stack. */
+		code.append( IN_SET_PARSER_CONTEXT );
 	}
 
 	evaluateCapture( pd, code, newUT );
@@ -1269,9 +1265,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	 * First load the context into the parser.
 	 */
 	if ( context ) {
-		/* Dup the parser. */
-		code.append( IN_DUP_VAL );
-
 		/* Eval the context. */
 		UniqueType *argUT = fieldInitArgs->data[0]->expr->evaluate( pd, code );
 
@@ -1279,8 +1272,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			error(loc) << "context argument must be a stream or a tree" << endp;
 
 		/* Store the context. */
-		code.append( IN_TOP_SWAP );
-		code.append( IN_SET_PARSER_CTX_WC );
+		code.append( IN_SET_PARSER_CONTEXT );
 	}
 
 	/*****************************/

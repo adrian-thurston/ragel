@@ -283,7 +283,7 @@ typedef unsigned long colm_value_t;
 #define IN_LOAD_CONTEXT_WC       0xca
 #define IN_LOAD_CONTEXT_BKT      0xcb
 
-#define IN_SET_PARSER_CTX_WC     0xd0
+#define IN_SET_PARSER_CONTEXT    0xd0
 
 #define IN_SPRINTF               0xd6
 
