@@ -163,9 +163,10 @@ static Head *tree_to_str( Program *prg, Tree **sp, Tree *tree, int trim )
 	return ret;
 }
 
-static Word stream_append( Program *prg, Tree **sp, Tree *input, StreamImpl *is )
+static Word stream_append_tree( Program *prg, Tree **sp, Stream *dest, Tree *input )
 {
 	long length = 0;
+	StreamImpl *impl = streamToImpl( dest );
 
 	if ( input->id == LEL_ID_STR ) {
 		/* Collect the tree data. */
@@ -174,27 +175,28 @@ static Word stream_append( Program *prg, Tree **sp, Tree *input, StreamImpl *is 
 		printTreeCollect( prg, sp, &collect, input, false );
 
 		/* Load it into the input. */
-		is->funcs->appendData( is, collect.data, collect.length );
+		impl->funcs->appendData( impl, collect.data, collect.length );
 		length = collect.length;
 		strCollectDestroy( &collect );
 	}
 	else if ( input->id == LEL_ID_PTR ) {
 		treeUpref( input );
-		is->funcs->appendStream( is, input );
+		impl->funcs->appendStream( impl, input );
 	}
 	else {
 		treeUpref( input );
-		is->funcs->appendTree( is, input );
+		impl->funcs->appendTree( impl, input );
 	}
 
 	return length;
 }
 
-static Word stream_append_stream( Program *prg, Tree **sp, StreamImpl *dest, Tree *stream )
+static Word stream_append_stream( Program *prg, Tree **sp, Stream *dest, Tree *stream )
 {
 	long length = 0;
 
-	dest->funcs->appendStream( dest, stream );
+	StreamImpl *impl = streamToImpl( dest );
+	impl->funcs->appendStream( impl, stream );
 
 	return length;
 }
@@ -2103,10 +2105,9 @@ again:
 			Tree *input = vm_pop();
 			Parser *parser = vm_pop_parser();
 
-			StreamImpl *si = streamToImpl( parser->input );
-			stream_append( prg, sp, input, si );
+			stream_append_tree( prg, sp, parser->input, input );
 
-			//vm_push( (Tree*)sptr );
+			vm_push_parser( parser );
 			treeDownref( prg, sp, input );
 			break;
 		}
@@ -2117,8 +2118,9 @@ again:
 			Tree *input = vm_pop();
 			Parser *parser = vm_pop_parser();
 
-			StreamImpl *si = streamToImpl( parser->input );
-			Word len = stream_append( prg, sp, input, si );
+			Word len = stream_append_tree( prg, sp, parser->input, input );
+
+			vm_push_parser( parser );
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_APPEND_BKT );
@@ -2152,8 +2154,9 @@ again:
 			Tree *input = vm_pop();
 			Parser *parser = vm_pop_parser();
 
-			StreamImpl *si = streamToImpl( parser->input );
-			stream_append_stream( prg, sp, si, input );
+			vm_push_parser( parser );
+
+			stream_append_stream( prg, sp, parser->input, input );
 			break;
 		}
 		case IN_PARSE_APPEND_STREAM_WV: {
@@ -2162,8 +2165,9 @@ again:
 			Tree *input = vm_pop();
 			Parser *parser = vm_pop_parser();
 
-			StreamImpl *si = streamToImpl( parser->input );
-			Word len = stream_append_stream( prg, sp, si, input );
+			Word len = stream_append_stream( prg, sp, parser->input, input );
+
+			vm_push_parser( parser );
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_APPEND_STREAM_BKT );

@@ -1276,9 +1276,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	}
 
 	/*****************************/
-
-	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ )
-		code.append( IN_DUP_TREE );
 	
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
@@ -1316,7 +1313,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
 				/* Clear it away if return type is void. */
 				code.append( IN_POP );
-				code.append( IN_POP );
 				continue;
 			}
 
@@ -1345,7 +1341,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 				code.append( IN_PARSE_APPEND_WC );
 		}
 
-		code.append( IN_DUP_TREE );
+		code.append( IN_DUP_VAL );
 
 		/* Parse instruction, dependent on whether or not we are producing
 		 * revert or commit code. */
@@ -1459,10 +1455,6 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 {
 	varRef->evaluate( pd, code );
 
-	/* Dup for every send. */
-	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ )
-		code.append( IN_DUP_VAL );
-
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		bool isStream = false;
@@ -1498,7 +1490,6 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
 				/* Clear it away if return type is void. */
 				code.append( IN_POP );
-				code.append( IN_POP );
 				continue;
 			}
 
@@ -1527,7 +1518,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 				code.append( IN_PARSE_APPEND_WC );
 		}
 
-		code.append( IN_DUP_TREE );
+		code.append( IN_DUP_VAL );
 
 		parseFrag( pd, code, 0 );
 	}
