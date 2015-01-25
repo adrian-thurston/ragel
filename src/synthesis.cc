@@ -2561,7 +2561,7 @@ void Compiler::compilePreEof( TokenRegion *region )
 	block->frameId = nextFrameId++;
 
 	addInput( block->localFrame );
-	addCtx( block->localFrame );
+	addThis( block->localFrame );
 
 	CodeVect &code = block->codeWV;
 

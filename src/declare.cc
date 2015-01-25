@@ -587,7 +587,7 @@ void Compiler::declareTranslateBlock( LangEl *langEl )
 	addMatchLength( block->localFrame, langEl );
 	addMatchText( block->localFrame, langEl );
 	addInput( block->localFrame );
-	addCtx( block->localFrame );
+	addThis( block->localFrame );
 
 	block->declare( this );
 }
@@ -597,7 +597,7 @@ void Compiler::declarePreEof( TokenRegion *region )
 	CodeBlock *block = region->preEofBlock;
 
 	addInput( block->localFrame );
-	addCtx( block->localFrame );
+	addThis( block->localFrame );
 
 	block->declare( this );
 }
@@ -729,14 +729,14 @@ void Compiler::addInput( ObjectDef *frame )
 	frame->rootScope->insertField( el->name, el );
 }
 
-void Compiler::addCtx( ObjectDef *frame )
+void Compiler::addThis( ObjectDef *frame )
 {
 	/* Make the type ref. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltObjectType, typeRef, "ctx" );
+			ObjectField::InbuiltObjectType, typeRef, "this" );
 	el->inGetR     = IN_LOAD_CTX_R;
 	el->inGetWV    = IN_LOAD_CTX_WV;
 	el->inGetWC    = IN_LOAD_CTX_WC;
@@ -1198,36 +1198,8 @@ void Compiler::initParserField( GenericType *gen, const char *name,
 	el->offset = offset;
 }
 
-void Compiler::initCtxField( GenericType *gen )
-{
-	LangEl *langEl = gen->utArg->langEl;
-	StructDef *structDef = langEl->contextIn;
-
-	/* Make the type ref and create the field. */
-	UniqueType *ctxUT = findUniqueType( TYPE_STRUCT, structDef->structEl );
-	TypeRef *typeRef = TypeRef::cons( internal, ctxUT );
-	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltFieldType, typeRef, "ctx" );
-
-	el->inGetR =  IN_GET_PARSER_CTX_R;
-	el->inGetWC = IN_GET_PARSER_CTX_WC;
-	el->inGetWV = IN_GET_PARSER_CTX_WV;
-	el->inSetWC = IN_SET_PARSER_CTX_WC;
-	el->inSetWV = IN_SET_PARSER_CTX_WV;
-
-	el->inGetValR =  IN_GET_PARSER_CTX_R;
-	el->inSetValWC = IN_SET_PARSER_CTX_WC;
-	el->inSetValWV = IN_SET_PARSER_CTX_WV;
-
-	gen->objDef->rootScope->insertField( el->name, el );
-}
-
 void Compiler::initParserFields( GenericType *gen )
 {
-	LangEl *langEl = gen->utArg->langEl;
-	if ( langEl->contextIn != 0 )
-		initCtxField( gen );
-
 	TypeRef *typeRef;
 
 	typeRef = TypeRef::cons( internal, gen->utArg );

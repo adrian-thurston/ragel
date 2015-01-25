@@ -724,7 +724,7 @@ struct Compiler
 	void addMatchText( ObjectDef *frame, LangEl *lel );
 	void addMatchLength( ObjectDef *frame, LangEl *lel );
 	void addInput( ObjectDef *frame );
-	void addCtx( ObjectDef *frame );
+	void addThis( ObjectDef *frame );
 	void addTransTokVar( ObjectDef *frame, LangEl *lel );
 	void addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList );
 	void addProdRedObjectVar( ObjectDef *localFrame, LangEl *langEl );
@@ -773,7 +773,6 @@ struct Compiler
 			int offset, TypeRef *typeRef );
 	void initParserFunctions( GenericType *gen );
 	void initParserFields( GenericType *gen );
-	void initCtxField( GenericType *gen );
 
 	void addStdin();
 	void addStdout();
