@@ -287,15 +287,6 @@ int rw_asm_var_decl( VarDecl: indep::var_decl )
 void rw_asm( Output: stream )
 {
 	send Output
-		~
-		~/*
-		~ * The C component of the test case.
-		~ */
-		~
-	
-	send Output
-		"#################### DRIVER SPLIT ####################
-		"
 		"#
 		"# @LANG: asm
 		"# @GENERATED: yes
