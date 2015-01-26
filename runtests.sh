@@ -116,22 +116,6 @@ function test_error
 
 function run_test()
 {
-	if [ $lang == asm ]; then
-		# Translated ASM test cases need to be split into C and ASM components.
-		# The actions and conditions of these cases are in C.
-		if egrep -qe '^#+ DRIVER SPLIT #+$' $wk/$case_rl; then
-			mv $wk/$case_rl $wk/${case_rl}.tmp
-
-			awk '/^#+ DRIVER SPLIT #+$/ { exit; } { print $0; }' \
-					$wk/${case_rl}.tmp > $wk/${case_rl}.c
-
-			awk 'y { print $0; } /^#+ DRIVER SPLIT #+$/ { y=1 }' \
-					$wk/${case_rl}.tmp > $wk/$case_rl
-
-			extra_src=$wk/${case_rl}.c
-		fi
-	fi
-
 	echo "$ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $wk/$case_rl"
 	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $wk/$case_rl; then
 		test_error;
@@ -143,8 +127,8 @@ function run_test()
 
 	# Ruby and OCaml don't need to be copiled.
 	if [ $lang != ruby ] && [ $lang != ocaml ]; then
-		echo "$compiler $flags $out_args $extra_src $wk/$code_src"
-		if ! $compiler $flags $out_args $extra_src $wk/$code_src; then
+		echo "$compiler $flags $out_args $wk/$code_src"
+		if ! $compiler $flags $out_args $wk/$code_src; then
 			test_error;
 		fi
 	fi
