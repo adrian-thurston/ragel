@@ -476,8 +476,6 @@ void AsmCodeGen::LM_EXEC( ostream &ret, GenInlineItem *item, int targState, int 
 	/* The parser gives fexec two children. The double brackets are for D code.
 	 * If the inline list is a single word it will get interpreted as a C-style
 	 * cast by the D compiler. This should be in the D code generator. */
-	ret << "# inline list\n";
-
 	INLINE_LIST( ret, item->children, targState, inFinish, false );
 
 	ret <<
@@ -1140,7 +1138,8 @@ bool AsmCodeGen::useAgainLabel()
 
 void AsmCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << CTRL_FLOW() << "goto st" << gotoDest << ";}";
+	ret <<
+		"	jmp		" << LABEL( "st", gotoDest ) << "\n";
 }
 
 void AsmCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
