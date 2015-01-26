@@ -54,6 +54,16 @@ int rw_asm_factor( Factor: indep::factor )
 			"	pushq	%rax
 
 	}
+	case "'0'" {
+		send Out
+			"	movq	$48,	%rax
+			"	push	%rax
+	}
+	case "'a'" {
+		send Out
+			"	movq	$97,	%rax
+			"	push	%rax
+	}
 	case [String: string] {
 		send Out
 			"	.section	.rodata
