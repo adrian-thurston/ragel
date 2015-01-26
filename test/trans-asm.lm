@@ -412,7 +412,7 @@ void rw_asm( Output: stream )
 		"exec:
 		"	pushq	%rbp
 		"	movq	%rsp, %rbp
-		"	subq	$40, %rsp
+		"	subq	$48, %rsp
 		"
 		"	pushq	%r12
 		"	pushq	%r13

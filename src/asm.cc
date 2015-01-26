@@ -188,7 +188,7 @@ string AsmCodeGen::vCS()
 {
 	ostringstream ret;
 	if ( csExpr == 0 )
-		ret << "%r11";
+		ret << "-40(%rbp)";
 	else {
 		INLINE_LIST( ret, csExpr, 0, false, false );
 	}
@@ -669,7 +669,8 @@ void AsmCodeGen::writeInit()
 	if ( !noCS ) {
 		// out << "\t" << vCS() << " = " << START() << ";\n";
 		out <<
-			"	movq	$" << redFsm->startState->id << ", " << vCS() << "\n";
+			"	movq	$" << redFsm->startState->id << ", " << vCS() << "\n"
+			"	movq	" << vCS() << ", %r11\n";
 	}
 	
 //	/* If there are any calls, then the stack top needs initialization. */
@@ -1470,7 +1471,8 @@ std::ostream &AsmCodeGen::AGAIN_CASES()
 	/* Jump into the machine based on the current state. */
 	out <<
 		"	leaq	" << LABEL( "again_jmp" ) << "(%rip), %rcx\n"
-		"	movq	(%rcx," << vCS() << ",8), %rcx\n"
+		"	movq	" << vCS() << ", %r11\n"
+		"	movq	(%rcx,%r11,8), %rcx\n"
 		"	jmp		*%rcx\n"
 		"	.section .rodata\n"
 		"	.align 8\n"
@@ -1512,11 +1514,13 @@ std::ostream &AsmCodeGen::FINISH_CASES()
 		}
 	}
 
+
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		if ( act->eofRefs != 0 ) {
 			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ ) {
 				long l = nextLmSwitchLabel++;
 				out <<
+					"	# eof ref case\n"
 					"	cmpq	$" << *pst << ", %rax\n"
 					"	jne		" << LABEL( "finish_next", l ) << "\n";
 
@@ -1530,6 +1534,7 @@ std::ostream &AsmCodeGen::FINISH_CASES()
 			}
 		}
 	}
+
 
 	out << 
 		"" << LABEL( "finish_done", done ) << ":\n";
@@ -1630,11 +1635,12 @@ void AsmCodeGen::writeExec()
 	 *
 	 * pe : %r13  -- callee-save, interface, persistent
 	 *
-	 * eof:      -8(%rbp)
-	 * ts:       -16(%rbp)
-	 * te:       -24(%rbp)
-	 * act:      -32(%rbp)
-	 * _nbreak:  -33(%rbp)
+	 * eof:         -8(%rbp)
+	 * ts:         -16(%rbp)
+	 * te:         -24(%rbp)
+	 * act:        -32(%rbp)
+	 * _nbreak:    -40(%rbp)
+	 * cs storage: -48(%rbp)
 	 */
 
 #if 0
@@ -1642,6 +1648,9 @@ void AsmCodeGen::writeExec()
 		out << "	int _ps = 0;\n";
 
 #endif
+
+	out <<
+		"	movq	%r11, " << vCS() << "\n";
 
 	if ( !noEnd ) {
 		out <<
@@ -1676,7 +1685,8 @@ void AsmCodeGen::writeExec()
 	/* Jump into the machine based on the current state. */
 	out <<
 		"	leaq	" << LABEL( "entry_jmp" ) << "(%rip), %rcx\n"
-		"	movq	(%rcx," << vCS() << ",8), %rcx\n"
+		"	movq	" << vCS() << ", %r11\n"
+		"	movq	(%rcx,%r11,8), %rcx\n"
 		"	jmp		*%rcx\n"
 		"	.section .rodata\n"
 		"	.align 8\n"
@@ -1708,6 +1718,9 @@ void AsmCodeGen::writeExec()
 
 	if ( outLabelUsed ) 
 		out << LABEL( "out" ) << ":\n";
+
+	out <<
+		"	movq	" << vCS() << ", %r11\n";
 
 	out << "# WRITE EXEC END\n";
 }
