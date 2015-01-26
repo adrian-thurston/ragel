@@ -345,9 +345,15 @@ void AsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inF
 	/* The parser gives fexec two children. The double brackets are for D
 	 * code. If the inline list is a single word it will get interpreted as a
 	 * C-style cast by the D compiler. */
-	ret << "{" << P() << " = ((";
+
+	ret <<
+		"	subq	$1, ";
 	INLINE_LIST( ret, item->children, targState, inFinish, false );
-	ret << "))-1;}";
+	ret <<
+		"\n"
+		"	movq	";
+	INLINE_LIST( ret, item->children, targState, inFinish, false );
+	ret << ", " << P() << "\n";
 }
 
 void AsmCodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item, 
@@ -528,7 +534,8 @@ void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			ret << GET_KEY();
 			break;
 		case GenInlineItem::Hold:
-			ret << P() << "--;";
+			ret <<
+				"	subq	$1, " << P() << "\n";
 			break;
 		case GenInlineItem::Exec:
 			EXEC( ret, item, targState, inFinish );
