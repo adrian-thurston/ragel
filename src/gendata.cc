@@ -274,7 +274,8 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 		host->children = new GenInlineList;
 		errCase->children->append( host );
 
-		/* Make the item. */
+		/* Make the item. This should probably be an LM goto, would eliminate
+		 * need for wrapping in host statement. .*/
 		GenInlineItem *gotoItem = new GenInlineItem( InputLoc(), GenInlineItem::Goto );
 		gotoItem->targId = fsm->errState->alg.stateNum;
 		host->children->append( gotoItem );
