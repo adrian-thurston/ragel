@@ -38,6 +38,15 @@ int rw_asm_factor( Factor: indep::factor )
 			"	movsbq	(%r12), %rax
 			"	pushq	%rax
 	}
+	case ["p"] {
+		send Out
+			"	pushq	%r12
+	}
+	case ["te"] {
+		send Out
+			"	movq	-24(%rbp), %rax
+			"	pushq	%rax
+	}
 	case [Ident: tk_ident] {
 		send Out
 			"	movq	[Ident](%rip), %rax
@@ -280,8 +289,18 @@ void rw_asm_buf_stmt( BufStmt: indep::buf_stmt )
 
 int rw_asm_ragel_stmt( Stmt: indep::ragel_stmt )
 {
-	send Out
-		"[Stmt]
+	switch Stmt
+	case [`fexec expr `;] {
+		rw_asm_expr( Stmt.expr )
+
+		send Out
+			"	popq	%rax
+			"	fexec	%rax;
+	}
+	default {
+		send Out
+			"[Stmt]
+	}
 }
 
 int rw_asm_stmt( Stmt: indep::stmt )
