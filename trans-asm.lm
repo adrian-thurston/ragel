@@ -107,6 +107,18 @@ void rw_asm_abs_expr( Expr: indep::abs_expr )
 			send Out
 				"	imul	%rcx, %rax
 		}
+		case [`==] {
+			send Out
+				"	cmp		%rcx, %rax
+				"	sete	%al
+				"	movsbq	%al, %rax
+		}
+		case [`!=] {
+			send Out
+				"	cmp		%rcx, %rax
+				"	setne	%al
+				"	movsbq	%al, %rax
+		}
 
 		send Out
 				"	pushq	%rax
@@ -267,8 +279,8 @@ out_code::lines rw_asm_asm_action_block( ActionBlock: indep::action_block Action
 	else if match ActionBlock [`{ expr `}] {
 		send Out
 			"{
-#			"	movq %r12, %rdi
-#			"	call action_[ActionNum]
+			"	[rw_asm_expr( ActionBlock.expr )]
+			"	popq	%rax
 			"}
 	}
 	send Out [] eos
