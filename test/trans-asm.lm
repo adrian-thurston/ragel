@@ -179,8 +179,30 @@ int rw_asm_print_stmt( Stmt: indep::print_stmt )
 			"	call	printf
 	}
 	case [`print_token `;] {
-		#send Out
-		#	"fwrite ( ts , 1 , te - ts , stdout );" 
+		L1: int = Label
+		Label = Label + 1
+
+		L2: int = Label
+		Label = Label + 1
+
+		send Out
+			"	movq	-16(%rbp), %rax   # ts
+			"	movq	-24(%rbp), %rcx   # te
+			"	subq	%rax, %rcx        # length
+			"[L1]:
+			"	cmp		$0, %rcx
+			"	je		[L2]f
+			"	movsbl	(%rax), %edi
+			"	push	%rax
+			"	push	%rcx
+			"	call	putchar	
+			"	pop		%rcx
+			"	pop		%rax
+			"	addq	$1, %rax
+			"	subq	$1, %rcx
+			"	jmp		[L1]b
+			"[L2]:
+			"
 	}
 }
 

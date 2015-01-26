@@ -1630,11 +1630,11 @@ void AsmCodeGen::writeExec()
 	 *
 	 * pe : %r13  -- callee-save, interface, persistent
 	 *
-	 * ts:  -8(%rbp)    -- eof
-	 * ts:  -16(%rbp)   -- tokstart
-	 * te:  -24(%rbp)   -- tokend
-	 * act: -32(%rbp)   -- act
-	 * act: -33(%rbp)   -- _nbreak (byte)
+	 * eof:      -8(%rbp)
+	 * ts:       -16(%rbp)
+	 * te:       -24(%rbp)
+	 * act:      -32(%rbp)
+	 * _nbreak:  -33(%rbp)
 	 */
 
 #if 0
