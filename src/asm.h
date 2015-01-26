@@ -95,6 +95,7 @@ protected:
 	string P();
 	string PE();
 	string vEOF();
+	string NBREAK();
 
 	string ACCESS();
 	string vCS();
@@ -165,6 +166,8 @@ protected:
 
 	/* Return types in HostType form. */
 	HostType *arrayType( unsigned long maxVal );
+
+	void NBREAK( ostream &ret, int targState, bool csForced );
 
 	void HOST_STMT( ostream &ret, GenInlineItem *item, 
 			int targState, bool inFinish, bool csForced );

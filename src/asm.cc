@@ -265,6 +265,11 @@ string AsmCodeGen::ACT()
 	return ret.str();
 }
 
+string AsmCodeGen::NBREAK()
+{
+	return string("-33(%rbp)");
+}
+
 string AsmCodeGen::GET_KEY()
 {
 	ostringstream ret;
@@ -480,6 +485,22 @@ void AsmCodeGen::LM_EXEC( ostream &ret, GenInlineItem *item, int targState, int 
 		"	subq	$1, " << P() << "\n";
 }
 
+void AsmCodeGen::NBREAK( ostream &ret, int targState, bool csForced )
+{
+	outLabelUsed = true;
+	ret << 
+		"	addq	$1, " << P() << "\n";
+
+	if ( !csForced ) {
+		ret <<
+			"	movq	$" << targState << ", " << vCS() << "\n";
+	}
+
+	ret <<
+		"	movb	$1, " << NBREAK() << "\n"
+		"	jmp		" << LABEL( "out" ) << "\n";
+}
+
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
 void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
@@ -561,6 +582,8 @@ void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::NcallExpr:
 		case GenInlineItem::Nret:
 		case GenInlineItem::Nbreak:
+			NBREAK( ret, targState, csForced );
+			break;
 		case GenInlineItem::LmCase:
 			break;
 
@@ -1291,12 +1314,25 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 //			if ( pair->action->anyNextStmt() )
 //				out << "	" << vCS() << " = " << pair->targ->id << ";\n";
 
+			if ( redFsm->anyRegNbreak() ) {
+				out <<
+					"	movb	$0, " << NBREAK() << "\n";
+			}
+
 			/* Write each action in the list. */
 			for ( GenActionTable::Iter item = pair->action->key; item.lte(); item++ ) {
 				ACTION( out, item->value, pair->targ->id, false, 
 						pair->action->anyNextStmt() );
 				out << "\n";
 			}
+
+			if ( redFsm->anyRegNbreak() ) {
+				out <<
+					"	cmpb	$0, " << NBREAK() << "\n"
+					"	jne		" << LABEL( "out" ) << "\n";
+				outLabelUsed = true;
+			}
+				
 
 			/* If the action contains a next then we need to reload, otherwise
 			 * jump directly to the target state. */
@@ -1599,6 +1635,7 @@ void AsmCodeGen::writeExec()
 	 * ts:  -16(%rbp)   -- tokstart
 	 * te:  -24(%rbp)   -- tokend
 	 * act: -32(%rbp)   -- act
+	 * act: -33(%rbp)   -- _nbreak (byte)
 	 */
 
 #if 0
