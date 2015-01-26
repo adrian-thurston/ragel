@@ -877,6 +877,9 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 			code.appendHalf( 0 );
 			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FINISH_EXIT_WV );
+
+			code.append( IN_GET_PARSER_MEM_R );
+			code.appendHalf( 0 );
 		}
 		else {
 			if ( lookup.objMethod->useFnInstr )
@@ -891,6 +894,9 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 			code.appendHalf( 0 );
 			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FINISH_EXIT_WC );
+
+			code.append( IN_GET_PARSER_MEM_R );
+			code.appendHalf( 0 );
 		}
 		else {
 			if ( lookup.objMethod->useFnInstr )
@@ -1258,9 +1264,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	code.append( IN_CONS_GENERIC );
 	code.appendHalf( parserUT->generic->id );
 
-	/* Dup for the finish operation. */
-	code.append( IN_DUP_VAL );
-
 	/*
 	 * First load the context into the parser.
 	 */
@@ -1341,8 +1344,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 				code.append( IN_PARSE_APPEND_WC );
 		}
 
-		code.append( IN_DUP_VAL );
-
 		/* Parse instruction, dependent on whether or not we are producing
 		 * revert or commit code. */
 		parseFrag( pd, code, stopId );
@@ -1371,12 +1372,10 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		code.append( IN_PARSE_FINISH_EXIT_WC );
 	}
 
-	code.append( IN_POP );
-
 	/* Parser is on the top of the stack. */
 
 	/* Pull out the error and save it off. */
-	code.append( IN_DUP_TREE );
+	code.append( IN_DUP_VAL );
 	code.append( IN_GET_PARSER_MEM_R );
 	code.appendHalf( 1 );
 	code.append( IN_SET_ERROR );
@@ -1517,8 +1516,6 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 			else
 				code.append( IN_PARSE_APPEND_WC );
 		}
-
-		code.append( IN_DUP_VAL );
 
 		parseFrag( pd, code, 0 );
 	}
@@ -2221,8 +2218,11 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 		}
 		case ExprType: {
 			/* Evaluate the exrepssion, then pop it immediately. */
-			expr->evaluate( pd, code );
-			code.append( IN_POP );
+			UniqueType *exprUt = expr->evaluate( pd, code );
+			if ( exprUt->tree() )
+				code.append( IN_POP );
+			else
+				code.append( IN_POP_VAL );
 			break;
 		}
 		case IfType: {

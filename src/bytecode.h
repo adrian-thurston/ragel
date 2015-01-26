@@ -80,6 +80,7 @@ typedef unsigned long colm_value_t;
 
 #define IN_POP                   0x1d
 #define IN_POP_N_WORDS           0x1e
+#define IN_POP_VAL               0xbe
 #define IN_DUP_VAL               0x1f
 #define IN_DUP_TREE              0xf2
 #define IN_TOP_SWAP              0x20

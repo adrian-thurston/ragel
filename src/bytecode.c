@@ -1501,6 +1501,12 @@ again:
 			treeDownref( prg, sp, val );
 			break;
 		}
+		case IN_POP_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_POP_VAL\n" );
+
+			vm_pop();
+			break;
+		}
 		case IN_POP_N_WORDS: {
 			short n;
 			read_half( n );
@@ -2352,6 +2358,8 @@ again:
 			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*) vm_pop();
 
+			vm_push_parser( parser );
+
 			if ( prg->induceExit )
 				goto out;
 
@@ -2383,6 +2391,8 @@ again:
 			exec->steps = (long)vm_pop();
 			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*)vm_pop();
+
+			vm_push_parser( parser );
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_INIT_BKT );
@@ -2454,7 +2464,8 @@ again:
 			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser*)vm_pop();
 
-			vm_push( parser->result );
+			vm_push_parser( parser );
+
 			if ( prg->induceExit )
 				goto out;
 
@@ -2488,7 +2499,7 @@ again:
 			exec->pcr = (long)vm_pop();
 			exec->parser = (Parser *) vm_pop();
 
-			vm_push( parser->result );
+			vm_push_parser( parser );
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_INIT_BKT );
