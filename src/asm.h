@@ -168,6 +168,9 @@ protected:
 	HostType *arrayType( unsigned long maxVal );
 
 	void NBREAK( ostream &ret, int targState, bool csForced );
+	void NCALL( ostream &ret, int callDest, int targState, bool inFinish );
+	void NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+	void NRET( ostream &ret, bool inFinish );
 
 	void HOST_STMT( ostream &ret, GenInlineItem *item, 
 			int targState, bool inFinish, bool csForced );

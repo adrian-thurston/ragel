@@ -188,7 +188,7 @@ string AsmCodeGen::vCS()
 {
 	ostringstream ret;
 	if ( csExpr == 0 )
-		ret << "-40(%rbp)";
+		ret << "-48(%rbp)";
 	else {
 		INLINE_LIST( ret, csExpr, 0, false, false );
 	}
@@ -199,7 +199,7 @@ string AsmCodeGen::TOP()
 {
 	ostringstream ret;
 	if ( topExpr == 0 )
-		ret << ACCESS() + "top";
+		ret << "-64(%rbp)";
 	else {
 		ret << "(";
 		INLINE_LIST( ret, topExpr, 0, false, false );
@@ -212,7 +212,7 @@ string AsmCodeGen::STACK()
 {
 	ostringstream ret;
 	if ( stackExpr == 0 )
-		ret << ACCESS() + "stack";
+		ret << "-56(%rbp)";
 	else {
 		ret << "(";
 		INLINE_LIST( ret, stackExpr, 0, false, false );
@@ -584,8 +584,14 @@ void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			break;
 		/* Stubbed. */
 		case GenInlineItem::Ncall:
+			NCALL( ret, item->targState->id, targState, inFinish );
+			break;
 		case GenInlineItem::NcallExpr:
+			NCALL_EXPR( ret, item, targState, inFinish );
+			break;
 		case GenInlineItem::Nret:
+			NRET( ret, inFinish );
+			break;
 		case GenInlineItem::Nbreak:
 			NBREAK( ret, targState, csForced );
 			break;
@@ -680,9 +686,11 @@ void AsmCodeGen::writeInit()
 			"	movq	" << vCS() << ", %r11\n";
 	}
 	
-//	/* If there are any calls, then the stack top needs initialization. */
-//	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() )
-//		out << "\t" << TOP() << " = 0;\n";
+	/* If there are any calls, then the stack top needs initialization. */
+	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() ) {
+		out <<
+			"	movq	$0, " << TOP() << "\n";
+	}
 
 	if ( hasLongestMatch ) {
 		out << 
@@ -1152,51 +1160,70 @@ void AsmCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 
 void AsmCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	if ( prePushExpr != 0 ) {
-		ret << "{";
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
-	}
-
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << 
-			"; " << CTRL_FLOW() << "goto st" << callDest << ";}";
-
 	if ( prePushExpr != 0 )
-		ret << "}";
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+
+	ret <<
+		"	movq	" << STACK() << ", %rax\n"
+		"	movq	" << TOP() << ", %rcx\n"
+		"	movq	$" << targState << ", (%rax, %rcx, 8)\n"
+		"	addq	$1, %rcx\n"
+		"	movq	%rcx, " << TOP() << "\n"
+		"	jmp		" << LABEL( "st", callDest ) << "\n";
+	;
 }
 
 void AsmCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	if ( prePushExpr != 0 ) {
-		ret << "{";
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
-	}
-
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << "; " << vCS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
-
 	if ( prePushExpr != 0 )
-		ret << "}";
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+
+	ret <<
+		"\n"
+		"	movq	%rax, %rdx\n"
+		"\n"
+		"	movq	" << STACK() << ", %rax\n"
+		"	movq	" << TOP() << ", %rcx\n"
+		"	movq	$" << targState << ", (%rax, %rcx, 8)\n"
+		"	addq	$1, %rcx\n"
+		"	movq	%rcx, " << TOP() << "\n"
+		"	movq	%rdx, " << vCS() << "\n"
+		"	jmp		" << LABEL( "again" ) << "\n";
+
+//	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << "; " << vCS() << " = (";
+
+//	ret << "); " << CTRL_FLOW() << "goto _again;}";
+
 }
 
 void AsmCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << vCS() << " = " << STACK() << "[--" << TOP() << "];";
+	ret <<
+		"	movq	" << STACK() << ", %rax\n"
+		"	movq	" << TOP() << ", %rcx\n"
+		"	subq	$1, %rcx\n"
+		"	movq	(%rax, %rcx, 8), %rax\n"
+		"	movq	%rax, " << vCS() << "\n"
+		"	movq	%rcx, " << TOP() << "\n";
 
-	if ( postPopExpr != 0 ) {
-		ret << "{";
+	if ( postPopExpr != 0 )
 		INLINE_LIST( ret, postPopExpr, 0, false, false );
-		ret << "}";
-	}
 
-	ret << CTRL_FLOW() << "goto _again;}";
+	ret <<
+		"	jmp		" << LABEL("again") << "\n";
 }
 
 void AsmCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << vCS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
+//	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+
+	ret <<
+		"	movq	%rax, " << vCS() << "\n"
+		"	jmp		" << LABEL("again") << "\n";
+
+//	ret << "{" << vCS() << " = (";
+//	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+//	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
 
 void AsmCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
@@ -1207,9 +1234,70 @@ void AsmCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 
 void AsmCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << vCS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << ");";
+//	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+
+	ret <<
+		"	movq	%rax, " << vCS() << "\n";
+
+//	ret << vCS() << " = (";
+//	ret << ");";
+}
+
+void AsmCodeGen::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
+{
+	if ( prePushExpr != 0 )
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+
+	ret <<
+		"	movq	" << STACK() << ", %rax\n"
+		"	movq	" << TOP() << ", %rcx\n"
+		"	movq	$" << targState << ", (%rax, %rcx, 8)\n"
+		"	addq	$1, %rcx\n"
+		"	movq	%rcx, " << TOP() << "\n"
+		"	movq	$" << callDest << ", " << vCS() << "\n";
+}
+
+void AsmCodeGen::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem,
+		int targState, bool inFinish )
+{
+	if ( prePushExpr != 0 )
+		INLINE_LIST( ret, prePushExpr, 0, false, false );
+
+	ret <<
+		"\n"
+		"	movq	%rax, %rdx\n"
+		"\n"
+		"	movq	" << STACK() << ", %rax\n"
+		"	movq	" << TOP() << ", %rcx\n"
+		"	movq	$" << targState << ", (%rax, %rcx, 8)\n"
+		"	addq	$1, %rcx\n"
+		"	movq	%rcx, " << TOP() << "\n"
+		"	movq	%rdx, " << vCS() << "\n";
+
+//	ret << STACK() << "[" << TOP() << "] = " << targState << "; " << TOP() << "+= 1;" <<
+//			vCS() << " = " << OPEN_HOST_EXPR();
+//	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+//	ret << CLOSE_HOST_EXPR() << "; " << CLOSE_GEN_BLOCK();
+}
+
+void AsmCodeGen::NRET( ostream &ret, bool inFinish )
+{
+//	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = "
+//			<< STACK() << "[" << TOP() << "];";
+
+//	if ( postPopExpr != 0 )
+//		INLINE_LIST( ret, postPopExpr, 0, false, false );
+
+	ret <<
+		"	movq	" << STACK() << ", %rax\n"
+		"	movq	" << TOP() << ", %rcx\n"
+		"	subq	$1, %rcx\n"
+		"	movq	(%rax, %rcx, 8), %rax\n"
+		"	movq	%rax, " << vCS() << "\n"
+		"	movq	%rcx, " << TOP() << "\n";
+
+	if ( postPopExpr != 0 )
+		INLINE_LIST( ret, postPopExpr, 0, false, false );
 }
 
 void AsmCodeGen::CURS( ostream &ret, bool inFinish )
@@ -1642,12 +1730,21 @@ void AsmCodeGen::writeExec()
 	 *
 	 * pe : %r13  -- callee-save, interface, persistent
 	 *
-	 * eof:         -8(%rbp)
-	 * ts:         -16(%rbp)
-	 * te:         -24(%rbp)
-	 * act:        -32(%rbp)
-	 * _nbreak:    -40(%rbp)
-	 * cs storage: -48(%rbp)
+	 * eof:        -8(%rbp)
+	 *
+	 * ts:        -16(%rbp)
+	 *
+	 * te:        -24(%rbp)
+	 *
+	 * act:       -32(%rbp)
+	 *
+	 * _nbreak:   -40(%rbp)
+	 *
+	 * internal:  -48(%rbp)
+	 *
+	 * stack:     -56(%rbp)
+	 * top:       -64(%rbp)
+	 *
 	 */
 
 #if 0
