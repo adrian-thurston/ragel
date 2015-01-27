@@ -70,8 +70,8 @@ void colm_parser_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 	clearPdaRun( prg, sp, parser->pdaRun );
 	free( parser->pdaRun );
 
-//	/* Free the result. */
-//	treeDownref( prg, sp, parser->result );
+	/* Free the result. */
+	treeDownref( prg, sp, parser->result );
 }
 
 Parser *colm_parser_new( Program *prg, GenericInfo *gi )
