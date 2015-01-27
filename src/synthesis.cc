@@ -271,7 +271,7 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 
 	UniqueType *elUT = el->typeRef->uniqueType;
 
-	if ( elUT->typeId == TYPE_STRUCT || elUT->typeId == TYPE_GENERIC ) {
+	if ( elUT->val() ) {
 		if ( forWriting ) {
 			/* The instruction, depends on whether or not we are reverting. */
 			if ( pd->revertOn && revert )
@@ -583,7 +583,7 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 	/* Ensure that the field is referenced. */
 	inObject->referenceField( pd, el );
 
-	if ( exprUT->typeId == TYPE_STRUCT || exprUT->typeId == TYPE_GENERIC ) {
+	if ( exprUT->val()  ) {
 		if ( pd->revertOn && revert )
 			code.append( el->inSetValWV );
 		else
@@ -1317,6 +1317,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 				continue;
 			}
 
+			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
+				code.append( IN_INT_TO_STR );
+
 			if ( ut == pd->uniqueTypeStream )
 				isStream = true;
 
@@ -1429,6 +1432,9 @@ void ConsItemList::evaluateSendStream( Compiler *pd, CodeVect &code )
 				code.append( IN_POP );
 				continue;
 			}
+
+			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
+				code.append( IN_INT_TO_STR );
 			break;
 		}
 
@@ -1492,6 +1498,9 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 
 			if ( ut == pd->uniqueTypeStream )
 				isStream = true;
+
+			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
+				code.append( IN_INT_TO_STR );
 
 			if ( strings && ut->typeId == TYPE_TREE &&
 					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
@@ -1596,6 +1605,9 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 		}
 		case ConsItem::ExprType: {
 			UniqueType *ut = item->expr->evaluate( pd, code );
+
+			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
+				code.append( IN_INT_TO_STR );
 
 			if ( ut->typeId == TYPE_TREE &&
 					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
@@ -1788,7 +1800,7 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					if ( lt != rt )
 						error(loc) << "comparison of different types" << endp;
 						
-					if ( lt->ptr() )
+					if ( lt->val() )
 						code.append( IN_TST_EQL_VAL );
 					else
 						code.append( IN_TST_EQL_TREE );
@@ -1801,7 +1813,7 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					if ( lt != rt )
 						error(loc) << "comparison of different types" << endp;
 
-					if ( lt->ptr() )
+					if ( lt->val() )
 						code.append( IN_TST_NOT_EQL_VAL );
 					else
 						code.append( IN_TST_NOT_EQL_TREE );
@@ -1809,49 +1821,80 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					return pd->uniqueTypeBool;
 				}
 				case '<': {
-					left->evaluate( pd, code );
-					right->evaluate( pd, code );
+					UniqueType *lt = left->evaluate( pd, code );
+					UniqueType *rt = right->evaluate( pd, code );
 
-					code.append( IN_TST_LESS );
+					if ( lt != rt )
+						error(loc) << "comparison of different types" << endp;
+
+					if ( lt->val() )
+						code.append( IN_TST_LESS_VAL );
+					else
+						code.append( IN_TST_LESS_TREE );
 					return pd->uniqueTypeBool;
 				}
 				case '>': {
-					left->evaluate( pd, code );
-					right->evaluate( pd, code );
+					UniqueType *lt = left->evaluate( pd, code );
+					UniqueType *rt = right->evaluate( pd, code );
 
-					code.append( IN_TST_GRTR );
+					if ( lt != rt )
+						error(loc) << "comparison of different types" << endp;
+
+					if ( lt->val() )
+						code.append( IN_TST_GRTR_VAL );
+					else
+						code.append( IN_TST_GRTR_TREE );
+
 					return pd->uniqueTypeBool;
 				}
 				case OP_LessEql: {
-					left->evaluate( pd, code );
-					right->evaluate( pd, code );
+					UniqueType *lt = left->evaluate( pd, code );
+					UniqueType *rt = right->evaluate( pd, code );
 
-					code.append( IN_TST_LESS_EQL );
+					if ( lt != rt )
+						error(loc) << "comparison of different types" << endp;
+
+					if ( lt->val() )
+						code.append( IN_TST_LESS_EQL_VAL );
+					else
+						code.append( IN_TST_LESS_EQL_TREE );
+
 					return pd->uniqueTypeBool;
 				}
 				case OP_GrtrEql: {
-					left->evaluate( pd, code );
-					right->evaluate( pd, code );
+					UniqueType *lt = left->evaluate( pd, code );
+					UniqueType *rt = right->evaluate( pd, code );
 
-					code.append( IN_TST_GRTR_EQL );
+					if ( lt != rt )
+						error(loc) << "comparison of different types" << endp;
+
+					if ( lt->val() )
+						code.append( IN_TST_GRTR_EQL_VAL );
+					else
+						code.append( IN_TST_GRTR_EQL_TREE );
+
 					return pd->uniqueTypeBool;
 				}
 				case OP_LogicalAnd: {
 					/* Evaluate the left and duplicate it. */
 					UniqueType *lut = left->evaluate( pd, code );
-					code.append( IN_DUP_TREE );
+					if ( !lut->val() )
+						code.append( IN_TST_NZ_TREE );
+					code.append( IN_DUP_VAL );
 
 					/* Jump over the right if false, leaving the original left
 					 * result on the top of the stack. We don't know the
 					 * distance yet so record the position of the jump. */
 					long jump = code.length();
-					Half jinstr = lut->tree() ? IN_JMP_FALSE_TREE : IN_JMP_FALSE_VAL;
-					code.append( jinstr );
+					code.append( IN_JMP_FALSE_VAL );
 					code.appendHalf( 0 );
 
 					/* Evauluate the right, add the test. Store it separately. */
-					right->evaluate( pd, code );
-					code.append( IN_TST_LOGICAL_AND );
+					UniqueType *rut = right->evaluate( pd, code );
+					if ( !rut->val() )
+						code.append( IN_TST_NZ_TREE );
+
+					code.append( IN_TST_LOGICAL_AND_VAL );
 
 					/* Set the distance of the jump. */
 					long distance = code.length() - jump - 3;
@@ -1862,19 +1905,23 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 				case OP_LogicalOr: {
 					/* Evaluate the left and duplicate it. */
 					UniqueType *lut = left->evaluate( pd, code );
-					code.append( IN_DUP_TREE );
+					if ( !lut->val() )
+						code.append( IN_TST_NZ_TREE );
+					code.append( IN_DUP_VAL );
 
 					/* Jump over the right if true, leaving the original left
 					 * result on the top of the stack. We don't know the
 					 * distance yet so record the position of the jump. */
 					long jump = code.length();
-					Half jinstr = lut->tree() ? IN_JMP_TRUE_TREE : IN_JMP_TRUE_VAL;
-					code.append( jinstr );
+					code.append( IN_JMP_TRUE_VAL );
 					code.appendHalf( 0 );
 
 					/* Evauluate the right, add the test. */
-					right->evaluate( pd, code );
-					code.append( IN_TST_LOGICAL_OR );
+					UniqueType *rut = right->evaluate( pd, code );
+					if ( !rut->val() )
+						code.append( IN_TST_NZ_TREE );
+
+					code.append( IN_TST_LOGICAL_OR_VAL );
 
 					/* Set the distance of the jump. */
 					long distance = code.length() - jump - 3;
@@ -1891,19 +1938,29 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 			switch ( op ) {
 				case '!': {
 					/* Evaluate the left and duplicate it. */
-					right->evaluate( pd, code );
-					code.append( IN_NOT );
+					UniqueType *ut = right->evaluate( pd, code );
+					if ( ut->val() )
+						code.append( IN_NOT_VAL );
+					else
+						code.append( IN_NOT_TREE );
 					return pd->uniqueTypeBool;
 				}
 				case '$': {
-					right->evaluate( pd, code );
+					UniqueType *ut = right->evaluate( pd, code );
+
+					if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
+						code.append( IN_INT_TO_STR );
+
 					code.append( IN_TREE_TO_STR_TRIM );
 					return pd->uniqueTypeStr;
 					
 				}
 				case '%': {
-					right->evaluate( pd, code );
-					code.append( IN_TREE_TO_STR );
+					UniqueType *ut = right->evaluate( pd, code );
+					if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
+						code.append( IN_INT_TO_STR );
+					else 
+						code.append( IN_TREE_TO_STR );
 					return pd->uniqueTypeStr;
 				}
 				case '^': {
@@ -2027,7 +2084,7 @@ void LangStmt::compileForIterBody( Compiler *pd,
 	/* Test: jump past the while block if false. Note that we don't have the
 	 * distance yet. */
 	long jumpFalse = code.length();
-	code.append( IN_JMP_FALSE_TREE );
+	code.append( IN_JMP_FALSE_VAL );
 	code.appendHalf( 0 );
 
 	/*
@@ -2181,8 +2238,14 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			UniqueType **types = new UniqueType*[exprPtrVect->length()];
 			
 			/* Push the args backwards. */
-			for ( CallArgVect::Iter pex = exprPtrVect->first(); pex.lte(); pex++ )
+			for ( CallArgVect::Iter pex = exprPtrVect->first(); pex.lte(); pex++ ) {
 				types[pex.pos()] = (*pex)->expr->evaluate( pd, code );
+				if ( types[pex.pos()]->typeId == TYPE_INT || 
+					types[pex.pos()]->typeId == TYPE_BOOL )
+				{
+					code.append( IN_INT_TO_STR );
+				}
+			}
 
 			/* Run the printing forwards. */
 			if ( type == PrintType ) {

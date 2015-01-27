@@ -1871,6 +1871,13 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 	
 	bool ptr()
 		{ return typeId == TYPE_STRUCT || typeId == TYPE_GENERIC; }
+
+	bool val() {
+		return typeId == TYPE_STRUCT ||
+			typeId == TYPE_GENERIC ||
+			typeId == TYPE_INT ||
+			typeId == TYPE_BOOL;
+	}
 };
 
 struct CmpUniqueType
@@ -1970,6 +1977,8 @@ struct TypeRef
 		MapEl,
 		Parser,
 		Ref,
+		Int,
+		Bool
 	};
 
 	TypeRef()

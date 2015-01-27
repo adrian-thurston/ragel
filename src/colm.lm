@@ -49,6 +49,8 @@ lex
 	token SWITCH / 'switch' /
 	token CASE / 'case' /
 	token DEFAULT / 'default' /
+	token INT / 'int' /
+	token BOOL / 'bool' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -561,6 +563,8 @@ def code_factor
 
 def type_ref
 	[region_qual id opt_repeat] :Id
+|	[INT] :Int
+|	[BOOL] :Bool
 |	[PARSER LT type_ref GT] :Parser
 |	[LIST LT type_ref GT] :List
 |	[MAP LT KeyType: type_ref ElType: type_ref GT] :Map

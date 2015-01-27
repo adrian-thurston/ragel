@@ -188,15 +188,15 @@ Program *colm_new_program( RuntimeData *rtd )
 	initPoolAlloc( &prg->headPool, sizeof(Head) );
 	initPoolAlloc( &prg->locationPool, sizeof(Location) );
 
-	Int *trueInt = (Int*) treeAllocate( prg );
-	trueInt->id = LEL_ID_BOOL;
-	trueInt->refs = 1;
-	trueInt->value = 1;
-
-	Int *falseInt = (Int*) treeAllocate( prg );
-	falseInt->id = LEL_ID_BOOL;
-	falseInt->refs = 1;
-	falseInt->value = 0;
+	Int *trueInt = (Int*) 1; //treeAllocate( prg );
+//	trueInt->id = LEL_ID_BOOL;
+//	trueInt->refs = 1;
+//	trueInt->value = 1;
+//
+	Int *falseInt = (Int*) 0; //treeAllocate( prg );
+//	falseInt->id = LEL_ID_BOOL;
+//	falseInt->refs = 1;
+//	falseInt->value = 0;
 
 	prg->trueVal = (Tree*)trueInt;
 	prg->falseVal = (Tree*)falseInt;
@@ -297,8 +297,8 @@ int colm_delete_program( Program *prg )
 	treeDownref( prg, sp, prg->returnVal );
 	colm_clear_heap( prg, sp );
 
-	treeDownref( prg, sp, prg->trueVal );
-	treeDownref( prg, sp, prg->falseVal );
+//	treeDownref( prg, sp, prg->trueVal );
+//	treeDownref( prg, sp, prg->falseVal );
 
 	treeDownref( prg, sp, prg->error );
 

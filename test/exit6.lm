@@ -699,8 +699,8 @@ send Output
 
 iter i()
 {
-	I: int = 1
-	yield I
+	S: str = "1"
+	yield S
 }
 
 int indepToHost( Indep: ref<section*> )

@@ -868,8 +868,6 @@ struct Compiler
 
 	LangEl *ptrLangEl;
 	LangEl *voidLangEl;
-	LangEl *boolLangEl;
-	LangEl *intLangEl;
 	LangEl *strLangEl;
 	LangEl *anyLangEl;
 	LangEl *rootLangEl;

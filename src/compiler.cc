@@ -364,8 +364,6 @@ Compiler::Compiler( )
 	//tokenStruct(0),
 
 	ptrLangEl(0),
-	boolLangEl(0),
-	intLangEl(0),
 	strLangEl(0),
 	anyLangEl(0),
 	rootLangEl(0),

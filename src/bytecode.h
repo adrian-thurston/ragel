@@ -41,6 +41,7 @@ typedef unsigned long colm_value_t;
 /* 
  */
 
+
 #define IN_LOAD_INT              0x01
 #define IN_LOAD_STR              0x02
 #define IN_LOAD_NIL              0x03
@@ -54,19 +55,32 @@ typedef unsigned long colm_value_t;
 #define IN_MULT_INT              0x0a
 #define IN_DIV_INT               0x0b
 
-#define IN_TST_EQL_TREE          0x0c
 #define IN_TST_EQL_VAL           0x59
-#define IN_TST_EQL               0x0c
+#define IN_TST_EQL_TREE          0x0c
+//#define IN_TST_EQL               0x0c
 #define IN_TST_NOT_EQL_TREE      0x0d
 #define IN_TST_NOT_EQL_VAL       0x5f
-#define IN_TST_LESS              0x0e
-#define IN_TST_GRTR              0x0f
-#define IN_TST_LESS_EQL          0x10
-#define IN_TST_GRTR_EQL          0x11
-#define IN_TST_LOGICAL_AND       0x12
-#define IN_TST_LOGICAL_OR        0x13
+#define IN_TST_LESS_VAL          0x0e
+#define IN_TST_LESS_TREE         0xbd
+#define IN_TST_GRTR_VAL          0x0f
+#define IN_TST_GRTR_TREE         0xbf
+#define IN_TST_LESS_EQL_VAL      0x10
+#define IN_TST_LESS_EQL_TREE     0xc0
+#define IN_TST_GRTR_EQL_VAL      0x11
+#define IN_TST_GRTR_EQL_TREE     0xcd
+#define IN_TST_LOGICAL_AND_VAL   0x12
+#define IN_TST_LOGICAL_AND_TREE  0xce
+#define IN_TST_LOGICAL_OR_VAL    0x13
+#define IN_TST_LOGICAL_OR_TREE   0xcf
 
-#define IN_NOT                   0x14
+#define IN_TST_NZ_TREE           0xd1
+
+//0xd3
+//0xd4
+//0xd5
+
+#define IN_NOT_VAL               0x14
+#define IN_NOT_TREE              0xd2
 
 #define IN_JMP                   0x15
 #define IN_JMP_FALSE_TREE        0x16
@@ -370,6 +384,8 @@ enum TYPE
 	TYPE_ITER    = 0x04,
 	TYPE_STRUCT  = 0x05,
 	TYPE_GENERIC = 0x06,
+	TYPE_INT     = 0x07,
+	TYPE_BOOL    = 0x08,
 };
 
 /* Types of Generics. */
@@ -385,10 +401,8 @@ enum GEN {
 enum LEL_ID {
 	LEL_ID_PTR        = 1,
 	LEL_ID_VOID       = 2,
-	LEL_ID_BOOL       = 3,
-	LEL_ID_INT        = 4,
-	LEL_ID_STR        = 5,
-	LEL_ID_IGNORE     = 6
+	LEL_ID_STR        = 3,
+	LEL_ID_IGNORE     = 4
 };
 
 /*

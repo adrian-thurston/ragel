@@ -206,8 +206,8 @@ void Compiler::makeLangElIds()
 	}
 
 	assert( ptrLangEl->id == LEL_ID_PTR );
-	assert( boolLangEl->id == LEL_ID_BOOL );
-	assert( intLangEl->id == LEL_ID_INT );
+//	assert( boolLangEl->id == LEL_ID_BOOL );
+//	assert( intLangEl->id == LEL_ID_INT );
 	assert( strLangEl->id == LEL_ID_STR );
 	assert( ignoreLangEl->id == LEL_ID_IGNORE );
 }
@@ -243,20 +243,20 @@ void Compiler::makeLangElNames()
 			lel->xmlTag = "void";
 
 		}
-		else if ( lel->id == LEL_ID_INT ) {
-			lel->fullName = "_int";
-			lel->fullLit = "_int";
-			lel->refName = "_int";
-			lel->declName = "_int";
-			lel->xmlTag = "int";
-		}
-		else if ( lel->id == LEL_ID_BOOL ) {
-			lel->fullName = "_bool";
-			lel->fullLit = "_bool";
-			lel->refName = "_bool";
-			lel->declName = "_bool";
-			lel->xmlTag = "bool";
-		}
+//		else if ( lel->id == LEL_ID_INT ) {
+//			lel->fullName = "_int";
+//			lel->fullLit = "_int";
+//			lel->refName = "_int";
+//			lel->declName = "_int";
+//			lel->xmlTag = "int";
+//		}
+//		else if ( lel->id == LEL_ID_BOOL ) {
+//			lel->fullName = "_bool";
+//			lel->fullLit = "_bool";
+//			lel->refName = "_bool";
+//			lel->declName = "_bool";
+//			lel->xmlTag = "bool";
+//		}
 		else {
 			lel->fullName = lel->name;
 			lel->fullLit = lel->lit;
@@ -1653,7 +1653,7 @@ void Compiler::makeRuntimeData()
 	runtimeData->firstNonTermId = firstNonTermId;
 
 	/* Special trees. */
-	runtimeData->integerId = intLangEl->id;
+	runtimeData->integerId = -1; //intLangEl->id;
 	runtimeData->stringId = strLangEl->id;
 	runtimeData->anyId = anyLangEl->id;
 	runtimeData->eofId = 0; //eofLangEl->id;

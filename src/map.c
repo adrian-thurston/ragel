@@ -552,6 +552,20 @@ MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid *
 	return newEl;
 }
 
+static long map_cmp( Program *prg, Map *map, const Tree *tree1, const Tree *tree2 )
+{
+	if ( map->genericInfo->keyType == 0x7 ) {
+		if ( (long)tree1 < (long)tree2 )
+			return -1;
+		else if ( (long)tree1 > (long)tree2)
+			return 1;
+		return 0;
+	}
+	else {
+		return cmpTree( prg, tree1, tree2 );
+	}
+}
+
 MapEl *mapInsertEl( Program *prg, Map *map, MapEl *element, MapEl **lastFound )
 {
 	long keyRelation;
@@ -569,7 +583,7 @@ MapEl *mapInsertEl( Program *prg, Map *map, MapEl *element, MapEl **lastFound )
 			return element;
 		}
 
-		keyRelation = cmpTree( prg,
+		keyRelation = map_cmp( prg, map,
 			element->key, curEl->key );
 
 		/* Do we go left? */
@@ -611,7 +625,7 @@ MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound )
 			return element;
 		}
 
-		keyRelation = cmpTree( prg, key, curEl->key );
+		keyRelation = map_cmp( prg, map, key, curEl->key );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 ) {
@@ -659,7 +673,7 @@ MapEl *mapImplFind( Program *prg, Map *map, Tree *key )
 	long keyRelation;
 
 	while ( curEl != 0 ) {
-		keyRelation = cmpTree( prg, key, curEl->key );
+		keyRelation = map_cmp( prg, map, key, curEl->key );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 )

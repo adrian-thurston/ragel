@@ -181,11 +181,7 @@ Kid *kidListConcat( Kid *list1, Kid *list2 )
 
 Tree *constructInteger( Program *prg, long i )
 {
-	Int *integer = (Int*) treeAllocate( prg );
-	integer->id = LEL_ID_INT;
-	integer->value = i;
-
-	return (Tree*)integer;
+	return (Tree*)i;
 }
 
 Tree *constructString( Program *prg, Head *s )
@@ -591,7 +587,7 @@ Tree *constructToken( Program *prg, Tree **args, long nargs )
 	Int *idInt = (Int*)args[0];
 	Str *textStr = (Str*)args[1];
 
-	long id = idInt->value;
+	long id = (long)idInt;//->value;
 	Head *tokdata = stringCopy( prg, textStr->value );
 
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
@@ -716,7 +712,7 @@ Tree *makeTree( Program *prg, Tree **args, long nargs )
 {
 	Int *idInt = (Int*)args[0];
 
-	long id = idInt->value;
+	long id = (long)idInt;//->value;
 	LangElInfo *lelInfo = prg->rtd->lelInfo;
 
 	Tree *tree = treeAllocate( prg );
@@ -749,8 +745,8 @@ int testFalse( Program *prg, Tree *tree )
 {
 	int flse = ( 
 		tree == 0 ||
-		tree == prg->falseVal ||
-		( tree->id == LEL_ID_INT && ((Int*)tree)->value == 0 ) );
+		tree == prg->falseVal /* ||
+		( tree->id == LEL_ID_INT && ((Int*)tree)->value == 0 ) */ );
 	return flse;
 }
 
@@ -923,10 +919,10 @@ Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
 //		assert(false);
 	if ( tree->id == LEL_ID_PTR )
 		assert(false);
-	else if ( tree->id == LEL_ID_BOOL )
-		assert(false);
-	else if ( tree->id == LEL_ID_INT )
-		assert(false);
+//	else if ( tree->id == LEL_ID_BOOL )
+//		assert(false);
+//	else if ( tree->id == LEL_ID_INT )
+//		assert(false);
 	else if ( tree->id == LEL_ID_STR )
 		assert(false);
 //	else if ( tree->id == LEL_ID_STREAM )
@@ -975,8 +971,8 @@ free_tree:
 //	assert( genericId == 0 );
 
 	switch ( tree->id ) {
-	case LEL_ID_BOOL:
-	case LEL_ID_INT:
+//	case LEL_ID_BOOL:
+//	case LEL_ID_INT:
 	case LEL_ID_PTR:
 		treeFree( prg, tree );
 		break;
@@ -1049,11 +1045,11 @@ free_tree:
 		treeFree( prg, tree );
 		break;
 	}
-	case LEL_ID_BOOL:
-	case LEL_ID_INT: {
-		treeFree( prg, tree );
-		break;
-	}
+//	case LEL_ID_BOOL:
+//	case LEL_ID_INT: {
+//		treeFree( prg, tree );
+//		break;
+//	}
 	case LEL_ID_PTR: {
 		treeFree( prg, tree );
 		break;
@@ -1338,12 +1334,12 @@ long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 )
 		else if ( ((Pointer*)tree1)->value > ((Pointer*)tree2)->value )
 			return 1;
 	}
-	else if ( tree1->id == LEL_ID_INT ) {
-		if ( ((Int*)tree1)->value < ((Int*)tree2)->value )
-			return -1;
-		else if ( ((Int*)tree1)->value > ((Int*)tree2)->value )
-			return 1;
-	}
+//	else if ( tree1->id == LEL_ID_INT ) {
+//		if ( ((Int*)tree1)->value < ((Int*)tree2)->value )
+//			return -1;
+//		else if ( ((Int*)tree1)->value > ((Int*)tree2)->value )
+//			return 1;
+//	}
 	else if ( tree1->id == LEL_ID_STR ) {
 		cmpres = cmpString( ((Str*)tree1)->value, ((Str*)tree2)->value );
 		if ( cmpres != 0 )
@@ -2063,18 +2059,18 @@ void colm_print_term_tree( Program *prg, Tree **sp, struct colm_print_args *prin
 {
 	debug( prg, REALM_PRINT, "printing term %p\n", kid->tree );
 
-	if ( kid->tree->id == LEL_ID_INT ) {
-		char buf[INT_SZ];
-		sprintf( buf, "%ld", ((Int*)kid->tree)->value );
-		printArgs->out( printArgs, buf, strlen(buf) );
-	}
-	else if ( kid->tree->id == LEL_ID_BOOL ) {
-		if ( ((Int*)kid->tree)->value )
-			printArgs->out( printArgs, "true", 4 );
-		else
-			printArgs->out( printArgs, "false", 5 );
-	}
-	else if ( kid->tree->id == LEL_ID_PTR ) {
+//	if ( kid->tree->id == LEL_ID_INT ) {
+//		char buf[INT_SZ];
+//		sprintf( buf, "%ld", ((Int*)kid->tree)->value );
+//		printArgs->out( printArgs, buf, strlen(buf) );
+//	}
+//	else if ( kid->tree->id == LEL_ID_BOOL ) {
+//		if ( ((Int*)kid->tree)->value )
+//			printArgs->out( printArgs, "true", 4 );
+//		else
+//			printArgs->out( printArgs, "false", 5 );
+//	}
+	if ( kid->tree->id == LEL_ID_PTR ) {
 		char buf[INT_SZ];
 		printArgs->out( printArgs, "#", 1 );
 		sprintf( buf, "%p", (void*) ((Pointer*)kid->tree)->value );
@@ -2134,17 +2130,17 @@ void printTermXml( Program *prg, Tree **sp, struct colm_print_args *printArgs, K
 		sprintf( ptr, "%p\n", (void*)((Pointer*)kid->tree)->value );
 		printArgs->out( printArgs, ptr, strlen(ptr) );
 	}
-	else if ( kid->tree->id == LEL_ID_BOOL ) {
-		if ( ((Int*)kid->tree)->value )
-			printArgs->out( printArgs, "true", 4 );
-		else
-			printArgs->out( printArgs, "false", 5 );
-	}
-	else if ( kid->tree->id == LEL_ID_INT ) {
-		char ptr[32];
-		sprintf( ptr, "%ld", ((Int*)kid->tree)->value );
-		printArgs->out( printArgs, ptr, strlen(ptr) );
-	}
+//	else if ( kid->tree->id == LEL_ID_BOOL ) {
+//		if ( ((Int*)kid->tree)->value )
+//			printArgs->out( printArgs, "true", 4 );
+//		else
+//			printArgs->out( printArgs, "false", 5 );
+//	}
+//	else if ( kid->tree->id == LEL_ID_INT ) {
+//		char ptr[32];
+//		sprintf( ptr, "%ld", ((Int*)kid->tree)->value );
+//		printArgs->out( printArgs, ptr, strlen(ptr) );
+//	}
 	else if ( kid->tree->id == LEL_ID_STR ) {
 		Head *head = (Head*) ((Str*)kid->tree)->value;
 

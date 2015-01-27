@@ -29,8 +29,8 @@ void Compiler::initUniqueTypes( )
 	uniqueTypeNil = new UniqueType( TYPE_NIL );
 	uniqueTypeVoid = new UniqueType( TYPE_TREE, voidLangEl );
 	uniqueTypePtr = new UniqueType( TYPE_TREE, ptrLangEl );
-	uniqueTypeBool = new UniqueType( TYPE_TREE, boolLangEl );
-	uniqueTypeInt = new UniqueType( TYPE_TREE, intLangEl );
+	uniqueTypeBool = new UniqueType( TYPE_BOOL );
+	uniqueTypeInt = new UniqueType( TYPE_INT );
 	uniqueTypeStr = new UniqueType( TYPE_TREE, strLangEl );
 	uniqueTypeIgnore = new UniqueType( TYPE_TREE, ignoreLangEl );
 	uniqueTypeAny = new UniqueType( TYPE_TREE, anyLangEl );
@@ -310,8 +310,8 @@ void Compiler::declareBaseLangEls()
 	
 	ptrLangEl = declareLangEl( this, rootNamespace, "ptr", LangEl::Term );
 	voidLangEl = declareLangEl( this, rootNamespace, "void", LangEl::Term );
-	boolLangEl = declareLangEl( this, rootNamespace, "bool", LangEl::Term );
-	intLangEl = declareLangEl( this, rootNamespace, "int", LangEl::Term );
+//	boolLangEl = declareLangEl( this, rootNamespace, "bool", LangEl::Term );
+//	intLangEl = declareLangEl( this, rootNamespace, "int", LangEl::Term );
 	strLangEl = declareLangEl( this, rootNamespace, "str", LangEl::Term );
 	ignoreLangEl = declareLangEl( this, rootNamespace, "il", LangEl::Term );
 
@@ -749,7 +749,7 @@ void Compiler::addThis( ObjectDef *frame )
 void Compiler::declareIntFields( )
 {
 	intObj = ObjectDef::cons( ObjectDef::BuiltinType, "int", nextObjectId++ );
-	intLangEl->objectDef = intObj;
+//	intLangEl->objectDef = intObj;
 
 	initFunction( uniqueTypeStr, intObj, "to_string", IN_INT_TO_STR, IN_INT_TO_STR, true );
 }
@@ -828,6 +828,7 @@ ObjectField *Compiler::makePosEl()
 
 	el->isConst = true;
 	el->inGetR = IN_GET_TOKEN_POS_R;
+	el->inGetValR = IN_GET_TOKEN_POS_R;
 	return el;
 }
 
@@ -840,6 +841,7 @@ ObjectField *Compiler::makeLineEl()
 
 	el->isConst = true;
 	el->inGetR = IN_GET_TOKEN_LINE_R;
+	el->inGetValR = IN_GET_TOKEN_LINE_R;
 	return el;
 }
 
@@ -853,6 +855,7 @@ void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
 			ObjectField::InbuiltFieldType, typeRef, "length" );
 	el->isConst = true;
 	el->inGetR = getLength;
+	el->inGetValR = getLength;
 
 	objDef->rootScope->insertField( el->name, el );
 }

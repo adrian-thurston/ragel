@@ -346,7 +346,7 @@ break; }
 static Tree *stream_pull_bc( Program *prg, Tree **sp, PdaRun *pdaRun,
 		Stream *stream, Tree *length )
 {
-	long len = ((Int*)length)->value;
+	long len = ((long)length);
 	StreamImpl *impl = streamToImpl( stream );
 	Head *tokdata = streamPull( prg, sp, pdaRun, impl, len );
 	return constructString( prg, tokdata );
@@ -688,13 +688,13 @@ again:
 		}
 		case IN_LOAD_TRUE: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_TRUE\n" );
-			treeUpref( prg->trueVal );
+			//treeUpref( prg->trueVal );
 			vm_push( prg->trueVal );
 			break;
 		}
 		case IN_LOAD_FALSE: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_FALSE\n" );
-			treeUpref( prg->falseVal );
+			//treeUpref( prg->falseVal );
 			vm_push( prg->falseVal );
 			break;
 		}
@@ -705,7 +705,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INT %d\n", i );
 
 			Tree *tree = constructInteger( prg, i );
-			treeUpref( tree );
+			//treeUpref( tree );
 			vm_push( tree );
 			break;
 		}
@@ -1071,6 +1071,7 @@ again:
 
 			Tree *val = vm_local(field);
 			vm_push( val );
+			debug( prg, REALM_BYTECODE, "val: %ld\n", (long)val );
 			break;
 		}
 		case IN_SET_LOCAL_VAL_WC: {
@@ -1527,7 +1528,7 @@ again:
 			Tree *str = constructString( prg, res );
 			treeUpref( str );
 			vm_push( str );
-			treeDownref( prg, sp, integer );
+			//treeDownref( prg, sp, integer );
 			treeDownref( prg, sp, format );
 			break;
 		}
@@ -1535,11 +1536,11 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_INT_TO_STR\n" );
 
 			Int *i = (Int*)vm_pop();
-			Head *res = intToStr( prg, i->value );
+			Head *res = intToStr( prg, (long)i );
 			Tree *str = constructString( prg, res );
 			treeUpref( str );
 			vm_push( str );
-			treeDownref( prg, sp, (Tree*) i );
+//			treeDownref( prg, sp, (Tree*) i );
 			break;
 		}
 		case IN_TREE_TO_STR: {
@@ -1592,7 +1593,7 @@ again:
 			Str *str = (Str*)vm_pop();
 			long len = stringLength( str->value );
 			Tree *res = constructInteger( prg, len );
-			treeUpref( res );
+			//treeUpref( res );
 			vm_push( res );
 			treeDownref( prg, sp, (Tree*)str );
 			break;
@@ -1639,7 +1640,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_JMP_TRUE_VAL %d\n", dist );
 
 			Tree *tree = vm_pop();
-			if ( !tree != 0 )
+			if ( tree != 0 )
 				instr += dist;
 			break;
 		}
@@ -1667,8 +1668,8 @@ again:
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
-			Tree *val = r ? prg->falseVal : prg->trueVal;
-			treeUpref( val );
+			Tree *val = r == 0 ? prg->trueVal : prg->falseVal;
+			//treeUpref( val );
 			vm_push( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
@@ -1680,7 +1681,7 @@ again:
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			Tree *val = o1 == o2 ? prg->trueVal : prg->falseVal;
-			treeUpref( val );
+			//treeUpref( val );
 			vm_push( val );
 			break;
 		}
@@ -1691,7 +1692,7 @@ again:
 			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
 			Tree *val = r ? prg->trueVal : prg->falseVal;
-			treeUpref( val );
+			//treeUpref( val );
 			vm_push( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
@@ -1703,63 +1704,120 @@ again:
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			Tree *val = o1 != o2 ? prg->trueVal : prg->falseVal;
-			treeUpref( val );
+			//treeUpref( val );
 			vm_push( val );
 			break;
 		}
-		case IN_TST_LESS: {
-			debug( prg, REALM_BYTECODE, "IN_TST_LESS\n" );
+		case IN_TST_LESS_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_TST_LESS_VAL\n" );
+
+			Tree *o2 = vm_pop();
+			Tree *o1 = vm_pop();
+			Tree *val = (long)o1 < (long)o2 ? prg->trueVal : prg->falseVal;
+			vm_push( val );
+			break;
+		}
+		case IN_TST_LESS_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_TST_LESS_TREE\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
 			Tree *val = r < 0 ? prg->trueVal : prg->falseVal;
-			treeUpref( val );
+			//treeUpref( val );
 			vm_push( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
 		}
-		case IN_TST_LESS_EQL: {
-			debug( prg, REALM_BYTECODE, "IN_TST_LESS_EQL\n" );
+		case IN_TST_LESS_EQL_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_TST_LESS_EQL_VAL\n" );
+
+			Tree *o2 = vm_pop();
+			Tree *o1 = vm_pop();
+			Tree *val = (long)o1 <= (long)o2 ? prg->trueVal : prg->falseVal;
+			vm_push( val );
+		}
+		case IN_TST_LESS_EQL_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_TST_LESS_EQL_TREE\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
 			Tree *val = r <= 0 ? prg->trueVal : prg->falseVal;
-			treeUpref( val );
+			//treeUpref( val );
 			vm_push( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 		}
-		case IN_TST_GRTR: {
-			debug( prg, REALM_BYTECODE, "IN_TST_GRTR\n" );
+		case IN_TST_GRTR_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_TST_GRTR_VAL\n" );
+
+			Tree *o2 = vm_pop();
+			Tree *o1 = vm_pop();
+			Tree *val = (long)o1 > (long)o2 ? prg->trueVal : prg->falseVal;
+			vm_push( val );
+			break;
+		}
+		case IN_TST_GRTR_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_TST_GRTR_TREE\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
 			Tree *val = r > 0 ? prg->trueVal : prg->falseVal;
-			treeUpref( val );
+			//treeUpref( val );
 			vm_push( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
 		}
-		case IN_TST_GRTR_EQL: {
-			debug( prg, REALM_BYTECODE, "IN_TST_GRTR_EQL\n" );
+		case IN_TST_GRTR_EQL_VAL: {
+
+			Tree *o2 = (Tree*)vm_pop();
+			Tree *o1 = (Tree*)vm_pop();
+
+			debug( prg, REALM_BYTECODE, "IN_TST_GRTR_EQL_VAL %ld %ld\n", (long)o1, (long)o2 );
+
+			//long r = cmpTree( prg, o1, o2 );
+			//Tree *val = r >= 0 ? prg->trueVal : prg->falseVal;
+			Tree *val = (long)o1 >= (long)o2 ? prg->trueVal : prg->falseVal;
+			//treeUpref( val );
+			vm_push( val );
+			//treeDownref( prg, sp, o1 );
+			//treeDownref( prg, sp, o2 );
+			break;
+		}
+		case IN_TST_GRTR_EQL_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_TST_GRTR_EQL_TREE\n" );
 
 			Tree *o2 = (Tree*)vm_pop();
 			Tree *o1 = (Tree*)vm_pop();
 			long r = cmpTree( prg, o1, o2 );
 			Tree *val = r >= 0 ? prg->trueVal : prg->falseVal;
-			treeUpref( val );
+			//treeUpref( val );
 			vm_push( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
 		}
-		case IN_TST_LOGICAL_AND: {
-			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_AND\n" );
+		case IN_TST_LOGICAL_AND_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_AND_VAL\n" );
+
+			Tree *o2 = vm_pop();
+			Tree *o1 = vm_pop();
+//			long v2 = !testFalse( prg, o2 );
+//			long v1 = !testFalse( prg, o1 );
+			Word r = o1 && o2;
+			Tree *val = r ? prg->trueVal : prg->falseVal;
+			//treeUpref( val );
+			vm_push( val );
+//			treeDownref( prg, sp, o1 );
+//			treeDownref( prg, sp, o2 );
+			break;
+		}
+		case IN_TST_LOGICAL_AND_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_AND_TREE\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -1767,14 +1825,29 @@ again:
 			long v1 = !testFalse( prg, o1 );
 			Word r = v1 && v2;
 			Tree *val = r ? prg->trueVal : prg->falseVal;
-			treeUpref( val );
+			//treeUpref( val );
 			vm_push( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
 		}
-		case IN_TST_LOGICAL_OR: {
-			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_OR\n" );
+		case IN_TST_LOGICAL_OR_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_OR_VAL\n" );
+
+			Tree *o2 = vm_pop();
+			Tree *o1 = vm_pop();
+//			long v2 = !testFalse( prg, o2 );
+//			long v1 = !testFalse( prg, o1 );
+			Word r = o1 || o2;
+			Tree *val = r ? prg->trueVal : prg->falseVal;
+			//treeUpref( val );
+			vm_push( val );
+//			treeDownref( prg, sp, o1 );
+//			treeDownref( prg, sp, o2 );
+			break;
+		}
+		case IN_TST_LOGICAL_OR_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_OR_TREE\n" );
 
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
@@ -1782,19 +1855,41 @@ again:
 			long v1 = !testFalse( prg, o1 );
 			Word r = v1 || v2;
 			Tree *val = r ? prg->trueVal : prg->falseVal;
-			treeUpref( val );
+			//treeUpref( val );
 			vm_push( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
 		}
-		case IN_NOT: {
-			debug( prg, REALM_BYTECODE, "IN_NOT\n" );
+
+		case IN_TST_NZ_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_TST_NZ_TREE\n" );
+
+			Tree *tree = (Tree*)vm_pop();
+			long r = !testFalse( prg, tree );
+			vm_push_val( r );
+			break;
+		}
+		
+		case IN_NOT_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_NOT_VAL\n" );
+
+			Tree *tree = (Tree*)vm_pop();
+//			long r = testFalse( prg, tree );
+			Tree *val = tree == 0 ? prg->trueVal : prg->falseVal;
+			//treeUpref( val );
+			vm_push( val );
+			//treeDownref( prg, sp, tree );
+			break;
+		}
+
+		case IN_NOT_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_NOT_TREE\n" );
 
 			Tree *tree = (Tree*)vm_pop();
 			long r = testFalse( prg, tree );
 			Tree *val = r ? prg->trueVal : prg->falseVal;
-			treeUpref( val );
+			//treeUpref( val );
 			vm_push( val );
 			treeDownref( prg, sp, tree );
 			break;
@@ -1805,12 +1900,12 @@ again:
 
 			Int *o2 = (Int*)vm_pop();
 			Int *o1 = (Int*)vm_pop();
-			long r = o1->value + o2->value;
+			long r = (long)o1 + (long)o2;
 			Tree *tree = constructInteger( prg, r );
-			treeUpref( tree );
+//			treeUpref( tree );
 			vm_push( tree );
-			treeDownref( prg, sp, (Tree*)o1 );
-			treeDownref( prg, sp, (Tree*)o2 );
+//			treeDownref( prg, sp, (Tree*)o1 );
+//			treeDownref( prg, sp, (Tree*)o2 );
 			break;
 		}
 		case IN_MULT_INT: {
@@ -1818,12 +1913,12 @@ again:
 
 			Int *o2 = (Int*)vm_pop();
 			Int *o1 = (Int*)vm_pop();
-			long r = o1->value * o2->value;
+			long r = (long)o1 * (long)o2;
 			Tree *tree = constructInteger( prg, r );
-			treeUpref( tree );
+//			treeUpref( tree );
 			vm_push( tree );
-			treeDownref( prg, sp, (Tree*)o1 );
-			treeDownref( prg, sp, (Tree*)o2 );
+//			treeDownref( prg, sp, (Tree*)o1 );
+//			treeDownref( prg, sp, (Tree*)o2 );
 			break;
 		}
 		case IN_DIV_INT: {
@@ -1831,12 +1926,12 @@ again:
 
 			Int *o2 = (Int*)vm_pop();
 			Int *o1 = (Int*)vm_pop();
-			long r = o1->value / o2->value;
+			long r = (long)o1 / (long)o2;
 			Tree *tree = constructInteger( prg, r );
-			treeUpref( tree );
+//			treeUpref( tree );
 			vm_push( tree );
-			treeDownref( prg, sp, (Tree*)o1 );
-			treeDownref( prg, sp, (Tree*)o2 );
+//			treeDownref( prg, sp, (Tree*)o1 );
+//			treeDownref( prg, sp, (Tree*)o2 );
 			break;
 		}
 		case IN_SUB_INT: {
@@ -1844,12 +1939,12 @@ again:
 
 			Int *o2 = (Int*)vm_pop();
 			Int *o1 = (Int*)vm_pop();
-			long r = o1->value - o2->value;
+			long r = (long)o1 - (long)o2;
 			Tree *tree = constructInteger( prg, r );
-			treeUpref( tree );
+//			treeUpref( tree );
 			vm_push( tree );
-			treeDownref( prg, sp, (Tree*)o1 );
-			treeDownref( prg, sp, (Tree*)o2 );
+//			treeDownref( prg, sp, (Tree*)o1 );
+//			treeDownref( prg, sp, (Tree*)o2 );
 			break;
 		}
 		case IN_TOP_SWAP: {
@@ -1970,7 +2065,7 @@ again:
 
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
 			Tree *res = treeIterAdvance( prg, &sp, iter );
-			treeUpref( res );
+			//treeUpref( res );
 			vm_push( res );
 			break;
 		}
@@ -1982,7 +2077,7 @@ again:
 
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
 			Tree *res = treeIterNextChild( prg, &sp, iter );
-			treeUpref( res );
+			//treeUpref( res );
 			vm_push( res );
 			break;
 		}
@@ -1994,7 +2089,7 @@ again:
 
 			RevTreeIter *iter = (RevTreeIter*) vm_plocal(field);
 			Tree *res = treeRevIterPrevChild( prg, &sp, iter );
-			treeUpref( res );
+			//treeUpref( res );
 			vm_push( res );
 			break;
 		}
@@ -2006,7 +2101,7 @@ again:
 
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
 			Tree *res = treeIterNextRepeat( prg, &sp, iter );
-			treeUpref( res );
+			//treeUpref( res );
 			vm_push( res );
 			break;
 		}
@@ -2018,7 +2113,7 @@ again:
 
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
 			Tree *res = treeIterPrevRepeat( prg, &sp, iter );
-			treeUpref( res );
+			//treeUpref( res );
 			vm_push( res );
 			break;
 		}
@@ -2562,7 +2657,7 @@ again:
 			rcode_word( exec, (Word) string );
 			rcode_unit_term( exec );
 
-			treeDownref( prg, sp, len );
+			//treeDownref( prg, sp, len );
 			break;
 		}
 
@@ -2576,7 +2671,7 @@ again:
 			treeUpref( string );
 			vm_push( string );
 
-			treeDownref( prg, sp, len );
+			//treeDownref( prg, sp, len );
 			break;
 		}
 		case IN_INPUT_PULL_BKT: {
@@ -2727,7 +2822,7 @@ again:
 				arg[i] = vm_pop();
 
 			Tree *result = constructToken( prg, arg, nargs );
-			for ( i = 0; i < nargs; i++ )
+			for ( i = 1; i < nargs; i++ )
 				treeDownref( prg, sp, arg[i] );
 			vm_push( result );
 			break;
@@ -2744,7 +2839,7 @@ again:
 				arg[i] = vm_pop();
 
 			Tree *result = makeTree( prg, arg, nargs );
-			for ( i = 0; i < nargs; i++ )
+			for ( i = 1; i < nargs; i++ )
 				treeDownref( prg, sp, arg[i] );
 
 			vm_push( result );
@@ -2961,7 +3056,7 @@ again:
 			Tree *integer = 0;
 			if ( tree->tokdata->location ) {
 				integer = constructInteger( prg, tree->tokdata->location->byte );
-				treeUpref( integer );
+				//treeUpref( integer );
 			}
 			vm_push( integer );
 			treeDownref( prg, sp, tree );
@@ -2974,7 +3069,7 @@ again:
 			Tree *integer = 0;
 			if ( tree->tokdata->location ) {
 				integer = constructInteger( prg, tree->tokdata->location->line );
-				treeUpref( integer );
+				//treeUpref( integer );
 			}
 			vm_push( integer );
 			treeDownref( prg, sp, tree );
@@ -2985,7 +3080,7 @@ again:
 
 			Tree *integer = constructInteger( prg, 
 					stringLength(exec->parser->pdaRun->tokdata) );
-			treeUpref( integer );
+			//treeUpref( integer );
 			vm_push( integer );
 			break;
 		}
@@ -3005,7 +3100,7 @@ again:
 			long len = colm_list_length( list );
 			Tree *res = constructInteger( prg, len );
 			treeDownref( prg, sp, (Tree*)list );
-			treeUpref( res );
+			//treeUpref( res );
 			vm_push( res );
 			break;
 		}
@@ -3119,7 +3214,7 @@ again:
 			Tree *obj = vm_pop();
 			long len = mapLength( (Map*)obj );
 			Tree *res = constructInteger( prg, len );
-			treeUpref( res );
+			//treeUpref( res );
 			vm_push( res );
 
 			treeDownref( prg, sp, obj );
@@ -3255,7 +3350,7 @@ again:
 
 				/* Return the yield result on the top of the stack. */
 				Tree *result = uiter->ref.kid != 0 ? prg->trueVal : prg->falseVal;
-				treeUpref( result );
+				//treeUpref( result );
 				vm_push( result );
 			}
 			break;
@@ -3426,7 +3521,7 @@ again:
 			treeDownref( prg, sp, (Tree*)cmd );
 
 			Tree *result = constructInteger( prg, r );
-			treeUpref( result );
+			//treeUpref( result );
 			vm_push( result );
 			break;
 		}
@@ -3440,7 +3535,7 @@ again:
 				Str *str = (Str*)vm_pop();
 				Word res = strAtoi( str->value );
 				Tree *integer = constructInteger( prg, res );
-				treeUpref( integer );
+				//treeUpref( integer );
 				vm_push( integer );
 				treeDownref( prg, sp, (Tree*)str );
 				break;
@@ -3451,7 +3546,7 @@ again:
 				Str *str = (Str*)vm_pop();
 				Word res = strUord8( str->value );
 				Tree *tree = constructInteger( prg, res );
-				treeUpref( tree );
+				//treeUpref( tree );
 				vm_push( tree );
 				treeDownref( prg, sp, (Tree*)str );
 				break;
@@ -3462,7 +3557,7 @@ again:
 				Str *str = (Str*)vm_pop();
 				Word res = strUord16( str->value );
 				Tree *tree = constructInteger( prg, res );
-				treeUpref( tree );
+				//treeUpref( tree );
 				vm_push( tree );
 				treeDownref( prg, sp, (Tree*)str );
 				break;
@@ -3522,7 +3617,7 @@ again:
 				ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 				colm_list_prepend( list, listEl );
 
-				treeUpref( prg->trueVal );
+				//treeUpref( prg->trueVal );
 				vm_push( prg->trueVal );
 				break;
 			}
@@ -3538,7 +3633,7 @@ again:
 				ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 				colm_list_prepend( list, listEl );
 
-				treeUpref( prg->trueVal );
+				//treeUpref( prg->trueVal );
 				vm_push( prg->trueVal );
 
 				/* Set up reverse code. Needs no args. */
@@ -3566,7 +3661,7 @@ again:
 				ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 				colm_list_append( list, listEl );
 
-				treeUpref( prg->trueVal );
+				//treeUpref( prg->trueVal );
 				vm_push( prg->trueVal );
 				break;
 			}
@@ -3582,7 +3677,7 @@ again:
 				ListEl *listEl = colm_struct_to_list_el( prg, s, genId );
 				colm_list_append( list, listEl );
 
-				treeUpref( prg->trueVal );
+				//treeUpref( prg->trueVal );
 				vm_push( prg->trueVal );
 
 				/* Set up reverse code. Needs no args. */
@@ -3736,7 +3831,7 @@ again:
 
 				colm_map_insert( prg, map, mapEl );
 
-				treeUpref( prg->trueVal );
+				//treeUpref( prg->trueVal );
 				vm_push( prg->trueVal );
 				break;
 			}
@@ -3753,7 +3848,7 @@ again:
 
 				MapEl *inserted = colm_map_insert( prg, map, mapEl );
 
-				treeUpref( prg->trueVal );
+				//treeUpref( prg->trueVal );
 				vm_push( prg->trueVal );
 
 				rcode_code( exec, IN_FN );
@@ -3798,7 +3893,7 @@ again:
 
 				colm_map_detach( prg, map, mapEl );
 
-				treeUpref( prg->trueVal );
+				//treeUpref( prg->trueVal );
 				vm_push( prg->trueVal );
 				break;
 			}
@@ -3848,9 +3943,9 @@ again:
 
 			Tree *global = vm_pop();
 			Int *status = (Int*)vm_pop();
-			prg->exitStatus = status->value;
+			prg->exitStatus = (long)status;//->value;
 			prg->induceExit = 1;
-			treeDownref( prg, sp, (Tree*)status );
+			//treeDownref( prg, sp, (Tree*)status );
 
 			while ( true ) {
 				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
@@ -3873,6 +3968,7 @@ again:
 				vm_popn( fi->argSize );
 				vm_pop();
 
+				/* Problem here. */
 				treeDownref( prg, sp, retVal );
 			}
 

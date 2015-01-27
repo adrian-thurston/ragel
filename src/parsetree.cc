@@ -119,7 +119,10 @@ int CmpUniqueType::compare( const UniqueType &ut1, const UniqueType &ut2 )
 				return 1;
 			break;
 		case TYPE_NIL:
+		case TYPE_INT:
+		case TYPE_BOOL:
 			break;
+
 		case TYPE_STRUCT:
 			if ( ut1.structEl < ut2.structEl )
 				return -1;

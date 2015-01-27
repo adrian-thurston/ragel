@@ -66,10 +66,10 @@ print( '\n' )
 ##### IN #####
 !a b b a;
 ##### EXP #####
-old_id = NIL
-new_id = 12
-old_id = NIL
-new_id = 11
+old_id = 0
+new_id = 10
+old_id = 0
+new_id = 9
 this is item2
 <si::start><si::item2><si::e2></si::e2><si::_literal_0001>!</si::_literal_0001><si::_literal_0003>a</si::_literal_0003><si::super_id>b</si::super_id><si::super_id>b</si::super_id><si::_literal_0003>a</si::_literal_0003></si::item2><si::SEMI_NL>;
 </si::SEMI_NL></si::start>

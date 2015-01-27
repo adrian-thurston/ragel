@@ -238,9 +238,9 @@ Head *makeLiteral( Program *prg, long offset )
 Head *stringSprintf( Program *prg, Str *format, Int *integer )
 {
 	Head *formatHead = format->value;
-	long written = snprintf( 0, 0, stringData(formatHead), integer->value );
+	long written = snprintf( 0, 0, stringData(formatHead), (long)integer );
 	Head *head = initStrSpace( written+1 );
-	written = snprintf( (char*)head->data, written+1, stringData(formatHead), integer->value );
+	written = snprintf( (char*)head->data, written+1, stringData(formatHead), (long)integer );
 	head->length -= 1;
 	return head;
 }
