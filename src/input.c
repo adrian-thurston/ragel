@@ -78,6 +78,20 @@ void clearSourceStream( struct colm_program *prg,
 	sourceStream->queue = 0;
 }
 
+void colm_stream_destroy( Program *prg, Tree **sp, Struct *s )
+{
+	Stream *stream = (Stream*) s;
+	clearSourceStream( prg, sp, stream->impl );
+
+	if ( stream->impl->file != 0 )
+		fclose( stream->impl->file );
+	else if ( stream->impl->fd >= 0 )
+		close( stream->impl->fd );
+
+	free( stream->impl );
+}
+
+
 /* Keep the position up to date after consuming text. */
 void updatePosition( StreamImpl *is, const char *data, long length )
 {
@@ -1033,6 +1047,7 @@ Stream *colm_stream_new_struct( Program *prg )
 	memset( stream, 0, memsize );
 	colm_struct_add( prg, (struct colm_struct *)stream );
 	stream->id = STRUCT_INBUILT_ID;
+	stream->destructor = &colm_stream_destroy;
 	return stream;
 }
 
