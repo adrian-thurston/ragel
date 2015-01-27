@@ -162,11 +162,11 @@ struct _StreamImpl
 	int consumed;
 };
 
-StreamImpl *newSourceStreamPat( const char *name, struct Pattern *pattern );
-StreamImpl *newSourceStreamCons( const char *name, struct Constructor *constructor );
-StreamImpl *newSourceStreamFile( const char *name, FILE *file );
-StreamImpl *newSourceStreamFd( const char *name, long fd );
-StreamImpl *newSourceStreamGeneric( const char *name );
+StreamImpl *colm_impl_new_pat( const char *name, struct Pattern *pattern );
+StreamImpl *colm_impl_new_cons( const char *name, struct Constructor *constructor );
+StreamImpl *colm_impl_new_file( const char *name, FILE *file );
+StreamImpl *colm_impl_new_fd( const char *name, long fd );
+StreamImpl *colm_impl_new_generic( const char *name );
 
 void updatePosition( StreamImpl *inputStream, const char *data, long length );
 void undoPosition( StreamImpl *inputStream, const char *data, long length );

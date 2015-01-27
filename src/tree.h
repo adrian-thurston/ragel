@@ -230,7 +230,6 @@ Tree *constructTree( struct colm_program *prg, Kid *kid,
 		Tree **bindings, long pat );
 Tree *constructObject( struct colm_program *prg, Kid *kid,
 		Tree **bindings, long langElId );
-Tree *constructGeneric( struct colm_program *prg, long genericId );
 Tree *constructToken( struct colm_program *prg, Tree **args, long nargs );
 
 Object *newList2( struct colm_program *prg );
@@ -238,7 +237,7 @@ Object *newList2( struct colm_program *prg );
 int testFalse( struct colm_program *prg, Tree *tree );
 Tree *makeTree( struct colm_program *prg, Tree **args, long nargs );
 Stream *openFile( struct colm_program *prg, Tree *name, Tree *mode );
-Stream *openStreamFd( struct colm_program *prg, char *name, long fd );
+Stream *colm_stream_open_fd( struct colm_program *prg, char *name, long fd );
 Kid *copyIgnoreList( struct colm_program *prg, Kid *ignoreHeader );
 Kid *copyKidList( struct colm_program *prg, Kid *kidList );
 void streamFree( struct colm_program *prg, Stream *s );

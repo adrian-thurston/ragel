@@ -961,44 +961,6 @@ Tree *splitTree( Program *prg, Tree *tree )
 	return tree;
 }
 
-Tree *constructGeneric( Program *prg, long genericId )
-{
-	GenericInfo *genericInfo = &prg->rtd->genericInfo[genericId];
-	Tree *newGeneric = 0;
-	switch ( genericInfo->type ) {
-		case GEN_MAP: {
-			Map *map = colm_map_new( prg );
-			map->genericInfo = genericInfo;
-			newGeneric = (Tree*) map;
-			break;
-		}
-		case GEN_MAP_EL: {
-			break;
-		}
-		case GEN_LIST: {
-			List *list = colm_list_new( prg );
-			list->genericInfo = genericInfo;
-			newGeneric = (Tree*) list;
-			break;
-		}
-		case GEN_LIST_EL: {
-			break;
-		}
-		case GEN_PARSER: {
-			Parser *parser = colm_parser_new( prg, genericInfo );
-			parser->input = (Tree*)colm_stream_new( prg );
-			newGeneric = (Tree*) parser;
-			break;
-		}
-		default:
-			assert(false);
-			return 0;
-	}
-
-	return newGeneric;
-}
-
-
 /* We can't make recursive calls here since the tree we are freeing may be
  * very large. Need the VM stack. */
 void treeFreeRec( Program *prg, Tree **sp, Tree *tree )
@@ -1097,15 +1059,6 @@ free_tree:
 		break;
 	}
 //	case LEL_ID_STREAM: {
-//		Stream *stream = (Stream*)tree;
-//		clearSourceStream( prg, sp, stream->in );
-//		if ( stream->in->file != 0 )
-//			fclose( stream->in->file );
-//		else if ( stream->in->fd >= 0 )
-//			close( stream->in->fd );
-//		free( stream->in );
-//		streamFree( prg, stream );
-//		break;
 //	}
 	default: { 
 		if ( tree->id != LEL_ID_IGNORE )

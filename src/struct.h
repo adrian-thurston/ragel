@@ -147,6 +147,8 @@ struct colm_struct *colm_map_el_get( struct colm_program *prg,
 struct colm_struct *colm_map_get( struct colm_program *prg, Map *map,
 		Word genId, Word field );
 
+struct colm_struct *colm_construct_generic( struct colm_program *prg, long genericId );
+
 #define STRUCT_INBUILT_ID -1
 
 #if defined(__cplusplus)

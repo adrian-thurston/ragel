@@ -995,7 +995,7 @@ struct StreamFuncs fileFuncs =
 };
 
 
-StreamImpl *newSourceStreamFile( const char *name, FILE *file )
+StreamImpl *colm_impl_new_file( const char *name, FILE *file )
 {
 	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
 	initStreamImpl( ss, name );
@@ -1006,7 +1006,7 @@ StreamImpl *newSourceStreamFile( const char *name, FILE *file )
 	return ss;
 }
 
-StreamImpl *newSourceStreamFd( const char *name, long fd )
+StreamImpl *colm_impl_new_fd( const char *name, long fd )
 {
 	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
 	initStreamImpl( ss, name );
@@ -1017,7 +1017,7 @@ StreamImpl *newSourceStreamFd( const char *name, long fd )
 	return ss;
 }
 
-StreamImpl *newSourceStreamGeneric( const char *name )
+StreamImpl *colm_impl_new_generic( const char *name )
 {
 	StreamImpl *ss = (StreamImpl*)malloc(sizeof(StreamImpl));
 	initStreamImpl( ss, name );
@@ -1026,25 +1026,26 @@ StreamImpl *newSourceStreamGeneric( const char *name )
 	return ss;
 }
 
-Stream *openStreamFile( Program *prg, char *name, FILE *file )
+Stream *colm_stream_new_struct( Program *prg )
 {
-	StreamImpl *impl = newSourceStreamFile( name, file );
+	size_t memsize = sizeof(struct colm_stream);
+	struct colm_stream *stream = (struct colm_stream*) malloc( memsize );
+	memset( stream, 0, memsize );
+	colm_struct_add( prg, (struct colm_struct *)stream );
+	stream->id = STRUCT_INBUILT_ID;
+	return stream;
+}
+
+Stream *colm_stream_open_fd( Program *prg, char *name, long fd )
+{
+	StreamImpl *impl = colm_impl_new_fd( name, fd );
 
 	struct colm_stream *s = colm_stream_new_struct( prg );
 	s->impl = impl;
 	return s;
 }
 
-Stream *openStreamFd( Program *prg, char *name, long fd )
-{
-	StreamImpl *impl = newSourceStreamFd( name, fd );
-
-	struct colm_stream *s = colm_stream_new_struct( prg );
-	s->impl = impl;
-	return s;
-}
-
-Stream *openFile( Program *prg, Tree *name, Tree *mode )
+Stream *colm_stream_open_file( Program *prg, Tree *name, Tree *mode )
 {
 	Head *headName = ((Str*)name)->value;
 	Head *headMode = ((Str*)mode)->value;
@@ -1067,15 +1068,17 @@ Stream *openFile( Program *prg, Tree *name, Tree *mode )
 	memcpy( fileName, stringData(headName), stringLength(headName) );
 	fileName[stringLength(headName)] = 0;
 	FILE *file = fopen( fileName, fopenMode );
-	if ( file != 0 )
-		stream = openStreamFile( prg, fileName, file );
+	if ( file != 0 ) {
+		stream = colm_stream_new_struct( prg );
+		stream->impl = colm_impl_new_file( fileName, file );
+	}
 
 	return stream;
 }
 
 Stream *colm_stream_new( Program *prg )
 {
-	StreamImpl *impl = newSourceStreamGeneric( "<internal>" );
+	StreamImpl *impl = colm_impl_new_generic( "<internal>" );
 
 	struct colm_stream *stream = colm_stream_new_struct( prg );
 	stream->impl = impl;

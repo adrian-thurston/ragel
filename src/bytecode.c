@@ -478,7 +478,7 @@ static Tree *construct_arg0( Program *prg, int argc, const char **argv )
 
 static List *construct_argv( Program *prg, int argc, const char **argv )
 {
-	List *list = (List*)constructGeneric( prg, prg->rtd->argvGenericId );
+	List *list = (List*)colm_construct_generic( prg, prg->rtd->argvGenericId );
 	int i;
 	for ( i = 1; i < argc; i++ ) {
 		Head *head = stringAllocPointer( prg, argv[i], strlen(argv[i]) );
@@ -2663,8 +2663,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CONS_GENERIC %hd\n", genericId );
 
-			Tree *replTree = constructGeneric( prg, genericId );
-			vm_push( replTree );
+			Struct *gen = colm_construct_generic( prg, genericId );
+			vm_push_struct( gen );
 			break;
 		}
 		case IN_CONS_OBJECT: {
@@ -3371,7 +3371,7 @@ again:
 
 			Tree *mode = vm_pop();
 			Tree *name = vm_pop();
-			Stream *res = openFile( prg, name, mode );
+			Stream *res = colm_stream_open_file( prg, name, mode );
 			vm_push_stream( res );
 			treeDownref( prg, sp, name );
 			treeDownref( prg, sp, mode );
@@ -3383,7 +3383,7 @@ again:
 			/* Pop the root object. */
 			Tree *obj = vm_pop();
 			if ( prg->stdinVal == 0 )
-				prg->stdinVal = openStreamFd( prg, "<stdin>", 0 );
+				prg->stdinVal = colm_stream_open_fd( prg, "<stdin>", 0 );
 
 			vm_push_stream( prg->stdinVal );
 			break;
@@ -3394,7 +3394,7 @@ again:
 			/* Pop the root object. */
 			Tree *obj = vm_pop();
 			if ( prg->stdoutVal == 0 )
-				prg->stdoutVal = openStreamFd( prg, "<stdout>", 1 );
+				prg->stdoutVal = colm_stream_open_fd( prg, "<stdout>", 1 );
 
 			vm_push_stream( prg->stdoutVal );
 			break;
@@ -3405,7 +3405,7 @@ again:
 			/* Pop the root object. */
 			Tree *obj = vm_pop();
 			if ( prg->stderrVal == 0 )
-				prg->stderrVal = openStreamFd( prg, "<stderr>", 2 );
+				prg->stderrVal = colm_stream_open_fd( prg, "<stderr>", 2 );
 
 			vm_push_stream( prg->stderrVal );
 			break;

@@ -625,9 +625,7 @@ bool LangVarRef::canTakeRef( Compiler *pd, VarRefLookup &lookup ) const
 	 * via a local and attributes. */
 	if ( lookup.inObject->type == ObjectDef::FrameType )
 		canTake = true;
-	else if ( isLocalRef() )
-	{
-		cerr << "lastPtrInQual: " << lookup.lastPtrInQual << endl;
+	else if ( isLocalRef() ) {
 		if ( lookup.lastPtrInQual < 0 && ! lookup.uniqueType->ptr() ) 
 			canTake = true;
 	}

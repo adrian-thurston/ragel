@@ -2,10 +2,12 @@
 #include <colm/struct.h>
 
 #include "internal.h"
+#include "bytecode.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 
 struct colm_tree *colm_get_global( Program *prg, long pos )
 {
@@ -94,16 +96,6 @@ Parser *colm_parser_new( Program *prg, GenericInfo *gi )
 	return parser;
 }
 
-Stream *colm_stream_new_struct( Program *prg )
-{
-	size_t memsize = sizeof(struct colm_stream);
-	struct colm_stream *stream = (struct colm_stream*) malloc( memsize );
-	memset( stream, 0, memsize );
-	colm_struct_add( prg, (struct colm_struct *)stream );
-	stream->id = STRUCT_INBUILT_ID;
-	return stream;
-}
-
 void colm_map_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 {
 	struct colm_map *map = (struct colm_map*) s;
@@ -125,4 +117,36 @@ Map *colm_map_new( struct colm_program *prg )
 	colm_struct_add( prg, (struct colm_struct *)map );
 	map->id = STRUCT_INBUILT_ID;
 	return map;
+}
+
+Struct *colm_construct_generic( Program *prg, long genericId )
+{
+	GenericInfo *genericInfo = &prg->rtd->genericInfo[genericId];
+	Struct *newGeneric = 0;
+	switch ( genericInfo->type ) {
+		case GEN_MAP_EL:
+		case GEN_LIST_EL:
+			break;
+
+		case GEN_MAP: {
+			Map *map = colm_map_new( prg );
+			map->genericInfo = genericInfo;
+			newGeneric = (Struct*) map;
+			break;
+		}
+		case GEN_LIST: {
+			List *list = colm_list_new( prg );
+			list->genericInfo = genericInfo;
+			newGeneric = (Struct*) list;
+			break;
+		}
+		case GEN_PARSER: {
+			Parser *parser = colm_parser_new( prg, genericInfo );
+			parser->input = colm_stream_new( prg );
+			newGeneric = (Struct*) parser;
+			break;
+		}
+	}
+
+	return newGeneric;
 }

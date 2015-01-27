@@ -983,7 +983,7 @@ void Compiler::initEmptyScanners()
 PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc, 
 		int parserId, StreamImpl *sourceStream )
 {
-	StreamImpl *in = newSourceStreamGeneric( "<internal>" );
+	StreamImpl *in = colm_impl_new_generic( "<internal>" );
 
 	PdaRun *pdaRun = new PdaRun;
 	colm_pda_init( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
@@ -1026,13 +1026,13 @@ void Compiler::parsePatterns()
 
 	for ( ConsList::Iter cons = replList; cons.lte(); cons++ ) {
 		if ( cons->langEl != 0 ) {
-			StreamImpl *in = newSourceStreamCons( "<internal>", cons );
+			StreamImpl *in = colm_impl_new_cons( "<internal>", cons );
 			cons->pdaRun = parsePattern( prg, sp, cons->loc, cons->langEl->parserId, in );
 		}
 	}
 
 	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
-		StreamImpl *in = newSourceStreamPat( "<internal>", pat );
+		StreamImpl *in = colm_impl_new_pat( "<internal>", pat );
 		pat->pdaRun = parsePattern( prg, sp, pat->loc, pat->langEl->parserId, in );
 	}
 
