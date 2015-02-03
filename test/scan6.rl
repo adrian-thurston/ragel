@@ -53,11 +53,10 @@ let () =
   %% write exec;
   ()
 
-(* _____OUTPUT_____
+##### OUTPUT #####
 got pat1
 got any
 got pat2
 got any
 got any
 got any
-_____OUTPUT_____ *)

@@ -350,9 +350,9 @@ void rw_ocaml( Output: stream )
 		";;
 		"
 
-	send Output "(* _____OUTPUT_____
-	for OutputLine: indep::output_line in RagelTree {
+	send Output
+		"##### OUTPUT #####
+
+	for OutputLine: indep::output_line in RagelTree
 		send Output [OutputLine]
-	}
-	send Output "*)
 }

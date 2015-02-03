@@ -104,7 +104,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 any
 any
 ascii
@@ -1206,4 +1206,3 @@ any
 extend
 any
 ACCEPT
-#endif

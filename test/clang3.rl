@@ -235,7 +235,7 @@ int main()
 	return 0;
 }
 
-/+ _____OUTPUT_____ 
+##### OUTPUT #####
 int(1): 999
 hex(1): 0xaAFF99
 float(1): 99.99
@@ -316,4 +316,3 @@ ident(22): AAPL_NAMESPACE
 symbol(23): #
 ident(23): endif
 ACCEPT
-++++++++++++++++/

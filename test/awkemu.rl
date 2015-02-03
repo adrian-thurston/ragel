@@ -145,11 +145,10 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 ACCEPT
 FAIL
 endline(2): one line
   word: one
   word: line
 ACCEPT
-#endif

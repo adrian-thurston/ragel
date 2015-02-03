@@ -69,7 +69,7 @@ int main( )
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 h
 e
 l
@@ -79,4 +79,3 @@ o
 
 ACCEPT
 ACCEPT
-#endif

@@ -32,6 +32,5 @@ int main()
 	return 0;
 } 
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 A
-#endif

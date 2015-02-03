@@ -48,7 +48,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 failure
 failure
 failure
@@ -58,4 +58,3 @@ success
 success
 success
 success
-#endif

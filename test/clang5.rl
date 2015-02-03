@@ -112,7 +112,7 @@ let () =
 ;;
 
 
-(* _____OUTPUT_____
+##### OUTPUT #####
 int(1): 999
 hex(1): 0xaAFF99
 float(1): 99.99
@@ -149,4 +149,3 @@ ident(4): unfinished
 symbol(4): .
 symbol(4): .
 symbol(4): .
-_____OUTPUT_____ *)

@@ -201,7 +201,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 ------
 FROM
 	"Adrian D. Thurston" | thurston@complang.org
@@ -244,4 +244,3 @@ SUBJECT
 
 
 DID NOT FINISH IN A FINAL STATE
-#endif

@@ -156,7 +156,7 @@ function run_test()
 	fi
 }
 
-indep_test_case()
+indep_lang()
 {
 	for lang in c asm d cs go java ruby ocaml; do
 		case $lang in 
@@ -209,8 +209,8 @@ for test_case; do
 
 	expected_out=$root.exp;
 	case_rl=${root}_rl.rl
-	sed '/_____OUTPUT_____/,$d' $test_case > $wk/$case_rl
-	sed '1,/_____OUTPUT_____/d;$d' $test_case > $wk/$expected_out
+	sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
+	sed '1,/^#\+ * OUTPUT #\+/d;' $test_case > $wk/$expected_out
 
 	lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
 	if [ -z "$lang" ]; then
@@ -285,7 +285,7 @@ for test_case; do
 		;;
 		indep)
 			lang_opt="";
-			indep_test_case;
+			indep_lang;
 			continue;
 		;;
 		*)

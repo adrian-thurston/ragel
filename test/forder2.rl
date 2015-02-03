@@ -88,7 +88,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 enter outter
 enter inner
 inside inner
@@ -130,4 +130,3 @@ inside outter
 inside inner
 inside outter
 FAIL
-#endif

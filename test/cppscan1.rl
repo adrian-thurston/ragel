@@ -276,7 +276,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 /*
  *  Copyright 
  */
@@ -309,4 +309,3 @@ int main()
 <192>"/*"
 <193>L'"'
 <192>L"'"
-#endif

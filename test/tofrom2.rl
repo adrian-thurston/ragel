@@ -97,7 +97,7 @@ int main( )
 	return 0;
 }
 
-/* _____OUTPUT_____
+##### OUTPUT #####
 from on 49
 to on 49
 from on 10
@@ -176,4 +176,3 @@ from on 45
 -> FAIL
 from on 32
 -> FAIL
-*/

@@ -91,7 +91,7 @@ class recdescent5
 	}
 }
 
-/* _____OUTPUT_____
+##### OUTPUT #####
 item: 88
 item: foo
 calling main
@@ -114,4 +114,3 @@ returning from main
 shrinking stack
 item: 76
 STRAY CLOSE
-*/

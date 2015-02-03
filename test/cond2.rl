@@ -52,7 +52,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 run:
   failure
 
@@ -88,4 +88,3 @@ run:
   two
   failure
 
-#endif

@@ -117,7 +117,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 ACCEPT
 ACCEPT
 ACCEPT
@@ -142,4 +142,3 @@ FAIL
 FAIL
  DIGIT
 FAIL
-#endif

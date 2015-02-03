@@ -50,10 +50,9 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 run: d1 d2 | d1 d2 | d1 d2 | d1 d2 | d1 d2 | d2 | d2 | d2 | d2 | failure
 run: d1 d2 | d1 d2 | d1 d2 | d1 d2 | d1 d2 | d2 | d2 | d2 | d2 | in_sequence |
 run: d1 d2 | d1 d2 | d1 d2 | d1 d2 | see_five in_sequence |
 run: d1 d2 | d1 | d1 | d1 | d1 | see_five |
 run: d1 d2 | d1 d2 | d1 d2 | d1 d2 | d1 d2 | see_five in_sequence |
-#endif

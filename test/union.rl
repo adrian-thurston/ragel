@@ -148,7 +148,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 word: 1 2
 word: 4 5
 word: 7 7
@@ -194,4 +194,3 @@ literal: 5 8
 word: 1 13
 comment: 9 13
 ACCEPT
-#endif

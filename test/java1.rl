@@ -41,8 +41,7 @@ class java1
 	}
 }
 
-/* _____OUTPUT_____
+##### OUTPUT #####
 ACCEPT
 FAIL
 FAIL
-*/

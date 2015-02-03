@@ -532,10 +532,9 @@ let () =
 	bench ();
 	exit 0
 
-(* _____OUTPUT_____
+##### OUTPUT #####
 BENCH parse "a:a" 
 BENCH parse "http://google.com/" 
 BENCH parse "sip:jtunney@lobstertech.com" 
 BENCH parse "http://user:pass@example.com:80;hello/lol.php?fun#omg" 
 BENCH parse "file:///etc/passwd" 
-_____OUTPUT_____ *)

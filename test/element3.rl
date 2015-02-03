@@ -134,11 +134,10 @@ length:(unsigned)length;
 }
 @end
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 one
 two-a
 two-b
 two-c
 three
 accept
-#endif

@@ -96,8 +96,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 yes
 ACCEPT
 FAIL
-#endif

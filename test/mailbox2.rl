@@ -159,7 +159,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 ------
 FROM
 	"Adrian D. Thurston" | thurston@complang.org
@@ -170,4 +170,3 @@ TO
 	Edgar Allen Poe | ep@net.com
 SUBJECT
 	(no subject) 
-#endif

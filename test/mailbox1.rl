@@ -230,7 +230,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 NEW MESSAGE
 Header1: this is the header contents there is more on the second line	and more on the third line.
 Header2: slkdj
@@ -264,4 +264,3 @@ Header:alsdj
 NEW MESSAGE
 
 ACCEPT
-#endif

@@ -33,11 +33,10 @@ inp = [
 
 inp.each { |str| run_machine(str) }
 
-=begin _____OUTPUT_____
+##### OUTPUT #####
 char: h
 to state: h
 char: e
 to state: e
 err: l
 rest: llo
-=end _____OUTPUT_____

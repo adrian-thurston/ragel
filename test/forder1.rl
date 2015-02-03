@@ -78,7 +78,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 finish a
 leave a
 enter b1
@@ -95,4 +95,3 @@ leave a
 enter b1
 enter b2
 FAIL
-#endif

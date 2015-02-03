@@ -103,5 +103,3 @@ struct XML
 	{
 		return 0;
 	}
-/* _____OUTPUT_____
-_____OUTPUT_____ */

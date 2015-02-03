@@ -307,7 +307,7 @@ int main()
 
 	return 0;
 }
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 hi <section>
 <re_lit>/'}%%'/</re_lit>
 <inline>{ /*{*/ {} }</inline>
@@ -350,4 +350,3 @@ hi <section>
 <single_lit>'\''</single_lit>
 </section>
 there
-#endif
