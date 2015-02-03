@@ -576,12 +576,4 @@ void rw_asm( Output: stream )
 		"	mov		$0, %rax
 		"	leave
 		"	ret
-
-	send Output 
-		"##### OUTPUT #####
-
-	for OutputLine: indep::output_line in RagelTree {
-		send Output
-			 [OutputLine]
-	}
 }

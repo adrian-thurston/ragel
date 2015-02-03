@@ -343,10 +343,4 @@ void rw_java( Output: stream )
 		"	}
 		"}
 		"}
-
-	send Output
-		"##### OUTPUT #####
-
-	for OutputLine: indep::output_line in RagelTree
-		send Output [OutputLine]
 }
