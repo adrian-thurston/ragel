@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-#   Copyright 2006-2009 Adrian Thurston <thurston@complang.org>
+#   Copyright 2006-2015 Adrian Thurston <thurston@complang.org>
 #
 
 #   This file is part of Ragel.
@@ -116,8 +116,8 @@ function test_error
 
 function run_test()
 {
-	echo "$ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $wk/$case_rl"
-	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $wk/$case_rl; then
+	echo "$ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $case2"
+	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $case2; then
 		test_error;
 	fi
 
@@ -136,7 +136,7 @@ function run_test()
 	if [ "$compile_only" != "true" ]; then
 		
 		exec_cmd=./$wk/$binary
-		[ $lang = java ] && exec_cmd="java -classpath $wk $root"
+		[ $lang = java ] && exec_cmd="java -classpath $wk ${root}_java"
 		[ $lang = ruby ] && exec_cmd="ruby $wk/$code_src"
 		[ $lang = csharp ] && exec_cmd="mono $wk/$binary"
 		[ $lang = ocaml ] && exec_cmd="ocaml $wk/$code_src"
@@ -156,71 +156,12 @@ function run_test()
 	fi
 }
 
-indep_lang()
+function translated_case()
 {
-	for lang in c asm d cs go java ruby ocaml; do
-		case $lang in 
-			c) lf="-C" ;;
-			asm) lf="--asm" ;;
-			d) lf="-D" ;;
-			cs) lf="-A" ;;
-			go) lf="-Z" ;;
-			java) lf="-J" ;;
-			ruby) lf="-R" ;;
-			ocaml) lf="-O" ;;
-		esac
+	case2=$1
 
-		echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
-		echo "$langflags" | grep -qe $lf || continue
-		echo "$supported_host_langs" | grep -qe $lf || continue
-
-		targ=${root}_$lang.rl
-		echo "./trans $lang $wk/$targ $test_case ${root}_${lang}"
-		if ! ./trans $lang $wk/$targ $test_case ${root}_${lang}; then
-			test_error
-		fi
-		echo "./runtests -g $gen_opts $wk/$targ"
-		if !  ./runtests -g $gen_opts $wk/$targ; then
-			test_error
-		fi
-	done
-}
-
-for test_case; do
-	root=`basename $test_case`
-	root=${root%.rl};
-
-	if ! [ -f "$test_case" ]; then
-		echo "runtests: not a file: $test_case"; >&2
-		exit 1;
-	fi
-
-	# Check if we should ignore the test case
-	ignore=`sed '/@IGNORE:/s/^.*: *//p;d' $test_case`
-    if [ "$ignore" = yes ]; then
-        continue;
-    fi
-
-	# If the generated flag is given make sure that the test case is generated.
-	is_generated=`sed '/@GENERATED:/s/^.*: *//p;d' $test_case`
-	if [ "$is_generated" = yes ] && [ "$allow_generated" != true ]; then
-		continue;
-	fi
-
-	expected_out=$root.exp;
-	case_rl=${root}_rl.rl
-	sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
-	sed '1,/^#\+ * OUTPUT #\+/d;' $test_case > $wk/$expected_out
-
-	lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
-	if [ -z "$lang" ]; then
-		echo "$test_case: language unset"; >&2
-		exit 1;
-	fi
-
-	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
-	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
-	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
+	# maybe translated to multiple targets, re-read each lang.
+	lang=`sed '/@LANG:/s/^.*: *//p;d' $case2`
 
 	case $lang in
 		c)
@@ -259,19 +200,19 @@ for test_case; do
 			compiler=$ruby_engine
 			flags=""
 		;;
-        csharp)
-            lang_opt="-A";
-            code_suffix=cs;
-            compiler=$csharp_compiler
-            flags=""
-        ;;
-        go)
+		csharp)
+			lang_opt="-A";
+			code_suffix=cs;
+			compiler=$csharp_compiler
+			flags=""
+		;;
+		go)
 			lang_opt="-Z"
 			code_suffix=go
 			compiler=$go_compiler
 			flags="build"
 		;;
-        ocaml)
+		ocaml)
 			lang_opt="-O"
 			code_suffix=ml
 			compiler=$ocaml_compiler
@@ -284,21 +225,19 @@ for test_case; do
 			flags=""
 		;;
 		indep)
-			lang_opt="";
-			indep_lang;
-			continue;
 		;;
 		*)
-			echo "$test_case: unknown language type $lang" >&2
+			echo "$case2: unknown language type $lang" >&2
 			exit 1;
 		;;
 	esac
 
+
 	# Make sure that we are interested in the host language.
-	echo "$langflags" | grep -qe $lang_opt || continue
+	echo "$langflags" | grep -qe $lang_opt || return
 
 	# Make sure that ragel supports the host language
-	echo "$supported_host_langs" | grep -qe $lang_opt || continue
+	echo "$supported_host_langs" | grep -qe $lang_opt || return
 
 	code_src=$root.$code_suffix;
 	binary=$root.bin;
@@ -307,15 +246,15 @@ for test_case; do
 	# If we have no compiler for the source program then skip it.
 	[ -z "$compiler" ] && continue
 
-	additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
 	[ -n "$additional_cflags" ] && flags="$flags $additional_cflags"
 
 	case $lang in
-	csharp) prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags";;
-	java) prohibit_genflags="$prohibit_genflags $java_prohibit_genflags";;
-	ruby) prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags";;
-	ocaml) prohibit_genflags="$prohibit_genflags $ocaml_prohibit_genflags";;
-	asm) prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags";;
+	csharp) lang_prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags";;
+	java) lang_prohibit_genflags="$prohibit_genflags $java_prohibit_genflags";;
+	ruby) lang_prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags";;
+	ocaml) lang_prohibit_genflags="$prohibit_genflags $ocaml_prohibit_genflags";;
+	asm) lang_prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags";;
+	*) lang_prohibit_genflags="$prohibit_genflags";;
 	esac
 
 	if [ $lang != c ] && [ $lang != c++ ]; then
@@ -328,11 +267,94 @@ for test_case; do
 	for min_opt in $minflags; do
 		echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
 		for gen_opt in $genflags; do
-			echo "" "$prohibit_genflags" | grep -e $gen_opt >/dev/null && continue
+			echo "" "$lang_prohibit_genflags" | grep -e $gen_opt >/dev/null && continue
 			for enc_opt in $encflags; do
 				echo "" "$prohibit_encflags" | grep -e $enc_opt >/dev/null && continue
 				run_test
 			done
 		done
 	done
+}
+
+function test_case()
+{
+	test_case=$1
+	root=`basename $test_case`
+	root=${root%.rl};
+
+	if ! [ -f "$test_case" ]; then
+		echo "runtests: not a file: $test_case"; >&2
+		exit 1;
+	fi
+
+	# Check if we should ignore the test case
+	ignore=`sed '/@IGNORE:/s/^.*: *//p;d' $test_case`
+    if [ "$ignore" = yes ]; then
+        continue;
+    fi
+
+	# If the generated flag is given make sure that the test case is generated.
+	is_generated=`sed '/@GENERATED:/s/^.*: *//p;d' $test_case`
+	if [ "$is_generated" = yes ] && [ "$allow_generated" != true ]; then
+		continue;
+	fi
+
+	expected_out=$root.exp;
+	case_rl=${root}_rl.rl
+
+	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
+	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
+	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
+
+	# Create the expected output.
+	sed '1,/^#\+ * OUTPUT #\+/d;' $test_case > $wk/$expected_out
+
+	additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
+
+	lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
+	if [ -z "$lang" ]; then
+		echo "$test_case: language unset"; >&2
+		exit 1;
+	fi
+
+	cases=""
+
+	if [ $lang == indep ]; then
+		for lang in c asm d cs go java ruby ocaml; do
+			case $lang in 
+				c) lf="-C" ;;
+				asm) lf="--asm" ;;
+				d) lf="-D" ;;
+				cs) lf="-A" ;;
+				go) lf="-Z" ;;
+				java) lf="-J" ;;
+				ruby) lf="-R" ;;
+				ocaml) lf="-O" ;;
+			esac
+
+			echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
+			echo "$langflags" | grep -qe $lf || continue
+			echo "$supported_host_langs" | grep -qe $lf || continue
+
+			# Translate to target language and strip off output.
+			targ=${root}_$lang.rl
+			echo "./trans $lang $wk/$targ $test_case ${root}_${lang}"
+			if ! ./trans $lang $wk/$targ $test_case ${root}_${lang}; then
+				test_error
+			fi
+
+			cases="$cases $wk/$targ"
+		done
+	else
+		sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
+		cases=$wk/$case_rl
+	fi
+
+	for case2 in $cases; do
+		translated_case $case2
+	done
+}
+
+for test_case; do
+	test_case $test_case
 done

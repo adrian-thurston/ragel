@@ -329,10 +329,4 @@ void rw_d( Output: stream )
 		"	return 0;
 		"}
 		"
-
-	send Output
-		"##### OUTPUT #####
-
-	for OutputLine: indep::output_line in RagelTree
-		prints( Output OutputLine )
 }
