@@ -45,9 +45,8 @@ inp = [
 
 run_machine( inp );
 
-=begin _____OUTPUT_____
+##### OUTPUT #####
 c1
 c2
 c3
 ACCEPT
-=end _____OUTPUT_____

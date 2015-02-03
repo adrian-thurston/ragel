@@ -262,7 +262,7 @@ int main()
 		"...\n" );
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 <195> void
 <195> RedFsmAp
 <197> ::
@@ -401,4 +401,3 @@ int main()
 <193> L'"'
 <192> L"'"
 <240> ...
-#endif

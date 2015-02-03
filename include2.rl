@@ -47,6 +47,5 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
  a1 b1 nr1 a2 b2 nr2 a3 b3 nr3
-#endif

@@ -68,7 +68,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 a or b
 a or b
 a or b
@@ -78,4 +78,3 @@ ACCEPT
 ACCEPT
 a or b
 FAIL
-#endif

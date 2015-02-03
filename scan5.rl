@@ -80,10 +80,9 @@ let () =
   t cnt 6;
   ()
 
-(* _____OUTPUT_____
+##### OUTPUT #####
 on last     yes
 on next     yes
 on lag      yes
 lm switch1  yes
 lm switch2  yes
-_____OUTPUT_____ *)

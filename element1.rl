@@ -98,11 +98,10 @@ int main( )
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 one
 two-a
 two-b
 two-c
 three
 accept
-#endif

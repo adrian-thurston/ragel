@@ -86,7 +86,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 newline
 newline
 newline
@@ -101,4 +101,3 @@ newline
 hello fails
 ACCEPT
 ACCEPT
-#endif

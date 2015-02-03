@@ -41,7 +41,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 char: 5
 c1 char: 15
 c1 c2 char: 25
@@ -51,4 +51,3 @@ c1 c2 c3 char: 39
 c1 c3 char: 45
 c1 char: 55
 char: 65
-#endif

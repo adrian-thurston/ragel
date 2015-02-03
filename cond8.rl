@@ -48,9 +48,8 @@ let () =
   run "d2:abc" ( ref 3 );
   run "d2:abc" ( ref 4 );
 
-(* _____OUTPUT_____
+##### OUTPUT #####
 fail
 fail
 ok
 ok
-_____OUTPUT_____ *)

@@ -75,7 +75,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 enter m1 aa
 enter m2
 leave m1 aa
@@ -104,4 +104,3 @@ ACCEPT
 enter m1 aa
 enter m2
 FAIL
-#endif

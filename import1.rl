@@ -64,10 +64,10 @@ int main()
 
 	return 0;
 }
-#ifdef _____OUTPUT_____
+
+##### OUTPUT #####
 foo
 bar
 bar
 foo
 ACCEPT
-#endif

@@ -56,7 +56,7 @@ inp = [
 
 inp.each { |str| run_machine(str) }
 
-=begin _____OUTPUT_____
+##### OUTPUT #####
 1
 ACCEPT
 12
@@ -72,4 +72,3 @@ FAIL
 -99
 ACCEPT
 FAIL
-=end _____OUTPUT_____

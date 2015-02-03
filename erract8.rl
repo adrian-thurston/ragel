@@ -34,11 +34,10 @@ class erract8
 	}
 }
 
-/* _____OUTPUT_____
+##### OUTPUT #####
 char: h
 to state: h
 char: e
 to state: e
 err: l
 rest: llo
-*/

@@ -43,7 +43,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 run:
   success
 
@@ -59,4 +59,3 @@ run:
   bail
   failure
 
-#endif

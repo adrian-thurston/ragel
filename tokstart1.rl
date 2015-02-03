@@ -149,7 +149,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 from: fc = a ts = 0
 to:   fc = a ts = 0
 from: fc =   ts = 0
@@ -235,4 +235,3 @@ to:   fc =
  ts = 30
 to:   fc = 
  ts = -1
-#endif

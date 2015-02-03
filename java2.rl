@@ -43,8 +43,7 @@ class java2
 	}
 }
 
-/* _____OUTPUT_____
+##### OUTPUT #####
 ACCEPT
 ACCEPT
 FAIL
-*/

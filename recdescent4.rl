@@ -104,7 +104,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 item: 88
 item: foo
 calling main
@@ -127,4 +127,3 @@ returning from main
 shrinking stack
 item: 76
 STRAY CLOSE
-#endif

@@ -218,7 +218,7 @@ int main()
 
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 <192> "\"hi"
 <241>  
 <242> /*
@@ -282,4 +282,3 @@ P: 51
 P: 55
 P: 1
 PARSE ERROR
-#endif

@@ -175,7 +175,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 comm char: h
 comm char: e
 comm char: l
@@ -195,4 +195,3 @@ comm char: e
 <195> hello
 <241>  
 <220> 0x88
-#endif

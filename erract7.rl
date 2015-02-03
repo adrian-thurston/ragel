@@ -32,11 +32,10 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 char: h
 to state: h
 char: e
 to state: e
 err: l
 rest: llo
-#endif

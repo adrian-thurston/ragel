@@ -155,7 +155,7 @@ int main()
 	return 0;
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 else
 gothigh1
 gothigh1
@@ -177,4 +177,3 @@ else
 else
 gothigh1
 ACCEPT
-#endif

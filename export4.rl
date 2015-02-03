@@ -51,9 +51,8 @@ int main()
 	return 0;
 }
 
-/+ _____OUTPUT_____
+##### OUTPUT #####
 c1
 c2
 c3
 ACCEPT
-++++++++++++++++++/

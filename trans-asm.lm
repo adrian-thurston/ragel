@@ -578,13 +578,10 @@ void rw_asm( Output: stream )
 		"	ret
 
 	send Output 
-		"# _____OUTPUT_____
+		"##### OUTPUT #####
 
 	for OutputLine: indep::output_line in RagelTree {
 		send Output
 			 [OutputLine]
 	}
-
-	send Output
-		 "# _____OUTPUT_____
 }

@@ -334,11 +334,9 @@ void rw_ruby( Output: stream )
 		"inp.each { |str| run_machine(str) }
 		"
 
-	send Output "=begin _____OUTPUT_____
+	send Output
+		"##### OUTPUT #####
 
-	for OutputLine: indep::output_line in RagelTree {
+	for OutputLine: indep::output_line in RagelTree
 		send Output [OutputLine]
-	}
-	send Output "=end _____OUTPUT_____
-
 }

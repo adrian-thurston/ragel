@@ -951,7 +951,7 @@ int main()
 	test4();
 }
 
-#ifdef _____OUTPUT_____
+##### OUTPUT #####
 F = tt_id;
 K = F tt_star;
 N = K;
@@ -1072,4 +1072,3 @@ A = tt_id tt_equals E tt_semi;
 M = A;
 start = M;
 1
-#endif
