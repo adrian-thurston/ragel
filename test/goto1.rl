@@ -1,13 +1,12 @@
 /*
  * @LANG: indep
- * @NEEDS_EOF: yes
  * @PROHIBIT_LANGUAGES: ruby ocaml
  */
 
 int target;
 
 %%{
-	machine goto;
+	machine goto1;
 
 	unused := 'unused';
 

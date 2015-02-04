@@ -1550,6 +1550,26 @@ std::ostream &AsmCodeGen::AGAIN_CASES()
 	return out;
 }
 
+std::ostream &AsmCodeGen::ENTRY_CASES()
+{
+	out <<
+		"	movq	(%rcx,%r11,8), %rcx\n"
+		"	jmp		*%rcx\n"
+		"	.section .rodata\n"
+		"	.align 8\n"
+		<< LABEL( "entry_jmp" ) << ":\n";
+
+	for ( int stId = 0; stId < redFsm->stateList.length(); stId++ ) {
+		out <<
+			"	.quad	" << LABEL( "en", stId ) << "\n";
+	}
+
+	out <<
+		"	.text\n";
+	return out;
+}
+
+
 std::ostream &AsmCodeGen::FINISH_CASES()
 {
 	/* The current state is in %rax. */
@@ -1746,19 +1766,6 @@ void AsmCodeGen::writeExec()
 
 		AGAIN_CASES();
 
-#if 0
-		if ( !noEnd ) {
-			testEofUsed = true;
-			out << 
-				"	if ( ++" << P() << " == " << PE() << " )\n"
-				"		goto _test_eof;\n";
-		}
-		else {
-			out << 
-				"	" << P() << " += 1;\n";
-		}
-#endif
-
 		out << LABEL( "resume" ) << ":\n";
 	}
 
@@ -1772,20 +1779,7 @@ void AsmCodeGen::writeExec()
 			"	movq	" << vCS() << ", %r11\n";
 	}
 
-	out <<
-		"	movq	(%rcx,%r11,8), %rcx\n"
-		"	jmp		*%rcx\n"
-		"	.section .rodata\n"
-		"	.align 8\n"
-		<< LABEL( "entry_jmp" ) << ":\n";
-
-	for ( int stId = 0; stId < redFsm->stateList.length(); stId++ ) {
-		out <<
-			"	.quad	" << LABEL( "en", stId ) << "\n";
-	}
-
-	out <<
-		"	.text\n";
+	ENTRY_CASES();
 
 	STATE_GOTOS();
 	EXIT_STATES() << "\n";

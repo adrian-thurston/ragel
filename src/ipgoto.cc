@@ -572,18 +572,6 @@ void IpGoto::writeExec()
 			"	}\n"
 			"\n";
 
-		if ( !noEnd ) {
-			testEofUsed = true;
-			out << 
-				"	" << P() << "+= 1;\n"
-				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto _test_eof;\n";
-		}
-		else {
-			out << 
-				"	" << P() << " += 1;\n";
-		}
-
 		out << "_resume:\n";
 	}
 

@@ -8,7 +8,7 @@ int stack[32];
 int target;
 
 %%{
-	machine goto;
+	machine ncall1;
 
 	unused := 'unused';
 

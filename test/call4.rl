@@ -3,13 +3,12 @@
  * @PROHIBIT_LANGUAGES: ruby ocaml
  */
 
+int target;
 int top;
 int stack[32];
 
-int target;
-
 %%{
-	machine goto;
+	machine call4;
 
 	unused := 'unused';
 

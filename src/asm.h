@@ -214,6 +214,7 @@ public:
 	std::ostream &TRANS_GOTO( RedTransAp *trans );
 	std::ostream &AGAIN_CASES();
 	std::ostream &FINISH_CASES();
+	std::ostream &ENTRY_CASES();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );

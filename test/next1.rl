@@ -5,7 +5,7 @@
 int target;
 
 %%{
-	machine goto;
+	machine next1;
 
 	unused := 'unused';
 
