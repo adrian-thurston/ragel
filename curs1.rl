@@ -5,7 +5,7 @@
 int return_to;
 
 %%{
-	machine goto;
+	machine curs1;
 
 	unused := 'unused';
 
