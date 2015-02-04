@@ -43,6 +43,16 @@ int rw_asm_factor( Factor: indep::factor )
 			"	movsbq	(%r12), %rax
 			"	pushq	%rax
 	}
+	case [`fcurs] {
+		send Out
+			"	fcurs;
+			"	pushq	%rax
+	}
+	case [`ftargs] {
+		send Out
+			"	ftargs;
+			"	pushq	%rax
+	}
 	case ["p"] {
 		send Out
 			"	pushq	%r12
@@ -471,7 +481,7 @@ void rw_asm( Output: stream )
 		"exec:
 		"	pushq	%rbp
 		"	movq	%rsp, %rbp
-		"	subq	$64, %rsp
+		"	subq	$72, %rsp
 		"
 		"	movq	$stack_data, -56(%rbp)
 		"
