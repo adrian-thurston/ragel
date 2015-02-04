@@ -1,7 +1,5 @@
 /*
  * @LANG: indep
- * @NEEDS_EOF: yes
- * @PROHIBIT_LANGUAGES: ruby ocaml
  */
 
 int target;
