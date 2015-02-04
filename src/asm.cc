@@ -1258,12 +1258,14 @@ void AsmCodeGen::NRET( ostream &ret, bool inFinish )
 
 void AsmCodeGen::CURS( ostream &ret, bool inFinish )
 {
-	ret << "(_ps)";
+	ret <<
+		"	movq	-72(%rbp), %rax\n";
 }
 
 void AsmCodeGen::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << targState;
+	ret <<
+		"	movq	$" << targState << ", %rax\n";
 }
 
 void AsmCodeGen::BREAK( ostream &ret, int targState, bool csForced )
@@ -1440,8 +1442,10 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 	}
 
 	/* Record the prev state if necessary. */
-	if ( state->anyRegCurStateRef() )
-		out << "	_ps = " << state->id << ";\n";
+	if ( state->anyRegCurStateRef() ) {
+		out <<
+			"	movq	$" << state->id << ", -72(%rbp)\n";
+	}
 }
 
 void AsmCodeGen::STATE_GOTO_ERROR()
@@ -1468,14 +1472,10 @@ std::string AsmCodeGen::TRANS_GOTO_TARG( RedCondPair *pair )
 	std::stringstream s;
 	if ( pair->action != 0 ) {
 		/* Go to the transition which will go to the state. */
-		// out << TABS(level) << "goto tr" << trans->id << ";";
-
 		s << LABEL( "tr", pair->id );
 	}
 	else {
 		/* Go directly to the target state. */
-		//out << TABS(level) << "goto st" << trans->targ->id << ";";
-
 		s << LABEL( "st", pair->targ->id );
 	}
 	return s.str();
@@ -1701,14 +1701,18 @@ void AsmCodeGen::writeExec()
 	 * stack:     -56(%rbp)
 	 * top:       -64(%rbp)
 	 *
+	 * _ps:       -72(%rbp)
+	 *
 	 */
 
-#if 0
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps = 0;\n";
+	if ( redFsm->anyRegCurStateRef() ) {
+		out <<
+			"	movq	$0, -72(%rbp)\n";
+	}
 
-#endif
-
+	/* Only need a persistent cs in the case of eof actions when exiting the
+	 * block. Where CS lives is a matter of performance though, so we should
+	 * only do this if necessary. */
 	out <<
 		"	movq	%r11, " << vCS() << "\n";
 
