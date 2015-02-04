@@ -116,10 +116,12 @@ function test_error
 
 function run_test()
 {
-	echo "$ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $case2"
-	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $case2; then
+	echo "$ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $translated"
+	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $translated; then
 		test_error;
 	fi
+
+	echo root: $root
 
 	out_args=""
 	[ $lang != java ] && out_args="-o $wk/$binary";
@@ -136,7 +138,7 @@ function run_test()
 	if [ "$compile_only" != "true" ]; then
 		
 		exec_cmd=./$wk/$binary
-		[ $lang = java ] && exec_cmd="java -classpath $wk ${root}_java"
+		[ $lang = java ] && exec_cmd="java -classpath $wk ${root}"
 		[ $lang = ruby ] && exec_cmd="ruby $wk/$code_src"
 		[ $lang = csharp ] && exec_cmd="mono $wk/$binary"
 		[ $lang = ocaml ] && exec_cmd="ocaml $wk/$code_src"
@@ -156,12 +158,15 @@ function run_test()
 	fi
 }
 
-function translated_case()
+function run_options()
 {
-	case2=$1
+	translated=$1
+
+	root=`basename $translated`
+	root=${root%.rl};
 
 	# maybe translated to multiple targets, re-read each lang.
-	lang=`sed '/@LANG:/s/^.*: *//p;d' $case2`
+	lang=`sed '/@LANG:/s/^.*: *//p;d' $translated`
 
 	case $lang in
 		c)
@@ -227,7 +232,7 @@ function translated_case()
 		indep)
 		;;
 		*)
-			echo "$case2: unknown language type $lang" >&2
+			echo "$translated: unknown language type $lang" >&2
 			exit 1;
 		;;
 	esac
@@ -276,9 +281,11 @@ function translated_case()
 	done
 }
 
-function test_case()
+function run_translate()
 {
 	test_case=$1
+
+	# Recompute the root.
 	root=`basename $test_case`
 	root=${root%.rl};
 
@@ -300,7 +307,7 @@ function test_case()
 	fi
 
 	expected_out=$root.exp;
-	case_rl=${root}_rl.rl
+	case_rl=${root}.rl
 
 	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
 	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
@@ -350,11 +357,11 @@ function test_case()
 		cases=$wk/$case_rl
 	fi
 
-	for case2 in $cases; do
-		translated_case $case2
+	for translated in $cases; do
+		run_options $translated
 	done
 }
 
 for test_case; do
-	test_case $test_case
+	run_translate $test_case
 done
