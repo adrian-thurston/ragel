@@ -71,6 +71,15 @@ void asmLineDirective( ostream &out, const char *fileName, int line )
 #endif
 }
 
+/* Init code gen with in parameters. */
+AsmCodeGen::AsmCodeGen( const CodeGenArgs &args )
+:
+	CodeGenData( args ),
+	nextLmSwitchLabel( 1 ),
+	stackCS( false )
+{
+}
+
 void AsmCodeGen::genAnalysis()
 {
 	/* For directly executable machines there is no required state
@@ -101,14 +110,6 @@ void AsmCodeGen::genLineDirective( ostream &out )
 	std::streambuf *sbuf = out.rdbuf();
 	output_filter *filter = static_cast<output_filter*>(sbuf);
 	asmLineDirective( out, filter->fileName, filter->line + 1 );
-}
-
-/* Init code gen with in parameters. */
-AsmCodeGen::AsmCodeGen( const CodeGenArgs &args )
-:
-	CodeGenData( args ),
-	nextLmSwitchLabel( 1 )
-{
 }
 
 unsigned int AsmCodeGen::arrayTypeSize( unsigned long maxVal )
@@ -187,8 +188,12 @@ string AsmCodeGen::PE()
 string AsmCodeGen::vCS()
 {
 	ostringstream ret;
-	if ( csExpr == 0 )
-		ret << "-48(%rbp)";
+	if ( csExpr == 0 ) {
+		if ( stackCS )
+			ret << "-48(%rbp)";
+		else
+			ret << "%r11";
+	}
 	else {
 		INLINE_LIST( ret, csExpr, 0, false, false );
 	}
@@ -656,9 +661,10 @@ string AsmCodeGen::FIRST_FINAL_STATE()
 void AsmCodeGen::writeInit()
 {
 	if ( !noCS ) {
+		/* Don't use vCS here. vCS may assumes CS needs to be on the stack.
+		 * Just use the interface register. */
 		out <<
-			"	movq	$" << redFsm->startState->id << ", " << vCS() << "\n"
-			"	movq	" << vCS() << ", %r11\n";
+			"	movq	$" << redFsm->startState->id << ", %r11\n";
 	}
 	
 	/* If there are any calls, then the stack top needs initialization. */
@@ -1316,7 +1322,6 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 				"	jmp		" << TRANS_GOTO_TARG( tp ) << "\n";
 		}
 		else {
-			/* Using EBX. This is callee-save. */
 			out << "	movq	$0, %r9\n";
 
 			for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
@@ -1520,8 +1525,14 @@ std::ostream &AsmCodeGen::AGAIN_CASES()
 {
 	/* Jump into the machine based on the current state. */
 	out <<
-		"	leaq	" << LABEL( "again_jmp" ) << "(%rip), %rcx\n"
-		"	movq	" << vCS() << ", %r11\n"
+		"	leaq	" << LABEL( "again_jmp" ) << "(%rip), %rcx\n";
+
+	if ( stackCS ) {
+		out <<
+			"	movq	" << vCS() << ", %r11\n";
+	}
+
+	out <<
 		"	movq	(%rcx,%r11,8), %rcx\n"
 		"	jmp		*%rcx\n"
 		"	.section .rodata\n"
@@ -1671,6 +1682,11 @@ void AsmCodeGen::writeExec()
 	testEofUsed = false;
 	outLabelUsed = false;
 
+	/* If there are eof actions then we need to run code after exporting the
+	 * final state to vCS. Since the interface register is calee-save, we need
+	 * it to live on the stack. */
+	stackCS = redFsm->anyEofActions();
+
 	/*
 	 * cv : %r9   -- caller-save, used internally, condition char, undefined in
 	 *               conditions and actions, can use
@@ -1695,7 +1711,7 @@ void AsmCodeGen::writeExec()
 	 *
 	 * _nbreak:   -40(%rbp)
 	 *
-	 * internal:  -48(%rbp)
+	 * stackCS:   -48(%rbp)
 	 *
 	 * stack:     -56(%rbp)
 	 * top:       -64(%rbp)
@@ -1709,11 +1725,13 @@ void AsmCodeGen::writeExec()
 			"	movq	$0, -72(%rbp)\n";
 	}
 
-	/* Only need a persistent cs in the case of eof actions when exiting the
-	 * block. Where CS lives is a matter of performance though, so we should
-	 * only do this if necessary. */
-	out <<
-		"	movq	%r11, " << vCS() << "\n";
+	if ( stackCS ) {
+		/* Only need a persistent cs in the case of eof actions when exiting the
+		 * block. Where CS lives is a matter of performance though, so we should
+		 * only do this if necessary. */
+		out <<
+			"	movq	%r11, " << vCS() << "\n";
+	}
 
 	if ( !noEnd ) {
 		out <<
@@ -1747,8 +1765,14 @@ void AsmCodeGen::writeExec()
 
 	/* Jump into the machine based on the current state. */
 	out <<
-		"	leaq	" << LABEL( "entry_jmp" ) << "(%rip), %rcx\n"
-		"	movq	" << vCS() << ", %r11\n"
+		"	leaq	" << LABEL( "entry_jmp" ) << "(%rip), %rcx\n";
+
+	if ( stackCS ) {
+		out <<
+			"	movq	" << vCS() << ", %r11\n";
+	}
+
+	out <<
 		"	movq	(%rcx,%r11,8), %rcx\n"
 		"	jmp		*%rcx\n"
 		"	.section .rodata\n"
@@ -1782,8 +1806,10 @@ void AsmCodeGen::writeExec()
 	if ( outLabelUsed ) 
 		out << LABEL( "out" ) << ":\n";
 
-	out <<
-		"	movq	" << vCS() << ", %r11\n";
+	if ( stackCS ) {
+		out <<
+			"	movq	" << vCS() << ", %r11\n";
+	}
 
 	out << "# WRITE EXEC END\n";
 }

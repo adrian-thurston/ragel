@@ -65,7 +65,6 @@ public:
 	AsmCodeGen( const CodeGenArgs &args );
 	virtual ~AsmCodeGen() {}
 
-
 	virtual void writeInit();
 	virtual void writeStart();
 	virtual void writeFirstFinal();
@@ -160,6 +159,7 @@ protected:
 	bool againLabelUsed;
 	bool useIndicies;
 	long nextLmSwitchLabel;
+	bool stackCS;
 
 	void genLineDirective( ostream &out );
 
