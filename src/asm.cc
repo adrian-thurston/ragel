@@ -299,11 +299,6 @@ string AsmCodeGen::TABS( int level )
 string AsmCodeGen::COND_KEY( CondKey key )
 {
 	ostringstream ret;
-//	ostringstream ret;
-//	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
-//		ret << key.getVal();
-//	else
-//		ret << (unsigned long) key.getVal() << 'u';
 	ret << "$" << key.getVal();
 	return ret.str();
 }
@@ -314,11 +309,6 @@ string AsmCodeGen::COND_KEY( CondKey key )
 string AsmCodeGen::KEY( Key key )
 {
 	ostringstream ret;
-//	ostringstream ret;
-//	if ( keyOps->isSigned || !hostLang->explicitUnsigned )
-//		ret << key.getVal();
-//	else
-//		ret << (unsigned long) key.getVal() << 'u';
 	ret << "$" << key.getVal();
 	return ret.str();
 }
@@ -326,18 +316,6 @@ string AsmCodeGen::KEY( Key key )
 bool AsmCodeGen::isAlphTypeSigned()
 {
 	return keyOps->isSigned;
-}
-
-bool AsmCodeGen::isWideAlphTypeSigned()
-{
-//	string ret;
-//	if ( redFsm->maxKey <= keyOps->maxKey )
-		return isAlphTypeSigned();
-//	else {
-//		long long maxKeyVal = redFsm->maxKey.getLongLong();
-//		HostType *wideType = keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
-//		return wideType->isSigned;
-//	}
 }
 
 void AsmCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
@@ -645,9 +623,7 @@ void AsmCodeGen::ACTION( ostream &ret, GenAction *action, int targState,
 	asmLineDirective( ret, action->loc.fileName, action->loc.line );
 
 	/* Write the block and close it off. */
-	// ret << "\t{";
 	INLINE_LIST( ret, action->inlineList, targState, inFinish, csForced );
-	// ret << "}\n";
 }
 
 void AsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
@@ -680,7 +656,6 @@ string AsmCodeGen::FIRST_FINAL_STATE()
 void AsmCodeGen::writeInit()
 {
 	if ( !noCS ) {
-		// out << "\t" << vCS() << " = " << START() << ";\n";
 		out <<
 			"	movq	$" << redFsm->startState->id << ", " << vCS() << "\n"
 			"	movq	" << vCS() << ", %r11\n";
@@ -1180,7 +1155,9 @@ void AsmCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 
 	ret <<
 		"\n"
-		"	movq	%rax, %rdx\n"
+		"	movq	";
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+	ret << ", %rdx\n"
 		"\n"
 		"	movq	" << STACK() << ", %rax\n"
 		"	movq	" << TOP() << ", %rcx\n"
@@ -1189,11 +1166,6 @@ void AsmCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 		"	movq	%rcx, " << TOP() << "\n"
 		"	movq	%rdx, " << vCS() << "\n"
 		"	jmp		" << LABEL( "again" ) << "\n";
-
-//	ret << "{" << STACK() << "[" << TOP() << "++] = " << targState << "; " << vCS() << " = (";
-
-//	ret << "); " << CTRL_FLOW() << "goto _again;}";
-
 }
 
 void AsmCodeGen::RET( ostream &ret, bool inFinish )
@@ -1215,15 +1187,12 @@ void AsmCodeGen::RET( ostream &ret, bool inFinish )
 
 void AsmCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-//	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+	ret << "	movq	";
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+	ret << ", " << vCS() << "\n";
 
 	ret <<
-		"	movq	%rax, " << vCS() << "\n"
 		"	jmp		" << LABEL("again") << "\n";
-
-//	ret << "{" << vCS() << " = (";
-//	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-//	ret << "); " << CTRL_FLOW() << "goto _again;}";
 }
 
 void AsmCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
@@ -1234,13 +1203,9 @@ void AsmCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
 
 void AsmCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-//	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-
-	ret <<
-		"	movq	%rax, " << vCS() << "\n";
-
-//	ret << vCS() << " = (";
-//	ret << ");";
+	ret << "	movq	";
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+	ret << ", " << vCS() << "\n";
 }
 
 void AsmCodeGen::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -1265,7 +1230,9 @@ void AsmCodeGen::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem,
 
 	ret <<
 		"\n"
-		"	movq	%rax, %rdx\n"
+		"	movq	";
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+	ret << ", %rdx\n"
 		"\n"
 		"	movq	" << STACK() << ", %rax\n"
 		"	movq	" << TOP() << ", %rcx\n"
@@ -1273,21 +1240,10 @@ void AsmCodeGen::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem,
 		"	addq	$1, %rcx\n"
 		"	movq	%rcx, " << TOP() << "\n"
 		"	movq	%rdx, " << vCS() << "\n";
-
-//	ret << STACK() << "[" << TOP() << "] = " << targState << "; " << TOP() << "+= 1;" <<
-//			vCS() << " = " << OPEN_HOST_EXPR();
-//	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-//	ret << CLOSE_HOST_EXPR() << "; " << CLOSE_GEN_BLOCK();
 }
 
 void AsmCodeGen::NRET( ostream &ret, bool inFinish )
 {
-//	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = "
-//			<< STACK() << "[" << TOP() << "];";
-
-//	if ( postPopExpr != 0 )
-//		INLINE_LIST( ret, postPopExpr, 0, false, false );
-
 	ret <<
 		"	movq	" << STACK() << ", %rax\n"
 		"	movq	" << TOP() << ", %rcx\n"

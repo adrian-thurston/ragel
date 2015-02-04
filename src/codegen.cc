@@ -568,18 +568,6 @@ bool CodeGen::isAlphTypeSigned()
 	return keyOps->isSigned;
 }
 
-bool CodeGen::isWideAlphTypeSigned()
-{
-	string ret;
-	if ( keyOps->le( redFsm->maxKey, keyOps->maxKey ) )
-		return isAlphTypeSigned();
-	else {
-		long long maxKeyVal = keyOps->getLongLong( redFsm->maxKey );
-		HostType *wideType = keyOps->typeSubsumes( keyOps->isSigned, maxKeyVal );
-		return wideType->isSigned;
-	}
-}
-
 void CodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
 {
 	/* The parser gives fexec two children. The double brackets are for D

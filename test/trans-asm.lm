@@ -311,26 +311,30 @@ int rw_asm_ragel_stmt( Stmt: indep::ragel_stmt )
 	case [`fgoto `* E: expr `;] {
 		rw_asm_expr( E )
 		send Out
-			"popq	%rax
-			"fgoto	* %rax;
-	}
-	case [`fcall `* E: expr `;] {
-		rw_asm_expr( E )
-		send Out
-			"popq	%rax
-			"fcall	* %rax;
-	}
-	case [`fncall `* E: expr `;] {
-		rw_asm_expr( E )
-		send Out
-			"popq	%rax
-			"fncall	* %rax;
+			"movq	$0, %rax
+			"popq	%rcx
+			"fgoto	* %rcx;
 	}
 	case [`fnext `* E: expr `;] {
 		rw_asm_expr( E )
 		send Out
-			"popq	%rax
-			"fnext	* %rax;
+			"movq	$0, %rax
+			"popq	%rcx
+			"fnext	* %rcx;
+	}
+	case [`fcall `* E: expr `;] {
+		rw_asm_expr( E )
+		send Out
+			"movq	$0, %rax
+			"popq	%rcx
+			"fcall	* %rcx;
+	}
+	case [`fncall `* E: expr `;] {
+		rw_asm_expr( E )
+		send Out
+			"movq	$0, %rax
+			"popq	%rcx
+			"fncall	* %rcx;
 	}
 	default {
 		send Out

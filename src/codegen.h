@@ -157,7 +157,6 @@ protected:
 	string ARRAY_TYPE( unsigned long maxVal );
 
 	bool isAlphTypeSigned();
-	bool isWideAlphTypeSigned();
 	long long tableData;
 	bool directBackend;
 	bool stringTables;

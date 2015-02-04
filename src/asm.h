@@ -88,7 +88,6 @@ protected:
 	string ARRAY_TYPE( unsigned long maxVal );
 
 	bool isAlphTypeSigned();
-	bool isWideAlphTypeSigned();
 
 	string GET_KEY();
 
