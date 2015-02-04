@@ -1362,10 +1362,12 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 			/* Write the label for the transition so it can be jumped to. */
 			out << LABEL( "tr", pair->id ) << ":\n";
 
-//			/* If the action contains a next, then we must preload the current
-//			 * state since the action may or may not set it. */
-//			if ( pair->action->anyNextStmt() )
-//				out << "	" << vCS() << " = " << pair->targ->id << ";\n";
+			/* If the action contains a next, then we must preload the current
+			 * state since the action may or may not set it. */
+			if ( pair->action->anyNextStmt() ) {
+				out <<
+					"	movq	$" << pair->targ->id << ", " << vCS() << "\n";
+			}
 
 			if ( redFsm->anyRegNbreak() ) {
 				out <<
@@ -1504,9 +1506,6 @@ std::ostream &AsmCodeGen::EXIT_STATES()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->outNeeded ) {
 			testEofUsed = true;
-
-			// out << "_test_eof" << st->id << ": " << vCS() << " = " << 
-			//		st->id << "; goto _test_eof; \n";
 
 			out << 
 				LABEL( "test_eof", st->id ) << ":\n"
