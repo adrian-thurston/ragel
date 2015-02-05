@@ -243,6 +243,8 @@ public:
 	void emitSingleIfElseIf( RedStateAp *state );
 	void emitSingleJumpTable( RedStateAp *state, std::string def );
 	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
+	void emitCharClassIfElseIf( RedStateAp *state );
+	void emitCharClassJumpTable( RedStateAp *state, std::string def );
 
 	/* Set up labelNeeded flag for each state. */
 	void setLabelsNeeded( RedCondPair *pair );

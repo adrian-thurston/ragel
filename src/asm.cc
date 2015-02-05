@@ -87,12 +87,10 @@ void AsmCodeGen::genAnalysis()
 	 * potential for fall-throughs. */
 	redFsm->depthFirstOrdering();
 
-	/* Choose default transitions and the single transition. */
+	/* Choose default transitions and make the flat transitions by character class. */
 	redFsm->chooseDefaultSpan();
+	redFsm->makeFlatClass();
 		
-	/* Choose single. */
-	redFsm->moveAllTransToSingle();
-
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
 		return;
@@ -1065,6 +1063,49 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 	}
 }
 
+void AsmCodeGen::emitCharClassIfElseIf( RedStateAp *st )
+{
+	long long span = st->high - st->low + 1;
+	for ( long long pos = 0; pos < span; pos++ ) {
+		out <<
+			"	cmpb	" << KEY( st->low + pos ) << ", %r10b\n"
+			"	je	" << TRANS_GOTO_TARG( st->transList[pos] ) << "\n";
+	}
+}
+
+void AsmCodeGen::emitCharClassJumpTable( RedStateAp *st, string def )
+{
+	long long low = st->low;
+	long long high = st->high;
+
+	if ( def.size() == 0 )
+		def = LABEL( "ccf", st->id );
+
+	out <<
+		"	movzbq	%r10b, %rax\n"
+		"	subq	$" << low << ", %rax\n"
+		"	cmpq	$" << (high - low) << ", %rax\n"
+		"	ja		" << def << "\n"
+		"	leaq	" << LABEL( "cct", st->id ) << "(%rip), %rcx\n"
+		"	movslq  (%rcx,%rax,4), %rdx\n"
+		"	addq	%rcx, %rdx\n"
+		"	jmp     *%rdx\n"
+		"	.section .rodata\n"
+		"	.align 4\n"
+		<< LABEL( "cct", st->id ) << ":\n";
+
+	long long span = st->high - st->low + 1;
+	for ( long long pos = 0; pos < span; pos++ ) {
+		out << "	.long	" << TRANS_GOTO_TARG( st->transList[pos] ) << " - " <<
+				LABEL( "cct", st->id ) << "\n";
+	}
+
+	out <<
+		"	.text\n"
+		"" << LABEL( "ccf", st->id ) << ":\n";
+	
+}
+
 std::ostream &AsmCodeGen::STATE_GOTOS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -1075,24 +1116,34 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 			GOTO_HEADER( st );
 
 			/* Load *p. */
-			if ( st->outSingle.length() > 0 || st->outRange.length() > 0 )
-				out << "	movb	(" << P() << "), %r10b\n";
+			if ( st->transList != 0 ) {
+				long lowKey = redFsm->lowKey.getVal();
+				long highKey = redFsm->highKey.getVal();
 
-			/* Try singles. */
-			if ( st->outSingle.length() > 0 ) {
-				if ( st->outSingle.length() <= 4 )
-					emitSingleIfElseIf( st );
+				out <<
+					"	movzbl	(" << P() << "), %r10d\n"
+					"	cmpl	$" << lowKey << ", %r10d\n"
+					"	jl		" << LABEL( "nf", st->id ) << "\n"
+					"	cmpl	$" << highKey << ", %r10d\n"
+					"	jg		" << LABEL( "nf", st->id ) << "\n"
+					"	subl	" << KEY( lowKey ) << ", %r10d\n"
+					"	leaq	" << LABEL( "char_class" ) << "(%rip), %rcx\n"
+					"	movslq	%r10d, %rax\n"
+					"	movb	(%rcx, %rax), %r10b\n"
+				;
+
+
+				long len = ( st->high - st->low + 1 );
+
+				if ( len < 8 )
+					emitCharClassIfElseIf( st );
 				else {
 					string def;
 					if ( st->outRange.length() == 0 )
 						def = TRANS_GOTO_TARG( st->defTrans );
-					emitSingleJumpTable( st, def );
+					emitCharClassJumpTable( st, def );
 				}
 			}
-
-			/* Default case is to binary search for the ranges, if that fails then */
-			if ( st->outRange.length() > 0 )
-				emitRangeBSearch( st, 1, 0, st->outRange.length() - 1 );
 
 			/* Write the default transition. */
 			out << LABEL( "nf", st->id ) << ":\n";
@@ -1692,6 +1743,17 @@ void AsmCodeGen::setLabelsNeeded()
 void AsmCodeGen::writeData()
 {
 	STATE_IDS();
+
+	long long maxSpan = keyOps->span( redFsm->lowKey, redFsm->highKey );
+
+	out <<
+		"	.type	" << LABEL( "char_class" ) << ", @object\n" <<
+		LABEL( "char_class" ) << ":\n";
+
+	for ( long long pos = 0; pos < maxSpan; pos++ ) {
+		out <<
+			"	.byte " << redFsm->classMap[pos] << "\n";
+	}
 }
 
 void AsmCodeGen::writeExec()
