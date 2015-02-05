@@ -538,6 +538,8 @@ void rw_asm( Output: stream )
 
 	send Output
 		"	.section	.rodata
+		".L_debug_msg:
+		"	.string	\"debug %d\\n\"
 
 	NR: int = 0
 	for InputString: indep::input_string in RagelTree {
@@ -590,4 +592,11 @@ void rw_asm( Output: stream )
 		"	mov		$0, %rax
 		"	leave
 		"	ret
+		"debug:
+		"	movl	%edi, %esi
+		"	movq	$0, %rax
+		"	movq	$.L_debug_msg, %rdi
+		"	call	printf
+		"	ret
+		"	
 }
