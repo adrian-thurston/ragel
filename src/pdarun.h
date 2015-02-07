@@ -447,10 +447,10 @@ Kid *makeTokenWithData( struct colm_program *prg, PdaRun *pdaRun, FsmRun *fsmRun
 
 void pushBinding( PdaRun *pdaRun, ParseTree *parseTree );
 
-void executeGenerationAction( struct colm_program *prg, Tree **sp, FsmRun *fsmRun, PdaRun *pdaRun, 
-		StreamImpl *inputStream, int frameId, Code *code, long id, Head *tokdata );
+void executeGenerationAction( struct colm_program *prg, Tree **sp, FsmRun *fsmRun,
+		PdaRun *pdaRun, StreamImpl *inputStream, int frameId, Code *code,
+		long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );
-void clearIgnoreList( struct colm_program *prg, Tree **sp, Kid *kid );
 long colm_parse_loop( struct colm_program *prg, Tree **sp, PdaRun *pdaRun, 
 		StreamImpl *inputStream, long entry );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );

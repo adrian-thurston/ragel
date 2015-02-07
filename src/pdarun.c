@@ -56,9 +56,6 @@
 	i = (Tree*)w; \
 } while(0)
 
-static long parse_token( Program *prg, Tree **sp, PdaRun *pdaRun,
-		FsmRun *fsmRun, StreamImpl *is, long entry );
-
 static void init_fsm_run( Program *prg, FsmRun *fsmRun )
 {
 	fsmRun->tables = prg->rtd->fsmTables;
@@ -187,7 +184,7 @@ static void sendBackText( FsmRun *fsmRun, StreamImpl *is, const char *data, long
 	is->funcs->undoConsumeData( is, data, length );
 }
 
-void sendBackTree( StreamImpl *is, Tree *tree )
+static void send_back_tree( StreamImpl *is, Tree *tree )
 {
 	is->funcs->undoConsumeTree( is, tree, false );
 }
@@ -196,7 +193,7 @@ void sendBackTree( StreamImpl *is, Tree *tree )
  * Stops on:
  *   PcrRevIgnore
  */
-static void sendBackIgnore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
+static void send_back_ignore( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 		StreamImpl *is, ParseTree *parseTree )
 {
 	#ifdef DEBUG
@@ -269,7 +266,7 @@ static void send_back( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun,
 
 		treeUpref( parseTree->shadow->tree );
 
-		sendBackTree( is, parseTree->shadow->tree );
+		send_back_tree( is, parseTree->shadow->tree );
 	}
 	else {
 		/* Check for reverse code. */
@@ -313,7 +310,7 @@ static void set_region( PdaRun *pdaRun, int emptyIgnore, ParseTree *tree )
 	}
 }
 
-void ignoreTree( Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree )
+static void ignore_tree( Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
@@ -334,7 +331,7 @@ void ignoreTree( Program *prg, FsmRun *fsmRun, PdaRun *pdaRun, Tree *tree )
 	set_region( pdaRun, emptyIgnore, pdaRun->accumIgnore );
 }
 
-void ignoreTree2( Program *prg, PdaRun *pdaRun, Tree *tree )
+static void ignore_tree_art( Program *prg, PdaRun *pdaRun, Tree *tree )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
@@ -388,16 +385,6 @@ Kid *makeTokenWithData( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun,
 	}
 
 	return input;
-}
-
-void clearIgnoreList( Program *prg, Tree **sp, Kid *kid )
-{
-	while ( kid != 0 ) {
-		Kid *next = kid->next;
-		treeDownref( prg, sp, kid->tree );
-		kidFree( prg, kid );
-		kid = next;
-	}
 }
 
 static void reportParseError( Program *prg, Tree **sp, PdaRun *pdaRun )
@@ -814,7 +801,7 @@ static void sendIgnore( Program *prg, Tree **sp, StreamImpl *is,
 	tree->tokdata = ignoreStr;
 
 	/* Send it to the pdaRun. */
-	ignoreTree( prg, fsmRun, pdaRun, tree );
+	ignore_tree( prg, fsmRun, pdaRun, tree );
 }
 
 static void send_token( Program *prg, Tree **sp, StreamImpl *is,
@@ -864,7 +851,7 @@ static void send_ignore_tree( Program *prg, Tree **sp, PdaRun *pdaRun,
 		FsmRun *fsmRun, StreamImpl *is )
 {
 	Tree *tree = is->funcs->consumeTree( is );
-	ignoreTree2( prg, pdaRun, tree );
+	ignore_tree_art( prg, pdaRun, tree );
 }
 
 static void send_ci( Program *prg, Tree **sp, StreamImpl *is,
@@ -1098,247 +1085,6 @@ static long scan_token( Program *prg, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl
 
 	/* Should not be reached. */
 	return SCAN_ERROR;
-}
-
-/*
- * Stops on:
- *   PcrPreEof
- *   PcrGeneration
- *   PcrReduction
- *   PcrRevReduction
- *   PcrRevIgnore
- *   PcrRevToken
- */
-
-long colm_parse_loop( Program *prg, Tree **sp, PdaRun *pdaRun, 
-		StreamImpl *is, long entry )
-{
-	FsmRun *fsmRun = pdaRun->fsmRun;
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
-
-switch ( entry ) {
-case PcrStart:
-
-	pdaRun->stop = false;
-
-	while ( true ) {
-		debug( prg, REALM_PARSE, "parse loop start %d:%d\n", is->line, is->column );
-
-		/* Pull the current scanner from the parser. This can change during
-		 * parsing due to inputStream pushes, usually for the purpose of includes.
-		 * */
-		pdaRun->tokenId = scan_token( prg, pdaRun, fsmRun, is );
-
-		if ( pdaRun->tokenId == SCAN_ERROR ) {
-			if ( fsmRun->preRegion >= 0 ) {
-				fsmRun->preRegion = -1;
-				fsmRun->cs = fsmRun->ncs;
-				continue;
-			}
-		}
-
-		if ( pdaRun->tokenId == SCAN_ERROR &&
-				( prg->rtd->regionInfo[fsmRun->region].ciLelId > 0 ) )
-		{
-			debug( prg, REALM_PARSE, "sending a collect ignore\n" );
-			send_ci( prg, sp, is, fsmRun, pdaRun,
-					prg->rtd->regionInfo[fsmRun->region].ciLelId );
-			goto yes;
-		}
-
-		if ( pdaRun->tokenId == SCAN_TRY_AGAIN_LATER ) {
-			debug( prg, REALM_PARSE, "scanner says try again later\n" );
-			break;
-		}
-
-		assert( pdaRun->parseInput == 0 );
-		pdaRun->parseInput = 0;
-
-		/* Check for EOF. */
-		if ( pdaRun->tokenId == SCAN_EOF ) {
-			is->eofSent = true;
-			send_eof( prg, sp, is, fsmRun, pdaRun );
-
-			pdaRun->frameId = prg->rtd->regionInfo[fsmRun->region].eofFrameId;
-
-			if ( prg->ctxDepParsing && pdaRun->frameId >= 0 ) {
-				debug( prg, REALM_PARSE, "HAVE PRE_EOF BLOCK\n" );
-
-				pdaRun->fi = &prg->rtd->frameInfo[pdaRun->frameId];
-				pdaRun->code = pdaRun->fi->codeWV;
-
-return PcrPreEof;
-case PcrPreEof:
-				colm_make_reverse_code( pdaRun );
-			}
-		}
-		else if ( pdaRun->tokenId == SCAN_UNDO ) {
-			/* Fall through with parseInput = 0. FIXME: Do we need to send back ignore? */
-			debug( prg, REALM_PARSE, "invoking undo from the scanner\n" );
-		}
-		else if ( pdaRun->tokenId == SCAN_ERROR ) {
-			/* Scanner error, maybe retry. */
-			if ( pdaRun->accumIgnore == 0 && get_next_region( pdaRun, 1 ) != 0 ) {
-				debug( prg, REALM_PARSE, "scanner failed, trying next region\n" );
-
-				pdaRun->nextRegionInd += 1;
-				goto skipSend;
-			}
-			else { // if ( pdaRun->numRetry > 0 ) {
-				debug( prg, REALM_PARSE, "invoking parse error from the scanner\n" );
-
-				/* Fall through to send null (error). */
-				push_bt_point( prg, pdaRun );
-			}
-#if 0
-			else {
-				debug( prg, REALM_PARSE, "no alternate scanning regions\n" );
-
-				/* There are no alternative scanning regions to try, nor are
-				 * there any alternatives stored in the current parse tree. No
-				 * choice but to end the parse. */
-				push_bt_point( prg, pdaRun );
-
-				reportParseError( prg, sp, pdaRun );
-				pdaRun->parseError = 1;
-				goto skipSend;
-			}
-#endif
-		}
-		else if ( pdaRun->tokenId == SCAN_LANG_EL ) {
-			debug( prg, REALM_PARSE, "sending an named lang el\n" );
-
-			/* A named language element (parsing colm program). */
-			prg->rtd->sendNamedLangEl( prg, sp, pdaRun, fsmRun, is );
-		}
-		else if ( pdaRun->tokenId == SCAN_TREE ) {
-			debug( prg, REALM_PARSE, "sending a tree\n" );
-
-			/* A tree already built. */
-			send_tree( prg, sp, pdaRun, fsmRun, is );
-		}
-		else if ( pdaRun->tokenId == SCAN_IGNORE ) {
-			debug( prg, REALM_PARSE, "sending an ignore token\n" );
-
-			/* A tree to ignore. */
-			send_ignore_tree( prg, sp, pdaRun, fsmRun, is );
-			goto skipSend;
-		}
-		else if ( prg->ctxDepParsing && lelInfo[pdaRun->tokenId].frameId >= 0 ) {
-			/* Has a generation action. */
-			debug( prg, REALM_PARSE, "token gen action: %s\n", 
-					prg->rtd->lelInfo[pdaRun->tokenId].name );
-
-			/* Make the token data. */
-			pdaRun->tokdata = peekMatch( prg, fsmRun, is );
-
-			/* Note that we don't update the position now. It is done when the token
-			 * data is pulled from the inputStream. */
-
-			fsmRun->p = fsmRun->pe = 0;
-			fsmRun->toklen = 0;
-			fsmRun->eof = 0;
-
-			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->lelInfo[pdaRun->tokenId].frameId];
-			pdaRun->frameId = prg->rtd->lelInfo[pdaRun->tokenId].frameId;
-			pdaRun->code = pdaRun->fi->codeWV;
-			
-return PcrGeneration;
-case PcrGeneration:
-
-			colm_make_reverse_code( pdaRun );
-
-			/* Finished with the match text. */
-			stringFree( prg, pdaRun->tokdata );
-
-			goto skipSend;
-		}
-		else if ( lelInfo[pdaRun->tokenId].ignore ) {
-			debug( prg, REALM_PARSE, "sending an ignore token: %s\n", 
-					prg->rtd->lelInfo[pdaRun->tokenId].name );
-
-			/* Is an ignore token. */
-			sendIgnore( prg, sp, is, fsmRun, pdaRun, pdaRun->tokenId );
-			goto skipSend;
-		}
-		else {
-			debug( prg, REALM_PARSE, "sending an a plain old token: %s\n", 
-					prg->rtd->lelInfo[pdaRun->tokenId].name );
-
-			/* Is a plain token. */
-			send_token( prg, sp, is, fsmRun, pdaRun, pdaRun->tokenId );
-		}
-yes:
-
-		if ( pdaRun->parseInput != 0 )
-			colm_transfer_reverse_code( pdaRun, pdaRun->parseInput );
-
-		if ( pdaRun->parseInput != 0 ) {
-			/* If it's a nonterminal with a termdup then flip the parse tree to
-			 * the terminal. */
-			if ( pdaRun->parseInput->id >= prg->rtd->firstNonTermId ) {
-				pdaRun->parseInput->id =
-						prg->rtd->lelInfo[pdaRun->parseInput->id].termDupId;
-				pdaRun->parseInput->flags |= PF_TERM_DUP;
-			}
-		}
-
-		long pcr = parse_token( prg, sp, pdaRun, fsmRun, is, PcrStart );
-		
-		while ( pcr != PcrDone ) {
-
-return pcr;
-case PcrReduction:
-case PcrReverse:
-
-			pcr = parse_token( prg, sp, pdaRun, fsmRun, is, entry );
-		}
-
-		assert( pcr == PcrDone );
-
-		handle_error( prg, sp, pdaRun );
-
-skipSend:
-		new_token( prg, pdaRun, fsmRun );
-
-		/* Various stop conditions. This should all be coverned by one test
-		 * eventually. */
-
-		if ( pdaRun->triggerUndo ) {
-			debug( prg, REALM_PARSE, "parsing stopped by triggerUndo\n" );
-			break;
-		}
-
-		if ( is->eofSent ) {
-			debug( prg, REALM_PARSE, "parsing stopped by EOF\n" );
-			break;
-		}
-
-		if ( pdaRun->stopParsing ) {
-			debug( prg, REALM_PARSE, "scanner has been stopped\n" );
-			break;
-		}
-
-		if ( pdaRun->stop ) {
-			debug( prg, REALM_PARSE, "parsing has been stopped by consumedCount\n" );
-			break;
-		}
-
-		if ( prg->induceExit ) {
-			debug( prg, REALM_PARSE, "parsing has been stopped by a call to exit\n" );
-			break;
-		}
-
-		if ( pdaRun->parseError ) {
-			debug( prg, REALM_PARSE, "parsing stopped by a parse error\n" );
-			break;
-		}
-	}
-
-case PcrDone:
-break; }
-
-	return PcrDone;
 }
 
 static Tree *get_parsed_root( PdaRun *pdaRun, int stop )
@@ -2148,7 +1894,7 @@ case PcrReverse:
 			pdaRun->checkNext = true;
 			pdaRun->checkStop = true;
 			
-			sendBackIgnore( prg, sp, pdaRun, fsmRun, is, ignore );
+			send_back_ignore( prg, sp, pdaRun, fsmRun, is, ignore );
 
 			treeDownref( prg, sp, ignore->shadow->tree );
 			kidFree( prg, ignore->shadow );
@@ -2229,6 +1975,250 @@ break; }
 
 	return PcrDone;
 }
+
+/*
+ * colm_parse_loop
+ *
+ * Stops on:
+ *   PcrPreEof
+ *   PcrGeneration
+ *   PcrReduction
+ *   PcrRevReduction
+ *   PcrRevIgnore
+ *   PcrRevToken
+ */
+
+long colm_parse_loop( Program *prg, Tree **sp, PdaRun *pdaRun, 
+		StreamImpl *is, long entry )
+{
+	FsmRun *fsmRun = pdaRun->fsmRun;
+	LangElInfo *lelInfo = prg->rtd->lelInfo;
+
+switch ( entry ) {
+case PcrStart:
+
+	pdaRun->stop = false;
+
+	while ( true ) {
+		debug( prg, REALM_PARSE, "parse loop start %d:%d\n", is->line, is->column );
+
+		/* Pull the current scanner from the parser. This can change during
+		 * parsing due to inputStream pushes, usually for the purpose of includes.
+		 * */
+		pdaRun->tokenId = scan_token( prg, pdaRun, fsmRun, is );
+
+		if ( pdaRun->tokenId == SCAN_ERROR ) {
+			if ( fsmRun->preRegion >= 0 ) {
+				fsmRun->preRegion = -1;
+				fsmRun->cs = fsmRun->ncs;
+				continue;
+			}
+		}
+
+		if ( pdaRun->tokenId == SCAN_ERROR &&
+				( prg->rtd->regionInfo[fsmRun->region].ciLelId > 0 ) )
+		{
+			debug( prg, REALM_PARSE, "sending a collect ignore\n" );
+			send_ci( prg, sp, is, fsmRun, pdaRun,
+					prg->rtd->regionInfo[fsmRun->region].ciLelId );
+			goto yes;
+		}
+
+		if ( pdaRun->tokenId == SCAN_TRY_AGAIN_LATER ) {
+			debug( prg, REALM_PARSE, "scanner says try again later\n" );
+			break;
+		}
+
+		assert( pdaRun->parseInput == 0 );
+		pdaRun->parseInput = 0;
+
+		/* Check for EOF. */
+		if ( pdaRun->tokenId == SCAN_EOF ) {
+			is->eofSent = true;
+			send_eof( prg, sp, is, fsmRun, pdaRun );
+
+			pdaRun->frameId = prg->rtd->regionInfo[fsmRun->region].eofFrameId;
+
+			if ( prg->ctxDepParsing && pdaRun->frameId >= 0 ) {
+				debug( prg, REALM_PARSE, "HAVE PRE_EOF BLOCK\n" );
+
+				pdaRun->fi = &prg->rtd->frameInfo[pdaRun->frameId];
+				pdaRun->code = pdaRun->fi->codeWV;
+
+return PcrPreEof;
+case PcrPreEof:
+				colm_make_reverse_code( pdaRun );
+			}
+		}
+		else if ( pdaRun->tokenId == SCAN_UNDO ) {
+			/* Fall through with parseInput = 0. FIXME: Do we need to send back ignore? */
+			debug( prg, REALM_PARSE, "invoking undo from the scanner\n" );
+		}
+		else if ( pdaRun->tokenId == SCAN_ERROR ) {
+			/* Scanner error, maybe retry. */
+			if ( pdaRun->accumIgnore == 0 && get_next_region( pdaRun, 1 ) != 0 ) {
+				debug( prg, REALM_PARSE, "scanner failed, trying next region\n" );
+
+				pdaRun->nextRegionInd += 1;
+				goto skipSend;
+			}
+			else { // if ( pdaRun->numRetry > 0 ) {
+				debug( prg, REALM_PARSE, "invoking parse error from the scanner\n" );
+
+				/* Fall through to send null (error). */
+				push_bt_point( prg, pdaRun );
+			}
+#if 0
+			else {
+				debug( prg, REALM_PARSE, "no alternate scanning regions\n" );
+
+				/* There are no alternative scanning regions to try, nor are
+				 * there any alternatives stored in the current parse tree. No
+				 * choice but to end the parse. */
+				push_bt_point( prg, pdaRun );
+
+				reportParseError( prg, sp, pdaRun );
+				pdaRun->parseError = 1;
+				goto skipSend;
+			}
+#endif
+		}
+		else if ( pdaRun->tokenId == SCAN_LANG_EL ) {
+			debug( prg, REALM_PARSE, "sending an named lang el\n" );
+
+			/* A named language element (parsing colm program). */
+			prg->rtd->sendNamedLangEl( prg, sp, pdaRun, fsmRun, is );
+		}
+		else if ( pdaRun->tokenId == SCAN_TREE ) {
+			debug( prg, REALM_PARSE, "sending a tree\n" );
+
+			/* A tree already built. */
+			send_tree( prg, sp, pdaRun, fsmRun, is );
+		}
+		else if ( pdaRun->tokenId == SCAN_IGNORE ) {
+			debug( prg, REALM_PARSE, "sending an ignore token\n" );
+
+			/* A tree to ignore. */
+			send_ignore_tree( prg, sp, pdaRun, fsmRun, is );
+			goto skipSend;
+		}
+		else if ( prg->ctxDepParsing && lelInfo[pdaRun->tokenId].frameId >= 0 ) {
+			/* Has a generation action. */
+			debug( prg, REALM_PARSE, "token gen action: %s\n", 
+					prg->rtd->lelInfo[pdaRun->tokenId].name );
+
+			/* Make the token data. */
+			pdaRun->tokdata = peekMatch( prg, fsmRun, is );
+
+			/* Note that we don't update the position now. It is done when the token
+			 * data is pulled from the inputStream. */
+
+			fsmRun->p = fsmRun->pe = 0;
+			fsmRun->toklen = 0;
+			fsmRun->eof = 0;
+
+			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->lelInfo[pdaRun->tokenId].frameId];
+			pdaRun->frameId = prg->rtd->lelInfo[pdaRun->tokenId].frameId;
+			pdaRun->code = pdaRun->fi->codeWV;
+			
+return PcrGeneration;
+case PcrGeneration:
+
+			colm_make_reverse_code( pdaRun );
+
+			/* Finished with the match text. */
+			stringFree( prg, pdaRun->tokdata );
+
+			goto skipSend;
+		}
+		else if ( lelInfo[pdaRun->tokenId].ignore ) {
+			debug( prg, REALM_PARSE, "sending an ignore token: %s\n", 
+					prg->rtd->lelInfo[pdaRun->tokenId].name );
+
+			/* Is an ignore token. */
+			sendIgnore( prg, sp, is, fsmRun, pdaRun, pdaRun->tokenId );
+			goto skipSend;
+		}
+		else {
+			debug( prg, REALM_PARSE, "sending an a plain old token: %s\n", 
+					prg->rtd->lelInfo[pdaRun->tokenId].name );
+
+			/* Is a plain token. */
+			send_token( prg, sp, is, fsmRun, pdaRun, pdaRun->tokenId );
+		}
+yes:
+
+		if ( pdaRun->parseInput != 0 )
+			colm_transfer_reverse_code( pdaRun, pdaRun->parseInput );
+
+		if ( pdaRun->parseInput != 0 ) {
+			/* If it's a nonterminal with a termdup then flip the parse tree to
+			 * the terminal. */
+			if ( pdaRun->parseInput->id >= prg->rtd->firstNonTermId ) {
+				pdaRun->parseInput->id =
+						prg->rtd->lelInfo[pdaRun->parseInput->id].termDupId;
+				pdaRun->parseInput->flags |= PF_TERM_DUP;
+			}
+		}
+
+		long pcr = parse_token( prg, sp, pdaRun, fsmRun, is, PcrStart );
+		
+		while ( pcr != PcrDone ) {
+
+return pcr;
+case PcrReduction:
+case PcrReverse:
+
+			pcr = parse_token( prg, sp, pdaRun, fsmRun, is, entry );
+		}
+
+		assert( pcr == PcrDone );
+
+		handle_error( prg, sp, pdaRun );
+
+skipSend:
+		new_token( prg, pdaRun, fsmRun );
+
+		/* Various stop conditions. This should all be coverned by one test
+		 * eventually. */
+
+		if ( pdaRun->triggerUndo ) {
+			debug( prg, REALM_PARSE, "parsing stopped by triggerUndo\n" );
+			break;
+		}
+
+		if ( is->eofSent ) {
+			debug( prg, REALM_PARSE, "parsing stopped by EOF\n" );
+			break;
+		}
+
+		if ( pdaRun->stopParsing ) {
+			debug( prg, REALM_PARSE, "scanner has been stopped\n" );
+			break;
+		}
+
+		if ( pdaRun->stop ) {
+			debug( prg, REALM_PARSE, "parsing has been stopped by consumedCount\n" );
+			break;
+		}
+
+		if ( prg->induceExit ) {
+			debug( prg, REALM_PARSE, "parsing has been stopped by a call to exit\n" );
+			break;
+		}
+
+		if ( pdaRun->parseError ) {
+			debug( prg, REALM_PARSE, "parsing stopped by a parse error\n" );
+			break;
+		}
+	}
+
+case PcrDone:
+break; }
+
+	return PcrDone;
+}
+
 
 long colm_parse_frag( Program *prg, Tree **sp, PdaRun *pdaRun,
 		Stream *input, long stopId, long entry )
