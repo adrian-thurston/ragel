@@ -585,8 +585,6 @@ void colm_rcode_downref_all( struct colm_program *prg, Tree **sp, RtCodeVect *cv
 int colm_make_reverse_code( PdaRun *pdaRun );
 void colm_transfer_reverse_code( PdaRun *pdaRun, ParseTree *tree );
 
-void commitFull( struct colm_program *prg, Tree **sp, PdaRun *pdaRun, long commitReduce );
-Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 void splitRef( struct colm_program *prg, Tree ***sp, Ref *fromRef );
 
 void allocGlobal( struct colm_program *prg );

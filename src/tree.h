@@ -93,10 +93,10 @@ typedef struct _ParseTree
 
 	/* Parsing algorithm. */
 	long state;
-	long region;
 	short causeReduce;
 
-	/* FIXME: unify probably. */
+	/* Retry vars. Might be able to unify lower and upper. */
+	long retryRegion;
 	char retryLower;
 	char retryUpper;
 } ParseTree;
@@ -237,6 +237,7 @@ Object *newList2( struct colm_program *prg );
 int testFalse( struct colm_program *prg, Tree *tree );
 Tree *makeTree( struct colm_program *prg, Tree **args, long nargs );
 Stream *openFile( struct colm_program *prg, Tree *name, Tree *mode );
+Stream *colm_stream_open_file( struct colm_program *prg, Tree *name, Tree *mode );
 Stream *colm_stream_open_fd( struct colm_program *prg, char *name, long fd );
 Kid *copyIgnoreList( struct colm_program *prg, Kid *ignoreHeader );
 Kid *copyKidList( struct colm_program *prg, Kid *kidList );

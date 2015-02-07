@@ -364,7 +364,7 @@ typedef struct _PdaRun
 
 void colm_pda_init( struct colm_program *prg, PdaRun *pdaRun, PdaTables *tables,
 		int parserId, long stopTarget, int revertOn, struct colm_struct *context );
-void clearPdaRun( struct colm_program *prg, struct colm_tree **sp, PdaRun *pdaRun );
+void colm_pda_clear( struct colm_program *prg, struct colm_tree **sp, PdaRun *pdaRun );
 void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
 void rtCodeVectEmpty( RtCodeVect *vect );
 void rtCodeVectRemove( RtCodeVect *vect, long pos, long len );
@@ -409,8 +409,8 @@ inline static void appendWord( RtCodeVect *vect, Word word )
 	#endif
 }
 
-void incrementSteps( PdaRun *pdaRun );
-void decrementSteps( PdaRun *pdaRun );
+void colm_increment_steps( PdaRun *pdaRun );
+void colm_decrement_steps( PdaRun *pdaRun );
 
 void clearStreamImpl( struct colm_program *prg, Tree **sp, StreamImpl *inputStream );
 void initSourceStream( StreamImpl *in );
@@ -419,9 +419,7 @@ void clearSourceStream( struct colm_program *prg, Tree **sp, StreamImpl *sourceS
 
 void clearContext( PdaRun *pdaRun, Tree **sp );
 Kid *extractIgnore( PdaRun *pdaRun );
-long stackTopTarget( struct colm_program *prg, PdaRun *pdaRun );
 void runCommit( PdaRun *pdaRun );
-int isParserStopFinished( PdaRun *pdaRun );
 void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 
 /* Offset can be used to look at the next nextRegionInd. */
@@ -434,11 +432,6 @@ int pdaRunGetNextPreRegion( PdaRun *pdaRun );
 #define PcrGeneration    4
 #define PcrPreEof        5
 #define PcrReverse       6
-
-long parseToken( struct colm_program *prg, Tree **sp, PdaRun *pdaRun, 
-		FsmRun *fsmRun, StreamImpl *inputStream, long entry );
-
-long undoParse( Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *inputStream, Tree *tree );
 
 Head *streamPull( struct colm_program *prg, struct colm_tree **sp,
 		PdaRun *pdaRun, StreamImpl *is, long length );
@@ -458,11 +451,17 @@ void executeGenerationAction( struct colm_program *prg, Tree **sp, FsmRun *fsmRu
 		StreamImpl *inputStream, int frameId, Code *code, long id, Head *tokdata );
 Kid *extractIgnore( PdaRun *pdaRun );
 void clearIgnoreList( struct colm_program *prg, Tree **sp, Kid *kid );
-long parseLoop( struct colm_program *prg, Tree **sp, PdaRun *pdaRun, 
+long colm_parse_loop( struct colm_program *prg, Tree **sp, PdaRun *pdaRun, 
 		StreamImpl *inputStream, long entry );
 Tree *getParsedRoot( PdaRun *pdaRun, int stop );
 
-void resetToken( PdaRun *pdaRun );
+
+long colm_parse_frag( struct colm_program *prg, Tree **sp, PdaRun *pdaRun,
+		Stream *input, long stopId, long entry );
+long colm_parse_finish( Tree **result, struct colm_program *prg, Tree **sp,
+		PdaRun *pdaRun, Stream *input , int revertOn, long entry );
+long colm_parse_undo_frag( struct colm_program *prg, Tree **sp, PdaRun *pdaRun,
+		Stream *input, long steps, long entry );
 
 #ifdef __cplusplus
 }

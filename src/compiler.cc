@@ -992,7 +992,7 @@ PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	in->funcs->appendStream( in, (Tree*)stream );
 	in->funcs->setEof( in );
 
-	long pcr = parseLoop( prg, sp, pdaRun, in, PcrStart );
+	long pcr = colm_parse_loop( prg, sp, pdaRun, in, PcrStart );
 	assert( pcr == PcrDone );
 	if ( pdaRun->parseError ) {
 		cerr << ( loc.fileName != 0 ? loc.fileName : "<input>" ) <<

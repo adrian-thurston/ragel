@@ -69,7 +69,7 @@ void colm_parser_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 	struct colm_parser *parser = (struct colm_parser*) s;
 
 	/* Free the PDA run. */
-	clearPdaRun( prg, sp, parser->pdaRun );
+	colm_pda_clear( prg, sp, parser->pdaRun );
 	free( parser->pdaRun );
 
 	/* Free the result. */

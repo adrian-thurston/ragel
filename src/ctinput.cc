@@ -446,7 +446,8 @@ StreamFuncs replFuncs =
 	&inputStreamConsUndoConsumeLangEl,
 };
 
-extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
+extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp,
+		PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
 {
 	/* All three set by consumeLangEl. */
 	long bindId;
@@ -464,7 +465,7 @@ extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp, PdaRun *pdaRun
 
 	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, is, klangEl->id, tokdata );
 
-	incrementSteps( pdaRun );
+	colm_increment_steps( pdaRun );
 
 	ParseTree *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;

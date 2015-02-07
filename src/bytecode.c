@@ -220,129 +220,6 @@ static void stream_undo_append_stream( Program *prg, Tree **sp, StreamImpl *is,
 	is->funcs->undoAppendStream( is );
 }
 
-static long parse_frag( Program *prg, Tree **sp, PdaRun *pdaRun,
-		Stream *input, long stopId, long entry )
-{
-switch ( entry ) {
-case PcrStart:
-
-	if ( ! pdaRun->parseError ) {
-		pdaRun->stopTarget = stopId;
-
-		long pcr = parseLoop( prg, sp, pdaRun, 
-				streamToImpl( input ), entry );
-
-		while ( pcr != PcrDone ) {
-
-return pcr;
-case PcrReduction:
-case PcrGeneration:
-case PcrPreEof:
-case PcrReverse:
-
-			pcr = parseLoop( prg, sp, pdaRun, 
-					streamToImpl( input ), entry );
-		}
-	}
-
-case PcrDone:
-break; }
-
-	return PcrDone;
-}
-
-static long parse_finish( Tree **result, Program *prg, Tree **sp,
-		PdaRun *pdaRun, Stream *input , int revertOn, long entry )
-{
-	StreamImpl *si;
-switch ( entry ) {
-case PcrStart:
-
-	if ( pdaRun->stopTarget <= 0 ) {
-		si = streamToImpl( input );
-		si->funcs->setEof( si );
-
-		if ( ! pdaRun->parseError ) {
-			si = streamToImpl( input );
-			long pcr = parseLoop( prg, sp, pdaRun, si, entry );
-
-		 	while ( pcr != PcrDone ) {
-
-return pcr;
-case PcrReduction:
-case PcrGeneration:
-case PcrPreEof:
-case PcrReverse:
-
-				si = streamToImpl( input );
-				pcr = parseLoop( prg, sp, pdaRun, si, entry );
-			}
-		}
-	}
-
-	/* FIXME: need something here to check that we are not stopped waiting for
-	 * more data when we are actually expected to finish. This check doesn't
-	 * work (at time of writing). */
-	//assert( (pdaRun->stopTarget > 0 && pdaRun->stopParsing) || streamToImpl( input )->eofSent );
-
-	if ( !revertOn )
-		commitFull( prg, sp, pdaRun, 0 );
-	
-	Tree *tree = getParsedRoot( pdaRun, pdaRun->stopTarget > 0 );
-	treeUpref( tree );
-
-	*result = tree;
-
-case PcrDone:
-break; }
-
-	return PcrDone;
-}
-
-static long parse_undo_frag( Program *prg, Tree **sp, PdaRun *pdaRun,
-		Stream *input, long steps, long entry )
-{
-	debug( prg, REALM_PARSE,
-			"undo parse frag, target steps: %ld, pdarun steps: %ld\n",
-			steps, pdaRun->steps );
-
-	resetToken( pdaRun );
-
-switch ( entry ) {
-case PcrStart:
-
-	if ( steps < pdaRun->steps ) {
-		/* Setup environment for going backwards until we reduced steps to
-		 * what we want. */
-		pdaRun->numRetry += 1;
-		pdaRun->targetSteps = steps;
-		pdaRun->triggerUndo = 1;
-
-		/* The parse loop will recognise the situation. */
-		long pcr = parseLoop( prg, sp, pdaRun, streamToImpl(input), entry );
-		while ( pcr != PcrDone ) {
-
-return pcr;
-case PcrReduction:
-case PcrGeneration:
-case PcrPreEof:
-case PcrReverse:
-
-			pcr = parseLoop( prg, sp, pdaRun, streamToImpl(input), entry );
-		}
-
-		/* Reset environment. */
-		pdaRun->triggerUndo = 0;
-		pdaRun->targetSteps = -1;
-		pdaRun->numRetry -= 1;
-	}
-
-case PcrDone:
-break; }
-
-	return PcrDone;
-}
-
 static Tree *stream_pull_bc( Program *prg, Tree **sp, PdaRun *pdaRun,
 		Stream *stream, Tree *length )
 {
@@ -562,7 +439,7 @@ int colm_make_reverse_code( PdaRun *pdaRun )
 		appendCode( reverseCode, IN_PCR_RET );
 		appendWord( reverseCode, 2 );
 		pdaRun->rcBlockCount += 1;
-		incrementSteps( pdaRun );
+		colm_increment_steps( pdaRun );
 	}
 
 	long startLength = reverseCode->tabLen;
@@ -586,7 +463,7 @@ int colm_make_reverse_code( PdaRun *pdaRun )
 	rcodeCollect->tabLen = 0;
 
 	pdaRun->rcBlockCount += 1;
-	incrementSteps( pdaRun );
+	colm_increment_steps( pdaRun );
 
 	return true;
 }
@@ -2433,7 +2310,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WC %hd\n", stopId );
 
-			exec->pcr = parse_frag( prg, sp, exec->parser->pdaRun,
+			exec->pcr = colm_parse_frag( prg, sp, exec->parser->pdaRun,
 					exec->parser->input, stopId, exec->pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
@@ -2466,7 +2343,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WV %hd\n", stopId );
 
-			exec->pcr = parse_frag( prg, sp, exec->parser->pdaRun,
+			exec->pcr = colm_parse_frag( prg, sp, exec->parser->pdaRun,
 					exec->parser->input, stopId, exec->pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
@@ -2510,7 +2387,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT %hd\n", stopId );
 
-			exec->pcr = parse_undo_frag( prg, sp, exec->parser->pdaRun,
+			exec->pcr = colm_parse_undo_frag( prg, sp, exec->parser->pdaRun,
 					exec->parser->input, exec->steps, exec->pcr );
 
 			if ( exec->pcr == PcrDone )
@@ -2537,7 +2414,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WC %hd\n", stopId );
 
 			Tree *result = 0;
-			exec->pcr = parse_finish( &result, prg, sp,
+			exec->pcr = colm_parse_finish( &result, prg, sp,
 					exec->parser->pdaRun, exec->parser->input, false, exec->pcr );
 
 			exec->parser->result = result;
@@ -2573,7 +2450,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WV %hd\n", stopId );
 
 			Tree *result = 0;
-			exec->pcr = parse_finish( &result, prg, sp, exec->parser->pdaRun,
+			exec->pcr = colm_parse_finish( &result, prg, sp, exec->parser->pdaRun,
 					exec->parser->input, true, exec->pcr );
 
 			exec->parser->result = result;
@@ -2618,7 +2495,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT %hd\n", stopId );
 
-			exec->pcr = parse_undo_frag( prg, sp, exec->parser->pdaRun,
+			exec->pcr = colm_parse_undo_frag( prg, sp, exec->parser->pdaRun,
 					exec->parser->input, exec->steps, exec->pcr );
 
 			if ( exec->pcr == PcrDone )
