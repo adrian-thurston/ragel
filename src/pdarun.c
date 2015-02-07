@@ -1163,12 +1163,13 @@ case PcrPreEof:
 				pdaRun->nextRegionInd += 1;
 				goto skipSend;
 			}
-			else if ( pdaRun->numRetry > 0 ) {
+			else { // if ( pdaRun->numRetry > 0 ) {
 				debug( prg, REALM_PARSE, "invoking parse error from the scanner\n" );
 
 				/* Fall through to send null (error). */
 				pushBtPoint( prg, pdaRun );
 			}
+#if 0
 			else {
 				debug( prg, REALM_PARSE, "no alternate scanning regions\n" );
 
@@ -1181,6 +1182,7 @@ case PcrPreEof:
 				pdaRun->parseError = 1;
 				goto skipSend;
 			}
+#endif
 		}
 		else if ( pdaRun->tokenId == SCAN_LANG_EL ) {
 			debug( prg, REALM_PARSE, "sending an named lang el\n" );
@@ -1790,6 +1792,8 @@ again:
 			/* FIXME: Has the retry already been counted? */
 			pdaRun->numRetry += 1; 
 		}
+
+		pdaRun->shiftCount += 1;
 	}
 
 	/* 
@@ -1797,12 +1801,15 @@ again:
 	 */
 
 	if ( pdaRun->tables->commitLen[pos] != 0 ) {
+#if 0
 		long causeReduce = 0;
 		if ( pdaRun->parseInput != 0 ) { 
 			if ( pdaRun->parseInput->flags & PF_HAS_RCODE )
 				causeReduce = pdaRun->parseInput->causeReduce;
 		}
 		commitFull( prg, sp, pdaRun, causeReduce );
+#endif
+		pdaRun->commitShiftCount = pdaRun->shiftCount;
 	}
 
 	/*
@@ -1967,10 +1974,12 @@ case PcrReduction:
 parseError:
 	debug( prg, REALM_PARSE, "hit error, backtracking\n" );
 
+#if 0
 	if ( pdaRun->numRetry == 0 ) {
 		debug( prg, REALM_PARSE, "out of retries failing parse\n" );
 		goto fail;
 	}
+#endif
 
 	while ( 1 ) {
 		if ( pdaRun->onDeck ) {
@@ -2007,8 +2016,8 @@ case PcrReverse:
 			}
 		}
 		else if ( pdaRun->parseInput != 0 ) {
-			/* Either we are dealing with a terminal that was
-			 * shifted or a nonterminal that was reduced. */
+			/* Either we are dealing with a terminal that was shifted or a
+			 * nonterminal that was reduced. */
 			if ( pdaRun->parseInput->id < prg->rtd->firstNonTermId ) {
 				assert( pdaRun->parseInput->retryUpper == 0 );
 
@@ -2145,6 +2154,13 @@ case PcrReverse:
 			parseTreeFree( prg, ignore );
 		}
 		else {
+			if ( pdaRun->shiftCount == pdaRun->commitShiftCount ) {
+				debug( prg, REALM_PARSE, "backed up to commit point, failing parse\n" );
+				goto fail;
+			}
+
+			pdaRun->shiftCount -= 1;
+
 			/* Now it is time to undo something. Pick an element from the top of
 			 * the stack. */
 			pdaRun->undoLel = pdaRun->stackTop;

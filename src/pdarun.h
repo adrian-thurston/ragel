@@ -319,6 +319,8 @@ typedef struct _PdaRun
 
 	long steps;
 	long targetSteps;
+	long shiftCount;
+	long commitShiftCount;
 
 	int onDeck;
 

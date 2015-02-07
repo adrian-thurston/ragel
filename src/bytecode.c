@@ -1071,7 +1071,6 @@ again:
 
 			Tree *val = vm_local(field);
 			vm_push( val );
-			debug( prg, REALM_BYTECODE, "val: %ld\n", (long)val );
 			break;
 		}
 		case IN_SET_LOCAL_VAL_WC: {
