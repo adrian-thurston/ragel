@@ -464,6 +464,72 @@ void FsmAp::unionOp( FsmAp *other )
 	setMisfitAccounting( false );
 }
 
+/* Unions other with this machine. Other is deleted. */
+void FsmAp::nfaUnionOp( FsmAp **others, int n )
+{
+	for ( int o = 0; o < n; o++ )
+		assert( ctx == others[o]->ctx );
+
+	/* Turn on misfit accounting for both graphs. */
+	setMisfitAccounting( true );
+
+	for ( int o = 0; o < n; o++ )
+		others[o]->setMisfitAccounting( true );
+
+	/* For the merging process. */
+	MergeData md;
+
+	/* Build a state set consisting of both start states */
+	StateSet startStateSet;
+	startStateSet.insert( startState );
+	for ( int o = 0; o < n; o++ )
+		startStateSet.insert( others[o]->startState );
+
+	/* Both of the original start states loose their start state status. */
+	unsetStartState();
+	for ( int o = 0; o < n; o++ )
+		others[o]->unsetStartState();
+
+	/* Bring in the rest of other's entry points. */
+	for ( int o = 0; o < n; o++ ) {
+		copyInEntryPoints( others[o] );
+		others[o]->entryPoints.empty();
+	}
+
+	for ( int o = 0; o < n; o++ ) {
+		/* Merge the lists. This will move all the states from other
+		 * into this. No states will be deleted. */
+		stateList.append( others[o]->stateList );
+		misfitList.append( others[o]->misfitList );
+	}
+
+	for ( int o = 0; o < n; o++ ) {
+		/* Move the final set data from other into this. */
+		finStateSet.insert( others[o]->finStateSet );
+		others[o]->finStateSet.empty();
+	}
+
+	for ( int o = 0; o < n; o++ ) {
+		/* Since other's list is empty, we can delete the fsm without
+		 * affecting any states. */
+		delete others[o];
+	}
+
+	/* Create a new start state. */
+	setStartState( addState() );
+
+	/* Merge the start states. */
+	mergeStates( md, startState, startStateSet.data, startStateSet.length() );
+
+	/* Fill in any new states made from merging. */
+	fillInStates( md );
+
+	/* Remove the misfits and turn off misfit accounting. */
+	removeMisfits();
+	setMisfitAccounting( false );
+}
+
+
 /* Intersects other with this machine. Other is deleted. */
 void FsmAp::intersectOp( FsmAp *other )
 {

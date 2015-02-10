@@ -1690,6 +1690,9 @@ struct FsmAp
 	void globOp( FsmAp **others, int numOthers );
 	void deterministicEntry();
 
+	/* Results in an NFA. */
+	void nfaUnionOp( FsmAp **others, int n );
+
 	/*
 	 * Operator workers
 	 */
