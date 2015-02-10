@@ -627,6 +627,31 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 	return rtnVal;
 }
 
+FsmAp *NfaUnion::walk( ParseData *pd )
+{
+	TermVect::Iter term = terms;
+	FsmAp *fsm = (*term)->walk( pd );
+
+	for ( term++; term.lte(); term++ ) {
+		FsmAp *other = (*term)->walk( pd );
+		fsm->unionOp( other );
+	}
+
+	return fsm;
+}
+
+void NfaUnion::makeNameTree( ParseData *pd )
+{
+	for ( TermVect::Iter term = terms; term.lte(); term++ )
+		(*term)->makeNameTree( pd );
+}
+
+void NfaUnion::resolveNameRefs( ParseData *pd )
+{
+	for ( TermVect::Iter term = terms; term.lte(); term++ )
+		(*term)->resolveNameRefs( pd );
+}
+
 FsmAp *MachineDef::walk( ParseData *pd )
 {
 	FsmAp *rtnVal = 0;
@@ -641,6 +666,9 @@ FsmAp *MachineDef::walk( ParseData *pd )
 		/* Towards lengths. */
 		rtnVal = new FsmAp( pd->fsmCtx );
 		rtnVal->lambdaFsm();
+		break;
+	case NfaUnionType:
+		rtnVal = nfaUnion->walk( pd );
 		break;
 	}
 	return rtnVal;
@@ -657,6 +685,9 @@ void MachineDef::makeNameTree( ParseData *pd )
 		break;
 	case LengthDefType:
 		break;
+	case NfaUnionType:
+		nfaUnion->makeNameTree( pd );
+		break;
 	}
 }
 
@@ -670,6 +701,9 @@ void MachineDef::resolveNameRefs( ParseData *pd )
 		longestMatch->resolveNameRefs( pd );
 		break;
 	case LengthDefType:
+		break;
+	case NfaUnionType:
+		nfaUnion->resolveNameRefs( pd );
 		break;
 	}
 }

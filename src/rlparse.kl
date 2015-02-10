@@ -60,6 +60,7 @@ statement_list: ;
 
 statement: assignment commit;
 statement: instantiation commit;
+statement: nfa_union commit;
 statement: action_spec commit;
 statement: alphtype_spec commit;
 statement: range_spec commit;
@@ -156,6 +157,31 @@ instantiation:
 		if ( $4->machineDef->join != 0 )
 			$4->machineDef->join->loc = $3->loc;
 	};
+
+nonterm nfa_expr
+{
+	NfaUnion *nfaUnion;
+};
+
+nfa_expr:
+	nfa_expr '|' term_short final {
+		$$->nfaUnion = $1->nfaUnion;
+		$$->nfaUnion->terms.append( $3->term );
+	};
+nfa_expr: 
+	term_short final {
+		$$->nfaUnion = new NfaUnion();
+		$$->nfaUnion->terms.append( $1->term );
+	};
+
+nfa_union: 
+	machine_name TK_BarEquals nfa_expr ';' final {
+		MachineDef *machineDef = new MachineDef( $3->nfaUnion );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( $1->token.loc, $1->token.data, machineDef, true );
+	};
+
 
 type token_type
 {

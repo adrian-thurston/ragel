@@ -67,6 +67,7 @@ struct FactorWithNeg;
 struct Factor;
 struct Expression;
 struct Join;
+struct NfaUnion;
 struct MachineDef;
 struct LongestMatch;
 struct LongestMatchPart;
@@ -329,7 +330,8 @@ struct MachineDef
 	enum Type {
 		JoinType,
 		LongestMatchType,
-		LengthDefType
+		LengthDefType,
+		NfaUnionType
 	};
 
 	MachineDef( Join *join )
@@ -338,6 +340,8 @@ struct MachineDef
 		: join(0), longestMatch(longestMatch), lengthDef(0), type(LongestMatchType) {}
 	MachineDef( LengthDef *lengthDef )
 		: join(0), longestMatch(0), lengthDef(lengthDef), type(LengthDefType) {}
+	MachineDef( NfaUnion *nfaUnion )
+		: join(0), longestMatch(0), lengthDef(0), nfaUnion(nfaUnion), type(NfaUnionType) {}
 
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
@@ -346,6 +350,7 @@ struct MachineDef
 	Join *join;
 	LongestMatch *longestMatch;
 	LengthDef *lengthDef;
+	NfaUnion *nfaUnion;
 	Type type;
 };
 
@@ -413,6 +418,28 @@ struct Expression
 
 	Expression *prev, *next;
 };
+
+typedef Vector<Term*> TermVect;
+
+/*
+ * NfaUnion
+ */
+struct NfaUnion
+{
+	/* Construct with only a term. */
+	NfaUnion() { }
+
+	~NfaUnion();
+
+	/* Tree traversal. */
+	FsmAp *walk( ParseData *pd );
+	void makeNameTree( ParseData *pd );
+	void resolveNameRefs( ParseData *pd );
+
+	/* Node data. */
+	TermVect terms;
+};
+
 
 /*
  * Term

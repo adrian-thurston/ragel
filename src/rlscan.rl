@@ -1168,6 +1168,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		pound_comment => { updateCol(); };
 
 		':=' => { token( TK_ColonEquals ); };
+		'|=' => { token( TK_BarEquals ); };
 
 		# To State Actions.
 		">~" => { token( TK_StartToState ); };
