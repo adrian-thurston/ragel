@@ -70,7 +70,8 @@ RedFsmAp::RedFsmAp( FsmCtx *fsmCtx )
 	bAnyRegCurStateRef(false),
 	bAnyRegBreak(false),
 	bAnyRegNbreak(false),
-	bUsingAct(false)
+	bUsingAct(false),
+	bAnyNfaStates(false)
 {
 }
 

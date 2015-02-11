@@ -274,26 +274,30 @@ void FlatGotoExp::writeExec()
 			"\n";
 	}
 
-	out <<
-		"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
-		"		int alt = 0;\n"
-		"		for ( alt = 1; alt < " << ARR_REF( nfaTargs ) << "[" <<
-					ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
-		"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" <<
-						ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
-		"			nfa_bp[nfa_len].p = " << P() << ";\n"
-		"			nfa_len += 1;\n"
-		"		}\n"
-		"		" << vCS() << " = (int) " << ARR_REF( nfaTargs ) << "[" <<
-					ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1];\n"
-		"		goto _resume;\n"
-		"	}\n"
-		"	else {\n";
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
+			"		int alt = 0;\n"
+			"		for ( alt = 1; alt < " << ARR_REF( nfaTargs ) << "[" <<
+						ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
+			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" <<
+							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+			"			nfa_bp[nfa_len].p = " << P() << ";\n"
+			"			nfa_len += 1;\n"
+			"		}\n"
+			"		" << vCS() << " = (int) " << ARR_REF( nfaTargs ) << "[" <<
+						ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1];\n"
+			"		goto _resume;\n"
+			"	}\n"
+			"	else {\n";
+	}
 
 	LOCATE_TRANS();
 	
-	out <<
-		"	}\n";
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	}\n";
+	}
 
 	string cond = "_cond";
 	if ( condSpaceList.length() == 0 )
@@ -405,13 +409,15 @@ void FlatGotoExp::writeExec()
 	/* The entry loop. */
 	out << "}}\n";
 
-	out <<
-		"	if ( nfa_len > 0 ) {\n"
-		"		nfa_len -= 1;\n"
-		"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
-		"		" << P() << " = nfa_bp[nfa_len].p;\n"
-		"		goto _resume;\n"
-		"	}\n";
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( nfa_len > 0 ) {\n"
+			"		nfa_len -= 1;\n"
+			"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
+			"		" << P() << " = nfa_bp[nfa_len].p;\n"
+			"		goto _resume;\n"
+			"	}\n";
+	}
 
 	out << "	}\n";
 }

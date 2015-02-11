@@ -593,6 +593,7 @@ struct RedFsmAp
 	bool bAnyRegBreak;
 	bool bAnyRegNbreak;
 	bool bUsingAct;
+	bool bAnyNfaStates;
 
 	int maxState;
 	int maxSingleLen;
@@ -627,6 +628,7 @@ struct RedFsmAp
 	bool anyRegBreak()              { return bAnyRegBreak; }
 	bool usingAct()                 { return bUsingAct; }
 	bool anyRegNbreak()				{ return bAnyRegNbreak; }
+	bool anyNfaStates()             { return bAnyNfaStates; }
 
 	/* Is is it possible to extend a range by bumping ranges that span only
 	 * one character to the singles array. */
