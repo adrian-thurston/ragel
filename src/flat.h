@@ -54,6 +54,8 @@ protected:
 	TableArray fromStateActions;
 	TableArray eofActions;
 	TableArray eofTrans;
+	TableArray nfaTargs;
+	TableArray nfaOffsets;
 
 	void taKeys();
 	void taKeySpans();
@@ -70,6 +72,8 @@ protected:
 	void taFromStateActions();
 	void taEofActions();
 	void taEofTrans();
+	void taNfaTargs();
+	void taNfaOffsets();
 
 	void setKeyType();
 

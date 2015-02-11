@@ -263,8 +263,8 @@ void FsmAp::detachState( StateAp *state )
 	if ( state->stateBits & STB_ISFINAL )
 		finStateSet.remove( state );
 	
-	if ( state->entryNfa != 0 ) {
-		for ( StateSet::Iter s = *state->entryNfa; s.lte(); s++ ) {
+	if ( state->nfaIn != 0 ) {
+		for ( StateSet::Iter s = *state->nfaIn; s.lte(); s++ ) {
 			bool removed = (*s)->stateDictEl->stateSet.remove( state );
 			assert( removed );
 		}
@@ -272,7 +272,7 @@ void FsmAp::detachState( StateAp *state )
 
 	if ( state->stateDictEl != 0 ) {
 		for ( StateSet::Iter s = state->stateDictEl->stateSet; s.lte(); s++ ) {
-			bool removed = (*s)->entryNfa->remove( state );
+			bool removed = (*s)->nfaIn->remove( state );
 			assert( removed );
 		}
 	}

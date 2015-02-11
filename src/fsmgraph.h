@@ -803,7 +803,7 @@ struct StateAp
 	 * the merging process. */
 	StateDictEl *stateDictEl;
 
-	StateSet *entryNfa;
+	StateSet *nfaIn;
 
 	/* When drawing epsilon transitions, holds the list of states to merge
 	 * with. */

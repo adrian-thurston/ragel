@@ -40,7 +40,9 @@ Flat::Flat( const CodeGenArgs &args )
 	toStateActions(   "to_state_actions",    *this ),
 	fromStateActions( "from_state_actions",  *this ),
 	eofActions(       "eof_actions",         *this ),
-	eofTrans(         "eof_trans",           *this )
+	eofTrans(         "eof_trans",           *this ),
+	nfaTargs(         "nfa_targs",           *this ),
+	nfaOffsets(       "nfa_offsets",         *this )
 {}
 
 void Flat::setKeyType()
@@ -153,6 +155,45 @@ void Flat::taEofTrans()
 	delete[] transPtrs;
 	delete[] transPos;
 }
+
+void Flat::taNfaTargs()
+{
+	nfaTargs.start();
+
+	/* Offset of zero means no NFA targs, put a filler there. */
+	nfaTargs.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			nfaTargs.value( st->nfaTargs->length() );
+			for ( RedStateSet::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				nfaTargs.value( (*targ)->id );
+		}
+	}
+
+	nfaTargs.finish();
+}
+
+void Flat::taNfaOffsets()
+{
+	nfaOffsets.start();
+
+	/* Offset of zero means no NFA targs, real targs start at 1. */
+	long offset = 1;
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs == 0 ) {
+			nfaOffsets.value( 0 );
+		}
+		else {
+			nfaOffsets.value( offset );
+			offset += 1 + st->nfaTargs->length();
+		}
+	}
+
+	nfaOffsets.finish();
+}
+
 
 void Flat::taKeys()
 {

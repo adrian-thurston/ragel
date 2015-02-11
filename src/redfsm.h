@@ -492,7 +492,8 @@ struct RedStateAp
 		inConds(0),
 		numInConds(0),
 		inCondTests(0),
-		numInCondTests(0)
+		numInCondTests(0),
+		nfaTargs(0)
 	{ }
 
 	/* Transitions out. */
@@ -507,6 +508,7 @@ struct RedStateAp
 
 	/* The list of states that transitions from this state go to. */
 	RedStateVect targStates;
+
 
 	bool isFinal;
 	bool labelNeeded;
@@ -533,6 +535,8 @@ struct RedStateAp
 
 	RedTransAp **inCondTests;
 	int numInCondTests;
+
+	RedStateSet *nfaTargs;
 };
 
 /* List of states. */

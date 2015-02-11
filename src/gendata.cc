@@ -731,10 +731,18 @@ void CodeGenData::makeStateList()
 		if ( st->isFinState() )
 			setFinal( curState );
 
+		if ( st->stateDictEl != 0 ) {
+			RedStateAp *from = allStates + curState;
+			from->nfaTargs = new RedStateSet;
+			for ( StateSet::Iter targ = st->stateDictEl->stateSet; targ.lte(); targ++ ) {
+				RedStateAp *rtarg = allStates + (*targ)->alg.stateNum;
+				from->nfaTargs->insert( rtarg );
+			}
+		}
+
 		curState += 1;
 	}
 }
-
 
 void CodeGenData::makeMachine()
 {

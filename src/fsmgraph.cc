@@ -578,9 +578,9 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n )
 		/* Setup the in links. */
 		for ( StateSet::Iter s = stateSet; s.lte(); s++ ) {
 			StateAp *d = *s;
-			if ( d->entryNfa == 0 )
-				d->entryNfa = new StateSet;
-			d->entryNfa->insert( fs );
+			if ( d->nfaIn == 0 )
+				d->nfaIn = new StateSet;
+			d->nfaIn->insert( fs );
 		}
 
 		/* Next state in the stfill list. */
