@@ -355,7 +355,7 @@ namespace ragel
 		literal `from `to `eof `lerr `err
 		literal `when `inwhen `outwhen `>? `$? `%? 
 
-		literal `:= `= `; `.. `::
+		literal `:= `|= `= `; `.. `::
 
 		literal `>~ `$~ `%~ `<~ `@~ `<>~ 
 		literal `>* `$* `%* `<* `@* `<>* 
@@ -616,6 +616,13 @@ namespace ragel
 	def instantiation
 		[opt_export word `:= lm `;] commit
 
+	def nfa_expr
+		[nfa_expr `| term] :Union
+	|	[term] :Base
+
+	def nfa_union
+		[word `|= nfa_expr `;] commit
+
 	def alphtype_type
 		[W1: word] :One
 	|	[W1: word W2: word] :Two
@@ -636,6 +643,7 @@ namespace ragel
 		[machine_name] :MachineName commit
 	|	[assignment] :Assignment
 	|	[instantiation] :Instantiation
+	|	[nfa_union] :NfaUnion
 	|	[action_spec] :ActionSpec
 	|	[`prepush action_block] :PrePushSpec commit
 	|	[`postpop action_block] :PostPopSpec commit

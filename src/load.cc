@@ -1798,7 +1798,8 @@ struct LoadRagel
 	void loadInstantiation( ragel::instantiation Instantiation )
 	{
 		InputLoc loc = Instantiation.loc();
-		bool exportMachine = Instantiation.opt_export().prodName() == ragel::opt_export::Export;
+		bool exportMachine = Instantiation.opt_export().prodName() ==
+				ragel::opt_export::Export;
 		if ( exportMachine )
 			exportContext.append( true );
 
@@ -1816,7 +1817,37 @@ struct LoadRagel
 		if ( machineDef->join != 0 )
 			machineDef->join->loc = loc;
 	}
-	
+
+	NfaUnion *loadNfaExpr( ragel::nfa_expr NfaExpr )
+	{
+		NfaUnion *nfaUnion;
+		Term *term;
+
+		if ( NfaExpr.prodName() == ragel::nfa_expr::Union ) {
+			nfaUnion = loadNfaExpr( NfaExpr._nfa_expr() );
+			term = loadTerm( NfaExpr.term() );
+		}
+		else {
+			nfaUnion = new NfaUnion();
+			term = loadTerm( NfaExpr.term() );
+		}
+
+		nfaUnion->terms.append( term );
+		return nfaUnion;
+	}
+
+	void loadNfaUnion( ragel::nfa_union NfaUnionTree )
+	{
+		InputLoc loc = NfaUnionTree.loc();
+
+		string name = loadMachineName( NfaUnionTree.word().text() );
+
+		NfaUnion *nfaUnion = loadNfaExpr( NfaUnionTree.nfa_expr() );
+		MachineDef *machineDef = new MachineDef( nfaUnion );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, true );
+	}
 
 	void loadWrite( ragel::word Cmd, ragel::_repeat_word WordList )
 	{
@@ -2041,6 +2072,9 @@ struct LoadRagel
 				break;
 			case ragel::statement::Instantiation:
 				loadInstantiation( Statement.instantiation() );
+				break;
+			case ragel::statement::NfaUnion:
+				loadNfaUnion( Statement.nfa_union() );
 				break;
 			case ragel::statement::Assignment:
 				loadAssignment( Statement.assignment() );
