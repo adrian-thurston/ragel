@@ -1374,6 +1374,11 @@ void CodeGenData::analyzeMachine()
 			analyzeActionList( redAct, act->value->inlineList );
 	}
 
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 )
+			redFsm->bAnyNfaStates = true;
+	}
+
 	/* Find states that have transitions with actions that have next
 	 * statements. */
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
