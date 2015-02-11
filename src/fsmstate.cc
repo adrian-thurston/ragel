@@ -88,6 +88,9 @@ StateAp::StateAp()
 
 	/* Only used during merging. Normally null. */
 	stateDictEl(0),
+
+	entryNfa(0),
+
 	eptVect(0),
 
 	/* No state identification bits. */
@@ -130,6 +133,9 @@ StateAp::StateAp(const StateAp &other)
 
 	/* This is only used during merging. Normally null. */
 	stateDictEl(0),
+
+	entryNfa(0),
+
 	eptVect(0),
 
 	/* Fsm state data. */
@@ -255,6 +261,17 @@ int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2 )
 {
 	int compareRes;
+
+	if ( state1->stateDictEl == 0 && state2->stateDictEl != 0 )
+		return -1;
+	else if ( state1->stateDictEl != 0 && state2->stateDictEl == 0 )
+		return 1;
+	else if ( state1->stateDictEl != 0 ) {
+		compareRes = CmpTable<StateAp*>::compare(
+				state1->stateDictEl->stateSet, state2->stateDictEl->stateSet );
+		if ( compareRes != 0 )
+			return compareRes;
+	}
 
 	/* Test final state status. */
 	if ( (state1->stateBits & STB_ISFINAL) && !(state2->stateBits & STB_ISFINAL) )

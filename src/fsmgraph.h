@@ -803,6 +803,8 @@ struct StateAp
 	 * the merging process. */
 	StateDictEl *stateDictEl;
 
+	StateSet *entryNfa;
+
 	/* When drawing epsilon transitions, holds the list of states to merge
 	 * with. */
 	EptVect *eptVect;
@@ -1613,6 +1615,7 @@ struct FsmAp
 	 * have not yet had their out transitions filled in. This will 
 	 * empty out stateDict and stFil. */
 	void fillInStates( MergeData &md );
+	void nfaFillInStates( MergeData &md );
 
 	/*
 	 * Transition Comparison.

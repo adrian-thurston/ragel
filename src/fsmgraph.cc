@@ -464,17 +464,38 @@ void FsmAp::unionOp( FsmAp *other )
 	setMisfitAccounting( false );
 }
 
+void FsmAp::nfaFillInStates( MergeData &md )
+{
+	int initial = 0, count = 0;
+	StateAp *state = md.stfillHead;
+	while ( state != 0 ) {
+		initial += 1;
+		state = state->alg.next;
+	}
+
+	/* Merge any states that are awaiting merging. This will likey cause
+	 * other states to be added to the stfil list. */
+	state = md.stfillHead;
+	count = initial;
+	while ( state != 0 && count-- ) {
+		StateSet *stateSet = &state->stateDictEl->stateSet;
+		mergeStates( md, state, stateSet->data, stateSet->length() );
+		state = state->alg.next;
+	}
+
+	/* Shift the head forward. The states we merged remain on the list. The
+	 * original head is kept by our caller. */
+	md.stfillHead = state;
+}
+
 /* Unions other with this machine. Other is deleted. */
 void FsmAp::nfaUnionOp( FsmAp **others, int n )
 {
 	for ( int o = 0; o < n; o++ )
 		assert( ctx == others[o]->ctx );
 
-	/* Turn on misfit accounting for both graphs. */
-	setMisfitAccounting( true );
-
-	for ( int o = 0; o < n; o++ )
-		others[o]->setMisfitAccounting( true );
+	/* Not doing misfit accounting here. If we wanted to, it would need to be
+	 * made nfa-compatibile. */
 
 	/* For the merging process. */
 	MergeData md;
@@ -521,12 +542,64 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n )
 	/* Merge the start states. */
 	mergeStates( md, startState, startStateSet.data, startStateSet.length() );
 
-	/* Fill in any new states made from merging. */
-	fillInStates( md );
+	StateAp *origStFillHead = md.stfillHead;
 
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
+	// /* Fill in any new states made from merging. */
+	static const int rounds = 5;
+	for ( int i = 0; i < rounds; i++ )
+		nfaFillInStates( md );
+
+	/* Clear state dicts up until the fill list head. From head onward we are
+	 * leaving the states as multi-states. */
+	StateAp *state = origStFillHead;
+	while ( state != 0 && state != md.stfillHead ) {
+		/* Delete and reset the state set. */
+		md.stateDict.detach( state->stateDictEl );
+		delete state->stateDictEl;
+		state->stateDictEl = 0;
+
+		/* Next state in the stfill list. */
+		state = state->alg.next;
+	}
+
+	/* Empty the state dict, but we need to preserve the elements in the state. */
+	md.stateDict.abandon();
+
+	long maxStateSetSize = 0;
+	long count = 0;
+	StateAp *fs = md.stfillHead;
+	while ( fs != 0 ) {
+		count += 1;
+
+		StateSet &stateSet = fs->stateDictEl->stateSet;
+		if ( stateSet.length() > maxStateSetSize )
+			maxStateSetSize = stateSet.length();
+
+		/* Setup the in links. */
+		for ( StateSet::Iter s = stateSet; s.lte(); s++ ) {
+			StateAp *d = *s;
+			if ( d->entryNfa == 0 )
+				d->entryNfa = new StateSet;
+			d->entryNfa->insert( fs );
+		}
+
+		/* Next state in the stfill list. */
+		fs = fs->alg.next;
+	}
+
+	std::cout << "fill-list\t" << count << std::endl;
+	std::cout << "state-dict\t" << md.stateDict.length() << std::endl;
+	std::cout << "states\t" << stateList.length() << std::endl;
+	std::cout << "max-ss\t" << maxStateSetSize << std::endl;
+
+	removeUnreachableStates();
+
+	std::cout << "post-unreachable\t" << stateList.length() << std::endl;
+
+	minimizePartition2();
+
+	std::cout << "post-min\t" << stateList.length() << std::endl;
+	std::cout << std::endl;
 }
 
 

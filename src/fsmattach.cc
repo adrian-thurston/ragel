@@ -262,6 +262,20 @@ void FsmAp::detachState( StateAp *state )
 	/* Unset final stateness before detaching from graph. */
 	if ( state->stateBits & STB_ISFINAL )
 		finStateSet.remove( state );
+	
+	if ( state->entryNfa != 0 ) {
+		for ( StateSet::Iter s = *state->entryNfa; s.lte(); s++ ) {
+			bool removed = (*s)->stateDictEl->stateSet.remove( state );
+			assert( removed );
+		}
+	}
+
+	if ( state->stateDictEl != 0 ) {
+		for ( StateSet::Iter s = state->stateDictEl->stateSet; s.lte(); s++ ) {
+			bool removed = (*s)->entryNfa->remove( state );
+			assert( removed );
+		}
+	}
 }
 
 TransDataAp *FsmAp::dupTransData( StateAp *from, TransDataAp *srcTrans )

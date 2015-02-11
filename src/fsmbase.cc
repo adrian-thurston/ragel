@@ -387,6 +387,12 @@ void FsmAp::markReachableFromHere( StateAp *state )
 			}
 		}
 	}
+
+	/* Recurse on all states that compose us. */
+	if ( state->stateDictEl != 0 ) {
+		for ( StateSet::Iter st = state->stateDictEl->stateSet; st.lte(); st++ )
+			markReachableFromHere( *st );
+	}
 }
 
 void FsmAp::markReachableFromHereStopFinal( StateAp *state )
@@ -556,6 +562,11 @@ void FsmAp::depthFirstOrdering( StateAp *state )
 					depthFirstOrdering( cond->toState );
 			}
 		}
+	}
+
+	if ( state->stateDictEl != 0 ) {
+		for ( StateSet::Iter s = state->stateDictEl->stateSet; s.lte(); s++ )
+			depthFirstOrdering( *s );
 	}
 }
 

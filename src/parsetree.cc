@@ -629,14 +629,33 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 
 FsmAp *NfaUnion::walk( ParseData *pd )
 {
+	std::cout << "terms\t" << terms.length() << std::endl;
+
 	TermVect::Iter term = terms;
 	FsmAp *fsm = (*term)->walk( pd );
+	long sumPlain = fsm->stateList.length();
 
-	for ( term++; term.lte(); term++ ) {
-		FsmAp *other = (*term)->walk( pd );
-		fsm->unionOp( other );
+	fsm->removeUnreachableStates();
+	fsm->minimizePartition2();
+	long sumMin = fsm->stateList.length();
+
+	int o = 0;
+	FsmAp **others = new FsmAp*[terms.length() - 1];
+	for ( term++; term.lte(); term++, o++ ) {
+		others[o] = (*term)->walk( pd );
+		sumPlain += others[o]->stateList.length();
+
+		others[o]->removeUnreachableStates();
+		others[o]->minimizePartition2();
+		sumMin += others[o]->stateList.length();
 	}
 
+	std::cout << "sum-plain\t" << sumPlain << std::endl;
+	std::cout << "sum-minimized\t" << sumMin << std::endl;
+
+	fsm->nfaUnionOp( others, terms.length() - 1 );
+
+	delete[] others;
 	return fsm;
 }
 

@@ -666,6 +666,20 @@ void FsmAp::fuseEquivStates( StateAp *dest, StateAp *src )
 	/* Cur is a duplicate. We can merge it with trail. */
 	moveInwardTrans( dest, src );
 
+	/* Move inward nfa links. */
+	if ( src->entryNfa != 0 ) {
+		for ( StateSet::Iter s = *src->entryNfa; s.lte(); s++ ) {
+			bool removed = (*s)->stateDictEl->stateSet.remove( src );
+			assert( removed );
+
+			(*s)->stateDictEl->stateSet.insert( dest );
+			if ( dest->entryNfa == 0 )
+				dest->entryNfa = new StateSet;
+			dest->entryNfa->insert( *s );
+		}
+		src->entryNfa->empty();
+	}
+
 	detachState( src );
 	stateList.detach( src );
 	delete src;
