@@ -28,6 +28,75 @@
 #define true 1
 #define false 0
 
+void colm_init_list_iter( ListIter *listIter, Tree **stackRoot,
+		long argSize, long rootSize, const Ref *rootRef, int genericId )
+{
+	listIter->type = IT_Tree;
+	listIter->rootRef = *rootRef;
+	listIter->stackRoot = stackRoot;
+	listIter->yieldSize = 0;
+	listIter->rootSize = rootSize;
+	listIter->ref.kid = 0;
+	listIter->ref.next = 0;
+	listIter->argSize = argSize;
+	listIter->genericId = genericId;
+}
+
+void colm_list_iter_destroy( Program *prg, Tree ***psp, ListIter *iter )
+{
+	if ( (int)iter->type != 0 ) {
+		int i;
+		Tree **sp = *psp;
+		long curStackSize = vm_ssize() - iter->rootSize;
+		assert( iter->yieldSize == curStackSize );
+		vm_popn( iter->yieldSize );
+		for ( i = 0; i < iter->argSize; i++ )
+			treeDownref( prg, sp, vm_pop() );
+		iter->type = 0;
+		*psp = sp;
+	}
+}
+
+Tree *colm_list_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
+{
+	Tree **sp = *psp;
+	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
+
+	if ( iter->ref.kid == 0 ) {
+		/* Kid is zero, start from the root. */
+		List *list = *((List**)iter->rootRef.kid);
+		iter->ref.kid = list->head;
+		iter->ref.next = 0;
+
+		//= iter->rootRef;
+		//iter
+		//iterFind( prg, psp, iter, true );
+	}
+	else {
+		/* Have a previous item, continue searching from there. */
+		//iterFind( prg, psp, iter, false );
+
+		ListEl *listEl = iter->ref.kid;
+		listEl = listEl->list_next;
+		iter->ref.kid = listEl;
+		iter->ref.next = 0;
+	}
+
+	sp = *psp;
+	iter->yieldSize = vm_ssize() - iter->rootSize;
+
+	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+}
+
+Tree *colm_list_iter_deref_cur( Program *prg, ListIter *iter )
+{
+	GenericInfo *gi = &prg->rtd->genericInfo[iter->genericId];
+	ListEl *el = (ListEl*)iter->ref.kid;
+	struct colm_struct *s = el != 0 ?
+			colm_struct_container( el, gi->elOffset ) : 0;
+	return (Tree*)s;
+}
+
 void initTreeIter( TreeIter *treeIter, Tree **stackRoot,
 		long argSize, long rootSize,
 		const Ref *rootRef, int searchId )

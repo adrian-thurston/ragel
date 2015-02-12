@@ -166,6 +166,18 @@ typedef struct _TreeIter
 	long rootSize;
 } TreeIter;
 
+typedef struct _ListIter
+{
+	enum IterType type;
+	Ref rootRef;
+	Ref ref;
+	Tree **stackRoot;
+	long argSize;
+	long yieldSize;
+	long rootSize;
+	long genericId;
+} ListIter;
+
 /* This must overlay tree iter because some of the same bytecodes are used. */
 typedef struct _RevTreeIter
 {
@@ -329,6 +341,11 @@ void userIterDestroy2( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 Tree *castTree( struct colm_program *prg, int langElId, Tree *tree );
 StreamImpl *streamToImpl( Stream *ptr );
 
+void colm_init_list_iter( ListIter *listIter, Tree **stackRoot,
+		long argSize, long rootSize, const Ref *rootRef, int genericId );
+void colm_list_iter_destroy( struct colm_program *prg, Tree ***psp, ListIter *iter );
+Tree *colm_list_iter_advance( struct colm_program *prg, Tree ***psp, ListIter *iter );
+Tree *colm_list_iter_deref_cur( struct colm_program *prg, ListIter *iter );
 
 #if defined(__cplusplus)
 }

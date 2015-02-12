@@ -495,6 +495,8 @@ void Compiler::makeIgnoreCollectors()
 
 void LangStmt::chooseDefaultIter( Compiler *pd, IterCall *iterCall ) const
 {
+	/* This is two-part, It gets rewritten before evaluation in synthesis. */
+
 	/* The iterator name. */
 	LangVarRef *callVarRef = LangVarRef::cons( loc, context, scope, "triter" );
 
@@ -680,6 +682,16 @@ void Compiler::makeDefaultIterators()
 				"rev_repeat", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::RevRepeat );
+		objMethod->iterDef = triter;
+	}
+
+	/* List iterator. */
+	{
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+				"list_iter", IN_HALT, IN_HALT, anyRefUT, true );
+
+		IterDef *triter = findIterDef( IterDef::List );
 		objMethod->iterDef = triter;
 	}
 }

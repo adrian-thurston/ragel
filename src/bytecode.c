@@ -2032,6 +2032,64 @@ again:
 			treeDownref( prg, sp, old );
 			break;
 		}
+		case IN_LIST_ITER_FROM_REF: {
+			short field;
+			Half argSize;
+			Half genericId;
+			read_half( field );
+			read_half( argSize );
+			read_half( genericId );
+
+			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_FROM_REF "
+					"%hd %hd %hd\n", field, argSize, genericId );
+
+			Ref rootRef;
+			rootRef.kid = (Kid*)vm_pop();
+			rootRef.next = (Ref*)vm_pop();
+			void *mem = vm_plocal(field);
+
+			Tree **stackRoot = vm_ptop();
+			long rootSize = vm_ssize();
+
+			colm_init_list_iter( (ListIter*)mem, stackRoot, argSize,
+				rootSize, &rootRef, genericId );
+			break;
+		}
+		case IN_LIST_ITER_DESTROY: {
+			short field;
+			read_half( field );
+
+			ListIter *iter = (ListIter*) vm_plocal(field);
+
+			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_DESTROY %d\n", iter->yieldSize );
+
+			colm_list_iter_destroy( prg, &sp, iter );
+			break;
+		}
+		case IN_LIST_ITER_ADVANCE: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_ADVANCE\n" );
+
+			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			Tree *res = colm_list_iter_advance( prg, &sp, iter );
+			//treeUpref( res );
+			vm_push( res );
+			break;
+		}
+		case IN_LIST_ITER_GET_CUR_R: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_GET_CUR_R\n" );
+			
+			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			Tree *tree = colm_list_iter_deref_cur( prg, iter );
+			//treeUpref( tree );
+			vm_push( tree );
+			break;
+		}
 		case IN_MATCH: {
 			Half patternId;
 			read_half( patternId );

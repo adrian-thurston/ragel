@@ -1731,7 +1731,7 @@ struct Function;
 
 struct IterDef
 {
-	enum Type { Tree, Child, RevChild, Repeat, RevRepeat, User };
+	enum Type { Tree, Child, RevChild, Repeat, RevRepeat, User, List };
 
 	IterDef( Type type, Function *func );
 	IterDef( Type type );
@@ -1741,6 +1741,7 @@ struct IterDef
 	Function *func;
 	bool useFuncId;
 	bool useSearchUT;
+	bool useGenericId;
 
 	Code inCreateWV;
 	Code inCreateWC;
@@ -2644,6 +2645,8 @@ struct LangVarRef
 			ObjectField *el, UniqueType *exprUT, bool revert ) const;
 
 	void assignValue( Compiler *pd, CodeVect &code, UniqueType *exprUT ) const;
+
+	void chooseTriterCall( Compiler *pd, CallArgVect *args );
 
 	/* The deref generics value is for iterator calls with lists and maps as args. */
 	ObjectField **evaluateArgs( Compiler *pd, CodeVect &code, 

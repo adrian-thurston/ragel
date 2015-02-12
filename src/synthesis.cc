@@ -34,7 +34,8 @@ IterDef::IterDef( Type type ) :
 	type(type), 
 	func(0),
 	useFuncId(false),
-	useSearchUT(false)
+	useSearchUT(false),
+	useGenericId(false)
 {
 	switch ( type ) {
 	case Tree:
@@ -98,6 +99,19 @@ IterDef::IterDef( Type type ) :
 		inSetCurWC = IN_TRITER_SET_CUR_WC;
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
 		useSearchUT = true;
+		break;
+	
+	case List:
+		inCreateWV =   IN_LIST_ITER_FROM_REF;
+		inCreateWC =   IN_LIST_ITER_FROM_REF;
+		inDestroy =    IN_LIST_ITER_DESTROY;
+		inAdvance =    IN_LIST_ITER_ADVANCE;
+
+		inGetCurR =    IN_LIST_ITER_GET_CUR_R;
+		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
+		inSetCurWC =   //IN_HALT;
+		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
+		useGenericId = true;
 		break;
 
 	case User:
@@ -221,8 +235,13 @@ long sizeOfField( UniqueType *fieldUT )
 			case IterDef::RevRepeat:
 				size = sizeof(TreeIter) / sizeof(Word);
 				break;
+
 			case IterDef::RevChild:
 				size = sizeof(RevTreeIter) / sizeof(Word);
+				break;
+
+			case IterDef::List:
+				size = sizeof(ListIter) / sizeof(Word);
 				break;
 
 			case IterDef::User:
@@ -724,6 +743,21 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 	return lookup.objField;
 }
 
+void LangVarRef::chooseTriterCall( Compiler *pd, CallArgVect *args )
+{
+	/* Evaluate the triter args and choose the triter call based on it. */
+	if ( args->length() == 1 ) {
+		/* Evaluate the expression. */
+		CodeVect unused;
+		CallArgVect::Iter pe = *args;
+		UniqueType *exprUT = (*pe)->expr->evaluate( pd, unused );
+
+		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_LIST ) {
+			cerr << "iterating list" << endl;
+			name = "list_iter";
+		}
+	}
+}
 
 ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
 		VarRefLookup &lookup, CallArgVect *args )
@@ -2138,6 +2172,9 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	/* The type we are searching for. */
 	UniqueType *searchUT = typeRef->uniqueType;
 
+	if ( iterCall->wasExpr )
+		iterCall->langTerm->varRef->chooseTriterCall( pd, iterCall->langTerm->args );
+
 	/* Lookup the iterator call. Make sure it is an iterator. */
 	VarRefLookup lookup = iterCall->langTerm->varRef->lookupMethod( pd );
 	if ( lookup.objMethod->iterDef == 0 ) {
@@ -2181,6 +2218,14 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	/* Search type. */
 	if ( iterUT->iterDef->useSearchUT )
 		code.appendHalf( searchUT->langEl->id );
+
+	if ( iterUT->iterDef->useGenericId ) {
+		CodeVect unused; 
+		UniqueType *ut = 
+				iterCall->langTerm->args->data[0]->expr->evaluate( pd, unused );
+
+		code.appendHalf( ut->generic->id );
+	}
 
 	compileForIterBody( pd, code, iterUT );
 
@@ -2439,6 +2484,12 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 					case IterDef::RevRepeat:
 						type = LT_Iter;
 						break;
+
+					case IterDef::List:
+						/* ? */
+						type = LT_Iter;
+						break;
+
 					case IterDef::RevChild:
 						type = LT_RevIter;
 						break;
