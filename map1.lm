@@ -1,0 +1,24 @@
+
+struct el
+	map_el<str> el
+end
+
+new M: map<str el>()
+
+AE: argv_el = argv->head
+while AE {
+	new El: el()
+	El->key = AE->value
+	M->insert( El )
+	AE = AE->next
+}
+
+for El: el in M {
+	print "[El->key]
+}
+##### ARGS #####
+a b c
+##### EXP #####
+a
+b
+c
