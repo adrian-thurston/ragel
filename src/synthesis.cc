@@ -30,7 +30,20 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-IterDef::IterDef( Type type ) : 
+IterDef::IterDef( Type type )
+: 
+	type(type), 
+	func(0)
+{
+}
+
+IterDef::IterDef( Type type, Function *func )
+:
+	type(type),
+	func(func)
+{}
+
+IterImpl::IterImpl( Type type ) : 
 	type(type), 
 	func(0),
 	useFuncId(false),
@@ -132,7 +145,7 @@ IterDef::IterDef( Type type ) :
 	}
 }
 
-IterDef::IterDef( Type type, Function *func ) : 
+IterImpl::IterImpl( Type type, Function *func ) : 
 	type(type),
 	func(func),
 	useFuncId(true),
@@ -321,7 +334,7 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 		if ( forWriting ) {
 			/* The instruction, depends on whether or not we are reverting. */
 			if ( elUT->typeId == TYPE_ITER )
-				code.append( elUT->iterDef->inGetCurWC );
+				code.append( el->iterImpl->inGetCurWC );
 			else if ( pd->revertOn && revert )
 				code.append( el->inGetWV );
 			else
@@ -330,7 +343,7 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 		else {
 			/* Loading something for reading */
 			if ( elUT->typeId == TYPE_ITER )
-				code.append( elUT->iterDef->inGetCurR );
+				code.append( el->iterImpl->inGetCurR );
 			else
 				code.append( el->inGetR );
 		}
@@ -392,8 +405,8 @@ long LangVarRef::loadQualificationRefs( Compiler *pd, CodeVect &code,
 				code.appendHalf( el->offset );
 			}
 		}
-		else if ( el->typeRef->iterDef != 0 ) {
-			code.append( el->typeRef->iterDef->inRefFromCur );
+		else if ( el->iterImpl != 0 ) {
+			code.append( el->iterImpl->inRefFromCur );
 			code.appendHalf( el->offset );
 		}
 		else if ( el->typeRef->type == TypeRef::Ref ) {
@@ -604,7 +617,7 @@ void LangVarRef::setFieldIter( Compiler *pd, CodeVect &code,
 		ObjectDef *inObject, ObjectField *el, UniqueType *objUT,
 		UniqueType *exprType, bool revert ) const
 {
-	code.append( objUT->iterDef->inSetCurWC );
+	code.append( el->iterImpl->inSetCurWC );
 	code.appendHalf( el->offset );
 }
 
@@ -740,8 +753,8 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 			code.appendHalf( lookup.objField->offset );
 		}
 	}
-	else if ( lookup.objField->typeRef->iterDef != 0 ) {
-		code.append( lookup.objField->typeRef->iterDef->inRefFromCur );
+	else if ( lookup.objField->iterImpl != 0 ) {
+		code.append( lookup.objField->iterImpl->inRefFromCur );
 		code.appendHalf( lookup.objField->offset );
 	}
 	else if ( lookup.objField->typeRef->type == TypeRef::Ref ) {
@@ -756,8 +769,10 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 	return lookup.objField;
 }
 
-void LangVarRef::chooseTriterCall( Compiler *pd, CallArgVect *args )
+IterImpl *LangVarRef::chooseTriterCall( Compiler *pd, CallArgVect *args )
 {
+	IterImpl *iterImpl = 0;
+
 	/* Evaluate the triter args and choose the triter call based on it. */
 	if ( args->length() == 1 ) {
 		/* Evaluate the expression. */
@@ -767,9 +782,19 @@ void LangVarRef::chooseTriterCall( Compiler *pd, CallArgVect *args )
 
 		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_LIST ) {
 			cerr << "iterating list" << endl;
-			name = "list_iter";
+			iterImpl = new IterImpl( IterImpl::List );
+		}
+
+		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_MAP ) {
+			cerr << "iterating map" << endl;
+			iterImpl = new IterImpl( IterImpl::Map );
 		}
 	}
+
+	if ( iterImpl == 0 )
+		iterImpl = new IterImpl( IterImpl::Tree );
+
+	return iterImpl;
 }
 
 ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code, 
@@ -2125,7 +2150,7 @@ void LangStmt::compileForIterBody( Compiler *pd,
 	long top = code.length();
 
 	/* Advance */
-	code.append( iterUT->iterDef->inAdvance );
+	code.append( objField->iterImpl->inAdvance );
 	code.appendHalf( objField->offset );
 
 	/* Test: jump past the while block if false. Note that we don't have the
@@ -2144,7 +2169,7 @@ void LangStmt::compileForIterBody( Compiler *pd,
 		loopCleanup.setAs( *pd->loopCleanup );
 
 	/* Add the cleanup for the current loop. */
-	loopCleanup.append( iterUT->iterDef->inDestroy );
+	loopCleanup.append( objField->iterImpl->inDestroy );
 	loopCleanup.appendHalf( objField->offset );
 
 	/* Push the loop cleanup. */
@@ -2174,7 +2199,7 @@ void LangStmt::compileForIterBody( Compiler *pd,
 	pd->breakJumps.empty();
 
 	/* Destroy the iterator. */
-	code.append( iterUT->iterDef->inDestroy );
+	code.append( objField->iterImpl->inDestroy );
 	code.appendHalf( objField->offset );
 
 	/* Clean up any prepush args. */
@@ -2185,8 +2210,6 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	/* The type we are searching for. */
 	UniqueType *searchUT = typeRef->uniqueType;
 
-	if ( iterCall->wasExpr )
-		iterCall->langTerm->varRef->chooseTriterCall( pd, iterCall->langTerm->args );
 
 	/* Lookup the iterator call. Make sure it is an iterator. */
 	VarRefLookup lookup = iterCall->langTerm->varRef->lookupMethod( pd );
@@ -2203,11 +2226,43 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 		resetContiguous = pd->beginContiguous( code, stretch );
 	}
 
+
 	/* 
 	 * Create the iterator from the local var.
 	 */
 
 	UniqueType *iterUT = objField->typeRef->uniqueType;
+	IterImpl *iterImpl = 0;
+
+	switch ( iterUT->iterDef->type ) {
+		case IterDef::Tree:
+			iterImpl = iterCall->langTerm->varRef->chooseTriterCall( pd,
+					iterCall->langTerm->args );
+			break;
+		case IterDef::Child:
+			iterImpl = new IterImpl( IterImpl::Child );
+			break;
+		case IterDef::RevChild:
+			iterImpl = new IterImpl( IterImpl::RevChild );
+			break;
+		case IterDef::Repeat:
+			iterImpl = new IterImpl( IterImpl::Repeat );
+			break;
+		case IterDef::RevRepeat:
+			iterImpl = new IterImpl( IterImpl::RevRepeat );
+			break;
+		case IterDef::User:
+			iterImpl = new IterImpl( IterImpl::User, iterUT->iterDef->func );
+			break;
+		case IterDef::List:
+			iterImpl = new IterImpl( IterImpl::List );
+			break;
+		case IterDef::Map:
+			iterImpl = new IterImpl( IterImpl::Map );
+			break;
+	}
+
+	objField->iterImpl = iterImpl;
 
 	/* Evaluate and push the arguments. */
 	ObjectField **paramRefs = iterCall->langTerm->varRef->evaluateArgs(
@@ -2216,9 +2271,9 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	pd->endContiguous( code, resetContiguous );
 
 	if ( pd->revertOn )
-		code.append( iterUT->iterDef->inCreateWV );
+		code.append( iterImpl->inCreateWV );
 	else
-		code.append( iterUT->iterDef->inCreateWC );
+		code.append( iterImpl->inCreateWC );
 
 	code.appendHalf( objField->offset );
 
@@ -2229,10 +2284,10 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 		code.appendHalf( iterCall->langTerm->varRef->argSize );
 
 	/* Search type. */
-	if ( iterUT->iterDef->useSearchUT )
+	if ( iterImpl->useSearchUT )
 		code.appendHalf( searchUT->langEl->id );
 
-	if ( iterUT->iterDef->useGenericId ) {
+	if ( iterImpl->useGenericId ) {
 		CodeVect unused; 
 		UniqueType *ut = 
 				iterCall->langTerm->args->data[0]->expr->evaluate( pd, unused );
