@@ -2078,6 +2078,18 @@ again:
 			vm_push( res );
 			break;
 		}
+		case IN_MAP_ITER_ADVANCE: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_MAP_ITER_ADVANCE\n" );
+
+			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			Tree *res = colm_map_iter_advance( prg, &sp, iter );
+			//treeUpref( res );
+			vm_push( res );
+			break;
+		}
 		case IN_LIST_ITER_GET_CUR_R: {
 			short field;
 			read_half( field );

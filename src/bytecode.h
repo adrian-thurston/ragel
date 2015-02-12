@@ -74,7 +74,6 @@ typedef unsigned long colm_value_t;
 
 #define IN_TST_NZ_TREE           0xd1
 
-// 0xe6
 // 0xe7
 // 0xe8
 // 0xe9
@@ -87,6 +86,7 @@ typedef unsigned long colm_value_t;
 #define IN_LIST_ITER_DESTROY     0xd5
 #define IN_LIST_ITER_ADVANCE     0xde
 #define IN_LIST_ITER_GET_CUR_R   0xdf
+#define IN_MAP_ITER_ADVANCE      0xe6
 
 #define IN_NOT_VAL               0x14
 #define IN_NOT_TREE              0xd2

@@ -694,6 +694,16 @@ void Compiler::makeDefaultIterators()
 		IterDef *triter = findIterDef( IterDef::List );
 		objMethod->iterDef = triter;
 	}
+
+	/* Map iterator. */
+	{
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+				"map_iter", IN_HALT, IN_HALT, anyRefUT, true );
+
+		IterDef *triter = findIterDef( IterDef::Map );
+		objMethod->iterDef = triter;
+	}
 }
 
 void Compiler::addMatchLength( ObjectDef *frame, LangEl *lel )

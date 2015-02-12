@@ -88,6 +88,37 @@ Tree *colm_list_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
+Tree *colm_map_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
+{
+	Tree **sp = *psp;
+	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
+
+	if ( iter->ref.kid == 0 ) {
+		/* Kid is zero, start from the root. */
+		Map *map = *((Map**)iter->rootRef.kid);
+		iter->ref.kid = map->head;
+		iter->ref.next = 0;
+
+		//= iter->rootRef;
+		//iter
+		//iterFind( prg, psp, iter, true );
+	}
+	else {
+		/* Have a previous item, continue searching from there. */
+		//iterFind( prg, psp, iter, false );
+
+		MapEl *mapEl = iter->ref.kid;
+		mapEl = mapEl->next;
+		iter->ref.kid = mapEl;
+		iter->ref.next = 0;
+	}
+
+	sp = *psp;
+	iter->yieldSize = vm_ssize() - iter->rootSize;
+
+	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+}
+
 Tree *colm_list_iter_deref_cur( Program *prg, ListIter *iter )
 {
 	GenericInfo *gi = &prg->rtd->genericInfo[iter->genericId];
