@@ -2032,7 +2032,7 @@ again:
 			treeDownref( prg, sp, old );
 			break;
 		}
-		case IN_LIST_ITER_FROM_REF: {
+		case IN_GEN_ITER_FROM_REF: {
 			short field;
 			Half argSize;
 			Half genericId;
@@ -2055,7 +2055,7 @@ again:
 				rootSize, &rootRef, genericId );
 			break;
 		}
-		case IN_LIST_ITER_DESTROY: {
+		case IN_GEN_ITER_DESTROY: {
 			short field;
 			read_half( field );
 
@@ -2090,11 +2090,11 @@ again:
 			vm_push( res );
 			break;
 		}
-		case IN_LIST_ITER_GET_CUR_R: {
+		case IN_GEN_ITER_GET_CUR_R: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_GET_CUR_R\n" );
+			debug( prg, REALM_BYTECODE, "IN_GEN_ITER_GET_CUR_R\n" );
 			
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
 			Tree *tree = colm_list_iter_deref_cur( prg, iter );

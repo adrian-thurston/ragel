@@ -115,12 +115,12 @@ IterImpl::IterImpl( Type type ) :
 		break;
 	
 	case List:
-		inCreateWV =   IN_LIST_ITER_FROM_REF;
-		inCreateWC =   IN_LIST_ITER_FROM_REF;
-		inDestroy =    IN_LIST_ITER_DESTROY;
+		inCreateWV =   IN_GEN_ITER_FROM_REF;
+		inCreateWC =   IN_GEN_ITER_FROM_REF;
+		inDestroy =    IN_GEN_ITER_DESTROY;
 		inAdvance =    IN_LIST_ITER_ADVANCE;
 
-		inGetCurR =    IN_LIST_ITER_GET_CUR_R;
+		inGetCurR =    IN_GEN_ITER_GET_CUR_R;
 		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
 		inSetCurWC =   //IN_HALT;
 		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
@@ -128,12 +128,12 @@ IterImpl::IterImpl( Type type ) :
 		break;
 
 	case Map:
-		inCreateWV =   IN_LIST_ITER_FROM_REF;
-		inCreateWC =   IN_LIST_ITER_FROM_REF;
-		inDestroy =    IN_LIST_ITER_DESTROY;
+		inCreateWV =   IN_GEN_ITER_FROM_REF;
+		inCreateWC =   IN_GEN_ITER_FROM_REF;
+		inDestroy =    IN_GEN_ITER_DESTROY;
 		inAdvance =    IN_MAP_ITER_ADVANCE;
 
-		inGetCurR =    IN_LIST_ITER_GET_CUR_R;
+		inGetCurR =    IN_GEN_ITER_GET_CUR_R;
 		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
 		inSetCurWC =   //IN_HALT;
 		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
@@ -266,6 +266,7 @@ long sizeOfField( UniqueType *fieldUT )
 				size = sizeof(RevTreeIter) / sizeof(Word);
 				break;
 
+			case IterDef::Map:
 			case IterDef::List:
 				size = sizeof(ListIter) / sizeof(Word);
 				break;
@@ -2553,6 +2554,7 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 						type = LT_Iter;
 						break;
 
+					case IterDef::Map:
 					case IterDef::List:
 						/* ? */
 						type = LT_Iter;

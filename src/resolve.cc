@@ -404,6 +404,7 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 		case Iterator:
 			uniqueType = resolveIterator( pd );
 			break;
+			
 		case Unspecified:
 			/* No lookup needed, unique type(s) set when constructed. */
 			break;
