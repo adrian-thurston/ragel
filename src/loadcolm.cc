@@ -617,8 +617,13 @@ struct LoadColm
 		PatternItemList *list = 0;
 		switch ( patternList.prodName() ) {
 		case pattern_list::List: {
-			PatternItemList *left = walkPatternList( patternList._pattern_list(), patternVarRef );
-			PatternItemList *right = walkPattternTopEl( patternList.pattern_top_el(), patternVarRef );
+
+			PatternItemList *left = walkPatternList(
+					patternList._pattern_list(), patternVarRef );
+
+			PatternItemList *right = walkPattternTopEl(
+					patternList.pattern_top_el(), patternVarRef );
+
 			list = patListConcat( left, right );
 			break;
 		}
@@ -743,72 +748,6 @@ struct LoadColm
 		precedenceStmt( predType, predDeclList );
 	}
 
-	void walkListElDef( list_el_def Def )
-	{
-		/*
-		 * The unique type. This is a def with a single empty form.
-		 */
-		String name = Def.id().data();
-		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
-				name, pd->nextObjectId++ );
-
-		LelDefList *defList = new LelDefList;
-
-		Production *prod = BaseParser::production( InputLoc(),
-				new ProdElList, String(), false, 0, 0 );
-		prodAppend( defList, prod );
-
-		NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
-		BaseParser::cflDef( ntDef, objectDef, defList );
-
-		/*
-		 * List element with the same name as containing context.
-		 */
-		NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
-		String id = curStruct()->objectDef->name;
-		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, RepeatNone );
-		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListEl, 0, objTr, 0 );
-
-		ObjectField *of = ObjectField::cons( InputLoc(),
-				ObjectField::GenericElementType, elTr, name );
-		structVarDef( InputLoc(), of );
-	}
-
-	void walkMapElDef( map_el_def Def )
-	{
-		/* Pull out the key type. */
-		TypeRef *keyTr = walkTypeRef( Def.type_ref() );
-
-		/*
-		 * The unique type. This is a def with a single empty form.
-		 */
-		String name = Def.id().data();
-		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
-				name, pd->nextObjectId++ );
-
-		LelDefList *defList = new LelDefList;
-
-		Production *prod = BaseParser::production( InputLoc(),
-				new ProdElList, String(), false, 0, 0 );
-		prodAppend( defList, prod );
-
-		NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
-		BaseParser::cflDef( ntDef, objectDef, defList );
-
-		/*
-		 * List element with the same name as containing context.
-		 */
-		NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
-		String id = curStruct()->objectDef->name;
-		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, RepeatNone );
-		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapEl, 0, objTr, keyTr );
-
-		ObjectField *of = ObjectField::cons( InputLoc(),
-				ObjectField::GenericElementType, elTr, name );
-		structVarDef( InputLoc(), of );
-	}
-
-
 	StmtList *walkInclude( include Include )
 	{
 		String lit = "";
@@ -866,6 +805,11 @@ struct LoadColm
 		return qual;
 	}
 
+	NamespaceQual *emptyNspaceQual()
+	{
+		return NamespaceQual::cons( curNspace() );
+	}
+
 	RepeatType walkOptRepeat( opt_repeat OptRepeat )
 	{
 		RepeatType repeatType = RepeatNone;
@@ -881,6 +825,56 @@ struct LoadColm
 			break;
 		}
 		return repeatType;
+	}
+
+	TypeRef *walkValueList( type_ref typeRef )
+	{
+		TypeRef *valType = walkTypeRef( typeRef._type_ref() );
+
+		/* Create the value list element. */
+		String name = "vlist_el";
+		structHead( internal, name, ObjectDef::StructType );
+
+		/* Var def. */
+		String id = "value";
+		ObjectField *elValObjField = ObjectField::cons( internal,
+				ObjectField::StructFieldType, valType, id );
+		structVarDef( internal, elValObjField );
+
+		/* List El. */
+		listElDef( "el" );
+
+		structStack.pop();
+		namespaceStack.pop();
+
+		TypeRef *type = TypeRef::cons( internal,
+				emptyNspaceQual(), "vlist_el" );
+		return TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
+	}
+
+	TypeRef *walkValueMap( type_ref typeRef )
+	{
+		TypeRef *keyType = walkTypeRef( typeRef.KeyType() );
+		TypeRef *valType = walkTypeRef( typeRef.ValType() );
+
+		String name = "vmap_el";
+		structHead( internal, name, ObjectDef::StructType );
+
+		/* Var def. */
+		String id = "value";
+		ObjectField *elValObjField = ObjectField::cons( internal,
+				ObjectField::StructFieldType, valType, id );
+		structVarDef( internal, elValObjField );
+
+		/* Map El. */
+		mapElDef( "el", keyType );
+
+		structStack.pop();
+		namespaceStack.pop();
+
+		TypeRef *elType = TypeRef::cons( internal,
+				emptyNspaceQual(), "vmap_el" );
+		return TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, keyType, elType );
 	}
 
 	TypeRef *walkTypeRef( type_ref typeRef )
@@ -916,6 +910,14 @@ struct LoadColm
 			TypeRef *keyType = walkTypeRef( typeRef.KeyType() );
 			TypeRef *elType = walkTypeRef( typeRef.ElType() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, keyType, elType );
+			break;
+		}
+		case type_ref::ValueList: {
+			tr = walkValueList( typeRef );
+			break;
+		}
+		case type_ref::ValueMap: {
+			tr = walkValueMap( typeRef );
 			break;
 		}}
 		return tr;
@@ -2278,11 +2280,14 @@ struct LoadColm
 			walkPrecedenceDef( structItem.precedence_def() );
 			break;
 		case struct_item::ListEl:
-			walkListElDef( structItem.list_el_def() );
+			listElDef( structItem.list_el_def().id().data() );
 			break;
-		case struct_item::MapEl:
-			walkMapElDef( structItem.map_el_def() );
+		case struct_item::MapEl: {
+			map_el_def Def = structItem.map_el_def();
+			TypeRef *keyTr = walkTypeRef( Def.type_ref() );
+			mapElDef( Def.id().data(), keyTr );
 			break;
+		}
 		case struct_item::Alias:
 			walkAliasDef( structItem.alias_def() );
 			break;

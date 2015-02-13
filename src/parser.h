@@ -59,6 +59,7 @@ struct BaseParser
 	/* Lexical feedback. */
 
 	void listElDef( String name );
+	void mapElDef( String name, TypeRef *keyType );
 
 	void argvDecl();
 	void init();

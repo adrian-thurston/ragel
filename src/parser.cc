@@ -44,6 +44,7 @@ void BaseParser::listElDef( String name )
 
 	Production *prod = BaseParser::production( InputLoc(),
 			new ProdElList, String(), false, 0, 0 );
+
 	prodAppend( defList, prod );
 
 	NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
@@ -61,6 +62,36 @@ void BaseParser::listElDef( String name )
 	ObjectField *of = ObjectField::cons( InputLoc(),
 			ObjectField::GenericElementType, elTr, name );
 
+	structVarDef( InputLoc(), of );
+}
+
+void BaseParser::mapElDef( String name, TypeRef *keyType )
+{
+	/*
+	 * The unique type. This is a def with a single empty form.
+	 */
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
+			name, pd->nextObjectId++ );
+
+	LelDefList *defList = new LelDefList;
+
+	Production *prod = BaseParser::production( InputLoc(),
+			new ProdElList, String(), false, 0, 0 );
+	prodAppend( defList, prod );
+
+	NtDef *ntDef = NtDef::cons( name, curNspace(), curStruct(), false );
+	BaseParser::cflDef( ntDef, objectDef, defList );
+
+	/*
+	 * List element with the same name as containing context.
+	 */
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+	String id = curStruct()->objectDef->name;
+	TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, RepeatNone );
+	TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapEl, 0, objTr, keyType );
+
+	ObjectField *of = ObjectField::cons( InputLoc(),
+			ObjectField::GenericElementType, elTr, name );
 	structVarDef( InputLoc(), of );
 }
 

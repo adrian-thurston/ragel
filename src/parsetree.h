@@ -1991,9 +1991,7 @@ struct TypeRef
 		Map,
 		MapEl,
 		Parser,
-		Ref,
-		Int,
-		Bool
+		Ref
 	};
 
 	TypeRef()
