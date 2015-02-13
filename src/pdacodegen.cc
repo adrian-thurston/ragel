@@ -388,7 +388,8 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 				runtimeData->genericInfo[i].keyOffset << ", " <<
 				runtimeData->genericInfo[i].keyType << ", " <<
 				runtimeData->genericInfo[i].parserId << ", " <<
-				runtimeData->genericInfo[i].elOffset << " },\n";
+				runtimeData->genericInfo[i].elOffset << ", " <<
+				runtimeData->genericInfo[i].elStructId << " },\n";
 	}
 	out << "};\n\n";
 

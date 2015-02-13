@@ -781,15 +781,17 @@ IterImpl *LangVarRef::chooseTriterCall( Compiler *pd, CallArgVect *args )
 		CallArgVect::Iter pe = *args;
 		UniqueType *exprUT = (*pe)->expr->evaluate( pd, unused );
 
-		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_LIST ) {
-			cerr << "iterating list" << endl;
+		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_LIST )
 			iterImpl = new IterImpl( IterImpl::List );
-		}
 
-		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_MAP ) {
-			cerr << "iterating map" << endl;
+		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_VLIST )
+			iterImpl = new IterImpl( IterImpl::List );
+
+		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_MAP )
 			iterImpl = new IterImpl( IterImpl::Map );
-		}
+
+		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_VMAP )
+			iterImpl = new IterImpl( IterImpl::Map );
 	}
 
 	if ( iterImpl == 0 )

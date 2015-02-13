@@ -583,7 +583,8 @@ struct LoadColm
 		return list;
 	}
 
-	PatternItemList *walkPattternTopEl( pattern_top_el patternTopEl, LangVarRef *patternVarRef )
+	PatternItemList *walkPattternTopEl( pattern_top_el patternTopEl,
+			LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = 0;
 		switch ( patternTopEl.prodName() ) {
@@ -849,7 +850,7 @@ struct LoadColm
 
 		TypeRef *type = TypeRef::cons( internal,
 				emptyNspaceQual(), "vlist_el" );
-		return TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
+		return TypeRef::cons( typeRef.loc(), TypeRef::ValueList, 0, type, 0 );
 	}
 
 	TypeRef *walkValueMap( type_ref typeRef )
@@ -874,7 +875,9 @@ struct LoadColm
 
 		TypeRef *elType = TypeRef::cons( internal,
 				emptyNspaceQual(), "vmap_el" );
-		return TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, keyType, elType );
+
+		return TypeRef::cons( typeRef.loc(), TypeRef::ValueMap,
+				0, keyType, elType, valType );
 	}
 
 	TypeRef *walkTypeRef( type_ref typeRef )

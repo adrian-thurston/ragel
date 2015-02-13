@@ -356,9 +356,9 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 {
 	utArg = typeArg->uniqueType;
  
-	if ( typeId == GEN_MAP )
+	if ( typeId == GEN_MAP || typeId == GEN_VMAP )
 		keyUT = keyTypeArg->uniqueType; 
-
+	
 	objDef = ObjectDef::cons( ObjectDef::BuiltinType, 
 			"generic", pd->nextObjectId++ );
 
@@ -368,9 +368,19 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 			pd->initMapFields( this );
 			pd->initMapElFields( this );
 			break;
+		case GEN_VMAP:
+			pd->initValueMapFunctions( this );
+			pd->initValueMapFields( this );
+			pd->initMapElFields( this );
+			break;
 		case GEN_LIST:
 			pd->initListFunctions( this );
 			pd->initListFields( this );
+			pd->initListElFields( this );
+			break;
+		case GEN_VLIST:
+			pd->initValueListFunctions( this );
+			pd->initValueListFields( this );
 			pd->initListElFields( this );
 			break;
 		case GEN_PARSER:
@@ -1034,6 +1044,19 @@ void Compiler::initMapFunctions( GenericType *gen )
 			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->utArg, false, true, gen );
 }
 
+void Compiler::initValueMapFunctions( GenericType *gen )
+{
+	initFunction( gen->utArg, gen->objDef, "find", 
+			IN_VMAP_FIND,      IN_VMAP_FIND, gen->keyUT, true, true, gen );
+
+	initFunction( uniqueTypeInt, gen->objDef, "insert", 
+			IN_VMAP_INSERT_WV, IN_VMAP_INSERT_WC, gen->keyUT, gen->valueUT,
+			false, true, gen );
+
+	initFunction( gen->utArg, gen->objDef, "remove", 
+			IN_VMAP_REMOVE_WV, IN_VMAP_REMOVE_WC, gen->keyUT, false, true, gen );
+}
+
 void Compiler::initMapField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
@@ -1060,6 +1083,14 @@ void Compiler::initMapField( GenericType *gen, const char *name, int offset )
 }
 
 void Compiler::initMapFields( GenericType *gen )
+{
+	addLengthField( gen->objDef, IN_MAP_LENGTH );
+
+	initMapField( gen, "head", 0 );
+	initMapField( gen, "tail", 1 );
+}
+
+void Compiler::initValueMapFields( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_MAP_LENGTH );
 
@@ -1113,7 +1144,27 @@ void Compiler::initMapElFields( GenericType *gen )
 
 void Compiler::initListFunctions( GenericType *gen )
 {
+	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, true, gen );
 
+	initFunction( uniqueTypeInt, gen->objDef, "push_tail", 
+			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->utArg, false, true, gen );
+
+	initFunction( uniqueTypeInt, gen->objDef, "push", 
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, true, gen );
+
+	initFunction( gen->utArg, gen->objDef, "pop_head", 
+			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
+
+	initFunction( gen->utArg, gen->objDef, "pop_tail", 
+			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, true, gen );
+
+	initFunction( gen->utArg, gen->objDef, "pop", 
+			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
+}
+
+void Compiler::initValueListFunctions( GenericType *gen )
+{
 	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
 			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, true, gen );
 
@@ -1189,6 +1240,13 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 }
 
 void Compiler::initListFields( GenericType *gen )
+{
+	initListField( gen, "head", 0 );
+	initListField( gen, "tail", 1 );
+	initListField( gen, "top", 0 );
+}
+
+void Compiler::initValueListFields( GenericType *gen )
 {
 	initListField( gen, "head", 0 );
 	initListField( gen, "tail", 1 );

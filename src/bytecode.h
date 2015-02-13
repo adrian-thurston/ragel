@@ -385,6 +385,13 @@ typedef unsigned long colm_value_t;
 #define IN_MAP_DETACH_WC         0x22
 #define IN_MAP_DETACH_BKT        0x23
 
+#define IN_VMAP_FIND             0x29
+#define IN_VMAP_INSERT_WC        0x25
+#define IN_VMAP_INSERT_WV        0x26
+#define IN_VMAP_REMOVE_WC        0x27
+#define IN_VMAP_REMOVE_WV        0x28
+
+
 enum TYPE
 {
 	TYPE_NIL     = 0x01,
@@ -404,6 +411,8 @@ enum GEN {
 	GEN_MAP      = 0x12,
 	GEN_MAP_EL   = 0x13,
 	GEN_PARSER   = 0x14,
+	GEN_VLIST    = 0x15,
+	GEN_VMAP     = 0x16,
 };
 
 /* Known language element ids. */

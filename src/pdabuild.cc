@@ -1581,6 +1581,9 @@ void Compiler::makeRuntimeData()
 					gen->typeId == GEN_PARSER ? gen->utArg->langEl->parserId : -1;
 			runtimeData->genericInfo[gen->id].elOffset =
 					gen->el != 0 ? gen->el->offset : -1;
+			runtimeData->genericInfo[gen->id].elStructId =
+					gen->typeId == GEN_VMAP ? gen->utArg->structEl->id : -1;
+			runtimeData->genericInfo[gen->id].valueOffset = 0;
 		}
 	}
 

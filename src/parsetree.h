@@ -732,7 +732,8 @@ struct GenericType
 	:
 		typeId(typeId), id(id),
 		typeArg(typeArg), keyTypeArg(0), 
-		utArg(0), keyUT(0), objDef(0), el(0), elOffset(0)
+		utArg(0), keyUT(0), valueUT(0),
+		objDef(0), el(0), elOffset(0)
 	{}
 
 	void declare( Compiler *pd, Namespace *nspace );
@@ -743,6 +744,7 @@ struct GenericType
 	TypeRef *keyTypeArg;
 	UniqueType *utArg;
 	UniqueType *keyUT;
+	UniqueType *valueUT;
 	ObjectDef *objDef;
 	ObjectField *el;
 	long elOffset;
@@ -1987,8 +1989,10 @@ struct TypeRef
 		Literal,
 		Iterator,
 		List,
+		ValueList,
 		ListEl,
 		Map,
+		ValueMap,
 		MapEl,
 		Parser,
 		Ref
@@ -2003,6 +2007,7 @@ struct TypeRef
 		iterDef(0),
 		typeRef1(0),
 		typeRef2(0),
+		typeRef3(0),
 		repeatType(RepeatNone),
 		parsedVarRef(0),
 		parsedTypeRef(0),
@@ -2114,6 +2119,21 @@ struct TypeRef
 		t->repeatType = RepeatNone;
 		return t;
 	}
+
+	static TypeRef *cons( const InputLoc &loc, Type type, 
+			NamespaceQual *nspaceQual, TypeRef *typeRef1,
+			TypeRef *typeRef2, TypeRef *typeRef3 )
+	{
+		TypeRef *t = new TypeRef;
+		t->type = type;
+		t->loc = loc;
+		t->nspaceQual = nspaceQual;
+		t->typeRef1 = typeRef1;
+		t->typeRef2 = typeRef2;
+		t->typeRef3 = typeRef3;
+		t->repeatType = RepeatNone;
+		return t;
+	}
 	
 	/* Pointers and Refs. */
 	static TypeRef *cons( const InputLoc &loc, Type type, TypeRef *typeRef1 )
@@ -2169,7 +2189,8 @@ struct TypeRef
 	UniqueType *resolveTypeParser( Compiler *pd );
 	UniqueType *resolveType( Compiler *pd );
 	UniqueType *resolveTypeRef( Compiler *pd );
-
+	UniqueType *resolveTypeValueList( Compiler *pd );
+	UniqueType *resolveTypeValueMap( Compiler *pd );
 
 	Type type;
 	InputLoc loc;
@@ -2180,6 +2201,7 @@ struct TypeRef
 	IterDef *iterDef;
 	TypeRef *typeRef1;
 	TypeRef *typeRef2;
+	TypeRef *typeRef3;
 	RepeatType repeatType;
 
 	/* For pattern and constructor context. */

@@ -128,13 +128,17 @@ Struct *colm_construct_generic( Program *prg, long genericId )
 		case GEN_LIST_EL:
 			break;
 
-		case GEN_MAP: {
+		case GEN_MAP:
+		case GEN_VMAP:
+		{
 			Map *map = colm_map_new( prg );
 			map->genericInfo = genericInfo;
 			newGeneric = (Struct*) map;
 			break;
 		}
-		case GEN_LIST: {
+		case GEN_LIST:
+		case GEN_VLIST:
+		{
 			List *list = colm_list_new( prg );
 			list->genericInfo = genericInfo;
 			newGeneric = (Struct*) list;

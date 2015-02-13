@@ -145,6 +145,8 @@ typedef struct _GenericInfo
 	long keyType;
 	long parserId;
 	long elOffset;
+	long elStructId;
+	long valueOffset;
 } GenericInfo;
 
 enum IterType

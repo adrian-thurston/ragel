@@ -3880,6 +3880,26 @@ again:
 
 				treeDownref( prg, sp, obj );
 				break;
+			}
+			case IN_VMAP_INSERT_WC: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_VMAP_INSERT_WC %hd\n", genId );
+
+				Map *map = vm_pop_map();
+				Struct *value = vm_pop_struct();
+				Struct *key = vm_pop_struct();
+
+				colm_vmap_insert( prg, map, key, value );
+
+				//treeUpref( prg->trueVal );
+				vm_push( prg->trueVal );
+				break;
+			}
+			default: {
+				fatal( "UNKNOWN FUNCTION: 0x%2x -- something is wrong\n", c );
+				break;
 			}}
 			break;
 		}

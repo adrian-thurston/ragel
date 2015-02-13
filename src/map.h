@@ -67,7 +67,7 @@ Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element );
 MapEl *colm_map_insert( Program *prg, Map *map, MapEl *mapEl );
 void colm_map_detach( Program *prg, Map *map, MapEl *mapEl );
 MapEl *colm_map_find( Program *prg, Map *map, Tree *key );
-
+MapEl *colm_vmap_insert( Program *prg, Map *map, Struct *key, Struct *value );
 
 #if defined(__cplusplus)
 }

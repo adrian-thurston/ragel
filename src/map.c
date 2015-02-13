@@ -651,6 +651,18 @@ MapEl *colm_map_insert( Program *prg, Map *map, MapEl *mapEl )
 	return mapInsertEl( prg, map, mapEl, 0 );
 }
 
+MapEl *colm_vmap_insert( Program *prg, Map *map, Struct *key, Struct *value )
+{
+	struct colm_struct *s = colm_struct_new( prg, map->genericInfo->elStructId );
+
+	colm_struct_set_field( s, Struct*, map->genericInfo->elOffset, key );
+	colm_struct_set_field( s, Struct*, 0, value );
+
+	MapEl *mapEl = colm_struct_get_addr( s, MapEl*, map->genericInfo->elOffset );
+
+	colm_map_insert( prg, map, mapEl );
+}
+
 void colm_map_detach( Program *prg, Map *map, MapEl *mapEl )
 {
 	mapDetach( prg, map, mapEl );
