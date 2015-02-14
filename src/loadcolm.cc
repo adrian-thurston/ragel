@@ -828,28 +828,51 @@ struct LoadColm
 		return repeatType;
 	}
 
+	BstSet<String, CmpStr> defined;
+
+	void structHead2( const InputLoc &loc,
+			const String &data, ObjectDef::Type objectType )
+	{
+		Namespace *inNspace = pd->rootNamespace;
+
+		ObjectDef *objectDef = ObjectDef::cons( objectType,
+				data, pd->nextObjectId++ ); 
+
+		StructDef *context = new StructDef( loc, data, objectDef );
+		structStack.push( context );
+
+		inNspace->structDefList.append( context );
+
+		/* Make the namespace for the struct. */
+		createNamespace( loc, data );
+	}
+
 	TypeRef *walkValueList( type_ref typeRef )
 	{
 		TypeRef *valType = walkTypeRef( typeRef._type_ref() );
 
 		/* Create the value list element. */
-		String name = "vlist_el";
-		structHead( internal, name, ObjectDef::StructType );
+		String name( 32, "vlist_el_%s", valType->stringify().data );
 
-		/* Var def. */
-		String id = "value";
-		ObjectField *elValObjField = ObjectField::cons( internal,
-				ObjectField::StructFieldType, valType, id );
-		structVarDef( internal, elValObjField );
+		if ( !defined.find( name ) ) {
+			defined.insert( name );
 
-		/* List El. */
-		listElDef( "el" );
+			structHead2( internal, name, ObjectDef::StructType );
 
-		structStack.pop();
-		namespaceStack.pop();
+			/* Var def. */
+			String id = "value";
+			ObjectField *elValObjField = ObjectField::cons( internal,
+					ObjectField::StructFieldType, valType, id );
+			structVarDef( internal, elValObjField );
 
-		TypeRef *elType = TypeRef::cons( internal,
-				emptyNspaceQual(), "vlist_el" );
+			/* List El. */
+			listElDef( "el" );
+
+			structStack.pop();
+			namespaceStack.pop();
+		}
+
+		TypeRef *elType = TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
 		return TypeRef::cons( typeRef.loc(), TypeRef::ValueList, 0, elType, valType );
 	}
 
@@ -858,24 +881,28 @@ struct LoadColm
 		TypeRef *keyType = walkTypeRef( typeRef.KeyType() );
 		TypeRef *valType = walkTypeRef( typeRef.ValType() );
 
-		String name = "vmap_el";
-		structHead( internal, name, ObjectDef::StructType );
+		String name( 32, "vmap_el_%s_%s", keyType->stringify().data,
+				valType->stringify().data );
 
-		/* Var def. */
-		String id = "value";
-		ObjectField *elValObjField = ObjectField::cons( internal,
-				ObjectField::StructFieldType, valType, id );
-		structVarDef( internal, elValObjField );
+		if ( !defined.find( name ) ) {
+			defined.insert( name );
+		
+			structHead2( internal, name, ObjectDef::StructType );
 
-		/* Map El. */
-		mapElDef( "el", keyType );
+			/* Var def. */
+			String id = "value";
+			ObjectField *elValObjField = ObjectField::cons( internal,
+					ObjectField::StructFieldType, valType, id );
+			structVarDef( internal, elValObjField );
 
-		structStack.pop();
-		namespaceStack.pop();
+			/* Map El. */
+			mapElDef( "el", keyType );
 
-		TypeRef *elType = TypeRef::cons( internal,
-				emptyNspaceQual(), "vmap_el" );
+			structStack.pop();
+			namespaceStack.pop();
+		}
 
+		TypeRef *elType = TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
 		return TypeRef::cons( typeRef.loc(), TypeRef::ValueMap,
 				0, keyType, elType, valType );
 	}

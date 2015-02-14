@@ -80,7 +80,7 @@ UniqueType *TypeRef::resolveTypeName( Compiler *pd )
 		nspace = nspace->parentNamespace;
 	}
 
-	error(loc) << "unknown type in typeof expression" << endp;
+	error(loc) << "unknown type " << typeName << " in typeof expression" << endp;
 	return 0;
 }
 
@@ -110,7 +110,7 @@ UniqueType *TypeRef::resolveTypeLiteral( Compiler *pd )
 		nspace = nspace->parentNamespace;
 	}
 
-	error(loc) << "unknown type in typeof expression" << endp;
+	error(loc) << "unknown type " << typeName << " in typeof expression" << endp;
 	return 0;
 }
 

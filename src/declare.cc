@@ -226,7 +226,7 @@ LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
      * it is not there then it will be inserted and last found will be set to it. */
 	TypeMapEl *inDict = nspace->typeMap.find( data );
 	if ( inDict != 0 )
-		error() << "'" << data << "' already defined as something else" << endp;
+		error() << "language element '" << data << "' already defined as something else" << endp;
 
 	/* Language element not there. Make the new lang el and insert.. */
 	LangEl *langEl = new LangEl( nspace, data, type );
@@ -243,9 +243,9 @@ StructEl *declareStruct( Compiler *pd, Namespace *inNspace,
 	if ( inNspace != 0 ) {
 		TypeMapEl *inDict = inNspace->typeMap.find( data );
 		if ( inDict != 0 )
-			error() << "'" << data << "' already defined as something else" << endp;
+			error() << "struct '" << data << "' already defined as something else" << endp;
 	}
-	
+
 	StructEl *structEl = new StructEl( data, structDef );
 	pd->structEls.append( structEl );
 	structDef->structEl = structEl;
@@ -274,7 +274,7 @@ void declareTypeAlias( Compiler *pd, Namespace *nspace,
      * it is not there then it will be inserted and last found will be set to it. */
 	TypeMapEl *inDict = nspace->typeMap.find( data );
 	if ( inDict != 0 )
-		error() << "'" << data << "' already defined as something else" << endp;
+		error() << "alias '" << data << "' already defined as something else" << endp;
 
 	/* Language element not there. Make the new lang el and insert. */
 	TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::AliasType, data, typeRef );
