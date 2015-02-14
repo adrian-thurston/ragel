@@ -1046,7 +1046,7 @@ void Compiler::initMapFunctions( GenericType *gen )
 
 void Compiler::initValueMapFunctions( GenericType *gen )
 {
-	initFunction( gen->utArg, gen->objDef, "find", 
+	initFunction( gen->valueUT, gen->objDef, "find", 
 			IN_VMAP_FIND,      IN_VMAP_FIND, gen->keyUT, true, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "insert", 

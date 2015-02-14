@@ -2072,7 +2072,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_ADVANCE\n" );
 
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			ListIter *iter = (ListIter*) vm_plocal(field);
 			Tree *res = colm_list_iter_advance( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push( res );
@@ -2084,7 +2084,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_MAP_ITER_ADVANCE\n" );
 
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			ListIter *iter = (ListIter*) vm_plocal(field);
 			Tree *res = colm_map_iter_advance( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push( res );
@@ -2096,7 +2096,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GEN_ITER_GET_CUR_R\n" );
 			
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			ListIter *iter = (ListIter*) vm_plocal(field);
 			Tree *tree = colm_list_iter_deref_cur( prg, iter );
 			//treeUpref( tree );
 			vm_push( tree );
@@ -3759,7 +3759,7 @@ again:
 				MapEl *mapEl = colm_map_find( prg, map, key );
 
 				struct colm_struct *strct = mapEl != 0 ?
-					colm_generic_el_container( prg, mapEl, genId ) : 0;
+						colm_generic_el_container( prg, mapEl, genId ) : 0;
 
 				vm_push_struct( strct );
 				break;
@@ -3904,12 +3904,27 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_VMAP_REMOVE_WC %hd\n", genId );
 
 				Map *map = vm_pop_map();
-				Struct *key = vm_pop_struct();
+				Tree *key = vm_pop();
 
 				colm_vmap_remove( prg, map, key );
 
 				//treeUpref( prg->trueVal );
 				vm_push( prg->trueVal );
+				break;
+			}
+			case IN_VMAP_FIND: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_VMAP_FIND %hd\n", genId );
+
+				Map *map = vm_pop_map();
+				Tree *key = vm_pop();
+
+				Tree *result = colm_vmap_find( prg, map, key );
+
+				treeUpref( result );
+				vm_push( result );
 				break;
 			}
 			default: {

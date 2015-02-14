@@ -663,18 +663,29 @@ MapEl *colm_vmap_insert( Program *prg, Map *map, Struct *key, Struct *value )
 	colm_map_insert( prg, map, mapEl );
 }
 
-MapEl *colm_vmap_remove( Program *prg, Map *map, Struct *key )
+MapEl *colm_vmap_remove( Program *prg, Map *map, Tree *key )
 {
 	MapEl *mapEl = colm_map_find( prg, map, key );
 	if ( mapEl != 0 )
 		colm_map_detach( prg, map, mapEl );
 }
 
+Tree *colm_vmap_find( Program *prg, Map *map, Tree *key )
+{
+	MapEl *mapEl = colm_map_find( prg, map, key );
+	if ( mapEl != 0 ) {
+		Struct *s = colm_generic_el_container( prg, mapEl, map->genericInfo - prg->rtd->genericInfo );
+		Tree *val = colm_struct_get_field( s, Tree*, 0 );
+		treeUpref( val );
+		return val;
+	}
+	return 0;
+}
+
 void colm_map_detach( Program *prg, Map *map, MapEl *mapEl )
 {
 	mapDetach( prg, map, mapEl );
 }
-
 
 MapEl *colm_map_find( Program *prg, Map *map, Tree *key )
 {
