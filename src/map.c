@@ -663,6 +663,13 @@ MapEl *colm_vmap_insert( Program *prg, Map *map, Struct *key, Struct *value )
 	colm_map_insert( prg, map, mapEl );
 }
 
+MapEl *colm_vmap_remove( Program *prg, Map *map, Struct *key )
+{
+	MapEl *mapEl = colm_map_find( prg, map, key );
+	if ( mapEl != 0 )
+		colm_map_detach( prg, map, mapEl );
+}
+
 void colm_map_detach( Program *prg, Map *map, MapEl *mapEl )
 {
 	mapDetach( prg, map, mapEl );

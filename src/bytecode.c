@@ -3897,6 +3897,21 @@ again:
 				vm_push( prg->trueVal );
 				break;
 			}
+			case IN_VMAP_REMOVE_WC: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_VMAP_REMOVE_WC %hd\n", genId );
+
+				Map *map = vm_pop_map();
+				Struct *key = vm_pop_struct();
+
+				colm_vmap_remove( prg, map, key );
+
+				//treeUpref( prg->trueVal );
+				vm_push( prg->trueVal );
+				break;
+			}
 			default: {
 				fatal( "UNKNOWN FUNCTION: 0x%2x -- something is wrong\n", c );
 				break;
