@@ -359,7 +359,7 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 	if ( typeId == GEN_MAP || typeId == GEN_VMAP )
 		keyUt = keyTr->resolveType( pd );
 	
-	if ( typeId == GEN_VMAP )
+	if ( typeId == GEN_VMAP || typeId == GEN_VLIST )
 		valueUt = valueTr->resolveType( pd );
 	
 	objDef = ObjectDef::cons( ObjectDef::BuiltinType, 
@@ -1169,22 +1169,22 @@ void Compiler::initListFunctions( GenericType *gen )
 void Compiler::initValueListFunctions( GenericType *gen )
 {
 	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
+			IN_VLIST_PUSH_HEAD_WV, IN_VLIST_PUSH_HEAD_WC, gen->valueUt, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push_tail", 
-			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->elUt, false, true, gen );
+			IN_VLIST_PUSH_TAIL_WV, IN_VLIST_PUSH_TAIL_WC, gen->valueUt, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
+			IN_VLIST_PUSH_HEAD_WV, IN_VLIST_PUSH_HEAD_WC, gen->valueUt, false, true, gen );
 
-	initFunction( gen->elUt, gen->objDef, "pop_head", 
-			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
+	initFunction( gen->valueUt, gen->objDef, "pop_head", 
+			IN_VLIST_POP_HEAD_WV, IN_VLIST_POP_HEAD_WC, false, true, gen );
 
-	initFunction( gen->elUt, gen->objDef, "pop_tail", 
-			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, true, gen );
+	initFunction( gen->valueUt, gen->objDef, "pop_tail", 
+			IN_VLIST_POP_TAIL_WV, IN_VLIST_POP_TAIL_WC, false, true, gen );
 
-	initFunction( gen->elUt, gen->objDef, "pop", 
-			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
+	initFunction( gen->valueUt, gen->objDef, "pop", 
+			IN_VLIST_POP_HEAD_WV, IN_VLIST_POP_HEAD_WC, false, true, gen );
 }
 
 void Compiler::initListElField( GenericType *gen, const char *name, int offset )

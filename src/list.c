@@ -22,12 +22,70 @@
 #include <colm/pdarun.h>
 #include <colm/program.h>
 #include <colm/struct.h>
+#include <colm/bytecode.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 
 static void colm_list_add_after( List *list, ListEl *prev_el, ListEl *new_el );
 static void colm_list_add_before( List *list, ListEl *next_el, ListEl *new_el);
+void colm_list_prepend( List *list, ListEl *newEl );
+void colm_list_append( List *list, ListEl *newEl );
+ListEl *colm_list_detach( List *list, ListEl *el );
+
+void colm_vlist_append( struct colm_program *prg, List *list, Tree *value )
+{
+	struct colm_struct *s = colm_struct_new( prg, list->genericInfo->elStructId );
+
+	colm_struct_set_field( s, Tree*, 0, value );
+
+	ListEl *listEl = colm_struct_get_addr( s, ListEl*, list->genericInfo->elOffset );
+
+	colm_list_append( list, listEl );
+}
+
+void colm_vlist_prepend( struct colm_program *prg, List *list, Tree *value )
+{
+	struct colm_struct *s = colm_struct_new( prg, list->genericInfo->elStructId );
+
+	colm_struct_set_field( s, Tree*, 0, value );
+
+	ListEl *listEl = colm_struct_get_addr( s, ListEl*, list->genericInfo->elOffset );
+
+	colm_list_prepend( list, listEl );
+}
+
+Tree *colm_vlist_detach_tail( struct colm_program *prg, List *list )
+{
+	ListEl *listEl = list->tail;
+	colm_list_detach( list, listEl );
+
+	struct colm_struct *s = colm_generic_el_container( prg, listEl,
+			(list->genericInfo - prg->rtd->genericInfo) );
+
+	Tree *val = colm_struct_get_field( s, Tree*, 0 );
+
+	if ( list->genericInfo->valueType == TYPE_TREE )
+		treeUpref( val );
+
+	return val;
+}
+
+Tree *colm_vlist_detach_head( struct colm_program *prg, List *list )
+{
+	ListEl *listEl = list->head;
+	colm_list_detach( list, listEl );
+
+	struct colm_struct *s = colm_generic_el_container( prg, listEl,
+			(list->genericInfo - prg->rtd->genericInfo) );
+
+	Tree *val = colm_struct_get_field( s, Tree*, 0 );
+
+	if ( list->genericInfo->valueType == TYPE_TREE )
+		treeUpref( val );
+
+	return val;
+}
 
 void colm_list_prepend( List *list, ListEl *newEl )
 {
@@ -39,7 +97,6 @@ void colm_list_append( List *list, ListEl *newEl )
 	colm_list_add_after( list, list->tail, newEl );
 }
 
-ListEl *colm_list_detach( List *list, ListEl *el );
 
 ListEl *colm_list_detach_head( List *list )
 {

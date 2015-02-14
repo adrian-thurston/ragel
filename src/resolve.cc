@@ -295,7 +295,7 @@ UniqueType *TypeRef::resolveTypeValueList( Compiler *pd )
 		pd->uniqueGenericMap.insert( inMap );
 
 		GenericType *generic = new GenericType( GEN_VLIST,
-				pd->nextGenericId++, typeRef1, 0, 0, listEl );
+				pd->nextGenericId++, typeRef1, 0, typeRef2, listEl );
 
 		nspace->genericList.append( generic );
 

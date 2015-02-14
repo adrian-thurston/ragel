@@ -140,15 +140,18 @@ typedef struct _Str
 typedef struct _GenericInfo
 {
 	long type;
-	long typeArg;
+
+	long elType;
+	long elStructId;
+	long elOffset;
+
 	long keyType;
 	long keyOffset;
-	long parserId;
-	long elOffset;
-	long elStructId;
 
 	long valueType;
 	long valueOffset;
+
+	long parserId;
 } GenericInfo;
 
 enum IterType
@@ -350,6 +353,10 @@ void colm_init_list_iter( ListIter *listIter, Tree **stackRoot,
 void colm_list_iter_destroy( struct colm_program *prg, Tree ***psp, ListIter *iter );
 Tree *colm_list_iter_advance( struct colm_program *prg, Tree ***psp, ListIter *iter );
 Tree *colm_list_iter_deref_cur( struct colm_program *prg, ListIter *iter );
+
+void colm_vlist_append( struct colm_program *prg, List *list, Tree *tree );
+void colm_vlist_prepend( struct colm_program *prg, List *list, Tree *value );
+Tree *colm_vlist_detach_tail( struct colm_program *prg, List *list );
 
 #if defined(__cplusplus)
 }

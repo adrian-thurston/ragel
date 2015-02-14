@@ -3926,6 +3926,64 @@ again:
 				vm_push( result );
 				break;
 			}
+			case IN_VLIST_PUSH_TAIL_WC: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_TAIL_WC %hd\n", genId );
+
+				List *list = vm_pop_list();
+				Struct *value = vm_pop_struct();
+
+				colm_vlist_append( prg, list, value );
+
+				//treeUpref( prg->trueVal );
+				vm_push( prg->trueVal );
+				break;
+			}
+			case IN_VLIST_PUSH_HEAD_WC: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_HEAD_WC %hd\n", genId );
+
+				List *list = vm_pop_list();
+				Struct *value = vm_pop_struct();
+
+				colm_vlist_prepend( prg, list, value );
+
+				//treeUpref( prg->trueVal );
+				vm_push( prg->trueVal );
+				break;
+			}
+			case IN_VLIST_POP_HEAD_WC: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_HEAD_WC %hd\n", genId );
+
+				List *list = vm_pop_list();
+
+				Tree *result = colm_vlist_detach_head( prg, list );
+
+				//treeUpref( prg->trueVal );
+				vm_push( result );
+				break;
+			}
+			case IN_VLIST_POP_TAIL_WC: {
+				short genId;
+				read_half( genId );
+
+				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_TAIL_WC %hd\n", genId );
+
+				List *list = vm_pop_list();
+
+				Tree *result = colm_vlist_detach_tail( prg, list );
+
+				//treeUpref( prg->trueVal );
+				vm_push( result );
+				break;
+			}
 			default: {
 				fatal( "UNKNOWN FUNCTION: 0x%2x -- something is wrong\n", c );
 				break;

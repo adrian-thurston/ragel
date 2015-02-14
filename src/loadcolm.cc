@@ -848,9 +848,9 @@ struct LoadColm
 		structStack.pop();
 		namespaceStack.pop();
 
-		TypeRef *type = TypeRef::cons( internal,
+		TypeRef *elType = TypeRef::cons( internal,
 				emptyNspaceQual(), "vlist_el" );
-		return TypeRef::cons( typeRef.loc(), TypeRef::ValueList, 0, type, 0 );
+		return TypeRef::cons( typeRef.loc(), TypeRef::ValueList, 0, elType, valType );
 	}
 
 	TypeRef *walkValueMap( type_ref typeRef )

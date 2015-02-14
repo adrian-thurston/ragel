@@ -391,6 +391,18 @@ typedef unsigned long colm_value_t;
 #define IN_VMAP_REMOVE_WC        0x27
 #define IN_VMAP_REMOVE_WV        0x28
 
+#define IN_VLIST_PUSH_TAIL_WV    0x2a
+#define IN_VLIST_PUSH_TAIL_WC    0x2b
+#define IN_VLIST_PUSH_TAIL_BKT   0x2c
+#define IN_VLIST_POP_TAIL_WV     0x2d
+#define IN_VLIST_POP_TAIL_WC     0x2e
+#define IN_VLIST_POP_TAIL_BKT    0x2f
+#define IN_VLIST_PUSH_HEAD_WV    0x30
+#define IN_VLIST_PUSH_HEAD_WC    0x31
+#define IN_VLIST_PUSH_HEAD_BKT   0x32
+#define IN_VLIST_POP_HEAD_WV     0x33
+#define IN_VLIST_POP_HEAD_WC     0x34
+#define IN_VLIST_POP_HEAD_BKT    0x35
 
 enum TYPE
 {
