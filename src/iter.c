@@ -128,6 +128,20 @@ Tree *colm_list_iter_deref_cur( Program *prg, ListIter *iter )
 	return (Tree*)s;
 }
 
+Tree *colm_viter_deref_cur( Program *prg, ListIter *iter )
+{
+	GenericInfo *gi = &prg->rtd->genericInfo[iter->genericId];
+	ListEl *el = (ListEl*)iter->ref.kid;
+	struct colm_struct *s = el != 0 ?
+			colm_struct_container( el, gi->elOffset ) : 0;
+
+	Tree *val = colm_struct_get_field( s, Tree*, 0 );
+	if ( gi->valueType == TYPE_TREE )
+		treeUpref( val );
+
+	return (Tree*)val;
+}
+
 void initTreeIter( TreeIter *treeIter, Tree **stackRoot,
 		long argSize, long rootSize,
 		const Ref *rootRef, int searchId )

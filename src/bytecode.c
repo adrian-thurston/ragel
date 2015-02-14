@@ -2102,6 +2102,18 @@ again:
 			vm_push( tree );
 			break;
 		}
+		case IN_GEN_VITER_GET_CUR_R: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GEN_VITER_GET_CUR_R\n" );
+			
+			ListIter *iter = (ListIter*) vm_plocal(field);
+			Tree *tree = colm_viter_deref_cur( prg, iter );
+			//treeUpref( tree );
+			vm_push( tree );
+			break;
+		}
 		case IN_MATCH: {
 			Half patternId;
 			read_half( patternId );

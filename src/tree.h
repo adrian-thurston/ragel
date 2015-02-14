@@ -357,6 +357,7 @@ Tree *colm_list_iter_deref_cur( struct colm_program *prg, ListIter *iter );
 void colm_vlist_append( struct colm_program *prg, List *list, Tree *tree );
 void colm_vlist_prepend( struct colm_program *prg, List *list, Tree *value );
 Tree *colm_vlist_detach_tail( struct colm_program *prg, List *list );
+Tree *colm_viter_deref_cur( struct colm_program *prg, ListIter *iter );
 
 #if defined(__cplusplus)
 }

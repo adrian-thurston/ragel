@@ -127,6 +127,32 @@ IterImpl::IterImpl( Type type ) :
 		useGenericId = true;
 		break;
 
+	case ValueList:
+		inCreateWV =   IN_GEN_ITER_FROM_REF;
+		inCreateWC =   IN_GEN_ITER_FROM_REF;
+		inDestroy =    IN_GEN_ITER_DESTROY;
+		inAdvance =    IN_LIST_ITER_ADVANCE;
+
+		inGetCurR =    IN_GEN_VITER_GET_CUR_R;
+		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
+		inSetCurWC =   //IN_HALT;
+		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
+		useGenericId = true;
+		break;
+
+	case ValueMap:
+		inCreateWV =   IN_GEN_ITER_FROM_REF;
+		inCreateWC =   IN_GEN_ITER_FROM_REF;
+		inDestroy =    IN_GEN_ITER_DESTROY;
+		inAdvance =    IN_MAP_ITER_ADVANCE;
+
+		inGetCurR =    IN_GEN_VITER_GET_CUR_R;
+		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
+		inSetCurWC =   //IN_HALT;
+		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
+		useGenericId = true;
+		break;
+
 	case Map:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
@@ -785,13 +811,13 @@ IterImpl *LangVarRef::chooseTriterCall( Compiler *pd, CallArgVect *args )
 			iterImpl = new IterImpl( IterImpl::List );
 
 		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_VLIST )
-			iterImpl = new IterImpl( IterImpl::List );
+			iterImpl = new IterImpl( IterImpl::ValueList );
 
 		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_MAP )
 			iterImpl = new IterImpl( IterImpl::Map );
 
 		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_VMAP )
-			iterImpl = new IterImpl( IterImpl::Map );
+			iterImpl = new IterImpl( IterImpl::ValueMap );
 	}
 
 	if ( iterImpl == 0 )
