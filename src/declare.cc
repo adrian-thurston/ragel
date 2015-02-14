@@ -354,10 +354,10 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 
 void GenericType::declare( Compiler *pd, Namespace *nspace )
 {
-	utArg = typeArg->uniqueType;
+	elUt = elTr->uniqueType;
  
 	if ( typeId == GEN_MAP || typeId == GEN_VMAP )
-		keyUT = keyTypeArg->uniqueType; 
+		keyUt = keyTr->uniqueType; 
 	
 	objDef = ObjectDef::cons( ObjectDef::BuiltinType, 
 			"generic", pd->nextObjectId++ );
@@ -384,7 +384,7 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 			pd->initListElFields( this );
 			break;
 		case GEN_PARSER:
-			utArg->langEl->parserId = pd->nextParserId++;
+			elUt->langEl->parserId = pd->nextParserId++;
 			pd->initParserFunctions( this );
 			pd->initParserFields( this );
 			break;
@@ -1034,34 +1034,34 @@ void Compiler::addError()
 
 void Compiler::initMapFunctions( GenericType *gen )
 {
-	initFunction( gen->utArg, gen->objDef, "find", 
-			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUT, true, true, gen );
+	initFunction( gen->elUt, gen->objDef, "find", 
+			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUt, true, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "insert", 
-			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->utArg, false, true, gen );
+			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->elUt, false, true, gen );
 
-	initFunction( gen->utArg, gen->objDef, "detach", 
-			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->utArg, false, true, gen );
+	initFunction( gen->elUt, gen->objDef, "detach", 
+			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->elUt, false, true, gen );
 }
 
 void Compiler::initValueMapFunctions( GenericType *gen )
 {
-	initFunction( gen->valueUT, gen->objDef, "find", 
-			IN_VMAP_FIND,      IN_VMAP_FIND, gen->keyUT, true, true, gen );
+	initFunction( gen->valueUt, gen->objDef, "find", 
+			IN_VMAP_FIND,      IN_VMAP_FIND, gen->keyUt, true, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "insert", 
-			IN_VMAP_INSERT_WV, IN_VMAP_INSERT_WC, gen->keyUT, gen->valueUT,
+			IN_VMAP_INSERT_WV, IN_VMAP_INSERT_WC, gen->keyUt, gen->valueUt,
 			false, true, gen );
 
-	initFunction( gen->utArg, gen->objDef, "remove", 
-			IN_VMAP_REMOVE_WV, IN_VMAP_REMOVE_WC, gen->keyUT, false, true, gen );
+	initFunction( gen->elUt, gen->objDef, "remove", 
+			IN_VMAP_REMOVE_WV, IN_VMAP_REMOVE_WC, gen->keyUt, false, true, gen );
 }
 
 void Compiler::initMapField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltOffType, gen->typeArg, name );
+			ObjectField::InbuiltOffType, gen->elTr, name );
 
 	el->inGetR =  IN_GET_MAP_MEM_R;
 	el->inGetWC = IN_GET_MAP_MEM_WC;
@@ -1102,21 +1102,21 @@ void Compiler::initMapElKey( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::GenericDependentType, gen->keyTypeArg, name );
+			ObjectField::GenericDependentType, gen->keyTr, name );
 	
 	gen->el->mapKeyField = el;
 	
 	/* Offset will be computed when the offset of the owning map element field
 	 * is computed. */
 
-	gen->utArg->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
+	gen->elUt->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
 }
 
 void Compiler::initMapElField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltOffType, gen->typeArg, name );
+			ObjectField::InbuiltOffType, gen->elTr, name );
 
 	el->inGetR    = IN_GET_MAP_EL_MEM_R;
 	el->inGetValR = IN_GET_MAP_EL_MEM_R;
@@ -1131,7 +1131,7 @@ void Compiler::initMapElField( GenericType *gen, const char *name, int offset )
 	/* Zero for head, One for tail. */
 	el->offset = offset;
 
-	gen->utArg->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
+	gen->elUt->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
 }
 
 void Compiler::initMapElFields( GenericType *gen )
@@ -1145,42 +1145,42 @@ void Compiler::initMapElFields( GenericType *gen )
 void Compiler::initListFunctions( GenericType *gen )
 {
 	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, true, gen );
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push_tail", 
-			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->utArg, false, true, gen );
+			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->elUt, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, true, gen );
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
 
-	initFunction( gen->utArg, gen->objDef, "pop_head", 
+	initFunction( gen->elUt, gen->objDef, "pop_head", 
 			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
 
-	initFunction( gen->utArg, gen->objDef, "pop_tail", 
+	initFunction( gen->elUt, gen->objDef, "pop_tail", 
 			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, true, gen );
 
-	initFunction( gen->utArg, gen->objDef, "pop", 
+	initFunction( gen->elUt, gen->objDef, "pop", 
 			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
 }
 
 void Compiler::initValueListFunctions( GenericType *gen )
 {
 	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, true, gen );
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push_tail", 
-			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->utArg, false, true, gen );
+			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->elUt, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, "push", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->utArg, false, true, gen );
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
 
-	initFunction( gen->utArg, gen->objDef, "pop_head", 
+	initFunction( gen->elUt, gen->objDef, "pop_head", 
 			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
 
-	initFunction( gen->utArg, gen->objDef, "pop_tail", 
+	initFunction( gen->elUt, gen->objDef, "pop_tail", 
 			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, true, gen );
 
-	initFunction( gen->utArg, gen->objDef, "pop", 
+	initFunction( gen->elUt, gen->objDef, "pop", 
 			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
 }
 
@@ -1188,7 +1188,7 @@ void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltOffType, gen->typeArg, name );
+			ObjectField::InbuiltOffType, gen->elTr, name );
 
 	el->inGetR    = IN_GET_LIST_EL_MEM_R;
 	el->inGetValR = IN_GET_LIST_EL_MEM_R;
@@ -1203,7 +1203,7 @@ void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 	/* Zero for head, One for tail. */
 	el->offset = offset;
 
-	gen->utArg->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
+	gen->elUt->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
 }
 
 void Compiler::initListElFields( GenericType *gen )
@@ -1218,7 +1218,7 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltOffType, gen->typeArg, name );
+			ObjectField::InbuiltOffType, gen->elTr, name );
 
 	el->inGetR =  IN_GET_LIST_MEM_R;
 	el->inGetWC = IN_GET_LIST_MEM_WC;
@@ -1255,10 +1255,10 @@ void Compiler::initValueListFields( GenericType *gen )
 
 void Compiler::initParserFunctions( GenericType *gen )
 {
-	initFunction( gen->utArg, gen->objDef, "finish",
+	initFunction( gen->elUt, gen->objDef, "finish",
 			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
 
-	initFunction( gen->utArg, gen->objDef, "eof",
+	initFunction( gen->elUt, gen->objDef, "eof",
 			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
 }
 
@@ -1285,7 +1285,7 @@ void Compiler::initParserFields( GenericType *gen )
 {
 	TypeRef *typeRef;
 
-	typeRef = TypeRef::cons( internal, gen->utArg );
+	typeRef = TypeRef::cons( internal, gen->elUt );
 	initParserField( gen, "tree", 0, typeRef );
 
 	typeRef = TypeRef::cons( internal, uniqueTypeStr );

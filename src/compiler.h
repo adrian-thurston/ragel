@@ -807,7 +807,6 @@ struct Compiler
 	void resolveTranslateBlock( LangEl *langEl );
 	void resolveReductionCode( Production *prod );
 	void resolveParseTree();
-	void resolveGenericTypes();
 
 	void compileFunction( Function *func, CodeVect &code );
 	void compileFunction( Function *func );

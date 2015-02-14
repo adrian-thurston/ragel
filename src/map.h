@@ -71,6 +71,7 @@ MapEl *colm_map_find( Program *prg, Map *map, Tree *key );
 MapEl *colm_vmap_insert( Program *prg, Map *map, Struct *key, Struct *value );
 MapEl *colm_vmap_remove( Program *prg, Map *map, Tree *key );
 Tree *colm_map_iter_advance( Program *prg, Tree ***psp, ListIter *iter );
+Tree *colm_vmap_find( Program *prg, Map *map, Tree *key );
 
 #if defined(__cplusplus)
 }

@@ -223,7 +223,7 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 
 		GenericType *generic = new GenericType( GEN_MAP,
 				pd->nextGenericId++, typeRef2 );
-		generic->keyTypeArg = typeRef1;
+		generic->keyTr = typeRef1;
 		generic->el = mapEl;
 
 		nspace->genericList.append( generic );
@@ -347,9 +347,9 @@ UniqueType *TypeRef::resolveTypeValueMap( Compiler *pd )
 
 		GenericType *generic = new GenericType( GEN_VMAP,
 				pd->nextGenericId++, typeRef2 );
-		generic->keyTypeArg = typeRef1;
+		generic->keyTr = typeRef1;
 		generic->el = mapEl;
-		generic->valueUT = utValue;
+		generic->valueUt = utValue;
 
 		nspace->genericList.append( generic );
 
@@ -883,19 +883,6 @@ void Compiler::resolveProductionEls()
 					break;
 				}
 			}
-		}
-	}
-}
-
-/* Is this necessary? */
-void Compiler::resolveGenericTypes()
-{
-	for ( NamespaceList::Iter ns = namespaceList; ns.lte(); ns++ ) {
-		for ( GenericList::Iter gen = ns->genericList; gen.lte(); gen++ ) {
-			gen->utArg = gen->typeArg->resolveType( this );
-
-			if ( gen->typeId == GEN_MAP )
-				gen->keyUT = gen->keyTypeArg->resolveType( this );
 		}
 	}
 }

@@ -1155,7 +1155,7 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	bool context = false;
 	if ( newUT->typeId == TYPE_GENERIC &&
 			newUT->generic->typeId == GEN_PARSER &&
-			newUT->generic->utArg->langEl->contextIn != 0 )
+			newUT->generic->elUt->langEl->contextIn != 0 )
 	{
 		if ( fieldInitArgs == 0 || fieldInitArgs->length() != 1 )
 			error(loc) << "parse command requires just input" << endp;
@@ -1306,7 +1306,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		bool tree, bool stop ) const
 {
 	UniqueType *parserUT = typeRef->uniqueType;
-	UniqueType *targetUT = parserUT->generic->utArg;
+	UniqueType *targetUT = parserUT->generic->elUt;
 
 	/* If this is a parse stop then we need to verify that the type is
 	 * compatible with parse stop. */

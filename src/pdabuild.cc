@@ -1573,16 +1573,16 @@ void Compiler::makeRuntimeData()
 	for ( NamespaceList::Iter nspace = namespaceList; nspace.lte(); nspace++ ) {
 		for ( GenericList::Iter gen = nspace->genericList; gen.lte(); gen++ ) {
 			runtimeData->genericInfo[gen->id].type = gen->typeId;
-			runtimeData->genericInfo[gen->id].typeArg = gen->utArg->typeId;
-			runtimeData->genericInfo[gen->id].keyType = gen->keyUT != 0 ? 
-					gen->keyUT->typeId : 0;
+			runtimeData->genericInfo[gen->id].typeArg = gen->elUt->typeId;
+			runtimeData->genericInfo[gen->id].keyType = gen->keyUt != 0 ? 
+					gen->keyUt->typeId : 0;
 			runtimeData->genericInfo[gen->id].keyOffset = 0;
 			runtimeData->genericInfo[gen->id].parserId =
-					gen->typeId == GEN_PARSER ? gen->utArg->langEl->parserId : -1;
+					gen->typeId == GEN_PARSER ? gen->elUt->langEl->parserId : -1;
 			runtimeData->genericInfo[gen->id].elOffset =
 					gen->el != 0 ? gen->el->offset : -1;
 			runtimeData->genericInfo[gen->id].elStructId =
-					gen->typeId == GEN_VMAP ? gen->utArg->structEl->id : -1;
+					gen->typeId == GEN_VMAP ? gen->elUt->structEl->id : -1;
 			runtimeData->genericInfo[gen->id].valueOffset = 0;
 		}
 	}
