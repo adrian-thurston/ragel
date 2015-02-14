@@ -3923,7 +3923,6 @@ again:
 
 				Tree *result = colm_vmap_find( prg, map, key );
 
-				treeUpref( result );
 				vm_push( result );
 				break;
 			}

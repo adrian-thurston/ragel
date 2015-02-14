@@ -1583,6 +1583,8 @@ void Compiler::makeRuntimeData()
 					gen->el != 0 ? gen->el->offset : -1;
 			runtimeData->genericInfo[gen->id].elStructId =
 					gen->typeId == GEN_VMAP ? gen->elUt->structEl->id : -1;
+			runtimeData->genericInfo[gen->id].valueType = gen->valueUt != 0 ?
+					gen->valueUt->typeId : 0;
 			runtimeData->genericInfo[gen->id].valueOffset = 0;
 		}
 	}

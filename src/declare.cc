@@ -354,10 +354,13 @@ void Compiler::addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList )
 
 void GenericType::declare( Compiler *pd, Namespace *nspace )
 {
-	elUt = elTr->uniqueType;
+	elUt = elTr->resolveType( pd );
  
 	if ( typeId == GEN_MAP || typeId == GEN_VMAP )
-		keyUt = keyTr->uniqueType; 
+		keyUt = keyTr->resolveType( pd );
+	
+	if ( typeId == GEN_VMAP )
+		valueUt = valueTr->resolveType( pd );
 	
 	objDef = ObjectDef::cons( ObjectDef::BuiltinType, 
 			"generic", pd->nextObjectId++ );

@@ -149,8 +149,7 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 		pd->uniqueGenericMap.insert( inMap );
 
 		GenericType *generic = new GenericType( GEN_LIST,
-				pd->nextGenericId++, typeRef1 );
-		generic->el = listEl;
+				pd->nextGenericId++, typeRef1, 0, 0, listEl );
 
 		nspace->genericList.append( generic );
 
@@ -176,7 +175,7 @@ UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 		pd->uniqueGenericMap.insert( inMap );
 
 		GenericType *generic = new GenericType( GEN_LIST_EL,
-				pd->nextGenericId++, typeRef1 );
+				pd->nextGenericId++, typeRef1, 0, 0, 0 );
 
 		nspace->genericList.append( generic );
 		inMap->generic = generic;
@@ -222,9 +221,7 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 		pd->uniqueGenericMap.insert( inMap );
 
 		GenericType *generic = new GenericType( GEN_MAP,
-				pd->nextGenericId++, typeRef2 );
-		generic->keyTr = typeRef1;
-		generic->el = mapEl;
+				pd->nextGenericId++, typeRef2, typeRef1, 0, mapEl );
 
 		nspace->genericList.append( generic );
 
@@ -250,7 +247,7 @@ UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
 		pd->uniqueGenericMap.insert( inMap );
 
 		GenericType *generic = new GenericType( GEN_MAP_EL,
-				pd->nextGenericId++, typeRef1 );
+				pd->nextGenericId++, typeRef1, 0, 0, 0 );
 
 		nspace->genericList.append( generic );
 
@@ -298,8 +295,7 @@ UniqueType *TypeRef::resolveTypeValueList( Compiler *pd )
 		pd->uniqueGenericMap.insert( inMap );
 
 		GenericType *generic = new GenericType( GEN_VLIST,
-				pd->nextGenericId++, typeRef1 );
-		generic->el = listEl;
+				pd->nextGenericId++, typeRef1, 0, 0, listEl );
 
 		nspace->genericList.append( generic );
 
@@ -318,7 +314,6 @@ UniqueType *TypeRef::resolveTypeValueMap( Compiler *pd )
 
 	UniqueType *utKey = typeRef1->resolveType( pd );	
 	UniqueType *utEl = typeRef2->resolveType( pd );	
-	UniqueType *utValue = typeRef3->resolveType( pd );	
 
 	if ( utEl->typeId != TYPE_STRUCT )
 		error( loc ) << "only structs can be map elements" << endp;
@@ -346,10 +341,7 @@ UniqueType *TypeRef::resolveTypeValueMap( Compiler *pd )
 		pd->uniqueGenericMap.insert( inMap );
 
 		GenericType *generic = new GenericType( GEN_VMAP,
-				pd->nextGenericId++, typeRef2 );
-		generic->keyTr = typeRef1;
-		generic->el = mapEl;
-		generic->valueUt = utValue;
+				pd->nextGenericId++, typeRef2, typeRef1, typeRef3, mapEl );
 
 		nspace->genericList.append( generic );
 
@@ -375,7 +367,7 @@ UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 		pd->uniqueGenericMap.insert( inMap );
 
 		GenericType *generic = new GenericType( GEN_PARSER,
-				pd->nextGenericId++, typeRef1 );
+				pd->nextGenericId++, typeRef1, 0, 0, 0 );
 
 		nspace->genericList.append( generic );
 

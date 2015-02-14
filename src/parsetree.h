@@ -727,12 +727,13 @@ typedef Vector<Namespace*> NamespaceVect;
 struct GenericType 
 	: public DListEl<GenericType>
 {
-	GenericType( long typeId, long id, TypeRef *elTr )
+	GenericType( long typeId, long id, TypeRef *elTr,
+			TypeRef *keyTr, TypeRef *valueTr, ObjectField *el )
 	:
 		typeId(typeId), id(id),
-		elTr(elTr), keyTr(0), 
+		elTr(elTr), keyTr(keyTr), valueTr(valueTr),
 		elUt(0), keyUt(0), valueUt(0),
-		objDef(0), el(0), elOffset(0)
+		objDef(0), el(el), elOffset(0)
 	{}
 
 	void declare( Compiler *pd, Namespace *nspace );
@@ -742,6 +743,7 @@ struct GenericType
 
 	TypeRef *elTr;
 	TypeRef *keyTr;
+	TypeRef *valueTr;
 
 	UniqueType *elUt;
 	UniqueType *keyUt;

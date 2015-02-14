@@ -141,11 +141,13 @@ typedef struct _GenericInfo
 {
 	long type;
 	long typeArg;
-	long keyOffset;
 	long keyType;
+	long keyOffset;
 	long parserId;
 	long elOffset;
 	long elStructId;
+
+	long valueType;
 	long valueOffset;
 } GenericInfo;
 

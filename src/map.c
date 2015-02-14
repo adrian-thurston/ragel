@@ -23,6 +23,7 @@
 #include <colm/pdarun.h>
 #include <colm/map.h>
 #include <colm/pool.h>
+#include <colm/bytecode.h>
 
 #define true 1
 #define false 0
@@ -674,9 +675,13 @@ Tree *colm_vmap_find( Program *prg, Map *map, Tree *key )
 {
 	MapEl *mapEl = colm_map_find( prg, map, key );
 	if ( mapEl != 0 ) {
-		Struct *s = colm_generic_el_container( prg, mapEl, map->genericInfo - prg->rtd->genericInfo );
+		Struct *s = colm_generic_el_container( prg, mapEl,
+				map->genericInfo - prg->rtd->genericInfo );
 		Tree *val = colm_struct_get_field( s, Tree*, 0 );
-		treeUpref( val );
+
+		if ( map->genericInfo->valueType == TYPE_TREE )
+			treeUpref( val );
+
 		return val;
 	}
 	return 0;

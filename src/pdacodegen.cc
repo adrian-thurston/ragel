@@ -385,11 +385,13 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		out << "\t{ " << 
 				runtimeData->genericInfo[i].type << ", " <<
 				runtimeData->genericInfo[i].typeArg << ", " <<
-				runtimeData->genericInfo[i].keyOffset << ", " <<
 				runtimeData->genericInfo[i].keyType << ", " <<
+				runtimeData->genericInfo[i].keyOffset << ", " <<
 				runtimeData->genericInfo[i].parserId << ", " <<
 				runtimeData->genericInfo[i].elOffset << ", " <<
-				runtimeData->genericInfo[i].elStructId << " },\n";
+				runtimeData->genericInfo[i].elStructId << ", " <<
+				runtimeData->genericInfo[i].valueType << ", " <<
+				runtimeData->genericInfo[i].valueOffset << " },\n";
 	}
 	out << "};\n\n";
 
