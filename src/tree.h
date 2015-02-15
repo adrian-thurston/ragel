@@ -28,6 +28,7 @@ extern "C" {
 
 #include <colm/colm.h>
 #include <colm/input.h>
+#include <colm/internal.h>
 
 typedef unsigned char Code;
 typedef unsigned long Word;
@@ -354,10 +355,12 @@ void colm_list_iter_destroy( struct colm_program *prg, Tree ***psp, ListIter *it
 Tree *colm_list_iter_advance( struct colm_program *prg, Tree ***psp, ListIter *iter );
 Tree *colm_list_iter_deref_cur( struct colm_program *prg, ListIter *iter );
 
-void colm_vlist_append( struct colm_program *prg, List *list, Tree *tree );
-void colm_vlist_prepend( struct colm_program *prg, List *list, Tree *value );
-Tree *colm_vlist_detach_tail( struct colm_program *prg, List *list );
-Tree *colm_viter_deref_cur( struct colm_program *prg, ListIter *iter );
+void colm_vlist_append( struct colm_program *prg, List *list, Value value );
+void colm_vlist_prepend( struct colm_program *prg, List *list, Value value );
+Value colm_vlist_detach_head( struct colm_program *prg, List *list );
+Value colm_vlist_detach_tail( struct colm_program *prg, List *list );
+
+Value colm_viter_deref_cur( struct colm_program *prg, ListIter *iter );
 
 #if defined(__cplusplus)
 }

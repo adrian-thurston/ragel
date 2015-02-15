@@ -33,29 +33,29 @@ void colm_list_prepend( List *list, ListEl *newEl );
 void colm_list_append( List *list, ListEl *newEl );
 ListEl *colm_list_detach( List *list, ListEl *el );
 
-void colm_vlist_append( struct colm_program *prg, List *list, Tree *value )
+void colm_vlist_append( struct colm_program *prg, List *list, Value value )
 {
 	struct colm_struct *s = colm_struct_new( prg, list->genericInfo->elStructId );
 
-	colm_struct_set_field( s, Tree*, 0, value );
+	colm_struct_set_field( s, Value, 0, value );
 
 	ListEl *listEl = colm_struct_get_addr( s, ListEl*, list->genericInfo->elOffset );
 
 	colm_list_append( list, listEl );
 }
 
-void colm_vlist_prepend( struct colm_program *prg, List *list, Tree *value )
+void colm_vlist_prepend( struct colm_program *prg, List *list, Value value )
 {
 	struct colm_struct *s = colm_struct_new( prg, list->genericInfo->elStructId );
 
-	colm_struct_set_field( s, Tree*, 0, value );
+	colm_struct_set_field( s, Value, 0, value );
 
 	ListEl *listEl = colm_struct_get_addr( s, ListEl*, list->genericInfo->elOffset );
 
 	colm_list_prepend( list, listEl );
 }
 
-Tree *colm_vlist_detach_tail( struct colm_program *prg, List *list )
+Value colm_vlist_detach_tail( struct colm_program *prg, List *list )
 {
 	ListEl *listEl = list->tail;
 	colm_list_detach( list, listEl );
@@ -63,15 +63,15 @@ Tree *colm_vlist_detach_tail( struct colm_program *prg, List *list )
 	struct colm_struct *s = colm_generic_el_container( prg, listEl,
 			(list->genericInfo - prg->rtd->genericInfo) );
 
-	Tree *val = colm_struct_get_field( s, Tree*, 0 );
+	Value val = colm_struct_get_field( s, Value, 0 );
 
 	if ( list->genericInfo->valueType == TYPE_TREE )
-		treeUpref( val );
+		treeUpref( (Tree*)val );
 
 	return val;
 }
 
-Tree *colm_vlist_detach_head( struct colm_program *prg, List *list )
+Value colm_vlist_detach_head( struct colm_program *prg, List *list )
 {
 	ListEl *listEl = list->head;
 	colm_list_detach( list, listEl );
@@ -79,10 +79,10 @@ Tree *colm_vlist_detach_head( struct colm_program *prg, List *list )
 	struct colm_struct *s = colm_generic_el_container( prg, listEl,
 			(list->genericInfo - prg->rtd->genericInfo) );
 
-	Tree *val = colm_struct_get_field( s, Tree*, 0 );
+	Value val = colm_struct_get_field( s, Value, 0 );
 
 	if ( list->genericInfo->valueType == TYPE_TREE )
-		treeUpref( val );
+		treeUpref( (Tree*) val );
 
 	return val;
 }

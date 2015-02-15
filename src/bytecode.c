@@ -2109,9 +2109,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GEN_VITER_GET_CUR_R\n" );
 			
 			ListIter *iter = (ListIter*) vm_plocal(field);
-			Tree *tree = colm_viter_deref_cur( prg, iter );
-			//treeUpref( tree );
-			vm_push( tree );
+			Value value = colm_viter_deref_cur( prg, iter );
+			vm_push_value( value );
 			break;
 		}
 		case IN_MATCH: {
@@ -3945,11 +3944,10 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_TAIL_WC %hd\n", genId );
 
 				List *list = vm_pop_list();
-				Struct *value = vm_pop_struct();
+				Value value = vm_pop_value();
 
 				colm_vlist_append( prg, list, value );
 
-				//treeUpref( prg->trueVal );
 				vm_push( prg->trueVal );
 				break;
 			}
@@ -3960,11 +3958,10 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_HEAD_WC %hd\n", genId );
 
 				List *list = vm_pop_list();
-				Struct *value = vm_pop_struct();
+				Value value = vm_pop_value();
 
 				colm_vlist_prepend( prg, list, value );
 
-				//treeUpref( prg->trueVal );
 				vm_push( prg->trueVal );
 				break;
 			}
@@ -3976,10 +3973,8 @@ again:
 
 				List *list = vm_pop_list();
 
-				Tree *result = colm_vlist_detach_head( prg, list );
-
-				//treeUpref( prg->trueVal );
-				vm_push( result );
+				Value result = colm_vlist_detach_head( prg, list );
+				vm_push_value( result );
 				break;
 			}
 			case IN_VLIST_POP_TAIL_WC: {
@@ -3990,10 +3985,8 @@ again:
 
 				List *list = vm_pop_list();
 
-				Tree *result = colm_vlist_detach_tail( prg, list );
-
-				//treeUpref( prg->trueVal );
-				vm_push( result );
+				Value result = colm_vlist_detach_tail( prg, list );
+				vm_push_value( result );
 				break;
 			}
 			default: {

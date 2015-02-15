@@ -65,7 +65,7 @@ Tree *colm_list_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the root. */
 		List *list = *((List**)iter->rootRef.kid);
-		iter->ref.kid = list->head;
+		iter->ref.kid = (Kid*)list->head;
 		iter->ref.next = 0;
 
 		//= iter->rootRef;
@@ -76,9 +76,9 @@ Tree *colm_list_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
 		/* Have a previous item, continue searching from there. */
 		//iterFind( prg, psp, iter, false );
 
-		ListEl *listEl = iter->ref.kid;
+		ListEl *listEl = (ListEl*)iter->ref.kid;
 		listEl = listEl->list_next;
-		iter->ref.kid = listEl;
+		iter->ref.kid = (Kid*)listEl;
 		iter->ref.next = 0;
 	}
 
@@ -96,7 +96,7 @@ Tree *colm_map_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
 	if ( iter->ref.kid == 0 ) {
 		/* Kid is zero, start from the root. */
 		Map *map = *((Map**)iter->rootRef.kid);
-		iter->ref.kid = map->head;
+		iter->ref.kid = (Kid*)map->head;
 		iter->ref.next = 0;
 
 		//= iter->rootRef;
@@ -107,9 +107,9 @@ Tree *colm_map_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
 		/* Have a previous item, continue searching from there. */
 		//iterFind( prg, psp, iter, false );
 
-		MapEl *mapEl = iter->ref.kid;
+		MapEl *mapEl = (MapEl*)iter->ref.kid;
 		mapEl = mapEl->next;
-		iter->ref.kid = mapEl;
+		iter->ref.kid = (Kid*)mapEl;
 		iter->ref.next = 0;
 	}
 
@@ -128,18 +128,18 @@ Tree *colm_list_iter_deref_cur( Program *prg, ListIter *iter )
 	return (Tree*)s;
 }
 
-Tree *colm_viter_deref_cur( Program *prg, ListIter *iter )
+Value colm_viter_deref_cur( Program *prg, ListIter *iter )
 {
 	GenericInfo *gi = &prg->rtd->genericInfo[iter->genericId];
 	ListEl *el = (ListEl*)iter->ref.kid;
 	struct colm_struct *s = el != 0 ?
 			colm_struct_container( el, gi->elOffset ) : 0;
 
-	Tree *val = colm_struct_get_field( s, Tree*, 0 );
+	Value value = colm_struct_get_field( s, Value, 0 );
 	if ( gi->valueType == TYPE_TREE )
-		treeUpref( val );
+		treeUpref( (Tree*)value );
 
-	return (Tree*)val;
+	return value;
 }
 
 void initTreeIter( TreeIter *treeIter, Tree **stackRoot,
