@@ -1460,12 +1460,13 @@ TreePair mapRemove( Program *prg, Map *map, Tree *key )
 	if ( mapEl != 0 ) {
 		mapDetach( prg, map, mapEl );
 		result.key = mapEl->key;
-		mapElFree( prg, mapEl );
+		//mapElFree( prg, mapEl );
 	}
 
 	return result;
 }
 
+#if 0
 Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
 {
 	Tree *stored = 0;
@@ -1481,6 +1482,7 @@ Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
 	}
 	return stored;
 }
+#endif
 
 Tree *mapFind( Program *prg, Map *map, Tree *key )
 {
@@ -1569,6 +1571,7 @@ Tree *getListMemSplit( Program *prg, List *list, Word field )
 }
 
 
+#if 0
 int mapInsert( Program *prg, Map *map, Tree *key, Tree *element )
 {
 	MapEl *mapEl = mapInsertKey( prg, map, key, 0 );
@@ -1580,14 +1583,18 @@ int mapInsert( Program *prg, Map *map, Tree *key, Tree *element )
 
 	return false;
 }
+#endif
 
+#if 0
 void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element )
 {
 	MapEl *mapEl = mapInsertKey( prg, map, key, 0 );
 	assert( mapEl != 0 );
 	//mapEl->tree = element;
 }
+#endif
 
+#if 0
 Tree *mapUninsert( Program *prg, Map *map, Tree *key )
 {
 	MapEl *el = mapDetachByKey( prg, map, key );
@@ -1596,7 +1603,9 @@ Tree *mapUninsert( Program *prg, Map *map, Tree *key )
 //	return val;
 	return 0;
 }
+#endif
 
+#if 0
 Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element )
 {
 	Tree *oldTree = 0;
@@ -1613,6 +1622,7 @@ Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element )
 
 	return oldTree;
 }
+#endif
 
 static Tree *treeSearchKid( Program *prg, Kid *kid, long id )
 {

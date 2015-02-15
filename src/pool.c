@@ -200,6 +200,7 @@ long parseTreeNumLost( Program *prg )
  * ListEl
  */
 
+#if 0
 ListEl *listElAllocate( Program *prg )
 {
 	return (ListEl*) poolAllocAllocate( &prg->listElPool );
@@ -219,11 +220,13 @@ long listElNumLost( Program *prg )
 {
 	return poolAllocNumLost( &prg->listElPool );
 }
+#endif
 
 /* 
  * MapEl
  */
 
+#if 0
 MapEl *mapElAllocate( Program *prg )
 {
 	return (MapEl*) poolAllocAllocate( &prg->mapElPool );
@@ -243,6 +246,7 @@ long mapElNumLost( Program *prg )
 {
 	return poolAllocNumLost( &prg->mapElPool );
 }
+#endif
 
 /* 
  * Head
@@ -296,6 +300,7 @@ long locationNumLost( Program *prg )
  * Stream
  */
 
+#if 0
 Stream *streamAllocate( Program *prg )
 {
 	return (Stream*)mapElAllocate( prg );
@@ -305,3 +310,4 @@ void streamFree( Program *prg, Stream *stream )
 {
 	mapElFree( prg, (MapEl*)stream );
 }
+#endif

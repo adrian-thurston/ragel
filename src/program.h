@@ -124,8 +124,6 @@ struct colm_program
 	PoolAlloc kidPool;
 	PoolAlloc treePool;
 	PoolAlloc parseTreePool;
-	PoolAlloc listElPool;
-	PoolAlloc mapElPool;
 	PoolAlloc headPool;
 	PoolAlloc locationPool;
 

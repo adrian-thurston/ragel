@@ -104,7 +104,7 @@ void colm_map_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 	while ( el != 0 ) {
 		MapEl *next = el->next;
 		treeDownref( prg, sp, el->key );
-		mapElFree( prg, el );
+		//mapElFree( prg, el );
 		el = next;
 	}
 }

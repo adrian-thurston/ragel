@@ -28,7 +28,7 @@
 #define true 1
 #define false 0
 
-void colm_init_list_iter( ListIter *listIter, Tree **stackRoot,
+void colm_init_list_iter( GenericIter *listIter, Tree **stackRoot,
 		long argSize, long rootSize, const Ref *rootRef, int genericId )
 {
 	listIter->type = IT_Tree;
@@ -42,7 +42,7 @@ void colm_init_list_iter( ListIter *listIter, Tree **stackRoot,
 	listIter->genericId = genericId;
 }
 
-void colm_list_iter_destroy( Program *prg, Tree ***psp, ListIter *iter )
+void colm_list_iter_destroy( Program *prg, Tree ***psp, GenericIter *iter )
 {
 	if ( (int)iter->type != 0 ) {
 		int i;
@@ -57,7 +57,7 @@ void colm_list_iter_destroy( Program *prg, Tree ***psp, ListIter *iter )
 	}
 }
 
-Tree *colm_list_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
+Tree *colm_list_iter_advance( Program *prg, Tree ***psp, GenericIter *iter )
 {
 	Tree **sp = *psp;
 	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
@@ -88,7 +88,7 @@ Tree *colm_list_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
-Tree *colm_map_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
+Tree *colm_map_iter_advance( Program *prg, Tree ***psp, GenericIter *iter )
 {
 	Tree **sp = *psp;
 	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
@@ -119,7 +119,7 @@ Tree *colm_map_iter_advance( Program *prg, Tree ***psp, ListIter *iter )
 	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
 }
 
-Tree *colm_list_iter_deref_cur( Program *prg, ListIter *iter )
+Tree *colm_list_iter_deref_cur( Program *prg, GenericIter *iter )
 {
 	GenericInfo *gi = &prg->rtd->genericInfo[iter->genericId];
 	ListEl *el = (ListEl*)iter->ref.kid;
@@ -128,7 +128,7 @@ Tree *colm_list_iter_deref_cur( Program *prg, ListIter *iter )
 	return (Tree*)s;
 }
 
-Value colm_viter_deref_cur( Program *prg, ListIter *iter )
+Value colm_viter_deref_cur( Program *prg, GenericIter *iter )
 {
 	GenericInfo *gi = &prg->rtd->genericInfo[iter->genericId];
 	ListEl *el = (ListEl*)iter->ref.kid;

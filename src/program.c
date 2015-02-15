@@ -183,8 +183,6 @@ Program *colm_new_program( RuntimeData *rtd )
 	initPoolAlloc( &prg->kidPool, sizeof(Kid) );
 	initPoolAlloc( &prg->treePool, sizeof(Tree) );
 	initPoolAlloc( &prg->parseTreePool, sizeof(ParseTree) );
-	initPoolAlloc( &prg->listElPool, sizeof(ListEl) );
-	initPoolAlloc( &prg->mapElPool, sizeof(MapEl) );
 	initPoolAlloc( &prg->headPool, sizeof(Head) );
 	initPoolAlloc( &prg->locationPool, sizeof(Location) );
 
@@ -287,17 +285,12 @@ int colm_delete_program( Program *prg )
 	treeDownref( prg, sp, prg->returnVal );
 	colm_clear_heap( prg, sp );
 
-//	treeDownref( prg, sp, prg->trueVal );
-//	treeDownref( prg, sp, prg->falseVal );
-
 	treeDownref( prg, sp, prg->error );
 
 #if DEBUG
 	long kidLost = kidNumLost( prg );
 	long treeLost = treeNumLost( prg );
 	long parseTreeLost = parseTreeNumLost( prg );
-	long listLost = listElNumLost( prg );
-	long mapLost = mapElNumLost( prg );
 	long headLost = headNumLost( prg );
 	long locationLost = locationNumLost( prg );
 
@@ -310,12 +303,6 @@ int colm_delete_program( Program *prg )
 	if ( parseTreeLost )
 		message( "warning: lost parse trees: %ld\n", parseTreeLost );
 
-	if ( listLost )
-		message( "warning: lost listEls: %ld\n", listLost );
-
-	if ( mapLost )
-		message( "warning: lost mapEls: %ld\n", mapLost );
-
 	if ( headLost )
 		message( "warning: lost heads: %ld\n", headLost );
 
@@ -327,8 +314,6 @@ int colm_delete_program( Program *prg )
 	treeClear( prg );
 	headClear( prg );
 	parseTreeClear( prg );
-	listElClear( prg );
-	mapElClear( prg );
 	locationClear( prg );
 
 	RunBuf *rb = prg->allocRunBuf;

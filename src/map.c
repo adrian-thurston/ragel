@@ -525,6 +525,7 @@ void mapRemoveEl( Map *map, MapEl *element, MapEl *filler )
 	return;
 }
 
+#if 0
 /* Recursive worker for tree copying. */
 MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid **newNextDown )
 {
@@ -552,6 +553,7 @@ MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid *
 
 	return newEl;
 }
+#endif
 
 static long map_cmp( Program *prg, Map *map, const Tree *tree1, const Tree *tree2 )
 {
@@ -606,6 +608,7 @@ MapEl *mapInsertEl( Program *prg, Map *map, MapEl *element, MapEl **lastFound )
 	}
 }
 
+#if 0
 MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound )
 {
 	long keyRelation;
@@ -646,6 +649,7 @@ MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound )
 		}
 	}
 }
+#endif
 
 MapEl *colm_map_insert( Program *prg, Map *map, MapEl *mapEl )
 {

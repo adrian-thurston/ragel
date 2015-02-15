@@ -294,7 +294,7 @@ long sizeOfField( UniqueType *fieldUT )
 
 			case IterDef::Map:
 			case IterDef::List:
-				size = sizeof(ListIter) / sizeof(Word);
+				size = sizeof(GenericIter) / sizeof(Word);
 				break;
 
 			case IterDef::User:

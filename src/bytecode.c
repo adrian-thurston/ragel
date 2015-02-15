@@ -2051,7 +2051,7 @@ again:
 			Tree **stackRoot = vm_ptop();
 			long rootSize = vm_ssize();
 
-			colm_init_list_iter( (ListIter*)mem, stackRoot, argSize,
+			colm_init_list_iter( (GenericIter*)mem, stackRoot, argSize,
 				rootSize, &rootRef, genericId );
 			break;
 		}
@@ -2059,7 +2059,7 @@ again:
 			short field;
 			read_half( field );
 
-			ListIter *iter = (ListIter*) vm_plocal(field);
+			GenericIter *iter = (GenericIter*) vm_plocal(field);
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_DESTROY %d\n", iter->yieldSize );
 
@@ -2072,7 +2072,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_ADVANCE\n" );
 
-			ListIter *iter = (ListIter*) vm_plocal(field);
+			GenericIter *iter = (GenericIter*) vm_plocal(field);
 			Tree *res = colm_list_iter_advance( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push( res );
@@ -2084,7 +2084,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_MAP_ITER_ADVANCE\n" );
 
-			ListIter *iter = (ListIter*) vm_plocal(field);
+			GenericIter *iter = (GenericIter*) vm_plocal(field);
 			Tree *res = colm_map_iter_advance( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push( res );
@@ -2096,7 +2096,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GEN_ITER_GET_CUR_R\n" );
 			
-			ListIter *iter = (ListIter*) vm_plocal(field);
+			GenericIter *iter = (GenericIter*) vm_plocal(field);
 			Tree *tree = colm_list_iter_deref_cur( prg, iter );
 			//treeUpref( tree );
 			vm_push( tree );
@@ -2108,7 +2108,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GEN_VITER_GET_CUR_R\n" );
 			
-			ListIter *iter = (ListIter*) vm_plocal(field);
+			GenericIter *iter = (GenericIter*) vm_plocal(field);
 			Value value = colm_viter_deref_cur( prg, iter );
 			vm_push_value( value );
 			break;
@@ -3886,8 +3886,10 @@ again:
 				assert( ( key == 0 ) ^ ( val != 0 ) );
 
 				Tree *obj = vm_pop();
+				#if 0
 				if ( key != 0 )
 					mapUnremove( prg, (Map*)obj, key, val );
+				#endif
 
 				treeDownref( prg, sp, obj );
 				break;

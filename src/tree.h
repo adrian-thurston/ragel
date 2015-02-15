@@ -184,7 +184,7 @@ typedef struct _ListIter
 	long yieldSize;
 	long rootSize;
 	long genericId;
-} ListIter;
+} GenericIter;
 
 /* This must overlay tree iter because some of the same bytecodes are used. */
 typedef struct _RevTreeIter
@@ -342,18 +342,18 @@ void userIterDestroy2( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 Tree *castTree( struct colm_program *prg, int langElId, Tree *tree );
 StreamImpl *streamToImpl( Stream *ptr );
 
-void colm_init_list_iter( ListIter *listIter, Tree **stackRoot,
+void colm_init_list_iter( GenericIter *listIter, Tree **stackRoot,
 		long argSize, long rootSize, const Ref *rootRef, int genericId );
-void colm_list_iter_destroy( struct colm_program *prg, Tree ***psp, ListIter *iter );
-Tree *colm_list_iter_advance( struct colm_program *prg, Tree ***psp, ListIter *iter );
-Tree *colm_list_iter_deref_cur( struct colm_program *prg, ListIter *iter );
+void colm_list_iter_destroy( struct colm_program *prg, Tree ***psp, GenericIter *iter );
+Tree *colm_list_iter_advance( struct colm_program *prg, Tree ***psp, GenericIter *iter );
+Tree *colm_list_iter_deref_cur( struct colm_program *prg, GenericIter *iter );
 
 void colm_vlist_append( struct colm_program *prg, List *list, Value value );
 void colm_vlist_prepend( struct colm_program *prg, List *list, Value value );
 Value colm_vlist_detach_head( struct colm_program *prg, List *list );
 Value colm_vlist_detach_tail( struct colm_program *prg, List *list );
 
-Value colm_viter_deref_cur( struct colm_program *prg, ListIter *iter );
+Value colm_viter_deref_cur( struct colm_program *prg, GenericIter *iter );
 
 #if defined(__cplusplus)
 }
