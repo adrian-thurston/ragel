@@ -1,0 +1,23 @@
+new M: vmap<str str>()
+
+M->insert( ( "hello" )  ( "friend" ) )
+M->insert( ( "one--" )  ( "num1" ) )
+M->insert( ( "two--" )  ( "num2" ) )
+M->insert( ( "three" )  ( "num3" ) )
+M->insert( ( "four-" )  ( "num4" ) )
+
+M->remove( "one--" )
+
+for V: str in M {
+	print "[V]
+}
+
+Two: str = M->find( "two--" )
+print "[Two]
+
+##### EXP #####
+num4
+friend
+num3
+num2
+num2
