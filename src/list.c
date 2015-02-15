@@ -29,9 +29,32 @@
 
 static void colm_list_add_after( List *list, ListEl *prev_el, ListEl *new_el );
 static void colm_list_add_before( List *list, ListEl *next_el, ListEl *new_el);
-void colm_list_prepend( List *list, ListEl *newEl );
-void colm_list_append( List *list, ListEl *newEl );
 ListEl *colm_list_detach( List *list, ListEl *el );
+
+void colm_list_prepend( List *list, ListEl *newEl )
+{
+	colm_list_add_before( list, list->head, newEl );
+}
+
+void colm_list_append( List *list, ListEl *newEl )
+{
+	colm_list_add_after( list, list->tail, newEl );
+}
+
+ListEl *colm_list_detach_head( List *list )
+{
+	return colm_list_detach( list, list->head );
+}
+
+ListEl *colm_list_detach_tail( List *list )
+{
+	return colm_list_detach( list, list->tail );
+}
+
+long colm_list_length( List *list )
+{
+	return list->listLen;
+}
 
 void colm_vlist_append( struct colm_program *prg, List *list, Value value )
 {
@@ -87,31 +110,6 @@ Value colm_vlist_detach_head( struct colm_program *prg, List *list )
 	return val;
 }
 
-void colm_list_prepend( List *list, ListEl *newEl )
-{
-	colm_list_add_before( list, list->head, newEl );
-}
-
-void colm_list_append( List *list, ListEl *newEl )
-{
-	colm_list_add_after( list, list->tail, newEl );
-}
-
-
-ListEl *colm_list_detach_head( List *list )
-{
-	return colm_list_detach( list, list->head );
-}
-
-ListEl *colm_list_detach_tail( List *list )
-{
-	return colm_list_detach( list, list->tail );
-}
-
-long colm_list_length( List *list )
-{
-	return list->listLen;
-}
 
 static void colm_list_add_after( List *list, ListEl *prev_el, ListEl *new_el )
 {

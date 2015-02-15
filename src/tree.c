@@ -1685,13 +1685,6 @@ struct colm_location *colm_find_location( Program *prg, Tree *tree )
 	return locSearch( prg, tree );
 }
 
-Object *newList2( Program *prg )
-{
-	Object *obj = (Object *) malloc( sizeof( Object ) );
-	memset( obj, 0, sizeof(*obj) );
-	return obj;
-}
-
 /*
  * Tree Printing
  */

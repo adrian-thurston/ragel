@@ -98,7 +98,7 @@ void BaseParser::mapElDef( String name, TypeRef *keyType )
 void BaseParser::argvDecl()
 {
 	String structName = "argv_el";
-	structHead( internal, structName, ObjectDef::StructType );
+	structHead( internal, pd->rootNamespace, structName, ObjectDef::StructType );
 
 	/* First the argv value. */
 	String name = "value";
@@ -264,8 +264,9 @@ LexJoin *BaseParser::literalJoin( const InputLoc &loc, const String &data )
 	return join;
 }
 
-void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join, ObjectDef *objectDef,
-		CodeBlock *transBlock, bool ignore, bool noPreIgnore, bool noPostIgnore )
+void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join,
+		ObjectDef *objectDef, CodeBlock *transBlock, bool ignore,
+		bool noPreIgnore, bool noPostIgnore )
 {
 	bool pushedRegion = false;
 	if ( !insideRegion() ) {
@@ -982,11 +983,9 @@ void BaseParser::structVarDef( const InputLoc &loc, ObjectField *objField )
 	object->rootScope->insertField( objField->name, objField );
 }
 
-void BaseParser::structHead( const InputLoc &loc,
+void BaseParser::structHead( const InputLoc &loc, Namespace *inNspace,
 		const String &data, ObjectDef::Type objectType )
 {
-	Namespace *inNspace = curNspace();
-
 	ObjectDef *objectDef = ObjectDef::cons( objectType,
 			data, pd->nextObjectId++ ); 
 

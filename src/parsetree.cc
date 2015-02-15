@@ -37,6 +37,50 @@ ostream &operator<<( ostream &out, const NameRef &nameRef );
 ostream &operator<<( ostream &out, const NameInst &nameInst );
 ostream &operator<<( ostream &out, const Token &token );
 
+string TypeRef::stringify()
+{
+	string s;
+	switch ( type ) {
+		case Unspecified:
+			s = "unspecified";
+			break;
+		case Name:
+			s = typeName;
+			break;
+		case Literal:
+			s = "literal";
+			break;
+		case Iterator:
+			s = "iterator";
+			break;
+		case List:
+			s = "list";
+			break;
+		case ValueList:
+			s = "vlist";
+			break;
+		case ListEl:
+			s = "listel";
+			break;
+		case Map:
+			s = "map";
+			break;
+		case ValueMap:
+			s = "vmap";
+			break;
+		case MapEl:
+			s = "mapel";
+			break;
+		case Parser:
+			s = "parser";
+			break;
+		case Ref:
+			s = "ref";
+			break;
+	}
+	return s;
+}
+
 /* Convert the literal string which comes in from the scanner into an array of
  * characters with escapes and options interpreted. Also null terminates the
  * string. Though this null termination should not be relied on for

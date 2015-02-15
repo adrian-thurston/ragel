@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <string.h>
+#include <string>
 
 #include "global.h"
 #include "avlmap.h"
@@ -2219,49 +2220,7 @@ struct TypeRef
 	GenericType *generic;
 	TypeRef *searchTypeRef;
 
-	String stringify()
-	{
-		String s;
-		switch ( type ) {
-			case Unspecified:
-				s = "unspecified";
-				break;
-			case Name:
-				s = typeName;
-				break;
-			case Literal:
-				s = "literal";
-				break;
-			case Iterator:
-				s = "iterator";
-				break;
-			case List:
-				s = "list";
-				break;
-			case ValueList:
-				s = "vlist";
-				break;
-			case ListEl:
-				s = "listel";
-				break;
-			case Map:
-				s = "map";
-				break;
-			case ValueMap:
-				s = "vmap";
-				break;
-			case MapEl:
-				s = "mapel";
-				break;
-			case Parser:
-				s = "parser";
-				break;
-			case Ref:
-				s = "ref";
-				break;
-		}
-		return s;
-	}
+	std::string stringify();
 };
 
 typedef DList<ObjectField> ParameterList; 

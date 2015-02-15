@@ -218,11 +218,6 @@ typedef struct _UserIter
 	long searchId;
 } UserIter;
 
-typedef struct object
-{
-	struct object *prev, *next;
-} Object;
-
 void treeUpref( Tree *tree );
 void treeDownref( struct colm_program *prg, Tree **sp, Tree *tree );
 long cmpTree( struct colm_program *prg, const Tree *tree1, const Tree *tree2 );
@@ -251,8 +246,6 @@ Tree *constructTree( struct colm_program *prg, Kid *kid,
 Tree *constructObject( struct colm_program *prg, Kid *kid,
 		Tree **bindings, long langElId );
 Tree *constructToken( struct colm_program *prg, Tree **args, long nargs );
-
-Object *newList2( struct colm_program *prg );
 
 int testFalse( struct colm_program *prg, Tree *tree );
 Tree *makeTree( struct colm_program *prg, Tree **args, long nargs );
