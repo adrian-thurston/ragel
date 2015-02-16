@@ -278,9 +278,9 @@ void FlatGotoExp::writeExec()
 		out <<
 			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
 			"		int alt = 0;\n"
-			"		for ( alt = 1; alt < " << ARR_REF( nfaTargs ) << "[" <<
+			"		for ( alt = 1; alt < " << ARR_REF( nfaTargs ) << "[(int)" <<
 						ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
-			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" <<
+			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
 							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
 			"			nfa_bp[nfa_len].p = " << P() << ";\n"
 			"			nfa_len += 1;\n"
