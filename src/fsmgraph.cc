@@ -489,7 +489,7 @@ void FsmAp::nfaFillInStates( MergeData &md )
 }
 
 /* Unions other with this machine. Other is deleted. */
-void FsmAp::nfaUnionOp( FsmAp **others, int n )
+void FsmAp::nfaUnionOp( FsmAp **others, int n, long rounds )
 {
 	for ( int o = 0; o < n; o++ )
 		assert( ctx == others[o]->ctx );
@@ -545,8 +545,7 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n )
 	StateAp *origStFillHead = md.stfillHead;
 
 	// /* Fill in any new states made from merging. */
-	static const int rounds = 5;
-	for ( int i = 0; i < rounds; i++ )
+	for ( long i = 0; i < rounds && md.stfillHead != 0; i++ )
 		nfaFillInStates( md );
 
 	/* Clear state dicts up until the fill list head. From head onward we are

@@ -438,6 +438,7 @@ struct NfaUnion
 
 	/* Node data. */
 	TermVect terms;
+	long rounds;
 };
 
 

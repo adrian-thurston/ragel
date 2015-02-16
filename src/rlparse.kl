@@ -158,6 +158,21 @@ instantiation:
 			$4->machineDef->join->loc = $3->loc;
 	};
 
+nonterm nfa_rounds
+{
+	long rounds;
+};
+
+nfa_rounds:
+	TK_UInt
+	final {
+		// Convert the priority number to a long. Check for overflow.
+		errno = 0;
+		$$->rounds = strtol( $1->data, 0, 10 );
+		if ( $$->rounds == LONG_MAX && errno == ERANGE )
+			error($1->loc) << "rounds " << $1->data << " overflows" << endl;
+	};
+
 nonterm nfa_expr
 {
 	NfaUnion *nfaUnion;
@@ -175,8 +190,9 @@ nfa_expr:
 	};
 
 nfa_union: 
-	machine_name TK_BarEquals nfa_expr ';' final {
-		MachineDef *machineDef = new MachineDef( $3->nfaUnion );
+	machine_name nfa_rounds TK_BarEquals nfa_expr ';' final {
+		$4->nfaUnion->rounds = $2->rounds;
+		MachineDef *machineDef = new MachineDef( $4->nfaUnion );
 
 		/* Generic creation of machine for instantiation and assignment. */
 		tryMachineDef( $1->token.loc, $1->token.data, machineDef, true );

@@ -1694,7 +1694,7 @@ struct FsmAp
 	void deterministicEntry();
 
 	/* Results in an NFA. */
-	void nfaUnionOp( FsmAp **others, int n );
+	void nfaUnionOp( FsmAp **others, int n, long rounds );
 
 	/*
 	 * Operator workers

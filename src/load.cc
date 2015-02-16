@@ -1842,7 +1842,14 @@ struct LoadRagel
 
 		string name = loadMachineName( NfaUnionTree.word().text() );
 
+		const char *roundsData = NfaUnionTree.uint().text().c_str();
+		errno = 0;
+		long rounds = strtol( roundsData, 0, 10 );
+		if ( rounds == LONG_MAX && errno == ERANGE )
+			error(loc) << "rounds " << roundsData << " overflows" << endl;
+
 		NfaUnion *nfaUnion = loadNfaExpr( NfaUnionTree.nfa_expr() );
+		nfaUnion->rounds = rounds;
 		MachineDef *machineDef = new MachineDef( nfaUnion );
 
 		/* Generic creation of machine for instantiation and assignment. */

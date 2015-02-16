@@ -653,7 +653,7 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	std::cout << "sum-plain\t" << sumPlain << std::endl;
 	std::cout << "sum-minimized\t" << sumMin << std::endl;
 
-	fsm->nfaUnionOp( others, terms.length() - 1 );
+	fsm->nfaUnionOp( others, terms.length() - 1, rounds );
 
 	delete[] others;
 	return fsm;

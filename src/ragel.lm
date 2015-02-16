@@ -621,7 +621,7 @@ namespace ragel
 	|	[term] :Base
 
 	def nfa_union
-		[word `|= nfa_expr `;] commit
+		[word uint `|= nfa_expr `;] commit
 
 	def alphtype_type
 		[W1: word] :One
