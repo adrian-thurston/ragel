@@ -12,18 +12,18 @@ ragel_SOURCES = \
 	buffer.h inputdata.h redfsm.h parsedata.h \
 	parsetree.h rlscan.h common.h \
 	fsmgraph.h pcheck.h gendata.h ragel.h codegen.h \
-	binary.h bingotoloop.h bingotoexp.h binvarloop.h \
-	flat.h flatgotoloop.h flatgotoexp.h \
-	goto.h switchgotoloop.h switchgotoexp.h \
+	binary.h binloopgoto.h binexpgoto.h binloopvar.h \
+	flat.h flatloopgoto.h flatexpgoto.h \
+	goto.h switchloopgoto.h switchexpgoto.h \
 	ipgoto.h xml.h dot.h asm.h \
 	\
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc \
 	inputdata.cc common.cc redfsm.cc gendata.cc allocgen.cc \
 	rlscan.cc rlparse.cc codegen.cc \
-	binary.cc bingotoloop.cc bingotoexp.cc binvarloop.cc \
-	flat.cc flatgotoloop.cc flatgotoexp.cc \
-	goto.cc switchgotoloop.cc switchgotoexp.cc \
+	binary.cc binloopgoto.cc binexpgoto.cc binloopvar.cc \
+	flat.cc flatloopgoto.cc flatexpgoto.cc \
+	goto.cc switchloopgoto.cc switchexpgoto.cc \
 	ipgoto.cc xml.cc dot.cc asm.cc
 
 if WITH_COLM

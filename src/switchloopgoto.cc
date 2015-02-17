@@ -20,7 +20,7 @@
  */
 
 #include "ragel.h"
-#include "switchgotoloop.h"
+#include "switchloopgoto.h"
 #include "redfsm.h"
 #include "bstmap.h"
 #include "gendata.h"

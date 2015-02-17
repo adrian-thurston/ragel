@@ -32,13 +32,13 @@
  */
 #include "xml.h"
 
-#include "binvarloop.h"
-#include "bingotoloop.h"
-#include "bingotoexp.h"
-#include "flatgotoloop.h"
-#include "flatgotoexp.h"
-#include "switchgotoloop.h"
-#include "switchgotoexp.h"
+#include "binloopvar.h"
+#include "binloopgoto.h"
+#include "binexpgoto.h"
+#include "flatloopgoto.h"
+#include "flatexpgoto.h"
+#include "switchloopgoto.h"
+#include "switchexpgoto.h"
 #include "ipgoto.h"
 #include "asm.h"
 

@@ -20,7 +20,7 @@
  */
 
 #include "ragel.h"
-#include "binvarloop.h"
+#include "binloopvar.h"
 #include "redfsm.h"
 #include "gendata.h"
 
