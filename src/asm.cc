@@ -211,6 +211,16 @@ string AsmCodeGen::TOP()
 	return ret.str();
 }
 
+string AsmCodeGen::NFA_STACK()
+{
+	return string( "-80(%rbp)" );
+}
+
+string AsmCodeGen::NFA_TOP()
+{
+	return string( "-88(%rbp)" );
+}
+
 string AsmCodeGen::STACK()
 {
 	ostringstream ret;
@@ -664,6 +674,11 @@ void AsmCodeGen::writeInit()
 		out <<
 			"	movq	$" << redFsm->startState->id << ", %r11\n";
 	}
+
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	movq	$0, " << NFA_TOP() << "\n";
+	}
 	
 	/* If there are any calls, then the stack top needs initialization. */
 	if ( redFsm->anyActionCalls() || redFsm->anyActionRets() ) {
@@ -677,7 +692,6 @@ void AsmCodeGen::writeInit()
 			"	movq	$0, " << TOKEND() << "\n"
 			"	movq	$0, " << ACT() << "\n";
 	}
-
 }
 
 string AsmCodeGen::DATA_PREFIX()
@@ -1103,7 +1117,6 @@ void AsmCodeGen::emitCharClassJumpTable( RedStateAp *st, string def )
 	out <<
 		"	.text\n"
 		"" << LABEL( "ccf", st->id ) << ":\n";
-	
 }
 
 std::ostream &AsmCodeGen::STATE_GOTOS()
@@ -1114,6 +1127,28 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 		else {
 			/* Writing code above state gotos. */
 			GOTO_HEADER( st );
+
+			if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
+				RedStateSet::Iter s = *st->nfaTargs;
+				s.increment();
+				for ( ; s.lte(); s++ ) {
+					out <<
+						"	movq	" << NFA_STACK() << ", %rax\n"
+						"	movq	" << NFA_TOP() << ", %rcx\n"
+						"	sal		$4, %rcx\n"
+						"	movq    $" << (*s)->id << ", 0(%rax,%rcx,)\n"
+						"	movq	" << P() << ", 8(%rax,%rcx,)\n"
+						"	movq	" << NFA_TOP() << ", %rcx\n"
+						"	addq	$1, %rcx\n"
+						"	movq	%rcx, " << NFA_TOP() << "\n"
+						"	# nfa_bp[nfa_len].state = " << (*s)->id << ";\n"
+						"	# nfa_bp[nfa_len].p = " << P() << ";\n";
+				}
+
+				RedStateAp *targ = st->nfaTargs->data[0];
+				out <<
+					"	jmp		" << LABEL( "en", targ->id ) << "\n";
+			}
 
 			/* Load *p. */
 			if ( st->transList != 0 ) {
@@ -1770,6 +1805,8 @@ void AsmCodeGen::writeExec()
 	stackCS = redFsm->anyEofActions();
 
 	/*
+	 * This code needs 88 bytes of stack (offset 0 from %rbp).
+	 *
 	 * cv : %r9   -- caller-save, used internally, condition char, undefined in
 	 *               conditions and actions, can use
 	 *
@@ -1800,6 +1837,8 @@ void AsmCodeGen::writeExec()
 	 *
 	 * _ps:       -72(%rbp)
 	 *
+	 * nfa_stack  -80(%rbp)
+	 * nfa_top    -88(%rbp)
 	 */
 
 	if ( redFsm->anyRegCurStateRef() ) {
@@ -1827,9 +1866,10 @@ void AsmCodeGen::writeExec()
 			<< LABEL( "again" ) << ":\n";
 
 		AGAIN_CASES();
-
-		out << LABEL( "resume" ) << ":\n";
 	}
+
+	if ( useAgainLabel() || redFsm->anyNfaStates() )
+		out << LABEL( "resume" ) << ":\n";
 
 
 	/* Jump into the machine based on the current state. */
@@ -1846,7 +1886,7 @@ void AsmCodeGen::writeExec()
 	STATE_GOTOS();
 	EXIT_STATES() << "\n";
 
-	if ( testEofUsed ) 
+	if ( testEofUsed )
 		out << LABEL( "test_eof" ) << ":\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
@@ -1859,8 +1899,24 @@ void AsmCodeGen::writeExec()
 	}
 
 
-	if ( outLabelUsed ) 
+	if ( outLabelUsed )
 		out << LABEL( "out" ) << ":\n";
+
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	movq    " << NFA_TOP() << ", %rcx\n"
+			"	cmpq	$0, %rcx\n"
+			"	je		" << LABEL( "no_alt" ) << "\n" <<
+			"	subq	$1, %rcx\n"
+			"	movq	%rcx, " << NFA_TOP() << "\n"
+			"	movq	" << NFA_STACK() << ", %rax\n"
+			"	salq	$4, %rcx\n"
+			"	movq    0(%rax,%rcx,), %r11\n"
+			"	movq	8(%rax,%rcx,), " << P() << "\n"
+			"	movq	%r11, " << vCS() << "\n"
+			"	jmp		" << LABEL( "resume" ) << "\n"
+			<< LABEL( "no_alt" ) << ":\n";
+	}
 
 	if ( stackCS ) {
 		out <<

@@ -103,6 +103,9 @@ protected:
 	string TOKEND();
 	string ACT();
 
+	string NFA_STACK();
+	string NFA_TOP();
+
 	string DATA_PREFIX();
 	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }
 	string C() { return "_" + DATA_PREFIX() + "cond_spaces"; }

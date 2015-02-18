@@ -103,6 +103,11 @@ void RedFsmAp::depthFirstOrdering( RedStateAp *state )
 				depthFirstOrdering( cond->targ );
 		}
 	}
+
+	if ( state->nfaTargs ) {
+		for ( RedStateSet::Iter s = *state->nfaTargs; s.lte(); s++ )
+			depthFirstOrdering( *s );
+	}
 }
 
 /* Ordering states by transition connections. */

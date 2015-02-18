@@ -881,10 +881,16 @@ void CodeGen::writeInit()
 
 	if ( !noCS )
 		out << "\t" << vCS() << " = " << START() << ";\n";
+
+	if ( redFsm->anyNfaStates() )
+		out << "\t" << "nfa_len = 0;\n";
 	
 	/* If there are any calls, then the stack top needs initialization. */
-	if ( redFsm->anyActionCalls() || redFsm->anyActionNcalls() || redFsm->anyActionRets() || redFsm->anyActionNrets() )
+	if ( redFsm->anyActionCalls() || redFsm->anyActionNcalls() ||
+			redFsm->anyActionRets() || redFsm->anyActionNrets() )
+	{
 		out << "\t" << TOP() << " = 0;\n";
+	}
 
 	if ( hasLongestMatch ) {
 		out << 

@@ -1314,6 +1314,7 @@ exec:
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
+	subq	$88, %rsp
 
 	push    %r12
 	push    %r13
@@ -1329,7 +1330,7 @@ exec:
 	pop		%r13
 	pop		%r12
 
-	popq	%rbp
+	leave
 	ret
 	.cfi_endproc
 .LFE0:
