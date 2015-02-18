@@ -9,7 +9,7 @@
 		# neg = 0;
 		# val = 0;
 		movl	$0, neg(%rip)
-		movl	$0, val(%rip)
+		movq	$0, val(%rip)
 	}
 
 	action see_neg {
@@ -19,12 +19,12 @@
 
 	action add_digit {
 		# val = val * 10 + (fc - 48);
-		movl	val(%rip), %eax
-		imul	$10, %eax
-		movsbl	(%r12), %ecx
-		subl	$48, %ecx
-		add		%ecx, %eax
-		movl	%eax, val(%rip)
+		movq	val(%rip), %rax
+		imul	$10, %rax
+		movsbq	(%r12), %rcx
+		subq	$48, %rcx
+		add		%rcx, %rax
+		movq	%rax, val(%rip)
 	}
 
 	action finish {
@@ -36,40 +36,50 @@
 		movl	neg(%rip), %eax
 		cmpl	$0, %eax
 		je		.finish_L
-		movl	val(%rip), %eax
-		negl	%eax
-		movl	%eax, val(%rip)
+		movq	val(%rip), %rax
+		negq	%rax
+		movq	%rax, val(%rip)
 	.finish_L:
 	}
 
-	action print {
-		#printf ("%i", val);
+	action print1 {
+		#printf ("%ld", val);
 		#fputs ("\n", stdout);
 		movl	$.L_fmt_i_nl, %edi
-		movl	val(%rip), %esi
+		movq	val(%rip), %rsi
 		movl	$0, %eax
 		call	printf
+	}
+
+	action print2 {
+		movl	$.L_saw, %edi
+		call	puts
 	}
 
 	atoi = 
 		(('-' @ see_neg | '+') ?
 		(digit @ add_digit) +) > begin %finish;
 
-	main := atoi '\n' @ print;
+	main1 = atoi '\n' @print1;
+	main2 = [0-9]* '00000000' [0-9]* '\n' @print2;
+
+	main 5|= main1 | main2;
 
 }%%
 	.file	"tmp.c"
 	.comm	neg,4,4
-	.comm	val,4,4
+	.comm	val,8,8
 	.comm	cs,4,4
 	.section	.rodata
 
 %% write data;
 
 .L_fmt_i_nl:
-	.string "%i\n"
+	.string "%ld\n"
 .L_marker:
 	.string "marker\n"
+.L_saw:
+	.string "saw 80808080"
 
 	.text
 	.globl	init
@@ -82,7 +92,7 @@ init:
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
-	movl	$0, val(%rip)
+	movq	$0, val(%rip)
 	movl	$0, neg(%rip)
 
 %% write init;
@@ -114,6 +124,10 @@ exec:
 	pushq   %r12
 	pushq   %r13
 
+	movq	nfa_bp@GOTPCREL(%rip), %rax
+	movq	%rax, -80(%rbp)
+	movq	$0, -88(%rbp)
+	
 	movq    cs(%rip), %r11
 	movq    %rdi, %r12
 	movq    %rsi, %r13
@@ -173,6 +187,8 @@ finish:
 	.string	"1\n"
 .LC4:
 	.string	"12\n"
+.LC45:
+	.string "1002000000002\n",
 .LC5:
 	.string	"222222\n"
 .LC6:
@@ -194,6 +210,7 @@ finish:
 inp:
 	.quad	.LC3
 	.quad	.LC4
+	.quad	.LC45
 	.quad	.LC5
 	.quad	.LC6
 	.quad	.LC7
@@ -206,7 +223,7 @@ inp:
 	.type	inplen, @object
 	.size	inplen, 4
 inplen:
-	.long	9
+	.long	10
 	.text
 	.globl	main
 	.type	main, @function
@@ -251,12 +268,23 @@ main:
 	.cfi_endproc
 .LFE3:
 	.size	main, .-main
+
+	.bss
+	.align 16
+	.type   nfa_len, @object
+	.size   nfa_len, 8
+nfa_len:
+	.zero   8
+	.comm   nfa_bp,16384,32
+
 	.ident	"GCC: (Ubuntu 4.8.2-19ubuntu1) 4.8.2"
 	.section	.note.GNU-stack,"",@progbits
 
 ##### OUTPUT #####
 1
 12
+1002000000002
+saw 80808080
 222222
 2123
 -99
