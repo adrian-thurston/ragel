@@ -1140,9 +1140,7 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 						"	movq	" << P() << ", 8(%rax,%rcx,)\n"
 						"	movq	" << NFA_TOP() << ", %rcx\n"
 						"	addq	$1, %rcx\n"
-						"	movq	%rcx, " << NFA_TOP() << "\n"
-						"	# nfa_bp[nfa_len].state = " << (*s)->id << ";\n"
-						"	# nfa_bp[nfa_len].p = " << P() << ";\n";
+						"	movq	%rcx, " << NFA_TOP() << "\n";
 				}
 
 				RedStateAp *targ = st->nfaTargs->data[0];
