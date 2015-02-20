@@ -73,8 +73,6 @@ AC_ARG_WITH(ragel,
 	]
 )
 
-
-
 dnl
 dnl Check for kelbt.
 dnl
