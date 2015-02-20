@@ -1,4 +1,6 @@
 COLM = @COLM@
+KELBT = @KELBT@
+RAGEL = @RAGEL@
 
 bin_PROGRAMS = ragel
 
@@ -85,9 +87,6 @@ endif
 rlscan.cc: rlparse.h
 
 ragel-rlscan.$(OBJEXT): rlscan.cc
-
-RAGEL = /usr/local/bin/ragel
-KELBT = /usr/local/bin/kelbt
 
 rlscan.cc: rlscan.rl
 	$(HOME)/devel/ragel-6/ragel/ragel -G2 -I$(builddir) -o $@ $<

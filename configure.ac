@@ -59,7 +59,50 @@ AC_LANG_CPLUSPLUS
 dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
+dnl
+dnl Check for ragel.
+dnl
+AC_ARG_WITH(ragel,
+	[AC_HELP_STRING([--with-ragel], [location of ragel install])],
+	[
+		RAGEL="$withval/bin/ragel"
+		AC_CHECK_FILES( [$RAGEL], [], [RAGEL=""] )
+	],
+	[
+		AC_PATH_PROG( [RAGEL], [RAGEL] )
+	]
+)
+
+
+
+dnl
+dnl Check for kelbt.
+dnl
+AC_ARG_WITH(kelbt,
+	[AC_HELP_STRING([--with-kelbt], [location of kelbt install])],
+	[
+		KELBT="$withval/bin/kelbt"
+		AC_CHECK_FILES( [$KELBT], [], [KELBT=""] )
+	],
+	[
+		AC_PATH_PROG( [KELBT], [kelbt] )
+	]
+)
+
+if test -z "$RAGEL"; then
+	AC_ERROR([ragel is required to build this package])
+fi
+if test -z "$KELBT"; then
+	AC_ERROR([kelbt is required to build this package])
+fi
+
+AC_SUBST(RAGEL)
+AC_SUBST(KELBT)
+
+
+dnl
 dnl Check for colm.
+dnl
 AC_ARG_WITH(colm,
 	[AC_HELP_STRING([--with-colm], [location of colm install])],
 	[
