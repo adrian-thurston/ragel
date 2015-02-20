@@ -17,7 +17,7 @@ ragel_SOURCES = \
 	binary.h binloopgoto.h binexpgoto.h binloopvar.h \
 	flat.h flatloopgoto.h flatexpgoto.h \
 	goto.h switchloopgoto.h switchexpgoto.h \
-	ipgoto.h xml.h dot.h asm.h \
+	ipgoto.h xml.h dot.h asm.h rlparse.h \
 	\
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc \
@@ -53,7 +53,10 @@ EXTRA_DIST = \
 	rlhc-ruby.lm \
 	rlhc-java.lm \
 	rlhc-ml.lm \
-	rlparse.lm
+	rlparse.lm \
+	rlscan.rl \
+	rlparse.kh \
+	rlparse.kl
 
 CLEANFILES = parse.c if.h if.cc
 

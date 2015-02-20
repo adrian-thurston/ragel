@@ -69,7 +69,7 @@ AC_ARG_WITH(ragel,
 		AC_CHECK_FILES( [$RAGEL], [], [RAGEL=""] )
 	],
 	[
-		AC_PATH_PROG( [RAGEL], [RAGEL] )
+		AC_PATH_PROG( [RAGEL], [ragel] )
 	]
 )
 
