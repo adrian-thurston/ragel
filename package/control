@@ -1,0 +1,6 @@
+Package: ragel-6.9
+Dists: ragel-6.9.tar.gz
+Prefix: /opt/colm/pkgs/ragel-6.9
+Configure: ./configure --prefix=$(PREFIX)
+Make: make
+Install: make DESTDIR=$(DESTDIR) install
