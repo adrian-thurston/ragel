@@ -1,5 +1,5 @@
 Package: ragel
 Configure: ./configure --prefix=$(PREFIX)
 	--with-ragel=/opt/colm/pkgs/ragel-6.9
-	--with-kelbt=/opt/colm
+	--with-kelbt=/opt/colm/pkgs/kelbt-0.16
 	--with-colm=/opt/colm
