@@ -92,7 +92,7 @@ rlscan.cc: rlparse.h
 ragel-rlscan.$(OBJEXT): rlscan.cc
 
 rlscan.cc: rlscan.rl
-	$(HOME)/devel/ragel-6/ragel/ragel -G2 -I$(builddir) -o $@ $<
+	$(RAGEL) -G2 -I$(builddir) -o $@ $<
 
 rlparse.h: rlparse.kh
 	$(KELBT) -o $@ $<
