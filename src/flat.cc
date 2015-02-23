@@ -385,15 +385,31 @@ void Flat::LOCATE_TRANS()
 	long lowKey = redFsm->lowKey.getVal();
 	long highKey = redFsm->highKey.getVal();
 
+	bool limitLow = keyOps->eq( lowKey, keyOps->minKey );
+	bool limitHigh = keyOps->eq( highKey, keyOps->maxKey );
+
 	out <<
 		"	_keys = " << OFFSET( ARR_REF( keys ), "(" + vCS() + "<<1)" ) << ";\n"
 		"	_inds = " << OFFSET( ARR_REF( indicies ),
 				ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
-		"\n"
-		"	if ( " <<
-				GET_KEY() << " <= " << highKey << " && " <<
-				GET_KEY() << " >= " << lowKey << " )\n"
-		"	{\n"
+		"\n";
+
+	if ( !limitLow || !limitHigh ) {
+		out << "	if ( ";
+
+		if ( !limitHigh )
+			out << GET_KEY() << " <= " << highKey;
+
+		if ( !limitHigh && !limitLow )
+			out << " && ";
+
+		if ( !limitLow )
+			out << GET_KEY() << " >= " << lowKey;
+
+		out << " )\n	{\n";
+	}
+
+	out <<
 		"       int _ic = (int)" << ARR_REF( charClass ) << "[" << GET_KEY() <<
 						" - " << lowKey << "];\n"
 		"		if ( _ic <= (int)" << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
@@ -403,12 +419,16 @@ void Flat::LOCATE_TRANS()
 							"_keys" ) + " ) " ) << "; \n"
 		"		else\n"
 		"			_trans = (int)" << ARR_REF( indexDefaults ) <<
-							"[" << vCS() << "]" << ";\n"
-		"	}\n"
-		"	else {\n"
-		"		_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
-		"	}\n"
-		"\n";
+							"[" << vCS() << "]" << ";\n";
+
+	if ( !limitLow || !limitHigh ) {
+		out <<
+			"	}\n"
+			"	else {\n"
+			"		_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
+			"	}\n"
+			"\n";
+	}
 
 
 	if ( condSpaceList.length() > 0 ) {
