@@ -95,7 +95,7 @@ void TableArray::valueAnalyze( long long v )
 
 void TableArray::finishAnalyze()
 {
-	if ( codeGen.directBackend ) {
+	if ( codeGen.backend == Direct ) {
 		/* Calculate the type if it is not already set. */
 		if ( type.empty() ) {
 			if ( min >= S8BIT_MIN && max <= S8BIT_MAX ) {
@@ -149,7 +149,7 @@ void TableArray::finishAnalyze()
 
 void TableArray::startGenerate()
 {
-	if ( codeGen.directBackend ) {
+	if ( codeGen.backend == Direct ) {
 		if ( stringTables ) {
 			out << "static const char S_" << codeGen.DATA_PREFIX() << name <<
 				"[] __attribute__((aligned (16))) = \n\t\"";
@@ -213,7 +213,7 @@ void TableArray::stringGenerate( long long value )
 
 void TableArray::valueGenerate( long long v )
 {
-	if ( codeGen.directBackend ) {
+	if ( codeGen.backend == Direct ) {
 		if ( stringTables ) {
 			stringGenerate( v );
 
@@ -252,7 +252,7 @@ void TableArray::valueGenerate( long long v )
 
 void TableArray::finishGenerate()
 {
-	if ( codeGen.directBackend ) {
+	if ( codeGen.backend == Direct ) {
 		if ( stringTables ) {
 	        out << "\";\nconst " << type << " *_" << codeGen.DATA_PREFIX() << name <<
 	                " = (const " << type << "*) S_" << codeGen.DATA_PREFIX() << name << ";\n\n";
@@ -331,7 +331,7 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 :
 	CodeGenData( args ),
 	tableData( 0 ),
-	directBackend( args.pd->id->directBackend ),
+	backend( args.pd->id->backend ),
 	stringTables( args.pd->id->stringTables )
 {
 }
@@ -541,7 +541,7 @@ string CodeGen::TABS( int level )
  * signed. */
 string CodeGen::KEY( Key key )
 {
-	if ( directBackend ) {
+	if ( backend == Direct ) {
 		ostringstream ret;
 		if ( keyOps->alphType->isChar )
 			ret << "c(" << (unsigned long) key.getVal() << ")";
@@ -925,7 +925,7 @@ string CodeGen::ALPH_TYPE()
 
 void CodeGen::VALUE( string type, string name, string value )
 {
-	if ( directBackend )
+	if ( backend == Direct )
 		out << "static const " << type << " " << name << " = " << value << ";\n";
 	else
 		out << "value " << type << " " << name << " = " << value << ";\n";

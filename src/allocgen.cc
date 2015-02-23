@@ -61,7 +61,7 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 	if ( hostLang->lang == HostLang::Asm ) {
 		codeGen = new AsmCodeGen( args );
 	}
-	else if ( args.pd->id->directBackend ) {
+	else if ( args.pd->id->backend == Direct ) {
 		switch ( args.codeStyle ) {
 		case GenBinaryLoop:
 			if ( langSupportsGoto( hostLang ) )

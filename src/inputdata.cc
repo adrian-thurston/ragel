@@ -261,13 +261,15 @@ void InputData::writeOutput()
 					ii->writeArgs.data, generateDot, hostLang );
 		}
 		else {
-			if ( hostLang->lang == HostLang::Asm || directBackend ) {
-				*outStream << ii->data.str();
-			}
-			else {
-				openHostBlock( '@', this, *outStream, inputFileName, ii->loc.line );
-				*outStream << ii->data.str();
-				*outStream << "}@";
+			switch ( backend ) {
+				case Direct:
+					*outStream << ii->data.str();
+					break;
+				case Translated:
+					openHostBlock( '@', this, *outStream, inputFileName, ii->loc.line );
+					*outStream << ii->data.str();
+					*outStream << "}@";
+					break;
 			}
 		}
 	}
@@ -337,9 +339,7 @@ void InputData::processCode( bool generateDot )
 
 	makeDefaultFileName();
 
-	if ( hostLang->lang == HostLang::Asm || directBackend ) {
-	}
-	else {
+	if ( backend == Translated ) {
 		origOutputFileName = outputFileName;
 		genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
 		outputFileName = genOutputFileName.c_str();
@@ -366,9 +366,7 @@ void InputData::processCode( bool generateDot )
 	writeOutput();
 	closeOutput();
 
-	if ( hostLang->lang == HostLang::Asm || directBackend ) {
-	}
-	else {
+	if ( backend == Translated ) {
 #ifdef WITH_COLM
 		if ( !noIntermediate ) {
 			string rlhc = dirName + "/rlhc " + 
@@ -418,11 +416,6 @@ void InputData::process()
 {
 	ifstream *inFile;
 
-	/* If the host lang is C, then default to the direct code generator.
-	 * Otherwise use rlhc. */
-	if ( hostLang->lang == HostLang::C )
-		directBackend = true;
-
 	switch ( frontend ) {
 		case KelbtBased: {
 			/*
@@ -456,9 +449,10 @@ void InputData::process()
 			/* Now send EOF to all parsers. */
 			terminateAllParsers();
 			break;
-	}
-#ifdef WITH_COLM
+		}
 		case ColmBased: {
+			std::cout << "colm frontend" << std::endl;
+#ifdef WITH_COLM
 			/*
 			 * Ragel parser introduced in ragel 7. Uses more memory.
 			 */
@@ -474,9 +468,9 @@ void InputData::process()
 			LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
 			loadRagel( lr, inputFileName );
 			deleteLoadRagel( lr );
+#endif
 			break;
 		}
-#endif
 	}
 
 	/* Bail on above error. */

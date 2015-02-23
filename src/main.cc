@@ -399,8 +399,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					rlhcShowCmd = true;
 				else if ( strcmp( arg, "no-intermediate" ) == 0 )
 					noIntermediate = true;
-				else if ( strcmp( arg, "kelbt-frontend" ) == 0 )
+				else if ( strcmp( arg, "kelbt-frontend" ) == 0 ) {
 					frontend = KelbtBased;
+					frontendSpecified = true;
+				}
 				else if ( strcmp( arg, "colm-frontend" ) == 0 ) {
 #ifdef WITH_COLM
 					frontend = ColmBased;
@@ -408,13 +410,16 @@ void InputData::parseArgs( int argc, const char **argv )
 					error() << "--colm-frontend specified but, "
 							"ragel not built with colm support" << endp;
 #endif
+					frontendSpecified = true;
 				}
 				else if ( strcmp( arg, "asm" ) == 0 )
 					hostLang = &hostLangAsm;
 				else if ( strcmp( arg, "gnu-asm-x86-64-sys-v" ) == 0 )
 					hostLang = &hostLangAsm;
-				else if ( strcmp( arg, "direct" ) == 0 )
-					directBackend = true;
+				else if ( strcmp( arg, "direct" ) == 0 ) {
+					backend = Direct;
+					backendSpecified = true;
+				}
 				else if ( strcmp( arg, "string-tables" ) == 0 )
 					stringTables = true;
 				else if ( strcmp( arg, "integral-tables" ) == 0 )
@@ -525,6 +530,20 @@ void InputData::checkArgs()
 				" requires building ragel with Colm support" << endp;
 	}
 #endif
+
+	if ( !frontendSpecified ) {
+		if ( hostLang->lang == HostLang::C || hostLang->lang == HostLang::Asm )
+			frontend = KelbtBased;
+		else
+			frontend = ColmBased;
+	}
+
+	if ( !backendSpecified ) {
+		if ( hostLang->lang == HostLang::C || hostLang->lang == HostLang::Asm )
+			backend = Direct;
+		else
+			backend = Translated;
+	}
 }
 
 /* Main, process args and call yyparse to start scanning input. */

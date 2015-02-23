@@ -465,4 +465,16 @@ struct exit_object { };
 extern exit_object endp;
 void operator<<( std::ostream &out, exit_object & );
 
+enum RagelFrontend
+{
+	KelbtBased,
+	ColmBased
+};
+
+enum RagelBackend
+{
+	Direct,
+	Translated
+};
+
 #endif

@@ -158,7 +158,7 @@ protected:
 
 	bool isAlphTypeSigned();
 	long long tableData;
-	bool directBackend;
+	RagelBackend backend;
 	bool stringTables;
 
 	virtual string GET_KEY();
@@ -242,58 +242,58 @@ protected:
 	void VALUE( string type, string name, string value );
 
 	string ACCESS_OPER()
-		{ return directBackend ? "" : " -> "; }
+		{ return backend == Direct ? "" : " -> "; }
 
 	string OPEN_HOST_EXPR()
-		{ return directBackend ? "(" : "host( \"-\", 1 ) ={"; }
+		{ return backend == Direct ? "(" : "host( \"-\", 1 ) ={"; }
 
 	string OPEN_HOST_EXPR( string fileName, int line )
-		{ return directBackend ? "(" : "host( \"" + fileName + "\", " + STR(line) + " ) ={"; }
+		{ return backend == Direct ? "(" : "host( \"" + fileName + "\", " + STR(line) + " ) ={"; }
 
 	string CLOSE_HOST_EXPR()
-		{ return directBackend ? ")" : "}="; }
+		{ return backend == Direct ? ")" : "}="; }
 
 	string OPEN_HOST_BLOCK()
-		{ return directBackend ? "{" : "host( \"-\", 1 ) ${"; }
+		{ return backend == Direct ? "{" : "host( \"-\", 1 ) ${"; }
 
 	string OPEN_HOST_BLOCK( string fileName, int line )
 	{ 
-		return directBackend ? "{" : "host( \"" + fileName + "\", " + STR(line) + " ) ${";
+		return backend == Direct ? "{" : "host( \"" + fileName + "\", " + STR(line) + " ) ${";
 	}
 
 	string CLOSE_HOST_BLOCK()
-		{ return directBackend ? "}" : "}$"; }
+		{ return backend == Direct ? "}" : "}$"; }
 
 	string OPEN_HOST_PLAIN()
-		{ return directBackend ? "" : "host( \"-\", 1 ) @{"; }
+		{ return backend == Direct ? "" : "host( \"-\", 1 ) @{"; }
 
 	string CLOSE_HOST_PLAIN()
-		{ return directBackend ? "" : "}@"; }
+		{ return backend == Direct ? "" : "}@"; }
 
 	string OPEN_GEN_EXPR()
-		{ return directBackend ? "(" : "={"; }
+		{ return backend == Direct ? "(" : "={"; }
 
 	string CLOSE_GEN_EXPR()
-		{ return directBackend ? ")" : "}="; }
+		{ return backend == Direct ? ")" : "}="; }
 
 	string OPEN_GEN_BLOCK()
-		{ return directBackend ? "{" : "${"; }
+		{ return backend == Direct ? "{" : "${"; }
 
 	string CLOSE_GEN_BLOCK()
-		{ return directBackend ? "}" : "}$"; }
+		{ return backend == Direct ? "}" : "}$"; }
 
 	string OPEN_GEN_PLAIN()
-		{ return directBackend ? "" : "@{"; }
+		{ return backend == Direct ? "" : "@{"; }
 
 	string CLOSE_GEN_PLAIN()
-		{ return directBackend ? "" : "}@"; }
+		{ return backend == Direct ? "" : "}@"; }
 	
 	string UINT()
-		{ return directBackend ? "unsigned int" : "uint"; }
+		{ return backend == Direct ? "unsigned int" : "uint"; }
 
 	string INDEX( string type, string name )
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return "const " + type + " *" + name;
 		else
 			return "index " + type + " " + name;
@@ -301,7 +301,7 @@ protected:
 
 	string ENTRY()
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return "";
 		else
 			return "entry";
@@ -309,7 +309,7 @@ protected:
 
 	string LABEL( string name )
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return name + ": ";
 		else
 			return "label " + name;
@@ -317,7 +317,7 @@ protected:
 
 	string OFFSET( string arr, string off )
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return "( " + arr + " + (" + off + "))";
 		else
 			return "offset( " + arr + ", " + off + " )";
@@ -325,7 +325,7 @@ protected:
 
 	string TRUE()
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return "1";
 		else
 			return "TRUE";
@@ -333,7 +333,7 @@ protected:
 
 	string DEREF( string arr, string off )
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return "(*( " + off + "))";
 		else
 			return "deref( " + arr + ", " + off + " )";
@@ -341,7 +341,7 @@ protected:
 	
 	string CASE( string val )
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return "case " + val + ": ";
 		else
 			return "case " + val;
@@ -349,7 +349,7 @@ protected:
 
 	string DEFAULT()
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return "default:";
 		else
 			return "default";
@@ -357,7 +357,7 @@ protected:
 
 	string CEND( )
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return " break; ";
 		else
 			return " ";
@@ -365,7 +365,7 @@ protected:
 
 	string FALLTHROUGH()
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return " ";
 		else
 			return "fallthrough;";
@@ -373,7 +373,7 @@ protected:
 
 	string NIL()
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return "0";
 		else
 			return "nil";
@@ -381,7 +381,7 @@ protected:
 
 	string EXPORT( string type, string name, string value )
 	{
-		if ( directBackend )
+		if ( backend == Direct )
 			return "#define " + name + " " + value;
 		else
 			return "export " + type + " " + name + " " + value + ";";
