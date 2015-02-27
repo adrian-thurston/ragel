@@ -1613,6 +1613,7 @@ again:
 			Tree *o1 = vm_pop();
 			Tree *val = (long)o1 <= (long)o2 ? prg->trueVal : prg->falseVal;
 			vm_push( val );
+			break;
 		}
 		case IN_TST_LESS_EQL_TREE: {
 			debug( prg, REALM_BYTECODE, "IN_TST_LESS_EQL_TREE\n" );
@@ -1625,6 +1626,7 @@ again:
 			vm_push( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
+			break;
 		}
 		case IN_TST_GRTR_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_TST_GRTR_VAL\n" );
