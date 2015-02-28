@@ -36,6 +36,9 @@
 
 typedef struct colm_struct Struct;
 
+#define TRUE_VAL  1
+#define FALSE_VAL 0
+
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
 #endif
@@ -581,9 +584,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INT %d\n", i );
 
-			Tree *tree = constructInteger( prg, i );
-			//treeUpref( tree );
-			vm_push( tree );
+			Value value = i;
+			vm_push_value( value );
 			break;
 		}
 		case IN_LOAD_STR: {
@@ -1468,9 +1470,8 @@ again:
 
 			Str *str = (Str*)vm_pop();
 			long len = stringLength( str->value );
-			Tree *res = constructInteger( prg, len );
-			//treeUpref( res );
-			vm_push( res );
+			Value res = len;
+			vm_push_value( res );
 			treeDownref( prg, sp, (Tree*)str );
 			break;
 		}
@@ -1544,9 +1545,8 @@ again:
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
-			Tree *val = r == 0 ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value val = r == 0 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
@@ -1554,11 +1554,10 @@ again:
 		case IN_TST_EQL_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_TST_EQL_VAL\n" );
 
-			Tree *o2 = vm_pop();
-			Tree *o1 = vm_pop();
-			Tree *val = o1 == o2 ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
+			Value val = o1 == o2 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			break;
 		}
 		case IN_TST_NOT_EQL_TREE: {
@@ -1567,9 +1566,8 @@ again:
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
-			Tree *val = r ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value val = r != 0 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
@@ -1577,20 +1575,19 @@ again:
 		case IN_TST_NOT_EQL_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_TST_NOT_EQL_VAL\n" );
 
-			Tree *o2 = vm_pop();
-			Tree *o1 = vm_pop();
-			Tree *val = o1 != o2 ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
+			Value val = o1 != o2 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			break;
 		}
 		case IN_TST_LESS_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_TST_LESS_VAL\n" );
 
-			Tree *o2 = vm_pop();
-			Tree *o1 = vm_pop();
-			Tree *val = (long)o1 < (long)o2 ? prg->trueVal : prg->falseVal;
-			vm_push( val );
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
+			Value res = (long)o1 < (long)o2 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( res );
 			break;
 		}
 		case IN_TST_LESS_TREE: {
@@ -1599,9 +1596,8 @@ again:
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
-			Tree *val = r < 0 ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value val = r < 0 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
@@ -1609,10 +1605,10 @@ again:
 		case IN_TST_LESS_EQL_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_TST_LESS_EQL_VAL\n" );
 
-			Tree *o2 = vm_pop();
-			Tree *o1 = vm_pop();
-			Tree *val = (long)o1 <= (long)o2 ? prg->trueVal : prg->falseVal;
-			vm_push( val );
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
+			Value val = (long)o1 <= (long)o2 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			break;
 		}
 		case IN_TST_LESS_EQL_TREE: {
@@ -1621,9 +1617,8 @@ again:
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
-			Tree *val = r <= 0 ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value val = r <= 0 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
@@ -1631,10 +1626,10 @@ again:
 		case IN_TST_GRTR_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_TST_GRTR_VAL\n" );
 
-			Tree *o2 = vm_pop();
-			Tree *o1 = vm_pop();
-			Tree *val = (long)o1 > (long)o2 ? prg->trueVal : prg->falseVal;
-			vm_push( val );
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
+			Value val = (long)o1 > (long)o2 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			break;
 		}
 		case IN_TST_GRTR_TREE: {
@@ -1643,38 +1638,30 @@ again:
 			Tree *o2 = vm_pop();
 			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
-			Tree *val = r > 0 ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value val = r > 0 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
 		}
 		case IN_TST_GRTR_EQL_VAL: {
+			debug( prg, REALM_BYTECODE, "IN_TST_GRTR_EQL_VAL\n" );
 
-			Tree *o2 = (Tree*)vm_pop();
-			Tree *o1 = (Tree*)vm_pop();
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
 
-			debug( prg, REALM_BYTECODE, "IN_TST_GRTR_EQL_VAL %ld %ld\n", (long)o1, (long)o2 );
-
-			//long r = cmpTree( prg, o1, o2 );
-			//Tree *val = r >= 0 ? prg->trueVal : prg->falseVal;
-			Tree *val = (long)o1 >= (long)o2 ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
-			//treeDownref( prg, sp, o1 );
-			//treeDownref( prg, sp, o2 );
+			Value val = (long)o1 >= (long)o2 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			break;
 		}
 		case IN_TST_GRTR_EQL_TREE: {
 			debug( prg, REALM_BYTECODE, "IN_TST_GRTR_EQL_TREE\n" );
 
-			Tree *o2 = (Tree*)vm_pop();
-			Tree *o1 = (Tree*)vm_pop();
+			Tree *o2 = vm_pop();
+			Tree *o1 = vm_pop();
 			long r = cmpTree( prg, o1, o2 );
-			Tree *val = r >= 0 ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value val = r >= 0 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
@@ -1682,16 +1669,10 @@ again:
 		case IN_TST_LOGICAL_AND_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_AND_VAL\n" );
 
-			Tree *o2 = vm_pop();
-			Tree *o1 = vm_pop();
-//			long v2 = !testFalse( prg, o2 );
-//			long v1 = !testFalse( prg, o1 );
-			Word r = o1 && o2;
-			Tree *val = r ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
-//			treeDownref( prg, sp, o1 );
-//			treeDownref( prg, sp, o2 );
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
+			Value val = o1 && o2 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			break;
 		}
 		case IN_TST_LOGICAL_AND_TREE: {
@@ -1702,9 +1683,8 @@ again:
 			long v2 = !testFalse( prg, o2 );
 			long v1 = !testFalse( prg, o1 );
 			Word r = v1 && v2;
-			Tree *val = r ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value val = r ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
@@ -1712,16 +1692,10 @@ again:
 		case IN_TST_LOGICAL_OR_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_OR_VAL\n" );
 
-			Tree *o2 = vm_pop();
-			Tree *o1 = vm_pop();
-//			long v2 = !testFalse( prg, o2 );
-//			long v1 = !testFalse( prg, o1 );
-			Word r = o1 || o2;
-			Tree *val = r ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
-//			treeDownref( prg, sp, o1 );
-//			treeDownref( prg, sp, o2 );
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
+			Value val = o1 || o2 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			break;
 		}
 		case IN_TST_LOGICAL_OR_TREE: {
@@ -1731,10 +1705,8 @@ again:
 			Tree *o1 = vm_pop();
 			long v2 = !testFalse( prg, o2 );
 			long v1 = !testFalse( prg, o1 );
-			Word r = v1 || v2;
-			Tree *val = r ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value val = v1 || v2 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			treeDownref( prg, sp, o1 );
 			treeDownref( prg, sp, o2 );
 			break;
@@ -1752,23 +1724,19 @@ again:
 		case IN_NOT_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_NOT_VAL\n" );
 
-			Tree *tree = (Tree*)vm_pop();
-//			long r = testFalse( prg, tree );
-			Tree *val = tree == 0 ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
-			//treeDownref( prg, sp, tree );
+			Value o1 = vm_pop_value();
+			Value val = o1 == 0 ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			break;
 		}
 
 		case IN_NOT_TREE: {
 			debug( prg, REALM_BYTECODE, "IN_NOT_TREE\n" );
 
-			Tree *tree = (Tree*)vm_pop();
+			Tree *tree = vm_pop();
 			long r = testFalse( prg, tree );
-			Tree *val = r ? prg->trueVal : prg->falseVal;
-			//treeUpref( val );
-			vm_push( val );
+			Value val = r ? TRUE_VAL : FALSE_VAL;
+			vm_push_value( val );
 			treeDownref( prg, sp, tree );
 			break;
 		}
@@ -1776,53 +1744,41 @@ again:
 		case IN_ADD_INT: {
 			debug( prg, REALM_BYTECODE, "IN_ADD_INT\n" );
 
-			Int *o2 = (Int*)vm_pop();
-			Int *o1 = (Int*)vm_pop();
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
 			long r = (long)o1 + (long)o2;
-			Tree *tree = constructInteger( prg, r );
-//			treeUpref( tree );
-			vm_push( tree );
-//			treeDownref( prg, sp, (Tree*)o1 );
-//			treeDownref( prg, sp, (Tree*)o2 );
+			Value val = r;
+			vm_push_value( val );
 			break;
 		}
 		case IN_MULT_INT: {
 			debug( prg, REALM_BYTECODE, "IN_MULT_INT\n" );
 
-			Int *o2 = (Int*)vm_pop();
-			Int *o1 = (Int*)vm_pop();
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
 			long r = (long)o1 * (long)o2;
-			Tree *tree = constructInteger( prg, r );
-//			treeUpref( tree );
-			vm_push( tree );
-//			treeDownref( prg, sp, (Tree*)o1 );
-//			treeDownref( prg, sp, (Tree*)o2 );
+			Value val = r;
+			vm_push_value( val );
 			break;
 		}
 		case IN_DIV_INT: {
 			debug( prg, REALM_BYTECODE, "IN_DIV_INT\n" );
 
-			Int *o2 = (Int*)vm_pop();
-			Int *o1 = (Int*)vm_pop();
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
 			long r = (long)o1 / (long)o2;
-			Tree *tree = constructInteger( prg, r );
-//			treeUpref( tree );
-			vm_push( tree );
-//			treeDownref( prg, sp, (Tree*)o1 );
-//			treeDownref( prg, sp, (Tree*)o2 );
+			Value val = r;
+			vm_push_value( val );
 			break;
 		}
 		case IN_SUB_INT: {
 			debug( prg, REALM_BYTECODE, "IN_SUB_INT\n" );
 
-			Int *o2 = (Int*)vm_pop();
-			Int *o1 = (Int*)vm_pop();
+			Value o2 = vm_pop_value();
+			Value o1 = vm_pop_value();
 			long r = (long)o1 - (long)o2;
-			Tree *tree = constructInteger( prg, r );
-//			treeUpref( tree );
-			vm_push( tree );
-//			treeDownref( prg, sp, (Tree*)o1 );
-//			treeDownref( prg, sp, (Tree*)o2 );
+			Value val = r;
+			vm_push_value( val );
 			break;
 		}
 		case IN_TOP_SWAP: {
@@ -3012,12 +2968,10 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_POS_R\n" );
 
 			Tree *tree = (Tree*) vm_pop();
-			Tree *integer = 0;
-			if ( tree->tokdata->location ) {
-				integer = constructInteger( prg, tree->tokdata->location->byte );
-				//treeUpref( integer );
-			}
-			vm_push( integer );
+			Value integer = 0;
+			if ( tree->tokdata->location )
+				integer = tree->tokdata->location->byte;
+			vm_push_value( integer );
 			treeDownref( prg, sp, tree );
 			break;
 		}
@@ -3025,22 +2979,19 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_LINE_R\n" );
 
 			Tree *tree = (Tree*) vm_pop();
-			Tree *integer = 0;
-			if ( tree->tokdata->location ) {
-				integer = constructInteger( prg, tree->tokdata->location->line );
-				//treeUpref( integer );
-			}
-			vm_push( integer );
+			Value integer = 0;
+			if ( tree->tokdata->location )
+				integer = tree->tokdata->location->line;
+
+			vm_push_value( integer );
 			treeDownref( prg, sp, tree );
 			break;
 		}
 		case IN_GET_MATCH_LENGTH_R: {
 			debug( prg, REALM_BYTECODE, "IN_GET_MATCH_LENGTH_R\n" );
 
-			Tree *integer = constructInteger( prg, 
-					stringLength(exec->parser->pdaRun->tokdata) );
-			//treeUpref( integer );
-			vm_push( integer );
+			Value integer = stringLength(exec->parser->pdaRun->tokdata);
+			vm_push_value( integer );
 			break;
 		}
 		case IN_GET_MATCH_TEXT_R: {
@@ -3057,10 +3008,9 @@ again:
 
 			List *list = vm_pop_list();
 			long len = colm_list_length( list );
-			Tree *res = constructInteger( prg, len );
+			Value res = len;
 			treeDownref( prg, sp, (Tree*)list );
-			//treeUpref( res );
-			vm_push( res );
+			vm_push_value( res );
 			break;
 		}
 		case IN_GET_LIST_EL_MEM_R: {
@@ -3172,9 +3122,8 @@ again:
 
 			Tree *obj = vm_pop();
 			long len = mapLength( (Map*)obj );
-			Tree *res = constructInteger( prg, len );
-			//treeUpref( res );
-			vm_push( res );
+			Value res = len;
+			vm_push_value( res );
 
 			treeDownref( prg, sp, obj );
 			break;
@@ -3479,9 +3428,8 @@ again:
 			treeDownref( prg, sp, global );
 			treeDownref( prg, sp, (Tree*)cmd );
 
-			Tree *result = constructInteger( prg, r );
-			//treeUpref( result );
-			vm_push( result );
+			Value result = r;
+			vm_push_value( result );
 			break;
 		}
 
@@ -3493,9 +3441,8 @@ again:
 
 				Str *str = (Str*)vm_pop();
 				Word res = strAtoi( str->value );
-				Tree *integer = constructInteger( prg, res );
-				//treeUpref( integer );
-				vm_push( integer );
+				Value integer = res;
+				vm_push_value( integer );
 				treeDownref( prg, sp, (Tree*)str );
 				break;
 			}
@@ -3504,9 +3451,8 @@ again:
 
 				Str *str = (Str*)vm_pop();
 				Word res = strUord8( str->value );
-				Tree *tree = constructInteger( prg, res );
-				//treeUpref( tree );
-				vm_push( tree );
+				Value integer = res;
+				vm_push_value( integer );
 				treeDownref( prg, sp, (Tree*)str );
 				break;
 			}
@@ -3515,9 +3461,8 @@ again:
 
 				Str *str = (Str*)vm_pop();
 				Word res = strUord16( str->value );
-				Tree *tree = constructInteger( prg, res );
-				//treeUpref( tree );
-				vm_push( tree );
+				Value integer = res;
+				vm_push_value( integer );
 				treeDownref( prg, sp, (Tree*)str );
 				break;
 			}
