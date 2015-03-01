@@ -1398,16 +1398,14 @@ again:
 		case IN_SPRINTF: {
 			debug( prg, REALM_BYTECODE, "IN_SPRINTF\n" );
 
-			Tree *f = vm_pop();
-			f++;
-			Tree *integer = vm_pop();
-			Tree *format = vm_pop();
-			Head *res = stringSprintf( prg, (Str*)format, (Int*)integer );
-			Tree *str = constructString( prg, res );
-			treeUpref( str );
-			vm_push( str );
-			//treeDownref( prg, sp, integer );
-			treeDownref( prg, sp, format );
+			vm_pop();
+			Value integer = vm_pop_value();
+			Str *format = vm_pop_string();
+			Head *res = stringSprintf( prg, format, (long)integer );
+			Str *str = (Str*)constructString( prg, res );
+			treeUpref( (Tree*)str );
+			vm_push_string( str );
+			treeDownref( prg, sp, (Tree*)format );
 			break;
 		}
 		case IN_INT_TO_STR: {
@@ -1418,7 +1416,6 @@ again:
 			Tree *str = constructString( prg, res );
 			treeUpref( str );
 			vm_push( str );
-//			treeDownref( prg, sp, (Tree*) i );
 			break;
 		}
 		case IN_TREE_TO_STR: {
@@ -3439,7 +3436,7 @@ again:
 			case IN_STR_ATOI: {
 				debug( prg, REALM_BYTECODE, "IN_STR_ATOI\n" );
 
-				Str *str = (Str*)vm_pop();
+				Str *str = vm_pop_string();
 				Word res = strAtoi( str->value );
 				Value integer = res;
 				vm_push_value( integer );
@@ -3449,7 +3446,7 @@ again:
 			case IN_STR_UORD8: {
 				debug( prg, REALM_BYTECODE, "IN_STR_UORD8\n" );
 
-				Str *str = (Str*)vm_pop();
+				Str *str = vm_pop_string();
 				Word res = strUord8( str->value );
 				Value integer = res;
 				vm_push_value( integer );
@@ -3459,7 +3456,7 @@ again:
 			case IN_STR_UORD16: {
 				debug( prg, REALM_BYTECODE, "IN_STR_UORD16\n" );
 
-				Str *str = (Str*)vm_pop();
+				Str *str = vm_pop_string();
 				Word res = strUord16( str->value );
 				Value integer = res;
 				vm_push_value( integer );
@@ -3474,7 +3471,7 @@ again:
 
 				Str *res = string_prefix( prg, str, (long) len );
 				treeUpref( (Tree*) res );
-				vm_push( (Tree*)res );
+				vm_push_string( res );
 				treeDownref( prg, sp, (Tree*)str );
 				break;
 			}
@@ -3486,7 +3483,7 @@ again:
 
 				Str *res = string_suffix( prg, str, (long) pos );
 				treeUpref( (Tree*) res );
-				vm_push( (Tree*)res );
+				vm_push_string( res );
 				treeDownref( prg, sp, (Tree*)str );
 				break;
 			}

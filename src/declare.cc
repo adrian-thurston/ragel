@@ -821,10 +821,10 @@ void Compiler::declareStrFields( )
 	initFunction( uniqueTypeStr, strObj, "suffix",
 			IN_STR_SUFFIX, IN_STR_SUFFIX, uniqueTypeInt, true, true );
 
-	addLengthField( strObj, IN_STR_LENGTH );
-
 	initFunction( uniqueTypeStr, globalObjectDef, "sprintf", 
 			IN_SPRINTF, IN_SPRINTF, uniqueTypeStr, uniqueTypeInt, true );
+
+	addLengthField( strObj, IN_STR_LENGTH );
 }
 
 void Compiler::declareStreamFields( )
