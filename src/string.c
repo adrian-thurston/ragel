@@ -29,6 +29,29 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+Str *string_prefix( Program *prg, Str *str, long len )
+{
+	Head *head = stringAllocFull( prg, str->value->data, len );
+	return (Str*)constructString( prg, head );
+}
+
+Str *string_suffix( Program *prg, Str *str, long pos )
+{
+	long len = str->value->length - pos;
+	Head *head = stringAllocFull( prg, str->value->data + pos, len );
+	return (Str*)constructString( prg, head );
+}
+
+Tree *constructString( Program *prg, Head *s )
+{
+	Str *str = (Str*) treeAllocate( prg );
+	str->id = LEL_ID_STR;
+	str->value = s;
+
+	return (Tree*)str;
+}
+
+
 /* 
  * In this system strings are not null terminated. Often strings come from a
  * parse, in which case the string is just a pointer into the the data string.

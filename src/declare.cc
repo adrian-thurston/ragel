@@ -815,6 +815,12 @@ void Compiler::declareStrFields( )
 	initFunction( uniqueTypeInt, strObj, "sord32",
 			IN_STR_SORD32, IN_STR_SORD32, true, true );
 
+	initFunction( uniqueTypeStr, strObj, "prefix",
+			IN_STR_PREFIX, IN_STR_PREFIX, uniqueTypeInt, true, true );
+
+	initFunction( uniqueTypeStr, strObj, "suffix",
+			IN_STR_SUFFIX, IN_STR_SUFFIX, uniqueTypeInt, true, true );
+
 	addLengthField( strObj, IN_STR_LENGTH );
 
 	initFunction( uniqueTypeStr, globalObjectDef, "sprintf", 

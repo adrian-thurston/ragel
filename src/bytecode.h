@@ -359,6 +359,8 @@ typedef unsigned long colm_value_t;
 #define IN_STR_SORD16            0x04
 #define IN_STR_UORD32            0x05
 #define IN_STR_SORD32            0x06
+#define IN_STR_PREFIX            0x36
+#define IN_STR_SUFFIX            0x37
 #define IN_LOAD_ARGV             0x07
 #define IN_LOAD_ARG0             0x08
 #define IN_INIT_LOCALS           0x09
@@ -524,6 +526,7 @@ enum LEL_ID {
 #define vm_push_value(i)  vm_push_type(Value, i)
 
 #define vm_pop_stream() vm_pop_type(Stream*)
+#define vm_pop_string() vm_pop_type(Str*)
 #define vm_pop_struct() vm_pop_type(Struct*)
 #define vm_pop_parser() vm_pop_type(Parser*)
 #define vm_pop_list()   vm_pop_type(List*)

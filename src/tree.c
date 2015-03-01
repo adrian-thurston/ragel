@@ -178,21 +178,6 @@ Kid *kidListConcat( Kid *list1, Kid *list2 )
 	return list1;
 }
 
-
-Tree *constructInteger( Program *prg, long i )
-{
-	return (Tree*)i;
-}
-
-Tree *constructString( Program *prg, Head *s )
-{
-	Str *str = (Str*) treeAllocate( prg );
-	str->id = LEL_ID_STR;
-	str->value = s;
-
-	return (Tree*)str;
-}
-
 Tree *colm_construct_pointer( Program *prg, Value value )
 {
 	Pointer *pointer = (Pointer*) treeAllocate( prg );

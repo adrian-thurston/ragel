@@ -238,7 +238,6 @@ Kid *kidListConcat( Kid *list1, Kid *list2 );
 Kid *treeExtractChild( struct colm_program *prg, Tree *tree );
 Kid *reverseKidList( Kid *kid );
 
-Tree *constructInteger( struct colm_program *prg, long i );
 Tree *colm_construct_pointer( struct colm_program *prg, colm_value_t value );
 Tree *constructTerm( struct colm_program *prg, Word id, Head *tokdata );
 Tree *constructTree( struct colm_program *prg, Kid *kid,
@@ -354,6 +353,9 @@ Value colm_vlist_detach_head( struct colm_program *prg, List *list );
 Value colm_vlist_detach_tail( struct colm_program *prg, List *list );
 
 Value colm_viter_deref_cur( struct colm_program *prg, GenericIter *iter );
+
+Str *string_prefix( Program *prg, Str *str, long len );
+Str *string_suffix( Program *prg, Str *str, long pos );
 
 #if defined(__cplusplus)
 }
