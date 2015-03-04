@@ -26,24 +26,6 @@
 #include <iostream>
 
 
-/* Simple singly linked list append routine for the fill list. The new state
- * goes to the end of the list. */
-void MergeData::fillListAppend( StateAp *state )
-{
-	state->alg.next = 0;
-
-	if ( stfillHead == 0 ) {
-		/* List is empty, state becomes head and tail. */
-		stfillHead = state;
-		stfillTail = state;
-	}
-	else {
-		/* List is not empty, state goes after last element. */
-		stfillTail->alg.next = state;
-		stfillTail = state;
-	}
-}
-
 /* Graph constructor. */
 FsmAp::FsmAp( FsmCtx *ctx )
 :

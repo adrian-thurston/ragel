@@ -466,26 +466,20 @@ void FsmAp::unionOp( FsmAp *other )
 
 void FsmAp::nfaFillInStates( MergeData &md )
 {
-	int initial = 0, count = 0;
-	StateAp *state = md.stfillHead;
-	while ( state != 0 ) {
-		initial += 1;
-		state = state->alg.next;
-	}
+	long count = nfaList.length();
 
 	/* Merge any states that are awaiting merging. This will likey cause
 	 * other states to be added to the stfil list. */
-	state = md.stfillHead;
-	count = initial;
-	while ( state != 0 && count-- ) {
+	while ( nfaList.length() > 0 && count-- ) {
+		StateAp *state = nfaList.head;
+
 		StateSet *stateSet = &state->stateDictEl->stateSet;
 		mergeStates( md, state, stateSet->data, stateSet->length() );
-		state = state->alg.next;
-	}
 
-	/* Shift the head forward. The states we merged remain on the list. The
-	 * original head is kept by our caller. */
-	md.stfillHead = state;
+		nfaList.detach( state );
+
+		// std::cerr << "misfit-list-len: " << misfitList.length() << std::endl;
+	}
 }
 
 /* Unions other with this machine. Other is deleted. */
@@ -542,48 +536,32 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, long rounds )
 	/* Merge the start states. */
 	mergeStates( md, startState, startStateSet.data, startStateSet.length() );
 
-	StateAp *origStFillHead = md.stfillHead;
-
-	// /* Fill in any new states made from merging. */
-	for ( long i = 0; i < rounds && md.stfillHead != 0; i++ )
+	/* Fill in any new states made from merging. */
+	for ( long i = 0; i < rounds && nfaList.length() > 0; i++ )
 		nfaFillInStates( md );
 
-	/* Clear state dicts up until the fill list head. From head onward we are
-	 * leaving the states as multi-states. */
-	StateAp *state = origStFillHead;
-	while ( state != 0 && state != md.stfillHead ) {
-		/* Delete and reset the state set. */
-		md.stateDict.detach( state->stateDictEl );
-		delete state->stateDictEl;
-		state->stateDictEl = 0;
+	/* For any remaining NFA states, remove from the state dict. We need to
+	 * keep the state sets. */
+	for ( NfaStateList::Iter ns = nfaList; ns.lte(); ns++ )
+		md.stateDict.detach( ns->stateDictEl );
 
-		/* Next state in the stfill list. */
-		state = state->alg.next;
-	}
+	/* Disassociate non-nfa states from their state dicts. */
+	for ( StateDict::Iter sdi = md.stateDict; sdi.lte(); sdi++ )
+		sdi->targState->stateDictEl = 0;
 
-	/* Empty the state dict, but we need to preserve the elements in the state. */
-	md.stateDict.abandon();
+	/* Delete the state dict elements for non-nfa states. */
+	md.stateDict.empty();
 
 	long maxStateSetSize = 0;
-	long count = 0;
-	StateAp *fs = md.stfillHead;
-	while ( fs != 0 ) {
-		count += 1;
-
-		StateSet &stateSet = fs->stateDictEl->stateSet;
+	long count = nfaList.length();
+	for ( NfaStateList::Iter ns = nfaList; ns.lte(); ns++ ) {
+		StateSet &stateSet = ns->stateDictEl->stateSet;
 		if ( stateSet.length() > maxStateSetSize )
 			maxStateSetSize = stateSet.length();
 
 		/* Setup the in links. */
-		for ( StateSet::Iter s = stateSet; s.lte(); s++ ) {
-			StateAp *d = *s;
-			if ( d->nfaIn == 0 )
-				d->nfaIn = new StateSet;
-			d->nfaIn->insert( fs );
-		}
-
-		/* Next state in the stfill list. */
-		fs = fs->alg.next;
+		for ( StateSet::Iter s = stateSet; s.lte(); s++ )
+			attachToNfa( ns, *s );
 	}
 
 	std::cout << "fill-list\t" << count << std::endl;
@@ -1049,7 +1027,7 @@ void FsmAp::isolateStartState( )
 	/* Stfil and stateDict will be empty because the merging of the old start
 	 * state into the new one will not have any conflicting transitions. */
 	assert( md.stateDict.treeSize == 0 );
-	assert( md.stfillHead == 0 );
+	assert( nfaList.length() == 0 );
 
 	/* The old start state may be unreachable. Remove the misfits and turn off
 	 * misfit accounting. */
@@ -1127,28 +1105,26 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 
 void FsmAp::fillInStates( MergeData &md )
 {
-	/* Merge any states that are awaiting merging. This will likey cause
-	 * other states to be added to the stfil list. */
-	StateAp *state = md.stfillHead;
-	while ( state != 0 ) {
+	/* Merge any states that are awaiting merging. This will likey cause other
+	 * states to be added to the NFA list. */
+	while ( nfaList.length() > 0 ) {
+		StateAp *state = nfaList.head;
+
 		StateSet *stateSet = &state->stateDictEl->stateSet;
 		mergeStates( md, state, stateSet->data, stateSet->length() );
-		state = state->alg.next;
+
+		nfaList.detach( state );
 	}
 
-	/* Delete the state sets of all states that are on the fill list. */
-	state = md.stfillHead;
-	while ( state != 0 ) {
-		/* Delete and reset the state set. */
-		delete state->stateDictEl;
-		state->stateDictEl = 0;
+	/* The NFA list is empty at this point. There are no state sets we need to
+	 * preserve. */
 
-		/* Next state in the stfill list. */
-		state = state->alg.next;
-	}
+	/* Disassociated state dict elements from states. */
+	for ( StateDict::Iter sdi = md.stateDict; sdi.lte(); sdi++ )
+		sdi->targState->stateDictEl = 0;
 
-	/* StateDict will still have its ptrs/size set but all of it's element
-	 * will be deleted so we don't need to clean it up. */
+	/* Delete all the state dict elements. */
+	md.stateDict.empty();
 }
 
 

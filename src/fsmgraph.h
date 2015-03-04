@@ -32,6 +32,7 @@
 #include "compare.h"
 #include "avltree.h"
 #include "dlist.h"
+#include "dlistmel.h"
 #include "bstmap.h"
 #include "sbstmap.h"
 #include "sbstset.h"
@@ -579,15 +580,7 @@ typedef AvlTree< StateDictEl, StateSet, CmpTable<StateAp*> > StateDict;
 /* Data needed for a merge operation. */
 struct MergeData
 {
-	MergeData() 
-		: stfillHead(0), stfillTail(0) { }
-
 	StateDict stateDict;
-
-	StateAp *stfillHead;
-	StateAp *stfillTail;
-
-	void fillListAppend( StateAp *state );
 };
 
 struct TransEl
@@ -745,8 +738,16 @@ struct FsmCtx
 typedef InList<CondAp> CondInList;
 typedef InList<TransDataAp> TransInList;
 
+struct NfaStateEl
+{
+	StateAp *prev, *next;
+};
+
+typedef DListMel<StateAp, NfaStateEl> NfaStateList;
+
 /* State class that implements actions and priorities. */
 struct StateAp 
+	: public NfaStateEl
 {
 	StateAp();
 	StateAp(const StateAp &other);
@@ -784,10 +785,6 @@ struct StateAp
 		/* When minimizing machines by partitioning, this maps to the group
 		 * the state is in. */
 		MinPartition *partition;
-
-		/* When merging states (state machine operations) this next pointer is
-		 * used for the list of states that need to be filled in. */
-		StateAp *next;
 
 		/* Identification for printing and stable minimization. */
 		int stateNum;
@@ -1408,6 +1405,7 @@ struct FsmAp
 	/* The list of states. */
 	StateList stateList;
 	StateList misfitList;
+	NfaStateList nfaList;
 
 	/* The map of entry points. */
 	EntryMap entryPoints;
@@ -1545,6 +1543,9 @@ struct FsmAp
 			StateAp *to, Head *&head, Head *trans );
 	template < class Head > void detachFromInList( StateAp *from,
 			StateAp *to, Head *&head, Head *trans );
+	
+	void attachToNfa( StateAp *from, StateAp *to );
+	void detachFromNfa( StateAp *from, StateAp *to );
 
 	/* Attach with a new transition. */
 	CondAp *attachNewCond( TransAp *trans, StateAp *from,

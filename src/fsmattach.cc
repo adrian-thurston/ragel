@@ -26,6 +26,21 @@
 #include <iostream>
 using namespace std;
 
+void FsmAp::attachToNfa( StateAp *from, StateAp *to )
+{
+	if ( to->nfaIn == 0 )
+		to->nfaIn = new StateSet;
+
+	bool inserted = to->nfaIn->insert( from );
+	assert( inserted );
+}
+
+void FsmAp::detachFromNfa( StateAp *from, StateAp *to )
+{
+	bool removed = to->nfaIn->remove( from );
+	assert( removed );
+}
+
 template< class Head > void FsmAp::attachToInList( StateAp *from,
 		StateAp *to, Head *&head, Head *trans )
 {
@@ -271,10 +286,8 @@ void FsmAp::detachState( StateAp *state )
 	}
 
 	if ( state->stateDictEl != 0 ) {
-		for ( StateSet::Iter s = state->stateDictEl->stateSet; s.lte(); s++ ) {
-			bool removed = (*s)->nfaIn->remove( state );
-			assert( removed );
-		}
+		for ( StateSet::Iter s = state->stateDictEl->stateSet; s.lte(); s++ )
+			detachFromNfa( state, *s );
 	}
 }
 
@@ -397,7 +410,7 @@ template< class Trans > Trans *FsmAp::fsmAttachStates( MergeData &md, StateAp *f
 			combinState->stateDictEl = lastFound;
 
 			/* Add to the fill list. */
-			md.fillListAppend( combinState );
+			nfaList.append( combinState );
 		}
 
 		/* Get the state insertted/deleted. */
