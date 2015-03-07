@@ -730,12 +730,12 @@ void Binary::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 
 void Binary::CURS( ostream &ret, bool inFinish )
 {
-	ret << "(_ps)";
+	ret << OPEN_GEN_EXPR() << "_ps" << CLOSE_GEN_EXPR();
 }
 
 void Binary::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << "(" << vCS() << ")";
+	ret << OPEN_GEN_EXPR() << vCS() << CLOSE_GEN_EXPR();
 }
 
 void Binary::NEXT( ostream &ret, int nextDest, bool inFinish )
@@ -745,9 +745,9 @@ void Binary::NEXT( ostream &ret, int nextDest, bool inFinish )
 
 void Binary::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << vCS() << " = (";
+	ret << OPEN_GEN_BLOCK() << "" << vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << ");";
+	ret << CLOSE_HOST_EXPR() << ";" << CLOSE_GEN_BLOCK();
 }
 
 void Binary::CALL( ostream &ret, int callDest, int targState, bool inFinish )
