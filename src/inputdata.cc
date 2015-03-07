@@ -380,7 +380,9 @@ void InputData::processCode( bool generateDot )
 			int res = system( rlhc.c_str() );
 			if ( res != 0 )
 				exit( 1 );
-			unlink( genOutputFileName.c_str() );
+
+			if ( !saveTemps )
+				unlink( genOutputFileName.c_str() );
 		}
 #else
 		error() << "colm-based codegen not available" << endp;
