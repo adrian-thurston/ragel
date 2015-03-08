@@ -558,10 +558,6 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, long rounds )
 		StateSet &stateSet = ns->stateDictEl->stateSet;
 		if ( stateSet.length() > maxStateSetSize )
 			maxStateSetSize = stateSet.length();
-
-		/* Setup the in links. */
-		for ( StateSet::Iter s = stateSet; s.lte(); s++ )
-			attachToNfa( ns, *s );
 	}
 
 	std::cout << "fill-list\t" << count << std::endl;
@@ -1112,6 +1108,9 @@ void FsmAp::fillInStates( MergeData &md )
 
 		StateSet *stateSet = &state->stateDictEl->stateSet;
 		mergeStates( md, state, stateSet->data, stateSet->length() );
+
+		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
+			detachFromNfa( state, *s );
 
 		nfaList.detach( state );
 	}

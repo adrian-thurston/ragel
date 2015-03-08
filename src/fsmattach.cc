@@ -427,6 +427,10 @@ template< class Trans > Trans *FsmAp::fsmAttachStates( MergeData &md, StateAp *f
 			lastFound->targState = combinState;
 			combinState->stateDictEl = lastFound;
 
+			/* Setup the in links. */
+			for ( StateSet::Iter s = stateSet; s.lte(); s++ )
+				attachToNfa( combinState, *s );
+			
 			/* Add to the fill list. */
 			nfaList.append( combinState );
 		}

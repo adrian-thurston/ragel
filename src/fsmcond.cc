@@ -225,8 +225,9 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 				}
 			}
 
+			//std::cerr << "orig: " << origVal << " new: " << newVal << std::endl;
+
 			if ( origVal != newVal ) {
-				std::cerr << "orig: " << origVal << " new: " << newVal << std::endl;
 				cti->key = newVal;
 			}
 
