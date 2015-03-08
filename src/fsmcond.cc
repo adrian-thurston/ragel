@@ -199,7 +199,11 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 		/* The merged cond set. */
 		CondSet mergedCS;
 		mergedCS.insert( origCS );
-		mergedCS.insert( condAction );
+		bool added = mergedCS.insert( condAction );
+		if ( !added ) {
+			/* FIXME: We need a proper solution for this. Issue #41. */
+			continue;
+		}
 
 		/* Allocate a cond space for the merged set. */
 		CondSpace *mergedCondSpace = addCondSpace( mergedCS );
