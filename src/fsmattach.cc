@@ -33,12 +33,30 @@ void FsmAp::attachToNfa( StateAp *from, StateAp *to )
 
 	bool inserted = to->nfaIn->insert( from );
 	assert( inserted );
+
+	if ( from != to ) {
+		if ( misfitAccounting ) {
+			if ( to->foreignInTrans == 0 )
+				stateList.append( misfitList.detach( to ) );
+		}
+
+		to->foreignInTrans += 1;
+	}
 }
 
 void FsmAp::detachFromNfa( StateAp *from, StateAp *to )
 {
 	bool removed = to->nfaIn->remove( from );
 	assert( removed );
+
+	to->foreignInTrans -= 1;
+
+	if ( from != to ) {
+		if ( misfitAccounting ) {
+			if ( to->foreignInTrans == 0 )
+				misfitList.append( stateList.detach( to ) );
+		}
+	}
 }
 
 template< class Head > void FsmAp::attachToInList( StateAp *from,
