@@ -476,6 +476,9 @@ void FsmAp::nfaFillInStates( MergeData &md )
 		StateSet *stateSet = &state->stateDictEl->stateSet;
 		mergeStates( md, state, stateSet->data, stateSet->length() );
 
+		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
+			detachFromNfa( state, *s );
+
 		nfaList.detach( state );
 
 		// std::cerr << "misfit-list-len: " << misfitList.length() << std::endl;
@@ -516,6 +519,7 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, long rounds )
 		 * into this. No states will be deleted. */
 		stateList.append( others[o]->stateList );
 		misfitList.append( others[o]->misfitList );
+		// nfaList.append( others[o]->nfaList );
 	}
 
 	for ( int o = 0; o < n; o++ ) {
@@ -533,46 +537,55 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, long rounds )
 	/* Create a new start state. */
 	setStartState( addState() );
 
-	/* Merge the start states. */
-	mergeStates( md, startState, startStateSet.data, startStateSet.length() );
+	if ( rounds == 0 ) {
+		startState->stateDictEl = new StateDictEl( startStateSet );
+		nfaList.append( startState );
 
-	/* Fill in any new states made from merging. */
-	for ( long i = 0; i < rounds && nfaList.length() > 0; i++ )
-		nfaFillInStates( md );
-
-	/* For any remaining NFA states, remove from the state dict. We need to
-	 * keep the state sets. */
-	for ( NfaStateList::Iter ns = nfaList; ns.lte(); ns++ )
-		md.stateDict.detach( ns->stateDictEl );
-
-	/* Disassociate non-nfa states from their state dicts. */
-	for ( StateDict::Iter sdi = md.stateDict; sdi.lte(); sdi++ )
-		sdi->targState->stateDictEl = 0;
-
-	/* Delete the state dict elements for non-nfa states. */
-	md.stateDict.empty();
-
-	long maxStateSetSize = 0;
-	long count = nfaList.length();
-	for ( NfaStateList::Iter ns = nfaList; ns.lte(); ns++ ) {
-		StateSet &stateSet = ns->stateDictEl->stateSet;
-		if ( stateSet.length() > maxStateSetSize )
-			maxStateSetSize = stateSet.length();
+		for ( StateSet::Iter s = startStateSet; s.lte(); s++ )
+			attachToNfa( startState, *s );
 	}
+	else {
+		/* Merge the start states. */
+		mergeStates( md, startState, startStateSet.data, startStateSet.length() );
 
-	std::cout << "fill-list\t" << count << std::endl;
-	std::cout << "state-dict\t" << md.stateDict.length() << std::endl;
-	std::cout << "states\t" << stateList.length() << std::endl;
-	std::cout << "max-ss\t" << maxStateSetSize << std::endl;
+		/* Fill in any new states made from merging. */
+		for ( long i = 1; i < rounds && nfaList.length() > 0; i++ )
+			nfaFillInStates( md );
 
-	removeUnreachableStates();
+		/* For any remaining NFA states, remove from the state dict. We need to
+		 * keep the state sets. */
+		for ( NfaStateList::Iter ns = nfaList; ns.lte(); ns++ )
+			md.stateDict.detach( ns->stateDictEl );
 
-	std::cout << "post-unreachable\t" << stateList.length() << std::endl;
+		/* Disassociate non-nfa states from their state dicts. */
+		for ( StateDict::Iter sdi = md.stateDict; sdi.lte(); sdi++ )
+			sdi->targState->stateDictEl = 0;
 
-	minimizePartition2();
+		/* Delete the state dict elements for non-nfa states. */
+		md.stateDict.empty();
 
-	std::cout << "post-min\t" << stateList.length() << std::endl;
-	std::cout << std::endl;
+		long maxStateSetSize = 0;
+		long count = nfaList.length();
+		for ( NfaStateList::Iter ns = nfaList; ns.lte(); ns++ ) {
+			StateSet &stateSet = ns->stateDictEl->stateSet;
+			if ( stateSet.length() > maxStateSetSize )
+				maxStateSetSize = stateSet.length();
+		}
+
+		std::cout << "fill-list\t" << count << std::endl;
+		std::cout << "state-dict\t" << md.stateDict.length() << std::endl;
+		std::cout << "states\t" << stateList.length() << std::endl;
+		std::cout << "max-ss\t" << maxStateSetSize << std::endl;
+
+		removeUnreachableStates();
+
+		std::cout << "post-unreachable\t" << stateList.length() << std::endl;
+
+		minimizePartition2();
+
+		std::cout << "post-min\t" << stateList.length() << std::endl;
+		std::cout << std::endl;
+	}
 }
 
 
