@@ -631,32 +631,65 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 {
 	std::cout << "terms\t" << terms.length() << std::endl;
 
-	TermVect::Iter term = terms;
-	FsmAp *fsm = (*term)->walk( pd );
-	long sumPlain = fsm->stateList.length();
+	long o = 0, sumPlain = 0, sumMin = 0;
+	FsmAp **machines = new FsmAp*[terms.length()];
+	for ( TermVect::Iter term = terms; term.lte(); term++, o++ ) {
+		machines[o] = (*term)->walk( pd );
+		sumPlain += machines[o]->stateList.length();
 
-	fsm->removeUnreachableStates();
-	fsm->minimizePartition2();
-	long sumMin = fsm->stateList.length();
+		machines[o]->removeUnreachableStates();
+		machines[o]->minimizePartition2();
+		sumMin += machines[o]->stateList.length();
 
-	int o = 0;
-	FsmAp **others = new FsmAp*[terms.length() - 1];
-	for ( term++; term.lte(); term++, o++ ) {
-		others[o] = (*term)->walk( pd );
-		sumPlain += others[o]->stateList.length();
-
-		others[o]->removeUnreachableStates();
-		others[o]->minimizePartition2();
-		sumMin += others[o]->stateList.length();
+		//std::cerr << (float)o * 100.0 / (float)terms.length() << std::endl;
 	}
 
 	std::cout << "sum-plain\t" << sumPlain << std::endl;
 	std::cout << "sum-minimized\t" << sumMin << std::endl;
 
-	fsm->nfaUnionOp( others, terms.length() - 1, rounds );
+	static const int groupMax = 500;
 
-	delete[] others;
-	return fsm;
+	/* Count the number of 0-depth groups. */
+	int numGroups = 0;
+	int start = 0;
+	while ( start < terms.length() ) {
+		int amount = groupMax;
+		if ( ( start + amount ) > terms.length() )
+			amount = terms.length() - start;
+
+		FsmAp **others = machines + start + 1;
+		machines[start]->nfaUnionOp( others, (amount - 1), rounds );
+
+		start += amount;
+		numGroups++;
+	}
+
+	/* If there is only one zero-depth group, then return it. */
+	FsmAp *ret = 0;
+	if ( numGroups == 1 ) {
+		ret = machines[0];
+	}
+	else {
+		FsmAp **groups = new FsmAp*[numGroups];
+
+		/* Move the group starts into the groups array. */
+		int g = 0;
+		int start = 0;
+		while ( start < terms.length() ) {
+			groups[g] = machines[start];
+			start += groupMax;
+			g++;
+		}
+
+		groups[0]->nfaUnionOp( groups + 1 , (numGroups - 1), 0 );
+		std::cout << "done" << std::endl;
+
+		ret = groups[0];
+		delete[] groups;
+	}
+
+	delete[] machines;
+	return ret;
 }
 
 void NfaUnion::makeNameTree( ParseData *pd )
