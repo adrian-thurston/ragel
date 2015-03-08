@@ -92,7 +92,8 @@ struct InputData
 		rlhcShowCmd(false),
 		noIntermediate(false),
 		frontendSpecified(false),
-		backendSpecified(false)
+		backendSpecified(false),
+		saveTemps(false)
 	{}
 
 	std::string dirName;
@@ -154,6 +155,8 @@ struct InputData
 
 	bool backendSpecified;
 	RagelBackend backend;
+
+	bool saveTemps;
 
 	void verifyWritesHaveData();
 

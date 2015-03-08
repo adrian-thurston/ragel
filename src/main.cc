@@ -428,6 +428,9 @@ void InputData::parseArgs( int argc, const char **argv )
 					showHostLangNames();
 				else if ( strcmp( arg, "host-lang-args" ) == 0 )
 					showHostLangArgs();
+				else if ( strcmp( arg, "save-temps" ) == 0 ) {
+					saveTemps = true;
+				}
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

@@ -9,9 +9,9 @@ int rw_ocaml_factor( Factor: indep::factor )
 		send Out
 			"[$Factor.tk_ident]\[ [rw_ocaml_expr(Factor.expr)] \]
 	}
-	case [ `fentry `( expr `)] {
+	case [ `fentry `( E: expr `)] {
 		send Out
-			"[Factor.tk_ident]( [Factor.expr] )
+			"fentry( [E] )"
 	}
 	case [tk_ident `( expr `)] {
 		send Out
@@ -212,8 +212,19 @@ void rw_ocaml_buf_stmt( BufStmt: indep::buf_stmt )
 
 int rw_ocaml_ragel_stmt( Stmt: indep::ragel_stmt )
 {
-	send Out
-		[Stmt]
+	switch Stmt
+	case [`fnext `* E: expr `;] {
+		send Out
+			"fnext *[rw_ocaml_expr(E)];
+	}
+	case [`fncall `* E: expr `;] {
+		send Out
+			"fncall *[rw_ocaml_expr(E)];
+	}
+	default {
+		send Out
+			[Stmt]
+	}
 }
 
 int rw_ocaml_stmt( Stmt: indep::stmt )
@@ -283,7 +294,7 @@ void rw_ocaml( Output: stream )
 		# Reparse as lang-independent code.
 		parse IndepActionBlock: indep::action_block[$Action]
 		if ( !IndepActionBlock ) {
-			print( error '\n' Action )
+			print( "error parsing indep action block: " error '\n' Action )
 			exit(1)
 		}
 
@@ -292,8 +303,7 @@ void rw_ocaml( Output: stream )
 		# Reparse back to ragel action block.
 		Action = parse ragel::action_block[$Out->tree]
 		if ( !Action ) {
-			print( error '\n' )
-			print( Out->tree )
+			print( "error parsing ragel action block: " error '\n' $Out->tree )
 			exit(1)
 		}
 	}
