@@ -1609,6 +1609,8 @@ struct FsmAp
 	/* Merge a set of states into newState. */
 	void mergeStates( MergeData &md, StateAp *destState, 
 			StateAp **srcStates, int numSrc );
+	void nfaMergeStates( MergeData &md, StateAp *destState,
+			StateAp **srcStates, int numSrc );
 	void mergeStatesLeaving( MergeData &md, StateAp *destState, StateAp *srcState );
 	void mergeStates( MergeData &md, StateAp *destState, StateAp *srcState );
 

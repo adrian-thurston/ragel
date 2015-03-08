@@ -474,7 +474,7 @@ void FsmAp::nfaFillInStates( MergeData &md )
 		StateAp *state = nfaList.head;
 
 		StateSet *stateSet = &state->stateDictEl->stateSet;
-		mergeStates( md, state, stateSet->data, stateSet->length() );
+		nfaMergeStates( md, state, stateSet->data, stateSet->length() );
 
 		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
 			detachFromNfa( state, *s );
@@ -546,7 +546,7 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, long rounds )
 	}
 	else {
 		/* Merge the start states. */
-		mergeStates( md, startState, startStateSet.data, startStateSet.length() );
+		nfaMergeStates( md, startState, startStateSet.data, startStateSet.length() );
 
 		/* Fill in any new states made from merging. */
 		for ( long i = 1; i < rounds && nfaList.length() > 0; i++ )
@@ -1069,6 +1069,34 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState,
 {
 	for ( int s = 0; s < numSrc; s++ )
 		mergeStates( md, destState, srcStates[s] );
+}
+
+void FsmAp::nfaMergeStates( MergeData &md, StateAp *destState, 
+		StateAp **srcStates, int numSrc )
+{
+	for ( int s = 0; s < numSrc; s++ ) {
+		mergeStates( md, destState, srcStates[s] );
+
+		while ( misfitList.length() > 0 ) {
+			StateAp *state = misfitList.head;
+
+			if ( state->stateDictEl ) {
+				md.stateDict.detach( state->stateDictEl );
+				nfaList.detach( state );
+			}
+
+			/* Detach and delete. */
+			detachState( state );
+			misfitList.detach( state );
+			delete state;
+
+		}
+
+		//std::cerr << "progress: " << (float)s * 100.0 / (float)numSrc << std::endl;
+		//std::cerr << "misfit-list-length: " << misfitList.length() << std::endl;
+		//std::cerr << "state-list-length: " << stateList.length() << std::endl;
+		//std::cerr << std::endl;
+	}
 }
 
 void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
