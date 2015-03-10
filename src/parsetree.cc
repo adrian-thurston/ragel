@@ -641,7 +641,11 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 		machines[o]->minimizePartition2();
 		sumMin += machines[o]->stateList.length();
 
-		//std::cerr << (float)o * 100.0 / (float)terms.length() << std::endl;
+		//std::cout << (float)o * 100.0 / (float)terms.length() <<
+		//	": " << machines[o]->stateList.length() << std::endl;
+
+		//log << "term-state-list\t " <<
+		//		machines[o]->stateList.length() << std::endl;
 	}
 
 	std::cout << "sum-plain\t" << sumPlain << std::endl;

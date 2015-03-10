@@ -481,7 +481,7 @@ void FsmAp::nfaFillInStates( MergeData &md )
 
 		nfaList.detach( state );
 
-		// std::cerr << "misfit-list-len: " << misfitList.length() << std::endl;
+		// std::cout << "misfit-list-len: " << misfitList.length() << std::endl;
 	}
 }
 
@@ -1092,10 +1092,10 @@ void FsmAp::nfaMergeStates( MergeData &md, StateAp *destState,
 
 		}
 
-		//std::cerr << "progress: " << (float)s * 100.0 / (float)numSrc << std::endl;
-		//std::cerr << "misfit-list-length: " << misfitList.length() << std::endl;
-		//std::cerr << "state-list-length: " << stateList.length() << std::endl;
-		//std::cerr << std::endl;
+		//std::cout << "progress: " << (float)s * 100.0 / (float)numSrc << std::endl;
+		//std::cout << "misfit-list-length: " << misfitList.length() << std::endl;
+		//std::cout << "state-list-length: " << stateList.length() << std::endl;
+		//std::cout << std::endl;
 	}
 }
 
