@@ -228,6 +228,17 @@ Word strAtoi( Head *str )
 	return res;
 }
 
+Word strAtoo( Head *str )
+{
+	/* FIXME: need to implement this by hand. There is no null terminator. */
+	char *nulled = (char*)malloc( str->length + 1 );
+	memcpy( nulled, str->data, str->length );
+	nulled[str->length] = 0;
+	int res = strtol( nulled, 0, 8 );
+	free( nulled );
+	return res;
+}
+
 Head *intToStr( Program *prg, Word i )
 {
 	char data[20];

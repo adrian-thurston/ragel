@@ -3443,6 +3443,16 @@ again:
 				treeDownref( prg, sp, (Tree*)str );
 				break;
 			}
+			case IN_STR_ATOO: {
+				debug( prg, REALM_BYTECODE, "IN_STR_ATOO\n" );
+
+				Str *str = vm_pop_string();
+				Word res = strAtoo( str->value );
+				Value integer = res;
+				vm_push_value( integer );
+				treeDownref( prg, sp, (Tree*)str );
+				break;
+			}
 			case IN_STR_UORD8: {
 				debug( prg, REALM_BYTECODE, "IN_STR_UORD8\n" );
 

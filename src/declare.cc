@@ -797,6 +797,9 @@ void Compiler::declareStrFields( )
 	initFunction( uniqueTypeInt, strObj, "atoi",
 			IN_STR_ATOI,   IN_STR_ATOI, true, true );
 
+	initFunction( uniqueTypeInt, strObj, "atoo",
+			IN_STR_ATOO,   IN_STR_ATOO, true, true );
+
 	initFunction( uniqueTypeInt, strObj, "uord8",
 			IN_STR_UORD8,  IN_STR_UORD8, true, true );
 

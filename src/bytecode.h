@@ -353,6 +353,7 @@ typedef unsigned long colm_value_t;
  */
 #define IN_FN                    0xff
 #define IN_STR_ATOI              0x1d
+#define IN_STR_ATOO              0x38
 #define IN_STR_UORD8             0x01
 #define IN_STR_SORD8             0x02
 #define IN_STR_UORD16            0x03
@@ -592,6 +593,7 @@ void stringFree( struct colm_program *prg, Head *head );
 void stringShorten( Head *tokdata, long newlen );
 Head *concatStr( Head *s1, Head *s2 );
 Word strAtoi( Head *str );
+Word strAtoo( Head *str );
 Word strUord16( Head *head );
 Word strUord8( Head *head );
 Word cmpString( Head *s1, Head *s2 );
