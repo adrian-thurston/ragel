@@ -64,7 +64,6 @@ typedef Vector<const char *> ArgsVector;
 
 struct InputData
 {
-
 	InputData()
 	: 
 		inputFileName(0),
@@ -93,7 +92,8 @@ struct InputData
 		noIntermediate(false),
 		frontendSpecified(false),
 		backendSpecified(false),
-		saveTemps(false)
+		saveTemps(false),
+		nfaTermCheck(0)
 	{}
 
 	std::string dirName;
@@ -157,6 +157,7 @@ struct InputData
 	RagelBackend backend;
 
 	bool saveTemps;
+	const char *nfaTermCheck;
 
 	void verifyWritesHaveData();
 

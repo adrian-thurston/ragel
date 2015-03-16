@@ -340,6 +340,12 @@ struct ParseData
 	void popNameScope( const NameFrame &frame );
 	void resetNameScope( const NameFrame &frame );
 
+	void nfaTermCheckKleeneZero();
+	void nfaTermCheckMinZero();
+	void nfaTermCheckPlusZero();
+	void nfaTermCheckRepZero();
+	void nfaTermCheckZeroReps();
+
 	/* Make name ids to name inst pointers. */
 	NameInst **nameIndex;
 

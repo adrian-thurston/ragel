@@ -46,6 +46,12 @@ StateAp *FsmAp::addState()
 		stateList.append( state );
 	}
 
+	if ( ctx->stateLimit > 0 ) {
+		long total = misfitList.length() + stateList.length();
+		if ( total > ctx->stateLimit )
+			throw TooManyStates();
+	}
+
 	return state;
 }
 

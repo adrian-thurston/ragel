@@ -428,9 +428,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					showHostLangNames();
 				else if ( strcmp( arg, "host-lang-args" ) == 0 )
 					showHostLangArgs();
-				else if ( strcmp( arg, "save-temps" ) == 0 ) {
+				else if ( strcmp( arg, "save-temps" ) == 0 )
 					saveTemps = true;
-				}
+				else if ( strcmp( arg, "nfa-term-check" ) == 0 )
+					nfaTermCheck = strdup( eq );
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

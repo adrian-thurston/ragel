@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <inputdata.h>
 
 /* Parsing. */
 #include "ragel.h"
@@ -627,25 +628,63 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 	return rtnVal;
 }
 
+bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp )
+{
+	return false;
+}
+
+void ParseData::nfaTermCheckKleeneZero()
+{
+	throw RepetitionError();
+}
+
+void ParseData::nfaTermCheckMinZero()
+{
+	throw RepetitionError();
+}
+
+void ParseData::nfaTermCheckPlusZero()
+{
+	throw RepetitionError();
+}
+
+void ParseData::nfaTermCheckRepZero()
+{
+	throw RepetitionError();
+}
+
+void ParseData::nfaTermCheckZeroReps()
+{
+	throw RepetitionError();
+}
+
 FsmAp *NfaUnion::walk( ParseData *pd )
 {
+	if ( pd->id->nfaTermCheck != 0 ) {
+		/* Does not return. */
+		nfaTermCheck( pd );
+	}
+
 	std::cout << "terms\t" << terms.length() << std::endl;
 
-	long o = 0, sumPlain = 0, sumMin = 0;
+	long numTerms = 0, sumPlain = 0, sumMin = 0;
 	FsmAp **machines = new FsmAp*[terms.length()];
-	for ( TermVect::Iter term = terms; term.lte(); term++, o++ ) {
-		machines[o] = (*term)->walk( pd );
-		sumPlain += machines[o]->stateList.length();
+	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
+		machines[numTerms] = (*term)->walk( pd );
 
-		machines[o]->removeUnreachableStates();
-		machines[o]->minimizePartition2();
-		sumMin += machines[o]->stateList.length();
+		sumPlain += machines[numTerms]->stateList.length();
+
+		machines[numTerms]->removeUnreachableStates();
+		machines[numTerms]->minimizePartition2();
+		sumMin += machines[numTerms]->stateList.length();
 
 		//std::cout << (float)o * 100.0 / (float)terms.length() <<
 		//	": " << machines[o]->stateList.length() << std::endl;
 
 		//log << "term-state-list\t " <<
 		//		machines[o]->stateList.length() << std::endl;
+
+		numTerms += 1;
 	}
 
 	std::cout << "sum-plain\t" << sumPlain << std::endl;
@@ -656,10 +695,10 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	/* Count the number of 0-depth groups. */
 	int numGroups = 0;
 	int start = 0;
-	while ( start < terms.length() ) {
+	while ( start < numTerms ) {
 		int amount = groupMax;
-		if ( ( start + amount ) > terms.length() )
-			amount = terms.length() - start;
+		if ( ( start + amount ) > numTerms )
+			amount = numTerms - start;
 
 		FsmAp **others = machines + start + 1;
 		machines[start]->nfaUnionOp( others, (amount - 1), rounds );
@@ -679,7 +718,7 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 		/* Move the group starts into the groups array. */
 		int g = 0;
 		int start = 0;
-		while ( start < terms.length() ) {
+		while ( start < numTerms ) {
 			groups[g] = machines[start];
 			start += groupMax;
 			g++;
@@ -696,16 +735,73 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	return ret;
 }
 
+void NfaUnion::nfaTermCheck( ParseData *pd )
+{
+	std::cout << "nfa-term-check: " << pd->id->nfaTermCheck << std::endl;
+	for ( TermNameVect::Iter name = names; name.lte(); name++ ) {
+		long resLen;
+		bool unused;
+		char *search = prepareLitString( (*name)->loc,
+				(*name)->data, (*name)->length, resLen, unused );
+
+		if ( strcmp( search, pd->id->nfaTermCheck ) == 0 ) {
+			try {
+				pd->fsmCtx->stateLimit = 2000;
+				terms[name.pos()]->walk( pd );
+				pd->fsmCtx->stateLimit = -1;
+			}
+			catch ( const TooManyStates & ) {
+				std::cout << "too-many-states" << std::endl;
+				exit( 1 );
+			}
+			catch ( const RepetitionError & ) {
+				std::cout << "rep-error" << std::endl;
+				exit( 2 );
+			};
+
+			exit( 0 );
+		}
+	}
+		
+	exit( 1 );
+}
+
 void NfaUnion::makeNameTree( ParseData *pd )
 {
-	for ( TermVect::Iter term = terms; term.lte(); term++ )
-		(*term)->makeNameTree( pd );
+	if ( pd->id->nfaTermCheck != 0 ) {
+		for ( TermNameVect::Iter name = names; name.lte(); name++ ) {
+			long resLen;
+			bool unused;
+			char *search = prepareLitString( (*name)->loc,
+					(*name)->data, (*name)->length, resLen, unused );
+
+			if ( strcmp( search, pd->id->nfaTermCheck ) == 0 )
+				terms[name.pos()]->makeNameTree( pd );
+		}
+	}
+	else {
+		for ( TermVect::Iter term = terms; term.lte(); term++ )
+			(*term)->makeNameTree( pd );
+	}
 }
 
 void NfaUnion::resolveNameRefs( ParseData *pd )
 {
-	for ( TermVect::Iter term = terms; term.lte(); term++ )
-		(*term)->resolveNameRefs( pd );
+	if ( pd->id->nfaTermCheck != 0 ) {
+		for ( TermNameVect::Iter name = names; name.lte(); name++ ) {
+			long resLen;
+			bool unused;
+			char *search = prepareLitString( (*name)->loc,
+					(*name)->data, (*name)->length, resLen, unused );
+
+			if ( strcmp( search, pd->id->nfaTermCheck ) == 0 )
+				terms[name.pos()]->resolveNameRefs( pd );
+		}
+	}
+	else {
+		for ( TermVect::Iter term = terms; term.lte(); term++ )
+			(*term)->resolveNameRefs( pd );
+	}
 }
 
 FsmAp *MachineDef::walk( ParseData *pd )
@@ -1584,6 +1680,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		/* Evaluate the FactorWithRep. */
 		retFsm = factorWithRep->walk( pd );
 		if ( retFsm->startState->isFinState() ) {
+			pd->nfaTermCheckKleeneZero();
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 			retFsm->unsetFinState( retFsm->startState );
@@ -1599,6 +1696,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		/* Evaluate the FactorWithRep. */
 		retFsm = factorWithRep->walk( pd );
 		if ( retFsm->startState->isFinState() ) {
+			pd->nfaTermCheckKleeneZero();
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 		}
@@ -1638,6 +1736,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		/* Evaluate the FactorWithRep. */
 		retFsm = factorWithRep->walk( pd );
 		if ( retFsm->startState->isFinState() ) {
+			pd->nfaTermCheckPlusZero();
 			warning(loc) << "applying plus operator to a machine that "
 					"accepts zero length word" << endl;
 		}
@@ -1661,6 +1760,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		if ( lowerRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep. 
 			 * This Defeats the purpose so give a warning. */
+			pd->nfaTermCheckZeroReps();
 			warning(loc) << "exactly zero repetitions results "
 					"in the null machine" << endl;
 
@@ -1671,6 +1771,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			/* Evaluate the first FactorWithRep. */
 			retFsm = factorWithRep->walk( pd );
 			if ( retFsm->startState->isFinState() ) {
+				pd->nfaTermCheckRepZero();
 				warning(loc) << "applying repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
@@ -1690,6 +1791,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		if ( upperRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep. 
 			 * This Defeats the purpose so give a warning. */
+			pd->nfaTermCheckZeroReps();
 			warning(loc) << "max zero repetitions results "
 					"in the null machine" << endl;
 
@@ -1700,6 +1802,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			/* Evaluate the first FactorWithRep. */
 			retFsm = factorWithRep->walk( pd );
 			if ( retFsm->startState->isFinState() ) {
+				pd->nfaTermCheckRepZero();
 				warning(loc) << "applying max repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
@@ -1718,6 +1821,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		/* Evaluate the repeated machine. */
 		retFsm = factorWithRep->walk( pd );
 		if ( retFsm->startState->isFinState() ) {
+			pd->nfaTermCheckMinZero();
 			warning(loc) << "applying min repetition to a machine that "
 					"accepts zero length word" << endl;
 		}
@@ -1761,6 +1865,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		else if ( lowerRep == 0 && upperRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep.  This
 			 * defeats the purpose so give a warning. */
+			pd->nfaTermCheckZeroReps();
 			warning(loc) << "zero to zero repetitions results "
 					"in the null machine" << endl;
 
@@ -1771,6 +1876,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			/* Now need to evaluate the repeated machine. */
 			retFsm = factorWithRep->walk( pd );
 			if ( retFsm->startState->isFinState() ) {
+				pd->nfaTermCheckMinZero();
 				warning(loc) << "applying range repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
@@ -2211,6 +2317,7 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 	/* If the item is followed by a star, then apply the star op. */
 	if ( star ) {
 		if ( rtnVal->startState->isFinState() ) {
+			pd->nfaTermCheckKleeneZero();
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 		}

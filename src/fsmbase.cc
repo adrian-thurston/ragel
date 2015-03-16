@@ -82,7 +82,8 @@ FsmAp::FsmAp( const FsmAp &graph )
 			if ( trans->plain() ) {
 				/* The points to the original in the src machine. The taget's duplicate
 				 * is in the statemap. */
-				StateAp *toState = trans->tdap()->toState != 0 ? trans->tdap()->toState->alg.stateMap : 0;
+				StateAp *toState = trans->tdap()->toState != 0 ?
+						trans->tdap()->toState->alg.stateMap : 0;
 
 				/* Attach The transition to the duplicate. */
 				trans->tdap()->toState = 0;

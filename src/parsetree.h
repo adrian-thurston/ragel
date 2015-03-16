@@ -420,6 +420,7 @@ struct Expression
 };
 
 typedef Vector<Term*> TermVect;
+typedef Vector<Token*> TermNameVect;
 
 /*
  * NfaUnion
@@ -435,9 +436,12 @@ struct NfaUnion
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
+	bool strike( ParseData *pd, FsmAp *fsmAp );
+	void nfaTermCheck( ParseData *pd );
 
 	/* Node data. */
 	TermVect terms;
+	TermNameVect names;
 	long rounds;
 };
 

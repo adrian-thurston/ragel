@@ -60,6 +60,9 @@ struct LengthDef;
 struct CondSpace;
 struct FsmCtx;
 
+struct TooManyStates {};
+struct RepetitionError {};
+
 /* State list element for unambiguous access to list element. */
 struct FsmListEl 
 {
@@ -723,7 +726,10 @@ struct FsmCtx
 	FsmCtx( const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 	:
 		minimizeLevel(minimizeLevel),
-		minimizeOpt(minimizeOpt)
+		minimizeOpt(minimizeOpt),
+
+		/* No limit. */
+		stateLimit(-1)
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
@@ -733,6 +739,8 @@ struct FsmCtx
 	CondData *condData;
 	MinimizeLevel minimizeLevel;
 	MinimizeOpt minimizeOpt;
+
+	long stateLimit;
 };
 
 typedef InList<CondAp> CondInList;
