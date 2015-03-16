@@ -1105,6 +1105,8 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		'prepush' => { token( KW_PrePush ); };
 		'postpop' => { token( KW_PostPop ); };
 
+		'nfa_cost_mark' => { token( KW_NfaCostMark ); };
+
 		# FIXME: Enable this post 5.17.
 		# 'range' => { token( KW_Range ); };
 

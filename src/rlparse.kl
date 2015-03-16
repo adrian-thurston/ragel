@@ -226,17 +226,30 @@ machine_name:
 		$$->token = *$1;
 	};
 
+nonterm cost_mark_opt
+{
+	bool costMark;
+};
+
+cost_mark_opt: KW_NfaCostMark
+	final { $$->costMark = true; };
+
+cost_mark_opt:
+	final { $$->costMark = false; };
+
 action_spec:
-	KW_Action TK_Word '{' inline_block '}' final {
-		if ( pd->actionDict.find( $2->data ) ) {
+	KW_Action cost_mark_opt TK_Word '{' inline_block '}' final {
+		if ( pd->actionDict.find( $3->data ) ) {
 			/* Recover by just ignoring the duplicate. */
-			error($2->loc) << "action \"" << $2->data << "\" already defined" << endl;
+			error($3->loc) << "action \"" << $3->data << "\" already defined" << endl;
 		}
 		else {
 			//std::cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << std::endl;
 			/* Add the action to the list of actions. */
-			Action *newAction = new Action( $3->loc, $2->data, 
-					$4->inlineList, pd->nextCondId++ );
+			Action *newAction = new Action( $4->loc, $3->data, 
+					$5->inlineList, pd->nextCondId++ );
+
+			newAction->costMark = $2->costMark;
 
 			/* Insert to list and dict. */
 			pd->actionList.append( newAction );

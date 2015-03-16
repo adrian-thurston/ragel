@@ -438,6 +438,7 @@ struct NfaUnion
 	void resolveNameRefs( ParseData *pd );
 	bool strike( ParseData *pd, FsmAp *fsmAp );
 	void nfaTermCheck( ParseData *pd );
+	void condsDensity( ParseData *pd, StateAp *state, long depth );
 
 	/* Node data. */
 	TermVect terms;

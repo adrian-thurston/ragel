@@ -62,6 +62,7 @@ struct FsmCtx;
 
 struct TooManyStates {};
 struct RepetitionError {};
+struct CondCostTooHigh {};
 
 /* State list element for unambiguous access to list element. */
 struct FsmListEl 
@@ -113,7 +114,8 @@ public:
 		numCondRefs(0),
 		anyCall(false),
 		isLmAction(false),
-		condId(condId)
+		condId(condId),
+		costMark(false)
 	{
 	}
 
@@ -149,6 +151,8 @@ public:
 
 	bool isLmAction;
 	int condId;
+
+	bool costMark;
 };
 
 struct CmpCondId

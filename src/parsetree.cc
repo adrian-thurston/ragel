@@ -628,9 +628,50 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 	return rtnVal;
 }
 
+void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
+{
+	/* Nothing to do if the state is already on the list. */
+	if ( state->stateBits & STB_ONLIST )
+		return;
+
+	if ( depth++ > 2 )
+		return;
+
+	/* Doing depth first, put state on the list. */
+	state->stateBits |= STB_ONLIST;
+
+	/* Recurse on everything ranges. */
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 )
+				condsDensity( pd, trans->tdap()->toState, depth );
+		}
+		else {
+			for ( CondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
+				if ( (*csi)->costMark ) {
+					throw CondCostTooHigh();
+				}
+			}
+			
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					condsDensity( pd, cond->toState, depth );
+			}
+		}
+	}
+}
+
 bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp )
 {
-	return false;
+	long density = 0;
+
+	/* Init on state list flags. */
+	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
+		st->stateBits &= ~STB_ONLIST;
+
+	condsDensity( pd, fsmAp->startState, 0 );
+	
+	return true;
 }
 
 void ParseData::nfaTermCheckKleeneZero()
@@ -745,10 +786,13 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 				(*name)->data, (*name)->length, resLen, unused );
 
 		if ( strcmp( search, pd->id->nfaTermCheck ) == 0 ) {
+			FsmAp *fsm = 0;
 			try {
 				pd->fsmCtx->stateLimit = 2000;
-				terms[name.pos()]->walk( pd );
+				fsm = terms[name.pos()]->walk( pd );
 				pd->fsmCtx->stateLimit = -1;
+
+				if ( ! strike( pd, fsm ) ) { }
 			}
 			catch ( const TooManyStates & ) {
 				std::cout << "too-many-states" << std::endl;
@@ -757,8 +801,13 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 			catch ( const RepetitionError & ) {
 				std::cout << "rep-error" << std::endl;
 				exit( 2 );
+			}
+			catch ( const CondCostTooHigh & ) {
+				std::cout << "cond-cost" << std::endl;
+				exit( 3 );
 			};
 
+			
 			exit( 0 );
 		}
 	}
