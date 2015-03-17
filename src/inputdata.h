@@ -93,7 +93,9 @@ struct InputData
 		frontendSpecified(false),
 		backendSpecified(false),
 		saveTemps(false),
-		nfaTermCheck(0)
+		nfaTermCheck(0),
+		nfaGroupMax(0),
+		nfaCondsDepth(6)
 	{}
 
 	std::string dirName;
@@ -158,6 +160,8 @@ struct InputData
 
 	bool saveTemps;
 	const char *nfaTermCheck;
+	long nfaGroupMax;
+	long nfaCondsDepth;
 
 	void verifyWritesHaveData();
 

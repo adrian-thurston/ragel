@@ -634,7 +634,7 @@ void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 	if ( state->stateBits & STB_ONLIST )
 		return;
 
-	if ( depth++ > 2 )
+	if ( depth++ > pd->id->nfaCondsDepth )
 		return;
 
 	/* Doing depth first, put state on the list. */
@@ -663,8 +663,6 @@ void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 
 bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp )
 {
-	long density = 0;
-
 	/* Init on state list flags. */
 	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
 		st->stateBits &= ~STB_ONLIST;
@@ -731,13 +729,13 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	std::cout << "sum-plain\t" << sumPlain << std::endl;
 	std::cout << "sum-minimized\t" << sumMin << std::endl;
 
-	static const int groupMax = 500;
-
 	/* Count the number of 0-depth groups. */
 	int numGroups = 0;
 	int start = 0;
 	while ( start < numTerms ) {
-		int amount = groupMax;
+		/* If nfa-group-max is zero, don't group, put all terms into a single
+		 * n-depth NFA. */
+		int amount = pd->id->nfaGroupMax == 0 ? numTerms : pd->id->nfaGroupMax;
 		if ( ( start + amount ) > numTerms )
 			amount = numTerms - start;
 
@@ -761,7 +759,7 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 		int start = 0;
 		while ( start < numTerms ) {
 			groups[g] = machines[start];
-			start += groupMax;
+			start += pd->id->nfaGroupMax == 0 ? numTerms : pd->id->nfaGroupMax;
 			g++;
 		}
 
