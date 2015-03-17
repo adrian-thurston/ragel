@@ -95,7 +95,9 @@ struct InputData
 		saveTemps(false),
 		nfaTermCheck(0),
 		nfaGroupMax(0),
-		nfaCondsDepth(6)
+		nfaCondsDepth(6),
+		nfaIntermedStateLimit(2000),
+		nfaFinalStateLimit(2000)
 	{}
 
 	std::string dirName;
@@ -162,6 +164,8 @@ struct InputData
 	const char *nfaTermCheck;
 	long nfaGroupMax;
 	long nfaCondsDepth;
+	long nfaIntermedStateLimit;
+	long nfaFinalStateLimit;
 
 	void verifyWritesHaveData();
 

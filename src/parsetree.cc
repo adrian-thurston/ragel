@@ -786,7 +786,7 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 		if ( strcmp( search, pd->id->nfaTermCheck ) == 0 ) {
 			FsmAp *fsm = 0;
 			try {
-				pd->fsmCtx->stateLimit = 2000;
+				pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
 				fsm = terms[name.pos()]->walk( pd );
 				pd->fsmCtx->stateLimit = -1;
 

@@ -436,6 +436,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					nfaGroupMax = strtol( eq, 0, 10 );
 				else if ( strcmp( arg, "nfa-conds-depth" ) == 0 )
 					nfaCondsDepth = strtol( eq, 0, 10 );
+				else if ( strcmp( arg, "nfa-intermed-state-limit" ) == 0 )
+					nfaIntermedStateLimit = strtol( eq, 0, 10 );
+				else if ( strcmp( arg, "nfa-final-state-limit" ) == 0 )
+					nfaFinalStateLimit = strtol( eq, 0, 10 );
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
