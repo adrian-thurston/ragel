@@ -237,21 +237,21 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 	int p;
 	for ( p = 0; p < paramCount; p++ ) {
 		if ( params[p] == 0 ) {
-			vm_push( 0 );
+			vm_push_tree( 0 );
 		}
 		else {
 			Head *head = stringAllocPointer( prg, params[p], strlen(params[p]) );
 			Tree *tree = constructString( prg, head );
 			treeUpref( tree );
-			vm_push( tree );
+			vm_push_tree( tree );
 		}
 	}
 
 	/* Set up the stack as if we have called. We allow a return value. */
-	vm_push( 0 ); 
-	vm_push( 0 );
-	vm_push( 0 );
-	vm_push( 0 );
+	vm_push_tree( 0 ); 
+	vm_push_tree( 0 );
+	vm_push_tree( 0 );
+	vm_push_tree( 0 );
 
 	execution.framePtr = vm_ptop();
 	execution.frameId = frameId;
@@ -260,7 +260,7 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 	sp = colm_execute_code( prg, &execution, sp, code );
 	
 	treeDownref( prg, sp, prg->returnVal );
-	prg->returnVal = vm_pop();
+	prg->returnVal = vm_pop_tree();
 
 	assert( sp == prg->stackRoot );
 

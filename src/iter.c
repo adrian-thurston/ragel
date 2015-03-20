@@ -51,7 +51,7 @@ void colm_list_iter_destroy( Program *prg, Tree ***psp, GenericIter *iter )
 		assert( iter->yieldSize == curStackSize );
 		vm_popn( iter->yieldSize );
 		for ( i = 0; i < iter->argSize; i++ )
-			treeDownref( prg, sp, vm_pop() );
+			treeDownref( prg, sp, vm_pop_tree() );
 		iter->type = 0;
 		*psp = sp;
 	}
@@ -232,7 +232,7 @@ void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
 		assert( iter->yieldSize == curStackSize );
 		vm_popn( iter->yieldSize );
 		for ( i = 0; i < iter->argSize; i++ )
-			treeDownref( prg, sp, vm_pop() );
+			treeDownref( prg, sp, vm_pop_tree() );
 		iter->type = 0;
 		*psp = sp;
 	}
@@ -247,7 +247,7 @@ void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *rit
 		assert( riter->yieldSize == curStackSize );
 		vm_popn( riter->yieldSize );
 		for ( i = 0; i < riter->argSize; i++ )
-			treeDownref( prg, sp, vm_pop() );
+			treeDownref( prg, sp, vm_pop_tree() );
 		riter->type = 0;
 		*psp = sp;
 	}
@@ -290,7 +290,7 @@ void userIterDestroy2( Program *prg, Tree ***psp, UserIter *uiter )
 		vm_popn( uiter->yieldSize );
 		vm_popn( sizeof(UserIter) / sizeof(Word) );
 		vm_popn( argSize );
-		vm_pop();
+		vm_pop_tree();
 
 		uiter->type = 0;
 
@@ -337,8 +337,8 @@ rec_call:
 		child = treeChild( prg, iter->ref.kid->tree );
 		if ( child != 0 ) {
 			vm_contiguous( 2 );
-			vm_push( (SW) iter->ref.next );
-			vm_push( (SW) iter->ref.kid );
+			vm_push_tree( (SW) iter->ref.next );
+			vm_push_tree( (SW) iter->ref.kid );
 			iter->ref.kid = child;
 			iter->ref.next = (Ref*)vm_ptop();
 			while ( iter->ref.kid != 0 ) {
@@ -347,8 +347,8 @@ rec_call:
 				rec_return:
 				iter->ref.kid = iter->ref.kid->next;
 			}
-			iter->ref.kid = (Kid*)vm_pop();
-			iter->ref.next = (Ref*)vm_pop();
+			iter->ref.kid = (Kid*)vm_pop_tree();
+			iter->ref.next = (Ref*)vm_pop_tree();
 		}
 	}
 
@@ -395,8 +395,8 @@ Tree *treeIterNextChild( Program *prg, Tree ***psp, TreeIter *iter )
 		else {
 			/* Make a reference to the root. */
 			vm_contiguous( 2 );
-			vm_push( (SW) iter->rootRef.next );
-			vm_push( (SW) iter->rootRef.kid );
+			vm_push_tree( (SW) iter->rootRef.next );
+			vm_push_tree( (SW) iter->rootRef.kid );
 			iter->ref.next = (Ref*)vm_ptop();
 
 			kid = child;
@@ -431,7 +431,7 @@ Tree *treeRevIterPrevChild( Program *prg, Tree ***psp, RevTreeIter *iter )
 		int c;
 		Kid *kid = treeChild( prg, iter->rootRef.kid->tree );
 		for ( c = 0; c < iter->children; c++ ) {
-			vm_push( (SW)kid );
+			vm_push_tree( (SW)kid );
 			kid = kid->next;
 		}
 	}
@@ -489,8 +489,8 @@ rec_call:
 			child = treeChild( prg, iter->ref.kid->tree );
 			if ( child != 0 ) {
 				vm_contiguous( 2 );
-				vm_push( (SW) iter->ref.next );
-				vm_push( (SW) iter->ref.kid );
+				vm_push_tree( (SW) iter->ref.next );
+				vm_push_tree( (SW) iter->ref.kid );
 				iter->ref.kid = child;
 				iter->ref.next = (Ref*)vm_ptop();
 				while ( iter->ref.kid != 0 ) {
@@ -499,8 +499,8 @@ rec_call:
 					rec_return:
 					iter->ref.kid = iter->ref.kid->next;
 				}
-				iter->ref.kid = (Kid*)vm_pop();
-				iter->ref.next = (Ref*)vm_pop();
+				iter->ref.kid = (Kid*)vm_pop_tree();
+				iter->ref.next = (Ref*)vm_pop_tree();
 			}
 		}
 	}
@@ -548,8 +548,8 @@ void iterFindRevRepeat( Program *prg, Tree ***psp, TreeIter *iter, int tryFirst 
 				if ( child == 0 )
 					break;
 				vm_contiguous( 2 );
-				vm_push( (SW) iter->ref.next );
-				vm_push( (SW) iter->ref.kid );
+				vm_push_tree( (SW) iter->ref.next );
+				vm_push_tree( (SW) iter->ref.kid );
 				iter->ref.kid = child;
 				iter->ref.next = (Ref*)vm_ptop();
 			}
@@ -576,8 +576,8 @@ void iterFindRevRepeat( Program *prg, Tree ***psp, TreeIter *iter, int tryFirst 
 			iter->ref.kid = treeChild( prg, ref->kid->tree );
 		}
 		else {
-			iter->ref.kid = (Kid*)vm_pop();
-			iter->ref.next = (Ref*)vm_pop();
+			iter->ref.kid = (Kid*)vm_pop_tree();
+			iter->ref.next = (Ref*)vm_pop_tree();
 		}
 first:
 		if ( iter->ref.kid->tree->id == iter->searchId || anyTree ) {

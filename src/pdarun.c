@@ -1111,19 +1111,19 @@ static void clear_parse_tree( Program *prg, Tree **sp, ParseTree *pt )
 
 free_tree:
 	if ( pt->next != 0 ) {
-		vm_push( (Tree*)pt->next );
+		vm_push_tree( (Tree*)pt->next );
 	}
 
 	if ( pt->leftIgnore != 0 ) {
-		vm_push( (Tree*)pt->leftIgnore );
+		vm_push_tree( (Tree*)pt->leftIgnore );
 	}
 
 	if ( pt->child != 0 ) {
-		vm_push( (Tree*)pt->child );
+		vm_push_tree( (Tree*)pt->child );
 	}
 
 	if ( pt->rightIgnore != 0 ) {
-		vm_push( (Tree*)pt->rightIgnore );
+		vm_push_tree( (Tree*)pt->rightIgnore );
 	}
 
 	if ( pt->shadow != 0 ) {
@@ -1135,7 +1135,7 @@ free_tree:
 
 	/* Any trees to downref? */
 	if ( sp != top ) {
-		pt = (ParseTree*)vm_pop();
+		pt = (ParseTree*)vm_pop_tree();
 		goto free_tree;
 	}
 }
@@ -1366,12 +1366,12 @@ head:
 			!(tree->flags & PF_ARTIFICIAL) && 
 			tree->child != 0 )
 	{
-		vm_push( (Tree*)lel );
+		vm_push_tree( (Tree*)lel );
 		lel = tree->child;
 
 		if ( lel != 0 ) {
 			while ( lel != 0 ) {
-				vm_push( (Tree*)lel );
+				vm_push_tree( (Tree*)lel );
 				lel = lel->next;
 			}
 		}
@@ -1379,7 +1379,7 @@ head:
 
 backup:
 	if ( sp != root ) {
-		ParseTree *next = (ParseTree*)vm_pop();
+		ParseTree *next = (ParseTree*)vm_pop_tree();
 		if ( next->next == lel ) {
 			/* Moving backwards. */
 			lel = next;

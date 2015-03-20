@@ -507,26 +507,24 @@ enum LEL_ID {
 #define IFR_RIF 1    /* return iframe pointer */
 #define IFR_RFR 0    /* return frame pointer */
 
-/* Exported to modules other than bytecode.c */
-#define vm_push(i) vm_push_type(Tree*, i)
-
 #define vm_push_type(type, i) \
 	( ( sp == prg->sb_beg ? (sp = vm_bs_add(prg, sp, 1)) : 0 ), (*((type*)(--sp)) = (i)) )
 
 #define vm_pushn(n) \
 	( ( (sp-(n)) < prg->sb_beg ? (sp = vm_bs_add(prg, sp, n)) : 0 ), (sp -= (n)) )
 
-#define vm_pop() vm_pop_type(Tree*)
 
 #define vm_pop_type(type) \
 	({ SW r = *sp; (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); (type)r; })
 
+#define vm_push_tree(i)   vm_push_type(Tree*, i)
 #define vm_push_stream(i) vm_push_type(Stream*, i)
 #define vm_push_struct(i) vm_push_type(Struct*, i)
 #define vm_push_parser(i) vm_push_type(Parser*, i)
 #define vm_push_value(i)  vm_push_type(Value, i)
 #define vm_push_string(i) vm_push_type(Str*, i)
 
+#define vm_pop_tree()   vm_pop_type(Tree*)
 #define vm_pop_stream() vm_pop_type(Stream*)
 #define vm_pop_struct() vm_pop_type(Struct*)
 #define vm_pop_parser() vm_pop_type(Parser*)
@@ -554,8 +552,6 @@ enum LEL_ID {
 #define vm_local_iframe(o) (exec->iframePtr[o])
 #define vm_plocal_iframe(o) (&exec->iframePtr[o])
 
-#define vm_push_val(i) \
-	vm_push( ((Tree*)i) )
 
 void vm_init( struct colm_program * );
 Tree** vm_bs_add( struct colm_program *, Tree **, int );
