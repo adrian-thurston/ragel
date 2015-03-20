@@ -1325,10 +1325,10 @@ void ParseData::analyzeGraph( FsmAp *graph )
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		/* The transition list. */
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
-			if ( trans->condSpace != 0 ) {
-				for ( CondSet::Iter sci = trans->condSpace->condSet; sci.lte(); sci++ )
-					(*sci)->numCondRefs += 1;
-			}
+			//if ( trans->condSpace != 0 ) {
+			//	for ( CondSet::Iter sci = trans->condSpace->condSet; sci.lte(); sci++ )
+			//		(*sci)->numCondRefs += 1;
+			//}
 
 			if ( trans->plain() ) {
 				for ( ActionTable::Iter at = trans->tdap()->actionTable; at.lte(); at++ )
@@ -1350,6 +1350,16 @@ void ParseData::analyzeGraph( FsmAp *graph )
 
 		for ( ActionTable::Iter at = st->eofActionTable; at.lte(); at++ )
 			at->value->numEofRefs += 1;
+
+		//for ( OutCondSet::Iter oci = st->outCondSet; oci.lte(); oci++ )
+		//	oci->action->numCondRefs += 1;
+	}
+
+	/* Can't count on cond references in transitions, since we don't refcount
+	 * the spaces. FIXME: That would be the proper solution. */
+	for ( CondSpaceMap::Iter cs = fsmCtx->condData->condSpaceMap; cs.lte(); cs++ ) {
+		for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
+			(*csi)->numCondRefs += 1;
 	}
 
 	/* Checks for bad usage of directives in action code. */
