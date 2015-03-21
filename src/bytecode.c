@@ -50,98 +50,63 @@ typedef struct colm_struct Struct;
 	i = ((uchar) *instr++); \
 } while(0)
 
-#define consume_byte( ) do { \
-	instr += 1; \
-} while(0)
-
-
-#define read_word_p( i, p ) do { \
-	i = ((Word)  p[0]); \
-	i |= ((Word) p[1]) << 8; \
-	i |= ((Word) p[2]) << 16; \
-	i |= ((Word) p[3]) << 24; \
-} while(0)
-
-/* There are better ways. */
-#if SIZEOF_LONG == 4
-	#define read_word( i ) do { \
-		i = ((Word) *instr++); \
-		i |= ((Word) *instr++) << 8; \
-		i |= ((Word) *instr++) << 16; \
-		i |= ((Word) *instr++) << 24; \
-	} while(0)
-#else
-	#define read_word( i ) do { \
-		i = ((Word) *instr++); \
-		i |= ((Word) *instr++) << 8; \
-		i |= ((Word) *instr++) << 16; \
-		i |= ((Word) *instr++) << 24; \
-		i |= ((Word) *instr++) << 32; \
-		i |= ((Word) *instr++) << 40; \
-		i |= ((Word) *instr++) << 48; \
-		i |= ((Word) *instr++) << 56; \
-	} while(0)
-#endif
-
-/* There are better ways. */
-#if SIZEOF_LONG == 4
-	#define read_tree( i ) do { \
-		Word w; \
-		w = ((Word) *instr++); \
-		w |= ((Word) *instr++) << 8; \
-		w |= ((Word) *instr++) << 16; \
-		w |= ((Word) *instr++) << 24; \
-		i = (Tree*) w; \
-	} while(0)
-
-	#define read_word_type( Type, i ) do { \
-		Word w; \
-		w = ((Word) *instr++); \
-		w |= ((Word) *instr++) << 8; \
-		w |= ((Word) *instr++) << 16; \
-		w |= ((Word) *instr++) << 24; \
-		i = (Type) w; \
-	} while(0)
-
-	#define consume_word( ) do { \
-		instr += 4; \
-	} while(0)
-#else
-	#define read_tree( i ) do { \
-		Word w; \
-		w = ((Word) *instr++); \
-		w |= ((Word) *instr++) << 8; \
-		w |= ((Word) *instr++) << 16; \
-		w |= ((Word) *instr++) << 24; \
-		w |= ((Word) *instr++) << 32; \
-		w |= ((Word) *instr++) << 40; \
-		w |= ((Word) *instr++) << 48; \
-		w |= ((Word) *instr++) << 56; \
-		i = (Tree*) w; \
-	} while(0)
-
-	#define read_word_type( Type, i ) do { \
-		Word w; \
-		w = ((Word) *instr++); \
-		w |= ((Word) *instr++) << 8; \
-		w |= ((Word) *instr++) << 16; \
-		w |= ((Word) *instr++) << 24; \
-		w |= ((Word) *instr++) << 32; \
-		w |= ((Word) *instr++) << 40; \
-		w |= ((Word) *instr++) << 48; \
-		w |= ((Word) *instr++) << 56; \
-		i = (Type) w; \
-	} while(0)
-
-	#define consume_word( ) do { \
-		instr += 8; \
-	} while(0)
-#endif
-
 #define read_half( i ) do { \
 	i = ((Word) *instr++); \
 	i |= ((Word) *instr++) << 8; \
 } while(0)
+
+/* There are better ways. */
+#if SIZEOF_LONG == 4
+
+	#define read_type( type, i ) do { \
+		Word w; \
+		w = ((Word) *instr++); \
+		w |= ((Word) *instr++) << 8; \
+		w |= ((Word) *instr++) << 16; \
+		w |= ((Word) *instr++) << 24; \
+		i = (type) w; \
+	} while(0)
+
+	#define read_type_p( type, i, p ) do { \
+		i = ((Type)  p[0]); \
+		i |= ((Type) p[1]) << 8; \
+		i |= ((Type) p[2]) << 16; \
+		i |= ((Type) p[3]) << 24; \
+	} while(0)
+
+#else
+
+	#define read_type( type, i ) do { \
+		Word w; \
+		w = ((Word) *instr++); \
+		w |= ((Word) *instr++) << 8; \
+		w |= ((Word) *instr++) << 16; \
+		w |= ((Word) *instr++) << 24; \
+		w |= ((Word) *instr++) << 32; \
+		w |= ((Word) *instr++) << 40; \
+		w |= ((Word) *instr++) << 48; \
+		w |= ((Word) *instr++) << 56; \
+		i = (type) w; \
+	} while(0)
+
+	#define read_type_p( type, i, p ) do { \
+		i = ((type)  p[0]); \
+		i |= ((type) p[1]) << 8; \
+		i |= ((type) p[2]) << 16; \
+		i |= ((type) p[3]) << 24; \
+		i |= ((type) p[4]) << 32; \
+		i |= ((type) p[5]) << 40; \
+		i |= ((type) p[6]) << 48; \
+		i |= ((type) p[7]) << 56; \
+	} while(0)
+#endif
+
+#define read_tree( i )   read_type( Tree*, i )
+#define read_parser( i ) read_type( Parser*, i )
+#define read_word( i )   read_type( Word, i )
+#define read_stream( i ) read_type( Stream*, i )
+
+#define read_word_p( i, p ) read_type_p( Word, i, p )
 
 static void rcode_downref( Program *prg, Tree **sp, Code *instr );
 
@@ -787,8 +752,8 @@ again:
 		}
 
 		case IN_INIT_CAPTURES: {
-			/* uchar ncaps; */
-			consume_byte();
+			uchar ncaps;
+			read_byte(ncaps);
 
 			debug( prg, REALM_BYTECODE, "IN_INIT_CAPTURES\n" );
 
@@ -2265,19 +2230,19 @@ again:
 		case IN_PARSE_INIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
 
-			Tree *parser;
+			Parser *parser;
 			Word pcr;
 			Word steps;
 
-			read_tree( parser );
+			read_parser( parser );
 			read_word( pcr );
 			read_word( steps );
 
-			vm_push_tree( (SW)exec->parser );
-			vm_push_tree( (SW)exec->pcr );
-			vm_push_tree( (SW)exec->steps );
+			vm_push_parser( exec->parser );
+			vm_push_value( exec->pcr );
+			vm_push_value( exec->steps );
 
-			exec->parser = (Parser*)parser;
+			exec->parser = parser;
 			exec->steps = steps;
 			exec->pcr = pcr;
 			break;
@@ -4046,13 +4011,13 @@ again:
 			break;
 		}
 		case IN_PARSE_INIT_BKT: {
-			Tree *parser;
+			Parser *parser;
 			Word pcr;
 			Word steps;
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
 
-			read_tree( parser );
+			read_parser( parser );
 			read_word( pcr );
 			read_word( steps );
 
@@ -4113,10 +4078,11 @@ again:
 			return;
 		}
 		case IN_PARSE_APPEND_BKT: {
-			Tree *parser;
+			Parser *parser;
 			Tree *input;
 			Word len;
-			read_tree( parser );
+
+			read_parser( parser );
 			read_tree( input );
 			read_word( len );
 
@@ -4128,6 +4094,7 @@ again:
 			Tree *sptr;
 			Tree *input;
 			Word len;
+
 			read_tree( sptr );
 			read_tree( input );
 			read_word( len );
@@ -4163,8 +4130,8 @@ again:
 			break;
 		}
 		case IN_LOAD_INPUT_BKT: {
-			/* Tree *input; */
-			consume_word();
+			Stream *input;
+			read_stream( input );
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_BKT\n" );
 			break;
 		}
