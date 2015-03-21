@@ -288,7 +288,6 @@ typedef unsigned long colm_value_t;
 #define IN_GET_STDERR            0xb7
 #define IN_TO_UPPER              0xb9
 #define IN_TO_LOWER              0xba
-#define IN_EXIT                  0xbb
 
 #define IN_LOAD_INPUT_R          0xc1
 #define IN_LOAD_INPUT_WV         0xc2
@@ -406,6 +405,8 @@ typedef unsigned long colm_value_t;
 #define IN_VLIST_POP_HEAD_WV     0x33
 #define IN_VLIST_POP_HEAD_WC     0x34
 #define IN_VLIST_POP_HEAD_BKT    0x35
+#define IN_EXIT                  0x39
+#define IN_EXIT_HARD             0x3a
 
 enum TYPE
 {

@@ -3933,6 +3933,56 @@ again:
 				vm_push_value( result );
 				break;
 			}
+
+			case IN_EXIT_HARD: {
+				debug( prg, REALM_BYTECODE, "IN_EXIT\n" );
+
+				Tree *global = vm_pop_tree();
+				prg->exitStatus = vm_pop_type(long);
+				prg->induceExit = 1;
+				exit( prg->exitStatus );
+			}
+			case IN_EXIT: {
+				debug( prg, REALM_BYTECODE, "IN_EXIT\n" );
+
+				Tree *global = vm_pop_tree();
+				prg->exitStatus = vm_pop_type(long);
+				prg->induceExit = 1;
+
+				while ( true ) {
+					FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
+					int frameId = exec->frameId;
+
+					downrefLocals( prg, &sp, exec->framePtr, fi->locals, fi->localsLen );
+
+					vm_popn( fi->frameSize );
+
+					/* This can help solve some crashes, but really need to move to
+					 * a register machine to make unwinding easier. Mixed values
+					 * living on the stack cannot be easily cleaned up in a
+					 * type-appropriate way. */
+					//while ( vm_ptop() != exec->framePtr )
+					//	vm_pop_value();
+
+					/* We stop on the root, leaving the psuedo-call setup on the
+					 * stack. Note we exclude the local data. */
+					if ( frameId == prg->rtd->rootFrameId )
+						break;
+
+					/* Call layout. */
+					exec->frameId = vm_pop_type(long);
+					exec->framePtr = vm_pop_type(Tree**);
+					instr = vm_pop_type(Code*);
+					Tree *retVal = vm_pop_tree();
+					vm_popn( fi->argSize );
+					vm_pop_tree();
+
+					/* Problem here. */
+					treeDownref( prg, sp, retVal );
+				}
+
+				goto out;
+			}
 			default: {
 				fatal( "UNKNOWN FUNCTION: 0x%2x -- something is wrong\n", c );
 				break;
@@ -3940,40 +3990,6 @@ again:
 			break;
 		}
 
-		case IN_EXIT: {
-			debug( prg, REALM_BYTECODE, "IN_EXIT\n" );
-
-			Tree *global = vm_pop_tree();
-			prg->exitStatus = vm_pop_type(long);
-			prg->induceExit = 1;
-
-			while ( true ) {
-				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-				int frameId = exec->frameId;
-
-				downrefLocals( prg, &sp, exec->framePtr, fi->locals, fi->localsLen );
-
-				vm_popn( fi->frameSize );
-
-				/* We stop on the root, leaving the psuedo-call setup on the
-				 * stack. Note we exclude the local data. */
-				if ( frameId == prg->rtd->rootFrameId )
-					break;
-
-				/* Call layout. */
-				exec->frameId = vm_pop_type(long);
-				exec->framePtr = vm_pop_type(Tree**);
-				instr = vm_pop_type(Code*);
-				Tree *retVal = vm_pop_tree();
-				vm_popn( fi->argSize );
-				vm_pop_tree();
-
-				/* Problem here. */
-				treeDownref( prg, sp, retVal );
-			}
-
-			goto out;
-		}
 
 
 		/* Halt is a default instruction given by the compiler when it is

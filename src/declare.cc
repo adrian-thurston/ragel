@@ -943,7 +943,10 @@ void Compiler::declareGlobalFields()
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeInt, globalObjectDef, "exit",
-		IN_EXIT, IN_EXIT, uniqueTypeInt, true );
+		IN_EXIT, IN_EXIT, uniqueTypeInt, true, true );
+
+	method = initFunction( uniqueTypeInt, globalObjectDef, "exit_hard",
+		IN_EXIT_HARD, IN_EXIT_HARD, uniqueTypeInt, true, true );
 
 	method = initFunction( uniqueTypeInt, globalObjectDef, "system",
 		IN_SYSTEM, IN_SYSTEM, uniqueTypeStr, true );
