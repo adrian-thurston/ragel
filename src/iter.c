@@ -347,8 +347,8 @@ rec_call:
 				rec_return:
 				iter->ref.kid = iter->ref.kid->next;
 			}
-			iter->ref.kid = (Kid*)vm_pop_tree();
-			iter->ref.next = (Ref*)vm_pop_tree();
+			iter->ref.kid = vm_pop_kid();
+			iter->ref.next = vm_pop_ref();
 		}
 	}
 
@@ -499,8 +499,8 @@ rec_call:
 					rec_return:
 					iter->ref.kid = iter->ref.kid->next;
 				}
-				iter->ref.kid = (Kid*)vm_pop_tree();
-				iter->ref.next = (Ref*)vm_pop_tree();
+				iter->ref.kid = vm_pop_kid();
+				iter->ref.next = vm_pop_ref();
 			}
 		}
 	}
@@ -576,8 +576,8 @@ void iterFindRevRepeat( Program *prg, Tree ***psp, TreeIter *iter, int tryFirst 
 			iter->ref.kid = treeChild( prg, ref->kid->tree );
 		}
 		else {
-			iter->ref.kid = (Kid*)vm_pop_tree();
-			iter->ref.next = (Ref*)vm_pop_tree();
+			iter->ref.kid = vm_pop_kid();
+			iter->ref.next = vm_pop_ref();
 		}
 first:
 		if ( iter->ref.kid->tree->id == iter->searchId || anyTree ) {

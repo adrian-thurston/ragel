@@ -1135,7 +1135,7 @@ free_tree:
 
 	/* Any trees to downref? */
 	if ( sp != top ) {
-		pt = (ParseTree*)vm_pop_tree();
+		pt = vm_pop_type(ParseTree*);
 		goto free_tree;
 	}
 }
@@ -1379,7 +1379,7 @@ head:
 
 backup:
 	if ( sp != root ) {
-		ParseTree *next = (ParseTree*)vm_pop_tree();
+		ParseTree *next = vm_pop_type(ParseTree*);
 		if ( next->next == lel ) {
 			/* Moving backwards. */
 			lel = next;

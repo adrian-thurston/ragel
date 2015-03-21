@@ -532,6 +532,8 @@ enum LEL_ID {
 #define vm_pop_map()    vm_pop_type(Map*)
 #define vm_pop_value()  vm_pop_type(Value)
 #define vm_pop_string() vm_pop_type(Str*)
+#define vm_pop_kid()    vm_pop_type(Kid*)
+#define vm_pop_ref()    vm_pop_type(Ref*)
 
 #define vm_pop_ignore() \
 	({ (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); })

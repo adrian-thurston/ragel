@@ -1837,8 +1837,8 @@ rec_call:
 		vm_push_tree( (SW) CollectIgnoreLeft );
 		goto rec_call;
 		rec_return_ign_left:
-		kid = (Kid*)vm_pop_tree();
-		parent = (Kid*)vm_pop_tree();
+		kid = vm_pop_kid();
+		parent = vm_pop_kid();
 	}
 
 	if ( kid->tree->id == LEL_ID_IGNORE )
@@ -1919,11 +1919,11 @@ rec_call:
 						goto rec_call;
 						rec_return_il:
 
-						kid = (Kid*)vm_pop_tree();
-						parent = (Kid*)vm_pop_tree();
-						ignore = (Kid*)vm_pop_tree();
-						leadingIgnore = (Kid*)vm_pop_tree();
-						visitType = (enum VisitType)vm_pop_tree();
+						kid = vm_pop_kid();
+						parent = vm_pop_kid();
+						ignore = vm_pop_kid();
+						leadingIgnore = vm_pop_kid();
+						visitType = vm_pop_type(enum VisitType);
 					}
 
 					ignore = ignore->next;
@@ -1970,9 +1970,9 @@ rec_call:
 			rec_return:
 			kid = kid->next;
 		}
-		kid = (Kid*)vm_pop_tree();
-		parent = (Kid*)vm_pop_tree();
-		visitType = (enum VisitType)vm_pop_tree();
+		kid = vm_pop_kid();
+		parent = vm_pop_kid();
+		visitType = vm_pop_type(enum VisitType);
 	}
 
 	if ( visitType == Term || visitType == NonTerm ) {
@@ -1993,14 +1993,14 @@ skip_node:
 		vm_push_tree( (SW) CollectIgnoreRight );
 		goto rec_call;
 		rec_return_ign_right:
-		kid = (Kid*)vm_pop_tree();
-		parent = (Kid*)vm_pop_tree();
+		kid = vm_pop_kid();
+		parent = vm_pop_kid();
 	}
 
 /* For skiping over content on null. */
 skip_null:
 
-	rt = (enum ReturnType)vm_pop_tree();
+	rt = vm_pop_type(enum ReturnType);
 	switch ( rt ) {
 		case Done:
 			debug( prg, REALM_PRINT, "return: done\n" );
