@@ -958,6 +958,31 @@ void Compiler::declareGlobalFields()
 			IN_SUFFIX, IN_SUFFIX, uniqueTypeStr, uniqueTypeInt, true, true );
 	method->useCallObj = false;
 
+
+	method = initFunction( uniqueTypeInt, globalObjectDef, "uord8",
+			IN_STR_UORD8,  IN_STR_UORD8, uniqueTypeStr, true, true );
+	method->useCallObj = false;
+
+	method = initFunction( uniqueTypeInt, globalObjectDef, "sord8",
+			IN_STR_SORD8,  IN_STR_SORD8, uniqueTypeStr, true, true );
+	method->useCallObj = false;
+
+	method = initFunction( uniqueTypeInt, globalObjectDef, "uord16",
+			IN_STR_UORD16, IN_STR_UORD16, uniqueTypeStr, true, true );
+	method->useCallObj = false;
+
+	method = initFunction( uniqueTypeInt, globalObjectDef, "sord16",
+			IN_STR_SORD16, IN_STR_SORD16, uniqueTypeStr, true, true );
+	method->useCallObj = false;
+
+	method = initFunction( uniqueTypeInt, globalObjectDef, "uord32",
+			IN_STR_UORD32, IN_STR_UORD32, uniqueTypeStr, true, true );
+	method->useCallObj = false;
+
+	method = initFunction( uniqueTypeInt, globalObjectDef, "sord32",
+			IN_STR_SORD32, IN_STR_SORD32, uniqueTypeStr, true, true );
+	method->useCallObj = false;
+
 	method = initFunction( uniqueTypeInt, globalObjectDef, "exit",
 		IN_EXIT, IN_EXIT, uniqueTypeInt, true, true );
 
