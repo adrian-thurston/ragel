@@ -1820,7 +1820,7 @@ again:
 			int children = 0;
 			Kid *kid = treeChild( prg, rootRef.kid->tree );
 			while ( kid != 0 ) {
-				vm_push_tree( (SW)kid );
+				vm_push_kid( kid );
 				kid = kid->next;
 				children++;
 			}
@@ -2188,7 +2188,7 @@ again:
 				si->fd = -1;
 			}
 
-			vm_push_tree( (Tree*)stream );
+			vm_push_stream( stream );
 			break;
 		}
 
@@ -2205,8 +2205,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_ERROR\n" );
 
 			Tree *obj = vm_pop_tree();
-			treeUpref( (Tree*)prg->error );
-			vm_push_tree( (Tree*)prg->error );
+			treeUpref( prg->error );
+			vm_push_tree( prg->error );
 			break;
 		}
 
@@ -2217,9 +2217,9 @@ again:
 			PdaRun *pdaRun = parser->pdaRun;
 			long steps = pdaRun->steps;
 
-			vm_push_tree( (SW)exec->parser );
-			vm_push_tree( (SW)exec->pcr );
-			vm_push_tree( (SW)exec->steps );
+			vm_push_parser( exec->parser );
+			vm_push_type( long, exec->pcr );
+			vm_push_type( long, exec->steps );
 
 			exec->parser = parser;
 			exec->steps = steps;
@@ -2257,14 +2257,14 @@ again:
 				vm_contiguous( stretch );
 			}
 
-			vm_push_tree( (SW)exec->framePtr );
-			vm_push_tree( (SW)exec->iframePtr );
-			vm_push_tree( (SW)exec->frameId );
+			vm_push_type( Tree**, exec->framePtr );
+			vm_push_type( Tree**, exec->iframePtr );
+			vm_push_type( long, exec->frameId );
 
 			/* Return location one instruction back. Depends on the size of of
 			 * the frag/finish. */
 			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
-			vm_push_tree( (SW)returnTo );
+			vm_push_type( Code*, returnTo );
 
 			exec->framePtr = 0;
 			exec->iframePtr = 0;
@@ -2764,10 +2764,10 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_REF_FROM_LOCAL %hd\n", field );
 
 			/* First push the null next pointer, then the kid pointer. */
-			Tree **ptr = vm_plocal(field);
+			Kid *kid = (Kid*)vm_plocal(field);
 			vm_contiguous( 2 );
-			vm_push_tree( 0 );
-			vm_push_tree( (SW)ptr );
+			vm_push_ref( 0 );
+			vm_push_kid( kid );
 			break;
 		}
 		case IN_REF_FROM_REF: {
@@ -2778,8 +2778,8 @@ again:
 
 			Ref *ref = (Ref*)vm_plocal(field);
 			vm_contiguous( 2 );
-			vm_push_tree( (SW)ref );
-			vm_push_tree( (SW)ref->kid );
+			vm_push_ref( ref );
+			vm_push_kid( ref->kid );
 			break;
 		}
 		case IN_REF_FROM_QUAL_REF: {
@@ -2796,8 +2796,8 @@ again:
 			Kid *attr_kid = getFieldKid( obj, field );
 
 			vm_contiguous( 2 );
-			vm_push_tree( (SW)ref );
-			vm_push_tree( (SW)attr_kid );
+			vm_push_ref( ref );
+			vm_push_kid( attr_kid );
 			break;
 		}
 		case IN_RHS_REF_FROM_QUAL_REF: {
@@ -2826,8 +2826,8 @@ again:
 			}
 
 			vm_contiguous( 2 );
-			vm_push_tree( (SW)ref );
-			vm_push_tree( (SW)attrKid );
+			vm_push_ref( ref );
+			vm_push_kid( attrKid );
 			break;
 		}
 		case IN_REF_FROM_BACK: {
@@ -2836,11 +2836,11 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_REF_FROM_BACK %hd\n", back );
 
-			Tree **ptr = (Tree**)(sp + back);
+			Kid *ptr = (Kid*)(sp + back);
 
 			vm_contiguous( 2 );
-			vm_push_tree( 0 );
-			vm_push_tree( (SW)ptr );
+			vm_push_ref( 0 );
+			vm_push_kid( ptr );
 			break;
 		}
 		case IN_TRITER_REF_FROM_CUR: {
@@ -2853,8 +2853,8 @@ again:
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
 			Ref *ref = &iter->ref;
 			vm_contiguous( 2 );
-			vm_push_tree( (SW)ref );
-			vm_push_tree( (SW)iter->ref.kid );
+			vm_push_ref( ref );
+			vm_push_kid( iter->ref.kid );
 			break;
 		}
 		case IN_UITER_REF_FROM_CUR: {
@@ -2866,8 +2866,8 @@ again:
 			/* Push the next pointer first, then the kid. */
 			UserIter *uiter = (UserIter*) vm_local(field);
 			vm_contiguous( 2 );
-			vm_push_tree( (SW)uiter->ref.next );
-			vm_push_tree( (SW)uiter->ref.kid );
+			vm_push_ref( uiter->ref.next );
+			vm_push_kid( uiter->ref.kid );
 			break;
 		}
 		case IN_GET_TOKEN_DATA_R: {
@@ -3166,10 +3166,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CALL_WV %s\n", fr->name );
 
-			vm_push_tree( 0 ); /* Return value. */
-			vm_push_tree( (SW)instr );
-			vm_push_tree( (SW)exec->framePtr );
-			vm_push_tree( (SW)exec->frameId );
+			vm_push_value( 0 ); /* Return value. */
+			vm_push_type( Code*, instr );
+			vm_push_type( Tree**, exec->framePtr );
+			vm_push_type( long, exec->frameId );
 
 			instr = fr->codeWV;
 			exec->framePtr = vm_ptop();
@@ -3185,10 +3185,10 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CALL_WC %s\n", fr->name );
 
-			vm_push_tree( 0 ); /* Return value. */
-			vm_push_tree( (SW)instr );
-			vm_push_tree( (SW)exec->framePtr );
-			vm_push_tree( (SW)exec->frameId );
+			vm_push_value( 0 ); /* Return value. */
+			vm_push_type( Code*, instr );
+			vm_push_type( Tree**, exec->framePtr );
+			vm_push_type( long, exec->frameId );
 
 			instr = fr->codeWC;
 			exec->framePtr = vm_ptop();
@@ -3243,9 +3243,9 @@ again:
 			 * the call. We don't need to set up the return ip because the
 			 * uiter advance will set it. The frame we need to do because it
 			 * is set once for the lifetime of the iterator. */
-			vm_push_tree( 0 );            /* Return instruction pointer,  */
-			vm_push_tree( (SW)exec->iframePtr ); /* Return iframe. */
-			vm_push_tree( (SW)exec->framePtr );  /* Return frame. */
+			vm_push_type( Code*, 0 );            /* Return instruction pointer,  */
+			vm_push_type( Tree**, exec->iframePtr ); /* Return iframe. */
+			vm_push_type( Tree**, exec->framePtr );  /* Return frame. */
 
 			uiterInit( prg, sp, uiter, fi, true );
 			break;
@@ -3268,9 +3268,9 @@ again:
 			 * the call. We don't need to set up the return ip because the
 			 * uiter advance will set it. The frame we need to do because it
 			 * is set once for the lifetime of the iterator. */
-			vm_push_tree( 0 );            /* Return instruction pointer,  */
-			vm_push_tree( (SW)exec->iframePtr ); /* Return iframe. */
-			vm_push_tree( (SW)exec->framePtr );  /* Return frame. */
+			vm_push_type( Code*, 0 );            /* Return instruction pointer,  */
+			vm_push_type( Tree**, exec->iframePtr ); /* Return iframe. */
+			vm_push_type( Tree**, exec->framePtr );  /* Return frame. */
 
 			uiterInit( prg, sp, uiter, fi, false );
 			break;

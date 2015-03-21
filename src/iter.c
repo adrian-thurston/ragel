@@ -337,8 +337,8 @@ rec_call:
 		child = treeChild( prg, iter->ref.kid->tree );
 		if ( child != 0 ) {
 			vm_contiguous( 2 );
-			vm_push_tree( (SW) iter->ref.next );
-			vm_push_tree( (SW) iter->ref.kid );
+			vm_push_ref( iter->ref.next );
+			vm_push_kid( iter->ref.kid );
 			iter->ref.kid = child;
 			iter->ref.next = (Ref*)vm_ptop();
 			while ( iter->ref.kid != 0 ) {
@@ -395,8 +395,8 @@ Tree *treeIterNextChild( Program *prg, Tree ***psp, TreeIter *iter )
 		else {
 			/* Make a reference to the root. */
 			vm_contiguous( 2 );
-			vm_push_tree( (SW) iter->rootRef.next );
-			vm_push_tree( (SW) iter->rootRef.kid );
+			vm_push_ref( iter->rootRef.next );
+			vm_push_kid( iter->rootRef.kid );
 			iter->ref.next = (Ref*)vm_ptop();
 
 			kid = child;
@@ -431,7 +431,7 @@ Tree *treeRevIterPrevChild( Program *prg, Tree ***psp, RevTreeIter *iter )
 		int c;
 		Kid *kid = treeChild( prg, iter->rootRef.kid->tree );
 		for ( c = 0; c < iter->children; c++ ) {
-			vm_push_tree( (SW)kid );
+			vm_push_kid( kid );
 			kid = kid->next;
 		}
 	}
@@ -489,8 +489,8 @@ rec_call:
 			child = treeChild( prg, iter->ref.kid->tree );
 			if ( child != 0 ) {
 				vm_contiguous( 2 );
-				vm_push_tree( (SW) iter->ref.next );
-				vm_push_tree( (SW) iter->ref.kid );
+				vm_push_ref( iter->ref.next );
+				vm_push_kid( iter->ref.kid );
 				iter->ref.kid = child;
 				iter->ref.next = (Ref*)vm_ptop();
 				while ( iter->ref.kid != 0 ) {
@@ -548,8 +548,8 @@ void iterFindRevRepeat( Program *prg, Tree ***psp, TreeIter *iter, int tryFirst 
 				if ( child == 0 )
 					break;
 				vm_contiguous( 2 );
-				vm_push_tree( (SW) iter->ref.next );
-				vm_push_tree( (SW) iter->ref.kid );
+				vm_push_ref( iter->ref.next );
+				vm_push_kid( iter->ref.kid );
 				iter->ref.kid = child;
 				iter->ref.next = (Ref*)vm_ptop();
 			}

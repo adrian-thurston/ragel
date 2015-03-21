@@ -1815,7 +1815,7 @@ void printKid( Program *prg, Tree **sp, struct colm_print_args *printArgs, Kid *
 	/* Iterate the kids passed in. We are expecting a next, which will allow us
 	 * to print the trailing ignore list. */
 	while ( kid != 0 ) {
-		vm_push_tree( (SW) Done );
+		vm_push_type( enum ReturnType, Done );
 		goto rec_call;
 		rec_return_top:
 		kid = kid->next;
@@ -1830,11 +1830,11 @@ rec_call:
 	/* If not currently skipping ignore data, then print it. Ignore data can
 	 * be associated with terminals and nonterminals. */
 	if ( kid->tree->flags & AF_LEFT_IGNORE ) {
-		vm_push_tree( (SW)parent );
-		vm_push_tree( (SW)kid );
+		vm_push_kid( parent );
+		vm_push_kid( kid );
 		parent = kid;
 		kid = treeLeftIgnoreKid( prg, kid->tree );
-		vm_push_tree( (SW) CollectIgnoreLeft );
+		vm_push_type( enum ReturnType, CollectIgnoreLeft );
 		goto rec_call;
 		rec_return_ign_left:
 		kid = vm_pop_kid();
@@ -1904,18 +1904,18 @@ rec_call:
 						break;
 
 					if ( ignore->tree->id != LEL_ID_IGNORE ) {
-						vm_push_tree( (SW)visitType );
-						vm_push_tree( (SW)leadingIgnore );
-						vm_push_tree( (SW)ignore );
-						vm_push_tree( (SW)parent );
-						vm_push_tree( (SW)kid );
+						vm_push_type( enum VisitType, visitType );
+						vm_push_kid( leadingIgnore );
+						vm_push_kid( ignore );
+						vm_push_kid( parent );
+						vm_push_kid( kid );
 
 						leadingIgnore = 0;
 						kid = ignore;
 						parent = 0;
 
 						debug( prg, REALM_PRINT, "rec call on %p\n", kid->tree );
-						vm_push_tree( (SW) RecIgnoreList );
+						vm_push_type( enum ReturnType, RecIgnoreList );
 						goto rec_call;
 						rec_return_il:
 
@@ -1959,13 +1959,13 @@ rec_call:
 		treeChild( prg, kid->tree );
 
 	if ( child != 0 ) {
-		vm_push_tree( (SW)visitType );
-		vm_push_tree( (SW)parent );
-		vm_push_tree( (SW)kid );
+		vm_push_type( enum VisitType, visitType );
+		vm_push_kid( parent );
+		vm_push_kid( kid );
 		parent = kid;
 		kid = child;
 		while ( kid != 0 ) {
-			vm_push_tree( (SW) ChildPrint );
+			vm_push_type( enum ReturnType, ChildPrint );
 			goto rec_call;
 			rec_return:
 			kid = kid->next;
@@ -1986,11 +1986,11 @@ skip_node:
 	 * be associated with terminals and nonterminals. */
 	if ( kid->tree->flags & AF_RIGHT_IGNORE ) {
 		debug( prg, REALM_PRINT, "right ignore\n" );
-		vm_push_tree( (SW)parent );
-		vm_push_tree( (SW)kid );
+		vm_push_kid( parent );
+		vm_push_kid( kid );
 		parent = kid;
 		kid = treeRightIgnoreKid( prg, kid->tree );
-		vm_push_tree( (SW) CollectIgnoreRight );
+		vm_push_type( enum ReturnType, CollectIgnoreRight );
 		goto rec_call;
 		rec_return_ign_right:
 		kid = vm_pop_kid();

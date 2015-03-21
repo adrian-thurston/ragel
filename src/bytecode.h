@@ -526,6 +526,10 @@ enum LEL_ID {
 #define vm_push_parser(i) vm_push_type(Parser*, i)
 #define vm_push_value(i)  vm_push_type(Value, i)
 #define vm_push_string(i) vm_push_type(Str*, i)
+#define vm_push_kid(i)    vm_push_type(Kid*, i)
+#define vm_push_ref(i)    vm_push_type(Ref*, i)
+#define vm_push_string(i) vm_push_type(Str*, i)
+#define vm_push_ptree(i)  vm_push_type(ParseTree*, i)
 
 #define vm_pop_tree()   vm_pop_type(Tree*)
 #define vm_pop_stream() vm_pop_type(Stream*)
@@ -537,6 +541,7 @@ enum LEL_ID {
 #define vm_pop_string() vm_pop_type(Str*)
 #define vm_pop_kid()    vm_pop_type(Kid*)
 #define vm_pop_ref()    vm_pop_type(Ref*)
+#define vm_pop_ptree()  vm_pop_type(ParseTree*)
 
 #define vm_pop_ignore() \
 	({ (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); })
