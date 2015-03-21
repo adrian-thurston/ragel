@@ -942,6 +942,22 @@ void Compiler::declareGlobalFields()
 		IN_TO_UPPER, IN_TO_UPPER, uniqueTypeStr, true );
 	method->useCallObj = false;
 
+	method = initFunction( uniqueTypeInt, globalObjectDef, "atoi",
+			IN_STR_ATOI,   IN_STR_ATOI, uniqueTypeStr, true, true );
+	method->useCallObj = false;
+
+	method = initFunction( uniqueTypeInt, globalObjectDef, "atoo",
+			IN_STR_ATOO,   IN_STR_ATOO, uniqueTypeStr, true, true );
+	method->useCallObj = false;
+
+	method = initFunction( uniqueTypeStr, globalObjectDef, "prefix",
+			IN_PREFIX, IN_PREFIX, uniqueTypeStr, uniqueTypeInt, true, true );
+	method->useCallObj = false;
+
+	method = initFunction( uniqueTypeStr, globalObjectDef, "suffix",
+			IN_SUFFIX, IN_SUFFIX, uniqueTypeStr, uniqueTypeInt, true, true );
+	method->useCallObj = false;
+
 	method = initFunction( uniqueTypeInt, globalObjectDef, "exit",
 		IN_EXIT, IN_EXIT, uniqueTypeInt, true, true );
 

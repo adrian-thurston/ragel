@@ -3461,6 +3461,30 @@ again:
 				treeDownref( prg, sp, (Tree*)str );
 				break;
 			}
+			case IN_PREFIX: {
+				debug( prg, REALM_BYTECODE, "IN_PREFIX\n" );
+
+				Value len = vm_pop_value();
+				Str *str = vm_pop_string();
+
+				Str *res = string_prefix( prg, str, (long) len );
+				treeUpref( (Tree*) res );
+				vm_push_string( res );
+				treeDownref( prg, sp, (Tree*)str );
+				break;
+			}
+			case IN_SUFFIX: {
+				debug( prg, REALM_BYTECODE, "IN_SUFFIX\n" );
+
+				Value pos = vm_pop_value();
+				Str *str = vm_pop_string();
+
+				Str *res = string_suffix( prg, str, (long) pos );
+				treeUpref( (Tree*) res );
+				vm_push_string( res );
+				treeDownref( prg, sp, (Tree*)str );
+				break;
+			}
 			case IN_LOAD_ARG0: {
 				Half field;
 				read_half( field );

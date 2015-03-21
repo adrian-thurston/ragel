@@ -407,6 +407,8 @@ typedef unsigned long colm_value_t;
 #define IN_VLIST_POP_HEAD_BKT    0x35
 #define IN_EXIT                  0x39
 #define IN_EXIT_HARD             0x3a
+#define IN_PREFIX                0x3b
+#define IN_SUFFIX                0x3c
 
 enum TYPE
 {
