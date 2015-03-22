@@ -2192,24 +2192,16 @@ void LangStmt::compileForIterBody( Compiler *pd,
 	 * Set up the loop cleanup code. 
 	 */
 
-	/* Set up the current loop cleanup. */
-	CodeVect loopCleanup;
-	if ( pd->loopCleanup != 0 )
-		loopCleanup.setAs( *pd->loopCleanup );
-
 	/* Add the cleanup for the current loop. */
-	loopCleanup.append( objField->iterImpl->inDestroy );
-	loopCleanup.appendHalf( objField->offset );
-
-	/* Push the loop cleanup. */
-	CodeVect *oldLoopCleanup = pd->loopCleanup;
-	pd->loopCleanup = &loopCleanup;
+	int lcLen = pd->unwindCode.length();
+	pd->unwindCode.insertHalf( 0, objField->offset );
+	pd->unwindCode.insert( 0, objField->iterImpl->inDestroy );
 
 	/* Compile the contents. */
 	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
 		stmt->compile( pd, code );
 
-	pd->loopCleanup = oldLoopCleanup;
+	pd->unwindCode.remove( 0, pd->unwindCode.length() - lcLen );
 
 	/* Jump back to the top to retest. */
 	long retestDist = code.length() - top + 3;
@@ -2511,8 +2503,8 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			code.append( IN_SAVE_RET );
 
 			/* The loop cleanup code. */
-			if ( pd->loopCleanup != 0 )
-				code.append( *pd->loopCleanup );
+			if ( pd->unwindCode.length() > 0 )
+				code.append( pd->unwindCode );
 
 			/* Jump to the return label. The distance will be filled in
 			 * later. */

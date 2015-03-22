@@ -395,7 +395,6 @@ Compiler::Compiler( )
 	nextPatConsId(0),
 	nextGenericId(1),
 	nextFuncId(0),
-	loopCleanup(0),
 	nextObjectId(1),     /* 0 is  reserved for no object. */
 	nextFrameId(0),
 	nextParserId(0),

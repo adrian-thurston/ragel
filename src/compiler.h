@@ -966,8 +966,8 @@ struct Compiler
 	LongVect breakJumps;
 	Function *curFunction;
 
-	/* Loops fill this in for return statements to use. */
-	CodeVect *loopCleanup;
+	/* For stack unwinding. Used at exits, returns, iterator destroy, etc. */
+	CodeVect unwindCode;
 
 	ObjectField *makeDataEl();
 	ObjectField *makePosEl();
@@ -1012,6 +1012,7 @@ struct Compiler
 	void clearContiguous( CodeVect &code, bool resetContiguous );
 
 	void declareReVars();
+
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

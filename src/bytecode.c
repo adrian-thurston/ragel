@@ -929,8 +929,8 @@ again:
 		case IN_SAVE_RET: {
 			debug( prg, REALM_BYTECODE, "IN_SAVE_RET\n" );
 
-			Tree *val = vm_pop_tree();
-			vm_local(FR_RV) = val;
+			Value val = vm_pop_value();
+			vm_local(FR_RV) = (Tree*)val;
 			break;
 		}
 		case IN_GET_LOCAL_REF_R: {
@@ -1795,7 +1795,8 @@ again:
 			read_half( field );
 
 			TreeIter *iter = (TreeIter*) vm_plocal(field);
-			debug( prg, REALM_BYTECODE, "IN_TRITER_DESTROY %d\n", iter->yieldSize );
+			debug( prg, REALM_BYTECODE, "IN_TRITER_DESTROY %hd %d\n",
+					field, iter->yieldSize );
 			treeIterDestroy( prg, &sp, iter );
 			break;
 		}
