@@ -3386,12 +3386,16 @@ again:
 			memcpy( cmd0, cmd->value->data, cmd->value->length );
 			cmd0[cmd->value->length] = 0;
 
-			int r = system( cmd0 );
+			int res = system( cmd0 );
+
+			if ( WIFSIGNALED( res ) )
+				raise( WTERMSIG( res ) );
+			res = WEXITSTATUS( res );
 
 			treeDownref( prg, sp, (Tree*)cmd );
 
-			Value result = r;
-			vm_push_value( result );
+			Value val = res;
+			vm_push_value( val );
 			break;
 		}
 
