@@ -78,6 +78,9 @@ typedef unsigned long colm_value_t;
 // 0xeb
 // 0xec
 // 0xd4
+// 0x20
+
+#define IN_LOAD_RETVAL           0xd4
 
 #define IN_PREP_ARGS             0xe8
 #define IN_CLEAR_ARGS            0xe9
@@ -107,7 +110,6 @@ typedef unsigned long colm_value_t;
 #define IN_POP_VAL               0xbe
 #define IN_DUP_VAL               0x1f
 #define IN_DUP_TREE              0xf2
-#define IN_TOP_SWAP              0x20
 
 #define IN_REJECT                0x21
 #define IN_MATCH                 0x22
@@ -590,6 +592,7 @@ typedef struct colm_execution
 	Parser *parser;
 	long steps;
 	long pcr;
+	Tree *retVal;
 } Execution;
 
 long stringLength( Head *str );

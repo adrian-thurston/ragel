@@ -1085,10 +1085,8 @@ void Compiler::endContiguous( CodeVect &code, bool resetContiguous )
 
 void Compiler::clearContiguous( CodeVect &code, bool resetContiguous )
 {
-	if ( resetContiguous ) {
-		code.append( IN_TOP_SWAP );
+	if ( resetContiguous )
 		code.append( IN_POP );
-	}
 }
 
 UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect *args ) 
@@ -1096,11 +1094,13 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );
 
+	Function *func = lookup.objMethod->func;
+
 	/* Prepare the contiguous call args space. */
-	code.append( IN_PREP_ARGS );
+	if ( func != 0 )
+		code.append( IN_PREP_ARGS );
 
 	bool resetContiguous = false;
-	Function *func = lookup.objMethod->func;
 	if ( func != 0 ) {
 		long stretch = func->paramListSize + 5 + func->localFrame->size();
 		resetContiguous = pd->beginContiguous( code, stretch );
@@ -1121,8 +1121,11 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	pd->endContiguous( code, resetContiguous );
 	pd->clearContiguous( code, resetContiguous );
 
-	code.append( IN_TOP_SWAP );
-	code.append( IN_CLEAR_ARGS );
+	if ( func != 0 )
+		code.append( IN_CLEAR_ARGS );
+
+	if ( func != 0 )
+		code.append( IN_LOAD_RETVAL );
 
 	/* Return the type to the expression. */
 	return lookup.uniqueType;

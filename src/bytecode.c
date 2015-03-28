@@ -1743,15 +1743,6 @@ again:
 			vm_push_value( val );
 			break;
 		}
-		case IN_TOP_SWAP: {
-			debug( prg, REALM_BYTECODE, "IN_TOP_SWAP\n" );
-
-			Tree *v1 = vm_pop_tree();
-			Tree *v2 = vm_pop_tree();
-			vm_push_tree( v1 );
-			vm_push_tree( v2 );
-			break;
-		}
 		case IN_DUP_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_DUP_VAL\n" );
 
@@ -2274,6 +2265,12 @@ again:
 			exec->frameId = exec->parser->pdaRun->frameId;
 
 			instr = exec->parser->pdaRun->code;
+			break;
+		}
+
+		case IN_LOAD_RETVAL: {
+			debug( prg, REALM_BYTECODE, "IN_LOAD_RETVAL\n" );
+			vm_push_tree( exec->retVal );
 			break;
 		}
 
@@ -3299,8 +3296,8 @@ again:
 			userIterDestroy( prg, &sp, uiter );
 			break;
 		}
-		case IN_RET: {
 
+		case IN_RET: {
 			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 			downref_local_trees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
 			vm_popn( fi->frameSize );
@@ -3308,9 +3305,8 @@ again:
 			exec->frameId = vm_pop_type(long);
 			exec->framePtr = vm_pop_type(Tree**);
 			instr = vm_pop_type(Code*);
-			Tree *retVal = vm_pop_tree();
+			exec->retVal = vm_pop_tree();
 			vm_popn( fi->argSize );
-			vm_push_tree( retVal );
 
 			fi = &prg->rtd->frameInfo[exec->frameId];
 			debug( prg, REALM_BYTECODE, "IN_RET %s\n", fi->name );
@@ -3991,9 +3987,6 @@ again:
 				prg->exitStatus = vm_pop_type(long);
 				prg->induceExit = 1;
 
-				/* The callArgs push for exit. */
-				vm_pop_value();
-
 				while ( true ) {
 					FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 					int frameId = exec->frameId;
@@ -4020,7 +4013,6 @@ again:
 					instr = vm_pop_type(Code*);
 					Tree *retVal = vm_pop_tree();
 					vm_popn( fi->argSize );
-
 
 					/* The CONTIGUOS PUSH. */
 					vm_pop_tree();
