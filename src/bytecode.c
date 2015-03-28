@@ -3157,13 +3157,25 @@ again:
 		}
 
 		case IN_PREP_ARGS: {
-			debug( prg, REALM_BYTECODE, "IN_PREP_ARGS\n" );
+			Half size;
+			read_half( size );
+
+			debug( prg, REALM_BYTECODE, "IN_PREP_ARGS %hd\n", size );
+
 			vm_push_type( Tree**, exec->callArgs );
+			exec->callArgs = vm_ptop();
+			vm_pushn( size );
+			memset( vm_ptop(), 0, sizeof(Word) * size );
 			break;
 		}
 
 		case IN_CLEAR_ARGS: {
-			debug( prg, REALM_BYTECODE, "IN_CLEAR_ARGS\n" );
+			Half size;
+			read_half( size );
+
+			debug( prg, REALM_BYTECODE, "IN_CLEAR_ARGS %hd\n", size );
+
+			vm_popn( size );
 			exec->callArgs = vm_pop_type( Tree** );
 			break;
 		}
@@ -3993,6 +4005,9 @@ again:
 
 					downrefLocals( prg, &sp, exec->framePtr, fi->locals, fi->localsLen );
 
+					debug( prg, REALM_BYTECODE, " exit popping %s argSize %d\n",
+							( fi->name != 0 ? fi->name : "<no-name>" ), fi->argSize );
+
 					vm_popn( fi->frameSize );
 
 					/* This can help solve some crashes, but really need to move to
@@ -4017,7 +4032,8 @@ again:
 					/* The CONTIGUOS PUSH. */
 					vm_pop_tree();
 
-					/* The callArgs push. */
+					/* The IN_PREP_ARGS stack data. */
+					vm_popn( fi->argSize );
 					vm_pop_value();
 
 					if ( fi->retTree ) {

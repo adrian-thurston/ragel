@@ -1097,8 +1097,12 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	Function *func = lookup.objMethod->func;
 
 	/* Prepare the contiguous call args space. */
-	if ( func != 0 )
+	int asLoc;
+	if ( func != 0 ) {
 		code.append( IN_PREP_ARGS );
+		asLoc = code.length();
+		code.appendHalf( 0 );
+	}
 
 	bool resetContiguous = false;
 	if ( func != 0 ) {
@@ -1121,8 +1125,11 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	pd->endContiguous( code, resetContiguous );
 	pd->clearContiguous( code, resetContiguous );
 
-	if ( func != 0 )
+	if ( func != 0 ) {
 		code.append( IN_CLEAR_ARGS );
+		code.appendHalf( func->paramListSize );
+		code.setHalf( asLoc, func->paramListSize );
+	}
 
 	if ( func != 0 )
 		code.append( IN_LOAD_RETVAL );
