@@ -63,6 +63,7 @@ IterImpl::IterImpl( Type type ) :
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
 		useSearchUT = true;
 		break;
+
 	case Child:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
@@ -75,6 +76,7 @@ IterImpl::IterImpl( Type type ) :
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
 		useSearchUT = true;
 		break;
+
 	case RevChild:
 		inCreateWV = IN_REV_TRITER_FROM_REF;
 		inCreateWC = IN_REV_TRITER_FROM_REF;
@@ -1094,12 +1096,16 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );
 
+	/* Prepare the contiguous call args space. */
+	code.append( IN_PREP_ARGS );
+
 	bool resetContiguous = false;
 	Function *func = lookup.objMethod->func;
 	if ( func != 0 ) {
 		long stretch = func->paramListSize + 5 + func->localFrame->size();
 		resetContiguous = pd->beginContiguous( code, stretch );
 	}
+
 
 	/* Evaluate and push the arguments. */
 	ObjectField **paramRefs = evaluateArgs( pd, code, lookup, args );
@@ -1114,6 +1120,9 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 
 	pd->endContiguous( code, resetContiguous );
 	pd->clearContiguous( code, resetContiguous );
+
+	code.append( IN_TOP_SWAP );
+	code.append( IN_CLEAR_ARGS );
 
 	/* Return the type to the expression. */
 	return lookup.uniqueType;

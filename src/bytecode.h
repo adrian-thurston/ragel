@@ -74,12 +74,13 @@ typedef unsigned long colm_value_t;
 
 #define IN_TST_NZ_TREE           0xd1
 
-// 0xe8
-// 0xe9
 // 0xea
 // 0xeb
 // 0xec
 // 0xd4
+
+#define IN_PREP_ARGS             0xe8
+#define IN_CLEAR_ARGS            0xe9
 
 #define IN_GEN_ITER_FROM_REF     0xd3
 #define IN_GEN_ITER_DESTROY      0xd5
@@ -577,11 +578,12 @@ typedef Tree **StackPtr;
 #define SIZEOF_HALF 2
 #define SIZEOF_WORD sizeof(Word)
 
-typedef struct _Execution
+typedef struct colm_execution
 {
 	Tree **framePtr;
 	Tree **iframePtr;
 	long frameId;
+	Tree **callArgs;
 
 	long rcodeUnitLen;
 

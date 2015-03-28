@@ -1358,6 +1358,7 @@ void Compiler::makeRuntimeData()
 
 	runtimeData->frameInfo[rootCodeBlock->frameId].frameSize = rootLocalFrame->size();
 	runtimeData->frameInfo[rootCodeBlock->frameId].argSize = 0;
+	runtimeData->frameInfo[rootCodeBlock->frameId].retTree = false;
 
 	/*
 	 * prodInfo
@@ -1385,6 +1386,7 @@ void Compiler::makeRuntimeData()
 
 			runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
 			runtimeData->frameInfo[block->frameId].argSize = 0;
+			runtimeData->frameInfo[block->frameId].retTree = false;
 		}
 
 		runtimeData->prodInfo[count].lhsUpref = true;
@@ -1424,6 +1426,7 @@ void Compiler::makeRuntimeData()
 
 			runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
 			runtimeData->frameInfo[block->frameId].argSize = 0;
+			runtimeData->frameInfo[block->frameId].retTree = false;
 		}
 	}
 
@@ -1458,6 +1461,7 @@ void Compiler::makeRuntimeData()
 
 				runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
 				runtimeData->frameInfo[block->frameId].argSize = 0;
+				runtimeData->frameInfo[block->frameId].retTree = false;
 			}
 			
 			runtimeData->lelInfo[i].objectTypeId = 
@@ -1541,6 +1545,13 @@ void Compiler::makeRuntimeData()
 			/* Meta. */
 			runtimeData->frameInfo[block->frameId].frameSize = func->localFrame->size();
 			runtimeData->frameInfo[block->frameId].argSize = func->paramListSize;
+
+			bool retTree = false;
+			if ( func->typeRef ) {
+				UniqueType *ut = func->typeRef->resolveType( this );
+				retTree = ut->tree();
+			}
+			runtimeData->frameInfo[block->frameId].retTree = retTree;
 		}
 
 		runtimeData->functionInfo[func->funcId].frameSize = func->localFrame->size();

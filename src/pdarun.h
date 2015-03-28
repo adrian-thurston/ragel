@@ -99,7 +99,7 @@ void undoStreamPull( StreamImpl *inputStream, const char *data, long length );
 	#error "SIZEOF_LONG contained an unexpected value"
 #endif
 
-struct _Execution;
+struct colm_execution;
 
 typedef struct _RtCodeVect
 {
@@ -225,6 +225,7 @@ typedef struct _FrameInfo
 	long localsLen;
 	long argSize;
 	long frameSize;
+	char retTree;
 } FrameInfo;
 
 typedef struct _RegionInfo

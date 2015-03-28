@@ -3158,6 +3158,19 @@ again:
 			vm_push_tree( 0 );
 			break;
 		}
+
+		case IN_PREP_ARGS: {
+			debug( prg, REALM_BYTECODE, "IN_PREP_ARGS\n" );
+			vm_push_type( Tree**, exec->callArgs );
+			break;
+		}
+
+		case IN_CLEAR_ARGS: {
+			debug( prg, REALM_BYTECODE, "IN_CLEAR_ARGS\n" );
+			exec->callArgs = vm_pop_type( Tree** );
+			break;
+		}
+
 		case IN_CALL_WV: {
 			Half funcId;
 			read_half( funcId );
@@ -3978,6 +3991,9 @@ again:
 				prg->exitStatus = vm_pop_type(long);
 				prg->induceExit = 1;
 
+				/* The callArgs push for exit. */
+				vm_pop_value();
+
 				while ( true ) {
 					FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 					int frameId = exec->frameId;
@@ -4004,10 +4020,18 @@ again:
 					instr = vm_pop_type(Code*);
 					Tree *retVal = vm_pop_tree();
 					vm_popn( fi->argSize );
+
+
+					/* The CONTIGUOS PUSH. */
 					vm_pop_tree();
 
-					/* Problem here. */
-					treeDownref( prg, sp, retVal );
+					/* The callArgs push. */
+					vm_pop_value();
+
+					if ( fi->retTree ) {
+						/* Problem here. */
+						treeDownref( prg, sp, retVal );
+					}
 				}
 
 				goto out;
