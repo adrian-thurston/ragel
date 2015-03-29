@@ -78,10 +78,10 @@ typedef unsigned long colm_value_t;
 // 0xeb
 // 0xec
 // 0xd4
-// 0x20
 
 #define IN_LOAD_RETVAL           0xd4
 
+#define IN_STASH_ARG             0x20
 #define IN_PREP_ARGS             0xe8
 #define IN_CLEAR_ARGS            0xe9
 
@@ -480,9 +480,10 @@ enum LEL_ID {
  */
 
 /* Number of spots in the frame, after the args. */
-#define FR_AA 4
+#define FR_AA 5
 
 /* Positions relative to the frame pointer. */
+#define FR_CA  4    /* call args */
 #define FR_RV  3    /* return value */
 #define FR_RI  2    /* return instruction */
 #define FR_RFP 1    /* return frame pointer */
@@ -506,7 +507,7 @@ enum LEL_ID {
  */
 
 /* Number of spots in the frame, after the args. */
-#define IFR_AA  3
+#define IFR_AA  5
 
 /* Positions relative to the frame pointer. */
 #define IFR_RIN 2    /* return instruction */
@@ -560,11 +561,8 @@ enum LEL_ID {
 
 #define vm_ssize()       ( prg->sb_total + (prg->sb_end - sp) )
 
-#define vm_local(o) (exec->framePtr[o])
-#define vm_plocal(o) (&exec->framePtr[o])
 #define vm_local_iframe(o) (exec->iframePtr[o])
 #define vm_plocal_iframe(o) (&exec->iframePtr[o])
-
 
 void vm_init( struct colm_program * );
 Tree** vm_bs_add( struct colm_program *, Tree **, int );
@@ -594,6 +592,42 @@ typedef struct colm_execution
 	long pcr;
 	Tree *retVal;
 } Execution;
+
+struct colm_execution;
+
+static inline Tree **vm_get_plocal( struct colm_execution *exec, int o )
+{
+	if ( o >= FR_AA ) {
+		Tree **callArgs = (Tree**)exec->framePtr[FR_CA];
+		return &callArgs[o - FR_AA];
+	}
+	else {
+		return &exec->framePtr[o];
+	}
+}
+
+static inline Tree *vm_get_local( struct colm_execution *exec, int o )
+{
+	if ( o >= FR_AA ) {
+		Tree **callArgs = (Tree**)exec->framePtr[FR_CA];
+		return callArgs[o - FR_AA];
+	}
+	else {
+		return exec->framePtr[o];
+	}
+}
+
+static inline void vm_set_local( struct colm_execution *exec, int o, Tree* v )
+{
+	if ( o >= FR_AA ) {
+		Tree **callArgs = (Tree**)exec->framePtr[FR_CA];
+		callArgs[o - FR_AA] = v;
+	}
+	else {
+		exec->framePtr[o] = v;
+	}
+}
+
 
 long stringLength( Head *str );
 const char *stringData( Head *str );

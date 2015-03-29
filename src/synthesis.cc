@@ -178,6 +178,7 @@ IterImpl::IterImpl( Type type, Function *func ) :
 	func(func),
 	useFuncId(true),
 	useSearchUT(true),
+	useGenericId(false),
 	inCreateWV(IN_UITER_CREATE_WV),
 	inCreateWC(IN_UITER_CREATE_WC),
 	inDestroy(IN_UITER_DESTROY),
@@ -852,8 +853,8 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 	ParameterList::Iter p;
 	long size = 0;
 	long tempPops = 0;
+	long pos = 0;
 
-	/* First pass we need to allocate and evaluate temporaries. */
 	paramList != 0 && ( p = *paramList );
 	for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
 		/* Get the expression and the UT for the arg. */
@@ -861,9 +862,23 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 		UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
 
 		if ( paramUT->typeId == TYPE_REF ) {
-			/* Make sure we are dealing with a variable reference. */
-			if ( ! expression->canTakeRef( pd ) ) {
-				/* Evaluate the expression. */
+			if ( expression->canTakeRef( pd ) ) {
+				/* Push object loads for reference parameters. */
+				LangVarRef *varRef = expression->term->varRef;
+				ObjectField *refOf = varRef->preEvaluateRef( pd, code );
+				paramRefs[pe.pos()] = refOf;
+
+				size += varRef->qual->length() * 2;
+				(*pe)->offQualRef = size;
+			/**/
+
+				refOf = varRef->evaluateRef( pd, code, 0 ); //(size - (*pe)->offQualRef) );
+				paramRefs[pe.pos()] = refOf;
+
+				//size += 2;
+			}
+			else {
+				/* First pass we need to allocate and evaluate temporaries. */
 				UniqueType *exprUT = expression->evaluate( pd, code );
 
 				(*pe)->exprUT = exprUT;
@@ -871,60 +886,20 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 				size += 1;
 				(*pe)->offTmp = size;
 				tempPops += 1;
-			}
-		}
-
-		/* Advance the parameter list iterator if we have it. */
-		paramList != 0 && p.increment();
-	}
-
-
-	/* Second pass we need to push object loads for reference parameters. */
-	paramList != 0 && ( p = *paramList );
-	for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
-		/* Get the expression and the UT for the arg. */
-		LangExpr *expression = (*pe)->expr;
-		UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
-
-		if ( paramUT->typeId == TYPE_REF ) {
-			if ( expression->canTakeRef( pd ) ) {
-				/* Lookup the field. */
-				LangVarRef *varRef = expression->term->varRef;
-				ObjectField *refOf = varRef->preEvaluateRef( pd, code );
-				paramRefs[pe.pos()] = refOf;
-
-				size += varRef->qual->length() * 2;
-				(*pe)->offQualRef = size;
-			}
-		}
-
-		/* Advance the parameter list iterator if we have it. */
-		paramList != 0 && p.increment();
-	}
-
-	paramList != 0 && ( p = *paramList );
-	for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
-		/* Get the expression and the UT for the arg. */
-		LangExpr *expression = (*pe)->expr;
-		UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
-
-		if ( paramUT->typeId == TYPE_REF ) {
-			if ( expression->canTakeRef( pd ) ) {
-				/* Lookup the field. */
-				LangVarRef *varRef = expression->term->varRef;
-
-				ObjectField *refOf = varRef->evaluateRef( pd, code,
-						(size - (*pe)->offQualRef) );
-				paramRefs[pe.pos()] = refOf;
-
-				size += 2;
-			}
-			else {
+			/**/
 				code.append( IN_REF_FROM_BACK );
-				code.appendHalf( size - (*pe)->offTmp );
+				code.appendHalf( 0 ); //size - (*pe)->offTmp );
 
-				size += 2;
+				//size += 2;
 			}
+
+			if ( lookup.objMethod->func ) {
+				code.append( IN_STASH_ARG );
+				code.appendHalf( pos );
+				code.appendHalf( 2 );
+			}
+
+			pos += 2;
 		}
 		else {
 			UniqueType *exprUT = expression->evaluate( pd, code );
@@ -933,6 +908,14 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 				error(loc) << "arg " << pe.pos()+1 << " is of the wrong type" << endp;
 
 			size += 1;
+
+			if ( lookup.objMethod->func ) {
+				code.append( IN_STASH_ARG );
+				code.appendHalf( pos );
+				code.appendHalf( 1 );
+			}
+
+			pos += 1;
 		}
 
 		/* Advance the parameter list iterator if we have it. */
@@ -1109,7 +1092,6 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 		long stretch = func->paramListSize + 5 + func->localFrame->size();
 		resetContiguous = pd->beginContiguous( code, stretch );
 	}
-
 
 	/* Evaluate and push the arguments. */
 	ObjectField **paramRefs = evaluateArgs( pd, code, lookup, args );
@@ -2258,14 +2240,21 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 				"that is not an iterator" << endp;
 	}
 
-	bool resetContiguous = false;
+	/* Prepare the contiguous call args space. */
 	Function *func = lookup.objMethod->func;
+	int asLoc;
+	if ( func != 0 ) {
+		code.append( IN_PREP_ARGS );
+		asLoc = code.length();
+		code.appendHalf( 0 );
+	}
+
+	bool resetContiguous = false;
 	if ( func != 0 ) {
 		/* FIXME: what is the right size here (16)? */
 		long stretch = func->paramListSize + 16 + func->localFrame->size();
 		resetContiguous = pd->beginContiguous( code, stretch );
 	}
-
 
 	/* 
 	 * Create the iterator from the local var.
@@ -2343,8 +2332,13 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	iterCall->langTerm->varRef->resetActiveRefs( pd, lookup, paramRefs );
 	delete[] paramRefs;
 
-	if ( resetContiguous )
-		code.append( IN_POP );
+	pd->clearContiguous( code, resetContiguous );
+
+	if ( func != 0 ) {
+		code.append( IN_CLEAR_ARGS );
+		code.appendHalf( func->paramListSize );
+		code.setHalf( asLoc, func->paramListSize );
+	}
 }
 
 void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
@@ -3059,18 +3053,12 @@ void Compiler::placeUserFunction( Function *func, bool isUserIter )
 	paramOffset = 0;
 	paramPos = 0;
 	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++, paramPos++ ) {
-		/* Moving downward, and need the offset to point to the lower half of
-		 * the argument. */
-		paramOffset -= sizeOfField( paramUTs[paramPos] );
-
 		/* How much space do we need to make for call overhead. */
 		long frameAfterArgs = isUserIter ? IFR_AA : FR_AA;
 
-		/* Going up first we have the frame data, then maybe
-		 * the user iterator, then the args from high to low. */
-		param->offset = frameAfterArgs + 
-				( isUserIter ? ( sizeof(UserIter) / sizeof(Word) ) : 0 ) +
-				paramListSize + paramOffset;
+		param->offset = frameAfterArgs + paramOffset;
+
+		paramOffset += sizeOfField( paramUTs[paramPos] );
 	}
 
 	func->paramListSize = paramListSize;

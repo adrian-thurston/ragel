@@ -258,7 +258,7 @@ static Tree *get_local_split( Program *prg, Tree **frame, long field )
 }
 
 static void downref_local_trees( Program *prg, Tree **sp,
-		Tree **frame, LocalInfo *locals, long localsLen )
+		Execution *exec, LocalInfo *locals, long localsLen )
 {
 	long i;
 	for ( i = localsLen-1; i >= 0; i-- ) {
@@ -266,14 +266,14 @@ static void downref_local_trees( Program *prg, Tree **sp,
 			debug( prg, REALM_BYTECODE, "local tree downref: %ld\n",
 					(long)locals[i].offset );
 
-			Tree *tree = (Tree*) frame[(long)locals[i].offset];
+			Tree *tree = (Tree*) vm_get_local( exec, (long)locals[i].offset );
 			treeDownref( prg, sp, tree );
 		}
 	}
 }
 
-static void downrefLocals( Program *prg, Tree ***psp,
-		Tree **frame, LocalInfo *locals, long localsLen )
+static void downref_locals( Program *prg, Tree ***psp,
+		Execution *exec, LocalInfo *locals, long localsLen )
 {
 	long i;
 	for ( i = localsLen-1; i >= 0; i-- ) {
@@ -281,28 +281,28 @@ static void downrefLocals( Program *prg, Tree ***psp,
 			case LI_Tree: {
 				debug( prg, REALM_BYTECODE, "local tree downref: %ld\n",
 						(long)locals[i].offset );
-				Tree *tree = (Tree*) frame[(long)locals[i].offset];
+				Tree *tree = (Tree*) vm_get_local( exec, (long)locals[i].offset );
 				treeDownref( prg, *psp, tree );
 				break;
 			}
 			case LI_Iter: {
 				debug( prg, REALM_BYTECODE, "local iter downref: %ld\n",
 						(long)locals[i].offset );
-				TreeIter *iter = (TreeIter*) &frame[(long)locals[i].offset];
+				TreeIter *iter = (TreeIter*) vm_get_plocal( exec, (long)locals[i].offset );
 				treeIterDestroy( prg, psp, iter );
 				break;
 			}
 			case LI_RevIter: {
 				debug( prg, REALM_BYTECODE, "local rev iter downref: %ld\n",
 						(long)locals[i].offset );
-				RevTreeIter *riter = (RevTreeIter*) &frame[(long)locals[i].offset];
+				RevTreeIter *riter = (RevTreeIter*) vm_get_plocal( exec, (long)locals[i].offset );
 				revTreeIterDestroy( prg, psp, riter );
 				break;
 			}
 			case LI_UserIter: {
 				debug( prg, REALM_BYTECODE, "local user iter downref: %ld\n",
 						(long)locals[i].offset );
-				UserIter *uiter = (UserIter*) frame[locals[i].offset];
+				UserIter *uiter = (UserIter*) vm_get_local( exec, locals[i].offset );
 				userIterDestroy2( prg, psp, uiter );
 				break;
 			}
@@ -784,7 +784,7 @@ again:
 
 			Tree *val = getRhsEl( prg, exec->parser->pdaRun->redLel->shadow->tree, position );
 			treeUpref( val );
-			vm_local(field) = val;
+			vm_set_local(exec, field, val);
 			break;
 		}
 
@@ -802,7 +802,7 @@ again:
 			exec->parser->pdaRun->parsed = val;
 
 			exec->parser->pdaRun->redLel->shadow->tree = 0;
-			vm_local(field) = val;
+			vm_set_local(exec, field, val);
 			break;
 		}
 		case IN_STORE_LHS_EL: {
@@ -811,8 +811,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_STORE_LHS_EL %hd\n", field );
 
-			Tree *val = vm_local(field);
-			vm_local(field) = 0;
+			Tree *val = vm_get_local(exec, field);
+			vm_set_local(exec, field, 0);
 			exec->parser->pdaRun->redLel->shadow->tree = val;
 			break;
 		}
@@ -823,7 +823,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_UITER_ADVANCE\n" );
 
 			/* Get the iterator. */
-			UserIter *uiter = (UserIter*) vm_local(field);
+			UserIter *uiter = (UserIter*) vm_get_local(exec, field);
 
 			long yieldSize = vm_ssize() - uiter->rootSize;
 			assert( uiter->yieldSize == yieldSize );
@@ -842,7 +842,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_UITER_GET_CUR_R\n" );
 
-			UserIter *uiter = (UserIter*) vm_local(field);
+			UserIter *uiter = (UserIter*) vm_get_local(exec, field);
 			Tree *val = uiter->ref.kid->tree;
 			treeUpref( val );
 			vm_push_tree( val );
@@ -854,7 +854,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_UITER_GET_CUR_WC\n" );
 
-			UserIter *uiter = (UserIter*) vm_local(field);
+			UserIter *uiter = (UserIter*) vm_get_local(exec, field);
 			splitRef( prg, &sp, &uiter->ref );
 			Tree *split = uiter->ref.kid->tree;
 			treeUpref( split );
@@ -868,7 +868,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_UITER_SET_CUR_WC\n" );
 
 			Tree *t = vm_pop_tree();
-			UserIter *uiter = (UserIter*) vm_local(field);
+			UserIter *uiter = (UserIter*) vm_get_local(exec, field);
 			splitRef( prg, &sp, &uiter->ref );
 			Tree *old = uiter->ref.kid->tree;
 			setUiterCur( prg, uiter, t );
@@ -881,7 +881,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_R %hd\n", field );
 
-			Tree *val = vm_local(field);
+			Tree *val = vm_get_local(exec, field);
 			treeUpref( val );
 			vm_push_tree( val );
 			break;
@@ -903,7 +903,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_SET_LOCAL_WC %hd\n", field );
 
 			Tree *val = vm_pop_tree();
-			treeDownref( prg, sp, vm_local(field) );
+			treeDownref( prg, sp, vm_get_local(exec, field) );
 			set_local( exec->framePtr, field, val );
 			break;
 		}
@@ -913,7 +913,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_VAL_R %hd\n", field );
 
-			Tree *val = vm_local(field);
+			Tree *val = vm_get_local(exec, field);
 			vm_push_tree( val );
 			break;
 		}
@@ -923,14 +923,14 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_SET_LOCAL_VAL_WC %hd\n", field );
 
 			Tree *val = vm_pop_tree();
-			vm_local(field) = val;
+			vm_set_local(exec, field, val);
 			break;
 		}
 		case IN_SAVE_RET: {
 			debug( prg, REALM_BYTECODE, "IN_SAVE_RET\n" );
 
 			Value val = vm_pop_value();
-			vm_local(FR_RV) = (Tree*)val;
+			vm_set_local(exec, FR_RV, (Tree*)val);
 			break;
 		}
 		case IN_GET_LOCAL_REF_R: {
@@ -939,7 +939,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_REF_R\n" );
 
-			Ref *ref = (Ref*) vm_plocal(field);
+			Ref *ref = (Ref*) vm_get_plocal(exec, field);
 			Tree *val = ref->kid->tree;
 			treeUpref( val );
 			vm_push_tree( val );
@@ -951,7 +951,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_REF_WC\n" );
 
-			Ref *ref = (Ref*) vm_plocal(field);
+			Ref *ref = (Ref*) vm_get_plocal(exec, field);
 			splitRef( prg, &sp, ref );
 			Tree *val = ref->kid->tree;
 			treeUpref( val );
@@ -965,7 +965,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_SET_LOCAL_REF_WC\n" );
 
 			Tree *val = vm_pop_tree();
-			Ref *ref = (Ref*) vm_plocal(field);
+			Ref *ref = (Ref*) vm_get_plocal(exec, field);
 			splitRef( prg, &sp, ref );
 			refSetValue( prg, sp, ref, val );
 			break;
@@ -1772,7 +1772,7 @@ again:
 			Ref rootRef;
 			rootRef.kid = vm_pop_kid();
 			rootRef.next = vm_pop_ref();
-			void *mem = vm_plocal(field);
+			void *mem = vm_get_plocal(exec, field);
 
 			Tree **stackRoot = vm_ptop();
 			long rootSize = vm_ssize();
@@ -1785,7 +1785,7 @@ again:
 			short field;
 			read_half( field );
 
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			TreeIter *iter = (TreeIter*) vm_get_plocal(exec, field);
 			debug( prg, REALM_BYTECODE, "IN_TRITER_DESTROY %hd %d\n",
 					field, iter->yieldSize );
 			treeIterDestroy( prg, &sp, iter );
@@ -1817,7 +1817,7 @@ again:
 				children++;
 			}
 
-			void *mem = vm_plocal(field);
+			void *mem = vm_get_plocal(exec, field);
 			initRevTreeIter( (RevTreeIter*)mem, stackRoot,
 					argSize, rootSize, &rootRef, searchTypeId, children );
 			break;
@@ -1828,7 +1828,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_REV_TRITER_DESTROY\n" );
 
-			RevTreeIter *iter = (RevTreeIter*) vm_plocal(field);
+			RevTreeIter *iter = (RevTreeIter*) vm_get_plocal(exec, field);
 			revTreeIterDestroy( prg, &sp, iter );
 			break;
 		}
@@ -1851,7 +1851,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_TRITER_ADVANCE\n" );
 
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			TreeIter *iter = (TreeIter*) vm_get_plocal(exec, field);
 			Tree *res = treeIterAdvance( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push_tree( res );
@@ -1863,7 +1863,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_TRITER_NEXT_CHILD\n" );
 
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			TreeIter *iter = (TreeIter*) vm_get_plocal(exec, field);
 			Tree *res = treeIterNextChild( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push_tree( res );
@@ -1875,7 +1875,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_REV_TRITER_PREV_CHILD\n" );
 
-			RevTreeIter *iter = (RevTreeIter*) vm_plocal(field);
+			RevTreeIter *iter = (RevTreeIter*) vm_get_plocal(exec, field);
 			Tree *res = treeRevIterPrevChild( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push_tree( res );
@@ -1887,7 +1887,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_TRITER_NEXT_REPEAT\n" );
 
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			TreeIter *iter = (TreeIter*) vm_get_plocal(exec, field);
 			Tree *res = treeIterNextRepeat( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push_tree( res );
@@ -1899,7 +1899,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_TRITER_PREV_REPEAT\n" );
 
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			TreeIter *iter = (TreeIter*) vm_get_plocal(exec, field);
 			Tree *res = treeIterPrevRepeat( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push_tree( res );
@@ -1911,7 +1911,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_TRITER_GET_CUR_R\n" );
 			
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			TreeIter *iter = (TreeIter*) vm_get_plocal(exec, field);
 			Tree *tree = treeIterDerefCur( iter );
 			treeUpref( tree );
 			vm_push_tree( tree );
@@ -1923,7 +1923,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_TRITER_GET_CUR_WC\n" );
 			
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			TreeIter *iter = (TreeIter*) vm_get_plocal(exec, field);
 			splitIterCur( prg, &sp, iter );
 			Tree *tree = treeIterDerefCur( iter );
 			treeUpref( tree );
@@ -1937,7 +1937,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_TRITER_SET_CUR_WC\n" );
 
 			Tree *tree = vm_pop_tree();
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			TreeIter *iter = (TreeIter*) vm_get_plocal(exec, field);
 			splitIterCur( prg, &sp, iter );
 			Tree *old = treeIterDerefCur( iter );
 			setTriterCur( prg, iter, tree );
@@ -1958,7 +1958,7 @@ again:
 			Ref rootRef;
 			rootRef.kid = vm_pop_kid();
 			rootRef.next = vm_pop_ref();
-			void *mem = vm_plocal(field);
+			void *mem = vm_get_plocal(exec, field);
 
 			Tree **stackRoot = vm_ptop();
 			long rootSize = vm_ssize();
@@ -1971,7 +1971,7 @@ again:
 			short field;
 			read_half( field );
 
-			GenericIter *iter = (GenericIter*) vm_plocal(field);
+			GenericIter *iter = (GenericIter*) vm_get_plocal(exec, field);
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_DESTROY %d\n", iter->yieldSize );
 
@@ -1984,7 +1984,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_ADVANCE\n" );
 
-			GenericIter *iter = (GenericIter*) vm_plocal(field);
+			GenericIter *iter = (GenericIter*) vm_get_plocal(exec, field);
 			Tree *res = colm_list_iter_advance( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push_tree( res );
@@ -1996,7 +1996,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_MAP_ITER_ADVANCE\n" );
 
-			GenericIter *iter = (GenericIter*) vm_plocal(field);
+			GenericIter *iter = (GenericIter*) vm_get_plocal(exec, field);
 			Tree *res = colm_map_iter_advance( prg, &sp, iter );
 			//treeUpref( res );
 			vm_push_tree( res );
@@ -2008,7 +2008,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GEN_ITER_GET_CUR_R\n" );
 			
-			GenericIter *iter = (GenericIter*) vm_plocal(field);
+			GenericIter *iter = (GenericIter*) vm_get_plocal(exec, field);
 			Tree *tree = colm_list_iter_deref_cur( prg, iter );
 			//treeUpref( tree );
 			vm_push_tree( tree );
@@ -2020,7 +2020,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GEN_VITER_GET_CUR_R\n" );
 			
-			GenericIter *iter = (GenericIter*) vm_plocal(field);
+			GenericIter *iter = (GenericIter*) vm_get_plocal(exec, field);
 			Value value = colm_viter_deref_cur( prg, iter );
 			vm_push_value( value );
 			break;
@@ -2279,7 +2279,7 @@ again:
 
 			if ( exec->frameId >= 0 ) {
 				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-				downref_local_trees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
+				downref_local_trees( prg, sp, exec, fi->locals, fi->localsLen );
 				debug( prg, REALM_BYTECODE, "RET: %d\n", fi->frameSize );
 
 				vm_popn( fi->frameSize );
@@ -2762,7 +2762,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_REF_FROM_LOCAL %hd\n", field );
 
 			/* First push the null next pointer, then the kid pointer. */
-			Kid *kid = (Kid*)vm_plocal(field);
+			Kid *kid = (Kid*)vm_get_plocal(exec, field);
 			vm_contiguous( 2 );
 			vm_push_ref( 0 );
 			vm_push_kid( kid );
@@ -2772,9 +2772,9 @@ again:
 			short int field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_REF_FROM_REF\n" );
+			debug( prg, REALM_BYTECODE, "IN_REF_FROM_REF %hd\n", field );
 
-			Ref *ref = (Ref*)vm_plocal(field);
+			Ref *ref = (Ref*)vm_get_plocal(exec, field);
 			vm_contiguous( 2 );
 			vm_push_ref( ref );
 			vm_push_kid( ref->kid );
@@ -2848,7 +2848,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_TRITER_REF_FROM_CUR\n" );
 
 			/* Push the next pointer first, then the kid. */
-			TreeIter *iter = (TreeIter*) vm_plocal(field);
+			TreeIter *iter = (TreeIter*) vm_get_plocal(exec, field);
 			Ref *ref = &iter->ref;
 			vm_contiguous( 2 );
 			vm_push_ref( ref );
@@ -2862,7 +2862,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_UITER_REF_FROM_CUR\n" );
 
 			/* Push the next pointer first, then the kid. */
-			UserIter *uiter = (UserIter*) vm_local(field);
+			UserIter *uiter = (UserIter*) vm_get_local(exec, field);
 			vm_contiguous( 2 );
 			vm_push_ref( uiter->ref.next );
 			vm_push_kid( uiter->ref.kid );
@@ -3156,6 +3156,24 @@ again:
 			break;
 		}
 
+		case IN_STASH_ARG: {
+			Half pos;
+			Half size;
+			read_half( pos );
+			read_half( size );
+
+			debug( prg, REALM_BYTECODE, "IN_STASH_ARG %hd %hd\n", pos, size );
+
+			while ( size > 0 ) {
+				Value v = vm_pop_value();
+				((Value*)exec->callArgs)[pos] = v;
+				size -= 1;
+				pos += 1;
+			}
+
+			break;
+		}
+
 		case IN_PREP_ARGS: {
 			Half size;
 			read_half( size );
@@ -3163,8 +3181,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PREP_ARGS %hd\n", size );
 
 			vm_push_type( Tree**, exec->callArgs );
-			exec->callArgs = vm_ptop();
 			vm_pushn( size );
+			exec->callArgs = vm_ptop();
 			memset( vm_ptop(), 0, sizeof(Word) * size );
 			break;
 		}
@@ -3189,6 +3207,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CALL_WV %s\n", fr->name );
 
+			vm_push_type( Tree**, exec->callArgs );
 			vm_push_value( 0 ); /* Return value. */
 			vm_push_type( Code*, instr );
 			vm_push_type( Tree**, exec->framePtr );
@@ -3208,6 +3227,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CALL_WC %s\n", fr->name );
 
+			vm_push_type( Tree**, exec->callArgs );
 			vm_push_value( 0 ); /* Return value. */
 			vm_push_type( Code*, instr );
 			vm_push_type( Tree**, exec->framePtr );
@@ -3259,13 +3279,16 @@ again:
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
 			UserIter *uiter = uiterCreate( prg, &sp, fi, searchId );
-			vm_local(field) = (SW) uiter;
+			vm_set_local(exec, field, (SW) uiter);
 
 			/* This is a setup similar to as a call, only the frame structure
 			 * is slightly different for user iterators. We aren't going to do
 			 * the call. We don't need to set up the return ip because the
 			 * uiter advance will set it. The frame we need to do because it
 			 * is set once for the lifetime of the iterator. */
+			vm_push_type( Tree**, exec->callArgs );
+			vm_push_value( 0 );
+
 			vm_push_type( Code*, 0 );            /* Return instruction pointer,  */
 			vm_push_type( Tree**, exec->iframePtr ); /* Return iframe. */
 			vm_push_type( Tree**, exec->framePtr );  /* Return frame. */
@@ -3284,13 +3307,16 @@ again:
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
 			UserIter *uiter = uiterCreate( prg, &sp, fi, searchId );
-			vm_local(field) = (SW) uiter;
+			vm_set_local(exec, field, (SW) uiter);
 
 			/* This is a setup similar to as a call, only the frame structure
 			 * is slightly different for user iterators. We aren't going to do
 			 * the call. We don't need to set up the return ip because the
 			 * uiter advance will set it. The frame we need to do because it
 			 * is set once for the lifetime of the iterator. */
+			vm_push_type( Tree**, exec->callArgs );
+			vm_push_value( 0 );
+
 			vm_push_type( Code*, 0 );            /* Return instruction pointer,  */
 			vm_push_type( Tree**, exec->iframePtr ); /* Return iframe. */
 			vm_push_type( Tree**, exec->framePtr );  /* Return frame. */
@@ -3304,21 +3330,22 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_UITER_DESTROY\n" );
 
-			UserIter *uiter = (UserIter*) vm_local(field);
+			UserIter *uiter = (UserIter*) vm_get_local(exec, field);
 			userIterDestroy( prg, &sp, uiter );
 			break;
 		}
 
 		case IN_RET: {
 			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-			downref_local_trees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
+			downref_local_trees( prg, sp, exec, fi->locals, fi->localsLen );
 			vm_popn( fi->frameSize );
 
 			exec->frameId = vm_pop_type(long);
 			exec->framePtr = vm_pop_type(Tree**);
 			instr = vm_pop_type(Code*);
 			exec->retVal = vm_pop_tree();
-			vm_popn( fi->argSize );
+			vm_pop_value();
+			//vm_popn( fi->argSize );
 
 			fi = &prg->rtd->frameInfo[exec->frameId];
 			debug( prg, REALM_BYTECODE, "IN_RET %s\n", fi->name );
@@ -3547,7 +3574,7 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_STOP\n" );
 
 				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-				downref_local_trees( prg, sp, exec->framePtr, fi->locals, fi->localsLen );
+				downref_local_trees( prg, sp, exec, fi->locals, fi->localsLen );
 				vm_popn( fi->frameSize );
 
 				fflush( stdout );
@@ -4003,7 +4030,7 @@ again:
 					FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 					int frameId = exec->frameId;
 
-					downrefLocals( prg, &sp, exec->framePtr, fi->locals, fi->localsLen );
+					downref_locals( prg, &sp, exec, fi->locals, fi->localsLen );
 
 					debug( prg, REALM_BYTECODE, " exit popping %s argSize %d\n",
 							( fi->name != 0 ? fi->name : "<no-name>" ), fi->argSize );
@@ -4027,7 +4054,8 @@ again:
 					exec->framePtr = vm_pop_type(Tree**);
 					instr = vm_pop_type(Code*);
 					Tree *retVal = vm_pop_tree();
-					vm_popn( fi->argSize );
+					vm_pop_value();
+//					vm_popn( fi->argSize );
 
 					/* The CONTIGUOS PUSH. */
 					vm_pop_tree();
