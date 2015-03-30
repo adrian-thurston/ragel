@@ -552,11 +552,14 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, long rounds )
 	}
 	else {
 		/* Merge the start states. */
+		std::cout << "nfa-fill-round\t0" << std::endl;
 		nfaMergeStates( md, startState, startStateSet.data, startStateSet.length() );
 
 		/* Fill in any new states made from merging. */
-		for ( long i = 1; i < rounds && nfaList.length() > 0; i++ )
+		for ( long i = 1; i < rounds && nfaList.length() > 0; i++ ) {
+			std::cout << "nfa-fill-round\t" << i << std::endl;
 			nfaFillInStates( md );
+		}
 
 		/* For any remaining NFA states, remove from the state dict. We need to
 		 * keep the state sets. */
