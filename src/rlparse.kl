@@ -229,10 +229,19 @@ machine_name:
 nonterm cost_mark_opt
 {
 	bool costMark;
+	long costId;
 };
 
-cost_mark_opt: KW_NfaCostMark
-	final { $$->costMark = true; };
+cost_mark_opt: KW_NfaCostMark TK_UInt final
+	{
+		$$->costMark = true;
+
+		// Convert the priority number to a long. Check for overflow.
+		errno = 0;
+		$$->costId = strtol( $2->data, 0, 10 );
+		if ( $$->costId == LONG_MAX && errno == ERANGE )
+			error($2->loc) << "rounds " << $2->data << " overflows" << endl;
+	};
 
 cost_mark_opt:
 	final { $$->costMark = false; };
@@ -250,6 +259,7 @@ action_spec:
 					$5->inlineList, pd->nextCondId++ );
 
 			newAction->costMark = $2->costMark;
+			newAction->costId = $2->costId;
 
 			/* Insert to list and dict. */
 			pd->actionList.append( newAction );

@@ -649,7 +649,7 @@ void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 		else {
 			for ( CondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
 				if ( (*csi)->costMark ) {
-					throw CondCostTooHigh();
+					throw CondCostTooHigh( (*csi)->costId );
 				}
 			}
 			
@@ -790,7 +790,7 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 				fsm = terms[name.pos()]->walk( pd );
 				pd->fsmCtx->stateLimit = -1;
 
-				if ( ! strike( pd, fsm ) ) { }
+				strike( pd, fsm );
 			}
 			catch ( const TooManyStates & ) {
 				std::cout << "too-many-states" << std::endl;
@@ -800,9 +800,9 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 				std::cout << "rep-error" << std::endl;
 				exit( 2 );
 			}
-			catch ( const CondCostTooHigh & ) {
+			catch ( const CondCostTooHigh &ccth ) {
 				std::cout << "cond-cost" << std::endl;
-				exit( 3 );
+				exit( 20 + ccth.costId );
 			};
 
 			
