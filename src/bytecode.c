@@ -242,18 +242,18 @@ static long stream_push_stream( Program *prg, Tree **sp,
 	return -1;
 }
 
-static void set_local( Tree **frame, long field, Tree *tree )
+static void set_local( Execution *exec, long field, Tree *tree )
 {
 	if ( tree != 0 )
 		assert( tree->refs >= 1 );
-	frame[field] = tree;
+	vm_set_local( exec, field, tree );
 }
 
-static Tree *get_local_split( Program *prg, Tree **frame, long field )
+static Tree *get_local_split( Program *prg, Execution *exec, long field )
 {
-	Tree *val = frame[field];
+	Tree *val = vm_get_local( exec, field );
 	Tree *split = splitTree( prg, val );
-	frame[field] = split;
+	vm_set_local( exec, field, split );
 	return split;
 }
 
@@ -770,7 +770,7 @@ again:
 						mark[ca->mark_leave] - mark[ca->mark_enter] );
 				Tree *string = constructString( prg, data );
 				treeUpref( string );
-				set_local( exec->framePtr, -1 - i, string );
+				set_local( exec, -1 - i, string );
 			}
 			break;
 		}
@@ -892,7 +892,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_LOCAL_WC %hd\n", field );
 
-			Tree *split = get_local_split( prg, exec->framePtr, field );
+			Tree *split = get_local_split( prg, exec, field );
 			treeUpref( split );
 			vm_push_tree( split );
 			break;
@@ -904,7 +904,7 @@ again:
 
 			Tree *val = vm_pop_tree();
 			treeDownref( prg, sp, vm_get_local(exec, field) );
-			set_local( exec->framePtr, field, val );
+			set_local( exec, field, val );
 			break;
 		}
 		case IN_GET_LOCAL_VAL_R: {
