@@ -2235,6 +2235,18 @@ struct LoadColm
 		blockClose();
 	}
 
+	void walkInHostDef( in_host_def InHostDef )
+	{
+		ObjectDef *localFrame = blockOpen();
+
+		TypeRef *typeRef = walkTypeRef( InHostDef.type_ref() );
+		String id = InHostDef.id().data();
+		ParameterList *paramList = walkParamVarDefList( InHostDef.ParamVarDefList() );
+		inHostDef( InHostDef.HostFunc().data(), localFrame, paramList, typeRef, id, false );
+
+		blockClose();
+	}
+
 	void walkIterDef( iter_def IterDef )
 	{
 		ObjectDef *localFrame = blockOpen();
@@ -2279,6 +2291,9 @@ struct LoadColm
 			break;
 		case struct_item::Function:
 			walkFunctionDef( structItem.function_def() );
+			break;
+		case struct_item::InHost:
+			walkInHostDef( structItem.in_host_def() );
 			break;
 		case struct_item::Iter:
 			walkIterDef( structItem.iter_def() );
@@ -2369,6 +2384,9 @@ struct LoadColm
 		case root_item::Function:
 			walkFunctionDef( rootItem.function_def() );
 			break;
+		case struct_item::InHost:
+			walkInHostDef( rootItem.in_host_def() );
+			break;
 		case root_item::Iter:
 			walkIterDef( rootItem.iter_def() );
 			break;
@@ -2432,6 +2450,9 @@ struct LoadColm
 			break;
 		case namespace_item::Function:
 			walkFunctionDef( item.function_def() );
+			break;
+		case struct_item::InHost:
+			walkInHostDef( item.in_host_def() );
 			break;
 		case namespace_item::Iter:
 			walkIterDef( item.iter_def() );

@@ -36,6 +36,8 @@
 
 typedef struct colm_struct Struct;
 
+Tree **host_call( Program *prg, long code, Tree **sp );
+
 #define TRUE_VAL  1
 #define FALSE_VAL 0
 
@@ -3198,6 +3200,15 @@ again:
 			break;
 		}
 
+		case IN_HOST: {
+			Half funcId;
+			read_half( funcId );
+
+			debug( prg, REALM_BYTECODE, "IN_HOST %hd\n", funcId );
+
+			sp = host_call( prg, funcId, sp );
+			break;
+		}
 		case IN_CALL_WV: {
 			Half funcId;
 			read_half( funcId );

@@ -909,7 +909,7 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 
 			size += 1;
 
-			if ( lookup.objMethod->func ) {
+			if ( lookup.objMethod->func && !lookup.objMethod->func->inHost ) {
 				code.append( IN_STASH_ARG );
 				code.appendHalf( pos );
 				code.appendHalf( 1 );
@@ -1081,14 +1081,14 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 
 	/* Prepare the contiguous call args space. */
 	int asLoc;
-	if ( func != 0 ) {
+	if ( func != 0 && !func->inHost ) {
 		code.append( IN_PREP_ARGS );
 		asLoc = code.length();
 		code.appendHalf( 0 );
 	}
 
 	bool resetContiguous = false;
-	if ( func != 0 ) {
+	if ( func != 0 && !func->inHost ) {
 		long stretch = func->paramListSize + 5 + func->localFrame->size();
 		resetContiguous = pd->beginContiguous( code, stretch );
 	}
@@ -1107,13 +1107,13 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	pd->endContiguous( code, resetContiguous );
 	pd->clearContiguous( code, resetContiguous );
 
-	if ( func != 0 ) {
+	if ( func != 0 && !func->inHost ) {
 		code.append( IN_CLEAR_ARGS );
 		code.appendHalf( func->paramListSize );
 		code.setHalf( asLoc, func->paramListSize );
 	}
 
-	if ( func != 0 )
+	if ( func != 0 && !func->inHost )
 		code.append( IN_LOAD_RETVAL );
 
 	/* Return the type to the expression. */
@@ -3008,6 +3008,9 @@ void Compiler::placeAllFrameObjects()
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
 		placeFrameFields( f->localFrame );
 
+	for ( FunctionList::Iter f = inHostList; f.lte(); f++ )
+		placeFrameFields( f->localFrame );
+
 	/* Reduction code. */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
 		if ( prod->redBlock != 0 )
@@ -3080,6 +3083,9 @@ void Compiler::placeAllFunctions()
 {
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
 		placeUserFunction( f, f->isUserIter );
+
+	for ( FunctionList::Iter f = inHostList; f.lte(); f++ )
+		placeUserFunction( f, false );
 }
 
 

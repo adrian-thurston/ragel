@@ -793,6 +793,7 @@ struct Compiler
 	void resolveMapElementOf( ObjectDef *container, ObjectDef *obj, ElementOf *elof );
 	void resolveElementOf( ObjectDef *obj );
 	void makeFuncVisible( Function *func, bool isUserIter );
+	void makeInHostVisible( Function *func );
 
 	void declareFunction( Function *func );
 	void declareReductionCode( Production *prod );
@@ -802,6 +803,7 @@ struct Compiler
 	void declareByteCode();
 
 	void resolveFunction( Function *func );
+	void resolveInHost( Function *func );
 	void resolvePreEof( TokenRegion *region );
 	void resolveRootBlock();
 	void resolveTranslateBlock( LangEl *langEl );
@@ -952,7 +954,9 @@ struct Compiler
 	int nextGenericId;
 
 	FunctionList functionList;
+	FunctionList inHostList;
 	int nextFuncId;
+	int nextHostId;
 
 	enum CompileContext {
 		CompileTranslation,

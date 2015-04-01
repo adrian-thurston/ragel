@@ -94,6 +94,7 @@ bool gblLibrary = false;
 long gblActiveRealm = 0;
 
 ArgsVector includePaths;
+ArgsVector additionalCodeFiles;;
 
 /* Print version information. */
 void version();
@@ -181,6 +182,7 @@ void usage()
 "   -c                   compile only (don't produce binary)\n"
 "   -e <file>            write C++ export header to <file>\n"
 "   -x <file>            write C++ export code to <file>\n"
+"	-a <file>            additional code file to include in output program\n"
 	;	
 }
 
@@ -394,8 +396,14 @@ void compileOutputInstalled( const char *argv0 )
 		last -= 1;
 	}
 
+
 	int length = 1024 + strlen(intermedFn) + strlen(binaryFn);
-	char command[length];
+
+	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ )
+		length += strlen( *af ) + 2;
+
+	char *command = new char[length];
+
 	sprintf( command, 
 		"gcc -Wall -Wwrite-strings"
 		" -I" PREFIX "/include"
@@ -405,8 +413,15 @@ void compileOutputInstalled( const char *argv0 )
 		" -L" PREFIX "/lib"
 		" -lcolmd",
 		binaryFn, intermedFn );
+	
+	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ ) {
+		strcat( command, " " );
+		strcat( command, *af );
+	}
 
 	compileOutputCommand( command );
+
+	delete[] command;
 }
 
 void compileOutputInSource( const char *argv0 )
@@ -418,7 +433,11 @@ void compileOutputInSource( const char *argv0 )
 	last[0] = 0;
 
 	int length = 1024 + 3 * strlen(location) + strlen(intermedFn) + strlen(binaryFn);
-	char command[length];
+
+	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ )
+		length += strlen( *af ) + 2;
+
+	char *command = new char[length];
 	sprintf( command, 
 		"gcc -Wall -Wwrite-strings"
 		" -I%s/../aapl"
@@ -430,8 +449,15 @@ void compileOutputInSource( const char *argv0 )
 		" -lcolmd",
 		location, location,
 		binaryFn, intermedFn, location );
+
+	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ ) {
+		strcat( command, " " );
+		strcat( command, *af );
+	}
 	
 	compileOutputCommand( command );
+
+	delete[] command;
 }
 
 bool inSourceTree( const char *argv0 )
@@ -456,7 +482,7 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "cD:e:x:I:vdlio:S:M:vHh?-:sV", argc, argv );
+	ParamCheck pc( "cD:e:x:I:vdlio:S:M:vHh?-:sVa:", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -522,6 +548,10 @@ void processArgs( int argc, const char **argv )
 			case 'x':
 				exportCodeFn = pc.parameterArg;
 				break;
+			case 'a':
+				additionalCodeFiles.append( pc.parameterArg );
+				break;
+
 			case 'D':
 #if DEBUG
 				if ( strcmp( pc.parameterArg, "BYTECODE" ) == 0 )

@@ -74,7 +74,6 @@ typedef unsigned long colm_value_t;
 
 #define IN_TST_NZ_TREE           0xd1
 
-// 0xea
 // 0xeb
 // 0xec
 // 0xd4
@@ -228,6 +227,8 @@ typedef unsigned long colm_value_t;
 #define IN_PRINT_XML_AC          0x88
 #define IN_PRINT_XML             0x89
 #define IN_PRINT_STREAM          0x8a
+
+#define IN_HOST                  0xea
 
 #define IN_CALL_WC               0x8c
 #define IN_CALL_WV               0x8d
@@ -520,7 +521,6 @@ enum LEL_ID {
 #define vm_pushn(n) \
 	( ( (sp-(n)) < prg->sb_beg ? (sp = vm_bs_add(prg, sp, n)) : 0 ), (sp -= (n)) )
 
-
 #define vm_pop_type(type) \
 	({ SW r = *sp; (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); (type)r; })
 
@@ -631,7 +631,6 @@ static inline void vm_set_local( struct colm_execution *exec, int o, Tree* v )
 
 long stringLength( Head *str );
 const char *stringData( Head *str );
-Head *stringAllocFull( struct colm_program *prg, const char *data, long length );
 Head *initStrSpace( long length );
 Head *stringCopy( struct colm_program *prg, Head *head );
 void stringFree( struct colm_program *prg, Head *head );
@@ -648,8 +647,6 @@ Head *stringSprintf( Program *prg, Str *format, long integer );
 
 Head *makeLiteral( struct colm_program *prg, long litoffset );
 Head *intToStr( struct colm_program *prg, Word i );
-
-Tree *constructString( struct colm_program *prg, Head *s );
 
 void colm_execute( struct colm_program *prg, Execution *exec, Code *code );
 void reductionExecution( Execution *exec, Tree **sp );

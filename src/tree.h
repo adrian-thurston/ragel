@@ -356,6 +356,8 @@ Value colm_viter_deref_cur( struct colm_program *prg, GenericIter *iter );
 
 Str *string_prefix( Program *prg, Str *str, long len );
 Str *string_suffix( Program *prg, Str *str, long pos );
+Head *stringAllocFull( struct colm_program *prg, const char *data, long length );
+Tree *constructString( struct colm_program *prg, Head *s );
 
 #if defined(__cplusplus)
 }

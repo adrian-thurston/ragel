@@ -452,6 +452,18 @@ void BaseParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
 	newFunction->inContext = curStruct();
 }
 
+void BaseParser::inHostDef( const String &hostCall, ObjectDef *localFrame,
+	ParameterList *paramList, TypeRef *typeRef, const String &name, bool exprt )
+{
+	Function *newFunction = Function::cons( typeRef, name, 
+			paramList, 0, pd->nextHostId++, false, exprt );
+	newFunction->hostCall = hostCall;
+	newFunction->localFrame = localFrame;
+	newFunction->inHost = true;
+	pd->inHostList.append( newFunction );
+	newFunction->inContext = curStruct();
+}
+
 void BaseParser::iterDef( StmtList *stmtList, ObjectDef *localFrame,
 	ParameterList *paramList, const String &name )
 {

@@ -214,6 +214,7 @@ def root_item
 |	[struct_def] :Struct commit
 |	[namespace_def] :Namespace commit
 |	[function_def] :Function commit
+|	[in_host_def] :InHost commit
 |	[iter_def] :Iter commit
 |	[statement] :Statement commit
 |	[global_def] :Global commit
@@ -265,6 +266,7 @@ def struct_item
 |	[region_def] :Region commit
 |	[struct_def] :Struct commit
 |	[function_def] :Function commit
+|	[in_host_def] :InHost commit
 |	[iter_def] :Iter commit
 |	[export_def] :Export commit
 |	[pre_eof_def] :PreEof commit
@@ -302,6 +304,11 @@ def function_def
 	[opt_export type_ref id 
 			POPEN ParamVarDefList: param_var_def_list PCLOSE
 			COPEN lang_stmt_list CCLOSE]
+
+def in_host_def
+	[opt_export type_ref id 
+			POPEN ParamVarDefList: param_var_def_list PCLOSE
+			EQUALS HostFunc: id]
 
 def struct_var_def
 	[var_def]
@@ -344,6 +351,7 @@ def namespace_item
 |	[struct_def] :Struct commit
 |	[namespace_def] :Namespace commit
 |	[function_def] :Function commit
+|	[in_host_def] :InHost commit
 |	[iter_def] :Iter commit
 |	[pre_eof_def] :PreEof commit
 |	[precedence_def] :Precedence commit

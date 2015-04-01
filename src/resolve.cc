@@ -780,6 +780,16 @@ void Compiler::resolveFunction( Function *func )
 	block->resolve( this );
 }
 
+void Compiler::resolveInHost( Function *func )
+{
+	if ( func->typeRef != 0 ) 
+		func->typeRef->resolveType( this );
+
+	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ )
+		param->typeRef->resolveType( this );
+}
+
+
 void Compiler::resolvePreEof( TokenRegion *region )
 {
 	CodeBlock *block = region->preEofBlock;
@@ -809,6 +819,9 @@ void Compiler::resolveParseTree()
 	/* Compile functions. */
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
 		resolveFunction( f );
+
+	for ( FunctionList::Iter f = inHostList; f.lte(); f++ )
+		resolveInHost( f );
 
 	/* Compile the reduction code. */
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {

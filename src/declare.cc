@@ -1379,6 +1379,30 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 	func->objMethod = objMethod;
 }
 
+void Compiler::makeInHostVisible( Function *func )
+{
+	/* Set up the parameters. */
+	for ( ParameterList::Iter param = *func->paramList; param.lte(); param++ ) {
+		if ( func->localFrame->rootScope->findField( param->name ) != 0 )
+			error(param->loc) << "parameter " << param->name << " redeclared" << endp;
+
+		func->localFrame->rootScope->insertField( param->name, param );
+	}
+
+	/* Insert the function into the global function map. */
+	ObjectMethod *objMethod = new ObjectMethod( func->typeRef, func->name, 
+			IN_HOST, IN_HOST, 
+			func->paramList->length(), 0, func->paramList, false );
+	objMethod->funcId = func->funcId;
+	objMethod->useFuncId = true;
+	objMethod->useCallObj = false;
+	objMethod->func = func;
+
+	globalObjectDef->methodMap->insert( func->name, objMethod );
+
+	func->objMethod = objMethod;
+}
+
 /*
  * Type Declaration Root.
  */
@@ -1390,6 +1414,9 @@ void Compiler::declarePass()
 
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
 		makeFuncVisible( f, f->isUserIter );
+
+	for ( FunctionList::Iter f = inHostList; f.lte(); f++ )
+		makeInHostVisible( f );
 
 	rootNamespace->declare( this );
 

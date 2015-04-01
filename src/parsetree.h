@@ -3338,7 +3338,8 @@ struct Function
 		paramListSize(0),
 		paramUTs(0),
 		inContext(0),
-		objMethod(0)
+		objMethod(0),
+		inHost(false)
 	{}
 
 	static Function *cons( TypeRef *typeRef, const String &name, 
@@ -3361,6 +3362,7 @@ struct Function
 	TransBlock *transBlock;
 	TypeRef *typeRef;
 	String name;
+	String hostCall;
 	ParameterList *paramList;
 	CodeBlock *codeBlock;
 	ObjectDef *localFrame;
@@ -3371,6 +3373,7 @@ struct Function
 	StructDef *inContext;
 	bool exprt;
 	ObjectMethod *objMethod;
+	bool inHost;
 
 	Function *prev, *next;
 };
