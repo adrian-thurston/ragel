@@ -497,8 +497,3 @@ extern "C" void internalPopBinding( PdaRun *pdaRun, ParseTree *parseTree )
 	if ( lastBound == parseTree )
 		pdaRun->bindings->pop();
 }
-
-extern "C" void host_call( long, Tree ** )
-{
-
-}

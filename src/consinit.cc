@@ -31,6 +31,11 @@
 #include "input.h"
 #include "consinit.h"
 
+extern "C" Tree **host_call( Program *prg, long code, Tree **sp )
+{
+	return 0;
+}
+
 using std::cout;
 using std::cerr;
 using std::endl;

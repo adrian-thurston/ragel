@@ -1094,52 +1094,53 @@ void Compiler::generateOutput( long activeRealm )
 	if ( !gblLibrary ) 
 		fsmGen->writeMain( activeRealm );
 
-	if ( !gblLibrary )  {
-		for ( FunctionList::Iter hc = inHostList; hc.lte(); hc++ ) {
-			*outStream <<
-				"Value " << hc->hostCall << "( Program *prg";
-			for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++ ) {
-				*outStream <<
-					", Value";
-			}
-			*outStream << " );\n";
-		}
-
+	/*
+	 * Host Call
+	 */
+	for ( FunctionList::Iter hc = inHostList; hc.lte(); hc++ ) {
 		*outStream <<
-			"Tree **host_call( Program *prg, long code, Tree **sp )\n"
-			"{\n"
-			"	Value rtn = 0;\n"
-			"	switch ( code ) {\n";
-		
-		for ( FunctionList::Iter hc = inHostList; hc.lte(); hc++ ) {
+			"Value " << hc->hostCall << "( Program *prg";
+		for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++ ) {
 			*outStream <<
-				"		case " << hc->funcId << ": {\n";
-
-			int pos = 0;
-			for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++, pos++ ) {
-				*outStream <<
-					"			Value p" << pos << " = vm_pop_value();\n";
-			}
-			
-			*outStream <<
-				"			rtn = " << hc->hostCall << "( prg";
-
-			pos = 0;
-			for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++, pos++ ) {
-				*outStream <<
-					", p" << pos;
-			}
-			*outStream << " );\n"
-				"			break;\n"
-				"		}\n";
+				", Value";
 		}
-			
-		*outStream <<
-			"	}\n"
-			"	vm_push_value( rtn );\n"
-			"	return sp;\n"
-			"}\n";
+		*outStream << " );\n";
 	}
+
+	*outStream <<
+		"Tree **host_call( Program *prg, long code, Tree **sp )\n"
+		"{\n"
+		"	Value rtn = 0;\n"
+		"	switch ( code ) {\n";
+	
+	for ( FunctionList::Iter hc = inHostList; hc.lte(); hc++ ) {
+		*outStream <<
+			"		case " << hc->funcId << ": {\n";
+
+		int pos = 0;
+		for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++, pos++ ) {
+			*outStream <<
+				"			Value p" << pos << " = vm_pop_value();\n";
+		}
+		
+		*outStream <<
+			"			rtn = " << hc->hostCall << "( prg";
+
+		pos = 0;
+		for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++, pos++ ) {
+			*outStream <<
+				", p" << pos;
+		}
+		*outStream << " );\n"
+			"			break;\n"
+			"		}\n";
+	}
+		
+	*outStream <<
+		"	}\n"
+		"	vm_push_value( rtn );\n"
+		"	return sp;\n"
+		"}\n";
 
 	outStream->flush();
 }
