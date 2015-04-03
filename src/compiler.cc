@@ -1099,7 +1099,7 @@ void Compiler::generateOutput( long activeRealm )
 	 */
 	for ( FunctionList::Iter hc = inHostList; hc.lte(); hc++ ) {
 		*outStream <<
-			"Value " << hc->hostCall << "( Program *prg";
+			"Value " << hc->hostCall << "( Program *prg, Tree **sp";
 		for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++ ) {
 			*outStream <<
 				", Value";
@@ -1124,7 +1124,7 @@ void Compiler::generateOutput( long activeRealm )
 		}
 		
 		*outStream <<
-			"			rtn = " << hc->hostCall << "( prg";
+			"			rtn = " << hc->hostCall << "( prg, sp";
 
 		pos = 0;
 		for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++, pos++ ) {
