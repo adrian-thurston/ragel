@@ -1,0 +1,9 @@
+str alphcount( Str: str )
+= c_alphcount
+
+print "[alphcount( " hello friend " )]
+
+##### CALL #####
+extfunc1.c
+##### EXP #####
+11

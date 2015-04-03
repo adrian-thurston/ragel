@@ -24,6 +24,14 @@
 #
 #   expected exit value
 #
+###### HOST ######
+#
+# Host program.
+#
+###### CALL ######
+#
+# files containing C functions
+#
 
 #######################################
 
@@ -157,9 +165,15 @@ function runtests()
 			continue
 		fi
 
+		COLM_ADDS=""
+		for a in `cat_section CALL 0 $TST`; do
+			COLM_ADDS="$COLM_ADDS -a $a"
+		done
+
+
 		# Compilation.
-		echo $COLM $TST
-		$COLM $LM &> $LOG 
+		echo $COLM $COLM_ADDS $TST
+		$COLM $COLM_ADDS $LM &> $LOG 
 		if [ $? != 0 ]; then
 			echo "ERROR: $TST cannot be run: compilation error"
 			ERRORS=$(( ERRORS + 1 ))
