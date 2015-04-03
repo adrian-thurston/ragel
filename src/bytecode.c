@@ -375,9 +375,10 @@ void colm_execute( Program *prg, Execution *exec, Code *code )
 	/* Set up the stack as if we have 
 	 * called. We allow a return value. */
 
-	long stretch = fi->argSize + 4 + fi->frameSize;
+	long stretch = 5 + fi->frameSize;
 	vm_contiguous( stretch );
 
+	vm_push_tree( 0 );
 	vm_push_tree( 0 ); 
 	vm_push_tree( 0 );
 	vm_push_tree( 0 );
@@ -401,6 +402,71 @@ void colm_execute( Program *prg, Execution *exec, Code *code )
 
 	prg->stackRoot = sp;
 }
+
+Tree *colm_run_func( struct colm_program *prg, int frameId,
+		const char **params, int paramCount )
+{
+	/* Make the arguments available to the program. */
+	prg->argc = 0;
+	prg->argv = 0;
+
+	Execution execution;
+	memset( &execution, 0, sizeof(execution) );
+
+	Tree **sp = prg->stackRoot;
+
+	FrameInfo *fi = &prg->rtd->frameInfo[frameId];
+	Code *code = fi->codeWC;
+
+	vm_pushn( paramCount );
+	execution.callArgs = vm_ptop();
+	memset( vm_ptop(), 0, sizeof(Word) * paramCount );
+
+	int p;
+	for ( p = 0; p < paramCount; p++ ) {
+		if ( params[p] == 0 ) {
+			((Value*)execution.callArgs)[p] = 0;
+		}
+		else {
+			Head *head = stringAllocPointer( prg, params[p], strlen(params[p]) );
+			Tree *tree = constructString( prg, head );
+			treeUpref( tree );
+			((Tree**)execution.callArgs)[p] = tree;
+		}
+	}
+
+	long stretch = 5 + fi->frameSize;
+	vm_contiguous( stretch );
+
+	/* Set up the stack as if we have called. We allow a return value. */
+	vm_push_tree( (Tree*)execution.callArgs );
+	vm_push_tree( 0 ); 
+	vm_push_tree( 0 );
+	vm_push_tree( 0 );
+	vm_push_tree( 0 );
+
+	execution.frameId = frameId;
+
+	execution.framePtr = vm_ptop();
+	vm_pushn( fi->frameSize );
+	memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
+
+	/* Execution loop. */
+	sp = colm_execute_code( prg, &execution, sp, code );
+
+	treeDownref( prg, sp, prg->returnVal );
+	prg->returnVal = execution.retVal; //vm_pop_tree();
+
+//	downref_local_trees( prg, sp, &execution, fi->locals, fi->localsLen );
+//	vm_popn( fi->frameSize );
+
+	vm_popn( paramCount );
+	
+	assert( sp == prg->stackRoot );
+
+	return prg->returnVal;
+};
+
 
 int colm_make_reverse_code( PdaRun *pdaRun )
 {

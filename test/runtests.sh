@@ -57,6 +57,22 @@ function sig_exit()
 	exit 1;
 }
 
+function echo_cmd()
+{
+	echo $@
+	$@
+}
+
+function check_compilation()
+{
+	if [ $1 != 0 ]; then
+		echo "ERROR: $TST cannot be run: compilation error"
+		ERRORS=$(( ERRORS + 1 ))
+		continue
+		return 1
+	fi
+}
+
 trap sig_exit SIGINT
 trap sig_exit SIGQUIT
 trap sig_exit SIGTERM
@@ -151,6 +167,8 @@ function runtests()
 		ARGS=$WORKING/$ROOT.args
 		IN=$WORKING/$ROOT.in
 		EXP=$WORKING/$ROOT.exp
+		HOST=$WORKING/$ROOT.host.cc
+		CALL=$WORKING/$ROOT.call.c
 
 		section LM 0 $TST $LM
 
@@ -165,19 +183,36 @@ function runtests()
 			continue
 		fi
 
+		section CALL 0 $TST $CALL
+		section HOST 0 $TST $HOST
+
 		COLM_ADDS=""
-		for a in `cat_section CALL 0 $TST`; do
-			COLM_ADDS="$COLM_ADDS -a $a"
-		done
+		if test -f $CALL; then
+			COLM_ADDS="-a $CALL"
+		fi
 
+		if test -f $HOST; then
+			PARSE=$WORKING/$ROOT.parse
+			IF=$WORKING/$ROOT.if
 
-		# Compilation.
-		echo $COLM $COLM_ADDS $TST
-		$COLM $COLM_ADDS $LM &> $LOG 
-		if [ $? != 0 ]; then
-			echo "ERROR: $TST cannot be run: compilation error"
-			ERRORS=$(( ERRORS + 1 ))
-			continue
+			echo_cmd $COLM -c -o $PARSE.c -e $IF.h -x $IF.cc $LM
+			if ! check_compilation $?; then
+				continue
+			fi
+
+			echo_cmd gcc -c -I../src/include -L../src -o $PARSE.o $PARSE.c
+			echo_cmd g++ -I. -I../src/include -L../src -o $WORKING/$ROOT \
+					$IF.cc $HOST $PARSE.o -lcolmd
+
+			if ! check_compilation $?; then
+				continue
+			fi
+		else
+			# Compilation.
+			echo_cmd $COLM $COLM_ADDS $LM &> $LOG 
+			if ! check_compilation $?; then
+				continue
+			fi
 		fi
 
 		Nth=0
