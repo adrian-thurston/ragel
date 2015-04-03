@@ -263,8 +263,6 @@ void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
 		long curStackSize = vm_ssize() - uiter->rootSize;
 		assert( uiter->yieldSize == curStackSize );
 
-		long argSize = uiter->argSize;
-
 		vm_popn( uiter->yieldSize );
 		vm_popn( sizeof(UserIter) / sizeof(Word) );
 

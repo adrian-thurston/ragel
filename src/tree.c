@@ -845,60 +845,10 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDow
 	return newTree;
 }
 
-List *copyList( Program *prg, List *list, Kid *oldNextDown, Kid **newNextDown )
-{
-#if 0
-	/* Not a need copy. */
-	List *newList = (List*)mapElAllocate( prg );
-	newList->id = list->genericInfo->langElId;
-	newList->genericInfo = list->genericInfo;
-
-	ListEl *src = list->head;
-	while( src != 0 ) {
-		ListEl *newEl = listElAllocate( prg );
-		newEl->value = src->value;
-		treeUpref( newEl->value );
-
-		listAppend( newList, newEl );
-
-		/* Watch out for next down. */
-		if ( (Kid*)src == oldNextDown )
-			*newNextDown = (Kid*)newEl;
-
-		src = src->next;
-	}
-
-	return newList;
-#endif
-}
-	
-Map *copyMap( Program *prg, Map *map, Kid *oldNextDown, Kid **newNextDown )
-{
-#if 0
-	Map *newMap = (Map*)mapElAllocate( prg );
-	newMap->id = map->genericInfo->langElId;
-	newMap->genericInfo = map->genericInfo;
-	newMap->treeSize = map->treeSize;
-	newMap->root = 0;
-
-	/* If there is a root, copy the tree. */
-	if ( map->root != 0 ) {
-		newMap->root = mapCopyBranch( prg, newMap, map->root, 
-				oldNextDown, newNextDown );
-	}
-	MapEl *el;
-	for ( el = newMap->head; el != 0; el = el->next ) {
-		assert( map->genericInfo->typeArg == TYPE_TREE );
-		treeUpref( el->tree );
-	}
-
-	return newMap;
-#endif
-}
 
 Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
 {
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+//	LangElInfo *lelInfo = prg->rtd->lelInfo;
 //	long genericId = lelInfo[tree->id].genericId;
 //	if ( genericId > 0 )
 //		assert(false);
@@ -947,11 +897,11 @@ Tree *splitTree( Program *prg, Tree *tree )
 void treeFreeRec( Program *prg, Tree **sp, Tree *tree )
 {
 	Tree **top = vm_ptop();
-	LangElInfo *lelInfo;
-	long genericId;
+//	LangElInfo *lelInfo;
+//	long genericId;
 
 free_tree:
-	lelInfo = prg->rtd->lelInfo;
+//	lelInfo = prg->rtd->lelInfo;
 //	genericId = lelInfo[tree->id].genericId;
 //	assert( genericId == 0 );
 
@@ -1017,11 +967,11 @@ void treeDownref( Program *prg, Tree **sp, Tree *tree )
 void objectFreeRec( Program *prg, Tree **sp, Tree *tree )
 {
 	Tree **top = vm_ptop();
-	LangElInfo *lelInfo;
-	long genericId;
+//	LangElInfo *lelInfo;
+//	long genericId;
 
 free_tree:
-	lelInfo = prg->rtd->lelInfo;
+//	lelInfo = prg->rtd->lelInfo;
 
 	switch ( tree->id ) {
 	case LEL_ID_STR: {

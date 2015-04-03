@@ -666,6 +666,7 @@ MapEl *colm_vmap_insert( Program *prg, Map *map, Struct *key, Struct *value )
 	MapEl *mapEl = colm_struct_get_addr( s, MapEl*, map->genericInfo->elOffset );
 
 	colm_map_insert( prg, map, mapEl );
+	return 0;
 }
 
 MapEl *colm_vmap_remove( Program *prg, Map *map, Tree *key )
@@ -673,6 +674,7 @@ MapEl *colm_vmap_remove( Program *prg, Map *map, Tree *key )
 	MapEl *mapEl = colm_map_find( prg, map, key );
 	if ( mapEl != 0 )
 		colm_map_detach( prg, map, mapEl );
+	return 0;
 }
 
 Tree *colm_vmap_find( Program *prg, Map *map, Tree *key )

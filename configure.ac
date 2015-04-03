@@ -23,6 +23,9 @@ PUBDATE="Jan 2015"
 
 AM_INIT_AUTOMAKE([foreign])
 
+: ${CFLAGS="-Wall -g"}
+: ${CXXFLAGS="-Wall -g"}
+
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_SUBST(PUBDATE)
@@ -38,9 +41,6 @@ dnl Set to true if the manual should be built.
 AM_CONDITIONAL(BUILD_MANUAL, [test "x$build_manual" = "xyes"])
 
 AC_CHECK_SIZEOF([long])
-
-: ${CFLAGS="-Wall -g"}
-: ${CXXFLAGS="-Wall -g"}
 
 dnl Generic dependency specification.
 AC_ARG_WITH(deps,
