@@ -2684,20 +2684,10 @@ void Compiler::compileReductionCode( Production *prod )
 
 	CodeVect &code = block->codeWV;
 
-	/* Add the alloc frame opcode. We don't have the right 
-	 * frame size yet. We will fill it in later. */
-	code.append( IN_FN );
-	code.append( IN_INIT_LOCALS );
-	int fsLoc = code.length();
-	code.appendHalf( 0 );
 	long afterInit = code.length();
 
 	/* Compile the reduce block. */
 	block->compile( this, code );
-
-	/* We have the frame size now. Set in the alloc frame instruction. */
-	long frameSize = block->localFrame->size();
-	code.setHalf( fsLoc, frameSize );
 
 	/* Might need to load right hand side values. */
 	addProdRHSLoads( prod, code, afterInit );
@@ -2723,13 +2713,6 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 
 	CodeVect &code = block->codeWV;
 
-	/* Add the alloc frame opcode. We don't have the right 
-	 * frame size yet. We will fill it in later. */
-	code.append( IN_FN );
-	code.append( IN_INIT_LOCALS );
-	int fsLoc = code.length();
-	code.appendHalf( 0 );
-
 	if ( langEl->tokenDef->reCaptureVect.length() > 0 ) {
 		code.append( IN_INIT_CAPTURES );
 		code.append( langEl->tokenDef->reCaptureVect.length() );
@@ -2737,10 +2720,6 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 
 	/* Set the local frame and compile the reduce block. */
 	block->compile( this, code );
-
-	/* We have the frame size now. Set in the alloc frame instruction. */
-	long frameSize = block->localFrame->size();
-	code.setHalf( fsLoc, frameSize );
 
 	code.append( IN_PCR_RET );
 
@@ -2763,19 +2742,8 @@ void Compiler::compilePreEof( TokenRegion *region )
 
 	CodeVect &code = block->codeWV;
 
-	/* Add the alloc frame opcode. We don't have the right 
-	 * frame size yet. We will fill it in later. */
-	code.append( IN_FN );
-	code.append( IN_INIT_LOCALS );
-	int fsLoc = code.length();
-	code.appendHalf( 0 );
-
 	/* Set the local frame and compile the reduce block. */
 	block->compile( this, code );
-
-	/* We have the frame size now. Set in the alloc frame instruction. */
-	long frameSize = block->localFrame->size();
-	code.setHalf( fsLoc, frameSize );
 
 	code.append( IN_PCR_RET );
 
@@ -2813,13 +2781,6 @@ void Compiler::compileRootBlock( )
 	/* The root block is not reverted. */
 	CodeVect &code = block->codeWC;
 
-	/* Add the alloc frame opcode. We don't have the right 
-	 * frame size yet. We will fill it in later. */
-	code.append( IN_FN );
-	code.append( IN_INIT_LOCALS );
-	int fsLoc = code.length();
-	code.appendHalf( 0 );
-
 	code.append( IN_FN );
 	code.append( IN_LOAD_ARG0 );
 	code.appendHalf( arg0Offset() );
@@ -2829,10 +2790,6 @@ void Compiler::compileRootBlock( )
 	code.appendHalf( argvOffset() );
 
 	block->compile( this, code );
-
-	/* We have the frame size now. Store it in frame init. */
-	long frameSize = rootLocalFrame->size();
-	code.setHalf( fsLoc, frameSize );
 
 	code.append( IN_FN );
 	code.append( IN_STOP );
@@ -3093,19 +3050,8 @@ void Compiler::compileUserIter( Function *func, CodeVect &code )
 {
 	CodeBlock *block = func->codeBlock;
 
-	/* Add the alloc frame opcode. We don't have the right 
-	 * frame size yet. We will fill it in later. */
-	code.append( IN_FN );
-	code.append( IN_INIT_LOCALS );
-	int fsLoc = code.length();
-	code.appendHalf( 0 );
-
 	/* Compile the block. */
 	block->compile( this, code );
-
-	/* We have the frame size now. Set in the alloc frame instruction. */
-	int frameSize = func->localFrame->size();
-	code.setHalf( fsLoc, frameSize );
 
 	/* Check for a return statement. */
 	if ( block->stmtList->length() == 0 ||
@@ -3145,19 +3091,8 @@ void Compiler::compileFunction( Function *func, CodeVect &code )
 {
 	CodeBlock *block = func->codeBlock;
 
-	/* Add the alloc frame opcode. We don't have the right 
-	 * frame size yet. We will fill it in later. */
-	code.append( IN_FN );
-	code.append( IN_INIT_LOCALS );
-	int fsLoc = code.length();
-	code.appendHalf( 0 );
-
 	/* Compile the block. */
 	block->compile( this, code );
-
-	/* We have the frame size now. Set in the alloc frame instruction. */
-	int frameSize = func->localFrame->size();
-	code.setHalf( fsLoc, frameSize );
 
 	/* Check for a return statement. */
 	if ( block->stmtList->length() == 0 ||

@@ -354,6 +354,9 @@ typedef unsigned long colm_value_t;
 /*
  * IN_FN instructions.
  */
+
+/* 0x09 */
+
 #define IN_FN                    0xff
 #define IN_STR_ATOI              0x1d
 #define IN_STR_ATOO              0x38
@@ -367,7 +370,6 @@ typedef unsigned long colm_value_t;
 #define IN_STR_SUFFIX            0x37
 #define IN_LOAD_ARGV             0x07
 #define IN_LOAD_ARG0             0x08
-#define IN_INIT_LOCALS           0x09
 #define IN_STOP                  0x0a
 
 #define IN_LIST_PUSH_TAIL_WV     0x11

@@ -214,7 +214,7 @@ void uiterInit( Program *prg, Tree **sp, UserIter *uiter,
 	/* Set up the first yeild so when we resume it starts at the beginning. */
 	uiter->ref.kid = 0;
 	uiter->yieldSize = vm_ssize() - uiter->rootSize;
-	uiter->frame = &uiter->stackRoot[-IFR_AA];
+	//	uiter->frame = &uiter->stackRoot[-IFR_AA];
 
 	if ( revertOn )
 		uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWV;

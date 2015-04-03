@@ -371,17 +371,27 @@ void colm_execute( Program *prg, Execution *exec, Code *code )
 	Tree **sp = prg->stackRoot;
 
 	FrameInfo *fi = &prg->rtd->frameInfo[prg->rtd->rootFrameId];
+
+	/* Set up the stack as if we have 
+	 * called. We allow a return value. */
+
 	long stretch = fi->argSize + 4 + fi->frameSize;
 	vm_contiguous( stretch );
 
-	/* Set up the stack as if we have called. We allow a return value. */
 	vm_push_tree( 0 ); 
 	vm_push_tree( 0 );
 	vm_push_tree( 0 );
 	vm_push_tree( 0 );
 
+	exec->framePtr = vm_ptop();
+	vm_pushn( fi->frameSize );
+	memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
+
 	/* Execution loop. */
 	colm_execute_code( prg, exec, sp, code );
+
+	downref_local_trees( prg, sp, exec, fi->locals, fi->localsLen );
+	vm_popn( fi->frameSize );
 
 	vm_pop_ignore();
 	vm_pop_ignore();
@@ -2264,9 +2274,17 @@ again:
 			exec->iframePtr = 0;
 			exec->frameId = 0;
 
+			instr = exec->parser->pdaRun->code;
+
 			exec->frameId = exec->parser->pdaRun->frameId;
 
-			instr = exec->parser->pdaRun->code;
+			if ( exec->parser->pdaRun->frameId >= 0 )  {
+				FrameInfo *fi = &prg->rtd->frameInfo[exec->parser->pdaRun->frameId];
+
+				exec->framePtr = vm_ptop();
+				vm_pushn( fi->frameSize );
+				memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
+			}
 			break;
 		}
 
@@ -3225,8 +3243,11 @@ again:
 			vm_push_type( long, exec->frameId );
 
 			instr = fr->codeWV;
-			exec->framePtr = vm_ptop();
 			exec->frameId = fi->frameId;
+
+			exec->framePtr = vm_ptop();
+			vm_pushn( fr->frameSize );
+			memset( vm_ptop(), 0, sizeof(Word) * fr->frameSize );
 			break;
 		}
 		case IN_CALL_WC: {
@@ -3236,7 +3257,7 @@ again:
 			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
 			FrameInfo *fr = &prg->rtd->frameInfo[fi->frameId];
 
-			debug( prg, REALM_BYTECODE, "IN_CALL_WC %s\n", fr->name );
+			debug( prg, REALM_BYTECODE, "IN_CALL_WC %s %d\n", fr->name, fr->frameSize );
 
 			vm_push_type( Tree**, exec->callArgs );
 			vm_push_value( 0 ); /* Return value. */
@@ -3245,8 +3266,11 @@ again:
 			vm_push_type( long, exec->frameId );
 
 			instr = fr->codeWC;
-			exec->framePtr = vm_ptop();
 			exec->frameId = fi->frameId;
+
+			exec->framePtr = vm_ptop();
+			vm_pushn( fr->frameSize );
+			memset( vm_ptop(), 0, sizeof(Word) * fr->frameSize );
 			break;
 		}
 		case IN_YIELD: {
@@ -3304,6 +3328,10 @@ again:
 			vm_push_type( Tree**, exec->iframePtr ); /* Return iframe. */
 			vm_push_type( Tree**, exec->framePtr );  /* Return frame. */
 
+			uiter->frame = vm_ptop();
+			vm_pushn( fi->frameSize );
+			memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
+
 			uiterInit( prg, sp, uiter, fi, true );
 			break;
 		}
@@ -3331,6 +3359,10 @@ again:
 			vm_push_type( Code*, 0 );            /* Return instruction pointer,  */
 			vm_push_type( Tree**, exec->iframePtr ); /* Return iframe. */
 			vm_push_type( Tree**, exec->framePtr );  /* Return frame. */
+
+			uiter->frame = vm_ptop();
+			vm_pushn( fi->frameSize );
+			memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
 
 			uiterInit( prg, sp, uiter, fi, false );
 			break;
@@ -3570,23 +3602,8 @@ again:
 				colm_struct_set_field( prg->global, List*, field, list );
 				break;
 			}
-			case IN_INIT_LOCALS: {
-				Half size;
-				read_half( size );
-
-				debug( prg, REALM_BYTECODE, "IN_INIT_LOCALS %hd\n", size );
-
-				exec->framePtr = vm_ptop();
-				vm_pushn( size );
-				memset( vm_ptop(), 0, sizeof(Word) * size );
-				break;
-			}
 			case IN_STOP: {
 				debug( prg, REALM_BYTECODE, "IN_STOP\n" );
-
-				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-				downref_local_trees( prg, sp, exec, fi->locals, fi->localsLen );
-				vm_popn( fi->frameSize );
 
 				fflush( stdout );
 				goto out;
@@ -4038,9 +4055,12 @@ again:
 				prg->induceExit = 1;
 
 				while ( true ) {
-					FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-					int frameId = exec->frameId;
+					/* We stop on the root, leaving the psuedo-call setup on the
+					 * stack. Note we exclude the local data. */
+					if ( exec->frameId == prg->rtd->rootFrameId )
+						break;
 
+					FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 					downref_locals( prg, &sp, exec, fi->locals, fi->localsLen );
 
 					debug( prg, REALM_BYTECODE, " exit popping %s argSize %d\n",
@@ -4055,10 +4075,6 @@ again:
 					//while ( vm_ptop() != exec->framePtr )
 					//	vm_pop_value();
 
-					/* We stop on the root, leaving the psuedo-call setup on the
-					 * stack. Note we exclude the local data. */
-					if ( frameId == prg->rtd->rootFrameId )
-						break;
 
 					/* Call layout. */
 					exec->frameId = vm_pop_type(long);
