@@ -289,9 +289,6 @@ void userIterDestroy2( Program *prg, Tree ***psp, UserIter *uiter )
 		vm_popn( uiter->yieldSize );
 		vm_popn( sizeof(UserIter) / sizeof(Word) );
 
-		/* Contiguous push. */
-		vm_pop_tree();
-
 		/* The IN_PREP_ARGS stack data. */
 		vm_popn( argSize );
 		vm_pop_value();

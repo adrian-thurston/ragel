@@ -1011,10 +1011,6 @@ struct Compiler
 	int contiguousOffset;
 	int contiguousStretch;
 
-	bool beginContiguous( CodeVect &code, int stretch );
-	void endContiguous( CodeVect &code, bool resetContiguous );
-	void clearContiguous( CodeVect &code, bool resetContiguous );
-
 	void declareReVars();
 
 };

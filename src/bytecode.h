@@ -77,6 +77,7 @@ typedef unsigned long colm_value_t;
 // 0xeb
 // 0xec
 // 0xd4
+// 0x5c
 
 #define IN_LOAD_RETVAL           0xd4
 
@@ -284,7 +285,6 @@ typedef unsigned long colm_value_t;
 #define IN_PCR_CALL              0xb1
 #define IN_PCR_RET               0xb2
 #define IN_PCR_END_DECK          0xb3
-#define IN_CONTIGUOUS            0x5c
 
 #define IN_OPEN_FILE             0xb4
 #define IN_GET_STDIN             0xb5

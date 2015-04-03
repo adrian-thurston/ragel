@@ -1036,41 +1036,6 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 	}
 }
 
-bool Compiler::beginContiguous( CodeVect &code, int stretch )
-{
-	bool resetContiguous = false;
-
-	if ( inContiguous )
-		contiguousStretch += stretch;
-	else {
-		/* We add one for the push that always comes with the contiguous
-		 * statement. */
-		contiguousStretch = stretch + 1;
-
-		code.append( IN_CONTIGUOUS );
-		contiguousOffset = code.length();
-		code.appendHalf( 0 );
-		inContiguous = true;
-		resetContiguous = true;
-	}
-
-	return resetContiguous;
-}
-
-void Compiler::endContiguous( CodeVect &code, bool resetContiguous )
-{
-	if ( resetContiguous ) {
-		inContiguous = false; 
-		code.setHalf( contiguousOffset, contiguousStretch );
-		contiguousOffset = 0;
-	}
-}
-
-void Compiler::clearContiguous( CodeVect &code, bool resetContiguous )
-{
-	if ( resetContiguous )
-		code.append( IN_POP );
-}
 
 UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect *args ) 
 {
@@ -1087,12 +1052,6 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 		code.appendHalf( 0 );
 	}
 
-	bool resetContiguous = false;
-	if ( func != 0 && !func->inHost ) {
-		long stretch = func->paramListSize + 5 + func->localFrame->size();
-		resetContiguous = pd->beginContiguous( code, stretch );
-	}
-
 	/* Evaluate and push the arguments. */
 	ObjectField **paramRefs = evaluateArgs( pd, code, lookup, args );
 
@@ -1103,9 +1062,6 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 
 	resetActiveRefs( pd, lookup, paramRefs);
 	delete[] paramRefs;
-
-	pd->endContiguous( code, resetContiguous );
-	pd->clearContiguous( code, resetContiguous );
 
 	if ( func != 0 && !func->inHost ) {
 		code.append( IN_CLEAR_ARGS );
@@ -2249,13 +2205,6 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 		code.appendHalf( 0 );
 	}
 
-	bool resetContiguous = false;
-	if ( func != 0 ) {
-		/* FIXME: what is the right size here (16)? */
-		long stretch = func->paramListSize + 16 + func->localFrame->size();
-		resetContiguous = pd->beginContiguous( code, stretch );
-	}
-
 	/* 
 	 * Create the iterator from the local var.
 	 */
@@ -2297,8 +2246,6 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	ObjectField **paramRefs = iterCall->langTerm->varRef->evaluateArgs(
 			pd, code, lookup, iterCall->langTerm->args );
 
-	pd->endContiguous( code, resetContiguous );
-
 	if ( pd->revertOn )
 		code.append( iterImpl->inCreateWV );
 	else
@@ -2331,8 +2278,6 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 
 	iterCall->langTerm->varRef->resetActiveRefs( pd, lookup, paramRefs );
 	delete[] paramRefs;
-
-	pd->clearContiguous( code, resetContiguous );
 
 	if ( func != 0 ) {
 		code.append( IN_CLEAR_ARGS );

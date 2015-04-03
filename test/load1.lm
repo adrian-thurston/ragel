@@ -28,7 +28,7 @@ int main( int argc, const char **argv )
 	colm_set_debug( program, 1 );
 	colm_run_program( program, argc, argv );
 
-	foo F = f( program, "passthrouh" );	
+	foo F = f( program, "passthrough" );	
 
 	std::cout << F.Str().text() << std::endl;
 

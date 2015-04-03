@@ -375,7 +375,7 @@ void colm_execute( Program *prg, Execution *exec, Code *code )
 	/* Set up the stack as if we have 
 	 * called. We allow a return value. */
 
-	long stretch = 5 + fi->frameSize;
+	long stretch = FR_AA + fi->frameSize;
 	vm_contiguous( stretch );
 
 	vm_push_tree( 0 );
@@ -435,7 +435,7 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 		}
 	}
 
-	long stretch = 5 + fi->frameSize;
+	long stretch = FR_AA + fi->frameSize;
 	vm_contiguous( stretch );
 
 	/* Set up the stack as if we have called. We allow a return value. */
@@ -455,10 +455,7 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 	sp = colm_execute_code( prg, &execution, sp, code );
 
 	treeDownref( prg, sp, prg->returnVal );
-	prg->returnVal = execution.retVal; //vm_pop_tree();
-
-//	downref_local_trees( prg, sp, &execution, fi->locals, fi->localsLen );
-//	vm_popn( fi->frameSize );
+	prg->returnVal = execution.retVal;
 
 	vm_popn( paramCount );
 	
@@ -2321,11 +2318,13 @@ again:
 		case IN_PCR_CALL: {
 			debug( prg, REALM_BYTECODE, "IN_PCR_CALL\n" );
 
+			int frameSize = 0;
 			if ( exec->parser->pdaRun->frameId >= 0 )  {
 				FrameInfo *fi = &prg->rtd->frameInfo[exec->parser->pdaRun->frameId];
-				long stretch = fi->argSize + 4 + fi->frameSize;
-				vm_contiguous( stretch );
+				frameSize = fi->frameSize;
 			}
+
+			vm_contiguous( 4 + frameSize );
 
 			vm_push_type( Tree**, exec->framePtr );
 			vm_push_type( Tree**, exec->iframePtr );
@@ -3233,14 +3232,6 @@ again:
 			vm_push_tree( res );
 			break;
 		}
-		case IN_CONTIGUOUS: {
-			Half size;
-			read_half( size );
-			debug( prg, REALM_BYTECODE, "IN_CONTIGUOUS %hd\n", size );
-			vm_contiguous( size );
-			vm_push_tree( 0 );
-			break;
-		}
 
 		case IN_STASH_ARG: {
 			Half pos;
@@ -3302,6 +3293,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CALL_WV %s\n", fr->name );
 
+			vm_contiguous( FR_AA + fi->frameSize );
+
 			vm_push_type( Tree**, exec->callArgs );
 			vm_push_value( 0 ); /* Return value. */
 			vm_push_type( Code*, instr );
@@ -3324,6 +3317,8 @@ again:
 			FrameInfo *fr = &prg->rtd->frameInfo[fi->frameId];
 
 			debug( prg, REALM_BYTECODE, "IN_CALL_WC %s %d\n", fr->name, fr->frameSize );
+
+			vm_contiguous( FR_AA + fi->frameSize );
 
 			vm_push_type( Tree**, exec->callArgs );
 			vm_push_value( 0 ); /* Return value. */
@@ -3382,6 +3377,8 @@ again:
 			UserIter *uiter = uiterCreate( prg, &sp, fi, searchId );
 			vm_set_local(exec, field, (SW) uiter);
 
+			vm_contiguous( FR_AA + fi->frameSize );
+
 			/* This is a setup similar to as a call, only the frame structure
 			 * is slightly different for user iterators. We aren't going to do
 			 * the call. We don't need to set up the return ip because the
@@ -3413,6 +3410,8 @@ again:
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
 			UserIter *uiter = uiterCreate( prg, &sp, fi, searchId );
 			vm_set_local(exec, field, (SW) uiter);
+
+			vm_contiguous( FR_AA + fi->frameSize );
 
 			/* This is a setup similar to as a call, only the frame structure
 			 * is slightly different for user iterators. We aren't going to do
@@ -4134,24 +4133,12 @@ again:
 
 					vm_popn( fi->frameSize );
 
-					/* This can help solve some crashes, but really need to move to
-					 * a register machine to make unwinding easier. Mixed values
-					 * living on the stack cannot be easily cleaned up in a
-					 * type-appropriate way. */
-					//while ( vm_ptop() != exec->framePtr )
-					//	vm_pop_value();
-
-
 					/* Call layout. */
 					exec->frameId = vm_pop_type(long);
 					exec->framePtr = vm_pop_type(Tree**);
 					instr = vm_pop_type(Code*);
 					Tree *retVal = vm_pop_tree();
 					vm_pop_value();
-//					vm_popn( fi->argSize );
-
-					/* The CONTIGUOS PUSH. */
-					vm_pop_tree();
 
 					/* The IN_PREP_ARGS stack data. */
 					vm_popn( fi->argSize );
