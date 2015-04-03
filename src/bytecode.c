@@ -389,9 +389,9 @@ void colm_execute( Program *prg, Execution *exec, Code *code )
 	memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
 
 	/* Execution loop. */
-	colm_execute_code( prg, exec, sp, code );
+	sp = colm_execute_code( prg, exec, sp, code );
 
-	downref_local_trees( prg, sp, exec, fi->locals, fi->localsLen );
+	downref_locals( prg, &sp, exec, fi->locals, fi->localsLen );
 	vm_popn( fi->frameSize );
 
 	vm_pop_ignore();
@@ -3374,10 +3374,11 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_UITER_CREATE_WV\n" );
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
+
+			vm_contiguous( (sizeof(UserIter) / sizeof(Word)) + FR_AA + fi->frameSize );
+
 			UserIter *uiter = uiterCreate( prg, &sp, fi, searchId );
 			vm_set_local(exec, field, (SW) uiter);
-
-			vm_contiguous( FR_AA + fi->frameSize );
 
 			/* This is a setup similar to as a call, only the frame structure
 			 * is slightly different for user iterators. We aren't going to do
@@ -3408,10 +3409,11 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_UITER_CREATE_WC\n" );
 
 			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
+
+			vm_contiguous( (sizeof(UserIter) / sizeof(Word)) + FR_AA + fi->frameSize );
+
 			UserIter *uiter = uiterCreate( prg, &sp, fi, searchId );
 			vm_set_local(exec, field, (SW) uiter);
-
-			vm_contiguous( FR_AA + fi->frameSize );
 
 			/* This is a setup similar to as a call, only the frame structure
 			 * is slightly different for user iterators. We aren't going to do
@@ -4126,11 +4128,11 @@ again:
 						break;
 
 					FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
-					downref_locals( prg, &sp, exec, fi->locals, fi->localsLen );
 
 					debug( prg, REALM_BYTECODE, " exit popping %s argSize %d\n",
 							( fi->name != 0 ? fi->name : "<no-name>" ), fi->argSize );
 
+					downref_locals( prg, &sp, exec, fi->locals, fi->localsLen );
 					vm_popn( fi->frameSize );
 
 					/* Call layout. */
