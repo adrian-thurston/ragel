@@ -2204,7 +2204,10 @@ void LangStmt::compileForIterBody( Compiler *pd,
 	/* Add the cleanup for the current loop. */
 	int lcLen = pd->unwindCode.length();
 	pd->unwindCode.insertHalf( 0, objField->offset );
-	pd->unwindCode.insert( 0, objField->iterImpl->inDestroy );
+	int c = objField->iterImpl->inDestroy;
+	if ( c == IN_UITER_DESTROY )
+		c = IN_UITER_DESTROY2;
+	pd->unwindCode.insert( 0, c ); //objField->iterImpl->inDestroy );
 
 	/* Compile the contents. */
 	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )

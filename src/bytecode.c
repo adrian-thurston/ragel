@@ -3511,6 +3511,17 @@ again:
 			break;
 		}
 
+		case IN_UITER_DESTROY2: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_UITER_DESTROY %hd\n", field );
+
+			UserIter *uiter = (UserIter*) vm_get_local(exec, field);
+			userIterDestroy2( prg, &sp, uiter );
+			break;
+		}
+
 		case IN_RET: {
 			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 			downref_local_trees( prg, sp, exec, fi->locals, fi->localsLen );
