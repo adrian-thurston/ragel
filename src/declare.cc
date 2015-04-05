@@ -1302,11 +1302,36 @@ void Compiler::initListFields( GenericType *gen )
 	initListField( gen, "top", 0 );
 }
 
+void Compiler::initValueListField( GenericType *gen, const char *name, int offset )
+{
+	/* Make the type ref and create the field. */
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltOffType, gen->valueTr, name );
+
+	el->inGetR =  IN_GET_VLIST_MEM_R;
+	el->inGetWC = IN_GET_VLIST_MEM_WC;
+	el->inGetWV = IN_GET_VLIST_MEM_WV;
+//	el->inSetWC = IN_SET_VLIST_MEM_WC;
+//	el->inSetWV = IN_SET_VLIST_MEM_WV;
+
+	el->inGetValR  =  IN_GET_VLIST_MEM_R;
+	el->inGetValWC =  IN_GET_VLIST_MEM_WC;
+	el->inGetValWV =  IN_GET_VLIST_MEM_WV;
+
+	gen->objDef->rootScope->insertField( el->name, el );
+
+	el->useGenericId = true;
+	el->generic = gen;
+
+	/* Zero for head, One for tail. */
+	el->offset = offset;
+}
+
 void Compiler::initValueListFields( GenericType *gen )
 {
-	initListField( gen, "head", 0 );
-	initListField( gen, "tail", 1 );
-	initListField( gen, "top", 0 );
+	initValueListField( gen, "head", 0 );
+	initValueListField( gen, "tail", 1 );
+	initValueListField( gen, "top", 0 );
 }
 
 void Compiler::initParserFunctions( GenericType *gen )

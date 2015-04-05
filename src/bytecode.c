@@ -33,6 +33,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
 
 typedef struct colm_struct Struct;
 
@@ -76,19 +77,21 @@ Tree **host_call( Program *prg, long code, Tree **sp );
 		i |= ((Type) p[3]) << 24; \
 	} while(0)
 
+	#define consume_word() instr += 4
+
 #else
 
 	#define read_type( type, i ) do { \
-		Word w; \
-		w = ((Word) *instr++); \
-		w |= ((Word) *instr++) << 8; \
-		w |= ((Word) *instr++) << 16; \
-		w |= ((Word) *instr++) << 24; \
-		w |= ((Word) *instr++) << 32; \
-		w |= ((Word) *instr++) << 40; \
-		w |= ((Word) *instr++) << 48; \
-		w |= ((Word) *instr++) << 56; \
-		i = (type) w; \
+		Word _w; \
+		_w = ((Word) *instr++); \
+		_w |= ((Word) *instr++) << 8; \
+		_w |= ((Word) *instr++) << 16; \
+		_w |= ((Word) *instr++) << 24; \
+		_w |= ((Word) *instr++) << 32; \
+		_w |= ((Word) *instr++) << 40; \
+		_w |= ((Word) *instr++) << 48; \
+		_w |= ((Word) *instr++) << 56; \
+		i = (type) _w; \
 	} while(0)
 
 	#define read_type_p( type, i, p ) do { \
@@ -101,6 +104,8 @@ Tree **host_call( Program *prg, long code, Tree **sp );
 		i |= ((type) p[6]) << 48; \
 		i |= ((type) p[7]) << 56; \
 	} while(0)
+
+	#define consume_word() instr += 8
 #endif
 
 #define read_tree( i )   read_type( Tree*, i )
@@ -109,6 +114,9 @@ Tree **host_call( Program *prg, long code, Tree **sp );
 #define read_stream( i ) read_type( Stream*, i )
 
 #define read_word_p( i, p ) read_type_p( Word, i, p )
+
+#define consume_byte() instr += 1
+#define consume_half() instr += 2
 
 static void rcode_downref( Program *prg, Tree **sp, Code *instr );
 
@@ -827,8 +835,7 @@ again:
 		}
 
 		case IN_INIT_CAPTURES: {
-			uchar ncaps;
-			read_byte(ncaps);
+			consume_byte();
 
 			debug( prg, REALM_BYTECODE, "IN_INIT_CAPTURES\n" );
 
@@ -2271,7 +2278,7 @@ again:
 		case IN_GET_ERROR: {
 			debug( prg, REALM_BYTECODE, "IN_GET_ERROR\n" );
 
-			Tree *obj = vm_pop_tree();
+			vm_pop_tree();
 			treeUpref( prg->error );
 			vm_push_tree( prg->error );
 			break;
@@ -2481,8 +2488,6 @@ again:
 
 		case IN_PARSE_FRAG_EXIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
-
-			Parser *parser = exec->parser;
 
 			exec->steps = vm_pop_type(long);
 			exec->pcr = vm_pop_type(long);
@@ -2738,8 +2743,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CONSTRUCT\n" );
 
-			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			PatConsNode *nodes = prg->rtd->patReplNodes;
+			//LangElInfo *lelInfo = prg->rtd->lelInfo;
+			//PatConsNode *nodes = prg->rtd->patReplNodes;
 			int rootNode = prg->rtd->patReplInfo[patternId].offset;
 
 			/* Note that bindIds are indexed at one. Add one spot for them. */
@@ -3131,6 +3136,67 @@ again:
 			vm_push_tree( res );
 			break;
 		}
+		case IN_GET_VLIST_MEM_R: {
+			short genId, field;
+			read_half( genId );
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, 
+					"IN_GET_VLIST_MEM_R %hd %hd\n", genId, field );
+
+			List *list = vm_pop_list();
+			Struct *el = colm_list_get( prg, list, genId, field );
+
+			Value val = colm_struct_get_field( el, Value, 0 );
+			vm_push_value( val );
+			break;
+		}
+		case IN_GET_VLIST_MEM_WC: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_VLIST_MEM_WC\n" );
+
+			Tree *obj = vm_pop_tree();
+			treeDownref( prg, sp, obj );
+
+			Tree *val = getListMemSplit( prg, (List*)obj, field );
+			treeUpref( val );
+			vm_push_tree( val );
+			break;
+		}
+		case IN_GET_VLIST_MEM_WV: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_VLIST_MEM_WV\n" );
+
+			Tree *obj = vm_pop_tree();
+			treeDownref( prg, sp, obj );
+
+			Tree *val = getListMemSplit( prg, (List*)obj, field );
+			treeUpref( val );
+			vm_push_tree( val );
+
+			/* Set up the reverse instruction. */
+			rcode_code( exec, IN_GET_LIST_MEM_BKT );
+			rcodeHalf( exec, field );
+			break;
+		}
+		case IN_GET_VLIST_MEM_BKT: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_GET_VLIST_MEM_BKT\n" );
+
+			Tree *obj = vm_pop_tree();
+			treeDownref( prg, sp, obj );
+
+			Tree *res = getListMemSplit( prg, (List*)obj, field );
+			treeUpref( res );
+			vm_push_tree( res );
+			break;
+		}
 		case IN_GET_PARSER_MEM_R: {
 			short field;
 			read_half( field );
@@ -3505,7 +3571,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STDIN\n" );
 
 			/* Pop the root object. */
-			Tree *obj = vm_pop_tree();
+			vm_pop_tree();
 			if ( prg->stdinVal == 0 )
 				prg->stdinVal = colm_stream_open_fd( prg, "<stdin>", 0 );
 
@@ -3516,7 +3582,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STDOUT\n" );
 
 			/* Pop the root object. */
-			Tree *obj = vm_pop_tree();
+			vm_pop_tree();
 			if ( prg->stdoutVal == 0 )
 				prg->stdoutVal = colm_stream_open_fd( prg, "<stdout>", 1 );
 
@@ -3527,7 +3593,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STDERR\n" );
 
 			/* Pop the root object. */
-			Tree *obj = vm_pop_tree();
+			vm_pop_tree();
 			if ( prg->stderrVal == 0 )
 				prg->stderrVal = colm_stream_open_fd( prg, "<stderr>", 2 );
 
@@ -4109,7 +4175,7 @@ again:
 			case IN_EXIT_HARD: {
 				debug( prg, REALM_BYTECODE, "IN_EXIT\n" );
 
-				Tree *global = vm_pop_tree();
+				vm_pop_tree();
 				prg->exitStatus = vm_pop_type(long);
 				prg->induceExit = 1;
 				exit( prg->exitStatus );
@@ -4117,7 +4183,7 @@ again:
 			case IN_EXIT: {
 				debug( prg, REALM_BYTECODE, "IN_EXIT\n" );
 
-				Tree *global = vm_pop_tree();
+				vm_pop_tree();
 				prg->exitStatus = vm_pop_type(long);
 				prg->induceExit = 1;
 
@@ -4198,29 +4264,24 @@ again:
 			break;
 		}
 		case IN_PARSE_INIT_BKT: {
-			Parser *parser;
-			Word pcr;
-			Word steps;
-
 			debug( prg, REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
 
-			read_parser( parser );
-			read_word( pcr );
-			read_word( steps );
+			consume_word(); //( parser );
+			consume_word(); //( pcr );
+			consume_word(); //( steps );
 
 			break;
 		}
 
 		case IN_LOAD_TREE: {
-			Word w;
-			read_word( w );
-			debug( prg, REALM_BYTECODE, "IN_LOAD_TREE %p\n", (Tree*)w );
-			treeDownref( prg, sp, (Tree*)w );
+			Tree *w;
+			read_tree( w );
+			debug( prg, REALM_BYTECODE, "IN_LOAD_TREE %p\n", w );
+			treeDownref( prg, sp, w );
 			break;
 		}
 		case IN_LOAD_WORD: {
-			Word w;
-			read_word( w );
+			consume_word();
 			debug( prg, REALM_BYTECODE, "IN_LOAD_WORD\n" );
 			break;
 		}
@@ -4265,26 +4326,20 @@ again:
 			return;
 		}
 		case IN_PARSE_APPEND_BKT: {
-			Parser *parser;
-			Tree *input;
-			Word len;
-
-			read_parser( parser );
-			read_tree( input );
-			read_word( len );
+			consume_word(); //( parser );
+			consume_word(); //( input );
+			consume_word(); //( len );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_BKT\n" ); 
 
 			break;
 		}
 		case IN_PARSE_APPEND_STREAM_BKT: {
-			Tree *sptr;
 			Tree *input;
-			Word len;
 
-			read_tree( sptr );
+			consume_word(); //( sptr );
 			read_tree( input );
-			read_word( len );
+			consume_word(); //( len );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_STREAM_BKT\n" );
 
@@ -4302,8 +4357,7 @@ again:
 			break;
 		}
 		case IN_INPUT_PUSH_BKT: {
-			Word len;
-			read_word( len );
+			consume_word(); //( len );
 
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_BKT\n" );
 			break;
@@ -4317,8 +4371,7 @@ again:
 			break;
 		}
 		case IN_LOAD_INPUT_BKT: {
-			Stream *input;
-			read_stream( input );
+			consume_word(); //( input );
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_BKT\n" );
 			break;
 		}
@@ -4352,17 +4405,14 @@ again:
 			break;
 		}
 		case IN_SET_STRUCT_VAL_BKT: {
-			short field;
-			Tree *val;
-			read_half( field );
-			read_tree( val );
+			consume_half(); //( field );
+			consume_word(); //( val );
 
 			debug( prg, REALM_BYTECODE, "IN_SET_STRUCT_VAL_BKT\n" );
 			break;
 		}
 		case IN_PTR_ACCESS_BKT: {
-			Tree *ptr;
-			read_tree( ptr );
+			consume_word(); //( ptr );
 
 			debug( prg, REALM_BYTECODE, "IN_PTR_ACCESS_BKT\n" );
 			break;
@@ -4401,10 +4451,8 @@ again:
 				break;
 			}
 			case IN_LIST_POP_HEAD_BKT: {
-				short genId;
-				Tree *val;
-				read_half( genId );
-				read_tree( val );
+				consume_half(); //( genId );
+				consume_word(); //( val );
 
 				debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
 
@@ -4415,23 +4463,19 @@ again:
 				break;
 			}
 			case IN_LIST_POP_TAIL_BKT: {
-				short genId;
-				Tree *val;
-				read_half( genId );
-				read_tree( val );
+				consume_half(); //( genId );
+				consume_word(); //( val );
 
 				debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
 
 				break;
 			}
 			case IN_MAP_INSERT_BKT: {
-				short genId;
 				uchar inserted;
-				Word wmapEl;
 
-				read_half( genId );
+				consume_half(); //( genId );
 				read_byte( inserted );
-				read_word( wmapEl );
+				consume_word(); //( wmapEl );
 
 				debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT %d\n",
 						(int)inserted );

@@ -768,8 +768,10 @@ struct Compiler
 	void initListFunctions( GenericType *gen );
 	void initListElFields( GenericType *gen );
 
+	void initValueListField( GenericType *gen, const char *name, int offset );
 	void initValueListFields( GenericType *gen );
 	void initValueListFunctions( GenericType *gen );
+
 	void initValueMapFunctions( GenericType *gen );
 	void initValueMapFields( GenericType *gen );
 

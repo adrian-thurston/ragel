@@ -74,10 +74,6 @@ typedef unsigned long colm_value_t;
 
 #define IN_TST_NZ_TREE           0xd1
 
-// 0xeb
-// 0xec
-// 0xd4
-// 0x5c
 
 #define IN_LOAD_RETVAL           0xd4
 
@@ -208,6 +204,19 @@ typedef unsigned long colm_value_t;
 #define IN_GET_LIST_MEM_WC       0x7a
 #define IN_GET_LIST_MEM_WV       0x7b
 #define IN_GET_LIST_MEM_BKT      0x7c
+
+#define IN_GET_VLIST_MEM_R       0xeb
+#define IN_GET_VLIST_MEM_WC      0xec
+#define IN_GET_VLIST_MEM_WV      0x70
+#define IN_GET_VLIST_MEM_BKT     0x5c
+
+// 0x71
+// 0x73
+// 0x74
+// 0x75
+// 0x76
+// 0x77
+// 0x78
 
 #define IN_GET_LIST_EL_MEM_R     0xf5
 

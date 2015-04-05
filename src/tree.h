@@ -348,6 +348,7 @@ void colm_list_iter_destroy( struct colm_program *prg, Tree ***psp, GenericIter 
 Tree *colm_list_iter_advance( struct colm_program *prg, Tree ***psp, GenericIter *iter );
 Tree *colm_list_iter_deref_cur( struct colm_program *prg, GenericIter *iter );
 void colm_list_append( struct colm_list *list, struct colm_list_el *newEl );
+void colm_list_prepend( struct colm_list *list, struct colm_list_el *newEl );
 
 void colm_vlist_append( struct colm_program *prg, List *list, Value value );
 void colm_vlist_prepend( struct colm_program *prg, List *list, Value value );
