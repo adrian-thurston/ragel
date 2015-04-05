@@ -2998,14 +2998,9 @@ void Compiler::compileUserIter( Function *func, CodeVect &code )
 	/* Compile the block. */
 	block->compile( this, code );
 
-	/* Check for a return statement. */
-	if ( block->stmtList->length() == 0 ||
-			block->stmtList->tail->type != LangStmt::YieldType )
-	{
-		/* Push the return value. */
-		code.append( IN_LOAD_NIL );
-		code.append( IN_YIELD );
-	}
+	/* Always yeild a nil at the end. This causes iteration to stop. */
+	code.append( IN_LOAD_NIL );
+	code.append( IN_YIELD );
 }
 
 void Compiler::compileUserIter( Function *func )
