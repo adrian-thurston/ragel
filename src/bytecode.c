@@ -3504,7 +3504,7 @@ again:
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_UITER_DESTROY\n" );
+			debug( prg, REALM_BYTECODE, "IN_UITER_DESTROY %hd\n", field );
 
 			UserIter *uiter = (UserIter*) vm_get_local(exec, field);
 			userIterDestroy( prg, &sp, uiter );
@@ -3530,6 +3530,17 @@ again:
 			if ( instr == 0 ){
 				//assert( sp == root );
 				return sp;
+			}
+
+			/* Might be some unwind code. */
+			{
+				short unwind_len;
+				read_half( unwind_len );
+				if ( unwind_len > 0 ) {
+					instr += unwind_len;
+					debug( prg, REALM_BYTECODE,
+							"skipping unwind code length: %hd\n", unwind_len );
+				}
 			}
 				
 			break;
@@ -3622,6 +3633,9 @@ again:
 			vm_push_value( val );
 			break;
 		}
+
+		case IN_DONE:
+			return sp;
 
 		case IN_FN: {
 			c = *instr++;
@@ -4181,7 +4195,12 @@ again:
 				exit( prg->exitStatus );
 			}
 			case IN_EXIT: {
-				debug( prg, REALM_BYTECODE, "IN_EXIT\n" );
+				/* The unwind code follows the exit call (exception, see
+				 * synthesis). */
+				short unwind_len;
+				read_half( unwind_len );
+
+				debug( prg, REALM_BYTECODE, "IN_EXIT, unwind len: %hd\n", unwind_len );
 
 				vm_pop_tree();
 				prg->exitStatus = vm_pop_type(long);
@@ -4195,8 +4214,13 @@ again:
 
 					FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
 
-					debug( prg, REALM_BYTECODE, " exit popping %s argSize %d\n",
-							( fi->name != 0 ? fi->name : "<no-name>" ), fi->argSize );
+					debug( prg, REALM_BYTECODE, "IN_EXIT, popping frame %s, "
+							"unwind-len %hd, arg-size %ld\n",
+							( fi->name != 0 ? fi->name : "<no-name>" ),
+							unwind_len, fi->argSize );
+
+					if ( unwind_len > 0 )
+						sp = colm_execute_code( prg, exec, sp, instr );
 
 					downref_locals( prg, &sp, exec, fi->locals, fi->localsLen );
 					vm_popn( fi->frameSize );
@@ -4205,6 +4229,7 @@ again:
 					exec->frameId = vm_pop_type(long);
 					exec->framePtr = vm_pop_type(Tree**);
 					instr = vm_pop_type(Code*);
+
 					Tree *retVal = vm_pop_tree();
 					vm_pop_value();
 
@@ -4216,6 +4241,8 @@ again:
 						/* Problem here. */
 						treeDownref( prg, sp, retVal );
 					}
+
+					read_half( unwind_len );
 				}
 
 				goto out;

@@ -74,7 +74,6 @@ typedef unsigned long colm_value_t;
 
 #define IN_TST_NZ_TREE           0xd1
 
-
 #define IN_LOAD_RETVAL           0xd4
 
 #define IN_STASH_ARG             0x20
@@ -216,7 +215,8 @@ typedef unsigned long colm_value_t;
 // 0x75
 // 0x76
 // 0x77
-// 0x78
+
+#define IN_DONE                  0x78
 
 #define IN_GET_LIST_EL_MEM_R     0xf5
 

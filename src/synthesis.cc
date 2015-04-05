@@ -903,6 +903,7 @@ ObjectField **LangVarRef::evaluateArgs( Compiler *pd, CodeVect &code,
 		}
 		else {
 			UniqueType *exprUT = expression->evaluate( pd, code );
+			// pd->unwindCode.remove( 0, 1 );
 
 			if ( !castAssignment( pd, code, paramUT, 0, exprUT ) )
 				error(loc) << "arg " << pe.pos()+1 << " is of the wrong type" << endp;
@@ -952,6 +953,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	/* Check if we need to revert the function. If it operates on a reference
 	 * or if it is not local then we need to revert it. */
 	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef() || isInbuiltObject();
+	bool unwind = false;
 	
 	/* The call instruction. */
 	if ( pd->revertOn && revert )  {
@@ -966,6 +968,10 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 			code.appendHalf( 0 );
 		}
 		else {
+			if ( lookup.objMethod->opcodeWV == IN_CALL_WV ||
+					lookup.objMethod->opcodeWC == IN_EXIT )
+				unwind = true;
+
 			if ( lookup.objMethod->useFnInstr )
 				code.append( IN_FN );
 			code.append( lookup.objMethod->opcodeWV );
@@ -983,6 +989,10 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 			code.appendHalf( 0 );
 		}
 		else {
+			if ( lookup.objMethod->opcodeWC == IN_CALL_WC ||
+					lookup.objMethod->opcodeWC == IN_EXIT )
+				unwind = true;
+
 			if ( lookup.objMethod->useFnInstr )
 				code.append( IN_FN );
 			code.append( lookup.objMethod->opcodeWC );
@@ -994,6 +1004,16 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 
 	if ( lookup.objMethod->useGenericId )
 		code.appendHalf( lookup.objMethod->generic->id );
+	
+	if ( unwind ) {
+		if ( pd->unwindCode.length() == 0 )
+			code.appendHalf( 0 );
+		else {
+			code.appendHalf( pd->unwindCode.length() + 1 );
+			code.append( pd->unwindCode );
+			code.append( IN_DONE );
+		}
+	}
 }
 
 void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code, 
@@ -1717,29 +1737,38 @@ UniqueType *LangTerm::evaluateSearch( Compiler *pd, CodeVect &code ) const
 
 UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 {
+	UniqueType *retUt = 0;
 	switch ( type ) {
 		case VarRefType:
-			return varRef->evaluate( pd, code );
+			retUt = varRef->evaluate( pd, code );
+			break;
 		case MethodCallType:
-			return varRef->evaluateCall( pd, code, args );
+			retUt = varRef->evaluateCall( pd, code, args );
+			break;
 		case NilType:
 			code.append( IN_LOAD_NIL );
-			return pd->uniqueTypeNil;
+			retUt = pd->uniqueTypeNil;
+			break;
 		case TrueType:
 			code.append( IN_LOAD_TRUE );
-			return pd->uniqueTypeBool;
+			retUt = pd->uniqueTypeBool;
+			break;
 		case FalseType:
 			code.append( IN_LOAD_FALSE );
-			return pd->uniqueTypeBool;
+			retUt = pd->uniqueTypeBool;
+			break;
 		case MakeTokenType:
-			return evaluateMakeToken( pd, code );
+			retUt = evaluateMakeToken( pd, code );
+			break;
 		case MakeTreeType:
-			return evaluateMakeTree( pd, code );
+			retUt = evaluateMakeTree( pd, code );
+			break;
 		case NumberType: {
 			unsigned int n = atoi( data );
 			code.append( IN_LOAD_INT );
 			code.appendWord( n );
-			return pd->uniqueTypeInt;
+			retUt = pd->uniqueTypeInt;
+			break;
 		}
 		case StringType: {
 			String interp;
@@ -1753,24 +1782,33 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 
 			code.append( IN_LOAD_STR );
 			code.appendWord( mapEl->value );
-			return pd->uniqueTypeStr;
+			retUt = pd->uniqueTypeStr;
+			break;
 		}
 		case MatchType:
-			return evaluateMatch( pd, code );
+			retUt = evaluateMatch( pd, code );
+			break;
 		case ParseType:
-			return evaluateParse( pd, code, false, false );
+			retUt = evaluateParse( pd, code, false, false );
+			break;
 		case ParseTreeType:
-			return evaluateParse( pd, code, true, false );
+			retUt = evaluateParse( pd, code, true, false );
+			break;
 		case ParseStopType:
-			return evaluateParse( pd, code, false, true );
+			retUt = evaluateParse( pd, code, false, true );
+			break;
 		case ConstructType:
-			return evaluateConstruct( pd, code );
+			retUt = evaluateConstruct( pd, code );
+			break;
 		case SendType:
-			return evaluateSend( pd, code );
+			retUt = evaluateSend( pd, code );
+			break;
 		case SendTreeType:
-			return evaluateSendTree( pd, code );
+			retUt = evaluateSendTree( pd, code );
+			break;
 		case NewType:
-			return evaluateNew( pd, code );
+			retUt = evaluateNew( pd, code );
+			break;
 		case TypeIdType: {
 			/* Evaluate the expression. */
 			UniqueType *ut = typeRef->uniqueType;
@@ -1779,16 +1817,26 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 
 			code.append( IN_LOAD_INT );
 			code.appendWord( ut->langEl->id );
-			return pd->uniqueTypeInt;
+			retUt = pd->uniqueTypeInt;
+			break;
 		}
 		case SearchType:
-			return evaluateSearch( pd, code );
+			retUt = evaluateSearch( pd, code );
+			break;
 		case EmbedStringType:
-			return evaluateEmbedString( pd, code );
+			retUt = evaluateEmbedString( pd, code );
+			break;
 		case CastType:
-			return evaluateCast( pd, code );
+			retUt = evaluateCast( pd, code );
+			break;
 	}
-	return 0;
+
+	// if ( retUt->val() )
+	//	pd->unwindCode.insert( 0, IN_POP_VAL );
+	// else
+	//	pd->unwindCode.insert( 0, IN_POP );
+
+	return retUt;
 }
 
 UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
@@ -1800,6 +1848,9 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					UniqueType *lt = left->evaluate( pd, code );
 					UniqueType *rt = right->evaluate( pd, code );
 
+					// pd->unwindCode.remove( 0, 2 );
+					// pd->unwindCode.insert( 0, IN_POP );
+
 					if ( lt == pd->uniqueTypeInt && rt == pd->uniqueTypeInt ) {
 						code.append( IN_ADD_INT );
 						return pd->uniqueTypeInt;
@@ -1809,6 +1860,7 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 						code.append( IN_CONCAT_STR );
 						return pd->uniqueTypeStr;
 					}
+
 
 					error(loc) << "do not have an addition operator for these types" << endp;
 					break;
@@ -2322,6 +2374,19 @@ void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
 
 void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 {
+	CodeVect block;
+
+	StringMapEl *mapEl = 0;
+	if ( pd->literalStrings.insert( "unwind code\n", &mapEl ) )
+		mapEl->value = pd->literalStrings.length()-1;
+
+	block.append( IN_LOAD_STR );
+	block.appendWord( mapEl->value );
+
+	block.append( IN_POP );
+
+	pd->unwindCode.insert( 0, block );
+
 	switch ( type ) {
 		case PrintType: 
 		case PrintXMLACType:
@@ -2376,6 +2441,8 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 				code.append( IN_POP );
 			else
 				code.append( IN_POP_VAL );
+
+			// pd->unwindCode.remove( 0, 1 );
 			break;
 		}
 		case IfType: {
@@ -2492,6 +2559,8 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 	}
+
+	pd->unwindCode.remove( 0, block.length() );
 }
 
 void CodeBlock::compile( Compiler *pd, CodeVect &code ) const
