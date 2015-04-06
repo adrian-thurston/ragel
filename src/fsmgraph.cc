@@ -405,12 +405,56 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
  * invoked. */
 void FsmAp::concatOp( FsmAp *other )
 {
-	assert( ctx == other->ctx );
-
 	/* Assert same signedness and return graph concatenation op. */
+	assert( ctx == other->ctx );
 	doConcat( other, 0, false );
 }
 
+void FsmAp::nfaConcatOp( FsmAp *other )
+{
+	assert( ctx == other->ctx );
+
+	StateSet origFinals = finStateSet;
+
+	/* Get the other's start state. */
+	StateAp *otherStartState = other->startState;
+
+	for ( StateSet::Iter orig = origFinals; orig.lte(); orig++ ) {
+		unsetFinState( *orig );
+
+		StateAp *repl = addState();
+		moveInwardTrans( repl, *orig );
+		
+		StateSet ss;
+		ss.insert( otherStartState );
+		ss.insert( *orig );
+
+		repl->stateDictEl = new StateDictEl( ss );
+		nfaList.append( repl );
+
+		for ( StateSet::Iter s = ss; s.lte(); s++ )
+			attachToNfa( repl, *s );
+	}
+
+	/* Now do the concatenation. */
+
+	/* Unset other's start state before bringing in the entry points. */
+	other->unsetStartState();
+
+	/* Bring in the rest of other's entry points. */
+	copyInEntryPoints( other );
+	other->entryPoints.empty();
+
+	/* Bring in other's states into our state lists. */
+	stateList.append( other->stateList );
+	misfitList.append( other->misfitList );
+
+	finStateSet.insert( other->finStateSet );
+	
+	/* Since other's lists are empty, we can delete the fsm without
+	 * affecting any states. */
+	delete other;
+}
 
 void FsmAp::doOr( FsmAp *other )
 {

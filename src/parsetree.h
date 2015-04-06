@@ -457,6 +457,7 @@ struct Term
 		RightStartType,
 		RightFinishType,
 		LeftType,
+		NfaConcat,
 		FactorWithAugType
 	};
 
