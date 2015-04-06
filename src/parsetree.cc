@@ -1169,9 +1169,13 @@ Term::~Term()
 		case RightStartType:
 		case RightFinishType:
 		case LeftType:
+			delete term;
+			delete factorWithAug;
+			break;
 		case NfaConcat:
 			delete term;
 			delete factorWithAug;
+			delete factorWithAug2;
 			break;
 		case FactorWithAugType:
 			delete factorWithAug;
@@ -1282,7 +1286,8 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			/* Eval both sides. */
 			rtnVal = term->walk( pd );
 			FsmAp *rhs = factorWithAug->walk( pd );
-			rtnVal->nfaConcatOp( rhs );
+			FsmAp *rhs2 = factorWithAug2->walk( pd );
+			rtnVal->nfaConcatOp( rhs, rhs2 );
 			break;
 		}
 		case FactorWithAugType: {
@@ -1300,9 +1305,13 @@ void Term::makeNameTree( ParseData *pd )
 	case RightStartType:
 	case RightFinishType:
 	case LeftType:
+		term->makeNameTree( pd );
+		factorWithAug->makeNameTree( pd );
+		break;
 	case NfaConcat:
 		term->makeNameTree( pd );
 		factorWithAug->makeNameTree( pd );
+		factorWithAug2->makeNameTree( pd );
 		break;
 	case FactorWithAugType:
 		factorWithAug->makeNameTree( pd );
@@ -1317,9 +1326,13 @@ void Term::resolveNameRefs( ParseData *pd )
 	case RightStartType:
 	case RightFinishType:
 	case LeftType:
+		term->resolveNameRefs( pd );
+		factorWithAug->resolveNameRefs( pd );
+		break;
 	case NfaConcat:
 		term->resolveNameRefs( pd );
 		factorWithAug->resolveNameRefs( pd );
+		factorWithAug2->resolveNameRefs( pd );
 		break;
 	case FactorWithAugType:
 		factorWithAug->resolveNameRefs( pd );

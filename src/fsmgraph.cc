@@ -410,11 +410,17 @@ void FsmAp::concatOp( FsmAp *other )
 	doConcat( other, 0, false );
 }
 
-void FsmAp::nfaConcatOp( FsmAp *other )
+/* this . other* . other */
+
+void FsmAp::nfaConcatOp( FsmAp *other, FsmAp *other2 )
 {
 	assert( ctx == other->ctx );
 
+	/*
+	 * First Concat.
+	 */
 	StateSet origFinals = finStateSet;
+	StateSet origFinals2 = other->finStateSet;
 
 	/* Get the other's start state. */
 	StateAp *otherStartState = other->startState;
@@ -436,24 +442,55 @@ void FsmAp::nfaConcatOp( FsmAp *other )
 			attachToNfa( repl, *s );
 	}
 
-	/* Now do the concatenation. */
+	/* Get the other's start state. */
+	StateAp *thisStartState = other->startState;
+	otherStartState = other2->startState;
+
+	for ( StateSet::Iter orig = origFinals2; orig.lte(); orig++ ) {
+		unsetFinState( *orig );
+
+		StateAp *repl = addState();
+		moveInwardTrans( repl, *orig );
+		
+		StateSet ss;
+		ss.insert( otherStartState );
+		ss.insert( *orig );
+		ss.insert( thisStartState );
+
+		repl->stateDictEl = new StateDictEl( ss );
+		nfaList.append( repl );
+
+		for ( StateSet::Iter s = ss; s.lte(); s++ )
+			attachToNfa( repl, *s );
+	}
+
+	/*
+	 * Second Concat.
+	 */
 
 	/* Unset other's start state before bringing in the entry points. */
 	other->unsetStartState();
+	other2->unsetStartState();
 
 	/* Bring in the rest of other's entry points. */
 	copyInEntryPoints( other );
+	copyInEntryPoints( other2 );
 	other->entryPoints.empty();
+	other2->entryPoints.empty();
 
 	/* Bring in other's states into our state lists. */
 	stateList.append( other->stateList );
+	stateList.append( other2->stateList );
 	misfitList.append( other->misfitList );
+	misfitList.append( other2->misfitList );
 
 	finStateSet.insert( other->finStateSet );
+	finStateSet.insert( other2->finStateSet );
 	
 	/* Since other's lists are empty, we can delete the fsm without
 	 * affecting any states. */
 	delete other;
+	delete other2;
 }
 
 void FsmAp::doOr( FsmAp *other )

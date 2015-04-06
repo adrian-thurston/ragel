@@ -499,8 +499,8 @@ term:
 				$3->factorWithAug, Term::LeftType );
 	};
 term:
-	term TK_ColonDot factor_with_label final {
-		$$->term = new Term( $1->term, $3->factorWithAug, Term::NfaConcat );
+	term TK_ColonDot factor_with_label TK_ColonDot factor_with_label final {
+		$$->term = new Term( $1->term, $3->factorWithAug, $5->factorWithAug, Term::NfaConcat );
 	};
 term:
 	factor_with_label final {

@@ -1709,7 +1709,7 @@ struct FsmAp
 	void repeatOp( int times );
 	void optionalRepeatOp( int times );
 	void concatOp( FsmAp *other );
-	void nfaConcatOp( FsmAp *other );
+	void nfaConcatOp( FsmAp *other, FsmAp *other2 );
 	void unionOp( FsmAp *other );
 	void intersectOp( FsmAp *other );
 	void subtractOp( FsmAp *other );

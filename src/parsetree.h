@@ -467,6 +467,13 @@ struct Term
 	Term( Term *term, FactorWithAug *factorWithAug, Type type ) :
 		term(term), factorWithAug(factorWithAug), type(type) { }
 
+	Term( Term *term, FactorWithAug *factorWithAug,
+			FactorWithAug *factorWithAug2, Type type )
+	:
+		term(term), factorWithAug(factorWithAug),
+		factorWithAug2(factorWithAug2), type(type)
+	{ }
+
 	Term( FactorWithAug *factorWithAug ) :
 		term(0), factorWithAug(factorWithAug), type(FactorWithAugType) { }
 	
@@ -478,6 +485,7 @@ struct Term
 
 	Term *term;
 	FactorWithAug *factorWithAug;
+	FactorWithAug *factorWithAug2;
 	Type type;
 
 	/* Priority descriptor for RightFinish type. */
