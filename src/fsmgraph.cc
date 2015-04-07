@@ -489,7 +489,6 @@ void FsmAp::nfaConcatRepeatOp( FsmAp *other, FsmAp *other2,
 	misfitList.append( other->misfitList );
 	misfitList.append( other2->misfitList );
 
-	finStateSet.insert( other->finStateSet );
 	finStateSet.insert( other2->finStateSet );
 	
 	/* Since other's lists are empty, we can delete the fsm without
