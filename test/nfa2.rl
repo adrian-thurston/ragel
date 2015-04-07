@@ -63,7 +63,7 @@
 	main1 = atoi '\n' @print1;
 	main2 = [0-9]* '00000000' [0-9]* '\n' @print2;
 
-	main 5|= main1 | main2;
+	main 5|= "main1" main1 | "main2" main2;
 
 }%%
 	.file	"tmp.c"
