@@ -412,7 +412,7 @@ void FsmAp::concatOp( FsmAp *other )
 
 /* this . other* . other */
 
-void FsmAp::nfaConcatOp( FsmAp *other, FsmAp *other2,
+void FsmAp::nfaConcatRepeatOp( FsmAp *other, FsmAp *other2,
 		Action *action1, Action *action2, Action *action3 )
 {
 	assert( ctx == other->ctx );

@@ -104,8 +104,11 @@ FsmAp *VarDef::walk( ParseData *pd )
 	/* If the expression below is a join operation with multiple expressions
 	 * then it just had epsilon transisions resolved. If it is a join
 	 * with only a single expression then run the epsilon op now. */
-	if ( machineDef->type == MachineDef::JoinType && machineDef->join->exprList.length() == 1 )
+	if ( machineDef->type == MachineDef::JoinType &&
+			machineDef->join->exprList.length() == 1 )
+	{
 		rtnVal->epsilonOp();
+	}
 
 	/* We can now unset entry points that are not longer used. */
 	pd->unsetObsoleteEntries( rtnVal );
@@ -1287,7 +1290,8 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			rtnVal = term->walk( pd );
 			FsmAp *rhs = factorWithAug->walk( pd );
 			FsmAp *rhs2 = factorWithAug2->walk( pd );
-			rtnVal->nfaConcatOp( rhs, rhs2, action1, action2, action3 );
+			rtnVal->nfaConcatRepeatOp( rhs, rhs2,
+					action1, action2, action3 );
 			break;
 		}
 		case FactorWithAugType: {
