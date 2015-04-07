@@ -1287,7 +1287,7 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			rtnVal = term->walk( pd );
 			FsmAp *rhs = factorWithAug->walk( pd );
 			FsmAp *rhs2 = factorWithAug2->walk( pd );
-			rtnVal->nfaConcatOp( rhs, rhs2 );
+			rtnVal->nfaConcatOp( rhs, rhs2, action1, action2, action3 );
 			break;
 		}
 		case FactorWithAugType: {

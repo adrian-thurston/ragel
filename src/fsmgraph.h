@@ -1709,7 +1709,8 @@ struct FsmAp
 	void repeatOp( int times );
 	void optionalRepeatOp( int times );
 	void concatOp( FsmAp *other );
-	void nfaConcatOp( FsmAp *other, FsmAp *other2 );
+	void nfaConcatOp( FsmAp *other, FsmAp *other2,
+			Action *action1, Action *action2, Action *action3 );
 	void unionOp( FsmAp *other );
 	void intersectOp( FsmAp *other );
 	void subtractOp( FsmAp *other );
@@ -1732,6 +1733,7 @@ struct FsmAp
 	/* Make a new start state that has no entry points. Will not change the
 	 * identity of the fsm. */
 	void isolateStartState();
+	StateAp *dupStartState();
 
 	/* Workers for resolving epsilon transitions. */
 	bool inEptVect( EptVect *eptVect, StateAp *targ );

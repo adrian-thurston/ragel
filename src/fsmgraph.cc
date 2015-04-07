@@ -412,7 +412,8 @@ void FsmAp::concatOp( FsmAp *other )
 
 /* this . other* . other */
 
-void FsmAp::nfaConcatOp( FsmAp *other, FsmAp *other2 )
+void FsmAp::nfaConcatOp( FsmAp *other, FsmAp *other2,
+		Action *action1, Action *action2, Action *action3 )
 {
 	assert( ctx == other->ctx );
 
@@ -443,8 +444,8 @@ void FsmAp::nfaConcatOp( FsmAp *other, FsmAp *other2 )
 	}
 
 	/* Get the other's start state. */
-	StateAp *thisStartState = other->startState;
-	otherStartState = other2->startState;
+	StateAp *dup = other->dupStartState();
+	StateAp *other2StartState = other2->startState;
 
 	for ( StateSet::Iter orig = origFinals2; orig.lte(); orig++ ) {
 		unsetFinState( *orig );
@@ -453,9 +454,9 @@ void FsmAp::nfaConcatOp( FsmAp *other, FsmAp *other2 )
 		moveInwardTrans( repl, *orig );
 		
 		StateSet ss;
-		ss.insert( otherStartState );
+		ss.insert( other2StartState );
 		ss.insert( *orig );
-		ss.insert( thisStartState );
+		ss.insert( dup );
 
 		repl->stateDictEl = new StateDictEl( ss );
 		nfaList.append( repl );
@@ -463,6 +464,10 @@ void FsmAp::nfaConcatOp( FsmAp *other, FsmAp *other2 )
 		for ( StateSet::Iter s = ss; s.lte(); s++ )
 			attachToNfa( repl, *s );
 	}
+
+	otherStartState->fromStateActionTable.setAction( 0, action1 );
+	other2StartState->fromStateActionTable.setAction( 0, action2 );
+	dup->fromStateActionTable.setAction( 0, action3 );
 
 	/*
 	 * Second Concat.
@@ -1132,6 +1137,14 @@ void FsmAp::isolateStartState( )
 	 * misfit accounting. */
 	removeMisfits();
 	setMisfitAccounting( false );
+}
+
+StateAp *FsmAp::dupStartState( )
+{
+	MergeData md;
+	StateAp *dup = addState();
+	mergeStates( md, dup, startState );
+	return dup;
 }
 
 /* A state merge which represents the drawing in of leaving transitions.  If
