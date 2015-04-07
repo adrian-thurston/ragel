@@ -499,12 +499,12 @@ term:
 				$3->factorWithAug, Term::LeftType );
 	};
 term:
-	term TK_ColonDot factor_with_label TK_ColonDot factor_with_label
-	'(' action_embed action_embed action_embed ')'
+	term '.' ':' '(' action_embed ',' action_embed ','
+		action_embed ',' factor_with_label ')' ':' '.' factor_with_label
 	final {
-		$$->term = new Term( $1->term, $3->factorWithAug,
-			$5->factorWithAug, $7->action,
-			$8->action, $9->action, Term::NfaConcat );
+		$$->term = new Term( $5->action, $7->action, $9->action,
+				$1->term, $11->factorWithAug, $15->factorWithAug,
+				Term::NfaConcat );
 	};
 term:
 	factor_with_label final {

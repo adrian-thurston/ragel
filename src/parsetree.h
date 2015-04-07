@@ -467,14 +467,13 @@ struct Term
 	Term( Term *term, FactorWithAug *factorWithAug, Type type ) :
 		term(term), factorWithAug(factorWithAug), type(type) { }
 
-	Term( Term *term, FactorWithAug *factorWithAug,
-			FactorWithAug *factorWithAug2,
-			Action *action1, Action *action2,
-			Action *action3, Type type )
+	Term( Action *action1, Action *action2, Action *action3, 
+			Term *term, FactorWithAug *factorWithAug,
+			FactorWithAug *factorWithAug2, Type type )
 	:
+		action1(action1), action2(action2), action3(action3),
 		term(term), factorWithAug(factorWithAug),
-		factorWithAug2(factorWithAug2), action1(action1),
-		action2(action2), action3(action3), type(type)
+		factorWithAug2(factorWithAug2), type(type)
 	{ }
 
 	Term( FactorWithAug *factorWithAug ) :
@@ -486,12 +485,13 @@ struct Term
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
-	Term *term;
-	FactorWithAug *factorWithAug;
-	FactorWithAug *factorWithAug2;
 	Action *action1;
 	Action *action2;
 	Action *action3;
+
+	Term *term;
+	FactorWithAug *factorWithAug;
+	FactorWithAug *factorWithAug2;
 	Type type;
 
 	/* Priority descriptor for RightFinish type. */
