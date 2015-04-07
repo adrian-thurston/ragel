@@ -89,6 +89,7 @@ StateAp::StateAp()
 	/* Only used during merging. Normally null. */
 	stateDictEl(0),
 
+	nfaOut(0),
 	nfaIn(0),
 
 	eptVect(0),
@@ -134,6 +135,7 @@ StateAp::StateAp(const StateAp &other)
 	/* This is only used during merging. Normally null. */
 	stateDictEl(0),
 
+	nfaOut(0),
 	nfaIn(0),
 
 	eptVect(0),
@@ -262,13 +264,13 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 {
 	int compareRes;
 
-	if ( state1->stateDictEl == 0 && state2->stateDictEl != 0 )
+	if ( state1->nfaOut == 0 && state2->nfaOut != 0 )
 		return -1;
-	else if ( state1->stateDictEl != 0 && state2->stateDictEl == 0 )
+	else if ( state1->nfaOut != 0 && state2->nfaOut == 0 )
 		return 1;
-	else if ( state1->stateDictEl != 0 ) {
+	else if ( state1->nfaOut != 0 ) {
 		compareRes = CmpTable<StateAp*>::compare(
-				state1->stateDictEl->stateSet, state2->stateDictEl->stateSet );
+				*state1->nfaOut, *state2->nfaOut );
 		if ( compareRes != 0 )
 			return compareRes;
 	}

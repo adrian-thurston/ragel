@@ -432,14 +432,11 @@ void FsmAp::nfaConcatRepeatOp( FsmAp *other, FsmAp *other2,
 		StateAp *repl = addState();
 		moveInwardTrans( repl, *orig );
 		
-		StateSet ss;
-		ss.insert( otherStartState );
-		ss.insert( *orig );
+		repl->nfaOut = new StateSet;
+		repl->nfaOut->insert( otherStartState );
+		repl->nfaOut->insert( *orig );
 
-		repl->stateDictEl = new StateDictEl( ss );
-		nfaList.append( repl );
-
-		for ( StateSet::Iter s = ss; s.lte(); s++ )
+		for ( StateSet::Iter s = *repl->nfaOut; s.lte(); s++ )
 			attachToNfa( repl, *s );
 	}
 
@@ -453,15 +450,12 @@ void FsmAp::nfaConcatRepeatOp( FsmAp *other, FsmAp *other2,
 		StateAp *repl = addState();
 		moveInwardTrans( repl, *orig );
 		
-		StateSet ss;
-		ss.insert( other2StartState );
-		ss.insert( *orig );
-		ss.insert( dup );
+		repl->nfaOut = new StateSet;
+		repl->nfaOut->insert( other2StartState );
+		repl->nfaOut->insert( *orig );
+		repl->nfaOut->insert( dup );
 
-		repl->stateDictEl = new StateDictEl( ss );
-		nfaList.append( repl );
-
-		for ( StateSet::Iter s = ss; s.lte(); s++ )
+		for ( StateSet::Iter s = *repl->nfaOut; s.lte(); s++ )
 			attachToNfa( repl, *s );
 	}
 
@@ -657,6 +651,16 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, long rounds )
 
 		/* Delete the state dict elements for non-nfa states. */
 		md.stateDict.empty();
+
+		/* Transfer remaining stateDictEl sets to nfaOut. */
+		while ( nfaList.length() > 0 ) {
+			StateAp *state = nfaList.head;
+			state->nfaOut = new StateSet( state->stateDictEl->stateSet );
+			delete state->stateDictEl;
+			state->stateDictEl = 0;
+			nfaList.detach( state );
+		}
+
 
 		long maxStateSetSize = 0;
 		long count = nfaList.length();

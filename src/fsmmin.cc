@@ -669,10 +669,10 @@ void FsmAp::fuseEquivStates( StateAp *dest, StateAp *src )
 	/* Move inward nfa links. */
 	if ( src->nfaIn != 0 ) {
 		for ( StateSet::Iter s = *src->nfaIn; s.lte(); s++ ) {
-			bool removed = (*s)->stateDictEl->stateSet.remove( src );
+			bool removed = (*s)->nfaOut->remove( src );
 			assert( removed );
 
-			(*s)->stateDictEl->stateSet.insert( dest );
+			(*s)->nfaOut->insert( dest );
 			if ( dest->nfaIn == 0 )
 				dest->nfaIn = new StateSet;
 			dest->nfaIn->insert( *s );

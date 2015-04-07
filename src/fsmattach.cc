@@ -298,13 +298,13 @@ void FsmAp::detachState( StateAp *state )
 	
 	if ( state->nfaIn != 0 ) {
 		for ( StateSet::Iter s = *state->nfaIn; s.lte(); s++ ) {
-			bool removed = (*s)->stateDictEl->stateSet.remove( state );
+			bool removed = (*s)->nfaOut->remove( state );
 			assert( removed );
 		}
 	}
 
-	if ( state->stateDictEl != 0 ) {
-		for ( StateSet::Iter s = state->stateDictEl->stateSet; s.lte(); s++ )
+	if ( state->nfaOut != 0 ) {
+		for ( StateSet::Iter s = *state->nfaOut; s.lte(); s++ )
 			detachFromNfa( state, *s );
 	}
 }

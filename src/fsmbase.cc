@@ -372,8 +372,8 @@ void FsmAp::markReachableFromHere( StateAp *state )
 	}
 
 	/* Recurse on all states that compose us. */
-	if ( state->stateDictEl != 0 ) {
-		for ( StateSet::Iter st = state->stateDictEl->stateSet; st.lte(); st++ )
+	if ( state->nfaOut != 0 ) {
+		for ( StateSet::Iter st = *state->nfaOut; st.lte(); st++ )
 			markReachableFromHere( *st );
 	}
 }
@@ -547,8 +547,8 @@ void FsmAp::depthFirstOrdering( StateAp *state )
 		}
 	}
 
-	if ( state->stateDictEl != 0 ) {
-		for ( StateSet::Iter s = state->stateDictEl->stateSet; s.lte(); s++ )
+	if ( state->nfaOut != 0 ) {
+		for ( StateSet::Iter s = *state->nfaOut; s.lte(); s++ )
 			depthFirstOrdering( *s );
 	}
 }
@@ -568,6 +568,7 @@ void FsmAp::depthFirstOrdering()
 	 * points. */
 	if ( errState != 0 )
 		depthFirstOrdering( errState );
+
 	depthFirstOrdering( startState );
 	for ( EntryMap::Iter en = entryPoints; en.lte(); en++ )
 		depthFirstOrdering( en->value );
