@@ -410,21 +410,25 @@ void FsmAp::concatOp( FsmAp *other )
 	doConcat( other, 0, false );
 }
 
-/* this . other* . other */
-
-void FsmAp::nfaConcatRepeatOp( FsmAp *other, FsmAp *other2,
-		Action *action1, Action *action2, Action *action3 )
+void FsmAp::nfaRepeatOp( Action *action1, Action *action2, Action *action3 )
 {
-	assert( ctx == other->ctx );
-
 	/*
 	 * First Concat.
 	 */
 	StateSet origFinals = finStateSet;
-	StateSet origFinals2 = other->finStateSet;
 
 	/* Get the other's start state. */
-	StateAp *otherStartState = other->startState;
+	StateAp *origStartState = startState;
+	StateAp *repStartState = dupStartState();
+
+
+	StateAp *newStart = addState();
+
+	newStart->nfaOut = new StateSet;
+	newStart->nfaOut->insert( origStartState );
+	attachToNfa( newStart, origStartState );
+
+	StateAp *newFinal = addState();
 
 	for ( StateSet::Iter orig = origFinals; orig.lte(); orig++ ) {
 		unsetFinState( *orig );
@@ -433,62 +437,21 @@ void FsmAp::nfaConcatRepeatOp( FsmAp *other, FsmAp *other2,
 		moveInwardTrans( repl, *orig );
 		
 		repl->nfaOut = new StateSet;
-		repl->nfaOut->insert( otherStartState );
+		repl->nfaOut->insert( repStartState );
 		repl->nfaOut->insert( *orig );
+		repl->nfaOut->insert( newFinal );
 
 		for ( StateSet::Iter s = *repl->nfaOut; s.lte(); s++ )
 			attachToNfa( repl, *s );
 	}
 
-	/* Get the other's start state. */
-	StateAp *dup = other->dupStartState();
-	StateAp *other2StartState = other2->startState;
+	origStartState->fromStateActionTable.setAction( 0, action1 );
+	newFinal->fromStateActionTable.setAction( 0, action2 );
+	repStartState->fromStateActionTable.setAction( 0, action3 );
 
-	for ( StateSet::Iter orig = origFinals2; orig.lte(); orig++ ) {
-		unsetFinState( *orig );
-
-		StateAp *repl = addState();
-		moveInwardTrans( repl, *orig );
-		
-		repl->nfaOut = new StateSet;
-		repl->nfaOut->insert( other2StartState );
-		repl->nfaOut->insert( *orig );
-		repl->nfaOut->insert( dup );
-
-		for ( StateSet::Iter s = *repl->nfaOut; s.lte(); s++ )
-			attachToNfa( repl, *s );
-	}
-
-	otherStartState->fromStateActionTable.setAction( 0, action1 );
-	other2StartState->fromStateActionTable.setAction( 0, action2 );
-	dup->fromStateActionTable.setAction( 0, action3 );
-
-	/*
-	 * Second Concat.
-	 */
-
-	/* Unset other's start state before bringing in the entry points. */
-	other->unsetStartState();
-	other2->unsetStartState();
-
-	/* Bring in the rest of other's entry points. */
-	copyInEntryPoints( other );
-	copyInEntryPoints( other2 );
-	other->entryPoints.empty();
-	other2->entryPoints.empty();
-
-	/* Bring in other's states into our state lists. */
-	stateList.append( other->stateList );
-	stateList.append( other2->stateList );
-	misfitList.append( other->misfitList );
-	misfitList.append( other2->misfitList );
-
-	finStateSet.insert( other2->finStateSet );
-	
-	/* Since other's lists are empty, we can delete the fsm without
-	 * affecting any states. */
-	delete other;
-	delete other2;
+	unsetStartState();
+	setStartState( newStart );
+	setFinState( newFinal );
 }
 
 void FsmAp::doOr( FsmAp *other )
@@ -1243,6 +1206,17 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 		destState->outCondSet.insert( srcState->outCondSet );
 		destState->errActionTable.setActions( srcState->errActionTable );
 		destState->eofActionTable.setActions( srcState->eofActionTable );
+
+	}
+
+	if ( srcState->nfaOut != 0 ) {
+		if ( destState->nfaOut == 0 )
+			destState->nfaOut = new StateSet;
+
+		for ( StateSet::Iter nt = *srcState->nfaOut; nt.lte(); nt++ ) {
+			if ( destState->nfaOut->insert( *nt ) )
+				attachToNfa( destState, *nt );
+		}
 	}
 }
 

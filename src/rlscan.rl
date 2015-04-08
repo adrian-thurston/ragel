@@ -1230,6 +1230,9 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		":>>" => { token( TK_ColonGtGt ); };
 		"<:"  => { token( TK_LtColon ); };
 
+		":("  => { token( TK_ColonOpen ); };
+		"):"  => { token( TK_CloseColon ); };
+
 		# Opening of longest match.
 		"|*" => { token( TK_BarStar ); };
 

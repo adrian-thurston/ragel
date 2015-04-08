@@ -499,14 +499,6 @@ term:
 				$3->factorWithAug, Term::LeftType );
 	};
 term:
-	term '.' ':' '(' action_embed ',' action_embed ','
-		action_embed ',' factor_with_label ')' ':' '.' factor_with_label
-	final {
-		$$->term = new Term( $5->action, $7->action, $9->action,
-				$1->term, $11->factorWithAug, $15->factorWithAug,
-				Term::NfaConcat );
-	};
-term:
 	factor_with_label final {
 		$$->term = new Term( $1->factorWithAug );
 	};
@@ -1014,6 +1006,13 @@ factor_with_rep:
 	factor_with_rep '{' factor_rep_num ',' factor_rep_num '}' final {
 		$$->factorWithRep = new FactorWithRep( $2->loc, $1->factorWithRep, 
 				$3->rep, $5->rep, FactorWithRep::RangeType );
+	};
+factor_with_rep:
+	TK_ColonOpen factor_with_rep ',' action_embed ',' action_embed ','
+		action_embed TK_CloseColon
+	final {
+		$$->factorWithRep = new FactorWithRep( $1->loc, $2->factorWithRep,
+				$4->action, $6->action, $8->action, FactorWithRep::NfaRep );
 	};
 factor_with_rep:
 	factor_with_neg final {

@@ -1175,11 +1175,6 @@ Term::~Term()
 			delete term;
 			delete factorWithAug;
 			break;
-		case NfaConcat:
-			delete term;
-			delete factorWithAug;
-			delete factorWithAug2;
-			break;
 		case FactorWithAugType:
 			delete factorWithAug;
 			break;
@@ -1285,15 +1280,6 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			afterOpMinimize( rtnVal, lastInSeq );
 			break;
 		}
-		case NfaConcat: {
-			/* Eval both sides. */
-			rtnVal = term->walk( pd );
-			FsmAp *rhs = factorWithAug->walk( pd );
-			FsmAp *rhs2 = factorWithAug2->walk( pd );
-			rtnVal->nfaConcatRepeatOp( rhs, rhs2,
-					action1, action2, action3 );
-			break;
-		}
 		case FactorWithAugType: {
 			rtnVal = factorWithAug->walk( pd );
 			break;
@@ -1312,11 +1298,6 @@ void Term::makeNameTree( ParseData *pd )
 		term->makeNameTree( pd );
 		factorWithAug->makeNameTree( pd );
 		break;
-	case NfaConcat:
-		term->makeNameTree( pd );
-		factorWithAug->makeNameTree( pd );
-		factorWithAug2->makeNameTree( pd );
-		break;
 	case FactorWithAugType:
 		factorWithAug->makeNameTree( pd );
 		break;
@@ -1332,11 +1313,6 @@ void Term::resolveNameRefs( ParseData *pd )
 	case LeftType:
 		term->resolveNameRefs( pd );
 		factorWithAug->resolveNameRefs( pd );
-		break;
-	case NfaConcat:
-		term->resolveNameRefs( pd );
-		factorWithAug->resolveNameRefs( pd );
-		factorWithAug2->resolveNameRefs( pd );
 		break;
 	case FactorWithAugType:
 		factorWithAug->resolveNameRefs( pd );
@@ -1736,6 +1712,7 @@ FactorWithRep::~FactorWithRep()
 	switch ( type ) {
 		case StarType: case StarStarType: case OptionalType: case PlusType:
 		case ExactType: case MaxType: case MinType: case RangeType:
+		case NfaRep:
 			delete factorWithRep;
 			break;
 		case FactorWithNegType:
@@ -1989,6 +1966,11 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		}
 		break;
 	}
+	case NfaRep: {
+		retFsm = factorWithRep->walk( pd );
+		retFsm->nfaRepeatOp( action1, action2, action3 );
+		break;
+	}
 	case FactorWithNegType: {
 		/* Evaluate the Factor. Pass it up. */
 		retFsm = factorWithNeg->walk( pd );
@@ -2008,6 +1990,7 @@ void FactorWithRep::makeNameTree( ParseData *pd )
 	case MaxType:
 	case MinType:
 	case RangeType:
+	case NfaRep:
 		factorWithRep->makeNameTree( pd );
 		break;
 	case FactorWithNegType:
@@ -2027,6 +2010,7 @@ void FactorWithRep::resolveNameRefs( ParseData *pd )
 	case MaxType:
 	case MinType:
 	case RangeType:
+	case NfaRep:
 		factorWithRep->resolveNameRefs( pd );
 		break;
 	case FactorWithNegType:

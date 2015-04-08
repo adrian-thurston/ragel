@@ -1710,8 +1710,7 @@ struct FsmAp
 	void repeatOp( int times );
 	void optionalRepeatOp( int times );
 	void concatOp( FsmAp *other );
-	void nfaConcatRepeatOp( FsmAp *other, FsmAp *other2,
-			Action *action1, Action *action2, Action *action3 );
+	void nfaRepeatOp( Action *action1, Action *action2, Action *action3 );
 	void unionOp( FsmAp *other );
 	void intersectOp( FsmAp *other );
 	void subtractOp( FsmAp *other );
