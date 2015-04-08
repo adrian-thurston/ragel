@@ -277,27 +277,19 @@ void FlatGotoExp::writeExec()
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
-			"		int alt = 0;\n"
-			"		for ( alt = 1; alt < " << ARR_REF( nfaTargs ) << "[(int)" <<
+			"		int alt; \n"
+			"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[(int)" <<
 						ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
 			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
 							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
 			"			nfa_bp[nfa_len].p = " << P() << ";\n"
 			"			nfa_len += 1;\n"
 			"		}\n"
-			"		" << vCS() << " = (int) " << ARR_REF( nfaTargs ) << "[" <<
-						ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1];\n"
-			"		goto _resume;\n"
 			"	}\n"
-			"	else {\n";
+			;
 	}
 
 	LOCATE_TRANS();
-	
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"	}\n";
-	}
 
 	string cond = "_cond";
 	if ( condSpaceList.length() == 0 )
