@@ -183,6 +183,10 @@ StateAp::StateAp(const StateAp &other)
 			outList.append( newTrans );
 		}
 	}
+
+	/* Dup the nfa trans. */
+	if ( other.nfaOut != 0 )
+		nfaOut = new NfaStateMap( *other.nfaOut );
 }
 
 /* If there is a state dict element, then delete it. Everything else is left

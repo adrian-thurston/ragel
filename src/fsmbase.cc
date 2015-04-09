@@ -106,6 +106,17 @@ FsmAp::FsmAp( const FsmAp &graph )
 		/* Fix the eofTarg, if set. */
 		if ( state->eofTarget != 0 )
 			state->eofTarget = state->eofTarget->alg.stateMap;
+
+		if ( state->nfaOut != 0 ) {
+			NfaStateMap *nfaOut = new NfaStateMap;
+			for ( NfaStateMap::Iter n = *state->nfaOut; n.lte(); n++ ) {
+				StateAp *targ = n->key->alg.stateMap;
+				nfaOut->insert( targ, n->value );
+				attachToNfa( state, targ );
+			}
+			delete state->nfaOut;
+			state->nfaOut = nfaOut;
+		}
 	}
 
 	/* Fix the state pointers in the entry points array. */
