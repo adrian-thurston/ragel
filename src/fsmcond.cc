@@ -201,46 +201,78 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 		mergedCS.insert( origCS );
 		bool added = mergedCS.insert( condAction );
 		if ( !added ) {
-			/* FIXME: We need a proper solution for this. Issue #41. */
-			continue;
-		}
+			/* Already exists in the cond set. For every transition, if the
+			 * sense is identical to what we are embedding, leave it alone. If
+			 * the sense is opposite, delete it. */
 
-		/* Allocate a cond space for the merged set. */
-		CondSpace *mergedCondSpace = addCondSpace( mergedCS );
-		tr->condSpace = mergedCondSpace;
+			/* Find the position. */
+			long pos;
+			for ( CondSet::Iter csi = mergedCS; csi.lte(); csi++ ) {
+				if ( *csi == condAction )
+					pos = csi.pos();
+			}
 
-		/* Translate original condition values, making space for the new bit
-		 * (possibly) introduced by the condition embedding. */
-		for ( CondList::Iter cti = tr->tcap()->condList; cti.lte(); cti++ ) {
-			long origVal = cti->key.getVal();
-			long newVal = 0;
+			for ( CondList::Iter cti = tr->tcap()->condList; cti.lte(); ) {
+				long key = cti->key.getVal();
 
-			/* For every set bit in the orig, find it's position in the merged
-			 * and set the bit appropriately. */
-			for ( CondSet::Iter csi = origCS; csi.lte(); csi++ ) {
-				/* If set, find it in the merged set and flip the bit to 1. If
-				 * not set, there is nothing to do (convenient eh?) */
-				if ( origVal & (1 << csi.pos()) ) {
-					/* The condition is set. Find the bit position in the
-					 * merged set. */
-					Action **cim = mergedCS.find( *csi );
-					long bitPos = (cim - mergedCS.data);
-					newVal |= 1 << bitPos;
+				bool set = ( key & ( 1 << pos ) ) != 0;
+				if ( sense xor set ) {
+					/* Delete. */
+					CondList::Iter next = cti.next();
+
+					CondAp *cond = cti;
+					detachTrans( state, cond->toState, cond );
+					tr->tcap()->condList.detach( cond );
+					delete cond;
+
+					cti = next;
+				}
+				else {
+					/* Leave alone. */
+					cti++;
 				}
 			}
+		}
+		else {
+			/* Does not exist in the cond set. We will add it. */
 
-			//std::cerr << "orig: " << origVal << " new: " << newVal << std::endl;
+			/* Allocate a cond space for the merged set. */
+			CondSpace *mergedCondSpace = addCondSpace( mergedCS );
+			tr->condSpace = mergedCondSpace;
 
-			if ( origVal != newVal ) {
-				cti->key = newVal;
-			}
+			/* Translate original condition values, making space for the new bit
+			 * (possibly) introduced by the condition embedding. */
+			for ( CondList::Iter cti = tr->tcap()->condList; cti.lte(); cti++ ) {
+				long origVal = cti->key.getVal();
+				long newVal = 0;
 
-			/* Now set the new bit appropriately. Since it defaults to zero we
-			 * only take action if sense is positive. */
-			if ( sense ) {
-				Action **cim = mergedCS.find( condAction );
-				int pos = cim - mergedCS.data;
-				cti->key = cti->key.getVal() | (1 << pos);
+				/* For every set bit in the orig, find it's position in the merged
+				 * and set the bit appropriately. */
+				for ( CondSet::Iter csi = origCS; csi.lte(); csi++ ) {
+					/* If set, find it in the merged set and flip the bit to 1. If
+					 * not set, there is nothing to do (convenient eh?) */
+					if ( origVal & (1 << csi.pos()) ) {
+						/* The condition is set. Find the bit position in the
+						 * merged set. */
+						Action **cim = mergedCS.find( *csi );
+						long bitPos = (cim - mergedCS.data);
+						newVal |= 1 << bitPos;
+					}
+				}
+
+				//std::cerr << "orig: " << origVal << " new: " << newVal << std::endl;
+
+				if ( origVal != newVal ) {
+					cti->key = newVal;
+				}
+
+				/* Now set the new bit appropriately. Since it defaults to zero we
+				 * only take action if sense is positive. */
+				if ( sense ) {
+					Action **cim = mergedCS.find( condAction );
+					int pos = cim - mergedCS.data;
+					cti->key = cti->key.getVal() | (1 << pos);
+				}
 			}
 		}
 	}
