@@ -1353,6 +1353,15 @@ void ParseData::analyzeGraph( FsmAp *graph )
 
 		//for ( OutCondSet::Iter oci = st->outCondSet; oci.lte(); oci++ )
 		//	oci->action->numCondRefs += 1;
+
+		if ( st->nfaOut != 0 ) {
+			for ( NfaStateMap::Iter n = *st->nfaOut; n.lte(); n++ ) {
+				if ( n->value.push != 0 )
+					n->value.push->numNfaRefs += 1;
+				if ( n->value.pop != 0 )
+					n->value.pop->numNfaRefs += 1;
+			}
+		}
 	}
 
 	/* Can't count on cond references in transitions, since we don't refcount

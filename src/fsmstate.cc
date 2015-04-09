@@ -259,6 +259,7 @@ int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 }
 #endif
 
+
 /* Compare class used in the initial partition. */
 int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2 )
 {
@@ -269,7 +270,7 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 	else if ( state1->nfaOut != 0 && state2->nfaOut == 0 )
 		return 1;
 	else if ( state1->nfaOut != 0 ) {
-		compareRes = CmpTable<StateAp*>::compare(
+		compareRes = CmpTable< NfaStateMapEl, CmpNfaStateMapEl >::compare(
 				*state1->nfaOut, *state2->nfaOut );
 		if ( compareRes != 0 )
 			return compareRes;

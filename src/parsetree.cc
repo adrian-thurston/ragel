@@ -1968,7 +1968,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 	}
 	case NfaRep: {
 		retFsm = factorWithRep->walk( pd );
-		retFsm->nfaRepeatOp( action1, action2, action3 );
+		retFsm->nfaRepeatOp( action1, action2, action3, action4, action5 );
 		break;
 	}
 	case FactorWithNegType: {

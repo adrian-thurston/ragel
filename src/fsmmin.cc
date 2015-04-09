@@ -669,10 +669,15 @@ void FsmAp::fuseEquivStates( StateAp *dest, StateAp *src )
 	/* Move inward nfa links. */
 	if ( src->nfaIn != 0 ) {
 		for ( StateSet::Iter s = *src->nfaIn; s.lte(); s++ ) {
+			NfaStateMapEl *el = (*s)->nfaOut->find( src );
+
+			(*s)->nfaOut->insert( dest, el->value );
+
+			/* Have to do this after reference of el->value, since this is
+			 * vector based the removed will invalidate el. */
 			bool removed = (*s)->nfaOut->remove( src );
 			assert( removed );
 
-			(*s)->nfaOut->insert( dest );
 			if ( dest->nfaIn == 0 )
 				dest->nfaIn = new StateSet;
 			dest->nfaIn->insert( *s );

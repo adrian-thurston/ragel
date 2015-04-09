@@ -44,6 +44,8 @@ void FlatGotoExp::tableDataPass()
 	taEofTrans();
 	taNfaTargs();
 	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
 }
 
 void FlatGotoExp::genAnalysis()
@@ -105,6 +107,22 @@ void FlatGotoExp::COND_ACTION( RedCondPair *cond )
 	if ( cond->action != 0 )
 		action = cond->action->actListId+1;
 	condActions.value( action );
+}
+
+void FlatGotoExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->push != 0 )
+		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
+}
+
+void FlatGotoExp::NFA_POP_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->pop != 0 )
+		act = targ->pop->actListId+1;
+	nfaPopActions.value( act );
 }
 
 /* Write out the function switch. This switch is keyed on the values
@@ -217,6 +235,8 @@ void FlatGotoExp::writeData()
 
 	taNfaTargs();
 	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
 
 	STATE_IDS();
 }
@@ -282,7 +302,38 @@ void FlatGotoExp::writeExec()
 						ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
 			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
 							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
-			"			nfa_bp[nfa_len].p = " << P() << ";\n"
+			"			nfa_bp[nfa_len].p = " << P() << ";\n";
+
+		if ( redFsm->bAnyNfaPushPops ) {
+			out <<
+				"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[(int)" <<
+								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+				"\n"
+				"			switch ( " << ARR_REF( nfaPushActions ) << "[(int)" <<
+								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt] ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPushRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						ACTION( out, item->value, IlOpts( 0, false, false ) );
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"			}\n";
+		}
+
+
+		out <<
 			"			nfa_len += 1;\n"
 			"		}\n"
 			"	}\n"
@@ -404,7 +455,33 @@ void FlatGotoExp::writeExec()
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"	if ( nfa_len > 0 ) {\n"
-			"		nfa_len -= 1;\n"
+			"		nfa_len -= 1;\n";
+
+		if ( redFsm->bAnyNfaPushPops ) {
+			out << 
+				"		switch ( nfa_bp[nfa_len].pop ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPopRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						ACTION( out, item->value, IlOpts( 0, false, false ) );
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"		}\n";
+		}
+
+		out <<
 			"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
 			"		" << P() << " = nfa_bp[nfa_len].p;\n"
 			"		goto _resume;\n"

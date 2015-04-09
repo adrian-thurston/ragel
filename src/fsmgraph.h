@@ -119,6 +119,7 @@ public:
 		numFromStateRefs(0),
 		numEofRefs(0),
 		numCondRefs(0),
+		numNfaRefs(0),
 		anyCall(false),
 		isLmAction(false),
 		condId(condId),
@@ -149,12 +150,18 @@ public:
 
 	/* Number of references in the final machine. */
 	int numRefs() 
-		{ return numTransRefs + numToStateRefs + numFromStateRefs + numEofRefs; }
+	{
+		return numTransRefs + numToStateRefs +
+				numFromStateRefs + numEofRefs +
+				numNfaRefs;
+	}
+
 	int numTransRefs;
 	int numToStateRefs;
 	int numFromStateRefs;
 	int numEofRefs;
 	int numCondRefs;
+	int numNfaRefs;
 	bool anyCall;
 
 	bool isLmAction;
@@ -573,6 +580,41 @@ inline TransDataAp *TransAp::tdap()
 
 typedef DList<TransAp> TransList;
 
+struct NfaActions
+{
+	NfaActions( Action *push, Action *pop )
+		: push(push), pop(pop) {}
+
+	Action *push;
+	Action *pop;
+
+	ActionTable pushTable;
+	ActionTable popTable;
+};
+
+typedef BstMap<StateAp*, NfaActions> NfaStateMap;
+typedef BstMapEl<StateAp*, NfaActions> NfaStateMapEl;
+
+struct CmpNfaStateMapEl
+{
+	static int compare( const NfaStateMapEl &el1, const NfaStateMapEl &el2 )
+	{
+		if ( el1.key < el2.key )
+			return -1;
+		else if ( el1.key > el2.key )
+			return 1;
+		else if ( el1.value.push < el2.value.push )
+			return -1;
+		else if ( el1.value.push > el2.value.push )
+			return 1;
+		else if ( el1.value.pop < el2.value.pop )
+			return -1;
+		else if ( el1.value.pop > el2.value.pop )
+			return 1;
+		return 0;
+	}
+};
+
 /* Set of states, list of states. */
 typedef BstSet<StateAp*> StateSet;
 typedef DList<StateAp> StateList;
@@ -821,7 +863,7 @@ struct StateAp
 	 * the merging process. */
 	StateDictEl *stateDictEl;
 
-	StateSet *nfaOut;
+	NfaStateMap *nfaOut;
 	StateSet *nfaIn;
 
 	/* When drawing epsilon transitions, holds the list of states to merge
@@ -1710,7 +1752,7 @@ struct FsmAp
 	void repeatOp( int times );
 	void optionalRepeatOp( int times );
 	void concatOp( FsmAp *other );
-	void nfaRepeatOp( Action *action1, Action *action2, Action *action3 );
+	void nfaRepeatOp( Action *init, Action *min, Action *max, Action *push, Action *pop );
 	void unionOp( FsmAp *other );
 	void intersectOp( FsmAp *other );
 	void subtractOp( FsmAp *other );

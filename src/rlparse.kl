@@ -1009,10 +1009,11 @@ factor_with_rep:
 	};
 factor_with_rep:
 	TK_ColonOpen factor_with_rep ',' action_embed ',' action_embed ','
-		action_embed TK_CloseColon
+		action_embed ',' action_embed ',' action_embed TK_CloseColon
 	final {
 		$$->factorWithRep = new FactorWithRep( $1->loc, $2->factorWithRep,
-				$4->action, $6->action, $8->action, FactorWithRep::NfaRep );
+				$4->action, $6->action, $8->action, $10->action, $12->action,
+				FactorWithRep::NfaRep );
 	};
 factor_with_rep:
 	factor_with_neg final {

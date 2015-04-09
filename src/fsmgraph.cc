@@ -410,7 +410,8 @@ void FsmAp::concatOp( FsmAp *other )
 	doConcat( other, 0, false );
 }
 
-void FsmAp::nfaRepeatOp( Action *action1, Action *action2, Action *action3 )
+void FsmAp::nfaRepeatOp( Action *init, Action *min,
+		Action *max, Action *push, Action *pop )
 {
 	/*
 	 * First Concat.
@@ -424,8 +425,8 @@ void FsmAp::nfaRepeatOp( Action *action1, Action *action2, Action *action3 )
 
 	StateAp *newStart = addState();
 
-	newStart->nfaOut = new StateSet;
-	newStart->nfaOut->insert( origStartState );
+	newStart->nfaOut = new NfaStateMap;
+	newStart->nfaOut->insert( origStartState, NfaActions( push, pop ) );
 	attachToNfa( newStart, origStartState );
 
 	StateAp *newFinal = addState();
@@ -436,18 +437,18 @@ void FsmAp::nfaRepeatOp( Action *action1, Action *action2, Action *action3 )
 		StateAp *repl = addState();
 		moveInwardTrans( repl, *orig );
 		
-		repl->nfaOut = new StateSet;
-		repl->nfaOut->insert( repStartState );
-		repl->nfaOut->insert( *orig );
-		repl->nfaOut->insert( newFinal );
+		repl->nfaOut = new NfaStateMap;
+		repl->nfaOut->insert( repStartState, NfaActions( push, pop ) );
+		repl->nfaOut->insert( *orig, NfaActions( push, pop ) );
+		repl->nfaOut->insert( newFinal, NfaActions( push, pop ) );
 
-		for ( StateSet::Iter s = *repl->nfaOut; s.lte(); s++ )
-			attachToNfa( repl, *s );
+		for ( NfaStateMap::Iter s = *repl->nfaOut; s.lte(); s++ )
+			attachToNfa( repl, s->key );
 	}
 
-	origStartState->fromStateActionTable.setAction( 0, action1 );
-	newFinal->fromStateActionTable.setAction( 0, action2 );
-	repStartState->fromStateActionTable.setAction( 0, action3 );
+	origStartState->fromStateActionTable.setAction( 0, init );
+	newFinal->fromStateActionTable.setAction( 0, min );
+	repStartState->fromStateActionTable.setAction( 0, max );
 
 	unsetStartState();
 	setStartState( newStart );
@@ -618,7 +619,9 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, long rounds )
 		/* Transfer remaining stateDictEl sets to nfaOut. */
 		while ( nfaList.length() > 0 ) {
 			StateAp *state = nfaList.head;
-			state->nfaOut = new StateSet( state->stateDictEl->stateSet );
+			state->nfaOut = new NfaStateMap;
+			for ( StateSet::Iter ss = state->stateDictEl->stateSet; ss.lte(); ss++ )
+				state->nfaOut->insert( *ss, NfaActions( 0, 0 ) );
 			delete state->stateDictEl;
 			state->stateDictEl = 0;
 			nfaList.detach( state );
@@ -1211,11 +1214,11 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 
 	if ( srcState->nfaOut != 0 ) {
 		if ( destState->nfaOut == 0 )
-			destState->nfaOut = new StateSet;
+			destState->nfaOut = new NfaStateMap;
 
-		for ( StateSet::Iter nt = *srcState->nfaOut; nt.lte(); nt++ ) {
-			if ( destState->nfaOut->insert( *nt ) )
-				attachToNfa( destState, *nt );
+		for ( NfaStateMap::Iter nt = *srcState->nfaOut; nt.lte(); nt++ ) {
+			if ( destState->nfaOut->insert( nt->key, nt->value ) )
+				attachToNfa( destState, nt->key );
 		}
 	}
 }

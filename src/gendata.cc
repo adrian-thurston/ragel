@@ -117,6 +117,22 @@ void GenBase::reduceActionTables()
 				}
 			}
 		}
+
+		if ( st->nfaOut != 0 ) {
+			for ( NfaStateMap::Iter n = *st->nfaOut; n.lte(); n++ ) {
+				if ( n->value.push != 0 )
+					n->value.pushTable.setAction( 0, n->value.push );
+
+				if ( n->value.pop != 0 )
+					n->value.popTable.setAction( 0, n->value.pop );
+
+				if ( actionTableMap.insert( n->value.pushTable, &actionTable ) )
+					actionTable->id = nextActionTableId++;
+
+				if ( actionTableMap.insert( n->value.popTable, &actionTable ) )
+					actionTable->id = nextActionTableId++;
+			}
+		}
 	}
 }
 
@@ -713,7 +729,6 @@ void CodeGenData::makeTransList( StateAp *state )
 	finishTransList( curState );
 }
 
-
 void CodeGenData::makeStateList()
 {
 	/* Write the list of states. */
@@ -733,10 +748,26 @@ void CodeGenData::makeStateList()
 
 		if ( st->nfaOut != 0 ) {
 			RedStateAp *from = allStates + curState;
-			from->nfaTargs = new RedStateSet;
-			for ( StateSet::Iter targ = *st->nfaOut; targ.lte(); targ++ ) {
-				RedStateAp *rtarg = allStates + (*targ)->alg.stateNum;
-				from->nfaTargs->insert( rtarg );
+			from->nfaTargs = new RedNfaTargs;
+			for ( NfaStateMap::Iter targ = *st->nfaOut; targ.lte(); targ++ ) {
+				RedStateAp *rtarg = allStates + targ->key->alg.stateNum;
+
+				RedAction *pushRa = 0;
+				RedAction *popRa = 0;
+
+				if ( targ->value.pushTable.length() > 0 ) {
+					RedActionTable *pushActions = 0;
+					pushActions = actionTableMap.find( targ->value.pushTable );
+					pushRa = allActionTables + pushActions->id;
+				}
+
+				if ( targ->value.popTable.length() > 0 ) {
+					RedActionTable *popActions = 0;
+					popActions = actionTableMap.find( targ->value.popTable );
+					popRa = allActionTables + popActions->id;
+				}
+
+				from->nfaTargs->append( RedNfaTarg( rtarg, pushRa, popRa ) );
 			}
 		}
 
@@ -1175,6 +1206,22 @@ void CodeGenData::findFinalActionRefs()
 			for ( GenActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
 				item->value->numEofRefs += 1;
 		}
+
+		if ( st->nfaTargs != 0 ) {
+			for ( RedNfaTargs::Iter nt = *st->nfaTargs; nt.lte(); nt++ ) {
+				if ( nt->push != 0 ) {
+					nt->push->numNfaPushRefs += 1;
+					for ( GenActionTable::Iter item = nt->push->key; item.lte(); item++ )
+						item->value->numNfaPushRefs += 1;
+				}
+
+				if ( nt->pop != 0 ) {
+					nt->pop->numNfaPopRefs += 1;
+					for ( GenActionTable::Iter item = nt->pop->key; item.lte(); item++ )
+						item->value->numNfaPopRefs += 1;
+				}
+			}
+		}
 	}
 }
 
@@ -1363,6 +1410,8 @@ void CodeGenData::analyzeMachine()
 			redFsm->bAnyEofActions = true;
 		if ( act->numTransRefs > 0 )
 			redFsm->bAnyRegActions = true;
+		if ( act->numNfaPushRefs > 0 || act->numNfaPopRefs > 0 )
+			redFsm->bAnyNfaPushPops = true;
 
 		/* Recurse through the action's parse tree looking for various things. */
 		analyzeAction( act, act->inlineList );

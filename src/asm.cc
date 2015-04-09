@@ -1129,21 +1129,21 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 			GOTO_HEADER( st );
 
 			if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
-				RedStateSet::Iter s = *st->nfaTargs;
+				RedNfaTargs::Iter s = *st->nfaTargs;
 				s.increment();
 				for ( ; s.lte(); s++ ) {
 					out <<
 						"	movq	" << NFA_STACK() << ", %rax\n"
 						"	movq	" << NFA_TOP() << ", %rcx\n"
 						"	sal		$4, %rcx\n"
-						"	movq    $" << (*s)->id << ", 0(%rax,%rcx,)\n"
+						"	movq    $" << s->state->id << ", 0(%rax,%rcx,)\n"
 						"	movq	" << P() << ", 8(%rax,%rcx,)\n"
 						"	movq	" << NFA_TOP() << ", %rcx\n"
 						"	addq	$1, %rcx\n"
 						"	movq	%rcx, " << NFA_TOP() << "\n";
 				}
 
-				RedStateAp *targ = st->nfaTargs->data[0];
+				RedStateAp *targ = st->nfaTargs->data[0].state;
 				out <<
 					"	jmp		" << LABEL( "en", targ->id ) << "\n";
 			}

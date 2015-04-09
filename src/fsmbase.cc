@@ -373,8 +373,8 @@ void FsmAp::markReachableFromHere( StateAp *state )
 
 	/* Recurse on all states that compose us. */
 	if ( state->nfaOut != 0 ) {
-		for ( StateSet::Iter st = *state->nfaOut; st.lte(); st++ )
-			markReachableFromHere( *st );
+		for ( NfaStateMap::Iter st = *state->nfaOut; st.lte(); st++ )
+			markReachableFromHere( st->key );
 	}
 }
 
@@ -548,8 +548,8 @@ void FsmAp::depthFirstOrdering( StateAp *state )
 	}
 
 	if ( state->nfaOut != 0 ) {
-		for ( StateSet::Iter s = *state->nfaOut; s.lte(); s++ )
-			depthFirstOrdering( *s );
+		for ( NfaStateMap::Iter s = *state->nfaOut; s.lte(); s++ )
+			depthFirstOrdering( s->key );
 	}
 }
 

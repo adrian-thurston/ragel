@@ -304,8 +304,8 @@ void FsmAp::detachState( StateAp *state )
 	}
 
 	if ( state->nfaOut != 0 ) {
-		for ( StateSet::Iter s = *state->nfaOut; s.lte(); s++ )
-			detachFromNfa( state, *s );
+		for ( NfaStateMap::Iter s = *state->nfaOut; s.lte(); s++ )
+			detachFromNfa( state, s->key );
 	}
 }
 

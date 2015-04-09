@@ -71,7 +71,8 @@ RedFsmAp::RedFsmAp( FsmCtx *fsmCtx )
 	bAnyRegBreak(false),
 	bAnyRegNbreak(false),
 	bUsingAct(false),
-	bAnyNfaStates(false)
+	bAnyNfaStates(false),
+	bAnyNfaPushPops(false)
 {
 }
 
@@ -105,8 +106,8 @@ void RedFsmAp::depthFirstOrdering( RedStateAp *state )
 	}
 
 	if ( state->nfaTargs ) {
-		for ( RedStateSet::Iter s = *state->nfaTargs; s.lte(); s++ )
-			depthFirstOrdering( *s );
+		for ( RedNfaTargs::Iter s = *state->nfaTargs; s.lte(); s++ )
+			depthFirstOrdering( s->state );
 	}
 }
 

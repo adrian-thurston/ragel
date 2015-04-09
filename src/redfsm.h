@@ -100,7 +100,9 @@ struct GenAction
 		numTransRefs(0),
 		numToStateRefs(0),
 		numFromStateRefs(0),
-		numEofRefs(0)
+		numEofRefs(0),
+		numNfaPushRefs(0),
+		numNfaPopRefs(0)
 	{
 	}
 
@@ -119,6 +121,8 @@ struct GenAction
 	int numToStateRefs;
 	int numFromStateRefs;
 	int numEofRefs;
+	int numNfaPushRefs;
+	int numNfaPopRefs;
 };
 
 
@@ -176,6 +180,8 @@ struct RedAction
 		numToStateRefs(0),
 		numFromStateRefs(0),
 		numEofRefs(0),
+		numNfaPushRefs(0),
+		numNfaPopRefs(0),
 		bAnyNextStmt(false), 
 		bAnyCurStateRef(false),
 		bAnyBreakStmt(false),
@@ -197,6 +203,8 @@ struct RedAction
 	int numToStateRefs;
 	int numFromStateRefs;
 	int numEofRefs;
+	int numNfaPushRefs;
+	int numNfaPopRefs;
 
 	bool anyNextStmt() { return bAnyNextStmt; }
 	bool anyCurStateRef() { return bAnyCurStateRef; }
@@ -471,6 +479,18 @@ struct GenStateCond
 typedef DList<GenStateCond> GenStateCondList;
 typedef Vector<GenStateCond*> StateCondVect;
 
+struct RedNfaTarg
+{
+	RedNfaTarg( RedStateAp *state, RedAction *push, RedAction *pop )
+		: state(state), push(push), pop(pop) {}
+
+	RedStateAp *state;
+	RedAction *push;
+	RedAction *pop;
+};
+
+typedef Vector<RedNfaTarg> RedNfaTargs;
+
 /* Reduced state. */
 struct RedStateAp
 {
@@ -536,7 +556,7 @@ struct RedStateAp
 	RedTransAp **inCondTests;
 	int numInCondTests;
 
-	RedStateSet *nfaTargs;
+	RedNfaTargs *nfaTargs;
 };
 
 /* List of states. */
@@ -594,6 +614,7 @@ struct RedFsmAp
 	bool bAnyRegNbreak;
 	bool bUsingAct;
 	bool bAnyNfaStates;
+	bool bAnyNfaPushPops;
 
 	int maxState;
 	int maxSingleLen;

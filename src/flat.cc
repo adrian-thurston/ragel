@@ -42,7 +42,9 @@ Flat::Flat( const CodeGenArgs &args )
 	eofActions(       "eof_actions",         *this ),
 	eofTrans(         "eof_trans",           *this ),
 	nfaTargs(         "nfa_targs",           *this ),
-	nfaOffsets(       "nfa_offsets",         *this )
+	nfaOffsets(       "nfa_offsets",         *this ),
+	nfaPushActions(   "nfa_push_actions",    *this ),
+	nfaPopActions(    "nfa_pop_actions",     *this )
 {}
 
 void Flat::setKeyType()
@@ -166,13 +168,49 @@ void Flat::taNfaTargs()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaTargs != 0 ) {
 			nfaTargs.value( st->nfaTargs->length() );
-			for ( RedStateSet::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
-				nfaTargs.value( (*targ)->id );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				nfaTargs.value( targ->state->id );
 		}
 	}
 
 	nfaTargs.finish();
 }
+
+/* These need to mirror nfa targs. */
+void Flat::taNfaPushActions()
+{
+	nfaPushActions.start();
+
+	nfaTargs.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			nfaPushActions.value( 0 );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				NFA_PUSH_ACTION( targ );
+		}
+	}
+
+	nfaPushActions.finish();
+}
+
+void Flat::taNfaPopActions()
+{
+	nfaPopActions.start();
+
+	nfaTargs.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			nfaPopActions.value( 0 );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				NFA_POP_ACTION( targ );
+		}
+	}
+
+	nfaPopActions.finish();
+}
+
 
 void Flat::taNfaOffsets()
 {

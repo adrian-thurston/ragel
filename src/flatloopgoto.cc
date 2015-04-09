@@ -416,3 +416,11 @@ void FlatGotoLoop::COND_ACTION( RedCondPair *cond )
 		act = cond->action->location+1;
 	condActions.value( act );
 }
+
+void FlatGotoLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
+{
+}
+
+void FlatGotoLoop::NFA_POP_ACTION( RedNfaTarg *targ )
+{
+}
