@@ -637,7 +637,7 @@ void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 	if ( state->stateBits & STB_ONLIST )
 		return;
 
-	if ( depth++ > pd->id->nfaCondsDepth )
+	if ( depth > pd->id->nfaCondsDepth )
 		return;
 
 	/* Doing depth first, put state on the list. */
@@ -646,8 +646,9 @@ void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 	/* Recurse on everything ranges. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
 		if ( trans->plain() ) {
-			if ( trans->tdap()->toState != 0 )
-				condsDensity( pd, trans->tdap()->toState, depth );
+			if ( trans->tdap()->toState != 0 ) {
+				condsDensity( pd, trans->tdap()->toState, depth + 1 );
+			}
 		}
 		else {
 			for ( CondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
@@ -658,9 +659,21 @@ void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 			
 			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
 				if ( cond->toState != 0 )
-					condsDensity( pd, cond->toState, depth );
+					condsDensity( pd, cond->toState, depth + 1 );
 			}
 		}
+	}
+
+	if ( state->nfaOut != 0 ) {
+		for ( NfaStateMap::Iter n = *state->nfaOut; n.lte(); n++ ) {
+			/* We do not increment depth here since this is an epsilon transition. */
+			condsDensity( pd, n->key, depth );
+		}
+	}
+
+	for ( ActionTable::Iter a = state->fromStateActionTable; a.lte(); a++ ) {
+		if ( a->value->costMark )
+			throw CondCostTooHigh( a->value->costId );
 	}
 }
 
@@ -670,7 +683,7 @@ bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp )
 	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
 		st->stateBits &= ~STB_ONLIST;
 
-	condsDensity( pd, fsmAp->startState, 0 );
+	condsDensity( pd, fsmAp->startState, 1 );
 	
 	return true;
 }
