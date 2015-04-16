@@ -677,14 +677,59 @@ void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 	}
 }
 
-bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp )
+void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, long depth )
+{
+	/* Nothing to do if the state is already on the list. */
+	if ( state->stateBits & STB_ONLIST )
+		return;
+
+	if ( depth > pd->id->transSpanDepth )
+		return;
+
+	/* Recurse on everything ranges. */
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 ) {
+				density += pd->fsmCtx->keyOps->span( trans->lowKey, trans->highKey );
+				transSpan( pd, trans->tdap()->toState, density, depth + 1 );
+			}
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					transSpan( pd, cond->toState, density, depth + 1 );
+			}
+		}
+	}
+
+	if ( state->nfaOut != 0 ) {
+		for ( NfaStateMap::Iter n = *state->nfaOut; n.lte(); n++ ) {
+			/* We do not increment depth here since this is an epsilon transition. */
+			transSpan( pd, n->key, density, depth );
+		}
+	}
+}
+
+bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp, const char *term )
 {
 	/* Init on state list flags. */
 	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
 		st->stateBits &= ~STB_ONLIST;
 
 	condsDensity( pd, fsmAp->startState, 1 );
+
+#if 0
+	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
+		st->stateBits &= ~STB_ONLIST;
 	
+	long long density;
+	transSpan( pd, fsmAp->startState, density, 1 );
+	std::cout << "density " << term << " " << density << std::endl;
+	
+	if ( density > 1000000 )
+		throw TransDensity();
+#endif
+
 	return true;
 }
 
@@ -806,7 +851,7 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 				fsm = terms[name.pos()]->walk( pd );
 				pd->fsmCtx->stateLimit = -1;
 
-				strike( pd, fsm );
+				strike( pd, fsm, pd->id->nfaTermCheck );
 			}
 			catch ( const TooManyStates & ) {
 				std::cout << "too-many-states" << std::endl;
@@ -815,6 +860,10 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 			catch ( const RepetitionError & ) {
 				std::cout << "rep-error" << std::endl;
 				exit( 2 );
+			}
+			catch ( const TransDensity & ) {
+				std::cout << "trans-density-error" << std::endl;
+				exit( 7 );
 			}
 			catch ( const CondCostTooHigh &ccth ) {
 				std::cout << "cond-cost" << std::endl;

@@ -62,6 +62,7 @@ struct FsmCtx;
 
 struct TooManyStates {};
 struct RepetitionError {};
+struct TransDensity {};
 
 struct CondCostTooHigh
 {

@@ -439,6 +439,8 @@ struct NfaUnion
 	bool strike( ParseData *pd, FsmAp *fsmAp );
 	void nfaTermCheck( ParseData *pd );
 	void condsDensity( ParseData *pd, StateAp *state, long depth );
+	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
+	bool strike( ParseData *pd, FsmAp *fsmAp, const char *term );
 
 	/* Node data. */
 	TermVect terms;
