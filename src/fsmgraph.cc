@@ -422,7 +422,6 @@ void FsmAp::nfaRepeatOp( Action *init, Action *min,
 	StateAp *origStartState = startState;
 	StateAp *repStartState = dupStartState();
 
-
 	StateAp *newStart = addState();
 
 	newStart->nfaOut = new NfaStateMap;
@@ -436,7 +435,7 @@ void FsmAp::nfaRepeatOp( Action *init, Action *min,
 
 		StateAp *repl = addState();
 		moveInwardTrans( repl, *orig );
-		
+
 		repl->nfaOut = new NfaStateMap;
 		repl->nfaOut->insert( repStartState, NfaActions( push, pop ) );
 		repl->nfaOut->insert( *orig, NfaActions( push, pop ) );
@@ -444,6 +443,67 @@ void FsmAp::nfaRepeatOp( Action *init, Action *min,
 
 		for ( NfaStateMap::Iter s = *repl->nfaOut; s.lte(); s++ )
 			attachToNfa( repl, s->key );
+	}
+
+	origStartState->fromStateActionTable.setAction( 0, init );
+	newFinal->fromStateActionTable.setAction( 0, min );
+	repStartState->fromStateActionTable.setAction( 0, max );
+
+	unsetStartState();
+	setStartState( newStart );
+	setFinState( newFinal );
+}
+
+/* This version attempts to avoid the dup of the final states. It shaves some
+ * time off but reduces correctness, haven't discovered why yet. */
+void FsmAp::nfaRepeatOp2( Action *init, Action *min,
+		Action *max, Action *push, Action *pop )
+{
+	/*
+	 * First Concat.
+	 */
+	StateSet origFinals = finStateSet;
+
+	/* Get the other's start state. */
+	StateAp *origStartState = startState;
+	StateAp *repStartState = dupStartState();
+
+	StateAp *newStart = addState();
+
+	newStart->nfaOut = new NfaStateMap;
+	newStart->nfaOut->insert( origStartState, NfaActions( push, pop ) );
+	attachToNfa( newStart, origStartState );
+
+	StateAp *newFinal = addState();
+
+	for ( StateSet::Iter orig = origFinals; orig.lte(); orig++ ) {
+		StateAp *fin = *orig;
+		unsetFinState( fin );
+		if ( fin->nfaOut && fin->nfaOut->length() > 0 ) {
+			StateAp *repl = addState();
+			moveInwardTrans( repl, fin );
+			
+			repl->nfaOut = new NfaStateMap;
+
+			if ( repl->nfaOut->insert( repStartState, NfaActions( push, pop ) ) )
+				attachToNfa( fin, repStartState );
+
+			if ( repl->nfaOut->insert( fin, NfaActions( push, pop ) ) )
+				attachToNfa( fin, fin );
+
+			if ( repl->nfaOut->insert( newFinal, NfaActions( push, pop ) ) )
+				attachToNfa( fin, newFinal );
+		}
+		else {
+			if ( fin->nfaOut == 0 )
+				fin->nfaOut = new NfaStateMap;
+
+			if ( fin->nfaOut->insert( repStartState, NfaActions( push, pop ) ) )
+				attachToNfa( fin, repStartState );
+
+			if ( fin->nfaOut->insert( newFinal, NfaActions( push, pop ) ) )
+				attachToNfa( fin, newFinal );
+		}
 	}
 
 	origStartState->fromStateActionTable.setAction( 0, init );
