@@ -83,7 +83,7 @@ void BaseParser::mapElDef( String name, TypeRef *keyType )
 	BaseParser::cflDef( ntDef, objectDef, defList );
 
 	/*
-	 * List element with the same name as containing context.
+	 * Same name as containing context.
 	 */
 	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	String id = curStruct()->objectDef->name;

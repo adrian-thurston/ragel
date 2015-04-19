@@ -2524,7 +2524,8 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			}
 			else {
 				UniqueType *resUT = pd->curFunction->typeRef->uniqueType;
-				if ( !castAssignment( pd, code, resUT, 0, exprUT ) )
+				if ( resUT != pd->uniqueTypeVoid && 
+						!castAssignment( pd, code, resUT, 0, exprUT ) )
 					error(loc) << "return value wrong type" << endp;
 			}
 

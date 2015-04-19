@@ -2400,6 +2400,7 @@ struct ObjectField
 			case ObjectField::RedRhsType:
 			case ObjectField::UserFieldType:
 			case ObjectField::StructFieldType:
+			case ObjectField::GenericDependentType:
 				return true;
 			default:
 				return false;
