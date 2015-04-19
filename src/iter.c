@@ -191,7 +191,7 @@ void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
 }
 
 
-UserIter *uiterCreate( Program *prg, Tree ***psp, FunctionInfo *fi, long searchId )
+UserIter *colm_uiter_create( Program *prg, Tree ***psp, FunctionInfo *fi, long searchId )
 {
 	Tree **sp = *psp;
 
@@ -253,7 +253,7 @@ void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *rit
 	}
 }
 
-void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
+void colm_uiter_destroy( Program *prg, Tree ***psp, UserIter *uiter )
 {
 	if ( uiter != 0 && (int)uiter->type != 0 ) {
 		Tree **sp = *psp;
@@ -272,7 +272,7 @@ void userIterDestroy( Program *prg, Tree ***psp, UserIter *uiter )
 	}
 }
 
-void userIterDestroy2( Program *prg, Tree ***psp, UserIter *uiter )
+void colm_uiter_unwind( Program *prg, Tree ***psp, UserIter *uiter )
 {
 	if ( uiter != 0 && (int)uiter->type != 0 ) {
 		Tree **sp = *psp;

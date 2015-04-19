@@ -322,7 +322,7 @@ void printXmlStdout( struct colm_program *prg, Tree **sp,
  * Iterators.
  */
 
-UserIter *uiterCreate( struct colm_program *prg, Tree ***psp,
+UserIter *colm_uiter_create( struct colm_program *prg, Tree ***psp,
 		struct _FunctionInfo *fi, long searchId );
 void uiterInit( struct colm_program *prg, Tree **sp, UserIter *uiter, 
 		struct _FunctionInfo *fi, int revertOn );
@@ -336,8 +336,8 @@ void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
 
 void treeIterDestroy( struct colm_program *prg, Tree ***psp, TreeIter *iter );
 void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *iter );
-void userIterDestroy( struct colm_program *prg, Tree ***psp, UserIter *uiter );
-void userIterDestroy2( struct colm_program *prg, Tree ***psp, UserIter *uiter );
+void colm_uiter_destroy( struct colm_program *prg, Tree ***psp, UserIter *uiter );
+void colm_uiter_unwind( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 
 Tree *castTree( struct colm_program *prg, int langElId, Tree *tree );
 StreamImpl *streamToImpl( Stream *ptr );

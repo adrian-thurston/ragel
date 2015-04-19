@@ -168,7 +168,7 @@ typedef unsigned long colm_value_t;
 #define IN_REV_TRITER_PREV_CHILD 0x4c
 
 #define IN_UITER_DESTROY         0x4d
-#define IN_UITER_DESTROY2        0x71
+#define IN_UITER_UNWIND          0x71
 #define IN_UITER_CREATE_WV       0x4e
 #define IN_UITER_CREATE_WC       0x4f
 #define IN_UITER_ADVANCE         0x50

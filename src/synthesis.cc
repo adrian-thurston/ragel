@@ -2206,7 +2206,7 @@ void LangStmt::compileForIterBody( Compiler *pd,
 	pd->unwindCode.insertHalf( 0, objField->offset );
 	int c = objField->iterImpl->inDestroy;
 	if ( c == IN_UITER_DESTROY )
-		c = IN_UITER_DESTROY2;
+		c = IN_UITER_UNWIND;
 	pd->unwindCode.insert( 0, c ); //objField->iterImpl->inDestroy );
 
 	/* Compile the contents. */

@@ -313,7 +313,7 @@ static void downref_locals( Program *prg, Tree ***psp,
 				debug( prg, REALM_BYTECODE, "local user iter downref: %ld\n",
 						(long)locals[i].offset );
 				UserIter *uiter = (UserIter*) vm_get_local( exec, locals[i].offset );
-				userIterDestroy2( prg, psp, uiter );
+				colm_uiter_unwind( prg, psp, uiter );
 				break;
 			}
 		}
@@ -3443,7 +3443,7 @@ again:
 
 			vm_contiguous( (sizeof(UserIter) / sizeof(Word)) + FR_AA + fi->frameSize );
 
-			UserIter *uiter = uiterCreate( prg, &sp, fi, searchId );
+			UserIter *uiter = colm_uiter_create( prg, &sp, fi, searchId );
 			vm_set_local(exec, field, (SW) uiter);
 
 			/* This is a setup similar to as a call, only the frame structure
@@ -3478,7 +3478,7 @@ again:
 
 			vm_contiguous( (sizeof(UserIter) / sizeof(Word)) + FR_AA + fi->frameSize );
 
-			UserIter *uiter = uiterCreate( prg, &sp, fi, searchId );
+			UserIter *uiter = colm_uiter_create( prg, &sp, fi, searchId );
 			vm_set_local(exec, field, (SW) uiter);
 
 			/* This is a setup similar to as a call, only the frame structure
@@ -3507,18 +3507,18 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_UITER_DESTROY %hd\n", field );
 
 			UserIter *uiter = (UserIter*) vm_get_local(exec, field);
-			userIterDestroy( prg, &sp, uiter );
+			colm_uiter_destroy( prg, &sp, uiter );
 			break;
 		}
 
-		case IN_UITER_DESTROY2: {
+		case IN_UITER_UNWIND: {
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_UITER_DESTROY %hd\n", field );
+			debug( prg, REALM_BYTECODE, "IN_UITER_UNWIND %hd\n", field );
 
 			UserIter *uiter = (UserIter*) vm_get_local(exec, field);
-			userIterDestroy2( prg, &sp, uiter );
+			colm_uiter_unwind( prg, &sp, uiter );
 			break;
 		}
 
