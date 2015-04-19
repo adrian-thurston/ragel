@@ -67,10 +67,8 @@ typedef unsigned long colm_value_t;
 #define IN_TST_LESS_EQL_TREE     0xc0
 #define IN_TST_GRTR_EQL_VAL      0x11
 #define IN_TST_GRTR_EQL_TREE     0xcd
-#define IN_TST_LOGICAL_AND_VAL   0x12
-#define IN_TST_LOGICAL_AND_TREE  0xce
-#define IN_TST_LOGICAL_OR_VAL    0x13
-#define IN_TST_LOGICAL_OR_TREE   0xcf
+#define IN_TST_LOGICAL_AND       0x12
+#define IN_TST_LOGICAL_OR        0x13
 
 #define IN_TST_NZ_TREE           0xd1
 

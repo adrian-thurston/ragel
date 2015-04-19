@@ -2004,7 +2004,7 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					if ( !rut->val() )
 						code.append( IN_TST_NZ_TREE );
 
-					code.append( IN_TST_LOGICAL_AND_VAL );
+					code.append( IN_TST_LOGICAL_AND );
 
 					/* Set the distance of the jump. */
 					long distance = code.length() - jump - 3;
@@ -2031,7 +2031,7 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					if ( !rut->val() )
 						code.append( IN_TST_NZ_TREE );
 
-					code.append( IN_TST_LOGICAL_OR_VAL );
+					code.append( IN_TST_LOGICAL_OR );
 
 					/* Set the distance of the jump. */
 					long distance = code.length() - jump - 3;

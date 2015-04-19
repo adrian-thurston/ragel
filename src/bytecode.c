@@ -1710,8 +1710,8 @@ again:
 			treeDownref( prg, sp, o2 );
 			break;
 		}
-		case IN_TST_LOGICAL_AND_VAL: {
-			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_AND_VAL\n" );
+		case IN_TST_LOGICAL_AND: {
+			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_AND\n" );
 
 			Value o2 = vm_pop_value();
 			Value o1 = vm_pop_value();
@@ -1719,40 +1719,13 @@ again:
 			vm_push_value( val );
 			break;
 		}
-		case IN_TST_LOGICAL_AND_TREE: {
-			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_AND_TREE\n" );
-
-			Tree *o2 = vm_pop_tree();
-			Tree *o1 = vm_pop_tree();
-			long v2 = !testFalse( prg, o2 );
-			long v1 = !testFalse( prg, o1 );
-			Word r = v1 && v2;
-			Value val = r ? TRUE_VAL : FALSE_VAL;
-			vm_push_value( val );
-			treeDownref( prg, sp, o1 );
-			treeDownref( prg, sp, o2 );
-			break;
-		}
-		case IN_TST_LOGICAL_OR_VAL: {
-			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_OR_VAL\n" );
+		case IN_TST_LOGICAL_OR: {
+			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_OR\n" );
 
 			Value o2 = vm_pop_value();
 			Value o1 = vm_pop_value();
 			Value val = o1 || o2 ? TRUE_VAL : FALSE_VAL;
 			vm_push_value( val );
-			break;
-		}
-		case IN_TST_LOGICAL_OR_TREE: {
-			debug( prg, REALM_BYTECODE, "IN_TST_LOGICAL_OR_TREE\n" );
-
-			Tree *o2 = vm_pop_tree();
-			Tree *o1 = vm_pop_tree();
-			long v2 = !testFalse( prg, o2 );
-			long v1 = !testFalse( prg, o1 );
-			Value val = v1 || v2 ? TRUE_VAL : FALSE_VAL;
-			vm_push_value( val );
-			treeDownref( prg, sp, o1 );
-			treeDownref( prg, sp, o2 );
 			break;
 		}
 
@@ -1761,6 +1734,7 @@ again:
 
 			Tree *tree = vm_pop_tree();
 			long r = !testFalse( prg, tree );
+			treeDownref( prg, sp, tree );
 			vm_push_value( r );
 			break;
 		}
