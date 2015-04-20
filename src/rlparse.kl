@@ -158,19 +158,56 @@ instantiation:
 			$4->machineDef->join->loc = $3->loc;
 	};
 
-nonterm nfa_rounds
+nonterm nfa_round_spec
 {
 	long rounds;
+	long grouping;
 };
 
-nfa_rounds:
-	TK_UInt
+nfa_round_spec:
+	'(' TK_UInt ',' TK_UInt ')'
 	final {
 		// Convert the priority number to a long. Check for overflow.
 		errno = 0;
-		$$->rounds = strtol( $1->data, 0, 10 );
+		$$->rounds = strtol( $2->data, 0, 10 );
 		if ( $$->rounds == LONG_MAX && errno == ERANGE )
-			error($1->loc) << "rounds " << $1->data << " overflows" << endl;
+			error($2->loc) << "rounds " << $2->data << " overflows" << endl;
+
+		$$->grouping = strtol( $4->data, 0, 10 );
+		if ( $$->grouping == LONG_MAX && errno == ERANGE )
+			error($4->loc) << "grouping " << $4->data << " overflows" << endl;
+	};
+
+nonterm nfa_round_list
+{
+	NfaRoundVect *roundsList;
+};
+
+nfa_round_list:
+	nfa_round_list nfa_round_spec
+	final {
+		$$->roundsList = $1->roundsList;
+		$$->roundsList->append(
+				NfaRound( $2->rounds, $2->grouping ) );
+	};
+
+nfa_round_list:
+	nfa_round_spec
+	final {
+		$$->roundsList = new NfaRoundVect;
+		$$->roundsList->append(
+				NfaRound( $1->rounds, $1->grouping ) );
+	};
+
+nonterm nfa_rounds
+{
+	NfaRoundVect *rounds;
+};
+
+nfa_rounds:
+	'(' nfa_round_list ')'
+	final {
+		$$->rounds = $2->roundsList;
 	};
 
 nonterm nfa_expr
@@ -192,9 +229,10 @@ nfa_expr:
 	};
 
 nfa_union: 
-	machine_name nfa_rounds TK_BarEquals nfa_expr ';' final {
-		$4->nfaUnion->rounds = $2->rounds;
-		MachineDef *machineDef = new MachineDef( $4->nfaUnion );
+	machine_name TK_BarEquals TK_Literal nfa_rounds nfa_expr ';' final {
+		$5->nfaUnion->name = $3->data;
+		$5->nfaUnion->rounds = $4->rounds;
+		MachineDef *machineDef = new MachineDef( $5->nfaUnion );
 
 		/* Generic creation of machine for instantiation and assignment. */
 		tryMachineDef( $1->token.loc, $1->token.data, machineDef, true );

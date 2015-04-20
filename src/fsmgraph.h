@@ -64,6 +64,18 @@ struct TooManyStates {};
 struct RepetitionError {};
 struct TransDensity {};
 
+struct NfaRound
+{
+	NfaRound( long rounds, long groups )
+		: rounds(rounds), groups(groups) {}
+
+	long rounds;
+	long groups;
+};
+
+typedef Vector<NfaRound> NfaRoundVect;
+
+
 struct CondCostTooHigh
 {
 	CondCostTooHigh( long costId )
@@ -1766,7 +1778,7 @@ struct FsmAp
 	void deterministicEntry();
 
 	/* Results in an NFA. */
-	void nfaUnionOp( FsmAp **others, int n, long rounds );
+	void nfaUnionOp( FsmAp **others, int n, int rounds );
 
 	/*
 	 * Operator workers
