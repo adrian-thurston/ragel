@@ -594,6 +594,51 @@ void FsmAp::nfaFillInStates( MergeData &md )
 	}
 }
 
+void FsmAp::prepareNfaRound( MergeData &md )
+{
+	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->nfaOut != 0 ) {
+			StateSet set;
+			for ( NfaStateMap::Iter to = *st->nfaOut; to.lte(); to++ )
+				set.insert( to->key );
+
+			st->stateDictEl = new StateDictEl( set );
+			st->stateDictEl->targState = st;
+			md.stateDict.insert( st->stateDictEl );
+			delete st->nfaOut;
+			st->nfaOut = 0;
+
+			nfaList.append( st );
+		}
+	}
+}
+	
+void FsmAp::finalizeNfaRound( MergeData &md )
+{
+	/* For any remaining NFA states, remove from the state dict. We need to
+	 * keep the state sets. */
+	for ( NfaStateList::Iter ns = nfaList; ns.lte(); ns++ )
+		md.stateDict.detach( ns->stateDictEl );
+
+	/* Disassociate non-nfa states from their state dicts. */
+	for ( StateDict::Iter sdi = md.stateDict; sdi.lte(); sdi++ )
+		sdi->targState->stateDictEl = 0;
+
+	/* Delete the state dict elements for non-nfa states. */
+	md.stateDict.empty();
+
+	/* Transfer remaining stateDictEl sets to nfaOut. */
+	while ( nfaList.length() > 0 ) {
+		StateAp *state = nfaList.head;
+		state->nfaOut = new NfaStateMap;
+		for ( StateSet::Iter ss = state->stateDictEl->stateSet; ss.lte(); ss++ )
+			state->nfaOut->insert( *ss, NfaActions( 0, 0 ) );
+		delete state->stateDictEl;
+		state->stateDictEl = 0;
+		nfaList.detach( state );
+	}
+}
+
 /* Unions other with this machine. Other is deleted. */
 void FsmAp::nfaUnionOp( FsmAp **others, int n, int rounds )
 {
@@ -657,36 +702,27 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int rounds )
 		/* Merge the start states. */
 		std::cout << "nfa-fill-round\t0" << std::endl;
 		nfaMergeStates( md, startState, startStateSet.data, startStateSet.length() );
+		finalizeNfaRound( md );
+		{
+			int len = stateList.length();
+			removeUnreachableStates();
+			int newLen = stateList.length();
+			std::cout << "round-unreach\t" << len - newLen << std::endl;
+		}
 
 		/* Fill in any new states made from merging. */
-		for ( long i = 1; i < rounds && nfaList.length() > 0; i++ ) {
+		for ( long i = 1; i < rounds; i++ ) {
 			std::cout << "nfa-fill-round\t" << i << std::endl;
+			prepareNfaRound( md );
+			if ( nfaList.length() == 0 )
+				break;
 			nfaFillInStates( md );
+			finalizeNfaRound( md );
+			int len = stateList.length();
+			removeUnreachableStates();
+			int newLen = stateList.length();
+			std::cout << "round-unreach\t" << len - newLen << std::endl;
 		}
-
-		/* For any remaining NFA states, remove from the state dict. We need to
-		 * keep the state sets. */
-		for ( NfaStateList::Iter ns = nfaList; ns.lte(); ns++ )
-			md.stateDict.detach( ns->stateDictEl );
-
-		/* Disassociate non-nfa states from their state dicts. */
-		for ( StateDict::Iter sdi = md.stateDict; sdi.lte(); sdi++ )
-			sdi->targState->stateDictEl = 0;
-
-		/* Delete the state dict elements for non-nfa states. */
-		md.stateDict.empty();
-
-		/* Transfer remaining stateDictEl sets to nfaOut. */
-		while ( nfaList.length() > 0 ) {
-			StateAp *state = nfaList.head;
-			state->nfaOut = new NfaStateMap;
-			for ( StateSet::Iter ss = state->stateDictEl->stateSet; ss.lte(); ss++ )
-				state->nfaOut->insert( *ss, NfaActions( 0, 0 ) );
-			delete state->stateDictEl;
-			state->stateDictEl = 0;
-			nfaList.detach( state );
-		}
-
 
 		long maxStateSetSize = 0;
 		long count = nfaList.length();
