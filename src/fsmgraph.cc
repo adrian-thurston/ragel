@@ -595,7 +595,7 @@ void FsmAp::nfaFillInStates( MergeData &md )
 }
 
 /* Unions other with this machine. Other is deleted. */
-void FsmAp::nfaUnionOp( FsmAp **others, int n, long rounds )
+void FsmAp::nfaUnionOp( FsmAp **others, int n, int rounds )
 {
 	for ( int o = 0; o < n; o++ )
 		assert( ctx == others[o]->ctx );

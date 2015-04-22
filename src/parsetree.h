@@ -443,9 +443,10 @@ struct NfaUnion
 	bool strike( ParseData *pd, FsmAp *fsmAp, const char *term );
 
 	/* Node data. */
+	std::string name;
 	TermVect terms;
 	TermNameVect names;
-	long rounds;
+	NfaRoundVect *rounds;
 };
 
 

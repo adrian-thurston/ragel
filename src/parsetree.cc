@@ -765,7 +765,10 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 		nfaTermCheck( pd );
 	}
 
+	std::cout << "nfa-union\t" << name << std::endl;
 	std::cout << "terms\t" << terms.length() << std::endl;
+
+	/* Compute the individual expressions. */
 
 	long numTerms = 0, sumPlain = 0, sumMin = 0;
 	FsmAp **machines = new FsmAp*[terms.length()];
@@ -790,48 +793,46 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	std::cout << "sum-plain\t" << sumPlain << std::endl;
 	std::cout << "sum-minimized\t" << sumMin << std::endl;
 
-	/* Count the number of 0-depth groups. */
-	int numGroups = 0;
-	int start = 0;
-	while ( start < numTerms ) {
-		/* If nfa-group-max is zero, don't group, put all terms into a single
-		 * n-depth NFA. */
-		int amount = pd->id->nfaGroupMax == 0 ? numTerms : pd->id->nfaGroupMax;
-		if ( ( start + amount ) > numTerms )
-			amount = numTerms - start;
+	/* For each round. */
+	for ( NfaRoundVect::Iter r = *rounds; r.lte(); r++ ) {
+		std::cout << "depth\t" << r->rounds << std::endl;
+		std::cout << "grouping\t" << r->groups << std::endl;
 
-		FsmAp **others = machines + start + 1;
-		machines[start]->nfaUnionOp( others, (amount - 1), rounds );
-
-		start += amount;
-		numGroups++;
-	}
-
-	/* If there is only one zero-depth group, then return it. */
-	FsmAp *ret = 0;
-	if ( numGroups == 1 ) {
-		ret = machines[0];
-	}
-	else {
-		FsmAp **groups = new FsmAp*[numGroups];
-
-		/* Move the group starts into the groups array. */
-		int g = 0;
+		int numGroups = 0;
 		int start = 0;
 		while ( start < numTerms ) {
+			/* If nfa-group-max is zero, don't group, put all terms into a single
+			 * n-depth NFA. */
+			int amount = r->groups == 0 ? numTerms : r->groups;
+			if ( ( start + amount ) > numTerms )
+				amount = numTerms - start;
+
+			FsmAp **others = machines + start + 1;
+			machines[start]->nfaUnionOp( others, (amount - 1), r->rounds );
+
+			start += amount;
+			numGroups++;
+		}
+
+		if ( numGroups == 1 )
+			break;
+
+		/* Move the group starts into the groups array. */
+		FsmAp **groups = new FsmAp*[numGroups];
+		int g = 0;
+		start = 0;
+		while ( start < numTerms ) {
 			groups[g] = machines[start];
-			start += pd->id->nfaGroupMax == 0 ? numTerms : pd->id->nfaGroupMax;
+			start += r->groups == 0 ? numTerms : r->groups;
 			g++;
 		}
 
-		groups[0]->nfaUnionOp( groups + 1 , (numGroups - 1), 0 );
-		std::cout << "done" << std::endl;
-
-		ret = groups[0];
-		delete[] groups;
+		delete[] machines;
+		machines = groups;
+		numTerms = numGroups;
 	}
 
-	delete[] machines;
+	FsmAp *ret = machines[0];
 	return ret;
 }
 
