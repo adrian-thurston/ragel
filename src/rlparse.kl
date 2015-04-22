@@ -165,17 +165,17 @@ nonterm nfa_round_spec
 };
 
 nfa_round_spec:
-	'(' TK_UInt ',' TK_UInt ')'
+	TK_UInt ',' TK_UInt
 	final {
 		// Convert the priority number to a long. Check for overflow.
 		errno = 0;
-		$$->rounds = strtol( $2->data, 0, 10 );
+		$$->rounds = strtol( $1->data, 0, 10 );
 		if ( $$->rounds == LONG_MAX && errno == ERANGE )
-			error($2->loc) << "rounds " << $2->data << " overflows" << endl;
+			error($1->loc) << "rounds " << $1->data << " overflows" << endl;
 
-		$$->grouping = strtol( $4->data, 0, 10 );
+		$$->grouping = strtol( $3->data, 0, 10 );
 		if ( $$->grouping == LONG_MAX && errno == ERANGE )
-			error($4->loc) << "grouping " << $4->data << " overflows" << endl;
+			error($3->loc) << "grouping " << $3->data << " overflows" << endl;
 	};
 
 nonterm nfa_round_list
@@ -184,11 +184,11 @@ nonterm nfa_round_list
 };
 
 nfa_round_list:
-	nfa_round_list nfa_round_spec
+	nfa_round_list ',' nfa_round_spec
 	final {
 		$$->roundsList = $1->roundsList;
 		$$->roundsList->append(
-				NfaRound( $2->rounds, $2->grouping ) );
+				NfaRound( $3->rounds, $3->grouping ) );
 	};
 
 nfa_round_list:
