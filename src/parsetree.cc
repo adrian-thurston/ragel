@@ -841,8 +841,8 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 	for ( TermNameVect::Iter name = names; name.lte(); name++ ) {
 		long resLen;
 		bool unused;
-		char *search = prepareLitString( (*name)->loc,
-				(*name)->data, (*name)->length, resLen, unused );
+		char *search = prepareLitString( name->loc,
+				name->data, name->length, resLen, unused );
 
 		if ( strcmp( search, pd->id->nfaTermCheck ) == 0 ) {
 			FsmAp *fsm = 0;
@@ -884,8 +884,8 @@ void NfaUnion::makeNameTree( ParseData *pd )
 		for ( TermNameVect::Iter name = names; name.lte(); name++ ) {
 			long resLen;
 			bool unused;
-			char *search = prepareLitString( (*name)->loc,
-					(*name)->data, (*name)->length, resLen, unused );
+			char *search = prepareLitString( name->loc,
+					name->data, name->length, resLen, unused );
 
 			if ( strcmp( search, pd->id->nfaTermCheck ) == 0 )
 				terms[name.pos()]->makeNameTree( pd );
@@ -903,8 +903,8 @@ void NfaUnion::resolveNameRefs( ParseData *pd )
 		for ( TermNameVect::Iter name = names; name.lte(); name++ ) {
 			long resLen;
 			bool unused;
-			char *search = prepareLitString( (*name)->loc,
-					(*name)->data, (*name)->length, resLen, unused );
+			char *search = prepareLitString( name->loc,
+					name->data, name->length, resLen, unused );
 
 			if ( strcmp( search, pd->id->nfaTermCheck ) == 0 )
 				terms[name.pos()]->resolveNameRefs( pd );

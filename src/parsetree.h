@@ -420,7 +420,7 @@ struct Expression
 };
 
 typedef Vector<Term*> TermVect;
-typedef Vector<Token*> TermNameVect;
+typedef Vector<Token> TermNameVect;
 
 /*
  * NfaUnion

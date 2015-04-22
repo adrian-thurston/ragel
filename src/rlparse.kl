@@ -181,13 +181,13 @@ nonterm nfa_expr
 nfa_expr:
 	nfa_expr '|' TK_Literal term_short final {
 		$$->nfaUnion = $1->nfaUnion;
-		$$->nfaUnion->names.append( $3 );
+		$$->nfaUnion->names.append( *$3 );
 		$$->nfaUnion->terms.append( $4->term );
 	};
 nfa_expr: 
 	TK_Literal term_short final {
 		$$->nfaUnion = new NfaUnion();
-		$$->nfaUnion->names.append( $1 );
+		$$->nfaUnion->names.append( *$1 );
 		$$->nfaUnion->terms.append( $2->term );
 	};
 
