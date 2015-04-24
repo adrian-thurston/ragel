@@ -94,7 +94,6 @@ struct InputData
 		backendSpecified(false),
 		saveTemps(false),
 		nfaTermCheck(0),
-		nfaGroupMax(0),
 		nfaCondsDepth(6),
 		transSpanDepth(6),
 		nfaIntermedStateLimit(2000),
@@ -163,7 +162,6 @@ struct InputData
 
 	bool saveTemps;
 	const char *nfaTermCheck;
-	long nfaGroupMax;
 	long nfaCondsDepth;
 	long transSpanDepth;
 	long nfaIntermedStateLimit;
