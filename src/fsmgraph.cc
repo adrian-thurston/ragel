@@ -26,7 +26,7 @@
 #include "mergesort.h"
 #include "parsedata.h"
 
-using std::cerr;
+using std::cout;
 using std::endl;
 
 /* Make a new state. The new state will be put on the graph's
@@ -700,19 +700,22 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int rounds )
 	}
 	else {
 		/* Merge the start states. */
-		std::cout << "nfa-fill-round\t0" << std::endl;
+		if ( ctx->printStatistics )
+			cout << "nfa-fill-round\t0" << endl;
 		nfaMergeStates( md, startState, startStateSet.data, startStateSet.length() );
 		finalizeNfaRound( md );
 		{
 			int len = stateList.length();
 			removeUnreachableStates();
 			int newLen = stateList.length();
-			std::cout << "round-unreach\t" << len - newLen << std::endl;
+			if ( ctx->printStatistics )
+				cout << "round-unreach\t" << len - newLen << endl;
 		}
 
 		/* Fill in any new states made from merging. */
 		for ( long i = 1; i < rounds; i++ ) {
-			std::cout << "nfa-fill-round\t" << i << std::endl;
+			if ( ctx->printStatistics )
+				cout << "nfa-fill-round\t" << i << endl;
 			prepareNfaRound( md );
 			if ( nfaList.length() == 0 )
 				break;
@@ -721,7 +724,8 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int rounds )
 			int len = stateList.length();
 			removeUnreachableStates();
 			int newLen = stateList.length();
-			std::cout << "round-unreach\t" << len - newLen << std::endl;
+			if ( ctx->printStatistics )
+				cout << "round-unreach\t" << len - newLen << endl;
 		}
 
 		long maxStateSetSize = 0;
@@ -734,19 +738,24 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int rounds )
 			}
 		}
 
-		std::cout << "fill-list\t" << count << std::endl;
-		std::cout << "state-dict\t" << md.stateDict.length() << std::endl;
-		std::cout << "states\t" << stateList.length() << std::endl;
-		std::cout << "max-ss\t" << maxStateSetSize << std::endl;
+		if ( ctx->printStatistics ) {
+			cout << "fill-list\t" << count << endl;
+			cout << "state-dict\t" << md.stateDict.length() << endl;
+			cout << "states\t" << stateList.length() << endl;
+			cout << "max-ss\t" << maxStateSetSize << endl;
+		}
 
 		removeUnreachableStates();
 
-		std::cout << "post-unreachable\t" << stateList.length() << std::endl;
+		if ( ctx->printStatistics )
+			cout << "post-unreachable\t" << stateList.length() << endl;
 
 		minimizePartition2();
 
-		std::cout << "post-min\t" << stateList.length() << std::endl;
-		std::cout << std::endl;
+		if ( ctx->printStatistics ) {
+			std::cout << "post-min\t" << stateList.length() << std::endl;
+			std::cout << std::endl;
+		}
 	}
 }
 

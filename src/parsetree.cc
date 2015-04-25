@@ -724,7 +724,7 @@ bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp )
 	
 	long long density;
 	transSpan( pd, fsmAp->startState, density, 1 );
-	std::cout << "density " << term << " " << density << std::endl;
+	cout << "density " << term << " " << density << endl;
 	
 	if ( density > 1000000 )
 		throw TransDensity();
@@ -765,7 +765,8 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 		nfaTermCheck( pd );
 	}
 
-	std::cout << "terms\t" << terms.length() << std::endl;
+	if ( pd->id->printStatistics )
+		cout << "terms\t" << terms.length() << endl;
 
 	/* Compute the individual expressions. */
 
@@ -789,13 +790,17 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 		numTerms += 1;
 	}
 
-	std::cout << "sum-plain\t" << sumPlain << std::endl;
-	std::cout << "sum-minimized\t" << sumMin << std::endl;
+	if ( pd->id->printStatistics ) {
+		cout << "sum-plain\t" << sumPlain << endl;
+		cout << "sum-minimized\t" << sumMin << endl;
+	}
 
 	/* For each round. */
 	for ( NfaRoundVect::Iter r = *rounds; r.lte(); r++ ) {
-		std::cout << "depth\t" << r->rounds << std::endl;
-		std::cout << "grouping\t" << r->groups << std::endl;
+		if ( pd->id->printStatistics ) {
+			cout << "depth\t" << r->rounds << endl;
+			cout << "grouping\t" << r->groups << endl;
+		}
 
 		int numGroups = 0;
 		int start = 0;
@@ -837,7 +842,8 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 
 void NfaUnion::nfaTermCheck( ParseData *pd )
 {
-	std::cout << "nfa-term-check" << std::endl;
+	cout << "nfa-term-check" << endl;
+
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
 		FsmAp *fsm = 0;
 		try {
@@ -848,19 +854,19 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 			strike( pd, fsm );
 		}
 		catch ( const TooManyStates & ) {
-			std::cout << "too-many-states" << std::endl;
+			cout << "too-many-states" << endl;
 			exit( 1 );
 		}
 		catch ( const RepetitionError & ) {
-			std::cout << "rep-error" << std::endl;
+			cout << "rep-error" << endl;
 			exit( 2 );
 		}
 		catch ( const TransDensity & ) {
-			std::cout << "trans-density-error" << std::endl;
+			cout << "trans-density-error" << endl;
 			exit( 7 );
 		}
 		catch ( const CondCostTooHigh &ccth ) {
-			std::cout << "cond-cost" << std::endl;
+			cout << "cond-cost" << endl;
 			exit( 20 + ccth.costId );
 		};
 

@@ -468,7 +468,7 @@ ParseData::ParseData( InputData *id, std::string fileName, string sectionName,
 	 * the builtins. */
 	initGraphDict();
 
-	fsmCtx = new FsmCtx( hostLang, minimizeLevel, minimizeOpt );
+	fsmCtx = new FsmCtx( hostLang, minimizeLevel, minimizeOpt, id->printStatistics );
 }
 
 /* Clean up the data collected during a parse. */
@@ -1088,6 +1088,9 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 /* Make the graph from a graph dict node. Does minimization and state sorting. */
 FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 {
+	if ( id->printStatistics )
+		cout << "compiling\t" << sectionName << endl;
+
 	/* Build the graph from a walk of the parse tree. */
 	FsmAp *graph = gdNode->value->walk( this );
 

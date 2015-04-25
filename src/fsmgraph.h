@@ -791,13 +791,16 @@ struct CondData
  * structure. */
 struct FsmCtx
 {
-	FsmCtx( const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
+	FsmCtx( const HostLang *hostLang, MinimizeLevel minimizeLevel,
+			MinimizeOpt minimizeOpt, bool printStatistics )
 	:
 		minimizeLevel(minimizeLevel),
 		minimizeOpt(minimizeOpt),
 
 		/* No limit. */
-		stateLimit(-1)
+		stateLimit(-1),
+
+		printStatistics(printStatistics)
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
@@ -809,6 +812,7 @@ struct FsmCtx
 	MinimizeOpt minimizeOpt;
 
 	long stateLimit;
+	bool printStatistics;
 };
 
 typedef InList<CondAp> CondInList;
