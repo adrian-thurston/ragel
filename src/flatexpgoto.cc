@@ -455,6 +455,7 @@ void FlatGotoExp::writeExec()
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"	if ( nfa_len > 0 ) {\n"
+			"		nfa_count += 1;\n"
 			"		nfa_len -= 1;\n";
 
 		if ( redFsm->bAnyNfaPushPops ) {

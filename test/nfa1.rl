@@ -17,6 +17,7 @@ struct nfa_bp_rec
 
 struct nfa_bp_rec nfa_bp[1024];
 long nfa_len = 0;
+long nfa_count = 0;
 
 %%{
 	machine atoi;
