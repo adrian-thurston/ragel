@@ -725,11 +725,13 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int rounds )
 		}
 
 		long maxStateSetSize = 0;
-		long count = nfaList.length();
-		for ( NfaStateList::Iter ns = nfaList; ns.lte(); ns++ ) {
-			StateSet &stateSet = ns->stateDictEl->stateSet;
-			if ( stateSet.length() > maxStateSetSize )
-				maxStateSetSize = stateSet.length();
+		long count = 0;
+		for ( StateList::Iter s = stateList; s.lte(); s++ ) {
+			if ( s->nfaOut != 0 && s->nfaOut->length() > 0 ) {
+				count += 1;
+				if ( s->nfaOut->length() > maxStateSetSize )
+					maxStateSetSize = s->nfaOut->length();
+			}
 		}
 
 		std::cout << "fill-list\t" << count << std::endl;
