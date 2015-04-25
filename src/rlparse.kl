@@ -216,23 +216,20 @@ nonterm nfa_expr
 };
 
 nfa_expr:
-	nfa_expr '|' TK_Literal term_short final {
+	nfa_expr '|' term_short final {
 		$$->nfaUnion = $1->nfaUnion;
-		$$->nfaUnion->names.append( *$3 );
-		$$->nfaUnion->terms.append( $4->term );
+		$$->nfaUnion->terms.append( $3->term );
 	};
 nfa_expr: 
-	TK_Literal term_short final {
+	term_short final {
 		$$->nfaUnion = new NfaUnion();
-		$$->nfaUnion->names.append( *$1 );
-		$$->nfaUnion->terms.append( $2->term );
+		$$->nfaUnion->terms.append( $1->term );
 	};
 
 nfa_union: 
-	machine_name TK_BarEquals TK_Literal nfa_rounds nfa_expr ';' final {
-		$5->nfaUnion->name = $3->data;
-		$5->nfaUnion->rounds = $4->rounds;
-		MachineDef *machineDef = new MachineDef( $5->nfaUnion );
+	machine_name TK_BarEquals nfa_rounds nfa_expr ';' final {
+		$4->nfaUnion->rounds = $3->rounds;
+		MachineDef *machineDef = new MachineDef( $4->nfaUnion );
 
 		/* Generic creation of machine for instantiation and assignment. */
 		tryMachineDef( $1->token.loc, $1->token.data, machineDef, true );

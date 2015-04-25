@@ -710,7 +710,7 @@ void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, lon
 	}
 }
 
-bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp, const char *term )
+bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp )
 {
 	/* Init on state list flags. */
 	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
@@ -760,12 +760,11 @@ void ParseData::nfaTermCheckZeroReps()
 
 FsmAp *NfaUnion::walk( ParseData *pd )
 {
-	if ( pd->id->nfaTermCheck != 0 ) {
+	if ( pd->id->nfaTermCheck ) {
 		/* Does not return. */
 		nfaTermCheck( pd );
 	}
 
-	std::cout << "nfa-union\t" << name << std::endl;
 	std::cout << "terms\t" << terms.length() << std::endl;
 
 	/* Compute the individual expressions. */
@@ -838,83 +837,47 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 
 void NfaUnion::nfaTermCheck( ParseData *pd )
 {
-	std::cout << "nfa-term-check: " << pd->id->nfaTermCheck << std::endl;
-	for ( TermNameVect::Iter name = names; name.lte(); name++ ) {
-		long resLen;
-		bool unused;
-		char *search = prepareLitString( name->loc,
-				name->data, name->length, resLen, unused );
+	std::cout << "nfa-term-check" << std::endl;
+	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
+		FsmAp *fsm = 0;
+		try {
+			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
+			fsm = (*term)->walk( pd );
+			pd->fsmCtx->stateLimit = -1;
 
-		if ( strcmp( search, pd->id->nfaTermCheck ) == 0 ) {
-			FsmAp *fsm = 0;
-			try {
-				pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
-				fsm = terms[name.pos()]->walk( pd );
-				pd->fsmCtx->stateLimit = -1;
-
-				strike( pd, fsm, pd->id->nfaTermCheck );
-			}
-			catch ( const TooManyStates & ) {
-				std::cout << "too-many-states" << std::endl;
-				exit( 1 );
-			}
-			catch ( const RepetitionError & ) {
-				std::cout << "rep-error" << std::endl;
-				exit( 2 );
-			}
-			catch ( const TransDensity & ) {
-				std::cout << "trans-density-error" << std::endl;
-				exit( 7 );
-			}
-			catch ( const CondCostTooHigh &ccth ) {
-				std::cout << "cond-cost" << std::endl;
-				exit( 20 + ccth.costId );
-			};
-
-			
-			exit( 0 );
+			strike( pd, fsm );
 		}
+		catch ( const TooManyStates & ) {
+			std::cout << "too-many-states" << std::endl;
+			exit( 1 );
+		}
+		catch ( const RepetitionError & ) {
+			std::cout << "rep-error" << std::endl;
+			exit( 2 );
+		}
+		catch ( const TransDensity & ) {
+			std::cout << "trans-density-error" << std::endl;
+			exit( 7 );
+		}
+		catch ( const CondCostTooHigh &ccth ) {
+			std::cout << "cond-cost" << std::endl;
+			exit( 20 + ccth.costId );
+		};
+
 	}
-		
-	exit( 1 );
+	exit( 0 );
 }
 
 void NfaUnion::makeNameTree( ParseData *pd )
 {
-	if ( pd->id->nfaTermCheck != 0 ) {
-		for ( TermNameVect::Iter name = names; name.lte(); name++ ) {
-			long resLen;
-			bool unused;
-			char *search = prepareLitString( name->loc,
-					name->data, name->length, resLen, unused );
-
-			if ( strcmp( search, pd->id->nfaTermCheck ) == 0 )
-				terms[name.pos()]->makeNameTree( pd );
-		}
-	}
-	else {
-		for ( TermVect::Iter term = terms; term.lte(); term++ )
-			(*term)->makeNameTree( pd );
-	}
+	for ( TermVect::Iter term = terms; term.lte(); term++ )
+		(*term)->makeNameTree( pd );
 }
 
 void NfaUnion::resolveNameRefs( ParseData *pd )
 {
-	if ( pd->id->nfaTermCheck != 0 ) {
-		for ( TermNameVect::Iter name = names; name.lte(); name++ ) {
-			long resLen;
-			bool unused;
-			char *search = prepareLitString( name->loc,
-					name->data, name->length, resLen, unused );
-
-			if ( strcmp( search, pd->id->nfaTermCheck ) == 0 )
-				terms[name.pos()]->resolveNameRefs( pd );
-		}
-	}
-	else {
-		for ( TermVect::Iter term = terms; term.lte(); term++ )
-			(*term)->resolveNameRefs( pd );
-	}
+	for ( TermVect::Iter term = terms; term.lte(); term++ )
+		(*term)->resolveNameRefs( pd );
 }
 
 FsmAp *MachineDef::walk( ParseData *pd )

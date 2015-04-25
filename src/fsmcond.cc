@@ -206,7 +206,7 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 			 * the sense is opposite, delete it. */
 
 			/* Find the position. */
-			long pos;
+			long pos = 0;
 			for ( CondSet::Iter csi = mergedCS; csi.lte(); csi++ ) {
 				if ( *csi == condAction )
 					pos = csi.pos();

@@ -420,7 +420,6 @@ struct Expression
 };
 
 typedef Vector<Term*> TermVect;
-typedef Vector<Token> TermNameVect;
 
 /*
  * NfaUnion
@@ -440,12 +439,9 @@ struct NfaUnion
 	void nfaTermCheck( ParseData *pd );
 	void condsDensity( ParseData *pd, StateAp *state, long depth );
 	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
-	bool strike( ParseData *pd, FsmAp *fsmAp, const char *term );
 
 	/* Node data. */
-	std::string name;
 	TermVect terms;
-	TermNameVect names;
 	NfaRoundVect *rounds;
 };
 

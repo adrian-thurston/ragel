@@ -161,7 +161,7 @@ struct InputData
 	RagelBackend backend;
 
 	bool saveTemps;
-	const char *nfaTermCheck;
+	bool nfaTermCheck;
 	long nfaCondsDepth;
 	long transSpanDepth;
 	long nfaIntermedStateLimit;

@@ -431,7 +431,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				else if ( strcmp( arg, "save-temps" ) == 0 )
 					saveTemps = true;
 				else if ( strcmp( arg, "nfa-term-check" ) == 0 )
-					nfaTermCheck = strdup( eq );
+					nfaTermCheck = true;
 				else if ( strcmp( arg, "nfa-conds-depth" ) == 0 )
 					nfaCondsDepth = strtol( eq, 0, 10 );
 				else if ( strcmp( arg, "nfa-intermed-state-limit" ) == 0 )
