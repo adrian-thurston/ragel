@@ -54,7 +54,7 @@ long nfa_count = 0;
 	main1 = atoi '\n' @print1;
 	main2 = [0-9]* '00000000' [0-9]* '\n' @print2;
 
-	main |= "main" (5, 0) "main1" main1 | "main2" main2;
+	main |= (5, 0) main1 | main2;
 }%%
 
 %% write data;

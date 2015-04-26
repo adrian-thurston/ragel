@@ -66,7 +66,7 @@ void nfa_pop()
 	}
 
 	main := 
-		( :( ( 'a' ), ini6, min6, max6, {nfa_push();}, {nfa_pop();} ): ' ' ) {2}
+		( :( ( 'a'  ), ini6, min6, max6, {nfa_push();}, {nfa_pop();} ): ) {2}
 		eol
 		any @{printf("----- MATCH\n");}
 	;
@@ -91,52 +91,28 @@ int test( const char *data )
 
 int main()
 {
-	test( "a " );
-	test( "aa " );
-	test( "aaa " );
-	test( "aaaa " );
-
-	test( "a a " );
-	test( "aa aa " );
-	test( "aaa aaa " );
-	test( "aaaa aaaa " );
-
-	test( "a a a " );
-	test( "aa aa aa " );
-	test( "aaa aaa aaa " );
-	test( "aaaa aaaa aaaa " );
-
-	test( "aa a " );
-	test( "aa aaa " );
-	test( "aa aaaa " );
-
-	test( "aaa a " );
-	test( "aaa aa " );
-	test( "aaa aaaa " );
+	test( "a" );
+	test( "aa" );
+	test( "aaa" );
+	test( "aaaa" );
+	test( "aaaaa" );
+	test( "aaaaaa" );
+	test( "aaaaaaa" );
+	test( "aaaaaaaa" );
 
 	return 0;
 }
 
 ##### OUTPUT #####
-testing: a 
-testing: aa 
-testing: aaa 
-testing: aaaa 
-testing: a a 
-testing: aa aa 
+testing: a
+testing: aa
+testing: aaa
+testing: aaaa
 ----- MATCH
-testing: aaa aaa 
+testing: aaaaa
 ----- MATCH
-testing: aaaa aaaa 
-testing: a a a 
-testing: aa aa aa 
-testing: aaa aaa aaa 
-testing: aaaa aaaa aaaa 
-testing: aa a 
-testing: aa aaa 
 ----- MATCH
-testing: aa aaaa 
-testing: aaa a 
-testing: aaa aa 
+testing: aaaaaa
 ----- MATCH
-testing: aaa aaaa 
+testing: aaaaaaa
+testing: aaaaaaaa
