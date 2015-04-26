@@ -44,6 +44,10 @@ void FlatLoopGoto::tableDataPass()
 	taFromStateActions();
 	taEofActions();
 	taEofTrans();
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
 }
 
 void FlatLoopGoto::genAnalysis()
@@ -170,6 +174,11 @@ void FlatLoopGoto::writeData()
 	if ( redFsm->anyEofTrans() )
 		taEofTrans();
 
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
+
 	STATE_IDS();
 }
 
@@ -245,6 +254,8 @@ void FlatLoopGoto::writeExec()
 			"	}\n"
 			"\n";
 	}
+
+	NFA_PUSH();
 
 	LOCATE_TRANS();
 
@@ -381,6 +392,8 @@ void FlatLoopGoto::writeExec()
 	/* The entry loop. */
 	out << "}}\n";
 
+	NFA_POP();
+
 	out << "	}\n";
 }
 
@@ -419,8 +432,16 @@ void FlatLoopGoto::COND_ACTION( RedCondPair *cond )
 
 void FlatLoopGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
+	int act = 0;
+	if ( targ->push != 0 )
+		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
 }
 
 void FlatLoopGoto::NFA_POP_ACTION( RedNfaTarg *targ )
 {
+	int act = 0;
+	if ( targ->pop != 0 )
+		act = targ->pop->actListId+1;
+	nfaPopActions.value( act );
 }

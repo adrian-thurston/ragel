@@ -294,51 +294,8 @@ void FlatExpGoto::writeExec()
 			"\n";
 	}
 
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
-			"		int alt; \n"
-			"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[(int)" <<
-						ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
-			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
-							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
-			"			nfa_bp[nfa_len].p = " << P() << ";\n";
 
-		if ( redFsm->bAnyNfaPushPops ) {
-			out <<
-				"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[(int)" <<
-								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
-				"\n"
-				"			switch ( " << ARR_REF( nfaPushActions ) << "[(int)" <<
-								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt] ) {\n";
-
-			/* Loop the actions. */
-			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-					redAct.lte(); redAct++ )
-			{
-				if ( redAct->numNfaPushRefs > 0 ) {
-					/* Write the entry label. */
-					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-						ACTION( out, item->value, IlOpts( 0, false, false ) );
-
-					out << "\n\t" << CEND() << "}\n";
-				}
-			}
-
-			out <<
-				"			}\n";
-		}
-
-
-		out <<
-			"			nfa_len += 1;\n"
-			"		}\n"
-			"	}\n"
-			;
-	}
+	NFA_PUSH();
 
 	LOCATE_TRANS();
 
@@ -452,42 +409,7 @@ void FlatExpGoto::writeExec()
 	/* The entry loop. */
 	out << "}}\n";
 
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"	if ( nfa_len > 0 ) {\n"
-			"		nfa_count += 1;\n"
-			"		nfa_len -= 1;\n";
-
-		if ( redFsm->bAnyNfaPushPops ) {
-			out << 
-				"		switch ( nfa_bp[nfa_len].pop ) {\n";
-
-			/* Loop the actions. */
-			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-					redAct.lte(); redAct++ )
-			{
-				if ( redAct->numNfaPopRefs > 0 ) {
-					/* Write the entry label. */
-					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-						ACTION( out, item->value, IlOpts( 0, false, false ) );
-
-					out << "\n\t" << CEND() << "}\n";
-				}
-			}
-
-			out <<
-				"		}\n";
-		}
-
-		out <<
-			"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
-			"		" << P() << " = nfa_bp[nfa_len].p;\n"
-			"		goto _resume;\n"
-			"	}\n";
-	}
+	NFA_POP();
 
 	out << "	}\n";
 }
