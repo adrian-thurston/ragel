@@ -468,7 +468,8 @@ ParseData::ParseData( InputData *id, std::string fileName, string sectionName,
 	 * the builtins. */
 	initGraphDict();
 
-	fsmCtx = new FsmCtx( hostLang, minimizeLevel, minimizeOpt, id->printStatistics );
+	fsmCtx = new FsmCtx( hostLang, minimizeLevel,
+			minimizeOpt, id->printStatistics, id->nfaTermCheck );
 }
 
 /* Clean up the data collected during a parse. */

@@ -61,6 +61,7 @@ struct CondSpace;
 struct FsmCtx;
 
 struct TooManyStates {};
+struct PriorInteraction {};
 struct RepetitionError {};
 struct TransDensity {};
 
@@ -792,7 +793,8 @@ struct CondData
 struct FsmCtx
 {
 	FsmCtx( const HostLang *hostLang, MinimizeLevel minimizeLevel,
-			MinimizeOpt minimizeOpt, bool printStatistics )
+			MinimizeOpt minimizeOpt, bool printStatistics,
+			bool nfaTermCheck )
 	:
 		minimizeLevel(minimizeLevel),
 		minimizeOpt(minimizeOpt),
@@ -800,7 +802,9 @@ struct FsmCtx
 		/* No limit. */
 		stateLimit(-1),
 
-		printStatistics(printStatistics)
+		printStatistics(printStatistics),
+
+		nfaTermCheck(nfaTermCheck)
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
@@ -813,6 +817,7 @@ struct FsmCtx
 
 	long stateLimit;
 	bool printStatistics;
+	bool nfaTermCheck;
 };
 
 typedef InList<CondAp> CondInList;

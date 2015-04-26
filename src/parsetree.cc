@@ -857,6 +857,10 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 			cout << "too-many-states" << endl;
 			exit( 1 );
 		}
+		catch ( const PriorInteraction & ) {
+			cout << "prior-interaction" << endl;
+			exit( 8 );
+		}
 		catch ( const RepetitionError & ) {
 			cout << "rep-error" << endl;
 			exit( 2 );

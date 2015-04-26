@@ -845,10 +845,16 @@ int FsmAp::comparePrior( const PriorTable &priorTable1, const PriorTable &priorT
 		else if ( pd1->desc->key > pd2->desc->key )
 			pd2.increment();
 		/* Keys are the same, check priorities. */
-		else if ( pd1->desc->priority < pd2->desc->priority )
+		else if ( pd1->desc->priority < pd2->desc->priority ) {
+			//if ( ctx->nfaTermCheck )
+			//	throw PriorInteraction();
 			return -1;
-		else if ( pd1->desc->priority > pd2->desc->priority )
+		}
+		else if ( pd1->desc->priority > pd2->desc->priority ) {
+			//if ( ctx->nfaTermCheck )
+			//	throw PriorInteraction();
 			return 1;
+		}
 		else {
 			/* Keys and priorities are equal, advance both. */
 			pd1.increment();
