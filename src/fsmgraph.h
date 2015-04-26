@@ -1043,6 +1043,8 @@ template <class ItemIter1, class ItemIter2 = ItemIter1> struct ValPairIter
 		ItemIter trans;
 		ItemIter next;
 
+		NextTrans() { key = 0; }
+
 		void load() {
 			if ( trans.end() )
 				next.clear();
@@ -1196,6 +1198,12 @@ template <class ItemIter1, class ItemIter2 = ItemIter1> struct RangePairIter
 		ItemIter trans;
 		ItemIter next;
 
+		NextTrans()
+		{
+			highKey = 0;
+			lowKey = 0;
+		}
+
 		void load() {
 			if ( trans.end() )
 				next.clear();
@@ -1250,6 +1258,8 @@ template <class ItemIter1, class ItemIter2> RangePairIter<ItemIter1, ItemIter2>:
 	list2(list2),
 	itState(Begin)
 {
+	bottomLow = 0;
+	bottomHigh = 0;
 	findNext();
 }
 
