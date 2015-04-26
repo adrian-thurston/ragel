@@ -24,14 +24,14 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-BinaryGotoExp::BinaryGotoExp( const CodeGenArgs &args ) 
+BinaryExpGoto::BinaryExpGoto( const CodeGenArgs &args ) 
 :
 	Binary(args)
 {
 }
 
 /* Determine if we should use indicies or not. */
-void BinaryGotoExp::calcIndexSize()
+void BinaryExpGoto::calcIndexSize()
 {
 //	long long sizeWithInds =
 //		indicies.size() +
@@ -49,7 +49,7 @@ void BinaryGotoExp::calcIndexSize()
 	useIndicies = false;
 }
 
-void BinaryGotoExp::tableDataPass()
+void BinaryExpGoto::tableDataPass()
 {
 	taKeyOffsets();
 	taSingleLens();
@@ -79,7 +79,7 @@ void BinaryGotoExp::tableDataPass()
 	taCondKeys();
 }
 
-void BinaryGotoExp::genAnalysis()
+void BinaryExpGoto::genAnalysis()
 {
 	redFsm->sortByStateId();
 
@@ -112,7 +112,7 @@ void BinaryGotoExp::genAnalysis()
 }
 
 
-void BinaryGotoExp::COND_ACTION( RedCondPair *cond )
+void BinaryExpGoto::COND_ACTION( RedCondPair *cond )
 {
 	int action = 0;
 	if ( cond->action != 0 )
@@ -120,7 +120,7 @@ void BinaryGotoExp::COND_ACTION( RedCondPair *cond )
 	condActions.value( action );
 }
 
-void BinaryGotoExp::TO_STATE_ACTION( RedStateAp *state )
+void BinaryExpGoto::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -128,7 +128,7 @@ void BinaryGotoExp::TO_STATE_ACTION( RedStateAp *state )
 	toStateActions.value( act );
 }
 
-void BinaryGotoExp::FROM_STATE_ACTION( RedStateAp *state )
+void BinaryExpGoto::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -136,7 +136,7 @@ void BinaryGotoExp::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void BinaryGotoExp::EOF_ACTION( RedStateAp *state )
+void BinaryExpGoto::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -146,7 +146,7 @@ void BinaryGotoExp::EOF_ACTION( RedStateAp *state )
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinaryGotoExp::TO_STATE_ACTION_SWITCH()
+std::ostream &BinaryExpGoto::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -169,7 +169,7 @@ std::ostream &BinaryGotoExp::TO_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinaryGotoExp::FROM_STATE_ACTION_SWITCH()
+std::ostream &BinaryExpGoto::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -190,7 +190,7 @@ std::ostream &BinaryGotoExp::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinaryGotoExp::EOF_ACTION_SWITCH()
+std::ostream &BinaryExpGoto::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -213,7 +213,7 @@ std::ostream &BinaryGotoExp::EOF_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinaryGotoExp::ACTION_SWITCH()
+std::ostream &BinaryExpGoto::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -234,7 +234,7 @@ std::ostream &BinaryGotoExp::ACTION_SWITCH()
 	return out;
 }
 
-void BinaryGotoExp::writeData()
+void BinaryExpGoto::writeData()
 {
 	taKeyOffsets();
 
@@ -277,7 +277,7 @@ void BinaryGotoExp::writeData()
 	STATE_IDS();
 }
 
-void BinaryGotoExp::writeExec()
+void BinaryExpGoto::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

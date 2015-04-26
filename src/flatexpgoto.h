@@ -29,13 +29,13 @@
 struct CodeGenData;
 
 /*
- * FlatGotoExp
+ * FlatExpGoto
  */
-class FlatGotoExp
+class FlatExpGoto
 	: public Flat
 {
 public:
-	FlatGotoExp( const CodeGenArgs &args ) 
+	FlatExpGoto( const CodeGenArgs &args ) 
 		: Flat(args) {}
 
 	void tableDataPass();
@@ -60,13 +60,13 @@ protected:
 
 namespace C
 {
-	class FlatGotoExp
+	class FlatExpGoto
 	:
-		public ::FlatGotoExp
+		public ::FlatExpGoto
 	{
 	public:
-		FlatGotoExp( const CodeGenArgs &args )
-			: ::FlatGotoExp( args )
+		FlatExpGoto( const CodeGenArgs &args )
+			: ::FlatExpGoto( args )
 		{}
 	};
 }

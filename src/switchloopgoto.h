@@ -32,11 +32,11 @@ struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;
 
-class SwitchGotoLoop
+class SwitchLoopGoto
 	: public Goto
 {
 public:
-	SwitchGotoLoop( const CodeGenArgs &args ) 
+	SwitchLoopGoto( const CodeGenArgs &args ) 
 		: Goto(args) {}
 
 	void tableDataPass();
@@ -55,13 +55,13 @@ public:
 
 namespace C
 {
-	class SwitchGotoLoop
+	class SwitchLoopGoto
 	:
-		public ::SwitchGotoLoop
+		public ::SwitchLoopGoto
 	{
 	public:
-		SwitchGotoLoop( const CodeGenArgs &args )
-			: ::SwitchGotoLoop( args )
+		SwitchLoopGoto( const CodeGenArgs &args )
+			: ::SwitchLoopGoto( args )
 		{}
 	};
 }

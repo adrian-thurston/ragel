@@ -24,7 +24,7 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-void FlatGotoExp::tableDataPass()
+void FlatExpGoto::tableDataPass()
 {
 	taKeys();
 	taCharClass();
@@ -48,7 +48,7 @@ void FlatGotoExp::tableDataPass()
 	taNfaPopActions();
 }
 
-void FlatGotoExp::genAnalysis()
+void FlatExpGoto::genAnalysis()
 {
 	redFsm->sortByStateId();
 
@@ -77,7 +77,7 @@ void FlatGotoExp::genAnalysis()
 	setTableState( TableArray::GeneratePass );
 }
 
-void FlatGotoExp::TO_STATE_ACTION( RedStateAp *state )
+void FlatExpGoto::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -85,7 +85,7 @@ void FlatGotoExp::TO_STATE_ACTION( RedStateAp *state )
 	toStateActions.value( act );
 }
 
-void FlatGotoExp::FROM_STATE_ACTION( RedStateAp *state )
+void FlatExpGoto::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -93,7 +93,7 @@ void FlatGotoExp::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void FlatGotoExp::EOF_ACTION( RedStateAp *state )
+void FlatExpGoto::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -101,7 +101,7 @@ void FlatGotoExp::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-void FlatGotoExp::COND_ACTION( RedCondPair *cond )
+void FlatExpGoto::COND_ACTION( RedCondPair *cond )
 {
 	int action = 0;
 	if ( cond->action != 0 )
@@ -109,7 +109,7 @@ void FlatGotoExp::COND_ACTION( RedCondPair *cond )
 	condActions.value( action );
 }
 
-void FlatGotoExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void FlatExpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -117,7 +117,7 @@ void FlatGotoExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void FlatGotoExp::NFA_POP_ACTION( RedNfaTarg *targ )
+void FlatExpGoto::NFA_POP_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->pop != 0 )
@@ -127,7 +127,7 @@ void FlatGotoExp::NFA_POP_ACTION( RedNfaTarg *targ )
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatGotoExp::TO_STATE_ACTION_SWITCH()
+std::ostream &FlatExpGoto::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -148,7 +148,7 @@ std::ostream &FlatGotoExp::TO_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatGotoExp::FROM_STATE_ACTION_SWITCH()
+std::ostream &FlatExpGoto::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -167,7 +167,7 @@ std::ostream &FlatGotoExp::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatGotoExp::EOF_ACTION_SWITCH()
+std::ostream &FlatExpGoto::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -188,7 +188,7 @@ std::ostream &FlatGotoExp::EOF_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatGotoExp::ACTION_SWITCH()
+std::ostream &FlatExpGoto::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -207,7 +207,7 @@ std::ostream &FlatGotoExp::ACTION_SWITCH()
 	return out;
 }
 
-void FlatGotoExp::writeData()
+void FlatExpGoto::writeData()
 {
 	taKeys();
 	taCharClass();
@@ -241,7 +241,7 @@ void FlatGotoExp::writeData()
 	STATE_IDS();
 }
 
-void FlatGotoExp::writeExec()
+void FlatExpGoto::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

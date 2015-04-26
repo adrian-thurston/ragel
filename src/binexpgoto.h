@@ -28,10 +28,10 @@
 /* Forwards. */
 struct CodeGenData;
 
-class BinaryGotoExp : public Binary
+class BinaryExpGoto : public Binary
 {
 public:
-	BinaryGotoExp( const CodeGenArgs &args );
+	BinaryExpGoto( const CodeGenArgs &args );
 
 	void calcIndexSize();
 	void tableDataPass();
@@ -50,18 +50,17 @@ protected:
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondPair *cond );
-
 };
 
 namespace C
 {
-	class BinaryGotoExp
+	class BinaryExpGoto
 	:
-		public ::BinaryGotoExp
+		public ::BinaryExpGoto
 	{
 	public:
-		BinaryGotoExp( const CodeGenArgs &args )
-			: ::BinaryGotoExp( args )
+		BinaryExpGoto( const CodeGenArgs &args )
+			: ::BinaryExpGoto( args )
 		{}
 	};
 }

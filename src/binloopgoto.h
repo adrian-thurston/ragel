@@ -32,11 +32,11 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-class BinaryGotoLoop
+class BinaryLoopGoto
 	: public Binary
 {
 public:
-	BinaryGotoLoop( const CodeGenArgs &args );
+	BinaryLoopGoto( const CodeGenArgs &args );
 
 	void calcIndexSize();
 	void tableDataPass();
@@ -58,13 +58,13 @@ public:
 
 namespace C
 {
-	class BinaryGotoLoop
+	class BinaryLoopGoto
 	:
-		public ::BinaryGotoLoop
+		public ::BinaryLoopGoto
 	{
 	public:
-		BinaryGotoLoop( const CodeGenArgs &args )
-			: ::BinaryGotoLoop( args )
+		BinaryLoopGoto( const CodeGenArgs &args )
+			: ::BinaryLoopGoto( args )
 		{}
 	};
 }

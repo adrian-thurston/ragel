@@ -25,14 +25,14 @@
 #include "gendata.h"
 #include "bstmap.h"
 
-void SwitchGotoExp::tableDataPass()
+void SwitchExpGoto::tableDataPass()
 {
 	taToStateActions();
 	taFromStateActions();
 	taEofActions();
 }
 
-void SwitchGotoExp::genAnalysis()
+void SwitchExpGoto::genAnalysis()
 {
 	/* For directly executable machines there is no required state
 	 * ordering. Choose a depth-first ordering to increase the
@@ -62,7 +62,7 @@ void SwitchGotoExp::genAnalysis()
 	setTableState( TableArray::GeneratePass );
 }
 
-std::ostream &SwitchGotoExp::EXEC_ACTIONS()
+std::ostream &SwitchExpGoto::EXEC_ACTIONS()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -93,7 +93,7 @@ std::ostream &SwitchGotoExp::EXEC_ACTIONS()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &SwitchGotoExp::TO_STATE_ACTION_SWITCH()
+std::ostream &SwitchExpGoto::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -114,7 +114,7 @@ std::ostream &SwitchGotoExp::TO_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &SwitchGotoExp::FROM_STATE_ACTION_SWITCH()
+std::ostream &SwitchExpGoto::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -133,7 +133,7 @@ std::ostream &SwitchGotoExp::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &SwitchGotoExp::EOF_ACTION_SWITCH()
+std::ostream &SwitchExpGoto::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -152,7 +152,7 @@ std::ostream &SwitchGotoExp::EOF_ACTION_SWITCH()
 	return out;
 }
 
-unsigned int SwitchGotoExp::TO_STATE_ACTION( RedStateAp *state )
+unsigned int SwitchExpGoto::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -160,7 +160,7 @@ unsigned int SwitchGotoExp::TO_STATE_ACTION( RedStateAp *state )
 	return act;
 }
 
-unsigned int SwitchGotoExp::FROM_STATE_ACTION( RedStateAp *state )
+unsigned int SwitchExpGoto::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -168,7 +168,7 @@ unsigned int SwitchGotoExp::FROM_STATE_ACTION( RedStateAp *state )
 	return act;
 }
 
-unsigned int SwitchGotoExp::EOF_ACTION( RedStateAp *state )
+unsigned int SwitchExpGoto::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -176,7 +176,7 @@ unsigned int SwitchGotoExp::EOF_ACTION( RedStateAp *state )
 	return act;
 }
 
-void SwitchGotoExp::writeData()
+void SwitchExpGoto::writeData()
 {
 	if ( redFsm->anyToStateActions() )
 		taToStateActions();
@@ -190,7 +190,7 @@ void SwitchGotoExp::writeData()
 	STATE_IDS();
 }
 
-void SwitchGotoExp::writeExec()
+void SwitchExpGoto::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

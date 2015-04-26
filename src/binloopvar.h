@@ -32,11 +32,11 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-class BinaryVarLoop
+class BinLoopVar
 	: public Binary
 {
 public:
-	BinaryVarLoop( const CodeGenArgs &args );
+	BinLoopVar( const CodeGenArgs &args );
 
 	void calcIndexSize();
 	void tableDataPass();
@@ -72,13 +72,13 @@ public:
 
 namespace C
 {
-	class BinaryVarLoop
+	class BinLoopVar
 	:
-		public ::BinaryVarLoop
+		public ::BinLoopVar
 	{
 	public:
-		BinaryVarLoop( const CodeGenArgs &args )
-			: ::BinaryVarLoop( args )
+		BinLoopVar( const CodeGenArgs &args )
+			: ::BinLoopVar( args )
 		{}
 	};
 }

@@ -24,13 +24,13 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-BinaryGotoLoop::BinaryGotoLoop( const CodeGenArgs &args )
+BinaryLoopGoto::BinaryLoopGoto( const CodeGenArgs &args )
 :
 	Binary( args )
 {}
 
 /* Determine if we should use indicies or not. */
-void BinaryGotoLoop::calcIndexSize()
+void BinaryLoopGoto::calcIndexSize()
 {
 //	long long sizeWithInds =
 //		indicies.size() +
@@ -51,7 +51,7 @@ void BinaryGotoLoop::calcIndexSize()
 }
 
 
-void BinaryGotoLoop::tableDataPass()
+void BinaryLoopGoto::tableDataPass()
 {
 	taActions();
 	taKeyOffsets();
@@ -82,7 +82,7 @@ void BinaryGotoLoop::tableDataPass()
 	taCondKeys();
 }
 
-void BinaryGotoLoop::genAnalysis()
+void BinaryLoopGoto::genAnalysis()
 {
 	redFsm->sortByStateId();
 
@@ -115,7 +115,7 @@ void BinaryGotoLoop::genAnalysis()
 }
 
 
-void BinaryGotoLoop::COND_ACTION( RedCondPair *cond )
+void BinaryLoopGoto::COND_ACTION( RedCondPair *cond )
 {
 	int act = 0;
 	if ( cond->action != 0 )
@@ -123,7 +123,7 @@ void BinaryGotoLoop::COND_ACTION( RedCondPair *cond )
 	condActions.value( act );
 }
 
-void BinaryGotoLoop::TO_STATE_ACTION( RedStateAp *state )
+void BinaryLoopGoto::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -131,7 +131,7 @@ void BinaryGotoLoop::TO_STATE_ACTION( RedStateAp *state )
 	toStateActions.value( act );
 }
 
-void BinaryGotoLoop::FROM_STATE_ACTION( RedStateAp *state )
+void BinaryLoopGoto::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -139,7 +139,7 @@ void BinaryGotoLoop::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void BinaryGotoLoop::EOF_ACTION( RedStateAp *state )
+void BinaryLoopGoto::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -147,7 +147,7 @@ void BinaryGotoLoop::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-std::ostream &BinaryGotoLoop::TO_STATE_ACTION_SWITCH()
+std::ostream &BinaryLoopGoto::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -163,7 +163,7 @@ std::ostream &BinaryGotoLoop::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinaryGotoLoop::FROM_STATE_ACTION_SWITCH()
+std::ostream &BinaryLoopGoto::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -179,7 +179,7 @@ std::ostream &BinaryGotoLoop::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinaryGotoLoop::EOF_ACTION_SWITCH()
+std::ostream &BinaryLoopGoto::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -196,7 +196,7 @@ std::ostream &BinaryGotoLoop::EOF_ACTION_SWITCH()
 }
 
 
-std::ostream &BinaryGotoLoop::ACTION_SWITCH()
+std::ostream &BinaryLoopGoto::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -213,7 +213,7 @@ std::ostream &BinaryGotoLoop::ACTION_SWITCH()
 }
 
 
-void BinaryGotoLoop::writeData()
+void BinaryLoopGoto::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -260,7 +260,7 @@ void BinaryGotoLoop::writeData()
 	STATE_IDS();
 }
 
-void BinaryGotoLoop::writeExec()
+void BinaryLoopGoto::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

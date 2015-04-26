@@ -24,13 +24,13 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-BinaryVarLoop::BinaryVarLoop( const CodeGenArgs &args )
+BinLoopVar::BinLoopVar( const CodeGenArgs &args )
 :
 	Binary( args )
 {}
 
 /* Determine if we should use indicies or not. */
-void BinaryVarLoop::calcIndexSize()
+void BinLoopVar::calcIndexSize()
 {
 //	long long sizeWithInds =
 //		indicies.size() +
@@ -51,7 +51,7 @@ void BinaryVarLoop::calcIndexSize()
 }
 
 
-void BinaryVarLoop::tableDataPass()
+void BinLoopVar::tableDataPass()
 {
 	taActions();
 	taKeyOffsets();
@@ -82,7 +82,7 @@ void BinaryVarLoop::tableDataPass()
 	taCondKeys();
 }
 
-void BinaryVarLoop::genAnalysis()
+void BinLoopVar::genAnalysis()
 {
 	redFsm->sortByStateId();
 
@@ -115,7 +115,7 @@ void BinaryVarLoop::genAnalysis()
 }
 
 
-void BinaryVarLoop::COND_ACTION( RedCondPair *cond )
+void BinLoopVar::COND_ACTION( RedCondPair *cond )
 {
 	int act = 0;
 	if ( cond->action != 0 )
@@ -123,7 +123,7 @@ void BinaryVarLoop::COND_ACTION( RedCondPair *cond )
 	condActions.value( act );
 }
 
-void BinaryVarLoop::TO_STATE_ACTION( RedStateAp *state )
+void BinLoopVar::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -131,7 +131,7 @@ void BinaryVarLoop::TO_STATE_ACTION( RedStateAp *state )
 	toStateActions.value( act );
 }
 
-void BinaryVarLoop::FROM_STATE_ACTION( RedStateAp *state )
+void BinLoopVar::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -139,7 +139,7 @@ void BinaryVarLoop::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void BinaryVarLoop::EOF_ACTION( RedStateAp *state )
+void BinLoopVar::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -147,7 +147,7 @@ void BinaryVarLoop::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-std::ostream &BinaryVarLoop::TO_STATE_ACTION_SWITCH()
+std::ostream &BinLoopVar::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -163,7 +163,7 @@ std::ostream &BinaryVarLoop::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinaryVarLoop::FROM_STATE_ACTION_SWITCH()
+std::ostream &BinLoopVar::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -179,7 +179,7 @@ std::ostream &BinaryVarLoop::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinaryVarLoop::EOF_ACTION_SWITCH()
+std::ostream &BinLoopVar::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -196,7 +196,7 @@ std::ostream &BinaryVarLoop::EOF_ACTION_SWITCH()
 }
 
 
-std::ostream &BinaryVarLoop::ACTION_SWITCH()
+std::ostream &BinLoopVar::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -213,7 +213,7 @@ std::ostream &BinaryVarLoop::ACTION_SWITCH()
 }
 
 
-void BinaryVarLoop::writeData()
+void BinLoopVar::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -260,25 +260,25 @@ void BinaryVarLoop::writeData()
 	STATE_IDS();
 }
 
-void BinaryVarLoop::GOTO( ostream &ret, int gotoDest, bool inFinish )
+void BinLoopVar::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << "${" << vCS() << " = " << gotoDest << ";}$";
 }
 
-void BinaryVarLoop::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void BinLoopVar::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "${" << vCS() << " = host( \"-\", 1 ) ={";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << "}=;}$";
 }
 
-void BinaryVarLoop::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+void BinLoopVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	error() << "cannot use fcall in -B mode" << std::endl;
 	exit(1);
 }
 
-void BinaryVarLoop::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
+void BinLoopVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << "${";
 
@@ -293,13 +293,13 @@ void BinaryVarLoop::NCALL( ostream &ret, int callDest, int targState, bool inFin
 			callDest << ";}$";
 }
 
-void BinaryVarLoop::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void BinLoopVar::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	error() << "cannot use fcall in -B mode" << std::endl;
 	exit(1);
 }
 
-void BinaryVarLoop::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void BinLoopVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	ret << "${";
 
@@ -316,13 +316,13 @@ void BinaryVarLoop::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targSta
 	ret << "}=;}$";
 }
 
-void BinaryVarLoop::RET( ostream &ret, bool inFinish )
+void BinLoopVar::RET( ostream &ret, bool inFinish )
 {
 	error() << "cannot use fcall in -B mode" << std::endl;
 	exit(1);
 }
 
-void BinaryVarLoop::NRET( ostream &ret, bool inFinish )
+void BinLoopVar::NRET( ostream &ret, bool inFinish )
 {
 	ret << "${" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
 
@@ -335,7 +335,7 @@ void BinaryVarLoop::NRET( ostream &ret, bool inFinish )
 	ret << CLOSE_HOST_BLOCK();
 }
 
-void BinaryVarLoop::BREAK( ostream &ret, int targState, bool csForced )
+void BinLoopVar::BREAK( ostream &ret, int targState, bool csForced )
 {
 	error() << "cannot use fcall in -B mode" << std::endl;
 	exit(1);
@@ -343,13 +343,13 @@ void BinaryVarLoop::BREAK( ostream &ret, int targState, bool csForced )
 	ret << "${" << P() << "+= 1; _cont = 0; }$";
 }
 
-void BinaryVarLoop::NBREAK( ostream &ret, int targState, bool csForced )
+void BinLoopVar::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << "${" << P() << "+= 1; _cont = 0; }$";
 }
 
-void BinaryVarLoop::LOCATE_TRANS()
+void BinLoopVar::LOCATE_TRANS()
 {
 	out <<
 		"	_keys = offset( " << ARR_REF( keys ) << ", " << ARR_REF( keyOffsets ) << "[" << vCS() << "]" << " );\n"
@@ -406,7 +406,7 @@ void BinaryVarLoop::LOCATE_TRANS()
 		"\n";
 }
 
-void BinaryVarLoop::LOCATE_COND()
+void BinLoopVar::LOCATE_COND()
 {
 	out <<
 		"	_ckeys = offset( " << ARR_REF( condKeys ) << ",  " << ARR_REF( transOffsets ) << "[_trans] );\n"
@@ -469,7 +469,7 @@ void BinaryVarLoop::LOCATE_COND()
 }
 
 
-void BinaryVarLoop::writeExec()
+void BinLoopVar::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

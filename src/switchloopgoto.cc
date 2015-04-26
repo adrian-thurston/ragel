@@ -25,7 +25,7 @@
 #include "bstmap.h"
 #include "gendata.h"
 
-void SwitchGotoLoop::tableDataPass()
+void SwitchLoopGoto::tableDataPass()
 {
 	taActions();
 	taToStateActions();
@@ -33,7 +33,7 @@ void SwitchGotoLoop::tableDataPass()
 	taEofActions();
 }
 
-void SwitchGotoLoop::genAnalysis()
+void SwitchLoopGoto::genAnalysis()
 {
 	/* For directly executable machines there is no required state
 	 * ordering. Choose a depth-first ordering to increase the
@@ -63,7 +63,7 @@ void SwitchGotoLoop::genAnalysis()
 	setTableState( TableArray::GeneratePass );
 }
 
-void SwitchGotoLoop::writeData()
+void SwitchLoopGoto::writeData()
 {
 	if ( redFsm->anyActions() )
 		taActions();
@@ -80,7 +80,7 @@ void SwitchGotoLoop::writeData()
 	STATE_IDS();
 }
 
-std::ostream &SwitchGotoLoop::ACTION_SWITCH()
+std::ostream &SwitchLoopGoto::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -96,7 +96,7 @@ std::ostream &SwitchGotoLoop::ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &SwitchGotoLoop::EOF_ACTION_SWITCH()
+std::ostream &SwitchLoopGoto::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -112,7 +112,7 @@ std::ostream &SwitchGotoLoop::EOF_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &SwitchGotoLoop::FROM_STATE_ACTION_SWITCH()
+std::ostream &SwitchLoopGoto::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -128,7 +128,7 @@ std::ostream &SwitchGotoLoop::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &SwitchGotoLoop::TO_STATE_ACTION_SWITCH()
+std::ostream &SwitchLoopGoto::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -145,7 +145,7 @@ std::ostream &SwitchGotoLoop::TO_STATE_ACTION_SWITCH()
 }
 
 
-std::ostream &SwitchGotoLoop::EXEC_FUNCS()
+std::ostream &SwitchLoopGoto::EXEC_FUNCS()
 {
 	/* Make labels that set acts and jump to execFuncs. Loop func indicies. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -188,7 +188,7 @@ std::ostream &SwitchGotoLoop::EXEC_FUNCS()
 }
 
 
-void SwitchGotoLoop::writeExec()
+void SwitchLoopGoto::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

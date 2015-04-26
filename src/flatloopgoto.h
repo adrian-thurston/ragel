@@ -31,11 +31,11 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-class FlatGotoLoop
+class FlatLoopGoto
 	: public Flat
 {
 public:
-	FlatGotoLoop( const CodeGenArgs &args )
+	FlatLoopGoto( const CodeGenArgs &args )
 		: Flat(args) {}
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
@@ -59,13 +59,13 @@ public:
 
 namespace C
 {
-	class FlatGotoLoop
+	class FlatLoopGoto
 	:
-		public ::FlatGotoLoop
+		public ::FlatLoopGoto
 	{
 	public:
-		FlatGotoLoop( const CodeGenArgs &args )
-			: ::FlatGotoLoop( args )
+		FlatLoopGoto( const CodeGenArgs &args )
+			: ::FlatLoopGoto( args )
 		{}
 	};
 }
