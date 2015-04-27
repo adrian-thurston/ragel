@@ -35,7 +35,11 @@ Goto::Goto( const CodeGenArgs &args )
 	actions(           "actions",             *this ),
 	toStateActions(    "to_state_actions",    *this ),
 	fromStateActions(  "from_state_actions",  *this ),
-	eofActions(        "eof_actions",         *this )
+	eofActions(        "eof_actions",         *this ),
+	nfaTargs(          "nfa_targs",           *this ),
+	nfaOffsets(        "nfa_offsets",         *this ),
+	nfaPushActions(    "nfa_push_actions",    *this ),
+	nfaPopActions(     "nfa_pop_actions",     *this )
 {}
 
 void Goto::setTableState( TableArray::State state )

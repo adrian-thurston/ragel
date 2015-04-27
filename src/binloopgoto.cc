@@ -80,6 +80,11 @@ void BinaryLoopGoto::tableDataPass()
 
 	taKeys();
 	taCondKeys();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
 }
 
 void BinaryLoopGoto::genAnalysis()
@@ -145,6 +150,22 @@ void BinaryLoopGoto::EOF_ACTION( RedStateAp *state )
 	if ( state->eofAction != 0 )
 		act = state->eofAction->location+1;
 	eofActions.value( act );
+}
+
+void BinaryLoopGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->push != 0 )
+		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
+}
+
+void BinaryLoopGoto::NFA_POP_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->pop != 0 )
+		act = targ->pop->actListId+1;
+	nfaPopActions.value( act );
 }
 
 std::ostream &BinaryLoopGoto::TO_STATE_ACTION_SWITCH()
@@ -257,6 +278,11 @@ void BinaryLoopGoto::writeData()
 		taEofTransDirect();
 	}
 
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
+
 	STATE_IDS();
 }
 
@@ -325,6 +351,8 @@ void BinaryLoopGoto::writeExec()
 			"	}\n"
 			"\n";
 	}
+
+	NFA_PUSH();
 
 	LOCATE_TRANS();
 
@@ -462,6 +490,8 @@ void BinaryLoopGoto::writeExec()
 
 	/* The entry loop. */
 	out << "}}\n";
+
+	NFA_POP();
 
 	/* The execute block. */
 	out << "	}\n";

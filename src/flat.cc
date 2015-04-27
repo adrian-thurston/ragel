@@ -158,81 +158,6 @@ void Flat::taEofTrans()
 	delete[] transPos;
 }
 
-void Flat::taNfaTargs()
-{
-	nfaTargs.start();
-
-	/* Offset of zero means no NFA targs, put a filler there. */
-	nfaTargs.value( 0 );
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->nfaTargs != 0 ) {
-			nfaTargs.value( st->nfaTargs->length() );
-			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
-				nfaTargs.value( targ->state->id );
-		}
-	}
-
-	nfaTargs.finish();
-}
-
-/* These need to mirror nfa targs. */
-void Flat::taNfaPushActions()
-{
-	nfaPushActions.start();
-
-	nfaTargs.value( 0 );
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->nfaTargs != 0 ) {
-			nfaPushActions.value( 0 );
-			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
-				NFA_PUSH_ACTION( targ );
-		}
-	}
-
-	nfaPushActions.finish();
-}
-
-void Flat::taNfaPopActions()
-{
-	nfaPopActions.start();
-
-	nfaTargs.value( 0 );
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->nfaTargs != 0 ) {
-			nfaPopActions.value( 0 );
-			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
-				NFA_POP_ACTION( targ );
-		}
-	}
-
-	nfaPopActions.finish();
-}
-
-
-void Flat::taNfaOffsets()
-{
-	nfaOffsets.start();
-
-	/* Offset of zero means no NFA targs, real targs start at 1. */
-	long offset = 1;
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->nfaTargs == 0 ) {
-			nfaOffsets.value( 0 );
-		}
-		else {
-			nfaOffsets.value( offset );
-			offset += 1 + st->nfaTargs->length();
-		}
-	}
-
-	nfaOffsets.finish();
-}
-
-
 void Flat::taKeys()
 {
 	keys.start();
@@ -416,6 +341,79 @@ void Flat::taActions()
 	}
 
 	actions.finish();
+}
+
+void Flat::taNfaTargs()
+{
+	nfaTargs.start();
+
+	/* Offset of zero means no NFA targs, put a filler there. */
+	nfaTargs.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			nfaTargs.value( st->nfaTargs->length() );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				nfaTargs.value( targ->state->id );
+		}
+	}
+
+	nfaTargs.finish();
+}
+
+/* These need to mirror nfa targs. */
+void Flat::taNfaPushActions()
+{
+	nfaPushActions.start();
+
+	nfaTargs.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			nfaPushActions.value( 0 );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				NFA_PUSH_ACTION( targ );
+		}
+	}
+
+	nfaPushActions.finish();
+}
+
+void Flat::taNfaPopActions()
+{
+	nfaPopActions.start();
+
+	nfaTargs.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			nfaPopActions.value( 0 );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				NFA_POP_ACTION( targ );
+		}
+	}
+
+	nfaPopActions.finish();
+}
+
+void Flat::taNfaOffsets()
+{
+	nfaOffsets.start();
+
+	/* Offset of zero means no NFA targs, real targs start at 1. */
+	long offset = 1;
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs == 0 ) {
+			nfaOffsets.value( 0 );
+		}
+		else {
+			nfaOffsets.value( offset );
+			offset += 1 + st->nfaTargs->length();
+		}
+	}
+
+	nfaOffsets.finish();
 }
 
 void Flat::NFA_PUSH()

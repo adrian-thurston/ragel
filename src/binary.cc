@@ -49,7 +49,11 @@ Binary::Binary( const CodeGenArgs &args )
 	eofTransIndexed(    "eof_trans_indexed",     *this ),
 	actions(            "actions",               *this ),
 	keys(               "trans_keys",            *this ),
-	condKeys(           "cond_keys",             *this )
+	condKeys(           "cond_keys",             *this ),
+	nfaTargs(           "nfa_targs",             *this ),
+	nfaOffsets(         "nfa_offsets",           *this ),
+	nfaPushActions(     "nfa_push_actions",      *this ),
+	nfaPopActions(      "nfa_pop_actions",       *this )
 {
 }
 
@@ -552,6 +556,80 @@ void Binary::taCondActions()
 	condActions.finish();
 }
 
+void Binary::taNfaTargs()
+{
+	nfaTargs.start();
+
+	/* Offset of zero means no NFA targs, put a filler there. */
+	nfaTargs.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			nfaTargs.value( st->nfaTargs->length() );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				nfaTargs.value( targ->state->id );
+		}
+	}
+
+	nfaTargs.finish();
+}
+
+/* These need to mirror nfa targs. */
+void Binary::taNfaPushActions()
+{
+	nfaPushActions.start();
+
+	nfaTargs.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			nfaPushActions.value( 0 );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				NFA_PUSH_ACTION( targ );
+		}
+	}
+
+	nfaPushActions.finish();
+}
+
+void Binary::taNfaPopActions()
+{
+	nfaPopActions.start();
+
+	nfaTargs.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			nfaPopActions.value( 0 );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				NFA_POP_ACTION( targ );
+		}
+	}
+
+	nfaPopActions.finish();
+}
+
+void Binary::taNfaOffsets()
+{
+	nfaOffsets.start();
+
+	/* Offset of zero means no NFA targs, real targs start at 1. */
+	long offset = 1;
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs == 0 ) {
+			nfaOffsets.value( 0 );
+		}
+		else {
+			nfaOffsets.value( offset );
+			offset += 1 + st->nfaTargs->length();
+		}
+	}
+
+	nfaOffsets.finish();
+}
+
+
 /* Write out the array of actions. */
 std::ostream &Binary::ACTIONS_ARRAY()
 {
@@ -595,6 +673,96 @@ void Binary::taActions()
 
 	actions.finish();
 }
+
+void Binary::NFA_PUSH()
+{
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
+			"		int alt; \n"
+			"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[(int)" <<
+						ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
+			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
+							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+			"			nfa_bp[nfa_len].p = " << P() << ";\n";
+
+		if ( redFsm->bAnyNfaPushPops ) {
+			out <<
+				"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[(int)" <<
+								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+				"\n"
+				"			switch ( " << ARR_REF( nfaPushActions ) << "[(int)" <<
+								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt] ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPushRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						ACTION( out, item->value, IlOpts( 0, false, false ) );
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"			}\n";
+		}
+
+
+		out <<
+			"			nfa_len += 1;\n"
+			"		}\n"
+			"	}\n"
+			;
+	}
+}
+
+void Binary::NFA_POP()
+{
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( nfa_len > 0 ) {\n"
+			"		nfa_count += 1;\n"
+			"		nfa_len -= 1;\n";
+
+		if ( redFsm->bAnyNfaPushPops ) {
+			out << 
+				"		switch ( nfa_bp[nfa_len].pop ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPopRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						ACTION( out, item->value, IlOpts( 0, false, false ) );
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"		}\n";
+		}
+
+		out <<
+			"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
+			"		" << P() << " = nfa_bp[nfa_len].p;\n"
+			"		goto _resume;\n"
+			"	}\n";
+	}
+}
+
 
 
 void Binary::LOCATE_TRANS()

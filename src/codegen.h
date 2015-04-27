@@ -387,7 +387,6 @@ protected:
 			return "export " + type + " " + name + " " + value + ";";
 	}
 
-
 public:
 	virtual void writeExports();
 };

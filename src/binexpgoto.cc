@@ -77,6 +77,11 @@ void BinaryExpGoto::tableDataPass()
 
 	taKeys();
 	taCondKeys();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
 }
 
 void BinaryExpGoto::genAnalysis()
@@ -142,6 +147,22 @@ void BinaryExpGoto::EOF_ACTION( RedStateAp *state )
 	if ( state->eofAction != 0 )
 		act = state->eofAction->actListId+1;
 	eofActions.value( act );
+}
+
+void BinaryExpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->push != 0 )
+		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
+}
+
+void BinaryExpGoto::NFA_POP_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->pop != 0 )
+		act = targ->pop->actListId+1;
+	nfaPopActions.value( act );
 }
 
 /* Write out the function switch. This switch is keyed on the values
@@ -274,6 +295,11 @@ void BinaryExpGoto::writeData()
 		taEofTransDirect();
 	}
 
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
+
 	STATE_IDS();
 }
 
@@ -326,6 +352,8 @@ void BinaryExpGoto::writeExec()
 			"	}\n"
 			"\n";
 	}
+
+	NFA_PUSH();
 
 	LOCATE_TRANS();
 
@@ -440,6 +468,7 @@ void BinaryExpGoto::writeExec()
 	/* The entry loop. */
 	out << "}}\n";
 
+	NFA_POP();
 
 	out << "	}\n";
 }

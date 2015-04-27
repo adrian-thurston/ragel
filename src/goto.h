@@ -51,11 +51,19 @@ public:
 	TableArray toStateActions;
 	TableArray fromStateActions;
 	TableArray eofActions;
+	TableArray nfaTargs;
+	TableArray nfaOffsets;
+	TableArray nfaPushActions;
+	TableArray nfaPopActions;
 
 	void taActions();
 	void taToStateActions();
 	void taFromStateActions();
 	void taEofActions();
+	void taNfaTargs();
+	void taNfaOffsets();
+	void taNfaPushActions();
+	void taNfaPopActions();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );

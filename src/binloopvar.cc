@@ -468,6 +468,21 @@ void BinLoopVar::LOCATE_COND()
 	outLabelUsed = true;
 }
 
+void BinLoopVar::NFA_PUSH_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->push != 0 )
+		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
+}
+
+void BinLoopVar::NFA_POP_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->pop != 0 )
+		act = targ->pop->actListId+1;
+	nfaPopActions.value( act );
+}
 
 void BinLoopVar::writeExec()
 {

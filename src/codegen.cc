@@ -986,6 +986,7 @@ void CodeGen::writeExports()
 	}
 }
 
+
 ostream &CodeGen::source_warning( const InputLoc &loc )
 {
 	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";

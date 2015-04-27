@@ -93,9 +93,6 @@ protected:
 	std::ostream &COND_TARGS();
 	std::ostream &COND_ACTIONS();
 
-	void NFA_PUSH();
-	void NFA_POP();
-
 	void LOCATE_TRANS();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
@@ -121,6 +118,9 @@ protected:
 	virtual void NFA_POP_ACTION( RedNfaTarg *targ ) = 0;
 
 	virtual void setTableState( TableArray::State );
+
+	void NFA_PUSH();
+	void NFA_POP();
 };
 
 #endif
