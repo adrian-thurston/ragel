@@ -31,6 +31,11 @@ void SwitchLoopGoto::tableDataPass()
 	taToStateActions();
 	taFromStateActions();
 	taEofActions();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
 }
 
 void SwitchLoopGoto::genAnalysis()
@@ -76,6 +81,11 @@ void SwitchLoopGoto::writeData()
 
 	if ( redFsm->anyEofActions() )
 		taEofActions();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
 
 	STATE_IDS();
 }
@@ -144,6 +154,21 @@ std::ostream &SwitchLoopGoto::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
+void SwitchLoopGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->push != 0 )
+		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
+}
+
+void SwitchLoopGoto::NFA_POP_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->pop != 0 )
+		act = targ->pop->actListId+1;
+	nfaPopActions.value( act );
+}
 
 std::ostream &SwitchLoopGoto::EXEC_FUNCS()
 {
@@ -243,6 +268,8 @@ void SwitchLoopGoto::writeExec()
 			"\n";
 	}
 
+	NFA_PUSH();
+
 	out <<
 		"	switch ( " << vCS() << " ) {\n";
 		STATE_GOTOS() <<
@@ -336,6 +363,8 @@ void SwitchLoopGoto::writeExec()
 
 	if ( outLabelUsed )
 		out << "	_out: {}\n";
+
+	NFA_POP();
 
 	out << "	}\n";
 }

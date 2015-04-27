@@ -203,6 +203,22 @@ void IpGoto::NBREAK( ostream &ret, int targState, bool csForced )
 	ret << "_nbreak = 1;}";
 }
 
+void IpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->push != 0 )
+		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
+}
+
+void IpGoto::NFA_POP_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->pop != 0 )
+		act = targ->pop->actListId+1;
+	nfaPopActions.value( act );
+}
+
 bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 {
 	bool anyWritten = false;

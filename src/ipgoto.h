@@ -78,6 +78,9 @@ protected:
 	void setLabelsNeeded( RedCondPair *pair );
 	void setLabelsNeeded( GenInlineList *inlineList );
 	void setLabelsNeeded();
+
+	void NFA_PUSH_ACTION( RedNfaTarg *targ );
+	void NFA_POP_ACTION( RedNfaTarg *targ );
 };
 
 namespace C

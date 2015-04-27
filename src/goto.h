@@ -106,6 +106,11 @@ public:
 	virtual void GOTO_HEADER( RedStateAp *state );
 	virtual void STATE_GOTO_ERROR();
 
+	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
+	virtual void NFA_POP_ACTION( RedNfaTarg *targ ) = 0;
+
+	void NFA_PUSH();
+	void NFA_POP();
 };
 
 #endif
