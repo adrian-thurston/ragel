@@ -121,8 +121,6 @@ function run_test()
 		test_error;
 	fi
 
-	echo root: $root
-
 	out_args=""
 	[ $lang != java ] && out_args="-o $wk/$binary";
 	[ $lang == csharp ] && out_args="-out:$wk/$binary";

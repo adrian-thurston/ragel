@@ -1,6 +1,6 @@
 /*
  * @LANG: c
- * @PROHIBIT_GENFLAGS: -T0 -T1 -G0 -G1 -G2
+ * @PROHIBIT_GENFLAGS: -G0 -G1 -G2
  */
 
 #include <string.h>
