@@ -67,10 +67,10 @@ struct TransDensity {};
 
 struct NfaRound
 {
-	NfaRound( long rounds, long groups )
-		: rounds(rounds), groups(groups) {}
+	NfaRound( long depth, long groups )
+		: depth(depth), groups(groups) {}
 
-	long rounds;
+	long depth;
 	long groups;
 };
 
@@ -1801,7 +1801,7 @@ struct FsmAp
 	void deterministicEntry();
 
 	/* Results in an NFA. */
-	void nfaUnionOp( FsmAp **others, int n, int rounds );
+	void nfaUnionOp( FsmAp **others, int n, int depth );
 
 	/*
 	 * Operator workers

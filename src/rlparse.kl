@@ -160,7 +160,7 @@ instantiation:
 
 nonterm nfa_round_spec
 {
-	long rounds;
+	long depth;
 	long grouping;
 };
 
@@ -169,8 +169,8 @@ nfa_round_spec:
 	final {
 		// Convert the priority number to a long. Check for overflow.
 		errno = 0;
-		$$->rounds = strtol( $1->data, 0, 10 );
-		if ( $$->rounds == LONG_MAX && errno == ERANGE )
+		$$->depth = strtol( $1->data, 0, 10 );
+		if ( $$->depth == LONG_MAX && errno == ERANGE )
 			error($1->loc) << "rounds " << $1->data << " overflows" << endl;
 
 		$$->grouping = strtol( $3->data, 0, 10 );
@@ -188,7 +188,7 @@ nfa_round_list:
 	final {
 		$$->roundsList = $1->roundsList;
 		$$->roundsList->append(
-				NfaRound( $3->rounds, $3->grouping ) );
+				NfaRound( $3->depth, $3->grouping ) );
 	};
 
 nfa_round_list:
@@ -196,18 +196,18 @@ nfa_round_list:
 	final {
 		$$->roundsList = new NfaRoundVect;
 		$$->roundsList->append(
-				NfaRound( $1->rounds, $1->grouping ) );
+				NfaRound( $1->depth, $1->grouping ) );
 	};
 
 nonterm nfa_rounds
 {
-	NfaRoundVect *rounds;
+	NfaRoundVect *roundsList;
 };
 
 nfa_rounds:
 	'(' nfa_round_list ')'
 	final {
-		$$->rounds = $2->roundsList;
+		$$->roundsList = $2->roundsList;
 	};
 
 nonterm nfa_expr
@@ -228,7 +228,7 @@ nfa_expr:
 
 nfa_union: 
 	machine_name TK_BarEquals nfa_rounds nfa_expr ';' final {
-		$4->nfaUnion->rounds = $3->rounds;
+		$4->nfaUnion->roundsList = $3->roundsList;
 		MachineDef *machineDef = new MachineDef( $4->nfaUnion );
 
 		/* Generic creation of machine for instantiation and assignment. */

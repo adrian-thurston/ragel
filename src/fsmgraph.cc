@@ -640,7 +640,7 @@ void FsmAp::finalizeNfaRound( MergeData &md )
 }
 
 /* Unions other with this machine. Other is deleted. */
-void FsmAp::nfaUnionOp( FsmAp **others, int n, int rounds )
+void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 {
 	for ( int o = 0; o < n; o++ )
 		assert( ctx == others[o]->ctx );
@@ -691,7 +691,7 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int rounds )
 	/* Create a new start state. */
 	setStartState( addState() );
 
-	if ( rounds == 0 ) {
+	if ( depth == 0 ) {
 		startState->stateDictEl = new StateDictEl( startStateSet );
 		nfaList.append( startState );
 
@@ -713,7 +713,7 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int rounds )
 		}
 
 		/* Fill in any new states made from merging. */
-		for ( long i = 1; i < rounds; i++ ) {
+		for ( long i = 1; i < depth; i++ ) {
 			if ( ctx->printStatistics )
 				cout << "nfa-fill-round\t" << i << endl;
 			prepareNfaRound( md );

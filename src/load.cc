@@ -1849,7 +1849,7 @@ struct LoadRagel
 //			error(loc) << "rounds " << roundsData << " overflows" << endl;
 
 		NfaUnion *nfaUnion = loadNfaExpr( NfaUnionTree.nfa_expr() );
-		nfaUnion->rounds = 0; //rounds;
+		nfaUnion->roundsList = 0; //rounds;
 		MachineDef *machineDef = new MachineDef( nfaUnion );
 
 		/* Generic creation of machine for instantiation and assignment. */

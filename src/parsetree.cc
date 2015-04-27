@@ -796,9 +796,9 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	}
 
 	/* For each round. */
-	for ( NfaRoundVect::Iter r = *rounds; r.lte(); r++ ) {
+	for ( NfaRoundVect::Iter r = *roundsList; r.lte(); r++ ) {
 		if ( pd->id->printStatistics ) {
-			cout << "depth\t" << r->rounds << endl;
+			cout << "depth\t" << r->depth << endl;
 			cout << "grouping\t" << r->groups << endl;
 		}
 
@@ -812,7 +812,7 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 				amount = numTerms - start;
 
 			FsmAp **others = machines + start + 1;
-			machines[start]->nfaUnionOp( others, (amount - 1), r->rounds );
+			machines[start]->nfaUnionOp( others, (amount - 1), r->depth );
 
 			start += amount;
 			numGroups++;

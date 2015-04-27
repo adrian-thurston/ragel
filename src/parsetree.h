@@ -442,7 +442,7 @@ struct NfaUnion
 
 	/* Node data. */
 	TermVect terms;
-	NfaRoundVect *rounds;
+	NfaRoundVect *roundsList;
 };
 
 
