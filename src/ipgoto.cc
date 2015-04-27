@@ -444,49 +444,34 @@ std::ostream &IpGoto::STATE_GOTOS()
 			GOTO_HEADER( st );
 
 			if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
-				out <<
-					"	if ( " << ARR_REF( nfaOffsets ) << "[" << st->id << "] ) {\n"
-					"		int alt; \n"
-					"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[(int)" <<
-								ARR_REF( nfaOffsets ) << "[" << st->id << "]]; alt++ ) { \n"
-					"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
-									ARR_REF( nfaOffsets ) << "[" << st->id << "] + 1 + alt];\n"
-					"			nfa_bp[nfa_len].p = " << P() << ";\n";
-
-				if ( redFsm->bAnyNfaPushPops ) {
+				for ( RedNfaTargs::Iter t = *st->nfaTargs; t.lte(); t++ ) {
 					out <<
-						"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[(int)" <<
-										ARR_REF( nfaOffsets ) << "[" << st->id << "] + 1 + alt];\n"
-						"\n"
-						"			switch ( " << ARR_REF( nfaPushActions ) << "[(int)" <<
-										ARR_REF( nfaOffsets ) << "[" << st->id << "] + 1 + alt] ) {\n";
+						"	{\n"
+						"		nfa_bp[nfa_len].state = " << t->state->id << ";\n"
+						"		nfa_bp[nfa_len].p = " << P() << ";\n";
 
-					/* Loop the actions. */
-					for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-							redAct.lte(); redAct++ )
-					{
-						if ( redAct->numNfaPushRefs > 0 ) {
-							/* Write the entry label. */
-							out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+					if ( t->pop ) {
+						out <<
+							"	nfa_bp[nfa_len].pop = " << t->pop->actListId+1 << ";\n";
+					}
+					else {
+						out <<
+							"	nfa_bp[nfa_len].pop = 0;\n";
+					}
 
-							/* Write each action in the list of action items. */
-							for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-								ACTION( out, item->value, IlOpts( 0, false, false ) );
-
-							out << "\n\t" << CEND() << "}\n";
+					if ( t->push ) {
+						for ( GenActionTable::Iter item = t->push->key; item.lte(); item++ ) {
+							ACTION( out, item->value, IlOpts( st->id, false,
+									t->push->anyNextStmt() ) );
+							out << "\n";
 						}
 					}
 
 					out <<
-						"			}\n";
+						"		nfa_len += 1;\n"
+						"	}\n"
+						;
 				}
-
-
-				out <<
-					"			nfa_len += 1;\n"
-					"		}\n"
-					"	}\n"
-					;
 			}
 
 			/* Try singles. */

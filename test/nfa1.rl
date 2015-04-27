@@ -12,6 +12,7 @@ struct nfa_bp_rec
 {
 	long state;
 	char *p;
+	int pop;
 };
 
 struct nfa_bp_rec nfa_bp[1024];

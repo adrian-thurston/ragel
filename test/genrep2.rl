@@ -1,6 +1,5 @@
 /*
  * @LANG: c
- * @PROHIBIT_GENFLAGS: -G2
  */
 
 #include <stddef.h>  /* NULL */
