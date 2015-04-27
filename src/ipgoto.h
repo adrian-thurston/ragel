@@ -81,6 +81,8 @@ protected:
 
 	void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	void NFA_POP_ACTION( RedNfaTarg *targ );
+
+	void tableDataPass();
 };
 
 namespace C

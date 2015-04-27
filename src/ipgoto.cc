@@ -29,6 +29,14 @@
 
 using std::ostringstream;
 
+void IpGoto::tableDataPass()
+{
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
+}
+
 void IpGoto::genAnalysis()
 {
 	/* For directly executable machines there is no required state
@@ -52,6 +60,13 @@ void IpGoto::genAnalysis()
 	 * things. We will use these in reporting the usage of fsm directives in
 	 * action code. */
 	analyzeMachine();
+
+	/* Run the analysis pass over the table data. */
+	setTableState( TableArray::AnalyzePass );
+	tableDataPass();
+
+	/* Switch the tables over to the code gen mode. */
+	setTableState( TableArray::GeneratePass );
 }
 
 bool IpGoto::useAgainLabel()
@@ -428,6 +443,52 @@ std::ostream &IpGoto::STATE_GOTOS()
 			/* Writing code above state gotos. */
 			GOTO_HEADER( st );
 
+			if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
+				out <<
+					"	if ( " << ARR_REF( nfaOffsets ) << "[" << st->id << "] ) {\n"
+					"		int alt; \n"
+					"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[(int)" <<
+								ARR_REF( nfaOffsets ) << "[" << st->id << "]]; alt++ ) { \n"
+					"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
+									ARR_REF( nfaOffsets ) << "[" << st->id << "] + 1 + alt];\n"
+					"			nfa_bp[nfa_len].p = " << P() << ";\n";
+
+				if ( redFsm->bAnyNfaPushPops ) {
+					out <<
+						"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[(int)" <<
+										ARR_REF( nfaOffsets ) << "[" << st->id << "] + 1 + alt];\n"
+						"\n"
+						"			switch ( " << ARR_REF( nfaPushActions ) << "[(int)" <<
+										ARR_REF( nfaOffsets ) << "[" << st->id << "] + 1 + alt] ) {\n";
+
+					/* Loop the actions. */
+					for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+							redAct.lte(); redAct++ )
+					{
+						if ( redAct->numNfaPushRefs > 0 ) {
+							/* Write the entry label. */
+							out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+							/* Write each action in the list of action items. */
+							for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+								ACTION( out, item->value, IlOpts( 0, false, false ) );
+
+							out << "\n\t" << CEND() << "}\n";
+						}
+					}
+
+					out <<
+						"			}\n";
+				}
+
+
+				out <<
+					"			nfa_len += 1;\n"
+					"		}\n"
+					"	}\n"
+					;
+			}
+
 			/* Try singles. */
 			if ( st->outSingle.length() > 0 )
 				SINGLE_SWITCH( st );
@@ -553,6 +614,11 @@ void IpGoto::setLabelsNeeded()
 void IpGoto::writeData()
 {
 	STATE_IDS();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopActions();
 }
 
 void IpGoto::writeExec()
@@ -588,8 +654,10 @@ void IpGoto::writeExec()
 			"	}\n"
 			"\n";
 
-		out << "_resume:\n";
 	}
+
+	if ( useAgainLabel() || redFsm->anyNfaStates() ) 
+		out << "_resume:\n";
 
 	out <<
 		"	switch ( " << vCS() << " )\n"
@@ -618,6 +686,8 @@ void IpGoto::writeExec()
 
 	if ( outLabelUsed ) 
 		out << "	_out: {}\n";
+
+	NFA_POP();
 
 	out <<
 		"	}\n";
