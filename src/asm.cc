@@ -1133,7 +1133,7 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 					out <<
 						"	movq	" << NFA_STACK() << ", %rax\n"
 						"	movq	" << NFA_TOP() << ", %rcx\n"
-						"	sal		$4, %rcx\n"
+						"	salq	$4, %rcx\n"
 						"	movq    $" << s->state->id << ", 0(%rax,%rcx,)\n"
 						"	movq	" << P() << ", 8(%rax,%rcx,)\n"
 						"	movq	" << NFA_TOP() << ", %rcx\n"
@@ -1271,9 +1271,9 @@ void AsmCodeGen::RET( ostream &ret, bool inFinish )
 
 void AsmCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "	movq	";
+	ret << "	movl	";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << ", " << vCS() << "\n";
+	ret << ", %r11d\n"; // << vCS() << "\n";
 
 	ret <<
 		"	jmp		" << LABEL("again") << "\n";
