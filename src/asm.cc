@@ -715,9 +715,9 @@ string AsmCodeGen::ALPH_TYPE()
 void AsmCodeGen::STATIC_CONST_INT( const string &name, const string &value )
 {
 	out <<
-		"	.align	4\n"
+		"	.align	8\n"
 		"	.type	" << name << ", @object\n"
-		"	.size	" << name << ", 4\n" <<
+		"	.size	" << name << ", 8\n" <<
 		name << ":\n"
 		"	.long	" << value << "\n";
 }
@@ -1290,9 +1290,9 @@ void AsmCodeGen::RET( ostream &ret, bool inFinish )
 
 void AsmCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "	movl	";
+	ret << "	movq	";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << ", %r11d\n"; // << vCS() << "\n";
+	ret << ", " << vCS() << "\n";
 
 	ret <<
 		"	jmp		" << LABEL("again") << "\n";
