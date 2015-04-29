@@ -1129,13 +1129,32 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 			GOTO_HEADER( st );
 
 			if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
-				for ( RedNfaTargs::Iter s = *st->nfaTargs; s.lte(); s++ ) {
+				for ( RedNfaTargs::Iter t = *st->nfaTargs; t.lte(); t++ ) {
 					out <<
 						"	movq	" << NFA_STACK() << ", %rax\n"
 						"	movq	" << NFA_TOP() << ", %rcx\n"
-						"	salq	$4, %rcx\n"
-						"	movq    $" << s->state->id << ", 0(%rax,%rcx,)\n"
-						"	movq	" << P() << ", 8(%rax,%rcx,)\n"
+						"	salq	$5, %rcx\n"
+						"	movq    $" << t->state->id << ", 0(%rax,%rcx,)\n"
+						"	movq	" << P() << ", 8(%rax,%rcx,)\n";
+
+					if ( t->pop ) {
+						out <<
+							"	movq	$" << (t->pop->actListId+1) << ", 16(%rax,%rcx,)\n";
+					}
+					else {
+						out <<
+							"	movq	$0, 16(%rax,%rcx,)\n";
+					}
+
+					if ( t->push ) {
+						for ( GenActionTable::Iter item = t->push->key; item.lte(); item++ ) {
+							ACTION( out, item->value, st->id, false,
+									t->push->anyNextStmt() );
+							out << "\n";
+						}
+					}
+
+					out <<
 						"	movq	" << NFA_TOP() << ", %rcx\n"
 						"	addq	$1, %rcx\n"
 						"	movq	%rcx, " << NFA_TOP() << "\n";
@@ -1898,14 +1917,49 @@ void AsmCodeGen::writeExec()
 		out <<
 			"	movq    " << NFA_TOP() << ", %rcx\n"
 			"	cmpq	$0, %rcx\n"
-			"	je		" << LABEL( "no_alt" ) << "\n" <<
+			"	je		" << LABEL( "no_alt" ) << "\n"
+			"	movq    " << NFA_TOP() << ", %rcx\n"
 			"	subq	$1, %rcx\n"
 			"	movq	%rcx, " << NFA_TOP() << "\n"
 			"	movq	" << NFA_STACK() << ", %rax\n"
-			"	salq	$4, %rcx\n"
+			"	salq	$5, %rcx\n"
 			"	movq    0(%rax,%rcx,), %r11\n"
 			"	movq	8(%rax,%rcx,), " << P() << "\n"
 			"	movq	%r11, " << vCS() << "\n"
+
+			;
+
+		if ( redFsm->bAnyNfaPushPops ) {
+			out <<
+				"	movq	%r11, %r14\n"
+				"	movq	16(%rax,%rcx,), %rax\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPopRefs > 0 ) {
+					/* Write the entry label. */
+					out <<
+						"	cmp		$" << (redAct->actListId+1) << ", %rax\n"
+						"	jne		100f\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						ACTION( out, item->value, 0, false, false );
+
+					out <<
+						"	jmp		101f\n"
+						"100:\n";
+				}
+			}
+
+			out <<
+				"101:\n"
+				"	movq	%r14, %r11\n";
+		}
+
+		out <<
 			"	jmp		" << LABEL( "resume" ) << "\n"
 			<< LABEL( "no_alt" ) << ":\n";
 	}
