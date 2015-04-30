@@ -933,6 +933,8 @@ struct StateAp
 
 	/* Set of longest match items that may be active in this state. */
 	LmItemSet lmItemSet;
+
+	bool guardedIn;
 };
 
 /* Return and re-entry for the co-routine iterators. This should ALWAYS be

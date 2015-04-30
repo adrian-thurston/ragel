@@ -501,7 +501,7 @@ struct Term
 struct FactorWithAug
 {
 	FactorWithAug( FactorWithRep *factorWithRep ) :
-		priorDescs(0), factorWithRep(factorWithRep) { }
+		priorDescs(0), guardedIn(false), factorWithRep(factorWithRep) { }
 	~FactorWithAug();
 
 	/* Tree traversal. */
@@ -521,6 +521,7 @@ struct FactorWithAug
 	Vector<Label> labels;
 	Vector<EpsilonLink> epsilonLinks;
 	Vector<ConditionTest> conditions;
+	bool guardedIn;
 
 	FactorWithRep *factorWithRep;
 };

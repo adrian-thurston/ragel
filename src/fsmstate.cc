@@ -106,7 +106,8 @@ StateAp::StateAp()
 	outActionTable(),
 	outCondSet(),
 	errActionTable(),
-	eofActionTable()
+	eofActionTable(),
+	guardedIn(false)
 {
 }
 
@@ -152,7 +153,9 @@ StateAp::StateAp(const StateAp &other)
 	outActionTable(other.outActionTable),
 	outCondSet(other.outCondSet),
 	errActionTable(other.errActionTable),
-	eofActionTable(other.eofActionTable)
+	eofActionTable(other.eofActionTable),
+
+	guardedIn(other.guardedIn)
 {
 	/* Duplicate all the transitions. */
 	for ( TransList::Iter trans = other.outList; trans.lte(); trans++ ) {
@@ -256,6 +259,11 @@ int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 	if ( state1->eofTarget < state2->eofTarget )
 		return -1;
 	else if ( state1->eofTarget > state2->eofTarget )
+		return 1;
+	
+	if ( state1->guardedIn || !state2->guardedIn )
+		return -1;
+	else if ( !state1->guardedIn || state2->guardedIn )
 		return 1;
 
 	/* Got through the entire state comparison, deem them equal. */

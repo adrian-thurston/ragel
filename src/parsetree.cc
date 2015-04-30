@@ -1659,6 +1659,10 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 		pd->popNameScope( nameFrame );
 	}
 
+	/* Guarded In? */
+	if ( guardedIn )
+		rtnVal->startState->guardedIn = true;
+
 	if ( priorOrd != 0 )
 		delete[] priorOrd;
 	if ( actionOrd != 0 )
