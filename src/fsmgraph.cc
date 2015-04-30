@@ -597,7 +597,7 @@ void FsmAp::nfaFillInStates( MergeData &md )
 void FsmAp::prepareNfaRound( MergeData &md )
 {
 	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
-		if ( st->nfaOut != 0 ) {
+		if ( st->nfaOut != 0 && ! (st->stateBits & STB_NFA_REP) ) {
 			StateSet set;
 			for ( NfaStateMap::Iter to = *st->nfaOut; to.lte(); to++ )
 				set.insert( to->key );
@@ -642,6 +642,22 @@ void FsmAp::finalizeNfaRound( MergeData &md )
 /* Unions other with this machine. Other is deleted. */
 void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 {
+	/* Mark existing NFA states as NFA_REP states, which excludes them from the
+	 * prepare NFA round. We must treat them as final NFA states and not try to
+	 * make them deterministic. */
+	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
+		if ( st->nfaOut != 0 )
+			st->stateBits |= STB_NFA_REP;
+	}
+
+	for ( int o = 0; o < n; o++ ) {
+		for ( StateList::Iter st = others[o]->stateList; st.lte(); st++ ) {
+			if ( st->nfaOut != 0 )
+				st->stateBits |= STB_NFA_REP;
+		}
+	}
+
+
 	for ( int o = 0; o < n; o++ )
 		assert( ctx == others[o]->ctx );
 

@@ -48,6 +48,7 @@
 #define STB_ISFINAL    0x04
 #define STB_ISMARKED   0x08
 #define STB_ONLIST     0x10
+#define STB_NFA_REP    0x20
 
 using std::ostream;
 
