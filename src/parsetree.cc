@@ -765,6 +765,12 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 		nfaTermCheck( pd );
 	}
 
+	if ( pd->id->nfaCondsDepth >= 0 ) {
+		/* Does not return. */
+		nfaCondsCheck( pd );
+	}
+
+
 	if ( pd->id->printStatistics )
 		cout << "terms\t" << terms.length() << endl;
 
@@ -845,13 +851,10 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 	cout << "nfa-term-check" << endl;
 
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		FsmAp *fsm = 0;
 		try {
 			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
-			fsm = (*term)->walk( pd );
+			(*term)->walk( pd );
 			pd->fsmCtx->stateLimit = -1;
-
-			strike( pd, fsm );
 		}
 		catch ( const TooManyStates & ) {
 			cout << "too-many-states" << endl;
@@ -868,6 +871,28 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 		catch ( const TransDensity & ) {
 			cout << "trans-density-error" << endl;
 			exit( 7 );
+		}
+
+	}
+	exit( 0 );
+}
+
+void NfaUnion::nfaCondsCheck( ParseData *pd )
+{
+	cout << "nfa-conds-check" << endl;
+
+	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
+		FsmAp *fsm = 0;
+		try {
+			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit * 2;
+			fsm = (*term)->walk( pd );
+			pd->fsmCtx->stateLimit = -1;
+
+			strike( pd, fsm );
+		}
+		catch ( const TooManyStates & ) {
+			cout << "too-many-states" << endl;
+			exit( 1 );
 		}
 		catch ( const CondCostTooHigh &ccth ) {
 			cout << "cond-cost" << endl;

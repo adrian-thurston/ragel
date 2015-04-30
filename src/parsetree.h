@@ -437,6 +437,7 @@ struct NfaUnion
 	void resolveNameRefs( ParseData *pd );
 	bool strike( ParseData *pd, FsmAp *fsmAp );
 	void nfaTermCheck( ParseData *pd );
+	void nfaCondsCheck( ParseData *pd );
 	void condsDensity( ParseData *pd, StateAp *state, long depth );
 	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
 

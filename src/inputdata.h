@@ -94,7 +94,7 @@ struct InputData
 		backendSpecified(false),
 		saveTemps(false),
 		nfaTermCheck(0),
-		nfaCondsDepth(6),
+		nfaCondsDepth(-1),
 		transSpanDepth(6),
 		nfaIntermedStateLimit(2000),
 		nfaFinalStateLimit(2000)
