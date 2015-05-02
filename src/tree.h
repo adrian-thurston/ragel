@@ -27,6 +27,7 @@ extern "C" {
 #endif
 
 #include <colm/colm.h>
+#include <colm/type.h>
 #include <colm/input.h>
 #include <colm/internal.h>
 
@@ -139,7 +140,7 @@ typedef struct _Str
 /*
  * Maps
  */
-typedef struct _GenericInfo
+typedef struct colm_generic_info
 {
 	long type;
 
@@ -147,10 +148,10 @@ typedef struct _GenericInfo
 	long elStructId;
 	long elOffset;
 
-	long keyType;
+	enum TYPE keyType;
 	long keyOffset;
 
-	long valueType;
+	enum TYPE valueType;
 	long valueOffset;
 
 	long parserId;

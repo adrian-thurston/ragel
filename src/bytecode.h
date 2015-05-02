@@ -9,9 +9,7 @@
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  * 
- *  Colm is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  Colm is distributed in the hope that it will be useful, *  but WITHOUT ANY WARRANTY; without even the implied warranty of *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  * 
  *  You should have received a copy of the GNU General Public License
@@ -23,6 +21,7 @@
 #define _BYTECODE_H
 
 #include <colm/pdarun.h>
+#include <colm/type.h>
 #include <colm/tree.h>
 
 #ifdef __cplusplus
@@ -422,18 +421,6 @@ typedef unsigned long colm_value_t;
 #define IN_EXIT_HARD             0x3a
 #define IN_PREFIX                0x3b
 #define IN_SUFFIX                0x3c
-
-enum TYPE
-{
-	TYPE_NIL     = 0x01,
-	TYPE_TREE    = 0x02,
-	TYPE_REF     = 0x03,
-	TYPE_ITER    = 0x04,
-	TYPE_STRUCT  = 0x05,
-	TYPE_GENERIC = 0x06,
-	TYPE_INT     = 0x07,
-	TYPE_BOOL    = 0x08,
-};
 
 /* Types of Generics. */
 enum GEN {

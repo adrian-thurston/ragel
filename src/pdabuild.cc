@@ -1594,11 +1594,11 @@ void Compiler::makeRuntimeData()
 					gen->el != 0 ? gen->el->offset : -1;
 
 			runtimeData->genericInfo[gen->id].keyType =
-					gen->keyUt != 0 ? gen->keyUt->typeId : 0;
+					gen->keyUt != 0 ? gen->keyUt->typeId : TYPE_NOTYPE;
 			runtimeData->genericInfo[gen->id].keyOffset = 0;
 
 			runtimeData->genericInfo[gen->id].valueType =
-					gen->valueUt != 0 ? gen->valueUt->typeId : 0;
+					gen->valueUt != 0 ? gen->valueUt->typeId : TYPE_NOTYPE;
 			runtimeData->genericInfo[gen->id].valueOffset = 0;
 
 			runtimeData->genericInfo[gen->id].parserId =

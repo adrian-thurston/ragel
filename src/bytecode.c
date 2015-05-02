@@ -3952,6 +3952,9 @@ again:
 						colm_generic_el_container( prg, mapEl, genId ) : 0;
 
 				vm_push_struct( strct );
+
+				if ( map->genericInfo->keyType == TYPE_TREE )
+					treeDownref( prg, sp, key );
 				break;
 			}
 			case IN_MAP_INSERT_WC: {
@@ -4114,8 +4117,11 @@ again:
 				Tree *key = vm_pop_tree();
 
 				Tree *result = colm_vmap_find( prg, map, key );
-
+	
 				vm_push_tree( result );
+
+				if ( map->genericInfo->keyType == TYPE_TREE )
+					treeDownref( prg, sp, key );
 				break;
 			}
 			case IN_VLIST_PUSH_TAIL_WC: {

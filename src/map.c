@@ -557,15 +557,15 @@ MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid *
 
 static long map_cmp( Program *prg, Map *map, const Tree *tree1, const Tree *tree2 )
 {
-	if ( map->genericInfo->keyType == 0x7 ) {
+	if ( map->genericInfo->keyType == TYPE_TREE ) {
+		return cmpTree( prg, tree1, tree2 );
+	}
+	else {
 		if ( (long)tree1 < (long)tree2 )
 			return -1;
 		else if ( (long)tree1 > (long)tree2)
 			return 1;
 		return 0;
-	}
-	else {
-		return cmpTree( prg, tree1, tree2 );
 	}
 }
 

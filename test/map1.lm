@@ -15,6 +15,7 @@ while AE {
 
 for El: el in M {
 	print "[El->key]
+	M->find( El->key )
 }
 ##### ARGS #####
 a b c
