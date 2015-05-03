@@ -162,6 +162,8 @@ int CmpUniqueType::compare( const UniqueType &ut1, const UniqueType &ut2 )
 			else if ( ut1.iterDef > ut2.iterDef )
 				return 1;
 			break;
+
+		case TYPE_NOTYPE:
 		case TYPE_NIL:
 		case TYPE_INT:
 		case TYPE_BOOL:

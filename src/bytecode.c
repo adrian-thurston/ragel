@@ -299,14 +299,15 @@ static void downref_locals( Program *prg, Tree ***psp,
 				debug( prg, REALM_BYTECODE, "local iter downref: %ld\n",
 						(long)locals[i].offset );
 				TreeIter *iter = (TreeIter*) vm_get_plocal( exec, (long)locals[i].offset );
-				treeIterDestroy( prg, psp, iter );
+				colm_tree_iter_destroy( prg, psp, iter );
 				break;
 			}
 			case LI_RevIter: {
 				debug( prg, REALM_BYTECODE, "local rev iter downref: %ld\n",
 						(long)locals[i].offset );
-				RevTreeIter *riter = (RevTreeIter*) vm_get_plocal( exec, (long)locals[i].offset );
-				revTreeIterDestroy( prg, psp, riter );
+				RevTreeIter *riter = (RevTreeIter*) vm_get_plocal( exec,
+						(long)locals[i].offset );
+				colm_rev_tree_iter_destroy( prg, psp, riter );
 				break;
 			}
 			case LI_UserIter: {
@@ -1420,8 +1421,8 @@ again:
 			vm_push_tree( val );
 			break;
 		}
-		case IN_POP: {
-			debug( prg, REALM_BYTECODE, "IN_POP\n" );
+		case IN_POP_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_POP_TREE\n" );
 
 			Tree *val = vm_pop_tree();
 			treeDownref( prg, sp, val );
@@ -1833,7 +1834,7 @@ again:
 			Tree **stackRoot = vm_ptop();
 			long rootSize = vm_ssize();
 
-			initTreeIter( (TreeIter*)mem, stackRoot,
+			colm_init_tree_iter( (TreeIter*)mem, stackRoot,
 					argSize, rootSize, &rootRef, searchTypeId );
 			break;
 		}
@@ -1844,7 +1845,7 @@ again:
 			TreeIter *iter = (TreeIter*) vm_get_plocal(exec, field);
 			debug( prg, REALM_BYTECODE, "IN_TRITER_DESTROY %hd %d\n",
 					field, iter->yieldSize );
-			treeIterDestroy( prg, &sp, iter );
+			colm_tree_iter_destroy( prg, &sp, iter );
 			break;
 		}
 		case IN_REV_TRITER_FROM_REF: {
@@ -1874,7 +1875,7 @@ again:
 			}
 
 			void *mem = vm_get_plocal(exec, field);
-			initRevTreeIter( (RevTreeIter*)mem, stackRoot,
+			colm_init_rev_tree_iter( (RevTreeIter*)mem, stackRoot,
 					argSize, rootSize, &rootRef, searchTypeId, children );
 			break;
 		}
@@ -1885,7 +1886,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_REV_TRITER_DESTROY\n" );
 
 			RevTreeIter *iter = (RevTreeIter*) vm_get_plocal(exec, field);
-			revTreeIterDestroy( prg, &sp, iter );
+			colm_rev_tree_iter_destroy( prg, &sp, iter );
 			break;
 		}
 		case IN_TREE_SEARCH: {

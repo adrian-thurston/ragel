@@ -79,6 +79,7 @@ typedef unsigned long colm_value_t;
 
 #define IN_GEN_ITER_FROM_REF     0xd3
 #define IN_GEN_ITER_DESTROY      0xd5
+#define IN_GEN_ITER_UNWIND       0x74
 #define IN_GEN_ITER_GET_CUR_R    0xdf
 #define IN_GEN_VITER_GET_CUR_R   0xe7
 #define IN_LIST_ITER_ADVANCE     0xde
@@ -97,7 +98,7 @@ typedef unsigned long colm_value_t;
 #define IN_CONCAT_STR            0x1a
 #define IN_TREE_TRIM             0x1b
 
-#define IN_POP                   0x1d
+#define IN_POP_TREE              0x1d
 #define IN_POP_N_WORDS           0x1e
 #define IN_POP_VAL               0xbe
 #define IN_DUP_VAL               0x1f
@@ -156,12 +157,14 @@ typedef unsigned long colm_value_t;
 #define IN_TRITER_GET_CUR_R      0x44
 #define IN_TRITER_GET_CUR_WC     0x45
 #define IN_TRITER_SET_CUR_WC     0x46
+#define IN_TRITER_UNWIND         0x73
 #define IN_TRITER_DESTROY        0x47
 #define IN_TRITER_NEXT_REPEAT    0x48
 #define IN_TRITER_PREV_REPEAT    0x49
 
 #define IN_REV_TRITER_FROM_REF   0x4a
 #define IN_REV_TRITER_DESTROY    0x4b
+#define IN_REV_TRITER_UNWIND     0x75
 #define IN_REV_TRITER_PREV_CHILD 0x4c
 
 #define IN_UITER_DESTROY         0x4d
@@ -207,9 +210,6 @@ typedef unsigned long colm_value_t;
 #define IN_GET_VLIST_MEM_WV      0x70
 #define IN_GET_VLIST_MEM_BKT     0x5c
 
-// 0x73
-// 0x74
-// 0x75
 // 0x76
 // 0x77
 

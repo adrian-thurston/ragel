@@ -142,7 +142,7 @@ Value colm_viter_deref_cur( Program *prg, GenericIter *iter )
 	return value;
 }
 
-void initTreeIter( TreeIter *treeIter, Tree **stackRoot,
+void colm_init_tree_iter( TreeIter *treeIter, Tree **stackRoot,
 		long argSize, long rootSize,
 		const Ref *rootRef, int searchId )
 {
@@ -157,7 +157,7 @@ void initTreeIter( TreeIter *treeIter, Tree **stackRoot,
 	treeIter->argSize = argSize;
 }
 
-void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot,
+void colm_init_rev_tree_iter( RevTreeIter *revTriter, Tree **stackRoot,
 		long argSize, long rootSize,
 		const Ref *rootRef, int searchId, int children )
 {
@@ -223,7 +223,7 @@ void uiterInit( Program *prg, Tree **sp, UserIter *uiter,
 }
 
 
-void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
+void colm_tree_iter_destroy( Program *prg, Tree ***psp, TreeIter *iter )
 {
 	if ( (int)iter->type != 0 ) {
 		int i;
@@ -238,7 +238,7 @@ void treeIterDestroy( Program *prg, Tree ***psp, TreeIter *iter )
 	}
 }
 
-void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *riter )
+void colm_rev_tree_iter_destroy( struct colm_program *prg, Tree ***psp, RevTreeIter *riter )
 {
 	if ( (int)riter->type != 0 ) {
 		int i;

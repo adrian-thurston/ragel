@@ -328,15 +328,15 @@ UserIter *colm_uiter_create( struct colm_program *prg, Tree ***psp,
 void uiterInit( struct colm_program *prg, Tree **sp, UserIter *uiter, 
 		struct _FunctionInfo *fi, int revertOn );
 
-void initTreeIter( TreeIter *treeIter, Tree **stackRoot, long argSize, long rootSize,
-		const Ref *rootRef, int searchId );
-void initRevTreeIter( RevTreeIter *revTriter, Tree **stackRoot, long argSize, long rootSize, 
-		const Ref *rootRef, int searchId, int children );
-void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
+void colm_init_tree_iter( TreeIter *treeIter, Tree **stackRoot,
+		long argSize, long rootSize, const Ref *rootRef, int searchId );
+void colm_init_rev_tree_iter( RevTreeIter *revTriter, Tree **stackRoot,
+		long argSize, long rootSize, const Ref *rootRef, int searchId, int children );
+void colm_init_user_iter( UserIter *userIter, Tree **stackRoot, long rootSize,
 		long argSize, long searchId );
 
-void treeIterDestroy( struct colm_program *prg, Tree ***psp, TreeIter *iter );
-void revTreeIterDestroy( struct colm_program *prg, Tree ***psp, RevTreeIter *iter );
+void colm_tree_iter_destroy( struct colm_program *prg, Tree ***psp, TreeIter *iter );
+void colm_rev_tree_iter_destroy( struct colm_program *prg, Tree ***psp, RevTreeIter *iter );
 void colm_uiter_destroy( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 void colm_uiter_unwind( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 

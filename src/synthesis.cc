@@ -54,10 +54,11 @@ IterImpl::IterImpl( Type type ) :
 	case Tree:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
-		inDestroy = IN_TRITER_DESTROY;
-		inAdvance = IN_TRITER_ADVANCE;
+		inDestroy =  IN_TRITER_DESTROY;
+		inUnwind =   IN_TRITER_UNWIND;
+		inAdvance =  IN_TRITER_ADVANCE;
 
-		inGetCurR = IN_TRITER_GET_CUR_R;
+		inGetCurR =  IN_TRITER_GET_CUR_R;
 		inGetCurWC = IN_TRITER_GET_CUR_WC;
 		inSetCurWC = IN_TRITER_SET_CUR_WC;
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
@@ -67,10 +68,11 @@ IterImpl::IterImpl( Type type ) :
 	case Child:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
-		inDestroy = IN_TRITER_DESTROY;
-		inAdvance = IN_TRITER_NEXT_CHILD;
+		inDestroy =  IN_TRITER_DESTROY;
+		inUnwind =   IN_TRITER_UNWIND;
+		inAdvance =  IN_TRITER_NEXT_CHILD;
 
-		inGetCurR = IN_TRITER_GET_CUR_R;
+		inGetCurR =  IN_TRITER_GET_CUR_R;
 		inGetCurWC = IN_TRITER_GET_CUR_WC;
 		inSetCurWC = IN_TRITER_SET_CUR_WC;
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
@@ -80,10 +82,11 @@ IterImpl::IterImpl( Type type ) :
 	case RevChild:
 		inCreateWV = IN_REV_TRITER_FROM_REF;
 		inCreateWC = IN_REV_TRITER_FROM_REF;
-		inDestroy = IN_REV_TRITER_DESTROY;
-		inAdvance = IN_REV_TRITER_PREV_CHILD;
+		inDestroy =  IN_REV_TRITER_DESTROY;
+		inUnwind =   IN_REV_TRITER_UNWIND;
+		inAdvance =  IN_REV_TRITER_PREV_CHILD;
 
-		inGetCurR = IN_TRITER_GET_CUR_R;
+		inGetCurR =  IN_TRITER_GET_CUR_R;
 		inGetCurWC = IN_TRITER_GET_CUR_WC;
 		inSetCurWC = IN_TRITER_SET_CUR_WC;
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
@@ -93,10 +96,11 @@ IterImpl::IterImpl( Type type ) :
 	case Repeat:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
-		inDestroy = IN_TRITER_DESTROY;
-		inAdvance = IN_TRITER_NEXT_REPEAT;
+		inDestroy =  IN_TRITER_DESTROY;
+		inUnwind =   IN_TRITER_UNWIND;
+		inAdvance =  IN_TRITER_NEXT_REPEAT;
 
-		inGetCurR = IN_TRITER_GET_CUR_R;
+		inGetCurR =  IN_TRITER_GET_CUR_R;
 		inGetCurWC = IN_TRITER_GET_CUR_WC;
 		inSetCurWC = IN_TRITER_SET_CUR_WC;
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
@@ -106,10 +110,11 @@ IterImpl::IterImpl( Type type ) :
 	case RevRepeat:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
-		inDestroy = IN_TRITER_DESTROY;
-		inAdvance = IN_TRITER_PREV_REPEAT;
+		inDestroy =  IN_TRITER_DESTROY;
+		inUnwind =   IN_TRITER_UNWIND;
+		inAdvance =  IN_TRITER_PREV_REPEAT;
 
-		inGetCurR = IN_TRITER_GET_CUR_R;
+		inGetCurR =  IN_TRITER_GET_CUR_R;
 		inGetCurWC = IN_TRITER_GET_CUR_WC;
 		inSetCurWC = IN_TRITER_SET_CUR_WC;
 		inRefFromCur = IN_TRITER_REF_FROM_CUR;
@@ -120,6 +125,7 @@ IterImpl::IterImpl( Type type ) :
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
 		inDestroy =    IN_GEN_ITER_DESTROY;
+		inUnwind =     IN_GEN_ITER_UNWIND;
 		inAdvance =    IN_LIST_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_ITER_GET_CUR_R;
@@ -133,6 +139,7 @@ IterImpl::IterImpl( Type type ) :
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
 		inDestroy =    IN_GEN_ITER_DESTROY;
+		inUnwind =     IN_GEN_ITER_UNWIND;
 		inAdvance =    IN_LIST_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_VITER_GET_CUR_R;
@@ -146,6 +153,7 @@ IterImpl::IterImpl( Type type ) :
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
 		inDestroy =    IN_GEN_ITER_DESTROY;
+		inUnwind =     IN_GEN_ITER_UNWIND;
 		inAdvance =    IN_MAP_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_VITER_GET_CUR_R;
@@ -159,6 +167,7 @@ IterImpl::IterImpl( Type type ) :
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
 		inDestroy =    IN_GEN_ITER_DESTROY;
+		inUnwind =     IN_GEN_ITER_UNWIND;
 		inAdvance =    IN_MAP_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_ITER_GET_CUR_R;
@@ -1049,7 +1058,7 @@ void LangVarRef::popRefQuals( Compiler *pd, CodeVect &code,
 
 				if ( paramUT->typeId == TYPE_REF ) {
 					if ( ! expression->canTakeRef( pd ) )
-						code.append( IN_POP );
+						code.append( IN_POP_TREE );
 				}
 			}
 		}
@@ -1391,7 +1400,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
 				/* Clear it away if return type is void. */
-				code.append( IN_POP );
+				code.append( IN_POP_TREE );
 				continue;
 			}
 
@@ -1506,8 +1515,8 @@ void ConsItemList::evaluateSendStream( Compiler *pd, CodeVect &code )
 			UniqueType *ut = item->expr->evaluate( pd, code );
 			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
 				/* Clear it away if the the return type is void. */
-				code.append( IN_POP );
-				code.append( IN_POP );
+				code.append( IN_POP_TREE );
+				code.append( IN_POP_TREE );
 				continue;
 			}
 
@@ -1570,7 +1579,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 			UniqueType *ut = item->expr->evaluate( pd, code );
 			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
 				/* Clear it away if return type is void. */
-				code.append( IN_POP );
+				code.append( IN_POP_TREE );
 				continue;
 			}
 
@@ -1834,7 +1843,7 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 	// if ( retUt->val() )
 	//	pd->unwindCode.insert( 0, IN_POP_VAL );
 	// else
-	//	pd->unwindCode.insert( 0, IN_POP );
+	//	pd->unwindCode.insert( 0, IN_POP_TREE );
 
 	return retUt;
 }
@@ -1849,7 +1858,7 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					UniqueType *rt = right->evaluate( pd, code );
 
 					// pd->unwindCode.remove( 0, 2 );
-					// pd->unwindCode.insert( 0, IN_POP );
+					// pd->unwindCode.insert( 0, IN_POP_TREE );
 
 					if ( lt == pd->uniqueTypeInt && rt == pd->uniqueTypeInt ) {
 						code.append( IN_ADD_INT );
@@ -2204,10 +2213,7 @@ void LangStmt::compileForIterBody( Compiler *pd,
 	/* Add the cleanup for the current loop. */
 	int lcLen = pd->unwindCode.length();
 	pd->unwindCode.insertHalf( 0, objField->offset );
-	int c = objField->iterImpl->inDestroy;
-	if ( c == IN_UITER_DESTROY )
-		c = IN_UITER_UNWIND;
-	pd->unwindCode.insert( 0, c ); //objField->iterImpl->inDestroy );
+	pd->unwindCode.insert( 0, objField->iterImpl->inUnwind );
 
 	/* Compile the contents. */
 	for ( StmtList::Iter stmt = *stmtList; stmt.lte(); stmt++ )
@@ -2386,7 +2392,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 	block.append( IN_LOAD_STR );
 	block.appendWord( mapEl->value );
 
-	block.append( IN_POP );
+	block.append( IN_POP_TREE );
 
 	pd->unwindCode.insert( 0, block );
 
@@ -2434,14 +2440,14 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			code.append( IN_LOAD_GLOBAL_R );
 			code.append( IN_GET_STDOUT );
 			consItemList->evaluateSendStream( pd, code );
-			code.append( IN_POP );
+			code.append( IN_POP_TREE );
 			break;
 		}
 		case ExprType: {
 			/* Evaluate the exrepssion, then pop it immediately. */
 			UniqueType *exprUt = expr->evaluate( pd, code );
 			if ( exprUt->tree() )
-				code.append( IN_POP );
+				code.append( IN_POP_TREE );
 			else
 				code.append( IN_POP_VAL );
 
