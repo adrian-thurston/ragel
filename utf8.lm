@@ -19,7 +19,7 @@ def utf8_octets
   [utf8_char*]
 
 parse P: utf8_octets[stdin]
-print(count '\n')
+print(count, '\n')
 ##### IN #####
 A≢Α.
 한국어

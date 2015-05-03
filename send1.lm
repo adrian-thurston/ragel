@@ -29,7 +29,7 @@ send_tree StartParser2
 	"a [Item2] c d\n" eos
 
 print( StartParser1->tree )
-print( StartParser2->tree "\n" )
+print( StartParser2->tree, "\n" )
 ######### EXP #########
 a b c d
 NIL

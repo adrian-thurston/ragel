@@ -6,7 +6,7 @@ context si
 
 		token id /'a'|'b'/
 		{
-			input->push( make_token( trans_id_to input->pull(match_length) ) )
+			input->push( make_token( trans_id_to, input->pull(match_length) ) )
 		}
 		
 		token super_id //
@@ -20,9 +20,9 @@ context si
 	def e1 
 		[]
 		{
-			print( 'old_id = ' trans_id_to '\n' )
+			print[ 'old_id = ' trans_id_to '\n' ]
 			trans_id_to = typeid<foo>
-			print( 'new_id = ' trans_id_to '\n' )
+			print[ 'new_id = ' trans_id_to '\n' ]
 		}
 
 	def item1 
@@ -36,9 +36,9 @@ context si
 	def e2 
 		[]
 		{
-			print( 'old_id = ' trans_id_to '\n' )
+			print[ 'old_id = ' trans_id_to '\n' ]
 			trans_id_to = typeid<super_id>
-			print( 'new_id = ' trans_id_to '\n' )
+			print[ 'new_id = ' trans_id_to '\n' ]
 		}
 
 	def item2 
@@ -55,7 +55,7 @@ context si
 	|	[item2 SEMI_NL]
 		{
 			match lhs [Item2:item2 ';\n']
-			print( Item2.msg )
+			print[ Item2.msg ]
 		}
 end # si
 

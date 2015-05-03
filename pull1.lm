@@ -1,5 +1,5 @@
 String: str = stdin->pull( 10 )
-print( String '\n' )
+print( String, '\n' )
 ##### IN #####
 this is input for a non-parse pull
 ##### EXP #####

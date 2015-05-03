@@ -26,7 +26,7 @@ context ctx
 			f()
 			f()
 			f()
-			print( i '\n' )
+			print( i, '\n' )
 		}
 	
 

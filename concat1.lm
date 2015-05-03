@@ -51,7 +51,7 @@ start parseTxt( T: str )
 	return A->tree
 }
 
-item* concatItems( IL1: item* IL2: item* )
+item* concatItems( IL1: item*, IL2: item* )
 {
 	for IL: item* in IL1 {
 		if match IL [] {
@@ -76,7 +76,7 @@ item* expandIncludes( ItemList: ref<item*> )
 
 			match S [em_item* `%% IncludedItems: item*]
 
-			IL = concatItems( IncludedItems Rest )
+			IL = concatItems( IncludedItems, Rest )
 		}
 	}
 }

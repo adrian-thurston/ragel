@@ -664,13 +664,13 @@ OutputFile: str = '/dev/stdout'
 InputFile: str = '/dev/stdin'
 Lang: str = 'c'
 
-Input: stream = open( InputFile "r" )
-Output: stream = open( OutputFile "w" )
+Input: stream = open( InputFile, "r" )
+Output: stream = open( OutputFile, "w" )
 
 RagelTree: start = parse start[ Input ]
 
 if ( !RagelTree ) {
-	print( error '\n' )
+	print( error, '\n' )
 	exit(1)
 }
 

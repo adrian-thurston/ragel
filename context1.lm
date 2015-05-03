@@ -20,7 +20,7 @@ context ctx
 			i = 0
 			j = i + 1
 			k = j + 1
-			print( k '\n' )
+			print( k, '\n' )
 		}
 
 	def start 

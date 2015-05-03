@@ -1,11 +1,11 @@
 
-new M: vmap<str int>()
+new M: vmap<str, int>()
 
-M->insert( ( "one--" )  ( 1 ) )
-M->insert( ( "two--" )  ( 2 ) )
-M->insert( ( "three" )  ( 3 ) )
-M->insert( ( "four-" )  ( 4 ) )
-M->insert( ( "five-" )  ( 5 ) )
+M->insert( "one--", 1 )
+M->insert( "two--", 2 )
+M->insert( "three", 3 )
+M->insert( "four-", 4 )
+M->insert( "five-", 5 )
 
 M->remove( "three" )
 

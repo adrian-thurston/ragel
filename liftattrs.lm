@@ -71,7 +71,7 @@ for AttrListIter:attr_list in RootItemList {
 IL = construct item_list 
 	["<wrapper " ^CollectedAttrs ">" ^RootItemList "</wrapper>"]
 
-print( ^IL '\n' )
+print( ^IL, '\n' )
 ##### IN #####
 <t1 a=b foo=bar1 c=d>
 	<t2 foo=bar2 e=f></t2>

@@ -43,7 +43,7 @@ parse Two: accum_bt::two( AccumBt )[ stdin ]
 send AccumBt->OneParser ['\n'] eos
 
 print( ^Two )
-print( ^( AccumBt->OneParser->tree ) '\n' )
+print( ^( AccumBt->OneParser->tree ), '\n' )
 ##### IN #####
 a b c d e ;
 ##### EXP #####

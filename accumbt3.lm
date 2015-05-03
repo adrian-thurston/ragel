@@ -13,7 +13,7 @@ lex
 	token open_paren /'('/ 
 	{
 		parse_stop NC: nested_comment[ input ]
-		print( 'discarding: ' NC '\n' )
+		print( 'discarding: ', NC, '\n' )
 	}
 end
 
@@ -87,8 +87,8 @@ send AccumBt->NestedParser [] eos
 Nested: nested = AccumBt->NestedParser->tree
 
 print( '\n------------\n' )
-print( ^Nested '\n' )
-print( ^Two '\n' )
+print( ^Nested, '\n' )
+print( ^Two, '\n' )
 
 ##### IN #####
 hello there ( (this is a nested comment /*sdf asd_++_stuff) ) and this is not ;

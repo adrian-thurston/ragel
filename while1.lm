@@ -6,7 +6,7 @@ global I: int = 3
 int f()
 {
 	I = I - 1
-	print( ' ' I )
+	print( ' ', I )
 }
 
 # simple expr and stmt
@@ -19,7 +19,7 @@ I = 3
 while I
 {
 	I = I - 1
-	print( ' ' I )
+	print( ' ', I )
 }
 print( '\n' )
 
@@ -40,7 +40,7 @@ I = 3
 while ( I + 2 )
 {
 	I = I - 1
-	print( ' ' I )
+	print( ' ', I )
 }
 print( '\n' )
 ##### EXP #####

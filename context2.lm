@@ -33,7 +33,7 @@ context ruby_here
 				input->push( $ROL )
 
 				# Send the here_id token. Attach the heredoc data as an attribute.
-				input->push( make_token( typeid<here_id> HereId HereData ) )
+				input->push( make_token( typeid<here_id>, HereId, HereData ) )
 			}
 	end
 
@@ -43,11 +43,11 @@ context ruby_here
 			{
 				if match_text == HereId + '\n' {
 					input->push( make_token( 
-						typeid<here_close_id>
+						typeid<here_close_id>,
 						input->pull( match_length ) ) )
 				}
 				else 
-					input->push( make_token( typeid<here_line> input->pull(match_length) ) )
+					input->push( make_token( typeid<here_line>, input->pull(match_length) ) )
 			}
 
 		token here_line

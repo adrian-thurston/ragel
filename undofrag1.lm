@@ -55,7 +55,7 @@ parse Input: ctx::start1( CTX )[stdin]
 send CTX->SP "{e}f g"
 
 print( Input )
-print( CTX->SP->finish() '\n' )
+print( CTX->SP->finish(), '\n' )
 
 ##### IN #####
 a b c ( d ) e f g ;

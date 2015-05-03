@@ -89,7 +89,7 @@ def goto_statement
 parse P: program[stdin]
 
 for E: expression in P {
-	print( ^(E.Term.Factor.Primary) '\n' )
+	print( ^(E.Term.Factor.Primary), '\n' )
 }
 
 ##### IN #####
