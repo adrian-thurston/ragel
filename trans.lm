@@ -305,13 +305,13 @@ OutputFile: str = argvPop()
 InputFile: str = argvPop()
 global ClassName: str = argvPop()
 
-Input: stream = open( InputFile "r" )
-Output: stream = open( OutputFile "w" )
+Input: stream = open( InputFile, "r" )
+Output: stream = open( OutputFile, "w" )
 
 global RagelTree: indep::start = parse indep::start[ Input ]
 
 if ( !RagelTree ) {
-	print( error '\n' )
+	print( error, '\n' )
 	exit(1)
 }
 
@@ -349,5 +349,5 @@ elsif ( Lang == 'ruby' )
 elsif ( Lang == 'ocaml' )
 	rw_ocaml( Output )
 else {
-	print( 'trans: unrecognized language: ' Lang '\n' )
+	print( 'trans: unrecognized language: ', Lang, '\n' )
 }

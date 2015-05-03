@@ -237,7 +237,7 @@ void rw_ruby( Output: stream )
 		# Reparse as lang-independent code.
 		parse IndepActionBlock: indep::action_block[$Action]
 		if ( !IndepActionBlock ) {
-			print( error '\n' Action )
+			print( error, '\n', Action )
 			exit(1)
 		}
 
@@ -246,7 +246,7 @@ void rw_ruby( Output: stream )
 		# Reparse back to ragel action block.
 		Action = parse ragel::action_block[$Out->tree]
 		if ( !Action ) {
-			print( error '\n' )
+			print( error, '\n' )
 			exit(1)
 		}
 	}
