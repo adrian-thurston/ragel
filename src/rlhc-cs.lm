@@ -244,7 +244,7 @@ void cs_number( Number: number )
 {
 	if match Number [`c `( uint `) ] {
 		Str: str = $Number.uint
-		send Output "'\\u[sprintf( "%04x" Str.atoi() )]'"
+		send Output "'\\u[sprintf( "%04x", Str.atoi() )]'"
 	}
 	elsif match Number [`u `( uint `) ] {
 		send Output [$Number.uint]

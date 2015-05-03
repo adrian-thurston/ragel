@@ -294,7 +294,7 @@ void rw_ocaml( Output: stream )
 		# Reparse as lang-independent code.
 		parse IndepActionBlock: indep::action_block[$Action]
 		if ( !IndepActionBlock ) {
-			print( "error parsing indep action block: " error '\n' Action )
+			print( "error parsing indep action block: ", error, '\n', Action )
 			exit(1)
 		}
 
@@ -303,7 +303,7 @@ void rw_ocaml( Output: stream )
 		# Reparse back to ragel action block.
 		Action = parse ragel::action_block[$Out->tree]
 		if ( !Action ) {
-			print( "error parsing ragel action block: " error '\n' $Out->tree )
+			print( "error parsing ragel action block: ", error, '\n', $Out->tree )
 			exit(1)
 		}
 	}

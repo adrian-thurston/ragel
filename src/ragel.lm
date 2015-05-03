@@ -324,11 +324,11 @@ lex
 	token select /''/
 	{
 		if Lang == "ruby"
-			input->push( make_token( typeid<ruby_select> '' ) )
+			input->push( make_token( typeid<ruby_select>, '' ) )
 		elsif Lang == "ocaml"
-			input->push( make_token( typeid<ocaml_select> '' ) )
+			input->push( make_token( typeid<ocaml_select>, '' ) )
 		else
-			input->push( make_token( typeid<c_select> '' ) )
+			input->push( make_token( typeid<c_select>, '' ) )
 	}
 
 	token c_select //

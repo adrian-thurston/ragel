@@ -330,12 +330,12 @@ OutputFile: str = argvPop()
 InputFile: str = argvPop()
 Lang: str = argvPop()
 
-Input: stream = open( InputFile "r" )
+Input: stream = open( InputFile, "r" )
 
 parse Start: start[ Input ]
 
 if ( !Start ) {
-	print( error '\n' )
+	print( error, '\n' )
 	exit(1)
 }
 
@@ -344,7 +344,7 @@ struct ident_map_el
 	value: label_stmt
 end
 
-void ident_map_insert( M: map<ident ident_map_el> K: ident V: label_stmt )
+void ident_map_insert( M: map<ident, ident_map_el>, K: ident, V: label_stmt )
 {
 	new El: ident_map_el()
 	El->key = K
@@ -352,7 +352,7 @@ void ident_map_insert( M: map<ident ident_map_el> K: ident V: label_stmt )
 	M->insert( El )
 }
 
-label_stmt ident_map_find( M: map<ident ident_map_el> K: ident )
+label_stmt ident_map_find( M: map<ident, ident_map_el>, K: ident )
 {
 	El: ident_map_el = M->find( K )
 	if El
@@ -363,15 +363,15 @@ label_stmt ident_map_find( M: map<ident ident_map_el> K: ident )
 void assign_labels( Prog: ref<any> )
 {
 	N: int = 1
-	new Map: map<ident ident_map_el>()
+	new Map: map<ident, ident_map_el>()
 	for LabelStmt: label_stmt in Prog {
 		LabelStmt.Id = N
-		ident_map_insert( Map LabelStmt.ident LabelStmt )
+		ident_map_insert( Map, LabelStmt.ident, LabelStmt )
 		N = N + 1
 	}
 
 	for GotoStmt: goto_stmt in Prog {
-		LabelStmt: label_stmt = ident_map_find( Map GotoStmt.ident )
+		LabelStmt: label_stmt = ident_map_find( Map, GotoStmt.ident )
 		if ( LabelStmt )
 			GotoStmt.Id = LabelStmt.Id
 	}
@@ -379,7 +379,7 @@ void assign_labels( Prog: ref<any> )
 
 assign_labels( Start )
 
-global Output: stream = open( OutputFile "w" )
+global Output: stream = open( OutputFile, "w" )
 if ( Lang == 'c' )
 	c_stmt_list( Start._repeat_stmt )
 elsif ( Lang == 'd' )
@@ -395,5 +395,5 @@ elsif ( Lang == 'ruby' )
 elsif ( Lang == 'ocaml' )
 	ml_stmt_list( Start._repeat_stmt )
 else {
-	print( 'rlhc: unrecognized language: ' Lang '\n' )
+	print( 'rlhc: unrecognized language: ', Lang, '\n' )
 }

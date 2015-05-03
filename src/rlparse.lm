@@ -4,11 +4,11 @@ lex
 	token selectt /''/
 	{
 		if Lang == "ruby"
-			input->push( make_token( typeid<ruby_selectt> '' ) )
+			input->push( make_token( typeid<ruby_selectt>, '' ) )
 		elsif Lang == "ocaml"
-			input->push( make_token( typeid<ocaml_selectt> '' ) )
+			input->push( make_token( typeid<ocaml_selectt>, '' ) )
 		else
-			input->push( make_token( typeid<c_selectt> '' ) )
+			input->push( make_token( typeid<c_selectt>, '' ) )
 	}
 
 	token c_selectt //
@@ -41,11 +41,11 @@ Lang = A->value
 # the colm program is called.
 A = argv->pop_tail()
 FileName: str = A->value
-Stream: stream = open( FileName "r" )
+Stream: stream = open( FileName, "r" )
 RagelTree = parse start[ Stream ]
 RagelError = error
 
-import* import( FileName: str Start: start )
+import* import( FileName: str, Start: start )
 {
 	ImportList: import* = cons import* []
 
@@ -93,6 +93,6 @@ if ( argv->length > 0 ) {
 	A = argv->pop_tail()
 	Cmd: str = A->value
 	if ( Cmd == 'import' ) {
-		RagelImport = import( FileName RagelTree )
+		RagelImport = import( FileName, RagelTree )
 	}
 }

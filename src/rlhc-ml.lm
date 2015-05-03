@@ -3,9 +3,9 @@ struct static_var_map_el
 	value: str
 end
 
-global StaticVarMap: map<str static_var_map_el> = new map<str static_var_map_el>()
+global StaticVarMap: map<str, static_var_map_el> = new map<str, static_var_map_el>()
 
-void staticVarMapInsert( Key: str Value: str)
+void staticVarMapInsert( Key: str, Value: str)
 {
 	new El: static_var_map_el()
 	El->key = Key
@@ -312,14 +312,14 @@ void ml_stmt( Stmt: stmt )
 			[ml_embedded_host( EH )]
 	}
 	elsif match Stmt [Array: array] {
-		staticVarMapInsert( $Array.ident ' ' )
+		staticVarMapInsert( $Array.ident, ' ' )
 		send Output
 			"let [Array.ident] : int array = \[|
 				"	[ml_num_list(Array.num_list)]
 			"|\]
 	}
 	elsif match Stmt [Value: value] {
-		staticVarMapInsert( $Value.ident ' ' )
+		staticVarMapInsert( $Value.ident, ' ' )
 		send Output
 			"let [Value.ident] : [Value.type] = [Value.number]
 	}

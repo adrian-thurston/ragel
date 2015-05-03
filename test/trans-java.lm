@@ -84,7 +84,7 @@ void rw_java_expr( Expr: indep::expr )
 	rw_java_abs_expr( AbsExpr )
 }
 
-void rw_java_opt_array( OptArr: indep::opt_arr Type: indep::type )
+void rw_java_opt_array( OptArr: indep::opt_arr, Type: indep::type )
 {
 	if OptArr.expr {
 		send Out "\[\] = new [rw_java_type( Type )]\[[rw_java_expr( OptArr.expr )]\]"
@@ -94,7 +94,7 @@ void rw_java_opt_array( OptArr: indep::opt_arr Type: indep::type )
 int rw_java_var_decl( VarDecl: indep::var_decl )
 {
 	send Out
-		"[rw_java_type( VarDecl.type )] [$VarDecl.tk_ident] [rw_java_opt_array(VarDecl.opt_arr VarDecl.type)];
+		"[rw_java_type( VarDecl.type )] [$VarDecl.tk_ident] [rw_java_opt_array(VarDecl.opt_arr, VarDecl.type)];
 }
 
 void rw_java_opt_sub( OptSub: indep::opt_sub )
@@ -223,7 +223,7 @@ void rw_java( Output: stream )
 		# Reparse as lang-independent code.
 		parse IndepActionBlock: indep::action_block[$Action]
 		if ( !IndepActionBlock ) {
-			print( error '\n' Action )
+			print( error, '\n', Action )
 			exit(1)
 		}
 
@@ -232,7 +232,7 @@ void rw_java( Output: stream )
 		# Reparse back to ragel action block.
 		Action = parse ragel::action_block[$Out->tree]
 		if ( !Action ) {
-			print( error '\n' )
+			print( error, '\n' )
 			exit(1)
 		}
 	}

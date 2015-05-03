@@ -265,7 +265,6 @@ int rw_asm_if_stmt( IfStmt: indep::if_stmt )
 
 	rw_asm_expr( IfStmt.expr )
 
-
 	send Out
 		"	popq	%rax
 		"	test	%rax, %rax
@@ -376,7 +375,7 @@ void rw_asm_stmt_list( StmtList: indep::stmt* )
 		rw_asm_stmt( Stmt )
 }
 
-out_code::lines rw_asm_asm_action_block( ActionBlock: indep::action_block ActionNum: int )
+out_code::lines rw_asm_asm_action_block( ActionBlock: indep::action_block, ActionNum: int )
 {
 	Out = new parser<out_code::lines>()
 	if match ActionBlock [`{ stmt* `}] {
@@ -439,17 +438,17 @@ void rw_asm( Output: stream )
 		# Reparse as lang-independent code.
 		parse IndepActionBlock: indep::action_block[$Action]
 		if ( !IndepActionBlock ) {
-			print( error '\n' Action )
+			print( error, '\n', Action )
 			exit(1)
 		}
 
 		Lines: out_code::lines =
-				rw_asm_asm_action_block( IndepActionBlock ActionNum )
+				rw_asm_asm_action_block( IndepActionBlock, ActionNum )
 
 		# Reparse back to ragel action block.
 		Action = parse ragel::action_block[Lines]
 		if ( !Action ) {
-			print( error ': could not reparse action: ' Lines '\n' )
+			print( error, ': could not reparse action: ', Lines, '\n' )
 			exit(1)
 		}
 
