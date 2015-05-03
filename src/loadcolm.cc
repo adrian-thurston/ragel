@@ -1263,15 +1263,21 @@ struct LoadColm
 		BaseParser::cflDef( ntDef, objectDef, defList );
 	}
 
-	CallArgVect *walkCallArgList( call_arg_list callArgList )
+	CallArgVect *walkCallArgSeq( call_arg_seq callArgSeq )
 	{
 		CallArgVect *callArgVect = new CallArgVect;
-		while ( callArgList.code_expr() != 0 ) {
-			code_expr codeExpr = callArgList.code_expr();
+		while ( callArgSeq != 0 ) {
+			code_expr codeExpr = callArgSeq.code_expr();
 			LangExpr *expr = walkCodeExpr( codeExpr );
 			callArgVect->append( new CallArg(expr) );
-			callArgList = callArgList._call_arg_list();
+			callArgSeq = callArgSeq._call_arg_seq();
 		}
+		return callArgVect;
+	}
+
+	CallArgVect *walkCallArgList( call_arg_list callArgList )
+	{
+		CallArgVect *callArgVect = walkCallArgSeq( callArgList.call_arg_seq() );
 		return callArgVect;
 	}
 
@@ -2205,14 +2211,21 @@ struct LoadColm
 		return addParam( paramVarDef.id().loc(), type, typeRef, id );
 	}
 
-	ParameterList *walkParamVarDefList( param_var_def_list paramVarDefList )
+	ParameterList *walkParamVarDefSeq( param_var_def_seq paramVarDefSeq )
 	{
 		ParameterList *paramList = new ParameterList;
-		while ( paramVarDefList.param_var_def() != 0 ) {
-			ObjectField *param = walkParamVarDef( paramVarDefList.param_var_def() );
+		while ( paramVarDefSeq != 0 ) {
+			ObjectField *param = walkParamVarDef( paramVarDefSeq.param_var_def() );
 			appendParam( paramList, param );
-			paramVarDefList = paramVarDefList._param_var_def_list();
+			paramVarDefSeq = paramVarDefSeq._param_var_def_seq();
 		}
+		return paramList;
+	}
+
+	ParameterList *walkParamVarDefList( param_var_def_list paramVarDefList )
+	{
+		ParameterList *paramList = walkParamVarDefSeq(
+				paramVarDefList.param_var_def_seq() );
 		return paramList;
 	}
 

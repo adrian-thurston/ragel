@@ -288,8 +288,12 @@ def iter_def
 def reference_type_ref
 	[REF LT type_ref GT]
 
+def param_var_def_seq
+	[param_var_def COMMA param_var_def_seq]
+|	[param_var_def]
+
 def param_var_def_list
-	[param_var_def param_var_def_list]
+	[param_var_def_seq]
 |	[]
 
 def param_var_def
@@ -472,8 +476,12 @@ def optional_else
 	[ELSE block_or_single] :Else
 |	[]
 
+def call_arg_seq
+	[code_expr COMMA call_arg_seq]
+|	[code_expr]
+
 def call_arg_list
-	[code_expr call_arg_list]
+	[call_arg_seq]
 |	[]
 
 def iter_call
@@ -577,9 +585,9 @@ def type_ref
 |	[BOOL] :Bool
 |	[PARSER LT type_ref GT] :Parser
 |	[LIST LT type_ref GT] :List
-|	[MAP LT KeyType: type_ref ElType: type_ref GT] :Map
+|	[MAP LT KeyType: type_ref COMMA ElType: type_ref GT] :Map
 |	[VLIST LT type_ref GT] :ValueList
-|	[VMAP LT KeyType: type_ref ValType: type_ref GT] :ValueMap
+|	[VMAP LT KeyType: type_ref COMMA ValType: type_ref GT] :ValueMap
 
 def region_qual
 	[region_qual id DOUBLE_COLON] :Qual

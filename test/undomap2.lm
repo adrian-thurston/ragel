@@ -11,7 +11,7 @@ context undo
 		map_el<item> el
 	end
 
-	Map: map<item item_el>
+	Map: map<item, item_el>
 
 	def item 
 		[id]
@@ -49,7 +49,7 @@ context undo
 end
 
 Undo: undo = new undo()
-Undo->Map = new map<undo::item undo::item_el>()
+Undo->Map = new map<undo::item, undo::item_el>()
 
 E: undo::item_el = new undo::item_el()
 E->key = cons undo::item "a"

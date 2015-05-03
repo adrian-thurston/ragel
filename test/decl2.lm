@@ -1,4 +1,4 @@
 Str: str = '77'
-print( Str '\n' )
+print( Str, '\n' )
 ##### EXP #####
 77

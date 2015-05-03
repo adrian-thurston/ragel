@@ -80,7 +80,7 @@ context generate
 			{
 				# Need to shorten to take off the newline.
 				# Turn it into ignore.
-				input->push_ignore( make_token( typeid<WS> input->pull(match_length - 1) ) )
+				input->push_ignore( make_token( typeid<WS>, input->pull(match_length - 1) ) )
 			}
 
 		# Find and ignore comments.
@@ -88,7 +88,7 @@ context generate
 			/ '#' [^\n]* '\n' /
 			{
 				# Need to shorten to take off the newline. Turn it into ignore.
-				input->push_ignore( make_token( typeid<WS> input->pull(match_length - 1) ) )
+				input->push_ignore( make_token( typeid<WS>, input->pull(match_length - 1) ) )
 			}
 
 		# These tokens are generated
@@ -101,7 +101,7 @@ context generate
 			/'\n' [ \t]*/
 			{
 				# We have squared up INDENTs and DEDENTs. Ignore the entire match.
-				input->push_ignore( make_token( typeid<WS> input->pull(match_length) ) )
+				input->push_ignore( make_token( typeid<WS>, input->pull(match_length) ) )
 
 				# We have already sent the newline, compute the indentation level.
 				data_length: int = match_length - 1
@@ -110,7 +110,7 @@ context generate
 				if data_length > Top->Int {
 					# The indentation level is more than the level on the top
 					# of the stack. This is an indent event. Send as an INDENT.
-					input->push( make_token( typeid<INDENT> '' ) )
+					input->push( make_token( typeid<INDENT>, '' ) )
 
 					# Push to the stack as per python manual.
 					IntEl: int_el = new int_el()
@@ -125,7 +125,7 @@ context generate
 						IndentStack->pop()
 
 						# Send as a DEDENT
-						input->push( make_token( typeid<DEDENT> '' ) )
+						input->push( make_token( typeid<DEDENT>, '' ) )
 
 						Top = IndentStack->top
 					}
@@ -135,7 +135,7 @@ context generate
 				# means the outdent does not match anything.
 
 				# First the newline.
-				input->push( make_token( typeid<NEWLINE> '' ) )
+				input->push( make_token( typeid<NEWLINE>, '' ) )
 			}
 	end
 
@@ -527,22 +527,22 @@ end # generate
 int print_stmts( S: generate::start )
 {
 	for Stmt: generate::statement in S
-		print( 'STMT: ' ^Stmt '\n' )
+		print[ 'STMT: ' ^Stmt '\n' ]
 }
 
 int print_target_subscriptions_and_slicings( Start: generate::start )
 {
 	for TI: generate::target_ext in Start {
 		if match TI [generate::subscription] {
-			print( 'TARGET SUBSCRIPTION: ' ^TI '\n' )
+			print[ 'TARGET SUBSCRIPTION: ' ^TI '\n' ]
 		}
 
 		if match TI [generate::simple_slicing] {
-			print( 'TARGET SIMPLE SLICING: ' ^TI '\n' )
+			print[ 'TARGET SIMPLE SLICING: ' ^TI '\n' ]
 		}
 
 		if match TI [generate::extended_slicing] {
-			print( 'TARGET EXTENDED SLICING: ' ^TI '\n' )
+			print[ 'TARGET EXTENDED SLICING: ' ^TI '\n' ]
 		}
 	}
 	
@@ -552,15 +552,15 @@ int print_primary_subscriptions_and_slicings( Start: generate::start )
 {
 	for PI: generate::primary_ext in Start {
 		if match PI [generate::subscription] {
-			print( 'PRIMARY SUBSCRIPTION: ' ^PI '\n' )
+			print[ 'PRIMARY SUBSCRIPTION: ' ^PI '\n' ]
 		}
 
 		if match PI [generate::simple_slicing] {
-			print( 'PRIMARY SIMPLE SLICING: ' ^PI '\n' )
+			print[ 'PRIMARY SIMPLE SLICING: ' ^PI '\n' ]
 		}
 
 		if match PI [generate::extended_slicing] {
-			print( 'PRIMARY EXTENDED SLICING: ' ^PI '\n' )
+			print[ 'PRIMARY EXTENDED SLICING: ' ^PI '\n' ]
 		}
 	}
 }
@@ -578,9 +578,9 @@ Generate->newline_sent = 0
 
 parse S: generate::start(Generate)[ stdin ]
 
-print( '*** SUCCESS ***\n' )
-print( ^S '\n' )
-print( '***\n' )
+print[ '*** SUCCESS ***\n' ]
+print[ ^S '\n' ]
+print[ '***\n' ]
 print_stmts( S )
 print_target_subscriptions_and_slicings( S )
 print_primary_subscriptions_and_slicings( S )

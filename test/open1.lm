@@ -1,7 +1,7 @@
 
 int testOpen( Fn: str )
 {
-	S: stream = open( Fn 'r' )
+	S: stream = open( Fn, 'r' )
 
 	if ( S )
 		print( 'yes\n' )

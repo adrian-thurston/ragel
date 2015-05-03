@@ -16,7 +16,7 @@ parse Input: four_ids[ stdin ]
 
 for Id: id in Input {
 	if ( Id == B )
-		print( B '\n' )
+		print( B, '\n' )
 }
 ##### IN #####
 a b c d

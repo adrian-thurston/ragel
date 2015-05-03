@@ -220,7 +220,7 @@ def start
 
 parse Start: start[ stdin ]
 if ( ! Start ) {
-	print( error '\n' )
+	print( error, '\n' )
 	exit( 1 )
 }
 
@@ -307,10 +307,10 @@ int printLines( Lines: line* )
 			print( '\\begin{center}\n' )
 			print( '\\includegraphics' )
 			if match Scale [lws Spd: word Spd2: word*]
-				print( '[scale=' Spd Spd2 ']' )
+				print( '[scale=', Spd, Spd2, ']' )
 			else 
 				print( '[scale=0.55]' )
-			print( '{' Name '}\n' )
+			print( '{', Name, '}\n' )
 			print( '\\end{center}\n' )
 			print( '\\graphspace\n' )
 		}
@@ -333,7 +333,7 @@ int printLines( Lines: line* )
 				printLines( CL )
 				print( '}\n' )
 			}
-			print( '\\label{' DirData '}\n' )
+			print( '\\label{', DirData, '}\n' )
 			print( '\\end{figure}\n' )
 		}
 		if match L [cmd_list LiList: li* end_list] {
@@ -359,7 +359,7 @@ int printLines( Lines: line* )
 			for Row: row in repeat(Rows) {
 				if match Row [cmd_row Lines: text* nl ] {
 					printText( Lines )
-					print( '\\\\' '\n' )
+					print( '\\\\', '\n' )
 					print( '\\hline\n' )
 				}
 			}
@@ -437,11 +437,11 @@ print(
 	~\vspace*{3in}
 )
 
-print( '{\\huge ' TitleData '}\\\\\n' )
+print( '{\\huge ', TitleData, '}\\\\\n' )
 
 print( '\\vspace*{12pt}\n' )
 
-print( '{\\Large ' SubTitleData '}\\\\\n' )
+print( '{\\Large ', SubTitleData, '}\\\\\n' )
 
 print(
 	~\vspace{1in}
@@ -449,7 +449,7 @@ print(
 	~\vspace{12pt}
 )
 
-print( '{\\large ' AuthorData '}\\\\\n' )
+print( '{\\large ', AuthorData, '}\\\\\n' )
 
 print(
 	~\end{center}
@@ -496,28 +496,28 @@ for Chapter: chapter in repeat(Chapters) {
 	match Chapter
 		[cmd_chapter DirData: text* nl Lines: line* SectionList: section*]
 
-	print( '\\chapter{' DirData '}\n' )
+	print( '\\chapter{', DirData, '}\n' )
 	printLines( Lines )
 
 	for Section: section in repeat(SectionList) {
 		match Section
 			[cmd_section DirData: text* nl Lines: line* SubSectionList: sub_section*]
 
-		print( '\\section{' DirData '}\n' )
+		print( '\\section{', DirData, '}\n' )
 		printLines( Lines )
 		for SubSection: sub_section in repeat(SubSectionList) {
 			match SubSection
 				[cmd_sub_section DirData: text* nl Lines: line* 
 						SubSubSectionList: sub_sub_section*]
 
-			print( '\\subsection{' DirData '}\n' )
+			print( '\\subsection{', DirData, '}\n' )
 			printLines( Lines )
 
 			for SubSubSection: sub_sub_section in repeat(SubSubSectionList) {
 				match SubSubSection
 					[cmd_sub_sub_section DirData: text* nl Lines: line*]
 
-				print( '\\subsubsection{' DirData '}\n' )
+				print( '\\subsubsection{', DirData, '}\n' )
 				printLines( Lines )
 			}
 		}

@@ -159,7 +159,7 @@ for Switch:tag in S {
 			if match Text
 					["<text>" TextContent:content "</text>"]
 			{
-				print( ' ' TextContent '\n' )
+				print( ' ', TextContent, '\n' )
 			}
 		}
 	}

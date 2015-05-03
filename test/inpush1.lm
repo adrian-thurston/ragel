@@ -56,10 +56,10 @@ namespace lang
 			if ( H ) {
 				if ( H.Inc ) {
 					FN: str = unquote( H.Inc )
-					print( 'opening ' FN '\n' )
-					IS: stream = open( FN 'r' )
+					print[ 'opening ' FN '\n' ]
+					IS: stream = open( FN, 'r' )
 					if ( ! IS ) {
-						print( 'ERROR: failed to open ' FN '\n' )
+						print[ 'ERROR: failed to open ' FN '\n' ]
 						exit(1)
 					}
 					input->push_stream( IS )
@@ -68,10 +68,10 @@ namespace lang
 			else {
 				parse_stop L: rest_of_line[ input ]
 				if ! L {
-					print( "ERROR: stuck: " error )
+					print[ "ERROR: stuck: " error ]
 					exit(1)
 				}
-				print( "ERROR: failed to parse # directive: " L )
+				print[ "ERROR: failed to parse # directive: " L ]
 			}
 		}
 	end
@@ -91,9 +91,9 @@ end # lang
 parse Input: lang::start[ stdin ]
 
 if ! Input
-	print( error '\n' )
+	print[ error '\n' ]
 else {
-	print( Input )
+	print[ Input ]
 }
 ##### IN #####
 

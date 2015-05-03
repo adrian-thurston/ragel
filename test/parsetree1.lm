@@ -21,7 +21,7 @@ parse Input1: start "a [Item2] c d
 print( Input1 )
 
 parse_tree Input2: start "a [Item2] c d
-print( Input2 "\n" )
+print( Input2, "\n" )
 ######### EXP #########
 a b c d
 NIL

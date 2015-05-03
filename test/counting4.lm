@@ -39,7 +39,7 @@ context counting
 		{
 			count = 0
 			target = r1.data.atoi()
-			print( 'target: ' target '\n' )
+			print( 'target: ', target, '\n' )
 		}
 
 	# Arbitrary item.
@@ -75,11 +75,11 @@ context counting
 		{
 			for List: counted_list in lhs {
 				match List [Count: number Items: count_items]
-				print( 'num items: ' Count.data.atoi() '\n' )
+				print( 'num items: ', Count.data.atoi(), '\n' )
 
 				i: int = 1
 				for Item: item in Items {
-					print( '  item ' i ': ' ^Item '\n' )
+					print( '  item ', i, ': ', ^Item, '\n' )
 					i = i + 1
 				}
 			}

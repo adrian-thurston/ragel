@@ -1,5 +1,5 @@
 A: argv_el = argv->pop()
-print( A->value '\n' )
+print( A->value, '\n' )
 ##### ARGS #####
 a
 ##### EXP #####

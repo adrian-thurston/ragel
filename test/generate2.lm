@@ -6,7 +6,7 @@ context generate
 		list_el el
 	end
 
-	open_item new_open_item( type: str num: int )
+	open_item new_open_item( type: str, num: int )
 	{
 		OI: open_item = new open_item()
 		OI->type = type
@@ -23,11 +23,11 @@ context generate
 		{
 			input->pull( match_length )
 
-			OI: open_item = new_open_item( '{' match_length )
+			OI: open_item = new_open_item( '{', match_length )
 			OpenStack->push( OI )
 			i: int = 0
 			while ( i < match_length ) {
-				input->push( make_token( typeid<ocurly> '{' ) )
+				input->push( make_token( typeid<ocurly>, '{' ) )
 				i = i + 1
 			}
 		}
@@ -49,11 +49,11 @@ context generate
 					length = Top->num
 
 				if ( length == 1 )
-					input->push( make_token( typeid<ccurly1> input->pull( 1 ) ) )
+					input->push( make_token( typeid<ccurly1>, input->pull( 1 ) ) )
 				else if ( length == 2 )
-					input->push( make_token( typeid<ccurly2> input->pull( 2 ) ) )
+					input->push( make_token( typeid<ccurly2>, input->pull( 2 ) ) )
 				else if ( length == 3 )
-					input->push( make_token( typeid<ccurly3> input->pull( 3 ) ) )
+					input->push( make_token( typeid<ccurly3>, input->pull( 3 ) ) )
 
 				Top->num = Top->num - length
 
@@ -61,18 +61,18 @@ context generate
 					OpenStack->push( Top )
 			}
 			else {
-				input->push( make_token( typeid<stray_close> input->pull( match_length ) ) )
+				input->push( make_token( typeid<stray_close>, input->pull( match_length ) ) )
 			}
 		}
 		
 		token osquare /'['+/
 		{
 			input->pull( match_length )
-			OI: open_item = new_open_item( '[' match_length )
+			OI: open_item = new_open_item( '[', match_length )
 			OpenStack->push( OI )
 			i: int = 0
 			while ( i < match_length ) {
-				input->push( make_token( typeid<osquare> '[' ) )
+				input->push( make_token( typeid<osquare>, '[' ) )
 				i = i + 1
 			}
 		}
@@ -93,9 +93,9 @@ context generate
 					length = Top->num
 
 				if ( length == 1 )
-					input->push( make_token( typeid<csquare1> input->pull( 1 ) ) )
+					input->push( make_token( typeid<csquare1>, input->pull( 1 ) ) )
 				else if ( length == 2 )
-					input->push( make_token( typeid<csquare2> input->pull( 2 ) ) )
+					input->push( make_token( typeid<csquare2>, input->pull( 2 ) ) )
 
 				Top->num = Top->num - length
 
@@ -103,7 +103,7 @@ context generate
 					OpenStack->push( Top )
 			}
 			else {
-				input->push( make_token( typeid<stray_close> input->pull( match_length ) ) )
+				input->push( make_token( typeid<stray_close>, input->pull( match_length ) ) )
 			}
 		}
 		
@@ -117,14 +117,14 @@ context generate
 				if ( Top->type == '{' ) {
 					i = 0
 					while ( i < Top->num ) {
-						input->push( make_token( typeid<missing_curly> '}' ) )
+						input->push( make_token( typeid<missing_curly>, '}' ) )
 						i = i + 1
 					}
 				}
 				else if ( Top->type == '[' ) {
 					i = 0
 					while ( i < Top->num ) {
-						input->push( make_token( typeid<missing_square> ']' ) )
+						input->push( make_token( typeid<missing_square>, ']' ) )
 						i = i + 1
 					}
 				}
@@ -203,17 +203,17 @@ end # generate
 Generate: generate = new generate()
 
 Generate->OpenStack = new list<generate::open_item>()
-Sentinal: generate::open_item = new_open_item( '** SENTINAL **' 1 )
+Sentinal: generate::open_item = new_open_item( '** SENTINAL **', 1 )
 Generate->OpenStack->push( Sentinal )
 
 parse S: generate::start(Generate)[stdin]
 
 if S {
 	for I: generate::external_link in S
-		print( 'EXTERNAL LINK: ' I  '\n' )
+		print[ 'EXTERNAL LINK: ' I  '\n' ]
 
 	for I: generate::internal_link in S
-		print( 'INTERNAL LINK: ' I  '\n' )
+		print[ 'INTERNAL LINK: ' I  '\n' ]
 }
 ##### IN #####
 [external]

@@ -1,4 +1,4 @@
-int f1( i: int j: int )
+int f1( i: int, j: int )
 {
 	return i + j
 }
@@ -6,9 +6,9 @@ int f1( i: int j: int )
 int main()
 {
 	print( f1( 
-		f1( f1( 1 1 ) f1( 1 1 ) )
-		f1( f1( 1 1 ) f1( 1 1 ) )
-	) '\n' )
+		f1( f1( 1, 1 ), f1( 1, 1 ) ),
+		f1( f1( 1, 1 ), f1( 1, 1 ) )
+	), '\n' )
 }
 
 main()

@@ -4,18 +4,18 @@ end
 
 def d [t]
 
-int testAppend( Fn: str Mode: str )
+int testAppend( Fn: str, Mode: str )
 {
-	S: stream = open( Fn Mode )
+	S: stream = open( Fn, Mode )
 	send S
 		"colm networks
 	S->close()
 }
 
-testAppend( 'working/open2.w' ('w') )
-testAppend( 'working/open2.w' ('a') )
+testAppend( 'working/open2.w', 'w' )
+testAppend( 'working/open2.w', 'a' )
 
-S: stream = open( 'working/open2.w' ('r') )
+S: stream = open( 'working/open2.w', 'r' )
 parse D: d [S]
 print( D )
 

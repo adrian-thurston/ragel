@@ -3,7 +3,7 @@ struct el
 	map_el<str> el
 end
 
-new M: map<str el>()
+new M: map<str, el>()
 
 for AE: argv_el in argv {
 	print "[AE->value]
