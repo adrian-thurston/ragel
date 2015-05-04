@@ -805,7 +805,9 @@ struct FsmCtx
 
 		printStatistics(printStatistics),
 
-		nfaTermCheck(nfaTermCheck)
+		nfaTermCheck(nfaTermCheck),
+
+		unionOp(false)
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
@@ -819,6 +821,8 @@ struct FsmCtx
 	long stateLimit;
 	bool printStatistics;
 	bool nfaTermCheck;
+
+	bool unionOp;
 };
 
 typedef InList<CondAp> CondInList;

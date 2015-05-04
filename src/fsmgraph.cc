@@ -577,6 +577,8 @@ void FsmAp::unionOp( FsmAp *other )
 {
 	assert( ctx == other->ctx );
 
+	ctx->unionOp = true;
+
 	/* Turn on misfit accounting for both graphs. */
 	setMisfitAccounting( true );
 	other->setMisfitAccounting( true );
@@ -587,6 +589,8 @@ void FsmAp::unionOp( FsmAp *other )
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
 	setMisfitAccounting( false );
+
+	ctx->unionOp = false;
 }
 
 void FsmAp::nfaFillInStates( MergeData &md )
@@ -1312,6 +1316,8 @@ void FsmAp::nfaMergeStates( MergeData &md, StateAp *destState,
 
 void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 {
+	bool bothFinal = srcState->isFinState() && destState->isFinState();
+
 	outTransCopy( md, destState, srcState->outList.head );
 
 	/* Get its bits and final state status. */
@@ -1332,7 +1338,10 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 		destState->fromStateActionTable.setActions( 
 				ActionTable( srcState->fromStateActionTable ) );
 		destState->outActionTable.setActions( ActionTable( srcState->outActionTable ) );
-		destState->outCondSet.insert( OutCondSet( srcState->outCondSet ) );
+
+		if ( !ctx->unionOp )
+			destState->outCondSet.insert( OutCondSet( srcState->outCondSet ) );
+
 		destState->errActionTable.setActions( ErrActionTable( srcState->errActionTable ) );
 		destState->eofActionTable.setActions( ActionTable( srcState->eofActionTable ) );
 	}
@@ -1345,7 +1354,15 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 		destState->toStateActionTable.setActions( srcState->toStateActionTable );
 		destState->fromStateActionTable.setActions( srcState->fromStateActionTable );
 		destState->outActionTable.setActions( srcState->outActionTable );
-		destState->outCondSet.insert( srcState->outCondSet );
+
+		if ( bothFinal ) {
+			if ( !ctx->unionOp )
+				destState->outCondSet.insert( srcState->outCondSet );
+		}
+		else {
+			destState->outCondSet.insert( srcState->outCondSet );
+		}
+
 		destState->errActionTable.setActions( srcState->errActionTable );
 		destState->eofActionTable.setActions( srcState->eofActionTable );
 
