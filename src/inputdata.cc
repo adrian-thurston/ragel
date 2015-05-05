@@ -188,7 +188,6 @@ void InputData::openOutput()
 
 void InputData::prepareSingleMachine()
 {
-#ifdef KELBT_PARSER
 	/* Locate a machine spec to generate dot output for. We can only emit.
 	 * Dot takes one graph at a time. */
 	if ( machineSpec != 0 ) {
@@ -220,8 +219,7 @@ void InputData::prepareSingleMachine()
 			error() << "no machine instantiations to generate graphviz output" << endp;
 	}
 
-	dotGenParser->pd->prepareMachineGen( gdEl );
-#endif
+	dotGenParser->pd->prepareMachineGen( gdEl, hostLang );
 }
 
 void InputData::prepareAllMachines()

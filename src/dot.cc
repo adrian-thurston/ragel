@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2011 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2015 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -24,6 +24,7 @@
 #include "gendata.h"
 #include "inputdata.h"
 #include "parsedata.h"
+#include "rlparse.h"
 
 using std::istream;
 using std::ifstream;
@@ -105,7 +106,7 @@ void GraphvizDotGen::onChar( Key lowKey, Key highKey, CondSpace *condSpace, long
 }
 
 
-void GraphvizDotGen::transAction( StateAp *fromState, CondAp *trans )
+void GraphvizDotGen::transAction( StateAp *fromState, TransData *trans )
 {
 	int n = 0;
 	ActionTable *actionTables[3] = { 0, 0, 0 };
@@ -148,22 +149,43 @@ void GraphvizDotGen::transList( StateAp *state )
 	/* Build the set of unique transitions out of this state. */
 	RedTransSet stTransSet;
 	for ( TransList::Iter tel = state->outList; tel.lte(); tel++ ) {
-		for ( CondList::Iter ctel = tel->tcap()->condList; ctel.lte(); ctel++ ) {
+		if ( tel->plain() ) {
+			TransDataAp *tdap = tel->tdap();
+
 			/* Write out the from and to states. */
 			out << "\t" << state->alg.stateNum << " -> ";
 
-			if ( ctel->toState == 0 )
+			if ( tdap->toState == 0 )
 				out << "err_" << state->alg.stateNum;
 			else
-				out << ctel->toState->alg.stateNum;
+				out << tdap->toState->alg.stateNum;
 
 			/* Begin the label. */
 			out << " [ label = \""; 
-			onChar( tel->lowKey, tel->highKey, tel->condSpace, ctel->key.getVal() );
+			onChar( tel->lowKey, tel->highKey, 0, 0 );
 
 			/* Write the action and close the transition. */
-			transAction( state, ctel );
+			transAction( state, tdap );
 			out << "\" ];\n";
+		}
+		else {
+			for ( CondList::Iter ctel = tel->tcap()->condList; ctel.lte(); ctel++ ) {
+				/* Write out the from and to states. */
+				out << "\t" << state->alg.stateNum << " -> ";
+
+				if ( ctel->toState == 0 )
+					out << "err_" << state->alg.stateNum;
+				else
+					out << ctel->toState->alg.stateNum;
+
+				/* Begin the label. */
+				out << " [ label = \""; 
+				onChar( tel->lowKey, tel->highKey, tel->condSpace, ctel->key.getVal() );
+
+				/* Write the action and close the transition. */
+				transAction( state, ctel );
+				out << "\" ];\n";
+			}
 		}
 	}
 }
@@ -217,10 +239,18 @@ void GraphvizDotGen::write( )
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		bool needsErr = false;
 		for ( TransList::Iter tel = st->outList; tel.lte(); tel++ ) {
-			for ( CondList::Iter ctel = tel->tcap()->condList; ctel.lte(); ctel++ ) {
-				if ( ctel->toState == 0 ) {
+			if ( tel->plain() ) {
+				if ( tel->tdap()->toState == 0 ) {
 					needsErr = true;
 					break;
+				}
+			}
+			else {
+				for ( CondList::Iter ctel = tel->tcap()->condList; ctel.lte(); ctel++ ) {
+					if ( ctel->toState == 0 ) {
+						needsErr = true;
+						break;
+					}
 				}
 			}
 		}
@@ -275,15 +305,11 @@ void GraphvizDotGen::write( )
 
 void InputData::writeDot( ostream &out )
 {
-#ifdef KELBT_PARSER
 	ParseData *pd = dotGenParser->pd;
-	FsmAp *graph = pd->sectionGraph;
 
-	CodeGenArgs args( *this, inputFileName, pd->sectionName, pd, graph, out );
+	CodeGenArgs args( inputFileName, pd->sectionName, pd->machineId,
+			pd, pd->sectionGraph, codeStyle, out );
 
 	GraphvizDotGen dotGen( args );
-
 	dotGen.write();
-#endif
 }
-

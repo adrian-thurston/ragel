@@ -56,7 +56,7 @@ public:
 
 	bool makeNameInst( std::string &res, NameInst *nameInst );
 	void action( ActionTable *actionTable );
-	void transAction( StateAp *fromState, CondAp *trans );
+	void transAction( StateAp *fromState, TransData *trans );
 	void key( Key key );
 	void onChar( Key lowKey, Key highKey, CondSpace *condSpace, long condVals );
 	void transList( StateAp *state );
