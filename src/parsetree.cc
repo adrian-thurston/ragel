@@ -770,7 +770,6 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 		nfaCondsCheck( pd );
 	}
 
-
 	if ( pd->id->printStatistics )
 		cout << "terms\t" << terms.length() << endl;
 
@@ -846,10 +845,14 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	return ret;
 }
 
+void nfaCheckResult( long code, long id, const char *scode )
+{
+	cout << code << " " << id << " " << scode << endl;
+	exit( code + id );
+}
+
 void NfaUnion::nfaTermCheck( ParseData *pd )
 {
-	cout << "nfa-term-check" << endl;
-
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
 		try {
 			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
@@ -857,30 +860,24 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 			pd->fsmCtx->stateLimit = -1;
 		}
 		catch ( const TooManyStates & ) {
-			cout << "too-many-states" << endl;
-			exit( 1 );
+			nfaCheckResult( 1, 0, "too-many-states" );
 		}
 		catch ( const PriorInteraction & ) {
-			cout << "prior-interaction" << endl;
-			exit( 8 );
+			nfaCheckResult( 8, 0, "prior-interaction" );
 		}
 		catch ( const RepetitionError & ) {
-			cout << "rep-error" << endl;
-			exit( 2 );
+			nfaCheckResult( 2, 0, "rep-error" );
 		}
 		catch ( const TransDensity & ) {
-			cout << "trans-density-error" << endl;
-			exit( 7 );
+			nfaCheckResult( 7, 0, "trans-density-error" );
 		}
-
 	}
-	exit( 0 );
+
+	nfaCheckResult( 0, 0, "OK" );
 }
 
 void NfaUnion::nfaCondsCheck( ParseData *pd )
 {
-	cout << "nfa-conds-check" << endl;
-
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
 		FsmAp *fsm = 0;
 		try {
@@ -891,16 +888,14 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 			strike( pd, fsm );
 		}
 		catch ( const TooManyStates & ) {
-			cout << "too-many-states" << endl;
-			exit( 1 );
+			nfaCheckResult( 1, 0, "too-many-states" );
 		}
 		catch ( const CondCostTooHigh &ccth ) {
-			cout << "cond-cost" << endl;
-			exit( 20 + ccth.costId );
-		};
-
+			nfaCheckResult( 20, ccth.costId, "cond-cost" );
+		}
 	}
-	exit( 0 );
+
+	nfaCheckResult( 0, 0, "OK" );
 }
 
 void NfaUnion::makeNameTree( ParseData *pd )

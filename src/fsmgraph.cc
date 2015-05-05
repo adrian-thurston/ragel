@@ -1356,6 +1356,9 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 		destState->outActionTable.setActions( srcState->outActionTable );
 
 		if ( bothFinal ) {
+			/* FIXME: This needs to be improved with a proper cross. This check
+			 * is covers some cases of future leaving condition interactions,
+			 * but not all. */
 			if ( !ctx->unionOp )
 				destState->outCondSet.insert( srcState->outCondSet );
 		}
