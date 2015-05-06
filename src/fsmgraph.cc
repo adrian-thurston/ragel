@@ -405,20 +405,9 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
  * invoked. */
 void FsmAp::concatOp( FsmAp *other )
 {
-	static int guardedPriorName = 10000;
-	if ( other->startState->guardedIn ) {
-		PriorDesc *pd1 = new PriorDesc;
-		pd1->key = guardedPriorName;
-		pd1->priority = 0;
-
-		PriorDesc *pd2 = new PriorDesc;
-		pd2->key = guardedPriorName;
-		pd2->priority = 1;
-
-		allTransPrior( 0, pd1 );
-		other->allTransPrior( 0, pd2 );
-
-		guardedPriorName++;
+	for ( PriorTable::Iter g = other->startState->guardedInTable; g.lte(); g++ ) {
+		allTransPrior( 0, g->desc );
+		other->allTransPrior( 0, g->desc->other );
 	}
 
 	/* Assert same signedness and return graph concatenation op. */
@@ -1369,7 +1358,7 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 		destState->errActionTable.setActions( srcState->errActionTable );
 		destState->eofActionTable.setActions( srcState->eofActionTable );
 
-		destState->guardedIn = destState->guardedIn || srcState->guardedIn;
+		destState->guardedInTable.setPriors( srcState->guardedInTable );
 	}
 
 	if ( srcState->nfaOut != 0 ) {

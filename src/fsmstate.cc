@@ -107,7 +107,7 @@ StateAp::StateAp()
 	outCondSet(),
 	errActionTable(),
 	eofActionTable(),
-	guardedIn(false)
+	guardedInTable()
 {
 }
 
@@ -155,7 +155,7 @@ StateAp::StateAp(const StateAp &other)
 	errActionTable(other.errActionTable),
 	eofActionTable(other.eofActionTable),
 
-	guardedIn(other.guardedIn)
+	guardedInTable(other.guardedInTable)
 {
 	/* Duplicate all the transitions. */
 	for ( TransList::Iter trans = other.outList; trans.lte(); trans++ ) {

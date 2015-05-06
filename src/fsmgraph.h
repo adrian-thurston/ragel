@@ -62,7 +62,13 @@ struct CondSpace;
 struct FsmCtx;
 
 struct TooManyStates {};
-struct PriorInteraction {};
+
+struct PriorInteraction
+{
+	PriorInteraction( int id ) : id(id) {}
+	int id;
+};
+
 struct RepetitionError {};
 struct TransDensity {};
 
@@ -332,8 +338,17 @@ typedef CmpSTable< ErrActionTableEl, CmpErrActionTableEl > CmpErrActionTable;
  * Has key and whether or not used. */
 struct PriorDesc
 {
+	PriorDesc() :
+		key(0),
+		priority(0),
+		guardId(0),
+		other(0)
+	{}
+
 	int key;
 	int priority;
+	int guardId;
+	PriorDesc *other;
 };
 
 /* Element in the arrays of priorities for transitions and arrays. Ordering is
@@ -938,7 +953,7 @@ struct StateAp
 	/* Set of longest match items that may be active in this state. */
 	LmItemSet lmItemSet;
 
-	bool guardedIn;
+	PriorTable guardedInTable;
 };
 
 /* Return and re-entry for the co-routine iterators. This should ALWAYS be

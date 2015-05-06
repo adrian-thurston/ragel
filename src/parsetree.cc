@@ -851,31 +851,9 @@ void nfaCheckResult( long code, long id, const char *scode )
 	exit( code + id );
 }
 
-void NfaUnion::nfaTermCheck( ParseData *pd )
-{
-	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		try {
-			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
-			(*term)->walk( pd );
-			pd->fsmCtx->stateLimit = -1;
-		}
-		catch ( const TooManyStates & ) {
-			nfaCheckResult( 1, 0, "too-many-states" );
-		}
-		catch ( const PriorInteraction & ) {
-			nfaCheckResult( 8, 0, "prior-interaction" );
-		}
-		catch ( const RepetitionError & ) {
-			nfaCheckResult( 2, 0, "rep-error" );
-		}
-		catch ( const TransDensity & ) {
-			nfaCheckResult( 7, 0, "trans-density-error" );
-		}
-	}
-
-	nfaCheckResult( 0, 0, "OK" );
-}
-
+/* This is the first pass check. It looks for state (limit times 2 ) or
+ * condition cost. We use this to expand generalized repetition to past the nfa
+  union choice point. */
 void NfaUnion::nfaCondsCheck( ParseData *pd )
 {
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
@@ -892,6 +870,32 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 		}
 		catch ( const CondCostTooHigh &ccth ) {
 			nfaCheckResult( 20, ccth.costId, "cond-cost" );
+		}
+	}
+
+	nfaCheckResult( 0, 0, "OK" );
+}
+
+
+void NfaUnion::nfaTermCheck( ParseData *pd )
+{
+	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
+		try {
+			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
+			(*term)->walk( pd );
+			pd->fsmCtx->stateLimit = -1;
+		}
+		catch ( const TooManyStates & ) {
+			nfaCheckResult( 1, 0, "too-many-states" );
+		}
+		catch ( const PriorInteraction &pi ) {
+			nfaCheckResult( 60, pi.id, "prior-interaction" );
+		}
+		catch ( const RepetitionError & ) {
+			nfaCheckResult( 2, 0, "rep-error" );
+		}
+		catch ( const TransDensity & ) {
+			nfaCheckResult( 7, 0, "trans-density-error" );
 		}
 	}
 
@@ -1639,6 +1643,7 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 			/* Init the prior descriptor for the priority setting. */
 			priorDescs[i].key = priorityAugs[i].priorKey;
 			priorDescs[i].priority = priorityAugs[i].priorValue;
+			priorDescs[i].guardId = 0;
 		}
 	}
 
@@ -1679,9 +1684,30 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 		pd->popNameScope( nameFrame );
 	}
 
-	/* Guarded In? */
-	if ( guardedIn )
-		rtnVal->startState->guardedIn = true;
+	/* Guarded In. Set up the two priorities that will interact. We also need
+	 * to assign the guard id so when the interaction is detected, we can
+	 * report on the source. */
+	if ( guardedIn ) {
+//		rtnVal->startState->guardedIn = true;
+		priorDescs = new PriorDesc[2];
+
+static int guardedPriorName = 10000;
+
+		priorDescs[0].key = guardedPriorName;
+		priorDescs[0].priority = 0;
+		priorDescs[0].guardId = guardPriorId;
+		priorDescs[0].other = &priorDescs[1];
+
+		priorDescs[1].key = guardedPriorName;
+		priorDescs[1].priority = 1;
+		priorDescs[1].guardId = guardPriorId;
+		priorDescs[1].other = &priorDescs[0];
+
+guardedPriorName++;
+
+		rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[0] );
+
+	}
 
 	if ( priorOrd != 0 )
 		delete[] priorOrd;

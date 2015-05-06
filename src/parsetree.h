@@ -501,8 +501,12 @@ struct Term
 /* Third level of precedence. Augmenting nodes with actions and priorities. */
 struct FactorWithAug
 {
-	FactorWithAug( FactorWithRep *factorWithRep ) :
-		priorDescs(0), guardedIn(false), factorWithRep(factorWithRep) { }
+	FactorWithAug( FactorWithRep *factorWithRep )
+	:
+		priorDescs(0), guardedIn(false),
+		guardPriorId(0), factorWithRep(factorWithRep)
+	{}
+
 	~FactorWithAug();
 
 	/* Tree traversal. */
@@ -523,6 +527,7 @@ struct FactorWithAug
 	Vector<EpsilonLink> epsilonLinks;
 	Vector<ConditionTest> conditions;
 	bool guardedIn;
+	long guardPriorId;
 
 	FactorWithRep *factorWithRep;
 };
