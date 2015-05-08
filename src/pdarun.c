@@ -1766,6 +1766,7 @@ case PcrReverse:
 			/* Either we are dealing with a terminal that was shifted or a
 			 * nonterminal that was reduced. */
 			if ( pdaRun->parseInput->id < prg->rtd->firstNonTermId ) {
+				/* This is a terminal. */
 				assert( pdaRun->parseInput->retryUpper == 0 );
 
 				if ( pdaRun->parseInput->retryLower != 0 ) {
@@ -1777,6 +1778,15 @@ case PcrReverse:
 				}
 
 				if ( pdaRun->parseInput->causeReduce != 0 ) {
+					/* The terminal caused a reduce. Unshift the reduced thing
+					 * (will unreduce in the next step. */
+					if ( pdaRun->shiftCount == pdaRun->commitShiftCount ) {
+						debug( prg, REALM_PARSE, "backed up to commit point, "
+								"failing parse\n" );
+						goto fail;
+					}
+					pdaRun->shiftCount -= 1;
+
 					pdaRun->undoLel = pdaRun->stackTop;
 
 					/* Check if we've arrived at the stack sentinal. This guard
