@@ -97,7 +97,7 @@ struct InputData
 		nfaTermCheck(0),
 		nfaCondsDepth(-1),
 		transSpanDepth(6),
-		nfaIntermedStateLimit(2000),
+		nfaIntermedStateLimit(10000),
 		nfaFinalStateLimit(2000)
 	{}
 
