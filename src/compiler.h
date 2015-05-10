@@ -88,7 +88,7 @@ struct ProdElList;
 struct PdaLiteral;
 struct Production;
 
-/* A pointer to this is in PdaRun, but it's specification is not known by the
+/* A pointer to this is in struct pda_run, but it's specification is not known by the
  * runtime code. The runtime functions that access it are defined in
  * ctinput.cpp and stubbed in fsmcodegen.cpp */
 struct Bindings
@@ -735,7 +735,7 @@ struct Compiler
 	void addPushBackLHS( Production *prod, CodeVect &code, long &insertPos );
 
 	void prepGrammar();
-	PdaRun *parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
+	struct pda_run *parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 			int parserId, StreamImpl *sourceStream );
 	void parsePatterns();
 

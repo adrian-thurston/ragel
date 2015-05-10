@@ -198,7 +198,7 @@ static void stream_undo_append_stream( Program *prg, Tree **sp, StreamImpl *is,
 	is->funcs->undoAppendStream( is );
 }
 
-static Tree *stream_pull_bc( Program *prg, Tree **sp, PdaRun *pdaRun,
+static Tree *stream_pull_bc( Program *prg, Tree **sp, struct pda_run *pdaRun,
 		Stream *stream, Tree *length )
 {
 	long len = ((long)length);
@@ -474,7 +474,7 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 };
 
 
-int colm_make_reverse_code( PdaRun *pdaRun )
+int colm_make_reverse_code( struct pda_run *pdaRun )
 {
 	RtCodeVect *reverseCode = &pdaRun->reverseCode;
 	RtCodeVect *rcodeCollect = &pdaRun->rcodeCollect;
@@ -520,7 +520,7 @@ int colm_make_reverse_code( PdaRun *pdaRun )
 	return true;
 }
 
-void colm_transfer_reverse_code( PdaRun *pdaRun, ParseTree *parseTree )
+void colm_transfer_reverse_code( struct pda_run *pdaRun, ParseTree *parseTree )
 {
 	if ( pdaRun->rcBlockCount > 0 ) {
 		//debug( REALM_PARSE, "attaching reverse code to token\n" );
@@ -843,7 +843,7 @@ again:
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
 			LangElInfo *lelInfo = prg->rtd->lelInfo;
-			char **mark = exec->parser->pdaRun->fsmRun->mark;
+			char **mark = exec->parser->pdaRun->mark;
 
 			int i;
 			for ( i = 0; i < lelInfo[exec->parser->pdaRun->tokenId].numCaptureAttr; i++ ) {
@@ -2266,7 +2266,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_LOAD\n" );
 
 			Parser *parser = vm_pop_parser();
-			PdaRun *pdaRun = parser->pdaRun;
+			struct pda_run *pdaRun = parser->pdaRun;
 			long steps = pdaRun->steps;
 
 			vm_push_parser( exec->parser );
@@ -2589,7 +2589,7 @@ again:
 
 			Stream *stream = vm_pop_stream();
 			Tree *len = vm_pop_tree();
-			PdaRun *pdaRun = exec->parser != 0 ? exec->parser->pdaRun : 0;
+			struct pda_run *pdaRun = exec->parser != 0 ? exec->parser->pdaRun : 0;
 			Tree *string = stream_pull_bc( prg, sp, pdaRun, stream, len );
 			treeUpref( string );
 			vm_push_tree( string );
@@ -2609,7 +2609,7 @@ again:
 
 			Stream *stream = vm_pop_stream();
 			Tree *len = vm_pop_tree();
-			PdaRun *pdaRun = exec->parser != 0 ? exec->parser->pdaRun : 0;
+			struct pda_run *pdaRun = exec->parser != 0 ? exec->parser->pdaRun : 0;
 			Tree *string = stream_pull_bc( prg, sp, pdaRun, stream, len );
 			treeUpref( string );
 			vm_push_tree( string );

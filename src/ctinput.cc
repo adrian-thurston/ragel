@@ -24,6 +24,7 @@
 #include "input.h"
 #include "debug.h"
 #include "pool.h"
+#include "pdacodegen.h"
 
 #include <iostream>
 
@@ -447,7 +448,7 @@ StreamFuncs replFuncs =
 };
 
 extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp,
-		PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *is )
+		pda_run *pdaRun, StreamImpl *is )
 {
 	/* All three set by consumeLangEl. */
 	long bindId;
@@ -478,20 +479,20 @@ extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp,
 	pdaRun->parseInput = parseTree;
 }
 
-extern "C" void internalInitBindings( PdaRun *pdaRun )
+extern "C" void internalInitBindings( pda_run *pdaRun )
 {
 	/* Bindings are indexed at 1. Need a no-binding. */
 	pdaRun->bindings = new Bindings;
 	pdaRun->bindings->push(0);
 }
 
-void pushBinding( PdaRun *pdaRun, ParseTree *parseTree )
+void pushBinding( pda_run *pdaRun, ParseTree *parseTree )
 {
 	/* If the item is bound then store it in the bindings array. */
 	pdaRun->bindings->push( parseTree );
 }
 
-extern "C" void internalPopBinding( PdaRun *pdaRun, ParseTree *parseTree )
+extern "C" void internalPopBinding( pda_run *pdaRun, ParseTree *parseTree )
 {
 	ParseTree *lastBound = pdaRun->bindings->top();
 	if ( lastBound == parseTree )

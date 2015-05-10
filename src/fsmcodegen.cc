@@ -95,7 +95,7 @@ string FsmCodeGen::CS()
 {
 	ostringstream ret;
 	/* Expression for retrieving the key, use simple dereference. */
-	ret << ACCESS() << "cs";
+	ret << ACCESS() << "fsm_cs";
 	return ret.str();
 }
 
@@ -848,9 +848,9 @@ void FsmCodeGen::writeExec()
 	setLabelsNeeded();
 
 	out <<
-		"static void fsmExecute( FsmRun *fsmRun, StreamImpl *inputStream )\n"
+		"static void fsmExecute( struct pda_run *pdaRun, StreamImpl *inputStream )\n"
 		"{\n"
-		"	" << BLOCK_START() << " = fsmRun->p;\n"
+		"	" << BLOCK_START() << " = pdaRun->p;\n"
 		"/*_resume:*/\n";
 
 	if ( redFsm->errState != 0 ) {
@@ -901,9 +901,9 @@ void FsmCodeGen::writeCode()
 	 * should use the preprocessor to make these go away. */
 	out <<
 		"static void sendNamedLangEl( struct colm_program *prg, Tree **tree,\n"
-		"		PdaRun *pdaRun, FsmRun *fsmRun, StreamImpl *inputStream ) { }\n"
-		"static void initBindings( PdaRun *pdaRun ) {}\n"
-		"static void popBinding( PdaRun *pdaRun, ParseTree *tree ) {}\n"
+		"		struct pda_run *pdaRun, StreamImpl *inputStream ) { }\n"
+		"static void initBindings( struct pda_run *pdaRun ) {}\n"
+		"static void popBinding( struct pda_run *pdaRun, ParseTree *tree ) {}\n"
 		"\n"
 		"\n";
 }

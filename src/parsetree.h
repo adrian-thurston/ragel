@@ -54,7 +54,6 @@
 struct NameInst;
 struct FsmGraph;
 struct RedFsm;
-struct _FsmRun;
 struct ObjectDef;
 struct ElementOf;
 struct UniqueType;
@@ -66,7 +65,6 @@ struct TypeAlias;
 struct RegionSet;
 struct NameScope;
 struct IterCall;
-typedef struct _PdaRun PdaRun;
 
 /* 
  * Code Vector
@@ -1668,7 +1666,7 @@ struct Pattern
 	PatternItemList *list;
 	long patRepId;
 	LangEl *langEl;
-	PdaRun *pdaRun;
+	struct pda_run *pdaRun;
 	long nextBindId;
 	Pattern *prev, *next;
 };
@@ -1697,7 +1695,7 @@ struct Constructor
 	ConsItemList *list;
 	int patRepId;
 	LangEl *langEl;
-	PdaRun *pdaRun;
+	struct pda_run *pdaRun;
 	long nextBindId;
 	bool parse;
 
@@ -1726,7 +1724,7 @@ struct ParserText
 	Namespace *nspace;
 	ConsItemList *list;
 	LangEl *langEl;
-	PdaRun *pdaRun;
+	struct pda_run *pdaRun;
 	long nextBindId;
 	bool parse;
 	ParserText *prev, *next;

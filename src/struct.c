@@ -78,7 +78,7 @@ void colm_parser_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 
 Parser *colm_parser_new( Program *prg, GenericInfo *gi )
 {
-	PdaRun *pdaRun = malloc( sizeof(PdaRun) );
+	struct pda_run *pdaRun = malloc( sizeof(struct pda_run) );
 
 	/* Start off the parsing process. */
 	colm_pda_init( prg, pdaRun, prg->rtd->pdaTables, 

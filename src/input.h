@@ -40,29 +40,11 @@ extern "C" {
 #define INPUT_TREE     6
 #define INPUT_IGNORE   7
 
-/*
- * pdaRun <- fsmRun <- stream 
- *
- * Activities we need to support:
- *
- * 1. Stuff data into an input stream each time we <<
- * 2. Detach an input stream, and attach another when we include
- * 3. Send data back to an input stream when the parser backtracks
- * 4. Temporarily stop parsing due to a lack of input.
- *
- * At any given time, the fsmRun struct may have a prefix of the stream's
- * input. If getting data we first get what we can out of the fsmRun, then
- * consult the stream. If sending data back, we first shift pointers in the
- * fsmRun, then ship to the stream. If changing streams the old stream needs to
- * take back unprocessed data from the fsmRun.
- */
-
 struct LangEl;
 struct Pattern;
 struct PatternItem;
 struct Constructor;
 struct ConsItem;
-struct _FsmRun;
 struct colm_tree;
 struct colm_stream;
 struct colm_location;

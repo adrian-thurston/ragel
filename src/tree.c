@@ -1474,7 +1474,7 @@ Tree *getParserMem( Parser *parser, Word field )
 			break;
 		}
 		case 1: {
-			PdaRun *pdaRun = parser->pdaRun;
+			struct pda_run *pdaRun = parser->pdaRun;
 			result = pdaRun->parseErrorText;
 			break;
 		}

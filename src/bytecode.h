@@ -656,8 +656,8 @@ Kid *getAttrKid( Tree *tree, long pos );
 Tree *splitTree( struct colm_program *prg, Tree *t );
 
 void colm_rcode_downref_all( struct colm_program *prg, Tree **sp, RtCodeVect *cv );
-int colm_make_reverse_code( PdaRun *pdaRun );
-void colm_transfer_reverse_code( PdaRun *pdaRun, ParseTree *tree );
+int colm_make_reverse_code( struct pda_run *pdaRun );
+void colm_transfer_reverse_code( struct pda_run *pdaRun, ParseTree *tree );
 
 void splitRef( struct colm_program *prg, Tree ***sp, Ref *fromRef );
 

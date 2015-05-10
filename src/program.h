@@ -94,11 +94,11 @@ typedef struct colm_sections
 	long globalId;
 	long argvElId;
 
-	void (*fsmExecute)( struct _FsmRun *fsmRun, struct _StreamImpl *inputStream );
-	void (*sendNamedLangEl)( struct colm_program *prg, Tree **tree, struct _PdaRun *pdaRun,
-			struct _FsmRun *fsmRun, struct _StreamImpl *inputStream );
-	void (*initBindings)( struct _PdaRun *pdaRun );
-	void (*popBinding)( struct _PdaRun *pdaRun, ParseTree *tree );
+	void (*fsmExecute)( struct pda_run *pdaRun, struct _StreamImpl *inputStream );
+	void (*sendNamedLangEl)( struct colm_program *prg, Tree **tree,
+			struct pda_run *pdaRun, struct _StreamImpl *inputStream );
+	void (*initBindings)( struct pda_run *pdaRun );
+	void (*popBinding)( struct pda_run *pdaRun, ParseTree *tree );
 
 } RuntimeData;
 

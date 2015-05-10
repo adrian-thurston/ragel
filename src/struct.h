@@ -34,7 +34,7 @@ typedef struct colm_parser
 
 	void *buffer[10];
 
-	struct _PdaRun *pdaRun;
+	struct pda_run *pdaRun;
 	struct colm_stream *input;
 	Tree *result;
 } Parser;

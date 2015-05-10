@@ -978,12 +978,12 @@ void Compiler::initEmptyScanners()
 	}
 }
 
-PdaRun *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc, 
+pda_run *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc, 
 		int parserId, StreamImpl *sourceStream )
 {
 	StreamImpl *in = colm_impl_new_generic( "<internal>" );
 
-	PdaRun *pdaRun = new PdaRun;
+	struct pda_run *pdaRun = new pda_run;
 	colm_pda_init( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
 
 	Stream *stream = colm_stream_new_struct( prg );
