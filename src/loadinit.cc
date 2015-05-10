@@ -36,7 +36,7 @@
 
 using std::string;
 
-extern RuntimeData colm_object;
+extern colm_sections colm_object;
 
 void LoadInit::walkProdElList( String defName, ProdElList *list, prod_el_list &prodElList )
 {

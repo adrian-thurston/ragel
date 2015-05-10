@@ -37,7 +37,7 @@ using std::endl;
 
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( ostream &out, 
-		RedFsm *redFsm, FsmTables *fsmTables )
+		RedFsm *redFsm, fsm_tables *fsmTables )
 :
 	out(out),
 	redFsm(redFsm), 
@@ -789,7 +789,7 @@ void FsmCodeGen::writeData()
 	out << "\n};\n\n";
 
 	out <<
-		"static FsmTables fsmTables_start =\n"
+		"static struct fsm_tables fsmTables_start =\n"
 		"{\n"
 		"	0, "       /* actions */
 		" 0, "         /* keyOffsets */
@@ -848,7 +848,7 @@ void FsmCodeGen::writeExec()
 	setLabelsNeeded();
 
 	out <<
-		"static void fsmExecute( struct pda_run *pdaRun, StreamImpl *inputStream )\n"
+		"static void fsm_execute( struct pda_run *pdaRun, StreamImpl *inputStream )\n"
 		"{\n"
 		"	" << BLOCK_START() << " = pdaRun->p;\n"
 		"/*_resume:*/\n";

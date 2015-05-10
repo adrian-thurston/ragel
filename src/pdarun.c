@@ -1039,7 +1039,7 @@ static long scan_token( Program *prg, struct pda_run *pdaRun, StreamImpl *is )
 				break;
 		}
 
-		prg->rtd->fsmExecute( pdaRun, is );
+		prg->rtd->fsm_execute( pdaRun, is );
 
 		/* First check if scanning stopped because we have a token. */
 		if ( pdaRun->matchedToken > 0 ) {
@@ -1177,7 +1177,7 @@ void colm_pda_clear( Program *prg, Tree **sp, struct pda_run *pdaRun )
 	treeDownref( prg, sp, pdaRun->parseErrorText );
 }
 
-void colm_pda_init( Program *prg, struct pda_run *pdaRun, PdaTables *tables,
+void colm_pda_init( Program *prg, struct pda_run *pdaRun, struct pda_tables *tables,
 		int parserId, long stopTarget, int revertOn, Struct *context )
 {
 	memset( pdaRun, 0, sizeof(struct pda_run) );

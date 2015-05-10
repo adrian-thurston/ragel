@@ -24,15 +24,15 @@
 
 #include <colm/pdarun.h>
 
-typedef struct ColmStackBlock
+struct stack_block
 {
 	Tree **data;
 	int len;
 	int offset;
-	struct ColmStackBlock *next;
-} StackBlock;
+	struct stack_block *next;
+};
 
-typedef struct colm_sections
+struct colm_sections
 {
 	LangElInfo *lelInfo;
 	long numLangEls;
@@ -75,8 +75,8 @@ typedef struct colm_sections
 	CaptureAttr *captureAttr;
 	long numCapturedAttr;
 
-	FsmTables *fsmTables;
-	PdaTables *pdaTables;
+	struct fsm_tables *fsmTables;
+	struct pda_tables *pdaTables;
 	int *startStates;
 	int *eofLelIds;
 	int *parserLelIds;
@@ -94,19 +94,19 @@ typedef struct colm_sections
 	long globalId;
 	long argvElId;
 
-	void (*fsmExecute)( struct pda_run *pdaRun, struct _StreamImpl *inputStream );
+	void (*fsm_execute)( struct pda_run *pdaRun, struct _StreamImpl *inputStream );
 	void (*sendNamedLangEl)( struct colm_program *prg, Tree **tree,
 			struct pda_run *pdaRun, struct _StreamImpl *inputStream );
 	void (*initBindings)( struct pda_run *pdaRun );
 	void (*popBinding)( struct pda_run *pdaRun, ParseTree *tree );
 
-} RuntimeData;
+};
 
-typedef struct colm_heap_list
+struct heap_list
 {
 	struct colm_struct *head;
 	struct colm_struct *tail;
-} HeapList;
+};
 
 struct colm_program
 {
@@ -116,7 +116,7 @@ struct colm_program
 	const char **argv;
 
 	unsigned char ctxDepParsing;
-	RuntimeData *rtd;
+	struct colm_sections *rtd;
 	struct colm_struct *global;
 	int induceExit;
 	int exitStatus;
@@ -130,7 +130,7 @@ struct colm_program
 	Tree *trueVal;
 	Tree *falseVal;
 
-	struct colm_heap_list heap;
+	struct heap_list heap;
 
 	Stream *stdinVal;
 	Stream *stdoutVal;
@@ -144,9 +144,8 @@ struct colm_program
 	Tree **sb_beg;
 	Tree **sb_end;
 	long sb_total;
-	StackBlock *reserve;
-
-	StackBlock *stackBlock;
+	struct stack_block *reserve;
+	struct stack_block *stackBlock;
 	Tree **stackRoot;
 
 	/* Returned value for main program and any exported functions. */

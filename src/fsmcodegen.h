@@ -71,7 +71,7 @@ inline string itoa( int i )
 class FsmCodeGen
 {
 public:
-	FsmCodeGen( ostream &out, RedFsm *redFsm, FsmTables *fsmTables );
+	FsmCodeGen( ostream &out, RedFsm *redFsm, fsm_tables *fsmTables );
 
 protected:
 
@@ -151,7 +151,7 @@ protected:
 public:
 	ostream &out;
 	RedFsm *redFsm;
-	FsmTables *fsmTables;
+	fsm_tables *fsmTables;
 	int codeGenErrCount;
 
 	/* Write options. */

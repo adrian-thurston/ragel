@@ -45,8 +45,8 @@ struct PdaCodeGen
 	void writeRhsLocate( Production *prod );
 
 	void defineRuntime();
-	void writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTables );
-	void writeParserData( long id, PdaTables *tables );
+	void writeRuntimeData( colm_sections *runtimeData, struct pda_tables *pdaTables );
+	void writeParserData( long id, struct pda_tables *tables );
 
 	String PARSER() { return "parser_"; }
 

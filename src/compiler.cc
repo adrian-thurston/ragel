@@ -1174,7 +1174,7 @@ void Compiler::prepGrammar()
 	/* Allocate the Runtime data now. Every PdaTable that we make 
 	 * will reference it, but it will be filled in after all the tables are
 	 * built. */
-	runtimeData = new RuntimeData;
+	runtimeData = new colm_sections;
 }
 
 void Compiler::compile()

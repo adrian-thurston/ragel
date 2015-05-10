@@ -468,7 +468,7 @@ struct RedFsm
 	void findFinalActionRefs();
 	void analyzeMachine();
 
-	FsmTables *makeFsmTables();
+	fsm_tables *makeFsmTables();
 };
 
 

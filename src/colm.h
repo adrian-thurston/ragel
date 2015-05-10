@@ -13,6 +13,8 @@ struct colm_sections;
 struct colm_tree;
 struct colm_location;
 
+extern struct colm_sections colm_object;
+
 typedef unsigned long colm_value_t;
 
 struct colm_tree

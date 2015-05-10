@@ -43,7 +43,7 @@ static void colm_alloc_global( Program *prg )
 
 void vm_init( Program *prg )
 {
-	StackBlock *b = malloc( sizeof(StackBlock) );
+	struct stack_block *b = malloc( sizeof(struct stack_block) );
 	b->data = malloc( sizeof(Tree*) * VM_STACK_SIZE );
 	b->len = VM_STACK_SIZE;
 	b->offset = 0;
@@ -71,7 +71,7 @@ Tree **vm_bs_add( Program *prg, Tree **sp, int n )
 	}
 
 	if ( prg->reserve != 0 && prg->reserve->len >= n) {
-		StackBlock *b = prg->reserve;
+		struct stack_block *b = prg->reserve;
 		b->next = prg->stackBlock;
 		b->offset = 0;
 
@@ -79,7 +79,7 @@ Tree **vm_bs_add( Program *prg, Tree **sp, int n )
 		prg->reserve = 0;
 	}
 	else {
-		StackBlock *b = malloc( sizeof(StackBlock) );
+		struct stack_block *b = malloc( sizeof(struct stack_block) );
 		int size = VM_STACK_SIZE;
 		if ( n > size )
 			size = n;
@@ -124,7 +124,7 @@ Tree **vm_bs_pop( Program *prg, Tree **sp, int n )
 		}
 
 		/* Pop the stack block. */
-		StackBlock *b = prg->stackBlock;
+		struct stack_block *b = prg->stackBlock;
 		prg->stackBlock = prg->stackBlock->next;
 		prg->reserve = b;
 
@@ -145,7 +145,7 @@ Tree **vm_bs_pop( Program *prg, Tree **sp, int n )
 void vm_clear( Program *prg )
 {
 	while ( prg->stackBlock != 0 ) {
-		StackBlock *b = prg->stackBlock;
+		struct stack_block *b = prg->stackBlock;
 		prg->stackBlock = prg->stackBlock->next;
 		
 		free( b->data );
@@ -168,7 +168,7 @@ void colm_set_debug( Program *prg, long activeRealm )
 	prg->activeRealm = activeRealm;
 }
 
-Program *colm_new_program( RuntimeData *rtd )
+Program *colm_new_program( struct colm_sections *rtd )
 {
 	Program *prg = malloc(sizeof(Program));
 	memset( prg, 0, sizeof(Program) );

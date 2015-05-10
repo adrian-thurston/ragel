@@ -829,13 +829,13 @@ int eofAction( RedState *state )
 }
 
 
-FsmTables *RedFsm::makeFsmTables()
+fsm_tables *RedFsm::makeFsmTables()
 {
 	/* The fsm runtime needs states sorted by id. */
 	sortByStateId();
 
 	int pos, curKeyOffset, curIndOffset;
-	FsmTables *fsmTables = new FsmTables;
+	fsm_tables *fsmTables = new fsm_tables;
 	fsmTables->numStates = stateList.length();
 
 	/*

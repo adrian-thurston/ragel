@@ -33,7 +33,7 @@
 #include "if2.h"
 #include "colm/colm.h"
 
-extern RuntimeData colm_object;
+extern colm_sections colm_object;
 
 InputLoc::InputLoc( colm_location *pcloc )
 {

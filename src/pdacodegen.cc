@@ -66,11 +66,11 @@ void escapeLiteralString( std::ostream &out, const char *path )
 void PdaCodeGen::defineRuntime()
 {
 	out << 
-		"extern RuntimeData colm_program_text;\n"
+		"extern struct colm_sections colm_program_text;\n"
 		"\n";
 }
 
-void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTables )
+void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables *pdaTables )
 {
 	/*
 	 * Blocks of code in frames.
@@ -446,7 +446,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 	out << "};\n\n";
 
 	out <<
-		"RuntimeData colm_object = \n"
+		"struct colm_sections colm_object = \n"
 		"{\n"
 		"	" << lelInfo() << ",\n"
 		"	" << runtimeData->numLangEls << ",\n"
@@ -502,7 +502,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		"	" << runtimeData->noTokenId << ",\n"
 		"	" << runtimeData->globalId << ",\n"
 		"	" << runtimeData->argvElId << ",\n"
-		"	&fsmExecute,\n"
+		"	&fsm_execute,\n"
 		"	&sendNamedLangEl,\n"
 		"	&initBindings,\n"
 		"	&popBinding,\n"
@@ -510,7 +510,7 @@ void PdaCodeGen::writeRuntimeData( RuntimeData *runtimeData, PdaTables *pdaTable
 		"\n";
 }
 
-void PdaCodeGen::writeParserData( long id, PdaTables *tables )
+void PdaCodeGen::writeParserData( long id, struct pda_tables *tables )
 {
 	String prefix = "pid_" + String(0, "%ld", id) + "_";
 
@@ -647,7 +647,7 @@ void PdaCodeGen::writeParserData( long id, PdaTables *tables )
 	out << "\n};\n\n";
 
 	out << 
-		"static PdaTables " << prefix << "pdaTables =\n"
+		"static struct pda_tables " << prefix << "pdaTables =\n"
 		"{\n"
 		"	" << prefix << indicies() << ",\n"
 		"	" << prefix << owners() << ",\n"

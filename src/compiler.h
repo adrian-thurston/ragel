@@ -273,7 +273,7 @@ struct LangEl : public DListEl<LangEl>
 	LangEl *eofLel;
 
 	PdaGraph *pdaGraph;
-	PdaTables *pdaTables;
+	struct pda_tables *pdaTables;
 
 	PdaState *startState;
 
@@ -691,7 +691,7 @@ struct Compiler
 	bool makeFirstSetProd( Production *prod, PdaState *state );
 	void makeFirstSets();
 
-	int findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph,
+	int findIndexOff( struct pda_tables *pdaTables, PdaGraph *pdaGraph,
 			PdaState *state, int &currLen );
 	void trySetTime( PdaTrans *trans, long code, long &time );
 	void addRegion( PdaState *tabState, PdaTrans *pdaTrans, long pdaKey,
@@ -742,7 +742,7 @@ struct Compiler
 	void collectParserEls( LangElSet &parserEls );
 	void makeParser( LangElSet &parserEls );
 	PdaGraph *makePdaGraph( BstSet<LangEl*> &parserEls  );
-	PdaTables *makePdaTables( PdaGraph *pdaGraph );
+	struct pda_tables *makePdaTables( PdaGraph *pdaGraph );
 
 	void fillInPatterns( Program *prg );
 	void makeRuntimeData();
@@ -949,8 +949,8 @@ struct Compiler
 	ObjectDef *strObj;
 	ObjectDef *streamObj;
 
-	FsmTables *fsmTables;
-	RuntimeData *runtimeData;
+	struct fsm_tables *fsmTables;
+	struct colm_sections *runtimeData;
 
 	int nextPatConsId;
 	int nextGenericId;
@@ -1002,7 +1002,7 @@ struct Compiler
 	RedFsm *redFsm;
 
 	PdaGraph *pdaGraph;
-	PdaTables *pdaTables;
+	struct pda_tables *pdaTables;
 
 	long predValue;
 	long nextMatchEndNum;

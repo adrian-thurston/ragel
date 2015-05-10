@@ -1683,7 +1683,7 @@ void Compiler::makeRuntimeData()
 	runtimeData->globalId = globalSel->id;
 	runtimeData->argvElId = argvElSel->id;
 
-	runtimeData->fsmExecute = &internalFsmExecute;
+	runtimeData->fsm_execute = &internalFsmExecute;
 	runtimeData->sendNamedLangEl = &internalSendNamedLangEl;
 	runtimeData->initBindings = &internalInitBindings;
 	runtimeData->popBinding = &internalPopBinding;
@@ -1894,7 +1894,7 @@ void Compiler::fillInPatterns( Program *prg )
 }
 
 
-int Compiler::findIndexOff( PdaTables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &curLen )
+int Compiler::findIndexOff( struct pda_tables *pdaTables, PdaGraph *pdaGraph, PdaState *state, int &curLen )
 {
 	for ( int start = 0; start < curLen;  ) {
 		int offset = start;
@@ -1960,10 +1960,10 @@ PdaGraph *Compiler::makePdaGraph( LangElSet &parserEls )
 	return pdaGraph;
 }
 
-PdaTables *Compiler::makePdaTables( PdaGraph *pdaGraph )
+struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 {
 	int count, pos;
-	PdaTables *pdaTables = new PdaTables;
+	struct pda_tables *pdaTables = new struct pda_tables;
 
 	/*
 	 * Counting max indices.
