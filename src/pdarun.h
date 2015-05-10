@@ -77,14 +77,14 @@ void undoStreamPull( StreamImpl *inputStream, const char *data, long length );
 
 struct colm_execution;
 
-typedef struct _RtCodeVect
+struct rt_code_vect
 {
 	Code *data;
 	long tabLen;
 	long allocLen;
 
 	/* FIXME: leak when freed. */
-} RtCodeVect;
+};
 
 void listAddAfter( List *list, ListEl *prev_el, ListEl *new_el );
 void listAddBefore( List *list, ListEl *next_el, ListEl *new_el );
@@ -98,24 +98,24 @@ ListEl *listDetachLast(List *list );
 
 long listLength(List *list);
 
-typedef struct _FunctionInfo
+struct function_info
 {
 	long frameId;
 	long argSize;
 	long frameSize;
-} FunctionInfo;
+};
 
 /*
  * Program Data.
  */
 
-typedef struct _PatConsInfo
+struct pat_cons_info
 {
 	long offset;
 	long numBindings;
-} PatConsInfo;
+};
 
-typedef struct _PatConsNode
+struct pat_cons_node
 {
 	long id;
 	long prodNum;
@@ -129,11 +129,11 @@ typedef struct _PatConsNode
 
 	/* Just match nonterminal, don't go inside. */
 	unsigned char stop;
-} PatConsNode;
+};
 
 /* FIXME: should have a descriptor for object types to give the length. */
 
-typedef struct _LangElInfo
+struct lang_el_info
 {
 	const char *name;
 	const char *xmlTag;
@@ -152,21 +152,16 @@ typedef struct _LangElInfo
 	long markId;
 	long captureAttr;
 	long numCaptureAttr;
-} LangElInfo;
+};
 
-typedef struct _StructElInfo
+struct struct_el_info
 {
 	long size;
 	short *trees;
 	long treesLen;
-} StructElInfo;
+};
 
-typedef struct _ObjFieldInfo
-{
-	int typeId;
-} ObjFieldInfo;
-
-typedef struct _ProdInfo
+struct prod_info
 {
 	unsigned long lhsId;
 	short prodNum;
@@ -176,7 +171,7 @@ typedef struct _ProdInfo
 	unsigned char lhsUpref;
 	unsigned char *copy;
 	long copyLen;
-} ProdInfo;
+};
 
 /* Must match the LocalType enum. */
 #define LI_Tree 1
@@ -184,32 +179,32 @@ typedef struct _ProdInfo
 #define LI_RevIter 3
 #define LI_UserIter 4
 
-typedef struct _LocalInfo
+struct local_info
 {
 	char type;
 	short offset;
-} LocalInfo;
+};
 
-typedef struct _FrameInfo
+struct frame_info
 {
 	const char *name;
 	Code *codeWV;
 	long codeLenWV;
 	Code *codeWC;
 	long codeLenWC;
-	LocalInfo *locals;
+	struct local_info *locals;
 	long localsLen;
 	long argSize;
 	long frameSize;
 	char retTree;
-} FrameInfo;
+};
 
-typedef struct _RegionInfo
+struct region_info
 {
 	long defaultToken;
 	long eofFrameId;
 	int ciLelId;
-} RegionInfo;
+};
 
 typedef struct _CaptureAttr
 {
@@ -244,24 +239,24 @@ struct pda_tables
 	int numPreRegionItems;
 };
 
-typedef struct _PoolBlock
+struct pool_block
 {
 	void *data;
-	struct _PoolBlock *next;
-} PoolBlock;
+	struct pool_block *next;
+};
 
-typedef struct _PoolItem
+struct pool_item
 {
-	struct _PoolItem *next;
-} PoolItem;
+	struct pool_item *next;
+};
 
-typedef struct _PoolAlloc
+struct pool_alloc
 {
-	PoolBlock *head;
+	struct pool_block *head;
 	long nextel;
-	PoolItem *pool;
+	struct pool_item *pool;
 	int sizeofT;
-} PoolAlloc;
+};
 
 struct pda_run
 {
@@ -301,8 +296,8 @@ struct pda_run
 	int parserId;
 
 	/* Reused. */
-	RtCodeVect rcodeCollect;
-	RtCodeVect reverseCode;
+	struct rt_code_vect rcodeCollect;
+	struct rt_code_vect reverseCode;
 
 	int stopParsing;
 	long stopTarget;
@@ -332,7 +327,7 @@ struct pda_run
 	 */
 
 	ParseTree *parseInput;
-	FrameInfo *fi;
+	struct frame_info *fi;
 	int reduction;
 	ParseTree *redLel;
 	int curState;
@@ -369,47 +364,46 @@ void colm_pda_init( struct colm_program *prg, struct pda_run *pdaRun,
 void colm_pda_clear( struct colm_program *prg, struct colm_tree **sp,
 		struct pda_run *pdaRun );
 
-void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len );
-void rtCodeVectEmpty( RtCodeVect *vect );
-void rtCodeVectRemove( RtCodeVect *vect, long pos, long len );
+void rtCodeVectReplace( struct rt_code_vect *vect, long pos, const Code *val, long len );
+void rtCodeVectEmpty( struct rt_code_vect *vect );
+void rtCodeVectRemove( struct rt_code_vect *vect, long pos, long len );
 
-void initRtCodeVect( RtCodeVect *codeVect );
+void initRtCodeVect( struct rt_code_vect *codeVect );
 
-//inline static void remove( RtCodeVect *vect, long pos );
-inline static void appendCode( RtCodeVect *vect, const Code val );
-inline static void appendCode2( RtCodeVect *vect, const Code *val, long len );
-inline static void appendHalf( RtCodeVect *vect, Half half );
-inline static void appendWord( RtCodeVect *vect, Word word );
+inline static void append_code_val( struct rt_code_vect *vect, const Code val );
+inline static void append_code_vect( struct rt_code_vect *vect, const Code *val, long len );
+inline static void append_half( struct rt_code_vect *vect, Half half );
+inline static void append_word( struct rt_code_vect *vect, Word word );
 
-inline static void appendCode2( RtCodeVect *vect, const Code *val, long len )
+inline static void append_code_vect( struct rt_code_vect *vect, const Code *val, long len )
 {
 	rtCodeVectReplace( vect, vect->tabLen, val, len );
 }
 
-inline static void appendCode( RtCodeVect *vect, const Code val )
+inline static void append_code_val( struct rt_code_vect *vect, const Code val )
 {
 	rtCodeVectReplace( vect, vect->tabLen, &val, 1 );
 }
 
-inline static void appendHalf( RtCodeVect *vect, Half half )
+inline static void append_half( struct rt_code_vect *vect, Half half )
 {
 	/* not optimal. */
-	appendCode( vect, half & 0xff );
-	appendCode( vect, (half>>8) & 0xff );
+	append_code_val( vect, half & 0xff );
+	append_code_val( vect, (half>>8) & 0xff );
 }
 
-inline static void appendWord( RtCodeVect *vect, Word word )
+inline static void append_word( struct rt_code_vect *vect, Word word )
 {
 	/* not optimal. */
-	appendCode( vect, word & 0xff );
-	appendCode( vect, (word>>8) & 0xff );
-	appendCode( vect, (word>>16) & 0xff );
-	appendCode( vect, (word>>24) & 0xff );
+	append_code_val( vect, word & 0xff );
+	append_code_val( vect, (word>>8) & 0xff );
+	append_code_val( vect, (word>>16) & 0xff );
+	append_code_val( vect, (word>>24) & 0xff );
 	#if SIZEOF_LONG == 8
-	appendCode( vect, (word>>32) & 0xff );
-	appendCode( vect, (word>>40) & 0xff );
-	appendCode( vect, (word>>48) & 0xff );
-	appendCode( vect, (word>>56) & 0xff );
+	append_code_val( vect, (word>>32) & 0xff );
+	append_code_val( vect, (word>>40) & 0xff );
+	append_code_val( vect, (word>>48) & 0xff );
+	append_code_val( vect, (word>>56) & 0xff );
 	#endif
 }
 

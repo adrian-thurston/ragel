@@ -26,7 +26,7 @@
 #include <colm/pool.h>
 #include <colm/debug.h>
 
-void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT )
+void initPoolAlloc( struct pool_alloc *poolAlloc, int sizeofT )
 {
 	poolAlloc->head = 0;
 	poolAlloc->nextel = FRESH_BLOCK;
@@ -34,7 +34,7 @@ void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT )
 	poolAlloc->sizeofT = sizeofT;
 }
 
-void *poolAllocAllocate( PoolAlloc *poolAlloc )
+void *poolAllocAllocate( struct pool_alloc *poolAlloc )
 {
 	//debug( REALM_POOL, "pool allocation\n" );
 
@@ -47,7 +47,7 @@ void *poolAllocAllocate( PoolAlloc *poolAlloc )
 	void *newEl = 0;
 	if ( poolAlloc->pool == 0 ) {
 		if ( poolAlloc->nextel == FRESH_BLOCK ) {
-			PoolBlock *newBlock = (PoolBlock*)malloc( sizeof(PoolBlock) );
+			struct pool_block *newBlock = (struct pool_block*)malloc( sizeof(struct pool_block) );
 			newBlock->data = malloc( poolAlloc->sizeofT * FRESH_BLOCK );
 			newBlock->next = poolAlloc->head;
 			poolAlloc->head = newBlock;
@@ -65,11 +65,11 @@ void *poolAllocAllocate( PoolAlloc *poolAlloc )
 #endif
 }
 
-void poolAllocFree( PoolAlloc *poolAlloc, void *el )
+void poolAllocFree( struct pool_alloc *poolAlloc, void *el )
 {
 	#if 0
 	/* Some sanity checking. Best not to normally run with this on. */
-	char *p = (char*)el + sizeof(PoolItem*);
+	char *p = (char*)el + sizeof(struct pool_item*);
 	char *pe = (char*)el + sizeof(T);
 	for ( ; p < pe; p++ )
 		assert( *p != 0xcc );
@@ -79,17 +79,17 @@ void poolAllocFree( PoolAlloc *poolAlloc, void *el )
 #ifdef POOL_MALLOC
 	free( el );
 #else
-	PoolItem *pi = (PoolItem*) el;
+	struct pool_item *pi = (struct pool_item*) el;
 	pi->next = poolAlloc->pool;
 	poolAlloc->pool = pi;
 #endif
 }
 
-void poolAllocClear( PoolAlloc *poolAlloc )
+void poolAllocClear( struct pool_alloc *poolAlloc )
 {
-	PoolBlock *block = poolAlloc->head;
+	struct pool_block *block = poolAlloc->head;
 	while ( block != 0 ) {
-		PoolBlock *next = block->next;
+		struct pool_block *next = block->next;
 		free( block->data );
 		free( block );
 		block = next;
@@ -100,11 +100,11 @@ void poolAllocClear( PoolAlloc *poolAlloc )
 	poolAlloc->pool = 0;
 }
 
-long poolAllocNumLost( PoolAlloc *poolAlloc )
+long poolAllocNumLost( struct pool_alloc *poolAlloc )
 {
 	/* Count the number of items allocated. */
 	long lost = 0;
-	PoolBlock *block = poolAlloc->head;
+	struct pool_block *block = poolAlloc->head;
 	if ( block != 0 ) {
 		lost = poolAlloc->nextel;
 		block = block->next;
@@ -115,7 +115,7 @@ long poolAllocNumLost( PoolAlloc *poolAlloc )
 	}
 
 	/* Subtract. Items that are on the free list. */
-	PoolItem *pi = poolAlloc->pool;
+	struct pool_item *pi = poolAlloc->pool;
 	while ( pi != 0 ) {
 		lost -= 1;
 		pi = pi->next;

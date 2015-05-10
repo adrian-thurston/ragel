@@ -31,7 +31,7 @@
 struct colm_struct *colm_map_el_get( struct colm_program *prg,
 		MapEl *mapEl, Word genId, Word field )
 {
-	GenericInfo *gi = &prg->rtd->genericInfo[genId];
+	struct generic_info *gi = &prg->rtd->genericInfo[genId];
 	MapEl *result = 0;
 	switch ( field ) {
 		case 0: 
@@ -53,7 +53,7 @@ struct colm_struct *colm_map_el_get( struct colm_program *prg,
 struct colm_struct *colm_map_get( struct colm_program *prg,
 		Map *map, Word genId, Word field )
 {
-	GenericInfo *gi = &prg->rtd->genericInfo[genId];
+	struct generic_info *gi = &prg->rtd->genericInfo[genId];
 	MapEl *result = 0;
 	switch ( field ) {
 		case 0: 

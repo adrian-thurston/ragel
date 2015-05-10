@@ -121,7 +121,7 @@ Tree *colm_map_iter_advance( Program *prg, Tree ***psp, GenericIter *iter )
 
 Tree *colm_list_iter_deref_cur( Program *prg, GenericIter *iter )
 {
-	GenericInfo *gi = &prg->rtd->genericInfo[iter->genericId];
+	struct generic_info *gi = &prg->rtd->genericInfo[iter->genericId];
 	ListEl *el = (ListEl*)iter->ref.kid;
 	struct colm_struct *s = el != 0 ?
 			colm_struct_container( el, gi->elOffset ) : 0;
@@ -130,7 +130,7 @@ Tree *colm_list_iter_deref_cur( Program *prg, GenericIter *iter )
 
 Value colm_viter_deref_cur( Program *prg, GenericIter *iter )
 {
-	GenericInfo *gi = &prg->rtd->genericInfo[iter->genericId];
+	struct generic_info *gi = &prg->rtd->genericInfo[iter->genericId];
 	ListEl *el = (ListEl*)iter->ref.kid;
 	struct colm_struct *s = el != 0 ?
 			colm_struct_container( el, gi->elOffset ) : 0;
@@ -191,7 +191,7 @@ void initUserIter( UserIter *userIter, Tree **stackRoot, long rootSize,
 }
 
 
-UserIter *colm_uiter_create( Program *prg, Tree ***psp, FunctionInfo *fi, long searchId )
+UserIter *colm_uiter_create( Program *prg, Tree ***psp, struct function_info *fi, long searchId )
 {
 	Tree **sp = *psp;
 
@@ -209,7 +209,7 @@ UserIter *colm_uiter_create( Program *prg, Tree ***psp, FunctionInfo *fi, long s
 }
 
 void uiterInit( Program *prg, Tree **sp, UserIter *uiter, 
-		FunctionInfo *fi, int revertOn )
+		struct function_info *fi, int revertOn )
 {
 	/* Set up the first yeild so when we resume it starts at the beginning. */
 	uiter->ref.kid = 0;

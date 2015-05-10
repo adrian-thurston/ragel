@@ -18,7 +18,9 @@
 #   along with Colm; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-INCLUDES = -I$(top_srcdir)/aapl
+AM_CPPFLAGS = -I$(top_srcdir)/aapl
+
+AUTOMAKE_OPTIONS = subdir-objects
 
 bin_PROGRAMS = colm
 noinst_PROGRAMS = bootstrap0 bootstrap1
@@ -72,7 +74,7 @@ bootstrap1_CFLAGS = $(common_CFLAGS)
 bootstrap1_SOURCES = \
 	loadinit.h loadinit.cc main.cc
 nodist_bootstrap1_SOURCES = \
-	if1.h if1.cc parse1.c
+	gen/if1.h gen/if1.cc gen/parse1.c
 bootstrap1_LDADD = libprog.a libcolmd.a
 
 colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
@@ -80,28 +82,32 @@ colm_CFLAGS = $(common_CFLAGS)
 colm_SOURCES = \
 	loadcolm.h loadcolm.cc main.cc
 nodist_colm_SOURCES = \
-	if2.h if2.cc parse2.c
+	gen/if2.h gen/if2.cc gen/parse2.c
 colm_LDADD = libprog.a libcolmd.a
 
 colmincdir = $(includedir)/colm
 
 colminc_HEADERS = $(RUNTIME_HDR)
 
-parse1.c: bootstrap0
-	$(builddir)/bootstrap0 -c -o parse1.c -e if1.h -x if1.cc
-if1.h: parse1.c
-if1.cc: parse1.c
+gen/parse1.c: bootstrap0
+	mkdir -p gen
+	$(builddir)/bootstrap0 -c -o gen/parse1.c -e gen/if1.h -x gen/if1.cc
 
-parse2.c: bootstrap1 colm.lm
-	$(builddir)/bootstrap1 -c -o parse2.c -e if2.h -x if2.cc colm.lm
-if2.h: parse2.c
-if2.cc: parse2.c
+gen/if1.h: gen/parse1.c
+gen/if1.cc: gen/parse1.c
 
-bootstrap1-if1.$(OBJEXT): if1.h if1.cc parse1.c
-bootstrap1-loadinit.$(OBJEXT): if1.h if1.cc parse1.c
+gen/parse2.c: bootstrap1 colm.lm
+	mkdir -p gen
+	$(builddir)/bootstrap1 -c -o gen/parse2.c -e gen/if2.h -x gen/if2.cc colm.lm
 
-colm-if2.$(OBJEXT): if2.h if2.cc parse2.c
-colm-loadcolm.$(OBJEXT): if2.h if2.cc parse2.c
+gen/if2.h: gen/parse2.c
+gen/if2.cc: gen/parse2.c
+
+bootstrap1-if1.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
+bootstrap1-loadinit.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
+
+colm-if2.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
+colm-loadcolm.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
 
 BUILT_SOURCES = version.h include/colm
 

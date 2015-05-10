@@ -76,7 +76,7 @@ void colm_parser_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 	treeDownref( prg, sp, parser->result );
 }
 
-Parser *colm_parser_new( Program *prg, GenericInfo *gi )
+Parser *colm_parser_new( Program *prg, struct generic_info *gi )
 {
 	struct pda_run *pdaRun = malloc( sizeof(struct pda_run) );
 
@@ -121,7 +121,7 @@ Map *colm_map_new( struct colm_program *prg )
 
 Struct *colm_construct_generic( Program *prg, long genericId )
 {
-	GenericInfo *genericInfo = &prg->rtd->genericInfo[genericId];
+	struct generic_info *genericInfo = &prg->rtd->genericInfo[genericId];
 	Struct *newGeneric = 0;
 	switch ( genericInfo->type ) {
 		case GEN_MAP_EL:

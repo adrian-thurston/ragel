@@ -31,7 +31,7 @@
 #include "global.h"
 #include "input.h"
 #include "loadinit.h"
-#include "if1.h"
+#include "gen/if1.h"
 #include "colm/colm.h"
 
 using std::string;

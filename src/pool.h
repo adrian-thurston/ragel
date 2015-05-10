@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-void initPoolAlloc( PoolAlloc *poolAlloc, int sizeofT );
+void initPoolAlloc( struct pool_alloc *poolAlloc, int sizeofT );
 
 Kid *kidAllocate( Program *prg );
 void kidFree( Program *prg, Kid *el );

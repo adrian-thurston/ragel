@@ -30,7 +30,7 @@
 #include "global.h"
 #include "input.h"
 #include "loadcolm.h"
-#include "if2.h"
+#include "gen/if2.h"
 #include "colm/colm.h"
 
 extern colm_sections colm_object;

@@ -70,7 +70,7 @@ typedef struct colm_list
 
 	ListEl *head, *tail;
 	long listLen;
-	GenericInfo *genericInfo;
+	struct generic_info *genericInfo;
 } List;
 
 typedef struct colm_map_el
@@ -95,7 +95,7 @@ typedef struct colm_map
 
 	struct colm_map_el *head, *tail, *root;
 	long treeSize;
-	GenericInfo *genericInfo;
+	struct generic_info *genericInfo;
 } Map;
 
 struct colm_struct *colm_struct_new_size( struct colm_program *prg, int size );
@@ -128,7 +128,7 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 #define colm_struct_to_map_el( prg, obj, genId ) \
 	colm_struct_get_addr( obj, MapEl*, prg->rtd->genericInfo[genId].elOffset )
 
-Parser *colm_parser_new( struct colm_program *prg, GenericInfo *gi );
+Parser *colm_parser_new( struct colm_program *prg, struct generic_info *gi );
 Stream *colm_stream_new( struct colm_program *prg );
 Stream *colm_stream_new_struct( struct colm_program *prg );
 

@@ -196,7 +196,7 @@ static void send_back_ignore( Program *prg, Tree **sp,
 		struct pda_run *pdaRun, StreamImpl *is, ParseTree *parseTree )
 {
 	#ifdef DEBUG
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 	debug( prg, REALM_PARSE, "sending back: %s%s\n",
 		lelInfo[parseTree->shadow->tree->id].name, 
 		parseTree->flags & PF_ARTIFICIAL ? " (artificial)" : "" );
@@ -367,7 +367,7 @@ Kid *make_token_with_data( Program *prg, struct pda_run *pdaRun,
 	/* No children and ignores get added later. */
 	input->tree->child = attrs;
 
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 	if ( lelInfo[id].numCaptureAttr > 0 ) {
 		int i;
 		for ( i = 0; i < lelInfo[id].numCaptureAttr; i++ ) {
@@ -1045,7 +1045,7 @@ static long scan_token( Program *prg, struct pda_run *pdaRun, StreamImpl *is )
 		if ( pdaRun->matchedToken > 0 ) {
 			/* If the token has a marker indicating the end (due to trailing
 			 * context) then adjust data now. */
-			LangElInfo *lelInfo = prg->rtd->lelInfo;
+			struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 			if ( lelInfo[pdaRun->matchedToken].markId >= 0 )
 				pdaRun->p = pdaRun->mark[lelInfo[pdaRun->matchedToken].markId];
 
@@ -1670,9 +1670,9 @@ again:
 //					treeUpref( pdaRun->redLel->tree );
 
 					/* Add the restore instruct. */
-					appendCode( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
-					appendWord( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
-					appendCode( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
+					append_code_val( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
+					append_word( &pdaRun->rcodeCollect, (Word)pdaRun->parsed );
+					append_code_val( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
 				}
 				else {
 					/* Not changed. Done with parsed. */
@@ -1995,7 +1995,7 @@ _out:
 long colm_parse_loop( Program *prg, Tree **sp, struct pda_run *pdaRun, 
 		StreamImpl *is, long entry )
 {
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 
 	/* COROUTINE */
 	switch ( entry ) {

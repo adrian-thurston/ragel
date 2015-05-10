@@ -195,7 +195,7 @@ Value colm_get_pointer_val( Tree *ptr )
 
 Tree *constructTerm( Program *prg, Word id, Head *tokdata )
 {
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 
 	Tree *tree = treeAllocate( prg );
 	tree->id = id;
@@ -213,7 +213,7 @@ Kid *constructKid( Program *prg, Tree **bindings, Kid *prev, long pat );
 
 static Kid *constructIgnoreList( Program *prg, long ignoreInd )
 {
-	PatConsNode *nodes = prg->rtd->patReplNodes;
+	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 
 	Kid *first = 0, *last = 0;
 	while ( ignoreInd >= 0 ) {
@@ -243,13 +243,13 @@ static Kid *constructIgnoreList( Program *prg, long ignoreInd )
 
 static Kid *constructLeftIgnoreList( Program *prg, long pat )
 {
-	PatConsNode *nodes = prg->rtd->patReplNodes;
+	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 	return constructIgnoreList( prg, nodes[pat].leftIgnore );
 }
 
 static Kid *constructRightIgnoreList( Program *prg, long pat )
 {
-	PatConsNode *nodes = prg->rtd->patReplNodes;
+	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 	return constructIgnoreList( prg, nodes[pat].rightIgnore );
 }
 
@@ -427,7 +427,7 @@ Tree *popLeftIgnore( Program *prg, Tree **sp, Tree *popFrom, Tree **leftIgnore )
 
 Tree *constructObject( Program *prg, Kid *kid, Tree **bindings, long langElId )
 {
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 	Tree *tree = 0;
 
 	tree = treeAllocate( prg );
@@ -450,8 +450,8 @@ Tree *constructObject( Program *prg, Kid *kid, Tree **bindings, long langElId )
  * return a zero-ref tree. */
 Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 {
-	PatConsNode *nodes = prg->rtd->patReplNodes;
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 	Tree *tree = 0;
 
 	if ( nodes[pat].bindId > 0 ) {
@@ -550,7 +550,7 @@ Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 
 Kid *constructKid( Program *prg, Tree **bindings, Kid *prev, long pat )
 {
-	PatConsNode *nodes = prg->rtd->patReplNodes;
+	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 	Kid *kid = 0;
 
 	if ( pat != -1 ) {
@@ -575,7 +575,7 @@ Tree *constructToken( Program *prg, Tree **args, long nargs )
 	long id = (long)idInt;//->value;
 	Head *tokdata = stringCopy( prg, textStr->value );
 
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 	Tree *tree;
 
 	if ( lelInfo[id].ignore ) {
@@ -608,7 +608,7 @@ Tree *constructToken( Program *prg, Tree **args, long nargs )
 
 Tree *castTree( Program *prg, int langElId, Tree *tree )
 {
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 
 	/* Need to keep a lookout for next down. If 
 	 * copying it, return the copy. */
@@ -698,7 +698,7 @@ Tree *makeTree( Program *prg, Tree **args, long nargs )
 	Int *idInt = (Int*)args[0];
 
 	long id = (long)idInt;//->value;
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 
 	Tree *tree = treeAllocate( prg );
 	tree->id = id;
@@ -848,7 +848,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDow
 
 Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
 {
-//	LangElInfo *lelInfo = prg->rtd->lelInfo;
+//	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 //	long genericId = lelInfo[tree->id].genericId;
 //	if ( genericId > 0 )
 //		assert(false);
@@ -897,7 +897,7 @@ Tree *splitTree( Program *prg, Tree *tree )
 void treeFreeRec( Program *prg, Tree **sp, Tree *tree )
 {
 	Tree **top = vm_ptop();
-//	LangElInfo *lelInfo;
+//	struct lang_el_info *lelInfo;
 //	long genericId;
 
 free_tree:
@@ -967,7 +967,7 @@ void treeDownref( Program *prg, Tree **sp, Tree *tree )
 void objectFreeRec( Program *prg, Tree **sp, Tree *tree )
 {
 	Tree **top = vm_ptop();
-//	LangElInfo *lelInfo;
+//	struct lang_el_info *lelInfo;
 //	long genericId;
 
 free_tree:
@@ -1033,7 +1033,7 @@ void objectDownref( Program *prg, Tree **sp, Tree *tree )
 /* Find the first child of a tree. */
 Kid *treeChild( Program *prg, const Tree *tree )
 {
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 	Kid *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
@@ -1053,7 +1053,7 @@ Kid *treeChild( Program *prg, const Tree *tree )
 /* Detach at the first real child of a tree. */
 Kid *treeExtractChild( Program *prg, Tree *tree )
 {
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 	Kid *kid = tree->child, *last = 0;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
@@ -1195,7 +1195,7 @@ Tree *getFieldSplit( Program *prg, Tree *tree, Word field )
  * in. */
 int matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, int checkNext )
 {
-	PatConsNode *nodes = prg->rtd->patReplNodes;
+	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 
 	/* match node, recurse on children. */
 	if ( pat != -1 && kid != 0 ) {
@@ -2042,7 +2042,7 @@ void openTreeXml( Program *prg, Tree **sp, struct colm_print_args *args, Kid *pa
 	if ( kid->tree->id == 0 )
 		return;
 
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 
 	/* List flattening: skip the repeats and lists that are a continuation of
 	 * the list. */
@@ -2101,7 +2101,7 @@ void closeTreeXml( Program *prg, Tree **sp, struct colm_print_args *args, Kid *p
 	if ( kid->tree->id == 0 )
 		return;
 
-	LangElInfo *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 
 	/* List flattening: skip the repeats and lists that are a continuation of
 	 * the list. */

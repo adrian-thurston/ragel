@@ -110,9 +110,9 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 		}
 
 		if ( runtimeData->frameInfo[i].localsLen > 0 ) {
-			out << "static LocalInfo locals_" << i << "[] = {\n\t";
+			out << "static struct local_info locals_" << i << "[] = {\n\t";
 
-			LocalInfo *li = runtimeData->frameInfo[i].locals;
+			struct local_info *li = runtimeData->frameInfo[i].locals;
 			for ( int j = 0; j < runtimeData->frameInfo[i].localsLen; j++ ) {
 				out << "{ " << (int)li[j].type << ", " << li[j].offset << " }";
 
@@ -166,9 +166,9 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	/*
 	 * lelInfo
 	 */
-	out << "static LangElInfo " << lelInfo() << "[] = {\n";
+	out << "static struct lang_el_info " << lelInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numLangEls; i++ ) {
-		LangElInfo *el = &runtimeData->lelInfo[i];
+		struct lang_el_info *el = &runtimeData->lelInfo[i];
 		out << "\t{";
 		
 		/* Name. */
@@ -204,7 +204,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 
 
 	for ( int i = 0; i < runtimeData->numStructEls; i++ ) {
-		StructElInfo *el = &runtimeData->selInfo[i];
+		struct struct_el_info *el = &runtimeData->selInfo[i];
 		if ( el->treesLen > 0 ) {
 			out << "static short struct_trees_" << i << "[] = {\n\t";
 
@@ -218,9 +218,9 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	/*
 	 * selInfo
 	 */
-	out << "static StructElInfo " << selInfo() << "[] = {\n";
+	out << "static struct struct_el_info " << selInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numStructEls; i++ ) {
-		StructElInfo *el = &runtimeData->selInfo[i];
+		struct struct_el_info *el = &runtimeData->selInfo[i];
 		out << "\t{ ";
 		out << el->size << ", ";
 
@@ -238,7 +238,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	/*
 	 * frameInfo
 	 */
-	out << "static FrameInfo " << frameInfo() << "[] = {\n";
+	out << "static struct frame_info " << frameInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numFrames; i++ ) {
 		out << "\t{ ";
 
@@ -283,7 +283,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	/*
 	 * prodInfo
 	 */
-	out << "static ProdInfo " << prodInfo() << "[] = {\n";
+	out << "static struct prod_info " << prodInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numProds; i++ ) {
 		out << "\t{ ";
 
@@ -314,7 +314,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	/*
 	 * patReplInfo
 	 */
-	out << "static PatConsInfo " << patReplInfo() << "[] = {\n";
+	out << "static struct pat_cons_info " << patReplInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numPatterns; i++ ) {
 		out << "	{ " << runtimeData->patReplInfo[i].offset << ", " <<
 				runtimeData->patReplInfo[i].numBindings << " },\n";
@@ -324,9 +324,9 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	/*
 	 * patReplNodes
 	 */
-	out << "static PatConsNode " << patReplNodes() << "[] = {\n";
+	out << "static struct pat_cons_node " << patReplNodes() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numPatternNodes; i++ ) {
-		PatConsNode &node = runtimeData->patReplNodes[i];
+		struct pat_cons_node &node = runtimeData->patReplNodes[i];
 		out << "	{ " << node.id << ", " << 
 				node.prodNum << ", " << node.next << ", " << 
 				node.child << ", " << node.bindId << ", ";
@@ -349,7 +349,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	/*
 	 * functionInfo
 	 */
-	out << "static FunctionInfo " << functionInfo() << "[] = {\n";
+	out << "static struct function_info " << functionInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numFunctions; i++ ) {
 		out << "\t{ " <<
 				runtimeData->functionInfo[i].frameId << ", " <<
@@ -365,7 +365,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	/*
 	 * regionInfo
 	 */
-	out << "static RegionInfo " << regionInfo() << "[] = {\n";
+	out << "static struct region_info " << regionInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numRegions; i++ ) {
 		out << "\t{ " << runtimeData->regionInfo[i].defaultToken <<
 			", " << runtimeData->regionInfo[i].eofFrameId <<
@@ -380,7 +380,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	/* 
 	 * genericInfo
 	 */
-	out << "static GenericInfo " << genericInfo() << "[] = {\n";
+	out << "static struct generic_info " << genericInfo() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->numGenerics; i++ ) {
 		out << "\t{ " << 
 				runtimeData->genericInfo[i].type << ", " <<

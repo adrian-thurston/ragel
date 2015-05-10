@@ -647,7 +647,7 @@ Head *intToStr( struct colm_program *prg, Word i );
 void colm_execute( struct colm_program *prg, Execution *exec, Code *code );
 void reductionExecution( Execution *exec, Tree **sp );
 void generationExecution( Execution *exec, Tree **sp );
-void reverseExecution( Execution *exec, Tree **sp, RtCodeVect *allRev );
+void reverseExecution( Execution *exec, Tree **sp, struct rt_code_vect *allRev );
 
 Kid *allocAttrs( struct colm_program *prg, long length );
 void freeAttrs( struct colm_program *prg, Kid *attrs );
@@ -655,7 +655,7 @@ Kid *getAttrKid( Tree *tree, long pos );
 
 Tree *splitTree( struct colm_program *prg, Tree *t );
 
-void colm_rcode_downref_all( struct colm_program *prg, Tree **sp, RtCodeVect *cv );
+void colm_rcode_downref_all( struct colm_program *prg, Tree **sp, struct rt_code_vect *cv );
 int colm_make_reverse_code( struct pda_run *pdaRun );
 void colm_transfer_reverse_code( struct pda_run *pdaRun, ParseTree *tree );
 
@@ -664,7 +664,7 @@ void splitRef( struct colm_program *prg, Tree ***sp, Ref *fromRef );
 void allocGlobal( struct colm_program *prg );
 Tree **colm_execute_code( struct colm_program *prg,
 	Execution *exec, Tree **sp, Code *instr );
-Code *colm_pop_reverse_code( RtCodeVect *allRev );
+Code *colm_pop_reverse_code( struct rt_code_vect *allRev );
 
 #ifdef __cplusplus
 }

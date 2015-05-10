@@ -27,7 +27,7 @@
 #include <assert.h>
 
 
-void initRtCodeVect( RtCodeVect *vect )
+void initRtCodeVect( struct rt_code_vect *vect )
 {
 	vect->data = 0;
 	vect->tabLen = 0;
@@ -46,7 +46,7 @@ static long newSizeDown( long existing, long needed )
 
 /* Up resize the data for len elements using Resize::upResize to tell us the
  * new tabLen. Reads and writes allocLen. Does not read or write tabLen. */
-static void upResize( RtCodeVect *vect, long len )
+static void upResize( struct rt_code_vect *vect, long len )
 {
 	/* Ask the resizer what the new tabLen will be. */
 	long newLen = newSizeUp(vect->allocLen, len);
@@ -71,7 +71,7 @@ static void upResize( RtCodeVect *vect, long len )
 
 /* Down resize the data for len elements using Resize::downResize to determine
  * the new tabLen. Reads and writes allocLen. Does not read or write tabLen. */
-static void downResize( RtCodeVect *vect, long len)
+static void downResize( struct rt_code_vect *vect, long len)
 {
 	/* Ask the resizer what the new tabLen will be. */
 	long newLen = newSizeDown( vect->allocLen, len );
@@ -94,7 +94,7 @@ static void downResize( RtCodeVect *vect, long len)
 }
 
 
-void rtCodeVectEmpty( RtCodeVect *vect )
+void rtCodeVectEmpty( struct rt_code_vect *vect )
 {
 	if ( vect->data != 0 ) {
 		/* Free the data space. */
@@ -104,7 +104,7 @@ void rtCodeVectEmpty( RtCodeVect *vect )
 	}
 }
 
-void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len )
+void rtCodeVectReplace( struct rt_code_vect *vect, long pos, const Code *val, long len )
 {
 	long endPos, i;
 	//Code *item;
@@ -144,7 +144,7 @@ void rtCodeVectReplace( RtCodeVect *vect, long pos, const Code *val, long len )
 		*dst = *src;
 }
 
-void rtCodeVectRemove( RtCodeVect *vect, long pos, long len )
+void rtCodeVectRemove( struct rt_code_vect *vect, long pos, long len )
 {
 	long newLen, lenToSlideOver, endPos;
 	Code *dst;//, *item;

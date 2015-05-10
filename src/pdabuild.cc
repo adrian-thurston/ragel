@@ -1279,10 +1279,10 @@ void Compiler::insertUniqueEmptyProductions()
 	}
 }
 
-LocalInfo *Compiler::makeLocalInfo( Locals &locals )
+struct local_info *Compiler::makeLocalInfo( Locals &locals )
 {
-	LocalInfo *localInfo = new LocalInfo[locals.locals.length()];
-	memset( localInfo, 0, sizeof(LocalInfo) * locals.locals.length() );
+	struct local_info *localInfo = new local_info[locals.locals.length()];
+	memset( localInfo, 0, sizeof(struct local_info) * locals.locals.length() );
 
 	for ( Vector<LocalLoc>::Iter l = locals.locals; l.lte(); l++ ) {
 		localInfo[l.pos()].type = (int) l->type;
@@ -1332,9 +1332,9 @@ void Compiler::makeRuntimeData()
 	 * ProdCodeBlockLens
 	 */
 
-	runtimeData->frameInfo = new FrameInfo[nextFrameId];
+	runtimeData->frameInfo = new frame_info[nextFrameId];
 	runtimeData->numFrames = nextFrameId;
-	memset( runtimeData->frameInfo, 0, sizeof(FrameInfo) * nextFrameId );
+	memset( runtimeData->frameInfo, 0, sizeof(struct frame_info) * nextFrameId );
 
 	/*
 	 * Init code block.
@@ -1364,7 +1364,7 @@ void Compiler::makeRuntimeData()
 	 * prodInfo
 	 */
 	count = prodList.length();
-	runtimeData->prodInfo = new ProdInfo[count];
+	runtimeData->prodInfo = new prod_info[count];
 	runtimeData->numProds = count;
 
 	count = 0;
@@ -1399,8 +1399,9 @@ void Compiler::makeRuntimeData()
 	 * regionInfo
 	 */
 	runtimeData->numRegions = regionList.length()+1;
-	runtimeData->regionInfo = new RegionInfo[runtimeData->numRegions];
-	memset( runtimeData->regionInfo, 0, sizeof(RegionInfo) * runtimeData->numRegions );
+	runtimeData->regionInfo = new region_info[runtimeData->numRegions];
+	memset( runtimeData->regionInfo, 0,
+			sizeof(struct region_info) * runtimeData->numRegions );
 
 	runtimeData->regionInfo[0].defaultToken = -1;
 	runtimeData->regionInfo[0].eofFrameId = -1;
@@ -1435,9 +1436,9 @@ void Compiler::makeRuntimeData()
 	 */
 
 	count = nextSymbolId;
-	runtimeData->lelInfo = new LangElInfo[count];
+	runtimeData->lelInfo = new lang_el_info[count];
 	runtimeData->numLangEls = count;
-	memset( runtimeData->lelInfo, 0, sizeof(LangElInfo)*count );
+	memset( runtimeData->lelInfo, 0, sizeof(struct lang_el_info)*count );
 
 	for ( int i = 0; i < nextSymbolId; i++ ) {
 		LangEl *lel = langElIndex[i];
@@ -1490,7 +1491,7 @@ void Compiler::makeRuntimeData()
 			runtimeData->lelInfo[i].numCaptureAttr = 0;
 		}
 		else {
-			memset(&runtimeData->lelInfo[i], 0, sizeof(LangElInfo) );
+			memset(&runtimeData->lelInfo[i], 0, sizeof(struct lang_el_info) );
 			runtimeData->lelInfo[i].name = "__UNUSED";
 			runtimeData->lelInfo[i].xmlTag = "__UNUSED";
 			runtimeData->lelInfo[i].frameId = -1;
@@ -1498,13 +1499,13 @@ void Compiler::makeRuntimeData()
 	}
 
 	/*
-	 * selInfo
+	 * struct_el_info
 	 */
 
 	count = structEls.length();
-	runtimeData->selInfo = new StructElInfo[count];
+	runtimeData->selInfo = new struct_el_info[count];
 	runtimeData->numStructEls = count;
-	memset( runtimeData->selInfo, 0, sizeof(StructElInfo)*count );
+	memset( runtimeData->selInfo, 0, sizeof(struct struct_el_info)*count );
 	StructElList::Iter sel = structEls;
 	for ( int i = 0; i < count; i++, sel++ ) {
 		int treesLen;
@@ -1514,13 +1515,13 @@ void Compiler::makeRuntimeData()
 	}
 
 	/*
-	 * FunctionInfo
+	 * function_info
 	 */
 	count = functionList.length();
 
-	runtimeData->functionInfo = new FunctionInfo[count];
+	runtimeData->functionInfo = new function_info[count];
 	runtimeData->numFunctions = count;
-	memset( runtimeData->functionInfo, 0, sizeof(FunctionInfo)*count );
+	memset( runtimeData->functionInfo, 0, sizeof(struct function_info)*count );
 	for ( FunctionList::Iter func = functionList; func.lte(); func++ ) {
 
 		runtimeData->functionInfo[func->funcId].frameId = -1;
@@ -1559,28 +1560,28 @@ void Compiler::makeRuntimeData()
 	}
 
 	/*
-	 * PatConsInfo
+	 * pat_cons_info
 	 */
 
 	/* Filled in later after patterns are parsed. */
-	runtimeData->patReplInfo = new PatConsInfo[nextPatConsId];
-	memset( runtimeData->patReplInfo, 0, sizeof(PatConsInfo) * nextPatConsId );
+	runtimeData->patReplInfo = new pat_cons_info[nextPatConsId];
+	memset( runtimeData->patReplInfo, 0, sizeof(struct pat_cons_info) * nextPatConsId );
 	runtimeData->numPatterns = nextPatConsId;
 	runtimeData->patReplNodes = 0;
 	runtimeData->numPatternNodes = 0;
 
 	
 	/*
-	 * GenericInfo
+	 * generic_info
 	 */
 	count = 1;
 	for ( NamespaceList::Iter nspace = namespaceList; nspace.lte(); nspace++ )
 		count += nspace->genericList.length();
 	assert( count == nextGenericId );
 
-	runtimeData->genericInfo = new GenericInfo[count];
+	runtimeData->genericInfo = new generic_info[count];
 	runtimeData->numGenerics = count;
-	memset( &runtimeData->genericInfo[0], 0, sizeof(GenericInfo) );
+	memset( &runtimeData->genericInfo[0], 0, sizeof(struct generic_info) );
 	for ( NamespaceList::Iter nspace = namespaceList; nspace.lte(); nspace++ ) {
 		for ( GenericList::Iter gen = nspace->genericList; gen.lte(); gen++ ) {
 			runtimeData->genericInfo[gen->id].type = gen->typeId;
@@ -1728,10 +1729,10 @@ void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 }
 
 void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId, 
-		PatConsNode *nodes, ParseTree *parseTree, Kid *kid, int ind )
+		struct pat_cons_node *nodes, ParseTree *parseTree, Kid *kid, int ind )
 {
 	if ( kid != 0 ) {
-		PatConsNode &node = nodes[ind];
+		struct pat_cons_node &node = nodes[ind];
 
 		Kid *child = 
 			!( parseTree->flags & PF_NAMED ) && 
@@ -1759,9 +1760,9 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		node.leftIgnore = ignore == 0 ? -1 : nextAvail;
 
 		while ( ignore != 0 ) {
-			PatConsNode &node = nodes[nextAvail++];
+			struct pat_cons_node &node = nodes[nextAvail++];
 
-			memset( &node, 0, sizeof(PatConsNode) );
+			memset( &node, 0, sizeof(struct pat_cons_node) );
 			node.id = ignore->tree->id;
 			node.prodNum = ignore->tree->prod_num;
 			node.next = ignore->next == 0 ? -1 : nextAvail;
@@ -1778,9 +1779,9 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		node.rightIgnore = ignore == 0 ? -1 : nextAvail;
 
 		while ( ignore != 0 ) {
-			PatConsNode &node = nodes[nextAvail++];
+			struct pat_cons_node &node = nodes[nextAvail++];
 
-			memset( &node, 0, sizeof(PatConsNode) );
+			memset( &node, 0, sizeof(struct pat_cons_node) );
 			node.id = ignore->tree->id;
 			node.prodNum = ignore->tree->prod_num;
 			node.next = ignore->next == 0 ? -1 : nextAvail;
@@ -1798,8 +1799,8 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 		//
 		//	Tree *attr = colm_get_attr( kid->tree, cap->offset );
 		//
-		//	PatConsNode &node = nodes[nextAvail++];
-		//	memset( &node, 0, sizeof(PatConsNode) );
+		//	struct pat_cons_node &node = nodes[nextAvail++];
+		//	memset( &node, 0, sizeof(struct pat_cons_node) );
 		//
 		//	node.id = attr->id;
 		//	node.prodNum = attr->prodNum;
@@ -1852,7 +1853,7 @@ void Compiler::fillInPatterns( Program *prg )
 				repl->pdaRun->stackTop->next->shadow );
 	}
 	
-	runtimeData->patReplNodes = new PatConsNode[count];
+	runtimeData->patReplNodes = new pat_cons_node[count];
 	runtimeData->numPatternNodes = count;
 
 	int nextAvail = 0;
@@ -1963,7 +1964,7 @@ PdaGraph *Compiler::makePdaGraph( LangElSet &parserEls )
 struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 {
 	int count, pos;
-	struct pda_tables *pdaTables = new struct pda_tables;
+	struct pda_tables *pdaTables = new pda_tables;
 
 	/*
 	 * Counting max indices.

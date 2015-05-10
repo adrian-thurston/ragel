@@ -34,35 +34,35 @@ struct stack_block
 
 struct colm_sections
 {
-	LangElInfo *lelInfo;
+	struct lang_el_info *lelInfo;
 	long numLangEls;
 
-	StructElInfo *selInfo;
+	struct struct_el_info *selInfo;
 	long numStructEls;
 
-	ProdInfo *prodInfo;
+	struct prod_info *prodInfo;
 	long numProds;
 
-	RegionInfo *regionInfo;
+	struct region_info *regionInfo;
 	long numRegions;
 
 	Code *rootCode;
 	long rootCodeLen;
 	long rootFrameId;
 
-	FrameInfo *frameInfo;
+	struct frame_info *frameInfo;
 	long numFrames;
 
-	FunctionInfo *functionInfo;
+	struct function_info *functionInfo;
 	long numFunctions;
 
-	PatConsInfo *patReplInfo;
+	struct pat_cons_info *patReplInfo;
 	long numPatterns;
 
-	PatConsNode *patReplNodes;
+	struct pat_cons_node *patReplNodes;
 	long numPatternNodes;
 
-	GenericInfo *genericInfo;
+	struct generic_info *genericInfo;
 	long numGenerics;
 
 	long argvGenericId;
@@ -121,11 +121,11 @@ struct colm_program
 	int induceExit;
 	int exitStatus;
 
-	PoolAlloc kidPool;
-	PoolAlloc treePool;
-	PoolAlloc parseTreePool;
-	PoolAlloc headPool;
-	PoolAlloc locationPool;
+	struct pool_alloc kidPool;
+	struct pool_alloc treePool;
+	struct pool_alloc parseTreePool;
+	struct pool_alloc headPool;
+	struct pool_alloc locationPool;
 
 	Tree *trueVal;
 	Tree *falseVal;

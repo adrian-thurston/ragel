@@ -27,14 +27,7 @@
 /include
 
 /bootstrap0
-
 /bootstrap1
-/if1.h
-/if1.cc
-/parse1.c
-
-/if2.h
-/if2.cc
-/parse2.c
+/gen
 
 /libprog.a

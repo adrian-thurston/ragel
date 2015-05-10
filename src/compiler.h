@@ -835,7 +835,7 @@ struct Compiler
 	void generateExports();
 	void generateExportsImpl();
 
-	LocalInfo *makeLocalInfo( Locals &locals );
+	struct local_info *makeLocalInfo( Locals &locals );
 	short *makeTrees( ObjectDef *objectDef, int &numTrees );
 
 	/* 

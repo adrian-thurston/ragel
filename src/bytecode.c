@@ -268,7 +268,7 @@ static Tree *get_local_split( Program *prg, Execution *exec, long field )
 }
 
 static void downref_local_trees( Program *prg, Tree **sp,
-		Execution *exec, LocalInfo *locals, long localsLen )
+		Execution *exec, struct local_info *locals, long localsLen )
 {
 	long i;
 	for ( i = localsLen-1; i >= 0; i-- ) {
@@ -283,7 +283,7 @@ static void downref_local_trees( Program *prg, Tree **sp,
 }
 
 static void downref_locals( Program *prg, Tree ***psp,
-		Execution *exec, LocalInfo *locals, long localsLen )
+		Execution *exec, struct local_info *locals, long localsLen )
 {
 	long i;
 	for ( i = localsLen-1; i >= 0; i-- ) {
@@ -355,7 +355,7 @@ static List *construct_argv( Program *prg, int argc, const char **argv )
  * Execution environment
  */
 
-void colm_rcode_downref_all( Program *prg, Tree **sp, RtCodeVect *rev )
+void colm_rcode_downref_all( Program *prg, Tree **sp, struct rt_code_vect *rev )
 {
 	while ( rev->tabLen > 0 ) {
 		/* Read the length */
@@ -379,7 +379,7 @@ void colm_execute( Program *prg, Execution *exec, Code *code )
 {
 	Tree **sp = prg->stackRoot;
 
-	FrameInfo *fi = &prg->rtd->frameInfo[prg->rtd->rootFrameId];
+	struct frame_info *fi = &prg->rtd->frameInfo[prg->rtd->rootFrameId];
 
 	/* Set up the stack as if we have 
 	 * called. We allow a return value. */
@@ -424,7 +424,7 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 
 	Tree **sp = prg->stackRoot;
 
-	FrameInfo *fi = &prg->rtd->frameInfo[frameId];
+	struct frame_info *fi = &prg->rtd->frameInfo[frameId];
 	Code *code = fi->codeWC;
 
 	vm_pushn( paramCount );
@@ -476,8 +476,8 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 
 int colm_make_reverse_code( struct pda_run *pdaRun )
 {
-	RtCodeVect *reverseCode = &pdaRun->reverseCode;
-	RtCodeVect *rcodeCollect = &pdaRun->rcodeCollect;
+	struct rt_code_vect *reverseCode = &pdaRun->reverseCode;
+	struct rt_code_vect *rcodeCollect = &pdaRun->rcodeCollect;
 
 	/* Do we need to revert the left hand side? */
 
@@ -487,9 +487,9 @@ int colm_make_reverse_code( struct pda_run *pdaRun )
 
 	if ( pdaRun->rcBlockCount == 0 ) {
 		/* One reverse code run for the DECK terminator. */
-		appendCode( reverseCode, IN_PCR_END_DECK );
-		appendCode( reverseCode, IN_PCR_RET );
-		appendWord( reverseCode, 2 );
+		append_code_val( reverseCode, IN_PCR_END_DECK );
+		append_code_val( reverseCode, IN_PCR_RET );
+		append_word( reverseCode, 2 );
 		pdaRun->rcBlockCount += 1;
 		colm_increment_steps( pdaRun );
 	}
@@ -503,13 +503,13 @@ int colm_make_reverse_code( struct pda_run *pdaRun )
 		p--;
 		long len = *p;
 		p = p - len;
-		appendCode2( reverseCode, p, len );
+		append_code_vect( reverseCode, p, len );
 	}
 
 	/* Stop, then place a total length in the global stack. */
-	appendCode( reverseCode, IN_PCR_RET );
+	append_code_val( reverseCode, IN_PCR_RET );
 	long length = reverseCode->tabLen - startLength;
-	appendWord( reverseCode, length );
+	append_word( reverseCode, length );
 
 	/* Clear the revere code buffer. */
 	rcodeCollect->tabLen = 0;
@@ -531,7 +531,7 @@ void colm_transfer_reverse_code( struct pda_run *pdaRun, ParseTree *parseTree )
 
 static void rcode_unit_term( Execution *exec )
 {
-	appendCode( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
+	append_code_val( &exec->parser->pdaRun->rcodeCollect, exec->rcodeUnitLen );
 	exec->rcodeUnitLen = 0;
 }
 
@@ -542,23 +542,23 @@ static void rcode_unit_start( Execution *exec )
 
 static void rcode_code( Execution *exec, const Code code )
 {
-	appendCode( &exec->parser->pdaRun->rcodeCollect, code );
+	append_code_val( &exec->parser->pdaRun->rcodeCollect, code );
 	exec->rcodeUnitLen += SIZEOF_CODE;
 }
 
 static void rcodeHalf( Execution *exec, const Half half )
 {
-	appendHalf( &exec->parser->pdaRun->rcodeCollect, half );
+	append_half( &exec->parser->pdaRun->rcodeCollect, half );
 	exec->rcodeUnitLen += SIZEOF_HALF;
 }
 
 static void rcode_word( Execution *exec, const Word word )
 {
-	appendWord( &exec->parser->pdaRun->rcodeCollect, word );
+	append_word( &exec->parser->pdaRun->rcodeCollect, word );
 	exec->rcodeUnitLen += SIZEOF_WORD;
 }
 
-Code *colm_pop_reverse_code( RtCodeVect *allRev )
+Code *colm_pop_reverse_code( struct rt_code_vect *allRev )
 {
 	/* Read the length */
 	Code *prcode = allRev->data + allRev->tabLen - SIZEOF_WORD;
@@ -842,12 +842,12 @@ again:
 
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
-			LangElInfo *lelInfo = prg->rtd->lelInfo;
+			struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 			char **mark = exec->parser->pdaRun->mark;
 
 			int i;
 			for ( i = 0; i < lelInfo[exec->parser->pdaRun->tokenId].numCaptureAttr; i++ ) {
-				LangElInfo *lei = &lelInfo[exec->parser->pdaRun->tokenId];
+				struct lang_el_info *lei = &lelInfo[exec->parser->pdaRun->tokenId];
 				CaptureAttr *ca = &prg->rtd->captureAttr[lei->captureAttr + i];
 				Head *data = stringAllocFull( prg, mark[ca->mark_enter],
 						mark[ca->mark_leave] - mark[ca->mark_enter] );
@@ -2305,7 +2305,7 @@ again:
 
 			int frameSize = 0;
 			if ( exec->parser->pdaRun->frameId >= 0 )  {
-				FrameInfo *fi = &prg->rtd->frameInfo[exec->parser->pdaRun->frameId];
+				struct frame_info *fi = &prg->rtd->frameInfo[exec->parser->pdaRun->frameId];
 				frameSize = fi->frameSize;
 			}
 
@@ -2329,7 +2329,7 @@ again:
 			exec->frameId = exec->parser->pdaRun->frameId;
 
 			if ( exec->parser->pdaRun->frameId >= 0 )  {
-				FrameInfo *fi = &prg->rtd->frameInfo[exec->parser->pdaRun->frameId];
+				struct frame_info *fi = &prg->rtd->frameInfo[exec->parser->pdaRun->frameId];
 
 				exec->framePtr = vm_ptop();
 				vm_pushn( fi->frameSize );
@@ -2348,7 +2348,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PCR_RET\n" );
 
 			if ( exec->frameId >= 0 ) {
-				FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
+				struct frame_info *fi = &prg->rtd->frameInfo[exec->frameId];
 				downref_local_trees( prg, sp, exec, fi->locals, fi->localsLen );
 				debug( prg, REALM_BYTECODE, "RET: %d\n", fi->frameSize );
 
@@ -2721,8 +2721,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CONSTRUCT\n" );
 
-			//LangElInfo *lelInfo = prg->rtd->lelInfo;
-			//PatConsNode *nodes = prg->rtd->patReplNodes;
+			//struct lang_el_info *lelInfo = prg->rtd->lelInfo;
+			//struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 			int rootNode = prg->rtd->patReplInfo[patternId].offset;
 
 			/* Note that bindIds are indexed at one. Add one spot for them. */
@@ -3332,8 +3332,8 @@ again:
 			Half funcId;
 			read_half( funcId );
 
-			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
-			FrameInfo *fr = &prg->rtd->frameInfo[fi->frameId];
+			struct function_info *fi = &prg->rtd->functionInfo[funcId];
+			struct frame_info *fr = &prg->rtd->frameInfo[fi->frameId];
 
 			debug( prg, REALM_BYTECODE, "IN_CALL_WV %s\n", fr->name );
 
@@ -3357,8 +3357,8 @@ again:
 			Half funcId;
 			read_half( funcId );
 
-			FunctionInfo *fi = &prg->rtd->functionInfo[funcId];
-			FrameInfo *fr = &prg->rtd->frameInfo[fi->frameId];
+			struct function_info *fi = &prg->rtd->functionInfo[funcId];
+			struct frame_info *fr = &prg->rtd->frameInfo[fi->frameId];
 
 			debug( prg, REALM_BYTECODE, "IN_CALL_WC %s %d\n", fr->name, fr->frameSize );
 
@@ -3417,7 +3417,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_UITER_CREATE_WV\n" );
 
-			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
+			struct function_info *fi = prg->rtd->functionInfo + funcId;
 
 			vm_contiguous( (sizeof(UserIter) / sizeof(Word)) + FR_AA + fi->frameSize );
 
@@ -3452,7 +3452,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_UITER_CREATE_WC\n" );
 
-			FunctionInfo *fi = prg->rtd->functionInfo + funcId;
+			struct function_info *fi = prg->rtd->functionInfo + funcId;
 
 			vm_contiguous( (sizeof(UserIter) / sizeof(Word)) + FR_AA + fi->frameSize );
 
@@ -3501,7 +3501,7 @@ again:
 		}
 
 		case IN_RET: {
-			FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
+			struct frame_info *fi = &prg->rtd->frameInfo[exec->frameId];
 			downref_local_trees( prg, sp, exec, fi->locals, fi->localsLen );
 			vm_popn( fi->frameSize );
 
@@ -4207,7 +4207,7 @@ again:
 					if ( exec->frameId == prg->rtd->rootFrameId )
 						break;
 
-					FrameInfo *fi = &prg->rtd->frameInfo[exec->frameId];
+					struct frame_info *fi = &prg->rtd->frameInfo[exec->frameId];
 
 					debug( prg, REALM_BYTECODE, "IN_EXIT, popping frame %s, "
 							"unwind-len %hd, arg-size %ld\n",

@@ -35,7 +35,7 @@ typedef unsigned char Code;
 typedef unsigned long Word;
 typedef unsigned long Half;
 struct Bindings;
-struct _FunctionInfo;
+struct function_info;
 
 typedef struct colm_stream Stream;
 typedef struct colm_parser Parser;
@@ -140,7 +140,7 @@ typedef struct _Str
 /*
  * Maps
  */
-typedef struct colm_generic_info
+struct generic_info
 {
 	long type;
 
@@ -155,7 +155,7 @@ typedef struct colm_generic_info
 	long valueOffset;
 
 	long parserId;
-} GenericInfo;
+};
 
 enum IterType
 {
@@ -324,9 +324,9 @@ void printXmlStdout( struct colm_program *prg, Tree **sp,
  */
 
 UserIter *colm_uiter_create( struct colm_program *prg, Tree ***psp,
-		struct _FunctionInfo *fi, long searchId );
+		struct function_info *fi, long searchId );
 void uiterInit( struct colm_program *prg, Tree **sp, UserIter *uiter, 
-		struct _FunctionInfo *fi, int revertOn );
+		struct function_info *fi, int revertOn );
 
 void colm_init_tree_iter( TreeIter *treeIter, Tree **stackRoot,
 		long argSize, long rootSize, const Ref *rootRef, int searchId );
