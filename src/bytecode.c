@@ -203,7 +203,7 @@ static Tree *stream_pull_bc( Program *prg, Tree **sp, PdaRun *pdaRun,
 {
 	long len = ((long)length);
 	StreamImpl *impl = streamToImpl( stream );
-	Head *tokdata = streamPull( prg, sp, pdaRun, impl, len );
+	Head *tokdata = colm_stream_pull( prg, sp, pdaRun, impl, len );
 	return constructString( prg, tokdata );
 }
 
@@ -2275,7 +2275,7 @@ again:
 
 			exec->parser = parser;
 			exec->steps = steps;
-			exec->pcr = PcrStart;
+			exec->pcr = PCR_START;
 			break;
 		}
 
@@ -2384,7 +2384,7 @@ again:
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
-			if ( exec->pcr == PcrDone )
+			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;
 			break;
 		}
@@ -2417,7 +2417,7 @@ again:
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
-			if ( exec->pcr == PcrDone )
+			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;
 			break;
 		}
@@ -2436,8 +2436,8 @@ again:
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_INIT_BKT );
-			rcode_word( exec, (Word)parser );
-			rcode_word( exec, (Word)PcrStart );
+			rcode_word( exec, (Word) parser );
+			rcode_word( exec, (Word) PCR_START );
 			rcode_word( exec, steps );
 			rcode_code( exec, IN_PARSE_FRAG_BKT );
 			rcodeHalf( exec, 0 );
@@ -2459,7 +2459,7 @@ again:
 			exec->pcr = colm_parse_undo_frag( prg, sp, exec->parser->pdaRun,
 					exec->parser->input, exec->steps, exec->pcr );
 
-			if ( exec->pcr == PcrDone )
+			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;
 			break;
 		}
@@ -2488,7 +2488,7 @@ again:
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
-			if ( exec->pcr == PcrDone )
+			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;
 			break;
 		}
@@ -2522,7 +2522,7 @@ again:
 
 			exec->parser->result = result;
 
-			if ( exec->pcr == PcrDone )
+			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;
 			break;
 		}
@@ -2542,7 +2542,7 @@ again:
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_INIT_BKT );
 			rcode_word( exec, (Word)parser );
-			rcode_word( exec, (Word)PcrStart );
+			rcode_word( exec, (Word)PCR_START );
 			rcode_word( exec, steps );
 			rcode_code( exec, IN_PARSE_FINISH_BKT );
 			rcodeHalf( exec, 0 );
@@ -2565,7 +2565,7 @@ again:
 			exec->pcr = colm_parse_undo_frag( prg, sp, exec->parser->pdaRun,
 					exec->parser->input, exec->steps, exec->pcr );
 
-			if ( exec->pcr == PcrDone )
+			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;
 			break;
 		}

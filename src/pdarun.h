@@ -428,14 +428,14 @@ void pdaRunMatch(  PdaRun *pdaRun, Kid *tree, Kid *pattern );
 int pdaRunGetNextRegion( PdaRun *pdaRun, int offset );
 int pdaRunGetNextPreRegion( PdaRun *pdaRun );
 
-#define PcrStart         1
-#define PcrDone          2
-#define PcrReduction     3
-#define PcrGeneration    4
-#define PcrPreEof        5
-#define PcrReverse       6
+#define PCR_START         1
+#define PCR_DONE          2
+#define PCR_REDUCTION     3
+#define PCR_GENERATION    4
+#define PCR_PRE_EOF       5
+#define PCR_REVERSE       6
 
-Head *streamPull( struct colm_program *prg, struct colm_tree **sp,
+Head *colm_stream_pull( struct colm_program *prg, struct colm_tree **sp,
 		PdaRun *pdaRun, StreamImpl *is, long length );
 Head *stringAllocPointer( struct colm_program *prg, const char *data, long length );
 
@@ -444,7 +444,8 @@ void streamPushTree( StreamImpl *inputStream, Tree *tree, int ignore );
 void streamPushStream( StreamImpl *inputStream, Tree *tree );
 void undoStreamPush( struct colm_program *prg, Tree **sp, StreamImpl *inputStream, long length );
 void undoStreamAppend( struct colm_program *prg, Tree **sp, StreamImpl *inputStream, struct colm_tree *tree, long length );
-Kid *makeTokenWithData( struct colm_program *prg, PdaRun *pdaRun, FsmRun *fsmRun, 
+
+Kid *make_token_with_data( struct colm_program *prg, PdaRun *pdaRun,
 		StreamImpl *inputStream, int id, Head *tokdata );
 
 void pushBinding( PdaRun *pdaRun, ParseTree *parseTree );

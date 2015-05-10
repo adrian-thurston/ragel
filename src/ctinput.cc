@@ -463,7 +463,7 @@ extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp,
 	if ( data != 0 )
 		tokdata = stringAllocFull( prg, data, length );
 
-	Kid *input = makeTokenWithData( prg, pdaRun, fsmRun, is, klangEl->id, tokdata );
+	Kid *input = make_token_with_data( prg, pdaRun, is, klangEl->id, tokdata );
 
 	colm_increment_steps( pdaRun );
 
