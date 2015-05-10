@@ -145,7 +145,7 @@ void Compiler::generateExports()
 			}
 			out << "	};\n";
 			out << "	enum prod_name prodName() " <<
-					"{ return (enum prod_name)__tree->prodNum; }\n";
+					"{ return (enum prod_name)__tree->prod_num; }\n";
 		}
 		
 

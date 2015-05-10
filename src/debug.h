@@ -24,6 +24,7 @@ extern "C" {
 #endif
 
 #include "config.h"
+#include "colm.h"
 
 void fatal( const char *fmt, ... );
 
@@ -41,14 +42,14 @@ int _debug( struct colm_program *prg, long realm, const char *fmt, ... );
 
 void message( const char *fmt, ... );
 
-#define REALM_BYTECODE    0x00000001
-#define REALM_PARSE       0x00000002
-#define REALM_MATCH       0x00000004
-#define REALM_COMPILE     0x00000008
-#define REALM_POOL        0x00000010
-#define REALM_PRINT       0x00000020
-#define REALM_INPUT       0x00000040
-#define REALM_SCAN        0x00000080
+#define REALM_BYTECODE    COLM_DBG_BYTECODE
+#define REALM_PARSE       COLM_DBG_PARSE
+#define REALM_MATCH       COLM_DBG_MATCH
+#define REALM_COMPILE     COLM_DBG_COMPILE
+#define REALM_POOL        COLM_DBG_POOL
+#define REALM_PRINT       COLM_DBG_PRINT
+#define REALM_INPUT       COLM_DBG_INPUT
+#define REALM_SCAN        COLM_DBG_SCAN
 
 #define REALMS            32
 

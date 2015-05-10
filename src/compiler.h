@@ -1015,6 +1015,7 @@ struct Compiler
 
 	void declareReVars();
 
+	void writeHostCall();
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

@@ -890,26 +890,6 @@ void FsmCodeGen::writeExec()
 		"\n";
 }
 
-void FsmCodeGen::writeIncludes()
-{
-	out << 
-		"#include <colm/pdarun.h>\n"
-		"#include <colm/debug.h>\n"
-		"#include <colm/bytecode.h>\n"
-		"#include <stdio.h>\n"
-		"#include <stdlib.h>\n"
-		"#include <string.h>\n"
-		"#include <assert.h>\n"
-		"#include <colm/config.h>\n"
-		"#include <colm/defs.h>\n"
-		"#include <colm/input.h>\n"
-		"#include <colm/tree.h>\n"
-		"#include <colm/program.h>\n"
-		"#include <colm/colm.h>\n"
-		"\n"
-		"\n";
-}
-
 void FsmCodeGen::writeCode()
 {
 	redFsm->depthFirstOrdering();

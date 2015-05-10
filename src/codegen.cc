@@ -27,6 +27,27 @@
 #include <sstream>
 #include <string>
 
+void FsmCodeGen::writeIncludes()
+{
+	out << 
+		"#include <colm/pdarun.h>\n"
+		"#include <colm/debug.h>\n"
+		"#include <colm/bytecode.h>\n"
+		"#include <colm/config.h>\n"
+		"#include <colm/defs.h>\n"
+		"#include <colm/input.h>\n"
+		"#include <colm/tree.h>\n"
+		"#include <colm/program.h>\n"
+		"#include <colm/colm.h>\n"
+		"\n"
+		"#include <stdio.h>\n"
+		"#include <stdlib.h>\n"
+		"#include <string.h>\n"
+		"#include <assert.h>\n"
+		"\n"
+		"\n";
+}
+
 
 void FsmCodeGen::writeMain( long activeRealm )
 {
@@ -34,16 +55,15 @@ void FsmCodeGen::writeMain( long activeRealm )
 		"int main( int argc, const char **argv )\n"
 		"{\n"
 		"	struct colm_program *prg;\n"
-		"	int exitStatus;\n"
+		"	int exit_status;\n"
+		"\n"
 		"	prg = colm_new_program( &colm_object );\n"
 		"	colm_set_debug( prg, " << activeRealm << " );\n"
 		"	colm_run_program( prg, argc, argv );\n"
-		"	exitStatus = colm_delete_program( prg );\n"
-		"	return exitStatus;\n"
+		"	exit_status = colm_delete_program( prg );\n"
+		"	return exit_status;\n"
 		"}\n"
 		"\n";
 
 	out.flush();
 }
-
-

@@ -1766,8 +1766,8 @@ struct IterImpl
 
 	Code inCreateWV;
 	Code inCreateWC;
-	Code inDestroy;
 	Code inUnwind;
+	Code inDestroy;
 	Code inAdvance;
 
 	Code inGetCurR;

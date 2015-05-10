@@ -1075,25 +1075,8 @@ void Compiler::collectParserEls( BstSet<LangEl*> &parserEls )
 	}
 }
 
-void Compiler::generateOutput( long activeRealm )
+void Compiler::writeHostCall()
 {
-	FsmCodeGen *fsmGen = new FsmCodeGen( *outStream, redFsm, fsmTables );
-
-	PdaCodeGen *pdaGen = new PdaCodeGen( *outStream );
-
-	fsmGen->writeIncludes();
-	pdaGen->defineRuntime();
-	fsmGen->writeCode();
-
-	/* Make parsers that we need. */
-	pdaGen->writeParserData( 0, pdaTables );
-
-	/* Write the runtime data. */
-	pdaGen->writeRuntimeData( runtimeData, pdaTables );
-
-	if ( !gblLibrary ) 
-		fsmGen->writeMain( activeRealm );
-
 	/*
 	 * Host Call
 	 */
@@ -1141,6 +1124,29 @@ void Compiler::generateOutput( long activeRealm )
 		"	vm_push_value( rtn );\n"
 		"	return sp;\n"
 		"}\n";
+
+}
+
+void Compiler::generateOutput( long activeRealm )
+{
+	FsmCodeGen *fsmGen = new FsmCodeGen( *outStream, redFsm, fsmTables );
+
+	PdaCodeGen *pdaGen = new PdaCodeGen( *outStream );
+
+	fsmGen->writeIncludes();
+	pdaGen->defineRuntime();
+	fsmGen->writeCode();
+
+	/* Make parsers that we need. */
+	pdaGen->writeParserData( 0, pdaTables );
+
+	/* Write the runtime data. */
+	pdaGen->writeRuntimeData( runtimeData, pdaTables );
+
+	writeHostCall();
+
+	if ( !gblLibrary ) 
+		fsmGen->writeMain( activeRealm );
 
 	outStream->flush();
 }

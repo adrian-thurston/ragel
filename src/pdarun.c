@@ -1582,7 +1582,7 @@ again:
 		value->tree = treeAllocate( prg );
 		value->tree->refs = 1;
 		value->tree->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
-		value->tree->prodNum = prg->rtd->prodInfo[pdaRun->reduction].prodNum;
+		value->tree->prod_num = prg->rtd->prodInfo[pdaRun->reduction].prodNum;
 
 		pdaRun->redLel = parseTreeAllocate( prg );
 		pdaRun->redLel->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;

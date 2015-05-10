@@ -434,7 +434,7 @@ Tree *constructObject( Program *prg, Kid *kid, Tree **bindings, long langElId )
 	tree->id = langElId;
 	tree->refs = 1;
 	tree->tokdata = 0;
-	tree->prodNum = 0;
+	tree->prod_num = 0;
 
 	int objectLength = lelInfo[tree->id].objectLength;
 
@@ -489,7 +489,7 @@ Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 		tree->tokdata = nodes[pat].length == 0 ? 0 :
 				stringAllocPointer( prg, 
 				nodes[pat].data, nodes[pat].length );
-		tree->prodNum = nodes[pat].prodNum;
+		tree->prod_num = nodes[pat].prodNum;
 
 		int objectLength = lelInfo[tree->id].objectLength;
 
@@ -618,7 +618,7 @@ Tree *castTree( Program *prg, int langElId, Tree *tree )
 	newTree->tokdata = stringCopy( prg, tree->tokdata );
 
 	/* Invalidate the production number. */
-	newTree->prodNum = -1;
+	newTree->prod_num = -1;
 
 	/* Copy the child list. Start with ignores, then the list. */
 	Kid *child = tree->child, *last = 0;
@@ -788,7 +788,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDow
 
 	newTree->id = tree->id;
 	newTree->tokdata = stringCopy( prg, tree->tokdata );
-	newTree->prodNum = tree->prodNum;
+	newTree->prod_num = tree->prod_num;
 
 	/* Copy the child list. Start with ignores, then the list. */
 	Kid *child = tree->child, *last = 0;
@@ -1157,9 +1157,9 @@ Tree *colm_get_rhs_val( Program *prg, Tree *tree, int *a )
 {
 	int i, len = a[0];
 	for ( i = 0; i < len; i++ ) {
-		int prodNum = a[1 + i * 2];
+		int prod_num = a[1 + i * 2];
 		int childNum = a[1 + i * 2 + 1];
-		if ( tree->prodNum == prodNum )
+		if ( tree->prod_num == prod_num )
 			return getRhsEl( prg, tree, childNum );
 	}
 	return 0;

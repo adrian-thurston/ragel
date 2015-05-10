@@ -54,8 +54,8 @@ IterImpl::IterImpl( Type type ) :
 	case Tree:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
-		inDestroy =  IN_TRITER_DESTROY;
 		inUnwind =   IN_TRITER_UNWIND;
+		inDestroy =  IN_TRITER_DESTROY;
 		inAdvance =  IN_TRITER_ADVANCE;
 
 		inGetCurR =  IN_TRITER_GET_CUR_R;
@@ -68,8 +68,8 @@ IterImpl::IterImpl( Type type ) :
 	case Child:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
-		inDestroy =  IN_TRITER_DESTROY;
 		inUnwind =   IN_TRITER_UNWIND;
+		inDestroy =  IN_TRITER_DESTROY;
 		inAdvance =  IN_TRITER_NEXT_CHILD;
 
 		inGetCurR =  IN_TRITER_GET_CUR_R;
@@ -82,8 +82,8 @@ IterImpl::IterImpl( Type type ) :
 	case RevChild:
 		inCreateWV = IN_REV_TRITER_FROM_REF;
 		inCreateWC = IN_REV_TRITER_FROM_REF;
-		inDestroy =  IN_REV_TRITER_DESTROY;
 		inUnwind =   IN_REV_TRITER_UNWIND;
+		inDestroy =  IN_REV_TRITER_DESTROY;
 		inAdvance =  IN_REV_TRITER_PREV_CHILD;
 
 		inGetCurR =  IN_TRITER_GET_CUR_R;
@@ -96,8 +96,8 @@ IterImpl::IterImpl( Type type ) :
 	case Repeat:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
-		inDestroy =  IN_TRITER_DESTROY;
 		inUnwind =   IN_TRITER_UNWIND;
+		inDestroy =  IN_TRITER_DESTROY;
 		inAdvance =  IN_TRITER_NEXT_REPEAT;
 
 		inGetCurR =  IN_TRITER_GET_CUR_R;
@@ -110,8 +110,8 @@ IterImpl::IterImpl( Type type ) :
 	case RevRepeat:
 		inCreateWV = IN_TRITER_FROM_REF;
 		inCreateWC = IN_TRITER_FROM_REF;
-		inDestroy =  IN_TRITER_DESTROY;
 		inUnwind =   IN_TRITER_UNWIND;
+		inDestroy =  IN_TRITER_DESTROY;
 		inAdvance =  IN_TRITER_PREV_REPEAT;
 
 		inGetCurR =  IN_TRITER_GET_CUR_R;
@@ -124,8 +124,8 @@ IterImpl::IterImpl( Type type ) :
 	case List:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
-		inDestroy =    IN_GEN_ITER_DESTROY;
 		inUnwind =     IN_GEN_ITER_UNWIND;
+		inDestroy =    IN_GEN_ITER_DESTROY;
 		inAdvance =    IN_LIST_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_ITER_GET_CUR_R;
@@ -138,8 +138,8 @@ IterImpl::IterImpl( Type type ) :
 	case ValueList:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
-		inDestroy =    IN_GEN_ITER_DESTROY;
 		inUnwind =     IN_GEN_ITER_UNWIND;
+		inDestroy =    IN_GEN_ITER_DESTROY;
 		inAdvance =    IN_LIST_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_VITER_GET_CUR_R;
@@ -152,8 +152,8 @@ IterImpl::IterImpl( Type type ) :
 	case ValueMap:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
-		inDestroy =    IN_GEN_ITER_DESTROY;
 		inUnwind =     IN_GEN_ITER_UNWIND;
+		inDestroy =    IN_GEN_ITER_DESTROY;
 		inAdvance =    IN_MAP_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_VITER_GET_CUR_R;
@@ -166,8 +166,8 @@ IterImpl::IterImpl( Type type ) :
 	case Map:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
-		inDestroy =    IN_GEN_ITER_DESTROY;
 		inUnwind =     IN_GEN_ITER_UNWIND;
+		inDestroy =    IN_GEN_ITER_DESTROY;
 		inAdvance =    IN_MAP_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_ITER_GET_CUR_R;
@@ -190,6 +190,7 @@ IterImpl::IterImpl( Type type, Function *func ) :
 	useGenericId(false),
 	inCreateWV(IN_UITER_CREATE_WV),
 	inCreateWC(IN_UITER_CREATE_WC),
+	inUnwind(IN_UITER_UNWIND),
 	inDestroy(IN_UITER_DESTROY),
 	inAdvance(IN_UITER_ADVANCE),
 	inGetCurR(IN_UITER_GET_CUR_R),

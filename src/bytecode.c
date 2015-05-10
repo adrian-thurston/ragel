@@ -1411,7 +1411,7 @@ again:
 				uchar prodNum, childNum;
 				read_byte( prodNum );
 				read_byte( childNum );
-				if ( !done && obj->prodNum == prodNum ) {
+				if ( !done && obj->prod_num == prodNum ) {
 					val = getRhsEl( prg, obj, childNum );
 					done = 1;
 				}
@@ -1838,6 +1838,7 @@ again:
 					argSize, rootSize, &rootRef, searchTypeId );
 			break;
 		}
+		case IN_TRITER_UNWIND:
 		case IN_TRITER_DESTROY: {
 			short field;
 			read_half( field );
@@ -1879,6 +1880,7 @@ again:
 					argSize, rootSize, &rootRef, searchTypeId, children );
 			break;
 		}
+		case IN_REV_TRITER_UNWIND:
 		case IN_REV_TRITER_DESTROY: {
 			short field;
 			read_half( field );
@@ -2024,6 +2026,7 @@ again:
 				rootSize, &rootRef, genericId );
 			break;
 		}
+		case IN_GEN_ITER_UNWIND:
 		case IN_GEN_ITER_DESTROY: {
 			short field;
 			read_half( field );
@@ -2882,7 +2885,7 @@ again:
 				uchar prodNum, childNum;
 				read_byte( prodNum );
 				read_byte( childNum );
-				if ( !done && obj->prodNum == prodNum ) {
+				if ( !done && obj->prod_num == prodNum ) {
 					attrKid = getRhsElKid( prg, obj, childNum );
 					done = 1;
 				}

@@ -1749,7 +1749,7 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 
 		/* Set up the fields. */
 		node.id = kid->tree->id;
-		node.prodNum = kid->tree->prodNum;
+		node.prodNum = kid->tree->prod_num;
 		node.length = stringLength( kid->tree->tokdata );
 		node.data = stringData( kid->tree->tokdata );
 
@@ -1763,7 +1763,7 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 
 			memset( &node, 0, sizeof(PatConsNode) );
 			node.id = ignore->tree->id;
-			node.prodNum = ignore->tree->prodNum;
+			node.prodNum = ignore->tree->prod_num;
 			node.next = ignore->next == 0 ? -1 : nextAvail;
 				
 			node.length = stringLength( ignore->tree->tokdata );
@@ -1782,7 +1782,7 @@ void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId,
 
 			memset( &node, 0, sizeof(PatConsNode) );
 			node.id = ignore->tree->id;
-			node.prodNum = ignore->tree->prodNum;
+			node.prodNum = ignore->tree->prod_num;
 			node.next = ignore->next == 0 ? -1 : nextAvail;
 				
 			node.length = stringLength( ignore->tree->tokdata );
