@@ -1303,6 +1303,63 @@ void FsmAp::nfaMergeStates( MergeData &md, StateAp *destState,
 	}
 }
 
+void FsmAp::expandOutConds( StateAp *state, CondSpace *fromSpace, CondSpace *mergedSpace )
+{
+	CondSet fromCS, mergedCS;
+
+	if ( fromSpace != 0 )
+		fromCS.insert( fromSpace->condSet );
+
+	if ( mergedSpace != 0 )
+		mergedCS.insert( mergedSpace->condSet );
+	
+	/* Need to transform condition element to the merged set. */
+	for ( int cti = 0; cti < state->outCondVect.length(); cti++ ) {
+		long origVal = state->outCondVect[cti];
+		long newVal = 0;
+
+		/* Iterate the bit positions in the from set. */
+		for ( CondSet::Iter csi = fromCS; csi.lte(); csi++ ) {
+			/* If set, find it in the merged set and flip the bit to 1. */
+			if ( origVal & (1 << csi.pos()) ) {
+				/* The condition is set. Find the bit position in the merged
+				 * set. */
+				Action **cim = mergedCS.find( *csi );
+				long bitPos = (cim - mergedCS.data);
+				newVal |= 1 << bitPos;
+			}
+		}
+
+		if ( origVal != newVal )
+			state->outCondVect[cti] = newVal;
+	}
+
+	/* Need to double up the whole transition list for each condition test in
+	 * merged that is not in from. The one we add has the bit in question set.
+	 * */
+	for ( CondSet::Iter csi = mergedCS; csi.lte(); csi++ ) {
+		Action **cim = fromCS.find( *csi );
+		if ( cim == 0 ) {
+			BstSet<int> newItems;
+			newItems.append( state->outCondVect );
+			for ( int cti = 0; cti < state->outCondVect.length(); cti++ ) {
+				int key = state->outCondVect[cti] | (1 << csi.pos());
+				newItems.insert( key );
+			}
+
+			state->outCondVect.setAs( newItems );
+		}
+	}
+}
+
+StateAp *FsmAp::copyStateForExpansion( StateAp *srcState )
+{
+	StateAp *newState = new StateAp();
+	newState->outCondSpace = srcState->outCondSpace;
+	newState->outCondVect = srcState->outCondVect;
+	return newState;
+}
+
 void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 {
 	bool bothFinal = srcState->isFinState() && destState->isFinState();
@@ -1345,11 +1402,57 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 		destState->outActionTable.setActions( srcState->outActionTable );
 
 		if ( bothFinal ) {
-			/* FIXME: This needs to be improved with a proper cross. This check
-			 * is covers some cases of future leaving condition interactions,
-			 * but not all. */
-			if ( !ctx->unionOp )
+			if ( ctx->unionOp ) {
+				CondSet destCS, srcCS;
+				CondSet mergedCS;
+
+				if ( destState->outCondSpace != 0 )
+					destCS.insert( destState->outCondSpace->condSet );
+
+				if ( srcState->outCondSpace != 0 )
+					srcCS.insert( srcState->outCondSpace->condSet );
+				
+				mergedCS.insert( destCS );
+				mergedCS.insert( srcCS );
+				if ( mergedCS.length() > 0 ) {
+					CondSpace *mergedSpace = addCondSpace( mergedCS );
+
+					StateAp *effSrcState = srcState;
+
+					if ( srcState->outCondSpace != mergedSpace ) {
+						effSrcState = copyStateForExpansion( srcState );
+
+						/* Prep the key list with zero item if necessary. */
+						if ( effSrcState->outCondSpace == 0 )
+							effSrcState->outCondVect.append( 0 );
+
+						CondSpace *orig = effSrcState->outCondSpace;
+						effSrcState->outCondSpace = mergedSpace;
+						expandOutConds( effSrcState, orig, mergedSpace );
+					}
+
+					if ( destState->outCondSpace != mergedSpace ) {
+						/* Prep the key list with zero item if necessary. */
+						if ( destState->outCondSpace == 0 )
+							destState->outCondVect.append( 0 );
+
+						/* Now expand the dest. */
+						CondSpace *orig = destState->outCondSpace;
+						destState->outCondSpace = mergedSpace;
+						expandOutConds( destState, orig, mergedSpace );
+					}
+
+					BstSet<int> newItems;
+					newItems.append( destState->outCondVect );
+					for ( Vector<int>::Iter c = srcState->outCondVect; c.lte(); c++ )
+						newItems.insert( *c );
+					destState->outCondVect.setAs( newItems );
+					destState->outCondSpace = mergedSpace;
+				}
+			}
+			else {
 				destState->outCondSet.insert( srcState->outCondSet );
+			}
 		}
 		else {
 			destState->outCondSet.insert( srcState->outCondSet );

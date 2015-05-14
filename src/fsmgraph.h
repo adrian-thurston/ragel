@@ -944,6 +944,9 @@ struct StateAp
 	/* Conditions to add to any future transiions that leave via this sttate. */
 	OutCondSet outCondSet;
 
+	Vector<int> outCondVect;
+	CondSpace *outCondSpace;
+
 	/* Error action tables. */
 	ErrActionTable errActionTable;
 
@@ -1702,6 +1705,7 @@ struct FsmAp
 	void expandConds( StateAp *fromState, TransAp *trans,
 			CondSpace *fromSpace, CondSpace *mergedSpace );
 	TransAp *copyTransForExpansion( StateAp *fromState, TransAp *srcTrans );
+	StateAp *copyStateForExpansion( StateAp *srcState );
 	void freeEffectiveTrans( TransAp *srcTrans );
 
 	/* Two transitions are to be crossed, handle the possibility of either
@@ -1711,6 +1715,8 @@ struct FsmAp
 
 	/* Compare deterimne relative priorities of two transition tables. */
 	int comparePrior( const PriorTable &priorTable1, const PriorTable &priorTable2 );
+
+	void expandOutConds( StateAp *state, CondSpace *fromSpace, CondSpace *mergedSpace );
 
 	/* Cross a src transition with one that is already occupying a spot. */
 	TransCondAp *convertToCondAp( StateAp *state, TransDataAp *trans );

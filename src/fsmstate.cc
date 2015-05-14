@@ -105,6 +105,7 @@ StateAp::StateAp()
 	fromStateActionTable(),
 	outActionTable(),
 	outCondSet(),
+	outCondSpace(0),
 	errActionTable(),
 	eofActionTable(),
 	guardedInTable()
@@ -152,6 +153,8 @@ StateAp::StateAp(const StateAp &other)
 	fromStateActionTable(other.fromStateActionTable),
 	outActionTable(other.outActionTable),
 	outCondSet(other.outCondSet),
+	outCondVect(other.outCondVect),
+	outCondSpace(other.outCondSpace),
 	errActionTable(other.errActionTable),
 	eofActionTable(other.eofActionTable),
 
