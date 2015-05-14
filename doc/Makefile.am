@@ -32,10 +32,13 @@ EXTRA_DIST = ragel-guide.tex \
 
 if BUILD_MANUAL
 
-doc_DATA = ragel-guide.pdf
+doc_DATA = ragel-guide.html
 
 .fig.pdf:
 	fig2dev -L pdf $< $@
+
+.fig.png:
+	fig2dev -L png -S 4 $< $@
 
 .tex.pdf:
 	pdflatex -interaction=nonstopmode $< >/dev/null
@@ -48,6 +51,9 @@ version.tex: Makefile
 
 ragel-guide.tex: generate ragel-guide.txt
 	./generate < ragel-guide.txt > ragel-guide.tex
+
+ragel-guide.html: ragel-guide.txt
+	asciidoc -d book $<
 	
 generate: generate.lm
 	$(COLM) $<
@@ -62,5 +68,14 @@ ragel-guide.pdf: bmconcat.pdf bmregex.pdf dropdown.pdf exdoneact.pdf \
 	exallact.pdf exoption.pdf exstact.pdf leftguard.pdf opor.pdf \
 	bmrange.pdf conds2.pdf exconcat.pdf exor.pdf exstar.pdf lines1.pdf \
 	opstar.pdf
+
+ragel-guide.html: bmconcat.png bmregex.png dropdown.png exdoneact.png \
+	exoutact1.png exstrongsubtr.png lines2.png smallscanner.png bmnull.png \
+	comments1.png entryguard.png exinter.png exoutact2.png exsubtr.png \
+	lmkleene.png stembed.png bmnum.png comments2.png exaction.png \
+	exnegate.png explus.png finguard.png opconcat.png bmor.png conds1.png \
+	exallact.png exoption.png exstact.png leftguard.png opor.png \
+	bmrange.png conds2.png exconcat.png exor.png exstar.png lines1.png \
+	opstar.png
 
 endif
