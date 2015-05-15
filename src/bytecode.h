@@ -572,7 +572,7 @@ typedef Tree **StackPtr;
  * serial representation. */
 #define SIZEOF_CODE 1
 #define SIZEOF_HALF 2
-#define SIZEOF_WORD sizeof(Word)
+#define SIZEOF_WORD sizeof(word_t)
 
 typedef struct colm_execution
 {
@@ -632,19 +632,19 @@ Head *stringCopy( struct colm_program *prg, Head *head );
 void stringFree( struct colm_program *prg, Head *head );
 void stringShorten( Head *tokdata, long newlen );
 Head *concatStr( Head *s1, Head *s2 );
-Word strAtoi( Head *str );
-Word strAtoo( Head *str );
-Word strUord16( Head *head );
-Word strUord8( Head *head );
-Word cmpString( Head *s1, Head *s2 );
+word_t strAtoi( Head *str );
+word_t strAtoo( Head *str );
+word_t strUord16( Head *head );
+word_t strUord8( Head *head );
+word_t cmpString( Head *s1, Head *s2 );
 Head *stringToUpper( Head *s );
 Head *stringToLower( Head *s );
 Head *stringSprintf( Program *prg, Str *format, long integer );
 
 Head *makeLiteral( struct colm_program *prg, long litoffset );
-Head *intToStr( struct colm_program *prg, Word i );
+Head *intToStr( struct colm_program *prg, word_t i );
 
-void colm_execute( struct colm_program *prg, Execution *exec, Code *code );
+void colm_execute( struct colm_program *prg, Execution *exec, code_t *code );
 void reductionExecution( Execution *exec, Tree **sp );
 void generationExecution( Execution *exec, Tree **sp );
 void reverseExecution( Execution *exec, Tree **sp, struct rt_code_vect *allRev );
@@ -663,8 +663,8 @@ void splitRef( struct colm_program *prg, Tree ***sp, Ref *fromRef );
 
 void allocGlobal( struct colm_program *prg );
 Tree **colm_execute_code( struct colm_program *prg,
-	Execution *exec, Tree **sp, Code *instr );
-Code *colm_pop_reverse_code( struct rt_code_vect *allRev );
+	Execution *exec, Tree **sp, code_t *instr );
+code_t *colm_pop_reverse_code( struct rt_code_vect *allRev );
 
 #ifdef __cplusplus
 }

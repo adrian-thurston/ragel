@@ -69,16 +69,16 @@ struct IterCall;
 /* 
  * Code Vector
  */
-struct CodeVect : public Vector<Code>
+struct CodeVect : public Vector<code_t>
 {
-	void appendHalf( Half half )
+	void appendHalf( half_t half )
 	{
 		/* not optimal. */
 		append( half & 0xff );
 		append( (half>>8) & 0xff );
 	}
 	
-	void appendWord( Word word )
+	void appendWord( word_t word )
 	{
 		/* not optimal. */
 		append( word & 0xff );
@@ -93,21 +93,21 @@ struct CodeVect : public Vector<Code>
 		#endif
 	}
 
-	void setHalf( long pos, Half half )
+	void setHalf( long pos, half_t half )
 	{
 		/* not optimal. */
 		data[pos] = half & 0xff;
 		data[pos+1] = (half>>8) & 0xff;
 	}
 	
-	void insertHalf( long pos, Half half )
+	void insertHalf( long pos, half_t half )
 	{
 		/* not optimal. */
 		insert( pos, half & 0xff );
 		insert( pos+1, (half>>8) & 0xff );
 	}
 
-	void insertWord( long pos, Word word )
+	void insertWord( long pos, word_t word )
 	{
 		/* not at all optimal. */
 		insert( pos, word & 0xff );
@@ -123,7 +123,7 @@ struct CodeVect : public Vector<Code>
 	}
 	
 	void insertTree( long pos, Tree *tree )
-		{ insertWord( pos, (Word) tree ); }
+		{ insertWord( pos, (word_t) tree ); }
 };
 
 
@@ -1762,17 +1762,17 @@ struct IterImpl
 	bool useSearchUT;
 	bool useGenericId;
 
-	Code inCreateWV;
-	Code inCreateWC;
-	Code inUnwind;
-	Code inDestroy;
-	Code inAdvance;
+	code_t inCreateWV;
+	code_t inCreateWC;
+	code_t inUnwind;
+	code_t inDestroy;
+	code_t inAdvance;
 
-	Code inGetCurR;
-	Code inGetCurWC;
-	Code inSetCurWC;
+	code_t inGetCurR;
+	code_t inGetCurWC;
+	code_t inSetCurWC;
 
-	Code inRefFromCur;
+	code_t inRefFromCur;
 };
 
 struct CmpIterDef
@@ -2431,16 +2431,16 @@ struct ObjectField
 
 	Vector<RhsVal> rhsVal;
 
-	Code inGetR;
-	Code inGetWC;
-	Code inGetWV;
-	Code inSetWC;
-	Code inSetWV;
-	Code inGetValR;
-	Code inGetValWC;
-	Code inGetValWV;
-	Code inSetValWC;
-	Code inSetValWV;
+	code_t inGetR;
+	code_t inGetWC;
+	code_t inGetWV;
+	code_t inSetWC;
+	code_t inSetWV;
+	code_t inGetValR;
+	code_t inGetValWC;
+	code_t inGetValWV;
+	code_t inSetValWC;
+	code_t inSetValWV;
 
 	IterImpl *iterImpl;
 

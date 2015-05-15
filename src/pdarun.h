@@ -69,7 +69,7 @@ struct fsm_tables
 	long numActionSwitch;
 };
 
-void undoStreamPull( StreamImpl *inputStream, const char *data, long length );
+void undoStreamPull( struct stream_impl *inputStream, const char *data, long length );
 
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
@@ -79,7 +79,7 @@ struct colm_execution;
 
 struct rt_code_vect
 {
-	Code *data;
+	code_t *data;
 	long tabLen;
 	long allocLen;
 
@@ -188,9 +188,9 @@ struct local_info
 struct frame_info
 {
 	const char *name;
-	Code *codeWV;
+	code_t *codeWV;
 	long codeLenWV;
-	Code *codeWC;
+	code_t *codeWC;
 	long codeLenWC;
 	struct local_info *locals;
 	long localsLen;
@@ -306,7 +306,7 @@ struct pda_run
 
 	Kid *btPoint;
 
-	struct Bindings *bindings;
+	struct bindings *bindings;
 
 	int revertOn;
 
@@ -350,7 +350,7 @@ struct pda_run
 	int reject;
 
 	/* Instruction pointer to use when we stop parsing and execute code. */
-	Code *code;
+	code_t *code;
 
 	int rcBlockCount;
 
@@ -364,35 +364,36 @@ void colm_pda_init( struct colm_program *prg, struct pda_run *pdaRun,
 void colm_pda_clear( struct colm_program *prg, struct colm_tree **sp,
 		struct pda_run *pdaRun );
 
-void rtCodeVectReplace( struct rt_code_vect *vect, long pos, const Code *val, long len );
-void rtCodeVectEmpty( struct rt_code_vect *vect );
-void rtCodeVectRemove( struct rt_code_vect *vect, long pos, long len );
+void colm_rt_code_vect_replace( struct rt_code_vect *vect, long pos,
+		const code_t *val, long len );
+void colm_rt_code_vect_empty( struct rt_code_vect *vect );
+void colm_rt_code_vect_remove( struct rt_code_vect *vect, long pos, long len );
 
 void initRtCodeVect( struct rt_code_vect *codeVect );
 
-inline static void append_code_val( struct rt_code_vect *vect, const Code val );
-inline static void append_code_vect( struct rt_code_vect *vect, const Code *val, long len );
-inline static void append_half( struct rt_code_vect *vect, Half half );
-inline static void append_word( struct rt_code_vect *vect, Word word );
+inline static void append_code_val( struct rt_code_vect *vect, const code_t val );
+inline static void append_code_vect( struct rt_code_vect *vect, const code_t *val, long len );
+inline static void append_half( struct rt_code_vect *vect, half_t half );
+inline static void append_word( struct rt_code_vect *vect, word_t word );
 
-inline static void append_code_vect( struct rt_code_vect *vect, const Code *val, long len )
+inline static void append_code_vect( struct rt_code_vect *vect, const code_t *val, long len )
 {
-	rtCodeVectReplace( vect, vect->tabLen, val, len );
+	colm_rt_code_vect_replace( vect, vect->tabLen, val, len );
 }
 
-inline static void append_code_val( struct rt_code_vect *vect, const Code val )
+inline static void append_code_val( struct rt_code_vect *vect, const code_t val )
 {
-	rtCodeVectReplace( vect, vect->tabLen, &val, 1 );
+	colm_rt_code_vect_replace( vect, vect->tabLen, &val, 1 );
 }
 
-inline static void append_half( struct rt_code_vect *vect, Half half )
+inline static void append_half( struct rt_code_vect *vect, half_t half )
 {
 	/* not optimal. */
 	append_code_val( vect, half & 0xff );
 	append_code_val( vect, (half>>8) & 0xff );
 }
 
-inline static void append_word( struct rt_code_vect *vect, Word word )
+inline static void append_word( struct rt_code_vect *vect, word_t word )
 {
 	/* not optimal. */
 	append_code_val( vect, word & 0xff );
@@ -410,18 +411,8 @@ inline static void append_word( struct rt_code_vect *vect, Word word )
 void colm_increment_steps( struct pda_run *pdaRun );
 void colm_decrement_steps( struct pda_run *pdaRun );
 
-void clearStreamImpl( struct colm_program *prg, Tree **sp, StreamImpl *inputStream );
-void initSourceStream( StreamImpl *in );
-void clearSourceStream( struct colm_program *prg, Tree **sp, StreamImpl *sourceStream );
-
-
-void clearContext( struct pda_run *pdaRun, Tree **sp );
-void runCommit( struct pda_run *pdaRun );
-void pdaRunMatch(  struct pda_run *pdaRun, Kid *tree, Kid *pattern );
-
-/* Offset can be used to look at the next nextRegionInd. */
-int pdaRunGetNextRegion( struct pda_run *pdaRun, int offset );
-int pdaRunGetNextPreRegion( struct pda_run *pdaRun );
+void colm_clear_stream_impl( struct colm_program *prg, Tree **sp, struct stream_impl *inputStream );
+void colm_clear_source_stream( struct colm_program *prg, Tree **sp, struct stream_impl *sourceStream );
 
 #define PCR_START         1
 #define PCR_DONE          2
@@ -431,24 +422,20 @@ int pdaRunGetNextPreRegion( struct pda_run *pdaRun );
 #define PCR_REVERSE       6
 
 Head *colm_stream_pull( struct colm_program *prg, struct colm_tree **sp,
-		struct pda_run *pdaRun, StreamImpl *is, long length );
-Head *stringAllocPointer( struct colm_program *prg, const char *data, long length );
+		struct pda_run *pdaRun, struct stream_impl *is, long length );
+Head *colm_string_alloc_pointer( struct colm_program *prg, const char *data, long length );
 
-void streamPushText( StreamImpl *inputStream, const char *data, long length );
-void streamPushTree( StreamImpl *inputStream, Tree *tree, int ignore );
-void streamPushStream( StreamImpl *inputStream, Tree *tree );
-void undoStreamPush( struct colm_program *prg, Tree **sp,
-		StreamImpl *inputStream, long length );
-void undoStreamAppend( struct colm_program *prg, Tree **sp,
-		StreamImpl *inputStream, struct colm_tree *tree, long length );
+void colm_stream_push_text( struct stream_impl *inputStream, const char *data, long length );
+void colm_stream_push_tree( struct stream_impl *inputStream, Tree *tree, int ignore );
+void colm_stream_push_stream( struct stream_impl *inputStream, Tree *tree );
+void colm_undo_stream_push( struct colm_program *prg, Tree **sp,
+		struct stream_impl *inputStream, long length );
 
 Kid *make_token_with_data( struct colm_program *prg, struct pda_run *pdaRun,
-		StreamImpl *inputStream, int id, Head *tokdata );
-
-void pushBinding( struct pda_run *pdaRun, ParseTree *parseTree );
+		struct stream_impl *inputStream, int id, Head *tokdata );
 
 long colm_parse_loop( struct colm_program *prg, Tree **sp, struct pda_run *pdaRun, 
-		StreamImpl *inputStream, long entry );
+		struct stream_impl *inputStream, long entry );
 
 long colm_parse_frag( struct colm_program *prg, Tree **sp, struct pda_run *pdaRun,
 		Stream *input, long stopId, long entry );

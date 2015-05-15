@@ -96,9 +96,9 @@ struct PdaCodeGen
 
 extern "C"
 {
-	void internalFsmExecute( struct pda_run *pdaRun, StreamImpl *inputStream );
+	void internalFsmExecute( struct pda_run *pdaRun, struct stream_impl *inputStream );
 	void internalSendNamedLangEl( Program *prg, Tree **sp,
-			struct pda_run *pdaRun, StreamImpl *is );
+			struct pda_run *pdaRun, struct stream_impl *is );
 	void internalInitBindings( struct pda_run *pdaRun );
 	void internalPopBinding( struct pda_run *pdaRun, ParseTree *parseTree );
 }

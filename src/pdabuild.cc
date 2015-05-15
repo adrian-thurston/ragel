@@ -1728,7 +1728,7 @@ void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 	}
 }
 
-void fillNodes( Program *prg, int &nextAvail, Bindings *bindings, long &bindId, 
+void fillNodes( Program *prg, int &nextAvail, struct bindings *bindings, long &bindId, 
 		struct pat_cons_node *nodes, ParseTree *parseTree, Kid *kid, int ind )
 {
 	if ( kid != 0 ) {

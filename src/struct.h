@@ -5,9 +5,6 @@
 extern "C" {
 #endif
 
-
-typedef struct _StreamImpl StreamImpl;
-
 typedef void (*colm_destructor_t)( struct colm_program *prg,
 		Tree **sp, struct colm_struct *s );
 
@@ -49,7 +46,7 @@ typedef struct colm_stream
 
 	void *buffer[8];
 
-	StreamImpl *impl;
+	struct stream_impl *impl;
 } Stream;
 
 #define COLM_LIST_EL_SIZE 2
@@ -134,18 +131,18 @@ Stream *colm_stream_new_struct( struct colm_program *prg );
 
 List *colm_list_new( struct colm_program *prg );
 struct colm_struct *colm_list_get( struct colm_program *prg, List *list,
-		Word genId, Word field );
+		word_t genId, word_t field );
 struct colm_struct *colm_list_el_get( struct colm_program *prg,
-		ListEl *listEl, Word genId, Word field );
+		ListEl *listEl, word_t genId, word_t field );
 ListEl *colm_list_detach_head( List *list );
 ListEl *colm_list_detach_tail( List *list );
 long colm_list_length( List *list );
 
 Map *colm_map_new( struct colm_program *prg );
 struct colm_struct *colm_map_el_get( struct colm_program *prg,
-		MapEl *mapEl, Word genId, Word field );
+		MapEl *mapEl, word_t genId, word_t field );
 struct colm_struct *colm_map_get( struct colm_program *prg, Map *map,
-		Word genId, Word field );
+		word_t genId, word_t field );
 
 struct colm_struct *colm_construct_generic( struct colm_program *prg, long genericId );
 

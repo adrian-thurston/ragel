@@ -209,7 +209,7 @@ List *colm_list_new( struct colm_program *prg )
 }
 
 struct colm_struct *colm_list_get( struct colm_program *prg,
-		List *list, Word genId, Word field )
+		List *list, word_t genId, word_t field )
 {
 	struct generic_info *gi = &prg->rtd->genericInfo[genId];
 	ListEl *result = 0;
@@ -231,7 +231,7 @@ struct colm_struct *colm_list_get( struct colm_program *prg,
 }
 
 struct colm_struct *colm_list_el_get( struct colm_program *prg,
-		ListEl *listEl, Word genId, Word field )
+		ListEl *listEl, word_t genId, word_t field )
 {
 	struct generic_info *gi = &prg->rtd->genericInfo[genId];
 	ListEl *result = 0;

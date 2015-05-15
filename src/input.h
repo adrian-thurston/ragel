@@ -51,6 +51,8 @@ struct colm_location;
 struct colm_program;
 struct colm_struct;
 
+struct stream_impl;
+
 enum RunBufType {
 	RunBufDataType = 0,
 	RunBufTokenType,
@@ -70,50 +72,50 @@ typedef struct _RunBuf
 
 RunBuf *newRunBuf();
 
-typedef struct _StreamImpl StreamImpl;
-
 struct StreamFuncs
 {
-	int (*getParseBlock)( StreamImpl *ss, int skip, char **pdp, int *copied );
+	int (*getParseBlock)( struct stream_impl *ss, int skip, char **pdp, int *copied );
 
-	int (*getData)( StreamImpl *ss, char *dest, int length );
+	int (*getData)( struct stream_impl *ss, char *dest, int length );
 
-	int (*consumeData)( struct colm_program *prg, struct colm_tree **sp, StreamImpl *ss,
-			int length, struct colm_location *loc );
-	int (*undoConsumeData)( StreamImpl *ss, const char *data, int length );
+	int (*consumeData)( struct colm_program *prg, struct colm_tree **sp,
+			struct stream_impl *ss, int length, struct colm_location *loc );
+	int (*undoConsumeData)( struct stream_impl *ss, const char *data, int length );
 
-	struct colm_tree *(*consumeTree)( StreamImpl *ss );
-	void (*undoConsumeTree)( StreamImpl *ss, struct colm_tree *tree, int ignore );
+	struct colm_tree *(*consumeTree)( struct stream_impl *ss );
+	void (*undoConsumeTree)( struct stream_impl *ss,
+			struct colm_tree *tree, int ignore );
 
 	/* Language elments (compile-time). */
-	struct LangEl *(*consumeLangEl)( StreamImpl *ss, long *bindId, char **data, long *length );
-	void (*undoConsumeLangEl)( StreamImpl *ss );
+	struct LangEl *(*consumeLangEl)( struct stream_impl *ss,
+			long *bindId, char **data, long *length );
+	void (*undoConsumeLangEl)( struct stream_impl *ss );
 
 	/* Private implmentation for some shared get data functions. */
-	int (*getDataSource)( StreamImpl *ss, char *dest, int length );
+	int (*getDataSource)( struct stream_impl *ss, char *dest, int length );
 
-	void (*setEof)( StreamImpl *is );
-	void (*unsetEof)( StreamImpl *is );
+	void (*setEof)( struct stream_impl *is );
+	void (*unsetEof)( struct stream_impl *is );
 
 	/* Prepending to a stream. */
-	void (*prependData)( StreamImpl *in, const char *data, long len );
-	void (*prependTree)( StreamImpl *is, struct colm_tree *tree, int ignore );
-	void (*prependStream)( StreamImpl *in, struct colm_tree *tree );
-	int (*undoPrependData)( StreamImpl *is, int length );
-	struct colm_tree *(*undoPrependTree)( StreamImpl *is );
-	struct colm_tree *(*undoPrependStream)( StreamImpl *in );
+	void (*prependData)( struct stream_impl *in, const char *data, long len );
+	void (*prependTree)( struct stream_impl *is, struct colm_tree *tree, int ignore );
+	void (*prependStream)( struct stream_impl *in, struct colm_tree *tree );
+	int (*undoPrependData)( struct stream_impl *is, int length );
+	struct colm_tree *(*undoPrependTree)( struct stream_impl *is );
+	struct colm_tree *(*undoPrependStream)( struct stream_impl *in );
 
 	/* Appending to a stream. */
-	void (*appendData)( StreamImpl *in, const char *data, long len );
-	void (*appendTree)( StreamImpl *in, struct colm_tree *tree );
-	void (*appendStream)( StreamImpl *in, struct colm_tree *tree );
-	struct colm_tree *(*undoAppendData)( StreamImpl *in, int length );
-	struct colm_tree *(*undoAppendTree)( StreamImpl *in );
-	struct colm_tree *(*undoAppendStream)( StreamImpl *in );
+	void (*appendData)( struct stream_impl *in, const char *data, long len );
+	void (*appendTree)( struct stream_impl *in, struct colm_tree *tree );
+	void (*appendStream)( struct stream_impl *in, struct colm_tree *tree );
+	struct colm_tree *(*undoAppendData)( struct stream_impl *in, int length );
+	struct colm_tree *(*undoAppendTree)( struct stream_impl *in );
+	struct colm_tree *(*undoAppendStream)( struct stream_impl *in );
 };
 
 /* List of source streams. Enables streams to be pushed/popped. */
-struct _StreamImpl
+struct stream_impl
 {
 	struct StreamFuncs *funcs;
 
@@ -144,16 +146,16 @@ struct _StreamImpl
 	int consumed;
 };
 
-StreamImpl *colm_impl_new_pat( const char *name, struct Pattern *pattern );
-StreamImpl *colm_impl_new_cons( const char *name, struct Constructor *constructor );
-StreamImpl *colm_impl_new_file( const char *name, FILE *file );
-StreamImpl *colm_impl_new_fd( const char *name, long fd );
-StreamImpl *colm_impl_new_generic( const char *name );
+struct stream_impl *colm_impl_new_pat( const char *name, struct Pattern *pattern );
+struct stream_impl *colm_impl_new_cons( const char *name, struct Constructor *constructor );
+struct stream_impl *colm_impl_new_file( const char *name, FILE *file );
+struct stream_impl *colm_impl_new_fd( const char *name, long fd );
+struct stream_impl *colm_impl_new_generic( const char *name );
 
-void updatePosition( StreamImpl *inputStream, const char *data, long length );
-void undoPosition( StreamImpl *inputStream, const char *data, long length );
+void updatePosition( struct stream_impl *inputStream, const char *data, long length );
+void undoPosition( struct stream_impl *inputStream, const char *data, long length );
 
-StreamImpl *colm_stream_impl( struct colm_struct *s );
+struct stream_impl *colm_stream_impl( struct colm_struct *s );
 
 #ifdef __cplusplus
 }

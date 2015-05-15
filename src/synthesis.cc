@@ -298,16 +298,16 @@ long sizeOfField( UniqueType *fieldUT )
 			case IterDef::Child:
 			case IterDef::Repeat:
 			case IterDef::RevRepeat:
-				size = sizeof(TreeIter) / sizeof(Word);
+				size = sizeof(TreeIter) / sizeof(word_t);
 				break;
 
 			case IterDef::RevChild:
-				size = sizeof(RevTreeIter) / sizeof(Word);
+				size = sizeof(RevTreeIter) / sizeof(word_t);
 				break;
 
 			case IterDef::Map:
 			case IterDef::List:
-				size = sizeof(GenericIter) / sizeof(Word);
+				size = sizeof(GenericIter) / sizeof(word_t);
 				break;
 
 			case IterDef::User:
@@ -2357,7 +2357,7 @@ void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
 	/* Jump past the while block if false. Note that we don't have the
 	 * distance yet. */
 	long jumpFalse = code.length();
-	Half jinstr = eut->tree() ? IN_JMP_FALSE_TREE : IN_JMP_FALSE_VAL;
+	half_t jinstr = eut->tree() ? IN_JMP_FALSE_TREE : IN_JMP_FALSE_VAL;
 	code.append( jinstr );
 	code.appendHalf( 0 );
 
@@ -2464,7 +2464,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			/* Jump past the if block if false. We don't know the distance
 			 * yet so store the location of the jump. */
 			jumpFalse = code.length();
-			Half jinstr = eut->tree() ? IN_JMP_FALSE_TREE : IN_JMP_FALSE_VAL;
+			half_t jinstr = eut->tree() ? IN_JMP_FALSE_TREE : IN_JMP_FALSE_VAL;
 
 			code.append( jinstr );
 			code.appendHalf( 0 );

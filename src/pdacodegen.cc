@@ -78,9 +78,9 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	for ( int i = 0; i < runtimeData->numFrames; i++ ) {
 		/* FIXME: horrible code cloning going on here. */
 		if ( runtimeData->frameInfo[i].codeLenWV > 0 ) {
-			out << "static Code code_" << i << "_wv[] = {\n\t";
+			out << "static code_t code_" << i << "_wv[] = {\n\t";
 
-			Code *block = runtimeData->frameInfo[i].codeWV;
+			code_t *block = runtimeData->frameInfo[i].codeWV;
 			for ( int j = 0; j < runtimeData->frameInfo[i].codeLenWV; j++ ) {
 				out << (unsigned long) block[j];
 
@@ -94,9 +94,9 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 		}
 
 		if ( runtimeData->frameInfo[i].codeLenWC > 0 ) {
-			out << "static Code code_" << i << "_wc[] = {\n\t";
+			out << "static code_t code_" << i << "_wc[] = {\n\t";
 
-			Code *block = runtimeData->frameInfo[i].codeWC;
+			code_t *block = runtimeData->frameInfo[i].codeWC;
 			for ( int j = 0; j < runtimeData->frameInfo[i].codeLenWC; j++ ) {
 				out << (unsigned long) block[j];
 
@@ -150,8 +150,8 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	/* 
 	 * Init code.
 	 */
-	out << "static Code " << rootCode() << "[] = {\n\t";
-	Code *block = runtimeData->rootCode ;
+	out << "static code_t " << rootCode() << "[] = {\n\t";
+	code_t *block = runtimeData->rootCode ;
 	for ( int j = 0; j < runtimeData->rootCodeLen; j++ ) {
 		out << (unsigned int) block[j];
 

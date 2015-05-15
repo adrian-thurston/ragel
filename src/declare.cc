@@ -891,7 +891,7 @@ ObjectField *Compiler::makeLineEl()
 
 /* Add a constant length field to the object. 
  * Opcode supplied by the caller. */
-void Compiler::addLengthField( ObjectDef *objDef, Code getLength )
+void Compiler::addLengthField( ObjectDef *objDef, code_t getLength )
 {
 	/* Create the "length" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );

@@ -46,7 +46,7 @@ struct colm_sections
 	struct region_info *regionInfo;
 	long numRegions;
 
-	Code *rootCode;
+	code_t *rootCode;
 	long rootCodeLen;
 	long rootFrameId;
 
@@ -94,9 +94,9 @@ struct colm_sections
 	long globalId;
 	long argvElId;
 
-	void (*fsm_execute)( struct pda_run *pdaRun, struct _StreamImpl *inputStream );
+	void (*fsm_execute)( struct pda_run *pdaRun, struct stream_impl *inputStream );
 	void (*sendNamedLangEl)( struct colm_program *prg, Tree **tree,
-			struct pda_run *pdaRun, struct _StreamImpl *inputStream );
+			struct pda_run *pdaRun, struct stream_impl *inputStream );
 	void (*initBindings)( struct pda_run *pdaRun );
 	void (*popBinding)( struct pda_run *pdaRun, ParseTree *tree );
 

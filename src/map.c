@@ -29,7 +29,7 @@
 #define false 0
 
 struct colm_struct *colm_map_el_get( struct colm_program *prg,
-		MapEl *mapEl, Word genId, Word field )
+		MapEl *mapEl, word_t genId, word_t field )
 {
 	struct generic_info *gi = &prg->rtd->genericInfo[genId];
 	MapEl *result = 0;
@@ -51,7 +51,7 @@ struct colm_struct *colm_map_el_get( struct colm_program *prg,
 }
 
 struct colm_struct *colm_map_get( struct colm_program *prg,
-		Map *map, Word genId, Word field )
+		Map *map, word_t genId, word_t field )
 {
 	struct generic_info *gi = &prg->rtd->genericInfo[genId];
 	MapEl *result = 0;

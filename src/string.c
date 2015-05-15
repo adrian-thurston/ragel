@@ -66,7 +66,7 @@ Head *stringCopy( Program *prg, Head *head )
 		if ( (char*)(head+1) == head->data )
 			result = stringAllocFull( prg, head->data, head->length );
 		else
-			result = stringAllocPointer( prg, head->data, head->length );
+			result = colm_string_alloc_pointer( prg, head->data, head->length );
 
 		if ( head->location != 0 ) {
 			result->location = locationAllocate( prg );
@@ -143,7 +143,7 @@ Head *stringAllocFull( Program *prg, const char *data, long length )
 }
 
 /* Create from a c-style string. */
-Head *stringAllocPointer( Program *prg, const char *data, long length )
+Head *colm_string_alloc_pointer( Program *prg, const char *data, long length )
 {
 	/* Find the length and allocate the space for the shared string. */
 	Head *head = headAllocate( prg );
@@ -204,7 +204,7 @@ Head *stringToLower( Head *s )
 
 
 /* Compare two strings. If identical returns 1, otherwise 0. */
-Word cmpString( Head *s1, Head *s2 )
+word_t cmpString( Head *s1, Head *s2 )
 {
 	if ( s1->length < s2->length )
 		return -1;
@@ -217,7 +217,7 @@ Word cmpString( Head *s1, Head *s2 )
 	}
 }
 
-Word strAtoi( Head *str )
+word_t strAtoi( Head *str )
 {
 	/* FIXME: need to implement this by hand. There is no null terminator. */
 	char *nulled = (char*)malloc( str->length + 1 );
@@ -228,7 +228,7 @@ Word strAtoi( Head *str )
 	return res;
 }
 
-Word strAtoo( Head *str )
+word_t strAtoo( Head *str )
 {
 	/* FIXME: need to implement this by hand. There is no null terminator. */
 	char *nulled = (char*)malloc( str->length + 1 );
@@ -239,14 +239,14 @@ Word strAtoo( Head *str )
 	return res;
 }
 
-Head *intToStr( Program *prg, Word i )
+Head *intToStr( Program *prg, word_t i )
 {
 	char data[20];
 	sprintf( data, "%ld", i );
 	return stringAllocFull( prg, data, strlen(data) );
 }
 
-Word strUord16( Head *head )
+word_t strUord16( Head *head )
 {
 	uchar *data = (uchar*)(head->data);
 	ulong res;
@@ -255,7 +255,7 @@ Word strUord16( Head *head )
 	return res;
 }
 
-Word strUord8( Head *head )
+word_t strUord8( Head *head )
 {
 	uchar *data = (uchar*)(head->data);
 	ulong res = (ulong)data[0];
@@ -264,7 +264,7 @@ Word strUord8( Head *head )
 
 Head *makeLiteral( Program *prg, long offset )
 {
-	return stringAllocPointer( prg,
+	return colm_string_alloc_pointer( prg,
 			prg->rtd->litdata[offset],
 			prg->rtd->litlen[offset] );
 }

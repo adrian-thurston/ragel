@@ -193,7 +193,7 @@ Value colm_get_pointer_val( Tree *ptr )
 }
 
 
-Tree *constructTerm( Program *prg, Word id, Head *tokdata )
+Tree *constructTerm( Program *prg, word_t id, Head *tokdata )
 {
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 
@@ -217,7 +217,7 @@ static Kid *constructIgnoreList( Program *prg, long ignoreInd )
 
 	Kid *first = 0, *last = 0;
 	while ( ignoreInd >= 0 ) {
-		Head *ignoreData = stringAllocPointer( prg, nodes[ignoreInd].data,
+		Head *ignoreData = colm_string_alloc_pointer( prg, nodes[ignoreInd].data,
 				nodes[ignoreInd].length );
 
 		Tree *ignTree = treeAllocate( prg );
@@ -487,7 +487,7 @@ Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 		tree->id = nodes[pat].id;
 		tree->refs = 1;
 		tree->tokdata = nodes[pat].length == 0 ? 0 :
-				stringAllocPointer( prg, 
+				colm_string_alloc_pointer( prg, 
 				nodes[pat].data, nodes[pat].length );
 		tree->prod_num = nodes[pat].prodNum;
 
@@ -538,7 +538,7 @@ Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 			attr->id = nodes[ci].id;
 			attr->refs = 1;
 			attr->tokdata = nodes[ci].length == 0 ? 0 :
-					stringAllocPointer( prg, 
+					colm_string_alloc_pointer( prg, 
 					nodes[ci].data, nodes[ci].length );
 
 			colm_tree_set_attr( tree, ca->offset, attr );
@@ -1173,17 +1173,17 @@ void colm_tree_set_field( Program *prg, Tree *tree, long field, Tree *value )
 	colm_tree_set_attr( tree, field, value );
 }
 
-Tree *colm_tree_get_field( Tree *tree, Word field )
+Tree *colm_tree_get_field( Tree *tree, word_t field )
 {
 	return colm_get_attr( tree, field );
 }
 
-Kid *getFieldKid( Tree *tree, Word field )
+Kid *getFieldKid( Tree *tree, word_t field )
 {
 	return getAttrKid( tree, field );
 }
 
-Tree *getFieldSplit( Program *prg, Tree *tree, Word field )
+Tree *getFieldSplit( Program *prg, Tree *tree, word_t field )
 {
 	Tree *val = colm_get_attr( tree, field );
 	Tree *split = splitTree( prg, val );
@@ -1366,7 +1366,7 @@ void splitRef( Program *prg, Tree ***psp, Ref *fromRef )
 	}
 }
 
-Tree *setListMem( List *list, Half field, Tree *value )
+Tree *setListMem( List *list, half_t field, Tree *value )
 {
 	if ( value != 0 )
 		assert( value->refs >= 1 );
@@ -1465,7 +1465,7 @@ Tree *listRemoveHead( Program *prg, List *list )
 	return 0;
 }
 
-Tree *getParserMem( Parser *parser, Word field )
+Tree *getParserMem( Parser *parser, word_t field )
 {
 	Tree *result = 0;
 	switch ( field ) {
@@ -1486,7 +1486,7 @@ Tree *getParserMem( Parser *parser, Word field )
 	return result;
 }
 
-Tree *getListMemSplit( Program *prg, List *list, Word field )
+Tree *getListMemSplit( Program *prg, List *list, word_t field )
 {
 	Tree *sv = 0;
 	switch ( field ) {

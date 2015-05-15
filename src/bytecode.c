@@ -54,19 +54,19 @@ Tree **host_call( Program *prg, long code, Tree **sp );
 } while(0)
 
 #define read_half( i ) do { \
-	i = ((Word) *instr++); \
-	i |= ((Word) *instr++) << 8; \
+	i = ((word_t) *instr++); \
+	i |= ((word_t) *instr++) << 8; \
 } while(0)
 
 /* There are better ways. */
 #if SIZEOF_LONG == 4
 
 	#define read_type( type, i ) do { \
-		Word w; \
-		w = ((Word) *instr++); \
-		w |= ((Word) *instr++) << 8; \
-		w |= ((Word) *instr++) << 16; \
-		w |= ((Word) *instr++) << 24; \
+		word_t w; \
+		w = ((word_t) *instr++); \
+		w |= ((word_t) *instr++) << 8; \
+		w |= ((word_t) *instr++) << 16; \
+		w |= ((word_t) *instr++) << 24; \
 		i = (type) w; \
 	} while(0)
 
@@ -82,15 +82,15 @@ Tree **host_call( Program *prg, long code, Tree **sp );
 #else
 
 	#define read_type( type, i ) do { \
-		Word _w; \
-		_w = ((Word) *instr++); \
-		_w |= ((Word) *instr++) << 8; \
-		_w |= ((Word) *instr++) << 16; \
-		_w |= ((Word) *instr++) << 24; \
-		_w |= ((Word) *instr++) << 32; \
-		_w |= ((Word) *instr++) << 40; \
-		_w |= ((Word) *instr++) << 48; \
-		_w |= ((Word) *instr++) << 56; \
+		word_t _w; \
+		_w = ((word_t) *instr++); \
+		_w |= ((word_t) *instr++) << 8; \
+		_w |= ((word_t) *instr++) << 16; \
+		_w |= ((word_t) *instr++) << 24; \
+		_w |= ((word_t) *instr++) << 32; \
+		_w |= ((word_t) *instr++) << 40; \
+		_w |= ((word_t) *instr++) << 48; \
+		_w |= ((word_t) *instr++) << 56; \
 		i = (type) _w; \
 	} while(0)
 
@@ -110,15 +110,15 @@ Tree **host_call( Program *prg, long code, Tree **sp );
 
 #define read_tree( i )   read_type( Tree*, i )
 #define read_parser( i ) read_type( Parser*, i )
-#define read_word( i )   read_type( Word, i )
+#define read_word( i )   read_type( word_t, i )
 #define read_stream( i ) read_type( Stream*, i )
 
-#define read_word_p( i, p ) read_type_p( Word, i, p )
+#define read_word_p( i, p ) read_type_p( word_t, i, p )
 
 #define consume_byte() instr += 1
 #define consume_half() instr += 2
 
-static void rcode_downref( Program *prg, Tree **sp, Code *instr );
+static void rcode_downref( Program *prg, Tree **sp, code_t *instr );
 
 void colm_parser_set_context( Program *prg, Tree **sp, Parser *parser, Struct *val )
 {
@@ -141,10 +141,10 @@ static Head *tree_to_str( Program *prg, Tree **sp, Tree *tree, int trim )
 	return ret;
 }
 
-static Word stream_append_tree( Program *prg, Tree **sp, Stream *dest, Tree *input )
+static word_t stream_append_tree( Program *prg, Tree **sp, Stream *dest, Tree *input )
 {
 	long length = 0;
-	StreamImpl *impl = streamToImpl( dest );
+	struct stream_impl *impl = streamToImpl( dest );
 
 	if ( input->id == LEL_ID_STR ) {
 		/* Collect the tree data. */
@@ -169,18 +169,18 @@ static Word stream_append_tree( Program *prg, Tree **sp, Stream *dest, Tree *inp
 	return length;
 }
 
-static Word stream_append_stream( Program *prg, Tree **sp, Stream *dest, Tree *stream )
+static word_t stream_append_stream( Program *prg, Tree **sp, Stream *dest, Tree *stream )
 {
 	long length = 0;
 
-	StreamImpl *impl = streamToImpl( dest );
+	struct stream_impl *impl = streamToImpl( dest );
 	impl->funcs->appendStream( impl, stream );
 
 	return length;
 }
 
 static void stream_undo_append( Program *prg, Tree **sp,
-		StreamImpl *is, Tree *input, long length )
+		struct stream_impl *is, Tree *input, long length )
 {
 	if ( input->id == LEL_ID_STR )
 		is->funcs->undoAppendData( is, length );
@@ -192,7 +192,7 @@ static void stream_undo_append( Program *prg, Tree **sp,
 	}
 }
 
-static void stream_undo_append_stream( Program *prg, Tree **sp, StreamImpl *is,
+static void stream_undo_append_stream( Program *prg, Tree **sp, struct stream_impl *is,
 		Tree *input, long length )
 {
 	is->funcs->undoAppendStream( is );
@@ -202,20 +202,20 @@ static Tree *stream_pull_bc( Program *prg, Tree **sp, struct pda_run *pdaRun,
 		Stream *stream, Tree *length )
 {
 	long len = ((long)length);
-	StreamImpl *impl = streamToImpl( stream );
+	struct stream_impl *impl = streamToImpl( stream );
 	Head *tokdata = colm_stream_pull( prg, sp, pdaRun, impl, len );
 	return constructString( prg, tokdata );
 }
 
 static void undo_pull( Program *prg, Stream *stream, Tree *str )
 {
-	StreamImpl *impl = streamToImpl( stream );
+	struct stream_impl *impl = streamToImpl( stream );
 	const char *data = stringData( ( (Str*)str )->value );
 	long length = stringLength( ( (Str*)str )->value );
 	undoStreamPull( impl, data, length );
 }
 
-static long stream_push( Program *prg, Tree **sp, StreamImpl *in, Tree *tree, int ignore )
+static long stream_push( Program *prg, Tree **sp, struct stream_impl *in, Tree *tree, int ignore )
 {
 	if ( tree->id == LEL_ID_STR ) {
 		/* This should become a compile error. If it's text, it's up to the
@@ -227,7 +227,7 @@ static long stream_push( Program *prg, Tree **sp, StreamImpl *in, Tree *tree, in
 		initStrCollect( &collect );
 		printTreeCollect( prg, sp, &collect, tree, false );
 
-		streamPushText( in, collect.data, collect.length );
+		colm_stream_push_text( in, collect.data, collect.length );
 		long length = collect.length;
 		strCollectDestroy( &collect );
 
@@ -235,20 +235,20 @@ static long stream_push( Program *prg, Tree **sp, StreamImpl *in, Tree *tree, in
 	}
 	else if ( tree->id == LEL_ID_PTR ) {
 		treeUpref( tree );
-		streamPushStream( in, tree );
+		colm_stream_push_stream( in, tree );
 		return -1;
 	}
 	else {
 		treeUpref( tree );
-		streamPushTree( in, tree, ignore );
+		colm_stream_push_tree( in, tree, ignore );
 		return -1;
 	}
 }
 
 static long stream_push_stream( Program *prg, Tree **sp,
-		StreamImpl *in, Stream *stream )
+		struct stream_impl *in, Stream *stream )
 {
-	streamPushStream( in, (Tree*)stream );
+	colm_stream_push_stream( in, (Tree*)stream );
 	return -1;
 }
 
@@ -325,7 +325,7 @@ static Tree *construct_arg0( Program *prg, int argc, const char **argv )
 {
 	Tree *arg0 = 0;
 	if ( argc > 0 ) {
-		Head *head = stringAllocPointer( prg, argv[0], strlen(argv[0]) );
+		Head *head = colm_string_alloc_pointer( prg, argv[0], strlen(argv[0]) );
 		arg0 = constructString( prg, head );
 		treeUpref( arg0 );
 	}
@@ -337,7 +337,7 @@ static List *construct_argv( Program *prg, int argc, const char **argv )
 	List *list = (List*)colm_construct_generic( prg, prg->rtd->argvGenericId );
 	int i;
 	for ( i = 1; i < argc; i++ ) {
-		Head *head = stringAllocPointer( prg, argv[i], strlen(argv[i]) );
+		Head *head = colm_string_alloc_pointer( prg, argv[i], strlen(argv[i]) );
 		Tree *arg = constructString( prg, head );
 		treeUpref( arg );
 
@@ -359,8 +359,8 @@ void colm_rcode_downref_all( Program *prg, Tree **sp, struct rt_code_vect *rev )
 {
 	while ( rev->tabLen > 0 ) {
 		/* Read the length */
-		Code *prcode = rev->data + rev->tabLen - SIZEOF_WORD;
-		Word len;
+		code_t *prcode = rev->data + rev->tabLen - SIZEOF_WORD;
+		word_t len;
 		read_word_p( len, prcode );
 
 		/* Find the start of block. */
@@ -375,7 +375,7 @@ void colm_rcode_downref_all( Program *prg, Tree **sp, struct rt_code_vect *rev )
 	}
 }
 
-void colm_execute( Program *prg, Execution *exec, Code *code )
+void colm_execute( Program *prg, Execution *exec, code_t *code )
 {
 	Tree **sp = prg->stackRoot;
 
@@ -395,7 +395,7 @@ void colm_execute( Program *prg, Execution *exec, Code *code )
 
 	exec->framePtr = vm_ptop();
 	vm_pushn( fi->frameSize );
-	memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
+	memset( vm_ptop(), 0, sizeof(word_t) * fi->frameSize );
 
 	/* Execution loop. */
 	sp = colm_execute_code( prg, exec, sp, code );
@@ -425,11 +425,11 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 	Tree **sp = prg->stackRoot;
 
 	struct frame_info *fi = &prg->rtd->frameInfo[frameId];
-	Code *code = fi->codeWC;
+	code_t *code = fi->codeWC;
 
 	vm_pushn( paramCount );
 	execution.callArgs = vm_ptop();
-	memset( vm_ptop(), 0, sizeof(Word) * paramCount );
+	memset( vm_ptop(), 0, sizeof(word_t) * paramCount );
 
 	int p;
 	for ( p = 0; p < paramCount; p++ ) {
@@ -437,7 +437,7 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 			((Value*)execution.callArgs)[p] = 0;
 		}
 		else {
-			Head *head = stringAllocPointer( prg, params[p], strlen(params[p]) );
+			Head *head = colm_string_alloc_pointer( prg, params[p], strlen(params[p]) );
 			Tree *tree = constructString( prg, head );
 			treeUpref( tree );
 			((Tree**)execution.callArgs)[p] = tree;
@@ -458,7 +458,7 @@ Tree *colm_run_func( struct colm_program *prg, int frameId,
 
 	execution.framePtr = vm_ptop();
 	vm_pushn( fi->frameSize );
-	memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
+	memset( vm_ptop(), 0, sizeof(word_t) * fi->frameSize );
 
 	/* Execution loop. */
 	sp = colm_execute_code( prg, &execution, sp, code );
@@ -498,7 +498,7 @@ int colm_make_reverse_code( struct pda_run *pdaRun )
 
 	/* Go backwards, group by group, through the reverse code. Push each group
 	 * to the global reverse code stack. */
-	Code *p = rcodeCollect->data + rcodeCollect->tabLen;
+	code_t *p = rcodeCollect->data + rcodeCollect->tabLen;
 	while ( p != rcodeCollect->data ) {
 		p--;
 		long len = *p;
@@ -540,29 +540,29 @@ static void rcode_unit_start( Execution *exec )
 	exec->rcodeUnitLen = 0;
 }
 
-static void rcode_code( Execution *exec, const Code code )
+static void rcode_code( Execution *exec, const code_t code )
 {
 	append_code_val( &exec->parser->pdaRun->rcodeCollect, code );
 	exec->rcodeUnitLen += SIZEOF_CODE;
 }
 
-static void rcodeHalf( Execution *exec, const Half half )
+static void rcodeHalf( Execution *exec, const half_t half )
 {
 	append_half( &exec->parser->pdaRun->rcodeCollect, half );
 	exec->rcodeUnitLen += SIZEOF_HALF;
 }
 
-static void rcode_word( Execution *exec, const Word word )
+static void rcode_word( Execution *exec, const word_t word )
 {
 	append_word( &exec->parser->pdaRun->rcodeCollect, word );
 	exec->rcodeUnitLen += SIZEOF_WORD;
 }
 
-Code *colm_pop_reverse_code( struct rt_code_vect *allRev )
+code_t *colm_pop_reverse_code( struct rt_code_vect *allRev )
 {
 	/* Read the length */
-	Code *prcode = allRev->data + allRev->tabLen - SIZEOF_WORD;
-	Word len;
+	code_t *prcode = allRev->data + allRev->tabLen - SIZEOF_WORD;
+	word_t len;
 	read_word_p( len, prcode );
 
 	/* Find the start of block. */
@@ -574,12 +574,12 @@ Code *colm_pop_reverse_code( struct rt_code_vect *allRev )
 	return prcode;
 }
 
-Tree **colm_execute_code( Program *prg, Execution *exec, Tree **sp, Code *instr )
+Tree **colm_execute_code( Program *prg, Execution *exec, Tree **sp, code_t *instr )
 {
 	/* When we exit we are going to verify that we did not eat up any stack
 	 * space. */
 	Tree **root = sp;
-	Code c;
+	code_t c;
 
 again:
 	c = *instr++;
@@ -610,9 +610,9 @@ again:
 		}
 		case IN_LOAD_WORD: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_WORD\n" );
-			Word w;
+			word_t w;
 			read_word( w );
-			vm_push_type( Word, w );
+			vm_push_type( word_t, w );
 			break;
 		}
 		case IN_LOAD_TRUE: {
@@ -628,7 +628,7 @@ again:
 			break;
 		}
 		case IN_LOAD_INT: {
-			Word i;
+			word_t i;
 			read_word( i );
 
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INT %d\n", i );
@@ -638,7 +638,7 @@ again:
 			break;
 		}
 		case IN_LOAD_STR: {
-			Word offset;
+			word_t offset;
 			read_word( offset );
 
 			debug( prg, REALM_BYTECODE, "IN_LOAD_STR %d\n", offset );
@@ -674,7 +674,7 @@ again:
 			for ( i = n-1; i >= 0; i-- )
 				arg[i] = vm_pop_tree();
 			Stream *stream = vm_pop_stream();
-			StreamImpl *si = streamToImpl( stream );
+			struct stream_impl *si = streamToImpl( stream );
 
 			for ( i = 0; i < n; i++ ) {
 				if ( si->file != 0 )
@@ -771,7 +771,7 @@ again:
 			/* Set up the reverse instruction. */
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_LOAD_INPUT_BKT );
-			rcode_word( exec, (Word)exec->parser->input );
+			rcode_word( exec, (word_t)exec->parser->input );
 			break;
 		}
 		case IN_LOAD_INPUT_WC: {
@@ -858,7 +858,7 @@ again:
 			break;
 		}
 		case IN_INIT_RHS_EL: {
-			Half position;
+			half_t position;
 			short field;
 			read_half( position );
 			read_half( field );
@@ -1147,7 +1147,7 @@ again:
 			/* Set up the reverse instruction. */
 			rcode_code( exec, IN_SET_FIELD_TREE_BKT );
 			rcodeHalf( exec, field );
-			rcode_word( exec, (Word)prev );
+			rcode_word( exec, (word_t)prev );
 			rcode_unit_term( exec );
 			break;
 		}
@@ -1323,7 +1323,7 @@ again:
 			/* Set up the reverse instruction. */
 			rcode_code( exec, IN_SET_STRUCT_BKT );
 			rcodeHalf( exec, field );
-			rcode_word( exec, (Word)prev );
+			rcode_word( exec, (word_t)prev );
 			rcode_unit_term( exec );
 			break;
 		}
@@ -1381,7 +1381,7 @@ again:
 
 			rcode_code( exec, IN_SET_STRUCT_VAL_BKT );
 			rcodeHalf( exec, field );
-			rcode_word( exec, (Word)prev );
+			rcode_word( exec, (word_t)prev );
 			rcode_unit_term( exec );
 			break;
 		}
@@ -1803,8 +1803,8 @@ again:
 		case IN_DUP_VAL: {
 			debug( prg, REALM_BYTECODE, "IN_DUP_VAL\n" );
 
-			Word val = (Word)vm_top();
-			vm_push_type( Word, val );
+			word_t val = (word_t)vm_top();
+			vm_push_type( word_t, val );
 			break;
 		}
 		case IN_DUP_TREE: {
@@ -1817,8 +1817,8 @@ again:
 		}
 		case IN_TRITER_FROM_REF: {
 			short field;
-			Half argSize;
-			Half searchTypeId;
+			half_t argSize;
+			half_t searchTypeId;
 			read_half( field );
 			read_half( argSize );
 			read_half( searchTypeId );
@@ -1851,8 +1851,8 @@ again:
 		}
 		case IN_REV_TRITER_FROM_REF: {
 			short field;
-			Half argSize;
-			Half searchTypeId;
+			half_t argSize;
+			half_t searchTypeId;
 			read_half( field );
 			read_half( argSize );
 			read_half( searchTypeId );
@@ -1892,7 +1892,7 @@ again:
 			break;
 		}
 		case IN_TREE_SEARCH: {
-			Word id;
+			word_t id;
 			read_word( id );
 
 			debug( prg, REALM_BYTECODE, "IN_TREE_SEARCH\n" );
@@ -2005,8 +2005,8 @@ again:
 		}
 		case IN_GEN_ITER_FROM_REF: {
 			short field;
-			Half argSize;
-			Half genericId;
+			half_t argSize;
+			half_t genericId;
 			read_half( field );
 			read_half( argSize );
 			read_half( genericId );
@@ -2086,7 +2086,7 @@ again:
 			break;
 		}
 		case IN_MATCH: {
-			Half patternId;
+			half_t patternId;
 			read_half( patternId );
 
 			debug( prg, REALM_BYTECODE, "IN_MATCH\n" );
@@ -2148,15 +2148,15 @@ again:
 			Tree *input = vm_pop_tree();
 			Parser *parser = vm_pop_parser();
 
-			Word len = stream_append_tree( prg, sp, parser->input, input );
+			word_t len = stream_append_tree( prg, sp, parser->input, input );
 
 			vm_push_parser( parser );
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_APPEND_BKT );
-			rcode_word( exec, (Word) parser );
-			rcode_word( exec, (Word) input );
-			rcode_word( exec, (Word) len );
+			rcode_word( exec, (word_t) parser );
+			rcode_word( exec, (word_t) input );
+			rcode_word( exec, (word_t) len );
 			rcode_unit_term( exec );
 			break;
 		}
@@ -2164,14 +2164,14 @@ again:
 		case IN_PARSE_APPEND_BKT: {
 			Tree *pptr;
 			Tree *input;
-			Word len;
+			word_t len;
 			read_tree( pptr );
 			read_tree( input );
 			read_word( len );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_BKT\n" );
 
-			StreamImpl *si = streamToImpl( ((Parser*)pptr)->input );
+			struct stream_impl *si = streamToImpl( ((Parser*)pptr)->input );
 			stream_undo_append( prg, sp, si, input, len );
 
 			treeDownref( prg, sp, input );
@@ -2195,15 +2195,15 @@ again:
 			Tree *input = vm_pop_tree();
 			Parser *parser = vm_pop_parser();
 
-			Word len = stream_append_stream( prg, sp, parser->input, input );
+			word_t len = stream_append_stream( prg, sp, parser->input, input );
 
 			vm_push_parser( parser );
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_APPEND_STREAM_BKT );
-			rcode_word( exec, (Word) parser );
-			rcode_word( exec, (Word) input );
-			rcode_word( exec, (Word) len );
+			rcode_word( exec, (word_t) parser );
+			rcode_word( exec, (word_t) input );
+			rcode_word( exec, (word_t) len );
 			rcode_unit_term( exec );
 			break;
 		}
@@ -2211,14 +2211,14 @@ again:
 		case IN_PARSE_APPEND_STREAM_BKT: {
 			Tree *pptr;
 			Tree *input;
-			Word len;
+			word_t len;
 			read_tree( pptr );
 			read_tree( input );
 			read_word( len );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_STREAM_BKT\n" );
 
-			StreamImpl *si = streamToImpl( ((Parser*)pptr)->input );
+			struct stream_impl *si = streamToImpl( ((Parser*)pptr)->input );
 			stream_undo_append_stream( prg, sp, si, input, len );
 
 			treeDownref( prg, sp, input );
@@ -2229,7 +2229,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_INPUT_CLOSE_WC\n" );
 
 			Stream *stream = vm_pop_stream();
-			StreamImpl *si = stream->impl;
+			struct stream_impl *si = stream->impl;
 
 			if ( si->file != 0 ) {
 				fclose( si->file );
@@ -2283,8 +2283,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
 
 			Parser *parser;
-			Word pcr;
-			Word steps;
+			word_t pcr;
+			word_t steps;
 
 			read_parser( parser );
 			read_word( pcr );
@@ -2317,8 +2317,8 @@ again:
 
 			/* Return location one instruction back. Depends on the size of of
 			 * the frag/finish. */
-			Code *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
-			vm_push_type( Code*, returnTo );
+			code_t *returnTo = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
+			vm_push_type( code_t*, returnTo );
 
 			exec->framePtr = 0;
 			exec->iframePtr = 0;
@@ -2333,7 +2333,7 @@ again:
 
 				exec->framePtr = vm_ptop();
 				vm_pushn( fi->frameSize );
-				memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
+				memset( vm_ptop(), 0, sizeof(word_t) * fi->frameSize );
 			}
 			break;
 		}
@@ -2355,7 +2355,7 @@ again:
 				vm_popn( fi->frameSize );
 			}
 
-			instr = vm_pop_type(Code*);
+			instr = vm_pop_type(code_t*);
 			exec->frameId =   vm_pop_type(long);
 			exec->iframePtr = vm_pop_type(Tree**);
 			exec->framePtr =  vm_pop_type(Tree**);
@@ -2374,7 +2374,7 @@ again:
 		}
 
 		case IN_PARSE_FRAG_WC: {
-			Half stopId;
+			half_t stopId;
 			read_half( stopId );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WC %hd\n", stopId );
@@ -2407,7 +2407,7 @@ again:
 		}
 
 		case IN_PARSE_FRAG_WV: {
-			Half stopId;
+			half_t stopId;
 			read_half( stopId );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WV %hd\n", stopId );
@@ -2436,8 +2436,8 @@ again:
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_INIT_BKT );
-			rcode_word( exec, (Word) parser );
-			rcode_word( exec, (Word) PCR_START );
+			rcode_word( exec, (word_t) parser );
+			rcode_word( exec, (word_t) PCR_START );
 			rcode_word( exec, steps );
 			rcode_code( exec, IN_PARSE_FRAG_BKT );
 			rcodeHalf( exec, 0 );
@@ -2451,7 +2451,7 @@ again:
 		}
 
 		case IN_PARSE_FRAG_BKT: {
-			Half stopId;
+			half_t stopId;
 			read_half( stopId );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT %hd\n", stopId );
@@ -2475,7 +2475,7 @@ again:
 		}
 
 		case IN_PARSE_FINISH_WC: {
-			Half stopId;
+			half_t stopId;
 			read_half( stopId );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WC %hd\n", stopId );
@@ -2511,7 +2511,7 @@ again:
 		}
 
 		case IN_PARSE_FINISH_WV: {
-			Half stopId;
+			half_t stopId;
 			read_half( stopId );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WV %hd\n", stopId );
@@ -2541,8 +2541,8 @@ again:
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_INIT_BKT );
-			rcode_word( exec, (Word)parser );
-			rcode_word( exec, (Word)PCR_START );
+			rcode_word( exec, (word_t)parser );
+			rcode_word( exec, (word_t)PCR_START );
 			rcode_word( exec, steps );
 			rcode_code( exec, IN_PARSE_FINISH_BKT );
 			rcodeHalf( exec, 0 );
@@ -2557,7 +2557,7 @@ again:
 		}
 
 		case IN_PARSE_FINISH_BKT: {
-			Half stopId;
+			half_t stopId;
 			read_half( stopId );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT %hd\n", stopId );
@@ -2579,7 +2579,7 @@ again:
 			exec->pcr = vm_pop_type(long);
 			exec->parser = vm_pop_parser();
 
-			StreamImpl *si = streamToImpl( parser->input );
+			struct stream_impl *si = streamToImpl( parser->input );
 			si->funcs->unsetEof( si );
 			break;
 		}
@@ -2597,7 +2597,7 @@ again:
 			/* Single unit. */
 			treeUpref( string );
 			rcode_code( exec, IN_INPUT_PULL_BKT );
-			rcode_word( exec, (Word) string );
+			rcode_word( exec, (word_t) string );
 			rcode_unit_term( exec );
 
 			//treeDownref( prg, sp, len );
@@ -2662,13 +2662,13 @@ again:
 			break;
 		}
 		case IN_INPUT_PUSH_BKT: {
-			Word len;
+			word_t len;
 			read_word( len );
 
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_BKT %d\n", len );
 
 			Stream *input = vm_pop_stream();
-			undoStreamPush( prg, sp, streamToImpl( input ), len );
+			colm_undo_stream_push( prg, sp, streamToImpl( input ), len );
 			break;
 		}
 		case IN_INPUT_PUSH_STREAM_WV: {
@@ -2686,17 +2686,17 @@ again:
 			break;
 		}
 		case IN_INPUT_PUSH_STREAM_BKT: {
-			Word len;
+			word_t len;
 			read_word( len );
 
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_STREAM_BKT %d\n", len );
 
 			Stream *input = vm_pop_stream();
-			undoStreamPush( prg, sp, streamToImpl( input ), len );
+			colm_undo_stream_push( prg, sp, streamToImpl( input ), len );
 			break;
 		}
 		case IN_CONS_GENERIC: {
-			Half genericId;
+			half_t genericId;
 			read_half( genericId );
 
 			debug( prg, REALM_BYTECODE, "IN_CONS_GENERIC %hd\n", genericId );
@@ -2706,7 +2706,7 @@ again:
 			break;
 		}
 		case IN_CONS_OBJECT: {
-			Half langElId;
+			half_t langElId;
 			read_half( langElId );
 
 			debug( prg, REALM_BYTECODE, "IN_CONS_OBJECT %hd\n", langElId );
@@ -2716,7 +2716,7 @@ again:
 			break;
 		}
 		case IN_CONSTRUCT: {
-			Half patternId;
+			half_t patternId;
 			read_half( patternId );
 
 			debug( prg, REALM_BYTECODE, "IN_CONSTRUCT\n" );
@@ -2741,7 +2741,7 @@ again:
 			break;
 		}
 		case IN_CONSTRUCT_TERM: {
-			Half tokenId;
+			half_t tokenId;
 			read_half( tokenId );
 
 			debug( prg, REALM_BYTECODE, "IN_CONSTRUCT_TERM\n" );
@@ -2789,7 +2789,7 @@ again:
 			break;
 		}
 		case IN_TREE_CAST: {
-			Half langElId;
+			half_t langElId;
 			read_half( langElId );
 
 			debug( prg, REALM_BYTECODE, "IN_TREE_CAST %hd\n", langElId );
@@ -2810,11 +2810,11 @@ again:
 			/* This is an initial global load. Need to reverse execute it. */
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PTR_ACCESS_BKT );
-			rcode_word( exec, (Word) ptr );
+			rcode_word( exec, (word_t) ptr );
 			break;
 		}
 		case IN_PTR_ACCESS_BKT: {
-			Word p;
+			word_t p;
 			read_word( p );
 
 			debug( prg, REALM_BYTECODE, "IN_PTR_ACCESS_BKT\n" );
@@ -2972,7 +2972,7 @@ again:
 
 			/* Set up reverse code. Needs no args. */
 			rcode_code( exec, IN_SET_TOKEN_DATA_BKT );
-			rcode_word( exec, (Word)oldval );
+			rcode_word( exec, (word_t)oldval );
 			rcode_unit_term( exec );
 
 			treeDownref( prg, sp, tree );
@@ -2982,7 +2982,7 @@ again:
 		case IN_SET_TOKEN_DATA_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_SET_TOKEN_DATA_BKT \n" );
 
-			Word oldval;
+			word_t oldval;
 			read_word( oldval );
 
 			Tree *tree = vm_pop_tree();
@@ -3278,8 +3278,8 @@ again:
 		}
 
 		case IN_STASH_ARG: {
-			Half pos;
-			Half size;
+			half_t pos;
+			half_t size;
 			read_half( pos );
 			read_half( size );
 
@@ -3296,7 +3296,7 @@ again:
 		}
 
 		case IN_PREP_ARGS: {
-			Half size;
+			half_t size;
 			read_half( size );
 
 			debug( prg, REALM_BYTECODE, "IN_PREP_ARGS %hd\n", size );
@@ -3304,12 +3304,12 @@ again:
 			vm_push_type( Tree**, exec->callArgs );
 			vm_pushn( size );
 			exec->callArgs = vm_ptop();
-			memset( vm_ptop(), 0, sizeof(Word) * size );
+			memset( vm_ptop(), 0, sizeof(word_t) * size );
 			break;
 		}
 
 		case IN_CLEAR_ARGS: {
-			Half size;
+			half_t size;
 			read_half( size );
 
 			debug( prg, REALM_BYTECODE, "IN_CLEAR_ARGS %hd\n", size );
@@ -3320,7 +3320,7 @@ again:
 		}
 
 		case IN_HOST: {
-			Half funcId;
+			half_t funcId;
 			read_half( funcId );
 
 			debug( prg, REALM_BYTECODE, "IN_HOST %hd\n", funcId );
@@ -3329,7 +3329,7 @@ again:
 			break;
 		}
 		case IN_CALL_WV: {
-			Half funcId;
+			half_t funcId;
 			read_half( funcId );
 
 			struct function_info *fi = &prg->rtd->functionInfo[funcId];
@@ -3341,7 +3341,7 @@ again:
 
 			vm_push_type( Tree**, exec->callArgs );
 			vm_push_value( 0 ); /* Return value. */
-			vm_push_type( Code*, instr );
+			vm_push_type( code_t*, instr );
 			vm_push_type( Tree**, exec->framePtr );
 			vm_push_type( long, exec->frameId );
 
@@ -3350,11 +3350,11 @@ again:
 
 			exec->framePtr = vm_ptop();
 			vm_pushn( fr->frameSize );
-			memset( vm_ptop(), 0, sizeof(Word) * fr->frameSize );
+			memset( vm_ptop(), 0, sizeof(word_t) * fr->frameSize );
 			break;
 		}
 		case IN_CALL_WC: {
-			Half funcId;
+			half_t funcId;
 			read_half( funcId );
 
 			struct function_info *fi = &prg->rtd->functionInfo[funcId];
@@ -3366,7 +3366,7 @@ again:
 
 			vm_push_type( Tree**, exec->callArgs );
 			vm_push_value( 0 ); /* Return value. */
-			vm_push_type( Code*, instr );
+			vm_push_type( code_t*, instr );
 			vm_push_type( Tree**, exec->framePtr );
 			vm_push_type( long, exec->frameId );
 
@@ -3375,7 +3375,7 @@ again:
 
 			exec->framePtr = vm_ptop();
 			vm_pushn( fr->frameSize );
-			memset( vm_ptop(), 0, sizeof(Word) * fr->frameSize );
+			memset( vm_ptop(), 0, sizeof(word_t) * fr->frameSize );
 			break;
 		}
 		case IN_YIELD: {
@@ -3397,7 +3397,7 @@ again:
 				uiter->frame = exec->framePtr;
 
 				/* Restore the instruction and frame pointer. */
-				instr = (Code*) vm_local_iframe(IFR_RIN);
+				instr = (code_t*) vm_local_iframe(IFR_RIN);
 				exec->framePtr = (Tree**) vm_local_iframe(IFR_RFR);
 				exec->iframePtr = (Tree**) vm_local_iframe(IFR_RIF);
 
@@ -3410,7 +3410,7 @@ again:
 		}
 		case IN_UITER_CREATE_WV: {
 			short field;
-			Half funcId, searchId;
+			half_t funcId, searchId;
 			read_half( field );
 			read_half( funcId );
 			read_half( searchId );
@@ -3419,7 +3419,7 @@ again:
 
 			struct function_info *fi = prg->rtd->functionInfo + funcId;
 
-			vm_contiguous( (sizeof(UserIter) / sizeof(Word)) + FR_AA + fi->frameSize );
+			vm_contiguous( (sizeof(UserIter) / sizeof(word_t)) + FR_AA + fi->frameSize );
 
 			UserIter *uiter = colm_uiter_create( prg, &sp, fi, searchId );
 			vm_set_local(exec, field, (SW) uiter);
@@ -3432,20 +3432,20 @@ again:
 			vm_push_type( Tree**, exec->callArgs );
 			vm_push_value( 0 );
 
-			vm_push_type( Code*, 0 );            /* Return instruction pointer,  */
+			vm_push_type( code_t*, 0 );            /* Return instruction pointer,  */
 			vm_push_type( Tree**, exec->iframePtr ); /* Return iframe. */
 			vm_push_type( Tree**, exec->framePtr );  /* Return frame. */
 
 			uiter->frame = vm_ptop();
 			vm_pushn( fi->frameSize );
-			memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
+			memset( vm_ptop(), 0, sizeof(word_t) * fi->frameSize );
 
 			uiterInit( prg, sp, uiter, fi, true );
 			break;
 		}
 		case IN_UITER_CREATE_WC: {
 			short field;
-			Half funcId, searchId;
+			half_t funcId, searchId;
 			read_half( field );
 			read_half( funcId );
 			read_half( searchId );
@@ -3454,7 +3454,7 @@ again:
 
 			struct function_info *fi = prg->rtd->functionInfo + funcId;
 
-			vm_contiguous( (sizeof(UserIter) / sizeof(Word)) + FR_AA + fi->frameSize );
+			vm_contiguous( (sizeof(UserIter) / sizeof(word_t)) + FR_AA + fi->frameSize );
 
 			UserIter *uiter = colm_uiter_create( prg, &sp, fi, searchId );
 			vm_set_local(exec, field, (SW) uiter);
@@ -3467,13 +3467,13 @@ again:
 			vm_push_type( Tree**, exec->callArgs );
 			vm_push_value( 0 );
 
-			vm_push_type( Code*, 0 );            /* Return instruction pointer,  */
+			vm_push_type( code_t*, 0 );            /* Return instruction pointer,  */
 			vm_push_type( Tree**, exec->iframePtr ); /* Return iframe. */
 			vm_push_type( Tree**, exec->framePtr );  /* Return frame. */
 
 			uiter->frame = vm_ptop();
 			vm_pushn( fi->frameSize );
-			memset( vm_ptop(), 0, sizeof(Word) * fi->frameSize );
+			memset( vm_ptop(), 0, sizeof(word_t) * fi->frameSize );
 
 			uiterInit( prg, sp, uiter, fi, false );
 			break;
@@ -3507,7 +3507,7 @@ again:
 
 			exec->frameId = vm_pop_type(long);
 			exec->framePtr = vm_pop_type(Tree**);
-			instr = vm_pop_type(Code*);
+			instr = vm_pop_type(code_t*);
 			exec->retVal = vm_pop_tree();
 			vm_pop_value();
 			//vm_popn( fi->argSize );
@@ -3633,7 +3633,7 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_STR_ATOI\n" );
 
 				Str *str = vm_pop_string();
-				Word res = strAtoi( str->value );
+				word_t res = strAtoi( str->value );
 				Value integer = res;
 				vm_push_value( integer );
 				treeDownref( prg, sp, (Tree*)str );
@@ -3643,7 +3643,7 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_STR_ATOO\n" );
 
 				Str *str = vm_pop_string();
-				Word res = strAtoo( str->value );
+				word_t res = strAtoo( str->value );
 				Value integer = res;
 				vm_push_value( integer );
 				treeDownref( prg, sp, (Tree*)str );
@@ -3653,7 +3653,7 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_STR_UORD8\n" );
 
 				Str *str = vm_pop_string();
-				Word res = strUord8( str->value );
+				word_t res = strUord8( str->value );
 				Value integer = res;
 				vm_push_value( integer );
 				treeDownref( prg, sp, (Tree*)str );
@@ -3663,7 +3663,7 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_STR_UORD16\n" );
 
 				Str *str = vm_pop_string();
-				Word res = strUord16( str->value );
+				word_t res = strUord16( str->value );
 				Value integer = res;
 				vm_push_value( integer );
 				treeDownref( prg, sp, (Tree*)str );
@@ -3718,7 +3718,7 @@ again:
 				break;
 			}
 			case IN_LOAD_ARG0: {
-				Half field;
+				half_t field;
 				read_half( field );
 				debug( prg, REALM_BYTECODE, "IN_LOAD_ARG0 %lu\n", field );
 
@@ -3730,7 +3730,7 @@ again:
 				break;
 			}
 			case IN_LOAD_ARGV: {
-				Half field;
+				half_t field;
 				read_half( field );
 				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
 
@@ -3867,7 +3867,7 @@ again:
 				rcode_code( exec, IN_FN );
 				rcode_code( exec, IN_LIST_POP_TAIL_BKT );
 				rcodeHalf( exec, genId );
-				rcode_word( exec, (Word)s );
+				rcode_word( exec, (word_t)s );
 				rcode_unit_term( exec );
 				break;
 			}
@@ -3921,7 +3921,7 @@ again:
 				rcode_code( exec, IN_FN );
 				rcode_code( exec, IN_LIST_POP_HEAD_BKT );
 				rcodeHalf( exec, genId );
-				rcode_word( exec, (Word)s );
+				rcode_word( exec, (word_t)s );
 				rcode_unit_term( exec );
 				break;
 			}
@@ -3998,7 +3998,7 @@ again:
 				rcode_code( exec, IN_MAP_INSERT_BKT );
 				rcodeHalf( exec, genId );
 				rcode_code( exec, inserted != 0 ? 1 : 0 );
-				rcode_word( exec, (Word)mapEl );
+				rcode_word( exec, (word_t)mapEl );
 				rcode_unit_term( exec );
 				break;
 			}
@@ -4006,7 +4006,7 @@ again:
 			case IN_MAP_INSERT_BKT: {
 				short genId;
 				uchar inserted;
-				Word wmapEl;
+				word_t wmapEl;
 
 				read_half( genId );
 				read_byte( inserted );
@@ -4053,8 +4053,8 @@ again:
 				/* Reverse instruction. */
 				rcode_code( exec, IN_FN );
 				rcode_code( exec, IN_MAP_DETACH_BKT );
-				rcode_word( exec, (Word)pair.key );
-				rcode_word( exec, (Word)pair.val );
+				rcode_word( exec, (word_t)pair.key );
+				rcode_word( exec, (word_t)pair.val );
 				rcode_unit_term( exec );
 
 				treeDownref( prg, sp, obj );
@@ -4223,7 +4223,7 @@ again:
 					/* Call layout. */
 					exec->frameId = vm_pop_type(long);
 					exec->framePtr = vm_pop_type(Tree**);
-					instr = vm_pop_type(Code*);
+					instr = vm_pop_type(code_t*);
 
 					Tree *retVal = vm_pop_tree();
 					vm_pop_value();
@@ -4277,7 +4277,7 @@ out:
 /*
  * Deleteing rcode required downreffing any trees held by it.
  */
-static void rcode_downref( Program *prg, Tree **sp, Code *instr )
+static void rcode_downref( Program *prg, Tree **sp, code_t *instr )
 {
 again:
 	switch ( *instr++ ) {
@@ -4316,7 +4316,7 @@ again:
 		}
 
 		case IN_PARSE_FRAG_BKT: {
-			Half stopId;
+			half_t stopId;
 			read_half( stopId );
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
 			break;
@@ -4326,7 +4326,7 @@ again:
 			break;
 		}
 		case IN_PARSE_FINISH_BKT: {
-			Half stopId;
+			half_t stopId;
 			read_half( stopId );
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
 			break;
@@ -4440,7 +4440,7 @@ again:
 			break;
 		}
 		case IN_SET_TOKEN_DATA_BKT: {
-			Word oldval;
+			word_t oldval;
 			read_word( oldval );
 
 			debug( prg, REALM_BYTECODE, "IN_SET_TOKEN_DATA_BKT\n" );

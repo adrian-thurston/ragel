@@ -31,10 +31,11 @@ extern "C" {
 #include <colm/input.h>
 #include <colm/internal.h>
 
-typedef unsigned char Code;
-typedef unsigned long Word;
-typedef unsigned long Half;
-struct Bindings;
+typedef unsigned char code_t;
+typedef unsigned long word_t;
+typedef unsigned long half_t;
+
+struct bindings;
 struct function_info;
 
 typedef struct colm_stream Stream;
@@ -215,7 +216,7 @@ typedef struct _UserIter
 	long yieldSize;
 	long rootSize;
 
-	Code *resume;
+	code_t *resume;
 	Tree **frame;
 	long searchId;
 } UserIter;
@@ -241,7 +242,7 @@ Kid *treeExtractChild( struct colm_program *prg, Tree *tree );
 Kid *reverseKidList( Kid *kid );
 
 Tree *colm_construct_pointer( struct colm_program *prg, colm_value_t value );
-Tree *constructTerm( struct colm_program *prg, Word id, Head *tokdata );
+Tree *constructTerm( struct colm_program *prg, word_t id, Head *tokdata );
 Tree *constructTree( struct colm_program *prg, Kid *kid,
 		Tree **bindings, long pat );
 Tree *constructObject( struct colm_program *prg, Kid *kid,
@@ -260,8 +261,8 @@ Tree *copyTree( struct colm_program *prg, Tree *tree,
 		Kid *oldNextDown, Kid **newNextDown );
 
 colm_value_t colm_get_pointer_val( Tree *pointer );
-Tree *colm_tree_get_field( Tree *tree, Word field );
-Tree *getFieldSplit( struct colm_program *prg, Tree *tree, Word field );
+Tree *colm_tree_get_field( Tree *tree, word_t field );
+Tree *getFieldSplit( struct colm_program *prg, Tree *tree, word_t field );
 Tree *getRhsEl( struct colm_program *prg, Tree *lhs, long position );
 Kid *getRhsElKid( struct colm_program *prg, Tree *lhs, long position );
 void colm_tree_set_field( struct colm_program *prg, Tree *tree, long field, Tree *value );
@@ -277,19 +278,19 @@ int matchPattern( Tree **bindings, struct colm_program *prg,
 Tree *treeIterDerefCur( TreeIter *iter );
 
 /* For making references of attributes. */
-Kid *getFieldKid( Tree *tree, Word field );
+Kid *getFieldKid( Tree *tree, word_t field );
 
 Tree *copyRealTree( struct colm_program *prg, Tree *tree,
 		Kid *oldNextDown, Kid **newNextDown );
 void splitIterCur( struct colm_program *prg, Tree ***psp, TreeIter *iter );
-Tree *setListMem( List *list, Half field, Tree *value );
+Tree *setListMem( List *list, half_t field, Tree *value );
 
 void listPushTail( struct colm_program *prg, List *list, Tree *val );
 void listPushHead( struct colm_program *prg, List *list, Tree *val );
 Tree *listRemoveEnd( struct colm_program *prg, List *list );
 Tree *listRemoveHead( struct colm_program *prg, List *list );
-Tree *getListMemSplit( struct colm_program *prg, List *list, Word field );
-Tree *getParserMem( Parser *parser, Word field );
+Tree *getListMemSplit( struct colm_program *prg, List *list, word_t field );
+Tree *getParserMem( Parser *parser, word_t field );
 
 Tree *treeIterAdvance( struct colm_program *prg, Tree ***psp, TreeIter *iter );
 Tree *treeIterNextChild( struct colm_program *prg, Tree ***psp, TreeIter *iter );
@@ -341,7 +342,7 @@ void colm_uiter_destroy( struct colm_program *prg, Tree ***psp, UserIter *uiter 
 void colm_uiter_unwind( struct colm_program *prg, Tree ***psp, UserIter *uiter );
 
 Tree *castTree( struct colm_program *prg, int langElId, Tree *tree );
-StreamImpl *streamToImpl( Stream *ptr );
+struct stream_impl *streamToImpl( Stream *ptr );
 
 void colm_init_list_iter( GenericIter *listIter, Tree **stackRoot,
 		long argSize, long rootSize, const Ref *rootRef, int genericId );

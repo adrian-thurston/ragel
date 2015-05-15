@@ -56,13 +56,13 @@ static void upResize( struct rt_code_vect *vect, long len )
 		vect->allocLen = newLen;
 		if ( vect->data != 0 ) {
 			/* Table exists already, resize it up. */
-			vect->data = (Code*) realloc( vect->data, sizeof(Code) * newLen );
+			vect->data = (code_t*) realloc( vect->data, sizeof(code_t) * newLen );
 			//if ( vect->data == 0 )
 			//	throw std::bad_alloc();
 		}
 		else {
 			/* Create the data. */
-			vect->data = (Code*) malloc( sizeof(Code) * newLen );
+			vect->data = (code_t*) malloc( sizeof(code_t) * newLen );
 			//if ( vect->data == 0 )
 			//	throw std::bad_alloc();
 		}
@@ -86,7 +86,7 @@ static void downResize( struct rt_code_vect *vect, long len)
 		}
 		else {
 			/* Not shrinking to size zero, realloc it to the smaller size. */
-			vect->data = (Code*) realloc( vect->data, sizeof(Code) * newLen );
+			vect->data = (code_t*) realloc( vect->data, sizeof(code_t) * newLen );
 			//if ( vect->data == 0 )
 			//	throw std::bad_alloc();
 		}
@@ -94,7 +94,7 @@ static void downResize( struct rt_code_vect *vect, long len)
 }
 
 
-void rtCodeVectEmpty( struct rt_code_vect *vect )
+void colm_rt_code_vect_empty( struct rt_code_vect *vect )
 {
 	if ( vect->data != 0 ) {
 		/* Free the data space. */
@@ -104,10 +104,11 @@ void rtCodeVectEmpty( struct rt_code_vect *vect )
 	}
 }
 
-void rtCodeVectReplace( struct rt_code_vect *vect, long pos, const Code *val, long len )
+void colm_rt_code_vect_replace( struct rt_code_vect *vect, long pos,
+		const code_t *val, long len )
 {
 	long endPos, i;
-	//Code *item;
+	//code_t *item;
 
 	/* If we are given a negative position to replace at then
 	 * treat it as a position relative to the length. */
@@ -125,7 +126,7 @@ void rtCodeVectReplace( struct rt_code_vect *vect, long pos, const Code *val, lo
 		/* Delete any objects we need to delete. */
 		//item = vect->data + pos;
 		//for ( i = pos; i < vect->tabLen; i++, item++ )
-		//	item->~Code();
+		//	item->~code_t();
 		
 		/* We are extending the vector, set the new data length. */
 		vect->tabLen = endPos;
@@ -134,20 +135,20 @@ void rtCodeVectReplace( struct rt_code_vect *vect, long pos, const Code *val, lo
 		/* Delete any objects we need to delete. */
 		//item = vect->data + pos;
 		//for ( i = pos; i < endPos; i++, item++ )
-		//	item->~Code();
+		//	item->~code_t();
 	}
 
 	/* Copy data in using copy constructor. */
-	Code *dst = vect->data + pos;
-	const Code *src = val;
+	code_t *dst = vect->data + pos;
+	const code_t *src = val;
 	for ( i = 0; i < len; i++, dst++, src++ )
 		*dst = *src;
 }
 
-void rtCodeVectRemove( struct rt_code_vect *vect, long pos, long len )
+void colm_rt_code_vect_remove( struct rt_code_vect *vect, long pos, long len )
 {
 	long newLen, lenToSlideOver, endPos;
-	Code *dst;//, *item;
+	code_t *dst;//, *item;
 
 	/* If we are given a negative position to remove at then
 	 * treat it as a position relative to the length. */
@@ -166,12 +167,12 @@ void rtCodeVectRemove( struct rt_code_vect *vect, long pos, long len )
 	/* Call Destructors. */
 	//item = dst;
 	//for ( long i = 0; i < len; i += 1, item += 1 )
-	//	item->~Code();
+	//	item->~code_t();
 	
 	/* Shift data over if necessary. */
 	lenToSlideOver = vect->tabLen - endPos;	
 	if ( len > 0 && lenToSlideOver > 0 )
-		memmove(dst, dst + len, sizeof(Code)*lenToSlideOver);
+		memmove(dst, dst + len, sizeof(code_t)*lenToSlideOver);
 
 	/* Shrink the data if necessary. */
 	downResize( vect, newLen );

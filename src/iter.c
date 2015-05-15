@@ -195,7 +195,7 @@ UserIter *colm_uiter_create( Program *prg, Tree ***psp, struct function_info *fi
 {
 	Tree **sp = *psp;
 
-	vm_pushn( sizeof(UserIter) / sizeof(Word) );
+	vm_pushn( sizeof(UserIter) / sizeof(word_t) );
 	void *mem = vm_ptop();
 	UserIter *uiter = mem;
 
@@ -264,7 +264,7 @@ void colm_uiter_destroy( Program *prg, Tree ***psp, UserIter *uiter )
 		assert( uiter->yieldSize == curStackSize );
 
 		vm_popn( uiter->yieldSize );
-		vm_popn( sizeof(UserIter) / sizeof(Word) );
+		vm_popn( sizeof(UserIter) / sizeof(word_t) );
 
 		uiter->type = 0;
 
@@ -285,7 +285,7 @@ void colm_uiter_unwind( Program *prg, Tree ***psp, UserIter *uiter )
 		long argSize = uiter->argSize;
 
 		vm_popn( uiter->yieldSize );
-		vm_popn( sizeof(UserIter) / sizeof(Word) );
+		vm_popn( sizeof(UserIter) / sizeof(word_t) );
 
 		/* The IN_PREP_ARGS stack data. */
 		vm_popn( argSize );

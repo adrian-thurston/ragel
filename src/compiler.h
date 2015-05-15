@@ -91,7 +91,7 @@ struct Production;
 /* A pointer to this is in struct pda_run, but it's specification is not known by the
  * runtime code. The runtime functions that access it are defined in
  * ctinput.cpp and stubbed in fsmcodegen.cpp */
-struct Bindings
+struct bindings
 	: public Vector<ParseTree*>
 {};
 
@@ -736,7 +736,7 @@ struct Compiler
 
 	void prepGrammar();
 	struct pda_run *parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
-			int parserId, StreamImpl *sourceStream );
+			int parserId, struct stream_impl *sourceStream );
 	void parsePatterns();
 
 	void collectParserEls( LangElSet &parserEls );
@@ -789,7 +789,7 @@ struct Compiler
 	int argvOffset();
 	int arg0Offset();
 	void makeDefaultIterators();
-	void addLengthField( ObjectDef *objDef, Code getLength );
+	void addLengthField( ObjectDef *objDef, code_t getLength );
 	ObjectDef *findObject( const String &name );
 	void resolveListElementOf( ObjectDef *container, ObjectDef *obj, ElementOf *elof );
 	void resolveMapElementOf( ObjectDef *container, ObjectDef *obj, ElementOf *elof );
