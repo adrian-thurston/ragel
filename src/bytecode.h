@@ -520,28 +520,28 @@ enum LEL_ID {
 #define vm_pop_type(type) \
 	({ SW r = *sp; (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); (type)r; })
 
-#define vm_push_tree(i)   vm_push_type(Tree*, i)
-#define vm_push_stream(i) vm_push_type(Stream*, i)
-#define vm_push_struct(i) vm_push_type(Struct*, i)
-#define vm_push_parser(i) vm_push_type(Parser*, i)
-#define vm_push_value(i)  vm_push_type(Value, i)
-#define vm_push_string(i) vm_push_type(Str*, i)
-#define vm_push_kid(i)    vm_push_type(Kid*, i)
-#define vm_push_ref(i)    vm_push_type(Ref*, i)
-#define vm_push_string(i) vm_push_type(Str*, i)
-#define vm_push_ptree(i)  vm_push_type(ParseTree*, i)
+#define vm_push_tree(i)   vm_push_type(tree_t*, i)
+#define vm_push_stream(i) vm_push_type(stream_t*, i)
+#define vm_push_struct(i) vm_push_type(struct_t*, i)
+#define vm_push_parser(i) vm_push_type(parser_t*, i)
+#define vm_push_value(i)  vm_push_type(value_t, i)
+#define vm_push_string(i) vm_push_type(str_t*, i)
+#define vm_push_kid(i)    vm_push_type(kid_t*, i)
+#define vm_push_ref(i)    vm_push_type(ref_t*, i)
+#define vm_push_string(i) vm_push_type(str_t*, i)
+#define vm_push_ptree(i)  vm_push_type(parse_tree_t*, i)
 
-#define vm_pop_tree()   vm_pop_type(Tree*)
-#define vm_pop_stream() vm_pop_type(Stream*)
-#define vm_pop_struct() vm_pop_type(Struct*)
-#define vm_pop_parser() vm_pop_type(Parser*)
-#define vm_pop_list()   vm_pop_type(List*)
-#define vm_pop_map()    vm_pop_type(Map*)
-#define vm_pop_value()  vm_pop_type(Value)
-#define vm_pop_string() vm_pop_type(Str*)
-#define vm_pop_kid()    vm_pop_type(Kid*)
-#define vm_pop_ref()    vm_pop_type(Ref*)
-#define vm_pop_ptree()  vm_pop_type(ParseTree*)
+#define vm_pop_tree()   vm_pop_type(tree_t*)
+#define vm_pop_stream() vm_pop_type(stream_t*)
+#define vm_pop_struct() vm_pop_type(struct_t*)
+#define vm_pop_parser() vm_pop_type(parser_t*)
+#define vm_pop_list()   vm_pop_type(list_t*)
+#define vm_pop_map()    vm_pop_type(map_t*)
+#define vm_pop_value()  vm_pop_type(value_t)
+#define vm_pop_string() vm_pop_type(str_t*)
+#define vm_pop_kid()    vm_pop_type(kid_t*)
+#define vm_pop_ref()    vm_pop_type(ref_t*)
+#define vm_pop_ptree()  vm_pop_type(parse_tree_t*)
 
 #define vm_pop_ignore() \
 	({ (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); })
@@ -561,12 +561,12 @@ enum LEL_ID {
 #define vm_plocal_iframe(o) (&exec->iframePtr[o])
 
 void vm_init( struct colm_program * );
-Tree** vm_bs_add( struct colm_program *, Tree **, int );
-Tree** vm_bs_pop( struct colm_program *, Tree **, int );
+tree_t** vm_bs_add( struct colm_program *, tree_t **, int );
+tree_t** vm_bs_pop( struct colm_program *, tree_t **, int );
 void vm_clear( struct colm_program * );
 
-typedef Tree *SW;
-typedef Tree **StackPtr;
+typedef tree_t *SW;
+typedef tree_t **StackPtr;
 
 /* Can't use sizeof() because we have used types that are bigger than the
  * serial representation. */
@@ -576,25 +576,25 @@ typedef Tree **StackPtr;
 
 typedef struct colm_execution
 {
-	Tree **framePtr;
-	Tree **iframePtr;
+	tree_t **framePtr;
+	tree_t **iframePtr;
 	long frameId;
-	Tree **callArgs;
+	tree_t **callArgs;
 
 	long rcodeUnitLen;
 
-	Parser *parser;
+	parser_t *parser;
 	long steps;
 	long pcr;
-	Tree *retVal;
+	tree_t *retVal;
 } Execution;
 
 struct colm_execution;
 
-static inline Tree **vm_get_plocal( struct colm_execution *exec, int o )
+static inline tree_t **vm_get_plocal( struct colm_execution *exec, int o )
 {
 	if ( o >= FR_AA ) {
-		Tree **callArgs = (Tree**)exec->framePtr[FR_CA];
+		tree_t **callArgs = (tree_t**)exec->framePtr[FR_CA];
 		return &callArgs[o - FR_AA];
 	}
 	else {
@@ -602,10 +602,10 @@ static inline Tree **vm_get_plocal( struct colm_execution *exec, int o )
 	}
 }
 
-static inline Tree *vm_get_local( struct colm_execution *exec, int o )
+static inline tree_t *vm_get_local( struct colm_execution *exec, int o )
 {
 	if ( o >= FR_AA ) {
-		Tree **callArgs = (Tree**)exec->framePtr[FR_CA];
+		tree_t **callArgs = (tree_t**)exec->framePtr[FR_CA];
 		return callArgs[o - FR_AA];
 	}
 	else {
@@ -613,10 +613,10 @@ static inline Tree *vm_get_local( struct colm_execution *exec, int o )
 	}
 }
 
-static inline void vm_set_local( struct colm_execution *exec, int o, Tree* v )
+static inline void vm_set_local( struct colm_execution *exec, int o, tree_t* v )
 {
 	if ( o >= FR_AA ) {
-		Tree **callArgs = (Tree**)exec->framePtr[FR_CA];
+		tree_t **callArgs = (tree_t**)exec->framePtr[FR_CA];
 		callArgs[o - FR_AA] = v;
 	}
 	else {
@@ -625,45 +625,45 @@ static inline void vm_set_local( struct colm_execution *exec, int o, Tree* v )
 }
 
 
-long stringLength( Head *str );
-const char *stringData( Head *str );
-Head *initStrSpace( long length );
-Head *stringCopy( struct colm_program *prg, Head *head );
-void stringFree( struct colm_program *prg, Head *head );
-void stringShorten( Head *tokdata, long newlen );
-Head *concatStr( Head *s1, Head *s2 );
-word_t strAtoi( Head *str );
-word_t strAtoo( Head *str );
-word_t strUord16( Head *head );
-word_t strUord8( Head *head );
-word_t cmpString( Head *s1, Head *s2 );
-Head *stringToUpper( Head *s );
-Head *stringToLower( Head *s );
-Head *stringSprintf( Program *prg, Str *format, long integer );
+long stringLength( head_t *str );
+const char *stringData( head_t *str );
+head_t *initStrSpace( long length );
+head_t *stringCopy( struct colm_program *prg, head_t *head );
+void stringFree( struct colm_program *prg, head_t *head );
+void stringShorten( head_t *tokdata, long newlen );
+head_t *concatStr( head_t *s1, head_t *s2 );
+word_t strAtoi( head_t *str );
+word_t strAtoo( head_t *str );
+word_t strUord16( head_t *head );
+word_t strUord8( head_t *head );
+word_t cmpString( head_t *s1, head_t *s2 );
+head_t *stringToUpper( head_t *s );
+head_t *stringToLower( head_t *s );
+head_t *stringSprintf( program_t *prg, str_t *format, long integer );
 
-Head *makeLiteral( struct colm_program *prg, long litoffset );
-Head *intToStr( struct colm_program *prg, word_t i );
+head_t *makeLiteral( struct colm_program *prg, long litoffset );
+head_t *intToStr( struct colm_program *prg, word_t i );
 
 void colm_execute( struct colm_program *prg, Execution *exec, code_t *code );
-void reductionExecution( Execution *exec, Tree **sp );
-void generationExecution( Execution *exec, Tree **sp );
-void reverseExecution( Execution *exec, Tree **sp, struct rt_code_vect *allRev );
+void reductionExecution( Execution *exec, tree_t **sp );
+void generationExecution( Execution *exec, tree_t **sp );
+void reverseExecution( Execution *exec, tree_t **sp, struct rt_code_vect *allRev );
 
-Kid *allocAttrs( struct colm_program *prg, long length );
-void freeAttrs( struct colm_program *prg, Kid *attrs );
-Kid *getAttrKid( Tree *tree, long pos );
+kid_t *allocAttrs( struct colm_program *prg, long length );
+void freeAttrs( struct colm_program *prg, kid_t *attrs );
+kid_t *getAttrKid( tree_t *tree, long pos );
 
-Tree *splitTree( struct colm_program *prg, Tree *t );
+tree_t *splitTree( struct colm_program *prg, tree_t *t );
 
-void colm_rcode_downref_all( struct colm_program *prg, Tree **sp, struct rt_code_vect *cv );
+void colm_rcode_downref_all( struct colm_program *prg, tree_t **sp, struct rt_code_vect *cv );
 int colm_make_reverse_code( struct pda_run *pdaRun );
-void colm_transfer_reverse_code( struct pda_run *pdaRun, ParseTree *tree );
+void colm_transfer_reverse_code( struct pda_run *pdaRun, parse_tree_t *tree );
 
-void splitRef( struct colm_program *prg, Tree ***sp, Ref *fromRef );
+void splitRef( struct colm_program *prg, tree_t ***sp, ref_t *fromRef );
 
 void allocGlobal( struct colm_program *prg );
-Tree **colm_execute_code( struct colm_program *prg,
-	Execution *exec, Tree **sp, code_t *instr );
+tree_t **colm_execute_code( struct colm_program *prg,
+	Execution *exec, tree_t **sp, code_t *instr );
 code_t *colm_pop_reverse_code( struct rt_code_vect *allRev );
 
 #ifdef __cplusplus

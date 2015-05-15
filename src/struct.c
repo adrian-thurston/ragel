@@ -9,12 +9,12 @@
 #include <assert.h>
 #include <stdbool.h>
 
-struct colm_tree *colm_get_global( Program *prg, long pos )
+struct colm_tree *colm_get_global( program_t *prg, long pos )
 {
-	return colm_struct_get_field( prg->global, Tree*, pos );
+	return colm_struct_get_field( prg->global, tree_t*, pos );
 }
 
-void colm_struct_add( Program *prg, struct colm_struct *item )
+void colm_struct_add( program_t *prg, struct colm_struct *item )
 {
 	if ( prg->heap.head == 0 ) {
 		prg->heap.head = prg->heap.tail = item;
@@ -28,9 +28,9 @@ void colm_struct_add( Program *prg, struct colm_struct *item )
 	}
 }
 
-struct colm_struct *colm_struct_new_size( Program *prg, int size )
+struct colm_struct *colm_struct_new_size( program_t *prg, int size )
 {
-	size_t memsize = sizeof(struct colm_struct) + ( sizeof(Tree*) * size );
+	size_t memsize = sizeof(struct colm_struct) + ( sizeof(tree_t*) * size );
 	struct colm_struct *item = (struct colm_struct*) malloc( memsize );
 	memset( item, 0, memsize );
 
@@ -38,14 +38,14 @@ struct colm_struct *colm_struct_new_size( Program *prg, int size )
 	return item;
 }
 
-struct colm_struct *colm_struct_new( Program *prg, int id )
+struct colm_struct *colm_struct_new( program_t *prg, int id )
 {
 	struct colm_struct *s = colm_struct_new_size( prg, prg->rtd->selInfo[id].size );
 	s->id = id;
 	return s;
 }
 
-void colm_struct_delete( Program *prg, Tree **sp, struct colm_struct *el )
+void colm_struct_delete( program_t *prg, tree_t **sp, struct colm_struct *el )
 {
 	if ( el->id == STRUCT_INBUILT_ID ) {
 		colm_destructor_t destructor = ((struct colm_inbuilt*)el)->destructor;
@@ -57,14 +57,14 @@ void colm_struct_delete( Program *prg, Tree **sp, struct colm_struct *el )
 		short *t = prg->rtd->selInfo[el->id].trees;
 		int i, len = prg->rtd->selInfo[el->id].treesLen;
 		for ( i = 0; i < len; i++ ) {
-			Tree *tree = colm_struct_get_field( el, Tree*, t[i] );
+			tree_t *tree = colm_struct_get_field( el, tree_t*, t[i] );
 			treeDownref( prg, sp, tree );
 		}
 	}
 	free( el );
 }
 
-void colm_parser_destroy( Program *prg, Tree **sp, struct colm_struct *s )
+void colm_parser_destroy( program_t *prg, tree_t **sp, struct colm_struct *s )
 {
 	struct colm_parser *parser = (struct colm_parser*) s;
 
@@ -76,7 +76,7 @@ void colm_parser_destroy( Program *prg, Tree **sp, struct colm_struct *s )
 	treeDownref( prg, sp, parser->result );
 }
 
-Parser *colm_parser_new( Program *prg, struct generic_info *gi )
+parser_t *colm_parser_new( program_t *prg, struct generic_info *gi )
 {
 	struct pda_run *pdaRun = malloc( sizeof(struct pda_run) );
 
@@ -96,20 +96,20 @@ Parser *colm_parser_new( Program *prg, struct generic_info *gi )
 	return parser;
 }
 
-void colm_map_destroy( Program *prg, Tree **sp, struct colm_struct *s )
+void colm_map_destroy( program_t *prg, tree_t **sp, struct colm_struct *s )
 {
 	struct colm_map *map = (struct colm_map*) s;
 
-	MapEl *el = map->head;
+	map_el_t *el = map->head;
 	while ( el != 0 ) {
-		MapEl *next = el->next;
+		map_el_t *next = el->next;
 		treeDownref( prg, sp, el->key );
 		//mapElFree( prg, el );
 		el = next;
 	}
 }
 
-Map *colm_map_new( struct colm_program *prg )
+map_t *colm_map_new( struct colm_program *prg )
 {
 	size_t memsize = sizeof(struct colm_map);
 	struct colm_map *map = (struct colm_map*) malloc( memsize );
@@ -119,10 +119,10 @@ Map *colm_map_new( struct colm_program *prg )
 	return map;
 }
 
-Struct *colm_construct_generic( Program *prg, long genericId )
+struct_t *colm_construct_generic( program_t *prg, long genericId )
 {
 	struct generic_info *genericInfo = &prg->rtd->genericInfo[genericId];
-	Struct *newGeneric = 0;
+	struct_t *newGeneric = 0;
 	switch ( genericInfo->type ) {
 		case GEN_MAP_EL:
 		case GEN_LIST_EL:
@@ -131,23 +131,23 @@ Struct *colm_construct_generic( Program *prg, long genericId )
 		case GEN_MAP:
 		case GEN_VMAP:
 		{
-			Map *map = colm_map_new( prg );
+			map_t *map = colm_map_new( prg );
 			map->genericInfo = genericInfo;
-			newGeneric = (Struct*) map;
+			newGeneric = (struct_t*) map;
 			break;
 		}
 		case GEN_LIST:
 		case GEN_VLIST:
 		{
-			List *list = colm_list_new( prg );
+			list_t *list = colm_list_new( prg );
 			list->genericInfo = genericInfo;
-			newGeneric = (Struct*) list;
+			newGeneric = (struct_t*) list;
 			break;
 		}
 		case GEN_PARSER: {
-			Parser *parser = colm_parser_new( prg, genericInfo );
+			parser_t *parser = colm_parser_new( prg, genericInfo );
 			parser->input = colm_stream_new( prg );
-			newGeneric = (Struct*) parser;
+			newGeneric = (struct_t*) parser;
 			break;
 		}
 	}

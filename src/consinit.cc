@@ -31,7 +31,7 @@
 #include "input.h"
 #include "consinit.h"
 
-extern "C" Tree **host_call( Program *prg, long code, Tree **sp )
+extern "C" tree_t **host_call( program_t *prg, long code, tree_t **sp )
 {
 	return 0;
 }

@@ -412,7 +412,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 		out << runtimeData->litlen[i] << ", ";
 	out << "};\n\n";
 
-	out << "static Head *" << literals() << "[] = {\n\t";
+	out << "static head_t *" << literals() << "[] = {\n\t";
 	for ( int i = 0; i < runtimeData->numLiterals; i++ )
 		out << "0, ";
 	out << "};\n\n";

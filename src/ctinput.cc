@@ -181,7 +181,7 @@ void inputStreamPatternUndoConsumeLangEl( struct stream_impl *ss )
 	ss->offset = ss->patItem->data.length();
 }
 
-int inputStreamPatternConsumeData( Program *prg, Tree **sp, struct stream_impl *ss, int length, Location *loc )
+int inputStreamPatternConsumeData( program_t *prg, tree_t **sp, struct stream_impl *ss, int length, location_t *loc )
 {
 	//debug( REALM_INPUT, "consuming %ld bytes\n", length );
 
@@ -398,8 +398,8 @@ void inputStreamConsUndoConsumeLangEl( struct stream_impl *ss )
 	ss->offset = ss->consItem->data.length();
 }
 
-int inputStreamConsConsumeData( Program *prg, Tree **sp,
-		struct stream_impl *ss, int length, Location *loc )
+int inputStreamConsConsumeData( program_t *prg, tree_t **sp,
+		struct stream_impl *ss, int length, location_t *loc )
 {
 	int consumed = 0;
 
@@ -449,13 +449,13 @@ StreamFuncs replFuncs =
 	&inputStreamConsUndoConsumeLangEl,
 };
 
-void pushBinding( pda_run *pdaRun, ParseTree *parseTree )
+void pushBinding( pda_run *pdaRun, parse_tree_t *parseTree )
 {
 	/* If the item is bound then store it in the bindings array. */
 	pdaRun->bindings->push( parseTree );
 }
 
-extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp,
+extern "C" void internalSendNamedLangEl( program_t *prg, tree_t **sp,
 		struct pda_run *pdaRun, struct stream_impl *is )
 {
 	/* All three set by consumeLangEl. */
@@ -468,15 +468,15 @@ extern "C" void internalSendNamedLangEl( Program *prg, Tree **sp,
 	//cerr << "named langEl: " << prg->rtd->lelInfo[klangEl->id].name << endl;
 
 	/* Copy the token data. */
-	Head *tokdata = 0;
+	head_t *tokdata = 0;
 	if ( data != 0 )
 		tokdata = stringAllocFull( prg, data, length );
 
-	Kid *input = make_token_with_data( prg, pdaRun, is, klangEl->id, tokdata );
+	kid_t *input = make_token_with_data( prg, pdaRun, is, klangEl->id, tokdata );
 
 	colm_increment_steps( pdaRun );
 
-	ParseTree *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->flags |= PF_NAMED;
 	parseTree->shadow = input;
@@ -495,9 +495,9 @@ extern "C" void internalInitBindings( pda_run *pdaRun )
 }
 
 
-extern "C" void internalPopBinding( pda_run *pdaRun, ParseTree *parseTree )
+extern "C" void internalPopBinding( pda_run *pdaRun, parse_tree_t *parseTree )
 {
-	ParseTree *lastBound = pdaRun->bindings->top();
+	parse_tree_t *lastBound = pdaRun->bindings->top();
 	if ( lastBound == parseTree )
 		pdaRun->bindings->pop();
 }

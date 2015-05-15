@@ -900,10 +900,10 @@ void FsmCodeGen::writeCode()
 	/* Referenced in the runtime lib, but used only in the compiler. Probably
 	 * should use the preprocessor to make these go away. */
 	out <<
-		"static void sendNamedLangEl( struct colm_program *prg, Tree **tree,\n"
+		"static void sendNamedLangEl( struct colm_program *prg, tree_t **tree,\n"
 		"		struct pda_run *pdaRun, struct stream_impl *inputStream ) { }\n"
 		"static void initBindings( struct pda_run *pdaRun ) {}\n"
-		"static void popBinding( struct pda_run *pdaRun, ParseTree *tree ) {}\n"
+		"static void popBinding( struct pda_run *pdaRun, parse_tree_t *tree ) {}\n"
 		"\n"
 		"\n";
 }

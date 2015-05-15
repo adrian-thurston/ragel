@@ -122,7 +122,7 @@ struct CodeVect : public Vector<code_t>
 		#endif
 	}
 	
-	void insertTree( long pos, Tree *tree )
+	void insertTree( long pos, tree_t *tree )
 		{ insertWord( pos, (word_t) tree ); }
 };
 
@@ -190,7 +190,7 @@ struct TypeRef;
 /* Leaf type. */
 struct Literal;
 
-/* Tree nodes. */
+/* tree_t nodes. */
 
 struct LexTerm;
 struct LexFactorAug;
@@ -679,7 +679,7 @@ struct TokenRegion
 
 	TokenRegion *next, *prev;
 
-	/* Tree traversal. */
+	/* tree_t traversal. */
 	void findName( Compiler *pd );
 };
 
@@ -755,10 +755,6 @@ struct GenericType
 
 typedef DList<GenericType> GenericList;
 
-typedef struct _UserIter UserIter;
-typedef AvlMap<String, UserIter*, CmpStr> UserIterMap;
-typedef AvlMapEl<String, UserIter*> UserIterMapEl;
-
 /* Graph dictionary. */
 struct GraphDictEl 
 :
@@ -813,7 +809,7 @@ struct Namespace
 		loc(loc), name(name), id(id),
 		parentNamespace(parentNamespace) { }
 
-	/* Tree traversal. */
+	/* tree_t traversal. */
 	Namespace *findNamespace( const String &name );
 
 	InputLoc loc;
@@ -871,7 +867,7 @@ struct LexJoin
 		return j;
 	}
 
-	/* Tree traversal. */
+	/* tree_t traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 	void varDecl( Compiler *pd, TokenDef *tokenDef );
@@ -930,7 +926,7 @@ struct LexExpression
 
 	~LexExpression();
 
-	/* Tree traversal. */
+	/* tree_t traversal. */
 	FsmGraph *walk( Compiler *pd, bool lastInSeq = true );
 	void makeNameTree( Compiler *pd );
 	void varDecl( Compiler *pd, TokenDef *tokenDef );
@@ -1016,7 +1012,7 @@ struct LexFactorAug
 
 	~LexFactorAug();
 
-	/* Tree traversal. */
+	/* tree_t traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 	void varDecl( Compiler *pd, TokenDef *tokenDef );
@@ -1078,7 +1074,7 @@ struct LexFactorRep
 
 	~LexFactorRep();
 
-	/* Tree traversal. */
+	/* tree_t traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 
@@ -1128,7 +1124,7 @@ struct LexFactorNeg
 
 	~LexFactorNeg();
 
-	/* Tree traversal. */
+	/* tree_t traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 
@@ -1223,7 +1219,7 @@ struct LexFactor
 	/* Cleanup. */
 	~LexFactor();
 
-	/* Tree traversal. */
+	/* tree_t traversal. */
 	FsmGraph *walk( Compiler *pd );
 	void makeNameTree( Compiler *pd );
 
@@ -2456,7 +2452,7 @@ typedef DList<ObjectField> ParameterList;
 
 struct TemplateType;
 
-/* Tree of name scopes for an object def. All of the object fields inside this
+/* tree_t of name scopes for an object def. All of the object fields inside this
  * tree live in one object def. This is used for scoping names in functions. */
 struct NameScope
 {

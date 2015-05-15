@@ -35,16 +35,16 @@
 
 #define VM_STACK_SIZE (8192)
 
-static void colm_alloc_global( Program *prg )
+static void colm_alloc_global( program_t *prg )
 {
 	/* Alloc the global. */
 	prg->global = colm_struct_new( prg, prg->rtd->globalId ) ;
 }
 
-void vm_init( Program *prg )
+void vm_init( program_t *prg )
 {
 	struct stack_block *b = malloc( sizeof(struct stack_block) );
-	b->data = malloc( sizeof(Tree*) * VM_STACK_SIZE );
+	b->data = malloc( sizeof(tree_t*) * VM_STACK_SIZE );
 	b->len = VM_STACK_SIZE;
 	b->offset = 0;
 	b->next = 0;
@@ -57,12 +57,12 @@ void vm_init( Program *prg )
 	prg->stackRoot = prg->sb_end;
 }
 
-Tree **colm_vm_root( Program *prg )
+tree_t **colm_vm_root( program_t *prg )
 {
 	return prg->stackRoot;
 }
 
-Tree **vm_bs_add( Program *prg, Tree **sp, int n )
+tree_t **vm_bs_add( program_t *prg, tree_t **sp, int n )
 {
 	/* Close off the current block. */
 	if ( prg->stackBlock != 0 ) {
@@ -84,7 +84,7 @@ Tree **vm_bs_add( Program *prg, Tree **sp, int n )
 		if ( n > size )
 			size = n;
 		b->next = prg->stackBlock;
-		b->data = malloc( sizeof(Tree*) * size );
+		b->data = malloc( sizeof(tree_t*) * size );
 		b->len = size;
 		b->offset = 0;
 
@@ -97,10 +97,10 @@ Tree **vm_bs_add( Program *prg, Tree **sp, int n )
 	return prg->sb_end;
 }
 
-Tree **vm_bs_pop( Program *prg, Tree **sp, int n )
+tree_t **vm_bs_pop( program_t *prg, tree_t **sp, int n )
 {
 	while ( 1 ) {
-		Tree **end = prg->stackBlock->data + prg->stackBlock->len;
+		tree_t **end = prg->stackBlock->data + prg->stackBlock->len;
 		int remaining = end - sp;
 
 		/* Don't have to free this block. Remaining values to pop leave us
@@ -142,7 +142,7 @@ Tree **vm_bs_pop( Program *prg, Tree **sp, int n )
 	}
 }
 
-void vm_clear( Program *prg )
+void vm_clear( program_t *prg )
 {
 	while ( prg->stackBlock != 0 ) {
 		struct stack_block *b = prg->stackBlock;
@@ -158,36 +158,35 @@ void vm_clear( Program *prg )
 	}
 }
 
-Tree *colm_return_val( struct colm_program *prg )
+tree_t *colm_return_val( struct colm_program *prg )
 {
 	return prg->returnVal;
 }
 
-void colm_set_debug( Program *prg, long activeRealm )
+void colm_set_debug( program_t *prg, long activeRealm )
 {
 	prg->activeRealm = activeRealm;
 }
 
-Program *colm_new_program( struct colm_sections *rtd )
+program_t *colm_new_program( struct colm_sections *rtd )
 {
-	Program *prg = malloc(sizeof(Program));
-	memset( prg, 0, sizeof(Program) );
+	program_t *prg = malloc(sizeof(program_t));
+	memset( prg, 0, sizeof(program_t) );
 
-	assert( sizeof(Int)      <= sizeof(Tree) );
-	assert( sizeof(Str)      <= sizeof(Tree) );
-	assert( sizeof(Pointer)  <= sizeof(Tree) );
+	assert( sizeof(str_t)      <= sizeof(tree_t) );
+	assert( sizeof(pointer_t)  <= sizeof(tree_t) );
 
 	prg->rtd = rtd;
 	prg->ctxDepParsing = 1;
 
-	initPoolAlloc( &prg->kidPool, sizeof(Kid) );
-	initPoolAlloc( &prg->treePool, sizeof(Tree) );
-	initPoolAlloc( &prg->parseTreePool, sizeof(ParseTree) );
-	initPoolAlloc( &prg->headPool, sizeof(Head) );
-	initPoolAlloc( &prg->locationPool, sizeof(Location) );
+	initPoolAlloc( &prg->kidPool, sizeof(kid_t) );
+	initPoolAlloc( &prg->treePool, sizeof(tree_t) );
+	initPoolAlloc( &prg->parseTreePool, sizeof(parse_tree_t) );
+	initPoolAlloc( &prg->headPool, sizeof(head_t) );
+	initPoolAlloc( &prg->locationPool, sizeof(location_t) );
 
-	prg->trueVal = (Tree*) 1;
-	prg->falseVal = (Tree*) 0;
+	prg->trueVal = (tree_t*) 1;
+	prg->falseVal = (tree_t*) 0;
 
 	/* Allocate the global variable. */
 	colm_alloc_global( prg );
@@ -197,7 +196,7 @@ Program *colm_new_program( struct colm_sections *rtd )
 	return prg;
 }
 
-void colm_run_program( Program *prg, int argc, const char **argv )
+void colm_run_program( program_t *prg, int argc, const char **argv )
 {
 	if ( prg->rtd->rootCodeLen == 0 )
 		return;
@@ -217,7 +216,7 @@ void colm_run_program( Program *prg, int argc, const char **argv )
 	prg->argv = 0;
 }
 
-static void colm_clear_heap( Program *prg, Tree **sp )
+static void colm_clear_heap( program_t *prg, tree_t **sp )
 {
 	struct colm_struct *hi = prg->heap.head;
 	while ( hi != 0 ) {
@@ -227,9 +226,9 @@ static void colm_clear_heap( Program *prg, Tree **sp )
 	}
 }
 
-int colm_delete_program( Program *prg )
+int colm_delete_program( program_t *prg )
 {
-	Tree **sp = prg->stackRoot;
+	tree_t **sp = prg->stackRoot;
 	int exitStatus = prg->exitStatus;
 
 	treeDownref( prg, sp, prg->returnVal );

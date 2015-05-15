@@ -29,26 +29,26 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-Str *string_prefix( Program *prg, Str *str, long len )
+str_t *string_prefix( program_t *prg, str_t *str, long len )
 {
-	Head *head = stringAllocFull( prg, str->value->data, len );
-	return (Str*)constructString( prg, head );
+	head_t *head = stringAllocFull( prg, str->value->data, len );
+	return (str_t*)constructString( prg, head );
 }
 
-Str *string_suffix( Program *prg, Str *str, long pos )
+str_t *string_suffix( program_t *prg, str_t *str, long pos )
 {
 	long len = str->value->length - pos;
-	Head *head = stringAllocFull( prg, str->value->data + pos, len );
-	return (Str*)constructString( prg, head );
+	head_t *head = stringAllocFull( prg, str->value->data + pos, len );
+	return (str_t*)constructString( prg, head );
 }
 
-Tree *constructString( Program *prg, Head *s )
+tree_t *constructString( program_t *prg, head_t *s )
 {
-	Str *str = (Str*) treeAllocate( prg );
+	str_t *str = (str_t*) treeAllocate( prg );
 	str->id = LEL_ID_STR;
 	str->value = s;
 
-	return (Tree*)str;
+	return (tree_t*)str;
 }
 
 
@@ -59,9 +59,9 @@ Tree *constructString( Program *prg, Head *s )
  * nulls.
  */
 
-Head *stringCopy( Program *prg, Head *head )
+head_t *stringCopy( program_t *prg, head_t *head )
 {
-	Head *result = 0;
+	head_t *result = 0;
 	if ( head != 0 ) {
 		if ( (char*)(head+1) == head->data )
 			result = stringAllocFull( prg, head->data, head->length );
@@ -79,7 +79,7 @@ Head *stringCopy( Program *prg, Head *head )
 	return result;
 }
 
-void stringFree( Program *prg, Head *head )
+void stringFree( program_t *prg, head_t *head )
 {
 	if ( head != 0 ) {
 		if ( head->location != 0 )
@@ -96,30 +96,30 @@ void stringFree( Program *prg, Head *head )
 	}
 }
 
-const char *stringData( Head *head )
+const char *stringData( head_t *head )
 {
 	if ( head == 0 )
 		return 0;
 	return head->data;
 }
 
-long stringLength( Head *head )
+long stringLength( head_t *head )
 {
 	if ( head == 0 )
 		return 0;
 	return head->length;
 }
 
-void stringShorten( Head *head, long newlen )
+void stringShorten( head_t *head, long newlen )
 {
 	assert( newlen <= head->length );
 	head->length = newlen;
 }
 
-Head *initStrSpace( long length )
+head_t *initStrSpace( long length )
 {
 	/* Find the length and allocate the space for the shared string. */
-	Head *head = (Head*) malloc( sizeof(Head) + length );
+	head_t *head = (head_t*) malloc( sizeof(head_t) + length );
 
 	/* Init the header. */
 	head->data = (char*)(head+1);
@@ -131,10 +131,10 @@ Head *initStrSpace( long length )
 }
 
 /* Create from a c-style string. */
-Head *stringAllocFull( Program *prg, const char *data, long length )
+head_t *stringAllocFull( program_t *prg, const char *data, long length )
 {
 	/* Init space for the data. */
-	Head *head = initStrSpace( length );
+	head_t *head = initStrSpace( length );
 
 	/* Copy in the data. */
 	memcpy( (head+1), data, length );
@@ -143,10 +143,10 @@ Head *stringAllocFull( Program *prg, const char *data, long length )
 }
 
 /* Create from a c-style string. */
-Head *colm_string_alloc_pointer( Program *prg, const char *data, long length )
+head_t *colm_string_alloc_pointer( program_t *prg, const char *data, long length )
 {
 	/* Find the length and allocate the space for the shared string. */
-	Head *head = headAllocate( prg );
+	head_t *head = headAllocate( prg );
 
 	/* Init the header. */
 	head->data = data;
@@ -155,13 +155,13 @@ Head *colm_string_alloc_pointer( Program *prg, const char *data, long length )
 	return head;
 }
 
-Head *concatStr( Head *s1, Head *s2 )
+head_t *concatStr( head_t *s1, head_t *s2 )
 {
 	long s1Len = s1->length;
 	long s2Len = s2->length;
 
 	/* Init space for the data. */
-	Head *head = initStrSpace( s1Len + s2Len );
+	head_t *head = initStrSpace( s1Len + s2Len );
 
 	/* Copy in the data. */
 	memcpy( (head+1), s1->data, s1Len );
@@ -170,11 +170,11 @@ Head *concatStr( Head *s1, Head *s2 )
 	return head;
 }
 
-Head *stringToUpper( Head *s )
+head_t *stringToUpper( head_t *s )
 {
 	/* Init space for the data. */
 	long len = s->length;
-	Head *head = initStrSpace( len );
+	head_t *head = initStrSpace( len );
 
 	/* Copy in the data. */
 	const char *src = s->data;
@@ -186,11 +186,11 @@ Head *stringToUpper( Head *s )
 	return head;
 }
 
-Head *stringToLower( Head *s )
+head_t *stringToLower( head_t *s )
 {
 	/* Init space for the data. */
 	long len = s->length;
-	Head *head = initStrSpace( len );
+	head_t *head = initStrSpace( len );
 
 	/* Copy in the data. */
 	const char *src = s->data;
@@ -204,7 +204,7 @@ Head *stringToLower( Head *s )
 
 
 /* Compare two strings. If identical returns 1, otherwise 0. */
-word_t cmpString( Head *s1, Head *s2 )
+word_t cmpString( head_t *s1, head_t *s2 )
 {
 	if ( s1->length < s2->length )
 		return -1;
@@ -217,7 +217,7 @@ word_t cmpString( Head *s1, Head *s2 )
 	}
 }
 
-word_t strAtoi( Head *str )
+word_t strAtoi( head_t *str )
 {
 	/* FIXME: need to implement this by hand. There is no null terminator. */
 	char *nulled = (char*)malloc( str->length + 1 );
@@ -228,7 +228,7 @@ word_t strAtoi( Head *str )
 	return res;
 }
 
-word_t strAtoo( Head *str )
+word_t strAtoo( head_t *str )
 {
 	/* FIXME: need to implement this by hand. There is no null terminator. */
 	char *nulled = (char*)malloc( str->length + 1 );
@@ -239,14 +239,14 @@ word_t strAtoo( Head *str )
 	return res;
 }
 
-Head *intToStr( Program *prg, word_t i )
+head_t *intToStr( program_t *prg, word_t i )
 {
 	char data[20];
 	sprintf( data, "%ld", i );
 	return stringAllocFull( prg, data, strlen(data) );
 }
 
-word_t strUord16( Head *head )
+word_t strUord16( head_t *head )
 {
 	uchar *data = (uchar*)(head->data);
 	ulong res;
@@ -255,25 +255,25 @@ word_t strUord16( Head *head )
 	return res;
 }
 
-word_t strUord8( Head *head )
+word_t strUord8( head_t *head )
 {
 	uchar *data = (uchar*)(head->data);
 	ulong res = (ulong)data[0];
 	return res;
 }
 
-Head *makeLiteral( Program *prg, long offset )
+head_t *makeLiteral( program_t *prg, long offset )
 {
 	return colm_string_alloc_pointer( prg,
 			prg->rtd->litdata[offset],
 			prg->rtd->litlen[offset] );
 }
 
-Head *stringSprintf( Program *prg, Str *format, long integer )
+head_t *stringSprintf( program_t *prg, str_t *format, long integer )
 {
-	Head *formatHead = format->value;
+	head_t *formatHead = format->value;
 	long written = snprintf( 0, 0, stringData(formatHead), integer );
-	Head *head = initStrSpace( written+1 );
+	head_t *head = initStrSpace( written+1 );
 	written = snprintf( (char*)head->data, written+1, stringData(formatHead), integer );
 	head->length -= 1;
 	return head;

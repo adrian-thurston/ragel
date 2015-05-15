@@ -35,46 +35,46 @@ extern "C" {
 
 void initPoolAlloc( struct pool_alloc *poolAlloc, int sizeofT );
 
-Kid *kidAllocate( Program *prg );
-void kidFree( Program *prg, Kid *el );
-void kidClear( Program *prg );
-long kidNumLost( Program *prg );
+kid_t *kidAllocate( program_t *prg );
+void kidFree( program_t *prg, kid_t *el );
+void kidClear( program_t *prg );
+long kidNumLost( program_t *prg );
 
-Tree *treeAllocate( Program *prg );
-void treeFree( Program *prg, Tree *el );
-void treeClear( Program *prg );
-long treeNumLost( Program *prg );
+tree_t *treeAllocate( program_t *prg );
+void treeFree( program_t *prg, tree_t *el );
+void treeClear( program_t *prg );
+long treeNumLost( program_t *prg );
 
-ParseTree *parseTreeAllocate( Program *prg );
-void parseTreeFree( Program *prg, ParseTree *el );
-void parseTreeClear( Program *prg );
-long parseTreeNumLost( Program *prg );
+parse_tree_t *parseTreeAllocate( program_t *prg );
+void parseTreeFree( program_t *prg, parse_tree_t *el );
+void parseTreeClear( program_t *prg );
+long parseTreeNumLost( program_t *prg );
 
-ListEl *listElAllocate( Program *prg );
-void listElFree( Program *prg, ListEl *el );
-void listElClear( Program *prg );
-long listElNumLost( Program *prg );
+list_el_t *listElAllocate( program_t *prg );
+void listElFree( program_t *prg, list_el_t *el );
+void listElClear( program_t *prg );
+long listElNumLost( program_t *prg );
 
-MapEl *mapElAllocate( Program *prg );
-void mapElFree( Program *prg, MapEl *el );
-void mapElClear( Program *prg );
-long mapElNumLost( Program *prg );
+map_el_t *mapElAllocate( program_t *prg );
+void mapElFree( program_t *prg, map_el_t *el );
+void mapElClear( program_t *prg );
+long mapElNumLost( program_t *prg );
 
-Head *headAllocate( Program *prg );
-void headFree( Program *prg, Head *el );
-void headClear( Program *prg );
-long headNumLost( Program *prg );
+head_t *headAllocate( program_t *prg );
+void headFree( program_t *prg, head_t *el );
+void headClear( program_t *prg );
+long headNumLost( program_t *prg );
 
-Location *locationAllocate( Program *prg );
-void locationFree( Program *prg, Location *el );
-void locationClear( Program *prg );
-long locationNumLost( Program *prg );
+location_t *locationAllocate( program_t *prg );
+void locationFree( program_t *prg, location_t *el );
+void locationClear( program_t *prg );
+long locationNumLost( program_t *prg );
 
-Stream *streamAllocate( Program *prg );
-void streamFree( Program *prg, Stream *stream );
+stream_t *streamAllocate( program_t *prg );
+void streamFree( program_t *prg, stream_t *stream );
 
 /* Wrong place. */
-TreePair mapRemove( Program *prg, Map *map, Tree *key );
+struct tree_pair mapRemove( program_t *prg, map_t *map, tree_t *key );
 
 #ifdef __cplusplus
 }

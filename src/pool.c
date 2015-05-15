@@ -125,189 +125,189 @@ long poolAllocNumLost( struct pool_alloc *poolAlloc )
 }
 
 /* 
- * Kid
+ * kid_t
  */
 
-Kid *kidAllocate( Program *prg )
+kid_t *kidAllocate( program_t *prg )
 {
-	return (Kid*) poolAllocAllocate( &prg->kidPool );
+	return (kid_t*) poolAllocAllocate( &prg->kidPool );
 }
 
-void kidFree( Program *prg, Kid *el )
+void kidFree( program_t *prg, kid_t *el )
 {
 	poolAllocFree( &prg->kidPool, el );
 }
 
-void kidClear( Program *prg )
+void kidClear( program_t *prg )
 {
 	poolAllocClear( &prg->kidPool );
 }
 
-long kidNumLost( Program *prg )
+long kidNumLost( program_t *prg )
 {
 	return poolAllocNumLost( &prg->kidPool );
 }
 
 /* 
- * Tree
+ * tree_t
  */
 
-Tree *treeAllocate( Program *prg )
+tree_t *treeAllocate( program_t *prg )
 {
-	return (Tree*) poolAllocAllocate( &prg->treePool );
+	return (tree_t*) poolAllocAllocate( &prg->treePool );
 }
 
-void treeFree( Program *prg, Tree *el )
+void treeFree( program_t *prg, tree_t *el )
 {
 	poolAllocFree( &prg->treePool, el );
 }
 
-void treeClear( Program *prg )
+void treeClear( program_t *prg )
 {
 	poolAllocClear( &prg->treePool );
 }
 
-long treeNumLost( Program *prg )
+long treeNumLost( program_t *prg )
 {
 	return poolAllocNumLost( &prg->treePool );
 }
 
 /* 
- * ParseTree
+ * parse_tree_t
  */
 
-ParseTree *parseTreeAllocate( Program *prg )
+parse_tree_t *parseTreeAllocate( program_t *prg )
 {
-	return (ParseTree*) poolAllocAllocate( &prg->parseTreePool );
+	return (parse_tree_t*) poolAllocAllocate( &prg->parseTreePool );
 }
 
-void parseTreeFree( Program *prg, ParseTree *el )
+void parseTreeFree( program_t *prg, parse_tree_t *el )
 {
 	poolAllocFree( &prg->parseTreePool, el );
 }
 
-void parseTreeClear( Program *prg )
+void parseTreeClear( program_t *prg )
 {
 	poolAllocClear( &prg->parseTreePool );
 }
 
-long parseTreeNumLost( Program *prg )
+long parseTreeNumLost( program_t *prg )
 {
 	return poolAllocNumLost( &prg->parseTreePool );
 }
 
 /* 
- * ListEl
+ * list_el_t
  */
 
 #if 0
-ListEl *listElAllocate( Program *prg )
+list_el_t *listElAllocate( program_t *prg )
 {
-	return (ListEl*) poolAllocAllocate( &prg->listElPool );
+	return (list_el_t*) poolAllocAllocate( &prg->listElPool );
 }
 
-void listElFree( Program *prg, ListEl *el )
+void listElFree( program_t *prg, list_el_t *el )
 {
 	//poolAllocFree( &prg->listElPool, el );
 }
 
-void listElClear( Program *prg )
+void listElClear( program_t *prg )
 {
 	poolAllocClear( &prg->listElPool );
 }
 
-long listElNumLost( Program *prg )
+long listElNumLost( program_t *prg )
 {
 	return poolAllocNumLost( &prg->listElPool );
 }
 #endif
 
 /* 
- * MapEl
+ * map_el_t
  */
 
 #if 0
-MapEl *mapElAllocate( Program *prg )
+map_el_t *mapElAllocate( program_t *prg )
 {
-	return (MapEl*) poolAllocAllocate( &prg->mapElPool );
+	return (map_el_t*) poolAllocAllocate( &prg->mapElPool );
 }
 
-void mapElFree( Program *prg, MapEl *el )
+void mapElFree( program_t *prg, map_el_t *el )
 {
 	poolAllocFree( &prg->mapElPool, el );
 }
 
-void mapElClear( Program *prg )
+void mapElClear( program_t *prg )
 {
 	poolAllocClear( &prg->mapElPool );
 }
 
-long mapElNumLost( Program *prg )
+long mapElNumLost( program_t *prg )
 {
 	return poolAllocNumLost( &prg->mapElPool );
 }
 #endif
 
 /* 
- * Head
+ * head_t
  */
 
-Head *headAllocate( Program *prg )
+head_t *headAllocate( program_t *prg )
 {
-	return (Head*) poolAllocAllocate( &prg->headPool );
+	return (head_t*) poolAllocAllocate( &prg->headPool );
 }
 
-void headFree( Program *prg, Head *el )
+void headFree( program_t *prg, head_t *el )
 {
 	poolAllocFree( &prg->headPool, el );
 }
 
-void headClear( Program *prg )
+void headClear( program_t *prg )
 {
 	poolAllocClear( &prg->headPool );
 }
 
-long headNumLost( Program *prg )
+long headNumLost( program_t *prg )
 {
 	return poolAllocNumLost( &prg->headPool );
 }
 
 /* 
- * Location
+ * location_t
  */
 
-Location *locationAllocate( Program *prg )
+location_t *locationAllocate( program_t *prg )
 {
-	return (Location*) poolAllocAllocate( &prg->locationPool );
+	return (location_t*) poolAllocAllocate( &prg->locationPool );
 }
 
-void locationFree( Program *prg, Location *el )
+void locationFree( program_t *prg, location_t *el )
 {
 	poolAllocFree( &prg->locationPool, el );
 }
 
-void locationClear( Program *prg )
+void locationClear( program_t *prg )
 {
 	poolAllocClear( &prg->locationPool );
 }
 
-long locationNumLost( Program *prg )
+long locationNumLost( program_t *prg )
 {
 	return poolAllocNumLost( &prg->locationPool );
 }
 
 /*
- * Stream
+ * stream_t
  */
 
 #if 0
-Stream *streamAllocate( Program *prg )
+stream_t *streamAllocate( program_t *prg )
 {
-	return (Stream*)mapElAllocate( prg );
+	return (stream_t*)mapElAllocate( prg );
 }
 
-void streamFree( Program *prg, Stream *stream )
+void streamFree( program_t *prg, stream_t *stream )
 {
-	mapElFree( prg, (MapEl*)stream );
+	mapElFree( prg, (map_el_t*)stream );
 }
 #endif

@@ -39,41 +39,41 @@
 
 #define BUFFER_INITIAL_SIZE 4096
 
-Kid *allocAttrs( Program *prg, long length )
+kid_t *allocAttrs( program_t *prg, long length )
 {
-	Kid *cur = 0;
+	kid_t *cur = 0;
 	long i;
 	for ( i = 0; i < length; i++ ) {
-		Kid *next = cur;
+		kid_t *next = cur;
 		cur = kidAllocate( prg );
 		cur->next = next;
 	}
 	return cur;
 }
 
-void freeAttrs( Program *prg, Kid *attrs )
+void freeAttrs( program_t *prg, kid_t *attrs )
 {
-	Kid *cur = attrs;
+	kid_t *cur = attrs;
 	while ( cur != 0 ) {
-		Kid *next = cur->next;
+		kid_t *next = cur->next;
 		kidFree( prg, cur );
 		cur = next;
 	}
 }
 
-void freeKidList( Program *prg, Kid *kid )
+void freeKidList( program_t *prg, kid_t *kid )
 {
 	while ( kid != 0 ) {
-		Kid *next = kid->next;
+		kid_t *next = kid->next;
 		kidFree( prg, kid );
 		kid = next;
 	}
 }
 
-static void colm_tree_set_attr( Tree *tree, long pos, Tree *val )
+static void colm_tree_set_attr( tree_t *tree, long pos, tree_t *val )
 {
 	long i;
-	Kid *kid = tree->child;
+	kid_t *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
 		kid = kid->next;
@@ -85,10 +85,10 @@ static void colm_tree_set_attr( Tree *tree, long pos, Tree *val )
 	kid->tree = val;
 }
 
-Tree *colm_get_attr( Tree *tree, long pos )
+tree_t *colm_get_attr( tree_t *tree, long pos )
 {
 	long i;
-	Kid *kid = tree->child;
+	kid_t *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
 		kid = kid->next;
@@ -101,9 +101,9 @@ Tree *colm_get_attr( Tree *tree, long pos )
 }
 
 
-Tree *colm_get_repeat_next( Tree *tree )
+tree_t *colm_get_repeat_next( tree_t *tree )
 {
-	Kid *kid = tree->child;
+	kid_t *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
 		kid = kid->next;
@@ -113,9 +113,9 @@ Tree *colm_get_repeat_next( Tree *tree )
 	return kid->next->tree;
 }
 
-Tree *colm_get_repeat_val( Tree *tree )
+tree_t *colm_get_repeat_val( tree_t *tree )
 {
-	Kid *kid = tree->child;
+	kid_t *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
 		kid = kid->next;
@@ -125,9 +125,9 @@ Tree *colm_get_repeat_val( Tree *tree )
 	return kid->tree;
 }
 
-int colm_repeat_end( Tree *tree )
+int colm_repeat_end( tree_t *tree )
 {
-	Kid *kid = tree->child;
+	kid_t *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
 		kid = kid->next;
@@ -137,9 +137,9 @@ int colm_repeat_end( Tree *tree )
 	return kid == 0;
 }
 
-int colm_list_last( Tree *tree )
+int colm_list_last( tree_t *tree )
 {
-	Kid *kid = tree->child;
+	kid_t *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
 		kid = kid->next;
@@ -149,10 +149,10 @@ int colm_list_last( Tree *tree )
 	return kid->next == 0;
 }
 
-Kid *getAttrKid( Tree *tree, long pos )
+kid_t *getAttrKid( tree_t *tree, long pos )
 {
 	long i;
-	Kid *kid = tree->child;
+	kid_t *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
 		kid = kid->next;
@@ -164,40 +164,40 @@ Kid *getAttrKid( Tree *tree, long pos )
 	return kid;
 }
 
-Kid *kidListConcat( Kid *list1, Kid *list2 )
+kid_t *kidListConcat( kid_t *list1, kid_t *list2 )
 {
 	if ( list1 == 0 )
 		return list2;
 	else if ( list2 == 0 )
 		return list1;
 
-	Kid *dest = list1;
+	kid_t *dest = list1;
 	while ( dest->next != 0 )
 		dest = dest->next;
 	dest->next = list2;
 	return list1;
 }
 
-Tree *colm_construct_pointer( Program *prg, Value value )
+tree_t *colm_construct_pointer( program_t *prg, value_t value )
 {
-	Pointer *pointer = (Pointer*) treeAllocate( prg );
+	pointer_t *pointer = (pointer_t*) treeAllocate( prg );
 	pointer->id = LEL_ID_PTR;
 	pointer->value = value;
 	
-	return (Tree*)pointer;
+	return (tree_t*)pointer;
 }
 
-Value colm_get_pointer_val( Tree *ptr )
+value_t colm_get_pointer_val( tree_t *ptr )
 {
-	return ((Pointer*)ptr)->value;
+	return ((pointer_t*)ptr)->value;
 }
 
 
-Tree *constructTerm( Program *prg, word_t id, Head *tokdata )
+tree_t *constructTerm( program_t *prg, word_t id, head_t *tokdata )
 {
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 
-	Tree *tree = treeAllocate( prg );
+	tree_t *tree = treeAllocate( prg );
 	tree->id = id;
 	tree->refs = 0;
 	tree->tokdata = tokdata;
@@ -209,23 +209,23 @@ Tree *constructTerm( Program *prg, word_t id, Head *tokdata )
 }
 
 
-Kid *constructKid( Program *prg, Tree **bindings, Kid *prev, long pat );
+kid_t *constructKid( program_t *prg, tree_t **bindings, kid_t *prev, long pat );
 
-static Kid *constructIgnoreList( Program *prg, long ignoreInd )
+static kid_t *constructIgnoreList( program_t *prg, long ignoreInd )
 {
 	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 
-	Kid *first = 0, *last = 0;
+	kid_t *first = 0, *last = 0;
 	while ( ignoreInd >= 0 ) {
-		Head *ignoreData = colm_string_alloc_pointer( prg, nodes[ignoreInd].data,
+		head_t *ignoreData = colm_string_alloc_pointer( prg, nodes[ignoreInd].data,
 				nodes[ignoreInd].length );
 
-		Tree *ignTree = treeAllocate( prg );
+		tree_t *ignTree = treeAllocate( prg );
 		ignTree->refs = 1;
 		ignTree->id = nodes[ignoreInd].id;
 		ignTree->tokdata = ignoreData;
 
-		Kid *ignKid = kidAllocate( prg );
+		kid_t *ignKid = kidAllocate( prg );
 		ignKid->tree = ignTree;
 		ignKid->next = 0;
 
@@ -241,24 +241,24 @@ static Kid *constructIgnoreList( Program *prg, long ignoreInd )
 	return first;
 }
 
-static Kid *constructLeftIgnoreList( Program *prg, long pat )
+static kid_t *constructLeftIgnoreList( program_t *prg, long pat )
 {
 	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 	return constructIgnoreList( prg, nodes[pat].leftIgnore );
 }
 
-static Kid *constructRightIgnoreList( Program *prg, long pat )
+static kid_t *constructRightIgnoreList( program_t *prg, long pat )
 {
 	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 	return constructIgnoreList( prg, nodes[pat].rightIgnore );
 }
 
-static void insLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList )
+static void insLeftIgnore( program_t *prg, tree_t *tree, tree_t *ignoreList )
 {
 	assert( ! (tree->flags & AF_LEFT_IGNORE) );
 
 	/* Allocate. */
-	Kid *kid = kidAllocate( prg );
+	kid_t *kid = kidAllocate( prg );
 	kid->tree = ignoreList;
 	treeUpref( ignoreList );
 
@@ -269,12 +269,12 @@ static void insLeftIgnore( Program *prg, Tree *tree, Tree *ignoreList )
 	tree->flags |= AF_LEFT_IGNORE;
 }
 
-static void insRightIgnore( Program *prg, Tree *tree, Tree *ignoreList )
+static void insRightIgnore( program_t *prg, tree_t *tree, tree_t *ignoreList )
 {
 	assert( ! (tree->flags & AF_RIGHT_IGNORE) );
 
 	/* Insert an ignore head in the child list. */
-	Kid *kid = kidAllocate( prg );
+	kid_t *kid = kidAllocate( prg );
 	kid->tree = ignoreList;
 	treeUpref( ignoreList );
 
@@ -291,7 +291,7 @@ static void insRightIgnore( Program *prg, Tree *tree, Tree *ignoreList )
 	tree->flags |= AF_RIGHT_IGNORE;
 }
 
-Tree *pushRightIgnore( Program *prg, Tree *pushTo, Tree *rightIgnore )
+tree_t *pushRightIgnore( program_t *prg, tree_t *pushTo, tree_t *rightIgnore )
 {
 	/* About to alter the data tree. Split first. */
 	pushTo = splitTree( prg, pushTo );
@@ -299,7 +299,7 @@ Tree *pushRightIgnore( Program *prg, Tree *pushTo, Tree *rightIgnore )
 	if ( pushTo->flags & AF_RIGHT_IGNORE ) {
 		/* The previous token already has a right ignore. Merge by
 		 * attaching it as a left ignore of the new list. */
-		Kid *curIgnore = treeRightIgnoreKid( prg, pushTo );
+		kid_t *curIgnore = treeRightIgnoreKid( prg, pushTo );
 		insLeftIgnore( prg, rightIgnore, curIgnore->tree );
 
 		/* Replace the current ignore. Safe to access refs here because we just
@@ -316,7 +316,7 @@ Tree *pushRightIgnore( Program *prg, Tree *pushTo, Tree *rightIgnore )
 	return pushTo;
 }
 
-Tree *pushLeftIgnore( Program *prg, Tree *pushTo, Tree *leftIgnore )
+tree_t *pushLeftIgnore( program_t *prg, tree_t *pushTo, tree_t *leftIgnore )
 {
 	pushTo = splitTree( prg, pushTo );
 
@@ -324,7 +324,7 @@ Tree *pushLeftIgnore( Program *prg, Tree *pushTo, Tree *leftIgnore )
 	if ( pushTo->flags & AF_LEFT_IGNORE ) {
 		/* The token already has a left-ignore. Merge by attaching it as a
 		 * right ignore of the new list. */
-		Kid *curIgnore = treeLeftIgnoreKid( prg, pushTo );
+		kid_t *curIgnore = treeLeftIgnoreKid( prg, pushTo );
 		insRightIgnore( prg, leftIgnore, curIgnore->tree );
 
 		/* Replace the current ignore. Safe to upref here because we just
@@ -341,11 +341,11 @@ Tree *pushLeftIgnore( Program *prg, Tree *pushTo, Tree *leftIgnore )
 	return pushTo;
 }
 
-static void remLeftIgnore( Program *prg, Tree **sp, Tree *tree )
+static void remLeftIgnore( program_t *prg, tree_t **sp, tree_t *tree )
 {
 	assert( tree->flags & AF_LEFT_IGNORE );
 
-	Kid *next = tree->child->next;
+	kid_t *next = tree->child->next;
 	treeDownref( prg, sp, tree->child->tree );
 	kidFree( prg, tree->child );
 	tree->child = next;
@@ -353,18 +353,18 @@ static void remLeftIgnore( Program *prg, Tree **sp, Tree *tree )
 	tree->flags &= ~AF_LEFT_IGNORE;
 }
 
-static void remRightIgnore( Program *prg, Tree **sp, Tree *tree )
+static void remRightIgnore( program_t *prg, tree_t **sp, tree_t *tree )
 {
 	assert( tree->flags & AF_RIGHT_IGNORE );
 
 	if ( tree->flags & AF_LEFT_IGNORE ) {
-		Kid *next = tree->child->next->next;
+		kid_t *next = tree->child->next->next;
 		treeDownref( prg, sp, tree->child->next->tree );
 		kidFree( prg, tree->child->next );
 		tree->child->next = next;
 	}
 	else {
-		Kid *next = tree->child->next;
+		kid_t *next = tree->child->next;
 		treeDownref( prg, sp, tree->child->tree );
 		kidFree( prg, tree->child );
 		tree->child = next;
@@ -373,16 +373,16 @@ static void remRightIgnore( Program *prg, Tree **sp, Tree *tree )
 	tree->flags &= ~AF_RIGHT_IGNORE;
 }
 
-Tree *popRightIgnore( Program *prg, Tree **sp, Tree *popFrom, Tree **rightIgnore )
+tree_t *popRightIgnore( program_t *prg, tree_t **sp, tree_t *popFrom, tree_t **rightIgnore )
 {
 	/* Modifying the tree we are detaching from. */
 	popFrom = splitTree( prg, popFrom );
 
-	Kid *riKid = treeRightIgnoreKid( prg, popFrom );
+	kid_t *riKid = treeRightIgnoreKid( prg, popFrom );
 
 	/* If the right ignore has a left ignore, then that was the original
 	 * right ignore. */
-	Kid *li = treeLeftIgnoreKid( prg, riKid->tree );
+	kid_t *li = treeLeftIgnoreKid( prg, riKid->tree );
 	if ( li != 0 ) {
 		treeUpref( li->tree );
 		remLeftIgnore( prg, sp, riKid->tree );
@@ -399,16 +399,16 @@ Tree *popRightIgnore( Program *prg, Tree **sp, Tree *popFrom, Tree **rightIgnore
 	return popFrom;
 }
 
-Tree *popLeftIgnore( Program *prg, Tree **sp, Tree *popFrom, Tree **leftIgnore )
+tree_t *popLeftIgnore( program_t *prg, tree_t **sp, tree_t *popFrom, tree_t **leftIgnore )
 {
 	/* Modifying, make the write safe. */
 	popFrom = splitTree( prg, popFrom );
 
-	Kid *liKid = treeLeftIgnoreKid( prg, popFrom );
+	kid_t *liKid = treeLeftIgnoreKid( prg, popFrom );
 
 	/* If the left ignore has a right ignore, then that was the original
 	 * left ignore. */
-	Kid *ri = treeRightIgnoreKid( prg, liKid->tree );
+	kid_t *ri = treeRightIgnoreKid( prg, liKid->tree );
 	if ( ri != 0 ) {
 		treeUpref( ri->tree );
 		remRightIgnore( prg, sp, liKid->tree );
@@ -425,10 +425,10 @@ Tree *popLeftIgnore( Program *prg, Tree **sp, Tree *popFrom, Tree **leftIgnore )
 	return popFrom;
 }
 
-Tree *constructObject( Program *prg, Kid *kid, Tree **bindings, long langElId )
+tree_t *constructObject( program_t *prg, kid_t *kid, tree_t **bindings, long langElId )
 {
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
-	Tree *tree = 0;
+	tree_t *tree = 0;
 
 	tree = treeAllocate( prg );
 	tree->id = langElId;
@@ -438,8 +438,8 @@ Tree *constructObject( Program *prg, Kid *kid, Tree **bindings, long langElId )
 
 	int objectLength = lelInfo[tree->id].objectLength;
 
-	Kid *attrs = allocAttrs( prg, objectLength );
-	Kid *child = 0;
+	kid_t *attrs = allocAttrs( prg, objectLength );
+	kid_t *child = 0;
 
 	tree->child = kidListConcat( attrs, child );
 
@@ -448,20 +448,20 @@ Tree *constructObject( Program *prg, Kid *kid, Tree **bindings, long langElId )
 
 /* Returns an uprefed tree. Saves us having to downref and bindings to zero to
  * return a zero-ref tree. */
-Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
+tree_t *constructTree( program_t *prg, kid_t *kid, tree_t **bindings, long pat )
 {
 	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
-	Tree *tree = 0;
+	tree_t *tree = 0;
 
 	if ( nodes[pat].bindId > 0 ) {
 		/* All bindings have been uprefed. */
 		tree = bindings[nodes[pat].bindId];
 
 		long ignore = nodes[pat].leftIgnore;
-		Tree *leftIgnore = 0;
+		tree_t *leftIgnore = 0;
 		if ( ignore >= 0 ) {
-			Kid *ignore = constructLeftIgnoreList( prg, pat );
+			kid_t *ignore = constructLeftIgnoreList( prg, pat );
 
 			leftIgnore = treeAllocate( prg );
 			leftIgnore->id = LEL_ID_IGNORE;
@@ -471,9 +471,9 @@ Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 		}
 
 		ignore = nodes[pat].rightIgnore;
-		Tree *rightIgnore = 0;
+		tree_t *rightIgnore = 0;
 		if ( ignore >= 0 ) {
-			Kid *ignore = constructRightIgnoreList( prg, pat );
+			kid_t *ignore = constructRightIgnoreList( prg, pat );
 
 			rightIgnore = treeAllocate( prg );
 			rightIgnore->id = LEL_ID_IGNORE;
@@ -493,21 +493,21 @@ Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 
 		int objectLength = lelInfo[tree->id].objectLength;
 
-		Kid *attrs = allocAttrs( prg, objectLength );
-		Kid *child = constructKid( prg, bindings,
+		kid_t *attrs = allocAttrs( prg, objectLength );
+		kid_t *child = constructKid( prg, bindings,
 				0, nodes[pat].child );
 
 		tree->child = kidListConcat( attrs, child );
 
 		/* Right first, then left. */
-		Kid *ignore = constructRightIgnoreList( prg, pat );
+		kid_t *ignore = constructRightIgnoreList( prg, pat );
 		if ( ignore != 0 ) {
-			Tree *ignoreList = treeAllocate( prg );
+			tree_t *ignoreList = treeAllocate( prg );
 			ignoreList->id = LEL_ID_IGNORE;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
 
-			Kid *ignoreHead = kidAllocate( prg );
+			kid_t *ignoreHead = kidAllocate( prg );
 			ignoreHead->tree = ignoreList;
 			ignoreHead->next = tree->child;
 			tree->child = ignoreHead;
@@ -517,12 +517,12 @@ Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 
 		ignore = constructLeftIgnoreList( prg, pat );
 		if ( ignore != 0 ) {
-			Tree *ignoreList = treeAllocate( prg );
+			tree_t *ignoreList = treeAllocate( prg );
 			ignoreList->id = LEL_ID_IGNORE;
 			ignoreList->refs = 1;
 			ignoreList->child = ignore;
 
-			Kid *ignoreHead = kidAllocate( prg );
+			kid_t *ignoreHead = kidAllocate( prg );
 			ignoreHead->tree = ignoreList;
 			ignoreHead->next = tree->child;
 			tree->child = ignoreHead;
@@ -534,7 +534,7 @@ Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 		for ( i = 0; i < lelInfo[tree->id].numCaptureAttr; i++ ) {
 			long ci = pat+1+i;
 			CaptureAttr *ca = prg->rtd->captureAttr + lelInfo[tree->id].captureAttr + i;
-			Tree *attr = treeAllocate( prg );
+			tree_t *attr = treeAllocate( prg );
 			attr->id = nodes[ci].id;
 			attr->refs = 1;
 			attr->tokdata = nodes[ci].length == 0 ? 0 :
@@ -548,17 +548,17 @@ Tree *constructTree( Program *prg, Kid *kid, Tree **bindings, long pat )
 	return tree;
 }
 
-Kid *constructKid( Program *prg, Tree **bindings, Kid *prev, long pat )
+kid_t *constructKid( program_t *prg, tree_t **bindings, kid_t *prev, long pat )
 {
 	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
-	Kid *kid = 0;
+	kid_t *kid = 0;
 
 	if ( pat != -1 ) {
 		kid = kidAllocate( prg );
 		kid->tree = constructTree( prg, kid, bindings, pat );
 
 		/* Recurse down next. */
-		Kid *next = constructKid( prg, bindings,
+		kid_t *next = constructKid( prg, bindings,
 				kid, nodes[pat].next );
 
 		kid->next = next;
@@ -567,16 +567,16 @@ Kid *constructKid( Program *prg, Tree **bindings, Kid *prev, long pat )
 	return kid;
 }
 
-Tree *constructToken( Program *prg, Tree **args, long nargs )
+tree_t *constructToken( program_t *prg, tree_t **args, long nargs )
 {
-	Int *idInt = (Int*)args[0];
-	Str *textStr = (Str*)args[1];
+	value_t idInt = (value_t)args[0];
+	str_t *textStr = (str_t*)args[1];
 
-	long id = (long)idInt;//->value;
-	Head *tokdata = stringCopy( prg, textStr->value );
+	long id = (long)idInt;
+	head_t *tokdata = stringCopy( prg, textStr->value );
 
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
-	Tree *tree;
+	tree_t *tree;
 
 	if ( lelInfo[id].ignore ) {
 		tree = treeAllocate( prg );
@@ -588,7 +588,7 @@ Tree *constructToken( Program *prg, Tree **args, long nargs )
 		long objectLength = lelInfo[id].objectLength;
 		assert( nargs-2 <= objectLength );
 
-		Kid *attrs = allocAttrs( prg, objectLength );
+		kid_t *attrs = allocAttrs( prg, objectLength );
 
 		tree = treeAllocate( prg );
 		tree->id = id;
@@ -606,13 +606,13 @@ Tree *constructToken( Program *prg, Tree **args, long nargs )
 	return tree;
 }
 
-Tree *castTree( Program *prg, int langElId, Tree *tree )
+tree_t *castTree( program_t *prg, int langElId, tree_t *tree )
 {
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 
 	/* Need to keep a lookout for next down. If 
 	 * copying it, return the copy. */
-	Tree *newTree = treeAllocate( prg );
+	tree_t *newTree = treeAllocate( prg );
 
 	newTree->id = langElId;
 	newTree->tokdata = stringCopy( prg, tree->tokdata );
@@ -621,7 +621,7 @@ Tree *castTree( Program *prg, int langElId, Tree *tree )
 	newTree->prod_num = -1;
 
 	/* Copy the child list. Start with ignores, then the list. */
-	Kid *child = tree->child, *last = 0;
+	kid_t *child = tree->child, *last = 0;
 
 	/* Flags we are interested in. */
 	newTree->flags |= tree->flags & ( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );
@@ -634,7 +634,7 @@ Tree *castTree( Program *prg, int langElId, Tree *tree )
 
 	/* Igores. */
 	while ( ignores-- > 0 ) {
-		Kid *newKid = kidAllocate( prg );
+		kid_t *newKid = kidAllocate( prg );
 
 		newKid->tree = child->tree;
 		newKid->next = 0;
@@ -658,7 +658,7 @@ Tree *castTree( Program *prg, int langElId, Tree *tree )
 	/* Allocate the target type's kids. */
 	objectLength = lelInfo[langElId].objectLength;
 	while ( objectLength-- > 0 ) {
-		Kid *newKid = kidAllocate( prg );
+		kid_t *newKid = kidAllocate( prg );
 
 		newKid->tree = 0;
 		newKid->next = 0;
@@ -674,7 +674,7 @@ Tree *castTree( Program *prg, int langElId, Tree *tree )
 	
 	/* Copy the source's children. */
 	while ( child != 0 ) {
-		Kid *newKid = kidAllocate( prg );
+		kid_t *newKid = kidAllocate( prg );
 
 		newKid->tree = child->tree;
 		newKid->next = 0;
@@ -693,23 +693,23 @@ Tree *castTree( Program *prg, int langElId, Tree *tree )
 	return newTree;
 }
 
-Tree *makeTree( Program *prg, Tree **args, long nargs )
+tree_t *makeTree( program_t *prg, tree_t **args, long nargs )
 {
-	Int *idInt = (Int*)args[0];
+	value_t idInt = (value_t)args[0];
 
-	long id = (long)idInt;//->value;
+	long id = (long)idInt;
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 
-	Tree *tree = treeAllocate( prg );
+	tree_t *tree = treeAllocate( prg );
 	tree->id = id;
 	tree->refs = 1;
 
 	long objectLength = lelInfo[id].objectLength;
-	Kid *attrs = allocAttrs( prg, objectLength );
+	kid_t *attrs = allocAttrs( prg, objectLength );
 
-	Kid *last = 0, *child = 0;
+	kid_t *last = 0, *child = 0;
 	for ( id = 1; id < nargs; id++ ) {
-		Kid *kid = kidAllocate( prg );
+		kid_t *kid = kidAllocate( prg );
 		kid->tree = args[id];
 		treeUpref( kid->tree );
 
@@ -726,28 +726,28 @@ Tree *makeTree( Program *prg, Tree **args, long nargs )
 	return tree;
 }
 
-int testFalse( Program *prg, Tree *tree )
+int testFalse( program_t *prg, tree_t *tree )
 {
 	int flse = ( 
 		tree == 0 ||
-		tree == prg->falseVal /* ||
-		( tree->id == LEL_ID_INT && ((Int*)tree)->value == 0 ) */ );
+		tree == prg->falseVal 
+	);
 	return flse;
 }
 
-Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader )
+kid_t *copyIgnoreList( program_t *prg, kid_t *ignoreHeader )
 {
-	Kid *newHeader = kidAllocate( prg );
-	Kid *last = 0, *ic = (Kid*)ignoreHeader->tree;
+	kid_t *newHeader = kidAllocate( prg );
+	kid_t *last = 0, *ic = (kid_t*)ignoreHeader->tree;
 	while ( ic != 0 ) {
-		Kid *newIc = kidAllocate( prg );
+		kid_t *newIc = kidAllocate( prg );
 
 		newIc->tree = ic->tree;
 		newIc->tree->refs += 1;
 
 		/* List pointers. */
 		if ( last == 0 )
-			newHeader->tree = (Tree*)newIc;
+			newHeader->tree = (tree_t*)newIc;
 		else
 			last->next = newIc;
 
@@ -757,12 +757,12 @@ Kid *copyIgnoreList( Program *prg, Kid *ignoreHeader )
 	return newHeader;
 }
 
-Kid *copyKidList( Program *prg, Kid *kidList )
+kid_t *copyKidList( program_t *prg, kid_t *kidList )
 {
-	Kid *newList = 0, *last = 0, *ic = kidList;
+	kid_t *newList = 0, *last = 0, *ic = kidList;
 
 	while ( ic != 0 ) {
-		Kid *newIc = kidAllocate( prg );
+		kid_t *newIc = kidAllocate( prg );
 
 		newIc->tree = ic->tree;
 		treeUpref( newIc->tree );
@@ -780,23 +780,23 @@ Kid *copyKidList( Program *prg, Kid *kidList )
 }
 
 /* New tree has zero ref. */
-Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
+tree_t *copyRealTree( program_t *prg, tree_t *tree, kid_t *oldNextDown, kid_t **newNextDown )
 {
 	/* Need to keep a lookout for next down. If 
 	 * copying it, return the copy. */
-	Tree *newTree = treeAllocate( prg );
+	tree_t *newTree = treeAllocate( prg );
 
 	newTree->id = tree->id;
 	newTree->tokdata = stringCopy( prg, tree->tokdata );
 	newTree->prod_num = tree->prod_num;
 
 	/* Copy the child list. Start with ignores, then the list. */
-	Kid *child = tree->child, *last = 0;
+	kid_t *child = tree->child, *last = 0;
 
 	/* Left ignores. */
 	if ( tree->flags & AF_LEFT_IGNORE ) {
 		newTree->flags |= AF_LEFT_IGNORE;
-//		Kid *newHeader = copyIgnoreList( prg, child );
+//		kid_t *newHeader = copyIgnoreList( prg, child );
 //
 //		/* Always the head. */
 //		newTree->child = newHeader;
@@ -808,7 +808,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDow
 	/* Right ignores. */
 	if ( tree->flags & AF_RIGHT_IGNORE ) {
 		newTree->flags |= AF_RIGHT_IGNORE;
-//		Kid *newHeader = copyIgnoreList( prg, child );
+//		kid_t *newHeader = copyIgnoreList( prg, child );
 //		if ( last == 0 )
 //			newTree->child = newHeader;
 //		else
@@ -819,7 +819,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDow
 
 	/* Attributes and children. */
 	while ( child != 0 ) {
-		Kid *newKid = kidAllocate( prg );
+		kid_t *newKid = kidAllocate( prg );
 
 		/* Watch out for next down. */
 		if ( child == oldNextDown )
@@ -846,7 +846,7 @@ Tree *copyRealTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDow
 }
 
 
-Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
+tree_t *copyTree( program_t *prg, tree_t *tree, kid_t *oldNextDown, kid_t **newNextDown )
 {
 //	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
 //	long genericId = lelInfo[tree->id].genericId;
@@ -870,14 +870,14 @@ Tree *copyTree( Program *prg, Tree *tree, Kid *oldNextDown, Kid **newNextDown )
 	return tree;
 }
 
-Tree *splitTree( Program *prg, Tree *tree )
+tree_t *splitTree( program_t *prg, tree_t *tree )
 {
 	if ( tree != 0 ) {
 		assert( tree->refs >= 1 );
 
 		if ( tree->refs > 1 ) {
-			Kid *oldNextDown = 0, *newNextDown = 0;
-			Tree *newTree = copyTree( prg, tree, oldNextDown, &newNextDown );
+			kid_t *oldNextDown = 0, *newNextDown = 0;
+			tree_t *newTree = copyTree( prg, tree, oldNextDown, &newNextDown );
 			treeUpref( newTree );
 
 			/* Downref the original. Don't need to consider freeing because
@@ -894,9 +894,9 @@ Tree *splitTree( Program *prg, Tree *tree )
 
 /* We can't make recursive calls here since the tree we are freeing may be
  * very large. Need the VM stack. */
-void treeFreeRec( Program *prg, Tree **sp, Tree *tree )
+void treeFreeRec( program_t *prg, tree_t **sp, tree_t *tree )
 {
-	Tree **top = vm_ptop();
+	tree_t **top = vm_ptop();
 //	struct lang_el_info *lelInfo;
 //	long genericId;
 
@@ -912,7 +912,7 @@ free_tree:
 		treeFree( prg, tree );
 		break;
 	case LEL_ID_STR: {
-		Str *str = (Str*) tree;
+		str_t *str = (str_t*) tree;
 		stringFree( prg, str->value );
 		treeFree( prg, tree );
 		break;
@@ -922,9 +922,9 @@ free_tree:
 			stringFree( prg, tree->tokdata );
 
 		/* Attributes and grammar-based children. */
-		Kid *child = tree->child;
+		kid_t *child = tree->child;
 		while ( child != 0 ) {
-			Kid *next = child->next;
+			kid_t *next = child->next;
 			vm_push_tree( child->tree );
 			kidFree( prg, child );
 			child = next;
@@ -946,13 +946,13 @@ free_tree:
 	}
 }
 
-void treeUpref( Tree *tree )
+void treeUpref( tree_t *tree )
 {
 	if ( tree != 0 )
 		tree->refs += 1;
 }
 
-void treeDownref( Program *prg, Tree **sp, Tree *tree )
+void treeDownref( program_t *prg, tree_t **sp, tree_t *tree )
 {
 	if ( tree != 0 ) {
 		assert( tree->refs > 0 );
@@ -964,9 +964,9 @@ void treeDownref( Program *prg, Tree **sp, Tree *tree )
 
 /* We can't make recursive calls here since the tree we are freeing may be
  * very large. Need the VM stack. */
-void objectFreeRec( Program *prg, Tree **sp, Tree *tree )
+void objectFreeRec( program_t *prg, tree_t **sp, tree_t *tree )
 {
-	Tree **top = vm_ptop();
+	tree_t **top = vm_ptop();
 //	struct lang_el_info *lelInfo;
 //	long genericId;
 
@@ -975,7 +975,7 @@ free_tree:
 
 	switch ( tree->id ) {
 	case LEL_ID_STR: {
-		Str *str = (Str*) tree;
+		str_t *str = (str_t*) tree;
 		stringFree( prg, str->value );
 		treeFree( prg, tree );
 		break;
@@ -996,9 +996,9 @@ free_tree:
 			stringFree( prg, tree->tokdata );
 
 		/* Attributes and grammar-based children. */
-		Kid *child = tree->child;
+		kid_t *child = tree->child;
 		while ( child != 0 ) {
-			Kid *next = child->next;
+			kid_t *next = child->next;
 			vm_push_tree( child->tree );
 			kidFree( prg, child );
 			child = next;
@@ -1020,7 +1020,7 @@ free_tree:
 	}
 }
 
-void objectDownref( Program *prg, Tree **sp, Tree *tree )
+void objectDownref( program_t *prg, tree_t **sp, tree_t *tree )
 {
 	if ( tree != 0 ) {
 		assert( tree->refs > 0 );
@@ -1031,10 +1031,10 @@ void objectDownref( Program *prg, Tree **sp, Tree *tree )
 }
 
 /* Find the first child of a tree. */
-Kid *treeChild( Program *prg, const Tree *tree )
+kid_t *treeChild( program_t *prg, const tree_t *tree )
 {
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
-	Kid *kid = tree->child;
+	kid_t *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
 		kid = kid->next;
@@ -1051,10 +1051,10 @@ Kid *treeChild( Program *prg, const Tree *tree )
 }
 
 /* Detach at the first real child of a tree. */
-Kid *treeExtractChild( Program *prg, Tree *tree )
+kid_t *treeExtractChild( program_t *prg, tree_t *tree )
 {
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
-	Kid *kid = tree->child, *last = 0;
+	kid_t *kid = tree->child, *last = 0;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
 		kid = kid->next;
@@ -1078,9 +1078,9 @@ Kid *treeExtractChild( Program *prg, Tree *tree )
 
 
 /* Find the first child of a tree. */
-Kid *treeAttr( Program *prg, const Tree *tree )
+kid_t *treeAttr( program_t *prg, const tree_t *tree )
 {
-	Kid *kid = tree->child;
+	kid_t *kid = tree->child;
 
 	if ( tree->flags & AF_LEFT_IGNORE )
 		kid = kid->next;
@@ -1090,14 +1090,14 @@ Kid *treeAttr( Program *prg, const Tree *tree )
 	return kid;
 }
 
-Tree *treeLeftIgnore( Program *prg, Tree *tree )
+tree_t *treeLeftIgnore( program_t *prg, tree_t *tree )
 {
 	if ( tree->flags & AF_LEFT_IGNORE )
 		return tree->child->tree;
 	return 0;
 }
 
-Tree *treeRightIgnore( Program *prg, Tree *tree )
+tree_t *treeRightIgnore( program_t *prg, tree_t *tree )
 {
 	if ( tree->flags & AF_RIGHT_IGNORE ) {
 		if ( tree->flags & AF_LEFT_IGNORE )
@@ -1108,14 +1108,14 @@ Tree *treeRightIgnore( Program *prg, Tree *tree )
 	return 0;
 }
 
-Kid *treeLeftIgnoreKid( Program *prg, Tree *tree )
+kid_t *treeLeftIgnoreKid( program_t *prg, tree_t *tree )
 {
 	if ( tree->flags & AF_LEFT_IGNORE )
 		return tree->child;
 	return 0;
 }
 
-Kid *treeRightIgnoreKid( Program *prg, Tree *tree )
+kid_t *treeRightIgnoreKid( program_t *prg, tree_t *tree )
 {
 	if ( tree->flags & AF_RIGHT_IGNORE ) {
 		if ( tree->flags & AF_LEFT_IGNORE )
@@ -1126,15 +1126,15 @@ Kid *treeRightIgnoreKid( Program *prg, Tree *tree )
 	return 0;
 }
 
-void refSetValue( Program *prg, Tree **sp, Ref *ref, Tree *v )
+void refSetValue( program_t *prg, tree_t **sp, ref_t *ref, tree_t *v )
 {
 	treeDownref( prg, sp, ref->kid->tree );
 	ref->kid->tree = v;
 }
 
-Tree *getRhsEl( Program *prg, Tree *lhs, long position )
+tree_t *getRhsEl( program_t *prg, tree_t *lhs, long position )
 {
-	Kid *pos = treeChild( prg, lhs );
+	kid_t *pos = treeChild( prg, lhs );
 	while ( position > 0 ) {
 		pos = pos->next;
 		position -= 1;
@@ -1142,9 +1142,9 @@ Tree *getRhsEl( Program *prg, Tree *lhs, long position )
 	return pos->tree;
 }
 
-Kid *getRhsElKid( Program *prg, Tree *lhs, long position )
+kid_t *getRhsElKid( program_t *prg, tree_t *lhs, long position )
 {
-	Kid *pos = treeChild( prg, lhs );
+	kid_t *pos = treeChild( prg, lhs );
 	while ( position > 0 ) {
 		pos = pos->next;
 		position -= 1;
@@ -1153,7 +1153,7 @@ Kid *getRhsElKid( Program *prg, Tree *lhs, long position )
 }
 
 
-Tree *colm_get_rhs_val( Program *prg, Tree *tree, int *a )
+tree_t *colm_get_rhs_val( program_t *prg, tree_t *tree, int *a )
 {
 	int i, len = a[0];
 	for ( i = 0; i < len; i++ ) {
@@ -1165,7 +1165,7 @@ Tree *colm_get_rhs_val( Program *prg, Tree *tree, int *a )
 	return 0;
 }
 
-void colm_tree_set_field( Program *prg, Tree *tree, long field, Tree *value )
+void colm_tree_set_field( program_t *prg, tree_t *tree, long field, tree_t *value )
 {
 	assert( tree->refs == 1 );
 	if ( value != 0 )
@@ -1173,27 +1173,27 @@ void colm_tree_set_field( Program *prg, Tree *tree, long field, Tree *value )
 	colm_tree_set_attr( tree, field, value );
 }
 
-Tree *colm_tree_get_field( Tree *tree, word_t field )
+tree_t *colm_tree_get_field( tree_t *tree, word_t field )
 {
 	return colm_get_attr( tree, field );
 }
 
-Kid *getFieldKid( Tree *tree, word_t field )
+kid_t *getFieldKid( tree_t *tree, word_t field )
 {
 	return getAttrKid( tree, field );
 }
 
-Tree *getFieldSplit( Program *prg, Tree *tree, word_t field )
+tree_t *getFieldSplit( program_t *prg, tree_t *tree, word_t field )
 {
-	Tree *val = colm_get_attr( tree, field );
-	Tree *split = splitTree( prg, val );
+	tree_t *val = colm_get_attr( tree, field );
+	tree_t *split = splitTree( prg, val );
 	colm_tree_set_attr( tree, field, split );
 	return split;
 }
 
 /* This must traverse in the same order that the bindId assignments are done
  * in. */
-int matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, int checkNext )
+int matchPattern( tree_t **bindings, program_t *prg, long pat, kid_t *kid, int checkNext )
 {
 	struct pat_cons_node *nodes = prg->rtd->patReplNodes;
 
@@ -1248,7 +1248,7 @@ int matchPattern( Tree **bindings, Program *prg, long pat, Kid *kid, int checkNe
 }
 
 
-long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 )
+long cmpTree( program_t *prg, const tree_t *tree1, const tree_t *tree2 )
 {
 	long cmpres = 0;
 	if ( tree1 == 0 ) {
@@ -1264,19 +1264,13 @@ long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 )
 	else if ( tree1->id > tree2->id )
 		return 1;
 	else if ( tree1->id == LEL_ID_PTR ) {
-		if ( ((Pointer*)tree1)->value < ((Pointer*)tree2)->value )
+		if ( ((pointer_t*)tree1)->value < ((pointer_t*)tree2)->value )
 			return -1;
-		else if ( ((Pointer*)tree1)->value > ((Pointer*)tree2)->value )
+		else if ( ((pointer_t*)tree1)->value > ((pointer_t*)tree2)->value )
 			return 1;
 	}
-//	else if ( tree1->id == LEL_ID_INT ) {
-//		if ( ((Int*)tree1)->value < ((Int*)tree2)->value )
-//			return -1;
-//		else if ( ((Int*)tree1)->value > ((Int*)tree2)->value )
-//			return 1;
-//	}
 	else if ( tree1->id == LEL_ID_STR ) {
-		cmpres = cmpString( ((Str*)tree1)->value, ((Str*)tree2)->value );
+		cmpres = cmpString( ((str_t*)tree1)->value, ((str_t*)tree2)->value );
 		if ( cmpres != 0 )
 			return cmpres;
 	}
@@ -1292,8 +1286,8 @@ long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 )
 		}
 	}
 
-	Kid *kid1 = treeChild( prg, tree1 );
-	Kid *kid2 = treeChild( prg, tree2 );
+	kid_t *kid1 = treeChild( prg, tree1 );
+	kid_t *kid2 = treeChild( prg, tree2 );
 
 	while ( true ) {
 		if ( kid1 == 0 && kid2 == 0 )
@@ -1313,10 +1307,10 @@ long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 )
 }
 
 
-void splitRef( Program *prg, Tree ***psp, Ref *fromRef )
+void splitRef( program_t *prg, tree_t ***psp, ref_t *fromRef )
 {
 	/* Go up the chain of kids, turing the pointers down. */
-	Ref *last = 0, *ref = fromRef, *next = 0;
+	ref_t *last = 0, *ref = fromRef, *next = 0;
 	while ( ref->next != 0 ) {
 		next = ref->next;
 		ref->next = last;
@@ -1328,14 +1322,14 @@ void splitRef( Program *prg, Tree ***psp, Ref *fromRef )
 	/* Now traverse the list, which goes down. */
 	while ( ref != 0 ) {
 		if ( ref->kid->tree->refs > 1 ) {
-			Ref *nextDown = ref->next;
+			ref_t *nextDown = ref->next;
 			while ( nextDown != 0 && nextDown->kid == ref->kid )
 				nextDown = nextDown->next;
 
-			Kid *oldNextKidDown = nextDown != 0 ? nextDown->kid : 0;
-			Kid *newNextKidDown = 0;
+			kid_t *oldNextKidDown = nextDown != 0 ? nextDown->kid : 0;
+			kid_t *newNextKidDown = 0;
 
-			Tree *newTree = copyTree( prg, ref->kid->tree, 
+			tree_t *newTree = copyTree( prg, ref->kid->tree, 
 					oldNextKidDown, &newNextKidDown );
 			treeUpref( newTree );
 			
@@ -1366,12 +1360,12 @@ void splitRef( Program *prg, Tree ***psp, Ref *fromRef )
 	}
 }
 
-Tree *setListMem( List *list, half_t field, Tree *value )
+tree_t *setListMem( list_t *list, half_t field, tree_t *value )
 {
 	if ( value != 0 )
 		assert( value->refs >= 1 );
 
-	Tree *existing = 0;
+	tree_t *existing = 0;
 	switch ( field ) {
 		case 0:
 //			existing = list->head->value;
@@ -1388,10 +1382,10 @@ Tree *setListMem( List *list, half_t field, Tree *value )
 	return existing;
 }
 
-TreePair mapRemove( Program *prg, Map *map, Tree *key )
+struct tree_pair mapRemove( program_t *prg, map_t *map, tree_t *key )
 {
-	MapEl *mapEl = mapImplFind( prg, map, key );
-	TreePair result = { 0, 0 };
+	map_el_t *mapEl = mapImplFind( prg, map, key );
+	struct tree_pair result = { 0, 0 };
 	if ( mapEl != 0 ) {
 		mapDetach( prg, map, mapEl );
 		result.key = mapEl->key;
@@ -1402,16 +1396,16 @@ TreePair mapRemove( Program *prg, Map *map, Tree *key )
 }
 
 #if 0
-Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
+tree_t *mapUnstore( program_t *prg, map_t *map, tree_t *key, tree_t *existing )
 {
-	Tree *stored = 0;
+	tree_t *stored = 0;
 	if ( existing == 0 ) {
-		MapEl *mapEl = mapDetachByKey( prg, map, key );
+		map_el_t *mapEl = mapDetachByKey( prg, map, key );
 		// stored = mapEl->tree;
 		mapElFree( prg, mapEl );
 	}
 	else {
-		MapEl *mapEl = mapImplFind( prg, map, key );
+		map_el_t *mapEl = mapImplFind( prg, map, key );
 		// stored = mapEl->tree;
 		//mapEl->tree = existing;
 	}
@@ -1419,55 +1413,55 @@ Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing )
 }
 #endif
 
-Tree *mapFind( Program *prg, Map *map, Tree *key )
+tree_t *mapFind( program_t *prg, map_t *map, tree_t *key )
 {
-//	MapEl *mapEl = mapImplFind( prg, map, key );
+//	map_el_t *mapEl = mapImplFind( prg, map, key );
 //	return mapEl == 0 ? 0 : mapEl->tree;
 	return 0;
 }
 
-long mapLength( Map *map )
+long mapLength( map_t *map )
 {
 	return map->treeSize;
 }
 
-void listPushTail( Program *prg, List *list, Tree *val )
+void listPushTail( program_t *prg, list_t *list, tree_t *val )
 {
 //	if ( val != 0 )
 //		assert( val->refs >= 1 );
-//	ListEl *listEl = colm_list_el_new( prg );
+//	list_el_t *listEl = colm_list_el_new( prg );
 //	listEl->value = val;
 //	listAppend( list, listEl );
 }
 
-void listPushHead( Program *prg, List *list, Tree *val )
+void listPushHead( program_t *prg, list_t *list, tree_t *val )
 {
 //	if ( val != 0 )
 //		assert( val->refs >= 1 );
-//	ListEl *listEl = listElAllocate( prg );
+//	list_el_t *listEl = listElAllocate( prg );
 //	listEl->value = val;
 //	listPrepend( list, listEl );
 }
 
-Tree *listRemoveEnd( Program *prg, List *list )
+tree_t *listRemoveEnd( program_t *prg, list_t *list )
 {
-//	Tree *tree = list->tail->value;
+//	tree_t *tree = list->tail->value;
 //	listElFree( prg, listDetachLast( list ) );
 //	return tree;
 	return 0;
 }
 
-Tree *listRemoveHead( Program *prg, List *list )
+tree_t *listRemoveHead( program_t *prg, list_t *list )
 {
-//	Tree *tree = list->head;
+//	tree_t *tree = list->head;
 //	listDetachFirst( list );
 //	return tree;
 	return 0;
 }
 
-Tree *getParserMem( Parser *parser, word_t field )
+tree_t *getParserMem( parser_t *parser, word_t field )
 {
-	Tree *result = 0;
+	tree_t *result = 0;
 	switch ( field ) {
 		case 0: {
 			result = parser->result;
@@ -1486,9 +1480,9 @@ Tree *getParserMem( Parser *parser, word_t field )
 	return result;
 }
 
-Tree *getListMemSplit( Program *prg, List *list, word_t field )
+tree_t *getListMemSplit( program_t *prg, list_t *list, word_t field )
 {
-	Tree *sv = 0;
+	tree_t *sv = 0;
 	switch ( field ) {
 		case 0: 
 //			sv = splitTree( prg, list->head->value );
@@ -1507,9 +1501,9 @@ Tree *getListMemSplit( Program *prg, List *list, word_t field )
 
 
 #if 0
-int mapInsert( Program *prg, Map *map, Tree *key, Tree *element )
+int mapInsert( program_t *prg, map_t *map, tree_t *key, tree_t *element )
 {
-	MapEl *mapEl = mapInsertKey( prg, map, key, 0 );
+	map_el_t *mapEl = mapInsertKey( prg, map, key, 0 );
 
 	if ( mapEl != 0 ) {
 		//mapEl->tree = element;
@@ -1521,19 +1515,19 @@ int mapInsert( Program *prg, Map *map, Tree *key, Tree *element )
 #endif
 
 #if 0
-void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element )
+void mapUnremove( program_t *prg, map_t *map, tree_t *key, tree_t *element )
 {
-	MapEl *mapEl = mapInsertKey( prg, map, key, 0 );
+	map_el_t *mapEl = mapInsertKey( prg, map, key, 0 );
 	assert( mapEl != 0 );
 	//mapEl->tree = element;
 }
 #endif
 
 #if 0
-Tree *mapUninsert( Program *prg, Map *map, Tree *key )
+tree_t *mapUninsert( program_t *prg, map_t *map, tree_t *key )
 {
-	MapEl *el = mapDetachByKey( prg, map, key );
-//	Tree *val = el->tree;
+	map_el_t *el = mapDetachByKey( prg, map, key );
+//	tree_t *val = el->tree;
 	mapElFree( prg, el );
 //	return val;
 	return 0;
@@ -1541,11 +1535,11 @@ Tree *mapUninsert( Program *prg, Map *map, Tree *key )
 #endif
 
 #if 0
-Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element )
+tree_t *mapStore( program_t *prg, map_t *map, tree_t *key, tree_t *element )
 {
-	Tree *oldTree = 0;
-	MapEl *elInTree = 0;
-	MapEl *mapEl = mapInsertKey( prg, map, key, &elInTree );
+	tree_t *oldTree = 0;
+	map_el_t *elInTree = 0;
+	map_el_t *mapEl = mapInsertKey( prg, map, key, &elInTree );
 
 //	if ( mapEl != 0 )
 //		mapEl->tree = element;
@@ -1559,16 +1553,16 @@ Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element )
 }
 #endif
 
-static Tree *treeSearchKid( Program *prg, Kid *kid, long id )
+static tree_t *treeSearchKid( program_t *prg, kid_t *kid, long id )
 {
 	/* This node the one? */
 	if ( kid->tree->id == id )
 		return kid->tree;
 
-	Tree *res = 0;
+	tree_t *res = 0;
 
 	/* Search children. */
-	Kid *child = treeChild( prg, kid->tree );
+	kid_t *child = treeChild( prg, kid->tree );
 	if ( child != 0 )
 		res = treeSearchKid( prg, child, id );
 	
@@ -1579,29 +1573,29 @@ static Tree *treeSearchKid( Program *prg, Kid *kid, long id )
 	return res;	
 }
 
-Tree *treeSearch( Program *prg, Tree *tree, long id )
+tree_t *treeSearch( program_t *prg, tree_t *tree, long id )
 {
-	Tree *res = 0;
+	tree_t *res = 0;
 	if ( tree->id == id )
 		res = tree;
 	else {
-		Kid *child = treeChild( prg, tree );
+		kid_t *child = treeChild( prg, tree );
 		if ( child != 0 )
 			res = treeSearchKid( prg, child, id );
 	}
 	return res;
 }
 
-static Location *locSearchKid( Program *prg, Kid *kid )
+static location_t *locSearchKid( program_t *prg, kid_t *kid )
 {
 	/* This node the one? */
 	if ( kid->tree->tokdata != 0 && kid->tree->tokdata->location != 0 )
 		return kid->tree->tokdata->location;
 
-	Location *res = 0;
+	location_t *res = 0;
 
 	/* Search children. */
-	Kid *child = treeChild( prg, kid->tree );
+	kid_t *child = treeChild( prg, kid->tree );
 	if ( child != 0 )
 		res = locSearchKid( prg, child );
 	
@@ -1612,26 +1606,26 @@ static Location *locSearchKid( Program *prg, Kid *kid )
 	return res;	
 }
 
-Location *locSearch( Program *prg, Tree *tree )
+location_t *locSearch( program_t *prg, tree_t *tree )
 {
-	Location *res = 0;
+	location_t *res = 0;
 	if ( tree->tokdata != 0 && tree->tokdata->location != 0 )
 		return tree->tokdata->location;
 
-	Kid *child = treeChild( prg, tree );
+	kid_t *child = treeChild( prg, tree );
 	if ( child != 0 )
 		res = locSearchKid( prg, child );
 
 	return res;
 }
 
-struct colm_location *colm_find_location( Program *prg, Tree *tree )
+struct colm_location *colm_find_location( program_t *prg, tree_t *tree )
 {
 	return locSearch( prg, tree );
 }
 
 /*
- * Tree Printing
+ * tree_t Printing
  */
 
 void xmlEscapeData( struct colm_print_args *printArgs, const char *data, long len )
@@ -1687,7 +1681,7 @@ void strCollectClear( StrCollect *collect )
 
 #define INT_SZ 32
 
-void printStr( struct colm_print_args *printArgs, Head *str )
+void printStr( struct colm_print_args *printArgs, head_t *str )
 {
 	printArgs->out( printArgs, (char*)(str->data), str->length );
 }
@@ -1710,12 +1704,12 @@ void appendFd( struct colm_print_args *args, const char *data, int length )
 		message( "write error on fd: %d: %s\n", fd, strerror(errno) );
 }
 
-Tree *treeTrim( struct colm_program *prg, Tree **sp, Tree *tree )
+tree_t *treeTrim( struct colm_program *prg, tree_t **sp, tree_t *tree )
 {
 	debug( prg, REALM_PARSE, "attaching left ignore\n" );
 
 	/* Make the ignore list for the left-ignore. */
-	Tree *leftIgnore = treeAllocate( prg );
+	tree_t *leftIgnore = treeAllocate( prg );
 	leftIgnore->id = LEL_ID_IGNORE;
 	leftIgnore->flags |= AF_SUPPRESS_RIGHT;
 
@@ -1725,7 +1719,7 @@ Tree *treeTrim( struct colm_program *prg, Tree **sp, Tree *tree )
 
 	/* Copy the ignore list first if we need to attach it as a right
 	 * ignore. */
-	Tree *rightIgnore = 0;
+	tree_t *rightIgnore = 0;
 	rightIgnore = treeAllocate( prg );
 	rightIgnore->id = LEL_ID_IGNORE;
 	rightIgnore->flags |= AF_SUPPRESS_LEFT;
@@ -1754,11 +1748,11 @@ enum VisitType
 
 #define TF_TERM_SEEN 0x1
 
-void printKid( Program *prg, Tree **sp, struct colm_print_args *printArgs, Kid *kid )
+void printKid( program_t *prg, tree_t **sp, struct colm_print_args *printArgs, kid_t *kid )
 {
 	enum ReturnType rt;
-	Kid *parent = 0;
-	Kid *leadingIgnore = 0;
+	kid_t *parent = 0;
+	kid_t *leadingIgnore = 0;
 	enum VisitType visitType;
 	int flags = 0;
 
@@ -1804,7 +1798,7 @@ rec_call:
 
 	if ( visitType == IgnoreData ) {
 		debug( prg, REALM_PRINT, "putting %p on ignore list\n", kid->tree );
-		Kid *newIgnore = kidAllocate( prg );
+		kid_t *newIgnore = kidAllocate( prg );
 		newIgnore->next = leadingIgnore;
 		leadingIgnore = newIgnore;
 		leadingIgnore->tree = kid->tree;
@@ -1812,7 +1806,7 @@ rec_call:
 	}
 
 	if ( visitType == IgnoreWrapper ) {
-		Kid *newIgnore = kidAllocate( prg );
+		kid_t *newIgnore = kidAllocate( prg );
 		newIgnore->next = leadingIgnore;
 		leadingIgnore = newIgnore;
 		leadingIgnore->tree = kid->tree;
@@ -1823,12 +1817,12 @@ rec_call:
 	if ( visitType == Term ) {
 		/* Reverse the leading ignore list. */
 		if ( leadingIgnore != 0 ) {
-			Kid *ignore = 0, *last = 0;
+			kid_t *ignore = 0, *last = 0;
 
 			/* Reverse the list and take the opportunity to implement the
 			 * suppress left. */
 			while ( true ) {
-				Kid *next = leadingIgnore->next;
+				kid_t *next = leadingIgnore->next;
 				leadingIgnore->next = last;
 
 				if ( leadingIgnore->tree->flags & AF_SUPPRESS_LEFT ) {
@@ -1904,7 +1898,7 @@ rec_call:
 	}
 
 	/* Print children. */
-	Kid *child = printArgs->attr ? 
+	kid_t *child = printArgs->attr ? 
 		treeAttr( prg, kid->tree ) : 
 		treeChild( prg, kid->tree );
 
@@ -1971,16 +1965,16 @@ skip_null:
 	}
 }
 
-void colm_print_tree_args( Program *prg, Tree **sp, struct colm_print_args *printArgs, Tree *tree )
+void colm_print_tree_args( program_t *prg, tree_t **sp, struct colm_print_args *printArgs, tree_t *tree )
 {
 	if ( tree == 0 )
 		printArgs->out( printArgs, "NIL", 3 );
 	else {
 		/* This term tree allows us to print trailing ignores. */
-		Tree termTree;
+		tree_t termTree;
 		memset( &termTree, 0, sizeof(termTree) );
 
-		Kid kid, term;
+		kid_t kid, term;
 		term.tree = &termTree;
 		term.next = 0;
 		term.flags = 0;
@@ -1993,34 +1987,23 @@ void colm_print_tree_args( Program *prg, Tree **sp, struct colm_print_args *prin
 	}
 }
 
-void colm_print_term_tree( Program *prg, Tree **sp, struct colm_print_args *printArgs, Kid *kid )
+void colm_print_term_tree( program_t *prg, tree_t **sp, struct colm_print_args *printArgs, kid_t *kid )
 {
 	debug( prg, REALM_PRINT, "printing term %p\n", kid->tree );
 
-//	if ( kid->tree->id == LEL_ID_INT ) {
-//		char buf[INT_SZ];
-//		sprintf( buf, "%ld", ((Int*)kid->tree)->value );
-//		printArgs->out( printArgs, buf, strlen(buf) );
-//	}
-//	else if ( kid->tree->id == LEL_ID_BOOL ) {
-//		if ( ((Int*)kid->tree)->value )
-//			printArgs->out( printArgs, "true", 4 );
-//		else
-//			printArgs->out( printArgs, "false", 5 );
-//	}
 	if ( kid->tree->id == LEL_ID_PTR ) {
 		char buf[INT_SZ];
 		printArgs->out( printArgs, "#", 1 );
-		sprintf( buf, "%p", (void*) ((Pointer*)kid->tree)->value );
+		sprintf( buf, "%p", (void*) ((pointer_t*)kid->tree)->value );
 		printArgs->out( printArgs, buf, strlen(buf) );
 	}
 	else if ( kid->tree->id == LEL_ID_STR ) {
-		printStr( printArgs, ((Str*)kid->tree)->value );
+		printStr( printArgs, ((str_t*)kid->tree)->value );
 	}
 //	else if ( kid->tree->id == LEL_ID_STREAM ) {
 //		char buf[INT_SZ];
 //		printArgs->out( printArgs, "#", 1 );
-//		sprintf( buf, "%p", (void*) ((Stream*)kid->tree)->in->file );
+//		sprintf( buf, "%p", (void*) ((stream_t*)kid->tree)->in->file );
 //		printArgs->out( printArgs, buf, strlen(buf) );
 //	}
 	else if ( kid->tree->tokdata != 0 && 
@@ -2032,11 +2015,13 @@ void colm_print_term_tree( Program *prg, Tree **sp, struct colm_print_args *prin
 }
 
 
-void colm_print_null( Program *prg, Tree **sp, struct colm_print_args *args, Kid *parent, Kid *kid )
+void colm_print_null( program_t *prg, tree_t **sp,
+		struct colm_print_args *args, kid_t *parent, kid_t *kid )
 {
 }
 
-void openTreeXml( Program *prg, Tree **sp, struct colm_print_args *args, Kid *parent, Kid *kid )
+void openTreeXml( program_t *prg, tree_t **sp, struct colm_print_args *args,
+		kid_t *parent, kid_t *kid )
 {
 	/* Skip the terminal that is for forcing trailing ignores out. */
 	if ( kid->tree->id == 0 )
@@ -2058,29 +2043,18 @@ void openTreeXml( Program *prg, Tree **sp, struct colm_print_args *args, Kid *pa
 	args->out( args, ">", 1 );
 }
 
-void printTermXml( Program *prg, Tree **sp, struct colm_print_args *printArgs, Kid *kid )
+void printTermXml( program_t *prg, tree_t **sp, struct colm_print_args *printArgs, kid_t *kid )
 {
-	//Kid *child;
+	//kid_t *child;
 
 	/*child = */ treeChild( prg, kid->tree );
 	if ( kid->tree->id == LEL_ID_PTR ) {
 		char ptr[32];
-		sprintf( ptr, "%p\n", (void*)((Pointer*)kid->tree)->value );
+		sprintf( ptr, "%p\n", (void*)((pointer_t*)kid->tree)->value );
 		printArgs->out( printArgs, ptr, strlen(ptr) );
 	}
-//	else if ( kid->tree->id == LEL_ID_BOOL ) {
-//		if ( ((Int*)kid->tree)->value )
-//			printArgs->out( printArgs, "true", 4 );
-//		else
-//			printArgs->out( printArgs, "false", 5 );
-//	}
-//	else if ( kid->tree->id == LEL_ID_INT ) {
-//		char ptr[32];
-//		sprintf( ptr, "%ld", ((Int*)kid->tree)->value );
-//		printArgs->out( printArgs, ptr, strlen(ptr) );
-//	}
 	else if ( kid->tree->id == LEL_ID_STR ) {
-		Head *head = (Head*) ((Str*)kid->tree)->value;
+		head_t *head = (head_t*) ((str_t*)kid->tree)->value;
 
 		xmlEscapeData( printArgs, (char*)(head->data), head->length );
 	}
@@ -2095,7 +2069,7 @@ void printTermXml( Program *prg, Tree **sp, struct colm_print_args *printArgs, K
 }
 
 
-void closeTreeXml( Program *prg, Tree **sp, struct colm_print_args *args, Kid *parent, Kid *kid )
+void closeTreeXml( program_t *prg, tree_t **sp, struct colm_print_args *args, kid_t *parent, kid_t *kid )
 {
 	/* Skip the terminal that is for forcing trailing ignores out. */
 	if ( kid->tree->id == 0 )
@@ -2117,28 +2091,28 @@ void closeTreeXml( Program *prg, Tree **sp, struct colm_print_args *args, Kid *p
 	args->out( args, ">", 1 );
 }
 
-void printTreeCollect( Program *prg, Tree **sp, StrCollect *collect, Tree *tree, int trim )
+void printTreeCollect( program_t *prg, tree_t **sp, StrCollect *collect, tree_t *tree, int trim )
 {
 	struct colm_print_args printArgs = { collect, true, false, trim, &appendCollect, 
 			&colm_print_null, &colm_print_term_tree, &colm_print_null };
 	colm_print_tree_args( prg, sp, &printArgs, tree );
 }
 
-void printTreeFile( Program *prg, Tree **sp, FILE *out, Tree *tree, int trim )
+void printTreeFile( program_t *prg, tree_t **sp, FILE *out, tree_t *tree, int trim )
 {
 	struct colm_print_args printArgs = { out, true, false, trim, &appendFile, 
 			&colm_print_null, &colm_print_term_tree, &colm_print_null };
 	colm_print_tree_args( prg, sp, &printArgs, tree );
 }
 
-void printTreeFd( Program *prg, Tree **sp, int fd, Tree *tree, int trim )
+void printTreeFd( program_t *prg, tree_t **sp, int fd, tree_t *tree, int trim )
 {
 	struct colm_print_args printArgs = { (void*)((long)fd), true, false, trim, &appendFd,
 			&colm_print_null, &colm_print_term_tree, &colm_print_null };
 	colm_print_tree_args( prg, sp, &printArgs, tree );
 }
 
-void printXmlStdout( Program *prg, Tree **sp, Tree *tree, int commAttr, int trim )
+void printXmlStdout( program_t *prg, tree_t **sp, tree_t *tree, int commAttr, int trim )
 {
 	struct colm_print_args printArgs = { stdout, commAttr, commAttr, trim, &appendFile, 
 			&openTreeXml, &printTermXml, &closeTreeXml };

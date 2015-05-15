@@ -92,7 +92,7 @@ struct Production;
  * runtime code. The runtime functions that access it are defined in
  * ctinput.cpp and stubbed in fsmcodegen.cpp */
 struct bindings
-	: public Vector<ParseTree*>
+	: public Vector<parse_tree_t*>
 {};
 
 struct DefListEl { Production *prev, *next; };
@@ -467,7 +467,7 @@ struct ReOrBlock;
 struct ReOrItem;
 struct TokenRegion;
 
-/* Tree of instantiated names. */
+/* tree_t of instantiated names. */
 typedef BstMapEl<String, NameInst*> NameMapEl;
 typedef BstMap<String, NameInst*, CmpStr> NameMap;
 typedef Vector<NameInst*> NameVect;
@@ -735,7 +735,7 @@ struct Compiler
 	void addPushBackLHS( Production *prod, CodeVect &code, long &insertPos );
 
 	void prepGrammar();
-	struct pda_run *parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
+	struct pda_run *parsePattern( program_t *prg, tree_t **sp, const InputLoc &loc,
 			int parserId, struct stream_impl *sourceStream );
 	void parsePatterns();
 
@@ -744,7 +744,7 @@ struct Compiler
 	PdaGraph *makePdaGraph( BstSet<LangEl*> &parserEls  );
 	struct pda_tables *makePdaTables( PdaGraph *pdaGraph );
 
-	void fillInPatterns( Program *prg );
+	void fillInPatterns( program_t *prg );
 	void makeRuntimeData();
 
 	/* Generate and write out the fsm. */

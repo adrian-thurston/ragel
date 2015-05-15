@@ -53,10 +53,10 @@
 	w |= ((word_t) p[1]) << 8; \
 	w |= ((word_t) p[2]) << 16; \
 	w |= ((word_t) p[3]) << 24; \
-	i = (Tree*)w; \
+	i = (tree_t*)w; \
 } while(0)
 
-static void init_fsm_run( Program *prg, struct pda_run *pdaRun )
+static void init_fsm_run( program_t *prg, struct pda_run *pdaRun )
 {
 	pdaRun->fsm_tables = prg->rtd->fsmTables;
 
@@ -69,7 +69,7 @@ static void init_fsm_run( Program *prg, struct pda_run *pdaRun )
 	pdaRun->preRegion = -1;
 }
 
-static void clear_fsm_run( Program *prg, struct pda_run *pdaRun )
+static void clear_fsm_run( program_t *prg, struct pda_run *pdaRun )
 {
 	if ( pdaRun->consumeBuf != 0 ) {
 		/* Transfer the run buf list to the program */
@@ -95,7 +95,7 @@ void colm_decrement_steps( struct pda_run *pdaRun )
 	//debug( prg, REALM_PARSE, "steps down to %ld\n", pdaRun->steps );
 }
 
-Head *colm_stream_pull( Program *prg, Tree **sp, struct pda_run *pdaRun, struct stream_impl *is, long length )
+head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is, long length )
 {
 	if ( pdaRun != 0 ) {
 		RunBuf *runBuf = pdaRun->consumeBuf;
@@ -108,7 +108,7 @@ Head *colm_stream_pull( Program *prg, Tree **sp, struct pda_run *pdaRun, struct 
 		char *dest = runBuf->data + runBuf->length;
 
 		is->funcs->getData( is, dest, length );
-		Location *loc = locationAllocate( prg );
+		location_t *loc = locationAllocate( prg );
 		is->funcs->consumeData( prg, sp, is, length, loc );
 
 		runBuf->length += length;
@@ -116,17 +116,17 @@ Head *colm_stream_pull( Program *prg, Tree **sp, struct pda_run *pdaRun, struct 
 		pdaRun->p = pdaRun->pe = 0;
 		pdaRun->toklen = 0;
 
-		Head *tokdata = colm_string_alloc_pointer( prg, dest, length );
+		head_t *tokdata = colm_string_alloc_pointer( prg, dest, length );
 		tokdata->location = loc;
 
 		return tokdata;
 	}
 	else {
-		Head *head = initStrSpace( length );
+		head_t *head = initStrSpace( length );
 		char *dest = (char*)head->data;
 
 		is->funcs->getData( is, dest, length );
-		Location *loc = locationAllocate( prg );
+		location_t *loc = locationAllocate( prg );
 		is->funcs->consumeData( prg, sp, is, length, loc );
 		head->location = loc;
 
@@ -146,20 +146,20 @@ void colm_stream_push_text( struct stream_impl *is, const char *data, long lengt
 	is->funcs->prependData( is, data, length );
 }
 
-void colm_stream_push_tree( struct stream_impl *is, Tree *tree, int ignore )
+void colm_stream_push_tree( struct stream_impl *is, tree_t *tree, int ignore )
 {
 	is->funcs->prependTree( is, tree, ignore );
 }
 
-void colm_stream_push_stream( struct stream_impl *is, Tree *tree )
+void colm_stream_push_stream( struct stream_impl *is, tree_t *tree )
 {
 	is->funcs->prependStream( is, tree );
 }
 
-void colm_undo_stream_push( Program *prg, Tree **sp, struct stream_impl *is, long length )
+void colm_undo_stream_push( program_t *prg, tree_t **sp, struct stream_impl *is, long length )
 {
 	if ( length < 0 ) {
-		Tree *tree = is->funcs->undoPrependTree( is );
+		tree_t *tree = is->funcs->undoPrependTree( is );
 		treeDownref( prg, sp, tree );
 	}
 	else {
@@ -183,7 +183,7 @@ static void send_back_text( struct stream_impl *is, const char *data, long lengt
 	is->funcs->undoConsumeData( is, data, length );
 }
 
-static void send_back_tree( struct stream_impl *is, Tree *tree )
+static void send_back_tree( struct stream_impl *is, tree_t *tree )
 {
 	is->funcs->undoConsumeTree( is, tree, false );
 }
@@ -192,8 +192,8 @@ static void send_back_tree( struct stream_impl *is, Tree *tree )
  * Stops on:
  *   PCR_REVERSE
  */
-static void send_back_ignore( Program *prg, Tree **sp,
-		struct pda_run *pdaRun, struct stream_impl *is, ParseTree *parseTree )
+static void send_back_ignore( program_t *prg, tree_t **sp,
+		struct pda_run *pdaRun, struct stream_impl *is, parse_tree_t *parseTree )
 {
 	#ifdef DEBUG
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
@@ -202,7 +202,7 @@ static void send_back_ignore( Program *prg, Tree **sp,
 		parseTree->flags & PF_ARTIFICIAL ? " (artificial)" : "" );
 	#endif
 
-	Head *head = parseTree->shadow->tree->tokdata;
+	head_t *head = parseTree->shadow->tree->tokdata;
 	int artificial = parseTree->flags & PF_ARTIFICIAL;
 
 	if ( head != 0 && !artificial )
@@ -238,8 +238,8 @@ static void reset_token( struct pda_run *pdaRun )
  *   PCR_REVERSE
  */
 
-static void send_back( Program *prg, Tree **sp, struct pda_run *pdaRun,
-		struct stream_impl *is, ParseTree *parseTree )
+static void send_back( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
+		struct stream_impl *is, parse_tree_t *parseTree )
 {
 	debug( prg, REALM_PARSE, "sending back: %s\n",
 			prg->rtd->lelInfo[parseTree->id].name );
@@ -297,7 +297,7 @@ static void send_back( Program *prg, Tree **sp, struct pda_run *pdaRun,
 	parseTreeFree( prg, parseTree );
 }
 
-static void set_region( struct pda_run *pdaRun, int emptyIgnore, ParseTree *tree )
+static void set_region( struct pda_run *pdaRun, int emptyIgnore, parse_tree_t *tree )
 {
 	if ( emptyIgnore ) {
 		/* Recording the next region. */
@@ -307,13 +307,13 @@ static void set_region( struct pda_run *pdaRun, int emptyIgnore, ParseTree *tree
 	}
 }
 
-static void ignore_tree( Program *prg, struct pda_run *pdaRun, Tree *tree )
+static void ignore_tree( program_t *prg, struct pda_run *pdaRun, tree_t *tree )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
 	colm_increment_steps( pdaRun );
 
-	ParseTree *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parseTreeAllocate( prg );
 	parseTree->shadow = kidAllocate( prg );
 	parseTree->shadow->tree = tree;
 
@@ -328,13 +328,13 @@ static void ignore_tree( Program *prg, struct pda_run *pdaRun, Tree *tree )
 	set_region( pdaRun, emptyIgnore, pdaRun->accumIgnore );
 }
 
-static void ignore_tree_art( Program *prg, struct pda_run *pdaRun, Tree *tree )
+static void ignore_tree_art( program_t *prg, struct pda_run *pdaRun, tree_t *tree )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
 	colm_increment_steps( pdaRun );
 
-	ParseTree *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parseTreeAllocate( prg );
 	parseTree->flags |= PF_ARTIFICIAL;
 	parseTree->shadow = kidAllocate( prg );
 	parseTree->shadow->tree = tree;
@@ -347,14 +347,14 @@ static void ignore_tree_art( Program *prg, struct pda_run *pdaRun, Tree *tree )
 	set_region( pdaRun, emptyIgnore, pdaRun->accumIgnore );
 }
 
-Kid *make_token_with_data( Program *prg, struct pda_run *pdaRun,
-		struct stream_impl *is, int id, Head *tokdata )
+kid_t *make_token_with_data( program_t *prg, struct pda_run *pdaRun,
+		struct stream_impl *is, int id, head_t *tokdata )
 {
 	/* Make the token object. */
 	long objectLength = prg->rtd->lelInfo[id].objectLength;
-	Kid *attrs = allocAttrs( prg, objectLength );
+	kid_t *attrs = allocAttrs( prg, objectLength );
 
-	Kid *input = 0;
+	kid_t *input = 0;
 	input = kidAllocate( prg );
 	input->tree = treeAllocate( prg );
 
@@ -372,11 +372,11 @@ Kid *make_token_with_data( Program *prg, struct pda_run *pdaRun,
 		int i;
 		for ( i = 0; i < lelInfo[id].numCaptureAttr; i++ ) {
 			CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[id].captureAttr + i];
-			Head *data = stringAllocFull( prg, 
+			head_t *data = stringAllocFull( prg, 
 					pdaRun->mark[ca->mark_enter],
 					pdaRun->mark[ca->mark_leave] -
 							pdaRun->mark[ca->mark_enter] );
-			Tree *string = constructString( prg, data );
+			tree_t *string = constructString( prg, data );
 			treeUpref( string );
 			colm_tree_set_field( prg, input->tree, ca->offset, string );
 		}
@@ -385,12 +385,12 @@ Kid *make_token_with_data( Program *prg, struct pda_run *pdaRun,
 	return input;
 }
 
-static void report_parse_error( Program *prg, Tree **sp, struct pda_run *pdaRun )
+static void report_parse_error( program_t *prg, tree_t **sp, struct pda_run *pdaRun )
 {
-	Kid *kid = pdaRun->btPoint;
-	Head *deepest = 0;
+	kid_t *kid = pdaRun->btPoint;
+	head_t *deepest = 0;
 	while ( kid != 0 ) {
-		Head *head = kid->tree->tokdata;
+		head_t *head = kid->tree->tokdata;
 		if ( head != 0 && head->location != 0 ) {
 			if ( deepest == 0 || head->location->byte > deepest->location->byte ) 
 				deepest = head;
@@ -398,7 +398,7 @@ static void report_parse_error( Program *prg, Tree **sp, struct pda_run *pdaRun 
 		kid = kid->next;
 	}
 
-	Head *errorHead = 0;
+	head_t *errorHead = 0;
 
 	/* If there are no error points on record assume the error occurred at the
 	 * beginning of the stream. */
@@ -442,14 +442,14 @@ static void report_parse_error( Program *prg, Tree **sp, struct pda_run *pdaRun 
 		errorHead->location->byte = byte;
 	}
 
-	Tree *tree = constructString( prg, errorHead );
+	tree_t *tree = constructString( prg, errorHead );
 	treeDownref( prg, sp, pdaRun->parseErrorText );
 	pdaRun->parseErrorText = tree;
 	treeUpref( pdaRun->parseErrorText );
 }
 
-static void attach_right_ignore( Program *prg, Tree **sp,
-		struct pda_run *pdaRun, ParseTree *parseTree )
+static void attach_right_ignore( program_t *prg, tree_t **sp,
+		struct pda_run *pdaRun, parse_tree_t *parseTree )
 {
 	if ( pdaRun->accumIgnore == 0 )
 		return;
@@ -463,9 +463,9 @@ static void attach_right_ignore( Program *prg, Tree **sp,
 		/* Reset. */
 		assert( ! ( parseTree->flags & PF_RIGHT_IL_ATTACHED ) );
 
-		ParseTree *accum = pdaRun->accumIgnore;
+		parse_tree_t *accum = pdaRun->accumIgnore;
 
-		ParseTree *stopAt = 0, *use = accum;
+		parse_tree_t *stopAt = 0, *use = accum;
 		while ( use != 0 ) {
 			if ( ! (use->flags & PF_RIGHT_IGNORE) )
 				stopAt = use;
@@ -485,12 +485,12 @@ static void attach_right_ignore( Program *prg, Tree **sp,
 
 		/* The data list needs to be extracted and reversed. The parse tree list
 		 * can remain in stack order. */
-		ParseTree *child = accum, *last = 0;
-		Kid *dataChild = 0, *dataLast = 0;
+		parse_tree_t *child = accum, *last = 0;
+		kid_t *dataChild = 0, *dataLast = 0;
 
 		while ( child ) {
 			dataChild = child->shadow;
-			ParseTree *next = child->next;
+			parse_tree_t *next = child->next;
 
 			/* Reverse the lists. */
 			dataChild->next = dataLast;
@@ -512,17 +512,17 @@ static void attach_right_ignore( Program *prg, Tree **sp,
 		if ( dataChild != 0 ) {
 			debug( prg, REALM_PARSE, "attaching ignore right\n" );
 
-			Kid *ignoreKid = dataLast;
+			kid_t *ignoreKid = dataLast;
 
 			/* Copy the ignore list first if we need to attach it as a right
 			 * ignore. */
-			Tree *rightIgnore = 0;
+			tree_t *rightIgnore = 0;
 
 			rightIgnore = treeAllocate( prg );
 			rightIgnore->id = LEL_ID_IGNORE;
 			rightIgnore->child = ignoreKid;
 
-			Tree *pushTo = parseTree->shadow->tree;
+			tree_t *pushTo = parseTree->shadow->tree;
 
 			pushTo = pushRightIgnore( prg, pushTo, rightIgnore );
 
@@ -533,23 +533,23 @@ static void attach_right_ignore( Program *prg, Tree **sp,
 	}
 }
 
-static void attach_left_ignore( Program *prg, Tree **sp,
-		struct pda_run *pdaRun, ParseTree *parseTree )
+static void attach_left_ignore( program_t *prg, tree_t **sp,
+		struct pda_run *pdaRun, parse_tree_t *parseTree )
 {
 	/* Reset. */
 	assert( ! ( parseTree->flags & PF_LEFT_IL_ATTACHED ) );
 
-	ParseTree *accum = pdaRun->accumIgnore;
+	parse_tree_t *accum = pdaRun->accumIgnore;
 	pdaRun->accumIgnore = 0;
 
 	/* The data list needs to be extracted and reversed. The parse tree list
 	 * can remain in stack order. */
-	ParseTree *child = accum, *last = 0;
-	Kid *dataChild = 0, *dataLast = 0;
+	parse_tree_t *child = accum, *last = 0;
+	kid_t *dataChild = 0, *dataLast = 0;
 
 	while ( child ) {
 		dataChild = child->shadow;
-		ParseTree *next = child->next;
+		parse_tree_t *next = child->next;
 
 		/* Reverse the lists. */
 		dataChild->next = dataLast;
@@ -571,14 +571,14 @@ static void attach_left_ignore( Program *prg, Tree **sp,
 	if ( dataChild != 0 ) {
 		debug( prg, REALM_PARSE, "attaching left ignore\n" );
 
-		Kid *ignoreKid = dataChild;
+		kid_t *ignoreKid = dataChild;
 
 		/* Make the ignore list for the left-ignore. */
-		Tree *leftIgnore = treeAllocate( prg );
+		tree_t *leftIgnore = treeAllocate( prg );
 		leftIgnore->id = LEL_ID_IGNORE;
 		leftIgnore->child = ignoreKid;
 
-		Tree *pushTo = parseTree->shadow->tree;
+		tree_t *pushTo = parseTree->shadow->tree;
 
 		pushTo = pushLeftIgnore( prg, pushTo, leftIgnore );
 
@@ -589,14 +589,14 @@ static void attach_left_ignore( Program *prg, Tree **sp,
 }
 
 /* Not currently used. Need to revive this. WARNING: untested changes here */
-static void detach_right_ignore( Program *prg, Tree **sp,
-		struct pda_run *pdaRun, ParseTree *parseTree )
+static void detach_right_ignore( program_t *prg, tree_t **sp,
+		struct pda_run *pdaRun, parse_tree_t *parseTree )
 {
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
-	Tree *rightIgnore = 0;
+	tree_t *rightIgnore = 0;
 	if ( parseTree->flags & PF_RIGHT_IL_ATTACHED ) {
-		Tree *popFrom = parseTree->shadow->tree;
+		tree_t *popFrom = parseTree->shadow->tree;
 
 		popFrom = popRightIgnore( prg, sp, popFrom, &rightIgnore );
 
@@ -609,17 +609,17 @@ static void detach_right_ignore( Program *prg, Tree **sp,
 		assert( rightIgnore != 0 );
 
 		/* Transfer the trees to accumIgnore. */
-		ParseTree *ignore = parseTree->rightIgnore;
+		parse_tree_t *ignore = parseTree->rightIgnore;
 		parseTree->rightIgnore = 0;
 
-		Kid *dataIgnore = rightIgnore->child;
+		kid_t *dataIgnore = rightIgnore->child;
 		rightIgnore->child = 0;
 
-		ParseTree *last = 0;
-		Kid *dataLast = 0;
+		parse_tree_t *last = 0;
+		kid_t *dataLast = 0;
 		while ( ignore != 0 ) {
-			ParseTree *next = ignore->next;
-			Kid *dataNext = dataIgnore->next;
+			parse_tree_t *next = ignore->next;
+			kid_t *dataNext = dataIgnore->next;
 
 			/* Put the data trees underneath the parse trees. */
 			ignore->shadow = dataIgnore;
@@ -642,13 +642,13 @@ static void detach_right_ignore( Program *prg, Tree **sp,
 	}
 }
 
-static void detach_left_ignore( Program *prg, Tree **sp,
-		struct pda_run *pdaRun, ParseTree *parseTree )
+static void detach_left_ignore( program_t *prg, tree_t **sp,
+		struct pda_run *pdaRun, parse_tree_t *parseTree )
 {
 	/* Detach left. */
-	Tree *leftIgnore = 0;
+	tree_t *leftIgnore = 0;
 	if ( parseTree->flags & PF_LEFT_IL_ATTACHED ) {
-		Tree *popFrom = parseTree->shadow->tree;
+		tree_t *popFrom = parseTree->shadow->tree;
 
 		popFrom = popLeftIgnore( prg, sp, popFrom, &leftIgnore );
 
@@ -661,17 +661,17 @@ static void detach_left_ignore( Program *prg, Tree **sp,
 		assert( leftIgnore != 0 );
 
 		/* Transfer the trees to accumIgnore. */
-		ParseTree *ignore = parseTree->leftIgnore;
+		parse_tree_t *ignore = parseTree->leftIgnore;
 		parseTree->leftIgnore = 0;
 
-		Kid *dataIgnore = leftIgnore->child;
+		kid_t *dataIgnore = leftIgnore->child;
 		leftIgnore->child = 0;
 
-		ParseTree *last = 0;
-		Kid *dataLast = 0;
+		parse_tree_t *last = 0;
+		kid_t *dataLast = 0;
 		while ( ignore != 0 ) {
-			ParseTree *next = ignore->next;
-			Kid *dataNext = dataIgnore->next;
+			parse_tree_t *next = ignore->next;
+			kid_t *dataNext = dataIgnore->next;
 
 			/* Put the data trees underneath the parse trees. */
 			ignore->shadow = dataIgnore;
@@ -703,7 +703,7 @@ static int is_parser_stop_finished( struct pda_run *pdaRun )
 	return done;
 }
 
-static void handle_error( Program *prg, Tree **sp, struct pda_run *pdaRun )
+static void handle_error( program_t *prg, tree_t **sp, struct pda_run *pdaRun )
 {
 	/* Check the result. */
 	if ( pdaRun->parseError ) {
@@ -718,7 +718,7 @@ static void handle_error( Program *prg, Tree **sp, struct pda_run *pdaRun )
 	}
 }
 
-static Head *extract_match( Program *prg, Tree **sp, struct pda_run *pdaRun, struct stream_impl *is )
+static head_t *extract_match( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is )
 {
 	long length = pdaRun->toklen;
 
@@ -734,7 +734,7 @@ static Head *extract_match( Program *prg, Tree **sp, struct pda_run *pdaRun, str
 	char *dest = runBuf->data + runBuf->length;
 
 	is->funcs->getData( is, dest, length );
-	Location *location = locationAllocate( prg );
+	location_t *location = locationAllocate( prg );
 	is->funcs->consumeData( prg, sp, is, length, location );
 
 	runBuf->length += length;
@@ -743,7 +743,7 @@ static Head *extract_match( Program *prg, Tree **sp, struct pda_run *pdaRun, str
 	pdaRun->toklen = 0;
 	pdaRun->tokstart = 0;
 
-	Head *head = colm_string_alloc_pointer( prg, dest, length );
+	head_t *head = colm_string_alloc_pointer( prg, dest, length );
 
 	head->location = location;
 
@@ -752,7 +752,7 @@ static Head *extract_match( Program *prg, Tree **sp, struct pda_run *pdaRun, str
 	return head;
 }
 
-static Head *peekMatch( Program *prg, struct pda_run *pdaRun, struct stream_impl *is )
+static head_t *peekMatch( program_t *prg, struct pda_run *pdaRun, struct stream_impl *is )
 {
 	long length = pdaRun->toklen;
 
@@ -770,7 +770,7 @@ static Head *peekMatch( Program *prg, struct pda_run *pdaRun, struct stream_impl
 	pdaRun->p = pdaRun->pe = 0;
 	pdaRun->toklen = 0;
 
-	Head *head = colm_string_alloc_pointer( prg, dest, length );
+	head_t *head = colm_string_alloc_pointer( prg, dest, length );
 
 	head->location = locationAllocate( prg );
 	head->location->line = is->line;
@@ -783,17 +783,17 @@ static Head *peekMatch( Program *prg, struct pda_run *pdaRun, struct stream_impl
 }
 
 
-static void send_ignore( Program *prg, Tree **sp,
+static void send_ignore( program_t *prg, tree_t **sp,
 		struct pda_run *pdaRun, struct stream_impl *is, long id )
 {
 	debug( prg, REALM_PARSE, "ignoring: %s\n", prg->rtd->lelInfo[id].name );
 
 	/* Make the ignore string. */
-	Head *ignoreStr = extract_match( prg, sp, pdaRun, is );
+	head_t *ignoreStr = extract_match( prg, sp, pdaRun, is );
 
 	debug( prg, REALM_PARSE, "ignoring: %.*s\n", ignoreStr->length, ignoreStr->data );
 
-	Tree *tree = treeAllocate( prg );
+	tree_t *tree = treeAllocate( prg );
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;
@@ -802,23 +802,23 @@ static void send_ignore( Program *prg, Tree **sp,
 	ignore_tree( prg, pdaRun, tree );
 }
 
-static void send_token( Program *prg, Tree **sp,
+static void send_token( program_t *prg, tree_t **sp,
 		struct pda_run *pdaRun, struct stream_impl *is, long id )
 {
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
 	/* Make the token data. */
-	Head *tokdata = extract_match( prg, sp, pdaRun, is );
+	head_t *tokdata = extract_match( prg, sp, pdaRun, is );
 
 	debug( prg, REALM_PARSE, "token: %s  text: %.*s\n",
 		prg->rtd->lelInfo[id].name,
 		stringLength(tokdata), stringData(tokdata) );
 
-	Kid *input = make_token_with_data( prg, pdaRun, is, id, tokdata );
+	kid_t *input = make_token_with_data( prg, pdaRun, is, id, tokdata );
 
 	colm_increment_steps( pdaRun );
 
-	ParseTree *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->shadow = input;
 		
@@ -829,14 +829,14 @@ static void send_token( Program *prg, Tree **sp,
 		set_region( pdaRun, emptyIgnore, parseTree );
 }
 
-static void send_tree( Program *prg, Tree **sp, struct pda_run *pdaRun, struct stream_impl *is )
+static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is )
 {
-	Kid *input = kidAllocate( prg );
+	kid_t *input = kidAllocate( prg );
 	input->tree = is->funcs->consumeTree( is );
 
 	colm_increment_steps( pdaRun );
 
-	ParseTree *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->flags |= PF_ARTIFICIAL;
 	parseTree->shadow = input;
@@ -844,13 +844,13 @@ static void send_tree( Program *prg, Tree **sp, struct pda_run *pdaRun, struct s
 	pdaRun->parseInput = parseTree;
 }
 
-static void send_ignore_tree( Program *prg, Tree **sp, struct pda_run *pdaRun, struct stream_impl *is )
+static void send_ignore_tree( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is )
 {
-	Tree *tree = is->funcs->consumeTree( is );
+	tree_t *tree = is->funcs->consumeTree( is );
 	ignore_tree_art( prg, pdaRun, tree );
 }
 
-static void send_collect_ignore( Program *prg, Tree **sp,
+static void send_collect_ignore( program_t *prg, tree_t **sp,
 		struct pda_run *pdaRun, struct stream_impl *is, int id )
 {
 	debug( prg, REALM_PARSE, "token: CI\n" );
@@ -858,7 +858,7 @@ static void send_collect_ignore( Program *prg, Tree **sp,
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
 	/* Make the token data. */
-	Head *tokdata = headAllocate( prg );
+	head_t *tokdata = headAllocate( prg );
 	tokdata->location = locationAllocate( prg );
 	tokdata->location->line = is->line;
 	tokdata->location->column = is->column;
@@ -868,11 +868,11 @@ static void send_collect_ignore( Program *prg, Tree **sp,
 		prg->rtd->lelInfo[id].name,
 		stringLength(tokdata), stringData(tokdata) );
 
-	Kid *input = make_token_with_data( prg, pdaRun, is, id, tokdata );
+	kid_t *input = make_token_with_data( prg, pdaRun, is, id, tokdata );
 
 	colm_increment_steps( pdaRun );
 
-	ParseTree *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->shadow = input;
 
@@ -894,19 +894,19 @@ static int get_next_pre_region( struct pda_run *pdaRun )
 	return pdaRun->pda_tables->tokenPreRegions[pdaRun->nextRegionInd];
 }
 
-static void send_eof( Program *prg, Tree **sp, struct pda_run *pdaRun, struct stream_impl *is )
+static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is )
 {
 	debug( prg, REALM_PARSE, "token: _EOF\n" );
 
 	colm_increment_steps( pdaRun );
 
-	Head *head = headAllocate( prg );
+	head_t *head = headAllocate( prg );
 	head->location = locationAllocate( prg );
 	head->location->line = is->line;
 	head->location->column = is->column;
 	head->location->byte = is->byte;
 
-	Kid *input = kidAllocate( prg );
+	kid_t *input = kidAllocate( prg );
 	input->tree = treeAllocate( prg );
 
 	input->tree->refs = 1;
@@ -918,14 +918,14 @@ static void send_eof( Program *prg, Tree **sp, struct pda_run *pdaRun, struct st
 	pdaRun->preRegion = get_next_pre_region( pdaRun );
 	pdaRun->fsm_cs = pdaRun->fsm_tables->entryByRegion[pdaRun->region];
 
-	ParseTree *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parseTreeAllocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->shadow = input;
 	
 	pdaRun->parseInput = parseTree;
 }
 
-static void new_token( Program *prg, struct pda_run *pdaRun )
+static void new_token( program_t *prg, struct pda_run *pdaRun )
 {
 	pdaRun->p = pdaRun->pe = 0;
 	pdaRun->toklen = 0;
@@ -953,9 +953,9 @@ static void new_token( Program *prg, struct pda_run *pdaRun )
 	memset( pdaRun->mark, 0, sizeof(pdaRun->mark) );
 }
 
-static void push_bt_point( Program *prg, struct pda_run *pdaRun )
+static void push_bt_point( program_t *prg, struct pda_run *pdaRun )
 {
-	Tree *tree = 0;
+	tree_t *tree = 0;
 	if ( pdaRun->accumIgnore != 0 ) 
 		tree = pdaRun->accumIgnore->shadow->tree;
 	else if ( pdaRun->tokenList != 0 )
@@ -966,7 +966,7 @@ static void push_bt_point( Program *prg, struct pda_run *pdaRun )
 				( tree != 0 && tree->tokdata != 0 && tree->tokdata->location != 0 ) ? 
 				tree->tokdata->location->byte : 0 );
 
-		Kid *kid = kidAllocate( prg );
+		kid_t *kid = kidAllocate( prg );
 		kid->tree = tree;
 		treeUpref( tree );
 		kid->next = pdaRun->btPoint;
@@ -983,7 +983,7 @@ static void push_bt_point( Program *prg, struct pda_run *pdaRun )
 #define SCAN_LANG_EL           -2
 #define SCAN_EOF               -1
 
-static long scan_token( Program *prg, struct pda_run *pdaRun, struct stream_impl *is )
+static long scan_token( program_t *prg, struct pda_run *pdaRun, struct stream_impl *is )
 {
 	if ( pdaRun->triggerUndo )
 		return SCAN_UNDO;
@@ -1082,7 +1082,7 @@ static long scan_token( Program *prg, struct pda_run *pdaRun, struct stream_impl
 	return SCAN_ERROR;
 }
 
-static Tree *get_parsed_root( struct pda_run *pdaRun, int stop )
+static tree_t *get_parsed_root( struct pda_run *pdaRun, int stop )
 {
 	if ( pdaRun->parseError )
 		return 0;
@@ -1097,9 +1097,9 @@ static Tree *get_parsed_root( struct pda_run *pdaRun, int stop )
 	return 0;
 }
 
-static void clear_parse_tree( Program *prg, Tree **sp, ParseTree *pt )
+static void clear_parse_tree( program_t *prg, tree_t **sp, parse_tree_t *pt )
 {
-	Tree **top = vm_ptop();
+	tree_t **top = vm_ptop();
 
 	if ( pt == 0 )
 		return;
@@ -1135,7 +1135,7 @@ free_tree:
 	}
 }
 
-void colm_pda_clear( Program *prg, Tree **sp, struct pda_run *pdaRun )
+void colm_pda_clear( program_t *prg, tree_t **sp, struct pda_run *pdaRun )
 {
 	clear_fsm_run( prg, pdaRun );
 
@@ -1144,20 +1144,20 @@ void colm_pda_clear( Program *prg, Tree **sp, struct pda_run *pdaRun )
 	pdaRun->stackTop = 0;
 
 	/* Traverse the token list downreffing. */
-	Ref *ref = pdaRun->tokenList;
+	ref_t *ref = pdaRun->tokenList;
 	while ( ref != 0 ) {
-		Ref *next = ref->next;
-		kidFree( prg, (Kid*)ref );
+		ref_t *next = ref->next;
+		kidFree( prg, (kid_t*)ref );
 		ref = next;
 	}
 	pdaRun->tokenList = 0;
 
 	/* Traverse the btPoint list downreffing */
-	Kid *btp = pdaRun->btPoint;
+	kid_t *btp = pdaRun->btPoint;
 	while ( btp != 0 ) {
-		Kid *next = btp->next;
+		kid_t *next = btp->next;
 		treeDownref( prg, sp, btp->tree );
-		kidFree( prg, (Kid*)btp );
+		kidFree( prg, (kid_t*)btp );
 		btp = next;
 	}
 	pdaRun->btPoint = 0;
@@ -1177,8 +1177,8 @@ void colm_pda_clear( Program *prg, Tree **sp, struct pda_run *pdaRun )
 	treeDownref( prg, sp, pdaRun->parseErrorText );
 }
 
-void colm_pda_init( Program *prg, struct pda_run *pdaRun, struct pda_tables *tables,
-		int parserId, long stopTarget, int revertOn, Struct *context )
+void colm_pda_init( program_t *prg, struct pda_run *pdaRun, struct pda_tables *tables,
+		int parserId, long stopTarget, int revertOn, struct_t *context )
 {
 	memset( pdaRun, 0, sizeof(struct pda_run) );
 
@@ -1193,7 +1193,7 @@ void colm_pda_init( Program *prg, struct pda_run *pdaRun, struct pda_tables *tab
 	/* FIXME: need the right one here. */
 	pdaRun->pda_cs = prg->rtd->startStates[pdaRun->parserId];
 
-	Kid *sentinal = kidAllocate( prg );
+	kid_t *sentinal = kidAllocate( prg );
 	sentinal->tree = treeAllocate( prg );
 	sentinal->tree->refs = 1;
 
@@ -1232,7 +1232,7 @@ void colm_pda_init( Program *prg, struct pda_run *pdaRun, struct pda_tables *tab
 	new_token( prg, pdaRun );
 }
 
-static long stack_top_target( Program *prg, struct pda_run *pdaRun )
+static long stack_top_target( program_t *prg, struct pda_run *pdaRun )
 {
 	long state;
 	if ( pdaRun->stackTop->state < 0 )
@@ -1261,7 +1261,7 @@ static long stack_top_target( Program *prg, struct pda_run *pdaRun )
  * 		-clears all alg structures
  */
 
-static int been_committed( ParseTree *parseTree )
+static int been_committed( parse_tree_t *parseTree )
 {
 	return parseTree->flags & PF_COMMITTED;
 }
@@ -1277,12 +1277,12 @@ static code_t *backup_over_rcode( code_t *rcode )
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-static void commit_kid( Program *prg, struct pda_run *pdaRun, Tree **root,
-		ParseTree *lel, code_t **rcode, long *causeReduce )
+static void commit_kid( program_t *prg, struct pda_run *pdaRun, tree_t **root,
+		parse_tree_t *lel, code_t **rcode, long *causeReduce )
 {
-	ParseTree *tree = 0;
-	Tree **sp = root;
-	//Tree *restore = 0;
+	parse_tree_t *tree = 0;
+	tree_t **sp = root;
+	//tree_t *restore = 0;
 
 head:
 	/* Commit */
@@ -1373,7 +1373,7 @@ head:
 
 backup:
 	if ( sp != root ) {
-		ParseTree *next = vm_pop_ptree();
+		parse_tree_t *next = vm_pop_ptree();
 		if ( next->next == lel ) {
 			/* Moving backwards. */
 			lel = next;
@@ -1393,11 +1393,11 @@ backup:
 	assert( sp == root );
 }
 
-static void commit_full( Program *prg, Tree **sp, struct pda_run *pdaRun, long causeReduce )
+static void commit_full( program_t *prg, tree_t **sp, struct pda_run *pdaRun, long causeReduce )
 {
 	debug( prg, REALM_PARSE, "running full commit\n" );
 	
-	ParseTree *parseTree = pdaRun->stackTop;
+	parse_tree_t *parseTree = pdaRun->stackTop;
 	code_t *rcode = pdaRun->reverseCode.data + pdaRun->reverseCode.tabLen;
 
 	/* The top level of the stack is linked right to left. This is the
@@ -1423,7 +1423,7 @@ static void commit_full( Program *prg, Tree **sp, struct pda_run *pdaRun, long c
  *   PCR_REDUCTION
  *   PCR_REVERSE
  */
-static long parse_token( Program *prg, Tree **sp,
+static long parse_token( program_t *prg, tree_t **sp,
 		struct pda_run *pdaRun, struct stream_impl *is, long entry )
 {
 	int pos;
@@ -1516,7 +1516,7 @@ again:
 		if ( pdaRun->lel->id < prg->rtd->firstNonTermId ) {
 			attach_left_ignore( prg, sp, pdaRun, pdaRun->lel );
 
-			Ref *ref = (Ref*)kidAllocate( prg );
+			ref_t *ref = (ref_t*)kidAllocate( prg );
 			ref->kid = pdaRun->lel->shadow;
 			//treeUpref( pdaRun->tree );
 			ref->next = pdaRun->tokenList;
@@ -1558,9 +1558,9 @@ again:
 
 	if ( *action & act_rb ) {
 		int r, objectLength;
-		ParseTree *last, *child;
-		Kid *attrs;
-		Kid *dataLast, *dataChild;
+		parse_tree_t *last, *child;
+		kid_t *attrs;
+		kid_t *dataLast, *dataChild;
 
 		/* If there was shift don't attach again. */
 		if ( !( *action & act_sb ) && pdaRun->lel->id < prg->rtd->firstNonTermId )
@@ -1571,7 +1571,7 @@ again:
 		if ( pdaRun->parseInput != 0 )
 			pdaRun->parseInput->causeReduce += 1;
 
-		Kid *value = kidAllocate( prg );
+		kid_t *value = kidAllocate( prg );
 		value->tree = treeAllocate( prg );
 		value->tree->refs = 1;
 		value->tree->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
@@ -1662,7 +1662,7 @@ again:
 							"adding a restore instruction\n" );
 //
 //					/* Make it into a parse tree. */
-//					Tree *newPt = prepParseTree( prg, sp, pdaRun->redLel->tree );
+//					tree_t *newPt = prepParseTree( prg, sp, pdaRun->redLel->tree );
 //					treeDownref( prg, sp, pdaRun->redLel->tree );
 //
 //					/* Copy it in. */
@@ -1832,18 +1832,18 @@ parseError:
 				pdaRun->parseInput = pdaRun->parseInput->next;
 
 				/* Extract children from the child list. */
-				ParseTree *first = pdaRun->undoLel->child;
+				parse_tree_t *first = pdaRun->undoLel->child;
 				pdaRun->undoLel->child = 0;
 
 				/* This will skip the ignores/attributes, etc. */
-				Kid *dataFirst = treeExtractChild( prg, pdaRun->undoLel->shadow->tree );
+				kid_t *dataFirst = treeExtractChild( prg, pdaRun->undoLel->shadow->tree );
 
 				/* Walk the child list and and push the items onto the parsing
 				 * stack one at a time. */
 				while ( first != 0 ) {
 					/* Get the next item ahead of time. */
-					ParseTree *next = first->next;
-					Kid *dataNext = dataFirst->next;
+					parse_tree_t *next = first->next;
+					kid_t *dataNext = dataFirst->next;
 
 					/* Push onto the stack. */
 					first->next = pdaRun->stackTop;
@@ -1890,7 +1890,7 @@ parseError:
 
 			/* Send back any accumulated ignore tokens, then trigger error
 			 * in the the parser. */
-			ParseTree *ignore = pdaRun->accumIgnore;
+			parse_tree_t *ignore = pdaRun->accumIgnore;
 			pdaRun->accumIgnore = pdaRun->accumIgnore->next;
 			ignore->next = 0;
 
@@ -1938,9 +1938,9 @@ parseError:
 				pdaRun->parseInput = pdaRun->undoLel;
 
 				/* Pop from the token list. */
-				Ref *ref = pdaRun->tokenList;
+				ref_t *ref = pdaRun->tokenList;
 				pdaRun->tokenList = ref->next;
-				kidFree( prg, (Kid*)ref );
+				kidFree( prg, (kid_t*)ref );
 
 				assert( pdaRun->accumIgnore == 0 );
 				detach_left_ignore( prg, sp, pdaRun, pdaRun->parseInput );
@@ -1992,7 +1992,7 @@ _out:
  *   PCR_REVERSE
  */
 
-long colm_parse_loop( Program *prg, Tree **sp, struct pda_run *pdaRun, 
+long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pdaRun, 
 		struct stream_impl *is, long entry )
 {
 	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
@@ -2229,8 +2229,8 @@ skipSend:
 }
 
 
-long colm_parse_frag( Program *prg, Tree **sp, struct pda_run *pdaRun,
-		Stream *input, long stopId, long entry )
+long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
+		stream_t *input, long stopId, long entry )
 {
 	/* COROUTINE */
 	switch ( entry ) {
@@ -2263,8 +2263,8 @@ long colm_parse_frag( Program *prg, Tree **sp, struct pda_run *pdaRun,
 	return PCR_DONE;
 }
 
-long colm_parse_finish( Tree **result, Program *prg, Tree **sp,
-		struct pda_run *pdaRun, Stream *input , int revertOn, long entry )
+long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
+		struct pda_run *pdaRun, stream_t *input , int revertOn, long entry )
 {
 	struct stream_impl *si;
 
@@ -2303,7 +2303,7 @@ long colm_parse_finish( Tree **result, Program *prg, Tree **sp,
 	if ( !revertOn )
 		commit_full( prg, sp, pdaRun, 0 );
 	
-	Tree *tree = get_parsed_root( pdaRun, pdaRun->stopTarget > 0 );
+	tree_t *tree = get_parsed_root( pdaRun, pdaRun->stopTarget > 0 );
 	treeUpref( tree );
 
 	*result = tree;
@@ -2315,8 +2315,8 @@ long colm_parse_finish( Tree **result, Program *prg, Tree **sp,
 	return PCR_DONE;
 }
 
-long colm_parse_undo_frag( Program *prg, Tree **sp, struct pda_run *pdaRun,
-		Stream *input, long steps, long entry )
+long colm_parse_undo_frag( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
+		stream_t *input, long steps, long entry )
 {
 	debug( prg, REALM_PARSE,
 			"undo parse frag, target steps: %ld, pdarun steps: %ld\n",

@@ -298,20 +298,20 @@ long sizeOfField( UniqueType *fieldUT )
 			case IterDef::Child:
 			case IterDef::Repeat:
 			case IterDef::RevRepeat:
-				size = sizeof(TreeIter) / sizeof(word_t);
+				size = sizeof(tree_iter_t) / sizeof(word_t);
 				break;
 
 			case IterDef::RevChild:
-				size = sizeof(RevTreeIter) / sizeof(word_t);
+				size = sizeof(rev_tree_iter_t) / sizeof(word_t);
 				break;
 
 			case IterDef::Map:
 			case IterDef::List:
-				size = sizeof(GenericIter) / sizeof(word_t);
+				size = sizeof(generic_iter_t) / sizeof(word_t);
 				break;
 
 			case IterDef::User:
-				/* User iterators are just a pointer to the UserIter struct. The
+				/* User iterators are just a pointer to the user_iter_t struct. The
 				 * struct needs to go right beneath the call to the user iterator
 				 * so it can be found by a yield. It is therefore allocated on the
 				 * stack right before the call. */

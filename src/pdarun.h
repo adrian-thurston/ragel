@@ -86,17 +86,17 @@ struct rt_code_vect
 	/* FIXME: leak when freed. */
 };
 
-void listAddAfter( List *list, ListEl *prev_el, ListEl *new_el );
-void listAddBefore( List *list, ListEl *next_el, ListEl *new_el );
+void listAddAfter( list_t *list, list_el_t *prev_el, list_el_t *new_el );
+void listAddBefore( list_t *list, list_el_t *next_el, list_el_t *new_el );
 
-void listPrepend( List *list, ListEl *new_el );
-void listAppend( List *list, ListEl *new_el );
+void listPrepend( list_t *list, list_el_t *new_el );
+void listAppend( list_t *list, list_el_t *new_el );
 
-ListEl *listDetach( List *list, ListEl *el );
-ListEl *listDetachFirst(List *list );
-ListEl *listDetachLast(List *list );
+list_el_t *listDetach( list_t *list, list_el_t *el );
+list_el_t *listDetachFirst(list_t *list );
+list_el_t *listDetachLast(list_t *list );
 
-long listLength(List *list);
+long listLength(list_t *list);
 
 struct function_info
 {
@@ -287,8 +287,8 @@ struct pda_run
 	 * Parsing
 	 */
 	int numRetry;
-	ParseTree *stackTop;
-	Ref *tokenList;
+	parse_tree_t *stackTop;
+	ref_t *tokenList;
 	int pda_cs;
 	int nextRegionInd;
 
@@ -302,9 +302,9 @@ struct pda_run
 	int stopParsing;
 	long stopTarget;
 
-	ParseTree *accumIgnore;
+	parse_tree_t *accumIgnore;
 
-	Kid *btPoint;
+	kid_t *btPoint;
 
 	struct bindings *bindings;
 
@@ -326,26 +326,26 @@ struct pda_run
 	 * Data we added when refactoring the parsing engine into a coroutine.
 	 */
 
-	ParseTree *parseInput;
+	parse_tree_t *parseInput;
 	struct frame_info *fi;
 	int reduction;
-	ParseTree *redLel;
+	parse_tree_t *redLel;
 	int curState;
-	ParseTree *lel;
+	parse_tree_t *lel;
 	int triggerUndo;
 
 	int tokenId;
-	Head *tokdata;
+	head_t *tokdata;
 	int frameId;
 	int next;
-	ParseTree *undoLel;
+	parse_tree_t *undoLel;
 
 	int checkNext;
 	int checkStop;
 
 	/* The lhs is sometimes saved before reduction actions in case it is
 	 * replaced and we need to restore it on backtracking */
-	Tree *parsed;
+	tree_t *parsed;
 
 	int reject;
 
@@ -354,7 +354,7 @@ struct pda_run
 
 	int rcBlockCount;
 
-	Tree *parseErrorText;
+	tree_t *parseErrorText;
 };
 
 void colm_pda_init( struct colm_program *prg, struct pda_run *pdaRun,
@@ -411,8 +411,8 @@ inline static void append_word( struct rt_code_vect *vect, word_t word )
 void colm_increment_steps( struct pda_run *pdaRun );
 void colm_decrement_steps( struct pda_run *pdaRun );
 
-void colm_clear_stream_impl( struct colm_program *prg, Tree **sp, struct stream_impl *inputStream );
-void colm_clear_source_stream( struct colm_program *prg, Tree **sp, struct stream_impl *sourceStream );
+void colm_clear_stream_impl( struct colm_program *prg, tree_t **sp, struct stream_impl *inputStream );
+void colm_clear_source_stream( struct colm_program *prg, tree_t **sp, struct stream_impl *sourceStream );
 
 #define PCR_START         1
 #define PCR_DONE          2
@@ -421,28 +421,28 @@ void colm_clear_source_stream( struct colm_program *prg, Tree **sp, struct strea
 #define PCR_PRE_EOF       5
 #define PCR_REVERSE       6
 
-Head *colm_stream_pull( struct colm_program *prg, struct colm_tree **sp,
+head_t *colm_stream_pull( struct colm_program *prg, struct colm_tree **sp,
 		struct pda_run *pdaRun, struct stream_impl *is, long length );
-Head *colm_string_alloc_pointer( struct colm_program *prg, const char *data, long length );
+head_t *colm_string_alloc_pointer( struct colm_program *prg, const char *data, long length );
 
 void colm_stream_push_text( struct stream_impl *inputStream, const char *data, long length );
-void colm_stream_push_tree( struct stream_impl *inputStream, Tree *tree, int ignore );
-void colm_stream_push_stream( struct stream_impl *inputStream, Tree *tree );
-void colm_undo_stream_push( struct colm_program *prg, Tree **sp,
+void colm_stream_push_tree( struct stream_impl *inputStream, tree_t *tree, int ignore );
+void colm_stream_push_stream( struct stream_impl *inputStream, tree_t *tree );
+void colm_undo_stream_push( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *inputStream, long length );
 
-Kid *make_token_with_data( struct colm_program *prg, struct pda_run *pdaRun,
-		struct stream_impl *inputStream, int id, Head *tokdata );
+kid_t *make_token_with_data( struct colm_program *prg, struct pda_run *pdaRun,
+		struct stream_impl *inputStream, int id, head_t *tokdata );
 
-long colm_parse_loop( struct colm_program *prg, Tree **sp, struct pda_run *pdaRun, 
+long colm_parse_loop( struct colm_program *prg, tree_t **sp, struct pda_run *pdaRun, 
 		struct stream_impl *inputStream, long entry );
 
-long colm_parse_frag( struct colm_program *prg, Tree **sp, struct pda_run *pdaRun,
-		Stream *input, long stopId, long entry );
-long colm_parse_finish( Tree **result, struct colm_program *prg, Tree **sp,
-		struct pda_run *pdaRun, Stream *input , int revertOn, long entry );
-long colm_parse_undo_frag( struct colm_program *prg, Tree **sp, struct pda_run *pdaRun,
-		Stream *input, long steps, long entry );
+long colm_parse_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pdaRun,
+		stream_t *input, long stopId, long entry );
+long colm_parse_finish( tree_t **result, struct colm_program *prg, tree_t **sp,
+		struct pda_run *pdaRun, stream_t *input , int revertOn, long entry );
+long colm_parse_undo_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pdaRun,
+		stream_t *input, long steps, long entry );
 
 #ifdef __cplusplus
 }

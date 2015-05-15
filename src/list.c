@@ -27,91 +27,91 @@
 #include <stdlib.h>
 #include <assert.h>
 
-static void colm_list_add_after( List *list, ListEl *prev_el, ListEl *new_el );
-static void colm_list_add_before( List *list, ListEl *next_el, ListEl *new_el);
-ListEl *colm_list_detach( List *list, ListEl *el );
+static void colm_list_add_after( list_t *list, list_el_t *prev_el, list_el_t *new_el );
+static void colm_list_add_before( list_t *list, list_el_t *next_el, list_el_t *new_el);
+list_el_t *colm_list_detach( list_t *list, list_el_t *el );
 
-void colm_list_prepend( List *list, ListEl *newEl )
+void colm_list_prepend( list_t *list, list_el_t *newEl )
 {
 	colm_list_add_before( list, list->head, newEl );
 }
 
-void colm_list_append( List *list, ListEl *newEl )
+void colm_list_append( list_t *list, list_el_t *newEl )
 {
 	colm_list_add_after( list, list->tail, newEl );
 }
 
-ListEl *colm_list_detach_head( List *list )
+list_el_t *colm_list_detach_head( list_t *list )
 {
 	return colm_list_detach( list, list->head );
 }
 
-ListEl *colm_list_detach_tail( List *list )
+list_el_t *colm_list_detach_tail( list_t *list )
 {
 	return colm_list_detach( list, list->tail );
 }
 
-long colm_list_length( List *list )
+long colm_list_length( list_t *list )
 {
 	return list->listLen;
 }
 
-void colm_vlist_append( struct colm_program *prg, List *list, Value value )
+void colm_vlist_append( struct colm_program *prg, list_t *list, value_t value )
 {
 	struct colm_struct *s = colm_struct_new( prg, list->genericInfo->elStructId );
 
-	colm_struct_set_field( s, Value, 0, value );
+	colm_struct_set_field( s, value_t, 0, value );
 
-	ListEl *listEl = colm_struct_get_addr( s, ListEl*, list->genericInfo->elOffset );
+	list_el_t *listEl = colm_struct_get_addr( s, list_el_t*, list->genericInfo->elOffset );
 
 	colm_list_append( list, listEl );
 }
 
-void colm_vlist_prepend( struct colm_program *prg, List *list, Value value )
+void colm_vlist_prepend( struct colm_program *prg, list_t *list, value_t value )
 {
 	struct colm_struct *s = colm_struct_new( prg, list->genericInfo->elStructId );
 
-	colm_struct_set_field( s, Value, 0, value );
+	colm_struct_set_field( s, value_t, 0, value );
 
-	ListEl *listEl = colm_struct_get_addr( s, ListEl*, list->genericInfo->elOffset );
+	list_el_t *listEl = colm_struct_get_addr( s, list_el_t*, list->genericInfo->elOffset );
 
 	colm_list_prepend( list, listEl );
 }
 
-Value colm_vlist_detach_tail( struct colm_program *prg, List *list )
+value_t colm_vlist_detach_tail( struct colm_program *prg, list_t *list )
 {
-	ListEl *listEl = list->tail;
+	list_el_t *listEl = list->tail;
 	colm_list_detach( list, listEl );
 
 	struct colm_struct *s = colm_generic_el_container( prg, listEl,
 			(list->genericInfo - prg->rtd->genericInfo) );
 
-	Value val = colm_struct_get_field( s, Value, 0 );
+	value_t val = colm_struct_get_field( s, value_t, 0 );
 
 	if ( list->genericInfo->valueType == TYPE_TREE )
-		treeUpref( (Tree*)val );
+		treeUpref( (tree_t*)val );
 
 	return val;
 }
 
-Value colm_vlist_detach_head( struct colm_program *prg, List *list )
+value_t colm_vlist_detach_head( struct colm_program *prg, list_t *list )
 {
-	ListEl *listEl = list->head;
+	list_el_t *listEl = list->head;
 	colm_list_detach( list, listEl );
 
 	struct colm_struct *s = colm_generic_el_container( prg, listEl,
 			(list->genericInfo - prg->rtd->genericInfo) );
 
-	Value val = colm_struct_get_field( s, Value, 0 );
+	value_t val = colm_struct_get_field( s, value_t, 0 );
 
 	if ( list->genericInfo->valueType == TYPE_TREE )
-		treeUpref( (Tree*) val );
+		treeUpref( (tree_t*) val );
 
 	return val;
 }
 
 
-static void colm_list_add_after( List *list, ListEl *prev_el, ListEl *new_el )
+static void colm_list_add_after( list_t *list, list_el_t *prev_el, list_el_t *new_el )
 {
 	/* Set the previous pointer of new_el to prev_el. We do
 	 * this regardless of the state of the list. */
@@ -143,7 +143,7 @@ static void colm_list_add_after( List *list, ListEl *prev_el, ListEl *new_el )
 	list->listLen++;
 }
 
-static void colm_list_add_before( List *list, ListEl *next_el, ListEl *new_el)
+static void colm_list_add_before( list_t *list, list_el_t *next_el, list_el_t *new_el)
 {
 	/* Set the next pointer of the new element to next_el. We do
 	 * this regardless of the state of the list. */
@@ -174,7 +174,7 @@ static void colm_list_add_before( List *list, ListEl *next_el, ListEl *new_el)
 	list->listLen++;
 }
 
-ListEl *colm_list_detach( List *list, ListEl *el )
+list_el_t *colm_list_detach( list_t *list, list_el_t *el )
 {
 	/* Set forward pointers to skip over el. */
 	if (el->list_prev == 0) 
@@ -193,11 +193,11 @@ ListEl *colm_list_detach( List *list, ListEl *el )
 	return el;
 }
 
-void colm_list_destroy( struct colm_program *prg, Tree **sp, struct colm_struct *s )
+void colm_list_destroy( struct colm_program *prg, tree_t **sp, struct colm_struct *s )
 {
 }
 
-List *colm_list_new( struct colm_program *prg )
+list_t *colm_list_new( struct colm_program *prg )
 {
 	size_t memsize = sizeof(struct colm_list);
 	struct colm_list *list = (struct colm_list*) malloc( memsize );
@@ -209,10 +209,10 @@ List *colm_list_new( struct colm_program *prg )
 }
 
 struct colm_struct *colm_list_get( struct colm_program *prg,
-		List *list, word_t genId, word_t field )
+		list_t *list, word_t genId, word_t field )
 {
 	struct generic_info *gi = &prg->rtd->genericInfo[genId];
-	ListEl *result = 0;
+	list_el_t *result = 0;
 	switch ( field ) {
 		case 0: 
 			result = list->head;
@@ -231,10 +231,10 @@ struct colm_struct *colm_list_get( struct colm_program *prg,
 }
 
 struct colm_struct *colm_list_el_get( struct colm_program *prg,
-		ListEl *listEl, word_t genId, word_t field )
+		list_el_t *listEl, word_t genId, word_t field )
 {
 	struct generic_info *gi = &prg->rtd->genericInfo[genId];
-	ListEl *result = 0;
+	list_el_t *result = 0;
 	switch ( field ) {
 		case 0: 
 			result = listEl->list_prev;

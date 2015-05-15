@@ -30,48 +30,49 @@ extern "C" {
 #include <colm/struct.h>
 #include "internal.h"
 
-void mapListAbandon( Map *map );
+void mapListAbandon( map_t *map );
 
-void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el );
-void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el );
-MapEl *mapListDetach( Map *map, MapEl *el );
-void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess );
-void mapDeleteChildrenOf( Map *map, MapEl *element );
-void mapEmpty( Map *map );
-MapEl *mapRebalance( Map *map, MapEl *n );
-void mapRecalcHeights( Map *map, MapEl *element );
-MapEl *mapFindFirstUnbalGP( Map *map, MapEl *element );
-MapEl *mapFindFirstUnbalEl( Map *map, MapEl *element );
-void mapRemoveEl( Map *map, MapEl *element, MapEl *filler );
-void mapReplaceEl( Map *map, MapEl *element, MapEl *replacement );
-MapEl *mapInsertEl( Program *prg, Map *map, MapEl *element, MapEl **lastFound );
-MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound );
-MapEl *mapImplFind( Program *prg, Map *map, Tree *key );
-MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key );
-MapEl *mapDetach( Program *prg, Map *map, MapEl *element );
-MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid **newNextDown );
+void mapListAddBefore( map_t *map, map_el_t *next_el, map_el_t *new_el );
+void mapListAddAfter( map_t *map, map_el_t *prev_el, map_el_t *new_el );
+map_el_t *mapListDetach( map_t *map, map_el_t *el );
+void mapAttachRebal( map_t *map, map_el_t *element, map_el_t *parentEl, map_el_t *lastLess );
+void mapDeleteChildrenOf( map_t *map, map_el_t *element );
+void mapEmpty( map_t *map );
+map_el_t *mapRebalance( map_t *map, map_el_t *n );
+void mapRecalcHeights( map_t *map, map_el_t *element );
+map_el_t *mapFindFirstUnbalGP( map_t *map, map_el_t *element );
+map_el_t *mapFindFirstUnbalEl( map_t *map, map_el_t *element );
+void mapRemoveEl( map_t *map, map_el_t *element, map_el_t *filler );
+void mapReplaceEl( map_t *map, map_el_t *element, map_el_t *replacement );
+map_el_t *mapInsertEl( program_t *prg, map_t *map, map_el_t *element, map_el_t **lastFound );
+map_el_t *mapInsertKey( program_t *prg, map_t *map, tree_t *key, map_el_t **lastFound );
+map_el_t *mapImplFind( program_t *prg, map_t *map, tree_t *key );
+map_el_t *mapDetachByKey( program_t *prg, map_t *map, tree_t *key );
+map_el_t *mapDetach( program_t *prg, map_t *map, map_el_t *element );
+map_el_t *mapCopyBranch( program_t *prg, map_t *map, map_el_t *el,
+		kid_t *oldNextDown, kid_t **newNextDown );
 
-long cmpTree( Program *prg, const Tree *tree1, const Tree *tree2 );
+long cmpTree( program_t *prg, const tree_t *tree1, const tree_t *tree2 );
 
-void mapImplRemoveEl( Program *prg, Map *map, MapEl *element );
-int mapImplRemoveKey( Program *prg, Map *map, Tree *key );
+void mapImplRemoveEl( program_t *prg, map_t *map, map_el_t *element );
+int mapImplRemoveKey( program_t *prg, map_t *map, tree_t *key );
 
-Tree *mapFind( Program *prg, Map *map, Tree *key );
-long mapLength( Map *map );
-Tree *mapUnstore( Program *prg, Map *map, Tree *key, Tree *existing );
-int mapInsert( Program *prg, Map *map, Tree *key, Tree *element );
-void mapUnremove( Program *prg, Map *map, Tree *key, Tree *element );
-Tree *mapUninsert( Program *prg, Map *map, Tree *key );
-Tree *mapStore( Program *prg, Map *map, Tree *key, Tree *element );
+tree_t *mapFind( program_t *prg, map_t *map, tree_t *key );
+long mapLength( map_t *map );
+tree_t *mapUnstore( program_t *prg, map_t *map, tree_t *key, tree_t *existing );
+int mapInsert( program_t *prg, map_t *map, tree_t *key, tree_t *element );
+void mapUnremove( program_t *prg, map_t *map, tree_t *key, tree_t *element );
+tree_t *mapUninsert( program_t *prg, map_t *map, tree_t *key );
+tree_t *mapStore( program_t *prg, map_t *map, tree_t *key, tree_t *element );
 
-MapEl *colm_map_insert( Program *prg, Map *map, MapEl *mapEl );
-void colm_map_detach( Program *prg, Map *map, MapEl *mapEl );
-MapEl *colm_map_find( Program *prg, Map *map, Tree *key );
+map_el_t *colm_map_insert( program_t *prg, map_t *map, map_el_t *mapEl );
+void colm_map_detach( program_t *prg, map_t *map, map_el_t *mapEl );
+map_el_t *colm_map_find( program_t *prg, map_t *map, tree_t *key );
 
-MapEl *colm_vmap_insert( Program *prg, Map *map, Struct *key, Struct *value );
-MapEl *colm_vmap_remove( Program *prg, Map *map, Tree *key );
-Tree *colm_map_iter_advance( Program *prg, Tree ***psp, GenericIter *iter );
-Tree *colm_vmap_find( Program *prg, Map *map, Tree *key );
+map_el_t *colm_vmap_insert( program_t *prg, map_t *map, struct_t *key, struct_t *value );
+map_el_t *colm_vmap_remove( program_t *prg, map_t *map, tree_t *key );
+tree_t *colm_map_iter_advance( program_t *prg, tree_t ***psp, generic_iter_t *iter );
+tree_t *colm_vmap_find( program_t *prg, map_t *map, tree_t *key );
 
 #if defined(__cplusplus)
 }

@@ -26,7 +26,7 @@
 
 struct stack_block
 {
-	Tree **data;
+	tree_t **data;
 	int len;
 	int offset;
 	struct stack_block *next;
@@ -69,7 +69,7 @@ struct colm_sections
 
 	const char **litdata;
 	long *litlen;
-	Head **literals;
+	head_t **literals;
 	long numLiterals;
 
 	CaptureAttr *captureAttr;
@@ -95,10 +95,10 @@ struct colm_sections
 	long argvElId;
 
 	void (*fsm_execute)( struct pda_run *pdaRun, struct stream_impl *inputStream );
-	void (*sendNamedLangEl)( struct colm_program *prg, Tree **tree,
+	void (*sendNamedLangEl)( struct colm_program *prg, tree_t **tree,
 			struct pda_run *pdaRun, struct stream_impl *inputStream );
 	void (*initBindings)( struct pda_run *pdaRun );
-	void (*popBinding)( struct pda_run *pdaRun, ParseTree *tree );
+	void (*popBinding)( struct pda_run *pdaRun, parse_tree_t *tree );
 
 };
 
@@ -127,29 +127,29 @@ struct colm_program
 	struct pool_alloc headPool;
 	struct pool_alloc locationPool;
 
-	Tree *trueVal;
-	Tree *falseVal;
+	tree_t *trueVal;
+	tree_t *falseVal;
 
 	struct heap_list heap;
 
-	Stream *stdinVal;
-	Stream *stdoutVal;
-	Stream *stderrVal;
+	stream_t *stdinVal;
+	stream_t *stdoutVal;
+	stream_t *stderrVal;
 
-	Tree *error;
+	tree_t *error;
 
 	RunBuf *allocRunBuf;
 
 	/* Current stack block limits. Changed when crossing block boundaries. */
-	Tree **sb_beg;
-	Tree **sb_end;
+	tree_t **sb_beg;
+	tree_t **sb_end;
 	long sb_total;
 	struct stack_block *reserve;
 	struct stack_block *stackBlock;
-	Tree **stackRoot;
+	tree_t **stackRoot;
 
 	/* Returned value for main program and any exported functions. */
-	Tree *returnVal;
+	tree_t *returnVal;
 };
 
 #endif

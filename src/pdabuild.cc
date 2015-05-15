@@ -1692,15 +1692,15 @@ void Compiler::makeRuntimeData()
 }
 
 /* Borrow alg->state for mapsTo. */
-void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
+void countNodes( program_t *prg, int &count, parse_tree_t *parseTree, kid_t *kid )
 {
 	if ( kid != 0 ) {
 		count += 1;
 
 		/* Should't have to recurse here. */
-		Tree *ignoreList = treeLeftIgnore( prg, kid->tree );
+		tree_t *ignoreList = treeLeftIgnore( prg, kid->tree );
 		if ( ignoreList != 0 ) {
-			Kid *ignore = ignoreList->child;
+			kid_t *ignore = ignoreList->child;
 			while ( ignore != 0 ) {
 				count += 1;
 				ignore = ignore->next;
@@ -1709,7 +1709,7 @@ void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 
 		ignoreList = treeRightIgnore( prg, kid->tree );
 		if ( ignoreList != 0 ) {
-			Kid *ignore = ignoreList->child;
+			kid_t *ignore = ignoreList->child;
 			while ( ignore != 0 ) {
 				count += 1;
 				ignore = ignore->next;
@@ -1728,20 +1728,20 @@ void countNodes( Program *prg, int &count, ParseTree *parseTree, Kid *kid )
 	}
 }
 
-void fillNodes( Program *prg, int &nextAvail, struct bindings *bindings, long &bindId, 
-		struct pat_cons_node *nodes, ParseTree *parseTree, Kid *kid, int ind )
+void fillNodes( program_t *prg, int &nextAvail, struct bindings *bindings, long &bindId, 
+		struct pat_cons_node *nodes, parse_tree_t *parseTree, kid_t *kid, int ind )
 {
 	if ( kid != 0 ) {
 		struct pat_cons_node &node = nodes[ind];
 
-		Kid *child = 
+		kid_t *child = 
 			!( parseTree->flags & PF_NAMED ) && 
 			!( parseTree->flags & PF_ARTIFICIAL ) && 
 			treeChild( prg, kid->tree ) != 0 
 			?
 			treeChild( prg, kid->tree ) : 0;
 
-		ParseTree *ptChild =
+		parse_tree_t *ptChild =
 			!( parseTree->flags & PF_NAMED ) && 
 			!( parseTree->flags & PF_ARTIFICIAL ) && 
 			treeChild( prg, kid->tree ) != 0 
@@ -1755,8 +1755,8 @@ void fillNodes( Program *prg, int &nextAvail, struct bindings *bindings, long &b
 		node.data = stringData( kid->tree->tokdata );
 
 		/* Ignore items. */
-		Tree *ignoreList = treeLeftIgnore( prg, kid->tree );
-		Kid *ignore = ignoreList == 0 ? 0 : ignoreList->child;
+		tree_t *ignoreList = treeLeftIgnore( prg, kid->tree );
+		kid_t *ignore = ignoreList == 0 ? 0 : ignoreList->child;
 		node.leftIgnore = ignore == 0 ? -1 : nextAvail;
 
 		while ( ignore != 0 ) {
@@ -1797,7 +1797,7 @@ void fillNodes( Program *prg, int &nextAvail, struct bindings *bindings, long &b
 		//	CaptureAttr *cap = prg->rtd->captureAttr + 
 		//			prg->rtd->lelInfo[kid->tree->id].captureAttr + i;
 		//
-		//	Tree *attr = colm_get_attr( kid->tree, cap->offset );
+		//	tree_t *attr = colm_get_attr( kid->tree, cap->offset );
 		//
 		//	struct pat_cons_node &node = nodes[nextAvail++];
 		//	memset( &node, 0, sizeof(struct pat_cons_node) );
@@ -1833,7 +1833,7 @@ void fillNodes( Program *prg, int &nextAvail, struct bindings *bindings, long &b
 	}
 }
 
-void Compiler::fillInPatterns( Program *prg )
+void Compiler::fillInPatterns( program_t *prg )
 {
 	/*
 	 * patReplNodes

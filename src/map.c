@@ -29,10 +29,10 @@
 #define false 0
 
 struct colm_struct *colm_map_el_get( struct colm_program *prg,
-		MapEl *mapEl, word_t genId, word_t field )
+		map_el_t *mapEl, word_t genId, word_t field )
 {
 	struct generic_info *gi = &prg->rtd->genericInfo[genId];
-	MapEl *result = 0;
+	map_el_t *result = 0;
 	switch ( field ) {
 		case 0: 
 			result = mapEl->prev;
@@ -51,10 +51,10 @@ struct colm_struct *colm_map_el_get( struct colm_program *prg,
 }
 
 struct colm_struct *colm_map_get( struct colm_program *prg,
-		Map *map, word_t genId, word_t field )
+		map_t *map, word_t genId, word_t field )
 {
 	struct generic_info *gi = &prg->rtd->genericInfo[genId];
-	MapEl *result = 0;
+	map_el_t *result = 0;
 	switch ( field ) {
 		case 0: 
 			result = map->head;
@@ -72,12 +72,12 @@ struct colm_struct *colm_map_get( struct colm_program *prg,
 	return s;
 }
 
-void mapListAbandon( Map *map )
+void mapListAbandon( map_t *map )
 {
 	map->head = map->tail = 0;
 }
 
-void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el )
+void mapListAddBefore( map_t *map, map_el_t *next_el, map_el_t *new_el )
 {
 	/* Set the next pointer of the new element to next_el. We do
 	 * this regardless of the state of the list. */
@@ -106,7 +106,7 @@ void mapListAddBefore( Map *map, MapEl *next_el, MapEl *new_el )
 	}
 }
 
-void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el )
+void mapListAddAfter( map_t *map, map_el_t *prev_el, map_el_t *new_el )
 {
 	/* Set the previous pointer of new_el to prev_el. We do
 	 * this regardless of the state of the list. */
@@ -136,7 +136,7 @@ void mapListAddAfter( Map *map, MapEl *prev_el, MapEl *new_el )
 }
 
 
-MapEl *mapListDetach( Map *map, MapEl *el )
+map_el_t *mapListDetach( map_t *map, map_el_t *el )
 {
 	/* Set forward pointers to skip over el. */
 	if ( el->prev == 0 ) 
@@ -156,7 +156,7 @@ MapEl *mapListDetach( Map *map, MapEl *el )
 
 
 /* Once an insertion position is found, attach a element to the tree. */
-void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess )
+void mapAttachRebal( map_t *map, map_el_t *element, map_el_t *parentEl, map_el_t *lastLess )
 {
 	/* Increment the number of element in the tree. */
 	map->treeSize += 1;
@@ -196,7 +196,7 @@ void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess 
 	mapRecalcHeights( map, parentEl );
 
 	/* Find the first unbalance. */
-	MapEl *ub = mapFindFirstUnbalGP( map, element );
+	map_el_t *ub = mapFindFirstUnbalGP( map, element );
 
 	/* rebalance. */
 	if ( ub != 0 )
@@ -209,7 +209,7 @@ void mapAttachRebal( Map *map, MapEl *element, MapEl *parentEl, MapEl *lastLess 
 
 #if 0
 /* Recursively delete all the children of a element. */
-void mapDeleteChildrenOf( Map *map, MapEl *element )
+void mapDeleteChildrenOf( map_t *map, map_el_t *element )
 {
 	/* Recurse left. */
 	if ( element->left ) {
@@ -230,7 +230,7 @@ void mapDeleteChildrenOf( Map *map, MapEl *element )
 	}
 }
 
-void mapEmpty( Map *map )
+void mapEmpty( map_t *map )
 {
 	if ( map->root ) {
 		/* Recursively delete from the tree structure. */
@@ -246,15 +246,15 @@ void mapEmpty( Map *map )
 
 /* rebalance from a element whose gradparent is unbalanced. Only
  * call on a element that has a grandparent. */
-MapEl *mapRebalance( Map *map, MapEl *n )
+map_el_t *mapRebalance( map_t *map, map_el_t *n )
 {
 	long lheight, rheight;
-	MapEl *a, *b, *c;
-	MapEl *t1, *t2, *t3, *t4;
+	map_el_t *a, *b, *c;
+	map_el_t *t1, *t2, *t3, *t4;
 
-	MapEl *p = n->parent; /* parent (Non-NUL). L*/
-	MapEl *gp = p->parent; /* Grand-parent (Non-NULL). */
-	MapEl *ggp = gp->parent; /* Great grand-parent (may be NULL). */
+	map_el_t *p = n->parent; /* parent (Non-NUL). L*/
+	map_el_t *gp = p->parent; /* Grand-parent (Non-NULL). */
+	map_el_t *ggp = gp->parent; /* Great grand-parent (may be NULL). */
 
 	if (gp->right == p)
 	{
@@ -400,7 +400,7 @@ MapEl *mapRebalance( Map *map, MapEl *n )
 }
 
 /* Recalculates the heights of all the ancestors of element. */
-void mapRecalcHeights( Map *map, MapEl *element )
+void mapRecalcHeights( map_t *map, map_el_t *element )
 {
 	while ( element != 0 )
 	{
@@ -422,10 +422,10 @@ void mapRecalcHeights( Map *map, MapEl *element )
 }
 
 /* Finds the first element whose grandparent is unbalanced. */
-MapEl *mapFindFirstUnbalGP( Map *map, MapEl *element )
+map_el_t *mapFindFirstUnbalGP( map_t *map, map_el_t *element )
 {
 	long lheight, rheight, balanceProp;
-	MapEl *gp;
+	map_el_t *gp;
 
 	if ( element == 0 || element->parent == 0 ||
 			element->parent->parent == 0 )
@@ -451,7 +451,7 @@ MapEl *mapFindFirstUnbalGP( Map *map, MapEl *element )
 
 
 /* Finds the first element that is unbalanced. */
-MapEl *mapFindFirstUnbalEl( Map *map, MapEl *element )
+map_el_t *mapFindFirstUnbalEl( map_t *map, map_el_t *element )
 {
 	if ( element == 0 )
 		return 0;
@@ -473,9 +473,9 @@ MapEl *mapFindFirstUnbalEl( Map *map, MapEl *element )
 }
 
 /* Replace a element in the tree with another element not in the tree. */
-void mapReplaceEl( Map *map, MapEl *element, MapEl *replacement )
+void mapReplaceEl( map_t *map, map_el_t *element, map_el_t *replacement )
 {
-	MapEl *parent = element->parent,
+	map_el_t *parent = element->parent,
 			*left = element->left,
 			*right = element->right;
 
@@ -504,9 +504,9 @@ void mapReplaceEl( Map *map, MapEl *element, MapEl *replacement )
 
 /* Removes a element from a tree and puts filler in it's place.
  * Filler should be null or a child of element. */
-void mapRemoveEl( Map *map, MapEl *element, MapEl *filler )
+void mapRemoveEl( map_t *map, map_el_t *element, map_el_t *filler )
 {
-	MapEl *parent = element->parent;
+	map_el_t *parent = element->parent;
 
 	if ( parent )
 	{
@@ -527,15 +527,15 @@ void mapRemoveEl( Map *map, MapEl *element, MapEl *filler )
 
 #if 0
 /* Recursive worker for tree copying. */
-MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid **newNextDown )
+map_el_t *mapCopyBranch( program_t *prg, map_t *map, map_el_t *el, kid_t *oldNextDown, kid_t **newNextDown )
 {
 	/* Duplicate element. Either the base element's copy constructor or defaul
 	 * constructor will get called. Both will suffice for initting the
 	 * pointers to null when they need to be. */
-	MapEl *newEl = mapElAllocate( prg );
+	map_el_t *newEl = mapElAllocate( prg );
 
-	if ( (Kid*)el == oldNextDown )
-		*newNextDown = (Kid*)newEl;
+	if ( (kid_t*)el == oldNextDown )
+		*newNextDown = (kid_t*)newEl;
 
 	/* If the left tree is there, copy it. */
 	if ( newEl->left ) {
@@ -555,7 +555,7 @@ MapEl *mapCopyBranch( Program *prg, Map *map, MapEl *el, Kid *oldNextDown, Kid *
 }
 #endif
 
-static long map_cmp( Program *prg, Map *map, const Tree *tree1, const Tree *tree2 )
+static long map_cmp( program_t *prg, map_t *map, const tree_t *tree1, const tree_t *tree2 )
 {
 	if ( map->genericInfo->keyType == TYPE_TREE ) {
 		return cmpTree( prg, tree1, tree2 );
@@ -569,11 +569,11 @@ static long map_cmp( Program *prg, Map *map, const Tree *tree1, const Tree *tree
 	}
 }
 
-MapEl *mapInsertEl( Program *prg, Map *map, MapEl *element, MapEl **lastFound )
+map_el_t *mapInsertEl( program_t *prg, map_t *map, map_el_t *element, map_el_t **lastFound )
 {
 	long keyRelation;
-	MapEl *curEl = map->root, *parentEl = 0;
-	MapEl *lastLess = 0;
+	map_el_t *curEl = map->root, *parentEl = 0;
+	map_el_t *lastLess = 0;
 
 	while ( true ) {
 		if ( curEl == 0 ) {
@@ -609,18 +609,18 @@ MapEl *mapInsertEl( Program *prg, Map *map, MapEl *element, MapEl **lastFound )
 }
 
 #if 0
-MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound )
+map_el_t *mapInsertKey( program_t *prg, map_t *map, tree_t *key, map_el_t **lastFound )
 {
 	long keyRelation;
-	MapEl *curEl = map->root, *parentEl = 0;
-	MapEl *lastLess = 0;
+	map_el_t *curEl = map->root, *parentEl = 0;
+	map_el_t *lastLess = 0;
 
 	while ( true ) {
 		if ( curEl == 0 ) {
 			/* We are at an external element and did not find the key we were
 			 * looking for. Create the new element, attach it underneath the leaf
 			 * and rebalance. */
-			MapEl *element = mapElAllocate( prg );
+			map_el_t *element = mapElAllocate( prg );
 			element->key = key;
 			mapAttachRebal( map, element, parentEl, lastLess );
 
@@ -651,39 +651,39 @@ MapEl *mapInsertKey( Program *prg, Map *map, Tree *key, MapEl **lastFound )
 }
 #endif
 
-MapEl *colm_map_insert( Program *prg, Map *map, MapEl *mapEl )
+map_el_t *colm_map_insert( program_t *prg, map_t *map, map_el_t *mapEl )
 {
 	return mapInsertEl( prg, map, mapEl, 0 );
 }
 
-MapEl *colm_vmap_insert( Program *prg, Map *map, Struct *key, Struct *value )
+map_el_t *colm_vmap_insert( program_t *prg, map_t *map, struct_t *key, struct_t *value )
 {
 	struct colm_struct *s = colm_struct_new( prg, map->genericInfo->elStructId );
 
-	colm_struct_set_field( s, Struct*, map->genericInfo->elOffset, key );
-	colm_struct_set_field( s, Struct*, 0, value );
+	colm_struct_set_field( s, struct_t*, map->genericInfo->elOffset, key );
+	colm_struct_set_field( s, struct_t*, 0, value );
 
-	MapEl *mapEl = colm_struct_get_addr( s, MapEl*, map->genericInfo->elOffset );
+	map_el_t *mapEl = colm_struct_get_addr( s, map_el_t*, map->genericInfo->elOffset );
 
 	colm_map_insert( prg, map, mapEl );
 	return 0;
 }
 
-MapEl *colm_vmap_remove( Program *prg, Map *map, Tree *key )
+map_el_t *colm_vmap_remove( program_t *prg, map_t *map, tree_t *key )
 {
-	MapEl *mapEl = colm_map_find( prg, map, key );
+	map_el_t *mapEl = colm_map_find( prg, map, key );
 	if ( mapEl != 0 )
 		colm_map_detach( prg, map, mapEl );
 	return 0;
 }
 
-Tree *colm_vmap_find( Program *prg, Map *map, Tree *key )
+tree_t *colm_vmap_find( program_t *prg, map_t *map, tree_t *key )
 {
-	MapEl *mapEl = colm_map_find( prg, map, key );
+	map_el_t *mapEl = colm_map_find( prg, map, key );
 	if ( mapEl != 0 ) {
-		Struct *s = colm_generic_el_container( prg, mapEl,
+		struct_t *s = colm_generic_el_container( prg, mapEl,
 				map->genericInfo - prg->rtd->genericInfo );
-		Tree *val = colm_struct_get_field( s, Tree*, 0 );
+		tree_t *val = colm_struct_get_field( s, tree_t*, 0 );
 
 		if ( map->genericInfo->valueType == TYPE_TREE )
 			treeUpref( val );
@@ -693,12 +693,12 @@ Tree *colm_vmap_find( Program *prg, Map *map, Tree *key )
 	return 0;
 }
 
-void colm_map_detach( Program *prg, Map *map, MapEl *mapEl )
+void colm_map_detach( program_t *prg, map_t *map, map_el_t *mapEl )
 {
 	mapDetach( prg, map, mapEl );
 }
 
-MapEl *colm_map_find( Program *prg, Map *map, Tree *key )
+map_el_t *colm_map_find( program_t *prg, map_t *map, tree_t *key )
 {
 	return mapImplFind( prg, map, key );
 }
@@ -708,9 +708,9 @@ MapEl *colm_map_find( Program *prg, Map *map, Tree *key )
  *
  * \returns The element if key exists, null if the key does not exist.
  */
-MapEl *mapImplFind( Program *prg, Map *map, Tree *key )
+map_el_t *mapImplFind( program_t *prg, map_t *map, tree_t *key )
 {
-	MapEl *curEl = map->root;
+	map_el_t *curEl = map->root;
 	long keyRelation;
 
 	while ( curEl != 0 ) {
@@ -738,9 +738,9 @@ MapEl *mapImplFind( Program *prg, Map *map, Tree *key )
  *
  * \returns The element detached if the key is found, othewise returns null.
  */
-MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key )
+map_el_t *mapDetachByKey( program_t *prg, map_t *map, tree_t *key )
 {
-	MapEl *element = mapImplFind( prg, map, key );
+	map_el_t *element = mapImplFind( prg, map, key );
 	if ( element )
 		mapDetach( prg, map, element );
 
@@ -754,9 +754,9 @@ MapEl *mapDetachByKey( Program *prg, Map *map, Tree *key )
  * 
  * \returns The element given.
  */
-MapEl *mapDetach( Program *prg, Map *map, MapEl *element )
+map_el_t *mapDetach( program_t *prg, map_t *map, map_el_t *element )
 {
-	MapEl *replacement, *fixfrom;
+	map_el_t *replacement, *fixfrom;
 	long lheight, rheight;
 
 	/* Remove the element from the ordered list. */
@@ -820,7 +820,7 @@ MapEl *mapDetach( Program *prg, Map *map, MapEl *element )
 	mapRecalcHeights( map, fixfrom );
 
 	/* Fix every unbalanced element going up in the tree. */
-	MapEl *ub = mapFindFirstUnbalEl( map, fixfrom );
+	map_el_t *ub = mapFindFirstUnbalEl( map, fixfrom );
 	while ( ub )
 	{
 		/* Find the element to rebalance by moving down from the first unbalanced

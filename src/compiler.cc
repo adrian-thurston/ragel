@@ -978,7 +978,7 @@ void Compiler::initEmptyScanners()
 	}
 }
 
-pda_run *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc, 
+pda_run *Compiler::parsePattern( program_t *prg, tree_t **sp, const InputLoc &loc, 
 		int parserId, struct stream_impl *sourceStream )
 {
 	struct stream_impl *in = colm_impl_new_generic( "<internal>" );
@@ -986,10 +986,10 @@ pda_run *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 	struct pda_run *pdaRun = new pda_run;
 	colm_pda_init( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
 
-	Stream *stream = colm_stream_new_struct( prg );
+	stream_t *stream = colm_stream_new_struct( prg );
 	stream->impl = sourceStream;
 
-	in->funcs->appendStream( in, (Tree*)stream );
+	in->funcs->appendStream( in, (tree_t*)stream );
 	in->funcs->setEof( in );
 
 	long pcr = colm_parse_loop( prg, sp, pdaRun, in, PCR_START );
@@ -1015,12 +1015,12 @@ pda_run *Compiler::parsePattern( Program *prg, Tree **sp, const InputLoc &loc,
 
 void Compiler::parsePatterns()
 {
-	Program *prg = colm_new_program( runtimeData );
+	program_t *prg = colm_new_program( runtimeData );
 
 	/* Turn off context-dependent parsing. */
 	prg->ctxDepParsing = 0;
 
-	Tree **sp = prg->stackRoot;
+	tree_t **sp = prg->stackRoot;
 
 	for ( ConsList::Iter cons = replList; cons.lte(); cons++ ) {
 		if ( cons->langEl != 0 ) {
@@ -1082,18 +1082,18 @@ void Compiler::writeHostCall()
 	 */
 	for ( FunctionList::Iter hc = inHostList; hc.lte(); hc++ ) {
 		*outStream <<
-			"Value " << hc->hostCall << "( Program *prg, Tree **sp";
+			"value_t " << hc->hostCall << "( program_t *prg, tree_t **sp";
 		for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++ ) {
 			*outStream <<
-				", Value";
+				", value_t";
 		}
 		*outStream << " );\n";
 	}
 
 	*outStream <<
-		"Tree **host_call( Program *prg, long code, Tree **sp )\n"
+		"tree_t **host_call( program_t *prg, long code, tree_t **sp )\n"
 		"{\n"
-		"	Value rtn = 0;\n"
+		"	value_t rtn = 0;\n"
 		"	switch ( code ) {\n";
 	
 	for ( FunctionList::Iter hc = inHostList; hc.lte(); hc++ ) {
@@ -1103,7 +1103,7 @@ void Compiler::writeHostCall()
 		int pos = 0;
 		for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++, pos++ ) {
 			*outStream <<
-				"			Value p" << pos << " = vm_pop_value();\n";
+				"			value_t p" << pos << " = vm_pop_value();\n";
 		}
 		
 		*outStream <<

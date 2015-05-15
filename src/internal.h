@@ -3,8 +3,8 @@
 
 #include "colm.h"
 
-typedef struct colm_struct Struct;
-typedef struct colm_program Program;
-typedef unsigned long Value;
+typedef struct colm_struct struct_t;
+typedef struct colm_program program_t;
+typedef unsigned long value_t;
 
 #endif
