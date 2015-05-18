@@ -33,48 +33,32 @@
 extern "C" {
 #endif
 
-void initPoolAlloc( struct pool_alloc *poolAlloc, int sizeofT );
+void init_pool_alloc( struct pool_alloc *poolAlloc, int sizeofT );
 
-kid_t *kidAllocate( program_t *prg );
-void kidFree( program_t *prg, kid_t *el );
-void kidClear( program_t *prg );
-long kidNumLost( program_t *prg );
+kid_t *kid_allocate( program_t *prg );
+void kid_free( program_t *prg, kid_t *el );
+void kid_clear( program_t *prg );
+long kid_num_lost( program_t *prg );
 
-tree_t *treeAllocate( program_t *prg );
-void treeFree( program_t *prg, tree_t *el );
-void treeClear( program_t *prg );
-long treeNumLost( program_t *prg );
+tree_t *tree_allocate( program_t *prg );
+void tree_free( program_t *prg, tree_t *el );
+void tree_clear( program_t *prg );
+long tree_num_lost( program_t *prg );
 
-parse_tree_t *parseTreeAllocate( program_t *prg );
+parse_tree_t *parse_tree_allocate( program_t *prg );
 void parseTreeFree( program_t *prg, parse_tree_t *el );
-void parseTreeClear( program_t *prg );
-long parseTreeNumLost( program_t *prg );
+void parse_tree_clear( program_t *prg );
+long parse_tree_num_lost( program_t *prg );
 
-list_el_t *listElAllocate( program_t *prg );
-void listElFree( program_t *prg, list_el_t *el );
-void listElClear( program_t *prg );
-long listElNumLost( program_t *prg );
+head_t *head_allocate( program_t *prg );
+void head_free( program_t *prg, head_t *el );
+void head_clear( program_t *prg );
+long head_num_lost( program_t *prg );
 
-map_el_t *mapElAllocate( program_t *prg );
-void mapElFree( program_t *prg, map_el_t *el );
-void mapElClear( program_t *prg );
-long mapElNumLost( program_t *prg );
-
-head_t *headAllocate( program_t *prg );
-void headFree( program_t *prg, head_t *el );
-void headClear( program_t *prg );
-long headNumLost( program_t *prg );
-
-location_t *locationAllocate( program_t *prg );
-void locationFree( program_t *prg, location_t *el );
-void locationClear( program_t *prg );
-long locationNumLost( program_t *prg );
-
-stream_t *streamAllocate( program_t *prg );
-void streamFree( program_t *prg, stream_t *stream );
-
-/* Wrong place. */
-struct tree_pair mapRemove( program_t *prg, map_t *map, tree_t *key );
+location_t *location_allocate( program_t *prg );
+void location_free( program_t *prg, location_t *el );
+void location_clear( program_t *prg );
+long location_num_lost( program_t *prg );
 
 #ifdef __cplusplus
 }

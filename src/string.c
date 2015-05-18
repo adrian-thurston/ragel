@@ -44,7 +44,7 @@ str_t *string_suffix( program_t *prg, str_t *str, long pos )
 
 tree_t *constructString( program_t *prg, head_t *s )
 {
-	str_t *str = (str_t*) treeAllocate( prg );
+	str_t *str = (str_t*) tree_allocate( prg );
 	str->id = LEL_ID_STR;
 	str->value = s;
 
@@ -69,7 +69,7 @@ head_t *stringCopy( program_t *prg, head_t *head )
 			result = colm_string_alloc_pointer( prg, head->data, head->length );
 
 		if ( head->location != 0 ) {
-			result->location = locationAllocate( prg );
+			result->location = location_allocate( prg );
 			result->location->name = head->location->name;
 			result->location->line = head->location->line;
 			result->location->column = head->location->column;
@@ -83,7 +83,7 @@ void stringFree( program_t *prg, head_t *head )
 {
 	if ( head != 0 ) {
 		if ( head->location != 0 )
-			locationFree( prg, head->location );
+			location_free( prg, head->location );
 
 		if ( (char*)(head+1) == head->data ) {
 			/* Full string allocation. */
@@ -91,7 +91,7 @@ void stringFree( program_t *prg, head_t *head )
 		}
 		else {
 			/* Just a string head. */
-			headFree( prg, head );
+			head_free( prg, head );
 		}
 	}
 }
@@ -146,7 +146,7 @@ head_t *stringAllocFull( program_t *prg, const char *data, long length )
 head_t *colm_string_alloc_pointer( program_t *prg, const char *data, long length )
 {
 	/* Find the length and allocate the space for the shared string. */
-	head_t *head = headAllocate( prg );
+	head_t *head = head_allocate( prg );
 
 	/* Init the header. */
 	head->data = data;

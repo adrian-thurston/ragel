@@ -51,7 +51,7 @@ void colm_list_iter_destroy( program_t *prg, tree_t ***psp, generic_iter_t *iter
 		assert( iter->yieldSize == curStackSize );
 		vm_popn( iter->yieldSize );
 		for ( i = 0; i < iter->argSize; i++ )
-			treeDownref( prg, sp, vm_pop_tree() );
+			colm_tree_downref( prg, sp, vm_pop_tree() );
 		iter->type = 0;
 		*psp = sp;
 	}
@@ -137,7 +137,7 @@ value_t colm_viter_deref_cur( program_t *prg, generic_iter_t *iter )
 
 	value_t value = colm_struct_get_field( s, value_t, 0 );
 	if ( gi->valueType == TYPE_TREE )
-		treeUpref( (tree_t*)value );
+		colm_tree_upref( (tree_t*)value );
 
 	return value;
 }
@@ -232,7 +232,7 @@ void colm_tree_iter_destroy( program_t *prg, tree_t ***psp, tree_iter_t *iter )
 		assert( iter->yieldSize == curStackSize );
 		vm_popn( iter->yieldSize );
 		for ( i = 0; i < iter->argSize; i++ )
-			treeDownref( prg, sp, vm_pop_tree() );
+			colm_tree_downref( prg, sp, vm_pop_tree() );
 		iter->type = 0;
 		*psp = sp;
 	}
@@ -247,7 +247,7 @@ void colm_rev_tree_iter_destroy( struct colm_program *prg, tree_t ***psp, rev_tr
 		assert( riter->yieldSize == curStackSize );
 		vm_popn( riter->yieldSize );
 		for ( i = 0; i < riter->argSize; i++ )
-			treeDownref( prg, sp, vm_pop_tree() );
+			colm_tree_downref( prg, sp, vm_pop_tree() );
 		riter->type = 0;
 		*psp = sp;
 	}

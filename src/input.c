@@ -64,7 +64,7 @@ void colm_clear_source_stream( struct colm_program *prg,
 
 			case RunBufTokenType:
 			case RunBufIgnoreType:
-				treeDownref( prg, sp, buf->tree );
+				colm_tree_downref( prg, sp, buf->tree );
 				break;
 			case RunBufSourceType:
 				break;
@@ -382,7 +382,7 @@ void colm_clear_stream_impl( struct colm_program *prg, tree_t **sp, struct strea
 
 			case RunBufTokenType:
 			case RunBufIgnoreType:
-				treeDownref( prg, sp, buf->tree );
+				colm_tree_downref( prg, sp, buf->tree );
 				break;
 
 			case RunBufSourceType:
@@ -673,7 +673,7 @@ static int _consumeData( program_t *prg, tree_t **sp, struct stream_impl *is,
 		RunBuf *runBuf = inputStreamPopHead( is );
 		//if ( runBuf->type == RunBufSourceType ) {
 		//	stream_t *stream = (stream_t*)runBuf->tree;
-		//	treeDownref( prg, sp, (tree_t*) stream );
+		//	colm_tree_downref( prg, sp, (tree_t*) stream );
 		//}
 		free( runBuf );
 	}

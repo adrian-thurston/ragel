@@ -179,11 +179,11 @@ program_t *colm_new_program( struct colm_sections *rtd )
 	prg->rtd = rtd;
 	prg->ctxDepParsing = 1;
 
-	initPoolAlloc( &prg->kidPool, sizeof(kid_t) );
-	initPoolAlloc( &prg->treePool, sizeof(tree_t) );
-	initPoolAlloc( &prg->parseTreePool, sizeof(parse_tree_t) );
-	initPoolAlloc( &prg->headPool, sizeof(head_t) );
-	initPoolAlloc( &prg->locationPool, sizeof(location_t) );
+	init_pool_alloc( &prg->kidPool, sizeof(kid_t) );
+	init_pool_alloc( &prg->treePool, sizeof(tree_t) );
+	init_pool_alloc( &prg->parseTreePool, sizeof(parse_tree_t) );
+	init_pool_alloc( &prg->headPool, sizeof(head_t) );
+	init_pool_alloc( &prg->locationPool, sizeof(location_t) );
 
 	prg->trueVal = (tree_t*) 1;
 	prg->falseVal = (tree_t*) 0;
@@ -231,17 +231,17 @@ int colm_delete_program( program_t *prg )
 	tree_t **sp = prg->stackRoot;
 	int exitStatus = prg->exitStatus;
 
-	treeDownref( prg, sp, prg->returnVal );
+	colm_tree_downref( prg, sp, prg->returnVal );
 	colm_clear_heap( prg, sp );
 
-	treeDownref( prg, sp, prg->error );
+	colm_tree_downref( prg, sp, prg->error );
 
 #if DEBUG
-	long kidLost = kidNumLost( prg );
-	long treeLost = treeNumLost( prg );
-	long parseTreeLost = parseTreeNumLost( prg );
-	long headLost = headNumLost( prg );
-	long locationLost = locationNumLost( prg );
+	long kidLost = kid_num_lost( prg );
+	long treeLost = tree_num_lost( prg );
+	long parseTreeLost = parse_tree_num_lost( prg );
+	long headLost = head_num_lost( prg );
+	long locationLost = location_num_lost( prg );
 
 	if ( kidLost )
 		message( "warning: lost kids: %ld\n", kidLost );
@@ -259,11 +259,11 @@ int colm_delete_program( program_t *prg )
 		message( "warning: lost locations: %ld\n", locationLost );
 #endif
 
-	kidClear( prg );
-	treeClear( prg );
-	headClear( prg );
-	parseTreeClear( prg );
-	locationClear( prg );
+	kid_clear( prg );
+	tree_clear( prg );
+	head_clear( prg );
+	parse_tree_clear( prg );
+	location_clear( prg );
 
 	RunBuf *rb = prg->allocRunBuf;
 	while ( rb != 0 ) {

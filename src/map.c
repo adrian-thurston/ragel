@@ -558,7 +558,7 @@ map_el_t *mapCopyBranch( program_t *prg, map_t *map, map_el_t *el, kid_t *oldNex
 static long map_cmp( program_t *prg, map_t *map, const tree_t *tree1, const tree_t *tree2 )
 {
 	if ( map->genericInfo->keyType == TYPE_TREE ) {
-		return cmpTree( prg, tree1, tree2 );
+		return colm_cmp_tree( prg, tree1, tree2 );
 	}
 	else {
 		if ( (long)tree1 < (long)tree2 )
@@ -686,7 +686,7 @@ tree_t *colm_vmap_find( program_t *prg, map_t *map, tree_t *key )
 		tree_t *val = colm_struct_get_field( s, tree_t*, 0 );
 
 		if ( map->genericInfo->valueType == TYPE_TREE )
-			treeUpref( val );
+			colm_tree_upref( val );
 
 		return val;
 	}

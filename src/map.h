@@ -52,6 +52,8 @@ map_el_t *mapDetach( program_t *prg, map_t *map, map_el_t *element );
 map_el_t *mapCopyBranch( program_t *prg, map_t *map, map_el_t *el,
 		kid_t *oldNextDown, kid_t **newNextDown );
 
+struct tree_pair mapRemove( program_t *prg, map_t *map, tree_t *key );
+
 long cmpTree( program_t *prg, const tree_t *tree1, const tree_t *tree2 );
 
 void mapImplRemoveEl( program_t *prg, map_t *map, map_el_t *element );

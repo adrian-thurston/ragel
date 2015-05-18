@@ -58,7 +58,7 @@ void colm_struct_delete( program_t *prg, tree_t **sp, struct colm_struct *el )
 		int i, len = prg->rtd->selInfo[el->id].treesLen;
 		for ( i = 0; i < len; i++ ) {
 			tree_t *tree = colm_struct_get_field( el, tree_t*, t[i] );
-			treeDownref( prg, sp, tree );
+			colm_tree_downref( prg, sp, tree );
 		}
 	}
 	free( el );
@@ -73,7 +73,7 @@ void colm_parser_destroy( program_t *prg, tree_t **sp, struct colm_struct *s )
 	free( parser->pdaRun );
 
 	/* Free the result. */
-	treeDownref( prg, sp, parser->result );
+	colm_tree_downref( prg, sp, parser->result );
 }
 
 parser_t *colm_parser_new( program_t *prg, struct generic_info *gi )
@@ -103,7 +103,7 @@ void colm_map_destroy( program_t *prg, tree_t **sp, struct colm_struct *s )
 	map_el_t *el = map->head;
 	while ( el != 0 ) {
 		map_el_t *next = el->next;
-		treeDownref( prg, sp, el->key );
+		colm_tree_downref( prg, sp, el->key );
 		//mapElFree( prg, el );
 		el = next;
 	}

@@ -108,7 +108,7 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pdaRun, s
 		char *dest = runBuf->data + runBuf->length;
 
 		is->funcs->getData( is, dest, length );
-		location_t *loc = locationAllocate( prg );
+		location_t *loc = location_allocate( prg );
 		is->funcs->consumeData( prg, sp, is, length, loc );
 
 		runBuf->length += length;
@@ -126,7 +126,7 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pdaRun, s
 		char *dest = (char*)head->data;
 
 		is->funcs->getData( is, dest, length );
-		location_t *loc = locationAllocate( prg );
+		location_t *loc = location_allocate( prg );
 		is->funcs->consumeData( prg, sp, is, length, loc );
 		head->location = loc;
 
@@ -160,7 +160,7 @@ void colm_undo_stream_push( program_t *prg, tree_t **sp, struct stream_impl *is,
 {
 	if ( length < 0 ) {
 		tree_t *tree = is->funcs->undoPrependTree( is );
-		treeDownref( prg, sp, tree );
+		colm_tree_downref( prg, sp, tree );
 	}
 	else {
 		is->funcs->undoPrependData( is, length );
@@ -261,7 +261,7 @@ static void send_back( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
 			parseTree->flags &= ~PF_HAS_RCODE;
 		}
 
-		treeUpref( parseTree->shadow->tree );
+		colm_tree_upref( parseTree->shadow->tree );
 
 		send_back_tree( is, parseTree->shadow->tree );
 	}
@@ -292,9 +292,9 @@ static void send_back( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
 	}
 
 	/* Downref the tree that was sent back and free the kid. */
-	treeDownref( prg, sp, parseTree->shadow->tree );
-	kidFree( prg, parseTree->shadow );
-	parseTreeFree( prg, parseTree );
+	colm_tree_downref( prg, sp, parseTree->shadow->tree );
+	kid_free( prg, parseTree->shadow );
+	parse_tree_free( prg, parseTree );
 }
 
 static void set_region( struct pda_run *pdaRun, int emptyIgnore, parse_tree_t *tree )
@@ -313,8 +313,8 @@ static void ignore_tree( program_t *prg, struct pda_run *pdaRun, tree_t *tree )
 
 	colm_increment_steps( pdaRun );
 
-	parse_tree_t *parseTree = parseTreeAllocate( prg );
-	parseTree->shadow = kidAllocate( prg );
+	parse_tree_t *parseTree = parse_tree_allocate( prg );
+	parseTree->shadow = kid_allocate( prg );
 	parseTree->shadow->tree = tree;
 
 	parseTree->next = pdaRun->accumIgnore;
@@ -334,9 +334,9 @@ static void ignore_tree_art( program_t *prg, struct pda_run *pdaRun, tree_t *tre
 
 	colm_increment_steps( pdaRun );
 
-	parse_tree_t *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parse_tree_allocate( prg );
 	parseTree->flags |= PF_ARTIFICIAL;
-	parseTree->shadow = kidAllocate( prg );
+	parseTree->shadow = kid_allocate( prg );
 	parseTree->shadow->tree = tree;
 
 	parseTree->next = pdaRun->accumIgnore;
@@ -355,8 +355,8 @@ kid_t *make_token_with_data( program_t *prg, struct pda_run *pdaRun,
 	kid_t *attrs = allocAttrs( prg, objectLength );
 
 	kid_t *input = 0;
-	input = kidAllocate( prg );
-	input->tree = treeAllocate( prg );
+	input = kid_allocate( prg );
+	input->tree = tree_allocate( prg );
 
 	debug( prg, REALM_PARSE, "made token %p\n", input->tree );
 
@@ -377,7 +377,7 @@ kid_t *make_token_with_data( program_t *prg, struct pda_run *pdaRun,
 					pdaRun->mark[ca->mark_leave] -
 							pdaRun->mark[ca->mark_enter] );
 			tree_t *string = constructString( prg, data );
-			treeUpref( string );
+			colm_tree_upref( string );
 			colm_tree_set_field( prg, input->tree, ca->offset, string );
 		}
 	}
@@ -404,7 +404,7 @@ static void report_parse_error( program_t *prg, tree_t **sp, struct pda_run *pda
 	 * beginning of the stream. */
 	if ( deepest == 0 )  {
 		errorHead = stringAllocFull( prg, "<input>:1:1: parse error", 32 );
-		errorHead->location = locationAllocate( prg );
+		errorHead->location = location_allocate( prg );
 		errorHead->location->line = 1;
 		errorHead->location->column = 1;
 	}
@@ -434,7 +434,7 @@ static void report_parse_error( program_t *prg, tree_t **sp, struct pda_run *pda
 		errorHead = stringAllocFull( prg, formatted, strlen(formatted) );
 		free( formatted );
 
-		errorHead->location = locationAllocate( prg );
+		errorHead->location = location_allocate( prg );
 
 		errorHead->location->name = deepest->location->name;
 		errorHead->location->line = line;
@@ -443,9 +443,9 @@ static void report_parse_error( program_t *prg, tree_t **sp, struct pda_run *pda
 	}
 
 	tree_t *tree = constructString( prg, errorHead );
-	treeDownref( prg, sp, pdaRun->parseErrorText );
+	colm_tree_downref( prg, sp, pdaRun->parseErrorText );
 	pdaRun->parseErrorText = tree;
-	treeUpref( pdaRun->parseErrorText );
+	colm_tree_upref( pdaRun->parseErrorText );
 }
 
 static void attach_right_ignore( program_t *prg, tree_t **sp,
@@ -518,13 +518,13 @@ static void attach_right_ignore( program_t *prg, tree_t **sp,
 			 * ignore. */
 			tree_t *rightIgnore = 0;
 
-			rightIgnore = treeAllocate( prg );
+			rightIgnore = tree_allocate( prg );
 			rightIgnore->id = LEL_ID_IGNORE;
 			rightIgnore->child = ignoreKid;
 
 			tree_t *pushTo = parseTree->shadow->tree;
 
-			pushTo = pushRightIgnore( prg, pushTo, rightIgnore );
+			pushTo = push_right_ignore( prg, pushTo, rightIgnore );
 
 			parseTree->shadow->tree = pushTo;
 
@@ -574,13 +574,13 @@ static void attach_left_ignore( program_t *prg, tree_t **sp,
 		kid_t *ignoreKid = dataChild;
 
 		/* Make the ignore list for the left-ignore. */
-		tree_t *leftIgnore = treeAllocate( prg );
+		tree_t *leftIgnore = tree_allocate( prg );
 		leftIgnore->id = LEL_ID_IGNORE;
 		leftIgnore->child = ignoreKid;
 
 		tree_t *pushTo = parseTree->shadow->tree;
 
-		pushTo = pushLeftIgnore( prg, pushTo, leftIgnore );
+		pushTo = push_left_ignore( prg, pushTo, leftIgnore );
 
 		parseTree->shadow->tree = pushTo;
 
@@ -638,7 +638,7 @@ static void detach_right_ignore( program_t *prg, tree_t **sp,
 
 		pdaRun->accumIgnore = last;
 
-		treeDownref( prg, sp, rightIgnore );
+		colm_tree_downref( prg, sp, rightIgnore );
 	}
 }
 
@@ -691,7 +691,7 @@ static void detach_left_ignore( program_t *prg, tree_t **sp,
 		pdaRun->accumIgnore = last;
 	}
 
-	treeDownref( prg, sp, leftIgnore );
+	colm_tree_downref( prg, sp, leftIgnore );
 }
 
 static int is_parser_stop_finished( struct pda_run *pdaRun )
@@ -734,7 +734,7 @@ static head_t *extract_match( program_t *prg, tree_t **sp, struct pda_run *pdaRu
 	char *dest = runBuf->data + runBuf->length;
 
 	is->funcs->getData( is, dest, length );
-	location_t *location = locationAllocate( prg );
+	location_t *location = location_allocate( prg );
 	is->funcs->consumeData( prg, sp, is, length, location );
 
 	runBuf->length += length;
@@ -772,7 +772,7 @@ static head_t *peekMatch( program_t *prg, struct pda_run *pdaRun, struct stream_
 
 	head_t *head = colm_string_alloc_pointer( prg, dest, length );
 
-	head->location = locationAllocate( prg );
+	head->location = location_allocate( prg );
 	head->location->line = is->line;
 	head->location->column = is->column;
 	head->location->byte = is->byte;
@@ -793,7 +793,7 @@ static void send_ignore( program_t *prg, tree_t **sp,
 
 	debug( prg, REALM_PARSE, "ignoring: %.*s\n", ignoreStr->length, ignoreStr->data );
 
-	tree_t *tree = treeAllocate( prg );
+	tree_t *tree = tree_allocate( prg );
 	tree->refs = 1;
 	tree->id = id;
 	tree->tokdata = ignoreStr;
@@ -818,7 +818,7 @@ static void send_token( program_t *prg, tree_t **sp,
 
 	colm_increment_steps( pdaRun );
 
-	parse_tree_t *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parse_tree_allocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->shadow = input;
 		
@@ -831,12 +831,12 @@ static void send_token( program_t *prg, tree_t **sp,
 
 static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is )
 {
-	kid_t *input = kidAllocate( prg );
+	kid_t *input = kid_allocate( prg );
 	input->tree = is->funcs->consumeTree( is );
 
 	colm_increment_steps( pdaRun );
 
-	parse_tree_t *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parse_tree_allocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->flags |= PF_ARTIFICIAL;
 	parseTree->shadow = input;
@@ -858,8 +858,8 @@ static void send_collect_ignore( program_t *prg, tree_t **sp,
 	int emptyIgnore = pdaRun->accumIgnore == 0;
 
 	/* Make the token data. */
-	head_t *tokdata = headAllocate( prg );
-	tokdata->location = locationAllocate( prg );
+	head_t *tokdata = head_allocate( prg );
+	tokdata->location = location_allocate( prg );
 	tokdata->location->line = is->line;
 	tokdata->location->column = is->column;
 	tokdata->location->byte = is->byte;
@@ -872,7 +872,7 @@ static void send_collect_ignore( program_t *prg, tree_t **sp,
 
 	colm_increment_steps( pdaRun );
 
-	parse_tree_t *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parse_tree_allocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->shadow = input;
 
@@ -900,14 +900,14 @@ static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struc
 
 	colm_increment_steps( pdaRun );
 
-	head_t *head = headAllocate( prg );
-	head->location = locationAllocate( prg );
+	head_t *head = head_allocate( prg );
+	head->location = location_allocate( prg );
 	head->location->line = is->line;
 	head->location->column = is->column;
 	head->location->byte = is->byte;
 
-	kid_t *input = kidAllocate( prg );
-	input->tree = treeAllocate( prg );
+	kid_t *input = kid_allocate( prg );
+	input->tree = tree_allocate( prg );
 
 	input->tree->refs = 1;
 	input->tree->id = prg->rtd->eofLelIds[pdaRun->parserId];
@@ -918,7 +918,7 @@ static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struc
 	pdaRun->preRegion = get_next_pre_region( pdaRun );
 	pdaRun->fsm_cs = pdaRun->fsm_tables->entryByRegion[pdaRun->region];
 
-	parse_tree_t *parseTree = parseTreeAllocate( prg );
+	parse_tree_t *parseTree = parse_tree_allocate( prg );
 	parseTree->id = input->tree->id;
 	parseTree->shadow = input;
 	
@@ -966,9 +966,9 @@ static void push_bt_point( program_t *prg, struct pda_run *pdaRun )
 				( tree != 0 && tree->tokdata != 0 && tree->tokdata->location != 0 ) ? 
 				tree->tokdata->location->byte : 0 );
 
-		kid_t *kid = kidAllocate( prg );
+		kid_t *kid = kid_allocate( prg );
 		kid->tree = tree;
-		treeUpref( tree );
+		colm_tree_upref( tree );
 		kid->next = pdaRun->btPoint;
 		pdaRun->btPoint = kid;
 	}
@@ -1122,11 +1122,11 @@ free_tree:
 	}
 
 	if ( pt->shadow != 0 ) {
-		treeDownref( prg, sp, pt->shadow->tree );
-		kidFree( prg, pt->shadow );
+		colm_tree_downref( prg, sp, pt->shadow->tree );
+		kid_free( prg, pt->shadow );
 	}
 
-	parseTreeFree( prg, pt );
+	parse_tree_free( prg, pt );
 
 	/* Any trees to downref? */
 	if ( sp != top ) {
@@ -1147,7 +1147,7 @@ void colm_pda_clear( program_t *prg, tree_t **sp, struct pda_run *pdaRun )
 	ref_t *ref = pdaRun->tokenList;
 	while ( ref != 0 ) {
 		ref_t *next = ref->next;
-		kidFree( prg, (kid_t*)ref );
+		kid_free( prg, (kid_t*)ref );
 		ref = next;
 	}
 	pdaRun->tokenList = 0;
@@ -1156,8 +1156,8 @@ void colm_pda_clear( program_t *prg, tree_t **sp, struct pda_run *pdaRun )
 	kid_t *btp = pdaRun->btPoint;
 	while ( btp != 0 ) {
 		kid_t *next = btp->next;
-		treeDownref( prg, sp, btp->tree );
-		kidFree( prg, (kid_t*)btp );
+		colm_tree_downref( prg, sp, btp->tree );
+		kid_free( prg, (kid_t*)btp );
 		btp = next;
 	}
 	pdaRun->btPoint = 0;
@@ -1174,7 +1174,7 @@ void colm_pda_clear( program_t *prg, tree_t **sp, struct pda_run *pdaRun )
 	colm_rt_code_vect_empty( &pdaRun->reverseCode );
 	colm_rt_code_vect_empty( &pdaRun->rcodeCollect );
 
-	treeDownref( prg, sp, pdaRun->parseErrorText );
+	colm_tree_downref( prg, sp, pdaRun->parseErrorText );
 }
 
 void colm_pda_init( program_t *prg, struct pda_run *pdaRun, struct pda_tables *tables,
@@ -1193,12 +1193,12 @@ void colm_pda_init( program_t *prg, struct pda_run *pdaRun, struct pda_tables *t
 	/* FIXME: need the right one here. */
 	pdaRun->pda_cs = prg->rtd->startStates[pdaRun->parserId];
 
-	kid_t *sentinal = kidAllocate( prg );
-	sentinal->tree = treeAllocate( prg );
+	kid_t *sentinal = kid_allocate( prg );
+	sentinal->tree = tree_allocate( prg );
 	sentinal->tree->refs = 1;
 
 	/* Init the element allocation variables. */
-	pdaRun->stackTop = parseTreeAllocate( prg );
+	pdaRun->stackTop = parse_tree_allocate( prg );
 	pdaRun->stackTop->state = -1;
 	pdaRun->stackTop->shadow = sentinal;
 
@@ -1516,9 +1516,9 @@ again:
 		if ( pdaRun->lel->id < prg->rtd->firstNonTermId ) {
 			attach_left_ignore( prg, sp, pdaRun, pdaRun->lel );
 
-			ref_t *ref = (ref_t*)kidAllocate( prg );
+			ref_t *ref = (ref_t*)kid_allocate( prg );
 			ref->kid = pdaRun->lel->shadow;
-			//treeUpref( pdaRun->tree );
+			//colm_tree_upref( pdaRun->tree );
 			ref->next = pdaRun->tokenList;
 			pdaRun->tokenList = ref;
 		}
@@ -1571,13 +1571,13 @@ again:
 		if ( pdaRun->parseInput != 0 )
 			pdaRun->parseInput->causeReduce += 1;
 
-		kid_t *value = kidAllocate( prg );
-		value->tree = treeAllocate( prg );
+		kid_t *value = kid_allocate( prg );
+		value->tree = tree_allocate( prg );
 		value->tree->refs = 1;
 		value->tree->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
 		value->tree->prod_num = prg->rtd->prodInfo[pdaRun->reduction].prodNum;
 
-		pdaRun->redLel = parseTreeAllocate( prg );
+		pdaRun->redLel = parse_tree_allocate( prg );
 		pdaRun->redLel->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
 		pdaRun->redLel->next = 0;
 		pdaRun->redLel->causeReduce = 0;
@@ -1663,11 +1663,11 @@ again:
 //
 //					/* Make it into a parse tree. */
 //					tree_t *newPt = prepParseTree( prg, sp, pdaRun->redLel->tree );
-//					treeDownref( prg, sp, pdaRun->redLel->tree );
+//					colm_tree_downref( prg, sp, pdaRun->redLel->tree );
 //
 //					/* Copy it in. */
 //					pdaRun->redLel->tree = newPt;
-//					treeUpref( pdaRun->redLel->tree );
+//					colm_tree_upref( pdaRun->redLel->tree );
 
 					/* Add the restore instruct. */
 					append_code_val( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
@@ -1676,7 +1676,7 @@ again:
 				}
 				else {
 					/* Not changed. Done with parsed. */
-					treeDownref( prg, sp, pdaRun->parsed );
+					colm_tree_downref( prg, sp, pdaRun->parsed );
 				}
 				pdaRun->parsed = 0;
 			}
@@ -1876,9 +1876,9 @@ parseError:
 				}
 
 				/* Free the reduced item. */
-				treeDownref( prg, sp, pdaRun->undoLel->shadow->tree );
-				kidFree( prg, pdaRun->undoLel->shadow );
-				parseTreeFree( prg, pdaRun->undoLel );
+				colm_tree_downref( prg, sp, pdaRun->undoLel->shadow->tree );
+				kid_free( prg, pdaRun->undoLel->shadow );
+				parse_tree_free( prg, pdaRun->undoLel );
 
 				/* If the stacktop had right ignore attached, detach now. */
 				if ( pdaRun->stackTop->flags & PF_RIGHT_IL_ATTACHED )
@@ -1901,9 +1901,9 @@ parseError:
 			
 			send_back_ignore( prg, sp, pdaRun, is, ignore );
 
-			treeDownref( prg, sp, ignore->shadow->tree );
-			kidFree( prg, ignore->shadow );
-			parseTreeFree( prg, ignore );
+			colm_tree_downref( prg, sp, ignore->shadow->tree );
+			kid_free( prg, ignore->shadow );
+			parse_tree_free( prg, ignore );
 		}
 		else {
 			if ( pdaRun->shiftCount == pdaRun->commitShiftCount ) {
@@ -1940,7 +1940,7 @@ parseError:
 				/* Pop from the token list. */
 				ref_t *ref = pdaRun->tokenList;
 				pdaRun->tokenList = ref->next;
-				kidFree( prg, (kid_t*)ref );
+				kid_free( prg, (kid_t*)ref );
 
 				assert( pdaRun->accumIgnore == 0 );
 				detach_left_ignore( prg, sp, pdaRun, pdaRun->parseInput );
@@ -2304,7 +2304,7 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 		commit_full( prg, sp, pdaRun, 0 );
 	
 	tree_t *tree = get_parsed_root( pdaRun, pdaRun->stopTarget > 0 );
-	treeUpref( tree );
+	colm_tree_upref( tree );
 
 	*result = tree;
 

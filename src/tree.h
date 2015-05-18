@@ -211,12 +211,12 @@ typedef struct colm_user_iter
 	long searchId;
 } user_iter_t;
 
-void treeUpref( tree_t *tree );
-void treeDownref( struct colm_program *prg, tree_t **sp, tree_t *tree );
-long cmpTree( struct colm_program *prg, const tree_t *tree1, const tree_t *tree2 );
+void colm_tree_upref( tree_t *tree );
+void colm_tree_downref( struct colm_program *prg, tree_t **sp, tree_t *tree );
+long colm_cmp_tree( struct colm_program *prg, const tree_t *tree1, const tree_t *tree2 );
 
-tree_t *pushRightIgnore( struct colm_program *prg, tree_t *pushTo, tree_t *rightIgnore );
-tree_t *pushLeftIgnore( struct colm_program *prg, tree_t *pushTo, tree_t *leftIgnore );
+tree_t *push_right_ignore( struct colm_program *prg, tree_t *pushTo, tree_t *rightIgnore );
+tree_t *push_left_ignore( struct colm_program *prg, tree_t *pushTo, tree_t *leftIgnore );
 tree_t *popRightIgnore( struct colm_program *prg, tree_t **sp,
 		tree_t *popFrom, tree_t **rightIgnore );
 tree_t *popLeftIgnore( struct colm_program *prg, tree_t **sp,
@@ -232,12 +232,12 @@ kid_t *treeExtractChild( struct colm_program *prg, tree_t *tree );
 kid_t *reverseKidList( kid_t *kid );
 
 tree_t *colm_construct_pointer( struct colm_program *prg, colm_value_t value );
-tree_t *constructTerm( struct colm_program *prg, word_t id, head_t *tokdata );
-tree_t *constructTree( struct colm_program *prg, kid_t *kid,
+tree_t *colm_construct_term( struct colm_program *prg, word_t id, head_t *tokdata );
+tree_t *colm_construct_tree( struct colm_program *prg, kid_t *kid,
 		tree_t **bindings, long pat );
-tree_t *constructObject( struct colm_program *prg, kid_t *kid,
+tree_t *colm_construct_object( struct colm_program *prg, kid_t *kid,
 		tree_t **bindings, long langElId );
-tree_t *constructToken( struct colm_program *prg, tree_t **args, long nargs );
+tree_t *colm_construct_token( struct colm_program *prg, tree_t **args, long nargs );
 
 int testFalse( struct colm_program *prg, tree_t *tree );
 tree_t *makeTree( struct colm_program *prg, tree_t **args, long nargs );
@@ -246,8 +246,8 @@ stream_t *colm_stream_open_file( struct colm_program *prg, tree_t *name, tree_t 
 stream_t *colm_stream_open_fd( struct colm_program *prg, char *name, long fd );
 kid_t *copyIgnoreList( struct colm_program *prg, kid_t *ignoreHeader );
 kid_t *copyKidList( struct colm_program *prg, kid_t *kidList );
-void streamFree( struct colm_program *prg, stream_t *s );
-tree_t *copyTree( struct colm_program *prg, tree_t *tree,
+void colm_stream_free( struct colm_program *prg, stream_t *s );
+tree_t *colm_copy_tree( struct colm_program *prg, tree_t *tree,
 		kid_t *oldNextDown, kid_t **newNextDown );
 
 colm_value_t colm_get_pointer_val( tree_t *pointer );
