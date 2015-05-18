@@ -23,8 +23,8 @@ str_t *c_alphcount( program_t *prg, tree_t **sp, str_t *a1 )
 
 	head_t *h = stringAllocFull( prg, strc, strlen( strc ) );
 	tree_t *s = constructString( prg, h );
-	treeUpref( s );
-	treeDownref( prg, sp, a1 );
+	colm_tree_upref( s );
+	colm_tree_downref( prg, sp, a1 );
 	return (str_t*)s;
 }
 ##### EXP #####
