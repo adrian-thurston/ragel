@@ -846,7 +846,9 @@ struct NfaStateEl
 
 typedef DListMel<StateAp, NfaStateEl> NfaStateList;
 
-typedef BstSet<int> OutCondVect;
+/* Need the base vector type for accessing underlying remove function. */
+typedef BstSet<int> CondKeySet;
+typedef Vector<int> CondKeyVect;
 
 /* State class that implements actions and priorities. */
 struct StateAp 
@@ -941,7 +943,7 @@ struct StateAp
 
 	/* Conditions to add to any future transiions that leave via this sttate. */
 	CondSpace *outCondSpace;
-	OutCondVect outCondVect;
+	CondKeySet outCondKeys;
 
 	/* Error action tables. */
 	ErrActionTable errActionTable;
@@ -1577,9 +1579,9 @@ struct FsmAp
 	void convertToCondAp( StateAp *state );
 
 	void embedCondition( MergeData &md, StateAp *state,
-			const CondSet &set, const OutCondVect &vals );
+			const CondSet &set, const CondKeySet &vals );
 	void embedCondition( StateAp *state, const CondSet &set,
-			const OutCondVect &vals );
+			const CondKeySet &vals );
 
 	void startFsmCondition( Action *condAction, bool sense );
 	void allTransCondition( Action *condAction, bool sense );
@@ -1715,8 +1717,10 @@ struct FsmAp
 	/* Compare deterimne relative priorities of two transition tables. */
 	int comparePrior( const PriorTable &priorTable1, const PriorTable &priorTable2 );
 
-	void expandOutConds( CondSpace *&outCondSpace, OutCondVect &outCondVect,
-			CondSpace *fromSpace, CondSpace *mergedSpace );
+	void addOutCondition( StateAp *state, Action *condAction, bool sense );
+
+	void expandCondKeys( CondKeySet &condKeys, CondSpace *fromSpace,
+			CondSpace *mergedSpace );
 
 	/* Cross a src transition with one that is already occupying a spot. */
 	TransCondAp *convertToCondAp( StateAp *state, TransDataAp *trans );

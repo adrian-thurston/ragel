@@ -820,7 +820,7 @@ void FsmAp::verifyStates()
 		if ( ! (state->stateBits & STB_ISFINAL) ) {
 			assert( state->outActionTable.length() == 0 );
 			assert( state->outCondSpace == 0 );
-			assert( state->outCondVect.length() == 0 );
+			assert( state->outCondKeys.length() == 0 );
 			assert( state->outPriorTable.length() == 0 );
 		}
 
@@ -971,8 +971,8 @@ int FsmAp::compareStateData( const StateAp *state1, const StateAp *state2 )
 	else if ( state1->outCondSpace > state2->outCondSpace )
 		return 1;
 
-	cmpRes = CmpTable<int>::compare( state1->outCondVect, 
-			state2->outCondVect );
+	cmpRes = CmpTable<int>::compare( state1->outCondKeys, 
+			state2->outCondKeys );
 	if ( cmpRes != 0 )
 		return cmpRes;
 
@@ -995,7 +995,7 @@ void FsmAp::clearOutData( StateAp *state )
 	/* Kill the out actions and priorities. */
 	state->outActionTable.empty();
 	state->outCondSpace = 0;
-	state->outCondVect.empty();
+	state->outCondKeys.empty();
 	state->outPriorTable.empty();
 }
 
@@ -1003,7 +1003,7 @@ bool FsmAp::hasOutData( StateAp *state )
 {
 	return ( state->outActionTable.length() > 0 ||
 			state->outCondSpace != 0 ||
-			state->outCondVect.length() > 0 ||
+			state->outCondKeys.length() > 0 ||
 			state->outPriorTable.length() > 0 ||
 			state->outCondSpace != 0 );
 }
@@ -1015,7 +1015,7 @@ bool FsmAp::hasOutData( StateAp *state )
 void FsmAp::startFsmCondition( Action *condAction, bool sense )
 {
 	CondSet set;
-	OutCondVect vals;
+	CondKeySet vals;
 	set.insert( condAction );
 	vals.append( sense ? 1 : 0 );
 
@@ -1028,7 +1028,7 @@ void FsmAp::startFsmCondition( Action *condAction, bool sense )
 void FsmAp::allTransCondition( Action *condAction, bool sense )
 {
 	CondSet set;
-	OutCondVect vals;
+	CondKeySet vals;
 	set.insert( condAction );
 	vals.append( sense ? 1 : 0 );
 
@@ -1038,89 +1038,6 @@ void FsmAp::allTransCondition( Action *condAction, bool sense )
 
 void FsmAp::leaveFsmCondition( Action *condAction, bool sense )
 {
-	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
-		CondSet origCS;
-		if ( (*state)->outCondSpace != 0 )
-			origCS.insert( (*state)->outCondSpace->condSet );
-
-		CondSet mergedCS;
-		mergedCS.insert( origCS );
-
-		bool added = mergedCS.insert( condAction );
-		if ( !added ) {
-	
-			/* Already exists in the cond set. For every transition, if the
-			 * sense is identical to what we are embedding, leave it alone. If
-			 * the sense is opposite, delete it. */
-			/* Find the position. */
-			long pos = 0;
-			for ( CondSet::Iter csi = mergedCS; csi.lte(); csi++ ) {
-				if ( *csi == condAction )
-					pos = csi.pos();
-			}
-
-			for ( int cti = 0; cti < (*state)->outCondVect.length(); ) {
-				long key = (*state)->outCondVect[cti];
-
-				bool set = ( key & ( 1 << pos ) ) != 0;
-				if ( sense xor set ) {
-					/* Delete. */
-					(*state)->outCondVect.Vector<int>::remove( cti, 1 );
-				}
-				else {
-					/* Leave alone. */
-					cti++;
-				}
-			}
-		}
-		else {
-			/* Does not exist in the cond set. We will add it. */
-
-			if ( (*state)->outCondSpace == 0 ) {
-				/* Note that unlike transitions, we start here with an empty key
-				 * list. Add the item */
-				(*state)->outCondVect.append( 0 );
-			}
-
-			/* Allocate a cond space for the merged set. */
-			CondSpace *mergedCondSpace = addCondSpace( mergedCS );
-			(*state)->outCondSpace = mergedCondSpace;
-
-			/* FIXME: assumes one item always. */
-
-			/* Translate original condition values, making space for the new bit
-			 * (possibly) introduced by the condition embedding. */
-			for ( int cti = 0; cti < (*state)->outCondVect.length(); cti++ ) {
-				long origVal = (*state)->outCondVect[cti];
-				long newVal = 0;
-
-				/* For every set bit in the orig, find it's position in the merged
-				 * and set the bit appropriately. */
-				for ( CondSet::Iter csi = origCS; csi.lte(); csi++ ) {
-					/* If set, find it in the merged set and flip the bit to 1. If
-					 * not set, there is nothing to do (convenient eh?) */
-					if ( origVal & (1 << csi.pos()) ) {
-						/* The condition is set. Find the bit position in the
-						 * merged set. */
-						Action **cim = mergedCS.find( *csi );
-						long bitPos = (cim - mergedCS.data);
-						newVal |= 1 << bitPos;
-					}
-				}
-
-				//std::cerr << "orig: " << origVal << " new: " << newVal << std::endl;
-
-				if ( origVal != newVal )
-					(*state)->outCondVect[cti] = newVal;
-
-				/* Now set the new bit appropriately. Since it defaults to zero we
-				 * only take action if sense is positive. */
-				if ( sense ) {
-					Action **cim = mergedCS.find( condAction );
-					int pos = cim - mergedCS.data;
-					(*state)->outCondVect[cti] = (*state)->outCondVect[cti] | (1 << pos);
-				}
-			}
-		}
-	}
+	for ( StateSet::Iter state = finStateSet; state.lte(); state++ )
+		addOutCondition( *state, condAction, sense );
 }

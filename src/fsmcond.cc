@@ -37,6 +37,56 @@
 long TransAp::condFullSize() 
 	{ return condSpace == 0 ? 1 : condSpace->fullSize(); }
 
+void FsmAp::expandCondKeys( CondKeySet &condKeys, CondSpace *fromSpace,
+		CondSpace *mergedSpace )
+{
+	CondSet fromCS, mergedCS;
+
+	if ( fromSpace != 0 )
+		fromCS.insert( fromSpace->condSet );
+
+	if ( mergedSpace != 0 )
+		mergedCS.insert( mergedSpace->condSet );
+	
+	/* Need to transform condition element to the merged set. */
+	for ( int cti = 0; cti < condKeys.length(); cti++ ) {
+		long origVal = condKeys[cti];
+		long newVal = 0;
+
+		/* Iterate the bit positions in the from set. */
+		for ( CondSet::Iter csi = fromCS; csi.lte(); csi++ ) {
+			/* If set, find it in the merged set and flip the bit to 1. */
+			if ( origVal & (1 << csi.pos()) ) {
+				/* The condition is set. Find the bit position in the merged
+				 * set. */
+				Action **cim = mergedCS.find( *csi );
+				long bitPos = (cim - mergedCS.data);
+				newVal |= 1 << bitPos;
+			}
+		}
+
+		if ( origVal != newVal )
+			condKeys[cti] = newVal;
+	}
+
+	/* Need to double up the whole transition list for each condition test in
+	 * merged that is not in from. The one we add has the bit in question set.
+	 * */
+	for ( CondSet::Iter csi = mergedCS; csi.lte(); csi++ ) {
+		Action **cim = fromCS.find( *csi );
+		if ( cim == 0 ) {
+			CondKeySet newItems;
+			newItems.append( condKeys );
+			for ( int cti = 0; cti < condKeys.length(); cti++ ) {
+				int key = condKeys[cti] | (1 << csi.pos());
+				newItems.insert( key );
+			}
+
+			condKeys.setAs( newItems );
+		}
+	}
+}
+
 void FsmAp::expandConds( StateAp *fromState, TransAp *trans,
 		CondSpace *fromSpace, CondSpace *mergedSpace )
 {
@@ -129,6 +179,86 @@ CondSpace *FsmAp::expandCondSpace( TransAp *destTrans, TransAp *srcTrans )
 	return addCondSpace( mergedCS );
 }
 
+StateAp *FsmAp::copyStateForExpansion( StateAp *srcState )
+{
+	StateAp *newState = new StateAp();
+	newState->outCondSpace = srcState->outCondSpace;
+	newState->outCondKeys = srcState->outCondKeys;
+	return newState;
+}
+
+void FsmAp::mergeOutConds( MergeData &md, StateAp *destState, StateAp *srcState )
+{
+	bool unionOp = 
+		( ( destState->stateBits & STB_GRAPH1 ) &&
+			( srcState->stateBits & STB_GRAPH2 ) ) ||
+		( ( destState->stateBits & STB_GRAPH2 ) &&
+			( srcState->stateBits & STB_GRAPH1 ) );
+				   
+	CondSet destCS, srcCS;
+	CondSet mergedCS;
+
+	if ( destState->outCondSpace != 0 )
+		destCS.insert( destState->outCondSpace->condSet );
+
+	if ( srcState->outCondSpace != 0 )
+		srcCS.insert( srcState->outCondSpace->condSet );
+	
+	mergedCS.insert( destCS );
+	mergedCS.insert( srcCS );
+	if ( mergedCS.length() > 0 ) {
+		CondSpace *mergedSpace = addCondSpace( mergedCS );
+
+		StateAp *effSrcState = srcState;
+
+		if ( srcState->outCondSpace != mergedSpace ) {
+			effSrcState = copyStateForExpansion( srcState );
+
+			/* Prep the key list with zero item if necessary. */
+			if ( effSrcState->outCondSpace == 0 )
+				effSrcState->outCondKeys.append( 0 );
+
+			CondSpace *orig = effSrcState->outCondSpace;
+			effSrcState->outCondSpace = mergedSpace;
+			expandCondKeys( effSrcState->outCondKeys, orig, mergedSpace );
+		}
+
+		if ( destState->outCondSpace != mergedSpace ) {
+			/* Prep the key list with zero item if necessary. */
+			if ( destState->outCondSpace == 0 )
+				destState->outCondKeys.append( 0 );
+
+			/* Now expand the dest. */
+			CondSpace *orig = destState->outCondSpace;
+			destState->outCondSpace = mergedSpace;
+			expandCondKeys( destState->outCondKeys, orig, mergedSpace );
+		}
+
+		if ( unionOp ) {
+			CondKeySet newItems;
+			newItems.append( destState->outCondKeys );
+			for ( CondKeySet::Iter c = effSrcState->outCondKeys; c.lte(); c++ )
+				newItems.insert( *c );
+			destState->outCondKeys.setAs( newItems );
+			destState->outCondSpace = mergedSpace;
+		}
+		else {
+			CondKeySet newItems;
+			for ( CondKeySet::Iter c = effSrcState->outCondKeys; c.lte(); c++ ) {
+				if ( destState->outCondKeys.find( *c ) )
+					newItems.insert( *c );
+			}
+
+			for ( CondKeySet::Iter c = destState->outCondKeys; c.lte(); c++ ) {
+				if ( effSrcState->outCondKeys.find( *c ) )
+					newItems.insert( *c );
+			}
+			destState->outCondKeys.setAs( newItems );
+			destState->outCondSpace = mergedSpace;
+		}
+	}
+}
+
 CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 {
 	CondSpace *condSpace = ctx->condData->condSpaceMap.find( condSet );
@@ -185,7 +315,7 @@ void FsmAp::convertToCondAp( StateAp *state )
 }
 
 void FsmAp::embedCondition( MergeData &md, StateAp *state,
-		const CondSet &set, const OutCondVect &vals )
+		const CondSet &set, const CondKeySet &vals )
 {
 	convertToCondAp( state );
 	
@@ -193,11 +323,11 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state,
 
 		/* The source (being embedded). */
 		CondSpace *srcSpace = addCondSpace( set );
-		OutCondVect srcVals = vals;
+		CondKeySet srcVals = vals;
 
 		/* The transition space (dest). */
 		CondSpace *trSpace = tr->condSpace;
-		OutCondVect trVals;
+		CondKeySet trVals;
 		if ( tr->condSpace == 0 ) {
 			trVals.append( 0 );
 		}
@@ -224,24 +354,24 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state,
 
 			CondSpace *orig = srcSpace;
 			srcSpace = mergedSpace;
-			expandOutConds( srcSpace, srcVals, orig, mergedSpace );
+			expandCondKeys( srcVals, orig, mergedSpace );
 		}
 
 		if ( trSpace != mergedSpace ) {
 			/* Don't need to prep the key list with zero item, will be there (see above). */
 			CondSpace *orig = trSpace;
 			trSpace = mergedSpace;
-			expandOutConds( trSpace, trVals, orig, mergedSpace );
+			expandCondKeys( trVals, orig, mergedSpace );
 		}
 
 		/* Implement AND, in two parts. */
-		BstSet<int> newItems;
-		for ( Vector<int>::Iter c = srcVals; c.lte(); c++ ) {
+		CondKeySet newItems;
+		for ( CondKeySet::Iter c = srcVals; c.lte(); c++ ) {
 			if ( trVals.find( *c ) )
 				newItems.insert( *c );
 		}
 
-		for ( Vector<int>::Iter c = trVals; c.lte(); c++ ) {
+		for ( CondKeySet::Iter c = trVals; c.lte(); c++ ) {
 			if ( srcVals.find( *c ) )
 				newItems.insert( *c );
 		}
@@ -277,7 +407,7 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state,
 	}
 }
 
-void FsmAp::embedCondition( StateAp *state, const CondSet &set, const OutCondVect &vals )
+void FsmAp::embedCondition( StateAp *state, const CondSet &set, const CondKeySet &vals )
 {
 	MergeData md;
 
@@ -293,4 +423,92 @@ void FsmAp::embedCondition( StateAp *state, const CondSet &set, const OutCondVec
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
 	setMisfitAccounting( false );
+}
+
+void FsmAp::addOutCondition( StateAp *state, Action *condAction, bool sense )
+{
+	CondSet origCS;
+	if ( state->outCondSpace != 0 )
+		origCS.insert( state->outCondSpace->condSet );
+
+	CondSet mergedCS;
+	mergedCS.insert( origCS );
+
+	bool added = mergedCS.insert( condAction );
+	if ( !added ) {
+
+		/* Already exists in the cond set. For every transition, if the
+		 * sense is identical to what we are embedding, leave it alone. If
+		 * the sense is opposite, delete it. */
+
+		/* Find the position. */
+		long pos = 0;
+		for ( CondSet::Iter csi = mergedCS; csi.lte(); csi++ ) {
+			if ( *csi == condAction )
+				pos = csi.pos();
+		}
+
+		for ( int cti = 0; cti < state->outCondKeys.length(); ) {
+			long key = state->outCondKeys[cti];
+
+			bool set = ( key & ( 1 << pos ) ) != 0;
+			if ( sense xor set ) {
+				/* Delete. */
+				state->outCondKeys.CondKeyVect::remove( cti, 1 );
+			}
+			else {
+				/* Leave alone. */
+				cti++;
+			}
+		}
+	}
+	else {
+		/* Does not exist in the cond set. We will add it. */
+
+		if ( state->outCondSpace == 0 ) {
+			/* Note that unlike transitions, we start here with an empty key
+			 * list. Add the item */
+			state->outCondKeys.append( 0 );
+		}
+
+		/* Allocate a cond space for the merged set. */
+		CondSpace *mergedCondSpace = addCondSpace( mergedCS );
+		state->outCondSpace = mergedCondSpace;
+
+		/* FIXME: assumes one item always. */
+
+		/* Translate original condition values, making space for the new bit
+		 * (possibly) introduced by the condition embedding. */
+		for ( int cti = 0; cti < state->outCondKeys.length(); cti++ ) {
+			long origVal = state->outCondKeys[cti];
+			long newVal = 0;
+
+			/* For every set bit in the orig, find it's position in the merged
+			 * and set the bit appropriately. */
+			for ( CondSet::Iter csi = origCS; csi.lte(); csi++ ) {
+				/* If set, find it in the merged set and flip the bit to 1. If
+				 * not set, there is nothing to do (convenient eh?) */
+				if ( origVal & (1 << csi.pos()) ) {
+					/* The condition is set. Find the bit position in the
+					 * merged set. */
+					Action **cim = mergedCS.find( *csi );
+					long bitPos = (cim - mergedCS.data);
+					newVal |= 1 << bitPos;
+				}
+			}
+
+			//std::cerr << "orig: " << origVal << " new: " << newVal << std::endl;
+
+			if ( origVal != newVal )
+				state->outCondKeys[cti] = newVal;
+
+			/* Now set the new bit appropriately. Since it defaults to zero we
+			 * only take action if sense is positive. */
+			if ( sense ) {
+				Action **cim = mergedCS.find( condAction );
+				int pos = cim - mergedCS.data;
+				state->outCondKeys[cti] = state->outCondKeys[cti] | (1 << pos);
+			}
+		}
+	}
 }
