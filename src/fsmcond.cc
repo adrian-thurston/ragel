@@ -141,8 +141,6 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 
 TransCondAp *FsmAp::convertToCondAp( StateAp *from, TransDataAp *trans )
 {
-//	std::cerr << __PRETTY_FUNCTION__ << std::endl;
-
 	TransCondAp *newTrans = new TransCondAp();
 	newTrans->lowKey = trans->lowKey;
 	newTrans->highKey = trans->highKey;
@@ -190,95 +188,92 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state,
 		const CondSet &set, const OutCondVect &vals )
 {
 	convertToCondAp( state );
-
-	Action *condAction = set[0];
-	bool sense = vals[0] ? true : false;
-
+	
 	for ( TransList::Iter tr = state->outList; tr.lte(); tr++ ) {
-		/* The original cond set. */
-		CondSet origCS;
-		if ( tr->condSpace != 0 )
-			origCS.insert( tr->condSpace->condSet );
 
-		/* The merged cond set. */
-		CondSet mergedCS;
-		mergedCS.insert( origCS );
-		bool added = mergedCS.insert( condAction );
-		if ( !added ) {
-			/* Already exists in the cond set. For every transition, if the
-			 * sense is identical to what we are embedding, leave it alone. If
-			 * the sense is opposite, delete it. */
+		/* The source (being embedded). */
+		CondSpace *srcSpace = addCondSpace( set );
+		OutCondVect srcVals = vals;
 
-			/* Find the position. */
-			long pos = 0;
-			for ( CondSet::Iter csi = mergedCS; csi.lte(); csi++ ) {
-				if ( *csi == condAction )
-					pos = csi.pos();
-			}
-
-			for ( CondList::Iter cti = tr->tcap()->condList; cti.lte(); ) {
-				long key = cti->key.getVal();
-
-				bool isSet = ( key & ( 1 << pos ) ) != 0;
-				if ( sense xor isSet ) {
-					/* Delete. */
-					CondList::Iter next = cti.next();
-
-					CondAp *cond = cti;
-					detachTrans( state, cond->toState, cond );
-					tr->tcap()->condList.detach( cond );
-					delete cond;
-
-					cti = next;
-				}
-				else {
-					/* Leave alone. */
-					cti++;
-				}
-			}
+		/* The transition space (dest). */
+		CondSpace *trSpace = tr->condSpace;
+		OutCondVect trVals;
+		if ( tr->condSpace == 0 ) {
+			trVals.append( 0 );
 		}
 		else {
-			/* Does not exist in the cond set. We will add it. */
-
-			/* Allocate a cond space for the merged set. */
-			CondSpace *mergedCondSpace = addCondSpace( mergedCS );
-			tr->condSpace = mergedCondSpace;
-
-			/* Translate original condition values, making space for the new bit
-			 * (possibly) introduced by the condition embedding. */
 			for ( CondList::Iter cti = tr->tcap()->condList; cti.lte(); cti++ ) {
-				long origVal = cti->key.getVal();
-				long newVal = 0;
-
-				/* For every set bit in the orig, find it's position in the merged
-				 * and set the bit appropriately. */
-				for ( CondSet::Iter csi = origCS; csi.lte(); csi++ ) {
-					/* If set, find it in the merged set and flip the bit to 1. If
-					 * not set, there is nothing to do (convenient eh?) */
-					if ( origVal & (1 << csi.pos()) ) {
-						/* The condition is set. Find the bit position in the
-						 * merged set. */
-						Action **cim = mergedCS.find( *csi );
-						long bitPos = (cim - mergedCS.data);
-						newVal |= 1 << bitPos;
-					}
-				}
-
-				//std::cerr << "orig: " << origVal << " new: " << newVal << std::endl;
-
-				if ( origVal != newVal ) {
-					cti->key = newVal;
-				}
-
-				/* Now set the new bit appropriately. Since it defaults to zero we
-				 * only take action if sense is positive. */
-				if ( sense ) {
-					Action **cim = mergedCS.find( condAction );
-					int pos = cim - mergedCS.data;
-					cti->key = cti->key.getVal() | (1 << pos);
-				}
+				long key = cti->key.getVal();
+				trVals.append( key );
 			}
 		}
+
+		/* Construct merged. */
+		CondSet mergedCS;
+		if ( tr->condSpace != 0 )
+			mergedCS.insert( tr->condSpace->condSet );
+
+		mergedCS.insert( set );
+
+		CondSpace *mergedSpace = addCondSpace( mergedCS );
+
+		if ( srcSpace != mergedSpace ) {
+			/* Prep the key list with zero item if necessary. */
+			if ( srcSpace == 0 )
+				srcVals.append( 0 );
+
+			CondSpace *orig = srcSpace;
+			srcSpace = mergedSpace;
+			expandOutConds( srcSpace, srcVals, orig, mergedSpace );
+		}
+
+		if ( trSpace != mergedSpace ) {
+			/* Don't need to prep the key list with zero item, will be there (see above). */
+			CondSpace *orig = trSpace;
+			trSpace = mergedSpace;
+			expandOutConds( trSpace, trVals, orig, mergedSpace );
+		}
+
+		/* Implement AND, in two parts. */
+		BstSet<int> newItems;
+		for ( Vector<int>::Iter c = srcVals; c.lte(); c++ ) {
+			if ( trVals.find( *c ) )
+				newItems.insert( *c );
+		}
+
+		for ( Vector<int>::Iter c = trVals; c.lte(); c++ ) {
+			if ( srcVals.find( *c ) )
+				newItems.insert( *c );
+		}
+
+		/* Expand the transitions, then we remove anything not in the computed
+		 * list of keys. This approach allows us to embed combinations of
+		 * senses, rather than cond-sense pairs. Necessary for out conditions. */
+		CondSpace *orig = tr->condSpace;
+		tr->condSpace = mergedSpace;
+		expandConds( state, tr, orig, mergedSpace );
+
+		/* After expansion, remove anything not in newItems. */
+		for ( CondList::Iter cti = tr->tcap()->condList; cti.lte(); ) {
+			long key = cti->key.getVal();
+
+			if ( !newItems.find( key ) ) {
+				/* Delete. */
+				CondList::Iter next = cti.next();
+
+				CondAp *cond = cti;
+				detachTrans( state, cond->toState, cond );
+				tr->tcap()->condList.detach( cond );
+				delete cond;
+
+				cti = next;
+			}
+			else {
+				/* Leave alone. */
+				cti++;
+			}
+		}
+
 	}
 }
 

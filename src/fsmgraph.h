@@ -1715,7 +1715,8 @@ struct FsmAp
 	/* Compare deterimne relative priorities of two transition tables. */
 	int comparePrior( const PriorTable &priorTable1, const PriorTable &priorTable2 );
 
-	void expandOutConds( StateAp *state, CondSpace *fromSpace, CondSpace *mergedSpace );
+	void expandOutConds( CondSpace *&outCondSpace, OutCondVect &outCondVect,
+			CondSpace *fromSpace, CondSpace *mergedSpace );
 
 	/* Cross a src transition with one that is already occupying a spot. */
 	TransCondAp *convertToCondAp( StateAp *state, TransDataAp *trans );

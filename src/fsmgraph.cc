@@ -1266,6 +1266,7 @@ void FsmAp::mergeStatesLeaving( MergeData &md, StateAp *destState, StateAp *srcS
 		transferOutData( ssMutable, destState );
 
 		if ( destState->outCondSpace != 0 ) {
+
 			std::cerr << "out cond transfer" << std::endl;
 			CondSpace *condSpace = destState->outCondSpace;
 			for ( OutCondVect::Iter cvi = destState->outCondVect; cvi.lte(); cvi++ ) {
@@ -1283,6 +1284,9 @@ void FsmAp::mergeStatesLeaving( MergeData &md, StateAp *destState, StateAp *srcS
 
 				std::cerr << std::endl;
 			}
+
+			embedCondition( md, ssMutable,
+					destState->outCondSpace->condSet, destState->outCondVect );
 		}
 
 		mergeStates( md, destState, ssMutable );
@@ -1324,7 +1328,8 @@ void FsmAp::nfaMergeStates( MergeData &md, StateAp *destState,
 	}
 }
 
-void FsmAp::expandOutConds( StateAp *state, CondSpace *fromSpace, CondSpace *mergedSpace )
+void FsmAp::expandOutConds( CondSpace *&outCondSpace, OutCondVect &outCondVect,
+		CondSpace *fromSpace, CondSpace *mergedSpace )
 {
 	CondSet fromCS, mergedCS;
 
@@ -1335,8 +1340,8 @@ void FsmAp::expandOutConds( StateAp *state, CondSpace *fromSpace, CondSpace *mer
 		mergedCS.insert( mergedSpace->condSet );
 	
 	/* Need to transform condition element to the merged set. */
-	for ( int cti = 0; cti < state->outCondVect.length(); cti++ ) {
-		long origVal = state->outCondVect[cti];
+	for ( int cti = 0; cti < outCondVect.length(); cti++ ) {
+		long origVal = outCondVect[cti];
 		long newVal = 0;
 
 		/* Iterate the bit positions in the from set. */
@@ -1352,7 +1357,7 @@ void FsmAp::expandOutConds( StateAp *state, CondSpace *fromSpace, CondSpace *mer
 		}
 
 		if ( origVal != newVal )
-			state->outCondVect[cti] = newVal;
+			outCondVect[cti] = newVal;
 	}
 
 	/* Need to double up the whole transition list for each condition test in
@@ -1362,13 +1367,13 @@ void FsmAp::expandOutConds( StateAp *state, CondSpace *fromSpace, CondSpace *mer
 		Action **cim = fromCS.find( *csi );
 		if ( cim == 0 ) {
 			BstSet<int> newItems;
-			newItems.append( state->outCondVect );
-			for ( int cti = 0; cti < state->outCondVect.length(); cti++ ) {
-				int key = state->outCondVect[cti] | (1 << csi.pos());
+			newItems.append( outCondVect );
+			for ( int cti = 0; cti < outCondVect.length(); cti++ ) {
+				int key = outCondVect[cti] | (1 << csi.pos());
 				newItems.insert( key );
 			}
 
-			state->outCondVect.setAs( newItems );
+			outCondVect.setAs( newItems );
 		}
 	}
 }
@@ -1414,7 +1419,8 @@ void FsmAp::mergeOutConds( MergeData &md, StateAp *destState, StateAp *srcState 
 
 			CondSpace *orig = effSrcState->outCondSpace;
 			effSrcState->outCondSpace = mergedSpace;
-			expandOutConds( effSrcState, orig, mergedSpace );
+			expandOutConds( effSrcState->outCondSpace,
+					effSrcState->outCondVect, orig, mergedSpace );
 		}
 
 		if ( destState->outCondSpace != mergedSpace ) {
@@ -1425,7 +1431,8 @@ void FsmAp::mergeOutConds( MergeData &md, StateAp *destState, StateAp *srcState 
 			/* Now expand the dest. */
 			CondSpace *orig = destState->outCondSpace;
 			destState->outCondSpace = mergedSpace;
-			expandOutConds( destState, orig, mergedSpace );
+			expandOutConds( destState->outCondSpace,
+					destState->outCondVect, orig, mergedSpace );
 		}
 
 		if ( unionOp ) {
