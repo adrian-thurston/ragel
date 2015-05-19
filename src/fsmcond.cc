@@ -206,21 +206,19 @@ void FsmAp::mergeOutConds( MergeData &md, StateAp *destState, StateAp *srcState 
 	
 	mergedCS.insert( destCS );
 	mergedCS.insert( srcCS );
+
 	if ( mergedCS.length() > 0 ) {
 		CondSpace *mergedSpace = addCondSpace( mergedCS );
 
-		StateAp *effSrcState = srcState;
+		CondSpace *srcSpace = srcState->outCondSpace;
+		CondKeySet srcKeys = srcState->outCondKeys;
 
-		if ( srcState->outCondSpace != mergedSpace ) {
-			effSrcState = copyStateForExpansion( srcState );
-
+		if ( srcSpace != mergedSpace ) {
 			/* Prep the key list with zero item if necessary. */
-			if ( effSrcState->outCondSpace == 0 )
-				effSrcState->outCondKeys.append( 0 );
+			if ( srcSpace == 0 )
+				srcKeys.append( 0 );
 
-			CondSpace *orig = effSrcState->outCondSpace;
-			effSrcState->outCondSpace = mergedSpace;
-			expandCondKeys( effSrcState->outCondKeys, orig, mergedSpace );
+			expandCondKeys( srcKeys, srcSpace, mergedSpace );
 		}
 
 		if ( destState->outCondSpace != mergedSpace ) {
@@ -229,32 +227,22 @@ void FsmAp::mergeOutConds( MergeData &md, StateAp *destState, StateAp *srcState 
 				destState->outCondKeys.append( 0 );
 
 			/* Now expand the dest. */
-			CondSpace *orig = destState->outCondSpace;
-			destState->outCondSpace = mergedSpace;
-			expandCondKeys( destState->outCondKeys, orig, mergedSpace );
+			expandCondKeys( destState->outCondKeys, destState->outCondSpace, mergedSpace );
 		}
+
+		destState->outCondSpace = mergedSpace;
 
 		if ( unionOp ) {
-			CondKeySet newItems;
-			newItems.append( destState->outCondKeys );
-			for ( CondKeySet::Iter c = effSrcState->outCondKeys; c.lte(); c++ )
-				newItems.insert( *c );
-			destState->outCondKeys.setAs( newItems );
-			destState->outCondSpace = mergedSpace;
+			/* Keys can come from either. */
+			for ( CondKeySet::Iter c = srcKeys; c.lte(); c++ )
+				destState->outCondKeys.insert( *c );
 		}
 		else {
-			CondKeySet newItems;
-			for ( CondKeySet::Iter c = effSrcState->outCondKeys; c.lte(); c++ ) {
-				if ( destState->outCondKeys.find( *c ) )
-					newItems.insert( *c );
-			}
-
+			/* Keys need to be in both sets. */
 			for ( CondKeySet::Iter c = destState->outCondKeys; c.lte(); c++ ) {
-				if ( effSrcState->outCondKeys.find( *c ) )
-					newItems.insert( *c );
+				if ( !srcKeys.find( *c ) )
+					destState->outCondKeys.CondKeyVect::remove( c.pos(), 1 );
 			}
-			destState->outCondKeys.setAs( newItems );
-			destState->outCondSpace = mergedSpace;
 		}
 	}
 }
@@ -325,12 +313,12 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state,
 		CondSpace *srcSpace = addCondSpace( set );
 		CondKeySet srcVals = vals;
 
-		/* The transition space (dest). */
+		/* Extract cond key set from the condition list. We will use this to
+		 * compute the intersection of the cond keys. */
 		CondSpace *trSpace = tr->condSpace;
 		CondKeySet trVals;
-		if ( tr->condSpace == 0 ) {
+		if ( tr->condSpace == 0 )
 			trVals.append( 0 );
-		}
 		else {
 			for ( CondList::Iter cti = tr->tcap()->condList; cti.lte(); cti++ ) {
 				long key = cti->key.getVal();
@@ -342,7 +330,6 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state,
 		CondSet mergedCS;
 		if ( tr->condSpace != 0 )
 			mergedCS.insert( tr->condSpace->condSet );
-
 		mergedCS.insert( set );
 
 		CondSpace *mergedSpace = addCondSpace( mergedCS );
@@ -352,16 +339,13 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state,
 			if ( srcSpace == 0 )
 				srcVals.append( 0 );
 
-			CondSpace *orig = srcSpace;
-			srcSpace = mergedSpace;
-			expandCondKeys( srcVals, orig, mergedSpace );
+			expandCondKeys( srcVals, srcSpace, mergedSpace );
 		}
 
 		if ( trSpace != mergedSpace ) {
-			/* Don't need to prep the key list with zero item, will be there (see above). */
-			CondSpace *orig = trSpace;
-			trSpace = mergedSpace;
-			expandCondKeys( trVals, orig, mergedSpace );
+			/* Don't need to prep the key list with zero item, will be there
+			 * (see above). */
+			expandCondKeys( trVals, trSpace, mergedSpace );
 		}
 
 		/* Implement AND, in two parts. */
