@@ -568,6 +568,9 @@ void FsmAp::unionOp( FsmAp *other )
 
 	ctx->unionOp = true;
 
+	setFinBits( STB_GRAPH1 );
+	other->setFinBits( STB_GRAPH2 );
+
 	/* Turn on misfit accounting for both graphs. */
 	setMisfitAccounting( true );
 	other->setMisfitAccounting( true );
@@ -580,6 +583,7 @@ void FsmAp::unionOp( FsmAp *other )
 	setMisfitAccounting( false );
 
 	ctx->unionOp = false;
+	unsetFinBits( STB_BOTH );
 }
 
 void FsmAp::nfaFillInStates( MergeData &md )
@@ -1261,8 +1265,25 @@ void FsmAp::mergeStatesLeaving( MergeData &md, StateAp *destState, StateAp *srcS
 		mergeStates( md, ssMutable, srcState );
 		transferOutData( ssMutable, destState );
 
-		for ( OutCondSet::Iter cond = destState->outCondSet; cond.lte(); cond++ )
-			embedCondition( md, ssMutable, cond->action, cond->sense );
+		if ( destState->outCondSpace != 0 ) {
+			std::cerr << "out cond transfer" << std::endl;
+			CondSpace *condSpace = destState->outCondSpace;
+			for ( OutCondVect::Iter cvi = destState->outCondVect; cvi.lte(); cvi++ ) {
+
+				std::cerr << " ";
+				for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+					int condVals = *cvi;
+					bool set = condVals & (1 << csi.pos());
+					if ( !set )
+						std::cerr << "!";
+					(*csi)->actionName( std::cerr );
+					if ( !csi.last() )
+						std::cerr << ", ";
+				}
+
+				std::cerr << std::endl;
+			}
+		}
 
 		mergeStates( md, destState, ssMutable );
 	}
@@ -1360,9 +1381,82 @@ StateAp *FsmAp::copyStateForExpansion( StateAp *srcState )
 	return newState;
 }
 
+void FsmAp::mergeOutConds( MergeData &md, StateAp *destState, StateAp *srcState )
+{
+	bool unionOp = 
+		( ( destState->stateBits & STB_GRAPH1 ) &&
+			( srcState->stateBits & STB_GRAPH2 ) ) ||
+		( ( destState->stateBits & STB_GRAPH2 ) &&
+			( srcState->stateBits & STB_GRAPH1 ) );
+				   
+	CondSet destCS, srcCS;
+	CondSet mergedCS;
+
+	if ( destState->outCondSpace != 0 )
+		destCS.insert( destState->outCondSpace->condSet );
+
+	if ( srcState->outCondSpace != 0 )
+		srcCS.insert( srcState->outCondSpace->condSet );
+	
+	mergedCS.insert( destCS );
+	mergedCS.insert( srcCS );
+	if ( mergedCS.length() > 0 ) {
+		CondSpace *mergedSpace = addCondSpace( mergedCS );
+
+		StateAp *effSrcState = srcState;
+
+		if ( srcState->outCondSpace != mergedSpace ) {
+			effSrcState = copyStateForExpansion( srcState );
+
+			/* Prep the key list with zero item if necessary. */
+			if ( effSrcState->outCondSpace == 0 )
+				effSrcState->outCondVect.append( 0 );
+
+			CondSpace *orig = effSrcState->outCondSpace;
+			effSrcState->outCondSpace = mergedSpace;
+			expandOutConds( effSrcState, orig, mergedSpace );
+		}
+
+		if ( destState->outCondSpace != mergedSpace ) {
+			/* Prep the key list with zero item if necessary. */
+			if ( destState->outCondSpace == 0 )
+				destState->outCondVect.append( 0 );
+
+			/* Now expand the dest. */
+			CondSpace *orig = destState->outCondSpace;
+			destState->outCondSpace = mergedSpace;
+			expandOutConds( destState, orig, mergedSpace );
+		}
+
+		if ( unionOp ) {
+			BstSet<int> newItems;
+			newItems.append( destState->outCondVect );
+			for ( Vector<int>::Iter c = effSrcState->outCondVect; c.lte(); c++ )
+				newItems.insert( *c );
+			destState->outCondVect.setAs( newItems );
+			destState->outCondSpace = mergedSpace;
+		}
+		else {
+
+			BstSet<int> newItems;
+			for ( Vector<int>::Iter c = effSrcState->outCondVect; c.lte(); c++ ) {
+				if ( destState->outCondVect.find( *c ) )
+					newItems.insert( *c );
+			}
+
+			for ( Vector<int>::Iter c = destState->outCondVect; c.lte(); c++ ) {
+				if ( effSrcState->outCondVect.find( *c ) )
+					newItems.insert( *c );
+			}
+			destState->outCondVect.setAs( newItems );
+			destState->outCondSpace = mergedSpace;
+		}
+	}
+}
+
 void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 {
-	bool bothFinal = srcState->isFinState() && destState->isFinState();
+//	bool bothFinal = srcState->isFinState() && destState->isFinState();
 
 	outTransCopy( md, destState, srcState->outList.head );
 
@@ -1385,8 +1479,9 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 				ActionTable( srcState->fromStateActionTable ) );
 		destState->outActionTable.setActions( ActionTable( srcState->outActionTable ) );
 
-		if ( !ctx->unionOp )
-			destState->outCondSet.insert( OutCondSet( srcState->outCondSet ) );
+//		/* Make not change to out condition space. */
+//		if ( !ctx->unionOp )
+//			destState->outCondSet.insert( OutCondSet( srcState->outCondSet ) );
 
 		destState->errActionTable.setActions( ErrActionTable( srcState->errActionTable ) );
 		destState->eofActionTable.setActions( ActionTable( srcState->eofActionTable ) );
@@ -1401,68 +1496,19 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 		destState->fromStateActionTable.setActions( srcState->fromStateActionTable );
 		destState->outActionTable.setActions( srcState->outActionTable );
 
-		if ( bothFinal ) {
-			if ( ctx->unionOp ) {
-				CondSet destCS, srcCS;
-				CondSet mergedCS;
-
-				if ( destState->outCondSpace != 0 )
-					destCS.insert( destState->outCondSpace->condSet );
-
-				if ( srcState->outCondSpace != 0 )
-					srcCS.insert( srcState->outCondSpace->condSet );
-				
-				mergedCS.insert( destCS );
-				mergedCS.insert( srcCS );
-				if ( mergedCS.length() > 0 ) {
-					CondSpace *mergedSpace = addCondSpace( mergedCS );
-
-					StateAp *effSrcState = srcState;
-
-					if ( srcState->outCondSpace != mergedSpace ) {
-						effSrcState = copyStateForExpansion( srcState );
-
-						/* Prep the key list with zero item if necessary. */
-						if ( effSrcState->outCondSpace == 0 )
-							effSrcState->outCondVect.append( 0 );
-
-						CondSpace *orig = effSrcState->outCondSpace;
-						effSrcState->outCondSpace = mergedSpace;
-						expandOutConds( effSrcState, orig, mergedSpace );
-					}
-
-					if ( destState->outCondSpace != mergedSpace ) {
-						/* Prep the key list with zero item if necessary. */
-						if ( destState->outCondSpace == 0 )
-							destState->outCondVect.append( 0 );
-
-						/* Now expand the dest. */
-						CondSpace *orig = destState->outCondSpace;
-						destState->outCondSpace = mergedSpace;
-						expandOutConds( destState, orig, mergedSpace );
-					}
-
-					BstSet<int> newItems;
-					newItems.append( destState->outCondVect );
-					for ( Vector<int>::Iter c = srcState->outCondVect; c.lte(); c++ )
-						newItems.insert( *c );
-					destState->outCondVect.setAs( newItems );
-					destState->outCondSpace = mergedSpace;
-				}
-			}
-			else {
-				destState->outCondSet.insert( srcState->outCondSet );
-			}
-		}
-		else {
-			destState->outCondSet.insert( srcState->outCondSet );
-		}
+		mergeOutConds( md, destState, srcState );
 
 		destState->errActionTable.setActions( srcState->errActionTable );
 		destState->eofActionTable.setActions( srcState->eofActionTable );
 
 		destState->guardedInTable.setPriors( srcState->guardedInTable );
 	}
+
+	/* Get bits and final state status. Note in the above code we depend on the
+	 * original final state status being present. */
+	destState->stateBits |= ( srcState->stateBits & ~STB_ISFINAL );
+	if ( srcState->isFinState() )
+		setFinState( destState );
 
 	if ( srcState->nfaOut != 0 ) {
 		if ( destState->nfaOut == 0 )

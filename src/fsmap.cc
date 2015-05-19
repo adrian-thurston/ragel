@@ -819,7 +819,8 @@ void FsmAp::verifyStates()
 		/* Non final states should not have leaving data. */
 		if ( ! (state->stateBits & STB_ISFINAL) ) {
 			assert( state->outActionTable.length() == 0 );
-			assert( state->outCondSet.length() == 0 );
+			assert( state->outCondSpace == 0 );
+			assert( state->outCondVect.length() == 0 );
 			assert( state->outPriorTable.length() == 0 );
 		}
 
@@ -964,9 +965,14 @@ int FsmAp::compareStateData( const StateAp *state1, const StateAp *state2 )
 	if ( cmpRes != 0 )
 		return cmpRes;
 
-	/* Test out condition sets. */
-	cmpRes = CmpOutCondSet::compare( state1->outCondSet, 
-			state2->outCondSet );
+	/* Out condition space and set of vals. */
+	if ( state1->outCondSpace < state2->outCondSpace )
+		return -1;
+	else if ( state1->outCondSpace > state2->outCondSpace )
+		return 1;
+
+	cmpRes = CmpTable<int>::compare( state1->outCondVect, 
+			state2->outCondVect );
 	if ( cmpRes != 0 )
 		return cmpRes;
 
@@ -988,15 +994,18 @@ void FsmAp::clearOutData( StateAp *state )
 {
 	/* Kill the out actions and priorities. */
 	state->outActionTable.empty();
-	state->outCondSet.empty();
+	state->outCondSpace = 0;
+	state->outCondVect.empty();
 	state->outPriorTable.empty();
 }
 
 bool FsmAp::hasOutData( StateAp *state )
 {
 	return ( state->outActionTable.length() > 0 ||
-			state->outCondSet.length() > 0 ||
-			state->outPriorTable.length() > 0 );
+			state->outCondSpace != 0 ||
+			state->outCondVect.length() > 0 ||
+			state->outPriorTable.length() > 0 ||
+			state->outCondSpace != 0 );
 }
 
 /* 
@@ -1005,24 +1014,31 @@ bool FsmAp::hasOutData( StateAp *state )
 
 void FsmAp::startFsmCondition( Action *condAction, bool sense )
 {
+	CondSet set;
+	OutCondVect vals;
+	set.insert( condAction );
+	vals.append( sense ? 1 : 0 );
+
 	/* Make sure the start state has no other entry points. */
 	isolateStartState();
-	embedCondition( startState, condAction, sense );
+
+	embedCondition( startState, set, vals );
 }
 
 void FsmAp::allTransCondition( Action *condAction, bool sense )
 {
-	for ( StateList::Iter state = stateList; state.lte(); state++ )
-		embedCondition( state, condAction, sense );
+	CondSet set;
+	OutCondVect vals;
+	set.insert( condAction );
+	vals.append( sense ? 1 : 0 );
+
+	for ( StateList::Iter state = stateList; state.lte(); state++ ) 
+		embedCondition( state, set, vals );
 }
 
 void FsmAp::leaveFsmCondition( Action *condAction, bool sense )
 {
 	for ( StateSet::Iter state = finStateSet; state.lte(); state++ ) {
-		(*state)->outCondSet.insert( OutCond( condAction, sense ) );
-
-		/* New. */
-
 		CondSet origCS;
 		if ( (*state)->outCondSpace != 0 )
 			origCS.insert( (*state)->outCondSpace->condSet );
@@ -1049,7 +1065,7 @@ void FsmAp::leaveFsmCondition( Action *condAction, bool sense )
 				bool set = ( key & ( 1 << pos ) ) != 0;
 				if ( sense xor set ) {
 					/* Delete. */
-					(*state)->outCondVect.remove( cti, 1 );
+					(*state)->outCondVect.Vector<int>::remove( cti, 1 );
 				}
 				else {
 					/* Leave alone. */

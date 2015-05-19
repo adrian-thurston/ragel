@@ -197,7 +197,7 @@ struct InputData
 
 	void processXML();
 	void processDot();
-	void processCode( bool generateDot );
+	void processCode();
 
 	void writeDot( std::ostream &out );
 

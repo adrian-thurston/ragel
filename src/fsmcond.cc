@@ -186,9 +186,13 @@ void FsmAp::convertToCondAp( StateAp *state )
 	state->outList.transfer( destList );
 }
 
-void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense )
+void FsmAp::embedCondition( MergeData &md, StateAp *state,
+		const CondSet &set, const OutCondVect &vals )
 {
 	convertToCondAp( state );
+
+	Action *condAction = set[0];
+	bool sense = vals[0] ? true : false;
 
 	for ( TransList::Iter tr = state->outList; tr.lte(); tr++ ) {
 		/* The original cond set. */
@@ -215,8 +219,8 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 			for ( CondList::Iter cti = tr->tcap()->condList; cti.lte(); ) {
 				long key = cti->key.getVal();
 
-				bool set = ( key & ( 1 << pos ) ) != 0;
-				if ( sense xor set ) {
+				bool isSet = ( key & ( 1 << pos ) ) != 0;
+				if ( sense xor isSet ) {
 					/* Delete. */
 					CondList::Iter next = cti.next();
 
@@ -278,7 +282,7 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 	}
 }
 
-void FsmAp::embedCondition( StateAp *state, Action *condAction, bool sense )
+void FsmAp::embedCondition( StateAp *state, const CondSet &set, const OutCondVect &vals )
 {
 	MergeData md;
 
@@ -286,7 +290,7 @@ void FsmAp::embedCondition( StateAp *state, Action *condAction, bool sense )
 	setMisfitAccounting( true );
 
 	/* Worker. */
-	embedCondition( md, state, condAction, sense );
+	embedCondition( md, state, set, vals );
 
 	/* Fill in any states that were newed up as combinations of others. */
 	fillInStates( md );

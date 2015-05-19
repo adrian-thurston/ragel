@@ -477,6 +477,12 @@ void FsmAp::setFinBits( int finStateBits )
 		finStateSet.data[s]->stateBits |= finStateBits;
 }
 
+void FsmAp::unsetFinBits( int finStateBits )
+{
+	for ( int s = 0; s < finStateSet.length(); s++ )
+		finStateSet.data[s]->stateBits &= ~ finStateBits;
+}
+
 
 /* Tests the integrity of the transition lists and the fromStates. */
 void FsmAp::verifyIntegrity()

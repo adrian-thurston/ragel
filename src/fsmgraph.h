@@ -770,10 +770,6 @@ struct CmpOutCond
 	}
 };
 
-/* Set of conditions to be transfered to on pending out transitions. */
-typedef SBstSet< OutCond, CmpOutCond > OutCondSet;
-typedef CmpSTable< OutCond, CmpOutCond > CmpOutCondSet;
-
 /* Conditions. */
 typedef BstSet< Action*, CmpCondId > CondSet;
 typedef CmpTable< Action*, CmpCondId > CmpCondSet;
@@ -849,6 +845,8 @@ struct NfaStateEl
 };
 
 typedef DListMel<StateAp, NfaStateEl> NfaStateList;
+
+typedef BstSet<int> OutCondVect;
 
 /* State class that implements actions and priorities. */
 struct StateAp 
@@ -942,10 +940,8 @@ struct StateAp
 	ActionTable outActionTable;
 
 	/* Conditions to add to any future transiions that leave via this sttate. */
-	OutCondSet outCondSet;
-
-	Vector<int> outCondVect;
 	CondSpace *outCondSpace;
+	OutCondVect outCondVect;
 
 	/* Error action tables. */
 	ErrActionTable errActionTable;
@@ -1579,8 +1575,11 @@ struct FsmAp
 	CondSpace *addCondSpace( const CondSet &condSet );
 
 	void convertToCondAp( StateAp *state );
-	void embedCondition( MergeData &md, StateAp *state, Action *condAction, bool sense );
-	void embedCondition( StateAp *state, Action *condAction, bool sense );
+
+	void embedCondition( MergeData &md, StateAp *state,
+			const CondSet &set, const OutCondVect &vals );
+	void embedCondition( StateAp *state, const CondSet &set,
+			const OutCondVect &vals );
 
 	void startFsmCondition( Action *condAction, bool sense );
 	void allTransCondition( Action *condAction, bool sense );
@@ -1729,6 +1728,8 @@ struct FsmAp
 			TransAp *destParent, CondAp *destTrans, CondAp *srcTrans );
 
 	void outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList );
+
+	void mergeOutConds( MergeData &md, StateAp *destState, StateAp *srcState );
 
 	/* Merge a set of states into newState. */
 	void mergeStates( MergeData &md, StateAp *destState, 
@@ -1879,6 +1880,7 @@ struct FsmAp
 
 	/* Set the bits of final states and clear the bits of non final states. */
 	void setFinBits( int finStateBits );
+	void unsetFinBits( int finStateBits );
 
 	/*
 	 * Self-consistency checks.
@@ -2025,6 +2027,5 @@ template< class Trans > int FsmAp::compareCondDataPtr( Trans *trans1, Trans *tra
 	}
 	return 0;
 }
-
 
 #endif

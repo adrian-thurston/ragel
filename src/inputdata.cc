@@ -327,7 +327,7 @@ void InputData::processDot()
 	closeOutput();
 }
 
-void InputData::processCode( bool generateDot )
+void InputData::processCode()
 {
 	/* Compiles machines. */
 	prepareAllMachines();
@@ -482,7 +482,7 @@ void InputData::process()
 	else if ( generateDot )
 		processDot();
 	else 
-		processCode( generateDot );
+		processCode();
 
 	assert( gblErrorCount == 0 );
 }
