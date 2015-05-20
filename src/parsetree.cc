@@ -871,6 +871,9 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 		catch ( const CondCostTooHigh &ccth ) {
 			nfaCheckResult( 20, ccth.costId, "cond-cost" );
 		}
+		catch ( const RepetitionError & ) {
+			nfaCheckResult( 2, 0, "rep-error" );
+		}
 	}
 
 	nfaCheckResult( 0, 0, "OK" );
