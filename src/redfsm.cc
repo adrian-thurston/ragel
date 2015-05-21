@@ -367,6 +367,7 @@ void RedFsmAp::makeFlat()
 void RedFsmAp::characterClass( EquivList &equiv )
 {
 	/* Find the global low and high keys. */
+	bool anyTrans = false;
 	Key lowKey = keyOps->maxKey;
 	Key highKey = keyOps->minKey;
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
@@ -381,7 +382,12 @@ void RedFsmAp::characterClass( EquivList &equiv )
 
 		if ( keyOps->gt( st->highKey, highKey ) )
 			highKey = st->highKey;
+
+		anyTrans = true;
 	}
+
+	if ( ! anyTrans )
+		return;
 
 	long long next = 1;
 	equiv.append( new EquivClass( lowKey, highKey, next++ ) );
