@@ -38,38 +38,38 @@ struct colm_program;
 struct fsm_tables
 {
 	long *actions;
-	long *keyOffsets;
-	char *transKeys;
-	long *singleLengths;
-	long *rangeLengths;
-	long *indexOffsets;
+	long *key_offsets;
+	char *trans_keys;
+	long *single_lengths;
+	long *range_lengths;
+	long *index_offsets;
 	long *transTargsWI;
 	long *transActionsWI;
-	long *toStateActions;
-	long *fromStateActions;
-	long *eofActions;
-	long *eofTargs;
-	long *entryByRegion;
+	long *to_state_actions;
+	long *from_state_actions;
+	long *eof_actions;
+	long *eof_targs;
+	long *entry_by_region;
 
-	long numStates;
-	long numActions;
-	long numTransKeys;
-	long numSingleLengths;
-	long numRangeLengths;
-	long numIndexOffsets;
+	long num_states;
+	long num_actions;
+	long num_trans_keys;
+	long num_single_lengths;
+	long num_range_lengths;
+	long num_index_offsets;
 	long numTransTargsWI;
 	long numTransActionsWI;
-	long numRegions;
+	long num_regions;
 
-	long startState;
-	long firstFinal;
-	long errorState;
+	long start_state;
+	long first_final;
+	long error_state;
 
-	struct GenAction **actionSwitch;
-	long numActionSwitch;
+	struct GenAction **action_switch;
+	long num_action_switch;
 };
 
-void undoStreamPull( struct stream_impl *inputStream, const char *data, long length );
+void undo_stream_pull( struct stream_impl *input_stream, const char *data, long length );
 
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
@@ -80,29 +80,29 @@ struct colm_execution;
 struct rt_code_vect
 {
 	code_t *data;
-	long tabLen;
-	long allocLen;
+	long tab_len;
+	long alloc_len;
 
 	/* FIXME: leak when freed. */
 };
 
-void listAddAfter( list_t *list, list_el_t *prev_el, list_el_t *new_el );
-void listAddBefore( list_t *list, list_el_t *next_el, list_el_t *new_el );
+void list_add_after( list_t *list, list_el_t *prev_el, list_el_t *new_el );
+void list_add_before( list_t *list, list_el_t *next_el, list_el_t *new_el );
 
-void listPrepend( list_t *list, list_el_t *new_el );
-void listAppend( list_t *list, list_el_t *new_el );
+void list_prepend( list_t *list, list_el_t *new_el );
+void list_append( list_t *list, list_el_t *new_el );
 
-list_el_t *listDetach( list_t *list, list_el_t *el );
-list_el_t *listDetachFirst(list_t *list );
-list_el_t *listDetachLast(list_t *list );
+list_el_t *list_detach( list_t *list, list_el_t *el );
+list_el_t *list_detach_first(list_t *list );
+list_el_t *list_detach_last(list_t *list );
 
-long listLength(list_t *list);
+long list_length(list_t *list);
 
 struct function_info
 {
-	long frameId;
-	long argSize;
-	long frameSize;
+	long frame_id;
+	long arg_size;
+	long frame_size;
 };
 
 /*
@@ -112,20 +112,20 @@ struct function_info
 struct pat_cons_info
 {
 	long offset;
-	long numBindings;
+	long num_bindings;
 };
 
 struct pat_cons_node
 {
 	long id;
-	long prodNum;
+	long prod_num;
 	long next;
 	long child;
-	long bindId;
+	long bind_id;
 	const char *data;
 	long length;
-	long leftIgnore;
-	long rightIgnore;
+	long left_ignore;
+	long right_ignore;
 
 	/* Just match nonterminal, don't go inside. */
 	unsigned char stop;
@@ -136,41 +136,41 @@ struct pat_cons_node
 struct lang_el_info
 {
 	const char *name;
-	const char *xmlTag;
+	const char *xml_tag;
 	unsigned char repeat;
 	unsigned char list;
 	unsigned char literal;
 	unsigned char ignore;
 
-	long frameId;
+	long frame_id;
 
-	long objectTypeId;
-	long ofiOffset;
-	long objectLength;
+	long object_type_id;
+	long ofi_offset;
+	long object_length;
 
-	long termDupId;
-	long markId;
-	long captureAttr;
-	long numCaptureAttr;
+	long term_dup_id;
+	long mark_id;
+	long capture_attr;
+	long num_capture_attr;
 };
 
 struct struct_el_info
 {
 	long size;
 	short *trees;
-	long treesLen;
+	long trees_len;
 };
 
 struct prod_info
 {
-	unsigned long lhsId;
-	short prodNum;
+	unsigned long lhs_id;
+	short prod_num;
 	long length;
 	const char *name;
-	long frameId;
-	unsigned char lhsUpref;
+	long frame_id;
+	unsigned char lhs_upref;
 	unsigned char *copy;
-	long copyLen;
+	long copy_len;
 };
 
 /* Must match the LocalType enum. */
@@ -193,17 +193,17 @@ struct frame_info
 	code_t *codeWC;
 	long codeLenWC;
 	struct local_info *locals;
-	long localsLen;
-	long argSize;
-	long frameSize;
-	char retTree;
+	long locals_len;
+	long arg_size;
+	long frame_size;
+	char ret_tree;
 };
 
 struct region_info
 {
-	long defaultToken;
-	long eofFrameId;
-	int ciLelId;
+	long default_token;
+	long eof_frame_id;
+	int ci_lel_id;
 };
 
 typedef struct _CaptureAttr
@@ -221,22 +221,22 @@ struct pda_tables
 	int *keys;
 	unsigned int *offsets;
 	unsigned int *targs;
-	unsigned int *actInds;
+	unsigned int *act_inds;
 	unsigned int *actions;
-	int *commitLen;
-	int *tokenRegionInds;
-	int *tokenRegions;
-	int *tokenPreRegions;
+	int *commit_len;
+	int *token_region_inds;
+	int *token_regions;
+	int *token_pre_regions;
 
-	int numIndicies;
-	int numKeys;
-	int numStates;
-	int numTargs;
-	int numActInds;
-	int numActions;
-	int numCommitLen;
-	int numRegionItems;
-	int numPreRegionItems;
+	int num_indicies;
+	int num_keys;
+	int num_states;
+	int num_targs;
+	int num_act_inds;
+	int num_actions;
+	int num_commit_len;
+	int num_region_items;
+	int num_pre_region_items;
 };
 
 struct pool_block
@@ -265,9 +265,9 @@ struct pda_run
 	 */
 	struct fsm_tables *fsm_tables;
 
-	RunBuf *consumeBuf;
+	RunBuf *consume_buf;
 
-	long region, preRegion;
+	long region, pre_region;
 	long fsm_cs, next_cs, act;
 	char *start;
 	char *tokstart;
@@ -277,71 +277,71 @@ struct pda_run
 
 	/* Bits. */
 	char eof;
-	char returnResult;
-	char skipToklen;
+	char return_result;
+	char skip_toklen;
 
 	char *mark[MARK_SLOTS];
-	long matchedToken;
+	long matched_token;
 
 	/*
 	 * Parsing
 	 */
-	int numRetry;
-	parse_tree_t *stackTop;
-	ref_t *tokenList;
+	int num_retry;
+	parse_tree_t *stack_top;
+	ref_t *token_list;
 	int pda_cs;
-	int nextRegionInd;
+	int next_region_ind;
 
 	struct pda_tables *pda_tables;
-	int parserId;
+	int parser_id;
 
 	/* Reused. */
-	struct rt_code_vect rcodeCollect;
-	struct rt_code_vect reverseCode;
+	struct rt_code_vect rcode_collect;
+	struct rt_code_vect reverse_code;
 
-	int stopParsing;
-	long stopTarget;
+	int stop_parsing;
+	long stop_target;
 
-	parse_tree_t *accumIgnore;
+	parse_tree_t *accum_ignore;
 
-	kid_t *btPoint;
+	kid_t *bt_point;
 
 	struct bindings *bindings;
 
-	int revertOn;
+	int revert_on;
 
 	struct colm_struct *context;
 
 	int stop;
-	int parseError;
+	int parse_error;
 
 	long steps;
-	long targetSteps;
-	long shiftCount;
-	long commitShiftCount;
+	long target_steps;
+	long shift_count;
+	long commit_shift_count;
 
-	int onDeck;
+	int on_deck;
 
 	/*
 	 * Data we added when refactoring the parsing engine into a coroutine.
 	 */
 
-	parse_tree_t *parseInput;
+	parse_tree_t *parse_input;
 	struct frame_info *fi;
 	int reduction;
-	parse_tree_t *redLel;
-	int curState;
+	parse_tree_t *red_lel;
+	int cur_state;
 	parse_tree_t *lel;
-	int triggerUndo;
+	int trigger_undo;
 
-	int tokenId;
+	int token_id;
 	head_t *tokdata;
-	int frameId;
+	int frame_id;
 	int next;
-	parse_tree_t *undoLel;
+	parse_tree_t *undo_lel;
 
-	int checkNext;
-	int checkStop;
+	int check_next;
+	int check_stop;
 
 	/* The lhs is sometimes saved before reduction actions in case it is
 	 * replaced and we need to restore it on backtracking */
@@ -352,24 +352,24 @@ struct pda_run
 	/* Instruction pointer to use when we stop parsing and execute code. */
 	code_t *code;
 
-	int rcBlockCount;
+	int rc_block_count;
 
-	tree_t *parseErrorText;
+	tree_t *parse_error_text;
 };
 
-void colm_pda_init( struct colm_program *prg, struct pda_run *pdaRun,
-		struct pda_tables *tables, int parserId, long stopTarget,
-		int revertOn, struct colm_struct *context );
+void colm_pda_init( struct colm_program *prg, struct pda_run *pda_run,
+		struct pda_tables *tables, int parser_id, long stop_target,
+		int revert_on, struct colm_struct *context );
 
 void colm_pda_clear( struct colm_program *prg, struct colm_tree **sp,
-		struct pda_run *pdaRun );
+		struct pda_run *pda_run );
 
 void colm_rt_code_vect_replace( struct rt_code_vect *vect, long pos,
 		const code_t *val, long len );
 void colm_rt_code_vect_empty( struct rt_code_vect *vect );
 void colm_rt_code_vect_remove( struct rt_code_vect *vect, long pos, long len );
 
-void initRtCodeVect( struct rt_code_vect *codeVect );
+void init_rt_code_vect( struct rt_code_vect *code_vect );
 
 inline static void append_code_val( struct rt_code_vect *vect, const code_t val );
 inline static void append_code_vect( struct rt_code_vect *vect, const code_t *val, long len );
@@ -378,12 +378,12 @@ inline static void append_word( struct rt_code_vect *vect, word_t word );
 
 inline static void append_code_vect( struct rt_code_vect *vect, const code_t *val, long len )
 {
-	colm_rt_code_vect_replace( vect, vect->tabLen, val, len );
+	colm_rt_code_vect_replace( vect, vect->tab_len, val, len );
 }
 
 inline static void append_code_val( struct rt_code_vect *vect, const code_t val )
 {
-	colm_rt_code_vect_replace( vect, vect->tabLen, &val, 1 );
+	colm_rt_code_vect_replace( vect, vect->tab_len, &val, 1 );
 }
 
 inline static void append_half( struct rt_code_vect *vect, half_t half )
@@ -408,11 +408,11 @@ inline static void append_word( struct rt_code_vect *vect, word_t word )
 	#endif
 }
 
-void colm_increment_steps( struct pda_run *pdaRun );
-void colm_decrement_steps( struct pda_run *pdaRun );
+void colm_increment_steps( struct pda_run *pda_run );
+void colm_decrement_steps( struct pda_run *pda_run );
 
-void colm_clear_stream_impl( struct colm_program *prg, tree_t **sp, struct stream_impl *inputStream );
-void colm_clear_source_stream( struct colm_program *prg, tree_t **sp, struct stream_impl *sourceStream );
+void colm_clear_stream_impl( struct colm_program *prg, tree_t **sp, struct stream_impl *input_stream );
+void colm_clear_source_stream( struct colm_program *prg, tree_t **sp, struct stream_impl *source_stream );
 
 #define PCR_START         1
 #define PCR_DONE          2
@@ -422,26 +422,26 @@ void colm_clear_source_stream( struct colm_program *prg, tree_t **sp, struct str
 #define PCR_REVERSE       6
 
 head_t *colm_stream_pull( struct colm_program *prg, struct colm_tree **sp,
-		struct pda_run *pdaRun, struct stream_impl *is, long length );
+		struct pda_run *pda_run, struct stream_impl *is, long length );
 head_t *colm_string_alloc_pointer( struct colm_program *prg, const char *data, long length );
 
-void colm_stream_push_text( struct stream_impl *inputStream, const char *data, long length );
-void colm_stream_push_tree( struct stream_impl *inputStream, tree_t *tree, int ignore );
-void colm_stream_push_stream( struct stream_impl *inputStream, tree_t *tree );
+void colm_stream_push_text( struct stream_impl *input_stream, const char *data, long length );
+void colm_stream_push_tree( struct stream_impl *input_stream, tree_t *tree, int ignore );
+void colm_stream_push_stream( struct stream_impl *input_stream, tree_t *tree );
 void colm_undo_stream_push( struct colm_program *prg, tree_t **sp,
-		struct stream_impl *inputStream, long length );
+		struct stream_impl *input_stream, long length );
 
-kid_t *make_token_with_data( struct colm_program *prg, struct pda_run *pdaRun,
-		struct stream_impl *inputStream, int id, head_t *tokdata );
+kid_t *make_token_with_data( struct colm_program *prg, struct pda_run *pda_run,
+		struct stream_impl *input_stream, int id, head_t *tokdata );
 
-long colm_parse_loop( struct colm_program *prg, tree_t **sp, struct pda_run *pdaRun, 
-		struct stream_impl *inputStream, long entry );
+long colm_parse_loop( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run, 
+		struct stream_impl *input_stream, long entry );
 
-long colm_parse_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pdaRun,
-		stream_t *input, long stopId, long entry );
+long colm_parse_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
+		stream_t *input, long stop_id, long entry );
 long colm_parse_finish( tree_t **result, struct colm_program *prg, tree_t **sp,
-		struct pda_run *pdaRun, stream_t *input , int revertOn, long entry );
-long colm_parse_undo_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pdaRun,
+		struct pda_run *pda_run, stream_t *input , int revert_on, long entry );
+long colm_parse_undo_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
 		stream_t *input, long steps, long entry );
 
 #ifdef __cplusplus

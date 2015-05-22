@@ -92,18 +92,18 @@ typedef struct colm_parse_tree
 
 	struct colm_parse_tree *child;
 	struct colm_parse_tree *next;
-	struct colm_parse_tree *leftIgnore;
-	struct colm_parse_tree *rightIgnore;
+	struct colm_parse_tree *left_ignore;
+	struct colm_parse_tree *right_ignore;
 	kid_t *shadow;
 
 	/* Parsing algorithm. */
 	long state;
-	short causeReduce;
+	short cause_reduce;
 
 	/* Retry vars. Might be able to unify lower and upper. */
-	long retryRegion;
-	char retryLower;
-	char retryUpper;
+	long retry_region;
+	char retry_lower;
+	char retry_upper;
 } parse_tree_t;
 
 typedef struct colm_pointer
@@ -135,17 +135,17 @@ struct generic_info
 {
 	long type;
 
-	long elType;
-	long elStructId;
-	long elOffset;
+	long el_type;
+	long el_struct_id;
+	long el_offset;
 
-	enum TYPE keyType;
-	long keyOffset;
+	enum TYPE key_type;
+	long key_offset;
 
-	enum TYPE valueType;
-	long valueOffset;
+	enum TYPE value_type;
+	long value_offset;
 
-	long parserId;
+	long parser_id;
 };
 
 enum IterType
@@ -158,41 +158,41 @@ enum IterType
 typedef struct _TreeIter
 {
 	enum IterType type;
-	ref_t rootRef;
+	ref_t root_ref;
 	ref_t ref;
-	long searchId;
-	tree_t **stackRoot;
-	long argSize;
-	long yieldSize;
-	long rootSize;
+	long search_id;
+	tree_t **stack_root;
+	long arg_size;
+	long yield_size;
+	long root_size;
 } tree_iter_t;
 
 typedef struct colm_generic_iter
 {
 	enum IterType type;
-	ref_t rootRef;
+	ref_t root_ref;
 	ref_t ref;
-	tree_t **stackRoot;
-	long argSize;
-	long yieldSize;
-	long rootSize;
-	long genericId;
+	tree_t **stack_root;
+	long arg_size;
+	long yield_size;
+	long root_size;
+	long generic_id;
 } generic_iter_t;
 
 /* This must overlay tree iter because some of the same bytecodes are used. */
 typedef struct _RevTreeIter
 {
 	enum IterType type;
-	ref_t rootRef;
+	ref_t root_ref;
 	ref_t ref;
-	long searchId;
-	tree_t **stackRoot;
-	long argSize;
-	long yieldSize;
-	long rootSize;
+	long search_id;
+	tree_t **stack_root;
+	long arg_size;
+	long yield_size;
+	long root_size;
 
 	/* For detecting a split at the leaf. */
-	kid_t *kidAtYield;
+	kid_t *kid_at_yield;
 	long children;
 } rev_tree_iter_t;
 
@@ -201,92 +201,92 @@ typedef struct colm_user_iter
 	enum IterType type;
 	/* The current item. */
 	ref_t ref;
-	tree_t **stackRoot;
-	long argSize;
-	long yieldSize;
-	long rootSize;
+	tree_t **stack_root;
+	long arg_size;
+	long yield_size;
+	long root_size;
 
 	code_t *resume;
 	tree_t **frame;
-	long searchId;
+	long search_id;
 } user_iter_t;
 
 void colm_tree_upref( tree_t *tree );
 void colm_tree_downref( struct colm_program *prg, tree_t **sp, tree_t *tree );
 long colm_cmp_tree( struct colm_program *prg, const tree_t *tree1, const tree_t *tree2 );
 
-tree_t *push_right_ignore( struct colm_program *prg, tree_t *pushTo, tree_t *rightIgnore );
-tree_t *push_left_ignore( struct colm_program *prg, tree_t *pushTo, tree_t *leftIgnore );
-tree_t *popRightIgnore( struct colm_program *prg, tree_t **sp,
-		tree_t *popFrom, tree_t **rightIgnore );
-tree_t *popLeftIgnore( struct colm_program *prg, tree_t **sp,
-		tree_t *popFrom, tree_t **leftIgnore );
-tree_t *treeLeftIgnore( struct colm_program *prg, tree_t *tree );
-tree_t *treeRightIgnore( struct colm_program *prg, tree_t *tree );
-kid_t *treeLeftIgnoreKid( struct colm_program *prg, tree_t *tree );
-kid_t *treeRightIgnoreKid( struct colm_program *prg, tree_t *tree );
-kid_t *treeChild( struct colm_program *prg, const tree_t *tree );
-kid_t *treeAttr( struct colm_program *prg, const tree_t *tree );
-kid_t *kidListConcat( kid_t *list1, kid_t *list2 );
-kid_t *treeExtractChild( struct colm_program *prg, tree_t *tree );
-kid_t *reverseKidList( kid_t *kid );
+tree_t *push_right_ignore( struct colm_program *prg, tree_t *push_to, tree_t *right_ignore );
+tree_t *push_left_ignore( struct colm_program *prg, tree_t *push_to, tree_t *left_ignore );
+tree_t *pop_right_ignore( struct colm_program *prg, tree_t **sp,
+		tree_t *pop_from, tree_t **right_ignore );
+tree_t *pop_left_ignore( struct colm_program *prg, tree_t **sp,
+		tree_t *pop_from, tree_t **left_ignore );
+tree_t *tree_left_ignore( struct colm_program *prg, tree_t *tree );
+tree_t *tree_right_ignore( struct colm_program *prg, tree_t *tree );
+kid_t *tree_left_ignore_kid( struct colm_program *prg, tree_t *tree );
+kid_t *tree_right_ignore_kid( struct colm_program *prg, tree_t *tree );
+kid_t *tree_child( struct colm_program *prg, const tree_t *tree );
+kid_t *tree_attr( struct colm_program *prg, const tree_t *tree );
+kid_t *kid_list_concat( kid_t *list1, kid_t *list2 );
+kid_t *tree_extract_child( struct colm_program *prg, tree_t *tree );
+kid_t *reverse_kid_list( kid_t *kid );
 
 tree_t *colm_construct_pointer( struct colm_program *prg, colm_value_t value );
 tree_t *colm_construct_term( struct colm_program *prg, word_t id, head_t *tokdata );
 tree_t *colm_construct_tree( struct colm_program *prg, kid_t *kid,
 		tree_t **bindings, long pat );
 tree_t *colm_construct_object( struct colm_program *prg, kid_t *kid,
-		tree_t **bindings, long langElId );
+		tree_t **bindings, long lang_el_id );
 tree_t *colm_construct_token( struct colm_program *prg, tree_t **args, long nargs );
 
-int testFalse( struct colm_program *prg, tree_t *tree );
-tree_t *makeTree( struct colm_program *prg, tree_t **args, long nargs );
-stream_t *openFile( struct colm_program *prg, tree_t *name, tree_t *mode );
+int test_false( struct colm_program *prg, tree_t *tree );
+tree_t *make_tree( struct colm_program *prg, tree_t **args, long nargs );
+stream_t *open_file( struct colm_program *prg, tree_t *name, tree_t *mode );
 stream_t *colm_stream_open_file( struct colm_program *prg, tree_t *name, tree_t *mode );
 stream_t *colm_stream_open_fd( struct colm_program *prg, char *name, long fd );
-kid_t *copyIgnoreList( struct colm_program *prg, kid_t *ignoreHeader );
-kid_t *copyKidList( struct colm_program *prg, kid_t *kidList );
+kid_t *copy_ignore_list( struct colm_program *prg, kid_t *ignore_header );
+kid_t *copy_kid_list( struct colm_program *prg, kid_t *kid_list );
 void colm_stream_free( struct colm_program *prg, stream_t *s );
 tree_t *colm_copy_tree( struct colm_program *prg, tree_t *tree,
-		kid_t *oldNextDown, kid_t **newNextDown );
+		kid_t *old_next_down, kid_t **new_next_down );
 
 colm_value_t colm_get_pointer_val( tree_t *pointer );
 tree_t *colm_tree_get_field( tree_t *tree, word_t field );
-tree_t *getFieldSplit( struct colm_program *prg, tree_t *tree, word_t field );
-tree_t *getRhsEl( struct colm_program *prg, tree_t *lhs, long position );
-kid_t *getRhsElKid( struct colm_program *prg, tree_t *lhs, long position );
+tree_t *get_field_split( struct colm_program *prg, tree_t *tree, word_t field );
+tree_t *get_rhs_el( struct colm_program *prg, tree_t *lhs, long position );
+kid_t *get_rhs_el_kid( struct colm_program *prg, tree_t *lhs, long position );
 void colm_tree_set_field( struct colm_program *prg, tree_t *tree, long field, tree_t *value );
 
-void setTriterCur( struct colm_program *prg, tree_iter_t *iter, tree_t *tree );
-void setUiterCur( struct colm_program *prg, user_iter_t *uiter, tree_t *tree );
-void refSetValue( struct colm_program *prg, tree_t **sp, ref_t *ref, tree_t *v );
-tree_t *treeSearch( struct colm_program *prg, tree_t *tree, long id );
-location_t *locSearch( struct colm_program *prg, tree_t *tree );
+void set_triter_cur( struct colm_program *prg, tree_iter_t *iter, tree_t *tree );
+void set_uiter_cur( struct colm_program *prg, user_iter_t *uiter, tree_t *tree );
+void ref_set_value( struct colm_program *prg, tree_t **sp, ref_t *ref, tree_t *v );
+tree_t *tree_search( struct colm_program *prg, tree_t *tree, long id );
+location_t *loc_search( struct colm_program *prg, tree_t *tree );
 
-int matchPattern( tree_t **bindings, struct colm_program *prg,
-		long pat, kid_t *kid, int checkNext );
-tree_t *treeIterDerefCur( tree_iter_t *iter );
+int match_pattern( tree_t **bindings, struct colm_program *prg,
+		long pat, kid_t *kid, int check_next );
+tree_t *tree_iter_deref_cur( tree_iter_t *iter );
 
 /* For making references of attributes. */
-kid_t *getFieldKid( tree_t *tree, word_t field );
+kid_t *get_field_kid( tree_t *tree, word_t field );
 
-tree_t *copyRealTree( struct colm_program *prg, tree_t *tree,
-		kid_t *oldNextDown, kid_t **newNextDown );
-void splitIterCur( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
-tree_t *setListMem( list_t *list, half_t field, tree_t *value );
+tree_t *copy_real_tree( struct colm_program *prg, tree_t *tree,
+		kid_t *old_next_down, kid_t **new_next_down );
+void split_iter_cur( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
+tree_t *set_list_mem( list_t *list, half_t field, tree_t *value );
 
-void listPushTail( struct colm_program *prg, list_t *list, tree_t *val );
-void listPushHead( struct colm_program *prg, list_t *list, tree_t *val );
-tree_t *listRemoveEnd( struct colm_program *prg, list_t *list );
-tree_t *listRemoveHead( struct colm_program *prg, list_t *list );
-tree_t *getListMemSplit( struct colm_program *prg, list_t *list, word_t field );
-tree_t *getParserMem( parser_t *parser, word_t field );
+void list_push_tail( struct colm_program *prg, list_t *list, tree_t *val );
+void list_push_head( struct colm_program *prg, list_t *list, tree_t *val );
+tree_t *list_remove_end( struct colm_program *prg, list_t *list );
+tree_t *list_remove_head( struct colm_program *prg, list_t *list );
+tree_t *get_list_mem_split( struct colm_program *prg, list_t *list, word_t field );
+tree_t *get_parser_mem( parser_t *parser, word_t field );
 
-tree_t *treeIterAdvance( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
-tree_t *treeIterNextChild( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
-tree_t *treeRevIterPrevChild( struct colm_program *prg, tree_t ***psp, rev_tree_iter_t *iter );
-tree_t *treeIterNextRepeat( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
-tree_t *treeIterPrevRepeat( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
+tree_t *tree_iter_advance( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
+tree_t *tree_iter_next_child( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
+tree_t *tree_rev_iter_prev_child( struct colm_program *prg, tree_t ***psp, rev_tree_iter_t *iter );
+tree_t *tree_iter_next_repeat( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
+tree_t *tree_iter_prev_repeat( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
 
 /* An automatically grown buffer for collecting tokens. Always reuses space;
  * never down resizes. */
@@ -297,50 +297,50 @@ typedef struct _StrCollect
 	int length;
 } StrCollect;
 
-void initStrCollect( StrCollect *collect );
-void strCollectDestroy( StrCollect *collect );
-void strCollectAppend( StrCollect *collect, const char *data, long len );
-void strCollectClear( StrCollect *collect );
-tree_t *treeTrim( struct colm_program *prg, tree_t **sp, tree_t *tree );
+void init_str_collect( StrCollect *collect );
+void str_collect_destroy( StrCollect *collect );
+void str_collect_append( StrCollect *collect, const char *data, long len );
+void str_collect_clear( StrCollect *collect );
+tree_t *tree_trim( struct colm_program *prg, tree_t **sp, tree_t *tree );
 
-void printTreeCollect( struct colm_program *prg, tree_t **sp,
+void print_tree_collect( struct colm_program *prg, tree_t **sp,
 		StrCollect *collect, tree_t *tree, int trim );
-void printTreeFile( struct colm_program *prg, tree_t **sp, FILE *out, tree_t *tree, int trim );
-void printTreeFd( struct colm_program *prg, tree_t **sp, int fd, tree_t *tree, int trim );
-void printXmlStdout( struct colm_program *prg, tree_t **sp,
-		tree_t *tree, int commAttr, int trim );
+void print_tree_file( struct colm_program *prg, tree_t **sp, FILE *out, tree_t *tree, int trim );
+void print_tree_fd( struct colm_program *prg, tree_t **sp, int fd, tree_t *tree, int trim );
+void print_xml_stdout( struct colm_program *prg, tree_t **sp,
+		tree_t *tree, int comm_attr, int trim );
 
 /*
  * Iterators.
  */
 
 user_iter_t *colm_uiter_create( struct colm_program *prg, tree_t ***psp,
-		struct function_info *fi, long searchId );
-void uiterInit( struct colm_program *prg, tree_t **sp, user_iter_t *uiter, 
-		struct function_info *fi, int revertOn );
+		struct function_info *fi, long search_id );
+void uiter_init( struct colm_program *prg, tree_t **sp, user_iter_t *uiter, 
+		struct function_info *fi, int revert_on );
 
-void colm_init_tree_iter( tree_iter_t *treeIter, tree_t **stackRoot,
-		long argSize, long rootSize, const ref_t *rootRef, int searchId );
-void colm_init_rev_tree_iter( rev_tree_iter_t *revTriter, tree_t **stackRoot,
-		long argSize, long rootSize, const ref_t *rootRef, int searchId, int children );
-void colm_init_user_iter( user_iter_t *userIter, tree_t **stackRoot, long rootSize,
-		long argSize, long searchId );
+void colm_init_tree_iter( tree_iter_t *tree_iter, tree_t **stack_root,
+		long arg_size, long root_size, const ref_t *root_ref, int search_id );
+void colm_init_rev_tree_iter( rev_tree_iter_t *rev_triter, tree_t **stack_root,
+		long arg_size, long root_size, const ref_t *root_ref, int search_id, int children );
+void colm_init_user_iter( user_iter_t *user_iter, tree_t **stack_root, long root_size,
+		long arg_size, long search_id );
 
 void colm_tree_iter_destroy( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
 void colm_rev_tree_iter_destroy( struct colm_program *prg, tree_t ***psp, rev_tree_iter_t *iter );
 void colm_uiter_destroy( struct colm_program *prg, tree_t ***psp, user_iter_t *uiter );
 void colm_uiter_unwind( struct colm_program *prg, tree_t ***psp, user_iter_t *uiter );
 
-tree_t *castTree( struct colm_program *prg, int langElId, tree_t *tree );
-struct stream_impl *streamToImpl( stream_t *ptr );
+tree_t *cast_tree( struct colm_program *prg, int lang_el_id, tree_t *tree );
+struct stream_impl *stream_to_impl( stream_t *ptr );
 
-void colm_init_list_iter( generic_iter_t *listIter, tree_t **stackRoot,
-		long argSize, long rootSize, const ref_t *rootRef, int genericId );
+void colm_init_list_iter( generic_iter_t *list_iter, tree_t **stack_root,
+		long arg_size, long root_size, const ref_t *root_ref, int generic_id );
 void colm_list_iter_destroy( struct colm_program *prg, tree_t ***psp, generic_iter_t *iter );
 tree_t *colm_list_iter_advance( struct colm_program *prg, tree_t ***psp, generic_iter_t *iter );
 tree_t *colm_list_iter_deref_cur( struct colm_program *prg, generic_iter_t *iter );
-void colm_list_append( struct colm_list *list, struct colm_list_el *newEl );
-void colm_list_prepend( struct colm_list *list, struct colm_list_el *newEl );
+void colm_list_append( struct colm_list *list, struct colm_list_el *new_el );
+void colm_list_prepend( struct colm_list *list, struct colm_list_el *new_el );
 
 void colm_vlist_append( struct colm_program *prg, list_t *list, value_t value );
 void colm_vlist_prepend( struct colm_program *prg, list_t *list, value_t value );
@@ -351,8 +351,8 @@ value_t colm_viter_deref_cur( struct colm_program *prg, generic_iter_t *iter );
 
 str_t *string_prefix( program_t *prg, str_t *str, long len );
 str_t *string_suffix( program_t *prg, str_t *str, long pos );
-head_t *stringAllocFull( struct colm_program *prg, const char *data, long length );
-tree_t *constructString( struct colm_program *prg, head_t *s );
+head_t *string_alloc_full( struct colm_program *prg, const char *data, long length );
+tree_t *construct_string( struct colm_program *prg, head_t *s );
 
 #if defined(__cplusplus)
 }

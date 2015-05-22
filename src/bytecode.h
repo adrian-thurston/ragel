@@ -557,8 +557,8 @@ enum LEL_ID {
 
 #define vm_ssize()       ( prg->sb_total + (prg->sb_end - sp) )
 
-#define vm_local_iframe(o) (exec->iframePtr[o])
-#define vm_plocal_iframe(o) (&exec->iframePtr[o])
+#define vm_local_iframe(o) (exec->iframe_ptr[o])
+#define vm_plocal_iframe(o) (&exec->iframe_ptr[o])
 
 void vm_init( struct colm_program * );
 tree_t** vm_bs_add( struct colm_program *, tree_t **, int );
@@ -576,17 +576,17 @@ typedef tree_t **StackPtr;
 
 typedef struct colm_execution
 {
-	tree_t **framePtr;
-	tree_t **iframePtr;
-	long frameId;
-	tree_t **callArgs;
+	tree_t **frame_ptr;
+	tree_t **iframe_ptr;
+	long frame_id;
+	tree_t **call_args;
 
-	long rcodeUnitLen;
+	long rcode_unit_len;
 
 	parser_t *parser;
 	long steps;
 	long pcr;
-	tree_t *retVal;
+	tree_t *ret_val;
 } Execution;
 
 struct colm_execution;
@@ -594,77 +594,77 @@ struct colm_execution;
 static inline tree_t **vm_get_plocal( struct colm_execution *exec, int o )
 {
 	if ( o >= FR_AA ) {
-		tree_t **callArgs = (tree_t**)exec->framePtr[FR_CA];
-		return &callArgs[o - FR_AA];
+		tree_t **call_args = (tree_t**)exec->frame_ptr[FR_CA];
+		return &call_args[o - FR_AA];
 	}
 	else {
-		return &exec->framePtr[o];
+		return &exec->frame_ptr[o];
 	}
 }
 
 static inline tree_t *vm_get_local( struct colm_execution *exec, int o )
 {
 	if ( o >= FR_AA ) {
-		tree_t **callArgs = (tree_t**)exec->framePtr[FR_CA];
-		return callArgs[o - FR_AA];
+		tree_t **call_args = (tree_t**)exec->frame_ptr[FR_CA];
+		return call_args[o - FR_AA];
 	}
 	else {
-		return exec->framePtr[o];
+		return exec->frame_ptr[o];
 	}
 }
 
 static inline void vm_set_local( struct colm_execution *exec, int o, tree_t* v )
 {
 	if ( o >= FR_AA ) {
-		tree_t **callArgs = (tree_t**)exec->framePtr[FR_CA];
-		callArgs[o - FR_AA] = v;
+		tree_t **call_args = (tree_t**)exec->frame_ptr[FR_CA];
+		call_args[o - FR_AA] = v;
 	}
 	else {
-		exec->framePtr[o] = v;
+		exec->frame_ptr[o] = v;
 	}
 }
 
 
-long stringLength( head_t *str );
-const char *stringData( head_t *str );
-head_t *initStrSpace( long length );
-head_t *stringCopy( struct colm_program *prg, head_t *head );
-void stringFree( struct colm_program *prg, head_t *head );
-void stringShorten( head_t *tokdata, long newlen );
-head_t *concatStr( head_t *s1, head_t *s2 );
-word_t strAtoi( head_t *str );
-word_t strAtoo( head_t *str );
-word_t strUord16( head_t *head );
-word_t strUord8( head_t *head );
-word_t cmpString( head_t *s1, head_t *s2 );
-head_t *stringToUpper( head_t *s );
-head_t *stringToLower( head_t *s );
-head_t *stringSprintf( program_t *prg, str_t *format, long integer );
+long string_length( head_t *str );
+const char *string_data( head_t *str );
+head_t *init_str_space( long length );
+head_t *string_copy( struct colm_program *prg, head_t *head );
+void string_free( struct colm_program *prg, head_t *head );
+void string_shorten( head_t *tokdata, long newlen );
+head_t *concat_str( head_t *s1, head_t *s2 );
+word_t str_atoi( head_t *str );
+word_t str_atoo( head_t *str );
+word_t str_uord16( head_t *head );
+word_t str_uord8( head_t *head );
+word_t cmp_string( head_t *s1, head_t *s2 );
+head_t *string_to_upper( head_t *s );
+head_t *string_to_lower( head_t *s );
+head_t *string_sprintf( program_t *prg, str_t *format, long integer );
 
-head_t *makeLiteral( struct colm_program *prg, long litoffset );
-head_t *intToStr( struct colm_program *prg, word_t i );
+head_t *make_literal( struct colm_program *prg, long litoffset );
+head_t *int_to_str( struct colm_program *prg, word_t i );
 
 void colm_execute( struct colm_program *prg, Execution *exec, code_t *code );
-void reductionExecution( Execution *exec, tree_t **sp );
-void generationExecution( Execution *exec, tree_t **sp );
-void reverseExecution( Execution *exec, tree_t **sp, struct rt_code_vect *allRev );
+void reduction_execution( Execution *exec, tree_t **sp );
+void generation_execution( Execution *exec, tree_t **sp );
+void reverse_execution( Execution *exec, tree_t **sp, struct rt_code_vect *all_rev );
 
-kid_t *allocAttrs( struct colm_program *prg, long length );
-void freeAttrs( struct colm_program *prg, kid_t *attrs );
-kid_t *getAttrKid( tree_t *tree, long pos );
+kid_t *alloc_attrs( struct colm_program *prg, long length );
+void free_attrs( struct colm_program *prg, kid_t *attrs );
+kid_t *get_attr_kid( tree_t *tree, long pos );
 
-tree_t *splitTree( struct colm_program *prg, tree_t *t );
+tree_t *split_tree( struct colm_program *prg, tree_t *t );
 
 void colm_rcode_downref_all( struct colm_program *prg, tree_t **sp, struct rt_code_vect *cv );
-int colm_make_reverse_code( struct pda_run *pdaRun );
-void colm_transfer_reverse_code( struct pda_run *pdaRun, parse_tree_t *tree );
+int colm_make_reverse_code( struct pda_run *pda_run );
+void colm_transfer_reverse_code( struct pda_run *pda_run, parse_tree_t *tree );
 
-void splitRef( struct colm_program *prg, tree_t ***sp, ref_t *fromRef );
+void split_ref( struct colm_program *prg, tree_t ***sp, ref_t *from_ref );
 
-void allocGlobal( struct colm_program *prg );
+void alloc_global( struct colm_program *prg );
 tree_t **colm_execute_code( struct colm_program *prg,
 	Execution *exec, tree_t **sp, code_t *instr );
-code_t *colm_pop_reverse_code( struct rt_code_vect *allRev );
+code_t *colm_pop_reverse_code( struct rt_code_vect *all_rev );
 
 #ifdef __cplusplus
 }

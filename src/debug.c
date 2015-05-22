@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const char *const colmRealmNames[REALMS] =
+const char *const colm_realm_names[REALMS] =
 	{
 		"BYTECODE",
 		"PARSE",
@@ -40,7 +40,7 @@ const char *const colmRealmNames[REALMS] =
 int _debug( struct colm_program *prg, long realm, const char *fmt, ... )
 {
 	int result = 0;
-	if ( prg->activeRealm & realm ) {
+	if ( prg->active_realm & realm ) {
 		/* Compute the index by shifting. */
 		int ind = 0;
 		while ( (realm & 0x1) != 0x1 ) {
@@ -48,7 +48,7 @@ int _debug( struct colm_program *prg, long realm, const char *fmt, ... )
 			ind += 1;
 		}
 
-		fprintf( stderr, "%s: ", colmRealmNames[ind] );
+		fprintf( stderr, "%s: ", colm_realm_names[ind] );
 		va_list args;
 		va_start( args, fmt );
 		result = vfprintf( stderr, fmt, args );

@@ -28,18 +28,18 @@
 #define true 1
 #define false 0
 
-void colm_init_list_iter( generic_iter_t *listIter, tree_t **stackRoot,
-		long argSize, long rootSize, const ref_t *rootRef, int genericId )
+void colm_init_list_iter( generic_iter_t *list_iter, tree_t **stack_root,
+		long arg_size, long root_size, const ref_t *root_ref, int generic_id )
 {
-	listIter->type = IT_Tree;
-	listIter->rootRef = *rootRef;
-	listIter->stackRoot = stackRoot;
-	listIter->yieldSize = 0;
-	listIter->rootSize = rootSize;
-	listIter->ref.kid = 0;
-	listIter->ref.next = 0;
-	listIter->argSize = argSize;
-	listIter->genericId = genericId;
+	list_iter->type = IT_Tree;
+	list_iter->root_ref = *root_ref;
+	list_iter->stack_root = stack_root;
+	list_iter->yield_size = 0;
+	list_iter->root_size = root_size;
+	list_iter->ref.kid = 0;
+	list_iter->ref.next = 0;
+	list_iter->arg_size = arg_size;
+	list_iter->generic_id = generic_id;
 }
 
 void colm_list_iter_destroy( program_t *prg, tree_t ***psp, generic_iter_t *iter )
@@ -47,10 +47,10 @@ void colm_list_iter_destroy( program_t *prg, tree_t ***psp, generic_iter_t *iter
 	if ( (int)iter->type != 0 ) {
 		int i;
 		tree_t **sp = *psp;
-		long curStackSize = vm_ssize() - iter->rootSize;
-		assert( iter->yieldSize == curStackSize );
-		vm_popn( iter->yieldSize );
-		for ( i = 0; i < iter->argSize; i++ )
+		long cur_stack_size = vm_ssize() - iter->root_size;
+		assert( iter->yield_size == cur_stack_size );
+		vm_popn( iter->yield_size );
+		for ( i = 0; i < iter->arg_size; i++ )
 			colm_tree_downref( prg, sp, vm_pop_tree() );
 		iter->type = 0;
 		*psp = sp;
@@ -60,11 +60,11 @@ void colm_list_iter_destroy( program_t *prg, tree_t ***psp, generic_iter_t *iter
 tree_t *colm_list_iter_advance( program_t *prg, tree_t ***psp, generic_iter_t *iter )
 {
 	tree_t **sp = *psp;
-	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
+	assert( iter->yield_size == (vm_ssize() - iter->root_size) );
 
 	if ( iter->ref.kid == 0 ) {
 		/* kid_t is zero, start from the root. */
-		list_t *list = *((list_t**)iter->rootRef.kid);
+		list_t *list = *((list_t**)iter->root_ref.kid);
 		iter->ref.kid = (kid_t*)list->head;
 		iter->ref.next = 0;
 
@@ -76,26 +76,26 @@ tree_t *colm_list_iter_advance( program_t *prg, tree_t ***psp, generic_iter_t *i
 		/* Have a previous item, continue searching from there. */
 		//iterFind( prg, psp, iter, false );
 
-		list_el_t *listEl = (list_el_t*)iter->ref.kid;
-		listEl = listEl->list_next;
-		iter->ref.kid = (kid_t*)listEl;
+		list_el_t *list_el = (list_el_t*)iter->ref.kid;
+		list_el = list_el->list_next;
+		iter->ref.kid = (kid_t*)list_el;
 		iter->ref.next = 0;
 	}
 
 	sp = *psp;
-	iter->yieldSize = vm_ssize() - iter->rootSize;
+	iter->yield_size = vm_ssize() - iter->root_size;
 
-	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+	return (iter->ref.kid ? prg->true_val : prg->false_val );
 }
 
 tree_t *colm_map_iter_advance( program_t *prg, tree_t ***psp, generic_iter_t *iter )
 {
 	tree_t **sp = *psp;
-	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
+	assert( iter->yield_size == (vm_ssize() - iter->root_size) );
 
 	if ( iter->ref.kid == 0 ) {
 		/* kid_t is zero, start from the root. */
-		map_t *map = *((map_t**)iter->rootRef.kid);
+		map_t *map = *((map_t**)iter->root_ref.kid);
 		iter->ref.kid = (kid_t*)map->head;
 		iter->ref.next = 0;
 
@@ -107,91 +107,91 @@ tree_t *colm_map_iter_advance( program_t *prg, tree_t ***psp, generic_iter_t *it
 		/* Have a previous item, continue searching from there. */
 		//iterFind( prg, psp, iter, false );
 
-		map_el_t *mapEl = (map_el_t*)iter->ref.kid;
-		mapEl = mapEl->next;
-		iter->ref.kid = (kid_t*)mapEl;
+		map_el_t *map_el = (map_el_t*)iter->ref.kid;
+		map_el = map_el->next;
+		iter->ref.kid = (kid_t*)map_el;
 		iter->ref.next = 0;
 	}
 
 	sp = *psp;
-	iter->yieldSize = vm_ssize() - iter->rootSize;
+	iter->yield_size = vm_ssize() - iter->root_size;
 
-	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+	return (iter->ref.kid ? prg->true_val : prg->false_val );
 }
 
 tree_t *colm_list_iter_deref_cur( program_t *prg, generic_iter_t *iter )
 {
-	struct generic_info *gi = &prg->rtd->genericInfo[iter->genericId];
+	struct generic_info *gi = &prg->rtd->generic_info[iter->generic_id];
 	list_el_t *el = (list_el_t*)iter->ref.kid;
 	struct colm_struct *s = el != 0 ?
-			colm_struct_container( el, gi->elOffset ) : 0;
+			colm_struct_container( el, gi->el_offset ) : 0;
 	return (tree_t*)s;
 }
 
 value_t colm_viter_deref_cur( program_t *prg, generic_iter_t *iter )
 {
-	struct generic_info *gi = &prg->rtd->genericInfo[iter->genericId];
+	struct generic_info *gi = &prg->rtd->generic_info[iter->generic_id];
 	list_el_t *el = (list_el_t*)iter->ref.kid;
 	struct colm_struct *s = el != 0 ?
-			colm_struct_container( el, gi->elOffset ) : 0;
+			colm_struct_container( el, gi->el_offset ) : 0;
 
 	value_t value = colm_struct_get_field( s, value_t, 0 );
-	if ( gi->valueType == TYPE_TREE )
+	if ( gi->value_type == TYPE_TREE )
 		colm_tree_upref( (tree_t*)value );
 
 	return value;
 }
 
-void colm_init_tree_iter( tree_iter_t *treeIter, tree_t **stackRoot,
-		long argSize, long rootSize,
-		const ref_t *rootRef, int searchId )
+void colm_init_tree_iter( tree_iter_t *tree_iter, tree_t **stack_root,
+		long arg_size, long root_size,
+		const ref_t *root_ref, int search_id )
 {
-	treeIter->type = IT_Tree;
-	treeIter->rootRef = *rootRef;
-	treeIter->searchId = searchId;
-	treeIter->stackRoot = stackRoot;
-	treeIter->yieldSize = 0;
-	treeIter->rootSize = rootSize;
-	treeIter->ref.kid = 0;
-	treeIter->ref.next = 0;
-	treeIter->argSize = argSize;
+	tree_iter->type = IT_Tree;
+	tree_iter->root_ref = *root_ref;
+	tree_iter->search_id = search_id;
+	tree_iter->stack_root = stack_root;
+	tree_iter->yield_size = 0;
+	tree_iter->root_size = root_size;
+	tree_iter->ref.kid = 0;
+	tree_iter->ref.next = 0;
+	tree_iter->arg_size = arg_size;
 }
 
-void colm_init_rev_tree_iter( rev_tree_iter_t *revTriter, tree_t **stackRoot,
-		long argSize, long rootSize,
-		const ref_t *rootRef, int searchId, int children )
+void colm_init_rev_tree_iter( rev_tree_iter_t *rev_triter, tree_t **stack_root,
+		long arg_size, long root_size,
+		const ref_t *root_ref, int search_id, int children )
 {
-	revTriter->type = IT_RevTree;
-	revTriter->rootRef = *rootRef;
-	revTriter->searchId = searchId;
-	revTriter->stackRoot = stackRoot;
-	revTriter->yieldSize = children;
-	revTriter->rootSize = rootSize;
-	revTriter->kidAtYield = 0;
-	revTriter->children = children;
-	revTriter->ref.kid = 0;
-	revTriter->ref.next = 0;
-	revTriter->argSize = argSize;
+	rev_triter->type = IT_RevTree;
+	rev_triter->root_ref = *root_ref;
+	rev_triter->search_id = search_id;
+	rev_triter->stack_root = stack_root;
+	rev_triter->yield_size = children;
+	rev_triter->root_size = root_size;
+	rev_triter->kid_at_yield = 0;
+	rev_triter->children = children;
+	rev_triter->ref.kid = 0;
+	rev_triter->ref.next = 0;
+	rev_triter->arg_size = arg_size;
 }
 
-void initUserIter( user_iter_t *userIter, tree_t **stackRoot, long rootSize,
-		long argSize, long searchId )
+void init_user_iter( user_iter_t *user_iter, tree_t **stack_root, long root_size,
+		long arg_size, long search_id )
 {
-	userIter->type = IT_User;
-	userIter->stackRoot = stackRoot;
-	userIter->argSize = argSize;
-	userIter->yieldSize = 0;
-	userIter->rootSize = rootSize;
-	userIter->resume = 0;
-	userIter->frame = 0;
-	userIter->searchId = searchId;
+	user_iter->type = IT_User;
+	user_iter->stack_root = stack_root;
+	user_iter->arg_size = arg_size;
+	user_iter->yield_size = 0;
+	user_iter->root_size = root_size;
+	user_iter->resume = 0;
+	user_iter->frame = 0;
+	user_iter->search_id = search_id;
 
-	userIter->ref.kid = 0;
-	userIter->ref.next = 0;
+	user_iter->ref.kid = 0;
+	user_iter->ref.next = 0;
 }
 
 
-user_iter_t *colm_uiter_create( program_t *prg, tree_t ***psp, struct function_info *fi, long searchId )
+user_iter_t *colm_uiter_create( program_t *prg, tree_t ***psp, struct function_info *fi, long search_id )
 {
 	tree_t **sp = *psp;
 
@@ -199,27 +199,27 @@ user_iter_t *colm_uiter_create( program_t *prg, tree_t ***psp, struct function_i
 	void *mem = vm_ptop();
 	user_iter_t *uiter = mem;
 
-	tree_t **stackRoot = vm_ptop();
-	long rootSize = vm_ssize();
+	tree_t **stack_root = vm_ptop();
+	long root_size = vm_ssize();
 
-	initUserIter( uiter, stackRoot, rootSize, fi->argSize, searchId );
+	init_user_iter( uiter, stack_root, root_size, fi->arg_size, search_id );
 
 	*psp = sp;
 	return uiter;
 }
 
-void uiterInit( program_t *prg, tree_t **sp, user_iter_t *uiter, 
-		struct function_info *fi, int revertOn )
+void uiter_init( program_t *prg, tree_t **sp, user_iter_t *uiter, 
+		struct function_info *fi, int revert_on )
 {
 	/* Set up the first yeild so when we resume it starts at the beginning. */
 	uiter->ref.kid = 0;
-	uiter->yieldSize = vm_ssize() - uiter->rootSize;
+	uiter->yield_size = vm_ssize() - uiter->root_size;
 	//	uiter->frame = &uiter->stackRoot[-IFR_AA];
 
-	if ( revertOn )
-		uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWV;
+	if ( revert_on )
+		uiter->resume = prg->rtd->frame_info[fi->frame_id].codeWV;
 	else
-		uiter->resume = prg->rtd->frameInfo[fi->frameId].codeWC;
+		uiter->resume = prg->rtd->frame_info[fi->frame_id].codeWC;
 }
 
 
@@ -228,10 +228,10 @@ void colm_tree_iter_destroy( program_t *prg, tree_t ***psp, tree_iter_t *iter )
 	if ( (int)iter->type != 0 ) {
 		int i;
 		tree_t **sp = *psp;
-		long curStackSize = vm_ssize() - iter->rootSize;
-		assert( iter->yieldSize == curStackSize );
-		vm_popn( iter->yieldSize );
-		for ( i = 0; i < iter->argSize; i++ )
+		long cur_stack_size = vm_ssize() - iter->root_size;
+		assert( iter->yield_size == cur_stack_size );
+		vm_popn( iter->yield_size );
+		for ( i = 0; i < iter->arg_size; i++ )
 			colm_tree_downref( prg, sp, vm_pop_tree() );
 		iter->type = 0;
 		*psp = sp;
@@ -243,10 +243,10 @@ void colm_rev_tree_iter_destroy( struct colm_program *prg, tree_t ***psp, rev_tr
 	if ( (int)riter->type != 0 ) {
 		int i;
 		tree_t **sp = *psp;
-		long curStackSize = vm_ssize() - riter->rootSize;
-		assert( riter->yieldSize == curStackSize );
-		vm_popn( riter->yieldSize );
-		for ( i = 0; i < riter->argSize; i++ )
+		long cur_stack_size = vm_ssize() - riter->root_size;
+		assert( riter->yield_size == cur_stack_size );
+		vm_popn( riter->yield_size );
+		for ( i = 0; i < riter->arg_size; i++ )
 			colm_tree_downref( prg, sp, vm_pop_tree() );
 		riter->type = 0;
 		*psp = sp;
@@ -260,10 +260,10 @@ void colm_uiter_destroy( program_t *prg, tree_t ***psp, user_iter_t *uiter )
 
 		/* We should always be coming from a yield. The current stack size will be
 		 * nonzero and the stack size in the iterator will be correct. */
-		long curStackSize = vm_ssize() - uiter->rootSize;
-		assert( uiter->yieldSize == curStackSize );
+		long cur_stack_size = vm_ssize() - uiter->root_size;
+		assert( uiter->yield_size == cur_stack_size );
 
-		vm_popn( uiter->yieldSize );
+		vm_popn( uiter->yield_size );
 		vm_popn( sizeof(user_iter_t) / sizeof(word_t) );
 
 		uiter->type = 0;
@@ -279,16 +279,16 @@ void colm_uiter_unwind( program_t *prg, tree_t ***psp, user_iter_t *uiter )
 
 		/* We should always be coming from a yield. The current stack size will be
 		 * nonzero and the stack size in the iterator will be correct. */
-		long curStackSize = vm_ssize() - uiter->rootSize;
-		assert( uiter->yieldSize == curStackSize );
+		long cur_stack_size = vm_ssize() - uiter->root_size;
+		assert( uiter->yield_size == cur_stack_size );
 
-		long argSize = uiter->argSize;
+		long arg_size = uiter->arg_size;
 
-		vm_popn( uiter->yieldSize );
+		vm_popn( uiter->yield_size );
 		vm_popn( sizeof(user_iter_t) / sizeof(word_t) );
 
 		/* The IN_PREP_ARGS stack data. */
-		vm_popn( argSize );
+		vm_popn( arg_size );
 		vm_pop_value();
 
 		uiter->type = 0;
@@ -297,43 +297,43 @@ void colm_uiter_unwind( program_t *prg, tree_t ***psp, user_iter_t *uiter )
 	}
 }
 
-tree_t *treeIterDerefCur( tree_iter_t *iter )
+tree_t *tree_iter_deref_cur( tree_iter_t *iter )
 {
 	return iter->ref.kid == 0 ? 0 : iter->ref.kid->tree;
 }
 
-void setTriterCur( program_t *prg, tree_iter_t *iter, tree_t *tree )
+void set_triter_cur( program_t *prg, tree_iter_t *iter, tree_t *tree )
 {
 	iter->ref.kid->tree = tree;
 }
 
-void setUiterCur( program_t *prg, user_iter_t *uiter, tree_t *tree )
+void set_uiter_cur( program_t *prg, user_iter_t *uiter, tree_t *tree )
 {
 	uiter->ref.kid->tree = tree;
 }
 
-void splitIterCur( program_t *prg, tree_t ***psp, tree_iter_t *iter )
+void split_iter_cur( program_t *prg, tree_t ***psp, tree_iter_t *iter )
 {
 	if ( iter->ref.kid == 0 )
 		return;
 	
-	splitRef( prg, psp, &iter->ref );
+	split_ref( prg, psp, &iter->ref );
 }
 
-void iterFind( program_t *prg, tree_t ***psp, tree_iter_t *iter, int tryFirst )
+void iter_find( program_t *prg, tree_t ***psp, tree_iter_t *iter, int try_first )
 {
-	int anyTree = iter->searchId == prg->rtd->anyId;
-	tree_t **top = iter->stackRoot;
+	int any_tree = iter->search_id == prg->rtd->any_id;
+	tree_t **top = iter->stack_root;
 	kid_t *child;
 	tree_t **sp = *psp;
 
 rec_call:
-	if ( tryFirst && ( iter->ref.kid->tree->id == iter->searchId || anyTree ) ) {
+	if ( try_first && ( iter->ref.kid->tree->id == iter->search_id || any_tree ) ) {
 		*psp = sp;
 		return;
 	}
 	else {
-		child = treeChild( prg, iter->ref.kid->tree );
+		child = tree_child( prg, iter->ref.kid->tree );
 		if ( child != 0 ) {
 			vm_contiguous( 2 );
 			vm_push_ref( iter->ref.next );
@@ -341,7 +341,7 @@ rec_call:
 			iter->ref.kid = child;
 			iter->ref.next = (ref_t*)vm_ptop();
 			while ( iter->ref.kid != 0 ) {
-				tryFirst = true;
+				try_first = true;
 				goto rec_call;
 				rec_return:
 				iter->ref.kid = iter->ref.kid->next;
@@ -358,44 +358,44 @@ rec_call:
 	*psp = sp;
 }
 
-tree_t *treeIterAdvance( program_t *prg, tree_t ***psp, tree_iter_t *iter )
+tree_t *tree_iter_advance( program_t *prg, tree_t ***psp, tree_iter_t *iter )
 {
 	tree_t **sp = *psp;
-	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
+	assert( iter->yield_size == (vm_ssize() - iter->root_size) );
 
 	if ( iter->ref.kid == 0 ) {
 		/* kid_t is zero, start from the root. */
-		iter->ref = iter->rootRef;
-		iterFind( prg, psp, iter, true );
+		iter->ref = iter->root_ref;
+		iter_find( prg, psp, iter, true );
 	}
 	else {
 		/* Have a previous item, continue searching from there. */
-		iterFind( prg, psp, iter, false );
+		iter_find( prg, psp, iter, false );
 	}
 
 	sp = *psp;
-	iter->yieldSize = vm_ssize() - iter->rootSize;
+	iter->yield_size = vm_ssize() - iter->root_size;
 
-	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+	return (iter->ref.kid ? prg->true_val : prg->false_val );
 }
 
-tree_t *treeIterNextChild( program_t *prg, tree_t ***psp, tree_iter_t *iter )
+tree_t *tree_iter_next_child( program_t *prg, tree_t ***psp, tree_iter_t *iter )
 {
 	tree_t **sp = *psp;
-	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
+	assert( iter->yield_size == (vm_ssize() - iter->root_size) );
 	kid_t *kid = 0;
 
 	if ( iter->ref.kid == 0 ) {
 		/* kid_t is zero, start from the first child. */
-		kid_t *child = treeChild( prg, iter->rootRef.kid->tree );
+		kid_t *child = tree_child( prg, iter->root_ref.kid->tree );
 
 		if ( child == 0 )
 			iter->ref.next = 0;
 		else {
 			/* Make a reference to the root. */
 			vm_contiguous( 2 );
-			vm_push_ref( iter->rootRef.next );
-			vm_push_kid( iter->rootRef.kid );
+			vm_push_ref( iter->root_ref.next );
+			vm_push_kid( iter->root_ref.kid );
 			iter->ref.next = (ref_t*)vm_ptop();
 
 			kid = child;
@@ -406,29 +406,29 @@ tree_t *treeIterNextChild( program_t *prg, tree_t ***psp, tree_iter_t *iter )
 		kid = iter->ref.kid->next;
 	}
 
-	if ( iter->searchId != prg->rtd->anyId ) {
+	if ( iter->search_id != prg->rtd->any_id ) {
 		/* Have a previous item, go to the next sibling. */
-		while ( kid != 0 && kid->tree->id != iter->searchId )
+		while ( kid != 0 && kid->tree->id != iter->search_id )
 			kid = kid->next;
 	}
 
 	iter->ref.kid = kid;
-	iter->yieldSize = vm_ssize() - iter->rootSize;
+	iter->yield_size = vm_ssize() - iter->root_size;
 	*psp = sp;
-	return ( iter->ref.kid ? prg->trueVal : prg->falseVal );
+	return ( iter->ref.kid ? prg->true_val : prg->false_val );
 }
 
-tree_t *treeRevIterPrevChild( program_t *prg, tree_t ***psp, rev_tree_iter_t *iter )
+tree_t *tree_rev_iter_prev_child( program_t *prg, tree_t ***psp, rev_tree_iter_t *iter )
 {
 	tree_t **sp = *psp;
-	assert( iter->yieldSize == ( vm_ssize() - iter->rootSize ) );
+	assert( iter->yield_size == ( vm_ssize() - iter->root_size ) );
 
-	if ( iter->kidAtYield != iter->ref.kid ) {
+	if ( iter->kid_at_yield != iter->ref.kid ) {
 		/* Need to reload the kids. */
 		vm_popn( iter->children );
 
 		int c;
-		kid_t *kid = treeChild( prg, iter->rootRef.kid->tree );
+		kid_t *kid = tree_child( prg, iter->root_ref.kid->tree );
 		for ( c = 0; c < iter->children; c++ ) {
 			vm_push_kid( kid );
 			kid = kid->next;
@@ -440,9 +440,9 @@ tree_t *treeRevIterPrevChild( program_t *prg, tree_t ***psp, rev_tree_iter_t *it
 		iter->children -= 1;
 	}
 
-	if ( iter->searchId != prg->rtd->anyId ) {
+	if ( iter->search_id != prg->rtd->any_id ) {
 		/* Have a previous item, go to the next sibling. */
-		while ( iter->children > 0 && ((kid_t*)(vm_top()))->tree->id != iter->searchId ) {
+		while ( iter->children > 0 && ((kid_t*)(vm_top()))->tree->id != iter->search_id ) {
 			iter->children -= 1;
 			vm_pop_ignore();
 		}
@@ -453,29 +453,29 @@ tree_t *treeRevIterPrevChild( program_t *prg, tree_t ***psp, rev_tree_iter_t *it
 		iter->ref.kid = 0;
 	}
 	else {
-		iter->ref.next = &iter->rootRef;
+		iter->ref.next = &iter->root_ref;
 		iter->ref.kid = (kid_t*)vm_top();
 	}
 
 	/* We will use this to detect a split above the iterated tree. */
-	iter->kidAtYield = iter->ref.kid;
+	iter->kid_at_yield = iter->ref.kid;
 
-	iter->yieldSize = vm_ssize() - iter->rootSize;
+	iter->yield_size = vm_ssize() - iter->root_size;
 
 	*psp = sp;
 
-	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+	return (iter->ref.kid ? prg->true_val : prg->false_val );
 }
 
-void iterFindRepeat( program_t *prg, tree_t ***psp, tree_iter_t *iter, int tryFirst )
+void iter_find_repeat( program_t *prg, tree_t ***psp, tree_iter_t *iter, int try_first )
 {
 	tree_t **sp = *psp;
-	int anyTree = iter->searchId == prg->rtd->anyId;
-	tree_t **top = iter->stackRoot;
+	int any_tree = iter->search_id == prg->rtd->any_id;
+	tree_t **top = iter->stack_root;
 	kid_t *child;
 
 rec_call:
-	if ( tryFirst && ( iter->ref.kid->tree->id == iter->searchId || anyTree ) ) {
+	if ( try_first && ( iter->ref.kid->tree->id == iter->search_id || any_tree ) ) {
 		*psp = sp;
 		return;
 	}
@@ -485,7 +485,7 @@ rec_call:
 		 * root of the iteration, or if does not have any neighbours to the
 		 * right. */
 		if ( top == vm_ptop() || iter->ref.kid->next == 0  ) {
-			child = treeChild( prg, iter->ref.kid->tree );
+			child = tree_child( prg, iter->ref.kid->tree );
 			if ( child != 0 ) {
 				vm_contiguous( 2 );
 				vm_push_ref( iter->ref.next );
@@ -493,7 +493,7 @@ rec_call:
 				iter->ref.kid = child;
 				iter->ref.next = (ref_t*)vm_ptop();
 				while ( iter->ref.kid != 0 ) {
-					tryFirst = true;
+					try_first = true;
 					goto rec_call;
 					rec_return:
 					iter->ref.kid = iter->ref.kid->next;
@@ -511,38 +511,38 @@ rec_call:
 	*psp = sp;
 }
 
-tree_t *treeIterNextRepeat( program_t *prg, tree_t ***psp, tree_iter_t *iter )
+tree_t *tree_iter_next_repeat( program_t *prg, tree_t ***psp, tree_iter_t *iter )
 {
 	tree_t **sp = *psp;
-	assert( iter->yieldSize == ( vm_ssize() - iter->rootSize ) );
+	assert( iter->yield_size == ( vm_ssize() - iter->root_size ) );
 
 	if ( iter->ref.kid == 0 ) {
 		/* kid_t is zero, start from the root. */
-		iter->ref = iter->rootRef;
-		iterFindRepeat( prg, psp, iter, true );
+		iter->ref = iter->root_ref;
+		iter_find_repeat( prg, psp, iter, true );
 	}
 	else {
 		/* Have a previous item, continue searching from there. */
-		iterFindRepeat( prg, psp, iter, false );
+		iter_find_repeat( prg, psp, iter, false );
 	}
 
 	sp = *psp;
-	iter->yieldSize = vm_ssize() - iter->rootSize;
+	iter->yield_size = vm_ssize() - iter->root_size;
 
-	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+	return (iter->ref.kid ? prg->true_val : prg->false_val );
 }
 
-void iterFindRevRepeat( program_t *prg, tree_t ***psp, tree_iter_t *iter, int tryFirst )
+void iter_find_rev_repeat( program_t *prg, tree_t ***psp, tree_iter_t *iter, int try_first )
 {
 	tree_t **sp = *psp;
-	int anyTree = iter->searchId == prg->rtd->anyId;
-	tree_t **top = iter->stackRoot;
+	int any_tree = iter->search_id == prg->rtd->any_id;
+	tree_t **top = iter->stack_root;
 	kid_t *child;
 
-	if ( tryFirst ) {
+	if ( try_first ) {
 		while ( true ) {
 			if ( top == vm_ptop() || iter->ref.kid->next == 0 ) {
-				child = treeChild( prg, iter->ref.kid->tree );
+				child = tree_child( prg, iter->ref.kid->tree );
 
 				if ( child == 0 )
 					break;
@@ -572,14 +572,14 @@ void iterFindRevRepeat( program_t *prg, tree_t ***psp, tree_iter_t *iter, int tr
 			 * because the chain may have been split, setting it null (to
 			 * prevent repeated walks up). */
 			ref_t *ref = (ref_t*)vm_ptop();
-			iter->ref.kid = treeChild( prg, ref->kid->tree );
+			iter->ref.kid = tree_child( prg, ref->kid->tree );
 		}
 		else {
 			iter->ref.kid = vm_pop_kid();
 			iter->ref.next = vm_pop_ref();
 		}
 first:
-		if ( iter->ref.kid->tree->id == iter->searchId || anyTree ) {
+		if ( iter->ref.kid->tree->id == iter->search_id || any_tree ) {
 			*psp = sp;
 			return;
 		}
@@ -589,25 +589,25 @@ first:
 }
 
 
-tree_t *treeIterPrevRepeat( program_t *prg, tree_t ***psp, tree_iter_t *iter )
+tree_t *tree_iter_prev_repeat( program_t *prg, tree_t ***psp, tree_iter_t *iter )
 {
 	tree_t **sp = *psp;
-	assert( iter->yieldSize == (vm_ssize() - iter->rootSize) );
+	assert( iter->yield_size == (vm_ssize() - iter->root_size) );
 
 	if ( iter->ref.kid == 0 ) {
 		/* kid_t is zero, start from the root. */
-		iter->ref = iter->rootRef;
-		iterFindRevRepeat( prg, psp, iter, true );
+		iter->ref = iter->root_ref;
+		iter_find_rev_repeat( prg, psp, iter, true );
 	}
 	else {
 		/* Have a previous item, continue searching from there. */
-		iterFindRevRepeat( prg, psp, iter, false );
+		iter_find_rev_repeat( prg, psp, iter, false );
 	}
 
 	sp = *psp;
-	iter->yieldSize = vm_ssize() - iter->rootSize;
+	iter->yield_size = vm_ssize() - iter->root_size;
 
-	return (iter->ref.kid ? prg->trueVal : prg->falseVal );
+	return (iter->ref.kid ? prg->true_val : prg->false_val );
 }
 
 

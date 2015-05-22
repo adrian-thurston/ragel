@@ -56,65 +56,65 @@
 	i = (tree_t*)w; \
 } while(0)
 
-static void init_fsm_run( program_t *prg, struct pda_run *pdaRun )
+static void init_fsm_run( program_t *prg, struct pda_run *pda_run )
 {
-	pdaRun->fsm_tables = prg->rtd->fsmTables;
+	pda_run->fsm_tables = prg->rtd->fsm_tables;
 
-	pdaRun->consumeBuf = 0;
+	pda_run->consume_buf = 0;
 
-	pdaRun->p = pdaRun->pe = 0;
-	pdaRun->toklen = 0;
-	pdaRun->eof = 0;
+	pda_run->p = pda_run->pe = 0;
+	pda_run->toklen = 0;
+	pda_run->eof = 0;
 
-	pdaRun->preRegion = -1;
+	pda_run->pre_region = -1;
 }
 
-static void clear_fsm_run( program_t *prg, struct pda_run *pdaRun )
+static void clear_fsm_run( program_t *prg, struct pda_run *pda_run )
 {
-	if ( pdaRun->consumeBuf != 0 ) {
+	if ( pda_run->consume_buf != 0 ) {
 		/* Transfer the run buf list to the program */
-		RunBuf *head = pdaRun->consumeBuf;
+		RunBuf *head = pda_run->consume_buf;
 		RunBuf *tail = head;
 		while ( tail->next != 0 )
 			tail = tail->next;
 
-		tail->next = prg->allocRunBuf;
-		prg->allocRunBuf = head;
+		tail->next = prg->alloc_run_buf;
+		prg->alloc_run_buf = head;
 	}
 }
 
-void colm_increment_steps( struct pda_run *pdaRun )
+void colm_increment_steps( struct pda_run *pda_run )
 {
-	pdaRun->steps += 1;
+	pda_run->steps += 1;
 	//debug( prg, REALM_PARSE, "steps up to %ld\n", pdaRun->steps );
 }
 
-void colm_decrement_steps( struct pda_run *pdaRun )
+void colm_decrement_steps( struct pda_run *pda_run )
 {
-	pdaRun->steps -= 1;
+	pda_run->steps -= 1;
 	//debug( prg, REALM_PARSE, "steps down to %ld\n", pdaRun->steps );
 }
 
-head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is, long length )
+head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run, struct stream_impl *is, long length )
 {
-	if ( pdaRun != 0 ) {
-		RunBuf *runBuf = pdaRun->consumeBuf;
-		if ( length > ( FSM_BUFSIZE - runBuf->length ) ) {
-			runBuf = newRunBuf();
-			runBuf->next = pdaRun->consumeBuf;
-			pdaRun->consumeBuf = runBuf;
+	if ( pda_run != 0 ) {
+		RunBuf *run_buf = pda_run->consume_buf;
+		if ( length > ( FSM_BUFSIZE - run_buf->length ) ) {
+			run_buf = new_run_buf();
+			run_buf->next = pda_run->consume_buf;
+			pda_run->consume_buf = run_buf;
 		}
 
-		char *dest = runBuf->data + runBuf->length;
+		char *dest = run_buf->data + run_buf->length;
 
-		is->funcs->getData( is, dest, length );
+		is->funcs->get_data( is, dest, length );
 		location_t *loc = location_allocate( prg );
-		is->funcs->consumeData( prg, sp, is, length, loc );
+		is->funcs->consume_data( prg, sp, is, length, loc );
 
-		runBuf->length += length;
+		run_buf->length += length;
 
-		pdaRun->p = pdaRun->pe = 0;
-		pdaRun->toklen = 0;
+		pda_run->p = pda_run->pe = 0;
+		pda_run->toklen = 0;
 
 		head_t *tokdata = colm_string_alloc_pointer( prg, dest, length );
 		tokdata->location = loc;
@@ -122,48 +122,48 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pdaRun, s
 		return tokdata;
 	}
 	else {
-		head_t *head = initStrSpace( length );
+		head_t *head = init_str_space( length );
 		char *dest = (char*)head->data;
 
-		is->funcs->getData( is, dest, length );
+		is->funcs->get_data( is, dest, length );
 		location_t *loc = location_allocate( prg );
-		is->funcs->consumeData( prg, sp, is, length, loc );
+		is->funcs->consume_data( prg, sp, is, length, loc );
 		head->location = loc;
 
 		return head;
 	}
 }
 
-void undoStreamPull( struct stream_impl *is, const char *data, long length )
+void undo_stream_pull( struct stream_impl *is, const char *data, long length )
 {
 	//debug( REALM_PARSE, "undoing stream pull\n" );
 
-	is->funcs->prependData( is, data, length );
+	is->funcs->prepend_data( is, data, length );
 }
 
 void colm_stream_push_text( struct stream_impl *is, const char *data, long length )
 {
-	is->funcs->prependData( is, data, length );
+	is->funcs->prepend_data( is, data, length );
 }
 
 void colm_stream_push_tree( struct stream_impl *is, tree_t *tree, int ignore )
 {
-	is->funcs->prependTree( is, tree, ignore );
+	is->funcs->prepend_tree( is, tree, ignore );
 }
 
 void colm_stream_push_stream( struct stream_impl *is, tree_t *tree )
 {
-	is->funcs->prependStream( is, tree );
+	is->funcs->prepend_stream( is, tree );
 }
 
 void colm_undo_stream_push( program_t *prg, tree_t **sp, struct stream_impl *is, long length )
 {
 	if ( length < 0 ) {
-		tree_t *tree = is->funcs->undoPrependTree( is );
+		tree_t *tree = is->funcs->undo_prepend_tree( is );
 		colm_tree_downref( prg, sp, tree );
 	}
 	else {
-		is->funcs->undoPrependData( is, length );
+		is->funcs->undo_prepend_data( is, length );
 	}
 }
 
@@ -180,12 +180,12 @@ static void send_back_text( struct stream_impl *is, const char *data, long lengt
 	//debug( REALM_PARSE, "sending back text: %.*s\n", 
 	//		(int)length, data );
 
-	is->funcs->undoConsumeData( is, data, length );
+	is->funcs->undo_consume_data( is, data, length );
 }
 
 static void send_back_tree( struct stream_impl *is, tree_t *tree )
 {
-	is->funcs->undoConsumeTree( is, tree, false );
+	is->funcs->undo_consume_tree( is, tree, false );
 }
 
 /*
@@ -193,44 +193,44 @@ static void send_back_tree( struct stream_impl *is, tree_t *tree )
  *   PCR_REVERSE
  */
 static void send_back_ignore( program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, struct stream_impl *is, parse_tree_t *parseTree )
+		struct pda_run *pda_run, struct stream_impl *is, parse_tree_t *parse_tree )
 {
 	#ifdef DEBUG
-	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lel_info = prg->rtd->lel_info;
 	debug( prg, REALM_PARSE, "sending back: %s%s\n",
-		lelInfo[parseTree->shadow->tree->id].name, 
-		parseTree->flags & PF_ARTIFICIAL ? " (artificial)" : "" );
+		lel_info[parse_tree->shadow->tree->id].name, 
+		parse_tree->flags & PF_ARTIFICIAL ? " (artificial)" : "" );
 	#endif
 
-	head_t *head = parseTree->shadow->tree->tokdata;
-	int artificial = parseTree->flags & PF_ARTIFICIAL;
+	head_t *head = parse_tree->shadow->tree->tokdata;
+	int artificial = parse_tree->flags & PF_ARTIFICIAL;
 
 	if ( head != 0 && !artificial )
-		send_back_text( is, stringData( head ), head->length );
+		send_back_text( is, string_data( head ), head->length );
 
-	colm_decrement_steps( pdaRun );
+	colm_decrement_steps( pda_run );
 
 	/* Check for reverse code. */
-	if ( parseTree->flags & PF_HAS_RCODE ) {
-		pdaRun->onDeck = true;
-		parseTree->flags &= ~PF_HAS_RCODE;
+	if ( parse_tree->flags & PF_HAS_RCODE ) {
+		pda_run->on_deck = true;
+		parse_tree->flags &= ~PF_HAS_RCODE;
 	}
 
-	if ( pdaRun->steps == pdaRun->targetSteps ) {
+	if ( pda_run->steps == pda_run->target_steps ) {
 		debug( prg, REALM_PARSE, "trigger parse stop, steps = "
-				"target = %d\n", pdaRun->targetSteps );
-		pdaRun->stop = true;
+				"target = %d\n", pda_run->target_steps );
+		pda_run->stop = true;
 	}
 }
 
-static void reset_token( struct pda_run *pdaRun )
+static void reset_token( struct pda_run *pda_run )
 {
 	/* If there is a token started, but never finished for a lack of data, we
 	 * must first backup over it. */
-	if ( pdaRun->tokstart != 0 ) {
-		pdaRun->p = pdaRun->pe = 0;
-		pdaRun->toklen = 0;
-		pdaRun->eof = 0;
+	if ( pda_run->tokstart != 0 ) {
+		pda_run->p = pda_run->pe = 0;
+		pda_run->toklen = 0;
+		pda_run->eof = 0;
 	}
 }
 
@@ -238,121 +238,121 @@ static void reset_token( struct pda_run *pdaRun )
  *   PCR_REVERSE
  */
 
-static void send_back( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
-		struct stream_impl *is, parse_tree_t *parseTree )
+static void send_back( program_t *prg, tree_t **sp, struct pda_run *pda_run,
+		struct stream_impl *is, parse_tree_t *parse_tree )
 {
 	debug( prg, REALM_PARSE, "sending back: %s\n",
-			prg->rtd->lelInfo[parseTree->id].name );
+			prg->rtd->lel_info[parse_tree->id].name );
 
-	if ( parseTree->flags & PF_NAMED ) {
+	if ( parse_tree->flags & PF_NAMED ) {
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
-		is->funcs->undoConsumeLangEl( is );
+		is->funcs->undo_consume_lang_el( is );
 	}
 
-	colm_decrement_steps( pdaRun );
+	colm_decrement_steps( pda_run );
 
 	/* Artifical were not parsed, instead sent in as items. */
-	if ( parseTree->flags & PF_ARTIFICIAL ) {
+	if ( parse_tree->flags & PF_ARTIFICIAL ) {
 		/* Check for reverse code. */
-		if ( parseTree->flags & PF_HAS_RCODE ) {
+		if ( parse_tree->flags & PF_HAS_RCODE ) {
 			debug( prg, REALM_PARSE, "tree has rcode, setting on deck\n" );
-			pdaRun->onDeck = true;
-			parseTree->flags &= ~PF_HAS_RCODE;
+			pda_run->on_deck = true;
+			parse_tree->flags &= ~PF_HAS_RCODE;
 		}
 
-		colm_tree_upref( parseTree->shadow->tree );
+		colm_tree_upref( parse_tree->shadow->tree );
 
-		send_back_tree( is, parseTree->shadow->tree );
+		send_back_tree( is, parse_tree->shadow->tree );
 	}
 	else {
 		/* Check for reverse code. */
-		if ( parseTree->flags & PF_HAS_RCODE ) {
+		if ( parse_tree->flags & PF_HAS_RCODE ) {
 			debug( prg, REALM_PARSE, "tree has rcode, setting on deck\n" );
-			pdaRun->onDeck = true;
-			parseTree->flags &= ~PF_HAS_RCODE;
+			pda_run->on_deck = true;
+			parse_tree->flags &= ~PF_HAS_RCODE;
 		}
 
 		/* Push back the token data. */
-		send_back_text( is, stringData( parseTree->shadow->tree->tokdata ), 
-				stringLength( parseTree->shadow->tree->tokdata ) );
+		send_back_text( is, string_data( parse_tree->shadow->tree->tokdata ), 
+				string_length( parse_tree->shadow->tree->tokdata ) );
 
 		/* If eof was just sent back remember that it needs to be sent again. */
-		if ( parseTree->id == prg->rtd->eofLelIds[pdaRun->parserId] )
-			is->eofSent = false;
+		if ( parse_tree->id == prg->rtd->eof_lel_ids[pda_run->parser_id] )
+			is->eof_sent = false;
 
 		/* If the item is bound then store remove it from the bindings array. */
-		prg->rtd->popBinding( pdaRun, parseTree );
+		prg->rtd->pop_binding( pda_run, parse_tree );
 	}
 
-	if ( pdaRun->steps == pdaRun->targetSteps ) {
+	if ( pda_run->steps == pda_run->target_steps ) {
 		debug( prg, REALM_PARSE, "trigger parse stop, "
-				"steps = target = %d\n", pdaRun->targetSteps );
-		pdaRun->stop = true;
+				"steps = target = %d\n", pda_run->target_steps );
+		pda_run->stop = true;
 	}
 
 	/* Downref the tree that was sent back and free the kid. */
-	colm_tree_downref( prg, sp, parseTree->shadow->tree );
-	kid_free( prg, parseTree->shadow );
-	parse_tree_free( prg, parseTree );
+	colm_tree_downref( prg, sp, parse_tree->shadow->tree );
+	kid_free( prg, parse_tree->shadow );
+	parse_tree_free( prg, parse_tree );
 }
 
-static void set_region( struct pda_run *pdaRun, int emptyIgnore, parse_tree_t *tree )
+static void set_region( struct pda_run *pda_run, int empty_ignore, parse_tree_t *tree )
 {
-	if ( emptyIgnore ) {
+	if ( empty_ignore ) {
 		/* Recording the next region. */
-		tree->retryRegion = pdaRun->nextRegionInd;
-		if ( pdaRun->pda_tables->tokenRegions[tree->retryRegion+1] != 0 )
-			pdaRun->numRetry += 1;
+		tree->retry_region = pda_run->next_region_ind;
+		if ( pda_run->pda_tables->token_regions[tree->retry_region+1] != 0 )
+			pda_run->num_retry += 1;
 	}
 }
 
-static void ignore_tree( program_t *prg, struct pda_run *pdaRun, tree_t *tree )
+static void ignore_tree( program_t *prg, struct pda_run *pda_run, tree_t *tree )
 {
-	int emptyIgnore = pdaRun->accumIgnore == 0;
+	int empty_ignore = pda_run->accum_ignore == 0;
 
-	colm_increment_steps( pdaRun );
+	colm_increment_steps( pda_run );
 
-	parse_tree_t *parseTree = parse_tree_allocate( prg );
-	parseTree->shadow = kid_allocate( prg );
-	parseTree->shadow->tree = tree;
+	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree->shadow = kid_allocate( prg );
+	parse_tree->shadow->tree = tree;
 
-	parseTree->next = pdaRun->accumIgnore;
-	pdaRun->accumIgnore = parseTree;
+	parse_tree->next = pda_run->accum_ignore;
+	pda_run->accum_ignore = parse_tree;
 
-	colm_transfer_reverse_code( pdaRun, parseTree );
+	colm_transfer_reverse_code( pda_run, parse_tree );
 
-	if ( pdaRun->preRegion >= 0 )
-		parseTree->flags |= PF_RIGHT_IGNORE;
+	if ( pda_run->pre_region >= 0 )
+		parse_tree->flags |= PF_RIGHT_IGNORE;
 
-	set_region( pdaRun, emptyIgnore, pdaRun->accumIgnore );
+	set_region( pda_run, empty_ignore, pda_run->accum_ignore );
 }
 
-static void ignore_tree_art( program_t *prg, struct pda_run *pdaRun, tree_t *tree )
+static void ignore_tree_art( program_t *prg, struct pda_run *pda_run, tree_t *tree )
 {
-	int emptyIgnore = pdaRun->accumIgnore == 0;
+	int empty_ignore = pda_run->accum_ignore == 0;
 
-	colm_increment_steps( pdaRun );
+	colm_increment_steps( pda_run );
 
-	parse_tree_t *parseTree = parse_tree_allocate( prg );
-	parseTree->flags |= PF_ARTIFICIAL;
-	parseTree->shadow = kid_allocate( prg );
-	parseTree->shadow->tree = tree;
+	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree->flags |= PF_ARTIFICIAL;
+	parse_tree->shadow = kid_allocate( prg );
+	parse_tree->shadow->tree = tree;
 
-	parseTree->next = pdaRun->accumIgnore;
-	pdaRun->accumIgnore = parseTree;
+	parse_tree->next = pda_run->accum_ignore;
+	pda_run->accum_ignore = parse_tree;
 
-	colm_transfer_reverse_code( pdaRun, parseTree );
+	colm_transfer_reverse_code( pda_run, parse_tree );
 
-	set_region( pdaRun, emptyIgnore, pdaRun->accumIgnore );
+	set_region( pda_run, empty_ignore, pda_run->accum_ignore );
 }
 
-kid_t *make_token_with_data( program_t *prg, struct pda_run *pdaRun,
+kid_t *make_token_with_data( program_t *prg, struct pda_run *pda_run,
 		struct stream_impl *is, int id, head_t *tokdata )
 {
 	/* Make the token object. */
-	long objectLength = prg->rtd->lelInfo[id].objectLength;
-	kid_t *attrs = allocAttrs( prg, objectLength );
+	long object_length = prg->rtd->lel_info[id].object_length;
+	kid_t *attrs = alloc_attrs( prg, object_length );
 
 	kid_t *input = 0;
 	input = kid_allocate( prg );
@@ -367,16 +367,16 @@ kid_t *make_token_with_data( program_t *prg, struct pda_run *pdaRun,
 	/* No children and ignores get added later. */
 	input->tree->child = attrs;
 
-	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
-	if ( lelInfo[id].numCaptureAttr > 0 ) {
+	struct lang_el_info *lel_info = prg->rtd->lel_info;
+	if ( lel_info[id].num_capture_attr > 0 ) {
 		int i;
-		for ( i = 0; i < lelInfo[id].numCaptureAttr; i++ ) {
-			CaptureAttr *ca = &prg->rtd->captureAttr[lelInfo[id].captureAttr + i];
-			head_t *data = stringAllocFull( prg, 
-					pdaRun->mark[ca->mark_enter],
-					pdaRun->mark[ca->mark_leave] -
-							pdaRun->mark[ca->mark_enter] );
-			tree_t *string = constructString( prg, data );
+		for ( i = 0; i < lel_info[id].num_capture_attr; i++ ) {
+			CaptureAttr *ca = &prg->rtd->capture_attr[lel_info[id].capture_attr + i];
+			head_t *data = string_alloc_full( prg, 
+					pda_run->mark[ca->mark_enter],
+					pda_run->mark[ca->mark_leave] -
+							pda_run->mark[ca->mark_enter] );
+			tree_t *string = construct_string( prg, data );
 			colm_tree_upref( string );
 			colm_tree_set_field( prg, input->tree, ca->offset, string );
 		}
@@ -385,9 +385,9 @@ kid_t *make_token_with_data( program_t *prg, struct pda_run *pdaRun,
 	return input;
 }
 
-static void report_parse_error( program_t *prg, tree_t **sp, struct pda_run *pdaRun )
+static void report_parse_error( program_t *prg, tree_t **sp, struct pda_run *pda_run )
 {
-	kid_t *kid = pdaRun->btPoint;
+	kid_t *kid = pda_run->bt_point;
 	head_t *deepest = 0;
 	while ( kid != 0 ) {
 		head_t *head = kid->tree->tokdata;
@@ -398,15 +398,15 @@ static void report_parse_error( program_t *prg, tree_t **sp, struct pda_run *pda
 		kid = kid->next;
 	}
 
-	head_t *errorHead = 0;
+	head_t *error_head = 0;
 
 	/* If there are no error points on record assume the error occurred at the
 	 * beginning of the stream. */
 	if ( deepest == 0 )  {
-		errorHead = stringAllocFull( prg, "<input>:1:1: parse error", 32 );
-		errorHead->location = location_allocate( prg );
-		errorHead->location->line = 1;
-		errorHead->location->column = 1;
+		error_head = string_alloc_full( prg, "<input>:1:1: parse error", 32 );
+		error_head->location = location_allocate( prg );
+		error_head->location->line = 1;
+		error_head->location->column = 1;
 	}
 	else {
 		debug( prg, REALM_PARSE, "deepest location byte: %d\n",
@@ -431,317 +431,317 @@ static void report_parse_error( program_t *prg, tree_t **sp, struct pda_run *pda
 			name = "<input>";
 		char *formatted = malloc( strlen( name ) + 128 );
 		sprintf( formatted, "%s:%ld:%ld: parse error", name, line, column );
-		errorHead = stringAllocFull( prg, formatted, strlen(formatted) );
+		error_head = string_alloc_full( prg, formatted, strlen(formatted) );
 		free( formatted );
 
-		errorHead->location = location_allocate( prg );
+		error_head->location = location_allocate( prg );
 
-		errorHead->location->name = deepest->location->name;
-		errorHead->location->line = line;
-		errorHead->location->column = column;
-		errorHead->location->byte = byte;
+		error_head->location->name = deepest->location->name;
+		error_head->location->line = line;
+		error_head->location->column = column;
+		error_head->location->byte = byte;
 	}
 
-	tree_t *tree = constructString( prg, errorHead );
-	colm_tree_downref( prg, sp, pdaRun->parseErrorText );
-	pdaRun->parseErrorText = tree;
-	colm_tree_upref( pdaRun->parseErrorText );
+	tree_t *tree = construct_string( prg, error_head );
+	colm_tree_downref( prg, sp, pda_run->parse_error_text );
+	pda_run->parse_error_text = tree;
+	colm_tree_upref( pda_run->parse_error_text );
 }
 
 static void attach_right_ignore( program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, parse_tree_t *parseTree )
+		struct pda_run *pda_run, parse_tree_t *parse_tree )
 {
-	if ( pdaRun->accumIgnore == 0 )
+	if ( pda_run->accum_ignore == 0 )
 		return;
 
-	if ( pdaRun->stackTop->id > 0 && 
-			pdaRun->stackTop->id < prg->rtd->firstNonTermId )
+	if ( pda_run->stack_top->id > 0 && 
+			pda_run->stack_top->id < prg->rtd->first_non_term_id )
 	{
 		/* OK, do it */
 		debug( prg, REALM_PARSE, "attaching right ignore\n" );
 
 		/* Reset. */
-		assert( ! ( parseTree->flags & PF_RIGHT_IL_ATTACHED ) );
+		assert( ! ( parse_tree->flags & PF_RIGHT_IL_ATTACHED ) );
 
-		parse_tree_t *accum = pdaRun->accumIgnore;
+		parse_tree_t *accum = pda_run->accum_ignore;
 
-		parse_tree_t *stopAt = 0, *use = accum;
+		parse_tree_t *stop_at = 0, *use = accum;
 		while ( use != 0 ) {
 			if ( ! (use->flags & PF_RIGHT_IGNORE) )
-				stopAt = use;
+				stop_at = use;
 			use = use->next;
 		}
 
-		if ( stopAt != 0 ) {
+		if ( stop_at != 0 ) {
 			/* Stop at was set. Make it the last item in the igore list. Take
 			 * the rest. */
-			accum = stopAt->next;
-			stopAt->next = 0;
+			accum = stop_at->next;
+			stop_at->next = 0;
 		}
 		else {
 			/* Stop at was never set. All right ignore. Use it all. */
-			pdaRun->accumIgnore = 0;
+			pda_run->accum_ignore = 0;
 		}
 
 		/* The data list needs to be extracted and reversed. The parse tree list
 		 * can remain in stack order. */
 		parse_tree_t *child = accum, *last = 0;
-		kid_t *dataChild = 0, *dataLast = 0;
+		kid_t *data_child = 0, *data_last = 0;
 
 		while ( child ) {
-			dataChild = child->shadow;
+			data_child = child->shadow;
 			parse_tree_t *next = child->next;
 
 			/* Reverse the lists. */
-			dataChild->next = dataLast;
+			data_child->next = data_last;
 			child->next = last;
 
 			/* Detach the parse tree from the data tree. */
 			child->shadow = 0;
 
 			/* Keep the last for reversal. */
-			dataLast = dataChild;
+			data_last = data_child;
 			last = child;
 
 			child = next;
 		}
 
 		/* Last is now the first. */
-		parseTree->rightIgnore = last;
+		parse_tree->right_ignore = last;
 
-		if ( dataChild != 0 ) {
+		if ( data_child != 0 ) {
 			debug( prg, REALM_PARSE, "attaching ignore right\n" );
 
-			kid_t *ignoreKid = dataLast;
+			kid_t *ignore_kid = data_last;
 
 			/* Copy the ignore list first if we need to attach it as a right
 			 * ignore. */
-			tree_t *rightIgnore = 0;
+			tree_t *right_ignore = 0;
 
-			rightIgnore = tree_allocate( prg );
-			rightIgnore->id = LEL_ID_IGNORE;
-			rightIgnore->child = ignoreKid;
+			right_ignore = tree_allocate( prg );
+			right_ignore->id = LEL_ID_IGNORE;
+			right_ignore->child = ignore_kid;
 
-			tree_t *pushTo = parseTree->shadow->tree;
+			tree_t *push_to = parse_tree->shadow->tree;
 
-			pushTo = push_right_ignore( prg, pushTo, rightIgnore );
+			push_to = push_right_ignore( prg, push_to, right_ignore );
 
-			parseTree->shadow->tree = pushTo;
+			parse_tree->shadow->tree = push_to;
 
-			parseTree->flags |= PF_RIGHT_IL_ATTACHED;
+			parse_tree->flags |= PF_RIGHT_IL_ATTACHED;
 		}
 	}
 }
 
 static void attach_left_ignore( program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, parse_tree_t *parseTree )
+		struct pda_run *pda_run, parse_tree_t *parse_tree )
 {
 	/* Reset. */
-	assert( ! ( parseTree->flags & PF_LEFT_IL_ATTACHED ) );
+	assert( ! ( parse_tree->flags & PF_LEFT_IL_ATTACHED ) );
 
-	parse_tree_t *accum = pdaRun->accumIgnore;
-	pdaRun->accumIgnore = 0;
+	parse_tree_t *accum = pda_run->accum_ignore;
+	pda_run->accum_ignore = 0;
 
 	/* The data list needs to be extracted and reversed. The parse tree list
 	 * can remain in stack order. */
 	parse_tree_t *child = accum, *last = 0;
-	kid_t *dataChild = 0, *dataLast = 0;
+	kid_t *data_child = 0, *data_last = 0;
 
 	while ( child ) {
-		dataChild = child->shadow;
+		data_child = child->shadow;
 		parse_tree_t *next = child->next;
 
 		/* Reverse the lists. */
-		dataChild->next = dataLast;
+		data_child->next = data_last;
 		child->next = last;
 
 		/* Detach the parse tree from the data tree. */
 		child->shadow = 0;
 
 		/* Keep the last for reversal. */
-		dataLast = dataChild;
+		data_last = data_child;
 		last = child;
 
 		child = next;
 	}
 
 	/* Last is now the first. */
-	parseTree->leftIgnore = last;
+	parse_tree->left_ignore = last;
 
-	if ( dataChild != 0 ) {
+	if ( data_child != 0 ) {
 		debug( prg, REALM_PARSE, "attaching left ignore\n" );
 
-		kid_t *ignoreKid = dataChild;
+		kid_t *ignore_kid = data_child;
 
 		/* Make the ignore list for the left-ignore. */
-		tree_t *leftIgnore = tree_allocate( prg );
-		leftIgnore->id = LEL_ID_IGNORE;
-		leftIgnore->child = ignoreKid;
+		tree_t *left_ignore = tree_allocate( prg );
+		left_ignore->id = LEL_ID_IGNORE;
+		left_ignore->child = ignore_kid;
 
-		tree_t *pushTo = parseTree->shadow->tree;
+		tree_t *push_to = parse_tree->shadow->tree;
 
-		pushTo = push_left_ignore( prg, pushTo, leftIgnore );
+		push_to = push_left_ignore( prg, push_to, left_ignore );
 
-		parseTree->shadow->tree = pushTo;
+		parse_tree->shadow->tree = push_to;
 
-		parseTree->flags |= PF_LEFT_IL_ATTACHED;
+		parse_tree->flags |= PF_LEFT_IL_ATTACHED;
 	}
 }
 
 /* Not currently used. Need to revive this. WARNING: untested changes here */
 static void detach_right_ignore( program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, parse_tree_t *parseTree )
+		struct pda_run *pda_run, parse_tree_t *parse_tree )
 {
 	/* Right ignore are immediately discarded since they are copies of
 	 * left-ignores. */
-	tree_t *rightIgnore = 0;
-	if ( parseTree->flags & PF_RIGHT_IL_ATTACHED ) {
-		tree_t *popFrom = parseTree->shadow->tree;
+	tree_t *right_ignore = 0;
+	if ( parse_tree->flags & PF_RIGHT_IL_ATTACHED ) {
+		tree_t *pop_from = parse_tree->shadow->tree;
 
-		popFrom = popRightIgnore( prg, sp, popFrom, &rightIgnore );
+		pop_from = pop_right_ignore( prg, sp, pop_from, &right_ignore );
 
-		parseTree->shadow->tree = popFrom;
+		parse_tree->shadow->tree = pop_from;
 
-		parseTree->flags &= ~PF_RIGHT_IL_ATTACHED;
+		parse_tree->flags &= ~PF_RIGHT_IL_ATTACHED;
 	}
 
-	if ( parseTree->rightIgnore != 0 ) {
-		assert( rightIgnore != 0 );
+	if ( parse_tree->right_ignore != 0 ) {
+		assert( right_ignore != 0 );
 
 		/* Transfer the trees to accumIgnore. */
-		parse_tree_t *ignore = parseTree->rightIgnore;
-		parseTree->rightIgnore = 0;
+		parse_tree_t *ignore = parse_tree->right_ignore;
+		parse_tree->right_ignore = 0;
 
-		kid_t *dataIgnore = rightIgnore->child;
-		rightIgnore->child = 0;
+		kid_t *data_ignore = right_ignore->child;
+		right_ignore->child = 0;
 
 		parse_tree_t *last = 0;
-		kid_t *dataLast = 0;
+		kid_t *data_last = 0;
 		while ( ignore != 0 ) {
 			parse_tree_t *next = ignore->next;
-			kid_t *dataNext = dataIgnore->next;
+			kid_t *data_next = data_ignore->next;
 
 			/* Put the data trees underneath the parse trees. */
-			ignore->shadow = dataIgnore;
+			ignore->shadow = data_ignore;
 
 			/* Reverse. */
 			ignore->next = last;
-			dataIgnore->next = dataLast;
+			data_ignore->next = data_last;
 
 			/* Keep last for reversal. */
 			last = ignore;
-			dataLast = dataIgnore;
+			data_last = data_ignore;
 
 			ignore = next;
-			dataIgnore = dataNext;
+			data_ignore = data_next;
 		}
 
-		pdaRun->accumIgnore = last;
+		pda_run->accum_ignore = last;
 
-		colm_tree_downref( prg, sp, rightIgnore );
+		colm_tree_downref( prg, sp, right_ignore );
 	}
 }
 
 static void detach_left_ignore( program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, parse_tree_t *parseTree )
+		struct pda_run *pda_run, parse_tree_t *parse_tree )
 {
 	/* Detach left. */
-	tree_t *leftIgnore = 0;
-	if ( parseTree->flags & PF_LEFT_IL_ATTACHED ) {
-		tree_t *popFrom = parseTree->shadow->tree;
+	tree_t *left_ignore = 0;
+	if ( parse_tree->flags & PF_LEFT_IL_ATTACHED ) {
+		tree_t *pop_from = parse_tree->shadow->tree;
 
-		popFrom = popLeftIgnore( prg, sp, popFrom, &leftIgnore );
+		pop_from = pop_left_ignore( prg, sp, pop_from, &left_ignore );
 
-		parseTree->shadow->tree = popFrom;
+		parse_tree->shadow->tree = pop_from;
 
-		parseTree->flags &= ~PF_LEFT_IL_ATTACHED;
+		parse_tree->flags &= ~PF_LEFT_IL_ATTACHED;
 	}
 
-	if ( parseTree->leftIgnore != 0 ) {
-		assert( leftIgnore != 0 );
+	if ( parse_tree->left_ignore != 0 ) {
+		assert( left_ignore != 0 );
 
 		/* Transfer the trees to accumIgnore. */
-		parse_tree_t *ignore = parseTree->leftIgnore;
-		parseTree->leftIgnore = 0;
+		parse_tree_t *ignore = parse_tree->left_ignore;
+		parse_tree->left_ignore = 0;
 
-		kid_t *dataIgnore = leftIgnore->child;
-		leftIgnore->child = 0;
+		kid_t *data_ignore = left_ignore->child;
+		left_ignore->child = 0;
 
 		parse_tree_t *last = 0;
-		kid_t *dataLast = 0;
+		kid_t *data_last = 0;
 		while ( ignore != 0 ) {
 			parse_tree_t *next = ignore->next;
-			kid_t *dataNext = dataIgnore->next;
+			kid_t *data_next = data_ignore->next;
 
 			/* Put the data trees underneath the parse trees. */
-			ignore->shadow = dataIgnore;
+			ignore->shadow = data_ignore;
 
 			/* Reverse. */
 			ignore->next = last;
-			dataIgnore->next = dataLast;
+			data_ignore->next = data_last;
 
 			/* Keep last for reversal. */
 			last = ignore;
-			dataLast = dataIgnore;
+			data_last = data_ignore;
 
 			ignore = next;
-			dataIgnore = dataNext;
+			data_ignore = data_next;
 		}
 
-		pdaRun->accumIgnore = last;
+		pda_run->accum_ignore = last;
 	}
 
-	colm_tree_downref( prg, sp, leftIgnore );
+	colm_tree_downref( prg, sp, left_ignore );
 }
 
-static int is_parser_stop_finished( struct pda_run *pdaRun )
+static int is_parser_stop_finished( struct pda_run *pda_run )
 {
 	int done = 
-			pdaRun->stackTop->next != 0 && 
-			pdaRun->stackTop->next->next == 0 &&
-			pdaRun->stackTop->id == pdaRun->stopTarget;
+			pda_run->stack_top->next != 0 && 
+			pda_run->stack_top->next->next == 0 &&
+			pda_run->stack_top->id == pda_run->stop_target;
 	return done;
 }
 
-static void handle_error( program_t *prg, tree_t **sp, struct pda_run *pdaRun )
+static void handle_error( program_t *prg, tree_t **sp, struct pda_run *pda_run )
 {
 	/* Check the result. */
-	if ( pdaRun->parseError ) {
+	if ( pda_run->parse_error ) {
 		/* Error occured in the top-level parser. */
-		report_parse_error( prg, sp, pdaRun );
+		report_parse_error( prg, sp, pda_run );
 	}
 	else {
-		if ( is_parser_stop_finished( pdaRun ) ) {
+		if ( is_parser_stop_finished( pda_run ) ) {
 			debug( prg, REALM_PARSE, "stopping the parse\n" );
-			pdaRun->stopParsing = true;
+			pda_run->stop_parsing = true;
 		}
 	}
 }
 
-static head_t *extract_match( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is )
+static head_t *extract_match( program_t *prg, tree_t **sp, struct pda_run *pda_run, struct stream_impl *is )
 {
-	long length = pdaRun->toklen;
+	long length = pda_run->toklen;
 
 	//debug( prg, REALM_PARSE, "extracting token of length: %ld\n", length );
 
-	RunBuf *runBuf = pdaRun->consumeBuf;
-	if ( runBuf == 0 || length > ( FSM_BUFSIZE - runBuf->length ) ) {
-		runBuf = newRunBuf();
-		runBuf->next = pdaRun->consumeBuf;
-		pdaRun->consumeBuf = runBuf;
+	RunBuf *run_buf = pda_run->consume_buf;
+	if ( run_buf == 0 || length > ( FSM_BUFSIZE - run_buf->length ) ) {
+		run_buf = new_run_buf();
+		run_buf->next = pda_run->consume_buf;
+		pda_run->consume_buf = run_buf;
 	}
 
-	char *dest = runBuf->data + runBuf->length;
+	char *dest = run_buf->data + run_buf->length;
 
-	is->funcs->getData( is, dest, length );
+	is->funcs->get_data( is, dest, length );
 	location_t *location = location_allocate( prg );
-	is->funcs->consumeData( prg, sp, is, length, location );
+	is->funcs->consume_data( prg, sp, is, length, location );
 
-	runBuf->length += length;
+	run_buf->length += length;
 
-	pdaRun->p = pdaRun->pe = 0;
-	pdaRun->toklen = 0;
-	pdaRun->tokstart = 0;
+	pda_run->p = pda_run->pe = 0;
+	pda_run->toklen = 0;
+	pda_run->tokstart = 0;
 
 	head_t *head = colm_string_alloc_pointer( prg, dest, length );
 
@@ -752,23 +752,23 @@ static head_t *extract_match( program_t *prg, tree_t **sp, struct pda_run *pdaRu
 	return head;
 }
 
-static head_t *peekMatch( program_t *prg, struct pda_run *pdaRun, struct stream_impl *is )
+static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct stream_impl *is )
 {
-	long length = pdaRun->toklen;
+	long length = pda_run->toklen;
 
-	RunBuf *runBuf = pdaRun->consumeBuf;
-	if ( runBuf == 0 || length > ( FSM_BUFSIZE - runBuf->length ) ) {
-		runBuf = newRunBuf();
-		runBuf->next = pdaRun->consumeBuf;
-		pdaRun->consumeBuf = runBuf;
+	RunBuf *run_buf = pda_run->consume_buf;
+	if ( run_buf == 0 || length > ( FSM_BUFSIZE - run_buf->length ) ) {
+		run_buf = new_run_buf();
+		run_buf->next = pda_run->consume_buf;
+		pda_run->consume_buf = run_buf;
 	}
 
-	char *dest = runBuf->data + runBuf->length;
+	char *dest = run_buf->data + run_buf->length;
 
-	is->funcs->getData( is, dest, length );
+	is->funcs->get_data( is, dest, length );
 
-	pdaRun->p = pdaRun->pe = 0;
-	pdaRun->toklen = 0;
+	pda_run->p = pda_run->pe = 0;
+	pda_run->toklen = 0;
 
 	head_t *head = colm_string_alloc_pointer( prg, dest, length );
 
@@ -784,78 +784,78 @@ static head_t *peekMatch( program_t *prg, struct pda_run *pdaRun, struct stream_
 
 
 static void send_ignore( program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, struct stream_impl *is, long id )
+		struct pda_run *pda_run, struct stream_impl *is, long id )
 {
-	debug( prg, REALM_PARSE, "ignoring: %s\n", prg->rtd->lelInfo[id].name );
+	debug( prg, REALM_PARSE, "ignoring: %s\n", prg->rtd->lel_info[id].name );
 
 	/* Make the ignore string. */
-	head_t *ignoreStr = extract_match( prg, sp, pdaRun, is );
+	head_t *ignore_str = extract_match( prg, sp, pda_run, is );
 
-	debug( prg, REALM_PARSE, "ignoring: %.*s\n", ignoreStr->length, ignoreStr->data );
+	debug( prg, REALM_PARSE, "ignoring: %.*s\n", ignore_str->length, ignore_str->data );
 
 	tree_t *tree = tree_allocate( prg );
 	tree->refs = 1;
 	tree->id = id;
-	tree->tokdata = ignoreStr;
+	tree->tokdata = ignore_str;
 
 	/* Send it to the pdaRun. */
-	ignore_tree( prg, pdaRun, tree );
+	ignore_tree( prg, pda_run, tree );
 }
 
 static void send_token( program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, struct stream_impl *is, long id )
+		struct pda_run *pda_run, struct stream_impl *is, long id )
 {
-	int emptyIgnore = pdaRun->accumIgnore == 0;
+	int empty_ignore = pda_run->accum_ignore == 0;
 
 	/* Make the token data. */
-	head_t *tokdata = extract_match( prg, sp, pdaRun, is );
+	head_t *tokdata = extract_match( prg, sp, pda_run, is );
 
 	debug( prg, REALM_PARSE, "token: %s  text: %.*s\n",
-		prg->rtd->lelInfo[id].name,
-		stringLength(tokdata), stringData(tokdata) );
+		prg->rtd->lel_info[id].name,
+		string_length(tokdata), string_data(tokdata) );
 
-	kid_t *input = make_token_with_data( prg, pdaRun, is, id, tokdata );
+	kid_t *input = make_token_with_data( prg, pda_run, is, id, tokdata );
 
-	colm_increment_steps( pdaRun );
+	colm_increment_steps( pda_run );
 
-	parse_tree_t *parseTree = parse_tree_allocate( prg );
-	parseTree->id = input->tree->id;
-	parseTree->shadow = input;
+	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree->id = input->tree->id;
+	parse_tree->shadow = input;
 		
-	pdaRun->parseInput = parseTree;
+	pda_run->parse_input = parse_tree;
 
 	/* Store any alternate scanning region. */
-	if ( input != 0 && pdaRun->pda_cs >= 0 )
-		set_region( pdaRun, emptyIgnore, parseTree );
+	if ( input != 0 && pda_run->pda_cs >= 0 )
+		set_region( pda_run, empty_ignore, parse_tree );
 }
 
-static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is )
+static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run, struct stream_impl *is )
 {
 	kid_t *input = kid_allocate( prg );
-	input->tree = is->funcs->consumeTree( is );
+	input->tree = is->funcs->consume_tree( is );
 
-	colm_increment_steps( pdaRun );
+	colm_increment_steps( pda_run );
 
-	parse_tree_t *parseTree = parse_tree_allocate( prg );
-	parseTree->id = input->tree->id;
-	parseTree->flags |= PF_ARTIFICIAL;
-	parseTree->shadow = input;
+	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree->id = input->tree->id;
+	parse_tree->flags |= PF_ARTIFICIAL;
+	parse_tree->shadow = input;
 	
-	pdaRun->parseInput = parseTree;
+	pda_run->parse_input = parse_tree;
 }
 
-static void send_ignore_tree( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is )
+static void send_ignore_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run, struct stream_impl *is )
 {
-	tree_t *tree = is->funcs->consumeTree( is );
-	ignore_tree_art( prg, pdaRun, tree );
+	tree_t *tree = is->funcs->consume_tree( is );
+	ignore_tree_art( prg, pda_run, tree );
 }
 
 static void send_collect_ignore( program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, struct stream_impl *is, int id )
+		struct pda_run *pda_run, struct stream_impl *is, int id )
 {
 	debug( prg, REALM_PARSE, "token: CI\n" );
 
-	int emptyIgnore = pdaRun->accumIgnore == 0;
+	int empty_ignore = pda_run->accum_ignore == 0;
 
 	/* Make the token data. */
 	head_t *tokdata = head_allocate( prg );
@@ -865,40 +865,40 @@ static void send_collect_ignore( program_t *prg, tree_t **sp,
 	tokdata->location->byte = is->byte;
 
 	debug( prg, REALM_PARSE, "token: %s  text: %.*s\n",
-		prg->rtd->lelInfo[id].name,
-		stringLength(tokdata), stringData(tokdata) );
+		prg->rtd->lel_info[id].name,
+		string_length(tokdata), string_data(tokdata) );
 
-	kid_t *input = make_token_with_data( prg, pdaRun, is, id, tokdata );
+	kid_t *input = make_token_with_data( prg, pda_run, is, id, tokdata );
 
-	colm_increment_steps( pdaRun );
+	colm_increment_steps( pda_run );
 
-	parse_tree_t *parseTree = parse_tree_allocate( prg );
-	parseTree->id = input->tree->id;
-	parseTree->shadow = input;
+	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree->id = input->tree->id;
+	parse_tree->shadow = input;
 
-	pdaRun->parseInput = parseTree;
+	pda_run->parse_input = parse_tree;
 
 	/* Store any alternate scanning region. */
-	if ( input != 0 && pdaRun->pda_cs >= 0 )
-		set_region( pdaRun, emptyIgnore, parseTree );
+	if ( input != 0 && pda_run->pda_cs >= 0 )
+		set_region( pda_run, empty_ignore, parse_tree );
 }
 
 /* Offset can be used to look at the next nextRegionInd. */
-static int get_next_region( struct pda_run *pdaRun, int offset )
+static int get_next_region( struct pda_run *pda_run, int offset )
 {
-	return pdaRun->pda_tables->tokenRegions[pdaRun->nextRegionInd+offset];
+	return pda_run->pda_tables->token_regions[pda_run->next_region_ind+offset];
 }
 
-static int get_next_pre_region( struct pda_run *pdaRun )
+static int get_next_pre_region( struct pda_run *pda_run )
 {
-	return pdaRun->pda_tables->tokenPreRegions[pdaRun->nextRegionInd];
+	return pda_run->pda_tables->token_pre_regions[pda_run->next_region_ind];
 }
 
-static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struct stream_impl *is )
+static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pda_run, struct stream_impl *is )
 {
 	debug( prg, REALM_PARSE, "token: _EOF\n" );
 
-	colm_increment_steps( pdaRun );
+	colm_increment_steps( pda_run );
 
 	head_t *head = head_allocate( prg );
 	head->location = location_allocate( prg );
@@ -910,56 +910,56 @@ static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pdaRun, struc
 	input->tree = tree_allocate( prg );
 
 	input->tree->refs = 1;
-	input->tree->id = prg->rtd->eofLelIds[pdaRun->parserId];
+	input->tree->id = prg->rtd->eof_lel_ids[pda_run->parser_id];
 	input->tree->tokdata = head;
 
 	/* Set the state using the state of the parser. */
-	pdaRun->region = get_next_region( pdaRun, 0 );
-	pdaRun->preRegion = get_next_pre_region( pdaRun );
-	pdaRun->fsm_cs = pdaRun->fsm_tables->entryByRegion[pdaRun->region];
+	pda_run->region = get_next_region( pda_run, 0 );
+	pda_run->pre_region = get_next_pre_region( pda_run );
+	pda_run->fsm_cs = pda_run->fsm_tables->entry_by_region[pda_run->region];
 
-	parse_tree_t *parseTree = parse_tree_allocate( prg );
-	parseTree->id = input->tree->id;
-	parseTree->shadow = input;
+	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree->id = input->tree->id;
+	parse_tree->shadow = input;
 	
-	pdaRun->parseInput = parseTree;
+	pda_run->parse_input = parse_tree;
 }
 
-static void new_token( program_t *prg, struct pda_run *pdaRun )
+static void new_token( program_t *prg, struct pda_run *pda_run )
 {
-	pdaRun->p = pdaRun->pe = 0;
-	pdaRun->toklen = 0;
-	pdaRun->eof = 0;
+	pda_run->p = pda_run->pe = 0;
+	pda_run->toklen = 0;
+	pda_run->eof = 0;
 
 	/* Init the scanner vars. */
-	pdaRun->act = 0;
-	pdaRun->tokstart = 0;
-	pdaRun->tokend = 0;
-	pdaRun->matchedToken = 0;
+	pda_run->act = 0;
+	pda_run->tokstart = 0;
+	pda_run->tokend = 0;
+	pda_run->matched_token = 0;
 
 	/* Set the state using the state of the parser. */
-	pdaRun->region = get_next_region( pdaRun, 0 );
-	pdaRun->preRegion = get_next_pre_region( pdaRun );
-	if ( pdaRun->preRegion > 0 ) {
-		pdaRun->fsm_cs = pdaRun->fsm_tables->entryByRegion[pdaRun->preRegion];
-		pdaRun->next_cs = pdaRun->fsm_tables->entryByRegion[pdaRun->region];
+	pda_run->region = get_next_region( pda_run, 0 );
+	pda_run->pre_region = get_next_pre_region( pda_run );
+	if ( pda_run->pre_region > 0 ) {
+		pda_run->fsm_cs = pda_run->fsm_tables->entry_by_region[pda_run->pre_region];
+		pda_run->next_cs = pda_run->fsm_tables->entry_by_region[pda_run->region];
 	}
 	else {
-		pdaRun->fsm_cs = pdaRun->fsm_tables->entryByRegion[pdaRun->region];
+		pda_run->fsm_cs = pda_run->fsm_tables->entry_by_region[pda_run->region];
 	}
 
 
 	/* Clear the mark array. */
-	memset( pdaRun->mark, 0, sizeof(pdaRun->mark) );
+	memset( pda_run->mark, 0, sizeof(pda_run->mark) );
 }
 
-static void push_bt_point( program_t *prg, struct pda_run *pdaRun )
+static void push_bt_point( program_t *prg, struct pda_run *pda_run )
 {
 	tree_t *tree = 0;
-	if ( pdaRun->accumIgnore != 0 ) 
-		tree = pdaRun->accumIgnore->shadow->tree;
-	else if ( pdaRun->tokenList != 0 )
-		tree = pdaRun->tokenList->kid->tree;
+	if ( pda_run->accum_ignore != 0 ) 
+		tree = pda_run->accum_ignore->shadow->tree;
+	else if ( pda_run->token_list != 0 )
+		tree = pda_run->token_list->kid->tree;
 
 	if ( tree != 0 ) {
 		debug( prg, REALM_PARSE, "pushing bt point with location byte %d\n", 
@@ -969,8 +969,8 @@ static void push_bt_point( program_t *prg, struct pda_run *pdaRun )
 		kid_t *kid = kid_allocate( prg );
 		kid->tree = tree;
 		colm_tree_upref( tree );
-		kid->next = pdaRun->btPoint;
-		pdaRun->btPoint = kid;
+		kid->next = pda_run->bt_point;
+		pda_run->bt_point = kid;
 	}
 }
 
@@ -983,116 +983,116 @@ static void push_bt_point( program_t *prg, struct pda_run *pdaRun )
 #define SCAN_LANG_EL           -2
 #define SCAN_EOF               -1
 
-static long scan_token( program_t *prg, struct pda_run *pdaRun, struct stream_impl *is )
+static long scan_token( program_t *prg, struct pda_run *pda_run, struct stream_impl *is )
 {
-	if ( pdaRun->triggerUndo )
+	if ( pda_run->trigger_undo )
 		return SCAN_UNDO;
 
 	while ( true ) {
 		char *pd = 0;
 		int len = 0;
-		int type = is->funcs->getParseBlock( is, pdaRun->toklen, &pd, &len );
+		int type = is->funcs->get_parse_block( is, pda_run->toklen, &pd, &len );
 
 		switch ( type ) {
 			case INPUT_DATA:
-				pdaRun->p = pd;
-				pdaRun->pe = pd + len;
+				pda_run->p = pd;
+				pda_run->pe = pd + len;
 				break;
 
 			case INPUT_EOS:
-				pdaRun->p = pdaRun->pe = 0;
-				if ( pdaRun->tokstart != 0 )
-					pdaRun->eof = 1;
+				pda_run->p = pda_run->pe = 0;
+				if ( pda_run->tokstart != 0 )
+					pda_run->eof = 1;
 				debug( prg, REALM_SCAN, "EOS *******************\n" );
 				break;
 
 			case INPUT_EOF:
-				pdaRun->p = pdaRun->pe = 0;
-				if ( pdaRun->tokstart != 0 )
-					pdaRun->eof = 1;
+				pda_run->p = pda_run->pe = 0;
+				if ( pda_run->tokstart != 0 )
+					pda_run->eof = 1;
 				else 
 					return SCAN_EOF;
 				break;
 
 			case INPUT_EOD:
-				pdaRun->p = pdaRun->pe = 0;
+				pda_run->p = pda_run->pe = 0;
 				return SCAN_TRY_AGAIN_LATER;
 
 			case INPUT_LANG_EL:
-				if ( pdaRun->tokstart != 0 )
-					pdaRun->eof = 1;
+				if ( pda_run->tokstart != 0 )
+					pda_run->eof = 1;
 				else 
 					return SCAN_LANG_EL;
 				break;
 
 			case INPUT_TREE:
-				if ( pdaRun->tokstart != 0 )
-					pdaRun->eof = 1;
+				if ( pda_run->tokstart != 0 )
+					pda_run->eof = 1;
 				else 
 					return SCAN_TREE;
 				break;
 			case INPUT_IGNORE:
-				if ( pdaRun->tokstart != 0 )
-					pdaRun->eof = 1;
+				if ( pda_run->tokstart != 0 )
+					pda_run->eof = 1;
 				else
 					return SCAN_IGNORE;
 				break;
 		}
 
-		prg->rtd->fsm_execute( pdaRun, is );
+		prg->rtd->fsm_execute( pda_run, is );
 
 		/* First check if scanning stopped because we have a token. */
-		if ( pdaRun->matchedToken > 0 ) {
+		if ( pda_run->matched_token > 0 ) {
 			/* If the token has a marker indicating the end (due to trailing
 			 * context) then adjust data now. */
-			struct lang_el_info *lelInfo = prg->rtd->lelInfo;
-			if ( lelInfo[pdaRun->matchedToken].markId >= 0 )
-				pdaRun->p = pdaRun->mark[lelInfo[pdaRun->matchedToken].markId];
+			struct lang_el_info *lel_info = prg->rtd->lel_info;
+			if ( lel_info[pda_run->matched_token].mark_id >= 0 )
+				pda_run->p = pda_run->mark[lel_info[pda_run->matched_token].mark_id];
 
-			return pdaRun->matchedToken;
+			return pda_run->matched_token;
 		}
 
 		/* Check for error. */
-		if ( pdaRun->fsm_cs == pdaRun->fsm_tables->errorState ) {
+		if ( pda_run->fsm_cs == pda_run->fsm_tables->error_state ) {
 			/* If a token was started, but not finished (tokstart != 0) then
 			 * restore data to the beginning of that token. */
-			if ( pdaRun->tokstart != 0 )
-				pdaRun->p = pdaRun->tokstart;
+			if ( pda_run->tokstart != 0 )
+				pda_run->p = pda_run->tokstart;
 
 			/* Check for a default token in the region. If one is there
 			 * then send it and continue with the processing loop. */
-			if ( prg->rtd->regionInfo[pdaRun->region].defaultToken >= 0 ) {
-				pdaRun->toklen = 0;
-				return prg->rtd->regionInfo[pdaRun->region].defaultToken;
+			if ( prg->rtd->region_info[pda_run->region].default_token >= 0 ) {
+				pda_run->toklen = 0;
+				return prg->rtd->region_info[pda_run->region].default_token;
 			}
 
 			return SCAN_ERROR;
 		}
 
 		/* Check for no match on eof (trailing data that partially matches a token). */
-		if ( pdaRun->eof )
+		if ( pda_run->eof )
 			return SCAN_ERROR;
 
 		/* Got here because the state machine didn't match a token or encounter
 		 * an error. Must be because we got to the end of the buffer data. */
-		assert( pdaRun->p == pdaRun->pe );
+		assert( pda_run->p == pda_run->pe );
 	}
 
 	/* Should not be reached. */
 	return SCAN_ERROR;
 }
 
-static tree_t *get_parsed_root( struct pda_run *pdaRun, int stop )
+static tree_t *get_parsed_root( struct pda_run *pda_run, int stop )
 {
-	if ( pdaRun->parseError )
+	if ( pda_run->parse_error )
 		return 0;
 	else if ( stop ) {
-		if ( pdaRun->stackTop->shadow != 0 )
-			return pdaRun->stackTop->shadow->tree;
+		if ( pda_run->stack_top->shadow != 0 )
+			return pda_run->stack_top->shadow->tree;
 	}
 	else {
-		if ( pdaRun->stackTop->next->shadow != 0 )
-			return pdaRun->stackTop->next->shadow->tree;
+		if ( pda_run->stack_top->next->shadow != 0 )
+			return pda_run->stack_top->next->shadow->tree;
 	}
 	return 0;
 }
@@ -1109,16 +1109,16 @@ free_tree:
 		vm_push_ptree( pt->next );
 	}
 
-	if ( pt->leftIgnore != 0 ) {
-		vm_push_ptree( pt->leftIgnore );
+	if ( pt->left_ignore != 0 ) {
+		vm_push_ptree( pt->left_ignore );
 	}
 
 	if ( pt->child != 0 ) {
 		vm_push_ptree( pt->child );
 	}
 
-	if ( pt->rightIgnore != 0 ) {
-		vm_push_ptree( pt->rightIgnore );
+	if ( pt->right_ignore != 0 ) {
+		vm_push_ptree( pt->right_ignore );
 	}
 
 	if ( pt->shadow != 0 ) {
@@ -1135,114 +1135,114 @@ free_tree:
 	}
 }
 
-void colm_pda_clear( program_t *prg, tree_t **sp, struct pda_run *pdaRun )
+void colm_pda_clear( program_t *prg, tree_t **sp, struct pda_run *pda_run )
 {
-	clear_fsm_run( prg, pdaRun );
+	clear_fsm_run( prg, pda_run );
 
 	/* Remaining stack and parse trees underneath. */
-	clear_parse_tree( prg, sp, pdaRun->stackTop );
-	pdaRun->stackTop = 0;
+	clear_parse_tree( prg, sp, pda_run->stack_top );
+	pda_run->stack_top = 0;
 
 	/* Traverse the token list downreffing. */
-	ref_t *ref = pdaRun->tokenList;
+	ref_t *ref = pda_run->token_list;
 	while ( ref != 0 ) {
 		ref_t *next = ref->next;
 		kid_free( prg, (kid_t*)ref );
 		ref = next;
 	}
-	pdaRun->tokenList = 0;
+	pda_run->token_list = 0;
 
 	/* Traverse the btPoint list downreffing */
-	kid_t *btp = pdaRun->btPoint;
+	kid_t *btp = pda_run->bt_point;
 	while ( btp != 0 ) {
 		kid_t *next = btp->next;
 		colm_tree_downref( prg, sp, btp->tree );
 		kid_free( prg, (kid_t*)btp );
 		btp = next;
 	}
-	pdaRun->btPoint = 0;
+	pda_run->bt_point = 0;
 
 	/* Clear out any remaining ignores. */
-	clear_parse_tree( prg, sp, pdaRun->accumIgnore );
-	pdaRun->accumIgnore = 0;
+	clear_parse_tree( prg, sp, pda_run->accum_ignore );
+	pda_run->accum_ignore = 0;
 
 	/* Clear the input list (scanned tokes, sent trees). */
-	clear_parse_tree( prg, sp, pdaRun->parseInput );
-	pdaRun->parseInput = 0;
+	clear_parse_tree( prg, sp, pda_run->parse_input );
+	pda_run->parse_input = 0;
 
-	colm_rcode_downref_all( prg, sp, &pdaRun->reverseCode );
-	colm_rt_code_vect_empty( &pdaRun->reverseCode );
-	colm_rt_code_vect_empty( &pdaRun->rcodeCollect );
+	colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
+	colm_rt_code_vect_empty( &pda_run->reverse_code );
+	colm_rt_code_vect_empty( &pda_run->rcode_collect );
 
-	colm_tree_downref( prg, sp, pdaRun->parseErrorText );
+	colm_tree_downref( prg, sp, pda_run->parse_error_text );
 }
 
-void colm_pda_init( program_t *prg, struct pda_run *pdaRun, struct pda_tables *tables,
-		int parserId, long stopTarget, int revertOn, struct_t *context )
+void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *tables,
+		int parser_id, long stop_target, int revert_on, struct_t *context )
 {
-	memset( pdaRun, 0, sizeof(struct pda_run) );
+	memset( pda_run, 0, sizeof(struct pda_run) );
 
-	pdaRun->pda_tables = tables;
-	pdaRun->parserId = parserId;
-	pdaRun->stopTarget = stopTarget;
-	pdaRun->revertOn = revertOn;
-	pdaRun->targetSteps = -1;
+	pda_run->pda_tables = tables;
+	pda_run->parser_id = parser_id;
+	pda_run->stop_target = stop_target;
+	pda_run->revert_on = revert_on;
+	pda_run->target_steps = -1;
 
 	debug( prg, REALM_PARSE, "initializing struct pda_run\n" );
 
 	/* FIXME: need the right one here. */
-	pdaRun->pda_cs = prg->rtd->startStates[pdaRun->parserId];
+	pda_run->pda_cs = prg->rtd->start_states[pda_run->parser_id];
 
 	kid_t *sentinal = kid_allocate( prg );
 	sentinal->tree = tree_allocate( prg );
 	sentinal->tree->refs = 1;
 
 	/* Init the element allocation variables. */
-	pdaRun->stackTop = parse_tree_allocate( prg );
-	pdaRun->stackTop->state = -1;
-	pdaRun->stackTop->shadow = sentinal;
+	pda_run->stack_top = parse_tree_allocate( prg );
+	pda_run->stack_top->state = -1;
+	pda_run->stack_top->shadow = sentinal;
 
-	pdaRun->numRetry = 0;
-	pdaRun->nextRegionInd = pdaRun->pda_tables->tokenRegionInds[pdaRun->pda_cs];
-	pdaRun->stopParsing = false;
-	pdaRun->accumIgnore = 0;
-	pdaRun->btPoint = 0;
-	pdaRun->checkNext = false;
-	pdaRun->checkStop = false;
+	pda_run->num_retry = 0;
+	pda_run->next_region_ind = pda_run->pda_tables->token_region_inds[pda_run->pda_cs];
+	pda_run->stop_parsing = false;
+	pda_run->accum_ignore = 0;
+	pda_run->bt_point = 0;
+	pda_run->check_next = false;
+	pda_run->check_stop = false;
 
-	prg->rtd->initBindings( pdaRun );
+	prg->rtd->init_bindings( pda_run );
 
-	initRtCodeVect( &pdaRun->reverseCode );
-	initRtCodeVect( &pdaRun->rcodeCollect );
+	init_rt_code_vect( &pda_run->reverse_code );
+	init_rt_code_vect( &pda_run->rcode_collect );
 
-	pdaRun->context = context;
-	pdaRun->parseError = 0;
-	pdaRun->parseInput = 0;
-	pdaRun->triggerUndo = 0;
+	pda_run->context = context;
+	pda_run->parse_error = 0;
+	pda_run->parse_input = 0;
+	pda_run->trigger_undo = 0;
 
-	pdaRun->tokenId = 0;
+	pda_run->token_id = 0;
 
-	pdaRun->onDeck = false;
-	pdaRun->parsed = 0;
-	pdaRun->reject = false;
+	pda_run->on_deck = false;
+	pda_run->parsed = 0;
+	pda_run->reject = false;
 
-	pdaRun->rcBlockCount = 0;
+	pda_run->rc_block_count = 0;
 
-	init_fsm_run( prg, pdaRun );
-	new_token( prg, pdaRun );
+	init_fsm_run( prg, pda_run );
+	new_token( prg, pda_run );
 }
 
-static long stack_top_target( program_t *prg, struct pda_run *pdaRun )
+static long stack_top_target( program_t *prg, struct pda_run *pda_run )
 {
 	long state;
-	if ( pdaRun->stackTop->state < 0 )
-		state = prg->rtd->startStates[pdaRun->parserId];
+	if ( pda_run->stack_top->state < 0 )
+		state = prg->rtd->start_states[pda_run->parser_id];
 	else {
-		unsigned shift = pdaRun->stackTop->id - 
-				pdaRun->pda_tables->keys[pdaRun->stackTop->state<<1];
-		unsigned offset = pdaRun->pda_tables->offsets[pdaRun->stackTop->state] + shift;
-		int index = pdaRun->pda_tables->indicies[offset];
-		state = pdaRun->pda_tables->targs[index];
+		unsigned shift = pda_run->stack_top->id - 
+				pda_run->pda_tables->keys[pda_run->stack_top->state<<1];
+		unsigned offset = pda_run->pda_tables->offsets[pda_run->stack_top->state] + shift;
+		int index = pda_run->pda_tables->indicies[offset];
+		state = pda_run->pda_tables->targs[index];
 	}
 	return state;
 }
@@ -1261,9 +1261,9 @@ static long stack_top_target( program_t *prg, struct pda_run *pdaRun )
  * 		-clears all alg structures
  */
 
-static int been_committed( parse_tree_t *parseTree )
+static int been_committed( parse_tree_t *parse_tree )
 {
-	return parseTree->flags & PF_COMMITTED;
+	return parse_tree->flags & PF_COMMITTED;
 }
 
 static code_t *backup_over_rcode( code_t *rcode )
@@ -1277,8 +1277,8 @@ static code_t *backup_over_rcode( code_t *rcode )
 
 /* The top level of the stack is linked right-to-left. Trees underneath are
  * linked left-to-right. */
-static void commit_kid( program_t *prg, struct pda_run *pdaRun, tree_t **root,
-		parse_tree_t *lel, code_t **rcode, long *causeReduce )
+static void commit_kid( program_t *prg, struct pda_run *pda_run, tree_t **root,
+		parse_tree_t *lel, code_t **rcode, long *cause_reduce )
 {
 	parse_tree_t *tree = 0;
 	tree_t **sp = root;
@@ -1287,7 +1287,7 @@ static void commit_kid( program_t *prg, struct pda_run *pdaRun, tree_t **root,
 head:
 	/* Commit */
 	debug( prg, REALM_PARSE, "commit: visiting %s\n",
-			prg->rtd->lelInfo[lel->id].name );
+			prg->rtd->lel_info[lel->id].name );
 
 	/* Load up the parsed tree. */
 	tree = lel;
@@ -1298,11 +1298,11 @@ head:
 		/* If tree caused some reductions, now is not the right time to backup
 		 * over the reverse code. We need to backup over the reductions first. Store
 		 * the count of the reductions and do it when the count drops to zero. */
-		if ( tree->causeReduce > 0 ) {
+		if ( tree->cause_reduce > 0 ) {
 			/* The top reduce block does not correspond to this alg. */
 			debug( prg, REALM_PARSE, "commit: causeReduce found, delaying backup: %ld\n",
-						(long)tree->causeReduce );
-			*causeReduce = tree->causeReduce;
+						(long)tree->cause_reduce );
+			*cause_reduce = tree->cause_reduce;
 		}
 		else {
 			*rcode = backup_over_rcode( *rcode );
@@ -1324,13 +1324,13 @@ head:
 
 	/* Check causeReduce, might be time to backup over the reverse code
 	 * belonging to a nonterminal that caused previous reductions. */
-	if ( *causeReduce > 0 && 
-			tree->id >= prg->rtd->firstNonTermId &&
+	if ( *cause_reduce > 0 && 
+			tree->id >= prg->rtd->first_non_term_id &&
 			!(tree->flags & PF_TERM_DUP) )
 	{
-		*causeReduce -= 1;
+		*cause_reduce -= 1;
 
-		if ( *causeReduce == 0 ) {
+		if ( *cause_reduce == 0 ) {
 			debug( prg, REALM_PARSE, "commit: causeReduce dropped to zero, "
 					"backing up over rcode\n" );
 
@@ -1389,28 +1389,28 @@ backup:
 		goto backup;
 	}
 
-	pdaRun->numRetry = 0;
+	pda_run->num_retry = 0;
 	assert( sp == root );
 }
 
-static void commit_full( program_t *prg, tree_t **sp, struct pda_run *pdaRun, long causeReduce )
+static void commit_full( program_t *prg, tree_t **sp, struct pda_run *pda_run, long cause_reduce )
 {
 	debug( prg, REALM_PARSE, "running full commit\n" );
 	
-	parse_tree_t *parseTree = pdaRun->stackTop;
-	code_t *rcode = pdaRun->reverseCode.data + pdaRun->reverseCode.tabLen;
+	parse_tree_t *parse_tree = pda_run->stack_top;
+	code_t *rcode = pda_run->reverse_code.data + pda_run->reverse_code.tab_len;
 
 	/* The top level of the stack is linked right to left. This is the
 	 * traversal order we need for committing. */
-	while ( parseTree != 0 && !been_committed( parseTree ) ) {
-		commit_kid( prg, pdaRun, sp, parseTree, &rcode, &causeReduce );
-		parseTree = parseTree->next;
+	while ( parse_tree != 0 && !been_committed( parse_tree ) ) {
+		commit_kid( prg, pda_run, sp, parse_tree, &rcode, &cause_reduce );
+		parse_tree = parse_tree->next;
 	}
 
 	/* We cannot always clear all the rcode here. We may need to backup over
 	 * the parse statement. We depend on the context flag. */
-	if ( !pdaRun->revertOn )
-		colm_rcode_downref_all( prg, sp, &pdaRun->reverseCode );
+	if ( !pda_run->revert_on )
+		colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
 }
 
 /*
@@ -1424,70 +1424,70 @@ static void commit_full( program_t *prg, tree_t **sp, struct pda_run *pdaRun, lo
  *   PCR_REVERSE
  */
 static long parse_token( program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, struct stream_impl *is, long entry )
+		struct pda_run *pda_run, struct stream_impl *is, long entry )
 {
 	int pos;
 	unsigned int *action;
-	int rhsLen;
+	int rhs_len;
 	int owner;
-	int induceReject;
-	int indPos;
+	int induce_reject;
+	int ind_pos;
 
 	/* COROUTINE */
 	switch ( entry ) {
 	case PCR_START:
 
 	/* The scanner will send a null token if it can't find a token. */
-	if ( pdaRun->parseInput == 0 )
-		goto parseError;
+	if ( pda_run->parse_input == 0 )
+		goto parse_error;
 
 	/* This will cause parseInput to be lost. This 
 	 * path should be traced. */
-	if ( pdaRun->pda_cs < 0 )
+	if ( pda_run->pda_cs < 0 )
 		return PCR_DONE;
 
 	/* Record the state in the parse tree. */
-	pdaRun->parseInput->state = pdaRun->pda_cs;
+	pda_run->parse_input->state = pda_run->pda_cs;
 
 again:
-	if ( pdaRun->parseInput == 0 )
+	if ( pda_run->parse_input == 0 )
 		goto _out;
 
-	pdaRun->lel = pdaRun->parseInput;
-	pdaRun->curState = pdaRun->pda_cs;
+	pda_run->lel = pda_run->parse_input;
+	pda_run->cur_state = pda_run->pda_cs;
 
-	if ( pdaRun->lel->id < pdaRun->pda_tables->keys[pdaRun->curState<<1] ||
-			pdaRun->lel->id > pdaRun->pda_tables->keys[(pdaRun->curState<<1)+1] )
+	if ( pda_run->lel->id < pda_run->pda_tables->keys[pda_run->cur_state<<1] ||
+			pda_run->lel->id > pda_run->pda_tables->keys[(pda_run->cur_state<<1)+1] )
 	{
 		debug( prg, REALM_PARSE, "parse error, no transition 1\n" );
-		push_bt_point( prg, pdaRun );
-		goto parseError;
+		push_bt_point( prg, pda_run );
+		goto parse_error;
 	}
 
-	indPos = pdaRun->pda_tables->offsets[pdaRun->curState] + 
-		(pdaRun->lel->id - pdaRun->pda_tables->keys[pdaRun->curState<<1]);
+	ind_pos = pda_run->pda_tables->offsets[pda_run->cur_state] + 
+		(pda_run->lel->id - pda_run->pda_tables->keys[pda_run->cur_state<<1]);
 
-	owner = pdaRun->pda_tables->owners[indPos];
-	if ( owner != pdaRun->curState ) {
+	owner = pda_run->pda_tables->owners[ind_pos];
+	if ( owner != pda_run->cur_state ) {
 		debug( prg, REALM_PARSE, "parse error, no transition 2\n" );
-		push_bt_point( prg, pdaRun );
-		goto parseError;
+		push_bt_point( prg, pda_run );
+		goto parse_error;
 	}
 
-	pos = pdaRun->pda_tables->indicies[indPos];
+	pos = pda_run->pda_tables->indicies[ind_pos];
 	if ( pos < 0 ) {
 		debug( prg, REALM_PARSE, "parse error, no transition 3\n" );
-		push_bt_point( prg, pdaRun );
-		goto parseError;
+		push_bt_point( prg, pda_run );
+		goto parse_error;
 	}
 
 	/* Checking complete. */
 
-	induceReject = false;
-	pdaRun->pda_cs = pdaRun->pda_tables->targs[pos];
-	action = pdaRun->pda_tables->actions + pdaRun->pda_tables->actInds[pos];
-	if ( pdaRun->lel->retryLower )
-		action += pdaRun->lel->retryLower;
+	induce_reject = false;
+	pda_run->pda_cs = pda_run->pda_tables->targs[pos];
+	action = pda_run->pda_tables->actions + pda_run->pda_tables->act_inds[pos];
+	if ( pda_run->lel->retry_lower )
+		action += pda_run->lel->retry_lower;
 
 	/*
 	 * Shift
@@ -1495,61 +1495,61 @@ again:
 
 	if ( *action & act_sb ) {
 		debug( prg, REALM_PARSE, "shifted: %s\n", 
-				prg->rtd->lelInfo[pdaRun->lel->id].name );
+				prg->rtd->lel_info[pda_run->lel->id].name );
 		/* Consume. */
-		pdaRun->parseInput = pdaRun->parseInput->next;
+		pda_run->parse_input = pda_run->parse_input->next;
 
-		pdaRun->lel->state = pdaRun->curState;
+		pda_run->lel->state = pda_run->cur_state;
 
 		/* If its a token then attach ignores and record it in the token list
 		 * of the next ignore attachment to use. */
-		if ( pdaRun->lel->id < prg->rtd->firstNonTermId ) {
-			if ( pdaRun->lel->causeReduce == 0 )
-				attach_right_ignore( prg, sp, pdaRun, pdaRun->stackTop );
+		if ( pda_run->lel->id < prg->rtd->first_non_term_id ) {
+			if ( pda_run->lel->cause_reduce == 0 )
+				attach_right_ignore( prg, sp, pda_run, pda_run->stack_top );
 		}
 
-		pdaRun->lel->next = pdaRun->stackTop;
-		pdaRun->stackTop = pdaRun->lel;
+		pda_run->lel->next = pda_run->stack_top;
+		pda_run->stack_top = pda_run->lel;
 
 		/* If its a token then attach ignores and record it in the token list
 		 * of the next ignore attachment to use. */
-		if ( pdaRun->lel->id < prg->rtd->firstNonTermId ) {
-			attach_left_ignore( prg, sp, pdaRun, pdaRun->lel );
+		if ( pda_run->lel->id < prg->rtd->first_non_term_id ) {
+			attach_left_ignore( prg, sp, pda_run, pda_run->lel );
 
 			ref_t *ref = (ref_t*)kid_allocate( prg );
-			ref->kid = pdaRun->lel->shadow;
+			ref->kid = pda_run->lel->shadow;
 			//colm_tree_upref( pdaRun->tree );
-			ref->next = pdaRun->tokenList;
-			pdaRun->tokenList = ref;
+			ref->next = pda_run->token_list;
+			pda_run->token_list = ref;
 		}
 
 		if ( action[1] == 0 )
-			pdaRun->lel->retryLower = 0;
+			pda_run->lel->retry_lower = 0;
 		else {
-			debug( prg, REALM_PARSE, "retry: %p\n", pdaRun->stackTop );
-			pdaRun->lel->retryLower += 1;
-			assert( pdaRun->lel->retryUpper == 0 );
+			debug( prg, REALM_PARSE, "retry: %p\n", pda_run->stack_top );
+			pda_run->lel->retry_lower += 1;
+			assert( pda_run->lel->retry_upper == 0 );
 			/* FIXME: Has the retry already been counted? */
-			pdaRun->numRetry += 1; 
+			pda_run->num_retry += 1; 
 		}
 
-		pdaRun->shiftCount += 1;
+		pda_run->shift_count += 1;
 	}
 
 	/* 
 	 * Commit
 	 */
 
-	if ( pdaRun->pda_tables->commitLen[pos] != 0 ) {
+	if ( pda_run->pda_tables->commit_len[pos] != 0 ) {
 #if 0
-		long causeReduce = 0;
-		if ( pdaRun->parseInput != 0 ) { 
-			if ( pdaRun->parseInput->flags & PF_HAS_RCODE )
-				causeReduce = pdaRun->parseInput->causeReduce;
+		long cause_reduce = 0;
+		if ( pda_run->parse_input != 0 ) { 
+			if ( pda_run->parse_input->flags & PF_HAS_RCODE )
+				cause_reduce = pda_run->parse_input->cause_reduce;
 		}
-		commit_full( prg, sp, pdaRun, causeReduce );
+		commit_full( prg, sp, pda_run, cause_reduce );
 #endif
-		pdaRun->commitShiftCount = pdaRun->shiftCount;
+		pda_run->commit_shift_count = pda_run->shift_count;
 	}
 
 	/*
@@ -1557,107 +1557,107 @@ again:
 	 */
 
 	if ( *action & act_rb ) {
-		int r, objectLength;
+		int r, object_length;
 		parse_tree_t *last, *child;
 		kid_t *attrs;
-		kid_t *dataLast, *dataChild;
+		kid_t *data_last, *data_child;
 
 		/* If there was shift don't attach again. */
-		if ( !( *action & act_sb ) && pdaRun->lel->id < prg->rtd->firstNonTermId )
-			attach_right_ignore( prg, sp, pdaRun, pdaRun->stackTop );
+		if ( !( *action & act_sb ) && pda_run->lel->id < prg->rtd->first_non_term_id )
+			attach_right_ignore( prg, sp, pda_run, pda_run->stack_top );
 
-		pdaRun->reduction = *action >> 2;
+		pda_run->reduction = *action >> 2;
 
-		if ( pdaRun->parseInput != 0 )
-			pdaRun->parseInput->causeReduce += 1;
+		if ( pda_run->parse_input != 0 )
+			pda_run->parse_input->cause_reduce += 1;
 
 		kid_t *value = kid_allocate( prg );
 		value->tree = tree_allocate( prg );
 		value->tree->refs = 1;
-		value->tree->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
-		value->tree->prod_num = prg->rtd->prodInfo[pdaRun->reduction].prodNum;
+		value->tree->id = prg->rtd->prod_info[pda_run->reduction].lhs_id;
+		value->tree->prod_num = prg->rtd->prod_info[pda_run->reduction].prod_num;
 
-		pdaRun->redLel = parse_tree_allocate( prg );
-		pdaRun->redLel->id = prg->rtd->prodInfo[pdaRun->reduction].lhsId;
-		pdaRun->redLel->next = 0;
-		pdaRun->redLel->causeReduce = 0;
-		pdaRun->redLel->retryLower = 0;
-		pdaRun->redLel->shadow = value;
+		pda_run->red_lel = parse_tree_allocate( prg );
+		pda_run->red_lel->id = prg->rtd->prod_info[pda_run->reduction].lhs_id;
+		pda_run->red_lel->next = 0;
+		pda_run->red_lel->cause_reduce = 0;
+		pda_run->red_lel->retry_lower = 0;
+		pda_run->red_lel->shadow = value;
 
 		/* Transfer. */
-		pdaRun->redLel->retryUpper = pdaRun->lel->retryLower;
-		pdaRun->lel->retryLower = 0;
+		pda_run->red_lel->retry_upper = pda_run->lel->retry_lower;
+		pda_run->lel->retry_lower = 0;
 
 		/* Allocate the attributes. */
-		objectLength = prg->rtd->lelInfo[pdaRun->redLel->id].objectLength;
-		attrs = allocAttrs( prg, objectLength );
+		object_length = prg->rtd->lel_info[pda_run->red_lel->id].object_length;
+		attrs = alloc_attrs( prg, object_length );
 
 		/* Build the list of children. We will be giving up a reference when we
 		 * detach parse tree and data tree, but gaining the reference when we
 		 * put the children under the new data tree. No need to alter refcounts
 		 * here. */
-		rhsLen = prg->rtd->prodInfo[pdaRun->reduction].length;
+		rhs_len = prg->rtd->prod_info[pda_run->reduction].length;
 		child = last = 0;
-		dataChild = dataLast = 0;
-		for ( r = 0; r < rhsLen; r++ ) {
+		data_child = data_last = 0;
+		for ( r = 0; r < rhs_len; r++ ) {
 
 			/* The child. */
-			child = pdaRun->stackTop;
-			dataChild = child->shadow;
+			child = pda_run->stack_top;
+			data_child = child->shadow;
 
 			/* Pop. */
-			pdaRun->stackTop = pdaRun->stackTop->next;
+			pda_run->stack_top = pda_run->stack_top->next;
 
 			/* Detach the parse tree from the data. */
 			child->shadow = 0;
 
 			/* Reverse list. */
 			child->next = last;
-			dataChild->next = dataLast;
+			data_child->next = data_last;
 
 			/* Track last for reversal. */
 			last = child;
-			dataLast = dataChild;
+			data_last = data_child;
 		}
 
-		pdaRun->redLel->child = child;
-		pdaRun->redLel->shadow->tree->child = kidListConcat( attrs, dataChild );
+		pda_run->red_lel->child = child;
+		pda_run->red_lel->shadow->tree->child = kid_list_concat( attrs, data_child );
 
 		debug( prg, REALM_PARSE, "reduced: %s rhsLen %d\n",
-				prg->rtd->prodInfo[pdaRun->reduction].name, rhsLen );
+				prg->rtd->prod_info[pda_run->reduction].name, rhs_len );
 		if ( action[1] == 0 )
-			pdaRun->redLel->retryUpper = 0;
+			pda_run->red_lel->retry_upper = 0;
 		else {
-			pdaRun->redLel->retryUpper += 1;
-			assert( pdaRun->lel->retryLower == 0 );
-			pdaRun->numRetry += 1;
-			debug( prg, REALM_PARSE, "retry: %p\n", pdaRun->redLel );
+			pda_run->red_lel->retry_upper += 1;
+			assert( pda_run->lel->retry_lower == 0 );
+			pda_run->num_retry += 1;
+			debug( prg, REALM_PARSE, "retry: %p\n", pda_run->red_lel );
 		}
 
 		/* When the production is of zero length we stay in the same state.
 		 * Otherwise we use the state stored in the first child. */
-		pdaRun->pda_cs = rhsLen == 0 ? pdaRun->curState : child->state;
+		pda_run->pda_cs = rhs_len == 0 ? pda_run->cur_state : child->state;
 
-		if ( prg->ctxDepParsing && prg->rtd->prodInfo[pdaRun->reduction].frameId >= 0 ) {
+		if ( prg->ctx_dep_parsing && prg->rtd->prod_info[pda_run->reduction].frame_id >= 0 ) {
 			/* Frame info for reduction. */
-			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->prodInfo[pdaRun->reduction].frameId];
-			pdaRun->frameId = prg->rtd->prodInfo[pdaRun->reduction].frameId;
-			pdaRun->reject = false;
-			pdaRun->parsed = 0;
-			pdaRun->code = pdaRun->fi->codeWV;
+			pda_run->fi = &prg->rtd->frame_info[prg->rtd->prod_info[pda_run->reduction].frame_id];
+			pda_run->frame_id = prg->rtd->prod_info[pda_run->reduction].frame_id;
+			pda_run->reject = false;
+			pda_run->parsed = 0;
+			pda_run->code = pda_run->fi->codeWV;
 
 			/* COROUTINE */
 			return PCR_REDUCTION;
 			case PCR_REDUCTION:
 
-			if ( prg->induceExit )
+			if ( prg->induce_exit )
 				goto fail;
 
 			/* If the lhs was stored and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a
 			 * copy above. */
-			if ( pdaRun->parsed != 0 ) {
-				if ( pdaRun->parsed != pdaRun->redLel->shadow->tree ) {
+			if ( pda_run->parsed != 0 ) {
+				if ( pda_run->parsed != pda_run->red_lel->shadow->tree ) {
 					debug( prg, REALM_PARSE, "lhs tree was modified, "
 							"adding a restore instruction\n" );
 //
@@ -1670,24 +1670,24 @@ again:
 //					colm_tree_upref( pdaRun->redLel->tree );
 
 					/* Add the restore instruct. */
-					append_code_val( &pdaRun->rcodeCollect, IN_RESTORE_LHS );
-					append_word( &pdaRun->rcodeCollect, (word_t)pdaRun->parsed );
-					append_code_val( &pdaRun->rcodeCollect, SIZEOF_CODE + SIZEOF_WORD );
+					append_code_val( &pda_run->rcode_collect, IN_RESTORE_LHS );
+					append_word( &pda_run->rcode_collect, (word_t)pda_run->parsed );
+					append_code_val( &pda_run->rcode_collect, SIZEOF_CODE + SIZEOF_WORD );
 				}
 				else {
 					/* Not changed. Done with parsed. */
-					colm_tree_downref( prg, sp, pdaRun->parsed );
+					colm_tree_downref( prg, sp, pda_run->parsed );
 				}
-				pdaRun->parsed = 0;
+				pda_run->parsed = 0;
 			}
 
 			/* Pull out the reverse code, if any. */
-			colm_make_reverse_code( pdaRun );
-			colm_transfer_reverse_code( pdaRun, pdaRun->redLel );
+			colm_make_reverse_code( pda_run );
+			colm_transfer_reverse_code( pda_run, pda_run->red_lel );
 
 			/* Perhaps the execution environment is telling us we need to
 			 * reject the reduction. */
-			induceReject = pdaRun->reject;
+			induce_reject = pda_run->reject;
 		}
 
 		/* If the left hand side was replaced then the only parse algorithm
@@ -1695,277 +1695,277 @@ again:
 		 * else will be in the original. This requires that we restore first
 		 * when going backwards and when doing a commit. */
 
-		if ( induceReject ) {
+		if ( induce_reject ) {
 			debug( prg, REALM_PARSE, "error induced during reduction of %s\n",
-					prg->rtd->lelInfo[pdaRun->redLel->id].name );
-			pdaRun->redLel->state = pdaRun->curState;
-			pdaRun->redLel->next = pdaRun->stackTop;
-			pdaRun->stackTop = pdaRun->redLel;
+					prg->rtd->lel_info[pda_run->red_lel->id].name );
+			pda_run->red_lel->state = pda_run->cur_state;
+			pda_run->red_lel->next = pda_run->stack_top;
+			pda_run->stack_top = pda_run->red_lel;
 			/* FIXME: What is the right argument here? */
-			push_bt_point( prg, pdaRun );
-			goto parseError;
+			push_bt_point( prg, pda_run );
+			goto parse_error;
 		}
 
-		pdaRun->redLel->next = pdaRun->parseInput;
-		pdaRun->parseInput = pdaRun->redLel;
+		pda_run->red_lel->next = pda_run->parse_input;
+		pda_run->parse_input = pda_run->red_lel;
 	}
 
 	goto again;
 
-parseError:
+parse_error:
 	debug( prg, REALM_PARSE, "hit error, backtracking\n" );
 
 #if 0
-	if ( pdaRun->numRetry == 0 ) {
+	if ( pda_run->num_retry == 0 ) {
 		debug( prg, REALM_PARSE, "out of retries failing parse\n" );
 		goto fail;
 	}
 #endif
 
 	while ( 1 ) {
-		if ( pdaRun->onDeck ) {
+		if ( pda_run->on_deck ) {
 			debug( prg, REALM_BYTECODE, "dropping out for reverse code call\n" );
 
-			pdaRun->frameId = -1;
-			pdaRun->code = colm_pop_reverse_code( &pdaRun->reverseCode );
+			pda_run->frame_id = -1;
+			pda_run->code = colm_pop_reverse_code( &pda_run->reverse_code );
 
 			/* COROUTINE */
 			return PCR_REVERSE;
 			case PCR_REVERSE: 
 
-			colm_decrement_steps( pdaRun );
+			colm_decrement_steps( pda_run );
 		}
-		else if ( pdaRun->checkNext ) {
-			pdaRun->checkNext = false;
+		else if ( pda_run->check_next ) {
+			pda_run->check_next = false;
 
-			if ( pdaRun->next > 0 && pdaRun->pda_tables->tokenRegions[pdaRun->next] != 0 ) {
+			if ( pda_run->next > 0 && pda_run->pda_tables->token_regions[pda_run->next] != 0 ) {
 				debug( prg, REALM_PARSE, "found a new region\n" );
-				pdaRun->numRetry -= 1;
-				pdaRun->pda_cs = stack_top_target( prg, pdaRun );
-				pdaRun->nextRegionInd = pdaRun->next;
+				pda_run->num_retry -= 1;
+				pda_run->pda_cs = stack_top_target( prg, pda_run );
+				pda_run->next_region_ind = pda_run->next;
 				return PCR_DONE;
 			}
 		}
-		else if ( pdaRun->checkStop ) {
-			pdaRun->checkStop = false;
+		else if ( pda_run->check_stop ) {
+			pda_run->check_stop = false;
 
-			if ( pdaRun->stop ) {
+			if ( pda_run->stop ) {
 				debug( prg, REALM_PARSE, "stopping the backtracking, "
-						"steps is %d\n", pdaRun->steps );
+						"steps is %d\n", pda_run->steps );
 
-				pdaRun->pda_cs = stack_top_target( prg, pdaRun );
+				pda_run->pda_cs = stack_top_target( prg, pda_run );
 				goto _out;
 			}
 		}
-		else if ( pdaRun->parseInput != 0 ) {
+		else if ( pda_run->parse_input != 0 ) {
 			/* Either we are dealing with a terminal that was shifted or a
 			 * nonterminal that was reduced. */
-			if ( pdaRun->parseInput->id < prg->rtd->firstNonTermId ) {
+			if ( pda_run->parse_input->id < prg->rtd->first_non_term_id ) {
 				/* This is a terminal. */
-				assert( pdaRun->parseInput->retryUpper == 0 );
+				assert( pda_run->parse_input->retry_upper == 0 );
 
-				if ( pdaRun->parseInput->retryLower != 0 ) {
-					debug( prg, REALM_PARSE, "found retry targ: %p\n", pdaRun->parseInput );
+				if ( pda_run->parse_input->retry_lower != 0 ) {
+					debug( prg, REALM_PARSE, "found retry targ: %p\n", pda_run->parse_input );
 
-					pdaRun->numRetry -= 1;
-					pdaRun->pda_cs = pdaRun->parseInput->state;
+					pda_run->num_retry -= 1;
+					pda_run->pda_cs = pda_run->parse_input->state;
 					goto again;
 				}
 
-				if ( pdaRun->parseInput->causeReduce != 0 ) {
+				if ( pda_run->parse_input->cause_reduce != 0 ) {
 					/* The terminal caused a reduce. Unshift the reduced thing
 					 * (will unreduce in the next step. */
-					if ( pdaRun->shiftCount == pdaRun->commitShiftCount ) {
+					if ( pda_run->shift_count == pda_run->commit_shift_count ) {
 						debug( prg, REALM_PARSE, "backed up to commit point, "
 								"failing parse\n" );
 						goto fail;
 					}
-					pdaRun->shiftCount -= 1;
+					pda_run->shift_count -= 1;
 
-					pdaRun->undoLel = pdaRun->stackTop;
+					pda_run->undo_lel = pda_run->stack_top;
 
 					/* Check if we've arrived at the stack sentinal. This guard
 					 * is here to allow us to initially set numRetry to one to
 					 * cause the parser to backup all the way to the beginning
 					 * when an error occurs. */
-					if ( pdaRun->undoLel->next == 0 )
+					if ( pda_run->undo_lel->next == 0 )
 						break;
 
 					/* Either we are dealing with a terminal that was
 					 * shifted or a nonterminal that was reduced. */
-					assert( !(pdaRun->stackTop->id < prg->rtd->firstNonTermId) );
+					assert( !(pda_run->stack_top->id < prg->rtd->first_non_term_id) );
 
 					debug( prg, REALM_PARSE, "backing up over non-terminal: %s\n",
-							prg->rtd->lelInfo[pdaRun->stackTop->id].name );
+							prg->rtd->lel_info[pda_run->stack_top->id].name );
 
 					/* Pop the item from the stack. */
-					pdaRun->stackTop = pdaRun->stackTop->next;
+					pda_run->stack_top = pda_run->stack_top->next;
 
 					/* Queue it as next parseInput item. */
-					pdaRun->undoLel->next = pdaRun->parseInput;
-					pdaRun->parseInput = pdaRun->undoLel;
+					pda_run->undo_lel->next = pda_run->parse_input;
+					pda_run->parse_input = pda_run->undo_lel;
 				}
 				else {
-					long region = pdaRun->parseInput->retryRegion;
-					pdaRun->next = region > 0 ? region + 1 : 0;
-					pdaRun->checkNext = true;
-					pdaRun->checkStop = true;
+					long region = pda_run->parse_input->retry_region;
+					pda_run->next = region > 0 ? region + 1 : 0;
+					pda_run->check_next = true;
+					pda_run->check_stop = true;
 
-					send_back( prg, sp, pdaRun, is, pdaRun->parseInput );
+					send_back( prg, sp, pda_run, is, pda_run->parse_input );
 
-					pdaRun->parseInput = 0;
+					pda_run->parse_input = 0;
 				}
 			}
-			else if ( pdaRun->parseInput->flags & PF_HAS_RCODE ) {
+			else if ( pda_run->parse_input->flags & PF_HAS_RCODE ) {
 				debug( prg, REALM_PARSE, "tree has rcode, setting on deck\n" );
-				pdaRun->onDeck = true;
-				pdaRun->parsed = 0;
+				pda_run->on_deck = true;
+				pda_run->parsed = 0;
 
 				/* Only the RCODE flag was in the replaced lhs. All the rest is in
 				 * the the original. We read it after restoring. */
 
-				pdaRun->parseInput->flags &= ~PF_HAS_RCODE;
+				pda_run->parse_input->flags &= ~PF_HAS_RCODE;
 			}
 			else {
 				/* Remove it from the input queue. */
-				pdaRun->undoLel = pdaRun->parseInput;
-				pdaRun->parseInput = pdaRun->parseInput->next;
+				pda_run->undo_lel = pda_run->parse_input;
+				pda_run->parse_input = pda_run->parse_input->next;
 
 				/* Extract children from the child list. */
-				parse_tree_t *first = pdaRun->undoLel->child;
-				pdaRun->undoLel->child = 0;
+				parse_tree_t *first = pda_run->undo_lel->child;
+				pda_run->undo_lel->child = 0;
 
 				/* This will skip the ignores/attributes, etc. */
-				kid_t *dataFirst = treeExtractChild( prg, pdaRun->undoLel->shadow->tree );
+				kid_t *data_first = tree_extract_child( prg, pda_run->undo_lel->shadow->tree );
 
 				/* Walk the child list and and push the items onto the parsing
 				 * stack one at a time. */
 				while ( first != 0 ) {
 					/* Get the next item ahead of time. */
 					parse_tree_t *next = first->next;
-					kid_t *dataNext = dataFirst->next;
+					kid_t *data_next = data_first->next;
 
 					/* Push onto the stack. */
-					first->next = pdaRun->stackTop;
-					pdaRun->stackTop = first;
+					first->next = pda_run->stack_top;
+					pda_run->stack_top = first;
 
 					/* Reattach the data and the parse tree. */
-					first->shadow = dataFirst;
+					first->shadow = data_first;
 
 					first = next;
-					dataFirst = dataNext;
+					data_first = data_next;
 				}
 
 				/* If there is an parseInput queued, this is one less reduction it has
 				 * caused. */
-				if ( pdaRun->parseInput != 0 )
-					pdaRun->parseInput->causeReduce -= 1;
+				if ( pda_run->parse_input != 0 )
+					pda_run->parse_input->cause_reduce -= 1;
 
-				if ( pdaRun->undoLel->retryUpper != 0 ) {
+				if ( pda_run->undo_lel->retry_upper != 0 ) {
 					/* There is always an parseInput item here because reduce
 					 * conflicts only happen on a lookahead character. */
-					assert( pdaRun->parseInput != pdaRun->undoLel );
-					assert( pdaRun->parseInput != 0 );
-					assert( pdaRun->undoLel->retryLower == 0 );
-					assert( pdaRun->parseInput->retryUpper == 0 );
+					assert( pda_run->parse_input != pda_run->undo_lel );
+					assert( pda_run->parse_input != 0 );
+					assert( pda_run->undo_lel->retry_lower == 0 );
+					assert( pda_run->parse_input->retry_upper == 0 );
 
 					/* Transfer the retry from undoLel to parseInput. */
-					pdaRun->parseInput->retryLower = pdaRun->undoLel->retryUpper;
-					pdaRun->parseInput->retryUpper = 0;
-					pdaRun->parseInput->state = stack_top_target( prg, pdaRun );
+					pda_run->parse_input->retry_lower = pda_run->undo_lel->retry_upper;
+					pda_run->parse_input->retry_upper = 0;
+					pda_run->parse_input->state = stack_top_target( prg, pda_run );
 				}
 
 				/* Free the reduced item. */
-				colm_tree_downref( prg, sp, pdaRun->undoLel->shadow->tree );
-				kid_free( prg, pdaRun->undoLel->shadow );
-				parse_tree_free( prg, pdaRun->undoLel );
+				colm_tree_downref( prg, sp, pda_run->undo_lel->shadow->tree );
+				kid_free( prg, pda_run->undo_lel->shadow );
+				parse_tree_free( prg, pda_run->undo_lel );
 
 				/* If the stacktop had right ignore attached, detach now. */
-				if ( pdaRun->stackTop->flags & PF_RIGHT_IL_ATTACHED )
-					detach_right_ignore( prg, sp, pdaRun, pdaRun->stackTop );
+				if ( pda_run->stack_top->flags & PF_RIGHT_IL_ATTACHED )
+					detach_right_ignore( prg, sp, pda_run, pda_run->stack_top );
 			}
 		}
-		else if ( pdaRun->accumIgnore != 0 ) {
+		else if ( pda_run->accum_ignore != 0 ) {
 			debug( prg, REALM_PARSE, "have accumulated ignore to undo\n" );
 
 			/* Send back any accumulated ignore tokens, then trigger error
 			 * in the the parser. */
-			parse_tree_t *ignore = pdaRun->accumIgnore;
-			pdaRun->accumIgnore = pdaRun->accumIgnore->next;
+			parse_tree_t *ignore = pda_run->accum_ignore;
+			pda_run->accum_ignore = pda_run->accum_ignore->next;
 			ignore->next = 0;
 
-			long region = ignore->retryRegion;
-			pdaRun->next = region > 0 ? region + 1 : 0;
-			pdaRun->checkNext = true;
-			pdaRun->checkStop = true;
+			long region = ignore->retry_region;
+			pda_run->next = region > 0 ? region + 1 : 0;
+			pda_run->check_next = true;
+			pda_run->check_stop = true;
 			
-			send_back_ignore( prg, sp, pdaRun, is, ignore );
+			send_back_ignore( prg, sp, pda_run, is, ignore );
 
 			colm_tree_downref( prg, sp, ignore->shadow->tree );
 			kid_free( prg, ignore->shadow );
 			parse_tree_free( prg, ignore );
 		}
 		else {
-			if ( pdaRun->shiftCount == pdaRun->commitShiftCount ) {
+			if ( pda_run->shift_count == pda_run->commit_shift_count ) {
 				debug( prg, REALM_PARSE, "backed up to commit point, failing parse\n" );
 				goto fail;
 			}
 
-			pdaRun->shiftCount -= 1;
+			pda_run->shift_count -= 1;
 
 			/* Now it is time to undo something. Pick an element from the top of
 			 * the stack. */
-			pdaRun->undoLel = pdaRun->stackTop;
+			pda_run->undo_lel = pda_run->stack_top;
 
 			/* Check if we've arrived at the stack sentinal. This guard is
 			 * here to allow us to initially set numRetry to one to cause the
 			 * parser to backup all the way to the beginning when an error
 			 * occurs. */
-			if ( pdaRun->undoLel->next == 0 )
+			if ( pda_run->undo_lel->next == 0 )
 				break;
 
 			/* Either we are dealing with a terminal that was
 			 * shifted or a nonterminal that was reduced. */
-			if ( pdaRun->stackTop->id < prg->rtd->firstNonTermId ) {
+			if ( pda_run->stack_top->id < prg->rtd->first_non_term_id ) {
 				debug( prg, REALM_PARSE, "backing up over effective terminal: %s\n",
-							prg->rtd->lelInfo[pdaRun->stackTop->id].name );
+							prg->rtd->lel_info[pda_run->stack_top->id].name );
 
 				/* Pop the item from the stack. */
-				pdaRun->stackTop = pdaRun->stackTop->next;
+				pda_run->stack_top = pda_run->stack_top->next;
 
 				/* Queue it as next parseInput item. */
-				pdaRun->undoLel->next = pdaRun->parseInput;
-				pdaRun->parseInput = pdaRun->undoLel;
+				pda_run->undo_lel->next = pda_run->parse_input;
+				pda_run->parse_input = pda_run->undo_lel;
 
 				/* Pop from the token list. */
-				ref_t *ref = pdaRun->tokenList;
-				pdaRun->tokenList = ref->next;
+				ref_t *ref = pda_run->token_list;
+				pda_run->token_list = ref->next;
 				kid_free( prg, (kid_t*)ref );
 
-				assert( pdaRun->accumIgnore == 0 );
-				detach_left_ignore( prg, sp, pdaRun, pdaRun->parseInput );
+				assert( pda_run->accum_ignore == 0 );
+				detach_left_ignore( prg, sp, pda_run, pda_run->parse_input );
 			}
 			else {
 				debug( prg, REALM_PARSE, "backing up over non-terminal: %s\n",
-						prg->rtd->lelInfo[pdaRun->stackTop->id].name );
+						prg->rtd->lel_info[pda_run->stack_top->id].name );
 
 				/* Pop the item from the stack. */
-				pdaRun->stackTop = pdaRun->stackTop->next;
+				pda_run->stack_top = pda_run->stack_top->next;
 
 				/* Queue it as next parseInput item. */
-				pdaRun->undoLel->next = pdaRun->parseInput;
-				pdaRun->parseInput = pdaRun->undoLel;
+				pda_run->undo_lel->next = pda_run->parse_input;
+				pda_run->parse_input = pda_run->undo_lel;
 			}
 
 			/* Undo attach of right ignore. */
-			if ( pdaRun->stackTop->flags & PF_RIGHT_IL_ATTACHED )
-				detach_right_ignore( prg, sp, pdaRun, pdaRun->stackTop );
+			if ( pda_run->stack_top->flags & PF_RIGHT_IL_ATTACHED )
+				detach_right_ignore( prg, sp, pda_run, pda_run->stack_top );
 		}
 	}
 
 fail:
-	pdaRun->pda_cs = -1;
-	pdaRun->parseError = 1;
+	pda_run->pda_cs = -1;
+	pda_run->parse_error = 1;
 
 	/* FIXME: do we still need to fall through here? A fail is permanent now,
 	 * no longer called into again. */
@@ -1973,7 +1973,7 @@ fail:
 	return PCR_DONE;
 
 _out:
-	pdaRun->nextRegionInd = pdaRun->pda_tables->tokenRegionInds[pdaRun->pda_cs];
+	pda_run->next_region_ind = pda_run->pda_tables->token_region_inds[pda_run->pda_cs];
 
 	/* COROUTINE */
 	case PCR_DONE:
@@ -1992,16 +1992,16 @@ _out:
  *   PCR_REVERSE
  */
 
-long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pdaRun, 
+long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run, 
 		struct stream_impl *is, long entry )
 {
-	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
+	struct lang_el_info *lel_info = prg->rtd->lel_info;
 
 	/* COROUTINE */
 	switch ( entry ) {
 	case PCR_START:
 
-	pdaRun->stop = false;
+	pda_run->stop = false;
 
 	while ( true ) {
 		debug( prg, REALM_PARSE, "parse loop start %d:%d\n", is->line, is->column );
@@ -2009,70 +2009,70 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.
 		 * */
-		pdaRun->tokenId = scan_token( prg, pdaRun, is );
+		pda_run->token_id = scan_token( prg, pda_run, is );
 
-		if ( pdaRun->tokenId == SCAN_ERROR ) {
-			if ( pdaRun->preRegion >= 0 ) {
-				pdaRun->preRegion = -1;
-				pdaRun->fsm_cs = pdaRun->next_cs;
+		if ( pda_run->token_id == SCAN_ERROR ) {
+			if ( pda_run->pre_region >= 0 ) {
+				pda_run->pre_region = -1;
+				pda_run->fsm_cs = pda_run->next_cs;
 				continue;
 			}
 		}
 
-		if ( pdaRun->tokenId == SCAN_ERROR &&
-				( prg->rtd->regionInfo[pdaRun->region].ciLelId > 0 ) )
+		if ( pda_run->token_id == SCAN_ERROR &&
+				( prg->rtd->region_info[pda_run->region].ci_lel_id > 0 ) )
 		{
 			debug( prg, REALM_PARSE, "sending a collect ignore\n" );
-			send_collect_ignore( prg, sp, pdaRun, is,
-					prg->rtd->regionInfo[pdaRun->region].ciLelId );
+			send_collect_ignore( prg, sp, pda_run, is,
+					prg->rtd->region_info[pda_run->region].ci_lel_id );
 			goto yes;
 		}
 
-		if ( pdaRun->tokenId == SCAN_TRY_AGAIN_LATER ) {
+		if ( pda_run->token_id == SCAN_TRY_AGAIN_LATER ) {
 			debug( prg, REALM_PARSE, "scanner says try again later\n" );
 			break;
 		}
 
-		assert( pdaRun->parseInput == 0 );
-		pdaRun->parseInput = 0;
+		assert( pda_run->parse_input == 0 );
+		pda_run->parse_input = 0;
 
 		/* Check for EOF. */
-		if ( pdaRun->tokenId == SCAN_EOF ) {
-			is->eofSent = true;
-			send_eof( prg, sp, pdaRun, is );
+		if ( pda_run->token_id == SCAN_EOF ) {
+			is->eof_sent = true;
+			send_eof( prg, sp, pda_run, is );
 
-			pdaRun->frameId = prg->rtd->regionInfo[pdaRun->region].eofFrameId;
+			pda_run->frame_id = prg->rtd->region_info[pda_run->region].eof_frame_id;
 
-			if ( prg->ctxDepParsing && pdaRun->frameId >= 0 ) {
+			if ( prg->ctx_dep_parsing && pda_run->frame_id >= 0 ) {
 				debug( prg, REALM_PARSE, "HAVE PRE_EOF BLOCK\n" );
 
-				pdaRun->fi = &prg->rtd->frameInfo[pdaRun->frameId];
-				pdaRun->code = pdaRun->fi->codeWV;
+				pda_run->fi = &prg->rtd->frame_info[pda_run->frame_id];
+				pda_run->code = pda_run->fi->codeWV;
 
 				/* COROUTINE */
 				return PCR_PRE_EOF;
 				case PCR_PRE_EOF:
 
-				colm_make_reverse_code( pdaRun );
+				colm_make_reverse_code( pda_run );
 			}
 		}
-		else if ( pdaRun->tokenId == SCAN_UNDO ) {
+		else if ( pda_run->token_id == SCAN_UNDO ) {
 			/* Fall through with parseInput = 0. FIXME: Do we need to send back ignore? */
 			debug( prg, REALM_PARSE, "invoking undo from the scanner\n" );
 		}
-		else if ( pdaRun->tokenId == SCAN_ERROR ) {
+		else if ( pda_run->token_id == SCAN_ERROR ) {
 			/* Scanner error, maybe retry. */
-			if ( pdaRun->accumIgnore == 0 && get_next_region( pdaRun, 1 ) != 0 ) {
+			if ( pda_run->accum_ignore == 0 && get_next_region( pda_run, 1 ) != 0 ) {
 				debug( prg, REALM_PARSE, "scanner failed, trying next region\n" );
 
-				pdaRun->nextRegionInd += 1;
-				goto skipSend;
+				pda_run->next_region_ind += 1;
+				goto skip_send;
 			}
 			else { // if ( pdaRun->numRetry > 0 ) {
 				debug( prg, REALM_PARSE, "invoking parse error from the scanner\n" );
 
 				/* Fall through to send null (error). */
-				push_bt_point( prg, pdaRun );
+				push_bt_point( prg, pda_run );
 			}
 #if 0
 			else {
@@ -2081,94 +2081,94 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
 				/* There are no alternative scanning regions to try, nor are
 				 * there any alternatives stored in the current parse tree. No
 				 * choice but to end the parse. */
-				push_bt_point( prg, pdaRun );
+				push_bt_point( prg, pda_run );
 
-				report_parse_error( prg, sp, pdaRun );
-				pdaRun->parseError = 1;
-				goto skipSend;
+				report_parse_error( prg, sp, pda_run );
+				pda_run->parse_error = 1;
+				goto skip_send;
 			}
 #endif
 		}
-		else if ( pdaRun->tokenId == SCAN_LANG_EL ) {
+		else if ( pda_run->token_id == SCAN_LANG_EL ) {
 			debug( prg, REALM_PARSE, "sending an named lang el\n" );
 
 			/* A named language element (parsing colm program). */
-			prg->rtd->sendNamedLangEl( prg, sp, pdaRun, is );
+			prg->rtd->send_named_lang_el( prg, sp, pda_run, is );
 		}
-		else if ( pdaRun->tokenId == SCAN_TREE ) {
+		else if ( pda_run->token_id == SCAN_TREE ) {
 			debug( prg, REALM_PARSE, "sending a tree\n" );
 
 			/* A tree already built. */
-			send_tree( prg, sp, pdaRun, is );
+			send_tree( prg, sp, pda_run, is );
 		}
-		else if ( pdaRun->tokenId == SCAN_IGNORE ) {
+		else if ( pda_run->token_id == SCAN_IGNORE ) {
 			debug( prg, REALM_PARSE, "sending an ignore token\n" );
 
 			/* A tree to ignore. */
-			send_ignore_tree( prg, sp, pdaRun, is );
-			goto skipSend;
+			send_ignore_tree( prg, sp, pda_run, is );
+			goto skip_send;
 		}
-		else if ( prg->ctxDepParsing && lelInfo[pdaRun->tokenId].frameId >= 0 ) {
+		else if ( prg->ctx_dep_parsing && lel_info[pda_run->token_id].frame_id >= 0 ) {
 			/* Has a generation action. */
 			debug( prg, REALM_PARSE, "token gen action: %s\n", 
-					prg->rtd->lelInfo[pdaRun->tokenId].name );
+					prg->rtd->lel_info[pda_run->token_id].name );
 
 			/* Make the token data. */
-			pdaRun->tokdata = peekMatch( prg, pdaRun, is );
+			pda_run->tokdata = peek_match( prg, pda_run, is );
 
 			/* Note that we don't update the position now. It is done when the token
 			 * data is pulled from the inputStream. */
 
-			pdaRun->p = pdaRun->pe = 0;
-			pdaRun->toklen = 0;
-			pdaRun->eof = 0;
+			pda_run->p = pda_run->pe = 0;
+			pda_run->toklen = 0;
+			pda_run->eof = 0;
 
-			pdaRun->fi = &prg->rtd->frameInfo[prg->rtd->lelInfo[pdaRun->tokenId].frameId];
-			pdaRun->frameId = prg->rtd->lelInfo[pdaRun->tokenId].frameId;
-			pdaRun->code = pdaRun->fi->codeWV;
+			pda_run->fi = &prg->rtd->frame_info[prg->rtd->lel_info[pda_run->token_id].frame_id];
+			pda_run->frame_id = prg->rtd->lel_info[pda_run->token_id].frame_id;
+			pda_run->code = pda_run->fi->codeWV;
 			
 			/* COROUTINE */
 			return PCR_GENERATION;
 			case PCR_GENERATION:
 
-			colm_make_reverse_code( pdaRun );
+			colm_make_reverse_code( pda_run );
 
 			/* Finished with the match text. */
-			stringFree( prg, pdaRun->tokdata );
+			string_free( prg, pda_run->tokdata );
 
-			goto skipSend;
+			goto skip_send;
 		}
-		else if ( lelInfo[pdaRun->tokenId].ignore ) {
+		else if ( lel_info[pda_run->token_id].ignore ) {
 			debug( prg, REALM_PARSE, "sending an ignore token: %s\n", 
-					prg->rtd->lelInfo[pdaRun->tokenId].name );
+					prg->rtd->lel_info[pda_run->token_id].name );
 
 			/* Is an ignore token. */
-			send_ignore( prg, sp, pdaRun, is, pdaRun->tokenId );
-			goto skipSend;
+			send_ignore( prg, sp, pda_run, is, pda_run->token_id );
+			goto skip_send;
 		}
 		else {
 			debug( prg, REALM_PARSE, "sending an a plain old token: %s\n", 
-					prg->rtd->lelInfo[pdaRun->tokenId].name );
+					prg->rtd->lel_info[pda_run->token_id].name );
 
 			/* Is a plain token. */
-			send_token( prg, sp, pdaRun, is, pdaRun->tokenId );
+			send_token( prg, sp, pda_run, is, pda_run->token_id );
 		}
 yes:
 
-		if ( pdaRun->parseInput != 0 )
-			colm_transfer_reverse_code( pdaRun, pdaRun->parseInput );
+		if ( pda_run->parse_input != 0 )
+			colm_transfer_reverse_code( pda_run, pda_run->parse_input );
 
-		if ( pdaRun->parseInput != 0 ) {
+		if ( pda_run->parse_input != 0 ) {
 			/* If it's a nonterminal with a termdup then flip the parse tree to
 			 * the terminal. */
-			if ( pdaRun->parseInput->id >= prg->rtd->firstNonTermId ) {
-				pdaRun->parseInput->id =
-						prg->rtd->lelInfo[pdaRun->parseInput->id].termDupId;
-				pdaRun->parseInput->flags |= PF_TERM_DUP;
+			if ( pda_run->parse_input->id >= prg->rtd->first_non_term_id ) {
+				pda_run->parse_input->id =
+						prg->rtd->lel_info[pda_run->parse_input->id].term_dup_id;
+				pda_run->parse_input->flags |= PF_TERM_DUP;
 			}
 		}
 
-		long pcr = parse_token( prg, sp, pdaRun, is, PCR_START );
+		long pcr = parse_token( prg, sp, pda_run, is, PCR_START );
 		
 		while ( pcr != PCR_DONE ) {
 
@@ -2177,45 +2177,45 @@ yes:
 			case PCR_REDUCTION:
 			case PCR_REVERSE:
 
-			pcr = parse_token( prg, sp, pdaRun, is, entry );
+			pcr = parse_token( prg, sp, pda_run, is, entry );
 		}
 
 		assert( pcr == PCR_DONE );
 
-		handle_error( prg, sp, pdaRun );
+		handle_error( prg, sp, pda_run );
 
-skipSend:
-		new_token( prg, pdaRun );
+skip_send:
+		new_token( prg, pda_run );
 
 		/* Various stop conditions. This should all be coverned by one test
 		 * eventually. */
 
-		if ( pdaRun->triggerUndo ) {
+		if ( pda_run->trigger_undo ) {
 			debug( prg, REALM_PARSE, "parsing stopped by triggerUndo\n" );
 			break;
 		}
 
-		if ( is->eofSent ) {
+		if ( is->eof_sent ) {
 			debug( prg, REALM_PARSE, "parsing stopped by EOF\n" );
 			break;
 		}
 
-		if ( pdaRun->stopParsing ) {
+		if ( pda_run->stop_parsing ) {
 			debug( prg, REALM_PARSE, "scanner has been stopped\n" );
 			break;
 		}
 
-		if ( pdaRun->stop ) {
+		if ( pda_run->stop ) {
 			debug( prg, REALM_PARSE, "parsing has been stopped by consumedCount\n" );
 			break;
 		}
 
-		if ( prg->induceExit ) {
+		if ( prg->induce_exit ) {
 			debug( prg, REALM_PARSE, "parsing has been stopped by a call to exit\n" );
 			break;
 		}
 
-		if ( pdaRun->parseError ) {
+		if ( pda_run->parse_error ) {
 			debug( prg, REALM_PARSE, "parsing stopped by a parse error\n" );
 			break;
 		}
@@ -2229,18 +2229,18 @@ skipSend:
 }
 
 
-long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
-		stream_t *input, long stopId, long entry )
+long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
+		stream_t *input, long stop_id, long entry )
 {
 	/* COROUTINE */
 	switch ( entry ) {
 	case PCR_START:
 
-	if ( ! pdaRun->parseError ) {
-		pdaRun->stopTarget = stopId;
+	if ( ! pda_run->parse_error ) {
+		pda_run->stop_target = stop_id;
 
-		long pcr = colm_parse_loop( prg, sp, pdaRun, 
-				streamToImpl( input ), entry );
+		long pcr = colm_parse_loop( prg, sp, pda_run, 
+				stream_to_impl( input ), entry );
 
 		while ( pcr != PCR_DONE ) {
 
@@ -2251,8 +2251,8 @@ long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
 			case PCR_PRE_EOF:
 			case PCR_REVERSE:
 
-			pcr = colm_parse_loop( prg, sp, pdaRun, 
-					streamToImpl( input ), entry );
+			pcr = colm_parse_loop( prg, sp, pda_run, 
+					stream_to_impl( input ), entry );
 		}
 	}
 
@@ -2264,7 +2264,7 @@ long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
 }
 
 long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, stream_t *input , int revertOn, long entry )
+		struct pda_run *pda_run, stream_t *input , int revert_on, long entry )
 {
 	struct stream_impl *si;
 
@@ -2272,13 +2272,13 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 	switch ( entry ) {
 	case PCR_START:
 
-	if ( pdaRun->stopTarget <= 0 ) {
-		si = streamToImpl( input );
-		si->funcs->setEof( si );
+	if ( pda_run->stop_target <= 0 ) {
+		si = stream_to_impl( input );
+		si->funcs->set_eof( si );
 
-		if ( ! pdaRun->parseError ) {
-			si = streamToImpl( input );
-			long pcr = colm_parse_loop( prg, sp, pdaRun, si, entry );
+		if ( ! pda_run->parse_error ) {
+			si = stream_to_impl( input );
+			long pcr = colm_parse_loop( prg, sp, pda_run, si, entry );
 
 			while ( pcr != PCR_DONE ) {
 
@@ -2289,8 +2289,8 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 				case PCR_PRE_EOF:
 				case PCR_REVERSE:
 
-				si = streamToImpl( input );
-				pcr = colm_parse_loop( prg, sp, pdaRun, si, entry );
+				si = stream_to_impl( input );
+				pcr = colm_parse_loop( prg, sp, pda_run, si, entry );
 			}
 		}
 	}
@@ -2300,10 +2300,10 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 	 * work (at time of writing). */
 	//assert( (pdaRun->stopTarget > 0 && pdaRun->stopParsing) || streamToImpl( input )->eofSent );
 
-	if ( !revertOn )
-		commit_full( prg, sp, pdaRun, 0 );
+	if ( !revert_on )
+		commit_full( prg, sp, pda_run, 0 );
 	
-	tree_t *tree = get_parsed_root( pdaRun, pdaRun->stopTarget > 0 );
+	tree_t *tree = get_parsed_root( pda_run, pda_run->stop_target > 0 );
 	colm_tree_upref( tree );
 
 	*result = tree;
@@ -2315,28 +2315,28 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 	return PCR_DONE;
 }
 
-long colm_parse_undo_frag( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
+long colm_parse_undo_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 		stream_t *input, long steps, long entry )
 {
 	debug( prg, REALM_PARSE,
 			"undo parse frag, target steps: %ld, pdarun steps: %ld\n",
-			steps, pdaRun->steps );
+			steps, pda_run->steps );
 
-	reset_token( pdaRun );
+	reset_token( pda_run );
 
 	/* COROUTINE */
 	switch ( entry ) {
 	case PCR_START:
 
-	if ( steps < pdaRun->steps ) {
+	if ( steps < pda_run->steps ) {
 		/* Setup environment for going backwards until we reduced steps to
 		 * what we want. */
-		pdaRun->numRetry += 1;
-		pdaRun->targetSteps = steps;
-		pdaRun->triggerUndo = 1;
+		pda_run->num_retry += 1;
+		pda_run->target_steps = steps;
+		pda_run->trigger_undo = 1;
 
 		/* The parse loop will recognise the situation. */
-		long pcr = colm_parse_loop( prg, sp, pdaRun, streamToImpl(input), entry );
+		long pcr = colm_parse_loop( prg, sp, pda_run, stream_to_impl(input), entry );
 		while ( pcr != PCR_DONE ) {
 
 			/* COROUTINE */
@@ -2346,13 +2346,13 @@ long colm_parse_undo_frag( program_t *prg, tree_t **sp, struct pda_run *pdaRun,
 			case PCR_PRE_EOF:
 			case PCR_REVERSE:
 
-			pcr = colm_parse_loop( prg, sp, pdaRun, streamToImpl(input), entry );
+			pcr = colm_parse_loop( prg, sp, pda_run, stream_to_impl(input), entry );
 		}
 
 		/* Reset environment. */
-		pdaRun->triggerUndo = 0;
-		pdaRun->targetSteps = -1;
-		pdaRun->numRetry -= 1;
+		pda_run->trigger_undo = 0;
+		pda_run->target_steps = -1;
+		pda_run->num_retry -= 1;
 	}
 
 	/* COROUTINE */

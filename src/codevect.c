@@ -27,42 +27,42 @@
 #include <assert.h>
 
 
-void initRtCodeVect( struct rt_code_vect *vect )
+void init_rt_code_vect( struct rt_code_vect *vect )
 {
 	vect->data = 0;
-	vect->tabLen = 0;
-	vect->allocLen = 0;
+	vect->tab_len = 0;
+	vect->alloc_len = 0;
 }
 
-static long newSizeUp( long existing, long needed )
+static long new_size_up( long existing, long needed )
 { 
 	return needed > existing ? (needed<<1) : existing;
 }
 
-static long newSizeDown( long existing, long needed )
+static long new_size_down( long existing, long needed )
 {
 	return needed < (existing>>2) ? (needed<<1) : existing;
 }
 
 /* Up resize the data for len elements using Resize::upResize to tell us the
  * new tabLen. Reads and writes allocLen. Does not read or write tabLen. */
-static void upResize( struct rt_code_vect *vect, long len )
+static void up_resize( struct rt_code_vect *vect, long len )
 {
 	/* Ask the resizer what the new tabLen will be. */
-	long newLen = newSizeUp(vect->allocLen, len);
+	long new_len = new_size_up(vect->alloc_len, len);
 
 	/* Did the data grow? */
-	if ( newLen > vect->allocLen ) {
-		vect->allocLen = newLen;
+	if ( new_len > vect->alloc_len ) {
+		vect->alloc_len = new_len;
 		if ( vect->data != 0 ) {
 			/* Table exists already, resize it up. */
-			vect->data = (code_t*) realloc( vect->data, sizeof(code_t) * newLen );
+			vect->data = (code_t*) realloc( vect->data, sizeof(code_t) * new_len );
 			//if ( vect->data == 0 )
 			//	throw std::bad_alloc();
 		}
 		else {
 			/* Create the data. */
-			vect->data = (code_t*) malloc( sizeof(code_t) * newLen );
+			vect->data = (code_t*) malloc( sizeof(code_t) * new_len );
 			//if ( vect->data == 0 )
 			//	throw std::bad_alloc();
 		}
@@ -71,22 +71,22 @@ static void upResize( struct rt_code_vect *vect, long len )
 
 /* Down resize the data for len elements using Resize::downResize to determine
  * the new tabLen. Reads and writes allocLen. Does not read or write tabLen. */
-static void downResize( struct rt_code_vect *vect, long len)
+static void down_resize( struct rt_code_vect *vect, long len)
 {
 	/* Ask the resizer what the new tabLen will be. */
-	long newLen = newSizeDown( vect->allocLen, len );
+	long new_len = new_size_down( vect->alloc_len, len );
 
 	/* Did the data shrink? */
-	if ( newLen < vect->allocLen ) {
-		vect->allocLen = newLen;
-		if ( newLen == 0 ) {
+	if ( new_len < vect->alloc_len ) {
+		vect->alloc_len = new_len;
+		if ( new_len == 0 ) {
 			/* Simply free the data. */
 			free( vect->data );
 			vect->data = 0;
 		}
 		else {
 			/* Not shrinking to size zero, realloc it to the smaller size. */
-			vect->data = (code_t*) realloc( vect->data, sizeof(code_t) * newLen );
+			vect->data = (code_t*) realloc( vect->data, sizeof(code_t) * new_len );
 			//if ( vect->data == 0 )
 			//	throw std::bad_alloc();
 		}
@@ -100,28 +100,28 @@ void colm_rt_code_vect_empty( struct rt_code_vect *vect )
 		/* Free the data space. */
 		free( vect->data );
 		vect->data = 0;
-		vect->tabLen = vect->allocLen = 0;
+		vect->tab_len = vect->alloc_len = 0;
 	}
 }
 
 void colm_rt_code_vect_replace( struct rt_code_vect *vect, long pos,
 		const code_t *val, long len )
 {
-	long endPos, i;
+	long end_pos, i;
 	//code_t *item;
 
 	/* If we are given a negative position to replace at then
 	 * treat it as a position relative to the length. */
 	if ( pos < 0 )
-		pos = vect->tabLen + pos;
+		pos = vect->tab_len + pos;
 
 	/* The end is the one past the last item that we want
 	 * to write to. */
-	endPos = pos + len;
+	end_pos = pos + len;
 
 	/* Make sure we have enough space. */
-	if ( endPos > vect->tabLen ) {
-		upResize( vect, endPos );
+	if ( end_pos > vect->tab_len ) {
+		up_resize( vect, end_pos );
 
 		/* Delete any objects we need to delete. */
 		//item = vect->data + pos;
@@ -129,7 +129,7 @@ void colm_rt_code_vect_replace( struct rt_code_vect *vect, long pos,
 		//	item->~code_t();
 		
 		/* We are extending the vector, set the new data length. */
-		vect->tabLen = endPos;
+		vect->tab_len = end_pos;
 	}
 	else {
 		/* Delete any objects we need to delete. */
@@ -147,19 +147,19 @@ void colm_rt_code_vect_replace( struct rt_code_vect *vect, long pos,
 
 void colm_rt_code_vect_remove( struct rt_code_vect *vect, long pos, long len )
 {
-	long newLen, lenToSlideOver, endPos;
+	long new_len, len_to_slide_over, end_pos;
 	code_t *dst;//, *item;
 
 	/* If we are given a negative position to remove at then
 	 * treat it as a position relative to the length. */
 	if ( pos < 0 )
-		pos = vect->tabLen + pos;
+		pos = vect->tab_len + pos;
 
 	/* The first position after the last item deleted. */
-	endPos = pos + len;
+	end_pos = pos + len;
 
 	/* The new data length. */
-	newLen = vect->tabLen - len;
+	new_len = vect->tab_len - len;
 
 	/* The place in the data we are deleting at. */
 	dst = vect->data + pos;
@@ -170,15 +170,15 @@ void colm_rt_code_vect_remove( struct rt_code_vect *vect, long pos, long len )
 	//	item->~code_t();
 	
 	/* Shift data over if necessary. */
-	lenToSlideOver = vect->tabLen - endPos;	
-	if ( len > 0 && lenToSlideOver > 0 )
-		memmove(dst, dst + len, sizeof(code_t)*lenToSlideOver);
+	len_to_slide_over = vect->tab_len - end_pos;	
+	if ( len > 0 && len_to_slide_over > 0 )
+		memmove(dst, dst + len, sizeof(code_t)*len_to_slide_over);
 
 	/* Shrink the data if necessary. */
-	downResize( vect, newLen );
+	down_resize( vect, new_len );
 
 	/* Set the new data length. */
-	vect->tabLen = newLen;
+	vect->tab_len = new_len;
 }
 
 

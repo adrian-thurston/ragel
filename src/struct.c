@@ -40,7 +40,7 @@ struct colm_struct *colm_struct_new_size( program_t *prg, int size )
 
 struct colm_struct *colm_struct_new( program_t *prg, int id )
 {
-	struct colm_struct *s = colm_struct_new_size( prg, prg->rtd->selInfo[id].size );
+	struct colm_struct *s = colm_struct_new_size( prg, prg->rtd->sel_info[id].size );
 	s->id = id;
 	return s;
 }
@@ -54,8 +54,8 @@ void colm_struct_delete( program_t *prg, tree_t **sp, struct colm_struct *el )
 	}
 
 	if ( el->id >= 0 ) { 
-		short *t = prg->rtd->selInfo[el->id].trees;
-		int i, len = prg->rtd->selInfo[el->id].treesLen;
+		short *t = prg->rtd->sel_info[el->id].trees;
+		int i, len = prg->rtd->sel_info[el->id].trees_len;
 		for ( i = 0; i < len; i++ ) {
 			tree_t *tree = colm_struct_get_field( el, tree_t*, t[i] );
 			colm_tree_downref( prg, sp, tree );
@@ -69,8 +69,8 @@ void colm_parser_destroy( program_t *prg, tree_t **sp, struct colm_struct *s )
 	struct colm_parser *parser = (struct colm_parser*) s;
 
 	/* Free the PDA run. */
-	colm_pda_clear( prg, sp, parser->pdaRun );
-	free( parser->pdaRun );
+	colm_pda_clear( prg, sp, parser->pda_run );
+	free( parser->pda_run );
 
 	/* Free the result. */
 	colm_tree_downref( prg, sp, parser->result );
@@ -78,11 +78,11 @@ void colm_parser_destroy( program_t *prg, tree_t **sp, struct colm_struct *s )
 
 parser_t *colm_parser_new( program_t *prg, struct generic_info *gi )
 {
-	struct pda_run *pdaRun = malloc( sizeof(struct pda_run) );
+	struct pda_run *pda_run = malloc( sizeof(struct pda_run) );
 
 	/* Start off the parsing process. */
-	colm_pda_init( prg, pdaRun, prg->rtd->pdaTables, 
-			gi->parserId, 0, 0, 0 );
+	colm_pda_init( prg, pda_run, prg->rtd->pda_tables, 
+			gi->parser_id, 0, 0, 0 );
 	
 	size_t memsize = sizeof(struct colm_parser);
 	struct colm_parser *parser = (struct colm_parser*) malloc( memsize );
@@ -91,7 +91,7 @@ parser_t *colm_parser_new( program_t *prg, struct generic_info *gi )
 
 	parser->id = STRUCT_INBUILT_ID;
 	parser->destructor = &colm_parser_destroy;
-	parser->pdaRun = pdaRun;
+	parser->pda_run = pda_run;
 
 	return parser;
 }
@@ -119,11 +119,11 @@ map_t *colm_map_new( struct colm_program *prg )
 	return map;
 }
 
-struct_t *colm_construct_generic( program_t *prg, long genericId )
+struct_t *colm_construct_generic( program_t *prg, long generic_id )
 {
-	struct generic_info *genericInfo = &prg->rtd->genericInfo[genericId];
-	struct_t *newGeneric = 0;
-	switch ( genericInfo->type ) {
+	struct generic_info *generic_info = &prg->rtd->generic_info[generic_id];
+	struct_t *new_generic = 0;
+	switch ( generic_info->type ) {
 		case GEN_MAP_EL:
 		case GEN_LIST_EL:
 			break;
@@ -132,25 +132,25 @@ struct_t *colm_construct_generic( program_t *prg, long genericId )
 		case GEN_VMAP:
 		{
 			map_t *map = colm_map_new( prg );
-			map->genericInfo = genericInfo;
-			newGeneric = (struct_t*) map;
+			map->generic_info = generic_info;
+			new_generic = (struct_t*) map;
 			break;
 		}
 		case GEN_LIST:
 		case GEN_VLIST:
 		{
 			list_t *list = colm_list_new( prg );
-			list->genericInfo = genericInfo;
-			newGeneric = (struct_t*) list;
+			list->generic_info = generic_info;
+			new_generic = (struct_t*) list;
 			break;
 		}
 		case GEN_PARSER: {
-			parser_t *parser = colm_parser_new( prg, genericInfo );
+			parser_t *parser = colm_parser_new( prg, generic_info );
 			parser->input = colm_stream_new( prg );
-			newGeneric = (struct_t*) parser;
+			new_generic = (struct_t*) parser;
 			break;
 		}
 	}
 
-	return newGeneric;
+	return new_generic;
 }

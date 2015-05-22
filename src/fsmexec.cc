@@ -57,33 +57,33 @@ void execAction( struct pda_run *pdaRun, GenAction *genAction )
 			 * will exist. */
 			pdaRun->toklen = pdaRun->tokend;
 			if ( item->tokenRegion->lmSwitchHandlesError && pdaRun->act == 0 ) {
-				pdaRun->fsm_cs = pdaRun->fsm_tables->errorState;
+				pdaRun->fsm_cs = pdaRun->fsm_tables->error_state;
 			}
 			else {
 				for ( TokenInstanceListReg::Iter lmi = item->tokenRegion->tokenInstanceList; 
 						lmi.lte(); lmi++ )
 				{
 					if ( lmi->inLmSelect && pdaRun->act == lmi->longestMatchId )
-						pdaRun->matchedToken = lmi->tokenDef->tdLangEl->id;
+						pdaRun->matched_token = lmi->tokenDef->tdLangEl->id;
 				}
 			}
-			pdaRun->returnResult = true;
-			pdaRun->skipToklen = true;
+			pdaRun->return_result = true;
+			pdaRun->skip_toklen = true;
 			break;
 		case InlineItem::LmOnLast:
 			pdaRun->p += 1;
-			pdaRun->matchedToken = item->longestMatchPart->tokenDef->tdLangEl->id;
-			pdaRun->returnResult = true;
+			pdaRun->matched_token = item->longestMatchPart->tokenDef->tdLangEl->id;
+			pdaRun->return_result = true;
 			break;
 		case InlineItem::LmOnNext:
-			pdaRun->matchedToken = item->longestMatchPart->tokenDef->tdLangEl->id;
-			pdaRun->returnResult = true;
+			pdaRun->matched_token = item->longestMatchPart->tokenDef->tdLangEl->id;
+			pdaRun->return_result = true;
 			break;
 		case InlineItem::LmOnLagBehind:
 			pdaRun->toklen = pdaRun->tokend;
-			pdaRun->matchedToken = item->longestMatchPart->tokenDef->tdLangEl->id;
-			pdaRun->returnResult = true;
-			pdaRun->skipToklen = true;
+			pdaRun->matched_token = item->longestMatchPart->tokenDef->tdLangEl->id;
+			pdaRun->return_result = true;
+			pdaRun->skip_toklen = true;
 			break;
 		}
 	}
@@ -103,25 +103,25 @@ extern "C" void internalFsmExecute( struct pda_run *pdaRun, struct stream_impl *
 	pdaRun->start = pdaRun->p;
 
 	/* Init the token match to nothing (the sentinal). */
-	pdaRun->matchedToken = 0;
+	pdaRun->matched_token = 0;
 
 /*_resume:*/
-	if ( pdaRun->fsm_cs == pdaRun->fsm_tables->errorState )
+	if ( pdaRun->fsm_cs == pdaRun->fsm_tables->error_state )
 		goto out;
 
 	if ( pdaRun->p == pdaRun->pe )
 		goto out;
 
 _loop_head:
-	_acts = pdaRun->fsm_tables->actions + pdaRun->fsm_tables->fromStateActions[pdaRun->fsm_cs];
+	_acts = pdaRun->fsm_tables->actions + pdaRun->fsm_tables->from_state_actions[pdaRun->fsm_cs];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
-		execAction( pdaRun, pdaRun->fsm_tables->actionSwitch[*_acts++] );
+		execAction( pdaRun, pdaRun->fsm_tables->action_switch[*_acts++] );
 
-	_keys = pdaRun->fsm_tables->transKeys + pdaRun->fsm_tables->keyOffsets[pdaRun->fsm_cs];
-	_trans = pdaRun->fsm_tables->indexOffsets[pdaRun->fsm_cs];
+	_keys = pdaRun->fsm_tables->trans_keys + pdaRun->fsm_tables->key_offsets[pdaRun->fsm_cs];
+	_trans = pdaRun->fsm_tables->index_offsets[pdaRun->fsm_cs];
 
-	_klen = pdaRun->fsm_tables->singleLengths[pdaRun->fsm_cs];
+	_klen = pdaRun->fsm_tables->single_lengths[pdaRun->fsm_cs];
 	if ( _klen > 0 ) {
 		const char *_lower = _keys;
 		const char *_mid;
@@ -144,7 +144,7 @@ _loop_head:
 		_trans += _klen;
 	}
 
-	_klen = pdaRun->fsm_tables->rangeLengths[pdaRun->fsm_cs];
+	_klen = pdaRun->fsm_tables->range_lengths[pdaRun->fsm_cs];
 	if ( _klen > 0 ) {
 		const char *_lower = _keys;
 		const char *_mid;
@@ -172,43 +172,43 @@ _match:
 	if ( pdaRun->fsm_tables->transActionsWI[_trans] == 0 )
 		goto _again;
 
-	pdaRun->returnResult = false;
-	pdaRun->skipToklen = false;
+	pdaRun->return_result = false;
+	pdaRun->skip_toklen = false;
 	_acts = pdaRun->fsm_tables->actions + pdaRun->fsm_tables->transActionsWI[_trans];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
-		execAction( pdaRun, pdaRun->fsm_tables->actionSwitch[*_acts++] );
-	if ( pdaRun->returnResult ) {
-		if ( pdaRun->skipToklen )
+		execAction( pdaRun, pdaRun->fsm_tables->action_switch[*_acts++] );
+	if ( pdaRun->return_result ) {
+		if ( pdaRun->skip_toklen )
 			goto skip_toklen;
 		goto final;
 	}
 
 _again:
-	_acts = pdaRun->fsm_tables->actions + pdaRun->fsm_tables->toStateActions[pdaRun->fsm_cs];
+	_acts = pdaRun->fsm_tables->actions + pdaRun->fsm_tables->to_state_actions[pdaRun->fsm_cs];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
-		execAction( pdaRun, pdaRun->fsm_tables->actionSwitch[*_acts++] );
+		execAction( pdaRun, pdaRun->fsm_tables->action_switch[*_acts++] );
 
-	if ( pdaRun->fsm_cs == pdaRun->fsm_tables->errorState )
+	if ( pdaRun->fsm_cs == pdaRun->fsm_tables->error_state )
 		goto out;
 
 	if ( ++pdaRun->p != pdaRun->pe )
 		goto _loop_head;
 out:
 	if ( pdaRun->eof ) {
-		pdaRun->returnResult = false;
-		pdaRun->skipToklen = false;
-		_acts = pdaRun->fsm_tables->actions + pdaRun->fsm_tables->eofActions[pdaRun->fsm_cs];
+		pdaRun->return_result = false;
+		pdaRun->skip_toklen = false;
+		_acts = pdaRun->fsm_tables->actions + pdaRun->fsm_tables->eof_actions[pdaRun->fsm_cs];
 		_nacts = (unsigned int) *_acts++;
 
-		if ( pdaRun->fsm_tables->eofTargs[pdaRun->fsm_cs] >= 0 )
-			pdaRun->fsm_cs = pdaRun->fsm_tables->eofTargs[pdaRun->fsm_cs];
+		if ( pdaRun->fsm_tables->eof_targs[pdaRun->fsm_cs] >= 0 )
+			pdaRun->fsm_cs = pdaRun->fsm_tables->eof_targs[pdaRun->fsm_cs];
 
 		while ( _nacts-- > 0 )
-			execAction( pdaRun, pdaRun->fsm_tables->actionSwitch[*_acts++] );
-		if ( pdaRun->returnResult ) {
-			if ( pdaRun->skipToklen )
+			execAction( pdaRun, pdaRun->fsm_tables->action_switch[*_acts++] );
+		if ( pdaRun->return_result ) {
+			if ( pdaRun->skip_toklen )
 				goto skip_toklen;
 			goto final;
 		}

@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-void init_pool_alloc( struct pool_alloc *poolAlloc, int sizeofT );
+void init_pool_alloc( struct pool_alloc *pool_alloc, int sizeofT );
 
 kid_t *kid_allocate( program_t *prg );
 void kid_free( program_t *prg, kid_t *el );
@@ -46,7 +46,7 @@ void tree_clear( program_t *prg );
 long tree_num_lost( program_t *prg );
 
 parse_tree_t *parse_tree_allocate( program_t *prg );
-void parseTreeFree( program_t *prg, parse_tree_t *el );
+void parse_tree_free( program_t *prg, parse_tree_t *el );
 void parse_tree_clear( program_t *prg );
 long parse_tree_num_lost( program_t *prg );
 

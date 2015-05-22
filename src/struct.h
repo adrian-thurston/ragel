@@ -31,7 +31,7 @@ typedef struct colm_parser
 
 	void *buffer[10];
 
-	struct pda_run *pdaRun;
+	struct pda_run *pda_run;
 	struct colm_stream *input;
 	tree_t *result;
 } parser_t;
@@ -66,8 +66,8 @@ typedef struct colm_list
 	void *buffer[8];
 
 	list_el_t *head, *tail;
-	long listLen;
-	struct generic_info *genericInfo;
+	long list_len;
+	struct generic_info *generic_info;
 } list_t;
 
 typedef struct colm_map_el
@@ -91,8 +91,8 @@ typedef struct colm_map
 	void *buffer[8];
 
 	struct colm_map_el *head, *tail, *root;
-	long treeSize;
-	struct generic_info *genericInfo;
+	long tree_size;
+	struct generic_info *generic_info;
 } map_t;
 
 struct colm_struct *colm_struct_new_size( struct colm_program *prg, int size );
@@ -117,13 +117,13 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 	((void*)el) - (field * sizeof(void*)) - sizeof(struct colm_struct)
 
 #define colm_generic_el_container( prg, el, genId ) \
-	colm_struct_container( el, prg->rtd->genericInfo[genId].elOffset )
+	colm_struct_container( el, prg->rtd->generic_info[genId].el_offset )
 
 #define colm_struct_to_list_el( prg, obj, genId ) \
-	colm_struct_get_addr( obj, list_el_t*, prg->rtd->genericInfo[genId].elOffset )
+	colm_struct_get_addr( obj, list_el_t*, prg->rtd->generic_info[genId].el_offset )
 
 #define colm_struct_to_map_el( prg, obj, genId ) \
-	colm_struct_get_addr( obj, map_el_t*, prg->rtd->genericInfo[genId].elOffset )
+	colm_struct_get_addr( obj, map_el_t*, prg->rtd->generic_info[genId].el_offset )
 
 parser_t *colm_parser_new( struct colm_program *prg, struct generic_info *gi );
 stream_t *colm_stream_new( struct colm_program *prg );
@@ -131,20 +131,20 @@ stream_t *colm_stream_new_struct( struct colm_program *prg );
 
 list_t *colm_list_new( struct colm_program *prg );
 struct colm_struct *colm_list_get( struct colm_program *prg, list_t *list,
-		word_t genId, word_t field );
+		word_t gen_id, word_t field );
 struct colm_struct *colm_list_el_get( struct colm_program *prg,
-		list_el_t *listEl, word_t genId, word_t field );
+		list_el_t *list_el, word_t gen_id, word_t field );
 list_el_t *colm_list_detach_head( list_t *list );
 list_el_t *colm_list_detach_tail( list_t *list );
 long colm_list_length( list_t *list );
 
 map_t *colm_map_new( struct colm_program *prg );
 struct colm_struct *colm_map_el_get( struct colm_program *prg,
-		map_el_t *mapEl, word_t genId, word_t field );
+		map_el_t *map_el, word_t gen_id, word_t field );
 struct colm_struct *colm_map_get( struct colm_program *prg, map_t *map,
-		word_t genId, word_t field );
+		word_t gen_id, word_t field );
 
-struct colm_struct *colm_construct_generic( struct colm_program *prg, long genericId );
+struct colm_struct *colm_construct_generic( struct colm_program *prg, long generic_id );
 
 #define STRUCT_INBUILT_ID -1
 

@@ -34,71 +34,71 @@ struct stack_block
 
 struct colm_sections
 {
-	struct lang_el_info *lelInfo;
-	long numLangEls;
+	struct lang_el_info *lel_info;
+	long num_lang_els;
 
-	struct struct_el_info *selInfo;
-	long numStructEls;
+	struct struct_el_info *sel_info;
+	long num_struct_els;
 
-	struct prod_info *prodInfo;
-	long numProds;
+	struct prod_info *prod_info;
+	long num_prods;
 
-	struct region_info *regionInfo;
-	long numRegions;
+	struct region_info *region_info;
+	long num_regions;
 
-	code_t *rootCode;
-	long rootCodeLen;
-	long rootFrameId;
+	code_t *root_code;
+	long root_code_len;
+	long root_frame_id;
 
-	struct frame_info *frameInfo;
-	long numFrames;
+	struct frame_info *frame_info;
+	long num_frames;
 
-	struct function_info *functionInfo;
-	long numFunctions;
+	struct function_info *function_info;
+	long num_functions;
 
-	struct pat_cons_info *patReplInfo;
-	long numPatterns;
+	struct pat_cons_info *pat_repl_info;
+	long num_patterns;
 
-	struct pat_cons_node *patReplNodes;
-	long numPatternNodes;
+	struct pat_cons_node *pat_repl_nodes;
+	long num_pattern_nodes;
 
-	struct generic_info *genericInfo;
-	long numGenerics;
+	struct generic_info *generic_info;
+	long num_generics;
 
-	long argvGenericId;
+	long argv_generic_id;
 
 	const char **litdata;
 	long *litlen;
 	head_t **literals;
-	long numLiterals;
+	long num_literals;
 
-	CaptureAttr *captureAttr;
-	long numCapturedAttr;
+	CaptureAttr *capture_attr;
+	long num_captured_attr;
 
-	struct fsm_tables *fsmTables;
-	struct pda_tables *pdaTables;
-	int *startStates;
-	int *eofLelIds;
-	int *parserLelIds;
-	long numParsers;
+	struct fsm_tables *fsm_tables;
+	struct pda_tables *pda_tables;
+	int *start_states;
+	int *eof_lel_ids;
+	int *parser_lel_ids;
+	long num_parsers;
 
-	long globalSize;
+	long global_size;
 
-	long firstNonTermId;
+	long first_non_term_id;
 
-	long integerId;
-	long stringId;
-	long anyId;
-	long eofId;
-	long noTokenId;
-	long globalId;
-	long argvElId;
+	long integer_id;
+	long string_id;
+	long any_id;
+	long eof_id;
+	long no_token_id;
+	long global_id;
+	long argv_el_id;
 
-	void (*fsm_execute)( struct pda_run *pdaRun, struct stream_impl *inputStream );
-	void (*sendNamedLangEl)( struct colm_program *prg, tree_t **tree,
-			struct pda_run *pdaRun, struct stream_impl *inputStream );
-	void (*initBindings)( struct pda_run *pdaRun );
-	void (*popBinding)( struct pda_run *pdaRun, parse_tree_t *tree );
+	void (*fsm_execute)( struct pda_run *pda_run, struct stream_impl *input_stream );
+	void (*send_named_lang_el)( struct colm_program *prg, tree_t **tree,
+			struct pda_run *pda_run, struct stream_impl *input_stream );
+	void (*init_bindings)( struct pda_run *pda_run );
+	void (*pop_binding)( struct pda_run *pda_run, parse_tree_t *tree );
 
 };
 
@@ -110,46 +110,46 @@ struct heap_list
 
 struct colm_program
 {
-	long activeRealm;
+	long active_realm;
 
 	int argc;
 	const char **argv;
 
-	unsigned char ctxDepParsing;
+	unsigned char ctx_dep_parsing;
 	struct colm_sections *rtd;
 	struct colm_struct *global;
-	int induceExit;
-	int exitStatus;
+	int induce_exit;
+	int exit_status;
 
-	struct pool_alloc kidPool;
-	struct pool_alloc treePool;
-	struct pool_alloc parseTreePool;
-	struct pool_alloc headPool;
-	struct pool_alloc locationPool;
+	struct pool_alloc kid_pool;
+	struct pool_alloc tree_pool;
+	struct pool_alloc parse_tree_pool;
+	struct pool_alloc head_pool;
+	struct pool_alloc location_pool;
 
-	tree_t *trueVal;
-	tree_t *falseVal;
+	tree_t *true_val;
+	tree_t *false_val;
 
 	struct heap_list heap;
 
-	stream_t *stdinVal;
-	stream_t *stdoutVal;
-	stream_t *stderrVal;
+	stream_t *stdin_val;
+	stream_t *stdout_val;
+	stream_t *stderr_val;
 
 	tree_t *error;
 
-	RunBuf *allocRunBuf;
+	RunBuf *alloc_run_buf;
 
 	/* Current stack block limits. Changed when crossing block boundaries. */
 	tree_t **sb_beg;
 	tree_t **sb_end;
 	long sb_total;
 	struct stack_block *reserve;
-	struct stack_block *stackBlock;
-	tree_t **stackRoot;
+	struct stack_block *stack_block;
+	tree_t **stack_root;
 
 	/* Returned value for main program and any exported functions. */
-	tree_t *returnVal;
+	tree_t *return_val;
 };
 
 #endif

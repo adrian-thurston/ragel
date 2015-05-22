@@ -989,18 +989,18 @@ pda_run *Compiler::parsePattern( program_t *prg, tree_t **sp, const InputLoc &lo
 	stream_t *stream = colm_stream_new_struct( prg );
 	stream->impl = sourceStream;
 
-	in->funcs->appendStream( in, (tree_t*)stream );
-	in->funcs->setEof( in );
+	in->funcs->append_stream( in, (tree_t*)stream );
+	in->funcs->set_eof( in );
 
 	long pcr = colm_parse_loop( prg, sp, pdaRun, in, PCR_START );
 	assert( pcr == PCR_DONE );
-	if ( pdaRun->parseError ) {
+	if ( pdaRun->parse_error ) {
 		cerr << ( loc.fileName != 0 ? loc.fileName : "<input>" ) <<
 				":" << loc.line << ":" << loc.col;
 
-		if ( pdaRun->parseErrorText != 0 ) {
+		if ( pdaRun->parse_error_text != 0 ) {
 			cerr << ": relative error: " << 
-					pdaRun->parseErrorText->tokdata->data;
+					pdaRun->parse_error_text->tokdata->data;
 		}
 		else {
 			cerr << ": parse error";
@@ -1018,9 +1018,9 @@ void Compiler::parsePatterns()
 	program_t *prg = colm_new_program( runtimeData );
 
 	/* Turn off context-dependent parsing. */
-	prg->ctxDepParsing = 0;
+	prg->ctx_dep_parsing = 0;
 
-	tree_t **sp = prg->stackRoot;
+	tree_t **sp = prg->stack_root;
 
 	for ( ConsList::Iter cons = replList; cons.lte(); cons++ ) {
 		if ( cons->langEl != 0 ) {

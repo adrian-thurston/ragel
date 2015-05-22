@@ -836,18 +836,18 @@ fsm_tables *RedFsm::makeFsmTables()
 
 	int pos, curKeyOffset, curIndOffset;
 	fsm_tables *fsmTables = new fsm_tables;
-	fsmTables->numStates = stateList.length();
+	fsmTables->num_states = stateList.length();
 
 	/*
 	 * actions
 	 */
 
-	fsmTables->numActions = 1;
+	fsmTables->num_actions = 1;
 	for ( GenActionTableMap::Iter act = actionMap; act.lte(); act++ )
-		fsmTables->numActions += 1 + act->key.length();
+		fsmTables->num_actions += 1 + act->key.length();
 
 	pos = 0;
-	fsmTables->actions = new long[fsmTables->numActions];
+	fsmTables->actions = new long[fsmTables->num_actions];
 	fsmTables->actions[pos++] = 0;
 	for ( GenActionTableMap::Iter act = actionMap; act.lte(); act++ ) {
 		fsmTables->actions[pos++] = act->key.length();
@@ -859,10 +859,10 @@ fsm_tables *RedFsm::makeFsmTables()
 	 * keyOffset
 	 */
 	pos = 0, curKeyOffset = 0;
-	fsmTables->keyOffsets = new long[fsmTables->numStates];
+	fsmTables->key_offsets = new long[fsmTables->num_states];
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		/* Store the current offset. */
-		fsmTables->keyOffsets[pos++] = curKeyOffset;
+		fsmTables->key_offsets[pos++] = curKeyOffset;
 
 		/* Move the key offset ahead. */
 		curKeyOffset += st->outSingle.length() + st->outRange.length()*2;
@@ -871,20 +871,20 @@ fsm_tables *RedFsm::makeFsmTables()
 	/*
 	 * transKeys
 	 */
-	fsmTables->numTransKeys = 0;
+	fsmTables->num_trans_keys = 0;
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		fsmTables->numTransKeys += st->outSingle.length();
-		fsmTables->numTransKeys += 2 * st->outRange.length();
+		fsmTables->num_trans_keys += st->outSingle.length();
+		fsmTables->num_trans_keys += 2 * st->outRange.length();
 	}
 
 	pos = 0;
-	fsmTables->transKeys = new char[fsmTables->numTransKeys];
+	fsmTables->trans_keys = new char[fsmTables->num_trans_keys];
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ )
-			fsmTables->transKeys[pos++] = stel->lowKey.getVal();
+			fsmTables->trans_keys[pos++] = stel->lowKey.getVal();
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
-			fsmTables->transKeys[pos++] = rtel->lowKey.getVal();
-			fsmTables->transKeys[pos++] = rtel->highKey.getVal();
+			fsmTables->trans_keys[pos++] = rtel->lowKey.getVal();
+			fsmTables->trans_keys[pos++] = rtel->highKey.getVal();
 		}
 	}
 
@@ -892,25 +892,25 @@ fsm_tables *RedFsm::makeFsmTables()
 	 * singleLengths
 	 */
 	pos = 0;
-	fsmTables->singleLengths = new long[fsmTables->numStates];
+	fsmTables->single_lengths = new long[fsmTables->num_states];
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
-		fsmTables->singleLengths[pos++] = st->outSingle.length();
+		fsmTables->single_lengths[pos++] = st->outSingle.length();
 
 	/*
 	 * rangeLengths
 	 */
 	pos = 0;
-	fsmTables->rangeLengths = new long[fsmTables->numStates];
+	fsmTables->range_lengths = new long[fsmTables->num_states];
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
-		fsmTables->rangeLengths[pos++] = st->outRange.length();
+		fsmTables->range_lengths[pos++] = st->outRange.length();
 
 	/*
 	 * indexOffsets
 	 */
 	pos = 0, curIndOffset = 0;
-	fsmTables->indexOffsets = new long[fsmTables->numStates];
+	fsmTables->index_offsets = new long[fsmTables->num_states];
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
-		fsmTables->indexOffsets[pos++] = curIndOffset;
+		fsmTables->index_offsets[pos++] = curIndOffset;
 
 		curIndOffset += st->outSingle.length() + st->outRange.length();
 		if ( st->defTrans != 0 )
@@ -969,63 +969,63 @@ fsm_tables *RedFsm::makeFsmTables()
 	 * toStateActions
 	 */
 	pos = 0;
-	fsmTables->toStateActions = new long[fsmTables->numStates];
+	fsmTables->to_state_actions = new long[fsmTables->num_states];
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
-		fsmTables->toStateActions[pos++] = toStateAction( st );
+		fsmTables->to_state_actions[pos++] = toStateAction( st );
 
 	/*
 	 * fromStateActions
 	 */
 	pos = 0;
-	fsmTables->fromStateActions = new long[fsmTables->numStates];
+	fsmTables->from_state_actions = new long[fsmTables->num_states];
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
-		fsmTables->fromStateActions[pos++] = fromStateAction( st );
+		fsmTables->from_state_actions[pos++] = fromStateAction( st );
 
 	/*
 	 * eofActions
 	 */
 	pos = 0;
-	fsmTables->eofActions = new long[fsmTables->numStates];
+	fsmTables->eof_actions = new long[fsmTables->num_states];
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
-		fsmTables->eofActions[pos++] = eofAction( st );
+		fsmTables->eof_actions[pos++] = eofAction( st );
 
 	/*
 	 * eofTargs
 	 */
 	pos = 0;
-	fsmTables->eofTargs = new long[fsmTables->numStates];
+	fsmTables->eof_targs = new long[fsmTables->num_states];
 	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		int targ = -1;
 		if ( st->eofTrans != 0 )
 			targ = st->eofTrans->targ->id;
-		fsmTables->eofTargs[pos++] = targ;
+		fsmTables->eof_targs[pos++] = targ;
 	}
 
 	/* Start state. */
-	fsmTables->startState = startState->id;
+	fsmTables->start_state = startState->id;
 
 	/* First final state. */
-	fsmTables->firstFinal = ( firstFinState != 0 ) ?
+	fsmTables->first_final = ( firstFinState != 0 ) ?
 		firstFinState->id : nextStateId;
 
 	/* The error state. */
-	fsmTables->errorState = ( errState != 0 ) ?
+	fsmTables->error_state = ( errState != 0 ) ?
 		errState->id : -1;
 
 	/* The array pointing to actions. */
 	pos = 0;
-	fsmTables->numActionSwitch = genActionList.length();
-	fsmTables->actionSwitch = new GenAction*[fsmTables->numActionSwitch];
+	fsmTables->num_action_switch = genActionList.length();
+	fsmTables->action_switch = new GenAction*[fsmTables->num_action_switch];
 	for ( GenActionList::Iter act = genActionList; act.lte(); act++ )
-		fsmTables->actionSwitch[pos++] = act;
+		fsmTables->action_switch[pos++] = act;
 	
 	/*
 	 * entryByRegion
 	 */
 
-	fsmTables->numRegions = regionToEntry.length()+1;
-	fsmTables->entryByRegion = new long[fsmTables->numRegions];
-	fsmTables->entryByRegion[0] = fsmTables->errorState;
+	fsmTables->num_regions = regionToEntry.length()+1;
+	fsmTables->entry_by_region = new long[fsmTables->num_regions];
+	fsmTables->entry_by_region[0] = fsmTables->error_state;
 
 	pos = 1;
 	for ( RegionToEntry::Iter en = regionToEntry; en.lte(); en++ ) {
@@ -1033,8 +1033,8 @@ fsm_tables *RedFsm::makeFsmTables()
 		RedEntryMapEl *entryMapEl = redEntryMap.find( *en );
 		
 		/* Save it off. */
-		fsmTables->entryByRegion[pos++] = entryMapEl != 0 ? entryMapEl->value 
-				: fsmTables->errorState;
+		fsmTables->entry_by_region[pos++] = entryMapEl != 0 ? entryMapEl->value 
+				: fsmTables->error_state;
 	}
 	
 	return fsmTables;

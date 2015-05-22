@@ -777,10 +777,10 @@ void FsmCodeGen::writeData()
 	out << "\n";
 
 	out << "static long " << ENTRY_BY_REGION() << "[] = {\n\t";
-	for ( int i = 0; i < fsmTables->numRegions; i++ ) {
-		out << fsmTables->entryByRegion[i];
+	for ( int i = 0; i < fsmTables->num_regions; i++ ) {
+		out << fsmTables->entry_by_region[i];
 
-		if ( i < fsmTables->numRegions-1 ) {
+		if ( i < fsmTables->num_regions-1 ) {
 			out << ", ";
 			if ( (i+1) % 8 == 0 )
 				out << "\n\t";

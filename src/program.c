@@ -38,7 +38,7 @@
 static void colm_alloc_global( program_t *prg )
 {
 	/* Alloc the global. */
-	prg->global = colm_struct_new( prg, prg->rtd->globalId ) ;
+	prg->global = colm_struct_new( prg, prg->rtd->global_id ) ;
 }
 
 void vm_init( program_t *prg )
@@ -49,33 +49,33 @@ void vm_init( program_t *prg )
 	b->offset = 0;
 	b->next = 0;
 
-	prg->stackBlock = b;
+	prg->stack_block = b;
 
-	prg->sb_beg = prg->stackBlock->data;
-	prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
+	prg->sb_beg = prg->stack_block->data;
+	prg->sb_end = prg->stack_block->data + prg->stack_block->len;
 
-	prg->stackRoot = prg->sb_end;
+	prg->stack_root = prg->sb_end;
 }
 
 tree_t **colm_vm_root( program_t *prg )
 {
-	return prg->stackRoot;
+	return prg->stack_root;
 }
 
 tree_t **vm_bs_add( program_t *prg, tree_t **sp, int n )
 {
 	/* Close off the current block. */
-	if ( prg->stackBlock != 0 ) {
-		prg->stackBlock->offset = sp - prg->stackBlock->data;
-		prg->sb_total += prg->stackBlock->len - prg->stackBlock->offset;
+	if ( prg->stack_block != 0 ) {
+		prg->stack_block->offset = sp - prg->stack_block->data;
+		prg->sb_total += prg->stack_block->len - prg->stack_block->offset;
 	}
 
 	if ( prg->reserve != 0 && prg->reserve->len >= n) {
 		struct stack_block *b = prg->reserve;
-		b->next = prg->stackBlock;
+		b->next = prg->stack_block;
 		b->offset = 0;
 
-		prg->stackBlock = b;
+		prg->stack_block = b;
 		prg->reserve = 0;
 	}
 	else {
@@ -83,16 +83,16 @@ tree_t **vm_bs_add( program_t *prg, tree_t **sp, int n )
 		int size = VM_STACK_SIZE;
 		if ( n > size )
 			size = n;
-		b->next = prg->stackBlock;
+		b->next = prg->stack_block;
 		b->data = malloc( sizeof(tree_t*) * size );
 		b->len = size;
 		b->offset = 0;
 
-		prg->stackBlock = b;
+		prg->stack_block = b;
 	}
 
-	prg->sb_beg = prg->stackBlock->data;
-	prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
+	prg->sb_beg = prg->stack_block->data;
+	prg->sb_end = prg->stack_block->data + prg->stack_block->len;
 
 	return prg->sb_end;
 }
@@ -100,7 +100,7 @@ tree_t **vm_bs_add( program_t *prg, tree_t **sp, int n )
 tree_t **vm_bs_pop( program_t *prg, tree_t **sp, int n )
 {
 	while ( 1 ) {
-		tree_t **end = prg->stackBlock->data + prg->stackBlock->len;
+		tree_t **end = prg->stack_block->data + prg->stack_block->len;
 		int remaining = end - sp;
 
 		/* Don't have to free this block. Remaining values to pop leave us
@@ -110,7 +110,7 @@ tree_t **vm_bs_pop( program_t *prg, tree_t **sp, int n )
 			return sp;
 		}
 
-		if ( prg->stackBlock->next == 0 ) {
+		if ( prg->stack_block->next == 0 ) {
 			/* Don't delete the sentinal stack block. Returns the end as in the
 			 * creation of the first stack block. */
 			return prg->sb_end;
@@ -124,29 +124,29 @@ tree_t **vm_bs_pop( program_t *prg, tree_t **sp, int n )
 		}
 
 		/* Pop the stack block. */
-		struct stack_block *b = prg->stackBlock;
-		prg->stackBlock = prg->stackBlock->next;
+		struct stack_block *b = prg->stack_block;
+		prg->stack_block = prg->stack_block->next;
 		prg->reserve = b;
 
 		/* Setup the bounds. Note that we restore the full block, which is
 		 * necessary to honour any CONTIGUOUS statements that counted on it
 		 * before a subsequent CONTIGUOUS triggered a new block. */
-		prg->sb_beg = prg->stackBlock->data; 
-		prg->sb_end = prg->stackBlock->data + prg->stackBlock->len;
+		prg->sb_beg = prg->stack_block->data; 
+		prg->sb_end = prg->stack_block->data + prg->stack_block->len;
 
 		/* Update the total stack usage. */
-		prg->sb_total -= prg->stackBlock->len - prg->stackBlock->offset;
+		prg->sb_total -= prg->stack_block->len - prg->stack_block->offset;
 
 		n -= remaining;
-		sp = prg->stackBlock->data + prg->stackBlock->offset;
+		sp = prg->stack_block->data + prg->stack_block->offset;
 	}
 }
 
 void vm_clear( program_t *prg )
 {
-	while ( prg->stackBlock != 0 ) {
-		struct stack_block *b = prg->stackBlock;
-		prg->stackBlock = prg->stackBlock->next;
+	while ( prg->stack_block != 0 ) {
+		struct stack_block *b = prg->stack_block;
+		prg->stack_block = prg->stack_block->next;
 		
 		free( b->data );
 		free( b );
@@ -160,12 +160,12 @@ void vm_clear( program_t *prg )
 
 tree_t *colm_return_val( struct colm_program *prg )
 {
-	return prg->returnVal;
+	return prg->return_val;
 }
 
-void colm_set_debug( program_t *prg, long activeRealm )
+void colm_set_debug( program_t *prg, long active_realm )
 {
-	prg->activeRealm = activeRealm;
+	prg->active_realm = active_realm;
 }
 
 program_t *colm_new_program( struct colm_sections *rtd )
@@ -177,16 +177,16 @@ program_t *colm_new_program( struct colm_sections *rtd )
 	assert( sizeof(pointer_t)  <= sizeof(tree_t) );
 
 	prg->rtd = rtd;
-	prg->ctxDepParsing = 1;
+	prg->ctx_dep_parsing = 1;
 
-	init_pool_alloc( &prg->kidPool, sizeof(kid_t) );
-	init_pool_alloc( &prg->treePool, sizeof(tree_t) );
-	init_pool_alloc( &prg->parseTreePool, sizeof(parse_tree_t) );
-	init_pool_alloc( &prg->headPool, sizeof(head_t) );
-	init_pool_alloc( &prg->locationPool, sizeof(location_t) );
+	init_pool_alloc( &prg->kid_pool, sizeof(kid_t) );
+	init_pool_alloc( &prg->tree_pool, sizeof(tree_t) );
+	init_pool_alloc( &prg->parse_tree_pool, sizeof(parse_tree_t) );
+	init_pool_alloc( &prg->head_pool, sizeof(head_t) );
+	init_pool_alloc( &prg->location_pool, sizeof(location_t) );
 
-	prg->trueVal = (tree_t*) 1;
-	prg->falseVal = (tree_t*) 0;
+	prg->true_val = (tree_t*) 1;
+	prg->false_val = (tree_t*) 0;
 
 	/* Allocate the global variable. */
 	colm_alloc_global( prg );
@@ -198,7 +198,7 @@ program_t *colm_new_program( struct colm_sections *rtd )
 
 void colm_run_program( program_t *prg, int argc, const char **argv )
 {
-	if ( prg->rtd->rootCodeLen == 0 )
+	if ( prg->rtd->root_code_len == 0 )
 		return;
 
 	/* Make the arguments available to the program. */
@@ -207,9 +207,9 @@ void colm_run_program( program_t *prg, int argc, const char **argv )
 
 	Execution execution;
 	memset( &execution, 0, sizeof(execution) );
-	execution.frameId = prg->rtd->rootFrameId;
+	execution.frame_id = prg->rtd->root_frame_id;
 
-	colm_execute( prg, &execution, prg->rtd->rootCode );
+	colm_execute( prg, &execution, prg->rtd->root_code );
 
 	/* Clear the arg and stack. */
 	prg->argc = 0;
@@ -228,35 +228,35 @@ static void colm_clear_heap( program_t *prg, tree_t **sp )
 
 int colm_delete_program( program_t *prg )
 {
-	tree_t **sp = prg->stackRoot;
-	int exitStatus = prg->exitStatus;
+	tree_t **sp = prg->stack_root;
+	int exit_status = prg->exit_status;
 
-	colm_tree_downref( prg, sp, prg->returnVal );
+	colm_tree_downref( prg, sp, prg->return_val );
 	colm_clear_heap( prg, sp );
 
 	colm_tree_downref( prg, sp, prg->error );
 
 #if DEBUG
-	long kidLost = kid_num_lost( prg );
-	long treeLost = tree_num_lost( prg );
-	long parseTreeLost = parse_tree_num_lost( prg );
-	long headLost = head_num_lost( prg );
-	long locationLost = location_num_lost( prg );
+	long kid_lost = kid_num_lost( prg );
+	long tree_lost = tree_num_lost( prg );
+	long parse_tree_lost = parse_tree_num_lost( prg );
+	long head_lost = head_num_lost( prg );
+	long location_lost = location_num_lost( prg );
 
-	if ( kidLost )
-		message( "warning: lost kids: %ld\n", kidLost );
+	if ( kid_lost )
+		message( "warning: lost kids: %ld\n", kid_lost );
 
-	if ( treeLost )
-		message( "warning: lost trees: %ld\n", treeLost );
+	if ( tree_lost )
+		message( "warning: lost trees: %ld\n", tree_lost );
 
-	if ( parseTreeLost )
-		message( "warning: lost parse trees: %ld\n", parseTreeLost );
+	if ( parse_tree_lost )
+		message( "warning: lost parse trees: %ld\n", parse_tree_lost );
 
-	if ( headLost )
-		message( "warning: lost heads: %ld\n", headLost );
+	if ( head_lost )
+		message( "warning: lost heads: %ld\n", head_lost );
 
-	if ( locationLost )
-		message( "warning: lost locations: %ld\n", locationLost );
+	if ( location_lost )
+		message( "warning: lost locations: %ld\n", location_lost );
 #endif
 
 	kid_clear( prg );
@@ -265,7 +265,7 @@ int colm_delete_program( program_t *prg )
 	parse_tree_clear( prg );
 	location_clear( prg );
 
-	RunBuf *rb = prg->allocRunBuf;
+	RunBuf *rb = prg->alloc_run_buf;
 	while ( rb != 0 ) {
 		RunBuf *next = rb->next;
 		free( rb );
@@ -276,5 +276,5 @@ int colm_delete_program( program_t *prg )
 
 	free( prg );
 
-	return exitStatus;
+	return exit_status;
 }

@@ -107,7 +107,7 @@ protected:
 	string BLOCK_START() { return ACCESS() + "start"; }
 	string TOKLEN() { return ACCESS() + "toklen"; }
 	string ACT() { return ACCESS() + "act"; }
-	string MATCHED_TOKEN() { return ACCESS() + "matchedToken"; }
+	string MATCHED_TOKEN() { return ACCESS() + "matched_token"; }
 
 	string DATA_PREFIX();
 
@@ -115,7 +115,7 @@ protected:
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 
-	string ENTRY_BY_REGION() { return DATA_PREFIX() + "entryByRegion"; }
+	string ENTRY_BY_REGION() { return DATA_PREFIX() + "entry_by_region"; }
 
 
 	void INLINE_LIST( ostream &ret, InlineList *inlineList, 

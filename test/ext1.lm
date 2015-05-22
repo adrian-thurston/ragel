@@ -21,8 +21,8 @@ str_t *c_alphcount( program_t *prg, tree_t **sp, str_t *a1 )
 	char strc[64];
 	sprintf( strc, "%d", count );
 
-	head_t *h = stringAllocFull( prg, strc, strlen( strc ) );
-	tree_t *s = constructString( prg, h );
+	head_t *h = string_alloc_full( prg, strc, strlen( strc ) );
+	tree_t *s = construct_string( prg, h );
 	colm_tree_upref( s );
 	colm_tree_downref( prg, sp, a1 );
 	return (str_t*)s;

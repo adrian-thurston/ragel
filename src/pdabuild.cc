@@ -1332,102 +1332,102 @@ void Compiler::makeRuntimeData()
 	 * ProdCodeBlockLens
 	 */
 
-	runtimeData->frameInfo = new frame_info[nextFrameId];
-	runtimeData->numFrames = nextFrameId;
-	memset( runtimeData->frameInfo, 0, sizeof(struct frame_info) * nextFrameId );
+	runtimeData->frame_info = new frame_info[nextFrameId];
+	runtimeData->num_frames = nextFrameId;
+	memset( runtimeData->frame_info, 0, sizeof(struct frame_info) * nextFrameId );
 
 	/*
 	 * Init code block.
 	 */
 	if ( rootCodeBlock == 0 ) {
-		runtimeData->rootCode = 0;
-		runtimeData->rootCodeLen = 0;
-		runtimeData->rootFrameId = 0;
+		runtimeData->root_code = 0;
+		runtimeData->root_code_len = 0;
+		runtimeData->root_frame_id = 0;
 	}
 	else {
-		runtimeData->rootCode = rootCodeBlock->codeWC.data;
-		runtimeData->rootCodeLen = rootCodeBlock->codeWC.length();
-		runtimeData->rootFrameId = rootCodeBlock->frameId;
+		runtimeData->root_code = rootCodeBlock->codeWC.data;
+		runtimeData->root_code_len = rootCodeBlock->codeWC.length();
+		runtimeData->root_frame_id = rootCodeBlock->frameId;
 	}
 
-	runtimeData->frameInfo[rootCodeBlock->frameId].codeWV = 0;
-	runtimeData->frameInfo[rootCodeBlock->frameId].codeLenWV = 0;
+	runtimeData->frame_info[rootCodeBlock->frameId].codeWV = 0;
+	runtimeData->frame_info[rootCodeBlock->frameId].codeLenWV = 0;
 
-	runtimeData->frameInfo[rootCodeBlock->frameId].locals = makeLocalInfo( rootCodeBlock->locals );
-	runtimeData->frameInfo[rootCodeBlock->frameId].localsLen = rootCodeBlock->locals.locals.length();
+	runtimeData->frame_info[rootCodeBlock->frameId].locals = makeLocalInfo( rootCodeBlock->locals );
+	runtimeData->frame_info[rootCodeBlock->frameId].locals_len = rootCodeBlock->locals.locals.length();
 
-	runtimeData->frameInfo[rootCodeBlock->frameId].frameSize = rootLocalFrame->size();
-	runtimeData->frameInfo[rootCodeBlock->frameId].argSize = 0;
-	runtimeData->frameInfo[rootCodeBlock->frameId].retTree = false;
+	runtimeData->frame_info[rootCodeBlock->frameId].frame_size = rootLocalFrame->size();
+	runtimeData->frame_info[rootCodeBlock->frameId].arg_size = 0;
+	runtimeData->frame_info[rootCodeBlock->frameId].ret_tree = false;
 
 	/*
 	 * prodInfo
 	 */
 	count = prodList.length();
-	runtimeData->prodInfo = new prod_info[count];
-	runtimeData->numProds = count;
+	runtimeData->prod_info = new prod_info[count];
+	runtimeData->num_prods = count;
 
 	count = 0;
 	for ( DefList::Iter prod = prodList; prod.lte(); prod++ ) {
-		runtimeData->prodInfo[count].lhsId = prod->prodName->id;
-		runtimeData->prodInfo[count].prodNum = prod->prodNum;
-		runtimeData->prodInfo[count].length = prod->fsmLength;
-		runtimeData->prodInfo[count].name = prod->data;
-		runtimeData->prodInfo[count].frameId = -1;
+		runtimeData->prod_info[count].lhs_id = prod->prodName->id;
+		runtimeData->prod_info[count].prod_num = prod->prodNum;
+		runtimeData->prod_info[count].length = prod->fsmLength;
+		runtimeData->prod_info[count].name = prod->data;
+		runtimeData->prod_info[count].frame_id = -1;
 
 		CodeBlock *block = prod->redBlock;
 		if ( block != 0 ) {
-			runtimeData->prodInfo[count].frameId = block->frameId;
-			runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
-			runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
+			runtimeData->prod_info[count].frame_id = block->frameId;
+			runtimeData->frame_info[block->frameId].codeWV = block->codeWV.data;
+			runtimeData->frame_info[block->frameId].codeLenWV = block->codeWV.length();
 
-			runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
-			runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
+			runtimeData->frame_info[block->frameId].locals = makeLocalInfo( block->locals );
+			runtimeData->frame_info[block->frameId].locals_len = block->locals.locals.length();
 
-			runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
-			runtimeData->frameInfo[block->frameId].argSize = 0;
-			runtimeData->frameInfo[block->frameId].retTree = false;
+			runtimeData->frame_info[block->frameId].frame_size = block->localFrame->size();
+			runtimeData->frame_info[block->frameId].arg_size = 0;
+			runtimeData->frame_info[block->frameId].ret_tree = false;
 		}
 
-		runtimeData->prodInfo[count].lhsUpref = true;
-		runtimeData->prodInfo[count].copy = prod->copy.data;
-		runtimeData->prodInfo[count].copyLen = prod->copy.length() / 2;
+		runtimeData->prod_info[count].lhs_upref = true;
+		runtimeData->prod_info[count].copy = prod->copy.data;
+		runtimeData->prod_info[count].copy_len = prod->copy.length() / 2;
 		count += 1;
 	}
 
 	/*
 	 * regionInfo
 	 */
-	runtimeData->numRegions = regionList.length()+1;
-	runtimeData->regionInfo = new region_info[runtimeData->numRegions];
-	memset( runtimeData->regionInfo, 0,
-			sizeof(struct region_info) * runtimeData->numRegions );
+	runtimeData->num_regions = regionList.length()+1;
+	runtimeData->region_info = new region_info[runtimeData->num_regions];
+	memset( runtimeData->region_info, 0,
+			sizeof(struct region_info) * runtimeData->num_regions );
 
-	runtimeData->regionInfo[0].defaultToken = -1;
-	runtimeData->regionInfo[0].eofFrameId = -1;
-	runtimeData->regionInfo[0].ciLelId = 0;
+	runtimeData->region_info[0].default_token = -1;
+	runtimeData->region_info[0].eof_frame_id = -1;
+	runtimeData->region_info[0].ci_lel_id = 0;
 
 	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
 		long regId = reg->id+1;
-		runtimeData->regionInfo[regId].defaultToken =
+		runtimeData->region_info[regId].default_token =
 				reg->impl->defaultTokenInstance == 0 ?
 				-1 : 
 				reg->impl->defaultTokenInstance->tokenDef->tdLangEl->id;
-		runtimeData->regionInfo[regId].eofFrameId = -1;
-		runtimeData->regionInfo[regId].ciLelId = reg->zeroLel != 0 ? reg->zeroLel->id : 0;
+		runtimeData->region_info[regId].eof_frame_id = -1;
+		runtimeData->region_info[regId].ci_lel_id = reg->zeroLel != 0 ? reg->zeroLel->id : 0;
 
 		CodeBlock *block = reg->preEofBlock;
 		if ( block != 0 ) {
-			runtimeData->regionInfo[regId].eofFrameId = block->frameId;
-			runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
-			runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
+			runtimeData->region_info[regId].eof_frame_id = block->frameId;
+			runtimeData->frame_info[block->frameId].codeWV = block->codeWV.data;
+			runtimeData->frame_info[block->frameId].codeLenWV = block->codeWV.length();
 
-			runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
-			runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
+			runtimeData->frame_info[block->frameId].locals = makeLocalInfo( block->locals );
+			runtimeData->frame_info[block->frameId].locals_len = block->locals.locals.length();
 
-			runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
-			runtimeData->frameInfo[block->frameId].argSize = 0;
-			runtimeData->frameInfo[block->frameId].retTree = false;
+			runtimeData->frame_info[block->frameId].frame_size = block->localFrame->size();
+			runtimeData->frame_info[block->frameId].arg_size = 0;
+			runtimeData->frame_info[block->frameId].ret_tree = false;
 		}
 	}
 
@@ -1436,39 +1436,39 @@ void Compiler::makeRuntimeData()
 	 */
 
 	count = nextSymbolId;
-	runtimeData->lelInfo = new lang_el_info[count];
-	runtimeData->numLangEls = count;
-	memset( runtimeData->lelInfo, 0, sizeof(struct lang_el_info)*count );
+	runtimeData->lel_info = new lang_el_info[count];
+	runtimeData->num_lang_els = count;
+	memset( runtimeData->lel_info, 0, sizeof(struct lang_el_info)*count );
 
 	for ( int i = 0; i < nextSymbolId; i++ ) {
 		LangEl *lel = langElIndex[i];
 		if ( lel != 0 ) {
-			runtimeData->lelInfo[i].name = lel->fullLit;
-			runtimeData->lelInfo[i].xmlTag = lel->xmlTag;
-			runtimeData->lelInfo[i].repeat = lel->isRepeat;
-			runtimeData->lelInfo[i].list = lel->isList;
-			runtimeData->lelInfo[i].literal = lel->isLiteral;
-			runtimeData->lelInfo[i].ignore = lel->isIgnore;
-			runtimeData->lelInfo[i].frameId = -1;
+			runtimeData->lel_info[i].name = lel->fullLit;
+			runtimeData->lel_info[i].xml_tag = lel->xmlTag;
+			runtimeData->lel_info[i].repeat = lel->isRepeat;
+			runtimeData->lel_info[i].list = lel->isList;
+			runtimeData->lel_info[i].literal = lel->isLiteral;
+			runtimeData->lel_info[i].ignore = lel->isIgnore;
+			runtimeData->lel_info[i].frame_id = -1;
 
 			CodeBlock *block = lel->transBlock;
 			if ( block != 0 ) {
-				runtimeData->lelInfo[i].frameId = block->frameId;
-				runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
-				runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
+				runtimeData->lel_info[i].frame_id = block->frameId;
+				runtimeData->frame_info[block->frameId].codeWV = block->codeWV.data;
+				runtimeData->frame_info[block->frameId].codeLenWV = block->codeWV.length();
 
-				runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
-				runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
+				runtimeData->frame_info[block->frameId].locals = makeLocalInfo( block->locals );
+				runtimeData->frame_info[block->frameId].locals_len = block->locals.locals.length();
 
-				runtimeData->frameInfo[block->frameId].frameSize = block->localFrame->size();
-				runtimeData->frameInfo[block->frameId].argSize = 0;
-				runtimeData->frameInfo[block->frameId].retTree = false;
+				runtimeData->frame_info[block->frameId].frame_size = block->localFrame->size();
+				runtimeData->frame_info[block->frameId].arg_size = 0;
+				runtimeData->frame_info[block->frameId].ret_tree = false;
 			}
 			
-			runtimeData->lelInfo[i].objectTypeId = 
+			runtimeData->lel_info[i].object_type_id = 
 					lel->objectDef == 0 ? 0 : lel->objectDef->id;
-			runtimeData->lelInfo[i].ofiOffset = lel->ofiOffset;
-			runtimeData->lelInfo[i].objectLength = 
+			runtimeData->lel_info[i].ofi_offset = lel->ofiOffset;
+			runtimeData->lel_info[i].object_length = 
 					lel->objectDef != 0 ? lel->objectDef->size() : 0;
 
 //			runtimeData->lelInfo[i].contextTypeId = 0;
@@ -1480,21 +1480,21 @@ void Compiler::makeRuntimeData()
 //					runtimeData->lelInfo[i].contextLength << endl;
 //			}
 
-			runtimeData->lelInfo[i].termDupId = lel->termDup == 0 ? 0 : lel->termDup->id;
+			runtimeData->lel_info[i].term_dup_id = lel->termDup == 0 ? 0 : lel->termDup->id;
 
 			if ( lel->tokenDef != 0 && lel->tokenDef->join != 0 && 
 					lel->tokenDef->join->context != 0 )
-				runtimeData->lelInfo[i].markId = lel->tokenDef->join->mark->markId;
+				runtimeData->lel_info[i].mark_id = lel->tokenDef->join->mark->markId;
 			else
-				runtimeData->lelInfo[i].markId = -1;
+				runtimeData->lel_info[i].mark_id = -1;
 
-			runtimeData->lelInfo[i].numCaptureAttr = 0;
+			runtimeData->lel_info[i].num_capture_attr = 0;
 		}
 		else {
-			memset(&runtimeData->lelInfo[i], 0, sizeof(struct lang_el_info) );
-			runtimeData->lelInfo[i].name = "__UNUSED";
-			runtimeData->lelInfo[i].xmlTag = "__UNUSED";
-			runtimeData->lelInfo[i].frameId = -1;
+			memset(&runtimeData->lel_info[i], 0, sizeof(struct lang_el_info) );
+			runtimeData->lel_info[i].name = "__UNUSED";
+			runtimeData->lel_info[i].xml_tag = "__UNUSED";
+			runtimeData->lel_info[i].frame_id = -1;
 		}
 	}
 
@@ -1503,15 +1503,15 @@ void Compiler::makeRuntimeData()
 	 */
 
 	count = structEls.length();
-	runtimeData->selInfo = new struct_el_info[count];
-	runtimeData->numStructEls = count;
-	memset( runtimeData->selInfo, 0, sizeof(struct struct_el_info)*count );
+	runtimeData->sel_info = new struct_el_info[count];
+	runtimeData->num_struct_els = count;
+	memset( runtimeData->sel_info, 0, sizeof(struct struct_el_info)*count );
 	StructElList::Iter sel = structEls;
 	for ( int i = 0; i < count; i++, sel++ ) {
 		int treesLen;
-		runtimeData->selInfo[i].size = sel->structDef->objectDef->size();
-		runtimeData->selInfo[i].trees = makeTrees( sel->structDef->objectDef, treesLen );
-		runtimeData->selInfo[i].treesLen = treesLen;
+		runtimeData->sel_info[i].size = sel->structDef->objectDef->size();
+		runtimeData->sel_info[i].trees = makeTrees( sel->structDef->objectDef, treesLen );
+		runtimeData->sel_info[i].trees_len = treesLen;
 	}
 
 	/*
@@ -1519,44 +1519,44 @@ void Compiler::makeRuntimeData()
 	 */
 	count = functionList.length();
 
-	runtimeData->functionInfo = new function_info[count];
-	runtimeData->numFunctions = count;
-	memset( runtimeData->functionInfo, 0, sizeof(struct function_info)*count );
+	runtimeData->function_info = new function_info[count];
+	runtimeData->num_functions = count;
+	memset( runtimeData->function_info, 0, sizeof(struct function_info)*count );
 	for ( FunctionList::Iter func = functionList; func.lte(); func++ ) {
 
-		runtimeData->functionInfo[func->funcId].frameId = -1;
+		runtimeData->function_info[func->funcId].frame_id = -1;
 
 		CodeBlock *block = func->codeBlock;
 		if ( block != 0 ) {
-			runtimeData->functionInfo[func->funcId].frameId = block->frameId;
+			runtimeData->function_info[func->funcId].frame_id = block->frameId;
 
 			/* Name. */
-			runtimeData->frameInfo[block->frameId].name = func->name;
+			runtimeData->frame_info[block->frameId].name = func->name;
 
 			/* Code. */
-			runtimeData->frameInfo[block->frameId].codeWV = block->codeWV.data;
-			runtimeData->frameInfo[block->frameId].codeLenWV = block->codeWV.length();
-			runtimeData->frameInfo[block->frameId].codeWC = block->codeWC.data;
-			runtimeData->frameInfo[block->frameId].codeLenWC = block->codeWC.length();
+			runtimeData->frame_info[block->frameId].codeWV = block->codeWV.data;
+			runtimeData->frame_info[block->frameId].codeLenWV = block->codeWV.length();
+			runtimeData->frame_info[block->frameId].codeWC = block->codeWC.data;
+			runtimeData->frame_info[block->frameId].codeLenWC = block->codeWC.length();
 
 			/* Locals. */
-			runtimeData->frameInfo[block->frameId].locals = makeLocalInfo( block->locals );
-			runtimeData->frameInfo[block->frameId].localsLen = block->locals.locals.length();
+			runtimeData->frame_info[block->frameId].locals = makeLocalInfo( block->locals );
+			runtimeData->frame_info[block->frameId].locals_len = block->locals.locals.length();
 
 			/* Meta. */
-			runtimeData->frameInfo[block->frameId].frameSize = func->localFrame->size();
-			runtimeData->frameInfo[block->frameId].argSize = func->paramListSize;
+			runtimeData->frame_info[block->frameId].frame_size = func->localFrame->size();
+			runtimeData->frame_info[block->frameId].arg_size = func->paramListSize;
 
 			bool retTree = false;
 			if ( func->typeRef ) {
 				UniqueType *ut = func->typeRef->resolveType( this );
 				retTree = ut->tree();
 			}
-			runtimeData->frameInfo[block->frameId].retTree = retTree;
+			runtimeData->frame_info[block->frameId].ret_tree = retTree;
 		}
 
-		runtimeData->functionInfo[func->funcId].frameSize = func->localFrame->size();
-		runtimeData->functionInfo[func->funcId].argSize = func->paramListSize;
+		runtimeData->function_info[func->funcId].frame_size = func->localFrame->size();
+		runtimeData->function_info[func->funcId].arg_size = func->paramListSize;
 	}
 
 	/*
@@ -1564,11 +1564,11 @@ void Compiler::makeRuntimeData()
 	 */
 
 	/* Filled in later after patterns are parsed. */
-	runtimeData->patReplInfo = new pat_cons_info[nextPatConsId];
-	memset( runtimeData->patReplInfo, 0, sizeof(struct pat_cons_info) * nextPatConsId );
-	runtimeData->numPatterns = nextPatConsId;
-	runtimeData->patReplNodes = 0;
-	runtimeData->numPatternNodes = 0;
+	runtimeData->pat_repl_info = new pat_cons_info[nextPatConsId];
+	memset( runtimeData->pat_repl_info, 0, sizeof(struct pat_cons_info) * nextPatConsId );
+	runtimeData->num_patterns = nextPatConsId;
+	runtimeData->pat_repl_nodes = 0;
+	runtimeData->num_pattern_nodes = 0;
 
 	
 	/*
@@ -1579,40 +1579,40 @@ void Compiler::makeRuntimeData()
 		count += nspace->genericList.length();
 	assert( count == nextGenericId );
 
-	runtimeData->genericInfo = new generic_info[count];
-	runtimeData->numGenerics = count;
-	memset( &runtimeData->genericInfo[0], 0, sizeof(struct generic_info) );
+	runtimeData->generic_info = new generic_info[count];
+	runtimeData->num_generics = count;
+	memset( &runtimeData->generic_info[0], 0, sizeof(struct generic_info) );
 	for ( NamespaceList::Iter nspace = namespaceList; nspace.lte(); nspace++ ) {
 		for ( GenericList::Iter gen = nspace->genericList; gen.lte(); gen++ ) {
-			runtimeData->genericInfo[gen->id].type = gen->typeId;
+			runtimeData->generic_info[gen->id].type = gen->typeId;
 
-			runtimeData->genericInfo[gen->id].elType =
+			runtimeData->generic_info[gen->id].el_type =
 					gen->elUt->typeId;
-			runtimeData->genericInfo[gen->id].elStructId =
+			runtimeData->generic_info[gen->id].el_struct_id =
 					( gen->typeId == GEN_VMAP || gen->typeId == GEN_VLIST ) ?
 					gen->elUt->structEl->id : -1;
-			runtimeData->genericInfo[gen->id].elOffset =
+			runtimeData->generic_info[gen->id].el_offset =
 					gen->el != 0 ? gen->el->offset : -1;
 
-			runtimeData->genericInfo[gen->id].keyType =
+			runtimeData->generic_info[gen->id].key_type =
 					gen->keyUt != 0 ? gen->keyUt->typeId : TYPE_NOTYPE;
-			runtimeData->genericInfo[gen->id].keyOffset = 0;
+			runtimeData->generic_info[gen->id].key_offset = 0;
 
-			runtimeData->genericInfo[gen->id].valueType =
+			runtimeData->generic_info[gen->id].value_type =
 					gen->valueUt != 0 ? gen->valueUt->typeId : TYPE_NOTYPE;
-			runtimeData->genericInfo[gen->id].valueOffset = 0;
+			runtimeData->generic_info[gen->id].value_offset = 0;
 
-			runtimeData->genericInfo[gen->id].parserId =
+			runtimeData->generic_info[gen->id].parser_id =
 					gen->typeId == GEN_PARSER ? gen->elUt->langEl->parserId : -1;
 		}
 	}
 
-	runtimeData->argvGenericId = argvTypeRef->generic->id;
+	runtimeData->argv_generic_id = argvTypeRef->generic->id;
 
 	/*
 	 * Literals
 	 */
-	runtimeData->numLiterals = literalStrings.length();
+	runtimeData->num_literals = literalStrings.length();
 	runtimeData->litdata = new const char *[literalStrings.length()];
 	runtimeData->litlen = new long [literalStrings.length()];
 	runtimeData->literals = 0;
@@ -1633,9 +1633,9 @@ void Compiler::makeRuntimeData()
 //		for ( TokenInstanceListReg::Iter td = reg->tokenInstanceList; td.lte(); td++ )
 //			numCapturedAttr += td->reCaptureVect.length();
 //	}
-	runtimeData->captureAttr = new CaptureAttr[numCapturedAttr];
-	runtimeData->numCapturedAttr = numCapturedAttr;
-	memset( runtimeData->captureAttr, 0, sizeof( CaptureAttr ) * numCapturedAttr );
+	runtimeData->capture_attr = new CaptureAttr[numCapturedAttr];
+	runtimeData->num_captured_attr = numCapturedAttr;
+	memset( runtimeData->capture_attr, 0, sizeof( CaptureAttr ) * numCapturedAttr );
 
 	count = 0;
 //	for ( RegionList::Iter reg = regionList; reg.lte(); reg++ ) {
@@ -1652,42 +1652,42 @@ void Compiler::makeRuntimeData()
 //		}
 //	}
 
-	runtimeData->fsmTables = fsmTables;
-	runtimeData->pdaTables = pdaTables;
+	runtimeData->fsm_tables = fsmTables;
+	runtimeData->pda_tables = pdaTables;
 
 	/* FIXME: need a parser descriptor. */
-	runtimeData->startStates = new int[nextParserId];
-	runtimeData->eofLelIds = new int[nextParserId];
-	runtimeData->parserLelIds = new int[nextParserId];
-	runtimeData->numParsers = nextParserId;
+	runtimeData->start_states = new int[nextParserId];
+	runtimeData->eof_lel_ids = new int[nextParserId];
+	runtimeData->parser_lel_ids = new int[nextParserId];
+	runtimeData->num_parsers = nextParserId;
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->parserId >= 0 ) {
-			runtimeData->startStates[lel->parserId] = lel->startState->stateNum;
-			runtimeData->eofLelIds[lel->parserId] = lel->eofLel->id;
-			runtimeData->parserLelIds[lel->parserId] = lel->id;
+			runtimeData->start_states[lel->parserId] = lel->startState->stateNum;
+			runtimeData->eof_lel_ids[lel->parserId] = lel->eofLel->id;
+			runtimeData->parser_lel_ids[lel->parserId] = lel->id;
 		}
 	}
 
-	runtimeData->globalSize = globalObjectDef->size();
+	runtimeData->global_size = globalObjectDef->size();
 
 	/*
 	 * firstNonTermId
 	 */
-	runtimeData->firstNonTermId = firstNonTermId;
+	runtimeData->first_non_term_id = firstNonTermId;
 
 	/* Special trees. */
-	runtimeData->integerId = -1; //intLangEl->id;
-	runtimeData->stringId = strLangEl->id;
-	runtimeData->anyId = anyLangEl->id;
-	runtimeData->eofId = 0; //eofLangEl->id;
-	runtimeData->noTokenId = noTokenLangEl->id;
-	runtimeData->globalId = globalSel->id;
-	runtimeData->argvElId = argvElSel->id;
+	runtimeData->integer_id = -1; //intLangEl->id;
+	runtimeData->string_id = strLangEl->id;
+	runtimeData->any_id = anyLangEl->id;
+	runtimeData->eof_id = 0; //eofLangEl->id;
+	runtimeData->no_token_id = noTokenLangEl->id;
+	runtimeData->global_id = globalSel->id;
+	runtimeData->argv_el_id = argvElSel->id;
 
 	runtimeData->fsm_execute = &internalFsmExecute;
-	runtimeData->sendNamedLangEl = &internalSendNamedLangEl;
-	runtimeData->initBindings = &internalInitBindings;
-	runtimeData->popBinding = &internalPopBinding;
+	runtimeData->send_named_lang_el = &internalSendNamedLangEl;
+	runtimeData->init_bindings = &internalInitBindings;
+	runtimeData->pop_binding = &internalPopBinding;
 
 }
 
@@ -1698,7 +1698,7 @@ void countNodes( program_t *prg, int &count, parse_tree_t *parseTree, kid_t *kid
 		count += 1;
 
 		/* Should't have to recurse here. */
-		tree_t *ignoreList = treeLeftIgnore( prg, kid->tree );
+		tree_t *ignoreList = tree_left_ignore( prg, kid->tree );
 		if ( ignoreList != 0 ) {
 			kid_t *ignore = ignoreList->child;
 			while ( ignore != 0 ) {
@@ -1707,7 +1707,7 @@ void countNodes( program_t *prg, int &count, parse_tree_t *parseTree, kid_t *kid
 			}
 		}
 
-		ignoreList = treeRightIgnore( prg, kid->tree );
+		ignoreList = tree_right_ignore( prg, kid->tree );
 		if ( ignoreList != 0 ) {
 			kid_t *ignore = ignoreList->child;
 			while ( ignore != 0 ) {
@@ -1720,9 +1720,9 @@ void countNodes( program_t *prg, int &count, parse_tree_t *parseTree, kid_t *kid
 
 		if ( !( parseTree->flags & PF_NAMED ) && 
 				!( parseTree->flags & PF_ARTIFICIAL ) && 
-				treeChild( prg, kid->tree ) != 0 )
+				tree_child( prg, kid->tree ) != 0 )
 		{
-			countNodes( prg, count, parseTree->child, treeChild( prg, kid->tree ) );
+			countNodes( prg, count, parseTree->child, tree_child( prg, kid->tree ) );
 		}
 		countNodes( prg, count, parseTree->next, kid->next );
 	}
@@ -1737,57 +1737,57 @@ void fillNodes( program_t *prg, int &nextAvail, struct bindings *bindings, long 
 		kid_t *child = 
 			!( parseTree->flags & PF_NAMED ) && 
 			!( parseTree->flags & PF_ARTIFICIAL ) && 
-			treeChild( prg, kid->tree ) != 0 
+			tree_child( prg, kid->tree ) != 0 
 			?
-			treeChild( prg, kid->tree ) : 0;
+			tree_child( prg, kid->tree ) : 0;
 
 		parse_tree_t *ptChild =
 			!( parseTree->flags & PF_NAMED ) && 
 			!( parseTree->flags & PF_ARTIFICIAL ) && 
-			treeChild( prg, kid->tree ) != 0 
+			tree_child( prg, kid->tree ) != 0 
 			?
 			parseTree->child : 0;
 
 		/* Set up the fields. */
 		node.id = kid->tree->id;
-		node.prodNum = kid->tree->prod_num;
-		node.length = stringLength( kid->tree->tokdata );
-		node.data = stringData( kid->tree->tokdata );
+		node.prod_num = kid->tree->prod_num;
+		node.length = string_length( kid->tree->tokdata );
+		node.data = string_data( kid->tree->tokdata );
 
 		/* Ignore items. */
-		tree_t *ignoreList = treeLeftIgnore( prg, kid->tree );
+		tree_t *ignoreList = tree_left_ignore( prg, kid->tree );
 		kid_t *ignore = ignoreList == 0 ? 0 : ignoreList->child;
-		node.leftIgnore = ignore == 0 ? -1 : nextAvail;
+		node.left_ignore = ignore == 0 ? -1 : nextAvail;
 
 		while ( ignore != 0 ) {
 			struct pat_cons_node &node = nodes[nextAvail++];
 
 			memset( &node, 0, sizeof(struct pat_cons_node) );
 			node.id = ignore->tree->id;
-			node.prodNum = ignore->tree->prod_num;
+			node.prod_num = ignore->tree->prod_num;
 			node.next = ignore->next == 0 ? -1 : nextAvail;
 				
-			node.length = stringLength( ignore->tree->tokdata );
-			node.data = stringData( ignore->tree->tokdata );
+			node.length = string_length( ignore->tree->tokdata );
+			node.data = string_data( ignore->tree->tokdata );
 
 			ignore = ignore->next;
 		}
 
 		/* Ignore items. */
-		ignoreList = treeRightIgnore( prg, kid->tree );
+		ignoreList = tree_right_ignore( prg, kid->tree );
 		ignore = ignoreList == 0 ? 0 : ignoreList->child;
-		node.rightIgnore = ignore == 0 ? -1 : nextAvail;
+		node.right_ignore = ignore == 0 ? -1 : nextAvail;
 
 		while ( ignore != 0 ) {
 			struct pat_cons_node &node = nodes[nextAvail++];
 
 			memset( &node, 0, sizeof(struct pat_cons_node) );
 			node.id = ignore->tree->id;
-			node.prodNum = ignore->tree->prod_num;
+			node.prod_num = ignore->tree->prod_num;
 			node.next = ignore->next == 0 ? -1 : nextAvail;
 				
-			node.length = stringLength( ignore->tree->tokdata );
-			node.data = stringData( ignore->tree->tokdata );
+			node.length = string_length( ignore->tree->tokdata );
+			node.data = string_data( ignore->tree->tokdata );
 
 			ignore = ignore->next;
 		}
@@ -1817,10 +1817,10 @@ void fillNodes( program_t *prg, int &nextAvail, struct bindings *bindings, long 
 
 		/* Since the parser is bottom up the bindings are in a bottom up
 		 * traversal order. Check after recursing. */
-		node.bindId = 0;
+		node.bind_id = 0;
 		if ( bindId < bindings->length() && bindings->data[bindId] == parseTree ) {
 			/* Remember that binding ids are indexed from one. */
-			node.bindId = bindId++;
+			node.bind_id = bindId++;
 
 			//cout << "binding match in " << __PRETTY_FUNCTION__ << endl;
 			//cout << "bindId: " << node.bindId << endl;
@@ -1843,51 +1843,51 @@ void Compiler::fillInPatterns( program_t *prg )
 	int count = 0;
 	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
 		countNodes( prg, count, 
-				pat->pdaRun->stackTop->next,
-				pat->pdaRun->stackTop->next->shadow );
+				pat->pdaRun->stack_top->next,
+				pat->pdaRun->stack_top->next->shadow );
 	}
 
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
 		countNodes( prg, count, 
-				repl->pdaRun->stackTop->next,
-				repl->pdaRun->stackTop->next->shadow );
+				repl->pdaRun->stack_top->next,
+				repl->pdaRun->stack_top->next->shadow );
 	}
 	
-	runtimeData->patReplNodes = new pat_cons_node[count];
-	runtimeData->numPatternNodes = count;
+	runtimeData->pat_repl_nodes = new pat_cons_node[count];
+	runtimeData->num_pattern_nodes = count;
 
 	int nextAvail = 0;
 
 	for ( PatList::Iter pat = patternList; pat.lte(); pat++ ) {
 		int ind = nextAvail++;
-		runtimeData->patReplInfo[pat->patRepId].offset = ind;
+		runtimeData->pat_repl_info[pat->patRepId].offset = ind;
 
 		/* BindIds are indexed base one. */
-		runtimeData->patReplInfo[pat->patRepId].numBindings = 
+		runtimeData->pat_repl_info[pat->patRepId].num_bindings = 
 				pat->pdaRun->bindings->length() - 1;
 
 		/* Init the bind */
 		long bindId = 1;
 		fillNodes( prg, nextAvail, pat->pdaRun->bindings, bindId,
-				runtimeData->patReplNodes, 
-				pat->pdaRun->stackTop->next, 
-				pat->pdaRun->stackTop->next->shadow, 
+				runtimeData->pat_repl_nodes, 
+				pat->pdaRun->stack_top->next, 
+				pat->pdaRun->stack_top->next->shadow, 
 				ind );
 	}
 
 	for ( ConsList::Iter repl = replList; repl.lte(); repl++ ) {
 		int ind = nextAvail++;
-		runtimeData->patReplInfo[repl->patRepId].offset = ind;
+		runtimeData->pat_repl_info[repl->patRepId].offset = ind;
 
 		/* BindIds are indexed base one. */
-		runtimeData->patReplInfo[repl->patRepId].numBindings = 
+		runtimeData->pat_repl_info[repl->patRepId].num_bindings = 
 				repl->pdaRun->bindings->length() - 1;
 
 		long bindId = 1;
 		fillNodes( prg, nextAvail, repl->pdaRun->bindings, bindId,
-				runtimeData->patReplNodes, 
-				repl->pdaRun->stackTop->next,
-				repl->pdaRun->stackTop->next->shadow, 
+				runtimeData->pat_repl_nodes, 
+				repl->pdaRun->stack_top->next,
+				repl->pdaRun->stack_top->next->shadow, 
 				ind );
 	}
 
@@ -1982,7 +1982,7 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 
 
 	/* Allocate indicies and owners. */
-	pdaTables->numIndicies = count;
+	pdaTables->num_indicies = count;
 	pdaTables->indicies = new int[count];
 	pdaTables->owners = new int[count];
 	for ( long i = 0; i < count; i++ ) {
@@ -1993,7 +1993,7 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	/* Allocate offsets. */
 	int numStates = pdaGraph->stateList.length(); 
 	pdaTables->offsets = new unsigned int[numStates];
-	pdaTables->numStates = numStates;
+	pdaTables->num_states = numStates;
 
 	/* Place transitions into indicies/owners */
 	PdaState **states = new PdaState*[numStates];
@@ -2029,7 +2029,7 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	}
 
 	/* We allocated the max, but cmpression gives us less. */
-	pdaTables->numIndicies = indLen;
+	pdaTables->num_indicies = indLen;
 	delete[] states;
 	
 
@@ -2038,7 +2038,7 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	 */
 	count = pdaGraph->stateList.length() * 2;;
 	pdaTables->keys = new int[count];
-	pdaTables->numKeys = count;
+	pdaTables->num_keys = count;
 
 	count = 0;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
@@ -2060,7 +2060,7 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	 */
 	count = pdaGraph->actionSet.length();
 	pdaTables->targs = new unsigned int[count];
-	pdaTables->numTargs = count;
+	pdaTables->num_targs = count;
 
 	count = 0;
 	for ( PdaActionSet::Iter asi = pdaGraph->actionSet; asi.lte(); asi++ )
@@ -2070,12 +2070,12 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	 * ActInds
 	 */
 	count = pdaGraph->actionSet.length();
-	pdaTables->actInds = new unsigned int[count];
-	pdaTables->numActInds = count;
+	pdaTables->act_inds = new unsigned int[count];
+	pdaTables->num_act_inds = count;
 
 	count = pos = 0;
 	for ( PdaActionSet::Iter asi = pdaGraph->actionSet; asi.lte(); asi++ ) {
-		pdaTables->actInds[count++] = pos;
+		pdaTables->act_inds[count++] = pos;
 		pos += asi->key.actions.length() + 1;
 	}
 
@@ -2087,7 +2087,7 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 		count += asi->key.actions.length() + 1;
 
 	pdaTables->actions = new unsigned int[count];
-	pdaTables->numActions = count;
+	pdaTables->num_actions = count;
 
 	count = 0;
 	for ( PdaActionSet::Iter asi = pdaGraph->actionSet; asi.lte(); asi++ ) {
@@ -2101,21 +2101,21 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	 * CommitLen
 	 */
 	count = pdaGraph->actionSet.length();
-	pdaTables->commitLen = new int[count];
-	pdaTables->numCommitLen = count;
+	pdaTables->commit_len = new int[count];
+	pdaTables->num_commit_len = count;
 
 	count = 0;
 	for ( PdaActionSet::Iter asi = pdaGraph->actionSet; asi.lte(); asi++ )
-		pdaTables->commitLen[count++] = asi->key.commitLen;
+		pdaTables->commit_len[count++] = asi->key.commitLen;
 	
 	/*
 	 * tokenRegionInds. Start at one so region index 0 is null (unset).
 	 */
 	count = 0;
 	pos = 1;
-	pdaTables->tokenRegionInds = new int[pdaTables->numStates];
+	pdaTables->token_region_inds = new int[pdaTables->num_states];
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
-		pdaTables->tokenRegionInds[count++] = pos;
+		pdaTables->token_region_inds[count++] = pos;
 		pos += state->regions.length() + 1;
 	}
 
@@ -2128,18 +2128,18 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ )
 		count += state->regions.length() + 1;
 
-	pdaTables->numRegionItems = count;
-	pdaTables->tokenRegions = new int[pdaTables->numRegionItems];
+	pdaTables->num_region_items = count;
+	pdaTables->token_regions = new int[pdaTables->num_region_items];
 
 	count = 0;
-	pdaTables->tokenRegions[count++] = 0;
+	pdaTables->token_regions[count++] = 0;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		for ( RegionVect::Iter reg = state->regions; reg.lte(); reg++ ) {
 			int id = ( *reg == EOF_REGION ) ? 0 : (*reg)->id + 1;
-			pdaTables->tokenRegions[count++] = id;
+			pdaTables->token_regions[count++] = id;
 		}
 
-		pdaTables->tokenRegions[count++] = 0;
+		pdaTables->token_regions[count++] = 0;
 	}
 
 	/*
@@ -2150,21 +2150,21 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ )
 		count += state->regions.length() + 1;
 
-	pdaTables->numPreRegionItems = count;
-	pdaTables->tokenPreRegions = new int[pdaTables->numPreRegionItems];
+	pdaTables->num_pre_region_items = count;
+	pdaTables->token_pre_regions = new int[pdaTables->num_pre_region_items];
 
 	count = 0;
-	pdaTables->tokenPreRegions[count++] = 0;
+	pdaTables->token_pre_regions[count++] = 0;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
 		for ( RegionVect::Iter reg = state->regions; reg.lte(); reg++ ) {
 			assert( state->preRegions.length() <= 1 );
 			if ( state->preRegions.length() == 0 || state->preRegions[0]->impl->wasEmpty )
-				pdaTables->tokenPreRegions[count++] = -1;
+				pdaTables->token_pre_regions[count++] = -1;
 			else 
-				pdaTables->tokenPreRegions[count++] = state->preRegions[0]->id + 1;
+				pdaTables->token_pre_regions[count++] = state->preRegions[0]->id + 1;
 		}
 
-		pdaTables->tokenPreRegions[count++] = 0;
+		pdaTables->token_pre_regions[count++] = 0;
 	}
 
 
