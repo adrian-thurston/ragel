@@ -1779,10 +1779,8 @@ void AsmCodeGen::setLabelsNeeded()
 	}
 
 	if ( !noEnd ) {
-		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-			if ( st != redFsm->errState )
-				st->outNeeded = st->labelNeeded;
-		}
+		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
+			st->outNeeded = st->labelNeeded;
 	}
 }
 
