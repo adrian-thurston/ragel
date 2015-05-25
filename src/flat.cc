@@ -32,7 +32,7 @@ Flat::Flat( const CodeGenArgs &args )
 	charClass(        "char_class",          *this ),
 	flatIndexOffset(  "index_offsets",       *this ),
 	indicies(         "indicies",            *this ),
-	indexDefaults(    "indexDefaults",       *this ),
+	indexDefaults(    "index_defaults",      *this ),
 	transCondSpaces(  "trans_cond_spaces",   *this ),
 	transOffsets(     "trans_offsets",       *this ),
 	condTargs(        "cond_targs",          *this ),
@@ -83,10 +83,12 @@ void Flat::taCharClass()
 {
 	charClass.start();
 
-    long long maxSpan = keyOps->span( redFsm->lowKey, redFsm->highKey );
+	if ( redFsm->classMap != 0 ) {
+		long long maxSpan = keyOps->span( redFsm->lowKey, redFsm->highKey );
 
-    for ( long long pos = 0; pos < maxSpan; pos++ )
-        charClass.value( redFsm->classMap[pos] );
+		for ( long long pos = 0; pos < maxSpan; pos++ )
+			charClass.value( redFsm->classMap[pos] );
+	}
 
 	charClass.finish();
 }
@@ -507,52 +509,58 @@ void Flat::NFA_POP()
 
 void Flat::LOCATE_TRANS()
 {
-	long lowKey = redFsm->lowKey.getVal();
-	long highKey = redFsm->highKey.getVal();
-
-	bool limitLow = keyOps->eq( lowKey, keyOps->minKey );
-	bool limitHigh = keyOps->eq( highKey, keyOps->maxKey );
-
-	out <<
-		"	_keys = " << OFFSET( ARR_REF( keys ), "(" + vCS() + "<<1)" ) << ";\n"
-		"	_inds = " << OFFSET( ARR_REF( indicies ),
-				ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
-		"\n";
-
-	if ( !limitLow || !limitHigh ) {
-		out << "	if ( ";
-
-		if ( !limitHigh )
-			out << GET_KEY() << " <= " << highKey;
-
-		if ( !limitHigh && !limitLow )
-			out << " && ";
-
-		if ( !limitLow )
-			out << GET_KEY() << " >= " << lowKey;
-
-		out << " )\n	{\n";
-	}
-
-	out <<
-		"       int _ic = (int)" << ARR_REF( charClass ) << "[" << GET_KEY() <<
-						" - " << lowKey << "];\n"
-		"		if ( _ic <= (int)" << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
-					"_ic >= (int)" << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
-		"			_trans = (int)" << DEREF( ARR_REF( indicies ),
-							"_inds + (int)( _ic - (int)" + DEREF( ARR_REF( keys ),
-							"_keys" ) + " ) " ) << "; \n"
-		"		else\n"
-		"			_trans = (int)" << ARR_REF( indexDefaults ) <<
-							"[" << vCS() << "]" << ";\n";
-
-	if ( !limitLow || !limitHigh ) {
+	if ( redFsm->classMap == 0 ) {
 		out <<
-			"	}\n"
-			"	else {\n"
-			"		_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
-			"	}\n"
+			"	_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
+	}
+	else {
+		long lowKey = redFsm->lowKey.getVal();
+		long highKey = redFsm->highKey.getVal();
+
+		bool limitLow = keyOps->eq( lowKey, keyOps->minKey );
+		bool limitHigh = keyOps->eq( highKey, keyOps->maxKey );
+
+		out <<
+			"	_keys = " << OFFSET( ARR_REF( keys ), "(" + vCS() + "<<1)" ) << ";\n"
+			"	_inds = " << OFFSET( ARR_REF( indicies ),
+					ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
 			"\n";
+
+		if ( !limitLow || !limitHigh ) {
+			out << "	if ( ";
+
+			if ( !limitHigh )
+				out << GET_KEY() << " <= " << highKey;
+
+			if ( !limitHigh && !limitLow )
+				out << " && ";
+
+			if ( !limitLow )
+				out << GET_KEY() << " >= " << lowKey;
+
+			out << " )\n	{\n";
+		}
+
+		out <<
+			"       int _ic = (int)" << ARR_REF( charClass ) << "[" << GET_KEY() <<
+							" - " << lowKey << "];\n"
+			"		if ( _ic <= (int)" << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
+						"_ic >= (int)" << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
+			"			_trans = (int)" << DEREF( ARR_REF( indicies ),
+								"_inds + (int)( _ic - (int)" + DEREF( ARR_REF( keys ),
+								"_keys" ) + " ) " ) << "; \n"
+			"		else\n"
+			"			_trans = (int)" << ARR_REF( indexDefaults ) <<
+								"[" << vCS() << "]" << ";\n";
+
+		if ( !limitLow || !limitHigh ) {
+			out <<
+				"	}\n"
+				"	else {\n"
+				"		_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
+				"	}\n"
+				"\n";
+		}
 	}
 
 

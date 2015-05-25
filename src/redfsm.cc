@@ -386,8 +386,13 @@ void RedFsmAp::characterClass( EquivList &equiv )
 		anyTrans = true;
 	}
 
-	if ( ! anyTrans )
+	if ( ! anyTrans ) {
+		this->lowKey = lowKey;
+		this->highKey = highKey;
+		this->classMap = 0;
+		this->nextClass = 1;
 		return;
+	}
 
 	long long next = 1;
 	equiv.append( new EquivClass( lowKey, highKey, next++ ) );
