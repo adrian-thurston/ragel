@@ -257,9 +257,11 @@ void FlatExpGoto::writeExec()
 	if ( condSpaceList.length() > 0 )
 		out << "	" << UINT() << " _cond;\n";
 
-	out <<
-		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-		"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
+	if ( redFsm->classMap != 0 ) {
+		out <<
+			"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
+	}
 
 	if ( condSpaceList.length() > 0 )
 		out << "	int _cpc;\n";
