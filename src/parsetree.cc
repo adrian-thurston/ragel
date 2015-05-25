@@ -718,18 +718,6 @@ bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp )
 
 	condsDensity( pd, fsmAp->startState, 1 );
 
-#if 0
-	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
-		st->stateBits &= ~STB_ONLIST;
-	
-	long long density;
-	transSpan( pd, fsmAp->startState, density, 1 );
-	cout << "density " << term << " " << density << endl;
-	
-	if ( density > 1000000 )
-		throw TransDensity();
-#endif
-
 	return true;
 }
 
@@ -896,9 +884,6 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 		}
 		catch ( const RepetitionError & ) {
 			nfaCheckResult( 2, 0, "rep-error" );
-		}
-		catch ( const TransDensity & ) {
-			nfaCheckResult( 7, 0, "trans-density-error" );
 		}
 	}
 
