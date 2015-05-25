@@ -355,7 +355,7 @@ namespace ragel
 		literal `from `to `eof `lerr `err
 		literal `when `inwhen `outwhen `>? `$? `%? 
 
-		literal `:= `|= `= `; `.. `::
+		literal `:= `|= `= `; `.. `../i `::
 
 		literal `>~ `$~ `%~ `<~ `@~ `<>~ 
 		literal `>* `$* `%* `<* `@* `<>* 
@@ -553,7 +553,8 @@ namespace ragel
 	|	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
 	|	[lex_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
 	|	[lex_regex_open regex re_close] :Regex
-	|	[RL1: range_lit `.. RL2: range_lit] :Range
+	|	[RL1: range_lit `.. RL2: range_lit]   :Range
+	|	[RL1: range_lit `../i RL2: range_lit] :RangeIndep
 	|	[`( join `)] :Join
 
 	def regex

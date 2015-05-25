@@ -54,7 +54,7 @@ struct Parser6
 	token TK_Word, TK_Literal, TK_EndSection, TK_UInt, TK_Hex,
 		TK_Word, TK_Literal, TK_DotDot, TK_ColonGt, TK_ColonGtGt, TK_LtColon,
 		TK_Arrow, TK_DoubleArrow, TK_StarStar, TK_ColonEquals, TK_BarEquals,
-		TK_NameSep, TK_BarStar, TK_DashDash;
+		TK_NameSep, TK_BarStar, TK_DashDash, TK_DotDotIndep;
 
 	# Conditions.
 	token TK_StartCond, TK_AllCond, TK_LeavingCond;

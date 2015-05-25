@@ -688,14 +688,15 @@ struct Factor
 /* A range machine. Only ever composed of two literals. */
 struct Range
 {
-	Range( Literal *lowerLit, Literal *upperLit ) 
-		: lowerLit(lowerLit), upperLit(upperLit) { }
+	Range( Literal *lowerLit, Literal *upperLit, bool caseIndep ) 
+		: lowerLit(lowerLit), upperLit(upperLit), caseIndep(caseIndep) { }
 
 	~Range();
 	FsmAp *walk( ParseData *pd );
 
 	Literal *lowerLit;
 	Literal *upperLit;
+	bool caseIndep;
 };
 
 /* Some literal machine. Can be a number or literal string. */

@@ -1031,7 +1031,13 @@ struct LoadRagel
 			case ragel::factor::Range: {
 				Literal *lit1 = loadRangeLit( FactorTree.RL1() );
 				Literal *lit2 = loadRangeLit( FactorTree.RL2() );
-				factor = new Factor( new Range( lit1, lit2 ) );
+				factor = new Factor( new Range( lit1, lit2, false ) );
+				break;
+			}
+			case ragel::factor::RangeIndep: {
+				Literal *lit1 = loadRangeLit( FactorTree.RL1() );
+				Literal *lit2 = loadRangeLit( FactorTree.RL2() );
+				factor = new Factor( new Range( lit1, lit2, true ) );
 				break;
 			}
 			case ragel::factor::Join:

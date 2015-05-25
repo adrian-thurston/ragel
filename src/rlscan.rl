@@ -1220,7 +1220,9 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		'$?' => { token( TK_AllCond ); };
 		'%?' => { token( TK_LeavingCond ); };
 
-		'..' => { token( TK_DotDot ); };
+		'..'   => { token( TK_DotDot ); };
+		'../i' => { token( TK_DotDotIndep ); };
+
 		'**' => { token( TK_StarStar ); };
 		'--' => { token( TK_DashDash ); };
 		'->' => { token( TK_Arrow ); };

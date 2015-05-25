@@ -2305,6 +2305,51 @@ FsmAp *Range::walk( ParseData *pd )
 	/* Return the range now that it is validated. */
 	FsmAp *retFsm = new FsmAp( pd->fsmCtx );
 	retFsm->rangeFsm( lowKey, highKey );
+
+
+	/* If case independent, then union the portion that covers alphas. */
+	if ( caseIndep ) { 
+		if ( lowKey.getVal() <= 'z' ) {
+			int low, high;
+			if ( lowKey.getVal() <= 'a' )
+				low = 'a';
+			else
+				low = lowKey.getVal();
+
+			if ( highKey.getVal() >= 'a' ) {
+				if ( highKey.getVal() >= 'z' )
+					high = 'z';
+				else
+					high = highKey.getVal();
+
+				/* Add in upper(low) .. upper(high) */
+
+				FsmAp *addFsm = new FsmAp( pd->fsmCtx );
+				addFsm->rangeFsm( toupper(low), toupper(high) );
+				retFsm->unionOp( addFsm );
+			}
+		}
+
+		if ( lowKey.getVal() <= 'Z' ) {
+			int low, high;
+			if ( lowKey.getVal() <= 'A' )
+				low = 'A';
+			else
+				low = lowKey.getVal();
+
+			if ( highKey.getVal() >= 'A' ) {
+				if ( highKey.getVal() >= 'Z' )
+					high = 'Z';
+				else
+					high = highKey.getVal();
+
+				/* Add in lower(low) .. lower(high) */
+				FsmAp *addFsm = new FsmAp( pd->fsmCtx );
+				addFsm->rangeFsm( tolower(low), tolower(high) );
+				retFsm->unionOp( addFsm );
+			}
+		}
+	}
 	return retFsm;
 }
 

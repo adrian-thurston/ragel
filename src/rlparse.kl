@@ -1167,7 +1167,12 @@ factor:
 factor:
 	range_lit TK_DotDot range_lit final {
 		/* Create a new factor node going to a range. */
-		$$->factor = new Factor( new Range( $1->literal, $3->literal ) );
+		$$->factor = new Factor( new Range( $1->literal, $3->literal, false ) );
+	};
+factor:
+	range_lit TK_DotDotIndep range_lit final {
+		/* Create a new factor node going to a range. */
+		$$->factor = new Factor( new Range( $1->literal, $3->literal, true ) );
 	};
 factor:
 	'(' join ')' final {
