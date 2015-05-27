@@ -382,7 +382,7 @@ CondAp *FsmAp::dupCondTrans( StateAp *from, TransAp *destParent, CondAp *srcTran
 
 /* In crossing, src trans and dest trans both go to existing states. Make one
  * state from the sets of states that src and dest trans go to. */
-template< class Trans > Trans *FsmAp::fsmAttachStates( MergeData &md, StateAp *from,
+template< class Trans > Trans *FsmAp::fsmAttachStates( StateAp *from,
 			Trans *destTrans, Trans *srcTrans )
 {
 	/* The priorities are equal. We must merge the transitions. Does the
@@ -416,7 +416,7 @@ template< class Trans > Trans *FsmAp::fsmAttachStates( MergeData &md, StateAp *f
 
 		/* Look for the state. If it is not there already, make it. */
 		StateDictEl *lastFound;
-		if ( md.stateDict.insert( stateSet, &lastFound ) ) {
+		if ( stateDict.insert( stateSet, &lastFound ) ) {
 			/* Make a new state representing the combination of states in
 			 * stateSet. It gets added to the fill list.  This means that we
 			 * need to fill in it's transitions sometime in the future.  We
@@ -455,7 +455,7 @@ template< class Trans > Trans *FsmAp::fsmAttachStates( MergeData &md, StateAp *f
 
 /* Two transitions are to be crossed, handle the possibility of either going
  * to the error state. */
-template < class Trans > Trans *FsmAp::mergeTrans( MergeData &md, StateAp *from,
+template < class Trans > Trans *FsmAp::mergeTrans( StateAp *from,
 			Trans *destTrans, Trans *srcTrans )
 {
 	Trans *retTrans = 0;
@@ -478,7 +478,7 @@ template < class Trans > Trans *FsmAp::mergeTrans( MergeData &md, StateAp *from,
 	}
 	else {
 		/* Both go somewhere, run the actual cross. */
-		retTrans = fsmAttachStates( md, from, destTrans, srcTrans );
+		retTrans = fsmAttachStates( from, destTrans, srcTrans );
 	}
 
 	return retTrans;
@@ -487,7 +487,7 @@ template < class Trans > Trans *FsmAp::mergeTrans( MergeData &md, StateAp *from,
 /* Find the trans with the higher priority. If src is lower priority then dest then
  * src is ignored. If src is higher priority than dest, then src overwrites dest. If
  * the priorities are equal, then they are merged. */
-CondAp *FsmAp::crossCondTransitions( MergeData &md, StateAp *from, TransAp *destParent,
+CondAp *FsmAp::crossCondTransitions( StateAp *from, TransAp *destParent,
 		CondAp *destTrans, CondAp *srcTrans )
 {
 	CondAp *retTrans;
@@ -506,7 +506,7 @@ CondAp *FsmAp::crossCondTransitions( MergeData &md, StateAp *from, TransAp *dest
 	}
 	else {
 		/* Src trans and dest trans have the same priority, they must be merged. */
-		retTrans = mergeTrans( md, from, destTrans, srcTrans );
+		retTrans = mergeTrans( from, destTrans, srcTrans );
 	}
 
 	/* Return the transition that resulted from the cross. */
@@ -569,7 +569,7 @@ void FsmAp::freeEffectiveTrans( TransAp *trans )
 	delete trans;
 }
 
-TransDataAp *FsmAp::crossTransitionsBothPlain( MergeData &md, StateAp *from,
+TransDataAp *FsmAp::crossTransitionsBothPlain( StateAp *from,
 		TransDataAp *destTrans, TransDataAp *srcTrans )
 {
 	/* Neither have cond space and no expansion took place. Cross them. */
@@ -589,7 +589,7 @@ TransDataAp *FsmAp::crossTransitionsBothPlain( MergeData &md, StateAp *from,
 	}
 	else {
 		/* Src trans and dest trans have the same priority, they must be merged. */
-		retTrans = mergeTrans( md, from, destTrans, srcTrans );
+		retTrans = mergeTrans( from, destTrans, srcTrans );
 	}
 
 	/* Return the transition that resulted from the cross. */
@@ -599,14 +599,14 @@ TransDataAp *FsmAp::crossTransitionsBothPlain( MergeData &md, StateAp *from,
 /* Find the trans with the higher priority. If src is lower priority then dest then
  * src is ignored. If src is higher priority than dest, then src overwrites dest. If
  * the priorities are equal, then they are merged. */
-TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
+TransAp *FsmAp::crossTransitions( StateAp *from,
 		TransAp *destTrans, TransAp *srcTrans )
 {
 	// cerr << __PRETTY_FUNCTION__ << endl;
 
 	if ( destTrans->plain() && srcTrans->plain() ) {
 		/* Return the transition that resulted from the cross. */
-		return crossTransitionsBothPlain( md, from,
+		return crossTransitionsBothPlain( from,
 				destTrans->tdap(), srcTrans->tdap() );
 	}
 	else {
@@ -666,7 +666,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 			}
 			case ValPairIter<CondAp>::RangeOverlap: {
 				/* Exact overlap, cross them. */
-				CondAp *newTrans = crossCondTransitions( md, from, destTrans,
+				CondAp *newTrans = crossCondTransitions( from, destTrans,
 						outPair.s1Tel.trans, outPair.s2Tel.trans );
 
 				/* Set up the transition's keys and append to the dest list. */
@@ -690,7 +690,7 @@ TransAp *FsmAp::crossTransitions( MergeData &md, StateAp *from,
 /* Copy the transitions in srcList to the outlist of dest. The srcList should
  * not be the outList of dest, otherwise you would be copying the contents of
  * srcList into itself as it's iterated: bad news. */
-void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
+void FsmAp::outTransCopy( StateAp *dest, TransAp *srcList )
 {
 	/* The destination list. */
 	TransList destList;
@@ -720,7 +720,7 @@ void FsmAp::outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList )
 		}
 		case RangePairIter<TransAp>::RangeOverlap: {
 			/* Exact overlap, cross them. */
-			TransAp *newTrans = crossTransitions( md, dest,
+			TransAp *newTrans = crossTransitions( dest,
 				outPair.s1Tel.trans, outPair.s2Tel.trans );
 
 			/* Set up the transition's keys and append to the dest list. */

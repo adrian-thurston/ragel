@@ -187,7 +187,7 @@ StateAp *FsmAp::copyStateForExpansion( StateAp *srcState )
 	return newState;
 }
 
-void FsmAp::mergeOutConds( MergeData &md, StateAp *destState, StateAp *srcState )
+void FsmAp::mergeOutConds( StateAp *destState, StateAp *srcState )
 {
 	bool unionOp = 
 		( ( destState->stateBits & STB_GRAPH1 ) &&
@@ -302,7 +302,7 @@ void FsmAp::convertToCondAp( StateAp *state )
 	state->outList.transfer( destList );
 }
 
-void FsmAp::embedCondition( MergeData &md, StateAp *state,
+void FsmAp::doEmbedCondition( StateAp *state,
 		const CondSet &set, const CondKeySet &vals )
 {
 	convertToCondAp( state );
@@ -393,16 +393,14 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state,
 
 void FsmAp::embedCondition( StateAp *state, const CondSet &set, const CondKeySet &vals )
 {
-	MergeData md;
-
 	/* Turn on misfit accounting to possibly catch the old start state. */
 	setMisfitAccounting( true );
 
 	/* Worker. */
-	embedCondition( md, state, set, vals );
+	doEmbedCondition( state, set, vals );
 
 	/* Fill in any states that were newed up as combinations of others. */
-	fillInStates( md );
+	fillInStates();
 
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();

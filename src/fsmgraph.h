@@ -665,12 +665,6 @@ struct StateDictEl
 /* Dictionary mapping a set of states to a target state. */
 typedef AvlTree< StateDictEl, StateSet, CmpTable<StateAp*> > StateDict;
 
-/* Data needed for a merge operation. */
-struct MergeData
-{
-	StateDict stateDict;
-};
-
 struct TransEl
 {
 	/* Constructors. */
@@ -1525,6 +1519,7 @@ struct FsmAp
 	StateList stateList;
 	StateList misfitList;
 	NfaStateList nfaList;
+	StateDict stateDict;
 
 	/* The map of entry points. */
 	EntryMap entryPoints;
@@ -1578,8 +1573,12 @@ struct FsmAp
 
 	void convertToCondAp( StateAp *state );
 
-	void embedCondition( MergeData &md, StateAp *state,
+private:
+	/* Can generate states. */
+	void doEmbedCondition( StateAp *state,
 			const CondSet &set, const CondKeySet &vals );
+
+public:
 	void embedCondition( StateAp *state, const CondSet &set,
 			const CondKeySet &vals );
 
@@ -1654,7 +1653,12 @@ struct FsmAp
 
 	/* Epsilon transitions. */
 	void epsilonTrans( int id );
-	void shadowReadWriteStates( MergeData &md );
+
+private:
+	/* Can generate staes. */
+	void shadowReadWriteStates();
+
+public:
 
 	/*
 	 * Basic attaching and detaching.
@@ -1699,21 +1703,26 @@ struct FsmAp
 	TransAp *dupTrans( StateAp *from, TransAp *srcTrans );
 	CondAp *dupCondTrans( StateAp *from, TransAp *destParent, CondAp *srcTrans );
 
-	/* In crossing, two transitions both go to real states. */
-	template< class Trans > Trans *fsmAttachStates( MergeData &md, StateAp *from,
-			Trans *destTrans, Trans *srcTrans );
+private:
+	/* In crossing, two transitions both go to real states. Can generate
+	 * states. */
+	template< class Trans > Trans *fsmAttachStates(
+			StateAp *from, Trans *destTrans, Trans *srcTrans );
 
+public:
 	void expandConds( StateAp *fromState, TransAp *trans,
 			CondSpace *fromSpace, CondSpace *mergedSpace );
 	TransAp *copyTransForExpansion( StateAp *fromState, TransAp *srcTrans );
 	StateAp *copyStateForExpansion( StateAp *srcState );
 	void freeEffectiveTrans( TransAp *srcTrans );
 
+private:
 	/* Two transitions are to be crossed, handle the possibility of either
-	 * going to the error state. */
-	template< class Trans > Trans *mergeTrans( MergeData &md, StateAp *from,
+	 * going to the error state. Can generate states. */
+	template< class Trans > Trans *mergeTrans( StateAp *from,
 			Trans *destTrans, Trans *srcTrans );
 
+public:
 	/* Compare deterimne relative priorities of two transition tables. */
 	int comparePrior( const PriorTable &priorTable1, const PriorTable &priorTable2 );
 
@@ -1725,34 +1734,38 @@ struct FsmAp
 	/* Cross a src transition with one that is already occupying a spot. */
 	TransCondAp *convertToCondAp( StateAp *state, TransDataAp *trans );
 	CondSpace *expandCondSpace( TransAp *destTrans, TransAp *srcTrans );
-	TransAp *crossTransitions( MergeData &md, StateAp *from,
+
+private:
+	/* Can generate states. */
+	TransAp *crossTransitions( StateAp *from,
 			TransAp *destTrans, TransAp *srcTrans );
-	TransDataAp *crossTransitionsBothPlain( MergeData &md, StateAp *from,
+	TransDataAp *crossTransitionsBothPlain( StateAp *from,
 			TransDataAp *destTrans, TransDataAp *srcTrans );
-	CondAp *crossCondTransitions( MergeData &md, StateAp *from,
+	CondAp *crossCondTransitions( StateAp *from,
 			TransAp *destParent, CondAp *destTrans, CondAp *srcTrans );
 
-	void outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList );
+public:
+	void outTransCopy( StateAp *dest, TransAp *srcList );
 
-	void mergeOutConds( MergeData &md, StateAp *destState, StateAp *srcState );
+	void mergeOutConds( StateAp *destState, StateAp *srcState );
 
 	/* Merge a set of states into newState. */
-	void mergeStates( MergeData &md, StateAp *destState, 
+	void mergeStates( StateAp *destState, 
 			StateAp **srcStates, int numSrc );
 
-	void prepareNfaRound( MergeData &md );
-	void finalizeNfaRound( MergeData &md );
+	void prepareNfaRound();
+	void finalizeNfaRound();
 
-	void nfaMergeStates( MergeData &md, StateAp *destState,
+	void nfaMergeStates( StateAp *destState,
 			StateAp **srcStates, int numSrc );
-	void mergeStatesLeaving( MergeData &md, StateAp *destState, StateAp *srcState );
-	void mergeStates( MergeData &md, StateAp *destState, StateAp *srcState );
+	void mergeStatesLeaving( StateAp *destState, StateAp *srcState );
+	void mergeStates( StateAp *destState, StateAp *srcState );
 
 	/* Make all states that are combinations of other states and that
 	 * have not yet had their out transitions filled in. This will 
 	 * empty out stateDict and stFil. */
-	void fillInStates( MergeData &md );
-	void nfaFillInStates( MergeData &md );
+	void fillInStates();
+	void nfaFillInStates();
 
 	/*
 	 * Transition Comparison.
@@ -1853,7 +1866,7 @@ struct FsmAp
 	/* Workers for resolving epsilon transitions. */
 	bool inEptVect( EptVect *eptVect, StateAp *targ );
 	void epsilonFillEptVectFrom( StateAp *root, StateAp *from, bool parentLeaving );
-	void resolveEpsilonTrans( MergeData &md );
+	void resolveEpsilonTrans();
 
 	/* Workers for concatenation and union. */
 	void doConcat( FsmAp *other, StateSet *fromStates, bool optional );
@@ -1971,7 +1984,7 @@ struct FsmAp
 	void moveInwardTrans(StateAp *dest, StateAp *src);
 	
 	/* Make state src and dest the same state. */
-	void fuseEquivStates(StateAp *dest, StateAp *src);
+	void fuseEquivStates( StateAp *dest, StateAp *src );
 
 	/* Find any states that didn't get marked by the marking algorithm and
 	 * merge them into the primary states of their equivalence class. */

@@ -221,9 +221,6 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
  * callback invoked. */
 void FsmAp::starOp( )
 {
-	/* For the merging process. */
-	MergeData md;
-
 	/* Turn on misfit accounting to possibly catch the old start state. */
 	setMisfitAccounting( true );
 
@@ -234,7 +231,7 @@ void FsmAp::starOp( )
 	setStartState( addState() );
 
 	/* Merge the new start state with the old one to isolate it. */
-	mergeStates( md, startState, prevStartState );
+	mergeStates( startState, prevStartState );
 
 	/* Merge the start state into all final states. Except the start state on
 	 * the first pass. If the start state is set final we will be doubling up
@@ -244,19 +241,19 @@ void FsmAp::starOp( )
 	 * start on a second pass. */
 	for ( StateSet::Iter st = finStateSet; st.lte(); st++ ) {
 		if ( *st != startState )
-			mergeStatesLeaving( md, *st, startState );
+			mergeStatesLeaving( *st, startState );
 	}
 
 	/* Now it is safe to merge the start state with itself (provided it
 	 * is set final). */
 	if ( startState->isFinState() )
-		mergeStatesLeaving( md, startState, startState );
+		mergeStatesLeaving( startState, startState );
 
 	/* Now ensure the new start state is a final state. */
 	setFinState( startState );
 
 	/* Fill in any states that were newed up as combinations of others. */
-	fillInStates( md );
+	fillInStates();
 
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
@@ -340,7 +337,6 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 {
 	/* For the merging process. */
 	StateSet finStateSetCopy, startStateSet;
-	MergeData md;
 
 	/* Turn on misfit accounting for both graphs. */
 	setMisfitAccounting( true );
@@ -381,7 +377,7 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 		StateAp *state = fromStates->data[i];
 
 		/* Merge the former final state with other's start state. */
-		mergeStatesLeaving( md, state, otherStartState );
+		mergeStatesLeaving( state, otherStartState );
 
 		/* If the former final state was not reset final then we must clear
 		 * the state's out trans data. If it got reset final then it gets to
@@ -392,7 +388,7 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 	}
 
 	/* Fill in any new states made from merging. */
-	fillInStates( md );
+	fillInStates();
 
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
@@ -522,9 +518,6 @@ void FsmAp::nfaRepeatOp2( Action *init, Action *min,
 
 void FsmAp::doOr( FsmAp *other )
 {
-	/* For the merging process. */
-	MergeData md;
-
 	/* Build a state set consisting of both start states */
 	StateSet startStateSet;
 	startStateSet.insert( startState );
@@ -555,10 +548,10 @@ void FsmAp::doOr( FsmAp *other )
 	setStartState( addState() );
 
 	/* Merge the start states. */
-	mergeStates( md, startState, startStateSet.data, startStateSet.length() );
+	mergeStates( startState, startStateSet.data, startStateSet.length() );
 
 	/* Fill in any new states made from merging. */
-	fillInStates( md );
+	fillInStates();
 }
 
 /* Unions other with this machine. Other is deleted. */
@@ -586,7 +579,7 @@ void FsmAp::unionOp( FsmAp *other )
 	unsetFinBits( STB_BOTH );
 }
 
-void FsmAp::nfaFillInStates( MergeData &md )
+void FsmAp::nfaFillInStates()
 {
 	long count = nfaList.length();
 
@@ -596,7 +589,7 @@ void FsmAp::nfaFillInStates( MergeData &md )
 		StateAp *state = nfaList.head;
 
 		StateSet *stateSet = &state->stateDictEl->stateSet;
-		nfaMergeStates( md, state, stateSet->data, stateSet->length() );
+		nfaMergeStates( state, stateSet->data, stateSet->length() );
 
 		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
 			detachFromNfa( state, *s );
@@ -607,7 +600,7 @@ void FsmAp::nfaFillInStates( MergeData &md )
 	}
 }
 
-void FsmAp::prepareNfaRound( MergeData &md )
+void FsmAp::prepareNfaRound()
 {
 	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->nfaOut != 0 && ! (st->stateBits & STB_NFA_REP) ) {
@@ -617,7 +610,7 @@ void FsmAp::prepareNfaRound( MergeData &md )
 
 			st->stateDictEl = new StateDictEl( set );
 			st->stateDictEl->targState = st;
-			md.stateDict.insert( st->stateDictEl );
+			stateDict.insert( st->stateDictEl );
 			delete st->nfaOut;
 			st->nfaOut = 0;
 
@@ -626,19 +619,19 @@ void FsmAp::prepareNfaRound( MergeData &md )
 	}
 }
 	
-void FsmAp::finalizeNfaRound( MergeData &md )
+void FsmAp::finalizeNfaRound()
 {
 	/* For any remaining NFA states, remove from the state dict. We need to
 	 * keep the state sets. */
 	for ( NfaStateList::Iter ns = nfaList; ns.lte(); ns++ )
-		md.stateDict.detach( ns->stateDictEl );
+		stateDict.detach( ns->stateDictEl );
 
 	/* Disassociate non-nfa states from their state dicts. */
-	for ( StateDict::Iter sdi = md.stateDict; sdi.lte(); sdi++ )
+	for ( StateDict::Iter sdi = stateDict; sdi.lte(); sdi++ )
 		sdi->targState->stateDictEl = 0;
 
 	/* Delete the state dict elements for non-nfa states. */
-	md.stateDict.empty();
+	stateDict.empty();
 
 	/* Transfer remaining stateDictEl sets to nfaOut. */
 	while ( nfaList.length() > 0 ) {
@@ -675,9 +668,6 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 
 	/* Not doing misfit accounting here. If we wanted to, it would need to be
 	 * made nfa-compatibile. */
-
-	/* For the merging process. */
-	MergeData md;
 
 	/* Build a state set consisting of both start states */
 	StateSet startStateSet;
@@ -730,8 +720,8 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 		/* Merge the start states. */
 		if ( ctx->printStatistics )
 			cout << "nfa-fill-round\t0" << endl;
-		nfaMergeStates( md, startState, startStateSet.data, startStateSet.length() );
-		finalizeNfaRound( md );
+		nfaMergeStates( startState, startStateSet.data, startStateSet.length() );
+		finalizeNfaRound();
 		{
 			int len = stateList.length();
 			removeUnreachableStates();
@@ -744,11 +734,11 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 		for ( long i = 1; i < depth; i++ ) {
 			if ( ctx->printStatistics )
 				cout << "nfa-fill-round\t" << i << endl;
-			prepareNfaRound( md );
+			prepareNfaRound();
 			if ( nfaList.length() == 0 )
 				break;
-			nfaFillInStates( md );
-			finalizeNfaRound( md );
+			nfaFillInStates();
+			finalizeNfaRound();
 			int len = stateList.length();
 			removeUnreachableStates();
 			int newLen = stateList.length();
@@ -768,7 +758,7 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 
 		if ( ctx->printStatistics ) {
 			cout << "fill-list\t" << count << endl;
-			cout << "state-dict\t" << md.stateDict.length() << endl;
+			cout << "state-dict\t" << stateDict.length() << endl;
 			cout << "states\t" << stateList.length() << endl;
 			cout << "max-ss\t" << maxStateSetSize << endl;
 		}
@@ -887,7 +877,7 @@ void FsmAp::epsilonFillEptVectFrom( StateAp *root, StateAp *from, bool parentLea
 	}
 }
 
-void FsmAp::shadowReadWriteStates( MergeData &md )
+void FsmAp::shadowReadWriteStates()
 {
 	/* Init isolatedShadow algorithm data. */
 	for ( StateList::Iter st = stateList; st.lte(); st++ )
@@ -909,7 +899,7 @@ void FsmAp::shadowReadWriteStates( MergeData &md )
 					 * there, create it. */
 					if ( targ->isolatedShadow == 0 ) {
 						StateAp *shadow = addState();
-						mergeStates( md, shadow, targ );
+						mergeStates( shadow, targ );
 						targ->isolatedShadow = shadow;
 					}
 
@@ -922,14 +912,14 @@ void FsmAp::shadowReadWriteStates( MergeData &md )
 	}
 }
 
-void FsmAp::resolveEpsilonTrans( MergeData &md )
+void FsmAp::resolveEpsilonTrans()
 {
 	/* Walk the state list and invoke recursive worker on each state. */
 	for ( StateList::Iter st = stateList; st.lte(); st++ )
 		epsilonFillEptVectFrom( st, st, false );
 
 	/* Prevent reading from and writing to of the same state. */
-	shadowReadWriteStates( md );
+	shadowReadWriteStates();
 
 	/* For all states that have epsilon transitions out, draw the transitions,
 	 * clear the epsilon transitions. */
@@ -939,9 +929,9 @@ void FsmAp::resolveEpsilonTrans( MergeData &md )
 			/* Merge all the epsilon targets into the state. */
 			for ( EptVect::Iter ept = *st->eptVect; ept.lte(); ept++ ) {
 				if ( ept->leaving )
-					mergeStatesLeaving( md, st, ept->targ );
+					mergeStatesLeaving( st, ept->targ );
 				else
-					mergeStates( md, st, ept->targ );
+					mergeStates( st, ept->targ );
 			}
 
 			/* Clean up the target list. */
@@ -956,19 +946,16 @@ void FsmAp::resolveEpsilonTrans( MergeData &md )
 
 void FsmAp::epsilonOp()
 {
-	/* For merging process. */
-	MergeData md;
-
 	setMisfitAccounting( true );
 
 	for ( StateList::Iter st = stateList; st.lte(); st++ )
 		st->owningGraph = 0;
 
 	/* Perform merges. */
-	resolveEpsilonTrans( md );
+	resolveEpsilonTrans();
 
 	/* Epsilons can caused merges which leave behind unreachable states. */
-	fillInStates( md );
+	fillInStates();
 
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
@@ -983,9 +970,6 @@ void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 	for ( int m = 0; m < numOthers; m++ ) {
 		assert( ctx == others[m]->ctx );
 	}
-
-	/* For the merging process. */
-	MergeData md;
 
 	/* Set the owning machines. Start at one. Zero is reserved for the start
 	 * and final states. */
@@ -1044,7 +1028,7 @@ void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 			stateSet.insert( en->value );
 
 		/* Merge in the set of start states into the new start state. */
-		mergeStates( md, newStart, stateSet.data, stateSet.length() );
+		mergeStates( newStart, stateSet.data, stateSet.length() );
 	}
 
 	/* Take a copy of the final state set, before unsetting them all. This
@@ -1069,7 +1053,7 @@ void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 
 	/* Hand over to workers for resolving epsilon trans. This will merge states
 	 * with the targets of their epsilon transitions. */
-	resolveEpsilonTrans( md );
+	resolveEpsilonTrans();
 
 	/* Invoke the relinquish final callback on any states that did not get
 	 * final state status back. */
@@ -1079,7 +1063,7 @@ void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 	}
 
 	/* Fill in any new states made from merging. */
-	fillInStates( md );
+	fillInStates();
 
 	/* Joining can be messy. Instead of having misfit accounting on (which is
 	 * tricky here) do a full cleaning. */
@@ -1119,9 +1103,6 @@ void FsmAp::globOp( FsmAp **others, int numOthers )
 
 void FsmAp::deterministicEntry()
 {
-	/* For the merging process. */
-	MergeData md;
-
 	/* States may loose their entry points, turn on misfit accounting. */
 	setMisfitAccounting( true );
 
@@ -1147,7 +1128,7 @@ void FsmAp::deterministicEntry()
 			 * all the targets of entry points. */
 			StateAp *newEntry = addState();
 			for ( int en = enId; en < highId; en++ )
-				mergeStates( md, newEntry, prevEntry[en].value );
+				mergeStates( newEntry, prevEntry[en].value );
 
 			/* Add the new state as the single entry point. */
 			setEntry( prevEntry[enId].key, newEntry );
@@ -1213,9 +1194,6 @@ void FsmAp::unsetIncompleteFinals()
  * only has start stateness as it's entry point. */
 void FsmAp::isolateStartState( )
 {
-	/* For the merging process. */
-	MergeData md;
-
 	/* Bail out if the start state is already isolated. */
 	if ( isStartStateIsolated() )
 		return;
@@ -1230,11 +1208,11 @@ void FsmAp::isolateStartState( )
 	setStartState( addState() );
 
 	/* Merge the new start state with the old one to isolate it. */
-	mergeStates( md, startState, prevStartState );
+	mergeStates( startState, prevStartState );
 
 	/* Stfil and stateDict will be empty because the merging of the old start
 	 * state into the new one will not have any conflicting transitions. */
-	assert( md.stateDict.treeSize == 0 );
+	assert( stateDict.treeSize == 0 );
 	assert( nfaList.length() == 0 );
 
 	/* The old start state may be unreachable. Remove the misfits and turn off
@@ -1245,9 +1223,8 @@ void FsmAp::isolateStartState( )
 
 StateAp *FsmAp::dupStartState( )
 {
-	MergeData md;
 	StateAp *dup = addState();
-	mergeStates( md, dup, startState );
+	mergeStates( dup, startState );
 	return dup;
 }
 
@@ -1255,13 +1232,13 @@ StateAp *FsmAp::dupStartState( )
  * there is any out data then we duplicate the source state, transfer the out
  * data, then merge in the state. The new state will be reaped because it will
  * not be given any in transitions. */
-void FsmAp::mergeStatesLeaving( MergeData &md, StateAp *destState, StateAp *srcState )
+void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 {
 	if ( !hasOutData( destState ) )
-		mergeStates( md, destState, srcState );
+		mergeStates( destState, srcState );
 	else {
 		StateAp *ssMutable = addState();
-		mergeStates( md, ssMutable, srcState );
+		mergeStates( ssMutable, srcState );
 		transferOutData( ssMutable, destState );
 
 		if ( destState->outCondSpace != 0 ) {
@@ -1286,32 +1263,32 @@ void FsmAp::mergeStatesLeaving( MergeData &md, StateAp *destState, StateAp *srcS
 			}
 			#endif
 
-			embedCondition( md, ssMutable, destState->outCondSpace->condSet,
+			doEmbedCondition( ssMutable, destState->outCondSpace->condSet,
 					destState->outCondKeys );
 		}
 
-		mergeStates( md, destState, ssMutable );
+		mergeStates( destState, ssMutable );
 	}
 }
 
-void FsmAp::mergeStates( MergeData &md, StateAp *destState, 
+void FsmAp::mergeStates( StateAp *destState, 
 		StateAp **srcStates, int numSrc )
 {
 	for ( int s = 0; s < numSrc; s++ )
-		mergeStates( md, destState, srcStates[s] );
+		mergeStates( destState, srcStates[s] );
 }
 
-void FsmAp::nfaMergeStates( MergeData &md, StateAp *destState, 
+void FsmAp::nfaMergeStates( StateAp *destState, 
 		StateAp **srcStates, int numSrc )
 {
 	for ( int s = 0; s < numSrc; s++ ) {
-		mergeStates( md, destState, srcStates[s] );
+		mergeStates( destState, srcStates[s] );
 
 		while ( misfitList.length() > 0 ) {
 			StateAp *state = misfitList.head;
 
 			if ( state->stateDictEl ) {
-				md.stateDict.detach( state->stateDictEl );
+				stateDict.detach( state->stateDictEl );
 				nfaList.detach( state );
 			}
 
@@ -1330,9 +1307,9 @@ void FsmAp::nfaMergeStates( MergeData &md, StateAp *destState,
 }
 
 
-void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
+void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 {
-	outTransCopy( md, destState, srcState->outList.head );
+	outTransCopy( destState, srcState->outList.head );
 
 	/* Get its bits and final state status. */
 	destState->stateBits |= ( srcState->stateBits & ~STB_ISFINAL );
@@ -1372,7 +1349,7 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 		destState->guardedInTable.setPriors( srcState->guardedInTable );
 
 		/* Out conditins. */
-		mergeOutConds( md, destState, srcState );
+		mergeOutConds( destState, srcState );
 	}
 
 	/* Get bits and final state status. Note in the above code we depend on the
@@ -1392,7 +1369,7 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 	}
 }
 
-void FsmAp::fillInStates( MergeData &md )
+void FsmAp::fillInStates()
 {
 	/* Merge any states that are awaiting merging. This will likey cause other
 	 * states to be added to the NFA list. */
@@ -1400,7 +1377,7 @@ void FsmAp::fillInStates( MergeData &md )
 		StateAp *state = nfaList.head;
 
 		StateSet *stateSet = &state->stateDictEl->stateSet;
-		mergeStates( md, state, stateSet->data, stateSet->length() );
+		mergeStates( state, stateSet->data, stateSet->length() );
 
 		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
 			detachFromNfa( state, *s );
@@ -1412,11 +1389,11 @@ void FsmAp::fillInStates( MergeData &md )
 	 * preserve. */
 
 	/* Disassociated state dict elements from states. */
-	for ( StateDict::Iter sdi = md.stateDict; sdi.lte(); sdi++ )
+	for ( StateDict::Iter sdi = stateDict; sdi.lte(); sdi++ )
 		sdi->targState->stateDictEl = 0;
 
 	/* Delete all the state dict elements. */
-	md.stateDict.empty();
+	stateDict.empty();
 }
 
 
