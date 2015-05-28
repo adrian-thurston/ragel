@@ -583,6 +583,10 @@ void FsmAp::nfaFillInStates()
 {
 	long count = nfaList.length();
 
+	/* Can this lead to too many DFAs? Since the nfa merge is removing misfits,
+	 * it is possible we remove a state that is on the nfa list, but we don't
+	 * adjust count. */
+
 	/* Merge any states that are awaiting merging. This will likey cause
 	 * other states to be added to the stfil list. */
 	while ( nfaList.length() > 0 && count-- ) {
@@ -592,7 +596,7 @@ void FsmAp::nfaFillInStates()
 		nfaMergeStates( state, stateSet->data, stateSet->length() );
 
 		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
-			detachFromNfa( state, *s );
+			detachStateDict( state, *s );
 
 		nfaList.detach( state );
 
@@ -637,8 +641,14 @@ void FsmAp::finalizeNfaRound()
 	while ( nfaList.length() > 0 ) {
 		StateAp *state = nfaList.head;
 		state->nfaOut = new NfaStateMap;
-		for ( StateSet::Iter ss = state->stateDictEl->stateSet; ss.lte(); ss++ )
+		for ( StateSet::Iter ss = state->stateDictEl->stateSet; ss.lte(); ss++ ) {
+			/* Attach it using the NFA transitions data structure (propigates
+			 * to output). */
 			state->nfaOut->insert( *ss, NfaActions( 0, 0 ) );
+			attachToNfa( state, *ss );
+
+			detachStateDict( state, *ss );
+		}
 		delete state->stateDictEl;
 		state->stateDictEl = 0;
 		nfaList.detach( state );
@@ -720,31 +730,29 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 		/* Merge the start states. */
 		if ( ctx->printStatistics )
 			cout << "nfa-fill-round\t0" << endl;
+
 		nfaMergeStates( startState, startStateSet.data, startStateSet.length() );
-		finalizeNfaRound();
-		{
-			int len = stateList.length();
-			removeUnreachableStates();
-			int newLen = stateList.length();
-			if ( ctx->printStatistics )
-				cout << "round-unreach\t" << len - newLen << endl;
-		}
+
+		long removed = removeUnreachableStates();
+		if ( ctx->printStatistics )
+			cout << "round-unreach\t" << removed << endl;
 
 		/* Fill in any new states made from merging. */
 		for ( long i = 1; i < depth; i++ ) {
 			if ( ctx->printStatistics )
 				cout << "nfa-fill-round\t" << i << endl;
-			prepareNfaRound();
+
 			if ( nfaList.length() == 0 )
 				break;
-			nfaFillInStates();
-			finalizeNfaRound();
-			int len = stateList.length();
-			removeUnreachableStates();
-			int newLen = stateList.length();
+
+			nfaFillInStates( );
+
+			long removed = removeUnreachableStates();
 			if ( ctx->printStatistics )
-				cout << "round-unreach\t" << len - newLen << endl;
+				cout << "round-unreach\t" << removed << endl;
 		}
+
+		finalizeNfaRound();
 
 		long maxStateSetSize = 0;
 		long count = 0;
@@ -1287,16 +1295,10 @@ void FsmAp::nfaMergeStates( StateAp *destState,
 		while ( misfitList.length() > 0 ) {
 			StateAp *state = misfitList.head;
 
-			if ( state->stateDictEl ) {
-				stateDict.detach( state->stateDictEl );
-				nfaList.detach( state );
-			}
-
 			/* Detach and delete. */
 			detachState( state );
 			misfitList.detach( state );
 			delete state;
-
 		}
 
 		//std::cout << "progress: " << (float)s * 100.0 / (float)numSrc << std::endl;
@@ -1380,7 +1382,7 @@ void FsmAp::fillInStates()
 		mergeStates( state, stateSet->data, stateSet->length() );
 
 		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
-			detachFromNfa( state, *s );
+			detachStateDict( state, *s );
 
 		nfaList.detach( state );
 	}

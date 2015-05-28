@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2015 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -25,6 +25,39 @@
 
 #include <iostream>
 using namespace std;
+
+void FsmAp::attachStateDict( StateAp *from, StateAp *to )
+{
+	if ( to->stateDictIn == 0 )
+		to->stateDictIn = new StateSet;
+
+	bool inserted = to->stateDictIn->insert( from );
+	assert( inserted );
+
+	if ( from != to ) {
+		if ( misfitAccounting ) {
+			if ( to->foreignInTrans == 0 )
+				stateList.append( misfitList.detach( to ) );
+		}
+
+		to->foreignInTrans += 1;
+	}
+}
+
+void FsmAp::detachStateDict( StateAp *from, StateAp *to )
+{
+	bool removed = to->stateDictIn->remove( from );
+	assert( removed );
+
+	to->foreignInTrans -= 1;
+
+	if ( from != to ) {
+		if ( misfitAccounting ) {
+			if ( to->foreignInTrans == 0 )
+				misfitList.append( stateList.detach( to ) );
+		}
+	}
+}
 
 void FsmAp::attachToNfa( StateAp *from, StateAp *to )
 {
@@ -307,6 +340,25 @@ void FsmAp::detachState( StateAp *state )
 		for ( NfaStateMap::Iter s = *state->nfaOut; s.lte(); s++ )
 			detachFromNfa( state, s->key );
 	}
+
+	if ( state->stateDictIn != 0 ) {
+		for ( StateSet::Iter s = *state->stateDictIn; s.lte(); s++ ) {
+			bool removed = (*s)->stateDictEl->stateSet.remove( state );
+			assert( removed );
+		}
+	}
+
+	if ( state->stateDictEl != 0 ) {
+
+		for ( StateSet::Iter s = state->stateDictEl->stateSet; s.lte(); s++ )
+			detachStateDict( state, *s );
+
+		stateDict.detach( state->stateDictEl );
+		delete state->stateDictEl;
+		state->stateDictEl = 0;
+
+		nfaList.detach( state );
+	}
 }
 
 TransDataAp *FsmAp::dupTransData( StateAp *from, TransDataAp *srcTrans )
@@ -429,7 +481,7 @@ template< class Trans > Trans *FsmAp::fsmAttachStates( StateAp *from,
 
 			/* Setup the in links. */
 			for ( StateSet::Iter s = stateSet; s.lte(); s++ )
-				attachToNfa( combinState, *s );
+				attachStateDict( combinState, *s );
 			
 			/* Add to the fill list. */
 			nfaList.append( combinState );

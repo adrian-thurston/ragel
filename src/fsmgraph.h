@@ -898,6 +898,7 @@ struct StateAp
 	 * represents. This cannot go into alg, because alg.next is used during
 	 * the merging process. */
 	StateDictEl *stateDictEl;
+	StateSet *stateDictIn;
 
 	NfaStateMap *nfaOut;
 	StateSet *nfaIn;
@@ -1673,6 +1674,9 @@ public:
 	void attachToNfa( StateAp *from, StateAp *to );
 	void detachFromNfa( StateAp *from, StateAp *to );
 
+	void attachStateDict( StateAp *from, StateAp *to );
+	void detachStateDict( StateAp *from, StateAp *to );
+
 	/* Attach with a new transition. */
 	CondAp *attachNewCond( TransAp *trans, StateAp *from,
 			StateAp *to, CondKey onChar );
@@ -1928,7 +1932,7 @@ public:
 
 	/* Removes states that cannot be reached by any path in the fsm and are
 	 * thus wasted silicon. */
-	void removeUnreachableStates();
+	long removeUnreachableStates();
 
 	/* Remove error actions from states on which the error transition will
 	 * never be taken. */

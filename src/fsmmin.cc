@@ -533,8 +533,10 @@ void FsmAp::minimizeApproximate()
 /* Remove states that have no path to them from the start state. Recursively
  * traverses the graph marking states that have paths into them. Then removes
  * all states that did not get marked. */
-void FsmAp::removeUnreachableStates()
+long FsmAp::removeUnreachableStates()
 {
+	long origLen = stateList.length();
+
 	/* Misfit accounting should be off and there should be no states on the
 	 * misfit list. */
 	assert( !misfitAccounting && misfitList.length() == 0 );
@@ -561,6 +563,8 @@ void FsmAp::removeUnreachableStates()
 
 		state = next;
 	}
+
+	return origLen - stateList.length();
 }
 
 bool FsmAp::outListCovers( StateAp *state )

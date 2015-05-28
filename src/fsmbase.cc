@@ -387,6 +387,11 @@ void FsmAp::markReachableFromHere( StateAp *state )
 		for ( NfaStateMap::Iter st = *state->nfaOut; st.lte(); st++ )
 			markReachableFromHere( st->key );
 	}
+
+	if ( state->stateDictEl != 0 ) {
+		for ( StateSet::Iter ss = state->stateDictEl->stateSet; ss.lte(); ss++ )
+			markReachableFromHere( *ss );
+	}
 }
 
 void FsmAp::markReachableFromHereStopFinal( StateAp *state )

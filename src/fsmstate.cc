@@ -88,6 +88,7 @@ StateAp::StateAp()
 
 	/* Only used during merging. Normally null. */
 	stateDictEl(0),
+	stateDictIn(0),
 
 	nfaOut(0),
 	nfaIn(0),
@@ -136,6 +137,7 @@ StateAp::StateAp(const StateAp &other)
 
 	/* This is only used during merging. Normally null. */
 	stateDictEl(0),
+	stateDictIn(0),
 
 	nfaOut(0),
 	nfaIn(0),
