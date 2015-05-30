@@ -98,7 +98,8 @@ struct InputData
 		nfaCondsDepth(-1),
 		transSpanDepth(6),
 		nfaIntermedStateLimit(10000),
-		nfaFinalStateLimit(2000)
+		nfaFinalStateLimit(2000),
+		varBackend(false)
 	{}
 
 	std::string dirName;
@@ -169,6 +170,8 @@ struct InputData
 	long transSpanDepth;
 	long nfaIntermedStateLimit;
 	long nfaFinalStateLimit;
+
+	bool varBackend;
 
 	void verifyWritesHaveData();
 

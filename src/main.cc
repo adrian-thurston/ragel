@@ -429,6 +429,17 @@ void InputData::parseArgs( int argc, const char **argv )
 					backend = Direct;
 					backendSpecified = true;
 				}
+				else if ( strcmp( arg, "colm-backend" ) == 0 ) {
+					backend = Translated;
+					backendSpecified = true;
+				}
+				else if ( strcmp( arg, "var-backend" ) == 0 ) {
+					/* Forces variable-based backend, even if the target
+					 * language supports the goto-based backend. May require
+					 * --colm-backend depending on the target language (C for
+					 * example is direct by default). */
+					varBackend = true;
+				}
 				else if ( strcmp( arg, "string-tables" ) == 0 )
 					stringTables = true;
 				else if ( strcmp( arg, "integral-tables" ) == 0 )

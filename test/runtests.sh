@@ -79,8 +79,8 @@ done
 # Prohibitied genflags for specific languages.
 cs_prohibit_genflags="-G2"
 java_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
-ruby_prohibit_genflags="-F0 -F1 -G0 -G1 -G2"
-ocaml_prohibit_genflags="-F0 -F1 -G0 -G1 -G2"
+ruby_prohibit_genflags="-G0 -G1 -G2"
+ocaml_prohibit_genflags="-G0 -G1 -G2"
 asm_prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
 
 [ -z "$minflags" ] && minflags="-n -m -l -e"

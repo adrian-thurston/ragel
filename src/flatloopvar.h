@@ -19,11 +19,11 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef BINBASIC_H
-#define BINBASIC_H
+#ifndef FLATLOOPVAR_H
+#define FLATLOOPVAR_H
 
 #include <iostream>
-#include "binvar.h"
+#include "flatvar.h"
 #include "vector.h"
 
 /* Forwards. */
@@ -32,11 +32,11 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-class BinaryLoopVar
-	: public BinaryVar
+class FlatLoopVar
+	: public FlatVar
 {
 public:
-	BinaryLoopVar( const CodeGenArgs &args );
+	FlatLoopVar( const CodeGenArgs &args );
 
 	void calcIndexSize();
 	void tableDataPass();
@@ -61,13 +61,13 @@ public:
 
 namespace C
 {
-	class BinaryLoopVar
+	class FlatLoopVar
 	:
-		public ::BinaryLoopVar
+		public ::FlatLoopVar
 	{
 	public:
-		BinaryLoopVar( const CodeGenArgs &args )
-			: ::BinaryLoopVar( args )
+		FlatLoopVar( const CodeGenArgs &args )
+			: ::FlatLoopVar( args )
 		{}
 	};
 }

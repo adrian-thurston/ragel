@@ -37,7 +37,9 @@
 #include "binexpvar.h"
 #include "binexpgoto.h"
 #include "flatloopgoto.h"
+#include "flatloopvar.h"
 #include "flatexpgoto.h"
+#include "flatexpvar.h"
 #include "switchloopgoto.h"
 #include "switchexpgoto.h"
 #include "ipgoto.h"
@@ -91,49 +93,50 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 		}
 	}
 	else {
-		switch ( args.codeStyle ) {
+		bool varBackend = args.pd->id->varBackend;
 
+		switch ( args.codeStyle ) {
 		case GenBinaryLoop:
-			if ( langSupportsGoto( hostLang ) )
+			if ( langSupportsGoto( hostLang ) && !varBackend )
 				codeGen = new BinaryLoopGoto( args );
 			else
-				codeGen = new BinLoopVar( args);
+				codeGen = new BinaryLoopVar( args);
 			break;
 		case GenBinaryExp:
-			if ( langSupportsGoto( hostLang ) )
+			if ( langSupportsGoto( hostLang ) && !varBackend )
 				codeGen = new BinaryExpGoto( args );
 			else
 				codeGen = new BinaryExpVar( args );
 			break;
 
 		case GenFlatLoop:
-			if ( langSupportsGoto( hostLang ) )
-				codeGen = new FlatLoopGoto(args);
+			if ( langSupportsGoto( hostLang ) && !varBackend )
+				codeGen = new FlatLoopGoto( args );
 			else
-				std::cerr << "unsupported lang/style combination" << endp;
+				codeGen = new FlatLoopVar( args );
 			break;
 		case GenFlatExp:
-			if ( langSupportsGoto( hostLang ) )
-				codeGen = new FlatExpGoto(args);
+			if ( langSupportsGoto( hostLang ) && !varBackend )
+				codeGen = new FlatExpGoto( args );
 			else
-				std::cerr << "unsupported lang/style combination" << endp;
+				codeGen = new FlatExpVar( args );
 			break;
 
 		case GenSwitchLoop:
-			if ( langSupportsGoto( hostLang ) )
+			if ( langSupportsGoto( hostLang ) && !varBackend )
 				codeGen = new SwitchLoopGoto(args);
 			else
 				std::cerr << "unsupported lang/style combination" << endp;
 			break;
 		case GenSwitchExp:
-			if ( langSupportsGoto( hostLang ) )
+			if ( langSupportsGoto( hostLang ) && !varBackend )
 				codeGen = new SwitchExpGoto(args);
 			else
 				std::cerr << "unsupported lang/style combination" << endp;
 			break;
 
 		case GenIpGoto:
-			if ( langSupportsGoto( hostLang ) )
+			if ( langSupportsGoto( hostLang ) && !varBackend )
 				codeGen = new IpGoto(args);
 			else
 				std::cerr << "unsupported lang/style combination" << endp;
