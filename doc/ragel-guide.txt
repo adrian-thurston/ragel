@@ -3383,7 +3383,7 @@ In general Ragel cannot handle recursive structures because the grammar is
 interpreted as a regular language. However, depending on what needs to be
 parsed it is sometimes practical to implement the recursive parts using manual
 coding techniques. This often works in cases where the recursive structures are
-simple and easy to recognize, such as in the balancing of parentheses
+simple and easy to recognize, such as in the balancing of parentheses.
 
 One approach to parsing recursive structures is to use actions that increment
 and decrement counters or otherwise recognize the entry to and exit from

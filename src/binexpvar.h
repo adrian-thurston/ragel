@@ -19,24 +19,21 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef BINBASIC_H
-#define BINBASIC_H
+#ifndef BINEXPVAR_H
+#define BINEXPVAR_H
 
 #include <iostream>
 #include "binvar.h"
-#include "vector.h"
 
 /* Forwards. */
 struct CodeGenData;
-struct NameInst;
-struct RedTransAp;
-struct RedStateAp;
 
-class BinLoopVar
-	: public BinaryVar
+class BinaryExpVar
+:
+	public BinaryVar
 {
 public:
-	BinLoopVar( const CodeGenArgs &args );
+	BinaryExpVar( const CodeGenArgs &args );
 
 	void calcIndexSize();
 	void tableDataPass();
@@ -45,29 +42,31 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 
-	virtual void TO_STATE_ACTION( RedStateAp *state );
-	virtual void FROM_STATE_ACTION( RedStateAp *state );
-	virtual void EOF_ACTION( RedStateAp *state );
-	virtual void COND_ACTION( RedCondPair *cond );
+protected:
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
 
-	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
-	virtual void NFA_POP_ACTION( RedNfaTarg *targ );
+	virtual void TO_STATE_ACTION( RedStateAp *state );
+	virtual void FROM_STATE_ACTION( RedStateAp *state );
+	virtual void EOF_ACTION( RedStateAp *state );
+	virtual void COND_ACTION( RedCondPair *cond );
+
+	void NFA_PUSH_ACTION( RedNfaTarg *targ );
+	void NFA_POP_ACTION( RedNfaTarg *targ );
 };
 
 namespace C
 {
-	class BinLoopVar
+	class BinaryExpVar
 	:
-		public ::BinLoopVar
+		public ::BinaryExpVar
 	{
 	public:
-		BinLoopVar( const CodeGenArgs &args )
-			: ::BinLoopVar( args )
+		BinaryExpVar( const CodeGenArgs &args )
+			: ::BinaryExpVar( args )
 		{}
 	};
 }
