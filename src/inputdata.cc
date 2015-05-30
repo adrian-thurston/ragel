@@ -451,10 +451,9 @@ void InputData::process()
 			break;
 		}
 		case ColmBased: {
-			std::cout << "colm frontend" << std::endl;
 #ifdef WITH_COLM
 			/*
-			 * Ragel parser introduced in ragel 7. Uses more memory.
+			 * Colm-based parser introduced in ragel 7. Uses more memory.
 			 */
 
 			/* Check input file. */
