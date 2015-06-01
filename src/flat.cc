@@ -614,24 +614,24 @@ void Flat::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 
 void Flat::CURS( ostream &ret, bool inFinish )
 {
-	ret << "(_ps)";
+	ret << OPEN_GEN_EXPR() << "_ps" << CLOSE_GEN_EXPR();
 }
 
 void Flat::TARGS( ostream &ret, bool inFinish, int targState )
 {
-	ret << "(" << vCS() << ")";
+	ret << OPEN_GEN_EXPR() << vCS() << CLOSE_GEN_EXPR();
 }
 
 void Flat::NEXT( ostream &ret, int nextDest, bool inFinish )
 {
-	ret << vCS() << " = " << nextDest << ";";
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << nextDest << ";" << CLOSE_GEN_BLOCK();
 }
 
 void Flat::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << vCS() << " = (";
+	ret << OPEN_GEN_BLOCK() << "" << vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << ");";
+	ret << CLOSE_HOST_EXPR() << ";" << CLOSE_GEN_BLOCK();
 }
 
 void Flat::CALL( ostream &ret, int callDest, int targState, bool inFinish )

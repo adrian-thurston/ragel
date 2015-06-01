@@ -335,8 +335,14 @@ void FlatExpVar::writeExec()
 			if ( redFsm->anyEofTrans() ) {
 				out <<
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-					"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
+					"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+				if ( condSpaceList.length() > 0 ) {
+					out << 
+						"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n";
+				}
+
+				out <<
 					"		_have = 1;\n"
 					"	}\n";
 					matchCondLabelUsed = true;

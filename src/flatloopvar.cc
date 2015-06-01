@@ -379,8 +379,9 @@ void FlatLoopVar::writeExec()
 	out <<
 		"	index " << ALPH_TYPE() << " _keys;\n"
 		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
-		"	int _cpc;\n";
 #endif 
+	out <<
+		"	int _cpc;\n";
 
 	out <<
 		"	while ( _cont == 1 ) {\n"
@@ -409,8 +410,14 @@ void FlatLoopVar::writeExec()
 			if ( redFsm->anyEofTrans() ) {
 				out <<
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-					"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
+					"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+				if ( condSpaceList.length() > 0 ) {
+					out <<
+						"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n";
+				}
+
+				out <<
 					"		_have = 1;\n"
 					"	}\n";
 					matchCondLabelUsed = true;
