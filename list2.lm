@@ -1,9 +1,5 @@
 
-struct el
-	map_el<str> el
-end
-
-new M: map<str, el>()
+new M: vmap<str, str>()
 
 for AE: argv_el in argv {
 	print "[AE->value]

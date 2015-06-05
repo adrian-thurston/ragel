@@ -7,24 +7,16 @@ context undo
 		token id /[a-zA-Z_]+/
 	end
 
-	struct item_el
-		map_el<item> el
-	end
-
-	Map: map<item, item_el>
+	Map: vmap<item, item>
 
 	def item 
 		[id]
 		{
-			E: item_el = new item_el()
-			E->key = lhs
-			Map->insert( E )
+			Map->insert( lhs, lhs )
 		}
 	|	[`( item* `)]
 		{
-			E: item_el = new item_el()
-			E->key = lhs
-			Map->insert( E )
+			Map->insert( lhs, lhs )
 		}
 
 	def no_accum_item 
@@ -39,21 +31,18 @@ context undo
 		[A1 item* `^]
 	|	[A2 no_accum_item* `; NL]
 	{
-		E: item_el = Map->head
-		while ( E ) {
-			print "map el: [E->key]
-			E = E->next
+		for I: item in Map {
+			print "map el: [I]
 		}
 	}
 
 end
 
 Undo: undo = new undo()
-Undo->Map = new map<undo::item, undo::item_el>()
+Undo->Map = new vmap<undo::item, undo::item>()
 
-E: undo::item_el = new undo::item_el()
-E->key = cons undo::item "a"
-Undo->Map->insert( E )
+cons I: undo::item "a"
+Undo->Map->insert( I, I )
 
 parse Input: undo::start(Undo)[ stdin ]
 print( Input )
