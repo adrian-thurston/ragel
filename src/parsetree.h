@@ -1733,7 +1733,8 @@ struct Function;
 struct IterDef
 {
 	enum Type { Tree, Child, RevChild, Repeat,
-			RevRepeat, User, List, Map };
+			RevRepeat, User, List, ValueList,
+			RevValueList, Map };
 
 	IterDef( Type type, Function *func );
 	IterDef( Type type );
@@ -1746,7 +1747,8 @@ struct IterDef
 struct IterImpl
 {
 	enum Type { Tree, Child, RevChild, Repeat,
-			RevRepeat, User, List, ValueList, Map, ValueMap };
+			RevRepeat, User, List, ValueList,
+			RevValueList, Map, ValueMap };
 
 	IterImpl( Type type, Function *func );
 	IterImpl( Type type );

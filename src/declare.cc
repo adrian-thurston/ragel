@@ -708,6 +708,28 @@ void Compiler::makeDefaultIterators()
 		objMethod->iterDef = triter;
 	}
 
+	/* Value List iterator. */
+	{
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+				"vlist_iter", IN_HALT, IN_HALT, anyRefUT, true );
+
+		IterDef *triter = findIterDef( IterDef::ValueList );
+		objMethod->iterDef = triter;
+	}
+
+	/* Reverse Value List iterator. */
+	{
+		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+				"rev_vlist_iter", IN_HALT, IN_HALT, anyRefUT, true );
+
+		IterDef *triter = findIterDef( IterDef::RevValueList );
+		objMethod->iterDef = triter;
+	}
+
+
+
 	/* Map iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );

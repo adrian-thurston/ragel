@@ -326,8 +326,12 @@ void colm_init_rev_tree_iter( rev_tree_iter_t *rev_triter, tree_t **stack_root,
 void colm_init_user_iter( user_iter_t *user_iter, tree_t **stack_root, long root_size,
 		long arg_size, long search_id );
 
-void colm_tree_iter_destroy( struct colm_program *prg, tree_t ***psp, tree_iter_t *iter );
-void colm_rev_tree_iter_destroy( struct colm_program *prg, tree_t ***psp, rev_tree_iter_t *iter );
+void colm_tree_iter_destroy( struct colm_program *prg,
+		tree_t ***psp, tree_iter_t *iter );
+
+void colm_rev_tree_iter_destroy( struct colm_program *prg,
+		tree_t ***psp, rev_tree_iter_t *iter );
+
 void colm_uiter_destroy( struct colm_program *prg, tree_t ***psp, user_iter_t *uiter );
 void colm_uiter_unwind( struct colm_program *prg, tree_t ***psp, user_iter_t *uiter );
 
@@ -336,8 +340,14 @@ struct stream_impl *stream_to_impl( stream_t *ptr );
 
 void colm_init_list_iter( generic_iter_t *list_iter, tree_t **stack_root,
 		long arg_size, long root_size, const ref_t *root_ref, int generic_id );
-void colm_list_iter_destroy( struct colm_program *prg, tree_t ***psp, generic_iter_t *iter );
-tree_t *colm_list_iter_advance( struct colm_program *prg, tree_t ***psp, generic_iter_t *iter );
+void colm_list_iter_destroy( struct colm_program *prg,
+		tree_t ***psp, generic_iter_t *iter );
+
+tree_t *colm_list_iter_advance( struct colm_program *prg,
+		tree_t ***psp, generic_iter_t *iter );
+tree_t *colm_rev_list_iter_advance( struct colm_program *prg,
+		tree_t ***psp, generic_iter_t *iter );
+
 tree_t *colm_list_iter_deref_cur( struct colm_program *prg, generic_iter_t *iter );
 void colm_list_append( struct colm_list *list, struct colm_list_el *new_el );
 void colm_list_prepend( struct colm_list *list, struct colm_list_el *new_el );

@@ -88,6 +88,37 @@ tree_t *colm_list_iter_advance( program_t *prg, tree_t ***psp, generic_iter_t *i
 	return (iter->ref.kid ? prg->true_val : prg->false_val );
 }
 
+tree_t *colm_rev_list_iter_advance( program_t *prg, tree_t ***psp, generic_iter_t *iter )
+{
+	tree_t **sp = *psp;
+	assert( iter->yield_size == (vm_ssize() - iter->root_size) );
+
+	if ( iter->ref.kid == 0 ) {
+		/* kid_t is zero, start from the root. */
+		list_t *list = *((list_t**)iter->root_ref.kid);
+		iter->ref.kid = (kid_t*)list->tail;
+		iter->ref.next = 0;
+
+		//= iter->rootRef;
+		//iter
+		//iterFind( prg, psp, iter, true );
+	}
+	else {
+		/* Have a previous item, continue searching from there. */
+		//iterFind( prg, psp, iter, false );
+
+		list_el_t *list_el = (list_el_t*)iter->ref.kid;
+		list_el = list_el->list_prev;
+		iter->ref.kid = (kid_t*)list_el;
+		iter->ref.next = 0;
+	}
+
+	sp = *psp;
+	iter->yield_size = vm_ssize() - iter->root_size;
+
+	return (iter->ref.kid ? prg->true_val : prg->false_val );
+}
+
 tree_t *colm_map_iter_advance( program_t *prg, tree_t ***psp, generic_iter_t *iter )
 {
 	tree_t **sp = *psp;

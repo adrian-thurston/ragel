@@ -2011,7 +2011,7 @@ again:
 			read_half( arg_size );
 			read_half( generic_id );
 
-			debug( prg, REALM_BYTECODE, "IN_LIST_ITER_FROM_REF "
+			debug( prg, REALM_BYTECODE, "IN_GEN_ITER_FROM_REF "
 					"%hd %hd %hd\n", field, arg_size, generic_id );
 
 			ref_t root_ref;
@@ -2046,6 +2046,18 @@ again:
 
 			generic_iter_t *iter = (generic_iter_t*) vm_get_plocal(exec, field);
 			tree_t *res = colm_list_iter_advance( prg, &sp, iter );
+			//colm_tree_upref( res );
+			vm_push_tree( res );
+			break;
+		}
+		case IN_REV_LIST_ITER_ADVANCE: {
+			short field;
+			read_half( field );
+
+			debug( prg, REALM_BYTECODE, "IN_RE_LIST_ITER_ADVANCE\n" );
+
+			generic_iter_t *iter = (generic_iter_t*) vm_get_plocal(exec, field);
+			tree_t *res = colm_rev_list_iter_advance( prg, &sp, iter );
 			//colm_tree_upref( res );
 			vm_push_tree( res );
 			break;
@@ -3862,8 +3874,7 @@ again:
 
 				vm_push_struct( s );
 
-				/* Set up reverse. The result comes off the list downrefed.
-				 * Need it up referenced for the reverse code too. */
+				/* Set up reverse. */
 				rcode_code( exec, IN_FN );
 				rcode_code( exec, IN_LIST_POP_TAIL_BKT );
 				rcode_half( exec, gen_id );
@@ -4142,6 +4153,32 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
+			case IN_VLIST_PUSH_TAIL_WV: {
+				short gen_id;
+				read_half( gen_id );
+
+				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_TAIL_WV %hd\n", gen_id );
+
+				list_t *list = vm_pop_list();
+				value_t value = vm_pop_value();
+
+				colm_vlist_append( prg, list, value );
+
+				vm_push_tree( prg->true_val );
+
+				/* Set up reverse code. Needs no args. */
+				rcode_code( exec, IN_FN );
+				rcode_code( exec, IN_VLIST_PUSH_TAIL_BKT );
+				rcode_unit_term( exec );
+				break;
+			}
+			case IN_VLIST_PUSH_TAIL_BKT: {
+				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_TAIL_BKT\n" );
+
+				list_t *list = vm_pop_list();
+				colm_list_detach_tail( list );
+				break;
+			}
 			case IN_VLIST_PUSH_HEAD_WC: {
 				short gen_id;
 				read_half( gen_id );
@@ -4156,6 +4193,32 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
+			case IN_VLIST_PUSH_HEAD_WV: {
+				short gen_id;
+				read_half( gen_id );
+
+				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_HEAD_WV %hd\n", gen_id );
+
+				list_t *list = vm_pop_list();
+				value_t value = vm_pop_value();
+
+				colm_vlist_prepend( prg, list, value );
+
+				vm_push_tree( prg->true_val );
+
+				/* Set up reverse code. Needs no args. */
+				rcode_code( exec, IN_FN );
+				rcode_code( exec, IN_VLIST_PUSH_HEAD_BKT );
+				rcode_unit_term( exec );
+				break;
+			}
+			case IN_VLIST_PUSH_HEAD_BKT: {
+				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_HEAD_BKT\n" );
+
+				list_t *list = vm_pop_list();
+				colm_list_detach_head( list );
+				break;
+			}
 			case IN_VLIST_POP_HEAD_WC: {
 				short gen_id;
 				read_half( gen_id );
@@ -4168,6 +4231,38 @@ again:
 				vm_push_value( result );
 				break;
 			}
+			case IN_VLIST_POP_HEAD_WV: {
+				short gen_id;
+				read_half( gen_id );
+
+				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_HEAD_WV %hd\n", gen_id );
+
+				list_t *list = vm_pop_list();
+
+				value_t result = colm_vlist_detach_head( prg, list );
+				vm_push_value( result );
+
+				/* Set up reverse. */
+				rcode_code( exec, IN_FN );
+				rcode_code( exec, IN_VLIST_POP_HEAD_BKT );
+				rcode_half( exec, gen_id );
+				rcode_word( exec, (word_t)result );
+				rcode_unit_term( exec );
+				break;
+			}
+			case IN_VLIST_POP_HEAD_BKT: {
+				short gen_id;
+				tree_t *val;
+				read_half( gen_id );
+				read_tree( val );
+
+				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_HEAD_BKT\n" );
+
+				list_t *list = vm_pop_list();
+
+				colm_vlist_prepend( prg, list, val );
+				break;
+			}
 			case IN_VLIST_POP_TAIL_WC: {
 				short gen_id;
 				read_half( gen_id );
@@ -4178,6 +4273,38 @@ again:
 
 				value_t result = colm_vlist_detach_tail( prg, list );
 				vm_push_value( result );
+				break;
+			}
+			case IN_VLIST_POP_TAIL_WV: {
+				short gen_id;
+				read_half( gen_id );
+
+				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_TAIL_WV %hd\n", gen_id );
+
+				list_t *list = vm_pop_list();
+
+				value_t result = colm_vlist_detach_tail( prg, list );
+				vm_push_value( result );
+
+				/* Set up reverse. */
+				rcode_code( exec, IN_FN );
+				rcode_code( exec, IN_VLIST_POP_TAIL_BKT );
+				rcode_half( exec, gen_id );
+				rcode_word( exec, (word_t)result );
+				rcode_unit_term( exec );
+				break;
+			}
+			case IN_VLIST_POP_TAIL_BKT: {
+				short gen_id;
+				tree_t *val;
+				read_half( gen_id );
+				read_tree( val );
+
+				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_TAIL_BKT\n" );
+
+				list_t *list = vm_pop_list();
+
+				colm_vlist_append( prg, list, val );
 				break;
 			}
 
@@ -4513,6 +4640,35 @@ again:
 				colm_tree_downref( prg, sp, key );
 				colm_tree_downref( prg, sp, val );
 				break;
+			}
+
+			case IN_VLIST_PUSH_TAIL_BKT: {
+				break;
+			}
+
+			case IN_VLIST_PUSH_HEAD_BKT: {
+				break;
+			}
+
+			case IN_VLIST_POP_HEAD_BKT: {
+				short gen_id;
+				word_t result;
+				read_half( gen_id );
+				read_word( result );
+				break;
+			}
+
+			case IN_VLIST_POP_TAIL_BKT: {
+				short gen_id;
+				word_t result;
+				read_half( gen_id );
+				read_word( result );
+				break;
+			}
+
+			default: {
+				fatal( "UNKNOWN FN 0x%2x: -- reverse code downref\n", *(instr-1));
+				assert(false);
 			}}
 			break;
 		}

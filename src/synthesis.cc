@@ -149,6 +149,21 @@ IterImpl::IterImpl( Type type ) :
 		useGenericId = true;
 		break;
 
+	case RevValueList:
+		inCreateWV =   IN_GEN_ITER_FROM_REF;
+		inCreateWC =   IN_GEN_ITER_FROM_REF;
+		inUnwind =     IN_GEN_ITER_UNWIND;
+		inDestroy =    IN_GEN_ITER_DESTROY;
+		inAdvance =    IN_REV_LIST_ITER_ADVANCE;
+
+		inGetCurR =    IN_GEN_VITER_GET_CUR_R;
+		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
+		inSetCurWC =   //IN_HALT;
+		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
+		useGenericId = true;
+		break;
+
+
 	case ValueMap:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
@@ -307,6 +322,8 @@ long sizeOfField( UniqueType *fieldUT )
 
 			case IterDef::Map:
 			case IterDef::List:
+			case IterDef::ValueList:
+			case IterDef::RevValueList:
 				size = sizeof(generic_iter_t) / sizeof(word_t);
 				break;
 
@@ -2297,6 +2314,12 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 		case IterDef::List:
 			iterImpl = new IterImpl( IterImpl::List );
 			break;
+		case IterDef::ValueList:
+			iterImpl = new IterImpl( IterImpl::ValueList );
+			break;
+		case IterDef::RevValueList:
+			iterImpl = new IterImpl( IterImpl::RevValueList );
+			break;
 		case IterDef::Map:
 			iterImpl = new IterImpl( IterImpl::Map );
 			break;
@@ -2614,6 +2637,8 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 
 					case IterDef::Map:
 					case IterDef::List:
+					case IterDef::ValueList:
+					case IterDef::RevValueList:
 						/* ? */
 						type = LT_Iter;
 						break;

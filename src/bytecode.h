@@ -83,6 +83,7 @@ typedef unsigned long colm_value_t;
 #define IN_GEN_ITER_GET_CUR_R    0xdf
 #define IN_GEN_VITER_GET_CUR_R   0xe7
 #define IN_LIST_ITER_ADVANCE     0xde
+#define IN_REV_LIST_ITER_ADVANCE 0x77
 #define IN_MAP_ITER_ADVANCE      0xe6
 
 #define IN_NOT_VAL               0x14
@@ -211,7 +212,6 @@ typedef unsigned long colm_value_t;
 #define IN_GET_VLIST_MEM_BKT     0x5c
 
 // 0x76
-// 0x77
 
 #define IN_DONE                  0x78
 
