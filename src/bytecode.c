@@ -4117,7 +4117,7 @@ again:
 				struct_t *value = vm_pop_struct();
 				struct_t *key = vm_pop_struct();
 
-				colm_vmap_insert( prg, map, key, value );
+				map_el_t *inserted = colm_vmap_insert( prg, map, key, value );
 
 				//colm_tree_upref( prg->trueVal );
 				vm_push_tree( prg->true_val );
@@ -4125,8 +4125,8 @@ again:
 				rcode_code( exec, IN_FN );
 				rcode_code( exec, IN_VMAP_INSERT_BKT );
 				rcode_half( exec, gen_id );
-				rcode_code( exec, 0 ); //inserted != 0 ? 1 : 0 );
-				rcode_word( exec, 0 ); //(word_t)map_el );
+				rcode_code( exec, inserted != 0 ? 1 : 0 );
+				rcode_word( exec, inserted );
 				rcode_unit_term( exec );
 				break;
 			}

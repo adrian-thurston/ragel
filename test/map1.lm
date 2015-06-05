@@ -1,21 +1,15 @@
 
-struct el
-	map_el<str> el
-end
-
-new M: map<str, el>()
+new M: vmap<str, str>()
 
 AE: argv_el = argv->head
 while AE {
-	new El: el()
-	El->key = AE->value
-	M->insert( El )
+	M->insert( AE->value, AE->value )
 	AE = AE->next
 }
 
-for El: el in M {
-	print "[El->key]
-	M->find( El->key )
+for V: str in M {
+	print "[V]
+	M->find( V )
 }
 ##### ARGS #####
 a b c

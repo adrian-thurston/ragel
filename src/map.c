@@ -665,8 +665,7 @@ map_el_t *colm_vmap_insert( program_t *prg, map_t *map, struct_t *key, struct_t 
 
 	map_el_t *map_el = colm_struct_get_addr( s, map_el_t*, map->generic_info->el_offset );
 
-	colm_map_insert( prg, map, map_el );
-	return 0;
+	return colm_map_insert( prg, map, map_el );
 }
 
 map_el_t *colm_vmap_remove( program_t *prg, map_t *map, tree_t *key )
