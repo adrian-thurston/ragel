@@ -402,6 +402,7 @@ typedef unsigned long colm_value_t;
 #define IN_VMAP_FIND             0x29
 #define IN_VMAP_INSERT_WC        0x25
 #define IN_VMAP_INSERT_WV        0x26
+#define IN_VMAP_INSERT_BKT       0x3d
 #define IN_VMAP_REMOVE_WC        0x27
 #define IN_VMAP_REMOVE_WV        0x28
 

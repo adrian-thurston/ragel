@@ -2054,7 +2054,7 @@ again:
 			short field;
 			read_half( field );
 
-			debug( prg, REALM_BYTECODE, "IN_RE_LIST_ITER_ADVANCE\n" );
+			debug( prg, REALM_BYTECODE, "IN_REV_LIST_ITER_ADVANCE\n" );
 
 			generic_iter_t *iter = (generic_iter_t*) vm_get_plocal(exec, field);
 			tree_t *res = colm_rev_list_iter_advance( prg, &sp, iter );
@@ -4107,6 +4107,49 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
+			case IN_VMAP_INSERT_WV: {
+				short gen_id;
+				read_half( gen_id );
+
+				debug( prg, REALM_BYTECODE, "IN_VMAP_INSERT_WV %hd\n", gen_id );
+
+				map_t *map = vm_pop_map();
+				struct_t *value = vm_pop_struct();
+				struct_t *key = vm_pop_struct();
+
+				colm_vmap_insert( prg, map, key, value );
+
+				//colm_tree_upref( prg->trueVal );
+				vm_push_tree( prg->true_val );
+
+				rcode_code( exec, IN_FN );
+				rcode_code( exec, IN_VMAP_INSERT_BKT );
+				rcode_half( exec, gen_id );
+				rcode_code( exec, 0 ); //inserted != 0 ? 1 : 0 );
+				rcode_word( exec, 0 ); //(word_t)map_el );
+				rcode_unit_term( exec );
+				break;
+			}
+			case IN_VMAP_INSERT_BKT: {
+				short gen_id;
+				uchar inserted;
+				word_t wmap_el;
+
+				read_half( gen_id );
+				read_byte( inserted );
+				read_word( wmap_el );
+
+				map_el_t *map_el = (map_el_t*)wmap_el;
+
+				debug( prg, REALM_BYTECODE, "IN_VMAP_INSERT_BKT %d\n",
+						(int)inserted );
+
+				map_t *map = vm_pop_map();
+
+				if ( inserted ) 
+					colm_map_detach( prg, map, map_el );
+				break;
+			}
 			case IN_VMAP_REMOVE_WC: {
 				short gen_id;
 				read_half( gen_id );
@@ -4370,7 +4413,7 @@ again:
 				goto out;
 			}
 			default: {
-				fatal( "UNKNOWN FUNCTION: 0x%2x -- something is wrong\n", c );
+				fatal( "UNKNOWN FUNCTION: 0x%02x -- something is wrong\n", c );
 				break;
 			}}
 			break;
@@ -4388,7 +4431,7 @@ again:
 			break;
 		}
 		default: {
-			fatal( "UNKNOWN INSTRUCTION: 0x%2x -- something is wrong\n", *(instr-1) );
+			fatal( "UNKNOWN INSTRUCTION: 0x%02x -- something is wrong\n", *(instr-1) );
 			assert(false);
 			break;
 		}
@@ -4630,6 +4673,22 @@ again:
 						(int)inserted );
 				break;
 			}
+			case IN_VMAP_INSERT_BKT: {
+				short gen_id;
+				uchar inserted;
+				word_t wmap_el;
+
+				read_half( gen_id );
+				read_byte( inserted );
+				read_word( wmap_el );
+
+				map_el_t *map_el = (map_el_t*)wmap_el;
+
+				debug( prg, REALM_BYTECODE, "IN_VMAP_INSERT_BKT %d\n",
+						(int)inserted );
+
+				break;
+			}
 			case IN_MAP_DETACH_BKT: {
 				tree_t *key, *val;
 				read_tree( key );
@@ -4667,13 +4726,13 @@ again:
 			}
 
 			default: {
-				fatal( "UNKNOWN FN 0x%2x: -- reverse code downref\n", *(instr-1));
+				fatal( "UNKNOWN FUNCTION 0x%02x: -- reverse code downref\n", *(instr-1));
 				assert(false);
 			}}
 			break;
 		}
 		default: {
-			fatal( "UNKNOWN INSTRUCTION 0x%2x: -- reverse code downref\n", *(instr-1));
+			fatal( "UNKNOWN INSTRUCTION 0x%02x: -- reverse code downref\n", *(instr-1));
 			assert(false);
 			break;
 		}

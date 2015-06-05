@@ -129,9 +129,9 @@ IterImpl::IterImpl( Type type ) :
 		inAdvance =    IN_LIST_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_ITER_GET_CUR_R;
-		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
-		inSetCurWC =   //IN_HALT;
-		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
+//		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
+//		inSetCurWC =   //IN_HALT;
+//		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
 		useGenericId = true;
 		break;
 
@@ -143,9 +143,9 @@ IterImpl::IterImpl( Type type ) :
 		inAdvance =    IN_LIST_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_VITER_GET_CUR_R;
-		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
-		inSetCurWC =   //IN_HALT;
-		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
+//		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
+//		inSetCurWC =   //IN_HALT;
+//		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
 		useGenericId = true;
 		break;
 
@@ -157,9 +157,9 @@ IterImpl::IterImpl( Type type ) :
 		inAdvance =    IN_REV_LIST_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_VITER_GET_CUR_R;
-		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
-		inSetCurWC =   //IN_HALT;
-		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
+//		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
+//		inSetCurWC =   //IN_HALT;
+//		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
 		useGenericId = true;
 		break;
 
@@ -172,9 +172,9 @@ IterImpl::IterImpl( Type type ) :
 		inAdvance =    IN_MAP_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_VITER_GET_CUR_R;
-		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
-		inSetCurWC =   //IN_HALT;
-		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
+		inGetCurWC =   IN_GEN_VITER_GET_CUR_R; //IN_HALT; //IN_LIST_ITER_GET_CUR_WC;
+//		inSetCurWC =   IN_HALT;//IN_HALT;
+//		inRefFromCur = IN_HALT;//IN_LIST_ITER_REF_FROM_CUR;
 		useGenericId = true;
 		break;
 
@@ -186,9 +186,9 @@ IterImpl::IterImpl( Type type ) :
 		inAdvance =    IN_MAP_ITER_ADVANCE;
 
 		inGetCurR =    IN_GEN_ITER_GET_CUR_R;
-		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
-		inSetCurWC =   //IN_HALT;
-		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
+//		inGetCurWC =   //IN_LIST_ITER_GET_CUR_WC;
+//		inSetCurWC =   //IN_HALT;
+//		inRefFromCur = //IN_LIST_ITER_REF_FROM_CUR;
 		useGenericId = true;
 		break;
 
