@@ -12,13 +12,8 @@ context lookup
 	alias list_int
 		vlist<int>
 	
-	struct map_list_lang_object_el
-		List: list_lang_object
-		map_el<str> el
-	end
-
 	alias map_list_lang_object
-		map<str, map_list_lang_object_el>
+		vmap<str, list_lang_object>
 	
 	#
 	# Data types for global data.
@@ -94,10 +89,10 @@ context lookup
 	{
 		# LOG print( '  looking in ', obj->name, '\n' )
 
-		ol: map_list_lang_object_el = obj->objectMap->find( name )
+		ol: list_lang_object = obj->objectMap->find( name )
 		if ol {
 			# LOG print( '  * found an object: ', ol.head, '\n' )
-			return ol->List->head
+			return ol->head
 		}
 
 		return nil
@@ -288,22 +283,20 @@ context lookup
 	# Building the language object tree.
 	int insertObject( definedIn: lang_object, name: str, obj: lang_object )
 	{
-		ol: map_list_lang_object_el = definedIn->objectMap->find( name )
+		ol: list_lang_object = definedIn->objectMap->find( name )
 		if !ol {
 			# Element not in the map already
-			ol = new map_list_lang_object_el()
-			ol->key = name
-			ol->List = new list_lang_object()
-			definedIn->objectMap->insert( ol )
+			ol = new list_lang_object()
+			definedIn->objectMap->insert( name, ol )
 		}
-		ol->List->push_tail( obj )
+		ol->push_tail( obj )
 	}
 
 	lang_object findClass( inObj: lang_object, lang_objectname: str )
 	{
-		ol: map_list_lang_object_el = inObj->objectMap->find( name )
-		if ol { 
-			for obj: lang_object in ol->List {
+		List: list_lang_object = inObj->objectMap->find( name )
+		if List { 
+			for obj: lang_object in List {
 				if obj->typeId == ClassType {
 					return obj
 				}
@@ -314,9 +307,9 @@ context lookup
 
 	lang_object findTemplateClass( inObj: lang_object, name: str )
 	{
-		ol: map_list_lang_object_el = inObj->objectMap->find( name )
-		if ol { 
-			for obj: lang_object in ol->List {
+		List: list_lang_object = inObj->objectMap->find( name )
+		if List { 
+			for obj: lang_object in List {
 				if obj->typeId == TemplateClassType
 					return obj
 			}
@@ -2171,14 +2164,14 @@ context lookup
 		if obj->objectMap->length > 0
 			print( ' {\n' )
 		
-		ChildNames: map_list_lang_object = obj->objectMap
-		MapEl: map_list_lang_object_el = ChildNames->head
-		while ( MapEl ) {
-			for Obj: lang_object in MapEl->List {
+		Map: map_list_lang_object = obj->objectMap
+		for List: list_lang_object in Map  {
+			List2: list_lang_object = List
+			for Obj: lang_object in List2 {
 				printObject( indent + '  ', Obj )
 			}
-			MapEl = MapEl->next
 		}
+
 
 		if obj->objectMap->length > 0
 			print( indent, '}' )
