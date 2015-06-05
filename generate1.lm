@@ -3,11 +3,7 @@ context generate
 	rl ident_char /[a-zA-Z_]/
 
 	# List used as a stack of indentations.
-	struct int_el
-		Int: int
-		list_el el
-	end
-	IndentStack: list<int_el>
+	IndentStack: vlist<int>
 
 	# Has a newline been sent for this '\n' .. whitespace match. 
 	newline_sent: int
@@ -106,18 +102,16 @@ context generate
 				# We have already sent the newline, compute the indentation level.
 				data_length: int = match_length - 1
 
-				Top: int_el = IndentStack->top
-				if data_length > Top->Int {
+				Top: int = IndentStack->top
+				if data_length > Top {
 					# The indentation level is more than the level on the top
 					# of the stack. This is an indent event. Send as an INDENT.
 					input->push( make_token( typeid<INDENT>, '' ) )
 
 					# Push to the stack as per python manual.
-					IntEl: int_el = new int_el()
-					IntEl->Int = data_length
-					IndentStack->push( IntEl )
+					IndentStack->push( data_length )
 				} else {
-					while data_length < Top->Int {
+					while data_length < Top {
 						# The indentation level is less than the level on the top of
 						# the stack. Pop the level and send one dedent. This flow of
 						# control will execute until we find the right indentation level
@@ -568,10 +562,8 @@ int print_primary_subscriptions_and_slicings( Start: generate::start )
 Generate: generate = new generate()
 
 # List used as a stack of indentations.
-Generate->IndentStack = new list<generate::int_el>()
-IntEl: generate::int_el = new generate::int_el()
-IntEl->Int = 0
-Generate->IndentStack->push( IntEl )
+Generate->IndentStack = new vlist<int>()
+Generate->IndentStack->push( 0 )
 
 # Has a newline been sent for this '\n' .. whitespace match. 
 Generate->newline_sent = 0

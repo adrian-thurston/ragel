@@ -1,0 +1,25 @@
+
+new L: vlist<str>()
+
+L->push_tail( "dear" )
+L->push_tail( "friend" )
+L->push_tail( "---" )
+
+L->push_head( "my" )
+L->push_head( "hello" )
+
+L->push_head( "..." )
+
+
+L->pop_tail()
+L->pop_head()
+
+for S: str in rev_vlist_iter(L) {
+	print "[S]
+}
+
+##### EXP #####
+friend
+dear
+my
+hello

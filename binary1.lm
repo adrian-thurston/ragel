@@ -116,19 +116,11 @@ def count
 # end
 #
 
-struct int_el
-	Int: int
-
-	list_el el
-end
-
-CL: list<int_el>
+CL: vlist<int>
 
 int start_list( count: int )
 {
-	IntEl: int_el = new int_el()
-	IntEl->Int = count
-	CL->push( IntEl )
+	CL->push( count )
 }
 
 def count_inc
@@ -503,25 +495,21 @@ int print_all_names( s: start )
 end # binary
 
 Binary: binary = new binary()
-Binary->CL = new list<binary::int_el>()
+Binary->CL = new vlist<int>()
 
-int top( L: list<binary::int_el> )
+int top( L: vlist<int> )
 {
-	Top: binary::int_el = L->top
-	return Top->Int
+	return L->top
 }
 
-int pop( L: list<binary::int_el> )
+int pop( L: vlist<int> )
 {
-	Top: binary::int_el = L->pop()
-	return Top->Int
+	return L->pop()
 }
 
-int push( L: list<binary::int_el>, Int: int )
+int push( L: vlist<int>, Int: int )
 {
-	Top: binary::int_el = new binary::int_el()
-	Top->Int = Int
-	L->push( Top )
+	L->push( Int )
 }
 
 parse S: binary::start(Binary) [ stdin ]
