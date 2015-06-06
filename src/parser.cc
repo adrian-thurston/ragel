@@ -57,7 +57,7 @@ void BaseParser::listElDef( String name )
 	String id = curStruct()->objectDef->name;
 	RepeatType repeatType = RepeatNone;
 	TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, repeatType );
-	TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListEl, 0, objTr, 0 );
+	TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListPtrs, 0, objTr, 0 );
 
 	ObjectField *of = ObjectField::cons( InputLoc(),
 			ObjectField::GenericElementType, elTr, name );
@@ -88,7 +88,7 @@ void BaseParser::mapElDef( String name, TypeRef *keyType )
 	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	String id = curStruct()->objectDef->name;
 	TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, id, RepeatNone );
-	TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapEl, 0, objTr, keyType );
+	TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapPtrs, 0, objTr, keyType );
 
 	ObjectField *of = ObjectField::cons( InputLoc(),
 			ObjectField::GenericElementType, elTr, name );
@@ -452,7 +452,7 @@ void BaseParser::addArgvList()
 			emptyNspaceQual(), name );
 
 	pd->argvTypeRef = TypeRef::cons( internal,
-			TypeRef::ValueList, 0, elType, valType );
+			TypeRef::List, 0, elType, valType );
 }
 
 ObjectDef *BaseParser::blockOpen()

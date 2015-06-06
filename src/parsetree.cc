@@ -57,24 +57,18 @@ string TypeRef::stringify()
 		case Iterator:
 			s = "iterator";
 			break;
-//		case List:
-//			s = "list";
-//			break;
-		case ValueList:
-			s = "vlist";
+		case List:
+			s = "list";
 			break;
-//		case ListEl:
-//			s = "listel";
-//			break;
-//		case Map:
-//			s = "map";
-//			break;
-		case ValueMap:
-			s = "vmap";
+		case ListPtrs:
+			s = "list_ptrs";
 			break;
-//		case MapEl:
-//			s = "mapel";
-//			break;
+		case Map:
+			s = "map";
+			break;
+		case MapPtrs:
+			s = "map_ptrs";
+			break;
 		case Parser:
 			s = "parser";
 			break;
@@ -219,12 +213,12 @@ int CmpUniqueGeneric::compare( const UniqueGeneric &ut1, const UniqueGeneric &ut
 	else {
 		switch ( ut1.type ) {
 		case UniqueGeneric::List:
-		case UniqueGeneric::ListEl:
+		case UniqueGeneric::ListPtrs:
 		case UniqueGeneric::Parser:
 			break;
 
 		case UniqueGeneric::Map:
-		case UniqueGeneric::MapEl:
+		case UniqueGeneric::MapPtrs:
 			if ( ut1.key < ut2.key )
 				return -1;
 			else if ( ut1.key > ut2.key )

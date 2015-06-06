@@ -1954,9 +1954,9 @@ struct UniqueGeneric
 	enum Type
 	{
 		List,
-		ListEl,
+		ListPtrs,
 		Map,
-		MapEl,
+		MapPtrs,
 		Parser
 	};
 
@@ -1998,10 +1998,10 @@ struct TypeRef
 		Name,
 		Literal,
 		Iterator,
-		ValueList,
-		ListEl,
-		ValueMap,
-		MapEl,
+		List,
+		ListPtrs,
+		Map,
+		MapPtrs,
 		Parser,
 		Ref
 	};
@@ -2185,20 +2185,13 @@ struct TypeRef
 	UniqueType *resolveIterator( Compiler *pd );
 	UniqueType *resolveTypeName( Compiler *pd );
 	UniqueType *resolveTypeLiteral( Compiler *pd );
-	UniqueType *resolveTypeListObj( Compiler *pd );
 	UniqueType *resolveTypeList( Compiler *pd );
-	UniqueType *resolveTypeListElObj( Compiler *pd );
-	UniqueType *resolveTypeListEl( Compiler *pd );
-	UniqueType *resolveTypeMapObj( Compiler *pd );
+	UniqueType *resolveTypeListPtrs( Compiler *pd );
 	UniqueType *resolveTypeMap( Compiler *pd );
-	UniqueType *resolveTypeMapElObj( Compiler *pd );
-	UniqueType *resolveTypeMapEl( Compiler *pd );
-	UniqueType *resolveTypeParserObj( Compiler *pd );
+	UniqueType *resolveTypeMapPtrs( Compiler *pd );
 	UniqueType *resolveTypeParser( Compiler *pd );
 	UniqueType *resolveType( Compiler *pd );
 	UniqueType *resolveTypeRef( Compiler *pd );
-	UniqueType *resolveTypeValueList( Compiler *pd );
-	UniqueType *resolveTypeValueMap( Compiler *pd );
 
 	Type type;
 	InputLoc loc;

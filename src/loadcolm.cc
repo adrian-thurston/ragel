@@ -850,7 +850,7 @@ struct LoadColm
 		}
 
 		TypeRef *elType = TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
-		return TypeRef::cons( typeRef.loc(), TypeRef::ValueList, 0, elType, valType );
+		return TypeRef::cons( typeRef.loc(), TypeRef::List, 0, elType, valType );
 	}
 
 	TypeRef *walkListEl( type_ref typeRef )
@@ -909,8 +909,8 @@ struct LoadColm
 		}
 
 		TypeRef *elType = TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
-		return TypeRef::cons( typeRef.loc(), TypeRef::ValueMap,
-				0, keyType, elType, valType );
+
+		return TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, keyType, elType, valType );
 	}
 
 	TypeRef *walkMapEl( type_ref typeRef )

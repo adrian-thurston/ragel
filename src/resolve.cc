@@ -114,157 +114,7 @@ UniqueType *TypeRef::resolveTypeLiteral( Compiler *pd )
 	return 0;
 }
 
-#if 0
 UniqueType *TypeRef::resolveTypeList( Compiler *pd )
-{
-	nspace = pd->rootNamespace;
-
-	UniqueType *utValue = typeRef1->resolveType( pd );	
-
-	if ( utValue->typeId != TYPE_STRUCT )
-		error( loc ) << "only structs can be list elements" << endp;
-
-	/* Find the offset of the list element. */
-	int off = 0;
-	ObjectField *listEl = 0;
-	FieldList *fieldList = utValue->structEl->structDef->objectDef->fieldList;
-	for ( FieldList::Iter f = *fieldList; f.lte(); f++, off++ ) {
-		if ( f->value->type == ObjectField::GenericElementType ) {
-			UniqueType *fUT = f->value->typeRef->resolveType( pd );
-			if ( fUT->typeId == TYPE_GENERIC && fUT->generic != 0 &&
-					fUT->generic->typeId == GEN_LIST_EL )
-			{
-				listEl = f->value;
-				break;
-			}
-		}
-	}
-
-	if ( !listEl )
-		error( loc ) << "could not find list element in type ref" << endp;
-
-	UniqueGeneric searchKey( UniqueGeneric::List, utValue );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueGeneric( searchKey );
-		pd->uniqueGenericMap.insert( inMap );
-
-		GenericType *generic = new GenericType( GEN_LIST,
-				pd->nextGenericId++, typeRef1, 0, 0, listEl );
-
-		nspace->genericList.append( generic );
-
-		generic->declare( pd, nspace );
-
-		inMap->generic = generic;
-	}
-
-	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
-}
-#endif
-
-UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
-{
-	nspace = pd->rootNamespace;
-
-	UniqueType *utValue = typeRef1->resolveType( pd );	
-
-	UniqueGeneric searchKey( UniqueGeneric::ListEl, utValue );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueGeneric( searchKey );
-		pd->uniqueGenericMap.insert( inMap );
-
-		GenericType *generic = new GenericType( GEN_LIST_EL,
-				pd->nextGenericId++, typeRef1, 0, 0, 0 );
-
-		nspace->genericList.append( generic );
-		inMap->generic = generic;
-
-		/* Note this is recurse, all of above must complete. */
-		generic->declare( pd, nspace );
-	}
-
-	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
-}
-
-#if 0
-UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
-{
-	nspace = pd->rootNamespace;
-
-	UniqueType *utKey = typeRef1->resolveType( pd );	
-	UniqueType *utEl = typeRef2->resolveType( pd );	
-
-	if ( utEl->typeId != TYPE_STRUCT )
-		error( loc ) << "only structs can be map elements" << endp;
-
-	/* Find the list element. */
-	ObjectField *mapEl = 0;
-	FieldList *fieldList = utEl->structEl->structDef->objectDef->fieldList;
-	for ( FieldList::Iter f = *fieldList; f.lte(); f++ ) {
-		UniqueType *fUT = f->value->typeRef->resolveType( pd );
-		if ( fUT->typeId == TYPE_GENERIC && fUT->generic != 0 &&
-				fUT->generic->typeId == GEN_MAP_EL )
-		{
-			mapEl = f->value;
-			break;
-		}
-	}
-
-	if ( !mapEl )
-		error( loc ) << "could not find list element in type ref" << endp;
-
-	UniqueGeneric searchKey( UniqueGeneric::Map, utKey, utEl );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueGeneric( searchKey );
-		pd->uniqueGenericMap.insert( inMap );
-
-		GenericType *generic = new GenericType( GEN_MAP,
-				pd->nextGenericId++, typeRef2, typeRef1, 0, mapEl );
-
-		nspace->genericList.append( generic );
-
-		generic->declare( pd, nspace );
-
-		inMap->generic = generic;
-	}
-
-	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
-}
-#endif
-
-UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
-{
-	nspace = pd->rootNamespace;
-
-	UniqueType *utValue = typeRef1->resolveType( pd );	
-
-	UniqueGeneric searchKey( UniqueGeneric::MapEl, utValue );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueGeneric( searchKey );
-		pd->uniqueGenericMap.insert( inMap );
-
-		GenericType *generic = new GenericType( GEN_MAP_EL,
-				pd->nextGenericId++, typeRef1, 0, 0, 0 );
-
-		nspace->genericList.append( generic );
-
-		generic->declare( pd, nspace );
-
-		inMap->generic = generic;
-	}
-
-	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
-}
-
-UniqueType *TypeRef::resolveTypeValueList( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
@@ -312,7 +162,60 @@ UniqueType *TypeRef::resolveTypeValueList( Compiler *pd )
 	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
 
-UniqueType *TypeRef::resolveTypeValueMap( Compiler *pd )
+
+UniqueType *TypeRef::resolveTypeListPtrs( Compiler *pd )
+{
+	nspace = pd->rootNamespace;
+
+	UniqueType *utValue = typeRef1->resolveType( pd );	
+
+	UniqueGeneric searchKey( UniqueGeneric::ListPtrs, utValue );
+	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueGeneric( searchKey );
+		pd->uniqueGenericMap.insert( inMap );
+
+		GenericType *generic = new GenericType( GEN_LIST_EL,
+				pd->nextGenericId++, typeRef1, 0, 0, 0 );
+
+		nspace->genericList.append( generic );
+		inMap->generic = generic;
+
+		/* Note this is recurse, all of above must complete. */
+		generic->declare( pd, nspace );
+	}
+
+	generic = inMap->generic;
+	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
+}
+
+UniqueType *TypeRef::resolveTypeMapPtrs( Compiler *pd )
+{
+	nspace = pd->rootNamespace;
+
+	UniqueType *utValue = typeRef1->resolveType( pd );	
+
+	UniqueGeneric searchKey( UniqueGeneric::MapPtrs, utValue );
+	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueGeneric( searchKey );
+		pd->uniqueGenericMap.insert( inMap );
+
+		GenericType *generic = new GenericType( GEN_MAP_EL,
+				pd->nextGenericId++, typeRef1, 0, 0, 0 );
+
+		nspace->genericList.append( generic );
+
+		generic->declare( pd, nspace );
+
+		inMap->generic = generic;
+	}
+
+	generic = inMap->generic;
+	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
+}
+
+UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
@@ -478,17 +381,11 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 		case Literal:
 			uniqueType = resolveTypeLiteral( pd );
 			break;
-//		case List:
-//			uniqueType = resolveTypeList( pd );
-//			break;
-		case ListEl:
-			uniqueType = resolveTypeListEl( pd );
+		case ListPtrs:
+			uniqueType = resolveTypeListPtrs( pd );
 			break;
-//		case Map:
-//			uniqueType = resolveTypeMap( pd );
-//			break;
-		case MapEl:
-			uniqueType = resolveTypeMapEl( pd );
+		case MapPtrs:
+			uniqueType = resolveTypeMapPtrs( pd );
 			break;
 		case Parser:
 			uniqueType = resolveTypeParser( pd );
@@ -499,11 +396,11 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 		case Iterator:
 			uniqueType = resolveIterator( pd );
 			break;
-		case ValueList:
-			uniqueType = resolveTypeValueList( pd );
+		case List:
+			uniqueType = resolveTypeList( pd );
 			break;
-		case ValueMap:
-			uniqueType = resolveTypeValueMap( pd );
+		case Map:
+			uniqueType = resolveTypeMap( pd );
 			break;
 			
 		case Unspecified:
