@@ -7,7 +7,7 @@ context undo
 		token id /[a-zA-Z_]+/
 	end
 
-	Map: vmap<item, item>
+	Map: map<item, item>
 
 	def item 
 		[id]
@@ -39,7 +39,7 @@ context undo
 end
 
 Undo: undo = new undo()
-Undo->Map = new vmap<undo::item, undo::item>()
+Undo->Map = new map<undo::item, undo::item>()
 
 cons I: undo::item "a"
 Undo->Map->insert( I, I )

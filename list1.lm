@@ -21,7 +21,7 @@ struct start_el
 	B3: start
 end
 
-L: vlist<start_el> = new vlist<start_el>()
+L: list<start_el> = new list<start_el>()
 
 E: start_el = new start_el()
 E->S = S

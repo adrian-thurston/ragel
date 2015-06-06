@@ -1,5 +1,5 @@
 
-new M: vmap<str, str>()
+new M: map<str, str>()
 
 for AE: argv_el in argv {
 	print "[AE->value]

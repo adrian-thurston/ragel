@@ -1,5 +1,5 @@
 
-new L: vlist<str>()
+new L: list<str>()
 
 L->push_tail( "dear" )
 L->push_tail( "friend" )

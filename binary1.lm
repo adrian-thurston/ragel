@@ -116,7 +116,7 @@ def count
 # end
 #
 
-CL: vlist<int>
+CL: list<int>
 
 int start_list( count: int )
 {
@@ -442,7 +442,7 @@ int print_RR_A( s: start )
 }
 
 alias name_map
-	vmap<int, name>
+	map<int, name>
 
 int print_name( n: name, m: name_map )
 {
@@ -490,19 +490,19 @@ int print_all_names( s: start )
 end # binary
 
 Binary: binary = new binary()
-Binary->CL = new vlist<int>()
+Binary->CL = new list<int>()
 
-int top( L: vlist<int> )
+int top( L: list<int> )
 {
 	return L->top
 }
 
-int pop( L: vlist<int> )
+int pop( L: list<int> )
 {
 	return L->pop()
 }
 
-int push( L: vlist<int>, Int: int )
+int push( L: list<int>, Int: int )
 {
 	L->push( Int )
 }

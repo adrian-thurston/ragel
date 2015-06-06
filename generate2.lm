@@ -12,7 +12,7 @@ context generate
 		return OI
 	}
 
-	OpenStack: vlist<open_item> 
+	OpenStack: list<open_item> 
 
 	lex
 		token stray_close //
@@ -200,7 +200,7 @@ end # generate
 
 Generate: generate = new generate()
 
-Generate->OpenStack = new vlist<generate::open_item>()
+Generate->OpenStack = new list<generate::open_item>()
 Sentinal: generate::open_item = new_open_item( '** SENTINAL **', 1 )
 Generate->OpenStack->push( Sentinal )
 

@@ -7,7 +7,7 @@ context undo
 		token id /[a-zA-Z_]+/
 	end
 
-	List: vlist<item>
+	List: list<item>
 
 	def item 
 		[id]
@@ -34,7 +34,7 @@ context undo
 end
 
 Undo: undo = new undo()
-Undo->List = new vlist<undo::item>()
+Undo->List = new list<undo::item>()
 
 parse Input: undo::start(Undo)[ stdin ]
 print( Input )
