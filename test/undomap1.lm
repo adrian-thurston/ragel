@@ -7,7 +7,7 @@ context undo
 		token id /[a-zA-Z_]+/
 	end
 
-	Map: vmap<item, item>
+	Map: map<item, item>
 
 	def item 
 		[id]
@@ -33,7 +33,7 @@ context undo
 end
 
 Undo: undo = new undo()
-Undo->Map = new vmap<undo::item, undo::item>()
+Undo->Map = new map<undo::item, undo::item>()
 
 parse Input: undo::start(Undo)[ stdin ]
 print( Input )

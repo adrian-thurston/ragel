@@ -114,6 +114,7 @@ UniqueType *TypeRef::resolveTypeLiteral( Compiler *pd )
 	return 0;
 }
 
+#if 0
 UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
@@ -161,6 +162,7 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 	generic = inMap->generic;
 	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
+#endif
 
 UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 {
@@ -188,6 +190,7 @@ UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
 
+#if 0
 UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
@@ -233,6 +236,7 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 	generic = inMap->generic;
 	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
+#endif
 
 UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
 {
@@ -474,15 +478,15 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 		case Literal:
 			uniqueType = resolveTypeLiteral( pd );
 			break;
-		case List:
-			uniqueType = resolveTypeList( pd );
-			break;
+//		case List:
+//			uniqueType = resolveTypeList( pd );
+//			break;
 		case ListEl:
 			uniqueType = resolveTypeListEl( pd );
 			break;
-		case Map:
-			uniqueType = resolveTypeMap( pd );
-			break;
+//		case Map:
+//			uniqueType = resolveTypeMap( pd );
+//			break;
 		case MapEl:
 			uniqueType = resolveTypeMapEl( pd );
 			break;

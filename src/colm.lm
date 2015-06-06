@@ -31,8 +31,6 @@ lex
 	token LIST_EL / 'list_el' /
 	token MAP / 'map' /
 	token MAP_EL / 'map_el' /
-	token VLIST / 'vlist' /
-	token VMAP / 'vmap' /
 	token PTR / 'ptr' /
 	token ITER / 'iter' /
 	token REF / 'ref' /
@@ -249,12 +247,6 @@ def pre_eof_def
 def alias_def
 	[ALIAS id type_ref]
 
-def list_el_def
-	[LIST_EL id]
-
-def map_el_def
-	[MAP_EL LT type_ref GT id]
-
 def struct_item
 	[struct_var_def] :StructVar commit
 |	[literal_def] :Literal commit
@@ -271,8 +263,6 @@ def struct_item
 |	[export_def] :Export commit
 |	[pre_eof_def] :PreEof commit
 |	[precedence_def] :Precedence commit
-|	[list_el_def] :ListEl commit
-|	[map_el_def] :MapEl commit
 |	[alias_def] :Alias commit
 
 def export_def
@@ -585,9 +575,9 @@ def type_ref
 |	[BOOL] :Bool
 |	[PARSER LT type_ref GT] :Parser
 |	[LIST LT type_ref GT] :List
-|	[MAP LT KeyType: type_ref COMMA ElType: type_ref GT] :Map
-|	[VLIST LT type_ref GT] :ValueList
-|	[VMAP LT KeyType: type_ref COMMA ValType: type_ref GT] :ValueMap
+|	[MAP LT KeyType: type_ref COMMA ValType: type_ref GT] :Map
+|	[LIST_EL LT type_ref GT] :ListEl
+|	[MAP_EL LT KeyType: type_ref COMMA ValType: type_ref GT] :MapEl
 
 def region_qual
 	[region_qual id DOUBLE_COLON] :Qual

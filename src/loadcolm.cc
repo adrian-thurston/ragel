@@ -806,11 +806,6 @@ struct LoadColm
 		return qual;
 	}
 
-	NamespaceQual *emptyNspaceQual()
-	{
-		return NamespaceQual::cons( curNspace() );
-	}
-
 	RepeatType walkOptRepeat( opt_repeat OptRepeat )
 	{
 		RepeatType repeatType = RepeatNone;
@@ -827,8 +822,6 @@ struct LoadColm
 		}
 		return repeatType;
 	}
-
-	BstSet<String, CmpStr> genericElDefined;
 
 	TypeRef *walkValueList( type_ref typeRef )
 	{
@@ -847,6 +840,7 @@ struct LoadColm
 			ObjectField *elValObjField = ObjectField::cons( internal,
 					ObjectField::StructFieldType, valType, id );
 			structVarDef( internal, elValObjField );
+			elValObjField->context->listEl = true;
 
 			/* List El. */
 			listElDef( "el" );
@@ -857,6 +851,35 @@ struct LoadColm
 
 		TypeRef *elType = TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
 		return TypeRef::cons( typeRef.loc(), TypeRef::ValueList, 0, elType, valType );
+	}
+
+	TypeRef *walkListEl( type_ref typeRef )
+	{
+		TypeRef *valType = walkTypeRef( typeRef._type_ref() );
+
+		/* Create the value list element. */
+		String name( 32, "vlist_el_%s", valType->stringify().c_str() );
+
+		if ( !genericElDefined.find( name ) ) {
+			genericElDefined.insert( name );
+
+			structHead( internal, pd->rootNamespace, name, ObjectDef::StructType );
+
+			/* Var def. */
+			String id = "value";
+			ObjectField *elValObjField = ObjectField::cons( internal,
+					ObjectField::StructFieldType, valType, id );
+			structVarDef( internal, elValObjField );
+			elValObjField->context->listEl = true;
+
+			/* List El. */
+			listElDef( "el" );
+
+			structStack.pop();
+			namespaceStack.pop();
+		}
+
+		return TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
 	}
 
 	TypeRef *walkValueMap( type_ref typeRef )
@@ -890,6 +913,35 @@ struct LoadColm
 				0, keyType, elType, valType );
 	}
 
+	TypeRef *walkMapEl( type_ref typeRef )
+	{
+		TypeRef *keyType = walkTypeRef( typeRef.KeyType() );
+		TypeRef *valType = walkTypeRef( typeRef.ValType() );
+
+		String name( 32, "vmap_el_%s_%s", keyType->stringify().c_str(),
+				valType->stringify().c_str() );
+
+		if ( !genericElDefined.find( name ) ) {
+			genericElDefined.insert( name );
+		
+			structHead( internal, pd->rootNamespace, name, ObjectDef::StructType );
+
+			/* Var def. */
+			String id = "value";
+			ObjectField *elValObjField = ObjectField::cons( internal,
+					ObjectField::StructFieldType, valType, id );
+			structVarDef( internal, elValObjField );
+
+			/* Map El. */
+			mapElDef( "el", keyType );
+
+			structStack.pop();
+			namespaceStack.pop();
+		}
+
+		return TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
+	}
+
 	TypeRef *walkTypeRef( type_ref typeRef )
 	{
 		TypeRef *tr = 0;
@@ -915,22 +967,19 @@ struct LoadColm
 			break;
 		}
 		case type_ref::List: {
-			TypeRef *type = walkTypeRef( typeRef._type_ref() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::List, 0, type, 0 );
-			break;
-		}
-		case type_ref::Map: {
-			TypeRef *keyType = walkTypeRef( typeRef.KeyType() );
-			TypeRef *elType = walkTypeRef( typeRef.ElType() );
-			tr = TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, keyType, elType );
-			break;
-		}
-		case type_ref::ValueList: {
 			tr = walkValueList( typeRef );
 			break;
 		}
-		case type_ref::ValueMap: {
+		case type_ref::Map: {
 			tr = walkValueMap( typeRef );
+			break;
+		}
+		case type_ref::ListEl: {
+			tr = walkListEl( typeRef );
+			break;
+		}
+		case type_ref::MapEl: {
+			tr = walkMapEl( typeRef );
 			break;
 		}}
 		return tr;
@@ -2320,15 +2369,15 @@ struct LoadColm
 		case struct_item::Precedence:
 			walkPrecedenceDef( structItem.precedence_def() );
 			break;
-		case struct_item::ListEl:
-			listElDef( structItem.list_el_def().id().data() );
-			break;
-		case struct_item::MapEl: {
-			map_el_def Def = structItem.map_el_def();
-			TypeRef *keyTr = walkTypeRef( Def.type_ref() );
-			mapElDef( Def.id().data(), keyTr );
-			break;
-		}
+//		case struct_item::ListEl:
+//			listElDef( structItem.list_el_def().id().data() );
+//			break;
+//		case struct_item::MapEl: {
+//			map_el_def Def = structItem.map_el_def();
+//			TypeRef *keyTr = walkTypeRef( Def.type_ref() );
+//			mapElDef( Def.id().data(), keyTr );
+//			break;
+//		}
 		case struct_item::Alias:
 			walkAliasDef( structItem.alias_def() );
 			break;

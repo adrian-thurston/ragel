@@ -554,13 +554,15 @@ struct StructDef
 		loc(loc),
 		name(name),
 		objectDef(objectDef),
-		structEl(0)
+		structEl(0),
+		listEl(false)
 	{}
 
 	InputLoc loc;
 	String name;
 	ObjectDef *objectDef;
 	StructEl *structEl;
+	bool listEl;
 
 	StructDef *prev, *next;
 };
@@ -568,11 +570,17 @@ struct StructDef
 struct StructEl
 {
 	StructEl( const String &name, StructDef *structDef )
-		: name(name), structDef(structDef), id(-1) {}
+	:
+		name(name),
+		structDef(structDef),
+		id(-1),
+		listEl(false)
+	{}
 
 	String name;
 	StructDef *structDef;
 	int id;
+	bool listEl;
 
 	StructEl *prev, *next;
 };
@@ -1990,10 +1998,8 @@ struct TypeRef
 		Name,
 		Literal,
 		Iterator,
-		List,
 		ValueList,
 		ListEl,
-		Map,
 		ValueMap,
 		MapEl,
 		Parser,
@@ -2688,7 +2694,7 @@ struct LangVarRef
 
 	void assignValue( Compiler *pd, CodeVect &code, UniqueType *exprUT ) const;
 
-	IterImpl *chooseTriterCall( Compiler *pd, CallArgVect *args );
+	IterImpl *chooseTriterCall( Compiler *pd, UniqueType *searchUT, CallArgVect *args );
 
 	/* The deref generics value is for iterator calls with lists and maps as args. */
 	ObjectField **evaluateArgs( Compiler *pd, CodeVect &code, 

@@ -95,6 +95,7 @@ void BaseParser::mapElDef( String name, TypeRef *keyType )
 	structVarDef( InputLoc(), of );
 }
 
+#if 0
 void BaseParser::argvDecl()
 {
 	String structName = "argv_el";
@@ -117,6 +118,7 @@ void BaseParser::argvDecl()
 	structStack.pop();
 	namespaceStack.pop();
 }
+#endif
 
 void BaseParser::init()
 {
@@ -157,7 +159,7 @@ void BaseParser::init()
 	pd->declareBaseLangEls();
 	pd->initUniqueTypes();
 
-	argvDecl();
+	//argvDecl();
 
 	/* Internal variables. */
 	addArgvList();
@@ -420,9 +422,37 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 
 void BaseParser::addArgvList()
 {
-	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
-	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, "argv_el", RepeatNone );
-	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List, 0, typeRef, 0 );
+	TypeRef *valType = TypeRef::cons( internal, pd->uniqueTypeStr );
+
+	/* Create the value list element. */
+	String name( 32, "vlist_el_%s", valType->stringify().c_str() );
+
+	if ( !genericElDefined.find( name ) ) {
+		genericElDefined.insert( name );
+
+		structHead( internal, pd->rootNamespace, name, ObjectDef::StructType );
+
+		/* Var def. */
+		String id = "value";
+		ObjectField *elValObjField = ObjectField::cons( internal,
+				ObjectField::StructFieldType, valType, id );
+		structVarDef( internal, elValObjField );
+
+		pd->argvEl = elValObjField->context;
+		elValObjField->context->listEl = true;
+
+		/* List El. */
+		listElDef( "el" );
+
+		structStack.pop();
+		namespaceStack.pop();
+	}
+
+	TypeRef *elType = TypeRef::cons( internal,
+			emptyNspaceQual(), name );
+
+	pd->argvTypeRef = TypeRef::cons( internal,
+			TypeRef::ValueList, 0, elType, valType );
 }
 
 ObjectDef *BaseParser::blockOpen()

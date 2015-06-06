@@ -62,7 +62,7 @@ syntax keyword Type
 	\ end eos print
 
 syntax keyword typeKeywords
-	\ int str bool any ref ptr void list_el map_el
+	\ int str bool any ref ptr void
 
 syntax keyword Keyword
 	\ reject else elsif return yield for while if

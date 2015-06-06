@@ -41,9 +41,13 @@ string TypeRef::stringify()
 {
 	string s;
 	switch ( type ) {
-		case Unspecified:
-			s = "unspecified";
+		case Unspecified: {
+			if ( uniqueType->typeId == TYPE_INT )
+				s = "int";
+			else
+				s = "unspecified";
 			break;
+		}
 		case Name:
 			s = typeName;
 			break;
@@ -53,24 +57,24 @@ string TypeRef::stringify()
 		case Iterator:
 			s = "iterator";
 			break;
-		case List:
-			s = "list";
-			break;
+//		case List:
+//			s = "list";
+//			break;
 		case ValueList:
 			s = "vlist";
 			break;
-		case ListEl:
-			s = "listel";
-			break;
-		case Map:
-			s = "map";
-			break;
+//		case ListEl:
+//			s = "listel";
+//			break;
+//		case Map:
+//			s = "map";
+//			break;
 		case ValueMap:
 			s = "vmap";
 			break;
-		case MapEl:
-			s = "mapel";
-			break;
+//		case MapEl:
+//			s = "mapel";
+//			break;
 		case Parser:
 			s = "parser";
 			break;

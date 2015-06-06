@@ -1,4 +1,4 @@
-new M: vmap<str, str>()
+new M: map<str, str>()
 
 M->insert( "hello",  "friend" )
 M->insert( "one--",  "num1" )

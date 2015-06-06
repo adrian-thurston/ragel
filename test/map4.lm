@@ -1,5 +1,5 @@
 
-new M: vmap<int, str>()
+new M: map<int, str>()
 
 M->insert( 0, "hello" )
 M->insert( 1, "one" )

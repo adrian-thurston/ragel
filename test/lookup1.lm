@@ -1,19 +1,19 @@
 
 context lookup
 	alias list_lang_object
-		vlist<lang_object>
+		list<lang_object>
 
 	alias list_declaration_data
-		vlist<declaration_data>
+		list<declaration_data>
 
 	alias list_declarator_data
-		vlist<declarator_data>
+		list<declarator_data>
 
 	alias list_int
-		vlist<int>
+		list<int>
 	
 	alias map_list_lang_object
-		vmap<str, list_lang_object>
+		map<str, list_lang_object>
 	
 	#
 	# Data types for global data.

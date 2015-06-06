@@ -162,6 +162,14 @@ struct BaseParser
 	void popScope();
 
 	virtual void go( long activeRealm ) = 0;
+
+	BstSet<String, CmpStr> genericElDefined;
+
+	NamespaceQual *emptyNspaceQual()
+	{
+		return NamespaceQual::cons( curNspace() );
+	}
+
 };
 
 #endif

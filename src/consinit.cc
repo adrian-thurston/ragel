@@ -758,8 +758,7 @@ void ConsInit::parseInput( StmtList *stmtList )
 			0, curLocalFrame->rootScope, popQual, String("pop") );
 	LangExpr *pop = LangExpr::cons( LangTerm::cons( InputLoc(), popRef, popArgs ) );
 
-	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
-	TypeRef *typeRef = TypeRef::cons( internal, nspaceQual, "argv_el", RepeatNone );
+	TypeRef *typeRef = TypeRef::cons( internal, pd->uniqueTypeStr );
 	ObjectField *objField = ObjectField::cons( internal,
 			ObjectField::UserLocalType, typeRef, "A" );
 
@@ -775,9 +774,8 @@ void ConsInit::parseInput( StmtList *stmtList )
 
 	/* Reference A->value */
 	QualItemVect *qual = new QualItemVect;
-	qual->append( QualItem( QualItem::Arrow, internal, "A" ) );
 	LangVarRef *varRef = LangVarRef::cons( internal, 0,
-			curLocalFrame->rootScope, qual, String("value") );
+			curLocalFrame->rootScope, qual, String("A") );
 	LangExpr *Avalue = LangExpr::cons( LangTerm::cons( internal,
 			LangTerm::VarRefType, varRef ) );
 	
@@ -799,7 +797,7 @@ void ConsInit::parseInput( StmtList *stmtList )
 			ObjectField::UserLocalType, 0, String("P") );
 
 	/* Parse the "start" def. */
-	nspaceQual = NamespaceQual::cons( curNspace() );
+	NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 	typeRef = TypeRef::cons( internal, nspaceQual,
 			String("start"), RepeatNone );
 

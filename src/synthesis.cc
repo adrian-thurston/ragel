@@ -826,7 +826,8 @@ ObjectField *LangVarRef::evaluateRef( Compiler *pd, CodeVect &code, long pushCou
 	return lookup.objField;
 }
 
-IterImpl *LangVarRef::chooseTriterCall( Compiler *pd, CallArgVect *args )
+IterImpl *LangVarRef::chooseTriterCall( Compiler *pd,
+		UniqueType *searchUT, CallArgVect *args )
 {
 	IterImpl *iterImpl = 0;
 
@@ -840,8 +841,12 @@ IterImpl *LangVarRef::chooseTriterCall( Compiler *pd, CallArgVect *args )
 		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_LIST )
 			iterImpl = new IterImpl( IterImpl::List );
 
-		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_VLIST )
-			iterImpl = new IterImpl( IterImpl::ValueList );
+		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_VLIST ) {
+			if ( searchUT->structEl != 0 && searchUT->structEl->listEl )
+				iterImpl = new IterImpl( IterImpl::List );
+			else
+				iterImpl = new IterImpl( IterImpl::ValueList );
+		}
 
 		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_MAP )
 			iterImpl = new IterImpl( IterImpl::Map );
@@ -2267,7 +2272,6 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	/* The type we are searching for. */
 	UniqueType *searchUT = typeRef->uniqueType;
 
-
 	/* Lookup the iterator call. Make sure it is an iterator. */
 	VarRefLookup lookup = iterCall->langTerm->varRef->lookupMethod( pd );
 	if ( lookup.objMethod->iterDef == 0 ) {
@@ -2294,7 +2298,7 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	switch ( iterUT->iterDef->type ) {
 		case IterDef::Tree:
 			iterImpl = iterCall->langTerm->varRef->chooseTriterCall( pd,
-					iterCall->langTerm->args );
+					searchUT, iterCall->langTerm->args );
 			break;
 		case IterDef::Child:
 			iterImpl = new IterImpl( IterImpl::Child );
