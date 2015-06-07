@@ -40,7 +40,7 @@ def args
 ArgParser: parser<args> = new parser<args>()
 
 # Parse the args and extract the result into Args.
-A: argv_el = argv->head
+A: list_el<str> = argv->head_el
 while ( A ) {
 	send ArgParser [A->value '\0']
 	A = A->next

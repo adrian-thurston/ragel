@@ -1,7 +1,7 @@
 
 new M: map<str, str>()
 
-AE: argv_el = argv->head
+AE: list_el<str> = argv->head_el
 while AE {
 	M->insert( AE->value, AE->value )
 	AE = AE->next

@@ -1,6 +1,6 @@
 print_xml( arg0 )
 
-A: argv_el = argv->head
+A: list_el<str> = argv->head_el
 while ( A ) {
 	print_xml( A->value )
 	A = A->next
