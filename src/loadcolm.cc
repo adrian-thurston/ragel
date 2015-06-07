@@ -826,91 +826,25 @@ struct LoadColm
 	TypeRef *walkValueList( type_ref typeRef )
 	{
 		TypeRef *valType = walkTypeRef( typeRef._type_ref() );
-
-		/* Create the value list element. */
-		String name( 32, "vlist_el_%s", valType->stringify().c_str() );
-
-		if ( !genericElDefined.find( name ) ) {
-			genericElDefined.insert( name );
-
-			structHead( internal, pd->rootNamespace, name, ObjectDef::StructType );
-
-			/* Var def. */
-			String id = "value";
-			ObjectField *elValObjField = ObjectField::cons( internal,
-					ObjectField::StructFieldType, valType, id );
-			structVarDef( internal, elValObjField );
-			elValObjField->context->listEl = true;
-
-			/* List El. */
-			listElDef( "el" );
-
-			structStack.pop();
-			namespaceStack.pop();
-		}
-
-		TypeRef *elType = TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
+		TypeRef *elType = TypeRef::cons( typeRef.loc(), TypeRef::ListEl, valType );
 		return TypeRef::cons( typeRef.loc(), TypeRef::List, 0, elType, valType );
 	}
 
 	TypeRef *walkListEl( type_ref typeRef )
 	{
 		TypeRef *valType = walkTypeRef( typeRef._type_ref() );
-
-		/* Create the value list element. */
-		String name( 32, "vlist_el_%s", valType->stringify().c_str() );
-
-		if ( !genericElDefined.find( name ) ) {
-			genericElDefined.insert( name );
-
-			structHead( internal, pd->rootNamespace, name, ObjectDef::StructType );
-
-			/* Var def. */
-			String id = "value";
-			ObjectField *elValObjField = ObjectField::cons( internal,
-					ObjectField::StructFieldType, valType, id );
-			structVarDef( internal, elValObjField );
-			elValObjField->context->listEl = true;
-
-			/* List El. */
-			listElDef( "el" );
-
-			structStack.pop();
-			namespaceStack.pop();
-		}
-
-		return TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
+		return TypeRef::cons( typeRef.loc(), TypeRef::ListEl, valType );
 	}
 
 	TypeRef *walkValueMap( type_ref typeRef )
 	{
 		TypeRef *keyType = walkTypeRef( typeRef.KeyType() );
 		TypeRef *valType = walkTypeRef( typeRef.ValType() );
+		TypeRef *elType = TypeRef::cons( typeRef.loc(),
+				TypeRef::MapEl, 0, keyType, valType );
 
-		String name( 32, "vmap_el_%s_%s", keyType->stringify().c_str(),
-				valType->stringify().c_str() );
-
-		if ( !genericElDefined.find( name ) ) {
-			genericElDefined.insert( name );
-		
-			structHead( internal, pd->rootNamespace, name, ObjectDef::StructType );
-
-			/* Var def. */
-			String id = "value";
-			ObjectField *elValObjField = ObjectField::cons( internal,
-					ObjectField::StructFieldType, valType, id );
-			structVarDef( internal, elValObjField );
-
-			/* Map El. */
-			mapElDef( "el", keyType );
-
-			structStack.pop();
-			namespaceStack.pop();
-		}
-
-		TypeRef *elType = TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
-
-		return TypeRef::cons( typeRef.loc(), TypeRef::Map, 0, keyType, elType, valType );
+		return TypeRef::cons( typeRef.loc(), TypeRef::Map, 0,
+				keyType, elType, valType );
 	}
 
 	TypeRef *walkMapEl( type_ref typeRef )
@@ -918,28 +852,7 @@ struct LoadColm
 		TypeRef *keyType = walkTypeRef( typeRef.KeyType() );
 		TypeRef *valType = walkTypeRef( typeRef.ValType() );
 
-		String name( 32, "vmap_el_%s_%s", keyType->stringify().c_str(),
-				valType->stringify().c_str() );
-
-		if ( !genericElDefined.find( name ) ) {
-			genericElDefined.insert( name );
-		
-			structHead( internal, pd->rootNamespace, name, ObjectDef::StructType );
-
-			/* Var def. */
-			String id = "value";
-			ObjectField *elValObjField = ObjectField::cons( internal,
-					ObjectField::StructFieldType, valType, id );
-			structVarDef( internal, elValObjField );
-
-			/* Map El. */
-			mapElDef( "el", keyType );
-
-			structStack.pop();
-			namespaceStack.pop();
-		}
-
-		return TypeRef::cons( typeRef.loc(), emptyNspaceQual(), name );
+		return TypeRef::cons( typeRef.loc(), TypeRef::MapEl, 0, keyType, valType );
 	}
 
 	TypeRef *walkTypeRef( type_ref typeRef )

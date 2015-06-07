@@ -189,6 +189,65 @@ UniqueType *TypeRef::resolveTypeListPtrs( Compiler *pd )
 	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
 
+UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
+{
+	UniqueType *utValue = typeRef1->resolveType( pd );	
+
+	UniqueGeneric searchKey( UniqueGeneric::ListEl, utValue );
+	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueGeneric( searchKey );
+		pd->uniqueGenericMap.insert( inMap );
+
+		static long vlistElId = 1;
+		String name( 32, "vlist_el_%d", vlistElId++ );
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::StructType,
+				name, pd->nextObjectId++ );
+
+		StructDef *structDef = new StructDef( loc, name, objectDef );
+
+		pd->rootNamespace->structDefList.append( structDef );
+
+		/* Make the new namespace. */
+		Namespace *nspace = new Namespace( loc, name,
+				pd->namespaceList.length(), pd->rootNamespace );
+
+		pd->rootNamespace->childNamespaces.append( nspace );
+
+		pd->namespaceList.append( nspace );
+
+
+		/* Value Element. */
+		String id = "value";
+		ObjectField *elValObjField = ObjectField::cons( internal,
+					ObjectField::StructFieldType, typeRef1, id );
+
+		elValObjField->context = structDef;
+		objectDef->rootScope->insertField( elValObjField->name, elValObjField );
+
+		elValObjField->context->listEl = true;
+
+		/* List element with the same name as containing context. */
+		NamespaceQual *nspaceQual = NamespaceQual::cons( nspace );
+		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, name, RepeatNone );
+		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListPtrs, 0, objTr, 0 );
+
+		ObjectField *of = ObjectField::cons( InputLoc(),
+				ObjectField::GenericElementType, elTr, name );
+
+		of->context = structDef;
+		objectDef->rootScope->insertField( of->name, of );
+
+		/* Note this is recurse, all of above must complete. */
+		//structDef->declare( pd, nspace );
+
+		StructEl *sel = declareStruct( pd, pd->rootNamespace, name, structDef );
+		inMap->structEl = sel;
+	}
+
+	return pd->findUniqueType( TYPE_STRUCT, inMap->structEl );
+}
+
 UniqueType *TypeRef::resolveTypeMapPtrs( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
@@ -214,6 +273,70 @@ UniqueType *TypeRef::resolveTypeMapPtrs( Compiler *pd )
 	generic = inMap->generic;
 	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
+
+UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
+{
+	TypeRef *keyType = typeRef1;
+	TypeRef *valType = typeRef2;
+
+	UniqueType *utKey = keyType->resolveType( pd );	
+	UniqueType *utValue = valType->resolveType( pd );	
+
+	UniqueGeneric searchKey( UniqueGeneric::MapEl, utKey, utValue );
+	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
+	if ( inMap == 0 ) {
+		inMap = new UniqueGeneric( searchKey );
+		pd->uniqueGenericMap.insert( inMap );
+
+		static long vlistElId = 1;
+		String name( 32, "map_el_%d", vlistElId++ );
+		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::StructType,
+				name, pd->nextObjectId++ );
+
+		StructDef *structDef = new StructDef( loc, name, objectDef );
+
+		pd->rootNamespace->structDefList.append( structDef );
+
+		/* Make the new namespace. */
+		Namespace *nspace = new Namespace( loc, name,
+				pd->namespaceList.length(), pd->rootNamespace );
+
+		pd->rootNamespace->childNamespaces.append( nspace );
+
+		pd->namespaceList.append( nspace );
+
+
+		/* Value Element. */
+		String id = "value";
+		ObjectField *elValObjField = ObjectField::cons( internal,
+					ObjectField::StructFieldType, valType, id );
+
+		elValObjField->context = structDef;
+		objectDef->rootScope->insertField( elValObjField->name, elValObjField );
+
+		elValObjField->context->mapEl = true;
+
+		/* List element with the same name as containing context. */
+		NamespaceQual *nspaceQual = NamespaceQual::cons( nspace );
+		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, name, RepeatNone );
+		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapPtrs, 0, objTr, keyType );
+
+		ObjectField *of = ObjectField::cons( InputLoc(),
+				ObjectField::GenericElementType, elTr, name );
+
+		of->context = structDef;
+		objectDef->rootScope->insertField( of->name, of );
+
+		/* Note this is recurse, all of above must complete. */
+		//structDef->declare( pd, nspace );
+
+		StructEl *sel = declareStruct( pd, pd->rootNamespace, name, structDef );
+		inMap->structEl = sel;
+	}
+
+	return pd->findUniqueType( TYPE_STRUCT, inMap->structEl );
+}
+
 
 UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 {
@@ -381,12 +504,6 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 		case Literal:
 			uniqueType = resolveTypeLiteral( pd );
 			break;
-		case ListPtrs:
-			uniqueType = resolveTypeListPtrs( pd );
-			break;
-		case MapPtrs:
-			uniqueType = resolveTypeMapPtrs( pd );
-			break;
 		case Parser:
 			uniqueType = resolveTypeParser( pd );
 			break;
@@ -396,11 +513,25 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 		case Iterator:
 			uniqueType = resolveIterator( pd );
 			break;
+
 		case List:
 			uniqueType = resolveTypeList( pd );
 			break;
+		case ListPtrs:
+			uniqueType = resolveTypeListPtrs( pd );
+			break;
+		case ListEl:
+			uniqueType = resolveTypeListEl( pd );
+			break;
+
 		case Map:
 			uniqueType = resolveTypeMap( pd );
+			break;
+		case MapPtrs:
+			uniqueType = resolveTypeMapPtrs( pd );
+			break;
+		case MapEl:
+			uniqueType = resolveTypeMapEl( pd );
 			break;
 			
 		case Unspecified:
@@ -859,7 +990,8 @@ void Compiler::resolvePass()
 
 	resolveParseTree();
 
-	argvTypeRef->resolveType( this );
+	UniqueType *argvUT = argvTypeRef->resolveType( this );
+	argvElSel = argvUT->generic->elUt->structEl;
 
 	/* We must do this as the last step in the type resolution process because
 	 * all type resolves can cause new language elments with associated

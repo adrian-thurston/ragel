@@ -555,7 +555,8 @@ struct StructDef
 		name(name),
 		objectDef(objectDef),
 		structEl(0),
-		listEl(false)
+		listEl(false),
+		mapEl(false)
 	{}
 
 	InputLoc loc;
@@ -563,6 +564,7 @@ struct StructDef
 	ObjectDef *objectDef;
 	StructEl *structEl;
 	bool listEl;
+	bool mapEl;
 
 	StructDef *prev, *next;
 };
@@ -574,13 +576,15 @@ struct StructEl
 		name(name),
 		structDef(structDef),
 		id(-1),
-		listEl(false)
+		listEl(false),
+		mapEl(false)
 	{}
 
 	String name;
 	StructDef *structDef;
 	int id;
 	bool listEl;
+	bool mapEl;
 
 	StructEl *prev, *next;
 };
@@ -1955,21 +1959,37 @@ struct UniqueGeneric
 	{
 		List,
 		ListPtrs,
+		ListEl,
 		Map,
 		MapPtrs,
+		MapEl,
 		Parser
 	};
 
-	UniqueGeneric( Type type, UniqueType *value ) :
-		type(type), key(0), value(value), generic(0) {}
+	UniqueGeneric( Type type, UniqueType *value )
+	:
+		type(type),
+		key(0),
+		value(value),
+		generic(0),
+		structEl(0)
+	{}
 
-	UniqueGeneric( Type type, UniqueType *key, UniqueType *value ) :
-		type(type), key(key), value(value), generic(0) {}
+	UniqueGeneric( Type type, UniqueType *key, UniqueType *value )
+	:
+		type(type),
+		key(key),
+		value(value),
+		generic(0),
+		structEl(0)
+	{}
 
 	Type type;
 	UniqueType *key;
 	UniqueType *value;
+
 	GenericType *generic;
+	StructEl *structEl;
 };
 
 struct CmpUniqueGeneric
@@ -1979,7 +1999,6 @@ struct CmpUniqueGeneric
 };
 
 typedef AvlBasic< UniqueGeneric, CmpUniqueGeneric > UniqueGenericMap;
-
 
 /*
  *
@@ -2000,7 +2019,9 @@ struct TypeRef
 		Iterator,
 		List,
 		ListPtrs,
+		ListEl,
 		Map,
+		MapEl,
 		MapPtrs,
 		Parser,
 		Ref
@@ -2187,8 +2208,10 @@ struct TypeRef
 	UniqueType *resolveTypeLiteral( Compiler *pd );
 	UniqueType *resolveTypeList( Compiler *pd );
 	UniqueType *resolveTypeListPtrs( Compiler *pd );
+	UniqueType *resolveTypeListEl( Compiler *pd );
 	UniqueType *resolveTypeMap( Compiler *pd );
 	UniqueType *resolveTypeMapPtrs( Compiler *pd );
+	UniqueType *resolveTypeMapEl( Compiler *pd );
 	UniqueType *resolveTypeParser( Compiler *pd );
 	UniqueType *resolveType( Compiler *pd );
 	UniqueType *resolveTypeRef( Compiler *pd );
@@ -2215,8 +2238,6 @@ struct TypeRef
 	UniqueType *searchUniqueType;
 	GenericType *generic;
 	TypeRef *searchTypeRef;
-
-	std::string stringify();
 };
 
 typedef DList<ObjectField> ParameterList; 

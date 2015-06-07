@@ -37,48 +37,6 @@ ostream &operator<<( ostream &out, const NameRef &nameRef );
 ostream &operator<<( ostream &out, const NameInst &nameInst );
 ostream &operator<<( ostream &out, const Token &token );
 
-string TypeRef::stringify()
-{
-	string s;
-	switch ( type ) {
-		case Unspecified: {
-			if ( uniqueType->typeId == TYPE_INT )
-				s = "int";
-			else
-				s = "unspecified";
-			break;
-		}
-		case Name:
-			s = typeName;
-			break;
-		case Literal:
-			s = "literal";
-			break;
-		case Iterator:
-			s = "iterator";
-			break;
-		case List:
-			s = "list";
-			break;
-		case ListPtrs:
-			s = "list_ptrs";
-			break;
-		case Map:
-			s = "map";
-			break;
-		case MapPtrs:
-			s = "map_ptrs";
-			break;
-		case Parser:
-			s = "parser";
-			break;
-		case Ref:
-			s = "ref";
-			break;
-	}
-	return s;
-}
-
 /* Convert the literal string which comes in from the scanner into an array of
  * characters with escapes and options interpreted. Also null terminates the
  * string. Though this null termination should not be relied on for
@@ -214,11 +172,13 @@ int CmpUniqueGeneric::compare( const UniqueGeneric &ut1, const UniqueGeneric &ut
 		switch ( ut1.type ) {
 		case UniqueGeneric::List:
 		case UniqueGeneric::ListPtrs:
+		case UniqueGeneric::ListEl:
 		case UniqueGeneric::Parser:
 			break;
 
 		case UniqueGeneric::Map:
 		case UniqueGeneric::MapPtrs:
+		case UniqueGeneric::MapEl:
 			if ( ut1.key < ut2.key )
 				return -1;
 			else if ( ut1.key > ut2.key )

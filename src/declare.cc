@@ -252,6 +252,8 @@ StructEl *declareStruct( Compiler *pd, Namespace *inNspace,
 
 	if ( structDef->listEl )
 		structEl->listEl = true;
+	if ( structDef->mapEl )
+		structEl->mapEl = true;
 
 	if ( inNspace ) {
 		TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::StructType, data, structEl );
@@ -430,12 +432,8 @@ void Namespace::declare( Compiler *pd )
 		}
 	}
 
-	for ( StructDefList::Iter s = structDefList; s.lte(); s++ ) {
-		StructEl *sel = declareStruct( pd, this, s->name, s );
-		if ( s == pd->argvEl )
-			pd->argvElSel = sel;
-			
-	}
+	for ( StructDefList::Iter s = structDefList; s.lte(); s++ )
+		declareStruct( pd, this, s->name, s );
 
 	for ( TokenDefListNs::Iter tokenDef = tokenDefList; tokenDef.lte(); tokenDef++ ) {
 		/* Literals already taken care of. */
@@ -730,8 +728,6 @@ void Compiler::makeDefaultIterators()
 		IterDef *triter = findIterDef( IterDef::RevValueList );
 		objMethod->iterDef = triter;
 	}
-
-
 
 	/* Map iterator. */
 	{

@@ -851,8 +851,12 @@ IterImpl *LangVarRef::chooseTriterCall( Compiler *pd,
 		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_MAP )
 			iterImpl = new IterImpl( IterImpl::Map );
 
-		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_VMAP )
-			iterImpl = new IterImpl( IterImpl::ValueMap );
+		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_VMAP ) {
+			if ( searchUT->structEl != 0 && searchUT->structEl->mapEl )
+				iterImpl = new IterImpl( IterImpl::Map );
+			else
+				iterImpl = new IterImpl( IterImpl::ValueMap );
+		}
 	}
 
 	if ( iterImpl == 0 )
