@@ -1132,6 +1132,15 @@ void Compiler::initValueMapFunctions( GenericType *gen )
 
 	initFunction( gen->elUt, gen->objDef, "remove", 
 			IN_VMAP_REMOVE_WV, IN_VMAP_REMOVE_WC, gen->keyUt, false, true, gen );
+
+	initFunction( gen->elUt, gen->objDef, "find_el", 
+			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUt, true, true, gen );
+
+	initFunction( uniqueTypeInt, gen->objDef, "insert_el", 
+			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->elUt, false, true, gen );
+
+	initFunction( gen->elUt, gen->objDef, "detach_el", 
+			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->elUt, false, true, gen );
 }
 
 void Compiler::initMapField( GenericType *gen, const char *name, int offset )
@@ -1163,16 +1172,16 @@ void Compiler::initMapFields( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_MAP_LENGTH );
 
-	initMapField( gen, "head", 0 );
-	initMapField( gen, "tail", 1 );
+	initMapField( gen, "head_el", 0 );
+	initMapField( gen, "tail_el", 1 );
 }
 
 void Compiler::initValueMapFields( GenericType *gen )
 {
 	addLengthField( gen->objDef, IN_MAP_LENGTH );
 
-	initMapField( gen, "head", 0 );
-	initMapField( gen, "tail", 1 );
+	initMapField( gen, "head_el", 0 );
+	initMapField( gen, "tail_el", 1 );
 }
 
 void Compiler::initMapElKey( GenericType *gen, const char *name, int offset )
@@ -1259,6 +1268,24 @@ void Compiler::initValueListFunctions( GenericType *gen )
 
 	initFunction( gen->valueUt, gen->objDef, "pop", 
 			IN_VLIST_POP_HEAD_WV, IN_VLIST_POP_HEAD_WC, false, true, gen );
+
+	initFunction( uniqueTypeInt, gen->objDef, "push_head_el", 
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
+
+	initFunction( uniqueTypeInt, gen->objDef, "push_tail_el", 
+			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->elUt, false, true, gen );
+
+	initFunction( uniqueTypeInt, gen->objDef, "push_el", 
+			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
+
+	initFunction( gen->elUt, gen->objDef, "pop_head_el", 
+			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
+
+	initFunction( gen->elUt, gen->objDef, "pop_tail_el", 
+			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, true, gen );
+
+	initFunction( gen->elUt, gen->objDef, "pop_el", 
+			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
 }
 
 void Compiler::initListElField( GenericType *gen, const char *name, int offset )
@@ -1353,6 +1380,10 @@ void Compiler::initValueListFields( GenericType *gen )
 	initValueListField( gen, "head", 0 );
 	initValueListField( gen, "tail", 1 );
 	initValueListField( gen, "top", 0 );
+
+	initListField( gen, "head_el", 0 );
+	initListField( gen, "tail_el", 1 );
+	initListField( gen, "top_el", 0 );
 }
 
 void Compiler::initParserFunctions( GenericType *gen )

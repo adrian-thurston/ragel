@@ -1,4 +1,4 @@
-A: argv_el = argv->pop()
+A: list_el<str> = argv->pop_el()
 print( A->value, '\n' )
 ##### ARGS #####
 a
