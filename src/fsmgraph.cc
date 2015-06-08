@@ -719,6 +719,8 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 	/* Create a new start state. */
 	setStartState( addState() );
 
+	ctx->nfaUnionOp = true;
+
 	if ( depth == 0 ) {
 		startState->stateDictEl = new StateDictEl( startStateSet );
 		nfaList.append( startState );
@@ -783,6 +785,8 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 			std::cout << std::endl;
 		}
 	}
+
+	ctx->nfaUnionOp = false;
 }
 
 
@@ -1326,8 +1330,11 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 		destState->epsilonTrans.append( EpsilonTrans( srcState->epsilonTrans ) );
 
 		/* Get all actions, duplicating to protect against write to source. */
-		destState->toStateActionTable.setActions( 
-				ActionTable( srcState->toStateActionTable ) );
+		if ( !ctx->nfaUnionOp ) {
+			destState->toStateActionTable.setActions( 
+					ActionTable( srcState->toStateActionTable ) );
+		}
+
 		destState->fromStateActionTable.setActions( 
 				ActionTable( srcState->fromStateActionTable ) );
 		destState->outActionTable.setActions( ActionTable( srcState->outActionTable ) );
@@ -1343,7 +1350,9 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 		destState->outPriorTable.setPriors( srcState->outPriorTable );
 
 		/* Get all actions. */
-		destState->toStateActionTable.setActions( srcState->toStateActionTable );
+		if ( !ctx->nfaUnionOp )
+			destState->toStateActionTable.setActions( srcState->toStateActionTable );
+
 		destState->fromStateActionTable.setActions( srcState->fromStateActionTable );
 		destState->outActionTable.setActions( srcState->outActionTable );
 		destState->errActionTable.setActions( srcState->errActionTable );

@@ -812,7 +812,8 @@ struct FsmCtx
 
 		nfaTermCheck(nfaTermCheck),
 
-		unionOp(false)
+		unionOp(false),
+		nfaUnionOp(false)
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
@@ -828,6 +829,7 @@ struct FsmCtx
 	bool nfaTermCheck;
 
 	bool unionOp;
+	bool nfaUnionOp;
 };
 
 typedef InList<CondAp> CondInList;

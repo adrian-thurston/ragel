@@ -343,6 +343,7 @@ void FlatExpGoto::writeExec()
 			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "} " << LABEL( "_again" ) << " {\n";
 
+	#if 0
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
@@ -350,6 +351,7 @@ void FlatExpGoto::writeExec()
 			"	}\n"
 			"\n";
 	}
+	#endif
 
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
@@ -404,6 +406,21 @@ void FlatExpGoto::writeExec()
 			"	}\n"
 			"\n";
 	}
+
+	out <<
+		"	if ( " << P() << " != " << vEOF() << " )\n"
+		"	{\n";
+
+	if ( redFsm->anyToStateActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
+			TO_STATE_ACTION_SWITCH() <<
+			"	}\n"
+			"\n";
+	}
+
+	out <<
+		"	}\n";
 
 	if ( outLabelUsed )
 		out << "} " << LABEL( "_out" ) << " { {}\n";
