@@ -431,29 +431,35 @@ def prod_list
 |	[prod] :Base
 
 def case_clause
-	[CASE pattern block_or_single]
+	[CASE pattern block_or_single] commit
 
 def default_clause
-	[DEFAULT block_or_single]
+	[DEFAULT block_or_single] commit
 
 def case_clause_list
 	[case_clause case_clause_list] :Recursive
 |	[case_clause] :BaseCase
 |	[default_clause] :BaseDefault
 
+# Note a commit on switch doesn't work because the default clause in
+# case_clause follow sets cause a premature commit. We could use a proper list
+# for case clauses, followed by an optional default, but just move the commits
+# to the clauses, which is is a better commit strategy anyways. Gives more
+# regular commits.
+
 def statement
-	[print_stmt] :Print
-|	[expr_stmt] :Expr
-|	[var_def opt_def_init] :VarDef
-|	[FOR id COLON type_ref IN iter_call block_or_single] :For
-|	[IF code_expr block_or_single elsif_list] :If
+	[print_stmt] :Print commit
+|	[expr_stmt] :Expr commit
+|	[var_def opt_def_init] :VarDef commit
+|	[FOR id COLON type_ref IN iter_call block_or_single] :For commit
+|	[IF code_expr block_or_single elsif_list] :If commit
 |	[SWITCH var_ref case_clause_list] :Switch
-|	[WHILE code_expr block_or_single] :While
-|	[var_ref EQUALS code_expr] :LhsVarRef
-|	[YIELD var_ref] :Yield
-|	[RETURN code_expr] :Return
-|	[BREAK] :Break
-|	[REJECT] :Reject
+|	[WHILE code_expr block_or_single] :While commit
+|	[var_ref EQUALS code_expr] :LhsVarRef commit
+|	[YIELD var_ref] :Yield commit
+|	[RETURN code_expr] :Return commit
+|	[BREAK] :Break commit
+|	[REJECT] :Reject commit
 
 def elsif_list
 	[elsif_clause elsif_list] :Clause
