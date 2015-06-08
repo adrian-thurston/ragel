@@ -400,9 +400,15 @@ void FsmAp::setErrorActions( StateAp *state, const ActionTable &other )
 
 	/* Set error transitions in the transitions that go to error. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-			if ( cond->toState == 0 )
-				cond->actionTable.setActions( other );
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState == 0 )
+				trans->tdap()->actionTable.setActions( other );
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState == 0 )
+					cond->actionTable.setActions( other );
+			}
 		}
 	}
 }
