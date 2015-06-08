@@ -361,10 +361,10 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 {
 	elUt = elTr->resolveType( pd );
  
-	if ( typeId == GEN_MAP || typeId == GEN_VMAP )
+	if ( typeId == GEN_MAP )
 		keyUt = keyTr->resolveType( pd );
 	
-	if ( typeId == GEN_VMAP || typeId == GEN_VLIST )
+	if ( typeId == GEN_MAP || typeId == GEN_LIST )
 		valueUt = valueTr->resolveType( pd );
 	
 	objDef = ObjectDef::cons( ObjectDef::BuiltinType, 
@@ -374,22 +374,10 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 		case GEN_MAP:
 			pd->initMapFunctions( this );
 			pd->initMapFields( this );
-			pd->initMapElFields( this );
-			break;
-		case GEN_VMAP:
-			pd->initValueMapFunctions( this );
-			pd->initValueMapFields( this );
-			pd->initMapElFields( this );
 			break;
 		case GEN_LIST:
 			pd->initListFunctions( this );
 			pd->initListFields( this );
-			pd->initListElFields( this );
-			break;
-		case GEN_VLIST:
-			pd->initValueListFunctions( this );
-			pd->initValueListFields( this );
-			pd->initListElFields( this );
 			break;
 		case GEN_PARSER:
 			elUt->langEl->parserId = pd->nextParserId++;
@@ -705,17 +693,7 @@ void Compiler::makeDefaultIterators()
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"list_iter", IN_HALT, IN_HALT, anyRefUT, true );
 
-		IterDef *triter = findIterDef( IterDef::List );
-		objMethod->iterDef = triter;
-	}
-
-	/* Value List iterator. */
-	{
-		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
-				"vlist_iter", IN_HALT, IN_HALT, anyRefUT, true );
-
-		IterDef *triter = findIterDef( IterDef::ValueList );
+		IterDef *triter = findIterDef( IterDef::ListEl );
 		objMethod->iterDef = triter;
 	}
 
@@ -723,9 +701,9 @@ void Compiler::makeDefaultIterators()
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
-				"rev_vlist_iter", IN_HALT, IN_HALT, anyRefUT, true );
+				"rev_list_iter", IN_HALT, IN_HALT, anyRefUT, true );
 
-		IterDef *triter = findIterDef( IterDef::RevValueList );
+		IterDef *triter = findIterDef( IterDef::RevListVal );
 		objMethod->iterDef = triter;
 	}
 
@@ -735,7 +713,7 @@ void Compiler::makeDefaultIterators()
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
 				"map_iter", IN_HALT, IN_HALT, anyRefUT, true );
 
-		IterDef *triter = findIterDef( IterDef::Map );
+		IterDef *triter = findIterDef( IterDef::MapEl );
 		objMethod->iterDef = triter;
 	}
 }
@@ -1111,18 +1089,7 @@ void Compiler::addError()
 
 void Compiler::initMapFunctions( GenericType *gen )
 {
-	initFunction( gen->elUt, gen->objDef, "find", 
-			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUt, true, true, gen );
-
-	initFunction( uniqueTypeInt, gen->objDef, "insert", 
-			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->elUt, false, true, gen );
-
-	initFunction( gen->elUt, gen->objDef, "detach", 
-			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->elUt, false, true, gen );
-}
-
-void Compiler::initValueMapFunctions( GenericType *gen )
-{
+	/* Value functions. */
 	initFunction( gen->valueUt, gen->objDef, "find", 
 			IN_VMAP_FIND,      IN_VMAP_FIND, gen->keyUt, true, true, gen );
 
@@ -1133,6 +1100,9 @@ void Compiler::initValueMapFunctions( GenericType *gen )
 	initFunction( gen->elUt, gen->objDef, "remove", 
 			IN_VMAP_REMOVE_WV, IN_VMAP_REMOVE_WC, gen->keyUt, false, true, gen );
 
+	/*
+	 * Element Functions
+	 */
 	initFunction( gen->elUt, gen->objDef, "find_el", 
 			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUt, true, true, gen );
 
@@ -1174,14 +1144,11 @@ void Compiler::initMapFields( GenericType *gen )
 
 	initMapField( gen, "head_el", 0 );
 	initMapField( gen, "tail_el", 1 );
-}
 
-void Compiler::initValueMapFields( GenericType *gen )
-{
-	addLengthField( gen->objDef, IN_MAP_LENGTH );
+	initMapElKey( gen, "key", 0 );
 
-	initMapField( gen, "head_el", 0 );
-	initMapField( gen, "tail_el", 1 );
+	initMapElField( gen, "prev", 0 );
+	initMapElField( gen, "next", 1 );
 }
 
 void Compiler::initMapElKey( GenericType *gen, const char *name, int offset )
@@ -1220,36 +1187,7 @@ void Compiler::initMapElField( GenericType *gen, const char *name, int offset )
 	gen->elUt->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
 }
 
-void Compiler::initMapElFields( GenericType *gen )
-{
-	initMapElKey( gen, "key", 0 );
-
-	initMapElField( gen, "prev", 0 );
-	initMapElField( gen, "next", 1 );
-}
-
 void Compiler::initListFunctions( GenericType *gen )
-{
-	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
-
-	initFunction( uniqueTypeInt, gen->objDef, "push_tail", 
-			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->elUt, false, true, gen );
-
-	initFunction( uniqueTypeInt, gen->objDef, "push", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
-
-	initFunction( gen->elUt, gen->objDef, "pop_head", 
-			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
-
-	initFunction( gen->elUt, gen->objDef, "pop_tail", 
-			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, true, gen );
-
-	initFunction( gen->elUt, gen->objDef, "pop", 
-			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
-}
-
-void Compiler::initValueListFunctions( GenericType *gen )
 {
 	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
 			IN_VLIST_PUSH_HEAD_WV, IN_VLIST_PUSH_HEAD_WC, gen->valueUt, false, true, gen );
@@ -1310,15 +1248,7 @@ void Compiler::initListElField( GenericType *gen, const char *name, int offset )
 	gen->elUt->structEl->structDef->objectDef->rootScope->insertField( el->name, el );
 }
 
-void Compiler::initListElFields( GenericType *gen )
-{
-	addLengthField( gen->objDef, IN_LIST_LENGTH );
-
-	initListElField( gen, "prev", 0 );
-	initListElField( gen, "next", 1 );
-}
-
-void Compiler::initListField( GenericType *gen, const char *name, int offset )
+void Compiler::initListFieldEl( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
@@ -1343,14 +1273,7 @@ void Compiler::initListField( GenericType *gen, const char *name, int offset )
 	el->offset = offset;
 }
 
-void Compiler::initListFields( GenericType *gen )
-{
-	initListField( gen, "head", 0 );
-	initListField( gen, "tail", 1 );
-	initListField( gen, "top", 0 );
-}
-
-void Compiler::initValueListField( GenericType *gen, const char *name, int offset )
+void Compiler::initListFieldVal( GenericType *gen, const char *name, int offset )
 {
 	/* Make the type ref and create the field. */
 	ObjectField *el = ObjectField::cons( internal,
@@ -1375,15 +1298,23 @@ void Compiler::initValueListField( GenericType *gen, const char *name, int offse
 	el->offset = offset;
 }
 
-void Compiler::initValueListFields( GenericType *gen )
+void Compiler::initListFields( GenericType *gen )
 {
-	initValueListField( gen, "head", 0 );
-	initValueListField( gen, "tail", 1 );
-	initValueListField( gen, "top", 0 );
+	/* The value fields. */
+	initListFieldVal( gen, "head", 0 );
+	initListFieldVal( gen, "tail", 1 );
+	initListFieldVal( gen, "top", 0 );
 
-	initListField( gen, "head_el", 0 );
-	initListField( gen, "tail_el", 1 );
-	initListField( gen, "top_el", 0 );
+	/* The element fields. */
+	initListFieldEl( gen, "head_el", 0 );
+	initListFieldEl( gen, "tail_el", 1 );
+	initListFieldEl( gen, "top_el", 0 );
+
+	addLengthField( gen->objDef, IN_LIST_LENGTH );
+
+	/* The fields of the list element. */
+	initListElField( gen, "prev", 0 );
+	initListElField( gen, "next", 1 );
 }
 
 void Compiler::initParserFunctions( GenericType *gen )

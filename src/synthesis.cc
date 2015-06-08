@@ -121,7 +121,7 @@ IterImpl::IterImpl( Type type ) :
 		useSearchUT = true;
 		break;
 	
-	case List:
+	case ListEl:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
 		inUnwind =     IN_GEN_ITER_UNWIND;
@@ -135,7 +135,7 @@ IterImpl::IterImpl( Type type ) :
 		useGenericId = true;
 		break;
 
-	case ValueList:
+	case ListVal:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
 		inUnwind =     IN_GEN_ITER_UNWIND;
@@ -149,7 +149,7 @@ IterImpl::IterImpl( Type type ) :
 		useGenericId = true;
 		break;
 
-	case RevValueList:
+	case RevListVal:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
 		inUnwind =     IN_GEN_ITER_UNWIND;
@@ -164,7 +164,7 @@ IterImpl::IterImpl( Type type ) :
 		break;
 
 
-	case ValueMap:
+	case MapVal:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
 		inUnwind =     IN_GEN_ITER_UNWIND;
@@ -178,7 +178,7 @@ IterImpl::IterImpl( Type type ) :
 		useGenericId = true;
 		break;
 
-	case Map:
+	case MapEl:
 		inCreateWV =   IN_GEN_ITER_FROM_REF;
 		inCreateWC =   IN_GEN_ITER_FROM_REF;
 		inUnwind =     IN_GEN_ITER_UNWIND;
@@ -320,10 +320,9 @@ long sizeOfField( UniqueType *fieldUT )
 				size = sizeof(rev_tree_iter_t) / sizeof(word_t);
 				break;
 
-			case IterDef::Map:
-			case IterDef::List:
-			case IterDef::ValueList:
-			case IterDef::RevValueList:
+			case IterDef::MapEl:
+			case IterDef::ListEl:
+			case IterDef::RevListVal:
 				size = sizeof(generic_iter_t) / sizeof(word_t);
 				break;
 
@@ -838,24 +837,18 @@ IterImpl *LangVarRef::chooseTriterCall( Compiler *pd,
 		CallArgVect::Iter pe = *args;
 		UniqueType *exprUT = (*pe)->expr->evaluate( pd, unused );
 
-		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_LIST )
-			iterImpl = new IterImpl( IterImpl::List );
-
-		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_VLIST ) {
+		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_LIST ) {
 			if ( searchUT->structEl != 0 && searchUT->structEl->listEl )
-				iterImpl = new IterImpl( IterImpl::List );
+				iterImpl = new IterImpl( IterImpl::ListEl );
 			else
-				iterImpl = new IterImpl( IterImpl::ValueList );
+				iterImpl = new IterImpl( IterImpl::ListVal );
 		}
 
-		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_MAP )
-			iterImpl = new IterImpl( IterImpl::Map );
-
-		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_VMAP ) {
+		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_MAP ) {
 			if ( searchUT->structEl != 0 && searchUT->structEl->mapEl )
-				iterImpl = new IterImpl( IterImpl::Map );
+				iterImpl = new IterImpl( IterImpl::MapEl );
 			else
-				iterImpl = new IterImpl( IterImpl::ValueMap );
+				iterImpl = new IterImpl( IterImpl::MapVal );
 		}
 	}
 
@@ -2319,17 +2312,14 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 		case IterDef::User:
 			iterImpl = new IterImpl( IterImpl::User, iterUT->iterDef->func );
 			break;
-		case IterDef::List:
-			iterImpl = new IterImpl( IterImpl::List );
+		case IterDef::ListEl:
+			iterImpl = new IterImpl( IterImpl::ListEl );
 			break;
-		case IterDef::ValueList:
-			iterImpl = new IterImpl( IterImpl::ValueList );
+		case IterDef::RevListVal:
+			iterImpl = new IterImpl( IterImpl::RevListVal );
 			break;
-		case IterDef::RevValueList:
-			iterImpl = new IterImpl( IterImpl::RevValueList );
-			break;
-		case IterDef::Map:
-			iterImpl = new IterImpl( IterImpl::Map );
+		case IterDef::MapEl:
+			iterImpl = new IterImpl( IterImpl::MapEl );
 			break;
 	}
 
@@ -2643,10 +2633,9 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 						type = LT_Iter;
 						break;
 
-					case IterDef::Map:
-					case IterDef::List:
-					case IterDef::ValueList:
-					case IterDef::RevValueList:
+					case IterDef::MapEl:
+					case IterDef::ListEl:
+					case IterDef::RevListVal:
 						/* ? */
 						type = LT_Iter;
 						break;

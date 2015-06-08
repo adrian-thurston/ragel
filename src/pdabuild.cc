@@ -1589,7 +1589,7 @@ void Compiler::makeRuntimeData()
 			runtimeData->generic_info[gen->id].el_type =
 					gen->elUt->typeId;
 			runtimeData->generic_info[gen->id].el_struct_id =
-					( gen->typeId == GEN_VMAP || gen->typeId == GEN_VLIST ) ?
+					( gen->typeId == GEN_MAP || gen->typeId == GEN_LIST ) ?
 					gen->elUt->structEl->id : -1;
 			runtimeData->generic_info[gen->id].el_offset =
 					gen->el != 0 ? gen->el->offset : -1;

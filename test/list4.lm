@@ -14,7 +14,7 @@ L->push_head( "..." )
 L->pop_tail()
 L->pop_head()
 
-for S: str in rev_vlist_iter(L) {
+for S: str in rev_list_iter(L) {
 	print "[S]
 }
 

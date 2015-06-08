@@ -129,7 +129,6 @@ struct_t *colm_construct_generic( program_t *prg, long generic_id )
 			break;
 
 		case GEN_MAP:
-		case GEN_VMAP:
 		{
 			map_t *map = colm_map_new( prg );
 			map->generic_info = generic_info;
@@ -137,7 +136,6 @@ struct_t *colm_construct_generic( program_t *prg, long generic_id )
 			break;
 		}
 		case GEN_LIST:
-		case GEN_VLIST:
 		{
 			list_t *list = colm_list_new( prg );
 			list->generic_info = generic_info;

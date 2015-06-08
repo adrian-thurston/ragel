@@ -148,7 +148,7 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 		inMap = new UniqueGeneric( searchKey );
 		pd->uniqueGenericMap.insert( inMap );
 
-		GenericType *generic = new GenericType( GEN_VLIST,
+		GenericType *generic = new GenericType( GEN_LIST,
 				pd->nextGenericId++, typeRef1, 0, typeRef2, listEl );
 
 		nspace->genericList.append( generic );
@@ -370,7 +370,7 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 		inMap = new UniqueGeneric( searchKey );
 		pd->uniqueGenericMap.insert( inMap );
 
-		GenericType *generic = new GenericType( GEN_VMAP,
+		GenericType *generic = new GenericType( GEN_MAP,
 				pd->nextGenericId++, typeRef2, typeRef1, typeRef3, mapEl );
 
 		nspace->genericList.append( generic );
