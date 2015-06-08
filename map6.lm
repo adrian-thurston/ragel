@@ -15,7 +15,6 @@ for A: str in argv {
 	M->insert_el( El )
 }
 
-
 for El: map_el<str, str> in M {
 	print "[El->key] [El->value]
 }
