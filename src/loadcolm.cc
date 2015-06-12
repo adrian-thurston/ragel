@@ -2382,7 +2382,8 @@ struct LoadColm
 			break;
 		case root_item::Include: {
 			StmtList *includeList = walkInclude( rootItem.include() );
-			stmtList->append( *includeList );
+			if ( includeList )
+				stmtList->append( *includeList );
 			break;
 		}
 		case root_item::Global: {
