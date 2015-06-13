@@ -735,6 +735,9 @@ typedef DList<RegionImpl> RegionImplList;
 
 typedef Vector<Namespace*> NamespaceVect;
 
+/* Generics have runtime-representations, so we must track them as unique
+ * types. This gives the runtimes some idea of what is contained in the
+ * structures. */
 struct GenericType 
 	: public DListEl<GenericType>
 {

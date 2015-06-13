@@ -127,7 +127,7 @@ context lookup
 		found: lang_object
 
 		# Start with the objects in the templateParamNs.
-		for Obj: lang_object in rev_vlist_iter( templateParamNs ) {
+		for Obj: lang_object in rev_list_iter( templateParamNs ) {
 			found = lookupWithInheritance( Obj, name )
 			if found
 				break

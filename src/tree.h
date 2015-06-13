@@ -135,7 +135,6 @@ struct generic_info
 {
 	long type;
 
-	long el_type;
 	long el_struct_id;
 	long el_offset;
 

@@ -124,19 +124,13 @@ struct_t *colm_construct_generic( program_t *prg, long generic_id )
 	struct generic_info *generic_info = &prg->rtd->generic_info[generic_id];
 	struct_t *new_generic = 0;
 	switch ( generic_info->type ) {
-		case GEN_MAP_EL:
-		case GEN_LIST_EL:
-			break;
-
-		case GEN_MAP:
-		{
+		case GEN_MAP: {
 			map_t *map = colm_map_new( prg );
 			map->generic_info = generic_info;
 			new_generic = (struct_t*) map;
 			break;
 		}
-		case GEN_LIST:
-		{
+		case GEN_LIST: {
 			list_t *list = colm_list_new( prg );
 			list->generic_info = generic_info;
 			new_generic = (struct_t*) list;

@@ -4126,7 +4126,7 @@ again:
 				rcode_code( exec, IN_VMAP_INSERT_BKT );
 				rcode_half( exec, gen_id );
 				rcode_code( exec, inserted != 0 ? 1 : 0 );
-				rcode_word( exec, inserted );
+				rcode_word( exec, (word_t)inserted );
 				rcode_unit_term( exec );
 				break;
 			}
@@ -4303,7 +4303,7 @@ again:
 
 				list_t *list = vm_pop_list();
 
-				colm_vlist_prepend( prg, list, val );
+				colm_vlist_prepend( prg, list, (value_t)val );
 				break;
 			}
 			case IN_VLIST_POP_TAIL_WC: {
@@ -4347,7 +4347,7 @@ again:
 
 				list_t *list = vm_pop_list();
 
-				colm_vlist_append( prg, list, val );
+				colm_vlist_append( prg, list, (value_t)val );
 				break;
 			}
 

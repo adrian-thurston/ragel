@@ -384,7 +384,6 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	for ( int i = 0; i < runtimeData->num_generics; i++ ) {
 		out << "\t{ " << 
 				runtimeData->generic_info[i].type << ", " <<
-				runtimeData->generic_info[i].el_type << ", " <<
 				runtimeData->generic_info[i].el_struct_id << ", " <<
 				runtimeData->generic_info[i].el_offset << ", " <<
 				runtimeData->generic_info[i].key_type << ", " <<

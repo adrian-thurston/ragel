@@ -425,8 +425,6 @@ typedef unsigned long colm_value_t;
 
 /* Types of Generics. */
 enum GEN {
-	GEN_LIST_EL  = 0x11,
-	GEN_MAP_EL   = 0x13,
 	GEN_PARSER   = 0x14,
 	GEN_LIST     = 0x15,
 	GEN_MAP      = 0x16,

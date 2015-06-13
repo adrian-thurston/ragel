@@ -123,6 +123,8 @@ int CmpUniqueType::compare( const UniqueType &ut1, const UniqueType &ut2 )
 		case TYPE_NIL:
 		case TYPE_INT:
 		case TYPE_BOOL:
+		case TYPE_LIST_PTRS:
+		case TYPE_MAP_PTRS:
 			break;
 
 		case TYPE_STRUCT:

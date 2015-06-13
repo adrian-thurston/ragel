@@ -103,10 +103,10 @@ gen/parse2.c: bootstrap1 colm.lm
 gen/if2.h: gen/parse2.c
 gen/if2.cc: gen/parse2.c
 
-bootstrap1-if1.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
+gen/bootstrap1-if1.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
 bootstrap1-loadinit.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
 
-colm-if2.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
+gen/colm-if2.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
 colm-loadcolm.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
 
 BUILT_SOURCES = version.h include/colm

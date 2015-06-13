@@ -114,79 +114,9 @@ UniqueType *TypeRef::resolveTypeLiteral( Compiler *pd )
 	return 0;
 }
 
-UniqueType *TypeRef::resolveTypeList( Compiler *pd )
-{
-	nspace = pd->rootNamespace;
-
-	UniqueType *utValue = typeRef1->resolveType( pd );	
-
-	if ( utValue->typeId != TYPE_STRUCT )
-		error( loc ) << "only structs can be list elements" << endp;
-
-	/* Find the offset of the list element. */
-	int off = 0;
-	ObjectField *listEl = 0;
-	FieldList *fieldList = utValue->structEl->structDef->objectDef->fieldList;
-	for ( FieldList::Iter f = *fieldList; f.lte(); f++, off++ ) {
-		if ( f->value->type == ObjectField::GenericElementType ) {
-			UniqueType *fUT = f->value->typeRef->resolveType( pd );
-			if ( fUT->typeId == TYPE_GENERIC && fUT->generic != 0 &&
-					fUT->generic->typeId == GEN_LIST_EL )
-			{
-				listEl = f->value;
-				break;
-			}
-		}
-	}
-
-	if ( !listEl )
-		error( loc ) << "could not find list element in type ref" << endp;
-
-	UniqueGeneric searchKey( UniqueGeneric::List, utValue );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueGeneric( searchKey );
-		pd->uniqueGenericMap.insert( inMap );
-
-		GenericType *generic = new GenericType( GEN_LIST,
-				pd->nextGenericId++, typeRef1, 0, typeRef2, listEl );
-
-		nspace->genericList.append( generic );
-
-		generic->declare( pd, nspace );
-
-		inMap->generic = generic;
-	}
-
-	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
-}
-
-
 UniqueType *TypeRef::resolveTypeListPtrs( Compiler *pd )
 {
-	nspace = pd->rootNamespace;
-
-	UniqueType *utValue = typeRef1->resolveType( pd );	
-
-	UniqueGeneric searchKey( UniqueGeneric::ListPtrs, utValue );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueGeneric( searchKey );
-		pd->uniqueGenericMap.insert( inMap );
-
-		GenericType *generic = new GenericType( GEN_LIST_EL,
-				pd->nextGenericId++, typeRef1, 0, 0, 0 );
-
-		nspace->genericList.append( generic );
-		inMap->generic = generic;
-
-		/* Note this is recurse, all of above must complete. */
-		generic->declare( pd, nspace );
-	}
-
-	generic = inMap->generic;
-	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
+	return pd->findUniqueType( TYPE_LIST_PTRS );
 }
 
 UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
@@ -200,7 +130,7 @@ UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 		pd->uniqueGenericMap.insert( inMap );
 
 		static long vlistElId = 1;
-		String name( 32, "vlist_el_%d", vlistElId++ );
+		String name( 32, "list_el_%d", vlistElId++ );
 		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::StructType,
 				name, pd->nextObjectId++ );
 
@@ -248,20 +178,38 @@ UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 	return pd->findUniqueType( TYPE_STRUCT, inMap->structEl );
 }
 
-UniqueType *TypeRef::resolveTypeMapPtrs( Compiler *pd )
+UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 {
 	nspace = pd->rootNamespace;
 
 	UniqueType *utValue = typeRef1->resolveType( pd );	
 
-	UniqueGeneric searchKey( UniqueGeneric::MapPtrs, utValue );
+	if ( utValue->typeId != TYPE_STRUCT )
+		error( loc ) << "only structs can be list elements" << endp;
+
+	/* Find the offset of the list element. */
+	int off = 0;
+	ObjectField *listEl = 0;
+	FieldList *fieldList = utValue->structEl->structDef->objectDef->fieldList;
+	for ( FieldList::Iter f = *fieldList; f.lte(); f++, off++ ) {
+		UniqueType *fUT = f->value->typeRef->resolveType( pd );
+		if ( fUT->typeId == TYPE_LIST_PTRS ) {
+			listEl = f->value;
+			break;
+		}
+	}
+
+	if ( !listEl )
+		error( loc ) << "could not find list element in type ref" << endp;
+
+	UniqueGeneric searchKey( UniqueGeneric::List, utValue );
 	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
 	if ( inMap == 0 ) {
 		inMap = new UniqueGeneric( searchKey );
 		pd->uniqueGenericMap.insert( inMap );
 
-		GenericType *generic = new GenericType( GEN_MAP_EL,
-				pd->nextGenericId++, typeRef1, 0, 0, 0 );
+		GenericType *generic = new GenericType( GEN_LIST,
+				pd->nextGenericId++, typeRef1, 0, typeRef2, listEl );
 
 		nspace->genericList.append( generic );
 
@@ -272,6 +220,11 @@ UniqueType *TypeRef::resolveTypeMapPtrs( Compiler *pd )
 
 	generic = inMap->generic;
 	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
+}
+
+UniqueType *TypeRef::resolveTypeMapPtrs( Compiler *pd )
+{
+	return pd->findUniqueType( TYPE_MAP_PTRS );
 }
 
 UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
@@ -353,9 +306,7 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 	FieldList *fieldList = utEl->structEl->structDef->objectDef->fieldList;
 	for ( FieldList::Iter f = *fieldList; f.lte(); f++ ) {
 		UniqueType *fUT = f->value->typeRef->resolveType( pd );
-		if ( fUT->typeId == TYPE_GENERIC && fUT->generic != 0 &&
-				fUT->generic->typeId == GEN_MAP_EL )
-		{
+		if ( fUT->typeId == TYPE_MAP_PTRS ) {
 			mapEl = f->value;
 			break;
 		}

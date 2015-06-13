@@ -339,17 +339,13 @@ long sizeOfField( UniqueType *fieldUT )
 		size = 2;
 		break;
 	case TYPE_GENERIC:
-		switch ( fieldUT->generic->typeId ) {
-		case GEN_LIST_EL:
-			size = COLM_LIST_EL_SIZE;
-			break;
-		case GEN_MAP_EL:
-			size = COLM_MAP_EL_SIZE;
-			break;
-		default:
-			size = 1;
-			break;
-		}
+		size = 1;
+		break;
+	case TYPE_LIST_PTRS:
+		size = COLM_LIST_EL_SIZE;
+		break;
+	case TYPE_MAP_PTRS:
+		size = COLM_MAP_EL_SIZE;
 		break;
 	default:
 		size = 1;
@@ -2941,7 +2937,7 @@ void ObjectDef::placeField( Compiler *pd, ObjectField *field )
 			field->offset = nextOffset;
 			nextOffset += sizeOfField( fieldUT );
 
-			if ( fieldUT->generic->typeId == GEN_MAP_EL ) {
+			if ( fieldUT->typeId == TYPE_MAP_PTRS ) {
 				if ( field->mapKeyField != 0 )
 					field->mapKeyField->offset = field->offset;
 			}

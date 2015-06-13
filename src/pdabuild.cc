@@ -1586,8 +1586,6 @@ void Compiler::makeRuntimeData()
 		for ( GenericList::Iter gen = nspace->genericList; gen.lte(); gen++ ) {
 			runtimeData->generic_info[gen->id].type = gen->typeId;
 
-			runtimeData->generic_info[gen->id].el_type =
-					gen->elUt->typeId;
 			runtimeData->generic_info[gen->id].el_struct_id =
 					( gen->typeId == GEN_MAP || gen->typeId == GEN_LIST ) ?
 					gen->elUt->structEl->id : -1;

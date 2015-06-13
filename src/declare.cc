@@ -315,8 +315,6 @@ void Compiler::declareBaseLangEls()
 	
 	ptrLangEl = declareLangEl( this, rootNamespace, "ptr", LangEl::Term );
 	voidLangEl = declareLangEl( this, rootNamespace, "void", LangEl::Term );
-//	boolLangEl = declareLangEl( this, rootNamespace, "bool", LangEl::Term );
-//	intLangEl = declareLangEl( this, rootNamespace, "int", LangEl::Term );
 	strLangEl = declareLangEl( this, rootNamespace, "str", LangEl::Term );
 	ignoreLangEl = declareLangEl( this, rootNamespace, "il", LangEl::Term );
 
@@ -383,9 +381,6 @@ void GenericType::declare( Compiler *pd, Namespace *nspace )
 			elUt->langEl->parserId = pd->nextParserId++;
 			pd->initParserFunctions( this );
 			pd->initParserFields( this );
-			break;
-		case GEN_LIST_EL:
-		case GEN_MAP_EL:
 			break;
 	}
 }
