@@ -114,48 +114,60 @@ UniqueType *TypeRef::resolveTypeLiteral( Compiler *pd )
 	return 0;
 }
 
-UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
+bool TypeRef::uniqueGeneric( UniqueGeneric *&inMap, Compiler *pd,
+		const UniqueGeneric &searchKey )
 {
-	UniqueType *utValue = typeRef1->resolveType( pd );	
-
-	UniqueGeneric searchKey( UniqueGeneric::ListEl, utValue );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
+	bool inserted = false;
+	inMap = pd->uniqueGenericMap.find( &searchKey );
 	if ( inMap == 0 ) {
+		inserted = true;
 		inMap = new UniqueGeneric( searchKey );
 		pd->uniqueGenericMap.insert( inMap );
-
-		static long vlistElId = 1;
-		String name( 32, "list_el_%d", vlistElId++ );
-		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::StructType,
-				name, pd->nextObjectId++ );
-
-		StructDef *structDef = new StructDef( loc, name, objectDef );
-
-		pd->rootNamespace->structDefList.append( structDef );
-
-		/* Value Element. */
-		String id = "value";
-		ObjectField *elValObjField = ObjectField::cons( internal,
-					ObjectField::StructFieldType, typeRef1, id );
-
-		objectDef->rootScope->insertField( elValObjField->name, elValObjField );
-
-
-		/* Typeref for the struct. Used for pointers. */
-		NamespaceQual *nspaceQual = NamespaceQual::cons( pd->rootNamespace );
-		TypeRef *selfTypeRef = TypeRef::cons( InputLoc(), nspaceQual, name, RepeatNone );
-
-		/* Type ref for the list pointers psuedo type. */
-		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListPtrs, 0, selfTypeRef, 0 );
-
-		ObjectField *of = ObjectField::cons( InputLoc(),
-				ObjectField::GenericElementType, elTr, name );
-
-		objectDef->rootScope->insertField( of->name, of );
-
-		StructEl *sel = declareStruct( pd, pd->rootNamespace, name, structDef );
-		inMap->structEl = sel;
 	}
+	return inserted;
+}
+
+StructEl *TypeRef::declareListEl( Compiler *pd, TypeRef *valType )
+{
+	static long vlistElId = 1;
+	String name( 32, "list_el_%d", vlistElId++ );
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::StructType,
+			name, pd->nextObjectId++ );
+
+	StructDef *structDef = new StructDef( loc, name, objectDef );
+
+	pd->rootNamespace->structDefList.append( structDef );
+
+	/* Value Element. */
+	String id = "value";
+	ObjectField *elValObjField = ObjectField::cons( internal,
+				ObjectField::StructFieldType, valType, id );
+
+	objectDef->rootScope->insertField( elValObjField->name, elValObjField );
+
+	/* Typeref for the struct. Used for pointers. */
+	NamespaceQual *nspaceQual = NamespaceQual::cons( pd->rootNamespace );
+	TypeRef *selfTypeRef = TypeRef::cons( InputLoc(), nspaceQual, name, RepeatNone );
+
+	/* Type ref for the list pointers psuedo type. */
+	TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListPtrs, 0, selfTypeRef, 0 );
+
+	ObjectField *of = ObjectField::cons( InputLoc(),
+			ObjectField::GenericElementType, elTr, name );
+
+	objectDef->rootScope->insertField( of->name, of );
+
+	return declareStruct( pd, pd->rootNamespace, name, structDef );
+}
+
+UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
+{
+	TypeRef *valTr = typeRef1;
+	UniqueType *utValue = valTr->resolveType( pd );	
+
+	UniqueGeneric *inMap = 0, searchKey( UniqueGeneric::ListEl, utValue );
+	if ( uniqueGeneric( inMap, pd, searchKey ) )
+		inMap->structEl = declareListEl( pd, valTr );
 
 	return pd->findUniqueType( TYPE_STRUCT, inMap->structEl );
 }
@@ -177,11 +189,8 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 	if ( !listEl )
 		error( loc ) << "could not find list element in type ref" << endp;
 
-	UniqueGeneric searchKey( UniqueGeneric::List, utValue );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueGeneric( searchKey );
-		pd->uniqueGenericMap.insert( inMap );
+	UniqueGeneric *inMap = 0, searchKey( UniqueGeneric::List, utValue );
+	if ( uniqueGeneric( inMap, pd, searchKey ) ) {
 
 		GenericType *generic = new GenericType( GEN_LIST,
 				pd->nextGenericId++, typeRef1, 0, typeRef2, listEl );
@@ -197,6 +206,39 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
 }
 
+StructEl *TypeRef::declareMapElStruct( Compiler *pd, TypeRef *keyType, TypeRef *valType )
+{
+	static long vlistElId = 1;
+	String name( 32, "map_el_%d", vlistElId++ );
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::StructType,
+			name, pd->nextObjectId++ );
+
+	StructDef *structDef = new StructDef( loc, name, objectDef );
+
+	pd->rootNamespace->structDefList.append( structDef );
+
+	/* Value Element. */
+	String id = "value";
+	ObjectField *elValObjField = ObjectField::cons( internal,
+				ObjectField::StructFieldType, valType, id );
+
+	objectDef->rootScope->insertField( elValObjField->name, elValObjField );
+
+	/* Typeref for the pointers. */
+	NamespaceQual *nspaceQual = NamespaceQual::cons( pd->rootNamespace );
+	TypeRef *selfTypeRef = TypeRef::cons( InputLoc(), nspaceQual, name, RepeatNone );
+
+	TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapPtrs, 0, selfTypeRef, keyType );
+
+	ObjectField *of = ObjectField::cons( InputLoc(),
+			ObjectField::GenericElementType, elTr, name );
+
+	objectDef->rootScope->insertField( of->name, of );
+
+	StructEl *sel = declareStruct( pd, pd->rootNamespace, name, structDef );
+	return sel;
+}
+
 UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
 {
 	TypeRef *keyType = typeRef1;
@@ -205,44 +247,9 @@ UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
 	UniqueType *utKey = keyType->resolveType( pd );	
 	UniqueType *utValue = valType->resolveType( pd );	
 
-	UniqueGeneric searchKey( UniqueGeneric::MapEl, utKey, utValue );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueGeneric( searchKey );
-		pd->uniqueGenericMap.insert( inMap );
-
-		static long vlistElId = 1;
-		String name( 32, "map_el_%d", vlistElId++ );
-		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::StructType,
-				name, pd->nextObjectId++ );
-
-		StructDef *structDef = new StructDef( loc, name, objectDef );
-
-		pd->rootNamespace->structDefList.append( structDef );
-
-		/* Value Element. */
-		String id = "value";
-		ObjectField *elValObjField = ObjectField::cons( internal,
-					ObjectField::StructFieldType, valType, id );
-
-		objectDef->rootScope->insertField( elValObjField->name, elValObjField );
-
-		/* List element with the same name as containing context. */
-		NamespaceQual *nspaceQual = NamespaceQual::cons( pd->rootNamespace );
-		TypeRef *selfTypeRef = TypeRef::cons( InputLoc(), nspaceQual, name, RepeatNone );
-		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapPtrs, 0, selfTypeRef, keyType );
-
-		ObjectField *of = ObjectField::cons( InputLoc(),
-				ObjectField::GenericElementType, elTr, name );
-
-		objectDef->rootScope->insertField( of->name, of );
-
-		/* Note this is recurse, all of above must complete. */
-		//structDef->declare( pd, nspace );
-
-		StructEl *sel = declareStruct( pd, pd->rootNamespace, name, structDef );
-		inMap->structEl = sel;
-	}
+	UniqueGeneric *inMap = 0, searchKey( UniqueGeneric::MapEl, utKey, utValue );
+	if ( uniqueGeneric( inMap, pd, searchKey ) )
+		inMap->structEl = declareMapElStruct( pd, keyType, valType );
 
 	return pd->findUniqueType( TYPE_STRUCT, inMap->structEl );
 }
@@ -266,11 +273,9 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 	if ( !mapEl )
 		error( loc ) << "could not find map element in type ref" << endp;
 
-	UniqueGeneric searchKey( UniqueGeneric::Map, utKey, utEl );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueGeneric( searchKey );
-		pd->uniqueGenericMap.insert( inMap );
+	UniqueGeneric *inMap = 0, searchKey( UniqueGeneric::Map, utKey, utEl );
+
+	if ( uniqueGeneric( inMap, pd, searchKey ) ) {
 
 		GenericType *generic = new GenericType( GEN_MAP,
 				pd->nextGenericId++, typeRef2, typeRef1, typeRef3, mapEl );
@@ -292,12 +297,8 @@ UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
 
 	UniqueType *utParse = typeRef1->resolveType( pd );	
 
-	UniqueGeneric searchKey( UniqueGeneric::Parser, utParse );
-	UniqueGeneric *inMap = pd->uniqueGenericMap.find( &searchKey );
-	if ( inMap == 0 ) {
-		inMap = new UniqueGeneric( searchKey );
-		pd->uniqueGenericMap.insert( inMap );
-
+	UniqueGeneric *inMap = 0, searchKey( UniqueGeneric::Parser, utParse );
+	if ( uniqueGeneric( inMap, pd, searchKey ) ) {
 		GenericType *generic = new GenericType( GEN_PARSER,
 				pd->nextGenericId++, typeRef1, 0, 0, 0 );
 

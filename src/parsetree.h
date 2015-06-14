@@ -2209,6 +2209,12 @@ struct TypeRef
 	UniqueType *resolveType( Compiler *pd );
 	UniqueType *resolveTypeRef( Compiler *pd );
 
+	bool uniqueGeneric( UniqueGeneric *&inMap,
+			Compiler *pd, const UniqueGeneric &searchKey );
+
+	StructEl *declareMapElStruct( Compiler *pd, TypeRef *keyType, TypeRef *valType );
+	StructEl *declareListEl( Compiler *pd, TypeRef *valType );
+
 	Type type;
 	InputLoc loc;
 	NamespaceQual *nspaceQual;
