@@ -114,11 +114,6 @@ UniqueType *TypeRef::resolveTypeLiteral( Compiler *pd )
 	return 0;
 }
 
-UniqueType *TypeRef::resolveTypeListPtrs( Compiler *pd )
-{
-	return pd->findUniqueType( TYPE_LIST_PTRS );
-}
-
 UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 {
 	UniqueType *utValue = typeRef1->resolveType( pd );	
@@ -138,38 +133,25 @@ UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 
 		pd->rootNamespace->structDefList.append( structDef );
 
-		/* Make the new namespace. */
-		Namespace *nspace = new Namespace( loc, name,
-				pd->namespaceList.length(), pd->rootNamespace );
-
-		pd->rootNamespace->childNamespaces.append( nspace );
-
-		pd->namespaceList.append( nspace );
-
-
 		/* Value Element. */
 		String id = "value";
 		ObjectField *elValObjField = ObjectField::cons( internal,
 					ObjectField::StructFieldType, typeRef1, id );
 
-		elValObjField->context = structDef;
 		objectDef->rootScope->insertField( elValObjField->name, elValObjField );
 
-		elValObjField->context->listEl = true;
 
-		/* List element with the same name as containing context. */
-		NamespaceQual *nspaceQual = NamespaceQual::cons( nspace );
-		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, name, RepeatNone );
-		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListPtrs, 0, objTr, 0 );
+		/* Typeref for the struct. Used for pointers. */
+		NamespaceQual *nspaceQual = NamespaceQual::cons( pd->rootNamespace );
+		TypeRef *selfTypeRef = TypeRef::cons( InputLoc(), nspaceQual, name, RepeatNone );
+
+		/* Type ref for the list pointers psuedo type. */
+		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::ListPtrs, 0, selfTypeRef, 0 );
 
 		ObjectField *of = ObjectField::cons( InputLoc(),
 				ObjectField::GenericElementType, elTr, name );
 
-		of->context = structDef;
 		objectDef->rootScope->insertField( of->name, of );
-
-		/* Note this is recurse, all of above must complete. */
-		//structDef->declare( pd, nspace );
 
 		StructEl *sel = declareStruct( pd, pd->rootNamespace, name, structDef );
 		inMap->structEl = sel;
@@ -187,17 +169,10 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 	if ( utValue->typeId != TYPE_STRUCT )
 		error( loc ) << "only structs can be list elements" << endp;
 
-	/* Find the offset of the list element. */
-	int off = 0;
-	ObjectField *listEl = 0;
-	FieldList *fieldList = utValue->structEl->structDef->objectDef->fieldList;
-	for ( FieldList::Iter f = *fieldList; f.lte(); f++, off++ ) {
-		UniqueType *fUT = f->value->typeRef->resolveType( pd );
-		if ( fUT->typeId == TYPE_LIST_PTRS ) {
-			listEl = f->value;
-			break;
-		}
-	}
+	/* Find the list element. */
+	ObjectDef *elObjDef = utValue->structEl->structDef->objectDef;
+	UniqueType *ptrsUt = pd->findUniqueType( TYPE_LIST_PTRS );
+	ObjectField *listEl = elObjDef->findFieldType( pd, ptrsUt );
 
 	if ( !listEl )
 		error( loc ) << "could not find list element in type ref" << endp;
@@ -220,11 +195,6 @@ UniqueType *TypeRef::resolveTypeList( Compiler *pd )
 
 	generic = inMap->generic;
 	return pd->findUniqueType( TYPE_GENERIC, inMap->generic );
-}
-
-UniqueType *TypeRef::resolveTypeMapPtrs( Compiler *pd )
-{
-	return pd->findUniqueType( TYPE_MAP_PTRS );
 }
 
 UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
@@ -250,34 +220,21 @@ UniqueType *TypeRef::resolveTypeMapEl( Compiler *pd )
 
 		pd->rootNamespace->structDefList.append( structDef );
 
-		/* Make the new namespace. */
-		Namespace *nspace = new Namespace( loc, name,
-				pd->namespaceList.length(), pd->rootNamespace );
-
-		pd->rootNamespace->childNamespaces.append( nspace );
-
-		pd->namespaceList.append( nspace );
-
-
 		/* Value Element. */
 		String id = "value";
 		ObjectField *elValObjField = ObjectField::cons( internal,
 					ObjectField::StructFieldType, valType, id );
 
-		elValObjField->context = structDef;
 		objectDef->rootScope->insertField( elValObjField->name, elValObjField );
 
-		elValObjField->context->mapEl = true;
-
 		/* List element with the same name as containing context. */
-		NamespaceQual *nspaceQual = NamespaceQual::cons( nspace );
-		TypeRef *objTr = TypeRef::cons( InputLoc(), nspaceQual, name, RepeatNone );
-		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapPtrs, 0, objTr, keyType );
+		NamespaceQual *nspaceQual = NamespaceQual::cons( pd->rootNamespace );
+		TypeRef *selfTypeRef = TypeRef::cons( InputLoc(), nspaceQual, name, RepeatNone );
+		TypeRef *elTr = TypeRef::cons( InputLoc(), TypeRef::MapPtrs, 0, selfTypeRef, keyType );
 
 		ObjectField *of = ObjectField::cons( InputLoc(),
 				ObjectField::GenericElementType, elTr, name );
 
-		of->context = structDef;
 		objectDef->rootScope->insertField( of->name, of );
 
 		/* Note this is recurse, all of above must complete. */
@@ -302,15 +259,9 @@ UniqueType *TypeRef::resolveTypeMap( Compiler *pd )
 		error( loc ) << "only structs can be map elements" << endp;
 
 	/* Find the list element. */
-	ObjectField *mapEl = 0;
-	FieldList *fieldList = utEl->structEl->structDef->objectDef->fieldList;
-	for ( FieldList::Iter f = *fieldList; f.lte(); f++ ) {
-		UniqueType *fUT = f->value->typeRef->resolveType( pd );
-		if ( fUT->typeId == TYPE_MAP_PTRS ) {
-			mapEl = f->value;
-			break;
-		}
-	}
+	ObjectDef *elObjDef = utEl->structEl->structDef->objectDef;
+	UniqueType *ptrsUt = pd->findUniqueType( TYPE_MAP_PTRS );
+	ObjectField *mapEl = elObjDef->findFieldType( pd, ptrsUt );
 
 	if ( !mapEl )
 		error( loc ) << "could not find map element in type ref" << endp;
@@ -469,7 +420,7 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 			uniqueType = resolveTypeList( pd );
 			break;
 		case ListPtrs:
-			uniqueType = resolveTypeListPtrs( pd );
+			uniqueType = pd->findUniqueType( TYPE_LIST_PTRS );
 			break;
 		case ListEl:
 			uniqueType = resolveTypeListEl( pd );
@@ -479,7 +430,7 @@ UniqueType *TypeRef::resolveType( Compiler *pd )
 			uniqueType = resolveTypeMap( pd );
 			break;
 		case MapPtrs:
-			uniqueType = resolveTypeMapPtrs( pd );
+			uniqueType = pd->findUniqueType( TYPE_MAP_PTRS );
 			break;
 		case MapEl:
 			uniqueType = resolveTypeMapEl( pd );

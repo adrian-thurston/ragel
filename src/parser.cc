@@ -480,14 +480,13 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 {
 	LangStmt *stmt = 0;
 
-	StructDef *context = 0;
+	StructDef *structDef = 0;
 	ObjectDef *object = 0;
 	if ( curStruct() == 0 )
 		object = pd->globalObjectDef;
 	else {
-		context = curStruct();
-		objField->context = context;
-		object = context->objectDef;
+		structDef = curStruct();
+		object = structDef->objectDef;
 	}
 
 	if ( object->rootScope->checkRedecl( objField->name ) != 0 )
@@ -497,7 +496,7 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				context, curScope, objField->name );
+				structDef, curScope, objField->name );
 
 		stmt = LangStmt::cons( objField->loc, 
 				assignType, varRef, expr );
@@ -988,7 +987,6 @@ void BaseParser::structVarDef( const InputLoc &loc, ObjectField *objField )
 		error(loc) << "internal error: no context stack items found" << endp;
 
 	StructDef *structDef = curStruct();
-	objField->context = structDef;
 	object = structDef->objectDef;
 
 	if ( object->rootScope->checkRedecl( objField->name ) != 0 )

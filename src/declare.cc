@@ -250,11 +250,6 @@ StructEl *declareStruct( Compiler *pd, Namespace *inNspace,
 	pd->structEls.append( structEl );
 	structDef->structEl = structEl;
 
-	if ( structDef->listEl )
-		structEl->listEl = true;
-	if ( structDef->mapEl )
-		structEl->mapEl = true;
-
 	if ( inNspace ) {
 		TypeMapEl *typeMapEl = new TypeMapEl( TypeMapEl::StructType, data, structEl );
 		inNspace->typeMap.insert( typeMapEl );

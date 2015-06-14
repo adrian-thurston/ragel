@@ -554,17 +554,13 @@ struct StructDef
 		loc(loc),
 		name(name),
 		objectDef(objectDef),
-		structEl(0),
-		listEl(false),
-		mapEl(false)
+		structEl(0)
 	{}
 
 	InputLoc loc;
 	String name;
 	ObjectDef *objectDef;
 	StructEl *structEl;
-	bool listEl;
-	bool mapEl;
 
 	StructDef *prev, *next;
 };
@@ -575,16 +571,12 @@ struct StructEl
 	:
 		name(name),
 		structDef(structDef),
-		id(-1),
-		listEl(false),
-		mapEl(false)
+		id(-1)
 	{}
 
 	String name;
 	StructDef *structDef;
 	int id;
-	bool listEl;
-	bool mapEl;
 
 	StructEl *prev, *next;
 };
@@ -1952,7 +1944,9 @@ struct CmpUniqueRepeat
 typedef AvlBasic< UniqueRepeat, CmpUniqueRepeat > UniqueRepeatMap;
 
 /* 
- * Unique Generics
+ * Unique generics. Allows us to do singleton declarations of generic types and
+ * supporting structures. For example, the list type, but also the list element
+ * struct created for the list type.
  */
 
 struct UniqueGeneric
@@ -1961,10 +1955,8 @@ struct UniqueGeneric
 	enum Type
 	{
 		List,
-		ListPtrs,
 		ListEl,
 		Map,
-		MapPtrs,
 		MapEl,
 		Parser
 	};
@@ -2210,10 +2202,8 @@ struct TypeRef
 	UniqueType *resolveTypeName( Compiler *pd );
 	UniqueType *resolveTypeLiteral( Compiler *pd );
 	UniqueType *resolveTypeList( Compiler *pd );
-	UniqueType *resolveTypeListPtrs( Compiler *pd );
 	UniqueType *resolveTypeListEl( Compiler *pd );
 	UniqueType *resolveTypeMap( Compiler *pd );
-	UniqueType *resolveTypeMapPtrs( Compiler *pd );
 	UniqueType *resolveTypeMapEl( Compiler *pd );
 	UniqueType *resolveTypeParser( Compiler *pd );
 	UniqueType *resolveType( Compiler *pd );
@@ -2355,7 +2345,6 @@ struct ObjectField
 	ObjectField()
 	: 
 		typeRef(0),
-		context(0),
 		scope(0),
 		offset(0),
 		beenReferenced(false),
@@ -2431,7 +2420,6 @@ struct ObjectField
 	Type type;
 	TypeRef *typeRef;
 	String name;
-	StructDef *context;
 	NameScope *scope;
 	long offset;
 	bool beenReferenced;
@@ -2572,6 +2560,7 @@ struct ObjectDef
 	void insertField( NameScope *inScope, const String &name, ObjectField *value );
 	void resolve( Compiler *pd );
 	ObjectField *findFieldNum( long offset );
+	ObjectField *findFieldType( Compiler *pd, UniqueType *ut );
 
 	long size() { return nextOffset; }
 	long sizeTrees() { return firstNonTree; }

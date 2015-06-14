@@ -173,13 +173,11 @@ int CmpUniqueGeneric::compare( const UniqueGeneric &ut1, const UniqueGeneric &ut
 	else {
 		switch ( ut1.type ) {
 		case UniqueGeneric::List:
-		case UniqueGeneric::ListPtrs:
 		case UniqueGeneric::ListEl:
 		case UniqueGeneric::Parser:
 			break;
 
 		case UniqueGeneric::Map:
-		case UniqueGeneric::MapPtrs:
 		case UniqueGeneric::MapEl:
 			if ( ut1.key < ut2.key )
 				return -1;

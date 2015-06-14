@@ -302,6 +302,18 @@ ObjectField *ObjectDef::findFieldNum( long offset )
 	return field->value;
 }
 
+/* Finds the first field by type. */
+ObjectField *ObjectDef::findFieldType( Compiler *pd, UniqueType *ut )
+{
+	for ( FieldList::Iter f = *fieldList; f.lte(); f++ ) {
+		UniqueType *fUT = f->value->typeRef->resolveType( pd );
+		if ( fUT == ut )
+			return f->value;
+	}
+	return 0;
+}
+
+
 long sizeOfField( UniqueType *fieldUT )
 {
 	long size = 0;
@@ -834,14 +846,14 @@ IterImpl *LangVarRef::chooseTriterCall( Compiler *pd,
 		UniqueType *exprUT = (*pe)->expr->evaluate( pd, unused );
 
 		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_LIST ) {
-			if ( searchUT->structEl != 0 && searchUT->structEl->listEl )
+			if ( searchUT == exprUT->generic->elUt )
 				iterImpl = new IterImpl( IterImpl::ListEl );
 			else
 				iterImpl = new IterImpl( IterImpl::ListVal );
 		}
 
 		if ( exprUT->typeId == TYPE_GENERIC && exprUT->generic->typeId == GEN_MAP ) {
-			if ( searchUT->structEl != 0 && searchUT->structEl->mapEl )
+			if ( searchUT == exprUT->generic->elUt )
 				iterImpl = new IterImpl( IterImpl::MapEl );
 			else
 				iterImpl = new IterImpl( IterImpl::MapVal );
