@@ -1,24 +1,15 @@
-struct has_def_list_el
-	HasDefault: int
-	list_el el
-end
 
-global HasDefault: list<has_def_list_el> = new list<has_def_list_el>()
+global HasDefault: list<int> = new list<int>()
 
 void pushHasDef( H: int )
 {
-	El: has_def_list_el = new has_def_list_el()
-	El->HasDefault = H
-	HasDefault->push( El )
+	HasDefault->push( H )
 }
 
 int popHasDef()
 {
-	El: has_def_list_el = HasDefault->pop()
-	return El->HasDefault
+	return HasDefault->pop()
 }
-
-
 
 void d_tok_list( TL: host::tok* )
 {
