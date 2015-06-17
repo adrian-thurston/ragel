@@ -453,7 +453,8 @@ def statement
 |	[var_def opt_def_init] :VarDef commit
 |	[FOR id COLON type_ref IN iter_call block_or_single] :For commit
 |	[IF code_expr block_or_single elsif_list] :If commit
-|	[SWITCH var_ref case_clause_list] :Switch
+|	[SWITCH var_ref case_clause_list] :SwitchUnder
+|	[SWITCH var_ref COPEN case_clause_list CCLOSE] :SwitchBlock
 |	[WHILE code_expr block_or_single] :While commit
 |	[var_ref EQUALS code_expr] :LhsVarRef commit
 |	[YIELD var_ref] :Yield commit

@@ -245,7 +245,8 @@ struct LoadColm
 			stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, elsifList );
 			break;
 		}
-		case statement::Switch: {
+		case statement::SwitchUnder:
+		case statement::SwitchBlock: {
 			pushScope();
 			stmt = walkCaseClauseList( Statement.case_clause_list(), Statement.var_ref() );
 			popScope();
