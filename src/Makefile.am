@@ -88,6 +88,7 @@ endif
 
 # This dependency comes from the import of the parser defines into the scanner.
 rlscan.cc: rlparse.h
+inputdata.cc: rlparse.h
 
 ragel-rlscan.$(OBJEXT): rlscan.cc
 
