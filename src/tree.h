@@ -304,10 +304,11 @@ tree_t *tree_trim( struct colm_program *prg, tree_t **sp, tree_t *tree );
 
 void print_tree_collect( struct colm_program *prg, tree_t **sp,
 		StrCollect *collect, tree_t *tree, int trim );
-void print_tree_file( struct colm_program *prg, tree_t **sp, FILE *out, tree_t *tree, int trim );
-void print_tree_fd( struct colm_program *prg, tree_t **sp, int fd, tree_t *tree, int trim );
+
+void print_tree_file( struct colm_program *prg, tree_t **sp,
+		struct stream_impl *impl, tree_t *tree, int trim );
 void print_xml_stdout( struct colm_program *prg, tree_t **sp,
-		tree_t *tree, int comm_attr, int trim );
+		struct stream_impl *impl, tree_t *tree, int comm_attr, int trim );
 
 /*
  * Iterators.

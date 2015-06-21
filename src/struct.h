@@ -44,6 +44,7 @@ typedef struct colm_stream
 	struct colm_struct *prev, *next;
 	colm_destructor_t destructor;
 
+	/* Transitional, needed during ref semantics impl. */
 	void *buffer[8];
 
 	struct stream_impl *impl;
@@ -63,6 +64,7 @@ typedef struct colm_list
 	struct colm_struct *prev, *next;
 	colm_destructor_t destructor;
 
+	/* Transitional, needed during ref semantics impl. */
 	void *buffer[8];
 
 	list_el_t *head, *tail;
@@ -88,6 +90,7 @@ typedef struct colm_map
 	struct colm_struct *prev, *next;
 	colm_destructor_t destructor;
 
+	/* Transitional, needed during ref semantics impl. */
 	void *buffer[8];
 
 	struct colm_map_el *head, *tail, *root;

@@ -72,7 +72,7 @@ typedef struct _RunBuf
 
 RunBuf *new_run_buf();
 
-struct StreamFuncs
+struct stream_funcs
 {
 	int (*get_parse_block)( struct stream_impl *ss, int skip, char **pdp, int *copied );
 
@@ -117,7 +117,7 @@ struct StreamFuncs
 /* List of source streams. Enables streams to be pushed/popped. */
 struct stream_impl
 {
-	struct StreamFuncs *funcs;
+	struct stream_funcs *funcs;
 
 	char eof_sent;
 	char eof;
@@ -136,7 +136,6 @@ struct stream_impl
 
 	const char *name;
 	FILE *file;
-	long fd;
 
 	struct Pattern *pattern;
 	struct PatternItem *pat_item;

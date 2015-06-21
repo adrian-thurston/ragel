@@ -49,9 +49,9 @@ void init_file_funcs();
 void init_pat_funcs();
 void init_cons_funcs();
 
-extern struct StreamFuncs file_funcs;
-extern struct StreamFuncs fd_funcs;
-extern struct StreamFuncs stream_funcs;
+extern struct stream_funcs file_funcs;
+extern struct stream_funcs fd_funcs;
+extern struct stream_funcs stream_funcs;
 
 void colm_clear_source_stream( struct colm_program *prg,
 		tree_t **sp, struct stream_impl *source_stream )
@@ -85,8 +85,6 @@ void colm_stream_destroy( program_t *prg, tree_t **sp, struct_t *s )
 
 	if ( stream->impl->file != 0 )
 		fclose( stream->impl->file );
-	else if ( stream->impl->fd >= 0 )
-		close( stream->impl->fd );
 
 	free( stream->impl );
 }
@@ -166,7 +164,7 @@ static void source_stream_prepend( struct stream_impl *ss, RunBuf *run_buf )
  * Base run-time input streams.
  */
 
-int fd_get_parse_block( struct stream_impl *ss, int skip, char **pdp, int *copied )
+int file_get_parse_block( struct stream_impl *ss, int skip, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -225,7 +223,7 @@ int fd_get_parse_block( struct stream_impl *ss, int skip, char **pdp, int *copie
 	return ret;
 }
 
-int fd_get_data( struct stream_impl *ss, char *dest, int length )
+int file_get_data( struct stream_impl *ss, char *dest, int length )
 {
 	int copied = 0;
 
@@ -268,7 +266,8 @@ int fd_get_data( struct stream_impl *ss, char *dest, int length )
 	return copied;
 }
 
-int fd_consume_data( program_t *prg, tree_t **sp, struct stream_impl *ss, int length, location_t *loc )
+int file_consume_data( program_t *prg, tree_t **sp,
+		struct stream_impl *ss, int length, location_t *loc )
 {
 	int consumed = 0;
 
@@ -314,7 +313,7 @@ int fd_consume_data( program_t *prg, tree_t **sp, struct stream_impl *ss, int le
 	return consumed;
 }
 
-int fd_undo_consume_data( struct stream_impl *ss, const char *data, int length )
+int file_undo_consume_data( struct stream_impl *ss, const char *data, int length )
 {
 	RunBuf *new_buf = new_run_buf();
 	new_buf->length = length;
@@ -332,30 +331,13 @@ int fd_undo_consume_data( struct stream_impl *ss, const char *data, int length )
 
 int file_get_data_source( struct stream_impl *ss, char *dest, int length )
 {
-	//debug( REALM_INPUT, "inputStreamFileGetDataSource length = %ld\n", length );
-	size_t res = fread( dest, 1, length, ss->file );
-	return res;
+	size_t read = fread( dest, 1, length, ss->file );
+	return read;
 }
 
 void init_file_funcs()
 {
-	memset( &file_funcs, 0, sizeof(struct StreamFuncs) );
-}
-
-/*
- * FD
- */
-
-int fd_get_data_source( struct stream_impl *ss, char *dest, int length )
-{
-	if ( ss->eof )
-		return 0;
-	else {
-		long got = read( ss->fd, dest, length );
-		if ( got == 0 )
-			ss->eof = true;
-		return got;
-	}
+	memset( &file_funcs, 0, sizeof(struct stream_funcs) );
 }
 
 /*
@@ -963,7 +945,7 @@ static tree_t *_undoAppendStream( struct stream_impl *is )
 	return tree;
 }
 
-struct StreamFuncs stream_funcs = 
+struct stream_funcs stream_funcs = 
 {
 	&_getParseBlock,
 	&_getData,
@@ -990,21 +972,12 @@ struct StreamFuncs stream_funcs =
 	&_undoAppendStream,
 };
 
-struct StreamFuncs fd_funcs = 
+struct stream_funcs file_funcs = 
 {
-	.get_data = &fd_get_data,
-	.get_parse_block = &fd_get_parse_block,
-	.consume_data = &fd_consume_data,
-	.undo_consume_data = &fd_undo_consume_data,
-	.get_data_source = &fd_get_data_source,
-};
-
-struct StreamFuncs file_funcs = 
-{
-	.get_data = &fd_get_data,
-	.get_parse_block = &fd_get_parse_block,
-	.consume_data = &fd_consume_data,
-	.undo_consume_data = &fd_undo_consume_data,
+	.get_data = &file_get_data,
+	.get_parse_block = &file_get_parse_block,
+	.consume_data = &file_consume_data,
+	.undo_consume_data = &file_undo_consume_data,
 	.get_data_source = &file_get_data_source,
 };
 
@@ -1024,9 +997,9 @@ struct stream_impl *colm_impl_new_fd( const char *name, long fd )
 {
 	struct stream_impl *ss = (struct stream_impl*)malloc(sizeof(struct stream_impl));
 	init_stream_impl( ss, name );
-	ss->funcs = &fd_funcs;
+	ss->funcs = &file_funcs;
 
-	ss->fd = fd;
+	ss->file = fdopen( fd, ( fd == 0 ) ? "r" : "w" );
 
 	return ss;
 }

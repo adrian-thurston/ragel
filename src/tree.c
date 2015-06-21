@@ -1693,15 +1693,8 @@ void append_collect( struct colm_print_args *args, const char *data, int length 
 
 void append_file( struct colm_print_args *args, const char *data, int length )
 {
-	fwrite( data, 1, length, (FILE*)args->arg );
-}
-
-void append_fd( struct colm_print_args *args, const char *data, int length )
-{
-	int fd = (long)args->arg;
-	int res = write( fd, data, length );
-	if ( res < 0 )
-		message( "write error on fd: %d: %s\n", fd, strerror(errno) );
+	struct stream_impl *impl = (struct stream_impl*) args->arg;
+	fwrite( data, 1, length, impl->file );
 }
 
 tree_t *tree_trim( struct colm_program *prg, tree_t **sp, tree_t *tree )
@@ -1965,7 +1958,8 @@ skip_null:
 	}
 }
 
-void colm_print_tree_args( program_t *prg, tree_t **sp, struct colm_print_args *print_args, tree_t *tree )
+void colm_print_tree_args( program_t *prg, tree_t **sp,
+		struct colm_print_args *print_args, tree_t *tree )
 {
 	if ( tree == 0 )
 		print_args->out( print_args, "NIL", 3 );
@@ -1987,7 +1981,8 @@ void colm_print_tree_args( program_t *prg, tree_t **sp, struct colm_print_args *
 	}
 }
 
-void colm_print_term_tree( program_t *prg, tree_t **sp, struct colm_print_args *print_args, kid_t *kid )
+void colm_print_term_tree( program_t *prg, tree_t **sp,
+		struct colm_print_args *print_args, kid_t *kid )
 {
 	debug( prg, REALM_PRINT, "printing term %p\n", kid->tree );
 
@@ -2043,7 +2038,8 @@ void open_tree_xml( program_t *prg, tree_t **sp, struct colm_print_args *args,
 	args->out( args, ">", 1 );
 }
 
-void print_term_xml( program_t *prg, tree_t **sp, struct colm_print_args *print_args, kid_t *kid )
+void print_term_xml( program_t *prg, tree_t **sp,
+	struct colm_print_args *print_args, kid_t *kid )
 {
 	//kid_t *child;
 
@@ -2069,7 +2065,8 @@ void print_term_xml( program_t *prg, tree_t **sp, struct colm_print_args *print_
 }
 
 
-void close_tree_xml( program_t *prg, tree_t **sp, struct colm_print_args *args, kid_t *parent, kid_t *kid )
+void close_tree_xml( program_t *prg, tree_t **sp,
+		struct colm_print_args *args, kid_t *parent, kid_t *kid )
 {
 	/* Skip the terminal that is for forcing trailing ignores out. */
 	if ( kid->tree->id == 0 )
@@ -2091,32 +2088,34 @@ void close_tree_xml( program_t *prg, tree_t **sp, struct colm_print_args *args, 
 	args->out( args, ">", 1 );
 }
 
-void print_tree_collect( program_t *prg, tree_t **sp, StrCollect *collect, tree_t *tree, int trim )
+void print_tree_collect( program_t *prg, tree_t **sp,
+		StrCollect *collect, tree_t *tree, int trim )
 {
-	struct colm_print_args print_args = { collect, true, false, trim, &append_collect, 
-			&colm_print_null, &colm_print_term_tree, &colm_print_null };
+	struct colm_print_args print_args = {
+			collect, true, false, trim, &append_collect, 
+			&colm_print_null, &colm_print_term_tree, &colm_print_null
+	};
+
 	colm_print_tree_args( prg, sp, &print_args, tree );
 }
 
-void print_tree_file( program_t *prg, tree_t **sp, FILE *out, tree_t *tree, int trim )
+void print_tree_file( program_t *prg, tree_t **sp, struct stream_impl *impl,
+		tree_t *tree, int trim )
 {
-	struct colm_print_args print_args = { out, true, false, trim, &append_file, 
-			&colm_print_null, &colm_print_term_tree, &colm_print_null };
+	struct colm_print_args print_args = {
+			impl, true, false, trim, &append_file, 
+			&colm_print_null, &colm_print_term_tree, &colm_print_null
+	};
+
 	colm_print_tree_args( prg, sp, &print_args, tree );
 }
 
-void print_tree_fd( program_t *prg, tree_t **sp, int fd, tree_t *tree, int trim )
+void print_xml_stdout( program_t *prg, tree_t **sp,
+		struct stream_impl *impl, tree_t *tree,
+		int comm_attr, int trim )
 {
-	struct colm_print_args print_args = { (void*)((long)fd), true, false, trim, &append_fd,
-			&colm_print_null, &colm_print_term_tree, &colm_print_null };
-	colm_print_tree_args( prg, sp, &print_args, tree );
-}
-
-void print_xml_stdout( program_t *prg, tree_t **sp, tree_t *tree, int comm_attr, int trim )
-{
-	struct colm_print_args print_args = { stdout, comm_attr, comm_attr, trim, &append_file, 
+	struct colm_print_args print_args = {
+			impl, comm_attr, comm_attr, trim, &append_file, 
 			&open_tree_xml, &print_term_xml, &close_tree_xml };
 	colm_print_tree_args( prg, sp, &print_args, tree );
 }
-
-

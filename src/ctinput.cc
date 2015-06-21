@@ -31,8 +31,8 @@
 using std::cerr;
 using std::endl;
 
-extern StreamFuncs patternFuncs;
-extern StreamFuncs replFuncs;
+extern stream_funcs patternFuncs;
+extern stream_funcs replFuncs;
 
 /*
  * Pattern
@@ -221,7 +221,7 @@ int inputStreamPatternUndoConsumeData( struct stream_impl *ss, const char *data,
 	return length;
 }
 
-StreamFuncs patternFuncs = 
+stream_funcs patternFuncs = 
 {
 	&inputStreamPatternGetParseBlock,
 	&inputStreamPatternGetData,
@@ -437,7 +437,7 @@ int inputStreamConsUndoConsumeData( struct stream_impl *ss, const char *data, in
 	return length;
 }
 
-StreamFuncs replFuncs =
+stream_funcs replFuncs =
 {
 	&inputStreamConsGetParseBlock,
 	&inputStreamConsGetData,

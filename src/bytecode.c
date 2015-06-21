@@ -120,6 +120,21 @@ tree_t **host_call( program_t *prg, long code, tree_t **sp );
 
 static void rcode_downref( program_t *prg, tree_t **sp, code_t *instr );
 
+static void open_stdout( program_t *prg )
+{
+	if ( prg->stdout_val == 0 )
+		prg->stdout_val = colm_stream_open_fd( prg, "<stdout>", 1 );
+}
+
+static void flush_streams( program_t *prg )
+{
+	if ( prg->stdout_val != 0 )
+		fflush( prg->stdout_val->impl->file );
+
+	if ( prg->stderr_val != 0 )
+		fflush( prg->stderr_val->impl->file );
+}
+
 void colm_parser_set_context( program_t *prg, tree_t **sp, parser_t *parser, struct_t *val )
 {
 	parser->pda_run->context = val;
@@ -654,12 +669,14 @@ again:
 			read_byte( n );
 			debug( prg, REALM_BYTECODE, "IN_PRINT %d\n", n );
 
+			open_stdout( prg );
+
 			tree_t *arg[n];
 			for ( i = n-1; i >= 0; i-- )
 				arg[i] = vm_pop_tree();
 
 			for ( i = 0; i < n; i++ )
-				print_tree_file( prg, sp, stdout, arg[i], false );
+				print_tree_file( prg, sp, prg->stdout_val->impl, arg[i], false );
 
 			for ( i = 0; i < n; i++ )
 				colm_tree_downref( prg, sp, arg[i] );
@@ -678,9 +695,7 @@ again:
 
 			for ( i = 0; i < n; i++ ) {
 				if ( si->file != 0 )
-					print_tree_file( prg, sp, si->file, arg[i], false );
-				else
-					print_tree_fd( prg, sp, si->fd, arg[i], false );
+					print_tree_file( prg, sp, si, arg[i], false );
 			}
 
 			for ( i = 0; i < n; i++ )
@@ -693,12 +708,14 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PRINT_XML_AC %d\n", n );
 
+			open_stdout( prg );
+
 			tree_t *arg[n];
 			for ( i = n-1; i >= 0; i-- )
 				arg[i] = vm_pop_tree();
 
 			for ( i = 0; i < n; i++ )
-				print_xml_stdout( prg, sp, arg[i], true, true );
+				print_xml_stdout( prg, sp, prg->stdout_val->impl, arg[i], true, true );
 
 			for ( i = 0; i < n; i++ )
 				colm_tree_downref( prg, sp, arg[i] );
@@ -707,14 +724,16 @@ again:
 		case IN_PRINT_XML: {
 			int n, i;
 			read_byte( n );
-			debug( prg, REALM_BYTECODE, "IN_PRINT_XML %d", n );
+			debug( prg, REALM_BYTECODE, "IN_PRINT_XML %d\n", n );
+
+			open_stdout( prg );
 
 			tree_t *arg[n];
 			for ( i = n-1; i >= 0; i-- )
 				arg[i] = vm_pop_tree();
 
 			for ( i = 0; i < n; i++ )
-				print_xml_stdout( prg, sp, arg[i], false, true );
+				print_xml_stdout( prg, sp, prg->stdout_val->impl, arg[i], false, true );
 
 			for ( i = 0; i < n; i++ )
 				colm_tree_downref( prg, sp, arg[i] );
@@ -2247,10 +2266,6 @@ again:
 				fclose( si->file );
 				si->file = 0;
 			}
-			else if ( si->fd >= 0 ) {
-				close( si->fd );
-				si->fd = -1;
-			}
 
 			vm_push_stream( stream );
 			break;
@@ -2373,7 +2388,7 @@ again:
 			exec->frame_ptr =  vm_pop_type(tree_t**);
 
 			if ( instr == 0 ) {
-				fflush( stdout );
+				flush_streams( prg );
 				goto out;
 			}
 			break;
@@ -3595,8 +3610,7 @@ again:
 
 			/* Pop the root object. */
 			vm_pop_tree();
-			if ( prg->stdout_val == 0 )
-				prg->stdout_val = colm_stream_open_fd( prg, "<stdout>", 1 );
+			open_stdout( prg );
 
 			vm_push_stream( prg->stdout_val );
 			break;
@@ -3753,7 +3767,7 @@ again:
 			case IN_STOP: {
 				debug( prg, REALM_BYTECODE, "IN_STOP\n" );
 
-				fflush( stdout );
+				flush_streams( prg );
 				goto out;
 			}
 
