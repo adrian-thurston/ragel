@@ -143,6 +143,8 @@ struct stream_impl
 	struct ConsItem *cons_item;
 
 	int consumed;
+
+	int indent;
 };
 
 struct stream_impl *colm_impl_new_pat( const char *name, struct Pattern *pattern );

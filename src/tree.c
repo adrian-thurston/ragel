@@ -1697,6 +1697,43 @@ void append_file( struct colm_print_args *args, const char *data, int length )
 	fwrite( data, 1, length, impl->file );
 }
 
+void append_file_indent( struct colm_print_args *args, const char *data, int length )
+{
+	struct stream_impl *impl = (struct stream_impl*) args->arg;
+restart:
+	if ( impl->indent ) {
+		/* Consume. */
+		while ( length > 0 && ( *data == ' ' || *data == '\t' ) ) {
+			data += 1;
+			length -= 1;
+		}
+
+		if ( length > 0 ) {
+			impl->indent = 0;
+			goto restart;
+		}
+	}
+	else {
+		char *nl = memchr( data, '\n', length );
+		if ( nl ) {
+			int wl = nl - data + 1;
+			fwrite( data, 1, wl, impl->file );
+			/* print indentation. */
+
+
+			/* go into consume state. */
+			data += wl;
+			length -= wl;
+			impl->indent = 1;
+			goto restart;
+		}
+		else {
+			fwrite( data, 1, length, impl->file );
+		}
+	}
+}
+
+
 tree_t *tree_trim( struct colm_program *prg, tree_t **sp, tree_t *tree )
 {
 	debug( prg, REALM_PARSE, "attaching left ignore\n" );
