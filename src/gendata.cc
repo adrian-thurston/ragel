@@ -767,7 +767,11 @@ void CodeGenData::makeStateList()
 					popRa = allActionTables + popActions->id;
 				}
 
-				from->nfaTargs->append( RedNfaTarg( rtarg, pushRa, popRa ) );
+				from->nfaTargs->append( RedNfaTarg( rtarg, pushRa,
+						popRa, targ->value.order ) );
+
+				MergeSort<RedNfaTarg, RedNfaTargCmp> sort;
+				sort.sort( from->nfaTargs->data, from->nfaTargs->length() );
 			}
 		}
 

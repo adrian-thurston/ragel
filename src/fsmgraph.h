@@ -612,11 +612,13 @@ typedef DList<TransAp> TransList;
 
 struct NfaActions
 {
-	NfaActions( Action *push, Action *pop )
-		: push(push), pop(pop) {}
+	NfaActions( Action *push, Action *pop, int order )
+		: push(push), pop(pop), order(order) {}
 
 	Action *push;
 	Action *pop;
+
+	int order;
 
 	ActionTable pushTable;
 	ActionTable popTable;
@@ -640,6 +642,10 @@ struct CmpNfaStateMapEl
 		else if ( el1.value.pop < el2.value.pop )
 			return -1;
 		else if ( el1.value.pop > el2.value.pop )
+			return 1;
+		else if ( el1.value.order < el2.value.order )
+			return -1;
+		else if ( el1.value.order > el2.value.order )
 			return 1;
 		return 0;
 	}

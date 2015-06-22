@@ -481,12 +481,25 @@ typedef Vector<GenStateCond*> StateCondVect;
 
 struct RedNfaTarg
 {
-	RedNfaTarg( RedStateAp *state, RedAction *push, RedAction *pop )
-		: state(state), push(push), pop(pop) {}
+	RedNfaTarg( RedStateAp *state, RedAction *push, RedAction *pop, int order )
+		: state(state), push(push), pop(pop), order(order) {}
 
 	RedStateAp *state;
 	RedAction *push;
 	RedAction *pop;
+	int order;
+};
+
+struct RedNfaTargCmp
+{
+	static inline long compare( const RedNfaTarg &k1, const RedNfaTarg &k2 )
+	{
+		if ( k1.order < k2.order )
+			return -1;
+		else if ( k1.order > k2.order )
+			return 1;
+		return 0;
+	}
 };
 
 typedef Vector<RedNfaTarg> RedNfaTargs;

@@ -426,7 +426,7 @@ void FsmAp::nfaRepeatOp( Action *init, Action *min,
 	StateAp *newStart = addState();
 
 	newStart->nfaOut = new NfaStateMap;
-	newStart->nfaOut->insert( origStartState, NfaActions( push, pop ) );
+	newStart->nfaOut->insert( origStartState, NfaActions( push, pop, 1 ) );
 	attachToNfa( newStart, origStartState );
 
 	StateAp *newFinal = addState();
@@ -438,9 +438,9 @@ void FsmAp::nfaRepeatOp( Action *init, Action *min,
 		moveInwardTrans( repl, *orig );
 
 		repl->nfaOut = new NfaStateMap;
-		repl->nfaOut->insert( repStartState, NfaActions( push, pop ) );
-		repl->nfaOut->insert( *orig, NfaActions( push, pop ) );
-		repl->nfaOut->insert( newFinal, NfaActions( push, pop ) );
+		repl->nfaOut->insert( repStartState, NfaActions( push, pop, 2 ) );
+		repl->nfaOut->insert( *orig, NfaActions( push, pop, 1 ) );
+		repl->nfaOut->insert( newFinal, NfaActions( push, pop, 3 ) );
 
 		for ( NfaStateMap::Iter s = *repl->nfaOut; s.lte(); s++ )
 			attachToNfa( repl, s->key );
@@ -472,7 +472,7 @@ void FsmAp::nfaRepeatOp2( Action *init, Action *min,
 	StateAp *newStart = addState();
 
 	newStart->nfaOut = new NfaStateMap;
-	newStart->nfaOut->insert( origStartState, NfaActions( push, pop ) );
+	newStart->nfaOut->insert( origStartState, NfaActions( push, pop, 1 ) );
 	attachToNfa( newStart, origStartState );
 
 	StateAp *newFinal = addState();
@@ -486,23 +486,23 @@ void FsmAp::nfaRepeatOp2( Action *init, Action *min,
 			
 			repl->nfaOut = new NfaStateMap;
 
-			if ( repl->nfaOut->insert( repStartState, NfaActions( push, pop ) ) )
+			if ( repl->nfaOut->insert( repStartState, NfaActions( push, pop, 1 ) ) )
 				attachToNfa( fin, repStartState );
 
-			if ( repl->nfaOut->insert( fin, NfaActions( push, pop ) ) )
+			if ( repl->nfaOut->insert( fin, NfaActions( push, pop, 2 ) ) )
 				attachToNfa( fin, fin );
 
-			if ( repl->nfaOut->insert( newFinal, NfaActions( push, pop ) ) )
+			if ( repl->nfaOut->insert( newFinal, NfaActions( push, pop, 3 ) ) )
 				attachToNfa( fin, newFinal );
 		}
 		else {
 			if ( fin->nfaOut == 0 )
 				fin->nfaOut = new NfaStateMap;
 
-			if ( fin->nfaOut->insert( repStartState, NfaActions( push, pop ) ) )
+			if ( fin->nfaOut->insert( repStartState, NfaActions( push, pop, 1 ) ) )
 				attachToNfa( fin, repStartState );
 
-			if ( fin->nfaOut->insert( newFinal, NfaActions( push, pop ) ) )
+			if ( fin->nfaOut->insert( newFinal, NfaActions( push, pop, 2 ) ) )
 				attachToNfa( fin, newFinal );
 		}
 	}
@@ -644,7 +644,7 @@ void FsmAp::finalizeNfaRound()
 		for ( StateSet::Iter ss = state->stateDictEl->stateSet; ss.lte(); ss++ ) {
 			/* Attach it using the NFA transitions data structure (propigates
 			 * to output). */
-			state->nfaOut->insert( *ss, NfaActions( 0, 0 ) );
+			state->nfaOut->insert( *ss, NfaActions( 0, 0, 1 ) );
 			attachToNfa( state, *ss );
 
 			detachStateDict( state, *ss );
