@@ -1697,6 +1697,9 @@ guardedPriorName++;
 
 	}
 
+	if ( nfaGuard )
+		rtnVal->nfaGuard();
+
 	if ( priorOrd != 0 )
 		delete[] priorOrd;
 	if ( actionOrd != 0 )

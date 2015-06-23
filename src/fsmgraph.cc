@@ -516,6 +516,19 @@ void FsmAp::nfaRepeatOp2( Action *init, Action *min,
 	setFinState( newFinal );
 }
 
+void FsmAp::nfaGuard()
+{
+	StateAp *origStartState = startState;
+
+	StateAp *newStart = addState();
+	newStart->nfaOut = new NfaStateMap;
+	newStart->nfaOut->insert( origStartState, NfaActions( 0, 0, 1 ) );
+	attachToNfa( newStart, origStartState );
+
+	unsetStartState();
+	setStartState( newStart );
+}
+
 void FsmAp::doOr( FsmAp *other )
 {
 	/* Build a state set consisting of both start states */

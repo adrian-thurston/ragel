@@ -90,6 +90,8 @@ struct Parser6
 
 	# Tokens specific to inline code.
 	token IL_WhiteSpace, IL_Comment, IL_Literal, IL_Symbol;
+	
+	token TK_LtBangGt;
 
 	# Keywords.
 	token KW_Machine, KW_Include, KW_Import, KW_Write, KW_Action, KW_AlphType,

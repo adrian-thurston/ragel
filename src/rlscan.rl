@@ -1236,6 +1236,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		"):"  => { token( TK_CloseColon ); };
 
 		"<:>" => { token( TK_LtColonGt ); };
+		"<!>" => { token( TK_LtBangGt ); };
 
 		# Opening of longest match.
 		"|*" => { token( TK_BarStar ); };
