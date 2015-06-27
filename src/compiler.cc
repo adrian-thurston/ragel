@@ -1017,6 +1017,8 @@ void Compiler::parsePatterns()
 {
 	program_t *prg = colm_new_program( runtimeData );
 
+	colm_set_debug( prg, gblActiveRealm );
+
 	/* Turn off context-dependent parsing. */
 	prg->ctx_dep_parsing = 0;
 
