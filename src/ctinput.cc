@@ -433,8 +433,23 @@ int inputStreamConsConsumeData( program_t *prg, tree_t **sp,
 
 int inputStreamConsUndoConsumeData( struct stream_impl *ss, const char *data, int length )
 {
-	ss->offset -= length;
-	return length;
+	int origLen = length;
+	while ( true ) {
+		int avail = ss->offset;
+
+		/* Okay to go up to the front of the buffer. */
+		if ( length > avail ) {
+			ss->cons_item= ss->cons_item->prev;
+			ss->offset = ss->cons_item->data.length();
+			length -= avail;
+		}
+		else {
+			ss->offset -= length;
+			break;
+		}
+	}
+
+	return origLen;
 }
 
 stream_funcs replFuncs =
