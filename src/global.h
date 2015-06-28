@@ -62,6 +62,7 @@ extern bool printStatistics;
 
 extern int gblErrorCount;
 extern bool gblLibrary;
+extern long gblActiveRealm;
 extern char machineMain[];
 extern const char *exportHeaderFn;
 

@@ -144,6 +144,8 @@ struct stream_impl
 
 	int consumed;
 
+	/* Indentation. */
+	int level;
 	int indent;
 };
 

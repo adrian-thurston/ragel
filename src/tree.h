@@ -31,6 +31,8 @@ extern "C" {
 #include <colm/input.h>
 #include <colm/internal.h>
 
+#define COLM_INDENT_OFF -1
+
 typedef unsigned char code_t;
 typedef unsigned long word_t;
 typedef unsigned long half_t;

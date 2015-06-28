@@ -1693,41 +1693,46 @@ void append_collect( struct colm_print_args *args, const char *data, int length 
 
 void append_file( struct colm_print_args *args, const char *data, int length )
 {
+	int level;
 	struct stream_impl *impl = (struct stream_impl*) args->arg;
-	fwrite( data, 1, length, impl->file );
-}
 
-void append_file_indent( struct colm_print_args *args, const char *data, int length )
-{
-	struct stream_impl *impl = (struct stream_impl*) args->arg;
 restart:
 	if ( impl->indent ) {
-		/* Consume. */
+		/* Consume mode. */
 		while ( length > 0 && ( *data == ' ' || *data == '\t' ) ) {
 			data += 1;
 			length -= 1;
 		}
 
 		if ( length > 0 ) {
+			/* Found some data, print the indentation and turn off indentation
+			 * mode. */
+			for ( level = 0; level < impl->level; level++ )
+				fputc( '\t', impl->file );
+
 			impl->indent = 0;
+
 			goto restart;
 		}
 	}
 	else {
-		char *nl = memchr( data, '\n', length );
-		if ( nl ) {
+		char *nl;
+		if ( impl->level != COLM_INDENT_OFF &&
+				(nl = memchr( data, '\n', length )) )
+		{
+			/* Print up to and including the newline. */
 			int wl = nl - data + 1;
 			fwrite( data, 1, wl, impl->file );
-			/* print indentation. */
 
-
-			/* go into consume state. */
+			/* Go into consume state. If we see more non-indentation chars we
+			 * will generate the appropriate indentation level. */
 			data += wl;
 			length -= wl;
 			impl->indent = 1;
 			goto restart;
 		}
 		else {
+			/* Indentation off, or no indent trigger (newline). */
 			fwrite( data, 1, length, impl->file );
 		}
 	}
@@ -1871,7 +1876,9 @@ rec_call:
 
 			/* Print the leading ignore list. Also implement the suppress right
 			 * in the process. */
-			if ( print_args->comm && (!print_args->trim || (flags & TF_TERM_SEEN && kid->tree->id > 0)) ) {	
+			if ( print_args->comm && (!print_args->trim ||
+					(flags & TF_TERM_SEEN && kid->tree->id > 0)) )
+			{
 				ignore = leading_ignore;
 				while ( ignore != 0 ) {
 					if ( ignore->tree->flags & AF_SUPPRESS_RIGHT )
@@ -2044,6 +2051,22 @@ void colm_print_term_tree( program_t *prg, tree_t **sp,
 		print_args->out( print_args, string_data( kid->tree->tokdata ), 
 				string_length( kid->tree->tokdata ) );
 	}
+
+	struct lang_el_info *lel_info = prg->rtd->lel_info;
+	struct stream_impl *impl = (struct stream_impl*) print_args->arg;
+
+	if ( strcmp( lel_info[kid->tree->id].name, "_IN_" ) == 0 ) {
+		if ( impl->level == COLM_INDENT_OFF ) {
+			impl->level = 1;
+			impl->indent = 1;
+		}
+		else {
+			impl->level += 1;
+		}
+	}
+
+	if ( strcmp( lel_info[kid->tree->id].name, "_EX_" ) == 0 )
+		impl->level -= 1;
 }
 
 
