@@ -1621,7 +1621,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
 			{
 				/* Convert it to a string. */
-				code.append( IN_TREE_TO_STR_TRIM );
+				code.append( IN_TREE_TO_STR );
 			}
 			break;
 		}
