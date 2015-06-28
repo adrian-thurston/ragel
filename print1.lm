@@ -31,5 +31,6 @@ send_tree StartParser2
 print [StartParser1->tree]
 print [StartParser2->tree "\n"]
 ######### EXP #########
-a b c d
+a b
+ c d
 NIL

@@ -4,32 +4,42 @@ lex
 	token id /[a-zA-Z_]+/
 end
 
-def item 
+def item1 
 	[id]
-|	[`( item* `)]
+|	[`( item1* `)]
 
 def item2
 	[id]
 |	[`( item2* `)]
 
 def start 
-	[item*]
+	[item1*]
 
 StartParser1: parser<start> = new parser<start>()
 StartParser2: parser<start> = new parser<start>()
+StartParser3: parser<start> = new parser<start>()
 
+parse Item1: item1 "b
 parse Item2: item2 "b
 
 # Success.
 send StartParser1
 	"a [Item2] c d\n" eos
 
-# Failure.
+# Success.
 send_tree StartParser2
+	"a [Item1] c d\n" eos
+
+# Failure.
+send_tree StartParser3
 	"a [Item2] c d\n" eos
 
 print( StartParser1->tree )
-print( StartParser2->tree, "\n" )
+print( StartParser2->tree )
+print( StartParser3->tree, "\n" )
 ######### EXP #########
-a b c d
+a b
+ c d
+a b
+ c d
 NIL
