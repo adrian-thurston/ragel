@@ -296,7 +296,7 @@ include 'trans-ocaml.lm'
 
 str argvPop()
 {
-	AE: argv_el = argv->pop()
+	AE: list_el<str> = argv->pop_el()
 	return AE->value
 }
 
