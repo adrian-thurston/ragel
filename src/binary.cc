@@ -579,7 +579,7 @@ void Binary::taNfaPushActions()
 {
 	nfaPushActions.start();
 
-	nfaTargs.value( 0 );
+	nfaPushActions.value( 0 );
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaTargs != 0 ) {
@@ -596,7 +596,7 @@ void Binary::taNfaPopActions()
 {
 	nfaPopActions.start();
 
-	nfaTargs.value( 0 );
+	nfaPopActions.value( 0 );
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaTargs != 0 ) {
