@@ -835,4 +835,28 @@ void FsmAp::moveInwardTrans( StateAp *dest, StateAp *src )
 		detachTrans( fromState, src, trans );
 		attachTrans( fromState, dest, trans );
 	}
+
+	/* Move inward nfa links. */
+	if ( src->nfaIn != 0 ) {
+		for ( StateSet::Iter s = *src->nfaIn; s.lte(); s++ ) {
+			/* Find the actions. Need to copy here because we are backed by a
+			 * vector that we are about to modify. References will not stay
+			 * valid. */
+			NfaStateMapEl *el = (*s)->nfaOut->find( src );
+			NfaActions actions = el->value;
+
+			/* Clear the nfa-out to src. */
+			bool removed = (*s)->nfaOut->remove( src );
+			assert( removed );
+
+			/* Add the nfa-out to the dest. */
+			(*s)->nfaOut->insert( dest, actions );
+
+			/* Set up the link back. */
+			if ( dest->nfaIn == 0 )
+				dest->nfaIn = new StateSet;
+			dest->nfaIn->insert( *s );
+		}
+		src->nfaIn->empty();
+	}
 }
