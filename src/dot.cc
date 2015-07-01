@@ -188,6 +188,14 @@ void GraphvizDotGen::transList( StateAp *state )
 			}
 		}
 	}
+
+	if ( state->nfaOut != 0 ) {
+		for ( NfaStateMap::Iter nfa = *state->nfaOut; nfa.lte(); nfa++ ) {
+			out << "\t" << state->alg.stateNum <<
+					" -> " << nfa->key->alg.stateNum <<
+					" [ label = \"EP," << nfa->value.order << "\" ];";
+		}
+	}
 }
 
 bool GraphvizDotGen::makeNameInst( std::string &res, NameInst *nameInst )
