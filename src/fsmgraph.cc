@@ -1289,6 +1289,17 @@ void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 		}
 
 		mergeStates( destState, ssMutable );
+
+		if ( destState->nfaOut != 0 ) {
+			for ( NfaStateMap::Iter na = *destState->nfaOut; na.lte(); na++ ) {
+				transferOutData( na->key, destState );
+
+				if ( destState->outCondSpace != 0 ) {
+					doEmbedCondition( na->key, destState->outCondSpace->condSet,
+							destState->outCondKeys );
+				}
+			}
+		}
 	}
 }
 

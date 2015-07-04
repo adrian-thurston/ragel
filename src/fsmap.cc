@@ -215,6 +215,34 @@ void FsmAp::startFsmAction( int ordering, Action *action )
 	 * not be bypassed. */
 	if ( startState->stateBits & STB_ISFINAL )
 		startState->outActionTable.setAction( ordering, action );
+	
+	if ( startState->nfaOut != 0 ) {
+		for ( NfaStateMap::Iter na = *startState->nfaOut; na.lte(); na++ ) {
+
+			StateAp *state = na->key;
+
+			/* Walk the start state's transitions, setting functions. */
+			for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+				if ( trans->plain() ) {
+					if ( trans->tdap()->toState != 0 )
+						trans->tdap()->actionTable.setAction( ordering, action );
+				}
+				else {
+					for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+						if ( cond->toState != 0 )
+							cond->actionTable.setAction( ordering, action );
+					}
+				}
+			}
+
+			/* If start state is final then add the action to the out action table.
+			 * This means that when the null string is accepted the start action will
+			 * not be bypassed. */
+			if ( state->stateBits & STB_ISFINAL )
+				state->outActionTable.setAction( ordering, action );
+
+		}
+	}
 }
 
 /* Set functions to execute on all transitions. Walks the out lists of all
@@ -1029,6 +1057,12 @@ void FsmAp::startFsmCondition( Action *condAction, bool sense )
 	isolateStartState();
 
 	embedCondition( startState, set, vals );
+
+	if ( startState->nfaOut != 0 ) {
+		for ( NfaStateMap::Iter na = *startState->nfaOut; na.lte(); na++ ) {
+			embedCondition( startState, set, vals );
+		}
+	}
 }
 
 void FsmAp::allTransCondition( Action *condAction, bool sense )
