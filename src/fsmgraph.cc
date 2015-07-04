@@ -438,9 +438,9 @@ void FsmAp::nfaRepeatOp( Action *init, Action *min,
 		moveInwardTrans( repl, *orig );
 
 		repl->nfaOut = new NfaStateMap;
+		repl->nfaOut->insert( *orig, NfaActions( push, pop, 3 ) );
 		repl->nfaOut->insert( repStartState, NfaActions( push, pop, 2 ) );
-		repl->nfaOut->insert( *orig, NfaActions( push, pop, 1 ) );
-		repl->nfaOut->insert( newFinal, NfaActions( push, pop, 3 ) );
+		repl->nfaOut->insert( newFinal, NfaActions( push, pop, 1 ) );
 
 		for ( NfaStateMap::Iter s = *repl->nfaOut; s.lte(); s++ )
 			attachToNfa( repl, s->key );
