@@ -1232,8 +1232,8 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		":>>" => { token( TK_ColonGtGt ); };
 		"<:"  => { token( TK_LtColon ); };
 
-		":("  => { token( TK_ColonOpen ); };
-		"):"  => { token( TK_CloseColon ); };
+		":nfa("  => { token( TK_ColonNfaOpen ); };
+		"):"     => { token( TK_CloseColon ); };
 
 		"<:>" => { token( TK_LtColonGt ); };
 		"<!>" => { token( TK_LtBangGt ); };

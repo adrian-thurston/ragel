@@ -1054,7 +1054,7 @@ factor_with_rep:
 				$3->rep, $5->rep, FactorWithRep::RangeType );
 	};
 factor_with_rep:
-	TK_ColonOpen factor_with_rep ',' action_embed ',' action_embed ','
+	TK_ColonNfaOpen factor_with_rep ',' action_embed ',' action_embed ','
 		action_embed ',' action_embed ',' action_embed TK_CloseColon
 	final {
 		$$->factorWithRep = new FactorWithRep( $1->loc, $2->factorWithRep,

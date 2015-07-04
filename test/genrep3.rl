@@ -106,7 +106,7 @@
 	}
 
 	main := 
-		( :( ( 'a' @char ), ini6, min6, max6, nfa_push, nfa_pop ): ' ' ) {2}
+		( :nfa( ( 'a' @char ), ini6, min6, max6, nfa_push, nfa_pop ): ' ' ) {2}
 		eol
 		any @{
 			# printf("----- MATCH\n");
