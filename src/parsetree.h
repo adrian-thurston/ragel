@@ -581,6 +581,7 @@ struct FactorWithRep
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
+	void applyGuardedPrior( ParseData *pd, FsmAp *rtnVal );
 
 	FsmAp *condRep( ParseData *pd );
 	FsmAp *noMaxRep( ParseData *pd );
@@ -599,6 +600,7 @@ struct FactorWithRep
 
 	/* Priority descriptor for StarStar type. */
 	PriorDesc priorDescs[2];
+
 };
 
 /* Fifth level of precedence. Provides Negation. */

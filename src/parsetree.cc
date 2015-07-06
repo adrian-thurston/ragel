@@ -1672,6 +1672,7 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 		pd->popNameScope( nameFrame );
 	}
 
+#if 0
 	/* Guarded In. Set up the two priorities that will interact. We also need
 	 * to assign the guard id so when the interaction is detected, we can
 	 * report on the source. */
@@ -1694,8 +1695,8 @@ static int guardedPriorName = 10000;
 guardedPriorName++;
 
 		rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[0] );
-
 	}
+#endif
 
 	if ( nfaGuard )
 		rtnVal->nfaGuard();
@@ -1798,14 +1799,48 @@ FactorWithRep::~FactorWithRep()
 	}
 }
 
+void FactorWithRep::applyGuardedPrior( ParseData *pd, FsmAp *rtnVal )
+{
+//	/* Guarded In. Set up the two priorities that will interact. We also need
+//	 * to assign the guard id so when the interaction is detected, we can
+//	 * report on the source. */
+//	/* if ( guardedIn ) */ {
+//		rtnVal->startState->guardedIn = true;
+//		priorDescs = new PriorDesc[2];
+
+	static int guardedPriorName = 10000;
+
+	priorDescs[0].key = guardedPriorName;
+	priorDescs[0].priority = 0;
+	priorDescs[0].guardId = repId;
+	priorDescs[0].other = &priorDescs[1];
+
+	priorDescs[1].key = guardedPriorName;
+	priorDescs[1].priority = 1;
+	priorDescs[1].guardId = repId;
+	priorDescs[1].other = &priorDescs[0];
+
+	guardedPriorName++;
+
+	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[0] );
+}
+
 FsmAp *FactorWithRep::condRep( ParseData *pd )
 {
-	return factorWithRep->walk( pd );
+	FsmAp *rtnVal = factorWithRep->walk( pd );
+
+	applyGuardedPrior( pd, rtnVal );
+
+	return rtnVal;
 }
 
 FsmAp *FactorWithRep::noMaxRep( ParseData *pd )
 {
-	return factorWithRep->walk( pd );
+	FsmAp *rtnVal =  factorWithRep->walk( pd );
+
+	applyGuardedPrior( pd, rtnVal );
+
+	return rtnVal;
 }
 
 /* Evaluate a factor with repetition node. */
