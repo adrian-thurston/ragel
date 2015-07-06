@@ -567,7 +567,8 @@ void ParseData::unsetObsoleteEntries( FsmAp *graph )
 	}
 }
 
-NameSet ParseData::resolvePart( NameInst *refFrom, const std::string &data, bool recLabelsOnly )
+NameSet ParseData::resolvePart( NameInst *refFrom,
+		const std::string &data, bool recLabelsOnly )
 {
 	/* Queue needed for breadth-first search, load it with the start node. */
 	NameInstList nameQueue;

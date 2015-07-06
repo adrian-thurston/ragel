@@ -548,22 +548,24 @@ struct FactorWithRep
 		MinType,
 		RangeType,
 		NfaRep,
+		CondRep,
+		NoMaxRep,
 		FactorWithNegType
 	};
 
 	FactorWithRep( const InputLoc &loc, FactorWithRep *factorWithRep, 
 			int lowerRep, int upperRep, Type type )
 	:
-		loc(loc), factorWithRep(factorWithRep), 
+		loc(loc), repId(0), factorWithRep(factorWithRep), 
 		factorWithNeg(0), lowerRep(lowerRep), 
 		upperRep(upperRep), type(type)
 	{}
 	
-	FactorWithRep( const InputLoc &loc, FactorWithRep *factorWithRep, 
+	FactorWithRep( const InputLoc &loc, long repId, FactorWithRep *factorWithRep, 
 			Action *action1, Action *action2, Action *action3,
 			Action *action4, Action *action5, Type type )
 	:
-		loc(loc), factorWithRep(factorWithRep), 
+		loc(loc), repId(repId), factorWithRep(factorWithRep), 
 		action1(action1), action2(action2), action3(action3),
 		action4(action4), action5(action5), factorWithNeg(0),
 		lowerRep(0), upperRep(0), type(type)
@@ -580,7 +582,11 @@ struct FactorWithRep
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
+	FsmAp *condRep( ParseData *pd );
+	FsmAp *noMaxRep( ParseData *pd );
+
 	InputLoc loc;
+	long repId;
 	FactorWithRep *factorWithRep;
 	Action *action1;
 	Action *action2;

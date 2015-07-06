@@ -1789,13 +1789,23 @@ FactorWithRep::~FactorWithRep()
 	switch ( type ) {
 		case StarType: case StarStarType: case OptionalType: case PlusType:
 		case ExactType: case MaxType: case MinType: case RangeType:
-		case NfaRep:
+		case NfaRep: case CondRep: case NoMaxRep:
 			delete factorWithRep;
 			break;
 		case FactorWithNegType:
 			delete factorWithNeg;
 			break;
 	}
+}
+
+FsmAp *FactorWithRep::condRep( ParseData *pd )
+{
+	return factorWithRep->walk( pd );
+}
+
+FsmAp *FactorWithRep::noMaxRep( ParseData *pd )
+{
+	return factorWithRep->walk( pd );
 }
 
 /* Evaluate a factor with repetition node. */
@@ -2048,6 +2058,14 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		retFsm->nfaRepeatOp( action1, action2, action3, action4, action5 );
 		break;
 	}
+	case CondRep: {
+		retFsm = condRep( pd );
+		break;
+	}
+	case NoMaxRep: {
+		retFsm = noMaxRep( pd );
+		break;
+	}
 	case FactorWithNegType: {
 		/* Evaluate the Factor. Pass it up. */
 		retFsm = factorWithNeg->walk( pd );
@@ -2068,6 +2086,8 @@ void FactorWithRep::makeNameTree( ParseData *pd )
 	case MinType:
 	case RangeType:
 	case NfaRep:
+	case CondRep:
+	case NoMaxRep:
 		factorWithRep->makeNameTree( pd );
 		break;
 	case FactorWithNegType:
@@ -2088,6 +2108,8 @@ void FactorWithRep::resolveNameRefs( ParseData *pd )
 	case MinType:
 	case RangeType:
 	case NfaRep:
+	case CondRep:
+	case NoMaxRep:
 		factorWithRep->resolveNameRefs( pd );
 		break;
 	case FactorWithNegType:
