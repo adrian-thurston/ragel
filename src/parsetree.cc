@@ -1825,19 +1825,51 @@ void FactorWithRep::applyGuardedPrior( ParseData *pd, FsmAp *rtnVal )
 	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[0] );
 }
 
-FsmAp *FactorWithRep::condRep( ParseData *pd )
+FsmAp *FactorWithRep::condRep( ParseData *pd, bool useMax )
 {
+	Action *ini = action1;
+	Action *inc = action2;
+	Action *min = action3;
+	Action *max = action4;
+
 	FsmAp *rtnVal = factorWithRep->walk( pd );
 
-	applyGuardedPrior( pd, rtnVal );
+	rtnVal->startFsmAction( 0, inc );
+	afterOpMinimize( rtnVal );
 
-	return rtnVal;
-}
+	if ( useMax ) {
+		rtnVal->startFsmCondition( max, true );
+		afterOpMinimize( rtnVal );
+	}
 
-FsmAp *FactorWithRep::noMaxRep( ParseData *pd )
-{
-	FsmAp *rtnVal =  factorWithRep->walk( pd );
+	/* Plus Operation. */
+	{
+		if ( rtnVal->startState->isFinState() ) {
+			pd->nfaTermCheckPlusZero();
+			warning(loc) << "applying plus operator to a machine that "
+					"accepts zero length word" << endl;
+		}
 
+		/* Need a duplicated for the star end. */
+		FsmAp *dup = new FsmAp( *rtnVal );
+
+		/* The start func orders need to be shifted before doing the star. */
+		pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
+
+		/* Star the duplicate. */
+		dup->starOp( );
+		afterOpMinimize( dup );
+
+		rtnVal->concatOp( dup );
+		afterOpMinimize( rtnVal );
+	}
+
+	rtnVal->leaveFsmCondition( min, true );
+
+	/* Init action. */
+	rtnVal->startFromStateAction( 0,  ini );
+
+	/* Leading priority guard. */
 	applyGuardedPrior( pd, rtnVal );
 
 	return rtnVal;
@@ -2094,11 +2126,11 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		break;
 	}
 	case CondRep: {
-		retFsm = condRep( pd );
+		retFsm = condRep( pd, true );
 		break;
 	}
 	case NoMaxRep: {
-		retFsm = noMaxRep( pd );
+		retFsm = condRep( pd, false );
 		break;
 	}
 	case FactorWithNegType: {

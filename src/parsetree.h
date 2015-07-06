@@ -583,7 +583,7 @@ struct FactorWithRep
 	void resolveNameRefs( ParseData *pd );
 	void applyGuardedPrior( ParseData *pd, FsmAp *rtnVal );
 
-	FsmAp *condRep( ParseData *pd );
+	FsmAp *condRep( ParseData *pd, bool useMax );
 	FsmAp *noMaxRep( ParseData *pd );
 
 	InputLoc loc;
