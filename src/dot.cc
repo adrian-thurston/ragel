@@ -106,13 +106,34 @@ void GraphvizDotGen::onChar( Key lowKey, Key highKey, CondSpace *condSpace, long
 }
 
 
-void GraphvizDotGen::transAction( StateAp *fromState, TransData *trans )
+void GraphvizDotGen::fromStateAction( StateAp *fromState )
 {
 	int n = 0;
 	ActionTable *actionTables[3] = { 0, 0, 0 };
 
 	if ( fromState->fromStateActionTable.length() != 0 )
 		actionTables[n++] = &fromState->fromStateActionTable;
+
+	
+	/* Loop the existing actions and write out what's there. */
+	for ( int a = 0; a < n; a++ ) {
+		for ( ActionTable::Iter actIt = actionTables[a]->first(); actIt.lte(); actIt++ ) {
+			Action *action = actIt->value;
+			action->actionName( out );
+			if ( a < n-1 || !actIt.last() )
+				out << ", ";
+		}
+	}
+
+	if ( n > 0 )
+		out << " / ";
+}
+
+void GraphvizDotGen::transAction( StateAp *fromState, TransData *trans )
+{
+	int n = 0;
+	ActionTable *actionTables[3] = { 0, 0, 0 };
+
 	if ( trans->actionTable.length() != 0 )
 		actionTables[n++] = &trans->actionTable;
 	if ( trans->toState != 0 && trans->toState->toStateActionTable.length() != 0 )
@@ -162,10 +183,14 @@ void GraphvizDotGen::transList( StateAp *state )
 
 			/* Begin the label. */
 			out << " [ label = \""; 
+
+			fromStateAction( state );
+
 			onChar( tel->lowKey, tel->highKey, 0, 0 );
 
 			/* Write the action and close the transition. */
 			transAction( state, tdap );
+
 			out << "\" ];\n";
 		}
 		else {
@@ -180,6 +205,9 @@ void GraphvizDotGen::transList( StateAp *state )
 
 				/* Begin the label. */
 				out << " [ label = \""; 
+
+				fromStateAction( state );
+
 				onChar( tel->lowKey, tel->highKey, tel->condSpace, ctel->key.getVal() );
 
 				/* Write the action and close the transition. */
