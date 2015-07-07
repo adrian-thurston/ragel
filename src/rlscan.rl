@@ -1233,9 +1233,10 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		"<:"  => { token( TK_LtColon ); };
 
 		":nfa("   => { token( TK_ColonNfaOpen ); };
+		":nfa2("  => { token( TK_ColonNfa2Open ); };
 		":cond("  => { token( TK_ColonCondOpen ); };
 		":nomax(" => { token( TK_ColonNoMaxOpen ); };
-		"):"     => { token( TK_CloseColon ); };
+		"):"      => { token( TK_CloseColon ); };
 
 		"<:>" => { token( TK_LtColonGt ); };
 		"<!>" => { token( TK_LtBangGt ); };

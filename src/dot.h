@@ -61,6 +61,7 @@ public:
 	void onChar( Key lowKey, Key highKey, CondSpace *condSpace, long condVals );
 	void transList( StateAp *state );
 	void write();
+	void fromStateAction( StateAp *fromState );
 	
 	ostream &out;
 };

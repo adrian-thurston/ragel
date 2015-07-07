@@ -548,6 +548,7 @@ struct FactorWithRep
 		MinType,
 		RangeType,
 		NfaRep,
+		NfaRep2,
 		CondRep,
 		NoMaxRep,
 		FactorWithNegType
@@ -563,11 +564,11 @@ struct FactorWithRep
 	
 	FactorWithRep( const InputLoc &loc, long repId, FactorWithRep *factorWithRep, 
 			Action *action1, Action *action2, Action *action3,
-			Action *action4, Action *action5, Type type )
+			Action *action4, Action *action5, Action *action6, Type type )
 	:
 		loc(loc), repId(repId), factorWithRep(factorWithRep), 
 		action1(action1), action2(action2), action3(action3),
-		action4(action4), action5(action5), factorWithNeg(0),
+		action4(action4), action5(action5), action6(action6), factorWithNeg(0),
 		lowerRep(0), upperRep(0), type(type)
 	{}
 	
@@ -594,6 +595,7 @@ struct FactorWithRep
 	Action *action3;
 	Action *action4;
 	Action *action5;
+	Action *action6;
 	FactorWithNeg *factorWithNeg;
 	int lowerRep, upperRep;
 	Type type;

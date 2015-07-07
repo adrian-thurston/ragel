@@ -516,6 +516,69 @@ void FsmAp::nfaRepeatOp2( Action *init, Action *min,
 	setFinState( newFinal );
 }
 
+/* This version uses conditions to test. This is better since it won't kill off
+ * other paths with the fgoto error, but there are problems with ordering,
+ * specifically if a repeat is repeated with something such as {2}. The init of
+ * the second round executes before the condition test for the exit. This
+ * implementation is suggesting we need to contain the repeat in some new kind
+ * of NFA actions. */
+void FsmAp::nfaRepeatOp3( Action *init, Action *min,
+		Action *max, Action *push, Action *pop, Action *inc )
+{
+	/*
+	 * First Concat.
+	 */
+	StateSet origFinals = finStateSet;
+
+	/* Get the other's start state. */
+	StateAp *origStartState = startState;
+	StateAp *repStartState = dupStartState();
+
+	StateAp *newStart = addState();
+
+	newStart->nfaOut = new NfaStateMap;
+	newStart->nfaOut->insert( origStartState, NfaActions( push, pop, 1 ) );
+	attachToNfa( newStart, origStartState );
+
+	StateAp *newFinal = addState();
+
+	for ( StateSet::Iter orig = origFinals; orig.lte(); orig++ ) {
+		unsetFinState( *orig );
+
+		StateAp *repl = addState();
+		moveInwardTrans( repl, *orig );
+
+		repl->nfaOut = new NfaStateMap;
+		repl->nfaOut->insert( *orig, NfaActions( push, pop, 3 ) );
+		repl->nfaOut->insert( repStartState, NfaActions( push, pop, 2 ) );
+		repl->nfaOut->insert( newFinal, NfaActions( push, pop, 1 ) );
+
+		for ( NfaStateMap::Iter s = *repl->nfaOut; s.lte(); s++ )
+			attachToNfa( repl, s->key );
+	}
+
+	origStartState->fromStateActionTable.setAction( 0, init );
+	newFinal->fromStateActionTable.setAction( 1, inc );
+
+	{
+		addOutCondition( newFinal, min, true );
+	}
+
+	repStartState->fromStateActionTable.setAction( 1, inc );
+
+	{
+		CondSet set;
+		CondKeySet vals;
+		set.insert( max );
+		vals.append( 1 );
+		embedCondition( repStartState, set, vals );
+	}
+
+	unsetStartState();
+	setStartState( newStart );
+	setFinState( newFinal );
+}
+
 void FsmAp::nfaGuard()
 {
 	StateAp *origStartState = startState;
@@ -1298,6 +1361,18 @@ void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 					doEmbedCondition( na->key, destState->outCondSpace->condSet,
 							destState->outCondKeys );
 				}
+
+				/* Second level. */
+				if ( na->key->nfaOut != 0 ) {
+					for ( NfaStateMap::Iter na2 = *na->key->nfaOut; na2.lte(); na2++ ) {
+						transferOutData( na2->key, na->key );
+
+						if ( na->key->outCondSpace != 0 ) {
+							doEmbedCondition( na2->key, na->key->outCondSpace->condSet,
+									na->key->outCondKeys );
+						}
+					}
+				}
 			}
 		}
 	}
@@ -1391,6 +1466,19 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 		for ( NfaStateMap::Iter nt = *srcState->nfaOut; nt.lte(); nt++ ) {
 			if ( destState->nfaOut->insert( nt->key, nt->value ) )
 				attachToNfa( destState, nt->key );
+
+			/* Second level. */
+			if ( nt->key->nfaOut != 0 ) {
+				if ( destState->nfaOut == 0 )
+					destState->nfaOut = new NfaStateMap;
+
+				for ( NfaStateMap::Iter nt2 = *nt->key->nfaOut; nt2.lte(); nt2++ ) {
+					if ( destState->nfaOut->insert( nt2->key, nt2->value ) )
+						attachToNfa( destState, nt2->key );
+
+					/* Second level. */
+				}
+			}
 		}
 	}
 }

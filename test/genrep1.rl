@@ -65,7 +65,7 @@ void nfa_pop()
 	}
 
 	main := 
-		( :nfa( ( 'a' ), ini6, min6, max6, {nfa_push();}, {nfa_pop();} ): ' ' ) {2}
+		( :nfa( 1, ( 'a' ), ini6, min6, max6, {nfa_push();}, {nfa_pop();} ): ' ' ) {2}
 		eol
 		any @{printf("----- MATCH\n");}
 	;

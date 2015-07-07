@@ -54,18 +54,21 @@ void nfa_pop()
 
 	action min6
 	{
-		if ( ++c < 2 )
-			fgoto *match_any_error;
+		c >= 2
 	}
 
 	action max6
 	{
-		if ( ++c == 3 )
-			fgoto *match_any_error;
+		c < 3
+	}
+
+	action inc6
+	{
+		c += 1;
 	}
 
 	main := 
-		( :nfa( 1, ( 'a'  ), ini6, min6, max6, {nfa_push();}, {nfa_pop();} ): ) {2}
+		( :nfa2( 0, ( 'a' @{ printf( "see a %d\n", fcurs ); }  ), ini6, min6, max6, {nfa_push();}, {nfa_pop();}, inc6 ): ) {2}
 		eol
 		any @{printf("----- MATCH\n");}
 	;
@@ -98,6 +101,9 @@ int main()
 	test( "aaaaaa" );
 	test( "aaaaaaa" );
 	test( "aaaaaaaa" );
+	test( "aaaaaaaaa" );
+	test( "aaaaaaaaaa" );
+	test( "aaaaaaaaaaa" );
 
 	return 0;
 }

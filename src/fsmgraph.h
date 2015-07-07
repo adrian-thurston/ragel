@@ -1849,6 +1849,8 @@ public:
 			Action *push, Action *pop );
 	void nfaRepeatOp2( Action *init, Action *min, Action *max,
 			Action *push, Action *pop );
+	void nfaRepeatOp3( Action *init, Action *min, Action *max,
+			Action *push, Action *pop, Action *inc );
 	void nfaGuard();
 	void unionOp( FsmAp *other );
 	void intersectOp( FsmAp *other );
