@@ -568,8 +568,8 @@ struct FactorWithRep
 	:
 		loc(loc), repId(repId), factorWithRep(factorWithRep), 
 		action1(action1), action2(action2), action3(action3),
-		action4(action4), action5(action5), action6(action6), factorWithNeg(0),
-		lowerRep(0), upperRep(0), type(type)
+		action4(action4), action5(action5), action6(action6),
+		factorWithNeg(0), lowerRep(0), upperRep(0), type(type)
 	{}
 	
 	FactorWithRep( FactorWithNeg *factorWithNeg )

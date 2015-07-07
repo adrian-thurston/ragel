@@ -522,8 +522,8 @@ void FsmAp::nfaRepeatOp2( Action *init, Action *min,
  * the second round executes before the condition test for the exit. This
  * implementation is suggesting we need to contain the repeat in some new kind
  * of NFA actions. */
-void FsmAp::nfaRepeatOp3( Action *init, Action *min,
-		Action *max, Action *push, Action *pop, Action *inc )
+void FsmAp::nfaRepeatOp3( Action *init, Action *inc, Action *min,
+		Action *max, Action *push, Action *pop )
 {
 	/*
 	 * First Concat.
