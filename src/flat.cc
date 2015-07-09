@@ -472,6 +472,7 @@ void Flat::NFA_POP()
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"	if ( nfa_len > 0 ) {\n"
+			"		int cont = 1;\n"
 			"		nfa_count += 1;\n"
 			"		nfa_len -= 1;\n";
 
@@ -488,8 +489,13 @@ void Flat::NFA_POP()
 					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-						ACTION( out, item->value, IlOpts( 0, false, false ) );
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+						if ( item.last() )
+							out << " cont = ";
+
+						CONDITION( out, item->value );
+						out << ";";
+					}
 
 					out << "\n\t" << CEND() << "}\n";
 				}
@@ -500,9 +506,12 @@ void Flat::NFA_POP()
 		}
 
 		out <<
-			"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
-			"		" << P() << " = nfa_bp[nfa_len].p;\n"
-			"		goto _resume;\n"
+			"		if ( cont ) {\n"
+			"			" << vCS() << " = nfa_bp[nfa_len].state;\n"
+			"			" << P() << " = nfa_bp[nfa_len].p;\n"
+			"			goto _resume;\n"
+			"		}\n"
+			"		goto _out;\n"
 			"	}\n";
 	}
 }
