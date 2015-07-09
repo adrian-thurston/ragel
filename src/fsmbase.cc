@@ -492,13 +492,17 @@ void FsmAp::unsetFinBits( int finStateBits )
 /* Tests the integrity of the transition lists and the fromStates. */
 void FsmAp::verifyIntegrity()
 {
-	std::cerr << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
-
+	int count = 0;
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Walk the out transitions and assert fromState is correct. */
 		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-				assert( cond->fromState == state );
+			if ( trans->plain() ) {
+				assert( trans->tdap()->fromState == state );
+			}
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+					assert( cond->fromState == state );
+				}
 			}
 		}
 
@@ -509,7 +513,25 @@ void FsmAp::verifyIntegrity()
 		for ( CondInList::Iter t = state->inCond; t.lte(); t++ ) {
 			assert( t->toState == state );
 		}
+
+		if ( state->nfaIn != 0 ) {
+			for ( StateSet::Iter s = *state->nfaIn; s.lte(); s++ ) {
+				assert( (*s)->nfaOut != 0 );
+				assert( (*s)->nfaOut->find( state ) );
+			}
+		}
+
+		if ( state->nfaOut != 0 ) {
+			for ( NfaStateMap::Iter s = *state->nfaOut; s.lte(); s++ ) {
+				assert( s->key->nfaIn != 0 );
+				assert( s->key->nfaIn->find( state ) );
+			}
+		}
+
+		count += 1;
 	}
+
+	assert( stateList.length() == count );
 }
 
 void FsmAp::verifyReachability()
