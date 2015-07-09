@@ -367,7 +367,7 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 	if ( !optional )
 		unsetAllFinStates();
 	finStateSet.insert( other->finStateSet );
-	
+
 	/* Since other's lists are empty, we can delete the fsm without
 	 * affecting any states. */
 	delete other;
@@ -411,7 +411,7 @@ void FsmAp::concatOp( FsmAp *other )
 	doConcat( other, 0, false );
 }
 
-void FsmAp::nfaRepeatOp( Action *init, Action *min,
+void FsmAp::nfaRepeatOp1( Action *init, Action *min,
 		Action *max, Action *push, Action *pop )
 {
 	/*
@@ -457,7 +457,7 @@ void FsmAp::nfaRepeatOp( Action *init, Action *min,
 
 /* This version attempts to avoid the dup of the final states. It shaves some
  * time off but reduces correctness, haven't discovered why yet. */
-void FsmAp::nfaRepeatOp2( Action *init, Action *min,
+void FsmAp::nfaRepeatOp1b( Action *init, Action *min,
 		Action *max, Action *push, Action *pop )
 {
 	/*
@@ -522,7 +522,7 @@ void FsmAp::nfaRepeatOp2( Action *init, Action *min,
  * the second round executes before the condition test for the exit. This
  * implementation is suggesting we need to contain the repeat in some new kind
  * of NFA actions. */
-void FsmAp::nfaRepeatOp3( Action *init, Action *inc, Action *min,
+void FsmAp::nfaRepeatOp2( Action *init, Action *inc, Action *min,
 		Action *max, Action *push, Action *pop )
 {
 	/*
@@ -572,6 +572,49 @@ void FsmAp::nfaRepeatOp3( Action *init, Action *inc, Action *min,
 		set.insert( max );
 		vals.append( 1 );
 		embedCondition( repStartState, set, vals );
+	}
+
+	unsetStartState();
+	setStartState( newStart );
+	setFinState( newFinal );
+}
+
+/* This version contains the init, increment and test in the nfa pop actions.
+ * This is a compositional operator since it doesn't leave any actions to
+ * trailing characters, where they may interact with other actions that use the
+ * same variables. */
+void FsmAp::nfaRepeatOp3( Action *init, Action *stay, Action *repeat, Action *exit, Action *push )
+{
+	/*
+	 * First Concat.
+	 */
+	StateSet origFinals = finStateSet;
+
+	/* Get the other's start state. */
+	StateAp *origStartState = startState;
+	StateAp *repStartState = dupStartState();
+
+	StateAp *newStart = addState();
+
+	newStart->nfaOut = new NfaStateMap;
+	newStart->nfaOut->insert( origStartState, NfaActions( push, init, 1 ) );
+	attachToNfa( newStart, origStartState );
+
+	StateAp *newFinal = addState();
+
+	for ( StateSet::Iter orig = origFinals; orig.lte(); orig++ ) {
+		unsetFinState( *orig );
+
+		StateAp *repl = addState();
+		moveInwardTrans( repl, *orig );
+
+		repl->nfaOut = new NfaStateMap;
+		repl->nfaOut->insert( *orig, NfaActions( push, stay, 3 ) );
+		repl->nfaOut->insert( repStartState, NfaActions( push, repeat, 2 ) );
+		repl->nfaOut->insert( newFinal, NfaActions( push, exit, 1 ) );
+
+		for ( NfaStateMap::Iter s = *repl->nfaOut; s.lte(); s++ )
+			attachToNfa( repl, s->key );
 	}
 
 	unsetStartState();

@@ -549,6 +549,7 @@ struct FactorWithRep
 		RangeType,
 		NfaRep,
 		NfaRep2,
+		NfaRep3,
 		CondRep,
 		NoMaxRep,
 		FactorWithNegType

@@ -1790,7 +1790,7 @@ FactorWithRep::~FactorWithRep()
 	switch ( type ) {
 		case StarType: case StarStarType: case OptionalType: case PlusType:
 		case ExactType: case MaxType: case MinType: case RangeType:
-		case NfaRep: case NfaRep2: case CondRep: case NoMaxRep:
+		case NfaRep: case NfaRep2: case NfaRep3: case CondRep: case NoMaxRep:
 			delete factorWithRep;
 			break;
 		case FactorWithNegType:
@@ -2122,12 +2122,18 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 	}
 	case NfaRep: {
 		retFsm = factorWithRep->walk( pd );
-		retFsm->nfaRepeatOp( action1, action2, action3, action4, action5 );
+		retFsm->nfaRepeatOp1( action1, action2, action3, action4, action5 );
 		break;
 	}
 	case NfaRep2: {
 		retFsm = factorWithRep->walk( pd );
-		retFsm->nfaRepeatOp3( action1, action2, action3, action4, action5, action6 );
+		retFsm->nfaRepeatOp2( action1, action2, action3, action4, action5, action6 );
+		break;
+	}
+	case NfaRep3: {
+		retFsm = factorWithRep->walk( pd );
+		retFsm->nfaRepeatOp3( action1, action2, action3, action4, action5 );
+		retFsm->verifyIntegrity();
 		break;
 	}
 	case CondRep: {
@@ -2159,6 +2165,7 @@ void FactorWithRep::makeNameTree( ParseData *pd )
 	case RangeType:
 	case NfaRep:
 	case NfaRep2:
+	case NfaRep3:
 	case CondRep:
 	case NoMaxRep:
 		factorWithRep->makeNameTree( pd );
@@ -2182,6 +2189,7 @@ void FactorWithRep::resolveNameRefs( ParseData *pd )
 	case RangeType:
 	case NfaRep:
 	case NfaRep2:
+	case NfaRep3:
 	case CondRep:
 	case NoMaxRep:
 		factorWithRep->resolveNameRefs( pd );

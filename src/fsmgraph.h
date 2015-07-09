@@ -1845,12 +1845,14 @@ public:
 	void repeatOp( int times );
 	void optionalRepeatOp( int times );
 	void concatOp( FsmAp *other );
-	void nfaRepeatOp( Action *init, Action *min, Action *max,
+	void nfaRepeatOp1( Action *init, Action *min, Action *max,
 			Action *push, Action *pop );
-	void nfaRepeatOp2( Action *init, Action *min, Action *max,
+	void nfaRepeatOp1b( Action *init, Action *min, Action *max,
 			Action *push, Action *pop );
-	void nfaRepeatOp3( Action *init, Action *inc, Action *min,
+	void nfaRepeatOp2( Action *init, Action *inc, Action *min,
 			Action *max, Action *push, Action *pop );
+	void nfaRepeatOp3( Action *init, Action *stay, Action *repeat,
+			Action *exit, Action *push );
 	void nfaGuard();
 	void unionOp( FsmAp *other );
 	void intersectOp( FsmAp *other );
