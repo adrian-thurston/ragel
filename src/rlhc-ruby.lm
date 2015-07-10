@@ -1,3 +1,56 @@
+namespace ruby_out
+	token _IN_ /''/
+	token _EX_ /''/
+
+	lex
+		token comment /
+			'#' any* :> '\n'
+		/
+
+		literal `def `class `begin `end `while `if
+
+		token id
+			/[a-zA-Z_][a-zA-Z_0-9]*/
+
+		token number /
+			[0-9]+
+		/
+
+		token string /
+				'"' ( [^"\\] | '\\' any ) * '"' |
+				"'" ( [^'\\] | '\\' any ) * "'" |
+				"/" ( [^/\\] | '\\' any ) * "/"
+			/
+
+		token symbol /
+			'!' | '#' | '$' | '%' | '&' | '(' | ')' | '*' |
+			'+' | ',' | '-' | '.' | '/' | ':' | ';' | '<' |
+			'=' | '>' | '?' | '@' | '[' | ']' | '^' | '|' |
+			'~' | '{' | '}' | '\\' /
+
+		ignore
+			/[ \t\v\r\n]+/
+	end
+
+	def item
+		[comment]
+	|	[id]
+	|	[number]
+	|	[symbol]
+	|	[string]
+	|	[`begin _IN_]
+	|	[`class _IN_]
+	|	[`while _IN_]
+	|	[`if _IN_]
+	|	[`def _IN_]
+	|	[_EX_ `end]
+
+	def ruby_out
+		[_IN_ _EX_ item*]
+end
+
+global RubyParser: parser<ruby_out::ruby_out>
+
 global EntryLoop: int = 0
 global ElCascade: int = 0
 
@@ -6,7 +59,7 @@ void ruby_tok_list( TL: host::tok* )
 	for Tok: host::tok in repeat(TL) {
 		if match Tok [host::`${ StmtList: stmt* host::`}$]
 		{
-			send Output
+			send RubyParser
 				"begin
 				"[ruby_stmt_list( StmtList )]
 				"end
@@ -14,7 +67,7 @@ void ruby_tok_list( TL: host::tok* )
 		elsif match Tok [host::`={ Expr: expr host::`}=]
 			ruby_expr( Expr )
 		else {
-			send Output [Tok]
+			send RubyParser [Tok]
 		}
 	}
 }
@@ -24,19 +77,19 @@ void ruby_embedded_host( EH: embedded_host )
 	switch EH
 	case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
-		send Output
+		send RubyParser
 			"([ruby_tok_list( TL )])"
 	}
 	case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 	{
-		send Output 
+		send RubyParser 
 			"begin
 			"	[ruby_tok_list( TL )]
 			"end
 	}
 	case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
-		send Output
+		send RubyParser
 			[ruby_tok_list( TL )]
 	}
 }
@@ -46,52 +99,52 @@ void ruby_expr_factor( ExprFactor: expr_factor )
 	if match ExprFactor
 		[EH: embedded_host]
 	{
-		send Output
+		send RubyParser
 			[ruby_embedded_host( EH )]
 	}
 	elsif match ExprFactor
 		[O:`( TL: expr C: `)]
 	{
-		send Output
+		send RubyParser
 			[O ruby_expr(TL) C]
 	}
 	elsif match ExprFactor
 		[ident O: `[ TL: expr C: `]]
 	{
-		send Output
+		send RubyParser
 			[ExprFactor.ident O ruby_expr( TL ) C]
 	}
 	elsif match ExprFactor
 		['offset' '(' ident ',' expr ')']
 	{
-		send Output
+		send RubyParser
 			[ruby_expr( ExprFactor.expr )]
 	}
 	elsif match ExprFactor
 		['deref' '(' ident ',' expr ')']
 	{
-		send Output
+		send RubyParser
 			[ ExprFactor.ident '[' ruby_expr( ExprFactor.expr ) ']']
 		if $ExprFactor.ident == 'data'
-			send Output '.ord'
+			send RubyParser '.ord'
 	}
 	elsif match ExprFactor
 			[T: `TRUE]
 	{
 		T.data = 'true'
-		send Output [T]
+		send RubyParser [T]
 	}
 	elsif match ExprFactor
 			[F: `FALSE]
 	{
 		F.data = 'false'
-		send Output [F]
+		send RubyParser [F]
 	}
 	elsif match ExprFactor
 			[N: `nil]
 	{
 		N.data = '0'
-		send Output [N]
+		send RubyParser [N]
 	}
 	elsif match ExprFactor
 			[Number: number]
@@ -105,14 +158,14 @@ void ruby_expr_factor( ExprFactor: expr_factor )
 	}
 	elsif match ExprFactor [Open: `( Type: type Close: `) expr_factor]
 	{
-		#send Output [Open]
+		#send RubyParser [Open]
 		#ruby_type( Type )
-		#send Output [Close]
+		#send RubyParser [Close]
 		ruby_expr_factor( ExprFactor._expr_factor )
 	}
 	else {
 		# Catches cases not specified
-		send Output [ExprFactor]
+		send RubyParser [ExprFactor]
 	}
 }
 
@@ -121,13 +174,13 @@ void ruby_lvalue( ExprFactor: lvalue )
 	if match ExprFactor
 		[EH: embedded_host]
 	{
-		send Output
+		send RubyParser
 			[ruby_embedded_host( EH )]
 	}
 	elsif match ExprFactor
 		[ident O: `[ TL: expr C: `]]
 	{
-		send Output
+		send RubyParser
 			[ExprFactor.ident O ruby_expr( TL ) C]
 	}
 	elsif match ExprFactor [E1: embedded_host `-> E2: lvalue]
@@ -137,7 +190,7 @@ void ruby_lvalue( ExprFactor: lvalue )
 	}
 	else {
 		# Catches cases not specified
-		send Output [ExprFactor]
+		send RubyParser [ExprFactor]
 	}
 }
 
@@ -145,12 +198,12 @@ void ruby_expr_factor_op( ExprFactorOp: expr_factor_op )
 {
 	if match ExprFactorOp [B: `! expr_factor_op]
 	{
-		send Output [B]
+		send RubyParser [B]
 		ruby_expr_factor_op( ExprFactorOp._expr_factor_op )
 	}
 	elsif match ExprFactorOp [T: `~ expr_factor_op]
 	{
-		send Output [T]
+		send RubyParser [T]
 		ruby_expr_factor_op( ExprFactorOp._expr_factor_op )
 	}
 	elsif match ExprFactorOp [expr_factor]
@@ -164,7 +217,7 @@ void ruby_expr_bitwise( ExprBitwise: expr_bitwise )
 	if match ExprBitwise [expr_bitwise A: `& expr_factor_op]
 	{
 		ruby_expr_bitwise( ExprBitwise._expr_bitwise )
-		send Output [A]
+		send RubyParser [A]
 		ruby_expr_factor_op( ExprBitwise.expr_factor_op )
 	}
 	elsif match ExprBitwise [expr_factor_op]
@@ -178,7 +231,7 @@ void ruby_expr_mult( ExprMult: expr_mult )
 	if match ExprMult [expr_mult T: `* expr_bitwise]
 	{
 		ruby_expr_mult( ExprMult._expr_mult )
-		send Output [T]
+		send RubyParser [T]
 		ruby_expr_bitwise( ExprMult.expr_bitwise )
 	}
 	elsif match ExprMult [expr_bitwise]
@@ -192,7 +245,7 @@ void ruby_expr_add( ExprAdd: expr_add )
 	if match ExprAdd [expr_add Op: add_op expr_mult]
 	{
 		ruby_expr_add( ExprAdd._expr_add )
-		send Output [Op]
+		send RubyParser [Op]
 		ruby_expr_mult( ExprAdd.expr_mult )
 	}
 	elsif match ExprAdd [expr_mult]
@@ -206,7 +259,7 @@ void ruby_expr_shift( ExprShift: expr_shift )
 	if match ExprShift [expr_shift Op: shift_op expr_add]
 	{
 		ruby_expr_shift( ExprShift._expr_shift )
-		send Output [Op]
+		send RubyParser [Op]
 		ruby_expr_add( ExprShift.expr_add )
 	}
 	elsif match ExprShift [expr_add]
@@ -220,7 +273,7 @@ void ruby_expr_test( ExprTest: expr_test )
 	if match ExprTest [expr_test Op: test_op expr_shift]
 	{
 		ruby_expr_test( ExprTest._expr_test )
-		send Output [Op]
+		send RubyParser [Op]
 		ruby_expr_shift( ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_shift]
@@ -237,33 +290,33 @@ void ruby_expr( Expr: expr )
 void ruby_type( Type: type )
 {
 	if match Type "s8"
-		send Output ['byte ']
+		send RubyParser ['byte ']
 	elsif match Type "s16"
-		send Output ['short ']
+		send RubyParser ['short ']
 	elsif match Type "s32"
-		send Output ['int ']
+		send RubyParser ['int ']
 	elsif match Type "s64"
-		send Output ['long ']
+		send RubyParser ['long ']
 	elsif match Type "s128"
-		send Output ['long long ']
+		send RubyParser ['long long ']
 	elsif match Type "uint"
-		send Output ['int ']
+		send RubyParser ['int ']
 	else
-		send Output [Type]
+		send RubyParser [Type]
 }
 
 void ruby_number( Number: number )
 {
 	if match Number [`u `( uint `) ]
-		send Output "[Number.uint]"
+		send RubyParser "[Number.uint]"
 	else
-		send Output [Number]
+		send RubyParser [Number]
 }
 
 void ruby_num_list( NumList: num_list )
 {
 	for Number: number in NumList
-		send Output "[ruby_number( Number )], "
+		send RubyParser "[ruby_number( Number )], "
 }
 
 void ruby_stmt( Stmt: stmt )
@@ -271,11 +324,11 @@ void ruby_stmt( Stmt: stmt )
 	if match Stmt
 		[EH: embedded_host]
 	{
-		send Output
+		send RubyParser
 			[ruby_embedded_host( EH )]
 	}
 	elsif match Stmt [Array: array] {
-		send Output
+		send RubyParser
 			"class << self
 			"	attr_accessor :[ Array.ident ] 
 			"	private :[ Array.ident ], :[ Array.ident ]=
@@ -286,7 +339,7 @@ void ruby_stmt( Stmt: stmt )
 			"
 	}
 	elsif match Stmt [Value: value] {
-		send Output
+		send RubyParser
 			"class << self
 			"	attr_accessor :[ Value.ident ]
 			"end
@@ -297,7 +350,7 @@ void ruby_stmt( Stmt: stmt )
 			'if' O: `( IfExpr: expr C: `) IfStmt: stmt
 			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 	] {
-		send Output
+		send RubyParser
 			"if ( [ruby_expr(IfExpr)] )
 			"	[ruby_stmt(IfStmt)]
 
@@ -305,33 +358,33 @@ void ruby_stmt( Stmt: stmt )
 			match ElseIfClause
 				['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
 
-			send Output
+			send RubyParser
 				"elsif ( [ruby_expr(ElseIfExpr)] )
 				"	[ruby_stmt(ElseIfStmt)]
 		}
 
 		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-			send Output
+			send RubyParser
 				"else
 				"	[ruby_stmt(ElseStmt)]
 		}
-		send Output
+		send RubyParser
 			"end
 	}
 	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
 		ElCascade = ElCascade + 1
-		send Output
+		send RubyParser
 			"while ( [ruby_expr(WhileExpr)] )
 			"	[ruby_stmt(WhileStmt)]
 			"end
 		if EntryLoop {
-			send Output
+			send RubyParser
 				"next if _trigger_goto
 		}
 		ElCascade = ElCascade - 1
 	}
 	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
-		send Output
+		send RubyParser
 			"case  [ruby_expr(SwitchExpr)] 
 			"when -2 then
 			"begin
@@ -340,35 +393,35 @@ void ruby_stmt( Stmt: stmt )
 			"end
 	}
 	elsif match Stmt [ExprExpr: expr Semi: `;] {
-		send Output
+		send RubyParser
 			[ruby_expr(ExprExpr) Semi]
 	}
 	elsif match Stmt [L: `{ TL: stmt* R: `}] {
-		send Output
+		send RubyParser
 			"begin
 			"[ruby_stmt_list(TL)]
 			"end
 	}
 	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: `;]
 	{
-		send Output
+		send RubyParser
 			[OptPtr Ident]
 
 		if match OptInit [E: `= expr] {
-			send Output
+			send RubyParser
 				[E ruby_expr(OptInit.expr)]
 		}
 		else {
-			send Output
+			send RubyParser
 				"= 0
 		}
 
-		send Output
+		send RubyParser
 			[Semi]
 	}
 	elsif match Stmt [Export: export_stmt]
 	{
-		send Output
+		send RubyParser
 			"class << self
 			"	attr_accessor :[ Export.ident ]
 			"end
@@ -381,12 +434,12 @@ void ruby_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [Index: index_stmt]
 	{
-		send Output
+		send RubyParser
 			"[Index.ident] = 0;
 	}
 	elsif match Stmt [case_block]
 	{
-		send Output
+		send RubyParser
 			"end
 			"when [ruby_expr( Stmt.case_block.expr )] then
 			"begin
@@ -394,7 +447,7 @@ void ruby_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [default_block]
 	{
-		send Output
+		send RubyParser
 			"end
 			"else
 			"begin
@@ -402,12 +455,12 @@ void ruby_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [goto_label]
 	{
-		send Output "{}"
+		send RubyParser "{}"
 	}
 	elsif match Stmt [G: goto_stmt]
 	{
 		if ( ElCascade ) {
-			send Output
+			send RubyParser
 				"begin
 				"	_trigger_goto = true
 				"	_goto_level = [$G.Id]
@@ -415,7 +468,7 @@ void ruby_stmt( Stmt: stmt )
 				"end
 		}
 		else {
-			send Output
+			send RubyParser
 				"begin
 				"	_goto_level = [$G.Id]
 				"	next
@@ -425,7 +478,7 @@ void ruby_stmt( Stmt: stmt )
 	elsif match Stmt [entry_loop]
 	{
 		EntryLoop = EntryLoop + 1
-		send Output
+		send RubyParser
 			"_goto_level = 0
 			"while true 
 			"	_trigger_goto = false
@@ -438,19 +491,19 @@ void ruby_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [label_stmt]
 	{
-		send Output
+		send RubyParser
 			"end
 			"if _goto_level <= [Stmt.label_stmt.Id]
 			"[ruby_stmt_list( Stmt.label_stmt._repeat_stmt )]
 	}
 	elsif match Stmt [AS: assign_stmt]
 	{
-		send Output
+		send RubyParser
 			"[ruby_lvalue(AS.LValue) AS.assign_op ruby_expr(AS.expr)];
 	}
 	else {
 		# catches unspecified cases
-		send Output [Stmt]
+		send RubyParser [Stmt]
 	}
 }
 
@@ -458,4 +511,22 @@ void ruby_stmt_list( StmtList: stmt* )
 {
 	for Stmt: stmt in repeat( StmtList )
 		ruby_stmt( Stmt )
+}
+
+void ruby_trans( StmtList: stmt* )
+{
+	RubyParser = new parser<ruby_out::ruby_out>()
+
+	ruby_stmt_list( StmtList )
+
+	RO: ruby_out::ruby_out = RubyParser->finish()
+
+	if RO {
+		send Output
+			[RO]
+	}
+	else {
+		send stderr
+			"failed to parse output: [RubyParser->error]
+	}
 }

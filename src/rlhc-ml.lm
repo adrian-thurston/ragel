@@ -1,18 +1,64 @@
+namespace ml_out
+	token _IN_ /''/
+	token _EX_ /''/
+
+	lex
+		token comment /
+			'(*' any* :>> '*)'
+		/
+
+		literal `begin `end `{ `}
+
+		token id
+			/[a-zA-Z_][a-zA-Z_0-9]* "'"? /
+
+		token number /
+			[0-9]+
+		/
+
+		token symbol /
+			'!' | '#' | '$' | '%' | '&' | '(' | ')' | '*' |
+			'+' | ',' | '-' | '.' | '/' | ':' | ';' | '<' |
+			'=' | '>' | '?' | '@' | '[' | ']' | '^' | '|' |
+			'~' | '`' /
+
+		token string /
+				'"' ( [^"\\\n] | '\\' any ) * '"' |
+				"'" ( [^'\\\n] | '\\' any ) * "'"
+			/
+
+		ignore
+			/[ \t\v\r\n]+/
+	end
+
+	def item
+		[comment]
+	|	[id]
+	|	[number]
+	|	[symbol]
+	|	[string]
+	|	[`begin _IN_ item* _EX_ `end ]
+	|	[`{ _IN_ item* _EX_ `} ]
+
+	def ml_out
+		[_IN_ _EX_ item*]
+end
 
 global StaticVarMap: map<str, str> = new map<str, str>()
+global MlParser: parser<ml_out::ml_out>
 
 void ml_tok_list( TL: host::tok* )
 {
 	for Tok: host::tok in repeat(TL) {
 		if match Tok [host::`${ StmtList: stmt* host::`}$]
-			send Output
+			send MlParser
 				"begin
 				"[ml_stmt_list( StmtList )]
 				"end;
 		elsif match Tok [host::`={ Expr: expr host::`}=]
-			send Output "([ml_expr( Expr )])"
+			send MlParser "([ml_expr( Expr )])"
 		else {
-			send Output [Tok]
+			send MlParser [Tok]
 		}
 	}
 }
@@ -22,19 +68,19 @@ void ml_embedded_host( EH: embedded_host )
 	switch EH
 	case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 	{
-		send Output
+		send MlParser
 			"([ml_tok_list( TL )])"
 	}
 	case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 	{
-		send Output 
+		send MlParser 
 			"begin
 			"[ml_tok_list( TL )]
 			"end;
 	}
 	case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 	{
-		send Output
+		send MlParser
 			[ml_tok_list( TL )]
 	}
 }
@@ -44,58 +90,58 @@ void ml_expr_factor( ExprFactor: expr_factor )
 	switch ExprFactor
 	case [EH: embedded_host]
 	{
-		send Output
+		send MlParser
 			[ml_embedded_host( EH )]
 	}
 	case [`( TL: expr `)]
 	{
-		send Output
+		send MlParser
 			"( [ ml_expr(TL) ] )"
 	}
 	case [I: ident `[ TL: expr `]]
 	{
 		if ( StaticVarMap->find( $I ) || $I == 'stack' ) {
-			send Output
+			send MlParser
 				"[ ExprFactor.ident ].([ ml_expr( TL ) ])"
 		}
 		else {
-			send Output
+			send MlParser
 				"[ ExprFactor.ident ].\[[ ml_expr( TL ) ]\]"
 		}
 	}
 	case ['offset' '(' ident ',' expr ')']
 	{
-		send Output
+		send MlParser
 			[ml_expr( ExprFactor.expr )]
 	}
 	case ['deref' '(' I: ident ',' Expr: expr ')']
 	{
 		if ( $I == 'data' )
-			send Output 'Char.code '
+			send MlParser 'Char.code '
 
 		if ( StaticVarMap->find( $I ) ) {
-			send Output
+			send MlParser
 				"[I].( [ ml_expr( Expr ) ] )"
 		}
 		else {
-			send Output
+			send MlParser
 				"[I].\[[ ml_expr( Expr ) ]\]"
 		}
 	}
 	case [T: `TRUE]
 	{
 		T.data = '1'
-		send Output [T]
+		send MlParser [T]
 	}
 	case [F: `FALSE]
 	{
 		F.data = '0'
-		send Output [F]
+		send MlParser [F]
 	}
 	case [N: `nil]
 	{
 		N.data = '0'
-		send Output [N]
+		send MlParser [N]
 	}
 	case [Number: number]
 	{
@@ -103,11 +149,11 @@ void ml_expr_factor( ExprFactor: expr_factor )
 	}
 	case [I: ident] {
 		if ( StaticVarMap->find( $I ) ) {
-			send Output
+			send MlParser
 				[^I]
 		}
 		else {
-			send Output
+			send MlParser
 				"[^I].contents"
 		}
 	}
@@ -119,12 +165,12 @@ void ml_expr_factor( ExprFactor: expr_factor )
 	}
 	case [`( type `) expr_factor]
 	{
-		send Output
+		send MlParser
 			[ml_expr_factor( ExprFactor._expr_factor )]
 	}
 	default {
 		# Catches cases not specified
-		send Output [ExprFactor]
+		send MlParser [ExprFactor]
 	}
 }
 
@@ -133,12 +179,12 @@ void ml_lvalue( ExprFactor: lvalue )
 	switch ExprFactor
 	case [EH: embedded_host]
 	{
-		send Output
+		send MlParser
 			[ml_embedded_host( EH )]
 	}
 	case [ident O: `[ TL: expr C: `]]
 	{
-		send Output
+		send MlParser
 			[ExprFactor.ident O ml_expr( TL ) C]
 	}
 	case [E1: embedded_host `-> E2: lvalue]
@@ -149,7 +195,7 @@ void ml_lvalue( ExprFactor: lvalue )
 	}
 	default {
 		# Catches cases not specified
-		send Output [ExprFactor]
+		send MlParser [ExprFactor]
 	}
 }
 
@@ -157,12 +203,12 @@ void ml_expr_factor_op( ExprFactorOp: expr_factor_op )
 {
 	if match ExprFactorOp [B: `! expr_factor_op]
 	{
-		send Output [B]
+		send MlParser [B]
 		ml_expr_factor_op( ExprFactorOp._expr_factor_op )
 	}
 	elsif match ExprFactorOp [T: `~ expr_factor_op]
 	{
-		send Output " lnot "
+		send MlParser " lnot "
 		ml_expr_factor_op( ExprFactorOp._expr_factor_op )
 	}
 	elsif match ExprFactorOp [expr_factor]
@@ -175,7 +221,7 @@ void ml_expr_bitwise( ExprBitwise: expr_bitwise )
 {
 	if match ExprBitwise [L: expr_bitwise `& R: expr_factor_op]
 	{
-		send Output
+		send MlParser
 			"[ml_expr_bitwise( L )] land [ml_expr_factor_op( R )]"
 	}
 	elsif match ExprBitwise [expr_factor_op]
@@ -189,7 +235,7 @@ void ml_expr_mult( ExprMult: expr_mult )
 	if match ExprMult [expr_mult T: `* expr_bitwise]
 	{
 		ml_expr_mult( ExprMult._expr_mult )
-		send Output [T]
+		send MlParser [T]
 		ml_expr_bitwise( ExprMult.expr_bitwise )
 	}
 	elsif match ExprMult [expr_bitwise]
@@ -203,7 +249,7 @@ void ml_expr_add( ExprAdd: expr_add )
 	if match ExprAdd [expr_add Op: add_op expr_mult]
 	{
 		ml_expr_add( ExprAdd._expr_add )
-		send Output [Op]
+		send MlParser [Op]
 		ml_expr_mult( ExprAdd.expr_mult )
 	}
 	elsif match ExprAdd [expr_mult]
@@ -218,9 +264,9 @@ void ml_expr_shift( ExprShift: expr_shift )
 	{
 		ml_expr_shift( ExprShift._expr_shift )
 		if match Op [`<<]
-			send Output " lsl "
+			send MlParser " lsl "
 		else
-			send Output " asr "
+			send MlParser " asr "
 		ml_expr_add( ExprShift.expr_add )
 	}
 	elsif match ExprShift [expr_add]
@@ -235,9 +281,9 @@ void ml_expr_test( ExprTest: expr_test )
 	{
 		ml_expr_test( ExprTest._expr_test )
 		if match Op [`==]
-			send Output "= "
+			send MlParser "= "
 		else
-			send Output [Op]
+			send MlParser [Op]
 		ml_expr_shift( ExprTest.expr_shift )
 	}
 	elsif match ExprTest [expr_shift]
@@ -254,33 +300,33 @@ void ml_expr( Expr: expr )
 void ml_type( Type: type )
 {
 	if match Type "s8"
-		send Output ['char ']
+		send MlParser ['char ']
 	elsif match Type "s16"
-		send Output ['short ']
+		send MlParser ['short ']
 	elsif match Type "s32"
-		send Output ['int ']
+		send MlParser ['int ']
 	elsif match Type "s64"
-		send Output ['long ']
+		send MlParser ['long ']
 	elsif match Type "s128"
-		send Output ['long long ']
+		send MlParser ['long long ']
 	elsif match Type "uint"
-		send Output ['int ']
+		send MlParser ['int ']
 	else
-		send Output [Type]
+		send MlParser [Type]
 }
 
 void ml_number( Number: number )
 {
 	if match Number [`u `( uint `) ]
-		send Output "[Number.uint]u"
+		send MlParser "[Number.uint]u"
 	else
-		send Output [Number]
+		send MlParser [Number]
 }
 
 void ml_num_list( NumList: num_list )
 {
 	for Number: number in NumList
-		send Output "[ml_number( Number )]; "
+		send MlParser "[ml_number( Number )]; "
 }
 
 void ml_stmt( Stmt: stmt )
@@ -288,26 +334,26 @@ void ml_stmt( Stmt: stmt )
 	if match Stmt
 		[EH: embedded_host]
 	{
-		send Output
+		send MlParser
 			[ml_embedded_host( EH )]
 	}
 	elsif match Stmt [Array: array] {
 		StaticVarMap->insert( $Array.ident, ' ' )
-		send Output
+		send MlParser
 			"let [Array.ident] : int array = \[|
 				"	[ml_num_list(Array.num_list)]
 			"|\]
 	}
 	elsif match Stmt [Value: value] {
 		StaticVarMap->insert( $Value.ident, ' ' )
-		send Output
+		send MlParser
 			"let [Value.ident] : [Value.type] = [Value.number]
 	}
 	elsif match Stmt [
 			'if' O: `( IfExpr: expr C: `) IfStmt: stmt
 			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 	] {
-		send Output
+		send MlParser
 			"if [ml_expr(IfExpr)] then
 			"begin
 			"	[ml_stmt(IfStmt)]
@@ -317,7 +363,7 @@ void ml_stmt( Stmt: stmt )
 			match ElseIfClause
 				['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
 
-			send Output
+			send MlParser
 				"else if [ml_expr(ElseIfExpr)] then
 				"begin
 				"	[ml_stmt(ElseIfStmt)]
@@ -325,18 +371,18 @@ void ml_stmt( Stmt: stmt )
 		}
 
 		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-			send Output
+			send MlParser
 				"else
 				"begin
 				"	[ml_stmt(ElseStmt)]
 				"end
 		}
 
-		send Output
+		send MlParser
 			";"
 	}
 	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
-		send Output
+		send MlParser
 			"while [ml_expr(WhileExpr)] do
 			"	[ml_stmt(WhileStmt)]
 			"done;
@@ -345,7 +391,7 @@ void ml_stmt( Stmt: stmt )
 		require StmtList
 			[`case E1: expr `{ Inner: stmt* `} Rest: stmt*]
 
-		send Output
+		send MlParser
 			"if [ml_expr(SwitchExpr)] = [ml_expr(E1)] then
 			"begin
 			"	[ml_stmt_list(Inner)]
@@ -355,7 +401,7 @@ void ml_stmt( Stmt: stmt )
 			if match S
 				[`case E1: expr `{ Inner: stmt* `}]
 			{
-				send Output
+				send MlParser
 					"else if [ml_expr(SwitchExpr)] = [ml_expr(E1)] then
 					"begin
 					"	[ml_stmt_list(Inner)]
@@ -364,7 +410,7 @@ void ml_stmt( Stmt: stmt )
 			elsif match S
 				[`default `{ Inner: stmt* `}]
 			{
-				send Output
+				send MlParser
 					"else
 					"begin
 					"	[ml_stmt_list(Inner)]
@@ -372,38 +418,38 @@ void ml_stmt( Stmt: stmt )
 			}
 		}
 
-		send Output
+		send MlParser
 			";
 	}
 	elsif match Stmt [ExprExpr: expr Semi: `;] {
-		send Output
+		send MlParser
 			[ml_expr(ExprExpr) Semi]
 	}
 	elsif match Stmt [L: `{ TL: stmt* R: `}] {
-		send Output
+		send MlParser
 			"begin
 			"[ml_stmt_list(TL)]
 			"end;
 	}
 	elsif match Stmt [D: declaration] {
-		send Output
+		send MlParser
 			"let [D.ident] : [ml_type(D.type)] ref "
 
 		if match D.opt_init [E: `= expr] {
-			send Output
+			send MlParser
 				"= ref [ml_expr(D.opt_init.expr)]"
 		}
 		else {
-			send Output
+			send MlParser
 				"= ref 0"
 		}
 
-		send Output
+		send MlParser
 			" in
 	}
 	elsif match Stmt [Export: export_stmt]
 	{
-		send Output
+		send MlParser
 			"#define [Export.ident] [ml_number(Export.number)] 
 	}
 	elsif match Stmt ['fallthrough' ';']
@@ -412,12 +458,12 @@ void ml_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [Index: index_stmt]
 	{
-		send Output
+		send MlParser
 			"let [Index.ident] : int ref = ref 0 in
 	}
 	elsif match Stmt [case_block]
 	{
-		send Output
+		send MlParser
 			"| [ml_expr( Stmt.case_block.expr )] -> 
 			"begin
 			"[ml_stmt_list( Stmt.case_block._repeat_stmt )]
@@ -425,24 +471,24 @@ void ml_stmt( Stmt: stmt )
 	}
 	elsif match Stmt [default_block]
 	{
-		send Output
+		send MlParser
 			"| _ ->
 			"[ml_stmt_list( Stmt.default_block._repeat_stmt )]
 	}
 	elsif match Stmt [case_label]
 	{
-		send Output
+		send MlParser
 			"case [ml_expr( Stmt.case_label.expr )]:
 	}
 	elsif match Stmt [label_stmt]
 	{
-		send Output
+		send MlParser
 			"[Stmt.label_stmt.ident]:
 			"[ml_stmt_list( Stmt.label_stmt._repeat_stmt )]
 	}
 	elsif match Stmt [entry_loop]
 	{
-		send Output
+		send MlParser
 			[ml_stmt_list( Stmt.entry_loop._repeat_stmt )]
 	}
 	elsif match Stmt [AS: assign_stmt]
@@ -451,33 +497,33 @@ void ml_stmt( Stmt: stmt )
 		case [`=]
 		{
 			if match AS.LValue "stack\[[expr]\]" {
-				send Output "Array.set stack top.contents [ml_expr(AS.expr)];"
+				send MlParser "Array.set stack top.contents [ml_expr(AS.expr)];"
 			}
 			else {
-				send Output
+				send MlParser
 					"[ml_lvalue(AS.LValue)] := [ml_expr(AS.expr)];
 			}
 		}
 		case [`+=]
 		{
 			parse RhsAsFactor: expr_factor [$AS.LValue]
-			send Output
+			send MlParser
 				"[ml_lvalue(AS.LValue)] := [ml_expr_factor(RhsAsFactor)] + [ml_expr(AS.expr)];
 		}
 		case [`-=]
 		{
 			parse RhsAsFactor: expr_factor [$AS.LValue]
-			send Output
+			send MlParser
 				"[ml_lvalue(AS.LValue)] := [ml_expr_factor(RhsAsFactor)] - [ml_expr(AS.expr)];
 		}
 		default {
-			send Output
+			send MlParser
 				"[ml_lvalue(AS.LValue) AS.assign_op ml_expr(AS.expr)];
 		}
 	}
 	else {
 		# catches unspecified cases
-		send Output [Stmt]
+		send MlParser [Stmt]
 	}
 }
 
@@ -485,4 +531,22 @@ void ml_stmt_list( StmtList: stmt* )
 {
 	for Stmt: stmt in repeat( StmtList )
 		ml_stmt( Stmt )
+}
+
+void ml_trans( StmtList: stmt* )
+{
+	MlParser = new parser<ml_out::ml_out>()
+
+	ml_stmt_list( StmtList )
+
+	MO: ml_out::ml_out = MlParser->finish()
+
+	if MO {
+		send Output
+			[MO]
+	}
+	else {
+		send stderr
+			"failed to parse output: [MlParser->error]
+	}
 }

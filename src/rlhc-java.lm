@@ -45,8 +45,6 @@ namespace java_out
 		[_IN_ _EX_ item*]
 end
 
-	
-
 global Parser: parser<java_out::java_out>
 
 void java_tok_list( TL: host::tok* )
@@ -476,6 +474,6 @@ void java_trans( StmtList: stmt* )
 	}
 	else {
 		send stderr
-			"failed to parse output"
+			"failed to parse output: [Parser->error]
 	}
 }
