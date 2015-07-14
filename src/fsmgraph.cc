@@ -1440,25 +1440,34 @@ void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 
 		if ( destState->nfaOut != 0 ) {
 			for ( NfaTransList::Iter na = *destState->nfaOut; na.lte(); na++ ) {
-				transferOutData( na->toState, destState );
+				StateAp *sdup = addState();
+				mergeStates( sdup, na->toState );
+
+				transferOutData( sdup, destState );
 
 				if ( destState->outCondSpace != 0 ) {
-					doEmbedCondition( na->toState, destState->outCondSpace->condSet,
+					doEmbedCondition( sdup, destState->outCondSpace->condSet,
 							destState->outCondKeys );
 				}
 
-				/* Second level. */
-				if ( na->toState->nfaOut != 0 ) {
-					for ( NfaTransList::Iter na2 = *na->toState->nfaOut; na2.lte(); na2++ ) {
-						transferOutData( na2->toState, na->toState );
+				NfaTrans *trans = na;
+				detachFromInList( destState, na->toState, na->toState->nfaIn->head, trans );
+				sdup->nfaIn = new NfaInList;
+				attachToInList( destState, sdup, sdup->nfaIn->head, trans );
+				trans->toState = sdup;
 
-						if ( na->toState->outCondSpace != 0 ) {
-							doEmbedCondition( na2->toState,
-								na->toState->outCondSpace->condSet,
-								na->toState->outCondKeys );
-						}
-					}
-				}
+//				/* Second level. */
+//				if ( na->toState->nfaOut != 0 ) {
+//					for ( NfaTransList::Iter na2 = *na->toState->nfaOut; na2.lte(); na2++ ) {
+//						transferOutData( na2->toState, na->toState );
+//
+//						if ( na->toState->outCondSpace != 0 ) {
+//							doEmbedCondition( na2->toState,
+//								na->toState->outCondSpace->condSet,
+//								na->toState->outCondKeys );
+//						}
+//					}
+//				}
 			}
 		}
 	}
