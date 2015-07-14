@@ -192,8 +192,13 @@ StateAp::StateAp(const StateAp &other)
 	}
 
 	/* Dup the nfa trans. */
-	if ( other.nfaOut != 0 )
-		nfaOut = new NfaStateMap( *other.nfaOut );
+	if ( other.nfaOut != 0 ) {
+		nfaOut = new NfaTransList;
+		for ( NfaTransList::Iter n = *other.nfaOut; n.lte(); n++ ) {
+			NfaTrans *t = new NfaTrans( *n );
+			nfaOut->append( t );
+		}
+	}
 }
 
 /* If there is a state dict element, then delete it. Everything else is left
@@ -277,7 +282,7 @@ int ApproxCompare::compare( const StateAp *state1, const StateAp *state2 )
 
 
 /* Compare class used in the initial partition. */
-int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2 )
+int InitPartitionCompare::compare( const StateAp *state1, const StateAp *state2 )
 {
 	int compareRes;
 
@@ -286,7 +291,7 @@ int InitPartitionCompare::compare( const StateAp *state1 , const StateAp *state2
 	else if ( state1->nfaOut != 0 && state2->nfaOut == 0 )
 		return 1;
 	else if ( state1->nfaOut != 0 ) {
-		compareRes = CmpTable< NfaStateMapEl, CmpNfaStateMapEl >::compare(
+		compareRes = CmpNfaTransList::compare(
 				*state1->nfaOut, *state2->nfaOut );
 		if ( compareRes != 0 )
 			return compareRes;

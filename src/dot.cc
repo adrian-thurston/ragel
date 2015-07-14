@@ -218,10 +218,10 @@ void GraphvizDotGen::transList( StateAp *state )
 	}
 
 	if ( state->nfaOut != 0 ) {
-		for ( NfaStateMap::Iter nfa = *state->nfaOut; nfa.lte(); nfa++ ) {
+		for ( NfaTransList::Iter nfa = *state->nfaOut; nfa.lte(); nfa++ ) {
 			out << "\t" << state->alg.stateNum <<
-					" -> " << nfa->key->alg.stateNum <<
-					" [ label = \"EP," << nfa->value.order << "\" ];";
+					" -> " << nfa->toState->alg.stateNum <<
+					" [ label = \"EP," << nfa->order << "\" ];";
 		}
 	}
 }

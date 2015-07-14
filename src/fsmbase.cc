@@ -108,12 +108,15 @@ FsmAp::FsmAp( const FsmAp &graph )
 			state->eofTarget = state->eofTarget->alg.stateMap;
 
 		if ( state->nfaOut != 0 ) {
-			NfaStateMap *nfaOut = new NfaStateMap;
-			for ( NfaStateMap::Iter n = *state->nfaOut; n.lte(); n++ ) {
-				StateAp *targ = n->key->alg.stateMap;
-				nfaOut->insert( targ, n->value );
-				attachToNfa( state, targ );
+			NfaTransList *nfaOut = new NfaTransList;
+
+			for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
+				StateAp *targ = n->toState->alg.stateMap;
+				NfaTrans *t = new NfaTrans( *n );
+				nfaOut->append( t );
+				attachToNfa( state, targ, t );
 			}
+
 			delete state->nfaOut;
 			state->nfaOut = nfaOut;
 		}
@@ -384,8 +387,8 @@ void FsmAp::markReachableFromHere( StateAp *state )
 
 	/* Recurse on all states that compose us. */
 	if ( state->nfaOut != 0 ) {
-		for ( NfaStateMap::Iter st = *state->nfaOut; st.lte(); st++ )
-			markReachableFromHere( st->key );
+		for ( NfaTransList::Iter st = *state->nfaOut; st.lte(); st++ )
+			markReachableFromHere( st->toState );
 	}
 
 	if ( state->stateDictEl != 0 ) {
@@ -514,20 +517,6 @@ void FsmAp::verifyIntegrity()
 			assert( t->toState == state );
 		}
 
-		if ( state->nfaIn != 0 ) {
-			for ( StateSet::Iter s = *state->nfaIn; s.lte(); s++ ) {
-				assert( (*s)->nfaOut != 0 );
-				assert( (*s)->nfaOut->find( state ) );
-			}
-		}
-
-		if ( state->nfaOut != 0 ) {
-			for ( NfaStateMap::Iter s = *state->nfaOut; s.lte(); s++ ) {
-				assert( s->key->nfaIn != 0 );
-				assert( s->key->nfaIn->find( state ) );
-			}
-		}
-
 		count += 1;
 	}
 
@@ -592,8 +581,8 @@ void FsmAp::depthFirstOrdering( StateAp *state )
 	}
 
 	if ( state->nfaOut != 0 ) {
-		for ( NfaStateMap::Iter s = *state->nfaOut; s.lte(); s++ )
-			depthFirstOrdering( s->key );
+		for ( NfaTransList::Iter s = *state->nfaOut; s.lte(); s++ )
+			depthFirstOrdering( s->toState );
 	}
 }
 

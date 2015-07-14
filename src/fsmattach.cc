@@ -59,37 +59,23 @@ void FsmAp::detachStateDict( StateAp *from, StateAp *to )
 	}
 }
 
-void FsmAp::attachToNfa( StateAp *from, StateAp *to )
+void FsmAp::attachToNfa( StateAp *from, StateAp *to, NfaTrans *nfaTrans )
 {
 	if ( to->nfaIn == 0 )
-		to->nfaIn = new StateSet;
+		to->nfaIn = new NfaInList;
 
-	bool inserted = to->nfaIn->insert( from );
-	assert( inserted );
+	nfaTrans->fromState = from;
+	nfaTrans->toState = to;
 
-	if ( from != to ) {
-		if ( misfitAccounting ) {
-			if ( to->foreignInTrans == 0 )
-				stateList.append( misfitList.detach( to ) );
-		}
-
-		to->foreignInTrans += 1;
-	}
+	attachToInList( from, to, to->nfaIn->head, nfaTrans );
 }
 
-void FsmAp::detachFromNfa( StateAp *from, StateAp *to )
+void FsmAp::detachFromNfa( StateAp *from, StateAp *to, NfaTrans *nfaTrans )
 {
-	bool removed = to->nfaIn->remove( from );
-	assert( removed );
+	nfaTrans->fromState = 0;
+	nfaTrans->toState = 0;
 
-	to->foreignInTrans -= 1;
-
-	if ( from != to ) {
-		if ( misfitAccounting ) {
-			if ( to->foreignInTrans == 0 )
-				misfitList.append( stateList.detach( to ) );
-		}
-	}
+	detachFromInList( from, to, to->nfaIn->head, nfaTrans );
 }
 
 template< class Head > void FsmAp::attachToInList( StateAp *from,
@@ -330,15 +316,17 @@ void FsmAp::detachState( StateAp *state )
 		finStateSet.remove( state );
 	
 	if ( state->nfaIn != 0 ) {
-		for ( StateSet::Iter s = *state->nfaIn; s.lte(); s++ ) {
-			bool removed = (*s)->nfaOut->remove( state );
-			assert( removed );
+		for ( NfaInList::Iter t = *state->nfaIn; t.lte(); t++ ) {
+			detachFromNfa( t->fromState, t->toState, t );
+			t->fromState->nfaOut->detach( t );
 		}
 	}
 
 	if ( state->nfaOut != 0 ) {
-		for ( NfaStateMap::Iter s = *state->nfaOut; s.lte(); s++ )
-			detachFromNfa( state, s->key );
+		for ( NfaTransList::Iter t = *state->nfaOut; t.lte(); t++ ) {
+			detachFromNfa( t->fromState, t->toState, t );
+			state->nfaOut->detach( t );
+		}
 	}
 
 	if ( state->stateDictIn != 0 ) {
@@ -349,7 +337,6 @@ void FsmAp::detachState( StateAp *state )
 	}
 
 	if ( state->stateDictEl != 0 ) {
-
 		for ( StateSet::Iter s = state->stateDictEl->stateSet; s.lte(); s++ )
 			detachStateDict( state, *s );
 
@@ -838,24 +825,12 @@ void FsmAp::moveInwardTrans( StateAp *dest, StateAp *src )
 
 	/* Move inward nfa links. */
 	if ( src->nfaIn != 0 ) {
-		while ( src->nfaIn->length() > 0 ) {
-			StateAp *fromState = src->nfaIn->data[0];
+		while ( src->nfaIn->head != 0 ) {
+			NfaTrans *trans = src->nfaIn->head;
+			StateAp *fromState = trans->fromState;
 
-			/* Find the actions. Need to copy here because we are backed by a
-			 * vector that we are about to modify. References will not stay
-			 * valid. */
-			NfaStateMapEl *el = fromState->nfaOut->find( src );
-			NfaActions actions = el->value;
-
-			/* Clear the nfa-out to src. */
-			bool removed = fromState->nfaOut->remove( src );
-			assert( removed );
-
-			/* Add the nfa-out to the dest. */
-			fromState->nfaOut->insert( dest, actions );
-
-			detachFromNfa( fromState, src );
-			attachToNfa( fromState, dest );
+			detachFromNfa( fromState, src, trans );
+			attachToNfa( fromState, dest, trans );
 		}
 	}
 }

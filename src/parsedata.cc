@@ -1360,11 +1360,11 @@ void ParseData::analyzeGraph( FsmAp *graph )
 		//	oci->action->numCondRefs += 1;
 
 		if ( st->nfaOut != 0 ) {
-			for ( NfaStateMap::Iter n = *st->nfaOut; n.lte(); n++ ) {
-				if ( n->value.push != 0 )
-					n->value.push->numNfaRefs += 1;
-				if ( n->value.pop != 0 )
-					n->value.pop->numNfaRefs += 1;
+			for ( NfaTransList::Iter n = *st->nfaOut; n.lte(); n++ ) {
+				if ( n->push != 0 )
+					n->push->numNfaRefs += 1;
+				if ( n->pop != 0 )
+					n->pop->numNfaRefs += 1;
 			}
 		}
 	}

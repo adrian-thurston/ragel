@@ -624,8 +624,83 @@ struct NfaActions
 	ActionTable popTable;
 };
 
+struct NfaTrans 
+{
+	NfaTrans( Action *push, Action *pop, int order )
+	:
+		fromState(0), toState(0),
+		push(push), pop(pop), order(order)
+	{}
+
+	StateAp *fromState;
+	StateAp *toState;
+
+	Action *push;
+	Action *pop;
+
+	int order;
+
+	ActionTable pushTable;
+	ActionTable popTable;
+
+	NfaTrans *prev, *next;
+	NfaTrans *ilprev, *ilnext;
+};
+
+
 typedef BstMap<StateAp*, NfaActions> NfaStateMap;
 typedef BstMapEl<StateAp*, NfaActions> NfaStateMapEl;
+
+typedef DList<NfaTrans> NfaTransList;
+typedef InList<NfaTrans> NfaInList;
+
+struct CmpNfaTrans
+{
+	static int compare( NfaTrans *t1, NfaTrans *t2 )
+	{
+		/* This comparison is too strong. (okay to use something too strong --
+		 * we just don't find minimal). * */
+		if ( t1->toState < t2->toState )
+			return -1;
+		else if ( t1->toState > t2->toState )
+			return 1;
+		else if ( t1->push < t2->push )
+			return -1;
+		else if ( t1->push > t2->push )
+			return 1;
+		else if ( t1->pop < t2->pop )
+			return -1;
+		else if ( t1->pop > t2->pop )
+			return 1;
+		else if ( t1->order < t2->order )
+			return -1;
+		else if ( t1->order > t2->order )
+			return 1;
+		return 0;
+	}
+};
+
+struct CmpNfaTransList
+{
+	static int compare( const NfaTransList &l1, const NfaTransList &l2 )
+	{
+		if ( l1.length() < l2.length() )
+			return -1;
+		else if ( l1.length() > l2.length() )
+			return 1;
+		else {
+			NfaTransList::Iter i1 = l1;
+			NfaTransList::Iter i2 = l2;
+			while ( i1.lte() ) {
+				int r = CmpNfaTrans::compare( i1, i2 );
+				if ( r != 0 )
+					return r;
+				i1++, i2++;
+			}
+		}
+		return 0;
+	}
+};
 
 struct CmpNfaStateMapEl
 {
@@ -906,8 +981,8 @@ struct StateAp
 	StateDictEl *stateDictEl;
 	StateSet *stateDictIn;
 
-	NfaStateMap *nfaOut;
-	StateSet *nfaIn;
+	NfaTransList *nfaOut;
+	NfaInList *nfaIn;
 
 	/* When drawing epsilon transitions, holds the list of states to merge
 	 * with. */
@@ -1677,8 +1752,8 @@ public:
 	template < class Head > void detachFromInList( StateAp *from,
 			StateAp *to, Head *&head, Head *trans );
 	
-	void attachToNfa( StateAp *from, StateAp *to );
-	void detachFromNfa( StateAp *from, StateAp *to );
+	void attachToNfa( StateAp *from, StateAp *to, NfaTrans *nfaTrans );
+	void detachFromNfa( StateAp *from, StateAp *to, NfaTrans *nfaTrans );
 
 	void attachStateDict( StateAp *from, StateAp *to );
 	void detachStateDict( StateAp *from, StateAp *to );

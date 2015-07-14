@@ -425,9 +425,11 @@ void FsmAp::nfaRepeatOp1( Action *init, Action *min,
 
 	StateAp *newStart = addState();
 
-	newStart->nfaOut = new NfaStateMap;
-	newStart->nfaOut->insert( origStartState, NfaActions( push, pop, 1 ) );
-	attachToNfa( newStart, origStartState );
+	newStart->nfaOut = new NfaTransList;
+
+	NfaTrans *trans = new NfaTrans( push, pop, 1 );
+	newStart->nfaOut->append( trans );
+	attachToNfa( newStart, origStartState, trans );
 
 	StateAp *newFinal = addState();
 
@@ -437,13 +439,19 @@ void FsmAp::nfaRepeatOp1( Action *init, Action *min,
 		StateAp *repl = addState();
 		moveInwardTrans( repl, *orig );
 
-		repl->nfaOut = new NfaStateMap;
-		repl->nfaOut->insert( *orig, NfaActions( push, pop, 3 ) );
-		repl->nfaOut->insert( repStartState, NfaActions( push, pop, 2 ) );
-		repl->nfaOut->insert( newFinal, NfaActions( push, pop, 1 ) );
+		repl->nfaOut = new NfaTransList;
 
-		for ( NfaStateMap::Iter s = *repl->nfaOut; s.lte(); s++ )
-			attachToNfa( repl, s->key );
+		NfaTrans *transOrig = new NfaTrans( push, pop, 3 );
+		repl->nfaOut->append( transOrig );
+		attachToNfa( repl, *orig, transOrig );
+
+		NfaTrans *transRep = new NfaTrans( push, pop, 2 );
+		repl->nfaOut->append( transRep );
+		attachToNfa( repl, repStartState, transRep );
+
+		NfaTrans *transNew = new NfaTrans( push, pop, 1 );
+		repl->nfaOut->append( transNew );
+		attachToNfa( repl, newFinal, transNew );
 	}
 
 	origStartState->fromStateActionTable.setAction( 0, init );
@@ -471,9 +479,11 @@ void FsmAp::nfaRepeatOp1b( Action *init, Action *min,
 
 	StateAp *newStart = addState();
 
-	newStart->nfaOut = new NfaStateMap;
-	newStart->nfaOut->insert( origStartState, NfaActions( push, pop, 1 ) );
-	attachToNfa( newStart, origStartState );
+	newStart->nfaOut = new NfaTransList;
+
+	NfaTrans *trans = new NfaTrans( push, pop, 1 );
+	newStart->nfaOut->append( trans );
+	attachToNfa( newStart, origStartState, trans );
 
 	StateAp *newFinal = addState();
 
@@ -484,26 +494,31 @@ void FsmAp::nfaRepeatOp1b( Action *init, Action *min,
 			StateAp *repl = addState();
 			moveInwardTrans( repl, fin );
 			
-			repl->nfaOut = new NfaStateMap;
+			repl->nfaOut = new NfaTransList;
 
-			if ( repl->nfaOut->insert( repStartState, NfaActions( push, pop, 1 ) ) )
-				attachToNfa( fin, repStartState );
+			trans = new NfaTrans( push, pop, 1 );
+			repl->nfaOut->append( trans );
+			attachToNfa( fin, repStartState, trans );
 
-			if ( repl->nfaOut->insert( fin, NfaActions( push, pop, 2 ) ) )
-				attachToNfa( fin, fin );
+			trans = new NfaTrans( push, pop, 2 );
+			repl->nfaOut->append( trans );
+			attachToNfa( fin, fin, trans );
 
-			if ( repl->nfaOut->insert( newFinal, NfaActions( push, pop, 3 ) ) )
-				attachToNfa( fin, newFinal );
+			trans = new NfaTrans ( push, pop, 3 );
+			repl->nfaOut->append( trans );
+			attachToNfa( fin, newFinal, trans );
 		}
 		else {
 			if ( fin->nfaOut == 0 )
-				fin->nfaOut = new NfaStateMap;
+				fin->nfaOut = new NfaTransList;
 
-			if ( fin->nfaOut->insert( repStartState, NfaActions( push, pop, 1 ) ) )
-				attachToNfa( fin, repStartState );
+			trans = new NfaTrans( push, pop, 1 );
+			fin->nfaOut->append( trans );
+			attachToNfa( fin, repStartState, trans );
 
-			if ( fin->nfaOut->insert( newFinal, NfaActions( push, pop, 2 ) ) )
-				attachToNfa( fin, newFinal );
+			trans = new NfaTrans( push, pop, 2 );
+			fin->nfaOut->append( trans );
+			attachToNfa( fin, newFinal, trans );
 		}
 	}
 
@@ -536,9 +551,11 @@ void FsmAp::nfaRepeatOp2( Action *init, Action *inc, Action *min,
 
 	StateAp *newStart = addState();
 
-	newStart->nfaOut = new NfaStateMap;
-	newStart->nfaOut->insert( origStartState, NfaActions( push, pop, 1 ) );
-	attachToNfa( newStart, origStartState );
+	newStart->nfaOut = new NfaTransList;
+
+	NfaTrans *trans = new NfaTrans( push, pop, 1 );
+	newStart->nfaOut->append( trans );
+	attachToNfa( newStart, origStartState, trans );
 
 	StateAp *newFinal = addState();
 
@@ -548,13 +565,19 @@ void FsmAp::nfaRepeatOp2( Action *init, Action *inc, Action *min,
 		StateAp *repl = addState();
 		moveInwardTrans( repl, *orig );
 
-		repl->nfaOut = new NfaStateMap;
-		repl->nfaOut->insert( *orig, NfaActions( push, pop, 3 ) );
-		repl->nfaOut->insert( repStartState, NfaActions( push, pop, 2 ) );
-		repl->nfaOut->insert( newFinal, NfaActions( push, pop, 1 ) );
+		repl->nfaOut = new NfaTransList;
 
-		for ( NfaStateMap::Iter s = *repl->nfaOut; s.lte(); s++ )
-			attachToNfa( repl, s->key );
+		trans = new NfaTrans( push, pop, 3 );
+		repl->nfaOut->append( trans );
+		attachToNfa( repl, *orig, trans );
+
+		trans = new NfaTrans( push, pop, 2 );
+		repl->nfaOut->append( trans );
+		attachToNfa( repl, repStartState, trans );
+
+		trans = new NfaTrans( push, pop, 1 );
+		repl->nfaOut->append( trans );
+		attachToNfa( repl, newFinal, trans );
 	}
 
 	origStartState->fromStateActionTable.setAction( 0, init );
@@ -590,15 +613,18 @@ void FsmAp::nfaRepeatOp3( Action *init, Action *stay, Action *repeat, Action *ex
 	 */
 	StateSet origFinals = finStateSet;
 
-	/* Get the other's start state. */
+	/* Get the orig start state. */
 	StateAp *origStartState = startState;
 	StateAp *repStartState = dupStartState();
 
+	/* New start state. */
 	StateAp *newStart = addState();
 
-	newStart->nfaOut = new NfaStateMap;
-	newStart->nfaOut->insert( origStartState, NfaActions( push, init, 1 ) );
-	attachToNfa( newStart, origStartState );
+	newStart->nfaOut = new NfaTransList;
+
+	NfaTrans *trans = new NfaTrans( push, init, 1 );
+	newStart->nfaOut->append( trans );
+	attachToNfa( newStart, origStartState, trans );
 
 	StateAp *newFinal = addState();
 
@@ -608,13 +634,19 @@ void FsmAp::nfaRepeatOp3( Action *init, Action *stay, Action *repeat, Action *ex
 		StateAp *repl = addState();
 		moveInwardTrans( repl, *orig );
 
-		repl->nfaOut = new NfaStateMap;
-		repl->nfaOut->insert( *orig, NfaActions( push, stay, 3 ) );
-		repl->nfaOut->insert( repStartState, NfaActions( push, repeat, 2 ) );
-		repl->nfaOut->insert( newFinal, NfaActions( push, exit, 1 ) );
+		repl->nfaOut = new NfaTransList;
 
-		for ( NfaStateMap::Iter s = *repl->nfaOut; s.lte(); s++ )
-			attachToNfa( repl, s->key );
+		trans = new NfaTrans( push, stay, 3 );
+		repl->nfaOut->append( trans );
+		attachToNfa( repl, *orig, trans );
+
+		trans = new NfaTrans( push, repeat, 2 );
+		repl->nfaOut->append( trans );
+		attachToNfa( repl, repStartState, trans );
+
+		trans = new NfaTrans( push, exit, 1 );
+		repl->nfaOut->append( trans );
+		attachToNfa( repl, newFinal, trans );
 	}
 
 	unsetStartState();
@@ -627,9 +659,11 @@ void FsmAp::nfaGuard()
 	StateAp *origStartState = startState;
 
 	StateAp *newStart = addState();
-	newStart->nfaOut = new NfaStateMap;
-	newStart->nfaOut->insert( origStartState, NfaActions( 0, 0, 1 ) );
-	attachToNfa( newStart, origStartState );
+	newStart->nfaOut = new NfaTransList;
+
+	NfaTrans *trans = new NfaTrans( 0, 0, 1 );
+	newStart->nfaOut->append( trans );
+	attachToNfa( newStart, origStartState, trans );
 
 	unsetStartState();
 	setStartState( newStart );
@@ -728,8 +762,8 @@ void FsmAp::prepareNfaRound()
 	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
 		if ( st->nfaOut != 0 && ! (st->stateBits & STB_NFA_REP) ) {
 			StateSet set;
-			for ( NfaStateMap::Iter to = *st->nfaOut; to.lte(); to++ )
-				set.insert( to->key );
+			for ( NfaTransList::Iter to = *st->nfaOut; to.lte(); to++ )
+				set.insert( to->toState );
 
 			st->stateDictEl = new StateDictEl( set );
 			st->stateDictEl->targState = st;
@@ -759,12 +793,13 @@ void FsmAp::finalizeNfaRound()
 	/* Transfer remaining stateDictEl sets to nfaOut. */
 	while ( nfaList.length() > 0 ) {
 		StateAp *state = nfaList.head;
-		state->nfaOut = new NfaStateMap;
+		state->nfaOut = new NfaTransList;
 		for ( StateSet::Iter ss = state->stateDictEl->stateSet; ss.lte(); ss++ ) {
 			/* Attach it using the NFA transitions data structure (propigates
 			 * to output). */
-			state->nfaOut->insert( *ss, NfaActions( 0, 0, 1 ) );
-			attachToNfa( state, *ss );
+			NfaTrans *trans = new NfaTrans( 0, 0, 1 );
+			state->nfaOut->append( trans );
+			attachToNfa( state, *ss, trans );
 
 			detachStateDict( state, *ss );
 		}
@@ -842,8 +877,15 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 		startState->stateDictEl = new StateDictEl( startStateSet );
 		nfaList.append( startState );
 
-		for ( StateSet::Iter s = startStateSet; s.lte(); s++ )
-			attachToNfa( startState, *s );
+		for ( StateSet::Iter s = startStateSet; s.lte(); s++ ) {
+			NfaTrans *trans = new NfaTrans( 0, 0, 0 );
+
+			if ( startState->nfaOut == 0 )
+				startState->nfaOut = new NfaTransList;
+
+			startState->nfaOut->append( trans );
+			attachToNfa( startState, *s, trans );
+		}
 	}
 	else {
 		/* Merge the start states. */
@@ -1397,22 +1439,23 @@ void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 		mergeStates( destState, ssMutable );
 
 		if ( destState->nfaOut != 0 ) {
-			for ( NfaStateMap::Iter na = *destState->nfaOut; na.lte(); na++ ) {
-				transferOutData( na->key, destState );
+			for ( NfaTransList::Iter na = *destState->nfaOut; na.lte(); na++ ) {
+				transferOutData( na->toState, destState );
 
 				if ( destState->outCondSpace != 0 ) {
-					doEmbedCondition( na->key, destState->outCondSpace->condSet,
+					doEmbedCondition( na->toState, destState->outCondSpace->condSet,
 							destState->outCondKeys );
 				}
 
 				/* Second level. */
-				if ( na->key->nfaOut != 0 ) {
-					for ( NfaStateMap::Iter na2 = *na->key->nfaOut; na2.lte(); na2++ ) {
-						transferOutData( na2->key, na->key );
+				if ( na->toState->nfaOut != 0 ) {
+					for ( NfaTransList::Iter na2 = *na->toState->nfaOut; na2.lte(); na2++ ) {
+						transferOutData( na2->toState, na->toState );
 
-						if ( na->key->outCondSpace != 0 ) {
-							doEmbedCondition( na2->key, na->key->outCondSpace->condSet,
-									na->key->outCondKeys );
+						if ( na->toState->outCondSpace != 0 ) {
+							doEmbedCondition( na2->toState,
+								na->toState->outCondSpace->condSet,
+								na->toState->outCondKeys );
 						}
 					}
 				}
@@ -1504,20 +1547,22 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 
 	if ( srcState->nfaOut != 0 ) {
 		if ( destState->nfaOut == 0 )
-			destState->nfaOut = new NfaStateMap;
+			destState->nfaOut = new NfaTransList;
 
-		for ( NfaStateMap::Iter nt = *srcState->nfaOut; nt.lte(); nt++ ) {
-			if ( destState->nfaOut->insert( nt->key, nt->value ) )
-				attachToNfa( destState, nt->key );
+		for ( NfaTransList::Iter nt = *srcState->nfaOut; nt.lte(); nt++ ) {
+			NfaTrans *trans = new NfaTrans( nt->push, nt->pop, nt->order );
+			destState->nfaOut->append( trans );
+			attachToNfa( destState, nt->toState, trans );
 
 			/* Second level. */
-			if ( nt->key->nfaOut != 0 ) {
+			if ( nt->toState->nfaOut != 0 ) {
 				if ( destState->nfaOut == 0 )
-					destState->nfaOut = new NfaStateMap;
+					destState->nfaOut = new NfaTransList;
 
-				for ( NfaStateMap::Iter nt2 = *nt->key->nfaOut; nt2.lte(); nt2++ ) {
-					if ( destState->nfaOut->insert( nt2->key, nt2->value ) )
-						attachToNfa( destState, nt2->key );
+				for ( NfaTransList::Iter nt2 = *nt->toState->nfaOut; nt2.lte(); nt2++ ) {
+					NfaTrans *trans = new NfaTrans( nt->push, nt->pop, nt->order );
+					destState->nfaOut->append( trans );
+					attachToNfa( destState, nt2->toState, trans );
 
 					/* Second level. */
 				}

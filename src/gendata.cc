@@ -119,17 +119,17 @@ void GenBase::reduceActionTables()
 		}
 
 		if ( st->nfaOut != 0 ) {
-			for ( NfaStateMap::Iter n = *st->nfaOut; n.lte(); n++ ) {
-				if ( n->value.push != 0 )
-					n->value.pushTable.setAction( 0, n->value.push );
+			for ( NfaTransList::Iter n = *st->nfaOut; n.lte(); n++ ) {
+				if ( n->push != 0 )
+					n->pushTable.setAction( 0, n->push );
 
-				if ( n->value.pop != 0 )
-					n->value.popTable.setAction( 0, n->value.pop );
+				if ( n->pop != 0 )
+					n->popTable.setAction( 0, n->pop );
 
-				if ( actionTableMap.insert( n->value.pushTable, &actionTable ) )
+				if ( actionTableMap.insert( n->pushTable, &actionTable ) )
 					actionTable->id = nextActionTableId++;
 
-				if ( actionTableMap.insert( n->value.popTable, &actionTable ) )
+				if ( actionTableMap.insert( n->popTable, &actionTable ) )
 					actionTable->id = nextActionTableId++;
 			}
 		}
@@ -749,26 +749,26 @@ void CodeGenData::makeStateList()
 		if ( st->nfaOut != 0 ) {
 			RedStateAp *from = allStates + curState;
 			from->nfaTargs = new RedNfaTargs;
-			for ( NfaStateMap::Iter targ = *st->nfaOut; targ.lte(); targ++ ) {
-				RedStateAp *rtarg = allStates + targ->key->alg.stateNum;
+			for ( NfaTransList::Iter targ = *st->nfaOut; targ.lte(); targ++ ) {
+				RedStateAp *rtarg = allStates + targ->toState->alg.stateNum;
 
 				RedAction *pushRa = 0;
 				RedAction *popRa = 0;
 
-				if ( targ->value.pushTable.length() > 0 ) {
+				if ( targ->pushTable.length() > 0 ) {
 					RedActionTable *pushActions = 0;
-					pushActions = actionTableMap.find( targ->value.pushTable );
+					pushActions = actionTableMap.find( targ->pushTable );
 					pushRa = allActionTables + pushActions->id;
 				}
 
-				if ( targ->value.popTable.length() > 0 ) {
+				if ( targ->popTable.length() > 0 ) {
 					RedActionTable *popActions = 0;
-					popActions = actionTableMap.find( targ->value.popTable );
+					popActions = actionTableMap.find( targ->popTable );
 					popRa = allActionTables + popActions->id;
 				}
 
 				from->nfaTargs->append( RedNfaTarg( rtarg, pushRa,
-						popRa, targ->value.order ) );
+						popRa, targ->order ) );
 
 				MergeSort<RedNfaTarg, RedNfaTargCmp> sort;
 				sort.sort( from->nfaTargs->data, from->nfaTargs->length() );

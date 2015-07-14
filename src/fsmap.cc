@@ -217,9 +217,9 @@ void FsmAp::startFsmAction( int ordering, Action *action )
 		startState->outActionTable.setAction( ordering, action );
 	
 	if ( startState->nfaOut != 0 ) {
-		for ( NfaStateMap::Iter na = *startState->nfaOut; na.lte(); na++ ) {
+		for ( NfaTransList::Iter na = *startState->nfaOut; na.lte(); na++ ) {
 
-			StateAp *state = na->key;
+			StateAp *state = na->toState;
 
 			/* Walk the start state's transitions, setting functions. */
 			for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
@@ -1059,7 +1059,8 @@ void FsmAp::startFsmCondition( Action *condAction, bool sense )
 	embedCondition( startState, set, vals );
 
 	if ( startState->nfaOut != 0 ) {
-		for ( NfaStateMap::Iter na = *startState->nfaOut; na.lte(); na++ ) {
+		/* Only one level. */
+		for ( NfaTransList::Iter na = *startState->nfaOut; na.lte(); na++ ) {
 			embedCondition( startState, set, vals );
 		}
 	}

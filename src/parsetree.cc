@@ -665,9 +665,9 @@ void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 	}
 
 	if ( state->nfaOut != 0 ) {
-		for ( NfaStateMap::Iter n = *state->nfaOut; n.lte(); n++ ) {
+		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
 			/* We do not increment depth here since this is an epsilon transition. */
-			condsDensity( pd, n->key, depth );
+			condsDensity( pd, n->toState, depth );
 		}
 	}
 
@@ -703,9 +703,9 @@ void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, lon
 	}
 
 	if ( state->nfaOut != 0 ) {
-		for ( NfaStateMap::Iter n = *state->nfaOut; n.lte(); n++ ) {
+		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
 			/* We do not increment depth here since this is an epsilon transition. */
-			transSpan( pd, n->key, density, depth );
+			transSpan( pd, n->toState, density, depth );
 		}
 	}
 }
