@@ -1799,17 +1799,11 @@ FactorWithRep::~FactorWithRep()
 	}
 }
 
+/* FIXME: This is an atrocious hack. */
+static int guardedPriorName = 10000;
+
 void FactorWithRep::applyGuardedPrior( ParseData *pd, FsmAp *rtnVal )
 {
-//	/* Guarded In. Set up the two priorities that will interact. We also need
-//	 * to assign the guard id so when the interaction is detected, we can
-//	 * report on the source. */
-//	/* if ( guardedIn ) */ {
-//		rtnVal->startState->guardedIn = true;
-//		priorDescs = new PriorDesc[2];
-
-	static int guardedPriorName = 10000;
-
 	priorDescs[0].key = guardedPriorName;
 	priorDescs[0].priority = 0;
 	priorDescs[0].guardId = repId;
@@ -1823,6 +1817,29 @@ void FactorWithRep::applyGuardedPrior( ParseData *pd, FsmAp *rtnVal )
 	guardedPriorName++;
 
 	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[0] );
+}
+
+void FactorWithRep::applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal )
+{
+	priorDescs[2].key = guardedPriorName;
+	priorDescs[2].priority = 0;
+	priorDescs[2].guardId = repId;
+	priorDescs[2].other = &priorDescs[3];
+
+	priorDescs[3].key = guardedPriorName;
+	priorDescs[3].priority = 1;
+	priorDescs[3].guardId = repId;
+	priorDescs[3].other = &priorDescs[2];
+
+	guardedPriorName++;
+
+	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[2] );
+	
+	rtnVal->allTransPrior( pd->curPriorOrd++, &priorDescs[3] );
+	rtnVal->leaveFsmPrior( pd->curPriorOrd++, &priorDescs[2] );
+
+	/* Shift over the start action orders then do the kleene star. */
+	pd->curActionOrd += rtnVal->shiftStartActionOrder( pd->curActionOrd );
 }
 
 FsmAp *FactorWithRep::condRep( ParseData *pd, bool useMax )
@@ -1855,6 +1872,8 @@ FsmAp *FactorWithRep::condRep( ParseData *pd, bool useMax )
 
 		/* The start func orders need to be shifted before doing the star. */
 		pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
+
+		applyGuardedPrior2( pd, dup );
 
 		/* Star the duplicate. */
 		dup->starOp( );
