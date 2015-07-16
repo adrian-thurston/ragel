@@ -643,6 +643,8 @@ struct NfaTrans
 	ActionTable pushTable;
 	ActionTable popTable;
 
+	PriorTable priorTable;
+
 	NfaTrans *prev, *next;
 	NfaTrans *ilprev, *ilnext;
 };
@@ -1735,6 +1737,8 @@ public:
 
 	/* Epsilon transitions. */
 	void epsilonTrans( int id );
+
+	void checkEpsilonRegularInteraction( const PriorTable &t1, const PriorTable &t2 );
 
 private:
 	/* Can generate staes. */

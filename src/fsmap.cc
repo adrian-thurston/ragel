@@ -128,6 +128,11 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 		}
 	}
 
+	if ( startState->nfaOut != 0 ) {
+		for ( NfaTransList::Iter na = *startState->nfaOut; na.lte(); na++ )
+			na->priorTable.setPrior( ordering, prior );
+	}
+
 	/* If the new start state is final then set the out priority. This follows
 	 * the same convention as setting start action in the out action table of
 	 * a final start state. */
@@ -154,6 +159,11 @@ void FsmAp::allTransPrior( int ordering, PriorDesc *prior )
 				}
 			}
 		}
+
+		if ( state->nfaOut != 0 ) {
+			for ( NfaTransList::Iter na = *state->nfaOut; na.lte(); na++ )
+				na->priorTable.setPrior( ordering, prior );
+		}
 	}
 }
 
@@ -171,6 +181,11 @@ void FsmAp::finishFsmPrior( int ordering, PriorDesc *prior )
 			t->priorTable.setPrior( ordering, prior );
 		for ( CondInList::Iter t = (*state)->inCond; t.lte(); t++ )
 			t->priorTable.setPrior( ordering, prior );
+
+		if ( (*state)->nfaIn != 0 ) {
+			for ( NfaInList::Iter na = *(*state)->nfaIn; na.lte(); na++ )
+				na->priorTable.setPrior( ordering, prior );
+		}
 	}
 }
 
@@ -777,6 +792,11 @@ void FsmAp::clearAllPriorities()
 				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ )
 					cond->priorTable.empty();
 			}
+		}
+
+		if ( state->nfaIn != 0 ) {
+			for ( NfaInList::Iter na = *state->nfaIn; na.lte(); na++ )
+				na->priorTable.empty();
 		}
 	}
 }

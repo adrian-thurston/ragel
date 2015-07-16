@@ -213,6 +213,12 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 			}
 		}
 	}
+
+	if ( destState->nfaOut != 0 ) {
+		for ( NfaTransList::Iter na = *destState->nfaOut; na.lte(); na++ ) {
+			na->priorTable.setPriors( srcState->outPriorTable );
+		}
+	}
 }
 
 /* Kleene star operator. Makes this machine the kleene star of itself. Any
@@ -1502,6 +1508,23 @@ void FsmAp::nfaMergeStates( StateAp *destState,
 	}
 }
 
+void FsmAp::checkEpsilonRegularInteraction( const PriorTable &t1, const PriorTable &t2 )
+{
+	for ( PriorTable::Iter pd1 = t1; pd1.lte(); pd1++ ) {
+		for ( PriorTable::Iter pd2 = t2; pd2.lte(); pd2++ ) {
+			if ( pd1->desc->key == pd2->desc->key ) {
+				if ( pd1->desc->priority < pd2->desc->priority ) {
+					if ( pd1->desc->key >= 10000 && ctx->nfaTermCheck )
+						throw PriorInteraction( pd1->desc->guardId );
+				}
+				else if ( pd1->desc->priority > pd2->desc->priority ) {
+					if ( pd1->desc->key >= 10000 && ctx->nfaTermCheck )
+						throw PriorInteraction( pd1->desc->guardId );
+				}
+			}
+		}
+	}
+}
 
 void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 {
@@ -1574,6 +1597,29 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 					attachToNfa( destState, nt2->toState, trans );
 
 					/* Second level. */
+				}
+			}
+		}
+	}
+
+	/* Run a check on priority interactions between epsilon transitions and
+	 * regular transitions. This can't be used to affect machine construction,
+	 * only to check for priority guards. */
+	if ( destState->nfaOut != 0 ) {
+		for ( NfaTransList::Iter nt = *destState->nfaOut; nt.lte(); nt++ ) {
+			for ( TransList::Iter trans = destState->outList; trans.lte(); trans++ ) {
+				if ( trans->plain() ) {
+					checkEpsilonRegularInteraction(
+							trans->tdap()->priorTable, nt->priorTable );
+				}
+				else {
+					for ( CondList::Iter cond = trans->tcap()->condList;
+							cond.lte(); cond++ )
+					{
+						checkEpsilonRegularInteraction(
+								cond->priorTable, nt->priorTable );
+
+					}
 				}
 			}
 		}
