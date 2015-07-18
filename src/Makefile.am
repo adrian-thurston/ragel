@@ -46,6 +46,7 @@ version.h: Makefile
 EXTRA_DIST = \
 	ragel.lm \
 	rlhc.lm \
+	rlhc-host.lm \
 	rlhc-c.lm \
 	rlhc-d.lm \
 	rlhc-cs.lm \
