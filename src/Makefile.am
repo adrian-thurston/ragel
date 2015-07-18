@@ -14,7 +14,7 @@ ragel_SOURCES = \
 	buffer.h inputdata.h redfsm.h parsedata.h \
 	parsetree.h rlscan.h common.h \
 	fsmgraph.h pcheck.h gendata.h ragel.h codegen.h \
-	binary.h binloopgoto.h binexpgoto.h binloopvar.h binexpvar.h \
+	binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h binloopvar.h binexpvar.h \
 	flat.h flatloopgoto.h flatexpgoto.h flatvar.h flatloopvar.h flatexpvar.h \
 	goto.h switchloopgoto.h switchexpgoto.h \
 	ipgoto.h xml.h dot.h asm.h rlparse.h \
