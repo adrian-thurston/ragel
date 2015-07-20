@@ -1586,19 +1586,19 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 			destState->nfaOut->append( trans );
 			attachToNfa( destState, nt->toState, trans );
 
-			/* Second level. */
-			if ( nt->toState->nfaOut != 0 ) {
-				if ( destState->nfaOut == 0 )
-					destState->nfaOut = new NfaTransList;
-
-				for ( NfaTransList::Iter nt2 = *nt->toState->nfaOut; nt2.lte(); nt2++ ) {
-					NfaTrans *trans = new NfaTrans( nt->push, nt->pop, nt->order );
-					destState->nfaOut->append( trans );
-					attachToNfa( destState, nt2->toState, trans );
-
-					/* Second level. */
-				}
-			}
+//			/* Second level. */
+//			if ( nt->toState->nfaOut != 0 ) {
+//				if ( destState->nfaOut == 0 )
+//					destState->nfaOut = new NfaTransList;
+//
+//				for ( NfaTransList::Iter nt2 = *nt->toState->nfaOut; nt2.lte(); nt2++ ) {
+//					NfaTrans *trans = new NfaTrans( nt->push, nt->pop, nt->order );
+//					destState->nfaOut->append( trans );
+//					attachToNfa( destState, nt2->toState, trans );
+//
+//					/* Second level. */
+//				}
+//			}
 		}
 	}
 
