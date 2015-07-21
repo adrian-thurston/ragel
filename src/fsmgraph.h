@@ -629,14 +629,26 @@ struct NfaTrans
 	NfaTrans( Action *push, Action *pop, int order )
 	:
 		fromState(0), toState(0),
-		push(push), pop(pop), order(order)
+		order(order)
+	{
+		if ( push != 0 )
+			pushTable.setAction( 0, push );
+
+		if ( pop != 0 )
+			popTable.setAction( 0, pop );
+	}
+
+	NfaTrans( const ActionTable &pushTable,
+			const ActionTable &popTable, int order )
+	:
+		fromState(0), toState(0),
+		order(order),
+		pushTable(pushTable), popTable(popTable)
 	{}
+
 
 	StateAp *fromState;
 	StateAp *toState;
-
-	Action *push;
-	Action *pop;
 
 	int order;
 
@@ -666,18 +678,19 @@ struct CmpNfaTrans
 			return -1;
 		else if ( t1->toState > t2->toState )
 			return 1;
-		else if ( t1->push < t2->push )
-			return -1;
-		else if ( t1->push > t2->push )
-			return 1;
-		else if ( t1->pop < t2->pop )
-			return -1;
-		else if ( t1->pop > t2->pop )
-			return 1;
 		else if ( t1->order < t2->order )
 			return -1;
 		else if ( t1->order > t2->order )
-			return 1;
+		{
+			int r = CmpActionTable::compare( t1->pushTable, t2->pushTable );
+			if ( r != 0 )
+				return r;
+
+			r = CmpActionTable::compare( t1->popTable, t2->popTable );
+			if ( r != 0 )
+				return r;
+		}
+
 		return 0;
 	}
 };

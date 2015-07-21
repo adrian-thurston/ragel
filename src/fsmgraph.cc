@@ -1582,7 +1582,8 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 			destState->nfaOut = new NfaTransList;
 
 		for ( NfaTransList::Iter nt = *srcState->nfaOut; nt.lte(); nt++ ) {
-			NfaTrans *trans = new NfaTrans( nt->push, nt->pop, nt->order );
+			NfaTrans *trans = new NfaTrans( nt->pushTable, nt->popTable, nt->order );
+
 			destState->nfaOut->append( trans );
 			attachToNfa( destState, nt->toState, trans );
 

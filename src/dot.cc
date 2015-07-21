@@ -223,9 +223,14 @@ void GraphvizDotGen::transList( StateAp *state )
 					" -> " << nfa->toState->alg.stateNum <<
 					" [ label = \"EP," << nfa->order;
 
-			if ( nfa->pop != 0 ) {
+			if ( nfa->popTable.length() > 0 ) {
 				out << " / ";
-				nfa->pop->actionName( out );
+
+				for ( ActionTable::Iter pa = nfa->popTable; pa.lte(); pa++ ) {
+					pa->value->actionName( out );
+					if ( !pa.last() )
+						out << ",";
+				}
 			}
 
 			out << "\" ];";

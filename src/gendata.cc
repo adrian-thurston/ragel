@@ -120,12 +120,6 @@ void GenBase::reduceActionTables()
 
 		if ( st->nfaOut != 0 ) {
 			for ( NfaTransList::Iter n = *st->nfaOut; n.lte(); n++ ) {
-				if ( n->push != 0 )
-					n->pushTable.setAction( 0, n->push );
-
-				if ( n->pop != 0 )
-					n->popTable.setAction( 0, n->pop );
-
 				if ( actionTableMap.insert( n->pushTable, &actionTable ) )
 					actionTable->id = nextActionTableId++;
 
