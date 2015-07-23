@@ -64,7 +64,6 @@ void Flat::setTableState( TableArray::State state )
 	}
 }
 
-
 void Flat::taFlatIndexOffset()
 {
 	flatIndexOffset.start();
@@ -563,16 +562,19 @@ void Flat::NFA_POP()
 
 			for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 				GenCondSpace *condSpace = csi;
-				out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
-				for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-					out << TABS(2) << "if ( ";
-					CONDITION( out, *csi );
-					Size condValOffset = (1 << csi.pos());
-					out << " ) _cpc += " << condValOffset << ";\n";
-				}
 
-				out << 
-					"	" << CEND() << "}\n";
+				if ( condSpace->numNfaRefs > 0 ) {
+					out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
+					for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+						out << TABS(2) << "if ( ";
+						CONDITION( out, *csi );
+						Size condValOffset = (1 << csi.pos());
+						out << " ) _cpc += " << condValOffset << ";\n";
+					}
+
+					out << 
+						"	" << CEND() << "}\n";
+				}
 			}
 
 			out << 
@@ -719,16 +721,18 @@ void Flat::LOCATE_TRANS()
 
 		for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 			GenCondSpace *condSpace = csi;
-			out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
-			for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-				out << TABS(2) << "if ( ";
-				CONDITION( out, *csi );
-				Size condValOffset = (1 << csi.pos());
-				out << " ) _cpc += " << condValOffset << ";\n";
-			}
+			if ( condSpace->numTransRefs > 0 ) {
+				out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
+				for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+					out << TABS(2) << "if ( ";
+					CONDITION( out, *csi );
+					Size condValOffset = (1 << csi.pos());
+					out << " ) _cpc += " << condValOffset << ";\n";
+				}
 
-			out << 
-				"	" << CEND() << "}\n";
+				out << 
+					"	" << CEND() << "}\n";
+			}
 		}
 
 		out << 

@@ -271,12 +271,21 @@ typedef Vector< GenAction* > GenCondSet;
 
 struct GenCondSpace
 {
+	GenCondSpace()
+	:
+		numTransRefs(0),
+		numNfaRefs(0)
+	{}
+
 	Key baseKey;
 	GenCondSet condSet;
 	int condSpaceId;
 
 	long fullSize()
 		{ return ( 1 << condSet.length() ); }
+	
+	long numTransRefs;
+	long numNfaRefs;
 
 	GenCondSpace *next, *prev;
 };

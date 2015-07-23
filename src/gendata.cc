@@ -1178,6 +1178,9 @@ void CodeGenData::transActionRefs( RedTransAp *trans )
 		if ( cond->action != 0 )
 			actionActionRefs( cond->action );
 	}
+
+	if ( trans->condSpace != 0 )
+		trans->condSpace->numTransRefs += 1;
 }
 
 void CodeGenData::transListActionRefs( RedTransList &list )
@@ -1244,6 +1247,9 @@ void CodeGenData::findFinalActionRefs()
 					for ( GenActionTable::Iter item = nt->pop->key; item.lte(); item++ )
 						item->value->numNfaPopTestRefs += 1;
 				}
+
+				if ( nt->condSpace != 0 )
+					nt->condSpace->numNfaRefs += 1;
 			}
 		}
 	}
