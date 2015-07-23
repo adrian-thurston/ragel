@@ -445,5 +445,5 @@ void FlatLoopGoto::NFA_POP_ACTION( RedNfaTarg *targ )
 	int act = 0;
 	if ( targ->pop != 0 )
 		act = targ->pop->actListId+1;
-	nfaPopActions.value( act );
+	nfaPopTests.value( act );
 }

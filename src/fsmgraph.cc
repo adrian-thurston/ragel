@@ -216,6 +216,11 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 
 	if ( destState->nfaOut != 0 ) {
 		for ( NfaTransList::Iter na = *destState->nfaOut; na.lte(); na++ ) {
+			na->popAction.setActions( srcState->outActionTable );
+
+			na->popCondSpace = srcState->outCondSpace;
+			na->popCondKeys = srcState->outCondKeys;
+
 			na->priorTable.setPriors( srcState->outPriorTable );
 		}
 	}
@@ -1444,24 +1449,24 @@ void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 
 		mergeStates( destState, ssMutable );
 
-		if ( destState->nfaOut != 0 ) {
-			for ( NfaTransList::Iter na = *destState->nfaOut; na.lte(); na++ ) {
-				StateAp *sdup = addState();
-				mergeStates( sdup, na->toState );
-
-				transferOutData( sdup, destState );
-
-				if ( destState->outCondSpace != 0 ) {
-					doEmbedCondition( sdup, destState->outCondSpace->condSet,
-							destState->outCondKeys );
-				}
-
-				NfaTrans *trans = na;
-				detachFromInList( destState, na->toState, na->toState->nfaIn->head, trans );
-				sdup->nfaIn = new NfaInList;
-				attachToInList( destState, sdup, sdup->nfaIn->head, trans );
-				trans->toState = sdup;
-
+//		if ( destState->nfaOut != 0 ) {
+//			for ( NfaTransList::Iter na = *destState->nfaOut; na.lte(); na++ ) {
+//				StateAp *sdup = addState();
+//				mergeStates( sdup, na->toState );
+//
+//				transferOutData( sdup, destState );
+//
+//				if ( destState->outCondSpace != 0 ) {
+//					doEmbedCondition( sdup, destState->outCondSpace->condSet,
+//							destState->outCondKeys );
+//				}
+//
+//				NfaTrans *trans = na;
+//				detachFromInList( destState, na->toState, na->toState->nfaIn->head, trans );
+//				sdup->nfaIn = new NfaInList;
+//				attachToInList( destState, sdup, sdup->nfaIn->head, trans );
+//				trans->toState = sdup;
+//
 //				/* Second level. */
 //				if ( na->toState->nfaOut != 0 ) {
 //					for ( NfaTransList::Iter na2 = *na->toState->nfaOut; na2.lte(); na2++ ) {
@@ -1474,8 +1479,8 @@ void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 //						}
 //					}
 //				}
-			}
-		}
+//			}
+//		}
 	}
 }
 
@@ -1582,7 +1587,9 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 			destState->nfaOut = new NfaTransList;
 
 		for ( NfaTransList::Iter nt = *srcState->nfaOut; nt.lte(); nt++ ) {
-			NfaTrans *trans = new NfaTrans( nt->pushTable, nt->popTable, nt->order );
+			NfaTrans *trans = new NfaTrans( nt->pushTable,
+					nt->popCondSpace, nt->popCondKeys,
+					nt->popAction, nt->popTest, nt->order );
 
 			destState->nfaOut->append( trans );
 			attachToNfa( destState, nt->toState, trans );

@@ -72,7 +72,8 @@ RedFsmAp::RedFsmAp( FsmCtx *fsmCtx )
 	bAnyRegNbreak(false),
 	bUsingAct(false),
 	bAnyNfaStates(false),
-	bAnyNfaPushPops(false)
+	bAnyNfaPushPops(false),
+	bAnyNfaPushPops2(false)
 {
 }
 

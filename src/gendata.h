@@ -235,7 +235,6 @@ public:
 	int startState;
 	int errState;
 	GenActionList actionList;
-	ConditionList conditionList;
 	CondSpaceList condSpaceList;
 	GenInlineList *getKeyExpr;
 	GenInlineList *accessExpr;

@@ -44,7 +44,10 @@ Flat::Flat( const CodeGenArgs &args )
 	nfaTargs(         "nfa_targs",           *this ),
 	nfaOffsets(       "nfa_offsets",         *this ),
 	nfaPushActions(   "nfa_push_actions",    *this ),
-	nfaPopActions(    "nfa_pop_actions",     *this )
+	nfaCondSpaces(    "nfa_cond_spaces",     *this ),
+	nfaCondVals(      "nfa_cond_vals",       *this ),
+	nfaPopActions(    "nfa_pop_actions",     *this ),
+	nfaPopTests(      "nfa_pop_tests",       *this )
 {}
 
 void Flat::setKeyType()
@@ -383,6 +386,49 @@ void Flat::taNfaPushActions()
 
 void Flat::taNfaPopActions()
 {
+/* ******** */
+
+	nfaCondSpaces.start();
+
+	nfaCondSpaces.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+
+			nfaCondSpaces.value( 0 );
+
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ ) {
+
+				if ( targ->condSpace != 0 )
+					nfaCondSpaces.value( targ->condSpace->condSpaceId );
+				else
+					nfaCondSpaces.value( -1 );
+			}
+		}
+	}
+
+	nfaCondSpaces.finish();
+
+/* ******** */
+
+	nfaCondVals.start();
+
+	nfaCondVals.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+
+			nfaCondVals.value( 0 );
+
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				nfaCondSpaces.value( targ->condVal );
+		}
+	}
+
+	nfaCondVals.finish();
+
+/* ******** */
+
 	nfaPopActions.start();
 
 	nfaPopActions.value( 0 );
@@ -391,12 +437,32 @@ void Flat::taNfaPopActions()
 		if ( st->nfaTargs != 0 ) {
 			nfaPopActions.value( 0 );
 			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
-				NFA_POP_ACTION( targ );
+				NFA_POP_ACTION2( targ );
 		}
 	}
 
 	nfaPopActions.finish();
 }
+
+
+void Flat::taNfaPopTests()
+{
+	nfaPopTests.start();
+
+	nfaPopTests.value( 0 );
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			nfaPopTests.value( 0 );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+				NFA_POP_ACTION( targ );
+		}
+	}
+
+	nfaPopTests.finish();
+
+}
+
 
 void Flat::taNfaOffsets()
 {
@@ -430,11 +496,20 @@ void Flat::NFA_PUSH()
 							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
 			"			nfa_bp[nfa_len].p = " << P() << ";\n";
 
+		out <<
+			"			nfa_bp[nfa_len].condSpace = " << ARR_REF( nfaCondSpaces ) << "[(int)" <<
+							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+			"			nfa_bp[nfa_len].condVal = " << ARR_REF( nfaCondVals ) << "[(int)" <<
+							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+			"			nfa_bp[nfa_len].popAction = " << ARR_REF( nfaPopActions ) << "[(int)" <<
+							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+			"			nfa_bp[nfa_len].popTest = " << ARR_REF( nfaPopTests ) << "[(int)" <<
+							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+			"\n"
+			;
+
 		if ( redFsm->bAnyNfaPushPops ) {
 			out <<
-				"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[(int)" <<
-								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
-				"\n"
 				"			switch ( " << ARR_REF( nfaPushActions ) << "[(int)" <<
 								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt] ) {\n";
 
@@ -474,17 +549,75 @@ void Flat::NFA_POP()
 			"	if ( nfa_len > 0 ) {\n"
 			"		int cont = 1;\n"
 			"		nfa_count += 1;\n"
-			"		nfa_len -= 1;\n";
+			"		nfa_len -= 1;\n"
+			"		" << P() << " = nfa_bp[nfa_len].p;\n"
+			;
+
+		if ( condSpaceList.length() > 0 ) {
+			out <<
+				"	_cpc = 0;\n";
+
+			out <<
+				"	switch ( nfa_bp[nfa_len].condSpace ) {\n"
+				"\n";
+
+			for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
+				GenCondSpace *condSpace = csi;
+				out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
+				for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+					out << TABS(2) << "if ( ";
+					CONDITION( out, *csi );
+					Size condValOffset = (1 << csi.pos());
+					out << " ) _cpc += " << condValOffset << ";\n";
+				}
+
+				out << 
+					"	" << CEND() << "}\n";
+			}
+
+			out << 
+				"	}\n"
+				"\n"
+				"	if ( nfa_bp[nfa_len].condSpace != -1 ) {\n"
+				"		if ( _cpc != nfa_bp[nfa_len].condVal )\n"
+				"			goto _out;\n"
+				"	}\n"
+				;
+		}
 
 		if ( redFsm->bAnyNfaPushPops ) {
 			out << 
-				"		switch ( nfa_bp[nfa_len].pop ) {\n";
+				"		switch ( nfa_bp[nfa_len].popAction ) {\n";
 
 			/* Loop the actions. */
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
 					redAct.lte(); redAct++ )
 			{
-				if ( redAct->numNfaPopRefs > 0 ) {
+				if ( redAct->numNfaPopActionRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						ACTION( out, item->value, IlOpts( 0, false, false ) );
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"		}\n";
+		}
+		
+		if ( redFsm->bAnyNfaPushPops ) {
+			out << 
+				"		switch ( nfa_bp[nfa_len].popTest ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPopTestRefs > 0 ) {
 					/* Write the entry label. */
 					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
@@ -508,7 +641,6 @@ void Flat::NFA_POP()
 		out <<
 			"		if ( cont ) {\n"
 			"			" << vCS() << " = nfa_bp[nfa_len].state;\n"
-			"			" << P() << " = nfa_bp[nfa_len].p;\n"
 			"			goto _resume;\n"
 			"		}\n"
 			"		goto _out;\n"

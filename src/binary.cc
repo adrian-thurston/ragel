@@ -739,7 +739,7 @@ void Binary::NFA_POP()
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
 					redAct.lte(); redAct++ )
 			{
-				if ( redAct->numNfaPopRefs > 0 ) {
+				if ( redAct->numNfaPopTestRefs > 0 ) {
 					/* Write the entry label. */
 					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 

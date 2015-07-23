@@ -102,7 +102,8 @@ struct GenAction
 		numFromStateRefs(0),
 		numEofRefs(0),
 		numNfaPushRefs(0),
-		numNfaPopRefs(0)
+		numNfaPopActionRefs(0),
+		numNfaPopTestRefs(0)
 	{
 	}
 
@@ -122,7 +123,8 @@ struct GenAction
 	int numFromStateRefs;
 	int numEofRefs;
 	int numNfaPushRefs;
-	int numNfaPopRefs;
+	int numNfaPopActionRefs;
+	int numNfaPopTestRefs;
 };
 
 
@@ -181,7 +183,8 @@ struct RedAction
 		numFromStateRefs(0),
 		numEofRefs(0),
 		numNfaPushRefs(0),
-		numNfaPopRefs(0),
+		numNfaPopActionRefs(0),
+		numNfaPopTestRefs(0),
 		bAnyNextStmt(false), 
 		bAnyCurStateRef(false),
 		bAnyBreakStmt(false),
@@ -204,7 +207,8 @@ struct RedAction
 	int numFromStateRefs;
 	int numEofRefs;
 	int numNfaPushRefs;
-	int numNfaPopRefs;
+	int numNfaPopActionRefs;
+	int numNfaPopTestRefs;
 
 	bool anyNextStmt() { return bAnyNextStmt; }
 	bool anyCurStateRef() { return bAnyCurStateRef; }
@@ -481,11 +485,24 @@ typedef Vector<GenStateCond*> StateCondVect;
 
 struct RedNfaTarg
 {
-	RedNfaTarg( RedStateAp *state, RedAction *push, RedAction *pop, int order )
-		: state(state), push(push), pop(pop), order(order) {}
+	RedNfaTarg( RedStateAp *state, RedAction *push,
+			GenCondSpace *condSpace, long condVal, RedAction *pop2,
+			RedAction *pop, int order )
+	:
+		state(state),
+		push(push),
+		condSpace(condSpace),
+		condVal(condVal),
+		action(pop2),
+		pop(pop),
+		order(order)
+	{}
 
 	RedStateAp *state;
 	RedAction *push;
+	GenCondSpace *condSpace;
+	long condVal;
+	RedAction *action;
 	RedAction *pop;
 	int order;
 };
@@ -628,6 +645,7 @@ struct RedFsmAp
 	bool bUsingAct;
 	bool bAnyNfaStates;
 	bool bAnyNfaPushPops;
+	bool bAnyNfaPushPops2;
 
 	int maxState;
 	int maxSingleLen;

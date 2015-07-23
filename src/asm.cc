@@ -1936,7 +1936,7 @@ void AsmCodeGen::writeExec()
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
 					redAct.lte(); redAct++ )
 			{
-				if ( redAct->numNfaPopRefs > 0 ) {
+				if ( redAct->numNfaPopTestRefs > 0 ) {
 					/* Write the entry label. */
 					out <<
 						"	cmp		$" << (redAct->actListId+1) << ", %rax\n"

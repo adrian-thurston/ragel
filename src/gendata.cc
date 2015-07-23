@@ -123,7 +123,10 @@ void GenBase::reduceActionTables()
 				if ( actionTableMap.insert( n->pushTable, &actionTable ) )
 					actionTable->id = nextActionTableId++;
 
-				if ( actionTableMap.insert( n->popTable, &actionTable ) )
+				if ( actionTableMap.insert( n->popAction, &actionTable ) )
+					actionTable->id = nextActionTableId++;
+
+				if ( actionTableMap.insert( n->popTest, &actionTable ) )
 					actionTable->id = nextActionTableId++;
 			}
 		}
@@ -748,6 +751,8 @@ void CodeGenData::makeStateList()
 
 				RedAction *pushRa = 0;
 				RedAction *popRa = 0;
+				RedAction *popRa2 = 0;
+
 
 				if ( targ->pushTable.length() > 0 ) {
 					RedActionTable *pushActions = 0;
@@ -755,14 +760,28 @@ void CodeGenData::makeStateList()
 					pushRa = allActionTables + pushActions->id;
 				}
 
-				if ( targ->popTable.length() > 0 ) {
+				if ( targ->popAction.length() > 0 ) {
 					RedActionTable *popActions = 0;
-					popActions = actionTableMap.find( targ->popTable );
+					popActions = actionTableMap.find( targ->popAction );
+					popRa2 = allActionTables + popActions->id;
+				}
+
+				if ( targ->popTest.length() > 0 ) {
+					RedActionTable *popActions = 0;
+					popActions = actionTableMap.find( targ->popTest );
 					popRa = allActionTables + popActions->id;
 				}
 
+				GenCondSpace *condSpace = 0;
+				if ( targ->popCondSpace != 0 )
+					condSpace = allCondSpaces + targ->popCondSpace->condSpaceId;
+
+				long condVal = 0;
+				if ( targ->popCondKeys.length() > 0 )
+					condVal = targ->popCondKeys[0];
+
 				from->nfaTargs->append( RedNfaTarg( rtarg, pushRa,
-						popRa, targ->order ) );
+						condSpace, condVal, popRa2, popRa, targ->order ) );
 
 				MergeSort<RedNfaTarg, RedNfaTargCmp> sort;
 				sort.sort( from->nfaTargs->data, from->nfaTargs->length() );
@@ -1207,16 +1226,23 @@ void CodeGenData::findFinalActionRefs()
 
 		if ( st->nfaTargs != 0 ) {
 			for ( RedNfaTargs::Iter nt = *st->nfaTargs; nt.lte(); nt++ ) {
+
 				if ( nt->push != 0 ) {
 					nt->push->numNfaPushRefs += 1;
 					for ( GenActionTable::Iter item = nt->push->key; item.lte(); item++ )
 						item->value->numNfaPushRefs += 1;
 				}
 
+				if ( nt->action != 0 ) {
+					nt->action->numNfaPopActionRefs += 1;
+					for ( GenActionTable::Iter item = nt->push->key; item.lte(); item++ )
+						item->value->numNfaPopActionRefs += 1;
+				}
+
 				if ( nt->pop != 0 ) {
-					nt->pop->numNfaPopRefs += 1;
+					nt->pop->numNfaPopTestRefs += 1;
 					for ( GenActionTable::Iter item = nt->pop->key; item.lte(); item++ )
-						item->value->numNfaPopRefs += 1;
+						item->value->numNfaPopTestRefs += 1;
 				}
 			}
 		}
@@ -1408,7 +1434,7 @@ void CodeGenData::analyzeMachine()
 			redFsm->bAnyEofActions = true;
 		if ( act->numTransRefs > 0 )
 			redFsm->bAnyRegActions = true;
-		if ( act->numNfaPushRefs > 0 || act->numNfaPopRefs > 0 )
+		if ( act->numNfaPushRefs > 0 || act->numNfaPopActionRefs > 0 || act->numNfaPopTestRefs > 0 )
 			redFsm->bAnyNfaPushPops = true;
 
 		/* Recurse through the action's parse tree looking for various things. */

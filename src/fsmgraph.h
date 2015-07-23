@@ -610,6 +610,12 @@ inline TransDataAp *TransAp::tdap()
 
 typedef DList<TransAp> TransList;
 
+/* Need the base vector type for accessing underlying remove function. */
+typedef BstSet<int> CondKeySet;
+typedef Vector<int> CondKeyVect;
+
+/* State class that implements actions and priorities. */
+
 struct NfaActions
 {
 	NfaActions( Action *push, Action *pop, int order )
@@ -628,22 +634,32 @@ struct NfaTrans
 {
 	NfaTrans( Action *push, Action *pop, int order )
 	:
-		fromState(0), toState(0),
-		order(order)
+		fromState(0),
+		toState(0),
+		order(order),
+		popCondSpace(0)
 	{
 		if ( push != 0 )
 			pushTable.setAction( 0, push );
 
 		if ( pop != 0 )
-			popTable.setAction( 0, pop );
+			popTest.setAction( 0, pop );
 	}
 
 	NfaTrans( const ActionTable &pushTable,
-			const ActionTable &popTable, int order )
+			CondSpace *popCondSpace,
+			const CondKeySet popCondKeys,
+			const ActionTable &popAction,
+			const ActionTable &popTable,
+			int order )
 	:
 		fromState(0), toState(0),
 		order(order),
-		pushTable(pushTable), popTable(popTable)
+		pushTable(pushTable),
+		popCondSpace(popCondSpace),
+		popCondKeys(popCondKeys),
+		popAction(popAction),
+		popTest(popTable)
 	{}
 
 
@@ -653,7 +669,17 @@ struct NfaTrans
 	int order;
 
 	ActionTable pushTable;
-	ActionTable popTable;
+
+	/* 
+	 * 1. Conditions transferred (always tested first)
+	 * 2. Actions transferred
+	 * 3. Pop actions created during epsilon draw. 
+	 */
+	CondSpace *popCondSpace;
+	CondKeySet popCondKeys;
+
+	ActionTable popAction;
+	ActionTable popTest;
 
 	PriorTable priorTable;
 
@@ -686,7 +712,7 @@ struct CmpNfaTrans
 			if ( r != 0 )
 				return r;
 
-			r = CmpActionTable::compare( t1->popTable, t2->popTable );
+			r = CmpActionTable::compare( t1->popTest, t2->popTest );
 			if ( r != 0 )
 				return r;
 		}
@@ -936,11 +962,6 @@ struct NfaStateEl
 
 typedef DListMel<StateAp, NfaStateEl> NfaStateList;
 
-/* Need the base vector type for accessing underlying remove function. */
-typedef BstSet<int> CondKeySet;
-typedef Vector<int> CondKeyVect;
-
-/* State class that implements actions and priorities. */
 struct StateAp 
 	: public NfaStateEl
 {

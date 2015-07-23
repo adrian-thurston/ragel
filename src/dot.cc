@@ -223,12 +223,41 @@ void GraphvizDotGen::transList( StateAp *state )
 					" -> " << nfa->toState->alg.stateNum <<
 					" [ label = \"EP," << nfa->order;
 
-			if ( nfa->popTable.length() > 0 ) {
+			if ( nfa->popTest.length() > 0 ||
+					nfa->popAction.length() > 0 ||
+					nfa->popCondKeys.length() > 0 )
+			{
 				out << " / ";
+			}
 
-				for ( ActionTable::Iter pa = nfa->popTable; pa.lte(); pa++ ) {
+			if ( nfa->popCondKeys.length() > 0 ) {
+				for ( CondKeySet::Iter key = nfa->popCondKeys; key.lte(); key++ ) {
+					out << "(";
+					long condVals = *key;
+					for ( CondSet::Iter csi = nfa->popCondSpace->condSet; csi.lte(); csi++ ) {
+						bool set = condVals & (1 << csi.pos());
+						if ( !set )
+							out << "!";
+						(*csi)->actionName( out );
+						if ( !csi.last() )
+							out << ", ";
+					}
+					out << ") ";
+				}
+			}
+
+			if ( nfa->popAction.length() > 0 ) {
+				for ( ActionTable::Iter pa = nfa->popAction; pa.lte(); pa++ ) {
 					pa->value->actionName( out );
 					if ( !pa.last() )
+						out << ",";
+				}
+			}
+
+			if ( nfa->popTest.length() > 0 ) {
+				for ( ActionTable::Iter pt = nfa->popTest; pt.lte(); pt++ ) {
+					pt->value->actionName( out );
+					if ( !pt.last() )
 						out << ",";
 				}
 			}
