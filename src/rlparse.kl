@@ -1079,14 +1079,14 @@ factor_with_rep:
 	};
 factor_with_rep:
 	TK_ColonNfa3Open TK_UInt ',' factor_with_rep ',' action_embed ','
-			action_embed ',' action_embed ',' action_embed ','
+			action_embed ',' action_embed ',' action_embed ',' action_embed ','
 			action_embed TK_CloseColon
 	final {
 		long repId = strtol( $2->data, 0, 10 );
 
 		/* ini, min, max, push, pop */
 		$$->factorWithRep = new FactorWithRep( $1->loc, repId, $4->factorWithRep,
-				$6->action, $8->action, $10->action, $12->action, $14->action, 0,
+				$6->action, $8->action, $10->action, $12->action, $14->action, $16->action,
 				FactorWithRep::NfaRep3 );
 	};
 factor_with_rep:

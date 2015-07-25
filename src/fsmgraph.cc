@@ -617,7 +617,8 @@ void FsmAp::nfaRepeatOp2( Action *init, Action *inc, Action *min,
  * This is a compositional operator since it doesn't leave any actions to
  * trailing characters, where they may interact with other actions that use the
  * same variables. */
-void FsmAp::nfaRepeatOp3( Action *init, Action *stay, Action *repeat, Action *exit, Action *push )
+void FsmAp::nfaRepeatOp3( Action *push, Action *pop,
+		Action *init, Action *stay, Action *repeat, Action *exit )
 {
 	/*
 	 * First Concat.
@@ -634,6 +635,7 @@ void FsmAp::nfaRepeatOp3( Action *init, Action *stay, Action *repeat, Action *ex
 	newStart->nfaOut = new NfaTransList;
 
 	NfaTrans *trans = new NfaTrans( push, init, 1 );
+	trans->popTest.setAction( 0, pop );
 	newStart->nfaOut->append( trans );
 	attachToNfa( newStart, origStartState, trans );
 
@@ -648,14 +650,17 @@ void FsmAp::nfaRepeatOp3( Action *init, Action *stay, Action *repeat, Action *ex
 		repl->nfaOut = new NfaTransList;
 
 		trans = new NfaTrans( push, stay, 3 );
+		trans->popTest.setAction( 0, pop );
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, *orig, trans );
 
 		trans = new NfaTrans( push, repeat, 2 );
+		trans->popTest.setAction( 0, pop );
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, repStartState, trans );
 
 		trans = new NfaTrans( push, exit, 1 );
+		trans->popTest.setAction( 0, pop );
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, newFinal, trans );
 	}

@@ -640,10 +640,10 @@ struct NfaTrans
 		popCondSpace(0)
 	{
 		if ( push != 0 )
-			pushTable.setAction( 0, push );
+			pushTable.setAction( 1, push );
 
 		if ( pop != 0 )
-			popTest.setAction( 0, pop );
+			popTest.setAction( 1, pop );
 	}
 
 	NfaTrans( const ActionTable &pushTable,
@@ -1964,8 +1964,8 @@ public:
 			Action *push, Action *pop );
 	void nfaRepeatOp2( Action *init, Action *inc, Action *min,
 			Action *max, Action *push, Action *pop );
-	void nfaRepeatOp3( Action *init, Action *stay, Action *repeat,
-			Action *exit, Action *push );
+	void nfaRepeatOp3( Action *push, Action *pop, Action *init,
+			Action *stay, Action *repeat, Action *exit );
 	void nfaGuard();
 	void unionOp( FsmAp *other );
 	void intersectOp( FsmAp *other );
