@@ -240,7 +240,7 @@ void rw_java( Output: stream )
 	send Output
 		"/*
 		" * @LANG: java
-		" * @GENERATED: yes
+		" * @GENERATED: true
 
 	if ProhibitGenflags {
 		send Output

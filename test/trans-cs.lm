@@ -231,7 +231,7 @@ void rw_cs( Output: stream )
 	}
 
 	send Output
-		" * @GENERATED: yes
+		" * @GENERATED: true
 		" */
 		"
 		"using System;

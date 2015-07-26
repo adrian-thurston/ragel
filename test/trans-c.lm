@@ -215,7 +215,7 @@ void rw_c( Output: stream )
 	send Output
 		"/*
 		" * @LANG: c
-		" * @GENERATED: yes
+		" * @GENERATED: true
 
 	if ProhibitGenflags {
 		send Output

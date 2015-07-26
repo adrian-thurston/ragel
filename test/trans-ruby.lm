@@ -255,7 +255,7 @@ void rw_ruby( Output: stream )
 	send Output
 		"#
 		"# @LANG: ruby
-		"# @GENERATED: yes
+		"# @GENERATED: true
 
 	if ProhibitGenflags {
 		send Output

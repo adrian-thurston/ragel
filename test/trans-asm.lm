@@ -409,7 +409,7 @@ void rw_asm( Output: stream )
 	send Output
 		"#
 		"# @LANG: asm
-		"# @GENERATED: yes
+		"# @GENERATED: true
 
 	if ProhibitGenflags {
 		send Output

@@ -1,7 +1,7 @@
 /*
  * This file is included by xml.rl
  *
- * @IGNORE: yes
+ * @ENABLED: no
  */
 
 %%{

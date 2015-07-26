@@ -227,7 +227,7 @@ void rw_go( Output: stream )
 	}
 
 	send Output
-		" * @GENERATED: yes
+		" * @GENERATED: true
 		" */
 		"
 		"package main

@@ -1,5 +1,6 @@
 /*
  * @LANG: c
+ * @ENABLED: false
  */
 
 #include <stddef.h>  /* NULL */

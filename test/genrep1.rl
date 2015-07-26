@@ -1,5 +1,6 @@
 /*
  * @LANG: c
+ * @ENABLED: false
  */
 
 #include <stddef.h>  /* NULL */
@@ -65,7 +66,7 @@ void nfa_pop()
 	}
 
 	main := 
-		( :nfa( 1, ( 'a' ), ini6, min6, max6, {nfa_push();}, {nfa_pop();} ): ' ' ) {2}
+		( :nfa( 1, ( 'a' ), ini6, min6, max6, {nfa_push();}, { ({nfa_pop(); 1;}) } ): ' ' ) {2}
 		eol
 		any @{printf("----- MATCH\n");}
 	;
