@@ -1,0 +1,147 @@
+namespace ocaml_inline
+	lex 
+		literal `fpc `fc  `fcurs `ftargs
+			`fentry `fhold `fexec `fgoto `fnext
+			`fcall `fret `fbreak `fncall `fnret `fnbreak
+
+		token ident /ident/
+		token number /digit+/
+		token hex_number /'0x' [0-9a-fA-F]+/
+
+		token comment
+			/ c_comment | cpp_comment /
+
+		token string
+			/ s_literal | d_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		literal 
+			`{ `} `:: `* `, `( `) `;
+
+		token c_any / any /
+	end
+
+	def inline_expr
+		[expr_item*]
+
+	def expr_item
+		[expr_any] :ExprAny
+	|	[expr_symbol] :ExprSymbol
+	|	[expr_interpret] :ExprInterpret
+
+	def expr_any
+		[whitespace]
+	|	[comment]
+	|	[string]
+	|	[number]
+	|	[hex_number]
+	|	[ident]
+	|	[c_any]
+
+	def expr_symbol
+		[`,] | [`(] | [`)] | [`*] | [`::]
+
+	def expr_interpret
+		[`fpc] :Fpc
+	|	[`fc] :Fc
+	|	[`fcurs] :Fcurs
+	|	[`ftargs]  :Ftargs
+	|	[`fentry `( state_ref srlex::`)] :Fentry
+
+	def state_ref
+		[opt_name_sep state_ref_names]
+
+	def opt_name_sep
+		[srlex::`::] :ColonColon
+	|	[] :Empty
+
+	# List of names separated by ::
+	def state_ref_names
+		[state_ref_names srlex::`:: srlex::word] :Rec
+	|	[srlex::word] :Base
+
+	def inline_block
+		[block_item*]
+	
+	def block_item
+		[expr_any] :ExprAny
+	|	[block_symbol] :BlockSymbol
+	|	[block_interpret] :BlockInterpret
+	|	[`{ inline_block `}] :RecBlock
+
+	def block_symbol
+		[`,] | [`;] | [`(] | [`)] | [`*] | [`::]
+
+	def block_interpret
+		[expr_interpret] :ExprInterpret
+	|	[`fhold whitespace? `;] :Fhold
+	|	[`fgoto whitespace? `* inline_expr `;] :FgotoExpr
+	|	[`fnext whitespace? `* inline_expr `;] :FnextExpr
+	|	[`fcall whitespace? `* inline_expr `;] :FcallExpr
+	|	[`fncall whitespace? `* inline_expr `;] :FncallExpr
+	|	[`fexec inline_expr `;] :Fexec
+	|	[`fgoto state_ref srlex::`;] :FgotoSr
+	|	[`fnext state_ref srlex::`;] :FnextSr
+	|	[`fcall state_ref srlex::`;] :FcallSr
+	|	[`fncall state_ref srlex::`;] :FncallSr
+	|	[`fret `;] :Fret
+	|	[`fnret `;] :Fnret
+	|	[`fbreak `;] :Fbreak
+	|	[`fnbreak `;] :Fnbreak
+end
+
+
+namespace ocaml_host
+	lex 
+		literal `%%{
+
+		token slr /'%%' [^{] [^\n]* '\n'/
+		{
+			input->pull( 2 )
+			R: str = input->pull( match_length - 3 )
+			input->push( "}%%" )
+			input->push( R )
+			input->push( "%%{" )
+		}
+
+		rl NL / '\n' /
+
+		rl s_literal
+			/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
+
+		rl d_literal
+			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+		token ident /ident "'"?/
+		token number /digit+/
+		token hex_number /'0x' [0-9a-fA-F]+/
+
+		token comment
+			/c_comment | cpp_comment/
+
+		token string
+			/ s_literal | d_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		token ocaml_any / any /
+	end
+
+	def tok
+		[ident]
+	|	[number]
+	|	[hex_number]
+	|	[comment]
+	|	[string]
+	|	[whitespace]
+	|	[ocaml_any]
+
+	def section
+		[`%%{ ragel::ragel_start ragel::`}%%] :MultiLine
+	|	[tok] :Tok
+end
+
+
