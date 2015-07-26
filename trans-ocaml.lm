@@ -268,7 +268,7 @@ void rw_ocaml( Output: stream )
 	send Output
 		"(*
 		" * @LANG: ocaml
-		" * @GENERATED: yes
+		" * @GENERATED: true
 
 	if ProhibitGenflags {
 		send Output

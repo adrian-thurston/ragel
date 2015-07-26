@@ -1,6 +1,6 @@
 /*
  * @LANG: c
- * @IGNORE: yes
+ * @ENABLED: false
  *
  * Provides definitions for include tests.
  */

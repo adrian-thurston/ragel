@@ -293,14 +293,14 @@ function run_translate()
 	fi
 
 	# Check if we should ignore the test case
-	ignore=`sed '/@IGNORE:/s/^.*: *//p;d' $test_case`
-    if [ "$ignore" = yes ]; then
+	enabled=`sed '/@ENABLED:/s/^.*: *//p;d' $test_case`
+    if [ -n "$enabled" ] || [ "$enabled" = true ]; then
         continue;
     fi
 
 	# If the generated flag is given make sure that the test case is generated.
 	is_generated=`sed '/@GENERATED:/s/^.*: *//p;d' $test_case`
-	if [ "$is_generated" = yes ] && [ "$allow_generated" != true ]; then
+	if [ "$is_generated" = true ] && [ "$allow_generated" != true ]; then
 		continue;
 	fi
 
