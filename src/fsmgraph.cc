@@ -300,6 +300,7 @@ void FsmAp::optionalRepeatOp( int times )
 
 	/* A repeat of one optional merely allows zero string. */
 	if ( times == 1 ) {
+		isolateStartState();
 		setFinState( startState );
 		return;
 	}
@@ -313,6 +314,7 @@ void FsmAp::optionalRepeatOp( int times )
 	StateSet lastFinSet( finStateSet );
 
 	/* Set the initial state to zero to allow zero copies. */
+	isolateStartState();
 	setFinState( startState );
 
 	/* Concatentate duplicates onto the end up until before the last. */
