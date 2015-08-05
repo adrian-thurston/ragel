@@ -187,13 +187,10 @@ StateAp *FsmAp::copyStateForExpansion( StateAp *srcState )
 	return newState;
 }
 
-void FsmAp::mergeOutConds( StateAp *destState, StateAp *srcState )
+void FsmAp::mergeOutConds( StateAp *destState, StateAp *srcState, bool leaving )
 {
-	bool unionOp = 
-		( ( destState->stateBits & STB_GRAPH1 ) &&
-			( srcState->stateBits & STB_GRAPH2 ) ) ||
-		( ( destState->stateBits & STB_GRAPH2 ) &&
-			( srcState->stateBits & STB_GRAPH1 ) );
+	bool bothFinal = destState->isFinState() && srcState->isFinState();
+	bool unionOp = !leaving;
 				   
 	CondSet destCS, srcCS;
 	CondSet mergedCS;
@@ -232,16 +229,18 @@ void FsmAp::mergeOutConds( StateAp *destState, StateAp *srcState )
 
 		destState->outCondSpace = mergedSpace;
 
-		if ( unionOp ) {
+		if ( unionOp && bothFinal ) {
 			/* Keys can come from either. */
 			for ( CondKeySet::Iter c = srcKeys; c.lte(); c++ )
 				destState->outCondKeys.insert( *c );
 		}
 		else {
 			/* Keys need to be in both sets. */
-			for ( CondKeySet::Iter c = destState->outCondKeys; c.lte(); c++ ) {
-				if ( !srcKeys.find( *c ) )
-					destState->outCondKeys.CondKeyVect::remove( c.pos(), 1 );
+			for ( long c = 0; c < destState->outCondKeys.length(); ) {
+				if ( !srcKeys.find( destState->outCondKeys[c] ) )
+					destState->outCondKeys.CondKeyVect::remove( c, 1 );
+				else
+					c++;
 			}
 		}
 	}

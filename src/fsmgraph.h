@@ -1870,11 +1870,10 @@ private:
 public:
 	void outTransCopy( StateAp *dest, TransAp *srcList );
 
-	void mergeOutConds( StateAp *destState, StateAp *srcState );
+	void mergeOutConds( StateAp *destState, StateAp *srcState, bool leaving = false );
 
 	/* Merge a set of states into newState. */
-	void mergeStates( StateAp *destState, 
-			StateAp **srcStates, int numSrc );
+	void mergeStates( StateAp *destState, StateAp **srcStates, int numSrc );
 
 	void prepareNfaRound();
 	void finalizeNfaRound();
@@ -1882,7 +1881,7 @@ public:
 	void nfaMergeStates( StateAp *destState,
 			StateAp **srcStates, int numSrc );
 	void mergeStatesLeaving( StateAp *destState, StateAp *srcState );
-	void mergeStates( StateAp *destState, StateAp *srcState );
+	void mergeStates( StateAp *destState, StateAp *srcState, bool leaving = false );
 
 	/* Make all states that are combinations of other states and that
 	 * have not yet had their out transitions filled in. This will 

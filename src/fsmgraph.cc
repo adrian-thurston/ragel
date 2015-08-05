@@ -1422,10 +1422,10 @@ StateAp *FsmAp::dupStartState( )
 void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 {
 	if ( !hasOutData( destState ) )
-		mergeStates( destState, srcState );
+		mergeStates( destState, srcState, true );
 	else {
 		StateAp *ssMutable = addState();
-		mergeStates( ssMutable, srcState );
+		mergeStates( ssMutable, srcState, false );
 		transferOutData( ssMutable, destState );
 
 		if ( destState->outCondSpace != 0 ) {
@@ -1454,7 +1454,7 @@ void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 					destState->outCondKeys );
 		}
 
-		mergeStates( destState, ssMutable );
+		mergeStates( destState, ssMutable, true );
 
 //		if ( destState->nfaOut != 0 ) {
 //			for ( NfaTransList::Iter na = *destState->nfaOut; na.lte(); na++ ) {
@@ -1489,13 +1489,6 @@ void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 //			}
 //		}
 	}
-}
-
-void FsmAp::mergeStates( StateAp *destState, 
-		StateAp **srcStates, int numSrc )
-{
-	for ( int s = 0; s < numSrc; s++ )
-		mergeStates( destState, srcStates[s] );
 }
 
 void FsmAp::nfaMergeStates( StateAp *destState, 
@@ -1538,14 +1531,9 @@ void FsmAp::checkEpsilonRegularInteraction( const PriorTable &t1, const PriorTab
 	}
 }
 
-void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
+void FsmAp::mergeStates( StateAp *destState, StateAp *srcState, bool leaving )
 {
 	outTransCopy( destState, srcState->outList.head );
-
-	/* Get its bits and final state status. */
-	destState->stateBits |= ( srcState->stateBits & ~STB_ISFINAL );
-	if ( srcState->isFinState() )
-		setFinState( destState );
 
 	/* Draw in any properties of srcState into destState. */
 	if ( srcState == destState ) {
@@ -1580,7 +1568,7 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 		destState->guardedInTable.setPriors( srcState->guardedInTable );
 
 		/* Out conditins. */
-		mergeOutConds( destState, srcState );
+		mergeOutConds( destState, srcState, leaving );
 	}
 
 	/* Get bits and final state status. Note in the above code we depend on the
@@ -1640,6 +1628,14 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState )
 		}
 	}
 }
+
+void FsmAp::mergeStates( StateAp *destState, 
+		StateAp **srcStates, int numSrc )
+{
+	for ( int s = 0; s < numSrc; s++ )
+		mergeStates( destState, srcStates[s] );
+}
+
 
 void FsmAp::fillInStates()
 {
