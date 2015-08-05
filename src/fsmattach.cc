@@ -320,6 +320,8 @@ void FsmAp::detachState( StateAp *state )
 			detachFromNfa( t->fromState, t->toState, t );
 			t->fromState->nfaOut->detach( t );
 		}
+		delete state->nfaIn;
+		state->nfaIn = 0;
 	}
 
 	if ( state->nfaOut != 0 ) {
@@ -327,6 +329,8 @@ void FsmAp::detachState( StateAp *state )
 			detachFromNfa( t->fromState, t->toState, t );
 			state->nfaOut->detach( t );
 		}
+		delete state->nfaOut;
+		state->nfaOut = 0;
 	}
 
 	if ( state->stateDictIn != 0 ) {
@@ -334,6 +338,9 @@ void FsmAp::detachState( StateAp *state )
 			bool removed = (*s)->stateDictEl->stateSet.remove( state );
 			assert( removed );
 		}
+
+		delete state->stateDictIn;
+		state->stateDictIn = 0;
 	}
 
 	if ( state->stateDictEl != 0 ) {
