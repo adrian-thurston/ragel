@@ -48,7 +48,7 @@ public:
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondPair *cond );
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
-	virtual void NFA_POP_ACTION( RedNfaTarg *targ );
+	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 
 	void tableDataPass();
 

@@ -1137,9 +1137,9 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 						"	movq    $" << t->state->id << ", 0(%rax,%rcx,)\n"
 						"	movq	" << P() << ", 8(%rax,%rcx,)\n";
 
-					if ( t->pop ) {
+					if ( t->popAction ) {
 						out <<
-							"	movq	$" << (t->pop->actListId+1) << ", 16(%rax,%rcx,)\n";
+							"	movq	$" << (t->popAction->actListId+1) << ", 16(%rax,%rcx,)\n";
 					}
 					else {
 						out <<

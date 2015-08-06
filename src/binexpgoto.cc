@@ -160,8 +160,8 @@ void BinaryExpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 void BinaryExpGoto::NFA_POP_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
-	if ( targ->pop != 0 )
-		act = targ->pop->actListId+1;
+	if ( targ->popAction != 0 )
+		act = targ->popAction->actListId+1;
 	nfaPopActions.value( act );
 }
 

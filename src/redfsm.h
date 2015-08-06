@@ -495,15 +495,15 @@ typedef Vector<GenStateCond*> StateCondVect;
 struct RedNfaTarg
 {
 	RedNfaTarg( RedStateAp *state, RedAction *push,
-			GenCondSpace *condSpace, long condVal, RedAction *pop2,
-			RedAction *pop, int order )
+			GenCondSpace *condSpace, long condVal, RedAction *popAction,
+			RedAction *popTest, int order )
 	:
 		state(state),
 		push(push),
 		condSpace(condSpace),
 		condVal(condVal),
-		action(pop2),
-		pop(pop),
+		popAction(popAction),
+		popTest(popTest),
 		order(order)
 	{}
 
@@ -511,8 +511,8 @@ struct RedNfaTarg
 	RedAction *push;
 	GenCondSpace *condSpace;
 	long condVal;
-	RedAction *action;
-	RedAction *pop;
+	RedAction *popAction;
+	RedAction *popTest;
 	int order;
 };
 
@@ -654,7 +654,8 @@ struct RedFsmAp
 	bool bUsingAct;
 	bool bAnyNfaStates;
 	bool bAnyNfaPushPops;
-	bool bAnyNfaPushPops2;
+	bool bAnyNfaPushes;
+	bool bAnyNfaPops;
 
 	int maxState;
 	int maxSingleLen;

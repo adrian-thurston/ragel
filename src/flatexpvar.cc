@@ -143,12 +143,12 @@ void FlatExpVar::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void FlatExpVar::NFA_POP_ACTION( RedNfaTarg *targ )
+void FlatExpVar::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
-	if ( targ->pop != 0 )
-		act = targ->pop->actListId+1;
-	nfaPopTests.value( act );
+	if ( targ->popTest != 0 )
+		act = targ->popTest->actListId+1;
+	nfaPopTrans.value( act );
 }
 
 /* Write out the function switch. This switch is keyed on the values

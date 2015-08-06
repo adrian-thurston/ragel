@@ -47,7 +47,7 @@ public:
 	unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	unsigned int EOF_ACTION( RedStateAp *state );
 	void NFA_PUSH_ACTION( RedNfaTarg *targ );
-	void NFA_POP_ACTION( RedNfaTarg *targ );
+	void NFA_POP_TEST( RedNfaTarg *targ );
 
 	void tableDataPass();
 

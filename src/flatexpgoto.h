@@ -56,7 +56,7 @@ protected:
 	virtual void COND_ACTION( RedCondPair *cond );
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_ACTION( RedNfaTarg *targ );
-	virtual void NFA_POP_ACTION2( RedNfaTarg *targ );
+	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 };
 
 namespace C

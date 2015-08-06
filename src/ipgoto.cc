@@ -226,11 +226,11 @@ void IpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void IpGoto::NFA_POP_ACTION( RedNfaTarg *targ )
+void IpGoto::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
-	if ( targ->pop != 0 )
-		act = targ->pop->actListId+1;
+	if ( targ->popTest != 0 )
+		act = targ->popTest->actListId+1;
 	nfaPopActions.value( act );
 }
 
@@ -450,9 +450,9 @@ std::ostream &IpGoto::STATE_GOTOS()
 						"		nfa_bp[nfa_len].state = " << t->state->id << ";\n"
 						"		nfa_bp[nfa_len].p = " << P() << ";\n";
 
-					if ( t->pop ) {
+					if ( t->popAction ) {
 						out <<
-							"	nfa_bp[nfa_len].pop = " << t->pop->actListId+1 << ";\n";
+							"	nfa_bp[nfa_len].pop = " << t->popAction->actListId+1 << ";\n";
 					}
 					else {
 						out <<

@@ -107,7 +107,8 @@ public:
 	virtual void STATE_GOTO_ERROR();
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
-	virtual void NFA_POP_ACTION( RedNfaTarg *targ ) = 0;
+	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
+	virtual void NFA_POP_ACTION( RedNfaTarg *targ ) {}
 
 	void NFA_PUSH();
 	void NFA_POP();

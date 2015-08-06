@@ -753,7 +753,6 @@ void CodeGenData::makeStateList()
 				RedAction *popRa = 0;
 				RedAction *popRa2 = 0;
 
-
 				if ( targ->pushTable.length() > 0 ) {
 					RedActionTable *pushActions = 0;
 					pushActions = actionTableMap.find( targ->pushTable );
@@ -1236,15 +1235,15 @@ void CodeGenData::findFinalActionRefs()
 						item->value->numNfaPushRefs += 1;
 				}
 
-				if ( nt->action != 0 ) {
-					nt->action->numNfaPopActionRefs += 1;
-					for ( GenActionTable::Iter item = nt->push->key; item.lte(); item++ )
+				if ( nt->popAction != 0 ) {
+					nt->popAction->numNfaPopActionRefs += 1;
+					for ( GenActionTable::Iter item = nt->popAction->key; item.lte(); item++ )
 						item->value->numNfaPopActionRefs += 1;
 				}
 
-				if ( nt->pop != 0 ) {
-					nt->pop->numNfaPopTestRefs += 1;
-					for ( GenActionTable::Iter item = nt->pop->key; item.lte(); item++ )
+				if ( nt->popTest != 0 ) {
+					nt->popTest->numNfaPopTestRefs += 1;
+					for ( GenActionTable::Iter item = nt->popTest->key; item.lte(); item++ )
 						item->value->numNfaPopTestRefs += 1;
 				}
 
@@ -1440,8 +1439,21 @@ void CodeGenData::analyzeMachine()
 			redFsm->bAnyEofActions = true;
 		if ( act->numTransRefs > 0 )
 			redFsm->bAnyRegActions = true;
-		if ( act->numNfaPushRefs > 0 || act->numNfaPopActionRefs > 0 || act->numNfaPopTestRefs > 0 )
+
+		if ( act->numNfaPushRefs > 0 ) {
 			redFsm->bAnyNfaPushPops = true;
+			redFsm->bAnyNfaPushes = true;
+		}
+
+		if ( act->numNfaPopActionRefs > 0 ) {
+			redFsm->bAnyNfaPushPops = true;
+			redFsm->bAnyNfaPops = true;
+		}
+
+		if ( act->numNfaPopTestRefs > 0 ) {
+			redFsm->bAnyNfaPushPops = true;
+			redFsm->bAnyNfaPops = true;
+		}
 
 		/* Recurse through the action's parse tree looking for various things. */
 		analyzeAction( act, act->inlineList );
