@@ -443,8 +443,20 @@ void Flat::NFA_PUSH()
 		out <<
 			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
 			"		int alt; \n"
-			"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[(int)" <<
-						ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
+			"		int new_recs = " << ARR_REF( nfaTargs ) << "[(int)" <<
+						ARR_REF( nfaOffsets ) << "[" << vCS() << "]];\n";
+
+		if ( nfaPrePushExpr != 0 ) {
+			out << OPEN_HOST_BLOCK();
+			INLINE_LIST( out, nfaPrePushExpr, 0, false, false );
+			out << CLOSE_HOST_BLOCK();
+		}
+
+		out <<
+			"		for ( alt = 0; alt < new_recs; alt++ ) { \n";
+
+
+		out <<
 			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
 							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
 			"			nfa_bp[nfa_len].p = " << P() << ";\n";
@@ -602,13 +614,38 @@ void Flat::NFA_POP()
 
 			out <<
 				"		if ( cont ) {\n"
-				"			" << vCS() << " = nfa_bp[nfa_len].state;\n"
+				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+			if ( nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK();
+				INLINE_LIST( out, nfaPostPopExpr, 0, false, false );
+				out << CLOSE_HOST_BLOCK();
+			}
+
+			out <<
 				"			goto _resume;\n"
 				"		}\n";
+
+			if ( nfaPostPopExpr != 0 ) {
+				out <<
+				"			else {\n"
+				"			" << OPEN_HOST_BLOCK();
+				INLINE_LIST( out, nfaPostPopExpr, 0, false, false );
+				out << CLOSE_HOST_BLOCK() << "\n"
+				"			};\n";
+			}
 		}
 		else {
 			out <<
-				"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
+				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+			if ( nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK();
+				INLINE_LIST( out, nfaPostPopExpr, 0, false, false );
+				out << CLOSE_HOST_BLOCK();
+			}
+
+			out <<
 				"		goto _resume;\n";
 		}
 

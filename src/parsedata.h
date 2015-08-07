@@ -283,6 +283,10 @@ struct ParseData
 	InlineList *prePushExpr;
 	InlineList *postPopExpr;
 
+	/* Nfa stack managment. */
+	InlineList *nfaPrePushExpr;
+	InlineList *nfaPostPopExpr;
+
 	/* Overriding variables. */
 	InlineList *pExpr;
 	InlineList *peExpr;

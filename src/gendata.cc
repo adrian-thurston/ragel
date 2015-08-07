@@ -157,6 +157,8 @@ CodeGenData::CodeGenData( const CodeGenArgs &args )
 	accessExpr(0),
 	prePushExpr(0),
 	postPopExpr(0),
+	nfaPrePushExpr(0),
+	nfaPostPopExpr(0),
 	pExpr(0),
 	peExpr(0),
 	eofExpr(0),
@@ -843,6 +845,19 @@ void CodeGenData::make( const HostLang *hostLang )
 		postPopExpr = new GenInlineList;
 		makeGenInlineList( postPopExpr, pd->postPopExpr );
 	}
+
+	/* PrePush expression. */
+	if ( pd->nfaPrePushExpr != 0 ) {
+		nfaPrePushExpr = new GenInlineList;
+		makeGenInlineList( nfaPrePushExpr, pd->nfaPrePushExpr );
+	}
+
+	/* PostPop expression. */
+	if ( pd->nfaPostPopExpr != 0 ) {
+		nfaPostPopExpr = new GenInlineList;
+		makeGenInlineList( nfaPostPopExpr, pd->nfaPostPopExpr );
+	}
+
 
 	/*
 	 * Variable expressions.

@@ -70,6 +70,8 @@ statement: variable_spec commit;
 statement: export_block commit;
 statement: pre_push_spec commit;
 statement: post_pop_spec commit;
+statement: nfa_pre_push_spec commit;
+statement: nfa_post_pop_spec commit;
 statement: length_spec commit;
 
 length_spec:
@@ -106,6 +108,27 @@ post_pop_spec:
 		pd->postPopExpr = $3->inlineList;
 	};
 
+nfa_pre_push_spec:
+	KW_NfaPrePush '{' inline_block '}' 
+	final {
+		if ( pd->nfaPrePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error($2->loc) << "nfa_pre_push code already defined" << endl;
+		}
+
+		pd->nfaPrePushExpr = $3->inlineList;
+	};
+
+nfa_post_pop_spec:
+	KW_NfaPostPop '{' inline_block '}' 
+	final {
+		if ( pd->nfaPostPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error($2->loc) << "nfa_post_pop code already defined" << endl;
+		}
+
+		pd->nfaPostPopExpr = $3->inlineList;
+	};
 
 export_open: KW_Export 
 	final {

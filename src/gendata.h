@@ -241,6 +241,9 @@ public:
 	GenInlineList *prePushExpr;
 	GenInlineList *postPopExpr;
 
+	GenInlineList *nfaPrePushExpr;
+	GenInlineList *nfaPostPopExpr;
+
 	/* Overriding variables. */
 	GenInlineList *pExpr;
 	GenInlineList *peExpr;

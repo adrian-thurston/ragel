@@ -877,6 +877,9 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		'prepush' => { token( KW_PrePush ); };
 		'postpop' => { token( KW_PostPop ); };
 
+		'nfaprepush' => { token( KW_NfaPrePush ); };
+		'nfapostpop' => { token( KW_NfaPostPop ); };
+
 		'nfa_cost_mark' => { token( KW_NfaCostMark ); };
 
 		# FIXME: Enable this post 5.17.
