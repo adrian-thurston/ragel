@@ -656,6 +656,8 @@ struct RedFsmAp
 	bool bAnyNfaPushPops;
 	bool bAnyNfaPushes;
 	bool bAnyNfaPops;
+	bool bAnyTransCondRefs;
+	bool bAnyNfaCondRefs;
 
 	int maxState;
 	int maxSingleLen;

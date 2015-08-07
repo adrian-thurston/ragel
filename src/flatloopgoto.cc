@@ -47,7 +47,7 @@ void FlatLoopGoto::tableDataPass()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 }
 
 void FlatLoopGoto::genAnalysis()
@@ -177,7 +177,7 @@ void FlatLoopGoto::writeData()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 
 	STATE_IDS();
 }

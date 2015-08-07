@@ -58,9 +58,6 @@ protected:
 	TableArray nfaOffsets;
 	TableArray nfaPushActions;
 	TableArray nfaPopTrans;
-//	TableArray nfaCondVals;
-//	TableArray nfaPopActions;
-//	TableArray nfaPopTests;
 
 	void taKeys();
 	void taKeySpans();
@@ -80,8 +77,7 @@ protected:
 	void taNfaTargs();
 	void taNfaOffsets();
 	void taNfaPushActions();
-	void taNfaPopActions();
-	void taNfaPopTests();
+	void taNfaPopTrans();
 
 	void setKeyType();
 

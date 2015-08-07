@@ -53,36 +53,6 @@ void FlatLoopVar::calcIndexSize()
 
 void FlatLoopVar::tableDataPass()
 {
-#if 0
-	taActions();
-	taKeyOffsets();
-	taSingleLens();
-	taRangeLens();
-	taIndexOffsets();
-	taIndicies();
-
-	taTransCondSpacesWi();
-	taTransOffsetsWi();
-	taTransLengthsWi();
-
-	taTransCondSpaces();
-	taTransOffsets();
-	taTransLengths();
-
-	taCondTargs();
-	taCondActions();
-
-	taToStateActions();
-	taFromStateActions();
-	taEofActions();
-
-	taEofTransDirect();
-	taEofTransIndexed();
-
-	taKeys();
-	taCondKeys();
-#endif
-
 	if ( redFsm->anyActions() )
 		taActions();
 
@@ -107,7 +77,7 @@ void FlatLoopVar::tableDataPass()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 }
 
 void FlatLoopVar::genAnalysis()
@@ -318,7 +288,7 @@ void FlatLoopVar::writeData()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 
 	STATE_IDS();
 }

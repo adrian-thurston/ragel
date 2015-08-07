@@ -380,7 +380,7 @@ void Flat::taNfaPushActions()
 	nfaPushActions.finish();
 }
 
-void Flat::taNfaPopActions()
+void Flat::taNfaPopTrans()
 {
 /* ******** */
 
@@ -414,67 +414,6 @@ void Flat::taNfaPopActions()
 	}
 
 	nfaPopTrans.finish();
-
-#if 0
-/* ******** */
-
-	nfaCondVals.start();
-
-	nfaCondVals.value( 0 );
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->nfaTargs != 0 ) {
-
-			nfaCondVals.value( 0 );
-			nfaCondVals.value( 0 );
-			nfaCondVals.value( 0 );
-			nfaCondVals.value( 0 );
-
-			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ ) {
-				nfaCondSpaces.value( targ->condVal );
-			}
-		}
-	}
-
-	nfaCondVals.finish();
-
-/* ******** */
-
-	nfaPopActions.start();
-
-	nfaPopActions.value( 0 );
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->nfaTargs != 0 ) {
-			nfaPopActions.value( 0 );
-			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
-				NFA_POP_ACTION( targ );
-		}
-	}
-
-	nfaPopActions.finish();
-#endif
-}
-
-
-void Flat::taNfaPopTests()
-{
-#if 0
-	nfaPopTests.start();
-
-	nfaPopTests.value( 0 );
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->nfaTargs != 0 ) {
-			nfaPopTests.value( 0 );
-			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
-				NFA_POP_TEST( targ );
-		}
-	}
-
-	nfaPopTests.finish();
-#endif
-
 }
 
 
@@ -562,12 +501,19 @@ void Flat::NFA_POP()
 			"		" << P() << " = nfa_bp[nfa_len].p;\n"
 			;
 
-		if ( redFsm->bAnyNfaPops && condSpaceList.length() > 0 ) {
+		const int sz = 4;
+		const int offCS = 0;
+		const int offCV = 1;
+		const int offPA = 2;
+		const int offPT = 3;
+
+		if ( redFsm->bAnyNfaCondRefs ) {
 			out <<
 				"	_cpc = 0;\n";
 
 			out <<
-				"	switch ( " << ARR_REF( nfaPopTrans ) << "[nfa_bp[nfa_len].popTrans*4+0] ) {\n"
+				"	switch ( " << ARR_REF( nfaPopTrans ) << 
+						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] ) {\n"
 				"\n";
 
 			for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
@@ -590,8 +536,10 @@ void Flat::NFA_POP()
 			out << 
 				"	}\n"
 				"\n"
-				"	if ( " << ARR_REF( nfaPopTrans ) << "[nfa_bp[nfa_len].popTrans*4+0] != -1 ) {\n"
-				"		if ( _cpc != " << ARR_REF( nfaPopTrans ) << "[nfa_bp[nfa_len].popTrans*4+1] )\n"
+				"	if ( " << ARR_REF( nfaPopTrans ) <<
+						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] != -1 ) {\n"
+				"		if ( _cpc != " << ARR_REF( nfaPopTrans ) <<
+								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "] )\n"
 				"			goto _out;\n"
 				"	}\n"
 				;
@@ -599,7 +547,8 @@ void Flat::NFA_POP()
 
 		if ( redFsm->bAnyNfaPops ) {
 			out << 
-				"		switch ( " << ARR_REF( nfaPopTrans ) << "[nfa_bp[nfa_len].popTrans*4+2] ) {\n";
+				"		switch ( " << ARR_REF( nfaPopTrans ) <<
+						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPA << "] ) {\n";
 
 			/* Loop the actions. */
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
@@ -624,7 +573,8 @@ void Flat::NFA_POP()
 		if ( redFsm->bAnyNfaPops ) {
 			out << 
 				"		int cont = 1;\n"
-				"		switch ( " << ARR_REF( nfaPopTrans ) << "[nfa_bp[nfa_len].popTrans*4+3] ) {\n";
+				"		switch ( " << ARR_REF( nfaPopTrans ) <<
+							"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPT << "] ) {\n";
 
 			/* Loop the actions. */
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;

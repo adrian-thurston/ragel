@@ -1507,6 +1507,16 @@ void CodeGenData::analyzeMachine()
 			redFsm->bAnyEofTrans = true;
 	}
 
+	for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
+		GenCondSpace *condSpace = csi;
+
+		if ( condSpace->numTransRefs > 0 )
+			redFsm->bAnyTransCondRefs = true;
+
+		if ( condSpace->numNfaRefs > 0 )
+			redFsm->bAnyNfaCondRefs = true;
+	}
+
 	/* Assign ids to actions that are referenced. */
 	assignActionIds();
 

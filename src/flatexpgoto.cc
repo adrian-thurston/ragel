@@ -45,8 +45,7 @@ void FlatExpGoto::tableDataPass()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
-	taNfaPopTests();
+	taNfaPopTrans();
 }
 
 void FlatExpGoto::genAnalysis()
@@ -246,8 +245,7 @@ void FlatExpGoto::writeData()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
-	taNfaPopTests();
+	taNfaPopTrans();
 
 	STATE_IDS();
 }

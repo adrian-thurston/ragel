@@ -70,7 +70,7 @@ void FlatExpVar::tableDataPass()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 }
 
 void FlatExpVar::genAnalysis()
@@ -270,7 +270,7 @@ void FlatExpVar::writeData()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 
 	STATE_IDS();
 }
