@@ -56,7 +56,7 @@ ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj,
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 0, 0, 0, isConst );
 	objMethod->useFnInstr = useFnInstr;
-	obj->methodMap->insert( name, objMethod );
+	obj->rootScope->methodMap.insert( name, objMethod );
 	
 	if ( useGeneric ) {
 		objMethod->useGenericId = true;
@@ -73,7 +73,7 @@ ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj,
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 1, args, 0, isConst );
 	objMethod->useFnInstr = useFnInstr;
-	obj->methodMap->insert( name, objMethod );
+	obj->rootScope->methodMap.insert( name, objMethod );
 
 	if ( useGeneric ) {
 		objMethod->useGenericId = true;
@@ -92,7 +92,7 @@ ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj,
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, 2, args, 0, isConst );
 	objMethod->useFnInstr = useFnInstr;
-	obj->methodMap->insert( name, objMethod );
+	obj->rootScope->methodMap.insert( name, objMethod );
 
 	if ( useGeneric ) {
 		objMethod->useGenericId = true;
@@ -115,7 +115,7 @@ void NameScope::insertField( const String &name, ObjectField *value )
 
 ObjectField *ObjectDef::checkRedecl( NameScope *inScope, const String &name )
 {
-	FieldMapEl *objDefMapEl = inScope->fieldMap->find( name );
+	FieldMapEl *objDefMapEl = inScope->fieldMap.find( name );
 	if ( objDefMapEl != 0 )
 		return objDefMapEl->value;
 	return 0;
@@ -123,15 +123,14 @@ ObjectField *ObjectDef::checkRedecl( NameScope *inScope, const String &name )
 
 void ObjectDef::insertField( NameScope *inScope, const String &name, ObjectField *value )
 {
-	inScope->fieldMap->insert( name, value );
-	fieldList->append( value );
+	inScope->fieldMap.insert( name, value );
+	fieldList.append( value );
 	value->scope = inScope;
 }
 
 NameScope *ObjectDef::pushScope( NameScope *curScope )
 {
 	NameScope *newScope = new NameScope;
-	newScope->fieldMap = new FieldMap;
 
 	newScope->owner = this;
 	newScope->parentScope = curScope;
@@ -1372,7 +1371,7 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 		objMethod->iterDef = uiter;
 	}
 
-	globalObjectDef->methodMap->insert( func->name, objMethod );
+	globalObjectDef->rootScope->methodMap.insert( func->name, objMethod );
 
 	func->objMethod = objMethod;
 }
@@ -1396,7 +1395,7 @@ void Compiler::makeInHostVisible( Function *func )
 	objMethod->useCallObj = false;
 	objMethod->func = func;
 
-	globalObjectDef->methodMap->insert( func->name, objMethod );
+	globalObjectDef->rootScope->methodMap.insert( func->name, objMethod );
 
 	func->objMethod = objMethod;
 }

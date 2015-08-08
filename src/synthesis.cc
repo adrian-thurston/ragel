@@ -289,11 +289,11 @@ UniqueType *Compiler::findUniqueType( enum TYPE typeId, GenericType *generic )
 ObjectField *ObjectDef::findFieldNum( long offset )
 {
 	/* Bounds check. */
-	if ( offset >= fieldList->length() )
+	if ( offset >= fieldList.length() )
 		return 0;
 
 	int fn = 0;
-	FieldList::Iter field = *fieldList; 
+	FieldList::Iter field = fieldList; 
 	while ( fn < offset ) {
 		fn++;
 		field++;
@@ -305,7 +305,7 @@ ObjectField *ObjectDef::findFieldNum( long offset )
 /* Finds the first field by type. */
 ObjectField *ObjectDef::findFieldType( Compiler *pd, UniqueType *ut )
 {
-	for ( FieldList::Iter f = *fieldList; f.lte(); f++ ) {
+	for ( FieldList::Iter f = fieldList; f.lte(); f++ ) {
 		UniqueType *fUT = f->value->typeRef->resolveType( pd );
 		if ( fUT == ut )
 			return f->value;
@@ -2613,7 +2613,7 @@ void Compiler::findLocals( ObjectDef *localFrame, CodeBlock *block )
 {
 	Locals &locals = block->locals;
 
-	for ( FieldList::Iter ol = *localFrame->fieldList; ol.lte(); ol++ ) {
+	for ( FieldList::Iter ol = localFrame->fieldList; ol.lte(); ol++ ) {
 		ObjectField *el = ol->value;
 
 		/* FIXME: This test needs to be improved. Match_text was getting
@@ -2993,7 +2993,7 @@ void Compiler::placeAllLanguageObjects()
 		ObjectDef *objDef = lel->objectDef;
 		if ( objDef != 0 ) {
 			/* Init all fields of the object. */
-			for ( FieldList::Iter f = *objDef->fieldList; f.lte(); f++ )
+			for ( FieldList::Iter f = objDef->fieldList; f.lte(); f++ )
 				objDef->placeField( this, f->value );
 		}
 	}
@@ -3003,14 +3003,14 @@ void Compiler::placeAllStructObjects()
 {
 	for ( StructElList::Iter s = structEls; s.lte(); s++ ) {
 		ObjectDef *objectDef = s->structDef->objectDef;
-		for ( FieldList::Iter f = *objectDef->fieldList; f.lte(); f++ )
+		for ( FieldList::Iter f = objectDef->fieldList; f.lte(); f++ )
 			objectDef->placeField( this, f->value );
 	}
 }
 
 void Compiler::placeFrameFields( ObjectDef *localFrame )
 {
-	for ( FieldList::Iter f = *localFrame->fieldList; f.lte(); f++ )
+	for ( FieldList::Iter f = localFrame->fieldList; f.lte(); f++ )
 		localFrame->placeField( this, f->value );
 }
 
@@ -3034,7 +3034,7 @@ void Compiler::placeAllFrameObjects()
 		if ( lel->transBlock != 0 ) {
 			ObjectDef *localFrame = lel->transBlock->localFrame;
 			if ( lel->tokenDef->reCaptureVect.length() > 0 ) {
-				FieldList::Iter f = *localFrame->fieldList;
+				FieldList::Iter f = localFrame->fieldList;
 				for ( int i = 0; i < lel->tokenDef->reCaptureVect.length(); i++, f++ )
 					localFrame->placeField( this, f->value );
 			}

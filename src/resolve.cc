@@ -685,7 +685,7 @@ void LangStmt::resolve( Compiler *pd ) const
 
 void ObjectDef::resolve( Compiler *pd )
 {
-	for ( FieldList::Iter fli = *fieldList; fli.lte(); fli++ ) {
+	for ( FieldList::Iter fli = fieldList; fli.lte(); fli++ ) {
 		ObjectField *field = fli->value;
 
 		if ( field->typeRef != 0 )
@@ -786,19 +786,19 @@ void Compiler::resolveParseTree()
 		ObjectDef *objDef = lel->objectDef;
 		if ( objDef != 0 ) {
 			/* Init all fields of the object. */
-			for ( FieldList::Iter f = *objDef->fieldList; f.lte(); f++ )
+			for ( FieldList::Iter f = objDef->fieldList; f.lte(); f++ )
 				f->value->typeRef->resolveType( this );
 		}
 	}
 
 	for ( StructElList::Iter sel = structEls; sel.lte(); sel++ ) {
 		ObjectDef *objDef = sel->structDef->objectDef;
-		for ( FieldList::Iter f = *objDef->fieldList; f.lte(); f++ )
+		for ( FieldList::Iter f = objDef->fieldList; f.lte(); f++ )
 			f->value->typeRef->resolveType( this );
 	}
 
 	/* Init all fields of the global object. */
-	for ( FieldList::Iter f = *globalObjectDef->fieldList; f.lte(); f++ ) {
+	for ( FieldList::Iter f = globalObjectDef->fieldList; f.lte(); f++ ) {
 		f->value->typeRef->resolveType( this );
 	}
 }

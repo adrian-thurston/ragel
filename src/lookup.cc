@@ -49,7 +49,7 @@ ObjectDef *UniqueType::objectDef()
 ObjectField *ObjectDef::findFieldInScope( const NameScope *inScope,
 		const String &name ) const
 {
-	FieldMapEl *objDefMapEl = inScope->fieldMap->find( name );
+	FieldMapEl *objDefMapEl = inScope->fieldMap.find( name );
 	if ( objDefMapEl != 0 )
 		return objDefMapEl->value;
 	if ( inScope->parentScope != 0 )
@@ -62,9 +62,9 @@ ObjectField *NameScope::findField( const String &name ) const
 	return owner->findFieldInScope( this, name );
 }
 
-ObjectMethod *ObjectDef::findMethod( const String &name ) const
+ObjectMethod *NameScope::findMethod( const String &name ) const
 {
-	MethodMapEl *methodMapEl = methodMap->find( name );
+	MethodMapEl *methodMapEl = methodMap.find( name );
 	if ( methodMapEl != 0 )
 		return methodMapEl->value;
 	return 0;
@@ -125,7 +125,7 @@ bool LangVarRef::isLocalRef() const
 	}
 	else if ( scope->findField( name ) != 0 )
 		return true;
-	else if ( scope->owner->findMethod( name ) != 0 )
+	else if ( scope->findMethod( name ) != 0 )
 		return true;
 
 	return false;
@@ -140,7 +140,7 @@ bool LangVarRef::isContextRef() const
 		}
 		else if ( context->objectDef->rootScope->findField( name ) != 0 )
 			return true;
-		else if ( context->objectDef->findMethod( name ) != 0 )
+		else if ( context->objectDef->rootScope->findMethod( name ) != 0 )
 			return true;
 	}
 
@@ -218,8 +218,7 @@ VarRefLookup LangVarRef::lookupMethod( Compiler *pd ) const
 	VarRefLookup lookup = lookupObj( pd );
 
 	/* Find the method. */
-	assert( lookup.inObject->methodMap != 0 );
-	ObjectMethod *method = lookup.inObject->findMethod( name );
+	ObjectMethod *method = lookup.inScope->findMethod( name );
 	if ( method == 0 ) {
 		/* Not found as a method, try it as an object on which we will call a
 		 * default function. */
@@ -229,8 +228,7 @@ VarRefLookup LangVarRef::lookupMethod( Compiler *pd ) const
 		VarRefLookup lookup = lookupObj( pd );
 
 		/* Find the method. */
-		assert( lookup.inObject->methodMap != 0 );
-		method = lookup.inObject->findMethod( "finish" );
+		method = lookup.inScope->findMethod( "finish" );
 		if ( method == 0 )
 			error(loc) << "cannot find " << name << "(...) in object" << endp;
 	}

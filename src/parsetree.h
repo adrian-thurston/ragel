@@ -65,6 +65,9 @@ struct TypeAlias;
 struct RegionSet;
 struct NameScope;
 struct IterCall;
+struct TemplateType;
+struct ObjectMethod;
+
 
 /* 
  * Code Vector
@@ -2315,9 +2318,6 @@ struct ObjectMethod
 	GenericType *generic;
 };
 
-typedef AvlMap<String, ObjectMethod*, CmpStr> MethodMap;
-typedef AvlMapEl<String, ObjectMethod*> MethodMapEl;
-
 struct RhsVal
 {
 	RhsVal( ProdEl *prodEl ) 
@@ -2469,7 +2469,10 @@ typedef DListVal<ObjectField*> FieldList;
 
 typedef DList<ObjectField> ParameterList; 
 
-struct TemplateType;
+
+typedef AvlMap<String, ObjectMethod*, CmpStr> MethodMap;
+typedef AvlMapEl<String, ObjectMethod*> MethodMapEl;
+
 
 /* tree_t of name scopes for an object def. All of the object fields inside this
  * tree live in one object def. This is used for scoping names in functions. */
@@ -2483,7 +2486,8 @@ struct NameScope
 	{}
 
 	ObjectDef *owner;
-	FieldMap *fieldMap;	
+	FieldMap fieldMap;	
+	MethodMap methodMap;	
 
 	NameScope *parentScope;
 	DList<NameScope> children;
@@ -2505,6 +2509,7 @@ struct NameScope
 	}
 
 	ObjectField *findField( const String &name ) const;
+	ObjectMethod *findMethod( const String &name ) const;
 
 	ObjectField *checkRedecl( const String &name );
 	void insertField( const String &name, ObjectField *value );
@@ -2536,18 +2541,13 @@ struct ObjectDef
 
 		o->rootScope = new NameScope;
 		o->rootScope->owner = o;
-		o->rootScope->fieldMap = new FieldMap;
-
-		o->fieldList = new FieldList;
-		o->methodMap = new MethodMap;
 
 		return o;
 	}
 
 	Type type;
 	String name;
-	FieldList *fieldList;
-	MethodMap *methodMap;	
+	FieldList fieldList;
 
 	NameScope *rootScope;
 
@@ -2560,7 +2560,6 @@ struct ObjectDef
 	void referenceField( Compiler *pd, ObjectField *field );
 	void placeField( Compiler *pd, ObjectField *field );
 	void createCode( Compiler *pd, CodeVect &code );
-	ObjectMethod *findMethod( const String &name ) const;
 	ObjectField *findFieldInScope( const NameScope *scope, const String &name ) const;
 	ObjectField *checkRedecl( NameScope *inScope, const String &name );
 	void insertField( NameScope *inScope, const String &name, ObjectField *value );
