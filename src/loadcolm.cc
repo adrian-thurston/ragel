@@ -2314,11 +2314,11 @@ struct LoadColm
 		namespaceStack.pop();
 	}
 
-	void walkNamespaceDef( namespace_def NamespaceDef )
+	void walkNamespaceDef( namespace_def NamespaceDef, StmtList *stmtList )
 	{
 		String name = NamespaceDef.id().data();
 		createNamespace( NamespaceDef.id().loc(), name );
-		walkNamespaceItemList( NamespaceDef.ItemList() );
+		walkNamespaceItemList( NamespaceDef.ItemList(), stmtList );
 		namespaceStack.pop();
 	}
 
@@ -2356,7 +2356,7 @@ struct LoadColm
 			walkStructDef( rootItem.struct_def() );
 			break;
 		case root_item::Namespace:
-			walkNamespaceDef( rootItem.namespace_def() );
+			walkNamespaceDef( rootItem.namespace_def(), stmtList );
 			break;
 		case root_item::Function:
 			walkFunctionDef( rootItem.function_def() );
@@ -2424,7 +2424,7 @@ struct LoadColm
 			walkStructDef( item.struct_def() );
 			break;
 		case namespace_item::Namespace:
-			walkNamespaceDef( item.namespace_def() );
+			walkNamespaceDef( item.namespace_def(), stmtList );
 			break;
 		case namespace_item::Function:
 			walkFunctionDef( item.function_def() );
@@ -2447,6 +2447,12 @@ struct LoadColm
 		case namespace_item::Include: {
 			StmtList *includeList = walkInclude( item.include() );
 			stmtList->append( *includeList );
+			break;
+		}
+		case namespace_item::Global: {
+			LangStmt *stmt = walkGlobalDef( item.global_def() );
+			if ( stmt != 0 )
+				stmtList->append( stmt );
 			break;
 		}}
 	}
@@ -2488,18 +2494,14 @@ struct LoadColm
 		walkLiteralList( literalDef.literal_list() );
 	}
 
-	StmtList *walkNamespaceItemList( _repeat_namespace_item itemList )
+	void walkNamespaceItemList( _repeat_namespace_item itemList, StmtList *stmtList )
 	{
-		StmtList *stmtList = new StmtList;
-
 		/* Walk the list of items. */
 		while ( !itemList.end() ) {
 			walkNamespaceItem( itemList.value(), stmtList );
 			itemList = itemList.next();
 		}
-		return stmtList;
 	}
-
 
 	StmtList *walkRootItemList( _repeat_root_item rootItemList )
 	{

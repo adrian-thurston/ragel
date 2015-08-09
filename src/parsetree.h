@@ -823,12 +823,12 @@ struct NameScope
 {
 	NameScope()
 	:
-		owner(0),
+		owningObj(0),
 		parentScope(0),
 		childIter(0)
 	{}
 
-	ObjectDef *owner;
+	ObjectDef *owningObj;
 	FieldMap fieldMap;	
 	MethodMap methodMap;	
 
@@ -2545,7 +2545,7 @@ struct ObjectDef
 		o->id = id;
 
 		o->rootScope = new NameScope;
-		o->rootScope->owner = o;
+		o->rootScope->owningObj = o;
 
 		return o;
 	}
@@ -2703,6 +2703,8 @@ struct LangVarRef
 	void loadGlobalObj( Compiler *pd, CodeVect &code, 
 			int lastPtrInQual, bool forWriting ) const;
 	void loadObj( Compiler *pd, CodeVect &code, int lastPtrInQual, bool forWriting ) const;
+	void loadScopedObj( Compiler *pd, CodeVect &code, 
+		NameScope *scope, int lastPtrInQual, bool forWriting ) const;
 
 	void verifyRefPossible( Compiler *pd, VarRefLookup &lookup ) const;
 	bool canTakeRef( Compiler *pd, VarRefLookup &lookup ) const;

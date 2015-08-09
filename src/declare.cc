@@ -131,12 +131,12 @@ ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *o
 
 ObjectField *NameScope::checkRedecl( const String &name )
 {
-	return owner->checkRedecl( this, name );
+	return owningObj->checkRedecl( this, name );
 }
 
 void NameScope::insertField( const String &name, ObjectField *value )
 {
-	return owner->insertField( this, name, value );
+	return owningObj->insertField( this, name, value );
 }
 
 ObjectField *ObjectDef::checkRedecl( NameScope *inScope, const String &name )
@@ -158,7 +158,7 @@ NameScope *ObjectDef::pushScope( NameScope *curScope )
 {
 	NameScope *newScope = new NameScope;
 
-	newScope->owner = this;
+	newScope->owningObj = this;
 	newScope->parentScope = curScope;
 	curScope->children.append( newScope );
 
@@ -655,7 +655,7 @@ void Compiler::makeDefaultIterators()
 	/* Tree iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
 				"triter", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::Tree );
@@ -665,7 +665,7 @@ void Compiler::makeDefaultIterators()
 	/* Child iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
 				"child", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::Child );
@@ -675,7 +675,7 @@ void Compiler::makeDefaultIterators()
 	/* Reverse iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
 				"rev_child", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::RevChild );
@@ -685,7 +685,7 @@ void Compiler::makeDefaultIterators()
 	/* Repeat iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
 				"repeat", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::Repeat );
@@ -695,7 +695,7 @@ void Compiler::makeDefaultIterators()
 	/* Reverse repeat iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
 				"rev_repeat", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::RevRepeat );
@@ -705,7 +705,7 @@ void Compiler::makeDefaultIterators()
 	/* List iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
 				"list_iter", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::ListEl );
@@ -715,7 +715,7 @@ void Compiler::makeDefaultIterators()
 	/* Reverse Value List iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
 				"rev_list_iter", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::RevListVal );
@@ -725,7 +725,7 @@ void Compiler::makeDefaultIterators()
 	/* Map iterator. */
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
-		ObjectMethod *objMethod = initFunction( uniqueTypeAny, globalObjectDef, 
+		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
 				"map_iter", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::MapEl );
@@ -1028,7 +1028,7 @@ void Compiler::addStdin()
 	el->inGetValR   = IN_GET_STDIN;
 	el->inGetValWC  = IN_GET_STDIN;
 	el->inGetValWV  = IN_GET_STDIN;
-	globalObjectDef->rootScope->insertField( el->name, el );
+	rootNamespace->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addStdout()
@@ -1047,7 +1047,7 @@ void Compiler::addStdout()
 	el->inGetValR   = IN_GET_STDOUT;
 	el->inGetValWC  = IN_GET_STDOUT;
 	el->inGetValWV  = IN_GET_STDOUT;
-	globalObjectDef->rootScope->insertField( el->name, el );
+	rootNamespace->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addStderr()
@@ -1066,7 +1066,7 @@ void Compiler::addStderr()
 	el->inGetValR   = IN_GET_STDERR;
 	el->inGetValWC  = IN_GET_STDERR;
 	el->inGetValWV  = IN_GET_STDERR;
-	globalObjectDef->rootScope->insertField( el->name, el );
+	rootNamespace->rootScope->insertField( el->name, el );
 }
 
 void Compiler::addArgv()
@@ -1075,7 +1075,7 @@ void Compiler::addArgv()
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::StructFieldType, argvTypeRef, "argv" );
 	el->isConst = true;
-	globalObjectDef->rootScope->insertField( el->name, el );
+	rootNamespace->rootScope->insertField( el->name, el );
 	argv = el;
 
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
@@ -1083,7 +1083,7 @@ void Compiler::addArgv()
 	el = ObjectField::cons( internal,
 			ObjectField::StructFieldType, typeRef, "arg0" );
 	el->isConst = true;
-	globalObjectDef->rootScope->insertField( el->name, el );
+	rootNamespace->rootScope->insertField( el->name, el );
 	arg0 = el;
 }
 
@@ -1099,7 +1099,7 @@ void Compiler::addError()
 	el->inGetR     = IN_GET_ERROR;
 	el->inGetWC    = IN_GET_ERROR;
 	el->inGetWV    = IN_GET_ERROR;
-	globalObjectDef->rootScope->insertField( el->name, el );
+	rootNamespace->rootScope->insertField( el->name, el );
 }
 
 void Compiler::initMapFunctions( GenericType *gen )
@@ -1397,7 +1397,7 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 		objMethod->iterDef = uiter;
 	}
 
-	NameScope *scope = !isUserIter ? func->nspace->rootScope : globalObjectDef->rootScope;
+	NameScope *scope = func->nspace->rootScope; // : globalObjectDef->rootScope;
 
 	if ( !scope->methodMap.insert( func->name, objMethod ) )
 		error(func->typeRef->loc) << "function " << func->name << " redeclared" << endp;

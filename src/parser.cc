@@ -130,6 +130,8 @@ void BaseParser::init()
 	pd->globalObjectDef = ObjectDef::cons( ObjectDef::UserType,
 			global, pd->nextObjectId++ ); 
 
+	pd->rootNamespace->rootScope->owningObj = pd->globalObjectDef;
+
 	pd->global = new StructDef( internal, global, pd->globalObjectDef );
 	pd->globalSel = declareStruct( pd, 0, global, pd->global );
 
@@ -227,6 +229,8 @@ Namespace *BaseParser::createRootNamespace()
 	Namespace *nspace = new Namespace( internal,
 			String("___ROOT_NAMESPACE"), 0, 0 );
 
+	nspace->rootScope->owningObj = pd->globalObjectDef;
+
 	pd->namespaceList.append( nspace );
 	namespaceStack.push( nspace );
 
@@ -246,6 +250,7 @@ Namespace *BaseParser::createNamespace( const InputLoc &loc, const String &name 
 
 		/* Link the new namespace's scope to the parent namespace's scope. */
 		nspace->rootScope->parentScope = parent->rootScope;
+		nspace->rootScope->owningObj = pd->globalObjectDef;
 
 		parent->childNamespaces.append( nspace );
 		pd->namespaceList.append( nspace );
@@ -473,7 +478,7 @@ void BaseParser::iterDef( StmtList *stmtList, ObjectDef *localFrame,
 	ParameterList *paramList, const String &name )
 {
 	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
-	Function *newFunction = Function::cons( 0, 0, name, 
+	Function *newFunction = Function::cons( curNspace(), 0, name, 
 			paramList, codeBlock, pd->nextFuncId++, true, false );
 	pd->functionList.append( newFunction );
 }
@@ -482,31 +487,51 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 		LangStmt::Type assignType )
 {
 	LangStmt *stmt = 0;
+	ObjectDef *object = pd->globalObjectDef;
+	Namespace *nspace = curNspace(); //pd->rootNamespace;
 
-	StructDef *structDef = 0;
-	ObjectDef *object = 0;
-	if ( curStruct() == 0 )
-		object = pd->globalObjectDef;
-	else {
-		structDef = curStruct();
-		object = structDef->objectDef;
-	}
-
-	if ( object->rootScope->checkRedecl( objField->name ) != 0 )
+	if ( nspace->rootScope->checkRedecl( objField->name ) != 0 )
 		error(objField->loc) << "object field renamed" << endp;
 
-	object->rootScope->insertField( objField->name, objField );
+	object->insertField( nspace->rootScope, objField->name, objField );
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				curNspace(), structDef, curScope(), objField->name );
+				curNspace(), curStruct(), curScope(), objField->name );
 
-		stmt = LangStmt::cons( objField->loc, 
-				assignType, varRef, expr );
+		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
 
 	return stmt;
 }
+
+LangStmt *BaseParser::exportStmt( ObjectField *objField,
+		LangStmt::Type assignType, LangExpr *expr )
+{
+	LangStmt *stmt = 0;
+
+	ObjectDef *object = pd->globalObjectDef;
+	Namespace *nspace = curNspace(); //pd->rootNamespace;
+
+	if ( curStruct() != 0 )
+		error(objField->loc) << "cannot export parser context variables" << endp;
+
+	if ( nspace->rootScope->checkRedecl( objField->name ) != 0 )
+		error(objField->loc) << "object field renamed" << endp;
+
+	object->insertField( nspace->rootScope, objField->name, objField );
+	objField->isExport = true;
+
+	if ( expr != 0 ) {
+		LangVarRef *varRef = LangVarRef::cons( objField->loc, 
+				curNspace(), 0, curScope(), objField->name );
+
+		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
+	}
+
+	return stmt;
+}
+
 
 void BaseParser::cflDef( NtDef *ntDef, ObjectDef *objectDef, LelDefList *defList )
 {
@@ -938,32 +963,6 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
 				curNspace(), curStruct(), curScope(), objField->name );
-
-		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
-	}
-
-	return stmt;
-}
-
-LangStmt *BaseParser::exportStmt( ObjectField *objField,
-		LangStmt::Type assignType, LangExpr *expr )
-{
-	LangStmt *stmt = 0;
-
-	if ( curStruct() != 0 )
-		error(objField->loc) << "cannot export parser context variables" << endp;
-
-	ObjectDef *object = pd->globalObjectDef;
-
-	if ( object->rootScope->checkRedecl( objField->name ) != 0 )
-		error(objField->loc) << "object field renamed" << endp;
-
-	object->rootScope->insertField( objField->name, objField );
-	objField->isExport = true;
-
-	if ( expr != 0 ) {
-		LangVarRef *varRef = LangVarRef::cons( objField->loc, 
-				curNspace(), 0, curScope(), objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}

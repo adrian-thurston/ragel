@@ -531,7 +531,7 @@ void LangVarRef::loadQualification( Compiler *pd, CodeVect &code,
 			}
 		}
 
-		UniqueType *qualUT = loadField( pd, code, searchScope->owner, 
+		UniqueType *qualUT = loadField( pd, code, searchScope->owningObj, 
 				el, lfForWriting, lfRevert );
 		
 		if ( qi->form == QualItem::Dot ) {
@@ -586,8 +586,7 @@ void LangVarRef::loadContextObj( Compiler *pd, CodeVect &code,
 void LangVarRef::loadGlobalObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
-	/* Start the search in the global object. */
-	ObjectDef *rootObj = pd->globalObjectDef;
+	NameScope *scope = nspace != 0 ? nspace->rootScope : pd->rootNamespace->rootScope;
 
 	if ( forWriting && lastPtrInQual < 0 ) {
 		/* If we are writing an no reference was found in the qualification
@@ -603,7 +602,29 @@ void LangVarRef::loadGlobalObj( Compiler *pd, CodeVect &code,
 		code.append( IN_LOAD_GLOBAL_R );
 	}
 
-	loadQualification( pd, code, rootObj->rootScope, lastPtrInQual, forWriting, true );
+	loadQualification( pd, code, scope, lastPtrInQual, forWriting, true );
+}
+
+void LangVarRef::loadScopedObj( Compiler *pd, CodeVect &code, 
+		NameScope *scope, int lastPtrInQual, bool forWriting ) const
+{
+//	NameScope *scope = nspace != 0 ? nspace->rootScope : pd->rootNamespace->rootScope;
+
+	if ( forWriting && lastPtrInQual < 0 ) {
+		/* If we are writing an no reference was found in the qualification
+		 * then load the gloabl with a revert. */
+		if ( pd->revertOn )
+			code.append( IN_LOAD_GLOBAL_WV );
+		else
+			code.append( IN_LOAD_GLOBAL_WC );
+	}
+	else {
+		/* Either we are reading or we are loading a pointer that will be
+		 * dereferenced. */
+		code.append( IN_LOAD_GLOBAL_R );
+	}
+
+	loadQualification( pd, code, scope, lastPtrInQual, forWriting, true );
 }
 
 void LangVarRef::loadInbuiltObject( Compiler *pd, CodeVect &code, 
@@ -623,7 +644,11 @@ void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code,
 void LangVarRef::loadObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
-	if ( isInbuiltObject() )
+	if ( nspaceQual != 0 && nspaceQual->qualNames.length() > 0 ) {
+		Namespace *nspace = pd->rootNamespace->findNamespace( nspaceQual->qualNames[0] );
+		loadScopedObj( pd, code, nspace->rootScope, lastPtrInQual, forWriting );
+	}
+	else if ( isInbuiltObject() )
 		loadInbuiltObject( pd, code, lastPtrInQual, forWriting );
 	else if ( isLocalRef() )
 		loadLocalObj( pd, code, lastPtrInQual, forWriting );

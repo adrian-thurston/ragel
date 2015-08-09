@@ -59,7 +59,7 @@ ObjectField *ObjectDef::findFieldInScope( const NameScope *inScope,
 
 ObjectField *NameScope::findField( const String &name ) const
 {
-	return owner->findFieldInScope( this, name );
+	return owningObj->findFieldInScope( this, name );
 }
 
 ObjectMethod *NameScope::findMethod( const String &name ) const
@@ -116,7 +116,7 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, NameScope *rootScope
 		searchScope = searchObjDef->rootScope;
 	}
 
-	return VarRefLookup( lastPtrInQual, firstConstPart, searchScope->owner, searchScope );
+	return VarRefLookup( lastPtrInQual, firstConstPart, searchScope->owningObj, searchScope );
 }
 
 bool LangVarRef::isLocalRef() const
@@ -169,12 +169,17 @@ bool LangVarRef::isInbuiltObject() const
 VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 {
 	NameScope *rootScope;
-	if ( isLocalRef() )
+
+	if ( nspaceQual != 0 && nspaceQual->qualNames.length() > 0 ) {
+		Namespace *nspace = pd->rootNamespace->findNamespace( nspaceQual->qualNames[0] );
+		rootScope = nspace->rootScope;
+	}
+	else if ( isLocalRef() )
 		rootScope = scope;
 	else if ( isStructRef() )
 		rootScope = structDef->objectDef->rootScope;
 	else
-		rootScope = pd->globalObjectDef->rootScope;
+		rootScope = nspace != 0 ? nspace->rootScope : pd->rootNamespace->rootScope;
 
 	return lookupQualification( pd, rootScope );
 }
@@ -183,7 +188,7 @@ VarRefLookup LangVarRef::lookupMethodObj( Compiler *pd ) const
 {
 	NameScope *rootScope;
 
-	if ( qual->length() == 0 && nspaceQual != 0 && nspaceQual->qualNames.length() > 0 ) {
+	if ( nspaceQual != 0 && nspaceQual->qualNames.length() > 0 ) {
 		Namespace *nspace = pd->rootNamespace->findNamespace( nspaceQual->qualNames[0] );
 		rootScope = nspace->rootScope;
 	}
@@ -191,11 +196,8 @@ VarRefLookup LangVarRef::lookupMethodObj( Compiler *pd ) const
 		rootScope = scope;
 	else if ( isStructRef() )
 		rootScope = structDef->objectDef->rootScope;
-	else if ( qual->length() == 0 ) {
-		rootScope = nspace != 0 ? nspace->rootScope : pd->rootNamespace->rootScope;
-	}
 	else 
-		rootScope = pd->globalObjectDef->rootScope;
+		rootScope = nspace != 0 ? nspace->rootScope : pd->rootNamespace->rootScope;
 
 	return lookupQualification( pd, rootScope );
 }
@@ -234,7 +236,6 @@ UniqueType *LangVarRef::lookup( Compiler *pd ) const
 
 	return elUT;
 }
-
 
 VarRefLookup LangVarRef::lookupMethod( Compiler *pd ) const
 {

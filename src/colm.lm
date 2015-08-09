@@ -351,6 +351,7 @@ def namespace_item
 |	[precedence_def] :Precedence commit
 |	[alias_def] :Alias commit
 |	[include] :Include commit
+|	[global_def] :Global commit
 
 def obj_var_list
 	[]
