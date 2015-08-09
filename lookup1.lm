@@ -2212,7 +2212,7 @@ Lookup->declaratorData = new lookup::list_declarator_data()
 Lookup->templDecl = new lookup::list_int()
 
 # Root namespace object
-Lookup->rootNamespace = createLangObject( Lookup->NamespaceType, '<root_namespace>', nil )
+Lookup->rootNamespace = lookup::createLangObject( Lookup->NamespaceType, '<root_namespace>', nil )
 
 # Initialize the namespace and declaration stacks with the root namespace
 Lookup->curNamespace->push_tail( Lookup->rootNamespace )
@@ -2237,7 +2237,7 @@ if ! S {
 }
 
 print( '***** NAMSPACES *****\n' )
-printObject( '', Lookup->rootNamespace )
+lookup::printObject( '', Lookup->rootNamespace )
 print( '***** UNKNOWN DECLARATORS *****\n' )
 for DI: lookup::declarator_id in S {
 	if match DI 

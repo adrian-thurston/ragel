@@ -830,10 +830,9 @@ for OutputLine: output_line in RagelTree {
 }
 send Output "*/
 
-iter i()
-{
-
-}
+# iter i()
+#{
+#}
 
 for I: any in i() {
 	Int: int = 1
