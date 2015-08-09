@@ -564,7 +564,7 @@ void LangVarRef::loadContextObj( Compiler *pd, CodeVect &code,
 		int lastPtrInQual, bool forWriting ) const
 {
 	/* Start the search in the global object. */
-	ObjectDef *rootObj = context->objectDef;
+	ObjectDef *rootObj = structDef->objectDef;
 
 	if ( forWriting && lastPtrInQual < 0 ) {
 		/* If we are writing an no reference was found in the qualification
@@ -627,7 +627,7 @@ void LangVarRef::loadObj( Compiler *pd, CodeVect &code,
 		loadInbuiltObject( pd, code, lastPtrInQual, forWriting );
 	else if ( isLocalRef() )
 		loadLocalObj( pd, code, lastPtrInQual, forWriting );
-	else if ( isContextRef() )
+	else if ( isStructRef() )
 		loadContextObj( pd, code, lastPtrInQual, forWriting );
 	else
 		loadGlobalObj( pd, code, lastPtrInQual, forWriting );
@@ -2278,7 +2278,7 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	UniqueType *searchUT = typeRef->uniqueType;
 
 	/* Lookup the iterator call. Make sure it is an iterator. */
-	VarRefLookup lookup = iterCall->langTerm->varRef->lookupMethod( pd );
+	VarRefLookup lookup = iterCall->langTerm->varRef->lookupIterCall( pd );
 	if ( lookup.objMethod->iterDef == 0 ) {
 		error(loc) << "attempt to iterate using something "
 				"that is not an iterator" << endp;

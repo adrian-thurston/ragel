@@ -150,8 +150,8 @@ void BaseParser::init()
 
 	pd->rootLocalFrame = ObjectDef::cons( ObjectDef::FrameType, 
 				"local", pd->nextObjectId++ );
-	curLocalFrame = pd->rootLocalFrame;
-	curScope = pd->rootLocalFrame->rootScope;
+	localFrameTop = pd->rootLocalFrame;
+	scopeTop = pd->rootLocalFrame->rootScope;
 
 
 	/* Declarations of internal types. They must be declared now because we use
@@ -243,6 +243,9 @@ Namespace *BaseParser::createNamespace( const InputLoc &loc, const String &name 
 	if ( nspace == 0 ) {
 		nspace = new Namespace( loc, name,
 				pd->namespaceList.length(), parent );
+
+		/* Link the new namespace's scope to the parent namespace's scope. */
+		nspace->rootScope->parentScope = parent->rootScope;
 
 		parent->childNamespaces.append( nspace );
 		pd->namespaceList.append( nspace );
@@ -433,22 +436,22 @@ ObjectDef *BaseParser::blockOpen()
 	ObjectDef *frame = ObjectDef::cons( ObjectDef::FrameType, 
 			"local", pd->nextObjectId++ );
 
-	curLocalFrame = frame;
-	curScope = frame->rootScope;
+	localFrameTop = frame;
+	scopeTop = frame->rootScope;
 	return frame;
 }
 
 void BaseParser::blockClose()
 {
-	curLocalFrame = pd->rootLocalFrame;
-	curScope = pd->rootLocalFrame->rootScope;
+	localFrameTop = pd->rootLocalFrame;
+	scopeTop = pd->rootLocalFrame->rootScope;
 }
 
 void BaseParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
 	ParameterList *paramList, TypeRef *typeRef, const String &name, bool exprt )
 {
 	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
-	Function *newFunction = Function::cons( typeRef, name, 
+	Function *newFunction = Function::cons( curNspace(), typeRef, name, 
 			paramList, codeBlock, pd->nextFuncId++, false, exprt );
 	pd->functionList.append( newFunction );
 	newFunction->inContext = curStruct();
@@ -457,7 +460,7 @@ void BaseParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
 void BaseParser::inHostDef( const String &hostCall, ObjectDef *localFrame,
 	ParameterList *paramList, TypeRef *typeRef, const String &name, bool exprt )
 {
-	Function *newFunction = Function::cons( typeRef, name, 
+	Function *newFunction = Function::cons( curNspace(), typeRef, name, 
 			paramList, 0, pd->nextHostId++, false, exprt );
 	newFunction->hostCall = hostCall;
 	newFunction->localFrame = localFrame;
@@ -470,7 +473,7 @@ void BaseParser::iterDef( StmtList *stmtList, ObjectDef *localFrame,
 	ParameterList *paramList, const String &name )
 {
 	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
-	Function *newFunction = Function::cons( 0, name, 
+	Function *newFunction = Function::cons( 0, 0, name, 
 			paramList, codeBlock, pd->nextFuncId++, true, false );
 	pd->functionList.append( newFunction );
 }
@@ -496,7 +499,7 @@ LangStmt *BaseParser::globalDef( ObjectField *objField, LangExpr *expr,
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				structDef, curScope, objField->name );
+				curNspace(), structDef, curScope(), objField->name );
 
 		stmt = LangStmt::cons( objField->loc, 
 				assignType, varRef, expr );
@@ -679,7 +682,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				curStruct(), curScope, objField->name );
+				curNspace(), curStruct(), curScope(), objField->name );
 	}
 
 	/* The typeref for the parser. */
@@ -698,14 +701,14 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 
 	/* Check for redeclaration. */
 	if ( objField != 0 ) {
-		if ( curScope->checkRedecl( objField->name ) != 0 ) {
+		if ( curScope()->checkRedecl( objField->name ) != 0 ) {
 			error( objField->loc ) << "variable " << objField->name <<
 					" redeclared" << endp;
 		}
 
 		/* Insert it into the field map. */
 		objField->typeRef = typeRef;
-		curScope->insertField( objField->name, objField );
+		curScope()->insertField( objField->name, objField );
 	}
 
 	return expr;
@@ -717,7 +720,7 @@ PatternItemList *BaseParser::consPatternEl( LangVarRef *varRef, PatternItemList 
 	list->head->varRef = varRef;
 
 	if ( varRef != 0 ) {
-		if ( curScope->checkRedecl( varRef->name ) != 0 ) {
+		if ( curScope()->checkRedecl( varRef->name ) != 0 ) {
 			error( varRef->loc ) << "variable " << varRef->name << 
 					" redeclared" << endp;
 		}
@@ -727,7 +730,7 @@ PatternItemList *BaseParser::consPatternEl( LangVarRef *varRef, PatternItemList 
 				ObjectField::UserLocalType, typeRef, varRef->name );
 
 		/* Insert it into the field map. */
-		curScope->insertField( varRef->name, objField );
+		curScope()->insertField( varRef->name, objField );
 	}
 
 	return list;
@@ -782,7 +785,7 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 		NameScope *scope, TypeRef *typeRef, IterCall *iterCall, StmtList *stmtList )
 {
 	/* Check for redeclaration. */
-	if ( curScope->checkRedecl( data ) != 0 )
+	if ( curScope()->checkRedecl( data ) != 0 )
 		error( loc ) << "variable " << data << " redeclared" << endp;
 
 	/* Note that we pass in a null type reference. This type is dependent on
@@ -790,7 +793,7 @@ LangStmt *BaseParser::forScope( const InputLoc &loc, const String &data,
 	 * the iterator that is called. This lookup is done at compile time. */
 	ObjectField *iterField = ObjectField::cons( loc,
 			ObjectField::UserLocalType, (TypeRef*)0, data );
-	curScope->insertField( data, iterField );
+	curScope()->insertField( data, iterField );
 
 	LangStmt *stmt = LangStmt::cons( loc, LangStmt::ForIterType, 
 			iterField, typeRef, iterCall, stmtList, curStruct(), scope );
@@ -882,7 +885,7 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 	LangVarRef *varRef = 0;
 	if ( objField != 0 ) {
 		varRef = LangVarRef::cons( objField->loc,
-				curStruct(), curScope, objField->name );
+				curNspace(), curStruct(), curScope(), objField->name );
 	}
 
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( loc, LangTerm::ConstructType,
@@ -890,14 +893,14 @@ LangExpr *BaseParser::construct( const InputLoc &loc, ObjectField *objField,
 
 	/* Check for redeclaration. */
 	if ( objField != 0 ) {
-		if ( curScope->checkRedecl( objField->name ) != 0 ) {
+		if ( curScope()->checkRedecl( objField->name ) != 0 ) {
 			error( objField->loc ) << "variable " << objField->name <<
 					" redeclared" << endp;
 		}
 
 		/* Insert it into the field map. */
 		objField->typeRef = typeRef;
-		curScope->insertField( objField->name, objField );
+		curScope()->insertField( objField->name, objField );
 	}
 
 	return expr;
@@ -922,19 +925,19 @@ LangStmt *BaseParser::varDef( ObjectField *objField,
 	LangStmt *stmt = 0;
 
 	/* Check for redeclaration. */
-	if ( curScope->checkRedecl( objField->name ) != 0 ) {
+	if ( curScope()->checkRedecl( objField->name ) != 0 ) {
 		error( objField->loc ) << "variable " << objField->name <<
 				" redeclared" << endp;
 	}
 
 	/* Insert it into the field map. */
-	curScope->insertField( objField->name, objField );
+	curScope()->insertField( objField->name, objField );
 
 	//cout << "var def " << $1->objField->name << endl;
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc,
-				curStruct(), curScope, objField->name );
+				curNspace(), curStruct(), curScope(), objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
@@ -960,7 +963,7 @@ LangStmt *BaseParser::exportStmt( ObjectField *objField,
 
 	if ( expr != 0 ) {
 		LangVarRef *varRef = LangVarRef::cons( objField->loc, 
-				0, curScope, objField->name );
+				curNspace(), 0, curScope(), objField->name );
 
 		stmt = LangStmt::cons( objField->loc, assignType, varRef, expr );
 	}
@@ -1066,10 +1069,10 @@ void BaseParser::precedenceStmt( PredType predType, PredDeclList *predDeclList )
 
 void BaseParser::pushScope()
 {
-	curScope = curLocalFrame->pushScope( curScope );
+	scopeTop = curLocalFrame()->pushScope( curScope() );
 }
 
 void BaseParser::popScope()
 {
-	curScope = curScope->parentScope;
+	scopeTop = curScope()->parentScope;
 }

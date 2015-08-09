@@ -508,7 +508,7 @@ int push( L: list<int>, Int: int )
 }
 
 parse S: binary::start(Binary) [ stdin ]
-print_all_names( S )
+binary::print_all_names( S )
 print( '*** SUCCESS ***\n' )
 ##### EXP #####
 www.google.ca.

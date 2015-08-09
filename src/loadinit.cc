@@ -284,8 +284,9 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	QualItemVect *popQual = new QualItemVect;
 	popQual->append( QualItem( QualItem::Arrow, internal, String( "argv" ) ) );
 
-	LangVarRef *popRef = LangVarRef::cons( internal, 0,
-			curLocalFrame->rootScope, popQual, String("pop") );
+	LangVarRef *popRef = LangVarRef::cons( internal, curNspace(), 0,
+			curLocalFrame()->rootScope, NamespaceQual::cons( curNspace() ),
+			popQual, String("pop") );
 	LangExpr *pop = LangExpr::cons( LangTerm::cons( InputLoc(), popRef, popArgs ) );
 
 	TypeRef *typeRef = TypeRef::cons( internal, pd->uniqueTypeStr );
@@ -303,16 +304,14 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	LangExpr *modeExpr = LangExpr::cons( LangTerm::cons( internal, modeCons ) );
 
 	/* Reference A->value */
-	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, 0,
-			curLocalFrame->rootScope, qual, String("A") );
+	LangVarRef *varRef = LangVarRef::cons( internal, curNspace(), 0,
+			curLocalFrame()->rootScope, String("A") );
 	LangExpr *Avalue = LangExpr::cons( LangTerm::cons( internal,
 			LangTerm::VarRefType, varRef ) );
 	
 	/* Call open. */
-	QualItemVect *openQual = new QualItemVect;
 	LangVarRef *openRef = LangVarRef::cons( internal,
-			0, curLocalFrame->rootScope, openQual, String("open") );
+			curNspace(), 0, curLocalFrame()->rootScope, String("open") );
 	CallArgVect *openArgs = new CallArgVect;
 	openArgs->append( new CallArg(Avalue) );
 	openArgs->append( new CallArg(modeExpr) );
@@ -339,9 +338,8 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 
 void LoadInit::consExportTree( StmtList *stmtList )
 {
-	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, 0,
-			curLocalFrame->rootScope, qual, String("P") );
+	LangVarRef *varRef = LangVarRef::cons( internal, curNspace(), 0,
+			curLocalFrame()->rootScope, String("P") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal,
 			LangTerm::VarRefType, varRef ) );
 
@@ -355,9 +353,8 @@ void LoadInit::consExportTree( StmtList *stmtList )
 
 void LoadInit::consExportError( StmtList *stmtList )
 {
-	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, 0,
-			curLocalFrame->rootScope, qual, String("error") );
+	LangVarRef *varRef = LangVarRef::cons( internal, curNspace(), 0,
+			curLocalFrame()->rootScope, String("error") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal,
 			LangTerm::VarRefType, varRef ) );
 

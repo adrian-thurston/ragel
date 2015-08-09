@@ -228,7 +228,7 @@ struct LoadColm
 			IterCall *iterCall = walkIterCall( Statement.iter_call() );
 
 			stmt = forScope( Statement.id().loc(), forDecl,
-					curScope, typeRef, iterCall, stmtList );
+					curScope(), typeRef, iterCall, stmtList );
 
 			popScope();
 			break;
@@ -448,7 +448,7 @@ struct LoadColm
 		if ( optLabel.prodName() == opt_label::Id ) {
 			String id = optLabel.id().data();
 			varRef = LangVarRef::cons( optLabel.id().loc(),
-					curStruct(), curScope, id );
+					curNspace(), curStruct(), curScope(), id );
 		}
 		return varRef;
 	}
@@ -1298,11 +1298,12 @@ struct LoadColm
 
 	LangVarRef *walkVarRef( var_ref varRef )
 	{
+		NamespaceQual *nspaceQual = walkRegionQual( varRef.region_qual() );
 		qual Qual = varRef.qual();
 		QualItemVect *qualItemVect = walkQual( Qual );
 		String id = varRef.id().data();
 		LangVarRef *langVarRef = LangVarRef::cons( varRef.id().loc(),
-				curStruct(), curScope, qualItemVect, id );
+				curNspace(), curStruct(), curScope(), nspaceQual, qualItemVect, id );
 		return langVarRef;
 	}
 
@@ -1891,7 +1892,7 @@ struct LoadColm
 			LangVarRef *captureVarRef = 0;
 			if ( captureField != 0 ) {
 				captureVarRef = LangVarRef::cons( captureField->loc,
-						curStruct(), curScope, captureField->name );
+						curNspace(), curStruct(), curScope(), captureField->name );
 			}
 
 			expr = LangExpr::cons( LangTerm::consNew(
@@ -1899,14 +1900,14 @@ struct LoadColm
 
 			/* Check for redeclaration. */
 			if ( captureField != 0 ) {
-				if ( curScope->checkRedecl( captureField->name ) != 0 ) {
+				if ( curScope()->checkRedecl( captureField->name ) != 0 ) {
 					error( captureField->loc ) << "variable " <<
 							captureField->name << " redeclared" << endp;
 				}
 
 				/* Insert it into the field map. */
 				captureField->typeRef = typeRef;
-				curScope->insertField( captureField->name, captureField );
+				curScope()->insertField( captureField->name, captureField );
 			}
 			break;
 		}
@@ -2040,7 +2041,7 @@ struct LoadColm
 		case iter_call::Id: {
 			String tree = Tree.id().data();
 			LangVarRef *varRef = LangVarRef::cons( Tree.id().loc(),
-					curStruct(), curScope, tree );
+					curNspace(), curStruct(), curScope(), tree );
 			LangTerm *langTerm = LangTerm::cons( Tree.id().loc(),
 					LangTerm::VarRefType, varRef );
 			LangExpr *langExpr = LangExpr::cons( langTerm );

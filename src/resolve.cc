@@ -377,7 +377,7 @@ UniqueType *TypeRef::resolveIterator( Compiler *pd )
 	UniqueType *searchUT = searchTypeRef->resolveType( pd );
 
 	/* Lookup the iterator call. Make sure it is an iterator. */
-	VarRefLookup lookup = iterCall->langTerm->varRef->lookupMethod( pd );
+	VarRefLookup lookup = iterCall->langTerm->varRef->lookupIterCall( pd );
 	if ( lookup.objMethod->iterDef == 0 ) {
 		error(loc) << "attempt to iterate using something "
 				"that is not an iterator" << endp;

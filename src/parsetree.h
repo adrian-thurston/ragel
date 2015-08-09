@@ -811,13 +811,64 @@ struct TypeAlias
 
 typedef DList<TypeAlias> TypeAliasList;
 
+typedef AvlMap<String, ObjectField*, CmpStr> FieldMap;
+typedef AvlMapEl<String, ObjectField*> FieldMapEl;
+
+typedef AvlMap<String, ObjectMethod*, CmpStr> MethodMap;
+typedef AvlMapEl<String, ObjectMethod*> MethodMapEl;
+
+/* tree_t of name scopes for an object def. All of the object fields inside this
+ * tree live in one object def. This is used for scoping names in functions. */
+struct NameScope
+{
+	NameScope()
+	:
+		owner(0),
+		parentScope(0),
+		childIter(0)
+	{}
+
+	ObjectDef *owner;
+	FieldMap fieldMap;	
+	MethodMap methodMap;	
+
+	NameScope *parentScope;
+	DList<NameScope> children;
+
+	/* For iteration after declaration. */
+	NameScope *childIter;
+
+	NameScope *prev, *next;
+
+	int depth()
+	{
+		int depth = 0;
+		NameScope *scope = this;
+		while ( scope != 0 ) {
+			depth += 1;
+			scope = scope->parentScope;
+		}
+		return depth;
+	}
+
+	ObjectField *findField( const String &name ) const;
+	ObjectMethod *findMethod( const String &name ) const;
+
+	ObjectField *checkRedecl( const String &name );
+	void insertField( const String &name, ObjectField *value );
+};
+
+
 struct Namespace
 {
 	/* Construct with a list of joins */
 	Namespace( const InputLoc &loc, const String &name, int id, 
 			Namespace *parentNamespace ) : 
 		loc(loc), name(name), id(id),
-		parentNamespace(parentNamespace) { }
+		parentNamespace(parentNamespace)
+	{
+		rootScope = new NameScope;
+	}
 
 	/* tree_t traversal. */
 	Namespace *findNamespace( const String &name );
@@ -849,6 +900,8 @@ struct Namespace
 
 	Namespace *parentNamespace;
 	NamespaceVect childNamespaces;
+
+	NameScope *rootScope;
 
 	Namespace *next, *prev;
 
@@ -2462,58 +2515,10 @@ struct ObjectField
 	ObjectField *prev, *next;
 };
 
-typedef AvlMap<String, ObjectField*, CmpStr> FieldMap;
-typedef AvlMapEl<String, ObjectField*> FieldMapEl;
-
 typedef DListVal<ObjectField*> FieldList;
 
 typedef DList<ObjectField> ParameterList; 
 
-
-typedef AvlMap<String, ObjectMethod*, CmpStr> MethodMap;
-typedef AvlMapEl<String, ObjectMethod*> MethodMapEl;
-
-
-/* tree_t of name scopes for an object def. All of the object fields inside this
- * tree live in one object def. This is used for scoping names in functions. */
-struct NameScope
-{
-	NameScope()
-	:
-		owner(0),
-		parentScope(0),
-		childIter(0)
-	{}
-
-	ObjectDef *owner;
-	FieldMap fieldMap;	
-	MethodMap methodMap;	
-
-	NameScope *parentScope;
-	DList<NameScope> children;
-
-	/* For iteration after declaration. */
-	NameScope *childIter;
-
-	NameScope *prev, *next;
-
-	int depth()
-	{
-		int depth = 0;
-		NameScope *scope = this;
-		while ( scope != 0 ) {
-			depth += 1;
-			scope = scope->parentScope;
-		}
-		return depth;
-	}
-
-	ObjectField *findField( const String &name ) const;
-	ObjectMethod *findMethod( const String &name ) const;
-
-	ObjectField *checkRedecl( const String &name );
-	void insertField( const String &name, ObjectField *value );
-};
 
 struct ObjectDef
 {
@@ -2647,22 +2652,27 @@ typedef Vector<QualItem> QualItemVect;
 
 struct LangVarRef
 {
-	static LangVarRef *cons( const InputLoc &loc, StructDef *context,
-			NameScope *scope, QualItemVect *qual, const String &name )
+	static LangVarRef *cons( const InputLoc &loc, Namespace *nspace,
+			StructDef *structDef, NameScope *scope,
+			NamespaceQual *nspaceQual, QualItemVect *qual,
+			const String &name )
 	{
 		LangVarRef *l = new LangVarRef;
 		l->loc = loc;
-		l->context = context;
+		l->nspace = nspace;
+		l->structDef = structDef;
 		l->scope = scope;
+		l->nspaceQual = nspaceQual;
 		l->qual = qual;
 		l->name = name;
 		return l;
 	}
 
-	static LangVarRef *cons( const InputLoc &loc, StructDef *context,
-			NameScope *scope, const String &name )
+	static LangVarRef *cons( const InputLoc &loc, Namespace *nspace,
+			StructDef *structDef, NameScope *scope, const String &name )
 	{
-		return cons( loc, context, scope, new QualItemVect, name );
+		return cons( loc, nspace, structDef, scope,
+				NamespaceQual::cons( nspace ), new QualItemVect, name );
 	}
 
 	void resolve( Compiler *pd ) const;
@@ -2671,15 +2681,17 @@ struct LangVarRef
 	UniqueType *loadField( Compiler *pd, CodeVect &code, ObjectDef *inObject,
 			ObjectField *el, bool forWriting, bool revert ) const;
 
+	VarRefLookup lookupIterCall( Compiler *pd ) const;
 	VarRefLookup lookupMethod( Compiler *pd ) const;
 	VarRefLookup lookupField( Compiler *pd ) const;
 
 	VarRefLookup lookupQualification( Compiler *pd, NameScope *rootScope ) const;
 	VarRefLookup lookupObj( Compiler *pd ) const;
+	VarRefLookup lookupMethodObj( Compiler *pd ) const;
 
 	bool isInbuiltObject() const;
 	bool isLocalRef() const;
-	bool isContextRef() const;
+	bool isStructRef() const;
 	void loadQualification( Compiler *pd, CodeVect &code, NameScope *rootScope, 
 			int lastPtrInQual, bool forWriting, bool revert ) const;
 	void loadInbuiltObject( Compiler *pd, CodeVect &code, 
@@ -2721,9 +2733,12 @@ struct LangVarRef
 	void popRefQuals( Compiler *pd, CodeVect &code, 
 			VarRefLookup &lookup, CallArgVect *args, bool temps ) const;
 
+
 	InputLoc loc;
-	StructDef *context;
+	Namespace *nspace;
+	StructDef *structDef;
 	NameScope *scope;
+	NamespaceQual *nspaceQual;
 	QualItemVect *qual;
 	String name;
 	long argSize;
@@ -3350,6 +3365,7 @@ struct Function
 {
 	Function()
 	:
+		nspace(0),
 		paramListSize(0),
 		paramUTs(0),
 		inContext(0),
@@ -3357,12 +3373,13 @@ struct Function
 		inHost(false)
 	{}
 
-	static Function *cons( TypeRef *typeRef, const String &name, 
+	static Function *cons( Namespace *nspace, TypeRef *typeRef, const String &name, 
 			ParameterList *paramList, CodeBlock *codeBlock, 
 			int funcId, bool isUserIter, bool exprt )
 	{
 		Function *f = new Function;
 
+		f->nspace = nspace;
 		f->typeRef = typeRef;
 		f->name = name;
 		f->paramList = paramList;
@@ -3374,6 +3391,7 @@ struct Function
 		return f;
 	}
 
+	Namespace *nspace;
 	TransBlock *transBlock;
 	TypeRef *typeRef;
 	String name;

@@ -755,7 +755,8 @@ void ConsInit::parseInput( StmtList *stmtList )
 	popQual->append( QualItem( QualItem::Arrow, internal, String( "argv" ) ) );
 
 	LangVarRef *popRef = LangVarRef::cons( internal,
-			0, curLocalFrame->rootScope, popQual, String("pop") );
+			curNspace(), 0, curLocalFrame()->rootScope,
+			NamespaceQual::cons( curNspace() ), popQual, String("pop") );
 	LangExpr *pop = LangExpr::cons( LangTerm::cons( InputLoc(), popRef, popArgs ) );
 
 	TypeRef *typeRef = TypeRef::cons( internal, pd->uniqueTypeStr );
@@ -774,15 +775,17 @@ void ConsInit::parseInput( StmtList *stmtList )
 
 	/* Reference A->value */
 	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, 0,
-			curLocalFrame->rootScope, qual, String("A") );
+	LangVarRef *varRef = LangVarRef::cons( internal, curNspace(), 0,
+			curLocalFrame()->rootScope, NamespaceQual::cons( curNspace() ),
+			qual, String("A") );
 	LangExpr *Avalue = LangExpr::cons( LangTerm::cons( internal,
 			LangTerm::VarRefType, varRef ) );
 	
 	/* Call open. */
 	QualItemVect *openQual = new QualItemVect;
 	LangVarRef *openRef = LangVarRef::cons( internal,
-			0, curLocalFrame->rootScope, openQual, String("open") );
+			0, 0, curLocalFrame()->rootScope,
+			NamespaceQual::cons( curNspace() ), openQual, String("open") );
 	CallArgVect *openArgs = new CallArgVect;
 	openArgs->append( new CallArg(Avalue) );
 	openArgs->append( new CallArg(modeExpr) );
@@ -811,8 +814,8 @@ void ConsInit::exportTree( StmtList *stmtList )
 {
 	/* reference P */
 	QualItemVect *qual = new QualItemVect;
-	LangVarRef *varRef = LangVarRef::cons( internal, 0,
-			curLocalFrame->rootScope, qual, String("P") );
+	LangVarRef *varRef = LangVarRef::cons( internal, curNspace(), 0,
+			curLocalFrame()->rootScope, NamespaceQual::cons( curNspace() ), qual, String("P") );
 	LangExpr *expr = LangExpr::cons( LangTerm::cons( internal,
 			LangTerm::VarRefType, varRef ) );
 

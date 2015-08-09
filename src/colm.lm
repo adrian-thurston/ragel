@@ -745,7 +745,7 @@ def string
 #
 
 def var_ref
-	[qual id]
+	[region_qual qual id]
 
 def qual
 	[qual id DOT] :Dot

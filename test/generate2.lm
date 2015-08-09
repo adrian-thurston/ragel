@@ -201,7 +201,7 @@ end # generate
 Generate: generate = new generate()
 
 Generate->OpenStack = new list<generate::open_item>()
-Sentinal: generate::open_item = new_open_item( '** SENTINAL **', 1 )
+Sentinal: generate::open_item = generate::new_open_item( '** SENTINAL **', 1 )
 Generate->OpenStack->push( Sentinal )
 
 parse S: generate::start(Generate)[stdin]

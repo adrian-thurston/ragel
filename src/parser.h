@@ -42,8 +42,8 @@ struct BaseParser
 	RegionSetVect regionStack;
 	NamespaceVect namespaceStack;
 	StructStack structStack;
-	ObjectDef *curLocalFrame;
-	NameScope *curScope;
+	ObjectDef *localFrameTop;
+	NameScope *scopeTop;
 
 	bool enterRl;
 
@@ -55,6 +55,12 @@ struct BaseParser
 
 	Namespace *curNspace()
 		{ return namespaceStack.top(); }
+	
+	NameScope *curScope()
+		{ return scopeTop; }
+	
+	ObjectDef *curLocalFrame()
+		{ return localFrameTop; }
 
 	/* Lexical feedback. */
 

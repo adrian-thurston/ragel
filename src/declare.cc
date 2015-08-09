@@ -49,20 +49,34 @@ void Compiler::initUniqueTypes( )
 	uniqeTypeMap.insert( uniqueTypeStream );
 }
 
-ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, bool isConst,
-		bool useFnInstr, GenericType *useGeneric )
+ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC,
+		int nargs, UniqueType **args, bool isConst, bool useFnInstr,
+		GenericType *useGeneric )
 {
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
-			methIdWV, methIdWC, 0, 0, 0, isConst );
+			methIdWV, methIdWC, nargs, args, 0, isConst );
 	objMethod->useFnInstr = useFnInstr;
-	obj->rootScope->methodMap.insert( name, objMethod );
-	
+
+	if ( nspace != 0 )
+		nspace->rootScope->methodMap.insert( name, objMethod );
+	else
+		obj->rootScope->methodMap.insert( name, objMethod );
+
 	if ( useGeneric ) {
 		objMethod->useGenericId = true;
 		objMethod->generic = useGeneric;
 	}
+
 	return objMethod;
+}
+
+ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC, bool isConst,
+		bool useFnInstr, GenericType *useGeneric )
+{
+	return initFunction( retType, 0, obj, name, methIdWV, methIdWC,
+			0, 0, isConst, useFnInstr, useGeneric );
 }
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
@@ -70,17 +84,8 @@ ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj,
 		bool isConst, bool useFnInstr, GenericType *useGeneric )
 {
 	UniqueType *args[] = { arg1 };
-	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
-			methIdWV, methIdWC, 1, args, 0, isConst );
-	objMethod->useFnInstr = useFnInstr;
-	obj->rootScope->methodMap.insert( name, objMethod );
-
-	if ( useGeneric ) {
-		objMethod->useGenericId = true;
-		objMethod->generic = useGeneric;
-	}
-
-	return objMethod;
+	return initFunction( retType, 0, obj, name, methIdWV, methIdWC,
+			1, args, isConst, useFnInstr, useGeneric );
 }
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
@@ -89,19 +94,40 @@ ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj,
 		bool isConst, bool useFnInstr, GenericType *useGeneric )
 {
 	UniqueType *args[] = { arg1, arg2 };
-	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
-			methIdWV, methIdWC, 2, args, 0, isConst );
-	objMethod->useFnInstr = useFnInstr;
-	obj->rootScope->methodMap.insert( name, objMethod );
-
-	if ( useGeneric ) {
-		objMethod->useGenericId = true;
-		objMethod->generic = useGeneric;
-	}
-
-	return objMethod;
+	return initFunction( retType, 0, obj, name, methIdWV, methIdWC,
+			2, args, isConst, useFnInstr, useGeneric );
 }
 
+/*
+ * With namespace supplied. Global functions.
+ */
+
+ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC, bool isConst,
+		bool useFnInstr, GenericType *useGeneric )
+{
+	return initFunction( retType, nspace, obj, name, methIdWV, methIdWC,
+			0, 0, isConst, useFnInstr, useGeneric );
+}
+
+ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC, UniqueType *arg1,
+		bool isConst, bool useFnInstr, GenericType *useGeneric )
+{
+	UniqueType *args[] = { arg1 };
+	return initFunction( retType, nspace, obj, name, methIdWV, methIdWC,
+			1, args, isConst, useFnInstr, useGeneric );
+}
+
+ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
+		const String &name, int methIdWV, int methIdWC, 
+		UniqueType *arg1, UniqueType *arg2,
+		bool isConst, bool useFnInstr, GenericType *useGeneric )
+{
+	UniqueType *args[] = { arg1, arg2 };
+	return initFunction( retType, nspace, obj, name, methIdWV, methIdWC,
+			2, args, isConst, useFnInstr, useGeneric );
+}
 
 ObjectField *NameScope::checkRedecl( const String &name )
 {
@@ -489,7 +515,7 @@ void LangStmt::chooseDefaultIter( Compiler *pd, IterCall *iterCall ) const
 	/* This is two-part, It gets rewritten before evaluation in synthesis. */
 
 	/* The iterator name. */
-	LangVarRef *callVarRef = LangVarRef::cons( loc, context, scope, "triter" );
+	LangVarRef *callVarRef = LangVarRef::cons( loc, 0, context, scope, "triter" );
 
 	/* The parameters. */
 	CallArgVect *callExprVect = new CallArgVect;
@@ -812,7 +838,7 @@ void Compiler::declareStrFields( )
 	initFunction( uniqueTypeStr, strObj, "suffix",
 			IN_STR_SUFFIX, IN_STR_SUFFIX, uniqueTypeInt, true, true );
 
-	initFunction( uniqueTypeStr, globalObjectDef, "sprintf", 
+	initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "sprintf", 
 			IN_SPRINTF, IN_SPRINTF, uniqueTypeStr, uniqueTypeInt, true );
 
 	addLengthField( strObj, IN_STR_LENGTH );
@@ -918,66 +944,66 @@ void Compiler::declareGlobalFields()
 {
 	ObjectMethod *method;
 
-	method = initFunction( uniqueTypeStream, globalObjectDef, "open",
+	method = initFunction( uniqueTypeStream, rootNamespace, globalObjectDef, "open",
 		IN_OPEN_FILE, IN_OPEN_FILE, uniqueTypeStr, uniqueTypeStr, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeStr, globalObjectDef, "tolower",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "tolower",
 		IN_TO_LOWER, IN_TO_LOWER, uniqueTypeStr, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeStr, globalObjectDef, "toupper",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "toupper",
 		IN_TO_UPPER, IN_TO_UPPER, uniqueTypeStr, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "atoi",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "atoi",
 			IN_STR_ATOI,   IN_STR_ATOI, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "atoo",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "atoo",
 			IN_STR_ATOO,   IN_STR_ATOO, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeStr, globalObjectDef, "prefix",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "prefix",
 			IN_PREFIX, IN_PREFIX, uniqueTypeStr, uniqueTypeInt, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeStr, globalObjectDef, "suffix",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "suffix",
 			IN_SUFFIX, IN_SUFFIX, uniqueTypeStr, uniqueTypeInt, true, true );
 	method->useCallObj = false;
 
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "uord8",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "uord8",
 			IN_STR_UORD8,  IN_STR_UORD8, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "sord8",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "sord8",
 			IN_STR_SORD8,  IN_STR_SORD8, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "uord16",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "uord16",
 			IN_STR_UORD16, IN_STR_UORD16, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "sord16",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "sord16",
 			IN_STR_SORD16, IN_STR_SORD16, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "uord32",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "uord32",
 			IN_STR_UORD32, IN_STR_UORD32, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "sord32",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "sord32",
 			IN_STR_SORD32, IN_STR_SORD32, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "exit",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "exit",
 		IN_EXIT, IN_EXIT, uniqueTypeInt, true, true );
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "exit_hard",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "exit_hard",
 		IN_EXIT_HARD, IN_EXIT_HARD, uniqueTypeInt, true, true );
 
-	method = initFunction( uniqueTypeInt, globalObjectDef, "system",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "system",
 		IN_SYSTEM, IN_SYSTEM, uniqueTypeStr, true );
 
 	addStdin();
@@ -1371,7 +1397,10 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 		objMethod->iterDef = uiter;
 	}
 
-	globalObjectDef->rootScope->methodMap.insert( func->name, objMethod );
+	NameScope *scope = !isUserIter ? func->nspace->rootScope : globalObjectDef->rootScope;
+
+	if ( !scope->methodMap.insert( func->name, objMethod ) )
+		error(func->typeRef->loc) << "function " << func->name << " redeclared" << endp;
 
 	func->objMethod = objMethod;
 }
@@ -1395,7 +1424,12 @@ void Compiler::makeInHostVisible( Function *func )
 	objMethod->useCallObj = false;
 	objMethod->func = func;
 
-	globalObjectDef->rootScope->methodMap.insert( func->name, objMethod );
+	NameScope *scope = func->nspace->rootScope;
+
+	if ( !scope->methodMap.insert( func->name, objMethod ) ) {
+		error(func->typeRef->loc) << "in-host function " << func->name <<
+				" redeclared" << endp;
+	}
 
 	func->objMethod = objMethod;
 }

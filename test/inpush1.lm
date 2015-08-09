@@ -55,7 +55,7 @@ namespace lang
 			parse_stop H: hash::hash[ input ]
 			if ( H ) {
 				if ( H.Inc ) {
-					FN: str = unquote( H.Inc )
+					FN: str = string::unquote( H.Inc )
 					print[ 'opening ' FN '\n' ]
 					IS: stream = open( FN, 'r' )
 					if ( ! IS ) {

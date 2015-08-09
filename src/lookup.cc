@@ -67,6 +67,8 @@ ObjectMethod *NameScope::findMethod( const String &name ) const
 	MethodMapEl *methodMapEl = methodMap.find( name );
 	if ( methodMapEl != 0 )
 		return methodMapEl->value;
+	if ( parentScope != 0 )
+		return parentScope->findMethod( name );
 	return 0;
 }
 
@@ -131,16 +133,16 @@ bool LangVarRef::isLocalRef() const
 	return false;
 }
 
-bool LangVarRef::isContextRef() const
+bool LangVarRef::isStructRef() const
 {
-	if ( context != 0 ) {
+	if ( structDef != 0 ) {
 		if ( qual->length() > 0 ) {
-			if ( context->objectDef->rootScope->findField( qual->data[0].data ) != 0 )
+			if ( structDef->objectDef->rootScope->findField( qual->data[0].data ) != 0 )
 				return true;
 		}
-		else if ( context->objectDef->rootScope->findField( name ) != 0 )
+		else if ( structDef->objectDef->rootScope->findField( name ) != 0 )
 			return true;
-		else if ( context->objectDef->rootScope->findMethod( name ) != 0 )
+		else if ( structDef->objectDef->rootScope->findMethod( name ) != 0 )
 			return true;
 	}
 
@@ -169,13 +171,35 @@ VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 	NameScope *rootScope;
 	if ( isLocalRef() )
 		rootScope = scope;
-	else if ( isContextRef() )
-		rootScope = context->objectDef->rootScope;
+	else if ( isStructRef() )
+		rootScope = structDef->objectDef->rootScope;
 	else
 		rootScope = pd->globalObjectDef->rootScope;
 
 	return lookupQualification( pd, rootScope );
 }
+
+VarRefLookup LangVarRef::lookupMethodObj( Compiler *pd ) const
+{
+	NameScope *rootScope;
+
+	if ( qual->length() == 0 && nspaceQual != 0 && nspaceQual->qualNames.length() > 0 ) {
+		Namespace *nspace = pd->rootNamespace->findNamespace( nspaceQual->qualNames[0] );
+		rootScope = nspace->rootScope;
+	}
+	else if ( isLocalRef() )
+		rootScope = scope;
+	else if ( isStructRef() )
+		rootScope = structDef->objectDef->rootScope;
+	else if ( qual->length() == 0 ) {
+		rootScope = nspace != 0 ? nspace->rootScope : pd->rootNamespace->rootScope;
+	}
+	else 
+		rootScope = pd->globalObjectDef->rootScope;
+
+	return lookupQualification( pd, rootScope );
+}
+
 
 VarRefLookup LangVarRef::lookupField( Compiler *pd ) const
 {
@@ -213,6 +237,33 @@ UniqueType *LangVarRef::lookup( Compiler *pd ) const
 
 
 VarRefLookup LangVarRef::lookupMethod( Compiler *pd ) const
+{
+	/* Lookup the object that the field is in. */
+	VarRefLookup lookup = lookupMethodObj( pd );
+
+	/* Find the method. */
+	ObjectMethod *method = lookup.inScope->findMethod( name );
+	if ( method == 0 ) {
+		/* Not found as a method, try it as an object on which we will call a
+		 * default function. */
+		qual->append( QualItem( QualItem::Dot, loc, name ) );
+
+		/* Lookup the object that the field is in. */
+		VarRefLookup lookup = lookupObj( pd );
+
+		/* Find the method. */
+		method = lookup.inScope->findMethod( "finish" );
+		if ( method == 0 )
+			error(loc) << "cannot find " << name << "(...) in object" << endp;
+	}
+	
+	lookup.objMethod = method;
+	lookup.uniqueType = method->returnUT;
+	
+	return lookup;
+}
+
+VarRefLookup LangVarRef::lookupIterCall( Compiler *pd ) const
 {
 	/* Lookup the object that the field is in. */
 	VarRefLookup lookup = lookupObj( pd );
