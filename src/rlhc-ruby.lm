@@ -49,484 +49,490 @@ namespace ruby_out
 		[_IN_ _EX_ item*]
 end
 
-global RubyParser: parser<ruby_out::ruby_out>
+namespace ruby_gen
 
-global EntryLoop: int = 0
-global ElCascade: int = 0
+	global Parser: parser<ruby_out::ruby_out>
 
-void ruby_tok_list( TL: host::tok* )
-{
-	for Tok: host::tok in repeat(TL) {
-		if match Tok [host::`${ StmtList: stmt* host::`}$]
+	global EntryLoop: int = 0
+	global ElCascade: int = 0
+
+	void tok_list( TL: host::tok* )
+	{
+		for Tok: host::tok in repeat(TL) {
+			switch Tok
+			case [host::`${ StmtList: stmt* host::`}$]
+			{
+				send Parser
+					"begin
+					"[stmt_list( StmtList )]
+					"end
+			}
+			case [host::`={ Expr: expr host::`}=]
+				expr( Expr )
+			default {
+				send Parser [Tok]
+			}
+		}
+	}
+
+	void embedded_host( EH: embedded_host )
+	{
+		switch EH
+		case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 		{
-			send RubyParser
+			send Parser
+				"([tok_list( TL )])"
+		}
+		case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
+		{
+			send Parser 
 				"begin
-				"[ruby_stmt_list( StmtList )]
+				"	[tok_list( TL )]
 				"end
 		}
-		elsif match Tok [host::`={ Expr: expr host::`}=]
-			ruby_expr( Expr )
-		else {
-			send RubyParser [Tok]
+		case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
+		{
+			send Parser
+				[tok_list( TL )]
 		}
 	}
-}
 
-void ruby_embedded_host( EH: embedded_host )
-{
-	switch EH
-	case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
+	void expr_factor( ExprFactor: expr_factor )
 	{
-		send RubyParser
-			"([ruby_tok_list( TL )])"
-	}
-	case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
-	{
-		send RubyParser 
-			"begin
-			"	[ruby_tok_list( TL )]
-			"end
-	}
-	case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
-	{
-		send RubyParser
-			[ruby_tok_list( TL )]
-	}
-}
-
-void ruby_expr_factor( ExprFactor: expr_factor )
-{
-	if match ExprFactor
-		[EH: embedded_host]
-	{
-		send RubyParser
-			[ruby_embedded_host( EH )]
-	}
-	elsif match ExprFactor
-		[O:`( TL: expr C: `)]
-	{
-		send RubyParser
-			[O ruby_expr(TL) C]
-	}
-	elsif match ExprFactor
-		[ident O: `[ TL: expr C: `]]
-	{
-		send RubyParser
-			[ExprFactor.ident O ruby_expr( TL ) C]
-	}
-	elsif match ExprFactor
-		['offset' '(' ident ',' expr ')']
-	{
-		send RubyParser
-			[ruby_expr( ExprFactor.expr )]
-	}
-	elsif match ExprFactor
-		['deref' '(' ident ',' expr ')']
-	{
-		send RubyParser
-			[ ExprFactor.ident '[' ruby_expr( ExprFactor.expr ) ']']
-		if $ExprFactor.ident == 'data'
-			send RubyParser '.ord'
-	}
-	elsif match ExprFactor
-			[T: `TRUE]
-	{
-		T.data = 'true'
-		send RubyParser [T]
-	}
-	elsif match ExprFactor
-			[F: `FALSE]
-	{
-		F.data = 'false'
-		send RubyParser [F]
-	}
-	elsif match ExprFactor
-			[N: `nil]
-	{
-		N.data = '0'
-		send RubyParser [N]
-	}
-	elsif match ExprFactor
-			[Number: number]
-	{
-		ruby_number( Number )
-	}
-	elsif match ExprFactor [E1: embedded_host `-> E2: expr_factor]
-	{
-		ruby_embedded_host( E1 )
-		ruby_expr_factor( E2 )
-	}
-	elsif match ExprFactor [Open: `( Type: type Close: `) expr_factor]
-	{
-		#send RubyParser [Open]
-		#ruby_type( Type )
-		#send RubyParser [Close]
-		ruby_expr_factor( ExprFactor._expr_factor )
-	}
-	else {
-		# Catches cases not specified
-		send RubyParser [ExprFactor]
-	}
-}
-
-void ruby_lvalue( ExprFactor: lvalue )
-{
-	if match ExprFactor
-		[EH: embedded_host]
-	{
-		send RubyParser
-			[ruby_embedded_host( EH )]
-	}
-	elsif match ExprFactor
-		[ident O: `[ TL: expr C: `]]
-	{
-		send RubyParser
-			[ExprFactor.ident O ruby_expr( TL ) C]
-	}
-	elsif match ExprFactor [E1: embedded_host `-> E2: lvalue]
-	{
-		ruby_embedded_host( E1 )
-		ruby_lvalue( E2 )
-	}
-	else {
-		# Catches cases not specified
-		send RubyParser [ExprFactor]
-	}
-}
-
-void ruby_expr_factor_op( ExprFactorOp: expr_factor_op )
-{
-	if match ExprFactorOp [B: `! expr_factor_op]
-	{
-		send RubyParser [B]
-		ruby_expr_factor_op( ExprFactorOp._expr_factor_op )
-	}
-	elsif match ExprFactorOp [T: `~ expr_factor_op]
-	{
-		send RubyParser [T]
-		ruby_expr_factor_op( ExprFactorOp._expr_factor_op )
-	}
-	elsif match ExprFactorOp [expr_factor]
-	{
-		ruby_expr_factor( ExprFactorOp.expr_factor )
-	}
-}
-
-void ruby_expr_bitwise( ExprBitwise: expr_bitwise )
-{
-	if match ExprBitwise [expr_bitwise A: `& expr_factor_op]
-	{
-		ruby_expr_bitwise( ExprBitwise._expr_bitwise )
-		send RubyParser [A]
-		ruby_expr_factor_op( ExprBitwise.expr_factor_op )
-	}
-	elsif match ExprBitwise [expr_factor_op]
-	{
-		ruby_expr_factor_op( ExprBitwise.expr_factor_op )
-	}
-}
-
-void ruby_expr_mult( ExprMult: expr_mult )
-{
-	if match ExprMult [expr_mult T: `* expr_bitwise]
-	{
-		ruby_expr_mult( ExprMult._expr_mult )
-		send RubyParser [T]
-		ruby_expr_bitwise( ExprMult.expr_bitwise )
-	}
-	elsif match ExprMult [expr_bitwise]
-	{
-		ruby_expr_bitwise( ExprMult.expr_bitwise )
-	}
-}
-
-void ruby_expr_add( ExprAdd: expr_add )
-{
-	if match ExprAdd [expr_add Op: add_op expr_mult]
-	{
-		ruby_expr_add( ExprAdd._expr_add )
-		send RubyParser [Op]
-		ruby_expr_mult( ExprAdd.expr_mult )
-	}
-	elsif match ExprAdd [expr_mult]
-	{
-		ruby_expr_mult( ExprAdd.expr_mult )
-	}
-}
-
-void ruby_expr_shift( ExprShift: expr_shift )
-{
-	if match ExprShift [expr_shift Op: shift_op expr_add]
-	{
-		ruby_expr_shift( ExprShift._expr_shift )
-		send RubyParser [Op]
-		ruby_expr_add( ExprShift.expr_add )
-	}
-	elsif match ExprShift [expr_add]
-	{
-		ruby_expr_add( ExprShift.expr_add )
-	}
-}
-
-void ruby_expr_test( ExprTest: expr_test )
-{
-	if match ExprTest [expr_test Op: test_op expr_shift]
-	{
-		ruby_expr_test( ExprTest._expr_test )
-		send RubyParser [Op]
-		ruby_expr_shift( ExprTest.expr_shift )
-	}
-	elsif match ExprTest [expr_shift]
-	{
-		ruby_expr_shift( ExprTest.expr_shift )
-	}
-}
-
-void ruby_expr( Expr: expr )
-{
-	ruby_expr_test( Expr.expr_test )
-}
-
-void ruby_type( Type: type )
-{
-	if match Type "s8"
-		send RubyParser ['byte ']
-	elsif match Type "s16"
-		send RubyParser ['short ']
-	elsif match Type "s32"
-		send RubyParser ['int ']
-	elsif match Type "s64"
-		send RubyParser ['long ']
-	elsif match Type "s128"
-		send RubyParser ['long long ']
-	elsif match Type "uint"
-		send RubyParser ['int ']
-	else
-		send RubyParser [Type]
-}
-
-void ruby_number( Number: number )
-{
-	if match Number [`u `( uint `) ]
-		send RubyParser "[Number.uint]"
-	else
-		send RubyParser [Number]
-}
-
-void ruby_num_list( NumList: num_list )
-{
-	for Number: number in NumList
-		send RubyParser "[ruby_number( Number )], "
-}
-
-void ruby_stmt( Stmt: stmt )
-{
-	if match Stmt
-		[EH: embedded_host]
-	{
-		send RubyParser
-			[ruby_embedded_host( EH )]
-	}
-	elsif match Stmt [Array: array] {
-		send RubyParser
-			"class << self
-			"	attr_accessor :[ Array.ident ] 
-			"	private :[ Array.ident ], :[ Array.ident ]=
-			"end
-			"self.[ Array.ident ] = \[
-			"	[ruby_num_list( Array.num_list )]
-			"\]
-			"
-	}
-	elsif match Stmt [Value: value] {
-		send RubyParser
-			"class << self
-			"	attr_accessor :[ Value.ident ]
-			"end
-			"self.[ Value.ident ] = [ Value.number ];
-			"
-	}
-	elsif match Stmt [
-			'if' O: `( IfExpr: expr C: `) IfStmt: stmt
-			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
-	] {
-		send RubyParser
-			"if ( [ruby_expr(IfExpr)] )
-			"	[ruby_stmt(IfStmt)]
-
-		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
-			match ElseIfClause
-				['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
-
-			send RubyParser
-				"elsif ( [ruby_expr(ElseIfExpr)] )
-				"	[ruby_stmt(ElseIfStmt)]
+		switch  ExprFactor
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
 		}
+		case [O:`( TL: expr C: `)]
+		{
+			send Parser
+				[O expr(TL) C]
+		}
+		case [ident O: `[ TL: expr C: `]]
+		{
+			send Parser
+				[ExprFactor.ident O expr( TL ) C]
+		}
+		case ['offset' '(' ident ',' expr ')']
+		{
+			send Parser
+				[expr( ExprFactor.expr )]
+		}
+		case ['deref' '(' ident ',' expr ')']
+		{
+			send Parser
+				[ ExprFactor.ident '[' expr( ExprFactor.expr ) ']']
+			if $ExprFactor.ident == 'data'
+				send Parser '.ord'
+		}
+		case [T: `TRUE]
+		{
+			T.data = 'true'
+			send Parser [T]
+		}
+		case [F: `FALSE]
+		{
+			F.data = 'false'
+			send Parser [F]
+		}
+		case [N: `nil]
+		{
+			N.data = '0'
+			send Parser [N]
+		}
+		case [Number: number]
+		{
+			ruby_number( Number )
+		}
+		case [E1: embedded_host `-> E2: expr_factor]
+		{
+			embedded_host( E1 )
+			expr_factor( E2 )
+		}
+		case [Open: `( Type: type Close: `) expr_factor]
+		{
+			#send Parser [Open]
+			#type( Type )
+			#send Parser [Close]
+			expr_factor( ExprFactor._expr_factor )
+		}
+		default {
+			# Catches cases not specified
+			send Parser [ExprFactor]
+		}
+	}
 
-		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-			send RubyParser
-				"else
-				"	[ruby_stmt(ElseStmt)]
-		}
-		send RubyParser
-			"end
-	}
-	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
-		ElCascade = ElCascade + 1
-		send RubyParser
-			"while ( [ruby_expr(WhileExpr)] )
-			"	[ruby_stmt(WhileStmt)]
-			"end
-		if EntryLoop {
-			send RubyParser
-				"next if _trigger_goto
-		}
-		ElCascade = ElCascade - 1
-	}
-	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
-		send RubyParser
-			"case  [ruby_expr(SwitchExpr)] 
-			"when -2 then
-			"begin
-			"	[ruby_stmt_list(StmtList)]
-			"end
-			"end
-	}
-	elsif match Stmt [ExprExpr: expr Semi: `;] {
-		send RubyParser
-			[ruby_expr(ExprExpr) Semi]
-	}
-	elsif match Stmt [L: `{ TL: stmt* R: `}] {
-		send RubyParser
-			"begin
-			"[ruby_stmt_list(TL)]
-			"end
-	}
-	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: `;]
+	void lvalue( ExprFactor: lvalue )
 	{
-		send RubyParser
-			[OptPtr Ident]
+		switch ExprFactor
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [ident O: `[ TL: expr C: `]]
+		{
+			send Parser
+				[ExprFactor.ident O expr( TL ) C]
+		}
+		case [E1: embedded_host `-> E2: lvalue]
+		{
+			embedded_host( E1 )
+			lvalue( E2 )
+		}
+		default {
+			# Catches cases not specified
+			send Parser [ExprFactor]
+		}
+	}
 
-		if match OptInit [E: `= expr] {
-			send RubyParser
-				[E ruby_expr(OptInit.expr)]
+	void expr_factor_op( ExprFactorOp: expr_factor_op )
+	{
+		switch ExprFactorOp
+		case [B: `! expr_factor_op]
+		{
+			send Parser [B]
+			expr_factor_op( ExprFactorOp._expr_factor_op )
 		}
-		else {
-			send RubyParser
-				"= 0
+		case [T: `~ expr_factor_op]
+		{
+			send Parser [T]
+			expr_factor_op( ExprFactorOp._expr_factor_op )
 		}
+		case [expr_factor]
+		{
+			expr_factor( ExprFactorOp.expr_factor )
+		}
+	}
 
-		send RubyParser
-			[Semi]
-	}
-	elsif match Stmt [Export: export_stmt]
+	void expr_bitwise( ExprBitwise: expr_bitwise )
 	{
-		send RubyParser
-			"class << self
-			"	attr_accessor :[ Export.ident ]
-			"end
-			"self.[ Export.ident ] = [ ruby_number(Export.number) ];
-			"
+		switch ExprBitwise
+		case [expr_bitwise A: `& expr_factor_op]
+		{
+			expr_bitwise( ExprBitwise._expr_bitwise )
+			send Parser [A]
+			expr_factor_op( ExprBitwise.expr_factor_op )
+		}
+		case [expr_factor_op]
+		{
+			expr_factor_op( ExprBitwise.expr_factor_op )
+		}
 	}
-	elsif match Stmt ['fallthrough' ';']
+
+	void expr_mult( ExprMult: expr_mult )
 	{
-		# Nothing needed here.
+		switch ExprMult
+		case [expr_mult T: `* expr_bitwise]
+		{
+			expr_mult( ExprMult._expr_mult )
+			send Parser [T]
+			expr_bitwise( ExprMult.expr_bitwise )
+		}
+		case [expr_bitwise]
+		{
+			expr_bitwise( ExprMult.expr_bitwise )
+		}
 	}
-	elsif match Stmt [Index: index_stmt]
+
+	void expr_add( ExprAdd: expr_add )
 	{
-		send RubyParser
-			"[Index.ident] = 0;
+		switch ExprAdd
+		case [expr_add Op: add_op expr_mult]
+		{
+			expr_add( ExprAdd._expr_add )
+			send Parser [Op]
+			expr_mult( ExprAdd.expr_mult )
+		}
+		case [expr_mult]
+		{
+			expr_mult( ExprAdd.expr_mult )
+		}
 	}
-	elsif match Stmt [case_block]
+
+	void expr_shift( ExprShift: expr_shift )
 	{
-		send RubyParser
-			"end
-			"when [ruby_expr( Stmt.case_block.expr )] then
-			"begin
-			"[ruby_stmt_list( Stmt.case_block._repeat_stmt )]
+		switch ExprShift
+		case [expr_shift Op: shift_op expr_add]
+		{
+			expr_shift( ExprShift._expr_shift )
+			send Parser [Op]
+			expr_add( ExprShift.expr_add )
+		}
+		case [expr_add]
+		{
+			expr_add( ExprShift.expr_add )
+		}
 	}
-	elsif match Stmt [default_block]
+
+	void expr_test( ExprTest: expr_test )
 	{
-		send RubyParser
-			"end
-			"else
-			"begin
-			"[ruby_stmt_list( Stmt.default_block._repeat_stmt )]
+		switch ExprTest
+		case [expr_test Op: test_op expr_shift]
+		{
+			expr_test( ExprTest._expr_test )
+			send Parser [Op]
+			expr_shift( ExprTest.expr_shift )
+		}
+		case [expr_shift]
+		{
+			expr_shift( ExprTest.expr_shift )
+		}
 	}
-	elsif match Stmt [goto_label]
+
+	void expr( Expr: expr )
 	{
-		send RubyParser "{}"
+		expr_test( Expr.expr_test )
 	}
-	elsif match Stmt [G: goto_stmt]
+
+	void type( Type: type )
 	{
-		if ( ElCascade ) {
-			send RubyParser
+		switch Type
+		case "s8"
+			send Parser ['byte ']
+		case "s16"
+			send Parser ['short ']
+		case "s32"
+			send Parser ['int ']
+		case "s64"
+			send Parser ['long ']
+		case "s128"
+			send Parser ['long long ']
+		case "uint"
+			send Parser ['int ']
+		default
+			send Parser [Type]
+	}
+
+	void ruby_number( Number: number )
+	{
+		switch Number
+		case [`u `( uint `) ]
+			send Parser "[Number.uint]"
+		default
+			send Parser [Number]
+	}
+
+	void ruby_num_list( NumList: num_list )
+	{
+		for Number: number in NumList
+			send Parser "[ruby_number( Number )], "
+	}
+
+	void stmt( Stmt: stmt )
+	{
+		switch Stmt
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [Array: array] {
+			send Parser
+				"class << self
+				"	attr_accessor :[ Array.ident ] 
+				"	private :[ Array.ident ], :[ Array.ident ]=
+				"end
+				"self.[ Array.ident ] = \[
+				"	[ruby_num_list( Array.num_list )]
+				"\]
+				"
+		}
+		case [Value: value] {
+			send Parser
+				"class << self
+				"	attr_accessor :[ Value.ident ]
+				"end
+				"self.[ Value.ident ] = [ Value.number ];
+				"
+		}
+		case [
+				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
+				ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
+		] {
+			send Parser
+				"if ( [expr(IfExpr)] )
+				"	[stmt(IfStmt)]
+
+			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
+				match ElseIfClause
+					['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
+
+				send Parser
+					"elsif ( [expr(ElseIfExpr)] )
+					"	[stmt(ElseIfStmt)]
+			}
+
+			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
+				send Parser
+					"else
+					"	[stmt(ElseStmt)]
+			}
+			send Parser
+				"end
+		}
+		case ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
+			ElCascade = ElCascade + 1
+			send Parser
+				"while ( [expr(WhileExpr)] )
+				"	[stmt(WhileStmt)]
+				"end
+			if EntryLoop {
+				send Parser
+					"next if _trigger_goto
+			}
+			ElCascade = ElCascade - 1
+		}
+		case ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
+			send Parser
+				"case  [expr(SwitchExpr)] 
+				"when -2 then
 				"begin
-				"	_trigger_goto = true
-				"	_goto_level = [$G.Id]
+				"	[stmt_list(StmtList)]
+				"end
+				"end
+		}
+		case [ExprExpr: expr Semi: `;] {
+			send Parser
+				[expr(ExprExpr) Semi]
+		}
+		case [L: `{ TL: stmt* R: `}] {
+			send Parser
+				"begin
+				"[stmt_list(TL)]
+				"end
+		}
+		case [
+			TypeList: opt_const Type: type OptPtr: opt_ptr 
+			Ident: ident OptInit: opt_init Semi: `;
+		]
+		{
+			send Parser
+				[OptPtr Ident]
+
+			if match OptInit [E: `= expr] {
+				send Parser
+					[E expr(OptInit.expr)]
+			}
+			else {
+				send Parser
+					"= 0
+			}
+
+			send Parser
+				[Semi]
+		}
+		case [Export: export_stmt]
+		{
+			send Parser
+				"class << self
+				"	attr_accessor :[ Export.ident ]
+				"end
+				"self.[ Export.ident ] = [ ruby_number(Export.number) ];
+				"
+		}
+		case ['fallthrough' ';']
+		{
+			# Nothing needed here.
+		}
+		case [Index: index_stmt]
+		{
+			send Parser
+				"[Index.ident] = 0;
+		}
+		case [case_block]
+		{
+			send Parser
+				"end
+				"when [expr( Stmt.case_block.expr )] then
+				"begin
+				"[stmt_list( Stmt.case_block._repeat_stmt )]
+		}
+		case [default_block]
+		{
+			send Parser
+				"end
+				"else
+				"begin
+				"[stmt_list( Stmt.default_block._repeat_stmt )]
+		}
+		case [goto_label]
+		{
+			send Parser "{}"
+		}
+		case [G: goto_stmt]
+		{
+			if ( ElCascade ) {
+				send Parser
+					"begin
+					"	_trigger_goto = true
+					"	_goto_level = [$G.Id]
+					"	break
+					"end
+			}
+			else {
+				send Parser
+					"begin
+					"	_goto_level = [$G.Id]
+					"	next
+					"end
+			}
+		}
+		case [entry_loop]
+		{
+			EntryLoop = EntryLoop + 1
+			send Parser
+				"_goto_level = 0
+				"while true 
+				"	_trigger_goto = false
+				"	if _goto_level <= 0 
+				"	[stmt_list( Stmt.entry_loop._repeat_stmt )]
+				"	end
 				"	break
 				"end
+			EntryLoop = EntryLoop - 1
+		}
+		case [label_stmt]
+		{
+			send Parser
+				"end
+				"if _goto_level <= [Stmt.label_stmt.Id]
+				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
+		}
+		case [AS: assign_stmt]
+		{
+			send Parser
+				"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
+		}
+		default {
+			# catches unspecified cases
+			send Parser [Stmt]
+		}
+	}
+
+	void stmt_list( StmtList: stmt* )
+	{
+		for Stmt: stmt in repeat( StmtList )
+			stmt( Stmt )
+	}
+
+	void trans( Output: stream, Start: start )
+	{
+		Parser = new parser<ruby_out::ruby_out>()
+
+		stmt_list( Start._repeat_stmt )
+
+		RO: ruby_out::ruby_out = Parser->finish()
+
+		if RO {
+			send Output
+				[RO]
 		}
 		else {
-			send RubyParser
-				"begin
-				"	_goto_level = [$G.Id]
-				"	next
-				"end
+			send stderr
+				"failed to parse output: [Parser->error]
 		}
 	}
-	elsif match Stmt [entry_loop]
-	{
-		EntryLoop = EntryLoop + 1
-		send RubyParser
-			"_goto_level = 0
-			"while true 
-			"	_trigger_goto = false
-			"	if _goto_level <= 0 
-			"	[ruby_stmt_list( Stmt.entry_loop._repeat_stmt )]
-			"	end
-			"	break
-			"end
-		EntryLoop = EntryLoop - 1
-	}
-	elsif match Stmt [label_stmt]
-	{
-		send RubyParser
-			"end
-			"if _goto_level <= [Stmt.label_stmt.Id]
-			"[ruby_stmt_list( Stmt.label_stmt._repeat_stmt )]
-	}
-	elsif match Stmt [AS: assign_stmt]
-	{
-		send RubyParser
-			"[ruby_lvalue(AS.LValue) AS.assign_op ruby_expr(AS.expr)];
-	}
-	else {
-		# catches unspecified cases
-		send RubyParser [Stmt]
-	}
-}
-
-void ruby_stmt_list( StmtList: stmt* )
-{
-	for Stmt: stmt in repeat( StmtList )
-		ruby_stmt( Stmt )
-}
-
-void ruby_trans( StmtList: stmt* )
-{
-	RubyParser = new parser<ruby_out::ruby_out>()
-
-	ruby_stmt_list( StmtList )
-
-	RO: ruby_out::ruby_out = RubyParser->finish()
-
-	if RO {
-		send Output
-			[RO]
-	}
-	else {
-		send stderr
-			"failed to parse output: [RubyParser->error]
-	}
-}
+end

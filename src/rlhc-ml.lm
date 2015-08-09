@@ -44,509 +44,526 @@ namespace ml_out
 		[_IN_ _EX_ item*]
 end
 
-global StaticVarMap: map<str, str> = new map<str, str>()
-global MlParser: parser<ml_out::ml_out>
+namespace ml_gen
 
-void ml_tok_list( TL: host::tok* )
-{
-	for Tok: host::tok in repeat(TL) {
-		if match Tok [host::`${ StmtList: stmt* host::`}$]
-			send MlParser
-				"begin
-				"[ml_stmt_list( StmtList )]
-				"end;
-		elsif match Tok [host::`={ Expr: expr host::`}=]
-			send MlParser "([ml_expr( Expr )])"
-		else {
-			send MlParser [Tok]
-		}
-	}
-}
+	global StaticVarMap: map<str, str> = new map<str, str>()
+	global Parser: parser<ml_out::ml_out>
 
-void ml_embedded_host( EH: embedded_host )
-{
-	switch EH
-	case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
+	void tok_list( TL: host::tok* )
 	{
-		send MlParser
-			"([ml_tok_list( TL )])"
-	}
-	case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
-	{
-		send MlParser 
-			"begin
-			"[ml_tok_list( TL )]
-			"end;
-	}
-	case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
-	{
-		send MlParser
-			[ml_tok_list( TL )]
-	}
-}
-
-void ml_expr_factor( ExprFactor: expr_factor )
-{
-	switch ExprFactor
-	case [EH: embedded_host]
-	{
-		send MlParser
-			[ml_embedded_host( EH )]
-	}
-	case [`( TL: expr `)]
-	{
-		send MlParser
-			"( [ ml_expr(TL) ] )"
-	}
-	case [I: ident `[ TL: expr `]]
-	{
-		if ( StaticVarMap->find( $I ) || $I == 'stack' ) {
-			send MlParser
-				"[ ExprFactor.ident ].([ ml_expr( TL ) ])"
-		}
-		else {
-			send MlParser
-				"[ ExprFactor.ident ].\[[ ml_expr( TL ) ]\]"
-		}
-	}
-	case ['offset' '(' ident ',' expr ')']
-	{
-		send MlParser
-			[ml_expr( ExprFactor.expr )]
-	}
-	case ['deref' '(' I: ident ',' Expr: expr ')']
-	{
-		if ( $I == 'data' )
-			send MlParser 'Char.code '
-
-		if ( StaticVarMap->find( $I ) ) {
-			send MlParser
-				"[I].( [ ml_expr( Expr ) ] )"
-		}
-		else {
-			send MlParser
-				"[I].\[[ ml_expr( Expr ) ]\]"
-		}
-	}
-	case [T: `TRUE]
-	{
-		T.data = '1'
-		send MlParser [T]
-	}
-	case [F: `FALSE]
-	{
-		F.data = '0'
-		send MlParser [F]
-	}
-	case [N: `nil]
-	{
-		N.data = '0'
-		send MlParser [N]
-	}
-	case [Number: number]
-	{
-		ml_number( Number )
-	}
-	case [I: ident] {
-		if ( StaticVarMap->find( $I ) ) {
-			send MlParser
-				[^I]
-		}
-		else {
-			send MlParser
-				"[^I].contents"
-		}
-	}
-	case [E1: embedded_host `-> E2: expr_factor]
-	{
-		# The accessor operator is contained wihtin the lhs.
-		ml_embedded_host( E1 )
-		ml_expr_factor( E2 )
-	}
-	case [`( type `) expr_factor]
-	{
-		send MlParser
-			[ml_expr_factor( ExprFactor._expr_factor )]
-	}
-	default {
-		# Catches cases not specified
-		send MlParser [ExprFactor]
-	}
-}
-
-void ml_lvalue( ExprFactor: lvalue )
-{
-	switch ExprFactor
-	case [EH: embedded_host]
-	{
-		send MlParser
-			[ml_embedded_host( EH )]
-	}
-	case [ident O: `[ TL: expr C: `]]
-	{
-		send MlParser
-			[ExprFactor.ident O ml_expr( TL ) C]
-	}
-	case [E1: embedded_host `-> E2: lvalue]
-	{
-		# The accessor operator is contained wihtin the lhs.
-		ml_embedded_host( E1 )
-		ml_lvalue( E2 )
-	}
-	default {
-		# Catches cases not specified
-		send MlParser [ExprFactor]
-	}
-}
-
-void ml_expr_factor_op( ExprFactorOp: expr_factor_op )
-{
-	if match ExprFactorOp [B: `! expr_factor_op]
-	{
-		send MlParser [B]
-		ml_expr_factor_op( ExprFactorOp._expr_factor_op )
-	}
-	elsif match ExprFactorOp [T: `~ expr_factor_op]
-	{
-		send MlParser " lnot "
-		ml_expr_factor_op( ExprFactorOp._expr_factor_op )
-	}
-	elsif match ExprFactorOp [expr_factor]
-	{
-		ml_expr_factor( ExprFactorOp.expr_factor )
-	}
-}
-
-void ml_expr_bitwise( ExprBitwise: expr_bitwise )
-{
-	if match ExprBitwise [L: expr_bitwise `& R: expr_factor_op]
-	{
-		send MlParser
-			"[ml_expr_bitwise( L )] land [ml_expr_factor_op( R )]"
-	}
-	elsif match ExprBitwise [expr_factor_op]
-	{
-		ml_expr_factor_op( ExprBitwise.expr_factor_op )
-	}
-}
-
-void ml_expr_mult( ExprMult: expr_mult )
-{
-	if match ExprMult [expr_mult T: `* expr_bitwise]
-	{
-		ml_expr_mult( ExprMult._expr_mult )
-		send MlParser [T]
-		ml_expr_bitwise( ExprMult.expr_bitwise )
-	}
-	elsif match ExprMult [expr_bitwise]
-	{
-		ml_expr_bitwise( ExprMult.expr_bitwise )
-	}
-}
-
-void ml_expr_add( ExprAdd: expr_add )
-{
-	if match ExprAdd [expr_add Op: add_op expr_mult]
-	{
-		ml_expr_add( ExprAdd._expr_add )
-		send MlParser [Op]
-		ml_expr_mult( ExprAdd.expr_mult )
-	}
-	elsif match ExprAdd [expr_mult]
-	{
-		ml_expr_mult( ExprAdd.expr_mult )
-	}
-}
-
-void ml_expr_shift( ExprShift: expr_shift )
-{
-	if match ExprShift [expr_shift Op: shift_op expr_add]
-	{
-		ml_expr_shift( ExprShift._expr_shift )
-		if match Op [`<<]
-			send MlParser " lsl "
-		else
-			send MlParser " asr "
-		ml_expr_add( ExprShift.expr_add )
-	}
-	elsif match ExprShift [expr_add]
-	{
-		ml_expr_add( ExprShift.expr_add )
-	}
-}
-
-void ml_expr_test( ExprTest: expr_test )
-{
-	if match ExprTest [expr_test Op: test_op expr_shift]
-	{
-		ml_expr_test( ExprTest._expr_test )
-		if match Op [`==]
-			send MlParser "= "
-		else
-			send MlParser [Op]
-		ml_expr_shift( ExprTest.expr_shift )
-	}
-	elsif match ExprTest [expr_shift]
-	{
-		ml_expr_shift( ExprTest.expr_shift )
-	}
-}
-
-void ml_expr( Expr: expr )
-{
-	ml_expr_test( Expr.expr_test )
-}
-
-void ml_type( Type: type )
-{
-	if match Type "s8"
-		send MlParser ['char ']
-	elsif match Type "s16"
-		send MlParser ['short ']
-	elsif match Type "s32"
-		send MlParser ['int ']
-	elsif match Type "s64"
-		send MlParser ['long ']
-	elsif match Type "s128"
-		send MlParser ['long long ']
-	elsif match Type "uint"
-		send MlParser ['int ']
-	else
-		send MlParser [Type]
-}
-
-void ml_number( Number: number )
-{
-	if match Number [`u `( uint `) ]
-		send MlParser "[Number.uint]u"
-	else
-		send MlParser [Number]
-}
-
-void ml_num_list( NumList: num_list )
-{
-	for Number: number in NumList
-		send MlParser "[ml_number( Number )]; "
-}
-
-void ml_stmt( Stmt: stmt )
-{
-	if match Stmt
-		[EH: embedded_host]
-	{
-		send MlParser
-			[ml_embedded_host( EH )]
-	}
-	elsif match Stmt [Array: array] {
-		StaticVarMap->insert( $Array.ident, ' ' )
-		send MlParser
-			"let [Array.ident] : int array = \[|
-				"	[ml_num_list(Array.num_list)]
-			"|\]
-	}
-	elsif match Stmt [Value: value] {
-		StaticVarMap->insert( $Value.ident, ' ' )
-		send MlParser
-			"let [Value.ident] : [Value.type] = [Value.number]
-	}
-	elsif match Stmt [
-			'if' O: `( IfExpr: expr C: `) IfStmt: stmt
-			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
-	] {
-		send MlParser
-			"if [ml_expr(IfExpr)] then
-			"begin
-			"	[ml_stmt(IfStmt)]
-			"end
-
-		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
-			match ElseIfClause
-				['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
-
-			send MlParser
-				"else if [ml_expr(ElseIfExpr)] then
-				"begin
-				"	[ml_stmt(ElseIfStmt)]
-				"end
-		}
-
-		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-			send MlParser
-				"else
-				"begin
-				"	[ml_stmt(ElseStmt)]
-				"end
-		}
-
-		send MlParser
-			";"
-	}
-	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
-		send MlParser
-			"while [ml_expr(WhileExpr)] do
-			"	[ml_stmt(WhileStmt)]
-			"done;
-	}
-	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
-		require StmtList
-			[`case E1: expr `{ Inner: stmt* `} Rest: stmt*]
-
-		send MlParser
-			"if [ml_expr(SwitchExpr)] = [ml_expr(E1)] then
-			"begin
-			"	[ml_stmt_list(Inner)]
-			"end
-
-		for S: stmt in repeat(Rest) {
-			if match S
-				[`case E1: expr `{ Inner: stmt* `}]
-			{
-				send MlParser
-					"else if [ml_expr(SwitchExpr)] = [ml_expr(E1)] then
+		for Tok: host::tok in repeat(TL) {
+			switch Tok
+			case [host::`${ StmtList: stmt* host::`}$]
+				send Parser
 					"begin
-					"	[ml_stmt_list(Inner)]
-					"end
-			}
-			elsif match S
-				[`default `{ Inner: stmt* `}]
-			{
-				send MlParser
-					"else
-					"begin
-					"	[ml_stmt_list(Inner)]
-					"end
+					"[stmt_list( StmtList )]
+					"end;
+			case [host::`={ Expr: expr host::`}=]
+				send Parser "([expr( Expr )])"
+			default {
+				send Parser [Tok]
 			}
 		}
+	}
 
-		send MlParser
-			";
-	}
-	elsif match Stmt [ExprExpr: expr Semi: `;] {
-		send MlParser
-			[ml_expr(ExprExpr) Semi]
-	}
-	elsif match Stmt [L: `{ TL: stmt* R: `}] {
-		send MlParser
-			"begin
-			"[ml_stmt_list(TL)]
-			"end;
-	}
-	elsif match Stmt [D: declaration] {
-		send MlParser
-			"let [D.ident] : [ml_type(D.type)] ref "
-
-		if match D.opt_init [E: `= expr] {
-			send MlParser
-				"= ref [ml_expr(D.opt_init.expr)]"
-		}
-		else {
-			send MlParser
-				"= ref 0"
-		}
-
-		send MlParser
-			" in
-	}
-	elsif match Stmt [Export: export_stmt]
+	void embedded_host( EH: embedded_host )
 	{
-		send MlParser
-			"#define [Export.ident] [ml_number(Export.number)] 
-	}
-	elsif match Stmt ['fallthrough' ';']
-	{
-		# Nothing needed here.
-	}
-	elsif match Stmt [Index: index_stmt]
-	{
-		send MlParser
-			"let [Index.ident] : int ref = ref 0 in
-	}
-	elsif match Stmt [case_block]
-	{
-		send MlParser
-			"| [ml_expr( Stmt.case_block.expr )] -> 
-			"begin
-			"[ml_stmt_list( Stmt.case_block._repeat_stmt )]
-			"end;
-	}
-	elsif match Stmt [default_block]
-	{
-		send MlParser
-			"| _ ->
-			"[ml_stmt_list( Stmt.default_block._repeat_stmt )]
-	}
-	elsif match Stmt [case_label]
-	{
-		send MlParser
-			"case [ml_expr( Stmt.case_label.expr )]:
-	}
-	elsif match Stmt [label_stmt]
-	{
-		send MlParser
-			"[Stmt.label_stmt.ident]:
-			"[ml_stmt_list( Stmt.label_stmt._repeat_stmt )]
-	}
-	elsif match Stmt [entry_loop]
-	{
-		send MlParser
-			[ml_stmt_list( Stmt.entry_loop._repeat_stmt )]
-	}
-	elsif match Stmt [AS: assign_stmt]
-	{
-		switch AS.assign_op 
-		case [`=]
+		switch EH
+		case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
 		{
-			if match AS.LValue "stack\[[expr]\]" {
-				send MlParser "Array.set stack top.contents [ml_expr(AS.expr)];"
+			send Parser
+				"([tok_list( TL )])"
+		}
+		case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
+		{
+			send Parser 
+				"begin
+				"[tok_list( TL )]
+				"end;
+		}
+		case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
+		{
+			send Parser
+				[tok_list( TL )]
+		}
+	}
+
+	void expr_factor( ExprFactor: expr_factor )
+	{
+		switch ExprFactor
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [`( TL: expr `)]
+		{
+			send Parser
+				"( [ expr(TL) ] )"
+		}
+		case [I: ident `[ TL: expr `]]
+		{
+			if ( StaticVarMap->find( $I ) || $I == 'stack' ) {
+				send Parser
+					"[ ExprFactor.ident ].([ expr( TL ) ])"
 			}
 			else {
-				send MlParser
-					"[ml_lvalue(AS.LValue)] := [ml_expr(AS.expr)];
+				send Parser
+					"[ ExprFactor.ident ].\[[ expr( TL ) ]\]"
 			}
 		}
-		case [`+=]
+		case ['offset' '(' ident ',' expr ')']
 		{
-			parse RhsAsFactor: expr_factor [$AS.LValue]
-			send MlParser
-				"[ml_lvalue(AS.LValue)] := [ml_expr_factor(RhsAsFactor)] + [ml_expr(AS.expr)];
+			send Parser
+				[expr( ExprFactor.expr )]
 		}
-		case [`-=]
+		case ['deref' '(' I: ident ',' Expr: expr ')']
 		{
-			parse RhsAsFactor: expr_factor [$AS.LValue]
-			send MlParser
-				"[ml_lvalue(AS.LValue)] := [ml_expr_factor(RhsAsFactor)] - [ml_expr(AS.expr)];
+			if ( $I == 'data' )
+				send Parser 'Char.code '
+
+			if ( StaticVarMap->find( $I ) ) {
+				send Parser
+					"[I].( [ expr( Expr ) ] )"
+			}
+			else {
+				send Parser
+					"[I].\[[ expr( Expr ) ]\]"
+			}
+		}
+		case [T: `TRUE]
+		{
+			T.data = '1'
+			send Parser [T]
+		}
+		case [F: `FALSE]
+		{
+			F.data = '0'
+			send Parser [F]
+		}
+		case [N: `nil]
+		{
+			N.data = '0'
+			send Parser [N]
+		}
+		case [Number: number]
+		{
+			number( Number )
+		}
+		case [I: ident] {
+			if ( StaticVarMap->find( $I ) ) {
+				send Parser
+					[^I]
+			}
+			else {
+				send Parser
+					"[^I].contents"
+			}
+		}
+		case [E1: embedded_host `-> E2: expr_factor]
+		{
+			# The accessor operator is contained wihtin the lhs.
+			embedded_host( E1 )
+			expr_factor( E2 )
+		}
+		case [`( type `) expr_factor]
+		{
+			send Parser
+				[expr_factor( ExprFactor._expr_factor )]
 		}
 		default {
-			send MlParser
-				"[ml_lvalue(AS.LValue) AS.assign_op ml_expr(AS.expr)];
+			# Catches cases not specified
+			send Parser [ExprFactor]
 		}
 	}
-	else {
-		# catches unspecified cases
-		send MlParser [Stmt]
+
+	void lvalue( ExprFactor: lvalue )
+	{
+		switch ExprFactor
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [ident O: `[ TL: expr C: `]]
+		{
+			send Parser
+				[ExprFactor.ident O expr( TL ) C]
+		}
+		case [E1: embedded_host `-> E2: lvalue]
+		{
+			# The accessor operator is contained wihtin the lhs.
+			embedded_host( E1 )
+			lvalue( E2 )
+		}
+		default {
+			# Catches cases not specified
+			send Parser [ExprFactor]
+		}
 	}
-}
 
-void ml_stmt_list( StmtList: stmt* )
-{
-	for Stmt: stmt in repeat( StmtList )
-		ml_stmt( Stmt )
-}
-
-void ml_trans( StmtList: stmt* )
-{
-	MlParser = new parser<ml_out::ml_out>()
-
-	ml_stmt_list( StmtList )
-
-	MO: ml_out::ml_out = MlParser->finish()
-
-	if MO {
-		send Output
-			[MO]
+	void expr_factor_op( ExprFactorOp: expr_factor_op )
+	{
+		switch ExprFactorOp
+		case [B: `! expr_factor_op]
+		{
+			send Parser [B]
+			expr_factor_op( ExprFactorOp._expr_factor_op )
+		}
+		case [T: `~ expr_factor_op]
+		{
+			send Parser " lnot "
+			expr_factor_op( ExprFactorOp._expr_factor_op )
+		}
+		case [expr_factor]
+		{
+			expr_factor( ExprFactorOp.expr_factor )
+		}
 	}
-	else {
-		send stderr
-			"failed to parse output: [MlParser->error]
+
+	void expr_bitwise( ExprBitwise: expr_bitwise )
+	{
+		switch ExprBitwise
+		case [L: expr_bitwise `& R: expr_factor_op]
+		{
+			send Parser
+				"[expr_bitwise( L )] land [expr_factor_op( R )]"
+		}
+		case [expr_factor_op]
+		{
+			expr_factor_op( ExprBitwise.expr_factor_op )
+		}
 	}
-}
+
+	void expr_mult( ExprMult: expr_mult )
+	{
+		switch ExprMult
+		case [expr_mult T: `* expr_bitwise]
+		{
+			expr_mult( ExprMult._expr_mult )
+			send Parser [T]
+			expr_bitwise( ExprMult.expr_bitwise )
+		}
+		case [expr_bitwise]
+		{
+			expr_bitwise( ExprMult.expr_bitwise )
+		}
+	}
+
+	void expr_add( ExprAdd: expr_add )
+	{
+		switch ExprAdd
+		case [expr_add Op: add_op expr_mult]
+		{
+			expr_add( ExprAdd._expr_add )
+			send Parser [Op]
+			expr_mult( ExprAdd.expr_mult )
+		}
+		case [expr_mult]
+		{
+			expr_mult( ExprAdd.expr_mult )
+		}
+	}
+
+	void expr_shift( ExprShift: expr_shift )
+	{
+		switch ExprShift
+		case [expr_shift Op: shift_op expr_add]
+		{
+			expr_shift( ExprShift._expr_shift )
+			switch Op
+			case [`<<]
+				send Parser " lsl "
+			default
+				send Parser " asr "
+			expr_add( ExprShift.expr_add )
+		}
+		case [expr_add]
+		{
+			expr_add( ExprShift.expr_add )
+		}
+	}
+
+	void expr_test( ExprTest: expr_test )
+	{
+		switch ExprTest
+		case [expr_test Op: test_op expr_shift]
+		{
+			expr_test( ExprTest._expr_test )
+			switch Op
+			case [`==]
+				send Parser "= "
+			default
+				send Parser [Op]
+			expr_shift( ExprTest.expr_shift )
+		}
+		case [expr_shift]
+		{
+			expr_shift( ExprTest.expr_shift )
+		}
+	}
+
+	void expr( Expr: expr )
+	{
+		expr_test( Expr.expr_test )
+	}
+
+	void type( Type: type )
+	{
+		switch Type
+		case "s8"
+			send Parser ['char ']
+		case "s16"
+			send Parser ['short ']
+		case "s32"
+			send Parser ['int ']
+		case "s64"
+			send Parser ['long ']
+		case "s128"
+			send Parser ['long long ']
+		case "uint"
+			send Parser ['int ']
+		default
+			send Parser [Type]
+	}
+
+	void number( Number: number )
+	{
+		switch Number
+		case [`u `( uint `) ]
+			send Parser "[Number.uint]u"
+		default
+			send Parser [Number]
+	}
+
+	void num_list( NumList: num_list )
+	{
+		for Number: number in NumList
+			send Parser "[number( Number )]; "
+	}
+
+	void stmt( Stmt: stmt )
+	{
+		switch Stmt
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [Array: array] {
+			StaticVarMap->insert( $Array.ident, ' ' )
+			send Parser
+				"let [Array.ident] : int array = \[|
+					"	[num_list(Array.num_list)]
+				"|\]
+		}
+		case [Value: value] {
+			StaticVarMap->insert( $Value.ident, ' ' )
+			send Parser
+				"let [Value.ident] : [Value.type] = [Value.number]
+		}
+		case [
+				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
+				ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
+		] {
+			send Parser
+				"if [expr(IfExpr)] then
+				"begin
+				"	[stmt(IfStmt)]
+				"end
+
+			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
+				match ElseIfClause
+					['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
+
+				send Parser
+					"else if [expr(ElseIfExpr)] then
+					"begin
+					"	[stmt(ElseIfStmt)]
+					"end
+			}
+
+			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
+				send Parser
+					"else
+					"begin
+					"	[stmt(ElseStmt)]
+					"end
+			}
+
+			send Parser
+				";"
+		}
+		case ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
+			send Parser
+				"while [expr(WhileExpr)] do
+				"	[stmt(WhileStmt)]
+				"done;
+		}
+		case ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
+			require StmtList
+				[`case E1: expr `{ Inner: stmt* `} Rest: stmt*]
+
+			send Parser
+				"if [expr(SwitchExpr)] = [expr(E1)] then
+				"begin
+				"	[stmt_list(Inner)]
+				"end
+
+			for S: stmt in repeat(Rest) {
+				switch S
+				case [`case E1: expr `{ Inner: stmt* `}]
+				{
+					send Parser
+						"else if [expr(SwitchExpr)] = [expr(E1)] then
+						"begin
+						"	[stmt_list(Inner)]
+						"end
+				}
+				case
+					[`default `{ Inner: stmt* `}]
+				{
+					send Parser
+						"else
+						"begin
+						"	[stmt_list(Inner)]
+						"end
+				}
+			}
+
+			send Parser
+				";
+		}
+		case [ExprExpr: expr Semi: `;] {
+			send Parser
+				[expr(ExprExpr) Semi]
+		}
+		case [L: `{ TL: stmt* R: `}] {
+			send Parser
+				"begin
+				"[stmt_list(TL)]
+				"end;
+		}
+		case [D: declaration] {
+			send Parser
+				"let [D.ident] : [type(D.type)] ref "
+
+			switch D.opt_init
+			case [E: `= expr] {
+				send Parser
+					"= ref [expr(D.opt_init.expr)]"
+			}
+			default {
+				send Parser
+					"= ref 0"
+			}
+
+			send Parser
+				" in
+		}
+		case [Export: export_stmt]
+		{
+			send Parser
+				"#define [Export.ident] [number(Export.number)] 
+		}
+		case ['fallthrough' ';']
+		{
+			# Nothing needed here.
+		}
+		case [Index: index_stmt]
+		{
+			send Parser
+				"let [Index.ident] : int ref = ref 0 in
+		}
+		case [case_block]
+		{
+			send Parser
+				"| [expr( Stmt.case_block.expr )] -> 
+				"begin
+				"[stmt_list( Stmt.case_block._repeat_stmt )]
+				"end;
+		}
+		case [default_block]
+		{
+			send Parser
+				"| _ ->
+				"[stmt_list( Stmt.default_block._repeat_stmt )]
+		}
+		case [case_label]
+		{
+			send Parser
+				"case [expr( Stmt.case_label.expr )]:
+		}
+		case [label_stmt]
+		{
+			send Parser
+				"[Stmt.label_stmt.ident]:
+				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
+		}
+		case [entry_loop]
+		{
+			send Parser
+				[stmt_list( Stmt.entry_loop._repeat_stmt )]
+		}
+		case [AS: assign_stmt]
+		{
+			switch AS.assign_op 
+			case [`=]
+			{
+				switch AS.LValue
+				case "stack\[[expr]\]" {
+					send Parser "Array.set stack top.contents [expr(AS.expr)];"
+				}
+				default {
+					send Parser
+						"[lvalue(AS.LValue)] := [expr(AS.expr)];
+				}
+			}
+			case [`+=]
+			{
+				parse RhsAsFactor: expr_factor [$AS.LValue]
+				send Parser
+					"[lvalue(AS.LValue)] := [expr_factor(RhsAsFactor)] + [expr(AS.expr)];
+			}
+			case [`-=]
+			{
+				parse RhsAsFactor: expr_factor [$AS.LValue]
+				send Parser
+					"[lvalue(AS.LValue)] := [expr_factor(RhsAsFactor)] - [expr(AS.expr)];
+			}
+			default {
+				send Parser
+					"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
+			}
+		}
+		default {
+			# catches unspecified cases
+			send Parser [Stmt]
+		}
+	}
+
+	void stmt_list( StmtList: stmt* )
+	{
+		for Stmt: stmt in repeat( StmtList )
+			stmt( Stmt )
+	}
+
+	void trans( Output: stream, Start: start )
+	{
+		Parser = new parser<ml_out::ml_out>()
+
+		stmt_list( Start._repeat_stmt )
+
+		MO: ml_out::ml_out = Parser->finish()
+
+		if MO {
+			send Output
+				[MO]
+		}
+		else {
+			send stderr
+				"failed to parse output: [Parser->error]
+		}
+	}
+
+end

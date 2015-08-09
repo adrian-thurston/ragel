@@ -45,417 +45,424 @@ namespace cs_out
 		[_IN_ _EX_ item*]
 end
 
-global CsParser: parser<cs_out::cs_out>
+namespace cs_gen
 
-void cs_tok_list( TL: host::tok* )
-{
-	for Tok: host::tok in repeat(TL) {
-		if match Tok [host::`${ StmtList: stmt* host::`}$]
-			send CsParser "{[cs_stmt_list( StmtList )]}"
-		elsif match Tok [host::`={ Expr: expr host::`}=]
-			send CsParser "([cs_expr( Expr )])"
+	global Parser: parser<cs_out::cs_out>
+
+	void tok_list( TL: host::tok* )
+	{
+		for Tok: host::tok in repeat(TL) {
+			switch Tok
+			case [host::`${ StmtList: stmt* host::`}$]
+				send Parser "{[stmt_list( StmtList )]}"
+			case [host::`={ Expr: expr host::`}=]
+				send Parser "([expr( Expr )])"
+			default {
+				send Parser [Tok]
+			}
+		}
+	}
+
+	void embedded_host( EH: embedded_host )
+	{
+		switch EH
+		case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
+		{
+			send Parser
+				"([tok_list( TL )])"
+		}
+		case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
+		{
+			send Parser 
+				"{[tok_list( TL )]}
+		}
+		case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
+		{
+			send Parser
+				[tok_list( TL )]
+		}
+	}
+
+	void expr_factor( ExprFactor: expr_factor )
+	{
+		switch ExprFactor
+		case
+			[EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [O:`( TL: expr C: `)]
+		{
+			send Parser
+				[O expr(TL) C]
+		}
+		case [ident O: `[ TL: expr C: `]]
+		{
+			send Parser
+				[ExprFactor.ident O expr( TL ) C]
+		}
+		case ['offset' '(' ident ',' expr ')']
+		{
+			send Parser
+				[expr( ExprFactor.expr )]
+		}
+		case ['deref' '(' ident ',' expr ')']
+		{
+			send Parser
+				[ ExprFactor.ident '[' expr( ExprFactor.expr ) ']']
+		}
+		case [T: `TRUE]
+		{
+			T.data = 'true'
+			send Parser [T]
+		}
+		case [F: `FALSE]
+		{
+			F.data = 'false'
+			send Parser [F]
+		}
+		case [N: `nil]
+		{
+			N.data = '0'
+			send Parser [N]
+		}
+		case [Number: number]
+		{
+			number( Number )
+		}
+		case [E1: embedded_host `-> E2: expr_factor]
+		{
+			embedded_host( E1 )
+			expr_factor( E2 )
+		}
+		case [Open: `( Type: type Close: `) expr_factor]
+		{
+			send Parser [Open]
+			type( Type )
+			send Parser [Close]
+			expr_factor( ExprFactor._expr_factor )
+		}
+		default {
+			# Catches cases not specified
+			send Parser [ExprFactor]
+		}
+	}
+
+	void lvalue( ExprFactor: lvalue )
+	{
+		switch ExprFactor
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [ident O: `[ TL: expr C: `]]
+		{
+			send Parser
+				[ExprFactor.ident O expr( TL ) C]
+		}
+		case [E1: embedded_host `-> E2: lvalue]
+		{
+			embedded_host( E1 )
+			lvalue( E2 )
+		}
+		default {
+			# Catches cases not specified
+			send Parser [ExprFactor]
+		}
+	}
+
+	void expr_factor_op( ExprFactorOp: expr_factor_op )
+	{
+		switch ExprFactorOp
+		case [B: `! expr_factor_op]
+		{
+			send Parser [B]
+			expr_factor_op( ExprFactorOp._expr_factor_op )
+		}
+		case [T: `~ expr_factor_op]
+		{
+			send Parser [T]
+			expr_factor_op( ExprFactorOp._expr_factor_op )
+		}
+		case [expr_factor]
+		{
+			expr_factor( ExprFactorOp.expr_factor )
+		}
+	}
+
+	void expr_bitwise( ExprBitwise: expr_bitwise )
+	{
+		switch ExprBitwise
+		case [expr_bitwise A: `& expr_factor_op]
+		{
+			expr_bitwise( ExprBitwise._expr_bitwise )
+			send Parser [A]
+			expr_factor_op( ExprBitwise.expr_factor_op )
+		}
+		case [expr_factor_op]
+		{
+			expr_factor_op( ExprBitwise.expr_factor_op )
+		}
+	}
+
+	void expr_mult( ExprMult: expr_mult )
+	{
+		switch ExprMult
+		case [expr_mult T: `* expr_bitwise]
+		{
+			expr_mult( ExprMult._expr_mult )
+			send Parser [T]
+			expr_bitwise( ExprMult.expr_bitwise )
+		}
+		case [expr_bitwise]
+		{
+			expr_bitwise( ExprMult.expr_bitwise )
+		}
+	}
+
+	void expr_add( ExprAdd: expr_add )
+	{
+		switch ExprAdd
+		case [expr_add Op: add_op expr_mult]
+		{
+			expr_add( ExprAdd._expr_add )
+			send Parser [Op]
+			expr_mult( ExprAdd.expr_mult )
+		}
+		case [expr_mult]
+		{
+			expr_mult( ExprAdd.expr_mult )
+		}
+	}
+
+	void expr_shift( ExprShift: expr_shift )
+	{
+		switch ExprShift
+		case [expr_shift Op: shift_op expr_add]
+		{
+			expr_shift( ExprShift._expr_shift )
+			send Parser [Op]
+			expr_add( ExprShift.expr_add )
+		}
+		case [expr_add]
+		{
+			expr_add( ExprShift.expr_add )
+		}
+	}
+
+	void expr_test( ExprTest: expr_test )
+	{
+		switch ExprTest
+		case [expr_test Op: test_op expr_shift]
+		{
+			expr_test( ExprTest._expr_test )
+			send Parser [Op]
+			expr_shift( ExprTest.expr_shift )
+		}
+		case [expr_shift]
+		{
+			expr_shift( ExprTest.expr_shift )
+		}
+	}
+
+	void expr( Expr: expr )
+	{
+		expr_test( Expr.expr_test )
+	}
+
+	void type( Type: type )
+	{
+		switch Type
+		case "s8"
+			send Parser ['sbyte ']
+		case "s16"
+			send Parser ['short ']
+		case "s32"
+			send Parser ['int ']
+		case "s64"
+			send Parser ['long ']
+		case "s128"
+			send Parser ['long long ']
+		case "uint"
+			send Parser ['uint ']
+		default
+			send Parser [Type]
+	}
+
+	void number( Number: number )
+	{
+		switch Number
+		case [`c `( uint `) ] {
+			Str: str = $Number.uint
+			send Parser "'\\u[sprintf( "%04x", Str.atoi() )]'"
+		}
+		case [`u `( uint `) ] {
+			send Parser [$Number.uint]
+		}
+		default {
+			send Parser [$Number.sint]
+		}
+	}
+
+	void num_list( NumList: num_list )
+	{
+		for Number: number in NumList
+			send Parser "[number( Number )], "
+	}
+
+	void stmt( Stmt: stmt )
+	{
+		switch Stmt
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [Array: array] {
+			send Parser
+				"static readonly [type(Array.type)] \[\]"
+					"[Array.ident] = { [num_list( Array.num_list )] };
+		}
+		case [Value: value] {
+			send Parser
+				"static readonly [Value.type] [Value.ident] = [Value.number];
+		}
+		case [
+				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
+				ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
+		] {
+			send Parser
+				"if ( [expr(IfExpr)] )
+				"	[stmt(IfStmt)]
+
+			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
+				match ElseIfClause
+					['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
+
+				send Parser
+					"else if ( [expr(ElseIfExpr)] )
+					"	[stmt(ElseIfStmt)]
+			}
+
+			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
+				send Parser
+					"else
+					"	[stmt(ElseStmt)]
+			}
+		}
+		case ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
+			send Parser
+				"while ( [expr(WhileExpr)] )
+				"	[stmt(WhileStmt)]
+		}
+		case ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
+			send Parser
+				"switch ( [expr(SwitchExpr)] ) {
+				"	[stmt_list(StmtList)]
+				"}
+		}
+		case [ExprExpr: expr Semi: `;] {
+			send Parser
+				[expr(ExprExpr) Semi]
+		}
+		case [L: `{ TL: stmt* R: `}] {
+			send Parser
+				[L stmt_list(TL) R]
+		}
+		case [
+			TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident
+			OptInit: opt_init Semi: `;
+		]
+		{
+			send Parser
+				[TypeList type(Type) OptPtr Ident]
+
+			if match OptInit [E: `= expr] {
+				send Parser
+					[E expr(OptInit.expr)]
+			}
+
+			send Parser
+				[Semi]
+		}
+		case [Export: export_stmt]
+		{
+			send Parser
+				"#define [Export.ident] [Export.number] 
+		}
+		case ['fallthrough' ';']
+		{
+			# Nothing needed here.
+		}
+		case [index_stmt]
+		{
+			send Parser
+				"int [Stmt.index_stmt.ident];
+		}
+		case [case_block]
+		{
+			send Parser
+				"case [expr( Stmt.case_block.expr )]:
+				"[stmt_list( Stmt.case_block._repeat_stmt )]
+				"break;
+		}
+		case [default_block]
+		{
+			send Parser
+				"default:
+				"[stmt_list( Stmt.default_block._repeat_stmt )]
+				"break;
+		}
+		case [case_label]
+		{
+			send Parser
+				"case [expr( Stmt.case_label.expr )]:
+		}
+		case [label_stmt]
+		{
+			send Parser
+				"[Stmt.label_stmt.ident]:
+				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
+		}
+		case [entry_loop]
+		{
+			send Parser
+				[stmt_list( Stmt.entry_loop._repeat_stmt )]
+		}
+		case [AS: assign_stmt]
+		{
+			send Parser
+				"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
+		}
+		default {
+			# catches unspecified cases
+			send Parser [Stmt]
+		}
+	}
+
+	void stmt_list( StmtList: stmt* )
+	{
+		for Stmt: stmt in repeat( StmtList )
+			stmt( Stmt )
+	}
+
+	void trans( Output: stream, Start: start )
+	{
+		Parser = new parser<cs_out::cs_out>()
+
+		stmt_list( Start._repeat_stmt )
+
+		CSO: cs_out::cs_out = Parser->finish()
+
+		if CSO {
+			send Output
+				[CSO]
+		}
 		else {
-			send CsParser [Tok]
+			send stderr
+				"failed to parse output: [Parser->error]
 		}
 	}
-}
-
-void cs_embedded_host( EH: embedded_host )
-{
-	switch EH
-	case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
-	{
-		send CsParser
-			"([cs_tok_list( TL )])"
-	}
-	case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
-	{
-		send CsParser 
-			"{[cs_tok_list( TL )]}
-	}
-	case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
-	{
-		send CsParser
-			[cs_tok_list( TL )]
-	}
-}
-
-void cs_expr_factor( ExprFactor: expr_factor )
-{
-	if match ExprFactor
-		[EH: embedded_host]
-	{
-		send CsParser
-			[cs_embedded_host( EH )]
-	}
-	elsif match ExprFactor
-		[O:`( TL: expr C: `)]
-	{
-		send CsParser
-			[O cs_expr(TL) C]
-	}
-	elsif match ExprFactor
-		[ident O: `[ TL: expr C: `]]
-	{
-		send CsParser
-			[ExprFactor.ident O cs_expr( TL ) C]
-	}
-	elsif match ExprFactor
-		['offset' '(' ident ',' expr ')']
-	{
-		send CsParser
-			[cs_expr( ExprFactor.expr )]
-	}
-	elsif match ExprFactor
-		['deref' '(' ident ',' expr ')']
-	{
-		send CsParser
-			[ ExprFactor.ident '[' cs_expr( ExprFactor.expr ) ']']
-	}
-	elsif match ExprFactor
-			[T: `TRUE]
-	{
-		T.data = 'true'
-		send CsParser [T]
-	}
-	elsif match ExprFactor
-			[F: `FALSE]
-	{
-		F.data = 'false'
-		send CsParser [F]
-	}
-	elsif match ExprFactor
-			[N: `nil]
-	{
-		N.data = '0'
-		send CsParser [N]
-	}
-	elsif match ExprFactor
-			[Number: number]
-	{
-		cs_number( Number )
-	}
-	elsif match ExprFactor [E1: embedded_host `-> E2: expr_factor]
-	{
-		cs_embedded_host( E1 )
-		cs_expr_factor( E2 )
-	}
-	elsif match ExprFactor [Open: `( Type: type Close: `) expr_factor]
-	{
-		send CsParser [Open]
-		cs_type( Type )
-		send CsParser [Close]
-		cs_expr_factor( ExprFactor._expr_factor )
-	}
-	else {
-		# Catches cases not specified
-		send CsParser [ExprFactor]
-	}
-}
-
-void cs_lvalue( ExprFactor: lvalue )
-{
-	if match ExprFactor
-		[EH: embedded_host]
-	{
-		send CsParser
-			[cs_embedded_host( EH )]
-	}
-	elsif match ExprFactor
-		[ident O: `[ TL: expr C: `]]
-	{
-		send CsParser
-			[ExprFactor.ident O cs_expr( TL ) C]
-	}
-	elsif match ExprFactor [E1: embedded_host `-> E2: lvalue]
-	{
-		cs_embedded_host( E1 )
-		cs_lvalue( E2 )
-	}
-	else {
-		# Catches cases not specified
-		send CsParser [ExprFactor]
-	}
-}
-
-void cs_expr_factor_op( ExprFactorOp: expr_factor_op )
-{
-	if match ExprFactorOp [B: `! expr_factor_op]
-	{
-		send CsParser [B]
-		cs_expr_factor_op( ExprFactorOp._expr_factor_op )
-	}
-	elsif match ExprFactorOp [T: `~ expr_factor_op]
-	{
-		send CsParser [T]
-		cs_expr_factor_op( ExprFactorOp._expr_factor_op )
-	}
-	elsif match ExprFactorOp [expr_factor]
-	{
-		cs_expr_factor( ExprFactorOp.expr_factor )
-	}
-}
-
-void cs_expr_bitwise( ExprBitwise: expr_bitwise )
-{
-	if match ExprBitwise [expr_bitwise A: `& expr_factor_op]
-	{
-		cs_expr_bitwise( ExprBitwise._expr_bitwise )
-		send CsParser [A]
-		cs_expr_factor_op( ExprBitwise.expr_factor_op )
-	}
-	elsif match ExprBitwise [expr_factor_op]
-	{
-		cs_expr_factor_op( ExprBitwise.expr_factor_op )
-	}
-}
-
-void cs_expr_mult( ExprMult: expr_mult )
-{
-	if match ExprMult [expr_mult T: `* expr_bitwise]
-	{
-		cs_expr_mult( ExprMult._expr_mult )
-		send CsParser [T]
-		cs_expr_bitwise( ExprMult.expr_bitwise )
-	}
-	elsif match ExprMult [expr_bitwise]
-	{
-		cs_expr_bitwise( ExprMult.expr_bitwise )
-	}
-}
-
-void cs_expr_add( ExprAdd: expr_add )
-{
-	if match ExprAdd [expr_add Op: add_op expr_mult]
-	{
-		cs_expr_add( ExprAdd._expr_add )
-		send CsParser [Op]
-		cs_expr_mult( ExprAdd.expr_mult )
-	}
-	elsif match ExprAdd [expr_mult]
-	{
-		cs_expr_mult( ExprAdd.expr_mult )
-	}
-}
-
-void cs_expr_shift( ExprShift: expr_shift )
-{
-	if match ExprShift [expr_shift Op: shift_op expr_add]
-	{
-		cs_expr_shift( ExprShift._expr_shift )
-		send CsParser [Op]
-		cs_expr_add( ExprShift.expr_add )
-	}
-	elsif match ExprShift [expr_add]
-	{
-		cs_expr_add( ExprShift.expr_add )
-	}
-}
-
-void cs_expr_test( ExprTest: expr_test )
-{
-	if match ExprTest [expr_test Op: test_op expr_shift]
-	{
-		cs_expr_test( ExprTest._expr_test )
-		send CsParser [Op]
-		cs_expr_shift( ExprTest.expr_shift )
-	}
-	elsif match ExprTest [expr_shift]
-	{
-		cs_expr_shift( ExprTest.expr_shift )
-	}
-}
-
-void cs_expr( Expr: expr )
-{
-	cs_expr_test( Expr.expr_test )
-}
-
-void cs_type( Type: type )
-{
-	if match Type "s8"
-		send CsParser ['sbyte ']
-	elsif match Type "s16"
-		send CsParser ['short ']
-	elsif match Type "s32"
-		send CsParser ['int ']
-	elsif match Type "s64"
-		send CsParser ['long ']
-	elsif match Type "s128"
-		send CsParser ['long long ']
-	elsif match Type "uint"
-		send CsParser ['uint ']
-	else
-		send CsParser [Type]
-}
-
-void cs_number( Number: number )
-{
-	if match Number [`c `( uint `) ] {
-		Str: str = $Number.uint
-		send CsParser "'\\u[sprintf( "%04x", Str.atoi() )]'"
-	}
-	elsif match Number [`u `( uint `) ] {
-		send CsParser [$Number.uint]
-	}
-	else {
-		send CsParser [$Number.sint]
-	}
-}
-
-void cs_num_list( NumList: num_list )
-{
-	for Number: number in NumList
-		send CsParser "[cs_number( Number )], "
-}
-
-void cs_stmt( Stmt: stmt )
-{
-	if match Stmt
-		[EH: embedded_host]
-	{
-		send CsParser
-			[cs_embedded_host( EH )]
-	}
-	elsif match Stmt [Array: array] {
-		send CsParser
-			"static readonly [cs_type(Array.type)] \[\]"
-				"[Array.ident] = { [cs_num_list( Array.num_list )] };
-	}
-	elsif match Stmt [Value: value] {
-		send CsParser
-			"static readonly [Value.type] [Value.ident] = [Value.number];
-	}
-	elsif match Stmt [
-			'if' O: `( IfExpr: expr C: `) IfStmt: stmt
-			ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
-	] {
-		send CsParser
-			"if ( [cs_expr(IfExpr)] )
-			"	[cs_stmt(IfStmt)]
-
-		for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
-			match ElseIfClause
-				['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
-
-			send CsParser
-				"else if ( [cs_expr(ElseIfExpr)] )
-				"	[cs_stmt(ElseIfStmt)]
-		}
-
-		if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-			send CsParser
-				"else
-				"	[cs_stmt(ElseStmt)]
-		}
-	}
-	elsif match Stmt ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
-		send CsParser
-			"while ( [cs_expr(WhileExpr)] )
-			"	[cs_stmt(WhileStmt)]
-	}
-	elsif match Stmt ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
-		send CsParser
-			"switch ( [cs_expr(SwitchExpr)] ) {
-			"	[cs_stmt_list(StmtList)]
-			"}
-	}
-	elsif match Stmt [ExprExpr: expr Semi: `;] {
-		send CsParser
-			[cs_expr(ExprExpr) Semi]
-	}
-	elsif match Stmt [L: `{ TL: stmt* R: `}] {
-		send CsParser
-			[L cs_stmt_list(TL) R]
-	}
-	elsif match Stmt [TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: `;]
-	{
-		send CsParser
-			[TypeList cs_type(Type) OptPtr Ident]
-
-		if match OptInit [E: `= expr] {
-			send CsParser
-				[E cs_expr(OptInit.expr)]
-		}
-
-		send CsParser
-			[Semi]
-	}
-	elsif match Stmt [Export: export_stmt]
-	{
-		send CsParser
-			"#define [Export.ident] [Export.number] 
-	}
-	elsif match Stmt ['fallthrough' ';']
-	{
-		# Nothing needed here.
-	}
-	elsif match Stmt [index_stmt]
-	{
-		send CsParser
-			"int [Stmt.index_stmt.ident];
-	}
-	elsif match Stmt [case_block]
-	{
-		send CsParser
-			"case [cs_expr( Stmt.case_block.expr )]:
-			"[cs_stmt_list( Stmt.case_block._repeat_stmt )]
-			"break;
-	}
-	elsif match Stmt [default_block]
-	{
-		send CsParser
-			"default:
-			"[cs_stmt_list( Stmt.default_block._repeat_stmt )]
-			"break;
-	}
-	elsif match Stmt [case_label]
-	{
-		send CsParser
-			"case [cs_expr( Stmt.case_label.expr )]:
-	}
-	elsif match Stmt [label_stmt]
-	{
-		send CsParser
-			"[Stmt.label_stmt.ident]:
-			"[cs_stmt_list( Stmt.label_stmt._repeat_stmt )]
-	}
-	elsif match Stmt [entry_loop]
-	{
-		send CsParser
-			[cs_stmt_list( Stmt.entry_loop._repeat_stmt )]
-	}
-	elsif match Stmt [AS: assign_stmt]
-	{
-		send CsParser
-			"[cs_lvalue(AS.LValue) AS.assign_op cs_expr(AS.expr)];
-	}
-	else {
-		# catches unspecified cases
-		send CsParser [Stmt]
-	}
-}
-
-void cs_stmt_list( StmtList: stmt* )
-{
-	for Stmt: stmt in repeat( StmtList )
-		cs_stmt( Stmt )
-}
-
-void cs_trans( StmtList: stmt* )
-{
-	CsParser = new parser<cs_out::cs_out>()
-
-	cs_stmt_list( StmtList )
-
-	CSO: cs_out::cs_out = CsParser->finish()
-
-	if CSO {
-		send Output
-			[CSO]
-	}
-	else {
-		send stderr
-			"failed to parse output: [CsParser->error]
-	}
-}
+end
