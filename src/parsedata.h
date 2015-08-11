@@ -57,6 +57,8 @@ struct ReOrItem;
 struct LongestMatch;
 struct CodeGenData;
 struct InputData;
+struct InputItem;
+
 typedef DList<LongestMatch> LmList;
 
 
@@ -204,8 +206,10 @@ struct ParseData
 	void resolveActionNameRefs();
 
 	/* Set the alphabet type. If type types are not valid returns false. */
-	bool setAlphType( const InputLoc &loc, const HostLang *hostLang, const char *s1, const char *s2 );
-	bool setAlphType( const InputLoc &loc, const HostLang *hostLang, const char *s1 );
+	bool setAlphType( const InputLoc &loc, const HostLang *hostLang,
+			const char *s1 );
+	bool setAlphType( const InputLoc &loc, const HostLang *hostLang,
+			const char *s1, const char *s2 );
 
 	/* Override one of the variables ragel uses. */
 	bool setVariable( const char *var, InlineList *inlineList );
@@ -380,6 +384,10 @@ struct ParseData
 	LengthDefList lengthDefList;
 
 	CodeGenData *cgd;
+
+	/* Pointer to the last input item to reference this parse data struct. Once
+	 * we pass over this item we are free to clear away the parse tree. */
+	InputItem *lastReference;
 
 	ParseData *prev, *next;
 };

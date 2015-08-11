@@ -839,8 +839,14 @@ struct LoadRagel
 			newEl->value->isExport = exportContext[exportContext.length()-1];
 
 			/* It it is an instance, put on the instance list. */
-			if ( isInstance )
+			if ( isInstance ) {
 				pd->instanceList.append( newEl );
+
+				InputItem *inputItem = new InputItem;
+				inputItem->type = InputItem::Instance;
+				pd->lastReference = inputItem;
+				id.inputItems.append( inputItem );
+			}
 		}
 		else {
 			// Recover by ignoring the duplicate.
@@ -1869,6 +1875,8 @@ struct LoadRagel
 		inputItem->loc = Cmd.loc();
 		inputItem->name = pd->sectionName;
 		inputItem->pd = pd;
+
+		pd->lastReference = inputItem;
 
 		inputItem->writeArgs.append( Cmd.text() );
 

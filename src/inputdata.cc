@@ -240,25 +240,30 @@ void InputData::generateReduced()
 	}
 }
 
-void InputData::verifyWritesHaveData()
+void InputData::verifyWriteHasData( InputItem *ii )
 {
-	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
-		if ( ii->type == InputItem::Write ) {
-			if ( ii->pd->cgd == 0 )
-				error( ii->loc ) << "no machine instantiations to write" << endl;
-		}
+	if ( ii->type == InputItem::Write ) {
+		if ( ii->pd->cgd == 0 )
+			error( ii->loc ) << "no machine instantiations to write" << endl;
 	}
 }
 
-void InputData::writeOutput()
+void InputData::verifyWritesHaveData()
 {
-	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
-		if ( ii->type == InputItem::Write ) {
+	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ )
+		verifyWriteHasData( ii );
+}
+
+void InputData::writeOutput( InputItem *ii )
+{
+	switch ( ii->type ) {
+		case InputItem::Write: {
 			CodeGenData *cgd = ii->pd->cgd;
 			cgd->writeStatement( ii->loc, ii->writeArgs.length(),
 					ii->writeArgs.data, generateDot, hostLang );
+			break;
 		}
-		else {
+		case InputItem::HostData: {
 			switch ( backend ) {
 				case Direct:
 					*outStream << ii->data.str();
@@ -269,8 +274,18 @@ void InputData::writeOutput()
 					*outStream << "}@";
 					break;
 			}
+			break;
+		}
+		case InputItem::Instance: {
+			break;
 		}
 	}
+}
+
+void InputData::writeOutput()
+{
+	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ )
+		writeOutput( ii );
 }
 
 void InputData::closeOutput()
@@ -327,6 +342,32 @@ void InputData::processDot()
 	closeOutput();
 }
 
+void InputData::runRlhc()
+{
+	if ( backend == Translated ) {
+#ifdef WITH_COLM
+		if ( !noIntermediate ) {
+			string rlhc = dirName + "/rlhc " + 
+					origOutputFileName + " " +
+					genOutputFileName + " " +
+					hostLang->rlhcArg;
+
+			if ( rlhcShowCmd )
+				std::cout << rlhc << std::endl;
+
+			int res = system( rlhc.c_str() );
+			if ( res != 0 )
+				exit( 1 );
+
+			if ( !saveTemps )
+				unlink( genOutputFileName.c_str() );
+		}
+#else
+		error() << "colm-based codegen not available" << endp;
+#endif
+	}
+}
+
 void InputData::processCode()
 {
 	/* Compiles machines. */
@@ -363,29 +404,86 @@ void InputData::processCode()
 	openOutput();
 	writeOutput();
 	closeOutput();
+	runRlhc();
+}
+
+void InputData::processCodeEarly()
+{
+	makeDefaultFileName();
 
 	if ( backend == Translated ) {
-#ifdef WITH_COLM
-		if ( !noIntermediate ) {
-			string rlhc = dirName + "/rlhc " + 
-					origOutputFileName + " " +
-					genOutputFileName + " " +
-					hostLang->rlhcArg;
-
-			if ( rlhcShowCmd )
-				std::cout << rlhc << std::endl;
-
-			int res = system( rlhc.c_str() );
-			if ( res != 0 )
-				exit( 1 );
-
-			if ( !saveTemps )
-				unlink( genOutputFileName.c_str() );
-		}
-#else
-		error() << "colm-based codegen not available" << endp;
-#endif
+		origOutputFileName = outputFileName;
+		genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
+		outputFileName = genOutputFileName.c_str();
 	}
+
+	makeOutputStream();
+
+	openOutput();
+
+	InputItem *lastFlush = inputItems.head;
+
+	/*
+	 * 1. Go forward to next last reference.
+	 * 2. Fully process that machine, mark as processed.
+	 * 3. Move forward through input items until no longer 
+	 */
+	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
+		if ( ii->pd != 0 && ii->pd->lastReference == ii ) {
+			/* Fully Process. */
+			ParseData *pd = ii->pd;
+
+			if ( pd->instanceList.length() > 0 ) {
+				pd->prepareMachineGen( 0, hostLang );
+
+				if ( gblErrorCount > 0 )
+					exit(1);
+
+				pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
+
+				if ( gblErrorCount > 0 )
+					exit(1);
+			}
+
+			/* Mark all input items referencing the machine as processed. */
+			InputItem *toMark = lastFlush;
+			while ( true ) {
+				toMark->processed = true;
+
+				if ( toMark == ii )
+					break;
+				toMark = toMark->next;
+			}
+
+			/* Move forward, flusing input items until we get to an unprocessed
+			 * input item. */
+			while ( lastFlush != 0 && lastFlush->processed ) {
+				verifyWriteHasData( ii );
+
+				if ( gblErrorCount > 0 )
+					exit(1);
+
+				/* Flush out. */
+				writeOutput( lastFlush );
+
+				/* If this is the last reference to a pd, we can now clear the
+				 * memory for it. */
+
+				lastFlush = lastFlush->next;
+			}
+		}
+	}
+
+	/* Flush remaining items. */
+	while ( lastFlush != 0 ) {
+		/* Flush out. */
+		writeOutput( lastFlush );
+
+		lastFlush = lastFlush->next;
+	}
+
+	closeOutput();
+	runRlhc();
 }
 
 void InputData::makeFirstInputItem()
@@ -412,10 +510,8 @@ void InputData::terminateAllParsers( )
 		pdel->value->token( loc, Parser6_tk_eof, 0, 0 );
 }
 
-void InputData::process()
+void InputData::parse()
 {
-	ifstream *inFile;
-
 	switch ( frontend ) {
 		case KelbtBased: {
 			/*
@@ -424,7 +520,7 @@ void InputData::process()
 
 			/* Open the input file for reading. */
 			assert( inputFileName != 0 );
-			inFile = new ifstream( inputFileName );
+			ifstream *inFile = new ifstream( inputFileName );
 			if ( ! inFile->is_open() )
 				error() << "could not open " << inputFileName << " for reading" << endp;
 
@@ -457,7 +553,7 @@ void InputData::process()
 			 */
 
 			/* Check input file. */
-			inFile = new ifstream( inputFileName );
+			ifstream *inFile = new ifstream( inputFileName );
 			if ( ! inFile->is_open() )
 				error() << "could not open " << inputFileName << " for reading" << endp;
 			delete inFile;
@@ -472,6 +568,12 @@ void InputData::process()
 		}
 	}
 
+}
+
+void InputData::process()
+{
+	parse();
+
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -485,4 +587,3 @@ void InputData::process()
 
 	assert( gblErrorCount == 0 );
 }
-

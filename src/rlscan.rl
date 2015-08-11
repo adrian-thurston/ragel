@@ -425,6 +425,10 @@ void Scanner::handleImport()
 			inputItem->loc.col = column;
 			inputItem->name = parser->sectionName;
 			inputItem->pd = parser->pd;
+
+			/* Track the last reference. */
+			inputItem->pd->lastReference = inputItem;
+
 			id.inputItems.append( inputItem );
 		}
 	}

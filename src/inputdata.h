@@ -34,8 +34,12 @@ struct ActionTable;
 
 struct InputItem
 {
+	InputItem()
+		: pd(0), processed(false) {}
+
 	enum Type {
 		HostData,
+		Instance,
 		Write,
 	};
 
@@ -46,6 +50,7 @@ struct InputItem
 	Vector<std::string> writeArgs;
 
 	InputLoc loc;
+	bool processed;
 
 	InputItem *prev, *next;
 };
@@ -173,6 +178,7 @@ struct InputData
 
 	bool varBackend;
 
+	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();
 
 	void makeFirstInputItem();
@@ -194,13 +200,15 @@ struct InputData
 	void crackDefaultFileName( const char *inputFile );
 	void asmDefaultFileName( const char *inputFile );
 
-
+	void writeOutput( InputItem *ii );
 	void writeLanguage( std::ostream &out );
 	void writeXML( std::ostream &out );
 
+	void parse();
 	void processXML();
 	void processDot();
 	void processCode();
+	void processCodeEarly();
 
 	void writeDot( std::ostream &out );
 
@@ -208,6 +216,7 @@ struct InputData
 	void checkArgs();
 	void terminateAllParsers();
 
+	void runRlhc();
 	void process();
 };
 
