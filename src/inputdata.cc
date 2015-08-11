@@ -468,6 +468,11 @@ void InputData::processCodeEarly()
 
 				/* If this is the last reference to a pd, we can now clear the
 				 * memory for it. */
+				if ( lastFlush->pd != 0 && lastFlush->pd->lastReference == lastFlush ) {
+					delete lastFlush->pd->sectionGraph;
+					delete lastFlush->pd->cgd->redFsm;
+					cout << "deleting graph" << endl;
+				}
 
 				lastFlush = lastFlush->next;
 			}
@@ -583,7 +588,7 @@ void InputData::process()
 	else if ( generateDot )
 		processDot();
 	else 
-		processCode();
+		processCodeEarly();
 
 	assert( gblErrorCount == 0 );
 }
