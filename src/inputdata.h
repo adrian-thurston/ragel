@@ -39,7 +39,7 @@ struct InputItem
 
 	enum Type {
 		HostData,
-		Instance,
+		EndSection,
 		Write,
 	};
 

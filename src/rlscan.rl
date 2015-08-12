@@ -540,6 +540,16 @@ void Scanner::endSection( )
 		loc.col = column;
 
 		parser->token( loc, TK_EndSection, 0, 0 );
+
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::EndSection;
+
+		if ( parser != 0 ) {
+			inputItem->pd = parser->pd;
+			parser->pd->lastReference = inputItem;
+		}
+
+		id.inputItems.append( inputItem );
 	}
 
 	if ( includeDepth == 0 ) {

@@ -1707,9 +1707,6 @@ void Parser6::tryMachineDef( const InputLoc &loc, char *name,
 		if ( isInstance ) {
 			pd->instanceList.append( newEl );
 
-			InputItem *inputItem = new InputItem;
-			inputItem->type = InputItem::Instance;
-			id->inputItems.append( inputItem );
 		}
 	}
 	else {

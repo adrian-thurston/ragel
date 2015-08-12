@@ -843,7 +843,7 @@ struct LoadRagel
 				pd->instanceList.append( newEl );
 
 				InputItem *inputItem = new InputItem;
-				inputItem->type = InputItem::Instance;
+				inputItem->type = InputItem::EndSection;
 				pd->lastReference = inputItem;
 				id.inputItems.append( inputItem );
 			}
