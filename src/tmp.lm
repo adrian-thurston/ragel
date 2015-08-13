@@ -1,9 +1,0 @@
-include 'rlhc-host.lm'
-include 'rlhc-ruby.lm'
-
-global Output: stream
-
-parse Ml: ruby_out::ruby_out[stdin]
-
-if !Ml
-	print "parse error: [error]

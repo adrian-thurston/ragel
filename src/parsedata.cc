@@ -462,8 +462,7 @@ ParseData::ParseData( InputData *id, std::string fileName, string sectionName,
 	nextEpsilonResolvedLink(0),
 	nextLongestMatchId(1),
 	lmRequiresErrorState(false),
-	cgd(0),
-	lastReference(0)
+	cgd(0)
 {
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the

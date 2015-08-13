@@ -385,10 +385,6 @@ struct ParseData
 
 	CodeGenData *cgd;
 
-	/* Pointer to the last input item to reference this parse data struct. Once
-	 * we pass over this item we are free to clear away the parse tree. */
-	InputItem *lastReference;
-
 	ParseData *prev, *next;
 };
 

@@ -33,7 +33,8 @@
 using std::istream;
 using std::ostream;
 
-extern char *Parser_lelNames[];
+extern char *Parser6_lelNames[];
+struct Section;
 
 struct Scanner
 {
@@ -52,8 +53,10 @@ struct Scanner
 		parser(0), ignoreSection(false), 
 		parserExistsError(false),
 		whitespaceOn(true),
-		lastToken(0)
-		{}
+		lastToken(0),
+		section(0),
+		sectionPass(false)
+	{}
 
 	bool duplicateInclude( char *inclFileName, char *inclSectionName );
 
@@ -127,6 +130,9 @@ struct Scanner
 
 	/* Keeps a record of the previous token sent to the section parser. */
 	int lastToken;
+
+	Section *section;
+	bool sectionPass;
 };
 
 #endif

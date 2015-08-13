@@ -31,11 +31,16 @@ struct Parser6;
 struct CondSpace;
 struct CondAp;
 struct ActionTable;
+struct Section;
 
 struct InputItem
 {
 	InputItem()
-		: pd(0), processed(false) {}
+	:
+		section(0),
+		pd(0),
+		processed(false)
+	{}
 
 	enum Type {
 		HostData,
@@ -46,6 +51,7 @@ struct InputItem
 	Type type;
 	std::ostringstream data;
 	std::string name;
+	Section *section;
 	ParseData *pd;
 	Vector<std::string> writeArgs;
 
@@ -67,6 +73,24 @@ typedef DList<Parser6> ParserList;
 typedef DList<InputItem> InputItemList;
 typedef Vector<const char *> ArgsVector;
 
+struct Section
+{
+	Section( const char *sectionName )
+	:
+		sectionName(sectionName),
+		lastReference(0)
+	{}
+
+	const char *sectionName;
+
+	/* Pointer to the last input item to reference this parse data struct. Once
+	 * we pass over this item we are free to clear away the parse tree. */
+	InputItem *lastReference;
+};
+
+typedef AvlMap<const char*, Section*, CmpStr> SectionDict;
+typedef AvlMapEl<const char*, Section*> SectionDictEl;
+
 struct InputData
 {
 	InputData()
@@ -77,6 +101,7 @@ struct InputData
 		inStream(0),
 		outStream(0),
 		outFilter(0),
+		curItem(0),
 		hostLang(&hostLangC),
 		codeStyle(GenBinaryLoop),
 		dotGenParser(0),
@@ -126,10 +151,13 @@ struct InputData
 	ParseDataDict parseDataDict;
 	ParseDataList parseDataList;
 	InputItemList inputItems;
+	InputItem *curItem;
 
 	/* Ragel-6 frontend. */
 	ParserDict parserDict;
 	ParserList parserList;
+
+	SectionDict sectionDict;
 
 	ArgsVector includePaths;
 
@@ -217,6 +245,8 @@ struct InputData
 	void terminateAllParsers();
 
 	void runRlhc();
+	void processKelbt();
+	void processColm();
 	void process();
 };
 

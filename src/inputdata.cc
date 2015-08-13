@@ -429,7 +429,7 @@ void InputData::processCodeEarly()
 	 * 3. Move forward through input items until no longer 
 	 */
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
-		if ( ii->pd != 0 && ii->pd->lastReference == ii ) {
+		if ( ii->section != 0 && ii->section->lastReference == ii ) {
 			/* Fully Process. */
 			ParseData *pd = ii->pd;
 
@@ -468,7 +468,7 @@ void InputData::processCodeEarly()
 
 				/* If this is the last reference to a pd, we can now clear the
 				 * memory for it. */
-				if ( lastFlush->pd != 0 && lastFlush->pd->lastReference == lastFlush ) {
+				if ( lastFlush->pd != 0 && lastFlush->section->lastReference == lastFlush ) {
 					if ( pd->instanceList.length() > 0 ) {
 						delete lastFlush->pd->sectionGraph;
 						delete lastFlush->pd->cgd->redFsm;
@@ -516,69 +516,41 @@ void InputData::terminateAllParsers( )
 		pdel->value->token( loc, Parser6_tk_eof, 0, 0 );
 }
 
-void InputData::parse()
+void InputData::processKelbt()
 {
-	switch ( frontend ) {
-		case KelbtBased: {
-			/*
-			 * Ragel Parser from ragel 6.
-			 */
+	/*
+	 * Ragel Parser from ragel 6.
+	 */
 
-			/* Open the input file for reading. */
-			assert( inputFileName != 0 );
-			ifstream *inFile = new ifstream( inputFileName );
-			if ( ! inFile->is_open() )
-				error() << "could not open " << inputFileName << " for reading" << endp;
+	/* Open the input file for reading. */
+	assert( inputFileName != 0 );
+	ifstream *inFile = new ifstream( inputFileName );
+	if ( ! inFile->is_open() )
+		error() << "could not open " << inputFileName << " for reading" << endp;
 
-			/* Used for just a few things. */
-			std::ostringstream hostData;
+	/* Used for just a few things. */
+	std::ostringstream hostData;
 
-			/* Make the first input item. */
-			InputItem *firstInputItem = new InputItem;
-			firstInputItem->type = InputItem::HostData;
-			firstInputItem->loc.fileName = inputFileName;
-			firstInputItem->loc.line = 1;
-			firstInputItem->loc.col = 1;
-			inputItems.append( firstInputItem );
+	makeFirstInputItem();
 
-			Scanner scanner( *this, inputFileName, *inFile, 0, 0, 0, false );
-			scanner.do_scan();
+	Scanner scanner( *this, inputFileName, *inFile, 0, 0, 0, false );
 
-			/* Finished, final check for errors.. */
-			if ( gblErrorCount > 0 )
-				exit(1);
+	scanner.sectionPass = true;
+	scanner.do_scan();
 
-			/* Now send EOF to all parsers. */
-			terminateAllParsers();
-			break;
-		}
-		case ColmBased: {
-#ifdef WITH_COLM
-			/*
-			 * Colm-based parser introduced in ragel 7. Uses more memory.
-			 */
+	inFile->clear();
+	inFile->seekg( 0, std::ios::beg );
+	curItem = inputItems.head;
 
-			/* Check input file. */
-			ifstream *inFile = new ifstream( inputFileName );
-			if ( ! inFile->is_open() )
-				error() << "could not open " << inputFileName << " for reading" << endp;
-			delete inFile;
+	scanner.sectionPass = false;
+	scanner.do_scan();
 
-			makeFirstInputItem();
+	/* Finished, final check for errors.. */
+	if ( gblErrorCount > 0 )
+		exit(1);
 
-			LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
-			loadRagel( lr, inputFileName );
-			deleteLoadRagel( lr );
-#endif
-			break;
-		}
-	}
-
-}
-
-void InputData::process()
-{
-	parse();
+	/* Now send EOF to all parsers. */
+	terminateAllParsers();
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
@@ -592,4 +564,52 @@ void InputData::process()
 		processCodeEarly();
 
 	assert( gblErrorCount == 0 );
+}
+
+void InputData::processColm()
+{
+#ifdef WITH_COLM
+	/*
+	 * Colm-based parser introduced in ragel 7. Uses more memory.
+	 */
+
+	/* Check input file. */
+	ifstream *inFile = new ifstream( inputFileName );
+	if ( ! inFile->is_open() )
+		error() << "could not open " << inputFileName << " for reading" << endp;
+	delete inFile;
+
+	makeFirstInputItem();
+
+	LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
+	loadRagel( lr, inputFileName );
+	deleteLoadRagel( lr );
+
+	/* Bail on above error. */
+	if ( gblErrorCount > 0 )
+		exit(1);
+
+	if ( generateXML )
+		processXML();
+	else if ( generateDot )
+		processDot();
+	else 
+		processCode();
+
+	assert( gblErrorCount == 0 );
+#endif
+}
+
+void InputData::process()
+{
+	switch ( frontend ) {
+		case KelbtBased: {
+			processKelbt();
+			break;
+		}
+		case ColmBased: {
+			processColm();
+			break;
+		}
+	}
 }

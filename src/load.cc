@@ -63,6 +63,7 @@ struct LoadRagel
 			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 	:
 		id(id),
+		section(0),
 		pd(0),
 		machineSpec(0),
 		machineName(0),
@@ -73,6 +74,7 @@ struct LoadRagel
 	{}
 
 	InputData &id;
+	Section *section;
 	ParseData *pd;
 	char *machineSpec;
 	char *machineName;
@@ -103,6 +105,14 @@ struct LoadRagel
 			machine = targetMachine;
 		}
 
+		SectionDictEl *sdEl = id.sectionDict.find( machine.c_str() );
+		if ( sdEl == 0 ) {
+			Section *section = new Section( strdup(machine.c_str() ) );
+			sdEl = new SectionDictEl( section->sectionName );
+			sdEl->value = section;
+			id.sectionDict.insert( sdEl );
+		}
+
 		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
 			pdEl = new ParseDataDictEl( machine );
@@ -111,8 +121,10 @@ struct LoadRagel
 					minimizeLevel, minimizeOpt );
 			id.parseDataDict.insert( pdEl );
 			id.parseDataList.append( pdEl->value );
+
 		}
 
+		section = sdEl->value;
 		pd = pdEl->value;
 	}
 
@@ -844,7 +856,7 @@ struct LoadRagel
 
 				InputItem *inputItem = new InputItem;
 				inputItem->type = InputItem::EndSection;
-				pd->lastReference = inputItem;
+				section->lastReference = inputItem;
 				id.inputItems.append( inputItem );
 			}
 		}
@@ -1876,7 +1888,7 @@ struct LoadRagel
 		inputItem->name = pd->sectionName;
 		inputItem->pd = pd;
 
-		pd->lastReference = inputItem;
+		section->lastReference = inputItem;
 
 		inputItem->writeArgs.append( Cmd.text() );
 

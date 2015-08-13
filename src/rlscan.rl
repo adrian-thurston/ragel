@@ -155,7 +155,7 @@ void Scanner::directToParser( Parser6 *toParser, const char *tokFileName, int to
 
 	#ifdef LOG_TOKENS
 	cerr << "scanner:" << tokLine << ":" << tokColumn << 
-			": sending token to the parser " << Parser_lelNames[type];
+			": sending token to the parser " << Parser6_lelNames[type];
 	cerr << " " << toklen;
 	if ( tokdata != 0 )
 		cerr << " " << tokdata;
@@ -189,22 +189,30 @@ void Scanner::importToken( int token, char *start, char *end )
 	cur_token++;
 }
 
-void Scanner::pass( int token, char *start, char *end )
-{
-	if ( importMachines )
-		importToken( token, start, end );
-	pass();
-}
-
 void Scanner::pass()
 {
+	if ( sectionPass )
+		return;
+
 	updateCol();
 
 	/* If no errors and we are at the bottom of the include stack (the
 	 * source file listed on the command line) then write out the data. */
 	if ( includeDepth == 0 && id.machineSpec == 0 && id.machineName == 0 )
-		id.inputItems.tail->data.write( ts, te-ts );
+		id.curItem->data.write( ts, te-ts );
 }
+
+void Scanner::pass( int token, char *start, char *end )
+{
+	if ( sectionPass )
+		return;
+
+	if ( importMachines )
+		importToken( token, start, end );
+
+	pass();
+}
+
 
 /*
  * The scanner for processing sections, includes, imports, etc.
@@ -273,44 +281,63 @@ void Scanner::updateCol()
 
 void Scanner::handleMachine()
 {
-	/* Assign a name to the machine. */
-	char *machine = word;
+	if ( sectionPass ) {
+		/* Assign a name to the machine. */
+		char *machine = word;
 
-	if ( !importMachines && inclSectionTarg == 0 ) {
-		ignoreSection = false;
-
-		ParserDictEl *pdEl = id.parserDict.find( machine );
-		if ( pdEl == 0 ) {
-			pdEl = new ParserDictEl( machine );
-			pdEl->value = new Parser6( &id, fileName, machine, sectionLoc,
-					id.hostLang, id.minimizeLevel, id.minimizeOpt );
-			pdEl->value->init();
-			id.parserDict.insert( pdEl );
-			id.parserList.append( pdEl->value );
-
-			/* Also into the parse data dict. This is the new style. */
-			ParseDataDictEl *pddEl = new ParseDataDictEl( machine );
-			pddEl->value = pdEl->value->pd;
-			id.parseDataDict.insert( pddEl );
-			id.parseDataList.append( pddEl->value );
+		SectionDictEl *sdEl = id.sectionDict.find( machine );
+		if ( sdEl == 0 ) {
+			sdEl = new SectionDictEl( machine );
+			sdEl->value = new Section( machine );
+			id.sectionDict.insert( sdEl );
 		}
 
-		parser = pdEl->value;
-	}
-	else if ( !importMachines && strcmp( inclSectionTarg, machine ) == 0 ) {
-		/* found include target */
-		ignoreSection = false;
-		parser = inclToParser;
+		section = sdEl->value;
 	}
 	else {
-		/* ignoring section */
-		ignoreSection = true;
-		parser = 0;
+
+		/* Assign a name to the machine. */
+		char *machine = word;
+
+		if ( !importMachines && inclSectionTarg == 0 ) {
+			ignoreSection = false;
+
+			ParserDictEl *pdEl = id.parserDict.find( machine );
+			if ( pdEl == 0 ) {
+				pdEl = new ParserDictEl( machine );
+				pdEl->value = new Parser6( &id, fileName, machine, sectionLoc,
+						id.hostLang, id.minimizeLevel, id.minimizeOpt );
+				pdEl->value->init();
+				id.parserDict.insert( pdEl );
+				id.parserList.append( pdEl->value );
+
+				/* Also into the parse data dict. This is the new style. */
+				ParseDataDictEl *pddEl = new ParseDataDictEl( machine );
+				pddEl->value = pdEl->value->pd;
+				id.parseDataDict.insert( pddEl );
+				id.parseDataList.append( pddEl->value );
+			}
+
+			parser = pdEl->value;
+		}
+		else if ( !importMachines && strcmp( inclSectionTarg, machine ) == 0 ) {
+			/* found include target */
+			ignoreSection = false;
+			parser = inclToParser;
+		}
+		else {
+			/* ignoring section */
+			ignoreSection = true;
+			parser = 0;
+		}
 	}
 }
 
 void Scanner::handleInclude()
 {
+	if ( sectionPass )
+		return;
+
 	if ( active() ) {
 		char *inclSectionName = word;
 		char **includeChecks = 0;
@@ -356,6 +383,9 @@ void Scanner::handleInclude()
 
 void Scanner::handleImport()
 {
+	if ( sectionPass )
+		return;
+
 	if ( active() ) {
 		char **importChecks = makeIncludePathChecks( fileName, lit, lit_len );
 
@@ -417,32 +447,48 @@ void Scanner::handleImport()
 
 	action write_command
 	{
-		if ( active() && id.machineSpec == 0 && id.machineName == 0 ) {
+		if ( sectionPass ) {
 			InputItem *inputItem = new InputItem;
 			inputItem->type = InputItem::Write;
 			inputItem->loc.fileName = fileName;
 			inputItem->loc.line = line;
 			inputItem->loc.col = column;
-			inputItem->name = parser->sectionName;
-			inputItem->pd = parser->pd;
+			inputItem->name = section->sectionName;
+			inputItem->section = section;
 
 			/* Track the last reference. */
-			inputItem->pd->lastReference = inputItem;
+			inputItem->section->lastReference = inputItem;
 
 			id.inputItems.append( inputItem );
+		}
+		else {
+			if ( includeDepth == 0 && active() &&
+					id.machineSpec == 0 && id.machineName == 0 )
+			{
+				id.curItem = id.curItem->next;
+				id.curItem->pd = parser->pd;
+			}
 		}
 	}
 
 	action write_arg
 	{
-		if ( active() && id.machineSpec == 0 && id.machineName == 0 )
-			id.inputItems.tail->writeArgs.append( strdup(tokdata) );
+		if ( sectionPass ) {
+		}
+		else {
+			if ( active() && id.machineSpec == 0 && id.machineName == 0 )
+				id.curItem->writeArgs.append( strdup(tokdata) );
+		}
 	}
 
 	action write_close
 	{
-		/* if ( active() && id.machineSpec == 0 && id.machineName == 0 )
-		 *	id.inputItems.tail->writeArgs.append( 0 ); */
+		if ( sectionPass ) {
+		}
+		else {
+			/* if ( active() && id.machineSpec == 0 && id.machineName == 0 )
+			 *	id.curItem->writeArgs.append( 0 ); */
+		}
 	}
 
 	write_stmt =
@@ -452,9 +498,13 @@ void Scanner::handleImport()
 
 	action handle_token
 	{
-		/* Send the token off to the parser. */
-		if ( active() )
-			directToParser( parser, fileName, line, column, type, tokdata, toklen );
+		if ( sectionPass ) {
+		}
+		else {
+			/* Send the token off to the parser. */
+			if ( active() )
+				directToParser( parser, fileName, line, column, type, tokdata, toklen );
+		}
 	}
 
 	# Catch everything else.
@@ -532,35 +582,48 @@ void Scanner::endSection( )
 	/* Execute the eof actions for the section parser. */
 	processToken( -1, 0, 0 );
 
-	/* Close off the section with the parser. */
-	if ( active() ) {
-		InputLoc loc;
-		loc.fileName = fileName;
-		loc.line = line;
-		loc.col = column;
-
-		parser->token( loc, TK_EndSection, 0, 0 );
-
+	if ( sectionPass ) {
 		InputItem *inputItem = new InputItem;
 		inputItem->type = InputItem::EndSection;
-
-		if ( parser != 0 ) {
-			inputItem->pd = parser->pd;
-			parser->pd->lastReference = inputItem;
+		id.inputItems.append( inputItem );
+		if ( section != 0 ) {
+			inputItem->section = section;
+			section->lastReference = inputItem;
 		}
 
-		id.inputItems.append( inputItem );
+		if ( includeDepth == 0 ) {
+			if ( id.machineSpec == 0 && id.machineName == 0 ) {
+				/* The end section may include a newline on the end, so
+				 * we use the last line, which will count the newline. */
+				InputItem *inputItem = new InputItem;
+				inputItem->type = InputItem::HostData;
+				inputItem->loc.line = line;
+				inputItem->loc.col = column;
+				id.inputItems.append( inputItem );
+			}
+		}
 	}
+	else {
+		/* Close off the section with the parser. */
+		if ( includeDepth == 0 && active() ) {
+			InputLoc loc;
+			loc.fileName = fileName;
+			loc.line = line;
+			loc.col = column;
 
-	if ( includeDepth == 0 ) {
-		if ( id.machineSpec == 0 && id.machineName == 0 ) {
-			/* The end section may include a newline on the end, so
-			 * we use the last line, which will count the newline. */
-			InputItem *inputItem = new InputItem;
-			inputItem->type = InputItem::HostData;
-			inputItem->loc.line = line;
-			inputItem->loc.col = column;
-			id.inputItems.append( inputItem );
+			parser->token( loc, TK_EndSection, 0, 0 );
+
+			id.curItem = id.curItem->next;
+
+			InputItem *inputItem = id.curItem;
+
+			if ( parser != 0 )
+				id.curItem->pd = parser->pd;
+		}
+
+		if ( includeDepth == 0 ) {
+			if ( id.machineSpec == 0 && id.machineName == 0 )
+				id.curItem = id.curItem->next;
 		}
 	}
 }
