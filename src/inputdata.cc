@@ -407,89 +407,68 @@ void InputData::processCode()
 	runRlhc();
 }
 
-void InputData::processCodeEarly()
+void InputData::checkLastRef( InputItem *ii )
 {
-	makeDefaultFileName();
-
-	if ( backend == Translated ) {
-		origOutputFileName = outputFileName;
-		genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
-		outputFileName = genOutputFileName.c_str();
-	}
-
-	makeOutputStream();
-
-	openOutput();
-
-	InputItem *lastFlush = inputItems.head;
-
+	if ( generateXML || generateDot )
+		return;
+		
 	/*
 	 * 1. Go forward to next last reference.
 	 * 2. Fully process that machine, mark as processed.
 	 * 3. Move forward through input items until no longer 
 	 */
-	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ ) {
-		if ( ii->section != 0 && ii->section->lastReference == ii ) {
-			/* Fully Process. */
-			ParseData *pd = ii->pd;
+	if ( ii->section != 0 && ii->section->lastReference == ii ) {
+		/* Fully Process. */
+		ParseData *pd = ii->pd;
 
-			if ( pd->instanceList.length() > 0 ) {
-				pd->prepareMachineGen( 0, hostLang );
+		if ( pd->instanceList.length() > 0 ) {
+			pd->prepareMachineGen( 0, hostLang );
 
-				if ( gblErrorCount > 0 )
-					exit(1);
+			if ( gblErrorCount > 0 )
+				exit(1);
 
-				pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
+			pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
 
-				if ( gblErrorCount > 0 )
-					exit(1);
-			}
+			if ( gblErrorCount > 0 )
+				exit(1);
+		}
 
-			/* Mark all input items referencing the machine as processed. */
-			InputItem *toMark = lastFlush;
-			while ( true ) {
-				toMark->processed = true;
+		/* Mark all input items referencing the machine as processed. */
+		InputItem *toMark = lastFlush;
+		while ( true ) {
+			toMark->processed = true;
 
-				if ( toMark == ii )
-					break;
-				toMark = toMark->next;
-			}
+			if ( toMark == ii )
+				break;
+			toMark = toMark->next;
+		}
 
-			/* Move forward, flusing input items until we get to an unprocessed
-			 * input item. */
-			while ( lastFlush != 0 && lastFlush->processed ) {
-				verifyWriteHasData( ii );
+		/* Move forward, flusing input items until we get to an unprocessed
+		 * input item. */
+		while ( lastFlush != 0 && lastFlush->processed ) {
+			verifyWriteHasData( ii );
 
-				if ( gblErrorCount > 0 )
-					exit(1);
+			if ( gblErrorCount > 0 )
+				exit(1);
 
-				/* Flush out. */
-				writeOutput( lastFlush );
+			/* Flush out. */
+			writeOutput( lastFlush );
 
-				/* If this is the last reference to a pd, we can now clear the
-				 * memory for it. */
-				if ( lastFlush->pd != 0 && lastFlush->section->lastReference == lastFlush ) {
-					if ( pd->instanceList.length() > 0 ) {
-						delete lastFlush->pd->sectionGraph;
-						delete lastFlush->pd->cgd->redFsm;
-					}
+			/* If this is the last reference to a pd, we can now clear the
+			 * memory for it. */
+			if ( lastFlush->pd != 0 && lastFlush->section->lastReference == lastFlush ) {
+				if ( lastFlush->pd->instanceList.length() > 0 ) {
+					delete lastFlush->pd->sectionGraph;
+					delete lastFlush->pd->cgd->redFsm;
+
+					lastFlush->pd->sectionGraph = 0;
+					lastFlush->pd->cgd->redFsm = 0;
 				}
-
-				lastFlush = lastFlush->next;
 			}
+
+			lastFlush = lastFlush->next;
 		}
 	}
-
-	/* Flush remaining items. */
-	while ( lastFlush != 0 ) {
-		/* Flush out. */
-		writeOutput( lastFlush );
-
-		lastFlush = lastFlush->next;
-	}
-
-	closeOutput();
-	runRlhc();
 }
 
 void InputData::makeFirstInputItem()
@@ -516,7 +495,7 @@ void InputData::terminateAllParsers( )
 		pdel->value->token( loc, Parser6_tk_eof, 0, 0 );
 }
 
-void InputData::processKelbt()
+void InputData::parse()
 {
 	/*
 	 * Ragel Parser from ragel 6.
@@ -528,9 +507,6 @@ void InputData::processKelbt()
 	if ( ! inFile->is_open() )
 		error() << "could not open " << inputFileName << " for reading" << endp;
 
-	/* Used for just a few things. */
-	std::ostringstream hostData;
-
 	makeFirstInputItem();
 
 	Scanner scanner( *this, inputFileName, *inFile, 0, 0, 0, false );
@@ -541,6 +517,7 @@ void InputData::processKelbt()
 	inFile->clear();
 	inFile->seekg( 0, std::ios::beg );
 	curItem = inputItems.head;
+	lastFlush = inputItems.head;
 
 	scanner.sectionPass = false;
 	scanner.do_scan();
@@ -555,13 +532,47 @@ void InputData::processKelbt()
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
 		exit(1);
+}
 
-	if ( generateXML )
+void InputData::processKelbt()
+{
+	if ( generateXML ) {
+		parse();
 		processXML();
-	else if ( generateDot )
+	}
+	else if ( generateDot ) {
+		parse();
 		processDot();
-	else 
-		processCodeEarly();
+	}
+	else {
+		makeDefaultFileName();
+
+		if ( backend == Translated ) {
+			origOutputFileName = outputFileName;
+			genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
+			outputFileName = genOutputFileName.c_str();
+		}
+
+		makeOutputStream();
+
+		openOutput();
+
+		parse();
+
+		if ( !generateXML && !generateDot ) {
+			/* Flush remaining items. */
+			while ( lastFlush != 0 ) {
+				/* Flush out. */
+				writeOutput( lastFlush );
+
+				lastFlush = lastFlush->next;
+			}
+		}
+
+		closeOutput();
+		runRlhc();
+	}
+
 
 	assert( gblErrorCount == 0 );
 }

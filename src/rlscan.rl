@@ -467,6 +467,7 @@ void Scanner::handleImport()
 			{
 				id.curItem = id.curItem->next;
 				id.curItem->pd = parser->pd;
+				id.checkLastRef( id.curItem );
 			}
 		}
 	}
@@ -615,15 +616,17 @@ void Scanner::endSection( )
 
 			id.curItem = id.curItem->next;
 
-			InputItem *inputItem = id.curItem;
-
 			if ( parser != 0 )
 				id.curItem->pd = parser->pd;
+
+			id.checkLastRef( id.curItem );
 		}
 
 		if ( includeDepth == 0 ) {
-			if ( id.machineSpec == 0 && id.machineName == 0 )
+			if ( id.machineSpec == 0 && id.machineName == 0 ) {
 				id.curItem = id.curItem->next;
+				id.checkLastRef( id.curItem );
+			}
 		}
 	}
 }

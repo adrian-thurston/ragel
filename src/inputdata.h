@@ -102,6 +102,7 @@ struct InputData
 		outStream(0),
 		outFilter(0),
 		curItem(0),
+		lastFlush(0),
 		hostLang(&hostLangC),
 		codeStyle(GenBinaryLoop),
 		dotGenParser(0),
@@ -152,6 +153,7 @@ struct InputData
 	ParseDataList parseDataList;
 	InputItemList inputItems;
 	InputItem *curItem;
+	InputItem *lastFlush;
 
 	/* Ragel-6 frontend. */
 	ParserDict parserDict;
@@ -231,6 +233,8 @@ struct InputData
 	void writeOutput( InputItem *ii );
 	void writeLanguage( std::ostream &out );
 	void writeXML( std::ostream &out );
+
+	void checkLastRef( InputItem *ii );
 
 	void parse();
 	void processXML();
