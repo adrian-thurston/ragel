@@ -235,7 +235,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKvHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKUvHh?-:sT:F:G:LpV", argc, argv );
 
 	/* Decide if we were invoked using a path variable, or with an explicit path. */
 	const char *lastSlash = strrchr( argv[0], '/' );
@@ -369,6 +369,9 @@ void InputData::parseArgs( int argc, const char **argv )
 				break;
 			case 'K':
 				hostLang = &hostLangCrack;
+				break;
+			case 'U':
+				hostLang = &hostLangRust;
 				break;
 
 			/* Version and help. */

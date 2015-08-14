@@ -708,6 +708,7 @@ void InputData::writeLanguage( std::ostream &out )
 		case HostLang::OCaml: out << "OCaml"; break;
 		case HostLang::Crack: out << "Crack"; break;
 		case HostLang::Asm: out << "ASM"; break;
+		case HostLang::Rust: out << "Rust"; break;
 	}
 	out << "\"";
 }

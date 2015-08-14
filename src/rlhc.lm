@@ -6,6 +6,7 @@ include 'rlhc-go.lm'
 include 'rlhc-java.lm'
 include 'rlhc-ruby.lm'
 include 'rlhc-ml.lm'
+include 'rlhc-rust.lm'
 
 str argvPop()
 {
@@ -61,6 +62,8 @@ elsif ( Lang == 'ruby' )
 	ruby_gen::trans( Output, Start )
 elsif ( Lang == 'ocaml' )
 	ml_gen::trans( Output, Start )
+elsif ( Lang == 'rust' )
+	rust_gen::trans( Output, Start )
 else {
 	print( 'rlhc: unrecognized language: ', Lang, '\n' )
 }

@@ -50,7 +50,9 @@ using std::endl;
 
 bool langSupportsGoto( const HostLang *hostLang )
 {
-	if ( hostLang->lang == HostLang::Ruby || hostLang->lang == HostLang::OCaml )
+	if ( hostLang->lang == HostLang::Ruby ||
+			hostLang->lang == HostLang::OCaml ||
+			hostLang->lang == HostLang::Rust )
 		return false;
 	
 	return true;

@@ -65,15 +65,6 @@ HostType hostTypesGo[] =
 	{ "rune",    0,  "int32",   true,   true,  true,   S32BIT_MIN, S32BIT_MAX,  4 }
 };
 
-HostType hostTypesCrack[] = 
-{
-  { "byte",    0,  "byte",     false,  true,  true,   0,            UCHAR_MAX,    1 },
-  { "int32",   0,  "uint32",   false,  true,  false,  S32BIT_MIN,   S32BIT_MAX,   4 },
-  { "uint32",  0,  "uint32",   false,  true,  false,  U32BIT_MIN,   U32BIT_MAX,   4 },
-  { "int",     0,  "int",      true,   true,  false,  INT_MIN,      INT_MAX,      sizeof(int) },
-  { "uint",    0,  "uint",     true,   true,  false,  0,            UINT_MAX,     sizeof(int) },  
-};
-
 HostType hostTypesJava[] = 
 {
 	{ "byte",    0,  "byte",   true,   true,  false,  CHAR_MIN,  CHAR_MAX,    1 },
@@ -103,6 +94,20 @@ HostType hostTypesCSharp[] =
 };
 
 HostType hostTypesOCaml[] =
+{
+	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  4 },
+};
+
+HostType hostTypesCrack[] = 
+{
+  { "byte",    0,  "byte",     false,  true,  true,   0,            UCHAR_MAX,    1 },
+  { "int32",   0,  "uint32",   false,  true,  false,  S32BIT_MIN,   S32BIT_MAX,   4 },
+  { "uint32",  0,  "uint32",   false,  true,  false,  U32BIT_MIN,   U32BIT_MAX,   4 },
+  { "int",     0,  "int",      true,   true,  false,  INT_MIN,      INT_MAX,      sizeof(int) },
+  { "uint",    0,  "uint",     true,   true,  false,  0,            UINT_MAX,     sizeof(int) },  
+};
+
+HostType hostTypesRust[] =
 {
 	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  4 },
 };
@@ -206,6 +211,17 @@ const HostLang hostLangCrack = {
 	"no-lang"
 };
 
+const HostLang hostLangRust = {
+	"Rust",
+	"-U",
+	HostLang::Rust,
+	hostTypesRust, 1,
+	hostTypesRust+0,
+	false,
+	true,
+	"rust"
+};
+
 const HostLang *hostLangs[] = {
 	&hostLangC,
 	&hostLangAsm,
@@ -215,11 +231,12 @@ const HostLang *hostLangs[] = {
 	&hostLangRuby,
 	&hostLangCSharp,
 	&hostLangOCaml,
+	&hostLangRust,
 };
 
 //	&hostLangCrack,
 
-const int numHostLangs = 8;
+const int numHostLangs = 9;
 
 HostType *findAlphType( const HostLang *hostLang, const char *s1 )
 {

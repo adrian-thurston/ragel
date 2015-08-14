@@ -53,6 +53,7 @@ EXTRA_DIST = \
 	rlhc-go.lm \
 	rlhc-ruby.lm \
 	rlhc-java.lm \
+	rlhc-rust.lm \
 	rlhc-ml.lm \
 	rlparse.lm \
 	rlscan.rl \
@@ -72,12 +73,14 @@ ragel-if.$(OBJEXT): if.h if.cc parse.c
 ragel-load.$(OBJEXT): if.h if.cc parse.c
 
 RLHC = \
+	rlhc-host.lm \
 	rlhc-c.lm \
 	rlhc-d.lm \
 	rlhc-go.lm \
 	rlhc-cs.lm \
 	rlhc-java.lm \
 	rlhc-ruby.lm \
+	rlhc-rust.lm \
 	rlhc-ml.lm
 
 rlhc_SOURCES =

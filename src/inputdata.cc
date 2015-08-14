@@ -123,6 +123,12 @@ void InputData::asmDefaultFileName( const char *inputFile )
         outputFileName = fileNameFromStem( inputFile, ".s" );
 }
 
+void InputData::rustDefaultFileName( const char *inputFile )
+{
+	if ( outputFileName == 0 )
+		outputFileName = fileNameFromStem( inputFile, ".rs" );
+}
+
 void InputData::makeDefaultFileName()
 {
 	switch ( hostLang->lang ) {
@@ -150,6 +156,9 @@ void InputData::makeDefaultFileName()
 			break;
 		case HostLang::Asm:
 			asmDefaultFileName( inputFileName );
+			break;
+		case HostLang::Rust:
+			rustDefaultFileName( inputFileName );
 			break;
 	}
 }
