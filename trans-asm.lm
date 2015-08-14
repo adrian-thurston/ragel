@@ -179,7 +179,7 @@ void rw_asm_abs_expr( Expr: indep::abs_expr )
 
 void rw_asm_expr( Expr: indep::expr )
 {
-	AbsExpr: indep::abs_expr = abs_comparative( Expr.comparative )
+	AbsExpr: indep::abs_expr = indep::abs_comparative( Expr.comparative )
 	rw_asm_abs_expr( AbsExpr )
 }
 
