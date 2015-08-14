@@ -1,4 +1,7 @@
 include 'ragel.lm'
+include 'ragel-c.lm'
+include 'ragel-ocaml.lm'
+include 'ragel-ruby.lm'
 
 lex
 	token selectt /''/

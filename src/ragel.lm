@@ -377,7 +377,3 @@ namespace ragel
 	def ragel_start
 		[statement*]
 end
-
-include 'ragel-c.lm'
-include 'ragel-ocaml.lm'
-include 'ragel-ruby.lm'

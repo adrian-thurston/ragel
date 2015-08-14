@@ -1,4 +1,7 @@
 include '../src/ragel.lm'
+include '../src/ragel-c.lm'
+include '../src/ragel-ocaml.lm'
+include '../src/ragel-ruby.lm'
 
 namespace indep
 	# Opening the test case header.
