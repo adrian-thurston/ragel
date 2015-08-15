@@ -83,10 +83,12 @@ ruby_prohibit_genflags="-G0 -G1 -G2"
 ocaml_prohibit_genflags="-G0 -G1 -G2"
 asm_prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
 
-[ -z "$minflags" ] && minflags="-n -m -l -e"
-[ -z "$genflags" ] && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
-[ -z "$encflags" ] && encflags="--integral-tables --string-tables"
-[ -z "$langflags" ] && langflags="-C -D -J -R -A -Z -O --asm"
+[ -z "$minflags" ]   && minflags="-n -m -l -e"
+[ -z "$genflags" ]   && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+[ -z "$encflags" ]   && encflags="--integral-tables --string-tables"
+[ -z "$langflags" ]  && langflags="-C -D -J -R -A -Z -O --asm"
+[ -z "$frontflags" ] && frontflags="--kelbt-frontend --colm-frontend"
+[ -z "$backflags" ]  && backflags="--direct-backend --colm-backend"
 
 shift $((OPTIND - 1));
 
@@ -116,8 +118,8 @@ function test_error
 
 function run_test()
 {
-	echo "$ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $translated"
-	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt -o $wk/$code_src $translated; then
+	echo "$ragel -I. $lang_opt $min_opt $gen_opt $enc_opt $f_opt $b_opt -o $wk/$code_src $translated"
+	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt $f_opt $b_opt -o $wk/$code_src $translated; then
 		test_error;
 	fi
 
@@ -272,8 +274,12 @@ function run_options()
 		for gen_opt in $genflags; do
 			echo "" "$lang_prohibit_genflags" | grep -e $gen_opt >/dev/null && continue
 			for enc_opt in $encflags; do
-				echo "" "$prohibit_encflags" | grep -e $enc_opt >/dev/null && continue
-				run_test
+				for f_opt in $frontflags; do
+					for b_opt in $backflags; do
+						echo "" "$prohibit_encflags" | grep -e $enc_opt >/dev/null && continue
+						run_test
+					done
+				done
 			done
 		done
 	done
