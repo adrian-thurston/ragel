@@ -53,12 +53,20 @@ namespace c_gen
 	{
 		for Tok: host::tok in repeat(TL) {
 			switch Tok
-			case [host::`${ StmtList: stmt* host::`}$]
-				send Parser "{[stmt_list( StmtList )]}"
-			case [host::`={ Expr: expr host::`}=]
-				send Parser "([expr( Expr )])"
-			default
-				send Parser [Tok]
+			case [host::`${ StmtList: stmt* host::`}$] {
+				send Parser
+					"{
+					"	[stmt_list( StmtList )]
+					"}
+			}
+			case [host::`={ Expr: expr host::`}=] {
+				send Parser
+					"([expr( Expr )])"
+			}
+			default {
+				send Parser
+					[Tok]
+			}
 		}
 	}
 
@@ -73,7 +81,9 @@ namespace c_gen
 		case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 		{
 			send Parser 
-				"{[tok_list( TL )]}
+				"{
+				"	[tok_list( TL )]
+				"}
 		}
 		case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 		{
@@ -90,15 +100,15 @@ namespace c_gen
 			send Parser
 				[embedded_host( EH )]
 		}
-		case [O:`( TL: expr C: `)]
+		case [`( E: expr `)]
 		{
 			send Parser
-				[O expr(TL) C]
+				"([expr(E)])"
 		}
-		case [ident O: `[ TL: expr C: `]]
+		case [I: ident `[ E: expr `]]
 		{
 			send Parser
-				[ExprFactor.ident O expr( TL ) C]
+				"[I]\[[expr( E )]\]"
 		}
 		case ['offset' '(' ident ',' expr ')']
 		{

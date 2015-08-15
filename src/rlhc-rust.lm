@@ -98,19 +98,17 @@ namespace rust_gen
 		case [I: ident `[ E: expr `]]
 		{
 			send Parser
-				"[I]\[[expr( E )] as usize\]"
+				"[I]\[([expr( E )]) as usize\]"
 		}
 		case ['offset' '(' ident ',' expr ')']
 		{
-#			send Parser
-#				[ExprFactor.ident ' + ' expr( ExprFactor.expr )]
 			send Parser
 				"[expr( ExprFactor.expr )]"
 		}
 		case ['deref' '(' I: ident ',' E: expr ')']
 		{
 			send Parser
-				"[I]\[[expr( E )] as usize\]
+				"[I]\[([expr( E )]) as usize\]
 		}
 		case [T: `TRUE]
 		{
@@ -137,11 +135,8 @@ namespace rust_gen
 			embedded_host( E1 )
 			expr_factor( E2 )
 		}
-		case [Open: `( Type: type Close: `) expr_factor]
+		case [`( type `) expr_factor]
 		{
-#			send Parser [Open]
-#			type( Type )
-#			send Parser [Close]
 			expr_factor( ExprFactor._expr_factor )
 		}
 		default {
@@ -161,7 +156,7 @@ namespace rust_gen
 		case [I: ident O: `[ E: expr C: `]]
 		{
 			send Parser
-				"[I]\[[expr( E )] as usize\]
+				"[I]\[([expr( E )]) as usize\]
 		}
 		case [E1: embedded_host `-> E2: lvalue]
 		{
