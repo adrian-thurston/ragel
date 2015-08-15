@@ -432,6 +432,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					backend = Direct;
 					backendSpecified = true;
 				}
+				else if ( strcmp( arg, "direct-backend" ) == 0 ) {
+					backend = Direct;
+					backendSpecified = true;
+				}
 				else if ( strcmp( arg, "colm-backend" ) == 0 ) {
 					backend = Translated;
 					backendSpecified = true;
