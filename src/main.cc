@@ -445,7 +445,13 @@ void InputData::parseArgs( int argc, const char **argv )
 					 * language supports the goto-based backend. May require
 					 * --colm-backend depending on the target language (C for
 					 * example is direct by default). */
-					varBackend = true;
+					backendFeature = VarFeature;
+					featureSpecified = true;
+				}
+				else if ( strcmp( arg, "goto-backend" ) == 0 ) {
+					/* Forces goto-based based backend. */
+					backendFeature = GotoFeature;
+					featureSpecified = true;
 				}
 				else if ( strcmp( arg, "string-tables" ) == 0 )
 					stringTables = true;
@@ -542,6 +548,17 @@ void InputData::parseArgs( int argc, const char **argv )
 	}
 }
 
+bool langSupportsGoto( const HostLang *hostLang )
+{
+	if ( hostLang->lang == HostLang::Ruby ||
+			hostLang->lang == HostLang::OCaml ||
+			hostLang->lang == HostLang::Rust )
+		return false;
+	
+	return true;
+}
+
+
 void InputData::checkArgs()
 {
 	/* Require an input file. If we use standard in then we won't have a file
@@ -580,6 +597,13 @@ void InputData::checkArgs()
 			backend = Direct;
 		else
 			backend = Translated;
+	}
+
+	if ( !featureSpecified ) {
+		if ( langSupportsGoto( hostLang ) )
+			backendFeature = GotoFeature;
+		else
+			backendFeature = VarFeature;
 	}
 }
 

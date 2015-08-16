@@ -2,14 +2,14 @@
 
 void FlatVar::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "${" << vCS() << " = " << gotoDest << ";}$";
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest << ";" << CLOSE_GEN_BLOCK();
 }
 
 void FlatVar::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "${" << vCS() << " = host( \"-\", 1 ) ={";
+	ret << OPEN_GEN_BLOCK() << vCS() << " = host( \"-\", 1 ) ={";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "}=;}$";
+	ret << "}=;" << CLOSE_GEN_BLOCK();
 }
 
 void FlatVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -20,7 +20,7 @@ void FlatVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 
 void FlatVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	ret << "${";
+	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
 		ret << OPEN_HOST_BLOCK();
@@ -30,7 +30,7 @@ void FlatVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 
 	ret << STACK() << "[" << TOP() << "] = " <<
 			vCS() << "; " << TOP() << " += 1;" << vCS() << " = " <<
-			callDest << ";}$";
+			callDest << ";" << CLOSE_GEN_BLOCK();
 }
 
 void FlatVar::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
@@ -41,7 +41,7 @@ void FlatVar::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, boo
 
 void FlatVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	ret << "${";
+	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
 		ret << OPEN_HOST_BLOCK();
@@ -53,7 +53,7 @@ void FlatVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bo
 			vCS() << "; " << TOP() << " += 1;" << vCS() <<
 			" = host( \"-\", 1 ) ={";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "}=;}$";
+	ret << "}=;" << CLOSE_GEN_BLOCK();
 }
 
 void FlatVar::RET( ostream &ret, bool inFinish )
@@ -64,7 +64,8 @@ void FlatVar::RET( ostream &ret, bool inFinish )
 
 void FlatVar::NRET( ostream &ret, bool inFinish )
 {
-	ret << "${" << TOP() << "-= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "]; ";
+	ret << OPEN_GEN_BLOCK() << TOP() << "-= 1;" << vCS() << " = " <<
+			STACK() << "[" << TOP() << "]; ";
 
 	if ( postPopExpr != 0 ) {
 		ret << OPEN_HOST_BLOCK();
@@ -72,7 +73,7 @@ void FlatVar::NRET( ostream &ret, bool inFinish )
 		ret << CLOSE_HOST_BLOCK();
 	}
 
-	ret << CLOSE_HOST_BLOCK();
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void FlatVar::BREAK( ostream &ret, int targState, bool csForced )
@@ -150,7 +151,7 @@ void FlatVar::LOCATE_TRANS()
 
 	if ( redFsm->classMap == 0 ) {
 		out <<
-			"	_trans = " << CAST( "int" ) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
+			"	_trans = " << CAST( UINT() ) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
 	}
 	else {
 		long lowKey = redFsm->lowKey.getVal();
@@ -185,18 +186,18 @@ void FlatVar::LOCATE_TRANS()
 							" - " << lowKey << "];\n"
 			"		if ( _ic <= " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
 						"_ic >= " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
-			"			_trans = " << CAST( "int" ) << DEREF( ARR_REF( indicies ),
+			"			_trans = " << CAST( UINT() ) << DEREF( ARR_REF( indicies ),
 								"_inds + " + CAST("int") + "( _ic - " + CAST("int") + DEREF( ARR_REF( keys ),
 								"_keys" ) + " ) " ) << "; \n"
 			"		else\n"
-			"			_trans = " << CAST( "int" ) << ARR_REF( indexDefaults ) <<
+			"			_trans = " << CAST( UINT() ) << ARR_REF( indexDefaults ) <<
 								"[" << vCS() << "]" << ";\n";
 
 		if ( !limitLow || !limitHigh ) {
 			out <<
 				"	}\n"
 				"	else {\n"
-				"		_trans = " << CAST( "int" ) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
+				"		_trans = " << CAST( UINT() ) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
 				"	}\n"
 				"\n";
 		}

@@ -59,12 +59,20 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 					langflags="$langflags --$OPTARG"
 					gen_opts="$gen_opts --$OPTARG"
 				;;
-				integral-tables)
+				integral-tables|string-tables)
 					encflags="$encflags --$OPTARG"
 					gen_opts="$gen_opts --$OPTARG"
 				;;
-				string-tables)
-					encflags="$encflags --$OPTARG"
+				kelbt-frontend|colm-frontend)
+					frontflags="$frontflags --$OPTARG"
+					gen_opts="$gen_opts --$OPTARG"
+				;;
+				direct-backend|colm-backend)
+					backflags="$backflags --$OPTARG"
+					gen_opts="$gen_opts --$OPTARG"
+				;;
+				var-backend|goto-backend)
+					featureflags="$featureflags --$OPTARG"
 					gen_opts="$gen_opts --$OPTARG"
 				;;
 				*)
@@ -83,12 +91,16 @@ ruby_prohibit_genflags="-G0 -G1 -G2"
 ocaml_prohibit_genflags="-G0 -G1 -G2"
 asm_prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
 
-[ -z "$minflags" ]   && minflags="-n -m -l -e"
-[ -z "$genflags" ]   && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
-[ -z "$encflags" ]   && encflags="--integral-tables --string-tables"
-[ -z "$langflags" ]  && langflags="-C -D -J -R -A -Z -O --asm"
-[ -z "$frontflags" ] && frontflags="--kelbt-frontend --colm-frontend"
-[ -z "$backflags" ]  && backflags="--direct-backend --colm-backend"
+ocaml_prohibit_features="--goto-backend"
+
+
+[ -z "$minflags" ]     && minflags="-n -m -l -e"
+[ -z "$genflags" ]     && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+[ -z "$encflags" ]     && encflags="--integral-tables --string-tables"
+[ -z "$langflags" ]    && langflags="-C -D -J -R -A -Z -O --asm"
+[ -z "$frontflags" ]   && frontflags="--kelbt-frontend --colm-frontend"
+[ -z "$backflags" ]    && backflags="--direct-backend --colm-backend"
+[ -z "$featureflags" ] && featureflags="--var-backend --goto-backend"
 
 shift $((OPTIND - 1));
 
@@ -118,8 +130,8 @@ function test_error
 
 function run_test()
 {
-	echo "$ragel -I. $lang_opt $min_opt $gen_opt $enc_opt $f_opt $b_opt -o $wk/$code_src $translated"
-	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt $f_opt $b_opt -o $wk/$code_src $translated; then
+	echo "$ragel -I. $lang_opt $min_opt $gen_opt $enc_opt $f_opt $b_opt $v_opt -o $wk/$code_src $translated"
+	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt $f_opt $b_opt $v_opt -o $wk/$code_src $translated; then
 		test_error;
 	fi
 
@@ -253,14 +265,31 @@ function run_options()
 
 	[ -n "$additional_cflags" ] && flags="$flags $additional_cflags"
 
+	lang_prohibit_features="$prohibit_features"
+
 	case $lang in
 	csharp) lang_prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags";;
 	java) lang_prohibit_genflags="$prohibit_genflags $java_prohibit_genflags";;
 	ruby) lang_prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags";;
-	ocaml) lang_prohibit_genflags="$prohibit_genflags $ocaml_prohibit_genflags";;
+	ocaml)
+		lang_prohibit_genflags="$prohibit_genflags $ocaml_prohibit_genflags"
+		lang_prohibit_features="$prohibit_features $ocaml_prohibit_features"
+	;;
 	asm) lang_prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags";;
 	*) lang_prohibit_genflags="$prohibit_genflags";;
 	esac
+
+	if [ $lang == asm ]; then
+		prohibit_frontflags="--colm-frontend"
+	elif [ $lang != c ]; then
+		prohibit_frontflags="--kelbt-frontend"
+	fi
+
+	if [ $lang == asm ]; then
+		prohibit_backflags="--colm-backend"
+	elif [ $lang != c ]; then
+		prohibit_backflags="--direct-backend"
+	fi
 
 	if [ $lang != c ] && [ $lang != c++ ]; then
 		prohibit_encflags="--string-tables"
@@ -271,13 +300,29 @@ function run_options()
 
 	for min_opt in $minflags; do
 		echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
+
 		for gen_opt in $genflags; do
 			echo "" "$lang_prohibit_genflags" | grep -e $gen_opt >/dev/null && continue
+
 			for enc_opt in $encflags; do
+				echo "" "$prohibit_encflags" | grep -e $enc_opt >/dev/null && continue
+
 				for f_opt in $frontflags; do
+					echo "" "$prohibit_frontflags" | grep -e $f_opt >/dev/null && continue
+
 					for b_opt in $backflags; do
-						echo "" "$prohibit_encflags" | grep -e $enc_opt >/dev/null && continue
-						run_test
+						echo "" "$prohibit_backflags" | grep -e $b_opt >/dev/null && continue
+
+						for v_opt in $featureflags; do
+
+							echo "" "$lang_prohibit_features" | grep -e $v_opt >/dev/null && continue
+
+							[ $gen_opt = -G0 ] && [ $v_opt = --var-backend ] && continue
+							[ $gen_opt = -G1 ] && [ $v_opt = --var-backend ] && continue
+							[ $gen_opt = -G2 ] && [ $v_opt = --var-backend ] && continue
+
+							run_test
+						done
 					done
 				done
 			done
@@ -316,6 +361,7 @@ function run_translate()
 	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
 	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
 	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
+	prohibit_features=`sed '/@PROHIBIT_FEATURES:/s/^.*: *//p;d' $test_case`
 
 	# Create the expected output.
 	sed '1,/^#\+ * OUTPUT #\+/d;' $test_case > $wk/$expected_out

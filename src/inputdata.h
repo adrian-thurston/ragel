@@ -124,6 +124,7 @@ struct InputData
 		noIntermediate(false),
 		frontendSpecified(false),
 		backendSpecified(false),
+		featureSpecified(false),
 		saveTemps(false),
 		nfaTermCheck(0),
 		nfaCondsDepth(-1),
@@ -198,6 +199,9 @@ struct InputData
 
 	bool backendSpecified;
 	RagelBackend backend;
+
+	bool featureSpecified;
+	BackendFeature backendFeature;
 
 	bool saveTemps;
 	bool nfaTermCheck;

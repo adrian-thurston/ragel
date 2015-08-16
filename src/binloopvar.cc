@@ -154,9 +154,9 @@ std::ostream &BinaryLoopVar::TO_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t case " << act->actionId << " {\n";
+			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -170,9 +170,9 @@ std::ostream &BinaryLoopVar::FROM_STATE_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t case " << act->actionId << " {\n";
+			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -186,9 +186,9 @@ std::ostream &BinaryLoopVar::EOF_ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t case " << act->actionId << " {\n";
+			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, true, false ) );
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -203,9 +203,9 @@ std::ostream &BinaryLoopVar::ACTION_SWITCH()
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t case " << act->actionId << " {\n";
+			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -299,13 +299,13 @@ void BinaryLoopVar::writeExec()
 			|| redFsm->anyFromStateActions() )
 	{
 		out << 
-			"	index " << ARR_TYPE( actions ) << " _acts;\n"
+			"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
 			"	" << UINT() << " _nacts;\n";
 	}
 
 	out <<
-		"	index " << ALPH_TYPE() << " _keys;\n"
-		"	index " << ARR_TYPE( condKeys ) << " _ckeys;\n"
+		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
 		"	int _cpc;\n"
 		"	while ( _cont == 1 ) {\n"
 		"\n";
@@ -345,14 +345,14 @@ void BinaryLoopVar::writeExec()
 
 			if ( redFsm->anyEofActions() ) {
 				out <<
-					"	index " << ARR_TYPE( actions ) << " __acts;\n"
+					"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
 					"	" << UINT() << " __nacts;\n"
-					"	__acts = offset( " << ARR_REF( actions ) << ", " <<
-							ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
-					"	__nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", __acts );\n"
+					"	__acts = " << OFFSET( ARR_REF( actions ),
+							ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
+					"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << ";\n"
 					"	__acts += 1;\n"
 					"	while ( __nacts > 0 ) {\n"
-					"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
+					"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
 					EOF_ACTION_SWITCH() <<
 					"		}\n"
 					"		__nacts -= 1;\n"
@@ -380,12 +380,12 @@ void BinaryLoopVar::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
-					"[" << vCS() << "]" << " );\n"
-			"	_nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + 
+					"[" + vCS() + "]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
-			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		_nacts -= 1;\n"
@@ -415,11 +415,11 @@ void BinaryLoopVar::writeExec()
 	if ( redFsm->anyRegActions() ) {
 		out <<
 			"	if ( " << ARR_REF( condActions ) << "[_cond] != 0 ) {\n"
-			"		_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
-			"		_nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"		_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[_cond]" ) << ";\n"
+			"		_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
 			"		_acts += 1;\n"
 			"		while ( _nacts > 0 )\n	{\n"
-			"			switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
+			"			switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " )\n"
 			"			{\n";
 			ACTION_SWITCH() <<
 			"			}\n"
@@ -439,12 +439,12 @@ void BinaryLoopVar::writeExec()
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) <<
-					"[" << vCS() << "]" << " );\n"
-			"	_nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_acts = " << OFFSET( ARR_REF( actions ),  ARR_REF( toStateActions ) +
+					"[" + vCS() + "]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
-			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		_nacts -= 1;\n"

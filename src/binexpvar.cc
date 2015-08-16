@@ -320,12 +320,12 @@ void BinaryExpVar::writeExec()
 		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
 		"	int _cpc;\n"
 		"	" << UINT() << " _trans;\n"
-		"	" << UINT() << " _cond;\n"
+		"	" << UINT() << " _cond = 0;\n"
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
-	if ( redFsm->anyRegNbreak() )
-		out << "	int _nbreak;\n";
+//	if ( redFsm->anyRegNbreak() )
+//		out << "	int _nbreak;\n";
 
 	out <<
 		"	while ( _cont == 1 ) {\n"

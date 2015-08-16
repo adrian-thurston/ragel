@@ -281,27 +281,33 @@ void FlatExpVar::writeExec()
 	outLabelUsed = false;
 
 	out << 
-		"	{\n"
-		"	int _klen;\n";
+		"	{\n";
+	
+//	out <<
+//		"	int _klen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
 
-	out <<
+//	out <<
 //		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
 //		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
-		"	int _cpc;\n"
-		"	" << UINT() << " _trans;\n"
+
+	if ( condSpaceList.length() > 0 )
+		out << "	int _cpc;\n";
+
+	out <<
+		"	" << UINT() << " _trans = 0;\n"
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
 	if ( condSpaceList.length() > 0 ) {
 		out <<
-			"	" << UINT() << " _cond;\n";
+			"	" << UINT() << " _cond = 0;\n";
 	}
 
-	if ( redFsm->anyRegNbreak() )
-		out << "	int _nbreak;\n";
+//	if ( redFsm->anyRegNbreak() )
+//		out << "	int _nbreak;\n";
 
 	if ( redFsm->classMap != 0 ) {
 		out <<

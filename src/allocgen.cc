@@ -48,97 +48,99 @@
 using std::cerr;
 using std::endl;
 
-bool langSupportsGoto( const HostLang *hostLang )
-{
-	if ( hostLang->lang == HostLang::Ruby ||
-			hostLang->lang == HostLang::OCaml ||
-			hostLang->lang == HostLang::Rust )
-		return false;
-	
-	return true;
-}
-
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
+	InputData *id = args.pd->id;
 
 	if ( hostLang->lang == HostLang::Asm ) {
 		codeGen = new AsmCodeGen( args );
 	}
-	else if ( args.pd->id->backend == Direct ) {
+	else if ( id->backend == Direct ) {
 		switch ( args.codeStyle ) {
 		case GenBinaryLoop:
-			codeGen = new C::BinaryLoopGoto(args);
-			break;
-		case GenBinaryExp:
-			codeGen = new C::BinaryExpGoto(args);
-			break;
-
-		case GenFlatLoop:
-			codeGen = new C::FlatLoopGoto(args);
-			break;
-		case GenFlatExp:
-			codeGen = new C::FlatExpGoto(args);
-			break;
-
-		case GenSwitchLoop:
-			codeGen = new C::SwitchLoopGoto(args);
-			break;
-		case GenSwitchExp:
-			codeGen = new C::SwitchExpGoto(args);
-			break;
-
-		case GenIpGoto:
-			codeGen = new C::IpGoto(args);
-			break;
-		}
-	}
-	else {
-		bool varBackend = args.pd->id->varBackend;
-
-		switch ( args.codeStyle ) {
-		case GenBinaryLoop:
-			if ( langSupportsGoto( hostLang ) && !varBackend )
+			if ( id->backendFeature == GotoFeature )
 				codeGen = new BinaryLoopGoto( args );
 			else
-				codeGen = new BinaryLoopVar( args);
+				codeGen = new BinaryLoopVar( args );
 			break;
 		case GenBinaryExp:
-			if ( langSupportsGoto( hostLang ) && !varBackend )
+			if ( id->backendFeature == GotoFeature )
 				codeGen = new BinaryExpGoto( args );
 			else
 				codeGen = new BinaryExpVar( args );
 			break;
 
 		case GenFlatLoop:
-			if ( langSupportsGoto( hostLang ) && !varBackend )
+			if ( id->backendFeature == GotoFeature )
 				codeGen = new FlatLoopGoto( args );
 			else
 				codeGen = new FlatLoopVar( args );
 			break;
 		case GenFlatExp:
-			if ( langSupportsGoto( hostLang ) && !varBackend )
+			if ( id->backendFeature == GotoFeature )
 				codeGen = new FlatExpGoto( args );
 			else
 				codeGen = new FlatExpVar( args );
 			break;
 
 		case GenSwitchLoop:
-			if ( langSupportsGoto( hostLang ) && !varBackend )
+			codeGen = new SwitchLoopGoto( args );
+			break;
+
+		case GenSwitchExp:
+			codeGen = new SwitchExpGoto( args );
+			break;
+
+		case GenIpGoto:
+			codeGen = new IpGoto( args );
+			break;
+		}
+	}
+	else {
+		switch ( args.codeStyle ) {
+		case GenBinaryLoop:
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new BinaryLoopGoto( args );
+			else
+				codeGen = new BinaryLoopVar( args);
+			break;
+		case GenBinaryExp:
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new BinaryExpGoto( args );
+			else
+				codeGen = new BinaryExpVar( args );
+			break;
+
+		case GenFlatLoop:
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new FlatLoopGoto( args );
+			else
+				codeGen = new FlatLoopVar( args );
+			break;
+		case GenFlatExp:
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new FlatExpGoto( args );
+			else
+				codeGen = new FlatExpVar( args );
+			break;
+
+		case GenSwitchLoop:
+			if ( id->backendFeature == GotoFeature )
 				codeGen = new SwitchLoopGoto(args);
 			else
 				std::cerr << "unsupported lang/style combination" << endp;
 			break;
 		case GenSwitchExp:
-			if ( langSupportsGoto( hostLang ) && !varBackend )
+			if ( id->backendFeature == GotoFeature )
 				codeGen = new SwitchExpGoto(args);
 			else
 				std::cerr << "unsupported lang/style combination" << endp;
 			break;
 
 		case GenIpGoto:
-			if ( langSupportsGoto( hostLang ) && !varBackend )
+			if ( id->backendFeature == GotoFeature )
 				codeGen = new IpGoto(args);
 			else
 				std::cerr << "unsupported lang/style combination" << endp;

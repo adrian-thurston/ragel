@@ -1,5 +1,6 @@
 /*
  * @LANG: java
+ * @PROHIBIT_FEATURES: --var-backend
  */
 
 class recdescent2
