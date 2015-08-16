@@ -74,7 +74,7 @@ lex
 			`while `switch `case
 			`if `else `offset `index
 			`goto `deref `entry `label `default
-			`host
+			`host `cast
 
 	literal `uint `const
 			`s8 `s16 `s32 `s64
@@ -137,7 +137,7 @@ def expr_factor
 |	[string]
 |	[embedded_host `-> expr_factor]
 |	[`( expr `)]
-|	[`( type `) expr_factor]
+|	[`cast `( type `) expr_factor]
 
 def lvalue
 	[embedded_host]

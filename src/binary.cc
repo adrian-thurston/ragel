@@ -680,18 +680,18 @@ void Binary::NFA_PUSH()
 		out <<
 			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
 			"		int alt; \n"
-			"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[(int)" <<
+			"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 						ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
-			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
+			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
 			"			nfa_bp[nfa_len].p = " << P() << ";\n";
 
 		if ( redFsm->bAnyNfaPushPops ) {
 			out <<
-				"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[(int)" <<
+				"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[" << CAST("int") <<
 								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
 				"\n"
-				"			switch ( " << ARR_REF( nfaPushActions ) << "[(int)" <<
+				"			switch ( " << ARR_REF( nfaPushActions ) << "[" << CAST("int") <<
 								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt] ) {\n";
 
 			/* Loop the actions. */
@@ -769,9 +769,9 @@ void Binary::LOCATE_TRANS()
 {
 	out <<
 		"	_keys = " << OFFSET( ARR_REF( keys ), ARR_REF( keyOffsets ) + "[" + vCS() + "]" ) << ";\n"
-		"	_trans = (" << UINT() << ")" << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
+		"	_trans = " << CAST(UINT()) << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
 		"\n"
-		"	_klen = (int)" << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
+		"	_klen = " << CAST( "int" ) << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		" << INDEX( ALPH_TYPE(), "_lower" ) << ";\n"
 		"		" << INDEX( ALPH_TYPE(), "_mid" ) << ";\n"
@@ -788,15 +788,15 @@ void Binary::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_trans += " << "(" << UINT() << ")" << "(_mid - _keys);\n"
+		"				_trans += " << CAST( UINT() ) << "(_mid - _keys);\n"
 		"				goto _match;\n"
 		"			}\n"
 		"		}\n"
 		"		_keys += _klen;\n"
-		"		_trans += (" << UINT() << ")_klen;\n"
+		"		_trans += " << CAST( UINT() ) << "_klen;\n"
 		"	}\n"
 		"\n"
-		"	_klen = (int)" << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
+		"	_klen = " << CAST("int") << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		" << INDEX( ALPH_TYPE(), "_lower" ) << ";\n"
 		"		" << INDEX( ALPH_TYPE(), "_mid" ) << ";\n"
@@ -813,11 +813,11 @@ void Binary::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( keys ), "_mid + 1" ) << " )\n"
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
-		"				_trans += " << "(" << UINT() << ")" << "((_mid - _keys)>>1);\n"
+		"				_trans += " << CAST( UINT() ) << "((_mid - _keys)>>1);\n"
 		"				goto _match;\n"
 		"			}\n"
 		"		}\n"
-		"		_trans += (" << UINT() << ")_klen;\n"
+		"		_trans += " << CAST( UINT() ) << "_klen;\n"
 		"	}\n"
 		"\n";
 }
@@ -826,8 +826,8 @@ void Binary::LOCATE_COND()
 {
 	out <<
 		"	_ckeys = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[_trans]" ) << ";\n"
-		"	_klen = (int) " << ARR_REF( transLengths ) << "[_trans];\n"
-		"	_cond = (" << UINT() << ") " << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	_klen = " << CAST( "int" ) << ARR_REF( transLengths ) << "[_trans];\n"
+		"	_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 		"\n";
 
 	out <<
@@ -868,12 +868,12 @@ void Binary::LOCATE_COND()
 		"				break;\n"
 		"\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( _cpc < (int)" << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
+		"			if ( _cpc < " << CAST("int") << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
 		"				_upper = _mid - 1;\n"
-		"			else if ( _cpc > (int) " << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
+		"			else if ( _cpc > " << CAST( "int" ) << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_cond += (" << UINT() << ")(_mid - _ckeys);\n"
+		"				_cond += " << CAST( UINT() ) << "(_mid - _ckeys);\n"
 		"				goto _match_cond;\n"
 		"			}\n"
 		"		}\n"

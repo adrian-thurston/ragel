@@ -245,7 +245,7 @@ void FlatLoopGoto::writeExec()
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	_nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
@@ -271,7 +271,7 @@ void FlatLoopGoto::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = (int) " << ARR_REF( condTargs ) << "[" << cond << "];\n"
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -285,7 +285,7 @@ void FlatLoopGoto::writeExec()
 
 		out <<
 			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[" + cond + "]" ) << ";\n"
-			"	_nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " )\n"
@@ -315,7 +315,7 @@ void FlatLoopGoto::writeExec()
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	_nacts = (" << UINT() << ") " << DEREF( ARR_REF ( actions ), "_acts" ) << "; _acts += 1;\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF ( actions ), "_acts" ) << "; _acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
@@ -356,11 +356,11 @@ void FlatLoopGoto::writeExec()
 		if ( redFsm->anyEofTrans() ) {
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = (int)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+				"		_trans = " << CAST("int") << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
 
 			if ( condSpaceList.length() > 0 ) {
 				out <<
-					"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n";
+					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
 			}
 
 			out << 
@@ -373,7 +373,7 @@ void FlatLoopGoto::writeExec()
 				"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
 				"	" << UINT() << " __nacts;\n"
 				"	__acts = " << OFFSET( ARR_REF( actions ), ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
-				"	__nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "__acts" ) << "; __acts += 1;\n"
+				"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << "; __acts += 1;\n"
 				"	while ( __nacts > 0 ) {\n"
 				"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
 				EOF_ACTION_SWITCH() <<

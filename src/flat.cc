@@ -443,7 +443,7 @@ void Flat::NFA_PUSH()
 		out <<
 			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
 			"		int alt; \n"
-			"		int new_recs = " << ARR_REF( nfaTargs ) << "[(int)" <<
+			"		int new_recs = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 						ARR_REF( nfaOffsets ) << "[" << vCS() << "]];\n";
 
 		if ( nfaPrePushExpr != 0 ) {
@@ -457,7 +457,7 @@ void Flat::NFA_PUSH()
 
 
 		out <<
-			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
+			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
 			"			nfa_bp[nfa_len].p = " << P() << ";\n";
 
@@ -471,7 +471,7 @@ void Flat::NFA_PUSH()
 
 		if ( redFsm->bAnyNfaPushes ) {
 			out <<
-				"			switch ( " << ARR_REF( nfaPushActions ) << "[(int)" <<
+				"			switch ( " << ARR_REF( nfaPushActions ) << "[" << CAST("int") <<
 								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt] ) {\n";
 
 			/* Loop the actions. */
@@ -659,7 +659,7 @@ void Flat::LOCATE_TRANS()
 {
 	if ( redFsm->classMap == 0 ) {
 		out <<
-			"	_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
+			"	_trans = " << CAST("int") << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
 	}
 	else {
 		long lowKey = redFsm->lowKey.getVal();
@@ -690,22 +690,22 @@ void Flat::LOCATE_TRANS()
 		}
 
 		out <<
-			"       int _ic = (int)" << ARR_REF( charClass ) << "[" << GET_KEY() <<
+			"       int _ic = " << CAST("int") << ARR_REF( charClass ) << "[" << GET_KEY() <<
 							" - " << lowKey << "];\n"
-			"		if ( _ic <= (int)" << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
-						"_ic >= (int)" << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
-			"			_trans = (int)" << DEREF( ARR_REF( indicies ),
-								"_inds + (int)( _ic - (int)" + DEREF( ARR_REF( keys ),
-								"_keys" ) + " ) " ) << "; \n"
+			"		if ( _ic <= " << CAST("int") << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
+						"_ic >= " << CAST("int") << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
+			"			_trans = " << CAST("int") << DEREF( ARR_REF( indicies ),
+								"_inds + " + CAST("int") + "( _ic - " + CAST("int") +
+								DEREF( ARR_REF( keys ), "_keys" ) + " ) " ) << "; \n"
 			"		else\n"
-			"			_trans = (int)" << ARR_REF( indexDefaults ) <<
+			"			_trans = " << CAST("int") << ARR_REF( indexDefaults ) <<
 								"[" << vCS() << "]" << ";\n";
 
 		if ( !limitLow || !limitHigh ) {
 			out <<
 				"	}\n"
 				"	else {\n"
-				"		_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
+				"		_trans = " << CAST("int") << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
 				"	}\n"
 				"\n";
 		}
@@ -714,7 +714,7 @@ void Flat::LOCATE_TRANS()
 
 	if ( condSpaceList.length() > 0 ) {
 		out <<
-			"	_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
+			"	_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 			"\n";
 
 		out <<
@@ -742,7 +742,7 @@ void Flat::LOCATE_TRANS()
 
 		out << 
 			"	}\n"
-			"	_cond += (" << UINT() << ")_cpc;\n";
+			"	_cond += " << CAST( UINT() ) << "_cpc;\n";
 	}
 	
 	out <<

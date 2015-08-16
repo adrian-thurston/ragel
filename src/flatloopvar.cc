@@ -380,11 +380,11 @@ void FlatLoopVar::writeExec()
 			if ( redFsm->anyEofTrans() ) {
 				out <<
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+					"		_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
 
 				if ( condSpaceList.length() > 0 ) {
 					out <<
-						"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n";
+						"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
 				}
 
 				out <<
@@ -401,7 +401,7 @@ void FlatLoopVar::writeExec()
 					"	" << UINT() << " __nacts;\n"
 					"	__acts = offset( " << ARR_REF( actions ) << ", " <<
 							ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
-					"	__nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", __acts );\n"
+					"	__nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", __acts );\n"
 					"	__acts += 1;\n"
 					"	while ( __nacts > 0 ) {\n"
 					"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
@@ -434,7 +434,7 @@ void FlatLoopVar::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
@@ -460,14 +460,14 @@ void FlatLoopVar::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = (int)" << ARR_REF( condTargs ) << "[" << cond << "];\n"
+		"	" << vCS() << " = " << CAST( "int" ) << ARR_REF( condTargs ) << "[" << cond << "];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
 			"	if ( " << ARR_REF( condActions ) << "[" << cond << "] != 0 ) {\n"
 			"		_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[" << cond << "]" << " );\n"
-			"		_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"		_nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"		_acts += 1;\n"
 			"		while ( _nacts > 0 )\n	{\n"
 			"			switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
@@ -492,7 +492,7 @@ void FlatLoopVar::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";

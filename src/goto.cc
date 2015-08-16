@@ -114,7 +114,7 @@ void Goto::NFA_PUSH()
 		out <<
 			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
 			"		int alt; \n"
-			"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[(int)" <<
+			"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 						ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
 			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[(int)" <<
 							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
@@ -122,8 +122,8 @@ void Goto::NFA_PUSH()
 
 		if ( redFsm->bAnyNfaPushPops ) {
 			out <<
-				"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[(int)" <<
-								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+				"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[" <<
+								CAST("int") << ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
 				"\n"
 				"			switch ( " << ARR_REF( nfaPushActions ) << "[(int)" <<
 								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt] ) {\n";

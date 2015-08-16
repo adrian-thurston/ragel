@@ -189,7 +189,7 @@ std::ostream &SwitchLoopGoto::EXEC_FUNCS()
 		out << "	_nbreak = 0;\n";
 
 	out <<
-		"	_nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+		"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
 		"	_acts += 1;\n"
 		"	while ( _nacts > 0 ) {\n"
 		"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
@@ -257,7 +257,7 @@ void SwitchLoopGoto::writeExec()
 		out <<
 			"	_acts = " << OFFSET( ARR_REF( actions ),
 					ARR_REF( fromStateActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	_nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "_acts" ) << "; _acts += 1;\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << "; _acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
@@ -287,7 +287,7 @@ void SwitchLoopGoto::writeExec()
 		out <<
 			"	_acts = " << OFFSET( ARR_REF( actions ),
 					ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	_nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "_acts" ) << "; _acts += 1;\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << "; _acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
@@ -346,7 +346,7 @@ void SwitchLoopGoto::writeExec()
 				"	" << UINT() << " __nacts;\n"
 				"	__acts = " << OFFSET( ARR_REF( actions ), 
 						ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
-				"	__nacts = (" << UINT() << ") " << DEREF( ARR_REF( actions ), "__acts" ) << "; __acts += 1;\n"
+				"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << "; __acts += 1;\n"
 				"	while ( __nacts > 0 ) {\n"
 				"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
 				EOF_ACTION_SWITCH() <<

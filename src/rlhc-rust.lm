@@ -135,7 +135,7 @@ namespace rust_gen
 			embedded_host( E1 )
 			expr_factor( E2 )
 		}
-		case [`( type `) expr_factor]
+		case [`cast `( type `) expr_factor]
 		{
 			expr_factor( ExprFactor._expr_factor )
 		}

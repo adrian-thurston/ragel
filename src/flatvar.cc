@@ -95,10 +95,10 @@ void FlatVar::LOCATE_TRANS()
 #if 0
 	out <<
 		"	_keys = offset( " << ARR_REF( keys ) << ", " << ARR_REF( keyOffsets ) << "[" << vCS() << "]" << " );\n"
-		"	_trans = (" << UINT() << ")" << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
+		"	_trans = " << CAST( UINT() ) << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
 		"	_have = 0;\n"
 		"\n"
-		"	_klen = (int)" << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
+		"	_klen = " << CAST("int") << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		index " << ALPH_TYPE() << " _lower;\n"
 		"		index " << ALPH_TYPE() << " _mid;\n"
@@ -112,18 +112,18 @@ void FlatVar::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > deref( " << ARR_REF( keys ) << ", _mid ) )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_trans += " << "(" << UINT() << ")" << "(_mid - _keys);\n"
+		"				_trans += " << CAST( UINT() ) << "(_mid - _keys);\n"
 		"				_have = 1;\n"
 		"			}\n"
 		"		}\n"
 		"		if ( _have == 0 ) {\n"
 		"			_keys += _klen;\n"
-		"			_trans += (" << UINT() << ")_klen;\n"
+		"			_trans += " << CAST( UINT() ) << "_klen;\n"
 		"		}\n"
 		"	}\n"
 		"\n"
 		"	if ( _have == 0 ) {\n"
-		"	_klen = (int)" << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
+		"	_klen = " << CAST( "int" ) << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
 		"	if ( _klen > 0 ) {\n"
 		"		index " << ALPH_TYPE() << " _lower;\n"
 		"		index " << ALPH_TYPE() << " _mid;\n"
@@ -137,12 +137,12 @@ void FlatVar::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > deref( " << ARR_REF( keys ) << ", _mid + 1 ) )\n"
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
-		"				_trans += " << "(" << UINT() << ")" << "((_mid - _keys)>>1);\n"
+		"				_trans += " << CAST( UINT() ) << "((_mid - _keys)>>1);\n"
 		"				_have = 1;\n"
 		"			}\n"
 		"		}\n"
 		"		if ( _have == 0 )\n"
-		"			_trans += (" << UINT() << ")_klen;\n"
+		"			_trans += " << CAST( UINT() ) << "_klen;\n"
 		"	}\n"
 		"	}\n"
 		"\n";
@@ -150,7 +150,7 @@ void FlatVar::LOCATE_TRANS()
 
 	if ( redFsm->classMap == 0 ) {
 		out <<
-			"	_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
+			"	_trans = " << CAST( "int" ) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
 	}
 	else {
 		long lowKey = redFsm->lowKey.getVal();
@@ -181,22 +181,22 @@ void FlatVar::LOCATE_TRANS()
 		}
 
 		out <<
-			"       int _ic = (int)" << ARR_REF( charClass ) << "[" << GET_KEY() <<
+			"       int _ic = " << CAST( "int" ) << ARR_REF( charClass ) << "[" << GET_KEY() <<
 							" - " << lowKey << "];\n"
-			"		if ( _ic <= (int)" << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
-						"_ic >= (int)" << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
-			"			_trans = (int)" << DEREF( ARR_REF( indicies ),
-								"_inds + (int)( _ic - (int)" + DEREF( ARR_REF( keys ),
+			"		if ( _ic <= " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
+						"_ic >= " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
+			"			_trans = " << CAST( "int" ) << DEREF( ARR_REF( indicies ),
+								"_inds + " + CAST("int") + "( _ic - " + CAST("int") + DEREF( ARR_REF( keys ),
 								"_keys" ) + " ) " ) << "; \n"
 			"		else\n"
-			"			_trans = (int)" << ARR_REF( indexDefaults ) <<
+			"			_trans = " << CAST( "int" ) << ARR_REF( indexDefaults ) <<
 								"[" << vCS() << "]" << ";\n";
 
 		if ( !limitLow || !limitHigh ) {
 			out <<
 				"	}\n"
 				"	else {\n"
-				"		_trans = (int)" << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
+				"		_trans = " << CAST( "int" ) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
 				"	}\n"
 				"\n";
 		}
@@ -205,7 +205,7 @@ void FlatVar::LOCATE_TRANS()
 
 	if ( condSpaceList.length() > 0 ) {
 		out <<
-			"	_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
+			"	_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 			"\n";
 
 		out <<
@@ -231,7 +231,7 @@ void FlatVar::LOCATE_TRANS()
 
 		out << 
 			"	}\n"
-			"	_cond += (" << UINT() << ")_cpc;\n";
+			"	_cond += " << CAST( UINT() ) << "_cpc;\n";
 	}
 	
 //	out <<
@@ -245,7 +245,7 @@ void FlatVar::LOCATE_COND()
 	out <<
 		"	_ckeys = offset( " << ARR_REF( condKeys ) << ",  " << ARR_REF( transOffsets ) << "[_trans] );\n"
 		"	_klen = (int) " << ARR_REF( transLengths ) << "[_trans];\n"
-		"	_cond = (" << UINT() << ") " << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 		"	_have = 0;\n"
 		"\n";
 
@@ -289,7 +289,7 @@ void FlatVar::LOCATE_COND()
 		"			else if ( _cpc > (int)deref( " << ARR_REF( condKeys ) << ", _mid ) )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_cond += (" << UINT() << ")(_mid - _ckeys);\n"
+		"				_cond += " << CAST( UINT() ) << "(_mid - _ckeys);\n"
 		"				_have = 1;\n"
 		"			}\n"
 		"		}\n"

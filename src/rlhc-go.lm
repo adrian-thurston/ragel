@@ -141,7 +141,7 @@ namespace go_gen
 			embedded_host( E1 )
 			expr_factor( E2 )
 		}
-		case ['(' Type: type ')' expr_factor]
+		case [`cast '(' Type: type ')' expr_factor]
 		{
 			type( Type )
 			send Parser ['(']

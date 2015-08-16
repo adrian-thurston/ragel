@@ -145,12 +145,10 @@ namespace c_gen
 			embedded_host( E1 )
 			expr_factor( E2 )
 		}
-		case [Open: `( Type: type Close: `) expr_factor]
+		case [`cast `( T: type `) F: expr_factor]
 		{
-			send Parser [Open]
-			type( Type )
-			send Parser [Close]
-			expr_factor( ExprFactor._expr_factor )
+			send Parser 
+				"( [type( T )] ) [expr_factor( F )]"
 		}
 		default {
 			# Catches cases not specified

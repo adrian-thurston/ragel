@@ -364,6 +364,13 @@ string CodeGen::ARRAY_TYPE( unsigned long maxVal )
 	return ret;
 }
 
+string CodeGen::CAST( string type )
+{
+	if ( backend == Direct )
+		return "(" + type + ")";
+	else
+		return "cast(" + type + ")";
+}
 
 /* Write out the fsm name. */
 string CodeGen::FSM_NAME()

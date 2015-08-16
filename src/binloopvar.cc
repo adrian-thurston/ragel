@@ -334,8 +334,8 @@ void BinaryLoopVar::writeExec()
 				TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 				out <<
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-					"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
+					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 					"		_have = 1;\n"
 					"	}\n";
 					matchCondLabelUsed = true;
@@ -349,7 +349,7 @@ void BinaryLoopVar::writeExec()
 					"	" << UINT() << " __nacts;\n"
 					"	__acts = offset( " << ARR_REF( actions ) << ", " <<
 							ARR_REF( eofActions ) << "[" << vCS() << "]" << " );\n"
-					"	__nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", __acts );\n"
+					"	__nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", __acts );\n"
 					"	__acts += 1;\n"
 					"	while ( __nacts > 0 ) {\n"
 					"		switch ( deref( " << ARR_REF( actions ) << ", __acts ) ) {\n";
@@ -382,7 +382,7 @@ void BinaryLoopVar::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( fromStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";
@@ -409,14 +409,14 @@ void BinaryLoopVar::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = (int)" << ARR_REF( condTargs ) << "[_cond];\n"
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
 			"	if ( " << ARR_REF( condActions ) << "[_cond] != 0 ) {\n"
 			"		_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( condActions ) << "[_cond]" << " );\n"
-			"		_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"		_nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"		_acts += 1;\n"
 			"		while ( _nacts > 0 )\n	{\n"
 			"			switch ( deref( " << ARR_REF( actions ) << ", _acts ) )\n"
@@ -441,7 +441,7 @@ void BinaryLoopVar::writeExec()
 		out <<
 			"	_acts = offset( " << ARR_REF( actions ) << ", " << ARR_REF( toStateActions ) <<
 					"[" << vCS() << "]" << " );\n"
-			"	_nacts = (" << UINT() << ") deref( " << ARR_REF( actions ) << ", _acts );\n"
+			"	_nacts = " << CAST( UINT() ) << " deref( " << ARR_REF( actions ) << ", _acts );\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( deref( " << ARR_REF( actions ) << ", _acts ) ) {\n";

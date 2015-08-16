@@ -335,11 +335,11 @@ void FlatExpVar::writeExec()
 			if ( redFsm->anyEofTrans() ) {
 				out <<
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
 
 				if ( condSpaceList.length() > 0 ) {
 					out << 
-						"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n";
+						"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
 				}
 
 				out <<
@@ -397,7 +397,7 @@ void FlatExpVar::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = (int)" << ARR_REF( condTargs ) << "[" << cond << "];\n"
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -482,7 +482,7 @@ void FlatExpVar::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = (int) " << ARR_REF( condTargs ) << "[_cond];\n"
+		"	" << vCS() << " = " << CAST( "int" ) << ARR_REF( condTargs ) << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -554,8 +554,8 @@ void FlatExpVar::writeExec()
 			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _match_cond;\n"
 				"	}\n";
 		}

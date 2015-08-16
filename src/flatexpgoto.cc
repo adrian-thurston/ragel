@@ -320,7 +320,7 @@ void FlatExpGoto::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out << 
-		"	" << vCS() << " = (int) " << ARR_REF( condTargs ) << "[" << cond << "];\n\n";
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
@@ -390,11 +390,11 @@ void FlatExpGoto::writeExec()
 		if ( redFsm->anyEofTrans() ) {
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = (int)" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+				"		_trans = " << CAST("int") << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
 
 			if ( condSpaceList.length() > 0 ) {
 				out <<
-					"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n";
+					"		_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n";
 			}
 
 			out <<

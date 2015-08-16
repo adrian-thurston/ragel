@@ -180,6 +180,8 @@ protected:
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 
+	string CAST( string type );
+
 	string ARR_TYPE( const TableArray &ta )
 		{ return ta.type; }
 

@@ -354,8 +354,8 @@ void BinaryExpVar::writeExec()
 				TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 				out <<
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-					"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
+					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 					"		_have = 1;\n"
 					"	}\n";
 					matchCondLabelUsed = true;
@@ -411,7 +411,7 @@ void BinaryExpVar::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = (int)" << ARR_REF( condTargs ) << "[_cond];\n"
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -496,7 +496,7 @@ void BinaryExpVar::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = (int) " << ARR_REF( condTargs ) << "[_cond];\n"
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -568,8 +568,8 @@ void BinaryExpVar::writeExec()
 			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = (" << UINT() << ")" << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = (" << UINT() << ")" << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _match_cond;\n"
 				"	}\n";
 		}

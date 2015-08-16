@@ -136,7 +136,7 @@ namespace cs_gen
 			embedded_host( E1 )
 			expr_factor( E2 )
 		}
-		case [Open: `( Type: type Close: `) expr_factor]
+		case [`cast Open: `( Type: type Close: `) expr_factor]
 		{
 			send Parser [Open]
 			type( Type )
