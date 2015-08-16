@@ -1,5 +1,6 @@
 /*
  * @LANG: c
+ * @PROHIBIT_FEATURES: --var-backend
  *
  * Test growable stack.
  */

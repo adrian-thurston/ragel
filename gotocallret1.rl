@@ -1,6 +1,7 @@
 /*
  * @LANG: indep
  * @PROHIBIT_LANGUAGES: ruby ocaml
+ * @PROHIBIT_FEATURES: --var-backend
  * @NEEDS_EOF: yes
  */
 
