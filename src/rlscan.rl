@@ -50,29 +50,29 @@ enum InlineBlockType
 
 char *newTokdata( int toklen )
 {
-	char *tokdata = new char[sizeof(char*) + toklen + 1];
-	return tokdata + sizeof(char*);
+	char *tokdata = new char[sizeof(TokHead) + toklen + 1];
+	return tokdata + sizeof(TokHead);
 }
 
 void deleteTokdata( char *tokdata )
 {
 	if ( tokdata )
-		delete[] ( tokdata - sizeof(char*) );
+		delete[] ( tokdata - sizeof(TokHead) );
 }
 
 void linkTokdata( Parser6 *parser, char *tokdata )
 {
-	char *head = tokdata - sizeof(char*);
-	*((char***)head) = (char**)parser->headt;
-	parser->headt = (char**)head;
+	TokHead *head = (TokHead*)( tokdata - sizeof(TokHead) );
+	head->next = parser->tokHead;
+	parser->tokHead = head;
 }
 
 void clearTokdata( Parser6 *parser )
 {
-	while ( parser->headt != 0 ) {
-		char **next = *((char***)parser->headt);
-		delete[] (char*)parser->headt;
-		parser->headt = next;
+	while ( parser->tokHead != 0 ) {
+		TokHead *next = parser->tokHead->next;
+		delete[] (char*)parser->tokHead;
+		parser->tokHead = next;
 	}
 }
 

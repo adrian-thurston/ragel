@@ -45,6 +45,11 @@ struct IncludeHistoryItem
 
 typedef Vector<IncludeHistoryItem> IncludeHistory;
 
+struct TokHead
+{
+	TokHead *next;
+};
+
 struct Parser6
 {
 %%{
@@ -139,7 +144,7 @@ struct Parser6
 	Vector<bool> exportContext;
 	IncludeHistory includeHistory;
 
-	char **headt;
+	TokHead *tokHead;
 
 	Parser6 *prev, *next;
 };

@@ -36,7 +36,7 @@ Parser6::Parser6( InputData *id, const char *fileName, char *sectionName,
 :
 	sectionName(sectionName),
 	hostLang(hostLang),
-	headt(0)
+	tokHead(0)
 {
 	pd = new ParseData( id, std::string(fileName), std::string(sectionName),
 			id->nextMachineId++, sectionLoc, hostLang, minimizeLevel, minimizeOpt );
