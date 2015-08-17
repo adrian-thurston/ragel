@@ -133,6 +133,7 @@ struct Scanner
 
 	Section *section;
 	bool sectionPass;
+
 };
 
 #endif

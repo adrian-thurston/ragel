@@ -48,6 +48,33 @@ enum InlineBlockType
 #define PATH_SEP '/'
 #endif
 
+char *newTokdata( int toklen )
+{
+	char *tokdata = new char[sizeof(char*) + toklen + 1];
+	return tokdata + sizeof(char*);
+}
+
+void deleteTokdata( char *tokdata )
+{
+	if ( tokdata )
+		delete[] ( tokdata - sizeof(char*) );
+}
+
+void linkTokdata( Parser6 *parser, char *tokdata )
+{
+	char *head = tokdata - sizeof(char*);
+	*((char***)head) = (char**)parser->headt;
+	parser->headt = (char**)head;
+}
+
+void clearTokdata( Parser6 *parser )
+{
+	while ( parser->headt != 0 ) {
+		char **next = *((char***)parser->headt);
+		delete[] (char*)parser->headt;
+		parser->headt = next;
+	}
+}
 
 /*
  * The Scanner for Importing
@@ -467,6 +494,7 @@ void Scanner::handleImport()
 			{
 				id.curItem = id.curItem->next;
 				id.curItem->pd = parser->pd;
+				id.curItem->parser = parser;
 				id.checkLastRef( id.curItem );
 			}
 		}
@@ -500,11 +528,20 @@ void Scanner::handleImport()
 	action handle_token
 	{
 		if ( sectionPass ) {
+			deleteTokdata( tokdata );
 		}
 		else {
 			/* Send the token off to the parser. */
-			if ( active() )
+			if ( active() ) {
+				if ( tokdata != 0 ) {
+					linkTokdata( parser, tokdata );
+				}
+
 				directToParser( parser, fileName, line, column, type, tokdata, toklen );
+			}
+			else {
+				deleteTokdata( tokdata );
+			}
 		}
 	}
 
@@ -531,13 +568,14 @@ void Scanner::token( int type )
 	token( type, 0, 0 );
 }
 
+
 void Scanner::token( int type, char *start, char *end )
 {
 	char *tokdata = 0;
 	int toklen = 0;
 	if ( start != 0 ) {
 		toklen = end-start;
-		tokdata = new char[toklen+1];
+		tokdata = newTokdata( toklen + 1 );
 		memcpy( tokdata, start, toklen );
 		tokdata[toklen] = 0;
 	}
@@ -616,8 +654,10 @@ void Scanner::endSection( )
 
 			id.curItem = id.curItem->next;
 
-			if ( parser != 0 )
+			if ( parser != 0 ) {
 				id.curItem->pd = parser->pd;
+				id.curItem->parser = parser;
+			}
 
 			id.checkLastRef( id.curItem );
 		}

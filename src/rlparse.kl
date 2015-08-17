@@ -35,7 +35,8 @@ Parser6::Parser6( InputData *id, const char *fileName, char *sectionName,
 		MinimizeOpt minimizeOpt )
 :
 	sectionName(sectionName),
-	hostLang(hostLang)
+	hostLang(hostLang),
+	headt(0)
 {
 	pd = new ParseData( id, std::string(fileName), std::string(sectionName),
 			id->nextMachineId++, sectionLoc, hostLang, minimizeLevel, minimizeOpt );
@@ -1690,6 +1691,17 @@ int Parser6::parseLangEl( int type, const Token *token )
 {
 	%% write exec;
 	return errCount == 0 ? 0 : -1;
+}
+
+void Parser6::clear()
+{
+	while ( block != 0 ) {
+		Parser6_Block *next = block->next;
+		free( block );
+		block = next;
+	}
+
+	clearTokdata( this );
 }
 
 void Parser6::tryMachineDef( const InputLoc &loc, char *name, 

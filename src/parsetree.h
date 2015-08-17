@@ -226,7 +226,9 @@ struct VarDef
 {
 	VarDef( std::string name, MachineDef *machineDef )
 		: name(name), machineDef(machineDef), isExport(false) { }
-	
+
+	~VarDef();
+
 	/* Parse tree traversal. */
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( const InputLoc &loc, ParseData *pd );
@@ -335,13 +337,22 @@ struct MachineDef
 	};
 
 	MachineDef( Join *join )
-		: join(join), longestMatch(0), lengthDef(0), type(JoinType) {}
+		: join(join), longestMatch(0), lengthDef(0), nfaUnion(0),
+		type(JoinType) {}
+
 	MachineDef( LongestMatch *longestMatch )
-		: join(0), longestMatch(longestMatch), lengthDef(0), type(LongestMatchType) {}
+		: join(0), longestMatch(longestMatch), lengthDef(0), nfaUnion(0),
+		type(LongestMatchType) {}
+
 	MachineDef( LengthDef *lengthDef )
-		: join(0), longestMatch(0), lengthDef(lengthDef), type(LengthDefType) {}
+		: join(0), longestMatch(0), lengthDef(lengthDef), nfaUnion(0),
+		type(LengthDefType) {}
+
 	MachineDef( NfaUnion *nfaUnion )
-		: join(0), longestMatch(0), lengthDef(0), nfaUnion(nfaUnion), type(NfaUnionType) {}
+		: join(0), longestMatch(0), lengthDef(0), nfaUnion(nfaUnion),
+		type(NfaUnionType) {}
+
+	~MachineDef();
 
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
@@ -362,6 +373,11 @@ struct Join
 	/* Construct with the first expression. */
 	Join( Expression *expr );
 	Join( const InputLoc &loc, Expression *expr );
+
+	~Join()
+	{
+		exprList.empty();
+	}
 
 	/* Tree traversal. */
 	FsmAp *walk( ParseData *pd );

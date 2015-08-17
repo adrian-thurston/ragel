@@ -431,6 +431,8 @@ void InputData::checkLastRef( InputItem *ii )
 		ParseData *pd = ii->pd;
 
 		if ( pd->instanceList.length() > 0 ) {
+			terminateParser( ii->parser );
+
 			pd->prepareMachineGen( 0, hostLang );
 
 			if ( gblErrorCount > 0 )
@@ -467,11 +469,9 @@ void InputData::checkLastRef( InputItem *ii )
 			 * memory for it. */
 			if ( lastFlush->pd != 0 && lastFlush->section->lastReference == lastFlush ) {
 				if ( lastFlush->pd->instanceList.length() > 0 ) {
-					delete lastFlush->pd->sectionGraph;
-					delete lastFlush->pd->cgd->redFsm;
-
-					lastFlush->pd->sectionGraph = 0;
-					lastFlush->pd->cgd->redFsm = 0;
+					lastFlush->pd->clear();
+					if ( lastFlush->parser != 0 )
+						lastFlush->parser->clear();
 				}
 			}
 
@@ -489,6 +489,19 @@ void InputData::makeFirstInputItem()
 	firstInputItem->loc.line = 1;
 	firstInputItem->loc.col = 1;
 	inputItems.append( firstInputItem );
+}
+
+/* Send eof to all parsers. */
+void InputData::terminateParser( Parser6 *parser )
+{
+	/* FIXME: a proper token is needed here. Suppose we should use the
+	 * location of EOF in the last file that the parser was referenced in. */
+	InputLoc loc;
+	loc.fileName = "<EOF>";
+	loc.line = 0;
+	loc.col = 0;
+
+	parser->token( loc, Parser6_tk_eof, 0, 0 );
 }
 
 /* Send eof to all parsers. */
@@ -535,8 +548,6 @@ void InputData::parse()
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	/* Now send EOF to all parsers. */
-	terminateAllParsers();
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
@@ -547,10 +558,12 @@ void InputData::processKelbt()
 {
 	if ( generateXML ) {
 		parse();
+		terminateAllParsers();
 		processXML();
 	}
 	else if ( generateDot ) {
 		parse();
+		terminateAllParsers();
 		processDot();
 	}
 	else {

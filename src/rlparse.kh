@@ -113,6 +113,7 @@ struct Parser6
 
 	void init();
 	int parseLangEl( int type, const Token *token );
+	void clear();
 
 	Parser6( InputData *id, const char *fileName, char *sectionName,
 			const InputLoc &sectionLoc, const HostLang *hostLang,
@@ -138,9 +139,13 @@ struct Parser6
 	Vector<bool> exportContext;
 	IncludeHistory includeHistory;
 
+	char **headt;
+
 	Parser6 *prev, *next;
 };
 
 %% write token_defs;
+
+void clearTokdata( Parser6 *parser );
 
 #endif

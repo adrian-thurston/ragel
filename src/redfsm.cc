@@ -74,8 +74,18 @@ RedFsmAp::RedFsmAp( FsmCtx *fsmCtx )
 	bAnyNfaStates(false),
 	bAnyNfaPushPops(false),
 	bAnyNfaPushes(false),
-	bAnyNfaPops(false)
+	bAnyNfaPops(false),
+	bAnyTransCondRefs(false),
+	bAnyNfaCondRefs(false)
 {
+}
+
+RedFsmAp::~RedFsmAp()
+{
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
+		delete[] st->transList;
+
+	delete[] allStates;
 }
 
 /* Does the machine have any actions. */

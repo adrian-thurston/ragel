@@ -957,7 +957,7 @@ void CodeGenData::initActionTableList( unsigned long length )
 
 void CodeGenData::initStateList( unsigned long length )
 {
-	allStates = new RedStateAp[length];
+	redFsm->allStates = allStates = new RedStateAp[length];
 	for ( unsigned long s = 0; s < length; s++ )
 		redFsm->stateList.append( allStates+s );
 

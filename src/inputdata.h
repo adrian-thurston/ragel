@@ -39,6 +39,7 @@ struct InputItem
 	:
 		section(0),
 		pd(0),
+		parser(0),
 		processed(false)
 	{}
 
@@ -53,6 +54,7 @@ struct InputItem
 	std::string name;
 	Section *section;
 	ParseData *pd;
+	Parser6 *parser;
 	Vector<std::string> writeArgs;
 
 	InputLoc loc;
@@ -251,6 +253,7 @@ struct InputData
 
 	void parseArgs( int argc, const char **argv );
 	void checkArgs();
+	void terminateParser( Parser6 *parser );
 	void terminateAllParsers();
 
 	void runRlhc();

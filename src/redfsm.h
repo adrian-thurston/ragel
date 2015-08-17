@@ -608,6 +608,7 @@ typedef BstSet< RedTransAp*, CmpOrd<RedTransAp*> > RedTransSet;
 struct RedFsmAp
 {
 	RedFsmAp( FsmCtx *fsmCtx );
+	~RedFsmAp();
 
 	KeyOps *keyOps;
 	FsmCtx *fsmCtx;
@@ -632,6 +633,7 @@ struct RedFsmAp
 	RedCondAp *errCond;
 	RedTransAp *errActionTrans;
 	RedStateAp *firstFinState;
+	RedStateAp *allStates;
 	int numFinStates;
 	int nParts;
 

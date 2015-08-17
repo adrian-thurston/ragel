@@ -151,6 +151,11 @@ void VarDef::resolveNameRefs( ParseData *pd )
 	pd->popNameScope( nameFrame );
 }
 
+VarDef::~VarDef()
+{
+	delete machineDef;
+}
+
 InputLoc LongestMatchPart::getLoc()
 { 
 	return action != 0 ? action->loc : semiLoc;
@@ -833,6 +838,11 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	return ret;
 }
 
+NfaUnion::~NfaUnion()
+{
+	
+}
+
 void nfaCheckResult( long code, long id, const char *scode )
 {
 	cout << code << " " << id << " " << scode << endl;
@@ -958,6 +968,17 @@ void MachineDef::resolveNameRefs( ParseData *pd )
 	}
 }
 
+MachineDef::~MachineDef()
+{
+	if ( join != 0 )
+		delete join;
+	if ( longestMatch != 0 )
+		delete longestMatch;
+	if ( lengthDef != 0 )
+		delete lengthDef;
+	if ( nfaUnion != 0 )
+		delete nfaUnion;
+}
 
 /* Construct with a location and the first expression. */
 Join::Join( const InputLoc &loc, Expression *expr )
@@ -1096,18 +1117,10 @@ void Join::resolveNameRefs( ParseData *pd )
 /* Clean up after an expression node. */
 Expression::~Expression()
 {
-	switch ( type ) {
-		case OrType: case IntersectType: case SubtractType:
-		case StrongSubtractType:
-			delete expression;
-			delete term;
-			break;
-		case TermType:
-			delete term;
-			break;
-		case BuiltinType:
-			break;
-	}
+	if ( expression )
+		delete expression;
+	if ( term )
+		delete term;
 }
 
 /* Evaluate a single expression node. */
@@ -1215,18 +1228,10 @@ void Expression::resolveNameRefs( ParseData *pd )
 /* Clean up after a term node. */
 Term::~Term()
 {
-	switch ( type ) {
-		case ConcatType:
-		case RightStartType:
-		case RightFinishType:
-		case LeftType:
-			delete term;
-			delete factorWithAug;
-			break;
-		case FactorWithAugType:
-			delete factorWithAug;
-			break;
-	}
+	if ( term )
+		delete term;
+	if ( factorWithAug )
+		delete factorWithAug;
 }
 
 /* Evaluate a term node. */

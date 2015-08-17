@@ -477,9 +477,6 @@ ParseData::ParseData( InputData *id, std::string fileName, string sectionName,
 /* Clean up the data collected during a parse. */
 ParseData::~ParseData()
 {
-	/* Delete all the nodes in the action list. Will cause all the
-	 * string data that represents the actions to be deallocated. */
-	actionList.empty();
 }
 
 /* Make a name id in the current name instantiation scope if it is not
@@ -1497,4 +1494,19 @@ void ParseData::generateXML( ostream &out )
 
 	/* Write out with it. */
 	codeGen.writeXML();
+}
+
+void ParseData::clear()
+{
+	delete cgd->redFsm;
+	cgd->redFsm = 0;
+
+	delete sectionGraph;
+	sectionGraph = 0;
+
+	graphDict.empty();
+
+	/* Delete all the nodes in the action list. Will cause all the
+	 * string data that represents the actions to be deallocated. */
+	actionList.empty();
 }

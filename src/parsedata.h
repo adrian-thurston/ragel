@@ -72,6 +72,11 @@ struct GraphDictEl
 		: key(k), value(0), isInstance(false) { }
 	GraphDictEl( std::string k, VarDef *value ) 
 		: key(k), value(value), isInstance(false) { }
+	
+	~GraphDictEl()
+	{
+		delete value;
+	}
 
 	std::string getKey() { return key; }
 
@@ -353,6 +358,8 @@ struct ParseData
 	void nfaTermCheckPlusZero();
 	void nfaTermCheckRepZero();
 	void nfaTermCheckZeroReps();
+
+	void clear();
 
 	/* Make name ids to name inst pointers. */
 	NameInst **nameIndex;
