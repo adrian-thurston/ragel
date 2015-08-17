@@ -135,9 +135,10 @@ namespace rust_gen
 			embedded_host( E1 )
 			expr_factor( E2 )
 		}
-		case [`cast `( type `) expr_factor]
+		case [`cast `( T: type `) E: expr_factor]
 		{
-			expr_factor( ExprFactor._expr_factor )
+			send Parser
+				"( [expr_factor( E )] ) as [type(T)]"
 		}
 		default {
 			# Catches cases not specified
