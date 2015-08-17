@@ -1868,20 +1868,21 @@ private:
 			TransAp *destParent, CondAp *destTrans, CondAp *srcTrans );
 
 public:
-	void outTransCopy( StateAp *dest, TransAp *srcList );
-
-	void mergeOutConds( StateAp *destState, StateAp *srcState, bool leaving = false );
-
-	/* Merge a set of states into newState. */
-	void mergeStates( StateAp *destState, StateAp **srcStates, int numSrc );
-
 	void prepareNfaRound();
 	void finalizeNfaRound();
 
-	void nfaMergeStates( StateAp *destState,
-			StateAp **srcStates, int numSrc );
+	void outTransCopy( StateAp *dest, TransAp *srcList );
+	void nfaMergeStates( StateAp *destState, StateAp **srcStates, int numSrc );
+	void mergeOutConds( StateAp *destState, StateAp *srcState, bool leaving = false );
+	void checkPriorInteractions( StateAp *destState, StateAp *srcState );
+	void mergeNfaTransions( StateAp *destState, StateAp *srcState );
+	void mergeStateProperties( StateAp *destState, StateAp *srcState );
 	void mergeStatesLeaving( StateAp *destState, StateAp *srcState );
+	void mergeStateBits( StateAp *destState, StateAp *srcState );
 	void mergeStates( StateAp *destState, StateAp *srcState, bool leaving = false );
+
+	/* Merge a set of states into destState. */
+	void mergeStateList( StateAp *destState, StateAp **srcStates, int numSrc );
 
 	/* Make all states that are combinations of other states and that
 	 * have not yet had their out transitions filled in. This will 

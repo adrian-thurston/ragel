@@ -189,6 +189,9 @@ StateAp *FsmAp::copyStateForExpansion( StateAp *srcState )
 
 void FsmAp::mergeOutConds( StateAp *destState, StateAp *srcState, bool leaving )
 {
+	if ( destState == srcState )
+		return;
+
 	bool bothFinal = destState->isFinState() && srcState->isFinState();
 	bool unionOp = !leaving;
 				   

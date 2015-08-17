@@ -456,7 +456,7 @@ void FsmAp::doOr( FsmAp *other )
 	setStartState( addState() );
 
 	/* Merge the start states. */
-	mergeStates( startState, startStateSet.data, startStateSet.length() );
+	mergeStateList( startState, startStateSet.data, startStateSet.length() );
 
 	/* Fill in any new states made from merging. */
 	fillInStates();
@@ -737,7 +737,7 @@ void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 			stateSet.insert( en->value );
 
 		/* Merge in the set of start states into the new start state. */
-		mergeStates( newStart, stateSet.data, stateSet.length() );
+		mergeStateList( newStart, stateSet.data, stateSet.length() );
 	}
 
 	/* Take a copy of the final state set, before unsetting them all. This
@@ -966,11 +966,17 @@ void FsmAp::logOutCondTransfer( StateAp *destState )
  * not be given any in transitions. */
 void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 {
-	if ( !hasOutData( destState ) )
+	if ( !hasOutData( destState ) ) {
+		/* Perform the merge, indicating we are leaving, which will affect how
+		 * out conds are merged. */
 		mergeStates( destState, srcState, true );
+	}
 	else {
+		/* Dup the source state. */
 		StateAp *ssMutable = addState();
-		mergeStates( ssMutable, srcState, false );
+		mergeStates( ssMutable, srcState );
+
+		/* Do out data transfer (and out condition embedding). */
 		transferOutData( ssMutable, destState );
 
 		if ( destState->outCondSpace != 0 ) {
@@ -979,6 +985,8 @@ void FsmAp::mergeStatesLeaving( StateAp *destState, StateAp *srcState )
 					destState->outCondKeys );
 		}
 
+		/* Now we merge with dest, setting leaving = true. This dictates how
+		 * out conditions should be merged. */
 		mergeStates( destState, ssMutable, true );
 	}
 }
@@ -1001,10 +1009,8 @@ void FsmAp::checkEpsilonRegularInteraction( const PriorTable &t1, const PriorTab
 	}
 }
 
-void FsmAp::mergeStates( StateAp *destState, StateAp *srcState, bool leaving )
+void FsmAp::mergeStateProperties( StateAp *destState, StateAp *srcState )
 {
-	outTransCopy( destState, srcState->outList.head );
-
 	/* Draw in any properties of srcState into destState. */
 	if ( srcState == destState ) {
 		/* Duplicate the list to protect against write to source. The
@@ -1037,16 +1043,23 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState, bool leaving )
 		destState->eofActionTable.setActions( srcState->eofActionTable );
 		destState->guardedInTable.setPriors( srcState->guardedInTable );
 
-		/* Out conditins. */
-		mergeOutConds( destState, srcState, leaving );
 	}
 
+
+}
+
+void FsmAp::mergeStateBits( StateAp *destState, StateAp *srcState )
+{
 	/* Get bits and final state status. Note in the above code we depend on the
 	 * original final state status being present. */
 	destState->stateBits |= ( srcState->stateBits & ~STB_ISFINAL );
 	if ( srcState->isFinState() )
 		setFinState( destState );
+}
 
+void FsmAp::mergeNfaTransions( StateAp *destState, StateAp *srcState )
+{
+	/* Copy in any NFA transitions. */
 	if ( srcState->nfaOut != 0 ) {
 		if ( destState->nfaOut == 0 )
 			destState->nfaOut = new NfaTransList;
@@ -1060,7 +1073,10 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState, bool leaving )
 			attachToNfa( destState, nt->toState, trans );
 		}
 	}
+}
 
+void FsmAp::checkPriorInteractions( StateAp *destState, StateAp *srcState )
+{
 	/* Run a check on priority interactions between epsilon transitions and
 	 * regular transitions. This can't be used to affect machine construction,
 	 * only to check for priority guards. */
@@ -1085,7 +1101,30 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState, bool leaving )
 	}
 }
 
-void FsmAp::mergeStates( StateAp *destState, 
+void FsmAp::mergeStates( StateAp *destState, StateAp *srcState, bool leaving )
+{
+	/* Transitions. */
+	outTransCopy( destState, srcState->outList.head );
+
+	/* Properties such as out data, to/from actions. */
+	mergeStateProperties( destState, srcState );
+
+	/* Merge out conditions, depends on the operation (leaving or not). */
+	mergeOutConds( destState, srcState, leaving );
+
+	/* State bits, including final state stats. Out conds depnds on this
+	 * happening after. */
+	mergeStateBits( destState, srcState );
+
+	/* Draw in the NFA transitions. */
+	mergeNfaTransions( destState, srcState );
+
+	/* Hacked in check for priority interactions, allowing detection of some
+	 * bad situations. */
+	checkPriorInteractions( destState, srcState );
+}
+
+void FsmAp::mergeStateList( StateAp *destState, 
 		StateAp **srcStates, int numSrc )
 {
 	for ( int s = 0; s < numSrc; s++ )
@@ -1101,7 +1140,7 @@ void FsmAp::fillInStates()
 		StateAp *state = nfaList.head;
 
 		StateSet *stateSet = &state->stateDictEl->stateSet;
-		mergeStates( state, stateSet->data, stateSet->length() );
+		mergeStateList( state, stateSet->data, stateSet->length() );
 
 		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
 			detachStateDict( state, *s );
