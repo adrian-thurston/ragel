@@ -20,7 +20,7 @@ ragel_SOURCES = \
 	ipgoto.h xml.h dot.h asm.h rlparse.h \
 	\
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
-	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc \
+	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc fsmnfa.cc \
 	inputdata.cc common.cc redfsm.cc gendata.cc allocgen.cc \
 	rlscan.cc rlparse.cc codegen.cc \
 	binary.cc binloopgoto.cc binexpgoto.cc binvar.cc binloopvar.cc binexpvar.cc \
