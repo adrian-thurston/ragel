@@ -217,10 +217,12 @@ struct InputData
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();
 
+	void makeTranslateOutputFileName();
+	void flushRemaining();
 	void makeFirstInputItem();
 	void writeOutput();
 	void makeDefaultFileName();
-	void makeOutputStream();
+	void createOutputStream();
 	void openOutput();
 	void closeOutput();
 	void generateReduced();
@@ -243,7 +245,7 @@ struct InputData
 
 	void checkLastRef( InputItem *ii );
 
-	void parse();
+	void parseKelbt();
 	void processXML();
 	void processDot();
 	void processCode();

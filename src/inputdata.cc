@@ -163,7 +163,7 @@ void InputData::makeDefaultFileName()
 	}
 }
 
-void InputData::makeOutputStream()
+void InputData::createOutputStream()
 {
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( outputFileName != 0 ) {
@@ -315,7 +315,7 @@ void InputData::processXML()
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	makeOutputStream();
+	createOutputStream();
 
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -337,7 +337,7 @@ void InputData::processDot()
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	makeOutputStream();
+	createOutputStream();
 
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -387,13 +387,9 @@ void InputData::processCode()
 
 	makeDefaultFileName();
 
-	if ( backend == Translated ) {
-		origOutputFileName = outputFileName;
-		genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
-		outputFileName = genOutputFileName.c_str();
-	}
+	makeTranslateOutputFileName();
 
-	makeOutputStream();
+	createOutputStream();
 
 	/* Generates the reduced machine, which we use to write output. */
 	generateReduced();
@@ -517,7 +513,7 @@ void InputData::terminateAllParsers( )
 		pdel->value->token( loc, Parser6_tk_eof, 0, 0 );
 }
 
-void InputData::parse()
+void InputData::parseKelbt()
 {
 	/*
 	 * Ragel Parser from ragel 6.
@@ -554,43 +550,52 @@ void InputData::parse()
 		exit(1);
 }
 
+void InputData::flushRemaining()
+{
+	/* Flush remaining items. */
+	while ( lastFlush != 0 ) {
+		/* Flush out. */
+		writeOutput( lastFlush );
+
+		lastFlush = lastFlush->next;
+	}
+}
+
+void InputData::makeTranslateOutputFileName()
+{
+	if ( backend == Translated ) {
+		origOutputFileName = outputFileName;
+		genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
+		outputFileName = genOutputFileName.c_str();
+	}
+}
+
 void InputData::processKelbt()
 {
+	/* With the kelbt version we implement two parse passes. The first is used
+	 * to identify the last time that any given machine is referenced by a
+	 * ragel section. In the second pass we parse, compile, and emit as far
+	 * forward as possible when we encounter the last reference to a machine.
+	 * */
+	
 	if ( generateXML ) {
-		parse();
+		/* When generating XML or dot the inline features are disabled */
+		parseKelbt();
 		terminateAllParsers();
 		processXML();
 	}
 	else if ( generateDot ) {
-		parse();
+		parseKelbt();
 		terminateAllParsers();
 		processDot();
 	}
 	else {
 		makeDefaultFileName();
-
-		if ( backend == Translated ) {
-			origOutputFileName = outputFileName;
-			genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
-			outputFileName = genOutputFileName.c_str();
-		}
-
-		makeOutputStream();
-
+		makeTranslateOutputFileName();
+		createOutputStream();
 		openOutput();
-
-		parse();
-
-		if ( !generateXML && !generateDot ) {
-			/* Flush remaining items. */
-			while ( lastFlush != 0 ) {
-				/* Flush out. */
-				writeOutput( lastFlush );
-
-				lastFlush = lastFlush->next;
-			}
-		}
-
+		parseKelbt();
+		flushRemaining();
 		closeOutput();
 		runRlhc();
 	}
@@ -602,6 +607,10 @@ void InputData::processKelbt()
 void InputData::processColm()
 {
 #ifdef WITH_COLM
+
+	/* With this version we parse, load, process. It is very memory intensive,
+	 * but allows use of colm grammars for parsing. */
+
 	/*
 	 * Colm-based parser introduced in ragel 7. Uses more memory.
 	 */

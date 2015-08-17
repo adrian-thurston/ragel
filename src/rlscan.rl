@@ -240,7 +240,6 @@ void Scanner::pass( int token, char *start, char *end )
 	pass();
 }
 
-
 /*
  * The scanner for processing sections, includes, imports, etc.
  */
@@ -250,7 +249,6 @@ void Scanner::pass( int token, char *start, char *end )
 	alphtype int;
 	write data;
 }%%
-
 
 void Scanner::init( )
 {
