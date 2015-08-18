@@ -109,7 +109,7 @@ HostType hostTypesCrack[] =
 
 HostType hostTypesRust[] =
 {
-	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  4 },
+	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  4 },
 };
 
 const HostLang hostLangC = {

@@ -103,7 +103,7 @@ namespace rust_gen
 		case ['offset' '(' ident ',' expr ')']
 		{
 			send Parser
-				"[expr( ExprFactor.expr )]"
+				"( [expr( ExprFactor.expr )] ) as i32"
 		}
 		case ['deref' '(' I: ident ',' E: expr ')']
 		{
@@ -344,7 +344,7 @@ namespace rust_gen
 		case [Index: index_stmt]
 		{
 			send Parser
-				"let mut [Index.ident] = 0;
+				"let mut [Index.ident] :i32 = 0;
 		}
 		case [
 				'if' `( IfExpr: expr `) IfStmt: stmt
@@ -380,6 +380,7 @@ namespace rust_gen
 			send Parser
 				"match ( [expr(SwitchExpr)] ) {
 				"	[stmt_list(StmtList)]
+				"	_ => {}
 				"}
 		}
 		case [ExprExpr: expr Semi: `;] {
