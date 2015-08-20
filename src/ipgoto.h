@@ -80,7 +80,10 @@ protected:
 	void setLabelsNeeded();
 
 	void NFA_PUSH_ACTION( RedNfaTarg *targ );
+	void NFA_POP_ACTION( RedNfaTarg *targ );
 	void NFA_POP_TEST( RedNfaTarg *targ );
+
+	void NFA_PUSH( RedStateAp *state );
 
 	void tableDataPass();
 };

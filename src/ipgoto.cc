@@ -226,13 +226,22 @@ void IpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
+void IpGoto::NFA_POP_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->popAction != 0 )
+		act = targ->popAction->actListId+1;
+	nfaPopTrans.value( act );
+}
+
 void IpGoto::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
 		act = targ->popTest->actListId+1;
-	nfaPopActions.value( act );
+	nfaPopTrans.value( act );
 }
+
 
 bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 {
@@ -434,6 +443,72 @@ std::ostream &IpGoto::STATE_GOTO_CASES()
 	return out;
 }
 
+void IpGoto::NFA_PUSH( RedStateAp *state )
+{
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
+			"		int alt; \n"
+			"		int new_recs = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
+						ARR_REF( nfaOffsets ) << "[" << vCS() << "]];\n";
+
+		if ( nfaPrePushExpr != 0 ) {
+			out << OPEN_HOST_BLOCK();
+			INLINE_LIST( out, nfaPrePushExpr, 0, false, false );
+			out << CLOSE_HOST_BLOCK();
+		}
+
+		out <<
+			"		for ( alt = 0; alt < new_recs; alt++ ) { \n";
+
+
+		out <<
+			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
+							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+			"			nfa_bp[nfa_len].p = " << P() << ";\n";
+
+		if ( redFsm->bAnyNfaPops ) {
+			out <<
+				"			nfa_bp[nfa_len].popTrans = (long)" <<
+								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt;\n"
+				"\n"
+				;
+		}
+
+		if ( redFsm->bAnyNfaPushes ) {
+			out <<
+				"			switch ( " << ARR_REF( nfaPushActions ) << "[" << CAST("int") <<
+								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt] ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPushRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						ACTION( out, item->value, IlOpts( 0, false, false ) );
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"			}\n";
+		}
+
+
+		out <<
+			"			nfa_len += 1;\n"
+			"		}\n"
+			"	}\n"
+			;
+	}
+}
+
 std::ostream &IpGoto::STATE_GOTOS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -443,36 +518,7 @@ std::ostream &IpGoto::STATE_GOTOS()
 			/* Writing code above state gotos. */
 			GOTO_HEADER( st );
 
-			if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
-				for ( RedNfaTargs::Iter t = *st->nfaTargs; t.lte(); t++ ) {
-					out <<
-						"	{\n"
-						"		nfa_bp[nfa_len].state = " << t->state->id << ";\n"
-						"		nfa_bp[nfa_len].p = " << P() << ";\n";
-
-					if ( t->popAction ) {
-						out <<
-							"	nfa_bp[nfa_len].pop = " << t->popAction->actListId+1 << ";\n";
-					}
-					else {
-						out <<
-							"	nfa_bp[nfa_len].pop = 0;\n";
-					}
-
-					if ( t->push ) {
-						for ( GenActionTable::Iter item = t->push->key; item.lte(); item++ ) {
-							ACTION( out, item->value, IlOpts( st->id, false,
-									t->push->anyNextStmt() ) );
-							out << "\n";
-						}
-					}
-
-					out <<
-						"		nfa_len += 1;\n"
-						"	}\n"
-						;
-				}
-			}
+			NFA_PUSH( st );
 
 			/* Try singles. */
 			if ( st->outSingle.length() > 0 )
