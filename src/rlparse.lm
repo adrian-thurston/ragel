@@ -2,28 +2,33 @@ include 'ragel.lm'
 include 'ragel-c.lm'
 include 'ragel-ocaml.lm'
 include 'ragel-ruby.lm'
+include 'ragel-crack.lm'
 
 lex
 	token selectt /''/
 	{
 		if Lang == "ruby"
-			input->push( make_token( typeid<ruby_selectt>, '' ) )
+			input->push( make_token( typeid<ruby_select_section>, '' ) )
 		elsif Lang == "ocaml"
-			input->push( make_token( typeid<ocaml_selectt>, '' ) )
+			input->push( make_token( typeid<ocaml_select_section>, '' ) )
+		elsif Lang == "crack"
+			input->push( make_token( typeid<crack_select_section>, '' ) )
 		else
-			input->push( make_token( typeid<c_selectt>, '' ) )
+			input->push( make_token( typeid<c_select_section>, '' ) )
 	}
 
-	token c_selectt //
-	token ruby_selectt //
-	token ocaml_selectt //
+	token c_select_section //
+	token ruby_select_section //
+	token ocaml_select_section //
+	token crack_select_section //
 end
 
 
 def start
-	[c_selectt SectionList: c_host::section*]
-|	[ruby_selectt RSectionList: ruby_host::section*]
-|	[ocaml_selectt OSectionList: ocaml_host::section*]
+	[c_select_section SectionList: c_host::section*]
+|	[ruby_select_section RSectionList: ruby_host::section*]
+|	[ocaml_select_section OSectionList: ocaml_host::section*]
+|	[crack_select_section OSectionList: crack_host::section*]
 
 def import_val
 	[c_host::number] :Number

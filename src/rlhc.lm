@@ -7,6 +7,7 @@ include 'rlhc-java.lm'
 include 'rlhc-ruby.lm'
 include 'rlhc-ocaml.lm'
 include 'rlhc-rust.lm'
+include 'rlhc-crack.lm'
 
 str argvPop()
 {
@@ -64,6 +65,8 @@ elsif ( Lang == 'ocaml' )
 	ml_gen::trans( Output, Start )
 elsif ( Lang == 'rust' )
 	rust_gen::trans( Output, Start )
+elsif ( Lang == 'crack' )
+	crack_gen::trans( Output, Start )
 else {
 	print( 'rlhc: unrecognized language: ', Lang, '\n' )
 }

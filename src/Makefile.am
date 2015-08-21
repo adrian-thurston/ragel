@@ -55,6 +55,10 @@ EXTRA_DIST = \
 	rlhc-java.lm \
 	rlhc-rust.lm \
 	rlhc-ocaml.lm \
+	ragel-c.lm \
+	ragel-crack.lm \
+	ragel-ruby.lm \
+	ragel-ocaml.lm \
 	rlparse.lm \
 	rlscan.rl \
 	rlparse.kh \
@@ -63,6 +67,8 @@ EXTRA_DIST = \
 CLEANFILES = parse.c if.h if.cc
 
 if WITH_COLM
+
+parse.c: ragel-c.lm ragel-ruby.lm ragel-ocaml.lm ragel-crack.lm
 
 parse.c: ragel.lm rlparse.lm
 	$(COLM) -c -o parse.c -e if.h -x if.cc rlparse.lm

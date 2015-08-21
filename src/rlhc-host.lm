@@ -8,6 +8,9 @@ namespace host
 		rl d_literal
 			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
 
+		rl bt_literal
+			/ '`' ([^`\\] | NL | '\\' (any | NL))* '`' /
+
 		rl c_comment 
 			/ '/*' ( any | NL )* :>> '*/' /
 
@@ -30,7 +33,7 @@ namespace host
 			/ c_comment | cpp_comment | pound_comment /
 
 		token string
-			/ s_literal | d_literal /
+			/ s_literal | d_literal | bt_literal /
 
 		token whitespace
 			/ ( [ \t] | NL )+ /

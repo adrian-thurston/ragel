@@ -208,7 +208,7 @@ const HostLang hostLangCrack = {
 	hostTypesCrack+0,
 	true,
 	true,
-	"no-lang"
+	"crack"
 };
 
 const HostLang hostLangRust = {

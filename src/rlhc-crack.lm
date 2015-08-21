@@ -1,5 +1,4 @@
-
-namespace c_out
+namespace crack_out
 	token _IN_ /''/
 	token _EX_ /''/
 
@@ -26,7 +25,8 @@ namespace c_out
 
 		token string /
 				'"' ( [^"\\] | '\\' any ) * '"' |
-				"'" ( [^'\\] | '\\' any ) * "'"
+				"'" ( [^'\\] | '\\' any ) * "'" |
+				"`" ( [^'\\] | '\\' any ) * "`"
 			/
 
 		ignore
@@ -41,13 +41,13 @@ namespace c_out
 	|	[string]
 	|	[`{ _IN_ item* _EX_ `} ]
 
-	def c_out
+	def crack_out
 		[_IN_ _EX_ item*]
 end
 
-namespace c_gen
+namespace crack_gen
 
-	global Parser: parser<c_out::c_out>
+	global Parser: parser<crack_out::crack_out>
 
 	void tok_list( TL: host::tok* )
 	{
@@ -449,11 +449,11 @@ namespace c_gen
 
 	void trans( Output: stream, Start: start )
 	{
-		Parser = new parser<c_out::c_out>()
+		Parser = new parser<crack_out::crack_out>()
 
 		stmt_list( Start._repeat_stmt )
 
-		CO: c_out::c_out = Parser->finish()
+		CO: crack_out::crack_out = Parser->finish()
 
 		if CO {
 			send Output
@@ -465,3 +465,4 @@ namespace c_gen
 		}
 	}
 end
+
