@@ -367,8 +367,9 @@ namespace rust_gen
 
 			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
 				send Parser
-					"else
+					"else {
 					"	[stmt(ElseStmt)]
+					"}
 			}
 		}
 		case ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {

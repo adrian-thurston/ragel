@@ -50,7 +50,7 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 		g) 
 			allow_generated="true"
 		;;
-		C|D|J|R|A|Z|O)
+		C|D|J|R|A|Z|O|R)
 			langflags="$langflags -$opt"
 		;;
 		-)
@@ -90,14 +90,16 @@ java_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
 ruby_prohibit_genflags="-G0 -G1 -G2"
 ocaml_prohibit_genflags="-G0 -G1 -G2"
 asm_prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
+rust_prohibi_genflags="-G2"
 
 ocaml_prohibit_features="--goto-backend"
+rust_prohibit_features="--goto-backend"
 
 
 [ -z "$minflags" ]     && minflags="-n -m -l -e"
 [ -z "$genflags" ]     && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$encflags" ]     && encflags="--integral-tables --string-tables"
-[ -z "$langflags" ]    && langflags="-C -D -J -R -A -Z -O --asm"
+[ -z "$langflags" ]    && langflags="-C -D -J -R -A -Z -O --asm -U"
 [ -z "$frontflags" ]   && frontflags="--kelbt-frontend --colm-frontend"
 [ -z "$backflags" ]    && backflags="--direct-backend --colm-backend"
 [ -z "$featureflags" ] && featureflags="--var-backend --goto-backend"
@@ -117,6 +119,7 @@ ruby_engine="@RUBY@"
 csharp_compiler="@GMCS@"
 go_compiler="@GOBIN@"
 ocaml_compiler="@OCAML@"
+rust_compiler="@RUST@"
 
 #
 # Remove any unsupported host languages.
@@ -241,6 +244,14 @@ function run_options()
 			compiler="gcc"
 			flags=""
 		;;
+		rust)
+			lang_opt="-U"
+			code_suffix=rs
+			compiler=$rust_compiler
+			flags="-A non_upper_case_globals -A dead_code \
+					-A unused_variables -A unused_assignments \
+					-A unused_mut -A unused_parens"
+		;;
 		indep)
 		;;
 		*)
@@ -275,7 +286,11 @@ function run_options()
 		lang_prohibit_genflags="$prohibit_genflags $ocaml_prohibit_genflags"
 		lang_prohibit_features="$prohibit_features $ocaml_prohibit_features"
 	;;
-	asm) lang_prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags";;
+	asm)
+		lang_prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags";;
+	rust)
+		lang_prohibit_features="$prohibit_features $rust_prohibit_features"
+	;;
 	*) lang_prohibit_genflags="$prohibit_genflags";;
 	esac
 
