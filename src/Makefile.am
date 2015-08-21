@@ -49,7 +49,7 @@ EXTRA_DIST = \
 	rlhc-host.lm \
 	rlhc-c.lm \
 	rlhc-d.lm \
-	rlhc-cs.lm \
+	rlhc-csharp.lm \
 	rlhc-go.lm \
 	rlhc-ruby.lm \
 	rlhc-java.lm \
@@ -77,7 +77,7 @@ RLHC = \
 	rlhc-c.lm \
 	rlhc-d.lm \
 	rlhc-go.lm \
-	rlhc-cs.lm \
+	rlhc-csharp.lm \
 	rlhc-java.lm \
 	rlhc-ruby.lm \
 	rlhc-rust.lm \

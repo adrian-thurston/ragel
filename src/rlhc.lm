@@ -1,7 +1,7 @@
 include 'rlhc-host.lm'
 include 'rlhc-c.lm'
 include 'rlhc-d.lm'
-include 'rlhc-cs.lm'
+include 'rlhc-csharp.lm'
 include 'rlhc-go.lm'
 include 'rlhc-java.lm'
 include 'rlhc-ruby.lm'
@@ -53,7 +53,7 @@ if ( Lang == 'c' )
 elsif ( Lang == 'd' )
 	d_gen::trans( Output, Start )
 elsif ( Lang == 'csharp' )
-	cs_gen::trans( Output, Start )
+	csharp_gen::trans( Output, Start )
 elsif ( Lang == 'go' )
 	go_gen::trans( Output, Start )
 elsif ( Lang == 'java' )

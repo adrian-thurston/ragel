@@ -1,5 +1,5 @@
 
-namespace cs_out
+namespace csharp_out
 	token _IN_ /''/
 	token _EX_ /''/
 
@@ -41,13 +41,13 @@ namespace cs_out
 	|	[string]
 	|	[`{ _IN_ item* _EX_ `} ]
 
-	def cs_out
+	def csharp_out
 		[_IN_ _EX_ item*]
 end
 
-namespace cs_gen
+namespace csharp_gen
 
-	global Parser: parser<cs_out::cs_out>
+	global Parser: parser<csharp_out::csharp_out>
 
 	void tok_list( TL: host::tok* )
 	{
@@ -450,11 +450,11 @@ namespace cs_gen
 
 	void trans( Output: stream, Start: start )
 	{
-		Parser = new parser<cs_out::cs_out>()
+		Parser = new parser<csharp_out::csharp_out>()
 
 		stmt_list( Start._repeat_stmt )
 
-		CSO: cs_out::cs_out = Parser->finish()
+		CSO: csharp_out::csharp_out = Parser->finish()
 
 		if CSO {
 			send Output
