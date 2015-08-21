@@ -54,7 +54,7 @@ EXTRA_DIST = \
 	rlhc-ruby.lm \
 	rlhc-java.lm \
 	rlhc-rust.lm \
-	rlhc-ml.lm \
+	rlhc-ocaml.lm \
 	rlparse.lm \
 	rlscan.rl \
 	rlparse.kh \
@@ -81,7 +81,7 @@ RLHC = \
 	rlhc-java.lm \
 	rlhc-ruby.lm \
 	rlhc-rust.lm \
-	rlhc-ml.lm
+	rlhc-ocaml.lm
 
 rlhc_SOURCES =
 

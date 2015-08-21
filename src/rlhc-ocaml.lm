@@ -1,4 +1,4 @@
-namespace ml_out
+namespace ocaml_out
 	token _IN_ /''/
 	token _EX_ /''/
 
@@ -40,14 +40,14 @@ namespace ml_out
 	|	[`begin _IN_ item* _EX_ `end ]
 	|	[`{ _IN_ item* _EX_ `} ]
 
-	def ml_out
+	def ocaml_out
 		[_IN_ _EX_ item*]
 end
 
 namespace ml_gen
 
 	global StaticVarMap: map<str, str> = new map<str, str>()
-	global Parser: parser<ml_out::ml_out>
+	global Parser: parser<ocaml_out::ocaml_out>
 
 	void tok_list( TL: host::tok* )
 	{
@@ -550,11 +550,11 @@ namespace ml_gen
 
 	void trans( Output: stream, Start: start )
 	{
-		Parser = new parser<ml_out::ml_out>()
+		Parser = new parser<ocaml_out::ocaml_out>()
 
 		stmt_list( Start._repeat_stmt )
 
-		MO: ml_out::ml_out = Parser->finish()
+		MO: ocaml_out::ocaml_out = Parser->finish()
 
 		if MO {
 			send Output

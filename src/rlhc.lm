@@ -5,7 +5,7 @@ include 'rlhc-csharp.lm'
 include 'rlhc-go.lm'
 include 'rlhc-java.lm'
 include 'rlhc-ruby.lm'
-include 'rlhc-ml.lm'
+include 'rlhc-ocaml.lm'
 include 'rlhc-rust.lm'
 
 str argvPop()
