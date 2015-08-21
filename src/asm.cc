@@ -1119,6 +1119,42 @@ void AsmCodeGen::emitCharClassJumpTable( RedStateAp *st, string def )
 		"" << LABEL( "ccf", st->id ) << ":\n";
 }
 
+void AsmCodeGen::NFA_PUSH( RedStateAp *st )
+{
+	if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
+		for ( RedNfaTargs::Iter t = *st->nfaTargs; t.lte(); t++ ) {
+			out <<
+				"	movq	" << NFA_STACK() << ", %rax\n"
+				"	movq	" << NFA_TOP() << ", %rcx\n"
+				"	salq	$5, %rcx\n"
+				"	movq    $" << t->state->id << ", 0(%rax,%rcx,)\n"
+				"	movq	" << P() << ", 8(%rax,%rcx,)\n";
+
+			if ( t->popAction ) {
+				out <<
+					"	movq	$" << (t->popAction->actListId+1) << ", 16(%rax,%rcx,)\n";
+			}
+			else {
+				out <<
+					"	movq	$0, 16(%rax,%rcx,)\n";
+			}
+
+			if ( t->push ) {
+				for ( GenActionTable::Iter item = t->push->key; item.lte(); item++ ) {
+					ACTION( out, item->value, st->id, false,
+							t->push->anyNextStmt() );
+					out << "\n";
+				}
+			}
+
+			out <<
+				"	movq	" << NFA_TOP() << ", %rcx\n"
+				"	addq	$1, %rcx\n"
+				"	movq	%rcx, " << NFA_TOP() << "\n";
+		}
+	}
+}
+
 std::ostream &AsmCodeGen::STATE_GOTOS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -1128,38 +1164,7 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 			/* Writing code above state gotos. */
 			GOTO_HEADER( st );
 
-			if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
-				for ( RedNfaTargs::Iter t = *st->nfaTargs; t.lte(); t++ ) {
-					out <<
-						"	movq	" << NFA_STACK() << ", %rax\n"
-						"	movq	" << NFA_TOP() << ", %rcx\n"
-						"	salq	$5, %rcx\n"
-						"	movq    $" << t->state->id << ", 0(%rax,%rcx,)\n"
-						"	movq	" << P() << ", 8(%rax,%rcx,)\n";
-
-					if ( t->popAction ) {
-						out <<
-							"	movq	$" << (t->popAction->actListId+1) << ", 16(%rax,%rcx,)\n";
-					}
-					else {
-						out <<
-							"	movq	$0, 16(%rax,%rcx,)\n";
-					}
-
-					if ( t->push ) {
-						for ( GenActionTable::Iter item = t->push->key; item.lte(); item++ ) {
-							ACTION( out, item->value, st->id, false,
-									t->push->anyNextStmt() );
-							out << "\n";
-						}
-					}
-
-					out <<
-						"	movq	" << NFA_TOP() << ", %rcx\n"
-						"	addq	$1, %rcx\n"
-						"	movq	%rcx, " << NFA_TOP() << "\n";
-				}
-			}
+			NFA_PUSH( st );
 
 			/* Load *p. */
 			if ( st->transList != 0 ) {

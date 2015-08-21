@@ -236,6 +236,8 @@ public:
 
 	bool useAgainLabel();
 
+	void NFA_PUSH( RedStateAp *state );
+
 	/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for
 	 * each state. */
 	bool IN_TRANS_ACTIONS( RedStateAp *state );
