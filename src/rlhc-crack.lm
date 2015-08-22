@@ -336,7 +336,7 @@ namespace crack_gen
 		] {
 			send Parser
 				"if ( [expr(IfExpr)] )
-				"	[stmt(IfStmt)]
+				"	[flow_stmt(IfStmt)]
 
 			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 				match ElseIfClause
@@ -344,19 +344,19 @@ namespace crack_gen
 
 				send Parser
 					"else if ( [expr(ElseIfExpr)] )
-					"	[stmt(ElseIfStmt)]
+					"	[flow_stmt(ElseIfStmt)]
 			}
 
 			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
 				send Parser
 					"else
-					"	[stmt(ElseStmt)]
+					"	[flow_stmt(ElseStmt)]
 			}
 		}
 		case [`while `( WhileExpr: expr `) WhileStmt: stmt] {
 			send Parser
 				"while ( [expr(WhileExpr)] )
-				"	[stmt(WhileStmt)]
+				"	[flow_stmt(WhileStmt)]
 		}
 		case [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
 
@@ -394,7 +394,7 @@ namespace crack_gen
 			send Parser
 				[expr(ExprExpr) Semi]
 		}
-		case [L: `{ TL: stmt* R: `}] {
+		case [`{ TL: stmt* `}] {
 			send Parser
 				"if ( 1 ) {
 				"	[stmt_list(TL)]
@@ -468,6 +468,20 @@ namespace crack_gen
 		default {
 			# catches unspecified cases
 			send Parser [Stmt]
+		}
+	}
+
+	void flow_stmt( Stmt: stmt )
+	{
+		switch Stmt
+		case [`{ TL: stmt* `}] {
+			send Parser
+				"{
+				"	[stmt_list(TL)]
+				"}
+		}
+		default {
+			stmt( Stmt )
 		}
 	}
 

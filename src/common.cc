@@ -232,11 +232,11 @@ const HostLang *hostLangs[] = {
 	&hostLangCSharp,
 	&hostLangOCaml,
 	&hostLangRust,
+	&hostLangCrack,
 };
 
-//	&hostLangCrack,
 
-const int numHostLangs = 9;
+const int numHostLangs = 10;
 
 HostType *findAlphType( const HostLang *hostLang, const char *s1 )
 {
