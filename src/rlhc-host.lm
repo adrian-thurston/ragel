@@ -2,60 +2,19 @@ namespace host
 	lex 
 		rl NL / '\n' /
 
-		rl s_literal
-			/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
-
-		rl d_literal
-			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
-
-		rl bt_literal
-			/ '`' ([^`\\] | NL | '\\' (any | NL))* '`' /
-
-		rl c_comment 
-			/ '/*' ( any | NL )* :>> '*/' /
-
-		rl cpp_comment
-			/ '//' [^\n]* NL /
-
-		rl pound_comment
-			/ '#' [^\n]* NL /
-
-		token ident
-			/( alpha | '_' ) ( alpha | digit | '_' )*/
-
-		token uint
-			/ digit+ /
-
-		token hex_number
-			/ '0x' [0-9a-fA-F]+ /
-
-		token comment
-			/ c_comment | cpp_comment | pound_comment /
-
-		token string
-			/ s_literal | d_literal | bt_literal /
-
-		token whitespace
-			/ ( [ \t] | NL )+ /
+		token escape
+			/ '@' any /
 
 		literal `={ `}= `${ `}$ `@{ `}@
 
-		token c_any / any /
+		token host_any / any /
 	end
 
 	def tok
-		[ident]
-	|	[uint]
-	|	[hex_number]
-	|	[comment]
-	|	[string]
-	|	[whitespace]
-	|	[`${ stmt* `}$]
+		[`${ stmt* `}$]
 	|	[`={ expr `}=]
-	|	[c_any]
-
-	def out
-		[tok*]
+	|	[escape]
+	|	[host_any]
 end
 
 lex 

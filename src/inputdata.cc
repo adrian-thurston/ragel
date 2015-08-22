@@ -263,6 +263,25 @@ void InputData::verifyWritesHaveData()
 		verifyWriteHasData( ii );
 }
 
+void translatedHostData( ostream &out, const string &data )
+{
+	const char *p = data.c_str();
+	for ( const char *c = p; *c != 0; ) {
+		if ( c[0] == '}' && ( c[1] == '@' || c[1] == '$' || c[1] == '=' ) ) {
+			out << "@}@" << c[1];
+			c += 2;
+		}
+		else if ( c[0] == '@' ) {
+			out << "@@";
+			c += 1;
+		}
+		else {
+			out << c[0];
+			c += 1;
+		}
+	}
+}
+
 void InputData::writeOutput( InputItem *ii )
 {
 	switch ( ii->type ) {
@@ -279,7 +298,7 @@ void InputData::writeOutput( InputItem *ii )
 					break;
 				case Translated:
 					openHostBlock( '@', this, *outStream, inputFileName, ii->loc.line );
-					*outStream << ii->data.str();
+					translatedHostData( *outStream, ii->data.str() );
 					*outStream << "}@";
 					break;
 			}

@@ -57,6 +57,11 @@ namespace go_gen
 				send Parser "{[stmt_list( StmtList )]}"
 			case [host::`={ Expr: expr host::`}=]
 				send Parser "([expr( Expr )])"
+			case [E: escape] {
+				Str: str = $E
+				send Parser
+					"[Str.suffix( 1 )]"
+			}
 			default
 				send Parser [Tok]
 		}

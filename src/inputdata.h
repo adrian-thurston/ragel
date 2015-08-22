@@ -33,6 +33,8 @@ struct CondAp;
 struct ActionTable;
 struct Section;
 
+void translatedHostData( ostream &out, const string &data );
+
 struct InputItem
 {
 	InputItem()
@@ -263,5 +265,6 @@ struct InputData
 	void processColm();
 	void process();
 };
+
 
 #endif

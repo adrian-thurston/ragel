@@ -69,6 +69,11 @@ namespace ruby_gen
 			}
 			case [host::`={ Expr: expr host::`}=]
 				expr( Expr )
+			case [E: escape] {
+				Str: str = $E
+				send Parser
+					"[Str.suffix( 1 )]"
+			}
 			default {
 				send Parser [Tok]
 			}
