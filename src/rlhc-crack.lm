@@ -55,7 +55,7 @@ namespace crack_gen
 			switch Tok
 			case [host::`${ StmtList: stmt* host::`}$] {
 				send Parser
-					"{
+					"if ( 1 ) {
 					"	[stmt_list( StmtList )]
 					"}
 			}
@@ -81,7 +81,7 @@ namespace crack_gen
 		case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 		{
 			send Parser 
-				"{
+				"if ( 1 ) {
 				"	[tok_list( TL )]
 				"}
 		}
@@ -113,12 +113,12 @@ namespace crack_gen
 		case [`offset `( ident `, expr `)]
 		{
 			send Parser
-				[ExprFactor.ident ' + ' expr( ExprFactor.expr )]
+				[expr( ExprFactor.expr )]
 		}
 		case [`deref `( ident `, expr `)]
 		{
 			send Parser
-				"(*( [expr(ExprFactor.expr)] ))
+				[ ExprFactor.ident '[' expr( ExprFactor.expr ) ']']
 		}
 		case [`TRUE]
 		{
@@ -145,7 +145,7 @@ namespace crack_gen
 		case [`cast `( T: type `) F: expr_factor]
 		{
 			send Parser 
-				"( [type( T )] ) [expr_factor( F )]"
+				"[type( T )] ( [expr_factor( F )] )"
 		}
 		default {
 			# Catches cases not specified
@@ -281,17 +281,17 @@ namespace crack_gen
 	{
 		switch Type
 		case "s8"
-			send Parser ['char ']
+			send Parser ['int16 ']
 		case "s16"
-			send Parser ['short ']
+			send Parser ['int16 ']
 		case "s32"
-			send Parser ['int ']
+			send Parser ['int32 ']
 		case "s64"
-			send Parser ['long ']
+			send Parser ['int64 ']
 		case "s128"
 			send Parser ['long long ']
 		case "uint"
-			send Parser ['unsigned int ']
+			send Parser ['uint32 ']
 		default
 			send Parser [Type]
 	}
@@ -301,6 +301,8 @@ namespace crack_gen
 		switch Number
 		case [`u `( uint `) ]
 			send Parser "[Number.uint]u"
+		case [`c `( uint `) ]
+			send Parser "[Number.uint]"
 		default
 			send Parser [Number]
 	}
@@ -321,12 +323,12 @@ namespace crack_gen
 		}
 		case [Array: array] {
 			send Parser
-				"static const [type(Array.type)] "
-					"[Array.ident] \[\] = { [num_list(Array.num_list)] };
+				"const array\[[type(Array.type)]\] "
+					"[Array.ident] = \[ [num_list(Array.num_list)] \];
 		}
 		case [Value: value] {
 			send Parser
-				"static const [Value.type] [Value.ident] = [Value.number];
+				"const [Value.type] [Value.ident] = [Value.number];
 		}
 		case [
 				`if `( IfExpr: expr `) IfStmt: stmt
@@ -357,10 +359,36 @@ namespace crack_gen
 				"	[stmt(WhileStmt)]
 		}
 		case [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
+
+			require StmtList
+				[`case E1: expr `{ Inner: stmt* `} Rest: stmt*]
+
 			send Parser
-				"switch ( [expr(SwitchExpr)] ) {
-				"	[stmt_list(StmtList)]
+				"if ( [expr(SwitchExpr)] == [expr(E1)] ) {
+				"	[stmt_list(Inner)]
 				"}
+
+			for S: stmt in repeat(Rest) {
+				switch S
+				case [`case E1: expr `{ Inner: stmt* `}]
+				{
+					send Parser
+						"else if ( [expr(SwitchExpr)] == [expr(E1)] ) {
+						"	[stmt_list(Inner)]
+						"}
+				}
+				case
+					[`default `{ Inner: stmt* `}]
+				{
+					send Parser
+						"else {
+						"	[stmt_list(Inner)]
+						"}
+				}
+			}
+
+			send Parser
+				";
 		}
 		case [ExprExpr: expr Semi: `;] {
 			send Parser
@@ -368,7 +396,9 @@ namespace crack_gen
 		}
 		case [L: `{ TL: stmt* R: `}] {
 			send Parser
-				[L stmt_list(TL) R]
+				"if ( 1 ) {
+				"	[stmt_list(TL)]
+				"}
 		}
 		case [
 			TypeList: opt_const Type: type OptPtr: opt_ptr
@@ -398,7 +428,7 @@ namespace crack_gen
 		case [Index: index_stmt]
 		{
 			send Parser
-				"const [type(Index.type)] *[Index.ident];
+				"int [Index.ident] = 0;
 		}
 		case [case_block]
 		{

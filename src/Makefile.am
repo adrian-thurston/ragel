@@ -55,6 +55,7 @@ EXTRA_DIST = \
 	rlhc-java.lm \
 	rlhc-rust.lm \
 	rlhc-ocaml.lm \
+	rlhc-crack.lm \
 	ragel-c.lm \
 	ragel-crack.lm \
 	ragel-ruby.lm \
@@ -87,7 +88,8 @@ RLHC = \
 	rlhc-java.lm \
 	rlhc-ruby.lm \
 	rlhc-rust.lm \
-	rlhc-ocaml.lm
+	rlhc-ocaml.lm \
+	rlhc-crack.lm
 
 rlhc_SOURCES =
 

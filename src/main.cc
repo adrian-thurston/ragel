@@ -552,7 +552,8 @@ bool langSupportsGoto( const HostLang *hostLang )
 {
 	if ( hostLang->lang == HostLang::Ruby ||
 			hostLang->lang == HostLang::OCaml ||
-			hostLang->lang == HostLang::Rust )
+			hostLang->lang == HostLang::Rust ||
+			hostLang->lang == HostLang::Crack )
 		return false;
 	
 	return true;
