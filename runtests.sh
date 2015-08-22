@@ -35,7 +35,7 @@ test -d $wk || mkdir $wk
 
 while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 	case $opt in
-		B|T|F|G|P) 
+		B|T|F|G|P)
 			genflags="$genflags -$opt$OPTARG"
 			gen_opts="$gen_opts -$opt$OPTARG"
 		;;
@@ -50,7 +50,7 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 		g) 
 			allow_generated="true"
 		;;
-		C|D|J|R|A|Z|O|R)
+		C|D|J|R|A|Z|O|R|K)
 			langflags="$langflags -$opt"
 		;;
 		-)
@@ -90,16 +90,17 @@ java_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
 ruby_prohibit_genflags="-G0 -G1 -G2"
 ocaml_prohibit_genflags="-G0 -G1 -G2"
 asm_prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
-rust_prohibi_genflags="-G2"
+rust_prohibit_genflags="-G2"
+crack_prohibit_genflags="-G2"
 
 ocaml_prohibit_features="--goto-backend"
 rust_prohibit_features="--goto-backend"
-
+crack_prohibit_features="--goto-backend"
 
 [ -z "$minflags" ]     && minflags="-n -m -l -e"
 [ -z "$genflags" ]     && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$encflags" ]     && encflags="--integral-tables --string-tables"
-[ -z "$langflags" ]    && langflags="-C -D -J -R -A -Z -O --asm -U"
+[ -z "$langflags" ]    && langflags="-C -D -J -R -A -Z -O --asm -U -K"
 [ -z "$frontflags" ]   && frontflags="--kelbt-frontend --colm-frontend"
 [ -z "$backflags" ]    && backflags="--direct-backend --colm-backend"
 [ -z "$featureflags" ] && featureflags="--var-backend --goto-backend"
@@ -120,6 +121,7 @@ csharp_compiler="@GMCS@"
 go_compiler="@GOBIN@"
 ocaml_compiler="@OCAML@"
 rust_compiler="@RUST@"
+crack_interpreter="@CRACK@"
 
 #
 # Remove any unsupported host languages.
@@ -142,8 +144,8 @@ function run_test()
 	[ $lang != java ] && out_args="-o $wk/$binary";
 	[ $lang == csharp ] && out_args="-out:$wk/$binary";
 
-	# Ruby and OCaml don't need to be copiled.
-	if [ $lang != ruby ] && [ $lang != ocaml ]; then
+	# Some langs are just interpreted.
+	if [ $lang != crack ] && [ $lang != ruby ] && [ $lang != ocaml ]; then
 		echo "$compiler $flags $out_args $wk/$code_src"
 		if ! $compiler $flags $out_args $wk/$code_src; then
 			test_error;
@@ -157,6 +159,7 @@ function run_test()
 		[ $lang = ruby ] && exec_cmd="ruby $wk/$code_src"
 		[ $lang = csharp ] && exec_cmd="mono $wk/$binary"
 		[ $lang = ocaml ] && exec_cmd="ocaml $wk/$code_src"
+		[ $lang = crack ] && exec_cmd="$crack_interpreter $wk/$code_src"
 
 		echo -n "running $exec_cmd ... ";
 
@@ -252,6 +255,11 @@ function run_options()
 					-A unused_variables -A unused_assignments \
 					-A unused_mut -A unused_parens"
 		;;
+		crack)
+			lang_opt="-K"
+			code_suffix=crk
+			compiler=$crack_interpreter
+		;;
 		indep)
 		;;
 		*)
@@ -287,10 +295,14 @@ function run_options()
 		lang_prohibit_features="$prohibit_features $ocaml_prohibit_features"
 	;;
 	asm)
-		lang_prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags";;
+		lang_prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags"
+		;;
 	rust)
 		lang_prohibit_features="$prohibit_features $rust_prohibit_features"
-	;;
+		;;
+	crack)
+		lang_prohibit_features="$prohibit_features $crack_prohibit_features"
+		;;
 	*) lang_prohibit_genflags="$prohibit_genflags";;
 	esac
 

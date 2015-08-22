@@ -108,6 +108,9 @@ AC_CHECK_PROG(OCAML, ocaml, ocaml)
 dnl Check for the rust compiler.
 AC_CHECK_PROG(RUST, rustc, rustc)
 
+dnl Check for the crack interpreter.
+AC_CHECK_PROG(CRACK, crack, crack)
+
 SED_SUBST=["\
 	-e 's|@SUBJECT@|${SUBJECT}|g' \
 	-e 's|@CXX@|${CXX}|g' \
@@ -120,6 +123,7 @@ SED_SUBST=["\
 	-e 's|@GOBIN@|${GOBIN}|g' \
 	-e 's|@OCAML@|${OCAML}|g' \
 	-e 's|@RUST@|${RUST}|g' \
+	-e 's|@CRACK@|${CRACK}|g' \
 "]
 
 AC_SUBST(SED_SUBST)
