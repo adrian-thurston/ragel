@@ -800,7 +800,7 @@ void Goto::taNfaPushActions()
 	nfaPushActions.finish();
 }
 
-void Goto::taNfaPopActions()
+void Goto::taNfaPopTrans()
 {
 /* ******** */
 

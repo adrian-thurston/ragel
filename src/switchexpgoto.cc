@@ -34,7 +34,7 @@ void SwitchExpGoto::tableDataPass()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 }
 
 void SwitchExpGoto::genAnalysis()
@@ -220,7 +220,7 @@ void SwitchExpGoto::writeData()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 
 	STATE_IDS();
 }

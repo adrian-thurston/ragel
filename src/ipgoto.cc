@@ -34,7 +34,7 @@ void IpGoto::tableDataPass()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 }
 
 void IpGoto::genAnalysis()
@@ -447,10 +447,10 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 {
 	if ( redFsm->anyNfaStates() ) {
 		out <<
-			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
+			"	if ( " << ARR_REF( nfaOffsets ) << "[" << state->id << "] ) {\n"
 			"		int alt; \n"
 			"		int new_recs = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
-						ARR_REF( nfaOffsets ) << "[" << vCS() << "]];\n";
+						ARR_REF( nfaOffsets ) << "[" << state->id << "]];\n";
 
 		if ( nfaPrePushExpr != 0 ) {
 			out << OPEN_HOST_BLOCK();
@@ -464,13 +464,13 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 
 		out <<
 			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
-							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+							ARR_REF( nfaOffsets ) << "[" << state->id << "] + 1 + alt];\n"
 			"			nfa_bp[nfa_len].p = " << P() << ";\n";
 
 		if ( redFsm->bAnyNfaPops ) {
 			out <<
 				"			nfa_bp[nfa_len].popTrans = (long)" <<
-								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt;\n"
+								ARR_REF( nfaOffsets ) << "[" << state->id << "] + 1 + alt;\n"
 				"\n"
 				;
 		}
@@ -478,7 +478,7 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 		if ( redFsm->bAnyNfaPushes ) {
 			out <<
 				"			switch ( " << ARR_REF( nfaPushActions ) << "[" << CAST("int") <<
-								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt] ) {\n";
+								ARR_REF( nfaOffsets ) << "[" << state->id << "] + 1 + alt] ) {\n";
 
 			/* Loop the actions. */
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
@@ -649,7 +649,7 @@ void IpGoto::writeData()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 }
 
 void IpGoto::writeExec()

@@ -63,7 +63,7 @@ public:
 	void taNfaTargs();
 	void taNfaOffsets();
 	void taNfaPushActions();
-	void taNfaPopActions();
+	void taNfaPopTrans();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );

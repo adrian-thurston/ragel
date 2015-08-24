@@ -1,7 +1,7 @@
 /*
  * @LANG: indep
  * @PROHIBIT_LANGUAGES: ruby ocaml
- * @PROHIBIT_FEATURES: --var-backend
+ * @PROHIBIT_FEATFLAGS: --var-backend
  * @NEEDS_EOF: yes
  */
 

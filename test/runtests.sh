@@ -284,7 +284,7 @@ function run_options()
 
 	[ -n "$additional_cflags" ] && flags="$flags $additional_cflags"
 
-	lang_prohibit_features="$prohibit_features"
+	lang_prohibit_featflags="$prohibit_featflags"
 
 	case $lang in
 	csharp) lang_prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags";;
@@ -292,30 +292,35 @@ function run_options()
 	ruby) lang_prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags";;
 	ocaml)
 		lang_prohibit_genflags="$prohibit_genflags $ocaml_prohibit_genflags"
-		lang_prohibit_features="$prohibit_features $ocaml_prohibit_features"
+		lang_prohibit_featflags="$prohibit_featflags $ocaml_prohibit_features"
 	;;
 	asm)
 		lang_prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags"
 		;;
 	rust)
-		lang_prohibit_features="$prohibit_features $rust_prohibit_features"
+		lang_prohibit_featflags="$prohibit_featflags $rust_prohibit_features"
 		;;
 	crack)
-		lang_prohibit_features="$prohibit_features $crack_prohibit_features"
+		lang_prohibit_featflags="$prohibit_featflags $crack_prohibit_features"
 		;;
-	*) lang_prohibit_genflags="$prohibit_genflags";;
+	*)
+		lang_prohibit_genflags="$prohibit_genflags";;
 	esac
 
 	if [ $lang == asm ]; then
-		prohibit_frontflags="--colm-frontend"
+		lang_prohibit_frontflags="$prohibit_frontflags --colm-frontend"
 	elif [ $lang != c ]; then
-		prohibit_frontflags="--kelbt-frontend"
+		lang_prohibit_frontflags="$prohibit_frontflags --kelbt-frontend"
+	else
+		lang_prohibit_frontflags="$prohibit_frontflags"
 	fi
 
 	if [ $lang == asm ]; then
-		prohibit_backflags="--colm-backend"
+		lang_prohibit_backflags="$prohibit_backflags --colm-backend"
 	elif [ $lang != c ]; then
-		prohibit_backflags="--direct-backend"
+		lang_prohibit_backflags="$prohibit_backflags --direct-backend"
+	else
+		lang_prohibit_backflags="$prohibit_backflags"
 	fi
 
 	if [ $lang != c ] && [ $lang != c++ ]; then
@@ -335,14 +340,14 @@ function run_options()
 				echo "" "$prohibit_encflags" | grep -e $enc_opt >/dev/null && continue
 
 				for f_opt in $frontflags; do
-					echo "" "$prohibit_frontflags" | grep -e $f_opt >/dev/null && continue
+					echo "" "$lang_prohibit_frontflags" | grep -e $f_opt >/dev/null && continue
 
 					for b_opt in $backflags; do
-						echo "" "$prohibit_backflags" | grep -e $b_opt >/dev/null && continue
+						echo "" "$lang_prohibit_backflags" | grep -e $b_opt >/dev/null && continue
 
 						for v_opt in $featureflags; do
 
-							echo "" "$lang_prohibit_features" | grep -e $v_opt >/dev/null && continue
+							echo "" "$lang_prohibit_featflags" | grep -e $v_opt >/dev/null && continue
 
 							[ $gen_opt = -G0 ] && [ $v_opt = --var-backend ] && continue
 							[ $gen_opt = -G1 ] && [ $v_opt = --var-backend ] && continue
@@ -388,7 +393,9 @@ function run_translate()
 	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
 	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
 	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
-	prohibit_features=`sed '/@PROHIBIT_FEATURES:/s/^.*: *//p;d' $test_case`
+	prohibit_featflags=`sed '/@PROHIBIT_FEATFLAGS:/s/^.*: *//p;d' $test_case`
+	prohibit_frontflags=`sed '/@PROHIBIT_FRONTFLAGS:/s/^.*: *//p;d' $test_case`
+	prohibit_backflags=`sed '/@PROHIBIT_BACKFLAGS:/s/^.*: *//p;d' $test_case`
 
 	# Create the expected output.
 	sed '1,/^#\+ * OUTPUT #\+/d;' $test_case > $wk/$expected_out
