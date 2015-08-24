@@ -298,6 +298,14 @@ void FlatLoopVar::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	int act = 0;
 	if ( targ->push != 0 )
 		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
+}
+
+void FlatLoopVar::NFA_POP_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->popAction != 0 )
+		act = targ->popAction->actListId+1;
 	nfaPopTrans.value( act );
 }
 

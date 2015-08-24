@@ -305,7 +305,6 @@ void FlatExpGoto::writeExec()
 			"\n";
 	}
 
-
 	NFA_PUSH();
 
 	LOCATE_TRANS();

@@ -54,8 +54,9 @@ protected:
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondPair *cond );
 
-	void NFA_PUSH_ACTION( RedNfaTarg *targ );
-	void NFA_POP_TEST( RedNfaTarg *targ );
+	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
+	virtual void NFA_POP_TEST( RedNfaTarg *targ );
+	virtual void NFA_POP_ACTION( RedNfaTarg *targ );
 };
 
 namespace C
