@@ -2,7 +2,7 @@
  * @LANG: indep
  * @NEEDS_EOF: yes
  * @PROHIBIT_LANGUAGES: ruby ocaml
- * @PROHIBIT_FEATURES: --var-backend
+ * @PROHIBIT_FEATFLAGS: --var-backend
  */
 
 char comm;

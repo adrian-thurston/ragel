@@ -1,6 +1,6 @@
 /*
  * @LANG: c
- * @PROHIBIT_FEATURES: --var-backend
+ * @PROHIBIT_FEATFLAGS: --var-backend
  *
  * Tests fnext in combination with fbreak.
  */
