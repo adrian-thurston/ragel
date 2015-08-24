@@ -81,7 +81,7 @@ void BinaryExpGoto::tableDataPass()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 }
 
 void BinaryExpGoto::genAnalysis()
@@ -162,8 +162,17 @@ void BinaryExpGoto::NFA_POP_ACTION( RedNfaTarg *targ )
 	int act = 0;
 	if ( targ->popAction != 0 )
 		act = targ->popAction->actListId+1;
-	nfaPopActions.value( act );
+	nfaPopTrans.value( act );
 }
+
+void BinaryExpGoto::NFA_POP_TEST( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->popTest != 0 )
+		act = targ->popTest->actListId+1;
+	nfaPopTrans.value( act );
+}
+
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
@@ -298,7 +307,7 @@ void BinaryExpGoto::writeData()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 
 	STATE_IDS();
 }

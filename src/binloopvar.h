@@ -55,8 +55,9 @@ public:
 	std::ostream &EOF_ACTION_SWITCH();
 	std::ostream &ACTION_SWITCH();
 
-	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
-	virtual void NFA_POP_ACTION( RedNfaTarg *targ );
+	void NFA_PUSH_ACTION( RedNfaTarg *targ );
+	void NFA_POP_ACTION( RedNfaTarg *targ );
+	void NFA_POP_TEST( RedNfaTarg *targ );
 };
 
 namespace C

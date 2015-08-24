@@ -53,7 +53,7 @@ Binary::Binary( const CodeGenArgs &args )
 	nfaTargs(           "nfa_targs",             *this ),
 	nfaOffsets(         "nfa_offsets",           *this ),
 	nfaPushActions(     "nfa_push_actions",      *this ),
-	nfaPopActions(      "nfa_pop_actions",       *this )
+	nfaPopTrans(        "nfa_pop_trans",         *this )
 {
 }
 
@@ -592,21 +592,38 @@ void Binary::taNfaPushActions()
 	nfaPushActions.finish();
 }
 
-void Binary::taNfaPopActions()
+void Binary::taNfaPopTrans()
 {
-	nfaPopActions.start();
+	nfaPopTrans.start();
 
-	nfaPopActions.value( 0 );
+	nfaPopTrans.value( 0 );
+	nfaPopTrans.value( 0 );
+	nfaPopTrans.value( 0 );
+	nfaPopTrans.value( 0 );
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaTargs != 0 ) {
-			nfaPopActions.value( 0 );
-			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
+
+			nfaPopTrans.value( 0 );
+			nfaPopTrans.value( 0 );
+			nfaPopTrans.value( 0 );
+			nfaPopTrans.value( 0 );
+
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ ) {
+
+				if ( targ->condSpace != 0 )
+					nfaPopTrans.value( targ->condSpace->condSpaceId );
+				else
+					nfaPopTrans.value( -1 );
+
+				nfaPopTrans.value( targ->condVal );
 				NFA_POP_ACTION( targ );
+				NFA_POP_TEST( targ );
+			}
 		}
 	}
 
-	nfaPopActions.finish();
+	nfaPopTrans.finish();
 }
 
 void Binary::taNfaOffsets()
@@ -680,17 +697,34 @@ void Binary::NFA_PUSH()
 		out <<
 			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
 			"		int alt; \n"
-			"		for ( alt = 0; alt < " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
-						ARR_REF( nfaOffsets ) << "[" << vCS() << "]]; alt++ ) { \n"
+			"		int new_recs = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
+						ARR_REF( nfaOffsets ) << "[" << vCS() << "]];\n";
+
+		if ( nfaPrePushExpr != 0 ) {
+			out << OPEN_HOST_BLOCK();
+			INLINE_LIST( out, nfaPrePushExpr, 0, false, false );
+			out << CLOSE_HOST_BLOCK();
+		}
+
+		out <<
+			"		for ( alt = 0; alt < new_recs; alt++ ) { \n";
+
+
+		out <<
 			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 							ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
 			"			nfa_bp[nfa_len].p = " << P() << ";\n";
 
-		if ( redFsm->bAnyNfaPushPops ) {
+		if ( redFsm->bAnyNfaPops ) {
 			out <<
-				"			nfa_bp[nfa_len].pop = " << ARR_REF( nfaPopActions ) << "[" << CAST("int") <<
-								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt];\n"
+				"			nfa_bp[nfa_len].popTrans = (long)" <<
+								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt;\n"
 				"\n"
+				;
+		}
+
+		if ( redFsm->bAnyNfaPushes ) {
+			out <<
 				"			switch ( " << ARR_REF( nfaPushActions ) << "[" << CAST("int") <<
 								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt] ) {\n";
 
@@ -729,17 +763,64 @@ void Binary::NFA_POP()
 		out <<
 			"	if ( nfa_len > 0 ) {\n"
 			"		nfa_count += 1;\n"
-			"		nfa_len -= 1;\n";
+			"		nfa_len -= 1;\n"
+			"		" << P() << " = nfa_bp[nfa_len].p;\n"
+			;
 
-		if ( redFsm->bAnyNfaPushPops ) {
+		const int sz = 4;
+		const int offCS = 0;
+		const int offCV = 1;
+		const int offPA = 2;
+		const int offPT = 3;
+
+		if ( redFsm->bAnyNfaCondRefs ) {
+			out <<
+				"	_cpc = 0;\n";
+
+			out <<
+				"	switch ( " << ARR_REF( nfaPopTrans ) << 
+						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] ) {\n"
+				"\n";
+
+			for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
+				GenCondSpace *condSpace = csi;
+
+				if ( condSpace->numNfaRefs > 0 ) {
+					out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
+					for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+						out << TABS(2) << "if ( ";
+						CONDITION( out, *csi );
+						Size condValOffset = (1 << csi.pos());
+						out << " ) _cpc += " << condValOffset << ";\n";
+					}
+
+					out << 
+						"	" << CEND() << "}\n";
+				}
+			}
+
 			out << 
-				"		switch ( nfa_bp[nfa_len].pop ) {\n";
+				"	}\n"
+				"\n"
+				"	if ( " << ARR_REF( nfaPopTrans ) <<
+						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] != -1 ) {\n"
+				"		if ( _cpc != " << ARR_REF( nfaPopTrans ) <<
+								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "] )\n"
+				"			goto _out;\n"
+				"	}\n"
+				;
+		}
+
+		if ( redFsm->bAnyNfaPops ) {
+			out << 
+				"		switch ( " << ARR_REF( nfaPopTrans ) <<
+						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPA << "] ) {\n";
 
 			/* Loop the actions. */
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
 					redAct.lte(); redAct++ )
 			{
-				if ( redAct->numNfaPopTestRefs > 0 ) {
+				if ( redAct->numNfaPopActionRefs > 0 ) {
 					/* Write the entry label. */
 					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
@@ -754,15 +835,79 @@ void Binary::NFA_POP()
 			out <<
 				"		}\n";
 		}
+		
+		if ( redFsm->bAnyNfaPops ) {
+			out << 
+				"		int cont = 1;\n"
+				"		switch ( " << ARR_REF( nfaPopTrans ) <<
+							"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPT << "] ) {\n";
 
-		out <<
-			"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
-			"		" << P() << " = nfa_bp[nfa_len].p;\n"
-			"		goto _resume;\n"
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPopTestRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+						if ( item.last() )
+							out << " cont = ";
+
+						CONDITION( out, item->value );
+						out << ";";
+					}
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"		}\n";
+
+			out <<
+				"		if ( cont ) {\n"
+				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+			if ( nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK();
+				INLINE_LIST( out, nfaPostPopExpr, 0, false, false );
+				out << CLOSE_HOST_BLOCK();
+			}
+
+			out <<
+				"			goto _resume;\n"
+				"		}\n";
+
+			if ( nfaPostPopExpr != 0 ) {
+				out <<
+				"			else {\n"
+				"			" << OPEN_HOST_BLOCK();
+				INLINE_LIST( out, nfaPostPopExpr, 0, false, false );
+				out << CLOSE_HOST_BLOCK() << "\n"
+				"			};\n";
+			}
+		}
+		else {
+			out <<
+				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+			if ( nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK();
+				INLINE_LIST( out, nfaPostPopExpr, 0, false, false );
+				out << CLOSE_HOST_BLOCK();
+			}
+
+			out <<
+				"		goto _resume;\n";
+		}
+
+		out << 
+			"		goto _out;\n"
 			"	}\n";
 	}
 }
-
 
 
 void Binary::LOCATE_TRANS()

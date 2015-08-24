@@ -84,7 +84,7 @@ void BinaryLoopGoto::tableDataPass()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 }
 
 void BinaryLoopGoto::genAnalysis()
@@ -165,8 +165,17 @@ void BinaryLoopGoto::NFA_POP_ACTION( RedNfaTarg *targ )
 	int act = 0;
 	if ( targ->popAction != 0 )
 		act = targ->popAction->actListId+1;
-	nfaPopActions.value( act );
+	nfaPopTrans.value( act );
 }
+
+void BinaryLoopGoto::NFA_POP_TEST( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->popTest != 0 )
+		act = targ->popTest->actListId+1;
+	nfaPopTrans.value( act );
+}
+
 
 std::ostream &BinaryLoopGoto::TO_STATE_ACTION_SWITCH()
 {
@@ -281,7 +290,7 @@ void BinaryLoopGoto::writeData()
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
-	taNfaPopActions();
+	taNfaPopTrans();
 
 	STATE_IDS();
 }

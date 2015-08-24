@@ -62,7 +62,7 @@ protected:
 	TableArray nfaTargs;
 	TableArray nfaOffsets;
 	TableArray nfaPushActions;
-	TableArray nfaPopActions;
+	TableArray nfaPopTrans;
 
 	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_SPACES_v1();
@@ -97,7 +97,7 @@ protected:
 	void taNfaTargs();
 	void taNfaOffsets();
 	void taNfaPushActions();
-	void taNfaPopActions();
+	void taNfaPopTrans();
 
 	void setKeyType();
 
@@ -123,8 +123,10 @@ protected:
 	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
 	virtual void EOF_ACTION( RedStateAp *state ) = 0;
 	virtual void COND_ACTION( RedCondPair *cond ) = 0;
+
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
 	virtual void NFA_POP_ACTION( RedNfaTarg *targ ) = 0;
+	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
 
 	void setTableState( TableArray::State );
 
