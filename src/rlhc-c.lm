@@ -115,6 +115,11 @@ namespace c_gen
 			send Parser
 				"[I]\[[expr( E )]\]"
 		}
+		case [I: ident `[ E: expr `] `. F: ident]
+		{
+			send Parser
+				"[I]\[[expr( E )]\].[F]"
+		}
 		case [`offset `( ident `, expr `)]
 		{
 			send Parser
@@ -170,6 +175,11 @@ namespace c_gen
 		{
 			send Parser
 				[ExprFactor.ident O expr( TL ) C]
+		}
+		case [I: ident `[ E: expr `] `. F: ident]
+		{
+			send Parser
+				"[I]\[[ expr( E )]\].[F]
 		}
 		case [E1: embedded_host `-> E2: lvalue]
 		{

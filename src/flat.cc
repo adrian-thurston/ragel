@@ -442,7 +442,7 @@ void Flat::NFA_PUSH()
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"	if ( " << ARR_REF( nfaOffsets ) << "[" << vCS() << "] ) {\n"
-			"		int alt; \n"
+			"		int alt = 0; \n"
 			"		int new_recs = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 						ARR_REF( nfaOffsets ) << "[" << vCS() << "]];\n";
 
@@ -453,7 +453,7 @@ void Flat::NFA_PUSH()
 		}
 
 		out <<
-			"		for ( alt = 0; alt < new_recs; alt++ ) { \n";
+			"		while ( alt < new_recs ) { \n";
 
 
 		out <<
@@ -463,7 +463,7 @@ void Flat::NFA_PUSH()
 
 		if ( redFsm->bAnyNfaPops ) {
 			out <<
-				"			nfa_bp[nfa_len].popTrans = (long)" <<
+				"			nfa_bp[nfa_len].popTrans = " << CAST("long") <<
 								ARR_REF( nfaOffsets ) << "[" << vCS() << "] + 1 + alt;\n"
 				"\n"
 				;
@@ -497,6 +497,7 @@ void Flat::NFA_PUSH()
 
 		out <<
 			"			nfa_len += 1;\n"
+			"			alt += 1;\n"
 			"		}\n"
 			"	}\n"
 			;

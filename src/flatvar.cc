@@ -303,4 +303,3 @@ void FlatVar::LOCATE_COND()
 	outLabelUsed = true;
 #endif
 }
-
