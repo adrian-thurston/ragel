@@ -89,6 +89,8 @@ namespace ragel
 				`access `write `getkey `export `import
 				`include `prepush `postpop
 
+		literal `:nfa3 `:cond `:nomax `):
+
 		token string /
 			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
 			"'" ( [^'\\] | '\\' any )* "'" 'i'?
@@ -249,7 +251,14 @@ namespace ragel
 	|	[factor_rep] :Base
 
 	def factor_rep 
-		[factor_neg factor_rep_op*]
+		[factor_neg factor_rep_op*] :Op
+	|	[`:nfa3  `( uint `, factor_rep `,
+			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `,
+			A5: action_ref `, A6: action_ref `):] :Nfa3
+	|	[`:cond  `( uint `, factor_rep `, 
+			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `):] :Cond
+	|	[`:nomax `( uint `, factor_rep `, 
+			A1: action_ref `, A2: action_ref `, A3: action_ref `):] :NoMax
 
 	def factor_rep_op
 		[`*] :Star

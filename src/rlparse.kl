@@ -1108,7 +1108,7 @@ factor_with_rep:
 	final {
 		long repId = strtol( $2->data, 0, 10 );
 
-		/* ini, min, max, push, pop */
+		/* push, pop, ini, stay, repeat, exit */
 		$$->factorWithRep = new FactorWithRep( $1->loc, repId, $4->factorWithRep,
 				$6->action, $8->action, $10->action, $12->action, $14->action, $16->action,
 				FactorWithRep::NfaRep3 );

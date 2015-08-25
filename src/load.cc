@@ -1110,57 +1110,102 @@ struct LoadRagel
 
 	FactorWithRep *loadFactorRep( ragel::factor_rep FactorRep )
 	{
-		FactorWithRep *factorWithRep = new FactorWithRep( loadFactorNeg( FactorRep.factor_neg() ) );
-		ragel::_repeat_factor_rep_op OpList = FactorRep._repeat_factor_rep_op();
-		while ( !OpList.end() ) {
-			ragel::factor_rep_op FactorRepOp = OpList.value();
-			InputLoc loc = FactorRepOp.loc();
-			switch ( FactorRepOp.prodName() ) {
-				case ragel::factor_rep_op::Star:
-					factorWithRep = new FactorWithRep( loc, factorWithRep,
-							0, 0, FactorWithRep::StarType );
-					break;
-					
-				case ragel::factor_rep_op::StarStar:
-					factorWithRep = new FactorWithRep( loc, factorWithRep,
-							0, 0, FactorWithRep::StarStarType );
-					break;
-				case ragel::factor_rep_op::Optional:
-					factorWithRep = new FactorWithRep( loc, factorWithRep,
-							0, 0, FactorWithRep::OptionalType );
-					break;
-				case ragel::factor_rep_op::Plus:
-					factorWithRep = new FactorWithRep( loc, factorWithRep,
-							0, 0, FactorWithRep::PlusType );
-					break;
-				case ragel::factor_rep_op::ExactRep: {
-					int rep = loadFactorRepNum( FactorRepOp.factor_rep_num() );
-					factorWithRep = new FactorWithRep( loc, factorWithRep,
-							rep, 0, FactorWithRep::ExactType );
-					break;
+		FactorWithRep *factorWithRep = 0;
+
+		switch ( FactorRep.prodName() ) {
+		case ragel::factor_rep::Op: {
+			factorWithRep = new FactorWithRep( loadFactorNeg( FactorRep.factor_neg() ) );
+			ragel::_repeat_factor_rep_op OpList = FactorRep._repeat_factor_rep_op();
+			while ( !OpList.end() ) {
+				ragel::factor_rep_op FactorRepOp = OpList.value();
+				InputLoc loc = FactorRepOp.loc();
+				switch ( FactorRepOp.prodName() ) {
+					case ragel::factor_rep_op::Star:
+						factorWithRep = new FactorWithRep( loc, factorWithRep,
+								0, 0, FactorWithRep::StarType );
+						break;
+						
+					case ragel::factor_rep_op::StarStar:
+						factorWithRep = new FactorWithRep( loc, factorWithRep,
+								0, 0, FactorWithRep::StarStarType );
+						break;
+					case ragel::factor_rep_op::Optional:
+						factorWithRep = new FactorWithRep( loc, factorWithRep,
+								0, 0, FactorWithRep::OptionalType );
+						break;
+					case ragel::factor_rep_op::Plus:
+						factorWithRep = new FactorWithRep( loc, factorWithRep,
+								0, 0, FactorWithRep::PlusType );
+						break;
+					case ragel::factor_rep_op::ExactRep: {
+						int rep = loadFactorRepNum( FactorRepOp.factor_rep_num() );
+						factorWithRep = new FactorWithRep( loc, factorWithRep,
+								rep, 0, FactorWithRep::ExactType );
+						break;
+					}
+					case ragel::factor_rep_op::MaxRep: {
+						int rep = loadFactorRepNum( FactorRepOp.factor_rep_num() );
+						factorWithRep = new FactorWithRep( loc, factorWithRep, 
+								0, rep, FactorWithRep::MaxType );
+						break;
+					}
+					case ragel::factor_rep_op::MinRep: {
+						int rep = loadFactorRepNum( FactorRepOp.factor_rep_num() );
+						factorWithRep = new FactorWithRep( loc, factorWithRep,
+								rep, 0, FactorWithRep::MinType );
+						break;
+					}
+					case ragel::factor_rep_op::RangeRep: {
+						int low = loadFactorRepNum( FactorRepOp.LowRep() );
+						int high = loadFactorRepNum( FactorRepOp.HighRep() );
+						factorWithRep = new FactorWithRep( loc, factorWithRep, 
+								low, high, FactorWithRep::RangeType );
+						break;
+					}
 				}
-				case ragel::factor_rep_op::MaxRep: {
-					int rep = loadFactorRepNum( FactorRepOp.factor_rep_num() );
-					factorWithRep = new FactorWithRep( loc, factorWithRep, 
-							0, rep, FactorWithRep::MaxType );
-					break;
-				}
-				case ragel::factor_rep_op::MinRep: {
-					int rep = loadFactorRepNum( FactorRepOp.factor_rep_num() );
-					factorWithRep = new FactorWithRep( loc, factorWithRep,
-							rep, 0, FactorWithRep::MinType );
-					break;
-				}
-				case ragel::factor_rep_op::RangeRep: {
-					int low = loadFactorRepNum( FactorRepOp.LowRep() );
-					int high = loadFactorRepNum( FactorRepOp.HighRep() );
-					factorWithRep = new FactorWithRep( loc, factorWithRep, 
-							low, high, FactorWithRep::RangeType );
-					break;
-				}
+				OpList = OpList.next();
 			}
-			OpList = OpList.next();
+			break;
 		}
+
+		case ragel::factor_rep::Nfa3: {
+			long repId = strtol( FactorRep.uint().text().c_str(), 0, 10 );
+			FactorWithRep *toRepeat = loadFactorRep( FactorRep._factor_rep() );
+			factorWithRep = new FactorWithRep( InputLoc(), repId, toRepeat,
+					loadActionRef( FactorRep.A1() ),
+					loadActionRef( FactorRep.A2() ),
+					loadActionRef( FactorRep.A3() ),
+					loadActionRef( FactorRep.A4() ),
+					loadActionRef( FactorRep.A5() ),
+					loadActionRef( FactorRep.A6() ),
+					FactorWithRep::NfaRep3 );
+			break;
+		}
+
+		case ragel::factor_rep::Cond: {
+			long repId = strtol( FactorRep.uint().text().c_str(), 0, 10 );
+			FactorWithRep *toRepeat = loadFactorRep( FactorRep._factor_rep() );
+			factorWithRep = new FactorWithRep( InputLoc(), repId, toRepeat,
+					loadActionRef( FactorRep.A1() ),
+					loadActionRef( FactorRep.A2() ),
+					loadActionRef( FactorRep.A3() ),
+					loadActionRef( FactorRep.A4() ),
+					0, 0,
+					FactorWithRep::CondRep );
+			break;
+		}
+
+		case ragel::factor_rep::NoMax: {
+			long repId = strtol( FactorRep.uint().text().c_str(), 0, 10 );
+			FactorWithRep *toRepeat = loadFactorRep( FactorRep._factor_rep() );
+			factorWithRep = new FactorWithRep( InputLoc(), repId, toRepeat,
+					loadActionRef( FactorRep.A1() ),
+					loadActionRef( FactorRep.A2() ),
+					loadActionRef( FactorRep.A3() ),
+					0, 0, 0,
+					FactorWithRep::NoMaxRep );
+			break;
+		}}
 
 		return factorWithRep;
 	}

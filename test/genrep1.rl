@@ -1,7 +1,6 @@
 /*
  * @LANG: c
  * @PROHIBIT_FEATFLAGS: --var-backend
- * @PROHIBIT_FRONTFLAGS: --colm-frontend
  * @PROHIBIT_BACKFLAGS: --colm-backend
  */
 
