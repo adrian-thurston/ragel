@@ -1,91 +1,102 @@
 /*
  * @LANG: c
- * @ENABLED: false
+ * @PROHIBIT_FEATFLAGS: --var-backend
  */
 
-#include <stddef.h>  /* NULL */
-#include <stdint.h>  /* uint64_t */
-#include <stdlib.h>  /* malloc(3) free(3) */
-#include <stdbool.h> /* bool */
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h> 
+#include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+
+const char s[4096];
+
+struct nfa_stack
+{
+	void *data;
+	unsigned long sz;
+};
 
 struct nfa_bp_rec
 {
 	long state;
-	const unsigned char *p;
-	int pop;
+	const char *p;
+	long popTrans;
+	long q_2;
 };
-
-struct nfa_bp_rec nfa_bp[1024];
-long nfa_len = 0;
-long nfa_count = 0;
-
-long c;
-
-struct nfa_state_rec
-{
-	long c;
-};
-
-struct nfa_state_rec nfa_s[1024];
-
-void nfa_push()
-{
-	nfa_s[nfa_len].c = c;
-}
-
-void nfa_pop()
-{
-	c = nfa_s[nfa_len].c;
-}
 
 %%{
-	machine match_any;
+	machine genrep;
 	alphtype unsigned char;
+	include shared;
 
 	action eol { p+1 == eof }
-
 	eol = '' %when eol;
 
-	action ini6
+	action psh
 	{
-		c = 0;
+		nfa_bp[nfa_len].q_2 = q_2;
 	}
 
-	action min6
-	{
-		if ( ++c < 2 )
-			fgoto *match_any_error;
+	action pop
+	{ ({
+		q_2 = nfa_bp[nfa_len].q_2;
+		1;
+	}) }
+
+	action ini_2 	{
+		({  q_2 = 0; 1; })
 	}
 
-	action max6
-	{
-		if ( ++c == 3 )
-			fgoto *match_any_error;
+	action stay_2 	{
+		({ 1; })
 	}
 
-	main := 
-		( :nfa( 1, ( 'a'  ), ini6, min6, max6, {nfa_push();}, {nfa_pop();} ): ) {2}
-		eol
-		any @{printf("----- MATCH\n");}
-	;
+	action repeat_2 	{
+		({ ++q_2 < 3; })
+	}
+
+	action exit_2 	{
+		({ ++q_2 >= 2; })
+	}
+
+
+	main :=
+		(
+			( :nfa3( 2, ( 'a' ) , 
+				psh, pop, ini_2, stay_2, repeat_2, exit_2 ): ) {2}
+			eol
+		)
+		:>
+		any
+		@{ printf( "------ MATCH\n" ); };
 
 	write data;
 }%%
 
-int test( const char *data )
+int test( const char *p )
 {
+	static int call = 1;
+	int len = strlen( p ) + 1;
+	const char *pe = p + len;
+	const char *eof = pe;
 	int cs;
-	const unsigned char *p = (const unsigned char *)data;
-	const unsigned char *pe = p + strlen(data) + 1;
-	const unsigned char *eof = pe;
 
-	printf( "testing: %s\n", data );
+	struct nfa_bp_rec *nfa_bp = (struct nfa_bp_rec*) s;
+	long nfa_len = 0;
+	long nfa_count = 0;
 
-	%% write init;
-	%% write exec;
-	
+	long q_2 = 0;
+
+	printf( "testing: %s\n", p );
+
+	%%{
+		machine genrep;
+		write init;
+		write exec;
+	}%%
+
 	return 0;
 }
 
@@ -99,20 +110,19 @@ int main()
 	test( "aaaaaa" );
 	test( "aaaaaaa" );
 	test( "aaaaaaaa" );
-
 	return 0;
 }
 
-##### OUTPUT #####
+###### OUTPUT ######
 testing: a
 testing: aa
 testing: aaa
 testing: aaaa
------ MATCH
+------ MATCH
 testing: aaaaa
------ MATCH
------ MATCH
+------ MATCH
+------ MATCH
 testing: aaaaaa
------ MATCH
+------ MATCH
 testing: aaaaaaa
 testing: aaaaaaaa

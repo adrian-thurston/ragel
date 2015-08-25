@@ -66,8 +66,9 @@ struct nfa_bp_rec
 			't' 'h' 'e' 'r' 'e'
 		)
 		:>
-		any
-		@{ printf( "match %d\n", call ); };
+		any @{
+			printf( "------ MATCH\n" );
+		};
 
 	write data;
 }%%
@@ -85,13 +86,14 @@ int test( const char *p )
 
 	long q_2 = 0;
 
+	printf( "testing: %s\n", p );
+
 	%%{
 		machine genrep;
 		write init;
 		write exec;
 	}%%
 
-	call += 1;
 	return 0;
 }
 
@@ -105,5 +107,9 @@ int main()
 }
 
 ###### OUTPUT ######
-match 2
-match 3
+testing: hello         there
+testing: hello          there
+------ MATCH
+testing: hello           there
+------ MATCH
+testing: hello            there
