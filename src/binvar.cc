@@ -90,6 +90,184 @@ void BinaryVar::NBREAK( ostream &ret, int targState, bool csForced )
 	ret << "${" << P() << "+= 1; _cont = 0; }$";
 }
 
+void BinaryVar::NFA_POP()
+{
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	_nfa_repeat = 1;\n"
+			"	while ( _nfa_repeat ) {\n"
+			"		_nfa_repeat = 0;\n"
+			"	if ( nfa_len > 0 ) {\n"
+			"		nfa_count += 1;\n"
+			"		nfa_len -= 1;\n"
+			"		" << P() << " = nfa_bp[nfa_len].p;\n"
+			;
+
+		const int sz = 4;
+		const int offCS = 0;
+		const int offCV = 1;
+		const int offPA = 2;
+		const int offPT = 3;
+
+		if ( redFsm->bAnyNfaCondRefs ) {
+			out <<
+				"	_cpc = 0;\n";
+
+			out <<
+				"	switch ( " << ARR_REF( nfaPopTrans ) << 
+						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] ) {\n"
+				"\n";
+
+			for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
+				GenCondSpace *condSpace = csi;
+
+				if ( condSpace->numNfaRefs > 0 ) {
+					out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
+					for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+						out << TABS(2) << "if ( ";
+						CONDITION( out, *csi );
+						Size condValOffset = (1 << csi.pos());
+						out << " ) _cpc += " << condValOffset << ";\n";
+					}
+
+					out << 
+						"	" << CEND() << "}\n";
+				}
+			}
+
+			out << 
+				"	}\n"
+				"\n"
+				"	if ( " << ARR_REF( nfaPopTrans ) <<
+						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] != -1 ) {\n"
+				"		if ( _cpc != " << ARR_REF( nfaPopTrans ) <<
+								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "] )\n"
+				"			goto _out;\n"
+				"	}\n"
+				;
+		}
+
+		if ( redFsm->bAnyNfaPops ) {
+			out << 
+				"		switch ( " << ARR_REF( nfaPopTrans ) <<
+						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPA << "] ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPopActionRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						ACTION( out, item->value, IlOpts( 0, false, false ) );
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"		}\n";
+		}
+		
+		if ( redFsm->bAnyNfaPops ) {
+			out << 
+				"		int cont = 1;\n"
+				"		switch ( " << ARR_REF( nfaPopTrans ) <<
+							"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPT << "] ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPopTestRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+						if ( item.last() )
+							out << " cont = ";
+
+						CONDITION( out, item->value );
+						out << ";";
+					}
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"		}\n";
+
+			out <<
+				"		if ( cont ) {\n"
+				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+			if ( nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK();
+				INLINE_LIST( out, nfaPostPopExpr, 0, false, false );
+				out << CLOSE_HOST_BLOCK();
+			}
+
+			out <<
+//				"			goto _resume;\n"
+				"			_nfa_cont = 1;\n"
+				"			_nfa_repeat = 0;\n"
+				"		}\n";
+
+			if ( nfaPostPopExpr != 0 ) {
+				out <<
+				"			else {\n"
+				"			" << OPEN_HOST_BLOCK();
+				INLINE_LIST( out, nfaPostPopExpr, 0, false, false );
+				out << CLOSE_HOST_BLOCK() << "\n"
+//				"				goto _out;\n"
+				"				_nfa_cont = 0;\n"
+				"				_nfa_repeat = 1;\n"
+				"			};\n";
+			}
+			else {
+				out <<
+				"			else {\n"
+//				"				goto _out;\n"
+				"				_nfa_cont = 0;\n"
+				"				_nfa_repeat = 1;\n"
+				"			}\n"
+				;
+			}
+		}
+		else {
+			out <<
+				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+			if ( nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK();
+				INLINE_LIST( out, nfaPostPopExpr, 0, false, false );
+				out << CLOSE_HOST_BLOCK();
+			}
+
+			out <<
+//				"		goto _resume;\n"
+				"		_nfa_cont = 1;\n"
+				"		_nfa_repeat = 0;\n"
+				;
+		}
+
+		out << 
+			"	}\n"
+			"	else {\n"
+			"		_nfa_cont = 0;\n"
+			"		_nfa_repeat = 0;\n"
+			"	}\n"
+			"}\n"
+			;
+	}
+}
+
+
 
 void BinaryVar::LOCATE_TRANS()
 {

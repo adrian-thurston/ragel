@@ -324,7 +324,13 @@ void FlatLoopVar::writeExec()
 	matchCondLabelUsed = false;
 
 	out <<
-		"	{\n";
+		"{\n"
+		"	" << UINT() << " _nfa_cont = 1;\n"
+		"	" << UINT() << " _nfa_repeat = 1;\n"
+		"	while ( _nfa_cont != 0 )\n"
+		"	{\n"
+		"		_nfa_cont = 0;\n"
+		;
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
@@ -332,7 +338,8 @@ void FlatLoopVar::writeExec()
 	out <<
 		"	" << UINT() << " _trans = 0;\n" <<
 		"	" << UINT() << " _have = 0;\n"
-		"	" << UINT() << " _cont = 1;\n";
+		"	" << UINT() << " _cont = 1;\n"
+	;
 
 	if ( condSpaceList.length() > 0 ) {
 		out <<
@@ -455,6 +462,8 @@ void FlatLoopVar::writeExec()
 			"\n";
 	}
 
+	NFA_PUSH();
+
 	LOCATE_TRANS();
 
 	string cond = "_cond";
@@ -526,17 +535,17 @@ void FlatLoopVar::writeExec()
 		"\n"
 		/* cont if. */
 		"}}\n";
-//		"	goto _resume;\n";
 
-//	if ( outLabelUsed )
-//		out << "} label _out { {}\n";
+
 
 	/* The loop. */
 	out << "}\n";
 
-//	/* The entry loop. */
-//	out << "}}\n";
+	NFA_POP();
 
-	/* The execute block. */
-	out << "	}\n";
+	out <<
+		"	}\n";
+
+	out <<
+		"}\n";
 }

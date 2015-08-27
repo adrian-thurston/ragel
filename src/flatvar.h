@@ -12,6 +12,7 @@ struct FlatVar
 		Flat( args )
 	{}
 
+	void NFA_POP();
 	void LOCATE_TRANS();
 	void LOCATE_COND();
 

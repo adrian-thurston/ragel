@@ -25,6 +25,8 @@ struct BinaryVar
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NRET( ostream &ret, bool inFinish );
 	void NBREAK( ostream &ret, int targState, bool csForced );
+
+	void NFA_POP();
 };
 
 

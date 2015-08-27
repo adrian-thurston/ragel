@@ -317,6 +317,10 @@ void BinaryExpVar::writeExec()
 	outLabelUsed = false;
 
 	out << 
+		"{\n"
+		"	" << UINT() << " _nfa_cont = 1;\n"
+		"	" << UINT() << " _nfa_repeat = 1;\n"
+		"	while ( _nfa_cont != 0 )\n"
 		"	{\n"
 		"	int _klen;\n";
 
@@ -404,6 +408,8 @@ void BinaryExpVar::writeExec()
 			"\n";
 	}
 
+	NFA_PUSH();
+
 	LOCATE_TRANS();
 
 	if ( useIndicies )
@@ -457,158 +463,10 @@ void BinaryExpVar::writeExec()
 	/* The loop. */
 	out << "}\n";
 
-//	/* The entry loop. */
-//	out << "}}\n";
-
-	/* The execute block. */
-	out << "	}\n";
-
-#if 0
-
-	out << "\n";
-
-	if ( !noEnd ) {
-		testEofUsed = true;
-		out <<
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
-	}
-
-
-	out << LABEL( "_resume" ) << " { \n";
-
-	if ( redFsm->anyFromStateActions() ) {
-		out <<
-			"	switch ( " << ARR_REF( fromStateActions ) << "[" << vCS() << "] ) {\n";
-			FROM_STATE_ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
-	}
-
-	NFA_PUSH();
-
-	LOCATE_TRANS();
-
-	out << "}\n";
-	out << LABEL( "_match" ) << " {\n";
-
-	if ( useIndicies )
-		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
-
-	LOCATE_COND();
-
-	out << "}\n";
-	out << LABEL( "_match_cond" ) << " {\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << vCS() << ";\n";
-
-	out <<
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[_cond];\n"
-		"\n";
-
-	if ( redFsm->anyRegActions() ) {
-		out << 
-			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
-			"		goto _again;\n"
-			"\n";
-
-		if ( redFsm->anyRegNbreak() )
-			out << "	_nbreak = 0;\n";
-
-		out <<
-			"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
-			ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
-
-		if ( redFsm->anyRegNbreak() ) {
-			out <<
-				"	if ( _nbreak == 1 )\n"
-				"		goto _out;\n";
-			outLabelUsed = true;
-		}
-
-		out << "\n";
-	}
-
-//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-	out << "}\n";
-	out << LABEL( "_again" ) << " {\n";
-
-	if ( redFsm->anyToStateActions() ) {
-		out <<
-			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
-			TO_STATE_ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
-	}
-
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
-	}
-
-	if ( !noEnd ) {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	if ( " << P() << " != " << PE() << " )\n"
-			"		goto _resume;\n";
-	}
-	else {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	goto _resume;\n";
-	}
-
-	if ( testEofUsed )
-		out << "}\n	" << LABEL( "_test_eof" ) << " { {}\n";
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		out <<
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"	{\n";
-
-		if ( redFsm->anyEofTrans() ) {
-			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
-			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
-				"		goto _match_cond;\n"
-				"	}\n";
-		}
-
-		if ( redFsm->anyEofActions() ) {
-			out <<
-				"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
-				EOF_ACTION_SWITCH() <<
-				"	}\n";
-		}
-
-		out << 
-			"	}\n"
-			"\n";
-	}
-
-	if ( outLabelUsed )
-		out << "}\n	" << LABEL( "_out" ) << " { {}\n";
-
-	/* The entry loop. */
-	out << "}\n";
-	out << "}\n";
-
 	NFA_POP();
 
+	/* The execute block. */
+	out << "}\n";
 
-	/* Continue loop. */
-	out << "	}\n";
-
-	/* Execute block. */
-	out << "	}\n";
-
-#endif
+	out << "}\n";
 }

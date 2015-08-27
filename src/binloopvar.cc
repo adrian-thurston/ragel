@@ -50,7 +50,6 @@ void BinaryLoopVar::calcIndexSize()
 	useIndicies = false;
 }
 
-
 void BinaryLoopVar::tableDataPass()
 {
 	taActions();
@@ -80,6 +79,11 @@ void BinaryLoopVar::tableDataPass()
 
 	taKeys();
 	taCondKeys();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopTrans();
 }
 
 void BinaryLoopVar::genAnalysis()
@@ -257,6 +261,11 @@ void BinaryLoopVar::writeData()
 		taEofTransDirect();
 	}
 
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopTrans();
+
 	STATE_IDS();
 }
 
@@ -291,6 +300,10 @@ void BinaryLoopVar::writeExec()
 	matchCondLabelUsed = false;
 
 	out <<
+		"{\n"
+		"	" << UINT() << " _nfa_cont = 1;\n"
+		"	" << UINT() << " _nfa_repeat = 1;\n"
+		"	while ( _nfa_cont != 0 )\n"
 		"	{\n"
 		"	int _klen;\n";
 
@@ -402,6 +415,8 @@ void BinaryLoopVar::writeExec()
 			"\n";
 	}
 
+	NFA_PUSH();
+
 	LOCATE_TRANS();
 
 	if ( useIndicies )
@@ -472,19 +487,16 @@ void BinaryLoopVar::writeExec()
 		"	if ( _cont == 1 )\n"
 		"		" << P() << " += 1;\n"
 		"\n"
-		/* cont if. */
-		"}}\n";
-//		"	goto _resume;\n";
+		"}\n";
 
-//	if ( outLabelUsed )
-//		out << "} label _out { {}\n";
+	out <<
+		"}\n";
 
-	/* The loop. */
 	out << "}\n";
 
-//	/* The entry loop. */
-//	out << "}}\n";
+	NFA_POP();
 
-	/* The execute block. */
-	out << "	}\n";
+	out << "}\n";
+
+	out << "}\n";
 }
