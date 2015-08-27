@@ -1958,6 +1958,34 @@ void AsmCodeGen::writeExec()
 								"	cmp		$" << targ->id << ", %rax\n"
 								"	jne		100f\n";
 
+							/* Condition test. */
+							out << "	movq	$0, %r9\n";
+
+							if ( targ->condSpace != 0 ) {
+								for ( GenCondSet::Iter csi = targ->condSpace->condSet; csi.lte(); csi++ ) {
+									out <<
+										"	pushq	%r9\n";
+
+									CONDITION( out, *csi );
+									out << 
+										"\n"
+										"	test	%eax, %eax\n"
+										"	setne   %cl\n"
+										"	movsbq	%cl, %rcx\n"
+										"	salq	$" << csi.pos() << ", %rcx\n"
+										"	popq	%r9\n"
+										"	addq	%rcx, %r9\n";
+								}
+
+								// for ( int c = 0; c < targ->cond trans->numConds(); c++ ) {
+									CondKey key = targ->condVal;
+									out <<
+										"	cmpq	" << COND_KEY( key ) << ", %r9\n"
+										"	jne	" << LABEL( "out" ) << "\n";
+								// }
+							}
+
+
 							if ( targ->popAction != 0 ) {
 								/* Write each action in the list of action items. */
 								for ( GenActionTable::Iter item = targ->popAction->key; item.lte(); item++ )

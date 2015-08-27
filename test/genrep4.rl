@@ -1,6 +1,5 @@
 /*
  * @LANG: c
- * @ENABLED: false
  */
 
 #include <stddef.h>  /* NULL */
@@ -14,7 +13,8 @@ struct nfa_bp_rec
 {
 	long state;
 	const unsigned char *p;
-	int pop;
+	int popTrans;
+	long q_2;
 };
 
 struct nfa_bp_rec nfa_bp[1024];
@@ -40,6 +40,8 @@ void nfa_pop()
 	c = nfa_s[nfa_len].c;
 }
 
+long q_2;
+
 %%{
 	machine match_any;
 	alphtype unsigned char;
@@ -48,28 +50,39 @@ void nfa_pop()
 
 	eol = '' %when eol;
 
-	action ini6
+	action psh
 	{
-		c = 0;
+		nfa_bp[nfa_len].q_2 = q_2;
 	}
 
-	action min6
-	{
-		c >= 2
+	action pop
+	{ ({
+		q_2 = nfa_bp[nfa_len].q_2;
+		1;
+	}) }
+
+	action ini 	{
+		({  q_2 = 0; 1; })
 	}
 
-	action max6
-	{
-		c < 3
+	action stay 	{
+		({ 1; })
 	}
 
-	action inc6
-	{
-		c += 1;
+	action repeat 	{
+		({ ++q_2 < 3; })
 	}
+
+	action exit 	{
+		({ ++q_2 >= 2; })
+	}
+
+	action marker
+	{ ({printf("  marker\n");1;}) }
 
 	main := 
-		( :nfa2( 0, ( 'a' ), ini6, min6, max6, {nfa_push();}, {nfa_pop();}, inc6 ): ' ' ) {2}
+		( '' %when(marker) 
+			:nfa3( 0, ( 'a' ), psh, pop, ini, stay, repeat, exit ): ' ' ) {2}
 		eol
 		any @{printf("----- MATCH\n");}
 	;
@@ -84,7 +97,7 @@ int test( const char *data )
 	const unsigned char *pe = p + strlen(data) + 1;
 	const unsigned char *eof = pe;
 
-	printf( "testing: %s\n", data );
+	printf( "%s\n", data );
 
 	%% write init;
 	%% write exec;
@@ -121,25 +134,55 @@ int main()
 }
 
 ##### OUTPUT #####
-testing: a 
-testing: aa 
-testing: aaa 
-testing: aaaa 
-testing: a a 
-testing: aa aa 
+a 
+  marker
+aa 
+  marker
+  marker
+aaa 
+  marker
+  marker
+aaaa 
+  marker
+a a 
+  marker
+aa aa 
+  marker
+  marker
 ----- MATCH
-testing: aaa aaa 
+aaa aaa 
+  marker
+  marker
 ----- MATCH
-testing: aaaa aaaa 
-testing: a a a 
-testing: aa aa aa 
-testing: aaa aaa aaa 
-testing: aaaa aaaa aaaa 
-testing: aa a 
-testing: aa aaa 
+aaaa aaaa 
+  marker
+a a a 
+  marker
+aa aa aa 
+  marker
+  marker
+aaa aaa aaa 
+  marker
+  marker
+aaaa aaaa aaaa 
+  marker
+aa a 
+  marker
+  marker
+aa aaa 
+  marker
+  marker
 ----- MATCH
-testing: aa aaaa 
-testing: aaa a 
-testing: aaa aa 
+aa aaaa 
+  marker
+  marker
+aaa a 
+  marker
+  marker
+aaa aa 
+  marker
+  marker
 ----- MATCH
-testing: aaa aaaa 
+aaa aaaa 
+  marker
+  marker
