@@ -1,6 +1,5 @@
 # 
 # @LANG: asm
-# @ENABLED: false
 # 
 
 %%{
@@ -23,93 +22,86 @@
 
 	eol = '' %when eol;
 
-	action ini6
-	{
-		# c = 0;
-#		movl	$.L_ini, %edi
-#		call	puts
 
+	action ini {
+		# ini
 		movl	$0, c(%rip)
+		movq	$1, %rax
 	}
 
-	action min6
-	{
-		# if ( ++c < 2 )
-		#	fto *match_any_error;
+	action stay {
+		# stay
+		movq	$1, %rax
+	}
 
+	action repeat {
+		# repeat
 
 		movl	c(%rip), %eax
 		addl	$1, %eax
 		movl	%eax, c(%rip)
 
-#		movl	$.L_min, %edi
-#		call	puts
-
-#		movl	$.L_min, %edi
-#		movq	c(%rip), %rsi
-#		movl	$0, %eax
-#		call	printf
-
-		movl	c(%rip), %eax
-		cmpl	$2, %eax
-		jge		1f
-		fgoto *gen_rep_error(%rip);
-		1:
-	}
-
-	action max6
-	{
-		# if ( ++c == 3 )
-		#	fto *match_any_error;
-
-#		movl	$.L_max, %edi
-#		call	puts
-
-		movl	c(%rip), %eax
-		addl	$1, %eax
-		movl	%eax, c(%rip)
 		cmpl	$3, %eax
-		jne		1f
-		fgoto *gen_rep_error(%rip);
-		1:
+		setl    %al
+		movzbl	%al, %eax
 	}
 
-	action nfa_push
+	action exit {
+		# exit
+
+		movl	c(%rip), %eax
+		addl	$1, %eax
+		movl	%eax, c(%rip)
+
+		cmpl	$2, %eax
+		setge	%al
+		movzbl	%al, %eax
+	}
+
+	action psh
 	{
+		# PUSH
 		movq	nfa_s@GOTPCREL(%rip), %rax
 		movq	-88(%rbp), %rcx
 		sal		$3, %rcx
 		movl	c(%rip), %edx
 		movq	%rdx, 0(%rax,%rcx,)
 
-#		movl	$.L_push, %edi
-#		call	puts
+		# movl	$.L_push, %edi
+		# call	puts
 	}
 
-	action nfa_pop
+	action pop
 	{
+		# POP
 		movq	nfa_s@GOTPCREL(%rip), %rax
 		movq	-88(%rbp), %rcx
 		sal		$3, %rcx
 		movq	0(%rax,%rcx,), %rdx
 		movl	%edx, c(%rip)
+		movq	$1, %rax
 
-#		movl	$.L_pop, %edi
-#		call	puts
+		# movl	$.L_pop, %edi
+		# call	puts
 	}
 
 	action char
 	{
-#		movl	$.L_char, %edi
-#		movq	c(%rip), %rsi
-#		movl	$0, %eax
-#		call	printf
+		# movl	$.L_char, %edi
+		# movq	c(%rip), %rsi
+		# movl	$0, %eax
+		# call	printf
 	}
 
 	main := 
-		( :nfa( ( 'a' @char ), ini6, min6, max6, nfa_push, nfa_pop ): ' ' ) {2}
-		eol
-		any @{
+		(
+			( :nfa3( 2, ( 'a' @char ) , 
+				psh, pop, ini, stay, repeat, exit ): ' ' ) {2}
+			eol
+		)
+		:>
+		any
+		@{
 			# printf("----- MATCH\n");
 			movl	$.L_match, %edi
 			call	puts

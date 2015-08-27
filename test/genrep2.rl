@@ -1,6 +1,5 @@
 /*
  * @LANG: c
- * @PROHIBIT_FEATFLAGS: --var-backend
  */
 
 #include <stddef.h>

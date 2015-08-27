@@ -1130,14 +1130,9 @@ void AsmCodeGen::NFA_PUSH( RedStateAp *st )
 				"	movq    $" << t->state->id << ", 0(%rax,%rcx,)\n"
 				"	movq	" << P() << ", 8(%rax,%rcx,)\n";
 
-			if ( t->popAction ) {
-				out <<
-					"	movq	$" << (t->popAction->actListId+1) << ", 16(%rax,%rcx,)\n";
-			}
-			else {
-				out <<
-					"	movq	$0, 16(%rax,%rcx,)\n";
-			}
+			out <<
+				"	# pop action id " << t->id << "\n"
+				"	movq	$" << t->id << ", 16(%rax,%rcx,)\n";
 
 			if ( t->push ) {
 				for ( GenActionTable::Iter item = t->push->key; item.lte(); item++ ) {
@@ -1805,6 +1800,20 @@ void AsmCodeGen::writeData()
 	}
 }
 
+void AsmCodeGen::setNfaIds()
+{
+	long nextId = 1;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ ) {
+				std::cout << "nfa id: " << nextId << std::endl;
+				targ->id = nextId;
+				nextId += 1;
+			}
+		}
+	}
+}
+
 void AsmCodeGen::writeExec()
 {
 	/* Must set labels immediately before writing because we may depend on the
@@ -1812,6 +1821,8 @@ void AsmCodeGen::writeExec()
 	setLabelsNeeded();
 	testEofUsed = false;
 	outLabelUsed = false;
+
+	setNfaIds();
 
 	/* If there are eof actions then we need to run code after exporting the
 	 * final state to vCS. Since the interface register is calee-save, we need
@@ -1932,28 +1943,43 @@ void AsmCodeGen::writeExec()
 
 			;
 
-		if ( redFsm->bAnyNfaPushPops ) {
+		if ( redFsm->bAnyNfaPops ) {
 			out <<
 				"	movq	%r11, %r14\n"
 				"	movq	16(%rax,%rcx,), %rax\n";
 
-			/* Loop the actions. */
-			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-					redAct.lte(); redAct++ )
-			{
-				if ( redAct->numNfaPopTestRefs > 0 ) {
-					/* Write the entry label. */
-					out <<
-						"	cmp		$" << (redAct->actListId+1) << ", %rax\n"
-						"	jne		100f\n";
+			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+				if ( st->nfaTargs != 0 ) {
+					for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ ) {
 
-					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-						ACTION( out, item->value, 0, false, false );
+							/* Write the entry label. */
+							out <<
+								"   # pop action select\n"
+								"	cmp		$" << targ->id << ", %rax\n"
+								"	jne		100f\n";
 
-					out <<
-						"	jmp		101f\n"
-						"100:\n";
+							if ( targ->popAction != 0 ) {
+								/* Write each action in the list of action items. */
+								for ( GenActionTable::Iter item = targ->popAction->key; item.lte(); item++ )
+									ACTION( out, item->value, 0, false, false );
+							}
+
+							if ( targ->popTest != 0 ) {
+								/* Write each action in the list of action items. */
+								for ( GenActionTable::Iter item = targ->popTest->key; item.lte(); item++ )
+									ACTION( out, item->value, 0, false, false );
+
+								out <<
+									"	test	%eax, %eax\n"
+									"	jz		" << LABEL( "out" ) << "\n"
+								;
+							}
+
+							out <<
+								"	jmp		101f\n"
+								"100:\n";
+
+					}
 				}
 			}
 

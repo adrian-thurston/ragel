@@ -255,6 +255,8 @@ public:
 	void setLabelsNeeded( RedCondPair *pair );
 	void setLabelsNeeded( GenInlineList *inlineList );
 	void setLabelsNeeded();
+
+	void setNfaIds();
 };
 
 #endif

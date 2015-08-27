@@ -498,6 +498,7 @@ struct RedNfaTarg
 			GenCondSpace *condSpace, long condVal, RedAction *popAction,
 			RedAction *popTest, int order )
 	:
+		id(0),
 		state(state),
 		push(push),
 		condSpace(condSpace),
@@ -507,6 +508,7 @@ struct RedNfaTarg
 		order(order)
 	{}
 
+	long id;
 	RedStateAp *state;
 	RedAction *push;
 	GenCondSpace *condSpace;
@@ -567,7 +569,6 @@ struct RedStateAp
 
 	/* The list of states that transitions from this state go to. */
 	RedStateVect targStates;
-
 
 	bool isFinal;
 	bool labelNeeded;

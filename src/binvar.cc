@@ -345,7 +345,7 @@ void BinaryVar::LOCATE_COND()
 
 		for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
 			GenCondSpace *condSpace = csi;
-			out << "	case " << condSpace->condSpaceId << " {\n";
+			out << "	" << CASE( STR( condSpace->condSpaceId ) ) << " {\n";
 			for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
 				out << TABS(2) << "if ( ";
 				CONDITION( out, *csi );
