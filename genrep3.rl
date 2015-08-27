@@ -93,9 +93,17 @@
 		# call	printf
 	}
 
+	action marker 
+	{
+		movl	$.L_marker, %edi
+		call	puts
+		movl	$1, %eax
+	}
+
 	main := 
 		(
-			( :nfa3( 2, ( 'a' @char ) , 
+			( '' %when marker
+				:nfa3( 2, ( 'a' @char ) , 
 				psh, pop, ini, stay, repeat, exit ): ' ' ) {2}
 			eol
 		)
@@ -125,7 +133,7 @@
 .L_fmt_s_nl:
 	.string "restart: %d\n"
 .L_marker:
-	.string "marker\n"
+	.string "  marker"
 .L_match:
 	.string "----- MATCH"
 
@@ -364,24 +372,54 @@ nfa_len:
 
 ##### OUTPUT #####
 a 
+  marker
 aa 
+  marker
+  marker
 aaa 
+  marker
+  marker
 aaaa 
+  marker
 a a 
+  marker
 aa aa 
+  marker
+  marker
 ----- MATCH
 aaa aaa 
+  marker
+  marker
 ----- MATCH
 aaaa aaaa 
+  marker
 a a a 
+  marker
 aa aa aa 
+  marker
+  marker
 aaa aaa aaa 
+  marker
+  marker
 aaaa aaaa aaaa 
+  marker
 aa a 
+  marker
+  marker
 aa aaa 
+  marker
+  marker
 ----- MATCH
 aa aaaa 
+  marker
+  marker
 aaa a 
+  marker
+  marker
 aaa aa 
+  marker
+  marker
 ----- MATCH
 aaa aaaa 
+  marker
+  marker
