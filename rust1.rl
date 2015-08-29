@@ -2,9 +2,6 @@
 // @LANG: rust
 //
 
-static neg: bool = false;
-static value: i32 = 0;
-
 %%{
 	machine atoi;
 
