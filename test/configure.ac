@@ -111,6 +111,9 @@ AC_CHECK_PROG(RUST, rustc, rustc)
 dnl Check for the crack interpreter.
 AC_CHECK_PROG(CRACK, crack, crack)
 
+dnl Check for the julia interpreter.
+AC_CHECK_PROG(JULIA, julia, julia)
+
 SED_SUBST=["\
 	-e 's|@SUBJECT@|${SUBJECT}|g' \
 	-e 's|@CXX@|${CXX}|g' \
@@ -124,6 +127,7 @@ SED_SUBST=["\
 	-e 's|@OCAML@|${OCAML}|g' \
 	-e 's|@RUST@|${RUST}|g' \
 	-e 's|@CRACK@|${CRACK}|g' \
+	-e 's|@JULIA@|${JULIA}|g' \
 "]
 
 AC_SUBST(SED_SUBST)

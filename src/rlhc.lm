@@ -8,6 +8,7 @@ include 'rlhc-ruby.lm'
 include 'rlhc-ocaml.lm'
 include 'rlhc-rust.lm'
 include 'rlhc-crack.lm'
+include 'rlhc-julia.lm'
 
 str argvPop()
 {
@@ -67,6 +68,8 @@ elsif ( Lang == 'rust' )
 	rust_gen::trans( Output, Start )
 elsif ( Lang == 'crack' )
 	crack_gen::trans( Output, Start )
+elsif ( Lang == 'julia' )
+	julia_gen::trans( Output, Start )
 else {
 	print( 'rlhc: unrecognized language: ', Lang, '\n' )
 }

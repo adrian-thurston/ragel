@@ -112,6 +112,12 @@ HostType hostTypesRust[] =
 	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  4 },
 };
 
+HostType hostTypesJulia[] =
+{
+	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  4 },
+};
+
+
 const HostLang hostLangC = {
 	"C",
 	"-C",
@@ -222,6 +228,17 @@ const HostLang hostLangRust = {
 	"rust"
 };
 
+const HostLang hostLangJulia = {
+	"Julia",
+	"-Y",
+	HostLang::Julia,
+	hostTypesJulia, 1,
+	hostTypesJulia+0,
+	false,
+	true,
+	"julia"
+};
+
 const HostLang *hostLangs[] = {
 	&hostLangC,
 	&hostLangAsm,
@@ -233,10 +250,11 @@ const HostLang *hostLangs[] = {
 	&hostLangOCaml,
 	&hostLangRust,
 	&hostLangCrack,
+	&hostLangJulia,
 };
 
 
-const int numHostLangs = 10;
+const int numHostLangs = sizeof(hostLangs)/sizeof(hostLangs[0]);
 
 HostType *findAlphType( const HostLang *hostLang, const char *s1 )
 {

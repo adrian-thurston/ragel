@@ -235,7 +235,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKUvHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKUYvHh?-:sT:F:G:LpV", argc, argv );
 
 	/* Decide if we were invoked using a path variable, or with an explicit path. */
 	const char *lastSlash = strrchr( argv[0], '/' );
@@ -372,6 +372,9 @@ void InputData::parseArgs( int argc, const char **argv )
 				break;
 			case 'U':
 				hostLang = &hostLangRust;
+				break;
+			case 'Y':
+				hostLang = &hostLangJulia;
 				break;
 
 			/* Version and help. */
@@ -553,7 +556,8 @@ bool langSupportsGoto( const HostLang *hostLang )
 	if ( hostLang->lang == HostLang::Ruby ||
 			hostLang->lang == HostLang::OCaml ||
 			hostLang->lang == HostLang::Rust ||
-			hostLang->lang == HostLang::Crack )
+			hostLang->lang == HostLang::Crack ||
+			hostLang->lang == HostLang::Julia )
 		return false;
 	
 	return true;

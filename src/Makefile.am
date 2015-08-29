@@ -56,6 +56,7 @@ EXTRA_DIST = \
 	rlhc-rust.lm \
 	rlhc-ocaml.lm \
 	rlhc-crack.lm \
+	rlhc-julia.lm \
 	ragel-c.lm \
 	ragel-crack.lm \
 	ragel-ruby.lm \
@@ -89,7 +90,8 @@ RLHC = \
 	rlhc-ruby.lm \
 	rlhc-rust.lm \
 	rlhc-ocaml.lm \
-	rlhc-crack.lm
+	rlhc-crack.lm \
+	rlhc-julia.lm
 
 rlhc_SOURCES =
 

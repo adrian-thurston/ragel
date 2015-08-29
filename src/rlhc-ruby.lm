@@ -409,6 +409,7 @@ namespace ruby_gen
 				"[stmt_list(TL)]
 				"end
 		}
+		# [declaration]
 		case [
 			TypeList: opt_const Type: type OptPtr: opt_ptr 
 			Ident: ident OptInit: opt_init Semi: `;

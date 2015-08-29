@@ -1,5 +1,5 @@
 
-namespace c_out
+namespace julia_out
 	token _IN_ /''/
 	token _EX_ /''/
 
@@ -8,6 +8,8 @@ namespace c_out
 			'//' any* :> '\n' |
 			'/*' any* :>> '*/'
 		/
+
+		literal `function `end `while `if
 
 		token id
 			/[a-zA-Z_][a-zA-Z_0-9]*/
@@ -33,21 +35,28 @@ namespace c_out
 			/[ \t\v\r\n]+/
 	end
 
+	def kw
+		[`function _IN_]
+	|	[`while _IN_]
+	|	[`if _IN_]
+	|	[_EX_ `end]
+
 	def item
 		[comment]
+	|	[kw]
 	|	[id]
 	|	[number]
 	|	[symbol]
 	|	[string]
 	|	[`{ _IN_ item* _EX_ `} ]
 
-	def c_out
+	def julia_out
 		[_IN_ _EX_ item*]
 end
 
-namespace c_gen
+namespace julia_gen
 
-	global Parser: parser<c_out::c_out>
+	global Parser: parser<julia_out::julia_out>
 
 	void tok_list( TL: host::tok* )
 	{
@@ -113,22 +122,22 @@ namespace c_gen
 		case [I: ident `[ E: expr `]]
 		{
 			send Parser
-				"[I]\[[expr( E )]\]"
+				"[I]\[1+([expr( E )])\]"
 		}
 		case [I: ident `[ E: expr `] `. F: ident]
 		{
 			send Parser
-				"[I]\[[expr( E )]\].[F]"
+				"[I]\[1+([expr( E )])\].[F]"
 		}
 		case [`offset `( ident `, expr `)]
 		{
 			send Parser
-				[ExprFactor.ident ' + ' expr( ExprFactor.expr )]
+				[expr( ExprFactor.expr )]
 		}
-		case [`deref `( ident `, expr `)]
+		case [`deref `( I: ident `, E: expr `)]
 		{
 			send Parser
-				"(*( [expr(ExprFactor.expr)] ))
+				"[I]\[1+([ expr( E ) ])\]"
 		}
 		case [`TRUE]
 		{
@@ -155,7 +164,7 @@ namespace c_gen
 		case [`cast `( T: type `) F: expr_factor]
 		{
 			send Parser 
-				"( [type( T )] ) [expr_factor( F )]"
+				"convert( [type( T )] , [expr_factor( F )] )"
 		}
 		default {
 			# Catches cases not specified
@@ -171,15 +180,15 @@ namespace c_gen
 			send Parser
 				[embedded_host( EH )]
 		}
-		case [ident O: `[ TL: expr C: `]]
+		case [I: ident `[ E: expr `]]
 		{
 			send Parser
-				[ExprFactor.ident O expr( TL ) C]
+				"[I]\[1+([expr( E )])\]"
 		}
 		case [I: ident `[ E: expr `] `. F: ident]
 		{
 			send Parser
-				"[I]\[[ expr( E )]\].[F]
+				"[I]\[1+([ expr( E )])\].[F]"
 		}
 		case [E1: embedded_host `-> E2: lvalue]
 		{
@@ -296,17 +305,21 @@ namespace c_gen
 	{
 		switch Type
 		case "s8"
-			send Parser ['char ']
+			send Parser ['Int8 ']
+		case "u8"
+			send Parser ['Uint8 ']
 		case "s16"
-			send Parser ['short ']
+			send Parser ['Int16 ']
 		case "s32"
-			send Parser ['int ']
+			send Parser ['Int32 ']
 		case "s64"
-			send Parser ['long ']
+			send Parser ['Int64 ']
 		case "s128"
-			send Parser ['long long ']
+			send Parser ['Int128 ']
 		case "uint"
-			send Parser ['unsigned int ']
+			send Parser ['Uint ']
+		case "int"
+			send Parser ['Int ']
 		default
 			send Parser [Type]
 	}
@@ -336,12 +349,36 @@ namespace c_gen
 		}
 		case [Array: array] {
 			send Parser
-				"static const [type(Array.type)] "
-					"[Array.ident] \[\] = { [num_list(Array.num_list)] };
+				"[Array.ident] = [type(Array.type)] "
+					"\[ [num_list(Array.num_list)] \]
 		}
 		case [Value: value] {
 			send Parser
-				"static const [Value.type] [Value.ident] = [Value.number];
+				"[Value.ident] = [Value.number]
+#			send Parser
+#				"[Value.ident] :: "
+#					"[type(Value.type)] = [Value.number]
+		}
+		# case [declaration]
+		case [
+			TypeList: opt_const Type: type OptPtr: opt_ptr 
+			Ident: ident OptInit: opt_init Semi: `;
+		]
+		{
+			send Parser
+				[OptPtr Ident]
+
+			if match OptInit [E: `= expr] {
+				send Parser
+					[E expr(OptInit.expr)]
+			}
+			else {
+				send Parser
+					"= 0
+			}
+
+			send Parser
+				[Semi]
 		}
 		case [
 				`if `( IfExpr: expr `) IfStmt: stmt
@@ -356,7 +393,7 @@ namespace c_gen
 					[`else `if `( ElseIfExpr: expr `) ElseIfStmt: stmt]
 
 				send Parser
-					"else if ( [expr(ElseIfExpr)] )
+					"elseif ( [expr(ElseIfExpr)] )
 					"	[stmt(ElseIfStmt)]
 			}
 
@@ -365,17 +402,48 @@ namespace c_gen
 					"else
 					"	[stmt(ElseStmt)]
 			}
+
+			send Parser
+				"end
 		}
 		case [`while `( WhileExpr: expr `) WhileStmt: stmt] {
 			send Parser
 				"while ( [expr(WhileExpr)] )
 				"	[stmt(WhileStmt)]
+				"end
 		}
 		case [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
+#			send Parser
+#				"@switch ( [expr(SwitchExpr)] ) begin
+#				"	[stmt_list(StmtList)]
+#				"end
+
+			require StmtList
+				[`case E1: expr `{ Inner: stmt* `} Rest: stmt*]
+
 			send Parser
-				"switch ( [expr(SwitchExpr)] ) {
-				"	[stmt_list(StmtList)]
-				"}
+				"if ( [expr(SwitchExpr)] == [expr(E1)] )
+				"	[stmt_list(Inner)]
+
+			for S: stmt in repeat(Rest) {
+				switch S
+				case [`case E1: expr `{ Inner: stmt* `}]
+				{
+					send Parser
+						"else if ( [expr(SwitchExpr)] == [expr(E1)] )
+						"	[stmt_list(Inner)]
+				}
+				case
+					[`default `{ Inner: stmt* `}]
+				{
+					send Parser
+						"else
+						"	[stmt_list(Inner)]
+				}
+			}
+
+			send Parser
+				"end
 		}
 		case [ExprExpr: expr Semi: `;] {
 			send Parser
@@ -413,14 +481,14 @@ namespace c_gen
 		case [Index: index_stmt]
 		{
 			send Parser
-				"const [type(Index.type)] *[Index.ident];
+				"[Index.ident] = 0;
 		}
 		case [case_block]
 		{
 			send Parser
-				"case [expr( Stmt.case_block.expr )]:
+				"@case [expr( Stmt.case_block.expr )] begin
 				"[stmt_list( Stmt.case_block._repeat_stmt )]
-				"break;
+				"end
 		}
 		case [default_block]
 		{
@@ -432,13 +500,25 @@ namespace c_gen
 		case [case_label]
 		{
 			send Parser
-				"case [expr( Stmt.case_label.expr )]:
+				"@case [expr( Stmt.case_label.expr )]
 		}
 		case [label_stmt]
 		{
 			send Parser
-				"[Stmt.label_stmt.ident]:
+				"@label [Stmt.label_stmt.ident]
+				"begin
 				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
+				"end
+		}
+		case [L: goto_label]
+		{
+			send Parser
+				"@label [L.ident]
+		}
+		case [G: goto_stmt]
+		{
+			send Parser
+				"@goto [G.ident]
 		}
 		case [entry_loop]
 		{
@@ -464,11 +544,11 @@ namespace c_gen
 
 	void trans( Output: stream, Start: start )
 	{
-		Parser = new parser<c_out::c_out>()
+		Parser = new parser<julia_out::julia_out>()
 
 		stmt_list( Start._repeat_stmt )
 
-		CO: c_out::c_out = Parser->finish()
+		CO: julia_out::julia_out = Parser->finish()
 
 		if CO {
 			send Output

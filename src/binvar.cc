@@ -265,6 +265,10 @@ void BinaryVar::NFA_POP()
 			"}\n"
 			;
 	}
+	else {
+		out <<
+			"	_nfa_cont = 0;\n";
+	}
 }
 
 

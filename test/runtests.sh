@@ -50,7 +50,7 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 		g) 
 			allow_generated="true"
 		;;
-		C|D|J|R|A|Z|O|R|K)
+		C|D|J|R|A|Z|O|R|K|Y)
 			langflags="$langflags -$opt"
 		;;
 		-)
@@ -96,11 +96,12 @@ crack_prohibit_genflags="-G2"
 ocaml_prohibit_features="--goto-backend"
 rust_prohibit_features="--goto-backend"
 crack_prohibit_features="--goto-backend"
+julia_prohibit_features="--goto-backend"
 
 [ -z "$minflags" ]     && minflags="-n -m -l -e"
 [ -z "$genflags" ]     && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$encflags" ]     && encflags="--integral-tables --string-tables"
-[ -z "$langflags" ]    && langflags="-C -D -J -R -A -Z -O --asm -U -K"
+[ -z "$langflags" ]    && langflags="-C -D -J -R -A -Z -O --asm -U -K -Y"
 [ -z "$frontflags" ]   && frontflags="--kelbt-frontend --colm-frontend"
 [ -z "$backflags" ]    && backflags="--direct-backend --colm-backend"
 [ -z "$featureflags" ] && featureflags="--var-backend --goto-backend"
@@ -122,6 +123,7 @@ go_compiler="@GOBIN@"
 ocaml_compiler="@OCAML@"
 rust_compiler="@RUST@"
 crack_interpreter="@CRACK@"
+julia_interpreter="@JULIA@"
 
 #
 # Remove any unsupported host languages.
@@ -145,7 +147,7 @@ function run_test()
 	[ $lang == csharp ] && out_args="-out:$wk/$binary";
 
 	# Some langs are just interpreted.
-	if [ $lang != crack ] && [ $lang != ruby ] && [ $lang != ocaml ]; then
+	if [ $lang != crack ] && [ $lang != ruby ] && [ $lang != ocaml ] && [ $lang != julia ]; then
 		echo "$compiler $flags $out_args $wk/$code_src"
 		if ! $compiler $flags $out_args $wk/$code_src; then
 			test_error;
@@ -160,6 +162,7 @@ function run_test()
 		[ $lang = csharp ] && exec_cmd="mono $wk/$binary"
 		[ $lang = ocaml ] && exec_cmd="ocaml $wk/$code_src"
 		[ $lang = crack ] && exec_cmd="$crack_interpreter $wk/$code_src"
+		[ $lang = julia ] && exec_cmd="$julia_interpreter $wk/$code_src"
 
 		echo -n "running $exec_cmd ... ";
 
@@ -184,7 +187,7 @@ function run_options()
 	root=${root%.rl};
 
 	# maybe translated to multiple targets, re-read each lang.
-	lang=`sed '/@LANG:/s/^.*: *//p;d' $translated`
+	lang=`sed '/@LANG:/{s/^.*: *//;s/ *$//;p};d' $translated`
 
 	case $lang in
 		c)
@@ -260,10 +263,15 @@ function run_options()
 			code_suffix=crk
 			compiler=$crack_interpreter
 		;;
+		julia)
+			lang_opt="-Y"
+			code_suffix=jl
+			compiler=$julia_interpreter
+		;;
 		indep)
 		;;
 		*)
-			echo "$translated: unknown language type $lang" >&2
+			echo "$translated: unknown language type '$lang'" >&2
 			exit 1;
 		;;
 	esac
@@ -287,24 +295,34 @@ function run_options()
 	lang_prohibit_featflags="$prohibit_featflags"
 
 	case $lang in
-	csharp) lang_prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags";;
-	java) lang_prohibit_genflags="$prohibit_genflags $java_prohibit_genflags";;
-	ruby) lang_prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags";;
+	csharp)
+		lang_prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags"
+	;;
+	java)
+		lang_prohibit_genflags="$prohibit_genflags $java_prohibit_genflags"
+	;;
+	ruby)
+		lang_prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags"
+	;;
 	ocaml)
 		lang_prohibit_genflags="$prohibit_genflags $ocaml_prohibit_genflags"
 		lang_prohibit_featflags="$prohibit_featflags $ocaml_prohibit_features"
 	;;
 	asm)
 		lang_prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags"
-		;;
+	;;
 	rust)
 		lang_prohibit_featflags="$prohibit_featflags $rust_prohibit_features"
-		;;
+	;;
 	crack)
 		lang_prohibit_featflags="$prohibit_featflags $crack_prohibit_features"
-		;;
+	;;
+	julia)
+		lang_prohibit_featflags="$prohibit_featflags $julia_prohibit_features"
+	;;
 	*)
-		lang_prohibit_genflags="$prohibit_genflags";;
+		lang_prohibit_genflags="$prohibit_genflags"
+	;;
 	esac
 
 	if [ $lang == asm ]; then

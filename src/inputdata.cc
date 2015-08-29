@@ -129,6 +129,12 @@ void InputData::rustDefaultFileName( const char *inputFile )
 		outputFileName = fileNameFromStem( inputFile, ".rs" );
 }
 
+void InputData::juliaDefaultFileName( const char *inputFile )
+{
+	if ( outputFileName == 0 )
+		outputFileName = fileNameFromStem( inputFile, ".jl" );
+}
+
 void InputData::makeDefaultFileName()
 {
 	switch ( hostLang->lang ) {
@@ -159,6 +165,9 @@ void InputData::makeDefaultFileName()
 			break;
 		case HostLang::Rust:
 			rustDefaultFileName( inputFileName );
+			break;
+		case HostLang::Julia:
+			juliaDefaultFileName( inputFileName );
 			break;
 	}
 }
