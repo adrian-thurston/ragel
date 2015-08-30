@@ -84,19 +84,7 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 	esac
 done
 
-# Prohibitied genflags for specific languages.
-cs_prohibit_genflags="-G2"
-java_prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
-ruby_prohibit_genflags="-G0 -G1 -G2"
-ocaml_prohibit_genflags="-G0 -G1 -G2"
-asm_prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
-rust_prohibit_genflags="-G2"
-crack_prohibit_genflags="-G2"
 
-ocaml_prohibit_features="--goto-backend"
-rust_prohibit_features="--goto-backend"
-crack_prohibit_features="--goto-backend"
-julia_prohibit_features="--goto-backend"
 
 [ -z "$minflags" ]     && minflags="-n -m -l -e"
 [ -z "$genflags" ]     && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
@@ -137,8 +125,10 @@ function test_error
 
 function run_test()
 {
-	echo "$ragel -I. $lang_opt $min_opt $gen_opt $enc_opt $f_opt $b_opt $v_opt -o $wk/$code_src $translated"
-	if ! $ragel -I. $lang_opt $min_opt $gen_opt $enc_opt $f_opt $b_opt $v_opt -o $wk/$code_src $translated; then
+	opts="$lang_opt $min_opt $gen_opt $enc_opt $f_opt $b_opt $v_opt"
+	args="-I. $opts -o $wk/$code_src $translated"
+	echo "$ragel $args"
+	if ! $ragel $args; then
 		test_error;
 	fi
 
@@ -147,7 +137,7 @@ function run_test()
 	[ $lang == csharp ] && out_args="-out:$wk/$binary";
 
 	# Some langs are just interpreted.
-	if [ $lang != crack ] && [ $lang != ruby ] && [ $lang != ocaml ] && [ $lang != julia ]; then
+	if [ $interpreted != "true" ]; then
 		echo "$compiler $flags $out_args $wk/$code_src"
 		if ! $compiler $flags $out_args $wk/$code_src; then
 			test_error;
@@ -156,13 +146,6 @@ function run_test()
 
 	if [ "$compile_only" != "true" ]; then
 		
-		exec_cmd=./$wk/$binary
-		[ $lang = java ] && exec_cmd="java -classpath $wk ${root}"
-		[ $lang = ruby ] && exec_cmd="ruby $wk/$code_src"
-		[ $lang = csharp ] && exec_cmd="mono $wk/$binary"
-		[ $lang = ocaml ] && exec_cmd="ocaml $wk/$code_src"
-		[ $lang = crack ] && exec_cmd="$crack_interpreter $wk/$code_src"
-		[ $lang = julia ] && exec_cmd="$julia_interpreter $wk/$code_src"
 
 		echo -n "running $exec_cmd ... ";
 
@@ -179,6 +162,216 @@ function run_test()
 	fi
 }
 
+
+function file_names()
+{
+	code_src=$root.$code_suffix;
+	binary=$root.bin;
+	output=$root.out;
+}
+
+function lang_opts()
+{
+	lang=$1
+
+	case $lang in
+		c)
+			lang_opt=-C;
+			code_suffix=c;
+			interpreted=false
+			compiler=$c_compiler;
+			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
+			prohibit_genflags=""
+			prohibit_featflags=""
+			prohibit_frontflags=""
+			prohibit_backflags=""
+			prohibit_encflags=""
+			file_names;
+			exec_cmd=./$wk/$binary
+		;;
+		c++)
+			lang_opt=-C;
+			code_suffix=cpp;
+			interpreted=false
+			compiler=$cxx_compiler;
+			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
+			prohibit_genflags=""
+			prohibit_featflags=""
+			prohibit_frontflags=""
+			prohibit_backflags=""
+			prohibit_encflags=""
+			file_names;
+			exec_cmd=./$wk/$binary
+		;;
+		obj-c)
+			lang_opt=-C;
+			code_suffix=m;
+			interpreted=false
+			compiler=$objc_compiler
+			flags="-Wall -O3 -fno-strict-aliasing -lobjc"
+			prohibit_genflags=""
+			prohibit_featflags=""
+			prohibit_frontflags=""
+			prohibit_backflags=""
+			prohibit_encflags=""
+			file_names;
+			exec_cmd=./$wk/$binary
+		;;
+		d)
+			lang_opt=-D;
+			code_suffix=d;
+			interpreted=false
+			compiler=$d_compiler;
+			flags="-Wall -O3"
+			prohibit_genflags=""
+			prohibit_featflags=""
+			prohibit_frontflags="--kelbt-frontend"
+			prohibit_backflags="--direct-backend"
+			prohibit_encflags="--string-tables"
+			file_names;
+			exec_cmd=./$wk/$binary
+		;;
+		java)
+			lang_opt=-J;
+			code_suffix=java;
+			interpreted=false
+			compiler=$java_compiler
+			flags=""
+			prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
+			prohibit_featflags=""
+			prohibit_frontflags=""
+			prohibit_backflags=""
+			prohibit_encflags="--string-tables"
+			file_names;
+			exec_cmd="java -classpath $wk $root"
+		;;
+		ruby)
+			lang_opt=-R;
+			code_suffix=rb;
+			interpreted=true
+			compiler=$ruby_engine
+			flags=""
+			prohibit_genflags="-G0 -G1 -G2"
+			prohibit_featflags=""
+			prohibit_frontflags="--kelbt-frontend"
+			prohibit_backflags="--direct-backend"
+			prohibit_encflags="--string-tables"
+			file_names;
+			exec_cmd="ruby $wk/$code_src"
+		;;
+		csharp)
+			lang_opt="-A";
+			code_suffix=cs;
+			interpreted=false
+			compiler=$csharp_compiler
+			flags=""
+			prohibit_genflags="-G2"
+			prohibit_featflags=""
+			prohibit_frontflags="--kelbt-frontend"
+			prohibit_backflags="--direct-backend"
+			prohibit_encflags="--string-tables"
+			file_names;
+			exec_cmd="mono $wk/$binary"
+		;;
+		go)
+			lang_opt="-Z"
+			code_suffix=go
+			interpreted=false
+			compiler=$go_compiler
+			flags="build"
+			prohibit_genflags=""
+			prohibit_featflags=""
+			prohibit_frontflags="--kelbt-frontend"
+			prohibit_backflags="--direct-backend"
+			prohibit_encflags="--string-tables"
+			file_names;
+			exec_cmd=./$wk/$binary
+		;;
+		ocaml)
+			lang_opt="-O"
+			code_suffix=ml
+			interpreted=true
+			compiler=$ocaml_compiler
+			flags=""
+			prohibit_genflags="-G0 -G1 -G2"
+			prohibit_features="--goto-backend"
+			prohibit_frontflags="--kelbt-frontend"
+			prohibit_backflags="--direct-backend"
+			prohibit_encflags="--string-tables"
+			file_names;
+			exec_cmd="ocaml $wk/$code_src"
+		;;
+		asm)
+			lang_opt="--asm"
+			code_suffix=s
+			interpreted=false
+			compiler="gcc"
+			flags=""
+			prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
+			prohibit_featflags=""
+			prohibit_frontflags="--colm-frontend"
+			prohibit_backflags="--colm-backend"
+			prohibit_encflags="--string-tables"
+			file_names;
+			exec_cmd=./$wk/$binary
+		;;
+		rust)
+			lang_opt="-U"
+			code_suffix=rs
+			interpreted=false
+			compiler=$rust_compiler
+			flags="-A non_upper_case_globals -A dead_code \
+					-A unused_variables -A unused_assignments \
+					-A unused_mut -A unused_parens"
+			prohibit_genflags="-G2"
+			prohibit_features="--goto-backend"
+			prohibit_frontflags="--kelbt-frontend"
+			prohibit_backflags="--direct-backend"
+			prohibit_encflags="--string-tables"
+			file_names;
+			exec_cmd=./$wk/$binary
+		;;
+		crack)
+			lang_opt="-K"
+			code_suffix=crk
+			interpreted=true
+			compiler=$crack_interpreter
+			prohibit_genflags="-G2"
+			prohibit_features="--goto-backend"
+			prohibit_frontflags="--kelbt-frontend"
+			prohibit_backflags="--direct-backend"
+			prohibit_encflags="--string-tables"
+			file_names;
+			exec_cmd="$crack_interpreter $wk/$code_src"
+		;;
+		julia)
+			lang_opt="-Y"
+			code_suffix=jl
+			interpreted=true
+			compiler=$julia_interpreter
+			prohibit_genflags=""
+			prohibit_features="--goto-backend"
+			prohibit_frontflags="--kelbt-frontend"
+			prohibit_backflags="--direct-backend"
+			prohibit_encflags="--string-tables"
+			file_names;
+			exec_cmd="$julia_interpreter $wk/$code_src"
+		;;
+		indep)
+		;;
+		*)
+			echo "$translated: unknown language type '$lang'" >&2
+			exit 1;
+		;;
+	esac
+
+	prohibit_minflags="$prohibit_minflags $case_prohibit_minflags"
+	prohibit_genflags="$prohibit_genflags $case_prohibit_genflags"
+	prohibit_featflags="$prohibit_featflags $case_prohibit_featflags"
+	prohibit_frontflags="$prohibit_frontflags $case_prohibit_frontflags"
+	prohibit_backflags="$prohibit_backflags $case_prohibit_backflags"
+}
+
 function run_options()
 {
 	translated=$1
@@ -189,93 +382,12 @@ function run_options()
 	# maybe translated to multiple targets, re-read each lang.
 	lang=`sed '/@LANG:/{s/^.*: *//;s/ *$//;p};d' $translated`
 
-	case $lang in
-		c)
-			lang_opt=-C;
-			code_suffix=c;
-			compiler=$c_compiler;
-			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
-		;;
-		c++)
-			lang_opt=-C;
-			code_suffix=cpp;
-			compiler=$cxx_compiler;
-			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
-		;;
-		obj-c)
-			lang_opt=-C;
-			code_suffix=m;
-			compiler=$objc_compiler
-			flags="-Wall -O3 -fno-strict-aliasing -lobjc"
-		;;
-		d)
-			lang_opt=-D;
-			code_suffix=d;
-			compiler=$d_compiler;
-			flags="-Wall -O3"
-		;;
-		java)
-			lang_opt=-J;
-			code_suffix=java;
-			compiler=$java_compiler
-			flags=""
-		;;
-		ruby)
-			lang_opt=-R;
-			code_suffix=rb;
-			compiler=$ruby_engine
-			flags=""
-		;;
-		csharp)
-			lang_opt="-A";
-			code_suffix=cs;
-			compiler=$csharp_compiler
-			flags=""
-		;;
-		go)
-			lang_opt="-Z"
-			code_suffix=go
-			compiler=$go_compiler
-			flags="build"
-		;;
-		ocaml)
-			lang_opt="-O"
-			code_suffix=ml
-			compiler=$ocaml_compiler
-			flags=""
-		;;
-		asm)
-			lang_opt="--asm"
-			code_suffix=s
-			compiler="gcc"
-			flags=""
-		;;
-		rust)
-			lang_opt="-U"
-			code_suffix=rs
-			compiler=$rust_compiler
-			flags="-A non_upper_case_globals -A dead_code \
-					-A unused_variables -A unused_assignments \
-					-A unused_mut -A unused_parens"
-		;;
-		crack)
-			lang_opt="-K"
-			code_suffix=crk
-			compiler=$crack_interpreter
-		;;
-		julia)
-			lang_opt="-Y"
-			code_suffix=jl
-			compiler=$julia_interpreter
-		;;
-		indep)
-		;;
-		*)
-			echo "$translated: unknown language type '$lang'" >&2
-			exit 1;
-		;;
-	esac
+	lang_opts $lang
 
+	[ -n "$additional_cflags" ] && flags="$flags $additional_cflags"
+
+	# If we have no compiler for the source program then skip it.
+	[ -z "$compiler" ] && continue
 
 	# Make sure that we are interested in the host language.
 	echo "$langflags" | grep -qe $lang_opt || return
@@ -283,89 +395,33 @@ function run_options()
 	# Make sure that ragel supports the host language
 	echo "$supported_host_langs" | grep -qe $lang_opt || return
 
-	code_src=$root.$code_suffix;
-	binary=$root.bin;
-	output=$root.out;
-
-	# If we have no compiler for the source program then skip it.
-	[ -z "$compiler" ] && continue
-
-	[ -n "$additional_cflags" ] && flags="$flags $additional_cflags"
-
-	lang_prohibit_featflags="$prohibit_featflags"
-
-	case $lang in
-	csharp)
-		lang_prohibit_genflags="$prohibit_genflags $cs_prohibit_genflags"
-	;;
-	java)
-		lang_prohibit_genflags="$prohibit_genflags $java_prohibit_genflags"
-	;;
-	ruby)
-		lang_prohibit_genflags="$prohibit_genflags $ruby_prohibit_genflags"
-	;;
-	ocaml)
-		lang_prohibit_genflags="$prohibit_genflags $ocaml_prohibit_genflags"
-		lang_prohibit_featflags="$prohibit_featflags $ocaml_prohibit_features"
-	;;
-	asm)
-		lang_prohibit_genflags="$prohibit_genflags $asm_prohibit_genflags"
-	;;
-	rust)
-		lang_prohibit_featflags="$prohibit_featflags $rust_prohibit_features"
-	;;
-	crack)
-		lang_prohibit_featflags="$prohibit_featflags $crack_prohibit_features"
-	;;
-	julia)
-		lang_prohibit_featflags="$prohibit_featflags $julia_prohibit_features"
-	;;
-	*)
-		lang_prohibit_genflags="$prohibit_genflags"
-	;;
-	esac
-
-	if [ $lang == asm ]; then
-		lang_prohibit_frontflags="$prohibit_frontflags --colm-frontend"
-	elif [ $lang != c ]; then
-		lang_prohibit_frontflags="$prohibit_frontflags --kelbt-frontend"
-	else
-		lang_prohibit_frontflags="$prohibit_frontflags"
-	fi
-
-	if [ $lang == asm ]; then
-		lang_prohibit_backflags="$prohibit_backflags --colm-backend"
-	elif [ $lang != c ]; then
-		lang_prohibit_backflags="$prohibit_backflags --direct-backend"
-	else
-		lang_prohibit_backflags="$prohibit_backflags"
-	fi
-
-	if [ $lang != c ] && [ $lang != c++ ]; then
-		prohibit_encflags="--string-tables"
-	fi
-
 	# Eh, need to remove this.
 	[ $lang == obj-c ] && continue;
 
 	for min_opt in $minflags; do
-		echo "" "$prohibit_minflags" | grep -e $min_opt >/dev/null && continue
+		echo "" "$prohibit_minflags" | \
+				grep -e $min_opt >/dev/null && continue
 
 		for gen_opt in $genflags; do
-			echo "" "$lang_prohibit_genflags" | grep -e $gen_opt >/dev/null && continue
+			echo "" "$prohibit_genflags" | \
+					grep -e $gen_opt >/dev/null && continue
 
 			for enc_opt in $encflags; do
-				echo "" "$prohibit_encflags" | grep -e $enc_opt >/dev/null && continue
+				echo "" "$prohibit_encflags" | \
+						grep -e $enc_opt >/dev/null && continue
 
 				for f_opt in $frontflags; do
-					echo "" "$lang_prohibit_frontflags" | grep -e $f_opt >/dev/null && continue
+					echo "" "$prohibit_frontflags" | \
+							grep -e $f_opt >/dev/null && continue
 
 					for b_opt in $backflags; do
-						echo "" "$lang_prohibit_backflags" | grep -e $b_opt >/dev/null && continue
+						echo "" "$prohibit_backflags" | \
+								grep -e $b_opt >/dev/null && continue
 
 						for v_opt in $featureflags; do
 
-							echo "" "$lang_prohibit_featflags" | grep -e $v_opt >/dev/null && continue
+							echo "" "$prohibit_featflags" | \
+									grep -e $v_opt >/dev/null && continue
 
 							[ $gen_opt = -G0 ] && [ $v_opt = --var-backend ] && continue
 							[ $gen_opt = -G1 ] && [ $v_opt = --var-backend ] && continue
@@ -408,12 +464,14 @@ function run_translate()
 	expected_out=$root.exp;
 	case_rl=${root}.rl
 
-	prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
-	prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
 	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
-	prohibit_featflags=`sed '/@PROHIBIT_FEATFLAGS:/s/^.*: *//p;d' $test_case`
-	prohibit_frontflags=`sed '/@PROHIBIT_FRONTFLAGS:/s/^.*: *//p;d' $test_case`
-	prohibit_backflags=`sed '/@PROHIBIT_BACKFLAGS:/s/^.*: *//p;d' $test_case`
+
+	# Add these into the langugage-specific defaults selected in run_options
+	case_prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
+	case_prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
+	case_prohibit_featflags=`sed '/@PROHIBIT_FEATFLAGS:/s/^.*: *//p;d' $test_case`
+	case_prohibit_frontflags=`sed '/@PROHIBIT_FRONTFLAGS:/s/^.*: *//p;d' $test_case`
+	case_prohibit_backflags=`sed '/@PROHIBIT_BACKFLAGS:/s/^.*: *//p;d' $test_case`
 
 	# Create the expected output.
 	sed '1,/^#\+ * OUTPUT #\+/d;' $test_case > $wk/$expected_out
