@@ -3,7 +3,7 @@
  */
 
 #include <stdio.h>
-#include <objc/Object.h>
+#include <Foundation/Foundation.h>
 
 struct LangEl
 {
@@ -11,7 +11,7 @@ struct LangEl
 	char *name;
 };
 
-@interface Fsm : Object
+@interface Fsm : NSObject
 {
 @public
 	int cs;
@@ -103,7 +103,7 @@ int main()
 	return 0;
 }
 
-@interface Fsm2 : Object
+@interface Fsm2 : NSObject
 {
 	// The current state may be read and written to from outside of the
 	// machine.  From within action code, curs is -1 and writing to it has no

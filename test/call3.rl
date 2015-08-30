@@ -1,15 +1,16 @@
 /*
  * @LANG: obj-c
+ * @PROHIBIT_FEATFLAGS: --var-backend
  */
 
 #include <stdio.h>
 #include <string.h>
-#include <objc/Object.h>
 
+#import <Foundation/Foundation.h>
 
 int num = 0;
 
-@interface CallTest : Object
+@interface CallTest : NSObject
 {
 @public 
 	/* State machine operation data. */

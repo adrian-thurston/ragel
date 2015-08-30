@@ -138,15 +138,13 @@ function run_test()
 
 	# Some langs are just interpreted.
 	if [ $interpreted != "true" ]; then
-		echo "$compiler $flags $out_args $wk/$code_src"
-		if ! $compiler $flags $out_args $wk/$code_src; then
+		echo "$compiler $flags $out_args $wk/$code_src $libs"
+		if ! $compiler $flags $out_args $wk/$code_src $libs; then
 			test_error;
 		fi
 	fi
 
 	if [ "$compile_only" != "true" ]; then
-		
-
 		echo -n "running $exec_cmd ... ";
 
 		$exec_cmd 2>&1 > $wk/$output;
@@ -181,6 +179,7 @@ function lang_opts()
 			interpreted=false
 			compiler=$c_compiler;
 			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
+			libs=""
 			prohibit_genflags=""
 			prohibit_featflags=""
 			prohibit_frontflags=""
@@ -195,6 +194,7 @@ function lang_opts()
 			interpreted=false
 			compiler=$cxx_compiler;
 			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
+			libs=""
 			prohibit_genflags=""
 			prohibit_featflags=""
 			prohibit_frontflags=""
@@ -208,7 +208,9 @@ function lang_opts()
 			code_suffix=m;
 			interpreted=false
 			compiler=$objc_compiler
-			flags="-Wall -O3 -fno-strict-aliasing -lobjc"
+			flags="-Wall -O3 -fno-strict-aliasing -I/usr/include/GNUstep"
+			libs="-lobjc -lgnustep-base"
+			prohibit_genflags=""
 			prohibit_genflags=""
 			prohibit_featflags=""
 			prohibit_frontflags=""
@@ -223,6 +225,7 @@ function lang_opts()
 			interpreted=false
 			compiler=$d_compiler;
 			flags="-Wall -O3"
+			libs=""
 			prohibit_genflags=""
 			prohibit_featflags=""
 			prohibit_frontflags="--kelbt-frontend"
@@ -237,10 +240,11 @@ function lang_opts()
 			interpreted=false
 			compiler=$java_compiler
 			flags=""
+			libs=""
 			prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
 			prohibit_featflags=""
-			prohibit_frontflags=""
-			prohibit_backflags=""
+			prohibit_frontflags="--kelbt-frontend"
+			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
 			exec_cmd="java -classpath $wk $root"
@@ -251,6 +255,7 @@ function lang_opts()
 			interpreted=true
 			compiler=$ruby_engine
 			flags=""
+			libs=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags=""
 			prohibit_frontflags="--kelbt-frontend"
@@ -265,6 +270,7 @@ function lang_opts()
 			interpreted=false
 			compiler=$csharp_compiler
 			flags=""
+			libs=""
 			prohibit_genflags="-G2"
 			prohibit_featflags=""
 			prohibit_frontflags="--kelbt-frontend"
@@ -279,6 +285,7 @@ function lang_opts()
 			interpreted=false
 			compiler=$go_compiler
 			flags="build"
+			libs=""
 			prohibit_genflags=""
 			prohibit_featflags=""
 			prohibit_frontflags="--kelbt-frontend"
@@ -293,8 +300,9 @@ function lang_opts()
 			interpreted=true
 			compiler=$ocaml_compiler
 			flags=""
+			libs=""
 			prohibit_genflags="-G0 -G1 -G2"
-			prohibit_features="--goto-backend"
+			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
@@ -307,6 +315,7 @@ function lang_opts()
 			interpreted=false
 			compiler="gcc"
 			flags=""
+			libs=""
 			prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
 			prohibit_featflags=""
 			prohibit_frontflags="--colm-frontend"
@@ -323,8 +332,9 @@ function lang_opts()
 			flags="-A non_upper_case_globals -A dead_code \
 					-A unused_variables -A unused_assignments \
 					-A unused_mut -A unused_parens"
+			libs=""
 			prohibit_genflags="-G2"
-			prohibit_features="--goto-backend"
+			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
@@ -337,7 +347,7 @@ function lang_opts()
 			interpreted=true
 			compiler=$crack_interpreter
 			prohibit_genflags="-G2"
-			prohibit_features="--goto-backend"
+			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
@@ -350,7 +360,7 @@ function lang_opts()
 			interpreted=true
 			compiler=$julia_interpreter
 			prohibit_genflags=""
-			prohibit_features="--goto-backend"
+			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
@@ -394,9 +404,6 @@ function run_options()
 
 	# Make sure that ragel supports the host language
 	echo "$supported_host_langs" | grep -qe $lang_opt || return
-
-	# Eh, need to remove this.
-	[ $lang == obj-c ] && continue;
 
 	for min_opt in $minflags; do
 		echo "" "$prohibit_minflags" | \

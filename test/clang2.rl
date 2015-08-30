@@ -4,12 +4,12 @@
  */
 
 #include <stdio.h>
-#include <objc/Object.h>
 #include <string.h>
+#include <Foundation/Foundation.h>
 
 #define IDENT_BUFLEN 256
 
-@interface Clang : Object
+@interface Clang : NSObject
 {
 @public 
 	/* State machine operation data. */

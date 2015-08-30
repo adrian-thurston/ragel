@@ -8,10 +8,9 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <objc/Object.h>
+#include <Foundation/Foundation.h>
 
-
-@interface ErrAct : Object
+@interface ErrAct : NSObject
 {
 @public
 	int cs;

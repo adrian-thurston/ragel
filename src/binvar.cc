@@ -7,9 +7,9 @@ void BinaryVar::GOTO( ostream &ret, int gotoDest, bool inFinish )
 
 void BinaryVar::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << OPEN_GEN_BLOCK() << vCS() << " = host( \"-\", 1 ) ={";
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR( "-", 1 );
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "}=;" << CLOSE_GEN_BLOCK();
+	ret << CLOSE_HOST_EXPR() << ";" << CLOSE_GEN_BLOCK();
 }
 
 void BinaryVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -51,9 +51,9 @@ void BinaryVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 
 	ret << STACK() << "[" << TOP() << "] = " <<
 			vCS() << "; " << TOP() << " += 1;" << vCS() <<
-			" = host( \"-\", 1 ) ={";
+			" = " << OPEN_HOST_EXPR( "-", 1 );
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "}=;" << CLOSE_GEN_BLOCK();
+	ret << CLOSE_HOST_EXPR() << ";" << CLOSE_GEN_BLOCK();
 }
 
 void BinaryVar::RET( ostream &ret, bool inFinish )
@@ -78,16 +78,14 @@ void BinaryVar::NRET( ostream &ret, bool inFinish )
 
 void BinaryVar::BREAK( ostream &ret, int targState, bool csForced )
 {
-	error() << "cannot use fcall in -B mode" << std::endl;
+	error() << "cannot use fbreak in -B mode" << std::endl;
 	exit(1);
-	outLabelUsed = true;
-	ret << "${" << P() << "+= 1; _cont = 0; }$";
 }
 
 void BinaryVar::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << "${" << P() << "+= 1; _cont = 0; }$";
+	ret << OPEN_GEN_BLOCK() << P() << "+= 1; _cont = 0; " << CLOSE_GEN_BLOCK();
 }
 
 void BinaryVar::NFA_POP()
@@ -98,6 +96,7 @@ void BinaryVar::NFA_POP()
 			"	while ( _nfa_repeat ) {\n"
 			"		_nfa_repeat = 0;\n"
 			"	if ( nfa_len > 0 ) {\n"
+			"		int cont = 1;\n"
 			"		nfa_count += 1;\n"
 			"		nfa_len -= 1;\n"
 			"		" << P() << " = nfa_bp[nfa_len].p;\n"
@@ -141,10 +140,16 @@ void BinaryVar::NFA_POP()
 				"	if ( " << ARR_REF( nfaPopTrans ) <<
 						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] != -1 ) {\n"
 				"		if ( _cpc != " << ARR_REF( nfaPopTrans ) <<
-								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "] )\n"
-				"			goto _out;\n"
+								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "] ) {\n"
+				"			cont = 0;\n"
+				"			_nfa_cont = 0;\n"
+				"			_nfa_repeat = 1;\n"
+				"		}\n"
 				"	}\n"
 				;
+
+			out <<
+				"	if ( cont ) {\n";
 		}
 
 		if ( redFsm->bAnyNfaPops ) {
@@ -174,7 +179,6 @@ void BinaryVar::NFA_POP()
 		
 		if ( redFsm->bAnyNfaPops ) {
 			out << 
-				"		int cont = 1;\n"
 				"		switch ( " << ARR_REF( nfaPopTrans ) <<
 							"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPT << "] ) {\n";
 
@@ -255,6 +259,9 @@ void BinaryVar::NFA_POP()
 				"		_nfa_repeat = 0;\n"
 				;
 		}
+
+		if ( redFsm->bAnyNfaCondRefs )
+			out << "	}\n";
 
 		out << 
 			"	}\n"
@@ -354,7 +361,7 @@ void BinaryVar::LOCATE_COND()
 			}
 
 			out << 
-				"	}\n";
+				"	" << CEND() << "}\n";
 		}
 
 		out << 

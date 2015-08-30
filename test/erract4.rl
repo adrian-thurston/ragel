@@ -3,11 +3,11 @@
  */
 
 #include <stdio.h>
-#include <objc/Object.h>
+#include <Foundation/Foundation.h>
 
 #define IDENT_BUFLEN 256
 
-@interface ErrAct : Object
+@interface ErrAct : NSObject
 {
 @public
 	int cs;
