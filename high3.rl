@@ -9,8 +9,9 @@
 
 #include <stdio.h>
 #include <objc/Object.h>
+#include <Foundation/Foundation.h>
 
-@interface Fsm : Object
+@interface Fsm : NSObject
 {
 @public
 	int cs;
