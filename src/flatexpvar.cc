@@ -289,11 +289,15 @@ void FlatExpVar::writeExec()
 	testEofUsed = false;
 	outLabelUsed = false;
 
-	out << 
-		"{\n"
-		"	" << UINT() << " _nfa_cont = 1;\n"
-		"	" << UINT() << " _nfa_repeat = 1;\n"
-		"	while ( _nfa_cont != 0 )\n"
+	if ( redFsm->anyNfaStates() ) {
+		out << 
+			"{\n"
+			"	" << UINT() << " _nfa_cont = 1;\n"
+			"	" << UINT() << " _nfa_repeat = 1;\n"
+			"	while ( _nfa_cont != 0 )\n";
+	}
+
+	out <<
 		"	{\n";
 	
 //	out <<
@@ -460,5 +464,7 @@ void FlatExpVar::writeExec()
 
 	/* The execute block. */
 	out << "	}\n";
-	out << "}\n";
+
+	if ( redFsm->anyNfaStates() )
+		out << "}\n";
 }

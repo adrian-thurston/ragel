@@ -299,11 +299,15 @@ void BinaryLoopVar::writeExec()
 	outLabelUsed = false;
 	matchCondLabelUsed = false;
 
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"{\n"
+			"	" << UINT() << " _nfa_cont = 1;\n"
+			"	" << UINT() << " _nfa_repeat = 1;\n"
+			"	while ( _nfa_cont != 0 )\n";
+	}
+	
 	out <<
-		"{\n"
-		"	" << UINT() << " _nfa_cont = 1;\n"
-		"	" << UINT() << " _nfa_repeat = 1;\n"
-		"	while ( _nfa_cont != 0 )\n"
 		"	{\n"
 		"	int _klen;\n";
 
@@ -498,5 +502,6 @@ void BinaryLoopVar::writeExec()
 
 	out << "}\n";
 
-	out << "}\n";
+	if ( redFsm->anyNfaStates() )
+		out << "}\n";
 }

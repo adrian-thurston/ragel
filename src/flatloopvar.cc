@@ -323,13 +323,16 @@ void FlatLoopVar::writeExec()
 	outLabelUsed = false;
 	matchCondLabelUsed = false;
 
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"{\n"
+			"	" << UINT() << " _nfa_cont = 1;\n"
+			"	" << UINT() << " _nfa_repeat = 1;\n"
+			"	while ( _nfa_cont != 0 )\n";
+	}
+
 	out <<
-		"{\n"
-		"	" << UINT() << " _nfa_cont = 1;\n"
-		"	" << UINT() << " _nfa_repeat = 1;\n"
-		"	while ( _nfa_cont != 0 )\n"
 		"	{\n"
-		"		_nfa_cont = 0;\n"
 		;
 
 	if ( redFsm->anyRegCurStateRef() )
@@ -546,6 +549,6 @@ void FlatLoopVar::writeExec()
 	out <<
 		"	}\n";
 
-	out <<
-		"}\n";
+	if ( redFsm->anyNfaStates() )
+		out << "}\n";
 }
