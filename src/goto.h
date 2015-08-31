@@ -55,6 +55,7 @@ public:
 	TableArray nfaOffsets;
 	TableArray nfaPushActions;
 	TableArray nfaPopTrans;
+	TableArray nfaPopConds;
 
 	void taActions();
 	void taToStateActions();

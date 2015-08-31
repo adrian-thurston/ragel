@@ -481,7 +481,7 @@ void InputData::checkLastRef( InputItem *ii )
 		/* Move forward, flusing input items until we get to an unprocessed
 		 * input item. */
 		while ( lastFlush != 0 && lastFlush->processed ) {
-			verifyWriteHasData( ii );
+			verifyWriteHasData( lastFlush );
 
 			if ( gblErrorCount > 0 )
 				exit(1);

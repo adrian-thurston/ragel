@@ -63,6 +63,7 @@ protected:
 	TableArray nfaOffsets;
 	TableArray nfaPushActions;
 	TableArray nfaPopTrans;
+	TableArray nfaPopConds;
 
 	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_SPACES_v1();

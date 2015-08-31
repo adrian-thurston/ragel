@@ -139,8 +139,18 @@ void FlatVar::NFA_POP()
 				"\n"
 				"	if ( " << ARR_REF( nfaPopTrans ) <<
 						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] != -1 ) {\n"
-				"		if ( _cpc != " << ARR_REF( nfaPopTrans ) <<
-								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "] ) {\n"
+				"		int o = " << ARR_REF( nfaPopTrans ) <<
+								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "];\n"
+				"		int l = " << ARR_REF( nfaPopConds ) << "[o];\n"
+				"		int m = 0;\n"
+				"		o += 1;\n"
+				"		while ( l > 0 ) {\n"
+				"			if ( " << ARR_REF( nfaPopConds ) << "[o] == _cpc )\n"
+				"				m = 1;\n"
+				"			o += 1;\n"
+				"			l -= 1;\n"
+				"		}\n"
+				"		if ( m == 0 ) {\n"
 				"			cont = 0;\n"
 				"			_nfa_cont = 0;\n"
 				"			_nfa_repeat = 1;\n"

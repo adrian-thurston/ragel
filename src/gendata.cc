@@ -777,12 +777,8 @@ void CodeGenData::makeStateList()
 				if ( targ->popCondSpace != 0 )
 					condSpace = allCondSpaces + targ->popCondSpace->condSpaceId;
 
-				long condVal = 0;
-				if ( targ->popCondKeys.length() > 0 )
-					condVal = targ->popCondKeys[0];
-
 				from->nfaTargs->append( RedNfaTarg( rtarg, pushRa,
-						condSpace, condVal, popRa2, popRa, targ->order ) );
+						condSpace, targ->popCondKeys, popRa2, popRa, targ->order ) );
 
 				MergeSort<RedNfaTarg, RedNfaTargCmp> sort;
 				sort.sort( from->nfaTargs->data, from->nfaTargs->length() );

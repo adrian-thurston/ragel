@@ -491,18 +491,19 @@ struct GenStateCond
 };
 typedef DList<GenStateCond> GenStateCondList;
 typedef Vector<GenStateCond*> StateCondVect;
+typedef BstSet<int> RedCondKeySet;
 
 struct RedNfaTarg
 {
 	RedNfaTarg( RedStateAp *state, RedAction *push,
-			GenCondSpace *condSpace, long condVal, RedAction *popAction,
-			RedAction *popTest, int order )
+			GenCondSpace *condSpace, const RedCondKeySet &condVals,
+			RedAction *popAction, RedAction *popTest, int order )
 	:
 		id(0),
 		state(state),
 		push(push),
 		condSpace(condSpace),
-		condVal(condVal),
+		condVals(condVals),
 		popAction(popAction),
 		popTest(popTest),
 		order(order)
@@ -512,7 +513,7 @@ struct RedNfaTarg
 	RedStateAp *state;
 	RedAction *push;
 	GenCondSpace *condSpace;
-	long condVal;
+	RedCondKeySet condVals;
 	RedAction *popAction;
 	RedAction *popTest;
 	int order;

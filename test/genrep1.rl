@@ -57,7 +57,6 @@ struct nfa_bp_rec
 		({ ++q_2 >= 10; })
 	}
 
-
 	main :=
 		(
 			'h' 'e' 'l' 'l' 'o' ' '?

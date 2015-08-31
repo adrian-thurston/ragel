@@ -58,6 +58,7 @@ protected:
 	TableArray nfaOffsets;
 	TableArray nfaPushActions;
 	TableArray nfaPopTrans;
+	TableArray nfaPopConds;
 
 	void taKeys();
 	void taKeySpans();

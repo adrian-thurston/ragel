@@ -1977,12 +1977,12 @@ void AsmCodeGen::writeExec()
 										"	addq	%rcx, %r9\n";
 								}
 
-								// for ( int c = 0; c < targ->cond trans->numConds(); c++ ) {
-									CondKey key = targ->condVal;
+								for ( int c = 0; c < targ->condVals.length(); c++ ) {
+									CondKey key = targ->condVals[c];
 									out <<
 										"	cmpq	" << COND_KEY( key ) << ", %r9\n"
 										"	jne	" << LABEL( "out" ) << "\n";
-								// }
+								}
 							}
 
 

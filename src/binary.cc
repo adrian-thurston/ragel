@@ -53,7 +53,8 @@ Binary::Binary( const CodeGenArgs &args )
 	nfaTargs(           "nfa_targs",             *this ),
 	nfaOffsets(         "nfa_offsets",           *this ),
 	nfaPushActions(     "nfa_push_actions",      *this ),
-	nfaPopTrans(        "nfa_pop_trans",         *this )
+	nfaPopTrans(        "nfa_pop_trans",         *this ),
+	nfaPopConds(        "nfa_pop_conds",         *this )
 {
 }
 
@@ -601,6 +602,8 @@ void Binary::taNfaPopTrans()
 	nfaPopTrans.value( 0 );
 	nfaPopTrans.value( 0 );
 
+	long condLoc = 0;
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaTargs != 0 ) {
 
@@ -616,7 +619,9 @@ void Binary::taNfaPopTrans()
 				else
 					nfaPopTrans.value( -1 );
 
-				nfaPopTrans.value( targ->condVal );
+				nfaPopTrans.value( condLoc );
+				condLoc += 1 + targ->condVals.length();
+
 				NFA_POP_ACTION( targ );
 				NFA_POP_TEST( targ );
 			}
@@ -624,6 +629,20 @@ void Binary::taNfaPopTrans()
 	}
 
 	nfaPopTrans.finish();
+
+	nfaPopConds.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaTargs != 0 ) {
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ ) {
+				nfaPopConds.value( targ->condVals.length() );
+				for ( int i = 0; i < targ->condVals.length(); i++ )
+					nfaPopConds.value( targ->condVals[i] );
+			}
+		}
+	}
+
+	nfaPopConds.finish();
 }
 
 void Binary::taNfaOffsets()
@@ -805,8 +824,18 @@ void Binary::NFA_POP()
 				"\n"
 				"	if ( " << ARR_REF( nfaPopTrans ) <<
 						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] != -1 ) {\n"
-				"		if ( _cpc != " << ARR_REF( nfaPopTrans ) <<
-								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "] )\n"
+				"		int o = " << ARR_REF( nfaPopTrans ) <<
+								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "];\n"
+				"		int l = " << ARR_REF( nfaPopConds ) << "[o];\n"
+				"		int m = 0;\n"
+				"		o += 1;\n"
+				"		while ( l > 0 ) {\n"
+				"			if ( " << ARR_REF( nfaPopConds ) << "[o] == _cpc )\n"
+				"				m = 1;\n"
+				"			o += 1;\n"
+				"			l -= 1;\n"
+				"		}\n"
+				"		if ( m == 0 )\n"
 				"			goto _out;\n"
 				"	}\n"
 				;
