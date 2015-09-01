@@ -999,6 +999,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		'nfapostpop' => { token( KW_NfaPostPop ); };
 
 		'nfa_cost_mark' => { token( KW_NfaCostMark ); };
+		'nfacostmark'   => { token( KW_NfaCostMark ); };
 
 		# FIXME: Enable this post 5.17.
 		# 'range' => { token( KW_Range ); };
