@@ -1117,9 +1117,6 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		":nomax(" => { token( TK_ColonNoMaxOpen ); };
 		"):"      => { token( TK_CloseColon ); };
 
-		"<:>" => { token( TK_LtColonGt ); };
-		"<!>" => { token( TK_LtBangGt ); };
-
 		# Opening of longest match.
 		"|*" => { token( TK_BarStar ); };
 

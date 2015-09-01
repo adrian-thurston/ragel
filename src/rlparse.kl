@@ -679,17 +679,6 @@ factor_with_aug:
 		$$->factorWithAug = $1->factorWithAug;
 	};
 factor_with_aug:
-	TK_LtColonGt TK_UInt factor_with_aug final {
-		$$->factorWithAug = $3->factorWithAug;
-		$$->factorWithAug->guardedIn = true;
-		$$->factorWithAug->guardPriorId = strtol( $2->data, 0, 10 );
-	};
-factor_with_aug:
-	TK_LtBangGt factor_with_aug final {
-		$$->factorWithAug = $2->factorWithAug;
-		$$->factorWithAug->nfaGuard = true;
-	};
-factor_with_aug:
 	factor_with_rep final {
 		$$->factorWithAug = new FactorWithAug( $1->factorWithRep );
 	};

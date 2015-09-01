@@ -45,7 +45,7 @@ struct nfa_bp_rec
 		( 'a' %when a )
 	)
 
-	:nfa3( 1, ( '.' ), psh, pop, ini, stay, repeat, exit ):
+	:nfa( 1, ( '.' ), psh, pop, ini, stay, repeat, exit ):
 
 	';'
 		@{ printf( " --> MATCH\n" ); };

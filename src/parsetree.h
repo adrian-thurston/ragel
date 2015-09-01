@@ -519,8 +519,7 @@ struct FactorWithAug
 {
 	FactorWithAug( FactorWithRep *factorWithRep )
 	:
-		priorDescs(0), guardedIn(false),
-		guardPriorId(0), nfaGuard(false),
+		priorDescs(0), 
 		factorWithRep(factorWithRep)
 	{}
 
@@ -543,9 +542,6 @@ struct FactorWithAug
 	Vector<Label> labels;
 	Vector<EpsilonLink> epsilonLinks;
 	Vector<ConditionTest> conditions;
-	bool guardedIn;
-	long guardPriorId;
-	bool nfaGuard;
 
 	FactorWithRep *factorWithRep;
 };

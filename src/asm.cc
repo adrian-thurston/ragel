@@ -1806,7 +1806,6 @@ void AsmCodeGen::setNfaIds()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaTargs != 0 ) {
 			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ ) {
-				std::cout << "nfa id: " << nextId << std::endl;
 				targ->id = nextId;
 				nextId += 1;
 			}

@@ -187,22 +187,6 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 	setFinState( newFinal );
 }
 
-void FsmAp::nfaGuard()
-{
-	StateAp *origStartState = startState;
-
-	StateAp *newStart = addState();
-	newStart->nfaOut = new NfaTransList;
-
-	NfaTrans *trans = new NfaTrans( 0, 0, 1 );
-	newStart->nfaOut->append( trans );
-	attachToNfa( newStart, origStartState, trans );
-
-	unsetStartState();
-	setStartState( newStart );
-}
-
-
 /* Unions other with this machine. Other is deleted. */
 void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 {

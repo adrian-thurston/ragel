@@ -1960,7 +1960,6 @@ public:
 	void concatOp( FsmAp *other );
 	void nfaRepeatOp( Action *push, Action *pop, Action *init,
 			Action *stay, Action *repeat, Action *exit );
-	void nfaGuard();
 	void unionOp( FsmAp *other );
 	void intersectOp( FsmAp *other );
 	void subtractOp( FsmAp *other );
