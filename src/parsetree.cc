@@ -1822,12 +1822,24 @@ void FactorWithRep::applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal )
 	pd->curActionOrd += rtnVal->shiftStartActionOrder( pd->curActionOrd );
 }
 
+void FactorWithRep::condCost( Action *action )
+{
+	action->costMark = true;
+	action->costId = repId;
+}
+
 FsmAp *FactorWithRep::condRep( ParseData *pd, bool useMax )
 {
 	Action *ini = action1;
 	Action *inc = action2;
 	Action *min = action3;
 	Action *max = action4;
+
+	condCost( ini );
+	condCost( inc );
+	condCost( min );
+	if ( useMax )
+		condCost( max );
 
 	FsmAp *rtnVal = factorWithRep->walk( pd );
 

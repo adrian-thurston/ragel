@@ -599,6 +599,8 @@ struct FactorWithRep
 	FsmAp *condRep( ParseData *pd, bool useMax );
 	FsmAp *noMaxRep( ParseData *pd );
 
+	void condCost( Action *action );
+
 	InputLoc loc;
 	long repId;
 	FactorWithRep *factorWithRep;
