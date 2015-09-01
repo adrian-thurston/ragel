@@ -1,6 +1,5 @@
 /*
  * @LANG: c
- # @ENABLED: false
  */
 
 #include <string.h>
