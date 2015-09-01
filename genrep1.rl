@@ -60,7 +60,7 @@ struct nfa_bp_rec
 	main :=
 		(
 			'h' 'e' 'l' 'l' 'o' ' '?
-				(:nfa3( 2, ( ' ' ), psh, pop, ini_2, stay_2, repeat_2, exit_2):)
+				(:nfa( 2, ( ' ' ), psh, pop, ini_2, stay_2, repeat_2, exit_2):)
 			't' 'h' 'e' 'r' 'e'
 		)
 		:>

@@ -82,7 +82,7 @@ long q_2;
 
 	main := 
 		( '' %when(marker) 
-			:nfa3( 0, ( 'a' ), psh, pop, ini, stay, repeat, exit ): ' ' ) {2}
+			:nfa( 0, ( 'a' ), psh, pop, ini, stay, repeat, exit ): ' ' ) {2}
 		eol
 		any @{printf("----- MATCH\n");}
 	;

@@ -103,7 +103,7 @@
 	main := 
 		(
 			( '' %when marker
-				:nfa3( 2, ( 'a' @char ) , 
+				:nfa( 2, ( 'a' @char ) , 
 				psh, pop, ini, stay, repeat, exit ): ' ' ) {2}
 			eol
 		)
