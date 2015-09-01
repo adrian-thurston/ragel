@@ -699,16 +699,17 @@ void InputData::writeLanguage( std::ostream &out )
 {
 	out << " lang=\"";
 	switch ( hostLang->lang ) {
-		case HostLang::C:    out << "C"; break;
-		case HostLang::D:    out << "D"; break;
-		case HostLang::Go:   out << "Go"; break;
-		case HostLang::Java: out << "Java"; break;
-		case HostLang::Ruby: out << "Ruby"; break;
-		case HostLang::CSharp: out << "C#"; break;
-		case HostLang::OCaml: out << "OCaml"; break;
-		case HostLang::Crack: out << "Crack"; break;
-		case HostLang::Asm: out << "ASM"; break;
-		case HostLang::Rust: out << "Rust"; break;
+		case HostLang::C:       out << "C"; break;
+		case HostLang::D:       out << "D"; break;
+		case HostLang::Go:      out << "Go"; break;
+		case HostLang::Java:    out << "Java"; break;
+		case HostLang::Ruby:    out << "Ruby"; break;
+		case HostLang::CSharp:  out << "C#"; break;
+		case HostLang::OCaml:   out << "OCaml"; break;
+		case HostLang::Crack:   out << "Crack"; break;
+		case HostLang::Asm:     out << "ASM"; break;
+		case HostLang::Rust:    out << "Rust"; break;
+		case HostLang::Julia:   out << "Julia"; break;
 	}
 	out << "\"";
 }

@@ -1958,13 +1958,7 @@ public:
 	void repeatOp( int times );
 	void optionalRepeatOp( int times );
 	void concatOp( FsmAp *other );
-	void nfaRepeatOp1( Action *init, Action *min, Action *max,
-			Action *push, Action *pop );
-	void nfaRepeatOp1b( Action *init, Action *min, Action *max,
-			Action *push, Action *pop );
-	void nfaRepeatOp2( Action *init, Action *inc, Action *min,
-			Action *max, Action *push, Action *pop );
-	void nfaRepeatOp3( Action *push, Action *pop, Action *init,
+	void nfaRepeatOp( Action *push, Action *pop, Action *init,
 			Action *stay, Action *repeat, Action *exit );
 	void nfaGuard();
 	void unionOp( FsmAp *other );

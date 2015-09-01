@@ -1168,7 +1168,7 @@ struct LoadRagel
 			break;
 		}
 
-		case ragel::factor_rep::Nfa3: {
+		case ragel::factor_rep::Nfa: {
 			long repId = strtol( FactorRep.uint().text().c_str(), 0, 10 );
 			FactorWithRep *toRepeat = loadFactorRep( FactorRep._factor_rep() );
 			factorWithRep = new FactorWithRep( InputLoc(), repId, toRepeat,
@@ -1178,7 +1178,7 @@ struct LoadRagel
 					loadActionRef( FactorRep.A4() ),
 					loadActionRef( FactorRep.A5() ),
 					loadActionRef( FactorRep.A6() ),
-					FactorWithRep::NfaRep3 );
+					FactorWithRep::NfaRep );
 			break;
 		}
 
@@ -1911,14 +1911,15 @@ struct LoadRagel
 
 		string name = loadMachineName( NfaUnionTree.word().text() );
 
-//		const char *roundsData = NfaUnionTree.uint().text().c_str();
-//		errno = 0;
-//		long rounds = strtol( roundsData, 0, 10 );
-//		if ( rounds == LONG_MAX && errno == ERANGE )
-//			error(loc) << "rounds " << roundsData << " overflows" << endl;
+		const char *depthText = NfaUnionTree.uint().text().c_str();
+		errno = 0;
+		long depth = strtol( depthText, 0, 10 );
+		if ( depth == LONG_MAX && errno == ERANGE )
+			error(loc) << "rounds " << depthText << " overflows" << endl;
 
 		NfaUnion *nfaUnion = loadNfaExpr( NfaUnionTree.nfa_expr() );
-		nfaUnion->roundsList = 0; //rounds;
+		nfaUnion->roundsList = new NfaRoundVect;
+		nfaUnion->roundsList->append( NfaRound( depth, 0 ) );
 		MachineDef *machineDef = new MachineDef( nfaUnion );
 
 		/* Generic creation of machine for instantiation and assignment. */

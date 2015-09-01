@@ -89,7 +89,7 @@ namespace ragel
 				`access `write `getkey `export `import
 				`include `prepush `postpop
 
-		literal `:nfa3 `:cond `:nomax `):
+		literal `:nfa3 `:nfa `:cond `:nomax `):
 
 		token string /
 			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
@@ -250,11 +250,15 @@ namespace ragel
 	|	[factor_aug aug_local_error `( word `, action_ref `)] :LocalErrorName
 	|	[factor_rep] :Base
 
+	def nfa_kw
+		[`:nfa3]
+	|	[`:nfa]
+
 	def factor_rep 
 		[factor_neg factor_rep_op*] :Op
-	|	[`:nfa3  `( uint `, factor_rep `,
+	|	[nfa_kw  `( uint `, factor_rep `,
 			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `,
-			A5: action_ref `, A6: action_ref `):] :Nfa3
+			A5: action_ref `, A6: action_ref `):] :Nfa
 	|	[`:cond  `( uint `, factor_rep `, 
 			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `):] :Cond
 	|	[`:nomax `( uint `, factor_rep `, 
@@ -354,7 +358,7 @@ namespace ragel
 	|	[term] :Base
 
 	def nfa_union
-		[word uint `|= nfa_expr `;] commit
+		[word `|= `( uint `, Unused: uint `) nfa_expr `;] commit
 
 	def alphtype_type
 		[W1: word] :One
