@@ -997,11 +997,11 @@ void FsmAp::checkEpsilonRegularInteraction( const PriorTable &t1, const PriorTab
 		for ( PriorTable::Iter pd2 = t2; pd2.lte(); pd2++ ) {
 			if ( pd1->desc->key == pd2->desc->key ) {
 				if ( pd1->desc->priority < pd2->desc->priority ) {
-					if ( pd1->desc->key >= 10000 && ctx->nfaTermCheck )
+					if ( ctx->nfaTermCheck && pd1->desc->guarded )
 						throw PriorInteraction( pd1->desc->guardId );
 				}
 				else if ( pd1->desc->priority > pd2->desc->priority ) {
-					if ( pd1->desc->key >= 10000 && ctx->nfaTermCheck )
+					if ( ctx->nfaTermCheck && pd1->desc->guarded )
 						throw PriorInteraction( pd1->desc->guardId );
 				}
 			}

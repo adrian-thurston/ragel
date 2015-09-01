@@ -338,15 +338,18 @@ typedef CmpSTable< ErrActionTableEl, CmpErrActionTableEl > CmpErrActionTable;
  * Has key and whether or not used. */
 struct PriorDesc
 {
-	PriorDesc() :
+	PriorDesc()
+	:
 		key(0),
 		priority(0),
+		guarded(false),
 		guardId(0),
 		other(0)
 	{}
 
 	int key;
 	int priority;
+	bool guarded;
 	int guardId;
 	PriorDesc *other;
 };

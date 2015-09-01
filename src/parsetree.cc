@@ -1636,6 +1636,7 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 			/* Init the prior descriptor for the priority setting. */
 			priorDescs[i].key = priorityAugs[i].priorKey;
 			priorDescs[i].priority = priorityAugs[i].priorValue;
+			priorDescs[i].guarded = false;
 			priorDescs[i].guardId = 0;
 		}
 	}
@@ -1775,39 +1776,42 @@ FactorWithRep::~FactorWithRep()
 	}
 }
 
-/* FIXME: This is an atrocious hack. */
-static int guardedPriorName = 10000;
-
 void FactorWithRep::applyGuardedPrior( ParseData *pd, FsmAp *rtnVal )
 {
-	priorDescs[0].key = guardedPriorName;
+	priorDescs[0].key = pd->nextPriorKey;
 	priorDescs[0].priority = 0;
+	priorDescs[0].guarded = true;
 	priorDescs[0].guardId = repId;
 	priorDescs[0].other = &priorDescs[1];
 
-	priorDescs[1].key = guardedPriorName;
+	priorDescs[1].key = pd->nextPriorKey;
 	priorDescs[1].priority = 1;
+	priorDescs[1].guarded = true;
 	priorDescs[1].guardId = repId;
 	priorDescs[1].other = &priorDescs[0];
 
-	guardedPriorName++;
+	/* Roll over for next allocation. */
+	pd->nextPriorKey += 1;
 
 	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[0] );
 }
 
 void FactorWithRep::applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal )
 {
-	priorDescs[2].key = guardedPriorName;
+	priorDescs[2].key = pd->nextPriorKey;
 	priorDescs[2].priority = 0;
+	priorDescs[2].guarded = true;
 	priorDescs[2].guardId = repId;
 	priorDescs[2].other = &priorDescs[3];
 
-	priorDescs[3].key = guardedPriorName;
+	priorDescs[3].key = pd->nextPriorKey;
+	priorDescs[3].guarded = true;
 	priorDescs[3].priority = 1;
 	priorDescs[3].guardId = repId;
 	priorDescs[3].other = &priorDescs[2];
 
-	guardedPriorName++;
+	/* Roll over for next allocation. */
+	pd->nextPriorKey += 1;
 
 	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[2] );
 	

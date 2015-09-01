@@ -901,12 +901,12 @@ int FsmAp::comparePrior( const PriorTable &priorTable1, const PriorTable &priorT
 			pd2.increment();
 		/* Keys are the same, check priorities. */
 		else if ( pd1->desc->priority < pd2->desc->priority ) {
-			if ( pd1->desc->key >= 10000 && ctx->nfaTermCheck )
+			if ( ctx->nfaTermCheck && pd1->desc->guarded )
 				throw PriorInteraction( pd1->desc->guardId );
 			return -1;
 		}
 		else if ( pd1->desc->priority > pd2->desc->priority ) {
-			if ( pd1->desc->key >= 10000 && ctx->nfaTermCheck )
+			if ( ctx->nfaTermCheck && pd1->desc->guarded )
 				throw PriorInteraction( pd1->desc->guardId );
 			return 1;
 		}
