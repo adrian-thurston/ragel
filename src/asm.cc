@@ -1122,6 +1122,9 @@ void AsmCodeGen::emitCharClassJumpTable( RedStateAp *st, string def )
 void AsmCodeGen::NFA_PUSH( RedStateAp *st )
 {
 	if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
+		if ( nfaPrePushExpr != 0 )
+			INLINE_LIST( out, nfaPrePushExpr, 0, false, false );
+
 		for ( RedNfaTargs::Iter t = *st->nfaTargs; t.lte(); t++ ) {
 			out <<
 				"	movq	" << NFA_STACK() << ", %rax\n"
