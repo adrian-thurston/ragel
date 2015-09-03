@@ -480,7 +480,7 @@ void rw_asm( Output: stream )
 		"exec:
 		"	pushq	%rbp
 		"	movq	%rsp, %rbp
-		"	subq	$88, %rsp
+		"	subq	$96, %rsp
 		"
 		"	movq	$stack_data, -56(%rbp)
 		"

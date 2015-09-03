@@ -105,6 +105,7 @@ protected:
 
 	string NFA_STACK();
 	string NFA_TOP();
+	string NFA_SZ();
 
 	string DATA_PREFIX();
 	string PM() { return "_" + DATA_PREFIX() + "partition_map"; }

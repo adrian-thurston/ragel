@@ -221,6 +221,11 @@ string AsmCodeGen::NFA_TOP()
 	return string( "-88(%rbp)" );
 }
 
+string AsmCodeGen::NFA_SZ()
+{
+	return string( "-96(%rbp)" );
+}
+
 string AsmCodeGen::STACK()
 {
 	ostringstream ret;
@@ -1122,14 +1127,16 @@ void AsmCodeGen::emitCharClassJumpTable( RedStateAp *st, string def )
 void AsmCodeGen::NFA_PUSH( RedStateAp *st )
 {
 	if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
-		if ( nfaPrePushExpr != 0 )
+		if ( nfaPrePushExpr != 0 ) {
+			out << "	movq    $" << st->nfaTargs->length() << ", %rcx\n";
 			INLINE_LIST( out, nfaPrePushExpr, 0, false, false );
+		}
 
 		for ( RedNfaTargs::Iter t = *st->nfaTargs; t.lte(); t++ ) {
 			out <<
 				"	movq	" << NFA_STACK() << ", %rax\n"
 				"	movq	" << NFA_TOP() << ", %rcx\n"
-				"	salq	$5, %rcx\n"
+				"	imulq	$24, %rcx\n"
 				"	movq    $" << t->state->id << ", 0(%rax,%rcx,)\n"
 				"	movq	" << P() << ", 8(%rax,%rcx,)\n";
 
@@ -1866,6 +1873,7 @@ void AsmCodeGen::writeExec()
 	 *
 	 * nfa_stack  -80(%rbp)
 	 * nfa_top    -88(%rbp)
+	 * nfa_sz     -96(%rbp)
 	 */
 
 	if ( redFsm->anyRegCurStateRef() ) {
@@ -1938,7 +1946,7 @@ void AsmCodeGen::writeExec()
 			"	subq	$1, %rcx\n"
 			"	movq	%rcx, " << NFA_TOP() << "\n"
 			"	movq	" << NFA_STACK() << ", %rax\n"
-			"	salq	$5, %rcx\n"
+			"	imulq	$24, %rcx\n"
 			"	movq    0(%rax,%rcx,), %r11\n"
 			"	movq	8(%rax,%rcx,), " << P() << "\n"
 			"	movq	%r11, " << vCS() << "\n"
