@@ -119,7 +119,7 @@ exec:
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
-	subq	$88, %rsp
+	subq	$96, %rsp
 
 	pushq   %r12
 	pushq   %r13
