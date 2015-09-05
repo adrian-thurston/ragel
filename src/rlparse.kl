@@ -36,7 +36,8 @@ Parser6::Parser6( InputData *id, const char *fileName, char *sectionName,
 :
 	sectionName(sectionName),
 	hostLang(hostLang),
-	tokHead(0)
+	tokHead(0),
+	parseSubstitutions(false)
 {
 	pd = new ParseData( id, std::string(fileName), std::string(sectionName),
 			id->nextMachineId++, sectionLoc, hostLang, minimizeLevel, minimizeOpt );
@@ -332,6 +333,9 @@ nonterm opt_action_params uses action_param_list;
 
 opt_action_params:
 	'(' opt_action_param_list ')'
+	try {
+		parseSubstitutions = true;
+	}
 	final {
 		$$->paramList = $2->paramList;
 	};
@@ -342,7 +346,8 @@ opt_action_params:
 	};
 
 action_spec:
-	KW_Action TK_Word opt_action_params '{' inline_block '}' final {
+	KW_Action TK_Word opt_action_params '{' inline_block '}'
+	final {
 		if ( pd->actionDict.find( $2->data ) ) {
 			/* Recover by just ignoring the duplicate. */
 			error($2->loc) << "action \"" << $2->data << "\" already defined" << endl;
@@ -361,6 +366,7 @@ action_spec:
 			if ( $3->paramList != 0 )
 				newAction->argListMap = new ActionArgListMap;
 		}
+		parseSubstitutions = false;
 	};
 
 # Specifies the data type of the input alphabet. One or two words followed by a

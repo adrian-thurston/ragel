@@ -874,6 +874,17 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 				fret;
 		};
 
+		"$" [a-zA-Z_][a-zA-Z_0-9]* => {
+			if ( parser != 0 && parser->parseSubstitutions ) {
+				scan_error() << "bleck" << endl;
+				token( TK_SubstRef, ts+1, te );
+			}
+			else {
+				token( IL_Symbol, ts, ts+1 );
+				fexec ts+1;
+			}
+		};
+
 		[*)] => { 
 			whitespaceOn = true;
 			token( *ts, ts, te );

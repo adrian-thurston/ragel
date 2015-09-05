@@ -181,7 +181,6 @@ public:
 		return action;
 	}
 
-
 	/* Key for action dictionary. */
 	std::string getKey() const { return name; }
 
