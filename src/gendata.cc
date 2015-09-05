@@ -1132,7 +1132,6 @@ void CodeGenData::resolveTargetStates()
 		resolveTargetStates( a->inlineList );
 }
 
-
 bool CodeGenData::setAlphType( const HostLang *hostLang, const char *data )
 {
 	HostType *alphType = findAlphTypeInternal( hostLang, data );

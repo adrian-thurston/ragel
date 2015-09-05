@@ -285,14 +285,64 @@ machine_name:
 		$$->token = *$1;
 	};
 
-nonterm cost_mark_opt
+nonterm action_param
 {
-	bool costMark;
-	long costId;
+	ActionParam *param;
 };
 
+action_param:
+	TK_Word
+	final {
+		$$->param = 0;
+	};
+
+nonterm action_param_list
+{
+	ActionParamList *paramList;
+};
+
+action_param_list:
+	action_param_list ',' action_param
+	final {
+		$$->paramList = $1->paramList;
+		$$->paramList->append( $3->param );
+	};
+
+action_param_list:
+	action_param
+	final {
+		$$->paramList = new ActionParamList;
+		$$->paramList->append( $1->param );
+	};
+
+nonterm opt_action_param_list uses action_param_list;
+
+opt_action_param_list:
+	action_param_list
+	final {
+		$$->paramList = new ActionParamList;
+	};
+
+opt_action_param_list:
+	final {
+		$$->paramList = new ActionParamList;
+	};
+
+nonterm opt_action_params uses action_param_list;
+
+opt_action_params:
+	'(' opt_action_param_list ')'
+	final {
+		$$->paramList = $2->paramList;
+	};
+
+opt_action_params:
+	final {
+		$$->paramList = 0;
+	};
+
 action_spec:
-	KW_Action TK_Word '{' inline_block '}' final {
+	KW_Action TK_Word opt_action_params '{' inline_block '}' final {
 		if ( pd->actionDict.find( $2->data ) ) {
 			/* Recover by just ignoring the duplicate. */
 			error($2->loc) << "action \"" << $2->data << "\" already defined" << endl;
@@ -300,12 +350,16 @@ action_spec:
 		else {
 			//std::cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << std::endl;
 			/* Add the action to the list of actions. */
-			Action *newAction = new Action( $3->loc, $2->data, 
-					$4->inlineList, pd->nextCondId++ );
+			Action *newAction = new Action( $4->loc, $2->data, 
+					$5->inlineList, pd->nextCondId++ );
 
 			/* Insert to list and dict. */
 			pd->actionList.append( newAction );
 			pd->actionDict.insert( newAction );
+
+			newAction->paramList = $3->paramList;
+			if ( $3->paramList != 0 )
+				newAction->argListMap = new ActionArgListMap;
 		}
 	};
 
@@ -411,11 +465,18 @@ nonterm longest_match_part
 };
 
 longest_match_part: 
-	action_spec final { $$->lmPart = 0; };
+	action_spec commit
+	final {
+		$$->lmPart = 0;
+	};
 longest_match_part: 
-	assignment final { $$->lmPart = 0; };
+	assignment commit
+	final {
+		$$->lmPart = 0;
+	};
 longest_match_part: 
-	join opt_lm_part_action ';' final {
+	join opt_lm_part_action ';' commit
+	final {
 		$$->lmPart = 0;
 		Action *action = $2->action;
 		if ( action != 0 )
@@ -889,15 +950,49 @@ action_embed: action_embed_word final { $$->action = $1->action; };
 action_embed: '(' action_embed_word ')' final { $$->action = $2->action; };
 action_embed: action_embed_block final { $$->action = $1->action; };
 
+nonterm action_arg_list
+{
+	ActionArgList *argList;
+};
+
+action_arg_list:
+	action_arg_list ',' action_embed
+	final {
+		$$->argList = $1->argList;
+		$$->argList->append( $3->action );
+	};
+action_arg_list:
+	action_embed
+	final {
+		$$->argList = new ActionArgList;
+		$$->argList->append( $1->action );
+	};
+
+nonterm opt_action_arg_list uses action_arg_list;
+
+opt_action_arg_list:
+	action_arg_list
+	final
+	{
+		$$->argList = $1->argList;
+	};
+opt_action_arg_list:
+	final {
+		$$->argList = new ActionArgList;
+	};
+
 nonterm action_embed_word uses action_ref;
 
 action_embed_word:
-	TK_Word final {
+	TK_Word
+	try {
 		/* Set the name in the actionDict. */
 		Action *action = pd->actionDict.find( $1->data );
 		if ( action != 0 ) {
 			/* Pass up the action element */
 			$$->action = action;
+			if ( action->paramList != 0 )
+				reject();
 		}
 		else {
 			/* Will recover by returning null as the action. */
@@ -905,13 +1000,58 @@ action_embed_word:
 			$$->action = 0;
 		}
 	};
+action_embed_word:
+	TK_Word '(' opt_action_arg_list ')'
+	try {
+		/* Set the name in the actionDict. */
+		Action *action = pd->actionDict.find( $1->data );
+		if ( action != 0 ) {
+
+			if ( action->paramList == 0 )
+				reject();
+
+			/*
+			 * Store the action we resolved. In the final action we will
+			 * convert this to the specialized action. Can't do this here since
+			 * it is a try action and we have not processed the args list (all
+			 * done by final actions ).
+			 */
+			$$->action = action;
+		}
+		else {
+			/* Will recover by returning null as the action. */
+			error($1->loc) << "action lookup of \"" << $1->data << "\" failed" << endl;
+			$$->action = 0;
+		}
+	}
+	final {
+		/* Make sure the number of actions line up. */
+				
+		/* Now we need to specialize using the supplied args. We can only
+		 * present an Action* to fsmcodegen. */
+		ActionArgListMapEl *el = $$->action->argListMap->find( $3->argList );
+		if ( el == 0 ) {
+			/* Allocate an action representing this specialization. */
+			Action *specAction = Action::cons( $1->loc, $$->action,
+					$3->argList, pd->nextCondId++ );
+			pd->actionList.append( specAction );
+
+			el = $$->action->argListMap->insert( $3->argList, specAction );
+		}
+		else {
+			/* Can delete $3->arg list. */
+		}
+
+		$$->action = el->value;
+	};
 
 nonterm action_embed_block uses action_ref;
 
 action_embed_block:
 	'{' inline_block '}' final {
 		/* Create the action, add it to the list and pass up. */
-		Action *newAction = new Action( $1->loc, std::string(), $2->inlineList, pd->nextCondId++ );
+		Action *newAction = new Action( $1->loc, std::string(),
+				$2->inlineList, pd->nextCondId++ );
 		pd->actionList.append( newAction );
 		$$->action = newAction;
 	};

@@ -121,6 +121,26 @@ struct NameInst;
 struct InlineList;
 typedef Vector<NameInst*> ActionRefs;
 
+struct ActionParam
+{
+	std::string name;
+};
+
+typedef Vector<ActionParam*> ActionParamList;
+
+typedef Vector<Action*> ActionArgList;
+
+struct CmpActionArgList
+{
+	static inline int compare( const ActionArgList *list1, const ActionArgList *list2 )
+	{
+		return CmpTable<Action*>::compare( *list1, *list2 );
+	}
+};
+
+typedef BstMap<ActionArgList*, Action*, CmpActionArgList> ActionArgListMap;
+typedef BstMapEl<ActionArgList*, Action*> ActionArgListMapEl;
+
 /* Element in list of actions. Contains the string for the code to exectute. */
 struct Action 
 :
@@ -145,9 +165,22 @@ public:
 		isLmAction(false),
 		condId(condId),
 		costMark(false),
-		costId(0)
+		costId(0),
+		paramList(0),
+		argListMap(0)
 	{
 	}
+
+	static Action *cons( const InputLoc &loc, Action *substOf,
+			ActionArgList *argList, int condId )
+	{
+		Action *action = new Action( loc, std::string(), 0, condId );
+		action->substOf = substOf;
+		action->argList = argList;
+		action->inlineList = substOf->inlineList;
+		return action;
+	}
+
 
 	/* Key for action dictionary. */
 	std::string getKey() const { return name; }
@@ -190,6 +223,11 @@ public:
 
 	bool costMark;
 	long costId;
+
+	ActionParamList *paramList;
+	ActionArgListMap *argListMap;
+	Action *substOf;
+	ActionArgList *argList;
 };
 
 struct CmpCondId
