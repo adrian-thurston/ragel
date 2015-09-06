@@ -257,7 +257,7 @@ function lang_opts()
 			flags=""
 			libs=""
 			prohibit_genflags="-G0 -G1 -G2"
-			prohibit_featflags=""
+			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
