@@ -72,7 +72,7 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 					gen_opts="$gen_opts --$OPTARG"
 				;;
 				var-backend|goto-backend)
-					featureflags="$featureflags --$OPTARG"
+					featflags="$featflags --$OPTARG"
 					gen_opts="$gen_opts --$OPTARG"
 				;;
 				*)
@@ -86,13 +86,13 @@ done
 
 
 
-[ -z "$minflags" ]     && minflags="-n -m -l -e"
-[ -z "$genflags" ]     && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
-[ -z "$encflags" ]     && encflags="--integral-tables --string-tables"
-[ -z "$langflags" ]    && langflags="-C -D -J -R -A -Z -O --asm -U -K -Y"
-[ -z "$frontflags" ]   && frontflags="--kelbt-frontend --colm-frontend"
-[ -z "$backflags" ]    && backflags="--direct-backend --colm-backend"
-[ -z "$featureflags" ] && featureflags="--var-backend --goto-backend"
+[ -z "$minflags" ]    && minflags="-n -m -l -e"
+[ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
+[ -z "$encflags" ]    && encflags="--integral-tables --string-tables"
+[ -z "$langflags" ]   && langflags="-C -D -J -R -A -Z -O --asm -U -K -Y"
+[ -z "$frontflags" ]  && frontflags="--kelbt-frontend --colm-frontend"
+[ -z "$backflags" ]   && backflags="--direct-backend --colm-backend"
+[ -z "$featflags" ]   && featflags="--var-backend --goto-backend"
 
 shift $((OPTIND - 1));
 
@@ -241,7 +241,7 @@ function lang_opts()
 			compiler=$java_compiler
 			flags=""
 			libs=""
-			prohibit_genflags="-T1 -F0 -F1 -G0 -G1 -G2"
+			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags=""
 			prohibit_frontflags="--kelbt-frontend"
 			prohibit_backflags="--direct-backend"
@@ -425,7 +425,7 @@ function run_options()
 						echo "" "$prohibit_backflags" | \
 								grep -e $b_opt >/dev/null && continue
 
-						for v_opt in $featureflags; do
+						for v_opt in $featflags; do
 
 							echo "" "$prohibit_featflags" | \
 									grep -e $v_opt >/dev/null && continue
