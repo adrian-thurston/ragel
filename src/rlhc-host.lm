@@ -36,7 +36,7 @@ lex
 			`while `switch `case
 			`if `else `offset `index
 			`goto `deref `entry `label `default
-			`host `cast
+			`host `cast `match `pat
 
 	literal `uint `const
 			`s8 `s16 `s32 `s64
@@ -59,8 +59,6 @@ lex
 		/ s_literal | d_literal /
 
 	ignore / ( [ \t] | NL )+ /
-
-	token pragma /'#' any* :> '\n' /
 
 	literal `$ `{ `} `= `[ `]
 			`- `, `. `; `( `) `:
@@ -163,10 +161,10 @@ def num_list
 	[number comma_num*]
 |	[]
 
-def array
+def static_array
 	[`array type ident `( number `, number  `) `= `{ num_list `} `;]
 
-def value
+def static_value
 	[`value type ident `= number `;]
 
 def while_stmt
@@ -189,6 +187,12 @@ def if_stmt [
 	`if `( expr `) stmt
 	else_if_clause* else_clause?
 ]
+
+def match_stmt
+	[`match `( E: expr `) `{ P: pat_block* D: default_block? `}]
+
+def pat_block
+	[`pat expr `{ stmt* `}]
 
 def switch_stmt
 	[`switch `( expr `) `{ stmt* `}]
@@ -218,7 +222,7 @@ def opt_const
 |	[]
 
 def declaration
-	[opt_const type opt_ptr ident opt_init `;]
+	[opt_const type ident opt_init `;]
 
 def export_stmt
 	[`export type ident number `;]
@@ -250,24 +254,24 @@ def assign_stmt
 
 def stmt
 	[embedded_host]
-|	[array]
-|	[value]
-|	[index_stmt]
+|	[static_array]
+|	[static_value]
 |	[declaration]
+|	[index_stmt]
+|	[export_stmt]
+|	[assign_stmt]
+|	[expr_stmt]
 |	[entry_loop]
 |	[label_stmt]
 |	[while_stmt]
 |	[if_stmt]
+|	[match_stmt]
 |	[switch_stmt]
 |	[case_block]
 |	[default_block]
 |	[case_label]
 |	[goto_label]
 |	[goto_stmt]
-|	[assign_stmt]
-|	[expr_stmt]
-|	[pragma]
-|	[export_stmt]
 |	[fallthrough]
 |	[break_stmt]
 |	[block]

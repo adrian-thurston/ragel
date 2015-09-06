@@ -104,13 +104,13 @@ std::ostream &SwitchExpGoto::TO_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numToStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << ":\n";
+			out << "\t" << CASE( STR( redAct->actListId+1 ) )  << "{\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
 
-			out << "\n\tbreak;\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -125,13 +125,13 @@ std::ostream &SwitchExpGoto::FROM_STATE_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numFromStateRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << ":\n";
+			out << "\t" << CASE( STR( redAct->actListId+1 ) ) << "{\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
 
-			out << "\n\tbreak;\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -144,13 +144,13 @@ std::ostream &SwitchExpGoto::EOF_ACTION_SWITCH()
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numEofRefs > 0 ) {
 			/* Write the entry label. */
-			out << "\t case " << redAct->actListId+1 << ":\n";
+			out << "\t" << CASE( STR( redAct->actListId+1 ) ) << "{\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, true, false ) );
 
-			out << "\n\tbreak;\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 

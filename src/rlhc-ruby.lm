@@ -331,23 +331,23 @@ namespace ruby_gen
 			send Parser
 				[embedded_host( EH )]
 		}
-		case [Array: array] {
+		case [A: static_array] {
 			send Parser
 				"class << self
-				"	attr_accessor :[ Array.ident ] 
-				"	private :[ Array.ident ], :[ Array.ident ]=
+				"	attr_accessor :[ A.ident ] 
+				"	private :[ A.ident ], :[ A.ident ]=
 				"end
-				"self.[ Array.ident ] = \[
-				"	[ruby_num_list( Array.num_list )]
+				"self.[ A.ident ] = \[
+				"	[ruby_num_list( A.num_list )]
 				"\]
 				"
 		}
-		case [Value: value] {
+		case [V: static_value] {
 			send Parser
 				"class << self
-				"	attr_accessor :[ Value.ident ]
+				"	attr_accessor :[ V.ident ]
 				"end
-				"self.[ Value.ident ] = [ Value.number ];
+				"self.[ V.ident ] = [ V.number ];
 				"
 		}
 		case [
@@ -402,12 +402,12 @@ namespace ruby_gen
 		}
 		# [declaration]
 		case [
-			TypeList: opt_const Type: type OptPtr: opt_ptr 
+			TypeList: opt_const Type: type
 			Ident: ident OptInit: opt_init Semi: `;
 		]
 		{
 			send Parser
-				[OptPtr Ident]
+				[Ident]
 
 			if match OptInit [E: `= expr] {
 				send Parser

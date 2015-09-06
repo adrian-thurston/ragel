@@ -325,14 +325,14 @@ namespace csharp_gen
 			send Parser
 				[embedded_host( EH )]
 		}
-		case [Array: array] {
+		case [A: static_array] {
 			send Parser
-				"static readonly [type(Array.type)] \[\]"
-					"[Array.ident] = { [num_list( Array.num_list )] };
+				"static readonly [type(A.type)] \[\]"
+					"[A.ident] = { [num_list( A.num_list )] };
 		}
-		case [Value: value] {
+		case [V: static_value] {
 			send Parser
-				"static readonly [Value.type] [Value.ident] = [Value.number];
+				"static readonly [V.type] [V.ident] = [V.number];
 		}
 		case [
 				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
@@ -377,12 +377,12 @@ namespace csharp_gen
 				[L stmt_list(TL) R]
 		}
 		case [
-			TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident
+			TypeList: opt_const Type: type Ident: ident
 			OptInit: opt_init Semi: `;
 		]
 		{
 			send Parser
-				[TypeList type(Type) OptPtr Ident]
+				[TypeList type(Type) Ident]
 
 			if match OptInit [E: `= expr] {
 				send Parser

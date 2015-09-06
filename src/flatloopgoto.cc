@@ -194,11 +194,11 @@ void FlatLoopGoto::writeExec()
 		out << "	int _ps;\n";
 
 	out << 
-		"	int _trans;\n";
+		"	int _trans = 0;\n";
 
 	if ( condSpaceList.length() > 0 ) {
 		out <<
-			"	" << UINT() << " _cond;\n";
+			"	" << UINT() << " _cond = 0;\n";
 	}
 
 	if ( redFsm->anyToStateActions() || 

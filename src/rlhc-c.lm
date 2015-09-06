@@ -334,14 +334,14 @@ namespace c_gen
 			send Parser
 				[embedded_host( EH )]
 		}
-		case [Array: array] {
+		case [A: static_array] {
 			send Parser
-				"static const [type(Array.type)] "
-					"[Array.ident] \[\] = { [num_list(Array.num_list)] };
+				"static const [type(A.type)] "
+					"[A.ident] \[\] = { [num_list(A.num_list)] };
 		}
-		case [Value: value] {
+		case [V: static_value] {
 			send Parser
-				"static const [Value.type] [Value.ident] = [Value.number];
+				"static const [V.type] [V.ident] = [V.number];
 		}
 		case [
 				`if `( IfExpr: expr `) IfStmt: stmt
@@ -371,6 +371,28 @@ namespace c_gen
 				"while ( [expr(WhileExpr)] )
 				"	[stmt(WhileStmt)]
 		}
+		case [M: match_stmt] {
+			send Parser
+				"switch ( [expr(M.E)] ) {
+
+			for PB: pat_block in repeat( M.P ) {
+				send Parser
+					"case [expr( PB.expr )]:
+					"[stmt_list( PB._repeat_stmt )]
+					"break;
+
+			}
+
+			if match M.D [D: default_block] {
+				send Parser
+					"default:
+					"[stmt_list( D._repeat_stmt )]
+					"break;
+			}
+
+			send Parser
+				"}
+		}
 		case [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
 			send Parser
 				"switch ( [expr(SwitchExpr)] ) {
@@ -386,12 +408,12 @@ namespace c_gen
 				[L stmt_list(TL) R]
 		}
 		case [
-			TypeList: opt_const Type: type OptPtr: opt_ptr
+			TypeList: opt_const Type: type 
 			Ident: ident OptInit: opt_init Semi: `;
 		]
 		{
 			send Parser
-				[TypeList type(Type) OptPtr Ident]
+				[TypeList type(Type) Ident]
 
 			if match OptInit [E: `= expr] {
 				send Parser

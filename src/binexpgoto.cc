@@ -328,8 +328,8 @@ void BinaryExpGoto::writeExec()
 		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
 		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
 		"	int _cpc;\n"
-		"	" << UINT() << " _trans;\n"
-		"	" << UINT() << " _cond;\n";
+		"	" << UINT() << " _trans = 0;\n"
+		"	" << UINT() << " _cond = 0;\n";
 
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";

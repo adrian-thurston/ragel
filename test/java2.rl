@@ -1,5 +1,6 @@
 /*
  * @LANG: java
+ * @PROHIBIT_GENFLAGS: -F0 -F1
  */
 
 class java2

@@ -327,14 +327,14 @@ namespace go_gen
 			send Parser
 				[embedded_host(EH)]
 		}
-		case [Array: array] {
+		case [A: static_array] {
 			send Parser
-				"var [Array.ident] \[\] [type(Array.type)] = \[\] "
-					"[type(Array.type)] { [num_list(Array.num_list)] }
+				"var [A.ident] \[\] [type(A.type)] = \[\] "
+					"[type(A.type)] { [num_list(A.num_list)] }
 		}
-		case [Value: value] {
+		case [V: static_value] {
 			send Parser
-				"var [Value.ident] [type(Value.type)] = [Value.number]
+				"var [V.ident] [type(V.type)] = [V.number]
 		}
 		case [
 				'if' O: `( IfExpr: expr C: `) IfStmt: stmt

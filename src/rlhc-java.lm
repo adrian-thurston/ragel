@@ -333,14 +333,14 @@ namespace java_gen
 			send Parser
 				[embedded_host( EH )]
 		}
-		case [Array: array] {
+		case [A: static_array] {
 			send Parser
-				"private static [type(Array.type)] "
-					"[Array.ident] \[\] = { [java_num_list(Array.num_list)] };
+				"private static [type(A.type)] "
+					"[A.ident] \[\] = { [java_num_list(A.num_list)] };
 		}
-		case [Value: value] {
+		case [V: static_value] {
 			send Parser
-				"private static [Value.type] [Value.ident] = [Value.number];
+				"private static [V.type] [V.ident] = [V.number];
 		}
 		case [
 				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
@@ -386,11 +386,13 @@ namespace java_gen
 				"	[stmt_list(TL)]
 				"}
 		}
-		case
-			[TypeList: opt_const Type: type OptPtr: opt_ptr Ident: ident OptInit: opt_init Semi: `;]
+		case [
+			TypeList: opt_const Type: type
+			Ident: ident OptInit: opt_init Semi: `;
+		]
 		{
 			send Parser
-				[TypeList type(Type) OptPtr Ident]
+				[TypeList type(Type) Ident]
 
 			if match OptInit [E: `= expr] {
 				send Parser

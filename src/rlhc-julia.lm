@@ -347,26 +347,23 @@ namespace julia_gen
 			send Parser
 				[embedded_host( EH )]
 		}
-		case [Array: array] {
+		case [A: static_array] {
 			send Parser
-				"[Array.ident] = [type(Array.type)] "
-					"\[ [num_list(Array.num_list)] \]
+				"[A.ident] = [type(A.type)] "
+					"\[ [num_list(A.num_list)] \]
 		}
-		case [Value: value] {
+		case [V: static_value] {
 			send Parser
-				"[Value.ident] = [Value.number]
-#			send Parser
-#				"[Value.ident] :: "
-#					"[type(Value.type)] = [Value.number]
+				"[V.ident] = [V.number]
 		}
 		# case [declaration]
 		case [
-			TypeList: opt_const Type: type OptPtr: opt_ptr 
+			TypeList: opt_const Type: type
 			Ident: ident OptInit: opt_init Semi: `;
 		]
 		{
 			send Parser
-				[OptPtr Ident]
+				[Ident]
 
 			if match OptInit [E: `= expr] {
 				send Parser
@@ -413,10 +410,6 @@ namespace julia_gen
 				"end
 		}
 		case [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
-#			send Parser
-#				"@switch ( [expr(SwitchExpr)] ) begin
-#				"	[stmt_list(StmtList)]
-#				"end
 
 			require StmtList
 				[`case E1: expr `{ Inner: stmt* `} Rest: stmt*]
@@ -454,12 +447,12 @@ namespace julia_gen
 				[L stmt_list(TL) R]
 		}
 		case [
-			TypeList: opt_const Type: type OptPtr: opt_ptr
+			TypeList: opt_const Type: type
 			Ident: ident OptInit: opt_init Semi: `;
 		]
 		{
 			send Parser
-				[TypeList type(Type) OptPtr Ident]
+				[TypeList type(Type) Ident]
 
 			if match OptInit [E: `= expr] {
 				send Parser

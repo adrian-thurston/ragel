@@ -337,14 +337,14 @@ namespace d_gen
 			send Parser
 				[embedded_host(EH)]
 		}
-		case [Array: array] {
+		case [A: static_array] {
 			send Parser
-				"static const [type(Array.type)] "
-					"[Array.ident] \[\] = \[ [num_list( Array.num_list )] \];
+				"static const [type(A.type)] "
+					"[A.ident] \[\] = \[ [num_list( A.num_list )] \];
 		}
-		case [Value: value] {
+		case [V: static_value] {
 			send Parser
-				"static const [Value.type] [Value.ident] = [Value.number];
+				"static const [V.type] [V.ident] = [V.number];
 		}
 		case [
 				`if `( IfExpr: expr `) IfStmt: stmt
@@ -398,7 +398,7 @@ namespace d_gen
 				[L stmt_list( TL ) R]
 		}
 		case [
-				OptConst: opt_const Type: type OptPtr: opt_ptr
+				OptConst: opt_const Type: type
 				Ident: ident OptInit: opt_init Semi: `;
 		]
 		{
@@ -410,7 +410,7 @@ namespace d_gen
 				type( Type )
 			}
 
-			send Parser [OptPtr Ident]
+			send Parser [Ident]
 
 			if match OptInit [E: `= expr] {
 				send Parser

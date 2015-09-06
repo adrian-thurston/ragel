@@ -320,17 +320,17 @@ namespace rust_gen
 			send Parser
 				[embedded_host( EH )]
 		}
-		case [Array: array] {
+		case [A: static_array] {
 			Length: int = 1
-			for Number: number in Array.num_list
+			for Number: number in A.num_list
 				Length = Length + 1
 
 			send Parser
-				"static [Array.ident]: \[[type(Array.type)]; [Length]\] = \[ [num_list(Array.num_list)] \];
+				"static [A.ident]: \[[type(A.type)]; [Length]\] = \[ [num_list(A.num_list)] \];
 		}
-		case [Value: value] {
+		case [V: static_value] {
 			send Parser
-				"static [Value.ident]: i32 = [Value.number];
+				"static [V.ident]: i32 = [V.number];
 		}
 		case [D: declaration] {
 			send Parser
@@ -398,12 +398,12 @@ namespace rust_gen
 				[L stmt_list(TL) R]
 		}
 		case [
-			TypeList: opt_const Type: type OptPtr: opt_ptr
+			TypeList: opt_const Type: type
 			Ident: ident OptInit: opt_init Semi: `;
 		]
 		{
 			send Parser
-				[TypeList type(Type) OptPtr Ident]
+				[TypeList type(Type) Ident]
 
 			if match OptInit [E: `= expr] {
 				send Parser

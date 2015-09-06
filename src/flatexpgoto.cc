@@ -261,10 +261,10 @@ void FlatExpGoto::writeExec()
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
 	
-	out << "	int _trans;\n";
+	out << "	int _trans = 0;\n";
 
 	if ( condSpaceList.length() > 0 )
-		out << "	" << UINT() << " _cond;\n";
+		out << "	" << UINT() << " _cond = 0;\n";
 
 	if ( redFsm->classMap != 0 ) {
 		out <<

@@ -326,12 +326,12 @@ namespace crack_gen
 			send Parser
 				[embedded_host( EH )]
 		}
-		case [Array: array] {
+		case [Array: static_array] {
 			send Parser
 				"const array\[[type(Array.type)]\] "
 					"[Array.ident] = \[ [num_list(Array.num_list)] \];
 		}
-		case [Value: value] {
+		case [Value: static_value] {
 			send Parser
 				"const [Value.type] [Value.ident] = [Value.number];
 		}
@@ -406,12 +406,12 @@ namespace crack_gen
 				"}
 		}
 		case [
-			TypeList: opt_const Type: type OptPtr: opt_ptr
+			TypeList: opt_const Type: type
 			Ident: ident OptInit: opt_init Semi: `;
 		]
 		{
 			send Parser
-				[TypeList type(Type) OptPtr Ident]
+				[TypeList type(Type) Ident]
 
 			if match OptInit [E: `= expr] {
 				send Parser

@@ -355,17 +355,17 @@ namespace ml_gen
 			send Parser
 				[embedded_host( EH )]
 		}
-		case [Array: array] {
-			StaticVarMap->insert( $Array.ident, ' ' )
+		case [A: static_array] {
+			StaticVarMap->insert( $A.ident, ' ' )
 			send Parser
-				"let [Array.ident] : int array = \[|
-					"	[num_list(Array.num_list)]
+				"let [A.ident] : int array = \[|
+					"	[num_list(A.num_list)]
 				"|\]
 		}
-		case [Value: value] {
-			StaticVarMap->insert( $Value.ident, ' ' )
+		case [V: static_value] {
+			StaticVarMap->insert( $V.ident, ' ' )
 			send Parser
-				"let [Value.ident] : [Value.type] = [Value.number]
+				"let [V.ident] : [V.type] = [V.number]
 		}
 		case [
 				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
