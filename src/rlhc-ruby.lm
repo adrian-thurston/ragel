@@ -53,9 +53,6 @@ namespace ruby_gen
 
 	global Parser: parser<ruby_out::ruby_out>
 
-	global EntryLoop: int = 0
-	global ElCascade: int = 0
-
 	void tok_list( TL: host::tok* )
 	{
 		for Tok: host::tok in repeat(TL) {
@@ -379,16 +376,10 @@ namespace ruby_gen
 				"end
 		}
 		case ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
-			ElCascade = ElCascade + 1
 			send Parser
 				"while ( [expr(WhileExpr)] )
 				"	[stmt(WhileStmt)]
 				"end
-			if EntryLoop {
-				send Parser
-					"next if _trigger_goto
-			}
-			ElCascade = ElCascade - 1
 		}
 		case ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
 			send Parser
@@ -464,49 +455,10 @@ namespace ruby_gen
 				"begin
 				"[stmt_list( Stmt.default_block._repeat_stmt )]
 		}
-		case [goto_label]
-		{
-			send Parser "{}"
-		}
-		case [G: goto_stmt]
-		{
-			if ( ElCascade ) {
-				send Parser
-					"begin
-					"	_trigger_goto = true
-					"	_goto_level = [$G.Id]
-					"	break
-					"end
-			}
-			else {
-				send Parser
-					"begin
-					"	_goto_level = [$G.Id]
-					"	next
-					"end
-			}
-		}
-		case [entry_loop]
-		{
-			EntryLoop = EntryLoop + 1
-			send Parser
-				"_goto_level = 0
-				"while true 
-				"	_trigger_goto = false
-				"	if _goto_level <= 0 
-				"	[stmt_list( Stmt.entry_loop._repeat_stmt )]
-				"	end
-				"	break
-				"end
-			EntryLoop = EntryLoop - 1
-		}
-		case [label_stmt]
-		{
-			send Parser
-				"end
-				"if _goto_level <= [Stmt.label_stmt.Id]
-				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
-		}
+		case [goto_label] {}
+		case [goto_stmt] {}
+		case [entry_loop] {}
+		case [label_stmt] {}
 		case [AS: assign_stmt]
 		{
 			send Parser
