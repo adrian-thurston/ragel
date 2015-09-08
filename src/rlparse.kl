@@ -294,7 +294,7 @@ nonterm action_param
 action_param:
 	TK_Word
 	final {
-		$$->param = 0;
+		$$->param = new ActionParam( $1->data );
 	};
 
 nonterm action_param_list
@@ -321,7 +321,7 @@ nonterm opt_action_param_list uses action_param_list;
 opt_action_param_list:
 	action_param_list
 	final {
-		$$->paramList = new ActionParamList;
+		$$->paramList = $1->paramList;
 	};
 
 opt_action_param_list:
@@ -338,6 +338,7 @@ opt_action_params:
 	}
 	final {
 		$$->paramList = $2->paramList;
+		paramList = $2->paramList;
 	};
 
 opt_action_params:
@@ -1032,6 +1033,10 @@ action_embed_word:
 	}
 	final {
 		/* Make sure the number of actions line up. */
+		if ( $3->argList->length() != $$->action->paramList->length() ) {
+			error($1->loc) << "wrong number of action "
+				"arguments for \"" << $1->data << "\"" << endl;
+		}
 				
 		/* Now we need to specialize using the supplied args. We can only
 		 * present an Action* to fsmcodegen. */
@@ -1046,6 +1051,7 @@ action_embed_word:
 		}
 		else {
 			/* Can delete $3->arg list. */
+			delete $3->argList;
 		}
 
 		$$->action = el->value;
@@ -1643,6 +1649,22 @@ inline_block_interpret:
 inline_block_interpret:
 	KW_Nbreak ';' final {
 		$$->inlineItem = new InlineItem( $1->loc, InlineItem::Nbreak );
+	};
+inline_block_interpret:
+	TK_SubstRef final {
+		$$->inlineItem = new InlineItem( $1->loc, InlineItem::Subst );
+
+		ActionParamList::Iter api = *paramList;
+		for ( ; api.lte(); api++ ) {
+			if ( (*api)->name == $1->data )
+				break;
+		}
+
+		if ( api.end() )
+			error( $1->loc ) << "invalid parameter reference \"$" << $1->data << "\"" << endl;
+		else {
+			$$->inlineItem->substPos = api.pos();
+		}
 	};
 
 

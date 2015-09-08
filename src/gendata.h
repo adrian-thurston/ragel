@@ -260,6 +260,7 @@ public:
 	EntryNameVect entryPointNames;
 	bool hasLongestMatch;
 	ExportList exportList;
+	Action *curInlineAction;
 
 	/* Write options. */
 	bool noEnd;

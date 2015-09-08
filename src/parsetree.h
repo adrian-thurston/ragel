@@ -832,7 +832,7 @@ struct InlineItem
 		Text, Goto, Call, Ncall, Next, GotoExpr, CallExpr, NcallExpr, NextExpr, Ret, Nret,
 		PChar, Char, Hold, Curs, Targs, Entry, Exec, Break, Nbreak,
 		LmSwitch, LmSetActId, LmSetTokEnd, LmOnLast, LmOnNext, LmOnLagBehind,
-		LmInitAct, LmInitTokStart, LmSetTokStart, Stmt
+		LmInitAct, LmInitTokStart, LmSetTokStart, Stmt, Subst
 	};
 
 	InlineItem( const InputLoc &loc, std::string data, Type type ) : 
@@ -860,6 +860,8 @@ struct InlineItem
 	InlineList *children;
 	LongestMatch *longestMatch;
 	LongestMatchPart *longestMatchPart;
+	long substPos;
+	Action *substAction;
 	Type type;
 
 	InlineItem *prev, *next;

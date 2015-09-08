@@ -123,6 +123,9 @@ typedef Vector<NameInst*> ActionRefs;
 
 struct ActionParam
 {
+	ActionParam( std::string name )
+		: name(name) {}
+
 	std::string name;
 };
 
@@ -167,7 +170,8 @@ public:
 		costMark(false),
 		costId(0),
 		paramList(0),
-		argListMap(0)
+		argListMap(0),
+		argList(0)
 	{
 	}
 

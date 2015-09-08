@@ -33,6 +33,8 @@
 #define IMP_UInt 130
 #define IMP_Define 131
 
+struct ParamList;
+
 /* This is used for tracking the include files/machine pairs. */
 struct IncludeHistoryItem
 {
@@ -141,8 +143,10 @@ struct Parser6
 	IncludeHistory includeHistory;
 
 	TokHead *tokHead;
+	ActionParamList *paramList;
 
 	Parser6 *prev, *next;
+
 
 	bool parseSubstitutions;
 };

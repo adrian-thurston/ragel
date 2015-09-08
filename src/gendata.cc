@@ -448,7 +448,12 @@ void CodeGenData::makeGenInlineList( GenInlineList *outList, InlineList *inList 
 		case InlineItem::Stmt:
 			makeSubList( outList, item->children, GenInlineItem::GenStmt );
 			break;
-		}
+		case InlineItem::Subst: {
+			/* Find the subst action. */
+			Action *subst = curInlineAction->argList->data[item->substPos];
+			makeGenInlineList( outList, subst->inlineList );
+			break;
+		}}
 	}
 }
 
@@ -461,7 +466,10 @@ void CodeGenData::makeExports()
 void CodeGenData::makeAction( Action *action )
 {
 	GenInlineList *genList = new GenInlineList;
+
+	curInlineAction = action;
 	makeGenInlineList( genList, action->inlineList );
+	curInlineAction = 0;
 
 	newAction( curAction++, action->name, action->loc, genList );
 }
