@@ -429,14 +429,81 @@ int output_filter::sync( )
 	return std::filebuf::sync();
 }
 
+std::streamsize output_filter::countAndWrite( const char *s, std::streamsize n )
+{
+	for ( int i = 0; i < n; i++ ) {
+		switch ( s[i] ) {
+		case '\n':
+			line += 1;
+			break;
+		case '{':
+			level += 1;
+			break;
+		case '}':
+			level -= 1;
+			break;
+		}
+	}
+
+	return std::filebuf::xsputn( s, n );
+}
+
 /* Counts newlines before sending data out to file. */
 std::streamsize output_filter::xsputn( const char *s, std::streamsize n )
 {
-	for ( int i = 0; i < n; i++ ) {
-		if ( s[i] == '\n' )
-			line += 1;
+	std::streamsize ret = n;
+	int l;
+
+restart:
+	if ( indent ) {
+		/* Consume mode Looking for the first non-whitespace. */
+		while ( n > 0 && ( *s == ' ' || *s == '\t' ) ) {
+			s += 1;
+			n -= 1;
+		}
+
+		if ( n > 0 ) {
+			int tabs = level;
+
+			if ( *s == '}' ) {
+				/* If the next char is de-dent, then reduce the tabs. This is
+				 * not a stream state change. The level reduction will be
+				 * computed in write. */
+				tabs -= 1;
+			}
+
+			/* Found some data, print the indentation and turn off indentation
+			 * mode. */
+			for ( l = 0; l < tabs; l++ )
+				countAndWrite( "\t", 1 );
+
+			indent = 0;
+
+			goto restart;
+		}
 	}
-	return std::filebuf::xsputn( s, n );
+	else {
+		char *nl;
+		if ( (nl = (char*)memchr( s, '\n', n )) ) {
+			/* Print up to and including the newline. */
+			int wl = nl - s + 1;
+			countAndWrite( s, wl );
+
+			/* Go into consume state. If we see more non-indentation chars we
+			 * will generate the appropriate indentation level. */
+			s += wl;
+			n -= wl;
+			indent = true;
+			goto restart;
+		}
+		else {
+			/* Indentation off, or no indent trigger (newline). */
+			countAndWrite( s, n );
+		}
+	}
+
+	// What to do here?
+	return ret;
 }
 
 /* Scans a string looking for the file extension. If there is a file

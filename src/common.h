@@ -397,13 +397,23 @@ inline void CondKey::increment()
 class output_filter : public std::filebuf
 {
 public:
-	output_filter( const char *fileName ) : fileName(fileName), line(1) { }
+	output_filter( const char *fileName )
+	:
+		fileName(fileName),
+		line(1),
+		level(0),
+		indent(false)
+	{}
 
 	virtual int sync();
 	virtual std::streamsize xsputn(const char* s, std::streamsize n);
 
+	std::streamsize countAndWrite( const char* s, std::streamsize n );
+
 	const char *fileName;
 	int line;
+	int level;
+	bool indent;
 };
 
 class cfilebuf : public std::streambuf
