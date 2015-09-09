@@ -95,7 +95,7 @@ pre_push_spec:
 			error($2->loc) << "pre_push code already defined" << endl;
 		}
 
-		pd->prePushExpr = $3->inlineList;
+		pd->prePushExpr = new InlineBlock( $2->loc, $3->inlineList );
 	};
 
 
@@ -107,7 +107,7 @@ post_pop_spec:
 			error($2->loc) << "post_pop code already defined" << endl;
 		}
 
-		pd->postPopExpr = $3->inlineList;
+		pd->postPopExpr = new InlineBlock( $2->loc, $3->inlineList );
 	};
 
 nfa_pre_push_spec:
@@ -118,7 +118,7 @@ nfa_pre_push_spec:
 			error($2->loc) << "nfa_pre_push code already defined" << endl;
 		}
 
-		pd->nfaPrePushExpr = $3->inlineList;
+		pd->nfaPrePushExpr = new InlineBlock( $2->loc, $3->inlineList );
 	};
 
 nfa_post_pop_spec:
@@ -129,7 +129,7 @@ nfa_post_pop_spec:
 			error($2->loc) << "nfa_post_pop code already defined" << endl;
 		}
 
-		pd->nfaPostPopExpr = $3->inlineList;
+		pd->nfaPostPopExpr = new InlineBlock( $2->loc, $3->inlineList );
 	};
 
 export_open: KW_Export 

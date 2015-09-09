@@ -814,12 +814,14 @@ struct LoadRagel
 			error(loc) << "pre_push code already defined" << endl;
 		}
 
+		InlineList *inlineList;
 		if ( PrePushBlock.RubyInlineBlock() )
-			pd->prePushExpr = loadInlineBlock( PrePushBlock.RubyInlineBlock() );
+			inlineList = loadInlineBlock( PrePushBlock.RubyInlineBlock() );
 		else if ( PrePushBlock.OCamlInlineBlock() )
-			pd->prePushExpr = loadInlineBlock( PrePushBlock.OCamlInlineBlock() );
+			inlineList = loadInlineBlock( PrePushBlock.OCamlInlineBlock() );
 		else
-			pd->prePushExpr = loadInlineBlock( PrePushBlock.CInlineBlock() );
+			inlineList = loadInlineBlock( PrePushBlock.CInlineBlock() );
+		pd->prePushExpr = new InlineBlock( loc, inlineList );
 	}
 
 	void loadPostPop( ragel::action_block PostPopBlock )
@@ -831,12 +833,14 @@ struct LoadRagel
 			error(loc) << "post_pop code already defined" << endl;
 		}
 
+		InlineList *inlineList;
 		if ( PostPopBlock.RubyInlineBlock() )
-			pd->postPopExpr = loadInlineBlock( PostPopBlock.RubyInlineBlock() );
+			inlineList = loadInlineBlock( PostPopBlock.RubyInlineBlock() );
 		else if ( PostPopBlock.OCamlInlineBlock() )
-			pd->postPopExpr = loadInlineBlock( PostPopBlock.OCamlInlineBlock() );
+			inlineList = loadInlineBlock( PostPopBlock.OCamlInlineBlock() );
 		else
-			pd->postPopExpr = loadInlineBlock( PostPopBlock.CInlineBlock() );
+			inlineList = loadInlineBlock( PostPopBlock.CInlineBlock() );
+		pd->postPopExpr = new InlineBlock( loc, inlineList );
 	}
 
 	void tryMachineDef( InputLoc &loc, std::string name, 

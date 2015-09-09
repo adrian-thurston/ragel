@@ -93,8 +93,8 @@ void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK();
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << OPEN_HOST_BLOCK( prePushExpr );
+		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -108,8 +108,8 @@ void IpGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK();
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << OPEN_HOST_BLOCK( prePushExpr );
+		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -123,8 +123,8 @@ void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK();
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << OPEN_HOST_BLOCK( prePushExpr );
+		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -139,8 +139,8 @@ void IpGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, boo
 	ret << OPEN_GEN_BLOCK();
 
 	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK();
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		ret << OPEN_HOST_BLOCK( prePushExpr );
+		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -156,8 +156,8 @@ void IpGoto::RET( ostream &ret, bool inFinish )
 			<< STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK();
-		INLINE_LIST( ret, postPopExpr, 0, false, false );
+		ret << OPEN_HOST_BLOCK( postPopExpr );
+		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -170,8 +170,8 @@ void IpGoto::NRET( ostream &ret, bool inFinish )
 			<< STACK() << "[" << TOP() << "];";
 
 	if ( postPopExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK();
-		INLINE_LIST( ret, postPopExpr, 0, false, false );
+		ret << OPEN_HOST_BLOCK( postPopExpr );
+		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -453,8 +453,8 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 						ARR_REF( nfaOffsets ) << "[" << state->id << "]];\n";
 
 		if ( nfaPrePushExpr != 0 ) {
-			out << OPEN_HOST_BLOCK();
-			INLINE_LIST( out, nfaPrePushExpr, 0, false, false );
+			out << OPEN_HOST_BLOCK( nfaPrePushExpr );
+			INLINE_LIST( out, nfaPrePushExpr->inlineList, 0, false, false );
 			out << CLOSE_HOST_BLOCK();
 		}
 

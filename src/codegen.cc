@@ -658,7 +658,7 @@ void CodeGen::HOST_STMT( ostream &ret, GenInlineItem *item,
 {
 	if ( item->children->length() > 0 ) {
 		/* Write the block and close it off. */
-		ret << OPEN_HOST_BLOCK();
+		ret << OPEN_HOST_BLOCK( item->loc.fileName, item->loc.line );
 		INLINE_LIST( ret, item->children, targState, inFinish, csForced );
 		ret << CLOSE_HOST_BLOCK();
 	}

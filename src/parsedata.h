@@ -289,12 +289,12 @@ struct ParseData
 	InlineList *accessExpr;
 
 	/* Stack management */
-	InlineList *prePushExpr;
-	InlineList *postPopExpr;
+	InlineBlock *prePushExpr;
+	InlineBlock *postPopExpr;
 
 	/* Nfa stack managment. */
-	InlineList *nfaPrePushExpr;
-	InlineList *nfaPostPopExpr;
+	InlineBlock *nfaPrePushExpr;
+	InlineBlock *nfaPostPopExpr;
 
 	/* Overriding variables. */
 	InlineList *pExpr;

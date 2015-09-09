@@ -251,17 +251,26 @@ protected:
 		{ return backend == Direct ? "(" : "host( \"-\", 1 ) ={"; }
 
 	string OPEN_HOST_EXPR( string fileName, int line )
-		{ return backend == Direct ? "(" : "host( \"" + fileName + "\", " + STR(line) + " ) ={"; }
+	{
+		return backend == Direct ? "(" : "host( \"" + fileName + "\", " + STR(line) + " ) ={"; 
+	}
 
 	string CLOSE_HOST_EXPR()
 		{ return backend == Direct ? ")" : "}="; }
 
-	string OPEN_HOST_BLOCK()
-		{ return backend == Direct ? "{" : "host( \"-\", 1 ) ${"; }
-
 	string OPEN_HOST_BLOCK( string fileName, int line )
 	{ 
-		return backend == Direct ? "{" : "host( \"" + fileName + "\", " + STR(line) + " ) ${";
+		if ( backend == Direct ) {
+			return "{\n#line " + STR(line) + " \"" + fileName + "\"\n";
+		}
+		else {
+			return "host( \"" + fileName + "\", " + STR(line) + " ) ${";
+		}
+	}
+
+	string OPEN_HOST_BLOCK( GenInlineExpr *inlineExpr )
+	{
+		return OPEN_HOST_BLOCK( inlineExpr->loc.fileName, inlineExpr->loc.line );
 	}
 
 	string CLOSE_HOST_BLOCK()

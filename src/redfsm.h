@@ -88,6 +88,15 @@ struct GenInlineItem
  * ptreetypes, which should be just typedef forwards. */
 struct GenInlineList : public DList<GenInlineItem> { };
 
+struct GenInlineExpr
+{
+	GenInlineExpr( const InputLoc &loc, GenInlineList *inlineList )
+		: loc(loc), inlineList( inlineList ) {}
+
+	InputLoc loc;
+	GenInlineList *inlineList;
+};
+
 /* Element in list of actions. Contains the string for the code to exectute. */
 struct GenAction 
 :

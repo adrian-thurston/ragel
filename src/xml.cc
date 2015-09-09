@@ -612,14 +612,14 @@ void XMLCodeGen::writeXML()
 	/* PrePush expression. */
 	if ( pd->prePushExpr != 0 ) {
 		out << "  <prepush>";
-		writeInlineList( pd->prePushExpr );
+		writeInlineList( pd->prePushExpr->inlineList );
 		out << "</prepush>\n";
 	}
 
 	/* PostPop expression. */
 	if ( pd->postPopExpr != 0 ) {
 		out << "  <postpop>";
-		writeInlineList( pd->postPopExpr );
+		writeInlineList( pd->postPopExpr->inlineList );
 		out << "</postpop>\n";
 	}
 

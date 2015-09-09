@@ -167,7 +167,8 @@ private:
 	void makeSetAct( GenInlineList *outList, long lmId );
 	void makeSubList( GenInlineList *outList, InlineList *inlineList, 
 			GenInlineItem::Type type );
-	void makeTargetItem( GenInlineList *outList, NameInst *nameTarg, GenInlineItem::Type type );
+	void makeTargetItem( GenInlineList *outList, NameInst *nameTarg,
+			GenInlineItem::Type type );
 	void makeExecGetTokend( GenInlineList *outList );
 	void makeExports();
 	void makeMachine();
@@ -212,7 +213,8 @@ public:
 
 	/* This can also be overridden to modify the processing of write
 	 * statements. */
-	virtual void writeStatement( InputLoc &loc, int nargs, std::string *args, bool generateDot, const HostLang *hostLang );
+	virtual void writeStatement( InputLoc &loc, int nargs,
+			std::string *args, bool generateDot, const HostLang *hostLang );
 
 	/********************/
 
@@ -236,13 +238,14 @@ public:
 	int errState;
 	GenActionList actionList;
 	CondSpaceList condSpaceList;
+
 	GenInlineList *getKeyExpr;
 	GenInlineList *accessExpr;
-	GenInlineList *prePushExpr;
-	GenInlineList *postPopExpr;
+	GenInlineExpr *prePushExpr;
+	GenInlineExpr *postPopExpr;
 
-	GenInlineList *nfaPrePushExpr;
-	GenInlineList *nfaPostPopExpr;
+	GenInlineExpr *nfaPrePushExpr;
+	GenInlineExpr *nfaPostPopExpr;
 
 	/* Overriding variables. */
 	GenInlineList *pExpr;
@@ -271,7 +274,8 @@ public:
 
 	void createMachine();
 	void initActionList( unsigned long length );
-	void newAction( int anum, std::string name, const InputLoc &loc, GenInlineList *inlineList );
+	void newAction( int anum, std::string name,
+			const InputLoc &loc, GenInlineList *inlineList );
 	void initActionTableList( unsigned long length );
 	void initStateList( unsigned long length );
 	void setStartState( unsigned long startState );
@@ -301,6 +305,9 @@ public:
 
 	void resolveTargetStates( GenInlineList *inlineList );
 	Key findMaxKey();
+
+	void makeSubList( GenInlineList *outList, const InputLoc &loc,
+			InlineList *inlineList, GenInlineItem::Type type );
 
 	/* Gather various info on the machine. */
 	void analyzeActionList( RedAction *redAct, GenInlineList *inlineList );

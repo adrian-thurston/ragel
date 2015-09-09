@@ -1129,7 +1129,7 @@ void AsmCodeGen::NFA_PUSH( RedStateAp *st )
 	if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
 		if ( nfaPrePushExpr != 0 ) {
 			out << "	movq    $" << st->nfaTargs->length() << ", %rdi\n";
-			INLINE_LIST( out, nfaPrePushExpr, 0, false, false );
+			INLINE_LIST( out, nfaPrePushExpr->inlineList, 0, false, false );
 		}
 
 		for ( RedNfaTargs::Iter t = *st->nfaTargs; t.lte(); t++ ) {
@@ -1249,7 +1249,7 @@ void AsmCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 void AsmCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 )
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
 
 	ret <<
 		"	movq	" << STACK() << ", %rax\n"
@@ -1264,7 +1264,7 @@ void AsmCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish 
 void AsmCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 )
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
 
 	ret <<
 		"\n"
@@ -1292,7 +1292,7 @@ void AsmCodeGen::RET( ostream &ret, bool inFinish )
 		"	movq	%rcx, " << TOP() << "\n";
 
 	if ( postPopExpr != 0 )
-		INLINE_LIST( ret, postPopExpr, 0, false, false );
+		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
 
 	ret <<
 		"	jmp		" << LABEL("again") << "\n";
@@ -1324,7 +1324,7 @@ void AsmCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 void AsmCodeGen::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 )
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
 
 	ret <<
 		"	movq	" << STACK() << ", %rax\n"
@@ -1339,7 +1339,7 @@ void AsmCodeGen::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem,
 		int targState, bool inFinish )
 {
 	if ( prePushExpr != 0 )
-		INLINE_LIST( ret, prePushExpr, 0, false, false );
+		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
 
 	ret <<
 		"\n"
@@ -1366,7 +1366,7 @@ void AsmCodeGen::NRET( ostream &ret, bool inFinish )
 		"	movq	%rcx, " << TOP() << "\n";
 
 	if ( postPopExpr != 0 )
-		INLINE_LIST( ret, postPopExpr, 0, false, false );
+		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
 }
 
 void AsmCodeGen::CURS( ostream &ret, bool inFinish )

@@ -871,4 +871,13 @@ struct InlineItem
  * ptreetypes, which should be just typedef forwards. */
 struct InlineList : public DList<InlineItem> { };
 
+struct InlineBlock
+{
+	InlineBlock( const InputLoc &loc, InlineList *inlineList )
+		: loc(loc), inlineList(inlineList) {}
+
+	InputLoc loc;
+	InlineList *inlineList;
+};
+
 #endif

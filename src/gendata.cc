@@ -203,8 +203,8 @@ void CodeGenData::makeTargetItem( GenInlineList *outList, NameInst *nameTarg,
 	outList->append( inlineItem );
 }
 
-/* Make a sublist item with a given type. */
-void CodeGenData::makeSubList( GenInlineList *outList, 
+
+void CodeGenData::makeSubList( GenInlineList *outList, const InputLoc &loc,
 		InlineList *inlineList, GenInlineItem::Type type )
 {
 	/* Fill the sub list. */
@@ -212,9 +212,16 @@ void CodeGenData::makeSubList( GenInlineList *outList,
 	makeGenInlineList( subList, inlineList );
 
 	/* Make the item. */
-	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), type );
+	GenInlineItem *inlineItem = new GenInlineItem( loc, type );
 	inlineItem->children = subList;
 	outList->append( inlineItem );
+}
+
+/* Make a sublist item with a given type. */
+void CodeGenData::makeSubList( GenInlineList *outList, 
+		InlineList *inlineList, GenInlineItem::Type type )
+{
+	makeSubList( outList, InputLoc(), inlineList, type );
 }
 
 void CodeGenData::makeLmOnLast( GenInlineList *outList, InlineItem *item )
@@ -222,8 +229,8 @@ void CodeGenData::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 	makeSetTokend( outList, 1 );
 
 	if ( item->longestMatchPart->action != 0 ) {
-		makeSubList( outList, 
-				item->longestMatchPart->action->inlineList, 
+		Action *action = item->longestMatchPart->action;
+		makeSubList( outList, action->loc, action->inlineList, 
 				GenInlineItem::HostStmt );
 	}
 }
@@ -234,8 +241,8 @@ void CodeGenData::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 	outList->append( new GenInlineItem( InputLoc(), GenInlineItem::LmHold ) );
 
 	if ( item->longestMatchPart->action != 0 ) {
-		makeSubList( outList, 
-			item->longestMatchPart->action->inlineList,
+		Action *action = item->longestMatchPart->action;
+		makeSubList( outList, action->loc, action->inlineList,
 			GenInlineItem::HostStmt );
 	}
 }
@@ -259,8 +266,8 @@ void CodeGenData::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 	makeExecGetTokend( outList );
 
 	if ( item->longestMatchPart->action != 0 ) {
-		makeSubList( outList,
-			item->longestMatchPart->action->inlineList,
+		Action *action = item->longestMatchPart->action;
+		makeSubList( outList, action->loc, action->inlineList,
 			GenInlineItem::HostStmt );
 	}
 }
@@ -285,7 +292,7 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 		errCase->lmId = 0;
 		errCase->children = new GenInlineList;
 
-		GenInlineItem *host = new GenInlineItem( InputLoc(), GenInlineItem::HostStmt );
+		GenInlineItem *host = new GenInlineItem( item->loc, GenInlineItem::HostStmt );
 		host->children = new GenInlineList;
 		errCase->children->append( host );
 
@@ -312,7 +319,8 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 
 				makeExecGetTokend( lmCase->children );
 
-				GenInlineItem *subHost = new GenInlineItem( InputLoc(), GenInlineItem::HostStmt );
+				GenInlineItem *subHost = new GenInlineItem( lmi->action->loc,
+						GenInlineItem::HostStmt );
 				subHost->children = new GenInlineList;
 				makeGenInlineList( subHost->children, lmi->action->inlineList );
 				lmCase->children->append( subHost );
@@ -323,7 +331,7 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 	}
 
 	if ( needDefault ) {
-		GenInlineItem *defCase = new GenInlineItem( InputLoc(), GenInlineItem::HostStmt );
+		GenInlineItem *defCase = new GenInlineItem( item->loc, GenInlineItem::HostStmt );
 		defCase->lmId = -1;
 		defCase->children = new GenInlineList;
 
@@ -840,26 +848,30 @@ void CodeGenData::make( const HostLang *hostLang )
 
 	/* PrePush expression. */
 	if ( pd->prePushExpr != 0 ) {
-		prePushExpr = new GenInlineList;
-		makeGenInlineList( prePushExpr, pd->prePushExpr );
+		GenInlineList *il = new GenInlineList;
+		makeGenInlineList( il, pd->prePushExpr->inlineList );
+		prePushExpr = new GenInlineExpr( pd->prePushExpr->loc, il );
 	}
 
 	/* PostPop expression. */
 	if ( pd->postPopExpr != 0 ) {
-		postPopExpr = new GenInlineList;
-		makeGenInlineList( postPopExpr, pd->postPopExpr );
+		GenInlineList *il = new GenInlineList;
+		makeGenInlineList( il, pd->postPopExpr->inlineList );
+		postPopExpr = new GenInlineExpr( pd->postPopExpr->loc, il );
 	}
 
 	/* PrePush expression. */
 	if ( pd->nfaPrePushExpr != 0 ) {
-		nfaPrePushExpr = new GenInlineList;
-		makeGenInlineList( nfaPrePushExpr, pd->nfaPrePushExpr );
+		GenInlineList *il = new GenInlineList;
+		makeGenInlineList( il, pd->nfaPrePushExpr->inlineList );
+		nfaPrePushExpr = new GenInlineExpr( pd->nfaPrePushExpr->loc, il );
 	}
 
 	/* PostPop expression. */
 	if ( pd->nfaPostPopExpr != 0 ) {
-		nfaPostPopExpr = new GenInlineList;
-		makeGenInlineList( nfaPostPopExpr, pd->nfaPostPopExpr );
+		GenInlineList *il = new GenInlineList;
+		makeGenInlineList( il, pd->nfaPostPopExpr->inlineList );
+		nfaPostPopExpr = new GenInlineExpr( pd->nfaPostPopExpr->loc, il );
 	}
 
 
