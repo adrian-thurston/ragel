@@ -303,6 +303,11 @@ void InputData::writeOutput( InputItem *ii )
 		case InputItem::HostData: {
 			switch ( backend ) {
 				case Direct:
+					if ( hostLang->lang == HostLang::C ) {
+						*outStream << "\n#line " << ii->loc.line <<
+								" \"" << ii->loc.fileName << "\"\n";
+					}
+						
 					*outStream << ii->data.str();
 					break;
 				case Translated:

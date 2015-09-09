@@ -622,6 +622,9 @@ void Scanner::endSection( )
 	if ( sectionPass ) {
 		InputItem *inputItem = new InputItem;
 		inputItem->type = InputItem::EndSection;
+		inputItem->loc.fileName = fileName;
+		inputItem->loc.line = line;
+		inputItem->loc.col = column;
 		id.inputItems.append( inputItem );
 		if ( section != 0 ) {
 			inputItem->section = section;
@@ -634,6 +637,7 @@ void Scanner::endSection( )
 				 * we use the last line, which will count the newline. */
 				InputItem *inputItem = new InputItem;
 				inputItem->type = InputItem::HostData;
+				inputItem->loc.fileName = fileName;
 				inputItem->loc.line = line;
 				inputItem->loc.col = column;
 				id.inputItems.append( inputItem );
