@@ -1206,7 +1206,7 @@ factor_with_rep:
 			action_embed ',' action_embed ',' action_embed ',' action_embed ','
 			action_embed TK_CloseColon
 	final {
-		long repId = strtol( $2->data, 0, 10 );
+		long long repId = strtoll( $2->data, 0, 10 );
 
 		/* push, pop, ini, stay, repeat, exit */
 		$$->factorWithRep = new FactorWithRep( $1->loc, repId, $4->factorWithRep,
@@ -1217,7 +1217,7 @@ factor_with_rep:
 	TK_ColonCondOpen TK_UInt ',' factor_with_rep ',' action_embed ','
 			action_embed ',' action_embed ',' action_embed TK_CloseColon
 	final {
-		long repId = strtol( $2->data, 0, 10 );
+		long long repId = strtoll( $2->data, 0, 10 );
 
 		/* ini, inc, min, max */
 		$$->factorWithRep = new FactorWithRep( $1->loc, repId, $4->factorWithRep,
@@ -1228,7 +1228,7 @@ factor_with_rep:
 	TK_ColonNoMaxOpen TK_UInt ',' factor_with_rep ',' action_embed ','
 			action_embed ',' action_embed TK_CloseColon
 	final {
-		long repId = strtol( $2->data, 0, 10 );
+		long long repId = strtoll( $2->data, 0, 10 );
 
 		/* ini, inc, min */
 		$$->factorWithRep = new FactorWithRep( $1->loc, repId, $4->factorWithRep,

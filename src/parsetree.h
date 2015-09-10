@@ -573,7 +573,7 @@ struct FactorWithRep
 		upperRep(upperRep), type(type)
 	{}
 	
-	FactorWithRep( const InputLoc &loc, long repId, FactorWithRep *factorWithRep, 
+	FactorWithRep( const InputLoc &loc, long long repId, FactorWithRep *factorWithRep, 
 			Action *action1, Action *action2, Action *action3,
 			Action *action4, Action *action5, Action *action6, Type type )
 	:
@@ -602,7 +602,7 @@ struct FactorWithRep
 	void condCost( Action *action );
 
 	InputLoc loc;
-	long repId;
+	long long repId;
 	FactorWithRep *factorWithRep;
 	Action *action1;
 	Action *action2;

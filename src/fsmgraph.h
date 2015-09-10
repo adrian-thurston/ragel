@@ -65,8 +65,8 @@ struct TooManyStates {};
 
 struct PriorInteraction
 {
-	PriorInteraction( int id ) : id(id) {}
-	int id;
+	PriorInteraction( long long id ) : id(id) {}
+	long long id;
 };
 
 struct RepetitionError {};
@@ -86,10 +86,10 @@ typedef Vector<NfaRound> NfaRoundVect;
 
 struct CondCostTooHigh
 {
-	CondCostTooHigh( long costId )
+	CondCostTooHigh( long long costId )
 		: costId(costId) {}
 
-	long costId;
+	long long costId;
 };
 
 /* State list element for unambiguous access to list element. */
@@ -225,7 +225,7 @@ public:
 	int condId;
 
 	bool costMark;
-	long costId;
+	long long costId;
 
 	ActionParamList *paramList;
 	ActionArgListMap *argListMap;
@@ -391,7 +391,7 @@ struct PriorDesc
 	int key;
 	int priority;
 	bool guarded;
-	int guardId;
+	long long guardId;
 	PriorDesc *other;
 };
 
