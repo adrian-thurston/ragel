@@ -316,9 +316,12 @@ void FsmAp::detachState( StateAp *state )
 		finStateSet.remove( state );
 	
 	if ( state->nfaIn != 0 ) {
-		for ( NfaInList::Iter t = *state->nfaIn; t.lte(); t++ ) {
-			detachFromNfa( t->fromState, t->toState, t );
-			t->fromState->nfaOut->detach( t );
+		while ( state->nfaIn->head != 0 ) {
+			NfaTrans *trans = state->nfaIn->head;
+			StateAp *fromState = trans->fromState;
+
+			detachFromNfa( fromState, state, trans );
+			fromState->nfaOut->detach( trans );
 		}
 		delete state->nfaIn;
 		state->nfaIn = 0;
