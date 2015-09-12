@@ -18,7 +18,7 @@ int c;
 	}
 
 	count = [0-9] @{ 
-		i = <int>(fc - '0');
+		i = <int>(fc - 48);
 		print_str "count: ";
 		print_int i;
 		print_str "\n";

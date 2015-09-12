@@ -386,7 +386,19 @@ namespace rust_gen
 			send Parser
 				"match ( [expr(SwitchExpr)] ) {
 				"	[stmt_list(StmtList)]
-				"	_ => {}
+
+			NeedDef: bool = true
+			for Stmt: stmt in repeat(StmtList) {
+				if match Stmt [default_block]
+					NeedDef = false
+			}
+
+			if NeedDef {
+				send Parser
+					"	_ => {}
+			}
+
+			send Parser
 				"}
 		}
 		case [ExprExpr: expr Semi: `;] {

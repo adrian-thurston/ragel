@@ -33,7 +33,7 @@ trap sig_exit SIGTERM
 wk=working
 test -d $wk || mkdir $wk
 
-while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
+while getopts "gcnmleB:T:F:G:P:CDJRAZOU-:" opt; do
 	case $opt in
 		B|T|F|G|P)
 			genflags="$genflags -$opt$OPTARG"
@@ -50,7 +50,7 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZO-:" opt; do
 		g) 
 			allow_generated="true"
 		;;
-		C|D|J|R|A|Z|O|R|K|Y)
+		C|D|J|R|A|Z|O|R|K|Y|U)
 			langflags="$langflags -$opt"
 		;;
 		-)
@@ -494,7 +494,7 @@ function run_translate()
 	cases=""
 
 	if [ $lang == indep ]; then
-		for lang in c asm d cs go java ruby ocaml; do
+		for lang in c asm d cs go java ruby ocaml rust; do
 			case $lang in 
 				c) lf="-C" ;;
 				asm) lf="--asm" ;;
@@ -504,6 +504,7 @@ function run_translate()
 				java) lf="-J" ;;
 				ruby) lf="-R" ;;
 				ocaml) lf="-O" ;;
+				rust) lf="-U" ;;
 			esac
 
 			echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
