@@ -297,6 +297,7 @@ include 'trans-go.lm'
 include 'trans-java.lm'
 include 'trans-ruby.lm'
 include 'trans-ocaml.lm'
+include 'trans-rust.lm'
 
 str argvPop()
 {
@@ -352,6 +353,8 @@ elsif ( Lang == 'ruby' )
 	rw_ruby( Output )
 elsif ( Lang == 'ocaml' )
 	rw_ocaml( Output )
+elsif ( Lang == 'rust' )
+	trans_rust::rust( Output )
 else {
 	print( 'trans: unrecognized language: ', Lang, '\n' )
 }

@@ -61,7 +61,8 @@ TRANS_DEPS = \
 	trans-go.lm \
 	trans-java.lm \
 	trans-ruby.lm \
-	trans-ocaml.lm
+	trans-ocaml.lm \
+	trans-rust.lm
 
 trans$(EXEEXT): trans.lm $(TRANS_DEPS)
 	$(COLM) -o $@ $<
