@@ -3,7 +3,6 @@
  * @NEEDS_EOF: yes
  */
 
-char array[32];
 int pos;
 int line;
 

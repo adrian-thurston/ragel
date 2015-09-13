@@ -219,7 +219,7 @@ int rw_cs_action_block( ActionBlock: indep::action_block )
 	send Out [] eos
 }
 
-void rw_cs( Output: stream )
+void rw_csharp( Output: stream )
 {
 	send Output
 		"/*
