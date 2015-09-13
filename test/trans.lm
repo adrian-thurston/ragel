@@ -292,12 +292,14 @@ global Out: parser<out_code::lines>
 include 'trans-c.lm'
 include 'trans-asm.lm'
 include 'trans-d.lm'
-include 'trans-cs.lm'
+include 'trans-csharp.lm'
 include 'trans-go.lm'
 include 'trans-java.lm'
 include 'trans-ruby.lm'
 include 'trans-ocaml.lm'
 include 'trans-rust.lm'
+include 'trans-julia.lm'
+include 'trans-crack.lm'
 
 str argvPop()
 {
@@ -344,7 +346,7 @@ elsif ( Lang == 'asm' )
 elsif ( Lang == 'd' )
 	rw_d( Output )
 elsif ( Lang == 'cs' )
-	rw_cs( Output )
+	rw_csharp( Output )
 elsif ( Lang == 'go' )
 	rw_go( Output )
 elsif ( Lang == 'java' )
@@ -355,6 +357,10 @@ elsif ( Lang == 'ocaml' )
 	rw_ocaml( Output )
 elsif ( Lang == 'rust' )
 	trans_rust::rust( Output )
+elsif ( Lang == 'julia' )
+	trans_julia::julia( Output )
+elsif ( Lang == 'crack' )
+	trans_crack::crack( Output )
 else {
 	print( 'trans: unrecognized language: ', Lang, '\n' )
 }

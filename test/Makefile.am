@@ -29,8 +29,9 @@ ragel-parse: ragel-parse.lm
 	$(COLM) $<
 
 EXTRA_DIST = \
-	ragel-parse.lm  trans-cs.lm  trans-go.lm    trans.lm \
-	trans-c.lm      trans-d.lm   trans-java.lm  trans-ruby.lm \
+	ragel-parse.lm  trans-csharp.lm  trans-go.lm    trans.lm \
+	trans-c.lm      trans-d.lm       trans-java.lm  trans-ruby.lm \
+	trans-julia.lm  trans-rust.lm    trans-crack.lm \
 	runtests.sh \
 	atoi1.rl clang2.rl cond7.rl element3.rl erract8.rl forder3.rl java1.rl \
 	range.rl scan3.rl xml.rl atoi2.rl clang3.rl cppscan1.rl eofact.rl \
@@ -57,12 +58,14 @@ TRANS_DEPS = \
 	trans-c.lm \
 	trans-asm.lm \
 	trans-d.lm \
-	trans-cs.lm \
+	trans-csharp.lm \
 	trans-go.lm \
 	trans-java.lm \
 	trans-ruby.lm \
 	trans-ocaml.lm \
-	trans-rust.lm
+	trans-rust.lm \
+	trans-julia.lm \
+	trans-crack.lm
 
 trans$(EXEEXT): trans.lm $(TRANS_DEPS)
 	$(COLM) -o $@ $<
