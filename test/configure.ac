@@ -90,29 +90,27 @@ else
 fi
 AC_SUBST(GOBJC)
 
-dnl Check for the Java compiler.
 AC_CHECK_PROG(JAVAC, javac, javac)
-
-dnl Check for Ruby.
 AC_CHECK_PROG(RUBY, ruby, ruby)
-
-dnl Check for the C# compiler.
 AC_CHECK_PROG(GMCS, gmcs, gmcs)
-
-dnl Check for the Go compiler.
 AC_CHECK_PROG(GOBIN, go, go)
-
-dnl Check for the ocaml compiler.
 AC_CHECK_PROG(OCAML, ocaml, ocaml)
-
-dnl Check for the rust compiler.
 AC_CHECK_PROG(RUST, rustc, rustc)
-
-dnl Check for the crack interpreter.
-AC_CHECK_PROG(CRACK, crack, crack)
-
-dnl Check for the julia interpreter.
 AC_CHECK_PROG(JULIA, julia, julia)
+
+AC_ARG_WITH(crack,
+	[AC_HELP_STRING([--with-crack], [location of crack install])],
+	[
+		CRACK="$withval/bin/crack"
+		AC_CHECK_FILES(
+			[$CRACK], [],
+			[AC_ERROR([could not find crack binary using --with-crack arg])]
+		)
+	],
+	[
+		AC_CHECK_PROG(CRACK, crack, crack)
+	]
+)
 
 SED_SUBST=["\
 	-e 's|@SUBJECT@|${SUBJECT}|g' \
