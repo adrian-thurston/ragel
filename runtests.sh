@@ -98,7 +98,7 @@ shift $((OPTIND - 1));
 
 [ -z "$*" ] && set -- *.rl
 
-ragel="@SUBJECT@"
+ragel="`dirname $0`/@SUBJECT@"
 
 cxx_compiler="@CXX@"
 c_compiler="@CC@"
@@ -159,7 +159,6 @@ function run_test()
 		fi;
 	fi
 }
-
 
 function file_names()
 {
@@ -455,6 +454,29 @@ function run_options()
 	done
 }
 
+function run_internal()
+{
+	test_case=$1
+
+	root=`basename $test_case`
+	root=${root%.rl};
+
+	output=$root.out;
+	args="-I. $internal -o $wk/unused $test_case"
+	exec_cmd="$ragel $args"
+
+	echo -n "running: $exec_cmd ... "
+
+	$exec_cmd 2>&1 > $wk/$output;
+	if diff --strip-trailing-cr $wk/$expected_out $wk/$output > /dev/null;
+	then
+		echo "passed";
+	else
+		echo "FAILED";
+		test_error;
+	fi;
+}
+
 function run_translate()
 {
 	test_case=$1
@@ -483,65 +505,71 @@ function run_translate()
 	expected_out=$root.exp;
 	case_rl=${root}.rl
 
-	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
-
-	# Add these into the langugage-specific defaults selected in run_options
-	case_prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
-	case_prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
-	case_prohibit_featflags=`sed '/@PROHIBIT_FEATFLAGS:/s/^.*: *//p;d' $test_case`
-	case_prohibit_frontflags=`sed '/@PROHIBIT_FRONTFLAGS:/s/^.*: *//p;d' $test_case`
-	case_prohibit_backflags=`sed '/@PROHIBIT_BACKFLAGS:/s/^.*: *//p;d' $test_case`
-
 	# Create the expected output.
 	sed '1,/^#\+ * OUTPUT #\+/d;' $test_case > $wk/$expected_out
 
-	additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
+	# internal consistency check?
+	internal=`sed '/@INTERNAL:/{s/^.*: *//;s/ *$//;p};d' $test_case`
+	if [ -n "$internal" ]; then
+		run_internal $test_case
+	else 
+		prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
 
-	lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
-	if [ -z "$lang" ]; then
-		echo "$test_case: language unset"; >&2
-		exit 1;
-	fi
+		# Add these into the langugage-specific defaults selected in run_options
+		case_prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
+		case_prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
+		case_prohibit_featflags=`sed '/@PROHIBIT_FEATFLAGS:/s/^.*: *//p;d' $test_case`
+		case_prohibit_frontflags=`sed '/@PROHIBIT_FRONTFLAGS:/s/^.*: *//p;d' $test_case`
+		case_prohibit_backflags=`sed '/@PROHIBIT_BACKFLAGS:/s/^.*: *//p;d' $test_case`
 
-	cases=""
+		additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
 
-	if [ $lang == indep ]; then
-		for lang in c asm d cs go java ruby ocaml rust crack julia; do
-			case $lang in 
-				c) lf="-C" ;;
-				asm) lf="--asm" ;;
-				d) lf="-D" ;;
-				cs) lf="-A" ;;
-				go) lf="-Z" ;;
-				java) lf="-J" ;;
-				ruby) lf="-R" ;;
-				ocaml) lf="-O" ;;
-				rust) lf="-U" ;;
-				crack) lf="-K" ;;
-				julia) lf="-Y" ;;
-			esac
+		lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
+		if [ -z "$lang" ]; then
+			echo "$test_case: language unset"; >&2
+			exit 1;
+		fi
 
-			echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
-			echo "$langflags" | grep -qe $lf || continue
-			echo "$supported_host_langs" | grep -qe $lf || continue
+		cases=""
 
-			# Translate to target language and strip off output.
-			targ=${root}_$lang.rl
-			echo "./trans $lang $wk/$targ $test_case ${root}_${lang}"
-			if ! ./trans $lang $wk/$targ $test_case ${root}_${lang}; then
-				test_error
-			fi
+		if [ $lang == indep ]; then
+			for lang in c asm d cs go java ruby ocaml rust crack julia; do
+				case $lang in 
+					c) lf="-C" ;;
+					asm) lf="--asm" ;;
+					d) lf="-D" ;;
+					cs) lf="-A" ;;
+					go) lf="-Z" ;;
+					java) lf="-J" ;;
+					ruby) lf="-R" ;;
+					ocaml) lf="-O" ;;
+					rust) lf="-U" ;;
+					crack) lf="-K" ;;
+					julia) lf="-Y" ;;
+				esac
 
-			cases="$cases $wk/$targ"
+				echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
+				echo "$langflags" | grep -qe $lf || continue
+				echo "$supported_host_langs" | grep -qe $lf || continue
+
+				# Translate to target language and strip off output.
+				targ=${root}_$lang.rl
+				echo "./trans $lang $wk/$targ $test_case ${root}_${lang}"
+				if ! ./trans $lang $wk/$targ $test_case ${root}_${lang}; then
+					test_error
+				fi
+
+				cases="$cases $wk/$targ"
+			done
+		else
+			sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
+			cases=$wk/$case_rl
+		fi
+
+		for translated in $cases; do
+			run_options $translated
 		done
-	else
-		sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
-		cases=$wk/$case_rl
 	fi
-
-	for translated in $cases; do
-		run_options $translated
-	done
 }
 
 for test_case; do
