@@ -180,6 +180,7 @@ function lang_opts()
 			compiler=$c_compiler;
 			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
+			prohibit_minflags=""
 			prohibit_genflags=""
 			prohibit_featflags=""
 			prohibit_frontflags=""
@@ -195,6 +196,7 @@ function lang_opts()
 			compiler=$cxx_compiler;
 			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
+			prohibit_minflags=""
 			prohibit_genflags=""
 			prohibit_featflags=""
 			prohibit_frontflags=""
@@ -210,7 +212,7 @@ function lang_opts()
 			compiler=$objc_compiler
 			flags="-Wall -O3 -fno-strict-aliasing -I/usr/include/GNUstep"
 			libs="-lobjc -lgnustep-base"
-			prohibit_genflags=""
+			prohibit_minflags=""
 			prohibit_genflags=""
 			prohibit_featflags=""
 			prohibit_frontflags=""
@@ -226,6 +228,7 @@ function lang_opts()
 			compiler=$d_compiler;
 			flags="-Wall -O3"
 			libs=""
+			prohibit_minflags=""
 			prohibit_genflags=""
 			prohibit_featflags=""
 			prohibit_frontflags="--kelbt-frontend"
@@ -241,6 +244,7 @@ function lang_opts()
 			compiler=$java_compiler
 			flags=""
 			libs=""
+			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags=""
 			prohibit_frontflags="--kelbt-frontend"
@@ -256,6 +260,7 @@ function lang_opts()
 			compiler=$ruby_engine
 			flags=""
 			libs=""
+			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend"
@@ -271,6 +276,7 @@ function lang_opts()
 			compiler=$csharp_compiler
 			flags=""
 			libs=""
+			prohibit_minflags=""
 			prohibit_genflags="-G2"
 			prohibit_featflags=""
 			prohibit_frontflags="--kelbt-frontend"
@@ -286,6 +292,7 @@ function lang_opts()
 			compiler=$go_compiler
 			flags="build"
 			libs=""
+			prohibit_minflags=""
 			prohibit_genflags=""
 			prohibit_featflags=""
 			prohibit_frontflags="--kelbt-frontend"
@@ -301,6 +308,7 @@ function lang_opts()
 			compiler=$ocaml_compiler
 			flags=""
 			libs=""
+			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend"
@@ -316,6 +324,7 @@ function lang_opts()
 			compiler="gcc"
 			flags=""
 			libs=""
+			prohibit_minflags=""
 			prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
 			prohibit_featflags=""
 			prohibit_frontflags="--colm-frontend"
@@ -333,6 +342,7 @@ function lang_opts()
 					-A unused_variables -A unused_assignments \
 					-A unused_mut -A unused_parens"
 			libs=""
+			prohibit_minflags=""
 			prohibit_genflags="-G2"
 			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend"
@@ -346,6 +356,7 @@ function lang_opts()
 			code_suffix=crk
 			interpreted=true
 			compiler=$crack_interpreter
+			prohibit_minflags=""
 			prohibit_genflags="-G2"
 			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend"
@@ -359,6 +370,7 @@ function lang_opts()
 			code_suffix=jl
 			interpreted=true
 			compiler=$julia_interpreter
+			prohibit_minflags=""
 			prohibit_genflags=""
 			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend"
