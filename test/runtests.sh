@@ -177,7 +177,7 @@ function lang_opts()
 			code_suffix=c;
 			interpreted=false
 			compiler=$c_compiler;
-			flags="-pedantic -ansi -Wall -O3 -I. -Wno-variadic-macros"
+			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
 			prohibit_minflags=""
 			prohibit_genflags=""
