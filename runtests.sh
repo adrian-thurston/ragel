@@ -138,8 +138,15 @@ function run_test()
 
 	# Some langs are just interpreted.
 	if [ $interpreted != "true" ]; then
-		echo "$compiler $flags $out_args $wk/$code_src $libs"
-		if ! $compiler $flags $out_args $wk/$code_src $libs; then
+		scode=""
+		if [ -n "$support" ]; then
+			echo $ragel -o $wk/$code_src-support.c $support
+			$ragel -o $wk/$code_src-support.c $support
+			scode="$wk/$code_src-support.c"
+		fi
+
+		echo "$compiler $flags $out_args $wk/$code_src $scode $libs"
+		if ! $compiler $flags $out_args $wk/$code_src $scode $libs; then
 			test_error;
 		fi
 	fi
@@ -523,6 +530,7 @@ function run_translate()
 		case_prohibit_backflags=`sed '/@PROHIBIT_BACKFLAGS:/s/^.*: *//p;d' $test_case`
 
 		additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
+		support=`sed '/@SUPPORT:/s/^.*: *//p;d' $test_case`
 
 		lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
 		if [ -z "$lang" ]; then
