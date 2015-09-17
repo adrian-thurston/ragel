@@ -846,7 +846,7 @@ NfaUnion::~NfaUnion()
 void nfaCheckResult( long code, long id, const char *scode )
 {
 	cout << code << " " << id << " " << scode << endl;
-	exit( code + id );
+	exit( code );
 }
 
 /* This is the first pass check. It looks for state (limit times 2 ) or
