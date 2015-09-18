@@ -1212,6 +1212,10 @@ void Scanner::do_scan()
 	bool singleLineSpec = false;
 	InlineBlockType inlineBlockType = CurlyDelimited;
 
+	line = 1;
+	column = 1;
+	lastnl = 0;
+
 	/* Init the section parser and the character scanner. */
 	init();
 	%% write init;
