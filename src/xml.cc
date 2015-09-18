@@ -400,6 +400,7 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList )
 		case InlineItem::Nret:
 		case InlineItem::Nbreak:
 		case InlineItem::Stmt:
+		case InlineItem::Subst:
 			break;
 		}
 	}

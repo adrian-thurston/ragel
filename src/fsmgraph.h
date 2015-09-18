@@ -676,21 +676,17 @@ struct NfaActions
 
 struct NfaTrans 
 {
-	NfaTrans( Action *push, Action *pop, int order )
+	NfaTrans( /* Action *push, Action *pop, */ int order )
 	:
 		fromState(0),
 		toState(0),
 		order(order),
 		popCondSpace(0)
 	{
-		if ( push != 0 )
-			pushTable.setAction( 1, push );
-
-		if ( pop != 0 )
-			popTest.setAction( 1, pop );
 	}
 
 	NfaTrans( const ActionTable &pushTable,
+			const ActionTable &restoreTable,
 			CondSpace *popCondSpace,
 			const CondKeySet popCondKeys,
 			const ActionTable &popAction,
@@ -700,6 +696,7 @@ struct NfaTrans
 		fromState(0), toState(0),
 		order(order),
 		pushTable(pushTable),
+		restoreTable(restoreTable),
 		popCondSpace(popCondSpace),
 		popCondKeys(popCondKeys),
 		popAction(popAction),
@@ -713,6 +710,7 @@ struct NfaTrans
 	int order;
 
 	ActionTable pushTable;
+	ActionTable restoreTable;
 
 	/* 
 	 * 1. Conditions transferred (always tested first)
@@ -751,12 +749,31 @@ struct CmpNfaTrans
 		else if ( t1->order < t2->order )
 			return -1;
 		else if ( t1->order > t2->order )
+			return 1;
+		else
 		{
 			int r = CmpActionTable::compare( t1->pushTable, t2->pushTable );
 			if ( r != 0 )
 				return r;
 
+			r = CmpActionTable::compare( t1->restoreTable, t2->restoreTable );
+			if ( r != 0 )
+				return r;
+
+			if ( t1->popCondSpace < t2->popCondSpace )
+				return -1;
+			else if ( t1->popCondSpace > t2->popCondSpace )
+				return 1;
+
+			r = CmpTable<int>::compare( t1->popCondKeys, t2->popCondKeys );
+			if ( r != 0 )
+				return r;
+
 			r = CmpActionTable::compare( t1->popTest, t2->popTest );
+			if ( r != 0 )
+				return r;
+
+			r = CmpActionTable::compare( t1->popAction, t2->popAction );
 			if ( r != 0 )
 				return r;
 		}

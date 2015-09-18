@@ -96,7 +96,7 @@ void FsmAp::finalizeNfaRound()
 		for ( StateSet::Iter ss = state->stateDictEl->stateSet; ss.lte(); ss++ ) {
 			/* Attach it using the NFA transitions data structure (propigates
 			 * to output). */
-			NfaTrans *trans = new NfaTrans( 0, 0, 1 );
+			NfaTrans *trans = new NfaTrans( /* 0, 0, */ 1 );
 			state->nfaOut->append( trans );
 			attachToNfa( state, *ss, trans );
 
@@ -151,8 +151,12 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 
 	newStart->nfaOut = new NfaTransList;
 
-	NfaTrans *trans = new NfaTrans( push, init, 1 );
-	trans->popTest.setAction( 0, pop );
+	NfaTrans *trans = new NfaTrans( 1 );
+
+	trans->pushTable.setAction( 1, push );
+	trans->restoreTable.setAction( 0, pop );
+	trans->popTest.setAction( 1, init );
+
 	newStart->nfaOut->append( trans );
 	attachToNfa( newStart, origStartState, trans );
 
@@ -166,18 +170,30 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 
 		repl->nfaOut = new NfaTransList;
 
-		trans = new NfaTrans( push, stay, 3 );
-		trans->popTest.setAction( 0, pop );
+		trans = new NfaTrans( 3 );
+
+		trans->pushTable.setAction( 1, push );
+		trans->restoreTable.setAction( 0, pop );
+		trans->popTest.setAction( 1, stay );
+
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, *orig, trans );
 
-		trans = new NfaTrans( push, repeat, 2 );
-		trans->popTest.setAction( 0, pop );
+		trans = new NfaTrans( 2 );
+
+		trans->pushTable.setAction( 1, push );
+		trans->restoreTable.setAction( 0, pop );
+		trans->popTest.setAction( 1, repeat );
+
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, repStartState, trans );
 
-		trans = new NfaTrans( push, exit, 1 );
-		trans->popTest.setAction( 0, pop );
+		trans = new NfaTrans( 1 );
+
+		trans->pushTable.setAction( 1, push );
+		trans->restoreTable.setAction( 0, pop );
+		trans->popTest.setAction( 1, exit );
+
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, newFinal, trans );
 	}
@@ -256,7 +272,7 @@ void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
 		nfaList.append( startState );
 
 		for ( StateSet::Iter s = startStateSet; s.lte(); s++ ) {
-			NfaTrans *trans = new NfaTrans( 0, 0, 0 );
+			NfaTrans *trans = new NfaTrans( /* 0, 0, */ 0 );
 
 			if ( startState->nfaOut == 0 )
 				startState->nfaOut = new NfaTransList;

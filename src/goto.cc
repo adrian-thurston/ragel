@@ -190,11 +190,39 @@ void Goto::NFA_POP()
 			"		" << P() << " = nfa_bp[nfa_len].p;\n"
 			;
 
-		const int sz = 4;
-		const int offCS = 0;
-		const int offCV = 1;
-		const int offPA = 2;
-		const int offPT = 3;
+		const int sz = 5;
+		const int offRA = 0;
+		const int offCS = 1;
+		const int offCV = 2;
+		const int offPA = 3;
+		const int offPT = 4;
+
+		if ( redFsm->bAnyNfaPops ) {
+			out << 
+				"		switch ( " << ARR_REF( nfaPopTrans ) <<
+						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offRA << "] ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaRestoreRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+						CONDITION( out, item->value );
+						out << ";";
+					}
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"		}\n";
+		}
 
 		if ( redFsm->bAnyNfaCondRefs ) {
 			out <<
@@ -822,6 +850,7 @@ void Goto::taNfaPopTrans()
 	nfaPopTrans.value( 0 );
 	nfaPopTrans.value( 0 );
 	nfaPopTrans.value( 0 );
+	nfaPopTrans.value( 0 );
 
 	int condLoc = 0;
 
@@ -832,8 +861,13 @@ void Goto::taNfaPopTrans()
 			nfaPopTrans.value( 0 );
 			nfaPopTrans.value( 0 );
 			nfaPopTrans.value( 0 );
+			nfaPopTrans.value( 0 );
 
 			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ ) {
+				int act = 0;
+				if ( targ->restore != 0 )
+					act = targ->restore->actListId+1;
+				nfaPopTrans.value( act );
 
 				if ( targ->condSpace != 0 )
 					nfaPopTrans.value( targ->condSpace->condSpaceId );

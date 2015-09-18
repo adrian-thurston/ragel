@@ -123,6 +123,9 @@ void GenBase::reduceActionTables()
 				if ( actionTableMap.insert( n->pushTable, &actionTable ) )
 					actionTable->id = nextActionTableId++;
 
+				if ( actionTableMap.insert( n->restoreTable, &actionTable ) )
+					actionTable->id = nextActionTableId++;
+
 				if ( actionTableMap.insert( n->popAction, &actionTable ) )
 					actionTable->id = nextActionTableId++;
 
@@ -768,33 +771,40 @@ void CodeGenData::makeStateList()
 				RedStateAp *rtarg = allStates + targ->toState->alg.stateNum;
 
 				RedAction *pushRa = 0;
-				RedAction *popRa = 0;
-				RedAction *popRa2 = 0;
+				RedAction *restoreRa = 0;
+				RedAction *popActionRa = 0;
+				RedAction *popTestRa = 0;
 
 				if ( targ->pushTable.length() > 0 ) {
-					RedActionTable *pushActions = 0;
-					pushActions = actionTableMap.find( targ->pushTable );
+					RedActionTable *pushActions =
+							actionTableMap.find( targ->pushTable );
 					pushRa = allActionTables + pushActions->id;
 				}
 
+				if ( targ->restoreTable.length() > 0 ) {
+					RedActionTable *restoreActions = 
+							actionTableMap.find( targ->restoreTable );
+					restoreRa = allActionTables + restoreActions->id;
+				}
+
 				if ( targ->popAction.length() > 0 ) {
-					RedActionTable *popActions = 0;
-					popActions = actionTableMap.find( targ->popAction );
-					popRa2 = allActionTables + popActions->id;
+					RedActionTable *popActions =
+							actionTableMap.find( targ->popAction );
+					popActionRa = allActionTables + popActions->id;
 				}
 
 				if ( targ->popTest.length() > 0 ) {
-					RedActionTable *popActions = 0;
-					popActions = actionTableMap.find( targ->popTest );
-					popRa = allActionTables + popActions->id;
+					RedActionTable *popActions =
+							actionTableMap.find( targ->popTest );
+					popTestRa = allActionTables + popActions->id;
 				}
 
 				GenCondSpace *condSpace = 0;
 				if ( targ->popCondSpace != 0 )
 					condSpace = allCondSpaces + targ->popCondSpace->condSpaceId;
 
-				from->nfaTargs->append( RedNfaTarg( rtarg, pushRa,
-						condSpace, targ->popCondKeys, popRa2, popRa, targ->order ) );
+				from->nfaTargs->append( RedNfaTarg( rtarg, pushRa, restoreRa,
+						condSpace, targ->popCondKeys, popActionRa, popTestRa, targ->order ) );
 
 				MergeSort<RedNfaTarg, RedNfaTargCmp> sort;
 				sort.sort( from->nfaTargs->data, from->nfaTargs->length() );
@@ -1263,6 +1273,12 @@ void CodeGenData::findFinalActionRefs()
 					nt->push->numNfaPushRefs += 1;
 					for ( GenActionTable::Iter item = nt->push->key; item.lte(); item++ )
 						item->value->numNfaPushRefs += 1;
+				}
+
+				if ( nt->restore != 0 ) {
+					nt->restore->numNfaRestoreRefs += 1;
+					for ( GenActionTable::Iter item = nt->restore->key; item.lte(); item++ )
+						item->value->numNfaRestoreRefs += 1;
 				}
 
 				if ( nt->popAction != 0 ) {

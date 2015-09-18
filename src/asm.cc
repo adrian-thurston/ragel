@@ -1968,6 +1968,13 @@ void AsmCodeGen::writeExec()
 								"	cmp		$" << targ->id << ", %rax\n"
 								"	jne		100f\n";
 
+							if ( targ->restore != 0 ) {
+								for ( GenActionTable::Iter item = targ->restore->key; item.lte(); item++ ) {
+									/* Not checking results. */
+									ACTION( out, item->value, 0, false, false );
+								}
+							}
+
 							/* Condition test. */
 							out << "	movq	$0, %r9\n";
 

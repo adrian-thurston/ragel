@@ -1065,7 +1065,8 @@ void FsmAp::mergeNfaTransions( StateAp *destState, StateAp *srcState )
 			destState->nfaOut = new NfaTransList;
 
 		for ( NfaTransList::Iter nt = *srcState->nfaOut; nt.lte(); nt++ ) {
-			NfaTrans *trans = new NfaTrans( nt->pushTable,
+			NfaTrans *trans = new NfaTrans(
+					nt->pushTable, nt->restoreTable,
 					nt->popCondSpace, nt->popCondKeys,
 					nt->popAction, nt->popTest, nt->order );
 

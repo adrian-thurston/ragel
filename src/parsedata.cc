@@ -1363,6 +1363,9 @@ void ParseData::analyzeGraph( FsmAp *graph )
 				for ( ActionTable::Iter ati = n->pushTable; ati.lte(); ati++ )
 					ati->value->numNfaRefs += 1;
 
+				for ( ActionTable::Iter ati = n->restoreTable; ati.lte(); ati++ )
+					ati->value->numNfaRefs += 1;
+
 				for ( ActionTable::Iter ati = n->popAction; ati.lte(); ati++ )
 					ati->value->numNfaRefs += 1;
 

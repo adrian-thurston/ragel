@@ -111,6 +111,7 @@ struct GenAction
 		numFromStateRefs(0),
 		numEofRefs(0),
 		numNfaPushRefs(0),
+		numNfaRestoreRefs(0),
 		numNfaPopActionRefs(0),
 		numNfaPopTestRefs(0)
 	{
@@ -132,6 +133,7 @@ struct GenAction
 	int numFromStateRefs;
 	int numEofRefs;
 	int numNfaPushRefs;
+	int numNfaRestoreRefs;
 	int numNfaPopActionRefs;
 	int numNfaPopTestRefs;
 };
@@ -192,6 +194,7 @@ struct RedAction
 		numFromStateRefs(0),
 		numEofRefs(0),
 		numNfaPushRefs(0),
+		numNfaRestoreRefs(0),
 		numNfaPopActionRefs(0),
 		numNfaPopTestRefs(0),
 		bAnyNextStmt(false), 
@@ -216,6 +219,7 @@ struct RedAction
 	int numFromStateRefs;
 	int numEofRefs;
 	int numNfaPushRefs;
+	int numNfaRestoreRefs;
 	int numNfaPopActionRefs;
 	int numNfaPopTestRefs;
 
@@ -504,13 +508,14 @@ typedef BstSet<int> RedCondKeySet;
 
 struct RedNfaTarg
 {
-	RedNfaTarg( RedStateAp *state, RedAction *push,
+	RedNfaTarg( RedStateAp *state, RedAction *push, RedAction *restore,
 			GenCondSpace *condSpace, const RedCondKeySet &condVals,
 			RedAction *popAction, RedAction *popTest, int order )
 	:
 		id(0),
 		state(state),
 		push(push),
+		restore(restore),
 		condSpace(condSpace),
 		condVals(condVals),
 		popAction(popAction),
@@ -521,6 +526,7 @@ struct RedNfaTarg
 	long id;
 	RedStateAp *state;
 	RedAction *push;
+	RedAction *restore;
 	GenCondSpace *condSpace;
 	RedCondKeySet condVals;
 	RedAction *popAction;
