@@ -768,6 +768,20 @@ struct LoadRagel
 	 * End Inline Loading
 	 */
 
+	InlineBlock *loadInlineBlock( ragel::action_block ActionBlock )
+	{
+		InputLoc loc = ActionBlock.loc();
+
+		InlineList *inlineList;
+		if ( ActionBlock.RubyInlineBlock() )
+			inlineList = loadInlineBlock( ActionBlock.RubyInlineBlock() );
+		else if ( ActionBlock.OCamlInlineBlock() )
+			inlineList = loadInlineBlock( ActionBlock.OCamlInlineBlock() );
+		else
+			inlineList = loadInlineBlock( ActionBlock.CInlineBlock() );
+		return new InlineBlock( loc, inlineList );
+	}
+
 	Action *loadActionBlock( string name, ragel::action_block ActionBlock )
 	{
 		InputLoc loc = ActionBlock.loc();
@@ -788,6 +802,7 @@ struct LoadRagel
 
 		return newAction;
 	}
+
 
 	void loadActionSpec( ragel::action_spec ActionSpec )
 	{
@@ -811,7 +826,7 @@ struct LoadRagel
 
 		if ( pd->prePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error(loc) << "pre_push code already defined" << endl;
+			error(loc) << "prepush code already defined" << endl;
 		}
 
 		InlineList *inlineList;
@@ -830,7 +845,7 @@ struct LoadRagel
 
 		if ( pd->postPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error(loc) << "post_pop code already defined" << endl;
+			error(loc) << "postpop code already defined" << endl;
 		}
 
 		InlineList *inlineList;
@@ -842,6 +857,31 @@ struct LoadRagel
 			inlineList = loadInlineBlock( PostPopBlock.CInlineBlock() );
 		pd->postPopExpr = new InlineBlock( loc, inlineList );
 	}
+
+	void loadNfaPrePush( ragel::action_block PrePushBlock )
+	{
+		InputLoc loc = PrePushBlock.loc();
+
+		if ( pd->nfaPrePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(loc) << "nfaprepush code already defined" << endl;
+		}
+
+		pd->nfaPrePushExpr = loadInlineBlock( PrePushBlock );
+	}
+
+	void loadNfaPostPop( ragel::action_block PostPopBlock )
+	{
+		InputLoc loc = PostPopBlock.loc();
+
+		if ( pd->nfaPostPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(loc) << "nfapostpop code already defined" << endl;
+		}
+
+		pd->nfaPostPopExpr = loadInlineBlock( PostPopBlock );
+	}
+
 
 	void tryMachineDef( InputLoc &loc, std::string name, 
 			MachineDef *machineDef, bool isInstance )
@@ -2141,10 +2181,10 @@ struct LoadRagel
 		}
 
 		switch( prodName ) {
-			case ragel::statement::PrePushSpec:
+			case ragel::statement::PrePush:
 				loadPrePush( Statement.action_block() );
 				break;
-			case ragel::statement::PostPopSpec:
+			case ragel::statement::PostPop:
 				loadPostPop( Statement.action_block() );
 				break;
 			case ragel::statement::MachineName:
@@ -2183,6 +2223,12 @@ struct LoadRagel
 				break;
 			case ragel::statement::Import:
 				loadImport( Statement.string() );
+				break;
+			case ragel::statement::NfaPrePush:
+				loadNfaPrePush( Statement.action_block() );
+				break;
+			case ragel::statement::NfaPostPop:
+				loadNfaPostPop( Statement.action_block() );
 				break;
 		}
 		return false;
