@@ -34,7 +34,10 @@ BUILT_SOURCES = version.h
 
 if WITH_COLM
 nodist_ragel_SOURCES += \
-	load.cc parse.c if.h if.cc load.h if.h 
+	parse.c if.h if.cc if.h 
+
+ragel_SOURCES += \
+	load.cc load.h
 
 ragel_LDADD = -lcolmd
 endif
