@@ -38,7 +38,9 @@
 WORKING=working
 ERRORS=0
 
-COLM=@SUBJECT@
+COLM="@SUBJECT_BIN@"
+CPPFLAGS="@SUBJECT_CPPFLAGS@"
+LDFLAGS="@SUBJECT_LDFLAGS@"
 
 cd `dirname $0`
 test -d $WORKING || mkdir $WORKING
@@ -200,8 +202,8 @@ function runtests()
 				continue
 			fi
 
-			echo_cmd gcc -c -I../src/include -L../src -o $PARSE.o $PARSE.c
-			echo_cmd g++ -I. -I../src/include -L../src -o $WORKING/$ROOT \
+			echo_cmd gcc -c $CPPFLAGS $LDFLAGS -o $PARSE.o $PARSE.c
+			echo_cmd g++ -I. $CPPFLAGS $LDFLAGS -o $WORKING/$ROOT \
 					$IF.cc $HOST $PARSE.o -lcolmd
 
 			if ! check_compilation $?; then
