@@ -28,16 +28,17 @@ ragel_SOURCES = \
 	goto.cc switchloopgoto.cc switchexpgoto.cc \
 	ipgoto.cc xml.cc dot.cc asm.cc
 
+nodist_ragel_SOURCES = version.h
+
+BUILT_SOURCES = version.h
+
 if WITH_COLM
-ragel_SOURCES += \
+nodist_ragel_SOURCES += \
 	load.cc parse.c if.h if.cc load.h if.h 
 
 ragel_LDADD = -lcolmd
 endif
 
-nodist_ragel_SOURCES = version.h
-
-BUILT_SOURCES = version.h
 
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
