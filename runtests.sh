@@ -98,7 +98,7 @@ shift $((OPTIND - 1));
 
 [ -z "$*" ] && set -- *.rl
 
-ragel="`dirname $0`/@SUBJECT@"
+ragel="@SUBJECT@"
 
 cxx_compiler="@CXX@"
 c_compiler="@CC@"
