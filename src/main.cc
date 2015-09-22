@@ -169,6 +169,26 @@ void showHostLangArgs()
 	exit(0);
 }
 
+void showFrontends()
+{
+	cout << "--kelbt-frontend";
+#ifdef WITH_COLM
+	cout << " --colm-frontend";
+#endif
+	cout << endl;
+	exit(0);
+}
+
+void showBackends()
+{
+	cout << "--direct-backend";
+#ifdef WITH_COLM
+	cout << " --colm-backend";
+#endif
+	cout << endl;
+	exit(0);
+}
+
 /* Error reporting format. */
 static ErrorFormat errorFormat = ErrorFormatGNU;
 
@@ -462,8 +482,13 @@ void InputData::parseArgs( int argc, const char **argv )
 					stringTables = false;
 				else if ( strcmp( arg, "host-lang-names" ) == 0 )
 					showHostLangNames();
-				else if ( strcmp( arg, "host-lang-args" ) == 0 )
+				else if ( strcmp( arg, "host-lang-args" ) == 0 || 
+						strcmp( arg, "supported-host-langs" ) == 0 )
 					showHostLangArgs();
+				else if ( strcmp( arg, "supported-frontends" ) == 0 )
+					showFrontends();
+				else if ( strcmp( arg, "supported-backends" ) == 0 )
+					showBackends();
 				else if ( strcmp( arg, "save-temps" ) == 0 )
 					saveTemps = true;
 				else if ( strcmp( arg, "nfa-term-check" ) == 0 )
