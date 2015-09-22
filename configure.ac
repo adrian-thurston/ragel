@@ -76,13 +76,25 @@ fi
 dnl Check for the D compiler
 AC_CHECK_PROG(GDC, gdc, gdc)
 
-dnl Check for the Objective-C compiler
+dnl
+dnl Check for the Objective-C compiler and for required dependencies.
+dnl 
 AC_MSG_CHECKING([for the Objective-C compiler])
 cat > conftest.m <<EOF
+#import <Foundation/Foundation.h>
+
+@interface ObjCTest : NSObject
+{
+@public 
+	int i;
+};
+
+@end
+
 int main() { return 0; }
 EOF
 GOBJC=""
-if gcc -x objective-c conftest.m -o conftest.bin 2>/dev/null; then
+if gcc -x objective-c -I/usr/include/GNUstep conftest.m -o conftest.bin -lobjc -lgnustep-base 2>/dev/null; then
 	GOBJC="gcc -x objective-c"
 	AC_MSG_RESULT([yes])
 else
