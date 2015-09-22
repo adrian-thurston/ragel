@@ -116,7 +116,9 @@ julia_interpreter="@JULIA@"
 #
 # Remove any unsupported host languages.
 #
-supported_host_langs=`$ragel --host-lang-args`
+supported_host_langs=`$ragel --supported-host-langs`
+supported_frontends=`$ragel --supported-frontends`
+supported_backends=`$ragel --supported-backends`
 
 function test_error
 {
@@ -439,9 +441,15 @@ function run_options()
 					echo "" "$prohibit_frontflags" | \
 							grep -e $f_opt >/dev/null && continue
 
+					# Ragel must support the frontend.
+					echo "$supported_frontends" | grep -qe $f_opt || continue
+
 					for b_opt in $backflags; do
 						echo "" "$prohibit_backflags" | \
 								grep -e $b_opt >/dev/null && continue
+
+						# Ragel must support the backend.
+						echo "$supported_backends" | grep -qe $b_opt || continue
 
 						for v_opt in $featflags; do
 
