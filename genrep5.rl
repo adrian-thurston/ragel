@@ -50,18 +50,23 @@ struct nfa_bp_rec
 	}
 
 	action repeat_2 	{
-		({ ++q_2 < 10; })
+		({ ++q_2 < 2; })
 	}
 
 	action exit_2 	{
-		({ ++q_2 >= 10; })
+		({ ++q_2 >= 2; })
+	}
+
+	action leaving
+	{
+		printf( "  -> leaving\n" );
 	}
 
 	main :=
 		(
-			'h' 'e' 'l' 'l' 'o' ' '?
+			'hello' %leaving
 				(:nfa( 2, ( ' ' ), psh, pop, ini_2, stay_2, repeat_2, exit_2):)
-			't' 'h' 'e' 'r' 'e'
+			'there'
 		)
 		:>
 		any @{
@@ -96,17 +101,23 @@ int test( const char *p )
 
 int main()
 {
-	test( "hello         there" );
-	test( "hello          there" );
-	test( "hello           there" );
-	test( "hello            there" );
+	test( "hellothere" );
+	test( "hello there" );
+	test( "hello  there" );
+	test( "hello   there" );
+	test( "hello    there" );
 	return 0;
 }
 
-###### OUTPUT ######
-testing: hello         there
-testing: hello          there
+########## OUTPUT ##########
+testing: hellothere
+  -> leaving
+testing: hello there
+  -> leaving
+testing: hello  there
+  -> leaving
 ------ MATCH
-testing: hello           there
------- MATCH
-testing: hello            there
+testing: hello   there
+  -> leaving
+testing: hello    there
+  -> leaving
