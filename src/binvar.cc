@@ -103,35 +103,7 @@ void BinaryVar::NFA_POP()
 			;
 
 		const int sz = 5;
-		const int offRA = 0;
 		const int offPT = 4;
-
-		if ( redFsm->bAnyNfaPops ) {
-			out << 
-				"		switch ( " << ARR_REF( nfaPopTrans ) <<
-						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offRA << "] ) {\n";
-
-			/* Loop the actions. */
-			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-					redAct.lte(); redAct++ )
-			{
-				if ( redAct->numNfaRestoreRefs > 0 ) {
-					/* Write the entry label. */
-					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
-						CONDITION( out, item->value );
-						out << ";";
-					}
-
-					out << "\n\t" << CEND() << "}\n";
-				}
-			}
-
-			out <<
-				"		}\n";
-		}
 		
 		if ( redFsm->bAnyNfaPops ) {
 			out << 
