@@ -1432,7 +1432,24 @@ void ParseData::makeExports()
 			}
 		}
 	}
+}
 
+void ParseData::createNfaActions( FsmAp *fsm )
+{
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
+		if ( st->nfaOut != 0 ) {
+			for ( NfaTransList::Iter n = *st->nfaOut; n.lte(); n++ ) {
+				for ( ActionTable::Iter ati = n->popAction; ati.lte(); ati++ ) {
+
+					InlineList *il1 = new InlineList;
+					il1->append( new InlineItem( InputLoc(),
+								ati->value, InlineItem::CondWrapAction ) );
+					Action *wrap = newAction( "initts", il1 );
+					n->popTest.setAction( ati->key, wrap );
+				}
+			}
+		}
+	}
 }
 
 void ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang )
@@ -1453,6 +1470,8 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hos
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
 		return;
+
+	createNfaActions( sectionGraph );
 
 	analyzeGraph( sectionGraph );
 

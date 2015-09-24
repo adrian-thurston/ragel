@@ -64,13 +64,14 @@ struct GenInlineItem
 		LmSwitch, LmExec, LmSetActId, LmSetTokEnd, LmGetTokEnd,
 		LmInitAct, LmInitTokStart, LmSetTokStart,
 		HostStmt, HostExpr, HostText,
-		GenStmt, GenExpr, LmCase, LmHold
+		GenStmt, GenExpr, LmCase, LmHold,
+		CondWrapAction
 	};
 
 	GenInlineItem( const InputLoc &loc, Type type ) : 
 		loc(loc), targId(0), targState(0), 
 		lmId(0), children(0), offset(0),
-		type(type) { }
+		wrappedAction(0), type(type) { }
 	
 	InputLoc loc;
 	std::string data;
@@ -79,6 +80,7 @@ struct GenInlineItem
 	int lmId;
 	GenInlineList *children;
 	int offset;
+	GenAction *wrappedAction;
 	Type type;
 
 	GenInlineItem *prev, *next;

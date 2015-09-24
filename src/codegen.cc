@@ -831,9 +831,16 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::GenExpr:
 			GEN_EXPR( ret, item, targState, inFinish, csForced );
 			break;
+		case GenInlineItem::CondWrapAction:
+			ret << "{{{{ ";
+			INLINE_LIST( ret, item->wrappedAction->inlineList,
+					targState, inFinish, csForced );
+			ret << "}}}}";
+			break;
 		}
 	}
 }
+
 /* Write out paths in line directives. Escapes any special characters. */
 string CodeGen::LDIR_PATH( char *path )
 {
@@ -861,6 +868,26 @@ void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 	ret << CLOSE_HOST_EXPR();
 }
+
+void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
+{
+	if ( condition->inlineList->length() == 1 &&
+			condition->inlineList->head->type == 
+			GenInlineItem::CondWrapAction )
+	{
+		ACTION( out, condition->inlineList->head->wrappedAction,
+				IlOpts( 0, false, false ) );
+		out << "\n";
+	}
+	else {
+		if ( last )
+			out << " cont = ";
+
+		CONDITION( out, condition );
+		out << ";";
+	}
+}
+
 
 string CodeGen::ERROR_STATE()
 {

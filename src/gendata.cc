@@ -464,6 +464,14 @@ void CodeGenData::makeGenInlineList( GenInlineList *outList, InlineList *inList 
 			Action *subst = curInlineAction->argList->data[item->substPos];
 			makeGenInlineList( outList, subst->inlineList );
 			break;
+		}
+		case InlineItem::CondWrapAction: {
+			GenAction *wrap = allActions + item->wrappedAction->actionId;
+			GenInlineItem *gii = new GenInlineItem( InputLoc(),
+					GenInlineItem::CondWrapAction );
+			gii->wrappedAction = wrap;
+			outList->append( gii );
+			break;
 		}}
 	}
 }

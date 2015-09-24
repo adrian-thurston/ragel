@@ -106,7 +106,6 @@ void BinaryVar::NFA_POP()
 		const int offRA = 0;
 		const int offCS = 1;
 		const int offCV = 2;
-		const int offPA = 3;
 		const int offPT = 4;
 
 		if ( redFsm->bAnyNfaPops ) {
@@ -189,31 +188,6 @@ void BinaryVar::NFA_POP()
 			out <<
 				"	if ( cont ) {\n";
 		}
-
-		if ( redFsm->bAnyNfaPops ) {
-			out << 
-				"		switch ( " << ARR_REF( nfaPopTrans ) <<
-						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPA << "] ) {\n";
-
-			/* Loop the actions. */
-			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-					redAct.lte(); redAct++ )
-			{
-				if ( redAct->numNfaPopActionRefs > 0 ) {
-					/* Write the entry label. */
-					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-						ACTION( out, item->value, IlOpts( 0, false, false ) );
-
-					out << "\n\t" << CEND() << "}\n";
-				}
-			}
-
-			out <<
-				"		}\n";
-		}
 		
 		if ( redFsm->bAnyNfaPops ) {
 			out << 
@@ -229,13 +203,8 @@ void BinaryVar::NFA_POP()
 					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
-						if ( item.last() )
-							out << " cont = ";
-
-						CONDITION( out, item->value );
-						out << ";";
-					}
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						NFA_CONDITION( out, item->value, item.last() );
 
 					out << "\n\t" << CEND() << "}\n";
 				}

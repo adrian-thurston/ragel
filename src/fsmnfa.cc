@@ -135,7 +135,8 @@ void FsmAp::nfaMergeStates( StateAp *destState,
  * trailing characters, where they may interact with other actions that use the
  * same variables. */
 void FsmAp::nfaRepeatOp( Action *push, Action *pop,
-		Action *init, Action *stay, Action *repeat, Action *exit )
+		Action *init, Action *stay, Action *repeat,
+		Action *exit, int &curActionOrd )
 {
 	/*
 	 * First Concat.
@@ -151,11 +152,20 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 
 	newStart->nfaOut = new NfaTransList;
 
+	/* Transition into the repetition. */
 	NfaTrans *trans = new NfaTrans( 1 );
 
-	trans->pushTable.setAction( 1, push );
-	trans->restoreTable.setAction( 0, pop );
-	trans->popTest.setAction( 1, init );
+	/*
+	 * WRT action ordering.
+	 *
+	 * All the pop actions get an ordering of -1 to cause them to always
+	 * execute first. This is the action that restores the state and we need
+	 * that to happen before any user actions.
+	 */
+
+	trans->pushTable.setAction( 0, push );
+	trans->restoreTable.setAction( -1, pop );
+	trans->popTest.setAction( curActionOrd++, init );
 
 	newStart->nfaOut->append( trans );
 	attachToNfa( newStart, origStartState, trans );
@@ -170,29 +180,32 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 
 		repl->nfaOut = new NfaTransList;
 
+		/* Transition to original final state. Represents staying. */
 		trans = new NfaTrans( 3 );
 
-		trans->pushTable.setAction( 1, push );
-		trans->restoreTable.setAction( 0, pop );
-		trans->popTest.setAction( 1, stay );
+		trans->pushTable.setAction( 0, push );
+		trans->restoreTable.setAction( -1, pop );
+		trans->popTest.setAction( curActionOrd++, stay );
 
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, *orig, trans );
 
+		/* Transition back to the start. Represents repeat. */
 		trans = new NfaTrans( 2 );
 
-		trans->pushTable.setAction( 1, push );
-		trans->restoreTable.setAction( 0, pop );
-		trans->popTest.setAction( 1, repeat );
+		trans->pushTable.setAction( 0, push );
+		trans->restoreTable.setAction( -1, pop );
+		trans->popTest.setAction( curActionOrd++, repeat );
 
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, repStartState, trans );
 
+		/* Transition to thew new final. Represents exiting. */
 		trans = new NfaTrans( 1 );
 
-		trans->pushTable.setAction( 1, push );
-		trans->restoreTable.setAction( 0, pop );
-		trans->popTest.setAction( 1, exit );
+		trans->pushTable.setAction( 0, push );
+		trans->restoreTable.setAction( -1, pop );
+		trans->popTest.setAction( curActionOrd++, exit );
 
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, newFinal, trans );

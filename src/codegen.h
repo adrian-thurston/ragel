@@ -152,6 +152,7 @@ protected:
 	string LDIR_PATH( char *path );
 
 	void ACTION( ostream &ret, GenAction *action, IlOpts opts );
+	void NFA_CONDITION( ostream &ret, GenAction *condition, bool last );
 	void CONDITION( ostream &ret, GenAction *condition );
 	string ALPH_TYPE();
 	string ARRAY_TYPE( unsigned long maxVal );

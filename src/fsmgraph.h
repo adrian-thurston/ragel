@@ -676,7 +676,7 @@ struct NfaActions
 
 struct NfaTrans 
 {
-	NfaTrans( /* Action *push, Action *pop, */ int order )
+	NfaTrans( int order )
 	:
 		fromState(0),
 		toState(0),
@@ -2020,7 +2020,7 @@ public:
 	void optionalRepeatOp( int times );
 	void concatOp( FsmAp *other );
 	void nfaRepeatOp( Action *push, Action *pop, Action *init,
-			Action *stay, Action *repeat, Action *exit );
+			Action *stay, Action *repeat, Action *exit, int &curActionOrd );
 	void unionOp( FsmAp *other );
 	void intersectOp( FsmAp *other );
 	void subtractOp( FsmAp *other );

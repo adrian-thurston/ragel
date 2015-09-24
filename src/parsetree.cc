@@ -2133,7 +2133,8 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 	}
 	case NfaRep: {
 		retFsm = factorWithRep->walk( pd );
-		retFsm->nfaRepeatOp( action1, action2, action3, action4, action5, action6 );
+		retFsm->nfaRepeatOp( action1, action2, action3,
+				action4, action5, action6, pd->curActionOrd );
 		retFsm->verifyIntegrity();
 		break;
 	}

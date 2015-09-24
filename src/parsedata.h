@@ -197,6 +197,7 @@ struct ParseData
 	void makeExportsNameTree();
 	void fillNameIndex( NameInst *from );
 	void printNameTree();
+	void createNfaActions( FsmAp *fsm );
 
 	/* Increments the usage count on entry names. Names that are no longer
 	 * needed will have their entry points unset. */
