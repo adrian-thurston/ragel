@@ -96,7 +96,7 @@ void FlatVar::NFA_POP()
 			"	while ( _nfa_repeat ) {\n"
 			"		_nfa_repeat = 0;\n"
 			"	if ( nfa_len > 0 ) {\n"
-			"		int cont = 1;\n"
+			"		int _pop_test = 1;\n"
 			"		nfa_count += 1;\n"
 			"		nfa_len -= 1;\n"
 			"		" << P() << " = nfa_bp[nfa_len].p;\n"
@@ -104,8 +104,6 @@ void FlatVar::NFA_POP()
 
 		const int sz = 5;
 		const int offRA = 0;
-		const int offCS = 1;
-		const int offCV = 2;
 		const int offPT = 4;
 
 		if ( redFsm->bAnyNfaPops ) {
@@ -135,60 +133,6 @@ void FlatVar::NFA_POP()
 				"		}\n";
 		}
 
-		if ( redFsm->bAnyNfaCondRefs ) {
-			out <<
-				"	_cpc = 0;\n";
-
-			out <<
-				"	switch ( " << ARR_REF( nfaPopTrans ) << 
-						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] ) {\n"
-				"\n";
-
-			for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
-				GenCondSpace *condSpace = csi;
-
-				if ( condSpace->numNfaRefs > 0 ) {
-					out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
-					for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-						out << TABS(2) << "if ( ";
-						CONDITION( out, *csi );
-						Size condValOffset = (1 << csi.pos());
-						out << " ) _cpc += " << condValOffset << ";\n";
-					}
-
-					out << 
-						"	" << CEND() << "}\n";
-				}
-			}
-
-			out << 
-				"	}\n"
-				"\n"
-				"	if ( " << ARR_REF( nfaPopTrans ) <<
-						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] != -1 ) {\n"
-				"		int o = " << ARR_REF( nfaPopTrans ) <<
-								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "];\n"
-				"		int l = " << ARR_REF( nfaPopConds ) << "[o];\n"
-				"		int m = 0;\n"
-				"		o += 1;\n"
-				"		while ( l > 0 ) {\n"
-				"			if ( " << ARR_REF( nfaPopConds ) << "[o] == _cpc )\n"
-				"				m = 1;\n"
-				"			o += 1;\n"
-				"			l -= 1;\n"
-				"		}\n"
-				"		if ( m == 0 ) {\n"
-				"			cont = 0;\n"
-				"			_nfa_cont = 0;\n"
-				"			_nfa_repeat = 1;\n"
-				"		}\n"
-				"	}\n"
-				;
-
-			out <<
-				"	if ( cont ) {\n";
-		}
-
 		if ( redFsm->bAnyNfaPops ) {
 			out << 
 				"		switch ( " << ARR_REF( nfaPopTrans ) <<
@@ -214,7 +158,7 @@ void FlatVar::NFA_POP()
 				"		}\n";
 
 			out <<
-				"		if ( cont ) {\n"
+				"		if ( _pop_test ) {\n"
 				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
 
 			if ( nfaPostPopExpr != 0 ) {
@@ -266,9 +210,6 @@ void FlatVar::NFA_POP()
 				"		_nfa_repeat = 0;\n"
 				;
 		}
-
-		if ( redFsm->bAnyNfaCondRefs )
-			out << "	}\n";
 
 		out << 
 			"	}\n"

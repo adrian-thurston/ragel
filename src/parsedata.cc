@@ -1439,12 +1439,23 @@ void ParseData::createNfaActions( FsmAp *fsm )
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaOut != 0 ) {
 			for ( NfaTransList::Iter n = *st->nfaOut; n.lte(); n++ ) {
+				/* Move condition evaluation into pop test. */
+				if ( n->popCondSpace != 0 ) {
+					InlineList *il1 = new InlineList;
+					il1->append( new InlineItem( InputLoc(),
+							n->popCondSpace, n->popCondKeys,
+							InlineItem::NfaWrapConds ) );
+					Action *wrap = newAction( "wrap", il1 );
+					n->popTest.setAction( -1, wrap );
+				}
+
+				/* Move pop actions into pop test. */
 				for ( ActionTable::Iter ati = n->popAction; ati.lte(); ati++ ) {
 
 					InlineList *il1 = new InlineList;
 					il1->append( new InlineItem( InputLoc(),
-								ati->value, InlineItem::CondWrapAction ) );
-					Action *wrap = newAction( "initts", il1 );
+								ati->value, InlineItem::NfaWrapAction ) );
+					Action *wrap = newAction( "wrap", il1 );
 					n->popTest.setAction( ati->key, wrap );
 				}
 			}

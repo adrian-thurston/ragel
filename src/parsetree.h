@@ -833,7 +833,7 @@ struct InlineItem
 		PChar, Char, Hold, Curs, Targs, Entry, Exec, Break, Nbreak,
 		LmSwitch, LmSetActId, LmSetTokEnd, LmOnLast, LmOnNext, LmOnLagBehind,
 		LmInitAct, LmInitTokStart, LmSetTokStart, Stmt, Subst,
-		CondWrapAction,
+		NfaWrapAction, NfaWrapConds
 	};
 
 	InlineItem( const InputLoc &loc, std::string data, Type type ) : 
@@ -859,6 +859,14 @@ struct InlineItem
 		loc(loc), nameRef(0), children(0), longestMatch(0),
 		longestMatchPart(0), wrappedAction(wrappedAction), type(type)
 	{} 
+
+	InlineItem( const InputLoc &loc, CondSpace *condSpace,
+			const CondKeySet &condKeySet, Type type )
+	:
+		loc(loc), nameRef(0), children(0), longestMatch(0),
+		longestMatchPart(0), wrappedAction(0), condSpace(condSpace),
+		condKeySet(condKeySet), type(type)
+	{} 
 	
 	InputLoc loc;
 	std::string data;
@@ -869,6 +877,8 @@ struct InlineItem
 	LongestMatchPart *longestMatchPart;
 	long substPos;
 	Action *wrappedAction;
+	CondSpace *condSpace;
+	CondKeySet condKeySet;
 	Type type;
 
 	InlineItem *prev, *next;

@@ -465,11 +465,21 @@ void CodeGenData::makeGenInlineList( GenInlineList *outList, InlineList *inList 
 			makeGenInlineList( outList, subst->inlineList );
 			break;
 		}
-		case InlineItem::CondWrapAction: {
+		case InlineItem::NfaWrapAction: {
 			GenAction *wrap = allActions + item->wrappedAction->actionId;
 			GenInlineItem *gii = new GenInlineItem( InputLoc(),
-					GenInlineItem::CondWrapAction );
+					GenInlineItem::NfaWrapAction );
 			gii->wrappedAction = wrap;
+			outList->append( gii );
+			break;
+		}
+		case InlineItem::NfaWrapConds: {
+			GenCondSpace *condSpace = allCondSpaces + item->condSpace->condSpaceId;
+
+			GenInlineItem *gii = new GenInlineItem( InputLoc(),
+					GenInlineItem::NfaWrapConds );
+			gii->condSpace = condSpace;
+			gii->condKeySet = item->condKeySet;
 			outList->append( gii );
 			break;
 		}}
@@ -561,14 +571,23 @@ void CodeGenData::makeConditions()
 		for ( long c = 0; c < length; c++ )
 			condSpaceList.append( &allCondSpaces[c] );
 
-		int curCondSpace = 0;
+		long curCondSpace = 0;
 		for ( CondSpaceMap::Iter cs = pd->fsmCtx->condData->condSpaceMap; cs.lte(); cs++ ) {
 			/* Transfer the id. */
 			allCondSpaces[curCondSpace].condSpaceId = cs->condSpaceId;
 
+			curCondSpace += 1;
+		}
+	}
+
+	makeActionList();
+	makeActionTableList();
+
+	if ( pd->fsmCtx->condData->condSpaceMap.length() > 0 ) {
+		long curCondSpace = 0;
+		for ( CondSpaceMap::Iter cs = pd->fsmCtx->condData->condSpaceMap; cs.lte(); cs++ ) {
 			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
 				condSpaceItem( curCondSpace, (*csi)->actionId );
-
 			curCondSpace += 1;
 		}
 	}
@@ -830,8 +849,6 @@ void CodeGenData::makeMachine()
 	/* Action tables. */
 	reduceActionTables();
 
-	makeActionList();
-	makeActionTableList();
 	makeConditions();
 
 	/* Start State. */

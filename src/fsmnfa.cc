@@ -158,13 +158,13 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 	/*
 	 * WRT action ordering.
 	 *
-	 * All the pop actions get an ordering of -1 to cause them to always
+	 * All the pop actions get an ordering of -2 to cause them to always
 	 * execute first. This is the action that restores the state and we need
-	 * that to happen before any user actions.
+	 * that to happen before any user actions. 
 	 */
 
 	trans->pushTable.setAction( 0, push );
-	trans->restoreTable.setAction( -1, pop );
+	trans->restoreTable.setAction( -2, pop );
 	trans->popTest.setAction( curActionOrd++, init );
 
 	newStart->nfaOut->append( trans );
@@ -184,7 +184,7 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 		trans = new NfaTrans( 3 );
 
 		trans->pushTable.setAction( 0, push );
-		trans->restoreTable.setAction( -1, pop );
+		trans->restoreTable.setAction( -2, pop );
 		trans->popTest.setAction( curActionOrd++, stay );
 
 		repl->nfaOut->append( trans );
@@ -194,7 +194,7 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 		trans = new NfaTrans( 2 );
 
 		trans->pushTable.setAction( 0, push );
-		trans->restoreTable.setAction( -1, pop );
+		trans->restoreTable.setAction( -2, pop );
 		trans->popTest.setAction( curActionOrd++, repeat );
 
 		repl->nfaOut->append( trans );
@@ -204,7 +204,7 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 		trans = new NfaTrans( 1 );
 
 		trans->pushTable.setAction( 0, push );
-		trans->restoreTable.setAction( -1, pop );
+		trans->restoreTable.setAction( -2, pop );
 		trans->popTest.setAction( curActionOrd++, exit );
 
 		repl->nfaOut->append( trans );

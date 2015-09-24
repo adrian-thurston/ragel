@@ -831,11 +831,9 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::GenExpr:
 			GEN_EXPR( ret, item, targState, inFinish, csForced );
 			break;
-		case GenInlineItem::CondWrapAction:
-			ret << "{{{{ ";
-			INLINE_LIST( ret, item->wrappedAction->inlineList,
-					targState, inFinish, csForced );
-			ret << "}}}}";
+		/* These should not be encountered. We handle these Nfa wraps at the top level. */
+		case GenInlineItem::NfaWrapAction:
+		case GenInlineItem::NfaWrapConds:
 			break;
 		}
 	}
@@ -873,18 +871,51 @@ void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 {
 	if ( condition->inlineList->length() == 1 &&
 			condition->inlineList->head->type == 
-			GenInlineItem::CondWrapAction )
+			GenInlineItem::NfaWrapAction )
 	{
-		ACTION( out, condition->inlineList->head->wrappedAction,
-				IlOpts( 0, false, false ) );
-		out << "\n";
+		GenAction *action = condition->inlineList->head->wrappedAction;
+		ACTION( out, action, IlOpts( 0, false, false ) );
+		ret << "\n";
+	}
+	else if ( condition->inlineList->length() == 1 &&
+			condition->inlineList->head->type == 
+			GenInlineItem::NfaWrapConds )
+	{
+		ret <<
+			"	_cpc = 0;\n";
+
+		GenCondSpace *condSpace = condition->inlineList->head->condSpace;
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+			ret <<
+				"	if ( ";
+			CONDITION( out, *csi );
+			Size condValOffset = (1 << csi.pos());
+			ret << " ) _cpc += " << condValOffset << ";\n";
+		}
+
+		const CondKeySet &keys = condition->inlineList->head->condKeySet;
+		if ( keys.length() > 0 ) {
+			ret << "_pop_test = ";
+			for ( CondKeySet::Iter cki = keys; cki.lte(); cki++ ) {
+				ret << "_cpc == " << *cki;
+				if ( !cki.last() )
+					ret << " || ";
+			}
+			ret << ";\n";
+		}
+		else {
+			ret << "_pop_test = 0;\n";
+		}
+
+		if ( !last )
+			ret << "if ( !_pop_test ) break;\n";
 	}
 	else {
-		if ( last )
-			out << " cont = ";
-
-		CONDITION( out, condition );
-		out << ";";
+		ret << "_pop_test = ";
+		CONDITION( ret, condition );
+		ret << ";\n";
+		if ( !last )
+			ret << "if ( !_pop_test ) break;\n";
 	}
 }
 

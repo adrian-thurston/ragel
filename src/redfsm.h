@@ -50,6 +50,8 @@ struct RedStateAp;
 struct GenInlineList;
 struct GenAction;
 struct FsmCtx;
+struct GenCondSpace;
+typedef BstSet<int> RedCondKeySet;
 
 /*
  * Inline code tree
@@ -65,7 +67,7 @@ struct GenInlineItem
 		LmInitAct, LmInitTokStart, LmSetTokStart,
 		HostStmt, HostExpr, HostText,
 		GenStmt, GenExpr, LmCase, LmHold,
-		CondWrapAction
+		NfaWrapAction, NfaWrapConds
 	};
 
 	GenInlineItem( const InputLoc &loc, Type type ) : 
@@ -81,6 +83,8 @@ struct GenInlineItem
 	GenInlineList *children;
 	int offset;
 	GenAction *wrappedAction;
+	GenCondSpace *condSpace;
+	RedCondKeySet condKeySet;
 	Type type;
 
 	GenInlineItem *prev, *next;
@@ -506,7 +510,6 @@ struct GenStateCond
 };
 typedef DList<GenStateCond> GenStateCondList;
 typedef Vector<GenStateCond*> StateCondVect;
-typedef BstSet<int> RedCondKeySet;
 
 struct RedNfaTarg
 {

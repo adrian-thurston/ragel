@@ -542,8 +542,6 @@ void Flat::NFA_POP()
 
 		const int sz = 5;
 		const int offRA = 0;
-		const int offCS = 1;
-		const int offCV = 2;
 		const int offPT = 4;
 
 		if ( redFsm->bAnyNfaPops ) {
@@ -565,65 +563,17 @@ void Flat::NFA_POP()
 						out << ";";
 					}
 
-					out << "\n\t" << CEND() << "}\n";
+					out << CEND() << "\n}\n";
 				}
 			}
 
 			out <<
 				"		}\n";
 		}
-
-		if ( redFsm->bAnyNfaCondRefs ) {
-			out <<
-				"	_cpc = 0;\n";
-
-			out <<
-				"	switch ( " << ARR_REF( nfaPopTrans ) << 
-						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] ) {\n"
-				"\n";
-
-			for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
-				GenCondSpace *condSpace = csi;
-
-				if ( condSpace->numNfaRefs > 0 ) {
-					out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
-					for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-						out << TABS(2) << "if ( ";
-						CONDITION( out, *csi );
-						Size condValOffset = (1 << csi.pos());
-						out << " ) _cpc += " << condValOffset << ";\n";
-					}
-
-					out << 
-						"	" << CEND() << "}\n";
-				}
-			}
-
-			out << 
-				"	}\n"
-				"\n"
-				"	if ( " << ARR_REF( nfaPopTrans ) <<
-						"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCS << "] != -1 ) {\n"
-				"		int o = " << ARR_REF( nfaPopTrans ) <<
-								"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offCV << "];\n"
-				"		int l = " << ARR_REF( nfaPopConds ) << "[o];\n"
-				"		int m = 0;\n"
-				"		o += 1;\n"
-				"		while ( l > 0 ) {\n"
-				"			if ( " << ARR_REF( nfaPopConds ) << "[o] == _cpc )\n"
-				"				m = 1;\n"
-				"			o += 1;\n"
-				"			l -= 1;\n"
-				"		}\n"
-				"		if ( m == 0 )\n"
-				"			goto _out;\n"
-				"	}\n"
-				;
-		}
 		
 		if ( redFsm->bAnyNfaPops ) {
 			out << 
-				"		int cont = 1;\n"
+				"		int _pop_test = 1;\n"
 				"		switch ( " << ARR_REF( nfaPopTrans ) <<
 							"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPT << "] ) {\n";
 
@@ -639,7 +589,7 @@ void Flat::NFA_POP()
 					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 						NFA_CONDITION( out, item->value, item.last() );
 
-					out << "\n\t" << CEND() << "}\n";
+					out << CEND() << "\n}\n";
 				}
 			}
 
@@ -647,7 +597,7 @@ void Flat::NFA_POP()
 				"		}\n";
 
 			out <<
-				"		if ( cont ) {\n"
+				"		if ( _pop_test ) {\n"
 				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
 
 			if ( nfaPostPopExpr != 0 ) {
