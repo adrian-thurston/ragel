@@ -55,7 +55,6 @@ struct nfa_bp_rec
 
 int test( const char *p, bool a, bool b )
 {
-	static int call = 1;
 	int len = strlen( p ) + 1;
 	const char *pe = p + len;
 	int cs;
