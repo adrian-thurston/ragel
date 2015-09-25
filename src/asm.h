@@ -83,6 +83,7 @@ protected:
 	virtual void ACTION( ostream &ret, GenAction *action, int targState, 
 			bool inFinish, bool csForced );
 	void CONDITION( ostream &ret, GenAction *condition );
+	void NFA_CONDITION( ostream &ret, GenAction *condition, bool last );
 	string ALPH_TYPE();
 	string ARRAY_TYPE( unsigned long maxVal );
 

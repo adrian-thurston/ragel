@@ -618,6 +618,10 @@ void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::GenExpr:
 			GEN_EXPR( ret, item, targState, inFinish, csForced );
 			break;
+		/* Handled at the top level. */
+		case GenInlineItem::NfaWrapAction:
+		case GenInlineItem::NfaWrapConds:
+			break;
 		}
 	}
 }
@@ -649,6 +653,59 @@ void AsmCodeGen::CONDITION( ostream &ret, GenAction *condition )
 	ret << "\n";
 	asmLineDirective( ret, condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
+}
+
+bool singleItem( GenAction *action, GenInlineItem::Type type )
+{
+	return action->inlineList->length() == 1 &&
+			action->inlineList->head->type == type;
+}
+
+void AsmCodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
+{
+	if ( singleItem( condition, GenInlineItem::NfaWrapAction ) )
+	{
+		GenAction *action = condition->inlineList->head->wrappedAction;
+		ACTION( out, action, 0, false, false );
+	}
+	else if ( singleItem( condition, GenInlineItem::NfaWrapConds ) )
+	{
+		GenCondSpace *condSpace = condition->inlineList->head->condSpace;
+		const CondKeySet &condKeySet = condition->inlineList->head->condKeySet;
+
+		out << "	movq	$0, %r9\n";
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+			out <<
+				"	pushq	%r9\n";
+
+			CONDITION( out, *csi );
+			out << 
+				"\n"
+				"	test	%eax, %eax\n"
+				"	setne   %cl\n"
+				"	movsbq	%cl, %rcx\n"
+				"	salq	$" << csi.pos() << ", %rcx\n"
+				"	popq	%r9\n"
+				"	addq	%rcx, %r9\n";
+		}
+
+		for ( int c = 0; c < condKeySet.length(); c++ ) {
+			CondKey key = condKeySet[c];
+			out <<
+				"	cmpq	" << COND_KEY( key ) << ", %r9\n"
+				"	je		102f\n";
+		}
+
+		out <<
+			"	jmp	" << LABEL( "out" ) << "\n"
+			"102:\n";
+	}
+	else {
+		CONDITION( ret, condition );
+		out <<
+			"	test	%eax, %eax\n"
+			"	jz		" << LABEL( "out" ) << "\n";
+	}
 }
 
 string AsmCodeGen::ERROR_STATE()
@@ -1968,56 +2025,10 @@ void AsmCodeGen::writeExec()
 								"	cmp		$" << targ->id << ", %rax\n"
 								"	jne		100f\n";
 
-							if ( targ->restore != 0 ) {
-								for ( GenActionTable::Iter item = targ->restore->key; item.lte(); item++ ) {
-									/* Not checking results. */
-									ACTION( out, item->value, 0, false, false );
-								}
-							}
-
-							/* Condition test. */
-							out << "	movq	$0, %r9\n";
-
-							if ( targ->condSpace != 0 ) {
-								for ( GenCondSet::Iter csi = targ->condSpace->condSet; csi.lte(); csi++ ) {
-									out <<
-										"	pushq	%r9\n";
-
-									CONDITION( out, *csi );
-									out << 
-										"\n"
-										"	test	%eax, %eax\n"
-										"	setne   %cl\n"
-										"	movsbq	%cl, %rcx\n"
-										"	salq	$" << csi.pos() << ", %rcx\n"
-										"	popq	%r9\n"
-										"	addq	%rcx, %r9\n";
-								}
-
-								for ( int c = 0; c < targ->condVals.length(); c++ ) {
-									CondKey key = targ->condVals[c];
-									out <<
-										"	cmpq	" << COND_KEY( key ) << ", %r9\n"
-										"	jne	" << LABEL( "out" ) << "\n";
-								}
-							}
-
-
-							if ( targ->popAction != 0 ) {
-								/* Write each action in the list of action items. */
-								for ( GenActionTable::Iter item = targ->popAction->key; item.lte(); item++ )
-									ACTION( out, item->value, 0, false, false );
-							}
-
 							if ( targ->popTest != 0 ) {
 								/* Write each action in the list of action items. */
 								for ( GenActionTable::Iter item = targ->popTest->key; item.lte(); item++ )
-									ACTION( out, item->value, 0, false, false );
-
-								out <<
-									"	test	%eax, %eax\n"
-									"	jz		" << LABEL( "out" ) << "\n"
-								;
+									NFA_CONDITION( out, item->value, item.last() );
 							}
 
 							out <<

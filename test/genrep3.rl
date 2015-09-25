@@ -93,16 +93,22 @@
 		# call	printf
 	}
 
-	action marker 
+	action marker1
 	{
 		movl	$.L_marker, %edi
 		call	puts
-		movl	$1, %eax
+		movl	m1(%rip), %eax
 	}
+
+	action marker2
+	{
+		movl	m2(%rip), %eax
+	}
+
 
 	main := 
 		(
-			( '' %when marker
+			( ( '' %when marker1 | '' %when marker2 )
 				:nfa( 2, ( 'a' @char ) , 
 				psh, pop, ini, stay, repeat, exit ): ' ' ) {2}
 			eol
@@ -122,6 +128,8 @@
 	.comm	val,8,8
 	.comm	cs,4,4
 	.comm	c,4,4
+	.comm   m1,4,4
+	.comm   m2,4,4
 	.section	.rodata
 
 %% write data;
@@ -136,6 +144,9 @@
 	.string "  marker"
 .L_match:
 	.string "----- MATCH"
+
+.L_break:
+	.string "============"
 
 .L_push:
 	.string "push"
@@ -306,9 +317,10 @@ inp:
 inplen:
 	.long	18
 	.text
-	.globl	main
-	.type	main, @function
-main:
+
+	.globl	test_run
+	.type	test_run, @function
+test_run:
 .LFB3:
 	.cfi_startproc
 	pushq	%rbp
@@ -318,6 +330,10 @@ main:
 	.cfi_def_cfa_register 6
 	subq	$16, %rsp
 	movl	$0, -4(%rbp)
+
+	movl	$.L_break, %edi
+	call	puts
+
 	jmp	.L39
 .L40:
 	movl	$0, %eax
@@ -356,6 +372,44 @@ main:
 	ret
 	.cfi_endproc
 .LFE3:
+	.size	test_run, .-test_run
+
+
+	.globl	main
+	.type	main, @function
+main:
+.LFB4:
+	.cfi_startproc
+	pushq	%rbp
+	.cfi_def_cfa_offset 16
+	.cfi_offset 6, -16
+	movq	%rsp, %rbp
+	.cfi_def_cfa_register 6
+	subq	$16, %rsp
+	movl	$0, -4(%rbp)
+
+	movl	$0, m1(%rip)
+	movl	$0, m2(%rip)
+	call	test_run
+
+	movl	$1, m1(%rip)
+	movl	$0, m2(%rip)
+	call	test_run
+
+	movl	$0, m1(%rip)
+	movl	$1, m2(%rip)
+	call	test_run
+
+	movl	$1, m1(%rip)
+	movl	$1, m2(%rip)
+	call	test_run
+
+	movl	$0, %eax
+	leave
+	.cfi_def_cfa 7, 8
+	ret
+	.cfi_endproc
+.LFE4:
 	.size	main, .-main
 
 	.bss
@@ -371,6 +425,150 @@ nfa_len:
 	.section	.note.GNU-stack,"",@progbits
 
 ##### OUTPUT #####
+============
+a 
+  marker
+aa 
+  marker
+aaa 
+  marker
+aaaa 
+  marker
+a a 
+  marker
+aa aa 
+  marker
+aaa aaa 
+  marker
+aaaa aaaa 
+  marker
+a a a 
+  marker
+aa aa aa 
+  marker
+aaa aaa aaa 
+  marker
+aaaa aaaa aaaa 
+  marker
+aa a 
+  marker
+aa aaa 
+  marker
+aa aaaa 
+  marker
+aaa a 
+  marker
+aaa aa 
+  marker
+aaa aaaa 
+  marker
+============
+a 
+  marker
+aa 
+  marker
+  marker
+aaa 
+  marker
+  marker
+aaaa 
+  marker
+a a 
+  marker
+aa aa 
+  marker
+  marker
+----- MATCH
+aaa aaa 
+  marker
+  marker
+----- MATCH
+aaaa aaaa 
+  marker
+a a a 
+  marker
+aa aa aa 
+  marker
+  marker
+aaa aaa aaa 
+  marker
+  marker
+aaaa aaaa aaaa 
+  marker
+aa a 
+  marker
+  marker
+aa aaa 
+  marker
+  marker
+----- MATCH
+aa aaaa 
+  marker
+  marker
+aaa a 
+  marker
+  marker
+aaa aa 
+  marker
+  marker
+----- MATCH
+aaa aaaa 
+  marker
+  marker
+============
+a 
+  marker
+aa 
+  marker
+  marker
+aaa 
+  marker
+  marker
+aaaa 
+  marker
+a a 
+  marker
+aa aa 
+  marker
+  marker
+----- MATCH
+aaa aaa 
+  marker
+  marker
+----- MATCH
+aaaa aaaa 
+  marker
+a a a 
+  marker
+aa aa aa 
+  marker
+  marker
+aaa aaa aaa 
+  marker
+  marker
+aaaa aaaa aaaa 
+  marker
+aa a 
+  marker
+  marker
+aa aaa 
+  marker
+  marker
+----- MATCH
+aa aaaa 
+  marker
+  marker
+aaa a 
+  marker
+  marker
+aaa aa 
+  marker
+  marker
+----- MATCH
+aaa aaaa 
+  marker
+  marker
+============
 a 
   marker
 aa 
