@@ -513,17 +513,12 @@ typedef Vector<GenStateCond*> StateCondVect;
 
 struct RedNfaTarg
 {
-	RedNfaTarg( RedStateAp *state, RedAction *push, RedAction *restore,
-			GenCondSpace *condSpace, const RedCondKeySet &condVals,
-			RedAction *popAction, RedAction *popTest, int order )
+	RedNfaTarg( RedStateAp *state, RedAction *push,
+			RedAction *popTest, int order )
 	:
 		id(0),
 		state(state),
 		push(push),
-		restore(restore),
-		condSpace(condSpace),
-		condVals(condVals),
-		popAction(popAction),
 		popTest(popTest),
 		order(order)
 	{}
@@ -531,10 +526,6 @@ struct RedNfaTarg
 	long id;
 	RedStateAp *state;
 	RedAction *push;
-	RedAction *restore;
-	GenCondSpace *condSpace;
-	RedCondKeySet condVals;
-	RedAction *popAction;
 	RedAction *popTest;
 	int order;
 };

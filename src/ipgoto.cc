@@ -226,14 +226,6 @@ void IpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void IpGoto::NFA_POP_ACTION( RedNfaTarg *targ )
-{
-	int act = 0;
-	if ( targ->popAction != 0 )
-		act = targ->popAction->actListId+1;
-	nfaPopTrans.value( act );
-}
-
 void IpGoto::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;

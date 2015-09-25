@@ -44,8 +44,7 @@ Flat::Flat( const CodeGenArgs &args )
 	nfaTargs(         "nfa_targs",           *this ),
 	nfaOffsets(       "nfa_offsets",         *this ),
 	nfaPushActions(   "nfa_push_actions",    *this ),
-	nfaPopTrans(      "nfa_pop_trans",       *this ),
-	nfaPopConds(      "nfa_pop_conds",       *this )
+	nfaPopTrans(      "nfa_pop_trans",       *this )
 {}
 
 void Flat::setKeyType()
@@ -383,63 +382,21 @@ void Flat::taNfaPushActions()
 
 void Flat::taNfaPopTrans()
 {
-/* ******** */
-
 	nfaPopTrans.start();
 
 	nfaPopTrans.value( 0 );
-	nfaPopTrans.value( 0 );
-	nfaPopTrans.value( 0 );
-	nfaPopTrans.value( 0 );
-	nfaPopTrans.value( 0 );
-
-	long condLoc = 0;
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaTargs != 0 ) {
 
 			nfaPopTrans.value( 0 );
-			nfaPopTrans.value( 0 );
-			nfaPopTrans.value( 0 );
-			nfaPopTrans.value( 0 );
-			nfaPopTrans.value( 0 );
 
-			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ ) {
-
-				int act = 0;
-				if ( targ->restore != 0 )
-					act = targ->restore->actListId+1;
-				nfaPopTrans.value( act );
-
-				if ( targ->condSpace != 0 )
-					nfaPopTrans.value( targ->condSpace->condSpaceId );
-				else
-					nfaPopTrans.value( -1 );
-
-				nfaPopTrans.value( condLoc );
-				condLoc += 1 + targ->condVals.length();
-
-				NFA_POP_ACTION( targ );
+			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ )
 				NFA_POP_TEST( targ );
-			}
 		}
 	}
 
 	nfaPopTrans.finish();
-
-	nfaPopConds.start();
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->nfaTargs != 0 ) {
-			for ( RedNfaTargs::Iter targ = *st->nfaTargs; targ.lte(); targ++ ) {
-				nfaPopConds.value( targ->condVals.length() );
-				for ( int i = 0; i < targ->condVals.length(); i++ )
-					nfaPopConds.value( targ->condVals[i] );
-			}
-		}
-	}
-
-	nfaPopConds.finish();
 }
 
 
@@ -540,14 +497,11 @@ void Flat::NFA_POP()
 			"		" << P() << " = nfa_bp[nfa_len].p;\n"
 			;
 
-		const int sz = 5;
-		const int offPT = 4;
-		
 		if ( redFsm->bAnyNfaPops ) {
 			out << 
 				"		int _pop_test = 1;\n"
 				"		switch ( " << ARR_REF( nfaPopTrans ) <<
-							"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPT << "] ) {\n";
+							"[nfa_bp[nfa_len].popTrans] ) {\n";
 
 			/* Loop the actions. */
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;

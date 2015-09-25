@@ -57,7 +57,6 @@ public:
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
-	virtual void NFA_POP_ACTION( RedNfaTarg *targ );
 };
 
 namespace C

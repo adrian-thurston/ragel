@@ -58,7 +58,6 @@ protected:
 	TableArray nfaOffsets;
 	TableArray nfaPushActions;
 	TableArray nfaPopTrans;
-	TableArray nfaPopConds;
 
 	void taKeys();
 	void taKeySpans();
@@ -116,7 +115,6 @@ protected:
 	virtual void EOF_ACTION( RedStateAp *state ) = 0;
 	virtual void COND_ACTION( RedCondPair *cond ) = 0;
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
-	virtual void NFA_POP_ACTION( RedNfaTarg *targ ) = 0;
 	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
 
 	virtual void setTableState( TableArray::State );

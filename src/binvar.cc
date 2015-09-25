@@ -102,13 +102,10 @@ void BinaryVar::NFA_POP()
 			"		" << P() << " = nfa_bp[nfa_len].p;\n"
 			;
 
-		const int sz = 5;
-		const int offPT = 4;
-		
 		if ( redFsm->bAnyNfaPops ) {
 			out << 
 				"		switch ( " << ARR_REF( nfaPopTrans ) <<
-							"[nfa_bp[nfa_len].popTrans*" << sz << "+" << offPT << "] ) {\n";
+							"[nfa_bp[nfa_len].popTrans] ) {\n";
 
 			/* Loop the actions. */
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;

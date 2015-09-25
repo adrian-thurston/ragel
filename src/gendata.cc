@@ -798,8 +798,6 @@ void CodeGenData::makeStateList()
 				RedStateAp *rtarg = allStates + targ->toState->alg.stateNum;
 
 				RedAction *pushRa = 0;
-				RedAction *restoreRa = 0;
-				RedAction *popActionRa = 0;
 				RedAction *popTestRa = 0;
 
 				if ( targ->pushTable.length() > 0 ) {
@@ -808,30 +806,15 @@ void CodeGenData::makeStateList()
 					pushRa = allActionTables + pushActions->id;
 				}
 
-				if ( targ->restoreTable.length() > 0 ) {
-					RedActionTable *restoreActions = 
-							actionTableMap.find( targ->restoreTable );
-					restoreRa = allActionTables + restoreActions->id;
-				}
-
-				if ( targ->popAction.length() > 0 ) {
-					RedActionTable *popActions =
-							actionTableMap.find( targ->popAction );
-					popActionRa = allActionTables + popActions->id;
-				}
-
 				if ( targ->popTest.length() > 0 ) {
 					RedActionTable *popActions =
 							actionTableMap.find( targ->popTest );
 					popTestRa = allActionTables + popActions->id;
 				}
 
-				GenCondSpace *condSpace = 0;
-				if ( targ->popCondSpace != 0 )
-					condSpace = allCondSpaces + targ->popCondSpace->condSpaceId;
 
-				from->nfaTargs->append( RedNfaTarg( rtarg, pushRa, restoreRa,
-						condSpace, targ->popCondKeys, popActionRa, popTestRa, targ->order ) );
+				from->nfaTargs->append( RedNfaTarg( rtarg, pushRa,
+						popTestRa, targ->order ) );
 
 				MergeSort<RedNfaTarg, RedNfaTargCmp> sort;
 				sort.sort( from->nfaTargs->data, from->nfaTargs->length() );
@@ -1300,26 +1283,11 @@ void CodeGenData::findFinalActionRefs()
 						item->value->numNfaPushRefs += 1;
 				}
 
-				if ( nt->restore != 0 ) {
-					nt->restore->numNfaRestoreRefs += 1;
-					for ( GenActionTable::Iter item = nt->restore->key; item.lte(); item++ )
-						item->value->numNfaRestoreRefs += 1;
-				}
-
-				if ( nt->popAction != 0 ) {
-					nt->popAction->numNfaPopActionRefs += 1;
-					for ( GenActionTable::Iter item = nt->popAction->key; item.lte(); item++ )
-						item->value->numNfaPopActionRefs += 1;
-				}
-
 				if ( nt->popTest != 0 ) {
 					nt->popTest->numNfaPopTestRefs += 1;
 					for ( GenActionTable::Iter item = nt->popTest->key; item.lte(); item++ )
 						item->value->numNfaPopTestRefs += 1;
 				}
-
-				if ( nt->condSpace != 0 )
-					nt->condSpace->numNfaRefs += 1;
 			}
 		}
 	}
@@ -1399,6 +1367,9 @@ void CodeGenData::analyzeActionList( RedAction *redAct, GenInlineList *inlineLis
 
 		if ( item->type == GenInlineItem::Break )
 			redAct->bAnyBreakStmt = true;
+
+		if ( item->type == GenInlineItem::NfaWrapConds )
+			item->condSpace->numNfaRefs += 1;
 
 		if ( item->children != 0 )
 			analyzeActionList( redAct, item->children );

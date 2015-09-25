@@ -48,7 +48,6 @@ public:
 	std::ostream &EOF_ACTION_SWITCH();
 
 	void NFA_PUSH_ACTION( RedNfaTarg *targ );
-	void NFA_POP_ACTION( RedNfaTarg *targ );
 	void NFA_POP_TEST( RedNfaTarg *targ );
 
 	/* Interface. */

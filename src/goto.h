@@ -55,7 +55,6 @@ public:
 	TableArray nfaOffsets;
 	TableArray nfaPushActions;
 	TableArray nfaPopTrans;
-	TableArray nfaPopConds;
 
 	void taActions();
 	void taToStateActions();
@@ -108,7 +107,6 @@ public:
 	virtual void STATE_GOTO_ERROR();
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
-	virtual void NFA_POP_ACTION( RedNfaTarg *targ ) = 0;
 	virtual void NFA_POP_TEST( RedNfaTarg *targ ) {}
 
 	void NFA_PUSH();
