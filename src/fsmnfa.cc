@@ -130,6 +130,19 @@ void FsmAp::nfaMergeStates( StateAp *destState,
 	}
 }
 
+
+/*
+ * WRT action ordering.
+ *
+ * All the pop restore actions get an ordering of -2 to cause them to always
+ * execute first. This is the action that restores the state and we need that
+ * to happen before any user actions. 
+ */
+const int ORD_PUSH = 0;
+const int ORD_RESTORE = -2;
+const int ORD_COND = -1;
+const int ORD_TEST = 1073741824;
+
 /* This version contains the init, increment and test in the nfa pop actions.
  * This is a compositional operator since it doesn't leave any actions to
  * trailing characters, where they may interact with other actions that use the
@@ -155,17 +168,9 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 	/* Transition into the repetition. */
 	NfaTrans *trans = new NfaTrans( 1 );
 
-	/*
-	 * WRT action ordering.
-	 *
-	 * All the pop actions get an ordering of -2 to cause them to always
-	 * execute first. This is the action that restores the state and we need
-	 * that to happen before any user actions. 
-	 */
-
-	trans->pushTable.setAction( 0, push );
-	trans->restoreTable.setAction( -2, pop );
-	trans->popTest.setAction( curActionOrd++, init );
+	trans->pushTable.setAction( ORD_PUSH, push );
+	trans->restoreTable.setAction( ORD_RESTORE, pop );
+	trans->popTest.setAction( ORD_TEST, init );
 
 	newStart->nfaOut->append( trans );
 	attachToNfa( newStart, origStartState, trans );
@@ -183,9 +188,9 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 		/* Transition to original final state. Represents staying. */
 		trans = new NfaTrans( 3 );
 
-		trans->pushTable.setAction( 0, push );
-		trans->restoreTable.setAction( -2, pop );
-		trans->popTest.setAction( curActionOrd++, stay );
+		trans->pushTable.setAction( ORD_PUSH, push );
+		trans->restoreTable.setAction( ORD_RESTORE, pop );
+		trans->popTest.setAction( ORD_TEST, stay );
 
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, *orig, trans );
@@ -193,9 +198,9 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 		/* Transition back to the start. Represents repeat. */
 		trans = new NfaTrans( 2 );
 
-		trans->pushTable.setAction( 0, push );
-		trans->restoreTable.setAction( -2, pop );
-		trans->popTest.setAction( curActionOrd++, repeat );
+		trans->pushTable.setAction( ORD_PUSH, push );
+		trans->restoreTable.setAction( ORD_RESTORE, pop );
+		trans->popTest.setAction( ORD_TEST, repeat );
 
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, repStartState, trans );
@@ -203,9 +208,9 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 		/* Transition to thew new final. Represents exiting. */
 		trans = new NfaTrans( 1 );
 
-		trans->pushTable.setAction( 0, push );
-		trans->restoreTable.setAction( -2, pop );
-		trans->popTest.setAction( curActionOrd++, exit );
+		trans->pushTable.setAction( ORD_PUSH, push );
+		trans->restoreTable.setAction( ORD_RESTORE, pop );
+		trans->popTest.setAction( ORD_TEST, exit );
 
 		repl->nfaOut->append( trans );
 		attachToNfa( repl, newFinal, trans );

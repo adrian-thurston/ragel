@@ -1439,8 +1439,8 @@ void ParseData::createNfaActions( FsmAp *fsm )
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaOut != 0 ) {
 			for ( NfaTransList::Iter n = *st->nfaOut; n.lte(); n++ ) {
-//				/* Move pop restore actions into poptest. Wrap to override the
-//				 * condition-like testing. */
+				/* Move pop restore actions into poptest. Wrap to override the
+				 * condition-like testing. */
 				for ( ActionTable::Iter ati = n->restoreTable; ati.lte(); ati++ ) {
 					n->popTest.setAction( ati->key, ati->value );
 				}
@@ -1452,8 +1452,8 @@ void ParseData::createNfaActions( FsmAp *fsm )
 					il1->append( new InlineItem( InputLoc(),
 							n->popCondSpace, n->popCondKeys,
 							InlineItem::NfaWrapConds ) );
-					Action *wrap = newAction( "wrap", il1 );
-					n->popTest.setAction( -1, wrap );
+					Action *wrap = newAction( "cond_wrap", il1 );
+					n->popTest.setAction( ORD_COND, wrap );
 				}
 
 				/* Move pop actions into pop test. Wrap to override the
@@ -1463,7 +1463,7 @@ void ParseData::createNfaActions( FsmAp *fsm )
 					InlineList *il1 = new InlineList;
 					il1->append( new InlineItem( InputLoc(),
 								ati->value, InlineItem::NfaWrapAction ) );
-					Action *wrap = newAction( "wrap", il1 );
+					Action *wrap = newAction( "action_wrap", il1 );
 					n->popTest.setAction( ati->key, wrap );
 				}
 			}
