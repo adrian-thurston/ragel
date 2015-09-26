@@ -953,8 +953,8 @@ type action_ref
 # specified immediately.
 nonterm action_embed uses action_ref;
 
-action_embed: action_embed_word final { $$->action = $1->action; };
-action_embed: '(' action_embed_word ')' final { $$->action = $2->action; };
+action_embed: named_action_ref final { $$->action = $1->action; };
+action_embed: '(' named_action_ref ')' final { $$->action = $2->action; };
 action_embed: action_embed_block final { $$->action = $1->action; };
 
 nonterm action_arg_list
@@ -988,9 +988,9 @@ opt_action_arg_list:
 		$$->argList = new ActionArgList;
 	};
 
-nonterm action_embed_word uses action_ref;
+nonterm named_action_ref uses action_ref;
 
-action_embed_word:
+named_action_ref:
 	TK_Word
 	try {
 		/* Set the name in the actionDict. */
@@ -1007,7 +1007,7 @@ action_embed_word:
 			$$->action = 0;
 		}
 	};
-action_embed_word:
+named_action_ref:
 	TK_Word '(' opt_action_arg_list ')'
 	try {
 		/* Set the name in the actionDict. */

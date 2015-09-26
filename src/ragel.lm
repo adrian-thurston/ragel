@@ -188,9 +188,12 @@ namespace ragel
 	|	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_block ocaml_inline::`}]
 	|	[`{ crack_select OCamlInlineBlock: crack_inline::inline_block crack_inline::`}]
 
+	def named_action_ref
+		[word]
+
 	def action_ref 
-		[word] :Word
-	|	[`( word `)] :ParenWord
+		[named_action_ref] :NamedRef
+	|	[`( named_action_ref `)] :ParenNamed
 	|	[action_block] :Block
 	
 	def priority_aug
@@ -344,9 +347,30 @@ namespace ragel
 		[join] :Join
 	|	[`|* lm_stmt_list `*|] :Lm
 
-	def action_spec
-		[`action word action_block] commit
+	#
+	# Actions
+	#
+	def action_param
+		[word]
 
+	def action_param_list
+		[action_param_list `, action_param]
+	|	[action_param]
+
+	def opt_action_param_list
+		[action_param_list]
+	|	[]
+
+	def opt_action_params
+		[`( opt_action_param_list `)]
+	|	[]
+
+	def action_spec
+		[`action word opt_action_params action_block] commit
+
+	#
+	# Machine Instantiations.
+	#
 	def assignment
 		[opt_export word `= join `;] commit
 

@@ -1259,9 +1259,9 @@ struct LoadRagel
 		InputLoc loc = ActionRef.loc();
 
 		switch ( ActionRef.prodName() ) {
-			case ragel::action_ref::Word:
-			case ragel::action_ref::ParenWord: {
-				string s = ActionRef.word().text();
+			case ragel::action_ref::NamedRef:
+			case ragel::action_ref::ParenNamed: {
+				string s = ActionRef.named_action_ref().text();
 
 				/* Set the name in the actionDict. */
 				Action *action = pd->actionDict.find( s );
