@@ -1,5 +1,5 @@
 dnl 
-dnl   Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
+dnl   Copyright 2001-2015 Adrian Thurston <thurston@complang.org>
 dnl
 
 dnl   This file is part of Ragel.
@@ -19,7 +19,7 @@ dnl   along with Ragel; if not, write to the Free Software
 dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
   
 AC_INIT(ragel, 7.0.0.5)
-PUBDATE="December 2014"
+PUBDATE="September 2015"
 
 EXPECTED_COLM=0.13.0.2
 
