@@ -2301,7 +2301,7 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 	//assert( (pdaRun->stopTarget > 0 && pdaRun->stopParsing) || streamToImpl( input )->eofSent );
 
 	if ( !revert_on )
-		commit_full( prg, sp, pda_run, 0 );
+		colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
 	
 	tree_t *tree = get_parsed_root( pda_run, pda_run->stop_target > 0 );
 	colm_tree_upref( tree );
