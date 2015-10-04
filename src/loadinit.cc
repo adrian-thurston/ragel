@@ -180,7 +180,12 @@ LexTerm *LoadInit::walkLexTerm( lex_term &lexTerm )
 
 		lex_factor_rep LexFactorRepTree = lexTerm.FactorRep();
 		LexFactorAug *factorAug = walkLexFactorAug( LexFactorRepTree );
-		LexTerm *term = LexTerm::cons( leftTerm, factorAug, LexTerm::ConcatType );
+
+		LexTerm::Type type = lexTerm.Dot() != 0 ?
+				LexTerm::ConcatType : LexTerm::RightFinishType;
+
+		LexTerm *term = LexTerm::cons( leftTerm, factorAug, type );
+
 		return term;
 	}
 	else {

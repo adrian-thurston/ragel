@@ -554,14 +554,19 @@ void ConsInit::lexFactorRep()
 void ConsInit::lexTerm()
 {
 	ProdEl *prodEl1 = prodRefName( "Term", "lex_term" );
-	ProdEl *prodEl2 = prodRefLit( "'.'" );
+	ProdEl *prodEl2 = prodRefName( "Dot", "DOT" );
 	ProdEl *prodEl3 = prodRefName( "FactorRep", "lex_factor_rep" );
 	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
-	
-	ProdEl *prodEl4 = prodRefName( "FactorRep", "lex_factor_rep" );
-	Production *prod2 = production( prodEl4 );
 
-	definition( "lex_term", prod1, prod2 );
+	ProdEl *prodEl4 = prodRefName( "Term", "lex_term" );
+	ProdEl *prodEl5 = prodRefName( "ColonLt", "COLON_LT" );
+	ProdEl *prodEl6 = prodRefName( "FactorRep", "lex_factor_rep" );
+	Production *prod2 = production( prodEl4, prodEl5, prodEl6 );
+	
+	ProdEl *prodEl7 = prodRefName( "FactorRep", "lex_factor_rep" );
+	Production *prod3 = production( prodEl7 );
+
+	definition( "lex_term", prod1, prod2, prod3 );
 }
 
 void ConsInit::lexExpr()
@@ -858,7 +863,8 @@ void ConsInit::go( long activeRealm )
 	keyword( "'|'" );
 	keyword( "'/'" );
 	keyword( "':'" );
-	keyword( "'.'" );
+	keyword( "DOT", "'.'" );
+	keyword( "COLON_LT", "':>'" );
 	keyword( "'('" );
 	keyword( "')'" );
 	keyword( "'..'" );

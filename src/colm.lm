@@ -19,6 +19,7 @@ lex
 	token SEND / 'send' /
 	token SEND_TREE / 'send_tree' /
 	token NAMESPACE / 'namespace' /
+	token REDUCTION / 'reduction' /
 	token FOR / 'for' /
 	token IF / 'if' /
 	token YIELD / 'yield' /
@@ -221,6 +222,7 @@ def root_item
 |	[precedence_def] :Precedence commit
 |	[alias_def] :Alias commit
 |	[include] :Include commit
+|	[reduction_def] :Reduction commit
 
 def include
 	[INCLUDE SQ SqConsDataList: sq_cons_data* sq_lit_term]
@@ -330,6 +332,52 @@ def no_ignore_left
 def no_ignore_right
 	[MINUS NI] :Ni
 |	[]
+
+def reduction_def
+	[REDUCTION id ItemList: reduction_item* END]
+
+lex
+	token ROPEN / '{' /
+	token RCLOSE / '}' /
+
+	token red_id /
+		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
+		( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '_' ) *
+	/
+
+	token red_comment / 
+		'//' . ( ^'\n' )* . '\n' |
+		'/*' . any* :> '*/'
+	/
+
+	token red_ws /
+		( '\n' | '\t' | ' ' )+
+	/
+
+	token red_lit / 
+		'\'' . ( ^( '\'' | '\\' ) | '\\' . any )* . ( '\'' | '\'i' ) |
+		'\"' . ( ^( '\"' | '\\' ) | '\\' . any )* . ( '\"' | '\"i' )
+	/
+
+	token red_any / any /
+end
+
+def red_nonterm
+	[id ROPEN host_item* RCLOSE]
+
+def red_action
+	[id COLON id ROPEN host_item* RCLOSE]
+
+def host_item
+	[red_id]
+|	[red_lit]
+|	[red_comment]
+|	[red_ws]
+|	[red_any]
+
+def reduction_item
+	[red_nonterm] commit
+|	[red_action] commit
 
 def namespace_def
 	[NAMESPACE id ItemList: namespace_item* END]
