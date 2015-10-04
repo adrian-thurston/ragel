@@ -696,7 +696,7 @@ LangExpr *BaseParser::sendTree( const InputLoc &loc, LangVarRef *varRef,
 
 LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 		ObjectField *objField, TypeRef *typeRef, FieldInitVect *fieldInitVect,
-		ConsItemList *list )
+		ConsItemList *list, bool used )
 {
 	LangExpr *expr = 0;
 
@@ -714,7 +714,10 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 	TypeRef *parserTypeRef = TypeRef::cons( loc,
 			TypeRef::Parser, 0, typeRef, 0 );
 
-	ParserText *parserText = ParserText::cons( loc, curNspace(), list );
+	if ( objField != 0 )
+		used = true;
+
+	ParserText *parserText = ParserText::cons( loc, curNspace(), list, used );
 	pd->parserTextList.append( parserText );
 
 	LangTerm::Type langTermType = stop ? LangTerm::ParseStopType : ( tree ? 

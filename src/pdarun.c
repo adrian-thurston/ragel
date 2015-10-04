@@ -56,6 +56,9 @@
 	i = (tree_t*)w; \
 } while(0)
 
+void commit_reduce( program_t *prg, tree_t **root, struct pda_run *pda_run );
+void commit_clear( program_t *prg, tree_t **root, struct pda_run *pda_run );
+
 static void init_fsm_run( program_t *prg, struct pda_run *pda_run )
 {
 	pda_run->fsm_tables = prg->rtd->fsm_tables;
@@ -95,7 +98,8 @@ void colm_decrement_steps( struct pda_run *pda_run )
 	//debug( prg, REALM_PARSE, "steps down to %ld\n", pdaRun->steps );
 }
 
-head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run, struct stream_impl *is, long length )
+head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
+		struct stream_impl *is, long length )
 {
 	if ( pda_run != 0 ) {
 		RunBuf *run_buf = pda_run->consume_buf;
@@ -1248,172 +1252,6 @@ static long stack_top_target( program_t *prg, struct pda_run *pda_run )
 }
 
 /*
- * Local commit:
- * 		-clears reparse flags underneath
- * 		-must be possible to backtrack after
- * Global commit (revertOn)
- * 		-clears all reparse flags
- * 		-must be possible to backtrack after
- * Global commit (!revertOn)
- * 		-clears all reparse flags
- * 		-clears all 'parsed' reverse code
- * 		-clears all reverse code
- * 		-clears all alg structures
- */
-
-static int been_committed( parse_tree_t *parse_tree )
-{
-	return parse_tree->flags & PF_COMMITTED;
-}
-
-static code_t *backup_over_rcode( code_t *rcode )
-{
-	word_t len;
-	rcode -= SIZEOF_WORD;
-	read_word_p( len, rcode );
-	rcode -= len;
-	return rcode;
-}
-
-/* The top level of the stack is linked right-to-left. Trees underneath are
- * linked left-to-right. */
-static void commit_kid( program_t *prg, struct pda_run *pda_run, tree_t **root,
-		parse_tree_t *lel, code_t **rcode, long *cause_reduce )
-{
-	parse_tree_t *tree = 0;
-	tree_t **sp = root;
-	//tree_t *restore = 0;
-
-head:
-	/* Commit */
-	debug( prg, REALM_PARSE, "commit: visiting %s\n",
-			prg->rtd->lel_info[lel->id].name );
-
-	/* Load up the parsed tree. */
-	tree = lel;
-
-	/* Check for reverse code. */
-	//restore = 0;
-	if ( tree->flags & PF_HAS_RCODE ) {
-		/* If tree caused some reductions, now is not the right time to backup
-		 * over the reverse code. We need to backup over the reductions first. Store
-		 * the count of the reductions and do it when the count drops to zero. */
-		if ( tree->cause_reduce > 0 ) {
-			/* The top reduce block does not correspond to this alg. */
-			debug( prg, REALM_PARSE, "commit: causeReduce found, delaying backup: %ld\n",
-						(long)tree->cause_reduce );
-			*cause_reduce = tree->cause_reduce;
-		}
-		else {
-			*rcode = backup_over_rcode( *rcode );
-
-			//if ( **rcode == IN_RESTORE_LHS ) {
-			//	debug( prg, REALM_PARSE, "commit: has restore_lhs\n" );
-			//	read_tree_p( restore, (*rcode+1) );
-			//}
-		}
-	}
-
-	//FIXME: what was this about?
-	//if ( restore != 0 )
-	//	tree = restore;
-
-	/* All the parse algorithm data except for the RCODE flag is in the
-	 * original. That is why we restore first, then we can clear the retry
-	 * values. */
-
-	/* Check causeReduce, might be time to backup over the reverse code
-	 * belonging to a nonterminal that caused previous reductions. */
-	if ( *cause_reduce > 0 && 
-			tree->id >= prg->rtd->first_non_term_id &&
-			!(tree->flags & PF_TERM_DUP) )
-	{
-		*cause_reduce -= 1;
-
-		if ( *cause_reduce == 0 ) {
-			debug( prg, REALM_PARSE, "commit: causeReduce dropped to zero, "
-					"backing up over rcode\n" );
-
-			/* Cause reduce just dropped down to zero. */
-			*rcode = backup_over_rcode( *rcode );
-		}
-	}
-
-	///* FIXME: why was this here?
-	// * Reset retries. */
-	//if ( tree->flags & AF_PARSED ) {
-	//	if ( tree->retryLower > 0 ) {
-	//		pdaRun->numRetry -= 1;
-	//		tree->retryLower = 0;
-	//	}
-	//	if ( tree->retryUpper > 0 ) {
-	//		pdaRun->numRetry -= 1;
-	//		tree->retryUpper = 0;
-	//	}
-	//}
-
-	tree->flags |= PF_COMMITTED;
-
-	/* Do not recures on trees that are terminal dups. */
-	if ( !(tree->flags & PF_TERM_DUP) && 
-			!(tree->flags & PF_NAMED) && 
-			!(tree->flags & PF_ARTIFICIAL) && 
-			tree->child != 0 )
-	{
-		vm_push_ptree( lel );
-		lel = tree->child;
-
-		if ( lel != 0 ) {
-			while ( lel != 0 ) {
-				vm_push_ptree( lel );
-				lel = lel->next;
-			}
-		}
-	}
-
-backup:
-	if ( sp != root ) {
-		parse_tree_t *next = vm_pop_ptree();
-		if ( next->next == lel ) {
-			/* Moving backwards. */
-			lel = next;
-
-			if ( !been_committed( lel ) )
-				goto head;
-		}
-		else {
-			/* Moving upwards. */
-			lel = next;
-		}
-
-		goto backup;
-	}
-
-	pda_run->num_retry = 0;
-	assert( sp == root );
-}
-
-static void commit_full( program_t *prg, tree_t **sp, struct pda_run *pda_run, long cause_reduce )
-{
-	debug( prg, REALM_PARSE, "running full commit\n" );
-	
-	parse_tree_t *parse_tree = pda_run->stack_top;
-	code_t *rcode = pda_run->reverse_code.data + pda_run->reverse_code.tab_len;
-
-	/* The top level of the stack is linked right to left. This is the
-	 * traversal order we need for committing. */
-	while ( parse_tree != 0 && !been_committed( parse_tree ) ) {
-		commit_kid( prg, pda_run, sp, parse_tree, &rcode, &cause_reduce );
-		parse_tree = parse_tree->next;
-	}
-
-	/* We cannot always clear all the rcode here. We may need to backup over
-	 * the parse statement. We depend on the context flag. */
-	if ( !pda_run->revert_on )
-		colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
-}
-
-/*
  * shift:         retry goes into lower of shifted node.
  * reduce:        retry goes into upper of reduced node.
  * shift-reduce:  cannot be a retry
@@ -1541,15 +1379,11 @@ again:
 	 */
 
 	if ( pda_run->pda_tables->commit_len[pos] != 0 ) {
-#if 0
-		long cause_reduce = 0;
-		if ( pda_run->parse_input != 0 ) { 
-			if ( pda_run->parse_input->flags & PF_HAS_RCODE )
-				cause_reduce = pda_run->parse_input->cause_reduce;
-		}
-		commit_full( prg, sp, pda_run, cause_reduce );
-#endif
 		pda_run->commit_shift_count = pda_run->shift_count;
+
+		/* Not in a reverting context and the parser result is not used. */
+		if ( ! pda_run->revert_on && pda_run->not_used )
+			commit_reduce( prg, sp, pda_run );
 	}
 
 	/*
@@ -2304,9 +2138,15 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 		colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
 	
 	tree_t *tree = get_parsed_root( pda_run, pda_run->stop_target > 0 );
-	colm_tree_upref( tree );
 
-	*result = tree;
+	if ( pda_run->not_used ) {
+		*result = 0;
+	}
+	else {
+		colm_tree_upref( tree );
+		*result = tree;
+	}
+
 
 	/* COROUTINE */
 	case PCR_DONE:

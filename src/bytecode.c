@@ -842,6 +842,14 @@ again:
 			break;
 		}
 
+		case IN_PARSER_NOT_USED: {
+			debug( prg, REALM_BYTECODE, "IN_PARSER_NOT_USED\n" );
+
+			//parser_t *parser = vm_pop_parser();
+			//parser->pda_run->not_used = 1;
+			//vm_push_parser( parser );
+			break;
+		}
 		case IN_SET_PARSER_CONTEXT: {
 			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_CTX_WC\n" );
 

@@ -355,6 +355,8 @@ struct pda_run
 	int rc_block_count;
 
 	tree_t *parse_error_text;
+	char not_used;
+	parse_tree_t *last_final;
 };
 
 void colm_pda_init( struct colm_program *prg, struct pda_run *pda_run,

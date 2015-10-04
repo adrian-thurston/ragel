@@ -170,13 +170,13 @@ struct LoadColm
 		return LexFactorAug::cons( factorRep );
 	}
 
-	LangExpr *walkCodeExpr( code_expr codeExpr )
+	LangExpr *walkCodeExpr( code_expr codeExpr, bool used = true )
 	{
 		LangExpr *expr = 0;
-		LangExpr *relational = walkCodeRelational( codeExpr.code_relational() );
 
 		switch ( codeExpr.prodName() ) {
 		case code_expr::AmpAmp: {
+			LangExpr *relational = walkCodeRelational( codeExpr.code_relational() );
 			LangExpr *left = walkCodeExpr( codeExpr._code_expr() );
 
 			InputLoc loc = codeExpr.AMPAMP().loc();
@@ -184,6 +184,7 @@ struct LoadColm
 			break;
 		}
 		case code_expr::BarBar: {
+			LangExpr *relational = walkCodeRelational( codeExpr.code_relational() );
 			LangExpr *left = walkCodeExpr( codeExpr._code_expr() );
 
 			InputLoc loc = codeExpr.BARBAR().loc();
@@ -191,6 +192,7 @@ struct LoadColm
 			break;
 		}
 		case code_expr::Base: {
+			LangExpr *relational = walkCodeRelational( codeExpr.code_relational(), used );
 			expr = relational;
 			break;
 		}}
@@ -396,22 +398,24 @@ struct LoadColm
 				0, true, false, false );
 	}
 
-	LangExpr *walkCodeMultiplicitive( code_multiplicitive mult )
+	LangExpr *walkCodeMultiplicitive( code_multiplicitive mult, bool used = true )
 	{
 		LangExpr *expr = 0;
-		LangExpr *right = walkCodeUnary( mult.code_unary() );
 		switch ( mult.prodName() ) {
 		case code_multiplicitive::Star: {
+			LangExpr *right = walkCodeUnary( mult.code_unary() );
 			LangExpr *left = walkCodeMultiplicitive( mult._code_multiplicitive() );
 			expr = LangExpr::cons( mult.STAR().loc(), left, '*', right );
 			break;
 		}
 		case code_multiplicitive::Fslash: {
+			LangExpr *right = walkCodeUnary( mult.code_unary() );
 			LangExpr *left = walkCodeMultiplicitive( mult._code_multiplicitive() );
 			expr = LangExpr::cons( mult.FSLASH().loc(), left, '/', right );
 			break;
 		}
 		case code_multiplicitive::Base: {
+			LangExpr *right = walkCodeUnary( mult.code_unary(), used );
 			expr = right;
 			break;
 		}}
@@ -1742,7 +1746,7 @@ struct LoadColm
 		return list;
 	}
 
-	LangExpr *walkCodeFactor( code_factor codeFactor )
+	LangExpr *walkCodeFactor( code_factor codeFactor, bool used = true )
 	{
 		LangExpr *expr = 0;
 		switch ( codeFactor.prodName() ) {
@@ -1776,7 +1780,7 @@ struct LoadColm
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
 			expr = parseCmd( codeFactor.PARSE().loc(), false, false, objField,
-					typeRef, init, list );
+					typeRef, init, list, used );
 			break;
 		}
 		case code_factor::ParseTree: {
@@ -1788,7 +1792,7 @@ struct LoadColm
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
 			expr = parseCmd( codeFactor.PARSE_TREE().loc(), true, false, objField,
-					typeRef, init, list );
+					typeRef, init, list, used );
 			break;
 		}
 		case code_factor::ParseStop: {
@@ -1800,7 +1804,7 @@ struct LoadColm
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
 			expr = parseCmd( codeFactor.PARSE_STOP().loc(), false, true, objField,
-					typeRef, init, list );
+					typeRef, init, list, used );
 			break;
 		}
 		case code_factor::Cons: {
@@ -1921,7 +1925,7 @@ struct LoadColm
 		return expr;
 	}
 
-	LangExpr *walkCodeAdditive( code_additive additive )
+	LangExpr *walkCodeAdditive( code_additive additive, bool used = true )
 	{
 		LangExpr *expr = 0;
 		switch ( additive.prodName() ) {
@@ -1938,48 +1942,57 @@ struct LoadColm
 			break;
 		}
 		case code_additive::Base: {
-			expr = walkCodeMultiplicitive( additive.code_multiplicitive() );
+			expr = walkCodeMultiplicitive( additive.code_multiplicitive(), used );
 			break;
 		}}
 		return expr;
 	}
 
-	LangExpr *walkCodeUnary( code_unary unary )
+	LangExpr *walkCodeUnary( code_unary unary, bool used = true )
 	{
-		LangExpr *expr = 0, *factor = walkCodeFactor( unary.code_factor() );
+		LangExpr *expr = 0;
 
 		switch ( unary.prodName() ) {
 		case code_unary::Bang: {
+			LangExpr *factor = walkCodeFactor( unary.code_factor() );
 			expr = LangExpr::cons( unary.BANG().loc(), '!', factor );
 			break;
 		}
 		case code_unary::Dollar: {
+			LangExpr *factor = walkCodeFactor( unary.code_factor() );
 			expr = LangExpr::cons( unary.DOLLAR().loc(), '$', factor );
 			break;
 		}
 		case code_unary::Caret: {
+			LangExpr *factor = walkCodeFactor( unary.code_factor() );
 			expr = LangExpr::cons( unary.CARET().loc(), '^', factor );
 			break;
 		}
 		case code_unary::Percent: {
+			LangExpr *factor = walkCodeFactor( unary.code_factor() );
 			expr = LangExpr::cons( unary.PERCENT().loc(), '%', factor );
 			break;
 		}
 		case code_unary::Base: {
+			LangExpr *factor = walkCodeFactor( unary.code_factor(), used );
 			expr = factor;
 		}}
 
 		return expr;
 	}
 
-	LangExpr *walkCodeRelational( code_relational codeRelational )
+	LangExpr *walkCodeRelational( code_relational codeRelational, bool used = true )
 	{
 		LangExpr *expr = 0, *left = 0;
 
-		if ( codeRelational.prodName() != code_relational::Base )
-			left = walkCodeRelational( codeRelational._code_relational() );
+		bool base = codeRelational.prodName() == code_relational::Base;
 
-		LangExpr *additive = walkCodeAdditive( codeRelational.code_additive() );
+		if ( ! base ) {
+			used = true;
+			left = walkCodeRelational( codeRelational._code_relational() );
+		}
+		
+		LangExpr *additive = walkCodeAdditive( codeRelational.code_additive(), used );
 
 		switch ( codeRelational.prodName() ) {
 		case code_relational::EqEq: {
@@ -2015,7 +2028,7 @@ struct LoadColm
 
 	LangStmt *walkExprStmt( expr_stmt exprStmt )
 	{
-		LangExpr *expr = walkCodeExpr( exprStmt.code_expr() );
+		LangExpr *expr = walkCodeExpr( exprStmt.code_expr(), false );
 		LangStmt *stmt = LangStmt::cons( expr->loc, LangStmt::ExprType, expr );
 		return stmt;
 	}

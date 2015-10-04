@@ -1402,6 +1402,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	code.append( IN_CONS_GENERIC );
 	code.appendHalf( parserUT->generic->id );
 
+	if ( !parserText->used )
+		code.append( IN_PARSER_NOT_USED );
+
 	/*
 	 * First load the context into the parser.
 	 */
