@@ -211,8 +211,7 @@ typedef unsigned long colm_value_t;
 #define IN_GET_VLIST_MEM_WV      0x70
 #define IN_GET_VLIST_MEM_BKT     0x5c
 
-/* This should be a bit in the parser generic. */
-#define IN_PARSER_NOT_USED       0x76
+#define IN_CONS_REDUCER          0x76
 
 #define IN_DONE                  0x78
 

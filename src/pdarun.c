@@ -1178,10 +1178,18 @@ void colm_pda_clear( program_t *prg, tree_t **sp, struct pda_run *pda_run )
 	colm_rt_code_vect_empty( &pda_run->rcode_collect );
 
 	colm_tree_downref( prg, sp, pda_run->parse_error_text );
+
+	if ( pda_run->reducer ) {
+		long local_lost = pool_alloc_num_lost( &pda_run->local_pool );
+
+		if ( local_lost )
+			message( "warning: reducer local lost parse trees: %ld\n", local_lost );
+		pool_alloc_clear( &pda_run->local_pool );
+	}
 }
 
 void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *tables,
-		int parser_id, long stop_target, int revert_on, struct_t *context )
+		int parser_id, long stop_target, int revert_on, struct_t *context, int reducer )
 {
 	memset( pda_run, 0, sizeof(struct pda_run) );
 
@@ -1190,6 +1198,13 @@ void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *
 	pda_run->stop_target = stop_target;
 	pda_run->revert_on = revert_on;
 	pda_run->target_steps = -1;
+	pda_run->reducer = reducer;
+
+	if ( reducer ) {
+		init_pool_alloc( &pda_run->local_pool, sizeof(parse_tree_t) + sizeof(void*) * 8 );
+		pda_run->parse_tree_pool = &pda_run->local_pool;
+	}
+
 	pda_run->parse_tree_pool = &prg->parse_tree_pool;
 
 	debug( prg, REALM_PARSE, "initializing struct pda_run\n" );
@@ -1382,9 +1397,8 @@ again:
 		pda_run->commit_shift_count = pda_run->shift_count;
 
 		/* Not in a reverting context and the parser result is not used. */
-		if ( pda_run->not_used ) {
+		if ( pda_run->reducer )
 			commit_reduce( prg, sp, pda_run );
-		}
 	}
 
 	/*
@@ -2137,7 +2151,7 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 	//		streamToImpl( input )->eofSent );
 
 	/* Flush out anything not committed. */
-	if ( pda_run->not_used )
+	if ( pda_run->reducer )
 		commit_reduce( prg, sp, pda_run );
 
 	if ( !revert_on )
@@ -2145,7 +2159,7 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 	
 	tree_t *tree = get_parsed_root( pda_run, pda_run->stop_target > 0 );
 
-	if ( pda_run->not_used ) {
+	if ( pda_run->reducer ) {
 		*result = 0;
 	}
 	else {

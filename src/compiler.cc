@@ -993,7 +993,7 @@ pda_run *Compiler::parsePattern( program_t *prg, tree_t **sp, const InputLoc &lo
 	struct stream_impl *in = colm_impl_new_generic( "<internal>" );
 
 	struct pda_run *pdaRun = new pda_run;
-	colm_pda_init( prg, pdaRun, pdaTables, parserId, 0, false, 0 );
+	colm_pda_init( prg, pdaRun, pdaTables, parserId, 0, false, 0, false );
 
 	stream_t *stream = colm_stream_new_struct( prg );
 	stream->impl = sourceStream;
@@ -1138,9 +1138,35 @@ void Compiler::writeHostCall()
 
 }
 
+void Compiler::writeCommitStub()
+{
+	*outStream <<
+		"void commit_forward_recurse( program_t *prg, tree_t **root,\n"
+		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
+		"{\n"
+		"	commit_clear_parse_tree( prg, root, pda_run, pt->child );\n"
+		"}\n";
+}
+
 void Compiler::writeCommit()
 {
 	*outStream <<
+		"#include <colm/pdarun.h>\n"
+		"#include <colm/debug.h>\n"
+		"#include <colm/bytecode.h>\n"
+		"#include <colm/config.h>\n"
+		"#include <colm/defs.h>\n"
+		"#include <colm/input.h>\n"
+		"#include <colm/tree.h>\n"
+		"#include <colm/program.h>\n"
+		"#include <colm/colm.h>\n"
+		"\n"
+		"#include <stdio.h>\n"
+		"#include <stdlib.h>\n"
+		"#include <string.h>\n"
+		"#include <assert.h>\n"
+		"\n"
+		"#include <iostream>\n"
 		"\n"
 		"void commit_forward_recurse( program_t *prg, tree_t **root,\n"
 		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
@@ -1203,7 +1229,7 @@ void Compiler::writeCommit()
 }
 
 
-void Compiler::generateOutput( long activeRealm )
+void Compiler::generateOutput( long activeRealm, bool includeCommit )
 {
 	FsmCodeGen *fsmGen = new FsmCodeGen( *outStream, redFsm, fsmTables );
 
@@ -1220,7 +1246,9 @@ void Compiler::generateOutput( long activeRealm )
 	pdaGen->writeRuntimeData( runtimeData, pdaTables );
 
 	writeHostCall();
-	writeCommit();
+
+	if ( includeCommit )
+		writeCommitStub();
 
 	if ( !gblLibrary ) 
 		fsmGen->writeMain( activeRealm );

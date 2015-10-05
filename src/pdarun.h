@@ -355,15 +355,16 @@ struct pda_run
 	int rc_block_count;
 
 	tree_t *parse_error_text;
-	char not_used;
+	char reducer;
 	parse_tree_t *last_final;
 
 	struct pool_alloc *parse_tree_pool;
+	struct pool_alloc local_pool;
 };
 
 void colm_pda_init( struct colm_program *prg, struct pda_run *pda_run,
 		struct pda_tables *tables, int parser_id, long stop_target,
-		int revert_on, struct colm_struct *context );
+		int revert_on, struct colm_struct *context, int reducer );
 
 void colm_pda_clear( struct colm_program *prg, struct colm_tree **sp,
 		struct pda_run *pda_run );

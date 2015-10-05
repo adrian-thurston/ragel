@@ -820,7 +820,7 @@ struct Compiler
 	void compileByteCode();
 
 	void resolveUses();
-	void generateOutput( long activeRealm );
+	void generateOutput( long activeRealm, bool includeCommit );
 	void compile();
 
 	void openNameSpace( ostream &out, Namespace *nspace );
@@ -1011,6 +1011,7 @@ struct Compiler
 
 	void writeHostCall();
 	void writeCommit();
+	void writeCommitStub();
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

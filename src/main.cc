@@ -83,6 +83,7 @@ const char *intermedFn = 0;
 const char *binaryFn = 0;
 const char *exportHeaderFn = 0;
 const char *exportCodeFn = 0;
+const char *commitCodeFn = 0;
 bool exportCode = false;
 
 bool generateGraphviz = false;
@@ -182,7 +183,8 @@ void usage()
 "   -c                   compile only (don't produce binary)\n"
 "   -e <file>            write C++ export header to <file>\n"
 "   -x <file>            write C++ export code to <file>\n"
-"	-a <file>            additional code file to include in output program\n"
+"   -m <file>            write C++ commit code to <file>\n"
+"   -a <file>            additional code file to include in output program\n"
 	;	
 }
 
@@ -370,6 +372,31 @@ void openExportsImpl( )
 	}
 }
 
+void openCommit( )
+{
+	/* Make sure we are not writing to the same file as the input file. */
+	if ( inputFn != 0 && commitCodeFn != 0 && strcmp( inputFn, commitCodeFn  ) == 0 ) {
+		error() << "output file \"" << commitCodeFn  << 
+				"\" is the same as the input file" << endl;
+	}
+
+	if ( commitCodeFn != 0 ) {
+		/* Open the output stream, attaching it to the filter. */
+		ofstream *outFStream = new ofstream( commitCodeFn );
+
+		if ( !outFStream->is_open() ) {
+			error() << "error opening " << commitCodeFn << " for writing" << endl;
+			exit(1);
+		}
+
+		outStream = outFStream;
+	}
+	else {
+		/* Writing out ot std out. */
+		outStream = &cout;
+	}
+}
+
 void compileOutputCommand( const char *command )
 {
 	//cout << "compiling with: " << command << endl;
@@ -482,7 +509,7 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "cD:e:x:I:vdlio:S:M:vHh?-:sVa:", argc, argv );
+	ParamCheck pc( "cD:e:x:I:vdlio:S:M:vHh?-:sVa:m:", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -550,6 +577,9 @@ void processArgs( int argc, const char **argv )
 				break;
 			case 'a':
 				additionalCodeFiles.append( pc.parameterArg );
+				break;
+			case 'm':
+				commitCodeFn = pc.parameterArg;
 				break;
 
 			case 'D':
@@ -679,7 +709,7 @@ int main(int argc, const char **argv)
 		else
 			openOutputCompiled();
 
-		pd->generateOutput( gblActiveRealm );
+		pd->generateOutput( gblActiveRealm, ( commitCodeFn == 0 ) );
 		if ( outStream != 0 )
 			delete outStream;
 
@@ -690,15 +720,21 @@ int main(int argc, const char **argv)
 				compileOutputInstalled( argv[0] );
 		}
 
-		if ( exportHeaderFn != 0 )  {
+		if ( exportHeaderFn != 0 ) {
 			openExports();
 			pd->generateExports();
 			delete outStream;
 		}
-		if ( exportCodeFn != 0 )  {
+		if ( exportCodeFn != 0 ) {
 			openExportsImpl();
 			pd->generateExportsImpl();
 			delete outStream;
+		}
+		if ( commitCodeFn != 0 ) {
+			openCommit();
+			pd->writeCommit();
+			delete outStream;
+
 		}
 	}
 

@@ -61,6 +61,9 @@ void location_free( program_t *prg, location_t *el );
 void location_clear( program_t *prg );
 long location_num_lost( program_t *prg );
 
+void pool_alloc_clear( struct pool_alloc *pool_alloc );
+long pool_alloc_num_lost( struct pool_alloc *pool_alloc );
+
 #ifdef __cplusplus
 }
 #endif

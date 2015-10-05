@@ -842,14 +842,6 @@ again:
 			break;
 		}
 
-		case IN_PARSER_NOT_USED: {
-			debug( prg, REALM_BYTECODE, "IN_PARSER_NOT_USED\n" );
-
-			parser_t *parser = vm_pop_parser();
-			parser->pda_run->not_used = 1;
-			vm_push_parser( parser );
-			break;
-		}
 		case IN_SET_PARSER_CONTEXT: {
 			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_CTX_WC\n" );
 
@@ -870,10 +862,11 @@ again:
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
 			struct lang_el_info *lel_info = prg->rtd->lel_info;
-			char **mark = exec->parser->pda_run->mark;
+			struct pda_run *pda_run = exec->parser->pda_run;
+			char **mark = pda_run->mark;
 
-			int i;
-			for ( i = 0; i < lel_info[exec->parser->pda_run->token_id].num_capture_attr; i++ ) {
+			int i, num_capture_attr = lel_info[pda_run->token_id].num_capture_attr;
+			for ( i = 0; i < num_capture_attr; i++ ) {
 				struct lang_el_info *lei = &lel_info[exec->parser->pda_run->token_id];
 				CaptureAttr *ca = &prg->rtd->capture_attr[lei->capture_attr + i];
 				head_t *data = string_alloc_full( prg, mark[ca->mark_enter],
@@ -2737,6 +2730,18 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_CONS_GENERIC %hd\n", generic_id );
 
 			struct_t *gen = colm_construct_generic( prg, generic_id );
+			vm_push_struct( gen );
+			break;
+		}
+		case IN_CONS_REDUCER: {
+			half_t generic_id;
+			read_half( generic_id );
+
+			debug( prg, REALM_BYTECODE, "IN_CONS_REDUCER %hd\n", generic_id );
+
+			struct_t *gen = colm_construct_generic( prg, generic_id );
+			parser_t *parser = (parser_t*)gen;
+			parser->pda_run->reducer = 1;
 			vm_push_struct( gen );
 			break;
 		}
