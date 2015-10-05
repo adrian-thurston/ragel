@@ -2346,14 +2346,24 @@ struct LoadColm
 		namespaceStack.pop();
 	}
 
+	void walkRedNonTerm( red_nonterm RN )
+	{
+		InputLoc loc = RN.ROPEN().loc();
+		String text = RN.HostItems().text().c_str();
+		TypeRef *typeRef = walkTypeRef( RN.type_ref() );
+
+		ReduceNonTerm *rnt = new ReduceNonTerm( loc, typeRef, text );
+		curReduction()->reduceNonTerms.append( rnt );
+	}
+
 	void walkRedAction( red_action RA )
 	{
-		InputLoc loc = RA.NonTerm().loc();
+		InputLoc loc = RA.id().loc();
 		String text = RA.HostItems().text().c_str();
 
-		TypeRef *typeRef = walkTypeRef( RA.NonTerm() );
+		TypeRef *typeRef = walkTypeRef( RA.type_ref() );
 			
-		ReduceAction *ra = new ReduceAction( loc, typeRef, RA.Prod().data(), text );
+		ReduceAction *ra = new ReduceAction( loc, typeRef, RA.id().data(), text );
 		curReduction()->reduceActions.append( ra );
 	}
 
@@ -2361,6 +2371,7 @@ struct LoadColm
 	{
 		switch ( reductionItem.prodName() ) {
 			case reduction_item::NonTerm: {
+				walkRedNonTerm( reductionItem.red_nonterm() );
 				break;
 			}
 			case reduction_item::Action: {

@@ -364,10 +364,10 @@ lex
 end
 
 def red_nonterm
-	[id ROPEN host_item* RCLOSE]
+	[type_ref ROPEN HostItems: host_item* RCLOSE]
 
 def red_action
-	[NonTerm: type_ref COLON Prod: id ROPEN HostItems: host_item* RCLOSE]
+	[type_ref COLON id ROPEN HostItems: host_item* RCLOSE]
 
 def host_item
 	[red_id]

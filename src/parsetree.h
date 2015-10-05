@@ -917,6 +917,22 @@ struct Namespace
 typedef DList<Namespace> NamespaceList;
 typedef BstSet< Namespace*, CmpOrd<Namespace*> > NamespaceSet;
 
+struct ReduceNonTerm
+{
+	ReduceNonTerm( const InputLoc &loc, TypeRef *nonterm, const String &txt )
+	:
+		loc(loc),
+		nonterm(nonterm),
+		txt(txt)
+	{}
+
+	InputLoc loc;
+	TypeRef *nonterm;
+	String txt;
+
+	ReduceNonTerm *prev, *next;
+};
+
 struct ReduceAction
 {
 	ReduceAction( const InputLoc &loc, TypeRef *nonterm,
@@ -937,6 +953,7 @@ struct ReduceAction
 };
 
 typedef DList<ReduceAction> ReduceActionList;
+typedef DList<ReduceNonTerm> ReduceNonTermList;
 
 struct Reduction
 {
@@ -948,6 +965,7 @@ struct Reduction
 	int id;
 
 	ReduceActionList reduceActions;
+	ReduceNonTermList reduceNonTerms;
 };
 
 /*
