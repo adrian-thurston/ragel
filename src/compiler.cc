@@ -1148,26 +1148,31 @@ void Compiler::writeCommit()
 		"	tree_t **sp = root;\n"
 		"\n"
 		"	parse_tree_t *lel = pt;\n"
+		"	kid_t *kid = pt->shadow;\n"
 		"\n"
 		"recurse:\n"
 		"\n"
 		"	if ( lel->child != 0 ) {\n"
 		"		/* There are children. Must process all children first. */\n"
 		"		vm_push_ptree( lel );\n"
+		"		vm_push_kid( kid );\n"
 		"\n"
 		"		lel = lel->child;\n"
+		"		kid = kid->tree->child;\n"
 		"		while ( lel != 0 ) {\n"
 		"			goto recurse;\n"
 		"			resume:\n"
 		"			lel = lel->next;\n"
+		"			kid = kid->next;\n"
 		"		}\n"
 		"\n"
+		"		kid = vm_pop_kid();\n"
 		"		lel = vm_pop_ptree();\n"
 		"	}\n"
 		"\n"
-		"	/* Now can execute the reduction action. */\n"
-		"	if ( lel->shadow != 0 ) {\n"
-		"		switch ( lel->shadow->tree->id ) {\n";
+		"	if ( !( lel->flags & PF_COMMITTED ) ) {\n"
+		"		/* Now can execute the reduction action. */\n"
+		"		switch ( kid->tree->id ) {\n";
 
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		for ( ReduceActionList::Iter rdi = (*r)->reduceActions; rdi.lte(); rdi++ ) {
@@ -1176,7 +1181,7 @@ void Compiler::writeCommit()
 
 			*outStream <<
 				"		case " << lelId << ": \n"
-				"			if ( lel->shadow->tree->prod_num == " << prodNum << " ) {\n"
+				"			if ( kid->tree->prod_num == " << prodNum << " ) {\n"
 				"			" << rdi->txt << "\n"
 				"			}\n"
 				"			break;\n";
@@ -1189,10 +1194,10 @@ void Compiler::writeCommit()
 		"\n"
 		"	commit_clear_parse_tree( prg, sp, pda_run, lel->child );\n"
 		"	lel->child = 0;\n"
-		"	pt->flags |= PF_COMMITTED;\n"
 		"\n"
 		"	if ( sp != root )\n"
 		"		goto resume;\n"
+		"	pt->flags |= PF_COMMITTED;\n"
 		"}\n"
 		"\n";
 }

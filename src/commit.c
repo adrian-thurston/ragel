@@ -82,7 +82,6 @@ static int been_committed( parse_tree_t *parse_tree )
 	return parse_tree->flags & PF_COMMITTED;
 }
 
-
 void commit_clear( program_t *prg, tree_t **root, struct pda_run *pda_run )
 {
 	tree_t **sp = root;

@@ -1382,8 +1382,9 @@ again:
 		pda_run->commit_shift_count = pda_run->shift_count;
 
 		/* Not in a reverting context and the parser result is not used. */
-		if ( ! pda_run->revert_on && pda_run->not_used )
+		if ( pda_run->not_used ) {
 			commit_reduce( prg, sp, pda_run );
+		}
 	}
 
 	/*
@@ -2132,7 +2133,12 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 	/* FIXME: need something here to check that we are not stopped waiting for
 	 * more data when we are actually expected to finish. This check doesn't
 	 * work (at time of writing). */
-	//assert( (pdaRun->stopTarget > 0 && pdaRun->stopParsing) || streamToImpl( input )->eofSent );
+	//assert( (pdaRun->stopTarget > 0 && pdaRun->stopParsing) || 
+	//		streamToImpl( input )->eofSent );
+
+	/* Flush out anything not committed. */
+	if ( pda_run->not_used )
+		commit_reduce( prg, sp, pda_run );
 
 	if ( !revert_on )
 		colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
