@@ -37,7 +37,9 @@
 //#define true 1
 //#define false 0
 
-static void commit_clear_parse_tree( program_t *prg, tree_t **sp, parse_tree_t *pt )
+extern void commit_forward_recurse( program_t *prg, tree_t **root, parse_tree_t *pt );
+
+void commit_clear_parse_tree( program_t *prg, tree_t **sp, parse_tree_t *pt )
 {
 	tree_t **top = vm_ptop();
 
@@ -82,38 +84,6 @@ static int been_committed( parse_tree_t *parse_tree )
 }
 
 
-static void commit_forward_recurse( program_t *prg, tree_t **root, parse_tree_t *pt )
-{
-	tree_t **sp = root;
-
-	parse_tree_t *lel = pt;
-
-recurse:
-
-	if ( lel->child != 0 ) {
-		/* There are children. Must process all children first. */
-		vm_push_ptree( lel );
-
-		lel = lel->child;
-		while ( lel != 0 ) {
-			goto recurse;
-			resume:
-			lel = lel->next;
-		}
-
-		lel = vm_pop_ptree();
-	}
-
-	/* Now can execute the reduction action. */
-
-	commit_clear_parse_tree( prg, sp, lel->child );
-	lel->child = 0;
-	pt->flags |= PF_COMMITTED;
-
-	if ( sp != root )
-		goto resume;
-}
-
 void commit_clear( program_t *prg, tree_t **root, struct pda_run *pda_run )
 {
 	tree_t **sp = root;
@@ -129,7 +99,7 @@ void commit_clear( program_t *prg, tree_t **root, struct pda_run *pda_run )
 	while ( sp != root ) {
 		pt = vm_pop_ptree();
 
-		commit_forward_recurse( prg, sp, pt );
+		commit_clear_parse_tree( prg, sp, pt->child );
 
 		pt->flags |= PF_COMMITTED;
 		pt = pt->next;
@@ -151,7 +121,7 @@ void commit_reduce( program_t *prg, tree_t **root, struct pda_run *pda_run )
 	while ( sp != root ) {
 		pt = vm_pop_ptree();
 
-		commit_clear_parse_tree( prg, sp, pt->child );
+		commit_forward_recurse( prg, sp, pt );
 		pt->child = 0;
 
 		pt->flags |= PF_COMMITTED;

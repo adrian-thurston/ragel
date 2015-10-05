@@ -366,7 +366,7 @@ def red_nonterm
 	[id ROPEN host_item* RCLOSE]
 
 def red_action
-	[id COLON id ROPEN host_item* RCLOSE]
+	[NonTerm: type_ref COLON Prod: id ROPEN HostItems: host_item* RCLOSE]
 
 def host_item
 	[red_id]
@@ -376,8 +376,8 @@ def host_item
 |	[red_any]
 
 def reduction_item
-	[red_nonterm] commit
-|	[red_action] commit
+	[red_nonterm] :NonTerm commit
+|	[red_action] :Action commit
 
 def namespace_def
 	[NAMESPACE id ItemList: namespace_item* END]

@@ -882,7 +882,39 @@ void Compiler::resolvePrecedence()
 	}
 }
 
+void Compiler::resolveReductionActions()
+{
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		for ( ReduceActionList::Iter rai = (*r)->reduceActions; rai.lte(); rai++ ) {
+			rai->nonterm->resolveType( this );
+		}
+	}
+}
 
+void Compiler::findReductionActionProds()
+{
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		for ( ReduceActionList::Iter rai = (*r)->reduceActions; rai.lte(); rai++ ) {
+			rai->nonterm->resolveType( this );
+			LangEl *langEl = rai->nonterm->uniqueType->langEl;
+
+			Production *prod = 0;
+			for ( LelDefList::Iter ldi = langEl->defList; ldi.lte(); ldi++ ) {
+				if ( strcmp( ldi->name, rai->prod ) == 0 ) {
+					prod = ldi;
+					break;
+				}
+			}
+
+			if ( prod == 0 ) {
+				error(rai->loc) << "could not find production \"" <<
+						rai->prod << "\"" << endp;
+			}
+
+			rai->production = prod;
+		}
+	}
+}
 void Compiler::resolvePass()
 {
 	/*
@@ -896,9 +928,13 @@ void Compiler::resolvePass()
 	UniqueType *argvUT = argvTypeRef->resolveType( this );
 	argvElSel = argvUT->generic->elUt->structEl;
 
+	resolveReductionActions();
+
 	/* We must do this as the last step in the type resolution process because
 	 * all type resolves can cause new language elments with associated
 	 * productions. They get tacked onto the end of the list of productions.
 	 * Doing it at the end results processing a growing list. */
 	resolveProductionEls();
+
+	findReductionActionProds();
 }

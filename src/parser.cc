@@ -261,6 +261,21 @@ Namespace *BaseParser::createNamespace( const InputLoc &loc, const String &name 
 	return nspace;
 }
 
+Reduction *BaseParser::createReduction( const InputLoc loc, const String &name )
+{
+	Namespace *parent = namespaceStack.top();
+	Reduction *reduction = parent->findReduction( name );
+
+	if ( reduction == 0 ) {
+		reduction = new Reduction( loc, name );
+		parent->reductions.append( reduction );
+	}
+
+	reductionStack.push( reduction );
+
+	return reduction;
+}
+
 LexJoin *BaseParser::literalJoin( const InputLoc &loc, const String &data )
 {
 	Literal *literal = Literal::cons( loc, data, Literal::LitString );

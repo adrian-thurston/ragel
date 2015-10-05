@@ -655,6 +655,8 @@ struct Compiler
 	void makeEofElements();
 	void makeIgnoreCollectors();
 	void resolvePrecedence();
+	void resolveReductionActions();
+	void findReductionActionProds();
 
 	void declarePass();
 	void resolvePass();
@@ -1008,6 +1010,7 @@ struct Compiler
 	void declareReVars();
 
 	void writeHostCall();
+	void writeCommit();
 };
 
 void afterOpMinimize( FsmGraph *fsm, bool lastInSeq = true );

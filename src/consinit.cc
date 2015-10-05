@@ -36,6 +36,13 @@ extern "C" tree_t **host_call( program_t *prg, long code, tree_t **sp )
 	return 0;
 }
 
+extern "C" void commit_clear_parse_tree( program_t *prg, tree_t **sp, parse_tree_t *pt );
+
+extern "C" void commit_forward_recurse( program_t *prg, tree_t **root, parse_tree_t *pt )
+{
+	commit_clear_parse_tree( prg, root, pt->child );
+}
+
 using std::cout;
 using std::cerr;
 using std::endl;

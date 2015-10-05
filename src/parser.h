@@ -41,6 +41,7 @@ struct BaseParser
 
 	RegionSetVect regionStack;
 	NamespaceVect namespaceStack;
+	ReductionVect reductionStack;
 	StructStack structStack;
 	ObjectDef *localFrameTop;
 	NameScope *scopeTop;
@@ -61,6 +62,9 @@ struct BaseParser
 	
 	ObjectDef *curLocalFrame()
 		{ return localFrameTop; }
+	
+	Reduction *curReduction()
+		{ return reductionStack.top(); }
 
 	/* Lexical feedback. */
 
@@ -81,6 +85,8 @@ struct BaseParser
 			CodeBlock *redBlock, LangEl *predOf );
 	void addArgvList();
 	LexJoin *literalJoin( const InputLoc &loc, const String &data );
+
+	Reduction *createReduction( const InputLoc loc, const String &name );
 
 	void defineToken( const InputLoc &loc, String name, LexJoin *join,
 			ObjectDef *objectDef, CodeBlock *transBlock,
@@ -112,7 +118,8 @@ struct BaseParser
 	LexFactorAug *lexFactorLabel( const InputLoc &loc, const String &data,
 			LexFactorAug *factorAug );
 	LexJoin *lexOptJoin( LexJoin *join, LexJoin *context );
-	LangExpr *send( const InputLoc &loc, LangVarRef *varRef, ConsItemList *list, bool eof );
+	LangExpr *send( const InputLoc &loc, LangVarRef *varRef,
+			ConsItemList *list, bool eof );
 	LangExpr *sendTree( const InputLoc &loc, LangVarRef *varRef,
 			ConsItemList *list, bool eof );
 	LangExpr *parseCmd( const InputLoc &loc, bool tree, bool stop, ObjectField *objField,

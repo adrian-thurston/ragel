@@ -67,6 +67,8 @@ struct NameScope;
 struct IterCall;
 struct TemplateType;
 struct ObjectMethod;
+struct Reduction;
+struct Production;
 
 
 /* 
@@ -729,6 +731,7 @@ typedef DList<TokenRegion> RegionList;
 typedef DList<RegionImpl> RegionImplList;
 
 typedef Vector<Namespace*> NamespaceVect;
+typedef Vector<Reduction*> ReductionVect;
 
 /* Generics have runtime-representations, so we must track them as unique
  * types. This gives the runtimes some idea of what is contained in the
@@ -872,6 +875,7 @@ struct Namespace
 
 	/* tree_t traversal. */
 	Namespace *findNamespace( const String &name );
+	Reduction *findReduction( const String &name );
 
 	InputLoc loc;
 	String name;
@@ -901,6 +905,8 @@ struct Namespace
 	Namespace *parentNamespace;
 	NamespaceVect childNamespaces;
 
+	ReductionVect reductions;
+
 	NameScope *rootScope;
 
 	Namespace *next, *prev;
@@ -910,6 +916,39 @@ struct Namespace
 
 typedef DList<Namespace> NamespaceList;
 typedef BstSet< Namespace*, CmpOrd<Namespace*> > NamespaceSet;
+
+struct ReduceAction
+{
+	ReduceAction( const InputLoc &loc, TypeRef *nonterm,
+			const String &prod, const String &txt )
+	:
+		loc(loc), nonterm(nonterm), prod(prod),
+		txt(txt), production(0)
+	{}
+
+	InputLoc loc;
+	TypeRef *nonterm;
+	String prod;
+	String txt;
+
+	Production *production;
+
+	ReduceAction *prev, *next;
+};
+
+typedef DList<ReduceAction> ReduceActionList;
+
+struct Reduction
+{
+	Reduction( const InputLoc &loc, String name )
+		: loc(loc), name(name) {}
+
+	InputLoc loc;
+	String name;
+	int id;
+
+	ReduceActionList reduceActions;
+};
 
 /*
  * LexJoin

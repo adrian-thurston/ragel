@@ -2335,6 +2335,38 @@ struct LoadColm
 		namespaceStack.pop();
 	}
 
+	void walkRedAction( red_action RA )
+	{
+		InputLoc loc = RA.NonTerm().loc();
+		String text = RA.HostItems().text().c_str();
+
+		TypeRef *typeRef = walkTypeRef( RA.NonTerm() );
+			
+		ReduceAction *ra = new ReduceAction( loc, typeRef, RA.Prod().data(), text );
+		curReduction()->reduceActions.append( ra );
+	}
+
+	void walkReductionItem( reduction_item reductionItem )
+	{
+		switch ( reductionItem.prodName() ) {
+			case reduction_item::NonTerm: {
+				break;
+			}
+			case reduction_item::Action: {
+				walkRedAction( reductionItem.red_action() );
+				break;
+			}
+		}
+	}
+
+	void walkReductionList( _repeat_reduction_item itemList )
+	{
+		while ( !itemList.end() ) {
+			walkReductionItem( itemList.value() );
+			itemList = itemList.next();
+		}
+	}
+
 	void walkRootItem( root_item rootItem, StmtList *stmtList )
 	{
 		switch ( rootItem.prodName() ) {
@@ -2405,6 +2437,19 @@ struct LoadColm
 			LangStmt *stmt = walkGlobalDef( rootItem.global_def() );
 			if ( stmt != 0 )
 				stmtList->append( stmt );
+			break;
+		}
+		case root_item::Reduction: {
+			reduction_def RD = rootItem.reduction_def();
+
+			InputLoc loc = RD.REDUCTION().loc();
+			String id = RD.id().data();
+
+			createReduction( loc, id );
+
+			walkReductionList( RD.ItemList() );
+
+			reductionStack.pop();
 			break;
 		}}
 	}

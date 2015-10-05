@@ -878,6 +878,15 @@ Namespace *Namespace::findNamespace( const String &name )
 	return 0;
 }
 
+Reduction *Namespace::findReduction( const String &name )
+{
+	for ( ReductionVect::Iter r = reductions; r.lte(); r++ ) {
+		if ( strcmp( name, (*r)->name ) == 0 )
+			return *r;
+	}
+	return 0;
+}
+
 /* Search from a previously resolved qualification. (name 1+ in a qual list). */
 Namespace *NamespaceQual::searchFrom( Namespace *from, StringVect::Iter &qualPart )
 {
@@ -1129,6 +1138,65 @@ void Compiler::writeHostCall()
 
 }
 
+void Compiler::writeCommit()
+{
+	*outStream <<
+		"void commit_clear_parse_tree( program_t *prg, tree_t **sp, parse_tree_t *pt );\n"
+		"void commit_forward_recurse( program_t *prg, tree_t **root, parse_tree_t *pt )\n"
+		"{\n"
+		"	tree_t **sp = root;\n"
+		"\n"
+		"	parse_tree_t *lel = pt;\n"
+		"\n"
+		"recurse:\n"
+		"\n"
+		"	if ( lel->child != 0 ) {\n"
+		"		/* There are children. Must process all children first. */\n"
+		"		vm_push_ptree( lel );\n"
+		"\n"
+		"		lel = lel->child;\n"
+		"		while ( lel != 0 ) {\n"
+		"			goto recurse;\n"
+		"			resume:\n"
+		"			lel = lel->next;\n"
+		"		}\n"
+		"\n"
+		"		lel = vm_pop_ptree();\n"
+		"	}\n"
+		"\n"
+		"	/* Now can execute the reduction action. */\n"
+		"	if ( lel->shadow != 0 ) {\n"
+		"		switch ( lel->shadow->tree->id ) {\n";
+
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		for ( ReduceActionList::Iter rdi = (*r)->reduceActions; rdi.lte(); rdi++ ) {
+			int lelId = rdi->production->prodName->id;
+			int prodNum = rdi->production->prodNum;
+
+			*outStream <<
+				"		case " << lelId << ": \n"
+				"			if ( lel->shadow->tree->prod_num == " << prodNum << " ) {\n"
+				"			" << rdi->txt << "\n"
+				"			}\n"
+				"			break;\n";
+		}
+	}
+
+	*outStream <<
+		"		}\n"
+		"	}\n"
+		"\n"
+		"	commit_clear_parse_tree( prg, sp, lel->child );\n"
+		"	lel->child = 0;\n"
+		"	pt->flags |= PF_COMMITTED;\n"
+		"\n"
+		"	if ( sp != root )\n"
+		"		goto resume;\n"
+		"}\n"
+		"\n";
+}
+
+
 void Compiler::generateOutput( long activeRealm )
 {
 	FsmCodeGen *fsmGen = new FsmCodeGen( *outStream, redFsm, fsmTables );
@@ -1146,6 +1214,7 @@ void Compiler::generateOutput( long activeRealm )
 	pdaGen->writeRuntimeData( runtimeData, pdaTables );
 
 	writeHostCall();
+	writeCommit();
 
 	if ( !gblLibrary ) 
 		fsmGen->writeMain( activeRealm );
