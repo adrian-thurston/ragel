@@ -298,7 +298,7 @@ static void send_back( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	/* Downref the tree that was sent back and free the kid. */
 	colm_tree_downref( prg, sp, parse_tree->shadow->tree );
 	kid_free( prg, parse_tree->shadow );
-	parse_tree_free( prg, parse_tree );
+	parse_tree_free( pda_run, parse_tree );
 }
 
 static void set_region( struct pda_run *pda_run, int empty_ignore, parse_tree_t *tree )
@@ -317,7 +317,7 @@ static void ignore_tree( program_t *prg, struct pda_run *pda_run, tree_t *tree )
 
 	colm_increment_steps( pda_run );
 
-	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree_t *parse_tree = parse_tree_allocate( pda_run );
 	parse_tree->shadow = kid_allocate( prg );
 	parse_tree->shadow->tree = tree;
 
@@ -338,7 +338,7 @@ static void ignore_tree_art( program_t *prg, struct pda_run *pda_run, tree_t *tr
 
 	colm_increment_steps( pda_run );
 
-	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree_t *parse_tree = parse_tree_allocate( pda_run );
 	parse_tree->flags |= PF_ARTIFICIAL;
 	parse_tree->shadow = kid_allocate( prg );
 	parse_tree->shadow->tree = tree;
@@ -822,7 +822,7 @@ static void send_token( program_t *prg, tree_t **sp,
 
 	colm_increment_steps( pda_run );
 
-	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree_t *parse_tree = parse_tree_allocate( pda_run );
 	parse_tree->id = input->tree->id;
 	parse_tree->shadow = input;
 		
@@ -840,7 +840,7 @@ static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run, str
 
 	colm_increment_steps( pda_run );
 
-	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree_t *parse_tree = parse_tree_allocate( pda_run );
 	parse_tree->id = input->tree->id;
 	parse_tree->flags |= PF_ARTIFICIAL;
 	parse_tree->shadow = input;
@@ -848,7 +848,8 @@ static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run, str
 	pda_run->parse_input = parse_tree;
 }
 
-static void send_ignore_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run, struct stream_impl *is )
+static void send_ignore_tree( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run, struct stream_impl *is )
 {
 	tree_t *tree = is->funcs->consume_tree( is );
 	ignore_tree_art( prg, pda_run, tree );
@@ -876,7 +877,7 @@ static void send_collect_ignore( program_t *prg, tree_t **sp,
 
 	colm_increment_steps( pda_run );
 
-	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree_t *parse_tree = parse_tree_allocate( pda_run );
 	parse_tree->id = input->tree->id;
 	parse_tree->shadow = input;
 
@@ -922,7 +923,7 @@ static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pda_run, stru
 	pda_run->pre_region = get_next_pre_region( pda_run );
 	pda_run->fsm_cs = pda_run->fsm_tables->entry_by_region[pda_run->region];
 
-	parse_tree_t *parse_tree = parse_tree_allocate( prg );
+	parse_tree_t *parse_tree = parse_tree_allocate( pda_run );
 	parse_tree->id = input->tree->id;
 	parse_tree->shadow = input;
 	
@@ -1101,7 +1102,8 @@ static tree_t *get_parsed_root( struct pda_run *pda_run, int stop )
 	return 0;
 }
 
-static void clear_parse_tree( program_t *prg, tree_t **sp, parse_tree_t *pt )
+static void clear_parse_tree( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run, parse_tree_t *pt )
 {
 	tree_t **top = vm_ptop();
 
@@ -1130,7 +1132,7 @@ free_tree:
 		kid_free( prg, pt->shadow );
 	}
 
-	parse_tree_free( prg, pt );
+	parse_tree_free( pda_run, pt );
 
 	/* Any trees to downref? */
 	if ( sp != top ) {
@@ -1144,7 +1146,7 @@ void colm_pda_clear( program_t *prg, tree_t **sp, struct pda_run *pda_run )
 	clear_fsm_run( prg, pda_run );
 
 	/* Remaining stack and parse trees underneath. */
-	clear_parse_tree( prg, sp, pda_run->stack_top );
+	clear_parse_tree( prg, sp, pda_run, pda_run->stack_top );
 	pda_run->stack_top = 0;
 
 	/* Traverse the token list downreffing. */
@@ -1167,11 +1169,11 @@ void colm_pda_clear( program_t *prg, tree_t **sp, struct pda_run *pda_run )
 	pda_run->bt_point = 0;
 
 	/* Clear out any remaining ignores. */
-	clear_parse_tree( prg, sp, pda_run->accum_ignore );
+	clear_parse_tree( prg, sp, pda_run, pda_run->accum_ignore );
 	pda_run->accum_ignore = 0;
 
 	/* Clear the input list (scanned tokes, sent trees). */
-	clear_parse_tree( prg, sp, pda_run->parse_input );
+	clear_parse_tree( prg, sp, pda_run, pda_run->parse_input );
 	pda_run->parse_input = 0;
 
 	colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
@@ -1191,6 +1193,7 @@ void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *
 	pda_run->stop_target = stop_target;
 	pda_run->revert_on = revert_on;
 	pda_run->target_steps = -1;
+	pda_run->parse_tree_pool = &prg->parse_tree_pool;
 
 	debug( prg, REALM_PARSE, "initializing struct pda_run\n" );
 
@@ -1202,7 +1205,7 @@ void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *
 	sentinal->tree->refs = 1;
 
 	/* Init the element allocation variables. */
-	pda_run->stack_top = parse_tree_allocate( prg );
+	pda_run->stack_top = parse_tree_allocate( pda_run );
 	pda_run->stack_top->state = -1;
 	pda_run->stack_top->shadow = sentinal;
 
@@ -1411,7 +1414,7 @@ again:
 		value->tree->id = prg->rtd->prod_info[pda_run->reduction].lhs_id;
 		value->tree->prod_num = prg->rtd->prod_info[pda_run->reduction].prod_num;
 
-		pda_run->red_lel = parse_tree_allocate( prg );
+		pda_run->red_lel = parse_tree_allocate( pda_run );
 		pda_run->red_lel->id = prg->rtd->prod_info[pda_run->reduction].lhs_id;
 		pda_run->red_lel->next = 0;
 		pda_run->red_lel->cause_reduce = 0;
@@ -1712,7 +1715,7 @@ parse_error:
 				/* Free the reduced item. */
 				colm_tree_downref( prg, sp, pda_run->undo_lel->shadow->tree );
 				kid_free( prg, pda_run->undo_lel->shadow );
-				parse_tree_free( prg, pda_run->undo_lel );
+				parse_tree_free( pda_run, pda_run->undo_lel );
 
 				/* If the stacktop had right ignore attached, detach now. */
 				if ( pda_run->stack_top->flags & PF_RIGHT_IL_ATTACHED )
@@ -1737,7 +1740,7 @@ parse_error:
 
 			colm_tree_downref( prg, sp, ignore->shadow->tree );
 			kid_free( prg, ignore->shadow );
-			parse_tree_free( prg, ignore );
+			parse_tree_free( pda_run, ignore );
 		}
 		else {
 			if ( pda_run->shift_count == pda_run->commit_shift_count ) {

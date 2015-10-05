@@ -491,7 +491,7 @@ extern "C" void internalSendNamedLangEl( program_t *prg, tree_t **sp,
 
 	colm_increment_steps( pdaRun );
 
-	parse_tree_t *parseTree = parse_tree_allocate( prg );
+	parse_tree_t *parseTree = parse_tree_allocate( pdaRun );
 	parseTree->id = input->tree->id;
 	parseTree->flags |= PF_NAMED;
 	parseTree->shadow = input;

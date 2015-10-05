@@ -357,6 +357,8 @@ struct pda_run
 	tree_t *parse_error_text;
 	char not_used;
 	parse_tree_t *last_final;
+
+	struct pool_alloc *parse_tree_pool;
 };
 
 void colm_pda_init( struct colm_program *prg, struct pda_run *pda_run,

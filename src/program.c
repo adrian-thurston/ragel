@@ -239,7 +239,7 @@ int colm_delete_program( program_t *prg )
 #if DEBUG
 	long kid_lost = kid_num_lost( prg );
 	long tree_lost = tree_num_lost( prg );
-	long parse_tree_lost = parse_tree_num_lost( prg );
+	long parse_tree_lost = parse_tree_num_lost( &prg->parse_tree_pool );
 	long head_lost = head_num_lost( prg );
 	long location_lost = location_num_lost( prg );
 
@@ -262,7 +262,7 @@ int colm_delete_program( program_t *prg )
 	kid_clear( prg );
 	tree_clear( prg );
 	head_clear( prg );
-	parse_tree_clear( prg );
+	parse_tree_clear( &prg->parse_tree_pool );
 	location_clear( prg );
 
 	RunBuf *rb = prg->alloc_run_buf;

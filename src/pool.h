@@ -45,10 +45,11 @@ void tree_free( program_t *prg, tree_t *el );
 void tree_clear( program_t *prg );
 long tree_num_lost( program_t *prg );
 
-parse_tree_t *parse_tree_allocate( program_t *prg );
-void parse_tree_free( program_t *prg, parse_tree_t *el );
-void parse_tree_clear( program_t *prg );
-long parse_tree_num_lost( program_t *prg );
+/* Parse tree allocators go into pda_run structs. */
+parse_tree_t *parse_tree_allocate( struct pda_run *pda_run );
+void parse_tree_free( struct pda_run *pda_run, parse_tree_t *el );
+void parse_tree_clear( struct pool_alloc *pool_alloc );
+long parse_tree_num_lost( struct pool_alloc *pool_alloc );
 
 head_t *head_allocate( program_t *prg );
 void head_free( program_t *prg, head_t *el );

@@ -176,24 +176,24 @@ long tree_num_lost( program_t *prg )
  * parse_tree_t
  */
 
-parse_tree_t *parse_tree_allocate( program_t *prg )
+parse_tree_t *parse_tree_allocate( struct pda_run *pda_run )
 {
-	return (parse_tree_t*) pool_alloc_allocate( &prg->parse_tree_pool );
+	return (parse_tree_t*) pool_alloc_allocate( pda_run->parse_tree_pool );
 }
 
-void parse_tree_free( program_t *prg, parse_tree_t *el )
+void parse_tree_free( struct pda_run *pda_run, parse_tree_t *el )
 {
-	pool_alloc_free( &prg->parse_tree_pool, el );
+	pool_alloc_free( pda_run->parse_tree_pool, el );
 }
 
-void parse_tree_clear( program_t *prg )
+void parse_tree_clear( struct pool_alloc *pool_alloc )
 {
-	pool_alloc_clear( &prg->parse_tree_pool );
+	pool_alloc_clear( pool_alloc );
 }
 
-long parse_tree_num_lost( program_t *prg )
+long parse_tree_num_lost( struct pool_alloc *pool_alloc )
 {
-	return pool_alloc_num_lost( &prg->parse_tree_pool );
+	return pool_alloc_num_lost( pool_alloc );
 }
 
 /* 
