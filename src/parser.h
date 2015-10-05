@@ -124,7 +124,7 @@ struct BaseParser
 			ConsItemList *list, bool eof );
 	LangExpr *parseCmd( const InputLoc &loc, bool tree, bool stop, ObjectField *objField,
 			TypeRef *typeRef, FieldInitVect *fieldInitVect, ConsItemList *list,
-			bool used = true );
+			bool used, bool reduce );
 	PatternItemList *consPatternEl( LangVarRef *varRef, PatternItemList *list );
 	PatternItemList *patternElNamed( const InputLoc &loc, LangVarRef *varRef,
 			NamespaceQual *nspaceQual, const String &data, RepeatType repeatType );

@@ -56,9 +56,6 @@
 	i = (tree_t*)w; \
 } while(0)
 
-void commit_reduce( program_t *prg, tree_t **root, struct pda_run *pda_run );
-void commit_clear( program_t *prg, tree_t **root, struct pda_run *pda_run );
-
 static void init_fsm_run( program_t *prg, struct pda_run *pda_run )
 {
 	pda_run->fsm_tables = prg->rtd->fsm_tables;

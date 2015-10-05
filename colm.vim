@@ -57,7 +57,8 @@ syntax match tlNumber "false"
 syntax keyword Type
 	\ commit include literal iter
 	\ namespace lex reducefirst global include export
-	\ construct cons parse parse_tree parse_stop match require send send_tree
+	\ construct cons parse parse_tree parse_stop reduce 
+	\ match require send send_tree
 	\ preeof left right nonassoc prec context struct alias
 	\ end eos print reduction nonterm
 

@@ -37,9 +37,8 @@
 //#define true 1
 //#define false 0
 
-extern void commit_forward_recurse( program_t *prg, tree_t **root, parse_tree_t *pt );
-
-void commit_clear_parse_tree( program_t *prg, tree_t **sp, parse_tree_t *pt )
+void commit_clear_parse_tree( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run, parse_tree_t *pt )
 {
 	tree_t **top = vm_ptop();
 
@@ -69,7 +68,7 @@ free_tree:
 	}
 
 	//printf( "commit_parse_tree_free %p\n", pt );
-	parse_tree_free( prg, pt );
+	parse_tree_free( pda_run, pt );
 
 	/* Any trees to downref? */
 	if ( sp != top ) {
@@ -99,7 +98,7 @@ void commit_clear( program_t *prg, tree_t **root, struct pda_run *pda_run )
 	while ( sp != root ) {
 		pt = vm_pop_ptree();
 
-		commit_clear_parse_tree( prg, sp, pt->child );
+		commit_clear_parse_tree( prg, sp, pda_run, pt->child );
 
 		pt->flags |= PF_COMMITTED;
 		pt = pt->next;
@@ -121,7 +120,7 @@ void commit_reduce( program_t *prg, tree_t **root, struct pda_run *pda_run )
 	while ( sp != root ) {
 		pt = vm_pop_ptree();
 
-		commit_forward_recurse( prg, sp, pt );
+		commit_forward_recurse( prg, sp, pda_run, pt );
 		pt->child = 0;
 
 		pt->flags |= PF_COMMITTED;

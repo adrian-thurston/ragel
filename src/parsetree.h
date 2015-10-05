@@ -1805,7 +1805,7 @@ typedef DList<Constructor> ConsList;
 struct ParserText
 {
 	static ParserText *cons( const InputLoc &loc,
-			Namespace *nspace, ConsItemList *list, bool used = true )
+			Namespace *nspace, ConsItemList *list, bool used, bool reduce )
 	{
 		ParserText *p = new ParserText;
 		p->loc = loc;
@@ -1816,6 +1816,7 @@ struct ParserText
 		p->nextBindId = 1;
 		p->parse = true;
 		p->used = used;
+		p->reduce = reduce;
 		return p;
 	}
 
@@ -1827,6 +1828,7 @@ struct ParserText
 	long nextBindId;
 	bool parse;
 	bool used;
+	bool reduce;
 	ParserText *prev, *next;
 };
 

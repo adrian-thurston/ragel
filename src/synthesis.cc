@@ -1402,7 +1402,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	code.append( IN_CONS_GENERIC );
 	code.appendHalf( parserUT->generic->id );
 
-	if ( !parserText->used )
+	if ( parserText->reduce )
 		code.append( IN_PARSER_NOT_USED );
 
 	/*

@@ -845,9 +845,9 @@ again:
 		case IN_PARSER_NOT_USED: {
 			debug( prg, REALM_BYTECODE, "IN_PARSER_NOT_USED\n" );
 
-			//parser_t *parser = vm_pop_parser();
-			//parser->pda_run->not_used = 1;
-			//vm_push_parser( parser );
+			parser_t *parser = vm_pop_parser();
+			parser->pda_run->not_used = 1;
+			vm_push_parser( parser );
 			break;
 		}
 		case IN_SET_PARSER_CONTEXT: {
@@ -4698,13 +4698,13 @@ again:
 			case IN_VMAP_INSERT_BKT: {
 				short gen_id;
 				uchar inserted;
-				word_t wmap_el;
+				//word_t wmap_el;
 
 				read_half( gen_id );
 				read_byte( inserted );
-				read_word( wmap_el );
+				consume_word(); //read_word( wmap_el );
 
-				map_el_t *map_el = (map_el_t*)wmap_el;
+				//map_el_t *map_el = (map_el_t*)wmap_el;
 
 				debug( prg, REALM_BYTECODE, "IN_VMAP_INSERT_BKT %d\n",
 						(int)inserted );
@@ -4733,17 +4733,17 @@ again:
 
 			case IN_VLIST_POP_HEAD_BKT: {
 				short gen_id;
-				word_t result;
+				//word_t result;
 				read_half( gen_id );
-				read_word( result );
+				consume_word(); //read_word( result );
 				break;
 			}
 
 			case IN_VLIST_POP_TAIL_BKT: {
 				short gen_id;
-				word_t result;
+				//word_t result;
 				read_half( gen_id );
-				read_word( result );
+				consume_word(); //read_word( result );
 				break;
 			}
 

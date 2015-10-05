@@ -336,7 +336,8 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 			String("start"), RepeatNone );
 
 	/* Parse the above list. */
-	LangExpr *parseExpr = parseCmd( internal, false, false, objField, typeRef, 0, list );
+	LangExpr *parseExpr = parseCmd( internal, false, false, objField,
+			typeRef, 0, list, true, false );
 	LangStmt *parseStmt = LangStmt::cons( internal, LangStmt::ExprType, parseExpr );
 	stmtList->append( parseStmt );
 }

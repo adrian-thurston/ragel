@@ -36,11 +36,10 @@ extern "C" tree_t **host_call( program_t *prg, long code, tree_t **sp )
 	return 0;
 }
 
-extern "C" void commit_clear_parse_tree( program_t *prg, tree_t **sp, parse_tree_t *pt );
-
-extern "C" void commit_forward_recurse( program_t *prg, tree_t **root, parse_tree_t *pt )
+extern "C" void commit_forward_recurse( program_t *prg, tree_t **root,
+		struct pda_run *pda_run, parse_tree_t *pt )
 {
-	commit_clear_parse_tree( prg, root, pt->child );
+	commit_clear_parse_tree( prg, root, pda_run, pt->child );
 }
 
 using std::cout;
@@ -817,7 +816,8 @@ void ConsInit::parseInput( StmtList *stmtList )
 			String("start"), RepeatNone );
 
 	/* Parse the above list. */
-	LangExpr *parseExpr = parseCmd( internal, false, false, objField, typeRef, 0, list );
+	LangExpr *parseExpr = parseCmd( internal, false, false, objField,
+			typeRef, 0, list, true, false );
 	LangStmt *parseStmt = LangStmt::cons( internal, LangStmt::ExprType, parseExpr );
 	stmtList->append( parseStmt );
 }

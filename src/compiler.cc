@@ -1141,8 +1141,9 @@ void Compiler::writeHostCall()
 void Compiler::writeCommit()
 {
 	*outStream <<
-		"void commit_clear_parse_tree( program_t *prg, tree_t **sp, parse_tree_t *pt );\n"
-		"void commit_forward_recurse( program_t *prg, tree_t **root, parse_tree_t *pt )\n"
+		"\n"
+		"void commit_forward_recurse( program_t *prg, tree_t **root,\n"
+		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
 		"{\n"
 		"	tree_t **sp = root;\n"
 		"\n"
@@ -1186,7 +1187,7 @@ void Compiler::writeCommit()
 		"		}\n"
 		"	}\n"
 		"\n"
-		"	commit_clear_parse_tree( prg, sp, lel->child );\n"
+		"	commit_clear_parse_tree( prg, sp, pda_run, lel->child );\n"
 		"	lel->child = 0;\n"
 		"	pt->flags |= PF_COMMITTED;\n"
 		"\n"

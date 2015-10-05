@@ -448,6 +448,15 @@ long colm_parse_finish( tree_t **result, struct colm_program *prg, tree_t **sp,
 long colm_parse_undo_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
 		stream_t *input, long steps, long entry );
 
+void commit_clear_parse_tree( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run, parse_tree_t *pt );
+void commit_forward_recurse( program_t *prg, tree_t **root,
+		struct pda_run *pda_run, parse_tree_t *pt );
+
+void commit_reduce( program_t *prg, tree_t **root, struct pda_run *pda_run );
+void commit_clear( program_t *prg, tree_t **root, struct pda_run *pda_run );
+
+
 #ifdef __cplusplus
 }
 #endif
