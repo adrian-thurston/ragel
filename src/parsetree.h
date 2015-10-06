@@ -919,15 +919,15 @@ typedef BstSet< Namespace*, CmpOrd<Namespace*> > NamespaceSet;
 
 struct ReduceNonTerm
 {
-	ReduceNonTerm( const InputLoc &loc, TypeRef *nonterm, const String &txt )
+	ReduceNonTerm( const InputLoc &loc, TypeRef *nonTerm, const String &txt )
 	:
 		loc(loc),
-		nonterm(nonterm),
+		nonTerm(nonTerm),
 		txt(txt)
 	{}
 
 	InputLoc loc;
-	TypeRef *nonterm;
+	TypeRef *nonTerm;
 	String txt;
 
 	ReduceNonTerm *prev, *next;
@@ -935,15 +935,16 @@ struct ReduceNonTerm
 
 struct ReduceAction
 {
-	ReduceAction( const InputLoc &loc, TypeRef *nonterm,
+	ReduceAction( const InputLoc &loc, TypeRef *nonTerm,
 			const String &prod, const String &txt )
 	:
-		loc(loc), nonterm(nonterm), prod(prod),
+		loc(loc), nonTerm(nonTerm),
+		prod(prod),
 		txt(txt), production(0)
 	{}
 
 	InputLoc loc;
-	TypeRef *nonterm;
+	TypeRef *nonTerm;
 	String prod;
 	String txt;
 

@@ -885,9 +885,11 @@ void Compiler::resolvePrecedence()
 void Compiler::resolveReductionActions()
 {
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
-		for ( ReduceActionList::Iter rai = (*r)->reduceActions; rai.lte(); rai++ ) {
-			rai->nonterm->resolveType( this );
-		}
+		for ( ReduceNonTermList::Iter rni = (*r)->reduceNonTerms; rni.lte(); rni++ )
+			rni->nonTerm->resolveType( this );
+
+		for ( ReduceActionList::Iter rai = (*r)->reduceActions; rai.lte(); rai++ )
+			rai->nonTerm->resolveType( this );
 	}
 }
 
@@ -895,8 +897,8 @@ void Compiler::findReductionActionProds()
 {
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		for ( ReduceActionList::Iter rai = (*r)->reduceActions; rai.lte(); rai++ ) {
-			rai->nonterm->resolveType( this );
-			LangEl *langEl = rai->nonterm->uniqueType->langEl;
+			rai->nonTerm->resolveType( this );
+			LangEl *langEl = rai->nonTerm->uniqueType->langEl;
 
 			Production *prod = 0;
 			for ( LelDefList::Iter ldi = langEl->defList; ldi.lte(); ldi++ ) {

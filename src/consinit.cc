@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2012 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2006-2015 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -41,6 +41,8 @@ extern "C" void commit_forward_recurse( program_t *prg, tree_t **root,
 {
 	commit_clear_parse_tree( prg, root, pda_run, pt->child );
 }
+
+extern "C" long commit_union_sz() { return 0; }
 
 using std::cout;
 using std::cerr;

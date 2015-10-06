@@ -457,6 +457,8 @@ void commit_forward_recurse( program_t *prg, tree_t **root,
 void commit_reduce( program_t *prg, tree_t **root, struct pda_run *pda_run );
 void commit_clear( program_t *prg, tree_t **root, struct pda_run *pda_run );
 
+long commit_union_sz();
+
 
 #ifdef __cplusplus
 }

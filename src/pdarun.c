@@ -1201,7 +1201,7 @@ void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *
 	pda_run->reducer = reducer;
 
 	if ( reducer ) {
-		init_pool_alloc( &pda_run->local_pool, sizeof(parse_tree_t) + sizeof(void*) * 8 );
+		init_pool_alloc( &pda_run->local_pool, sizeof(parse_tree_t) + commit_union_sz() );
 		pda_run->parse_tree_pool = &pda_run->local_pool;
 	}
 

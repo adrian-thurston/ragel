@@ -1145,7 +1145,11 @@ void Compiler::writeCommitStub()
 		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
 		"{\n"
 		"	commit_clear_parse_tree( prg, root, pda_run, pt->child );\n"
-		"}\n";
+		"}\n"
+		"\n"
+		"long commit_union_sz() { return 0; }\n"
+		"\n";
+	;
 }
 
 void Compiler::writeCommit()
@@ -1166,7 +1170,36 @@ void Compiler::writeCommit()
 		"#include <string.h>\n"
 		"#include <assert.h>\n"
 		"\n"
-		"#include <iostream>\n"
+		"#include <iostream>\n";
+
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		for ( ReduceNonTermList::Iter rdi = (*r)->reduceNonTerms; rdi.lte(); rdi++ ) {
+			*outStream <<
+				"struct lel_" << rdi->nonTerm->uniqueType->langEl->fullName << "\n"
+				"{" << rdi->txt << "};\n";
+		}
+	}
+
+	*outStream << 
+		"union commit_reduce_union\n"
+		"{\n";
+
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		for ( ReduceNonTermList::Iter rdi = (*r)->reduceNonTerms; rdi.lte(); rdi++ ) {
+			LangEl *langEl = rdi->nonTerm->uniqueType->langEl;
+			*outStream <<
+				"	lel_" << langEl->fullName << " " << langEl->fullName << ";\n";
+		}
+	}
+
+	*outStream <<
+		"};\n"
+		"\n";
+
+	*outStream <<
+		"long commit_union_sz() { return sizeof( commit_reduce_union ); }\n";
+
+	*outStream <<
 		"\n"
 		"void commit_forward_recurse( program_t *prg, tree_t **root,\n"
 		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
