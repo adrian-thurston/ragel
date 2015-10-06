@@ -338,8 +338,8 @@ def reduction_def
 	[REDUCTION id ItemList: reduction_item* END]
 
 lex
-	token ROPEN / '{' /
-	token RCLOSE / '}' /
+	token RED_OPEN / '{' /
+	token RED_CLOSE / '}' /
 
 	token red_id /
 		( 'a' .. 'z' | 'A' .. 'Z' | '_' ) .
@@ -360,14 +360,17 @@ lex
 		'\"' . ( ^( '\"' | '\\' ) | '\\' . any )* . ( '\"' | '\"i' )
 	/
 
+	token RED_LHS / '$' . '$' /
+	token RED_RHS / '$' . red_id /
+
 	token red_any / any /
 end
 
 def red_nonterm
-	[type_ref ROPEN HostItems: host_item* RCLOSE]
+	[type_ref RED_OPEN HostItems: host_item* RED_CLOSE]
 
 def red_action
-	[type_ref COLON id ROPEN HostItems: host_item* RCLOSE]
+	[type_ref COLON id RED_OPEN HostItems: host_item* RED_CLOSE]
 
 def host_item
 	[red_id]
@@ -375,6 +378,8 @@ def host_item
 |	[red_comment]
 |	[red_ws]
 |	[red_any]
+|	[RED_LHS]
+|	[RED_RHS]
 
 def reduction_item
 	[red_nonterm] :NonTerm commit

@@ -2346,13 +2346,47 @@ struct LoadColm
 		namespaceStack.pop();
 	}
 
+	void walkRedItem( host_item item, ReduceTextItemList &list )
+	{
+		if ( item.RED_LHS() != 0 ) {
+
+		}
+		else if ( item.RED_RHS() != 0 ) {
+
+		}
+		else {
+			if ( list.length() > 0 && list.tail->type == ReduceTextItem::Txt ) {
+				std::string txt = item.text();
+				list.tail->txt.append( txt.c_str(), txt.size() );
+			}
+			else {
+				ReduceTextItem *rti = new ReduceTextItem;
+				rti->type = ReduceTextItem::Txt;
+				rti->txt = item.text().c_str();
+				list.append( rti );
+			}
+		}
+	}
+
+	void walkRedItemList( _repeat_host_item itemList, ReduceTextItemList &list )
+	{
+		while ( !itemList.end() ) {
+			walkRedItem( itemList.value(), list );
+			itemList = itemList.next();
+		}
+	}
+
 	void walkRedNonTerm( red_nonterm RN )
 	{
-		InputLoc loc = RN.ROPEN().loc();
-		String text = RN.HostItems().text().c_str();
+		InputLoc loc = RN.RED_OPEN().loc();
+
+
 		TypeRef *typeRef = walkTypeRef( RN.type_ref() );
 
-		ReduceNonTerm *rnt = new ReduceNonTerm( loc, typeRef, text );
+		ReduceNonTerm *rnt = new ReduceNonTerm( loc, typeRef );
+
+		walkRedItemList( RN.HostItems(), rnt->itemList );
+
 		curReduction()->reduceNonTerms.append( rnt );
 	}
 
@@ -2363,7 +2397,10 @@ struct LoadColm
 
 		TypeRef *typeRef = walkTypeRef( RA.type_ref() );
 			
-		ReduceAction *ra = new ReduceAction( loc, typeRef, RA.id().data(), text );
+		ReduceAction *ra = new ReduceAction( loc, typeRef, RA.id().data() );
+
+		walkRedItemList( RA.HostItems(), ra->itemList );
+
 		curReduction()->reduceActions.append( ra );
 	}
 

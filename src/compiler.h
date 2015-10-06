@@ -1011,6 +1011,7 @@ struct Compiler
 
 	void writeHostCall();
 	void writeCommit();
+	void writeHostItemList( const ReduceTextItemList &list );
 	void writeCommitStub();
 };
 

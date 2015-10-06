@@ -1152,6 +1152,17 @@ void Compiler::writeCommitStub()
 	;
 }
 
+void Compiler::writeHostItemList( const ReduceTextItemList &list )
+{
+	for ( ReduceTextItemList::Iter i = list; i.lte(); i++ ) {
+		switch ( i->type ) {
+			case ReduceTextItem::Txt:
+				*outStream << i->txt;
+				break;
+		}
+	}
+}
+
 void Compiler::writeCommit()
 {
 	*outStream <<
@@ -1176,7 +1187,12 @@ void Compiler::writeCommit()
 		for ( ReduceNonTermList::Iter rdi = (*r)->reduceNonTerms; rdi.lte(); rdi++ ) {
 			*outStream <<
 				"struct lel_" << rdi->nonTerm->uniqueType->langEl->fullName << "\n"
-				"{" << rdi->txt << "};\n";
+				"{";
+
+			writeHostItemList( rdi->itemList );
+
+			*outStream <<
+				"};\n";
 		}
 	}
 
@@ -1240,8 +1256,11 @@ void Compiler::writeCommit()
 
 			*outStream <<
 				"		case " << lelId << ": \n"
-				"			if ( kid->tree->prod_num == " << prodNum << " ) {\n"
-				"			" << rdi->txt << "\n"
+				"			if ( kid->tree->prod_num == " << prodNum << " ) {\n";
+
+			writeHostItemList( rdi->itemList );
+
+			*outStream <<
 				"			}\n"
 				"			break;\n";
 		}

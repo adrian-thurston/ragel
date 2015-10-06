@@ -5,8 +5,6 @@
 extern "C" {
 #endif
 
-#include <stdbool.h>
-
 typedef void (*colm_destructor_t)( struct colm_program *prg,
 		tree_t **sp, struct colm_struct *s );
 
@@ -131,7 +129,7 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 	colm_struct_get_addr( obj, map_el_t*, prg->rtd->generic_info[genId].el_offset )
 
 parser_t *colm_parser_new( struct colm_program *prg,
-		struct generic_info *gi, bool reducer );
+		struct generic_info *gi, int reducer );
 stream_t *colm_stream_new( struct colm_program *prg );
 stream_t *colm_stream_new_struct( struct colm_program *prg );
 

@@ -76,7 +76,7 @@ void colm_parser_destroy( program_t *prg, tree_t **sp, struct colm_struct *s )
 	colm_tree_downref( prg, sp, parser->result );
 }
 
-parser_t *colm_parser_new( program_t *prg, struct generic_info *gi, bool reducer )
+parser_t *colm_parser_new( program_t *prg, struct generic_info *gi, int reducer )
 {
 	struct pda_run *pda_run = malloc( sizeof(struct pda_run) );
 

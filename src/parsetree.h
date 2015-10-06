@@ -917,18 +917,33 @@ struct Namespace
 typedef DList<Namespace> NamespaceList;
 typedef BstSet< Namespace*, CmpOrd<Namespace*> > NamespaceSet;
 
+struct ReduceTextItem
+{
+	enum Type {
+		LhsRef,
+		RhsRef,
+		Txt
+	};
+
+	Type type;
+	String txt;
+
+	ReduceTextItem *prev, *next;
+};
+
+typedef DList<ReduceTextItem> ReduceTextItemList;
+
 struct ReduceNonTerm
 {
-	ReduceNonTerm( const InputLoc &loc, TypeRef *nonTerm, const String &txt )
+	ReduceNonTerm( const InputLoc &loc, TypeRef *nonTerm )
 	:
 		loc(loc),
-		nonTerm(nonTerm),
-		txt(txt)
+		nonTerm(nonTerm)
 	{}
 
 	InputLoc loc;
 	TypeRef *nonTerm;
-	String txt;
+	ReduceTextItemList itemList;
 
 	ReduceNonTerm *prev, *next;
 };
@@ -936,17 +951,18 @@ struct ReduceNonTerm
 struct ReduceAction
 {
 	ReduceAction( const InputLoc &loc, TypeRef *nonTerm,
-			const String &prod, const String &txt )
+			const String &prod )
 	:
 		loc(loc), nonTerm(nonTerm),
 		prod(prod),
-		txt(txt), production(0)
+		production(0)
 	{}
 
 	InputLoc loc;
 	TypeRef *nonTerm;
 	String prod;
-	String txt;
+	ReduceTextItemList itemList;
+
 
 	Production *production;
 
