@@ -61,7 +61,7 @@ libprog_a_SOURCES = \
 	fsmgraph.cc pdagraph.cc pdabuild.cc pdacodegen.cc fsmcodegen.cc \
 	redfsm.cc fsmexec.cc redbuild.cc closure.cc fsmap.cc \
 	dotgen.cc pcheck.cc ctinput.cc declare.cc codegen.cc \
-	exports.cc compiler.cc parser.cc
+	exports.cc compiler.cc parser.cc reduce.cc
 
 libprog_a_CXXFLAGS = $(common_CFLAGS)
 

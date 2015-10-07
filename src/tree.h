@@ -256,6 +256,8 @@ tree_t *colm_tree_get_field( tree_t *tree, word_t field );
 tree_t *get_field_split( struct colm_program *prg, tree_t *tree, word_t field );
 tree_t *get_rhs_el( struct colm_program *prg, tree_t *lhs, long position );
 kid_t *get_rhs_el_kid( struct colm_program *prg, tree_t *lhs, long position );
+parse_tree_t *get_rhs_parse_tree( struct colm_program *prg,
+		parse_tree_t *lhs, long position );
 void colm_tree_set_field( struct colm_program *prg, tree_t *tree, long field, tree_t *value );
 
 void set_triter_cur( struct colm_program *prg, tree_iter_t *iter, tree_t *tree );

@@ -24,6 +24,10 @@
 #include <iostream>
 #include <assert.h>
 
+/*
+ * Type Resolution.
+ */
+
 using std::cout;
 using std::cerr;
 using std::endl;

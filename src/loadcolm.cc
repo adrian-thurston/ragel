@@ -2349,10 +2349,15 @@ struct LoadColm
 	void walkRedItem( host_item item, ReduceTextItemList &list )
 	{
 		if ( item.RED_LHS() != 0 ) {
-
+			ReduceTextItem *rti = new ReduceTextItem;
+			rti->type = ReduceTextItem::LhsRef;
+			list.append( rti );
 		}
 		else if ( item.RED_RHS() != 0 ) {
-
+			ReduceTextItem *rti = new ReduceTextItem;
+			rti->type = ReduceTextItem::RhsRef;
+			rti->txt = item.RED_RHS().text().c_str();
+			list.append( rti );
 		}
 		else {
 			if ( list.length() > 0 && list.tail->type == ReduceTextItem::Txt ) {

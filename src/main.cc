@@ -734,7 +734,6 @@ int main(int argc, const char **argv)
 			openCommit();
 			pd->writeCommit();
 			delete outStream;
-
 		}
 	}
 

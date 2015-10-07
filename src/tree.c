@@ -1152,6 +1152,15 @@ kid_t *get_rhs_el_kid( program_t *prg, tree_t *lhs, long position )
 	return pos;
 }
 
+parse_tree_t *get_rhs_parse_tree( program_t *prg, parse_tree_t *lhs, long position )
+{
+	parse_tree_t *pos = lhs->child;
+	while ( position > 0 ) {
+		pos = pos->next;
+		position -= 1;
+	}
+	return pos;
+}
 
 tree_t *colm_get_rhs_val( program_t *prg, tree_t *tree, int *a )
 {
