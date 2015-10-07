@@ -82,28 +82,6 @@ static int been_committed( parse_tree_t *parse_tree )
 	return parse_tree->flags & PF_COMMITTED;
 }
 
-void commit_clear( program_t *prg, tree_t **root, struct pda_run *pda_run )
-{
-	tree_t **sp = root;
-	parse_tree_t *pt = pda_run->stack_top;
-
-	/* The top level of the stack is linked right to left. This is the
-	 * traversal order we need for committing. */
-	while ( pt != 0 && !been_committed( pt ) ) {
-		vm_push_ptree( pt );
-		pt = pt->next;
-	}
-
-	while ( sp != root ) {
-		pt = vm_pop_ptree();
-
-		commit_clear_parse_tree( prg, sp, pda_run, pt->child );
-
-		pt->flags |= PF_COMMITTED;
-		pt = pt->next;
-	}
-}
-
 void commit_reduce( program_t *prg, tree_t **root, struct pda_run *pda_run )
 {
 	tree_t **sp = root;
@@ -119,7 +97,7 @@ void commit_reduce( program_t *prg, tree_t **root, struct pda_run *pda_run )
 	while ( sp != root ) {
 		pt = vm_pop_ptree();
 
-		commit_forward_recurse( prg, sp, pda_run, pt );
+		commit_reduce_forward( prg, sp, pda_run, pt );
 		pt->child = 0;
 
 		pt->flags |= PF_COMMITTED;

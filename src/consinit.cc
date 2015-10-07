@@ -36,7 +36,7 @@ extern "C" tree_t **host_call( program_t *prg, long code, tree_t **sp )
 	return 0;
 }
 
-extern "C" void commit_forward_recurse( program_t *prg, tree_t **root,
+extern "C" void commit_reduce_forward( program_t *prg, tree_t **root,
 		struct pda_run *pda_run, parse_tree_t *pt )
 {
 	commit_clear_parse_tree( prg, root, pda_run, pt->child );

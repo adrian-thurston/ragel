@@ -43,7 +43,7 @@
 void Compiler::writeCommitStub()
 {
 	*outStream <<
-		"void commit_forward_recurse( program_t *prg, tree_t **root,\n"
+		"void commit_reduce_forward( program_t *prg, tree_t **root,\n"
 		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
 		"{\n"
 		"	commit_clear_parse_tree( prg, root, pda_run, pt->child );\n"
@@ -54,42 +54,94 @@ void Compiler::writeCommitStub()
 	;
 }
 
-void Compiler::writeHostItemList( LangEl *prodName, int prodNum,
+void Compiler::loadRefs( Production *production, const ReduceTextItemList &list )
+{
+	ObjectDef *objectDef = production->prodName->objectDef;
+	Vector<ProdEl*> rhsUsed;
+	rhsUsed.setAsNew( production->prodElList->length() );
+
+	bool lhsUsed = false;
+	for ( ReduceTextItemList::Iter i = list; i.lte(); i++ ) {
+		if ( i->type == ReduceTextItem::LhsRef ) {
+			lhsUsed = true;
+		}
+
+		if ( i->type == ReduceTextItem::RhsRef ) {
+			String name( i->txt.data + 1, i->txt.length() - 1 );
+			ObjectField *field = objectDef->rootScope->findField( name );
+			if ( field != 0 ) {
+				for ( Vector<RhsVal>::Iter r = field->rhsVal; r.lte(); r++ ) {
+					if ( r->prodEl->production == production )
+						rhsUsed[r->prodEl->pos] = r->prodEl;
+				}
+			}
+		}
+	}
+
+	if ( lhsUsed ) {
+		*outStream <<
+			"	lel_" << production->prodName->fullName << " *_lhs = "
+				"&((commit_reduce_union*)(lel+1))->" <<
+				production->prodName->fullName << ";\n";
+	}
+
+	for ( Vector<ProdEl*>::Iter rhs = rhsUsed; rhs.lte(); rhs++ ) {
+		if ( *rhs != 0 ) {
+			ProdEl *prodEl = *rhs;
+			if ( prodEl->production == production ) {
+				if ( prodEl->langEl->type == LangEl::Term ) {
+					*outStream <<
+						"	colm_data *_rhs" << rhs.pos() << " = "
+							"get_rhs_el_kid( prg, kid->tree, "
+							<< prodEl->pos << ")->tree->tokdata;\n";
+				}
+				else {
+					*outStream <<
+							"lel_" << prodEl->langEl->fullName << " *"
+							"_rhs" << rhs.pos() << " = &((commit_reduce_union*)"
+							"(get_rhs_parse_tree( prg, lel, " <<
+							prodEl->pos << ")+1))->" <<
+							prodEl->langEl->fullName << ";\n";
+				}
+			}
+
+		}
+	}
+}
+
+void Compiler::writeRhsRef( Production *production, ReduceTextItem *i )
+{
+	ObjectDef *objectDef = production->prodName->objectDef;
+	String name( i->txt.data + 1, i->txt.length() - 1 );
+
+	/* Find the field in the rhsVal using capture field. */
+	ObjectField *field = objectDef->rootScope->findField( name );
+	if ( field != 0 ) {
+		for ( Vector<RhsVal>::Iter r = field->rhsVal;
+				r.lte(); r++ )
+		{
+			if ( r->prodEl->production == production )
+				*outStream << "_rhs" << r->prodEl->pos;
+		}
+	}
+}
+
+void Compiler::writeLhsRef( Production *production, ReduceTextItem *i )
+{
+	*outStream << "_lhs";
+}
+
+void Compiler::writeHostItemList( Production *production,
 		const ReduceTextItemList &list )
 {
 	for ( ReduceTextItemList::Iter i = list; i.lte(); i++ ) {
 		switch ( i->type ) {
-			case ReduceTextItem::RhsRef: {
-				String name( i->txt.data + 1, i->txt.length() - 1 );
-
-				/* Find the field in the rhsVal using capture field. */
-				ObjectField *field = prodName->objectDef->rootScope->findField( name );
-				if ( field != 0 ) {
-					for ( Vector<RhsVal>::Iter r = field->rhsVal;
-							r.lte(); r++ )
-					{
-						if ( r->prodEl->production->prodNum == prodNum ) {
-							if ( r->prodEl->langEl->type == LangEl::Term ) {
-								*outStream << "(get_rhs_el_kid( prg, kid->tree, "
-										<< r->prodEl->pos << ")->tree->tokdata)";
-							}
-							else {
-								*outStream << "(&((commit_reduce_union*)"
-										"(get_rhs_parse_tree( prg, lel, " <<
-										r->prodEl->pos << ")+1))->" <<
-										r->prodEl->langEl->fullName << ")";
-							}
-						}
-					}
-				}
-					
+			case ReduceTextItem::RhsRef:
+				writeRhsRef( production, i );
 				break;
-			}
 			case ReduceTextItem::LhsRef:
-				*outStream << "(&((commit_reduce_union*)(lel+1))->" <<
-						prodName->fullName << ")";
+				writeLhsRef( production, i );
 				break;
-					
 			case ReduceTextItem::Txt:
 				*outStream << i->txt;
 				break;
@@ -123,7 +175,7 @@ void Compiler::writeCommit()
 				"struct lel_" << rdi->nonTerm->uniqueType->langEl->fullName << "\n"
 				"{";
 
-			writeHostItemList( 0, 0, rdi->itemList );
+			writeHostItemList( 0, rdi->itemList );
 
 			*outStream <<
 				"};\n";
@@ -151,7 +203,7 @@ void Compiler::writeCommit()
 
 	*outStream <<
 		"\n"
-		"void commit_forward_recurse( program_t *prg, tree_t **root,\n"
+		"void commit_reduce_forward( program_t *prg, tree_t **root,\n"
 		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
 		"{\n"
 		"	tree_t **sp = root;\n"
@@ -192,7 +244,8 @@ void Compiler::writeCommit()
 				"		case " << lelId << ": {\n"
 				"			if ( kid->tree->prod_num == " << prodNum << " ) {\n";
 
-			writeHostItemList( rdi->production->prodName, prodNum, rdi->itemList );
+			loadRefs( rdi->production, rdi->itemList );
+			writeHostItemList( rdi->production, rdi->itemList );
 
 			*outStream <<
 				"			}\n"

@@ -451,11 +451,10 @@ long colm_parse_undo_frag( struct colm_program *prg, tree_t **sp, struct pda_run
 
 void commit_clear_parse_tree( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, parse_tree_t *pt );
-void commit_forward_recurse( program_t *prg, tree_t **root,
+void commit_reduce_forward( program_t *prg, tree_t **root,
 		struct pda_run *pda_run, parse_tree_t *pt );
-
-void commit_reduce( program_t *prg, tree_t **root, struct pda_run *pda_run );
-void commit_clear( program_t *prg, tree_t **root, struct pda_run *pda_run );
+void commit_reduce( program_t *prg, tree_t **root,
+		struct pda_run *pda_run );
 
 long commit_union_sz();
 

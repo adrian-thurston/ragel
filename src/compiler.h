@@ -1009,11 +1009,13 @@ struct Compiler
 
 	void declareReVars();
 
+	void loadRefs( Production *production, const ReduceTextItemList &list );
+
 	void writeHostCall();
 	void writeCommit();
-	void writeHostItemList( LangEl *prodName, const ReduceTextItemList &list );
-	void writeHostItemList( LangEl *prodName, int prodNum,
-			const ReduceTextItemList &list );
+	void writeRhsRef( Production *production, ReduceTextItem *i );
+	void writeLhsRef( Production *production, ReduceTextItem *i );
+	void writeHostItemList( Production *production, const ReduceTextItemList &list );
 	void writeCommitStub();
 };
 
