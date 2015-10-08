@@ -366,23 +366,23 @@ namespace ragel
 	|	[]
 
 	def action_spec
-		[`action word opt_action_params action_block] commit
+		[`action word opt_action_params action_block] :ActionSpec commit
 
 	#
 	# Machine Instantiations.
 	#
 	def assignment
-		[opt_export word `= join `;] commit
+		[opt_export word `= join `;] :Assignment commit
 
 	def instantiation
-		[opt_export word `:= lm `;] commit
+		[opt_export word `:= lm `;] :Instantiation commit
 
 	def nfa_expr
 		[nfa_expr `| term] :Union
 	|	[term] :Base
 
 	def nfa_union
-		[word `|= `( uint `, Unused: uint `) nfa_expr `;] commit
+		[word `|= `( uint `, Unused: uint `) nfa_expr `;] :NfaUnion commit
 
 	def alphtype_type
 		[W1: word] :One
@@ -397,8 +397,11 @@ namespace ragel
 		[`export] :Export
 	|	[] :Base
 
+	def write_arg
+		[word] :Word
+
 	def machine_name
-		[`machine word `;]
+		[`machine word `;] :MachineName
 
 	def statement
 		[machine_name] :MachineName commit
@@ -411,7 +414,7 @@ namespace ragel
 	|	[`variable variable_name inline_expr_reparse] :Variable commit
 	|	[`alphtype alphtype_type `;] :AlphType commit
 	|	[`access inline_expr_reparse] :Access commit
-	|	[`write Cmd: word ArgList: word* `;] :Write commit
+	|	[`write Cmd: word ArgList: write_arg* `;] :Write commit
 	|	[`getkey inline_expr_reparse] :GetKey commit
 	|	[`import string `;] :Import commit
 	|	[`include include_spec `;] :Include commit

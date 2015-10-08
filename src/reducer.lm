@@ -1,0 +1,141 @@
+reduction load
+	ragel::machine_name
+	{
+		std::string *data;
+	}
+	
+	ragel::factor :AlphabetNum
+	{
+		//std::cout << " factor -> [string]\n";
+	}
+
+	#
+	# def statement
+	#
+
+	ragel::machine_name :MachineName
+	{
+		InputLoc sectionLoc;
+		string fileName = "input.rl";
+		string machine( $word->data, $word->length );
+
+		if ( includeDepth > 0 ) {
+			/* Check if the the machine is the one we are searching for. If
+			 * not, reset pd. Otherwise, rename it to target machine because we
+			 * are drawing the statements into target. */
+			if ( machine != searchMachine ) {
+				pd = 0;
+				return;
+			}
+
+			machine = targetMachine;
+		}
+
+		SectionDictEl *sdEl = id.sectionDict.find( machine.c_str() );
+		if ( sdEl == 0 ) {
+			Section *section = new Section( strdup(machine.c_str() ) );
+			sdEl = new SectionDictEl( section->sectionName );
+			sdEl->value = section;
+			id.sectionDict.insert( sdEl );
+		}
+
+		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
+		if ( pdEl == 0 ) {
+			pdEl = new ParseDataDictEl( machine );
+			pdEl->value = new ParseData( &id, fileName, machine,
+					id.nextMachineId++, sectionLoc, hostLang,
+					minimizeLevel, minimizeOpt );
+			id.parseDataDict.insert( pdEl );
+			id.parseDataList.append( pdEl->value );
+		}
+
+		section = sdEl->value;
+		pd = pdEl->value;
+	}
+
+	ragel::write_arg :Word
+	{
+		string arg( $word->data, $word->length );
+		writeArgs.append( arg );
+	}
+
+	# def opt_export
+	#	[`export] :Export
+	# |	[] :Base
+	ragel::opt_export
+	{
+		bool isSet;
+	}
+
+	ragel::opt_export :Export
+	{
+		$$->isSet = true;
+	}
+
+	ragel::opt_export :Base
+	{
+		$$->isSet = false;
+	}
+
+	ragel::assignment :Assignment
+	{
+		InputLoc loc = @word;
+
+		bool exportMachine = $opt_export->isSet;
+		if ( exportMachine )
+			exportContext.append( true );
+
+//		string name = loadMachineName( Assignment.word().text() );
+//
+//		/* Main machine must be an instance. */
+//		bool isInstance = false;
+//		if ( name == MAIN_MACHINE ) {
+//			warning(loc) << "main machine will be implicitly instantiated" << endl;
+//			isInstance = true;
+//		}
+//
+//		MachineDef *machineDef = new MachineDef( loadJoin( Assignment.join() ) );
+//
+//		/* Generic creation of machine for instantiation and assignment. */
+//		tryMachineDef( loc, name, machineDef, isInstance );
+
+		if ( exportMachine )
+			exportContext.remove( exportContext.length()-1 );
+
+//		/* Pass a location to join_or_lm */
+//		if ( machineDef->join != 0 )
+//			machineDef->join->loc = loc;
+	}
+
+	ragel::instantiation :Instantiation
+	{
+		//std::cout << " assignment\n";
+	}
+
+	ragel::statement :Write
+	{
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::Write;
+		inputItem->loc = @Cmd;
+		inputItem->name = pd->sectionName;
+		inputItem->pd = pd;
+
+		section->lastReference = inputItem;
+
+		string cmd( $Cmd->data, $Cmd->length );
+		inputItem->writeArgs.append( cmd );
+		inputItem->writeArgs.append( writeArgs );
+
+		id.inputItems.append( inputItem );
+
+		for ( Vector<std::string>::Iter a = inputItem->writeArgs; a.lte(); a++ ) {
+			std::cout << "write: " << *a << std::endl;
+		}
+
+		/* Clear the write args collector. */
+		writeArgs.empty();
+	}
+
+end 
+
+

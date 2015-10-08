@@ -1970,7 +1970,7 @@ struct LoadRagel
 		tryMachineDef( loc, name, machineDef, true );
 	}
 
-	void loadWrite( ragel::word Cmd, ragel::_repeat_word WordList )
+	void loadWrite( ragel::word Cmd, ragel::_repeat_write_arg WordList )
 	{
 		InputItem *inputItem = new InputItem;
 		inputItem->type = InputItem::Write;
