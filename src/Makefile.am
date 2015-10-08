@@ -34,7 +34,7 @@ BUILT_SOURCES = version.h
 
 if WITH_COLM
 nodist_ragel_SOURCES += \
-	parse.c if.h if.cc if.h 
+	parse.c if.h if.cc
 
 ragel_SOURCES += \
 	load.cc load.h
@@ -74,15 +74,20 @@ CLEANFILES = parse.c if.h if.cc
 
 if WITH_COLM
 
-parse.c: ragel-c.lm ragel-ruby.lm ragel-ocaml.lm ragel-crack.lm
+RAGEL_LM = \
+	ragel.lm \
+	ragel-c.lm \
+	ragel-ruby.lm \
+	ragel-ocaml.lm \
+	ragel-crack.lm
 
-parse.c: ragel.lm rlparse.lm
-	$(COLM) -c -o parse.c -e if.h -x if.cc rlparse.lm
-if.h: parse.c
-if.cc: parse.c
+parse.c: rlparse.lm $(RAGEL_LM)
+	$(COLM) -c -o $@ -e if.h -x if.cc -m commit.cc $<
 
-ragel-if.$(OBJEXT): if.h if.cc parse.c
-ragel-load.$(OBJEXT): if.h if.cc parse.c
+# These are necessary because we are not using built sources. They create the
+# dependency on the colm run for the objects that that require its output.
+ragel-if.$(OBJEXT): parse.c
+ragel-load.$(OBJEXT): parse.c
 
 RLHC = \
 	rlhc-host.lm \
