@@ -922,6 +922,7 @@ struct ReduceTextItem
 	enum Type {
 		LhsRef,
 		RhsRef,
+		RhsLoc,
 		Txt
 	};
 
@@ -971,6 +972,8 @@ struct ReduceAction
 
 typedef DList<ReduceAction> ReduceActionList;
 typedef DList<ReduceNonTerm> ReduceNonTermList;
+
+typedef Vector<ReduceAction*> ReduceActionVect;
 
 struct Reduction
 {

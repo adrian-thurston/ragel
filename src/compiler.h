@@ -1013,8 +1013,9 @@ struct Compiler
 
 	void writeHostCall();
 	void writeCommit();
-	void writeRhsRef( Production *production, ReduceTextItem *i );
 	void writeLhsRef( Production *production, ReduceTextItem *i );
+	void writeRhsRef( Production *production, ReduceTextItem *i );
+	void writeRhsLoc( Production *production, ReduceTextItem *i );
 	void writeHostItemList( Production *production, const ReduceTextItemList &list );
 	void writeCommitStub();
 };

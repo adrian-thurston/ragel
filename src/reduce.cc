@@ -58,7 +58,9 @@ void Compiler::loadRefs( Production *production, const ReduceTextItemList &list 
 {
 	ObjectDef *objectDef = production->prodName->objectDef;
 	Vector<ProdEl*> rhsUsed;
+	Vector<ProdEl*> locUsed;
 	rhsUsed.setAsNew( production->prodElList->length() );
+	locUsed.setAsNew( production->prodElList->length() );
 
 	bool lhsUsed = false;
 	for ( ReduceTextItemList::Iter i = list; i.lte(); i++ ) {
@@ -66,13 +68,17 @@ void Compiler::loadRefs( Production *production, const ReduceTextItemList &list 
 			lhsUsed = true;
 		}
 
-		if ( i->type == ReduceTextItem::RhsRef ) {
+		if ( i->type == ReduceTextItem::RhsRef || i->type == ReduceTextItem::RhsLoc ) {
 			String name( i->txt.data + 1, i->txt.length() - 1 );
 			ObjectField *field = objectDef->rootScope->findField( name );
 			if ( field != 0 ) {
 				for ( Vector<RhsVal>::Iter r = field->rhsVal; r.lte(); r++ ) {
-					if ( r->prodEl->production == production )
-						rhsUsed[r->prodEl->pos] = r->prodEl;
+					if ( r->prodEl->production == production ) {
+						if ( i->type == ReduceTextItem::RhsLoc )
+							locUsed[r->prodEl->pos] = r->prodEl;
+						else
+							rhsUsed[r->prodEl->pos] = r->prodEl;
+					}
 				}
 			}
 		}
@@ -93,18 +99,29 @@ void Compiler::loadRefs( Production *production, const ReduceTextItemList &list 
 					*outStream <<
 						"	colm_data *_rhs" << rhs.pos() << " = "
 							"get_rhs_el_kid( prg, kid->tree, "
-							<< prodEl->pos << ")->tree->tokdata;\n";
+							<< prodEl->pos << " )->tree->tokdata;\n";
 				}
 				else {
 					*outStream <<
 							"lel_" << prodEl->langEl->fullName << " *"
 							"_rhs" << rhs.pos() << " = &((commit_reduce_union*)"
 							"(get_rhs_parse_tree( prg, lel, " <<
-							prodEl->pos << ")+1))->" <<
+							prodEl->pos << " )+1))->" <<
 							prodEl->langEl->fullName << ";\n";
 				}
 			}
 
+		}
+	}
+	for ( Vector<ProdEl*>::Iter loc = locUsed; loc.lte(); loc++ ) {
+		ProdEl *prodEl = *loc;
+		if ( prodEl != 0 ) {
+			if ( prodEl->production == production ) {
+				*outStream <<
+					"	colm_location *_loc" << loc.pos() << " = "
+						"colm_find_location( prg, get_rhs_el_kid( prg, kid->tree, " <<
+						prodEl->pos << " )->tree );\n";
+			}
 		}
 	}
 }
@@ -126,6 +143,23 @@ void Compiler::writeRhsRef( Production *production, ReduceTextItem *i )
 	}
 }
 
+void Compiler::writeRhsLoc( Production *production, ReduceTextItem *i )
+{
+	ObjectDef *objectDef = production->prodName->objectDef;
+	String name( i->txt.data + 1, i->txt.length() - 1 );
+
+	/* Find the field in the rhsVal using capture field. */
+	ObjectField *field = objectDef->rootScope->findField( name );
+	if ( field != 0 ) {
+		for ( Vector<RhsVal>::Iter r = field->rhsVal;
+				r.lte(); r++ )
+		{
+			if ( r->prodEl->production == production )
+				*outStream << "_loc" << r->prodEl->pos;
+		}
+	}
+}
+
 void Compiler::writeLhsRef( Production *production, ReduceTextItem *i )
 {
 	*outStream << "_lhs";
@@ -136,11 +170,14 @@ void Compiler::writeHostItemList( Production *production,
 {
 	for ( ReduceTextItemList::Iter i = list; i.lte(); i++ ) {
 		switch ( i->type ) {
+			case ReduceTextItem::LhsRef:
+				writeLhsRef( production, i );
+				break;
 			case ReduceTextItem::RhsRef:
 				writeRhsRef( production, i );
 				break;
-			case ReduceTextItem::LhsRef:
-				writeLhsRef( production, i );
+			case ReduceTextItem::RhsLoc:
+				writeRhsLoc( production, i );
 				break;
 			case ReduceTextItem::Txt:
 				*outStream << i->txt;
@@ -149,13 +186,30 @@ void Compiler::writeHostItemList( Production *production,
 	}
 }
 
+/* For sorting according to prod name id, then by prod num. */
+struct CmpReduceAction
+{
+	static int compare( const ReduceAction *ra1 , const ReduceAction *ra2 )
+	{
+		if ( ra1->production->prodName->id < ra2->production->prodName->id )
+			return -1;
+		else if ( ra1->production->prodName->id > ra2->production->prodName->id )
+			return 1;
+		else {
+			if ( ra1->production->prodNum < ra2->production->prodNum )
+				return -1;
+			else if ( ra1->production->prodNum < ra2->production->prodNum )
+				return 1;
+		}
+		return 0;
+	}
+};
+
 void Compiler::writeCommit()
 {
 	*outStream <<
 		"#include <colm/pdarun.h>\n"
-		"#include <colm/debug.h>\n"
 		"#include <colm/bytecode.h>\n"
-		"#include <colm/config.h>\n"
 		"#include <colm/defs.h>\n"
 		"#include <colm/input.h>\n"
 		"#include <colm/tree.h>\n"
@@ -167,7 +221,13 @@ void Compiler::writeCommit()
 		"#include <string.h>\n"
 		"#include <assert.h>\n"
 		"\n"
-		"#include <iostream>\n";
+		"#include <iostream>\n"
+		"\n"
+		"#include \"reducer.h\"\n"
+		"\n"
+		"Reducer *reducer;\n"
+		"\n"
+	;
 
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		for ( ReduceNonTermList::Iter rdi = (*r)->reduceNonTerms; rdi.lte(); rdi++ ) {
@@ -205,6 +265,10 @@ void Compiler::writeCommit()
 		"\n"
 		"void commit_reduce_forward( program_t *prg, tree_t **root,\n"
 		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
+		"{ reducer->commit_reduce_forward( prg, root, pda_run, pt ); }\n"
+		"\n"
+		"void Reducer::commit_reduce_forward( program_t *prg, tree_t **root,\n"
+		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
 		"{\n"
 		"	tree_t **sp = root;\n"
 		"\n"
@@ -236,19 +300,56 @@ void Compiler::writeCommit()
 		"		switch ( kid->tree->id ) {\n";
 
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
-		for ( ReduceActionList::Iter rdi = (*r)->reduceActions; rdi.lte(); rdi++ ) {
-			int lelId = rdi->production->prodName->id;
-			int prodNum = rdi->production->prodNum;
+		/* Populate a vector with the reduce actions. */
+		Vector<ReduceAction*> actions;
+		actions.setAsNew( (*r)->reduceActions.length() );
+		long pos = 0;
+		for ( ReduceActionList::Iter rdi = (*r)->reduceActions; rdi.lte(); rdi++ )
+			actions[pos++] = rdi;
 
-			*outStream <<
-				"		case " << lelId << ": {\n"
+		/* Sort it by lhs id, then prod num. */
+		MergeSort<ReduceAction*, CmpReduceAction> sortActions;
+		sortActions.sort( actions.data, actions.length() );
+
+		ReduceAction *last = 0;
+
+		for ( Vector<ReduceAction*>::Iter rdi = actions; rdi.lte(); rdi++ ) {
+			ReduceAction *action = *rdi;
+			int lelId = action->production->prodName->id;
+			int prodNum = action->production->prodNum;
+
+			/* Maybe close off the last prod. */
+			if ( last != 0 && 
+					last->production->prodName != action->production->prodName )
+			{
+				*outStream <<
+				"			break;\n"
+				"		}\n";
+					
+			}
+
+			/* Maybe open a new prod. */
+			if ( last == 0 || 
+					last->production->prodName != action->production->prodName )
+			{
+				*outStream <<
+					"		case " << lelId << ": {\n";
+			}
+
+			*outStream << 
 				"			if ( kid->tree->prod_num == " << prodNum << " ) {\n";
 
-			loadRefs( rdi->production, rdi->itemList );
-			writeHostItemList( rdi->production, rdi->itemList );
+			loadRefs( action->production, action->itemList );
+			writeHostItemList( action->production, action->itemList );
 
+			*outStream << 
+				"			}\n";
+
+			last = action;
+		}
+
+		if ( last != 0 ) {
 			*outStream <<
-				"			}\n"
 				"			break;\n"
 				"		}\n";
 		}

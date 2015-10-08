@@ -2353,11 +2353,30 @@ struct LoadColm
 			rti->type = ReduceTextItem::LhsRef;
 			list.append( rti );
 		}
-		else if ( item.RED_RHS() != 0 ) {
+		else if ( item.RED_RHS_REF() != 0 ) {
 			ReduceTextItem *rti = new ReduceTextItem;
 			rti->type = ReduceTextItem::RhsRef;
-			rti->txt = item.RED_RHS().text().c_str();
+			rti->txt = item.RED_RHS_REF().text().c_str();
 			list.append( rti );
+		}
+		else if ( item.RED_RHS_LOC() != 0 ) {
+			ReduceTextItem *rti = new ReduceTextItem;
+			rti->type = ReduceTextItem::RhsLoc;
+			rti->txt = item.RED_RHS_LOC().text().c_str();
+			list.append( rti );
+		}
+		else if ( item.RED_OPEN() != 0 ) {
+			ReduceTextItem *open = new ReduceTextItem;
+			open->type = ReduceTextItem::Txt;
+			open->txt = "{";
+			list.append( open );
+
+			walkRedItemList( item.HostItems(), list );
+
+			ReduceTextItem *close = new ReduceTextItem;
+			close->type = ReduceTextItem::Txt;
+			close->txt = "}";
+			list.append( close );
 		}
 		else {
 			if ( list.length() > 0 && list.tail->type == ReduceTextItem::Txt ) {

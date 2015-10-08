@@ -361,7 +361,8 @@ lex
 	/
 
 	token RED_LHS / '$' . '$' /
-	token RED_RHS / '$' . red_id /
+	token RED_RHS_REF / '$' . red_id /
+	token RED_RHS_LOC / '@' . red_id /
 
 	token red_any / any /
 end
@@ -379,7 +380,9 @@ def host_item
 |	[red_ws]
 |	[red_any]
 |	[RED_LHS]
-|	[RED_RHS]
+|	[RED_RHS_REF]
+|	[RED_RHS_LOC]
+|	[RED_OPEN HostItems: host_item* RED_CLOSE]
 
 def reduction_item
 	[red_nonterm] :NonTerm commit
