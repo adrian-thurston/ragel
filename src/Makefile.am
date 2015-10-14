@@ -63,6 +63,7 @@ EXTRA_DIST = \
 	rlhc-ocaml.lm \
 	rlhc-crack.lm \
 	rlhc-julia.lm \
+	rlhc-js.lm \
 	ragel-c.lm \
 	ragel-crack.lm \
 	ragel-ruby.lm \
@@ -102,7 +103,8 @@ RLHC = \
 	rlhc-rust.lm \
 	rlhc-ocaml.lm \
 	rlhc-crack.lm \
-	rlhc-julia.lm
+	rlhc-julia.lm \
+	rlhc-js.lm
 
 rlhc.c: rlhc.lm $(RLHC) $(COLM_BINDEP)
 	$(COLM) -c -b rlhc_object -o $@ $<

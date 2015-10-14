@@ -138,6 +138,14 @@ void InputData::juliaDefaultFileName( const char *inputFile )
 		outputFileName = fileNameFromStem( inputFile, ".jl" );
 }
 
+void InputData::jsDefaultFileName( const char *inputFile )
+{
+	/* If the output format is code and no output file name is given, then
+	 * make a default. */
+	if ( outputFileName == 0 )
+		outputFileName = fileNameFromStem( inputFile, ".js" );
+}
+
 void InputData::makeDefaultFileName()
 {
 	switch ( hostLang->lang ) {
@@ -171,6 +179,9 @@ void InputData::makeDefaultFileName()
 			break;
 		case HostLang::Julia:
 			juliaDefaultFileName( inputFileName );
+			break;
+		case HostLang::JS:
+			jsDefaultFileName( inputFileName );
 			break;
 	}
 }

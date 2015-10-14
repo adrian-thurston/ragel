@@ -311,6 +311,7 @@ struct InputData
 	void asmDefaultFileName( const char *inputFile );
 	void rustDefaultFileName( const char *inputFile );
 	void juliaDefaultFileName( const char *inputFile );
+	void jsDefaultFileName( const char *inputFile );
 
 	void writeOutput( InputItem *ii );
 	void writeLanguage( std::ostream &out );

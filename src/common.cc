@@ -117,6 +117,16 @@ HostType hostTypesJulia[] =
 	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  4 },
 };
 
+HostType hostTypesJS[] =
+{
+	{ "Int8",     0, "int8",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,   1 },
+	{ "Uint8",    0, "uint8",   false,  true,  false,  0,         UCHAR_MAX,  1 },
+	{ "Int16",    0, "int16",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,   2 },
+	{ "Uint16",   0, "ushort",  false,  true,  false,  0,         USHRT_MAX,  2 },
+	{ "Int32",    0, "int",     true,   true,  false,  INT_MIN,   INT_MAX,    4 },
+	{ "Uint32",   0, "uint",    false,  true,  false,  0,         UINT_MAX,   4 },
+	{ "Float64",  0, "number",  true,   true,  false,  LONG_MIN,  LONG_MAX,   8 },
+};
 
 const HostLang hostLangC = {
 	"C",
@@ -239,6 +249,17 @@ const HostLang hostLangJulia = {
 	"julia"
 };
 
+const HostLang hostLangJS = {
+	"JavaScript",
+	"-P",
+	HostLang::JS,
+	hostTypesJS, 7,
+	hostTypesJS+1,
+	false,
+	true,
+	"js"
+};
+
 const HostLang *hostLangs[] = {
 	&hostLangC,
 	&hostLangAsm,
@@ -251,6 +272,7 @@ const HostLang *hostLangs[] = {
 	&hostLangRust,
 	&hostLangCrack,
 	&hostLangJulia,
+	&hostLangJS,
 };
 
 
