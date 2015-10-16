@@ -271,13 +271,24 @@ namespace js_gen
 		}
 	}
 
+	void expr_test_op( Op: test_op )
+	{
+		switch Op
+		case [ `== ]
+			send Parser '==='
+		case [ `!= ]
+			send Parser '!=='
+		default
+			send Parser [Op]
+	}
+
 	void expr_test( ExprTest: expr_test )
 	{
 		switch ExprTest
-		case [expr_test Op: test_op expr_shift]
+		case [expr_test test_op expr_shift]
 		{
 			expr_test( ExprTest._expr_test )
-			send Parser [Op]
+			expr_test_op( ExprTest.test_op )
 			expr_shift( ExprTest.expr_shift )
 		}
 		case [expr_shift]
@@ -482,6 +493,9 @@ namespace js_gen
 	void trans( Output: stream, Start: start )
 	{
 		Parser = new parser<js_out::js_out>()
+
+		send Parser
+			"'use strict';
 
 		stmt_list( Start._repeat_stmt )
 
