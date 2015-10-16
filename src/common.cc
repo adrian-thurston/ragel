@@ -119,13 +119,13 @@ HostType hostTypesJulia[] =
 
 HostType hostTypesJS[] =
 {
-	{ "Int8",     0, "int8",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,   1 },
-	{ "Uint8",    0, "uint8",   false,  true,  false,  0,         UCHAR_MAX,  1 },
-	{ "Int16",    0, "int16",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,   2 },
-	{ "Uint16",   0, "ushort",  false,  true,  false,  0,         USHRT_MAX,  2 },
-	{ "Int32",    0, "int",     true,   true,  false,  INT_MIN,   INT_MAX,    4 },
-	{ "Uint32",   0, "uint",    false,  true,  false,  0,         UINT_MAX,   4 },
-	{ "Float64",  0, "number",  true,   true,  false,  LONG_MIN,  LONG_MAX,   8 },
+	{ "s8",     0, "int8",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,   1 },
+	{ "u8",     0, "uint8",   false,  true,  false,  0,         UCHAR_MAX,  1 },
+	{ "s16",    0, "int16",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,   2 },
+	{ "u16",    0, "uint16",  false,  true,  false,  0,         USHRT_MAX,  2 },
+	{ "i32",    0, "int32",   true,   true,  false,  INT_MIN,   INT_MAX,    4 },
+	{ "u32",    0, "uint32",  false,  true,  false,  0,         UINT_MAX,   4 },
+	{ "number", 0, "number",  true,   true,  false,  LONG_MIN,  LONG_MAX,   8 },
 };
 
 const HostLang hostLangC = {

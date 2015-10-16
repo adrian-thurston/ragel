@@ -315,8 +315,6 @@ namespace js_gen
 			send Parser 'Int16'
 		case 's32'
 			send Parser 'Int32'
-		case 'Uint8'
-			send Parser 'Uint8'
 		default
 			send Parser 'Float64'
 	}
@@ -450,13 +448,13 @@ namespace js_gen
 		{
 			send Parser
 				"var _goto_targ = 0;
-				"_goto: do {
+				"_goto: while ( true ) {
 				"	switch ( _goto_targ ) {
 				"	case 0:
 				"	[stmt_list( Stmt.entry_loop._repeat_stmt )]
 				"	}
 				"	break;
-				"} while ( true )
+				"}
 		}
 		case [label_stmt]
 		{
