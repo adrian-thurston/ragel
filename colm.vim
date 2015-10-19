@@ -60,7 +60,7 @@ syntax keyword Type
 	\ construct cons parse parse_tree parse_stop reduce 
 	\ match require send send_tree
 	\ preeof left right nonassoc prec context struct alias
-	\ end eos print reduction nonterm
+	\ end eos print nonterm
 
 syntax keyword typeKeywords
 	\ int str bool any ref ptr void list_el map_el
@@ -78,7 +78,43 @@ syntax region defTypes matchgroup=defKeywords
 	\ start="\<rl\>" start="\<def\>" start="\<token\>" start="\<ignore\>"
 	\ matchgroup=Function end="[a-zA-Z_][a-zA-Z0-9_]*" end="/"me=e-1
 
-syntax sync match colmSyncPat grouphere NONE "([{}]|\<token\>|\<ignore\>|\<def\>)"
+syntax region redTypes matchgroup=redBlock
+	\ start="\<reduction\>" 
+	\ contains=externalCode,extComment
+	\ end="\<end\>"
+
+syntax match extComment "#.*$" contained
+
+syntax region externalCode contained 
+	\ start="{"
+	\ contains=@redItems
+	\ end="}"
+
+syntax cluster redItems contains=redRef,redType,redKeyword,redLiteral,redComment,externalCode
+
+syntax region redComment start="\/\*" end="\*\/" contained
+syntax match redComment "\/\/.*$" contained
+
+syntax match redLiteral "'\(\\.\|[^'\\]\)*'"
+syntax match redLiteral "\"\(\\.\|[^\"\\]\)*\""
+
+syntax match redRef "\$\$" contained
+syntax match redRef "\$[a-zA-Z_][a-zA-Z0-9_]*" contained
+syntax match redRef "@[a-zA-Z_][a-zA-Z0-9_]*" contained
+
+syntax keyword redType unsigned signed void char short int long float double bool
+syntax keyword redType inline static extern register const volatile auto
+syntax keyword redType union enum struct class typedef
+syntax keyword redType namespace template typename mutable
+syntax keyword redKeyword break continue default do else for
+syntax keyword redKeyword goto if return switch while
+syntax keyword redKeyword new delete this using friend public private protected sizeof
+syntax keyword redKeyword throw try catch operator typeid
+syntax keyword redKeyword and bitor xor compl bitand and_eq or_eq xor_eq not not_eq
+syntax keyword redKeyword static_cast dynamic_cast
+
+syntax sync match colmSyncPat grouphere NONE "([{}]|\<reduction\>|\<token\>|\<ignore\>|\<def\>)"
+
 
 "
 " Specifying Groups
@@ -89,10 +125,18 @@ hi link otLit String
 hi link rlNumber Number
 hi link rlLiteral String
 hi link defKeywords Type
+hi link redBlock Type
 hi link typeKeywords Type
 hi link regionDelimiter Type
 hi link char String
 hi link tokenName Function
 hi link varCapture Identifier
+
+hi link extComment Comment
+hi link redType Type
+hi link redKeyword Keyword
+hi link redLiteral String
+hi link redRef Function
+hi link redComment Comment
  
 let b:current_syntax = "colm"
