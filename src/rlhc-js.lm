@@ -140,7 +140,7 @@ namespace js_gen
 		}
 		case [N: `nil]
 		{
-			N.data = '0'
+			N.data = '-1'
 			send Parser [N]
 		}
 		case [Number: number]
