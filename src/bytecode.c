@@ -2739,9 +2739,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_CONS_REDUCER %hd\n", generic_id );
 
-			struct_t *gen = colm_construct_generic( prg, generic_id );
-			parser_t *parser = (parser_t*)gen;
-			parser->pda_run->reducer = 1;
+			struct_t *gen = colm_construct_reducer( prg, generic_id );
 			vm_push_struct( gen );
 			break;
 		}

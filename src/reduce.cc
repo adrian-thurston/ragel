@@ -222,6 +222,7 @@ void Compiler::writeCommit()
 		"#include <assert.h>\n"
 		"\n"
 		"#include <iostream>\n"
+		"using std::endl;\n"
 		"\n"
 		"#include \"reducer.h\"\n"
 		"\n"

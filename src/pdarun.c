@@ -1204,8 +1204,9 @@ void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *
 		init_pool_alloc( &pda_run->local_pool, sizeof(parse_tree_t) + commit_union_sz() );
 		pda_run->parse_tree_pool = &pda_run->local_pool;
 	}
-
-	pda_run->parse_tree_pool = &prg->parse_tree_pool;
+	else {
+		pda_run->parse_tree_pool = &prg->parse_tree_pool;
+	}
 
 	debug( prg, REALM_PARSE, "initializing struct pda_run\n" );
 
