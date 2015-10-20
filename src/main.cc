@@ -438,15 +438,25 @@ void InputData::parseArgs( int argc, const char **argv )
 					frontend = KelbtBased;
 					frontendSpecified = true;
 				}
-				else if ( strcmp( arg, "colm-frontend" ) == 0 ) {
 #ifdef WITH_COLM
+				else if ( strcmp( arg, "colm-frontend" ) == 0 ) {
 					frontend = ColmBased;
-#else
-					error() << "--colm-frontend specified but, "
-							"ragel not built with colm support" << endp;
-#endif
 					frontendSpecified = true;
 				}
+				else if ( strcmp( arg, "reduce-frontend" ) == 0 ) {
+					frontend = ReduceBased;
+					frontendSpecified = true;
+				}
+#else
+				else if ( strcmp( arg, "colm-frontend" ) == 0 ) {
+					error() << "--colm-frontend specified but, "
+							"ragel not built with colm support" << endp;
+				}
+				else if ( strcmp( arg, "colm-reduce" ) == 0 ) {
+					error() << "--colm-frontend specified but, "
+							"ragel not built with colm support" << endp;
+				}
+#endif
 				else if ( strcmp( arg, "asm" ) == 0 )
 					hostLang = &hostLangAsm;
 				else if ( strcmp( arg, "gnu-asm-x86-64-sys-v" ) == 0 )

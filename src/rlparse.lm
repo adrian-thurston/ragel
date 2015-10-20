@@ -41,18 +41,6 @@ export RagelTree: start
 export RagelError: str
 export RagelImport: import*
 
-# Language
-A: list_el<str> = argv->pop_tail_el()
-Lang = A->value
-
-# The open is expected to succeed. The open is tested before
-# the colm program is called.
-A = argv->pop_tail_el()
-FileName: str = A->value
-Stream: stream = open( FileName, "r" )
-RagelTree = parse start[ Stream ]
-RagelError = error
-
 import* import( FileName: str, Start: start )
 {
 	ImportList: import* = cons import* []
@@ -96,11 +84,29 @@ import* import( FileName: str, Start: start )
 	return ImportList
 }
 
-# Extra operations.
-if ( argv->length > 0 ) {
-	A = argv->pop_tail_el()
-	Cmd: str = A->value
-	if ( Cmd == 'import' ) {
-		RagelImport = import( FileName, RagelTree )
-	}
+# Language
+A: list_el<str> = argv->pop_tail_el()
+Lang = A->value
+
+# File name. The open is expected to succeed. The open is tested before the
+# colm program is called.
+A = argv->pop_tail_el()
+FileName: str = A->value
+Stream: stream = open( FileName, "r" )
+
+# Command.
+A = argv->pop_tail_el()
+Cmd: str = A->value
+
+if ( Cmd == 'import' ) {
+	RagelImport = import( FileName, RagelTree )
 }
+else if ( Cmd == 'load' ) {
+	RagelTree = parse start[ Stream ]
+	RagelError = error
+}
+else if ( Cmd == 'reduce' ) {
+	reduce start[ Stream ]
+}
+
+include 'reducer.lm'

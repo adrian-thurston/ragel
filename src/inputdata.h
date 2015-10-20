@@ -264,6 +264,7 @@ struct InputData
 	void runRlhc();
 	void processKelbt();
 	void processColm();
+	void processReduce();
 	void process();
 };
 

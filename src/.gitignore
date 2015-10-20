@@ -19,6 +19,7 @@
 /if.h
 /if.cc
 /parse.c
+/commit.cc
 
 # Common testing file.
 /tmp.rl

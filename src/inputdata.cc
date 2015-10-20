@@ -25,6 +25,7 @@
 #include "parsedata.h"
 #include "load.h"
 #include "rlscan.h"
+#include "reducer.h"
 
 #include <iostream>
 #include <unistd.h>
@@ -577,7 +578,6 @@ void InputData::parseKelbt()
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -633,16 +633,14 @@ void InputData::processKelbt()
 		runRlhc();
 	}
 
-
 	assert( gblErrorCount == 0 );
 }
+
+extern Reducer *reducer;
 
 void InputData::processColm()
 {
 #ifdef WITH_COLM
-
-	/* With this version we parse, load, process. It is very memory intensive,
-	 * but allows use of colm grammars for parsing. */
 
 	/*
 	 * Colm-based parser introduced in ragel 7. Uses more memory.
@@ -675,6 +673,44 @@ void InputData::processColm()
 #endif
 }
 
+void InputData::processReduce()
+{
+#ifdef WITH_COLM
+
+	/*
+	 * Colm-based reduction parser introduced in ragel 7. 
+	 */
+
+	::reducer = new Reducer( *this, hostLang, minimizeLevel, minimizeOpt );
+
+	/* Check input file. */
+	ifstream *inFile = new ifstream( inputFileName );
+	if ( ! inFile->is_open() )
+		error() << "could not open " << inputFileName << " for reading" << endp;
+	delete inFile;
+
+	makeFirstInputItem();
+
+	//LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
+	::reducer->reduceFile( inputFileName, 0, 0 );
+	//deleteLoadRagel( lr );
+
+//	/* Bail on above error. */
+//	if ( gblErrorCount > 0 )
+//		exit(1);
+//
+//	if ( generateXML )
+//		processXML();
+//	else if ( generateDot )
+//		processDot();
+//	else 
+//		processCode();
+//
+//	assert( gblErrorCount == 0 );
+#endif
+}
+
+
 void InputData::process()
 {
 	switch ( frontend ) {
@@ -684,6 +720,10 @@ void InputData::process()
 		}
 		case ColmBased: {
 			processColm();
+			break;
+		}
+		case ReduceBased: {
+			processReduce();
 			break;
 		}
 	}

@@ -74,6 +74,8 @@ struct LongestMatchPart;
 struct LmPartList;
 struct Range;
 struct LengthDef;
+struct colm_data;
+struct colm_location;
 
 /* Type of augmentation. Describes locations in the machine. */
 enum AugType
@@ -201,9 +203,28 @@ struct Token
 	int length;
 	ParserLoc loc;
 
-	void append( const Token &other );
+	void append( const Token &other )
+		{ append( other.data, other.length ); }
+
+	void append( const char *otherData, int otherLen );
+	void set( const char *str, int len );
+	void set( colm_location *cl );
+	void set( colm_data *cd );
+};
+
+struct RedToken
+{
+	char *data;
+	int length;
+	InputLoc loc;
+
+	void append( const char *otherData, int otherLen );
+	void append( const Token &other )
+		{ append( other.data, other.length ); }
+
 	void set( const char *str, int len );
 };
+
 
 char *prepareLitString( const InputLoc &loc, const char *src, long length, 
 			long &resLen, bool &caseInsensitive );

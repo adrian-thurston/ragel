@@ -34,8 +34,12 @@ struct Reducer
 		
 		/* Should be passed into the load, somehow. */
 		targetMachine(0),
-		searchMachine(0)
-	{}
+		searchMachine(0),
+
+		exprLeft(0)
+	{
+		exportContext.append( false );
+	}
 
 	InputData &id;
 	Section *section;
@@ -54,6 +58,20 @@ struct Reducer
 	const char *targetMachine;
 	const char *searchMachine;
 
+	/* Expression reduction. Grammar is right recursive. Output tree is left.
+	 * This keeps the left tree. */
+	Expression *exprLeft;
+
+	/* Term reduction. Also right recursive grammar. */
+	Term *termLeft;
+
 	void commit_reduce_forward( program_t *prg, tree_t **root,
 		struct pda_run *pda_run, parse_tree_t *pt );
+
+	void loadMachineName( string data );
+	void tryMachineDef( InputLoc &loc, std::string name, 
+			MachineDef *machineDef, bool isInstance );
+
+	void reduceFile( const char *inputFileName, const char *targetMachine,
+			const char *searchMachine );
 };

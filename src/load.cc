@@ -1692,7 +1692,7 @@ struct LoadRagel
 
 	Term *loadTerm( ragel::term TermTree )
 	{
-		Term *term = new Term( loadFactorLabel( TermTree.factor_label() ) );
+		Term *term = new Term( loadFactorLabel( TermTree.term_left().factor_label() ) );
 
 		/* Walk the list of terms. */
 		ragel::term_op_list_short TermOpList = TermTree.term_op_list_short();
@@ -1726,7 +1726,7 @@ struct LoadRagel
 
 	Expression *loadExpression( ragel::expression ExprTree )
 	{
-		Expression *expr = new Expression( loadTerm( ExprTree.term() ) );
+		Expression *expr = new Expression( loadTerm( ExprTree.expr_left().term() ) );
 
 		/* Walk the list of terms. */
 		ragel::_repeat_expression_op ExprOpList = ExprTree._repeat_expression_op();
@@ -2380,15 +2380,16 @@ struct LoadRagel
 	void loadFile( const char *inputFileName, const char *targetMachine,
 			const char *searchMachine )
 	{
-		const char *argv[4];
-		argv[0] = "load-ragel";
-		argv[1] = inputFileName;
-		argv[2] = id.hostLang->rlhcArg;
-		argv[3] = 0;
+		const char *argv[5];
+		argv[0] = "rlparse";
+		argv[1] = "load";
+		argv[2] = inputFileName;
+		argv[3] = id.hostLang->rlhcArg;
+		argv[4] = 0;
 
 		colm_program *program = colm_new_program( &colm_object );
 		colm_set_debug( program, 0 );
-		colm_run_program( program, 3, argv );
+		colm_run_program( program, 4, argv );
 
 		/* Extract the parse tree. */
 		start Start = RagelTree( program );
@@ -2405,6 +2406,7 @@ struct LoadRagel
 
 		colm_delete_program( program );
 	}
+
 };
 
 LoadRagel *newLoadRagel( InputData &id, const HostLang *hostLang,

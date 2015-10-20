@@ -1,3 +1,4 @@
+
 reduction load
 	ragel::machine_name
 	{
@@ -23,14 +24,13 @@ reduction load
 			/* Check if the the machine is the one we are searching for. If
 			 * not, reset pd. Otherwise, rename it to target machine because we
 			 * are drawing the statements into target. */
-			if ( machine != searchMachine ) {
+			if ( machine == searchMachine )
+				machine = targetMachine;
+			else
 				pd = 0;
-				return;
-			}
-
-			machine = targetMachine;
 		}
 
+		if ( pd != 0 ) {
 		SectionDictEl *sdEl = id.sectionDict.find( machine.c_str() );
 		if ( sdEl == 0 ) {
 			Section *section = new Section( strdup(machine.c_str() ) );
@@ -51,12 +51,445 @@ reduction load
 
 		section = sdEl->value;
 		pd = pdEl->value;
+		}
 	}
 
 	ragel::write_arg :Word
 	{
 		string arg( $word->data, $word->length );
 		writeArgs.append( arg );
+	}
+
+
+	# def join
+	#	[join `, expression] :Rec
+	# |	[expression] :Base
+	ragel::join 
+	{
+		Join *join;
+	}
+
+	ragel::join :Rec
+	{
+		Join *join = $_join->join;
+		join->exprList.append( $expression->expr );
+		$$->join = join;
+	}
+
+	ragel::join :Base
+	{
+		$$->join = new Join( $expression->expr );
+	}
+	
+	# def expression
+	#	[expr_left expression_op*] :Expression
+	ragel::expression
+	{
+		Expression *expr;
+	}
+
+	ragel::expression :Expression
+	{
+		$$->expr = exprLeft;
+		exprLeft = 0;
+	}
+
+	ragel::expr_left :Term
+	{
+		exprLeft = new Expression( $term->term );
+	}
+
+	# def expression_op
+	# 	[`| term] :Or
+	# |	[`& term] :And
+	# |	[`- term] :Sub
+	# |	[`-- term] :Ssub
+
+	ragel::expression_op :Or
+	{
+		exprLeft = new Expression( exprLeft, $term->term,
+				Expression::OrType );
+	}
+
+	ragel::expression_op :And
+	{
+		exprLeft = new Expression( exprLeft, $term->term,
+				Expression::IntersectType );
+	}
+
+	ragel::expression_op :Sub
+	{
+		exprLeft = new Expression( exprLeft, $term->term,
+				Expression::SubtractType );
+	}
+
+	ragel::expression_op :Ssub
+	{
+		exprLeft = new Expression( exprLeft, $term->term,
+				Expression::StrongSubtractType );
+	}
+
+
+	# def term
+	#	[term_left term_op_list_short] :Term
+	ragel::term
+	{
+		Term *term;
+	}
+
+	# def factor_label_left
+	#	[factor_label] :FactorLabel
+	ragel::term_left :FactorLabel
+	{
+		termLeft = new Term( $factor_label->fwa );
+	}
+
+	# def term_op
+	#	[factor_label] :None
+	# |	[`. factor_label] :Dot
+	# |	[`:> factor_label] :ColonLt
+	# |	[`:>> factor_label] :ColonLtLt
+	# |	[`<: factor_label] :GtColon
+	ragel::term_op :None
+	{
+		termLeft = new Term( termLeft, $factor_label->fwa, Term::ConcatType );
+	}
+
+	ragel::term_op :Dot
+	{
+		termLeft = new Term( termLeft, $factor_label->fwa, Term::ConcatType );
+	}
+
+	ragel::term_op :ColonLt
+	{
+		termLeft = new Term( termLeft, $factor_label->fwa, Term::RightStartType );
+	}
+
+	ragel::term_op :ColonLtLt
+	{
+		termLeft = new Term( termLeft, $factor_label->fwa, Term::RightFinishType );
+	}
+
+	ragel::term_op :GtColon
+	{
+		termLeft = new Term( termLeft, $factor_label->fwa, Term::LeftType );
+	}
+
+	# def factor_label
+	#	[word `: factor_label] :Label
+	# |	[factor_ep] :Ep
+	ragel::factor_label
+	{
+		FactorWithAug *fwa;
+	}
+
+	ragel::factor_label :Label
+	{
+		InputLoc loc = @word;
+		string label( $word->data, $word->length );
+		$_factor_label->fwa->labels.prepend( Label(loc, label) );
+
+		$$->fwa = $_factor_label->fwa;
+	}
+
+	ragel::factor_label :Ep
+	{
+		$$->fwa = $factor_ep->fwa;
+	}
+
+	# def factor_ep
+	#	[factor_aug `-> epsilon_target] :Epsilon
+	# |	[factor_aug] :Base
+	ragel::factor_ep
+	{
+		FactorWithAug *fwa;
+	}
+
+	ragel::factor_ep :Epsilon
+	{
+//		InputLoc loc = FactorEp.loc();
+//		factorWithAug = loadFactorAug( FactorEp.factor_aug() );
+//		NameRef *nameRef = loadEpsilonTarget( FactorEp.epsilon_target() );
+//
+//		/* Add the target to the list and return the factor object. */
+//		factorWithAug->epsilonLinks.append( EpsilonLink( loc, nameRef ) );
+
+		$$->fwa = $factor_aug->fwa;
+	}
+
+	ragel::factor_ep :Base
+	{
+		$$->fwa = $factor_aug->fwa;
+	}
+
+	# def epsilon_target
+	# 	[epsilon_target `:: word] :Rec
+	# |	[word] :Base
+
+	# def factor_aug
+	#	[factor_aug aug_base action_ref] :ActionRef
+	# |	[factor_aug aug_base priority_aug] :PriorEmbed
+	# |	[factor_aug aug_base `( word `, priority_aug `)] :NamedPriorEmbed
+	# |	[factor_aug aug_cond action_ref] :CondEmbed
+	# |	[factor_aug aug_cond `! action_ref] :NegCondEmbed
+	# |	[factor_aug aug_to_state action_ref] :ToStateAction
+	# |	[factor_aug aug_from_state action_ref] :FromStateAction
+	# |	[factor_aug aug_eof action_ref] :EofAction
+	# |	[factor_aug aug_gbl_error action_ref] :GblErrorAction
+	# |	[factor_aug aug_local_error action_ref] :LocalErrorDef
+	# |	[factor_aug aug_local_error `( word `, action_ref `)] :LocalErrorName
+	# |	[factor_rep] :Base
+	ragel::factor_aug
+	{
+		FactorWithAug *fwa;
+	}
+
+	ragel::factor_aug :ActionRef
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+
+	ragel::factor_aug :PriorEmbed
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+
+	ragel::factor_aug :NamedPriorEmbed
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+
+	ragel::factor_aug :CondEmbed
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+
+	ragel::factor_aug :NegCondEmbed
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+
+	ragel::factor_aug :ToStateAction
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+	
+	ragel::factor_aug :FromStateAction
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+
+	ragel::factor_aug :EofAction
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+
+	ragel::factor_aug :GblErrorAction
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+
+	ragel::factor_aug :LocalErrorDef
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+
+	ragel::factor_aug :LocalErrorName
+	{
+		$$->fwa = $_factor_aug->fwa;
+	}
+
+	ragel::factor_aug :Base
+	{
+		$$->fwa = new FactorWithAug( $factor_rep->rep );
+	}
+
+	#def factor_rep 
+	#	[factor_neg factor_rep_op*] :Op
+	#|	[nfa_kw  `( uint `, factor_rep `,
+	#		A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `,
+	#		A5: action_ref `, A6: action_ref `):] :Nfa
+	#|	[`:cond  `( uint `, factor_rep `, 
+	#		A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `):] :Cond
+	#|	[`:nomax `( uint `, factor_rep `, 
+	#		A1: action_ref `, A2: action_ref `, A3: action_ref `):] :NoMax
+
+	ragel::factor_rep
+	{
+		FactorWithRep *rep;
+	}
+
+	ragel::factor_rep :Op
+	{
+		$$->rep = new FactorWithRep( $factor_neg->neg );
+	}
+
+	ragel::factor_rep :Nfa
+	{
+		$$->rep = $_factor_rep->rep;
+	}
+
+	ragel::factor_rep :Cond
+	{
+		$$->rep = $_factor_rep->rep;
+	}
+
+	ragel::factor_rep :NoMax
+	{
+		$$->rep = $_factor_rep->rep;
+	}
+
+	# def factor_neg 
+	#	[`! factor_neg] :Bang
+	# |	[`^ factor_neg] :Caret
+	# |	[factor] :Base
+	ragel::factor_neg
+	{
+		FactorWithNeg *neg;
+	}
+
+	ragel::factor_neg :Bang
+	{
+		$$->neg = $_factor_neg->neg;
+	}
+
+	ragel::factor_neg :Caret
+	{
+		$$->neg = $_factor_neg->neg;
+	}
+
+	ragel::factor_neg :Base
+	{
+		$$->neg = new FactorWithNeg( $factor->factor );
+	}
+
+	# def factor 
+	#	[alphabet_num] :AlphabetNum
+	# |	[word] :Word
+	# |	[string] :String
+	# |	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	# |	[lex_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
+	# |	[lex_regex_open regex re_close] :Regex
+	# |	[RL1: range_lit `.. RL2: range_lit]   :Range
+	# |	[RL1: range_lit `../i RL2: range_lit] :RangeIndep
+	# |	[`( join `)] :Join
+	ragel::factor
+	{
+		Factor *factor;
+	}
+
+	ragel::factor :AlphabetNum
+	{
+		$$->factor = new Factor( new Literal( $alphabet_num->tok, Literal::Number ) );
+	}
+
+	ragel::factor :Word
+	{
+		InputLoc loc = @word;
+		if ( pd != 0 ) {
+		string s( $word->data, $word->length );
+		
+		/* Find the named graph. */
+		GraphDictEl *gdNode = pd->graphDict.find( s );
+		if ( gdNode == 0 ) {
+			/* Recover by returning null as the factor node. */
+			error(loc) << "graph lookup of \"" << s << "\" failed" << endl;
+			$$->factor = 0;
+		}
+		else if ( gdNode->isInstance ) {
+			/* Recover by retuning null as the factor node. */
+			error(loc) << "references to graph instantiations not allowed "
+					"in expressions" << endl;
+			$$->factor = 0;
+		}
+		else {
+			/* Create a factor node that is a lookup of an expression. */
+			$$->factor = new Factor( loc, gdNode->value );
+		}
+		}
+		else {
+			$$->factor = new Factor( loc, 0 );
+		}
+	}
+
+	ragel::factor :String
+	{
+		Token tok;
+		tok.set( $string );
+
+		$$->factor = new Factor( new Literal( tok, Literal::LitString ) );
+	}
+
+	# def alphabet_num 
+	#	[uint] :Uint
+	# |	[`- uint] :Neg
+	# |	[hex] :Hex
+	ragel::alphabet_num
+	{
+		Token tok;
+	}
+
+	ragel::alphabet_num :Uint
+	{
+		$$->tok.set( $uint );
+		$$->tok.set( @uint );
+	}
+
+	ragel::alphabet_num :Neg
+	{
+//		$$->tok.data = $uint->data;
+//		$$->tok.length = $uint->length
+//		$$->tok.loc = @uint
+//
+//		$$->token.set( "-", 1 );
+//		$$->token.loc = $1->loc;
+//		$$->token.append( *$2 );
+	}
+
+	ragel::alphabet_num :Hex
+	{
+		$$->tok.set( $hex );
+		$$->tok.set( @hex );
+	}
+
+	# def assignment
+	#	[opt_export word `= join `;] :Assignment commit
+	ragel::assignment :Assignment
+	{
+		if ( pd != 0 ) {
+		InputLoc loc = @word;
+
+		bool exportMachine = $opt_export->isSet;
+		if ( exportMachine )
+			exportContext.append( true );
+
+		string name( $word->data, $word->length );
+		loadMachineName( name );
+
+		/* Main machine must be an instance. */
+		bool isInstance = false;
+		if ( name == MAIN_MACHINE ) {
+			warning(loc) << "main machine will be implicitly instantiated" << endl;
+			isInstance = true;
+		}
+
+		MachineDef *machineDef = new MachineDef( $join->join );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, isInstance );
+
+		if ( exportMachine )
+			exportContext.remove( exportContext.length()-1 );
+
+		/* Pass a location to join_or_lm */
+		if ( machineDef->join != 0 )
+			machineDef->join->loc = loc;
+		}
+	}
+
+	ragel::instantiation :Instantiation
+	{
+		//std::cout << " assignment\n";
 	}
 
 	# def opt_export
@@ -66,6 +499,7 @@ reduction load
 	{
 		bool isSet;
 	}
+
 
 	ragel::opt_export :Export
 	{
@@ -77,63 +511,103 @@ reduction load
 		$$->isSet = false;
 	}
 
-	ragel::assignment :Assignment
-	{
-		InputLoc loc = @word;
-
-		bool exportMachine = $opt_export->isSet;
-		if ( exportMachine )
-			exportContext.append( true );
-
-//		string name = loadMachineName( Assignment.word().text() );
-//
-//		/* Main machine must be an instance. */
-//		bool isInstance = false;
-//		if ( name == MAIN_MACHINE ) {
-//			warning(loc) << "main machine will be implicitly instantiated" << endl;
-//			isInstance = true;
-//		}
-//
-//		MachineDef *machineDef = new MachineDef( loadJoin( Assignment.join() ) );
-//
-//		/* Generic creation of machine for instantiation and assignment. */
-//		tryMachineDef( loc, name, machineDef, isInstance );
-
-		if ( exportMachine )
-			exportContext.remove( exportContext.length()-1 );
-
-//		/* Pass a location to join_or_lm */
-//		if ( machineDef->join != 0 )
-//			machineDef->join->loc = loc;
-	}
-
-	ragel::instantiation :Instantiation
-	{
-		//std::cout << " assignment\n";
-	}
-
 	ragel::statement :Write
 	{
-		InputItem *inputItem = new InputItem;
-		inputItem->type = InputItem::Write;
-		inputItem->loc = @Cmd;
-		inputItem->name = pd->sectionName;
-		inputItem->pd = pd;
+		if ( pd != 0 ) {
+			InputItem *inputItem = new InputItem;
+			inputItem->type = InputItem::Write;
+			inputItem->loc = @Cmd;
+			inputItem->name = pd->sectionName;
+			inputItem->pd = pd;
 
-		section->lastReference = inputItem;
+			section->lastReference = inputItem;
 
-		string cmd( $Cmd->data, $Cmd->length );
-		inputItem->writeArgs.append( cmd );
-		inputItem->writeArgs.append( writeArgs );
+			string cmd( $Cmd->data, $Cmd->length );
+			inputItem->writeArgs.append( cmd );
+			inputItem->writeArgs.append( writeArgs );
 
-		id.inputItems.append( inputItem );
+			id.inputItems.append( inputItem );
 
-		for ( Vector<std::string>::Iter a = inputItem->writeArgs; a.lte(); a++ ) {
-			std::cout << "write: " << *a << std::endl;
+			/* Clear the write args collector. */
+			writeArgs.empty();
 		}
+	}
 
-		/* Clear the write args collector. */
-		writeArgs.empty();
+	# def include_spec
+	#	[word] :Machine
+	# |	[string] :File
+	# |	[word string] :MachineFile
+
+	ragel::include_spec 
+	{
+		Token machine;
+		Token file;
+	}
+
+	ragel::include_spec :Machine
+	{
+		$$->machine.set( $word );
+		$$->machine.set( @word );
+		$$->file.data = 0;
+	}
+
+	ragel::include_spec :File
+	{
+		$$->file.set( $string );
+		$$->file.set( @string );
+		$$->machine.data = 0;
+	}
+
+	ragel::include_spec :MachineFile
+	{
+		$$->machine.set( $word );
+		$$->machine.set( @word );
+		$$->file.set( $string );
+		$$->file.set( @string );
+	}
+	
+	# [`include include_spec `;] :Include commit
+	ragel::statement :Include
+	{
+		if ( pd != 0 ) {
+			string machine = pd->sectionName;
+			string fileName = id.inputFileName;
+
+			if ( $include_spec->machine.data != 0 )
+				machine = string( $include_spec->machine.data, $include_spec->machine.length );
+
+			if ( $include_spec->file.data != 0 ) {
+				fileName = string( $include_spec->file.data, $include_spec->file.length );
+
+				InputLoc loc = $include_spec->file.loc;
+				long length;
+				bool caseInsensitive;
+				char *unescaped = prepareLitString( loc, fileName.c_str(), fileName.size(),
+						length, caseInsensitive );
+				fileName = unescaped;
+			}
+
+			string sectionName = pd->sectionName;
+
+			ParseData *pd0 = pd;
+			
+			const char *targetMachine0 = targetMachine;
+			const char *searchMachine0 = searchMachine;
+
+			includeDepth += 1;
+			pd = 0;
+
+			targetMachine = sectionName.c_str();
+			searchMachine = machine.c_str();
+
+			this->reduceFile( fileName.c_str(), sectionName.c_str(), machine.c_str() );
+
+			pd = pd0;
+			includeDepth -= 1;
+
+			targetMachine = targetMachine0;
+			searchMachine = searchMachine0;
+		}
 	}
 
 end 

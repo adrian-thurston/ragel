@@ -32,6 +32,7 @@
 #include "version.h"
 #include "inputdata.h"
 #include "xml.h"
+#include <colm/tree.h>
 
 using namespace std;
 
@@ -45,15 +46,29 @@ void Token::set( const char *str, int len )
 	data[len] = 0;
 }
 
-void Token::append( const Token &other )
+
+void Token::append( const char *otherData, int otherLen )
 {
-	int newLength = length + other.length;
+	int newLength = length + otherLen;
 	char *newString = new char[newLength+1];
 	memcpy( newString, data, length );
-	memcpy( newString + length, other.data, other.length );
+	memcpy( newString + length, otherData, otherLen );
 	newString[newLength] = 0;
 	data = newString;
 	length = newLength;
+}
+
+void Token::set( colm_location *cl )
+{
+	loc.fileName = cl->name;
+	loc.line = cl->line;
+	loc.col = cl->column;
+}
+
+void Token::set( colm_data *cd )
+{
+	data = (char*)cd->data;
+	length = cd->length;
 }
 
 /* Perform minimization after an operation according 

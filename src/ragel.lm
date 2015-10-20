@@ -141,7 +141,7 @@ namespace ragel
 	|	[expression] :Base
 
 	def expression
-		[term expression_op*]
+		[expr_left expression_op*] :Expression
 
 	def expression_op
 		[`| term] :Or
@@ -149,8 +149,14 @@ namespace ragel
 	|	[`- term] :Sub
 	|	[`-- term] :Ssub
 
+	def expr_left
+		[term] :Term
+
 	def term
-		[factor_label term_op_list_short]
+		[term_left term_op_list_short] :Term
+	
+	def term_left
+		[factor_label] :FactorLabel
 
 	# This list is done manually to get shortest match.
 	def term_op_list_short
@@ -322,9 +328,9 @@ namespace ragel
 	|	[alphabet_num] :AN
 
 	def alphabet_num 
-		[uint]
-	|	[`- uint]
-	|	[hex]
+		[uint] :Uint
+	|	[`- uint] :Neg
+	|	[hex] :Hex
 
 	def lm_act
 		[`=> action_ref] :ActionRef
@@ -389,9 +395,9 @@ namespace ragel
 	|	[W1: word W2: word] :Two
 
 	def include_spec
-		[word] 
-	|	[string]
-	|	[word string]
+		[word] :Machine
+	|	[string] :File
+	|	[word string] :MachineFile
 
 	def opt_export
 		[`export] :Export

@@ -13,7 +13,7 @@ ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 ragel_SOURCES = \
 	buffer.h inputdata.h redfsm.h parsedata.h \
 	parsetree.h rlscan.h common.h \
-	fsmgraph.h pcheck.h gendata.h ragel.h codegen.h \
+	fsmgraph.h pcheck.h gendata.h ragel.h codegen.h reducer.h \
 	binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h binloopvar.h binexpvar.h \
 	flat.h flatloopgoto.h flatexpgoto.h flatvar.h flatloopvar.h flatexpvar.h \
 	goto.h switchloopgoto.h switchexpgoto.h \
@@ -22,7 +22,7 @@ ragel_SOURCES = \
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc fsmnfa.cc \
 	inputdata.cc common.cc redfsm.cc gendata.cc allocgen.cc \
-	rlscan.cc rlparse.cc codegen.cc \
+	rlscan.cc rlparse.cc codegen.cc reducer.cc \
 	binary.cc binloopgoto.cc binexpgoto.cc binvar.cc binloopvar.cc binexpvar.cc \
 	flat.cc flatloopgoto.cc flatexpgoto.cc flatvar.cc flatloopvar.cc flatexpvar.cc \
 	goto.cc switchloopgoto.cc switchexpgoto.cc \
@@ -34,7 +34,7 @@ BUILT_SOURCES = version.h
 
 if WITH_COLM
 nodist_ragel_SOURCES += \
-	parse.c if.h if.cc
+	parse.c if.h if.cc commit.cc
 
 ragel_SOURCES += \
 	load.cc load.h
@@ -66,11 +66,12 @@ EXTRA_DIST = \
 	ragel-ruby.lm \
 	ragel-ocaml.lm \
 	rlparse.lm \
+	reducer.lm \
 	rlscan.rl \
 	rlparse.kh \
 	rlparse.kl
 
-CLEANFILES = parse.c if.h if.cc
+CLEANFILES = parse.c if.h if.cc commit.cc
 
 if WITH_COLM
 
@@ -81,13 +82,14 @@ RAGEL_LM = \
 	ragel-ocaml.lm \
 	ragel-crack.lm
 
-parse.c: rlparse.lm $(RAGEL_LM)
+parse.c: rlparse.lm reducer.lm $(RAGEL_LM)
 	$(COLM) -c -o $@ -e if.h -x if.cc -m commit.cc $<
 
 # These are necessary because we are not using built sources. They create the
 # dependency on the colm run for the objects that that require its output.
 ragel-if.$(OBJEXT): parse.c
 ragel-load.$(OBJEXT): parse.c
+ragel-commit.$(OBJEXT): parse.c
 
 RLHC = \
 	rlhc-host.lm \
