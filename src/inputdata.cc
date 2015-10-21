@@ -692,7 +692,7 @@ void InputData::processReduce()
 	makeFirstInputItem();
 
 	//LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
-	::reducer->reduceFile( inputFileName, 0, 0 );
+	::reducer->topReduce( inputFileName, 0, 0 );
 	//deleteLoadRagel( lr );
 
 //	/* Bail on above error. */

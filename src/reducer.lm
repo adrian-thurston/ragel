@@ -1,9 +1,4 @@
 reduction TopLevel
-	ragel::machine_name
-	{
-		std::string *data;
-	}
-
 	#
 	# def statement
 	#
@@ -13,6 +8,8 @@ reduction TopLevel
 		InputLoc sectionLoc;
 		string fileName = "input.rl";
 		string machine( $word->data, $word->length );
+
+		std::cout << "pass 0: machine name: " << machine << std::endl;
 
 		if ( includeDepth > 0 ) {
 			/* Check if the the machine is the one we are searching for. If
@@ -507,19 +504,12 @@ reduction TopLevel
 
 	ragel::statement :Write
 	{
-		InputItem *inputItem = new InputItem;
-		inputItem->type = InputItem::Write;
-		inputItem->loc = @Cmd;
-		inputItem->name = pd->sectionName;
-		inputItem->pd = pd;
-
-		section->lastReference = inputItem;
+		id.curItem = id.curItem->next;
+		InputItem *inputItem = id.curItem;
 
 		string cmd( $Cmd->data, $Cmd->length );
 		inputItem->writeArgs.append( cmd );
 		inputItem->writeArgs.append( writeArgs );
-
-		id.inputItems.append( inputItem );
 
 		/* Clear the write args collector. */
 		writeArgs.empty();
@@ -609,3 +599,35 @@ reduction RagelIgnore
 		current = 0;
 	}
 end 
+
+reduction SectionPass
+	ragel::machine_name :MachineName
+	{
+		string machine( $word->data, $word->length );
+
+		std::cout << "pass 2: machine name: " << machine << std::endl;
+
+		SectionDictEl *sdEl = id.sectionDict.find( machine );
+		if ( sdEl == 0 ) {
+			sdEl = new SectionDictEl( machine );
+			sdEl->value = new Section( machine );
+			id.sectionDict.insert( sdEl );
+		}
+
+		section = sdEl->value;
+	}
+
+	ragel::statement :Write
+	{
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::Write;
+		inputItem->loc = @Cmd;
+		inputItem->name = section->sectionName;
+		inputItem->pd = pd;
+		inputItem->section = section;
+
+		section->lastReference = inputItem;
+
+		id.inputItems.append( inputItem );
+	}
+end

@@ -59,6 +59,17 @@ void Reducer::reduceFile( const char *inputFileName,
 	colm_program *program = colm_new_program( &colm_object );
 	colm_set_debug( program, 0 );
 	colm_run_program( program, 4, argv );
-
 	colm_delete_program( program );
+}
+
+void Reducer::topReduce( const char *inputFileName,
+		const char *targetMachine, const char *searchMachine )
+{
+	current = 2;
+	id.makeFirstInputItem();
+	reduceFile( inputFileName, targetMachine, searchMachine );
+
+	current = 0;
+	id.curItem = id.inputItems.head;
+	reduceFile( inputFileName, targetMachine, searchMachine );
 }

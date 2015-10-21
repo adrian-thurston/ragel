@@ -79,21 +79,21 @@ typedef Vector<const char *> ArgsVector;
 
 struct Section
 {
-	Section( const char *sectionName )
+	Section( std::string sectionName )
 	:
 		sectionName(sectionName),
 		lastReference(0)
 	{}
 
-	const char *sectionName;
+	std::string sectionName;
 
 	/* Pointer to the last input item to reference this parse data struct. Once
 	 * we pass over this item we are free to clear away the parse tree. */
 	InputItem *lastReference;
 };
 
-typedef AvlMap<const char*, Section*, CmpStr> SectionDict;
-typedef AvlMapEl<const char*, Section*> SectionDictEl;
+typedef AvlMap<std::string, Section*, CmpString> SectionDict;
+typedef AvlMapEl<std::string, Section*> SectionDictEl;
 
 struct InputData
 {

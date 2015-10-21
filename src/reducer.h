@@ -78,4 +78,7 @@ struct Reducer
 
 	void reduceFile( const char *inputFileName, const char *targetMachine,
 			const char *searchMachine );
+
+	void topReduce( const char *inputFileName, const char *targetMachine,
+			const char *searchMachine );
 };
