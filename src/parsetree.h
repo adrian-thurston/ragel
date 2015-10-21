@@ -978,7 +978,11 @@ typedef Vector<ReduceAction*> ReduceActionVect;
 struct Reduction
 {
 	Reduction( const InputLoc &loc, String name )
-		: loc(loc), name(name) {}
+		: loc(loc), name(name)
+	{
+		static int nextId = 0;	
+		id = nextId++;
+	}
 
 	InputLoc loc;
 	String name;
@@ -1843,7 +1847,8 @@ typedef DList<Constructor> ConsList;
 struct ParserText
 {
 	static ParserText *cons( const InputLoc &loc,
-			Namespace *nspace, ConsItemList *list, bool used, bool reduce )
+			Namespace *nspace, ConsItemList *list,
+			bool used, bool reduce )
 	{
 		ParserText *p = new ParserText;
 		p->loc = loc;
@@ -1867,6 +1872,8 @@ struct ParserText
 	bool parse;
 	bool used;
 	bool reduce;
+	String reducerClass;
+
 	ParserText *prev, *next;
 };
 

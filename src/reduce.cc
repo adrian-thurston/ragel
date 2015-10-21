@@ -298,14 +298,19 @@ void Compiler::writeCommit()
 		"\n"
 		"	if ( !( lel->flags & PF_COMMITTED ) ) {\n"
 		"		/* Now can execute the reduction action. */\n"
-		"		switch ( kid->tree->id ) {\n";
+		"		switch ( reducer->current ) {\n";
 
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		Reduction *reduction = *r;
+
+		*outStream <<
+			"		case " << reduction->id << ": { switch ( kid->tree->id ) {\n";
+
 		/* Populate a vector with the reduce actions. */
 		Vector<ReduceAction*> actions;
-		actions.setAsNew( (*r)->reduceActions.length() );
+		actions.setAsNew( reduction->reduceActions.length() );
 		long pos = 0;
-		for ( ReduceActionList::Iter rdi = (*r)->reduceActions; rdi.lte(); rdi++ )
+		for ( ReduceActionList::Iter rdi = reduction->reduceActions; rdi.lte(); rdi++ )
 			actions[pos++] = rdi;
 
 		/* Sort it by lhs id, then prod num. */
@@ -354,6 +359,9 @@ void Compiler::writeCommit()
 				"			break;\n"
 				"		}\n";
 		}
+
+		*outStream <<
+			"		} break; }\n";
 	}
 
 	*outStream <<
