@@ -1,13 +1,7 @@
-
-reduction load
+reduction TopLevel
 	ragel::machine_name
 	{
 		std::string *data;
-	}
-	
-	ragel::factor :AlphabetNum
-	{
-		//std::cout << " factor -> [string]\n";
 	}
 
 	#
@@ -26,32 +20,40 @@ reduction load
 			 * are drawing the statements into target. */
 			if ( machine == searchMachine )
 				machine = targetMachine;
-			else
+			else {
 				pd = 0;
+				current = 1;
+			}
 		}
 
-		if ( pd != 0 ) {
-		SectionDictEl *sdEl = id.sectionDict.find( machine.c_str() );
-		if ( sdEl == 0 ) {
-			Section *section = new Section( strdup(machine.c_str() ) );
-			sdEl = new SectionDictEl( section->sectionName );
-			sdEl->value = section;
-			id.sectionDict.insert( sdEl );
-		}
+		if ( current == 0 ) {
+			SectionDictEl *sdEl = id.sectionDict.find( machine.c_str() );
+			if ( sdEl == 0 ) {
+				Section *section = new Section( strdup(machine.c_str() ) );
+				sdEl = new SectionDictEl( section->sectionName );
+				sdEl->value = section;
+				id.sectionDict.insert( sdEl );
+			}
 
-		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
-		if ( pdEl == 0 ) {
-			pdEl = new ParseDataDictEl( machine );
-			pdEl->value = new ParseData( &id, fileName, machine,
-					id.nextMachineId++, sectionLoc, hostLang,
-					minimizeLevel, minimizeOpt );
-			id.parseDataDict.insert( pdEl );
-			id.parseDataList.append( pdEl->value );
-		}
+			ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
+			if ( pdEl == 0 ) {
+				pdEl = new ParseDataDictEl( machine );
+				pdEl->value = new ParseData( &id, fileName, machine,
+						id.nextMachineId++, sectionLoc, hostLang,
+						minimizeLevel, minimizeOpt );
+				id.parseDataDict.insert( pdEl );
+				id.parseDataList.append( pdEl->value );
+			}
 
-		section = sdEl->value;
-		pd = pdEl->value;
+			section = sdEl->value;
+			pd = pdEl->value;
 		}
+	}
+
+	ragel::opt_machine_name :Empty
+	{
+		if ( pd == 0 )
+			current = 1;
 	}
 
 	ragel::write_arg :Word
@@ -386,7 +388,6 @@ reduction load
 	ragel::factor :Word
 	{
 		InputLoc loc = @word;
-		if ( pd != 0 ) {
 		string s( $word->data, $word->length );
 		
 		/* Find the named graph. */
@@ -405,10 +406,6 @@ reduction load
 		else {
 			/* Create a factor node that is a lookup of an expression. */
 			$$->factor = new Factor( loc, gdNode->value );
-		}
-		}
-		else {
-			$$->factor = new Factor( loc, 0 );
 		}
 	}
 
@@ -456,7 +453,6 @@ reduction load
 	#	[opt_export word `= join `;] :Assignment commit
 	ragel::assignment :Assignment
 	{
-		if ( pd != 0 ) {
 		InputLoc loc = @word;
 
 		bool exportMachine = $opt_export->isSet;
@@ -484,7 +480,6 @@ reduction load
 		/* Pass a location to join_or_lm */
 		if ( machineDef->join != 0 )
 			machineDef->join->loc = loc;
-		}
 	}
 
 	ragel::instantiation :Instantiation
@@ -500,7 +495,6 @@ reduction load
 		bool isSet;
 	}
 
-
 	ragel::opt_export :Export
 	{
 		$$->isSet = true;
@@ -513,24 +507,22 @@ reduction load
 
 	ragel::statement :Write
 	{
-		if ( pd != 0 ) {
-			InputItem *inputItem = new InputItem;
-			inputItem->type = InputItem::Write;
-			inputItem->loc = @Cmd;
-			inputItem->name = pd->sectionName;
-			inputItem->pd = pd;
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::Write;
+		inputItem->loc = @Cmd;
+		inputItem->name = pd->sectionName;
+		inputItem->pd = pd;
 
-			section->lastReference = inputItem;
+		section->lastReference = inputItem;
 
-			string cmd( $Cmd->data, $Cmd->length );
-			inputItem->writeArgs.append( cmd );
-			inputItem->writeArgs.append( writeArgs );
+		string cmd( $Cmd->data, $Cmd->length );
+		inputItem->writeArgs.append( cmd );
+		inputItem->writeArgs.append( writeArgs );
 
-			id.inputItems.append( inputItem );
+		id.inputItems.append( inputItem );
 
-			/* Clear the write args collector. */
-			writeArgs.empty();
-		}
+		/* Clear the write args collector. */
+		writeArgs.empty();
 	}
 
 	# def include_spec
@@ -569,47 +561,51 @@ reduction load
 	# [`include include_spec `;] :Include commit
 	ragel::statement :Include
 	{
-		if ( pd != 0 ) {
-			string machine = pd->sectionName;
-			string fileName = id.inputFileName;
+		string machine = pd->sectionName;
+		string fileName = id.inputFileName;
 
-			if ( $include_spec->machine.data != 0 )
-				machine = string( $include_spec->machine.data, $include_spec->machine.length );
+		if ( $include_spec->machine.data != 0 )
+			machine = string( $include_spec->machine.data, $include_spec->machine.length );
 
-			if ( $include_spec->file.data != 0 ) {
-				fileName = string( $include_spec->file.data, $include_spec->file.length );
+		if ( $include_spec->file.data != 0 ) {
+			fileName = string( $include_spec->file.data, $include_spec->file.length );
 
-				InputLoc loc = $include_spec->file.loc;
-				long length;
-				bool caseInsensitive;
-				char *unescaped = prepareLitString( loc, fileName.c_str(), fileName.size(),
-						length, caseInsensitive );
-				fileName = unescaped;
-			}
-
-			string sectionName = pd->sectionName;
-
-			ParseData *pd0 = pd;
-			
-			const char *targetMachine0 = targetMachine;
-			const char *searchMachine0 = searchMachine;
-
-			includeDepth += 1;
-			pd = 0;
-
-			targetMachine = sectionName.c_str();
-			searchMachine = machine.c_str();
-
-			this->reduceFile( fileName.c_str(), sectionName.c_str(), machine.c_str() );
-
-			pd = pd0;
-			includeDepth -= 1;
-
-			targetMachine = targetMachine0;
-			searchMachine = searchMachine0;
+			InputLoc loc = $include_spec->file.loc;
+			long length;
+			bool caseInsensitive;
+			char *unescaped = prepareLitString( loc, fileName.c_str(), fileName.size(),
+					length, caseInsensitive );
+			fileName = unescaped;
 		}
+
+		string sectionName = pd->sectionName;
+
+		ParseData *pd0 = pd;
+		
+		const char *targetMachine0 = targetMachine;
+		const char *searchMachine0 = searchMachine;
+
+		includeDepth += 1;
+		pd = 0;
+
+		targetMachine = sectionName.c_str();
+		searchMachine = machine.c_str();
+
+		this->reduceFile( fileName.c_str(), sectionName.c_str(), machine.c_str() );
+
+		pd = pd0;
+		includeDepth -= 1;
+
+		targetMachine = targetMachine0;
+		searchMachine = searchMachine0;
 	}
 
 end 
 
-
+reduction RagelIgnore
+	c_host::section :MultiLine
+	{
+		/* Reset to other reducer. */
+		current = 0;
+	}
+end 

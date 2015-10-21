@@ -97,8 +97,9 @@ namespace c_host
 	lex 
 		literal `%%{
 
-		token slr /'%%' [^{] [^\n]* '\n'/
+		token slr / '%%' [^{] [^\n]* '\n' /
 		{
+			# Translates single line to multi-line
 			input->pull( 2 )
 			R: str = input->pull( match_length - 3 )
 			input->push( "}%%" )
@@ -119,7 +120,7 @@ namespace c_host
 		token hex_number /'0x' [0-9a-fA-F]+/
 
 		token comment
-			/c_comment | cpp_comment/
+			/ c_comment | cpp_comment /
 
 		token string
 			/ s_literal | d_literal /

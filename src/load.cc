@@ -2187,9 +2187,6 @@ struct LoadRagel
 			case ragel::statement::PostPop:
 				loadPostPop( Statement.action_block() );
 				break;
-			case ragel::statement::MachineName:
-				error(loc) << "machine statements must be the first statement" << endl;
-				break;
 			case ragel::statement::ActionSpec:
 				loadActionSpec( Statement.action_spec() );
 				break;
@@ -2234,21 +2231,20 @@ struct LoadRagel
 		return false;
 	}
 
-	void loadStmtList( ragel::_repeat_statement StmtList, const char *targetMachine,
+	void loadStmtList( ragel::ragel_start RagelStart, const char *targetMachine,
 			const char *searchMachine )
 	{
-		if ( StmtList.end() )
-			return;
-
 		/* Handle machine statements separately. They must appear at the head
 		 * of a block. */
-		ragel::statement::prod_name prodName = StmtList.value().prodName();
-		if ( prodName == ragel::statement::MachineName ) {
+		ragel::opt_machine_name::prod_name prodName = RagelStart.opt_machine_name().prodName();
+		if ( prodName == ragel::opt_machine_name::MachineName ) {
+			ragel::machine_name MachineName = RagelStart.opt_machine_name().machine_name();
+
 			/* Process the name, move over it. */
-			loadMachineStmt( StmtList.value().machine_name().word(), targetMachine, searchMachine );
-			StmtList = StmtList.next();
+			loadMachineStmt( MachineName.word(), targetMachine, searchMachine );
 		}
 
+		ragel::_repeat_statement StmtList = RagelStart._repeat_statement();
 		while ( !StmtList.end() ) {
 			bool stop = loadStatement( StmtList.value() );
 			if ( stop )
@@ -2262,7 +2258,7 @@ struct LoadRagel
 	{
 		switch ( Section.prodName() ) {
 			case c_host::section::MultiLine:
-				loadStmtList( Section.ragel_start()._repeat_statement(),
+				loadStmtList( Section.ragel_start(),
 						targetMachine, searchMachine );
 				break;
 
@@ -2291,7 +2287,7 @@ struct LoadRagel
 	{
 		switch ( Section.prodName() ) {
 			case ruby_host::section::MultiLine:
-				loadStmtList( Section.ragel_start()._repeat_statement(),
+				loadStmtList( Section.ragel_start(),
 						targetMachine, searchMachine );
 				break;
 
@@ -2320,7 +2316,7 @@ struct LoadRagel
 	{
 		switch ( Section.prodName() ) {
 			case ocaml_host::section::MultiLine:
-				loadStmtList( Section.ragel_start()._repeat_statement(),
+				loadStmtList( Section.ragel_start(),
 						targetMachine, searchMachine );
 				break;
 

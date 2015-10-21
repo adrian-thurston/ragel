@@ -36,6 +36,8 @@ struct Reducer
 		targetMachine(0),
 		searchMachine(0),
 
+		current(0),
+
 		exprLeft(0)
 	{
 		exportContext.append( false );
@@ -57,6 +59,8 @@ struct Reducer
 
 	const char *targetMachine;
 	const char *searchMachine;
+
+	int current;
 
 	/* Expression reduction. Grammar is right recursive. Output tree is left.
 	 * This keeps the left tree. */

@@ -410,8 +410,7 @@ namespace ragel
 		[`machine word `;] :MachineName
 
 	def statement
-		[machine_name] :MachineName commit
-	|	[assignment] :Assignment
+		[assignment] :Assignment
 	|	[instantiation] :Instantiation
 	|	[nfa_union] :NfaUnion
 	|	[action_spec] :ActionSpec
@@ -427,6 +426,10 @@ namespace ragel
 	|	[`nfaprepush action_block] :NfaPrePush commit
 	|	[`nfapostpop action_block] :NfaPostPop commit
 
+	def opt_machine_name
+		[machine_name] :MachineName
+	|	[] :Empty
+
 	def ragel_start
-		[statement*]
+		[opt_machine_name statement*]
 end
