@@ -60,7 +60,7 @@ end
 
 namespace ragel
 	lex
-		literal `}%%
+		token end_section / '}%%' /
 
 		ignore /[\t\n ]+/
 		ignore /'#' any* :> '\n'/

@@ -1832,10 +1832,8 @@ void Parser6::tryMachineDef( const InputLoc &loc, char *name,
 		newEl->value->isExport = exportContext[exportContext.length()-1];
 
 		/* It it is an instance, put on the instance list. */
-		if ( isInstance ) {
+		if ( isInstance )
 			pd->instanceList.append( newEl );
-
-		}
 	}
 	else {
 		// Recover by ignoring the duplicate.

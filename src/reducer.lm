@@ -136,7 +136,13 @@ reduction TopLevel
 		Term *term;
 	}
 
-	# def factor_label_left
+	ragel::term :Term
+	{
+		$$->term = termLeft;
+		termLeft = 0;
+	}
+
+	# def term_left
 	#	[factor_label] :FactorLabel
 	ragel::term_left :FactorLabel
 	{
@@ -479,9 +485,50 @@ reduction TopLevel
 			machineDef->join->loc = loc;
 	}
 
+	
+	# def lm
+	#	[join] :Join
+	# |	[`|* lm_stmt_list `*|] :Lm
+	ragel::lm
+	{
+		Join *join;
+	}
+
+	ragel::lm :Join
+	{
+		$$->join = $join->join;
+	}
+
+	ragel::lm :Lm
+	{
+		$$->join = 0;
+	}
+
+
+	# def instantiation
+	#	[opt_export word `:= lm `;] :Instantiation commit
 	ragel::instantiation :Instantiation
 	{
-		//std::cout << " assignment\n";
+		InputLoc loc = @word;
+
+		bool exportMachine = $opt_export->isSet;
+		if ( exportMachine )
+			exportContext.append( true );
+
+		string name( $word->data, $word->length );
+		loadMachineName( name );
+
+		MachineDef *machineDef = new MachineDef( $lm->join );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, true );
+
+		if ( exportMachine )
+			exportContext.remove( exportContext.length()-1 );
+
+		/* Pass a location to join_or_lm */
+		if ( machineDef->join != 0 )
+			machineDef->join->loc = loc;
 	}
 
 	# def opt_export
@@ -500,19 +547,6 @@ reduction TopLevel
 	ragel::opt_export :Base
 	{
 		$$->isSet = false;
-	}
-
-	ragel::statement :Write
-	{
-		id.curItem = id.curItem->next;
-		InputItem *inputItem = id.curItem;
-
-		string cmd( $Cmd->data, $Cmd->length );
-		inputItem->writeArgs.append( cmd );
-		inputItem->writeArgs.append( writeArgs );
-
-		/* Clear the write args collector. */
-		writeArgs.empty();
 	}
 
 	# def include_spec
@@ -590,6 +624,33 @@ reduction TopLevel
 		searchMachine = searchMachine0;
 	}
 
+	ragel::statement :Write
+	{
+		id.curItem = id.curItem->next;
+		InputItem *inputItem = id.curItem;
+
+		string cmd( $Cmd->data, $Cmd->length );
+		inputItem->writeArgs.append( cmd );
+		inputItem->writeArgs.append( writeArgs );
+
+		inputItem->pd = pd;
+
+		/* Clear the write args collector. */
+		writeArgs.empty();
+	}
+
+	c_host::section :MultiLine
+	{
+		id.curItem = id.curItem->next;
+
+		id.curItem->pd = pd;
+
+		id.checkLastRef( id.curItem );
+
+		if ( includeDepth == 0 )
+			id.curItem = id.curItem->next;
+	}
+
 end 
 
 reduction RagelIgnore
@@ -623,11 +684,30 @@ reduction SectionPass
 		inputItem->type = InputItem::Write;
 		inputItem->loc = @Cmd;
 		inputItem->name = section->sectionName;
-		inputItem->pd = pd;
 		inputItem->section = section;
 
-		section->lastReference = inputItem;
-
 		id.inputItems.append( inputItem );
+	}
+
+	c_host::section :MultiLine
+	{
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::EndSection;
+		inputItem->loc = @end_section;
+		id.inputItems.append( inputItem );
+
+		if ( section != 0 ) {
+			inputItem->section = section;
+			section->lastReference = inputItem;
+		}
+
+		if ( includeDepth == 0 ) {
+			/* The end section may include a newline on the end, so
+			 * we use the last line, which will count the newline. */
+			InputItem *inputItem = new InputItem;
+			inputItem->type = InputItem::HostData;
+			inputItem->loc = @end_section;
+			id.inputItems.append( inputItem );
+		}
 	}
 end

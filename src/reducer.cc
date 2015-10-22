@@ -34,10 +34,10 @@ void Reducer::tryMachineDef( InputLoc &loc, std::string name,
 		if ( isInstance ) {
 			pd->instanceList.append( newEl );
 
-			InputItem *inputItem = new InputItem;
-			inputItem->type = InputItem::EndSection;
-			section->lastReference = inputItem;
-			id.inputItems.append( inputItem );
+//			InputItem *inputItem = new InputItem;
+//			inputItem->type = InputItem::EndSection;
+//			section->lastReference = inputItem;
+//			id.inputItems.append( inputItem );
 		}
 	}
 	else {
@@ -66,10 +66,10 @@ void Reducer::topReduce( const char *inputFileName,
 		const char *targetMachine, const char *searchMachine )
 {
 	current = 2;
-	id.makeFirstInputItem();
 	reduceFile( inputFileName, targetMachine, searchMachine );
 
 	current = 0;
 	id.curItem = id.inputItems.head;
+	id.lastFlush = id.inputItems.head;
 	reduceFile( inputFileName, targetMachine, searchMachine );
 }

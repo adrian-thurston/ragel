@@ -140,7 +140,7 @@ namespace ocaml_host
 	|	[ocaml_any]
 
 	def section
-		[`%%{ ragel::ragel_start ragel::`}%%] :MultiLine
+		[`%%{ ragel::ragel_start ragel::end_section] :MultiLine
 	|	[tok] :Tok
 end
 

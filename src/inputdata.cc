@@ -461,7 +461,8 @@ void InputData::checkLastRef( InputItem *ii )
 		ParseData *pd = ii->pd;
 
 		if ( pd->instanceList.length() > 0 ) {
-			terminateParser( ii->parser );
+			if ( ii->parser != 0 ) 
+				terminateParser( ii->parser );
 
 			pd->prepareMachineGen( 0, hostLang );
 
@@ -673,9 +674,15 @@ void InputData::processColm()
 #endif
 }
 
+
 void InputData::processReduce()
 {
 #ifdef WITH_COLM
+
+	makeDefaultFileName();
+	makeTranslateOutputFileName();
+	createOutputStream();
+	openOutput();
 
 	/*
 	 * Colm-based reduction parser introduced in ragel 7. 
@@ -693,6 +700,12 @@ void InputData::processReduce()
 
 	//LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
 	::reducer->topReduce( inputFileName, 0, 0 );
+
+	flushRemaining();
+
+	closeOutput();
+	runRlhc();
+
 	//deleteLoadRagel( lr );
 
 //	/* Bail on above error. */
