@@ -9,7 +9,7 @@ reduction TopLevel
 		string fileName = "input.rl";
 		string machine( $word->data, $word->length );
 
-		std::cout << "pass 0: machine name: " << machine << std::endl;
+		//std::cout << "pass 0: machine name: " << machine << std::endl;
 
 		if ( includeDepth > 0 ) {
 			/* Check if the the machine is the one we are searching for. If
@@ -81,7 +81,7 @@ reduction TopLevel
 	}
 	
 	# def expression
-	#	[expr_left expression_op*] :Expression
+	#	[expr_left expression_op_list] :Expression
 	ragel::expression
 	{
 		Expression *expr;
@@ -89,43 +89,86 @@ reduction TopLevel
 
 	ragel::expression :Expression
 	{
-		$$->expr = exprLeft;
-		exprLeft = 0;
+		// 1. reverse the list
+		// 2. put the new term at the end.
+		Expression *prev = new Expression( $expr_left->term );
+		Expression *cur = $expression_op_list->expr;
+		while ( cur != 0 ) {
+			Expression *next = cur->expression;
+
+			/* Reverse. */
+			cur->expression = prev;
+
+			prev = cur;
+			cur = next;
+		}
+
+		$$->expr = prev;
+	}
+
+	ragel::expr_left
+	{
+		Term *term;
 	}
 
 	ragel::expr_left :Term
 	{
-		exprLeft = new Expression( $term->term );
+		$$->term = $term->term;
 	}
+
+	# def expression_op_list
+	#	[expression_op expression_op_list] :Op
+	# |	[] :Empty
+	ragel::expression_op_list
+	{
+		Expression *expr;
+	}
+
+	ragel::expression_op_list :Op
+	{
+		$$->expr = new Expression( $_expression_op_list->expr,
+				$expression_op->term, $expression_op->type );
+	}
+
+	ragel::expression_op_list :Empty
+	{
+		$$->expr = 0;
+	}
+
 
 	# def expression_op
 	# 	[`| term] :Or
 	# |	[`& term] :And
 	# |	[`- term] :Sub
 	# |	[`-- term] :Ssub
+	ragel::expression_op
+	{
+		Expression::Type type;
+		Term *term;
+	}
 
 	ragel::expression_op :Or
 	{
-		exprLeft = new Expression( exprLeft, $term->term,
-				Expression::OrType );
+		$$->type = Expression::OrType;
+		$$->term = $term->term;
 	}
 
 	ragel::expression_op :And
 	{
-		exprLeft = new Expression( exprLeft, $term->term,
-				Expression::IntersectType );
+		$$->type = Expression::IntersectType;
+		$$->term = $term->term;
 	}
 
 	ragel::expression_op :Sub
 	{
-		exprLeft = new Expression( exprLeft, $term->term,
-				Expression::SubtractType );
+		$$->type = Expression::SubtractType;
+		$$->term = $term->term;
 	}
 
 	ragel::expression_op :Ssub
 	{
-		exprLeft = new Expression( exprLeft, $term->term,
-				Expression::StrongSubtractType );
+		$$->type = Expression::StrongSubtractType;
+		$$->term = $term->term;
 	}
 
 
@@ -138,16 +181,55 @@ reduction TopLevel
 
 	ragel::term :Term
 	{
-		$$->term = termLeft;
-		termLeft = 0;
+		// 1. reverse the list
+		// 2. put the new term at the end.
+		Term *prev = new Term( $term_left->fwa );
+		Term *cur = $term_op_list_short->term;
+		while ( cur != 0 ) {
+			Term *next = cur->term;
+
+			/* Reverse. */
+			cur->term = prev;
+
+			prev = cur;
+			cur = next;
+		}
+
+		$$->term = prev;
 	}
 
 	# def term_left
 	#	[factor_label] :FactorLabel
+	ragel::term_left
+	{
+		FactorWithAug *fwa;
+	}
+
 	ragel::term_left :FactorLabel
 	{
-		termLeft = new Term( $factor_label->fwa );
+		$$->fwa = $factor_label->fwa;
 	}
+
+	# # This list is done manually to get shortest match.
+	# def term_op_list_short
+	# 	[] :Empty
+	# |	[term_op term_op_list_short] :Terms
+	ragel::term_op_list_short
+	{
+		Term *term;
+	}
+
+	ragel::term_op_list_short :Empty
+	{
+		$$->term = 0;
+	}
+
+	ragel::term_op_list_short :Terms
+	{
+		$$->term = new Term( $_term_op_list_short->term,
+				$term_op->fwa, $term_op->type );
+	}
+
 
 	# def term_op
 	#	[factor_label] :None
@@ -155,29 +237,40 @@ reduction TopLevel
 	# |	[`:> factor_label] :ColonLt
 	# |	[`:>> factor_label] :ColonLtLt
 	# |	[`<: factor_label] :GtColon
+	ragel::term_op
+	{
+		Term::Type type;
+		FactorWithAug *fwa;
+	}
+
 	ragel::term_op :None
 	{
-		termLeft = new Term( termLeft, $factor_label->fwa, Term::ConcatType );
+		$$->type = Term::ConcatType;
+		$$->fwa = $factor_label->fwa;
 	}
 
 	ragel::term_op :Dot
 	{
-		termLeft = new Term( termLeft, $factor_label->fwa, Term::ConcatType );
+		$$->type = Term::ConcatType;
+		$$->fwa = $factor_label->fwa;
 	}
 
 	ragel::term_op :ColonLt
 	{
-		termLeft = new Term( termLeft, $factor_label->fwa, Term::RightStartType );
+		$$->type = Term::RightStartType;
+		$$->fwa = $factor_label->fwa;
 	}
 
 	ragel::term_op :ColonLtLt
 	{
-		termLeft = new Term( termLeft, $factor_label->fwa, Term::RightFinishType );
+		$$->type = Term::RightFinishType;
+		$$->fwa = $factor_label->fwa;
 	}
 
 	ragel::term_op :GtColon
 	{
-		termLeft = new Term( termLeft, $factor_label->fwa, Term::LeftType );
+		$$->type = Term::LeftType;
+		$$->fwa = $factor_label->fwa;
 	}
 
 	# def factor_label
@@ -231,6 +324,332 @@ reduction TopLevel
 	# 	[epsilon_target `:: word] :Rec
 	# |	[word] :Base
 
+	# def named_action_ref
+	#	[word]
+
+	# def action_ref 
+	#	[named_action_ref] :NamedRef
+	# |	[`( named_action_ref `)] :ParenNamed
+	# |	[action_block] :Block
+	ragel::action_ref
+	{
+		Action *action;
+	}
+
+	ragel::action_ref :NamedRef
+	{
+
+	}
+
+	ragel::action_ref :ParenNamed
+	{
+
+	}
+
+	ragel::action_ref :Block
+	{
+
+	}
+
+	# def action_block
+	#	[`{ c_select     CInlineBlock: c_inline::inline_block `}] :C
+	# |	[`{ ruby_select  RubyInlineBlock: ruby_inline::inline_block ruby_inline::`}]
+	# |	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_block ocaml_inline::`}]
+	# |	[`{ crack_select OCamlInlineBlock: crack_inline::inline_block crack_inline::`}]
+	ragel::action_block
+	{
+		Action *action;
+	}
+
+	ragel::action_block :C
+	{
+		InputLoc loc; // $1->loc;
+
+		/* Create the action, add it to the list and pass up. */
+		Action *newAction = new Action( loc, std::string(),
+				$CInlineBlock->inlineList, pd->nextCondId++ );
+		pd->actionList.append( newAction );
+		$$->action = newAction;
+	}
+
+	# def inline_block
+	#	[block_item*]
+	c_inline::inline_block
+	{
+		InlineList *inlineList;
+	}
+
+	# def block_item
+	#	[expr_any] :ExprAny
+	# |	[block_symbol] :BlockSymbol
+	# |	[block_interpret] :BlockInterpret
+	# |	[`{ inline_block `}] :RecBlock
+
+	# def block_symbol
+	#	[`,] | [`;] | [`(] | [`)] | [`*] | [`::]
+
+	# def block_interpret
+	#	[expr_interpret] :ExprInterpret
+	# |	[`fhold whitespace? `;] :Fhold
+	# |	[`fgoto whitespace? `* inline_expr `;] :FgotoExpr
+	# |	[`fnext whitespace? `* inline_expr `;] :FnextExpr
+	# |	[`fcall whitespace? `* inline_expr `;] :FcallExpr
+	# |	[`fncall whitespace? `* inline_expr `;] :FncallExpr
+	# |	[`fexec inline_expr `;] :Fexec
+	# |	[`fgoto state_ref srlex::`;] :FgotoSr
+	# |	[`fnext state_ref srlex::`;] :FnextSr
+	# |	[`fcall state_ref srlex::`;] :FcallSr
+	# |	[`fncall state_ref srlex::`;] :FncallSr
+	# |	[`fret `;] :Fret
+	# |	[`fnret `;] :Fnret
+	# |	[`fbreak `;] :Fbreak
+	# |	[`fnbreak `;] :Fnbreak
+
+	
+	# def priority_aug
+	#	[uint]
+	# |	[`+ uint]
+	# |	[`- uint]
+
+	# def aug_base
+	# 	[`@] :Finish | [`>] :Enter | [`%] :Leave | [`$] :All
+
+	ragel::aug_base
+	{
+		AugType augType;
+	}
+
+	ragel::aug_base :Enter
+		{ $$->augType = at_start; }
+	ragel::aug_base :All
+		{ $$->augType = at_all; }
+	ragel::aug_base :Finish
+		{ $$->augType = at_finish; }
+	ragel::aug_base :Leave
+		{ $$->augType = at_leave; }
+
+	# def aug_cond
+	# 	[`>?] :Start1 | [`$?] :All1 | [`%?] :Leave1
+	# |	[`> `when] :Start2 | [`$ `when] :All2 | [`% `when] :Leave2
+	# |	[`inwhen] :Start3 | [`when] :All3 | [`outwhen] :Leave3
+
+	ragel::aug_cond
+	{
+		AugType augType;
+	}
+
+	ragel::aug_cond :Start1
+		{ $$->augType = at_start; }
+	ragel::aug_cond :Start2
+		{ $$->augType = at_start; }
+	ragel::aug_cond :Start3
+		{ $$->augType = at_start; }
+	ragel::aug_cond :All1
+		{ $$->augType = at_all; }
+	ragel::aug_cond :All2
+		{ $$->augType = at_all; }
+	ragel::aug_cond :All3
+		{ $$->augType = at_all; }
+	ragel::aug_cond :Leave1
+		{ $$->augType = at_leave; }
+	ragel::aug_cond :Leave2
+		{ $$->augType = at_leave; }
+	ragel::aug_cond :Leave3
+		{ $$->augType = at_leave; }
+
+	# def aug_to_state
+	# 	[`>~] :Start1 | [`<~] :NotStart1 | [`$~] :All1
+	# |	[`%~] :Final1 | [`@~] :NotFinal1 | [`<>~] :Middle1
+	# |	[`> `to] :Start2 | [`< `to] :NotStart2 | [`$ `to] :All2
+	# |	[`% `to] :Final2 | [`@ `to] :NotFinal2 | [`<> `to] :Middle2
+
+	ragel::aug_to_state
+	{
+		AugType augType;	
+	}
+
+	ragel::aug_to_state :Start1
+		{ $$->augType = at_start_to_state; }
+	ragel::aug_to_state :Start2
+		{ $$->augType = at_start_to_state; }
+	ragel::aug_to_state :NotStart1
+		{ $$->augType = at_not_start_to_state; }
+	ragel::aug_to_state :NotStart2
+		{ $$->augType = at_not_start_to_state; }
+	ragel::aug_to_state :All1
+		{ $$->augType = at_all_to_state; }
+	ragel::aug_to_state :All2
+		{ $$->augType = at_all_to_state; }
+	ragel::aug_to_state :Final1
+		{ $$->augType = at_final_to_state; }
+	ragel::aug_to_state :Final2
+		{ $$->augType = at_final_to_state; }
+	ragel::aug_to_state :NotFinal1
+		{ $$->augType = at_not_final_to_state; }
+	ragel::aug_to_state :NotFinal2
+		{ $$->augType = at_not_final_to_state; }
+	ragel::aug_to_state :Middle1
+		{ $$->augType = at_middle_to_state; }
+	ragel::aug_to_state :Middle2
+		{ $$->augType = at_middle_to_state; }
+
+	# def aug_from_state
+	# 	[`>*] :Start1 | [`<*] :NotStart1 | [`$*] :All1
+	# |	[`%*] :Final1 | [`@*] :NotFinal1 | [`<>*] :Middle1
+	# |	[`> `from] :Start2 | [`< `from] :NotStart2 | [`$ `from] :All2
+	# |	[`% `from] :Final2 | [`@ `from] :NotFinal2 | [`<> `from] :Middle2
+
+	ragel::aug_from_state
+	{
+		AugType augType;	
+	}
+
+	ragel::aug_from_state :Start1
+		{ $$->augType = at_start_from_state; }
+	ragel::aug_from_state :Start2
+		{ $$->augType = at_start_from_state; }
+	ragel::aug_from_state :NotStart1
+		{ $$->augType = at_not_start_from_state; }
+	ragel::aug_from_state :NotStart2
+		{ $$->augType = at_not_start_from_state; }
+	ragel::aug_from_state :All1
+		{ $$->augType = at_all_from_state; }
+	ragel::aug_from_state :All2
+		{ $$->augType = at_all_from_state; }
+	ragel::aug_from_state :Final1
+		{ $$->augType = at_final_from_state; }
+	ragel::aug_from_state :Final2
+		{ $$->augType = at_final_from_state; }
+	ragel::aug_from_state :NotFinal1
+		{ $$->augType = at_not_final_from_state; }
+	ragel::aug_from_state :NotFinal2
+		{ $$->augType = at_not_final_from_state; }
+	ragel::aug_from_state :Middle1
+		{ $$->augType = at_middle_from_state; }
+	ragel::aug_from_state :Middle2
+		{ $$->augType = at_middle_from_state; }
+
+	# def aug_eof
+	# 	[`>/] :Start1 | [`</] :NotStart1 | [`$/] :All1
+	# |	[`%/] :Final1 | [`@/] :NotFinal1 | [`<>/] :Middle1
+	# |	[`> `eof] :Start2 | [`< `eof] :NotStart2 | [`$ `eof] :All2
+	# |	[`% `eof] :Final2 | [`@ `eof] :NotFinal2 | [`<> `eof] :Middle2
+
+	ragel::aug_eof
+	{
+		AugType augType;	
+	}
+
+	ragel::aug_eof :Start1
+		{ $$->augType = at_start_eof; }
+	ragel::aug_eof :Start2
+		{ $$->augType = at_start_eof; }
+	ragel::aug_eof :NotStart1
+		{ $$->augType = at_not_start_eof; }
+	ragel::aug_eof :NotStart2
+		{ $$->augType = at_not_start_eof; }
+	ragel::aug_eof :All1
+		{ $$->augType = at_all_eof; }
+	ragel::aug_eof :All2
+		{ $$->augType = at_all_eof; }
+	ragel::aug_eof :Final1
+		{ $$->augType = at_final_eof; }
+	ragel::aug_eof :Final2
+		{ $$->augType = at_final_eof; }
+	ragel::aug_eof :NotFinal1
+		{ $$->augType = at_not_final_eof; }
+	ragel::aug_eof :NotFinal2
+		{ $$->augType = at_not_final_eof; }
+	ragel::aug_eof :Middle1
+		{ $$->augType = at_middle_eof; }
+	ragel::aug_eof :Middle2
+		{ $$->augType = at_middle_eof; }
+
+	# def aug_gbl_error
+	# 	[`>!] :Start1 | [`<!] :NotStart1 | [`$!] :All1
+	# |	[`%!] :Final1 | [`@!] :NotFinal1 | [`<>!] :Middle1
+	# |	[`> `err] :Start2 | [`< `err] :NotStart2 | [`$ `err] :All2
+	# |	[`% `err] :Final2 | [`@ `err] :NotFinal2 | [`<> `err] :Middle2
+
+	ragel::aug_gbl_error
+	{
+		AugType augType;	
+	}
+
+	ragel::aug_gbl_error :Start1
+		{ $$->augType = at_start_gbl_error; }
+	ragel::aug_gbl_error :Start2
+		{ $$->augType = at_start_gbl_error; }
+	ragel::aug_gbl_error :NotStart1
+		{ $$->augType = at_not_start_gbl_error; }
+	ragel::aug_gbl_error :NotStart2
+		{ $$->augType = at_not_start_gbl_error; }
+	ragel::aug_gbl_error :NotStart2
+		{ $$->augType = at_not_start_gbl_error; }
+	ragel::aug_gbl_error :All1
+		{ $$->augType = at_all_gbl_error; }
+	ragel::aug_gbl_error :All2
+		{ $$->augType = at_all_gbl_error; }
+	ragel::aug_gbl_error :Final1
+		{ $$->augType = at_final_gbl_error; }
+	ragel::aug_gbl_error :Final2
+		{ $$->augType = at_final_gbl_error; }
+	ragel::aug_gbl_error :NotFinal1
+		{ $$->augType = at_not_final_gbl_error; }
+	ragel::aug_gbl_error :NotFinal2
+		{ $$->augType = at_not_final_gbl_error; }
+	ragel::aug_gbl_error :Middle1
+		{ $$->augType = at_middle_gbl_error; }
+	ragel::aug_gbl_error :Middle2
+		{ $$->augType = at_middle_gbl_error; }
+
+	# def aug_local_error
+	# 	[`>^] :Start1 | [`<^] :NotStart1 | [`$^] :All1
+	# |	[`%^] :Final1 | [`@^] :NotFinal1 | [`<>^] :Middle1
+	# |	[`> `lerr] :Start2 | [`< `lerr] :NotStart2 | [`$ `lerr] :All2
+	# |	[`% `lerr] :Final2 | [`@ `lerr] :NotFinal2 | [`<> `lerr] :Middle2
+
+	ragel::aug_local_error
+	{
+		AugType augType;
+	}
+
+	ragel::aug_local_error :Start1
+		{ $$->augType = at_start_local_error; }
+
+	ragel::aug_local_error :Start2
+		{ $$->augType = at_start_local_error; }
+
+	ragel::aug_local_error :NotStart1
+		{ $$->augType = at_not_start_local_error; }
+
+	ragel::aug_local_error :NotStart2
+		{ $$->augType = at_not_start_local_error; }
+
+	ragel::aug_local_error :All1
+		{ $$->augType = at_all_local_error; }
+
+	ragel::aug_local_error :All2
+		{ $$->augType = at_all_local_error; }
+
+	ragel::aug_local_error :Final1
+		{ $$->augType = at_final_local_error; }
+
+	ragel::aug_local_error :Final2
+		{ $$->augType = at_final_local_error; }
+
+	ragel::aug_local_error :NotFinal1
+		{ $$->augType = at_not_final_local_error; }
+
+	ragel::aug_local_error :NotFinal2
+		{ $$->augType = at_not_final_local_error; }
+
+	ragel::aug_local_error :Middle1
+		{ $$->augType = at_middle_local_error; }
+
+	ragel::aug_local_error :Middle2
+		{ $$->augType = at_middle_local_error; }
+
 	# def factor_aug
 	#	[factor_aug aug_base action_ref] :ActionRef
 	# |	[factor_aug aug_base priority_aug] :PriorEmbed
@@ -252,6 +671,12 @@ reduction TopLevel
 	ragel::factor_aug :ActionRef
 	{
 		$$->fwa = $_factor_aug->fwa;
+
+//		/* Append the action to the factorWithAug, record the refernce from 
+//		 * factorWithAug to the action and pass up the factorWithAug. */
+//		$1->factorWithAug->actions.append( 
+//				ParserAction( $2->loc, $2->augType, 0, $3->action ) );
+//		$$->factorWithAug = $1->factorWithAug;
 	}
 
 	ragel::factor_aug :PriorEmbed
@@ -383,6 +808,14 @@ reduction TopLevel
 		Factor *factor;
 	}
 
+
+	ragel::factor :Join
+	{
+		/* Create a new factor going to a parenthesized join. */
+		$$->factor = new Factor( $join->join );
+		//$2->join->loc = $1->loc;
+	}
+
 	ragel::factor :AlphabetNum
 	{
 		$$->factor = new Factor( new Literal( $alphabet_num->tok, Literal::Number ) );
@@ -416,9 +849,106 @@ reduction TopLevel
 	{
 		Token tok;
 		tok.set( $string );
-
 		$$->factor = new Factor( new Literal( tok, Literal::LitString ) );
 	}
+
+	ragel::factor :Range
+	{
+		$$->factor = new Factor( new Range( $RL1->literal, $RL2->literal, false ) );
+	}
+
+	ragel::factor :RangeIndep
+	{
+		$$->factor = new Factor( new Range( $RL1->literal, $RL2->literal, false ) );
+	}
+
+	# |	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	ragel::factor :PosOrBlock
+	{
+		$$->factor = new Factor( new ReItem( @lex_sqopen_pos,
+				$reg_or_data->reOrBlock, ReItem::OrBlock ) );
+	}
+
+	ragel::factor :NegOrBlock
+	{
+		$$->factor = new Factor( new ReItem( @lex_sqopen_neg,
+				$reg_or_data->reOrBlock, ReItem::NegOrBlock ) );
+	}
+
+	ragel::factor :Regex
+	{
+	}
+
+	# def regex
+	# 	[reg_item_rep*]
+
+	# def reg_item_rep
+	# 	[reg_item re_star] :Star
+	# |	[reg_item] :Base
+
+	# def reg_item
+	# 	[re_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	# |	[re_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
+	# |	[re_dot] :Dot
+	# |	[re_char] :Char
+
+	# def reg_or_data
+	# 	[reg_or_data reg_or_char] :Data
+	# |	[] :Base
+	ragel::reg_or_data
+	{
+		ReOrBlock *reOrBlock;
+	}
+
+	ragel::reg_or_data :Data
+	{
+		/* An optimization to lessen the tree size. If an or char is directly
+		 * under the left side on the right and the right side is another or
+		 * char then paste them together and return the left side. Otherwise
+		 * just put the two under a new or data node. */
+		if ( $reg_or_char->reOrItem->type == ReOrItem::Data &&
+				$_reg_or_data->reOrBlock->type == ReOrBlock::RecurseItem &&
+				$_reg_or_data->reOrBlock->item->type == ReOrItem::Data )
+		{
+			/* Append the right side to right side of the left and toss the
+			 * right side. */
+			$_reg_or_data->reOrBlock->item->token.append( $reg_or_char->reOrItem->token );
+			delete $reg_or_char->reOrItem;
+			$$->reOrBlock = $_reg_or_data->reOrBlock;
+		}
+		else {
+			/* Can't optimize, put the left and right under a new node. */
+			$$->reOrBlock = new ReOrBlock( $_reg_or_data->reOrBlock, $reg_or_char->reOrItem );
+		}
+	}
+
+	ragel::reg_or_data :Base
+	{
+		$$->reOrBlock = new ReOrBlock();
+	}
+
+	# def reg_or_char
+	# 	[re_or_char] :Char
+	# |	[Low: re_or_char re_or_dash High: re_or_char] :Range
+	ragel::reg_or_char
+	{
+		ReOrItem *reOrItem;
+	}
+
+	ragel::reg_or_char :Char
+	{
+		// ReOrItem *reOrItem;
+		Token tok;
+		tok.set( $re_or_char );
+		$$->reOrItem = new ReOrItem( @re_or_char, tok );
+	}
+
+	ragel::reg_or_char :Range
+	{
+		// ReOrItem *reOrItem;
+		$$->reOrItem = new ReOrItem( @re_or_dash, $Low->data[0], $High->data[0] );
+	}
+
 
 	# def alphabet_num 
 	#	[uint] :Uint
@@ -437,14 +967,33 @@ reduction TopLevel
 
 	ragel::alphabet_num :Neg
 	{
-//		$$->tok.data = $uint->data;
-//		$$->tok.length = $uint->length
-//		$$->tok.loc = @uint
-//
-//		$$->token.set( "-", 1 );
-//		$$->token.loc = $1->loc;
-//		$$->token.append( *$2 );
+		$$->tok.set( "-", 1 );
+		$$->tok.append( $uint->data, $uint->length );
+		//$$->tok.loc = @uint;
 	}
+
+	# def range_lit
+	#	[string] :String
+	# |	[alphabet_num] :AN
+	ragel::range_lit
+	{
+		Literal *literal;
+	}
+
+	ragel::range_lit :String
+	{
+		/* Range literals must have only one char. We restrict this in the
+		 * parse tree. */
+		Token tok;
+		tok.set( $string );
+		$$->literal = new Literal( tok, Literal::LitString );
+	}
+
+	ragel::range_lit :AN
+	{
+		$$->literal = new Literal( $alphabet_num->tok, Literal::Number );
+	}
+
 
 	ragel::alphabet_num :Hex
 	{
@@ -549,6 +1098,97 @@ reduction TopLevel
 		$$->isSet = false;
 	}
 
+
+	# def nfa_expr
+	#	[nfa_expr `| term] :Union
+	# |	[term] :Base
+	ragel::nfa_expr
+	{
+		NfaUnion *nfaUnion;
+	}
+
+	ragel::nfa_expr :Union
+	{
+		$$->nfaUnion = $_nfa_expr->nfaUnion;
+		$$->nfaUnion->terms.append( $term->term );
+	}
+
+	ragel::nfa_expr :Base
+	{
+		$$->nfaUnion = new NfaUnion();
+		$$->nfaUnion->terms.append( $term->term );
+	}
+	
+	# def nfa_round_spec
+	#	[uint `, uint]
+	ragel::nfa_round_spec
+	{
+		long depth;
+		long group;
+	}
+
+	ragel::nfa_round_spec :Spec
+	{
+		// Convert the priority number to a long. Check for overflow.
+		errno = 0;
+		$$->depth = strtol( $Depth->data, 0, 10 );
+		if ( $$->depth == LONG_MAX && errno == ERANGE )
+			error(@Depth) << "rounds " << $Depth->data << " overflows" << endl;
+
+		$$->group = strtol( $Group->data, 0, 10 );
+		if ( $$->group == LONG_MAX && errno == ERANGE )
+			error(@Groups) << "group " << $Group->data << " overflows" << endl;
+	}
+
+	# def nfa_round_list
+	#	[nfa_round_list `, nfa_round_spec] :Recurse
+	# |	[nfa_round_spec] :Base
+	ragel::nfa_round_list
+	{
+		NfaRoundVect *roundsList;
+	}
+
+	ragel::nfa_round_list :Recurse
+	{
+		$$->roundsList = $_nfa_round_list->roundsList;
+		$$->roundsList->append( NfaRound( $nfa_round_spec->depth,
+				$nfa_round_spec->group ) );
+	}
+
+	ragel::nfa_round_list :Base
+	{
+		$$->roundsList = new NfaRoundVect;
+		$$->roundsList->append( NfaRound( $nfa_round_spec->depth,
+				$nfa_round_spec->group ) );
+	}
+
+	# def nfa_rounds
+	#	[`( nfa_round_list `)] :Rounds
+	ragel::nfa_rounds
+	{
+		NfaRoundVect *roundsList;
+	}
+
+	ragel::nfa_rounds :Rounds
+	{
+		$$->roundsList = $nfa_round_list->roundsList;
+	}
+
+	# def nfa_union
+	#	[word `|= nfa_rounds nfa_expr `;] :NfaUnion commit
+	ragel::nfa_union :NfaUnion
+	{
+		InputLoc loc = @word;
+		string name( $word->data, $word->length );
+
+		$nfa_expr->nfaUnion->roundsList = $nfa_rounds->roundsList;
+
+		MachineDef *machineDef = new MachineDef( $nfa_expr->nfaUnion );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, true );
+	}
+
 	# def include_spec
 	#	[word] :Machine
 	# |	[string] :File
@@ -580,6 +1220,30 @@ reduction TopLevel
 		$$->machine.set( @word );
 		$$->file.set( $string );
 		$$->file.set( @string );
+	}
+
+	# def alphtype_type
+	#	[W1: word] :One
+	# |	[W1: word W2: word] :Two
+	ragel::alphtype_type :One
+	{
+		string one( $W1->data, $W1->length );
+		if ( ! pd->setAlphType( @W1, hostLang, one.c_str() ) ) {
+			// Recover by ignoring the alphtype statement.
+			error(@W1) << "\"" << one << 
+					"\" is not a valid alphabet type" << endl;
+		}
+	}
+
+	ragel::alphtype_type :Two
+	{
+		string one( $W1->data, $W1->length );
+		string two( $W2->data, $W2->length );
+		if ( ! pd->setAlphType( @W1, hostLang, one.c_str(), two.c_str() ) ) {
+			// Recover by ignoring the alphtype statement.
+			error(@W1) << "\"" << one << 
+					"\" is not a valid alphabet type" << endl;
+		}
 	}
 	
 	# [`include include_spec `;] :Include commit
@@ -626,14 +1290,16 @@ reduction TopLevel
 
 	ragel::statement :Write
 	{
-		id.curItem = id.curItem->next;
-		InputItem *inputItem = id.curItem;
+		if ( includeDepth == 0 ) {
+			id.curItem = id.curItem->next;
+			InputItem *inputItem = id.curItem;
 
-		string cmd( $Cmd->data, $Cmd->length );
-		inputItem->writeArgs.append( cmd );
-		inputItem->writeArgs.append( writeArgs );
+			string cmd( $Cmd->data, $Cmd->length );
+			inputItem->writeArgs.append( cmd );
+			inputItem->writeArgs.append( writeArgs );
 
-		inputItem->pd = pd;
+			inputItem->pd = pd;
+		}
 
 		/* Clear the write args collector. */
 		writeArgs.empty();
@@ -641,14 +1307,15 @@ reduction TopLevel
 
 	c_host::section :MultiLine
 	{
-		id.curItem = id.curItem->next;
-
-		id.curItem->pd = pd;
-
-		id.checkLastRef( id.curItem );
-
-		if ( includeDepth == 0 )
+		if ( includeDepth == 0 ) {
 			id.curItem = id.curItem->next;
+
+			id.curItem->pd = pd;
+
+			id.checkLastRef( id.curItem );
+
+			id.curItem = id.curItem->next;
+		}
 	}
 
 end 
@@ -666,7 +1333,7 @@ reduction SectionPass
 	{
 		string machine( $word->data, $word->length );
 
-		std::cout << "pass 2: machine name: " << machine << std::endl;
+		//std::cout << "pass 2: machine name: " << machine << std::endl;
 
 		SectionDictEl *sdEl = id.sectionDict.find( machine );
 		if ( sdEl == 0 ) {

@@ -1723,9 +1723,9 @@ struct LoadRagel
 		Expression *expr = new Expression( loadTerm( ExprTree.expr_left().term() ) );
 
 		/* Walk the list of terms. */
-		ragel::_repeat_expression_op ExprOpList = ExprTree._repeat_expression_op();
-		while ( !ExprOpList.end() ) {
-			ragel::expression_op ExprOp = ExprOpList.value();
+		ragel::expression_op_list ExprOpList = ExprTree.expression_op_list();
+		while ( ExprOpList.expression_op() ) {
+			ragel::expression_op ExprOp = ExprOpList.expression_op();
 			Expression::Type type = Expression::OrType;
 			switch ( ExprOp.prodName() ) {
 				case ragel::expression_op::Or:
@@ -1743,7 +1743,7 @@ struct LoadRagel
 			}
 			Term *term = loadTerm( ExprOp.term() );
 			expr = new Expression( expr, term, type );
-			ExprOpList = ExprOpList.next();
+			ExprOpList = ExprOpList._expression_op_list();
 		}
 
 		return expr;
@@ -1943,21 +1943,44 @@ struct LoadRagel
 		return nfaUnion;
 	}
 
+	void loadNfaRoundSpec( long &depth, long &groups, ragel::nfa_round_spec Spec )
+	{
+		const char *depthText = Spec.Depth().text().c_str();
+		errno = 0;
+		depth = strtol( depthText, 0, 10 );
+		if ( depth == LONG_MAX && errno == ERANGE )
+			error(Spec.Depth().loc()) << "depth " << depthText << " overflows" << endl;
+
+		const char *groupText = Spec.Group().text().c_str();
+		errno = 0;
+		groups = strtol( groupText, 0, 10 );
+		if ( depth == LONG_MAX && errno == ERANGE )
+			error(Spec.Group().loc()) << "group " << groupText << " overflows" << endl;
+	}
+
+	NfaRoundVect *loadNfaRoundList( ragel::nfa_round_list RoundList )
+	{
+		NfaRoundVect *roundVect;
+		if ( RoundList.prodName() == ragel::nfa_round_list::Recurse )
+			roundVect = loadNfaRoundList( RoundList._nfa_round_list() );
+		else
+			roundVect = new NfaRoundVect();
+
+		long depth, groups;
+		loadNfaRoundSpec( depth, groups, RoundList.nfa_round_spec() );
+		roundVect->append( NfaRound( depth, groups ) );
+		return roundVect;
+	}
+
 	void loadNfaUnion( ragel::nfa_union NfaUnionTree )
 	{
 		InputLoc loc = NfaUnionTree.loc();
 
 		string name = loadMachineName( NfaUnionTree.word().text() );
 
-		const char *depthText = NfaUnionTree.uint().text().c_str();
-		errno = 0;
-		long depth = strtol( depthText, 0, 10 );
-		if ( depth == LONG_MAX && errno == ERANGE )
-			error(loc) << "rounds " << depthText << " overflows" << endl;
-
 		NfaUnion *nfaUnion = loadNfaExpr( NfaUnionTree.nfa_expr() );
 		nfaUnion->roundsList = new NfaRoundVect;
-		nfaUnion->roundsList->append( NfaRound( depth, 0 ) );
+		nfaUnion->roundsList->append( NfaRound( /* depth */ 0, 0 ) );
 		MachineDef *machineDef = new MachineDef( nfaUnion );
 
 		/* Generic creation of machine for instantiation and assignment. */

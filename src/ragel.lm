@@ -141,7 +141,11 @@ namespace ragel
 	|	[expression] :Base
 
 	def expression
-		[expr_left expression_op*] :Expression
+		[expr_left expression_op_list] :Expression
+	
+	def expression_op_list
+		[expression_op expression_op_list] :Op
+	|	[] :Empty
 
 	def expression_op
 		[`| term] :Or
@@ -183,13 +187,13 @@ namespace ragel
 	|	[word] :Base
 
 	def action_expr
-		[`{ c_select     c_inline::inline_expr `}]
+		[`{ c_select     c_inline::inline_expr `}] :C
 	|	[`{ ruby_select  ruby_inline::inline_expr ruby_inline::`}]
 	|	[`{ ocaml_select ocaml_inline::inline_expr ocaml_inline::`}]
 	|	[`{ crack_select crack_inline::inline_expr crack_inline::`}]
 
 	def action_block
-		[`{ c_select     CInlineBlock: c_inline::inline_block `}]
+		[`{ c_select     CInlineBlock: c_inline::inline_block `}] :C
 	|	[`{ ruby_select  RubyInlineBlock: ruby_inline::inline_block ruby_inline::`}]
 	|	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_block ocaml_inline::`}]
 	|	[`{ crack_select OCamlInlineBlock: crack_inline::inline_block crack_inline::`}]
@@ -387,8 +391,18 @@ namespace ragel
 		[nfa_expr `| term] :Union
 	|	[term] :Base
 
+	def nfa_round_spec
+		[Depth: uint `, Group: uint] :Spec
+
+	def nfa_round_list
+		[nfa_round_list `, nfa_round_spec] :Recurse
+	|	[nfa_round_spec] :Base
+
+	def nfa_rounds
+		[`( nfa_round_list `)] :Rounds
+
 	def nfa_union
-		[word `|= `( uint `, Unused: uint `) nfa_expr `;] :NfaUnion commit
+		[word `|= nfa_rounds nfa_expr `;] :NfaUnion commit
 
 	def alphtype_type
 		[W1: word] :One

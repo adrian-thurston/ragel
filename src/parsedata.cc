@@ -67,9 +67,9 @@ void Token::set( colm_location *cl )
 
 void Token::set( colm_data *cd )
 {
-	data = (char*)cd->data;
-	length = cd->length;
+	set( cd->data, cd->length );
 }
+
 
 /* Perform minimization after an operation according 
  * to the command line args. */

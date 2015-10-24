@@ -108,7 +108,7 @@ else if ( Cmd == 'load' ) {
 	RagelError = error
 }
 else if ( Cmd == 'reduce' ) {
-	reduce TopLevel start[ Stream ]
+	reduce start[ Stream ]
 }
 
 include 'reducer.lm'
