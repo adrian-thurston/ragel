@@ -338,7 +338,20 @@ reduction TopLevel
 
 	ragel::action_ref :NamedRef
 	{
-
+		/* Set the name in the actionDict. */
+		string data( $word->data, $word->length );
+		Action *action = pd->actionDict.find( data );
+		if ( action != 0 ) {
+			/* Pass up the action element */
+			$$->action = action;
+//			if ( action->paramList != 0 )
+//				reject();
+		}
+		else {
+			/* Will recover by returning null as the action. */
+			error(@word) << "action lookup of \"" << data << "\" failed" << endl;
+			$$->action = 0;
+		}
 	}
 
 	ragel::action_ref :ParenNamed
@@ -348,8 +361,45 @@ reduction TopLevel
 
 	ragel::action_ref :Block
 	{
-
+		/* Create the action, add it to the list and pass up. */
+		InputLoc loc;
+		Action *newAction = new Action( loc, std::string(),
+				$action_block->inlineList, pd->nextCondId++ );
+		pd->actionList.append( newAction );
+		$$->action = newAction;
 	}
+
+	# def action_spec
+	#	[`action word opt_action_params action_block] :ActionSpec commit
+	ragel::action_spec
+	{
+		Action *action;
+	}
+
+	ragel::action_spec :ActionSpec
+	{
+		string data( $word->data, $word->length );
+		if ( pd->actionDict.find( data ) ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@word) << "action \"" << data << "\" already defined" << endl;
+		}
+		else {
+			//std::cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << std::endl;
+			/* Add the action to the list of actions. */
+			Action *newAction = new Action( @1, data, 
+					$action_block->inlineList, pd->nextCondId++ );
+
+			/* Insert to list and dict. */
+			pd->actionList.append( newAction );
+			pd->actionDict.insert( newAction );
+
+//			newAction->paramList = $3->paramList;
+//			if ( $3->paramList != 0 )
+//				newAction->argListMap = new ActionArgListMap;
+		}
+	//	parseSubstitutions = false;
+	}
+
 
 	# def action_block
 	#	[`{ c_select     CInlineBlock: c_inline::inline_block `}] :C
@@ -358,35 +408,183 @@ reduction TopLevel
 	# |	[`{ crack_select OCamlInlineBlock: crack_inline::inline_block crack_inline::`}]
 	ragel::action_block
 	{
+		InlineList *inlineList;
 		Action *action;
 	}
 
 	ragel::action_block :C
 	{
-		InputLoc loc; // $1->loc;
-
-		/* Create the action, add it to the list and pass up. */
-		Action *newAction = new Action( loc, std::string(),
-				$CInlineBlock->inlineList, pd->nextCondId++ );
-		pd->actionList.append( newAction );
-		$$->action = newAction;
+		$$->inlineList = $CInlineBlock->inlineList;
 	}
 
 	# def inline_block
-	#	[block_item*]
+	#	[block_item_list] :List
 	c_inline::inline_block
 	{
 		InlineList *inlineList;
 	}
 
+	c_inline::inline_block :List
+	{
+		$$->inlineList = $block_item_list->inlineList;
+	}
+
+	# def block_item_list
+	# 	[block_item block_item_list] :Rec
+	# |	[] :Base
+	c_inline::block_item_list
+	{
+		InlineList *inlineList;
+	}
+
+	c_inline::block_item_list :Rec
+	{
+		$$->inlineList = $_block_item_list->inlineList;
+
+		if ( $block_item->inlineItem != 0 )
+			$$->inlineList->prepend( $block_item->inlineItem );
+		else if ( $block_item->inlineList != 0 ) {
+//			$$->inlineList->append( $block_item->inlineList );
+//			delete $block_item->inlineList;
+		}
+	}
+
+	c_inline::block_item_list :Base
+	{
+		$$->inlineList = new InlineList;
+	}
+	
 	# def block_item
 	#	[expr_any] :ExprAny
 	# |	[block_symbol] :BlockSymbol
 	# |	[block_interpret] :BlockInterpret
 	# |	[`{ inline_block `}] :RecBlock
+	c_inline::block_item
+	{
+		InlineItem *inlineItem;
+		InlineList *inlineList;
+	}
+
+	c_inline::block_item :ExprAny
+	{
+		$$->inlineItem = $expr_any->inlineItem;
+	}
+
+	c_inline::block_item :BlockSymbol
+	{
+		$$->inlineItem = $block_symbol->inlineItem;
+	}
+
+	c_inline::block_item :BlockInterpret
+	{
+
+	}
+
+	c_inline::block_item :RecBlock
+	{
+		$$->inlineList = $inline_block->inlineList;
+		$$->inlineList->prepend( new InlineItem( @1, "{", InlineItem::Text ) );
+		$$->inlineList->append( new InlineItem( @1, "}", InlineItem::Text ) );
+		$$->inlineItem = 0;
+	}
+
+	# def expr_any
+	#	[whitespace] :WS
+	#|	[comment] :Comment
+	#|	[string] :String
+	#|	[number] :Number
+	#|	[hex_number] :Hex
+	#|	[ident] :Ident
+	#|	[c_any] :Any
+	c_inline::expr_any
+	{
+		InlineItem *inlineItem;
+	}
+
+	c_inline::expr_any :WS
+	{
+		string data( $whitespace->data, $whitespace->length );
+		$$->inlineItem = new InlineItem( @whitespace, data, InlineItem::Text );
+	}
+		
+	c_inline::expr_any :Comment
+	{
+		string data( $comment->data, $comment->length );
+		$$->inlineItem = new InlineItem( @comment, data, InlineItem::Text );
+	}
+
+	c_inline::expr_any :String
+	{
+		string data( $string->data, $string->length );
+		$$->inlineItem = new InlineItem( @string, data, InlineItem::Text );
+	}
+
+	c_inline::expr_any :Number
+	{
+		string data( $number->data, $number->length );
+		$$->inlineItem = new InlineItem( @number, data, InlineItem::Text );
+	}
+
+	c_inline::expr_any :Hex
+	{
+		string data( $hex_number->data, $hex_number->length );
+		$$->inlineItem = new InlineItem( @hex_number, data, InlineItem::Text );
+	}
+
+	c_inline::expr_any :Ident
+	{
+		string data( $ident->data, $ident->length );
+		$$->inlineItem = new InlineItem( @ident, data, InlineItem::Text );
+	}
+
+	c_inline::expr_any :Any
+	{
+		string data( $c_any->data, $c_any->length );
+		$$->inlineItem = new InlineItem( @c_any, data, InlineItem::Text );
+	}
 
 	# def block_symbol
-	#	[`,] | [`;] | [`(] | [`)] | [`*] | [`::]
+	#	[`,] :B1 | [`;] :B2 | [`(] :B3 | [`)] :B4 | [`*] :B5 | [`::] :B6
+	c_inline::block_symbol
+	{
+		InlineItem *inlineItem;
+	}
+
+	c_inline::block_symbol :B1
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	c_inline::block_symbol :B2
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	c_inline::block_symbol :B3
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	c_inline::block_symbol :B4
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	c_inline::block_symbol :B5
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	c_inline::block_symbol :B6
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
 
 	# def block_interpret
 	#	[expr_interpret] :ExprInterpret
@@ -404,7 +602,6 @@ reduction TopLevel
 	# |	[`fnret `;] :Fnret
 	# |	[`fbreak `;] :Fbreak
 	# |	[`fnbreak `;] :Fnbreak
-
 	
 	# def priority_aug
 	#	[uint]
@@ -672,11 +869,12 @@ reduction TopLevel
 	{
 		$$->fwa = $_factor_aug->fwa;
 
-//		/* Append the action to the factorWithAug, record the refernce from 
-//		 * factorWithAug to the action and pass up the factorWithAug. */
-//		$1->factorWithAug->actions.append( 
-//				ParserAction( $2->loc, $2->augType, 0, $3->action ) );
-//		$$->factorWithAug = $1->factorWithAug;
+		InputLoc loc;
+
+		/* Append the action to the factorWithAug, record the refernce from 
+		 * factorWithAug to the action and pass up the factorWithAug. */
+		$$->fwa->actions.append( 
+				ParserAction( loc, $aug_base->augType, 0, $action_ref->action ) );
 	}
 
 	ragel::factor_aug :PriorEmbed
@@ -813,7 +1011,7 @@ reduction TopLevel
 	{
 		/* Create a new factor going to a parenthesized join. */
 		$$->factor = new Factor( $join->join );
-		//$2->join->loc = $1->loc;
+		$$->factor->join->loc = @1;
 	}
 
 	ragel::factor :AlphabetNum

@@ -32,13 +32,13 @@ namespace c_inline
 	|	[expr_interpret] :ExprInterpret
 
 	def expr_any
-		[whitespace]
-	|	[comment]
-	|	[string]
-	|	[number]
-	|	[hex_number]
-	|	[ident]
-	|	[c_any]
+		[whitespace] :WS
+	|	[comment] :Comment
+	|	[string] :String
+	|	[number] :Number
+	|	[hex_number] :Hex
+	|	[ident] :Ident
+	|	[c_any] :Any
 
 	def expr_symbol
 		[`,] | [`(] | [`)] | [`*] | [`::]
@@ -63,7 +63,11 @@ namespace c_inline
 	|	[srlex::word] :Base
 
 	def inline_block
-		[block_item*]
+		[block_item_list] :List
+	
+	def block_item_list
+		[block_item block_item_list] :Rec
+	|	[] :Base
 	
 	def block_item
 		[expr_any] :ExprAny
@@ -72,7 +76,7 @@ namespace c_inline
 	|	[`{ inline_block `}] :RecBlock
 
 	def block_symbol
-		[`,] | [`;] | [`(] | [`)] | [`*] | [`::]
+		[`,] :B1 | [`;] :B2 | [`(] :B3 | [`)] :B4 | [`*] :B5 | [`::] :B6
 
 	def block_interpret
 		[expr_interpret] :ExprInterpret

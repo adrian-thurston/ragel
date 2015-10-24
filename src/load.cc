@@ -710,10 +710,10 @@ struct LoadRagel
 
 	InlineList *loadInlineBlock( InlineList *inlineList, c_inline::inline_block InlineBlock )
 	{
-		c_inline::_repeat_block_item BlockItemList = InlineBlock._repeat_block_item();
-		while ( !BlockItemList.end() ) {
-			loadBlockItem( inlineList, BlockItemList.value() );
-			BlockItemList = BlockItemList.next();
+		c_inline::block_item_list BlockItemList = InlineBlock.block_item_list();
+		while ( !BlockItemList.prodName() == c_inline::block_item_list::Rec ) {
+			loadBlockItem( inlineList, BlockItemList.block_item() );
+			BlockItemList = BlockItemList._block_item_list();
 		}
 		return inlineList;
 	}

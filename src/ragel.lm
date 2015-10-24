@@ -202,7 +202,7 @@ namespace ragel
 		[word]
 
 	def action_ref 
-		[named_action_ref] :NamedRef
+		[word] :NamedRef
 	|	[`( named_action_ref `)] :ParenNamed
 	|	[action_block] :Block
 	
