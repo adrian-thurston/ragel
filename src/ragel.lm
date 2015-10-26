@@ -268,7 +268,7 @@ namespace ragel
 	|	[`:nfa]
 
 	def factor_rep 
-		[factor_neg factor_rep_op*] :Op
+		[factor_neg factor_rep_op_list] :Op
 	|	[nfa_kw  `( uint `, factor_rep `,
 			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `,
 			A5: action_ref `, A6: action_ref `):] :Nfa
@@ -276,6 +276,10 @@ namespace ragel
 			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `):] :Cond
 	|	[`:nomax `( uint `, factor_rep `, 
 			A1: action_ref `, A2: action_ref `, A3: action_ref `):] :NoMax
+
+	def factor_rep_op_list
+		[factor_rep_op factor_rep_op_list] :Rec
+	|	[] :Base
 
 	def factor_rep_op
 		[`*] :Star
@@ -288,7 +292,7 @@ namespace ragel
 	|	[`{ LowRep: factor_rep_num `, HighRep: factor_rep_num `}] :RangeRep
 
 	def factor_rep_num
-		[uint]
+		[uint] :RepNum
 
 	def factor_neg 
 		[`! factor_neg] :Bang

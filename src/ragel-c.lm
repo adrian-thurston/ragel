@@ -136,13 +136,13 @@ namespace c_host
 	end
 
 	def tok
-		[ident]
-	|	[number]
-	|	[hex_number]
-	|	[comment]
-	|	[string]
-	|	[whitespace]
-	|	[c_any]
+		[ident] :Ident
+	|	[number] :Number
+	|	[hex_number] :HexNumber
+	|	[comment] :Comment
+	|	[string] :String
+	|	[whitespace] :Whitespace
+	|	[c_any] :Any
 
 	def section
 		[`%%{ ragel::ragel_start ragel::end_section] :MultiLine

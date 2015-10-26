@@ -305,8 +305,10 @@ void InputData::writeOutput( InputItem *ii )
 			switch ( backend ) {
 				case Direct:
 					if ( hostLang->lang == HostLang::C ) {
-						*outStream << "\n#line " << ii->loc.line <<
-								" \"" << ii->loc.fileName << "\"\n";
+						if ( ii->loc.fileName != 0 ) {
+							*outStream << "\n#line " << ii->loc.line <<
+									" \"" << ii->loc.fileName << "\"\n";
+						}
 					}
 						
 					*outStream << ii->data.str();

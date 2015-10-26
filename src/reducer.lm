@@ -362,8 +362,7 @@ reduction TopLevel
 	ragel::action_ref :Block
 	{
 		/* Create the action, add it to the list and pass up. */
-		InputLoc loc;
-		Action *newAction = new Action( loc, std::string(),
+		Action *newAction = new Action( &$action_block->loc, std::string(),
 				$action_block->inlineList, pd->nextCondId++ );
 		pd->actionList.append( newAction );
 		$$->action = newAction;
@@ -408,12 +407,13 @@ reduction TopLevel
 	# |	[`{ crack_select OCamlInlineBlock: crack_inline::inline_block crack_inline::`}]
 	ragel::action_block
 	{
+		colm_location loc;
 		InlineList *inlineList;
-		Action *action;
 	}
 
 	ragel::action_block :C
 	{
+		$$->loc = *@1;
 		$$->inlineList = $CInlineBlock->inlineList;
 	}
 
@@ -613,17 +613,18 @@ reduction TopLevel
 
 	ragel::aug_base
 	{
+		colm_location loc;
 		AugType augType;
 	}
 
 	ragel::aug_base :Enter
-		{ $$->augType = at_start; }
+		{ $$->loc = *@1; $$->augType = at_start; }
 	ragel::aug_base :All
-		{ $$->augType = at_all; }
+		{ $$->loc = *@1; $$->augType = at_all; }
 	ragel::aug_base :Finish
-		{ $$->augType = at_finish; }
+		{ $$->loc = *@1; $$->augType = at_finish; }
 	ragel::aug_base :Leave
-		{ $$->augType = at_leave; }
+		{ $$->loc = *@1; $$->augType = at_leave; }
 
 	# def aug_cond
 	# 	[`>?] :Start1 | [`$?] :All1 | [`%?] :Leave1
@@ -632,27 +633,28 @@ reduction TopLevel
 
 	ragel::aug_cond
 	{
+		colm_location loc;
 		AugType augType;
 	}
 
 	ragel::aug_cond :Start1
-		{ $$->augType = at_start; }
+		{ $$->loc = *@1; $$->augType = at_start; }
 	ragel::aug_cond :Start2
-		{ $$->augType = at_start; }
+		{ $$->loc = *@1; $$->augType = at_start; }
 	ragel::aug_cond :Start3
-		{ $$->augType = at_start; }
+		{ $$->loc = *@1; $$->augType = at_start; }
 	ragel::aug_cond :All1
-		{ $$->augType = at_all; }
+		{ $$->loc = *@1; $$->augType = at_all; }
 	ragel::aug_cond :All2
-		{ $$->augType = at_all; }
+		{ $$->loc = *@1; $$->augType = at_all; }
 	ragel::aug_cond :All3
-		{ $$->augType = at_all; }
+		{ $$->loc = *@1; $$->augType = at_all; }
 	ragel::aug_cond :Leave1
-		{ $$->augType = at_leave; }
+		{ $$->loc = *@1; $$->augType = at_leave; }
 	ragel::aug_cond :Leave2
-		{ $$->augType = at_leave; }
+		{ $$->loc = *@1; $$->augType = at_leave; }
 	ragel::aug_cond :Leave3
-		{ $$->augType = at_leave; }
+		{ $$->loc = *@1; $$->augType = at_leave; }
 
 	# def aug_to_state
 	# 	[`>~] :Start1 | [`<~] :NotStart1 | [`$~] :All1
@@ -867,14 +869,12 @@ reduction TopLevel
 
 	ragel::factor_aug :ActionRef
 	{
-		$$->fwa = $_factor_aug->fwa;
-
-		InputLoc loc;
-
 		/* Append the action to the factorWithAug, record the refernce from 
 		 * factorWithAug to the action and pass up the factorWithAug. */
-		$$->fwa->actions.append( 
-				ParserAction( loc, $aug_base->augType, 0, $action_ref->action ) );
+		$_factor_aug->fwa->actions.append( ParserAction(
+				&$aug_base->loc, $aug_base->augType, 0, $action_ref->action ) );
+
+		$$->fwa = $_factor_aug->fwa;
 	}
 
 	ragel::factor_aug :PriorEmbed
@@ -889,11 +889,17 @@ reduction TopLevel
 
 	ragel::factor_aug :CondEmbed
 	{
+		$_factor_aug->fwa->conditions.append( ConditionTest( &$aug_cond->loc, 
+				$aug_cond->augType, $action_ref->action, true ) );
+
 		$$->fwa = $_factor_aug->fwa;
 	}
 
 	ragel::factor_aug :NegCondEmbed
 	{
+		$_factor_aug->fwa->conditions.append( ConditionTest( &$aug_cond->loc, 
+				$aug_cond->augType, $action_ref->action, false ) );
+
 		$$->fwa = $_factor_aug->fwa;
 	}
 
@@ -933,7 +939,7 @@ reduction TopLevel
 	}
 
 	#def factor_rep 
-	#	[factor_neg factor_rep_op*] :Op
+	#	[factor_neg factor_rep_op_list] :Op
 	#|	[nfa_kw  `( uint `, factor_rep `,
 	#		A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `,
 	#		A5: action_ref `, A6: action_ref `):] :Nfa
@@ -949,23 +955,148 @@ reduction TopLevel
 
 	ragel::factor_rep :Op
 	{
-		$$->rep = new FactorWithRep( $factor_neg->neg );
+		FactorWithRep *prev = new FactorWithRep( $factor_neg->neg );
+		FactorWithRep *cur = $factor_rep_op_list->rep;
+		while ( cur != 0 ) {
+			FactorWithRep *next = cur->factorWithRep;
+
+			/* Reverse. */
+			cur->factorWithRep = prev;
+
+			prev = cur;
+			cur = next;
+		}
+
+		$$->rep = prev;
 	}
 
 	ragel::factor_rep :Nfa
 	{
-		$$->rep = $_factor_rep->rep;
+		string data( $uint->data, $uint->length );
+		long long repId = strtoll( data.c_str(), 0, 10);
+
+		/* push, pop, ini, stay, repeat, exit */
+		$$->rep = new FactorWithRep( @1, repId, $_factor_rep->rep,
+				$A1->action, $A2->action, $A3->action, $A4->action, $A5->action, $A6->action,
+				FactorWithRep::NfaRep );
 	}
 
 	ragel::factor_rep :Cond
 	{
-		$$->rep = $_factor_rep->rep;
+		string data( $uint->data, $uint->length );
+		long long repId = strtoll( data.c_str(), 0, 10);
+
+		$$->rep = new FactorWithRep( @1, repId, $_factor_rep->rep,
+				$A1->action, $A2->action, $A3->action, $A4->action, 0, 0,
+				FactorWithRep::CondRep );
 	}
 
 	ragel::factor_rep :NoMax
 	{
-		$$->rep = $_factor_rep->rep;
+		string data( $uint->data, $uint->length );
+		long long repId = strtoll( data.c_str(), 0, 10);
+
+		$$->rep = new FactorWithRep( @1, repId, $_factor_rep->rep,
+				$A1->action, $A2->action, $A3->action, 0, 0, 0,
+				FactorWithRep::NoMaxRep );
 	}
+
+
+	# def factor_rep_op_list
+	#	[factor_rep_op factor_rep_op_list]
+	# |	[]
+	ragel::factor_rep_op_list
+	{
+		FactorWithRep *rep;
+	}
+	ragel::factor_rep_op_list :Rec
+	{
+		$$->rep = $factor_rep_op->rep;
+		$$->rep->factorWithRep = $_factor_rep_op_list->rep;
+	}
+	ragel::factor_rep_op_list :Base
+	{
+		$$->rep = 0;
+	}
+
+	# def factor_rep_op
+	#	[`*] :Star
+	# |	[`**] :StarStar
+	# |	[`?] :Optional
+	# |	[`+] :Plus
+	# |	[`{ factor_rep_num `}] :ExactRep
+	# |	[`{ `, factor_rep_num `}] :MaxRep
+	# |	[`{ factor_rep_num `, `}] :MinRep
+	# |	[`{ LowRep: factor_rep_num `, HighRep: factor_rep_num `}] :RangeRep
+	ragel::factor_rep_op
+	{
+		FactorWithRep *rep;
+	}
+	ragel::factor_rep_op :Star
+	{
+		$$->rep = new FactorWithRep( @1, 0, 0, 0, FactorWithRep::StarType );
+	}
+	ragel::factor_rep_op :StarStar
+	{
+		$$->rep = new FactorWithRep( @1, 0, 0, 0, FactorWithRep::StarStarType );
+	}
+	ragel::factor_rep_op :Optional
+	{
+		$$->rep = new FactorWithRep( @1, 0, 0, 0, FactorWithRep::OptionalType );
+	}
+	ragel::factor_rep_op :Plus
+	{
+		$$->rep = new FactorWithRep( @1, 0, 0, 0, FactorWithRep::PlusType );
+	}
+	ragel::factor_rep_op :ExactRep
+	{
+		$$->rep = new FactorWithRep( @1, 0,
+				$factor_rep_num->rep, 0,
+				FactorWithRep::ExactType );
+	}
+	ragel::factor_rep_op :MaxRep
+	{
+		$$->rep = new FactorWithRep( @1, 0,
+				0, $factor_rep_num->rep,
+				FactorWithRep::MaxType );
+	}
+	ragel::factor_rep_op :MinRep
+	{
+		$$->rep = new FactorWithRep( @1, 0,
+				$factor_rep_num->rep, 0,
+				FactorWithRep::MinType );
+	}
+	ragel::factor_rep_op :RangeRep
+	{
+		$$->rep = new FactorWithRep( @1, 0,
+				$LowRep->rep, $HighRep->rep,
+				FactorWithRep::RangeType );
+	}
+
+	# def factor_rep_num
+	#	[uint]
+	ragel::factor_rep_num
+	{
+		int rep;
+	}
+
+	ragel::factor_rep_num :RepNum
+	{
+		// Convert the priority number to a long. Check for overflow.
+		string data( $uint->data, $uint->length );
+		errno = 0;
+		long rep = strtol( data.c_str(), 0, 10 );
+		if ( errno == ERANGE && rep == LONG_MAX ) {
+			// Repetition too large. Recover by returing repetition 1. */
+			error(@uint) << "repetition number " << data << " overflows" << endl;
+			$$->rep = 1;
+		}
+		else {
+			// Cannot be negative, so no overflow.
+			$$->rep = rep;
+		}
+	}
+
 
 	# def factor_neg 
 	#	[`! factor_neg] :Bang
@@ -1005,7 +1136,6 @@ reduction TopLevel
 	{
 		Factor *factor;
 	}
-
 
 	ragel::factor :Join
 	{
@@ -1057,7 +1187,7 @@ reduction TopLevel
 
 	ragel::factor :RangeIndep
 	{
-		$$->factor = new Factor( new Range( $RL1->literal, $RL2->literal, false ) );
+		$$->factor = new Factor( new Range( $RL1->literal, $RL2->literal, true ) );
 	}
 
 	# |	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
@@ -1507,15 +1637,62 @@ reduction TopLevel
 	{
 		if ( includeDepth == 0 ) {
 			id.curItem = id.curItem->next;
-
 			id.curItem->pd = pd;
-
 			id.checkLastRef( id.curItem );
-
 			id.curItem = id.curItem->next;
 		}
 	}
 
+	# Pass Through.
+	# def tok
+	# 	[ident] :Ident
+	# |	[number] :Number
+	# |	[hex_number] :HexNumber
+	# |	[comment] :Comment
+	# |	[string] :String
+	# |	[whitespace] :Whitespace
+	# |	[c_any] :Any
+	c_host::tok :Ident
+	{
+		if ( includeDepth == 0 )
+			id.curItem->data.write( $ident->data, $ident->length );
+	}
+
+	c_host::tok :Number
+	{
+		if ( includeDepth == 0 )
+			id.curItem->data.write( $number->data, $number->length );
+	}
+
+	c_host::tok :HexNumber
+	{
+		if ( includeDepth == 0 )
+			id.curItem->data.write( $hex_number->data, $hex_number->length );
+	}
+
+	c_host::tok :Comment
+	{
+		if ( includeDepth == 0 )
+			id.curItem->data.write( $comment->data, $comment->length );
+	}
+
+	c_host::tok :String
+	{
+		if ( includeDepth == 0 )
+			id.curItem->data.write( $string->data, $string->length );
+	}
+
+	c_host::tok :Whitespace
+	{
+		if ( includeDepth == 0 )
+			id.curItem->data.write( $whitespace->data, $whitespace->length );
+	}
+
+	c_host::tok :Any
+	{
+		if ( includeDepth == 0 )
+			id.curItem->data.write( $c_any->data, $c_any->length );
+	}
 end 
 
 reduction RagelIgnore
@@ -1572,6 +1749,9 @@ reduction SectionPass
 			InputItem *inputItem = new InputItem;
 			inputItem->type = InputItem::HostData;
 			inputItem->loc = @end_section;
+			if ( inputItem->loc.fileName == 0 )
+				inputItem->loc = @1;
+				
 			id.inputItems.append( inputItem );
 		}
 	}

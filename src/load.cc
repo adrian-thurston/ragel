@@ -1153,9 +1153,9 @@ struct LoadRagel
 		switch ( FactorRep.prodName() ) {
 		case ragel::factor_rep::Op: {
 			factorWithRep = new FactorWithRep( loadFactorNeg( FactorRep.factor_neg() ) );
-			ragel::_repeat_factor_rep_op OpList = FactorRep._repeat_factor_rep_op();
-			while ( !OpList.end() ) {
-				ragel::factor_rep_op FactorRepOp = OpList.value();
+			ragel::factor_rep_op_list OpList = FactorRep.factor_rep_op_list();
+			while ( OpList.prodName() == ragel::factor_rep_op_list::Rec ) {
+				ragel::factor_rep_op FactorRepOp = OpList.factor_rep_op();
 				InputLoc loc = FactorRepOp.loc();
 				switch ( FactorRepOp.prodName() ) {
 					case ragel::factor_rep_op::Star:
@@ -1201,7 +1201,7 @@ struct LoadRagel
 						break;
 					}
 				}
-				OpList = OpList.next();
+				OpList = OpList._factor_rep_op_list();
 			}
 			break;
 		}
