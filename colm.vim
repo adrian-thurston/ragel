@@ -90,7 +90,7 @@ syntax region externalCode contained
 	\ contains=@redItems
 	\ end="}"
 
-syntax cluster redItems contains=redRef,redType,redKeyword,redLiteral,redComment,externalCode
+syntax cluster redItems contains=redRef,redType,redKeyword,redNumber,redIdentifier,redLiteral,redComment,externalCode
 
 syntax region redComment start="\/\*" end="\*\/" contained
 syntax match redComment "\/\/.*$" contained
@@ -101,6 +101,14 @@ syntax match redLiteral "\"\(\\.\|[^\"\\]\)*\""
 syntax match redRef "\$\$" contained
 syntax match redRef "\$[a-zA-Z_][a-zA-Z0-9_]*" contained
 syntax match redRef "@[a-zA-Z_][a-zA-Z0-9_]*" contained
+syntax match redRef "\$[0-9]\+" contained
+syntax match redRef "@[0-9]\+" contained
+
+syntax match redNumber "[0-9][0-9]*" contained
+syntax match redNumber "true" contained
+syntax match redNumber "false" contained
+
+syntax match redIdentifier "[a-zA-Z_][a-zA-Z_0-9]*" contained
 
 syntax keyword redType unsigned signed void char short int long float double bool
 syntax keyword redType inline static extern register const volatile auto
@@ -138,5 +146,6 @@ hi link redKeyword Keyword
 hi link redLiteral String
 hi link redRef Function
 hi link redComment Comment
+hi link redNumber Number
  
 let b:current_syntax = "colm"

@@ -926,8 +926,11 @@ struct ReduceTextItem
 		Txt
 	};
 
+	ReduceTextItem() : n(0) {}
+
 	Type type;
 	String txt;
+	int n;
 
 	ReduceTextItem *prev, *next;
 };

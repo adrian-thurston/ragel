@@ -69,15 +69,30 @@ void Compiler::loadRefs( Production *production, const ReduceTextItemList &list 
 		}
 
 		if ( i->type == ReduceTextItem::RhsRef || i->type == ReduceTextItem::RhsLoc ) {
-			String name( i->txt.data + 1, i->txt.length() - 1 );
-			ObjectField *field = objectDef->rootScope->findField( name );
-			if ( field != 0 ) {
-				for ( Vector<RhsVal>::Iter r = field->rhsVal; r.lte(); r++ ) {
-					if ( r->prodEl->production == production ) {
-						if ( i->type == ReduceTextItem::RhsLoc )
-							locUsed[r->prodEl->pos] = r->prodEl;
-						else
-							rhsUsed[r->prodEl->pos] = r->prodEl;
+			if ( i->n > 0 ) {
+				ProdEl *prodEl = production->prodElList->head;
+				int adv = i->n - 1;
+				while ( adv > 0 ) {
+					prodEl = prodEl->next;
+					adv -= 1;
+				}
+
+				if ( i->type == ReduceTextItem::RhsLoc )
+					locUsed[i->n-1] = prodEl;
+				else
+					rhsUsed[i->n-1] = prodEl;
+			}
+			else {
+				String name( i->txt.data + 1, i->txt.length() - 1 );
+				ObjectField *field = objectDef->rootScope->findField( name );
+				if ( field != 0 ) {
+					for ( Vector<RhsVal>::Iter r = field->rhsVal; r.lte(); r++ ) {
+						if ( r->prodEl->production == production ) {
+							if ( i->type == ReduceTextItem::RhsLoc )
+								locUsed[r->prodEl->pos] = r->prodEl;
+							else
+								rhsUsed[r->prodEl->pos] = r->prodEl;
+						}
 					}
 				}
 			}
@@ -128,34 +143,44 @@ void Compiler::loadRefs( Production *production, const ReduceTextItemList &list 
 
 void Compiler::writeRhsRef( Production *production, ReduceTextItem *i )
 {
-	ObjectDef *objectDef = production->prodName->objectDef;
-	String name( i->txt.data + 1, i->txt.length() - 1 );
+	if ( i->n > 0 ) {
+		*outStream << "_rhs" << ( i->n - 1 );
+	}
+	else {
+		ObjectDef *objectDef = production->prodName->objectDef;
+		String name( i->txt.data + 1, i->txt.length() - 1 );
 
-	/* Find the field in the rhsVal using capture field. */
-	ObjectField *field = objectDef->rootScope->findField( name );
-	if ( field != 0 ) {
-		for ( Vector<RhsVal>::Iter r = field->rhsVal;
-				r.lte(); r++ )
-		{
-			if ( r->prodEl->production == production )
-				*outStream << "_rhs" << r->prodEl->pos;
+		/* Find the field in the rhsVal using capture field. */
+		ObjectField *field = objectDef->rootScope->findField( name );
+		if ( field != 0 ) {
+			for ( Vector<RhsVal>::Iter r = field->rhsVal;
+					r.lte(); r++ )
+			{
+				if ( r->prodEl->production == production )
+					*outStream << "_rhs" << r->prodEl->pos;
+			}
 		}
 	}
 }
 
 void Compiler::writeRhsLoc( Production *production, ReduceTextItem *i )
 {
-	ObjectDef *objectDef = production->prodName->objectDef;
-	String name( i->txt.data + 1, i->txt.length() - 1 );
+	if ( i->n > 0 ) {
+		*outStream << "_loc" << ( i->n - 1 );
+	}
+	else {
+		ObjectDef *objectDef = production->prodName->objectDef;
+		String name( i->txt.data + 1, i->txt.length() - 1 );
 
-	/* Find the field in the rhsVal using capture field. */
-	ObjectField *field = objectDef->rootScope->findField( name );
-	if ( field != 0 ) {
-		for ( Vector<RhsVal>::Iter r = field->rhsVal;
-				r.lte(); r++ )
-		{
-			if ( r->prodEl->production == production )
-				*outStream << "_loc" << r->prodEl->pos;
+		/* Find the field in the rhsVal using capture field. */
+		ObjectField *field = objectDef->rootScope->findField( name );
+		if ( field != 0 ) {
+			for ( Vector<RhsVal>::Iter r = field->rhsVal;
+					r.lte(); r++ )
+			{
+				if ( r->prodEl->production == production )
+					*outStream << "_loc" << r->prodEl->pos;
+			}
 		}
 	}
 }
@@ -220,6 +245,7 @@ void Compiler::writeCommit()
 		"#include <stdlib.h>\n"
 		"#include <string.h>\n"
 		"#include <assert.h>\n"
+		"#include <errno.h>\n"
 		"\n"
 		"#include <iostream>\n"
 		"using std::endl;\n"
