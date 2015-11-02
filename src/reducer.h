@@ -22,7 +22,7 @@
 
 struct Reducer
 {
-	Reducer( InputData &id, const HostLang *hostLang,
+	Reducer( InputData *id, const HostLang *hostLang,
 			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 	:
 		id(id),
@@ -46,7 +46,7 @@ struct Reducer
 		exportContext.append( false );
 	}
 
-	InputData &id;
+	InputData *id;
 	Section *section;
 	ParseData *pd;
 	char *machineSpec;
@@ -79,11 +79,9 @@ struct Reducer
 	void tryMachineDef( InputLoc &loc, std::string name, 
 			MachineDef *machineDef, bool isInstance );
 
-	void reduceFile( const char *inputFileName, const char *targetMachine,
-			const char *searchMachine );
-
-	void topReduce( const char *inputFileName, const char *targetMachine,
-			const char *searchMachine );
+	void reduceFile( const char *inputFileName );
+	void reduceString( const char *data );
+	void topReduce( const char *inputFileName );
 };
 
 char *unescape( const char *s, int slen );

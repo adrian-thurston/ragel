@@ -17,40 +17,28 @@ reduction TopLevel
 			 * are drawing the statements into target. */
 			if ( machine == searchMachine )
 				machine = targetMachine;
-			else {
-				pd = 0;
-				current = 1;
-			}
 		}
 
-		if ( current == 0 ) {
-			SectionDictEl *sdEl = id.sectionDict.find( machine.c_str() );
-			if ( sdEl == 0 ) {
-				Section *section = new Section( strdup(machine.c_str() ) );
-				sdEl = new SectionDictEl( section->sectionName );
-				sdEl->value = section;
-				id.sectionDict.insert( sdEl );
-			}
-
-			ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
-			if ( pdEl == 0 ) {
-				pdEl = new ParseDataDictEl( machine );
-				pdEl->value = new ParseData( &id, fileName, machine,
-						id.nextMachineId++, sectionLoc, hostLang,
-						minimizeLevel, minimizeOpt );
-				id.parseDataDict.insert( pdEl );
-				id.parseDataList.append( pdEl->value );
-			}
-
-			section = sdEl->value;
-			pd = pdEl->value;
+		SectionDictEl *sdEl = id->sectionDict.find( machine.c_str() );
+		if ( sdEl == 0 ) {
+			Section *section = new Section( strdup(machine.c_str() ) );
+			sdEl = new SectionDictEl( section->sectionName );
+			sdEl->value = section;
+			id->sectionDict.insert( sdEl );
 		}
-	}
 
-	ragel::opt_machine_name :Empty
-	{
-		if ( pd == 0 )
-			current = 1;
+		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
+		if ( pdEl == 0 ) {
+			pdEl = new ParseDataDictEl( machine );
+			pdEl->value = new ParseData( id, fileName, machine,
+					id->nextMachineId++, sectionLoc, hostLang,
+					minimizeLevel, minimizeOpt );
+			id->parseDataDict.insert( pdEl );
+			id->parseDataList.append( pdEl->value );
+		}
+
+		section = sdEl->value;
+		pd = pdEl->value;
 	}
 
 	ragel::write_arg :Word
@@ -58,7 +46,6 @@ reduction TopLevel
 		string arg( $word->data, $word->length );
 		writeArgs.append( arg );
 	}
-
 
 	# def join
 	#	[join `, expression] :Rec
@@ -1630,11 +1617,8 @@ reduction TopLevel
 	# [`include include_spec `;] :Include commit
 	ragel::statement :Include
 	{
+		string fileName = id->inputFileName;
 		string machine = pd->sectionName;
-		string fileName = id.inputFileName;
-
-		if ( $include_spec->machine.data != 0 )
-			machine = string( $include_spec->machine.data, $include_spec->machine.length );
 
 		if ( $include_spec->file.data != 0 ) {
 			fileName = string( $include_spec->file.data, $include_spec->file.length );
@@ -1647,10 +1631,55 @@ reduction TopLevel
 			fileName = unescaped;
 		}
 
-		string sectionName = pd->sectionName;
+		if ( $include_spec->machine.data != 0 )
+			machine = string( $include_spec->machine.data, $include_spec->machine.length );
 
+
+		std::cout << "including " << fileName << std::endl;
+
+		/* Stash the current section name and pd. */
+		string sectionName = pd->sectionName;
 		ParseData *pd0 = pd;
-		
+
+		IncludeRec *el = id->includeDict.find( FnMachine( fileName, machine ) );
+		if ( el == 0 ) {
+			el = new IncludeRec( fileName, machine );
+
+			InputData idr, *id0 = id;
+			
+			pd = 0;
+			current = 2;
+			id = &idr;
+
+			this->reduceFile( fileName.c_str() );
+
+			/* Count bytes. */
+			int len = 0;
+			for ( InputItem *ii = id->inputItems.head; ii != 0; ii = ii->next ) {
+				if ( ii->section != 0 && ii->section->sectionName == machine )
+					len += ii->end - ii->start + 3;
+			}
+
+			/* Load bytes. */
+			el->data = new char[len+1];
+			len = 0;
+			for ( InputItem *ii = id->inputItems.head; ii != 0; ii = ii->next ) {
+				if ( ii->section != 0 && ii->section->sectionName == machine ) {
+					std::ifstream f( fileName.c_str() );
+					f.seekg( ii->start, std::ios::beg );
+					f.read( el->data + len, ii->end - ii->start + 3 );
+					len += f.gcount();
+				}
+			}
+			el->data[len] = 0;
+			el->len = len;
+
+			id = id0;
+			current = 0;
+
+			id->includeDict.insert( el );
+		}
+
 		const char *targetMachine0 = targetMachine;
 		const char *searchMachine0 = searchMachine;
 
@@ -1660,8 +1689,8 @@ reduction TopLevel
 		targetMachine = sectionName.c_str();
 		searchMachine = machine.c_str();
 
-		std::cout << "including " << searchMachine << std::endl;
-		this->reduceFile( fileName.c_str(), sectionName.c_str(), machine.c_str() );
+		this->reduceString( el->data );
+		std::cout << el->data;
 
 		pd = pd0;
 		includeDepth -= 1;
@@ -1673,8 +1702,8 @@ reduction TopLevel
 	ragel::statement :Write
 	{
 		if ( includeDepth == 0 ) {
-			id.curItem = id.curItem->next;
-			InputItem *inputItem = id.curItem;
+			id->curItem = id->curItem->next;
+			InputItem *inputItem = id->curItem;
 
 			string cmd( $Cmd->data, $Cmd->length );
 			inputItem->writeArgs.append( cmd );
@@ -1690,10 +1719,10 @@ reduction TopLevel
 	c_host::section :MultiLine
 	{
 		if ( includeDepth == 0 ) {
-			id.curItem = id.curItem->next;
-			id.curItem->pd = pd;
-			id.checkLastRef( id.curItem );
-			id.curItem = id.curItem->next;
+			id->curItem = id->curItem->next;
+			id->curItem->pd = pd;
+			id->checkLastRef( id->curItem );
+			id->curItem = id->curItem->next;
 		}
 	}
 
@@ -1706,7 +1735,6 @@ reduction TopLevel
 		}
 
 		pd->nfaPrePushExpr = new InlineBlock( @1, $action_block->inlineList );
-
 	}
 
 	# [`nfapostpop action_block] :NfaPostPop commit
@@ -1732,52 +1760,47 @@ reduction TopLevel
 	c_host::tok :Ident
 	{
 		if ( includeDepth == 0 )
-			id.curItem->data.write( $ident->data, $ident->length );
+			id->curItem->data.write( $ident->data, $ident->length );
 	}
 
 	c_host::tok :Number
 	{
 		if ( includeDepth == 0 )
-			id.curItem->data.write( $number->data, $number->length );
+			id->curItem->data.write( $number->data, $number->length );
 	}
 
 	c_host::tok :HexNumber
 	{
 		if ( includeDepth == 0 )
-			id.curItem->data.write( $hex_number->data, $hex_number->length );
+			id->curItem->data.write( $hex_number->data, $hex_number->length );
 	}
 
 	c_host::tok :Comment
 	{
 		if ( includeDepth == 0 )
-			id.curItem->data.write( $comment->data, $comment->length );
+			id->curItem->data.write( $comment->data, $comment->length );
 	}
 
 	c_host::tok :String
 	{
 		if ( includeDepth == 0 )
-			id.curItem->data.write( $string->data, $string->length );
+			id->curItem->data.write( $string->data, $string->length );
 	}
 
 	c_host::tok :Whitespace
 	{
 		if ( includeDepth == 0 )
-			id.curItem->data.write( $whitespace->data, $whitespace->length );
+			id->curItem->data.write( $whitespace->data, $whitespace->length );
 	}
 
 	c_host::tok :Any
 	{
 		if ( includeDepth == 0 )
-			id.curItem->data.write( $c_any->data, $c_any->length );
+			id->curItem->data.write( $c_any->data, $c_any->length );
 	}
 end 
 
 reduction RagelIgnore
-	c_host::section :MultiLine
-	{
-		/* Reset to other reducer. */
-		current = 0;
-	}
 end 
 
 reduction SectionPass
@@ -1787,11 +1810,11 @@ reduction SectionPass
 
 		//std::cout << "pass 2: machine name: " << machine << std::endl;
 
-		SectionDictEl *sdEl = id.sectionDict.find( machine );
+		SectionDictEl *sdEl = id->sectionDict.find( machine );
 		if ( sdEl == 0 ) {
 			sdEl = new SectionDictEl( machine );
 			sdEl->value = new Section( machine );
-			id.sectionDict.insert( sdEl );
+			id->sectionDict.insert( sdEl );
 		}
 
 		section = sdEl->value;
@@ -1805,15 +1828,17 @@ reduction SectionPass
 		inputItem->name = section->sectionName;
 		inputItem->section = section;
 
-		id.inputItems.append( inputItem );
+		id->inputItems.append( inputItem );
 	}
 
 	c_host::section :MultiLine
 	{
 		InputItem *inputItem = new InputItem;
 		inputItem->type = InputItem::EndSection;
-		inputItem->loc = @end_section;
-		id.inputItems.append( inputItem );
+		inputItem->loc = @3;
+		inputItem->start = @1->byte;
+		inputItem->end = @3->byte + 3;
+		id->inputItems.append( inputItem );
 
 		if ( section != 0 ) {
 			inputItem->section = section;
@@ -1825,11 +1850,11 @@ reduction SectionPass
 			 * we use the last line, which will count the newline. */
 			InputItem *inputItem = new InputItem;
 			inputItem->type = InputItem::HostData;
-			inputItem->loc = @end_section;
+			inputItem->loc = @3;
 			if ( inputItem->loc.fileName == 0 )
 				inputItem->loc = @1;
 				
-			id.inputItems.append( inputItem );
+			id->inputItems.append( inputItem );
 		}
 	}
 end

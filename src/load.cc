@@ -59,6 +59,9 @@ InputLoc::InputLoc( colm_location *pcloc )
 		line = -1;
 		col = -1;
 	}
+
+	if ( fileName == 0 )
+		fileName = "-";
 }
 
 struct LoadRagel

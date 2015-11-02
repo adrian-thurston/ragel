@@ -31,14 +31,8 @@ void Reducer::tryMachineDef( InputLoc &loc, std::string name,
 		newEl->value->isExport = exportContext[exportContext.length()-1];
 
 		/* It it is an instance, put on the instance list. */
-		if ( isInstance ) {
+		if ( isInstance )
 			pd->instanceList.append( newEl );
-
-//			InputItem *inputItem = new InputItem;
-//			inputItem->type = InputItem::EndSection;
-//			section->lastReference = inputItem;
-//			id.inputItems.append( inputItem );
-		}
 	}
 	else {
 		// Recover by ignoring the duplicate.
@@ -46,14 +40,13 @@ void Reducer::tryMachineDef( InputLoc &loc, std::string name,
 	}
 }
 
-void Reducer::reduceFile( const char *inputFileName,
-		const char *targetMachine, const char *searchMachine )
+void Reducer::reduceFile( const char *inputFileName )
 {
 	const char *argv[5];
 	argv[0] = "rlparse";
 	argv[1] = "reduce";
 	argv[2] = inputFileName;
-	argv[3] = id.hostLang->rlhcArg;
+	argv[3] = id->hostLang->rlhcArg;
 	argv[4] = 0;
 
 	colm_program *program = colm_new_program( &colm_object );
@@ -62,14 +55,30 @@ void Reducer::reduceFile( const char *inputFileName,
 	colm_delete_program( program );
 }
 
-void Reducer::topReduce( const char *inputFileName,
-		const char *targetMachine, const char *searchMachine )
+void Reducer::topReduce( const char *inputFileName )
 {
 	current = 2;
-	reduceFile( inputFileName, targetMachine, searchMachine );
+	reduceFile( inputFileName );
 
 	current = 0;
-	id.curItem = id.inputItems.head;
-	id.lastFlush = id.inputItems.head;
-	reduceFile( inputFileName, targetMachine, searchMachine );
+	id->curItem = id->inputItems.head;
+	id->lastFlush = id->inputItems.head;
+	reduceFile( inputFileName );
+}
+
+void Reducer::reduceString( const char *data )
+{
+	const char *argv[6];
+	argv[0] = "rlparse";
+	argv[1] = "string";
+	argv[2] = "-";
+	argv[3] = id->hostLang->rlhcArg;
+	argv[4] = data;
+	argv[5] = 0;
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_set_debug( program, 0 );
+	colm_run_program( program, 5, argv );
+	colm_delete_program( program );
+
 }

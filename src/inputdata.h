@@ -61,6 +61,7 @@ struct InputItem
 
 	InputLoc loc;
 	bool processed;
+	long start, end;
 
 	InputItem *prev, *next;
 };
@@ -94,6 +95,48 @@ struct Section
 
 typedef AvlMap<std::string, Section*, CmpString> SectionDict;
 typedef AvlMapEl<std::string, Section*> SectionDictEl;
+
+struct FnMachine
+{
+	FnMachine( const string &fileName, const string &machine )
+		: fileName( fileName ), machine( machine ) {}
+
+	string fileName;
+	string machine;
+};
+
+struct CmpFnMachine
+{
+	static inline int compare( const FnMachine &k1, const FnMachine &k2 )
+	{
+		int r = strcmp( k1.fileName.c_str(), k2.fileName.c_str() );
+		if ( r != 0 )
+			return r;
+		else {
+			r = strcmp( k1.machine.c_str(), k2.machine.c_str() );
+			if ( r != 0 )
+				return r;
+		}
+		return 0;
+	}
+};
+
+struct IncludeRec
+	: public AvlTreeEl<IncludeRec>
+{
+	IncludeRec( const string &fileName, const string &machine )
+		: key( fileName, machine ) {}
+
+	FnMachine key;
+
+	const FnMachine &getKey()
+		{ return key; }
+	
+	char *data;
+	int len;
+};
+
+typedef AvlTree<IncludeRec, FnMachine, CmpFnMachine> IncludeDict;
 
 struct InputData
 {
@@ -215,6 +258,8 @@ struct InputData
 	long nfaFinalStateLimit;
 
 	bool varBackend;
+
+	IncludeDict includeDict;
 
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();

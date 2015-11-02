@@ -143,7 +143,7 @@ namespace crack_host
 	|	[c_any]
 
 	def section
-		[`%%{ ragel::ragel_start ragel::end_section] :MultiLine
+		[`%%{ ragel::ragel_start ragel::`}%%] :MultiLine
 	|	[tok] :Tok
 end
 

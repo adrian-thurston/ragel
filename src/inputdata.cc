@@ -690,7 +690,7 @@ void InputData::processReduce()
 	 * Colm-based reduction parser introduced in ragel 7. 
 	 */
 
-	::reducer = new Reducer( *this, hostLang, minimizeLevel, minimizeOpt );
+	::reducer = new Reducer( this, hostLang, minimizeLevel, minimizeOpt );
 
 	/* Check input file. */
 	ifstream *inFile = new ifstream( inputFileName );
@@ -700,15 +700,12 @@ void InputData::processReduce()
 
 	makeFirstInputItem();
 
-	//LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
-	::reducer->topReduce( inputFileName, 0, 0 );
+	::reducer->topReduce( inputFileName );
 
 	flushRemaining();
 
 	closeOutput();
 	runRlhc();
-
-	//deleteLoadRagel( lr );
 
 //	/* Bail on above error. */
 //	if ( gblErrorCount > 0 )
