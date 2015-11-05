@@ -17,6 +17,9 @@
 #include "inputdata.h"
 #include "parsedata.h"
 
+#ifndef _REDUCER_H
+#define _REDUCER_H
+
 struct Reducer
 {
 	Reducer( InputData &id, const HostLang *hostLang,
@@ -82,3 +85,8 @@ struct Reducer
 	void topReduce( const char *inputFileName, const char *targetMachine,
 			const char *searchMachine );
 };
+
+char *unescape( const char *s, int slen );
+char *unescape( const char *s );
+
+#endif

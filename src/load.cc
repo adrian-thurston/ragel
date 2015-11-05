@@ -13,9 +13,8 @@ using std::endl;
 
 extern colm_sections colm_object;
 
-char *unescape( const char *s )
+char *unescape( const char *s, int slen )
 {
-	int slen = strlen(s);
 	char *out = new char[slen+1];
 	char *d = out;
 
@@ -41,6 +40,11 @@ char *unescape( const char *s )
 	}
 	*d = 0;
 	return out;
+}
+
+char *unescape( const char *s )
+{
+	return unescape( s, strlen(s) );
 }
 
 InputLoc::InputLoc( colm_location *pcloc )

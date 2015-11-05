@@ -174,6 +174,7 @@ void showFrontends()
 	cout << "--kelbt-frontend";
 #ifdef WITH_COLM
 	cout << " --colm-frontend";
+	cout << " --reduce-frontend";
 #endif
 	cout << endl;
 	exit(0);
@@ -452,8 +453,8 @@ void InputData::parseArgs( int argc, const char **argv )
 					error() << "--colm-frontend specified but, "
 							"ragel not built with colm support" << endp;
 				}
-				else if ( strcmp( arg, "colm-reduce" ) == 0 ) {
-					error() << "--colm-frontend specified but, "
+				else if ( strcmp( arg, "reduce-frontend" ) == 0 ) {
+					error() << "--reduce-frontend specified but, "
 							"ragel not built with colm support" << endp;
 				}
 #endif

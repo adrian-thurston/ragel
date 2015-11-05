@@ -444,8 +444,8 @@ reduction TopLevel
 		if ( $block_item->inlineItem != 0 )
 			$$->inlineList->prepend( $block_item->inlineItem );
 		else if ( $block_item->inlineList != 0 ) {
-//			$$->inlineList->append( $block_item->inlineList );
-//			delete $block_item->inlineList;
+			$$->inlineList->prepend( *$block_item->inlineList );
+			delete $block_item->inlineList;
 		}
 	}
 
@@ -477,7 +477,7 @@ reduction TopLevel
 
 	c_inline::block_item :BlockInterpret
 	{
-
+		$$->inlineItem = $block_interpret->inlineItem;
 	}
 
 	c_inline::block_item :RecBlock
@@ -602,6 +602,53 @@ reduction TopLevel
 	# |	[`fnret `;] :Fnret
 	# |	[`fbreak `;] :Fbreak
 	# |	[`fnbreak `;] :Fnbreak
+	c_inline::block_interpret
+	{
+		InlineItem *inlineItem;
+	}
+
+	c_inline::block_interpret :ExprInterpret
+	{
+		$$->inlineItem = $expr_interpret->inlineItem;
+	}
+
+
+	# def expr_interpret
+	#	[`fpc] :Fpc
+	# |	[`fc] :Fc
+	# |	[`fcurs] :Fcurs
+	# |	[`ftargs]  :Ftargs
+	# |	[`fentry `( state_ref srlex::`)] :Fentry
+	c_inline::expr_interpret
+	{
+		InlineItem *inlineItem;
+	}
+
+	c_inline::expr_interpret :Fpc
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::PChar );
+	}
+
+	c_inline::expr_interpret :Fc
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Char );
+	}
+
+	c_inline::expr_interpret :Fcurs
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Curs );
+	}
+
+	c_inline::expr_interpret :Ftargs
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Targs );
+	}
+
+#	c_inline::expr_interpret :Fentry
+#	{
+#//		NameRef *nameRef = loadStateRef( ExprInterpret.state_ref() );
+#//		$$->inlineItem = new InlineItem( @1, nameRef, InlineItem::Entry );
+#	}
 	
 	# def priority_aug
 	#	[uint]
@@ -1109,12 +1156,14 @@ reduction TopLevel
 
 	ragel::factor_neg :Bang
 	{
-		$$->neg = $_factor_neg->neg;
+		$$->neg = new FactorWithNeg( @1,
+				$_factor_neg->neg, FactorWithNeg::NegateType );
 	}
 
 	ragel::factor_neg :Caret
 	{
-		$$->neg = $_factor_neg->neg;
+		$$->neg = new FactorWithNeg( @1,
+				$_factor_neg->neg, FactorWithNeg::CharNegateType );
 	}
 
 	ragel::factor_neg :Base
@@ -1266,15 +1315,19 @@ reduction TopLevel
 	ragel::reg_or_char :Char
 	{
 		// ReOrItem *reOrItem;
+		char *c = unescape( $re_or_char->data, $re_or_char->length );
 		Token tok;
-		tok.set( $re_or_char );
+		tok.set( c, 1 );
+		delete[] c;
 		$$->reOrItem = new ReOrItem( @re_or_char, tok );
 	}
 
 	ragel::reg_or_char :Range
 	{
 		// ReOrItem *reOrItem;
-		$$->reOrItem = new ReOrItem( @re_or_dash, $Low->data[0], $High->data[0] );
+		char *low = unescape( $Low->data, $Low->length );
+		char *high = unescape( $High->data, $High->length );
+		$$->reOrItem = new ReOrItem( @re_or_dash, low[0], high[0] );
 	}
 
 
@@ -1607,6 +1660,7 @@ reduction TopLevel
 		targetMachine = sectionName.c_str();
 		searchMachine = machine.c_str();
 
+		std::cout << "including " << searchMachine << std::endl;
 		this->reduceFile( fileName.c_str(), sectionName.c_str(), machine.c_str() );
 
 		pd = pd0;
@@ -1641,6 +1695,29 @@ reduction TopLevel
 			id.checkLastRef( id.curItem );
 			id.curItem = id.curItem->next;
 		}
+	}
+
+	# [`nfaprepush action_block] :NfaPrePush commit
+	ragel::statement :NfaPrePush
+	{
+		if ( pd->nfaPrePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@1) << "nfa_pre_push code already defined" << endl;
+		}
+
+		pd->nfaPrePushExpr = new InlineBlock( @1, $action_block->inlineList );
+
+	}
+
+	# [`nfapostpop action_block] :NfaPostPop commit
+	ragel::statement :NfaPostPop
+	{
+		if ( pd->nfaPostPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@1) << "nfa_post_pop code already defined" << endl;
+		}
+
+		pd->nfaPostPopExpr = new InlineBlock( @1, $action_block->inlineList );
 	}
 
 	# Pass Through.
