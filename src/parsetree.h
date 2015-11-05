@@ -983,12 +983,15 @@ struct Reduction
 	Reduction( const InputLoc &loc, String name )
 		: loc(loc), name(name)
 	{
-		static int nextId = 0;	
+		static int nextId = 1;	
 		id = nextId++;
+		var = name.data;
+		var.data[0] = tolower( var.data[0] );
 	}
 
 	InputLoc loc;
 	String name;
+	String var;
 	int id;
 
 	ReduceActionList reduceActions;
@@ -1851,7 +1854,7 @@ struct ParserText
 {
 	static ParserText *cons( const InputLoc &loc,
 			Namespace *nspace, ConsItemList *list,
-			bool used, bool reduce )
+			bool used, bool reduce, const String &reducer )
 	{
 		ParserText *p = new ParserText;
 		p->loc = loc;
@@ -1863,6 +1866,8 @@ struct ParserText
 		p->parse = true;
 		p->used = used;
 		p->reduce = reduce;
+		p->reducer = reducer;
+		p->reducerId = -1;
 		return p;
 	}
 
@@ -1875,7 +1880,8 @@ struct ParserText
 	bool parse;
 	bool used;
 	bool reduce;
-	String reducerClass;
+	String reducer;
+	int reducerId;
 
 	ParserText *prev, *next;
 };

@@ -149,7 +149,7 @@ struct colm_struct *colm_map_get( struct colm_program *prg, map_t *map,
 		word_t gen_id, word_t field );
 
 struct colm_struct *colm_construct_generic( struct colm_program *prg, long generic_id );
-struct colm_struct *colm_construct_reducer( struct colm_program *prg, long generic_id );
+struct colm_struct *colm_construct_reducer( struct colm_program *prg, long generic_id, int reducer_id );
 
 #define STRUCT_INBUILT_ID -1
 

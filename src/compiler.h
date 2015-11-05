@@ -657,6 +657,7 @@ struct Compiler
 	void resolvePrecedence();
 	void resolveReductionActions();
 	void findReductionActionProds();
+	void resolveReducers();
 
 	void declarePass();
 	void resolvePass();

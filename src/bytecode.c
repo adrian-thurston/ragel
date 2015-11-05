@@ -2735,11 +2735,13 @@ again:
 		}
 		case IN_CONS_REDUCER: {
 			half_t generic_id;
+			half_t reducer_id;
 			read_half( generic_id );
+			read_half( reducer_id );
 
 			debug( prg, REALM_BYTECODE, "IN_CONS_REDUCER %hd\n", generic_id );
 
-			struct_t *gen = colm_construct_reducer( prg, generic_id );
+			struct_t *gen = colm_construct_reducer( prg, generic_id, reducer_id );
 			vm_push_struct( gen );
 			break;
 		}

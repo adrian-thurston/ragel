@@ -147,12 +147,12 @@ struct_t *colm_construct_generic( program_t *prg, long generic_id )
 	return new_generic;
 }
 
-struct_t *colm_construct_reducer( program_t *prg, long generic_id )
+struct_t *colm_construct_reducer( program_t *prg, long generic_id, int reducer_id )
 {
 	struct generic_info *generic_info = &prg->rtd->generic_info[generic_id];
 	struct_t *new_generic = 0;
 
-	parser_t *parser = colm_parser_new( prg, generic_info, 1 );
+	parser_t *parser = colm_parser_new( prg, generic_info, reducer_id );
 	parser->input = colm_stream_new( prg );
 	new_generic = (struct_t*) parser;
 

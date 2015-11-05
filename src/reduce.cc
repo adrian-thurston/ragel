@@ -49,7 +49,7 @@ void Compiler::writeCommitStub()
 		"	commit_clear_parse_tree( prg, root, pda_run, pt->child );\n"
 		"}\n"
 		"\n"
-		"long commit_union_sz() { return 0; }\n"
+		"long commit_union_sz( int reducer ) { return 0; }\n"
 		"\n";
 	;
 }
@@ -251,10 +251,15 @@ void Compiler::writeCommit()
 		"using std::endl;\n"
 		"\n"
 		"#include \"reducer.h\"\n"
-		"\n"
-		"Reducer *reducer;\n"
-		"\n"
-	;
+		"\n";
+
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		Reduction *reduction = *r;
+		*outStream <<
+			reduction->name << "* " << reduction->var << ";\n";
+	}
+
+	*outStream << "\n";
 
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		for ( ReduceNonTermList::Iter rdi = (*r)->reduceNonTerms; rdi.lte(); rdi++ ) {
@@ -286,51 +291,71 @@ void Compiler::writeCommit()
 		"\n";
 
 	*outStream <<
-		"long commit_union_sz() { return sizeof( commit_reduce_union ); }\n";
+		"long commit_union_sz( int reducer )\n"
+		"{\n"
+		"	return sizeof( commit_reduce_union );\n"
+		"}\n";
 
 	*outStream <<
 		"\n"
 		"void commit_reduce_forward( program_t *prg, tree_t **root,\n"
 		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
-		"{ reducer->commit_reduce_forward( prg, root, pda_run, pt ); }\n"
-		"\n"
-		"void Reducer::commit_reduce_forward( program_t *prg, tree_t **root,\n"
-		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
 		"{\n"
-		"	tree_t **sp = root;\n"
-		"\n"
-		"	parse_tree_t *lel = pt;\n"
-		"	kid_t *kid = pt->shadow;\n"
-		"\n"
-		"recurse:\n"
-		"\n"
-		"	if ( lel->child != 0 ) {\n"
-		"		/* There are children. Must process all children first. */\n"
-		"		vm_push_ptree( lel );\n"
-		"		vm_push_kid( kid );\n"
-		"\n"
-		"		lel = lel->child;\n"
-		"		kid = kid->tree->child;\n"
-		"		while ( lel != 0 ) {\n"
-		"			goto recurse;\n"
-		"			resume:\n"
-		"			lel = lel->next;\n"
-		"			kid = kid->next;\n"
-		"		}\n"
-		"\n"
-		"		kid = vm_pop_kid();\n"
-		"		lel = vm_pop_ptree();\n"
+		"	switch ( pda_run->reducer ) {\n";
+
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		Reduction *reduction = *r;
+		*outStream <<
+			"	case " << reduction->id << ":\n"
+			"		" << reduction->var << "->commit_reduce_forward( "
+						"prg, root, pda_run, pt );\n"
+			"		break;\n";
+	}
+
+	*outStream <<
 		"	}\n"
-		"\n"
-		"	if ( !( lel->flags & PF_COMMITTED ) ) {\n"
-		"		/* Now can execute the reduction action. */\n"
-		"		switch ( reducer->current ) {\n";
+		"}\n"
+		"\n";
 
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		Reduction *reduction = *r;
 
 		*outStream <<
-			"		case " << reduction->id << ": { switch ( kid->tree->id ) {\n";
+			"void " << reduction->name << "::commit_reduce_forward( program_t *prg, \n"
+			"		tree_t **root, struct pda_run *pda_run, parse_tree_t *pt )\n"
+			"{\n"
+			"	tree_t **sp = root;\n"
+			"\n"
+			"	parse_tree_t *lel = pt;\n"
+			"	kid_t *kid = pt->shadow;\n"
+			"\n"
+			"recurse:\n"
+			"\n"
+			"	if ( lel->child != 0 ) {\n"
+			"		/* There are children. Must process all children first. */\n"
+			"		vm_push_ptree( lel );\n"
+			"		vm_push_kid( kid );\n"
+			"\n"
+			"		lel = lel->child;\n"
+			"		kid = kid->tree->child;\n"
+			"		while ( lel != 0 ) {\n"
+			"			goto recurse;\n"
+			"			resume:\n"
+			"			lel = lel->next;\n"
+			"			kid = kid->next;\n"
+			"		}\n"
+			"\n"
+			"		kid = vm_pop_kid();\n"
+			"		lel = vm_pop_ptree();\n"
+			"	}\n"
+			"\n"
+			"	if ( !( lel->flags & PF_COMMITTED ) ) {\n"
+			"		/* Now can execute the reduction action. */\n"
+			"		{\n";
+
+
+		*outStream <<
+			"		{ switch ( kid->tree->id ) {\n";
 
 		/* Populate a vector with the reduce actions. */
 		Vector<ReduceAction*> actions;
@@ -387,22 +412,17 @@ void Compiler::writeCommit()
 		}
 
 		*outStream <<
-			"		} break; }\n";
+			"		} }\n"
+			"		}\n"
+			"	}\n"
+			"\n"
+			"	commit_clear_parse_tree( prg, sp, pda_run, lel->child );\n"
+			"	lel->child = 0;\n"
+			"\n"
+			"	if ( sp != root )\n"
+			"		goto resume;\n"
+			"	pt->flags |= PF_COMMITTED;\n"
+			"}\n"
+			"\n";
 	}
-
-	*outStream <<
-		"		}\n"
-		"	}\n"
-		"\n"
-		"	commit_clear_parse_tree( prg, sp, pda_run, lel->child );\n"
-		"	lel->child = 0;\n"
-		"\n"
-		"	if ( sp != root )\n"
-		"		goto resume;\n"
-		"	pt->flags |= PF_COMMITTED;\n"
-		"}\n"
-		"\n";
 }
-
-
-

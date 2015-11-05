@@ -1400,11 +1400,15 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 	/* Construct the parser. */
 
-	if ( parserText->reduce )
+	if ( parserText->reduce ) {
 		code.append( IN_CONS_REDUCER );
-	else
+		code.appendHalf( parserUT->generic->id );
+		code.appendHalf( parserText->reducerId );
+	}
+	else {
 		code.append( IN_CONS_GENERIC );
-	code.appendHalf( parserUT->generic->id );
+		code.appendHalf( parserUT->generic->id );
+	}
 
 	/*
 	 * First load the context into the parser.

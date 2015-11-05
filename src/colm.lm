@@ -629,7 +629,7 @@ def code_factor
 |	[PARSE opt_capture type_ref opt_field_init accumulate] :Parse
 |	[PARSE_TREE opt_capture type_ref opt_field_init accumulate] :ParseTree
 |	[PARSE_STOP opt_capture type_ref opt_field_init accumulate] :ParseStop
-|	[REDUCE type_ref opt_field_init accumulate] :Reduce
+|	[REDUCE id type_ref opt_field_init accumulate] :Reduce
 |	[CONS opt_capture type_ref opt_field_init constructor] :Cons
 |	[MATCH var_ref pattern] :Match
 |	[string] :String

@@ -355,7 +355,10 @@ struct pda_run
 	int rc_block_count;
 
 	tree_t *parse_error_text;
-	char reducer;
+
+	/* Zero indicates parsing proper. Nonzero is the reducer id. */
+	int reducer;
+
 	parse_tree_t *last_final;
 
 	struct pool_alloc *parse_tree_pool;
@@ -456,7 +459,7 @@ void commit_reduce_forward( program_t *prg, tree_t **root,
 void commit_reduce( program_t *prg, tree_t **root,
 		struct pda_run *pda_run );
 
-long commit_union_sz();
+long commit_union_sz( int reducer );
 
 
 #ifdef __cplusplus

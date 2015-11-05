@@ -921,6 +921,22 @@ void Compiler::findReductionActionProds()
 		}
 	}
 }
+
+void Compiler::resolveReducers()
+{
+	for ( ParserTextList::Iter pt = parserTextList; pt.lte(); pt++ ) {
+		if ( pt->reduce ) {
+			Reduction *reduction = rootNamespace->findReduction( pt->reducer );
+			if ( reduction == 0 ) {
+				error ( pt->loc ) << "could not locate reduction \"" <<
+					pt->reducer << "\"" << endp;
+			}
+
+			pt->reducerId = reduction->id;
+		}
+	}
+}
+
 void Compiler::resolvePass()
 {
 	/*
@@ -943,4 +959,6 @@ void Compiler::resolvePass()
 	resolveProductionEls();
 
 	findReductionActionProds();
+
+	resolveReducers();
 }

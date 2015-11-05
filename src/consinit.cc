@@ -42,7 +42,7 @@ extern "C" void commit_reduce_forward( program_t *prg, tree_t **root,
 	commit_clear_parse_tree( prg, root, pda_run, pt->child );
 }
 
-extern "C" long commit_union_sz() { return 0; }
+extern "C" long commit_union_sz( int reducer ) { return 0; }
 
 using std::cout;
 using std::cerr;
@@ -819,7 +819,7 @@ void ConsInit::parseInput( StmtList *stmtList )
 
 	/* Parse the above list. */
 	LangExpr *parseExpr = parseCmd( internal, false, false, objField,
-			typeRef, 0, list, true, false );
+			typeRef, 0, list, true, false, "" );
 	LangStmt *parseStmt = LangStmt::cons( internal, LangStmt::ExprType, parseExpr );
 	stmtList->append( parseStmt );
 }
