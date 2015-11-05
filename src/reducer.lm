@@ -1623,10 +1623,9 @@ reduction TopLevel
 			InputData idr, *id0 = id;
 			
 			pd = 0;
-			current = 1;
-			id = &idr;
+			::sectionPass->id = &idr;
 
-			this->reduceFile( fileName.c_str() );
+			::sectionPass->reduceFile( fileName.c_str() );
 
 			/* Count bytes. */
 			int len = 0;
@@ -1649,8 +1648,7 @@ reduction TopLevel
 			el->data[len] = 0;
 			el->len = len;
 
-			id = id0;
-			current = 0;
+			::sectionPass->id = id0;
 
 			id->includeDict.insert( el );
 		}
@@ -1664,7 +1662,7 @@ reduction TopLevel
 		targetMachine = sectionName.c_str();
 		searchMachine = machine.c_str();
 
-		this->reduceString( el->data );
+		reduceString( el->data );
 		std::cout << el->data;
 
 		pd = pd0;
@@ -1723,7 +1721,6 @@ reduction TopLevel
 			id->parseDataList.append( pdEl->value );
 		}
 
-		section = sdEl->value;
 		pd = pdEl->value;
 	}
 

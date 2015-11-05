@@ -20,13 +20,12 @@
 #ifndef _REDUCER_H
 #define _REDUCER_H
 
-struct Reducer
+struct TopLevel
 {
-	Reducer( InputData *id, const HostLang *hostLang,
+	TopLevel( InputData *id, const HostLang *hostLang,
 			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 	:
 		id(id),
-		section(0),
 		pd(0),
 		machineSpec(0),
 		machineName(0),
@@ -37,17 +36,12 @@ struct Reducer
 		
 		/* Should be passed into the load, somehow. */
 		targetMachine(0),
-		searchMachine(0),
-
-		current(0),
-
-		exprLeft(0)
+		searchMachine(0)
 	{
 		exportContext.append( false );
 	}
 
 	InputData *id;
-	Section *section;
 	ParseData *pd;
 	char *machineSpec;
 	char *machineName;
@@ -63,15 +57,6 @@ struct Reducer
 	const char *targetMachine;
 	const char *searchMachine;
 
-	int current;
-
-	/* Expression reduction. Grammar is right recursive. Output tree is left.
-	 * This keeps the left tree. */
-	Expression *exprLeft;
-
-	/* Term reduction. Also right recursive grammar. */
-	Term *termLeft;
-
 	void commit_reduce_forward( program_t *prg, tree_t **root,
 		struct pda_run *pda_run, parse_tree_t *pt );
 
@@ -83,6 +68,47 @@ struct Reducer
 	void reduceString( const char *data );
 	void topReduce( const char *inputFileName );
 };
+
+struct SectionPass
+{
+	SectionPass( InputData *id, const HostLang *hostLang,
+			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
+	:
+		id(id),
+		section(0),
+		machineSpec(0),
+		machineName(0),
+		includeDepth(0),
+		hostLang(hostLang),
+		minimizeLevel(minimizeLevel),
+		minimizeOpt(minimizeOpt),
+		
+		/* Should be passed into the load, somehow. */
+		targetMachine(0),
+		searchMachine(0)
+	{
+	}
+
+	InputData *id;
+	Section *section;
+	char *machineSpec;
+	char *machineName;
+	int includeDepth;
+	const HostLang *hostLang;
+	MinimizeLevel minimizeLevel;
+	MinimizeOpt minimizeOpt;
+
+	const char *targetMachine;
+	const char *searchMachine;
+
+	void commit_reduce_forward( program_t *prg, tree_t **root,
+		struct pda_run *pda_run, parse_tree_t *pt );
+
+	void reduceFile( const char *inputFileName );
+	void reduceString( const char *data );
+	void topReduce( const char *inputFileName );
+};
+
 
 char *unescape( const char *s, int slen );
 char *unescape( const char *s );

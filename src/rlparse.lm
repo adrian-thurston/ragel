@@ -107,14 +107,17 @@ else if ( Cmd == 'load' ) {
 	RagelTree = parse start[ Stream ]
 	RagelError = error
 }
-else if ( Cmd == 'reduce' ) {
-	reduce start[ Stream ]
-}
 else if ( Cmd == 'string' ) {
 	# The string to parse.
 	A = argv->pop_head_el()
 	Data: str = A->value
-	reduce start[ Data ]
+	reduce TopLevel start[ Data ]
+}
+else if ( Cmd == 'reduce' ) {
+	reduce TopLevel start[ Stream ]
+}
+else if ( Cmd == 'section' ) {
+	reduce SectionPass start[ Stream ]
 }
 
 include 'reducer.lm'

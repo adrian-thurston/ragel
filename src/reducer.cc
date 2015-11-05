@@ -3,7 +3,7 @@
 using std::endl;
 
 
-void Reducer::loadMachineName( string data )
+void TopLevel::loadMachineName( string data )
 {
 	/* Make/get the priority key. The name may have already been referenced
 	 * and therefore exist. */
@@ -19,7 +19,7 @@ void Reducer::loadMachineName( string data )
 	pd->curDefLocalErrKey = localErrDictEl->value;
 }
 
-void Reducer::tryMachineDef( InputLoc &loc, std::string name, 
+void TopLevel::tryMachineDef( InputLoc &loc, std::string name, 
 		MachineDef *machineDef, bool isInstance )
 {
 	GraphDictEl *newEl = pd->graphDict.insert( name );
@@ -40,33 +40,7 @@ void Reducer::tryMachineDef( InputLoc &loc, std::string name,
 	}
 }
 
-void Reducer::reduceFile( const char *inputFileName )
-{
-	const char *argv[5];
-	argv[0] = "rlparse";
-	argv[1] = "reduce";
-	argv[2] = inputFileName;
-	argv[3] = id->hostLang->rlhcArg;
-	argv[4] = 0;
-
-	colm_program *program = colm_new_program( &colm_object );
-	colm_set_debug( program, 0 );
-	colm_run_program( program, 4, argv );
-	colm_delete_program( program );
-}
-
-void Reducer::topReduce( const char *inputFileName )
-{
-	current = 1;
-	reduceFile( inputFileName );
-
-	current = 0;
-	id->curItem = id->inputItems.head;
-	id->lastFlush = id->inputItems.head;
-	reduceFile( inputFileName );
-}
-
-void Reducer::reduceString( const char *data )
+void TopLevel::reduceString( const char *data )
 {
 	const char *argv[6];
 	argv[0] = "rlparse";
@@ -81,4 +55,35 @@ void Reducer::reduceString( const char *data )
 	colm_run_program( program, 5, argv );
 	colm_delete_program( program );
 
+}
+
+void TopLevel::reduceFile( const char *inputFileName )
+{
+	const char *argv[5];
+	argv[0] = "rlparse";
+	argv[1] = "reduce";
+	argv[2] = inputFileName;
+	argv[3] = id->hostLang->rlhcArg;
+	argv[4] = 0;
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_set_debug( program, 0 );
+	colm_run_program( program, 4, argv );
+	colm_delete_program( program );
+}
+
+
+void SectionPass::reduceFile( const char *inputFileName )
+{
+	const char *argv[5];
+	argv[0] = "rlparse";
+	argv[1] = "section";
+	argv[2] = inputFileName;
+	argv[3] = id->hostLang->rlhcArg;
+	argv[4] = 0;
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_set_debug( program, 0 );
+	colm_run_program( program, 4, argv );
+	colm_delete_program( program );
 }
