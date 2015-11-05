@@ -63,7 +63,7 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZOUKY-:" opt; do
 					encflags="$encflags --$OPTARG"
 					gen_opts="$gen_opts --$OPTARG"
 				;;
-				kelbt-frontend|colm-frontend)
+				kelbt-frontend|colm-frontend|reduce-frontend)
 					frontflags="$frontflags --$OPTARG"
 					gen_opts="$gen_opts --$OPTARG"
 				;;
@@ -90,7 +90,7 @@ done
 [ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$encflags" ]    && encflags="--integral-tables --string-tables"
 [ -z "$langflags" ]   && langflags="-C -D -J -R -A -Z -O --asm -U -K -Y"
-[ -z "$frontflags" ]  && frontflags="--kelbt-frontend --colm-frontend"
+[ -z "$frontflags" ]  && frontflags="--kelbt-frontend --colm-frontend --reduce-frontend"
 [ -z "$backflags" ]   && backflags="--direct-backend --colm-backend"
 [ -z "$featflags" ]   && featflags="--var-backend --goto-backend"
 
