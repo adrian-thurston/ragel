@@ -3,50 +3,6 @@ reduction TopLevel
 	# def statement
 	#
 
-	ragel::machine_name :MachineName
-	{
-		InputLoc sectionLoc;
-		string fileName = "input.rl";
-		string machine( $word->data, $word->length );
-
-		//std::cout << "pass 0: machine name: " << machine << std::endl;
-
-		if ( includeDepth > 0 ) {
-			/* Check if the the machine is the one we are searching for. If
-			 * not, reset pd. Otherwise, rename it to target machine because we
-			 * are drawing the statements into target. */
-			if ( machine == searchMachine )
-				machine = targetMachine;
-		}
-
-		SectionDictEl *sdEl = id->sectionDict.find( machine.c_str() );
-		if ( sdEl == 0 ) {
-			Section *section = new Section( strdup(machine.c_str() ) );
-			sdEl = new SectionDictEl( section->sectionName );
-			sdEl->value = section;
-			id->sectionDict.insert( sdEl );
-		}
-
-		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
-		if ( pdEl == 0 ) {
-			pdEl = new ParseDataDictEl( machine );
-			pdEl->value = new ParseData( id, fileName, machine,
-					id->nextMachineId++, sectionLoc, hostLang,
-					minimizeLevel, minimizeOpt );
-			id->parseDataDict.insert( pdEl );
-			id->parseDataList.append( pdEl->value );
-		}
-
-		section = sdEl->value;
-		pd = pdEl->value;
-	}
-
-	ragel::write_arg :Word
-	{
-		string arg( $word->data, $word->length );
-		writeArgs.append( arg );
-	}
-
 	# def join
 	#	[join `, expression] :Rec
 	# |	[expression] :Base
@@ -1557,6 +1513,52 @@ reduction TopLevel
 		tryMachineDef( loc, name, machineDef, true );
 	}
 
+	# def alphtype_type
+	#	[W1: word] :One
+	# |	[W1: word W2: word] :Two
+	ragel::alphtype_type :One
+	{
+		string one( $W1->data, $W1->length );
+		if ( ! pd->setAlphType( @W1, hostLang, one.c_str() ) ) {
+			// Recover by ignoring the alphtype statement.
+			error(@W1) << "\"" << one << 
+					"\" is not a valid alphabet type" << endl;
+		}
+	}
+
+	ragel::alphtype_type :Two
+	{
+		string one( $W1->data, $W1->length );
+		string two( $W2->data, $W2->length );
+		if ( ! pd->setAlphType( @W1, hostLang, one.c_str(), two.c_str() ) ) {
+			// Recover by ignoring the alphtype statement.
+			error(@W1) << "\"" << one << 
+					"\" is not a valid alphabet type" << endl;
+		}
+	}
+
+	# [`nfaprepush action_block] :NfaPrePush commit
+	ragel::statement :NfaPrePush
+	{
+		if ( pd->nfaPrePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@1) << "nfa_pre_push code already defined" << endl;
+		}
+
+		pd->nfaPrePushExpr = new InlineBlock( @1, $action_block->inlineList );
+	}
+
+	# [`nfapostpop action_block] :NfaPostPop commit
+	ragel::statement :NfaPostPop
+	{
+		if ( pd->nfaPostPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@1) << "nfa_post_pop code already defined" << endl;
+		}
+
+		pd->nfaPostPopExpr = new InlineBlock( @1, $action_block->inlineList );
+	}
+
 	# def include_spec
 	#	[word] :Machine
 	# |	[string] :File
@@ -1589,30 +1591,6 @@ reduction TopLevel
 		$$->file.set( $string );
 		$$->file.set( @string );
 	}
-
-	# def alphtype_type
-	#	[W1: word] :One
-	# |	[W1: word W2: word] :Two
-	ragel::alphtype_type :One
-	{
-		string one( $W1->data, $W1->length );
-		if ( ! pd->setAlphType( @W1, hostLang, one.c_str() ) ) {
-			// Recover by ignoring the alphtype statement.
-			error(@W1) << "\"" << one << 
-					"\" is not a valid alphabet type" << endl;
-		}
-	}
-
-	ragel::alphtype_type :Two
-	{
-		string one( $W1->data, $W1->length );
-		string two( $W2->data, $W2->length );
-		if ( ! pd->setAlphType( @W1, hostLang, one.c_str(), two.c_str() ) ) {
-			// Recover by ignoring the alphtype statement.
-			error(@W1) << "\"" << one << 
-					"\" is not a valid alphabet type" << endl;
-		}
-	}
 	
 	# [`include include_spec `;] :Include commit
 	ragel::statement :Include
@@ -1634,9 +1612,6 @@ reduction TopLevel
 		if ( $include_spec->machine.data != 0 )
 			machine = string( $include_spec->machine.data, $include_spec->machine.length );
 
-
-		std::cout << "including " << fileName << std::endl;
-
 		/* Stash the current section name and pd. */
 		string sectionName = pd->sectionName;
 		ParseData *pd0 = pd;
@@ -1648,7 +1623,7 @@ reduction TopLevel
 			InputData idr, *id0 = id;
 			
 			pd = 0;
-			current = 2;
+			current = 1;
 			id = &idr;
 
 			this->reduceFile( fileName.c_str() );
@@ -1716,36 +1691,46 @@ reduction TopLevel
 		writeArgs.empty();
 	}
 
-	c_host::section :MultiLine
+	ragel::machine_name :MachineName
 	{
-		if ( includeDepth == 0 ) {
-			id->curItem = id->curItem->next;
-			id->curItem->pd = pd;
-			id->checkLastRef( id->curItem );
-			id->curItem = id->curItem->next;
+		InputLoc sectionLoc;
+		string fileName = "input.rl";
+		string machine( $word->data, $word->length );
+
+		if ( includeDepth > 0 ) {
+			/* Check if the the machine is the one we are searching for. If
+			 * not, reset pd. Otherwise, rename it to target machine because we
+			 * are drawing the statements into target. */
+			if ( machine == searchMachine )
+				machine = targetMachine;
 		}
+
+		SectionDictEl *sdEl = id->sectionDict.find( machine.c_str() );
+		if ( sdEl == 0 ) {
+			Section *section = new Section( strdup(machine.c_str() ) );
+			sdEl = new SectionDictEl( section->sectionName );
+			sdEl->value = section;
+			id->sectionDict.insert( sdEl );
+		}
+
+		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
+		if ( pdEl == 0 ) {
+			pdEl = new ParseDataDictEl( machine );
+			pdEl->value = new ParseData( id, fileName, machine,
+					id->nextMachineId++, sectionLoc, hostLang,
+					minimizeLevel, minimizeOpt );
+			id->parseDataDict.insert( pdEl );
+			id->parseDataList.append( pdEl->value );
+		}
+
+		section = sdEl->value;
+		pd = pdEl->value;
 	}
 
-	# [`nfaprepush action_block] :NfaPrePush commit
-	ragel::statement :NfaPrePush
+	ragel::write_arg :Word
 	{
-		if ( pd->nfaPrePushExpr != 0 ) {
-			/* Recover by just ignoring the duplicate. */
-			error(@1) << "nfa_pre_push code already defined" << endl;
-		}
-
-		pd->nfaPrePushExpr = new InlineBlock( @1, $action_block->inlineList );
-	}
-
-	# [`nfapostpop action_block] :NfaPostPop commit
-	ragel::statement :NfaPostPop
-	{
-		if ( pd->nfaPostPopExpr != 0 ) {
-			/* Recover by just ignoring the duplicate. */
-			error(@1) << "nfa_post_pop code already defined" << endl;
-		}
-
-		pd->nfaPostPopExpr = new InlineBlock( @1, $action_block->inlineList );
+		string arg( $word->data, $word->length );
+		writeArgs.append( arg );
 	}
 
 	# Pass Through.
@@ -1798,17 +1783,22 @@ reduction TopLevel
 		if ( includeDepth == 0 )
 			id->curItem->data.write( $c_any->data, $c_any->length );
 	}
-end 
 
-reduction RagelIgnore
+	c_host::section :MultiLine
+	{
+		if ( includeDepth == 0 ) {
+			id->curItem = id->curItem->next;
+			id->curItem->pd = pd;
+			id->checkLastRef( id->curItem );
+			id->curItem = id->curItem->next;
+		}
+	}
 end 
 
 reduction SectionPass
 	ragel::machine_name :MachineName
 	{
 		string machine( $word->data, $word->length );
-
-		//std::cout << "pass 2: machine name: " << machine << std::endl;
 
 		SectionDictEl *sdEl = id->sectionDict.find( machine );
 		if ( sdEl == 0 ) {

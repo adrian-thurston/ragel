@@ -57,7 +57,7 @@ void Reducer::reduceFile( const char *inputFileName )
 
 void Reducer::topReduce( const char *inputFileName )
 {
-	current = 2;
+	current = 1;
 	reduceFile( inputFileName );
 
 	current = 0;
