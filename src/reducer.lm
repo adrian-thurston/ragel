@@ -268,7 +268,61 @@ reduction TopLevel
 	# |	[word] :Base
 
 	# def named_action_ref
-	#	[word]
+	#	[word] :Plain
+	# |	[word `( opt_action_arg_list `)] :Args
+	ragel::named_action_ref
+	{
+		Token tok;
+	}
+
+	ragel::named_action_ref :Plain
+	{
+		$$->tok.set( $word );
+	}
+
+	ragel::named_action_ref :Args
+	{
+		$$->tok.set( $word );
+		assert(false);
+
+	}
+
+	# def action_arg_list
+	#	[action_arg_list `, action_ref] :Rec
+	# |	[action_ref] :Base
+	ragel::action_arg_list
+	{
+		ActionArgList *argList;
+	}
+
+	ragel::action_arg_list :Rec
+	{
+		$$->argList = $_action_arg_list->argList;
+		$$->argList->append( $action_ref->action );
+	}
+
+	ragel::action_arg_list :Base
+	{
+		$$->argList = new ActionArgList;
+	}
+
+	# def opt_action_arg_list
+	#	[action_arg_list] :List
+	# |	[] :Empty
+	ragel::opt_action_arg_list
+	{
+		ActionArgList *argList;
+	}
+
+	ragel::opt_action_arg_list :List
+	{
+		$$->argList = $action_arg_list->argList;
+	}
+
+	ragel::opt_action_arg_list :Empty
+	{
+		$$->argList = new ActionArgList;
+	}
 
 	# def action_ref 
 	#	[named_action_ref] :NamedRef
@@ -282,13 +336,11 @@ reduction TopLevel
 	ragel::action_ref :NamedRef
 	{
 		/* Set the name in the actionDict. */
-		string data( $word->data, $word->length );
+		string data( $named_action_ref->tok.data );
 		Action *action = pd->actionDict.find( data );
 		if ( action != 0 ) {
 			/* Pass up the action element */
 			$$->action = action;
-//			if ( action->paramList != 0 )
-//				reject();
 		}
 		else {
 			/* Will recover by returning null as the action. */
@@ -299,7 +351,6 @@ reduction TopLevel
 
 	ragel::action_ref :ParenNamed
 	{
-
 	}
 
 	ragel::action_ref :Block

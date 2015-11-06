@@ -118,6 +118,8 @@ else if ( Cmd == 'reduce' ) {
 }
 else if ( Cmd == 'section' ) {
 	reduce SectionPass start[ Stream ]
+	if error
+		send stderr "[error]
 }
 
 include 'reducer.lm'

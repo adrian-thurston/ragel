@@ -35,6 +35,13 @@ namespace srlex
 	end
 end
 
+struct machine
+	Name: str
+	ActionParams: map<str, str>
+end
+
+global MachineMap: map<str, machine> = new map<str, machine>()
+global CurMachine: machine
 
 global Lang: str
 
@@ -198,11 +205,28 @@ namespace ragel
 	|	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_block ocaml_inline::`}]
 	|	[`{ crack_select OCamlInlineBlock: crack_inline::inline_block crack_inline::`}]
 
+	def action_arg_list
+		[action_arg_list `, action_ref] :Rec
+	|	[action_ref] :Base
+
+	def opt_action_arg_list
+		[action_arg_list] :List
+	|	[] :Empty
+
 	def named_action_ref
-		[word]
+		[word] :Plain
+		{
+			if CurMachine->ActionParams->find( $lhs.word )
+				reject
+		}
+	|	[word `( opt_action_arg_list `)] :Args
+		{
+			if ! CurMachine->ActionParams->find( $lhs.word )
+				reject
+		}
 
 	def action_ref 
-		[word] :NamedRef
+		[named_action_ref] :NamedRef
 	|	[`( named_action_ref `)] :ParenNamed
 	|	[action_block] :Block
 	
@@ -380,7 +404,13 @@ namespace ragel
 	|	[]
 
 	def action_spec
-		[`action word opt_action_params action_block] :ActionSpec commit
+		[`action word OP: opt_action_params action_block] :ActionSpec commit
+		{
+			if lhs.OP.opt_action_param_list {
+				print "action with params [lhs.word]
+				CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
+			}
+		}
 
 	#
 	# Machine Instantiations.
@@ -426,6 +456,19 @@ namespace ragel
 
 	def machine_name
 		[`machine word `;] :MachineName
+		{
+			Machine: machine = MachineMap->find( $lhs.word )
+
+			if !Machine
+			{
+				Machine = new machine()
+				Machine->Name = $lhs.word
+				Machine->ActionParams = new map<str, str>()
+				MachineMap->insert( Machine->Name, Machine )
+			}
+
+			CurMachine = Machine
+		}
 
 	def statement
 		[assignment] :Assignment
