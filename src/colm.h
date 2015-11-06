@@ -98,6 +98,9 @@ struct colm_tree *colm_run_func( struct colm_program *prg, int frame_id,
 /* Delete a colm program. Clears all memory. */
 int colm_delete_program( struct colm_program *prg );
 
+/* Set the pointer to the reduce struct used. */
+void colm_set_reduce_ctx( struct colm_program *prg, void *ctx );
+
 #ifdef __cplusplus
 }
 #endif

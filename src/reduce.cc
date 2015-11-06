@@ -253,12 +253,6 @@ void Compiler::writeCommit()
 		"#include \"reducer.h\"\n"
 		"\n";
 
-	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
-		Reduction *reduction = *r;
-		*outStream <<
-			reduction->name << "* " << reduction->var << ";\n";
-	}
-
 	*outStream << "\n";
 
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
@@ -307,7 +301,7 @@ void Compiler::writeCommit()
 		Reduction *reduction = *r;
 		*outStream <<
 			"	case " << reduction->id << ":\n"
-			"		" << reduction->var << "->commit_reduce_forward( "
+			"		((" << reduction->name << "*)prg->red_ctx)->commit_reduce_forward( "
 						"prg, root, pda_run, pt );\n"
 			"		break;\n";
 	}

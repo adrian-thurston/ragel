@@ -99,7 +99,6 @@ struct colm_sections
 			struct pda_run *pda_run, struct stream_impl *input_stream );
 	void (*init_bindings)( struct pda_run *pda_run );
 	void (*pop_binding)( struct pda_run *pda_run, parse_tree_t *tree );
-
 };
 
 struct heap_list
@@ -150,6 +149,8 @@ struct colm_program
 
 	/* Returned value for main program and any exported functions. */
 	tree_t *return_val;
+
+	void *red_ctx;
 };
 
 #endif
