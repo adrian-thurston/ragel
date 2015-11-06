@@ -639,9 +639,6 @@ void InputData::processKelbt()
 	assert( gblErrorCount == 0 );
 }
 
-extern TopLevel *topLevel;
-extern SectionPass *sectionPass;
-
 void InputData::processColm()
 {
 #ifdef WITH_COLM
@@ -691,8 +688,10 @@ void InputData::processReduce()
 	 * Colm-based reduction parser introduced in ragel 7. 
 	 */
 
-	::topLevel = new TopLevel( this, hostLang, minimizeLevel, minimizeOpt );
-	::sectionPass = new SectionPass( this, hostLang, minimizeLevel, minimizeOpt );
+	SectionPass *sectionPass = new SectionPass( this, hostLang,
+			minimizeLevel, minimizeOpt );
+	TopLevel *topLevel = new TopLevel( this, sectionPass, hostLang,
+			minimizeLevel, minimizeOpt );
 
 	/* Check input file. */
 	ifstream *inFile = new ifstream( inputFileName );
@@ -702,11 +701,11 @@ void InputData::processReduce()
 
 	makeFirstInputItem();
 
-	::sectionPass->reduceFile( inputFileName );
+	sectionPass->reduceFile( inputFileName );
 
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
-	::topLevel->reduceFile( inputFileName );
+	topLevel->reduceFile( inputFileName );
 
 	flushRemaining();
 

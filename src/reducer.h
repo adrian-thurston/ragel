@@ -20,12 +20,15 @@
 #ifndef _REDUCER_H
 #define _REDUCER_H
 
+struct SectionPass;
+
 struct TopLevel
 {
-	TopLevel( InputData *id, const HostLang *hostLang,
+	TopLevel( InputData *id, SectionPass *sectionPass, const HostLang *hostLang,
 			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 	:
 		id(id),
+		sectionPass(sectionPass),
 		pd(0),
 		machineSpec(0),
 		machineName(0),
@@ -42,6 +45,7 @@ struct TopLevel
 	}
 
 	InputData *id;
+	SectionPass *sectionPass;
 	ParseData *pd;
 	char *machineSpec;
 	char *machineName;

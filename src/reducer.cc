@@ -52,6 +52,7 @@ void TopLevel::reduceString( const char *data )
 
 	colm_program *program = colm_new_program( &colm_object );
 	colm_set_debug( program, 0 );
+	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 5, argv );
 	colm_delete_program( program );
 
@@ -68,6 +69,7 @@ void TopLevel::reduceFile( const char *inputFileName )
 
 	colm_program *program = colm_new_program( &colm_object );
 	colm_set_debug( program, 0 );
+	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );
 	colm_delete_program( program );
 }
@@ -84,6 +86,7 @@ void SectionPass::reduceFile( const char *inputFileName )
 
 	colm_program *program = colm_new_program( &colm_object );
 	colm_set_debug( program, 0 );
+	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );
 	colm_delete_program( program );
 }

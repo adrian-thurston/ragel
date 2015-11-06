@@ -1623,9 +1623,9 @@ reduction TopLevel
 			InputData idr, *id0 = id;
 			
 			pd = 0;
-			::sectionPass->id = &idr;
+			sectionPass->id = &idr;
 
-			::sectionPass->reduceFile( fileName.c_str() );
+			sectionPass->reduceFile( fileName.c_str() );
 
 			/* Count bytes. */
 			int len = 0;
@@ -1648,7 +1648,7 @@ reduction TopLevel
 			el->data[len] = 0;
 			el->len = len;
 
-			::sectionPass->id = id0;
+			sectionPass->id = id0;
 
 			id->includeDict.insert( el );
 		}
