@@ -13,9 +13,8 @@ reduction TopLevel
 
 	ragel::join :Rec
 	{
-		Join *join = $_join->join;
-		join->exprList.append( $expression->expr );
-		$$->join = join;
+		$$->join = $_join->join;
+		$$->join->exprList.append( $expression->expr );
 	}
 
 	ragel::join :Base
@@ -248,14 +247,8 @@ reduction TopLevel
 
 	ragel::factor_ep :Epsilon
 	{
-//		InputLoc loc = FactorEp.loc();
-//		factorWithAug = loadFactorAug( FactorEp.factor_aug() );
-//		NameRef *nameRef = loadEpsilonTarget( FactorEp.epsilon_target() );
-//
-//		/* Add the target to the list and return the factor object. */
-//		factorWithAug->epsilonLinks.append( EpsilonLink( loc, nameRef ) );
-
 		$$->fwa = $factor_aug->fwa;
+		$1->fwa->epsilonLinks.append( EpsilonLink( @2, $epsilon_target->nameRef ) );
 	}
 
 	ragel::factor_ep :Base
@@ -266,6 +259,22 @@ reduction TopLevel
 	# def epsilon_target
 	# 	[epsilon_target `:: word] :Rec
 	# |	[word] :Base
+	ragel::epsilon_target
+	{
+		NameRef *nameRef;
+	}
+
+	ragel::epsilon_target :Rec
+	{
+		$$->nameRef = $_epsilon_target->nameRef;
+		$$->nameRef->append( string( $word->data, $word->length ) );
+	}
+
+	ragel::epsilon_target :Base
+	{
+		$$->nameRef = new NameRef;
+		$$->nameRef->append( string( $word->data, $word->length ) );
+	}
 
 	# def named_action_ref
 	#	[word] :Plain
