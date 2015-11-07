@@ -273,18 +273,78 @@ reduction TopLevel
 	ragel::named_action_ref
 	{
 		Token tok;
+		Action *action;
 	}
 
 	ragel::named_action_ref :Plain
 	{
 		$$->tok.set( $word );
+
+		/* Set the name in the actionDict. */
+		string data( $$->tok.data );
+		Action *action = pd->actionDict.find( data );
+		if ( action != 0 ) {
+			if ( action->paramList != 0 )
+				error(@word) << "expecting no action args for " << data << endp;
+
+			/* Pass up the action element */
+			$$->action = action;
+		}
+		else {
+			/* Will recover by returning null as the action. */
+			error(@word) << "action lookup of \"" << data << "\" failed" << endl;
+			$$->action = 0;
+		}
 	}
 
 	ragel::named_action_ref :Args
 	{
 		$$->tok.set( $word );
-		assert(false);
 
+		/* Set the name in the actionDict. */
+		string data( $$->tok.data );
+		Action *action = pd->actionDict.find( data );
+		if ( action != 0 ) {
+			if ( action->paramList == 0 )
+				error(@word) << "expecting action args" << endp;
+
+			/* Pass up the action element */
+			$$->action = action;
+		}
+		else {
+			/* Will recover by returning null as the action. */
+			error(@word) << "action lookup of \"" << data << "\" failed" << endl;
+			$$->action = 0;
+		}
+
+		if ( $$->action != 0 ) {
+			ActionArgList *argList = $opt_action_arg_list->argList;
+			ActionParamList *paramList = action->paramList;
+
+			/* Make sure the number of actions line up. */
+			if ( argList->length() != paramList->length() ) {
+				error(@1) << "wrong number of action "
+					"arguments for \"" << data << "\"" << endl;
+			}
+					
+			/* Now we need to specialize using the supplied args. We can only
+			 * present an Action* to fsmcodegen. */
+			ActionArgListMapEl *el = action->argListMap->find( argList );
+			if ( el == 0 ) {
+				/* Allocate an action representing this specialization. */
+				Action *specAction = Action::cons( @1, action,
+						argList, pd->nextCondId++ );
+				pd->actionList.append( specAction );
+
+				el = action->argListMap->insert( argList, specAction );
+			}
+			else {
+				/* Can delete $3->arg list. */
+				delete $opt_action_arg_list->argList;
+			}
+
+			$$->action = el->value;
+		}
 	}
 
 	# def action_arg_list
@@ -304,6 +364,7 @@ reduction TopLevel
 	ragel::action_arg_list :Base
 	{
 		$$->argList = new ActionArgList;
+		$$->argList->append( $action_ref->action );
 	}
 
 	# def opt_action_arg_list
@@ -335,22 +396,12 @@ reduction TopLevel
 
 	ragel::action_ref :NamedRef
 	{
-		/* Set the name in the actionDict. */
-		string data( $named_action_ref->tok.data );
-		Action *action = pd->actionDict.find( data );
-		if ( action != 0 ) {
-			/* Pass up the action element */
-			$$->action = action;
-		}
-		else {
-			/* Will recover by returning null as the action. */
-			error(@word) << "action lookup of \"" << data << "\" failed" << endl;
-			$$->action = 0;
-		}
+		$$->action = $named_action_ref->action;
 	}
 
 	ragel::action_ref :ParenNamed
 	{
+		$$->action = $named_action_ref->action;
 	}
 
 	ragel::action_ref :Block
@@ -361,6 +412,77 @@ reduction TopLevel
 		pd->actionList.append( newAction );
 		$$->action = newAction;
 	}
+
+	# def opt_action_params
+	#	[`( opt_action_param_list `)]
+	# |	[]
+	ragel::opt_action_params
+	{
+		ActionParamList *paramList;
+	}
+
+	ragel::opt_action_params :List
+	{
+		$$->paramList = $opt_action_param_list->paramList;
+		paramList = $2->paramList;
+	}
+
+	ragel::opt_action_params :Empty
+	{
+		$$->paramList = 0;
+	}
+
+	# def opt_action_param_list
+	# 	[action_param_list] :List
+	# |	[] :Empty
+	ragel::opt_action_param_list
+	{
+		ActionParamList *paramList;
+	}
+
+	ragel::opt_action_param_list :List
+	{
+		$$->paramList = $action_param_list->paramList;
+	}
+
+	ragel::opt_action_param_list :Empty
+	{
+		$$->paramList = new ActionParamList;
+	}
+
+	# def action_param
+	#	[word]
+	ragel::action_param
+	{
+		ActionParam *param;
+	}
+
+	ragel::action_param :Word
+	{
+		string param( $word->data, $word->length );
+		$$->param = new ActionParam( param );
+	}
+
+	# def action_param_list
+	# 	[action_param_list `, action_param]
+	# |	[action_param]
+	ragel::action_param_list
+	{
+		ActionParamList *paramList;
+	}
+
+	ragel::action_param_list :Rec
+	{
+		$$->paramList = $_action_param_list->paramList;
+		$$->paramList->append( $action_param->param );
+	}
+
+	ragel::action_param_list :Base
+	{
+		$$->paramList = new ActionParamList;
+		$$->paramList->append( $action_param->param );
+	}
+
 
 	# def action_spec
 	#	[`action word opt_action_params action_block] :ActionSpec commit
@@ -386,11 +508,10 @@ reduction TopLevel
 			pd->actionList.append( newAction );
 			pd->actionDict.insert( newAction );
 
-//			newAction->paramList = $3->paramList;
-//			if ( $3->paramList != 0 )
-//				newAction->argListMap = new ActionArgListMap;
+			newAction->paramList = $opt_action_params->paramList;
+			if ( $opt_action_params->paramList != 0 )
+				newAction->argListMap = new ActionArgListMap;
 		}
-	//	parseSubstitutions = false;
 	}
 
 
@@ -613,6 +734,7 @@ reduction TopLevel
 	# |	[`fcurs] :Fcurs
 	# |	[`ftargs]  :Ftargs
 	# |	[`fentry `( state_ref srlex::`)] :Fentry
+	# |	[var_ref] :VarRef
 	c_inline::expr_interpret
 	{
 		InlineItem *inlineItem;
@@ -643,7 +765,25 @@ reduction TopLevel
 #//		NameRef *nameRef = loadStateRef( ExprInterpret.state_ref() );
 #//		$$->inlineItem = new InlineItem( @1, nameRef, InlineItem::Entry );
 #	}
-	
+
+	c_inline::expr_interpret :VarRef
+	{
+		string data( $1->data + 1, $1->length - 1 );
+		$$->inlineItem = new InlineItem( @1, InlineItem::Subst );
+
+		ActionParamList::Iter api = *paramList;
+		for ( ; api.lte(); api++ ) {
+			if ( (*api)->name == data )
+				break;
+		}
+
+		if ( api.end() )
+			error( @1 ) << "invalid parameter reference \"$" << $1->data << "\"" << endl;
+		else {
+			$$->inlineItem->substPos = api.pos();
+		}
+	}
+
 	# def priority_aug
 	#	[uint]
 	# |	[`+ uint]

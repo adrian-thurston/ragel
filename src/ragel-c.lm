@@ -20,6 +20,9 @@ namespace c_inline
 		literal 
 			`{ `} `:: `* `, `( `) `;
 
+		token var_ref
+			/ "$" [a-zA-Z_][a-zA-Z_0-9]* /
+
 		token c_any / any /
 	end
 
@@ -49,6 +52,7 @@ namespace c_inline
 	|	[`fcurs] :Fcurs
 	|	[`ftargs]  :Ftargs
 	|	[`fentry `( state_ref srlex::`)] :Fentry
+	|	[var_ref] :VarRef
 
 	def state_ref
 		[opt_name_sep state_ref_names]

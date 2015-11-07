@@ -389,27 +389,25 @@ namespace ragel
 	# Actions
 	#
 	def action_param
-		[word]
+		[word] :Word
 
 	def action_param_list
-		[action_param_list `, action_param]
-	|	[action_param]
+		[action_param_list `, action_param] :Rec
+	|	[action_param] :Base
 
 	def opt_action_param_list
-		[action_param_list]
-	|	[]
+		[action_param_list] :List
+	|	[] :Empty
 
 	def opt_action_params
-		[`( opt_action_param_list `)]
-	|	[]
+		[`( opt_action_param_list `)] :List
+	|	[] :Empty
 
 	def action_spec
-		[`action word OP: opt_action_params action_block] :ActionSpec commit
+		[`action word opt_action_params action_block] :ActionSpec commit
 		{
-			if lhs.OP.opt_action_param_list {
-				print "action with params [lhs.word]
+			if lhs.opt_action_params.opt_action_param_list
 				CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
-			}
 		}
 
 	#

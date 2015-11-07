@@ -77,6 +77,8 @@ struct InputLoc
 
 		if ( fileName == 0 )
 			fileName = "-";
+		if ( line == 0 )
+			line = 1;
 	}
 
 	InputLoc( const InputLoc &loc )
@@ -87,6 +89,8 @@ struct InputLoc
 
 		if ( fileName == 0 )
 			fileName = "-";
+		if ( line == 0 )
+			line = 1;
 	}
 
 	InputLoc( const char *fileName, int line, int col )
