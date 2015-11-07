@@ -622,6 +622,9 @@ struct LoadRagel
 				inlineItem = new InlineItem( loc, nameRef, InlineItem::Entry );
 				break;
 			}
+			case c_inline::expr_interpret::VarRef:
+				/* FIXME: */
+				break;
 		}
 		return inlineItem;
 	}
@@ -762,11 +765,11 @@ struct LoadRagel
 	InlineList *loadInlineExpr( c_inline::inline_expr InlineExpr )
 	{
 		InlineList *inlineList = new InlineList;
-		c_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
-		while ( !ExprItemList.end() ) {
-			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
+		c_inline::expr_item_list ExprItemList = InlineExpr.expr_item_list();
+		while ( ExprItemList.prodName() == c_inline::expr_item_list::Rec ) {
+			InlineItem *inlineItem = loadExprItem( ExprItemList.expr_item() );
 			inlineList->append( inlineItem );
-			ExprItemList = ExprItemList.next();
+			ExprItemList = ExprItemList._expr_item_list();
 		}
 		return inlineList;
 	}

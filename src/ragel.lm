@@ -140,8 +140,8 @@ namespace ragel
 	token variable_name /ident/
 
 	def inline_expr_reparse
-		[_inline_expr_reparse]
-	|	[action_expr]
+		[_inline_expr_reparse] :Reparse
+	|	[action_expr] :ActionExpr
 
 	def join
 		[join `, expression] :Rec
@@ -203,7 +203,7 @@ namespace ragel
 		[`{ c_select     CInlineBlock: c_inline::inline_block `}] :C
 	|	[`{ ruby_select  RubyInlineBlock: ruby_inline::inline_block ruby_inline::`}]
 	|	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_block ocaml_inline::`}]
-	|	[`{ crack_select OCamlInlineBlock: crack_inline::inline_block crack_inline::`}]
+	|	[`{ crack_select CrackInlineBlock: crack_inline::inline_block crack_inline::`}]
 
 	def action_arg_list
 		[action_arg_list `, action_ref] :Rec
@@ -230,10 +230,13 @@ namespace ragel
 	|	[`( named_action_ref `)] :ParenNamed
 	|	[action_block] :Block
 	
+	def priority_name
+		[word] :Word
+
 	def priority_aug
-		[uint]
-	|	[`+ uint]
-	|	[`- uint]
+		[uint] :NoSign
+	|	[`+ uint] :Plus
+	|	[`- uint] :Minus
 
 	def aug_base
 		[`@] :Finish | [`>] :Enter | [`%] :Leave | [`$] :All
@@ -276,7 +279,7 @@ namespace ragel
 	def factor_aug
 		[factor_aug aug_base action_ref] :ActionRef
 	|	[factor_aug aug_base priority_aug] :PriorEmbed
-	|	[factor_aug aug_base `( word `, priority_aug `)] :NamedPriorEmbed
+	|	[factor_aug aug_base `( priority_name `, priority_aug `)] :NamedPriorEmbed
 	|	[factor_aug aug_cond action_ref] :CondEmbed
 	|	[factor_aug aug_cond `! action_ref] :NegCondEmbed
 	|	[factor_aug aug_to_state action_ref] :ToStateAction
@@ -369,8 +372,8 @@ namespace ragel
 	|	[action_block] :ActionBlock
 
 	def opt_lm_act
-		[lm_act]
-	|	[]
+		[lm_act] :Act
+	|	[] :Empty
 
 	def lm_stmt
 		[join opt_lm_act `;] :LmStmt commit

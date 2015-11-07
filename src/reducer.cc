@@ -1,4 +1,5 @@
 #include "reducer.h"
+#include <errno.h>
 
 using std::endl;
 
@@ -38,6 +39,33 @@ void TopLevel::tryMachineDef( InputLoc &loc, std::string name,
 		// Recover by ignoring the duplicate.
 		error(loc) << "fsm \"" << name << "\" previously defined" << endl;
 	}
+}
+	
+long TopLevel::tryLongScan( const InputLoc &loc, const char *data )
+{
+	/* Convert the priority number to a long. Check for overflow. */
+	long priorityNum;
+	errno = 0;
+
+	long aug = strtol( data, 0, 10 );
+	if ( errno == ERANGE && aug == LONG_MAX ) {
+		/* Priority number too large. Recover by setting the priority to 0. */
+		error(loc) << "priority number " << data << 
+				" overflows" << endl;
+		priorityNum = 0;
+	}
+	else if ( errno == ERANGE && aug == LONG_MIN ) {
+		/* Priority number too large in the neg. Recover by using 0. */
+		error(loc) << "priority number " << data << 
+				" underflows" << endl;
+		priorityNum = 0;
+	}
+	else {
+		/* No overflow or underflow. */
+		priorityNum = aug;
+	}
+
+	return priorityNum;
 }
 
 void TopLevel::reduceString( const char *data )

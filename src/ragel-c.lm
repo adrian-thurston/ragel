@@ -27,7 +27,11 @@ namespace c_inline
 	end
 
 	def inline_expr
-		[expr_item*]
+		[expr_item_list] :List
+
+	def expr_item_list
+		[expr_item_list expr_item] :Rec
+	|	[] :Empty
 
 	def expr_item
 		[expr_any] :ExprAny
@@ -55,7 +59,7 @@ namespace c_inline
 	|	[var_ref] :VarRef
 
 	def state_ref
-		[opt_name_sep state_ref_names]
+		[opt_name_sep state_ref_names] :Ref
 
 	def opt_name_sep
 		[srlex::`::] :ColonColon

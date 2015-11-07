@@ -523,7 +523,6 @@ reduction TopLevel
 		}
 	}
 
-
 	# def action_block
 	#	[`{ c_select     CInlineBlock: c_inline::inline_block `}] :C
 	# |	[`{ ruby_select  RubyInlineBlock: ruby_inline::inline_block ruby_inline::`}]
@@ -539,6 +538,35 @@ reduction TopLevel
 	{
 		$$->loc = *@1;
 		$$->inlineList = $CInlineBlock->inlineList;
+	}
+
+	# def inline_expr_reparse
+	#	[_inline_expr_reparse] :Reparse
+	# |	[action_expr] :ActionExpr
+	ragel::inline_expr_reparse
+	{
+		InlineList *inlineList;
+	}
+	ragel::inline_expr_reparse :ActionExpr
+	{
+		$$->inlineList = $action_expr->inlineList;
+	}
+
+	# def action_expr
+	#	[`{ c_select     CInlineBlock: c_inline::inline_expr `}] :C
+	# |	[`{ ruby_select  RubyInlineBlock: ruby_inline::inline_expr ruby_inline::`}]
+	# |	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_expr ocaml_inline::`}]
+	# |	[`{ crack_select CrackInlineBlock: crack_inline::inline_expr crack_inline::`}]
+	ragel::action_expr
+	{
+		colm_location loc;
+		InlineList *inlineList;
+	}
+
+	ragel::action_expr :C
+	{
+		$$->loc = *@1;
+		$$->inlineList = $inline_expr->inlineList;
 	}
 
 	# def inline_block
@@ -710,6 +738,58 @@ reduction TopLevel
 		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
 	}
 
+	# def state_ref
+	# 	[opt_name_sep state_ref_names] :Ref
+	c_inline::state_ref
+	{
+		NameRef *nameRef;
+	}
+
+	c_inline::state_ref :Ref
+	{
+		$$->nameRef = $state_ref_names->nameRef;
+		if ( $opt_name_sep->nameSep )
+			$$->nameRef->prepend( "" );
+	}
+
+	# def opt_name_sep
+	# 	[srlex::`::] :ColonColon
+	# |	[] :Empty
+	c_inline::opt_name_sep
+	{
+		bool nameSep;
+	}
+
+	c_inline::opt_name_sep :ColonColon
+	{
+		$$->nameSep = true;
+	}
+
+	c_inline::opt_name_sep :Empty
+	{
+		$$->nameSep = false;
+	}
+
+	# def state_ref_names
+	# 	[state_ref_names srlex::`:: srlex::word] :Rec
+	# |	[srlex::word] :Base
+	c_inline::state_ref_names
+	{
+		NameRef *nameRef;
+	}
+
+	c_inline::state_ref_names :Rec
+	{
+		$$->nameRef = $_state_ref_names->nameRef;
+		$$->nameRef->append( string( $word->data, $word->length ) );
+	}
+
+	c_inline::state_ref_names :Base
+	{
+		$$->nameRef = new NameRef;
+		$$->nameRef->append( string( $word->data, $word->length ) );
+	}
+
 	# def block_interpret
 	#	[expr_interpret] :ExprInterpret
 	# |	[`fhold whitespace? `;] :Fhold
@@ -731,10 +811,121 @@ reduction TopLevel
 		InlineItem *inlineItem;
 	}
 
+	c_inline::block_interpret :Fhold
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Hold );
+	}
+	c_inline::block_interpret :FgotoExpr
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::GotoExpr );
+		$$->inlineItem->children = $inline_expr->inlineList;
+	}
+	c_inline::block_interpret :FnextExpr
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::NextExpr );
+		$$->inlineItem->children = $inline_expr->inlineList;
+	}
+	c_inline::block_interpret :FcallExpr
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::CallExpr );
+		$$->inlineItem->children = $inline_expr->inlineList;
+	}
+	c_inline::block_interpret :FncallExpr
+	{
+	}
+	c_inline::block_interpret :Fexec
+	{
+	}
+	c_inline::block_interpret :FgotoSr
+	{
+		$$->inlineItem = new InlineItem( @1,
+				$state_ref->nameRef, InlineItem::Goto );
+	}
+	c_inline::block_interpret :FnextSr
+	{
+		$$->inlineItem = new InlineItem( @1,
+				$state_ref->nameRef, InlineItem::Next );
+	}
+	c_inline::block_interpret :FcallSr
+	{
+		$$->inlineItem = new InlineItem( @1,
+				$state_ref->nameRef, InlineItem::Call );
+	}
+	c_inline::block_interpret :FncallSr
+	{
+	}
+	c_inline::block_interpret :Fret
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Ret );
+	}
+	c_inline::block_interpret :Fnret
+	{
+	}
+	c_inline::block_interpret :Fbreak
+	{
+	}
+	c_inline::block_interpret :Fnbreak
+	{
+	}
+
 	c_inline::block_interpret :ExprInterpret
 	{
 		$$->inlineItem = $expr_interpret->inlineItem;
 	}
+
+	# def inline_expr
+	# 	[expr_item_list] :List
+	c_inline::inline_expr
+	{
+		InlineList *inlineList;
+	}
+
+	c_inline::inline_expr :List
+	{
+		$$->inlineList = $expr_item_list->inlineList;
+	}
+
+	# def expr_item_list
+	#	[expr_item_list expr_item] :Rec
+	# |	[] :Empty
+	c_inline::expr_item_list
+	{
+		InlineList *inlineList;
+	}
+
+	c_inline::expr_item_list :Rec
+	{
+		$$->inlineList = $_expr_item_list->inlineList;
+		$$->inlineList->append( $expr_item->inlineItem );
+	}
+
+	c_inline::expr_item_list :Empty
+	{
+		$$->inlineList = new InlineList;
+	}
+
+	# def expr_item
+	# 	[expr_any] :ExprAny
+	# |	[expr_symbol] :ExprSymbol
+	# |	[expr_interpret] :ExprInterpret
+	c_inline::expr_item
+	{
+		InlineItem *inlineItem;
+	}
+
+	c_inline::expr_item :ExprAny
+	{
+		$$->inlineItem = $expr_any->inlineItem;
+	}
+	c_inline::expr_item :ExprSymbol
+	{
+//		$$->inlineItem = $expr_any->inlineItem;
+	}
+	c_inline::expr_item :ExprInterpret
+	{
+		$$->inlineItem = $expr_interpret->inlineItem;
+	}
+
 
 
 	# def expr_interpret
@@ -769,11 +960,10 @@ reduction TopLevel
 		$$->inlineItem = new InlineItem( @1, InlineItem::Targs );
 	}
 
-#	c_inline::expr_interpret :Fentry
-#	{
-#//		NameRef *nameRef = loadStateRef( ExprInterpret.state_ref() );
-#//		$$->inlineItem = new InlineItem( @1, nameRef, InlineItem::Entry );
-#	}
+	c_inline::expr_interpret :Fentry
+	{
+		$$->inlineItem = new InlineItem( @1, $state_ref->nameRef, InlineItem::Entry );
+	}
 
 	c_inline::expr_interpret :VarRef
 	{
@@ -794,9 +984,49 @@ reduction TopLevel
 	}
 
 	# def priority_aug
-	#	[uint]
-	# |	[`+ uint]
-	# |	[`- uint]
+	#	[uint] :NoSign
+	# |	[`+ uint] :Plus
+	# |	[`- uint] :Minus
+	ragel::priority_aug
+	{
+		int priorityNum;
+	}
+	ragel::priority_aug :NoSign
+	{
+		string data( $uint->data, $uint->length );
+		$$->priorityNum = tryLongScan( @1, data.c_str() );
+	}
+	ragel::priority_aug :Plus
+	{
+		string data( $uint->data, $uint->length );
+		$$->priorityNum = tryLongScan( @1, data.c_str() );
+	}
+	ragel::priority_aug :Minus
+	{
+		string data( $uint->data, $uint->length );
+		$$->priorityNum = -1 * tryLongScan( @1, data.c_str() );
+	}
+	
+	#def priority_name
+	#	[word] :Word
+
+	ragel::priority_name
+	{
+		int priorityName;
+	}
+
+	ragel::priority_name :Word
+	{
+		string data( $word->data, $word->length );
+
+		// Lookup/create the priority key.
+		PriorDictEl *priorDictEl;
+		if ( pd->priorDict.insert( data, pd->nextPriorKey, &priorDictEl ) )
+			pd->nextPriorKey += 1;
+
+		// Use the inserted/found priority key.
+		$$->priorityName = priorDictEl->value;
+	}
 
 	# def aug_base
 	# 	[`@] :Finish | [`>] :Enter | [`%] :Leave | [`$] :All
@@ -854,33 +1084,34 @@ reduction TopLevel
 
 	ragel::aug_to_state
 	{
+		colm_location loc;
 		AugType augType;	
 	}
 
 	ragel::aug_to_state :Start1
-		{ $$->augType = at_start_to_state; }
+		{ $$->loc = *@1; $$->augType = at_start_to_state; }
 	ragel::aug_to_state :Start2
-		{ $$->augType = at_start_to_state; }
+		{ $$->loc = *@1; $$->augType = at_start_to_state; }
 	ragel::aug_to_state :NotStart1
-		{ $$->augType = at_not_start_to_state; }
+		{ $$->loc = *@1; $$->augType = at_not_start_to_state; }
 	ragel::aug_to_state :NotStart2
-		{ $$->augType = at_not_start_to_state; }
+		{ $$->loc = *@1; $$->augType = at_not_start_to_state; }
 	ragel::aug_to_state :All1
-		{ $$->augType = at_all_to_state; }
+		{ $$->loc = *@1; $$->augType = at_all_to_state; }
 	ragel::aug_to_state :All2
-		{ $$->augType = at_all_to_state; }
+		{ $$->loc = *@1; $$->augType = at_all_to_state; }
 	ragel::aug_to_state :Final1
-		{ $$->augType = at_final_to_state; }
+		{ $$->loc = *@1; $$->augType = at_final_to_state; }
 	ragel::aug_to_state :Final2
-		{ $$->augType = at_final_to_state; }
+		{ $$->loc = *@1; $$->augType = at_final_to_state; }
 	ragel::aug_to_state :NotFinal1
-		{ $$->augType = at_not_final_to_state; }
+		{ $$->loc = *@1; $$->augType = at_not_final_to_state; }
 	ragel::aug_to_state :NotFinal2
-		{ $$->augType = at_not_final_to_state; }
+		{ $$->loc = *@1; $$->augType = at_not_final_to_state; }
 	ragel::aug_to_state :Middle1
-		{ $$->augType = at_middle_to_state; }
+		{ $$->loc = *@1; $$->augType = at_middle_to_state; }
 	ragel::aug_to_state :Middle2
-		{ $$->augType = at_middle_to_state; }
+		{ $$->loc = *@1; $$->augType = at_middle_to_state; }
 
 	# def aug_from_state
 	# 	[`>*] :Start1 | [`<*] :NotStart1 | [`$*] :All1
@@ -890,33 +1121,34 @@ reduction TopLevel
 
 	ragel::aug_from_state
 	{
+		colm_location loc;
 		AugType augType;	
 	}
 
 	ragel::aug_from_state :Start1
-		{ $$->augType = at_start_from_state; }
+		{ $$->loc = *@1; $$->augType = at_start_from_state; }
 	ragel::aug_from_state :Start2
-		{ $$->augType = at_start_from_state; }
+		{ $$->loc = *@1; $$->augType = at_start_from_state; }
 	ragel::aug_from_state :NotStart1
-		{ $$->augType = at_not_start_from_state; }
+		{ $$->loc = *@1; $$->augType = at_not_start_from_state; }
 	ragel::aug_from_state :NotStart2
-		{ $$->augType = at_not_start_from_state; }
+		{ $$->loc = *@1; $$->augType = at_not_start_from_state; }
 	ragel::aug_from_state :All1
-		{ $$->augType = at_all_from_state; }
+		{ $$->loc = *@1; $$->augType = at_all_from_state; }
 	ragel::aug_from_state :All2
-		{ $$->augType = at_all_from_state; }
+		{ $$->loc = *@1; $$->augType = at_all_from_state; }
 	ragel::aug_from_state :Final1
-		{ $$->augType = at_final_from_state; }
+		{ $$->loc = *@1; $$->augType = at_final_from_state; }
 	ragel::aug_from_state :Final2
-		{ $$->augType = at_final_from_state; }
+		{ $$->loc = *@1; $$->augType = at_final_from_state; }
 	ragel::aug_from_state :NotFinal1
-		{ $$->augType = at_not_final_from_state; }
+		{ $$->loc = *@1; $$->augType = at_not_final_from_state; }
 	ragel::aug_from_state :NotFinal2
-		{ $$->augType = at_not_final_from_state; }
+		{ $$->loc = *@1; $$->augType = at_not_final_from_state; }
 	ragel::aug_from_state :Middle1
-		{ $$->augType = at_middle_from_state; }
+		{ $$->loc = *@1; $$->augType = at_middle_from_state; }
 	ragel::aug_from_state :Middle2
-		{ $$->augType = at_middle_from_state; }
+		{ $$->loc = *@1; $$->augType = at_middle_from_state; }
 
 	# def aug_eof
 	# 	[`>/] :Start1 | [`</] :NotStart1 | [`$/] :All1
@@ -926,33 +1158,34 @@ reduction TopLevel
 
 	ragel::aug_eof
 	{
+		colm_location loc;
 		AugType augType;	
 	}
 
 	ragel::aug_eof :Start1
-		{ $$->augType = at_start_eof; }
+		{ $$->loc = *@1; $$->augType = at_start_eof; }
 	ragel::aug_eof :Start2
-		{ $$->augType = at_start_eof; }
+		{ $$->loc = *@1; $$->augType = at_start_eof; }
 	ragel::aug_eof :NotStart1
-		{ $$->augType = at_not_start_eof; }
+		{ $$->loc = *@1; $$->augType = at_not_start_eof; }
 	ragel::aug_eof :NotStart2
-		{ $$->augType = at_not_start_eof; }
+		{ $$->loc = *@1; $$->augType = at_not_start_eof; }
 	ragel::aug_eof :All1
-		{ $$->augType = at_all_eof; }
+		{ $$->loc = *@1; $$->augType = at_all_eof; }
 	ragel::aug_eof :All2
-		{ $$->augType = at_all_eof; }
+		{ $$->loc = *@1; $$->augType = at_all_eof; }
 	ragel::aug_eof :Final1
-		{ $$->augType = at_final_eof; }
+		{ $$->loc = *@1; $$->augType = at_final_eof; }
 	ragel::aug_eof :Final2
-		{ $$->augType = at_final_eof; }
+		{ $$->loc = *@1; $$->augType = at_final_eof; }
 	ragel::aug_eof :NotFinal1
-		{ $$->augType = at_not_final_eof; }
+		{ $$->loc = *@1; $$->augType = at_not_final_eof; }
 	ragel::aug_eof :NotFinal2
-		{ $$->augType = at_not_final_eof; }
+		{ $$->loc = *@1; $$->augType = at_not_final_eof; }
 	ragel::aug_eof :Middle1
-		{ $$->augType = at_middle_eof; }
+		{ $$->loc = *@1; $$->augType = at_middle_eof; }
 	ragel::aug_eof :Middle2
-		{ $$->augType = at_middle_eof; }
+		{ $$->loc = *@1; $$->augType = at_middle_eof; }
 
 	# def aug_gbl_error
 	# 	[`>!] :Start1 | [`<!] :NotStart1 | [`$!] :All1
@@ -962,35 +1195,36 @@ reduction TopLevel
 
 	ragel::aug_gbl_error
 	{
+		colm_location loc;
 		AugType augType;	
 	}
 
 	ragel::aug_gbl_error :Start1
-		{ $$->augType = at_start_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_start_gbl_error; }
 	ragel::aug_gbl_error :Start2
-		{ $$->augType = at_start_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_start_gbl_error; }
 	ragel::aug_gbl_error :NotStart1
-		{ $$->augType = at_not_start_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_not_start_gbl_error; }
 	ragel::aug_gbl_error :NotStart2
-		{ $$->augType = at_not_start_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_not_start_gbl_error; }
 	ragel::aug_gbl_error :NotStart2
-		{ $$->augType = at_not_start_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_not_start_gbl_error; }
 	ragel::aug_gbl_error :All1
-		{ $$->augType = at_all_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_all_gbl_error; }
 	ragel::aug_gbl_error :All2
-		{ $$->augType = at_all_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_all_gbl_error; }
 	ragel::aug_gbl_error :Final1
-		{ $$->augType = at_final_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_final_gbl_error; }
 	ragel::aug_gbl_error :Final2
-		{ $$->augType = at_final_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_final_gbl_error; }
 	ragel::aug_gbl_error :NotFinal1
-		{ $$->augType = at_not_final_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_not_final_gbl_error; }
 	ragel::aug_gbl_error :NotFinal2
-		{ $$->augType = at_not_final_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_not_final_gbl_error; }
 	ragel::aug_gbl_error :Middle1
-		{ $$->augType = at_middle_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_middle_gbl_error; }
 	ragel::aug_gbl_error :Middle2
-		{ $$->augType = at_middle_gbl_error; }
+		{ $$->loc = *@1; $$->augType = at_middle_gbl_error; }
 
 	# def aug_local_error
 	# 	[`>^] :Start1 | [`<^] :NotStart1 | [`$^] :All1
@@ -1000,44 +1234,45 @@ reduction TopLevel
 
 	ragel::aug_local_error
 	{
+		colm_location loc;
 		AugType augType;
 	}
 
 	ragel::aug_local_error :Start1
-		{ $$->augType = at_start_local_error; }
+		{ $$->loc = *@1; $$->augType = at_start_local_error; }
 
 	ragel::aug_local_error :Start2
-		{ $$->augType = at_start_local_error; }
+		{ $$->loc = *@1; $$->augType = at_start_local_error; }
 
 	ragel::aug_local_error :NotStart1
-		{ $$->augType = at_not_start_local_error; }
+		{ $$->loc = *@1; $$->augType = at_not_start_local_error; }
 
 	ragel::aug_local_error :NotStart2
-		{ $$->augType = at_not_start_local_error; }
+		{ $$->loc = *@1; $$->augType = at_not_start_local_error; }
 
 	ragel::aug_local_error :All1
-		{ $$->augType = at_all_local_error; }
+		{ $$->loc = *@1; $$->augType = at_all_local_error; }
 
 	ragel::aug_local_error :All2
-		{ $$->augType = at_all_local_error; }
+		{ $$->loc = *@1; $$->augType = at_all_local_error; }
 
 	ragel::aug_local_error :Final1
-		{ $$->augType = at_final_local_error; }
+		{ $$->loc = *@1; $$->augType = at_final_local_error; }
 
 	ragel::aug_local_error :Final2
-		{ $$->augType = at_final_local_error; }
+		{ $$->loc = *@1; $$->augType = at_final_local_error; }
 
 	ragel::aug_local_error :NotFinal1
-		{ $$->augType = at_not_final_local_error; }
+		{ $$->loc = *@1; $$->augType = at_not_final_local_error; }
 
 	ragel::aug_local_error :NotFinal2
-		{ $$->augType = at_not_final_local_error; }
+		{ $$->loc = *@1; $$->augType = at_not_final_local_error; }
 
 	ragel::aug_local_error :Middle1
-		{ $$->augType = at_middle_local_error; }
+		{ $$->loc = *@1; $$->augType = at_middle_local_error; }
 
 	ragel::aug_local_error :Middle2
-		{ $$->augType = at_middle_local_error; }
+		{ $$->loc = *@1; $$->augType = at_middle_local_error; }
 
 	# def factor_aug
 	#	[factor_aug aug_base action_ref] :ActionRef
@@ -1059,38 +1294,44 @@ reduction TopLevel
 
 	ragel::factor_aug :ActionRef
 	{
+		$$->fwa = $_factor_aug->fwa;
+
 		/* Append the action to the factorWithAug, record the refernce from 
 		 * factorWithAug to the action and pass up the factorWithAug. */
-		$_factor_aug->fwa->actions.append( ParserAction(
+		$$->fwa->actions.append( ParserAction(
 				&$aug_base->loc, $aug_base->augType, 0, $action_ref->action ) );
-
-		$$->fwa = $_factor_aug->fwa;
 	}
 
 	ragel::factor_aug :PriorEmbed
 	{
 		$$->fwa = $_factor_aug->fwa;
+
+		$1->fwa->priorityAugs.append( PriorityAug( $aug_base->augType,
+				pd->curDefPriorKey, $priority_aug->priorityNum ) );
 	}
 
 	ragel::factor_aug :NamedPriorEmbed
 	{
 		$$->fwa = $_factor_aug->fwa;
+
+		$1->fwa->priorityAugs.append( PriorityAug( $aug_base->augType,
+				$priority_name->priorityName, $priority_aug->priorityNum ) );
 	}
 
 	ragel::factor_aug :CondEmbed
 	{
-		$_factor_aug->fwa->conditions.append( ConditionTest( &$aug_cond->loc, 
-				$aug_cond->augType, $action_ref->action, true ) );
-
 		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->conditions.append( ConditionTest( &$aug_cond->loc, 
+				$aug_cond->augType, $action_ref->action, true ) );
 	}
 
 	ragel::factor_aug :NegCondEmbed
 	{
-		$_factor_aug->fwa->conditions.append( ConditionTest( &$aug_cond->loc, 
-				$aug_cond->augType, $action_ref->action, false ) );
-
 		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->conditions.append( ConditionTest( &$aug_cond->loc, 
+				$aug_cond->augType, $action_ref->action, false ) );
 	}
 
 	ragel::factor_aug :ToStateAction
@@ -1106,11 +1347,16 @@ reduction TopLevel
 	ragel::factor_aug :EofAction
 	{
 		$$->fwa = $_factor_aug->fwa;
+		$1->fwa->actions.append( ParserAction( &$aug_eof->loc,
+				$aug_eof->augType, 0, $action_ref->action ) );
 	}
 
 	ragel::factor_aug :GblErrorAction
 	{
 		$$->fwa = $_factor_aug->fwa;
+
+		$1->fwa->actions.append( ParserAction( &$aug_gbl_error->loc,
+				$aug_gbl_error->augType, pd->curDefLocalErrKey, $action_ref->action ) );
 	}
 
 	ragel::factor_aug :LocalErrorDef
@@ -1518,7 +1764,6 @@ reduction TopLevel
 		$$->literal = new Literal( $alphabet_num->tok, Literal::Number );
 	}
 
-
 	ragel::alphabet_num :Hex
 	{
 		$$->tok.set( $hex );
@@ -1564,19 +1809,123 @@ reduction TopLevel
 	# |	[`|* lm_stmt_list `*|] :Lm
 	ragel::lm
 	{
-		Join *join;
+		MachineDef *machineDef;
 	}
 
 	ragel::lm :Join
 	{
-		$$->join = $join->join;
+		$$->machineDef = new MachineDef( $join->join );
 	}
 
 	ragel::lm :Lm
 	{
-		$$->join = 0;
+		/* Create a new factor going to a longest match structure. Record in
+		 * the parse data that we have a longest match. */
+		LongestMatch *lm = new LongestMatch( @1, $lm_stmt_list->lmPartList );
+		pd->lmList.append( lm );
+		for ( LmPartList::Iter lmp = *$lm_stmt_list->lmPartList; lmp.lte(); lmp++ )
+			lmp->longestMatch = lm;
+		$$->machineDef = new MachineDef( lm );
 	}
 
+	# def lm_stmt_list
+	# 	[lm_stmt_list lm_stmt] :Rec
+	# |	[lm_stmt] :Base
+	ragel::lm_stmt_list
+	{
+		LmPartList *lmPartList;
+	}
+	ragel::lm_stmt_list :Rec
+	{
+		$$->lmPartList = $_lm_stmt_list->lmPartList;
+		if ( $lm_stmt->lmPart != 0 )
+			$$->lmPartList->append( $lm_stmt->lmPart );
+	}
+	ragel::lm_stmt_list :Base
+	{
+		$$->lmPartList = new LmPartList;
+		if ( $lm_stmt->lmPart != 0 )
+			$$->lmPartList->append( $lm_stmt->lmPart );
+	}
+
+
+	# def lm_stmt
+	# 	[join opt_lm_act `;] :LmStmt commit
+	# |	[assignment] :Assignment
+	# |	[action_spec] :ActionSpec
+
+	ragel::lm_stmt
+	{
+		LongestMatchPart *lmPart;
+	}
+
+	ragel::lm_stmt :LmStmt
+	{
+		InputLoc loc;
+		loc.line = 1;
+		loc.fileName = 0;
+
+		Join *join = $join->join;
+		Action *action = $opt_lm_act->action;
+
+		if ( action != 0 )
+			action->isLmAction = true;
+
+		/* Provide a location to join. Unfortunately We don't
+		 * have the start of the join as in other occurances. Use the end. */
+		join->loc = loc;
+
+		$$->lmPart = new LongestMatchPart( join, action, 
+				loc, pd->nextLongestMatchId++ );
+	}
+
+	ragel::lm_stmt :Assignment
+	{
+		$$->lmPart = 0;
+	}
+
+	ragel::lm_stmt :ActionSpec
+	{
+		$$->lmPart = 0;
+	}
+
+	# def opt_lm_act
+	#	[lm_act] :Act
+	# |	[] :Empty
+	ragel::opt_lm_act
+	{
+		Action *action;
+	}
+
+	ragel::opt_lm_act :Act
+	{
+		$$->action = $lm_act->action;
+	}
+
+	ragel::opt_lm_act :Empty
+	{
+		$$->action = 0;
+	}
+
+	# def lm_act
+	# 	[`=> action_ref] :ActionRef
+	# |	[action_block] :ActionBlock
+	ragel::lm_act
+	{
+		Action *action;
+	}
+	ragel::lm_act :ActionRef
+	{
+		$$->action = $action_ref->action;
+	}
+	ragel::lm_act :ActionBlock
+	{
+		/* Create the action, add it to the list and pass up. */
+		Action *newAction = new Action( &$action_block->loc, std::string(),
+				$action_block->inlineList, pd->nextCondId++ );
+		pd->actionList.append( newAction );
+		$$->action = newAction;
+	}
 
 	# def instantiation
 	#	[opt_export word `:= lm `;] :Instantiation commit
@@ -1591,7 +1940,7 @@ reduction TopLevel
 		string name( $word->data, $word->length );
 		loadMachineName( name );
 
-		MachineDef *machineDef = new MachineDef( $lm->join );
+		MachineDef *machineDef = $lm->machineDef;
 
 		/* Generic creation of machine for instantiation and assignment. */
 		tryMachineDef( loc, name, machineDef, true );
@@ -1737,6 +2086,40 @@ reduction TopLevel
 		}
 	}
 
+	# def statement
+	# |	[`alphtype alphtype_type `;] :AlphType commit
+	# |	[`getkey inline_expr_reparse] :GetKey commit
+	# |	[`import string `;] :Import commit
+
+	# def statement
+	# |	[`prepush action_block] :PrePush commit
+	# |	[`postpop action_block] :PostPop commit
+#	ragel::statement :PrePush
+#	{
+#
+#	}
+#	ragel::statement :PostPop
+#	{
+#
+#	}
+
+	# def statement
+	# |	[`variable variable_name inline_expr_reparse] :Variable commit
+	# |	[`access inline_expr_reparse] :Access commit
+	ragel::statement :Variable
+	{
+		string data( $variable_name->data, $variable_name->length );
+		bool wasSet = pd->setVariable( data.c_str(),
+				$inline_expr_reparse->inlineList );
+		if ( !wasSet )
+			error(@1) << "bad variable name: " << $variable_name->data << endl;
+	}
+
+	ragel::statement :Access
+	{
+		pd->accessExpr = $inline_expr_reparse->inlineList;
+	}
+
 	# [`nfaprepush action_block] :NfaPrePush commit
 	ragel::statement :NfaPrePush
 	{
@@ -1863,7 +2246,6 @@ reduction TopLevel
 		searchMachine = machine.c_str();
 
 		reduceString( el->data );
-		std::cout << el->data;
 
 		pd = pd0;
 		includeDepth -= 1;
