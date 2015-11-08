@@ -742,7 +742,7 @@ struct LoadRagel
 	InlineList *loadInlineBlock( InlineList *inlineList, c_inline::inline_block InlineBlock )
 	{
 		c_inline::block_item_list BlockItemList = InlineBlock.block_item_list();
-		while ( !BlockItemList.prodName() == c_inline::block_item_list::Rec ) {
+		while ( BlockItemList.prodName() == c_inline::block_item_list::Rec ) {
 			loadBlockItem( inlineList, BlockItemList.block_item() );
 			BlockItemList = BlockItemList._block_item_list();
 		}
@@ -789,7 +789,7 @@ struct LoadRagel
 		c_inline::expr_item_list ExprItemList = InlineExpr.expr_item_list();
 		while ( ExprItemList.prodName() == c_inline::expr_item_list::Rec ) {
 			InlineItem *inlineItem = loadExprItem( ExprItemList.expr_item() );
-			inlineList->append( inlineItem );
+			inlineList->prepend( inlineItem );
 			ExprItemList = ExprItemList._expr_item_list();
 		}
 		return inlineList;
@@ -798,6 +798,18 @@ struct LoadRagel
 	/*
 	 * End Inline Loading
 	 */
+
+	InlineList *loadInlineExpr( ragel::action_expr ActionExpr )
+	{
+		InlineList *inlineList;
+		if ( ActionExpr.RubyInlineExpr() )
+			inlineList = loadInlineExpr( ActionExpr.RubyInlineExpr() );
+		else if ( ActionExpr.OCamlInlineExpr() )
+			inlineList = loadInlineExpr( ActionExpr.OCamlInlineExpr() );
+		else
+			inlineList = loadInlineExpr( ActionExpr.CInlineExpr() );
+		return inlineList;
+	}
 
 	InlineBlock *loadInlineBlock( ragel::action_block ActionBlock )
 	{
@@ -2041,18 +2053,18 @@ struct LoadRagel
 		id.inputItems.append( inputItem );
 	}
 
-	void loadVariable( ragel::variable_name Var, c_inline::inline_expr InlineExpr )
+	void loadVariable( ragel::variable_name Var, ragel::action_expr ActionExpr )
 	{
-		InputLoc loc = InlineExpr.loc();
-		InlineList *inlineList = loadInlineExpr( InlineExpr );
+		InputLoc loc = ActionExpr.loc();
+		InlineList *inlineList = loadInlineExpr( ActionExpr );
 		bool wasSet = pd->setVariable( Var.text().c_str(), inlineList );
 		if ( !wasSet )
 			error(loc) << "bad variable name: " << Var.text() << endl;
 	}
 
-	void loadGetKey( c_inline::inline_expr InlineExpr )
+	void loadGetKey( ragel::action_expr ActionExpr )
 	{
-		InlineList *inlineList = loadInlineExpr( InlineExpr );
+		InlineList *inlineList = loadInlineExpr( ActionExpr );
 		pd->getKeyExpr = inlineList;
 	}
 
@@ -2083,9 +2095,9 @@ struct LoadRagel
 		}
 	}
 
-	void loadAccess( c_inline::inline_expr InlineExpr )
+	void loadAccess( ragel::action_expr ActionExpr )
 	{
-		InlineList *inlineList = loadInlineExpr( InlineExpr );
+		InlineList *inlineList = loadInlineExpr( ActionExpr );
 		pd->accessExpr = inlineList;
 	}
 
@@ -2255,16 +2267,16 @@ struct LoadRagel
 				break;
 			case ragel::statement::Variable:
 				loadVariable( Statement.variable_name(),
-						Statement.inline_expr_reparse().action_expr().inline_expr() );
+						Statement.inline_expr_reparse().action_expr() );
 				break;
 			case ragel::statement::GetKey:
-				loadGetKey( Statement.inline_expr_reparse().action_expr().inline_expr() );
+				loadGetKey( Statement.inline_expr_reparse().action_expr() );
 				break;
 			case ragel::statement::AlphType:
 				loadAlphType( Statement.alphtype_type() );
 				break;
 			case ragel::statement::Access:
-				loadAccess( Statement.inline_expr_reparse().action_expr().inline_expr() );
+				loadAccess( Statement.inline_expr_reparse().action_expr() );
 				break;
 			case ragel::statement::Include:
 				loadInclude( Statement.include_spec() );

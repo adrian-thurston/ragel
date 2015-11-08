@@ -194,10 +194,10 @@ namespace ragel
 	|	[word] :Base
 
 	def action_expr
-		[`{ c_select     c_inline::inline_expr `}] :C
-	|	[`{ ruby_select  ruby_inline::inline_expr ruby_inline::`}]
-	|	[`{ ocaml_select ocaml_inline::inline_expr ocaml_inline::`}]
-	|	[`{ crack_select crack_inline::inline_expr crack_inline::`}]
+		[`{ c_select     CInlineExpr: c_inline::inline_expr `}] :C
+	|	[`{ ruby_select  RubyInlineExpr: ruby_inline::inline_expr ruby_inline::`}]
+	|	[`{ ocaml_select OCamlInlineExpr: ocaml_inline::inline_expr ocaml_inline::`}]
+	|	[`{ crack_select CrackInlineExpr: crack_inline::inline_expr crack_inline::`}]
 
 	def action_block
 		[`{ c_select     CInlineBlock: c_inline::inline_block `}] :C

@@ -553,10 +553,10 @@ reduction TopLevel
 	}
 
 	# def action_expr
-	#	[`{ c_select     CInlineBlock: c_inline::inline_expr `}] :C
-	# |	[`{ ruby_select  RubyInlineBlock: ruby_inline::inline_expr ruby_inline::`}]
-	# |	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_expr ocaml_inline::`}]
-	# |	[`{ crack_select CrackInlineBlock: crack_inline::inline_expr crack_inline::`}]
+	#	[`{ c_select     CInlineExpr: c_inline::inline_expr `}] :C
+	# |	[`{ ruby_select  RubyInlineExpr: ruby_inline::inline_expr ruby_inline::`}]
+	# |	[`{ ocaml_select OCamlInlineExpr: ocaml_inline::inline_expr ocaml_inline::`}]
+	# |	[`{ crack_select CrackInlineExpr: crack_inline::inline_expr crack_inline::`}]
 	ragel::action_expr
 	{
 		colm_location loc;
@@ -566,7 +566,7 @@ reduction TopLevel
 	ragel::action_expr :C
 	{
 		$$->loc = *@1;
-		$$->inlineList = $inline_expr->inlineList;
+		$$->inlineList = $CInlineExpr->inlineList;
 	}
 
 	# def inline_block
