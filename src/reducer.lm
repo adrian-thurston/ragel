@@ -832,9 +832,13 @@ reduction TopLevel
 	}
 	c_inline::block_interpret :FncallExpr
 	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::NcallExpr );
+		$$->inlineItem->children = $inline_expr->inlineList;
 	}
 	c_inline::block_interpret :Fexec
 	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Exec );
+		$$->inlineItem->children = $inline_expr->inlineList;
 	}
 	c_inline::block_interpret :FgotoSr
 	{
@@ -853,6 +857,8 @@ reduction TopLevel
 	}
 	c_inline::block_interpret :FncallSr
 	{
+		$$->inlineItem = new InlineItem( @1,
+				$state_ref->nameRef, InlineItem::Ncall );
 	}
 	c_inline::block_interpret :Fret
 	{
@@ -860,12 +866,15 @@ reduction TopLevel
 	}
 	c_inline::block_interpret :Fnret
 	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Nret );
 	}
 	c_inline::block_interpret :Fbreak
 	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Break );
 	}
 	c_inline::block_interpret :Fnbreak
 	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Nbreak );
 	}
 
 	c_inline::block_interpret :ExprInterpret
@@ -919,13 +928,32 @@ reduction TopLevel
 	}
 	c_inline::expr_item :ExprSymbol
 	{
-//		$$->inlineItem = $expr_any->inlineItem;
+		string sym( $expr_symbol->sym );
+		$$->inlineItem = new InlineItem( &$expr_symbol->loc, sym, InlineItem::Text );
 	}
 	c_inline::expr_item :ExprInterpret
 	{
 		$$->inlineItem = $expr_interpret->inlineItem;
 	}
 
+	# def expr_symbol
+	#	[`,] | [`(] | [`)] | [`*] | [`::]
+	c_inline::expr_symbol
+	{
+		const char *sym;
+		colm_location loc;
+	}
+
+	c_inline::expr_symbol :Comma 
+		{ $$->loc = *@1; $$->sym = ","; }
+	c_inline::expr_symbol :Open 
+		{ $$->loc = *@1; $$->sym = "("; }
+	c_inline::expr_symbol :Close 
+		{ $$->loc = *@1; $$->sym = ")"; }
+	c_inline::expr_symbol :Star 
+		{ $$->loc = *@1; $$->sym = "*"; }
+	c_inline::expr_symbol :DoubleColon
+		{ $$->loc = *@1; $$->sym = "::"; }
 
 
 	# def expr_interpret
@@ -1026,6 +1054,25 @@ reduction TopLevel
 
 		// Use the inserted/found priority key.
 		$$->priorityName = priorDictEl->value;
+	}
+
+	# def error_name
+	# 	[word] :Word
+	ragel::error_name
+	{
+		int errName;
+	}
+
+	ragel::error_name :Word
+	{
+		string data( $word->data, $word->length );
+		/* Lookup/create the priority key. */
+		LocalErrDictEl *localErrDictEl;
+		if ( pd->localErrDict.insert( data, pd->nextLocalErrKey, &localErrDictEl ) )
+			pd->nextLocalErrKey += 1;
+
+		/* Use the inserted/found priority key. */
+		$$->errName = localErrDictEl->value;
 	}
 
 	# def aug_base
@@ -1277,7 +1324,7 @@ reduction TopLevel
 	# def factor_aug
 	#	[factor_aug aug_base action_ref] :ActionRef
 	# |	[factor_aug aug_base priority_aug] :PriorEmbed
-	# |	[factor_aug aug_base `( word `, priority_aug `)] :NamedPriorEmbed
+	# |	[factor_aug aug_base `( priority_name `, priority_aug `)] :NamedPriorEmbed
 	# |	[factor_aug aug_cond action_ref] :CondEmbed
 	# |	[factor_aug aug_cond `! action_ref] :NegCondEmbed
 	# |	[factor_aug aug_to_state action_ref] :ToStateAction
@@ -1337,11 +1384,17 @@ reduction TopLevel
 	ragel::factor_aug :ToStateAction
 	{
 		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->actions.append( ParserAction( &$aug_to_state->loc,
+				$aug_to_state->augType, 0, $action_ref->action ) );
 	}
 	
 	ragel::factor_aug :FromStateAction
 	{
 		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->actions.append( ParserAction( &$aug_from_state->loc,
+				$aug_from_state->augType, 0, $action_ref->action ) );
 	}
 
 	ragel::factor_aug :EofAction
@@ -1362,11 +1415,17 @@ reduction TopLevel
 	ragel::factor_aug :LocalErrorDef
 	{
 		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->actions.append( ParserAction( &$aug_local_error->loc, 
+				$aug_local_error->augType, pd->curDefLocalErrKey, $action_ref->action ) );
 	}
 
 	ragel::factor_aug :LocalErrorName
 	{
 		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->actions.append( ParserAction( &$aug_local_error->loc, 
+				$aug_local_error->augType, $error_name->errName, $action_ref->action ) );
 	}
 
 	ragel::factor_aug :Base
@@ -1643,20 +1702,87 @@ reduction TopLevel
 
 	ragel::factor :Regex
 	{
+		$$->factor = new Factor( $regex->regExpr );
 	}
 
 	# def regex
-	# 	[reg_item_rep*]
+	#	[reg_item_rep_list] :List
+	ragel::regex
+	{
+		RegExpr *regExpr;
+	}
+
+	ragel::regex :List
+	{
+		$$->regExpr = $reg_item_rep_list->regExpr;
+	}
+
+	# def reg_item_rep_list
+	# 	[reg_item_rep_list reg_item_rep] :Rec
+	# |	[] :Base
+	ragel::reg_item_rep_list
+	{
+		RegExpr *regExpr;
+	}
+	ragel::reg_item_rep_list :Rec
+	{
+		$$->regExpr = new RegExpr( $_reg_item_rep_list->regExpr,
+				$reg_item_rep->reItem );
+	}
+	ragel::reg_item_rep_list :Base
+	{
+		$$->regExpr = new RegExpr();
+	}
 
 	# def reg_item_rep
 	# 	[reg_item re_star] :Star
 	# |	[reg_item] :Base
+	ragel::reg_item_rep
+	{
+		ReItem *reItem;
+	}
+
+	ragel::reg_item_rep :Star
+	{
+		$$->reItem = $reg_item->reItem;
+		$$->reItem->star = true;
+	}
+
+	ragel::reg_item_rep :Base
+	{
+		$$->reItem = $reg_item->reItem;
+	}
 
 	# def reg_item
 	# 	[re_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
 	# |	[re_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
 	# |	[re_dot] :Dot
 	# |	[re_char] :Char
+	ragel::reg_item
+	{
+		ReItem *reItem;
+	}
+	ragel::reg_item :PosOrBlock
+	{
+		$$->reItem = new ReItem( @1, $reg_or_data->reOrBlock, ReItem::OrBlock );
+	}
+	ragel::reg_item :NegOrBlock
+	{
+		$$->reItem = new ReItem( @1, $reg_or_data->reOrBlock, ReItem::NegOrBlock );
+	}
+	ragel::reg_item :Dot
+	{
+		$$->reItem = new ReItem( @1, ReItem::Dot );
+	}
+	ragel::reg_item :Char
+	{
+		string data( $re_char->data, $re_char->length );
+		char *c = unescape( data.c_str() );
+		Token tok;
+		tok.set( c, strlen( c ) );
+		$$->reItem = new ReItem( @1, tok );
+		delete[] c;
+	}
 
 	# def reg_or_data
 	# 	[reg_or_data reg_or_char] :Data
@@ -1770,18 +1896,45 @@ reduction TopLevel
 		$$->tok.set( @hex );
 	}
 
+	# def def_name
+	# 	[word] :Word
+	ragel::def_name
+	{
+		Token tok;
+		colm_location loc;
+	}
+
+	ragel::def_name :Word
+	{
+		string data( $word->data, $word->length );
+		$$->tok.set( $word );
+		$$->loc = *@1;
+
+		/* Make/get the priority key. The name may have already been referenced
+		 * and therefore exist. */
+		PriorDictEl *priorDictEl;
+		if ( pd->priorDict.insert( data, pd->nextPriorKey, &priorDictEl ) )
+			pd->nextPriorKey += 1;
+		pd->curDefPriorKey = priorDictEl->value;
+
+		/* Make/get the local error key. */
+		LocalErrDictEl *localErrDictEl;
+		if ( pd->localErrDict.insert( data, pd->nextLocalErrKey, &localErrDictEl ) )
+			pd->nextLocalErrKey += 1;
+		pd->curDefLocalErrKey = localErrDictEl->value;
+	}
+
 	# def assignment
-	#	[opt_export word `= join `;] :Assignment commit
+	#	[opt_export def_name `= join `;] :Assignment commit
 	ragel::assignment :Assignment
 	{
-		InputLoc loc = @word;
+		InputLoc loc = &$def_name->loc;
 
 		bool exportMachine = $opt_export->isSet;
 		if ( exportMachine )
 			exportContext.append( true );
 
-		string name( $word->data, $word->length );
-		loadMachineName( name );
+		string name( $def_name->tok.data );
 
 		/* Main machine must be an instance. */
 		bool isInstance = false;
@@ -1928,17 +2081,16 @@ reduction TopLevel
 	}
 
 	# def instantiation
-	#	[opt_export word `:= lm `;] :Instantiation commit
+	#	[opt_export def_name `:= lm `;] :Instantiation commit
 	ragel::instantiation :Instantiation
 	{
-		InputLoc loc = @word;
+		InputLoc loc = &$def_name->loc;
 
 		bool exportMachine = $opt_export->isSet;
 		if ( exportMachine )
 			exportContext.append( true );
 
-		string name( $word->data, $word->length );
-		loadMachineName( name );
+		string name( $def_name->tok.data );
 
 		MachineDef *machineDef = $lm->machineDef;
 
@@ -2048,11 +2200,11 @@ reduction TopLevel
 	}
 
 	# def nfa_union
-	#	[word `|= nfa_rounds nfa_expr `;] :NfaUnion commit
+	#	[def_name `|= nfa_rounds nfa_expr `;] :NfaUnion commit
 	ragel::nfa_union :NfaUnion
 	{
-		InputLoc loc = @word;
-		string name( $word->data, $word->length );
+		InputLoc loc = &$def_name->loc;
+		string name( $def_name->tok.data );
 
 		$nfa_expr->nfaUnion->roundsList = $nfa_rounds->roundsList;
 
@@ -2087,21 +2239,48 @@ reduction TopLevel
 	}
 
 	# def statement
-	# |	[`alphtype alphtype_type `;] :AlphType commit
 	# |	[`getkey inline_expr_reparse] :GetKey commit
 	# |	[`import string `;] :Import commit
+	ragel::statement :GetKey
+	{
+		pd->getKeyExpr = $inline_expr_reparse->inlineList;
+	}
+
+	ragel::statement :Import
+	{
+		InputLoc loc = @string;
+		std::string fileName( $string->data, $string->length );
+
+		long length;
+		bool caseInsensitive;
+		char *unescaped = prepareLitString( loc,
+					fileName.c_str(), fileName.size(),
+					length, caseInsensitive );
+
+		loadImport( unescaped );
+	}
+
 
 	# def statement
 	# |	[`prepush action_block] :PrePush commit
 	# |	[`postpop action_block] :PostPop commit
-#	ragel::statement :PrePush
-#	{
-#
-#	}
-#	ragel::statement :PostPop
-#	{
-#
-#	}
+	ragel::statement :PrePush
+	{
+		if ( pd->prePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@1) << "prepush code already defined" << endl;
+		}
+		pd->prePushExpr = new InlineBlock( @1, $action_block->inlineList );
+
+	}
+	ragel::statement :PostPop
+	{
+		if ( pd->postPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@1) << "postpop code already defined" << endl;
+		}
+		pd->postPopExpr = new InlineBlock( @1, $action_block->inlineList );
+	}
 
 	# def statement
 	# |	[`variable variable_name inline_expr_reparse] :Variable commit
@@ -2212,16 +2391,21 @@ reduction TopLevel
 
 			/* Count bytes. */
 			int len = 0;
-			for ( InputItem *ii = id->inputItems.head; ii != 0; ii = ii->next ) {
-				if ( ii->section != 0 && ii->section->sectionName == machine )
+			for ( InputItem *ii = idr.inputItems.head; ii != 0; ii = ii->next ) {
+				if ( ii->section != 0 && ii->section->sectionName == machine &&
+						ii->type == InputItem::EndSection )
+				{
 					len += ii->end - ii->start + 3;
+				}
 			}
 
 			/* Load bytes. */
 			el->data = new char[len+1];
 			len = 0;
-			for ( InputItem *ii = id->inputItems.head; ii != 0; ii = ii->next ) {
-				if ( ii->section != 0 && ii->section->sectionName == machine ) {
+			for ( InputItem *ii = idr.inputItems.head; ii != 0; ii = ii->next ) {
+				if ( ii->section != 0 && ii->section->sectionName == machine &&
+						ii->type == InputItem::EndSection )
+				{
 					std::ifstream f( fileName.c_str() );
 					f.seekg( ii->start, std::ios::beg );
 					f.read( el->data + len, ii->end - ii->start + 3 );

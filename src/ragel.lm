@@ -233,6 +233,9 @@ namespace ragel
 	def priority_name
 		[word] :Word
 
+	def error_name
+		[word] :Word
+
 	def priority_aug
 		[uint] :NoSign
 	|	[`+ uint] :Plus
@@ -287,7 +290,7 @@ namespace ragel
 	|	[factor_aug aug_eof action_ref] :EofAction
 	|	[factor_aug aug_gbl_error action_ref] :GblErrorAction
 	|	[factor_aug aug_local_error action_ref] :LocalErrorDef
-	|	[factor_aug aug_local_error `( word `, action_ref `)] :LocalErrorName
+	|	[factor_aug aug_local_error `( error_name `, action_ref `)] :LocalErrorName
 	|	[factor_rep] :Base
 
 	def nfa_kw
@@ -338,7 +341,11 @@ namespace ragel
 	|	[`( join `)] :Join
 
 	def regex
-		[reg_item_rep*]
+		[reg_item_rep_list] :List
+	
+	def reg_item_rep_list
+		[reg_item_rep_list reg_item_rep] :Rec
+	|	[] :Base
 
 	def reg_item_rep
 		[reg_item re_star] :Star
@@ -413,14 +420,17 @@ namespace ragel
 				CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
 		}
 
+	def def_name
+		[word] :Word
+
 	#
 	# Machine Instantiations.
 	#
 	def assignment
-		[opt_export word `= join `;] :Assignment commit
+		[opt_export def_name `= join `;] :Assignment commit
 
 	def instantiation
-		[opt_export word `:= lm `;] :Instantiation commit
+		[opt_export def_name `:= lm `;] :Instantiation commit
 
 	def nfa_expr
 		[nfa_expr `| term] :Union
@@ -437,7 +447,7 @@ namespace ragel
 		[`( nfa_round_list `)] :Rounds
 
 	def nfa_union
-		[word `|= nfa_rounds nfa_expr `;] :NfaUnion commit
+		[def_name `|= nfa_rounds nfa_expr `;] :NfaUnion commit
 
 	def alphtype_type
 		[W1: word] :One

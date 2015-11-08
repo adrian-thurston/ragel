@@ -1,3 +1,24 @@
+/*
+ *  Copyright 2015 Adrian Thurston <thurston@complang.org>
+ */
+
+/*  This file is part of Ragel.
+ *
+ *  Ragel is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Ragel is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ragel; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
 #include "load.h"
 #include "if.h"
 #include "ragel.h"
@@ -1024,12 +1045,12 @@ struct LoadRagel
 	RegExpr *loadRegex( ragel::regex Regex )
 	{
 		RegExpr *regExpr = new RegExpr();
-		ragel::_repeat_reg_item_rep RegItemRepList = Regex._repeat_reg_item_rep();
-		while ( !RegItemRepList.end() ) {
-			ragel::reg_item_rep RegItemRep = RegItemRepList.value();
+		ragel::reg_item_rep_list RegItemRepList = Regex.reg_item_rep_list();
+		while ( RegItemRepList.prodName() == ragel::reg_item_rep_list::Rec ) {
+			ragel::reg_item_rep RegItemRep = RegItemRepList.reg_item_rep();
 			ReItem *reItem = loadRegexItemRep( RegItemRep );
 			regExpr = new RegExpr( regExpr, reItem );
-			RegItemRepList = RegItemRepList.next();
+			RegItemRepList = RegItemRepList._reg_item_rep_list();
 		}
 
 		return regExpr;
@@ -1543,7 +1564,8 @@ struct LoadRagel
 				factorWithAug = loadFactorAug( FactorAug._factor_aug() );
 				AugType augType = loadAugBase( FactorAug.aug_base() );
 				int priorityNum = loadPriorAug( FactorAug.priority_aug() );
-				factorWithAug->priorityAugs.append( PriorityAug( augType, pd->curDefPriorKey, priorityNum ) );
+				factorWithAug->priorityAugs.append( PriorityAug( augType,
+						pd->curDefPriorKey, priorityNum ) );
 				break;
 			}
 			case ragel::factor_aug::NamedPriorEmbed: {
@@ -1552,14 +1574,16 @@ struct LoadRagel
 
 				/* Lookup/create the priority key. */
 				PriorDictEl *priorDictEl;
-				if ( pd->priorDict.insert( FactorAug.word().text(), pd->nextPriorKey, &priorDictEl ) )
+				if ( pd->priorDict.insert( FactorAug.priority_name().word().text(),
+						pd->nextPriorKey, &priorDictEl ) )
 					pd->nextPriorKey += 1;
 
 				/* Use the inserted/found priority key. */
 				int priorityName = priorDictEl->value;
 
 				int priorityNum = loadPriorAug( FactorAug.priority_aug() );
-				factorWithAug->priorityAugs.append( PriorityAug( augType, priorityName, priorityNum ) );
+				factorWithAug->priorityAugs.append( PriorityAug( augType,
+						priorityName, priorityNum ) );
 				break;
 			}
 			case ragel::factor_aug::CondEmbed: {
@@ -1623,7 +1647,7 @@ struct LoadRagel
 				AugType augType = loadAugLocalError( FactorAug.aug_local_error() );
 				Action *action = loadActionRef( FactorAug.action_ref() );
 
-				string errName = FactorAug.word().text();
+				string errName = FactorAug.error_name().word().text();
 				LocalErrDictEl *localErrDictEl;
 				if ( pd->localErrDict.insert( errName, pd->nextLocalErrKey, &localErrDictEl ) )
 					pd->nextLocalErrKey += 1;
@@ -1890,7 +1914,7 @@ struct LoadRagel
 		bool exportMachine = Assignment.opt_export().prodName() == ragel::opt_export::Export;
 		if ( exportMachine )
 			exportContext.append( true );
-		string name = loadMachineName( Assignment.word().text() );
+		string name = loadMachineName( Assignment.def_name().word().text() );
 
 		/* Main machine must be an instance. */
 		bool isInstance = false;
@@ -1920,7 +1944,7 @@ struct LoadRagel
 		if ( exportMachine )
 			exportContext.append( true );
 
-		string name = loadMachineName( Instantiation.word().text() );
+		string name = loadMachineName( Instantiation.def_name().word().text() );
 
 		MachineDef *machineDef = loadLm( Instantiation.lm() );
 
@@ -1986,7 +2010,7 @@ struct LoadRagel
 	{
 		InputLoc loc = NfaUnionTree.loc();
 
-		string name = loadMachineName( NfaUnionTree.word().text() );
+		string name = loadMachineName( NfaUnionTree.def_name().word().text() );
 
 		NfaUnion *nfaUnion = loadNfaExpr( NfaUnionTree.nfa_expr() );
 		nfaUnion->roundsList = new NfaRoundVect;

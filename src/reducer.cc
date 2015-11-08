@@ -1,4 +1,30 @@
+/*
+ *  Copyright 2015 Adrian Thurston <thurston@complang.org>
+ */
+
+/*  This file is part of Ragel.
+ *
+ *  Ragel is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Ragel is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ragel; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
 #include "reducer.h"
+#include "if.h"
+
+#include <colm/colm.h>
+#include <colm/tree.h>
+
 #include <errno.h>
 
 using std::endl;
@@ -102,6 +128,96 @@ void TopLevel::reduceFile( const char *inputFileName )
 	colm_delete_program( program );
 }
 
+#if 0
+void TopLevel::loadImport( import Import )
+{
+}
+	
+void TopLevel::loadImportList( _repeat_import ImportList )
+{
+}
+#endif
+
+void TopLevel::loadImport( std::string fileName )
+{
+	const char *argv[5];
+	argv[0] = "rlparse";
+	argv[1] = "import";
+	argv[2] = fileName.c_str();
+	argv[3] = id->hostLang->rlhcArg;
+	argv[4] = 0;
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_set_debug( program, 0 );
+	colm_run_program( program, 4, argv );
+
+	/* Extract the parse tree. */
+	start Start = RagelTree( program );
+	str Error = RagelError( program );
+	_repeat_import ImportList = RagelImport( program );
+
+	if ( Start == 0 ) {
+		gblErrorCount += 1;
+		InputLoc loc( Error.loc() );
+		error(loc) << fileName << ": parse error: " << Error.text() << std::endl;
+		return;
+	}
+
+	while ( !ImportList.end() ) {
+		import Import = ImportList.value();
+
+		InputLoc loc = Import.loc();
+		string name = Import.Name().text();
+		loadMachineName( name );
+
+		Literal *literal = 0;
+		switch ( Import.Val().prodName() ) {
+			case import_val::String: {
+				string s = Import.Val().string().text();
+				Token tok;
+				tok.loc.fileName = loc.fileName;
+				tok.loc.line = loc.line;
+				tok.loc.col = loc.col;
+				tok.set( s.c_str(), s.size() );
+				literal = new Literal( tok, Literal::LitString );
+				break;
+			}
+
+			case import_val::Number: {
+				string s = Import.Val().number().text();
+				Token tok;
+				tok.loc.fileName = loc.fileName;
+				tok.loc.line = loc.line;
+				tok.loc.col = loc.col;
+				tok.set( s.c_str(), s.size() );
+				literal = new Literal( tok, Literal::Number );
+				break;
+			}
+		}
+
+		MachineDef *machineDef = new MachineDef(
+			new Join(
+				new Expression(
+					new Term(
+						new FactorWithAug(
+							new FactorWithRep(
+								new FactorWithNeg( new Factor( literal ) )
+							)
+						)
+					)
+				)
+			)
+		);
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, false );
+		machineDef->join->loc = loc;
+
+		ImportList = ImportList.next();
+	}
+
+	colm_delete_program( program );
+}
 
 void SectionPass::reduceFile( const char *inputFileName )
 {

@@ -48,7 +48,7 @@ namespace c_inline
 	|	[c_any] :Any
 
 	def expr_symbol
-		[`,] | [`(] | [`)] | [`*] | [`::]
+		[`,] :Comma | [`(] :Open | [`)] :Close | [`*] :Star | [`::] :DoubleColon
 
 	def expr_interpret
 		[`fpc] :Fpc

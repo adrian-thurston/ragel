@@ -71,6 +71,11 @@ struct TopLevel
 			MachineDef *machineDef, bool isInstance );
 	long tryLongScan( const InputLoc &loc, const char *data );
 
+//	void loadImport( import Import );
+//	void loadImportList( _repeat_import ImportList );
+//	void loadImport( ragel::string ImportFn );
+	void loadImport( std::string fileName );
+
 	void reduceFile( const char *inputFileName );
 	void reduceString( const char *data );
 	void topReduce( const char *inputFileName );
@@ -110,6 +115,7 @@ struct SectionPass
 
 	void commit_reduce_forward( program_t *prg, tree_t **root,
 		struct pda_run *pda_run, parse_tree_t *pt );
+
 
 	void reduceFile( const char *inputFileName );
 	void reduceString( const char *data );
