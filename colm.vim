@@ -95,8 +95,8 @@ syntax cluster redItems contains=redRef,redType,redKeyword,redNumber,redIdentifi
 syntax region redComment start="\/\*" end="\*\/" contained
 syntax match redComment "\/\/.*$" contained
 
-syntax match redLiteral "'\(\\.\|[^'\\]\)*'"
-syntax match redLiteral "\"\(\\.\|[^\"\\]\)*\""
+syntax match redLiteral "'\(\\.\|[^'\\]\)*'" contained
+syntax match redLiteral "\"\(\\.\|[^\"\\]\)*\"" contained
 
 syntax match redRef "\$\$" contained
 syntax match redRef "\$[a-zA-Z_][a-zA-Z0-9_]*" contained
