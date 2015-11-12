@@ -578,6 +578,217 @@ struct LoadRagel
 		return inlineList;
 	}
 
+	/*
+	 * Crack Inline Loading.
+	 */
+
+	InlineItem *loadExprAny( crack_inline::expr_any ExprAny )
+	{
+		string t = ExprAny.text();
+		InputLoc loc = ExprAny.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	InlineItem *loadExprSymbol( crack_inline::expr_symbol ExprSymbol )
+	{
+		string t = ExprSymbol.text();
+		InputLoc loc = ExprSymbol.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	NameRef *loadStateRefNames( crack_inline::state_ref_names StateRefNames )
+	{
+		NameRef *nameRef = 0;
+		switch ( StateRefNames.prodName() ) {
+			case crack_inline::state_ref_names::Rec:
+				nameRef = loadStateRefNames( StateRefNames._state_ref_names() );
+				nameRef->append( StateRefNames.word().text() );
+				break;
+			case crack_inline::state_ref_names::Base:
+				nameRef = new NameRef;
+				nameRef->append( StateRefNames.word().text() );
+				break;
+		}
+		return nameRef;
+	}
+
+	NameRef *loadStateRef( crack_inline::state_ref StateRef )
+	{
+		NameRef *nameRef = loadStateRefNames( StateRef.state_ref_names() );
+		if ( StateRef.opt_name_sep().prodName() == crack_inline::opt_name_sep::ColonColon )
+			nameRef->prepend( "" );
+		return nameRef;
+	}
+
+	InlineItem *loadExprInterpret( crack_inline::expr_interpret ExprInterpret )
+	{
+		InlineItem *inlineItem = 0;
+		InputLoc loc = ExprInterpret.loc();
+		switch ( ExprInterpret.prodName() ) {
+			case crack_inline::expr_interpret::Fpc:
+				inlineItem = new InlineItem( loc, InlineItem::PChar );
+				break;
+			case crack_inline::expr_interpret::Fc:
+				inlineItem = new InlineItem( loc, InlineItem::Char );
+				break;
+			case crack_inline::expr_interpret::Fcurs:
+				inlineItem = new InlineItem( loc, InlineItem::Curs );
+				break;
+			case crack_inline::expr_interpret::Ftargs:
+				inlineItem = new InlineItem( loc, InlineItem::Targs );
+				break;
+			case crack_inline::expr_interpret::Fentry: {
+				NameRef *nameRef = loadStateRef( ExprInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Entry );
+				break;
+			}
+		}
+		return inlineItem;
+	}
+
+	InlineItem *loadExprItem( crack_inline::expr_item ExprItem )
+	{
+		switch ( ExprItem.prodName() ) {
+			case crack_inline::expr_item::ExprAny:
+				return loadExprAny( ExprItem.expr_any() );
+			case crack_inline::expr_item::ExprSymbol:
+				return loadExprSymbol( ExprItem.expr_symbol() );
+			case crack_inline::expr_item::ExprInterpret:
+				return loadExprInterpret( ExprItem.expr_interpret() );
+		}
+		return 0;
+	}
+
+	InlineItem *loadBlockSymbol( crack_inline::block_symbol BlockSymbol )
+	{
+		string t = BlockSymbol.text();
+		InputLoc loc = BlockSymbol.loc();
+		return new InlineItem( loc, t, InlineItem::Text );
+	}
+
+	InlineItem *loadBlockInterpret( crack_inline::block_interpret BlockInterpret )
+	{
+		InlineItem *inlineItem = 0;
+		InputLoc loc = BlockInterpret.loc();
+		switch ( BlockInterpret.prodName() ) {
+			case crack_inline::block_interpret::ExprInterpret:
+				inlineItem = loadExprInterpret( BlockInterpret.expr_interpret() );
+				break;
+			case crack_inline::block_interpret::Fhold:
+				inlineItem = new InlineItem( loc, InlineItem::Hold );
+				break;
+			case crack_inline::block_interpret::Fret:
+				inlineItem = new InlineItem( loc, InlineItem::Ret );
+				break;
+			case crack_inline::block_interpret::Fnret:
+				inlineItem = new InlineItem( loc, InlineItem::Nret );
+				break;
+			case crack_inline::block_interpret::Fbreak:
+				inlineItem = new InlineItem( loc, InlineItem::Break );
+				break;
+			case crack_inline::block_interpret::Fnbreak:
+				inlineItem = new InlineItem( loc, InlineItem::Nbreak );
+				break;
+
+			case crack_inline::block_interpret::FgotoExpr:
+				inlineItem = new InlineItem( loc, InlineItem::GotoExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case crack_inline::block_interpret::FnextExpr:
+				inlineItem = new InlineItem( loc, InlineItem::NextExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case crack_inline::block_interpret::FcallExpr:
+				inlineItem = new InlineItem( loc, InlineItem::CallExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case crack_inline::block_interpret::FncallExpr:
+				inlineItem = new InlineItem( loc, InlineItem::NcallExpr );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case crack_inline::block_interpret::Fexec:
+				inlineItem = new InlineItem( loc, InlineItem::Exec );
+				inlineItem->children = loadInlineExpr( BlockInterpret.inline_expr() );
+				break;
+			case crack_inline::block_interpret::FgotoSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Goto );
+				break;
+			}
+			case crack_inline::block_interpret::FnextSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Next );
+				break;
+			}
+			case crack_inline::block_interpret::FcallSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Call );
+				break;
+			}
+			case crack_inline::block_interpret::FncallSr: {
+				NameRef *nameRef = loadStateRef( BlockInterpret.state_ref() );
+				inlineItem = new InlineItem( loc, nameRef, InlineItem::Ncall );
+				break;
+			}
+		}
+		return inlineItem;
+	}
+
+	InlineList *loadInlineBlock( InlineList *inlineList, crack_inline::inline_block CrackInlineBlock )
+	{
+		crack_inline::_repeat_block_item BlockItemList = CrackInlineBlock._repeat_block_item();
+		while ( !BlockItemList.end() ) {
+			loadBlockItem( inlineList, BlockItemList.value() );
+			BlockItemList = BlockItemList.next();
+		}
+		return inlineList;
+	}
+
+	InlineList *loadInlineBlock( crack_inline::inline_block CrackInlineBlock )
+	{
+		InlineList *inlineList = new InlineList;
+		return loadInlineBlock( inlineList, CrackInlineBlock );
+	}
+
+	void loadBlockItem( InlineList *inlineList, crack_inline::block_item BlockItem )
+	{
+		switch ( BlockItem.prodName() ) {
+			case crack_inline::block_item::ExprAny: {
+				InlineItem *inlineItem = loadExprAny( BlockItem.expr_any() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case crack_inline::block_item::BlockSymbol: {
+				InlineItem *inlineItem = loadBlockSymbol( BlockItem.block_symbol() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case crack_inline::block_item::BlockInterpret: {
+				InlineItem *inlineItem = loadBlockInterpret( BlockItem.block_interpret() );
+				inlineList->append( inlineItem );
+				break;
+			}
+			case crack_inline::block_item::RecBlock:
+				InputLoc loc = BlockItem.loc();
+				inlineList->append( new InlineItem( loc, "{", InlineItem::Text ) );
+				loadInlineBlock( inlineList, BlockItem.inline_block() );
+				inlineList->append( new InlineItem( loc, "}", InlineItem::Text ) );
+				break;
+		}
+	}
+
+	InlineList *loadInlineExpr( crack_inline::inline_expr InlineExpr )
+	{
+		InlineList *inlineList = new InlineList;
+		crack_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
+		while ( !ExprItemList.end() ) {
+			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
+			inlineList->append( inlineItem );
+			ExprItemList = ExprItemList.next();
+		}
+		return inlineList;
+	}
+
 
 	/*
 	 * C Inline Loading
@@ -806,6 +1017,8 @@ struct LoadRagel
 			inlineList = loadInlineExpr( ActionExpr.RubyInlineExpr() );
 		else if ( ActionExpr.OCamlInlineExpr() )
 			inlineList = loadInlineExpr( ActionExpr.OCamlInlineExpr() );
+		else if ( ActionExpr.CrackInlineExpr() )
+			inlineList = loadInlineExpr( ActionExpr.CrackInlineExpr() );
 		else
 			inlineList = loadInlineExpr( ActionExpr.CInlineExpr() );
 		return inlineList;
@@ -820,6 +1033,8 @@ struct LoadRagel
 			inlineList = loadInlineBlock( ActionBlock.RubyInlineBlock() );
 		else if ( ActionBlock.OCamlInlineBlock() )
 			inlineList = loadInlineBlock( ActionBlock.OCamlInlineBlock() );
+		else if ( ActionBlock.CrackInlineBlock() )
+			inlineList = loadInlineBlock( ActionBlock.CrackInlineBlock() );
 		else
 			inlineList = loadInlineBlock( ActionBlock.CInlineBlock() );
 		return new InlineBlock( loc, inlineList );
@@ -833,6 +1048,8 @@ struct LoadRagel
 			inlineList = loadInlineBlock( ActionBlock.RubyInlineBlock() );
 		else if ( ActionBlock.OCamlInlineBlock() )
 			inlineList = loadInlineBlock( ActionBlock.OCamlInlineBlock() );
+		else if ( ActionBlock.CrackInlineBlock() )
+			inlineList = loadInlineBlock( ActionBlock.CrackInlineBlock() );
 		else
 			inlineList = loadInlineBlock( ActionBlock.CInlineBlock() );
 
@@ -877,6 +1094,8 @@ struct LoadRagel
 			inlineList = loadInlineBlock( PrePushBlock.RubyInlineBlock() );
 		else if ( PrePushBlock.OCamlInlineBlock() )
 			inlineList = loadInlineBlock( PrePushBlock.OCamlInlineBlock() );
+		else if ( PrePushBlock.CrackInlineBlock() )
+			inlineList = loadInlineBlock( PrePushBlock.CrackInlineBlock() );
 		else
 			inlineList = loadInlineBlock( PrePushBlock.CInlineBlock() );
 		pd->prePushExpr = new InlineBlock( loc, inlineList );
@@ -896,6 +1115,8 @@ struct LoadRagel
 			inlineList = loadInlineBlock( PostPopBlock.RubyInlineBlock() );
 		else if ( PostPopBlock.OCamlInlineBlock() )
 			inlineList = loadInlineBlock( PostPopBlock.OCamlInlineBlock() );
+		else if ( PostPopBlock.CrackInlineBlock() )
+			inlineList = loadInlineBlock( PostPopBlock.CrackInlineBlock() );
 		else
 			inlineList = loadInlineBlock( PostPopBlock.CInlineBlock() );
 		pd->postPopExpr = new InlineBlock( loc, inlineList );
@@ -1314,6 +1535,8 @@ struct LoadRagel
 					inlineList = loadInlineBlock( ActionRef.action_block().RubyInlineBlock() );
 				else if ( ActionRef.action_block().OCamlInlineBlock() )
 					inlineList = loadInlineBlock( ActionRef.action_block().OCamlInlineBlock() );
+				else if ( ActionRef.action_block().CrackInlineBlock() )
+					inlineList = loadInlineBlock( ActionRef.action_block().CrackInlineBlock() );
 				else
 					inlineList = loadInlineBlock( ActionRef.action_block().CInlineBlock() );
 
