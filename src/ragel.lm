@@ -1,3 +1,5 @@
+global GblActionParams: bool = false
+
 rl ident
 	/( alpha | '_' ) ( alpha | digit | '_' )*/
 
@@ -107,7 +109,7 @@ namespace ragel
 		token lex_sqopen_pos /'['/ -ni
 		token lex_sqopen_neg /'[^'/ -ni
 
-		token word /[a-zA-Z_][a-zA-Z0-9_]*/
+		token word / [a-zA-Z_][a-zA-Z0-9_]* /
 		token uint / number /
 		token hex / hex_number /
 	end 
@@ -411,13 +413,20 @@ namespace ragel
 
 	def opt_action_params
 		[`( opt_action_param_list `)] :List
+		{
+			GblActionParams = true
+		}
 	|	[] :Empty
+		{
+			GblActionParams = false
+		}
 
 	def action_spec
 		[`action word opt_action_params action_block] :ActionSpec commit
 		{
 			if lhs.opt_action_params.opt_action_param_list
 				CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
+			GblActionParams = false
 		}
 
 	def def_name

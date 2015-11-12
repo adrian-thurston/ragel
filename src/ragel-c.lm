@@ -22,8 +22,23 @@ namespace c_inline
 
 		token var_ref
 			/ "$" [a-zA-Z_][a-zA-Z_0-9]* /
+			{
+				if GblActionParams 
+				{
+					input->push( make_token(
+							typeid<var_ref>, input->pull( match_length ) ) )
+				}
+				else
+				{
+					# Just pull one char. Don't consume the word because it may
+					# be a keyword.
+					input->push( make_token(
+							typeid<c_any>, input->pull( 1 ) ) )
+				}
+			}
 
-		token c_any / any /
+		token c_any
+			/ any /
 	end
 
 	def inline_expr
