@@ -1275,18 +1275,24 @@ struct LoadRagel
 		return reItem;
 	}
 
+	RegExpr *loadRegItemRepList( ragel::reg_item_rep_list RepList )
+	{
+		RegExpr *regExpr;
+		if ( RepList.prodName() == ragel::reg_item_rep_list::Rec ) {
+			RegExpr *recList = loadRegItemRepList( RepList._reg_item_rep_list() );
+			ReItem *reItem = loadRegexItemRep( RepList.reg_item_rep() );
+			regExpr = new RegExpr( recList, reItem );
+		}
+		else {
+			regExpr = new RegExpr();
+
+		}
+		return regExpr;
+	}
+
 	RegExpr *loadRegex( ragel::regex Regex )
 	{
-		RegExpr *regExpr = new RegExpr();
-		ragel::reg_item_rep_list RegItemRepList = Regex.reg_item_rep_list();
-		while ( RegItemRepList.prodName() == ragel::reg_item_rep_list::Rec ) {
-			ragel::reg_item_rep RegItemRep = RegItemRepList.reg_item_rep();
-			ReItem *reItem = loadRegexItemRep( RegItemRep );
-			regExpr = new RegExpr( regExpr, reItem );
-			RegItemRepList = RegItemRepList._reg_item_rep_list();
-		}
-
-		return regExpr;
+		return loadRegItemRepList( Regex.reg_item_rep_list() );
 	}
 
 	Factor *loadFactor( ragel::factor FactorTree )
