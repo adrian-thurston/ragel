@@ -239,8 +239,8 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags=""
 			prohibit_featflags=""
-			prohibit_frontflags="--kelbt-frontend"
-			prohibit_backflags="--direct-backend"
+			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
+			prohibit_backflags="--direct-backend --reduce-frontend"
 			prohibit_encflags="--string-tables"
 			file_names;
 			exec_cmd=./$wk/$binary
@@ -255,7 +255,7 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags=""
-			prohibit_frontflags="--kelbt-frontend"
+			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
@@ -271,7 +271,7 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend"
+			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
@@ -287,7 +287,7 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags="-G2"
 			prohibit_featflags=""
-			prohibit_frontflags="--kelbt-frontend"
+			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
@@ -303,7 +303,7 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags=""
 			prohibit_featflags=""
-			prohibit_frontflags="--kelbt-frontend"
+			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
@@ -319,7 +319,7 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend"
+			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
@@ -353,7 +353,7 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags="-G2"
 			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend"
+			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
@@ -367,7 +367,7 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags="-G2"
 			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend"
+			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
@@ -381,7 +381,7 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags=""
 			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend"
+			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
