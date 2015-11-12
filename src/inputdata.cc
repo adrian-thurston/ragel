@@ -207,38 +207,40 @@ void InputData::openOutput()
 
 void InputData::prepareSingleMachine()
 {
+	ParseData *pd = 0;
+	GraphDictEl *gdEl = 0;
+
 	/* Locate a machine spec to generate dot output for. We can only emit.
 	 * Dot takes one graph at a time. */
 	if ( machineSpec != 0 ) {
 		/* Machine specified. */
-		ParserDictEl *pdEl = parserDict.find( machineSpec );
+		ParseDataDictEl *pdEl = parseDataDict.find( machineSpec );
 		if ( pdEl == 0 )
 			error() << "could not locate machine specified with -S and/or -M" << endp;
-		dotGenParser = pdEl->value;
+		pd = pdEl->value;
 	}
 	else { 
 		/* No machine spec given, generate the first one. */
 		if ( parserList.length() == 0 )
 			error() << "no machine specification to generate graphviz output" << endp;
 
-		dotGenParser = parserList.head;
+		pd = parseDataList.head;
 	}
 
-	GraphDictEl *gdEl = 0;
-
 	if ( machineName != 0 ) {
-		gdEl = dotGenParser->pd->graphDict.find( machineName );
+		gdEl = pd->graphDict.find( machineName );
 		if ( gdEl == 0 )
 			error() << "machine definition/instantiation not found" << endp;
 	}
 	else {
 		/* We are using the whole machine spec. Need to make sure there
 		 * are instances in the spec. */
-		if ( dotGenParser->pd->instanceList.length() == 0 )
+		if ( pd->instanceList.length() == 0 )
 			error() << "no machine instantiations to generate graphviz output" << endp;
 	}
 
-	dotGenParser->pd->prepareMachineGen( gdEl, hostLang );
+	pd->prepareMachineGen( gdEl, hostLang );
+	dotGenPd = pd;
 }
 
 void InputData::prepareAllMachines()

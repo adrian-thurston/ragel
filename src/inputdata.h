@@ -152,7 +152,7 @@ struct InputData
 		lastFlush(0),
 		hostLang(&hostLangC),
 		codeStyle(GenBinaryLoop),
-		dotGenParser(0),
+		dotGenPd(0),
 		machineSpec(0),
 		machineName(0),
 		minimizeLevel(MinimizePartition2),
@@ -216,7 +216,7 @@ struct InputData
 	/* Target language and output style. */
 	CodeStyle codeStyle;
 
-	Parser6 *dotGenParser;
+	ParseData *dotGenPd;
 
 	const char *machineSpec;
 	const char *machineName;
