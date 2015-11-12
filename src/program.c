@@ -270,9 +270,9 @@ int colm_delete_program( program_t *prg )
 	parse_tree_clear( &prg->parse_tree_pool );
 	location_clear( prg );
 
-	RunBuf *rb = prg->alloc_run_buf;
+	struct run_buf *rb = prg->alloc_run_buf;
 	while ( rb != 0 ) {
-		RunBuf *next = rb->next;
+		struct run_buf *next = rb->next;
 		free( rb );
 		rb = next;
 	}

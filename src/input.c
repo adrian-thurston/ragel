@@ -37,10 +37,18 @@
 #define true 1
 #define false 0
 
-RunBuf *new_run_buf()
+struct run_buf *new_run_buf( int sz )
 {
-	RunBuf *rb = (RunBuf*)malloc(sizeof(RunBuf));
-	memset( rb, 0, sizeof(RunBuf) );
+	struct run_buf *rb;
+	if ( sz > FSM_BUFSIZE ) {
+		int ssz = sizeof(struct run_buf) + sz - FSM_BUFSIZE;
+		rb = rb = (struct run_buf*) malloc( ssz );
+		memset( rb, 0, ssz );
+	}
+	else {
+		rb = (struct run_buf*) malloc( sizeof(struct run_buf) );
+		memset( rb, 0, sizeof(struct run_buf) );
+	}
 	return rb;
 }
 
@@ -56,7 +64,7 @@ extern struct stream_funcs stream_funcs;
 void colm_clear_source_stream( struct colm_program *prg,
 		tree_t **sp, struct stream_impl *source_stream )
 {
-	RunBuf *buf = source_stream->queue;
+	struct run_buf *buf = source_stream->queue;
 	while ( buf != 0 ) {
 		switch ( buf->type ) {
 			case RunBufDataType:
@@ -70,7 +78,7 @@ void colm_clear_source_stream( struct colm_program *prg,
 				break;
 		}
 
-		RunBuf *next = buf->next;
+		struct run_buf *next = buf->next;
 		free( buf );
 		buf = next;
 	}
@@ -121,9 +129,9 @@ void undo_position( struct stream_impl *is, const char *data, long length )
 }
 
 
-static RunBuf *source_stream_pop_head( struct stream_impl *ss )
+static struct run_buf *source_stream_pop_head( struct stream_impl *ss )
 {
-	RunBuf *ret = ss->queue;
+	struct run_buf *ret = ss->queue;
 	ss->queue = ss->queue->next;
 	if ( ss->queue == 0 )
 		ss->queue_tail = 0;
@@ -132,7 +140,7 @@ static RunBuf *source_stream_pop_head( struct stream_impl *ss )
 	return ret;
 }
 
-static void source_stream_append( struct stream_impl *ss, RunBuf *run_buf )
+static void source_stream_append( struct stream_impl *ss, struct run_buf *run_buf )
 {
 	if ( ss->queue == 0 ) {
 		run_buf->prev = run_buf->next = 0;
@@ -146,7 +154,7 @@ static void source_stream_append( struct stream_impl *ss, RunBuf *run_buf )
 	}
 }
 
-static void source_stream_prepend( struct stream_impl *ss, RunBuf *run_buf )
+static void source_stream_prepend( struct stream_impl *ss, struct run_buf *run_buf )
 {
 	if ( ss->queue == 0 ) {
 		run_buf->prev = run_buf->next = 0;
@@ -170,11 +178,11 @@ int file_get_parse_block( struct stream_impl *ss, int skip, char **pdp, int *cop
 	*copied = 0;
 
 	/* Move over skip bytes. */
-	RunBuf *buf = ss->queue;
+	struct run_buf *buf = ss->queue;
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
-			RunBuf *run_buf = new_run_buf();
+			struct run_buf *run_buf = new_run_buf( 0 );
 			source_stream_append( ss, run_buf );
 			int received = ss->funcs->get_data_source( ss, run_buf->data, FSM_BUFSIZE );
 			if ( received == 0 ) {
@@ -228,11 +236,11 @@ int file_get_data( struct stream_impl *ss, char *dest, int length )
 	int copied = 0;
 
 	/* Move over skip bytes. */
-	RunBuf *buf = ss->queue;
+	struct run_buf *buf = ss->queue;
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
-			RunBuf *run_buf = new_run_buf();
+			struct run_buf *run_buf = new_run_buf( 0 );
 			source_stream_append( ss, run_buf );
 			int received = ss->funcs->get_data_source( ss, run_buf->data, FSM_BUFSIZE );
 			run_buf->length = received;
@@ -273,7 +281,7 @@ int file_consume_data( program_t *prg, tree_t **sp,
 
 	/* Move over skip bytes. */
 	while ( true ) {
-		RunBuf *buf = ss->queue;
+		struct run_buf *buf = ss->queue;
 
 		if ( buf == 0 )
 			break;
@@ -306,7 +314,7 @@ int file_consume_data( program_t *prg, tree_t **sp,
 		if ( length == 0 )
 			break;
 
-		RunBuf *run_buf = source_stream_pop_head( ss );
+		struct run_buf *run_buf = source_stream_pop_head( ss );
 		free( run_buf );
 	}
 
@@ -315,7 +323,7 @@ int file_consume_data( program_t *prg, tree_t **sp,
 
 int file_undo_consume_data( struct stream_impl *ss, const char *data, int length )
 {
-	RunBuf *new_buf = new_run_buf();
+	struct run_buf *new_buf = new_run_buf( 0 );
 	new_buf->length = length;
 	memcpy( new_buf->data, data, length );
 	source_stream_prepend( ss, new_buf );
@@ -360,7 +368,7 @@ void init_stream_impl( struct stream_impl *is, const char *name )
 void colm_clear_stream_impl( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *input_stream )
 {
-	RunBuf *buf = input_stream->queue;
+	struct run_buf *buf = input_stream->queue;
 	while ( buf != 0 ) {
 		switch ( buf->type ) {
 			case RunBufDataType:
@@ -375,7 +383,7 @@ void colm_clear_stream_impl( struct colm_program *prg, tree_t **sp,
 				break;
 		}
 
-		RunBuf *next = buf->next;
+		struct run_buf *next = buf->next;
 		free( buf );
 		buf = next;
 	}
@@ -383,7 +391,7 @@ void colm_clear_stream_impl( struct colm_program *prg, tree_t **sp,
 	input_stream->queue = 0;
 }
 
-static void input_stream_prepend( struct stream_impl *is, RunBuf *run_buf )
+static void input_stream_prepend( struct stream_impl *is, struct run_buf *run_buf )
 {
 	if ( is->queue == 0 ) {
 		run_buf->prev = run_buf->next = 0;
@@ -397,9 +405,9 @@ static void input_stream_prepend( struct stream_impl *is, RunBuf *run_buf )
 	}
 }
 
-static RunBuf *input_stream_pop_head( struct stream_impl *is )
+static struct run_buf *input_stream_pop_head( struct stream_impl *is )
 {
-	RunBuf *ret = is->queue;
+	struct run_buf *ret = is->queue;
 	is->queue = is->queue->next;
 	if ( is->queue == 0 )
 		is->queue_tail = 0;
@@ -408,7 +416,7 @@ static RunBuf *input_stream_pop_head( struct stream_impl *is )
 	return ret;
 }
 
-static void input_stream_append( struct stream_impl *is, RunBuf *run_buf )
+static void input_stream_append( struct stream_impl *is, struct run_buf *run_buf )
 {
 	if ( is->queue == 0 ) {
 		run_buf->prev = run_buf->next = 0;
@@ -422,9 +430,9 @@ static void input_stream_append( struct stream_impl *is, RunBuf *run_buf )
 	}
 }
 
-static RunBuf *input_stream_pop_tail( struct stream_impl *is )
+static struct run_buf *input_stream_pop_tail( struct stream_impl *is )
 {
-	RunBuf *ret = is->queue_tail;
+	struct run_buf *ret = is->queue_tail;
 	is->queue_tail = is->queue_tail->prev;
 	if ( is->queue_tail == 0 )
 		is->queue = 0;
@@ -463,7 +471,7 @@ static int _getParseBlock( struct stream_impl *is, int skip, char **pdp, int *co
 	*copied = 0;
 
 	/* Move over skip bytes. */
-	RunBuf *buf = is->queue;
+	struct run_buf *buf = is->queue;
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
@@ -561,7 +569,7 @@ static int _getData( struct stream_impl *is, char *dest, int length )
 	int copied = 0;
 
 	/* Move over skip bytes. */
-	RunBuf *buf = is->queue;
+	struct run_buf *buf = is->queue;
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
@@ -621,7 +629,7 @@ static int _consumeData( program_t *prg, tree_t **sp, struct stream_impl *is,
 
 	/* Move over skip bytes. */
 	while ( true ) {
-		RunBuf *buf = is->queue;
+		struct run_buf *buf = is->queue;
 
 		if ( buf == 0 )
 			break;
@@ -656,7 +664,7 @@ static int _consumeData( program_t *prg, tree_t **sp, struct stream_impl *is,
 			break;
 		}
 
-		RunBuf *run_buf = input_stream_pop_head( is );
+		struct run_buf *run_buf = input_stream_pop_head( is );
 		//if ( runBuf->type == RunBufSourceType ) {
 		//	stream_t *stream = (stream_t*)runBuf->tree;
 		//	colm_tree_downref( prg, sp, (tree_t*) stream );
@@ -677,7 +685,7 @@ static int _undoConsumeData( struct stream_impl *is, const char *data, int lengt
 		return len;
 	}
 	else {
-		RunBuf *new_buf = new_run_buf();
+		struct run_buf *new_buf = new_run_buf( 0 );
 		new_buf->length = length;
 		memcpy( new_buf->data, data, length );
 		input_stream_prepend( is, new_buf );
@@ -692,14 +700,14 @@ static tree_t *_consumeTree( struct stream_impl *is )
 	while ( is->queue != 0 && is->queue->type == RunBufDataType && 
 			is->queue->offset == is->queue->length )
 	{
-		RunBuf *run_buf = input_stream_pop_head( is );
+		struct run_buf *run_buf = input_stream_pop_head( is );
 		free( run_buf );
 	}
 
 	if ( is->queue != 0 && (is->queue->type == RunBufTokenType || 
 			is->queue->type == RunBufIgnoreType) )
 	{
-		RunBuf *run_buf = input_stream_pop_head( is );
+		struct run_buf *run_buf = input_stream_pop_head( is );
 
 		/* FIXME: using runbufs here for this is a poor use of memory. */
 		tree_t *tree = run_buf->tree;
@@ -715,7 +723,7 @@ static void _undoConsumeTree( struct stream_impl *is, tree_t *tree, int ignore )
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
-	RunBuf *new_buf = new_run_buf();
+	struct run_buf *new_buf = new_run_buf( 0 );
 	new_buf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
 	new_buf->tree = tree;
 	input_stream_prepend( is, new_buf );
@@ -757,7 +765,7 @@ static void _prependData( struct stream_impl *is, const char *data, long length 
 		 * data that can be pushed back to the inputStream. */
 		assert( length < FSM_BUFSIZE );
 
-		RunBuf *new_buf = new_run_buf();
+		struct run_buf *new_buf = new_run_buf( 0 );
 		new_buf->length = length;
 		memcpy( new_buf->data, data, length );
 
@@ -770,7 +778,7 @@ static void _prependTree( struct stream_impl *is, tree_t *tree, int ignore )
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
-	RunBuf *new_buf = new_run_buf();
+	struct run_buf *new_buf = new_run_buf( 0 );
 	new_buf->type = ignore ? RunBufIgnoreType : RunBufTokenType;
 	new_buf->tree = tree;
 	input_stream_prepend( is, new_buf );
@@ -781,7 +789,7 @@ static void _prependStream( struct stream_impl *in, struct colm_tree *tree )
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
-	RunBuf *new_buf = new_run_buf();
+	struct run_buf *new_buf = new_run_buf( 0 );
 	new_buf->type = RunBufSourceType;
 	new_buf->tree = tree;
 	input_stream_prepend( in, new_buf );
@@ -795,7 +803,7 @@ static int _undoPrependData( struct stream_impl *is, int length )
 
 	/* Move over skip bytes. */
 	while ( true ) {
-		RunBuf *buf = is->queue;
+		struct run_buf *buf = is->queue;
 
 		if ( buf == 0 )
 			break;
@@ -826,7 +834,7 @@ static int _undoPrependData( struct stream_impl *is, int length )
 		if ( length == 0 )
 			break;
 
-		RunBuf *run_buf = input_stream_pop_head( is );
+		struct run_buf *run_buf = input_stream_pop_head( is );
 		free( run_buf );
 	}
 
@@ -838,14 +846,14 @@ static tree_t *_undoPrependTree( struct stream_impl *is )
 	while ( is->queue != 0 && is->queue->type == RunBufDataType &&
 			is->queue->offset == is->queue->length )
 	{
-		RunBuf *run_buf = input_stream_pop_head( is );
+		struct run_buf *run_buf = input_stream_pop_head( is );
 		free( run_buf );
 	}
 
 	if ( is->queue != 0 && (is->queue->type == RunBufTokenType ||
 			is->queue->type == RunBufIgnoreType) )
 	{
-		RunBuf *run_buf = input_stream_pop_head( is );
+		struct run_buf *run_buf = input_stream_pop_head( is );
 
 		/* FIXME: using runbufs here for this is a poor use of memory. */
 		tree_t *tree = run_buf->tree;
@@ -859,7 +867,7 @@ static tree_t *_undoPrependTree( struct stream_impl *is )
 static void _appendData( struct stream_impl *is, const char *data, long len )
 {
 	while ( len > 0 ) {
-		RunBuf *ad = new_run_buf();
+		struct run_buf *ad = new_run_buf( 0 );
 		input_stream_append( is, ad );
 
 		long consume = 
@@ -880,7 +888,7 @@ static tree_t *_undoAppendData( struct stream_impl *is, int length )
 
 	/* Move over skip bytes. */
 	while ( true ) {
-		RunBuf *buf = is->queue_tail;
+		struct run_buf *buf = is->queue_tail;
 
 		if ( buf == 0 )
 			break;
@@ -904,7 +912,7 @@ static tree_t *_undoAppendData( struct stream_impl *is, int length )
 		if ( length == 0 )
 			break;
 
-		RunBuf *run_buf = input_stream_pop_tail( is );
+		struct run_buf *run_buf = input_stream_pop_tail( is );
 		free( run_buf );
 	}
 
@@ -913,7 +921,7 @@ static tree_t *_undoAppendData( struct stream_impl *is, int length )
 
 static void _appendTree( struct stream_impl *is, tree_t *tree )
 {
-	RunBuf *ad = new_run_buf();
+	struct run_buf *ad = new_run_buf( 0 );
 
 	input_stream_append( is, ad );
 
@@ -924,7 +932,7 @@ static void _appendTree( struct stream_impl *is, tree_t *tree )
 
 static void _appendStream( struct stream_impl *in, struct colm_tree *tree )
 {
-	RunBuf *ad = new_run_buf();
+	struct run_buf *ad = new_run_buf( 0 );
 
 	input_stream_append( in, ad );
 
@@ -935,7 +943,7 @@ static void _appendStream( struct stream_impl *in, struct colm_tree *tree )
 
 static tree_t *_undoAppendTree( struct stream_impl *is )
 {
-	RunBuf *run_buf = input_stream_pop_tail( is );
+	struct run_buf *run_buf = input_stream_pop_tail( is );
 	tree_t *tree = run_buf->tree;
 	free( run_buf );
 	return tree;
@@ -943,7 +951,7 @@ static tree_t *_undoAppendTree( struct stream_impl *is )
 
 static tree_t *_undoAppendStream( struct stream_impl *is )
 {
-	RunBuf *run_buf = input_stream_pop_tail( is );
+	struct run_buf *run_buf = input_stream_pop_tail( is );
 	tree_t *tree = run_buf->tree;
 	free( run_buf );
 	return tree;

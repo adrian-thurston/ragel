@@ -154,7 +154,7 @@ void inputStreamPatternBackup( struct stream_impl *ss )
 		ss->pat_item = ss->pat_item->prev;
 }
 
-void inputStreamPatternPushBackBuf( struct stream_impl *ss, RunBuf *runBuf )
+void inputStreamPatternPushBackBuf( struct stream_impl *ss, struct run_buf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;
@@ -181,7 +181,8 @@ void inputStreamPatternUndoConsumeLangEl( struct stream_impl *ss )
 	ss->offset = ss->pat_item->data.length();
 }
 
-int inputStreamPatternConsumeData( program_t *prg, tree_t **sp, struct stream_impl *ss, int length, location_t *loc )
+int inputStreamPatternConsumeData( program_t *prg, tree_t **sp,
+		struct stream_impl *ss, int length, location_t *loc )
 {
 	//debug( REALM_INPUT, "consuming %ld bytes\n", length );
 
@@ -367,7 +368,7 @@ void inputStreamConsBackup( struct stream_impl *ss )
 		ss->cons_item = ss->cons_item->prev;
 }
 
-void inputStreamConsPushBackBuf( struct stream_impl *ss, RunBuf *runBuf )
+void inputStreamConsPushBackBuf( struct stream_impl *ss, struct run_buf *runBuf )
 {
 	char *data = runBuf->data + runBuf->offset;
 	long length = runBuf->length;

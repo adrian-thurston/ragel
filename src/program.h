@@ -137,7 +137,7 @@ struct colm_program
 
 	tree_t *error;
 
-	RunBuf *alloc_run_buf;
+	struct run_buf *alloc_run_buf;
 
 	/* Current stack block limits. Changed when crossing block boundaries. */
 	tree_t **sb_beg;

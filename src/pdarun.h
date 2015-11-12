@@ -265,7 +265,7 @@ struct pda_run
 	 */
 	struct fsm_tables *fsm_tables;
 
-	RunBuf *consume_buf;
+	struct run_buf *consume_buf;
 
 	long region, pre_region;
 	long fsm_cs, next_cs, act;

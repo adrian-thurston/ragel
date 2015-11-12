@@ -73,8 +73,8 @@ static void clear_fsm_run( program_t *prg, struct pda_run *pda_run )
 {
 	if ( pda_run->consume_buf != 0 ) {
 		/* Transfer the run buf list to the program */
-		RunBuf *head = pda_run->consume_buf;
-		RunBuf *tail = head;
+		struct run_buf *head = pda_run->consume_buf;
+		struct run_buf *tail = head;
 		while ( tail->next != 0 )
 			tail = tail->next;
 
@@ -99,9 +99,9 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 		struct stream_impl *is, long length )
 {
 	if ( pda_run != 0 ) {
-		RunBuf *run_buf = pda_run->consume_buf;
+		struct run_buf *run_buf = pda_run->consume_buf;
 		if ( length > ( FSM_BUFSIZE - run_buf->length ) ) {
-			run_buf = new_run_buf();
+			run_buf = new_run_buf( 0 );
 			run_buf->next = pda_run->consume_buf;
 			pda_run->consume_buf = run_buf;
 		}
@@ -719,15 +719,16 @@ static void handle_error( program_t *prg, tree_t **sp, struct pda_run *pda_run )
 	}
 }
 
-static head_t *extract_match( program_t *prg, tree_t **sp, struct pda_run *pda_run, struct stream_impl *is )
+static head_t *extract_match( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run, struct stream_impl *is )
 {
 	long length = pda_run->toklen;
 
 	//debug( prg, REALM_PARSE, "extracting token of length: %ld\n", length );
 
-	RunBuf *run_buf = pda_run->consume_buf;
+	struct run_buf *run_buf = pda_run->consume_buf;
 	if ( run_buf == 0 || length > ( FSM_BUFSIZE - run_buf->length ) ) {
-		run_buf = new_run_buf();
+		run_buf = new_run_buf( length );
 		run_buf->next = pda_run->consume_buf;
 		pda_run->consume_buf = run_buf;
 	}
@@ -757,9 +758,9 @@ static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct strea
 {
 	long length = pda_run->toklen;
 
-	RunBuf *run_buf = pda_run->consume_buf;
+	struct run_buf *run_buf = pda_run->consume_buf;
 	if ( run_buf == 0 || length > ( FSM_BUFSIZE - run_buf->length ) ) {
-		run_buf = new_run_buf();
+		run_buf = new_run_buf( 0 );
 		run_buf->next = pda_run->consume_buf;
 		pda_run->consume_buf = run_buf;
 	}

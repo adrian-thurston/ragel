@@ -53,24 +53,27 @@ struct colm_struct;
 
 struct stream_impl;
 
-enum RunBufType {
+enum run_buf_type {
 	RunBufDataType = 0,
 	RunBufTokenType,
 	RunBufIgnoreType,
 	RunBufSourceType
 };
 
-typedef struct _RunBuf
+struct run_buf
 {
-	enum RunBufType type;
-	char data[FSM_BUFSIZE];
+	enum run_buf_type type;
 	long length;
 	struct colm_tree *tree;
 	long offset;
-	struct _RunBuf *next, *prev;
-} RunBuf;
+	struct run_buf *next, *prev;
 
-RunBuf *new_run_buf();
+	/* Must be at the end. We will grow this struct to add data if the input
+	 * demands it. */
+	char data[FSM_BUFSIZE];
+};
+
+struct run_buf *new_run_buf( int sz );
 
 struct stream_funcs
 {
@@ -123,8 +126,8 @@ struct stream_impl
 	char eof;
 	char eos_sent;
 
-	RunBuf *queue;
-	RunBuf *queue_tail;
+	struct run_buf *queue;
+	struct run_buf *queue_tail;
 
 	const char *data;
 	long dlen;
