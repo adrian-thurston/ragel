@@ -33,16 +33,14 @@
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
-
-#define true 1
-#define false 0
+#include <stdbool.h>
 
 struct run_buf *new_run_buf( int sz )
 {
 	struct run_buf *rb;
 	if ( sz > FSM_BUFSIZE ) {
 		int ssz = sizeof(struct run_buf) + sz - FSM_BUFSIZE;
-		rb = rb = (struct run_buf*) malloc( ssz );
+		rb = (struct run_buf*) malloc( ssz );
 		memset( rb, 0, ssz );
 	}
 	else {
@@ -60,6 +58,27 @@ void init_cons_funcs();
 extern struct stream_funcs file_funcs;
 extern struct stream_funcs fd_funcs;
 extern struct stream_funcs stream_funcs;
+
+static bool loc_set( location_t *loc )
+{
+	return loc->line != 0;
+}
+
+static void default_loc( location_t *loc )
+{
+	loc->name = "--";
+	loc->line = 1;
+	loc->column = 1;
+	loc->byte = 1;
+}
+
+static void transfer_loc( location_t *loc, struct stream_impl *ss )
+{
+	loc->name = ss->name;
+	loc->line = ss->line;
+	loc->column = ss->column;
+	loc->byte = ss->byte;
+}
 
 void colm_clear_source_stream( struct colm_program *prg,
 		tree_t **sp, struct stream_impl *source_stream )
@@ -172,7 +191,7 @@ static void source_stream_prepend( struct stream_impl *ss, struct run_buf *run_b
  * Base run-time input streams.
  */
 
-int file_get_parse_block( struct stream_impl *ss, int skip, char **pdp, int *copied )
+static int file_get_parse_block( struct stream_impl *ss, int skip, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -231,7 +250,7 @@ int file_get_parse_block( struct stream_impl *ss, int skip, char **pdp, int *cop
 	return ret;
 }
 
-int file_get_data( struct stream_impl *ss, char *dest, int length )
+static int file_get_data( struct stream_impl *ss, char *dest, int length )
 {
 	int copied = 0;
 
@@ -274,7 +293,7 @@ int file_get_data( struct stream_impl *ss, char *dest, int length )
 	return copied;
 }
 
-int file_consume_data( program_t *prg, tree_t **sp,
+static int file_consume_data( program_t *prg, tree_t **sp,
 		struct stream_impl *ss, int length, location_t *loc )
 {
 	int consumed = 0;
@@ -291,12 +310,8 @@ int file_consume_data( program_t *prg, tree_t **sp,
 		else if ( buf->type == RunBufIgnoreType )
 			break;
 		else {
-			if ( loc->line == 0 ) {
-				loc->name = ss->name;
-				loc->line = ss->line;
-				loc->column = ss->column;
-				loc->byte = ss->byte;
-			}
+			if ( !loc_set( loc ) )
+				transfer_loc( loc, ss );
 
 			/* Anything available in the current buffer. */
 			int avail = buf->length - buf->offset;
@@ -321,7 +336,7 @@ int file_consume_data( program_t *prg, tree_t **sp,
 	return consumed;
 }
 
-int file_undo_consume_data( struct stream_impl *ss, const char *data, int length )
+static int file_undo_consume_data( struct stream_impl *ss, const char *data, int length )
 {
 	struct run_buf *new_buf = new_run_buf( 0 );
 	new_buf->length = length;
@@ -337,7 +352,7 @@ int file_undo_consume_data( struct stream_impl *ss, const char *data, int length
  * File
  */
 
-int file_get_data_source( struct stream_impl *ss, char *dest, int length )
+static int file_get_data_source( struct stream_impl *ss, char *dest, int length )
 {
 	size_t read = fread( dest, 1, length, ss->file );
 	return read;
@@ -448,13 +463,13 @@ static int is_source_stream( struct stream_impl *is )
 	return false;
 }
 
-static void _setEof( struct stream_impl *is )
+static void stream_set_eof( struct stream_impl *is )
 {
 	//debug( REALM_INPUT, "setting EOF in input stream\n" );
 	is->eof = true;
 }
 
-static void _unsetEof( struct stream_impl *is )
+static void stream_unset_eof( struct stream_impl *is )
 {
 	if ( is_source_stream( is ) ) {
 		struct stream_impl *si = stream_to_impl( (stream_t*)is->queue->tree );
@@ -465,7 +480,7 @@ static void _unsetEof( struct stream_impl *is )
 	}
 }
 
-static int _getParseBlock( struct stream_impl *is, int skip, char **pdp, int *copied )
+static int stream_get_parse_block( struct stream_impl *is, int skip, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -564,7 +579,7 @@ static int _getParseBlock( struct stream_impl *is, int skip, char **pdp, int *co
 	return ret;
 }
 
-static int _getData( struct stream_impl *is, char *dest, int length )
+static int stream_get_data( struct stream_impl *is, char *dest, int length )
 {
 	int copied = 0;
 
@@ -620,7 +635,7 @@ static int _getData( struct stream_impl *is, char *dest, int length )
 	return copied;
 }
 
-static int _consumeData( program_t *prg, tree_t **sp, struct stream_impl *is,
+static int stream_consume_data( program_t *prg, tree_t **sp, struct stream_impl *is,
 		int length, location_t *loc )
 {
 	//debug( REALM_INPUT, "consuming %d bytes\n", length );
@@ -657,6 +672,9 @@ static int _consumeData( program_t *prg, tree_t **sp, struct stream_impl *is,
 				buf->offset += slen;
 				is->consumed += slen;
 			}
+
+			if ( !loc_set( loc ) )
+				default_loc( loc );
 		}
 
 		if ( length == 0 ) {
@@ -675,7 +693,7 @@ static int _consumeData( program_t *prg, tree_t **sp, struct stream_impl *is,
 	return consumed;
 }
 
-static int _undoConsumeData( struct stream_impl *is, const char *data, int length )
+static int stream_undo_consume_data( struct stream_impl *is, const char *data, int length )
 {
 	//debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
@@ -695,7 +713,7 @@ static int _undoConsumeData( struct stream_impl *is, const char *data, int lengt
 	}
 }
 
-static tree_t *_consumeTree( struct stream_impl *is )
+static tree_t *stream_consume_tree( struct stream_impl *is )
 {
 	while ( is->queue != 0 && is->queue->type == RunBufDataType && 
 			is->queue->offset == is->queue->length )
@@ -718,7 +736,7 @@ static tree_t *_consumeTree( struct stream_impl *is )
 	return 0;
 }
 
-static void _undoConsumeTree( struct stream_impl *is, tree_t *tree, int ignore )
+static void stream_undo_consume_tree( struct stream_impl *is, tree_t *tree, int ignore )
 {
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -729,7 +747,7 @@ static void _undoConsumeTree( struct stream_impl *is, tree_t *tree, int ignore )
 	input_stream_prepend( is, new_buf );
 }
 
-static struct LangEl *_consumeLangEl( struct stream_impl *is, long *bind_id,
+static struct LangEl *stream_consume_lang_el( struct stream_impl *is, long *bind_id,
 		char **data, long *length )
 {
 	if ( is_source_stream( is ) ) {
@@ -741,7 +759,7 @@ static struct LangEl *_consumeLangEl( struct stream_impl *is, long *bind_id,
 	}
 }
 
-static void _undoConsumeLangEl( struct stream_impl *is )
+static void stream_undo_consume_lang_el( struct stream_impl *is )
 {
 	if ( is_source_stream( is ) ) {
 		struct stream_impl *si = stream_to_impl( (stream_t*)is->queue->tree );
@@ -752,12 +770,12 @@ static void _undoConsumeLangEl( struct stream_impl *is )
 	}
 }
 
-static void _prependData( struct stream_impl *is, const char *data, long length )
+static void stream_prepend_data( struct stream_impl *is, const char *data, long length )
 {
 	if ( is_source_stream( is ) && 
 			stream_to_impl((stream_t*)is->queue->tree)->funcs == &stream_funcs )
 	{
-		_prependData( stream_to_impl( (stream_t*)is->queue->tree ), data, length );
+		stream_prepend_data( stream_to_impl( (stream_t*)is->queue->tree ), data, length );
 	}
 	else {
 		/* Create a new buffer for the data. This is the easy implementation.
@@ -773,7 +791,7 @@ static void _prependData( struct stream_impl *is, const char *data, long length 
 	}
 }
 
-static void _prependTree( struct stream_impl *is, tree_t *tree, int ignore )
+static void stream_prepend_tree( struct stream_impl *is, tree_t *tree, int ignore )
 {
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -784,7 +802,7 @@ static void _prependTree( struct stream_impl *is, tree_t *tree, int ignore )
 	input_stream_prepend( is, new_buf );
 }
 
-static void _prependStream( struct stream_impl *in, struct colm_tree *tree )
+static void stream_prepend_stream( struct stream_impl *in, struct colm_tree *tree )
 {
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
@@ -795,7 +813,7 @@ static void _prependStream( struct stream_impl *in, struct colm_tree *tree )
 	input_stream_prepend( in, new_buf );
 }
 
-static int _undoPrependData( struct stream_impl *is, int length )
+static int stream_undo_prepend_data( struct stream_impl *is, int length )
 {
 	//debug( REALM_INPUT, "consuming %d bytes\n", length );
 
@@ -841,7 +859,7 @@ static int _undoPrependData( struct stream_impl *is, int length )
 	return consumed;
 }
 
-static tree_t *_undoPrependTree( struct stream_impl *is )
+static tree_t *stream_undo_prepend_tree( struct stream_impl *is )
 {
 	while ( is->queue != 0 && is->queue->type == RunBufDataType &&
 			is->queue->offset == is->queue->length )
@@ -864,7 +882,7 @@ static tree_t *_undoPrependTree( struct stream_impl *is )
 	return 0;
 }
 
-static void _appendData( struct stream_impl *is, const char *data, long len )
+static void stream_append_data( struct stream_impl *is, const char *data, long len )
 {
 	while ( len > 0 ) {
 		struct run_buf *ad = new_run_buf( 0 );
@@ -882,7 +900,7 @@ static void _appendData( struct stream_impl *is, const char *data, long len )
 	}
 }
 
-static tree_t *_undoAppendData( struct stream_impl *is, int length )
+static tree_t *stream_undo_append_data( struct stream_impl *is, int length )
 {
 	int consumed = 0;
 
@@ -919,7 +937,7 @@ static tree_t *_undoAppendData( struct stream_impl *is, int length )
 	return 0;
 }
 
-static void _appendTree( struct stream_impl *is, tree_t *tree )
+static void stream_append_tree( struct stream_impl *is, tree_t *tree )
 {
 	struct run_buf *ad = new_run_buf( 0 );
 
@@ -930,7 +948,7 @@ static void _appendTree( struct stream_impl *is, tree_t *tree )
 	ad->length = 0;
 }
 
-static void _appendStream( struct stream_impl *in, struct colm_tree *tree )
+static void stream_append_stream( struct stream_impl *in, struct colm_tree *tree )
 {
 	struct run_buf *ad = new_run_buf( 0 );
 
@@ -941,7 +959,7 @@ static void _appendStream( struct stream_impl *in, struct colm_tree *tree )
 	ad->length = 0;
 }
 
-static tree_t *_undoAppendTree( struct stream_impl *is )
+static tree_t *stream_undo_append_tree( struct stream_impl *is )
 {
 	struct run_buf *run_buf = input_stream_pop_tail( is );
 	tree_t *tree = run_buf->tree;
@@ -949,7 +967,7 @@ static tree_t *_undoAppendTree( struct stream_impl *is )
 	return tree;
 }
 
-static tree_t *_undoAppendStream( struct stream_impl *is )
+static tree_t *stream_undo_append_stream( struct stream_impl *is )
 {
 	struct run_buf *run_buf = input_stream_pop_tail( is );
 	tree_t *tree = run_buf->tree;
@@ -959,29 +977,29 @@ static tree_t *_undoAppendStream( struct stream_impl *is )
 
 struct stream_funcs stream_funcs = 
 {
-	&_getParseBlock,
-	&_getData,
-	&_consumeData,
-	&_undoConsumeData,
-	&_consumeTree,
-	&_undoConsumeTree,
-	&_consumeLangEl,
-	&_undoConsumeLangEl,
+	&stream_get_parse_block,
+	&stream_get_data,
+	&stream_consume_data,
+	&stream_undo_consume_data,
+	&stream_consume_tree,
+	&stream_undo_consume_tree,
+	&stream_consume_lang_el,
+	&stream_undo_consume_lang_el,
 	0, // source data get, not needed.
-	&_setEof,
-	&_unsetEof,
-	&_prependData,
-	&_prependTree,
-	&_prependStream,
-	&_undoPrependData,
-	&_undoPrependTree,
-	0, // FIXME: Add this.
-	&_appendData,
-	&_appendTree,
-	&_appendStream,
-	&_undoAppendData,
-	&_undoAppendTree,
-	&_undoAppendStream,
+	&stream_set_eof,
+	&stream_unset_eof,
+	&stream_prepend_data,
+	&stream_prepend_tree,
+	&stream_prepend_stream,
+	&stream_undo_prepend_data,
+	&stream_undo_prepend_tree,
+	0, // fixme: _add this.
+	&stream_append_data,
+	&stream_append_tree,
+	&stream_append_stream,
+	&stream_undo_append_data,
+	&stream_undo_append_tree,
+	&stream_undo_append_stream,
 };
 
 struct stream_funcs file_funcs = 

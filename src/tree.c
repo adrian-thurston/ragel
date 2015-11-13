@@ -1615,7 +1615,7 @@ static location_t *loc_search_kid( program_t *prg, kid_t *kid )
 	return res;	
 }
 
-location_t *loc_search( program_t *prg, tree_t *tree )
+static location_t *loc_search( program_t *prg, tree_t *tree )
 {
 	location_t *res = 0;
 	if ( tree->tokdata != 0 && tree->tokdata->location != 0 )

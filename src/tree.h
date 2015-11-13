@@ -264,7 +264,6 @@ void set_triter_cur( struct colm_program *prg, tree_iter_t *iter, tree_t *tree )
 void set_uiter_cur( struct colm_program *prg, user_iter_t *uiter, tree_t *tree );
 void ref_set_value( struct colm_program *prg, tree_t **sp, ref_t *ref, tree_t *v );
 tree_t *tree_search( struct colm_program *prg, tree_t *tree, long id );
-location_t *loc_search( struct colm_program *prg, tree_t *tree );
 
 int match_pattern( tree_t **bindings, struct colm_program *prg,
 		long pat, kid_t *kid, int check_next );
