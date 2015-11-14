@@ -94,6 +94,73 @@ long TopLevel::tryLongScan( const InputLoc &loc, const char *data )
 	return priorityNum;
 }
 
+void TopLevel::include( string fileName, string machine )
+{
+	/* Stash the current section name and pd. */
+	string sectionName = pd->sectionName;
+	ParseData *pd0 = pd;
+
+	IncludeRec *el = id->includeDict.find( FnMachine( fileName, machine ) );
+	if ( el == 0 ) {
+		el = new IncludeRec( fileName, machine );
+
+		InputData idr, *id0 = id;
+
+		pd = 0;
+		sectionPass->id = &idr;
+
+		sectionPass->reduceFile( fileName.c_str() );
+
+		/* Count bytes. */
+		int len = 0;
+		for ( InputItem *ii = idr.inputItems.head; ii != 0; ii = ii->next ) {
+			if ( ii->section != 0 && ii->section->sectionName == machine &&
+					ii->type == InputItem::EndSection )
+			{
+				len += ii->end - ii->start + 3;
+			}
+		}
+
+		/* Load bytes. */
+		el->data = new char[len+1];
+		len = 0;
+		for ( InputItem *ii = idr.inputItems.head; ii != 0; ii = ii->next ) {
+			if ( ii->section != 0 && ii->section->sectionName == machine &&
+					ii->type == InputItem::EndSection )
+			{
+				std::ifstream f( fileName.c_str() );
+				f.seekg( ii->start, std::ios::beg );
+				f.read( el->data + len, ii->end - ii->start + 3 );
+				len += f.gcount();
+			}
+		}
+		el->data[len] = 0;
+		el->len = len;
+
+		sectionPass->id = id0;
+
+		id->includeDict.insert( el );
+	}
+
+	const char *targetMachine0 = targetMachine;
+	const char *searchMachine0 = searchMachine;
+
+	includeDepth += 1;
+	pd = 0;
+
+	targetMachine = sectionName.c_str();
+	searchMachine = machine.c_str();
+
+	reduceString( el->data );
+
+	pd = pd0;
+	includeDepth -= 1;
+
+	targetMachine = targetMachine0;
+	searchMachine = searchMachine0;
+}
+
+
 void TopLevel::reduceString( const char *data )
 {
 	const char *argv[6];

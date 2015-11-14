@@ -70,11 +70,8 @@ struct TopLevel
 	void tryMachineDef( InputLoc &loc, std::string name, 
 			MachineDef *machineDef, bool isInstance );
 	long tryLongScan( const InputLoc &loc, const char *data );
-
-//	void loadImport( import Import );
-//	void loadImportList( _repeat_import ImportList );
-//	void loadImport( ragel::string ImportFn );
 	void loadImport( std::string fileName );
+	void include( string fileName, string machine );
 
 	void reduceFile( const char *inputFileName );
 	void reduceString( const char *data );
