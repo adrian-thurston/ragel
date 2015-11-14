@@ -690,8 +690,7 @@ void InputData::processReduce()
 	 * Colm-based reduction parser introduced in ragel 7. 
 	 */
 
-	SectionPass *sectionPass = new SectionPass( this, hostLang,
-			minimizeLevel, minimizeOpt );
+	SectionPass *sectionPass = new SectionPass( this );
 	TopLevel *topLevel = new TopLevel( this, sectionPass, hostLang,
 			minimizeLevel, minimizeOpt );
 

@@ -20,6 +20,9 @@
 #ifndef _REDUCER_H
 #define _REDUCER_H
 
+char *unescape( const char *s, int slen );
+char *unescape( const char *s );
+
 struct SectionPass;
 
 struct TopLevel
@@ -63,8 +66,9 @@ struct TopLevel
 
 	ActionParamList *paramList;
 
+	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,
-		struct pda_run *pda_run, parse_tree_t *pt );
+			struct pda_run *pda_run, parse_tree_t *pt );
 
 	void loadMachineName( string data );
 	void tryMachineDef( InputLoc &loc, std::string name, 
@@ -80,47 +84,23 @@ struct TopLevel
 
 struct SectionPass
 {
-	SectionPass( InputData *id, const HostLang *hostLang,
-			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
+	SectionPass( InputData *id )
 	:
 		id(id),
 		section(0),
-		machineSpec(0),
-		machineName(0),
-		includeDepth(0),
-		hostLang(hostLang),
-		minimizeLevel(minimizeLevel),
-		minimizeOpt(minimizeOpt),
-		
-		/* Should be passed into the load, somehow. */
-		targetMachine(0),
-		searchMachine(0)
+		includeDepth(0)
 	{
 	}
 
 	InputData *id;
 	Section *section;
-	char *machineSpec;
-	char *machineName;
 	int includeDepth;
-	const HostLang *hostLang;
-	MinimizeLevel minimizeLevel;
-	MinimizeOpt minimizeOpt;
-
-	const char *targetMachine;
-	const char *searchMachine;
-
-	void commit_reduce_forward( program_t *prg, tree_t **root,
-		struct pda_run *pda_run, parse_tree_t *pt );
-
 
 	void reduceFile( const char *inputFileName );
-	void reduceString( const char *data );
-	void topReduce( const char *inputFileName );
+
+	/* Generated and called by colm. */
+	void commit_reduce_forward( program_t *prg, tree_t **root,
+			struct pda_run *pda_run, parse_tree_t *pt );
 };
-
-
-char *unescape( const char *s, int slen );
-char *unescape( const char *s );
 
 #endif

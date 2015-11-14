@@ -195,16 +195,6 @@ void TopLevel::reduceFile( const char *inputFileName )
 	colm_delete_program( program );
 }
 
-#if 0
-void TopLevel::loadImport( import Import )
-{
-}
-	
-void TopLevel::loadImportList( _repeat_import ImportList )
-{
-}
-#endif
-
 void TopLevel::loadImport( std::string fileName )
 {
 	const char *argv[5];
