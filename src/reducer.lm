@@ -2546,17 +2546,15 @@ reduction SectionPass
 			section->lastReference = inputItem;
 		}
 
-		if ( includeDepth == 0 ) {
-			/* The end section may include a newline on the end, so
-			 * we use the last line, which will count the newline. */
-			InputItem *inputItem = new InputItem;
-			inputItem->type = InputItem::HostData;
-			inputItem->loc = @3;
-			if ( inputItem->loc.fileName == 0 )
-				inputItem->loc = @1;
+		/* The end section may include a newline on the end, so
+		 * we use the last line, which will count the newline. */
+		inputItem = new InputItem;
+		inputItem->type = InputItem::HostData;
+		inputItem->loc = @3;
+		if ( inputItem->loc.fileName == 0 )
+			inputItem->loc = @1;
 				
-			id->inputItems.append( inputItem );
-		}
+		id->inputItems.append( inputItem );
 	}
 end
 

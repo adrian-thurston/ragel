@@ -87,14 +87,12 @@ struct SectionPass
 	SectionPass( InputData *id )
 	:
 		id(id),
-		section(0),
-		includeDepth(0)
+		section(0)
 	{
 	}
 
 	InputData *id;
 	Section *section;
-	int includeDepth;
 
 	void reduceFile( const char *inputFileName );
 
