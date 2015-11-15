@@ -103,4 +103,25 @@ struct SectionPass
 			struct pda_run *pda_run, parse_tree_t *pt );
 };
 
+struct IncludePass
+{
+	IncludePass( InputData *id )
+	:
+		id(id),
+		section(0),
+		includeDepth(0)
+	{
+	}
+
+	InputData *id;
+	Section *section;
+	int includeDepth;
+
+	void reduceFile( const char *inputFileName );
+
+	/* Generated and called by colm. */
+	void commit_reduce_forward( program_t *prg, tree_t **root,
+			struct pda_run *pda_run, parse_tree_t *pt );
+};
+
 #endif

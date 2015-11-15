@@ -104,12 +104,9 @@ void TopLevel::include( string fileName, string machine )
 	if ( el == 0 ) {
 		el = new IncludeRec( fileName, machine );
 
-		InputData idr, *id0 = id;
-
-		pd = 0;
-		sectionPass->id = &idr;
-
-		sectionPass->reduceFile( fileName.c_str() );
+		InputData idr;
+		IncludePass includePass( &idr );
+		includePass.reduceFile( fileName.c_str() );
 
 		/* Count bytes. */
 		int len = 0;
@@ -137,9 +134,9 @@ void TopLevel::include( string fileName, string machine )
 		el->data[len] = 0;
 		el->len = len;
 
-		sectionPass->id = id0;
-
 		id->includeDict.insert( el );
+
+		idr.inputItems.empty();
 	}
 
 	const char *targetMachine0 = targetMachine;
@@ -277,6 +274,22 @@ void TopLevel::loadImport( std::string fileName )
 }
 
 void SectionPass::reduceFile( const char *inputFileName )
+{
+	const char *argv[5];
+	argv[0] = "rlparse";
+	argv[1] = "section";
+	argv[2] = inputFileName;
+	argv[3] = id->hostLang->rlhcArg;
+	argv[4] = 0;
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_set_debug( program, 0 );
+	colm_set_reduce_ctx( program, this );
+	colm_run_program( program, 4, argv );
+	colm_delete_program( program );
+}
+
+void IncludePass::reduceFile( const char *inputFileName )
 {
 	const char *argv[5];
 	argv[0] = "rlparse";

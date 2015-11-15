@@ -2559,3 +2559,57 @@ reduction SectionPass
 		}
 	}
 end
+
+reduction IncludePass
+	ragel::machine_name :MachineName
+	{
+		string machine( $word->data, $word->length );
+
+		SectionDictEl *sdEl = id->sectionDict.find( machine );
+		if ( sdEl == 0 ) {
+			sdEl = new SectionDictEl( machine );
+			sdEl->value = new Section( machine );
+			id->sectionDict.insert( sdEl );
+		}
+
+		section = sdEl->value;
+	}
+
+	ragel::statement :Write
+	{
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::Write;
+		inputItem->loc = @Cmd;
+		inputItem->name = section->sectionName;
+		inputItem->section = section;
+
+		id->inputItems.append( inputItem );
+	}
+
+	c_host::section :MultiLine
+	{
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::EndSection;
+		inputItem->loc = @3;
+		inputItem->start = @1->byte;
+		inputItem->end = @3->byte + 3;
+		id->inputItems.append( inputItem );
+
+		if ( section != 0 ) {
+			inputItem->section = section;
+			section->lastReference = inputItem;
+		}
+
+		if ( includeDepth == 0 ) {
+			/* The end section may include a newline on the end, so
+			 * we use the last line, which will count the newline. */
+			InputItem *inputItem = new InputItem;
+			inputItem->type = InputItem::HostData;
+			inputItem->loc = @3;
+			if ( inputItem->loc.fileName == 0 )
+				inputItem->loc = @1;
+				
+			id->inputItems.append( inputItem );
+		}
+	}
+end
