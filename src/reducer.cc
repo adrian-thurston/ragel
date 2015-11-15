@@ -105,12 +105,12 @@ void TopLevel::include( string fileName, string machine )
 		el = new IncludeRec( fileName, machine );
 
 		InputData idr;
-		IncludePass includePass( &idr );
-		includePass.reduceFile( fileName.c_str() );
+		IncludePass includePass;
+		includePass.reduceFile( fileName.c_str(), id->hostLang );
 
 		/* Count bytes. */
 		int len = 0;
-		for ( InputItem *ii = idr.inputItems.head; ii != 0; ii = ii->next ) {
+		for ( InputItem *ii = includePass.inputItems.head; ii != 0; ii = ii->next ) {
 			if ( ii->section != 0 && ii->section->sectionName == machine &&
 					ii->type == InputItem::EndSection )
 			{
@@ -121,7 +121,7 @@ void TopLevel::include( string fileName, string machine )
 		/* Load bytes. */
 		el->data = new char[len+1];
 		len = 0;
-		for ( InputItem *ii = idr.inputItems.head; ii != 0; ii = ii->next ) {
+		for ( InputItem *ii = includePass.inputItems.head; ii != 0; ii = ii->next ) {
 			if ( ii->section != 0 && ii->section->sectionName == machine &&
 					ii->type == InputItem::EndSection )
 			{
@@ -136,7 +136,7 @@ void TopLevel::include( string fileName, string machine )
 
 		id->includeDict.insert( el );
 
-		idr.inputItems.empty();
+		includePass.inputItems.empty();
 	}
 
 	const char *targetMachine0 = targetMachine;
@@ -289,13 +289,13 @@ void SectionPass::reduceFile( const char *inputFileName )
 	colm_delete_program( program );
 }
 
-void IncludePass::reduceFile( const char *inputFileName )
+void IncludePass::reduceFile( const char *inputFileName, const HostLang *hostLang )
 {
 	const char *argv[5];
 	argv[0] = "rlparse";
-	argv[1] = "section";
+	argv[1] = "include";
 	argv[2] = inputFileName;
-	argv[3] = id->hostLang->rlhcArg;
+	argv[3] = hostLang->rlhcArg;
 	argv[4] = 0;
 
 	colm_program *program = colm_new_program( &colm_object );

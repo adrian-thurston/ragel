@@ -103,19 +103,17 @@ struct SectionPass
 
 struct IncludePass
 {
-	IncludePass( InputData *id )
+	IncludePass()
 	:
-		id(id),
-		section(0),
-		includeDepth(0)
+		section(0)
 	{
 	}
 
-	InputData *id;
 	Section *section;
-	int includeDepth;
+	InputItemList inputItems;
+	SectionDict sectionDict;
 
-	void reduceFile( const char *inputFileName );
+	void reduceFile( const char *inputFileName, const HostLang *hostLang );
 
 	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,

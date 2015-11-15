@@ -121,5 +121,10 @@ else if ( Cmd == 'section' ) {
 	if error
 		send stderr "[error]
 }
+else if ( Cmd == 'include' ) {
+	reduce IncludePass start[ Stream ]
+	if error
+		send stderr "[error]
+}
 
 include 'reducer.lm'
