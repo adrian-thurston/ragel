@@ -2573,17 +2573,6 @@ reduction IncludePass
 		section = sdEl->value;
 	}
 
-	ragel::statement :Write
-	{
-		InputItem *inputItem = new InputItem;
-		inputItem->type = InputItem::Write;
-		inputItem->loc = @Cmd;
-		inputItem->name = section->sectionName;
-		inputItem->section = section;
-
-		inputItems.append( inputItem );
-	}
-
 	c_host::section :MultiLine
 	{
 		InputItem *inputItem = new InputItem;
@@ -2597,13 +2586,5 @@ reduction IncludePass
 			inputItem->section = section;
 			section->lastReference = inputItem;
 		}
-
-		inputItem = new InputItem;
-		inputItem->type = InputItem::HostData;
-		inputItem->loc = @3;
-		if ( inputItem->loc.fileName == 0 )
-			inputItem->loc = @1;
-			
-		inputItems.append( inputItem );
 	}
 end
