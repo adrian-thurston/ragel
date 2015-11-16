@@ -110,7 +110,7 @@ struct IncludePass
 	}
 
 	Section *section;
-	InputItemList inputItems;
+	IncItemList incItems;
 	SectionDict sectionDict;
 
 	void reduceFile( const char *inputFileName, const HostLang *hostLang );

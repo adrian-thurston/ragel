@@ -66,6 +66,20 @@ struct InputItem
 	InputItem *prev, *next;
 };
 
+struct IncItem
+{
+	IncItem()
+	:
+		section(0)
+	{}
+
+	Section *section;
+	InputLoc loc;
+	long start, end;
+	IncItem *prev, *next;
+};
+
+
 typedef AvlMap<std::string, ParseData*, CmpString> ParseDataDict;
 typedef AvlMapEl<std::string, ParseData*> ParseDataDictEl;
 typedef DList<ParseData> ParseDataList;
@@ -76,6 +90,7 @@ typedef AvlMapEl<const char*, Parser6*> ParserDictEl;
 typedef DList<Parser6> ParserList;
 
 typedef DList<InputItem> InputItemList;
+typedef DList<IncItem> IncItemList;
 typedef Vector<const char *> ArgsVector;
 
 struct Section

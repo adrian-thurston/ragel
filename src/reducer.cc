@@ -110,21 +110,16 @@ void TopLevel::include( string fileName, string machine )
 
 		/* Count bytes. */
 		int len = 0;
-		for ( InputItem *ii = includePass.inputItems.head; ii != 0; ii = ii->next ) {
-			if ( ii->section != 0 && ii->section->sectionName == machine &&
-					ii->type == InputItem::EndSection )
-			{
+		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
+			if ( ii->section != 0 && ii->section->sectionName == machine )
 				len += ii->end - ii->start + 3;
-			}
 		}
 
 		/* Load bytes. */
 		el->data = new char[len+1];
 		len = 0;
-		for ( InputItem *ii = includePass.inputItems.head; ii != 0; ii = ii->next ) {
-			if ( ii->section != 0 && ii->section->sectionName == machine &&
-					ii->type == InputItem::EndSection )
-			{
+		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
+			if ( ii->section != 0 && ii->section->sectionName == machine ) {
 				std::ifstream f( fileName.c_str() );
 				f.seekg( ii->start, std::ios::beg );
 				f.read( el->data + len, ii->end - ii->start + 3 );
@@ -136,7 +131,7 @@ void TopLevel::include( string fileName, string machine )
 
 		id->includeDict.insert( el );
 
-		includePass.inputItems.empty();
+		includePass.incItems.empty();
 	}
 
 	const char *targetMachine0 = targetMachine;

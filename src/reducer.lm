@@ -2575,16 +2575,13 @@ reduction IncludePass
 
 	c_host::section :MultiLine
 	{
-		InputItem *inputItem = new InputItem;
-		inputItem->type = InputItem::EndSection;
-		inputItem->loc = @3;
-		inputItem->start = @1->byte;
-		inputItem->end = @3->byte + 3;
-		inputItems.append( inputItem );
+		IncItem *incItem = new IncItem;
+		incItem->loc = @3;
+		incItem->start = @1->byte;
+		incItem->end = @3->byte + 3;
+		incItems.append( incItem );
 
-		if ( section != 0 ) {
-			inputItem->section = section;
-			section->lastReference = inputItem;
-		}
+		if ( section != 0 )
+			incItem->section = section;
 	}
 end
