@@ -32,7 +32,7 @@ dnl
 AC_ARG_WITH(subject,
 	[AC_HELP_STRING([--with-subject], [location of ragel to test])],
 		[SUBJECT="$withval/bin/ragel"],
-		[SUBJECT="../src/ragel"] )
+		[SUBJECT="\${abs_top_builddir}/../src/ragel"] )
 
 AC_SUBST(SUBJECT)
 
