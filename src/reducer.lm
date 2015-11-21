@@ -2537,8 +2537,6 @@ reduction SectionPass
 		InputItem *inputItem = new InputItem;
 		inputItem->type = InputItem::EndSection;
 		inputItem->loc = @3;
-		inputItem->start = @1->byte;
-		inputItem->end = @3->byte + 3;
 		id->inputItems.append( inputItem );
 
 		if ( section != 0 ) {
@@ -2561,27 +2559,22 @@ end
 reduction IncludePass
 	ragel::machine_name :MachineName
 	{
-		string machine( $word->data, $word->length );
-
-		SectionDictEl *sdEl = sectionDict.find( machine );
-		if ( sdEl == 0 ) {
-			sdEl = new SectionDictEl( machine );
-			sdEl->value = new Section( machine );
-			sectionDict.insert( sdEl );
-		}
-
-		section = sdEl->value;
+		sectionMachine = string( $word->data, $word->length );
 	}
 
 	c_host::section :MultiLine
 	{
-		IncItem *incItem = new IncItem;
-		incItem->loc = @3;
-		incItem->start = @1->byte;
-		incItem->end = @3->byte + 3;
-		incItems.append( incItem );
+		if ( sectionMachine.size() > 0 && sectionMachine == targetMachine ) {
+			IncItem *incItem = new IncItem;
+			incItem->loc = @1;
 
-		if ( section != 0 )
+			/* The locations are token starts. Include the trailing }%% token. */
+			incItem->start = @1->byte;
+			incItem->end = @3->byte + 3;
+			incItem->length = incItem->end - incItem->start;
+
 			incItem->section = section;
+			incItems.append( incItem );
+		}
 	}
 end

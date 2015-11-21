@@ -105,26 +105,27 @@ void TopLevel::include( string fileName, string machine )
 		el = new IncludeRec( fileName, machine );
 
 		InputData idr;
-		IncludePass includePass;
+		IncludePass includePass( machine );
 		includePass.reduceFile( fileName.c_str(), id->hostLang );
 
 		/* Count bytes. */
-		int len = 0;
-		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
-			if ( ii->section != 0 && ii->section->sectionName == machine )
-				len += ii->end - ii->start + 3;
-		}
+		size_t len = 0;
+		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next )
+			len += ii->length;
 
-		/* Load bytes. */
+		/* Store bytes. */
 		el->data = new char[len+1];
 		len = 0;
 		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
-			if ( ii->section != 0 && ii->section->sectionName == machine ) {
-				std::ifstream f( fileName.c_str() );
-				f.seekg( ii->start, std::ios::beg );
-				f.read( el->data + len, ii->end - ii->start + 3 );
-				len += f.gcount();
+			std::ifstream f( fileName.c_str() );
+			f.seekg( ii->start, std::ios::beg );
+			f.read( el->data + len, ii->length );
+			size_t read = f.gcount();
+			if ( read != ii->length ) {
+				error(ii->loc) << "unexpected length in read of include: file changed "
+						"during include" << endl;
 			}
+			len += read;
 		}
 		el->data[len] = 0;
 		el->len = len;

@@ -103,15 +103,18 @@ struct SectionPass
 
 struct IncludePass
 {
-	IncludePass()
+	IncludePass( const string targetMachine )
 	:
+		targetMachine(targetMachine),
 		section(0)
 	{
 	}
 
+	const string targetMachine;
+	string sectionMachine;
 	Section *section;
 	IncItemList incItems;
-	SectionDict sectionDict;
+	SectionDict sectionDict2;
 
 	void reduceFile( const char *inputFileName, const HostLang *hostLang );
 

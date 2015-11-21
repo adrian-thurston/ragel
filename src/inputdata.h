@@ -61,7 +61,6 @@ struct InputItem
 
 	InputLoc loc;
 	bool processed;
-	long start, end;
 
 	InputItem *prev, *next;
 };
@@ -76,6 +75,7 @@ struct IncItem
 	Section *section;
 	InputLoc loc;
 	long start, end;
+	size_t length;
 	IncItem *prev, *next;
 };
 
