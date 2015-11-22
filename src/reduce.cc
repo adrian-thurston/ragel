@@ -259,7 +259,10 @@ void Compiler::writeCommit()
 		for ( ReduceNonTermList::Iter rdi = (*r)->reduceNonTerms; rdi.lte(); rdi++ ) {
 			*outStream <<
 				"struct lel_" << rdi->nonTerm->uniqueType->langEl->fullName << "\n"
-				"{";
+				"{\n";
+
+			*outStream <<
+				"#line " << rdi->loc.line << "\"" << rdi->loc.fileName << "\"\n";
 
 			writeHostItemList( 0, rdi->itemList );
 
@@ -391,6 +394,10 @@ void Compiler::writeCommit()
 				"			if ( kid->tree->prod_num == " << prodNum << " ) {\n";
 
 			loadRefs( action->production, action->itemList );
+
+			*outStream <<
+				"#line " << action->loc.line << "\"" << action->loc.fileName << "\"\n";
+
 			writeHostItemList( action->production, action->itemList );
 
 			*outStream << 
