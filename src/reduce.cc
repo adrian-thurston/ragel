@@ -106,36 +106,106 @@ void Compiler::loadRefs( Production *production, const ReduceTextItemList &list 
 				production->prodName->fullName << ";\n";
 	}
 
+	/*
+	 * In the first pass we 
+	 */
+	bool useCursor = false;
 	for ( Vector<ProdEl*>::Iter rhs = rhsUsed; rhs.lte(); rhs++ ) {
-		if ( *rhs != 0 ) {
-			ProdEl *prodEl = *rhs;
-			if ( prodEl->production == production ) {
-				if ( prodEl->langEl->type == LangEl::Term ) {
-					*outStream <<
-						"	colm_data *_rhs" << rhs.pos() << " = "
-							"get_rhs_el_kid( prg, kid->tree, "
-							<< prodEl->pos << " )->tree->tokdata;\n";
-				}
-				else {
-					*outStream <<
-							"lel_" << prodEl->langEl->fullName << " *"
-							"_rhs" << rhs.pos() << " = &((commit_reduce_union*)"
-							"(get_rhs_parse_tree( prg, lel, " <<
-							prodEl->pos << " )+1))->" <<
-							prodEl->langEl->fullName << ";\n";
-				}
-			}
+		if ( *rhs != 0 && (*rhs)->production == production &&
+				(*rhs)->langEl->type != LangEl::Term )
+		{
+			useCursor = true;
+			break;
+		}
+	}
 
+	if ( useCursor ) {
+		int cursorPos = 0;
+
+		*outStream <<
+				"	struct colm_parse_tree *_pt_cursor = lel->child;\n";
+
+		/* Same length, can concurrently walk with one test. */
+		Vector<ProdEl*>::Iter rhs = rhsUsed;
+		Vector<ProdEl*>::Iter loc = locUsed;
+		
+		for ( ; rhs.lte(); rhs++, loc++ ) {
+			ProdEl *prodEl = *rhs;
+			if ( prodEl != 0 ) {
+				while ( cursorPos < rhs.pos() ) {
+					*outStream <<
+						"	_pt_cursor = _pt_cursor->next;\n";
+					cursorPos += 1;
+				}
+
+
+				if ( prodEl->production == production ) {
+					if ( prodEl->langEl->type != LangEl::Term ) {
+						*outStream <<
+								"lel_" << prodEl->langEl->fullName << " *"
+								"_rhs" << rhs.pos() << " = &((commit_reduce_union*)"
+								"(_pt_cursor+1))->" <<
+								prodEl->langEl->fullName << ";\n";
+					}
+				}
+
+			}
+		}
+	}
+
+	useCursor = false;
+	for ( Vector<ProdEl*>::Iter rhs = rhsUsed; rhs.lte(); rhs++ ) {
+		if ( *rhs != 0 && (*rhs)->production == production &&
+				(*rhs)->langEl->type == LangEl::Term )
+		{
+			useCursor = true;
+			break;
 		}
 	}
 	for ( Vector<ProdEl*>::Iter loc = locUsed; loc.lte(); loc++ ) {
-		ProdEl *prodEl = *loc;
-		if ( prodEl != 0 ) {
-			if ( prodEl->production == production ) {
-				*outStream <<
-					"	colm_location *_loc" << loc.pos() << " = "
-						"colm_find_location( prg, get_rhs_el_kid( prg, kid->tree, " <<
-						prodEl->pos << " )->tree );\n";
+		if ( *loc != 0 ) {
+			useCursor = true;
+			break;
+		}
+	}
+
+	if ( useCursor ) {
+		int cursorPos = 0;
+
+		*outStream <<
+				"	kid_t *_tree_cursor = kid->tree->child;\n";
+
+		/* Same length, can concurrently walk with one test. */
+		Vector<ProdEl*>::Iter rhs = rhsUsed;
+		Vector<ProdEl*>::Iter loc = locUsed;
+		
+		for ( ; rhs.lte(); rhs++, loc++ ) {
+			ProdEl *prodEl = *rhs;
+			if ( prodEl != 0 ) {
+				while ( cursorPos < rhs.pos() ) {
+					*outStream <<
+						"	_tree_cursor = _tree_cursor->next;\n";
+					cursorPos += 1;
+				}
+
+
+				if ( prodEl->production == production ) {
+					if ( prodEl->langEl->type == LangEl::Term ) {
+						*outStream <<
+							"	colm_data *_rhs" << rhs.pos() << " = "
+								"_tree_cursor->tree->tokdata;\n";
+					}
+				}
+
+			}
+
+			ProdEl *locEl = *loc;
+			if ( locEl != 0 ) {
+				if ( locEl->production == production ) {
+					*outStream <<
+						"	colm_location *_loc" << loc.pos() << " = "
+							"colm_find_location( prg, _tree_cursor->tree );\n";
+				}
 			}
 		}
 	}
