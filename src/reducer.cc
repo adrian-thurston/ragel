@@ -94,7 +94,7 @@ long TopLevel::tryLongScan( const InputLoc &loc, const char *data )
 	return priorityNum;
 }
 
-void TopLevel::include( string fileName, string machine )
+void TopLevel::include( const InputLoc &incLoc, string fileName, string machine )
 {
 	/* Stash the current section name and pd. */
 	string sectionName = pd->sectionName;
@@ -108,31 +108,37 @@ void TopLevel::include( string fileName, string machine )
 		IncludePass includePass( machine );
 		includePass.reduceFile( fileName.c_str(), id->hostLang );
 
-		/* Count bytes. */
-		size_t len = 0;
-		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next )
-			len += ii->length;
-
-		/* Store bytes. */
-		el->data = new char[len+1];
-		len = 0;
-		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
-			std::ifstream f( fileName.c_str() );
-			f.seekg( ii->start, std::ios::beg );
-			f.read( el->data + len, ii->length );
-			size_t read = f.gcount();
-			if ( read != ii->length ) {
-				error(ii->loc) << "unexpected length in read of include: file changed "
-						"during include" << endl;
-			}
-			len += read;
+		if ( includePass.incItems.length() == 0 ) {
+			error(incLoc) << "could not find machine " << machine <<
+					" in " << fileName << endp;
 		}
-		el->data[len] = 0;
-		el->len = len;
+		else {
+			/* Count bytes. */
+			size_t len = 0;
+			for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next )
+				len += ii->length;
 
-		id->includeDict.insert( el );
+			/* Store bytes. */
+			el->data = new char[len+1];
+			len = 0;
+			for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
+				std::ifstream f( fileName.c_str() );
+				f.seekg( ii->start, std::ios::beg );
+				f.read( el->data + len, ii->length );
+				size_t read = f.gcount();
+				if ( read != ii->length ) {
+					error(ii->loc) << "unexpected length in read of included file: "
+							"possible change to file" << endp;
+				}
+				len += read;
+			}
+			el->data[len] = 0;
+			el->len = len;
 
-		includePass.incItems.empty();
+			id->includeDict.insert( el );
+
+			includePass.incItems.empty();
+		}
 	}
 
 	const char *targetMachine0 = targetMachine;
@@ -169,7 +175,6 @@ void TopLevel::reduceString( const char *data )
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 5, argv );
 	colm_delete_program( program );
-
 }
 
 void TopLevel::reduceFile( const char *inputFileName )

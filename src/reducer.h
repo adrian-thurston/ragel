@@ -75,7 +75,7 @@ struct TopLevel
 			MachineDef *machineDef, bool isInstance );
 	long tryLongScan( const InputLoc &loc, const char *data );
 	void loadImport( std::string fileName );
-	void include( string fileName, string machine );
+	void include( const InputLoc &incLoc, string fileName, string machine );
 
 	void reduceFile( const char *inputFileName );
 	void reduceString( const char *data );

@@ -2374,7 +2374,7 @@ reduction TopLevel
 		if ( $include_spec->machine.data != 0 )
 			machine = string( $include_spec->machine.data, $include_spec->machine.length );
 
-		include( fileName, machine );
+		include( @1, fileName, machine );
 	}
 
 	ragel::statement :Write
@@ -2570,7 +2570,7 @@ reduction IncludePass
 
 			/* The locations are token starts. Include the trailing }%% token. */
 			incItem->start = @1->byte;
-			incItem->end = @3->byte + 3;
+			incItem->end = @3->byte + $3->length;
 			incItem->length = incItem->end - incItem->start;
 
 			incItem->section = section;
