@@ -596,7 +596,7 @@ void InputData::checkArgs()
 
 	if ( !frontendSpecified ) {
 		if ( hostLang->lang == HostLang::C || hostLang->lang == HostLang::Asm )
-			frontend = KelbtBased;
+			frontend = ReduceBased;
 		else
 			frontend = ColmBased;
 	}
