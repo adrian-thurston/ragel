@@ -2,11 +2,7 @@ COLM = @COLM@
 KELBT = @KELBT@
 RAGEL = @RAGEL@
 
-bin_PROGRAMS = ragel
-
-if WITH_COLM
-bin_PROGRAMS += rlhc
-endif
+bin_PROGRAMS = ragel rlhc
 
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
@@ -32,7 +28,6 @@ nodist_ragel_SOURCES = version.h
 
 BUILT_SOURCES = version.h
 
-if WITH_COLM
 nodist_ragel_SOURCES += \
 	parse.c if.h if.cc commit.cc
 
@@ -40,7 +35,6 @@ ragel_SOURCES += \
 	load.cc load.h
 
 ragel_LDADD = -lcolmd
-endif
 
 
 version.h: Makefile
@@ -72,8 +66,6 @@ EXTRA_DIST = \
 	rlparse.kl
 
 CLEANFILES = parse.c if.h if.cc commit.cc
-
-if WITH_COLM
 
 RAGEL_LM = \
 	ragel.lm \
@@ -108,8 +100,6 @@ rlhc_SOURCES =
 
 rlhc$(EXEEXT): rlhc.lm $(RLHC)
 	$(COLM) -o $@ $<
-
-endif
 
 # This dependency comes from the import of the parser defines into the scanner.
 rlscan.cc: rlparse.h

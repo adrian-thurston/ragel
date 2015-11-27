@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2013 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2015 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -142,12 +142,7 @@ void showHostLangNames()
 	for ( int i = 0; i < numHostLangs; i++ ) {
 		if ( i > 0 )
 			cout << " ";
-#ifdef WITH_COLM
 		cout << hostLangs[i]->name;
-#else
-		if ( !hostLangs[i]->rlhcRequired )
-			cout << hostLangs[i]->name;
-#endif
 	}
 	cout << endl;
 	exit(0);
@@ -158,12 +153,7 @@ void showHostLangArgs()
 	for ( int i = 0; i < numHostLangs; i++ ) {
 		if ( i > 0 )
 			cout << " ";
-#ifdef WITH_COLM
 		cout << hostLangs[i]->arg;
-#else
-		if ( !hostLangs[i]->rlhcRequired )
-			cout << hostLangs[i]->arg;
-#endif
 	}
 	cout << endl;
 	exit(0);
@@ -172,10 +162,8 @@ void showHostLangArgs()
 void showFrontends()
 {
 	cout << "--kelbt-frontend";
-#ifdef WITH_COLM
 	cout << " --colm-frontend";
 	cout << " --reduce-frontend";
-#endif
 	cout << endl;
 	exit(0);
 }
@@ -183,9 +171,7 @@ void showFrontends()
 void showBackends()
 {
 	cout << "--direct-backend";
-#ifdef WITH_COLM
 	cout << " --colm-backend";
-#endif
 	cout << endl;
 	exit(0);
 }
@@ -439,7 +425,6 @@ void InputData::parseArgs( int argc, const char **argv )
 					frontend = KelbtBased;
 					frontendSpecified = true;
 				}
-#ifdef WITH_COLM
 				else if ( strcmp( arg, "colm-frontend" ) == 0 ) {
 					frontend = ColmBased;
 					frontendSpecified = true;
@@ -448,16 +433,6 @@ void InputData::parseArgs( int argc, const char **argv )
 					frontend = ReduceBased;
 					frontendSpecified = true;
 				}
-#else
-				else if ( strcmp( arg, "colm-frontend" ) == 0 ) {
-					error() << "--colm-frontend specified but, "
-							"ragel not built with colm support" << endp;
-				}
-				else if ( strcmp( arg, "reduce-frontend" ) == 0 ) {
-					error() << "--reduce-frontend specified but, "
-							"ragel not built with colm support" << endp;
-				}
-#endif
 				else if ( strcmp( arg, "asm" ) == 0 )
 					hostLang = &hostLangAsm;
 				else if ( strcmp( arg, "gnu-asm-x86-64-sys-v" ) == 0 )
@@ -618,13 +593,6 @@ void InputData::checkArgs()
 		error() << "output file \"" << outputFileName  << 
 				"\" is the same as the input file" << endp;
 	}
-
-#ifndef WITH_COLM
-	if ( hostLang->rlhcRequired ) {
-		error() << "host language " << hostLang->name <<
-				" requires building ragel with Colm support" << endp;
-	}
-#endif
 
 	if ( !frontendSpecified ) {
 		if ( hostLang->lang == HostLang::C || hostLang->lang == HostLang::Asm )

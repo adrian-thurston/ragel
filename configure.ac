@@ -119,14 +119,15 @@ AC_ARG_WITH(colm,
 			AC_ERROR( [check colm: expected version $EXPECTED_COLM,]
 					[ but $INSTALLED_VER is installed] )
 		fi
-
-		AC_DEFINE([WITH_COLM], [1], [colm is available])
 	],
 	[]
 )
 
+if test -z "$COLM"; then
+	AC_ERROR([colm is required to build ragel])
+fi
+
 AC_SUBST(COLM)
-AM_CONDITIONAL([WITH_COLM], [test x$COLM != x])
 
 dnl Checks to carry out if we are building the manual.
 if test "x$build_manual" = "xyes"; then

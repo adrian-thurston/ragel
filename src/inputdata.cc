@@ -392,7 +392,6 @@ void InputData::processDot()
 void InputData::runRlhc()
 {
 	if ( backend == Translated ) {
-#ifdef WITH_COLM
 		if ( !noIntermediate ) {
 			string rlhc = dirName + "/rlhc " + 
 					origOutputFileName + " " +
@@ -409,9 +408,6 @@ void InputData::runRlhc()
 			if ( !saveTemps )
 				unlink( genOutputFileName.c_str() );
 		}
-#else
-		error() << "colm-based codegen not available" << endp;
-#endif
 	}
 }
 
@@ -643,8 +639,6 @@ void InputData::processKelbt()
 
 void InputData::processColm()
 {
-#ifdef WITH_COLM
-
 	/*
 	 * Colm-based parser introduced in ragel 7. Uses more memory.
 	 */
@@ -673,14 +667,11 @@ void InputData::processColm()
 		processCode();
 
 	assert( gblErrorCount == 0 );
-#endif
 }
 
 
 void InputData::processReduce()
 {
-#ifdef WITH_COLM
-
 	makeDefaultFileName();
 	makeTranslateOutputFileName();
 	createOutputStream();
@@ -725,7 +716,6 @@ void InputData::processReduce()
 //		processCode();
 //
 //	assert( gblErrorCount == 0 );
-#endif
 }
 
 
