@@ -28,7 +28,6 @@ struct nfa_bp_rec
 %%{
 	machine genrep;
 	alphtype unsigned char;
-	include shared;
 
 	action eol { p+1 == eof }
 	eol = '' %when eol;
