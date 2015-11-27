@@ -1154,9 +1154,10 @@ void Compiler::generateOutput( long activeRealm, bool includeCommit )
 	/* Write the runtime data. */
 	pdaGen->writeRuntimeData( runtimeData, pdaTables );
 
-	writeHostCall();
+	if ( hostAdapters )
+		writeHostCall();
 
-	if ( includeCommit )
+	if ( hostAdapters && includeCommit )
 		writeCommitStub();
 
 	if ( !gblLibrary ) 

@@ -445,7 +445,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	out << "};\n\n";
 
 	out <<
-		"struct colm_sections colm_object = \n"
+		"struct colm_sections " << objectName << " = \n"
 		"{\n"
 		"	" << lelInfo() << ",\n"
 		"	" << runtimeData->num_lang_els << ",\n"

@@ -84,7 +84,9 @@ const char *binaryFn = 0;
 const char *exportHeaderFn = 0;
 const char *exportCodeFn = 0;
 const char *commitCodeFn = 0;
+const char *objectName = "colm_object";
 bool exportCode = false;
+bool hostAdapters = true;
 
 bool generateGraphviz = false;
 bool verbose = false;
@@ -509,7 +511,7 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "cD:e:x:I:vdlio:S:M:vHh?-:sVa:m:", argc, argv );
+	ParamCheck pc( "cD:e:x:I:vdlio:S:M:vHh?-:sVa:m:b:", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -531,8 +533,8 @@ void processArgs( int argc, const char **argv )
 			case 'i':
 				branchPointInfo = true;
 				break;
-			/* Output. */
 			case 'o':
+				/* Output. */
 				if ( *pc.parameterArg == 0 )
 					error() << "a zero length output file name was given" << endl;
 				else if ( outputFn != 0 )
@@ -540,6 +542,17 @@ void processArgs( int argc, const char **argv )
 				else {
 					/* Ok, remember the output file name. */
 					outputFn = pc.parameterArg;
+				}
+				break;
+
+			case 'b':
+				/* object name. */
+				if ( *pc.parameterArg == 0 )
+					error() << "a zero length object name was given" << endl;
+				else {
+					/* Ok, remember the output file name. */
+					objectName = pc.parameterArg;
+					hostAdapters = false;
 				}
 				break;
 
