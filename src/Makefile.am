@@ -2,7 +2,7 @@ COLM = @COLM@
 KELBT = @KELBT@
 RAGEL = @RAGEL@
 
-bin_PROGRAMS = ragel rlhc
+bin_PROGRAMS = ragel
 
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
@@ -33,7 +33,8 @@ nodist_ragel_SOURCES = version.h
 BUILT_SOURCES = version.h
 
 nodist_ragel_SOURCES += \
-	parse.c if.h if.cc commit.cc
+	parse.c if.h if.cc commit.cc \
+	rlhc.c
 
 ragel_SOURCES += \
 	load.cc load.h
@@ -102,8 +103,8 @@ RLHC = \
 
 rlhc_SOURCES =
 
-rlhc$(EXEEXT): rlhc.lm $(RLHC)
-	$(COLM) -o $@ $<
+rlhc.c: rlhc.lm $(RLHC)
+	$(COLM) -c -b rlhc_object -o $@ $<
 
 if WITH_RAGEL_KELBT
 

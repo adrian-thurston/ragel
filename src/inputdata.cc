@@ -38,6 +38,8 @@ using std::cerr;
 using std::endl;
 using std::ios;
 
+extern colm_sections rlhc_object;
+
 /* Invoked by the parser when the root element is opened. */
 void InputData::cdDefaultFileName( const char *inputFile )
 {
@@ -401,9 +403,17 @@ void InputData::runRlhc()
 			if ( rlhcShowCmd )
 				std::cout << rlhc << std::endl;
 
-			int res = system( rlhc.c_str() );
-			if ( res != 0 )
-				exit( 1 );
+			const char *argv[5];
+			argv[0] = "rlhc";
+			argv[1] = origOutputFileName.c_str();
+			argv[2] = genOutputFileName.c_str(); 
+			argv[3] = hostLang->rlhcArg;
+			argv[4] = 0;
+
+			colm_program *program = colm_new_program( &rlhc_object );
+			colm_set_debug( program, 0 );
+			colm_run_program( program, 4, argv );
+			colm_delete_program( program );
 
 			if ( !saveTemps )
 				unlink( genOutputFileName.c_str() );
