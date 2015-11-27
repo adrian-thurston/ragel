@@ -13,16 +13,20 @@ ragel_SOURCES = \
 	binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h binloopvar.h binexpvar.h \
 	flat.h flatloopgoto.h flatexpgoto.h flatvar.h flatloopvar.h flatexpvar.h \
 	goto.h switchloopgoto.h switchexpgoto.h \
-	ipgoto.h xml.h dot.h asm.h rlparse.h \
+	ipgoto.h xml.h dot.h asm.h \
 	\
 	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
 	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc fsmnfa.cc \
 	inputdata.cc common.cc redfsm.cc gendata.cc allocgen.cc \
-	rlscan.cc rlparse.cc codegen.cc reducer.cc \
+	codegen.cc reducer.cc \
 	binary.cc binloopgoto.cc binexpgoto.cc binvar.cc binloopvar.cc binexpvar.cc \
 	flat.cc flatloopgoto.cc flatexpgoto.cc flatvar.cc flatloopvar.cc flatexpvar.cc \
 	goto.cc switchloopgoto.cc switchexpgoto.cc \
 	ipgoto.cc xml.cc dot.cc asm.cc
+
+if WITH_RAGEL_KELBT
+ragel_SOURCES += rlscan.cc rlparse.cc rlparse.h 
+endif
 
 nodist_ragel_SOURCES = version.h
 
@@ -101,6 +105,8 @@ rlhc_SOURCES =
 rlhc$(EXEEXT): rlhc.lm $(RLHC)
 	$(COLM) -o $@ $<
 
+if WITH_RAGEL_KELBT
+
 # This dependency comes from the import of the parser defines into the scanner.
 rlscan.cc: rlparse.h
 inputdata.cc: rlparse.h
@@ -116,4 +122,4 @@ rlparse.h: rlparse.kh
 rlparse.cc: rlparse.kl rlparse.kh
 	$(KELBT) -o $@ $<
 
-
+endif

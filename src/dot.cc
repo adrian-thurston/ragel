@@ -24,7 +24,6 @@
 #include "gendata.h"
 #include "inputdata.h"
 #include "parsedata.h"
-#include "rlparse.h"
 
 using std::istream;
 using std::ifstream;

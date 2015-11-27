@@ -147,6 +147,7 @@ struct Parser6
 
 	Parser6 *prev, *next;
 
+	void terminateParser();
 
 	bool parseSubstitutions;
 };

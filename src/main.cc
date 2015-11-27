@@ -161,17 +161,18 @@ void showHostLangArgs()
 
 void showFrontends()
 {
+	cout << "--colm-frontend";
+	cout << "--reduce-frontend";
+#ifdef WITH_RAGEL_KELBT
 	cout << "--kelbt-frontend";
-	cout << " --colm-frontend";
-	cout << " --reduce-frontend";
+#endif
 	cout << endl;
 	exit(0);
 }
 
 void showBackends()
 {
-	cout << "--direct-backend";
-	cout << " --colm-backend";
+	cout << "--direct-backend --colm-backend";
 	cout << endl;
 	exit(0);
 }
@@ -421,10 +422,17 @@ void InputData::parseArgs( int argc, const char **argv )
 					rlhcShowCmd = true;
 				else if ( strcmp( arg, "no-intermediate" ) == 0 )
 					noIntermediate = true;
+#ifdef WITH_RAGEL_KELBT
 				else if ( strcmp( arg, "kelbt-frontend" ) == 0 ) {
 					frontend = KelbtBased;
 					frontendSpecified = true;
 				}
+#else
+				else if ( strcmp( arg, "kelbt-frontend" ) == 0 ) {
+					error() << "--kelbt-frontend specified but, "
+							"ragel not built with ragel+kelbt support" << endp;
+				}
+#endif
 				else if ( strcmp( arg, "colm-frontend" ) == 0 ) {
 					frontend = ColmBased;
 					frontendSpecified = true;

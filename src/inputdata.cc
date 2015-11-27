@@ -461,8 +461,10 @@ void InputData::checkLastRef( InputItem *ii )
 		ParseData *pd = ii->pd;
 
 		if ( pd->instanceList.length() > 0 ) {
+#ifdef WITH_RAGEL_KELBT
 			if ( ii->parser != 0 ) 
-				terminateParser( ii->parser );
+				ii->parser->terminateParser();
+#endif
 
 			pd->prepareMachineGen( 0, hostLang );
 
@@ -501,8 +503,10 @@ void InputData::checkLastRef( InputItem *ii )
 			if ( lastFlush->pd != 0 && lastFlush->section->lastReference == lastFlush ) {
 				if ( lastFlush->pd->instanceList.length() > 0 ) {
 					lastFlush->pd->clear();
+#ifdef WITH_RAGEL_KELBT
 					if ( lastFlush->parser != 0 )
 						lastFlush->parser->clear();
+#endif
 				}
 			}
 
@@ -523,31 +527,35 @@ void InputData::makeFirstInputItem()
 }
 
 /* Send eof to all parsers. */
-void InputData::terminateParser( Parser6 *parser )
-{
-	/* FIXME: a proper token is needed here. Suppose we should use the
-	 * location of EOF in the last file that the parser was referenced in. */
-	InputLoc loc;
-	loc.fileName = "<EOF>";
-	loc.line = 0;
-	loc.col = 0;
-
-	parser->token( loc, Parser6_tk_eof, 0, 0 );
-}
-
-/* Send eof to all parsers. */
 void InputData::terminateAllParsers( )
 {
-	/* FIXME: a proper token is needed here. Suppose we should use the
-	 * location of EOF in the last file that the parser was referenced in. */
-	InputLoc loc;
-	loc.fileName = "<EOF>";
-	loc.line = 0;
-	loc.col = 0;
+#ifdef WITH_RAGEL_KELBT
 	for ( ParserDict::Iter pdel = parserDict; pdel.lte(); pdel++ )
-		pdel->value->token( loc, Parser6_tk_eof, 0, 0 );
+		pdel->value->terminateParser();
+#endif
 }
 
+void InputData::flushRemaining()
+{
+	/* Flush remaining items. */
+	while ( lastFlush != 0 ) {
+		/* Flush out. */
+		writeOutput( lastFlush );
+
+		lastFlush = lastFlush->next;
+	}
+}
+
+void InputData::makeTranslateOutputFileName()
+{
+	if ( backend == Translated ) {
+		origOutputFileName = outputFileName;
+		genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
+		outputFileName = genOutputFileName.c_str();
+	}
+}
+
+#ifdef WITH_RAGEL_KELBT
 void InputData::parseKelbt()
 {
 	/*
@@ -584,26 +592,6 @@ void InputData::parseKelbt()
 		exit(1);
 }
 
-void InputData::flushRemaining()
-{
-	/* Flush remaining items. */
-	while ( lastFlush != 0 ) {
-		/* Flush out. */
-		writeOutput( lastFlush );
-
-		lastFlush = lastFlush->next;
-	}
-}
-
-void InputData::makeTranslateOutputFileName()
-{
-	if ( backend == Translated ) {
-		origOutputFileName = outputFileName;
-		genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
-		outputFileName = genOutputFileName.c_str();
-	}
-}
-
 void InputData::processKelbt()
 {
 	/* With the kelbt version we implement two parse passes. The first is used
@@ -636,6 +624,7 @@ void InputData::processKelbt()
 
 	assert( gblErrorCount == 0 );
 }
+#endif
 
 void InputData::processColm()
 {
@@ -703,27 +692,15 @@ void InputData::processReduce()
 
 	closeOutput();
 	runRlhc();
-
-//	/* Bail on above error. */
-//	if ( gblErrorCount > 0 )
-//		exit(1);
-//
-//	if ( generateXML )
-//		processXML();
-//	else if ( generateDot )
-//		processDot();
-//	else 
-//		processCode();
-//
-//	assert( gblErrorCount == 0 );
 }
-
 
 void InputData::process()
 {
 	switch ( frontend ) {
 		case KelbtBased: {
+#ifdef WITH_RAGEL_KELBT
 			processKelbt();
+#endif
 			break;
 		}
 		case ColmBased: {

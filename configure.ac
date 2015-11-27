@@ -87,16 +87,15 @@ AC_ARG_WITH(kelbt,
 	]
 )
 
-if test -z "$RAGEL"; then
-	AC_ERROR([ragel is required to build this package])
-fi
-if test -z "$KELBT"; then
-	AC_ERROR([kelbt is required to build this package])
-fi
-
 AC_SUBST(RAGEL)
 AC_SUBST(KELBT)
 
+if test x$RAGEL != x -a x$KELBT != x; then
+	RAGEL_KELBT=yes
+	AC_DEFINE([WITH_RAGEL_KELBT], [1], [ragel AND kelbt are available])
+fi
+
+AM_CONDITIONAL([WITH_RAGEL_KELBT], [test x$RAGEL_KELBT == xyes])
 
 dnl
 dnl Check for colm.

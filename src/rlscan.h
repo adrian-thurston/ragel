@@ -25,7 +25,9 @@
 #include <iostream>
 #include "rlscan.h"
 #include "vector.h"
+#ifdef WITH_RAGEL_KELBT
 #include "rlparse.h"
+#endif
 #include "parsedata.h"
 #include "avltree.h"
 #include "vector.h"

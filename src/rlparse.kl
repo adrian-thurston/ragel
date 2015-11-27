@@ -1874,3 +1874,18 @@ int Parser6::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
 	}
 	return res;
 }
+
+/* Send eof to all parsers. */
+void Parser6::terminateParser()
+{
+	/* FIXME: a proper token is needed here. Suppose we should use the
+	 * location of EOF in the last file that the parser was referenced in. */
+	InputLoc loc;
+	loc.fileName = "<EOF>";
+	loc.line = 0;
+	loc.col = 0;
+
+	token( loc, Parser6_tk_eof, 0, 0 );
+}
+
+
