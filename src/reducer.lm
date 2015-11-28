@@ -1,7 +1,375 @@
 reduction TopLevel
-	#
+
+	# def machine_name
+	#	[`machine word `;] :MachineName
+	ragel::machine_name :MachineName
+	{
+		InputLoc sectionLoc;
+		string fileName = "input.rl";
+		string machine( $word->data, $word->length );
+
+		if ( includeDepth > 0 ) {
+			/* Check if the the machine is the one we are searching for. If
+			 * not, reset pd. Otherwise, rename it to target machine because we
+			 * are drawing the statements into target. */
+			if ( machine == searchMachine )
+				machine = targetMachine;
+		}
+
+		SectionDictEl *sdEl = id->sectionDict.find( machine.c_str() );
+		if ( sdEl == 0 ) {
+			Section *section = new Section( strdup(machine.c_str() ) );
+			sdEl = new SectionDictEl( section->sectionName );
+			sdEl->value = section;
+			id->sectionDict.insert( sdEl );
+		}
+
+		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
+		if ( pdEl == 0 ) {
+			pdEl = new ParseDataDictEl( machine );
+			pdEl->value = new ParseData( id, fileName, machine,
+					id->nextMachineId++, sectionLoc, hostLang,
+					minimizeLevel, minimizeOpt );
+			id->parseDataDict.insert( pdEl );
+			id->parseDataList.append( pdEl->value );
+		}
+
+		pd = pdEl->value;
+	}
+
 	# def statement
-	#
+	#	[assignment] :Assignment
+	# |	[instantiation] :Instantiation
+	# |	[nfa_union] :NfaUnion
+	# |	[action_spec] :ActionSpec
+	# |	[`prepush action_block] :PrePush commit
+	# |	[`postpop action_block] :PostPop commit
+	# |	[`nfaprepush action_block] :NfaPrePush commit
+	# |	[`nfapostpop action_block] :NfaPostPop commit
+	# |	[`variable variable_name inline_expr_reparse] :Variable commit
+	# |	[`alphtype alphtype_type `;] :AlphType commit
+	# |	[`access inline_expr_reparse] :Access commit
+	# |	[`write Cmd: word ArgList: write_arg* `;] :Write commit
+	# |	[`getkey inline_expr_reparse] :GetKey commit
+	# |	[`import string `;] :Import commit
+	# |	[`include include_spec `;] :Include commit
+
+	# def assignment
+	#	[opt_export def_name `= join `;] :Assignment commit
+	ragel::assignment :Assignment
+	{
+		InputLoc loc = &$def_name->loc;
+
+		bool exportMachine = $opt_export->isSet;
+		if ( exportMachine )
+			exportContext.append( true );
+
+		string name( $def_name->tok.data );
+
+		/* Main machine must be an instance. */
+		bool isInstance = false;
+		if ( name == MAIN_MACHINE ) {
+			warning(loc) << "main machine will be implicitly instantiated" << endl;
+			isInstance = true;
+		}
+
+		MachineDef *machineDef = new MachineDef( $join->join );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, isInstance );
+
+		if ( exportMachine )
+			exportContext.remove( exportContext.length()-1 );
+
+		/* Pass a location to join_or_lm */
+		if ( machineDef->join != 0 )
+			machineDef->join->loc = loc;
+	}
+
+	# def instantiation
+	#	[opt_export def_name `:= lm `;] :Instantiation commit
+	ragel::instantiation :Instantiation
+	{
+		InputLoc loc = &$def_name->loc;
+
+		bool exportMachine = $opt_export->isSet;
+		if ( exportMachine )
+			exportContext.append( true );
+
+		string name( $def_name->tok.data );
+
+		MachineDef *machineDef = $lm->machineDef;
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, true );
+
+		if ( exportMachine )
+			exportContext.remove( exportContext.length()-1 );
+
+		/* Pass a location to join_or_lm */
+		if ( machineDef->join != 0 )
+			machineDef->join->loc = loc;
+	}
+
+	# def def_name
+	# 	[word] :Word
+	ragel::def_name
+	{
+		Token tok;
+		colm_location loc;
+	}
+
+	ragel::def_name :Word
+	{
+		string data( $word->data, $word->length );
+		$$->tok.set( $word );
+		$$->loc = *@1;
+
+		/* Make/get the priority key. The name may have already been referenced
+		 * and therefore exist. */
+		PriorDictEl *priorDictEl;
+		if ( pd->priorDict.insert( data, pd->nextPriorKey, &priorDictEl ) )
+			pd->nextPriorKey += 1;
+		pd->curDefPriorKey = priorDictEl->value;
+
+		/* Make/get the local error key. */
+		LocalErrDictEl *localErrDictEl;
+		if ( pd->localErrDict.insert( data, pd->nextLocalErrKey, &localErrDictEl ) )
+			pd->nextLocalErrKey += 1;
+		pd->curDefLocalErrKey = localErrDictEl->value;
+	}
+
+	
+
+	# def nfa_union
+	#	[def_name `|= nfa_rounds nfa_expr `;] :NfaUnion commit
+	ragel::nfa_union :NfaUnion
+	{
+		InputLoc loc = &$def_name->loc;
+		string name( $def_name->tok.data );
+
+		$nfa_expr->nfaUnion->roundsList = $nfa_rounds->roundsList;
+
+		MachineDef *machineDef = new MachineDef( $nfa_expr->nfaUnion );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, true );
+	}
+
+	# def action_spec
+	#	[`action word opt_action_params action_block] :ActionSpec commit
+	ragel::action_spec
+	{
+		Action *action;
+	}
+
+	ragel::action_spec :ActionSpec
+	{
+		string data( $word->data, $word->length );
+		if ( pd->actionDict.find( data ) ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@word) << "action \"" << data << "\" already defined" << endl;
+		}
+		else {
+			//std::cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << std::endl;
+			/* Add the action to the list of actions. */
+			Action *newAction = new Action( @1, data, 
+					$action_block->inlineList, pd->nextCondId++ );
+
+			/* Insert to list and dict. */
+			pd->actionList.append( newAction );
+			pd->actionDict.insert( newAction );
+
+			newAction->paramList = $opt_action_params->paramList;
+			if ( $opt_action_params->paramList != 0 )
+				newAction->argListMap = new ActionArgListMap;
+		}
+	}
+
+	# def statement
+	# |	[`prepush action_block] :PrePush commit
+	# |	[`postpop action_block] :PostPop commit
+	ragel::statement :PrePush
+	{
+		if ( pd->prePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@1) << "prepush code already defined" << endl;
+		}
+		pd->prePushExpr = new InlineBlock( @1, $action_block->inlineList );
+
+	}
+	ragel::statement :PostPop
+	{
+		if ( pd->postPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@1) << "postpop code already defined" << endl;
+		}
+		pd->postPopExpr = new InlineBlock( @1, $action_block->inlineList );
+	}
+
+	# def statement
+	#   [`nfaprepush action_block] :NfaPrePush commit
+	ragel::statement :NfaPrePush
+	{
+		if ( pd->nfaPrePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@1) << "nfa_pre_push code already defined" << endl;
+		}
+
+		pd->nfaPrePushExpr = new InlineBlock( @1, $action_block->inlineList );
+	}
+
+	# def statement
+	#   [`nfapostpop action_block] :NfaPostPop commit
+	ragel::statement :NfaPostPop
+	{
+		if ( pd->nfaPostPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@1) << "nfa_post_pop code already defined" << endl;
+		}
+
+		pd->nfaPostPopExpr = new InlineBlock( @1, $action_block->inlineList );
+	}
+
+	# def statement
+	# |	[`variable variable_name inline_expr_reparse] :Variable commit
+	# |	[`access inline_expr_reparse] :Access commit
+	ragel::statement :Variable
+	{
+		string data( $variable_name->data, $variable_name->length );
+		bool wasSet = pd->setVariable( data.c_str(),
+				$inline_expr_reparse->inlineList );
+		if ( !wasSet )
+			error(@1) << "bad variable name: " << $variable_name->data << endl;
+	}
+
+	ragel::statement :Access
+	{
+		pd->accessExpr = $inline_expr_reparse->inlineList;
+	}
+
+	# def statement
+	# |	[`write Cmd: word ArgList: write_arg* `;] :Write commit
+	ragel::statement :Write
+	{
+		if ( includeDepth == 0 ) {
+			id->curItem = id->curItem->next;
+			InputItem *inputItem = id->curItem;
+
+			string cmd( $Cmd->data, $Cmd->length );
+			inputItem->writeArgs.append( cmd );
+			inputItem->writeArgs.append( writeArgs );
+
+			inputItem->pd = pd;
+		}
+
+		/* Clear the write args collector. */
+		writeArgs.empty();
+	}
+
+	# def alphtype_type
+	#	[W1: word] :One
+	# |	[W1: word W2: word] :Two
+	ragel::alphtype_type :One
+	{
+		string one( $W1->data, $W1->length );
+		if ( ! pd->setAlphType( @W1, hostLang, one.c_str() ) ) {
+			// Recover by ignoring the alphtype statement.
+			error(@W1) << "\"" << one << 
+					"\" is not a valid alphabet type" << endl;
+		}
+	}
+
+	ragel::alphtype_type :Two
+	{
+		string one( $W1->data, $W1->length );
+		string two( $W2->data, $W2->length );
+		if ( ! pd->setAlphType( @W1, hostLang, one.c_str(), two.c_str() ) ) {
+			// Recover by ignoring the alphtype statement.
+			error(@W1) << "\"" << one << 
+					"\" is not a valid alphabet type" << endl;
+		}
+	}
+
+	# def statement
+	# |	[`getkey inline_expr_reparse] :GetKey commit
+	# |	[`import string `;] :Import commit
+	ragel::statement :GetKey
+	{
+		pd->getKeyExpr = $inline_expr_reparse->inlineList;
+	}
+
+	ragel::statement :Import
+	{
+		InputLoc loc = @string;
+		std::string fileName( $string->data, $string->length );
+
+		long length;
+		bool caseInsensitive;
+		char *unescaped = prepareLitString( loc,
+					fileName.c_str(), fileName.size(),
+					length, caseInsensitive );
+
+		loadImport( unescaped );
+	}
+
+	# def statement
+	#   [`include include_spec `;] :Include commit
+	ragel::statement :Include
+	{
+		string fileName = id->inputFileName;
+		string machine = pd->sectionName;
+
+		if ( $include_spec->file.data != 0 ) {
+			fileName = string( $include_spec->file.data, $include_spec->file.length );
+
+			InputLoc loc = $include_spec->file.loc;
+			long length;
+			bool caseInsensitive;
+			char *unescaped = prepareLitString( loc, fileName.c_str(), fileName.size(),
+					length, caseInsensitive );
+			fileName = unescaped;
+		}
+
+		if ( $include_spec->machine.data != 0 )
+			machine = string( $include_spec->machine.data, $include_spec->machine.length );
+
+		include( @1, fileName, machine );
+	}
+
+	# def include_spec
+	#	[word] :Machine
+	# |	[string] :File
+	# |	[word string] :MachineFile
+
+	ragel::include_spec 
+	{
+		Token machine;
+		Token file;
+	}
+
+	ragel::include_spec :Machine
+	{
+		$$->machine.set( $word );
+		$$->machine.set( @word );
+		$$->file.data = 0;
+	}
+
+	ragel::include_spec :File
+	{
+		$$->file.set( $string );
+		$$->file.set( @string );
+		$$->machine.data = 0;
+	}
+
+	ragel::include_spec :MachineFile
+	{
+		$$->machine.set( $word );
+		$$->machine.set( @word );
+		$$->file.set( $string );
+		$$->file.set( @string );
+	}
+	
 
 	# def join
 	#	[join `, expression] :Rec
@@ -492,36 +860,6 @@ reduction TopLevel
 		$$->paramList->append( $action_param->param );
 	}
 
-
-	# def action_spec
-	#	[`action word opt_action_params action_block] :ActionSpec commit
-	ragel::action_spec
-	{
-		Action *action;
-	}
-
-	ragel::action_spec :ActionSpec
-	{
-		string data( $word->data, $word->length );
-		if ( pd->actionDict.find( data ) ) {
-			/* Recover by just ignoring the duplicate. */
-			error(@word) << "action \"" << data << "\" already defined" << endl;
-		}
-		else {
-			//std::cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << std::endl;
-			/* Add the action to the list of actions. */
-			Action *newAction = new Action( @1, data, 
-					$action_block->inlineList, pd->nextCondId++ );
-
-			/* Insert to list and dict. */
-			pd->actionList.append( newAction );
-			pd->actionDict.insert( newAction );
-
-			newAction->paramList = $opt_action_params->paramList;
-			if ( $opt_action_params->paramList != 0 )
-				newAction->argListMap = new ActionArgListMap;
-		}
-	}
 
 	# def action_block
 	#	[`{ c_select     CInlineBlock: c_inline::inline_block `}] :C
@@ -1896,67 +2234,6 @@ reduction TopLevel
 		$$->tok.set( @hex );
 	}
 
-	# def def_name
-	# 	[word] :Word
-	ragel::def_name
-	{
-		Token tok;
-		colm_location loc;
-	}
-
-	ragel::def_name :Word
-	{
-		string data( $word->data, $word->length );
-		$$->tok.set( $word );
-		$$->loc = *@1;
-
-		/* Make/get the priority key. The name may have already been referenced
-		 * and therefore exist. */
-		PriorDictEl *priorDictEl;
-		if ( pd->priorDict.insert( data, pd->nextPriorKey, &priorDictEl ) )
-			pd->nextPriorKey += 1;
-		pd->curDefPriorKey = priorDictEl->value;
-
-		/* Make/get the local error key. */
-		LocalErrDictEl *localErrDictEl;
-		if ( pd->localErrDict.insert( data, pd->nextLocalErrKey, &localErrDictEl ) )
-			pd->nextLocalErrKey += 1;
-		pd->curDefLocalErrKey = localErrDictEl->value;
-	}
-
-	# def assignment
-	#	[opt_export def_name `= join `;] :Assignment commit
-	ragel::assignment :Assignment
-	{
-		InputLoc loc = &$def_name->loc;
-
-		bool exportMachine = $opt_export->isSet;
-		if ( exportMachine )
-			exportContext.append( true );
-
-		string name( $def_name->tok.data );
-
-		/* Main machine must be an instance. */
-		bool isInstance = false;
-		if ( name == MAIN_MACHINE ) {
-			warning(loc) << "main machine will be implicitly instantiated" << endl;
-			isInstance = true;
-		}
-
-		MachineDef *machineDef = new MachineDef( $join->join );
-
-		/* Generic creation of machine for instantiation and assignment. */
-		tryMachineDef( loc, name, machineDef, isInstance );
-
-		if ( exportMachine )
-			exportContext.remove( exportContext.length()-1 );
-
-		/* Pass a location to join_or_lm */
-		if ( machineDef->join != 0 )
-			machineDef->join->loc = loc;
-	}
-
-	
 	# def lm
 	#	[join] :Join
 	# |	[`|* lm_stmt_list `*|] :Lm
@@ -2080,31 +2357,6 @@ reduction TopLevel
 		$$->action = newAction;
 	}
 
-	# def instantiation
-	#	[opt_export def_name `:= lm `;] :Instantiation commit
-	ragel::instantiation :Instantiation
-	{
-		InputLoc loc = &$def_name->loc;
-
-		bool exportMachine = $opt_export->isSet;
-		if ( exportMachine )
-			exportContext.append( true );
-
-		string name( $def_name->tok.data );
-
-		MachineDef *machineDef = $lm->machineDef;
-
-		/* Generic creation of machine for instantiation and assignment. */
-		tryMachineDef( loc, name, machineDef, true );
-
-		if ( exportMachine )
-			exportContext.remove( exportContext.length()-1 );
-
-		/* Pass a location to join_or_lm */
-		if ( machineDef->join != 0 )
-			machineDef->join->loc = loc;
-	}
-
 	# def opt_export
 	#	[`export] :Export
 	# |	[] :Base
@@ -2199,235 +2451,6 @@ reduction TopLevel
 		$$->roundsList = $nfa_round_list->roundsList;
 	}
 
-	# def nfa_union
-	#	[def_name `|= nfa_rounds nfa_expr `;] :NfaUnion commit
-	ragel::nfa_union :NfaUnion
-	{
-		InputLoc loc = &$def_name->loc;
-		string name( $def_name->tok.data );
-
-		$nfa_expr->nfaUnion->roundsList = $nfa_rounds->roundsList;
-
-		MachineDef *machineDef = new MachineDef( $nfa_expr->nfaUnion );
-
-		/* Generic creation of machine for instantiation and assignment. */
-		tryMachineDef( loc, name, machineDef, true );
-	}
-
-	# def alphtype_type
-	#	[W1: word] :One
-	# |	[W1: word W2: word] :Two
-	ragel::alphtype_type :One
-	{
-		string one( $W1->data, $W1->length );
-		if ( ! pd->setAlphType( @W1, hostLang, one.c_str() ) ) {
-			// Recover by ignoring the alphtype statement.
-			error(@W1) << "\"" << one << 
-					"\" is not a valid alphabet type" << endl;
-		}
-	}
-
-	ragel::alphtype_type :Two
-	{
-		string one( $W1->data, $W1->length );
-		string two( $W2->data, $W2->length );
-		if ( ! pd->setAlphType( @W1, hostLang, one.c_str(), two.c_str() ) ) {
-			// Recover by ignoring the alphtype statement.
-			error(@W1) << "\"" << one << 
-					"\" is not a valid alphabet type" << endl;
-		}
-	}
-
-	# def statement
-	# |	[`getkey inline_expr_reparse] :GetKey commit
-	# |	[`import string `;] :Import commit
-	ragel::statement :GetKey
-	{
-		pd->getKeyExpr = $inline_expr_reparse->inlineList;
-	}
-
-	ragel::statement :Import
-	{
-		InputLoc loc = @string;
-		std::string fileName( $string->data, $string->length );
-
-		long length;
-		bool caseInsensitive;
-		char *unescaped = prepareLitString( loc,
-					fileName.c_str(), fileName.size(),
-					length, caseInsensitive );
-
-		loadImport( unescaped );
-	}
-
-
-	# def statement
-	# |	[`prepush action_block] :PrePush commit
-	# |	[`postpop action_block] :PostPop commit
-	ragel::statement :PrePush
-	{
-		if ( pd->prePushExpr != 0 ) {
-			/* Recover by just ignoring the duplicate. */
-			error(@1) << "prepush code already defined" << endl;
-		}
-		pd->prePushExpr = new InlineBlock( @1, $action_block->inlineList );
-
-	}
-	ragel::statement :PostPop
-	{
-		if ( pd->postPopExpr != 0 ) {
-			/* Recover by just ignoring the duplicate. */
-			error(@1) << "postpop code already defined" << endl;
-		}
-		pd->postPopExpr = new InlineBlock( @1, $action_block->inlineList );
-	}
-
-	# def statement
-	# |	[`variable variable_name inline_expr_reparse] :Variable commit
-	# |	[`access inline_expr_reparse] :Access commit
-	ragel::statement :Variable
-	{
-		string data( $variable_name->data, $variable_name->length );
-		bool wasSet = pd->setVariable( data.c_str(),
-				$inline_expr_reparse->inlineList );
-		if ( !wasSet )
-			error(@1) << "bad variable name: " << $variable_name->data << endl;
-	}
-
-	ragel::statement :Access
-	{
-		pd->accessExpr = $inline_expr_reparse->inlineList;
-	}
-
-	# [`nfaprepush action_block] :NfaPrePush commit
-	ragel::statement :NfaPrePush
-	{
-		if ( pd->nfaPrePushExpr != 0 ) {
-			/* Recover by just ignoring the duplicate. */
-			error(@1) << "nfa_pre_push code already defined" << endl;
-		}
-
-		pd->nfaPrePushExpr = new InlineBlock( @1, $action_block->inlineList );
-	}
-
-	# [`nfapostpop action_block] :NfaPostPop commit
-	ragel::statement :NfaPostPop
-	{
-		if ( pd->nfaPostPopExpr != 0 ) {
-			/* Recover by just ignoring the duplicate. */
-			error(@1) << "nfa_post_pop code already defined" << endl;
-		}
-
-		pd->nfaPostPopExpr = new InlineBlock( @1, $action_block->inlineList );
-	}
-
-	# def include_spec
-	#	[word] :Machine
-	# |	[string] :File
-	# |	[word string] :MachineFile
-
-	ragel::include_spec 
-	{
-		Token machine;
-		Token file;
-	}
-
-	ragel::include_spec :Machine
-	{
-		$$->machine.set( $word );
-		$$->machine.set( @word );
-		$$->file.data = 0;
-	}
-
-	ragel::include_spec :File
-	{
-		$$->file.set( $string );
-		$$->file.set( @string );
-		$$->machine.data = 0;
-	}
-
-	ragel::include_spec :MachineFile
-	{
-		$$->machine.set( $word );
-		$$->machine.set( @word );
-		$$->file.set( $string );
-		$$->file.set( @string );
-	}
-	
-	# [`include include_spec `;] :Include commit
-	ragel::statement :Include
-	{
-		string fileName = id->inputFileName;
-		string machine = pd->sectionName;
-
-		if ( $include_spec->file.data != 0 ) {
-			fileName = string( $include_spec->file.data, $include_spec->file.length );
-
-			InputLoc loc = $include_spec->file.loc;
-			long length;
-			bool caseInsensitive;
-			char *unescaped = prepareLitString( loc, fileName.c_str(), fileName.size(),
-					length, caseInsensitive );
-			fileName = unescaped;
-		}
-
-		if ( $include_spec->machine.data != 0 )
-			machine = string( $include_spec->machine.data, $include_spec->machine.length );
-
-		include( @1, fileName, machine );
-	}
-
-	ragel::statement :Write
-	{
-		if ( includeDepth == 0 ) {
-			id->curItem = id->curItem->next;
-			InputItem *inputItem = id->curItem;
-
-			string cmd( $Cmd->data, $Cmd->length );
-			inputItem->writeArgs.append( cmd );
-			inputItem->writeArgs.append( writeArgs );
-
-			inputItem->pd = pd;
-		}
-
-		/* Clear the write args collector. */
-		writeArgs.empty();
-	}
-
-	ragel::machine_name :MachineName
-	{
-		InputLoc sectionLoc;
-		string fileName = "input.rl";
-		string machine( $word->data, $word->length );
-
-		if ( includeDepth > 0 ) {
-			/* Check if the the machine is the one we are searching for. If
-			 * not, reset pd. Otherwise, rename it to target machine because we
-			 * are drawing the statements into target. */
-			if ( machine == searchMachine )
-				machine = targetMachine;
-		}
-
-		SectionDictEl *sdEl = id->sectionDict.find( machine.c_str() );
-		if ( sdEl == 0 ) {
-			Section *section = new Section( strdup(machine.c_str() ) );
-			sdEl = new SectionDictEl( section->sectionName );
-			sdEl->value = section;
-			id->sectionDict.insert( sdEl );
-		}
-
-		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
-		if ( pdEl == 0 ) {
-			pdEl = new ParseDataDictEl( machine );
-			pdEl->value = new ParseData( id, fileName, machine,
-					id->nextMachineId++, sectionLoc, hostLang,
-					minimizeLevel, minimizeOpt );
-			id->parseDataDict.insert( pdEl );
-			id->parseDataList.append( pdEl->value );
-		}
-
-		pd = pdEl->value;
-	}
 
 	ragel::write_arg :Word
 	{
