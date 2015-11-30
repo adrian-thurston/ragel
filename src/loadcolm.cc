@@ -2419,7 +2419,6 @@ struct LoadColm
 	{
 		InputLoc loc = RN.RED_OPEN().loc();
 
-
 		TypeRef *typeRef = walkTypeRef( RN.type_ref() );
 
 		ReduceNonTerm *rnt = new ReduceNonTerm( loc, typeRef );
@@ -2431,7 +2430,7 @@ struct LoadColm
 
 	void walkRedAction( red_action RA )
 	{
-		InputLoc loc = RA.id().loc();
+		InputLoc loc = RA.RED_OPEN().loc();
 		String text = RA.HostItems().text().c_str();
 
 		TypeRef *typeRef = walkTypeRef( RA.type_ref() );
