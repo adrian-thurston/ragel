@@ -139,8 +139,6 @@ reduction TopLevel
 		pd->curDefLocalErrKey = localErrDictEl->value;
 	}
 
-	
-
 	# def nfa_union
 	#	[def_name `|= nfa_rounds nfa_expr `;] :NfaUnion commit
 	ragel::nfa_union :NfaUnion
@@ -2012,6 +2010,7 @@ reduction TopLevel
 	{
 		Token tok;
 		tok.set( $string );
+		tok.set( @string );
 		$$->factor = new Factor( new Literal( tok, Literal::LitString ) );
 	}
 
