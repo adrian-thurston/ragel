@@ -883,7 +883,7 @@ struct Compiler
 
 	Namespace *rootNamespace;
 
-	int nextSymbolId;
+	int nextLelId;
 	int firstNonTermId;
 
 	LangEl **langElIndex;
@@ -1012,9 +1012,12 @@ struct Compiler
 
 	void declareReVars();
 
-	void loadRefs( Production *production, const ReduceTextItemList &list );
+	void initReductionNeeds( Reduction *reduction );
+	void loadRefs( Reduction *reduction, Production *production,
+			const ReduceTextItemList &list );
 
 	void writeHostCall();
+	void writeNeeds();
 	void writeCommit();
 	void writeLhsRef( Production *production, ReduceTextItem *i );
 	void writeRhsRef( Production *production, ReduceTextItem *i );

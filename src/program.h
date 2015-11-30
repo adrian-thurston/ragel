@@ -99,6 +99,8 @@ struct colm_sections
 			struct pda_run *pda_run, struct stream_impl *input_stream );
 	void (*init_bindings)( struct pda_run *pda_run );
 	void (*pop_binding)( struct pda_run *pda_run, parse_tree_t *tree );
+
+	void (*init_need)();
 };
 
 struct heap_list

@@ -77,6 +77,11 @@ struct colm_location *colm_find_location( struct colm_program *prg, struct colm_
 #define COLM_DBG_INPUT       0x00000040
 #define COLM_DBG_SCAN        0x00000080
 
+#define COLM_RN_NEITHER 0x00
+#define COLM_RN_DATA    0x01
+#define COLM_RN_LOC     0x02
+#define COLM_RN_BOTH    0x03
+
 /*
  * Primary Interface.
  */

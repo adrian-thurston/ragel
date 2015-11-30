@@ -165,7 +165,7 @@ void Compiler::makeLangElIds()
 {
 	/* The first id 0 is reserved for the stack sentinal. A negative id means
 	 * error to the parsing function, inducing backtracking. */
-	nextSymbolId = 1;
+	nextLelId = 1;
 
 	/* First pass assigns to the user terminals. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
@@ -176,33 +176,33 @@ void Compiler::makeLangElIds()
 				lel != errorLangEl &&
 				lel != noTokenLangEl )
 		{
-			lel->id = nextSymbolId++;
+			lel->id = nextLelId++;
 		}
 	}
 
-	//eofLangEl->id = nextSymbolId++;
+	//eofLangEl->id = nextLelId++;
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		/* Must be a term, and not any of the special reserved terminals.
 		 * Remember if the non terminal is a user non terminal. */
 		if ( lel->isEOF )
-			lel->id = nextSymbolId++;
+			lel->id = nextLelId++;
 	}
 
 	/* Next assign to the eof notoken, which we always create. */
-	noTokenLangEl->id = nextSymbolId++;
+	noTokenLangEl->id = nextLelId++;
 
 	/* Possibly assign to the error language element. */
 	if ( errorLangEl != 0 )
-		errorLangEl->id = nextSymbolId++;
+		errorLangEl->id = nextLelId++;
 
 	/* Save this for the code generation. */
-	firstNonTermId = nextSymbolId;
+	firstNonTermId = nextLelId;
 
 	/* A third and final pass assigns to everything else. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		/* Anything else not yet assigned gets assigned now. */
 		if ( lel->id < 0 )
-			lel->id = nextSymbolId++;
+			lel->id = nextLelId++;
 	}
 
 	assert( ptrLangEl->id == LEL_ID_PTR );
@@ -980,7 +980,7 @@ again:
 void Compiler::analyzeMachine( PdaGraph *pdaGraph, LangElSet &parserEls )
 {
 	pdaGraph->maxState = pdaGraph->stateList.length() - 1;
-	pdaGraph->maxLelId = nextSymbolId - 1;
+	pdaGraph->maxLelId = nextLelId - 1;
 	pdaGraph->maxOffset = pdaGraph->stateList.length() * pdaGraph->maxLelId;
 
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ ) {
@@ -1435,12 +1435,12 @@ void Compiler::makeRuntimeData()
 	 * lelInfo
 	 */
 
-	count = nextSymbolId;
+	count = nextLelId;
 	runtimeData->lel_info = new lang_el_info[count];
 	runtimeData->num_lang_els = count;
 	memset( runtimeData->lel_info, 0, sizeof(struct lang_el_info)*count );
 
-	for ( int i = 0; i < nextSymbolId; i++ ) {
+	for ( int i = 0; i < nextLelId; i++ ) {
 		LangEl *lel = langElIndex[i];
 		if ( lel != 0 ) {
 			runtimeData->lel_info[i].name = lel->fullLit;

@@ -50,11 +50,17 @@ void Compiler::writeCommitStub()
 		"}\n"
 		"\n"
 		"long commit_union_sz( int reducer ) { return 0; }\n"
+		"void init_need() {}\n"
+		"int reducer_need_tok( program_t *prg, "
+				"struct pda_run *pda_run, int id ) { return COLM_RN_BOTH; }\n"
+		"int reducer_need_ign( program_t *prg, "
+				"struct pda_run *pda_run ) { return COLM_RN_BOTH; }\n"
 		"\n";
 	;
 }
 
-void Compiler::loadRefs( Production *production, const ReduceTextItemList &list )
+void Compiler::loadRefs( Reduction *reduction, Production *production,
+		const ReduceTextItemList &list )
 {
 	ObjectDef *objectDef = production->prodName->objectDef;
 	Vector<ProdEl*> rhsUsed;
@@ -107,7 +113,8 @@ void Compiler::loadRefs( Production *production, const ReduceTextItemList &list 
 	}
 
 	/*
-	 * In the first pass we 
+	 * In the first pass we load using a parse tree cursor. This is for
+	 * nonterms.
 	 */
 	bool useCursor = false;
 	for ( Vector<ProdEl*>::Iter rhs = rhsUsed; rhs.lte(); rhs++ ) {
@@ -153,6 +160,10 @@ void Compiler::loadRefs( Production *production, const ReduceTextItemList &list 
 		}
 	}
 
+	/* In the second pass we load using a tree cursor. This is for token data
+	 * and locations.
+	 */
+
 	useCursor = false;
 	for ( Vector<ProdEl*>::Iter rhs = rhsUsed; rhs.lte(); rhs++ ) {
 		if ( *rhs != 0 && (*rhs)->production == production &&
@@ -180,20 +191,23 @@ void Compiler::loadRefs( Production *production, const ReduceTextItemList &list 
 		Vector<ProdEl*>::Iter loc = locUsed;
 		
 		for ( ; rhs.lte(); rhs++, loc++ ) {
+
 			ProdEl *prodEl = *rhs;
+
 			if ( prodEl != 0 ) {
-				while ( cursorPos < rhs.pos() ) {
-					*outStream <<
-						"	_tree_cursor = _tree_cursor->next;\n";
-					cursorPos += 1;
-				}
-
-
 				if ( prodEl->production == production ) {
 					if ( prodEl->langEl->type == LangEl::Term ) {
+
+			while ( cursorPos < rhs.pos() ) {
+				*outStream <<
+					"	_tree_cursor = _tree_cursor->next;\n";
+				cursorPos += 1;
+			}
 						*outStream <<
 							"	colm_data *_rhs" << rhs.pos() << " = "
 								"_tree_cursor->tree->tokdata;\n";
+
+						reduction->needData[prodEl->langEl->id] = true;
 					}
 				}
 
@@ -202,9 +216,18 @@ void Compiler::loadRefs( Production *production, const ReduceTextItemList &list 
 			ProdEl *locEl = *loc;
 			if ( locEl != 0 ) {
 				if ( locEl->production == production ) {
+
+			while ( cursorPos < rhs.pos() ) {
+				*outStream <<
+					"	_tree_cursor = _tree_cursor->next;\n";
+				cursorPos += 1;
+			}
+
 					*outStream <<
 						"	colm_location *_loc" << loc.pos() << " = "
 							"colm_find_location( prg, _tree_cursor->tree );\n";
+
+					reduction->needLoc[locEl->langEl->id] = true;
 				}
 			}
 		}
@@ -300,6 +323,78 @@ struct CmpReduceAction
 	}
 };
 
+void Compiler::initReductionNeeds( Reduction *reduction )
+{
+	reduction->needData = new bool[nextLelId];
+	reduction->needLoc = new bool[nextLelId];
+	memset( reduction->needData, 0, sizeof(bool)*nextLelId );
+	memset( reduction->needLoc, 0, sizeof(bool)*nextLelId );
+}
+
+void Compiler::writeNeeds()
+{
+	*outStream <<
+		"struct reduction_info\n"
+		"{\n"
+		"	unsigned char need_data[" << nextLelId << "];\n"
+		"	unsigned char need_loc[" << nextLelId << "];\n"
+		"};\n"
+		"\n";
+
+	*outStream <<
+		"struct reduction_info ri[" << rootNamespace->reductions.length() + 1 << "];\n"
+		"\n";
+
+	*outStream <<
+		"extern \"C\" void init_need()\n"
+		"{\n";
+	
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		Reduction *reduction = *r;
+		*outStream <<
+			"	memset( ri[" << reduction->id << "]"
+					".need_data, 0, sizeof(unsigned char) * " << nextLelId << " );\n"
+			"	memset( ri[" << reduction->id << "]"
+					".need_loc, 0, sizeof(unsigned char) * " << nextLelId << " );\n";
+
+		for ( int i = 0; i < nextLelId; i++ ) {
+			if ( reduction->needData[i] ) {
+				*outStream <<
+					"	ri[" << reduction->id << "].need_data[" << i << "] = COLM_RN_DATA;\n";
+			}
+
+			if ( reduction->needLoc[i] ) {
+				*outStream <<
+					"	ri[" << reduction->id << "].need_loc[" << i << "] = COLM_RN_LOC;\n";
+			}
+		}
+	}
+
+	*outStream <<
+		"}\n";
+
+	*outStream <<
+		"extern \"C\" int reducer_need_tok( program_t *prg, "
+				"struct pda_run *pda_run, int id )\n"
+		"{\n"
+		"	if ( pda_run->reducer > 0 ) {\n"
+		/* Note we are forcing the reducer need for data. Enabling requires finding
+		 * a solution for backtracking push. */
+		"		return COLM_RN_DATA | ri[pda_run->reducer].need_data[id] | \n"
+		"			ri[pda_run->reducer].need_loc[id];\n"
+		"	}\n"
+		"	return COLM_RN_BOTH;\n"
+		"}\n"
+		"\n"
+		"extern \"C\" int reducer_need_ign( program_t *prg, struct pda_run *pda_run )\n"
+		"{\n"
+		// Using this requires finding a solution for backtracking push back.
+		//"	if ( pda_run->reducer > 0 )\n"
+		//"		return COLM_RN_NEITHER;\n"
+		"	return COLM_RN_BOTH;\n"
+		"}\n";
+}
+
 void Compiler::writeCommit()
 {
 	*outStream <<
@@ -386,6 +481,7 @@ void Compiler::writeCommit()
 
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		Reduction *reduction = *r;
+		initReductionNeeds( reduction );
 
 		*outStream <<
 			"void " << reduction->name << "::commit_reduce_forward( program_t *prg, \n"
@@ -463,7 +559,7 @@ void Compiler::writeCommit()
 			*outStream << 
 				"			if ( kid->tree->prod_num == " << prodNum << " ) {\n";
 
-			loadRefs( action->production, action->itemList );
+			loadRefs( reduction, action->production, action->itemList );
 
 			*outStream <<
 				"#line " << action->loc.line << "\"" << action->loc.fileName << "\"\n";
@@ -496,4 +592,6 @@ void Compiler::writeCommit()
 			"}\n"
 			"\n";
 	}
+
+	writeNeeds();
 }

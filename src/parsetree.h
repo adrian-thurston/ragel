@@ -981,7 +981,9 @@ typedef Vector<ReduceAction*> ReduceActionVect;
 struct Reduction
 {
 	Reduction( const InputLoc &loc, String name )
-		: loc(loc), name(name)
+	:
+		loc(loc), name(name),
+		needData(0), needLoc(0)
 	{
 		static int nextId = 1;	
 		id = nextId++;
@@ -993,6 +995,9 @@ struct Reduction
 	String name;
 	String var;
 	int id;
+
+	bool *needData;
+	bool *needLoc;
 
 	ReduceActionList reduceActions;
 	ReduceNonTermList reduceNonTerms;

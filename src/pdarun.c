@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007-2012 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2015 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -18,6 +18,7 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+
 
 #include "config.h"
 #include "debug.h"
@@ -55,6 +56,13 @@
 	w |= ((word_t) p[3]) << 24; \
 	i = (tree_t*)w; \
 } while(0)
+
+/* bit 0: data needed. bit 1: loc needed */
+#define RN_NONE 0x0
+#define RN_DATA 0x1
+#define RN_LOC  0x2
+#define RN_BOTH 0x3
+
 
 static void init_fsm_run( program_t *prg, struct pda_run *pda_run )
 {
@@ -754,6 +762,87 @@ static head_t *extract_match( program_t *prg, tree_t **sp,
 	return head;
 }
 
+static head_t *extract_no_d( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run, struct stream_impl *is )
+{
+	long length = pda_run->toklen;
+
+	/* Just a consume, no data allocate. */
+	location_t *location = location_allocate( prg );
+	is->funcs->consume_data( prg, sp, is, length, location );
+
+	pda_run->p = pda_run->pe = 0;
+	pda_run->toklen = 0;
+	pda_run->tokstart = 0;
+
+	head_t *head = colm_string_alloc_pointer( prg, 0, 0 );
+
+	head->location = location;
+
+	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
+
+	return head;
+}
+
+static head_t *extract_no_l( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run, struct stream_impl *is )
+{
+	long length = pda_run->toklen;
+
+	//debug( prg, REALM_PARSE, "extracting token of length: %ld\n", length );
+
+	struct run_buf *run_buf = pda_run->consume_buf;
+	if ( run_buf == 0 || length > ( FSM_BUFSIZE - run_buf->length ) ) {
+		run_buf = new_run_buf( length );
+		run_buf->next = pda_run->consume_buf;
+		pda_run->consume_buf = run_buf;
+	}
+
+	char *dest = run_buf->data + run_buf->length;
+
+	is->funcs->get_data( is, dest, length );
+
+	/* Using a dummpy location. */
+	location_t location;
+	memset( &location, 0, sizeof( location ) );
+	is->funcs->consume_data( prg, sp, is, length, &location );
+
+	run_buf->length += length;
+
+	pda_run->p = pda_run->pe = 0;
+	pda_run->toklen = 0;
+	pda_run->tokstart = 0;
+
+	head_t *head = colm_string_alloc_pointer( prg, dest, length );
+
+	/* Don't pass the location. */
+	head->location = 0;
+
+	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
+
+	return head;
+}
+
+static head_t *consume_match( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run, struct stream_impl *is )
+{
+	long length = pda_run->toklen;
+
+	/* No data or location returned. We just consume the data. */
+	location_t dummy_loc;
+	memset( &dummy_loc, 0, sizeof(dummy_loc) );
+	is->funcs->consume_data( prg, sp, is, length, &dummy_loc );
+
+	pda_run->p = pda_run->pe = 0;
+	pda_run->toklen = 0;
+	pda_run->tokstart = 0;
+
+	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
+
+	return 0;
+}
+
+
 static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct stream_impl *is )
 {
 	long length = pda_run->toklen;
@@ -788,20 +877,25 @@ static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct strea
 static void send_ignore( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, struct stream_impl *is, long id )
 {
-	debug( prg, REALM_PARSE, "ignoring: %s\n", prg->rtd->lel_info[id].name );
+	if ( reducer_need_ign( prg, pda_run ) == RN_NONE ) {
+		consume_match( prg, sp, pda_run, is );
+	}
+	else {
+		debug( prg, REALM_PARSE, "ignoring: %s\n", prg->rtd->lel_info[id].name );
 
-	/* Make the ignore string. */
-	head_t *ignore_str = extract_match( prg, sp, pda_run, is );
+		/* Make the ignore string. */
+		head_t *ignore_str = extract_match( prg, sp, pda_run, is );
 
-	debug( prg, REALM_PARSE, "ignoring: %.*s\n", ignore_str->length, ignore_str->data );
+		debug( prg, REALM_PARSE, "ignoring: %.*s\n", ignore_str->length, ignore_str->data );
 
-	tree_t *tree = tree_allocate( prg );
-	tree->refs = 1;
-	tree->id = id;
-	tree->tokdata = ignore_str;
+		tree_t *tree = tree_allocate( prg );
+		tree->refs = 1;
+		tree->id = id;
+		tree->tokdata = ignore_str;
 
-	/* Send it to the pdaRun. */
-	ignore_tree( prg, pda_run, tree );
+		/* Send it to the pdaRun. */
+		ignore_tree( prg, pda_run, tree );
+	}
 }
 
 static void send_token( program_t *prg, tree_t **sp,
@@ -810,7 +904,23 @@ static void send_token( program_t *prg, tree_t **sp,
 	int empty_ignore = pda_run->accum_ignore == 0;
 
 	/* Make the token data. */
-	head_t *tokdata = extract_match( prg, sp, pda_run, is );
+	head_t *tokdata = 0;
+	int rn = reducer_need_tok( prg, pda_run, id );
+
+	switch ( rn ) {
+		case RN_NONE:
+			tokdata = consume_match( prg, sp, pda_run, is );
+			break;
+		case RN_DATA:
+			tokdata = extract_no_l( prg, sp, pda_run, is );
+			break;
+		case RN_LOC:
+			tokdata = extract_no_d( prg, sp, pda_run, is );
+			break;
+		case RN_BOTH:
+			tokdata = extract_match( prg, sp, pda_run, is );
+			break;
+	}
 
 	debug( prg, REALM_PARSE, "token: %s  text: %.*s\n",
 		prg->rtd->lel_info[id].name,
@@ -831,7 +941,8 @@ static void send_token( program_t *prg, tree_t **sp,
 		set_region( pda_run, empty_ignore, parse_tree );
 }
 
-static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run, struct stream_impl *is )
+static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run,
+		struct stream_impl *is )
 {
 	kid_t *input = kid_allocate( prg );
 	input->tree = is->funcs->consume_tree( is );

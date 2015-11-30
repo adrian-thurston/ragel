@@ -193,6 +193,8 @@ program_t *colm_new_program( struct colm_sections *rtd )
 
 	/* Allocate the VM stack. */
 	vm_init( prg );
+
+	init_need();
 	return prg;
 }
 

@@ -1179,8 +1179,8 @@ void Compiler::prepGrammar()
 	noUndefindLangEls();
 
 	/* Put the language elements in an index by language element id. */
-	langElIndex = new LangEl*[nextSymbolId+1];
-	memset( langElIndex, 0, sizeof(LangEl*)*(nextSymbolId+1) );
+	langElIndex = new LangEl*[nextLelId+1];
+	memset( langElIndex, 0, sizeof(LangEl*)*(nextLelId+1) );
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ )
 		langElIndex[lel->id] = lel;
 
