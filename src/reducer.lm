@@ -5,7 +5,6 @@ reduction TopLevel
 	ragel::machine_name :MachineName
 	{
 		InputLoc sectionLoc;
-		string fileName = "input.rl";
 		string machine( $word->data, $word->length );
 
 		if ( includeDepth > 0 ) {
@@ -27,7 +26,7 @@ reduction TopLevel
 		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
 			pdEl = new ParseDataDictEl( machine );
-			pdEl->value = new ParseData( id, fileName, machine,
+			pdEl->value = new ParseData( id, machine,
 					id->nextMachineId++, sectionLoc, hostLang,
 					minimizeLevel, minimizeOpt );
 			id->parseDataDict.insert( pdEl );

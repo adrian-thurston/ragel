@@ -435,7 +435,7 @@ bool NameInst::anyRefsRec()
 
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
-ParseData::ParseData( InputData *id, std::string fileName, string sectionName, 
+ParseData::ParseData( InputData *id, string sectionName, 
 		int machineId, const InputLoc &sectionLoc, const HostLang *hostLang,
 		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 :	
@@ -466,7 +466,6 @@ ParseData::ParseData( InputData *id, std::string fileName, string sectionName,
 	lowerNum(0),
 	upperNum(0),
 	id(id),
-	fileName(fileName),
 	sectionName(sectionName),
 	machineId(machineId),
 	sectionLoc(sectionLoc),

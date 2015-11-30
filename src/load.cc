@@ -118,7 +118,6 @@ struct LoadRagel
 			const char *targetMachine, const char *searchMachine )
 	{
 		InputLoc sectionLoc;
-		string fileName = "input.rl";
 		string machine = MachineName.text();
 
 		if ( includeDepth > 0 ) {
@@ -144,7 +143,7 @@ struct LoadRagel
 		ParseDataDictEl *pdEl = id.parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
 			pdEl = new ParseDataDictEl( machine );
-			pdEl->value = new ParseData( &id, fileName, machine,
+			pdEl->value = new ParseData( &id, machine,
 					id.nextMachineId++, sectionLoc, hostLang,
 					minimizeLevel, minimizeOpt );
 			id.parseDataDict.insert( pdEl );
