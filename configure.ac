@@ -108,12 +108,15 @@ AC_ARG_WITH(colm,
 			LDFLAGS="${LDFLAGS} -L$withval/src"
 			COLM="$withval/src/colm"
 			COLM_LD="$withval/src/libcolmd.a"
-			COLM_DEPS="$COLM_LD"
+			COLM_LIBDEP="$COLM_LD"
+			COLM_BINDEP="$COLM"
 		else
 			CPPFLAGS="${CPPFLAGS} -I$withval/include"
 			LDFLAGS="${LDFLAGS} -L$withval/lib"
 			COLM="$withval/bin/colm"
 			COLM_LD="-lcolmd"
+			COLM_LIBDEP=""
+			COLM_BINDEP="$COLM"
 		fi
 
 		AC_CHECK_FILES(
@@ -125,6 +128,8 @@ AC_ARG_WITH(colm,
 	[
 		AC_PATH_PROG( [COLM], [colm] )
 		COLM_LD="-lcolmd"
+		COLM_LIBDEP=""
+		COLM_BINDEP=""
 	]
 )
 
@@ -146,7 +151,8 @@ fi
 
 AC_SUBST(COLM)
 AC_SUBST(COLM_LD)
-AC_SUBST(COLM_DEPS)
+AC_SUBST(COLM_LIBDEP)
+AC_SUBST(COLM_BINDEP)
 
 dnl Checks to carry out if we are building the manual.
 if test "x$build_manual" = "xyes"; then

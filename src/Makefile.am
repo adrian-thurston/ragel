@@ -1,6 +1,9 @@
-COLM = @COLM@
-KELBT = @KELBT@
-RAGEL = @RAGEL@
+COLM        = @COLM@
+COLM_LD     = @COLM_LD@
+COLM_LIBDEP = @COLM_LIBDEP@
+COLM_BINDEP = @COLM_BINDEP@
+KELBT       = @KELBT@
+RAGEL       = @RAGEL@
 
 bin_PROGRAMS = ragel
 
@@ -39,8 +42,8 @@ nodist_ragel_SOURCES += \
 ragel_SOURCES += \
 	load.cc load.h
 
-ragel_LDADD = @COLM_LD@
-ragel_DEPENDENCIES = @COLM_DEPS@
+ragel_LDADD = $(COLM_LD)
+ragel_DEPENDENCIES = $(COLM_LIBDEP)
 
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
@@ -79,7 +82,7 @@ RAGEL_LM = \
 	ragel-ocaml.lm \
 	ragel-crack.lm
 
-parse.c: rlparse.lm reducer.lm $(RAGEL_LM)
+parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM_BINDEP)
 	$(COLM) -c -o $@ -e if.h -x if.cc -m commit.cc $<
 
 # These are necessary because we are not using built sources. They create the
@@ -101,7 +104,7 @@ RLHC = \
 	rlhc-crack.lm \
 	rlhc-julia.lm
 
-rlhc.c: rlhc.lm $(RLHC)
+rlhc.c: rlhc.lm $(RLHC) $(COLM_BINDEP)
 	$(COLM) -c -b rlhc_object -o $@ $<
 
 if WITH_RAGEL_KELBT
