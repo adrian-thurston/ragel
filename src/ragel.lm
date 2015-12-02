@@ -411,21 +411,24 @@ namespace ragel
 		[action_param_list] :List
 	|	[] :Empty
 
-	def opt_action_params
+	def action_params
 		[`( opt_action_param_list `)] :List
 		{
 			GblActionParams = true
 		}
-	|	[] :Empty
-		{
-			GblActionParams = false
-		}
 
 	def action_spec
-		[`action word opt_action_params action_block] :ActionSpec commit
+		[`action word action_params action_block] :ActionSpecParams commit
 		{
-			if lhs.opt_action_params.opt_action_param_list
-				CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
+			# Track that this action has params so we can parse appropriately
+			# when reducing.
+			CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
+
+			# Reset after parsing the block. 
+			GblActionParams = false
+		}
+	|	[`action word action_block] :ActionSpec commit
+		{
 			GblActionParams = false
 		}
 

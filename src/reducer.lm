@@ -154,10 +154,34 @@ reduction TopLevel
 	}
 
 	# def action_spec
-	#	[`action word opt_action_params action_block] :ActionSpec commit
+	#	[`action word action_params action_block] :ActionSpecParams commit
+	# |	[`action word action_block] :ActionSpec commit
 	ragel::action_spec
 	{
 		Action *action;
+	}
+
+	ragel::action_spec :ActionSpecParams
+	{
+		string data( $word->data, $word->length );
+		if ( pd->actionDict.find( data ) ) {
+			/* Recover by just ignoring the duplicate. */
+			error(@word) << "action \"" << data << "\" already defined" << endl;
+		}
+		else {
+			//std::cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << std::endl;
+			/* Add the action to the list of actions. */
+			Action *newAction = new Action( @1, data, 
+					$action_block->inlineList, pd->nextCondId++ );
+
+			/* Insert to list and dict. */
+			pd->actionList.append( newAction );
+			pd->actionDict.insert( newAction );
+
+			newAction->paramList = $action_params->paramList;
+			if ( $action_params->paramList != 0 )
+				newAction->argListMap = new ActionArgListMap;
+		}
 	}
 
 	ragel::action_spec :ActionSpec
@@ -176,10 +200,6 @@ reduction TopLevel
 			/* Insert to list and dict. */
 			pd->actionList.append( newAction );
 			pd->actionDict.insert( newAction );
-
-			newAction->paramList = $opt_action_params->paramList;
-			if ( $opt_action_params->paramList != 0 )
-				newAction->argListMap = new ActionArgListMap;
 		}
 	}
 
@@ -787,23 +807,17 @@ reduction TopLevel
 		$$->action = newAction;
 	}
 
-	# def opt_action_params
+	# def action_params
 	#	[`( opt_action_param_list `)]
-	# |	[]
-	ragel::opt_action_params
+	ragel::action_params
 	{
 		ActionParamList *paramList;
 	}
 
-	ragel::opt_action_params :List
+	ragel::action_params :List
 	{
 		$$->paramList = $opt_action_param_list->paramList;
 		paramList = $2->paramList;
-	}
-
-	ragel::opt_action_params :Empty
-	{
-		$$->paramList = 0;
 	}
 
 	# def opt_action_param_list
