@@ -37,6 +37,17 @@
 //#define true 1
 //#define false 0
 
+void commit_clear_kid_list( program_t *prg, tree_t **sp, kid_t *kid )
+{
+	kid_t *next;
+	while ( kid ) {
+		colm_tree_downref( prg, sp, kid->tree );
+		next = kid->next;
+		kid_free( prg, kid );
+		kid = next;
+	}
+}
+
 void commit_clear_parse_tree( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, parse_tree_t *pt )
 {
@@ -62,12 +73,9 @@ free_tree:
 		vm_push_ptree( pt->right_ignore );
 	}
 
-	if ( pt->shadow != 0 ) {
-		colm_tree_downref( prg, sp, pt->shadow->tree );
-		kid_free( prg, pt->shadow );
-	}
-
-	//printf( "commit_parse_tree_free %p\n", pt );
+	/* Only the root level of the stack has tree 
+	 * shadows and we are below that. */
+	assert( pt->shadow == 0 );
 	parse_tree_free( pda_run, pt );
 
 	/* Any trees to downref? */
