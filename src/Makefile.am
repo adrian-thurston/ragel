@@ -39,8 +39,8 @@ nodist_ragel_SOURCES += \
 ragel_SOURCES += \
 	load.cc load.h
 
-ragel_LDADD = -lcolmd
-
+ragel_LDADD = @COLM_LD@
+ragel_DEPENDENCIES = @COLM_DEPS@
 
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
@@ -100,8 +100,6 @@ RLHC = \
 	rlhc-ocaml.lm \
 	rlhc-crack.lm \
 	rlhc-julia.lm
-
-rlhc_SOURCES =
 
 rlhc.c: rlhc.lm $(RLHC)
 	$(COLM) -c -b rlhc_object -o $@ $<

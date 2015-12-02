@@ -101,32 +101,52 @@ dnl
 dnl Check for colm.
 dnl
 AC_ARG_WITH(colm,
-	[AC_HELP_STRING([--with-colm], [location of colm install])],
+	[AC_HELP_STRING([--with-colm], [location of colm install (or built source)])],
 	[
-		CPPFLAGS="${CPPFLAGS} -I$withval/include"
-		LDFLAGS="${LDFLAGS} -L$withval/lib"
-		COLM="$withval/bin/colm"
+		if test -f "$withval/src/fsmgraph.h"; then
+			CPPFLAGS="${CPPFLAGS} -I$withval/src/include"
+			LDFLAGS="${LDFLAGS} -L$withval/src"
+			COLM="$withval/src/colm"
+			COLM_LD="$withval/src/libcolmd.a"
+			COLM_DEPS="$COLM_LD"
+		else
+			CPPFLAGS="${CPPFLAGS} -I$withval/include"
+			LDFLAGS="${LDFLAGS} -L$withval/lib"
+			COLM="$withval/bin/colm"
+			COLM_LD="-lcolmd"
+		fi
 
 		AC_CHECK_FILES(
 			[$COLM],
 			[],
 			[AC_ERROR([--with-colm was specified, but binary was not found])]
 		)
-
-		INSTALLED_VER=`$COLM -v | sed -n -e '1 { s/^.*version //; s/ .*$//; p; }'`
-		if test "x$INSTALLED_VER" != "x$EXPECTED_COLM"; then
-			AC_ERROR( [check colm: expected version $EXPECTED_COLM,]
-					[ but $INSTALLED_VER is installed] )
-		fi
 	],
-	[]
+	[
+		AC_PATH_PROG( [COLM], [colm] )
+		COLM_LD="-lcolmd"
+	]
 )
 
 if test -z "$COLM"; then
 	AC_ERROR([colm is required to build ragel])
 fi
 
+AC_CHECK_FILES(
+	[$COLM],
+	[],
+	[AC_ERROR([could not find $COLM])]
+)
+
+INSTALLED_VER=`$COLM -v | sed -n -e '1 { s/^.*version //; s/ .*$//; p; }'`
+if test "x$INSTALLED_VER" != "x$EXPECTED_COLM"; then
+	AC_ERROR( [check colm: expected version $EXPECTED_COLM,]
+			[ but $INSTALLED_VER is installed] )
+fi
+
 AC_SUBST(COLM)
+AC_SUBST(COLM_LD)
+AC_SUBST(COLM_DEPS)
 
 dnl Checks to carry out if we are building the manual.
 if test "x$build_manual" = "xyes"; then
