@@ -69,7 +69,7 @@ end
 
 namespace ragel
 	lex
-		literal `}%%
+		literal `}%% -ni
 
 		ignore /[\t\n ]+/
 		ignore /'#' any* :> '\n'/
