@@ -40,10 +40,11 @@ string GenAction::nameOrLoc()
 	}
 }
 
-RedFsmAp::RedFsmAp( FsmCtx *fsmCtx )
+RedFsmAp::RedFsmAp( FsmCtx *fsmCtx, int machineId )
 :
 	keyOps(fsmCtx->keyOps),
 	fsmCtx(fsmCtx),
+	machineId(machineId),
 	forcedErrorState(false),
 	nextActionId(0),
 	nextTransId(0),
@@ -144,6 +145,294 @@ void RedFsmAp::depthFirstOrdering()
 		depthFirstOrdering( errState );
 	
 	/* Make sure we put everything back on. */
+	assert( stateListLen == stateList.length() );
+}
+
+void RedFsmAp::breadthFirstAdd( RedStateAp *state )
+{
+	if ( state->onStateList )
+		return;
+
+	state->onStateList = true;
+	stateList.append( state );
+}
+
+void RedFsmAp::breadthFirstOrdering()
+{
+	/* Init on state list flags. */
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
+		st->onStateList = false;
+	
+	/* Clear out the state list, we will rebuild it. */
+	int stateListLen = stateList.length();
+	stateList.abandon();
+
+	if ( startState != 0 )
+		breadthFirstAdd( startState );
+	
+	int depth = 0;
+	int nextLevel = stateList.length();
+	int pos = 0;
+
+	/* To implement breadth-first we traverse the current list (assuming a
+	 * start state) and add children. */
+	RedStateAp *cur = stateList.head;
+	while ( cur != 0 ) {
+		/* Recurse on everything ranges. */
+		for ( RedTransList::Iter rtel = cur->outRange; rtel.lte(); rtel++ ) {
+			for ( int c = 0; c < rtel->value->numConds(); c++ ) {
+				RedCondPair *cond = rtel->value->outCond( c );
+				if ( cond->targ != 0 )
+					breadthFirstAdd( cond->targ );
+			}
+		}
+
+		if ( cur->nfaTargs ) {
+			for ( RedNfaTargs::Iter s = *cur->nfaTargs; s.lte(); s++ )
+				breadthFirstAdd( s->state );
+		}
+
+		cur = cur->next;
+		pos += 1;
+
+		if ( pos == nextLevel ) {
+			depth += 1;
+			nextLevel = stateList.length();
+		}
+	}
+
+	for ( RedStateSet::Iter en = entryPoints; en.lte(); en++ )
+		depthFirstOrdering( *en );
+	if ( forcedErrorState )
+		depthFirstOrdering( errState );
+
+	assert( stateListLen == stateList.length() );
+}
+
+#ifdef SCORE_ORDERING
+void RedFsmAp::readScores()
+{
+	/*
+	 * Reads processed transitions logged by ASM codegen when LOG_TRANS is
+	 * enabled. Process with:
+	 *
+	 * cat trans-log | sort -n -k 1 -k 2 -k 3 | uniq -c | sort -r -n -k1 -r > scores
+	 */
+	FILE *sfn = fopen( "scores", "r" );
+
+	scores = new long*[nextStateId];
+	for ( int i = 0; i < nextStateId; i++ ) {
+		scores[i] = new long[256];
+		memset( scores[i], 0, sizeof(long) * 256 );
+	}
+
+	long score, m, state, ch;
+	while ( true ) {
+		int n = fscanf( sfn, "%ld %ld %ld %ld\n", &score, &m, &state, &ch );
+		if ( n != 4 )
+			break;
+		if ( m == machineId )
+			scores[state][ch] = score;
+	}
+	fclose( sfn );
+
+	/* Init on state list flags. */
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		RedTransList::Iter rtel = st->outRange;
+		int chi = 0;
+		while ( rtel.lte() ) {
+			/* 1. Bring chi up to lower end of out range. */
+			while ( chi < rtel->lowKey.getVal() ) {
+				chi++;
+			}
+
+			/* 2. While inside lower, add in score. */
+			while ( chi <= rtel->highKey.getVal() ) {
+				rtel->score += scores[st->id][chi];
+				// std::cerr << "score to " << rtel->score << std::endl;
+				chi++;
+			}
+
+			/* 3. Next range. */
+			// std::cerr << "rtel score " << rtel->lowKey.getVal() << " " <<
+			//		rtel->highKey.getVal() << " " << rtel->score << std::endl;
+			rtel++;
+		}
+	}
+}
+
+/* This second pass will collect any states that didn't make it in the first
+ * pass. Used for depth-first and breadth-first passes. */
+void RedFsmAp::scoreSecondPass( RedStateAp *state )
+{
+	/* Nothing to do if the state is already on the list. */
+	if ( state->onListRest )
+		return;
+
+	/* Doing depth first, put state on the list. */
+	state->onListRest = true;
+
+	if ( !state->onStateList ) {
+		state->onStateList = true;
+		stateList.append( state );
+	}
+	
+	/* At this point transitions should only be in ranges. */
+	assert( state->outSingle.length() == 0 );
+	assert( state->defTrans == 0 );
+
+	/* Recurse on everything ranges. */
+	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
+		for ( int c = 0; c < rtel->value->numConds(); c++ ) {
+			RedCondPair *cond = rtel->value->outCond( c );
+			if ( cond->targ != 0 )
+				scoreSecondPass( cond->targ );
+		}
+	}
+
+	if ( state->nfaTargs ) {
+		for ( RedNfaTargs::Iter s = *state->nfaTargs; s.lte(); s++ )
+			scoreSecondPass( s->state );
+	}
+}
+
+void RedFsmAp::scoreOrderingDepth( RedStateAp *state )
+{
+	/* Nothing to do if the state is already on the list. */
+	if ( state->onStateList )
+		return;
+
+	/* Doing depth first, put state on the list. */
+	state->onStateList = true;
+	stateList.append( state );
+
+	/* At this point transitions should only be in ranges. */
+	assert( state->outSingle.length() == 0 );
+	assert( state->defTrans == 0 );
+
+	/* Recurse on everything ranges. */
+	for ( RedTransList::Iter rtel = state->outRange; rtel.lte(); rtel++ ) {
+		if ( rtel->score > 10 ) {
+			for ( int c = 0; c < rtel->value->numConds(); c++ ) {
+				RedCondPair *cond = rtel->value->outCond( c );
+				if ( cond->targ != 0 )
+					scoreOrderingDepth( cond->targ );
+			}
+		}
+	}
+}
+
+void RedFsmAp::scoreOrderingDepth()
+{
+	readScores();
+
+	/* Init on state list flags. */
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		st->onStateList = false;
+		st->onListRest = false;
+	}
+	
+	/* Clear out the state list, we will rebuild it. */
+	int stateListLen = stateList.length();
+	stateList.abandon();
+
+	scoreOrderingDepth( startState );
+
+	scoreSecondPass( startState );
+	for ( RedStateSet::Iter en = entryPoints; en.lte(); en++ )
+		scoreSecondPass( *en );
+	if ( forcedErrorState )
+		scoreSecondPass( errState );
+
+	assert( stateListLen == stateList.length() );
+}
+
+void RedFsmAp::scoreOrderingBreadth()
+{
+	readScores();
+
+	/* Init on state list flags. */
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
+		st->onStateList = false;
+		st->onListRest = false;
+	}
+	
+	/* Clear out the state list, we will rebuild it. */
+	int stateListLen = stateList.length();
+	stateList.abandon();
+
+	if ( startState != 0 )
+		breadthFirstAdd( startState );
+	
+	int depth = 0;
+	int nextLevel = stateList.length();
+	int pos = 0;
+
+	/* To implement breadth-first we traverse the current list (assuming a
+	 * start state) and add children. */
+	RedStateAp *cur = stateList.head;
+	while ( cur != 0 ) {
+		/* Recurse on everything ranges. */
+		for ( RedTransList::Iter rtel = cur->outRange; rtel.lte(); rtel++ ) {
+			if ( rtel->score > 100 ) {
+				for ( int c = 0; c < rtel->value->numConds(); c++ ) {
+					RedCondPair *cond = rtel->value->outCond( c );
+					if ( cond->targ != 0 )
+						breadthFirstAdd( cond->targ );
+				}
+			}
+		}
+
+		cur = cur->next;
+		pos += 1;
+
+		if ( pos == nextLevel ) {
+			depth += 1;
+			nextLevel = stateList.length();
+		}
+	}
+
+	scoreSecondPass( startState );
+	for ( RedStateSet::Iter en = entryPoints; en.lte(); en++ )
+		scoreSecondPass( *en );
+	if ( forcedErrorState )
+		scoreSecondPass( errState );
+
+	assert( stateListLen == stateList.length() );
+}
+#endif
+
+void RedFsmAp::randomizedOrdering()
+{
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
+		st->onStateList = false;
+
+	/* Clear out the state list, we will rebuild it. */
+	int stateListLen = stateList.length();
+	stateList.abandon();
+
+	srand( time( 0 ) );
+
+	for ( int i = nextStateId; i > 0; i-- ) {
+		/* Pick one from 0 ... i (how many are left). */
+		int nth = random() % i;
+
+		/* Go forward through the list adding the nth. Need to scan because
+		 * there are items already added in the list. */
+		for ( int j = 0; j < nextStateId; j++ ) {
+			if ( !allStates[j].onStateList ) {
+				if ( nth == 0 ) {
+					/* Add. */
+					allStates[j].onStateList = true;
+					stateList.append( &allStates[j] );
+					break;
+				}
+				else {
+					nth -= 1;
+				}
+			}
+		}
+	}
 	assert( stateListLen == stateList.length() );
 }
 

@@ -44,6 +44,8 @@
 #define STATE_ERR_STATE   0
 #define FUNC_NO_FUNC      0
 
+// #define SCORE_ORDERING 1
+
 using std::string;
 
 struct RedStateAp;
@@ -453,10 +455,20 @@ struct RedTransEl
 {
 	/* Constructors. */
 	RedTransEl( Key lowKey, Key highKey, RedTransAp *value ) 
-		: lowKey(lowKey), highKey(highKey), value(value) { }
+	:
+		lowKey(lowKey), 
+		highKey(highKey), 
+		value(value)
+#ifdef SCORE_ORDERING
+		, score(0)
+#endif
+	{ }
 
 	Key lowKey, highKey;
 	RedTransAp *value;
+#ifdef SCORE_ORDERING
+	long long score;
+#endif
 };
 
 typedef Vector<RedTransEl> RedTransList;
@@ -555,6 +567,7 @@ struct RedStateAp
 		labelNeeded(false), 
 		outNeeded(false), 
 		onStateList(false), 
+		onListRest(false), 
 		toStateAction(0), 
 		fromStateAction(0), 
 		eofAction(0), 
@@ -586,6 +599,7 @@ struct RedStateAp
 	bool labelNeeded;
 	bool outNeeded;
 	bool onStateList;
+	bool onListRest;
 	RedAction *toStateAction;
 	RedAction *fromStateAction;
 	RedAction *eofAction;
@@ -620,11 +634,12 @@ typedef BstSet< RedTransAp*, CmpOrd<RedTransAp*> > RedTransSet;
 /* Next version of the fsm machine. */
 struct RedFsmAp
 {
-	RedFsmAp( FsmCtx *fsmCtx );
+	RedFsmAp( FsmCtx *fsmCtx, int machineId );
 	~RedFsmAp();
 
 	KeyOps *keyOps;
 	FsmCtx *fsmCtx;
+	int machineId;
 
 	bool forcedErrorState;
 
@@ -797,6 +812,20 @@ struct RedFsmAp
 	/* Ordering states by transition connections. */
 	void depthFirstOrdering( RedStateAp *state );
 	void depthFirstOrdering();
+
+	void breadthFirstAdd( RedStateAp *state );
+	void breadthFirstOrdering();
+
+	void randomizedOrdering();
+
+#ifdef SCORE_ORDERING
+	long **scores;
+	void scoreSecondPass( RedStateAp *state );
+	void scoreOrderingBreadth();
+	void readScores();
+	void scoreOrderingDepth( RedStateAp *state );
+	void scoreOrderingDepth();
+#endif
 
 	/* Set state ids. */
 	void sequentialStateIds();

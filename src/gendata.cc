@@ -965,7 +965,7 @@ void CodeGenData::make( const HostLang *hostLang )
 
 void CodeGenData::createMachine()
 {
-	redFsm = new RedFsmAp( pd->fsmCtx );
+	redFsm = new RedFsmAp( pd->fsmCtx, machineId );
 }
 
 void CodeGenData::initActionList( unsigned long length )

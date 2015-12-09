@@ -48,6 +48,11 @@ extern int numSplitPartitions;
 extern bool noLineDirectives;
 bool printStatistics = false;
 
+/* Enables transition logging in the form that score-based state sorting can
+ * processes. This bit of code is intended to increase locality and reduce
+ * cache misses. Gains are minimal, 1-2%. */
+// #define LOG_TRANS 1
+
 void asmLineDirective( ostream &out, const char *fileName, int line )
 {
 #if 0
@@ -1228,6 +1233,16 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 
 			NFA_PUSH( st );
 
+#ifdef LOG_TRANS
+			out <<
+				"	movzbl	(" << P() << "), %r10d\n"
+				"	movq	$" << machineId << ", %rdi\n"
+				"	movq	$" << st->id << ", %rsi\n"
+				"	movslq	%r10d, %rdx\n"
+				"	call	" << LABEL( "log_trans" ) << "\n"
+				;
+#endif
+
 			/* Load *p. */
 			if ( st->transList != 0 ) {
 				long lowKey = redFsm->lowKey.getVal();
@@ -1865,6 +1880,12 @@ void AsmCodeGen::writeData()
 		out <<
 			"	.byte " << redFsm->classMap[pos] << "\n";
 	}
+	
+#ifdef LOG_TRANS
+	out <<
+		LABEL( "fmt_log_trans" ) << ":\n"
+		"	.string \"%i %i %i\\n\"\n";
+#endif
 }
 
 void AsmCodeGen::setNfaIds()
@@ -2054,5 +2075,21 @@ void AsmCodeGen::writeExec()
 			"	movq	" << vCS() << ", %r11\n";
 	}
 
-	out << "# WRITE EXEC END\n";
+	out <<
+		"# WRITE EXEC END\n";
+
+#ifdef LOG_TRANS
+	out <<
+		"	jmp " << LABEL( "skip" ) << "\n" <<
+		LABEL( "log_trans" ) << ":\n"
+		"	movq    %rdx, %rcx\n"
+		"	movq    %rsi, %rdx\n"
+		"	movq    %rdi, %rsi\n"
+		"	movq	" << LABEL( "fmt_log_trans" ) << "@GOTPCREL(%rip), %rdi\n"
+		"	movq    $0, %rax\n"
+		"	call    printf@PLT\n"
+		"	ret\n" <<
+		LABEL( "skip" ) << ":\n"
+		"\n";
+#endif
 }
