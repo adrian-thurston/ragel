@@ -140,13 +140,16 @@ void colm_parser_set_context( program_t *prg, tree_t **sp, parser_t *parser, str
 	parser->pda_run->context = val;
 }
 
-static head_t *tree_to_str( program_t *prg, tree_t **sp, tree_t *tree, int trim )
+static head_t *tree_to_str( program_t *prg, tree_t **sp, tree_t *tree, int trim, int attrs )
 {
 	/* Collect the tree data. */
 	StrCollect collect;
 	init_str_collect( &collect );
 
-	print_tree_collect( prg, sp, &collect, tree, trim );
+	if ( attrs )
+		print_tree_collect_a( prg, sp, &collect, tree, trim );
+	else
+		print_tree_collect( prg, sp, &collect, tree, trim );
 
 	/* Set up the input stream. */
 	head_t *ret = string_alloc_full( prg, collect.data, collect.length );
@@ -1490,7 +1493,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_TREE_TO_STR\n" );
 
 			tree_t *tree = vm_pop_tree();
-			head_t *res = tree_to_str( prg, sp, tree, false );
+			head_t *res = tree_to_str( prg, sp, tree, false, false );
 			tree_t *str = construct_string( prg, res );
 			colm_tree_upref( str );
 			vm_push_tree( str );
@@ -1501,7 +1504,18 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_TREE_TO_STR_TRIM\n" );
 
 			tree_t *tree = vm_pop_tree();
-			head_t *res = tree_to_str( prg, sp, tree, true );
+			head_t *res = tree_to_str( prg, sp, tree, true, false );
+			tree_t *str = construct_string( prg, res );
+			colm_tree_upref( str );
+			vm_push_tree( str );
+			colm_tree_downref( prg, sp, tree );
+			break;
+		}
+		case IN_TREE_TO_STR_TRIM_A: {
+			debug( prg, REALM_BYTECODE, "IN_TREE_TO_STR_TRIM_A\n" );
+
+			tree_t *tree = vm_pop_tree();
+			head_t *res = tree_to_str( prg, sp, tree, true, true );
 			tree_t *str = construct_string( prg, res );
 			colm_tree_upref( str );
 			vm_push_tree( str );

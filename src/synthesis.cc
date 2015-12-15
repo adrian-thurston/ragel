@@ -2135,6 +2135,15 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 					return pd->uniqueTypeStr;
 					
 				}
+				case 'S': {
+					UniqueType *ut = right->evaluate( pd, code );
+
+					if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
+						code.append( IN_INT_TO_STR );
+
+					code.append( IN_TREE_TO_STR_TRIM_A );
+					return pd->uniqueTypeStr;
+				}
 				case '%': {
 					UniqueType *ut = right->evaluate( pd, code );
 					if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )

@@ -607,6 +607,7 @@ def code_multiplicitive
 def code_unary
 	[BANG code_factor] :Bang
 |	[DOLLAR code_factor] :Dollar
+|	[DOLLAR DOLLAR code_factor] :DollarDollar
 |	[CARET code_factor] :Caret
 |	[PERCENT code_factor] :Percent
 |	[code_factor] :Base

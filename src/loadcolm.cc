@@ -1977,6 +1977,11 @@ struct LoadColm
 			expr = LangExpr::cons( unary.DOLLAR().loc(), '$', factor );
 			break;
 		}
+		case code_unary::DollarDollar: {
+			LangExpr *factor = walkCodeFactor( unary.code_factor() );
+			expr = LangExpr::cons( unary.DOLLAR().loc(), 'S', factor );
+			break;
+		}
 		case code_unary::Caret: {
 			LangExpr *factor = walkCodeFactor( unary.code_factor() );
 			expr = LangExpr::cons( unary.CARET().loc(), '^', factor );

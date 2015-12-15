@@ -2041,9 +2041,10 @@ void colm_print_term_tree( program_t *prg, tree_t **sp,
 
 	if ( kid->tree->id == LEL_ID_PTR ) {
 		char buf[INT_SZ];
-		print_args->out( print_args, "#", 1 );
-		sprintf( buf, "%p", (void*) ((pointer_t*)kid->tree)->value );
+		print_args->out( print_args, "#<", 2 );
+		sprintf( buf, "%lx", ((pointer_t*)kid->tree)->value );
 		print_args->out( print_args, buf, strlen(buf) );
+		print_args->out( print_args, ">", 1 );
 	}
 	else if ( kid->tree->id == LEL_ID_STR ) {
 		print_str( print_args, ((str_t*)kid->tree)->value );
@@ -2114,8 +2115,8 @@ void print_term_xml( program_t *prg, tree_t **sp,
 
 	/*child = */ tree_child( prg, kid->tree );
 	if ( kid->tree->id == LEL_ID_PTR ) {
-		char ptr[32];
-		sprintf( ptr, "%p\n", (void*)((pointer_t*)kid->tree)->value );
+		char ptr[INT_SZ];
+		sprintf( ptr, "%lx", ((pointer_t*)kid->tree)->value );
 		print_args->out( print_args, ptr, strlen(ptr) );
 	}
 	else if ( kid->tree->id == LEL_ID_STR ) {
@@ -2162,6 +2163,17 @@ void print_tree_collect( program_t *prg, tree_t **sp,
 {
 	struct colm_print_args print_args = {
 			collect, true, false, trim, &append_collect, 
+			&colm_print_null, &colm_print_term_tree, &colm_print_null
+	};
+
+	colm_print_tree_args( prg, sp, &print_args, tree );
+}
+
+void print_tree_collect_a( program_t *prg, tree_t **sp,
+		StrCollect *collect, tree_t *tree, int trim )
+{
+	struct colm_print_args print_args = {
+			collect, true, true, trim, &append_collect, 
 			&colm_print_null, &colm_print_term_tree, &colm_print_null
 	};
 

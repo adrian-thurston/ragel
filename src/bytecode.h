@@ -247,6 +247,7 @@ typedef unsigned long colm_value_t;
 #define IN_INT_TO_STR            0x97
 #define IN_TREE_TO_STR           0x98
 #define IN_TREE_TO_STR_TRIM      0x99
+#define IN_TREE_TO_STR_TRIM_A    0x18
 
 #define IN_CREATE_TOKEN          0x9a
 #define IN_MAKE_TOKEN            0x9b
