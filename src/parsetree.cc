@@ -763,6 +763,11 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 		nfaCondsCheck( pd );
 	}
 
+	if ( pd->id->nfaBreadthCheck ) {
+		/* Does not return. */
+		nfaBreadthCheck( pd );
+	}
+
 	if ( pd->id->printStatistics )
 		cout << "terms\t" << terms.length() << endl;
 
@@ -895,6 +900,82 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 		catch ( const RepetitionError & ) {
 			nfaCheckResult( 2, 0, "rep-error" );
 		}
+	}
+
+	nfaCheckResult( 0, 0, "OK" );
+}
+
+/*
+ * This algorithm assigns a price to each state visit, then adds that to a
+ * running total. Note that we do not guard against multiple visits to a state,
+ * since we are estimating runtime cost.
+ *
+ * We rely on a character histogram and are looking for a probability of being
+ * in any given state, given that histogram, simple and very effective.
+ */
+void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
+		long depth, int maxDepth, double stateScore, double &total )
+{
+	if ( depth > maxDepth )
+		return;
+	
+	/* Recurse on everything ranges. */
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		/* Compute target state score. */
+		double span = 0;
+		for ( int i = trans->lowKey.getVal(); i <= trans->highKey.getVal(); i++ )
+			span += pd->id->histogram[i];
+
+		double targetStateScore = stateScore * ( span );
+
+		/* Add to the level. */
+		total += targetStateScore;
+
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 ) {
+				checkBreadth( pd, fsm, trans->tdap()->toState,
+						depth + 1, maxDepth, targetStateScore, total );
+			}
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 ) {
+					checkBreadth( pd, fsm, cond->toState,
+							depth + 1, maxDepth, targetStateScore, total );
+				}
+			}
+		}
+	}
+
+	if ( state->nfaOut != 0 ) {
+		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
+			/* We do not increment depth here since this is an epsilon transition. */
+			checkBreadth( pd, fsm, n->toState, depth, maxDepth, stateScore, total );
+		}
+	}
+}
+
+void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
+{
+	const int maxDepth = 5;
+	double total = 0;
+	checkBreadth( pd, fsm, fsm->startState, 1, maxDepth, 1.0, total );
+
+	cerr << std::fixed << std::setprecision(6) <<
+			"BREADTH-SCORE: " << pd->id->nfaBreadthCheck << " " << total << endl;
+	
+	nfaCheckResult( 21, 1, "OK" );
+}
+
+void NfaUnion::nfaBreadthCheck( ParseData *pd )
+{
+	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
+		FsmAp *fsm = 0;
+
+		/* No need for state limit here since this check is used after all
+		 * others pass. One check only and . */
+		fsm = (*term)->walk( pd );
+		checkBreadth( pd, fsm );
 	}
 
 	nfaCheckResult( 0, 0, "OK" );

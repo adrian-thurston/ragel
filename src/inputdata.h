@@ -193,7 +193,10 @@ struct InputData
 		transSpanDepth(6),
 		nfaIntermedStateLimit(10000),
 		nfaFinalStateLimit(2000),
-		varBackend(false)
+		nfaBreadthCheck(0),
+		varBackend(false),
+		histogramFn(0),
+		histogram(0)
 	{}
 
 	std::string dirName;
@@ -271,10 +274,14 @@ struct InputData
 	long transSpanDepth;
 	long nfaIntermedStateLimit;
 	long nfaFinalStateLimit;
+	const char *nfaBreadthCheck;
 
 	bool varBackend;
 
 	IncludeDict includeDict;
+
+	const char *histogramFn;
+	double *histogram;
 
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();
@@ -316,6 +323,9 @@ struct InputData
 
 	void writeDot( std::ostream &out );
 
+	void loadHistogram();
+	void defaultHistogram();
+
 	void parseArgs( int argc, const char **argv );
 	void checkArgs();
 	void terminateParser( Parser6 *parser );
@@ -326,6 +336,7 @@ struct InputData
 	void processColm();
 	void processReduce();
 	void process();
+
 };
 
 

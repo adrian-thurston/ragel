@@ -475,8 +475,15 @@ struct NfaUnion
 	bool strike( ParseData *pd, FsmAp *fsmAp );
 	void nfaTermCheck( ParseData *pd );
 	void nfaCondsCheck( ParseData *pd );
+	void nfaBreadthCheck( ParseData *pd );
 	void condsDensity( ParseData *pd, StateAp *state, long depth );
 	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
+
+	void checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
+			long depth, int maxDepth, double stateScore, double &total );
+	void checkBreadth( ParseData *pd, FsmAp *fsm );
+	void checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state, long depth,
+			double ss, double *scores );
 
 	/* Node data. */
 	TermVect terms;

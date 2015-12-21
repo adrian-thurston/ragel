@@ -92,6 +92,7 @@ struct CondCostTooHigh
 	long long costId;
 };
 
+
 /* State list element for unambiguous access to list element. */
 struct FsmListEl 
 {

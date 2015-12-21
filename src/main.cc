@@ -23,6 +23,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <unistd.h>
 #include <sstream>
@@ -493,6 +494,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					nfaIntermedStateLimit = strtol( eq, 0, 10 );
 				else if ( strcmp( arg, "nfa-final-state-limit" ) == 0 )
 					nfaFinalStateLimit = strtol( eq, 0, 10 );
+				else if ( strcmp( arg, "nfa-breadth-check" ) == 0 )
+					nfaBreadthCheck = strdup(eq);
+				else if ( strcmp( arg, "input-histogram" ) == 0 )
+					histogramFn = strdup(eq);
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
@@ -582,6 +587,53 @@ bool langSupportsGoto( const HostLang *hostLang )
 	return true;
 }
 
+void InputData::loadHistogram()
+{
+	const int alphsize = 256;
+
+	/* Init a default. */
+	histogram = new double[alphsize];
+	ifstream h( histogramFn );
+	if ( !h.is_open() )
+		error() << "histogram read: failed to open file: " << histogramFn << endp;
+
+	int i = 0;
+	double value;
+	while ( true ) {
+		if ( h >> value ) {
+			if ( i >= alphsize ) {
+				/* Too many items. */
+				error() << "histogram read: too many histogram values,"
+						" expecting " << alphsize << " (for char alphabet)" << endp;
+			}
+			histogram[i] = value;
+			i++;
+		}
+		else {
+			/* Read failure. */
+			if ( h.eof() ) {
+				if ( i < alphsize ) {
+					error() << "histogram read: fell short of " <<
+							alphsize << " items" << endp;
+				}
+				break;
+			}
+			else {
+				error() << "histogram read: error at item " << i << endp;
+			}
+		}
+	}
+}
+
+void InputData::defaultHistogram()
+{
+	/* Flat histogram. */
+	const int alphsize = 256;
+	histogram = new double[alphsize];
+	for ( int i = 0; i < alphsize; i++ ) {
+		histogram[i] = 1.0 / (double)alphsize;
+	}
+}
 
 void InputData::checkArgs()
 {
@@ -621,6 +673,13 @@ void InputData::checkArgs()
 			backendFeature = GotoFeature;
 		else
 			backendFeature = VarFeature;
+	}
+
+	if ( nfaBreadthCheck != 0 ) {
+		if ( histogramFn != 0 )
+			loadHistogram();
+		else
+			defaultHistogram();
 	}
 }
 
