@@ -955,14 +955,30 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
 	}
 }
 
-void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
+double NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state )
 {
 	const int maxDepth = 5;
 	double total = 0;
-	checkBreadth( pd, fsm, fsm->startState, 1, maxDepth, 1.0, total );
+	checkBreadth( pd, fsm, state, 1, maxDepth, 1.0, total );
+	return total;
+}
 
-	cerr << std::fixed << std::setprecision(6) <<
-			"BREADTH-SCORE: " << pd->id->nfaBreadthCheck << " " << total << endl;
+void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
+{
+	double total = checkBreadth( pd, fsm, fsm->startState );
+
+	cerr << std::fixed << std::setprecision(6);
+	cerr << "BREADTH-SCORE: " << pd->id->nfaBreadthCheck << " start " << total << endl;
+	
+	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
+		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
+			if ( mel->key == c->entryId ) {
+				total = checkBreadth( pd, fsm, mel->value );
+				cerr << "BREADTH-SCORE: " << pd->id->nfaBreadthCheck << " " <<
+						c->name << " " << " " << total << endl;
+			}
+		}
+	}
 	
 	nfaCheckResult( 21, 1, "OK" );
 }
@@ -1754,6 +1770,9 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 			/* If the name is referenced then set the entry point. */
 			if ( name->numRefs > 0 )
 				rtnVal->setEntry( name->id, rtnVal->startState );
+
+			if ( labels[i].cut )
+				pd->cuts.append( ParseData::Cut( labels[i].data, name->id ) );
 		}
 
 		pd->popNameScope( nameFrame );
@@ -1771,8 +1790,12 @@ void FactorWithAug::makeNameTree( ParseData *pd )
 	/* Add the labels to the tree of instantiated names. Each label
 	 * makes a new scope. */
 	NameInst *prevNameInst = pd->curNameInst;
-	for ( int i = 0; i < labels.length(); i++ )
+	for ( int i = 0; i < labels.length(); i++ ) {
 		pd->curNameInst = pd->addNameInst( labels[i].loc, labels[i].data, true );
+
+		if ( labels[i].cut )
+			pd->curNameInst->numRefs += 1;
+	}
 
 	/* Recurse, then pop the names. */
 	factorWithRep->makeNameTree( pd );

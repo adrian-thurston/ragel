@@ -610,11 +610,23 @@ reduction TopLevel
 
 	ragel::factor_label :Label
 	{
+		$$->fwa = $_factor_label->fwa;
+
 		InputLoc loc = @word;
 		string label( $word->data, $word->length );
-		$_factor_label->fwa->labels.prepend( Label(loc, label) );
 
+		$$->fwa->labels.prepend( Label(loc, label) );
+	}
+
+	ragel::factor_label :Cut
+	{
 		$$->fwa = $_factor_label->fwa;
+
+		InputLoc loc = @word;
+		string label( $word->data, $word->length );
+
+		$$->fwa->labels.prepend( Label(loc, label) );
+		$$->fwa->labels[0].cut = true;
 	}
 
 	ragel::factor_label :Ep

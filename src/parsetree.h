@@ -167,10 +167,11 @@ struct EpsilonLink
 struct Label
 {
 	Label( const InputLoc &loc, std::string data )
-		: loc(loc), data(data) { }
+		: loc(loc), data(data), cut(false) { }
 
 	InputLoc loc;
 	std::string data;
+	bool cut;
 };
 
 /* Structrue represents an action assigned to some FactorWithAug node. The
@@ -479,6 +480,7 @@ struct NfaUnion
 	void condsDensity( ParseData *pd, StateAp *state, long depth );
 	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
 
+	double checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state );
 	void checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
 			long depth, int maxDepth, double stateScore, double &total );
 	void checkBreadth( ParseData *pd, FsmAp *fsm );

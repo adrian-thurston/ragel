@@ -397,6 +397,19 @@ struct ParseData
 
 	CodeGenData *cgd;
 
+	struct Cut
+	{
+		Cut( std::string name, int entryId )
+			: name(name), entryId(entryId) {}
+
+		std::string name;
+		int entryId;
+	};
+
+	/* Track the cuts we set in the fsm graph. We perform cost analysis on the
+	 * built fsm graph for each of these entry points. */
+	Vector<Cut> cuts;
+
 	ParseData *prev, *next;
 };
 
