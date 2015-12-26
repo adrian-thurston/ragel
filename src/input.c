@@ -673,8 +673,12 @@ static int stream_consume_data( program_t *prg, tree_t **sp, struct stream_impl 
 				is->consumed += slen;
 			}
 
-			if ( !loc_set( loc ) )
-				default_loc( loc );
+			if ( !loc_set( loc ) ) {
+				if ( is->line > 0 )
+					transfer_loc( loc, is );
+				else
+					default_loc( loc );
+			}
 		}
 
 		if ( length == 0 ) {
@@ -778,6 +782,17 @@ static void stream_prepend_data( struct stream_impl *is, const char *data, long 
 		stream_prepend_data( stream_to_impl( (stream_t*)is->queue->tree ), data, length );
 	}
 	else {
+		if ( is_source_stream( is ) ) {
+			message( "sourcing line info\n" );
+
+			/* steal the location information. */
+			stream_t *s = ((stream_t*)is->queue->tree);
+			is->line = s->impl->line;
+			is->column = s->impl->column;
+			is->byte = s->impl->byte;
+			is->name = s->impl->name;
+		}
+
 		/* Create a new buffer for the data. This is the easy implementation.
 		 * Something better is needed here. It puts a max on the amount of
 		 * data that can be pushed back to the inputStream. */
