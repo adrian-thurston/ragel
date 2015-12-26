@@ -401,6 +401,8 @@ void XMLCodeGen::writeInlineList( InlineList *inlineList )
 		case InlineItem::Nbreak:
 		case InlineItem::Stmt:
 		case InlineItem::Subst:
+		case InlineItem::NfaWrapAction:
+		case InlineItem::NfaWrapConds:
 			break;
 		}
 	}
