@@ -98,7 +98,7 @@ namespace ragel
 				`access `write `getkey `export `import
 				`include `prepush `postpop `nfaprepush `nfapostpop
 
-		literal `:nfa3 `:nfa `:cond `:nomax `:cut `):
+		literal `:nfa3 `:nfa `:cond `:nomax `):
 
 		token string /
 			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
@@ -185,7 +185,6 @@ namespace ragel
 
 	def factor_label
 		[word `: factor_label] :Label
-	|	[`:cut `( word `): factor_label] :Cut
 	|	[factor_ep] :Ep
 
 	def factor_ep

@@ -494,8 +494,17 @@ void InputData::parseArgs( int argc, const char **argv )
 					nfaIntermedStateLimit = strtol( eq, 0, 10 );
 				else if ( strcmp( arg, "nfa-final-state-limit" ) == 0 )
 					nfaFinalStateLimit = strtol( eq, 0, 10 );
-				else if ( strcmp( arg, "nfa-breadth-check" ) == 0 )
-					nfaBreadthCheck = strdup(eq);
+				else if ( strcmp( arg, "nfa-breadth-check" ) == 0 ) {
+					char *ptr = 0;
+					while ( true ) {
+						char *label = strtok_r( eq, ",", &ptr );
+						eq = NULL;
+						if ( label == NULL )
+							break;
+						breadthLabels.append( strdup( label ) );
+					}
+					nfaBreadthCheck = (const char*)0x1;
+				}
 				else if ( strcmp( arg, "input-histogram" ) == 0 )
 					histogramFn = strdup(eq);
 				else {

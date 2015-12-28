@@ -229,6 +229,9 @@ struct InputData
 
 	ArgsVector includePaths;
 
+	bool isBreadthLabel( const string &label );
+	ArgsVector breadthLabels;
+
 	const HostLang *hostLang;
 
 	/* Target language and output style. */

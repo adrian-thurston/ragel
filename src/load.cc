@@ -1951,14 +1951,6 @@ struct LoadRagel
 				factorWithAug->labels.prepend( Label(loc, label) );
 				break;
 			}
-			case ragel::factor_label::Cut: {
-				InputLoc loc = FactorLabel.loc();
-				string label = FactorLabel.word().text();
-				factorWithAug = loadFactorLabel( FactorLabel._factor_label() );
-				factorWithAug->labels.prepend( Label(loc, label) );
-				factorWithAug->labels[0].cut = true;
-				break;
-			}
 			case ragel::factor_label::Ep:
 				factorWithAug = loadFactorEp( FactorLabel.factor_ep() );
 				break;

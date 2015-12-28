@@ -175,6 +175,15 @@ void InputData::makeDefaultFileName()
 	}
 }
 
+bool InputData::isBreadthLabel( const string &label )
+{
+	for ( ArgsVector::Iter bl = breadthLabels; bl.lte(); bl++ ) {
+		if ( label == *bl )
+			return true;
+	}
+	return false;
+}
+
 void InputData::createOutputStream()
 {
 	/* Make sure we are not writing to the same file as the input file. */

@@ -848,10 +848,11 @@ NfaUnion::~NfaUnion()
 	
 }
 
-void nfaCheckResult( long code, long id, const char *scode )
+void nfaCheckResult( long code, long id, const char *scode, bool suppressExit = false )
 {
 	cout << code << " " << id << " " << scode << endl;
-	exit( code );
+	if ( !suppressExit )
+		exit( code );
 }
 
 /* This is the first pass check. It looks for state (limit times 2 ) or
@@ -965,22 +966,25 @@ double NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state )
 
 void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 {
+	int exitCode = 21;
 	double total = checkBreadth( pd, fsm, fsm->startState );
 
-	cerr << std::fixed << std::setprecision(6);
-	cerr << "BREADTH-SCORE: " << pd->id->nfaBreadthCheck << " start " << total << endl;
+	/* Suppress exit with this call. We need to perform the score checks after. */
+	nfaCheckResult( exitCode, 1, "OK", true );
+
+	cout << std::fixed << std::setprecision(6);
+	cout << "COST start " << total << endl;
 	
 	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
 		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
 			if ( mel->key == c->entryId ) {
 				total = checkBreadth( pd, fsm, mel->value );
-				cerr << "BREADTH-SCORE: " << pd->id->nfaBreadthCheck << " " <<
-						c->name << " " << " " << total << endl;
+				cout << "COST " << c->name << " " << total << endl;
 			}
 		}
 	}
-	
-	nfaCheckResult( 21, 1, "OK" );
+
+	exit( exitCode );
 }
 
 void NfaUnion::nfaBreadthCheck( ParseData *pd )
