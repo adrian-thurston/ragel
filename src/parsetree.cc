@@ -972,14 +972,19 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 	/* Suppress exit with this call. We need to perform the score checks after. */
 	nfaCheckResult( exitCode, 1, "OK", true );
 
-	cout << std::fixed << std::setprecision(6);
-	cout << "COST start " << total << endl;
+	cout << std::fixed << std::setprecision(0);
+	double start = total;
 	
 	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
 		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
 			if ( mel->key == c->entryId ) {
 				total = checkBreadth( pd, fsm, mel->value );
-				cout << "COST " << c->name << " " << total << endl;
+
+				if ( start > 0.01 ) {
+					cout << "COST " << c->name << " " <<
+							( 1000000.0 * start ) << " " << 
+							( 1000000.0 * ( total / start ) ) << endl;
+				}
 			}
 		}
 	}
