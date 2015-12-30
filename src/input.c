@@ -783,7 +783,7 @@ static void stream_prepend_data( struct stream_impl *is, const char *data, long 
 	}
 	else {
 		if ( is_source_stream( is ) ) {
-			message( "sourcing line info\n" );
+			// message( "sourcing line info\n" );
 
 			/* steal the location information. */
 			stream_t *s = ((stream_t*)is->queue->tree);
