@@ -90,6 +90,7 @@ parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM_BINDEP)
 ragel-if.$(OBJEXT): parse.c
 ragel-load.$(OBJEXT): parse.c
 ragel-commit.$(OBJEXT): parse.c
+ragel-reducer.$(OBJEXT): parse.c
 
 RLHC = \
 	rlhc-host.lm \
