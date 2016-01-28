@@ -211,7 +211,8 @@ struct HostLang
 		Crack,
 		Asm,
 		Rust,
-		Julia
+		Julia,
+		JS
 	};
 
 	const char *name;
@@ -236,6 +237,7 @@ extern const HostLang hostLangCrack;
 extern const HostLang hostLangAsm;
 extern const HostLang hostLangRust;
 extern const HostLang hostLangJulia;
+extern const HostLang hostLangJS;
 
 extern const HostLang *hostLangs[];
 extern const int numHostLangs;

@@ -713,6 +713,7 @@ void InputData::writeLanguage( std::ostream &out )
 		case HostLang::Asm:     out << "ASM"; break;
 		case HostLang::Rust:    out << "Rust"; break;
 		case HostLang::Julia:   out << "Julia"; break;
+		case HostLang::JS:      out << "JavaScript"; break;
 	}
 	out << "\"";
 }

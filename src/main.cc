@@ -115,6 +115,8 @@ void usage()
 "                          -T0 code style supported\n"
 "   -K                   The host language is Crack\n"
 "                          -T0 code style supported\n"
+"   -P                   The host language is JavaScript\n"
+"                          -T0 code style supported\n"
 "line directives:\n"
 "   -L                   Inhibit writing of #line directives\n"
 "code style:\n"
@@ -244,7 +246,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKUYvHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKUYPvHh?-:sT:F:G:LpV", argc, argv );
 
 	/* Decide if we were invoked using a path variable, or with an explicit path. */
 	const char *lastSlash = strrchr( argv[0], '/' );
@@ -384,6 +386,9 @@ void InputData::parseArgs( int argc, const char **argv )
 				break;
 			case 'Y':
 				hostLang = &hostLangJulia;
+				break;
+			case 'P':
+				hostLang = &hostLangJS;
 				break;
 
 			/* Version and help. */
