@@ -1,5 +1,5 @@
 dnl 
-dnl   Copyright 2006-2012 Adrian Thurston <thurston@complang.org>
+dnl   Copyright 2006-2016 Adrian Thurston <thurston@complang.org>
 dnl
 
 dnl   This file is part of Colm.
@@ -18,8 +18,8 @@ dnl   You should have received a copy of the GNU General Public License
 dnl   along with Colm; if not, write to the Free Software
 dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
   
-AC_INIT(colm, 0.13.0.2)
-PUBDATE="Jan 2015"
+AC_INIT(colm, 0.13.0.3)
+PUBDATE="January 2016"
 
 AM_INIT_AUTOMAKE([foreign])
 
