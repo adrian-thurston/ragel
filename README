@@ -2,18 +2,31 @@
                      Ragel State Machine Compiler -- README
                      ======================================
 
-Building Ragel
---------------
+REQUIRED DEPENDENCIES
+---------------------
 
-To build ragel you need these dependencies
+Colm is a mandatory dependency.
+
+http://www.colm.net/files/colm/colm-0.13.0.3.tar.gz
+
+Either install this to your path or configure the location using
+--with-colm=DEST and pass it the prefix colm was installed to.
+
+OPTIONAL DEPENDENCIES
+---------------------
+
+Get these if you want to build ragel with the original parser (as it exists in
+ragel 6).
 
 http://www.colm.net/files/ragel/ragel-6.9.tar.gz
 http://www.colm.net/files/kelbt/kelbt-0.16.tar.gz
-http://www.colm.net/files/colm/colm-0.13.0.2.tar.gz
 
 Install them to your path, or configure ragel with:
 
-  --with-{ragel,kelbt,colm}=DEST
+  --with-{ragel,kelbt}=DEST
 
-To build the user guide pass "--enable-manual=yes" to the configure script. You
-will need the following extra programs:
+To build the user guide, pass "--enable-manual=yes" to the configure script.
+You will need the following programs.
+
+ * asciidoc
+ * fig2dev

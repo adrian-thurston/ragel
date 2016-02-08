@@ -25,23 +25,24 @@ Ragel Version 7.0
 
 === Abstract
 
-Regular expressions are used heavily for the purpose of specifying parsers.
-They are normally treated as black boxes, linked together with program logic.
-User code is executed in between invocations of the regular expression engine.
-Adding cdoe before a pattern terminates requires patterns to be broken and
-pasted back together with program logic. The more inline user code is needed,
-the less the advantages of regular expressions are seen. 
+In today's computing landscape, regular expressions are used heavily for the
+purpose of specifying parsers. They are normally treated as black boxes, linked
+together with program logic. User code is executed in between invocations of
+the regular expression engine. To add code before a pattern terminates, the
+programmer is required to break patterns and paste them back together with
+program logic. The more inline code needed, the less the advantages of regular
+expressions are seen. 
 
 Ragel is a software development tool that allows user code to be embedded into
 the transitions of a regular expression's corresponding state machine,
 eliminating the need to switch from the regular expression engine to the user
 code execution environment, and then back again. As a result, expressions can
-be maximally continuous.  One is free to specify an entire parser using a
-single regular expression.  The single-expression model affords concise and
-elegant descriptions of languages and the generation of very simple, fast and
-robust code.  Ragel compiles executable finite state machines from a high level
-regular language notation. Ragel targets C, C++, Objective-C, D, Go, Java, Ruby
-and OCaml.
+be maximally continuous. One is free to specify an entire parser using a single
+regular expression. The single-expression model affords concise and elegant
+descriptions of languages and the generation of very simple, fast and robust
+code. Ragel compiles executable finite state machines from a high level regular
+language notation. Ragel targets C, C++, Objective-C, D, Go, GNU ASM x86-64,
+Java, Ruby, C#, OCaml, Crack, Rust, Julia and Javascript
 
 In addition to building state machines from regular expressions, Ragel allows
 the programmer to directly specify state machines with state charts. These two
@@ -106,7 +107,8 @@ deterministic finite state automaton. Since every regular language has a state
 machine representation and vice versa, the terms regular language and state
 machine (or just machine) will be used interchangeably in this document.
 
-Ragel outputs machines to C, C++, Objective-C, D, Go, Java, Ruby or OCaml code. The output is
+Ragel outputs machines to C, C++, Objective-C, D, Go, GNU ASM x86-64, Java,
+Ruby, C#, OCaml, Crack, Rust, Julia or Javascript code. The output is
 designed to be generic and is not bound to any particular input or processing
 method. A Ragel machine expects to have data passed to it in buffer blocks.
 When there is no more input, the machine can be queried for acceptance.  In
