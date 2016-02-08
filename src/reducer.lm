@@ -2056,6 +2056,10 @@ reduction TopLevel
 
 	ragel::factor :Regex
 	{
+		bool caseInsensitive = false;
+		checkLitOptions( @re_close, $re_close->data, $re_close->length, caseInsensitive );
+		if ( caseInsensitive )
+			$2->regExpr->caseInsensitive = true;
 		$$->factor = new Factor( $regex->regExpr );
 	}
 

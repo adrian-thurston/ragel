@@ -118,7 +118,7 @@ namespace ragel
 		token re_dot / '.' /
 		token re_star / '*' /
 		token re_char / ^( '\\' | '.' | '*' | '[' | '/' ) | '\\' . any /
-		token re_close / '/' /
+		token re_close / '/' 'i'? /
 		token re_sqopen_pos /'['/
 		token re_sqopen_neg /'[^'/
 	end

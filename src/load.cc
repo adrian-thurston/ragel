@@ -1350,6 +1350,12 @@ struct LoadRagel
 			}
 			case ragel::factor::Regex: {
 				RegExpr *regExp = loadRegex( FactorTree.regex() );
+				bool caseInsensitive = false;
+				string re_close = FactorTree.re_close().text();
+				checkLitOptions( FactorTree.re_close().loc(), re_close.c_str(),
+						re_close.size(), caseInsensitive );
+				if ( caseInsensitive )
+					regExp->caseInsensitive = true;
 				factor = new Factor( regExp );
 				break;
 			}

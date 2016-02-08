@@ -35,6 +35,22 @@ using namespace std;
 ostream &operator<<( ostream &out, const NameRef &nameRef );
 ostream &operator<<( ostream &out, const NameInst &nameInst );
 
+/* Read string literal (and regex) options and return the true end. */
+const char *checkLitOptions( const InputLoc &loc, const char *data, int length, bool &caseInsensitive )
+{
+	const char *end = data + length - 1;
+	while ( *end != '\'' && *end != '\"' && *end != '/' ) {
+		if ( *end == 'i' )
+			caseInsensitive = true;
+		else {
+			error( loc ) << "literal string '" << *end << 
+					"' option not supported" << endl;
+		}
+		end -= 1;
+	}
+	return end;
+}
+
 /* Convert the literal string which comes in from the scanner into an array of
  * characters with escapes and options interpreted. Also null terminates the
  * string. Though this null termination should not be relied on for
@@ -46,17 +62,7 @@ char *prepareLitString( const InputLoc &loc, const char *data, long length,
 	caseInsensitive = false;
 
 	const char *src = data + 1;
-	const char *end = data + length - 1;
-
-	while ( *end != '\'' && *end != '\"' ) {
-		if ( *end == 'i' )
-			caseInsensitive = true;
-		else {
-			error( loc ) << "literal string '" << *end << 
-					"' option not supported" << endl;
-		}
-		end -= 1;
-	}
+	const char *end = checkLitOptions( loc, data, length, caseInsensitive );
 
 	char *dest = resData;
 	long len = 0;

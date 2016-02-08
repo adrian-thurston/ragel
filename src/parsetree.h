@@ -227,6 +227,7 @@ struct RedToken
 };
 
 
+const char *checkLitOptions( const InputLoc &loc, const char *data, int length, bool &caseInsensitive );
 char *prepareLitString( const InputLoc &loc, const char *src, long length, 
 			long &resLen, bool &caseInsensitive );
 

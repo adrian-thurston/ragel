@@ -20,7 +20,8 @@
     Ross Thomas, Mitchell Foral, John D. Mitchell, Diego 'Flameeyes' Pettenò,
     Jose Quinteiro, William Morgan, _why, Iñaki Baz Castillo, Attila Sztupák,
     Graham Miller, Ismael Luceno, Josh Stern, Denis Naumov, Arbor Networks,
-    Victor Hugo Borja, Daniel Tang, Justine Tunney, Johannes Pfau, ygrek
+    Victor Hugo Borja, Daniel Tang, Justine Tunney, Johannes Pfau, ygrek,
+    Ingvar Stepanyan, Kelvin Sherlock
 
 * Ragel 6 Code generators contributed by:
 
@@ -32,3 +33,6 @@
   - Go: Justine Tunney
   - D2: Johannes Pfau
   - OCaml: ygrek
+
+* Ragel 7 Code generators contributed by:
+  - Javascript: Ingvar Stepanyan

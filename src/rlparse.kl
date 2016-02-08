@@ -1333,12 +1333,10 @@ factor:
 	};
 factor:
 	RE_Slash regular_expr RE_Slash final {
-		if ( $3->length > 1 ) {
-			for ( char *p = $3->data; *p != 0; p++ ) {
-				if ( *p == 'i' )
-					$2->regExpr->caseInsensitive = true;
-			}
-		}
+		bool caseInsensitive = false;
+		checkLitOptions( $3->loc, $3->data, $3->length, caseInsensitive );
+		if ( caseInsensitive )
+			$2->regExpr->caseInsensitive = true;
 
 		/* Create a new factor node going to a regular exp. */
 		$$->factor = new Factor( $2->regExpr );
