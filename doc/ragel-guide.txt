@@ -42,7 +42,7 @@ regular expression. The single-expression model affords concise and elegant
 descriptions of languages and the generation of very simple, fast and robust
 code. Ragel compiles executable finite state machines from a high level regular
 language notation. Ragel targets C, C++, Objective-C, D, Go, GNU ASM x86-64,
-Java, Ruby, C#, OCaml, Crack, Rust, Julia and Javascript
+Java, Ruby, C#, OCaml, Crack, Rust, Julia and JavaScript
 
 In addition to building state machines from regular expressions, Ragel allows
 the programmer to directly specify state machines with state charts. These two
@@ -108,7 +108,7 @@ machine representation and vice versa, the terms regular language and state
 machine (or just machine) will be used interchangeably in this document.
 
 Ragel outputs machines to C, C++, Objective-C, D, Go, GNU ASM x86-64, Java,
-Ruby, C#, OCaml, Crack, Rust, Julia or Javascript code. The output is
+Ruby, C#, OCaml, Crack, Rust, Julia and JavaScript code. The output is
 designed to be generic and is not bound to any particular input or processing
 method. A Ragel machine expects to have data passed to it in buffer blocks.
 When there is no more input, the machine can be queried for acceptance.  In
@@ -2248,6 +2248,112 @@ because there is never any backtracking. To build a scanner with backtracking
 use the Longest-Match machine construction described in
 <<generating_scanners, Generating Scanners>>.
 
+=== NFA Features
+
+New in Ragel 7 are features for specifying non-deterministic machines. Prior to
+this, ragel always produced DFAs, so these features represent a departure
+from the standard runtime model. They allow us to cope with very large state
+machines, without having to compromise on the language matched, or devise some
+techniques outside of the ragel language.
+
+The NFA features require that the programmer make available `nfa_bp`, `nfa_len`
+and `nfa_count` variables. See the section <<variables_used_by_ragel, Varibles
+Used by Ragel>>
+
+Note that NFA features are non compatible with non-contiguous buffer blocks. It
+requires being able to set p to some previously stashed value. If the buffer is
+no longer available, ragel will attempt to backtrack into invalid data.
+
+==== NFA Union
+
+The NFA union operator allows the programmer to create a large union of
+expressions without making the construction fully deterministic. Only a prefix
+is made deterministic, in a breadth-first manner, and up to a specified depth.
+
+--------------
+<name> |= ( <depth>, <group-size> ) <expression1> | <expression2> | ... ;
+--------------
+
+The NFA union operator looks like a normal union, except some additional
+controls are specified. The depth value says how deep into the machine the
+NFA-to-DFA algorithm should go looking for NFA states to make deterministic.
+The group-size value allows the programmer to set a limit on the number of
+expressions that are packed into a single DFA prefix. If this value is zero,
+there is no limit, and all expressions go into a single group. If this number
+is less than the number of expressions, there will be an immediate NFA branch
+for the groups, before entering into the DFA prefixes. Roughly speaking,
+group-size allows you to control initial branch width. 
+
+By making depth or groups-size smaller, you can shift cost from compile-time to
+run-time to get otherwise intractable unions to build.
+
+==== NFA Repetition
+
+The NFA repetition `:nfa()` is a construct designed to allow counting of
+objects in an ambiguous context, however it is useful for much more. It
+generalizes to a state capture/manipulation construct that works regardless of
+ambiguities. For example, if there are two possible data captures, the :nfa
+union operator can backtrack to try an alternate. It before backtracking it can
+restore relevant state, then perform the new capture.
+
+--------------
+:nfa( <id>, <expression>, 
+	<push>, <pop>,
+	<init>, <stay>, <repeat>, <exit> )
+--------------
+
+* `id` is a unique integer identifying the expression. This is used primarily
+for automated analysis purposes.
+
+* `expression` is the ragel-expression that is to be repeated.
+
+* `push` is an action that saves state needed for counting instances of expression.
+
+* `pop` is an action that restores state needed for counting instances of expression.
+
+* `init` is an condition that is tested before entering the repeat.
+
+* `stay` is an condition that is tested before deciding to stay in the
+expression, as opposed to wrapping around to begin a new expression, or
+exiting. If true, this allows the expression to continue to match, once a final
+state has been entered.
+
+* `repeat` is an condition that is tested before deciding to wrap around and
+attempt a new instance of expression.
+
+* `exit` is an condition that is tested before deciding to leave the repeat
+
+The following actions achieve a generalized repetition that looks for 10 to 100
+repetitions of some expression. It requires that the count variable be placed
+in the nfa_bp struct. Note that it is correct to reference nfa_len. It does not
+need to manipulated, that is done by the generated code.
+
+----------------
+action push   { nfa_bp[nfa_len].count = count; }
+action pop    { count = nfa_bp[nfa_len].count; }
+action init   { ({ count = 0; 1; }) }
+action stay   { ({ 1; }) }
+action repeat { ({ ++count < 100 ; }) }
+action exit   { ({ ++count >= 10; }) }
+------------------
+
+The following actions, when used with expression `''`,  achieve a test of a
+previously stored value (eg. backref). In the exit the stashed value is checked
+against the data at p. 
+
+----------------
+action init    { ({ 1; }) }
+action stay    { ({ 0; }) }
+action repeat  { ({ 0; }) }
+action exit
+{ ({ 
+    int match = check_stashed( p, pe, stashed_start, stashed_end );
+    if ( match )
+        p += ( stashed_end - stashed_start );
+    match;
+}) }
+------------------
+
 Interface to Host Program
 -------------------------
 
@@ -2309,6 +2415,7 @@ int main( int argc, char **argv )
 }
 ----------------------
 
+[[variables_used_by_ragel]]
 === Variables Used by Ragel
 
 There are a number of variables that Ragel expects the user to declare. At a
@@ -2359,6 +2466,31 @@ OCaml code this must be an integer. See <<generating_scanners, Generating
 Scanners>> for more information.
 
 * `te` - Also a pointer to character data.
+
+* `nfa_bp` - NFA backtrack points. Only necessary if NFA features are used.
+This var must be an array of records containing at least a state and alphtype
+pointer.
++
+---------
+struct nfa_bp_rec
+{
+    long state;
+    char *p;
+};
+
+struct nfa_bp_rec nfa_bp[1024];
+---------
++
+This array can be guarded against overflow or dynamically resized using
+`nfaprepush` and `nfapostpop` code blocks. If the `:nfa()` construct is being
+used, the record also needs to contain an `long pop;` field, and `long q_N`
+fields for each instance of the `:nfa()` construct, where N corresponds to the
+id specified in the `:nfa()` construct.
+
+* `nfa_len` - Number of active nfa records. Must be initialized to zero.
+
+* `nfa_count` - Number of NFA pops that have occurred. This is only for
+tracking purposes.
 
 === Alphtype Statement
 
@@ -2734,12 +2866,17 @@ The `ragel` program has a number of options for specifying the host
 language. The host-language options are:
 
 * `-C` for C/C++/Objective-C code (default)
+* `--asm` or `--gas-x86-64-sys-v` for GNU AS, x86_64, System V ABI.
 * `-D` for D code.
 * `-Z` for Go code.
 * `-J` for Java code.
 * `-R` for Ruby code.
 * `-A` for C# code.
 * `-O` for OCaml code.
+* `-U` for Rust
+* `-Y` for Julia 
+* `-K` for Crack
+* `-P` for JavaScript
 
 [[genout]]
 === Choosing a Generated Code Style
@@ -2797,13 +2934,32 @@ overhead. For many parsing applications `-G2` is the preferred output format.
 
 Code Output Style Options
 
-* `-T0` - binary search table-driven - C/D/Java/Ruby/C#/OCaml
-* `-T1` - binary search, expanded actions - &C/D/Ruby/C#/OCaml
-* `-F0` - flat table-driven - C/D/Ruby/C#/OCaml
-* `-F1` - flat table, expanded actions - C/D/Ruby/C#/OCaml
-* `-G0` - goto-driven - C/D/C#/OCaml
-* `-G1` - goto, expanded actions - C/D/C#/OCaml
-* `-G2` - goto, in-place actions - C/D/Go
+* `-T0` - binary search table-driven
+* `-T1` - binary search, expanded actions
+* `-F0` - flat table-driven
+* `-F1` - flat table, expanded actions
+* `-G0` - goto-driven
+* `-G1` - goto, expanded actions
+* `-G2` - goto, in-place actions 
+
+Due to limitations of the host languages, not all styles are supported for all
+host languages. The following table shows what is supported.
+
+[width="50%"]
+|===========================================
+| C          | `-T0 -T1 -F0 -F1 -G0 -G1 -G2`
+| ASM        | `-G2`
+| D          | `-T0 -T1 -F0 -F1 -G0 -G1 -G2`
+| Go         | `-T0 -T1 -F0 -F1 -G0 -G1 -G2`
+| C#         | `-T0 -T1 -F0 -F1 -G0 -G1`
+| Java       | `-T0 -T1 -F0 -F1`
+| Ruby       | `-T0 -T1 -F0 -F1`
+| OCaml      | `-T0 -T1 -F0 -F1`
+| Rust       | `-T0 -T1 -F0 -F1`
+| Julia      | `-T0 -T1 -F0 -F1`
+| Crack      | `-T0 -T1 -F0 -F1`
+| JavaScript | `-T0 -T1 -F0 -F1`
+|===========================================
 
 Beyond the Basic Model
 ----------------------

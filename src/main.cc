@@ -113,7 +113,7 @@ void usage()
 "   -U                   Rust        -T0 -T1 -F0 -F1\n"
 "   -Y                   Julia       -T0 -T1 -F0 -F1\n"
 "   -K                   Crack       -T0 -T1 -F0 -F1\n"
-"   -P                   JavaScript  -T0\n"
+"   -P                   JavaScript  -T0 -T1 -F0 -F1\n"
 "line directives:\n"
 "   -L                   Inhibit writing of #line directives\n"
 "code style:\n"
