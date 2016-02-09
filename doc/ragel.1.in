@@ -103,6 +103,9 @@ Generate a dot file for Graphviz.
 .B \-p
 Display printable characters on labels.
 .TP
+.B \-L
+Inhibit writing of #line directives.
+.TP
 .B \-S <spec>
 FSM specification to output.
 .TP
@@ -112,20 +115,39 @@ Machine definition/instantiation to output.
 .B \-C
 The host language is C, C++, Obj-C or Obj-C++. This is the default host language option.
 .TP
+.B --asm --gas-x86-64-sys-v
+GNU AS, x86_64, System V ABI
+ASM is generated in a code style equiv to -G2
+.TP
 .B \-D
 The host language is D.
+.TP
+.B \-Z
+The host language is Go.
 .TP
 .B \-J
 The host language is Java.
 .TP
-.B \-Z
-The host language is Go.  Must be used with -G2 option.
-.TP
 .B \-R
 The host language is Ruby.
 .TP
-.B \-L
-Inhibit writing of #line directives.
+.B -A
+The host language is C#
+.TP
+.B -O
+The host language is OCaml.
+.TP
+.B -U
+The host language is Rust.
+.TP
+.B -Y
+The host language is Julia.
+.TP
+.B -K
+The host language is Crack.
+.TP
+.B -P
+The host language is JavaScript.
 .TP
 .B \-T0
 (C/D/Java/Ruby/C#) Generate a table driven FSM. This is the default code style.
@@ -169,9 +191,27 @@ execute code.
 (C/D/Go) Generate a really fast goto driven FSM by embedding action lists in the state
 machine control code.
 .TP
-.B \-P<N>
-(C/D) N-Way Split really fast goto-driven FSM.
-
+.B --nfa-conds-depth=D
+Search for high-cost conditions inside a prefix of the machine (depth D from
+start state). Search is rooted at NFA union contructs.
+.TP
+.B --nfa-term-check
+Search for condition-based general repetitions that will not function properly
+and must be NFA reps. Search is rooted at NFA union constructs.
+.TP
+.B --nfa-intermed-state-limit=L
+Report fail if number of states exceeds this during compilation.
+.TP
+.B --nfa-final-state-limit=L
+Report a fail if number states in final machine exceeds this.
+.TP
+.B --nfa-breadth-check=E1,E2,..
+Report breadth cost of named entry points by (and start). Reporting starts at
+NFA union contructs.
+.TP
+.B --input-histogram=FN
+Input char histogram for breadth check. If unspecified a flat histogram is
+used.
 .SH RAGEL INPUT
 NOTE: This is a very brief description of Ragel input. Ragel is described in
 more detail in the user guide available from the homepage (see below).

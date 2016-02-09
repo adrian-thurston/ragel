@@ -101,17 +101,18 @@ void usage()
 "host language:\n"
 "   -C                   C, C++, Obj-C or Obj-C++ (default)\n"
 "                        All code styles supported.\n"
-"   --gas-x86-64-sys-v   GNU AS, x86_64, System V ABI\n"
-"   --asm                ASM is generated in a code style equiv to -G2\n"
+"   --asm --gas-x86-64-sys-v\n"
+"                        GNU AS, x86_64, System V ABI.\n"
+"                        Generated in a code style equivalent to -G2\n"
 "   -D                   D           All code styles supported\n"
 "   -Z                   Go          All code styles supported\n"
-"   -J                   Java        -T0\n"
-"   -R                   Ruby        -T0\n"
 "   -A                   C#          -T0 -T1 -F0 -F1 -G0 -G1\n"
-"   -O                   OCaml       -T0 code style supported\n"
-"   -U                   Rust        -T0 -T1 -F0 -F1 -G0 -G1\n"
+"   -J                   Java        -T0 -T1 -F0 -F1\n"
+"   -R                   Ruby        -T0 -T1 -F0 -F1\n"
+"   -O                   OCaml       -T0 -T1 -F0 -F1\n"
+"   -U                   Rust        -T0 -T1 -F0 -F1\n"
 "   -Y                   Julia       -T0 -T1 -F0 -F1\n"
-"   -K                   Crack       -T0\n"
+"   -K                   Crack       -T0 -T1 -F0 -F1\n"
 "   -P                   JavaScript  -T0\n"
 "line directives:\n"
 "   -L                   Inhibit writing of #line directives\n"
@@ -127,19 +128,20 @@ void usage()
 "   --integral-tables    Use integers for table data (default)\n"
 "   --string-tables      Encode table data into strings for faster host lang\n"
 "                        compilation\n"
-"nfa-analysis (large machines):\n"
-"   --nfa-conds-depth            Search for high-cost conditions inside a prefix\n"
-"                                of the machine.\n"
+"NFA analysis (large machines):\n"
+"   --nfa-conds-depth=D          Search for high-cost conditions inside a prefix\n"
+"                                of the machine (depth D from start state).\n"
+"                                Search is rooted at NFA union contructs.\n"
 "   --nfa-term-check             Search for condition-based general repetitions\n"
-"                                that will not function properly and must be nfa\n"
-"                                reps.\n"
-"   --nfa-intermed-state-limit   Report fail if number of states exceeds this\n"
+"                                that will not function properly and must be NFA\n"
+"                                reps. Search is rooted at NFA union constructs.\n"
+"   --nfa-intermed-state-limit=L Report fail if number of states exceeds this\n"
 "                                during compilation.\n"
-"   --nfa-final-state-limit      Report a fail if number states in final machine\n"
+"   --nfa-final-state-limit=L    Report a fail if number states in final machine\n"
 "                                exceeds this.\n"
-"   --nfa-breadth-check          Report breadth cost of named entry points (and\n"
-"                                start).\n"
-"   --input-histogram            Input char histogram for breadth check. If\n"
+"   --nfa-breadth-check=E1,E2,.. Report breadth cost of named entry points by (and\n"
+"                                start). Reporting starts at NFA union contructs.\n"
+"   --input-histogram=FN         Input char histogram for breadth check. If\n"
 "                                unspecified a flat histogram is used.\n"
 "testing:\n"
 "   --kelbt-frontend        Compile using original ragel + kelbt frontend\n"
@@ -206,6 +208,37 @@ void showBackends()
 {
 	cout << "--direct-backend --colm-backend";
 	cout << endl;
+	exit(0);
+}
+
+void showStyles( InputData *id )
+{
+	switch ( id->hostLang->lang ) {
+	case HostLang::C:
+	case HostLang::D:
+	case HostLang::Go:
+		cout << "-T0 -T1 -F0 -F1 -G0 -G1 -G2" << endl;
+		break;
+	case HostLang::CSharp:
+		cout << "-T0 -T1 -F0 -F1 -G0 -G1" << endl;
+		break;
+	case HostLang::Asm:
+		cout << "-G2" << endl;
+		break;
+	case HostLang::Java:
+	case HostLang::Ruby:
+	case HostLang::OCaml:
+	case HostLang::Crack:
+	case HostLang::Rust:
+	case HostLang::Julia:
+		cout << "-T0 -T1 -F0 -F1" << endl;
+		break;
+	case HostLang::JS:
+		cout << "-T0" << endl;
+		break;
+
+	}
+
 	exit(0);
 }
 
@@ -276,6 +309,8 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 void InputData::parseArgs( int argc, const char **argv )
 {
 	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKUYPvHh?-:sT:F:G:LpV", argc, argv );
+
+	bool showStylesOpt = false;
 
 	/* Decide if we were invoked using a path variable, or with an explicit path. */
 	const char *lastSlash = strrchr( argv[0], '/' );
@@ -518,6 +553,8 @@ void InputData::parseArgs( int argc, const char **argv )
 					showFrontends();
 				else if ( strcmp( arg, "supported-backends" ) == 0 )
 					showBackends();
+				else if ( strcmp( arg, "supported-styles" ) == 0 )
+					showStylesOpt = true;
 				else if ( strcmp( arg, "save-temps" ) == 0 )
 					saveTemps = true;
 				else if ( strcmp( arg, "nfa-term-check" ) == 0 )
@@ -616,6 +653,10 @@ void InputData::parseArgs( int argc, const char **argv )
 			break;
 		}
 	}
+
+	if ( showStylesOpt )
+		showStyles( this );
+
 }
 
 bool langSupportsGoto( const HostLang *hostLang )
