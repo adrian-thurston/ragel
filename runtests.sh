@@ -351,7 +351,7 @@ function lang_opts()
 					-A unused_mut -A unused_parens"
 			libs=""
 			prohibit_minflags=""
-			prohibit_genflags="-G2"
+			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
@@ -365,7 +365,7 @@ function lang_opts()
 			interpreted=true
 			compiler=$crack_interpreter
 			prohibit_minflags=""
-			prohibit_genflags="-G2"
+			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
@@ -379,7 +379,7 @@ function lang_opts()
 			interpreted=true
 			compiler=$julia_interpreter
 			prohibit_minflags=""
-			prohibit_genflags=""
+			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
 			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
 			prohibit_backflags="--direct-backend"
