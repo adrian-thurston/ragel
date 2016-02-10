@@ -1371,6 +1371,44 @@ struct LoadRagel
 				factor = new Factor( new Range( lit1, lit2, true ) );
 				break;
 			}
+			case ragel::factor::Nfa: {
+				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
+				FactorWithRep *toRepeat = loadFactorRep( FactorTree.factor_rep() );
+				factor = new Factor( InputLoc(), repId, toRepeat,
+						loadActionRef( FactorTree.A1() ),
+						loadActionRef( FactorTree.A2() ),
+						loadActionRef( FactorTree.A3() ),
+						loadActionRef( FactorTree.A4() ),
+						loadActionRef( FactorTree.A5() ),
+						loadActionRef( FactorTree.A6() ),
+						Factor::NfaRep );
+				break;
+			}
+
+			case ragel::factor::Cond: {
+				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
+				FactorWithRep *toRepeat = loadFactorRep( FactorTree.factor_rep() );
+				factor = new Factor( InputLoc(), repId, toRepeat,
+						loadActionRef( FactorTree.A1() ),
+						loadActionRef( FactorTree.A2() ),
+						loadActionRef( FactorTree.A3() ),
+						loadActionRef( FactorTree.A4() ),
+						0, 0,
+						Factor::CondRep );
+				break;
+			}
+
+			case ragel::factor::NoMax: {
+				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
+				FactorWithRep *toRepeat = loadFactorRep( FactorTree.factor_rep() );
+				factor = new Factor( InputLoc(), repId, toRepeat,
+						loadActionRef( FactorTree.A1() ),
+						loadActionRef( FactorTree.A2() ),
+						loadActionRef( FactorTree.A3() ),
+						0, 0, 0,
+						Factor::NoMaxRep );
+				break;
+			}
 			case ragel::factor::Join:
 				Join *join = loadJoin( FactorTree.join() );
 				join->loc = loc;
@@ -1478,45 +1516,6 @@ struct LoadRagel
 				}
 				OpList = OpList._factor_rep_op_list();
 			}
-			break;
-		}
-
-		case ragel::factor_rep::Nfa: {
-			long repId = strtol( FactorRep.uint().text().c_str(), 0, 10 );
-			FactorWithRep *toRepeat = loadFactorRep( FactorRep._factor_rep() );
-			factorWithRep = new FactorWithRep( InputLoc(), repId, toRepeat,
-					loadActionRef( FactorRep.A1() ),
-					loadActionRef( FactorRep.A2() ),
-					loadActionRef( FactorRep.A3() ),
-					loadActionRef( FactorRep.A4() ),
-					loadActionRef( FactorRep.A5() ),
-					loadActionRef( FactorRep.A6() ),
-					FactorWithRep::NfaRep );
-			break;
-		}
-
-		case ragel::factor_rep::Cond: {
-			long repId = strtol( FactorRep.uint().text().c_str(), 0, 10 );
-			FactorWithRep *toRepeat = loadFactorRep( FactorRep._factor_rep() );
-			factorWithRep = new FactorWithRep( InputLoc(), repId, toRepeat,
-					loadActionRef( FactorRep.A1() ),
-					loadActionRef( FactorRep.A2() ),
-					loadActionRef( FactorRep.A3() ),
-					loadActionRef( FactorRep.A4() ),
-					0, 0,
-					FactorWithRep::CondRep );
-			break;
-		}
-
-		case ragel::factor_rep::NoMax: {
-			long repId = strtol( FactorRep.uint().text().c_str(), 0, 10 );
-			FactorWithRep *toRepeat = loadFactorRep( FactorRep._factor_rep() );
-			factorWithRep = new FactorWithRep( InputLoc(), repId, toRepeat,
-					loadActionRef( FactorRep.A1() ),
-					loadActionRef( FactorRep.A2() ),
-					loadActionRef( FactorRep.A3() ),
-					0, 0, 0,
-					FactorWithRep::NoMaxRep );
 			break;
 		}}
 

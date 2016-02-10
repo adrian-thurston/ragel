@@ -1202,40 +1202,6 @@ factor_with_rep:
 				$3->rep, $5->rep, FactorWithRep::RangeType );
 	};
 factor_with_rep:
-	TK_ColonNfaOpen TK_UInt ',' factor_with_rep ',' action_embed ','
-			action_embed ',' action_embed ',' action_embed ',' action_embed ','
-			action_embed TK_CloseColon
-	final {
-		long long repId = strtoll( $2->data, 0, 10 );
-
-		/* push, pop, ini, stay, repeat, exit */
-		$$->factorWithRep = new FactorWithRep( $1->loc, repId, $4->factorWithRep,
-				$6->action, $8->action, $10->action, $12->action, $14->action, $16->action,
-				FactorWithRep::NfaRep );
-	};
-factor_with_rep:
-	TK_ColonCondOpen TK_UInt ',' factor_with_rep ',' action_embed ','
-			action_embed ',' action_embed ',' action_embed TK_CloseColon
-	final {
-		long long repId = strtoll( $2->data, 0, 10 );
-
-		/* ini, inc, min, max */
-		$$->factorWithRep = new FactorWithRep( $1->loc, repId, $4->factorWithRep,
-				$6->action, $8->action, $10->action, $12->action, 0, 0,
-				FactorWithRep::CondRep );
-	};
-factor_with_rep:
-	TK_ColonNoMaxOpen TK_UInt ',' factor_with_rep ',' action_embed ','
-			action_embed ',' action_embed TK_CloseColon
-	final {
-		long long repId = strtoll( $2->data, 0, 10 );
-
-		/* ini, inc, min */
-		$$->factorWithRep = new FactorWithRep( $1->loc, repId, $4->factorWithRep,
-				$6->action, $8->action, $10->action, 0, 0, 0,
-				FactorWithRep::NoMaxRep );
-	};
-factor_with_rep:
 	factor_with_neg final {
 		$$->factorWithRep = new FactorWithRep( $1->factorWithNeg );
 	};
@@ -1350,6 +1316,40 @@ factor:
 	range_lit TK_DotDotIndep range_lit final {
 		/* Create a new factor node going to a range. */
 		$$->factor = new Factor( new Range( $1->literal, $3->literal, true ) );
+	};
+factor:
+	TK_ColonNfaOpen TK_UInt ',' factor_with_rep ',' action_embed ','
+			action_embed ',' action_embed ',' action_embed ',' action_embed ','
+			action_embed TK_CloseColon
+	final {
+		long long repId = strtoll( $2->data, 0, 10 );
+
+		/* push, pop, ini, stay, repeat, exit */
+		$$->factor = new Factor( $1->loc, repId, $4->factorWithRep,
+				$6->action, $8->action, $10->action, $12->action, $14->action, $16->action,
+				Factor::NfaRep );
+	};
+factor:
+	TK_ColonCondOpen TK_UInt ',' factor_with_rep ',' action_embed ','
+			action_embed ',' action_embed ',' action_embed TK_CloseColon
+	final {
+		long long repId = strtoll( $2->data, 0, 10 );
+
+		/* ini, inc, min, max */
+		$$->factor = new Factor( $1->loc, repId, $4->factorWithRep,
+				$6->action, $8->action, $10->action, $12->action, 0, 0,
+				Factor::CondRep );
+	};
+factor:
+	TK_ColonNoMaxOpen TK_UInt ',' factor_with_rep ',' action_embed ','
+			action_embed ',' action_embed TK_CloseColon
+	final {
+		long long repId = strtoll( $2->data, 0, 10 );
+
+		/* ini, inc, min */
+		$$->factor = new Factor( $1->loc, repId, $4->factorWithRep,
+				$6->action, $8->action, $10->action, 0, 0, 0,
+				Factor::NoMaxRep );
 	};
 factor:
 	'(' join ')' final {

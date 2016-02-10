@@ -590,9 +590,6 @@ struct FactorWithRep
 		MaxType,
 		MinType,
 		RangeType,
-		NfaRep,
-		CondRep,
-		NoMaxRep,
 		FactorWithNegType
 	};
 
@@ -602,16 +599,6 @@ struct FactorWithRep
 		loc(loc), repId(0), factorWithRep(factorWithRep), 
 		factorWithNeg(0), lowerRep(lowerRep), 
 		upperRep(upperRep), type(type)
-	{}
-	
-	FactorWithRep( const InputLoc &loc, long long repId, FactorWithRep *factorWithRep, 
-			Action *action1, Action *action2, Action *action3,
-			Action *action4, Action *action5, Action *action6, Type type )
-	:
-		loc(loc), repId(repId), factorWithRep(factorWithRep), 
-		action1(action1), action2(action2), action3(action3),
-		action4(action4), action5(action5), action6(action6),
-		factorWithNeg(0), lowerRep(0), upperRep(0), type(type)
 	{}
 	
 	FactorWithRep( FactorWithNeg *factorWithNeg )
@@ -624,30 +611,16 @@ struct FactorWithRep
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
-	void applyGuardedPrior( ParseData *pd, FsmAp *rtnVal );
-	void applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal );
-
-	FsmAp *condRep( ParseData *pd, bool useMax );
-	FsmAp *noMaxRep( ParseData *pd );
-
-	void condCost( Action *action );
 
 	InputLoc loc;
 	long long repId;
 	FactorWithRep *factorWithRep;
-	Action *action1;
-	Action *action2;
-	Action *action3;
-	Action *action4;
-	Action *action5;
-	Action *action6;
 	FactorWithNeg *factorWithNeg;
 	int lowerRep, upperRep;
 	Type type;
 
 	/* Priority descriptor for StarStar type. */
 	PriorDesc priorDescs[4];
-
 };
 
 /* Fifth level of precedence. Provides Negation. */
@@ -692,6 +665,9 @@ struct Factor
 		ReferenceType,
 		ParenType,
 		LongestMatchType,
+		NfaRep,
+		CondRep,
+		NoMaxRep,
 	}; 
 
 	/* Construct with a literal fsm. */
@@ -722,6 +698,17 @@ struct Factor
 	Factor( LongestMatch *longestMatch ) :
 		longestMatch(longestMatch), type(LongestMatchType) {}
 
+	Factor( const InputLoc &loc, long long repId, FactorWithRep *factorWithRep, 
+			Action *action1, Action *action2, Action *action3,
+			Action *action4, Action *action5, Action *action6, Type type )
+	:
+		loc(loc), repId(repId), factorWithRep(factorWithRep), 
+		action1(action1), action2(action2), action3(action3),
+		action4(action4), action5(action5), action6(action6),
+		/* factorWithNeg(0), lowerRep(0), upperRep(0), */
+		type(type)
+	{}
+
 	/* Cleanup. */
 	~Factor();
 
@@ -729,6 +716,12 @@ struct Factor
 	FsmAp *walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
+
+	FsmAp *condRep( ParseData *pd, bool useMax );
+	FsmAp *noMaxRep( ParseData *pd );
+	void condCost( Action *action );
+	void applyGuardedPrior( ParseData *pd, FsmAp *rtnVal );
+	void applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal );
 
 	InputLoc loc;
 	Literal *literal;
@@ -739,6 +732,16 @@ struct Factor
 	Join *join;
 	LongestMatch *longestMatch;
 	int lower, upper;
+	long repId;
+	FactorWithRep *factorWithRep;
+	Action *action1;
+	Action *action2;
+	Action *action3;
+	Action *action4;
+	Action *action5;
+	Action *action6;
+	PriorDesc priorDescs[4];
+
 	Type type;
 };
 

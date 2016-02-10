@@ -1788,13 +1788,6 @@ reduction TopLevel
 
 	#def factor_rep 
 	#	[factor_neg factor_rep_op_list] :Op
-	#|	[nfa_kw  `( uint `, factor_rep `,
-	#		A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `,
-	#		A5: action_ref `, A6: action_ref `):] :Nfa
-	#|	[`:cond  `( uint `, factor_rep `, 
-	#		A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `):] :Cond
-	#|	[`:nomax `( uint `, factor_rep `, 
-	#		A1: action_ref `, A2: action_ref `, A3: action_ref `):] :NoMax
 
 	ragel::factor_rep
 	{
@@ -1816,37 +1809,6 @@ reduction TopLevel
 		}
 
 		$$->rep = prev;
-	}
-
-	ragel::factor_rep :Nfa
-	{
-		string data( $uint->data, $uint->length );
-		long long repId = strtoll( data.c_str(), 0, 10);
-
-		/* push, pop, ini, stay, repeat, exit */
-		$$->rep = new FactorWithRep( @1, repId, $_factor_rep->rep,
-				$A1->action, $A2->action, $A3->action, $A4->action, $A5->action, $A6->action,
-				FactorWithRep::NfaRep );
-	}
-
-	ragel::factor_rep :Cond
-	{
-		string data( $uint->data, $uint->length );
-		long long repId = strtoll( data.c_str(), 0, 10);
-
-		$$->rep = new FactorWithRep( @1, repId, $_factor_rep->rep,
-				$A1->action, $A2->action, $A3->action, $A4->action, 0, 0,
-				FactorWithRep::CondRep );
-	}
-
-	ragel::factor_rep :NoMax
-	{
-		string data( $uint->data, $uint->length );
-		long long repId = strtoll( data.c_str(), 0, 10);
-
-		$$->rep = new FactorWithRep( @1, repId, $_factor_rep->rep,
-				$A1->action, $A2->action, $A3->action, 0, 0, 0,
-				FactorWithRep::NoMaxRep );
 	}
 
 
@@ -1981,6 +1943,13 @@ reduction TopLevel
 	# |	[lex_regex_open regex re_close] :Regex
 	# |	[RL1: range_lit `.. RL2: range_lit]   :Range
 	# |	[RL1: range_lit `../i RL2: range_lit] :RangeIndep
+	# |	[nfa_kw  `( uint `, factor_rep `,
+	#		A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `,
+	#		A5: action_ref `, A6: action_ref `):] :Nfa
+	# |	[`:cond  `( uint `, factor_rep `, 
+	#		A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `):] :Cond
+	# |	[`:nomax `( uint `, factor_rep `, 
+	#		A1: action_ref `, A2: action_ref `, A3: action_ref `):] :NoMax
 	# |	[`( join `)] :Join
 	ragel::factor
 	{
@@ -2052,6 +2021,37 @@ reduction TopLevel
 	{
 		$$->factor = new Factor( new ReItem( @lex_sqopen_neg,
 				$reg_or_data->reOrBlock, ReItem::NegOrBlock ) );
+	}
+
+	ragel::factor :Nfa
+	{
+		string data( $uint->data, $uint->length );
+		long long repId = strtoll( data.c_str(), 0, 10);
+
+		/* push, pop, ini, stay, repeat, exit */
+		$$->factor = new Factor( @1, repId, $factor_rep->rep,
+				$A1->action, $A2->action, $A3->action, $A4->action, $A5->action, $A6->action,
+				Factor::NfaRep );
+	}
+
+	ragel::factor :Cond
+	{
+		string data( $uint->data, $uint->length );
+		long long repId = strtoll( data.c_str(), 0, 10);
+
+		$$->factor = new Factor( @1, repId, $factor_rep->rep,
+				$A1->action, $A2->action, $A3->action, $A4->action, 0, 0,
+				Factor::CondRep );
+	}
+
+	ragel::factor :NoMax
+	{
+		string data( $uint->data, $uint->length );
+		long long repId = strtoll( data.c_str(), 0, 10);
+
+		$$->factor = new Factor( @1, repId, $factor_rep->rep,
+				$A1->action, $A2->action, $A3->action, 0, 0, 0,
+				Factor::NoMaxRep );
 	}
 
 	ragel::factor :Regex

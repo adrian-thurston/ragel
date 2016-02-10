@@ -1886,16 +1886,14 @@ FactorWithRep::~FactorWithRep()
 	switch ( type ) {
 		case StarType: case StarStarType: case OptionalType: case PlusType:
 		case ExactType: case MaxType: case MinType: case RangeType:
-		case NfaRep: case CondRep: case NoMaxRep:
 			delete factorWithRep;
-			break;
 		case FactorWithNegType:
 			delete factorWithNeg;
 			break;
 	}
 }
 
-void FactorWithRep::applyGuardedPrior( ParseData *pd, FsmAp *rtnVal )
+void Factor::applyGuardedPrior( ParseData *pd, FsmAp *rtnVal )
 {
 	priorDescs[0].key = pd->nextPriorKey;
 	priorDescs[0].priority = 0;
@@ -1915,7 +1913,7 @@ void FactorWithRep::applyGuardedPrior( ParseData *pd, FsmAp *rtnVal )
 	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[0] );
 }
 
-void FactorWithRep::applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal )
+void Factor::applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal )
 {
 	priorDescs[2].key = pd->nextPriorKey;
 	priorDescs[2].priority = 0;
@@ -1941,68 +1939,10 @@ void FactorWithRep::applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal )
 	pd->curActionOrd += rtnVal->shiftStartActionOrder( pd->curActionOrd );
 }
 
-void FactorWithRep::condCost( Action *action )
+void Factor::condCost( Action *action )
 {
 	action->costMark = true;
 	action->costId = repId;
-}
-
-FsmAp *FactorWithRep::condRep( ParseData *pd, bool useMax )
-{
-	Action *ini = action1;
-	Action *inc = action2;
-	Action *min = action3;
-	Action *max = action4;
-
-	condCost( ini );
-	condCost( inc );
-	condCost( min );
-	if ( useMax )
-		condCost( max );
-
-	FsmAp *rtnVal = factorWithRep->walk( pd );
-
-	rtnVal->startFsmAction( 0, inc );
-	afterOpMinimize( rtnVal );
-
-	if ( useMax ) {
-		rtnVal->startFsmCondition( max, true );
-		afterOpMinimize( rtnVal );
-	}
-
-	/* Plus Operation. */
-	{
-		if ( rtnVal->startState->isFinState() ) {
-			pd->nfaTermCheckPlusZero();
-			warning(loc) << "applying plus operator to a machine that "
-					"accepts zero length word" << endl;
-		}
-
-		/* Need a duplicated for the star end. */
-		FsmAp *dup = new FsmAp( *rtnVal );
-
-		/* The start func orders need to be shifted before doing the star. */
-		pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
-
-		applyGuardedPrior2( pd, dup );
-
-		/* Star the duplicate. */
-		dup->starOp( );
-		afterOpMinimize( dup );
-
-		rtnVal->concatOp( dup );
-		afterOpMinimize( rtnVal );
-	}
-
-	rtnVal->leaveFsmCondition( min, true );
-
-	/* Init action. */
-	rtnVal->startFromStateAction( 0,  ini );
-
-	/* Leading priority guard. */
-	applyGuardedPrior( pd, rtnVal );
-
-	return rtnVal;
 }
 
 /* Evaluate a factor with repetition node. */
@@ -2250,21 +2190,6 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		}
 		break;
 	}
-	case NfaRep: {
-		retFsm = factorWithRep->walk( pd );
-		retFsm->nfaRepeatOp( action1, action2, action3,
-				action4, action5, action6, pd->curActionOrd );
-		retFsm->verifyIntegrity();
-		break;
-	}
-	case CondRep: {
-		retFsm = condRep( pd, true );
-		break;
-	}
-	case NoMaxRep: {
-		retFsm = condRep( pd, false );
-		break;
-	}
 	case FactorWithNegType: {
 		/* Evaluate the Factor. Pass it up. */
 		retFsm = factorWithNeg->walk( pd );
@@ -2284,9 +2209,6 @@ void FactorWithRep::makeNameTree( ParseData *pd )
 	case MaxType:
 	case MinType:
 	case RangeType:
-	case NfaRep:
-	case CondRep:
-	case NoMaxRep:
 		factorWithRep->makeNameTree( pd );
 		break;
 	case FactorWithNegType:
@@ -2306,9 +2228,6 @@ void FactorWithRep::resolveNameRefs( ParseData *pd )
 	case MaxType:
 	case MinType:
 	case RangeType:
-	case NfaRep:
-	case CondRep:
-	case NoMaxRep:
 		factorWithRep->resolveNameRefs( pd );
 		break;
 	case FactorWithNegType:
@@ -2415,8 +2334,70 @@ Factor::~Factor()
 		case LongestMatchType:
 			delete longestMatch;
 			break;
+		case NfaRep: case CondRep: case NoMaxRep:
+			delete factorWithRep;
+			break;
 	}
 }
+
+FsmAp *Factor::condRep( ParseData *pd, bool useMax )
+{
+	Action *ini = action1;
+	Action *inc = action2;
+	Action *min = action3;
+	Action *max = action4;
+
+	condCost( ini );
+	condCost( inc );
+	condCost( min );
+	if ( useMax )
+		condCost( max );
+
+	FsmAp *rtnVal = factorWithRep->walk( pd );
+
+	rtnVal->startFsmAction( 0, inc );
+	afterOpMinimize( rtnVal );
+
+	if ( useMax ) {
+		rtnVal->startFsmCondition( max, true );
+		afterOpMinimize( rtnVal );
+	}
+
+	/* Plus Operation. */
+	{
+		if ( rtnVal->startState->isFinState() ) {
+			pd->nfaTermCheckPlusZero();
+			warning(loc) << "applying plus operator to a machine that "
+					"accepts zero length word" << endl;
+		}
+
+		/* Need a duplicated for the star end. */
+		FsmAp *dup = new FsmAp( *rtnVal );
+
+		/* The start func orders need to be shifted before doing the star. */
+		pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
+
+		applyGuardedPrior2( pd, dup );
+
+		/* Star the duplicate. */
+		dup->starOp( );
+		afterOpMinimize( dup );
+
+		rtnVal->concatOp( dup );
+		afterOpMinimize( rtnVal );
+	}
+
+	rtnVal->leaveFsmCondition( min, true );
+
+	/* Init action. */
+	rtnVal->startFromStateAction( 0,  ini );
+
+	/* Leading priority guard. */
+	applyGuardedPrior( pd, rtnVal );
+
+	return rtnVal;
+}
+
 
 /* Evaluate a factor node. */
 FsmAp *Factor::walk( ParseData *pd )
@@ -2444,7 +2425,21 @@ FsmAp *Factor::walk( ParseData *pd )
 	case LongestMatchType:
 		rtnVal = longestMatch->walk( pd );
 		break;
+	case NfaRep: {
+		rtnVal = factorWithRep->walk( pd );
+		rtnVal->nfaRepeatOp( action1, action2, action3,
+				action4, action5, action6, pd->curActionOrd );
+		rtnVal->verifyIntegrity();
+		break;
 	}
+	case CondRep: {
+		rtnVal = condRep( pd, true );
+		break;
+	}
+	case NoMaxRep: {
+		rtnVal = condRep( pd, false );
+		break;
+	}}
 
 	return rtnVal;
 }
@@ -2466,6 +2461,11 @@ void Factor::makeNameTree( ParseData *pd )
 	case LongestMatchType:
 		longestMatch->makeNameTree( pd );
 		break;
+	case NfaRep:
+	case CondRep:
+	case NoMaxRep:
+		factorWithRep->makeNameTree( pd );
+		break;
 	}
 }
 
@@ -2485,6 +2485,11 @@ void Factor::resolveNameRefs( ParseData *pd )
 		break;
 	case LongestMatchType:
 		longestMatch->resolveNameRefs( pd );
+		break;
+	case NfaRep:
+	case CondRep:
+	case NoMaxRep:
+		factorWithRep->resolveNameRefs( pd );
 		break;
 	}
 }
