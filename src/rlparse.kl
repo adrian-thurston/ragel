@@ -1341,7 +1341,7 @@ factor:
 				Factor::CondRep );
 	};
 factor:
-	TK_ColonNoMaxOpen TK_UInt ',' expression ',' action_embed ','
+	TK_ColonCondOpen TK_UInt ',' expression ',' action_embed ','
 			action_embed ',' action_embed TK_CloseColon
 	final {
 		long long repId = strtoll( $2->data, 0, 10 );

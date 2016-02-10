@@ -98,7 +98,7 @@ namespace ragel
 				`access `write `getkey `export `import
 				`include `prepush `postpop `nfaprepush `nfapostpop
 
-		literal `:nfa3 `:nfa `:cond `:nomax `):
+		literal `:nfa `:cond `):
 
 		token string /
 			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
@@ -295,10 +295,6 @@ namespace ragel
 	|	[factor_aug aug_local_error `( error_name `, action_ref `)] :LocalErrorName
 	|	[factor_rep] :Base
 
-	def nfa_kw
-		[`:nfa3]
-	|	[`:nfa]
-
 	def factor_rep 
 		[factor_neg factor_rep_op_list] :Op
 
@@ -333,12 +329,12 @@ namespace ragel
 	|	[lex_regex_open regex re_close] :Regex
 	|	[RL1: range_lit `.. RL2: range_lit]   :Range
 	|	[RL1: range_lit `../i RL2: range_lit] :RangeIndep
-	|	[nfa_kw  `( uint `, expression `,
+	|	[`:nfa  `( uint `, expression `,
 			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `,
 			A5: action_ref `, A6: action_ref `):] :Nfa
 	|	[`:cond  `( uint `, expression `, 
 			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `):] :Cond
-	|	[`:nomax `( uint `, expression `, 
+	|	[`:cond `( uint `, expression `, 
 			A1: action_ref `, A2: action_ref `, A3: action_ref `):] :NoMax
 	|	[`( join `)] :Join
 
