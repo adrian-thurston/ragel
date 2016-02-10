@@ -333,15 +333,14 @@ namespace ragel
 	|	[lex_regex_open regex re_close] :Regex
 	|	[RL1: range_lit `.. RL2: range_lit]   :Range
 	|	[RL1: range_lit `../i RL2: range_lit] :RangeIndep
-	|	[nfa_kw  `( uint `, factor_rep `,
+	|	[nfa_kw  `( uint `, expression `,
 			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `,
 			A5: action_ref `, A6: action_ref `):] :Nfa
-	|	[`:cond  `( uint `, factor_rep `, 
+	|	[`:cond  `( uint `, expression `, 
 			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `):] :Cond
-	|	[`:nomax `( uint `, factor_rep `, 
+	|	[`:nomax `( uint `, expression `, 
 			A1: action_ref `, A2: action_ref `, A3: action_ref `):] :NoMax
 	|	[`( join `)] :Join
-
 
 	def regex
 		[reg_item_rep_list] :List

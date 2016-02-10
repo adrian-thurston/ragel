@@ -698,11 +698,11 @@ struct Factor
 	Factor( LongestMatch *longestMatch ) :
 		longestMatch(longestMatch), type(LongestMatchType) {}
 
-	Factor( const InputLoc &loc, long long repId, FactorWithRep *factorWithRep, 
+	Factor( const InputLoc &loc, long long repId, Expression *expression, 
 			Action *action1, Action *action2, Action *action3,
 			Action *action4, Action *action5, Action *action6, Type type )
 	:
-		loc(loc), repId(repId), factorWithRep(factorWithRep), 
+		loc(loc), repId(repId), expression(expression), 
 		action1(action1), action2(action2), action3(action3),
 		action4(action4), action5(action5), action6(action6),
 		/* factorWithNeg(0), lowerRep(0), upperRep(0), */
@@ -733,7 +733,7 @@ struct Factor
 	LongestMatch *longestMatch;
 	int lower, upper;
 	long repId;
-	FactorWithRep *factorWithRep;
+	Expression *expression;
 	Action *action1;
 	Action *action2;
 	Action *action3;

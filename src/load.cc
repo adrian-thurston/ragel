@@ -1373,7 +1373,7 @@ struct LoadRagel
 			}
 			case ragel::factor::Nfa: {
 				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
-				FactorWithRep *toRepeat = loadFactorRep( FactorTree.factor_rep() );
+				Expression *toRepeat = loadExpression( FactorTree.expression() );
 				factor = new Factor( InputLoc(), repId, toRepeat,
 						loadActionRef( FactorTree.A1() ),
 						loadActionRef( FactorTree.A2() ),
@@ -1387,7 +1387,7 @@ struct LoadRagel
 
 			case ragel::factor::Cond: {
 				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
-				FactorWithRep *toRepeat = loadFactorRep( FactorTree.factor_rep() );
+				Expression *toRepeat = loadExpression( FactorTree.expression() );
 				factor = new Factor( InputLoc(), repId, toRepeat,
 						loadActionRef( FactorTree.A1() ),
 						loadActionRef( FactorTree.A2() ),
@@ -1400,7 +1400,7 @@ struct LoadRagel
 
 			case ragel::factor::NoMax: {
 				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
-				FactorWithRep *toRepeat = loadFactorRep( FactorTree.factor_rep() );
+				Expression *toRepeat = loadExpression( FactorTree.expression() );
 				factor = new Factor( InputLoc(), repId, toRepeat,
 						loadActionRef( FactorTree.A1() ),
 						loadActionRef( FactorTree.A2() ),

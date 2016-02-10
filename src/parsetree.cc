@@ -2335,7 +2335,7 @@ Factor::~Factor()
 			delete longestMatch;
 			break;
 		case NfaRep: case CondRep: case NoMaxRep:
-			delete factorWithRep;
+			delete expression;
 			break;
 	}
 }
@@ -2353,7 +2353,7 @@ FsmAp *Factor::condRep( ParseData *pd, bool useMax )
 	if ( useMax )
 		condCost( max );
 
-	FsmAp *rtnVal = factorWithRep->walk( pd );
+	FsmAp *rtnVal = expression->walk( pd );
 
 	rtnVal->startFsmAction( 0, inc );
 	afterOpMinimize( rtnVal );
@@ -2426,7 +2426,7 @@ FsmAp *Factor::walk( ParseData *pd )
 		rtnVal = longestMatch->walk( pd );
 		break;
 	case NfaRep: {
-		rtnVal = factorWithRep->walk( pd );
+		rtnVal = expression->walk( pd );
 		rtnVal->nfaRepeatOp( action1, action2, action3,
 				action4, action5, action6, pd->curActionOrd );
 		rtnVal->verifyIntegrity();
@@ -2464,7 +2464,7 @@ void Factor::makeNameTree( ParseData *pd )
 	case NfaRep:
 	case CondRep:
 	case NoMaxRep:
-		factorWithRep->makeNameTree( pd );
+		expression->makeNameTree( pd );
 		break;
 	}
 }
@@ -2489,7 +2489,7 @@ void Factor::resolveNameRefs( ParseData *pd )
 	case NfaRep:
 	case CondRep:
 	case NoMaxRep:
-		factorWithRep->resolveNameRefs( pd );
+		expression->resolveNameRefs( pd );
 		break;
 	}
 }

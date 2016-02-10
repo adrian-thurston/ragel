@@ -2029,7 +2029,7 @@ reduction TopLevel
 		long long repId = strtoll( data.c_str(), 0, 10);
 
 		/* push, pop, ini, stay, repeat, exit */
-		$$->factor = new Factor( @1, repId, $factor_rep->rep,
+		$$->factor = new Factor( @1, repId, $expression->expr,
 				$A1->action, $A2->action, $A3->action, $A4->action, $A5->action, $A6->action,
 				Factor::NfaRep );
 	}
@@ -2039,7 +2039,7 @@ reduction TopLevel
 		string data( $uint->data, $uint->length );
 		long long repId = strtoll( data.c_str(), 0, 10);
 
-		$$->factor = new Factor( @1, repId, $factor_rep->rep,
+		$$->factor = new Factor( @1, repId, $expression->expr,
 				$A1->action, $A2->action, $A3->action, $A4->action, 0, 0,
 				Factor::CondRep );
 	}
@@ -2049,7 +2049,7 @@ reduction TopLevel
 		string data( $uint->data, $uint->length );
 		long long repId = strtoll( data.c_str(), 0, 10);
 
-		$$->factor = new Factor( @1, repId, $factor_rep->rep,
+		$$->factor = new Factor( @1, repId, $expression->expr,
 				$A1->action, $A2->action, $A3->action, 0, 0, 0,
 				Factor::NoMaxRep );
 	}
