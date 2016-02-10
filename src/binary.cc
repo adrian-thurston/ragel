@@ -798,7 +798,7 @@ void Binary::NFA_POP()
 				"			" << OPEN_HOST_BLOCK( nfaPostPopExpr );
 				INLINE_LIST( out, nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK() << "\n"
-				"			};\n";
+				"			}\n";
 			}
 		}
 		else {

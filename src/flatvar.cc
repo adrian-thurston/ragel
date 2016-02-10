@@ -151,7 +151,7 @@ void FlatVar::NFA_POP()
 //				"				goto _out;\n"
 				"				_nfa_cont = 0;\n"
 				"				_nfa_repeat = 1;\n"
-				"			};\n";
+				"			}\n";
 			}
 			else {
 				out <<
