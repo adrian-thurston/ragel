@@ -100,7 +100,7 @@ namespace ruby_host
 		{
 			input->pull( 2 )
 			R: str = input->pull( match_length - 3 )
-			input->push( "}%%" )
+			input->push( "\n}%%" )
 			input->push( R )
 			input->push( "%%{" )
 		}
