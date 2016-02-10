@@ -413,32 +413,37 @@ void InputData::processDot()
 
 void InputData::runRlhc()
 {
-	if ( backend == Translated ) {
-		if ( !noIntermediate ) {
-			string rlhc = dirName + "/rlhc " + 
-					origOutputFileName + " " +
-					genOutputFileName + " " +
-					hostLang->rlhcArg;
+	if ( backend != Translated || noIntermediate )
+		return;
 
-			if ( rlhcShowCmd )
-				std::cout << rlhc << std::endl;
+	string rlhc = dirName + "/rlhc " + 
+			origOutputFileName + " " +
+			genOutputFileName + " " +
+			hostLang->rlhcArg;
 
-			const char *argv[5];
-			argv[0] = "rlhc";
-			argv[1] = origOutputFileName.c_str();
-			argv[2] = genOutputFileName.c_str(); 
-			argv[3] = hostLang->rlhcArg;
-			argv[4] = 0;
+	if ( rlhcShowCmd )
+		std::cout << rlhc << std::endl;
 
-			colm_program *program = colm_new_program( &rlhc_object );
-			colm_set_debug( program, 0 );
-			colm_run_program( program, 4, argv );
-			colm_delete_program( program );
+	const char *argv[5];
+	argv[0] = "rlhc";
+	argv[1] = origOutputFileName.c_str();
+	argv[2] = genOutputFileName.c_str(); 
+	argv[3] = hostLang->rlhcArg;
+	argv[4] = 0;
 
-			if ( !saveTemps )
-				unlink( genOutputFileName.c_str() );
-		}
-	}
+	colm_program *program = colm_new_program( &rlhc_object );
+	colm_set_debug( program, 0 );
+	colm_run_program( program, 4, argv );
+	int es = program->exit_status;
+	colm_delete_program( program );
+
+	if ( !saveTemps )
+		unlink( genOutputFileName.c_str() );
+
+	/* Translation step shouldn't fail, but it can if there is an
+	 * internal error. Pass it up.  */
+	if ( es != 0 )
+		exit( es );
 }
 
 void InputData::processCode()
