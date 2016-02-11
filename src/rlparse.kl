@@ -1341,6 +1341,18 @@ factor:
 				Factor::CondRep );
 	};
 factor:
+	TK_ColonCondStarOpen TK_UInt ',' expression ',' action_embed ','
+			action_embed ',' action_embed ',' action_embed TK_CloseColon
+	final {
+		long long repId = strtoll( $2->data, 0, 10 );
+
+		/* ini, inc, min, max */
+		$$->factor = new Factor( $1->loc, repId, $4->expression,
+				$6->action, $8->action, $10->action, $12->action, 0, 0,
+				Factor::CondRep );
+		$$->factor->isCondStar = true;
+	};
+factor:
 	TK_ColonCondOpen TK_UInt ',' expression ',' action_embed ','
 			action_embed ',' action_embed TK_CloseColon
 	final {

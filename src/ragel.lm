@@ -98,7 +98,7 @@ namespace ragel
 				`access `write `getkey `export `import
 				`include `prepush `postpop `nfaprepush `nfapostpop
 
-		literal `:nfa `:cond `):
+		literal `:nfa `:cond `:cond_star `):
 
 		token string /
 			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
@@ -337,7 +337,9 @@ namespace ragel
 			Push: action_ref `, Pop: action_ref `, Init: action_ref `, Stay: action_ref `,
 			Repeat: action_ref `, Exit: action_ref `):] :Nfa
 	|	[`:cond  `( uint `, expression `, 
-			Init: action_ref `, Inc: action_ref `, Min: action_ref OptMax: opt_max_arg `):] :Cond
+			Init: action_ref `, Inc: action_ref `, Min: action_ref OptMax: opt_max_arg `):] :CondPlus
+	|	[`:cond_star  `( uint `, expression `, 
+			Init: action_ref `, Inc: action_ref `, Min: action_ref OptMax: opt_max_arg `):] :CondStar
 	|	[`( join `)] :Join
 
 	def regex

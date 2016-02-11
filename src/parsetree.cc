@@ -2340,7 +2340,7 @@ Factor::~Factor()
 	}
 }
 
-FsmAp *Factor::condRep( ParseData *pd, bool useMax )
+FsmAp *Factor::condPlus( ParseData *pd, bool useMax )
 {
 	Action *ini = action1;
 	Action *inc = action2;
@@ -2398,6 +2398,22 @@ FsmAp *Factor::condRep( ParseData *pd, bool useMax )
 	return rtnVal;
 }
 
+FsmAp *Factor::condStar( ParseData *pd, bool useMax )
+{
+	Action *min = action3;
+
+	FsmAp *rtnVal = condPlus( pd, useMax );
+
+	StateAp *newStart = rtnVal->dupStartState();
+	rtnVal->unsetStartState();
+	rtnVal->setStartState( newStart );
+
+	/* Now ensure the new start state is a final state. */
+	rtnVal->setFinState( newStart );
+	rtnVal->addOutCondition( newStart, min, true );
+
+	return rtnVal;
+}
 
 /* Evaluate a factor node. */
 FsmAp *Factor::walk( ParseData *pd )
@@ -2433,11 +2449,14 @@ FsmAp *Factor::walk( ParseData *pd )
 		break;
 	}
 	case CondRep: {
-		rtnVal = condRep( pd, true );
+		if ( isCondStar )
+			rtnVal = condStar( pd, true );
+		else
+			rtnVal = condPlus( pd, true );
 		break;
 	}
 	case NoMaxRep: {
-		rtnVal = condRep( pd, false );
+		rtnVal = condPlus( pd, false );
 		break;
 	}}
 

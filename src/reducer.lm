@@ -2049,7 +2049,7 @@ reduction TopLevel
 				$Repeat->action, $Exit->action, Factor::NfaRep );
 	}
 
-	ragel::factor :Cond
+	ragel::factor :CondPlus
 	{
 		string data( $uint->data, $uint->length );
 		long long repId = strtoll( data.c_str(), 0, 10);
@@ -2058,6 +2058,18 @@ reduction TopLevel
 		$$->factor = new Factor( @1, repId, $expression->expr,
 				$Init->action, $Inc->action, $Min->action, optMax, 0, 0,
 				optMax != 0 ? Factor::CondRep : Factor::NoMaxRep );
+	}
+
+	ragel::factor :CondStar
+	{
+		string data( $uint->data, $uint->length );
+		long long repId = strtoll( data.c_str(), 0, 10);
+		Action *optMax = $OptMax->action;
+
+		$$->factor = new Factor( @1, repId, $expression->expr,
+				$Init->action, $Inc->action, $Min->action, optMax, 0, 0,
+				optMax != 0 ? Factor::CondRep : Factor::NoMaxRep );
+		$$->factor->isCondStar = true;
 	}
 
 	ragel::factor :Regex

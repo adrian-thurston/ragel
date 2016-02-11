@@ -1385,7 +1385,7 @@ struct LoadRagel
 				break;
 			}
 
-			case ragel::factor::Cond: {
+			case ragel::factor::CondPlus: {
 				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
 				Expression *toRepeat = loadExpression( FactorTree.expression() );
 				Action *optMax = loadActionRef( FactorTree.OptMax() );
@@ -1394,6 +1394,19 @@ struct LoadRagel
 						loadActionRef( FactorTree.Inc() ),
 						loadActionRef( FactorTree.Min() ),
 						optMax, 0, 0, optMax != 0 ? Factor::CondRep : Factor::NoMaxRep );
+				break;
+			}
+
+			case ragel::factor::CondStar: {
+				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
+				Expression *toRepeat = loadExpression( FactorTree.expression() );
+				Action *optMax = loadActionRef( FactorTree.OptMax() );
+				factor = new Factor( InputLoc(), repId, toRepeat,
+						loadActionRef( FactorTree.Init() ),
+						loadActionRef( FactorTree.Inc() ),
+						loadActionRef( FactorTree.Min() ),
+						optMax, 0, 0, optMax != 0 ? Factor::CondRep : Factor::NoMaxRep );
+				factor->isCondStar = true;
 				break;
 			}
 

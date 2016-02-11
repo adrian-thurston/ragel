@@ -706,6 +706,7 @@ struct Factor
 		action1(action1), action2(action2), action3(action3),
 		action4(action4), action5(action5), action6(action6),
 		/* factorWithNeg(0), lowerRep(0), upperRep(0), */
+		isCondStar(false),
 		type(type)
 	{}
 
@@ -717,7 +718,8 @@ struct Factor
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
-	FsmAp *condRep( ParseData *pd, bool useMax );
+	FsmAp *condPlus( ParseData *pd, bool useMax );
+	FsmAp *condStar( ParseData *pd, bool useMax );
 	FsmAp *noMaxRep( ParseData *pd );
 	void condCost( Action *action );
 	void applyGuardedPrior( ParseData *pd, FsmAp *rtnVal );
@@ -741,6 +743,7 @@ struct Factor
 	Action *action5;
 	Action *action6;
 	PriorDesc priorDescs[4];
+	bool isCondStar;
 
 	Type type;
 };
