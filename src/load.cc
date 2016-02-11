@@ -1375,12 +1375,12 @@ struct LoadRagel
 				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
 				Expression *toRepeat = loadExpression( FactorTree.expression() );
 				factor = new Factor( InputLoc(), repId, toRepeat,
-						loadActionRef( FactorTree.A1() ),
-						loadActionRef( FactorTree.A2() ),
-						loadActionRef( FactorTree.A3() ),
-						loadActionRef( FactorTree.A4() ),
-						loadActionRef( FactorTree.A5() ),
-						loadActionRef( FactorTree.A6() ),
+						loadActionRef( FactorTree.Push() ),
+						loadActionRef( FactorTree.Pop() ),
+						loadActionRef( FactorTree.Init() ),
+						loadActionRef( FactorTree.Stay() ),
+						loadActionRef( FactorTree.Repeat() ),
+						loadActionRef( FactorTree.Exit() ),
 						Factor::NfaRep );
 				break;
 			}
@@ -1388,27 +1388,15 @@ struct LoadRagel
 			case ragel::factor::Cond: {
 				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
 				Expression *toRepeat = loadExpression( FactorTree.expression() );
+				Action *optMax = loadActionRef( FactorTree.OptMax() );
 				factor = new Factor( InputLoc(), repId, toRepeat,
-						loadActionRef( FactorTree.A1() ),
-						loadActionRef( FactorTree.A2() ),
-						loadActionRef( FactorTree.A3() ),
-						loadActionRef( FactorTree.A4() ),
-						0, 0,
-						Factor::CondRep );
+						loadActionRef( FactorTree.Init() ),
+						loadActionRef( FactorTree.Inc() ),
+						loadActionRef( FactorTree.Min() ),
+						optMax, 0, 0, optMax != 0 ? Factor::CondRep : Factor::NoMaxRep );
 				break;
 			}
 
-			case ragel::factor::NoMax: {
-				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
-				Expression *toRepeat = loadExpression( FactorTree.expression() );
-				factor = new Factor( InputLoc(), repId, toRepeat,
-						loadActionRef( FactorTree.A1() ),
-						loadActionRef( FactorTree.A2() ),
-						loadActionRef( FactorTree.A3() ),
-						0, 0, 0,
-						Factor::NoMaxRep );
-				break;
-			}
 			case ragel::factor::Join:
 				Join *join = loadJoin( FactorTree.join() );
 				join->loc = loc;
@@ -1520,6 +1508,12 @@ struct LoadRagel
 		}}
 
 		return factorWithRep;
+	}
+
+	Action *loadActionRef( ragel::opt_max_arg OptMaxArg )
+	{
+		return OptMaxArg.prodName() == ragel::opt_max_arg::Action ?
+				loadActionRef( OptMaxArg.action_ref() ) : 0;
 	}
 
 	Action *loadActionRef( ragel::action_ref ActionRef )

@@ -930,7 +930,7 @@ void FsmAp::isolateStartState( )
 	setMisfitAccounting( false );
 }
 
-StateAp *FsmAp::dupStartState( )
+StateAp *FsmAp::dupStartState()
 {
 	StateAp *dup = addState();
 	mergeStates( dup, startState );

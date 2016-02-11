@@ -320,6 +320,10 @@ namespace ragel
 	|	[`^ factor_neg] :Caret
 	|	[factor] :Base
 
+	def opt_max_arg
+		[`, action_ref] :Action
+	|	[] :Empty
+
 	def factor 
 		[alphabet_num] :AlphabetNum
 	|	[word] :Word
@@ -330,12 +334,10 @@ namespace ragel
 	|	[RL1: range_lit `.. RL2: range_lit]   :Range
 	|	[RL1: range_lit `../i RL2: range_lit] :RangeIndep
 	|	[`:nfa  `( uint `, expression `,
-			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `,
-			A5: action_ref `, A6: action_ref `):] :Nfa
+			Push: action_ref `, Pop: action_ref `, Init: action_ref `, Stay: action_ref `,
+			Repeat: action_ref `, Exit: action_ref `):] :Nfa
 	|	[`:cond  `( uint `, expression `, 
-			A1: action_ref `, A2: action_ref `, A3: action_ref `, A4: action_ref `):] :Cond
-	|	[`:cond `( uint `, expression `, 
-			A1: action_ref `, A2: action_ref `, A3: action_ref `):] :NoMax
+			Init: action_ref `, Inc: action_ref `, Min: action_ref OptMax: opt_max_arg `):] :Cond
 	|	[`( join `)] :Join
 
 	def regex
