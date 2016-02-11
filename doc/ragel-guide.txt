@@ -2248,112 +2248,6 @@ because there is never any backtracking. To build a scanner with backtracking
 use the Longest-Match machine construction described in
 <<generating_scanners, Generating Scanners>>.
 
-=== NFA Features
-
-New in Ragel 7 are features for specifying non-deterministic machines. Prior to
-this, ragel always produced DFAs, so these features represent a departure
-from the standard runtime model. They allow us to cope with very large state
-machines, without having to compromise on the language matched, or devise some
-techniques outside of the ragel language.
-
-The NFA features require that the programmer make available `nfa_bp`, `nfa_len`
-and `nfa_count` variables. See the section <<variables_used_by_ragel, Varibles
-Used by Ragel>>
-
-Note that NFA features are non compatible with non-contiguous buffer blocks. It
-requires being able to set p to some previously stashed value. If the buffer is
-no longer available, ragel will attempt to backtrack into invalid data.
-
-==== NFA Union
-
-The NFA union operator allows the programmer to create a large union of
-expressions without making the construction fully deterministic. Only a prefix
-is made deterministic, in a breadth-first manner, and up to a specified depth.
-
---------------
-<name> |= ( <depth>, <group-size> ) <expression1> | <expression2> | ... ;
---------------
-
-The NFA union operator looks like a normal union, except some additional
-controls are specified. The depth value says how deep into the machine the
-NFA-to-DFA algorithm should go looking for NFA states to make deterministic.
-The group-size value allows the programmer to set a limit on the number of
-expressions that are packed into a single DFA prefix. If this value is zero,
-there is no limit, and all expressions go into a single group. If this number
-is less than the number of expressions, there will be an immediate NFA branch
-for the groups, before entering into the DFA prefixes. Roughly speaking,
-group-size allows you to control initial branch width. 
-
-By making depth or groups-size smaller, you can shift cost from compile-time to
-run-time to get otherwise intractable unions to build.
-
-==== NFA Repetition
-
-The NFA repetition `:nfa()` is a construct designed to allow counting of
-objects in an ambiguous context, however it is useful for much more. It
-generalizes to a state capture/manipulation construct that works regardless of
-ambiguities. For example, if there are two possible data captures, the :nfa
-union operator can backtrack to try an alternate. It before backtracking it can
-restore relevant state, then perform the new capture.
-
---------------
-:nfa( <id>, <expression>, 
-	<push>, <pop>,
-	<init>, <stay>, <repeat>, <exit> )
---------------
-
-* `id` is a unique integer identifying the expression. This is used primarily
-for automated analysis purposes.
-
-* `expression` is the ragel-expression that is to be repeated.
-
-* `push` is an action that saves state needed for counting instances of expression.
-
-* `pop` is an action that restores state needed for counting instances of expression.
-
-* `init` is an condition that is tested before entering the repeat.
-
-* `stay` is an condition that is tested before deciding to stay in the
-expression, as opposed to wrapping around to begin a new expression, or
-exiting. If true, this allows the expression to continue to match, once a final
-state has been entered.
-
-* `repeat` is an condition that is tested before deciding to wrap around and
-attempt a new instance of expression.
-
-* `exit` is an condition that is tested before deciding to leave the repeat
-
-The following actions achieve a generalized repetition that looks for 10 to 100
-repetitions of some expression. It requires that the count variable be placed
-in the nfa_bp struct. Note that it is correct to reference nfa_len. It does not
-need to manipulated, that is done by the generated code.
-
-----------------
-action push   { nfa_bp[nfa_len].count = count; }
-action pop    { count = nfa_bp[nfa_len].count; }
-action init   { ({ count = 0; 1; }) }
-action stay   { ({ 1; }) }
-action repeat { ({ ++count < 100 ; }) }
-action exit   { ({ ++count >= 10; }) }
-------------------
-
-The following actions, when used with expression `''`,  achieve a test of a
-previously stored value (eg. backref). In the exit the stashed value is checked
-against the data at p. 
-
-----------------
-action init    { ({ 1; }) }
-action stay    { ({ 0; }) }
-action repeat  { ({ 0; }) }
-action exit
-{ ({ 
-    int match = check_stashed( p, pe, stashed_start, stashed_end );
-    if ( match )
-        p += ( stashed_end - stashed_start );
-    match;
-}) }
-------------------
-
 Interface to Host Program
 -------------------------
 
@@ -3424,6 +3318,8 @@ image::dropdown.png[align="left"]
 [[semantic]]
 === Semantic Conditions
 
+==== Semantic Conditions
+
 Many communication protocols contain variable-length fields, where the length
 of the field is given ahead of the field as a value. This
 problem cannot be expressed using regular languages because of its
@@ -3520,6 +3416,151 @@ these allocated characters to express "character C with condition P true" or "C
 with P false." Since internally Ragel uses longs to store characters there is
 no room left in the alphabet space unless an alphabet type smaller than long is
 used.
+
+==== Condition Based Repetition
+
+New in ragel 7 is a construct designed to simplify use of conditions to specify
+repetition. While possible to count properly using condition embedding
+operators, there is a corner case that prove difficult. If the zero-width case
+is to be accepted properly, some knowledge of what is before and after is
+necessary and tests need to be embedded there. The `:cond()` operator is
+designed to solve this problem, automatically embedding actions such that a
+zero count is possible.
+
+--------------
+:cond( <id>, <expression>, 
+	<init>, <inc>, <min> [ , <max> ] ):
+--------------
+
+* `id` is a unique integer identifying the expression. This is for automated
+analysis.
+
+* `expression` is the ragel-expression that is to be repeated.
+
+* `init` is an action that is used to initialize the state.
+
+* `inc` is an action that is used to increment the count.
+
+* `min` is a condition used to test if the minimal count has been achieved.
+
+* `max` is an optional condition used to test if the maximum count has been achieved.
+
+=== NFA Features
+
+New in Ragel 7 are features for specifying non-deterministic machines. Prior to
+this, ragel always produced DFAs, so these features represent a departure
+from the standard runtime model. They allow us to cope with very large state
+machines, without having to compromise on the language matched, or devise some
+techniques outside of the ragel language.
+
+The NFA features require that the programmer make available `nfa_bp`, `nfa_len`
+and `nfa_count` variables. See the section <<variables_used_by_ragel, Varibles
+Used by Ragel>>
+
+Note that NFA features are non compatible with non-contiguous buffer blocks. It
+requires being able to set p to some previously stashed value. If the buffer is
+no longer available, ragel will attempt to backtrack into invalid data.
+
+==== NFA Union
+
+The NFA union operator allows the programmer to create a large union of
+expressions without making the construction fully deterministic. Only a prefix
+is made deterministic, in a breadth-first manner, and up to a specified depth.
+
+--------------
+<name> |= ( <depth>, <group-size> ) <expression1> | <expression2> | ... ;
+--------------
+
+The NFA union operator looks like a normal union, except some additional
+controls are specified. The depth value says how deep into the machine the
+NFA-to-DFA algorithm should go looking for NFA states to make deterministic.
+The group-size value allows the programmer to set a limit on the number of
+expressions that are packed into a single DFA prefix. If this value is zero,
+there is no limit, and all expressions go into a single group. If this number
+is less than the number of expressions, there will be an immediate NFA branch
+for the groups, before entering into the DFA prefixes. Roughly speaking,
+group-size allows you to control initial branch width. 
+
+By making depth or groups-size smaller, you can shift cost from compile-time to
+run-time to get otherwise intractable unions to build.
+
+==== NFA Repetition
+
+The NFA repetition construct `:nfa()` is designed to allow counting of objects
+in an ambiguous context. While the `:cond()` construct is an efficent counting
+method, it does not work properly when there are ambiguities around starting,
+repeating, or exiting a repetition. Since condition tests are embedding into
+transitions, they are made deterministic, therefore the repetition could be
+simultaneously incrementing and exiting the repetition. In these cases the NFA
+repetition is useful, because it will explore all possibilites and allow use
+user to preserve and restore state. To pay for this, you must be willing to
+accept backtracking, however, and also give up non-congiguous buffer blocks.
+
+While the NFA repetition construct is designed for counting, it is useful for
+much more. It generalizes to a state capture/manipulation/test construct that
+works regardless of ambiguities. For example, if there are two possible data
+captures, the :nfa union operator can backtrack to try an alternate. It before
+backtracking it can restore relevant state, then perform the new capture.
+
+--------------
+:nfa( <id>, <expression>, 
+	<push>, <pop>,
+	<init>, <stay>, <repeat>, <exit> ):
+--------------
+
+* `id` is a unique integer identifying the expression. This is used primarily
+for automated analysis purposes.
+
+* `expression` is the ragel-expression that is to be repeated.
+
+* `push` is an action that saves state needed for counting instances of expression.
+
+* `pop` is a condition action that restores state needed for counting instances
+of expression. This is an expression due to a current limitation of the
+implementation. In the future theis may change to a plain action.
+
+* `init` is an condition that is tested before entering the repeat.
+
+* `stay` is an condition that is tested before deciding to stay in the
+expression, as opposed to wrapping around to begin a new expression, or
+exiting. If true, this allows the expression to continue to match, once a final
+state has been entered.
+
+* `repeat` is an condition that is tested before deciding to wrap around and
+attempt a new instance of expression.
+
+* `exit` is an condition that is tested before deciding to leave the repeat
+
+The following actions achieve a generalized repetition that looks for 10 to 100
+repetitions of some expression. It requires that the count variable be placed
+in the nfa_bp struct. Note that it is correct to reference nfa_len. It does not
+need to manipulated, that is done by the generated code.
+
+----------------
+action push   { nfa_bp[nfa_len].count = count; }
+action pop    { ({ count = nfa_bp[nfa_len].count; 1; }) }
+action init   { ({ count = 0; 1; }) }
+action stay   { ({ 1; }) }
+action repeat { ({ ++count < 100; }) }
+action exit   { ({ ++count >= 10; }) }
+------------------
+
+The following actions, when used with expression `''`,  achieve a test of a
+previously stored value (eg. backref). In the exit the stashed value is checked
+against the data at p. 
+
+----------------
+action init    { ({ 1; }) }
+action stay    { ({ 0; }) }
+action repeat  { ({ 0; }) }
+action exit
+{ ({ 
+    int match = check_stashed( p, pe, stashed_start, stashed_end );
+    if ( match )
+        p += ( stashed_end - stashed_start );
+    match;
+}) }
+------------------
 
 === Implementing Lookahead
 
