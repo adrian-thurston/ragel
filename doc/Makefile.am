@@ -20,7 +20,8 @@
 
 man_MANS = ragel.1 
 
-EXTRA_DIST = ragel-guide.tex \
+EXTRA_DIST = \
+	ragel-guide.tex ragel-guide.txt \
 	bmconcat.fig bmregex.fig dropdown.fig exdoneact.fig \
 	exoutact1.fig exstrongsubtr.fig lines2.fig smallscanner.fig bmnull.fig \
 	comments1.fig entryguard.fig exinter.fig exoutact2.fig exsubtr.fig \
