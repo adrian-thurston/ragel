@@ -718,7 +718,7 @@ NameInst *ParseData::resolveStateRef( NameRef *nameRef, InputLoc &loc, Action *a
 				nameInst = resolved[0];
 				if ( resolved.length() > 1 ) {
 					/* Complain about the multiple references. */
-					error(loc) << "state reference " << nameRef << 
+					error(loc) << "state reference " << *nameRef << 
 							" resolves to multiple entry points" << endl;
 					errorStateLabels( resolved );
 				}
@@ -737,7 +737,7 @@ NameInst *ParseData::resolveStateRef( NameRef *nameRef, InputLoc &loc, Action *a
 			nameInst = resolved[0];
 			if ( resolved.length() > 1 ) {
 				/* Complain about the multiple references. */
-				error(loc) << "state reference " << nameRef << 
+				error(loc) << "state reference " << *nameRef << 
 						" resolves to multiple entry points" << endl;
 				errorStateLabels( resolved );
 			}
@@ -746,7 +746,7 @@ NameInst *ParseData::resolveStateRef( NameRef *nameRef, InputLoc &loc, Action *a
 
 	if ( nameInst == 0 ) {
 		/* If not found then complain. */
-		error(loc) << "could not resolve state reference " << nameRef << endl;
+		error(loc) << "could not resolve state reference " << *nameRef << endl;
 	}
 	return nameInst;
 }
