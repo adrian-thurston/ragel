@@ -3419,8 +3419,8 @@ used.
 
 ==== Condition Based Repetition
 
-New in ragel 7 is a construct designed to simplify use of conditions to specify
-repetition. While possible to count properly using condition embedding
+New in ragel 7 is a construct designed to simplify the use of conditions to
+control repetition. While possible to count properly using condition embedding
 operators, there is a corner case that prove difficult. If the zero-width case
 is to be accepted properly, some knowledge of what is before and after is
 necessary and tests need to be embedded there. The `:cond()` operator is
@@ -3444,6 +3444,10 @@ analysis.
 * `min` is a condition used to test if the minimal count has been achieved.
 
 * `max` is an optional condition used to test if the maximum count has been achieved.
+
+The `:cond` construct is a synonym for `:condstar`. Ragel also supports
+`:condplus`, which does not allow the zero-width case. There must be at least
+one item.
 
 === NFA Features
 
