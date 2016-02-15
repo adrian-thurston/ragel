@@ -90,7 +90,7 @@ struct Parser6
 		TK_NotFinalFromState, TK_NotStartFromState, TK_MiddleFromState;
 		
 	token TK_ColonNfaOpen, TK_CloseColon, TK_ColonCondOpen,
-		TK_ColonCondStarOpen, TK_ColonNoMaxOpen;
+		TK_ColonCondStarOpen, TK_ColonCondPlusOpen, TK_ColonNoMaxOpen;
 
 	# Regular expression tokens. */
 	token RE_Slash, RE_SqOpen, RE_SqOpenNeg, RE_SqClose, RE_Dot, RE_Star,

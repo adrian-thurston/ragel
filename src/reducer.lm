@@ -1951,6 +1951,27 @@ reduction TopLevel
 		$$->action = 0;
 	}
 
+	ragel::colon_cond
+	{
+		Factor::Type type;
+	}
+
+	ragel::colon_cond :Cond
+	{
+		$$->type = Factor::CondStar;
+	}
+
+	ragel::colon_cond :CondStar
+	{
+		$$->type = Factor::CondStar;
+	}
+
+	ragel::colon_cond :CondPlus
+	{
+		$$->type = Factor::CondPlus;
+	}
+
+
 	# def factor 
 	#	[alphabet_num] :AlphabetNum
 	# |	[word] :Word
@@ -2049,27 +2070,14 @@ reduction TopLevel
 				$Repeat->action, $Exit->action, Factor::NfaRep );
 	}
 
-	ragel::factor :CondPlus
+	ragel::factor :Cond
 	{
 		string data( $uint->data, $uint->length );
 		long long repId = strtoll( data.c_str(), 0, 10);
 		Action *optMax = $OptMax->action;
 
-		$$->factor = new Factor( @1, repId, $expression->expr,
-				$Init->action, $Inc->action, $Min->action, optMax, 0, 0,
-				optMax != 0 ? Factor::CondRep : Factor::NoMaxRep );
-	}
-
-	ragel::factor :CondStar
-	{
-		string data( $uint->data, $uint->length );
-		long long repId = strtoll( data.c_str(), 0, 10);
-		Action *optMax = $OptMax->action;
-
-		$$->factor = new Factor( @1, repId, $expression->expr,
-				$Init->action, $Inc->action, $Min->action, optMax, 0, 0,
-				optMax != 0 ? Factor::CondRep : Factor::NoMaxRep );
-		$$->factor->isCondStar = true;
+		$$->factor = new Factor( @2, repId, $expression->expr,
+				$Init->action, $Inc->action, $Min->action, optMax, 0, 0, $1->type );
 	}
 
 	ragel::factor :Regex

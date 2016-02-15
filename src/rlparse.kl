@@ -1329,39 +1329,61 @@ factor:
 				$6->action, $8->action, $10->action, $12->action, $14->action, $16->action,
 				Factor::NfaRep );
 	};
+
+
+nonterm colon_cond
+{
+	Factor::Type type;
+	ParserLoc loc;
+};
+
+colon_cond:
+	TK_ColonCondOpen
+	final {
+		$$->type = Factor::CondStar;
+		$$->loc = $1->loc;
+	};
+colon_cond:
+	TK_ColonCondStarOpen
+	final {
+		$$->type = Factor::CondStar;
+		$$->loc = $1->loc;
+	};
+colon_cond:
+	TK_ColonCondPlusOpen
+	final {
+		$$->type = Factor::CondPlus;
+		$$->loc = $1->loc;
+	};
+
+nonterm opt_max_arg
+{
+	Action *action;
+};
+
+opt_max_arg:
+	',' action_embed
+	final
+	{
+		$$->action = $2->action;
+
+	};
+opt_max_arg:
+	final
+	{
+		$$->action = 0;
+	};
+
 factor:
-	TK_ColonCondOpen TK_UInt ',' expression ',' action_embed ','
-			action_embed ',' action_embed ',' action_embed TK_CloseColon
+	colon_cond TK_UInt ',' expression ',' action_embed ','
+			action_embed ',' action_embed opt_max_arg TK_CloseColon
 	final {
 		long long repId = strtoll( $2->data, 0, 10 );
 
 		/* ini, inc, min, max */
 		$$->factor = new Factor( $1->loc, repId, $4->expression,
-				$6->action, $8->action, $10->action, $12->action, 0, 0,
-				Factor::CondRep );
-	};
-factor:
-	TK_ColonCondStarOpen TK_UInt ',' expression ',' action_embed ','
-			action_embed ',' action_embed ',' action_embed TK_CloseColon
-	final {
-		long long repId = strtoll( $2->data, 0, 10 );
-
-		/* ini, inc, min, max */
-		$$->factor = new Factor( $1->loc, repId, $4->expression,
-				$6->action, $8->action, $10->action, $12->action, 0, 0,
-				Factor::CondRep );
-		$$->factor->isCondStar = true;
-	};
-factor:
-	TK_ColonCondOpen TK_UInt ',' expression ',' action_embed ','
-			action_embed ',' action_embed TK_CloseColon
-	final {
-		long long repId = strtoll( $2->data, 0, 10 );
-
-		/* ini, inc, min */
-		$$->factor = new Factor( $1->loc, repId, $4->expression,
-				$6->action, $8->action, $10->action, 0, 0, 0,
-				Factor::NoMaxRep );
+				$6->action, $8->action, $10->action, $11->action, 0, 0,
+				$1->type );
 	};
 factor:
 	'(' join ')' final {

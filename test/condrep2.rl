@@ -18,7 +18,7 @@ using std::endl;
 	action max { ({ c < max; }) }
 
 	main :=
-		:condstar( 0, '.' @seen, init, inc, min, max ):
+		:condplus( 0, '.' @seen, init, inc, min, max ):
 		0;
 
 }%%
@@ -85,8 +85,8 @@ int main()
 }
 
 ##### OUTPUT #####
-run  0 0: 0 success
-run  0 1: 0 success
+run  0 0: 0 failure
+run  0 1: 0 failure
 run  1 1: 0 failure
 run  1 2: 0 failure
 run  2 2: 0 failure

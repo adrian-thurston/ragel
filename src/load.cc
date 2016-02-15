@@ -1294,6 +1294,21 @@ struct LoadRagel
 		return loadRegItemRepList( Regex.reg_item_rep_list() );
 	}
 
+	Factor::Type loadCondRep( ragel::colon_cond ColonCond )
+	{
+		Factor::Type type;
+		switch ( ColonCond.prodName() ) {
+			case ragel::colon_cond::CondStar:
+			case ragel::colon_cond::Cond:
+				type = Factor::CondStar;
+				break;
+			case ragel::colon_cond::CondPlus:
+				type = Factor::CondPlus;
+				break;
+		}
+		return type;
+	}
+
 	Factor *loadFactor( ragel::factor FactorTree )
 	{
 		InputLoc loc = FactorTree.loc();
@@ -1384,29 +1399,16 @@ struct LoadRagel
 						Factor::NfaRep );
 				break;
 			}
-
-			case ragel::factor::CondPlus: {
+			case ragel::factor::Cond: {
 				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
 				Expression *toRepeat = loadExpression( FactorTree.expression() );
 				Action *optMax = loadActionRef( FactorTree.OptMax() );
+				Factor::Type type = loadCondRep( FactorTree.colon_cond() );
 				factor = new Factor( InputLoc(), repId, toRepeat,
 						loadActionRef( FactorTree.Init() ),
 						loadActionRef( FactorTree.Inc() ),
 						loadActionRef( FactorTree.Min() ),
-						optMax, 0, 0, optMax != 0 ? Factor::CondRep : Factor::NoMaxRep );
-				break;
-			}
-
-			case ragel::factor::CondStar: {
-				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
-				Expression *toRepeat = loadExpression( FactorTree.expression() );
-				Action *optMax = loadActionRef( FactorTree.OptMax() );
-				factor = new Factor( InputLoc(), repId, toRepeat,
-						loadActionRef( FactorTree.Init() ),
-						loadActionRef( FactorTree.Inc() ),
-						loadActionRef( FactorTree.Min() ),
-						optMax, 0, 0, optMax != 0 ? Factor::CondRep : Factor::NoMaxRep );
-				factor->isCondStar = true;
+						optMax, 0, 0, type );
 				break;
 			}
 

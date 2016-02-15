@@ -2334,13 +2334,13 @@ Factor::~Factor()
 		case LongestMatchType:
 			delete longestMatch;
 			break;
-		case NfaRep: case CondRep: case NoMaxRep:
+		case NfaRep: case CondStar: case CondPlus:
 			delete expression;
 			break;
 	}
 }
 
-FsmAp *Factor::condPlus( ParseData *pd, bool useMax )
+FsmAp *Factor::condPlus( ParseData *pd )
 {
 	Action *ini = action1;
 	Action *inc = action2;
@@ -2350,7 +2350,7 @@ FsmAp *Factor::condPlus( ParseData *pd, bool useMax )
 	condCost( ini );
 	condCost( inc );
 	condCost( min );
-	if ( useMax )
+	if ( max != 0 )
 		condCost( max );
 
 	FsmAp *rtnVal = expression->walk( pd );
@@ -2358,7 +2358,7 @@ FsmAp *Factor::condPlus( ParseData *pd, bool useMax )
 	rtnVal->startFsmAction( 0, inc );
 	afterOpMinimize( rtnVal );
 
-	if ( useMax ) {
+	if ( max != 0 ) {
 		rtnVal->startFsmCondition( max, true );
 		afterOpMinimize( rtnVal );
 	}
@@ -2398,11 +2398,11 @@ FsmAp *Factor::condPlus( ParseData *pd, bool useMax )
 	return rtnVal;
 }
 
-FsmAp *Factor::condStar( ParseData *pd, bool useMax )
+FsmAp *Factor::condStar( ParseData *pd )
 {
 	Action *min = action3;
 
-	FsmAp *rtnVal = condPlus( pd, useMax );
+	FsmAp *rtnVal = condPlus( pd );
 
 	StateAp *newStart = rtnVal->dupStartState();
 	rtnVal->unsetStartState();
@@ -2448,15 +2448,12 @@ FsmAp *Factor::walk( ParseData *pd )
 		rtnVal->verifyIntegrity();
 		break;
 	}
-	case CondRep: {
-		if ( isCondStar )
-			rtnVal = condStar( pd, true );
-		else
-			rtnVal = condPlus( pd, true );
+	case CondStar: {
+		rtnVal = condStar( pd );
 		break;
 	}
-	case NoMaxRep: {
-		rtnVal = condPlus( pd, false );
+	case CondPlus: {
+		rtnVal = condPlus( pd );
 		break;
 	}}
 
@@ -2481,8 +2478,8 @@ void Factor::makeNameTree( ParseData *pd )
 		longestMatch->makeNameTree( pd );
 		break;
 	case NfaRep:
-	case CondRep:
-	case NoMaxRep:
+	case CondStar:
+	case CondPlus:
 		expression->makeNameTree( pd );
 		break;
 	}
@@ -2506,8 +2503,8 @@ void Factor::resolveNameRefs( ParseData *pd )
 		longestMatch->resolveNameRefs( pd );
 		break;
 	case NfaRep:
-	case CondRep:
-	case NoMaxRep:
+	case CondStar:
+	case CondPlus:
 		expression->resolveNameRefs( pd );
 		break;
 	}
