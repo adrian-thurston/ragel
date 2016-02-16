@@ -307,21 +307,21 @@ namespace julia_gen
 	{
 		switch Type
 		case "s8"
-			send Parser ['Int8 ']
+			send Parser ['Int8']
 		case "u8"
-			send Parser ['Uint8 ']
+			send Parser ['Uint8']
 		case "s16"
-			send Parser ['Int16 ']
+			send Parser ['Int16']
 		case "s32"
-			send Parser ['Int32 ']
+			send Parser ['Int32']
 		case "s64"
-			send Parser ['Int64 ']
+			send Parser ['Int64']
 		case "s128"
-			send Parser ['Int128 ']
+			send Parser ['Int128']
 		case "uint"
-			send Parser ['Uint ']
+			send Parser ['Uint']
 		case "int"
-			send Parser ['Int ']
+			send Parser ['Int']
 		default
 			send Parser [Type]
 	}
@@ -351,8 +351,7 @@ namespace julia_gen
 		}
 		case [A: static_array] {
 			send Parser
-				"const [A.ident] = [type(A.type)] "
-					"\[ [num_list(A.num_list)] \]
+				"const [A.ident] = [type(A.type)]\[[num_list(A.num_list)]\]
 		}
 		case [V: static_value] {
 			send Parser
