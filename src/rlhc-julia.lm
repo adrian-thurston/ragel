@@ -351,12 +351,12 @@ namespace julia_gen
 		}
 		case [A: static_array] {
 			send Parser
-				"[A.ident] = [type(A.type)] "
+				"const [A.ident] = [type(A.type)] "
 					"\[ [num_list(A.num_list)] \]
 		}
 		case [V: static_value] {
 			send Parser
-				"[V.ident] = [V.number]
+				"const [V.ident] = [V.number]
 		}
 		# case [declaration]
 		case [
