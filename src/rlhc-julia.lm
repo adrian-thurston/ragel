@@ -309,7 +309,7 @@ namespace julia_gen
 		case "s8"
 			send Parser ['Int8']
 		case "u8"
-			send Parser ['Uint8']
+			send Parser ['UInt8']
 		case "s16"
 			send Parser ['Int16']
 		case "s32"
@@ -319,7 +319,7 @@ namespace julia_gen
 		case "s128"
 			send Parser ['Int128']
 		case "uint"
-			send Parser ['Uint']
+			send Parser ['UInt']
 		case "int"
 			send Parser ['Int']
 		default
