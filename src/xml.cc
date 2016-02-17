@@ -91,32 +91,60 @@ void XMLCodeGen::writeKey( Key key )
 
 void XMLCodeGen::writeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
-	/* First reduce the action. */
-	RedActionTable *actionTable = 0;
-	if ( trans->tcap()->condList.head->actionTable.length() > 0 )
-		actionTable = actionTableMap.find( trans->tcap()->condList.head->actionTable );
-
 	/* Write the transition. */
 	out << "        <t>";
 	writeKey( lowKey );
 	out << " ";
 	writeKey( highKey );
 
-	if ( trans->tcap()->condList.head->toState != 0 )
-		out << " " << trans->tcap()->condList.head->toState->alg.stateNum;
-	else
-		out << " x";
+	if ( trans->plain() ) {
+		/* First reduce the action. */
+		RedActionTable *actionTable = 0;
+		if ( trans->tdap()->actionTable.length() > 0 )
+			actionTable = actionTableMap.find( trans->tdap()->actionTable );
 
-	if ( actionTable != 0 )
-		out << " " << actionTable->id;
-	else
-		out << " x";
+		if ( trans->tdap()->toState != 0 )
+			out << " " << trans->tdap()->toState->alg.stateNum;
+		else
+			out << " x";
+
+		if ( actionTable != 0 )
+			out << " " << actionTable->id;
+		else
+			out << " x";
+	}
+	else {
+		for ( CondList::Iter ctel = trans->tcap()->condList; ctel.lte(); ctel++ ) {
+			out << "<c>";
+			out << trans->tcap()->condSpace->condSpaceId;
+		
+			/* First reduce the action. */
+			RedActionTable *actionTable = 0;
+			if ( ctel->actionTable.length() > 0 )
+				actionTable = actionTableMap.find( ctel->actionTable );
+
+			if ( ctel->toState != 0 )
+				out << " " << ctel->toState->alg.stateNum;
+			else
+				out << " x";
+
+			if ( actionTable != 0 )
+				out << " " << actionTable->id;
+			else
+				out << " x";
+
+			out << "</c>";
+		}
+	}
+
 	out << "</t>\n";
 }
 
 void XMLCodeGen::writeTransList( StateAp *state )
 {
 	TransListVect outList;
+
+	out << "      <trans_list length=\"" << state->outList.length() << "\">\n";
 
 	/* If there is only are no ranges the task is simple. */
 	if ( state->outList.length() > 0 ) {
@@ -127,7 +155,6 @@ void XMLCodeGen::writeTransList( StateAp *state )
 		}
 	}
 
-	out << "      <trans_list length=\"" << outList.length() << "\">\n";
 	for ( TransListVect::Iter tvi = outList; tvi.lte(); tvi++ )
 		writeTrans( tvi->lowKey, tvi->highKey, tvi->value );
 	out << "      </trans_list>\n";
@@ -720,17 +747,15 @@ void InputData::writeLanguage( std::ostream &out )
 
 void InputData::writeXML( std::ostream &out )
 {
-#ifdef KELBT_PARSER
 	out << "<ragel version=\"" VERSION "\" filename=\"" << inputFileName << "\"";
 	writeLanguage( out );
 	out << ">\n";
 
-	for ( ParserDict::Iter parser = parserDict; parser.lte(); parser++ ) {
-		ParseData *pd = parser->value->pd;
+	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
+		ParseData *pd = pdel->value;
 		if ( pd->instanceList.length() > 0 )
 			pd->generateXML( *outStream );
 	}
 
 	out << "</ragel>\n";
-#endif
 }

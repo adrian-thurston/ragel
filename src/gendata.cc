@@ -67,6 +67,7 @@ void GenBase::appendTrans( TransListVect &outList, Key lowKey,
 			outList.append( TransEl( lowKey, highKey, trans ) );
 	}
 	else {
+		/* Add once if any cond has a to-state or an action table. */
 		for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
 			if ( cond->toState != 0 || cond->actionTable.length() > 0 ) {
 				outList.append( TransEl( lowKey, highKey, trans ) );
