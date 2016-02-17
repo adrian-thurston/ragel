@@ -243,7 +243,7 @@ void InputData::prepareSingleMachine()
 	}
 	else { 
 		/* No machine spec given, generate the first one. */
-		if ( parserList.length() == 0 )
+		if ( parseDataList.length() == 0 )
 			error() << "no machine specification to generate graphviz output" << endp;
 
 		pd = parseDataList.head;
@@ -703,14 +703,8 @@ void InputData::processColm()
 	assert( gblErrorCount == 0 );
 }
 
-
-void InputData::processReduce()
+void InputData::parseReduce()
 {
-	makeDefaultFileName();
-	makeTranslateOutputFileName();
-	createOutputStream();
-	openOutput();
-
 	/*
 	 * Colm-based reduction parser introduced in ragel 7. 
 	 */
@@ -732,11 +726,28 @@ void InputData::processReduce()
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
 	topLevel->reduceFile( inputFileName );
+}
 
-	flushRemaining();
-
-	closeOutput();
-	runRlhc();
+void InputData::processReduce()
+{
+	if ( generateXML ) {
+		parseReduce();
+		processXML();
+	}
+	else if ( generateDot ) {
+		parseReduce();
+		processDot();
+	}
+	else {
+		makeDefaultFileName();
+		makeTranslateOutputFileName();
+		createOutputStream();
+		openOutput();
+		parseReduce();
+		flushRemaining();
+		closeOutput();
+		runRlhc();
+	}
 }
 
 void InputData::process()

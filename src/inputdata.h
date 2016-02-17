@@ -340,7 +340,7 @@ struct InputData
 	void processColm();
 	void processReduce();
 	void process();
-
+	void parseReduce();
 };
 
 
