@@ -660,7 +660,6 @@ void InputData::parseArgs( int argc, const char **argv )
 
 	if ( showStylesOpt )
 		showStyles( this );
-
 }
 
 bool langSupportsGoto( const HostLang *hostLang )

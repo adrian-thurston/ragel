@@ -42,3 +42,5 @@
 /util.ml
 /util.cmi
 /util.cmx
+
+/libragel.a

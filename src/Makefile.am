@@ -7,6 +7,8 @@ RAGEL       = @RAGEL@
 
 bin_PROGRAMS = ragel
 
+lib_LIBRARIES = libragel.a
+
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 ragel_SOURCES = \
@@ -48,6 +50,9 @@ ragel_DEPENDENCIES = $(COLM_LIBDEP)
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
+
+libragel_a_SOURCES = $(ragel_SOURCES) $(nodist_ragel_SOURCES) lib.cc
+libragel_a_CPPFLAGS = -Dmain=main_lib -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 EXTRA_DIST = \
 	ragel.lm \
