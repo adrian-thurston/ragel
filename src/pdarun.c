@@ -877,7 +877,7 @@ static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct strea
 static void send_ignore( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, struct stream_impl *is, long id )
 {
-	if ( reducer_need_ign( prg, pda_run ) == RN_NONE ) {
+	if ( prg->rtd->reducer_need_ign( prg, pda_run ) == RN_NONE ) {
 		consume_match( prg, sp, pda_run, is );
 	}
 	else {
@@ -905,7 +905,7 @@ static void send_token( program_t *prg, tree_t **sp,
 
 	/* Make the token data. */
 	head_t *tokdata = 0;
-	int rn = reducer_need_tok( prg, pda_run, id );
+	int rn = prg->rtd->reducer_need_tok( prg, pda_run, id );
 
 	switch ( rn ) {
 		case RN_NONE:
@@ -1314,7 +1314,7 @@ void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *
 
 	if ( reducer ) {
 		init_pool_alloc( &pda_run->local_pool, sizeof(parse_tree_t) +
-				commit_union_sz(reducer) );
+				prg->rtd->commit_union_sz(reducer) );
 		pda_run->parse_tree_pool = &pda_run->local_pool;
 	}
 	else {

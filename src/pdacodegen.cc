@@ -445,6 +445,18 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	out << "};\n\n";
 
 	out <<
+		"tree_t **" << objectName << "_host_call( program_t *prg, long code, tree_t **sp );\n"
+		"void " << objectName << "_commit_reduce_forward( program_t *prg, tree_t **root,\n"
+		"		struct pda_run *pda_run, parse_tree_t *pt );\n"
+		"long " << objectName << "_commit_union_sz( int reducer );\n"
+		"void " << objectName << "_init_need();\n"
+		"int " << objectName << "_reducer_need_tok( program_t *prg, "
+				"struct pda_run *pda_run, int id );\n"
+		"int " << objectName << "_reducer_need_ign( program_t *prg, "
+				"struct pda_run *pda_run );\n"
+		"\n";
+
+	out <<
 		"struct colm_sections " << objectName << " = \n"
 		"{\n"
 		"	" << lelInfo() << ",\n"
@@ -505,6 +517,12 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 		"	&sendNamedLangEl,\n"
 		"	&initBindings,\n"
 		"	&popBinding,\n"
+		"	&" << objectName << "_host_call,\n"
+		"	&" << objectName << "_commit_reduce_forward,\n" 
+		"	&" << objectName << "_commit_union_sz,\n"
+		"	&" << objectName << "_init_need,\n"
+		"	&" << objectName << "_reducer_need_tok,\n"
+		"	&" << objectName << "_reducer_need_ign,\n"
 		"};\n"
 		"\n";
 }

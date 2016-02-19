@@ -37,8 +37,6 @@
 
 typedef struct colm_struct struct_t;
 
-tree_t **host_call( program_t *prg, long code, tree_t **sp );
-
 #define TRUE_VAL  1
 #define FALSE_VAL 0
 
@@ -3379,7 +3377,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_HOST %hd\n", func_id );
 
-			sp = host_call( prg, func_id, sp );
+			sp = prg->rtd->host_call( prg, func_id, sp );
 			break;
 		}
 		case IN_CALL_WV: {

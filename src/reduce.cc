@@ -43,17 +43,17 @@
 void Compiler::writeCommitStub()
 {
 	*outStream <<
-		"void commit_reduce_forward( program_t *prg, tree_t **root,\n"
+		"void " << objectName << "_commit_reduce_forward( program_t *prg, tree_t **root,\n"
 		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
 		"{\n"
 		"	commit_clear_parse_tree( prg, root, pda_run, pt->child );\n"
 		"}\n"
 		"\n"
-		"long commit_union_sz( int reducer ) { return 0; }\n"
-		"void init_need() {}\n"
-		"int reducer_need_tok( program_t *prg, "
+		"long " << objectName << "_commit_union_sz( int reducer ) { return 0; }\n"
+		"void " << objectName << "_init_need() {}\n"
+		"int " << objectName << "_reducer_need_tok( program_t *prg, "
 				"struct pda_run *pda_run, int id ) { return COLM_RN_BOTH; }\n"
-		"int reducer_need_ign( program_t *prg, "
+		"int " << objectName << "_reducer_need_ign( program_t *prg, "
 				"struct pda_run *pda_run ) { return COLM_RN_BOTH; }\n"
 		"\n";
 	;
@@ -346,7 +346,7 @@ void Compiler::writeNeeds()
 		"\n";
 
 	*outStream <<
-		"extern \"C\" void init_need()\n"
+		"extern \"C\" void " << objectName << "_init_need()\n"
 		"{\n";
 	
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
@@ -374,7 +374,7 @@ void Compiler::writeNeeds()
 		"}\n";
 
 	*outStream <<
-		"extern \"C\" int reducer_need_tok( program_t *prg, "
+		"extern \"C\" int " << objectName << "_reducer_need_tok( program_t *prg, "
 				"struct pda_run *pda_run, int id )\n"
 		"{\n"
 		"	if ( pda_run->reducer > 0 ) {\n"
@@ -386,7 +386,7 @@ void Compiler::writeNeeds()
 		"	return COLM_RN_BOTH;\n"
 		"}\n"
 		"\n"
-		"extern \"C\" int reducer_need_ign( program_t *prg, struct pda_run *pda_run )\n"
+		"extern \"C\" int " << objectName << "_reducer_need_ign( program_t *prg, struct pda_run *pda_run )\n"
 		"{\n"
 		// Using this requires finding a solution for backtracking push back.
 		//"	if ( pda_run->reducer > 0 )\n"
@@ -453,14 +453,14 @@ void Compiler::writeCommit()
 		"\n";
 
 	*outStream <<
-		"long commit_union_sz( int reducer )\n"
+		"extern \"C\" long " << objectName << "_commit_union_sz( int reducer )\n"
 		"{\n"
 		"	return sizeof( commit_reduce_union );\n"
 		"}\n";
 
 	*outStream <<
 		"\n"
-		"void commit_reduce_forward( program_t *prg, tree_t **root,\n"
+		"extern \"C\" void " << objectName << "_commit_reduce_forward( program_t *prg, tree_t **root,\n"
 		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
 		"{\n"
 		"	switch ( pda_run->reducer ) {\n";

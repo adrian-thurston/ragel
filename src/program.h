@@ -100,7 +100,13 @@ struct colm_sections
 	void (*init_bindings)( struct pda_run *pda_run );
 	void (*pop_binding)( struct pda_run *pda_run, parse_tree_t *tree );
 
+	tree_t **(*host_call)( program_t *prg, long code, tree_t **sp );
+
+	void (*commit_reduce_forward)( program_t *prg, tree_t **root, struct pda_run *pda_run, parse_tree_t *pt );
+	long (*commit_union_sz)( int reducer );
 	void (*init_need)();
+	int (*reducer_need_tok)( program_t *prg, struct pda_run *pda_run, int id );
+	int (*reducer_need_ign)( program_t *prg, struct pda_run *pda_run );
 };
 
 struct heap_list

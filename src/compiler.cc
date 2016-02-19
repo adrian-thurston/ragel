@@ -1102,7 +1102,7 @@ void Compiler::writeHostCall()
 	}
 
 	*outStream <<
-		"tree_t **host_call( program_t *prg, long code, tree_t **sp )\n"
+		"tree_t **" << objectName << "_host_call( program_t *prg, long code, tree_t **sp )\n"
 		"{\n"
 		"	value_t rtn = 0;\n"
 		"	switch ( code ) {\n";
@@ -1111,8 +1111,8 @@ void Compiler::writeHostCall()
 		*outStream <<
 			"		case " << hc->funcId << ": {\n";
 
-		int pos = 0;
-		for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++, pos++ ) {
+		int pos = hc->paramList->length() - 1;
+		for ( ParameterList::Iter p = *hc->paramList; p.lte(); p++, pos-- ) {
 			*outStream <<
 				"			value_t p" << pos << " = vm_pop_value();\n";
 		}
@@ -1154,10 +1154,9 @@ void Compiler::generateOutput( long activeRealm, bool includeCommit )
 	/* Write the runtime data. */
 	pdaGen->writeRuntimeData( runtimeData, pdaTables );
 
-	if ( hostAdapters )
-		writeHostCall();
+	writeHostCall();
 
-	if ( hostAdapters && includeCommit )
+	if ( includeCommit )
 		writeCommitStub();
 
 	if ( !gblLibrary ) 

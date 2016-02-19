@@ -105,7 +105,7 @@ void commit_reduce( program_t *prg, tree_t **root, struct pda_run *pda_run )
 	while ( sp != root ) {
 		pt = vm_pop_ptree();
 
-		commit_reduce_forward( prg, sp, pda_run, pt );
+		prg->rtd->commit_reduce_forward( prg, sp, pda_run, pt );
 		pt->child = 0;
 
 		pt->flags |= PF_COMMITTED;

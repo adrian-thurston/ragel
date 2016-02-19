@@ -44,6 +44,36 @@ using std::cout;
 
 char startDefName[] = "start";
 
+extern "C" tree_t **internal_host_call( program_t *prg, long code, tree_t **sp )
+{
+	return 0;
+}
+
+extern "C" void internal_commit_reduce_forward( program_t *prg, tree_t **root,
+		struct pda_run *pda_run, parse_tree_t *pt )
+{
+	commit_clear_parse_tree( prg, root, pda_run, pt->child );
+}
+
+extern "C" long internal_commit_union_sz( int reducer )
+{
+	return 0;
+}
+
+extern "C" void internal_init_need()
+{
+}
+
+extern "C" int internal_reducer_need_tok( program_t *prg, struct pda_run *, int id )
+{
+	return 3;
+}
+
+extern "C" int internal_reducer_need_ign( program_t *prg, struct pda_run * )
+{
+	return 3;
+}
+
 /* Count the transitions in the fsm by walking the state list. */
 int countTransitions( PdaGraph *fsm )
 {
@@ -1687,6 +1717,12 @@ void Compiler::makeRuntimeData()
 	runtimeData->init_bindings = &internalInitBindings;
 	runtimeData->pop_binding = &internalPopBinding;
 
+	runtimeData->host_call = &internal_host_call;
+	runtimeData->commit_reduce_forward = &internal_commit_reduce_forward;
+	runtimeData->commit_union_sz = &internal_commit_union_sz;
+	runtimeData->init_need = &internal_init_need;
+	runtimeData->reducer_need_tok = &internal_reducer_need_tok;
+	runtimeData->reducer_need_ign = &internal_reducer_need_ign;
 }
 
 /* Borrow alg->state for mapsTo. */
