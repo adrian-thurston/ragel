@@ -28,7 +28,7 @@
 #include <errno.h>
 
 using std::endl;
-
+extern colm_sections rlparse_object;
 
 void TopLevel::loadMachineName( string data )
 {
@@ -170,7 +170,7 @@ void TopLevel::reduceString( const char *data )
 	argv[4] = data;
 	argv[5] = 0;
 
-	colm_program *program = colm_new_program( &colm_object );
+	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 5, argv );
@@ -186,7 +186,7 @@ void TopLevel::reduceFile( const char *inputFileName )
 	argv[3] = id->hostLang->rlhcArg;
 	argv[4] = 0;
 
-	colm_program *program = colm_new_program( &colm_object );
+	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );
@@ -202,7 +202,7 @@ void TopLevel::loadImport( std::string fileName )
 	argv[3] = id->hostLang->rlhcArg;
 	argv[4] = 0;
 
-	colm_program *program = colm_new_program( &colm_object );
+	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_run_program( program, 4, argv );
 
@@ -283,7 +283,7 @@ void SectionPass::reduceFile( const char *inputFileName )
 	argv[3] = id->hostLang->rlhcArg;
 	argv[4] = 0;
 
-	colm_program *program = colm_new_program( &colm_object );
+	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );
@@ -299,7 +299,7 @@ void IncludePass::reduceFile( const char *inputFileName, const HostLang *hostLan
 	argv[3] = hostLang->rlhcArg;
 	argv[4] = 0;
 
-	colm_program *program = colm_new_program( &colm_object );
+	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );

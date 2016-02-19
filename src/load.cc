@@ -32,7 +32,7 @@
 
 using std::endl;
 
-extern colm_sections colm_object;
+extern colm_sections rlparse_object;
 
 char *unescape( const char *s, int slen )
 {
@@ -2447,7 +2447,7 @@ struct LoadRagel
 		argv[3] = id.hostLang->rlhcArg;
 		argv[4] = 0;
 
-		colm_program *program = colm_new_program( &colm_object );
+		colm_program *program = colm_new_program( &rlparse_object );
 		colm_set_debug( program, 0 );
 		colm_run_program( program, 4, argv );
 
@@ -2688,7 +2688,7 @@ struct LoadRagel
 		argv[3] = id.hostLang->rlhcArg;
 		argv[4] = 0;
 
-		colm_program *program = colm_new_program( &colm_object );
+		colm_program *program = colm_new_program( &rlparse_object );
 		colm_set_debug( program, 0 );
 		colm_run_program( program, 4, argv );
 

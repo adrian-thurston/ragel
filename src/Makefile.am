@@ -84,7 +84,7 @@ RAGEL_LM = \
 	ragel-crack.lm
 
 parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM_BINDEP)
-	$(COLM) -c -o $@ -e if.h -x if.cc -m commit.cc $<
+	$(COLM) -c -b rlparse_object -o $@ -e if.h -x if.cc -m commit.cc $<
 
 # These are necessary because we are not using built sources. They create the
 # dependency on the colm run for the objects that that require its output.
