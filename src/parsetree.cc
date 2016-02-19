@@ -854,9 +854,11 @@ NfaUnion::~NfaUnion()
 	
 }
 
-void nfaCheckResult( long code, long id, const char *scode, bool suppressExit = false )
+void nfaCheckResult( ParseData *pd, long code, long id, const char *scode, bool suppressExit = false )
 {
-	cout << code << " " << id << " " << scode << endl;
+	ofstream out( pd->id->commFileName );
+	out << code << " " << id << " " << scode << endl;
+	out.close();
 	if ( !suppressExit )
 		exit( code );
 }
@@ -876,17 +878,17 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 			strike( pd, fsm );
 		}
 		catch ( const TooManyStates & ) {
-			nfaCheckResult( 1, 0, "too-many-states" );
+			nfaCheckResult( pd, 1, 0, "too-many-states" );
 		}
 		catch ( const CondCostTooHigh &ccth ) {
-			nfaCheckResult( 20, ccth.costId, "cond-cost" );
+			nfaCheckResult( pd, 20, ccth.costId, "cond-cost" );
 		}
 		catch ( const RepetitionError & ) {
-			nfaCheckResult( 2, 0, "rep-error" );
+			nfaCheckResult( pd, 2, 0, "rep-error" );
 		}
 	}
 
-	nfaCheckResult( 0, 0, "OK" );
+	nfaCheckResult( pd, 0, 0, "OK" );
 }
 
 
@@ -899,17 +901,17 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 			pd->fsmCtx->stateLimit = -1;
 		}
 		catch ( const TooManyStates & ) {
-			nfaCheckResult( 1, 0, "too-many-states" );
+			nfaCheckResult( pd, 1, 0, "too-many-states" );
 		}
 		catch ( const PriorInteraction &pi ) {
-			nfaCheckResult( 60, pi.id, "prior-interaction" );
+			nfaCheckResult( pd, 60, pi.id, "prior-interaction" );
 		}
 		catch ( const RepetitionError & ) {
-			nfaCheckResult( 2, 0, "rep-error" );
+			nfaCheckResult( pd, 2, 0, "rep-error" );
 		}
 	}
 
-	nfaCheckResult( 0, 0, "OK" );
+	nfaCheckResult( pd, 0, 0, "OK" );
 }
 
 /*
@@ -975,10 +977,12 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 	int exitCode = 21;
 	double total = checkBreadth( pd, fsm, fsm->startState );
 
-	/* Suppress exit with this call. We need to perform the score checks after. */
-	nfaCheckResult( exitCode, 1, "OK", true );
+	/* This will exit. Can't call it because we need to perform the score
+	 * checks after. */
+	nfaCheckResult( pd, exitCode, 1, "OK", true );
 
-	cout << std::fixed << std::setprecision(0);
+	ofstream out( pd->id->commFileName, std::fstream::app );
+	out << std::fixed << std::setprecision(0);
 	double start = total;
 	
 	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
@@ -987,7 +991,7 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 				total = checkBreadth( pd, fsm, mel->value );
 
 				if ( start > 0.01 ) {
-					cout << "COST " << c->name << " " <<
+					out << "COST " << c->name << " " <<
 							( 1000000.0 * start ) << " " << 
 							( 1000000.0 * ( total / start ) ) << endl;
 				}
@@ -1009,7 +1013,7 @@ void NfaUnion::nfaBreadthCheck( ParseData *pd )
 		checkBreadth( pd, fsm );
 	}
 
-	nfaCheckResult( 0, 0, "OK" );
+	nfaCheckResult( pd, 0, 0, "OK" );
 }
 
 void NfaUnion::makeNameTree( ParseData *pd )

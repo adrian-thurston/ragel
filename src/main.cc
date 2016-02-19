@@ -308,7 +308,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKUYPvHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "r:xo:dnmleabjkS:M:I:CDEJZRAOKUYPvHh?-:sT:F:G:LpV", argc, argv );
 
 	bool showStylesOpt = false;
 
@@ -347,6 +347,10 @@ void InputData::parseArgs( int argc, const char **argv )
 					/* Ok, remember the output file name. */
 					outputFileName = pc.paramArg;
 				}
+				break;
+
+			case 'r':
+				commFileName = pc.paramArg;
 				break;
 
 			/* Flag for turning off duplicate action removal. */
