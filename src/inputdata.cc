@@ -32,6 +32,7 @@
 
 using std::istream;
 using std::ifstream;
+using std::stringstream;
 using std::ostream;
 using std::cout;
 using std::cerr;
@@ -626,22 +627,34 @@ void InputData::parseKelbt()
 	/*
 	 * Ragel Parser from ragel 6.
 	 */
+	ifstream *inFileStream;
+	stringstream *inStringStream;
+	istream *inStream;
 
-	/* Open the input file for reading. */
-	assert( inputFileName != 0 );
-	ifstream *inFile = new ifstream( inputFileName );
-	if ( ! inFile->is_open() )
-		error() << "could not open " << inputFileName << " for reading" << endp;
+	if ( inLibRagel ) {
+		/* Open the input file for reading. */
+		assert( inputFileName != 0 );
+		inStringStream = new stringstream( string( input ) );
+		inStream = inStringStream;
+	}
+	else {
+		/* Open the input file for reading. */
+		assert( inputFileName != 0 );
+		inFileStream = new ifstream( inputFileName );
+		if ( ! inFileStream->is_open() )
+			error() << "could not open " << inputFileName << " for reading" << endp;
+		inStream = inFileStream;
+	}
 
 	makeFirstInputItem();
 
-	Scanner scanner( *this, inputFileName, *inFile, 0, 0, 0, false );
+	Scanner scanner( *this, inputFileName, *inStream, 0, 0, 0, false );
 
 	scanner.sectionPass = true;
 	scanner.do_scan();
 
-	inFile->clear();
-	inFile->seekg( 0, std::ios::beg );
+	inStream->clear();
+	inStream->seekg( 0, std::ios::beg );
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
 
@@ -650,11 +663,16 @@ void InputData::parseKelbt()
 
 	/* Finished, final check for errors.. */
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
+	
+	if ( inLibRagel )
+		delete inStringStream;
+	else
+		delete inFileStream;
 }
 
 void InputData::processKelbt()
@@ -733,11 +751,15 @@ void InputData::parseReduce()
 	TopLevel *topLevel = new TopLevel( this, sectionPass, hostLang,
 			minimizeLevel, minimizeOpt );
 
-	/* Check input file. */
-	ifstream *inFile = new ifstream( inputFileName );
-	if ( ! inFile->is_open() )
-		error() << "could not open " << inputFileName << " for reading" << endp;
-	delete inFile;
+	if ( ! inLibRagel ) {
+		/* Check input file. */
+		if ( input == 0 ) {
+			ifstream *inFile = new ifstream( inputFileName );
+			if ( ! inFile->is_open() )
+				error() << "could not open " << inputFileName << " for reading" << endp;
+			delete inFile;
+		}
+	}
 
 	makeFirstInputItem();
 

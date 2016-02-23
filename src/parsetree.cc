@@ -857,11 +857,20 @@ NfaUnion::~NfaUnion()
 
 void nfaCheckResult( ParseData *pd, long code, long id, const char *scode, bool suppressExit = false )
 {
-	ofstream out( pd->id->commFileName );
-	out << code << " " << id << " " << scode << endl;
-	out.close();
+	if ( pd->id->inLibRagel ) {
+		stringstream out;
+		out << code << " " << id << " " << scode << endl;
+		//out.close();
+		pd->id->comm = out.str();
+	}
+	else {
+		ofstream out( pd->id->commFileName );
+		out << code << " " << id << " " << scode << endl;
+		out.close();
+	}
+
 	if ( !suppressExit )
-		exit( code );
+		pd->id->abortCompile( code );
 }
 
 /* This is the first pass check. It looks for state (limit times 2 ) or
@@ -1000,7 +1009,9 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 		}
 	}
 
-	exit( exitCode );
+	out.close();
+
+	pd->id->abortCompile( exitCode );
 }
 
 void NfaUnion::nfaBreadthCheck( ParseData *pd )

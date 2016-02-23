@@ -7,8 +7,10 @@ using std::cout;
 
 int main_lib( int argc, const char **argv );
 
+int libragel_main( char **result, int argc, const char **argv, const char *input );
+
 extern "C"
-int libragel( char *cmd )
+int libragel( char **result, char *cmd, const char *input )
 {
 	const int max = 32;
 	int argc = 0;
@@ -29,7 +31,7 @@ int libragel( char *cmd )
 	}
 	argv[argc] = NULL;
 
-	int es = main_lib( argc, argv );
+	int es = libragel_main( result, argc, argv, input );
 
 	for ( int i = 0; i < argc; i++ )
 		free( (void*)argv[i] );
