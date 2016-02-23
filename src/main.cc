@@ -599,7 +599,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				else {
 					error() << "-T" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
-					exit(1);
+					abortCompile(1);
 				}
 				break;
 			case 'F': 
@@ -610,7 +610,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				else {
 					error() << "-F" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
-					exit(1);
+					abortCompile(1);
 				}
 				break;
 			case 'G': 
@@ -626,7 +626,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				} else {
 					error() << "-G" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
-					exit(1);
+					abortCompile(1);
 				}
 				break;
 
@@ -731,7 +731,7 @@ void InputData::checkArgs()
 
 	/* Bail on argument processing errors. */
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
 
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( inputFileName != 0 && outputFileName != 0 && 
@@ -778,5 +778,28 @@ int main( int argc, const char **argv )
 	id.parseArgs( argc, argv );
 	id.checkArgs();
 	id.process();
+	return 0;
+}
+
+int libragel_main( char **result, int argc, const char **argv, const char *input )
+{
+	InputData id;
+
+	try {
+		id.parseArgs( argc, argv );
+		id.checkArgs();
+		id.input = input;
+		id.inLibRagel = true;
+		inLibRagel = true;
+		id.frontend = KelbtBased;
+		id.process();
+		*result = strdup( id.comm.c_str() );
+	}
+	catch ( const AbortCompile &ac ) {
+		*result = strdup( "" );
+	}
+	catch ( const std::bad_alloc & ) {
+
+	}
 	return 0;
 }

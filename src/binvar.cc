@@ -1,4 +1,6 @@
 #include "binvar.h"
+#include "parsedata.h"
+#include "inputdata.h"
 
 void BinaryVar::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
@@ -15,7 +17,7 @@ void BinaryVar::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 void BinaryVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	error() << "cannot use fcall in -B mode" << std::endl;
-	exit(1);
+	pd->id->abortCompile(1);
 }
 
 void BinaryVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -36,7 +38,7 @@ void BinaryVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish 
 void BinaryVar::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	error() << "cannot use fcall in -B mode" << std::endl;
-	exit(1);
+	pd->id->abortCompile(1);
 }
 
 void BinaryVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
@@ -59,7 +61,7 @@ void BinaryVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 void BinaryVar::RET( ostream &ret, bool inFinish )
 {
 	error() << "cannot use fcall in -B mode" << std::endl;
-	exit(1);
+	pd->id->abortCompile(1);
 }
 
 void BinaryVar::NRET( ostream &ret, bool inFinish )
@@ -79,7 +81,7 @@ void BinaryVar::NRET( ostream &ret, bool inFinish )
 void BinaryVar::BREAK( ostream &ret, int targState, bool csForced )
 {
 	error() << "cannot use fbreak in -B mode" << std::endl;
-	exit(1);
+	pd->id->abortCompile(1);
 }
 
 void BinaryVar::NBREAK( ostream &ret, int targState, bool csForced )

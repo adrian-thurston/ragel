@@ -24,6 +24,8 @@
 #include "stdlib.h"
 #include <string.h>
 #include <assert.h>
+#include "ragel.h"
+
 
 HostType hostTypesC[] =
 {
@@ -582,9 +584,13 @@ const char *fileNameFromStem( const char *stemFile, const char *suffix )
 }
 
 exit_object endp;
+bool inLibRagel;
 
 void operator<<( std::ostream &out, exit_object & )
 {
     out << std::endl;
-    exit(1);
+	if ( inLibRagel )
+		throw AbortCompile();
+	else
+	    exit(1);
 }

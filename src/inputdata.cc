@@ -40,6 +40,14 @@ using std::ios;
 
 extern colm_sections rlhc_object;
 
+void InputData::abortCompile( int code )
+{
+	if ( inLibRagel )
+		throw AbortCompile();
+	else
+		exit(code);
+}
+
 /* Invoked by the parser when the root element is opened. */
 void InputData::cdDefaultFileName( const char *inputFile )
 {
@@ -222,7 +230,7 @@ void InputData::openOutput()
 		outFilter->open( outputFileName, ios::out|ios::trunc );
 		if ( !outFilter->is_open() ) {
 			error() << "error opening " << outputFileName << " for writing" << endl;
-			exit(1);
+			abortCompile(1);
 		}
 	}
 }
@@ -383,12 +391,12 @@ void InputData::processXML()
 	prepareAllMachines();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
 
 	createOutputStream();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
 
 	/*
 	 * From this point on we should not be reporting any errors.
@@ -405,12 +413,12 @@ void InputData::processDot()
 	prepareSingleMachine();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
 
 	createOutputStream();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
 
 	/*
 	 * From this point on we should not be reporting any errors.
@@ -453,7 +461,7 @@ void InputData::runRlhc()
 	/* Translation step shouldn't fail, but it can if there is an
 	 * internal error. Pass it up.  */
 	if ( es != 0 )
-		exit( es );
+		abortCompile( es );
 }
 
 void InputData::processCode()
@@ -462,7 +470,7 @@ void InputData::processCode()
 	prepareAllMachines();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
 
 	makeDefaultFileName();
 
@@ -474,12 +482,12 @@ void InputData::processCode()
 	generateReduced();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
 
 	verifyWritesHaveData();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
 
 	/*
 	 * From this point on we should not be reporting any errors.
@@ -511,15 +519,22 @@ void InputData::checkLastRef( InputItem *ii )
 				ii->parser->terminateParser();
 #endif
 
-			pd->prepareMachineGen( 0, hostLang );
+			try {
+				if ( !abortedCompile ) {
+					pd->prepareMachineGen( 0, hostLang );
 
-			if ( gblErrorCount > 0 )
-				exit(1);
+					if ( gblErrorCount > 0 )
+						abortCompile(1);
 
-			pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
+					pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
 
-			if ( gblErrorCount > 0 )
-				exit(1);
+					if ( gblErrorCount > 0 )
+						abortCompile(1);
+				}
+			}
+			catch ( const AbortCompile &ac ) {
+				abortedCompile = true;
+			}
 		}
 
 		/* Mark all input items referencing the machine as processed. */
@@ -532,26 +547,31 @@ void InputData::checkLastRef( InputItem *ii )
 			toMark = toMark->next;
 		}
 
-		/* Move forward, flusing input items until we get to an unprocessed
+		/* Move forward, flushing input items until we get to an unprocessed
 		 * input item. */
 		while ( lastFlush != 0 && lastFlush->processed ) {
-			verifyWriteHasData( lastFlush );
+			if ( !abortedCompile ) {
+				verifyWriteHasData( lastFlush );
 
-			if ( gblErrorCount > 0 )
-				exit(1);
+				if ( gblErrorCount > 0 )
+					abortCompile(1);
 
-			/* Flush out. */
-			writeOutput( lastFlush );
+				/* Flush out. */
+				writeOutput( lastFlush );
+			}
 
 			/* If this is the last reference to a pd, we can now clear the
 			 * memory for it. */
 			if ( lastFlush->pd != 0 && lastFlush->section->lastReference == lastFlush ) {
 				if ( lastFlush->pd->instanceList.length() > 0 ) {
-					lastFlush->pd->clear();
+					if ( !abortedCompile ) {
+						lastFlush->pd->clear();
+
 #ifdef WITH_RAGEL_KELBT
-					if ( lastFlush->parser != 0 )
-						lastFlush->parser->clear();
+						if ( lastFlush->parser != 0 )
+							lastFlush->parser->clear();
 #endif
+					}
 				}
 			}
 
@@ -691,7 +711,7 @@ void InputData::processColm()
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile(1);
 
 	if ( generateXML )
 		processXML();
@@ -725,6 +745,7 @@ void InputData::parseReduce()
 
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
+
 	topLevel->reduceFile( inputFileName );
 }
 

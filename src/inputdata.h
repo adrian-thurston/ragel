@@ -197,7 +197,10 @@ struct InputData
 		nfaBreadthCheck(0),
 		varBackend(false),
 		histogramFn(0),
-		histogram(0)
+		histogram(0),
+		abortedCompile(false),
+		input(0),
+		inLibRagel(false)
 	{}
 
 	std::string dirName;
@@ -206,6 +209,8 @@ struct InputData
 	const char *inputFileName;
 	const char *outputFileName;
 	const char *commFileName;
+
+	string comm;
 
 	int nextMachineId;
 
@@ -288,6 +293,10 @@ struct InputData
 	const char *histogramFn;
 	double *histogram;
 
+	bool abortedCompile;
+	const char *input;
+	bool inLibRagel;
+
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();
 
@@ -343,6 +352,8 @@ struct InputData
 	void processReduce();
 	void process();
 	void parseReduce();
+
+	void abortCompile( int code );
 };
 
 

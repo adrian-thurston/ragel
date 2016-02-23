@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>

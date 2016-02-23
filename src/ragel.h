@@ -98,4 +98,7 @@ std::ostream &error();
 
 extern const char mainMachine[];
 
+struct AbortCompile {};
+extern bool inLibRagel;
+
 #endif
