@@ -898,6 +898,8 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 			pd->fsmCtx->stateLimit = -1;
 
 			strike( pd, fsm );
+
+			delete fsm;
 		}
 		catch ( const TooManyStates & ) {
 			nfaCheckResult( pd, 1, 0, "too-many-states" );
