@@ -114,7 +114,7 @@ FsmAp *VarDef::walk( ParseData *pd )
 	if ( machineDef->type == MachineDef::JoinType &&
 			machineDef->join->exprList.length() == 1 )
 	{
-		rtnVal->epsilonOp();
+		rtnVal = FsmAp::epsilonOp( rtnVal );
 	}
 
 	/* We can now unset entry points that are not longer used. */
@@ -407,7 +407,7 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	}
 
 	/* The actions executed on starting to match a token. */
-	graph->isolateStartState();
+	graph = FsmAp::isolateStartState( graph );
 	graph->startState->toStateActionTable.setAction( pd->initTokStartOrd, pd->initTokStart );
 	graph->startState->fromStateActionTable.setAction( pd->setTokStartOrd, pd->setTokStart );
 	if ( maxItemSetLength > 1 ) {
@@ -630,7 +630,7 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 	 * there will always be at least one part. */
 	FsmAp *rtnVal = parts[0];
 	for ( int i = 1; i < longestMatchList->length(); i++ ) {
-		rtnVal->unionOp( parts[i] );
+		rtnVal = FsmAp::unionOp( rtnVal, parts[i] );
 		afterOpMinimize( rtnVal );
 	}
 
@@ -822,7 +822,7 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 				amount = numTerms - start;
 
 			FsmAp **others = machines + start + 1;
-			machines[start]->nfaUnionOp( others, (amount - 1), r->depth );
+			machines[start] = FsmAp::nfaUnionOp( machines[start], others, (amount - 1), r->depth );
 
 			start += amount;
 			numGroups++;
@@ -1073,8 +1073,7 @@ FsmAp *MachineDef::walk( ParseData *pd )
 		break;
 	case LengthDefType:
 		/* Towards lengths. */
-		rtnVal = new FsmAp( pd->fsmCtx );
-		rtnVal->lambdaFsm();
+		rtnVal = FsmAp::lambdaFsm( pd->fsmCtx );
 		break;
 	case NfaUnionType:
 		rtnVal = nfaUnion->walk( pd );
@@ -1184,7 +1183,7 @@ FsmAp *Join::walkJoin( ParseData *pd )
 
 	/* Join machines 1 and up onto machine 0. */
 	FsmAp *retFsm = fsms[0];
-	retFsm->joinOp( startId, finalId, fsms+1, exprList.length()-1 );
+	retFsm = FsmAp::joinOp( retFsm, startId, finalId, fsms+1, exprList.length()-1 );
 
 	/* We can now unset entry points that are not longer used. */
 	pd->unsetObsoleteEntries( retFsm );
@@ -1283,7 +1282,7 @@ FsmAp *Expression::walk( ParseData *pd, bool lastInSeq )
 			/* Evaluate the term. */
 			FsmAp *rhs = term->walk( pd );
 			/* Perform union. */
-			rtnVal->unionOp( rhs );
+			rtnVal = FsmAp::unionOp( rtnVal, rhs );
 			afterOpMinimize( rtnVal, lastInSeq );
 			break;
 		}
@@ -1293,7 +1292,7 @@ FsmAp *Expression::walk( ParseData *pd, bool lastInSeq )
 			/* Evaluate the term. */
 			FsmAp *rhs = term->walk( pd );
 			/* Perform intersection. */
-			rtnVal->intersectOp( rhs );
+			rtnVal = FsmAp::intersectOp( rtnVal, rhs );
 			afterOpMinimize( rtnVal, lastInSeq );
 			break;
 		}
@@ -1303,7 +1302,7 @@ FsmAp *Expression::walk( ParseData *pd, bool lastInSeq )
 			/* Evaluate the term. */
 			FsmAp *rhs = term->walk( pd );
 			/* Perform subtraction. */
-			rtnVal->subtractOp( rhs );
+			rtnVal = FsmAp::subtractOp( rtnVal, rhs );
 			afterOpMinimize( rtnVal, lastInSeq );
 			break;
 		}
@@ -1315,11 +1314,11 @@ FsmAp *Expression::walk( ParseData *pd, bool lastInSeq )
 			FsmAp *rhs = dotStarFsm( pd );
 			FsmAp *termFsm = term->walk( pd );
 			FsmAp *trailAnyStar = dotStarFsm( pd );
-			rhs->concatOp( termFsm );
-			rhs->concatOp( trailAnyStar );
+			rhs = FsmAp::concatOp( rhs, termFsm );
+			rhs = FsmAp::concatOp( rhs, trailAnyStar );
 
 			/* Perform subtraction. */
-			rtnVal->subtractOp( rhs );
+			rtnVal = FsmAp::subtractOp( rtnVal, rhs );
 			afterOpMinimize( rtnVal, lastInSeq );
 			break;
 		}
@@ -1394,7 +1393,7 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			/* Evaluate the FactorWithRep. */
 			FsmAp *rhs = factorWithAug->walk( pd );
 			/* Perform concatenation. */
-			rtnVal->concatOp( rhs );
+			rtnVal = FsmAp::concatOp( rtnVal, rhs );
 			afterOpMinimize( rtnVal, lastInSeq );
 			break;
 		}
@@ -1418,7 +1417,7 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			rhs->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
-			rtnVal->concatOp( rhs );
+			rtnVal = FsmAp::concatOp( rtnVal, rhs );
 			afterOpMinimize( rtnVal, lastInSeq );
 			break;
 		}
@@ -1451,7 +1450,7 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			}
 
 			/* Perform concatenation. */
-			rtnVal->concatOp( rhs );
+			rtnVal = FsmAp::concatOp( rtnVal, rhs );
 			afterOpMinimize( rtnVal, lastInSeq );
 			break;
 		}
@@ -1478,7 +1477,7 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			rhs->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
-			rtnVal->concatOp( rhs );
+			rtnVal = FsmAp::concatOp( rtnVal, rhs );
 			afterOpMinimize( rtnVal, lastInSeq );
 			break;
 		}
@@ -2000,7 +1999,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 
 		/* Shift over the start action orders then do the kleene star. */
 		pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
-		retFsm->starOp( );
+		retFsm = FsmAp::starOp( retFsm );
 		afterOpMinimize( retFsm );
 		break;
 	}
@@ -2027,20 +2026,19 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 
 		/* Shift over the start action orders then do the kleene star. */
 		pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
-		retFsm->starOp( );
+		retFsm = FsmAp::starOp( retFsm );
 		afterOpMinimize( retFsm );
 		break;
 	}
 	case OptionalType: {
 		/* Make the null fsm. */
-		FsmAp *nu = new FsmAp( pd->fsmCtx );
-		nu->lambdaFsm( );
+		FsmAp *nu = FsmAp::lambdaFsm( pd->fsmCtx );
 
 		/* Evaluate the FactorWithRep. */
 		retFsm = factorWithRep->walk( pd );
 
 		/* Perform the question operator. */
-		retFsm->unionOp( nu );
+		retFsm = FsmAp::unionOp( retFsm, nu );
 		afterOpMinimize( retFsm );
 		break;
 	}
@@ -2060,10 +2058,10 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
 
 		/* Star the duplicate. */
-		dup->starOp( );
+		dup = FsmAp::starOp( dup );
 		afterOpMinimize( dup );
 
-		retFsm->concatOp( dup );
+		retFsm = FsmAp::concatOp( retFsm, dup );
 		afterOpMinimize( retFsm );
 		break;
 	}
@@ -2076,8 +2074,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "exactly zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->lambdaFsm();
+			retFsm = FsmAp::lambdaFsm( pd->fsmCtx );
 		}
 		else {
 			/* Evaluate the first FactorWithRep. */
@@ -2093,7 +2090,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
 
 			/* Do the repetition on the machine. Already guarded against n == 0 */
-			retFsm->repeatOp( lowerRep );
+			retFsm = FsmAp::repeatOp( retFsm, lowerRep );
 			afterOpMinimize( retFsm );
 		}
 		break;
@@ -2107,8 +2104,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "max zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->lambdaFsm();
+			retFsm = FsmAp::lambdaFsm( pd->fsmCtx );
 		}
 		else {
 			/* Evaluate the first FactorWithRep. */
@@ -2124,7 +2120,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
 
 			/* Do the repetition on the machine. Already guarded against n == 0 */
-			retFsm->optionalRepeatOp( upperRep );
+			retFsm = FsmAp::optionalRepeatOp( retFsm, upperRep );
 			afterOpMinimize( retFsm );
 		}
 		break;
@@ -2144,7 +2140,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 	
 		if ( lowerRep == 0 ) {
 			/* Acts just like a star op on the machine to return. */
-			retFsm->starOp( );
+			retFsm = FsmAp::starOp( retFsm );
 			afterOpMinimize( retFsm );
 		}
 		else {
@@ -2152,15 +2148,15 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			FsmAp *dup = new FsmAp( *retFsm );
 
 			/* Do repetition on the first half. */
-			retFsm->repeatOp( lowerRep );
+			retFsm = FsmAp::repeatOp( retFsm, lowerRep );
 			afterOpMinimize( retFsm );
 
 			/* Star the duplicate. */
-			dup->starOp( );
+			dup = FsmAp::starOp( dup );
 			afterOpMinimize( dup );
 
 			/* Tak on the kleene star. */
-			retFsm->concatOp( dup );
+			retFsm = FsmAp::concatOp( retFsm, dup );
 			afterOpMinimize( retFsm );
 		}
 		break;
@@ -2171,8 +2167,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			error(loc) << "invalid range repetition" << endl;
 
 			/* Return null machine as recovery. */
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->lambdaFsm();
+			retFsm = FsmAp::lambdaFsm( pd->fsmCtx );
 		}
 		else if ( lowerRep == 0 && upperRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep.  This
@@ -2181,8 +2176,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "zero to zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->lambdaFsm();
+			retFsm = FsmAp::lambdaFsm( pd->fsmCtx );
 		}
 		else {
 			/* Now need to evaluate the repeated machine. */
@@ -2199,12 +2193,12 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 
 			if ( lowerRep == 0 ) {
 				/* Just doing max repetition. Already guarded against n == 0. */
-				retFsm->optionalRepeatOp( upperRep );
+				retFsm = FsmAp::optionalRepeatOp( retFsm, upperRep );
 				afterOpMinimize( retFsm );
 			}
 			else if ( lowerRep == upperRep ) {
 				/* Just doing exact repetition. Already guarded against n == 0. */
-				retFsm->repeatOp( lowerRep );
+				retFsm = FsmAp::repeatOp( retFsm, lowerRep );
 				afterOpMinimize( retFsm );
 			}
 			else {
@@ -2213,15 +2207,15 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 				FsmAp *dup = new FsmAp( *retFsm );
 
 				/* Do repetition on the first half. */
-				retFsm->repeatOp( lowerRep );
+				retFsm = FsmAp::repeatOp( retFsm, lowerRep );
 				afterOpMinimize( retFsm );
 
 				/* Do optional repetition on the second half. */
-				dup->optionalRepeatOp( upperRep - lowerRep );
+				dup = FsmAp::optionalRepeatOp( dup, upperRep - lowerRep );
 				afterOpMinimize( dup );
 
 				/* Tak on the duplicate machine. */
-				retFsm->concatOp( dup );
+				retFsm = FsmAp::concatOp( retFsm, dup );
 				afterOpMinimize( retFsm );
 			}
 		}
@@ -2299,7 +2293,7 @@ FsmAp *FactorWithNeg::walk( ParseData *pd )
 
 		/* Negation is subtract from dot-star. */
 		retFsm = dotStarFsm( pd );
-		retFsm->subtractOp( toNegate );
+		retFsm = FsmAp::subtractOp( retFsm, toNegate );
 		afterOpMinimize( retFsm );
 		break;
 	}
@@ -2309,7 +2303,7 @@ FsmAp *FactorWithNeg::walk( ParseData *pd )
 
 		/* CharNegation is subtract from dot. */
 		retFsm = dotFsm( pd );
-		retFsm->subtractOp( toNegate );
+		retFsm = FsmAp::subtractOp( retFsm, toNegate );
 		afterOpMinimize( retFsm );
 		break;
 	}
@@ -2417,10 +2411,10 @@ FsmAp *Factor::condPlus( ParseData *pd )
 		applyGuardedPrior2( pd, dup );
 
 		/* Star the duplicate. */
-		dup->starOp( );
+		dup = FsmAp::starOp( dup );
 		afterOpMinimize( dup );
 
-		rtnVal->concatOp( dup );
+		rtnVal = FsmAp::concatOp( rtnVal, dup );
 		afterOpMinimize( rtnVal );
 	}
 
@@ -2480,7 +2474,7 @@ FsmAp *Factor::walk( ParseData *pd )
 		break;
 	case NfaRep: {
 		rtnVal = expression->walk( pd );
-		rtnVal->nfaRepeatOp( action1, action2, action3,
+		rtnVal = FsmAp::nfaRepeatOp( rtnVal, action1, action2, action3,
 				action4, action5, action6, pd->curActionOrd );
 		rtnVal->verifyIntegrity();
 		break;
@@ -2585,9 +2579,7 @@ FsmAp *Range::walk( ParseData *pd )
 	}
 
 	/* Return the range now that it is validated. */
-	FsmAp *retFsm = new FsmAp( pd->fsmCtx );
-	retFsm->rangeFsm( lowKey, highKey );
-
+	FsmAp *retFsm = FsmAp::rangeFsm( pd->fsmCtx, lowKey, highKey );
 
 	/* If case independent, then union the portion that covers alphas. */
 	if ( caseIndep ) { 
@@ -2606,9 +2598,8 @@ FsmAp *Range::walk( ParseData *pd )
 
 				/* Add in upper(low) .. upper(high) */
 
-				FsmAp *addFsm = new FsmAp( pd->fsmCtx );
-				addFsm->rangeFsm( toupper(low), toupper(high) );
-				retFsm->unionOp( addFsm );
+				FsmAp *addFsm = FsmAp::rangeFsm( pd->fsmCtx, toupper(low), toupper(high) );
+				retFsm = FsmAp::unionOp( retFsm, addFsm );
 			}
 		}
 
@@ -2626,9 +2617,8 @@ FsmAp *Range::walk( ParseData *pd )
 					high = highKey.getVal();
 
 				/* Add in lower(low) .. lower(high) */
-				FsmAp *addFsm = new FsmAp( pd->fsmCtx );
-				addFsm->rangeFsm( tolower(low), tolower(high) );
-				retFsm->unionOp( addFsm );
+				FsmAp *addFsm = FsmAp::rangeFsm( pd->fsmCtx, tolower(low), tolower(high) );
+				retFsm = FsmAp::unionOp( retFsm, addFsm );
 			}
 		}
 	}
@@ -2645,9 +2635,9 @@ FsmAp *Literal::walk( ParseData *pd )
 	case Number: {
 		/* Make the fsm key in int format. */
 		Key fsmKey = makeFsmKeyNum( token.data, token.loc, pd );
+
 		/* Make the new machine. */
-		rtnVal = new FsmAp( pd->fsmCtx );
-		rtnVal->concatFsm( fsmKey );
+		rtnVal = FsmAp::concatFsm( pd->fsmCtx, fsmKey );
 		break;
 	}
 	case LitString: {
@@ -2660,11 +2650,10 @@ FsmAp *Literal::walk( ParseData *pd )
 		makeFsmKeyArray( arr, data, length, pd );
 
 		/* Make the new machine. */
-		rtnVal = new FsmAp( pd->fsmCtx );
 		if ( caseInsensitive )
-			rtnVal->concatFsmCI( arr, length );
+			rtnVal = FsmAp::concatFsmCI( pd->fsmCtx, arr, length );
 		else
-			rtnVal->concatFsm( arr, length );
+			rtnVal = FsmAp::concatFsm( pd->fsmCtx, arr, length );
 		delete[] data;
 		delete[] arr;
 		break;
@@ -2698,12 +2687,11 @@ FsmAp *RegExpr::walk( ParseData *pd, RegExpr *rootRegex )
 			/* Walk both items. */
 			rtnVal = regExpr->walk( pd, rootRegex );
 			FsmAp *fsm2 = item->walk( pd, rootRegex );
-			rtnVal->concatOp( fsm2 );
+			rtnVal = FsmAp::concatOp( rtnVal, fsm2 );
 			break;
 		}
 		case Empty: {
-			rtnVal = new FsmAp( pd->fsmCtx );
-			rtnVal->lambdaFsm();
+			rtnVal = FsmAp::lambdaFsm( pd->fsmCtx );
 			break;
 		}
 	}
@@ -2737,11 +2725,10 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 			makeFsmKeyArray( arr, token.data, token.length, pd );
 
 			/* Make the concat fsm. */
-			rtnVal = new FsmAp( pd->fsmCtx );
 			if ( rootRegex != 0 && rootRegex->caseInsensitive )
-				rtnVal->concatFsmCI( arr, token.length );
+				rtnVal = FsmAp::concatFsmCI( pd->fsmCtx, arr, token.length );
 			else
-				rtnVal->concatFsm( arr, token.length );
+				rtnVal = FsmAp::concatFsm( pd->fsmCtx, arr, token.length );
 			delete[] arr;
 			break;
 		}
@@ -2753,10 +2740,8 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 		case OrBlock: {
 			/* Get the or block and minmize it. */
 			rtnVal = orBlock->walk( pd, rootRegex );
-			if ( rtnVal == 0 ) {
-				rtnVal = new FsmAp( pd->fsmCtx );
-				rtnVal->lambdaFsm();
-			}
+			if ( rtnVal == 0 )
+				rtnVal = FsmAp::lambdaFsm( pd->fsmCtx );
 			rtnVal->minimizePartition2();
 			break;
 		}
@@ -2767,7 +2752,7 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 
 			/* Make a dot fsm and subtract from it. */
 			rtnVal = dotFsm( pd );
-			rtnVal->subtractOp( fsm );
+			rtnVal = FsmAp::subtractOp( rtnVal, fsm );
 			rtnVal->minimizePartition2();
 			break;
 		}
@@ -2781,7 +2766,7 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 					"accepts zero length word" << endl;
 		}
 
-		rtnVal->starOp();
+		rtnVal = FsmAp::starOp( rtnVal );
 		rtnVal->minimizePartition2();
 	}
 	return rtnVal;
@@ -2813,7 +2798,7 @@ FsmAp *ReOrBlock::walk( ParseData *pd, RegExpr *rootRegex )
 			if ( fsm1 == 0 )
 				rtnVal = fsm2;
 			else {
-				fsm1->unionOp( fsm2 );
+				fsm1 = FsmAp::unionOp( fsm1, fsm2 );
 				rtnVal = fsm1;
 			}
 			break;
@@ -2835,9 +2820,6 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 	FsmAp *rtnVal = 0;
 	switch ( type ) {
 	case Data: {
-		/* Make the or machine. */
-		rtnVal = new FsmAp( pd->fsmCtx );
-
 		/* Put the or data into an array of ints. Note that we find unique
 		 * keys. Duplicates are silently ignored. The alternative would be to
 		 * issue warning or an error but since we can't with [a0-9a] or 'a' |
@@ -2847,7 +2829,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 			rootRegex != 0 ? rootRegex->caseInsensitive : false, pd );
 
 		/* Run the or operator. */
-		rtnVal->orFsm( keySet.data, keySet.length() );
+		rtnVal = FsmAp::orFsm( pd->fsmCtx, keySet.data, keySet.length() );
 		break;
 	}
 	case Range: {
@@ -2863,8 +2845,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 		}
 
 		/* Make the range machine. */
-		rtnVal = new FsmAp( pd->fsmCtx );
-		rtnVal->rangeFsm( lowKey, highKey );
+		rtnVal = FsmAp::rangeFsm( pd->fsmCtx, lowKey, highKey );
 
 		if ( rootRegex != 0 && rootRegex->caseInsensitive ) {
 			if ( keyOps->le( lowKey, 'Z' ) && pd->fsmCtx->keyOps->le( 'A', highKey ) ) {
@@ -2874,9 +2855,8 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 				otherLow = keyOps->add( 'a', ( keyOps->sub( otherLow, 'A' ) ) );
 				otherHigh = keyOps->add( 'a', ( keyOps->sub( otherHigh, 'A' ) ) );
 
-				FsmAp *otherRange = new FsmAp( pd->fsmCtx );
-				otherRange->rangeFsm( otherLow, otherHigh );
-				rtnVal->unionOp( otherRange );
+				FsmAp *otherRange = FsmAp::rangeFsm( pd->fsmCtx, otherLow, otherHigh );
+				rtnVal = FsmAp::unionOp( rtnVal, otherRange );
 				rtnVal->minimizePartition2();
 			}
 			else if ( keyOps->le( lowKey, 'z' ) && keyOps->le( 'a', highKey ) ) {
@@ -2886,9 +2866,8 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 				otherLow = keyOps->add('A' , ( keyOps->sub( otherLow , 'a' ) ));
 				otherHigh = keyOps->add('A' , ( keyOps->sub( otherHigh , 'a' ) ));
 
-				FsmAp *otherRange = new FsmAp( pd->fsmCtx );
-				otherRange->rangeFsm( otherLow, otherHigh );
-				rtnVal->unionOp( otherRange );
+				FsmAp *otherRange = FsmAp::rangeFsm( pd->fsmCtx, otherLow, otherHigh );
+				rtnVal = FsmAp::unionOp( rtnVal, otherRange );
 				rtnVal->minimizePartition2();
 			}
 		}

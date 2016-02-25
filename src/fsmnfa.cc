@@ -147,7 +147,7 @@ const int ORD_TEST = 1073741824;
  * This is a compositional operator since it doesn't leave any actions to
  * trailing characters, where they may interact with other actions that use the
  * same variables. */
-void FsmAp::nfaRepeatOp( Action *push, Action *pop,
+void FsmAp::_nfaRepeatOp( Action *push, Action *pop,
 		Action *init, Action *stay, Action *repeat,
 		Action *exit, int &curActionOrd )
 {
@@ -222,7 +222,7 @@ void FsmAp::nfaRepeatOp( Action *push, Action *pop,
 }
 
 /* Unions other with this machine. Other is deleted. */
-void FsmAp::nfaUnionOp( FsmAp **others, int n, int depth )
+void FsmAp::_nfaUnionOp( FsmAp **others, int n, int depth )
 {
 	/* Mark existing NFA states as NFA_REP states, which excludes them from the
 	 * prepare NFA round. We must treat them as final NFA states and not try to

@@ -53,7 +53,7 @@ StateAp *FsmAp::addState()
  * machine will be made that has len+1 states with one transition between each
  * state for each integer in str. IsSigned determines if the integers are to
  * be considered as signed or unsigned ints. */
-void FsmAp::concatFsm( Key *str, int len )
+void FsmAp::_concatFsm( Key *str, int len )
 {
 	/* Make the first state and set it as the start state. */
 	StateAp *last = addState();
@@ -71,7 +71,7 @@ void FsmAp::concatFsm( Key *str, int len )
 }
 
 /* Case insensitive version of concatFsm. */
-void FsmAp::concatFsmCI( Key *str, int len )
+void FsmAp::_concatFsmCI( Key *str, int len )
 {
 	/* Make the first state and set it as the start state. */
 	StateAp *last = addState();
@@ -101,7 +101,7 @@ void FsmAp::concatFsmCI( Key *str, int len )
 /* Construct a machine that matches one character.  A new machine will be made
  * that has two states with a single transition between the states. IsSigned
  * determines if the integers are to be considered as signed or unsigned ints. */
-void FsmAp::concatFsm( Key chr )
+void FsmAp::_concatFsm( Key chr )
 {
 	/* Two states first start, second final. */
 	setStartState( addState() );
@@ -117,7 +117,7 @@ void FsmAp::concatFsm( Key chr )
  * be made that has two states and len transitions between the them. The set
  * should be ordered correctly accroding to KeyOps and should not contain
  * any duplicates. */
-void FsmAp::orFsm( Key *set, int len )
+void FsmAp::_orFsm( Key *set, int len )
 {
 	/* Two states first start, second final. */
 	setStartState( addState() );
@@ -138,7 +138,7 @@ void FsmAp::orFsm( Key *set, int len )
  * match any characters from low to high inclusive. Low should be less than or
  * equal to high otherwise undefined behaviour results.  IsSigned determines
  * if the integers are to be considered as signed or unsigned ints. */
-void FsmAp::rangeFsm( Key low, Key high )
+void FsmAp::_rangeFsm( Key low, Key high )
 {
 	/* Two states first start, second final. */
 	setStartState( addState() );
@@ -151,7 +151,7 @@ void FsmAp::rangeFsm( Key low, Key high )
 }
 
 /* Construct a machine that a repeated range of characters.  */
-void FsmAp::rangeStarFsm( Key low, Key high)
+void FsmAp::_rangeStarFsm( Key low, Key high)
 {
 	/* One state which is final and is the start state. */
 	setStartState( addState() );
@@ -166,7 +166,7 @@ void FsmAp::rangeStarFsm( Key low, Key high)
  * state. IsSigned determines if the machine has a signed or unsigned
  * alphabet. Fsm operations must be done on machines with the same alphabet
  * signedness. */
-void FsmAp::lambdaFsm( )
+void FsmAp::_lambdaFsm( )
 {
 	/* Give it one state with no transitions making it
 	 * the start state and final state. */
@@ -176,11 +176,67 @@ void FsmAp::lambdaFsm( )
 
 /* Construct a machine that matches nothing at all. A new machine will be
  * made with only one state. It will not be final. */
-void FsmAp::emptyFsm( )
+void FsmAp::_emptyFsm( )
 {
 	/* Give it one state with no transitions making it
 	 * the start state and final state. */
 	setStartState( addState() );
+}
+
+FsmAp *FsmAp::concatFsm( FsmCtx *ctx, Key c )
+{
+	FsmAp *fsm = new FsmAp( ctx );
+	fsm->_concatFsm( c );
+	return fsm;
+}
+
+FsmAp *FsmAp::concatFsm( FsmCtx *ctx, Key *str, int len )
+{
+	FsmAp *fsm = new FsmAp( ctx );
+	fsm->_concatFsm( str, len );
+	return fsm;
+}
+
+FsmAp *FsmAp::concatFsmCI( FsmCtx *ctx, Key *str, int len )
+{
+	FsmAp *fsm = new FsmAp( ctx );
+	fsm->_concatFsmCI( str, len );
+	return fsm;
+}
+
+FsmAp *FsmAp::orFsm( FsmCtx *ctx, Key *set, int len )
+{
+	FsmAp *fsm = new FsmAp( ctx );
+	fsm->_orFsm( set, len );
+	return fsm;
+}
+
+FsmAp *FsmAp::rangeFsm( FsmCtx *ctx, Key low, Key high )
+{
+	FsmAp *fsm = new FsmAp( ctx );
+	fsm->_rangeFsm( low, high );
+	return fsm;
+}
+
+FsmAp *FsmAp::rangeStarFsm( FsmCtx *ctx, Key low, Key high )
+{
+	FsmAp *fsm = new FsmAp( ctx );
+	fsm->_rangeStarFsm( low, high );
+	return fsm;
+}
+
+FsmAp *FsmAp::emptyFsm( FsmCtx *ctx )
+{
+	FsmAp *fsm = new FsmAp( ctx );
+	fsm->_emptyFsm();
+	return fsm;
+}
+
+FsmAp *FsmAp::lambdaFsm( FsmCtx *ctx )
+{
+	FsmAp *fsm = new FsmAp( ctx );
+	fsm->_lambdaFsm();
+	return fsm;
 }
 
 void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
@@ -224,7 +280,7 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
  * transitions made going out of the machine and back into itself will be
  * notified that they are leaving transitions by having the leavingFromState
  * callback invoked. */
-void FsmAp::starOp( )
+void FsmAp::_starOp( )
 {
 	/* Turn on misfit accounting to possibly catch the old start state. */
 	setMisfitAccounting( true );
@@ -265,7 +321,7 @@ void FsmAp::starOp( )
 	setMisfitAccounting( false );
 }
 
-void FsmAp::repeatOp( int times )
+void FsmAp::_repeatOp( int times )
 {
 	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
 	assert( times > 0 );
@@ -287,14 +343,14 @@ void FsmAp::repeatOp( int times )
 	doConcat( copyFrom, 0, false );
 }
 
-void FsmAp::optionalRepeatOp( int times )
+void FsmAp::_optionalRepeatOp( int times )
 {
 	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
 	assert( times > 0 );
 
 	/* A repeat of one optional merely allows zero string. */
 	if ( times == 1 ) {
-		isolateStartState();
+		_isolateStartState();
 		setFinState( startState );
 		return;
 	}
@@ -308,7 +364,7 @@ void FsmAp::optionalRepeatOp( int times )
 	StateSet lastFinSet( finStateSet );
 
 	/* Set the initial state to zero to allow zero copies. */
-	isolateStartState();
+	_isolateStartState();
 	setFinState( startState );
 
 	/* Concatentate duplicates onto the end up until before the last. */
@@ -406,7 +462,7 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
  * transitions made leaving this machine and entering into other are notified
  * that they are leaving transitions by having the leavingFromState callback
  * invoked. */
-void FsmAp::concatOp( FsmAp *other )
+void FsmAp::_concatOp( FsmAp *other )
 {
 	for ( PriorTable::Iter g = other->startState->guardedInTable; g.lte(); g++ ) {
 		allTransPrior( 0, g->desc );
@@ -457,7 +513,7 @@ void FsmAp::doOr( FsmAp *other )
 }
 
 /* Unions other with this machine. Other is deleted. */
-void FsmAp::unionOp( FsmAp *other )
+void FsmAp::_unionOp( FsmAp *other )
 {
 	assert( ctx == other->ctx );
 
@@ -482,7 +538,7 @@ void FsmAp::unionOp( FsmAp *other )
 }
 
 /* Intersects other with this machine. Other is deleted. */
-void FsmAp::intersectOp( FsmAp *other )
+void FsmAp::_intersectOp( FsmAp *other )
 {
 	assert( ctx == other->ctx );
 
@@ -510,7 +566,7 @@ void FsmAp::intersectOp( FsmAp *other )
 }
 
 /* Set subtracts other machine from this machine. Other is deleted. */
-void FsmAp::subtractOp( FsmAp *other )
+void FsmAp::_subtractOp( FsmAp *other )
 {
 	assert( ctx == other->ctx );
 
@@ -647,7 +703,7 @@ void FsmAp::resolveEpsilonTrans()
 	}
 }
 
-void FsmAp::epsilonOp()
+void FsmAp::_epsilonOp()
 {
 	setMisfitAccounting( true );
 
@@ -668,7 +724,7 @@ void FsmAp::epsilonOp()
 /* Make a new maching by joining together a bunch of machines without making
  * any transitions between them. A negative finalId results in there being no
  * final id. */
-void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
+void FsmAp::_joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 {
 	for ( int m = 0; m < numOthers; m++ ) {
 		assert( ctx == others[m]->ctx );
@@ -773,7 +829,7 @@ void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 	removeUnreachableStates();
 }
 
-void FsmAp::globOp( FsmAp **others, int numOthers )
+void FsmAp::_globOp( FsmAp **others, int numOthers )
 {
 	for ( int m = 0; m < numOthers; m++ ) {
 		assert( ctx == others[m]->ctx );
@@ -804,7 +860,7 @@ void FsmAp::globOp( FsmAp **others, int numOthers )
 	}
 }
 
-void FsmAp::deterministicEntry()
+void FsmAp::_deterministicEntry()
 {
 	/* States may loose their entry points, turn on misfit accounting. */
 	setMisfitAccounting( true );
@@ -895,7 +951,7 @@ void FsmAp::unsetIncompleteFinals()
  * start state entry then modifying its transitions changes more than the start
  * transitions. So isolate the start state by separating it out such that it
  * only has start stateness as it's entry point. */
-void FsmAp::isolateStartState( )
+void FsmAp::_isolateStartState( )
 {
 	/* Bail out if the start state is already isolated. */
 	if ( isStartStateIsolated() )
@@ -922,6 +978,92 @@ void FsmAp::isolateStartState( )
 	 * misfit accounting. */
 	removeMisfits();
 	setMisfitAccounting( false );
+}
+
+FsmAp *FsmAp::starOp( FsmAp *fsm )
+{
+	fsm->_starOp();
+	return fsm;
+}
+
+FsmAp *FsmAp::repeatOp( FsmAp *fsm, int times )
+{
+	fsm->_repeatOp( times );
+	return fsm;
+}
+
+FsmAp *FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
+{
+	fsm->_optionalRepeatOp( times );
+	return fsm;
+}
+
+FsmAp *FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
+{
+	fsm->_concatOp( other );
+	return fsm;
+}
+
+FsmAp *FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
+{
+	fsm->_unionOp( other );
+	return fsm;
+}
+
+FsmAp *FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
+{
+	fsm->_intersectOp( other );
+	return fsm;
+}
+
+FsmAp *FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
+{
+	fsm->_subtractOp( other );
+	return fsm;
+}
+
+FsmAp *FsmAp::epsilonOp( FsmAp *fsm )
+{
+	fsm->_epsilonOp( );
+	return fsm;
+}
+
+FsmAp *FsmAp::joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers )
+{
+	fsm->_joinOp( startId, finalId, others, numOthers );
+	return fsm;
+}
+
+FsmAp *FsmAp::globOp( FsmAp *fsm, FsmAp **others, int numOthers )
+{
+	fsm->_globOp( others, numOthers );
+	return fsm;
+}
+
+FsmAp *FsmAp::deterministicEntry( FsmAp *fsm )
+{
+	fsm->_deterministicEntry();
+	return fsm;
+}
+
+FsmAp *FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
+{
+	fsm->_nfaUnionOp( others, n, depth );
+	return fsm;
+}
+
+FsmAp *FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
+		Action *stay, Action *repeat, Action *exit, int &curActionOrd )
+{
+	fsm->_nfaRepeatOp( push, pop, init,
+			stay, repeat, exit, curActionOrd );
+	return fsm;
+}
+
+FsmAp *FsmAp::isolateStartState( FsmAp *fsm )
+{
+	fsm->_isolateStartState();
+	return fsm;
 }
 
 StateAp *FsmAp::dupStartState()

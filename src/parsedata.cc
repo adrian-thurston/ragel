@@ -249,15 +249,15 @@ void makeFsmUniqueKeyArray( KeySet &result, char *data, int len,
 
 FsmAp *dotFsm( ParseData *pd )
 {
-	FsmAp *retFsm = new FsmAp( pd->fsmCtx );
-	retFsm->rangeFsm( pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
+	FsmAp *retFsm = FsmAp::rangeFsm( pd->fsmCtx,
+			pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
 	return retFsm;
 }
 
 FsmAp *dotStarFsm( ParseData *pd )
 {
-	FsmAp *retFsm = new FsmAp( pd->fsmCtx );
-	retFsm->rangeStarFsm( pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
+	FsmAp *retFsm = FsmAp::rangeStarFsm( pd->fsmCtx,
+			pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
 	return retFsm;
 }
 
@@ -276,138 +276,112 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 	}
 	case BT_Ascii: {
 		/* Ascii characters 0 to 127. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( 0, 127 );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, 0, 127 );
 		break;
 	}
 	case BT_Extend: {
 		/* Ascii extended characters. This is the full byte range. Dependent
 		 * on signed, vs no signed. If the alphabet is one byte then just use
 		 * dot fsm. */
-		if ( isSigned ) {
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->rangeFsm( -128, 127 );
-		}
-		else {
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->rangeFsm( 0, 255 );
-		}
+		if ( isSigned )
+			retFsm = FsmAp::rangeFsm( pd->fsmCtx, -128, 127 );
+		else
+			retFsm = FsmAp::rangeFsm( pd->fsmCtx, 0, 255 );
 		break;
 	}
 	case BT_Alpha: {
 		/* Alpha [A-Za-z]. */
-		FsmAp *upper = new FsmAp( pd->fsmCtx ), *lower = new FsmAp( pd->fsmCtx );
-		upper->rangeFsm( 'A', 'Z' );
-		lower->rangeFsm( 'a', 'z' );
-		upper->unionOp( lower );
+		FsmAp *upper = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'Z' );
+		FsmAp *lower = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'z' );
+		upper = FsmAp::unionOp( upper, lower );
 		upper->minimizePartition2();
 		retFsm = upper;
 		break;
 	}
 	case BT_Digit: {
 		/* Digits [0-9]. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( '0', '9' );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, '0', '9' );
 		break;
 	}
 	case BT_Alnum: {
 		/* Alpha numerics [0-9A-Za-z]. */
-		FsmAp *digit = new FsmAp( pd->fsmCtx ), *lower = new FsmAp( pd->fsmCtx );
-		FsmAp *upper = new FsmAp( pd->fsmCtx );
-		digit->rangeFsm( '0', '9' );
-		upper->rangeFsm( 'A', 'Z' );
-		lower->rangeFsm( 'a', 'z' );
-		digit->unionOp( upper );
-		digit->unionOp( lower );
+		FsmAp *digit = FsmAp::rangeFsm( pd->fsmCtx, '0', '9' );
+		FsmAp *upper = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'Z' );
+		FsmAp *lower = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'z' );
+		digit = FsmAp::unionOp( digit, upper );
+		digit = FsmAp::unionOp( digit, lower );
 		digit->minimizePartition2();
 		retFsm = digit;
 		break;
 	}
 	case BT_Lower: {
 		/* Lower case characters. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( 'a', 'z' );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'z' );
 		break;
 	}
 	case BT_Upper: {
 		/* Upper case characters. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( 'A', 'Z' );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'Z' );
 		break;
 	}
 	case BT_Cntrl: {
 		/* Control characters. */
-		FsmAp *cntrl = new FsmAp( pd->fsmCtx );
-		FsmAp *highChar = new FsmAp( pd->fsmCtx );
-		cntrl->rangeFsm( 0, 31 );
-		highChar->concatFsm( 127 );
-		cntrl->unionOp( highChar );
+		FsmAp *cntrl = FsmAp::rangeFsm( pd->fsmCtx, 0, 31 );
+		FsmAp *highChar = FsmAp::concatFsm( pd->fsmCtx, 127 );
+		cntrl = FsmAp::unionOp( cntrl, highChar );
 		cntrl->minimizePartition2();
 		retFsm = cntrl;
 		break;
 	}
 	case BT_Graph: {
 		/* Graphical ascii characters [!-~]. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( '!', '~' );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, '!', '~' );
 		break;
 	}
 	case BT_Print: {
 		/* Printable characters. Same as graph except includes space. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( ' ', '~' );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, ' ', '~' );
 		break;
 	}
 	case BT_Punct: {
 		/* Punctuation. */
-		FsmAp *range1 = new FsmAp( pd->fsmCtx );
-		FsmAp *range2 = new FsmAp( pd->fsmCtx );
-		FsmAp *range3 = new FsmAp( pd->fsmCtx ); 
-		FsmAp *range4 = new FsmAp( pd->fsmCtx );
-		range1->rangeFsm( '!', '/' );
-		range2->rangeFsm( ':', '@' );
-		range3->rangeFsm( '[', '`' );
-		range4->rangeFsm( '{', '~' );
-		range1->unionOp( range2 );
-		range1->unionOp( range3 );
-		range1->unionOp( range4 );
+		FsmAp *range1 = FsmAp::rangeFsm( pd->fsmCtx, '!', '/' );
+		FsmAp *range2 = FsmAp::rangeFsm( pd->fsmCtx, ':', '@' );
+		FsmAp *range3 = FsmAp::rangeFsm( pd->fsmCtx, '[', '`' );
+		FsmAp *range4 = FsmAp::rangeFsm( pd->fsmCtx, '{', '~' );
+		range1 = FsmAp::unionOp( range1, range2 );
+		range1 = FsmAp::unionOp( range1, range3 );
+		range1 = FsmAp::unionOp( range1, range4 );
 		range1->minimizePartition2();
 		retFsm = range1;
 		break;
 	}
 	case BT_Space: {
 		/* Whitespace: [\t\v\f\n\r ]. */
-		FsmAp *cntrl = new FsmAp( pd->fsmCtx );
-		FsmAp *space = new FsmAp( pd->fsmCtx );
-		cntrl->rangeFsm( '\t', '\r' );
-		space->concatFsm( ' ' );
-		cntrl->unionOp( space );
+		FsmAp *cntrl = FsmAp::rangeFsm( pd->fsmCtx, '\t', '\r' );
+		FsmAp *space = FsmAp::concatFsm( pd->fsmCtx, ' ' );
+		cntrl = FsmAp::unionOp( cntrl, space );
 		cntrl->minimizePartition2();
 		retFsm = cntrl;
 		break;
 	}
 	case BT_Xdigit: {
 		/* Hex digits [0-9A-Fa-f]. */
-		FsmAp *digit = new FsmAp( pd->fsmCtx );
-		FsmAp *upper = new FsmAp( pd->fsmCtx );
-		FsmAp *lower = new FsmAp( pd->fsmCtx );
-		digit->rangeFsm( '0', '9' );
-		upper->rangeFsm( 'A', 'F' );
-		lower->rangeFsm( 'a', 'f' );
-		digit->unionOp( upper );
-		digit->unionOp( lower );
+		FsmAp *digit = FsmAp::rangeFsm( pd->fsmCtx, '0', '9' );
+		FsmAp *upper = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'F' );
+		FsmAp *lower = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'f' );
+		digit = FsmAp::unionOp( digit, upper );
+		digit = FsmAp::unionOp( digit, lower );
 		digit->minimizePartition2();
 		retFsm = digit;
 		break;
 	}
 	case BT_Lambda: {
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->lambdaFsm();
+		retFsm = FsmAp::lambdaFsm( pd->fsmCtx );
 		break;
 	}
 	case BT_Empty: {
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->emptyFsm();
+		retFsm = FsmAp::emptyFsm( pd->fsmCtx );
 		break;
 	}}
 
@@ -1112,7 +1086,7 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 	/* Resolve any labels that point to multiple states. Any labels that are
 	 * still around are referenced only by gotos and calls and they need to be
 	 * made into deterministic entry points. */
-	graph->deterministicEntry();
+	graph = FsmAp::deterministicEntry( graph );
 
 	/*
 	 * All state construction is now complete.
@@ -1251,7 +1225,7 @@ FsmAp *ParseData::makeAll()
 
 	if ( numOthers > 0 ) {
 		/* Add all the other graphs into main. */
-		mainGraph->globOp( graphs, numOthers );
+		mainGraph = FsmAp::globOp( mainGraph, graphs, numOthers );
 	}
 
 	delete[] graphs;

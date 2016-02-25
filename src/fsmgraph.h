@@ -1690,6 +1690,12 @@ typedef BstMapEl< int, StateAp* > EntryMapEl;
 typedef BstMap< int, StateAp* > EntryMap;
 typedef Vector<EntryMapEl> EntryMapBase;
 
+/* Result of an operation. */
+struct FsmRes
+{
+	FsmAp *fsm;
+};
+
 /* Graph class that implements actions and priorities. */
 struct FsmAp 
 {
@@ -2012,35 +2018,69 @@ public:
 	 * Building basic machines
 	 */
 
-	void concatFsm( Key c );
-	void concatFsm( Key *str, int len );
-	void concatFsmCI( Key *str, int len );
-	void orFsm( Key *set, int len );
-	void rangeFsm( Key low, Key high );
-	void rangeStarFsm( Key low, Key high );
-	void emptyFsm( );
-	void lambdaFsm( );
+	void _concatFsm( Key c );
+	void _concatFsm( Key *str, int len );
+	void _concatFsmCI( Key *str, int len );
+	void _orFsm( Key *set, int len );
+	void _rangeFsm( Key low, Key high );
+	void _rangeStarFsm( Key low, Key high );
+	void _emptyFsm( );
+	void _lambdaFsm( );
+
+	static FsmAp *concatFsm( FsmCtx *ctx, Key c );
+	static FsmAp *concatFsm( FsmCtx *ctx, Key *str, int len );
+	static FsmAp *concatFsmCI( FsmCtx *ctx, Key *str, int len );
+	static FsmAp *orFsm( FsmCtx *ctx, Key *set, int len );
+	static FsmAp *rangeFsm( FsmCtx *ctx, Key low, Key high );
+	static FsmAp *rangeStarFsm( FsmCtx *ctx, Key low, Key high );
+	static FsmAp *emptyFsm( FsmCtx *ctx );
+	static FsmAp *lambdaFsm( FsmCtx *ctx );
 
 	/*
 	 * Fsm operators.
 	 */
 
-	void starOp( );
-	void repeatOp( int times );
-	void optionalRepeatOp( int times );
-	void concatOp( FsmAp *other );
-	void nfaRepeatOp( Action *push, Action *pop, Action *init,
-			Action *stay, Action *repeat, Action *exit, int &curActionOrd );
-	void unionOp( FsmAp *other );
-	void intersectOp( FsmAp *other );
-	void subtractOp( FsmAp *other );
-	void epsilonOp();
-	void joinOp( int startId, int finalId, FsmAp **others, int numOthers );
-	void globOp( FsmAp **others, int numOthers );
-	void deterministicEntry();
+	void _starOp( );
+	void _repeatOp( int times );
+	void _optionalRepeatOp( int times );
+	void _concatOp( FsmAp *other );
+	void _unionOp( FsmAp *other );
+	void _intersectOp( FsmAp *other );
+	void _subtractOp( FsmAp *other );
+	void _epsilonOp();
+	void _joinOp( int startId, int finalId, FsmAp **others, int numOthers );
+	void _globOp( FsmAp **others, int numOthers );
+	void _deterministicEntry();
 
 	/* Results in an NFA. */
-	void nfaUnionOp( FsmAp **others, int n, int depth );
+	void _nfaUnionOp( FsmAp **others, int n, int depth );
+	void _nfaRepeatOp( Action *push, Action *pop, Action *init,
+			Action *stay, Action *repeat, Action *exit, int &curActionOrd );
+
+	/* Make a new start state that has no entry points. Will not change the
+	 * meaning of the fsm. */
+	void _isolateStartState();
+
+	static FsmAp *starOp( FsmAp *fsm );
+	static FsmAp *repeatOp( FsmAp *fsm, int times );
+	static FsmAp *optionalRepeatOp( FsmAp *fsm, int times );
+	static FsmAp *concatOp( FsmAp *fsm, FsmAp *other );
+	static FsmAp *unionOp( FsmAp *fsm, FsmAp *other );
+	static FsmAp *intersectOp( FsmAp *fsm, FsmAp *other );
+	static FsmAp *subtractOp( FsmAp *fsm, FsmAp *other );
+	static FsmAp *epsilonOp( FsmAp *fsm );
+	static FsmAp *joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers );
+	static FsmAp *globOp( FsmAp *fsm, FsmAp **others, int numOthers );
+	static FsmAp *deterministicEntry( FsmAp *fsm );
+
+	/* Results in an NFA. */
+	static FsmAp *nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth );
+	static FsmAp *nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
+			Action *stay, Action *repeat, Action *exit, int &curActionOrd );
+
+	/* Make a new start state that has no entry points. Will not change the
+	 * meaning of the fsm. */
+	static FsmAp *isolateStartState( FsmAp *fsm );
 
 	/*
 	 * Operator workers
@@ -2051,8 +2091,7 @@ public:
 	bool isStartStateIsolated();
 
 	/* Make a new start state that has no entry points. Will not change the
-	 * identity of the fsm. */
-	void isolateStartState();
+	 * meaning of the fsm. */
 	StateAp *dupStartState();
 
 	/* Workers for resolving epsilon transitions. */
