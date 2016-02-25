@@ -154,7 +154,15 @@ FsmAp::~FsmAp()
 	/* Delete all the transitions. */
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Iterate the out transitions, deleting them. */
-		state->outList.empty();
+		for ( TransList::Iter n, t = state->outList; t.lte(); ) {
+			n = t.next();
+			if ( t->plain() )
+				delete t->tdap();
+			else
+				delete t->tcap();
+			t = n;
+		}
+		state->outList.abandon();
 	}
 
 	/* Delete all the states. */

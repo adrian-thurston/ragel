@@ -624,6 +624,11 @@ struct TransCondAp
 		condList()
 	{}
 
+	~TransCondAp()
+	{
+		condList.empty();
+	}
+
 	/* Cond trans list. */
 	CondList condList;
 };
