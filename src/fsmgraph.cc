@@ -980,90 +980,90 @@ void FsmAp::_isolateStartState( )
 	setMisfitAccounting( false );
 }
 
-FsmAp *FsmAp::starOp( FsmAp *fsm )
+FsmRes FsmAp::starOp( FsmAp *fsm )
 {
 	fsm->_starOp();
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::repeatOp( FsmAp *fsm, int times )
+FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 {
 	fsm->_repeatOp( times );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
+FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
 {
 	fsm->_optionalRepeatOp( times );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
+FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
 {
 	fsm->_concatOp( other );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
+FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
 {
 	fsm->_unionOp( other );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
+FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
 {
 	fsm->_intersectOp( other );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
+FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
 {
 	fsm->_subtractOp( other );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::epsilonOp( FsmAp *fsm )
+FsmRes FsmAp::epsilonOp( FsmAp *fsm )
 {
 	fsm->_epsilonOp( );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers )
+FsmRes FsmAp::joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers )
 {
 	fsm->_joinOp( startId, finalId, others, numOthers );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::globOp( FsmAp *fsm, FsmAp **others, int numOthers )
+FsmRes FsmAp::globOp( FsmAp *fsm, FsmAp **others, int numOthers )
 {
 	fsm->_globOp( others, numOthers );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::deterministicEntry( FsmAp *fsm )
+FsmRes FsmAp::deterministicEntry( FsmAp *fsm )
 {
 	fsm->_deterministicEntry();
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
+FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
 {
 	fsm->_nfaUnionOp( others, n, depth );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
+FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 		Action *stay, Action *repeat, Action *exit, int &curActionOrd )
 {
 	fsm->_nfaRepeatOp( push, pop, init,
 			stay, repeat, exit, curActionOrd );
-	return fsm;
+	return FsmRes( fsm );
 }
 
-FsmAp *FsmAp::isolateStartState( FsmAp *fsm )
+FsmRes FsmAp::isolateStartState( FsmAp *fsm )
 {
 	fsm->_isolateStartState();
-	return fsm;
+	return FsmRes( fsm );
 }
 
 StateAp *FsmAp::dupStartState()

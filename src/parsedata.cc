@@ -293,7 +293,8 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 		/* Alpha [A-Za-z]. */
 		FsmAp *upper = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'Z' );
 		FsmAp *lower = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'z' );
-		upper = FsmAp::unionOp( upper, lower );
+		FsmRes res = FsmAp::unionOp( upper, lower );
+		upper = res.fsm;
 		upper->minimizePartition2();
 		retFsm = upper;
 		break;
@@ -308,8 +309,10 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 		FsmAp *digit = FsmAp::rangeFsm( pd->fsmCtx, '0', '9' );
 		FsmAp *upper = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'Z' );
 		FsmAp *lower = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'z' );
-		digit = FsmAp::unionOp( digit, upper );
-		digit = FsmAp::unionOp( digit, lower );
+		FsmRes res1 = FsmAp::unionOp( digit, upper );
+		digit = res1.fsm;
+		FsmRes res2 = FsmAp::unionOp( digit, lower );
+		digit = res2.fsm;
 		digit->minimizePartition2();
 		retFsm = digit;
 		break;
@@ -328,7 +331,8 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 		/* Control characters. */
 		FsmAp *cntrl = FsmAp::rangeFsm( pd->fsmCtx, 0, 31 );
 		FsmAp *highChar = FsmAp::concatFsm( pd->fsmCtx, 127 );
-		cntrl = FsmAp::unionOp( cntrl, highChar );
+		FsmRes res = FsmAp::unionOp( cntrl, highChar );
+		cntrl = res.fsm;
 		cntrl->minimizePartition2();
 		retFsm = cntrl;
 		break;
@@ -349,9 +353,13 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 		FsmAp *range2 = FsmAp::rangeFsm( pd->fsmCtx, ':', '@' );
 		FsmAp *range3 = FsmAp::rangeFsm( pd->fsmCtx, '[', '`' );
 		FsmAp *range4 = FsmAp::rangeFsm( pd->fsmCtx, '{', '~' );
-		range1 = FsmAp::unionOp( range1, range2 );
-		range1 = FsmAp::unionOp( range1, range3 );
-		range1 = FsmAp::unionOp( range1, range4 );
+
+		FsmRes res1 = FsmAp::unionOp( range1, range2 );
+		range1 = res1.fsm;
+		FsmRes res2 = FsmAp::unionOp( range1, range3 );
+		range1 = res2.fsm;
+		FsmRes res3 = FsmAp::unionOp( range1, range4 );
+		range1 = res3.fsm;
 		range1->minimizePartition2();
 		retFsm = range1;
 		break;
@@ -360,7 +368,8 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 		/* Whitespace: [\t\v\f\n\r ]. */
 		FsmAp *cntrl = FsmAp::rangeFsm( pd->fsmCtx, '\t', '\r' );
 		FsmAp *space = FsmAp::concatFsm( pd->fsmCtx, ' ' );
-		cntrl = FsmAp::unionOp( cntrl, space );
+		FsmRes res = FsmAp::unionOp( cntrl, space );
+		cntrl = res.fsm;
 		cntrl->minimizePartition2();
 		retFsm = cntrl;
 		break;
@@ -370,8 +379,12 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 		FsmAp *digit = FsmAp::rangeFsm( pd->fsmCtx, '0', '9' );
 		FsmAp *upper = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'F' );
 		FsmAp *lower = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'f' );
-		digit = FsmAp::unionOp( digit, upper );
-		digit = FsmAp::unionOp( digit, lower );
+
+		FsmRes res1 = FsmAp::unionOp( digit, upper );
+		digit = res1.fsm;
+		FsmRes res2 = FsmAp::unionOp( digit, lower );
+		digit = res2.fsm;
+
 		digit->minimizePartition2();
 		retFsm = digit;
 		break;
@@ -1086,7 +1099,8 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 	/* Resolve any labels that point to multiple states. Any labels that are
 	 * still around are referenced only by gotos and calls and they need to be
 	 * made into deterministic entry points. */
-	graph = FsmAp::deterministicEntry( graph );
+	FsmRes res = FsmAp::deterministicEntry( graph );
+	graph = res.fsm;
 
 	/*
 	 * All state construction is now complete.
@@ -1225,7 +1239,8 @@ FsmAp *ParseData::makeAll()
 
 	if ( numOthers > 0 ) {
 		/* Add all the other graphs into main. */
-		mainGraph = FsmAp::globOp( mainGraph, graphs, numOthers );
+		FsmRes res = FsmAp::globOp( mainGraph, graphs, numOthers );
+		mainGraph = res.fsm;
 	}
 
 	delete[] graphs;

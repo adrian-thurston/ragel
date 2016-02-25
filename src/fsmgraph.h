@@ -1693,6 +1693,9 @@ typedef Vector<EntryMapEl> EntryMapBase;
 /* Result of an operation. */
 struct FsmRes
 {
+	FsmRes( FsmAp *fsm )
+		: fsm(fsm) {}
+
 	FsmAp *fsm;
 };
 
@@ -2061,26 +2064,26 @@ public:
 	 * meaning of the fsm. */
 	void _isolateStartState();
 
-	static FsmAp *starOp( FsmAp *fsm );
-	static FsmAp *repeatOp( FsmAp *fsm, int times );
-	static FsmAp *optionalRepeatOp( FsmAp *fsm, int times );
-	static FsmAp *concatOp( FsmAp *fsm, FsmAp *other );
-	static FsmAp *unionOp( FsmAp *fsm, FsmAp *other );
-	static FsmAp *intersectOp( FsmAp *fsm, FsmAp *other );
-	static FsmAp *subtractOp( FsmAp *fsm, FsmAp *other );
-	static FsmAp *epsilonOp( FsmAp *fsm );
-	static FsmAp *joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers );
-	static FsmAp *globOp( FsmAp *fsm, FsmAp **others, int numOthers );
-	static FsmAp *deterministicEntry( FsmAp *fsm );
+	static FsmRes starOp( FsmAp *fsm );
+	static FsmRes repeatOp( FsmAp *fsm, int times );
+	static FsmRes optionalRepeatOp( FsmAp *fsm, int times );
+	static FsmRes concatOp( FsmAp *fsm, FsmAp *other );
+	static FsmRes unionOp( FsmAp *fsm, FsmAp *other );
+	static FsmRes intersectOp( FsmAp *fsm, FsmAp *other );
+	static FsmRes subtractOp( FsmAp *fsm, FsmAp *other );
+	static FsmRes epsilonOp( FsmAp *fsm );
+	static FsmRes joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers );
+	static FsmRes globOp( FsmAp *fsm, FsmAp **others, int numOthers );
+	static FsmRes deterministicEntry( FsmAp *fsm );
 
 	/* Results in an NFA. */
-	static FsmAp *nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth );
-	static FsmAp *nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
+	static FsmRes nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth );
+	static FsmRes nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 			Action *stay, Action *repeat, Action *exit, int &curActionOrd );
 
 	/* Make a new start state that has no entry points. Will not change the
 	 * meaning of the fsm. */
-	static FsmAp *isolateStartState( FsmAp *fsm );
+	static FsmRes isolateStartState( FsmAp *fsm );
 
 	/*
 	 * Operator workers
