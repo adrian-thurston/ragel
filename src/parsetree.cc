@@ -855,18 +855,30 @@ NfaUnion::~NfaUnion()
 	
 }
 
+void nfaResultWrite( ostream &out, long code, long id, const char *scode )
+{
+	out << code << " " << id << " " << scode << endl;
+}
+
 void nfaCheckResult( ParseData *pd, long code, long id, const char *scode, bool suppressExit = false )
 {
 	if ( pd->id->inLibRagel ) {
 		stringstream out;
-		out << code << " " << id << " " << scode << endl;
-		//out.close();
+		nfaResultWrite( out, code, id, scode );
 		pd->id->comm = out.str();
 	}
 	else {
-		ofstream out( pd->id->commFileName );
-		out << code << " " << id << " " << scode << endl;
-		out.close();
+		ostream *out = &cout;
+		ofstream *ofs = 0;
+		if ( pd->id->commFileName != 0 )
+			out = ofs = new ofstream( pd->id->commFileName, std::fstream::app );
+
+		nfaResultWrite( *out, code, id, scode );
+
+		if ( ofs != 0 ) {
+			ofs->close();
+			delete ofs;
+		}
 	}
 
 	if ( !suppressExit )
@@ -991,8 +1003,12 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 	 * checks after. */
 	nfaCheckResult( pd, exitCode, 1, "OK", true );
 
-	ofstream out( pd->id->commFileName, std::fstream::app );
-	out << std::fixed << std::setprecision(0);
+	ostream *out = &cout;
+	ofstream *ofs = 0;
+	if ( pd->id->commFileName != 0 )
+		out = ofs = new ofstream( pd->id->commFileName, std::fstream::app );
+
+	*out << std::fixed << std::setprecision(0);
 	double start = total;
 	
 	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
@@ -1001,7 +1017,7 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 				total = checkBreadth( pd, fsm, mel->value );
 
 				if ( start > 0.01 ) {
-					out << "COST " << c->name << " " <<
+					*out << "COST " << c->name << " " <<
 							( 1000000.0 * start ) << " " << 
 							( 1000000.0 * ( total / start ) ) << endl;
 				}
@@ -1009,7 +1025,10 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 		}
 	}
 
-	out.close();
+	if ( ofs != 0 ) {
+		ofs->close();
+		delete ofs;
+	}
 
 	pd->id->abortCompile( exitCode );
 }
