@@ -31,6 +31,8 @@ FsmAp::FsmAp( FsmCtx *ctx )
 :
 	ctx( ctx ),
 
+	priorInteraction(false),
+
 	/* No start state. */
 	startState(0),
 	errState(0),
@@ -46,6 +48,8 @@ FsmAp::FsmAp( FsmCtx *ctx )
 FsmAp::FsmAp( const FsmAp &graph )
 :
 	ctx( graph.ctx ),
+
+	priorInteraction(false),
 
 	/* Lists start empty. Will be filled by copy. */
 	stateList(),

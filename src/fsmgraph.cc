@@ -46,12 +46,6 @@ StateAp *FsmAp::addState()
 		stateList.append( state );
 	}
 
-	if ( ctx->stateLimit > 0 ) {
-		long total = misfitList.length() + stateList.length();
-		if ( total > ctx->stateLimit )
-			throw TooManyStates();
-	}
-
 	return state;
 }
 
@@ -995,14 +989,17 @@ void FsmAp::checkEpsilonRegularInteraction( const PriorTable &t1, const PriorTab
 {
 	for ( PriorTable::Iter pd1 = t1; pd1.lte(); pd1++ ) {
 		for ( PriorTable::Iter pd2 = t2; pd2.lte(); pd2++ ) {
+			/* Looking for unequal guarded priorities with the same key. */
 			if ( pd1->desc->key == pd2->desc->key ) {
-				if ( pd1->desc->priority < pd2->desc->priority ) {
-					if ( ctx->nfaTermCheck && pd1->desc->guarded )
-						throw PriorInteraction( pd1->desc->guardId );
-				}
-				else if ( pd1->desc->priority > pd2->desc->priority ) {
-					if ( ctx->nfaTermCheck && pd1->desc->guarded )
-						throw PriorInteraction( pd1->desc->guardId );
+				if ( pd1->desc->priority < pd2->desc->priority || 
+						pd1->desc->priority > pd2->desc->priority )
+				{
+					if ( ctx->nfaTermCheck && pd1->desc->guarded ) {
+						if ( ! priorInteraction ) {
+							priorInteraction = true;
+							guardId = pd1->desc->guardId;
+						}
+					}
 				}
 			}
 		}
@@ -1147,6 +1144,16 @@ void FsmAp::fillInStates()
 			detachStateDict( state, *s );
 
 		nfaList.detach( state );
+
+		if ( priorInteraction ) {
+			// cout << "aborting due to prior interaction" << endl;
+			throw PriorInteraction( guardId );
+		}
+
+		if ( ctx->stateLimit > 0 && ( misfitList.length() + stateList.length() ) > ctx->stateLimit ) {
+			// cout << "aborting due to state limit" << endl;
+			throw TooManyStates();
+		}
 	}
 
 	/* The NFA list is empty at this point. There are no state sets we need to

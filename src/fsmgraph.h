@@ -1695,6 +1695,9 @@ struct FsmAp
 
 	FsmCtx *ctx;
 
+	bool priorInteraction;
+	int guardId;
+
 	/* The list of states. */
 	StateList stateList;
 	StateList misfitList;
