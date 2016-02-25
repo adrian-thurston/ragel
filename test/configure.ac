@@ -5,7 +5,7 @@ dnl
 AC_INIT(ragel-suite, 1.0.1)
 PUBDATE="November 2014"
 
-EXPECTED_VER=0.13.0.2
+EXPECTED_VER=0.13.0.3
 
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
@@ -120,7 +120,7 @@ AC_ARG_WITH(crack,
 		)
 	],
 	[
-		AC_CHECK_PROG(CRACK, crack, crack)
+		AC_PATH_PROG( [CRACK], [crack] )
 	]
 )
 
