@@ -1128,6 +1128,62 @@ void FsmAp::mergeStateList( StateAp *destState,
 	for ( int s = 0; s < numSrc; s++ )
 		mergeStates( destState, srcStates[s] );
 }
+			
+void FsmAp::cleanAbortedFill()
+{
+	while ( nfaList.length() > 0 ) {
+		StateAp *state = nfaList.head;
+
+		StateSet *stateSet = &state->stateDictEl->stateSet;
+		//mergeStateList( state, stateSet->data, stateSet->length() );
+
+		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
+			detachStateDict( state, *s );
+
+		nfaList.detach( state );
+	}
+
+	/* Disassociated state dict elements from states. */
+	for ( StateDict::Iter sdi = stateDict; sdi.lte(); sdi++ )
+		sdi->targState->stateDictEl = 0;
+
+	/* Delete all the state dict elements. */
+	stateDict.empty();
+
+	/* Delete all the transitions. */
+	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
+		/* Iterate the out transitions, deleting them. */
+		for ( TransList::Iter n, t = state->outList; t.lte(); ) {
+			n = t.next();
+			if ( t->plain() )
+				delete t->tdap();
+			else
+				delete t->tcap();
+			t = n;
+		}
+		state->outList.abandon();
+	}
+
+	/* Delete all the states. */
+	stateList.empty();
+
+	/* Delete all the transitions. */
+	for ( StateList::Iter state = misfitList; state.lte(); state++ ) {
+		/* Iterate the out transitions, deleting them. */
+		for ( TransList::Iter n, t = state->outList; t.lte(); ) {
+			n = t.next();
+			if ( t->plain() )
+				delete t->tdap();
+			else
+				delete t->tcap();
+			t = n;
+		}
+		state->outList.abandon();
+	}
+
+	/* Delete all the states. */
+	misfitList.empty();
+}
 
 
 void FsmAp::fillInStates()
@@ -1152,6 +1208,7 @@ void FsmAp::fillInStates()
 
 		if ( ctx->stateLimit > 0 && ( misfitList.length() + stateList.length() ) > ctx->stateLimit ) {
 			// cout << "aborting due to state limit" << endl;
+			cleanAbortedFill();
 			throw TooManyStates();
 		}
 	}
