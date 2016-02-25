@@ -798,8 +798,5 @@ int libragel_main( char **result, int argc, const char **argv, const char *input
 	catch ( const AbortCompile &ac ) {
 		*result = strdup( "" );
 	}
-	catch ( const std::bad_alloc & ) {
-
-	}
 	return 0;
 }
