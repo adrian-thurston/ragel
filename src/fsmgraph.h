@@ -2052,8 +2052,6 @@ public:
 	void _subtractOp( FsmAp *other );
 	void _epsilonOp();
 	void _joinOp( int startId, int finalId, FsmAp **others, int numOthers );
-	void _globOp( FsmAp **others, int numOthers );
-	void _deterministicEntry();
 
 	/* Results in an NFA. */
 	void _nfaUnionOp( FsmAp **others, int n, int depth );
@@ -2073,8 +2071,6 @@ public:
 	static FsmRes subtractOp( FsmAp *fsm, FsmAp *other );
 	static FsmRes epsilonOp( FsmAp *fsm );
 	static FsmRes joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers );
-	static FsmRes globOp( FsmAp *fsm, FsmAp **others, int numOthers );
-	static FsmRes deterministicEntry( FsmAp *fsm );
 
 	/* Results in an NFA. */
 	static FsmRes nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth );
@@ -2088,6 +2084,8 @@ public:
 	/*
 	 * Operator workers
 	 */
+	void globOp( FsmAp **others, int numOthers );
+	void deterministicEntry();
 
 	/* Determine if there are any entry points into a start state other than
 	 * the start state. */

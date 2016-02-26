@@ -829,7 +829,7 @@ void FsmAp::_joinOp( int startId, int finalId, FsmAp **others, int numOthers )
 	removeUnreachableStates();
 }
 
-void FsmAp::_globOp( FsmAp **others, int numOthers )
+void FsmAp::globOp( FsmAp **others, int numOthers )
 {
 	for ( int m = 0; m < numOthers; m++ ) {
 		assert( ctx == others[m]->ctx );
@@ -860,7 +860,10 @@ void FsmAp::_globOp( FsmAp **others, int numOthers )
 	}
 }
 
-void FsmAp::_deterministicEntry()
+/* Used near the end of an fsm construction. Any labels that are still around
+ * are referenced only by gotos and calls and they need to be made into
+ * deterministic entry points. */
+void FsmAp::deterministicEntry()
 {
 	/* States may loose their entry points, turn on misfit accounting. */
 	setMisfitAccounting( true );
@@ -1031,18 +1034,6 @@ FsmRes FsmAp::epsilonOp( FsmAp *fsm )
 FsmRes FsmAp::joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers )
 {
 	fsm->_joinOp( startId, finalId, others, numOthers );
-	return FsmRes( fsm );
-}
-
-FsmRes FsmAp::globOp( FsmAp *fsm, FsmAp **others, int numOthers )
-{
-	fsm->_globOp( others, numOthers );
-	return FsmRes( fsm );
-}
-
-FsmRes FsmAp::deterministicEntry( FsmAp *fsm )
-{
-	fsm->_deterministicEntry();
 	return FsmRes( fsm );
 }
 

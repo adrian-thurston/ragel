@@ -1099,8 +1099,7 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 	/* Resolve any labels that point to multiple states. Any labels that are
 	 * still around are referenced only by gotos and calls and they need to be
 	 * made into deterministic entry points. */
-	FsmRes res = FsmAp::deterministicEntry( graph );
-	graph = res.fsm;
+	graph->deterministicEntry();
 
 	/*
 	 * All state construction is now complete.
@@ -1239,8 +1238,7 @@ FsmAp *ParseData::makeAll()
 
 	if ( numOthers > 0 ) {
 		/* Add all the other graphs into main. */
-		FsmRes res = FsmAp::globOp( mainGraph, graphs, numOthers );
-		mainGraph = res.fsm;
+		mainGraph->globOp( graphs, numOthers );
 	}
 
 	delete[] graphs;
