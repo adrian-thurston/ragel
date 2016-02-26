@@ -393,7 +393,7 @@ void FsmAp::doEmbedCondition( StateAp *state,
 	}
 }
 
-void FsmAp::embedCondition( StateAp *state, const CondSet &set, const CondKeySet &vals )
+void FsmAp::_embedCondition( StateAp *state, const CondSet &set, const CondKeySet &vals )
 {
 	/* Turn on misfit accounting to possibly catch the old start state. */
 	setMisfitAccounting( true );
@@ -407,6 +407,12 @@ void FsmAp::embedCondition( StateAp *state, const CondSet &set, const CondKeySet
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
 	setMisfitAccounting( false );
+}
+
+FsmRes FsmAp::embedCondition( FsmAp *fsm, StateAp *state, const CondSet &set, const CondKeySet &vals )
+{
+	fsm->_embedCondition( state, set, vals );
+	return FsmRes( fsm );
 }
 
 void FsmAp::addOutCondition( StateAp *state, Action *condAction, bool sense )

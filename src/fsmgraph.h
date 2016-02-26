@@ -1776,7 +1776,10 @@ private:
 			const CondSet &set, const CondKeySet &vals );
 
 public:
-	void embedCondition( StateAp *state, const CondSet &set,
+	void _embedCondition( StateAp *state, const CondSet &set,
+			const CondKeySet &vals );
+
+	static FsmRes embedCondition( FsmAp *fsm, StateAp *state, const CondSet &set,
 			const CondKeySet &vals );
 
 	void startFsmCondition( Action *condAction, bool sense );

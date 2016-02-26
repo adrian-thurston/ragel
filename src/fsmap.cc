@@ -1076,12 +1076,12 @@ void FsmAp::startFsmCondition( Action *condAction, bool sense )
 	/* Make sure the start state has no other entry points. */
 	_isolateStartState();
 
-	embedCondition( startState, set, vals );
+	_embedCondition( startState, set, vals );
 
 	if ( startState->nfaOut != 0 ) {
 		/* Only one level. */
 		for ( NfaTransList::Iter na = *startState->nfaOut; na.lte(); na++ ) {
-			embedCondition( startState, set, vals );
+			_embedCondition( startState, set, vals );
 		}
 	}
 }
@@ -1094,7 +1094,7 @@ void FsmAp::allTransCondition( Action *condAction, bool sense )
 	vals.append( sense ? 1 : 0 );
 
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) 
-		embedCondition( state, set, vals );
+		_embedCondition( state, set, vals );
 }
 
 void FsmAp::leaveFsmCondition( Action *condAction, bool sense )
