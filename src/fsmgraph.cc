@@ -396,7 +396,7 @@ void FsmAp::_optionalRepeatOp( int times )
 
 /* Fsm concatentation worker. Supports treating the concatentation as optional,
  * which essentially leaves the final states of machine one as final. */
-void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
+bool FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 {
 	/* For the merging process. */
 	StateSet finStateSetCopy, startStateSet;
@@ -451,27 +451,13 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 	}
 
 	/* Fill in any new states made from merging. */
-	fillInStates();
+	bool success = fillInStates();
 
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
 	setMisfitAccounting( false );
-}
 
-/* Concatenates other to the end of this machine. Other is deleted.  Any
- * transitions made leaving this machine and entering into other are notified
- * that they are leaving transitions by having the leavingFromState callback
- * invoked. */
-void FsmAp::_concatOp( FsmAp *other )
-{
-	for ( PriorTable::Iter g = other->startState->guardedInTable; g.lte(); g++ ) {
-		allTransPrior( 0, g->desc );
-		other->allTransPrior( 0, g->desc->other );
-	}
-
-	/* Assert same signedness and return graph concatenation op. */
-	assert( ctx == other->ctx );
-	doConcat( other, 0, false );
+	return success;
 }
 
 void FsmAp::doOr( FsmAp *other )
@@ -1001,9 +987,24 @@ FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
 	return FsmRes( fsm );
 }
 
+/* Concatenates other to the end of this machine. Other is deleted.  Any
+ * transitions made leaving this machine and entering into other are notified
+ * that they are leaving transitions by having the leavingFromState callback
+ * invoked. */
 FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
 {
-	fsm->_concatOp( other );
+	for ( PriorTable::Iter g = other->startState->guardedInTable; g.lte(); g++ ) {
+		fsm->allTransPrior( 0, g->desc );
+		other->allTransPrior( 0, g->desc->other );
+	}
+
+	/* Assert same signedness and return graph concatenation op. */
+	assert( fsm->ctx == other->ctx );
+	bool success = fsm->doConcat( other, 0, false );
+
+	if ( !success )
+		fsm = 0;
+
 	return FsmRes( fsm );
 }
 
@@ -1319,7 +1320,7 @@ void FsmAp::cleanAbortedFill()
 }
 
 
-void FsmAp::fillInStates()
+bool FsmAp::fillInStates()
 {
 	/* Merge any states that are awaiting merging. This will likey cause other
 	 * states to be added to the NFA list. */
@@ -1355,6 +1356,8 @@ void FsmAp::fillInStates()
 
 	/* Delete all the state dict elements. */
 	stateDict.empty();
+
+	return true;
 }
 
 

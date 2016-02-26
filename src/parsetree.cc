@@ -99,13 +99,15 @@ FsmAp *VarDef::walk( ParseData *pd )
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
 
 	/* Recurse on the expression. */
-	FsmAp *rtnVal = machineDef->walk( pd );
+	FsmRes rtnVal = machineDef->walk( pd );
+	if ( !rtnVal.success() )
+		return rtnVal.fsm;
 	
 	/* Do the tranfer of local error actions. */
 	LocalErrDictEl *localErrDictEl = pd->localErrDict.find( name );
 	if ( localErrDictEl != 0 ) {
-		for ( StateList::Iter state = rtnVal->stateList; state.lte(); state++ )
-			rtnVal->transferErrorActions( state, localErrDictEl->value );
+		for ( StateList::Iter state = rtnVal.fsm->stateList; state.lte(); state++ )
+			rtnVal.fsm->transferErrorActions( state, localErrDictEl->value );
 	}
 
 	/* If the expression below is a join operation with multiple expressions
@@ -114,21 +116,24 @@ FsmAp *VarDef::walk( ParseData *pd )
 	if ( machineDef->type == MachineDef::JoinType &&
 			machineDef->join->exprList.length() == 1 )
 	{
-		FsmRes res = FsmAp::epsilonOp( rtnVal );
-		rtnVal = res.fsm;
+		FsmRes res = FsmAp::epsilonOp( rtnVal.fsm );
+		if ( !res.success() )
+			return res.fsm;
+
+		rtnVal.fsm = res.fsm;
 	}
 
 	/* We can now unset entry points that are not longer used. */
-	pd->unsetObsoleteEntries( rtnVal );
+	pd->unsetObsoleteEntries( rtnVal.fsm );
 
 	/* If the name of the variable is referenced then add the entry point to
 	 * the graph. */
 	if ( pd->curNameInst->numRefs > 0 )
-		rtnVal->setEntry( pd->curNameInst->id, rtnVal->startState );
+		rtnVal.fsm->setEntry( pd->curNameInst->id, rtnVal.fsm->startState );
 
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );
-	return rtnVal;
+	return rtnVal.fsm;
 }
 
 void VarDef::makeNameTree( const InputLoc &loc, ParseData *pd )
@@ -1399,90 +1404,121 @@ Term::~Term()
 /* Evaluate a term node. */
 FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 {
-	FsmAp *rtnVal = 0;
 	switch ( type ) {
 		case ConcatType: {
 			/* Evaluate the Term. */
-			rtnVal = term->walk( pd, false );
+			FsmRes termFsm = term->walk( pd, false );
+			if ( !termFsm.success() )
+				return termFsm.fsm;
+
 			/* Evaluate the FactorWithRep. */
-			FsmAp *rhs = factorWithAug->walk( pd );
+			FsmRes rhs = factorWithAug->walk( pd );
+			if ( !rhs.success() ) {
+				delete termFsm.fsm;
+				return rhs.fsm;
+			}
+
 			/* Perform concatenation. */
-			FsmRes res = FsmAp::concatOp( rtnVal, rhs );
-			rtnVal = res.fsm;
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res.fsm;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res.fsm;
 		}
 		case RightStartType: {
 			/* Evaluate the Term. */
-			rtnVal = term->walk( pd );
+			FsmRes termFsm = term->walk( pd );
+			if ( !termFsm.success() )
+				return termFsm.fsm;
 
 			/* Evaluate the FactorWithRep. */
-			FsmAp *rhs = factorWithAug->walk( pd );
+			FsmRes rhs = factorWithAug->walk( pd );
+			if ( !rhs.success() ) {
+				delete termFsm.fsm;
+				return rhs.fsm;
+			}
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * lower priority where as the right get the higher start priority. */
 			priorDescs[0].key = pd->nextPriorKey++;
 			priorDescs[0].priority = 0;
-			rtnVal->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+			termFsm.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
 
 			/* The start transitions of the right machine gets the higher
 			 * priority. Use the same unique key. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 1;
-			rhs->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+			rhs.fsm->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
-			FsmRes res = FsmAp::concatOp( rtnVal, rhs );
-			rtnVal = res.fsm;
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res.fsm;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res.fsm;
 		}
 		case RightFinishType: {
 			/* Evaluate the Term. */
-			rtnVal = term->walk( pd );
+			FsmRes termFsm = term->walk( pd );
+			if ( !termFsm.success() )
+				return termFsm.fsm;
 
 			/* Evaluate the FactorWithRep. */
-			FsmAp *rhs = factorWithAug->walk( pd );
+			FsmRes rhs = factorWithAug->walk( pd );
+			if ( !rhs.success() ) {
+				delete termFsm.fsm;
+				return rhs.fsm;
+			}
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * lower priority where as the finishing transitions to the right
 			 * get the higher priority. */
 			priorDescs[0].key = pd->nextPriorKey++;
 			priorDescs[0].priority = 0;
-			rtnVal->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+			termFsm.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
 
 			/* The finishing transitions of the right machine get the higher
 			 * priority. Use the same unique key. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 1;
-			rhs->finishFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+			rhs.fsm->finishFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 			/* If the right machine's start state is final we need to guard
 			 * against the left machine persisting by moving through the empty
 			 * string. */
-			if ( rhs->startState->isFinState() ) {
-				rhs->startState->outPriorTable.setPrior( 
+			if ( rhs.fsm->startState->isFinState() ) {
+				rhs.fsm->startState->outPriorTable.setPrior( 
 						pd->curPriorOrd++, &priorDescs[1] );
 			}
 
 			/* Perform concatenation. */
-			FsmRes res = FsmAp::concatOp( rtnVal, rhs );
-			rtnVal = res.fsm;
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			if ( !res.success() ) 
+				return res.fsm;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res.fsm;
 		}
 		case LeftType: {
 			/* Evaluate the Term. */
-			rtnVal = term->walk( pd );
+			FsmRes termFsm = term->walk( pd );
+			if ( !termFsm.success() )
+				return termFsm.fsm;
 
 			/* Evaluate the FactorWithRep. */
-			FsmAp *rhs = factorWithAug->walk( pd );
+			FsmRes rhs = factorWithAug->walk( pd );
+			if ( !rhs.success() ) {
+				delete termFsm.fsm;
+				return rhs.fsm;
+			}
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * higher priority. */
 			priorDescs[0].key = pd->nextPriorKey++;
 			priorDescs[0].priority = 1;
-			rtnVal->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+			termFsm.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
 
 			/* The right machine gets the lower priority. We cannot use
 			 * allTransPrior here in case the start state of the right machine
@@ -1491,20 +1527,22 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			 * startFsmPrior prevents this. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 0;
-			rhs->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+			rhs.fsm->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
-			FsmRes res = FsmAp::concatOp( rtnVal, rhs );
-			rtnVal = res.fsm;
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res.fsm;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res.fsm;
 		}
 		case FactorWithAugType: {
-			rtnVal = factorWithAug->walk( pd );
-			break;
+			FsmRes fa = factorWithAug->walk( pd );
+			return fa.fsm;
 		}
 	}
-	return rtnVal;
+	return 0;
 }
 
 void Term::makeNameTree( ParseData *pd )

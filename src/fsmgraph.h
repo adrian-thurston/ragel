@@ -1696,6 +1696,8 @@ struct FsmRes
 	FsmRes( FsmAp *fsm )
 		: fsm(fsm) {}
 
+	bool success() { return fsm != 0; }
+
 	FsmAp *fsm;
 };
 
@@ -1970,7 +1972,7 @@ public:
 	 * have not yet had their out transitions filled in. This will 
 	 * empty out stateDict and stFil. */
 	void cleanAbortedFill();
-	void fillInStates();
+	bool fillInStates();
 	void nfaFillInStates();
 
 	/*
@@ -2049,7 +2051,6 @@ public:
 	void _starOp( );
 	void _repeatOp( int times );
 	void _optionalRepeatOp( int times );
-	void _concatOp( FsmAp *other );
 	void _unionOp( FsmAp *other );
 	void _intersectOp( FsmAp *other );
 	void _subtractOp( FsmAp *other );
@@ -2104,7 +2105,7 @@ public:
 	void resolveEpsilonTrans();
 
 	/* Workers for concatenation and union. */
-	void doConcat( FsmAp *other, StateSet *fromStates, bool optional );
+	bool doConcat( FsmAp *other, StateSet *fromStates, bool optional );
 	void doOr( FsmAp *other );
 
 	/*
