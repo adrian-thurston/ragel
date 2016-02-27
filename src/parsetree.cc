@@ -1284,76 +1284,106 @@ Expression::~Expression()
 /* Evaluate a single expression node. */
 FsmAp *Expression::walk( ParseData *pd, bool lastInSeq )
 {
-	FsmAp *rtnVal = 0;
 	switch ( type ) {
 		case OrType: {
 			/* Evaluate the expression. */
-			rtnVal = expression->walk( pd, false );
+			FsmRes exprFsm = expression->walk( pd, false );
+			if ( !exprFsm.success() )
+				return exprFsm.fsm;
+
 			/* Evaluate the term. */
-			FsmAp *rhs = term->walk( pd );
+			FsmRes rhs = term->walk( pd );
+			if ( !rhs.success() )
+				return rhs.fsm;
+
 			/* Perform union. */
-			FsmRes res = FsmAp::unionOp( rtnVal, rhs );
-			rtnVal = res.fsm;
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::unionOp( exprFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res.fsm;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+
+			return res.fsm;
 		}
 		case IntersectType: {
 			/* Evaluate the expression. */
-			rtnVal = expression->walk( pd );
+			FsmRes exprFsm = expression->walk( pd );
+			if ( !exprFsm.success() )
+				return exprFsm.fsm;
+
 			/* Evaluate the term. */
-			FsmAp *rhs = term->walk( pd );
+			FsmRes rhs = term->walk( pd );
+			if ( !rhs.success() )
+				return rhs.fsm;
+
 			/* Perform intersection. */
-			FsmRes res = FsmAp::intersectOp( rtnVal, rhs );
-			rtnVal = res.fsm;
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::intersectOp( exprFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res.fsm;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res.fsm;
 		}
 		case SubtractType: {
 			/* Evaluate the expression. */
-			rtnVal = expression->walk( pd );
+			FsmRes exprFsm = expression->walk( pd );
+			if ( !exprFsm.success() )
+				return exprFsm.fsm;
+
 			/* Evaluate the term. */
-			FsmAp *rhs = term->walk( pd );
+			FsmRes rhs = term->walk( pd );
+			if ( !rhs.success() )
+				return rhs.fsm;
+
 			/* Perform subtraction. */
-			FsmRes res = FsmAp::subtractOp( rtnVal, rhs );
-			rtnVal = res.fsm;
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::subtractOp( exprFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res.fsm;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res.fsm;
 		}
 		case StrongSubtractType: {
 			/* Evaluate the expression. */
-			rtnVal = expression->walk( pd );
+			FsmRes exprFsm = expression->walk( pd );
+			if ( !exprFsm.success() )
+				return exprFsm.fsm;
+
+			FsmRes leadAnyStar = dotStarFsm( pd );
+			FsmRes trailAnyStar = dotStarFsm( pd );
 
 			/* Evaluate the term and pad it with any* machines. */
-			FsmAp *rhs = dotStarFsm( pd );
-			FsmAp *termFsm = term->walk( pd );
-			FsmAp *trailAnyStar = dotStarFsm( pd );
+			FsmRes termFsm = term->walk( pd );
+			if ( !termFsm.success() )
+				return termFsm.fsm;
 
-			FsmRes res1 = FsmAp::concatOp( rhs, termFsm );
-			rhs = res1.fsm;
+			FsmRes res1 = FsmAp::concatOp( leadAnyStar.fsm, termFsm.fsm );
+			if ( !res1.success() )
+				return res1.fsm;
 
-			FsmRes res2 = FsmAp::concatOp( rhs, trailAnyStar );
-			rhs = res2.fsm;
+			FsmRes res2 = FsmAp::concatOp( res1.fsm, trailAnyStar.fsm );
+			if ( !res2.success() )
+				return res2.fsm;
 
 			/* Perform subtraction. */
-			FsmRes res3 = FsmAp::subtractOp( rtnVal, rhs );
-			rtnVal = res3.fsm;
+			FsmRes res3 = FsmAp::subtractOp( exprFsm.fsm, res2.fsm );
+			if ( !res3.success() )
+				return res3.fsm;
 
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			afterOpMinimize( res3.fsm, lastInSeq );
+			return res3.fsm;
 		}
 		case TermType: {
 			/* Return result of the term. */
-			rtnVal = term->walk( pd );
-			break;
+			return term->walk( pd );
 		}
 		case BuiltinType: {
-			/* Duplicate the builtin. */
-			rtnVal = makeBuiltin( builtin, pd );
-			break;
+			/* Construct the builtin. */
+			return makeBuiltin( builtin, pd );
 		}
 	}
 
-	return rtnVal;
+	return 0;
 }
 
 void Expression::makeNameTree( ParseData *pd )
@@ -1538,8 +1568,7 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			return res.fsm;
 		}
 		case FactorWithAugType: {
-			FsmRes fa = factorWithAug->walk( pd );
-			return fa.fsm;
+			return factorWithAug->walk( pd );
 		}
 	}
 	return 0;
