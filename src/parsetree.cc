@@ -930,8 +930,11 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
 		try {
 			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
-			(*term)->walk( pd );
+			FsmRes res = (*term)->walk( pd );
 			pd->fsmCtx->stateLimit = -1;
+
+			if ( !res.success() )
+				nfaCheckResult( pd, 1, 0, "too-many-states" );
 		}
 		catch ( const TooManyStates & ) {
 			nfaCheckResult( pd, 1, 0, "too-many-states" );
@@ -1831,7 +1834,13 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 	}
 
 	/* Evaluate the factor with repetition. */
-	FsmAp *rtnVal = factorWithRep->walk( pd );
+	FsmRes frep = factorWithRep->walk( pd );
+	if ( ! frep.success() ) {
+		delete [] actionOrd;
+		return frep.fsm;
+	}
+
+	FsmAp *rtnVal = frep.fsm;
 
 	/* Compute the remaining action orderings. */
 	for ( int i = 0; i < actions.length(); i++ ) {
