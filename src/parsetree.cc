@@ -796,7 +796,8 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	long numTerms = 0, sumPlain = 0, sumMin = 0;
 	FsmAp **machines = new FsmAp*[terms.length()];
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		machines[numTerms] = (*term)->walk( pd );
+		FsmRes res = (*term)->walk( pd );
+		machines[numTerms] = res.fsm;
 
 		sumPlain += machines[numTerms]->stateList.length();
 
@@ -908,7 +909,8 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 		FsmAp *fsm = 0;
 		try {
 			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit * 2;
-			fsm = (*term)->walk( pd );
+			FsmRes res = (*term)->walk( pd );
+			fsm = res.fsm;
 			pd->fsmCtx->stateLimit = -1;
 
 			strike( pd, fsm );
@@ -1059,7 +1061,8 @@ void NfaUnion::nfaBreadthCheck( ParseData *pd )
 
 		/* No need for state limit here since this check is used after all
 		 * others pass. One check only and . */
-		fsm = (*term)->walk( pd );
+		FsmRes res = (*term)->walk( pd );
+		fsm = res.fsm;
 		checkBreadth( pd, fsm );
 	}
 
@@ -1164,8 +1167,10 @@ FsmAp *Join::walk( ParseData *pd )
 {
 	if ( exprList.length() > 1 )
 		return walkJoin( pd );
-	else
-		return exprList.head->walk( pd );
+	else {
+		FsmRes res = exprList.head->walk( pd );
+		return res.fsm;
+	}
 }
 
 /* There is a list of expressions to join. */
@@ -1178,7 +1183,7 @@ FsmAp *Join::walkJoin( ParseData *pd )
 	FsmAp **fsms = new FsmAp*[exprList.length()];
 	ExprList::Iter expr = exprList;
 	for ( int e = 0; e < exprList.length(); e++, expr++ ) {
-		FsmRes res = fsms[e] = expr->walk( pd );
+		FsmRes res = expr->walk( pd );
 		if ( !res.success() )
 			return res.fsm;
 		fsms[e] = res.fsm;
@@ -1294,72 +1299,72 @@ Expression::~Expression()
 }
 
 /* Evaluate a single expression node. */
-FsmAp *Expression::walk( ParseData *pd, bool lastInSeq )
+FsmRes Expression::walk( ParseData *pd, bool lastInSeq )
 {
 	switch ( type ) {
 		case OrType: {
 			/* Evaluate the expression. */
 			FsmRes exprFsm = expression->walk( pd, false );
 			if ( !exprFsm.success() )
-				return exprFsm.fsm;
+				return exprFsm;
 
 			/* Evaluate the term. */
 			FsmRes rhs = term->walk( pd );
 			if ( !rhs.success() )
-				return rhs.fsm;
+				return rhs;
 
 			/* Perform union. */
 			FsmRes res = FsmAp::unionOp( exprFsm.fsm, rhs.fsm );
 			if ( !res.success() )
-				return res.fsm;
+				return res;
 
 			afterOpMinimize( res.fsm, lastInSeq );
 
-			return res.fsm;
+			return res;
 		}
 		case IntersectType: {
 			/* Evaluate the expression. */
 			FsmRes exprFsm = expression->walk( pd );
 			if ( !exprFsm.success() )
-				return exprFsm.fsm;
+				return exprFsm;
 
 			/* Evaluate the term. */
 			FsmRes rhs = term->walk( pd );
 			if ( !rhs.success() )
-				return rhs.fsm;
+				return rhs;
 
 			/* Perform intersection. */
 			FsmRes res = FsmAp::intersectOp( exprFsm.fsm, rhs.fsm );
 			if ( !res.success() )
-				return res.fsm;
+				return res;
 
 			afterOpMinimize( res.fsm, lastInSeq );
-			return res.fsm;
+			return res;
 		}
 		case SubtractType: {
 			/* Evaluate the expression. */
 			FsmRes exprFsm = expression->walk( pd );
 			if ( !exprFsm.success() )
-				return exprFsm.fsm;
+				return exprFsm;
 
 			/* Evaluate the term. */
 			FsmRes rhs = term->walk( pd );
 			if ( !rhs.success() )
-				return rhs.fsm;
+				return rhs;
 
 			/* Perform subtraction. */
 			FsmRes res = FsmAp::subtractOp( exprFsm.fsm, rhs.fsm );
 			if ( !res.success() )
-				return res.fsm;
+				return res;
 
 			afterOpMinimize( res.fsm, lastInSeq );
-			return res.fsm;
+			return res;
 		}
 		case StrongSubtractType: {
 			/* Evaluate the expression. */
 			FsmRes exprFsm = expression->walk( pd );
 			if ( !exprFsm.success() )
-				return exprFsm.fsm;
+				return exprFsm;
 
 			FsmRes leadAnyStar = dotStarFsm( pd );
 			FsmRes trailAnyStar = dotStarFsm( pd );
@@ -1367,23 +1372,23 @@ FsmAp *Expression::walk( ParseData *pd, bool lastInSeq )
 			/* Evaluate the term and pad it with any* machines. */
 			FsmRes termFsm = term->walk( pd );
 			if ( !termFsm.success() )
-				return termFsm.fsm;
+				return termFsm;
 
 			FsmRes res1 = FsmAp::concatOp( leadAnyStar.fsm, termFsm.fsm );
 			if ( !res1.success() )
-				return res1.fsm;
+				return res1;
 
 			FsmRes res2 = FsmAp::concatOp( res1.fsm, trailAnyStar.fsm );
 			if ( !res2.success() )
-				return res2.fsm;
+				return res2;
 
 			/* Perform subtraction. */
 			FsmRes res3 = FsmAp::subtractOp( exprFsm.fsm, res2.fsm );
 			if ( !res3.success() )
-				return res3.fsm;
+				return res3;
 
 			afterOpMinimize( res3.fsm, lastInSeq );
-			return res3.fsm;
+			return res3;
 		}
 		case TermType: {
 			/* Return result of the term. */
@@ -1395,7 +1400,7 @@ FsmAp *Expression::walk( ParseData *pd, bool lastInSeq )
 		}
 	}
 
-	return 0;
+	return FsmRes( 0 );
 }
 
 void Expression::makeNameTree( ParseData *pd )
@@ -1444,41 +1449,41 @@ Term::~Term()
 }
 
 /* Evaluate a term node. */
-FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
+FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 {
 	switch ( type ) {
 		case ConcatType: {
 			/* Evaluate the Term. */
 			FsmRes termFsm = term->walk( pd, false );
 			if ( !termFsm.success() )
-				return termFsm.fsm;
+				return termFsm;
 
 			/* Evaluate the FactorWithRep. */
 			FsmRes rhs = factorWithAug->walk( pd );
 			if ( !rhs.success() ) {
 				delete termFsm.fsm;
-				return rhs.fsm;
+				return rhs;
 			}
 
 			/* Perform concatenation. */
 			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
 			if ( !res.success() )
-				return res.fsm;
+				return res;
 
 			afterOpMinimize( res.fsm, lastInSeq );
-			return res.fsm;
+			return res;
 		}
 		case RightStartType: {
 			/* Evaluate the Term. */
 			FsmRes termFsm = term->walk( pd );
 			if ( !termFsm.success() )
-				return termFsm.fsm;
+				return termFsm;
 
 			/* Evaluate the FactorWithRep. */
 			FsmRes rhs = factorWithAug->walk( pd );
 			if ( !rhs.success() ) {
 				delete termFsm.fsm;
-				return rhs.fsm;
+				return rhs;
 			}
 
 			/* Set up the priority descriptors. The left machine gets the
@@ -1496,22 +1501,22 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			/* Perform concatenation. */
 			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
 			if ( !res.success() )
-				return res.fsm;
+				return res;
 
 			afterOpMinimize( res.fsm, lastInSeq );
-			return res.fsm;
+			return res;
 		}
 		case RightFinishType: {
 			/* Evaluate the Term. */
 			FsmRes termFsm = term->walk( pd );
 			if ( !termFsm.success() )
-				return termFsm.fsm;
+				return termFsm;
 
 			/* Evaluate the FactorWithRep. */
 			FsmRes rhs = factorWithAug->walk( pd );
 			if ( !rhs.success() ) {
 				delete termFsm.fsm;
-				return rhs.fsm;
+				return rhs;
 			}
 
 			/* Set up the priority descriptors. The left machine gets the
@@ -1538,22 +1543,22 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			/* Perform concatenation. */
 			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
 			if ( !res.success() ) 
-				return res.fsm;
+				return res;
 
 			afterOpMinimize( res.fsm, lastInSeq );
-			return res.fsm;
+			return res;
 		}
 		case LeftType: {
 			/* Evaluate the Term. */
 			FsmRes termFsm = term->walk( pd );
 			if ( !termFsm.success() )
-				return termFsm.fsm;
+				return termFsm;
 
 			/* Evaluate the FactorWithRep. */
 			FsmRes rhs = factorWithAug->walk( pd );
 			if ( !rhs.success() ) {
 				delete termFsm.fsm;
-				return rhs.fsm;
+				return rhs;
 			}
 
 			/* Set up the priority descriptors. The left machine gets the
@@ -1574,10 +1579,10 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			/* Perform concatenation. */
 			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
 			if ( !res.success() )
-				return res.fsm;
+				return res;
 
 			afterOpMinimize( res.fsm, lastInSeq );
-			return res.fsm;
+			return res;
 		}
 		case FactorWithAugType: {
 			return factorWithAug->walk( pd );
@@ -2513,7 +2518,8 @@ FsmAp *Factor::condPlus( ParseData *pd )
 	if ( max != 0 )
 		condCost( max );
 
-	FsmAp *rtnVal = expression->walk( pd );
+	FsmRes res = expression->walk( pd );
+	FsmAp *rtnVal = res.fsm;
 
 	rtnVal->startFsmAction( 0, inc );
 	afterOpMinimize( rtnVal );
@@ -2606,8 +2612,9 @@ FsmAp *Factor::walk( ParseData *pd )
 		rtnVal = longestMatch->walk( pd );
 		break;
 	case NfaRep: {
-		rtnVal = expression->walk( pd );
-		FsmRes res = FsmAp::nfaRepeatOp( rtnVal, action1, action2, action3,
+		FsmRes res = expression->walk( pd );
+		rtnVal = res.fsm;
+		res = FsmAp::nfaRepeatOp( rtnVal, action1, action2, action3,
 				action4, action5, action6, pd->curActionOrd );
 		rtnVal = res.fsm;
 		rtnVal->verifyIntegrity();

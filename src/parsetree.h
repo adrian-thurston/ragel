@@ -445,7 +445,7 @@ struct Expression
 	~Expression();
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd, bool lastInSeq = true );
+	FsmRes walk( ParseData *pd, bool lastInSeq = true );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -527,7 +527,7 @@ struct Term
 	
 	~Term();
 
-	FsmAp *walk( ParseData *pd, bool lastInSeq = true );
+	FsmRes walk( ParseData *pd, bool lastInSeq = true );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
