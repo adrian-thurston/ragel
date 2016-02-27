@@ -1972,6 +1972,7 @@ public:
 	 * have not yet had their out transitions filled in. This will 
 	 * empty out stateDict and stFil. */
 	void cleanAbortedFill();
+	bool overStateLimit();
 	bool fillInStates();
 	void nfaFillInStates();
 

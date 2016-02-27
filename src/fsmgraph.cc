@@ -1319,6 +1319,15 @@ void FsmAp::cleanAbortedFill()
 	misfitList.empty();
 }
 
+bool FsmAp::overStateLimit()
+{
+	if ( ctx->stateLimit > 0 ) {
+		long states = misfitList.length() + stateList.length();
+		if ( states > ctx->stateLimit )
+			return true;
+	}
+	return false;
+}
 
 bool FsmAp::fillInStates()
 {
@@ -1340,7 +1349,7 @@ bool FsmAp::fillInStates()
 			throw PriorInteraction( guardId );
 		}
 
-		if ( ctx->stateLimit > 0 && ( misfitList.length() + stateList.length() ) > ctx->stateLimit ) {
+		if ( overStateLimit() ) {
 			// cout << "aborting due to state limit" << endl;
 			cleanAbortedFill();
 			throw TooManyStates();
