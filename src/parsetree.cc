@@ -116,11 +116,9 @@ FsmAp *VarDef::walk( ParseData *pd )
 	if ( machineDef->type == MachineDef::JoinType &&
 			machineDef->join->exprList.length() == 1 )
 	{
-		FsmRes res = FsmAp::epsilonOp( rtnVal.fsm );
-		if ( !res.success() )
-			return res.fsm;
-
-		rtnVal.fsm = res.fsm;
+		rtnVal = FsmAp::epsilonOp( rtnVal.fsm );
+		if ( !rtnVal.success() )
+			return rtnVal.fsm;
 	}
 
 	/* We can now unset entry points that are not longer used. */
@@ -622,7 +620,11 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 	LmPartList::Iter lmi = *longestMatchList; 
 	for ( int i = 0; lmi.lte(); lmi++, i++ ) {
 		/* Create the machine and embed the setting of the longest match id. */
-		parts[i] = lmi->join->walk( pd );
+		FsmRes res = lmi->join->walk( pd );
+		if ( !res.success() )
+			return res.fsm;
+
+		parts[i] = res.fsm;
 		parts[i]->longMatchAction( pd->curActionOrd++, lmi );
 	}
 
@@ -638,6 +640,9 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 	FsmAp *rtnVal = parts[0];
 	for ( int i = 1; i < longestMatchList->length(); i++ ) {
 		FsmRes res = FsmAp::unionOp( rtnVal, parts[i] );
+		if ( !res.success() )
+			return res.fsm;
+
 		rtnVal = res.fsm;
 		afterOpMinimize( rtnVal );
 	}
@@ -1172,8 +1177,12 @@ FsmAp *Join::walkJoin( ParseData *pd )
 	/* Evaluate the machines. */
 	FsmAp **fsms = new FsmAp*[exprList.length()];
 	ExprList::Iter expr = exprList;
-	for ( int e = 0; e < exprList.length(); e++, expr++ )
-		fsms[e] = expr->walk( pd );
+	for ( int e = 0; e < exprList.length(); e++, expr++ ) {
+		FsmRes res = fsms[e] = expr->walk( pd );
+		if ( !res.success() )
+			return res.fsm;
+		fsms[e] = res.fsm;
+	}
 	
 	/* Get the start and final names. Final is 
 	 * guaranteed to exist, start is not. */
@@ -1194,18 +1203,18 @@ FsmAp *Join::walkJoin( ParseData *pd )
 		finalId = finalName->id;
 
 	/* Join machines 1 and up onto machine 0. */
-	FsmAp *retFsm = fsms[0];
-	FsmRes res = FsmAp::joinOp( retFsm, startId, finalId, fsms+1, exprList.length()-1 );
-	retFsm = res.fsm;
+	FsmRes res = FsmAp::joinOp( fsms[0], startId, finalId, fsms+1, exprList.length()-1 );
+	if ( !res.success() )
+		return res.fsm;
 
 	/* We can now unset entry points that are not longer used. */
-	pd->unsetObsoleteEntries( retFsm );
+	pd->unsetObsoleteEntries( res.fsm );
 
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );
 
 	delete[] fsms;
-	return retFsm;
+	return res.fsm;
 }
 
 void Join::makeNameTree( ParseData *pd )
