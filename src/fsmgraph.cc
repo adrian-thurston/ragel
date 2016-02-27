@@ -1356,6 +1356,12 @@ bool FsmAp::fillInStates()
 		}
 	}
 
+	if ( overStateLimit() ) {
+		// cout << "aborting due to state limit" << endl;
+		cleanAbortedFill();
+		throw TooManyStates();
+	}
+
 	/* The NFA list is empty at this point. There are no state sets we need to
 	 * preserve. */
 
