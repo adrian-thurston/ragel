@@ -460,7 +460,7 @@ bool FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 	return success;
 }
 
-void FsmAp::doOr( FsmAp *other )
+bool FsmAp::doUnion( FsmAp *other )
 {
 	/* Build a state set consisting of both start states */
 	StateSet startStateSet;
@@ -495,87 +495,7 @@ void FsmAp::doOr( FsmAp *other )
 	mergeStateList( startState, startStateSet.data, startStateSet.length() );
 
 	/* Fill in any new states made from merging. */
-	fillInStates();
-}
-
-/* Unions other with this machine. Other is deleted. */
-void FsmAp::_unionOp( FsmAp *other )
-{
-	assert( ctx == other->ctx );
-
-	ctx->unionOp = true;
-
-	setFinBits( STB_GRAPH1 );
-	other->setFinBits( STB_GRAPH2 );
-
-	/* Turn on misfit accounting for both graphs. */
-	setMisfitAccounting( true );
-	other->setMisfitAccounting( true );
-
-	/* Call Worker routine. */
-	doOr( other );
-
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-
-	ctx->unionOp = false;
-	unsetFinBits( STB_BOTH );
-}
-
-/* Intersects other with this machine. Other is deleted. */
-void FsmAp::_intersectOp( FsmAp *other )
-{
-	assert( ctx == other->ctx );
-
-	/* Turn on misfit accounting for both graphs. */
-	setMisfitAccounting( true );
-	other->setMisfitAccounting( true );
-
-	/* Set the fin bits on this and other to want each other. */
-	setFinBits( STB_GRAPH1 );
-	other->setFinBits( STB_GRAPH2 );
-
-	/* Call worker Or routine. */
-	doOr( other );
-
-	/* Unset any final states that are no longer to 
-	 * be final due to final bits. */
-	unsetIncompleteFinals();
-
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-
-	/* Remove states that have no path to a final state. */
-	removeDeadEndStates();
-}
-
-/* Set subtracts other machine from this machine. Other is deleted. */
-void FsmAp::_subtractOp( FsmAp *other )
-{
-	assert( ctx == other->ctx );
-
-	/* Turn on misfit accounting for both graphs. */
-	setMisfitAccounting( true );
-	other->setMisfitAccounting( true );
-
-	/* Set the fin bits of other to be killers. */
-	other->setFinBits( STB_GRAPH1 );
-
-	/* Call worker Or routine. */
-	doOr( other );
-
-	/* Unset any final states that are no longer to 
-	 * be final due to final bits. */
-	unsetKilledFinals();
-
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-
-	/* Remove states that have no path to a final state. */
-	removeDeadEndStates();
+	return fillInStates();
 }
 
 bool FsmAp::inEptVect( EptVect *eptVect, StateAp *state )
@@ -1008,21 +928,95 @@ FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
 	return FsmRes( fsm );
 }
 
+/* Returns union of fsm and other. Other is deleted. */
 FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
 {
-	fsm->_unionOp( other );
+	assert( fsm->ctx == other->ctx );
+
+	fsm->ctx->unionOp = true;
+
+	fsm->setFinBits( STB_GRAPH1 );
+	other->setFinBits( STB_GRAPH2 );
+
+	/* Turn on misfit accounting for both graphs. */
+	fsm->setMisfitAccounting( true );
+	other->setMisfitAccounting( true );
+
+	/* Call Worker routine. */
+	bool success = fsm->doUnion( other );
+	if ( !success )
+		return FsmRes( 0 );
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	fsm->ctx->unionOp = false;
+	fsm->unsetFinBits( STB_BOTH );
+
 	return FsmRes( fsm );
 }
 
+/* Intersects other with this machine. Other is deleted. */
 FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
 {
-	fsm->_intersectOp( other );
+	assert( fsm->ctx == other->ctx );
+
+	/* Turn on misfit accounting for both graphs. */
+	fsm->setMisfitAccounting( true );
+	other->setMisfitAccounting( true );
+
+	/* Set the fin bits on this and other to want each other. */
+	fsm->setFinBits( STB_GRAPH1 );
+	other->setFinBits( STB_GRAPH2 );
+
+	/* Call worker Or routine. */
+	bool success = fsm->doUnion( other );
+	if ( !success )
+		return FsmRes( 0 );
+
+	/* Unset any final states that are no longer to 
+	 * be final due to final bits. */
+	fsm->unsetIncompleteFinals();
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	/* Remove states that have no path to a final state. */
+	fsm->removeDeadEndStates();
+
 	return FsmRes( fsm );
 }
 
+/* Set subtracts other machine from this machine. Other is deleted. */
 FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
 {
-	fsm->_subtractOp( other );
+	assert( fsm->ctx == other->ctx );
+
+	/* Turn on misfit accounting for both graphs. */
+	fsm->setMisfitAccounting( true );
+	other->setMisfitAccounting( true );
+
+	/* Set the fin bits of other to be killers. */
+	other->setFinBits( STB_GRAPH1 );
+
+	/* Call worker Or routine. */
+	bool success = fsm->doUnion( other );
+	if ( !success )
+		return FsmRes( 0 );
+
+	/* Unset any final states that are no longer to 
+	 * be final due to final bits. */
+	fsm->unsetKilledFinals();
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	/* Remove states that have no path to a final state. */
+	fsm->removeDeadEndStates();
+
 	return FsmRes( fsm );
 }
 

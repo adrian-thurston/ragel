@@ -2052,9 +2052,6 @@ public:
 	void _starOp( );
 	void _repeatOp( int times );
 	void _optionalRepeatOp( int times );
-	void _unionOp( FsmAp *other );
-	void _intersectOp( FsmAp *other );
-	void _subtractOp( FsmAp *other );
 	void _epsilonOp();
 	void _joinOp( int startId, int finalId, FsmAp **others, int numOthers );
 
@@ -2107,7 +2104,7 @@ public:
 
 	/* Workers for concatenation and union. */
 	bool doConcat( FsmAp *other, StateSet *fromStates, bool optional );
-	void doOr( FsmAp *other );
+	bool doUnion( FsmAp *other );
 
 	/*
 	 * Final states
