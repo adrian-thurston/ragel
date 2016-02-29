@@ -2089,32 +2089,39 @@ void Factor::condCost( Action *action )
 }
 
 /* Evaluate a factor with repetition node. */
-FsmAp *FactorWithRep::walk( ParseData *pd )
+FsmRes FactorWithRep::walk( ParseData *pd )
 {
-	FsmAp *retFsm = 0;
-
 	switch ( type ) {
 	case StarType: {
 		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
-		if ( retFsm->startState->isFinState() ) {
+		FsmRes factorTree = factorWithRep->walk( pd );
+		if ( !factorTree.success() )
+			return factorTree;
+		
+		if ( factorTree.fsm->startState->isFinState() ) {
 			pd->nfaTermCheckKleeneZero();
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
-			retFsm->unsetFinState( retFsm->startState );
+			factorTree.fsm->unsetFinState( factorTree.fsm->startState );
 		}
 
 		/* Shift over the start action orders then do the kleene star. */
-		pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
-		FsmRes res = FsmAp::starOp( retFsm );
-		retFsm = res.fsm;
-		afterOpMinimize( retFsm );
-		break;
+		pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
+
+		FsmRes res = FsmAp::starOp( factorTree.fsm );
+		if ( !res.success() )
+			return res;
+
+		afterOpMinimize( res.fsm );
+		return res;
 	}
 	case StarStarType: {
 		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
-		if ( retFsm->startState->isFinState() ) {
+		FsmRes factorTree = factorWithRep->walk( pd );
+		if ( !factorTree.success() )
+			return factorTree;
+
+		if ( factorTree.fsm->startState->isFinState() ) {
 			pd->nfaTermCheckKleeneZero();
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
@@ -2125,59 +2132,71 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		 * interfere with any priorities set by the user. */
 		priorDescs[0].key = pd->nextPriorKey++;
 		priorDescs[0].priority = 1;
-		retFsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+		factorTree.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
 
 		/* Leaveing gets priority 0. Use same unique key. */
 		priorDescs[1].key = priorDescs[0].key;
 		priorDescs[1].priority = 0;
-		retFsm->leaveFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+		factorTree.fsm->leaveFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 		/* Shift over the start action orders then do the kleene star. */
-		pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
-		FsmRes res = FsmAp::starOp( retFsm );
-		retFsm = res.fsm;
-		afterOpMinimize( retFsm );
-		break;
+		pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
+
+		FsmRes res = FsmAp::starOp( factorTree.fsm );
+		if ( !res.success() )
+			return res;
+
+		afterOpMinimize( res.fsm );
+		return res;
 	}
 	case OptionalType: {
 		/* Make the null fsm. */
 		FsmAp *nu = FsmAp::lambdaFsm( pd->fsmCtx );
 
 		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
+		FsmRes factorTree = factorWithRep->walk( pd );
+		if ( !factorTree.success() )
+			return factorTree;
 
 		/* Perform the question operator. */
-		FsmRes res = FsmAp::unionOp( retFsm, nu );
-		retFsm = res.fsm;
-		afterOpMinimize( retFsm );
-		break;
+		FsmRes res = FsmAp::unionOp( factorTree.fsm, nu );
+		if ( !res.success() )
+			return res;
+
+		afterOpMinimize( res.fsm );
+		return res;
 	}
 	case PlusType: {
 		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
-		if ( retFsm->startState->isFinState() ) {
+		FsmRes factorTree = factorWithRep->walk( pd );
+		if ( !factorTree.success() )
+			return factorTree;
+
+		if ( factorTree.fsm->startState->isFinState() ) {
 			pd->nfaTermCheckPlusZero();
 			warning(loc) << "applying plus operator to a machine that "
 					"accepts zero length word" << endl;
 		}
 
-		/* Need a duplicated for the star end. */
-		FsmAp *dup = new FsmAp( *retFsm );
+		/* Need a duplicate for the star end. */
+		FsmAp *factorDup = new FsmAp( *factorTree.fsm );
 
 		/* The start func orders need to be shifted before doing the star. */
-		pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
+		pd->curActionOrd += factorDup->shiftStartActionOrder( pd->curActionOrd );
 
 		/* Star the duplicate. */
-		FsmRes res1 = FsmAp::starOp( dup );
-		dup = res1.fsm;
+		FsmRes res1 = FsmAp::starOp( factorDup );
+		if ( !res1.success() )
+			return res1;
 
-		afterOpMinimize( dup );
+		afterOpMinimize( res1.fsm );
 
-		FsmRes res2 = FsmAp::concatOp( retFsm, dup );
-		retFsm = res2.fsm;
+		FsmRes res2 = FsmAp::concatOp( factorTree.fsm, res1.fsm );
+		if ( !res2.success() )
+			return res2;
 
-		afterOpMinimize( retFsm );
-		break;
+		afterOpMinimize( res2.fsm );
+		return res2;
 	}
 	case ExactType: {
 		/* Get an int from the repetition amount. */
@@ -2188,12 +2207,15 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "exactly zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = FsmAp::lambdaFsm( pd->fsmCtx );
+			return FsmAp::lambdaFsm( pd->fsmCtx );
 		}
 		else {
 			/* Evaluate the first FactorWithRep. */
-			retFsm = factorWithRep->walk( pd );
-			if ( retFsm->startState->isFinState() ) {
+			FsmRes factorTree = factorWithRep->walk( pd );
+			if ( !factorTree.success() )
+				return factorTree;
+
+			if ( factorTree.fsm->startState->isFinState() ) {
 				pd->nfaTermCheckRepZero();
 				warning(loc) << "applying repetition to a machine that "
 						"accepts zero length word" << endl;
@@ -2201,12 +2223,15 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 
 			/* The start func orders need to be shifted before doing the
 			 * repetition. */
-			pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
+			pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
 
 			/* Do the repetition on the machine. Already guarded against n == 0 */
-			FsmRes res = FsmAp::repeatOp( retFsm, lowerRep );
-			retFsm = res.fsm;
-			afterOpMinimize( retFsm );
+			FsmRes res = FsmAp::repeatOp( factorTree.fsm, lowerRep );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm );
+			return res;
 		}
 		break;
 	}
@@ -2219,12 +2244,15 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "max zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = FsmAp::lambdaFsm( pd->fsmCtx );
+			return FsmAp::lambdaFsm( pd->fsmCtx );
 		}
 		else {
 			/* Evaluate the first FactorWithRep. */
-			retFsm = factorWithRep->walk( pd );
-			if ( retFsm->startState->isFinState() ) {
+			FsmRes factorTree = factorWithRep->walk( pd );
+			if ( !factorTree.success() )
+				return factorTree;
+
+			if ( factorTree.fsm->startState->isFinState() ) {
 				pd->nfaTermCheckRepZero();
 				warning(loc) << "applying max repetition to a machine that "
 						"accepts zero length word" << endl;
@@ -2232,19 +2260,25 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 
 			/* The start func orders need to be shifted before doing the 
 			 * repetition. */
-			pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
+			pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
 
 			/* Do the repetition on the machine. Already guarded against n == 0 */
-			FsmRes res = FsmAp::optionalRepeatOp( retFsm, upperRep );
-			retFsm = res.fsm;
-			afterOpMinimize( retFsm );
+			FsmRes res = FsmAp::optionalRepeatOp( factorTree.fsm, upperRep );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm );
+			return res;
 		}
 		break;
 	}
 	case MinType: {
 		/* Evaluate the repeated machine. */
-		retFsm = factorWithRep->walk( pd );
-		if ( retFsm->startState->isFinState() ) {
+		FsmRes factorTree = factorWithRep->walk( pd );
+		if ( !factorTree.success() )
+			return factorTree;
+
+		if ( factorTree.fsm->startState->isFinState() ) {
 			pd->nfaTermCheckMinZero();
 			warning(loc) << "applying min repetition to a machine that "
 					"accepts zero length word" << endl;
@@ -2252,35 +2286,42 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 
 		/* The start func orders need to be shifted before doing the repetition
 		 * and the kleene star. */
-		pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
+		pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
 	
 		if ( lowerRep == 0 ) {
 			/* Acts just like a star op on the machine to return. */
-			FsmRes res = FsmAp::starOp( retFsm );
-			retFsm = res.fsm;
-			afterOpMinimize( retFsm );
+			FsmRes res = FsmAp::starOp( factorTree.fsm );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm );
+			return res;
 		}
 		else {
 			/* Take a duplicate for the plus. */
-			FsmAp *dup = new FsmAp( *retFsm );
+			FsmAp *dup = new FsmAp( *factorTree.fsm );
 
 			/* Do repetition on the first half. */
-			FsmRes res1 = FsmAp::repeatOp( retFsm, lowerRep );
-			retFsm = res1.fsm;
+			FsmRes res1 = FsmAp::repeatOp( factorTree.fsm, lowerRep );
+			if ( !res1.success() )
+				return res1;
 
-			afterOpMinimize( retFsm );
+			afterOpMinimize( res1.fsm );
 
 			/* Star the duplicate. */
 			FsmRes res2 = FsmAp::starOp( dup );
-			dup = res2.fsm;
+			if ( !res2.success() )
+				return res2;
 
-			afterOpMinimize( dup );
+			afterOpMinimize( res2.fsm );
 
 			/* Tack on the kleene star. */
-			FsmRes res3 = FsmAp::concatOp( retFsm, dup );
-			retFsm = res3.fsm;
+			FsmRes res3 = FsmAp::concatOp( res1.fsm, res2.fsm );
+			if ( !res3.success() )
+				return res3;
 
-			afterOpMinimize( retFsm );
+			afterOpMinimize( res3.fsm );
+			return res3;
 		}
 		break;
 	}
@@ -2290,7 +2331,7 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			error(loc) << "invalid range repetition" << endl;
 
 			/* Return null machine as recovery. */
-			retFsm = FsmAp::lambdaFsm( pd->fsmCtx );
+			return FsmAp::lambdaFsm( pd->fsmCtx );
 		}
 		else if ( lowerRep == 0 && upperRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep.  This
@@ -2299,12 +2340,15 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "zero to zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = FsmAp::lambdaFsm( pd->fsmCtx );
+			return FsmAp::lambdaFsm( pd->fsmCtx );
 		}
 		else {
 			/* Now need to evaluate the repeated machine. */
-			retFsm = factorWithRep->walk( pd );
-			if ( retFsm->startState->isFinState() ) {
+			FsmRes factorTree = factorWithRep->walk( pd );
+			if ( !factorTree.success() )
+				return factorTree;
+
+			if ( factorTree.fsm->startState->isFinState() ) {
 				pd->nfaTermCheckMinZero();
 				warning(loc) << "applying range repetition to a machine that "
 						"accepts zero length word" << endl;
@@ -2312,52 +2356,61 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 
 			/* The start func orders need to be shifted before doing both kinds
 			 * of repetition. */
-			pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
+			pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
 
 			if ( lowerRep == 0 ) {
 				/* Just doing max repetition. Already guarded against n == 0. */
-				FsmRes res = FsmAp::optionalRepeatOp( retFsm, upperRep );
-				retFsm = res.fsm;
-				afterOpMinimize( retFsm );
+				FsmRes res = FsmAp::optionalRepeatOp( factorTree.fsm, upperRep );
+				if ( !res.success() )
+					return res;
+
+				afterOpMinimize( res.fsm );
+				return res;
 			}
 			else if ( lowerRep == upperRep ) {
 				/* Just doing exact repetition. Already guarded against n == 0. */
-				FsmRes res = FsmAp::repeatOp( retFsm, lowerRep );
-				retFsm = res.fsm;
-				afterOpMinimize( retFsm );
+				FsmRes res = FsmAp::repeatOp( factorTree.fsm, lowerRep );
+				if ( !res.success() )
+					return res;
+
+				afterOpMinimize( res.fsm );
+				return res;
 			}
 			else {
 				/* This is the case that 0 < lowerRep < upperRep. Take a
 				 * duplicate for the optional repeat. */
-				FsmAp *dup = new FsmAp( *retFsm );
+				FsmAp *dup = new FsmAp( *factorTree.fsm );
 
 				/* Do repetition on the first half. */
-				FsmRes res1 = FsmAp::repeatOp( retFsm, lowerRep );
-				retFsm = res1.fsm;
+				FsmRes res1 = FsmAp::repeatOp( factorTree.fsm, lowerRep );
+				if ( !res1.success() )
+					return res1;
 
-				afterOpMinimize( retFsm );
+				afterOpMinimize( res1.fsm );
 
 				/* Do optional repetition on the second half. */
 				FsmRes res2 = FsmAp::optionalRepeatOp( dup, upperRep - lowerRep );
-				dup = res2.fsm;
+				if ( !res2.success() )
+					return res2;
 
-				afterOpMinimize( dup );
+				afterOpMinimize( res2.fsm );
 
 				/* Tak on the duplicate machine. */
-				FsmRes res3 = FsmAp::concatOp( retFsm, dup );
-				retFsm = res3.fsm;
+				FsmRes res3 = FsmAp::concatOp( res1.fsm, res2.fsm );
+				if ( !res3.success() )
+					return res3;
 
-				afterOpMinimize( retFsm );
+				afterOpMinimize( res3.fsm );
+				return res3;
 			}
 		}
 		break;
 	}
 	case FactorWithNegType: {
 		/* Evaluate the Factor. Pass it up. */
-		retFsm = factorWithNeg->walk( pd );
-		break;
+		return factorWithNeg->walk( pd );
 	}}
-	return retFsm;
+	return FsmRes( 0 );
 }
 
 void FactorWithRep::makeNameTree( ParseData *pd )

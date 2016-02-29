@@ -608,7 +608,7 @@ struct FactorWithRep
 	~FactorWithRep();
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
