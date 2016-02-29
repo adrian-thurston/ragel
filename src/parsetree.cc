@@ -1823,9 +1823,8 @@ void FactorWithAug::assignConditions( FsmAp *graph )
 	}
 }
 
-
 /* Evaluate a factor with augmentation node. */
-FsmAp *FactorWithAug::walk( ParseData *pd )
+FsmRes FactorWithAug::walk( ParseData *pd )
 {
 	/* Enter into the scopes created for the labels. */
 	NameFrame nameFrame = pd->enterNameScope( false, labels.length() );
@@ -1848,13 +1847,13 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 	}
 
 	/* Evaluate the factor with repetition. */
-	FsmRes frep = factorWithRep->walk( pd );
-	if ( ! frep.success() ) {
+	FsmRes factorTree = factorWithRep->walk( pd );
+	if ( ! factorTree.success() ) {
 		delete [] actionOrd;
-		return frep.fsm;
+		return factorTree;
 	}
 
-	FsmAp *rtnVal = frep.fsm;
+	FsmAp *rtnVal = factorTree.fsm;
 
 	/* Compute the remaining action orderings. */
 	for ( int i = 0; i < actions.length(); i++ ) {
@@ -1941,7 +1940,7 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 		delete[] priorOrd;
 	if ( actionOrd != 0 )
 		delete[] actionOrd;	
-	return rtnVal;
+	return FsmRes( rtnVal );
 }
 
 void FactorWithAug::makeNameTree( ParseData *pd )
