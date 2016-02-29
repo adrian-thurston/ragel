@@ -325,7 +325,7 @@ struct LongestMatch
 		lmSwitchHandlesError(false) { }
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 	void transferScannerLeavingActions( FsmAp *graph );
@@ -377,7 +377,7 @@ struct MachineDef
 
 	~MachineDef();
 
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 	
@@ -403,8 +403,8 @@ struct Join
 	}
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
-	FsmAp *walkJoin( ParseData *pd );
+	FsmRes walk( ParseData *pd );
+	FsmRes walkJoin( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -471,7 +471,7 @@ struct NfaUnion
 	~NfaUnion();
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 	bool strike( ParseData *pd, FsmAp *fsmAp );

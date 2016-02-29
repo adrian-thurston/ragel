@@ -610,7 +610,7 @@ void LongestMatch::transferScannerLeavingActions( FsmAp *graph )
 	}
 }
 
-FsmAp *LongestMatch::walk( ParseData *pd )
+FsmRes LongestMatch::walk( ParseData *pd )
 {
 	/* The longest match has it's own name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
@@ -637,23 +637,22 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 
 	/* Union machines one and up with machine zero. The grammar dictates that
 	 * there will always be at least one part. */
-	FsmAp *rtnVal = parts[0];
+	FsmRes res = parts[0];
 	for ( int i = 1; i < longestMatchList->length(); i++ ) {
-		FsmRes res = FsmAp::unionOp( rtnVal, parts[i] );
+		res = FsmAp::unionOp( res.fsm, parts[i] );
 		if ( !res.success() )
 			return res.fsm;
 
-		rtnVal = res.fsm;
-		afterOpMinimize( rtnVal );
+		afterOpMinimize( res.fsm );
 	}
 
-	runLongestMatch( pd, rtnVal );
+	runLongestMatch( pd, res.fsm );
 
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );
 
 	delete[] parts;
-	return rtnVal;
+	return res.fsm;
 }
 
 void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
@@ -771,7 +770,7 @@ void ParseData::nfaTermCheckZeroReps()
 	throw RepetitionError();
 }
 
-FsmAp *NfaUnion::walk( ParseData *pd )
+FsmRes NfaUnion::walk( ParseData *pd )
 {
 	if ( pd->id->nfaTermCheck ) {
 		/* Does not return. */
@@ -862,7 +861,7 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	}
 
 	FsmAp *ret = machines[0];
-	return ret;
+	return FsmRes( ret );
 }
 
 NfaUnion::~NfaUnion()
@@ -1081,23 +1080,19 @@ void NfaUnion::resolveNameRefs( ParseData *pd )
 		(*term)->resolveNameRefs( pd );
 }
 
-FsmAp *MachineDef::walk( ParseData *pd )
+FsmRes MachineDef::walk( ParseData *pd )
 {
 	FsmAp *rtnVal = 0;
 	switch ( type ) {
 	case JoinType:
-		rtnVal = join->walk( pd );
-		break;
+		return join->walk( pd );
 	case LongestMatchType:
-		rtnVal = longestMatch->walk( pd );
-		break;
+		return longestMatch->walk( pd );
 	case LengthDefType:
 		/* Towards lengths. */
-		rtnVal = FsmAp::lambdaFsm( pd->fsmCtx );
-		break;
+		return FsmAp::lambdaFsm( pd->fsmCtx );
 	case NfaUnionType:
-		rtnVal = nfaUnion->walk( pd );
-		break;
+		return nfaUnion->walk( pd );
 	}
 	return rtnVal;
 }
@@ -1163,18 +1158,16 @@ Join::Join( Expression *expr )
 }
 
 /* Walk an expression node. */
-FsmAp *Join::walk( ParseData *pd )
+FsmRes Join::walk( ParseData *pd )
 {
-	if ( exprList.length() > 1 )
-		return walkJoin( pd );
-	else {
-		FsmRes res = exprList.head->walk( pd );
-		return res.fsm;
-	}
+	if ( exprList.length() == 1 )
+		return exprList.head->walk( pd );
+
+	return walkJoin( pd );
 }
 
 /* There is a list of expressions to join. */
-FsmAp *Join::walkJoin( ParseData *pd )
+FsmRes Join::walkJoin( ParseData *pd )
 {
 	/* We enter into a new name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
@@ -2658,20 +2651,22 @@ FsmAp *Factor::walk( ParseData *pd )
 		FsmRes var = varDef->walk( pd );
 		return var.fsm;
 	}
-	case ParenType:
-		rtnVal = join->walk( pd );
-		break;
-	case LongestMatchType:
-		rtnVal = longestMatch->walk( pd );
-		break;
+	case ParenType: {
+		FsmRes res = join->walk( pd );
+		return res.fsm;
+	}
+	case LongestMatchType: {
+		FsmRes res = longestMatch->walk( pd );
+		return res.fsm;
+	}
 	case NfaRep: {
-		FsmRes res = expression->walk( pd );
-		rtnVal = res.fsm;
-		res = FsmAp::nfaRepeatOp( rtnVal, action1, action2, action3,
+		FsmRes exprTree = expression->walk( pd );
+
+		FsmRes res = FsmAp::nfaRepeatOp( exprTree.fsm, action1, action2, action3,
 				action4, action5, action6, pd->curActionOrd );
-		rtnVal = res.fsm;
-		rtnVal->verifyIntegrity();
-		break;
+
+		res.fsm->verifyIntegrity();
+		return res.fsm;
 	}
 	case CondStar: {
 		rtnVal = condStar( pd );
