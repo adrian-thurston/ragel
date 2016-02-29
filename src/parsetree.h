@@ -641,7 +641,7 @@ struct FactorWithNeg
 	~FactorWithNeg();
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -712,7 +712,7 @@ struct Factor
 	~Factor();
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 

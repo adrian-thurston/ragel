@@ -2459,39 +2459,36 @@ FactorWithNeg::~FactorWithNeg()
 }
 
 /* Evaluate a factor with negation node. */
-FsmAp *FactorWithNeg::walk( ParseData *pd )
+FsmRes FactorWithNeg::walk( ParseData *pd )
 {
-	FsmAp *retFsm = 0;
-
 	switch ( type ) {
 	case NegateType: {
 		/* Evaluate the factorWithNeg. */
-		FsmAp *toNegate = factorWithNeg->walk( pd );
+		FsmRes toNegate = factorWithNeg->walk( pd );
 
 		/* Negation is subtract from dot-star. */
-		retFsm = dotStarFsm( pd );
-		FsmRes res = FsmAp::subtractOp( retFsm, toNegate );
-		retFsm = res.fsm;
-		afterOpMinimize( retFsm );
-		break;
+		FsmAp *ds = dotStarFsm( pd );
+		FsmRes res = FsmAp::subtractOp( ds, toNegate.fsm );
+
+		afterOpMinimize( res.fsm );
+		return res;
 	}
 	case CharNegateType: {
 		/* Evaluate the factorWithNeg. */
-		FsmAp *toNegate = factorWithNeg->walk( pd );
+		FsmRes toNegate = factorWithNeg->walk( pd );
 
 		/* CharNegation is subtract from dot. */
-		retFsm = dotFsm( pd );
-		FsmRes res = FsmAp::subtractOp( retFsm, toNegate );
-		retFsm = res.fsm;
-		afterOpMinimize( retFsm );
-		break;
+		FsmAp *ds = dotFsm( pd );
+		FsmRes res = FsmAp::subtractOp( ds, toNegate.fsm );
+
+		afterOpMinimize( res.fsm );
+		return res;
 	}
 	case FactorType: {
 		/* Evaluate the Factor. Pass it up. */
-		retFsm = factor->walk( pd );
-		break;
+		return factor->walk( pd );
 	}}
-	return retFsm;
+	return FsmRes(0);
 }
 
 void FactorWithNeg::makeNameTree( ParseData *pd )
@@ -2631,34 +2628,25 @@ FsmAp *Factor::condStar( ParseData *pd )
 }
 
 /* Evaluate a factor node. */
-FsmAp *Factor::walk( ParseData *pd )
+FsmRes Factor::walk( ParseData *pd )
 {
 	FsmAp *rtnVal = 0;
 	switch ( type ) {
 	case LiteralType:
-		rtnVal = literal->walk( pd );
-		break;
+		return literal->walk( pd );
 	case RangeType:
-		rtnVal = range->walk( pd );
-		break;
+		return range->walk( pd );
 	case OrExprType:
-		rtnVal = reItem->walk( pd, 0 );
-		break;
+		return reItem->walk( pd, 0 );
 	case RegExprType:
-		rtnVal = regExpr->walk( pd, 0 );
+		return regExpr->walk( pd, 0 );
 		break;
-	case ReferenceType: {
-		FsmRes var = varDef->walk( pd );
-		return var.fsm;
-	}
-	case ParenType: {
-		FsmRes res = join->walk( pd );
-		return res.fsm;
-	}
-	case LongestMatchType: {
-		FsmRes res = longestMatch->walk( pd );
-		return res.fsm;
-	}
+	case ReferenceType:
+		return varDef->walk( pd );
+	case ParenType:
+		return join->walk( pd );
+	case LongestMatchType:
+		return longestMatch->walk( pd );
 	case NfaRep: {
 		FsmRes exprTree = expression->walk( pd );
 
@@ -2666,16 +2654,13 @@ FsmAp *Factor::walk( ParseData *pd )
 				action4, action5, action6, pd->curActionOrd );
 
 		res.fsm->verifyIntegrity();
-		return res.fsm;
+		return res;
 	}
-	case CondStar: {
-		rtnVal = condStar( pd );
-		break;
+	case CondStar:
+		return condStar( pd );
+	case CondPlus:
+		return condPlus( pd );
 	}
-	case CondPlus: {
-		rtnVal = condPlus( pd );
-		break;
-	}}
 
 	return rtnVal;
 }
