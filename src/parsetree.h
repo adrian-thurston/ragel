@@ -716,9 +716,9 @@ struct Factor
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
-	FsmAp *condPlus( ParseData *pd );
-	FsmAp *condStar( ParseData *pd );
-	FsmAp *noMaxRep( ParseData *pd );
+	FsmRes condPlus( ParseData *pd );
+	FsmRes condStar( ParseData *pd );
+
 	void condCost( Action *action );
 	void applyGuardedPrior( ParseData *pd, FsmAp *rtnVal );
 	void applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal );

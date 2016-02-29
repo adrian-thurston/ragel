@@ -2547,7 +2547,7 @@ Factor::~Factor()
 	}
 }
 
-FsmAp *Factor::condPlus( ParseData *pd )
+FsmRes Factor::condPlus( ParseData *pd )
 {
 	Action *ini = action1;
 	Action *inc = action2;
@@ -2560,77 +2560,72 @@ FsmAp *Factor::condPlus( ParseData *pd )
 	if ( max != 0 )
 		condCost( max );
 
-	FsmRes res = expression->walk( pd );
-	FsmAp *rtnVal = res.fsm;
+	FsmRes exprTree = expression->walk( pd );
 
-	rtnVal->startFsmAction( 0, inc );
-	afterOpMinimize( rtnVal );
+	exprTree.fsm->startFsmAction( 0, inc );
+	afterOpMinimize( exprTree.fsm );
 
 	if ( max != 0 ) {
-		rtnVal->startFsmCondition( max, true );
-		afterOpMinimize( rtnVal );
+		exprTree.fsm->startFsmCondition( max, true );
+		afterOpMinimize( exprTree.fsm );
 	}
 
 	/* Plus Operation. */
-	{
-		if ( rtnVal->startState->isFinState() ) {
-			pd->nfaTermCheckPlusZero();
-			warning(loc) << "applying plus operator to a machine that "
-					"accepts zero length word" << endl;
-		}
-
-		/* Need a duplicated for the star end. */
-		FsmAp *dup = new FsmAp( *rtnVal );
-
-		/* The start func orders need to be shifted before doing the star. */
-		pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
-
-		applyGuardedPrior2( pd, dup );
-
-		/* Star the duplicate. */
-		FsmRes res1 = FsmAp::starOp( dup );
-		dup = res1.fsm;
-
-		afterOpMinimize( dup );
-
-		FsmRes res2 = FsmAp::concatOp( rtnVal, dup );
-		rtnVal = res2.fsm;
-
-		afterOpMinimize( rtnVal );
+	if ( exprTree.fsm->startState->isFinState() ) {
+		pd->nfaTermCheckPlusZero();
+		warning(loc) << "applying plus operator to a machine that "
+				"accepts zero length word" << endl;
 	}
 
-	rtnVal->leaveFsmCondition( min, true );
+	/* Need a duplicated for the star end. */
+	FsmAp *dup = new FsmAp( *exprTree.fsm );
+
+	/* The start func orders need to be shifted before doing the star. */
+	pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
+
+	applyGuardedPrior2( pd, dup );
+
+	/* Star the duplicate. */
+	FsmRes res1 = FsmAp::starOp( dup );
+
+	afterOpMinimize( res1.fsm );
+
+	FsmRes res2 = FsmAp::concatOp( exprTree.fsm, res1.fsm );
+	afterOpMinimize( res2.fsm );
+
+	/* End plus operation. */
+
+	res2.fsm->leaveFsmCondition( min, true );
 
 	/* Init action. */
-	rtnVal->startFromStateAction( 0,  ini );
+	res2.fsm->startFromStateAction( 0,  ini );
 
 	/* Leading priority guard. */
-	applyGuardedPrior( pd, rtnVal );
+	applyGuardedPrior( pd, res2.fsm );
 
-	return rtnVal;
+	return res2.fsm;
 }
 
-FsmAp *Factor::condStar( ParseData *pd )
+FsmRes Factor::condStar( ParseData *pd )
 {
 	Action *min = action3;
 
-	FsmAp *rtnVal = condPlus( pd );
+	FsmRes cp = condPlus( pd );
 
-	StateAp *newStart = rtnVal->dupStartState();
-	rtnVal->unsetStartState();
-	rtnVal->setStartState( newStart );
+	StateAp *newStart = cp.fsm->dupStartState();
+	cp.fsm->unsetStartState();
+	cp.fsm->setStartState( newStart );
 
 	/* Now ensure the new start state is a final state. */
-	rtnVal->setFinState( newStart );
-	rtnVal->addOutCondition( newStart, min, true );
+	cp.fsm->setFinState( newStart );
+	cp.fsm->addOutCondition( newStart, min, true );
 
-	return rtnVal;
+	return cp;
 }
 
 /* Evaluate a factor node. */
 FsmRes Factor::walk( ParseData *pd )
 {
-	FsmAp *rtnVal = 0;
 	switch ( type ) {
 	case LiteralType:
 		return literal->walk( pd );
@@ -2640,7 +2635,6 @@ FsmRes Factor::walk( ParseData *pd )
 		return reItem->walk( pd, 0 );
 	case RegExprType:
 		return regExpr->walk( pd, 0 );
-		break;
 	case ReferenceType:
 		return varDef->walk( pd );
 	case ParenType:
@@ -2662,7 +2656,7 @@ FsmRes Factor::walk( ParseData *pd )
 		return condPlus( pd );
 	}
 
-	return rtnVal;
+	return 0;
 }
 
 void Factor::makeNameTree( ParseData *pd )
