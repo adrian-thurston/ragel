@@ -253,7 +253,7 @@ struct VarDef
 	~VarDef();
 
 	/* Parse tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( const InputLoc &loc, ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 

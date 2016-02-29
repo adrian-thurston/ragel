@@ -93,7 +93,7 @@ char *prepareLitString( const InputLoc &loc, const char *data, long length,
 	return resData;
 }
 
-FsmAp *VarDef::walk( ParseData *pd )
+FsmRes VarDef::walk( ParseData *pd )
 {
 	/* We enter into a new name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
@@ -101,7 +101,7 @@ FsmAp *VarDef::walk( ParseData *pd )
 	/* Recurse on the expression. */
 	FsmRes rtnVal = machineDef->walk( pd );
 	if ( !rtnVal.success() )
-		return rtnVal.fsm;
+		return rtnVal;
 	
 	/* Do the tranfer of local error actions. */
 	LocalErrDictEl *localErrDictEl = pd->localErrDict.find( name );
@@ -118,7 +118,7 @@ FsmAp *VarDef::walk( ParseData *pd )
 	{
 		rtnVal = FsmAp::epsilonOp( rtnVal.fsm );
 		if ( !rtnVal.success() )
-			return rtnVal.fsm;
+			return rtnVal;
 	}
 
 	/* We can now unset entry points that are not longer used. */
@@ -131,7 +131,7 @@ FsmAp *VarDef::walk( ParseData *pd )
 
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );
-	return rtnVal.fsm;
+	return rtnVal;
 }
 
 void VarDef::makeNameTree( const InputLoc &loc, ParseData *pd )
@@ -2654,9 +2654,10 @@ FsmAp *Factor::walk( ParseData *pd )
 	case RegExprType:
 		rtnVal = regExpr->walk( pd, 0 );
 		break;
-	case ReferenceType:
-		rtnVal = varDef->walk( pd );
-		break;
+	case ReferenceType: {
+		FsmRes var = varDef->walk( pd );
+		return var.fsm;
+	}
 	case ParenType:
 		rtnVal = join->walk( pd );
 		break;

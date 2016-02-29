@@ -1094,67 +1094,67 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 		cout << "compiling\t" << sectionName << endl;
 
 	/* Build the graph from a walk of the parse tree. */
-	FsmAp *graph = gdNode->value->walk( this );
+	FsmRes graph = gdNode->value->walk( this );
 
 	/* Resolve any labels that point to multiple states. Any labels that are
 	 * still around are referenced only by gotos and calls and they need to be
 	 * made into deterministic entry points. */
-	graph->deterministicEntry();
+	graph.fsm->deterministicEntry();
 
 	/*
 	 * All state construction is now complete.
 	 */
 
 	/* Transfer actions from the out action tables to eof action tables. */
-	for ( StateSet::Iter state = graph->finStateSet; state.lte(); state++ )
-		graph->transferOutActions( *state );
+	for ( StateSet::Iter state = graph.fsm->finStateSet; state.lte(); state++ )
+		graph.fsm->transferOutActions( *state );
 
 	/* Transfer global error actions. */
-	for ( StateList::Iter state = graph->stateList; state.lte(); state++ )
-		graph->transferErrorActions( state, 0 );
+	for ( StateList::Iter state = graph.fsm->stateList; state.lte(); state++ )
+		graph.fsm->transferErrorActions( state, 0 );
 	
 	if ( id->wantDupsRemoved )
-		removeActionDups( graph );
+		removeActionDups( graph.fsm );
 
 	/* Remove unreachable states. There should be no dead end states. The
 	 * subtract and intersection operators are the only places where they may
 	 * be created and those operators clean them up. */
-	graph->removeUnreachableStates();
+	graph.fsm->removeUnreachableStates();
 
 	/* No more fsm operations are to be done. Action ordering numbers are
 	 * no longer of use and will just hinder minimization. Clear them. */
-	graph->nullActionKeys();
+	graph.fsm->nullActionKeys();
 
 	/* Transition priorities are no longer of use. We can clear them
 	 * because they will just hinder minimization as well. Clear them. */
-	graph->clearAllPriorities();
+	graph.fsm->clearAllPriorities();
 
-	if ( graph->ctx->minimizeOpt != MinimizeNone ) {
+	if ( graph.fsm->ctx->minimizeOpt != MinimizeNone ) {
 		/* Minimize here even if we minimized at every op. Now that function
 		 * keys have been cleared we may get a more minimal fsm. */
-		switch ( graph->ctx->minimizeLevel ) {
+		switch ( graph.fsm->ctx->minimizeLevel ) {
 			#ifdef TO_UPGRADE_CONDS
 			case MinimizeApprox:
-				graph->minimizeApproximate();
+				graph.fsm->minimizeApproximate();
 				break;
 			#endif
 			#ifdef TO_UPGRADE_CONDS
 			case MinimizeStable:
-				graph->minimizeStable();
+				graph.fsm->minimizeStable();
 				break;
 			#endif
 			case MinimizePartition1:
-				graph->minimizePartition1();
+				graph.fsm->minimizePartition1();
 				break;
 			case MinimizePartition2:
-				graph->minimizePartition2();
+				graph.fsm->minimizePartition2();
 				break;
 		}
 	}
 
-	graph->compressTransitions();
+	graph.fsm->compressTransitions();
 
-	return graph;
+	return graph.fsm;
 }
 
 void ParseData::printNameTree()
@@ -1419,16 +1419,16 @@ void ParseData::makeExports()
 		/* Check if this var def is an export. */
 		if ( gdel->value->isExport ) {
 			/* Build the graph from a walk of the parse tree. */
-			FsmAp *graph = gdel->value->walk( this );
+			FsmRes graph = gdel->value->walk( this );
 
 			/* Build the graph from a walk of the parse tree. */
-			if ( !graph->checkSingleCharMachine() ) {
+			if ( !graph.fsm->checkSingleCharMachine() ) {
 				error(gdel->loc) << "bad export machine, must define "
 						"a single character" << endl;
 			}
 			else {
 				/* Safe to extract the key and declare the export. */
-				Key exportKey = graph->startState->outList.head->lowKey;
+				Key exportKey = graph.fsm->startState->outList.head->lowKey;
 				exportList.append( new Export( gdel->value->name, exportKey ) );
 			}
 		}
