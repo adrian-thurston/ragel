@@ -2556,6 +2556,12 @@ reduction TopLevel
 			id->curItem = id->curItem->next;
 			id->curItem->pd = pd;
 			id->checkLastRef( id->curItem );
+
+			if ( id ->abortedCompile ) {
+				pda_run->fail_parsing = 1;
+				this->success = false;
+			}
+
 			id->curItem = id->curItem->next;
 		}
 	}

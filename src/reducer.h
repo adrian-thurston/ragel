@@ -42,7 +42,9 @@ struct TopLevel
 		
 		/* Should be passed into the load, somehow. */
 		targetMachine(0),
-		searchMachine(0)
+		searchMachine(0),
+		paramList(0),
+		success(true)
 	{
 		exportContext.append( false );
 	}
@@ -65,6 +67,7 @@ struct TopLevel
 	const char *searchMachine;
 
 	ActionParamList *paramList;
+	bool success;
 
 	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,
