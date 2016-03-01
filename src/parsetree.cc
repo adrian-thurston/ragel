@@ -775,16 +775,19 @@ FsmRes NfaUnion::walk( ParseData *pd )
 	if ( pd->id->nfaTermCheck ) {
 		/* Does not return. */
 		nfaTermCheck( pd );
+		return FsmRes(0);
 	}
 
 	if ( pd->id->nfaCondsDepth >= 0 ) {
 		/* Does not return. */
 		nfaCondsCheck( pd );
+		return FsmRes(0);
 	}
 
 	if ( pd->id->nfaBreadthCheck ) {
 		/* Does not return. */
 		nfaBreadthCheck( pd );
+		return FsmRes(0);
 	}
 
 	if ( pd->id->printStatistics )
@@ -905,16 +908,18 @@ void nfaCheckResult( ParseData *pd, long code, long id, const char *scode, bool 
 void NfaUnion::nfaCondsCheck( ParseData *pd )
 {
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		FsmAp *fsm = 0;
 		try {
 			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit * 2;
 			FsmRes res = (*term)->walk( pd );
-			fsm = res.fsm;
 			pd->fsmCtx->stateLimit = -1;
 
-			strike( pd, fsm );
+			if ( !res.success() ) {
+				nfaCheckResult( pd, 1, 0, "too-many-states", true );
+				return;
+			}
 
-			delete fsm;
+			strike( pd, res.fsm );
+			delete res.fsm;
 		}
 		catch ( const TooManyStates & ) {
 			nfaCheckResult( pd, 1, 0, "too-many-states" );
@@ -939,8 +944,10 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 			FsmRes res = (*term)->walk( pd );
 			pd->fsmCtx->stateLimit = -1;
 
-			if ( !res.success() )
-				nfaCheckResult( pd, 1, 0, "too-many-states" );
+			if ( !res.success() ) {
+				nfaCheckResult( pd, 1, 0, "too-many-states", true );
+				return;
+			}
 		}
 		catch ( const TooManyStates & ) {
 			nfaCheckResult( pd, 1, 0, "too-many-states" );
