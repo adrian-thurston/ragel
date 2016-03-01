@@ -1105,6 +1105,7 @@ stream_t *colm_stream_open_file( program_t *prg, tree_t *name, tree_t *mode )
 		stream = colm_stream_new_struct( prg );
 		stream->impl = colm_impl_new_file( file_name, file );
 	}
+	free( file_name );
 
 	return stream;
 }
