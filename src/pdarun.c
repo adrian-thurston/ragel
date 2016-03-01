@@ -1513,6 +1513,10 @@ again:
 		/* Not in a reverting context and the parser result is not used. */
 		if ( pda_run->reducer )
 			commit_reduce( prg, sp, pda_run );
+
+		if ( pda_run->fail_parsing )
+			goto fail;
+			
 	}
 
 	/*
@@ -2182,6 +2186,12 @@ skip_send:
 			debug( prg, REALM_PARSE, "parsing stopped by a parse error\n" );
 			break;
 		}
+
+		/* Disregard any alternate parse paths, just go right to failure. */
+		if ( pda_run->fail_parsing ) {
+			debug( prg, REALM_PARSE, "parsing failed by explicit request\n" );
+			break;
+		}
 	}
 
 	/* COROUTINE */
@@ -2267,6 +2277,10 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 	/* Flush out anything not committed. */
 	if ( pda_run->reducer )
 		commit_reduce( prg, sp, pda_run );
+	
+	/* What to do here.
+	 * if ( pda_run->fail_parsing )
+	 *   goto fail; */
 
 	if ( !revert_on )
 		colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );

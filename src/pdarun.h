@@ -363,6 +363,9 @@ struct pda_run
 
 	struct pool_alloc *parse_tree_pool;
 	struct pool_alloc local_pool;
+
+	/* Disregard any alternate parse paths, just go right to failure. */
+	int fail_parsing;
 };
 
 void colm_pda_init( struct colm_program *prg, struct pda_run *pda_run,
