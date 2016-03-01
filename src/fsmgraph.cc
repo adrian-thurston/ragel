@@ -888,7 +888,7 @@ void FsmAp::_isolateStartState( )
 FsmRes FsmAp::starOp( FsmAp *fsm )
 {
 	fsm->_starOp();
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
@@ -898,7 +898,7 @@ FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 
 	/* A repeat of one does absolutely nothing. */
 	if ( times == 1 )
-		return FsmRes( fsm );
+		return FsmRes( fsm, FsmRes::T() );
 
 	/* Make a machine to make copies from. */
 	FsmAp *copyFrom = new FsmAp( *fsm );
@@ -908,21 +908,21 @@ FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 		FsmAp *dup = new FsmAp( *copyFrom );
 		bool success = fsm->doConcat( dup, 0, false );
 		if ( !success )
-			return FsmRes( 0 );
+			return FsmRes( 0, FsmRes::T() );
 	}
 
 	/* Now use the copyFrom on the end. */
 	bool success = fsm->doConcat( copyFrom, 0, false );
 	if ( !success )
-		return FsmRes( 0 );
+		return FsmRes( 0, FsmRes::T() );
 
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
 {
 	fsm->_optionalRepeatOp( times );
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 /* Concatenates other to the end of this machine. Other is deleted.  Any
@@ -943,7 +943,7 @@ FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
 	if ( !success )
 		fsm = 0;
 
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 /* Returns union of fsm and other. Other is deleted. */
@@ -963,7 +963,7 @@ FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
 	/* Call Worker routine. */
 	bool success = fsm->doUnion( other );
 	if ( !success )
-		return FsmRes( 0 );
+		return FsmRes( 0, FsmRes::T() );
 
 	/* Remove the misfits and turn off misfit accounting. */
 	fsm->removeMisfits();
@@ -972,7 +972,7 @@ FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
 	fsm->ctx->unionOp = false;
 	fsm->unsetFinBits( STB_BOTH );
 
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 /* Intersects other with this machine. Other is deleted. */
@@ -991,7 +991,7 @@ FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
 	/* Call worker Or routine. */
 	bool success = fsm->doUnion( other );
 	if ( !success )
-		return FsmRes( 0 );
+		return FsmRes( 0, FsmRes::T() );
 
 	/* Unset any final states that are no longer to 
 	 * be final due to final bits. */
@@ -1004,7 +1004,7 @@ FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
 	/* Remove states that have no path to a final state. */
 	fsm->removeDeadEndStates();
 
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 /* Set subtracts other machine from this machine. Other is deleted. */
@@ -1022,7 +1022,7 @@ FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
 	/* Call worker Or routine. */
 	bool success = fsm->doUnion( other );
 	if ( !success )
-		return FsmRes( 0 );
+		return FsmRes( 0, FsmRes::T() );
 
 	/* Unset any final states that are no longer to 
 	 * be final due to final bits. */
@@ -1035,25 +1035,25 @@ FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
 	/* Remove states that have no path to a final state. */
 	fsm->removeDeadEndStates();
 
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 FsmRes FsmAp::epsilonOp( FsmAp *fsm )
 {
 	fsm->_epsilonOp( );
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 FsmRes FsmAp::joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers )
 {
 	fsm->_joinOp( startId, finalId, others, numOthers );
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
 {
 	fsm->_nfaUnionOp( others, n, depth );
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
@@ -1061,13 +1061,13 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 {
 	fsm->_nfaRepeatOp( push, pop, init,
 			stay, repeat, exit, curActionOrd );
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 FsmRes FsmAp::isolateStartState( FsmAp *fsm )
 {
 	fsm->_isolateStartState();
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 StateAp *FsmAp::dupStartState()

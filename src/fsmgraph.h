@@ -1696,7 +1696,9 @@ typedef Vector<EntryMapEl> EntryMapBase;
 /* Result of an operation. */
 struct FsmRes
 {
-	FsmRes( FsmAp *fsm )
+	struct T {};
+
+	FsmRes( FsmAp *fsm, const T &t )
 		: fsm(fsm) {}
 
 	bool success() { return fsm != 0; }

@@ -412,7 +412,7 @@ void FsmAp::_embedCondition( StateAp *state, const CondSet &set, const CondKeySe
 FsmRes FsmAp::embedCondition( FsmAp *fsm, StateAp *state, const CondSet &set, const CondKeySet &vals )
 {
 	fsm->_embedCondition( state, set, vals );
-	return FsmRes( fsm );
+	return FsmRes( fsm, FsmRes::T() );
 }
 
 void FsmAp::addOutCondition( StateAp *state, Action *condAction, bool sense )

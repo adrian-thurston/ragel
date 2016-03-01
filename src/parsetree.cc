@@ -622,7 +622,7 @@ FsmRes LongestMatch::walk( ParseData *pd )
 		/* Create the machine and embed the setting of the longest match id. */
 		FsmRes res = lmi->join->walk( pd );
 		if ( !res.success() )
-			return res.fsm;
+			return res;
 
 		parts[i] = res.fsm;
 		parts[i]->longMatchAction( pd->curActionOrd++, lmi );
@@ -637,11 +637,11 @@ FsmRes LongestMatch::walk( ParseData *pd )
 
 	/* Union machines one and up with machine zero. The grammar dictates that
 	 * there will always be at least one part. */
-	FsmRes res = parts[0];
+	FsmRes res( parts[0], FsmRes::T() );
 	for ( int i = 1; i < longestMatchList->length(); i++ ) {
 		res = FsmAp::unionOp( res.fsm, parts[i] );
 		if ( !res.success() )
-			return res.fsm;
+			return res;
 
 		afterOpMinimize( res.fsm );
 	}
@@ -652,7 +652,7 @@ FsmRes LongestMatch::walk( ParseData *pd )
 	pd->popNameScope( nameFrame );
 
 	delete[] parts;
-	return res.fsm;
+	return res;
 }
 
 void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
@@ -775,19 +775,19 @@ FsmRes NfaUnion::walk( ParseData *pd )
 	if ( pd->id->nfaTermCheck ) {
 		/* Does not return. */
 		nfaTermCheck( pd );
-		return FsmRes(0);
+		return FsmRes( 0, FsmRes::T() );
 	}
 
 	if ( pd->id->nfaCondsDepth >= 0 ) {
 		/* Does not return. */
 		nfaCondsCheck( pd );
-		return FsmRes(0);
+		return FsmRes( 0, FsmRes::T() );
 	}
 
 	if ( pd->id->nfaBreadthCheck ) {
 		/* Does not return. */
 		nfaBreadthCheck( pd );
-		return FsmRes(0);
+		return FsmRes( 0, FsmRes::T() );
 	}
 
 	if ( pd->id->printStatistics )
@@ -864,7 +864,7 @@ FsmRes NfaUnion::walk( ParseData *pd )
 	}
 
 	FsmAp *ret = machines[0];
-	return FsmRes( ret );
+	return FsmRes( ret, FsmRes::T() );
 }
 
 NfaUnion::~NfaUnion()
@@ -1074,7 +1074,6 @@ void NfaUnion::resolveNameRefs( ParseData *pd )
 
 FsmRes MachineDef::walk( ParseData *pd )
 {
-	FsmAp *rtnVal = 0;
 	switch ( type ) {
 	case JoinType:
 		return join->walk( pd );
@@ -1082,11 +1081,11 @@ FsmRes MachineDef::walk( ParseData *pd )
 		return longestMatch->walk( pd );
 	case LengthDefType:
 		/* Towards lengths. */
-		return FsmAp::lambdaFsm( pd->fsmCtx );
+		return FsmRes( FsmAp::lambdaFsm( pd->fsmCtx ), FsmRes::T() );
 	case NfaUnionType:
 		return nfaUnion->walk( pd );
 	}
-	return rtnVal;
+	return FsmRes( 0, FsmRes::T() );
 }
 
 void MachineDef::makeNameTree( ParseData *pd )
@@ -1170,7 +1169,7 @@ FsmRes Join::walkJoin( ParseData *pd )
 	for ( int e = 0; e < exprList.length(); e++, expr++ ) {
 		FsmRes res = expr->walk( pd );
 		if ( !res.success() )
-			return res.fsm;
+			return res;
 		fsms[e] = res.fsm;
 	}
 	
@@ -1195,7 +1194,7 @@ FsmRes Join::walkJoin( ParseData *pd )
 	/* Join machines 1 and up onto machine 0. */
 	FsmRes res = FsmAp::joinOp( fsms[0], startId, finalId, fsms+1, exprList.length()-1 );
 	if ( !res.success() )
-		return res.fsm;
+		return res;
 
 	/* We can now unset entry points that are not longer used. */
 	pd->unsetObsoleteEntries( res.fsm );
@@ -1204,7 +1203,7 @@ FsmRes Join::walkJoin( ParseData *pd )
 	pd->popNameScope( nameFrame );
 
 	delete[] fsms;
-	return res.fsm;
+	return res;
 }
 
 void Join::makeNameTree( ParseData *pd )
@@ -1351,19 +1350,19 @@ FsmRes Expression::walk( ParseData *pd, bool lastInSeq )
 			if ( !exprFsm.success() )
 				return exprFsm;
 
-			FsmRes leadAnyStar = dotStarFsm( pd );
-			FsmRes trailAnyStar = dotStarFsm( pd );
+			FsmAp *leadAnyStar = dotStarFsm( pd );
+			FsmAp *trailAnyStar = dotStarFsm( pd );
 
 			/* Evaluate the term and pad it with any* machines. */
 			FsmRes termFsm = term->walk( pd );
 			if ( !termFsm.success() )
 				return termFsm;
 
-			FsmRes res1 = FsmAp::concatOp( leadAnyStar.fsm, termFsm.fsm );
+			FsmRes res1 = FsmAp::concatOp( leadAnyStar, termFsm.fsm );
 			if ( !res1.success() )
 				return res1;
 
-			FsmRes res2 = FsmAp::concatOp( res1.fsm, trailAnyStar.fsm );
+			FsmRes res2 = FsmAp::concatOp( res1.fsm, trailAnyStar );
 			if ( !res2.success() )
 				return res2;
 
@@ -1381,11 +1380,11 @@ FsmRes Expression::walk( ParseData *pd, bool lastInSeq )
 		}
 		case BuiltinType: {
 			/* Construct the builtin. */
-			return makeBuiltin( builtin, pd );
+			return FsmRes( makeBuiltin( builtin, pd ), FsmRes::T() );
 		}
 	}
 
-	return FsmRes( 0 );
+	return FsmRes( 0, FsmRes::T() );
 }
 
 void Expression::makeNameTree( ParseData *pd )
@@ -1573,7 +1572,7 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			return factorWithAug->walk( pd );
 		}
 	}
-	return 0;
+	return FsmRes( 0, FsmRes::T() );
 }
 
 void Term::makeNameTree( ParseData *pd )
@@ -1925,7 +1924,7 @@ FsmRes FactorWithAug::walk( ParseData *pd )
 		delete[] priorOrd;
 	if ( actionOrd != 0 )
 		delete[] actionOrd;	
-	return FsmRes( rtnVal );
+	return FsmRes( rtnVal, FsmRes::T() );
 }
 
 void FactorWithAug::makeNameTree( ParseData *pd )
@@ -2192,7 +2191,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "exactly zero repetitions results "
 					"in the null machine" << endl;
 
-			return FsmAp::lambdaFsm( pd->fsmCtx );
+			return FsmRes( FsmAp::lambdaFsm( pd->fsmCtx ), FsmRes::T() );
 		}
 		else {
 			/* Evaluate the first FactorWithRep. */
@@ -2229,7 +2228,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "max zero repetitions results "
 					"in the null machine" << endl;
 
-			return FsmAp::lambdaFsm( pd->fsmCtx );
+			return FsmRes( FsmAp::lambdaFsm( pd->fsmCtx ), FsmRes::T() );
 		}
 		else {
 			/* Evaluate the first FactorWithRep. */
@@ -2316,7 +2315,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			error(loc) << "invalid range repetition" << endl;
 
 			/* Return null machine as recovery. */
-			return FsmAp::lambdaFsm( pd->fsmCtx );
+			return FsmRes( FsmAp::lambdaFsm( pd->fsmCtx ), FsmRes::T() );
 		}
 		else if ( lowerRep == 0 && upperRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep.  This
@@ -2325,7 +2324,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			warning(loc) << "zero to zero repetitions results "
 					"in the null machine" << endl;
 
-			return FsmAp::lambdaFsm( pd->fsmCtx );
+			return FsmRes( FsmAp::lambdaFsm( pd->fsmCtx ), FsmRes::T() );
 		}
 		else {
 			/* Now need to evaluate the repeated machine. */
@@ -2395,7 +2394,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		/* Evaluate the Factor. Pass it up. */
 		return factorWithNeg->walk( pd );
 	}}
-	return FsmRes( 0 );
+	return FsmRes( 0, FsmRes::T() );
 }
 
 void FactorWithRep::makeNameTree( ParseData *pd )
@@ -2480,7 +2479,7 @@ FsmRes FactorWithNeg::walk( ParseData *pd )
 		/* Evaluate the Factor. Pass it up. */
 		return factor->walk( pd );
 	}}
-	return FsmRes(0);
+	return FsmRes( 0, FsmRes::T() );
 }
 
 void FactorWithNeg::makeNameTree( ParseData *pd )
@@ -2595,7 +2594,7 @@ FsmRes Factor::condPlus( ParseData *pd )
 	/* Leading priority guard. */
 	applyGuardedPrior( pd, res2.fsm );
 
-	return res2.fsm;
+	return res2;
 }
 
 FsmRes Factor::condStar( ParseData *pd )
@@ -2620,13 +2619,13 @@ FsmRes Factor::walk( ParseData *pd )
 {
 	switch ( type ) {
 	case LiteralType:
-		return literal->walk( pd );
+		return FsmRes( literal->walk( pd ), FsmRes::T() );
 	case RangeType:
-		return range->walk( pd );
+		return FsmRes( range->walk( pd ), FsmRes::T() );
 	case OrExprType:
-		return reItem->walk( pd, 0 );
+		return FsmRes( reItem->walk( pd, 0 ), FsmRes::T() );
 	case RegExprType:
-		return regExpr->walk( pd, 0 );
+		return FsmRes( regExpr->walk( pd, 0 ), FsmRes::T() );
 	case ReferenceType:
 		return varDef->walk( pd );
 	case ParenType:
@@ -2648,7 +2647,7 @@ FsmRes Factor::walk( ParseData *pd )
 		return condPlus( pd );
 	}
 
-	return 0;
+	return FsmRes( 0, FsmRes::T() );
 }
 
 void Factor::makeNameTree( ParseData *pd )
