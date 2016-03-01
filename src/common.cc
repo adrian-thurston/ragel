@@ -584,13 +584,9 @@ const char *fileNameFromStem( const char *stemFile, const char *suffix )
 }
 
 exit_object endp;
-bool inLibRagel;
 
 void operator<<( std::ostream &out, exit_object & )
 {
-    out << std::endl;
-	if ( inLibRagel )
-		throw AbortCompile();
-	else
-	    exit(1);
+	out << std::endl;
+	throw AbortCompile(1);
 }

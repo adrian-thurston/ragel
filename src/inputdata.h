@@ -353,9 +353,9 @@ struct InputData
 	void runRlhc();
 	void processKelbt();
 	void processColm();
-	void processReduce();
-	void process();
-	void parseReduce();
+	bool processReduce();
+	bool process();
+	bool parseReduce();
 
 	void abortCompile( int code );
 };

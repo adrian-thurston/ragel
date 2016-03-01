@@ -43,10 +43,7 @@ extern colm_sections rlhc_object;
 
 void InputData::abortCompile( int code )
 {
-	if ( inLibRagel )
-		throw AbortCompile();
-	else
-		exit(code);
+	throw AbortCompile( code );
 }
 
 /* Invoked by the parser when the root element is opened. */
@@ -521,20 +518,24 @@ void InputData::checkLastRef( InputItem *ii )
 #endif
 
 			try {
-				if ( !abortedCompile ) {
-					pd->prepareMachineGen( 0, hostLang );
+				FsmRes res = pd->prepareMachineGen( 0, hostLang );
 
-					if ( gblErrorCount > 0 )
-						abortCompile(1);
-
-					pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
-
-					if ( gblErrorCount > 0 )
-						abortCompile(1);
+				if ( !res.success() ) {
+					abortedCompile = true;
+					return;
 				}
+
+				if ( gblErrorCount > 0 )
+					abortCompile(1);
+
+				pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
+
+				if ( gblErrorCount > 0 )
+					abortCompile(1);
 			}
 			catch ( const AbortCompile &ac ) {
 				abortedCompile = true;
+				return;
 			}
 		}
 
@@ -551,28 +552,30 @@ void InputData::checkLastRef( InputItem *ii )
 		/* Move forward, flushing input items until we get to an unprocessed
 		 * input item. */
 		while ( lastFlush != 0 && lastFlush->processed ) {
-			if ( !abortedCompile ) {
+			try {
 				verifyWriteHasData( lastFlush );
 
 				if ( gblErrorCount > 0 )
 					abortCompile(1);
-
-				/* Flush out. */
-				writeOutput( lastFlush );
 			}
+			catch ( const AbortCompile &ac ) {
+				abortedCompile = true;
+				return;
+			}
+
+			/* Flush out. */
+			writeOutput( lastFlush );
 
 			/* If this is the last reference to a pd, we can now clear the
 			 * memory for it. */
 			if ( lastFlush->pd != 0 && lastFlush->section->lastReference == lastFlush ) {
 				if ( lastFlush->pd->instanceList.length() > 0 ) {
-					if ( !abortedCompile ) {
-						lastFlush->pd->clear();
+					lastFlush->pd->clear();
 
 #ifdef WITH_RAGEL_KELBT
-						if ( lastFlush->parser != 0 )
-							lastFlush->parser->clear();
+					if ( lastFlush->parser != 0 )
+						lastFlush->parser->clear();
 #endif
-					}
 				}
 			}
 
@@ -741,7 +744,7 @@ void InputData::processColm()
 	assert( gblErrorCount == 0 );
 }
 
-void InputData::parseReduce()
+bool InputData::parseReduce()
 {
 	/*
 	 * Colm-based reduction parser introduced in ragel 7. 
@@ -752,7 +755,9 @@ void InputData::parseReduce()
 			minimizeLevel, minimizeOpt );
 
 	if ( ! inLibRagel ) {
-		/* Check input file. */
+		/* Check input file. File is actually opened by colm code. We don't
+		 * need to perform the check if in libragel since it comes in via a
+		 * string. */
 		if ( input == 0 ) {
 			ifstream *inFile = new ifstream( inputFileName );
 			if ( ! inFile->is_open() )
@@ -770,52 +775,61 @@ void InputData::parseReduce()
 
 	topLevel->reduceFile( inputFileName );
 
+	bool success = topLevel->success;
+
 	delete topLevel;
 	delete sectionPass;
+
+	return success;
 }
 
-void InputData::processReduce()
+bool InputData::processReduce()
 {
 	if ( generateXML ) {
 		parseReduce();
 		processXML();
+		return true;
 	}
 	else if ( generateDot ) {
 		parseReduce();
 		processDot();
+		return true;
 	}
 	else {
 		makeDefaultFileName();
 		makeTranslateOutputFileName();
 		createOutputStream();
 		openOutput();
-		parseReduce();
-		flushRemaining();
-		closeOutput();
-		runRlhc();
+		bool success = parseReduce();
+		if ( success ) {
+			flushRemaining();
+			closeOutput();
+			runRlhc();
+		}
 
 		inputItems.empty();
 		parseDataList.empty();
 		sectionList.empty();
+		return success;
 	}
 }
 
-void InputData::process()
+bool InputData::process()
 {
 	switch ( frontend ) {
 		case KelbtBased: {
 #ifdef WITH_RAGEL_KELBT
 			processKelbt();
 #endif
-			break;
+			return true;
 		}
 		case ColmBased: {
 			processColm();
-			break;
+			return true;
 		}
 		case ReduceBased: {
-			processReduce();
-			break;
+			return processReduce();
 		}
 	}
+	return false;
 }

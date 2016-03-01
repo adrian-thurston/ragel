@@ -879,24 +879,9 @@ void nfaResultWrite( ostream &out, long code, long id, const char *scode )
 
 void nfaCheckResult( ParseData *pd, long code, long id, const char *scode, bool suppressExit = false )
 {
-	if ( pd->id->inLibRagel ) {
-		stringstream out;
-		nfaResultWrite( out, code, id, scode );
-		pd->id->comm = out.str();
-	}
-	else {
-		ostream *out = &cout;
-		ofstream *ofs = 0;
-		if ( pd->id->commFileName != 0 )
-			out = ofs = new ofstream( pd->id->commFileName, std::fstream::app );
-
-		nfaResultWrite( *out, code, id, scode );
-
-		if ( ofs != 0 ) {
-			ofs->close();
-			delete ofs;
-		}
-	}
+	stringstream out;
+	nfaResultWrite( out, code, id, scode );
+	pd->id->comm = out.str();
 
 	if ( !suppressExit )
 		pd->id->abortCompile( code );

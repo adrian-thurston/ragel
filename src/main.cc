@@ -160,7 +160,7 @@ void usage()
 "   --supported-backends    Show supported backends\n"
 	;	
 
-	exit( 0 );
+	throw AbortCompile( 0 );
 }
 
 /* Print version information and exit. */
@@ -168,7 +168,7 @@ void version()
 {
 	cout << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
 			"Copyright (c) 2001-2015 by Adrian Thurston" << endl;
-	exit( 0 );
+	throw AbortCompile( 0 );
 }
 
 void showHostLangNames()
@@ -179,7 +179,7 @@ void showHostLangNames()
 		cout << hostLangs[i]->name;
 	}
 	cout << endl;
-	exit(0);
+	throw AbortCompile( 0 );
 }
 
 void showHostLangArgs()
@@ -190,7 +190,7 @@ void showHostLangArgs()
 		cout << hostLangs[i]->arg;
 	}
 	cout << endl;
-	exit(0);
+	throw AbortCompile( 0 );
 }
 
 void showFrontends()
@@ -201,14 +201,14 @@ void showFrontends()
 	cout << " --kelbt-frontend";
 #endif
 	cout << endl;
-	exit(0);
+	throw AbortCompile( 0 );
 }
 
 void showBackends()
 {
 	cout << "--direct-backend --colm-backend";
 	cout << endl;
-	exit(0);
+	throw AbortCompile( 0 );
 }
 
 void showStyles( InputData *id )
@@ -239,7 +239,7 @@ void showStyles( InputData *id )
 
 	}
 
-	exit(0);
+	throw AbortCompile( 0 );
 }
 
 /* Error reporting format. */
@@ -773,12 +773,30 @@ void InputData::checkArgs()
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
 {
+	int code = 0;
 	InputData id;
+	try {
+		id.inLibRagel = true;
 
-	id.parseArgs( argc, argv );
-	id.checkArgs();
-	id.process();
-	return 0;
+		id.parseArgs( argc, argv );
+		id.checkArgs();
+
+		if ( !id.process() )
+			throw AbortCompile( 1 );
+	}
+	catch ( const AbortCompile &ac ) {
+		code = ac.code;
+
+		if ( id.commFileName == 0 ) {
+			cout << id.comm;
+		}
+		else {
+			ofstream ofs( id.commFileName, std::fstream::app );
+			ofs << id.comm;
+			ofs.close();
+		}
+	}
+	return code;
 }
 
 int libragel_main( char **result, int argc, const char **argv, const char *input )
@@ -786,14 +804,16 @@ int libragel_main( char **result, int argc, const char **argv, const char *input
 	InputData id;
 
 	try {
+		id.inLibRagel = true;
+
 		id.parseArgs( argc, argv );
 		id.checkArgs();
 		id.input = input;
-		id.inLibRagel = true;
-		inLibRagel = true;
-		id.frontend = KelbtBased;
+		id.frontend = ReduceBased;
 		id.process();
+
 		*result = strdup( id.comm.c_str() );
+		// cout << "result: " << *result << endl;
 	}
 	catch ( const AbortCompile &ac ) {
 		*result = strdup( "" );
