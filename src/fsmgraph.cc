@@ -339,28 +339,6 @@ void FsmAp::_starOp( )
 	setMisfitAccounting( false );
 }
 
-void FsmAp::_repeatOp( int times )
-{
-	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
-	assert( times > 0 );
-
-	/* A repeat of one does absolutely nothing. */
-	if ( times == 1 )
-		return;
-
-	/* Make a machine to make copies from. */
-	FsmAp *copyFrom = new FsmAp( *this );
-
-	/* Concatentate duplicates onto the end up until before the last. */
-	for ( int i = 1; i < times-1; i++ ) {
-		FsmAp *dup = new FsmAp( *copyFrom );
-		doConcat( dup, 0, false );
-	}
-
-	/* Now use the copyFrom on the end. */
-	doConcat( copyFrom, 0, false );
-}
-
 void FsmAp::_optionalRepeatOp( int times )
 {
 	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
@@ -915,7 +893,29 @@ FsmRes FsmAp::starOp( FsmAp *fsm )
 
 FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 {
-	fsm->_repeatOp( times );
+	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
+	assert( times > 0 );
+
+	/* A repeat of one does absolutely nothing. */
+	if ( times == 1 )
+		return FsmRes( fsm );
+
+	/* Make a machine to make copies from. */
+	FsmAp *copyFrom = new FsmAp( *fsm );
+
+	/* Concatentate duplicates onto the end up until before the last. */
+	for ( int i = 1; i < times-1; i++ ) {
+		FsmAp *dup = new FsmAp( *copyFrom );
+		bool success = fsm->doConcat( dup, 0, false );
+		if ( !success )
+			return FsmRes( 0 );
+	}
+
+	/* Now use the copyFrom on the end. */
+	bool success = fsm->doConcat( copyFrom, 0, false );
+	if ( !success )
+		return FsmRes( 0 );
+
 	return FsmRes( fsm );
 }
 

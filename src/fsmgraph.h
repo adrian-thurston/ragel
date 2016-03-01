@@ -2053,7 +2053,6 @@ public:
 	 */
 
 	void _starOp( );
-	void _repeatOp( int times );
 	void _optionalRepeatOp( int times );
 	void _epsilonOp();
 	void _joinOp( int startId, int finalId, FsmAp **others, int numOthers );
