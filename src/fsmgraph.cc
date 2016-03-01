@@ -31,8 +31,12 @@ using std::endl;
 	
 Action::~Action()
 {
-	inlineList->empty();
-	delete inlineList;
+	/* If we were created by substitution of another action then we don't own the inline list. */
+	if ( substOf == 0 && inlineList != 0 ) {
+		inlineList->empty();
+		delete inlineList;
+		inlineList = 0;
+	}
 }
 
 InlineItem::~InlineItem()

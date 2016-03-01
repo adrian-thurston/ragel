@@ -172,6 +172,7 @@ public:
 		costId(0),
 		paramList(0),
 		argListMap(0),
+		substOf(0),
 		argList(0)
 	{
 	}
