@@ -1095,13 +1095,15 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 }
 
 /* Make the graph from a graph dict node. Does minimization and state sorting. */
-FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
+FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 {
 	if ( id->printStatistics )
 		cout << "compiling\t" << sectionName << endl;
 
 	/* Build the graph from a walk of the parse tree. */
 	FsmRes graph = gdNode->value->walk( this );
+	if ( !graph.success() )
+		return graph;
 
 	/* Resolve any labels that point to multiple states. Any labels that are
 	 * still around are referenced only by gotos and calls and they need to be
@@ -1161,7 +1163,7 @@ FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
 
 	graph.fsm->compressTransitions();
 
-	return graph.fsm;
+	return graph;
 }
 
 void ParseData::printNameTree()
@@ -1179,7 +1181,7 @@ void ParseData::printNameTree()
 	}
 }
 
-FsmAp *ParseData::makeSpecific( GraphDictEl *gdNode )
+FsmRes ParseData::makeSpecific( GraphDictEl *gdNode )
 {
 	/* Build the name tree and supporting data structures. */
 	makeNameTree( gdNode );
@@ -1201,12 +1203,12 @@ FsmAp *ParseData::makeSpecific( GraphDictEl *gdNode )
 
 	/* Just building the specified graph. */
 	initNameWalk();
-	FsmAp *mainGraph = makeInstance( gdNode );
+	FsmRes mainGraph = makeInstance( gdNode );
 
 	return mainGraph;
 }
 
-FsmAp *ParseData::makeAll()
+FsmRes ParseData::makeAll()
 {
 	/* Build the name tree and supporting data structures. */
 	makeNameTree( 0 );
@@ -1232,11 +1234,17 @@ FsmAp *ParseData::makeAll()
 	for ( GraphList::Iter glel = instanceList; glel.lte();  glel++ ) {
 		if ( glel->key == MAIN_MACHINE ) {
 			/* Main graph is always instantiated. */
-			mainGraph = makeInstance( glel );
+			FsmRes main = makeInstance( glel );
+			if ( !main.success() )
+				return main;
+			mainGraph = main.fsm;
 		}
 		else {
 			/* Instantiate and store in others array. */
-			graphs[numOthers++] = makeInstance( glel );
+			FsmRes other = makeInstance( glel );
+			if ( !other.success() )
+				return other;
+			graphs[numOthers++] = other.fsm;
 		}
 	}
 
@@ -1249,7 +1257,7 @@ FsmAp *ParseData::makeAll()
 	}
 
 	delete[] graphs;
-	return mainGraph;
+	return FsmRes( mainGraph );
 }
 
 void ParseData::analyzeAction( Action *action, InlineList *inlineList )
@@ -1479,24 +1487,33 @@ void ParseData::createNfaActions( FsmAp *fsm )
 	}
 }
 
-void ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang )
+FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang )
 {
 	initKeyOps( hostLang );
 	makeRootNames();
 	initLongestMatchData();
 
 	/* Make the graph, do minimization. */
-	if ( graphDictEl == 0 )
-		sectionGraph = makeAll();
-	else
-		sectionGraph = makeSpecific( graphDictEl );
+	if ( graphDictEl == 0 ) {
+		FsmRes res = makeAll();
+		if ( !res.success() )
+			return res;
+		sectionGraph = res.fsm;
+	}
+	else {
+		FsmRes res = makeSpecific( graphDictEl );
+		if ( !res.success() )
+			return res;
+		sectionGraph = res.fsm;
+	}
+	
 	
 	/* Compute exports from the export definitions. */
 	makeExports();
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
-		return;
+		return FsmRes( 0 );
 
 	createNfaActions( sectionGraph );
 
@@ -1522,6 +1539,8 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hos
 	sectionGraph->depthFirstOrdering();
 	sectionGraph->sortStatesByFinal();
 	sectionGraph->setStateNumbers( 0 );
+
+	return sectionGraph;
 }
 
 void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,

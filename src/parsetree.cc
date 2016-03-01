@@ -1841,7 +1841,7 @@ FsmRes FactorWithAug::walk( ParseData *pd )
 
 	/* Evaluate the factor with repetition. */
 	FsmRes factorTree = factorWithRep->walk( pd );
-	if ( ! factorTree.success() ) {
+	if ( !factorTree.success() ) {
 		delete [] actionOrd;
 		return factorTree;
 	}

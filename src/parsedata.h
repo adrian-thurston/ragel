@@ -233,9 +233,9 @@ struct ParseData
 	void printNameInst( NameInst *nameInst, int level );
 
 	/* Make the graph from a graph dict node. Does minimization. */
-	FsmAp *makeInstance( GraphDictEl *gdNode );
-	FsmAp *makeSpecific( GraphDictEl *gdNode );
-	FsmAp *makeAll();
+	FsmRes makeInstance( GraphDictEl *gdNode );
+	FsmRes makeSpecific( GraphDictEl *gdNode );
+	FsmRes makeAll();
 
 	/* Checking the contents of actions. */
 	void checkAction( Action *action );
@@ -245,7 +245,7 @@ struct ParseData
 	void analyzeGraph( FsmAp *graph );
 	void makeExports();
 
-	void prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang );
+	FsmRes prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang );
 	void generateXML( ostream &out );
 	void generateReduced( const char *inputFileName, CodeStyle codeStyle,
 			std::ostream &out, const HostLang *hostLang );
