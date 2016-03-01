@@ -800,12 +800,15 @@ bool InputData::processReduce()
 		makeTranslateOutputFileName();
 		createOutputStream();
 		openOutput();
+
 		bool success = parseReduce();
-		if ( success ) {
+		if ( success )
 			flushRemaining();
-			closeOutput();
+
+		closeOutput();
+
+		if ( success )
 			runRlhc();
-		}
 
 		inputItems.empty();
 		parseDataList.empty();
