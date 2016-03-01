@@ -28,6 +28,20 @@
 
 using std::cout;
 using std::endl;
+	
+Action::~Action()
+{
+	inlineList->empty();
+	delete inlineList;
+}
+
+InlineItem::~InlineItem()
+{
+	if ( children != 0 ) {
+		children->empty();
+		delete children;
+	}
+}
 
 /* Make a new state. The new state will be put on the graph's
  * list of state. The new state can be created final or non final. */

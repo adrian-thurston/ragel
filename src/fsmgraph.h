@@ -176,6 +176,8 @@ public:
 	{
 	}
 
+	~Action();
+
 	static Action *cons( const InputLoc &loc, Action *substOf,
 			ActionArgList *argList, int condId )
 	{

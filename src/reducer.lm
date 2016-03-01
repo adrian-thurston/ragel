@@ -16,12 +16,7 @@ reduction TopLevel
 		}
 
 		SectionDictEl *sdEl = id->sectionDict.find( machine.c_str() );
-		if ( sdEl == 0 ) {
-			Section *section = new Section( strdup(machine.c_str() ) );
-			sdEl = new SectionDictEl( section->sectionName );
-			sdEl->value = section;
-			id->sectionDict.insert( sdEl );
-		}
+		assert( sdEl != 0 );
 
 		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
@@ -2585,6 +2580,7 @@ reduction SectionPass
 			sdEl = new SectionDictEl( machine );
 			sdEl->value = new Section( machine );
 			id->sectionDict.insert( sdEl );
+			id->sectionList.append( sdEl->value );
 		}
 
 		section = sdEl->value;

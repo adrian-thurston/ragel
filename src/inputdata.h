@@ -106,10 +106,13 @@ struct Section
 	/* Pointer to the last input item to reference this parse data struct. Once
 	 * we pass over this item we are free to clear away the parse tree. */
 	InputItem *lastReference;
+
+	Section *prev, *next;
 };
 
 typedef AvlMap<std::string, Section*, CmpString> SectionDict;
 typedef AvlMapEl<std::string, Section*> SectionDictEl;
+typedef DList<Section> SectionList;
 
 struct FnMachine
 {
@@ -233,6 +236,7 @@ struct InputData
 	ParserList parserList;
 
 	SectionDict sectionDict;
+	SectionList sectionList;
 
 	ArgsVector includePaths;
 

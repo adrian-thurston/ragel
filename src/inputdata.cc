@@ -769,6 +769,9 @@ void InputData::parseReduce()
 	lastFlush = inputItems.head;
 
 	topLevel->reduceFile( inputFileName );
+
+	delete topLevel;
+	delete sectionPass;
 }
 
 void InputData::processReduce()
@@ -790,6 +793,10 @@ void InputData::processReduce()
 		flushRemaining();
 		closeOutput();
 		runRlhc();
+
+		inputItems.empty();
+		parseDataList.empty();
+		sectionList.empty();
 	}
 }
 

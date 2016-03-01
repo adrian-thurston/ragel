@@ -478,6 +478,13 @@ ParseData::ParseData( InputData *id, string sectionName,
 /* Clean up the data collected during a parse. */
 ParseData::~ParseData()
 {
+	graphDict.empty();
+	actionList.empty();
+
+	delete prePushExpr;
+	delete postPopExpr;
+	delete nfaPrePushExpr;
+	delete nfaPostPopExpr;
 }
 
 /* Make a name id in the current name instantiation scope if it is not

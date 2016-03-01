@@ -901,6 +901,8 @@ struct InlineItem
 		longestMatchPart(0), wrappedAction(0), condSpace(condSpace),
 		condKeySet(condKeySet), type(type)
 	{} 
+
+	~InlineItem();
 	
 	InputLoc loc;
 	std::string data;
@@ -926,6 +928,12 @@ struct InlineBlock
 {
 	InlineBlock( const InputLoc &loc, InlineList *inlineList )
 		: loc(loc), inlineList(inlineList) {}
+
+	~InlineBlock()
+	{
+		inlineList->empty();
+		delete inlineList;
+	}
 
 	InputLoc loc;
 	InlineList *inlineList;
