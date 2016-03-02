@@ -137,7 +137,7 @@ struct stream_impl
 	long column;
 	long byte;
 
-	const char *name;
+	char *name;
 	FILE *file;
 
 	struct Pattern *pattern;
@@ -152,11 +152,10 @@ struct stream_impl
 	int indent;
 };
 
-struct stream_impl *colm_impl_new_pat( const char *name, struct Pattern *pattern );
-struct stream_impl *colm_impl_new_cons( const char *name, struct Constructor *constructor );
-struct stream_impl *colm_impl_new_file( const char *name, FILE *file );
-struct stream_impl *colm_impl_new_fd( const char *name, long fd );
-struct stream_impl *colm_impl_new_generic( const char *name );
+struct stream_impl *colm_impl_new_pat( char *name, struct Pattern *pattern );
+struct stream_impl *colm_impl_new_cons( char *name, struct Constructor *constructor );
+struct stream_impl *colm_impl_new_generic( char *name );
+
 
 void update_position( struct stream_impl *input_stream, const char *data, long length );
 void undo_position( struct stream_impl *input_stream, const char *data, long length );

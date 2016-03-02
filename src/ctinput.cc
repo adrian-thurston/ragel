@@ -38,7 +38,7 @@ extern stream_funcs replFuncs;
  * Pattern
  */
 
-struct stream_impl *colm_impl_new_pat( const char *name, Pattern *pattern )
+struct stream_impl *colm_impl_new_pat( char *name, Pattern *pattern )
 {
 	struct stream_impl *ss = (struct stream_impl*)malloc(sizeof(struct stream_impl));
 	memset( ss, 0, sizeof(struct stream_impl) );
@@ -239,7 +239,7 @@ stream_funcs patternFuncs =
  * Constructor
  */
 
-struct stream_impl *colm_impl_new_cons( const char *name, Constructor *constructor )
+struct stream_impl *colm_impl_new_cons( char *name, Constructor *constructor )
 {
 	struct stream_impl *ss = (struct stream_impl*)malloc(sizeof(struct stream_impl));
 	memset( ss, 0, sizeof(struct stream_impl) );

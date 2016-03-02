@@ -113,9 +113,14 @@ void colm_stream_destroy( program_t *prg, tree_t **sp, struct_t *s )
 	if ( stream->impl->file != 0 )
 		fclose( stream->impl->file );
 
+	/* FIXME: Need to leak this for now. Until we can return strings to a
+	 * program loader and free them at a later date (after the colm program is
+	 * deleted). */
+	// if ( stream->impl->name != 0 )
+	//	free( stream->impl->name );
+
 	free( stream->impl );
 }
-
 
 /* Keep the position up to date after consuming text. */
 void update_position( struct stream_impl *is, const char *data, long length )
@@ -367,7 +372,7 @@ void init_file_funcs()
  * StreamImpl struct, this wraps the list of input streams.
  */
 
-void init_stream_impl( struct stream_impl *is, const char *name )
+void init_stream_impl( struct stream_impl *is, char *name )
 {
 	memset( is, 0, sizeof(struct stream_impl) );
 
@@ -785,12 +790,16 @@ static void stream_prepend_data( struct stream_impl *is, const char *data, long 
 		if ( is_source_stream( is ) ) {
 			// message( "sourcing line info\n" );
 
-			/* steal the location information. */
+			/* Steal the location information. */
 			stream_t *s = ((stream_t*)is->queue->tree);
 			is->line = s->impl->line;
 			is->column = s->impl->column;
 			is->byte = s->impl->byte;
-			is->name = s->impl->name;
+
+			/* Dup the name otherwise we will break stream destructor. */
+			if ( is->name )
+				free(is->name);
+			is->name = strdup(s->impl->name);
 		}
 
 		/* Create a new buffer for the data. This is the easy implementation.
@@ -1027,34 +1036,29 @@ struct stream_funcs file_funcs =
 };
 
 
-struct stream_impl *colm_impl_new_file( const char *name, FILE *file )
+static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
 {
 	struct stream_impl *ss = (struct stream_impl*)malloc(sizeof(struct stream_impl));
 	init_stream_impl( ss, name );
 	ss->funcs = &file_funcs;
-
 	ss->file = file;
-
 	return ss;
 }
 
-struct stream_impl *colm_impl_new_fd( const char *name, long fd )
+static struct stream_impl *colm_impl_new_fd( char *name, long fd )
 {
 	struct stream_impl *ss = (struct stream_impl*)malloc(sizeof(struct stream_impl));
 	init_stream_impl( ss, name );
 	ss->funcs = &file_funcs;
-
 	ss->file = fdopen( fd, ( fd == 0 ) ? "r" : "w" );
-
 	return ss;
 }
 
-struct stream_impl *colm_impl_new_generic( const char *name )
+struct stream_impl *colm_impl_new_generic( char *name )
 {
 	struct stream_impl *ss = (struct stream_impl*)malloc(sizeof(struct stream_impl));
 	init_stream_impl( ss, name );
 	ss->funcs = &stream_funcs;
-
 	return ss;
 }
 
@@ -1105,14 +1109,13 @@ stream_t *colm_stream_open_file( program_t *prg, tree_t *name, tree_t *mode )
 		stream = colm_stream_new_struct( prg );
 		stream->impl = colm_impl_new_file( file_name, file );
 	}
-	free( file_name );
 
 	return stream;
 }
 
 stream_t *colm_stream_new( program_t *prg )
 {
-	struct stream_impl *impl = colm_impl_new_generic( "<internal>" );
+	struct stream_impl *impl = colm_impl_new_generic( strdup("<internal>") );
 
 	struct colm_stream *stream = colm_stream_new_struct( prg );
 	stream->impl = impl;

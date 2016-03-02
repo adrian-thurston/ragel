@@ -121,7 +121,7 @@ static void rcode_downref( program_t *prg, tree_t **sp, code_t *instr );
 static void open_stdout( program_t *prg )
 {
 	if ( prg->stdout_val == 0 )
-		prg->stdout_val = colm_stream_open_fd( prg, "<stdout>", 1 );
+		prg->stdout_val = colm_stream_open_fd( prg, strdup("<stdout>"), 1 );
 }
 
 static void flush_streams( program_t *prg )
@@ -3625,7 +3625,7 @@ again:
 			/* Pop the root object. */
 			vm_pop_tree();
 			if ( prg->stdin_val == 0 )
-				prg->stdin_val = colm_stream_open_fd( prg, "<stdin>", 0 );
+				prg->stdin_val = colm_stream_open_fd( prg, strdup("<stdin>"), 0 );
 
 			vm_push_stream( prg->stdin_val );
 			break;
@@ -3646,7 +3646,7 @@ again:
 			/* Pop the root object. */
 			vm_pop_tree();
 			if ( prg->stderr_val == 0 )
-				prg->stderr_val = colm_stream_open_fd( prg, "<stderr>", 2 );
+				prg->stderr_val = colm_stream_open_fd( prg, strdup("<stderr>"), 2 );
 
 			vm_push_stream( prg->stderr_val );
 			break;
