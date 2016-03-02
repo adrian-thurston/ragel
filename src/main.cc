@@ -776,8 +776,6 @@ int main( int argc, const char **argv )
 	int code = 0;
 	InputData id;
 	try {
-		id.inLibRagel = true;
-
 		id.parseArgs( argc, argv );
 		id.checkArgs();
 
