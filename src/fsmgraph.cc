@@ -392,7 +392,7 @@ void FsmAp::_optionalRepeatOp( int times )
 
 /* Fsm concatentation worker. Supports treating the concatentation as optional,
  * which essentially leaves the final states of machine one as final. */
-bool FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
+FsmRes FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 {
 	/* For the merging process. */
 	StateSet finStateSetCopy, startStateSet;
@@ -447,16 +447,16 @@ bool FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 	}
 
 	/* Fill in any new states made from merging. */
-	bool success = fillInStates();
+	FsmRes res = fillInStates();
 
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
 	setMisfitAccounting( false );
 
-	return success;
+	return res;
 }
 
-bool FsmAp::doUnion( FsmAp *other )
+FsmRes FsmAp::doUnion( FsmAp *other )
 {
 	/* Build a state set consisting of both start states */
 	StateSet startStateSet;
@@ -906,17 +906,17 @@ FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 	/* Concatentate duplicates onto the end up until before the last. */
 	for ( int i = 1; i < times-1; i++ ) {
 		FsmAp *dup = new FsmAp( *copyFrom );
-		bool success = fsm->doConcat( dup, 0, false );
-		if ( !success )
-			return FsmRes( 0, FsmRes::T() );
+		FsmRes res = fsm->doConcat( dup, 0, false );
+		if ( !res.success() )
+			return res;
 	}
 
 	/* Now use the copyFrom on the end. */
-	bool success = fsm->doConcat( copyFrom, 0, false );
-	if ( !success )
-		return FsmRes( 0, FsmRes::T() );
+	FsmRes res = fsm->doConcat( copyFrom, 0, false );
+	if ( !res.success())
+		return res;
 
-	return FsmRes( fsm, FsmRes::T() );
+	return res;
 }
 
 FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
@@ -938,12 +938,12 @@ FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
 
 	/* Assert same signedness and return graph concatenation op. */
 	assert( fsm->ctx == other->ctx );
-	bool success = fsm->doConcat( other, 0, false );
 
-	if ( !success )
-		fsm = 0;
+	FsmRes res = fsm->doConcat( other, 0, false );
+	if ( !res.success() )
+		return res;
 
-	return FsmRes( fsm, FsmRes::T() );
+	return res;
 }
 
 /* Returns union of fsm and other. Other is deleted. */
@@ -961,9 +961,9 @@ FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
 	other->setMisfitAccounting( true );
 
 	/* Call Worker routine. */
-	bool success = fsm->doUnion( other );
-	if ( !success )
-		return FsmRes( 0, FsmRes::T() );
+	FsmRes res = fsm->doUnion( other );
+	if ( !res.success() )
+		return res;
 
 	/* Remove the misfits and turn off misfit accounting. */
 	fsm->removeMisfits();
@@ -972,7 +972,7 @@ FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
 	fsm->ctx->unionOp = false;
 	fsm->unsetFinBits( STB_BOTH );
 
-	return FsmRes( fsm, FsmRes::T() );
+	return res;
 }
 
 /* Intersects other with this machine. Other is deleted. */
@@ -989,9 +989,9 @@ FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
 	other->setFinBits( STB_GRAPH2 );
 
 	/* Call worker Or routine. */
-	bool success = fsm->doUnion( other );
-	if ( !success )
-		return FsmRes( 0, FsmRes::T() );
+	FsmRes res = fsm->doUnion( other );
+	if ( !res.success() )
+		return res;
 
 	/* Unset any final states that are no longer to 
 	 * be final due to final bits. */
@@ -1004,7 +1004,7 @@ FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
 	/* Remove states that have no path to a final state. */
 	fsm->removeDeadEndStates();
 
-	return FsmRes( fsm, FsmRes::T() );
+	return res;
 }
 
 /* Set subtracts other machine from this machine. Other is deleted. */
@@ -1020,9 +1020,9 @@ FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
 	other->setFinBits( STB_GRAPH1 );
 
 	/* Call worker Or routine. */
-	bool success = fsm->doUnion( other );
-	if ( !success )
-		return FsmRes( 0, FsmRes::T() );
+	FsmRes res = fsm->doUnion( other );
+	if ( !res.success() )
+		return res;
 
 	/* Unset any final states that are no longer to 
 	 * be final due to final bits. */
@@ -1035,7 +1035,7 @@ FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
 	/* Remove states that have no path to a final state. */
 	fsm->removeDeadEndStates();
 
-	return FsmRes( fsm, FsmRes::T() );
+	return res;
 }
 
 FsmRes FsmAp::epsilonOp( FsmAp *fsm )
@@ -1341,7 +1341,7 @@ bool FsmAp::overStateLimit()
 	return false;
 }
 
-bool FsmAp::fillInStates()
+FsmRes FsmAp::fillInStates()
 {
 	/* Merge any states that are awaiting merging. This will likey cause other
 	 * states to be added to the NFA list. */
@@ -1364,16 +1364,14 @@ bool FsmAp::fillInStates()
 		if ( overStateLimit() ) {
 			// cout << "aborting due to state limit" << endl;
 			cleanAbortedFill();
-			// throw TooManyStates();
-			return false;
+			return FsmRes( FsmRes::TooManyStates() );
 		}
 	}
 
 	if ( overStateLimit() ) {
 		// cout << "aborting due to state limit" << endl;
 		cleanAbortedFill();
-		// throw TooManyStates();
-		return false;
+		return FsmRes( FsmRes::TooManyStates() );
 	}
 
 	/* The NFA list is empty at this point. There are no state sets we need to
@@ -1386,7 +1384,7 @@ bool FsmAp::fillInStates()
 	/* Delete all the state dict elements. */
 	stateDict.empty();
 
-	return true;
+	return FsmRes( FsmRes::Fsm(), this );
 }
 
 

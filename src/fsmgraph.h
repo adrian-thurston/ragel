@@ -1697,9 +1697,17 @@ typedef Vector<EntryMapEl> EntryMapBase;
 struct FsmRes
 {
 	struct T {};
+	struct TooManyStates {};
+	struct Fsm {};
 
 	FsmRes( FsmAp *fsm, const T &t )
 		: fsm(fsm) {}
+
+	FsmRes( const Fsm &, FsmAp *fsm )
+		: fsm(fsm) {}
+
+	FsmRes( const TooManyStates & )
+		: fsm(0) {}
 
 	bool success() { return fsm != 0; }
 
@@ -1978,7 +1986,7 @@ public:
 	 * empty out stateDict and stFil. */
 	void cleanAbortedFill();
 	bool overStateLimit();
-	bool fillInStates();
+	FsmRes fillInStates();
 	void nfaFillInStates();
 
 	/*
@@ -2107,8 +2115,8 @@ public:
 	void resolveEpsilonTrans();
 
 	/* Workers for concatenation and union. */
-	bool doConcat( FsmAp *other, StateSet *fromStates, bool optional );
-	bool doUnion( FsmAp *other );
+	FsmRes doConcat( FsmAp *other, StateSet *fromStates, bool optional );
+	FsmRes doUnion( FsmAp *other );
 
 	/*
 	 * Final states
