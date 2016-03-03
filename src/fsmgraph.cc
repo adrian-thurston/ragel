@@ -1368,6 +1368,11 @@ FsmRes FsmAp::fillInStates()
 		}
 	}
 
+	if ( priorInteraction ) {
+		// cout << "aborting due to prior interaction" << endl;
+		throw PriorInteraction( guardId );
+	}
+
 	if ( overStateLimit() ) {
 		// cout << "aborting due to state limit" << endl;
 		cleanAbortedFill();
