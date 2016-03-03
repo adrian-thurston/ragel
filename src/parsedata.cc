@@ -1257,7 +1257,7 @@ FsmRes ParseData::makeAll()
 	}
 
 	delete[] graphs;
-	return FsmRes( mainGraph, FsmRes::T() );
+	return FsmRes( FsmRes::Fsm(), mainGraph );
 }
 
 void ParseData::analyzeAction( Action *action, InlineList *inlineList )
@@ -1513,7 +1513,7 @@ FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *h
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
-		return FsmRes( 0, FsmRes::T() );
+		return FsmRes( FsmRes::Aborted() );
 
 	createNfaActions( sectionGraph );
 
@@ -1540,7 +1540,7 @@ FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *h
 	sectionGraph->sortStatesByFinal();
 	sectionGraph->setStateNumbers( 0 );
 
-	return FsmRes( sectionGraph, FsmRes::T() );
+	return FsmRes( FsmRes::Fsm(), sectionGraph );
 }
 
 void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,

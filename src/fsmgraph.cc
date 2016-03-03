@@ -900,7 +900,7 @@ FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 
 	/* A repeat of one does absolutely nothing. */
 	if ( times == 1 )
-		return FsmRes( fsm, FsmRes::T() );
+		return FsmRes( FsmRes::Fsm(), fsm );
 
 	/* Make a machine to make copies from. */
 	FsmAp *copyFrom = new FsmAp( *fsm );
@@ -1043,19 +1043,19 @@ FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
 FsmRes FsmAp::epsilonOp( FsmAp *fsm )
 {
 	fsm->_epsilonOp( );
-	return FsmRes( fsm, FsmRes::T() );
+	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
 FsmRes FsmAp::joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers )
 {
 	fsm->_joinOp( startId, finalId, others, numOthers );
-	return FsmRes( fsm, FsmRes::T() );
+	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
 FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
 {
 	fsm->_nfaUnionOp( others, n, depth );
-	return FsmRes( fsm, FsmRes::T() );
+	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
 FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
@@ -1063,13 +1063,13 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 {
 	fsm->_nfaRepeatOp( push, pop, init,
 			stay, repeat, exit, curActionOrd );
-	return FsmRes( fsm, FsmRes::T() );
+	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
 FsmRes FsmAp::isolateStartState( FsmAp *fsm )
 {
 	fsm->_isolateStartState();
-	return FsmRes( fsm, FsmRes::T() );
+	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
 StateAp *FsmAp::dupStartState()
