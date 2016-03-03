@@ -393,29 +393,24 @@ void FsmAp::doEmbedCondition( StateAp *state,
 	}
 }
 
-FsmRes FsmAp::_embedCondition( StateAp *state, const CondSet &set, const CondKeySet &vals )
+FsmRes FsmAp::embedCondition( FsmAp *fsm, StateAp *state, const CondSet &set, const CondKeySet &vals )
 {
 	/* Turn on misfit accounting to possibly catch the old start state. */
-	setMisfitAccounting( true );
+	fsm->setMisfitAccounting( true );
 
 	/* Worker. */
-	doEmbedCondition( state, set, vals );
+	fsm->doEmbedCondition( state, set, vals );
 
 	/* Fill in any states that were newed up as combinations of others. */
-	FsmRes res = fillInStates();
+	FsmRes res = fsm->fillInStates();
 	if ( !res.success() )
 		return res;
 
 	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
 
 	return res;
-}
-
-FsmRes FsmAp::embedCondition( FsmAp *fsm, StateAp *state, const CondSet &set, const CondKeySet &vals )
-{
-	return fsm->_embedCondition( state, set, vals );
 }
 
 void FsmAp::addOutCondition( StateAp *state, Action *condAction, bool sense )

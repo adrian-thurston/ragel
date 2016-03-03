@@ -112,7 +112,7 @@ void PriorTable::setPriors( const PriorTable &other )
 void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 {
 	/* Make sure the start state has no other entry points. */
-	_isolateStartState();
+	isolateStartState( this );
 
 	/* Walk all transitions out of the start state. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
@@ -209,7 +209,7 @@ void FsmAp::leaveFsmPrior( int ordering, PriorDesc *prior )
 void FsmAp::startFsmAction( int ordering, Action *action )
 {
 	/* Make sure the start state has no other entry points. */
-	_isolateStartState();
+	isolateStartState( this );
 
 	/* Walk the start state's transitions, setting functions. */
 	for ( TransList::Iter trans = startState->outList; trans.lte(); trans++ ) {
@@ -534,7 +534,7 @@ void FsmAp::transferErrorActions( StateAp *state, int transferPoint )
 void FsmAp::startErrorAction( int ordering, Action *action, int transferPoint )
 {
 	/* Make sure the start state has no other entry points. */
-	_isolateStartState();
+	isolateStartState( this );
 
 	/* Add the actions. */
 	startState->errActionTable.setAction( ordering, action, transferPoint );
@@ -587,7 +587,7 @@ void FsmAp::middleErrorAction( int ordering, Action *action, int transferPoint )
 void FsmAp::startEOFAction( int ordering, Action *action )
 {
 	/* Make sure the start state has no other entry points. */
-	_isolateStartState();
+	isolateStartState( this );
 
 	/* Add the actions. */
 	startState->eofActionTable.setAction( ordering, action );
@@ -643,7 +643,7 @@ void FsmAp::middleEOFAction( int ordering, Action *action )
 void FsmAp::startToStateAction( int ordering, Action *action )
 {
 	/* Make sure the start state has no other entry points. */
-	_isolateStartState();
+	isolateStartState( this );
 	startState->toStateActionTable.setAction( ordering, action );
 }
 
@@ -696,7 +696,7 @@ void FsmAp::middleToStateAction( int ordering, Action *action )
 void FsmAp::startFromStateAction( int ordering, Action *action )
 {
 	/* Make sure the start state has no other entry points. */
-	_isolateStartState();
+	isolateStartState( this );
 	startState->fromStateActionTable.setAction( ordering, action );
 }
 
@@ -1082,16 +1082,16 @@ FsmRes FsmAp::startFsmCondition( Action *condAction, bool sense )
 	vals.append( sense ? 1 : 0 );
 
 	/* Make sure the start state has no other entry points. */
-	_isolateStartState();
+	isolateStartState( this );
 
-	FsmRes res = _embedCondition( startState, set, vals );
+	FsmRes res = embedCondition( this, startState, set, vals );
 	if ( !res.success() )
 		return res;
 
 	if ( startState->nfaOut != 0 ) {
 		/* Only one level. */
 		for ( NfaTransList::Iter na = *startState->nfaOut; na.lte(); na++ ) {
-			res = _embedCondition( startState, set, vals );
+			res = embedCondition( this, startState, set, vals );
 			if ( !res.success() )
 				return res;
 		}
@@ -1107,7 +1107,7 @@ void FsmAp::allTransCondition( Action *condAction, bool sense )
 	vals.append( sense ? 1 : 0 );
 
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) 
-		_embedCondition( state, set, vals );
+		embedCondition( this, state, set, vals );
 }
 
 void FsmAp::leaveFsmCondition( Action *condAction, bool sense )

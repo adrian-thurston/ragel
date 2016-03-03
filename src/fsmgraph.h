@@ -1805,9 +1805,6 @@ private:
 			const CondSet &set, const CondKeySet &vals );
 
 public:
-	FsmRes _embedCondition( StateAp *state, const CondSet &set,
-			const CondKeySet &vals );
-
 	static FsmRes embedCondition( FsmAp *fsm, StateAp *state, const CondSet &set,
 			const CondKeySet &vals );
 
@@ -2075,20 +2072,6 @@ public:
 	/*
 	 * Fsm operators.
 	 */
-
-	FsmRes _starOp( );
-	FsmRes _optionalRepeatOp( int times );
-	void _epsilonOp();
-	void _joinOp( int startId, int finalId, FsmAp **others, int numOthers );
-
-	/* Results in an NFA. */
-	void _nfaUnionOp( FsmAp **others, int n, int depth );
-	void _nfaRepeatOp( Action *push, Action *pop, Action *init,
-			Action *stay, Action *repeat, Action *exit, int &curActionOrd );
-
-	/* Make a new start state that has no entry points. Will not change the
-	 * meaning of the fsm. */
-	void _isolateStartState();
 
 	static FsmRes starOp( FsmAp *fsm );
 	static FsmRes repeatOp( FsmAp *fsm, int times );

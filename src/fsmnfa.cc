@@ -147,21 +147,20 @@ const int ORD_TEST = 1073741824;
  * This is a compositional operator since it doesn't leave any actions to
  * trailing characters, where they may interact with other actions that use the
  * same variables. */
-void FsmAp::_nfaRepeatOp( Action *push, Action *pop,
-		Action *init, Action *stay, Action *repeat,
-		Action *exit, int &curActionOrd )
+FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
+		Action *stay, Action *repeat, Action *exit, int &curActionOrd )
 {
 	/*
 	 * First Concat.
 	 */
-	StateSet origFinals = finStateSet;
+	StateSet origFinals = fsm->finStateSet;
 
 	/* Get the orig start state. */
-	StateAp *origStartState = startState;
-	StateAp *repStartState = dupStartState();
+	StateAp *origStartState = fsm->startState;
+	StateAp *repStartState = fsm->dupStartState();
 
 	/* New start state. */
-	StateAp *newStart = addState();
+	StateAp *newStart = fsm->addState();
 
 	newStart->nfaOut = new NfaTransList;
 
@@ -173,15 +172,15 @@ void FsmAp::_nfaRepeatOp( Action *push, Action *pop,
 	trans->popTest.setAction( ORD_TEST, init );
 
 	newStart->nfaOut->append( trans );
-	attachToNfa( newStart, origStartState, trans );
+	fsm->attachToNfa( newStart, origStartState, trans );
 
-	StateAp *newFinal = addState();
+	StateAp *newFinal = fsm->addState();
 
 	for ( StateSet::Iter orig = origFinals; orig.lte(); orig++ ) {
-		unsetFinState( *orig );
+		fsm->unsetFinState( *orig );
 
-		StateAp *repl = addState();
-		moveInwardTrans( repl, *orig );
+		StateAp *repl = fsm->addState();
+		fsm->moveInwardTrans( repl, *orig );
 
 		repl->nfaOut = new NfaTransList;
 
@@ -193,7 +192,7 @@ void FsmAp::_nfaRepeatOp( Action *push, Action *pop,
 		trans->popTest.setAction( ORD_TEST, stay );
 
 		repl->nfaOut->append( trans );
-		attachToNfa( repl, *orig, trans );
+		fsm->attachToNfa( repl, *orig, trans );
 
 		/* Transition back to the start. Represents repeat. */
 		trans = new NfaTrans( 2 );
@@ -203,7 +202,7 @@ void FsmAp::_nfaRepeatOp( Action *push, Action *pop,
 		trans->popTest.setAction( ORD_TEST, repeat );
 
 		repl->nfaOut->append( trans );
-		attachToNfa( repl, repStartState, trans );
+		fsm->attachToNfa( repl, repStartState, trans );
 
 		/* Transition to thew new final. Represents exiting. */
 		trans = new NfaTrans( 1 );
@@ -213,21 +212,24 @@ void FsmAp::_nfaRepeatOp( Action *push, Action *pop,
 		trans->popTest.setAction( ORD_TEST, exit );
 
 		repl->nfaOut->append( trans );
-		attachToNfa( repl, newFinal, trans );
+		fsm->attachToNfa( repl, newFinal, trans );
 	}
 
-	unsetStartState();
-	setStartState( newStart );
-	setFinState( newFinal );
+	fsm->unsetStartState();
+	fsm->setStartState( newStart );
+	fsm->setFinState( newFinal );
+
+	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
-/* Unions other with this machine. Other is deleted. */
-void FsmAp::_nfaUnionOp( FsmAp **others, int n, int depth )
+
+/* Unions others with fsm. Others are deleted. */
+FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
 {
 	/* Mark existing NFA states as NFA_REP states, which excludes them from the
 	 * prepare NFA round. We must treat them as final NFA states and not try to
 	 * make them deterministic. */
-	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaOut != 0 )
 			st->stateBits |= STB_NFA_REP;
 	}
@@ -240,39 +242,39 @@ void FsmAp::_nfaUnionOp( FsmAp **others, int n, int depth )
 	}
 
 	for ( int o = 0; o < n; o++ )
-		assert( ctx == others[o]->ctx );
+		assert( fsm->ctx == others[o]->ctx );
 
 	/* Not doing misfit accounting here. If we wanted to, it would need to be
 	 * made nfa-compatibile. */
 
 	/* Build a state set consisting of both start states */
 	StateSet startStateSet;
-	startStateSet.insert( startState );
+	startStateSet.insert( fsm->startState );
 	for ( int o = 0; o < n; o++ )
 		startStateSet.insert( others[o]->startState );
 
 	/* Both of the original start states loose their start state status. */
-	unsetStartState();
+	fsm->unsetStartState();
 	for ( int o = 0; o < n; o++ )
 		others[o]->unsetStartState();
 
 	/* Bring in the rest of other's entry points. */
 	for ( int o = 0; o < n; o++ ) {
-		copyInEntryPoints( others[o] );
+		fsm->copyInEntryPoints( others[o] );
 		others[o]->entryPoints.empty();
 	}
 
 	for ( int o = 0; o < n; o++ ) {
 		/* Merge the lists. This will move all the states from other
 		 * into this. No states will be deleted. */
-		stateList.append( others[o]->stateList );
-		misfitList.append( others[o]->misfitList );
+		fsm->stateList.append( others[o]->stateList );
+		fsm->misfitList.append( others[o]->misfitList );
 		// nfaList.append( others[o]->nfaList );
 	}
 
 	for ( int o = 0; o < n; o++ ) {
 		/* Move the final set data from other into this. */
-		finStateSet.insert( others[o]->finStateSet );
+		fsm->finStateSet.insert( others[o]->finStateSet );
 		others[o]->finStateSet.empty();
 	}
 
@@ -283,53 +285,53 @@ void FsmAp::_nfaUnionOp( FsmAp **others, int n, int depth )
 	}
 
 	/* Create a new start state. */
-	setStartState( addState() );
+	fsm->setStartState( fsm->addState() );
 
 	if ( depth == 0 ) {
-		startState->stateDictEl = new StateDictEl( startStateSet );
-		nfaList.append( startState );
+		fsm->startState->stateDictEl = new StateDictEl( startStateSet );
+		fsm->nfaList.append( fsm->startState );
 
 		for ( StateSet::Iter s = startStateSet; s.lte(); s++ ) {
 			NfaTrans *trans = new NfaTrans( /* 0, 0, */ 0 );
 
-			if ( startState->nfaOut == 0 )
-				startState->nfaOut = new NfaTransList;
+			if ( fsm->startState->nfaOut == 0 )
+				fsm->startState->nfaOut = new NfaTransList;
 
-			startState->nfaOut->append( trans );
-			attachToNfa( startState, *s, trans );
+			fsm->startState->nfaOut->append( trans );
+			fsm->attachToNfa( fsm->startState, *s, trans );
 		}
 	}
 	else {
 		/* Merge the start states. */
-		if ( ctx->printStatistics )
+		if ( fsm->ctx->printStatistics )
 			cout << "nfa-fill-round\t0" << endl;
 
-		nfaMergeStates( startState, startStateSet.data, startStateSet.length() );
+		fsm->nfaMergeStates( fsm->startState, startStateSet.data, startStateSet.length() );
 
-		long removed = removeUnreachableStates();
-		if ( ctx->printStatistics )
+		long removed = fsm->removeUnreachableStates();
+		if ( fsm->ctx->printStatistics )
 			cout << "round-unreach\t" << removed << endl;
 
 		/* Fill in any new states made from merging. */
 		for ( long i = 1; i < depth; i++ ) {
-			if ( ctx->printStatistics )
+			if ( fsm->ctx->printStatistics )
 				cout << "nfa-fill-round\t" << i << endl;
 
-			if ( nfaList.length() == 0 )
+			if ( fsm->nfaList.length() == 0 )
 				break;
 
-			nfaFillInStates( );
+			fsm->nfaFillInStates( );
 
-			long removed = removeUnreachableStates();
-			if ( ctx->printStatistics )
+			long removed = fsm->removeUnreachableStates();
+			if ( fsm->ctx->printStatistics )
 				cout << "round-unreach\t" << removed << endl;
 		}
 
-		finalizeNfaRound();
+		fsm->finalizeNfaRound();
 
 		long maxStateSetSize = 0;
 		long count = 0;
-		for ( StateList::Iter s = stateList; s.lte(); s++ ) {
+		for ( StateList::Iter s = fsm->stateList; s.lte(); s++ ) {
 			if ( s->nfaOut != 0 && s->nfaOut->length() > 0 ) {
 				count += 1;
 				if ( s->nfaOut->length() > maxStateSetSize )
@@ -337,24 +339,25 @@ void FsmAp::_nfaUnionOp( FsmAp **others, int n, int depth )
 			}
 		}
 
-		if ( ctx->printStatistics ) {
+		if ( fsm->ctx->printStatistics ) {
 			cout << "fill-list\t" << count << endl;
-			cout << "state-dict\t" << stateDict.length() << endl;
-			cout << "states\t" << stateList.length() << endl;
+			cout << "state-dict\t" << fsm->stateDict.length() << endl;
+			cout << "states\t" << fsm->stateList.length() << endl;
 			cout << "max-ss\t" << maxStateSetSize << endl;
 		}
 
-		removeUnreachableStates();
+		fsm->removeUnreachableStates();
 
-		if ( ctx->printStatistics )
-			cout << "post-unreachable\t" << stateList.length() << endl;
+		if ( fsm->ctx->printStatistics )
+			cout << "post-unreachable\t" << fsm->stateList.length() << endl;
 
-		minimizePartition2();
+		fsm->minimizePartition2();
 
-		if ( ctx->printStatistics ) {
-			std::cout << "post-min\t" << stateList.length() << std::endl;
+		if ( fsm->ctx->printStatistics ) {
+			std::cout << "post-min\t" << fsm->stateList.length() << std::endl;
 			std::cout << std::endl;
 		}
 	}
-}
 
+	return FsmRes( FsmRes::Fsm(), fsm );
+}

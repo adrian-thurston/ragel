@@ -294,108 +294,6 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 	}
 }
 
-/* Kleene star operator. Makes this machine the kleene star of itself. Any
- * transitions made going out of the machine and back into itself will be
- * notified that they are leaving transitions by having the leavingFromState
- * callback invoked. */
-FsmRes FsmAp::_starOp( )
-{
-	/* Turn on misfit accounting to possibly catch the old start state. */
-	setMisfitAccounting( true );
-
-	/* Create the new new start state. It will be set final after the merging
-	 * of the final states with the start state is complete. */
-	StateAp *prevStartState = startState;
-	unsetStartState();
-	setStartState( addState() );
-
-	/* Merge the new start state with the old one to isolate it. */
-	mergeStates( startState, prevStartState );
-
-	/* Merge the start state into all final states. Except the start state on
-	 * the first pass. If the start state is set final we will be doubling up
-	 * its transitions, which will get transfered to any final states that
-	 * follow it in the final state set. This will be determined by the order
-	 * of items in the final state set. To prevent this we just merge with the
-	 * start on a second pass. */
-	for ( StateSet::Iter st = finStateSet; st.lte(); st++ ) {
-		if ( *st != startState )
-			mergeStatesLeaving( *st, startState );
-	}
-
-	/* Now it is safe to merge the start state with itself (provided it
-	 * is set final). */
-	if ( startState->isFinState() )
-		mergeStatesLeaving( startState, startState );
-
-	/* Now ensure the new start state is a final state. */
-	setFinState( startState );
-
-	/* Fill in any states that were newed up as combinations of others. */
-	FsmRes res = fillInStates();
-	if ( !res.success() )
-		return res;
-
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-
-	return res;
-}
-
-FsmRes FsmAp::_optionalRepeatOp( int times )
-{
-	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
-	assert( times > 0 );
-
-	/* A repeat of one optional merely allows zero string. */
-	if ( times == 1 ) {
-		_isolateStartState();
-		setFinState( startState );
-		return FsmRes( FsmRes::Fsm(), this );
-	}
-
-	/* Make a machine to make copies from. */
-	FsmAp *copyFrom = new FsmAp( *this );
-
-	/* The state set used in the from end of the concatentation. Starts with
-	 * the initial final state set, then after each concatenation, gets set to
-	 * the the final states that come from the the duplicate. */
-	StateSet lastFinSet( finStateSet );
-
-	/* Set the initial state to zero to allow zero copies. */
-	_isolateStartState();
-	setFinState( startState );
-
-	/* Concatentate duplicates onto the end up until before the last. */
-	for ( int i = 1; i < times-1; i++ ) {
-		/* Make a duplicate for concating and set the fin bits to graph 2 so we
-		 * can pick out it's final states after the optional style concat. */
-		FsmAp *dup = new FsmAp( *copyFrom );
-		dup->setFinBits( STB_GRAPH2 );
-		FsmRes res = doConcat( dup, &lastFinSet, true );
-		if ( !res.success() )
-			return res;
-
-		/* Clear the last final state set and make the new one by taking only
-		 * the final states that come from graph 2.*/
-		lastFinSet.empty();
-		for ( int i = 0; i < finStateSet.length(); i++ ) {
-			/* If the state came from graph 2, add it to the last set and clear
-			 * the bits. */
-			StateAp *fs = finStateSet[i];
-			if ( fs->stateBits & STB_GRAPH2 ) {
-				lastFinSet.insert( fs );
-				fs->stateBits &= ~STB_GRAPH2;
-			}
-		}
-	}
-
-	/* Now use the copyFrom on the end, no bits set, no bits to clear. */
-	return doConcat( copyFrom, &lastFinSet, true );
-}
-
-
 /* Fsm concatentation worker. Supports treating the concatentation as optional,
  * which essentially leaves the final states of machine one as final. */
 FsmRes FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
@@ -613,132 +511,6 @@ void FsmAp::resolveEpsilonTrans()
 	}
 }
 
-void FsmAp::_epsilonOp()
-{
-	setMisfitAccounting( true );
-
-	for ( StateList::Iter st = stateList; st.lte(); st++ )
-		st->owningGraph = 0;
-
-	/* Perform merges. */
-	resolveEpsilonTrans();
-
-	/* Epsilons can caused merges which leave behind unreachable states. */
-	fillInStates();
-
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-}
-
-/* Make a new maching by joining together a bunch of machines without making
- * any transitions between them. A negative finalId results in there being no
- * final id. */
-void FsmAp::_joinOp( int startId, int finalId, FsmAp **others, int numOthers )
-{
-	for ( int m = 0; m < numOthers; m++ ) {
-		assert( ctx == others[m]->ctx );
-	}
-
-	/* Set the owning machines. Start at one. Zero is reserved for the start
-	 * and final states. */
-	for ( StateList::Iter st = stateList; st.lte(); st++ )
-		st->owningGraph = 1;
-	for ( int m = 0; m < numOthers; m++ ) {
-		for ( StateList::Iter st = others[m]->stateList; st.lte(); st++ )
-			st->owningGraph = 2+m;
-	}
-
-	/* All machines loose start state status. */
-	unsetStartState();
-	for ( int m = 0; m < numOthers; m++ )
-		others[m]->unsetStartState();
-	
-	/* Bring the other machines into this. */
-	for ( int m = 0; m < numOthers; m++ ) {
-		/* Bring in the rest of other's entry points. */
-		copyInEntryPoints( others[m] );
-		others[m]->entryPoints.empty();
-
-		/* Merge the lists. This will move all the states from other into
-		 * this. No states will be deleted. */
-		stateList.append( others[m]->stateList );
-		assert( others[m]->misfitList.length() == 0 );
-
-		/* Move the final set data from other into this. */
-		finStateSet.insert( others[m]->finStateSet );
-		others[m]->finStateSet.empty();
-
-		/* Since other's list is empty, we can delete the fsm without
-		 * affecting any states. */
-		delete others[m];
-	}
-
-	/* Look up the start entry point. */
-	EntryMapEl *enLow = 0, *enHigh = 0;
-	bool findRes = entryPoints.findMulti( startId, enLow, enHigh );
-	if ( ! findRes ) {
-		/* No start state. Set a default one and proceed with the join. Note
-		 * that the result of the join will be a very uninteresting machine. */
-		setStartState( addState() );
-	}
-	else {
-		/* There is at least one start state, create a state that will become
-		 * the new start state. */
-		StateAp *newStart = addState();
-		setStartState( newStart );
-
-		/* The start state is in an owning machine class all it's own. */
-		newStart->owningGraph = 0;
-
-		/* Create the set of states to merge from. */
-		StateSet stateSet;
-		for ( EntryMapEl *en = enLow; en <= enHigh; en++ )
-			stateSet.insert( en->value );
-
-		/* Merge in the set of start states into the new start state. */
-		mergeStateList( newStart, stateSet.data, stateSet.length() );
-	}
-
-	/* Take a copy of the final state set, before unsetting them all. This
-	 * will allow us to call clearOutData on the states that don't get
-	 * final state status back back. */
-	StateSet finStateSetCopy = finStateSet;
-
-	/* Now all final states are unset. */
-	unsetAllFinStates();
-
-	if ( finalId >= 0 ) {
-		/* Create the implicit final state. */
-		StateAp *finState = addState();
-		setFinState( finState );
-
-		/* Assign an entry into the final state on the final state entry id. Note
-		 * that there may already be an entry on this id. That's ok. Also set the
-		 * final state owning machine id. It's in a class all it's own. */
-		setEntry( finalId, finState );
-		finState->owningGraph = 0;
-	}
-
-	/* Hand over to workers for resolving epsilon trans. This will merge states
-	 * with the targets of their epsilon transitions. */
-	resolveEpsilonTrans();
-
-	/* Invoke the relinquish final callback on any states that did not get
-	 * final state status back. */
-	for ( StateSet::Iter st = finStateSetCopy; st.lte(); st++ ) {
-		if ( !((*st)->stateBits & STB_ISFINAL) )
-			clearOutData( *st );
-	}
-
-	/* Fill in any new states made from merging. */
-	fillInStates();
-
-	/* Joining can be messy. Instead of having misfit accounting on (which is
-	 * tricky here) do a full cleaning. */
-	removeUnreachableStates();
-}
-
 void FsmAp::globOp( FsmAp **others, int numOthers )
 {
 	for ( int m = 0; m < numOthers; m++ ) {
@@ -857,45 +629,53 @@ void FsmAp::unsetIncompleteFinals()
 	}
 }
 
-/* Ensure that the start state is free of entry points (aside from the fact
- * that it is the start state). If the start state has entry points then Make a
- * new start state by merging with the old one. Useful before modifying start
- * transitions. If the existing start state has any entry points other than the
- * start state entry then modifying its transitions changes more than the start
- * transitions. So isolate the start state by separating it out such that it
- * only has start stateness as it's entry point. */
-void FsmAp::_isolateStartState( )
-{
-	/* Bail out if the start state is already isolated. */
-	if ( isStartStateIsolated() )
-		return;
-
-	/* Turn on misfit accounting to possibly catch the old start state. */
-	setMisfitAccounting( true );
-
-	/* This will be the new start state. The existing start
-	 * state is merged with it. */
-	StateAp *prevStartState = startState;
-	unsetStartState();
-	setStartState( addState() );
-
-	/* Merge the new start state with the old one to isolate it. */
-	mergeStates( startState, prevStartState );
-
-	/* Stfil and stateDict will be empty because the merging of the old start
-	 * state into the new one will not have any conflicting transitions. */
-	assert( stateDict.treeSize == 0 );
-	assert( nfaList.length() == 0 );
-
-	/* The old start state may be unreachable. Remove the misfits and turn off
-	 * misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-}
-
+/* Kleene star operator. Makes this machine the kleene star of itself. Any
+ * transitions made going out of the machine and back into itself will be
+ * notified that they are leaving transitions by having the leavingFromState
+ * callback invoked. */
 FsmRes FsmAp::starOp( FsmAp *fsm )
 {
-	return fsm->_starOp();
+	/* Turn on misfit accounting to possibly catch the old start state. */
+	fsm->setMisfitAccounting( true );
+
+	/* Create the new new start state. It will be set final after the merging
+	 * of the final states with the start state is complete. */
+	StateAp *prevStartState = fsm->startState;
+	fsm->unsetStartState();
+	fsm->setStartState( fsm->addState() );
+
+	/* Merge the new start state with the old one to isolate it. */
+	fsm->mergeStates( fsm->startState, prevStartState );
+
+	/* Merge the start state into all final states. Except the start state on
+	 * the first pass. If the start state is set final we will be doubling up
+	 * its transitions, which will get transfered to any final states that
+	 * follow it in the final state set. This will be determined by the order
+	 * of items in the final state set. To prevent this we just merge with the
+	 * start on a second pass. */
+	for ( StateSet::Iter st = fsm->finStateSet; st.lte(); st++ ) {
+		if ( *st != fsm->startState )
+			fsm->mergeStatesLeaving( *st, fsm->startState );
+	}
+
+	/* Now it is safe to merge the start state with itself (provided it
+	 * is set final). */
+	if ( fsm->startState->isFinState() )
+		fsm->mergeStatesLeaving( fsm->startState, fsm->startState );
+
+	/* Now ensure the new start state is a final state. */
+	fsm->setFinState( fsm->startState );
+
+	/* Fill in any states that were newed up as combinations of others. */
+	FsmRes res = fsm->fillInStates();
+	if ( !res.success() )
+		return res;
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	return res;
 }
 
 FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
@@ -928,7 +708,54 @@ FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 
 FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
 {
-	return fsm->_optionalRepeatOp( times );
+	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
+	assert( times > 0 );
+
+	/* A repeat of one optional merely allows zero string. */
+	if ( times == 1 ) {
+		isolateStartState( fsm );
+		fsm->setFinState( fsm->startState );
+		return FsmRes( FsmRes::Fsm(), fsm );
+	}
+
+	/* Make a machine to make copies from. */
+	FsmAp *copyFrom = new FsmAp( *fsm );
+
+	/* The state set used in the from end of the concatentation. Starts with
+	 * the initial final state set, then after each concatenation, gets set to
+	 * the the final states that come from the the duplicate. */
+	StateSet lastFinSet( fsm->finStateSet );
+
+	/* Set the initial state to zero to allow zero copies. */
+	isolateStartState( fsm );
+	fsm->setFinState( fsm->startState );
+
+	/* Concatentate duplicates onto the end up until before the last. */
+	for ( int i = 1; i < times-1; i++ ) {
+		/* Make a duplicate for concating and set the fin bits to graph 2 so we
+		 * can pick out it's final states after the optional style concat. */
+		FsmAp *dup = new FsmAp( *copyFrom );
+		dup->setFinBits( STB_GRAPH2 );
+		FsmRes res = fsm->doConcat( dup, &lastFinSet, true );
+		if ( !res.success() )
+			return res;
+
+		/* Clear the last final state set and make the new one by taking only
+		 * the final states that come from graph 2.*/
+		lastFinSet.empty();
+		for ( int i = 0; i < fsm->finStateSet.length(); i++ ) {
+			/* If the state came from graph 2, add it to the last set and clear
+			 * the bits. */
+			StateAp *fs = fsm->finStateSet[i];
+			if ( fs->stateBits & STB_GRAPH2 ) {
+				lastFinSet.insert( fs );
+				fs->stateBits &= ~STB_GRAPH2;
+			}
+		}
+	}
+
+	/* Now use the copyFrom on the end, no bits set, no bits to clear. */
+	return fsm->doConcat( copyFrom, &lastFinSet, true );
 }
 
 /* Concatenates other to the end of this machine. Other is deleted.  Any
@@ -1046,33 +873,173 @@ FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
 
 FsmRes FsmAp::epsilonOp( FsmAp *fsm )
 {
-	fsm->_epsilonOp( );
-	return FsmRes( FsmRes::Fsm(), fsm );
+	fsm->setMisfitAccounting( true );
+
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ )
+		st->owningGraph = 0;
+
+	/* Perform merges. */
+	fsm->resolveEpsilonTrans();
+
+	/* Epsilons can caused merges which leave behind unreachable states. */
+	FsmRes res = fsm->fillInStates();
+	if ( !res.success() )
+		return res;
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	return res;
 }
 
+/* Make a new maching by joining together a bunch of machines without making
+ * any transitions between them. A negative finalId results in there being no
+ * final id. */
 FsmRes FsmAp::joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers )
 {
-	fsm->_joinOp( startId, finalId, others, numOthers );
-	return FsmRes( FsmRes::Fsm(), fsm );
+	for ( int m = 0; m < numOthers; m++ ) {
+		assert( fsm->ctx == others[m]->ctx );
+	}
+
+	/* Set the owning machines. Start at one. Zero is reserved for the start
+	 * and final states. */
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ )
+		st->owningGraph = 1;
+	for ( int m = 0; m < numOthers; m++ ) {
+		for ( StateList::Iter st = others[m]->stateList; st.lte(); st++ )
+			st->owningGraph = 2+m;
+	}
+
+	/* All machines loose start state status. */
+	fsm->unsetStartState();
+	for ( int m = 0; m < numOthers; m++ )
+		others[m]->unsetStartState();
+	
+	/* Bring the other machines into this. */
+	for ( int m = 0; m < numOthers; m++ ) {
+		/* Bring in the rest of other's entry points. */
+		fsm->copyInEntryPoints( others[m] );
+		others[m]->entryPoints.empty();
+
+		/* Merge the lists. This will move all the states from other into
+		 * this. No states will be deleted. */
+		fsm->stateList.append( others[m]->stateList );
+		assert( others[m]->misfitList.length() == 0 );
+
+		/* Move the final set data from other into this. */
+		fsm->finStateSet.insert( others[m]->finStateSet );
+		others[m]->finStateSet.empty();
+
+		/* Since other's list is empty, we can delete the fsm without
+		 * affecting any states. */
+		delete others[m];
+	}
+
+	/* Look up the start entry point. */
+	EntryMapEl *enLow = 0, *enHigh = 0;
+	bool findRes = fsm->entryPoints.findMulti( startId, enLow, enHigh );
+	if ( ! findRes ) {
+		/* No start state. Set a default one and proceed with the join. Note
+		 * that the result of the join will be a very uninteresting machine. */
+		fsm->setStartState( fsm->addState() );
+	}
+	else {
+		/* There is at least one start state, create a state that will become
+		 * the new start state. */
+		StateAp *newStart = fsm->addState();
+		fsm->setStartState( newStart );
+
+		/* The start state is in an owning machine class all it's own. */
+		newStart->owningGraph = 0;
+
+		/* Create the set of states to merge from. */
+		StateSet stateSet;
+		for ( EntryMapEl *en = enLow; en <= enHigh; en++ )
+			stateSet.insert( en->value );
+
+		/* Merge in the set of start states into the new start state. */
+		fsm->mergeStateList( newStart, stateSet.data, stateSet.length() );
+	}
+
+	/* Take a copy of the final state set, before unsetting them all. This
+	 * will allow us to call clearOutData on the states that don't get
+	 * final state status back back. */
+	StateSet finStateSetCopy = fsm->finStateSet;
+
+	/* Now all final states are unset. */
+	fsm->unsetAllFinStates();
+
+	if ( finalId >= 0 ) {
+		/* Create the implicit final state. */
+		StateAp *finState = fsm->addState();
+		fsm->setFinState( finState );
+
+		/* Assign an entry into the final state on the final state entry id. Note
+		 * that there may already be an entry on this id. That's ok. Also set the
+		 * final state owning machine id. It's in a class all it's own. */
+		fsm->setEntry( finalId, finState );
+		finState->owningGraph = 0;
+	}
+
+	/* Hand over to workers for resolving epsilon trans. This will merge states
+	 * with the targets of their epsilon transitions. */
+	fsm->resolveEpsilonTrans();
+
+	/* Invoke the relinquish final callback on any states that did not get
+	 * final state status back. */
+	for ( StateSet::Iter st = finStateSetCopy; st.lte(); st++ ) {
+		if ( !((*st)->stateBits & STB_ISFINAL) )
+			fsm->clearOutData( *st );
+	}
+
+	/* Fill in any new states made from merging. */
+	FsmRes res = fsm->fillInStates();
+	if ( !res.success() )
+		return res;
+
+	/* Joining can be messy. Instead of having misfit accounting on (which is
+	 * tricky here) do a full cleaning. */
+	fsm->removeUnreachableStates();
+
+	return res;
 }
 
-FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
-{
-	fsm->_nfaUnionOp( others, n, depth );
-	return FsmRes( FsmRes::Fsm(), fsm );
-}
-
-FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
-		Action *stay, Action *repeat, Action *exit, int &curActionOrd )
-{
-	fsm->_nfaRepeatOp( push, pop, init,
-			stay, repeat, exit, curActionOrd );
-	return FsmRes( FsmRes::Fsm(), fsm );
-}
-
+/* Ensure that the start state is free of entry points (aside from the fact
+ * that it is the start state). If the start state has entry points then Make a
+ * new start state by merging with the old one. Useful before modifying start
+ * transitions. If the existing start state has any entry points other than the
+ * start state entry then modifying its transitions changes more than the start
+ * transitions. So isolate the start state by separating it out such that it
+ * only has start stateness as it's entry point. */
 FsmRes FsmAp::isolateStartState( FsmAp *fsm )
 {
-	fsm->_isolateStartState();
+	/* Do nothing if the start state is already isolated. */
+	if ( fsm->isStartStateIsolated() )
+		return FsmRes( FsmRes::Fsm(), fsm );
+
+	/* Turn on misfit accounting to possibly catch the old start state. */
+	fsm->setMisfitAccounting( true );
+
+	/* This will be the new start state. The existing start
+	 * state is merged with it. */
+	StateAp *prevStartState = fsm->startState;
+	fsm->unsetStartState();
+	fsm->setStartState( fsm->addState() );
+
+	/* Merge the new start state with the old one to isolate it. */
+	fsm->mergeStates( fsm->startState, prevStartState );
+
+	/* Stfil and stateDict will be empty because the merging of the old start
+	 * state into the new one will not have any conflicting transitions. */
+	assert( fsm->stateDict.treeSize == 0 );
+	assert( fsm->nfaList.length() == 0 );
+
+	/* The old start state may be unreachable. Remove the misfits and turn off
+	 * misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
 	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
