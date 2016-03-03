@@ -1074,7 +1074,7 @@ bool FsmAp::hasOutData( StateAp *state )
  * Setting Conditions.
  */
 
-void FsmAp::startFsmCondition( Action *condAction, bool sense )
+FsmRes FsmAp::startFsmCondition( Action *condAction, bool sense )
 {
 	CondSet set;
 	CondKeySet vals;
@@ -1084,14 +1084,19 @@ void FsmAp::startFsmCondition( Action *condAction, bool sense )
 	/* Make sure the start state has no other entry points. */
 	_isolateStartState();
 
-	_embedCondition( startState, set, vals );
+	FsmRes res = _embedCondition( startState, set, vals );
+	if ( !res.success() )
+		return res;
 
 	if ( startState->nfaOut != 0 ) {
 		/* Only one level. */
 		for ( NfaTransList::Iter na = *startState->nfaOut; na.lte(); na++ ) {
-			_embedCondition( startState, set, vals );
+			res = _embedCondition( startState, set, vals );
+			if ( !res.success() )
+				return res;
 		}
 	}
+	return FsmRes( FsmRes::Fsm(), this );
 }
 
 void FsmAp::allTransCondition( Action *condAction, bool sense )

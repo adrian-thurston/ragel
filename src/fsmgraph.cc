@@ -298,7 +298,7 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
  * transitions made going out of the machine and back into itself will be
  * notified that they are leaving transitions by having the leavingFromState
  * callback invoked. */
-void FsmAp::_starOp( )
+FsmRes FsmAp::_starOp( )
 {
 	/* Turn on misfit accounting to possibly catch the old start state. */
 	setMisfitAccounting( true );
@@ -332,14 +332,18 @@ void FsmAp::_starOp( )
 	setFinState( startState );
 
 	/* Fill in any states that were newed up as combinations of others. */
-	fillInStates();
+	FsmRes res = fillInStates();
+	if ( !res.success() )
+		return res;
 
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
 	setMisfitAccounting( false );
+
+	return res;
 }
 
-void FsmAp::_optionalRepeatOp( int times )
+FsmRes FsmAp::_optionalRepeatOp( int times )
 {
 	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
 	assert( times > 0 );
@@ -348,7 +352,7 @@ void FsmAp::_optionalRepeatOp( int times )
 	if ( times == 1 ) {
 		_isolateStartState();
 		setFinState( startState );
-		return;
+		return FsmRes( FsmRes::Fsm(), this );
 	}
 
 	/* Make a machine to make copies from. */
@@ -369,7 +373,9 @@ void FsmAp::_optionalRepeatOp( int times )
 		 * can pick out it's final states after the optional style concat. */
 		FsmAp *dup = new FsmAp( *copyFrom );
 		dup->setFinBits( STB_GRAPH2 );
-		doConcat( dup, &lastFinSet, true );
+		FsmRes res = doConcat( dup, &lastFinSet, true );
+		if ( !res.success() )
+			return res;
 
 		/* Clear the last final state set and make the new one by taking only
 		 * the final states that come from graph 2.*/
@@ -386,7 +392,7 @@ void FsmAp::_optionalRepeatOp( int times )
 	}
 
 	/* Now use the copyFrom on the end, no bits set, no bits to clear. */
-	doConcat( copyFrom, &lastFinSet, true );
+	return doConcat( copyFrom, &lastFinSet, true );
 }
 
 
@@ -889,8 +895,7 @@ void FsmAp::_isolateStartState( )
 
 FsmRes FsmAp::starOp( FsmAp *fsm )
 {
-	fsm->_starOp();
-	return FsmRes( fsm, FsmRes::T() );
+	return fsm->_starOp();
 }
 
 FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
@@ -923,8 +928,7 @@ FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 
 FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
 {
-	fsm->_optionalRepeatOp( times );
-	return FsmRes( fsm, FsmRes::T() );
+	return fsm->_optionalRepeatOp( times );
 }
 
 /* Concatenates other to the end of this machine. Other is deleted.  Any

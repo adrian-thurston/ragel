@@ -1805,13 +1805,13 @@ private:
 			const CondSet &set, const CondKeySet &vals );
 
 public:
-	void _embedCondition( StateAp *state, const CondSet &set,
+	FsmRes _embedCondition( StateAp *state, const CondSet &set,
 			const CondKeySet &vals );
 
 	static FsmRes embedCondition( FsmAp *fsm, StateAp *state, const CondSet &set,
 			const CondKeySet &vals );
 
-	void startFsmCondition( Action *condAction, bool sense );
+	FsmRes startFsmCondition( Action *condAction, bool sense );
 	void allTransCondition( Action *condAction, bool sense );
 	void leaveFsmCondition( Action *condAction, bool sense );
 
@@ -2076,8 +2076,8 @@ public:
 	 * Fsm operators.
 	 */
 
-	void _starOp( );
-	void _optionalRepeatOp( int times );
+	FsmRes _starOp( );
+	FsmRes _optionalRepeatOp( int times );
 	void _epsilonOp();
 	void _joinOp( int startId, int finalId, FsmAp **others, int numOthers );
 
