@@ -1696,22 +1696,36 @@ typedef Vector<EntryMapEl> EntryMapBase;
 /* Result of an operation. */
 struct FsmRes
 {
-	struct T {};
-	struct TooManyStates {};
 	struct Fsm {};
+	struct Aborted {};
+	struct TooManyStates {};
+	struct PriorInteraction {};
 
-	FsmRes( FsmAp *fsm, const T &t )
-		: fsm(fsm) {}
+	enum Type
+	{
+		TypeFsm,
+		TypeAborted,
+		TypeTooManyStates,
+		TypePriorInteraction
+	};
 
 	FsmRes( const Fsm &, FsmAp *fsm )
-		: fsm(fsm) {}
+		: fsm(fsm), type(TypeFsm) {}
+
+	FsmRes( const Aborted & )
+		: fsm(0), type(TypeAborted) {}
 
 	FsmRes( const TooManyStates & )
-		: fsm(0) {}
+		: fsm(0), type(TypeTooManyStates) {}
+
+	FsmRes( const PriorInteraction &, long long guardId )
+		: fsm(0), type(TypePriorInteraction), id(guardId) {}
 
 	bool success() { return fsm != 0; }
 
 	FsmAp *fsm;
+	Type type;
+	long long id;
 };
 
 /* Graph class that implements actions and priorities. */
