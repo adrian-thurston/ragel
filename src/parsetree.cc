@@ -2552,12 +2552,17 @@ FsmRes Factor::condPlus( ParseData *pd )
 		condCost( max );
 
 	FsmRes exprTree = expression->walk( pd );
+	if ( !exprTree.success() )
+		return exprTree;
 
 	exprTree.fsm->startFsmAction( 0, inc );
 	afterOpMinimize( exprTree.fsm );
 
 	if ( max != 0 ) {
-		exprTree.fsm->startFsmCondition( max, true );
+		FsmRes res = exprTree.fsm->startFsmCondition( max, true );
+		if ( !res.success() )
+			return res;
+
 		afterOpMinimize( exprTree.fsm );
 	}
 
@@ -2578,10 +2583,15 @@ FsmRes Factor::condPlus( ParseData *pd )
 
 	/* Star the duplicate. */
 	FsmRes res1 = FsmAp::starOp( dup );
+	if ( !res1.success() )
+		return res1;
 
 	afterOpMinimize( res1.fsm );
 
 	FsmRes res2 = FsmAp::concatOp( exprTree.fsm, res1.fsm );
+	if ( !res2.success() )
+		return res2;
+
 	afterOpMinimize( res2.fsm );
 
 	/* End plus operation. */
@@ -2602,6 +2612,8 @@ FsmRes Factor::condStar( ParseData *pd )
 	Action *min = action3;
 
 	FsmRes cp = condPlus( pd );
+	if ( !cp.success() )
+		return cp;
 
 	StateAp *newStart = cp.fsm->dupStartState();
 	cp.fsm->unsetStartState();

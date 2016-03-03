@@ -448,6 +448,8 @@ FsmRes FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 
 	/* Fill in any new states made from merging. */
 	FsmRes res = fillInStates();
+	if ( !res.success() )
+		return res;
 
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
