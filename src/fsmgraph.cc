@@ -71,33 +71,39 @@ StateAp *FsmAp::addState()
  * machine will be made that has len+1 states with one transition between each
  * state for each integer in str. IsSigned determines if the integers are to
  * be considered as signed or unsigned ints. */
-void FsmAp::_concatFsm( Key *str, int len )
+FsmAp *FsmAp::concatFsm( FsmCtx *ctx, Key *str, int len )
 {
+	FsmAp *fsm = new FsmAp( ctx );
+
 	/* Make the first state and set it as the start state. */
-	StateAp *last = addState();
-	setStartState( last );
+	StateAp *last = fsm->addState();
+	fsm->setStartState( last );
 
 	/* Attach subsequent states. */
 	for ( int i = 0; i < len; i++ ) {
-		StateAp *newState = addState();
-		attachNewTrans( last, newState, str[i], str[i] );
+		StateAp *newState = fsm->addState();
+		fsm->attachNewTrans( last, newState, str[i], str[i] );
 		last = newState;
 	}
 
 	/* Make the last state the final state. */
-	setFinState( last );
+	fsm->setFinState( last );
+
+	return fsm;
 }
 
 /* Case insensitive version of concatFsm. */
-void FsmAp::_concatFsmCI( Key *str, int len )
+FsmAp *FsmAp::concatFsmCI( FsmCtx *ctx, Key *str, int len )
 {
+	FsmAp *fsm = new FsmAp( ctx );
+
 	/* Make the first state and set it as the start state. */
-	StateAp *last = addState();
-	setStartState( last );
+	StateAp *last = fsm->addState();
+	fsm->setStartState( last );
 
 	/* Attach subsequent states. */
 	for ( int i = 0; i < len; i++ ) {
-		StateAp *newState = addState();
+		StateAp *newState = fsm->addState();
 
 		KeySet keySet( ctx->keyOps );
 		if ( str[i].isLower() )
@@ -107,48 +113,60 @@ void FsmAp::_concatFsmCI( Key *str, int len )
 		keySet.insert( str[i] );
 
 		for ( int i = 0; i < keySet.length(); i++ )
-			attachNewTrans( last, newState, keySet[i], keySet[i] );
+			fsm->attachNewTrans( last, newState, keySet[i], keySet[i] );
 
 		last = newState;
 	}
 
 	/* Make the last state the final state. */
-	setFinState( last );
+	fsm->setFinState( last );
+
+	return fsm;
 }
+
 
 /* Construct a machine that matches one character.  A new machine will be made
  * that has two states with a single transition between the states. IsSigned
  * determines if the integers are to be considered as signed or unsigned ints. */
-void FsmAp::_concatFsm( Key chr )
+FsmAp *FsmAp::concatFsm( FsmCtx *ctx, Key chr )
 {
-	/* Two states first start, second final. */
-	setStartState( addState() );
+	FsmAp *fsm = new FsmAp( ctx );
 
-	StateAp *end = addState();
-	setFinState( end );
+	/* Two states first start, second final. */
+	fsm->setStartState( fsm->addState() );
+
+	StateAp *end = fsm->addState();
+	fsm->setFinState( end );
 
 	/* Attach on the character. */
-	attachNewTrans( startState, end, chr, chr );
+	fsm->attachNewTrans( fsm->startState, end, chr, chr );
+
+	return fsm;
 }
+
 
 /* Construct a machine that matches any character in set.  A new machine will
  * be made that has two states and len transitions between the them. The set
  * should be ordered correctly accroding to KeyOps and should not contain
  * any duplicates. */
-void FsmAp::_orFsm( Key *set, int len )
+FsmAp *FsmAp::orFsm( FsmCtx *ctx, Key *set, int len )
 {
-	/* Two states first start, second final. */
-	setStartState( addState() );
+	FsmAp *fsm = new FsmAp( ctx );
 
-	StateAp *end = addState();
-	setFinState( end );
+	/* Two states first start, second final. */
+	fsm->setStartState( fsm->addState() );
+
+	StateAp *end = fsm->addState();
+	fsm->setFinState( end );
 
 	for ( int i = 1; i < len; i++ )
 		assert( ctx->keyOps->lt( set[i-1], set[i] ) );
 
 	/* Attach on all the integers in the given string of ints. */
 	for ( int i = 0; i < len; i++ )
-		attachNewTrans( startState, end, set[i], set[i] );
+		fsm->attachNewTrans( fsm->startState, end, set[i], set[i] );
+
+	return fsm;
 }
 
 /* Construct a machine that matches a range of characters.  A new machine will
@@ -156,27 +174,35 @@ void FsmAp::_orFsm( Key *set, int len )
  * match any characters from low to high inclusive. Low should be less than or
  * equal to high otherwise undefined behaviour results.  IsSigned determines
  * if the integers are to be considered as signed or unsigned ints. */
-void FsmAp::_rangeFsm( Key low, Key high )
+FsmAp *FsmAp::rangeFsm( FsmCtx *ctx, Key low, Key high )
 {
-	/* Two states first start, second final. */
-	setStartState( addState() );
+	FsmAp *fsm = new FsmAp( ctx );
 
-	StateAp *end = addState();
-	setFinState( end );
+	/* Two states first start, second final. */
+	fsm->setStartState( fsm->addState() );
+
+	StateAp *end = fsm->addState();
+	fsm->setFinState( end );
 
 	/* Attach using the range of characters. */
-	attachNewTrans( startState, end, low, high );
+	fsm->attachNewTrans( fsm->startState, end, low, high );
+
+	return fsm;
 }
 
 /* Construct a machine that a repeated range of characters.  */
-void FsmAp::_rangeStarFsm( Key low, Key high)
+FsmAp *FsmAp::rangeStarFsm( FsmCtx *ctx, Key low, Key high )
 {
+	FsmAp *fsm = new FsmAp( ctx );
+
 	/* One state which is final and is the start state. */
-	setStartState( addState() );
-	setFinState( startState );
+	fsm->setStartState( fsm->addState() );
+	fsm->setFinState( fsm->startState );
 
 	/* Attach start to start using range of characters. */
-	attachNewTrans( startState, startState, low, high );
+	fsm->attachNewTrans( fsm->startState, fsm->startState, low, high );
+
+	return fsm;
 }
 
 /* Construct a machine that matches the empty string.  A new machine will be
@@ -184,76 +210,28 @@ void FsmAp::_rangeStarFsm( Key low, Key high)
  * state. IsSigned determines if the machine has a signed or unsigned
  * alphabet. Fsm operations must be done on machines with the same alphabet
  * signedness. */
-void FsmAp::_lambdaFsm( )
+FsmAp *FsmAp::lambdaFsm( FsmCtx *ctx )
 {
+	FsmAp *fsm = new FsmAp( ctx );
+
 	/* Give it one state with no transitions making it
 	 * the start state and final state. */
-	setStartState( addState() );
-	setFinState( startState );
+	fsm->setStartState( fsm->addState() );
+	fsm->setFinState( fsm->startState );
+
+	return fsm;
 }
 
 /* Construct a machine that matches nothing at all. A new machine will be
  * made with only one state. It will not be final. */
-void FsmAp::_emptyFsm( )
-{
-	/* Give it one state with no transitions making it
-	 * the start state and final state. */
-	setStartState( addState() );
-}
-
-FsmAp *FsmAp::concatFsm( FsmCtx *ctx, Key c )
-{
-	FsmAp *fsm = new FsmAp( ctx );
-	fsm->_concatFsm( c );
-	return fsm;
-}
-
-FsmAp *FsmAp::concatFsm( FsmCtx *ctx, Key *str, int len )
-{
-	FsmAp *fsm = new FsmAp( ctx );
-	fsm->_concatFsm( str, len );
-	return fsm;
-}
-
-FsmAp *FsmAp::concatFsmCI( FsmCtx *ctx, Key *str, int len )
-{
-	FsmAp *fsm = new FsmAp( ctx );
-	fsm->_concatFsmCI( str, len );
-	return fsm;
-}
-
-FsmAp *FsmAp::orFsm( FsmCtx *ctx, Key *set, int len )
-{
-	FsmAp *fsm = new FsmAp( ctx );
-	fsm->_orFsm( set, len );
-	return fsm;
-}
-
-FsmAp *FsmAp::rangeFsm( FsmCtx *ctx, Key low, Key high )
-{
-	FsmAp *fsm = new FsmAp( ctx );
-	fsm->_rangeFsm( low, high );
-	return fsm;
-}
-
-FsmAp *FsmAp::rangeStarFsm( FsmCtx *ctx, Key low, Key high )
-{
-	FsmAp *fsm = new FsmAp( ctx );
-	fsm->_rangeStarFsm( low, high );
-	return fsm;
-}
-
 FsmAp *FsmAp::emptyFsm( FsmCtx *ctx )
 {
 	FsmAp *fsm = new FsmAp( ctx );
-	fsm->_emptyFsm();
-	return fsm;
-}
 
-FsmAp *FsmAp::lambdaFsm( FsmCtx *ctx )
-{
-	FsmAp *fsm = new FsmAp( ctx );
-	fsm->_lambdaFsm();
+	/* Give it one state with no transitions making it
+	 * the start state and final state. */
+	fsm->setStartState( fsm->addState() );
+
 	return fsm;
 }
 

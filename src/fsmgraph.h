@@ -2051,15 +2051,6 @@ public:
 	 * Building basic machines
 	 */
 
-	void _concatFsm( Key c );
-	void _concatFsm( Key *str, int len );
-	void _concatFsmCI( Key *str, int len );
-	void _orFsm( Key *set, int len );
-	void _rangeFsm( Key low, Key high );
-	void _rangeStarFsm( Key low, Key high );
-	void _emptyFsm( );
-	void _lambdaFsm( );
-
 	static FsmAp *concatFsm( FsmCtx *ctx, Key c );
 	static FsmAp *concatFsm( FsmCtx *ctx, Key *str, int len );
 	static FsmAp *concatFsmCI( FsmCtx *ctx, Key *str, int len );
