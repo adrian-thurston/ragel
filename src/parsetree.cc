@@ -899,7 +899,8 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 			pd->fsmCtx->stateLimit = -1;
 
 			if ( !res.success() ) {
-				nfaCheckResult( pd, 1, 0, "too-many-states", true );
+				if ( res.type == FsmRes::TypeTooManyStates )
+					nfaCheckResult( pd, 1, 0, "too-many-states", true );
 				return;
 			}
 
@@ -930,7 +931,10 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 			pd->fsmCtx->stateLimit = -1;
 
 			if ( !res.success() ) {
-				nfaCheckResult( pd, 1, 0, "too-many-states", true );
+				if ( res.type == FsmRes::TypeTooManyStates )
+					nfaCheckResult( pd, 1, 0, "too-many-states", true );
+				else if ( res.type == FsmRes::TypePriorInteraction )
+					nfaCheckResult( pd, 60, res.id, "prior-interaction", true );
 				return;
 			}
 		}
