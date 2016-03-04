@@ -150,7 +150,7 @@ void TopLevel::include( const InputLoc &incLoc, string fileName, string machine 
 	targetMachine = sectionName.c_str();
 	searchMachine = machine.c_str();
 
-	reduceString( el->data );
+	reduceStr( "-", el->data );
 
 	pd = pd0;
 	includeDepth -= 1;
@@ -159,45 +159,11 @@ void TopLevel::include( const InputLoc &incLoc, string fileName, string machine 
 	searchMachine = searchMachine0;
 }
 
-
-void TopLevel::reduceString( const char *data )
-{
-	const char *argv[6];
-	argv[0] = "rlparse";
-	argv[1] = "string";
-	argv[2] = "-";
-	argv[3] = id->hostLang->rlhcArg;
-	argv[4] = data;
-	argv[5] = 0;
-
-	colm_program *program = colm_new_program( &rlparse_object );
-	colm_set_debug( program, 0 );
-	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 5, argv );
-	colm_delete_program( program );
-}
-
-void TopLevel::reduceFile( const char *inputFileName )
-{
-	const char *argv[5];
-	argv[0] = "rlparse";
-	argv[1] = "reduce";
-	argv[2] = inputFileName;
-	argv[3] = id->hostLang->rlhcArg;
-	argv[4] = 0;
-
-	colm_program *program = colm_new_program( &rlparse_object );
-	colm_set_debug( program, 0 );
-	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 4, argv );
-	colm_delete_program( program );
-}
-
 void TopLevel::loadImport( std::string fileName )
 {
 	const char *argv[5];
 	argv[0] = "rlparse";
-	argv[1] = "import";
+	argv[1] = "import-file";
 	argv[2] = fileName.c_str();
 	argv[3] = id->hostLang->rlhcArg;
 	argv[4] = 0;
@@ -274,11 +240,28 @@ void TopLevel::loadImport( std::string fileName )
 	colm_delete_program( program );
 }
 
-void SectionPass::reduceFile( const char *inputFileName )
+void TopLevel::reduceStr( const char *inputFileName, const char *input )
+{
+	const char *argv[6];
+	argv[0] = "rlparse";
+	argv[1] = "toplevel-reduce-str";
+	argv[2] = inputFileName;
+	argv[3] = id->hostLang->rlhcArg;
+	argv[4] = input;
+	argv[5] = 0;
+
+	colm_program *program = colm_new_program( &rlparse_object );
+	colm_set_debug( program, 0 );
+	colm_set_reduce_ctx( program, this );
+	colm_run_program( program, 5, argv );
+	colm_delete_program( program );
+}
+
+void TopLevel::reduceFile( const char *inputFileName )
 {
 	const char *argv[5];
 	argv[0] = "rlparse";
-	argv[1] = "section";
+	argv[1] = "toplevel-reduce-file";
 	argv[2] = inputFileName;
 	argv[3] = id->hostLang->rlhcArg;
 	argv[4] = 0;
@@ -290,11 +273,46 @@ void SectionPass::reduceFile( const char *inputFileName )
 	colm_delete_program( program );
 }
 
+
+void SectionPass::reduceStr( const char *inputFileName, const char *input )
+{
+	const char *argv[6];
+	argv[0] = "rlparse";
+	argv[1] = "section-reduce-str";
+	argv[2] = inputFileName;
+	argv[3] = id->hostLang->rlhcArg;
+	argv[4] = input;
+	argv[5] = 0;
+
+	colm_program *program = colm_new_program( &rlparse_object );
+	colm_set_debug( program, 0 );
+	colm_set_reduce_ctx( program, this );
+	colm_run_program( program, 5, argv );
+	colm_delete_program( program );
+}
+
+void SectionPass::reduceFile( const char *inputFileName )
+{
+	const char *argv[5];
+	argv[0] = "rlparse";
+	argv[1] = "section-reduce-file";
+	argv[2] = inputFileName;
+	argv[3] = id->hostLang->rlhcArg;
+	argv[4] = 0;
+
+	colm_program *program = colm_new_program( &rlparse_object );
+	colm_set_debug( program, 0 );
+	colm_set_reduce_ctx( program, this );
+	colm_run_program( program, 4, argv );
+	colm_delete_program( program );
+}
+
+
 void IncludePass::reduceFile( const char *inputFileName, const HostLang *hostLang )
 {
 	const char *argv[5];
 	argv[0] = "rlparse";
-	argv[1] = "include";
+	argv[1] = "include-reduce-file";
 	argv[2] = inputFileName;
 	argv[3] = hostLang->rlhcArg;
 	argv[4] = 0;

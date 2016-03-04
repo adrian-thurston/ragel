@@ -768,12 +768,18 @@ bool InputData::parseReduce()
 
 	makeFirstInputItem();
 
-	sectionPass->reduceFile( inputFileName );
+	if ( inLibRagel )
+		sectionPass->reduceStr( inputFileName, input );
+	else
+		sectionPass->reduceFile( inputFileName );
 
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
 
-	topLevel->reduceFile( inputFileName );
+	if ( inLibRagel )
+		topLevel->reduceStr( inputFileName, input );
+	else
+		topLevel->reduceFile( inputFileName );
 
 	bool success = topLevel->success;
 

@@ -81,7 +81,7 @@ struct TopLevel
 	void include( const InputLoc &incLoc, string fileName, string machine );
 
 	void reduceFile( const char *inputFileName );
-	void reduceString( const char *data );
+	void reduceStr( const char *inputFileName, const char *input );
 	void topReduce( const char *inputFileName );
 };
 
@@ -98,6 +98,7 @@ struct SectionPass
 	Section *section;
 
 	void reduceFile( const char *inputFileName );
+	void reduceStr( const char *inputFileName, const char *input );
 
 	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,

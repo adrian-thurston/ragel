@@ -2442,7 +2442,7 @@ struct LoadRagel
 
 		const char *argv[5];
 		argv[0] = "rlparse";
-		argv[1] = "import";
+		argv[1] = "import-file";
 		argv[2] = unescaped;
 		argv[3] = id.hostLang->rlhcArg;
 		argv[4] = 0;
@@ -2683,7 +2683,7 @@ struct LoadRagel
 	{
 		const char *argv[5];
 		argv[0] = "rlparse";
-		argv[1] = "load";
+		argv[1] = "parse-file";
 		argv[2] = inputFileName;
 		argv[3] = id.hostLang->rlhcArg;
 		argv[4] = 0;
