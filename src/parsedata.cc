@@ -38,12 +38,43 @@ using namespace std;
 
 const char mainMachine[] = "main";
 
-void Token::set( const char *str, int len )
+void Token::_set( const char *str, int len )
 {
 	length = len;
 	data = new char[len+1];
 	memcpy( data, str, len );
 	data[len] = 0;
+}
+
+void Token::set( const char *str, int len, colm_location *cl )
+{
+	_set( str, len );
+
+	if ( cl != 0 ) {
+		loc.fileName = cl->name;
+		loc.line = cl->line;
+		loc.col = cl->column;
+	}
+}
+
+void Token::set( colm_data *cd, colm_location *cl )
+{
+	set( cd->data, cd->length, cl );
+}
+
+void Token::set( const char *str, int len, const InputLoc &l )
+{
+	_set( str, len );
+
+	loc.fileName = l.fileName;
+	loc.line = l.line;
+	loc.col = l.col;
+}
+
+void Token::set( const char *str, int len, const ParserLoc &l )
+{
+	_set( str, len );
+	loc = l;
 }
 
 
@@ -56,20 +87,8 @@ void Token::append( const char *otherData, int otherLen )
 	newString[newLength] = 0;
 	data = newString;
 	length = newLength;
-}
 
-void Token::set( colm_location *cl )
-{
-	loc.fileName = cl->name;
-	loc.line = cl->line;
-	loc.col = cl->column;
 }
-
-void Token::set( colm_data *cd )
-{
-	set( cd->data, cd->length );
-}
-
 
 /* Perform minimization after an operation according 
  * to the command line args. */

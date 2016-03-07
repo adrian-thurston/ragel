@@ -220,10 +220,7 @@ void TopLevel::loadImport( std::string fileName )
 			case import_val::String: {
 				string s = Import.Val().string().text();
 				Token tok;
-				tok.loc.fileName = loc.fileName;
-				tok.loc.line = loc.line;
-				tok.loc.col = loc.col;
-				tok.set( s.c_str(), s.size() );
+				tok.set( s.c_str(), s.size(), loc );
 				literal = new Literal( tok, Literal::LitString );
 				break;
 			}
@@ -231,10 +228,7 @@ void TopLevel::loadImport( std::string fileName )
 			case import_val::Number: {
 				string s = Import.Val().number().text();
 				Token tok;
-				tok.loc.fileName = loc.fileName;
-				tok.loc.line = loc.line;
-				tok.loc.col = loc.col;
-				tok.set( s.c_str(), s.size() );
+				tok.set( s.c_str(), s.size(), loc );
 				literal = new Literal( tok, Literal::Number );
 				break;
 			}

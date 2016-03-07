@@ -116,7 +116,7 @@ reduction TopLevel
 	ragel::def_name :Word
 	{
 		string data( $word->data, $word->length );
-		$$->tok.set( $word );
+		$$->tok.set( $word, @word );
 		$$->loc = *@1;
 
 		/* Make/get the priority key. The name may have already been referenced
@@ -365,24 +365,20 @@ reduction TopLevel
 
 	ragel::include_spec :Machine
 	{
-		$$->machine.set( $word );
-		$$->machine.set( @word );
+		$$->machine.set( $word, @word );
 		$$->file.data = 0;
 	}
 
 	ragel::include_spec :File
 	{
-		$$->file.set( $string );
-		$$->file.set( @string );
+		$$->file.set( $string, @string );
 		$$->machine.data = 0;
 	}
 
 	ragel::include_spec :MachineFile
 	{
-		$$->machine.set( $word );
-		$$->machine.set( @word );
-		$$->file.set( $string );
-		$$->file.set( @string );
+		$$->machine.set( $word, @word );
+		$$->file.set( $string, @string );
 	}
 	
 
@@ -674,7 +670,7 @@ reduction TopLevel
 
 	ragel::named_action_ref :Plain
 	{
-		$$->tok.set( $word );
+		$$->tok.set( $word, @word );
 
 		/* Set the name in the actionDict. */
 		string data( $$->tok.data );
@@ -695,7 +691,7 @@ reduction TopLevel
 
 	ragel::named_action_ref :Args
 	{
-		$$->tok.set( $word );
+		$$->tok.set( $word, @word );
 
 		/* Set the name in the actionDict. */
 		string data( $$->tok.data );
@@ -2029,8 +2025,7 @@ reduction TopLevel
 	ragel::factor :String
 	{
 		Token tok;
-		tok.set( $string );
-		tok.set( @string );
+		tok.set( $string, @string );
 		$$->factor = new Factor( new Literal( tok, Literal::LitString ) );
 	}
 
@@ -2161,7 +2156,7 @@ reduction TopLevel
 		string data( $re_char->data, $re_char->length );
 		char *c = unescape( data.c_str() );
 		Token tok;
-		tok.set( c, strlen( c ) );
+		tok.set( c, strlen( c ), @re_char );
 		$$->reItem = new ReItem( @1, tok );
 		delete[] c;
 	}
@@ -2214,7 +2209,7 @@ reduction TopLevel
 		// ReOrItem *reOrItem;
 		char *c = unescape( $re_or_char->data, $re_or_char->length );
 		Token tok;
-		tok.set( c, 1 );
+		tok.set( c, 1, @re_or_char );
 		delete[] c;
 		$$->reOrItem = new ReOrItem( @re_or_char, tok );
 	}
@@ -2239,13 +2234,12 @@ reduction TopLevel
 
 	ragel::alphabet_num :Uint
 	{
-		$$->tok.set( $uint );
-		$$->tok.set( @uint );
+		$$->tok.set( $uint, @uint );
 	}
 
 	ragel::alphabet_num :Neg
 	{
-		$$->tok.set( "-", 1 );
+		$$->tok.set( "-", 1, @1 );
 		$$->tok.append( $uint->data, $uint->length );
 		//$$->tok.loc = @uint;
 	}
@@ -2263,7 +2257,7 @@ reduction TopLevel
 		/* Range literals must have only one char. We restrict this in the
 		 * parse tree. */
 		Token tok;
-		tok.set( $string );
+		tok.set( $string, @string );
 		$$->literal = new Literal( tok, Literal::LitString );
 	}
 
@@ -2274,8 +2268,7 @@ reduction TopLevel
 
 	ragel::alphabet_num :Hex
 	{
-		$$->tok.set( $hex );
-		$$->tok.set( @hex );
+		$$->tok.set( $hex, @hex );
 	}
 
 	# def lm

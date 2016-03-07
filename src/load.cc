@@ -1174,7 +1174,7 @@ struct LoadRagel
 			case ragel::range_lit::String: {
 				string s = RL.string().text();
 				Token tok;
-				tok.set( s.c_str(), s.size() );
+				tok.set( s.c_str(), s.size(), RL.string().loc() );
 				literal = new Literal( tok, Literal::LitString );
 				break;
 			}
@@ -1182,7 +1182,7 @@ struct LoadRagel
 			case ragel::range_lit::AN: {
 				string s = RL.alphabet_num().text();
 				Token tok;
-				tok.set( s.c_str(), s.size() );
+				tok.set( s.c_str(), s.size(), RL.alphabet_num().loc() );
 				literal = new Literal( tok, Literal::Number );
 				break;
 			}
@@ -1197,7 +1197,7 @@ struct LoadRagel
 			case ragel::reg_or_char::Char: {
 				char *c = unescape( RegOrChar.re_or_char().text().c_str() );
 				Token tok;
-				tok.set( c, strlen(c) );
+				tok.set( c, strlen(c), RegOrChar.re_or_char().loc() );
 				orItem = new ReOrItem( RegOrChar.re_or_char().loc(), tok );
 				delete[] c;
 				break;
@@ -1257,7 +1257,7 @@ struct LoadRagel
 			case ragel::reg_item::Char: {
 				char *c = unescape( RegItem.re_char().text().c_str() );
 				Token tok;
-				tok.set( c, strlen( c ) );
+				tok.set( c, strlen( c ), RegItem.re_char().loc() );
 				reItem = new ReItem( loc, tok );
 				delete[] c;
 				break;
@@ -1317,7 +1317,7 @@ struct LoadRagel
 			case ragel::factor::AlphabetNum: {
 				string s = FactorTree.alphabet_num().text();
 				Token tok;
-				tok.set( s.c_str(), s.size() );
+				tok.set( s.c_str(), s.size(), FactorTree.alphabet_num().loc() );
 
 				factor = new Factor( new Literal( tok, Literal::Number ) );
 				break;
@@ -1348,7 +1348,7 @@ struct LoadRagel
 			case ragel::factor::String: {
 				string s = FactorTree.string().text();
 				Token tok;
-				tok.set( s.c_str(), s.size() );
+				tok.set( s.c_str(), s.size(), FactorTree.string().loc() );
 
 				factor = new Factor( new Literal( tok, Literal::LitString ) );
 				break;
@@ -2382,10 +2382,7 @@ struct LoadRagel
 			case import_val::String: {
 				string s = Import.Val().string().text();
 				Token tok;
-				tok.loc.fileName = loc.fileName;
-				tok.loc.line = loc.line;
-				tok.loc.col = loc.col;
-				tok.set( s.c_str(), s.size() );
+				tok.set( s.c_str(), s.size(), loc );
 				literal = new Literal( tok, Literal::LitString );
 				break;
 			}
@@ -2393,10 +2390,7 @@ struct LoadRagel
 			case import_val::Number: {
 				string s = Import.Val().number().text();
 				Token tok;
-				tok.loc.fileName = loc.fileName;
-				tok.loc.line = loc.line;
-				tok.loc.col = loc.col;
-				tok.set( s.c_str(), s.size() );
+				tok.set( s.c_str(), s.size(), loc );
 				literal = new Literal( tok, Literal::Number );
 				break;
 			}

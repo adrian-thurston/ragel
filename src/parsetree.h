@@ -208,9 +208,14 @@ struct Token
 		{ append( other.data, other.length ); }
 
 	void append( const char *otherData, int otherLen );
-	void set( const char *str, int len );
-	void set( colm_location *cl );
-	void set( colm_data *cd );
+
+	void set( const char *str, int len, colm_location *cl);
+	void set( colm_data *cd, colm_location *cl);
+	void set( const char *str, int len, const InputLoc &loc );
+	void set( const char *str, int len, const ParserLoc &loc );
+
+private:
+	void _set( const char *str, int len );
 };
 
 struct RedToken

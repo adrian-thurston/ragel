@@ -1124,14 +1124,12 @@ priority_aug_num:
 	};
 priority_aug_num:
 	'+' TK_UInt final {
-		$$->token.set( "+", 1 );
-		$$->token.loc = $1->loc;
+		$$->token.set( "+", 1, $1->loc );
 		$$->token.append( *$2 );
 	};
 priority_aug_num:
 	'-' TK_UInt final {
-		$$->token.set( "-", 1 );
-		$$->token.loc = $1->loc;
+		$$->token.set( "-", 1, $1->loc );
 		$$->token.append( *$2 );
 	};
 
@@ -1418,8 +1416,7 @@ alphabet_num:
 	};
 alphabet_num: 
 	'-' TK_UInt final { 
-		$$->token.set( "-", 1 );
-		$$->token.loc = $1->loc;
+		$$->token.set( "-", 1, $1->loc );
 		$$->token.append( *$2 );
 	};
 alphabet_num: 
