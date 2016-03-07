@@ -667,6 +667,13 @@ static int stream_consume_data( program_t *prg, tree_t **sp, struct stream_impl 
 		else if ( buf->type == RunBufIgnoreType )
 			break;
 		else {
+			if ( !loc_set( loc ) ) {
+				if ( is->line > 0 )
+					transfer_loc( loc, is );
+				else
+					default_loc( loc );
+			}
+
 			/* Anything available in the current buffer. */
 			int avail = buf->length - buf->offset;
 			if ( avail > 0 ) {
@@ -674,16 +681,11 @@ static int stream_consume_data( program_t *prg, tree_t **sp, struct stream_impl 
 				int slen = avail <= length ? avail : length;
 				consumed += slen;
 				length -= slen;
+				update_position( is, buf->data + buf->offset, slen );
 				buf->offset += slen;
 				is->consumed += slen;
 			}
 
-			if ( !loc_set( loc ) ) {
-				if ( is->line > 0 )
-					transfer_loc( loc, is );
-				else
-					default_loc( loc );
-			}
 		}
 
 		if ( length == 0 ) {
