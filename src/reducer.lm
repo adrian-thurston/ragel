@@ -2644,6 +2644,8 @@ reduction IncludePass
 			incItem->end = @3->byte + $3->length;
 			incItem->length = incItem->end - incItem->start;
 
+			//std::cout << "include pass length:" << incItem->length << std::endl;
+
 			incItem->section = section;
 			incItems.append( incItem );
 		}

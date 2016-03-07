@@ -121,6 +121,7 @@ struct IncludePass
 	SectionDict sectionDict2;
 
 	void reduceFile( const char *inputFileName, const HostLang *hostLang );
+	void reduceStr( const char *inputFileName, const HostLang *hostLang, const char *input );
 
 	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,

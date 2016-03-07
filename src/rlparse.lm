@@ -108,9 +108,17 @@ else if ( Cmd == 'parse-file' ) {
 	RagelTree = parse start[ Stream ]
 	RagelError = error
 }
-else if ( Cmd == 'include-reduce-ffile' ) {
+else if ( Cmd == 'include-reduce-file' ) {
 	Stream: stream = open( FileName, "r" )
 	reduce IncludePass start[ Stream ]
+	if error
+		send stderr "[error]
+}
+else if ( Cmd == 'include-reduce-str' ) {
+	A = argv->pop_head_el()
+	Data: str = A->value
+	#print "Data: [Data]
+	reduce IncludePass start[ Data ]
 	if error
 		send stderr "[error]
 }
