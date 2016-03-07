@@ -331,6 +331,7 @@ reduction TopLevel
 	{
 		string fileName = id->inputFileName;
 		string machine = pd->sectionName;
+		bool fileSpecified = false;
 
 		if ( $include_spec->file.data != 0 ) {
 			fileName = string( $include_spec->file.data, $include_spec->file.length );
@@ -341,12 +342,14 @@ reduction TopLevel
 			char *unescaped = prepareLitString( loc, fileName.c_str(), fileName.size(),
 					length, caseInsensitive );
 			fileName = unescaped;
+
+			fileSpecified = true;
 		}
 
 		if ( $include_spec->machine.data != 0 )
 			machine = string( $include_spec->machine.data, $include_spec->machine.length );
 
-		include( @1, fileName, machine );
+		include( @1, fileSpecified, fileName, machine );
 	}
 
 	# def include_spec

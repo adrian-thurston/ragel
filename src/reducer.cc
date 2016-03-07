@@ -94,7 +94,43 @@ long TopLevel::tryLongScan( const InputLoc &loc, const char *data )
 	return priorityNum;
 }
 
-void TopLevel::include( const InputLoc &incLoc, string fileName, string machine )
+void TopLevel::loadIncludeData( IncludeRec *el, IncludePass &includePass, const string &fileName )
+{
+	/* Count bytes. */
+	size_t len = 0;
+	for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next )
+		len += ii->length;
+
+	/* Store bytes. */
+	el->data = new char[len+1];
+	len = 0;
+
+	if ( id->inLibRagel ) {
+		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
+			//std::cout << "start: " << ii->start << " length: " << ii->length << std::endl;
+			memcpy( el->data + len, id->input + ii->start, ii->length );
+			len += ii->length;
+		}
+	}
+	else {
+		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
+			std::ifstream f( fileName.c_str() );
+			f.seekg( ii->start, std::ios::beg );
+			f.read( el->data + len, ii->length );
+			size_t read = f.gcount();
+			if ( read != ii->length ) {
+				error(ii->loc) << "unexpected length in read of included file: "
+						"possible change to file" << endp;
+			}
+			len += read;
+		}
+	}
+
+	el->data[len] = 0;
+	el->len = len;
+}
+
+void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileName, string machine )
 {
 	/* Stash the current section name and pd. */
 	string sectionName = pd->sectionName;
@@ -104,57 +140,27 @@ void TopLevel::include( const InputLoc &incLoc, string fileName, string machine 
 	if ( el == 0 ) {
 		el = new IncludeRec( fileName, machine );
 
-		InputData idr;
+		/* First collect the locations of the text using an include pass. */
 		IncludePass includePass( machine );
-
-		if ( id->inLibRagel )
+		if ( id->inLibRagel && !fileSpecified ) {
+			/* In libragel and no file was specified in the include statement.
+			 * In this case we run the include pass on the input text supplied. */
 			includePass.reduceStr( fileName.c_str(), id->hostLang, id->input );
-		else
+		}
+		else {
+			/* Either we are not in the lib, or a file was specifed, use the
+			 * file-based include pass. */
 			includePass.reduceFile( fileName.c_str(), id->hostLang );
+		}
 
 		if ( includePass.incItems.length() == 0 ) {
 			error(incLoc) << "could not find machine " << machine <<
 					" in " << fileName << endp;
 		}
 		else {
-			/* Count bytes. */
-			size_t len = 0;
-			for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next )
-				len += ii->length;
-
-			/* Store bytes. */
-			el->data = new char[len+1];
-			len = 0;
-
-			if ( id->inLibRagel ) {
-				for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
-
-					//std::cout << "start: " << ii->start << " length: " << ii->length << std::endl;
-					memcpy( el->data + len, id->input + ii->start, ii->length );
-					len += ii->length;
-
-				}
-			}
-			else {
-				for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
-					std::ifstream f( fileName.c_str() );
-					f.seekg( ii->start, std::ios::beg );
-					f.read( el->data + len, ii->length );
-					size_t read = f.gcount();
-					if ( read != ii->length ) {
-						error(ii->loc) << "unexpected length in read of included file: "
-								"possible change to file" << endp;
-					}
-					len += read;
-				}
-			}
-
-			el->data[len] = 0;
-			el->len = len;
-			//std::cout << "include: " << el->data << std::endl;
-
+			/* Load the data into include el. Save in the dict. */
+			loadIncludeData( el, includePass, fileName );
 			id->includeDict.insert( el );
-
 			includePass.incItems.empty();
 		}
 	}

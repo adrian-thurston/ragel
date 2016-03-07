@@ -117,7 +117,6 @@ else if ( Cmd == 'include-reduce-file' ) {
 else if ( Cmd == 'include-reduce-str' ) {
 	A = argv->pop_head_el()
 	Data: str = A->value
-	#print "Data: [Data]
 	reduce IncludePass start[ Data ]
 	if error
 		send stderr "[error]
