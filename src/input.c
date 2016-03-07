@@ -112,6 +112,11 @@ void colm_stream_destroy( program_t *prg, tree_t **sp, struct_t *s )
 
 	if ( stream->impl->file != 0 )
 		fclose( stream->impl->file );
+	
+	if ( stream->impl->collect != 0 ) {
+		str_collect_destroy( stream->impl->collect );
+		free( stream->impl->collect );
+	}
 
 	/* FIXME: Need to leak this for now. Until we can return strings to a
 	 * program loader and free them at a later date (after the colm program is
