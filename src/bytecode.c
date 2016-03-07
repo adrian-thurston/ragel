@@ -697,6 +697,8 @@ again:
 			for ( i = 0; i < n; i++ ) {
 				if ( si->file != 0 )
 					print_tree_file( prg, sp, si, arg[i], false );
+				else if ( si->collect != 0 )
+					print_tree_collect( prg, sp, si->collect, arg[i], false );
 			}
 
 			for ( i = 0; i < n; i++ )
@@ -1255,7 +1257,21 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_NEW_STRUCT %hd\n", id );
 			struct_t *item = colm_struct_new( prg, id );
-			vm_push_type( struct_t*, item );
+			vm_push_struct( item );
+			break;
+		}
+		case IN_NEW_STREAM: {
+			debug( prg, REALM_BYTECODE, "IN_NEW_STREAM\n" );
+			stream_t *item = colm_stream_open_collect( prg );
+			vm_push_stream( item );
+			break;
+		}
+		case IN_GET_COLLECT_STRING: {
+			debug( prg, REALM_BYTECODE, "IN_GET_COLLECT_STRING\n" );
+			stream_t *stream = vm_pop_stream();
+			str_t *str = collect_string( prg, stream );
+			colm_tree_upref( (tree_t*)str );
+			vm_push_string( str );
 			break;
 		}
 		case IN_GET_STRUCT_R: {

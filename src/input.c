@@ -1064,6 +1064,17 @@ struct stream_impl *colm_impl_new_generic( char *name )
 	return ss;
 }
 
+struct stream_impl *colm_impl_new_collect( char *name )
+{
+	struct stream_impl *ss = (struct stream_impl*)malloc(sizeof(struct stream_impl));
+	init_stream_impl( ss, name );
+	ss->funcs = &stream_funcs;
+	ss->collect = (StrCollect*) malloc( sizeof( StrCollect ) );
+	init_str_collect( ss->collect );
+	return ss;
+}
+
+
 stream_t *colm_stream_new_struct( program_t *prg )
 {
 	size_t memsize = sizeof(struct colm_stream);
@@ -1118,7 +1129,22 @@ stream_t *colm_stream_open_file( program_t *prg, tree_t *name, tree_t *mode )
 stream_t *colm_stream_new( program_t *prg )
 {
 	struct stream_impl *impl = colm_impl_new_generic( strdup("<internal>") );
+	struct colm_stream *stream = colm_stream_new_struct( prg );
+	stream->impl = impl;
+	return stream;
+}
 
+str_t *collect_string( program_t *prg, stream_t *s )
+{
+	head_t *head = string_alloc_full( prg, s->impl->collect->data, s->impl->collect->length );
+	str_t *str = (str_t*)construct_string( prg, head );
+	return str;
+}
+
+
+stream_t *colm_stream_open_collect( program_t *prg )
+{
+	struct stream_impl *impl = colm_impl_new_collect( strdup("<internal>") );
 	struct colm_stream *stream = colm_stream_new_struct( prg );
 	stream->impl = impl;
 	return stream;

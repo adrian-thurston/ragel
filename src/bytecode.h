@@ -37,9 +37,6 @@ typedef unsigned char uchar;
 
 typedef unsigned long colm_value_t;
 
-/* 
- */
-
 
 #define IN_LOAD_INT              0x01
 #define IN_LOAD_STR              0x02
@@ -357,6 +354,9 @@ typedef unsigned long colm_value_t;
 
 #define IN_GET_LOCAL_VAL_R       0x91
 #define IN_SET_LOCAL_VAL_WC      0x92
+
+#define IN_NEW_STREAM            0x24
+#define IN_GET_COLLECT_STRING    0x68
 
 /*
  * IN_FN instructions.

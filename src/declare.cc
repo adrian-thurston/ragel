@@ -844,6 +844,19 @@ void Compiler::declareStrFields( )
 	addLengthField( strObj, IN_STR_LENGTH );
 }
 
+void Compiler::declareStreamField( ObjectDef *objDef, code_t getLength )
+{
+	/* Create the "length" field. */
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "tree" );
+	el->isConst = true;
+	el->inGetR = IN_GET_COLLECT_STRING;
+	el->inGetValR = IN_GET_COLLECT_STRING;
+
+	objDef->rootScope->insertField( el->name, el );
+}
+
 void Compiler::declareStreamFields( )
 {
 	streamObj = streamSel->structDef->objectDef;
@@ -862,6 +875,8 @@ void Compiler::declareStreamFields( )
 
 	initFunction( uniqueTypeVoid, streamObj, "close",
 			IN_INPUT_CLOSE_WC, IN_INPUT_CLOSE_WC, false );
+
+	declareStreamField( streamObj, 0 );
 }
 
 ObjectField *Compiler::makeDataEl()

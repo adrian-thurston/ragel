@@ -50,6 +50,8 @@ struct colm_stream;
 struct colm_location;
 struct colm_program;
 struct colm_struct;
+struct colm_str;
+struct colm_stream;
 
 struct stream_impl;
 
@@ -140,6 +142,8 @@ struct stream_impl
 	char *name;
 	FILE *file;
 
+	struct _StrCollect *collect;
+
 	struct Pattern *pattern;
 	struct PatternItem *pat_item;
 	struct Constructor *constructor;
@@ -161,6 +165,9 @@ void update_position( struct stream_impl *input_stream, const char *data, long l
 void undo_position( struct stream_impl *input_stream, const char *data, long length );
 
 struct stream_impl *colm_stream_impl( struct colm_struct *s );
+
+struct colm_str *collect_string( struct colm_program *prg, struct colm_stream *s );
+struct colm_stream *colm_stream_open_collect( struct colm_program *prg );
 
 #ifdef __cplusplus
 }

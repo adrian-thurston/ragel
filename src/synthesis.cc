@@ -1235,6 +1235,9 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 
 		}
 	}
+	else if ( newUT->typeId == TYPE_STRUCT && newUT->structEl == pd->streamSel ) {
+		code.append( IN_NEW_STREAM );
+	}
 	else {
 		code.append( IN_NEW_STRUCT );
 		code.appendHalf( newUT->structEl->id );

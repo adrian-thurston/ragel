@@ -938,7 +938,10 @@ struct Compiler
 
 	void declareGlobalFields();
 	void declareStrFields();
+
+	void declareStreamField( ObjectDef *objDef, code_t getLength );
 	void declareStreamFields();
+
 	void declareIntFields();
 	void declareTokenFields();
 
