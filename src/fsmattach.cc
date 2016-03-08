@@ -304,6 +304,7 @@ void FsmAp::detachState( StateAp *state )
 				delete cond;
 				cond = next;
 			}
+			trans->tcap()->condList.abandon();
 			delete trans->tcap();
 		}
 		trans = next;
