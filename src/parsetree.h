@@ -471,8 +471,7 @@ typedef Vector<Term*> TermVect;
 struct NfaUnion
 {
 	/* Construct with only a term. */
-	NfaUnion() { }
-
+	NfaUnion() : roundsList(0) { }
 	~NfaUnion();
 
 	/* Tree traversal. */

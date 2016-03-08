@@ -435,6 +435,15 @@ bool NameInst::anyRefsRec()
 	return false;
 }
 
+NameInst::~NameInst()
+{
+	/* Recurse on the implicit final state and then all children. */
+	if ( final != 0 )
+		delete final;
+	for ( NameVect::Iter name = childVect; name.lte(); name++ )
+		delete *name;
+}
+
 /*
  * ParseData
  */
@@ -480,6 +489,7 @@ ParseData::ParseData( InputData *id, string sectionName,
 	rootName(0),
 	exportsRootName(0),
 	nextEpsilonResolvedLink(0),
+	nameIndex(0),
 	nextLongestMatchId(1),
 	lmRequiresErrorState(false),
 	cgd(0)
@@ -499,6 +509,16 @@ ParseData::~ParseData()
 {
 	graphDict.empty();
 	actionList.empty();
+
+	if ( nameIndex != 0 )
+		delete[] nameIndex;
+
+	if ( rootName != 0 )
+		delete rootName;
+	if ( exportsRootName != 0 )
+		delete exportsRootName;
+
+	delete fsmCtx;
 
 	delete prePushExpr;
 	delete postPopExpr;
@@ -1251,20 +1271,19 @@ FsmRes ParseData::makeAll()
 	/* Make all the instantiations, we know that main exists in this list. */
 	initNameWalk();
 	for ( GraphList::Iter glel = instanceList; glel.lte();  glel++ ) {
-		if ( glel->key == MAIN_MACHINE ) {
-			/* Main graph is always instantiated. */
-			FsmRes main = makeInstance( glel );
-			if ( !main.success() )
-				return main;
-			mainGraph = main.fsm;
+		FsmRes res = makeInstance( glel );
+		if ( !res.success() ) {
+			for ( int i = 0; i < numOthers; i++ )
+				delete graphs[i];
+			delete[] graphs;
+			return res;
 		}
-		else {
-			/* Instantiate and store in others array. */
-			FsmRes other = makeInstance( glel );
-			if ( !other.success() )
-				return other;
-			graphs[numOthers++] = other.fsm;
-		}
+
+		/* Main graph is always instantiated. */
+		if ( glel->key == MAIN_MACHINE )
+			mainGraph = res.fsm;
+		else
+			graphs[numOthers++] = res.fsm;
 	}
 
 	if ( mainGraph == 0 )

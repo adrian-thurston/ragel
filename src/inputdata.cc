@@ -41,6 +41,14 @@ using std::ios;
 
 extern colm_sections rlhc_object;
 
+InputData::~InputData()
+{
+	includeDict.empty();
+	inputItems.empty();
+	parseDataList.empty();
+	sectionList.empty();
+}
+
 void InputData::abortCompile( int code )
 {
 	throw AbortCompile( code );
@@ -816,9 +824,6 @@ bool InputData::processReduce()
 		if ( success )
 			runRlhc();
 
-		inputItems.empty();
-		parseDataList.empty();
-		sectionList.empty();
 		return success;
 	}
 }

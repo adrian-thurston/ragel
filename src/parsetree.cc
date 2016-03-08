@@ -655,6 +655,15 @@ FsmRes LongestMatch::walk( ParseData *pd )
 	return res;
 }
 
+NfaUnion::~NfaUnion()
+{
+	for ( TermVect::Iter term = terms; term.lte(); term++ )
+		delete *term;
+	if ( roundsList != 0 )
+		delete roundsList;
+}
+
+
 void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 {
 	/* Nothing to do if the state is already on the list. */
@@ -865,11 +874,6 @@ FsmRes NfaUnion::walk( ParseData *pd )
 
 	FsmAp *ret = machines[0];
 	return FsmRes( FsmRes::Fsm(), ret );
-}
-
-NfaUnion::~NfaUnion()
-{
-	
 }
 
 void nfaResultWrite( ostream &out, long code, long id, const char *scode )

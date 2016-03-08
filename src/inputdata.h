@@ -143,7 +143,13 @@ struct IncludeRec
 	: public AvlTreeEl<IncludeRec>
 {
 	IncludeRec( const string &fileName, const string &machine )
-		: key( fileName, machine ) {}
+		: key( fileName, machine ), data(0) {}
+	
+	~IncludeRec()
+	{
+		if ( data != 0 )
+			delete[] data;
+	}
 
 	FnMachine key;
 
@@ -205,6 +211,8 @@ struct InputData
 		input(0),
 		inLibRagel(false)
 	{}
+
+	~InputData();
 
 	std::string dirName;
 

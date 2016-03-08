@@ -984,6 +984,11 @@ typedef Vector<long> LongVect;
 struct CondData
 {
 	CondSpaceMap condSpaceMap;
+
+	~CondData()
+	{
+		condSpaceMap.empty();
+	}
 };
 
 /* All FSM operations must be between machines that point to the same context
@@ -1008,6 +1013,12 @@ struct FsmCtx
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
+	}
+
+	~FsmCtx()
+	{
+		delete keyOps;
+		delete condData;
 	}
 
 	KeyOps *keyOps;

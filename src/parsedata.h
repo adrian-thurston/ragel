@@ -112,6 +112,8 @@ struct NameInst
 		loc(loc), parent(parent), name(name), id(id), isLabel(isLabel),
 		isLongestMatch(false), numRefs(0), numUses(0), start(0), final(0) {}
 
+	~NameInst();
+
 	InputLoc loc;
 
 	/* Keep parent pointers in the name tree to retrieve 
