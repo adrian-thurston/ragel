@@ -206,7 +206,6 @@ struct Token
 
 	void append( const Token &other )
 		{ append( other.data, other.length ); }
-
 	void append( const char *otherData, int otherLen );
 
 	void set( const char *str, int len, colm_location *cl);
@@ -768,11 +767,12 @@ struct Literal
 {
 	enum LiteralType { Number, LitString };
 
-	Literal( const Token &token, LiteralType type )
-		: token(token), type(type) { }
+	Literal( bool neg, const Token &token, LiteralType type )
+		: neg(neg), token(token), type(type) { }
 
 	FsmAp *walk( ParseData *pd );
 	
+	bool neg;
 	Token token;
 	LiteralType type;
 };

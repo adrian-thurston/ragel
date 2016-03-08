@@ -2812,8 +2812,19 @@ FsmAp *Literal::walk( ParseData *pd )
 
 	switch ( type ) {
 	case Number: {
+		char *data = token.data;
+		if ( neg ) {
+			data = new char[token.length + 2];
+			data[0] = '-';
+			memcpy( data + 1, token.data, token.length );
+			data[token.length + 1] = 0;
+		}
+
 		/* Make the fsm key in int format. */
-		Key fsmKey = makeFsmKeyNum( token.data, token.loc, pd );
+		Key fsmKey = makeFsmKeyNum( data, token.loc, pd );
+
+		if ( neg )
+			delete[] data;
 
 		/* Make the new machine. */
 		rtnVal = FsmAp::concatFsm( pd->fsmCtx, fsmKey );

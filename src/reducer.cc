@@ -221,7 +221,7 @@ void TopLevel::loadImport( std::string fileName )
 				string s = Import.Val().string().text();
 				Token tok;
 				tok.set( s.c_str(), s.size(), loc );
-				literal = new Literal( tok, Literal::LitString );
+				literal = new Literal( false, tok, Literal::LitString );
 				break;
 			}
 
@@ -229,7 +229,7 @@ void TopLevel::loadImport( std::string fileName )
 				string s = Import.Val().number().text();
 				Token tok;
 				tok.set( s.c_str(), s.size(), loc );
-				literal = new Literal( tok, Literal::Number );
+				literal = new Literal( false, tok, Literal::Number );
 				break;
 			}
 		}
