@@ -92,11 +92,17 @@ parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM_BINDEP)
 	$(COLM) -c -b rlparse_object -o $@ -e if.h -x if.cc -m commit.cc $<
 
 # These are necessary because we are not using built sources. They create the
-# dependency on the colm run for the objects that that require its output.
+# dependency on the colm run for the objects that that require its output. Must
+# create them for every target.
 ragel-if.$(OBJEXT): parse.c
 ragel-load.$(OBJEXT): parse.c
 ragel-commit.$(OBJEXT): parse.c
 ragel-reducer.$(OBJEXT): parse.c
+
+libragel_a-if.$(OBJEXT): parse.c
+libragel_a-load.$(OBJEXT): parse.c
+libragel_a-commit.$(OBJEXT): parse.c
+libragel_a-reducer.$(OBJEXT): parse.c
 
 RLHC = \
 	rlhc-host.lm \
