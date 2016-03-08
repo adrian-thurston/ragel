@@ -907,9 +907,6 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 			strike( pd, res.fsm );
 			delete res.fsm;
 		}
-		catch ( const TooManyStates & ) {
-			nfaCheckResult( pd, 1, 0, "too-many-states" );
-		}
 		catch ( const CondCostTooHigh &ccth ) {
 			nfaCheckResult( pd, 20, ccth.costId, "cond-cost" );
 		}
@@ -918,7 +915,7 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 		}
 	}
 
-	nfaCheckResult( pd, 0, 0, "OK" );
+	nfaCheckResult( pd, 0, 0, "OK", true );
 }
 
 
