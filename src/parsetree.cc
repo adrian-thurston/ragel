@@ -934,6 +934,7 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 					nfaCheckResult( pd, 60, res.id, "prior-interaction", true );
 				return;
 			}
+			delete res.fsm;
 		}
 		catch ( const TooManyStates & ) {
 			nfaCheckResult( pd, 1, 0, "too-many-states" );
@@ -946,7 +947,7 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 		}
 	}
 
-	nfaCheckResult( pd, 0, 0, "OK" );
+	nfaCheckResult( pd, 0, 0, "OK", true );
 }
 
 /*
