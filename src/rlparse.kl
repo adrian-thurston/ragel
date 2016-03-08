@@ -1473,7 +1473,7 @@ regular_expr:
 		{
 			/* Append the right side to the right side of the left and toss the
 			 * right side. */
-			$1->regExpr->item->token.append( $2->reItem->token );
+			$1->regExpr->item->data.append( $2->reItem->data );
 			delete $2->reItem;
 			$$->regExpr = $1->regExpr;
 		}
@@ -1546,7 +1546,7 @@ regular_expr_or_data:
 		{
 			/* Append the right side to right side of the left and toss the
 			 * right side. */
-			$1->reOrBlock->item->token.append( $2->reOrItem->token );
+			$1->reOrBlock->item->data.append( $2->reOrItem->data );
 			delete $2->reOrItem;
 			$$->reOrBlock = $1->reOrBlock;
 		}

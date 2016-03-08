@@ -2181,7 +2181,7 @@ reduction TopLevel
 		{
 			/* Append the right side to right side of the left and toss the
 			 * right side. */
-			$_reg_or_data->reOrBlock->item->token.append( $reg_or_char->reOrItem->token );
+			$_reg_or_data->reOrBlock->item->data.append( $reg_or_char->reOrItem->data );
 			delete $reg_or_char->reOrItem;
 			$$->reOrBlock = $_reg_or_data->reOrBlock;
 		}

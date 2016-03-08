@@ -421,7 +421,7 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd );
 Key makeFsmKeyNum( char *str, const InputLoc &loc, ParseData *pd );
 Key makeFsmKeyChar( char c, ParseData *pd );
 void makeFsmKeyArray( Key *result, char *data, int len, ParseData *pd );
-void makeFsmUniqueKeyArray( KeySet &result, char *data, int len, 
+void makeFsmUniqueKeyArray( KeySet &result, const char *data, int len, 
 		bool caseInsensitive, ParseData *pd );
 FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd );
 FsmAp *dotFsm( ParseData *pd );

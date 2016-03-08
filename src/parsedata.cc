@@ -77,19 +77,6 @@ void Token::set( const char *str, int len, const ParserLoc &l )
 	loc = l;
 }
 
-
-void Token::append( const char *otherData, int otherLen )
-{
-	int newLength = length + otherLen;
-	char *newString = new char[newLength+1];
-	memcpy( newString, data, length );
-	memcpy( newString + length, otherData, otherLen );
-	newString[newLength] = 0;
-	data = newString;
-	length = newLength;
-
-}
-
 /* Perform minimization after an operation according 
  * to the command line args. */
 void afterOpMinimize( FsmAp *fsm, bool lastInSeq )
@@ -232,13 +219,13 @@ void makeFsmKeyArray( Key *result, char *data, int len, ParseData *pd )
 
 /* Like makeFsmKeyArray except the result has only unique keys. They ordering
  * will be changed. */
-void makeFsmUniqueKeyArray( KeySet &result, char *data, int len, 
+void makeFsmUniqueKeyArray( KeySet &result, const char *data, int len, 
 		bool caseInsensitive, ParseData *pd )
 {
 	/* Use a transitions list for getting unique keys. */
 	if ( pd->fsmCtx->keyOps->isSigned ) {
 		/* Copy from a char star type. */
-		char *src = data;
+		const char *src = data;
 		for ( int si = 0; si < len; si++ ) {
 			Key key( src[si] );
 			result.insert( key );
@@ -252,7 +239,7 @@ void makeFsmUniqueKeyArray( KeySet &result, char *data, int len,
 	}
 	else {
 		/* Copy from an unsigned byte ptr type. */
-		unsigned char *src = (unsigned char*) data;
+		const unsigned char *src = (unsigned char*) data;
 		for ( int si = 0; si < len; si++ ) {
 			Key key( src[si] );
 			result.insert( key );

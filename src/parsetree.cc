@@ -2912,14 +2912,14 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 	switch ( type ) {
 		case Data: {
 			/* Move the data into an integer array and make a concat fsm. */
-			Key *arr = new Key[token.length];
-			makeFsmKeyArray( arr, token.data, token.length, pd );
+			Key *arr = new Key[data.length()];
+			makeFsmKeyArray( arr, data.data, data.length(), pd );
 
 			/* Make the concat fsm. */
 			if ( rootRegex != 0 && rootRegex->caseInsensitive )
-				rtnVal = FsmAp::concatFsmCI( pd->fsmCtx, arr, token.length );
+				rtnVal = FsmAp::concatFsmCI( pd->fsmCtx, arr, data.length() );
 			else
-				rtnVal = FsmAp::concatFsm( pd->fsmCtx, arr, token.length );
+				rtnVal = FsmAp::concatFsm( pd->fsmCtx, arr, data.length() );
 			delete[] arr;
 			break;
 		}
@@ -3019,7 +3019,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 		 * issue warning or an error but since we can't with [a0-9a] or 'a' |
 		 * 'a' don't bother here. */
 		KeySet keySet( keyOps );
-		makeFsmUniqueKeyArray( keySet, token.data, token.length, 
+		makeFsmUniqueKeyArray( keySet, data.data, data.length(), 
 			rootRegex != 0 ? rootRegex->caseInsensitive : false, pd );
 
 		/* Run the or operator. */

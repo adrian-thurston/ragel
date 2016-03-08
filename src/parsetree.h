@@ -204,10 +204,6 @@ struct Token
 	int length;
 	ParserLoc loc;
 
-	void append( const Token &other )
-		{ append( other.data, other.length ); }
-	void append( const char *otherData, int otherLen );
-
 	void set( const char *str, int len, colm_location *cl);
 	void set( colm_data *cd, colm_location *cl);
 	void set( const char *str, int len, const InputLoc &loc );
@@ -222,10 +218,6 @@ struct RedToken
 	char *data;
 	int length;
 	InputLoc loc;
-
-	void append( const char *otherData, int otherLen );
-	void append( const Token &other )
-		{ append( other.data, other.length ); }
 
 	void set( const char *str, int len );
 };
@@ -804,9 +796,15 @@ struct ReItem
 	enum ReItemType { Data, Dot, OrBlock, NegOrBlock };
 	
 	ReItem( const InputLoc &loc, const Token &token ) 
-		: loc(loc), token(token), star(false), type(Data) { }
+	:
+		loc(loc), star(false), type(Data)
+	{
+		data.append( token.data, token.length );
+	}
+
 	ReItem( const InputLoc &loc, ReItemType type )
 		: loc(loc), star(false), type(type) { }
+
 	ReItem( const InputLoc &loc, ReOrBlock *orBlock, ReItemType type )
 		: loc(loc), orBlock(orBlock), star(false), type(type) { }
 
@@ -814,7 +812,7 @@ struct ReItem
 	FsmAp *walk( ParseData *pd, RegExpr *rootRegex );
 
 	InputLoc loc;
-	Token token;
+	Vector<char> data;
 	ReOrBlock *orBlock;
 	bool star;
 	ReItemType type;
@@ -845,14 +843,19 @@ struct ReOrItem
 	enum ReOrItemType { Data, Range };
 
 	ReOrItem( const InputLoc &loc, const Token &token ) 
-		: loc(loc), token(token), type(Data) {}
+	:
+		loc(loc), type(Data)
+	{
+		data.append( token.data, token.length );
+	}
+
 	ReOrItem( const InputLoc &loc, char lower, char upper )
 		: loc(loc), lower(lower), upper(upper), type(Range) { }
 
 	FsmAp *walk( ParseData *pd, RegExpr *rootRegex );
 
 	InputLoc loc;
-	Token token;
+	Vector<char> data;
 	char lower;
 	char upper;
 	ReOrItemType type;
