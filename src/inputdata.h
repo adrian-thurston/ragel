@@ -309,6 +309,8 @@ struct InputData
 	const char *input;
 	bool inLibRagel;
 
+	Vector<const char**> streamFileNames;
+
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();
 

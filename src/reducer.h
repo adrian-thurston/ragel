@@ -111,13 +111,15 @@ struct SectionPass
 
 struct IncludePass
 {
-	IncludePass( const string targetMachine )
+	IncludePass( InputData *id, const string targetMachine )
 	:
+		id(id),
 		targetMachine(targetMachine),
 		section(0)
 	{
 	}
 
+	InputData *id;
 	const string targetMachine;
 	string sectionMachine;
 	Section *section;

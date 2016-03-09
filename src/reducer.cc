@@ -141,7 +141,7 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 		el = new IncludeRec( fileName, machine );
 
 		/* First collect the locations of the text using an include pass. */
-		IncludePass includePass( machine );
+		IncludePass includePass( id, machine );
 		if ( id->inLibRagel && !fileSpecified ) {
 			/* In libragel and no file was specified in the include statement.
 			 * In this case we run the include pass on the input text supplied. */
@@ -255,6 +255,7 @@ void TopLevel::loadImport( std::string fileName )
 		ImportList = ImportList.next();
 	}
 
+	id->streamFileNames.append( colm_extract_fns( program ) );
 	colm_delete_program( program );
 }
 
@@ -271,6 +272,7 @@ void TopLevel::reduceFile( const char *inputFileName )
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );
+	id->streamFileNames.append( colm_extract_fns( program ) );
 	colm_delete_program( program );
 }
 
@@ -288,6 +290,7 @@ void TopLevel::reduceStr( const char *inputFileName, const char *input )
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 5, argv );
+	id->streamFileNames.append( colm_extract_fns( program ) );
 	colm_delete_program( program );
 }
 
@@ -305,6 +308,7 @@ void SectionPass::reduceFile( const char *inputFileName )
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );
+	id->streamFileNames.append( colm_extract_fns( program ) );
 	colm_delete_program( program );
 }
 
@@ -322,6 +326,7 @@ void SectionPass::reduceStr( const char *inputFileName, const char *input )
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 5, argv );
+	id->streamFileNames.append( colm_extract_fns( program ) );
 	colm_delete_program( program );
 }
 
@@ -339,6 +344,7 @@ void IncludePass::reduceFile( const char *inputFileName, const HostLang *hostLan
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );
+	id->streamFileNames.append( colm_extract_fns( program ) );
 	colm_delete_program( program );
 }
 
@@ -356,5 +362,6 @@ void IncludePass::reduceStr( const char *inputFileName, const HostLang *hostLang
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 5, argv );
+	id->streamFileNames.append( colm_extract_fns( program ) );
 	colm_delete_program( program );
 }

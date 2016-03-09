@@ -2458,6 +2458,9 @@ struct LoadRagel
 		}
 
 		loadImportList( ImportList );
+
+		id.streamFileNames.append( colm_extract_fns( program ) );
+
 		colm_delete_program( program );
 	}
 
@@ -2698,6 +2701,8 @@ struct LoadRagel
 		}
 
 		load( Start, targetMachine, searchMachine );
+
+		id.streamFileNames.append( colm_extract_fns( program ) );
 
 		colm_delete_program( program );
 	}

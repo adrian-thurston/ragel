@@ -47,6 +47,15 @@ InputData::~InputData()
 	inputItems.empty();
 	parseDataList.empty();
 	sectionList.empty();
+
+	for ( Vector<const char**>::Iter fns = streamFileNames; fns.lte(); fns++ ) {
+		const char **ptr = *fns;
+		while ( *ptr != 0 ) {
+			::free( (void*)*ptr );
+			ptr += 1;
+		}
+		free( (void*) *fns );
+	}
 }
 
 void InputData::abortCompile( int code )
@@ -459,6 +468,9 @@ void InputData::runRlhc()
 	colm_set_debug( program, 0 );
 	colm_run_program( program, 4, argv );
 	int es = program->exit_status;
+
+	streamFileNames.append( colm_extract_fns( program ) );
+
 	colm_delete_program( program );
 
 	if ( !saveTemps )
