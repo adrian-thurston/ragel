@@ -77,6 +77,16 @@ void Token::set( const char *str, int len, const ParserLoc &l )
 	loc = l;
 }
 
+void RedToken::set( colm_data *cd, colm_location *cl )
+{
+	data = cd->data;
+	length = cd->length;
+	loc.fileName = cl->name;
+	loc.line = cl->line;
+	loc.col = cl->column;
+}
+
+
 /* Perform minimization after an operation according 
  * to the command line args. */
 void afterOpMinimize( FsmAp *fsm, bool lastInSeq )

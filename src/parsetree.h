@@ -215,11 +215,11 @@ private:
 
 struct RedToken
 {
-	char *data;
+	const char *data;
 	int length;
-	InputLoc loc;
+	ParserLoc loc;
 
-	void set( const char *str, int len );
+	void set( colm_data *cd, colm_location *cl);
 };
 
 

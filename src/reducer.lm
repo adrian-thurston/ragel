@@ -58,7 +58,7 @@ reduction TopLevel
 		if ( exportMachine )
 			exportContext.append( true );
 
-		string name( $def_name->tok.data );
+		string name( $def_name->tok.data, $def_name->tok.length );
 
 		/* Main machine must be an instance. */
 		bool isInstance = false;
@@ -90,7 +90,7 @@ reduction TopLevel
 		if ( exportMachine )
 			exportContext.append( true );
 
-		string name( $def_name->tok.data );
+		string name( $def_name->tok.data, $def_name->tok.length );
 
 		MachineDef *machineDef = $lm->machineDef;
 
@@ -109,7 +109,7 @@ reduction TopLevel
 	# 	[word] :Word
 	ragel::def_name
 	{
-		Token tok;
+		RedToken tok;
 		colm_location loc;
 	}
 
@@ -138,7 +138,7 @@ reduction TopLevel
 	ragel::nfa_union :NfaUnion
 	{
 		InputLoc loc = &$def_name->loc;
-		string name( $def_name->tok.data );
+		string name( $def_name->tok.data, $def_name->tok.length );
 
 		$nfa_expr->nfaUnion->roundsList = $nfa_rounds->roundsList;
 
@@ -359,8 +359,8 @@ reduction TopLevel
 
 	ragel::include_spec 
 	{
-		Token machine;
-		Token file;
+		RedToken machine;
+		RedToken file;
 	}
 
 	ragel::include_spec :Machine
@@ -664,16 +664,13 @@ reduction TopLevel
 	# |	[word `( opt_action_arg_list `)] :Args
 	ragel::named_action_ref
 	{
-		Token tok;
 		Action *action;
 	}
 
 	ragel::named_action_ref :Plain
 	{
-		$$->tok.set( $word, @word );
-
 		/* Set the name in the actionDict. */
-		string data( $$->tok.data );
+		string data( $word->data, $word->length );
 		Action *action = pd->actionDict.find( data );
 		if ( action != 0 ) {
 			if ( action->paramList != 0 )
@@ -691,10 +688,8 @@ reduction TopLevel
 
 	ragel::named_action_ref :Args
 	{
-		$$->tok.set( $word, @word );
-
 		/* Set the name in the actionDict. */
-		string data( $$->tok.data );
+		string data( $word->data, $word->length );
 		Action *action = pd->actionDict.find( data );
 		if ( action != 0 ) {
 			if ( action->paramList == 0 )
@@ -2026,9 +2021,8 @@ reduction TopLevel
 
 	ragel::factor :String
 	{
-		Token tok;
-		tok.set( $string, @string );
-		$$->factor = new Factor( new Literal( @string, false, tok.data, tok.length, Literal::LitString ) );
+		$$->factor = new Factor( new Literal( @string, false,
+				$string->data, $string->length, Literal::LitString ) );
 	}
 
 	ragel::factor :Range
@@ -2157,9 +2151,7 @@ reduction TopLevel
 	{
 		string data( $re_char->data, $re_char->length );
 		char *c = unescape( data.c_str() );
-		Token tok;
-		tok.set( c, strlen( c ), @re_char );
-		$$->reItem = new ReItem( @1, tok.data, tok.length );
+		$$->reItem = new ReItem( @re_char, c, strlen(c) );
 		delete[] c;
 	}
 
@@ -2210,10 +2202,8 @@ reduction TopLevel
 	{
 		// ReOrItem *reOrItem;
 		char *c = unescape( $re_or_char->data, $re_or_char->length );
-		Token tok;
-		tok.set( c, 1, @re_or_char );
+		$$->reOrItem = new ReOrItem( @re_or_char, c, 1 );
 		delete[] c;
-		$$->reOrItem = new ReOrItem( @re_or_char, tok.data, tok.length );
 	}
 
 	ragel::reg_or_char :Range
@@ -2232,7 +2222,7 @@ reduction TopLevel
 	ragel::alphabet_num
 	{
 		bool neg;
-		Token tok;
+		RedToken tok;
 	}
 
 	ragel::alphabet_num :Uint
@@ -2265,15 +2255,15 @@ reduction TopLevel
 	{
 		/* Range literals must have only one char. We restrict this in the
 		 * parse tree. */
-		Token tok;
-		tok.set( $string, @string );
-		$$->literal = new Literal( @string, false, tok.data, tok.length, Literal::LitString );
+		$$->literal = new Literal( @string, false,
+				$string->data, $string->length, Literal::LitString );
 	}
 
 	ragel::range_lit :AN
 	{
 		$$->literal = new Literal( $alphabet_num->tok.loc,
-				$alphabet_num->neg, $alphabet_num->tok.data, $alphabet_num->tok.length, Literal::Number );
+				$alphabet_num->neg, $alphabet_num->tok.data,
+				$alphabet_num->tok.length, Literal::Number );
 	}
 
 	# def lm
