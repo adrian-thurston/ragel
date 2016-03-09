@@ -2731,14 +2731,14 @@ FsmAp *Range::walk( ParseData *pd )
 	/* Construct and verify the suitability of the lower end of the range. */
 	FsmAp *lowerFsm = lowerLit->walk( pd );
 	if ( !lowerFsm->checkSingleCharMachine() ) {
-		error(lowerLit->token.loc) << 
+		error(lowerLit->loc) << 
 			"bad range lower end, must be a single character" << endl;
 	}
 
 	/* Construct and verify the upper end. */
 	FsmAp *upperFsm = upperLit->walk( pd );
 	if ( !upperFsm->checkSingleCharMachine() ) {
-		error(upperLit->token.loc) << 
+		error(upperLit->loc) << 
 			"bad range upper end, must be a single character" << endl;
 	}
 
@@ -2751,7 +2751,7 @@ FsmAp *Range::walk( ParseData *pd )
 	/* Validate the range. */
 	if ( pd->fsmCtx->keyOps->gt( lowKey, highKey ) ) {
 		/* Recover by setting upper to lower; */
-		error(lowerLit->token.loc) << "lower end of range is greater then upper end" << endl;
+		error(lowerLit->loc) << "lower end of range is greater then upper end" << endl;
 		highKey = lowKey;
 	}
 
@@ -2812,19 +2812,14 @@ FsmAp *Literal::walk( ParseData *pd )
 
 	switch ( type ) {
 	case Number: {
-		char *data = token.data;
-		if ( neg ) {
-			data = new char[token.length + 2];
-			data[0] = '-';
-			memcpy( data + 1, token.data, token.length );
-			data[token.length + 1] = 0;
-		}
+		/* Make a C string. Maybe put - up front. */
+		Vector<char> num = data;
+		if ( neg )
+			num.insert( 0, '-' );
+		num.append( 0 );
 
 		/* Make the fsm key in int format. */
-		Key fsmKey = makeFsmKeyNum( data, token.loc, pd );
-
-		if ( neg )
-			delete[] data;
+		Key fsmKey = makeFsmKeyNum( num.data, loc, pd );
 
 		/* Make the new machine. */
 		rtnVal = FsmAp::concatFsm( pd->fsmCtx, fsmKey );
@@ -2834,17 +2829,17 @@ FsmAp *Literal::walk( ParseData *pd )
 		/* Make the array of keys in int format. */
 		long length;
 		bool caseInsensitive;
-		char *data = prepareLitString( token.loc, token.data, token.length, 
+		char *litstr = prepareLitString( loc, data.data, data.length(), 
 				length, caseInsensitive );
 		Key *arr = new Key[length];
-		makeFsmKeyArray( arr, data, length, pd );
+		makeFsmKeyArray( arr, litstr, length, pd );
 
 		/* Make the new machine. */
 		if ( caseInsensitive )
 			rtnVal = FsmAp::concatFsmCI( pd->fsmCtx, arr, length );
 		else
 			rtnVal = FsmAp::concatFsm( pd->fsmCtx, arr, length );
-		delete[] data;
+		delete[] litstr;
 		delete[] arr;
 		break;
 	}}

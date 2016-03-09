@@ -1175,7 +1175,7 @@ struct LoadRagel
 				string s = RL.string().text();
 				Token tok;
 				tok.set( s.c_str(), s.size(), RL.string().loc() );
-				literal = new Literal( false, tok, Literal::LitString );
+				literal = new Literal( tok.loc, false, tok.data, tok.length, Literal::LitString );
 				break;
 			}
 
@@ -1183,7 +1183,7 @@ struct LoadRagel
 				string s = RL.alphabet_num().text();
 				Token tok;
 				tok.set( s.c_str(), s.size(), RL.alphabet_num().loc() );
-				literal = new Literal( false, tok, Literal::Number );
+				literal = new Literal( tok.loc, false, tok.data, tok.length, Literal::Number );
 				break;
 			}
 		}
@@ -1198,7 +1198,7 @@ struct LoadRagel
 				char *c = unescape( RegOrChar.re_or_char().text().c_str() );
 				Token tok;
 				tok.set( c, strlen(c), RegOrChar.re_or_char().loc() );
-				orItem = new ReOrItem( RegOrChar.re_or_char().loc(), tok );
+				orItem = new ReOrItem( RegOrChar.re_or_char().loc(), tok.data, tok.length );
 				delete[] c;
 				break;
 			}
@@ -1258,7 +1258,7 @@ struct LoadRagel
 				char *c = unescape( RegItem.re_char().text().c_str() );
 				Token tok;
 				tok.set( c, strlen( c ), RegItem.re_char().loc() );
-				reItem = new ReItem( loc, tok );
+				reItem = new ReItem( loc, tok.data, tok.length );
 				delete[] c;
 				break;
 			}
@@ -1319,7 +1319,7 @@ struct LoadRagel
 				Token tok;
 				tok.set( s.c_str(), s.size(), FactorTree.alphabet_num().loc() );
 
-				factor = new Factor( new Literal( false, tok, Literal::Number ) );
+				factor = new Factor( new Literal( tok.loc, false, tok.data, tok.length, Literal::Number ) );
 				break;
 			}
 
@@ -1350,7 +1350,7 @@ struct LoadRagel
 				Token tok;
 				tok.set( s.c_str(), s.size(), FactorTree.string().loc() );
 
-				factor = new Factor( new Literal( false, tok, Literal::LitString ) );
+				factor = new Factor( new Literal( tok.loc, false, tok.data, tok.length, Literal::LitString ) );
 				break;
 			}
 			case ragel::factor::PosOrBlock: {
@@ -2383,7 +2383,7 @@ struct LoadRagel
 				string s = Import.Val().string().text();
 				Token tok;
 				tok.set( s.c_str(), s.size(), loc );
-				literal = new Literal( false, tok, Literal::LitString );
+				literal = new Literal( tok.loc, false, tok.data, tok.length, Literal::LitString );
 				break;
 			}
 
@@ -2391,7 +2391,7 @@ struct LoadRagel
 				string s = Import.Val().number().text();
 				Token tok;
 				tok.set( s.c_str(), s.size(), loc );
-				literal = new Literal( false, tok, Literal::Number );
+				literal = new Literal( tok.loc, false, tok.data, tok.length, Literal::Number );
 				break;
 			}
 		}

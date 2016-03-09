@@ -1995,7 +1995,9 @@ reduction TopLevel
 
 	ragel::factor :AlphabetNum
 	{
-		$$->factor = new Factor( new Literal( $alphabet_num->neg, $alphabet_num->tok, Literal::Number ) );
+		$$->factor = new Factor( new Literal( $alphabet_num->tok.loc,
+				$alphabet_num->neg, $alphabet_num->tok.data,
+				$alphabet_num->tok.length, Literal::Number ) );
 	}
 
 	ragel::factor :Word
@@ -2026,7 +2028,7 @@ reduction TopLevel
 	{
 		Token tok;
 		tok.set( $string, @string );
-		$$->factor = new Factor( new Literal( false, tok, Literal::LitString ) );
+		$$->factor = new Factor( new Literal( @string, false, tok.data, tok.length, Literal::LitString ) );
 	}
 
 	ragel::factor :Range
@@ -2157,7 +2159,7 @@ reduction TopLevel
 		char *c = unescape( data.c_str() );
 		Token tok;
 		tok.set( c, strlen( c ), @re_char );
-		$$->reItem = new ReItem( @1, tok );
+		$$->reItem = new ReItem( @1, tok.data, tok.length );
 		delete[] c;
 	}
 
@@ -2211,7 +2213,7 @@ reduction TopLevel
 		Token tok;
 		tok.set( c, 1, @re_or_char );
 		delete[] c;
-		$$->reOrItem = new ReOrItem( @re_or_char, tok );
+		$$->reOrItem = new ReOrItem( @re_or_char, tok.data, tok.length );
 	}
 
 	ragel::reg_or_char :Range
@@ -2265,12 +2267,13 @@ reduction TopLevel
 		 * parse tree. */
 		Token tok;
 		tok.set( $string, @string );
-		$$->literal = new Literal( false, tok, Literal::LitString );
+		$$->literal = new Literal( @string, false, tok.data, tok.length, Literal::LitString );
 	}
 
 	ragel::range_lit :AN
 	{
-		$$->literal = new Literal( $alphabet_num->neg, $alphabet_num->tok, Literal::Number );
+		$$->literal = new Literal( $alphabet_num->tok.loc,
+				$alphabet_num->neg, $alphabet_num->tok.data, $alphabet_num->tok.length, Literal::Number );
 	}
 
 	# def lm

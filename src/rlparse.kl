@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2015 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2016 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -1279,12 +1279,14 @@ nonterm factor
 factor: 
 	TK_Literal final {
 		/* Create a new factor node going to a concat literal. */
-		$$->factor = new Factor( new Literal( false, *$1, Literal::LitString ) );
+		$$->factor = new Factor( new Literal( $1->loc, false, $1->data,
+				$1->length, Literal::LitString ) );
 	};
 factor: 
 	alphabet_num final {
 		/* Create a new factor node going to a literal number. */
-		$$->factor = new Factor( new Literal( $1->neg, $1->token, Literal::Number ) );
+		$$->factor = new Factor( new Literal( $1->token.loc, $1->neg,
+				$1->token.data, $1->token.length, Literal::Number ) );
 	};
 factor:
 	TK_Word final {
@@ -1420,12 +1422,14 @@ nonterm range_lit
 range_lit:
 	TK_Literal final {
 		/* Range literas must have only one char. We restrict this in the parse tree. */
-		$$->literal = new Literal( false, *$1, Literal::LitString );
+		$$->literal = new Literal( $1->loc, false, $1->data,
+				$1->length, Literal::LitString );
 	};
 range_lit:
 	alphabet_num final {
 		/* Create a new literal number. */
-		$$->literal = new Literal( $1->neg, $1->token, Literal::Number );
+		$$->literal = new Literal( $1->token.loc, $1->neg,
+				$1->token.data, $1->token.length, Literal::Number );
 	};
 
 nonterm alphabet_num 
@@ -1524,7 +1528,7 @@ regular_expr_char:
 	};
 regular_expr_char:
 	RE_Char final {
-		$$->reItem = new ReItem( $1->loc, *$1 );
+		$$->reItem = new ReItem( $1->loc, $1->data, $1->length );
 	};
 
 # The data inside of a [] expression in a regular expression. Accepts any
@@ -1569,7 +1573,7 @@ nonterm regular_expr_or_char
 
 regular_expr_or_char:
 	RE_Char final {
-		$$->reOrItem = new ReOrItem( $1->loc, *$1 );
+		$$->reOrItem = new ReOrItem( $1->loc, $1->data, $1->length );
 	};
 regular_expr_or_char:
 	RE_Char RE_Dash RE_Char final {

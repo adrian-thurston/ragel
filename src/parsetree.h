@@ -759,13 +759,17 @@ struct Literal
 {
 	enum LiteralType { Number, LitString };
 
-	Literal( bool neg, const Token &token, LiteralType type )
-		: neg(neg), token(token), type(type) { }
+	Literal( const InputLoc &loc, bool neg, const char *_data, int len, LiteralType type )
+		: loc(loc), neg(neg), type(type)
+	{
+		data.append( _data, len );
+	}
 
 	FsmAp *walk( ParseData *pd );
 	
+	InputLoc loc;
 	bool neg;
-	Token token;
+	Vector<char> data;
 	LiteralType type;
 };
 
@@ -795,11 +799,11 @@ struct ReItem
 {
 	enum ReItemType { Data, Dot, OrBlock, NegOrBlock };
 	
-	ReItem( const InputLoc &loc, const Token &token ) 
+	ReItem( const InputLoc &loc, const char *_data, int len ) 
 	:
 		loc(loc), star(false), type(Data)
 	{
-		data.append( token.data, token.length );
+		data.append( _data, len );
 	}
 
 	ReItem( const InputLoc &loc, ReItemType type )
@@ -842,11 +846,11 @@ struct ReOrItem
 {
 	enum ReOrItemType { Data, Range };
 
-	ReOrItem( const InputLoc &loc, const Token &token ) 
+	ReOrItem( const InputLoc &loc, const char *_data, int len ) 
 	:
 		loc(loc), type(Data)
 	{
-		data.append( token.data, token.length );
+		data.append( _data, len );
 	}
 
 	ReOrItem( const InputLoc &loc, char lower, char upper )
