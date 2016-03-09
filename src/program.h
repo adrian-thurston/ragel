@@ -159,6 +159,9 @@ struct colm_program
 	tree_t *return_val;
 
 	void *red_ctx;
+
+	/* This can be extracted for ownership transfer before a program is deleted. */
+	const char **stream_fns;
 };
 
 #endif

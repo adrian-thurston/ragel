@@ -195,6 +195,9 @@ program_t *colm_new_program( struct colm_sections *rtd )
 	vm_init( prg );
 
 	rtd->init_need();
+
+	prg->stream_fns = malloc( sizeof(char*) * 1 );
+	prg->stream_fns[0] = 0;
 	return prg;
 }
 
@@ -231,6 +234,13 @@ static void colm_clear_heap( program_t *prg, tree_t **sp )
 void colm_set_reduce_ctx( struct colm_program *prg, void *ctx )
 {
 	prg->red_ctx = ctx;
+}
+
+const char **colm_extract_fns( struct colm_program *prg )
+{
+	const char **fns = prg->stream_fns;
+	prg->stream_fns = 0;
+	return fns;
 }
 
 int colm_delete_program( program_t *prg )
@@ -280,6 +290,16 @@ int colm_delete_program( program_t *prg )
 	}
 
 	vm_clear( prg );
+
+	if ( prg->stream_fns ) {
+		char **ptr = prg->stream_fns;
+		while ( *ptr != 0 ) {
+			free( *ptr );
+			ptr += 1;
+		}
+
+		free( prg->stream_fns );
+	}
 
 	free( prg );
 

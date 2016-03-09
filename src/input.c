@@ -35,6 +35,26 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+char *colm_filename_add( program_t *prg, const char *fn )
+{
+	/* Search for it. */
+	const char **ptr = prg->stream_fns;
+	while ( *ptr != 0 ) {
+		if ( strcmp( *ptr, fn ) == 0 )
+			return (char*)*ptr;
+		ptr += 1;
+	}
+
+	/* Not present, find. */
+	int items = ptr - prg->stream_fns;
+
+	prg->stream_fns = realloc( prg->stream_fns, sizeof(char*) * ( items + 2 ) );
+	prg->stream_fns[items] = strdup( fn );
+	prg->stream_fns[items+1] = 0;
+
+	return (char*)prg->stream_fns[items];
+}
+
 struct run_buf *new_run_buf( int sz )
 {
 	struct run_buf *rb;
@@ -1093,7 +1113,7 @@ stream_t *colm_stream_new_struct( program_t *prg )
 
 stream_t *colm_stream_open_fd( program_t *prg, char *name, long fd )
 {
-	struct stream_impl *impl = colm_impl_new_fd( name, fd );
+	struct stream_impl *impl = colm_impl_new_fd( colm_filename_add( prg, name ), fd );
 
 	struct colm_stream *s = colm_stream_new_struct( prg );
 	s->impl = impl;
@@ -1122,18 +1142,21 @@ stream_t *colm_stream_open_file( program_t *prg, tree_t *name, tree_t *mode )
 	char *file_name = (char*)malloc(string_length(head_name)+1);
 	memcpy( file_name, string_data(head_name), string_length(head_name) );
 	file_name[string_length(head_name)] = 0;
+
 	FILE *file = fopen( file_name, fopen_mode );
 	if ( file != 0 ) {
 		stream = colm_stream_new_struct( prg );
-		stream->impl = colm_impl_new_file( file_name, file );
+		stream->impl = colm_impl_new_file( colm_filename_add( prg, file_name ), file );
 	}
+
+	free( file_name );
 
 	return stream;
 }
 
 stream_t *colm_stream_new( program_t *prg )
 {
-	struct stream_impl *impl = colm_impl_new_generic( strdup("<internal>") );
+	struct stream_impl *impl = colm_impl_new_generic( colm_filename_add( prg, "<internal>" ) );
 	struct colm_stream *stream = colm_stream_new_struct( prg );
 	stream->impl = impl;
 	return stream;
@@ -1149,7 +1172,7 @@ str_t *collect_string( program_t *prg, stream_t *s )
 
 stream_t *colm_stream_open_collect( program_t *prg )
 {
-	struct stream_impl *impl = colm_impl_new_collect( strdup("<internal>") );
+	struct stream_impl *impl = colm_impl_new_collect( colm_filename_add( prg, "<internal>" ) );
 	struct colm_stream *stream = colm_stream_new_struct( prg );
 	stream->impl = impl;
 	return stream;
