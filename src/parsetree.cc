@@ -760,31 +760,6 @@ FsmRes NfaUnion::condsDensity( ParseData *pd, FsmAp *fsmAp )
 	return condsDensity( pd, fsmAp, fsmAp->startState, 1 );
 }
 
-void ParseData::nfaTermCheckKleeneZero()
-{
-	throw RepetitionError();
-}
-
-void ParseData::nfaTermCheckMinZero()
-{
-	throw RepetitionError();
-}
-
-void ParseData::nfaTermCheckPlusZero()
-{
-	throw RepetitionError();
-}
-
-void ParseData::nfaTermCheckRepZero()
-{
-	throw RepetitionError();
-}
-
-void ParseData::nfaTermCheckZeroReps()
-{
-	throw RepetitionError();
-}
-
 FsmRes NfaUnion::walk( ParseData *pd )
 {
 	if ( pd->id->nfaTermCheck ) {
@@ -911,6 +886,8 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 			if ( !res.success() ) {
 				if ( res.type == FsmRes::TypeTooManyStates )
 					nfaCheckResult( pd, 1, 0, "too-many-states", true );
+				else if ( res.type == FsmRes::TypeRepetitionError )
+					nfaCheckResult( pd, 2, 0, "rep-error" );
 				return;
 			}
 
@@ -920,6 +897,8 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 			if ( !condsRes.success() ) {
 				if ( condsRes.type == FsmRes::TypeCondCostTooHigh )
 					nfaCheckResult( pd, 20, condsRes.id, "cond-cost", true );
+				else if ( condsRes.type == FsmRes::TypeRepetitionError )
+					nfaCheckResult( pd, 2, 0, "rep-error" );
 				return;
 			}
 		}
@@ -948,6 +927,8 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 					nfaCheckResult( pd, 1, 0, "too-many-states", true );
 				else if ( res.type == FsmRes::TypePriorInteraction )
 					nfaCheckResult( pd, 60, res.id, "prior-interaction", true );
+				else if ( res.type == FsmRes::TypeRepetitionError )
+					nfaCheckResult( pd, 2, 0, "rep-error" );
 				return;
 			}
 			delete res.fsm;
@@ -2101,7 +2082,10 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			return factorTree;
 		
 		if ( factorTree.fsm->startState->isFinState() ) {
-			pd->nfaTermCheckKleeneZero();
+			if ( pd->id->inLibRagel ) {
+				delete factorTree.fsm;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 			factorTree.fsm->unsetFinState( factorTree.fsm->startState );
@@ -2124,7 +2108,10 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			return factorTree;
 
 		if ( factorTree.fsm->startState->isFinState() ) {
-			pd->nfaTermCheckKleeneZero();
+			if ( pd->id->inLibRagel ) {
+				delete factorTree.fsm;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 		}
@@ -2175,7 +2162,10 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			return factorTree;
 
 		if ( factorTree.fsm->startState->isFinState() ) {
-			pd->nfaTermCheckPlusZero();
+			if ( pd->id->inLibRagel ) {
+				delete factorTree.fsm;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
 			warning(loc) << "applying plus operator to a machine that "
 					"accepts zero length word" << endl;
 		}
@@ -2205,7 +2195,9 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		if ( lowerRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep. 
 			 * This Defeats the purpose so give a warning. */
-			pd->nfaTermCheckZeroReps();
+			if ( pd->id->inLibRagel )
+				return FsmRes( FsmRes::RepetitionError() );
+
 			warning(loc) << "exactly zero repetitions results "
 					"in the null machine" << endl;
 
@@ -2218,7 +2210,10 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				return factorTree;
 
 			if ( factorTree.fsm->startState->isFinState() ) {
-				pd->nfaTermCheckRepZero();
+				if ( pd->id->inLibRagel ) {
+					delete factorTree.fsm;
+					return FsmRes( FsmRes::RepetitionError() );
+				}
 				warning(loc) << "applying repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
@@ -2242,7 +2237,9 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		if ( upperRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep. 
 			 * This Defeats the purpose so give a warning. */
-			pd->nfaTermCheckZeroReps();
+			if ( pd->id->inLibRagel )
+				return FsmRes( FsmRes::RepetitionError() );
+
 			warning(loc) << "max zero repetitions results "
 					"in the null machine" << endl;
 
@@ -2255,7 +2252,10 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				return factorTree;
 
 			if ( factorTree.fsm->startState->isFinState() ) {
-				pd->nfaTermCheckRepZero();
+				if ( pd->id->inLibRagel ) {
+					delete factorTree.fsm;
+					return FsmRes( FsmRes::RepetitionError() );
+				}
 				warning(loc) << "applying max repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
@@ -2281,7 +2281,10 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			return factorTree;
 
 		if ( factorTree.fsm->startState->isFinState() ) {
-			pd->nfaTermCheckMinZero();
+			if ( pd->id->inLibRagel ) {
+				delete factorTree.fsm;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
 			warning(loc) << "applying min repetition to a machine that "
 					"accepts zero length word" << endl;
 		}
@@ -2338,7 +2341,9 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		else if ( lowerRep == 0 && upperRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep.  This
 			 * defeats the purpose so give a warning. */
-			pd->nfaTermCheckZeroReps();
+			if ( pd->id->inLibRagel )
+				return FsmRes( FsmRes::RepetitionError() );
+
 			warning(loc) << "zero to zero repetitions results "
 					"in the null machine" << endl;
 
@@ -2351,7 +2356,10 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				return factorTree;
 
 			if ( factorTree.fsm->startState->isFinState() ) {
-				pd->nfaTermCheckMinZero();
+				if ( pd->id->inLibRagel ) {
+					delete factorTree.fsm;
+					return FsmRes( FsmRes::RepetitionError() );
+				}
 				warning(loc) << "applying range repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
@@ -2586,7 +2594,10 @@ FsmRes Factor::condPlus( ParseData *pd )
 
 	/* Plus Operation. */
 	if ( exprTree.fsm->startState->isFinState() ) {
-		pd->nfaTermCheckPlusZero();
+		if ( pd->id->inLibRagel ) {
+			delete exprTree.fsm;
+			return FsmRes( FsmRes::RepetitionError() );
+		}
 		warning(loc) << "applying plus operator to a machine that "
 				"accepts zero length word" << endl;
 	}
@@ -2653,7 +2664,7 @@ FsmRes Factor::walk( ParseData *pd )
 	case RangeType:
 		return FsmRes( FsmRes::Fsm(), range->walk( pd ) );
 	case OrExprType:
-		return FsmRes( FsmRes::Fsm(), reItem->walk( pd, 0 ) );
+		return reItem->walk( pd, 0 );
 	case RegExprType:
 		return FsmRes( FsmRes::Fsm(), regExpr->walk( pd, 0 ) );
 	case ReferenceType:
@@ -2883,8 +2894,8 @@ FsmAp *RegExpr::walk( ParseData *pd, RegExpr *rootRegex )
 		case RecurseItem: {
 			/* Walk both items. */
 			rtnVal = regExpr->walk( pd, rootRegex );
-			FsmAp *fsm2 = item->walk( pd, rootRegex );
-			FsmRes res = FsmAp::concatOp( rtnVal, fsm2 );
+			FsmRes fsm2 = item->walk( pd, rootRegex );
+			FsmRes res = FsmAp::concatOp( rtnVal, fsm2.fsm );
 			rtnVal = res.fsm;
 			break;
 		}
@@ -2911,7 +2922,7 @@ ReItem::~ReItem()
 }
 
 /* Evaluate a regular expression object. */
-FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
+FsmRes ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 {
 	/* The fsm to return, is the alphabet signed? */
 	FsmAp *rtnVal = 0;
@@ -2960,7 +2971,11 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 	/* If the item is followed by a star, then apply the star op. */
 	if ( star ) {
 		if ( rtnVal->startState->isFinState() ) {
-			pd->nfaTermCheckKleeneZero();
+			if ( pd->id->inLibRagel ) {
+				delete rtnVal;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
+
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 		}
@@ -2969,7 +2984,8 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 		rtnVal = res.fsm;
 		rtnVal->minimizePartition2();
 	}
-	return rtnVal;
+
+	return FsmRes( FsmRes::Fsm(), rtnVal );
 }
 
 /* Clean up after an or block of a regular expression. */

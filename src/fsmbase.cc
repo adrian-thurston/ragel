@@ -628,7 +628,7 @@ void FsmAp::depthFirstOrdering()
 /* Stable sort the states by final state status. */
 void FsmAp::sortStatesByFinal()
 {
-	/* Move forward through the list and throw final states onto the end. */
+	/* Move forward through the list and move final states onto the end. */
 	StateAp *state = 0;
 	StateAp *next = stateList.head;
 	StateAp *last = stateList.tail;

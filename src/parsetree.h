@@ -813,7 +813,7 @@ struct ReItem
 		: loc(loc), orBlock(orBlock), star(false), type(type) { }
 
 	~ReItem();
-	FsmAp *walk( ParseData *pd, RegExpr *rootRegex );
+	FsmRes walk( ParseData *pd, RegExpr *rootRegex );
 
 	InputLoc loc;
 	Vector<char> data;

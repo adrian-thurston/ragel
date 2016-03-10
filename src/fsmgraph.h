@@ -1712,6 +1712,7 @@ struct FsmRes
 	struct TooManyStates {};
 	struct PriorInteraction {};
 	struct CondCostTooHigh {};
+	struct RepetitionError {};
 
 	enum Type
 	{
@@ -1719,7 +1720,8 @@ struct FsmRes
 		TypeAborted,
 		TypeTooManyStates,
 		TypePriorInteraction,
-		TypeCondCostTooHigh
+		TypeCondCostTooHigh,
+		TypeRepetitionError,
 	};
 
 	FsmRes( const Fsm &, FsmAp *fsm )
@@ -1736,6 +1738,9 @@ struct FsmRes
 
 	FsmRes( const CondCostTooHigh &, long long costId )
 		: fsm(0), type(TypeCondCostTooHigh), id(costId) {}
+
+	FsmRes( const RepetitionError & )
+		: fsm(0), type(TypeRepetitionError) {}
 
 	bool success() { return fsm != 0; }
 
