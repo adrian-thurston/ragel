@@ -664,14 +664,14 @@ NfaUnion::~NfaUnion()
 }
 
 
-void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
+FsmRes NfaUnion::condsDensity( ParseData *pd, FsmAp *fsm, StateAp *state, long depth )
 {
 	/* Nothing to do if the state is already on the list. */
 	if ( state->stateBits & STB_ONLIST )
-		return;
+		return FsmRes( FsmRes::Fsm(), fsm );
 
 	if ( depth > pd->id->nfaCondsDepth )
-		return;
+		return FsmRes( FsmRes::Fsm(), fsm );
 
 	/* Doing depth first, put state on the list. */
 	state->stateBits |= STB_ONLIST;
@@ -680,19 +680,23 @@ void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
 		if ( trans->plain() ) {
 			if ( trans->tdap()->toState != 0 ) {
-				condsDensity( pd, trans->tdap()->toState, depth + 1 );
+				FsmRes res = condsDensity( pd, fsm, trans->tdap()->toState, depth + 1 );
+				if ( !res.success() )
+					return res;
 			}
 		}
 		else {
 			for ( CondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
-				if ( (*csi)->costMark ) {
-					throw CondCostTooHigh( (*csi)->costId );
-				}
+				if ( (*csi)->costMark )
+					return FsmRes( FsmRes::CondCostTooHigh(), (*csi)->costId );
 			}
 			
 			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-				if ( cond->toState != 0 )
-					condsDensity( pd, cond->toState, depth + 1 );
+				if ( cond->toState != 0 ) {
+					FsmRes res = condsDensity( pd, fsm, cond->toState, depth + 1 );
+					if ( !res.success() )
+						return res;
+				}
 			}
 		}
 	}
@@ -700,14 +704,18 @@ void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
 	if ( state->nfaOut != 0 ) {
 		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
 			/* We do not increment depth here since this is an epsilon transition. */
-			condsDensity( pd, n->toState, depth );
+			FsmRes res = condsDensity( pd, fsm, n->toState, depth );
+			if ( !res.success() )
+				return res;
 		}
 	}
 
 	for ( ActionTable::Iter a = state->fromStateActionTable; a.lte(); a++ ) {
 		if ( a->value->costMark )
-			throw CondCostTooHigh( a->value->costId );
+			return FsmRes( FsmRes::CondCostTooHigh(), a->value->costId );
 	}
+
+	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
 void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, long depth )
@@ -743,15 +751,13 @@ void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, lon
 	}
 }
 
-bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp )
+FsmRes NfaUnion::condsDensity( ParseData *pd, FsmAp *fsmAp )
 {
 	/* Init on state list flags. */
 	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
 		st->stateBits &= ~STB_ONLIST;
 
-	condsDensity( pd, fsmAp->startState, 1 );
-
-	return true;
+	return condsDensity( pd, fsmAp, fsmAp->startState, 1 );
 }
 
 void ParseData::nfaTermCheckKleeneZero()
@@ -908,8 +914,14 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 				return;
 			}
 
-			strike( pd, res.fsm );
+			FsmRes condsRes = condsDensity( pd, res.fsm );
 			delete res.fsm;
+
+			if ( !condsRes.success() ) {
+				if ( condsRes.type == FsmRes::TypeCondCostTooHigh )
+					nfaCheckResult( pd, 20, condsRes.id, "cond-cost", true );
+				return;
+			}
 		}
 		catch ( const CondCostTooHigh &ccth ) {
 			nfaCheckResult( pd, 20, ccth.costId, "cond-cost" );

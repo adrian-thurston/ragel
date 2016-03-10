@@ -1711,13 +1711,15 @@ struct FsmRes
 	struct Aborted {};
 	struct TooManyStates {};
 	struct PriorInteraction {};
+	struct CondCostTooHigh {};
 
 	enum Type
 	{
 		TypeFsm,
 		TypeAborted,
 		TypeTooManyStates,
-		TypePriorInteraction
+		TypePriorInteraction,
+		TypeCondCostTooHigh
 	};
 
 	FsmRes( const Fsm &, FsmAp *fsm )
@@ -1731,6 +1733,9 @@ struct FsmRes
 
 	FsmRes( const PriorInteraction &, long long guardId )
 		: fsm(0), type(TypePriorInteraction), id(guardId) {}
+
+	FsmRes( const CondCostTooHigh &, long long costId )
+		: fsm(0), type(TypeCondCostTooHigh), id(costId) {}
 
 	bool success() { return fsm != 0; }
 

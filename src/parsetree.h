@@ -469,11 +469,11 @@ struct NfaUnion
 	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
-	bool strike( ParseData *pd, FsmAp *fsmAp );
+	FsmRes condsDensity( ParseData *pd, FsmAp *fsmAp );
 	void nfaTermCheck( ParseData *pd );
 	void nfaCondsCheck( ParseData *pd );
 	void nfaBreadthCheck( ParseData *pd );
-	void condsDensity( ParseData *pd, StateAp *state, long depth );
+	FsmRes condsDensity( ParseData *pd, FsmAp *fsm, StateAp *state, long depth );
 	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
 
 	double checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state );
