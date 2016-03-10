@@ -125,16 +125,16 @@ else if ( Cmd == 'toplevel-reduce-file' ) {
 	Stream: stream = open( FileName, "r" )
 	reduce TopLevel start[ Stream ]
 }
+else if ( Cmd == 'toplevel-reduce-str' ) {
+	A = argv->pop_head_el()
+	Data: str = A->value
+	reduce TopLevel start[ Data ]
+}
 else if ( Cmd == 'section-reduce-file' ) {
 	Stream: stream = open( FileName, "r" )
 	reduce SectionPass start[ Stream ]
 	if error
 		send stderr "[error]
-}
-else if ( Cmd == 'toplevel-reduce-str' ) {
-	A = argv->pop_head_el()
-	Data: str = A->value
-	reduce TopLevel start[ Data ]
 }
 else if ( Cmd == 'section-reduce-str' ) {
 	A = argv->pop_head_el()

@@ -56,6 +56,18 @@ InputData::~InputData()
 		}
 		free( (void*) *fns );
 	}
+
+	if ( outputFileName != 0 )
+		delete[] outputFileName;
+
+	if ( histogramFn != 0 )
+		::free( (void*)histogramFn );
+
+	if ( histogram != 0 )
+		delete[] histogram;
+
+	for ( ArgsVector::Iter bl = breadthLabels; bl.lte(); bl++ )
+		free( (void*) *bl );
 }
 
 void InputData::abortCompile( int code )
@@ -639,8 +651,8 @@ void InputData::makeTranslateOutputFileName()
 {
 	if ( backend == Translated ) {
 		origOutputFileName = outputFileName;
-		genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
-		outputFileName = genOutputFileName.c_str();
+		outputFileName = fileNameFromStem( inputFileName, ".ri" );
+		genOutputFileName = outputFileName;
 	}
 }
 

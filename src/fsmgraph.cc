@@ -751,8 +751,10 @@ FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
 	assert( fsm->ctx == other->ctx );
 
 	FsmRes res = fsm->doConcat( other, 0, false );
-	if ( !res.success() )
+	if ( !res.success() ) {
+		delete fsm;
 		return res;
+	}
 
 	return res;
 }

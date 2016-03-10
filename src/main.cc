@@ -345,7 +345,8 @@ void InputData::parseArgs( int argc, const char **argv )
 					error() << "more than one output file name was given" << endl;
 				else {
 					/* Ok, remember the output file name. */
-					outputFileName = pc.paramArg;
+					outputFileName = new char[strlen(pc.paramArg)+1];
+					strcpy( (char*)outputFileName, pc.paramArg );
 				}
 				break;
 

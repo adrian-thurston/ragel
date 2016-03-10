@@ -2212,6 +2212,8 @@ reduction TopLevel
 		char *low = unescape( $Low->data, $Low->length );
 		char *high = unescape( $High->data, $High->length );
 		$$->reOrItem = new ReOrItem( @re_or_dash, low[0], high[0] );
+		delete[] low;
+		delete[] high;
 	}
 
 
