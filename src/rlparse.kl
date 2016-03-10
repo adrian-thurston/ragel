@@ -1930,7 +1930,7 @@ int Parser6::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
 	int res = parseLangEl( tokId, &token );
 	if ( res < 0 ) {
 		parse_error(tokId, token) << "parse error" << endl;
-		pd->id->abortCompile(1);
+		pd->id->abortCompile( 1 );
 	}
 	return res;
 }

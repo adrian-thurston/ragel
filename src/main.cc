@@ -68,7 +68,7 @@ using std::ios;
 using std::streamsize;
 
 /* Print a summary of the options. */
-void usage()
+void InputData::usage()
 {
 	cout <<
 "usage: ragel [options] file\n"
@@ -160,18 +160,18 @@ void usage()
 "   --supported-backends    Show supported backends\n"
 	;	
 
-	throw AbortCompile( 0 );
+	abortCompile( 0 );
 }
 
 /* Print version information and exit. */
-void version()
+void InputData::version()
 {
 	cout << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
 			"Copyright (c) 2001-2015 by Adrian Thurston" << endl;
-	throw AbortCompile( 0 );
+	abortCompile( 0 );
 }
 
-void showHostLangNames()
+void InputData::showHostLangNames()
 {
 	for ( int i = 0; i < numHostLangs; i++ ) {
 		if ( i > 0 )
@@ -179,10 +179,10 @@ void showHostLangNames()
 		cout << hostLangs[i]->name;
 	}
 	cout << endl;
-	throw AbortCompile( 0 );
+	abortCompile( 0 );
 }
 
-void showHostLangArgs()
+void InputData::showHostLangArgs()
 {
 	for ( int i = 0; i < numHostLangs; i++ ) {
 		if ( i > 0 )
@@ -190,10 +190,10 @@ void showHostLangArgs()
 		cout << hostLangs[i]->arg;
 	}
 	cout << endl;
-	throw AbortCompile( 0 );
+	abortCompile( 0 );
 }
 
-void showFrontends()
+void InputData::showFrontends()
 {
 	cout << "--colm-frontend";
 	cout << " --reduce-frontend";
@@ -201,19 +201,19 @@ void showFrontends()
 	cout << " --kelbt-frontend";
 #endif
 	cout << endl;
-	throw AbortCompile( 0 );
+	abortCompile( 0 );
 }
 
-void showBackends()
+void InputData::showBackends()
 {
 	cout << "--direct-backend --colm-backend";
 	cout << endl;
-	throw AbortCompile( 0 );
+	abortCompile( 0 );
 }
 
-void showStyles( InputData *id )
+void InputData::showStyles()
 {
-	switch ( id->hostLang->lang ) {
+	switch ( hostLang->lang ) {
 	case HostLang::C:
 	case HostLang::D:
 	case HostLang::Go:
@@ -239,7 +239,7 @@ void showStyles( InputData *id )
 
 	}
 
-	throw AbortCompile( 0 );
+	abortCompile( 0 );
 }
 
 /* Error reporting format. */
@@ -600,7 +600,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				else {
 					error() << "-T" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
-					abortCompile(1);
+					abortCompile( 1 );
 				}
 				break;
 			case 'F': 
@@ -611,7 +611,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				else {
 					error() << "-F" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
-					abortCompile(1);
+					abortCompile( 1 );
 				}
 				break;
 			case 'G': 
@@ -627,7 +627,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				} else {
 					error() << "-G" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
-					abortCompile(1);
+					abortCompile( 1 );
 				}
 				break;
 
@@ -660,7 +660,7 @@ void InputData::parseArgs( int argc, const char **argv )
 	}
 
 	if ( showStylesOpt )
-		showStyles( this );
+		showStyles();
 }
 
 bool langSupportsGoto( const HostLang *hostLang )
@@ -732,7 +732,7 @@ void InputData::checkArgs()
 
 	/* Bail on argument processing errors. */
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( inputFileName != 0 && outputFileName != 0 && 
@@ -781,7 +781,7 @@ int main( int argc, const char **argv )
 		id.checkArgs();
 
 		if ( !id.process() )
-			throw AbortCompile( 1 );
+			id.abortCompile( 1 );
 	}
 	catch ( const AbortCompile &ac ) {
 		code = ac.code;

@@ -257,7 +257,7 @@ void InputData::openOutput()
 		outFilter->open( outputFileName, ios::out|ios::trunc );
 		if ( !outFilter->is_open() ) {
 			error() << "error opening " << outputFileName << " for writing" << endl;
-			abortCompile(1);
+			abortCompile( 1 );
 		}
 	}
 }
@@ -418,12 +418,12 @@ void InputData::processXML()
 	prepareAllMachines();
 
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 
 	createOutputStream();
 
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 
 	/*
 	 * From this point on we should not be reporting any errors.
@@ -440,12 +440,12 @@ void InputData::processDot()
 	prepareSingleMachine();
 
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 
 	createOutputStream();
 
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 
 	/*
 	 * From this point on we should not be reporting any errors.
@@ -500,7 +500,7 @@ void InputData::processCode()
 	prepareAllMachines();
 
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 
 	makeDefaultFileName();
 
@@ -512,12 +512,12 @@ void InputData::processCode()
 	generateReduced();
 
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 
 	verifyWritesHaveData();
 
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 
 	/*
 	 * From this point on we should not be reporting any errors.
@@ -549,23 +549,21 @@ void InputData::checkLastRef( InputItem *ii )
 				ii->parser->terminateParser();
 #endif
 
-			try {
-				FsmRes res = pd->prepareMachineGen( 0, hostLang );
+			FsmRes res = pd->prepareMachineGen( 0, hostLang );
 
-				if ( !res.success() ) {
-					abortedCompile = true;
-					return;
-				}
-
-				if ( gblErrorCount > 0 )
-					abortCompile(1);
-
-				pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
-
-				if ( gblErrorCount > 0 )
-					abortCompile(1);
+			if ( !res.success() ) {
+				abortedCompile = true;
+				return;
 			}
-			catch ( const AbortCompile &ac ) {
+
+			if ( gblErrorCount > 0 ) {
+				abortedCompile = true;
+				return;
+			}
+
+			pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
+
+			if ( gblErrorCount > 0 ) {
 				abortedCompile = true;
 				return;
 			}
@@ -584,13 +582,9 @@ void InputData::checkLastRef( InputItem *ii )
 		/* Move forward, flushing input items until we get to an unprocessed
 		 * input item. */
 		while ( lastFlush != 0 && lastFlush->processed ) {
-			try {
-				verifyWriteHasData( lastFlush );
+			verifyWriteHasData( lastFlush );
 
-				if ( gblErrorCount > 0 )
-					abortCompile(1);
-			}
-			catch ( const AbortCompile &ac ) {
+			if ( gblErrorCount > 0 ) {
 				abortedCompile = true;
 				return;
 			}
@@ -698,11 +692,11 @@ void InputData::parseKelbt()
 
 	/* Finished, final check for errors.. */
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 	
 	if ( inLibRagel )
 		delete inStringStream;
@@ -764,7 +758,7 @@ void InputData::processColm()
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
-		abortCompile(1);
+		abortCompile( 1 );
 
 	if ( generateXML )
 		processXML();

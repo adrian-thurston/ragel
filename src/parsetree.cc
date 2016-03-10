@@ -862,14 +862,11 @@ void nfaResultWrite( ostream &out, long code, long id, const char *scode )
 	out << code << " " << id << " " << scode << endl;
 }
 
-void nfaCheckResult( ParseData *pd, long code, long id, const char *scode, bool suppressExit = false )
+void nfaCheckResult( ParseData *pd, long code, long id, const char *scode )
 {
 	stringstream out;
 	nfaResultWrite( out, code, id, scode );
 	pd->id->comm = out.str();
-
-	if ( !suppressExit )
-		pd->id->abortCompile( code );
 }
 
 /* This is the first pass check. It looks for state (limit times 2 ) or
@@ -878,73 +875,54 @@ void nfaCheckResult( ParseData *pd, long code, long id, const char *scode, bool 
 void NfaUnion::nfaCondsCheck( ParseData *pd )
 {
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		try {
-			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit * 2;
-			FsmRes res = (*term)->walk( pd );
-			pd->fsmCtx->stateLimit = -1;
+		pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit * 2;
+		FsmRes res = (*term)->walk( pd );
+		pd->fsmCtx->stateLimit = -1;
 
-			if ( !res.success() ) {
-				if ( res.type == FsmRes::TypeTooManyStates )
-					nfaCheckResult( pd, 1, 0, "too-many-states", true );
-				else if ( res.type == FsmRes::TypeRepetitionError )
-					nfaCheckResult( pd, 2, 0, "rep-error" );
-				return;
-			}
-
-			FsmRes condsRes = condsDensity( pd, res.fsm );
-			delete res.fsm;
-
-			if ( !condsRes.success() ) {
-				if ( condsRes.type == FsmRes::TypeCondCostTooHigh )
-					nfaCheckResult( pd, 20, condsRes.id, "cond-cost", true );
-				else if ( condsRes.type == FsmRes::TypeRepetitionError )
-					nfaCheckResult( pd, 2, 0, "rep-error" );
-				return;
-			}
+		if ( !res.success() ) {
+			if ( res.type == FsmRes::TypeTooManyStates )
+				nfaCheckResult( pd, 1, 0, "too-many-states" );
+			else if ( res.type == FsmRes::TypeRepetitionError )
+				nfaCheckResult( pd, 2, 0, "rep-error" );
+			return;
 		}
-		catch ( const CondCostTooHigh &ccth ) {
-			nfaCheckResult( pd, 20, ccth.costId, "cond-cost" );
-		}
-		catch ( const RepetitionError & ) {
-			nfaCheckResult( pd, 2, 0, "rep-error" );
+
+		FsmRes condsRes = condsDensity( pd, res.fsm );
+		delete res.fsm;
+
+		if ( !condsRes.success() ) {
+			if ( condsRes.type == FsmRes::TypeCondCostTooHigh )
+				nfaCheckResult( pd, 20, condsRes.id, "cond-cost" );
+			else if ( condsRes.type == FsmRes::TypeRepetitionError )
+				nfaCheckResult( pd, 2, 0, "rep-error" );
+			return;
 		}
 	}
 
-	nfaCheckResult( pd, 0, 0, "OK", true );
+	nfaCheckResult( pd, 0, 0, "OK" );
 }
 
 
 void NfaUnion::nfaTermCheck( ParseData *pd )
 {
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		try {
-			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
-			FsmRes res = (*term)->walk( pd );
-			pd->fsmCtx->stateLimit = -1;
+		pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
+		FsmRes res = (*term)->walk( pd );
+		pd->fsmCtx->stateLimit = -1;
 
-			if ( !res.success() ) {
-				if ( res.type == FsmRes::TypeTooManyStates )
-					nfaCheckResult( pd, 1, 0, "too-many-states", true );
-				else if ( res.type == FsmRes::TypePriorInteraction )
-					nfaCheckResult( pd, 60, res.id, "prior-interaction", true );
-				else if ( res.type == FsmRes::TypeRepetitionError )
-					nfaCheckResult( pd, 2, 0, "rep-error" );
-				return;
-			}
-			delete res.fsm;
+		if ( !res.success() ) {
+			if ( res.type == FsmRes::TypeTooManyStates )
+				nfaCheckResult( pd, 1, 0, "too-many-states" );
+			else if ( res.type == FsmRes::TypePriorInteraction )
+				nfaCheckResult( pd, 60, res.id, "prior-interaction" );
+			else if ( res.type == FsmRes::TypeRepetitionError )
+				nfaCheckResult( pd, 2, 0, "rep-error" );
+			return;
 		}
-		catch ( const TooManyStates & ) {
-			nfaCheckResult( pd, 1, 0, "too-many-states" );
-		}
-		catch ( const PriorInteraction &pi ) {
-			nfaCheckResult( pd, 60, pi.id, "prior-interaction" );
-		}
-		catch ( const RepetitionError & ) {
-			nfaCheckResult( pd, 2, 0, "rep-error" );
-		}
+		delete res.fsm;
 	}
 
-	nfaCheckResult( pd, 0, 0, "OK", true );
+	nfaCheckResult( pd, 0, 0, "OK" );
 }
 
 /*
@@ -1012,7 +990,7 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 
 	/* This will exit. Can't call it because we need to perform the score
 	 * checks after. */
-	nfaCheckResult( pd, exitCode, 1, "OK", true );
+	nfaCheckResult( pd, exitCode, 1, "OK" );
 
 	ostream *out = &cout;
 	ofstream *ofs = 0;
@@ -1056,7 +1034,7 @@ void NfaUnion::nfaBreadthCheck( ParseData *pd )
 		return;
 	}
 
-	nfaCheckResult( pd, 0, 0, "OK", false );
+	nfaCheckResult( pd, 0, 0, "OK" );
 }
 
 void NfaUnion::makeNameTree( ParseData *pd )

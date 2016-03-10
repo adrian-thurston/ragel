@@ -1268,7 +1268,7 @@ void Scanner::do_scan()
 			/* Machine failed before finding a token. I'm not yet sure if this
 			 * is reachable. */
 			scan_error() << "scanner error" << endl;
-			id.abortCompile(1);
+			id.abortCompile( 1 );
 		}
 
 		/* Decide if we need to preserve anything. */

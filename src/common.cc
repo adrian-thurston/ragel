@@ -588,5 +588,5 @@ exit_object endp;
 void operator<<( std::ostream &out, exit_object & )
 {
 	out << std::endl;
-	throw AbortCompile(1);
+	throw AbortCompile( 1 );
 }

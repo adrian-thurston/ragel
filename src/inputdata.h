@@ -214,6 +214,14 @@ struct InputData
 
 	~InputData();
 
+	void usage();
+	void version();
+	void showHostLangNames();
+	void showHostLangArgs();
+	void showFrontends();
+	void showBackends();
+	void showStyles();
+
 	std::string dirName;
 
 	/* The name of the root section, this does not change during an include. */
