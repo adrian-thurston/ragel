@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2012 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2006-2016 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -3678,6 +3678,8 @@ again:
 			cmd0[cmd->value->length] = 0;
 
 			int res = system( cmd0 );
+
+			free( cmd0 );
 
 			if ( WIFSIGNALED( res ) )
 				raise( WTERMSIG( res ) );
