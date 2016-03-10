@@ -1047,8 +1047,6 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 		ofs->close();
 		delete ofs;
 	}
-
-	pd->id->abortCompile( exitCode );
 }
 
 void NfaUnion::nfaBreadthCheck( ParseData *pd )
@@ -1061,9 +1059,11 @@ void NfaUnion::nfaBreadthCheck( ParseData *pd )
 		FsmRes res = (*term)->walk( pd );
 		fsm = res.fsm;
 		checkBreadth( pd, fsm );
+		delete fsm;
+		return;
 	}
 
-	nfaCheckResult( pd, 0, 0, "OK" );
+	nfaCheckResult( pd, 0, 0, "OK", false );
 }
 
 void NfaUnion::makeNameTree( ParseData *pd )
