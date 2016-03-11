@@ -465,23 +465,24 @@ struct NfaUnion
 	NfaUnion() : roundsList(0) { }
 	~NfaUnion();
 
+	FsmRes condCostFromState( ParseData *pd, FsmAp *fsm, StateAp *state, long depth );
+	FsmRes condCostSearch( ParseData *pd, FsmAp *fsmAp );
+
+	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
+
+	void breadthFromState( ParseData *pd, FsmAp *fsm, StateAp *state,
+			long depth, int maxDepth, double stateScore, double &total );
+	double breadthFromEntry( ParseData *pd, FsmAp *fsm, StateAp *state );
+	FsmRes checkBreadth( ParseData *pd, FsmAp *fsm );
+
+	void nfaTermCheck( ParseData *pd );
+	void nfaCondsCheck( ParseData *pd );
+	void nfaBreadthCheck( ParseData *pd );
+
 	/* Tree traversal. */
 	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
-	FsmRes condsDensity( ParseData *pd, FsmAp *fsmAp );
-	void nfaTermCheck( ParseData *pd );
-	void nfaCondsCheck( ParseData *pd );
-	void nfaBreadthCheck( ParseData *pd );
-	FsmRes condsDensity( ParseData *pd, FsmAp *fsm, StateAp *state, long depth );
-	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
-
-	double checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state );
-	void checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
-			long depth, int maxDepth, double stateScore, double &total );
-	FsmRes checkBreadth( ParseData *pd, FsmAp *fsm );
-	void checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state, long depth,
-			double ss, double *scores );
 
 	/* Node data. */
 	TermVect terms;

@@ -663,8 +663,7 @@ NfaUnion::~NfaUnion()
 		delete roundsList;
 }
 
-
-FsmRes NfaUnion::condsDensity( ParseData *pd, FsmAp *fsm, StateAp *state, long depth )
+FsmRes NfaUnion::condCostFromState( ParseData *pd, FsmAp *fsm, StateAp *state, long depth )
 {
 	/* Nothing to do if the state is already on the list. */
 	if ( state->stateBits & STB_ONLIST )
@@ -680,7 +679,7 @@ FsmRes NfaUnion::condsDensity( ParseData *pd, FsmAp *fsm, StateAp *state, long d
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
 		if ( trans->plain() ) {
 			if ( trans->tdap()->toState != 0 ) {
-				FsmRes res = condsDensity( pd, fsm, trans->tdap()->toState, depth + 1 );
+				FsmRes res = condCostFromState( pd, fsm, trans->tdap()->toState, depth + 1 );
 				if ( !res.success() )
 					return res;
 			}
@@ -693,7 +692,7 @@ FsmRes NfaUnion::condsDensity( ParseData *pd, FsmAp *fsm, StateAp *state, long d
 			
 			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
 				if ( cond->toState != 0 ) {
-					FsmRes res = condsDensity( pd, fsm, cond->toState, depth + 1 );
+					FsmRes res = condCostFromState( pd, fsm, cond->toState, depth + 1 );
 					if ( !res.success() )
 						return res;
 				}
@@ -704,7 +703,7 @@ FsmRes NfaUnion::condsDensity( ParseData *pd, FsmAp *fsm, StateAp *state, long d
 	if ( state->nfaOut != 0 ) {
 		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
 			/* We do not increment depth here since this is an epsilon transition. */
-			FsmRes res = condsDensity( pd, fsm, n->toState, depth );
+			FsmRes res = condCostFromState( pd, fsm, n->toState, depth );
 			if ( !res.success() )
 				return res;
 		}
@@ -718,6 +717,8 @@ FsmRes NfaUnion::condsDensity( ParseData *pd, FsmAp *fsm, StateAp *state, long d
 	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
+
+/* Currently unused. Histogram-based cost analysis much more useful. */
 void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, long depth )
 {
 	/* Nothing to do if the state is already on the list. */
@@ -751,31 +752,28 @@ void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, lon
 	}
 }
 
-FsmRes NfaUnion::condsDensity( ParseData *pd, FsmAp *fsmAp )
+FsmRes NfaUnion::condCostSearch( ParseData *pd, FsmAp *fsmAp )
 {
 	/* Init on state list flags. */
 	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
 		st->stateBits &= ~STB_ONLIST;
 
-	return condsDensity( pd, fsmAp, fsmAp->startState, 1 );
+	return condCostFromState( pd, fsmAp, fsmAp->startState, 1 );
 }
 
 FsmRes NfaUnion::walk( ParseData *pd )
 {
 	if ( pd->id->nfaTermCheck ) {
-		/* Does not return. */
 		nfaTermCheck( pd );
 		return FsmRes( FsmRes::Aborted() );
 	}
 
 	if ( pd->id->nfaCondsDepth >= 0 ) {
-		/* Does not return. */
 		nfaCondsCheck( pd );
 		return FsmRes( FsmRes::Aborted() );
 	}
 
 	if ( pd->id->nfaBreadthCheck ) {
-		/* Does not return. */
 		nfaBreadthCheck( pd );
 		return FsmRes( FsmRes::Aborted() );
 	}
@@ -922,7 +920,7 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 			return;
 		}
 
-		FsmRes condsRes = condsDensity( pd, res.fsm );
+		FsmRes condsRes = condCostSearch( pd, res.fsm );
 		delete res.fsm;
 
 		if ( !condsRes.success() ) {
@@ -938,6 +936,7 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 void NfaUnion::nfaTermCheck( ParseData *pd )
 {
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
+		/* With nfaTermCheck on we have the possibility of a prior interaction. */
 		pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
 		FsmRes res = (*term)->walk( pd );
 		pd->fsmCtx->stateLimit = -1;
@@ -960,7 +959,7 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
  * We rely on a character histogram and are looking for a probability of being
  * in any given state, given that histogram, simple and very effective.
  */
-void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
+void NfaUnion::breadthFromState( ParseData *pd, FsmAp *fsm, StateAp *state,
 		long depth, int maxDepth, double stateScore, double &total )
 {
 	if ( depth > maxDepth )
@@ -980,14 +979,14 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
 
 		if ( trans->plain() ) {
 			if ( trans->tdap()->toState != 0 ) {
-				checkBreadth( pd, fsm, trans->tdap()->toState,
+				breadthFromState( pd, fsm, trans->tdap()->toState,
 						depth + 1, maxDepth, targetStateScore, total );
 			}
 		}
 		else {
 			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
 				if ( cond->toState != 0 ) {
-					checkBreadth( pd, fsm, cond->toState,
+					breadthFromState( pd, fsm, cond->toState,
 							depth + 1, maxDepth, targetStateScore, total );
 				}
 			}
@@ -997,29 +996,29 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
 	if ( state->nfaOut != 0 ) {
 		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
 			/* We do not increment depth here since this is an epsilon transition. */
-			checkBreadth( pd, fsm, n->toState, depth, maxDepth, stateScore, total );
+			breadthFromState( pd, fsm, n->toState, depth, maxDepth, stateScore, total );
 		}
 	}
 }
 
-double NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state )
+double NfaUnion::breadthFromEntry( ParseData *pd, FsmAp *fsm, StateAp *state )
 {
 	const int maxDepth = 5;
 	double total = 0;
-	checkBreadth( pd, fsm, state, 1, maxDepth, 1.0, total );
+	breadthFromState( pd, fsm, state, 1, maxDepth, 1.0, total );
 	return total;
 }
 
 FsmRes NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 {
-	double start = checkBreadth( pd, fsm, fsm->startState );
+	double start = breadthFromEntry( pd, fsm, fsm->startState );
 
 	BreadthResult *breadth = new BreadthResult( start );
 	
 	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
 		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
 			if ( mel->key == c->entryId ) {
-				double cost = checkBreadth( pd, fsm, mel->value );
+				double cost = breadthFromEntry( pd, fsm, mel->value );
 
 				breadth->costs.append( BreadthCost( c->name, cost ) );
 			}
