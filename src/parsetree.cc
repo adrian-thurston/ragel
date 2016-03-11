@@ -871,7 +871,10 @@ void nfaCheckResult( ParseData *pd, long code, long id, const char *scode )
 
 void reportAnalysisResult( ParseData *pd, FsmRes &res )
 {
-	if ( res.type == FsmRes::TypeTooManyStates )
+	if ( res.type == FsmRes::TypeAnalysisOk )
+		nfaCheckResult( pd, 0, 0, "OK" );
+
+	else if ( res.type == FsmRes::TypeTooManyStates )
 		nfaCheckResult( pd, 1, 0, "too-many-states" );
 
 	else if ( res.type == FsmRes::TypeCondCostTooHigh )

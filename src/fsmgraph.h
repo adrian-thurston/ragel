@@ -1731,6 +1731,7 @@ struct FsmRes
 	struct CondCostTooHigh {};
 	struct RepetitionError {};
 	struct BreadthCheck {};
+	struct AnalysisOk {};
 
 	enum Type
 	{
@@ -1741,6 +1742,7 @@ struct FsmRes
 		TypeCondCostTooHigh,
 		TypeRepetitionError,
 		TypeBreadthCheck,
+		TypeAnalysisOk,
 	};
 
 	FsmRes( const Fsm &, FsmAp *fsm )
@@ -1763,6 +1765,9 @@ struct FsmRes
 
 	FsmRes( const BreadthCheck &, BreadthResult *breadth )
 		: fsm(0), type(TypeBreadthCheck), breadth(breadth) {}
+
+	FsmRes( const AnalysisOk & )
+		: fsm(0), type(TypeAnalysisOk) {}
 
 	bool success() { return fsm != 0; }
 
