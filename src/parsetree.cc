@@ -748,22 +748,21 @@ void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, lon
 	}
 }
 
-void NfaUnion::nfaTermCheck( ParseData *pd )
+FsmRes NfaUnion::nfaTermCheck( ParseData *pd )
 {
-	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		/* With nfaTermCheck on we have the possibility of a prior interaction. */
-		pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
-		FsmRes res = (*term)->walk( pd );
-		pd->fsmCtx->stateLimit = -1;
+	TermVect::Iter term = terms;
 
-		if ( !res.success() ) {
-			reportAnalysisResult( pd, res );
-			return;
-		}
-		delete res.fsm;
-	}
+	/* With nfaTermCheck on we have the possibility of a prior interaction. */
+	pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
+	FsmRes res = (*term)->walk( pd );
+	pd->fsmCtx->stateLimit = -1;
 
-	nfaCheckResult( pd, 0, 0, "OK" );
+	if ( !res.success() )
+		return res;
+
+	delete res.fsm;
+
+	return FsmRes( FsmRes::AnalysisOk() );
 }
 
 
@@ -822,6 +821,8 @@ FsmRes NfaUnion::condCostFromState( ParseData *pd, FsmAp *fsm, StateAp *state, l
 }
 
 
+/* Returns either success (using supplied fsm, or some error condition. Does
+ * not delete the fsm (under any condition). */
 FsmRes NfaUnion::condCostSearch( ParseData *pd, FsmAp *fsmAp )
 {
 	/* Init on state list flags. */
@@ -834,28 +835,28 @@ FsmRes NfaUnion::condCostSearch( ParseData *pd, FsmAp *fsmAp )
 /* This is the first pass check. It looks for state (limit times 2 ) or
  * condition cost. We use this to expand generalized repetition to past the nfa
   union choice point. */
-void NfaUnion::nfaCondsCheck( ParseData *pd )
+FsmRes NfaUnion::nfaCondsCheck( ParseData *pd )
 {
-	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit * 2;
-		FsmRes res = (*term)->walk( pd );
-		pd->fsmCtx->stateLimit = -1;
+	TermVect::Iter term = terms;
 
-		if ( !res.success() ) {
-			reportAnalysisResult( pd, res );
-			return;
-		}
+	pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit * 2;
+	FsmRes res = (*term)->walk( pd );
+	pd->fsmCtx->stateLimit = -1;
 
-		FsmRes condsRes = condCostSearch( pd, res.fsm );
-		delete res.fsm;
+	if ( !res.success() )
+		return res;
 
-		if ( !condsRes.success() ) {
-			reportAnalysisResult( pd, condsRes );
-			return;
-		}
-	}
+	FsmRes costRes = condCostSearch( pd, res.fsm );
 
-	nfaCheckResult( pd, 0, 0, "OK" );
+	/* Unlike other funcs, have to delete this regardless. Analysis either
+	 * returns fsm or some error, but does not currently remove it. This needs
+	 * cleanup */
+	delete res.fsm;
+
+	if ( !costRes.success() )
+		return costRes;
+
+	return FsmRes( FsmRes::AnalysisOk() );
 }
 
 
@@ -917,6 +918,7 @@ double NfaUnion::breadthFromEntry( ParseData *pd, FsmAp *fsm, StateAp *state )
 	return total;
 }
 
+/* Always returns the breadth check result. Will not consume the fsm. */
 FsmRes NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 {
 	double start = breadthFromEntry( pd, fsm, fsm->startState );
@@ -936,39 +938,42 @@ FsmRes NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 	return FsmRes( FsmRes::BreadthCheck(), breadth );
 }
 
-void NfaUnion::nfaBreadthCheck( ParseData *pd )
+FsmRes NfaUnion::nfaBreadthCheck( ParseData *pd )
 {
-	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		FsmAp *fsm = 0;
+	TermVect::Iter term = terms;
+	
+	/* No need for state limit here since this check is used after all
+	 * others pass. One check only and . */
+	FsmRes res = (*term)->walk( pd );
+	if ( !res.success() )
+		return res;
 
-		/* No need for state limit here since this check is used after all
-		 * others pass. One check only and . */
-		FsmRes res = (*term)->walk( pd );
-		fsm = res.fsm;
-		FsmRes bres = checkBreadth( pd, fsm );
-		reportAnalysisResult( pd, bres );
-		delete fsm;
-		return;
-	}
+	FsmRes breadthRes = checkBreadth( pd, res.fsm );
 
-	nfaCheckResult( pd, 0, 0, "OK" );
+	/* Always delete here. The analysis doesn't do it regardless of the result. */
+	delete res.fsm;
+
+	return breadthRes;
 }
 
 
 FsmRes NfaUnion::walk( ParseData *pd )
 {
 	if ( pd->id->nfaTermCheck ) {
-		nfaTermCheck( pd );
+		FsmRes res = nfaTermCheck( pd );
+		reportAnalysisResult( pd, res );
 		return FsmRes( FsmRes::Aborted() );
 	}
 
 	if ( pd->id->nfaCondsDepth >= 0 ) {
-		nfaCondsCheck( pd );
+		FsmRes res = nfaCondsCheck( pd );
+		reportAnalysisResult( pd, res );
 		return FsmRes( FsmRes::Aborted() );
 	}
 
 	if ( pd->id->nfaBreadthCheck ) {
-		nfaBreadthCheck( pd );
+		FsmRes res = nfaBreadthCheck( pd );
+		reportAnalysisResult( pd, res );
 		return FsmRes( FsmRes::Aborted() );
 	}
 

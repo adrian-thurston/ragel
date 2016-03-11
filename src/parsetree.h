@@ -475,9 +475,9 @@ struct NfaUnion
 	double breadthFromEntry( ParseData *pd, FsmAp *fsm, StateAp *state );
 	FsmRes checkBreadth( ParseData *pd, FsmAp *fsm );
 
-	void nfaTermCheck( ParseData *pd );
-	void nfaCondsCheck( ParseData *pd );
-	void nfaBreadthCheck( ParseData *pd );
+	FsmRes nfaTermCheck( ParseData *pd );
+	FsmRes nfaCondsCheck( ParseData *pd );
+	FsmRes nfaBreadthCheck( ParseData *pd );
 
 	/* Tree traversal. */
 	FsmRes walk( ParseData *pd );
