@@ -869,6 +869,41 @@ void nfaCheckResult( ParseData *pd, long code, long id, const char *scode )
 	pd->id->comm = out.str();
 }
 
+void reportAnalysisResult( ParseData *pd, FsmRes &res )
+{
+	if ( res.type == FsmRes::TypeTooManyStates )
+		nfaCheckResult( pd, 1, 0, "too-many-states" );
+
+	else if ( res.type == FsmRes::TypeCondCostTooHigh )
+		nfaCheckResult( pd, 20, res.id, "cond-cost" );
+
+	else if ( res.type == FsmRes::TypePriorInteraction )
+		nfaCheckResult( pd, 60, res.id, "prior-interaction" );
+
+	else if ( res.type == FsmRes::TypeRepetitionError )
+		nfaCheckResult( pd, 2, 0, "rep-error" );
+
+	else if ( res.type == FsmRes::TypeBreadthCheck )
+	{
+		BreadthResult *breadth = res.breadth;
+		stringstream out;
+
+		nfaResultWrite( out, 21, 1, "OK" );
+
+		out << std::fixed << std::setprecision(0);
+
+		if ( breadth->start > 0.01 ) {
+			for ( Vector<BreadthCost>::Iter c = breadth->costs; c.lte(); c++ ) {
+				out << "COST " << c->name << " " <<
+						( 1000000.0 * breadth->start ) << " " << 
+						( 1000000.0 * ( c->cost / breadth->start ) ) << endl;
+			}
+		}
+
+		pd->id->comm = out.str();
+	}
+}
+
 /* This is the first pass check. It looks for state (limit times 2 ) or
  * condition cost. We use this to expand generalized repetition to past the nfa
   union choice point. */
@@ -880,10 +915,7 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 		pd->fsmCtx->stateLimit = -1;
 
 		if ( !res.success() ) {
-			if ( res.type == FsmRes::TypeTooManyStates )
-				nfaCheckResult( pd, 1, 0, "too-many-states" );
-			else if ( res.type == FsmRes::TypeRepetitionError )
-				nfaCheckResult( pd, 2, 0, "rep-error" );
+			reportAnalysisResult( pd, res );
 			return;
 		}
 
@@ -891,10 +923,7 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 		delete res.fsm;
 
 		if ( !condsRes.success() ) {
-			if ( condsRes.type == FsmRes::TypeCondCostTooHigh )
-				nfaCheckResult( pd, 20, condsRes.id, "cond-cost" );
-			else if ( condsRes.type == FsmRes::TypeRepetitionError )
-				nfaCheckResult( pd, 2, 0, "rep-error" );
+			reportAnalysisResult( pd, condsRes );
 			return;
 		}
 	}
@@ -911,12 +940,7 @@ void NfaUnion::nfaTermCheck( ParseData *pd )
 		pd->fsmCtx->stateLimit = -1;
 
 		if ( !res.success() ) {
-			if ( res.type == FsmRes::TypeTooManyStates )
-				nfaCheckResult( pd, 1, 0, "too-many-states" );
-			else if ( res.type == FsmRes::TypePriorInteraction )
-				nfaCheckResult( pd, 60, res.id, "prior-interaction" );
-			else if ( res.type == FsmRes::TypeRepetitionError )
-				nfaCheckResult( pd, 2, 0, "rep-error" );
+			reportAnalysisResult( pd, res );
 			return;
 		}
 		delete res.fsm;
@@ -983,34 +1007,23 @@ double NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state )
 	return total;
 }
 
-void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
+FsmRes NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 {
-	int exitCode = 21;
-	double total = checkBreadth( pd, fsm, fsm->startState );
+	double start = checkBreadth( pd, fsm, fsm->startState );
 
-	/* This will exit. Can't call it because we need to perform the score
-	 * checks after. */
-	nfaCheckResult( pd, exitCode, 1, "OK" );
-
-	stringstream out;
-	out << std::fixed << std::setprecision(0);
-	double start = total;
+	BreadthResult *breadth = new BreadthResult( start );
 	
 	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
 		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
 			if ( mel->key == c->entryId ) {
-				total = checkBreadth( pd, fsm, mel->value );
+				double cost = checkBreadth( pd, fsm, mel->value );
 
-				if ( start > 0.01 ) {
-					out << "COST " << c->name << " " <<
-							( 1000000.0 * start ) << " " << 
-							( 1000000.0 * ( total / start ) ) << endl;
-				}
+				breadth->costs.append( BreadthCost( c->name, cost ) );
 			}
 		}
 	}
 
-	pd->id->comm = pd->id->comm + out.str();
+	return FsmRes( FsmRes::BreadthCheck(), breadth );
 }
 
 void NfaUnion::nfaBreadthCheck( ParseData *pd )
@@ -1022,7 +1035,8 @@ void NfaUnion::nfaBreadthCheck( ParseData *pd )
 		 * others pass. One check only and . */
 		FsmRes res = (*term)->walk( pd );
 		fsm = res.fsm;
-		checkBreadth( pd, fsm );
+		FsmRes bres = checkBreadth( pd, fsm );
+		reportAnalysisResult( pd, bres );
 		delete fsm;
 		return;
 	}

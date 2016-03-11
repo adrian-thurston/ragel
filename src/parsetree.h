@@ -479,7 +479,7 @@ struct NfaUnion
 	double checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state );
 	void checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
 			long depth, int maxDepth, double stateScore, double &total );
-	void checkBreadth( ParseData *pd, FsmAp *fsm );
+	FsmRes checkBreadth( ParseData *pd, FsmAp *fsm );
 	void checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state, long depth,
 			double ss, double *scores );
 

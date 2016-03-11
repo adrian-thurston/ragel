@@ -1704,6 +1704,23 @@ typedef BstMapEl< int, StateAp* > EntryMapEl;
 typedef BstMap< int, StateAp* > EntryMap;
 typedef Vector<EntryMapEl> EntryMapBase;
 
+struct BreadthCost
+{
+	BreadthCost( std::string name, double cost )
+		: name(name), cost(cost) {}
+
+	std::string name;
+	double cost;
+};
+
+struct BreadthResult
+{
+	BreadthResult( double start ) : start(start) {}
+
+	double start;
+	Vector<BreadthCost> costs;
+};
+
 /* Result of an operation. */
 struct FsmRes
 {
@@ -1713,6 +1730,7 @@ struct FsmRes
 	struct PriorInteraction {};
 	struct CondCostTooHigh {};
 	struct RepetitionError {};
+	struct BreadthCheck {};
 
 	enum Type
 	{
@@ -1722,6 +1740,7 @@ struct FsmRes
 		TypePriorInteraction,
 		TypeCondCostTooHigh,
 		TypeRepetitionError,
+		TypeBreadthCheck,
 	};
 
 	FsmRes( const Fsm &, FsmAp *fsm )
@@ -1742,11 +1761,18 @@ struct FsmRes
 	FsmRes( const RepetitionError & )
 		: fsm(0), type(TypeRepetitionError) {}
 
+	FsmRes( const BreadthCheck &, BreadthResult *breadth )
+		: fsm(0), type(TypeBreadthCheck), breadth(breadth) {}
+
 	bool success() { return fsm != 0; }
 
 	FsmAp *fsm;
 	Type type;
-	long long id;
+
+	union {
+		long long id;
+		BreadthResult *breadth;
+	};
 };
 
 /* Graph class that implements actions and priorities. */
