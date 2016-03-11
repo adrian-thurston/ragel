@@ -2548,9 +2548,8 @@ reduction TopLevel
 		if ( includeDepth == 0 ) {
 			id->curItem = id->curItem->next;
 			id->curItem->pd = pd;
-			id->checkLastRef( id->curItem );
-
-			if ( id ->abortedCompile ) {
+			bool success = id->checkLastRef( id->curItem );
+			if ( ! success ) {
 				pda_run->fail_parsing = 1;
 				this->success = false;
 			}

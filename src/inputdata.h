@@ -207,7 +207,6 @@ struct InputData
 		varBackend(false),
 		histogramFn(0),
 		histogram(0),
-		abortedCompile(false),
 		input(0),
 		inLibRagel(false)
 	{}
@@ -313,7 +312,6 @@ struct InputData
 	const char *histogramFn;
 	double *histogram;
 
-	bool abortedCompile;
 	const char *input;
 	bool inLibRagel;
 
@@ -350,7 +348,7 @@ struct InputData
 	void writeLanguage( std::ostream &out );
 	void writeXML( std::ostream &out );
 
-	void checkLastRef( InputItem *ii );
+	bool checkLastRef( InputItem *ii );
 
 	void parseKelbt();
 	void processXML();

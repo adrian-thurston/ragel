@@ -529,10 +529,10 @@ void InputData::processCode()
 	runRlhc();
 }
 
-void InputData::checkLastRef( InputItem *ii )
+bool InputData::checkLastRef( InputItem *ii )
 {
 	if ( generateXML || generateDot )
-		return;
+		return true;
 		
 	/*
 	 * 1. Go forward to next last reference.
@@ -551,22 +551,16 @@ void InputData::checkLastRef( InputItem *ii )
 
 			FsmRes res = pd->prepareMachineGen( 0, hostLang );
 
-			if ( !res.success() ) {
-				abortedCompile = true;
-				return;
-			}
+			if ( !res.success() )
+				return false;
 
-			if ( gblErrorCount > 0 ) {
-				abortedCompile = true;
-				return;
-			}
+			if ( gblErrorCount > 0 )
+				return false;
 
 			pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
 
-			if ( gblErrorCount > 0 ) {
-				abortedCompile = true;
-				return;
-			}
+			if ( gblErrorCount > 0 )
+				return false;
 		}
 
 		/* Mark all input items referencing the machine as processed. */
@@ -576,6 +570,7 @@ void InputData::checkLastRef( InputItem *ii )
 
 			if ( toMark == ii )
 				break;
+
 			toMark = toMark->next;
 		}
 
@@ -584,10 +579,8 @@ void InputData::checkLastRef( InputItem *ii )
 		while ( lastFlush != 0 && lastFlush->processed ) {
 			verifyWriteHasData( lastFlush );
 
-			if ( gblErrorCount > 0 ) {
-				abortedCompile = true;
-				return;
-			}
+			if ( gblErrorCount > 0 )
+				return false;
 
 			/* Flush out. */
 			writeOutput( lastFlush );
@@ -608,6 +601,7 @@ void InputData::checkLastRef( InputItem *ii )
 			lastFlush = lastFlush->next;
 		}
 	}
+	return true;
 }
 
 void InputData::makeFirstInputItem()
