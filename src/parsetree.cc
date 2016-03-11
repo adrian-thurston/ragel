@@ -663,6 +663,110 @@ NfaUnion::~NfaUnion()
 		delete roundsList;
 }
 
+void nfaResultWrite( ostream &out, long code, long id, const char *scode )
+{
+	out << code << " " << id << " " << scode << endl;
+}
+
+void nfaCheckResult( ParseData *pd, long code, long id, const char *scode )
+{
+	stringstream out;
+	nfaResultWrite( out, code, id, scode );
+	pd->id->comm = out.str();
+}
+
+void reportAnalysisResult( ParseData *pd, FsmRes &res )
+{
+	if ( res.type == FsmRes::TypeAnalysisOk )
+		nfaCheckResult( pd, 0, 0, "OK" );
+
+	else if ( res.type == FsmRes::TypeTooManyStates )
+		nfaCheckResult( pd, 1, 0, "too-many-states" );
+
+	else if ( res.type == FsmRes::TypeCondCostTooHigh )
+		nfaCheckResult( pd, 20, res.id, "cond-cost" );
+
+	else if ( res.type == FsmRes::TypePriorInteraction )
+		nfaCheckResult( pd, 60, res.id, "prior-interaction" );
+
+	else if ( res.type == FsmRes::TypeRepetitionError )
+		nfaCheckResult( pd, 2, 0, "rep-error" );
+
+	else if ( res.type == FsmRes::TypeBreadthCheck )
+	{
+		BreadthResult *breadth = res.breadth;
+		stringstream out;
+
+		nfaResultWrite( out, 21, 1, "OK" );
+
+		out << std::fixed << std::setprecision(0);
+
+		if ( breadth->start > 0.01 ) {
+			for ( Vector<BreadthCost>::Iter c = breadth->costs; c.lte(); c++ ) {
+				out << "COST " << c->name << " " <<
+						( 1000000.0 * breadth->start ) << " " << 
+						( 1000000.0 * ( c->cost / breadth->start ) ) << endl;
+			}
+		}
+
+		pd->id->comm = out.str();
+	}
+}
+
+
+/* Currently unused. Histogram-based cost analysis much more useful. */
+void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, long depth )
+{
+	/* Nothing to do if the state is already on the list. */
+	if ( state->stateBits & STB_ONLIST )
+		return;
+
+	if ( depth > pd->id->transSpanDepth )
+		return;
+
+	/* Recurse on everything ranges. */
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 ) {
+				density += pd->fsmCtx->keyOps->span( trans->lowKey, trans->highKey );
+				transSpan( pd, trans->tdap()->toState, density, depth + 1 );
+			}
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 )
+					transSpan( pd, cond->toState, density, depth + 1 );
+			}
+		}
+	}
+
+	if ( state->nfaOut != 0 ) {
+		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
+			/* We do not increment depth here since this is an epsilon transition. */
+			transSpan( pd, n->toState, density, depth );
+		}
+	}
+}
+
+void NfaUnion::nfaTermCheck( ParseData *pd )
+{
+	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
+		/* With nfaTermCheck on we have the possibility of a prior interaction. */
+		pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
+		FsmRes res = (*term)->walk( pd );
+		pd->fsmCtx->stateLimit = -1;
+
+		if ( !res.success() ) {
+			reportAnalysisResult( pd, res );
+			return;
+		}
+		delete res.fsm;
+	}
+
+	nfaCheckResult( pd, 0, 0, "OK" );
+}
+
+
 FsmRes NfaUnion::condCostFromState( ParseData *pd, FsmAp *fsm, StateAp *state, long depth )
 {
 	/* Nothing to do if the state is already on the list. */
@@ -718,40 +822,6 @@ FsmRes NfaUnion::condCostFromState( ParseData *pd, FsmAp *fsm, StateAp *state, l
 }
 
 
-/* Currently unused. Histogram-based cost analysis much more useful. */
-void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, long depth )
-{
-	/* Nothing to do if the state is already on the list. */
-	if ( state->stateBits & STB_ONLIST )
-		return;
-
-	if ( depth > pd->id->transSpanDepth )
-		return;
-
-	/* Recurse on everything ranges. */
-	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		if ( trans->plain() ) {
-			if ( trans->tdap()->toState != 0 ) {
-				density += pd->fsmCtx->keyOps->span( trans->lowKey, trans->highKey );
-				transSpan( pd, trans->tdap()->toState, density, depth + 1 );
-			}
-		}
-		else {
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-				if ( cond->toState != 0 )
-					transSpan( pd, cond->toState, density, depth + 1 );
-			}
-		}
-	}
-
-	if ( state->nfaOut != 0 ) {
-		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
-			/* We do not increment depth here since this is an epsilon transition. */
-			transSpan( pd, n->toState, density, depth );
-		}
-	}
-}
-
 FsmRes NfaUnion::condCostSearch( ParseData *pd, FsmAp *fsmAp )
 {
 	/* Init on state list flags. */
@@ -759,150 +829,6 @@ FsmRes NfaUnion::condCostSearch( ParseData *pd, FsmAp *fsmAp )
 		st->stateBits &= ~STB_ONLIST;
 
 	return condCostFromState( pd, fsmAp, fsmAp->startState, 1 );
-}
-
-FsmRes NfaUnion::walk( ParseData *pd )
-{
-	if ( pd->id->nfaTermCheck ) {
-		nfaTermCheck( pd );
-		return FsmRes( FsmRes::Aborted() );
-	}
-
-	if ( pd->id->nfaCondsDepth >= 0 ) {
-		nfaCondsCheck( pd );
-		return FsmRes( FsmRes::Aborted() );
-	}
-
-	if ( pd->id->nfaBreadthCheck ) {
-		nfaBreadthCheck( pd );
-		return FsmRes( FsmRes::Aborted() );
-	}
-
-	if ( pd->id->printStatistics )
-		cout << "terms\t" << terms.length() << endl;
-
-	/* Compute the individual expressions. */
-
-	long numTerms = 0, sumPlain = 0, sumMin = 0;
-	FsmAp **machines = new FsmAp*[terms.length()];
-	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		FsmRes res = (*term)->walk( pd );
-		machines[numTerms] = res.fsm;
-
-		sumPlain += machines[numTerms]->stateList.length();
-
-		machines[numTerms]->removeUnreachableStates();
-		machines[numTerms]->minimizePartition2();
-		sumMin += machines[numTerms]->stateList.length();
-
-		//std::cout << (float)o * 100.0 / (float)terms.length() <<
-		//	": " << machines[o]->stateList.length() << std::endl;
-
-		//log << "term-state-list\t " <<
-		//		machines[o]->stateList.length() << std::endl;
-
-		numTerms += 1;
-	}
-
-	if ( pd->id->printStatistics ) {
-		cout << "sum-plain\t" << sumPlain << endl;
-		cout << "sum-minimized\t" << sumMin << endl;
-	}
-
-	/* For each round. */
-	for ( NfaRoundVect::Iter r = *roundsList; r.lte(); r++ ) {
-		if ( pd->id->printStatistics ) {
-			cout << "depth\t" << r->depth << endl;
-			cout << "grouping\t" << r->groups << endl;
-		}
-
-		int numGroups = 0;
-		int start = 0;
-		while ( start < numTerms ) {
-			/* If nfa-group-max is zero, don't group, put all terms into a single
-			 * n-depth NFA. */
-			int amount = r->groups == 0 ? numTerms : r->groups;
-			if ( ( start + amount ) > numTerms )
-				amount = numTerms - start;
-
-			FsmAp **others = machines + start + 1;
-			FsmRes res = FsmAp::nfaUnionOp( machines[start], others, (amount - 1), r->depth );
-			machines[start] = res.fsm;
-
-			start += amount;
-			numGroups++;
-		}
-
-		if ( numGroups == 1 )
-			break;
-
-		/* Move the group starts into the groups array. */
-		FsmAp **groups = new FsmAp*[numGroups];
-		int g = 0;
-		start = 0;
-		while ( start < numTerms ) {
-			groups[g] = machines[start];
-			start += r->groups == 0 ? numTerms : r->groups;
-			g++;
-		}
-
-		delete[] machines;
-		machines = groups;
-		numTerms = numGroups;
-	}
-
-	FsmAp *ret = machines[0];
-	return FsmRes( FsmRes::Fsm(), ret );
-}
-
-void nfaResultWrite( ostream &out, long code, long id, const char *scode )
-{
-	out << code << " " << id << " " << scode << endl;
-}
-
-void nfaCheckResult( ParseData *pd, long code, long id, const char *scode )
-{
-	stringstream out;
-	nfaResultWrite( out, code, id, scode );
-	pd->id->comm = out.str();
-}
-
-void reportAnalysisResult( ParseData *pd, FsmRes &res )
-{
-	if ( res.type == FsmRes::TypeAnalysisOk )
-		nfaCheckResult( pd, 0, 0, "OK" );
-
-	else if ( res.type == FsmRes::TypeTooManyStates )
-		nfaCheckResult( pd, 1, 0, "too-many-states" );
-
-	else if ( res.type == FsmRes::TypeCondCostTooHigh )
-		nfaCheckResult( pd, 20, res.id, "cond-cost" );
-
-	else if ( res.type == FsmRes::TypePriorInteraction )
-		nfaCheckResult( pd, 60, res.id, "prior-interaction" );
-
-	else if ( res.type == FsmRes::TypeRepetitionError )
-		nfaCheckResult( pd, 2, 0, "rep-error" );
-
-	else if ( res.type == FsmRes::TypeBreadthCheck )
-	{
-		BreadthResult *breadth = res.breadth;
-		stringstream out;
-
-		nfaResultWrite( out, 21, 1, "OK" );
-
-		out << std::fixed << std::setprecision(0);
-
-		if ( breadth->start > 0.01 ) {
-			for ( Vector<BreadthCost>::Iter c = breadth->costs; c.lte(); c++ ) {
-				out << "COST " << c->name << " " <<
-						( 1000000.0 * breadth->start ) << " " << 
-						( 1000000.0 * ( c->cost / breadth->start ) ) << endl;
-			}
-		}
-
-		pd->id->comm = out.str();
-	}
 }
 
 /* This is the first pass check. It looks for state (limit times 2 ) or
@@ -932,24 +858,6 @@ void NfaUnion::nfaCondsCheck( ParseData *pd )
 	nfaCheckResult( pd, 0, 0, "OK" );
 }
 
-
-void NfaUnion::nfaTermCheck( ParseData *pd )
-{
-	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		/* With nfaTermCheck on we have the possibility of a prior interaction. */
-		pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
-		FsmRes res = (*term)->walk( pd );
-		pd->fsmCtx->stateLimit = -1;
-
-		if ( !res.success() ) {
-			reportAnalysisResult( pd, res );
-			return;
-		}
-		delete res.fsm;
-	}
-
-	nfaCheckResult( pd, 0, 0, "OK" );
-}
 
 /*
  * This algorithm assigns a price to each state visit, then adds that to a
@@ -1044,6 +952,101 @@ void NfaUnion::nfaBreadthCheck( ParseData *pd )
 	}
 
 	nfaCheckResult( pd, 0, 0, "OK" );
+}
+
+
+FsmRes NfaUnion::walk( ParseData *pd )
+{
+	if ( pd->id->nfaTermCheck ) {
+		nfaTermCheck( pd );
+		return FsmRes( FsmRes::Aborted() );
+	}
+
+	if ( pd->id->nfaCondsDepth >= 0 ) {
+		nfaCondsCheck( pd );
+		return FsmRes( FsmRes::Aborted() );
+	}
+
+	if ( pd->id->nfaBreadthCheck ) {
+		nfaBreadthCheck( pd );
+		return FsmRes( FsmRes::Aborted() );
+	}
+
+	if ( pd->id->printStatistics )
+		cout << "terms\t" << terms.length() << endl;
+
+	/* Compute the individual expressions. */
+
+	long numTerms = 0, sumPlain = 0, sumMin = 0;
+	FsmAp **machines = new FsmAp*[terms.length()];
+	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
+		FsmRes res = (*term)->walk( pd );
+		machines[numTerms] = res.fsm;
+
+		sumPlain += machines[numTerms]->stateList.length();
+
+		machines[numTerms]->removeUnreachableStates();
+		machines[numTerms]->minimizePartition2();
+		sumMin += machines[numTerms]->stateList.length();
+
+		//std::cout << (float)o * 100.0 / (float)terms.length() <<
+		//	": " << machines[o]->stateList.length() << std::endl;
+
+		//log << "term-state-list\t " <<
+		//		machines[o]->stateList.length() << std::endl;
+
+		numTerms += 1;
+	}
+
+	if ( pd->id->printStatistics ) {
+		cout << "sum-plain\t" << sumPlain << endl;
+		cout << "sum-minimized\t" << sumMin << endl;
+	}
+
+	/* For each round. */
+	for ( NfaRoundVect::Iter r = *roundsList; r.lte(); r++ ) {
+		if ( pd->id->printStatistics ) {
+			cout << "depth\t" << r->depth << endl;
+			cout << "grouping\t" << r->groups << endl;
+		}
+
+		int numGroups = 0;
+		int start = 0;
+		while ( start < numTerms ) {
+			/* If nfa-group-max is zero, don't group, put all terms into a single
+			 * n-depth NFA. */
+			int amount = r->groups == 0 ? numTerms : r->groups;
+			if ( ( start + amount ) > numTerms )
+				amount = numTerms - start;
+
+			FsmAp **others = machines + start + 1;
+			FsmRes res = FsmAp::nfaUnionOp( machines[start], others, (amount - 1), r->depth );
+			machines[start] = res.fsm;
+
+			start += amount;
+			numGroups++;
+		}
+
+		if ( numGroups == 1 )
+			break;
+
+		/* Move the group starts into the groups array. */
+		FsmAp **groups = new FsmAp*[numGroups];
+		int g = 0;
+		start = 0;
+		while ( start < numTerms ) {
+			groups[g] = machines[start];
+			start += r->groups == 0 ? numTerms : r->groups;
+			g++;
+		}
+
+		delete[] machines;
+		machines = groups;
+		numTerms = numGroups;
+	}
+
+	FsmAp *ret = machines[0];
+	return FsmRes( FsmRes::Fsm(), ret );
 }
 
 void NfaUnion::makeNameTree( ParseData *pd )
