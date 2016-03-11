@@ -992,12 +992,8 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 	 * checks after. */
 	nfaCheckResult( pd, exitCode, 1, "OK" );
 
-	ostream *out = &cout;
-	ofstream *ofs = 0;
-	if ( pd->id->commFileName != 0 )
-		out = ofs = new ofstream( pd->id->commFileName, std::fstream::app );
-
-	*out << std::fixed << std::setprecision(0);
+	stringstream out;
+	out << std::fixed << std::setprecision(0);
 	double start = total;
 	
 	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
@@ -1006,7 +1002,7 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 				total = checkBreadth( pd, fsm, mel->value );
 
 				if ( start > 0.01 ) {
-					*out << "COST " << c->name << " " <<
+					out << "COST " << c->name << " " <<
 							( 1000000.0 * start ) << " " << 
 							( 1000000.0 * ( total / start ) ) << endl;
 				}
@@ -1014,10 +1010,7 @@ void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 		}
 	}
 
-	if ( ofs != 0 ) {
-		ofs->close();
-		delete ofs;
-	}
+	pd->id->comm = pd->id->comm + out.str();
 }
 
 void NfaUnion::nfaBreadthCheck( ParseData *pd )
