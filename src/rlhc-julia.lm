@@ -97,9 +97,7 @@ namespace julia_gen
 		case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
 		{
 			send Parser 
-				"{
-				"	[tok_list( TL )]
-				"}
+				[tok_list( TL )]
 		}
 		case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
 		{
@@ -143,11 +141,11 @@ namespace julia_gen
 		}
 		case [`TRUE]
 		{
-			send Parser "1"
+			send Parser "true"
 		}
 		case [`FALSE]
 		{
-			send Parser "1"
+			send Parser "false"
 		}
 		case [N: `nil]
 		{
@@ -166,7 +164,7 @@ namespace julia_gen
 		case [`cast `( T: type `) F: expr_factor]
 		{
 			send Parser 
-				"convert( [type( T )] , [expr_factor( F )] )"
+				"convert([type( T )], [expr_factor( F )] )"
 		}
 		default {
 			# Catches cases not specified
@@ -383,7 +381,7 @@ namespace julia_gen
 				ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 		] {
 			send Parser
-				"if ( [expr(IfExpr)] )
+				"if [expr(IfExpr)]
 				"	[stmt(IfStmt)]
 
 			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
@@ -391,7 +389,7 @@ namespace julia_gen
 					[`else `if `( ElseIfExpr: expr `) ElseIfStmt: stmt]
 
 				send Parser
-					"elseif ( [expr(ElseIfExpr)] )
+					"elseif [expr(ElseIfExpr)]
 					"	[stmt(ElseIfStmt)]
 			}
 
@@ -406,7 +404,7 @@ namespace julia_gen
 		}
 		case [`while `( WhileExpr: expr `) WhileStmt: stmt] {
 			send Parser
-				"while ( [expr(WhileExpr)] )
+				"while [expr(WhileExpr)]
 				"	[stmt(WhileStmt)]
 				"end
 		}
@@ -416,7 +414,7 @@ namespace julia_gen
 				[`case E1: expr `{ Inner: stmt* `} Rest: stmt*]
 
 			send Parser
-				"if ( [expr(SwitchExpr)] == [expr(E1)] )
+				"if [expr(SwitchExpr)] == [expr(E1)]
 				"	[stmt_list(Inner)]
 
 			for S: stmt in repeat(Rest) {
@@ -424,7 +422,7 @@ namespace julia_gen
 				case [`case E1: expr `{ Inner: stmt* `}]
 				{
 					send Parser
-						"elseif ( [expr(SwitchExpr)] == [expr(E1)] )
+						"elseif [expr(SwitchExpr)] == [expr(E1)]
 						"	[stmt_list(Inner)]
 				}
 				case
@@ -441,11 +439,11 @@ namespace julia_gen
 		}
 		case [ExprExpr: expr Semi: `;] {
 			send Parser
-				[expr(ExprExpr) Semi]
+				[expr(ExprExpr)]
 		}
 		case [L: `{ TL: stmt* R: `}] {
 			send Parser
-				[L stmt_list(TL) R]
+				[stmt_list(TL)]
 		}
 		case [
 			TypeList: opt_const Type: type
@@ -500,9 +498,7 @@ namespace julia_gen
 		{
 			send Parser
 				"@label [Stmt.label_stmt.ident]
-				"begin
 				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
-				"end
 		}
 		case [L: goto_label]
 		{
@@ -522,7 +518,7 @@ namespace julia_gen
 		case [AS: assign_stmt]
 		{
 			send Parser
-				"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
+				"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)]
 		}
 		default {
 			# catches unspecified cases
