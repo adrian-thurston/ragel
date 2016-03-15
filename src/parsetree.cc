@@ -65,31 +65,62 @@ char *prepareLitString( const InputLoc &loc, const char *data, long length,
 	const char *end = checkLitOptions( loc, data, length, caseInsensitive );
 
 	char *dest = resData;
-	long len = 0;
+	long dlen = 0;
 	while ( src != end ) {
 		if ( *src == '\\' ) {
 			switch ( src[1] ) {
-			case '0': dest[len++] = '\0'; break;
-			case 'a': dest[len++] = '\a'; break;
-			case 'b': dest[len++] = '\b'; break;
-			case 't': dest[len++] = '\t'; break;
-			case 'n': dest[len++] = '\n'; break;
-			case 'v': dest[len++] = '\v'; break;
-			case 'f': dest[len++] = '\f'; break;
-			case 'r': dest[len++] = '\r'; break;
+			case '0': dest[dlen++] = '\0'; break;
+			case 'a': dest[dlen++] = '\a'; break;
+			case 'b': dest[dlen++] = '\b'; break;
+			case 't': dest[dlen++] = '\t'; break;
+			case 'n': dest[dlen++] = '\n'; break;
+			case 'v': dest[dlen++] = '\v'; break;
+			case 'f': dest[dlen++] = '\f'; break;
+			case 'r': dest[dlen++] = '\r'; break;
 			case '\n':  break;
-			default: dest[len++] = src[1]; break;
+			default: dest[dlen++] = src[1]; break;
 			}
 			src += 2;
 		}
 		else {
-			dest[len++] = *src++;
+			dest[dlen++] = *src++;
 		}
 	}
 
-	resLen = len;
+	resLen = dlen;
 	resData[resLen] = 0;
 	return resData;
+}
+
+Key *prepareHexString( ParseData *pd, const InputLoc &loc, const char *data, long length, long &resLen )
+{
+	Key *dest = new Key[( length - 2 ) >> 1];
+	const char *src = data;
+	const char *end = data + length;
+	long dlen = 0;
+	char s[3];
+
+	/* Scan forward over 0x. */
+	src += 2;
+
+	s[2] = 0;
+	while ( src < end ) {
+		s[0] = src[0];
+		s[1] = src[1];
+	
+		dest[dlen++] = makeFsmKeyHex( s, loc, pd );
+
+		/* Scan forward over the hex chars, then any whitespace or . characters. */
+		src += 2;
+		while ( *src == ' ' || *src == '\t' || *src == '\n' || *src == '.' )
+			src += 1;
+
+		/* Scan forward over 0x. */
+		src += 2;
+	}
+
+	resLen = dlen;
+	return dest;
 }
 
 FsmAp *VarDef::walk( ParseData *pd )
@@ -2629,6 +2660,13 @@ FsmAp *Literal::walk( ParseData *pd )
 		else
 			rtnVal->concatFsm( arr, length );
 		delete[] data;
+		delete[] arr;
+		break;
+	}
+	case HexString: {
+		long length;
+		Key *arr = prepareHexString( pd, loc, data.data, data.length(), length );
+		rtnVal = FsmAp::concatFsm( pd->fsmCtx, arr, length );
 		delete[] arr;
 		break;
 	}}

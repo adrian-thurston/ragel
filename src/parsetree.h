@@ -762,7 +762,7 @@ struct Range
 /* Some literal machine. Can be a number or literal string. */
 struct Literal
 {
-	enum LiteralType { Number, LitString };
+	enum LiteralType { Number, LitString, HexString };
 
 	Literal( const Token &token, LiteralType type )
 		: token(token), type(type) { }
