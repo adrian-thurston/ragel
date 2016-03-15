@@ -51,7 +51,8 @@ version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
-libragel_a_SOURCES = $(ragel_SOURCES) $(nodist_ragel_SOURCES) lib.cc
+nodist_libagel_a_SOURCES = $(nodist_ragel_SOURCES)
+libragel_a_SOURCES = $(ragel_SOURCES) lib.cc
 libragel_a_CPPFLAGS = -Dmain=main_lib -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 EXTRA_DIST = \
@@ -79,7 +80,7 @@ EXTRA_DIST = \
 	rlparse.kh \
 	rlparse.kl
 
-CLEANFILES = parse.c if.h if.cc commit.cc
+CLEANFILES = parse.c if.h if.cc commit.cc rlhc.c
 
 RAGEL_LM = \
 	ragel.lm \
