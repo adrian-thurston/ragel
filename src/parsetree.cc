@@ -2665,8 +2665,9 @@ FsmAp *Literal::walk( ParseData *pd )
 	}
 	case HexString: {
 		long length;
-		Key *arr = prepareHexString( pd, loc, data.data, data.length(), length );
-		rtnVal = FsmAp::concatFsm( pd->fsmCtx, arr, length );
+		Key *arr = prepareHexString( pd, token.loc, token.data, token.length, length );
+		rtnVal = new FsmAp( pd->fsmCtx );
+		rtnVal->concatFsm( arr, length );
 		delete[] arr;
 		break;
 	}}

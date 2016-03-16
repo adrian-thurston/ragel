@@ -2038,9 +2038,10 @@ reduction TopLevel
 
 	ragel::factor :HexString
 	{
-		$$->factor = new Factor( new Literal( @hex_string, false,
-				$hex_string->data, $hex_string->length, Literal::HexString ) );
-	}
+		Token tok;
+		tok.set( $hex_string );
+		tok.set( @hex_string );
+		$$->factor = new Factor( new Literal( tok, Literal::HexString ) ); }
 
 	ragel::factor :Range
 	{
