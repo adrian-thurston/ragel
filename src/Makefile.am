@@ -51,7 +51,7 @@ version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
-nodist_libagel_a_SOURCES = $(nodist_ragel_SOURCES)
+nodist_libragel_a_SOURCES = $(nodist_ragel_SOURCES)
 libragel_a_SOURCES = $(ragel_SOURCES) lib.cc
 libragel_a_CPPFLAGS = -Dmain=main_lib -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
@@ -91,6 +91,10 @@ RAGEL_LM = \
 
 parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM_BINDEP)
 	$(COLM) -c -b rlparse_object -o $@ -e if.h -x if.cc -m commit.cc $<
+
+if.cc: parse.c
+if.h: parse.c
+commit.cc: parse.c
 
 # These are necessary because we are not using built sources. They create the
 # dependency on the colm run for the objects that that require its output. Must
