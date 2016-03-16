@@ -408,6 +408,7 @@ void LoadInit::go( long activeRealm )
 		ItemList = ItemList.next();
 	}
 
+	pd->streamFileNames.append( colm_extract_fns( program ) );
 	colm_delete_program( program );
 
 	consParseStmt( stmtList );

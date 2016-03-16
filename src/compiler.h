@@ -64,6 +64,8 @@ struct FsmCodeGen;
 #define REDUCE_CODE 0x2
 #define SHIFT_REDUCE_CODE 0x3
 
+typedef Vector<const char**> CharVectVect;
+
 /* This is used for tracking the current stack of include file/machine pairs. It is
  * is used to detect and recursive include structure. */
 struct IncludeStackItem
@@ -643,6 +645,8 @@ struct Compiler
 	KeyOps thisKeyOps;
 
 	UniqueType *mainReturnUT;
+
+	CharVectVect streamFileNames;
 
 	/* CONTEXT FREE */
 	ProdElList *makeProdElList( LangEl *langEl );

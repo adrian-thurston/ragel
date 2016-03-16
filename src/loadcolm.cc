@@ -790,6 +790,7 @@ struct LoadColm
 		}
 
 		StmtList *stmtList = walkRootItemList( Start.RootItemList() );
+		pd->streamFileNames.append( colm_extract_fns( program ) );
 		colm_delete_program( program );
 		return stmtList;
 	}
@@ -2703,6 +2704,7 @@ void LoadColm::go( long activeRealm )
 	}
 
 	StmtList *stmtList = walkRootItemList( Start.RootItemList() );
+	pd->streamFileNames.append( colm_extract_fns( program ) );
 	colm_delete_program( program );
 
 	pd->rootCodeBlock = CodeBlock::cons( stmtList, 0 );

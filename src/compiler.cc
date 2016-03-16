@@ -415,6 +415,15 @@ Compiler::~Compiler()
 	/* Delete all the nodes in the action list. Will cause all the
 	 * string data that represents the actions to be deallocated. */
 	actionList.empty();
+
+	for ( CharVectVect::Iter fns = streamFileNames; fns.lte(); fns++ ) {
+		const char **ptr = *fns;
+		while ( *ptr != 0 ) {
+			::free( (void*)*ptr );
+			ptr += 1;
+		}
+		free( (void*) *fns );
+	}
 }
 
 ostream &operator<<( ostream &out, const Token &token )
