@@ -106,10 +106,13 @@ struct Section
 	/* Pointer to the last input item to reference this parse data struct. Once
 	 * we pass over this item we are free to clear away the parse tree. */
 	InputItem *lastReference;
+
+	Section *prev, *next;
 };
 
 typedef AvlMap<std::string, Section*, CmpString> SectionDict;
 typedef AvlMapEl<std::string, Section*> SectionDictEl;
+typedef DList<Section> SectionList;
 
 struct FnMachine
 {
@@ -140,7 +143,13 @@ struct IncludeRec
 	: public AvlTreeEl<IncludeRec>
 {
 	IncludeRec( const string &fileName, const string &machine )
-		: key( fileName, machine ) {}
+		: key( fileName, machine ), data(0) {}
+	
+	~IncludeRec()
+	{
+		if ( data != 0 )
+			delete[] data;
+	}
 
 	FnMachine key;
 
@@ -159,6 +168,7 @@ struct InputData
 	: 
 		inputFileName(0),
 		outputFileName(0),
+		commFileName(0),
 		nextMachineId(0),
 		inStream(0),
 		outStream(0),
@@ -196,14 +206,29 @@ struct InputData
 		nfaBreadthCheck(0),
 		varBackend(false),
 		histogramFn(0),
-		histogram(0)
+		histogram(0),
+		input(0),
+		inLibRagel(false)
 	{}
+
+	~InputData();
+
+	void usage();
+	void version();
+	void showHostLangNames();
+	void showHostLangArgs();
+	void showFrontends();
+	void showBackends();
+	void showStyles();
 
 	std::string dirName;
 
 	/* The name of the root section, this does not change during an include. */
 	const char *inputFileName;
 	const char *outputFileName;
+	const char *commFileName;
+
+	string comm;
 
 	int nextMachineId;
 
@@ -226,6 +251,7 @@ struct InputData
 	ParserList parserList;
 
 	SectionDict sectionDict;
+	SectionList sectionList;
 
 	ArgsVector includePaths;
 
@@ -286,6 +312,11 @@ struct InputData
 	const char *histogramFn;
 	double *histogram;
 
+	const char *input;
+	bool inLibRagel;
+
+	Vector<const char**> streamFileNames;
+
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();
 
@@ -317,7 +348,7 @@ struct InputData
 	void writeLanguage( std::ostream &out );
 	void writeXML( std::ostream &out );
 
-	void checkLastRef( InputItem *ii );
+	bool checkLastRef( InputItem *ii );
 
 	void parseKelbt();
 	void processXML();
@@ -338,9 +369,11 @@ struct InputData
 	void runRlhc();
 	void processKelbt();
 	void processColm();
-	void processReduce();
-	void process();
-	void parseReduce();
+	bool processReduce();
+	bool process();
+	bool parseReduce();
+
+	void abortCompile( int code );
 };
 
 

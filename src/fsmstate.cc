@@ -207,6 +207,15 @@ StateAp::~StateAp()
 {
 	if ( stateDictEl != 0 )
 		delete stateDictEl;
+
+	if ( stateDictIn != 0 )
+		delete stateDictIn;
+
+	if ( nfaIn != 0 )
+		delete nfaIn;
+
+	if ( nfaOut != 0 )
+		delete nfaOut;
 }
 
 #ifdef TO_UPGRADE_CONDS

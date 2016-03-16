@@ -32,7 +32,7 @@
 
 using std::endl;
 
-extern colm_sections colm_object;
+extern colm_sections rlparse_object;
 
 char *unescape( const char *s, int slen )
 {
@@ -1174,16 +1174,16 @@ struct LoadRagel
 			case ragel::range_lit::String: {
 				string s = RL.string().text();
 				Token tok;
-				tok.set( s.c_str(), s.size() );
-				literal = new Literal( tok, Literal::LitString );
+				tok.set( s.c_str(), s.size(), RL.string().loc() );
+				literal = new Literal( tok.loc, false, tok.data, tok.length, Literal::LitString );
 				break;
 			}
 
 			case ragel::range_lit::AN: {
 				string s = RL.alphabet_num().text();
 				Token tok;
-				tok.set( s.c_str(), s.size() );
-				literal = new Literal( tok, Literal::Number );
+				tok.set( s.c_str(), s.size(), RL.alphabet_num().loc() );
+				literal = new Literal( tok.loc, false, tok.data, tok.length, Literal::Number );
 				break;
 			}
 		}
@@ -1197,8 +1197,8 @@ struct LoadRagel
 			case ragel::reg_or_char::Char: {
 				char *c = unescape( RegOrChar.re_or_char().text().c_str() );
 				Token tok;
-				tok.set( c, strlen(c) );
-				orItem = new ReOrItem( RegOrChar.re_or_char().loc(), tok );
+				tok.set( c, strlen(c), RegOrChar.re_or_char().loc() );
+				orItem = new ReOrItem( RegOrChar.re_or_char().loc(), tok.data, tok.length );
 				delete[] c;
 				break;
 			}
@@ -1257,8 +1257,8 @@ struct LoadRagel
 			case ragel::reg_item::Char: {
 				char *c = unescape( RegItem.re_char().text().c_str() );
 				Token tok;
-				tok.set( c, strlen( c ) );
-				reItem = new ReItem( loc, tok );
+				tok.set( c, strlen( c ), RegItem.re_char().loc() );
+				reItem = new ReItem( loc, tok.data, tok.length );
 				delete[] c;
 				break;
 			}
@@ -1317,9 +1317,9 @@ struct LoadRagel
 			case ragel::factor::AlphabetNum: {
 				string s = FactorTree.alphabet_num().text();
 				Token tok;
-				tok.set( s.c_str(), s.size() );
+				tok.set( s.c_str(), s.size(), FactorTree.alphabet_num().loc() );
 
-				factor = new Factor( new Literal( tok, Literal::Number ) );
+				factor = new Factor( new Literal( tok.loc, false, tok.data, tok.length, Literal::Number ) );
 				break;
 			}
 
@@ -1348,9 +1348,9 @@ struct LoadRagel
 			case ragel::factor::String: {
 				string s = FactorTree.string().text();
 				Token tok;
-				tok.set( s.c_str(), s.size() );
+				tok.set( s.c_str(), s.size(), FactorTree.string().loc() );
 
-				factor = new Factor( new Literal( tok, Literal::LitString ) );
+				factor = new Factor( new Literal( tok.loc, false, tok.data, tok.length, Literal::LitString ) );
 				break;
 			}
 			case ragel::factor::PosOrBlock: {
@@ -2382,22 +2382,16 @@ struct LoadRagel
 			case import_val::String: {
 				string s = Import.Val().string().text();
 				Token tok;
-				tok.loc.fileName = loc.fileName;
-				tok.loc.line = loc.line;
-				tok.loc.col = loc.col;
-				tok.set( s.c_str(), s.size() );
-				literal = new Literal( tok, Literal::LitString );
+				tok.set( s.c_str(), s.size(), loc );
+				literal = new Literal( tok.loc, false, tok.data, tok.length, Literal::LitString );
 				break;
 			}
 
 			case import_val::Number: {
 				string s = Import.Val().number().text();
 				Token tok;
-				tok.loc.fileName = loc.fileName;
-				tok.loc.line = loc.line;
-				tok.loc.col = loc.col;
-				tok.set( s.c_str(), s.size() );
-				literal = new Literal( tok, Literal::Number );
+				tok.set( s.c_str(), s.size(), loc );
+				literal = new Literal( tok.loc, false, tok.data, tok.length, Literal::Number );
 				break;
 			}
 		}
@@ -2442,12 +2436,12 @@ struct LoadRagel
 
 		const char *argv[5];
 		argv[0] = "rlparse";
-		argv[1] = "import";
+		argv[1] = "import-file";
 		argv[2] = unescaped;
 		argv[3] = id.hostLang->rlhcArg;
 		argv[4] = 0;
 
-		colm_program *program = colm_new_program( &colm_object );
+		colm_program *program = colm_new_program( &rlparse_object );
 		colm_set_debug( program, 0 );
 		colm_run_program( program, 4, argv );
 
@@ -2464,6 +2458,9 @@ struct LoadRagel
 		}
 
 		loadImportList( ImportList );
+
+		id.streamFileNames.append( colm_extract_fns( program ) );
+
 		colm_delete_program( program );
 	}
 
@@ -2683,12 +2680,12 @@ struct LoadRagel
 	{
 		const char *argv[5];
 		argv[0] = "rlparse";
-		argv[1] = "load";
+		argv[1] = "parse-file";
 		argv[2] = inputFileName;
 		argv[3] = id.hostLang->rlhcArg;
 		argv[4] = 0;
 
-		colm_program *program = colm_new_program( &colm_object );
+		colm_program *program = colm_new_program( &rlparse_object );
 		colm_set_debug( program, 0 );
 		colm_run_program( program, 4, argv );
 
@@ -2704,6 +2701,8 @@ struct LoadRagel
 		}
 
 		load( Start, targetMachine, searchMachine );
+
+		id.streamFileNames.append( colm_extract_fns( program ) );
 
 		colm_delete_program( program );
 	}

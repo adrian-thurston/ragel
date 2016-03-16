@@ -28,6 +28,24 @@
 
 using std::cout;
 using std::endl;
+	
+Action::~Action()
+{
+	/* If we were created by substitution of another action then we don't own the inline list. */
+	if ( substOf == 0 && inlineList != 0 ) {
+		inlineList->empty();
+		delete inlineList;
+		inlineList = 0;
+	}
+}
+
+InlineItem::~InlineItem()
+{
+	if ( children != 0 ) {
+		children->empty();
+		delete children;
+	}
+}
 
 /* Make a new state. The new state will be put on the graph's
  * list of state. The new state can be created final or non final. */
@@ -46,12 +64,6 @@ StateAp *FsmAp::addState()
 		stateList.append( state );
 	}
 
-	if ( ctx->stateLimit > 0 ) {
-		long total = misfitList.length() + stateList.length();
-		if ( total > ctx->stateLimit )
-			throw TooManyStates();
-	}
-
 	return state;
 }
 
@@ -59,33 +71,39 @@ StateAp *FsmAp::addState()
  * machine will be made that has len+1 states with one transition between each
  * state for each integer in str. IsSigned determines if the integers are to
  * be considered as signed or unsigned ints. */
-void FsmAp::concatFsm( Key *str, int len )
+FsmAp *FsmAp::concatFsm( FsmCtx *ctx, Key *str, int len )
 {
+	FsmAp *fsm = new FsmAp( ctx );
+
 	/* Make the first state and set it as the start state. */
-	StateAp *last = addState();
-	setStartState( last );
+	StateAp *last = fsm->addState();
+	fsm->setStartState( last );
 
 	/* Attach subsequent states. */
 	for ( int i = 0; i < len; i++ ) {
-		StateAp *newState = addState();
-		attachNewTrans( last, newState, str[i], str[i] );
+		StateAp *newState = fsm->addState();
+		fsm->attachNewTrans( last, newState, str[i], str[i] );
 		last = newState;
 	}
 
 	/* Make the last state the final state. */
-	setFinState( last );
+	fsm->setFinState( last );
+
+	return fsm;
 }
 
 /* Case insensitive version of concatFsm. */
-void FsmAp::concatFsmCI( Key *str, int len )
+FsmAp *FsmAp::concatFsmCI( FsmCtx *ctx, Key *str, int len )
 {
+	FsmAp *fsm = new FsmAp( ctx );
+
 	/* Make the first state and set it as the start state. */
-	StateAp *last = addState();
-	setStartState( last );
+	StateAp *last = fsm->addState();
+	fsm->setStartState( last );
 
 	/* Attach subsequent states. */
 	for ( int i = 0; i < len; i++ ) {
-		StateAp *newState = addState();
+		StateAp *newState = fsm->addState();
 
 		KeySet keySet( ctx->keyOps );
 		if ( str[i].isLower() )
@@ -95,48 +113,60 @@ void FsmAp::concatFsmCI( Key *str, int len )
 		keySet.insert( str[i] );
 
 		for ( int i = 0; i < keySet.length(); i++ )
-			attachNewTrans( last, newState, keySet[i], keySet[i] );
+			fsm->attachNewTrans( last, newState, keySet[i], keySet[i] );
 
 		last = newState;
 	}
 
 	/* Make the last state the final state. */
-	setFinState( last );
+	fsm->setFinState( last );
+
+	return fsm;
 }
+
 
 /* Construct a machine that matches one character.  A new machine will be made
  * that has two states with a single transition between the states. IsSigned
  * determines if the integers are to be considered as signed or unsigned ints. */
-void FsmAp::concatFsm( Key chr )
+FsmAp *FsmAp::concatFsm( FsmCtx *ctx, Key chr )
 {
-	/* Two states first start, second final. */
-	setStartState( addState() );
+	FsmAp *fsm = new FsmAp( ctx );
 
-	StateAp *end = addState();
-	setFinState( end );
+	/* Two states first start, second final. */
+	fsm->setStartState( fsm->addState() );
+
+	StateAp *end = fsm->addState();
+	fsm->setFinState( end );
 
 	/* Attach on the character. */
-	attachNewTrans( startState, end, chr, chr );
+	fsm->attachNewTrans( fsm->startState, end, chr, chr );
+
+	return fsm;
 }
+
 
 /* Construct a machine that matches any character in set.  A new machine will
  * be made that has two states and len transitions between the them. The set
  * should be ordered correctly accroding to KeyOps and should not contain
  * any duplicates. */
-void FsmAp::orFsm( Key *set, int len )
+FsmAp *FsmAp::orFsm( FsmCtx *ctx, Key *set, int len )
 {
-	/* Two states first start, second final. */
-	setStartState( addState() );
+	FsmAp *fsm = new FsmAp( ctx );
 
-	StateAp *end = addState();
-	setFinState( end );
+	/* Two states first start, second final. */
+	fsm->setStartState( fsm->addState() );
+
+	StateAp *end = fsm->addState();
+	fsm->setFinState( end );
 
 	for ( int i = 1; i < len; i++ )
 		assert( ctx->keyOps->lt( set[i-1], set[i] ) );
 
 	/* Attach on all the integers in the given string of ints. */
 	for ( int i = 0; i < len; i++ )
-		attachNewTrans( startState, end, set[i], set[i] );
+		fsm->attachNewTrans( fsm->startState, end, set[i], set[i] );
+
+	return fsm;
 }
 
 /* Construct a machine that matches a range of characters.  A new machine will
@@ -144,27 +174,35 @@ void FsmAp::orFsm( Key *set, int len )
  * match any characters from low to high inclusive. Low should be less than or
  * equal to high otherwise undefined behaviour results.  IsSigned determines
  * if the integers are to be considered as signed or unsigned ints. */
-void FsmAp::rangeFsm( Key low, Key high )
+FsmAp *FsmAp::rangeFsm( FsmCtx *ctx, Key low, Key high )
 {
-	/* Two states first start, second final. */
-	setStartState( addState() );
+	FsmAp *fsm = new FsmAp( ctx );
 
-	StateAp *end = addState();
-	setFinState( end );
+	/* Two states first start, second final. */
+	fsm->setStartState( fsm->addState() );
+
+	StateAp *end = fsm->addState();
+	fsm->setFinState( end );
 
 	/* Attach using the range of characters. */
-	attachNewTrans( startState, end, low, high );
+	fsm->attachNewTrans( fsm->startState, end, low, high );
+
+	return fsm;
 }
 
 /* Construct a machine that a repeated range of characters.  */
-void FsmAp::rangeStarFsm( Key low, Key high)
+FsmAp *FsmAp::rangeStarFsm( FsmCtx *ctx, Key low, Key high )
 {
+	FsmAp *fsm = new FsmAp( ctx );
+
 	/* One state which is final and is the start state. */
-	setStartState( addState() );
-	setFinState( startState );
+	fsm->setStartState( fsm->addState() );
+	fsm->setFinState( fsm->startState );
 
 	/* Attach start to start using range of characters. */
-	attachNewTrans( startState, startState, low, high );
+	fsm->attachNewTrans( fsm->startState, fsm->startState, low, high );
+
+	return fsm;
 }
 
 /* Construct a machine that matches the empty string.  A new machine will be
@@ -172,21 +210,29 @@ void FsmAp::rangeStarFsm( Key low, Key high)
  * state. IsSigned determines if the machine has a signed or unsigned
  * alphabet. Fsm operations must be done on machines with the same alphabet
  * signedness. */
-void FsmAp::lambdaFsm( )
+FsmAp *FsmAp::lambdaFsm( FsmCtx *ctx )
 {
+	FsmAp *fsm = new FsmAp( ctx );
+
 	/* Give it one state with no transitions making it
 	 * the start state and final state. */
-	setStartState( addState() );
-	setFinState( startState );
+	fsm->setStartState( fsm->addState() );
+	fsm->setFinState( fsm->startState );
+
+	return fsm;
 }
 
 /* Construct a machine that matches nothing at all. A new machine will be
  * made with only one state. It will not be final. */
-void FsmAp::emptyFsm( )
+FsmAp *FsmAp::emptyFsm( FsmCtx *ctx )
 {
+	FsmAp *fsm = new FsmAp( ctx );
+
 	/* Give it one state with no transitions making it
 	 * the start state and final state. */
-	setStartState( addState() );
+	fsm->setStartState( fsm->addState() );
+
+	return fsm;
 }
 
 void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
@@ -226,127 +272,9 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 	}
 }
 
-/* Kleene star operator. Makes this machine the kleene star of itself. Any
- * transitions made going out of the machine and back into itself will be
- * notified that they are leaving transitions by having the leavingFromState
- * callback invoked. */
-void FsmAp::starOp( )
-{
-	/* Turn on misfit accounting to possibly catch the old start state. */
-	setMisfitAccounting( true );
-
-	/* Create the new new start state. It will be set final after the merging
-	 * of the final states with the start state is complete. */
-	StateAp *prevStartState = startState;
-	unsetStartState();
-	setStartState( addState() );
-
-	/* Merge the new start state with the old one to isolate it. */
-	mergeStates( startState, prevStartState );
-
-	/* Merge the start state into all final states. Except the start state on
-	 * the first pass. If the start state is set final we will be doubling up
-	 * its transitions, which will get transfered to any final states that
-	 * follow it in the final state set. This will be determined by the order
-	 * of items in the final state set. To prevent this we just merge with the
-	 * start on a second pass. */
-	for ( StateSet::Iter st = finStateSet; st.lte(); st++ ) {
-		if ( *st != startState )
-			mergeStatesLeaving( *st, startState );
-	}
-
-	/* Now it is safe to merge the start state with itself (provided it
-	 * is set final). */
-	if ( startState->isFinState() )
-		mergeStatesLeaving( startState, startState );
-
-	/* Now ensure the new start state is a final state. */
-	setFinState( startState );
-
-	/* Fill in any states that were newed up as combinations of others. */
-	fillInStates();
-
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-}
-
-void FsmAp::repeatOp( int times )
-{
-	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
-	assert( times > 0 );
-
-	/* A repeat of one does absolutely nothing. */
-	if ( times == 1 )
-		return;
-
-	/* Make a machine to make copies from. */
-	FsmAp *copyFrom = new FsmAp( *this );
-
-	/* Concatentate duplicates onto the end up until before the last. */
-	for ( int i = 1; i < times-1; i++ ) {
-		FsmAp *dup = new FsmAp( *copyFrom );
-		doConcat( dup, 0, false );
-	}
-
-	/* Now use the copyFrom on the end. */
-	doConcat( copyFrom, 0, false );
-}
-
-void FsmAp::optionalRepeatOp( int times )
-{
-	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
-	assert( times > 0 );
-
-	/* A repeat of one optional merely allows zero string. */
-	if ( times == 1 ) {
-		isolateStartState();
-		setFinState( startState );
-		return;
-	}
-
-	/* Make a machine to make copies from. */
-	FsmAp *copyFrom = new FsmAp( *this );
-
-	/* The state set used in the from end of the concatentation. Starts with
-	 * the initial final state set, then after each concatenation, gets set to
-	 * the the final states that come from the the duplicate. */
-	StateSet lastFinSet( finStateSet );
-
-	/* Set the initial state to zero to allow zero copies. */
-	isolateStartState();
-	setFinState( startState );
-
-	/* Concatentate duplicates onto the end up until before the last. */
-	for ( int i = 1; i < times-1; i++ ) {
-		/* Make a duplicate for concating and set the fin bits to graph 2 so we
-		 * can pick out it's final states after the optional style concat. */
-		FsmAp *dup = new FsmAp( *copyFrom );
-		dup->setFinBits( STB_GRAPH2 );
-		doConcat( dup, &lastFinSet, true );
-
-		/* Clear the last final state set and make the new one by taking only
-		 * the final states that come from graph 2.*/
-		lastFinSet.empty();
-		for ( int i = 0; i < finStateSet.length(); i++ ) {
-			/* If the state came from graph 2, add it to the last set and clear
-			 * the bits. */
-			StateAp *fs = finStateSet[i];
-			if ( fs->stateBits & STB_GRAPH2 ) {
-				lastFinSet.insert( fs );
-				fs->stateBits &= ~STB_GRAPH2;
-			}
-		}
-	}
-
-	/* Now use the copyFrom on the end, no bits set, no bits to clear. */
-	doConcat( copyFrom, &lastFinSet, true );
-}
-
-
 /* Fsm concatentation worker. Supports treating the concatentation as optional,
  * which essentially leaves the final states of machine one as final. */
-void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
+FsmRes FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 {
 	/* For the merging process. */
 	StateSet finStateSetCopy, startStateSet;
@@ -401,30 +329,18 @@ void FsmAp::doConcat( FsmAp *other, StateSet *fromStates, bool optional )
 	}
 
 	/* Fill in any new states made from merging. */
-	fillInStates();
+	FsmRes res = fillInStates();
+	if ( !res.success() )
+		return res;
 
 	/* Remove the misfits and turn off misfit accounting. */
 	removeMisfits();
 	setMisfitAccounting( false );
+
+	return res;
 }
 
-/* Concatenates other to the end of this machine. Other is deleted.  Any
- * transitions made leaving this machine and entering into other are notified
- * that they are leaving transitions by having the leavingFromState callback
- * invoked. */
-void FsmAp::concatOp( FsmAp *other )
-{
-	for ( PriorTable::Iter g = other->startState->guardedInTable; g.lte(); g++ ) {
-		allTransPrior( 0, g->desc );
-		other->allTransPrior( 0, g->desc->other );
-	}
-
-	/* Assert same signedness and return graph concatenation op. */
-	assert( ctx == other->ctx );
-	doConcat( other, 0, false );
-}
-
-void FsmAp::doOr( FsmAp *other )
+FsmRes FsmAp::doUnion( FsmAp *other )
 {
 	/* Build a state set consisting of both start states */
 	StateSet startStateSet;
@@ -459,87 +375,7 @@ void FsmAp::doOr( FsmAp *other )
 	mergeStateList( startState, startStateSet.data, startStateSet.length() );
 
 	/* Fill in any new states made from merging. */
-	fillInStates();
-}
-
-/* Unions other with this machine. Other is deleted. */
-void FsmAp::unionOp( FsmAp *other )
-{
-	assert( ctx == other->ctx );
-
-	ctx->unionOp = true;
-
-	setFinBits( STB_GRAPH1 );
-	other->setFinBits( STB_GRAPH2 );
-
-	/* Turn on misfit accounting for both graphs. */
-	setMisfitAccounting( true );
-	other->setMisfitAccounting( true );
-
-	/* Call Worker routine. */
-	doOr( other );
-
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-
-	ctx->unionOp = false;
-	unsetFinBits( STB_BOTH );
-}
-
-/* Intersects other with this machine. Other is deleted. */
-void FsmAp::intersectOp( FsmAp *other )
-{
-	assert( ctx == other->ctx );
-
-	/* Turn on misfit accounting for both graphs. */
-	setMisfitAccounting( true );
-	other->setMisfitAccounting( true );
-
-	/* Set the fin bits on this and other to want each other. */
-	setFinBits( STB_GRAPH1 );
-	other->setFinBits( STB_GRAPH2 );
-
-	/* Call worker Or routine. */
-	doOr( other );
-
-	/* Unset any final states that are no longer to 
-	 * be final due to final bits. */
-	unsetIncompleteFinals();
-
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-
-	/* Remove states that have no path to a final state. */
-	removeDeadEndStates();
-}
-
-/* Set subtracts other machine from this machine. Other is deleted. */
-void FsmAp::subtractOp( FsmAp *other )
-{
-	assert( ctx == other->ctx );
-
-	/* Turn on misfit accounting for both graphs. */
-	setMisfitAccounting( true );
-	other->setMisfitAccounting( true );
-
-	/* Set the fin bits of other to be killers. */
-	other->setFinBits( STB_GRAPH1 );
-
-	/* Call worker Or routine. */
-	doOr( other );
-
-	/* Unset any final states that are no longer to 
-	 * be final due to final bits. */
-	unsetKilledFinals();
-
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-
-	/* Remove states that have no path to a final state. */
-	removeDeadEndStates();
+	return fillInStates();
 }
 
 bool FsmAp::inEptVect( EptVect *eptVect, StateAp *state )
@@ -653,132 +489,6 @@ void FsmAp::resolveEpsilonTrans()
 	}
 }
 
-void FsmAp::epsilonOp()
-{
-	setMisfitAccounting( true );
-
-	for ( StateList::Iter st = stateList; st.lte(); st++ )
-		st->owningGraph = 0;
-
-	/* Perform merges. */
-	resolveEpsilonTrans();
-
-	/* Epsilons can caused merges which leave behind unreachable states. */
-	fillInStates();
-
-	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
-}
-
-/* Make a new maching by joining together a bunch of machines without making
- * any transitions between them. A negative finalId results in there being no
- * final id. */
-void FsmAp::joinOp( int startId, int finalId, FsmAp **others, int numOthers )
-{
-	for ( int m = 0; m < numOthers; m++ ) {
-		assert( ctx == others[m]->ctx );
-	}
-
-	/* Set the owning machines. Start at one. Zero is reserved for the start
-	 * and final states. */
-	for ( StateList::Iter st = stateList; st.lte(); st++ )
-		st->owningGraph = 1;
-	for ( int m = 0; m < numOthers; m++ ) {
-		for ( StateList::Iter st = others[m]->stateList; st.lte(); st++ )
-			st->owningGraph = 2+m;
-	}
-
-	/* All machines loose start state status. */
-	unsetStartState();
-	for ( int m = 0; m < numOthers; m++ )
-		others[m]->unsetStartState();
-	
-	/* Bring the other machines into this. */
-	for ( int m = 0; m < numOthers; m++ ) {
-		/* Bring in the rest of other's entry points. */
-		copyInEntryPoints( others[m] );
-		others[m]->entryPoints.empty();
-
-		/* Merge the lists. This will move all the states from other into
-		 * this. No states will be deleted. */
-		stateList.append( others[m]->stateList );
-		assert( others[m]->misfitList.length() == 0 );
-
-		/* Move the final set data from other into this. */
-		finStateSet.insert( others[m]->finStateSet );
-		others[m]->finStateSet.empty();
-
-		/* Since other's list is empty, we can delete the fsm without
-		 * affecting any states. */
-		delete others[m];
-	}
-
-	/* Look up the start entry point. */
-	EntryMapEl *enLow = 0, *enHigh = 0;
-	bool findRes = entryPoints.findMulti( startId, enLow, enHigh );
-	if ( ! findRes ) {
-		/* No start state. Set a default one and proceed with the join. Note
-		 * that the result of the join will be a very uninteresting machine. */
-		setStartState( addState() );
-	}
-	else {
-		/* There is at least one start state, create a state that will become
-		 * the new start state. */
-		StateAp *newStart = addState();
-		setStartState( newStart );
-
-		/* The start state is in an owning machine class all it's own. */
-		newStart->owningGraph = 0;
-
-		/* Create the set of states to merge from. */
-		StateSet stateSet;
-		for ( EntryMapEl *en = enLow; en <= enHigh; en++ )
-			stateSet.insert( en->value );
-
-		/* Merge in the set of start states into the new start state. */
-		mergeStateList( newStart, stateSet.data, stateSet.length() );
-	}
-
-	/* Take a copy of the final state set, before unsetting them all. This
-	 * will allow us to call clearOutData on the states that don't get
-	 * final state status back back. */
-	StateSet finStateSetCopy = finStateSet;
-
-	/* Now all final states are unset. */
-	unsetAllFinStates();
-
-	if ( finalId >= 0 ) {
-		/* Create the implicit final state. */
-		StateAp *finState = addState();
-		setFinState( finState );
-
-		/* Assign an entry into the final state on the final state entry id. Note
-		 * that there may already be an entry on this id. That's ok. Also set the
-		 * final state owning machine id. It's in a class all it's own. */
-		setEntry( finalId, finState );
-		finState->owningGraph = 0;
-	}
-
-	/* Hand over to workers for resolving epsilon trans. This will merge states
-	 * with the targets of their epsilon transitions. */
-	resolveEpsilonTrans();
-
-	/* Invoke the relinquish final callback on any states that did not get
-	 * final state status back. */
-	for ( StateSet::Iter st = finStateSetCopy; st.lte(); st++ ) {
-		if ( !((*st)->stateBits & STB_ISFINAL) )
-			clearOutData( *st );
-	}
-
-	/* Fill in any new states made from merging. */
-	fillInStates();
-
-	/* Joining can be messy. Instead of having misfit accounting on (which is
-	 * tricky here) do a full cleaning. */
-	removeUnreachableStates();
-}
-
 void FsmAp::globOp( FsmAp **others, int numOthers )
 {
 	for ( int m = 0; m < numOthers; m++ ) {
@@ -810,6 +520,9 @@ void FsmAp::globOp( FsmAp **others, int numOthers )
 	}
 }
 
+/* Used near the end of an fsm construction. Any labels that are still around
+ * are referenced only by gotos and calls and they need to be made into
+ * deterministic entry points. */
 void FsmAp::deterministicEntry()
 {
 	/* States may loose their entry points, turn on misfit accounting. */
@@ -894,6 +607,384 @@ void FsmAp::unsetIncompleteFinals()
 	}
 }
 
+/* Kleene star operator. Makes this machine the kleene star of itself. Any
+ * transitions made going out of the machine and back into itself will be
+ * notified that they are leaving transitions by having the leavingFromState
+ * callback invoked. */
+FsmRes FsmAp::starOp( FsmAp *fsm )
+{
+	/* Turn on misfit accounting to possibly catch the old start state. */
+	fsm->setMisfitAccounting( true );
+
+	/* Create the new new start state. It will be set final after the merging
+	 * of the final states with the start state is complete. */
+	StateAp *prevStartState = fsm->startState;
+	fsm->unsetStartState();
+	fsm->setStartState( fsm->addState() );
+
+	/* Merge the new start state with the old one to isolate it. */
+	fsm->mergeStates( fsm->startState, prevStartState );
+
+	/* Merge the start state into all final states. Except the start state on
+	 * the first pass. If the start state is set final we will be doubling up
+	 * its transitions, which will get transfered to any final states that
+	 * follow it in the final state set. This will be determined by the order
+	 * of items in the final state set. To prevent this we just merge with the
+	 * start on a second pass. */
+	for ( StateSet::Iter st = fsm->finStateSet; st.lte(); st++ ) {
+		if ( *st != fsm->startState )
+			fsm->mergeStatesLeaving( *st, fsm->startState );
+	}
+
+	/* Now it is safe to merge the start state with itself (provided it
+	 * is set final). */
+	if ( fsm->startState->isFinState() )
+		fsm->mergeStatesLeaving( fsm->startState, fsm->startState );
+
+	/* Now ensure the new start state is a final state. */
+	fsm->setFinState( fsm->startState );
+
+	/* Fill in any states that were newed up as combinations of others. */
+	FsmRes res = fsm->fillInStates();
+	if ( !res.success() )
+		return res;
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	return res;
+}
+
+FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
+{
+	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
+	assert( times > 0 );
+
+	/* A repeat of one does absolutely nothing. */
+	if ( times == 1 )
+		return FsmRes( FsmRes::Fsm(), fsm );
+
+	/* Make a machine to make copies from. */
+	FsmAp *copyFrom = new FsmAp( *fsm );
+
+	/* Concatentate duplicates onto the end up until before the last. */
+	for ( int i = 1; i < times-1; i++ ) {
+		FsmAp *dup = new FsmAp( *copyFrom );
+		FsmRes res = fsm->doConcat( dup, 0, false );
+		if ( !res.success() )
+			return res;
+	}
+
+	/* Now use the copyFrom on the end. */
+	FsmRes res = fsm->doConcat( copyFrom, 0, false );
+	if ( !res.success())
+		return res;
+
+	return res;
+}
+
+FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
+{
+	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
+	assert( times > 0 );
+
+	/* A repeat of one optional merely allows zero string. */
+	if ( times == 1 ) {
+		isolateStartState( fsm );
+		fsm->setFinState( fsm->startState );
+		return FsmRes( FsmRes::Fsm(), fsm );
+	}
+
+	/* Make a machine to make copies from. */
+	FsmAp *copyFrom = new FsmAp( *fsm );
+
+	/* The state set used in the from end of the concatentation. Starts with
+	 * the initial final state set, then after each concatenation, gets set to
+	 * the the final states that come from the the duplicate. */
+	StateSet lastFinSet( fsm->finStateSet );
+
+	/* Set the initial state to zero to allow zero copies. */
+	isolateStartState( fsm );
+	fsm->setFinState( fsm->startState );
+
+	/* Concatentate duplicates onto the end up until before the last. */
+	for ( int i = 1; i < times-1; i++ ) {
+		/* Make a duplicate for concating and set the fin bits to graph 2 so we
+		 * can pick out it's final states after the optional style concat. */
+		FsmAp *dup = new FsmAp( *copyFrom );
+		dup->setFinBits( STB_GRAPH2 );
+		FsmRes res = fsm->doConcat( dup, &lastFinSet, true );
+		if ( !res.success() )
+			return res;
+
+		/* Clear the last final state set and make the new one by taking only
+		 * the final states that come from graph 2.*/
+		lastFinSet.empty();
+		for ( int i = 0; i < fsm->finStateSet.length(); i++ ) {
+			/* If the state came from graph 2, add it to the last set and clear
+			 * the bits. */
+			StateAp *fs = fsm->finStateSet[i];
+			if ( fs->stateBits & STB_GRAPH2 ) {
+				lastFinSet.insert( fs );
+				fs->stateBits &= ~STB_GRAPH2;
+			}
+		}
+	}
+
+	/* Now use the copyFrom on the end, no bits set, no bits to clear. */
+	return fsm->doConcat( copyFrom, &lastFinSet, true );
+}
+
+/* Concatenates other to the end of this machine. Other is deleted.  Any
+ * transitions made leaving this machine and entering into other are notified
+ * that they are leaving transitions by having the leavingFromState callback
+ * invoked. */
+FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
+{
+	for ( PriorTable::Iter g = other->startState->guardedInTable; g.lte(); g++ ) {
+		fsm->allTransPrior( 0, g->desc );
+		other->allTransPrior( 0, g->desc->other );
+	}
+
+	/* Assert same signedness and return graph concatenation op. */
+	assert( fsm->ctx == other->ctx );
+
+	FsmRes res = fsm->doConcat( other, 0, false );
+	if ( !res.success() ) {
+		delete fsm;
+		return res;
+	}
+
+	return res;
+}
+
+/* Returns union of fsm and other. Other is deleted. */
+FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
+{
+	assert( fsm->ctx == other->ctx );
+
+	fsm->ctx->unionOp = true;
+
+	fsm->setFinBits( STB_GRAPH1 );
+	other->setFinBits( STB_GRAPH2 );
+
+	/* Turn on misfit accounting for both graphs. */
+	fsm->setMisfitAccounting( true );
+	other->setMisfitAccounting( true );
+
+	/* Call Worker routine. */
+	FsmRes res = fsm->doUnion( other );
+	if ( !res.success() )
+		return res;
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	fsm->ctx->unionOp = false;
+	fsm->unsetFinBits( STB_BOTH );
+
+	return res;
+}
+
+/* Intersects other with this machine. Other is deleted. */
+FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
+{
+	assert( fsm->ctx == other->ctx );
+
+	/* Turn on misfit accounting for both graphs. */
+	fsm->setMisfitAccounting( true );
+	other->setMisfitAccounting( true );
+
+	/* Set the fin bits on this and other to want each other. */
+	fsm->setFinBits( STB_GRAPH1 );
+	other->setFinBits( STB_GRAPH2 );
+
+	/* Call worker Or routine. */
+	FsmRes res = fsm->doUnion( other );
+	if ( !res.success() )
+		return res;
+
+	/* Unset any final states that are no longer to 
+	 * be final due to final bits. */
+	fsm->unsetIncompleteFinals();
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	/* Remove states that have no path to a final state. */
+	fsm->removeDeadEndStates();
+
+	return res;
+}
+
+/* Set subtracts other machine from this machine. Other is deleted. */
+FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
+{
+	assert( fsm->ctx == other->ctx );
+
+	/* Turn on misfit accounting for both graphs. */
+	fsm->setMisfitAccounting( true );
+	other->setMisfitAccounting( true );
+
+	/* Set the fin bits of other to be killers. */
+	other->setFinBits( STB_GRAPH1 );
+
+	/* Call worker Or routine. */
+	FsmRes res = fsm->doUnion( other );
+	if ( !res.success() )
+		return res;
+
+	/* Unset any final states that are no longer to 
+	 * be final due to final bits. */
+	fsm->unsetKilledFinals();
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	/* Remove states that have no path to a final state. */
+	fsm->removeDeadEndStates();
+
+	return res;
+}
+
+FsmRes FsmAp::epsilonOp( FsmAp *fsm )
+{
+	fsm->setMisfitAccounting( true );
+
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ )
+		st->owningGraph = 0;
+
+	/* Perform merges. */
+	fsm->resolveEpsilonTrans();
+
+	/* Epsilons can caused merges which leave behind unreachable states. */
+	FsmRes res = fsm->fillInStates();
+	if ( !res.success() )
+		return res;
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	return res;
+}
+
+/* Make a new maching by joining together a bunch of machines without making
+ * any transitions between them. A negative finalId results in there being no
+ * final id. */
+FsmRes FsmAp::joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers )
+{
+	for ( int m = 0; m < numOthers; m++ ) {
+		assert( fsm->ctx == others[m]->ctx );
+	}
+
+	/* Set the owning machines. Start at one. Zero is reserved for the start
+	 * and final states. */
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ )
+		st->owningGraph = 1;
+	for ( int m = 0; m < numOthers; m++ ) {
+		for ( StateList::Iter st = others[m]->stateList; st.lte(); st++ )
+			st->owningGraph = 2+m;
+	}
+
+	/* All machines loose start state status. */
+	fsm->unsetStartState();
+	for ( int m = 0; m < numOthers; m++ )
+		others[m]->unsetStartState();
+	
+	/* Bring the other machines into this. */
+	for ( int m = 0; m < numOthers; m++ ) {
+		/* Bring in the rest of other's entry points. */
+		fsm->copyInEntryPoints( others[m] );
+		others[m]->entryPoints.empty();
+
+		/* Merge the lists. This will move all the states from other into
+		 * this. No states will be deleted. */
+		fsm->stateList.append( others[m]->stateList );
+		assert( others[m]->misfitList.length() == 0 );
+
+		/* Move the final set data from other into this. */
+		fsm->finStateSet.insert( others[m]->finStateSet );
+		others[m]->finStateSet.empty();
+
+		/* Since other's list is empty, we can delete the fsm without
+		 * affecting any states. */
+		delete others[m];
+	}
+
+	/* Look up the start entry point. */
+	EntryMapEl *enLow = 0, *enHigh = 0;
+	bool findRes = fsm->entryPoints.findMulti( startId, enLow, enHigh );
+	if ( ! findRes ) {
+		/* No start state. Set a default one and proceed with the join. Note
+		 * that the result of the join will be a very uninteresting machine. */
+		fsm->setStartState( fsm->addState() );
+	}
+	else {
+		/* There is at least one start state, create a state that will become
+		 * the new start state. */
+		StateAp *newStart = fsm->addState();
+		fsm->setStartState( newStart );
+
+		/* The start state is in an owning machine class all it's own. */
+		newStart->owningGraph = 0;
+
+		/* Create the set of states to merge from. */
+		StateSet stateSet;
+		for ( EntryMapEl *en = enLow; en <= enHigh; en++ )
+			stateSet.insert( en->value );
+
+		/* Merge in the set of start states into the new start state. */
+		fsm->mergeStateList( newStart, stateSet.data, stateSet.length() );
+	}
+
+	/* Take a copy of the final state set, before unsetting them all. This
+	 * will allow us to call clearOutData on the states that don't get
+	 * final state status back back. */
+	StateSet finStateSetCopy = fsm->finStateSet;
+
+	/* Now all final states are unset. */
+	fsm->unsetAllFinStates();
+
+	if ( finalId >= 0 ) {
+		/* Create the implicit final state. */
+		StateAp *finState = fsm->addState();
+		fsm->setFinState( finState );
+
+		/* Assign an entry into the final state on the final state entry id. Note
+		 * that there may already be an entry on this id. That's ok. Also set the
+		 * final state owning machine id. It's in a class all it's own. */
+		fsm->setEntry( finalId, finState );
+		finState->owningGraph = 0;
+	}
+
+	/* Hand over to workers for resolving epsilon trans. This will merge states
+	 * with the targets of their epsilon transitions. */
+	fsm->resolveEpsilonTrans();
+
+	/* Invoke the relinquish final callback on any states that did not get
+	 * final state status back. */
+	for ( StateSet::Iter st = finStateSetCopy; st.lte(); st++ ) {
+		if ( !((*st)->stateBits & STB_ISFINAL) )
+			fsm->clearOutData( *st );
+	}
+
+	/* Fill in any new states made from merging. */
+	FsmRes res = fsm->fillInStates();
+	if ( !res.success() )
+		return res;
+
+	/* Joining can be messy. Instead of having misfit accounting on (which is
+	 * tricky here) do a full cleaning. */
+	fsm->removeUnreachableStates();
+
+	return res;
+}
+
 /* Ensure that the start state is free of entry points (aside from the fact
  * that it is the start state). If the start state has entry points then Make a
  * new start state by merging with the old one. Useful before modifying start
@@ -901,33 +992,35 @@ void FsmAp::unsetIncompleteFinals()
  * start state entry then modifying its transitions changes more than the start
  * transitions. So isolate the start state by separating it out such that it
  * only has start stateness as it's entry point. */
-void FsmAp::isolateStartState( )
+FsmRes FsmAp::isolateStartState( FsmAp *fsm )
 {
-	/* Bail out if the start state is already isolated. */
-	if ( isStartStateIsolated() )
-		return;
+	/* Do nothing if the start state is already isolated. */
+	if ( fsm->isStartStateIsolated() )
+		return FsmRes( FsmRes::Fsm(), fsm );
 
 	/* Turn on misfit accounting to possibly catch the old start state. */
-	setMisfitAccounting( true );
+	fsm->setMisfitAccounting( true );
 
 	/* This will be the new start state. The existing start
 	 * state is merged with it. */
-	StateAp *prevStartState = startState;
-	unsetStartState();
-	setStartState( addState() );
+	StateAp *prevStartState = fsm->startState;
+	fsm->unsetStartState();
+	fsm->setStartState( fsm->addState() );
 
 	/* Merge the new start state with the old one to isolate it. */
-	mergeStates( startState, prevStartState );
+	fsm->mergeStates( fsm->startState, prevStartState );
 
 	/* Stfil and stateDict will be empty because the merging of the old start
 	 * state into the new one will not have any conflicting transitions. */
-	assert( stateDict.treeSize == 0 );
-	assert( nfaList.length() == 0 );
+	assert( fsm->stateDict.treeSize == 0 );
+	assert( fsm->nfaList.length() == 0 );
 
 	/* The old start state may be unreachable. Remove the misfits and turn off
 	 * misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
 StateAp *FsmAp::dupStartState()
@@ -995,14 +1088,17 @@ void FsmAp::checkEpsilonRegularInteraction( const PriorTable &t1, const PriorTab
 {
 	for ( PriorTable::Iter pd1 = t1; pd1.lte(); pd1++ ) {
 		for ( PriorTable::Iter pd2 = t2; pd2.lte(); pd2++ ) {
+			/* Looking for unequal guarded priorities with the same key. */
 			if ( pd1->desc->key == pd2->desc->key ) {
-				if ( pd1->desc->priority < pd2->desc->priority ) {
-					if ( ctx->nfaTermCheck && pd1->desc->guarded )
-						throw PriorInteraction( pd1->desc->guardId );
-				}
-				else if ( pd1->desc->priority > pd2->desc->priority ) {
-					if ( ctx->nfaTermCheck && pd1->desc->guarded )
-						throw PriorInteraction( pd1->desc->guardId );
+				if ( pd1->desc->priority < pd2->desc->priority || 
+						pd1->desc->priority > pd2->desc->priority )
+				{
+					if ( ctx->nfaTermCheck && pd1->desc->guarded ) {
+						if ( ! priorInteraction ) {
+							priorInteraction = true;
+							guardId = pd1->desc->guardId;
+						}
+					}
 				}
 			}
 		}
@@ -1131,9 +1227,74 @@ void FsmAp::mergeStateList( StateAp *destState,
 	for ( int s = 0; s < numSrc; s++ )
 		mergeStates( destState, srcStates[s] );
 }
+			
+void FsmAp::cleanAbortedFill()
+{
+	while ( nfaList.length() > 0 ) {
+		StateAp *state = nfaList.head;
 
+		StateSet *stateSet = &state->stateDictEl->stateSet;
+		//mergeStateList( state, stateSet->data, stateSet->length() );
 
-void FsmAp::fillInStates()
+		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
+			detachStateDict( state, *s );
+
+		nfaList.detach( state );
+	}
+
+	/* Disassociated state dict elements from states. */
+	for ( StateDict::Iter sdi = stateDict; sdi.lte(); sdi++ )
+		sdi->targState->stateDictEl = 0;
+
+	/* Delete all the state dict elements. */
+	stateDict.empty();
+
+	/* Delete all the transitions. */
+	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
+		/* Iterate the out transitions, deleting them. */
+		for ( TransList::Iter n, t = state->outList; t.lte(); ) {
+			n = t.next();
+			if ( t->plain() )
+				delete t->tdap();
+			else
+				delete t->tcap();
+			t = n;
+		}
+		state->outList.abandon();
+	}
+
+	/* Delete all the states. */
+	stateList.empty();
+
+	/* Delete all the transitions. */
+	for ( StateList::Iter state = misfitList; state.lte(); state++ ) {
+		/* Iterate the out transitions, deleting them. */
+		for ( TransList::Iter n, t = state->outList; t.lte(); ) {
+			n = t.next();
+			if ( t->plain() )
+				delete t->tdap();
+			else
+				delete t->tcap();
+			t = n;
+		}
+		state->outList.abandon();
+	}
+
+	/* Delete all the states. */
+	misfitList.empty();
+}
+
+bool FsmAp::overStateLimit()
+{
+	if ( ctx->stateLimit > 0 ) {
+		long states = misfitList.length() + stateList.length();
+		if ( states > ctx->stateLimit )
+			return true;
+	}
+	return false;
+}
+
+FsmRes FsmAp::fillInStates()
 {
 	/* Merge any states that are awaiting merging. This will likey cause other
 	 * states to be added to the NFA list. */
@@ -1147,6 +1308,30 @@ void FsmAp::fillInStates()
 			detachStateDict( state, *s );
 
 		nfaList.detach( state );
+
+		if ( priorInteraction ) {
+			// cout << "aborting due to prior interaction" << endl;
+			cleanAbortedFill();
+			return FsmRes( FsmRes::PriorInteraction(), guardId );
+		}
+
+		if ( overStateLimit() ) {
+			// cout << "aborting due to state limit" << endl;
+			cleanAbortedFill();
+			return FsmRes( FsmRes::TooManyStates() );
+		}
+	}
+
+	if ( priorInteraction ) {
+		// cout << "aborting due to prior interaction" << endl;
+		cleanAbortedFill();
+		return FsmRes( FsmRes::PriorInteraction(), guardId );
+	}
+
+	if ( overStateLimit() ) {
+		// cout << "aborting due to state limit" << endl;
+		cleanAbortedFill();
+		return FsmRes( FsmRes::TooManyStates() );
 	}
 
 	/* The NFA list is empty at this point. There are no state sets we need to
@@ -1158,6 +1343,8 @@ void FsmAp::fillInStates()
 
 	/* Delete all the state dict elements. */
 	stateDict.empty();
+
+	return FsmRes( FsmRes::Fsm(), this );
 }
 
 

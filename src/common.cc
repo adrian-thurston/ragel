@@ -24,6 +24,8 @@
 #include "stdlib.h"
 #include <string.h>
 #include <assert.h>
+#include "ragel.h"
+
 
 HostType hostTypesC[] =
 {
@@ -585,6 +587,6 @@ exit_object endp;
 
 void operator<<( std::ostream &out, exit_object & )
 {
-    out << std::endl;
-    exit(1);
+	out << std::endl;
+	throw AbortCompile( 1 );
 }

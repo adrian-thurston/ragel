@@ -7,6 +7,8 @@ RAGEL       = @RAGEL@
 
 bin_PROGRAMS = ragel
 
+lib_LIBRARIES = libragel.a
+
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 ragel_SOURCES = \
@@ -49,6 +51,10 @@ version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
+nodist_libagel_a_SOURCES = $(nodist_ragel_SOURCES)
+libragel_a_SOURCES = $(ragel_SOURCES) lib.cc
+libragel_a_CPPFLAGS = -Dmain=main_lib -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
+
 EXTRA_DIST = \
 	ragel.lm \
 	rlhc.lm \
@@ -74,7 +80,7 @@ EXTRA_DIST = \
 	rlparse.kh \
 	rlparse.kl
 
-CLEANFILES = parse.c if.h if.cc commit.cc
+CLEANFILES = parse.c if.h if.cc commit.cc rlhc.c
 
 RAGEL_LM = \
 	ragel.lm \
@@ -84,14 +90,20 @@ RAGEL_LM = \
 	ragel-crack.lm
 
 parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM_BINDEP)
-	$(COLM) -c -o $@ -e if.h -x if.cc -m commit.cc $<
+	$(COLM) -c -b rlparse_object -o $@ -e if.h -x if.cc -m commit.cc $<
 
 # These are necessary because we are not using built sources. They create the
-# dependency on the colm run for the objects that that require its output.
+# dependency on the colm run for the objects that that require its output. Must
+# create them for every target.
 ragel-if.$(OBJEXT): parse.c
 ragel-load.$(OBJEXT): parse.c
 ragel-commit.$(OBJEXT): parse.c
 ragel-reducer.$(OBJEXT): parse.c
+
+libragel_a-if.$(OBJEXT): parse.c
+libragel_a-load.$(OBJEXT): parse.c
+libragel_a-commit.$(OBJEXT): parse.c
+libragel_a-reducer.$(OBJEXT): parse.c
 
 RLHC = \
 	rlhc-host.lm \

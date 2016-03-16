@@ -92,37 +92,54 @@ Cmd: str = A->value
 # colm program is called.
 A = argv->pop_head_el()
 FileName: str = A->value
-Stream: stream = open( FileName, "r" )
 
 # Language.
 A = argv->pop_head_el()
 Lang = A->value
 
-if ( Cmd == 'import' ) {
+if ( Cmd == 'import-file' ) {
+	Stream: stream = open( FileName, "r" )
 	RagelTree = parse start[ Stream ]
 	RagelError = error
 	RagelImport = import( FileName, RagelTree )
 }
-else if ( Cmd == 'load' ) {
+else if ( Cmd == 'parse-file' ) {
+	Stream: stream = open( FileName, "r" )
 	RagelTree = parse start[ Stream ]
 	RagelError = error
 }
-else if ( Cmd == 'string' ) {
-	# The string to parse.
+else if ( Cmd == 'include-reduce-file' ) {
+	Stream: stream = open( FileName, "r" )
+	reduce IncludePass start[ Stream ]
+	if error
+		send stderr "[error]
+}
+else if ( Cmd == 'include-reduce-str' ) {
+	A = argv->pop_head_el()
+	Data: str = A->value
+	reduce IncludePass start[ Data ]
+	if error
+		send stderr "[error]
+}
+else if ( Cmd == 'toplevel-reduce-file' ) {
+	Stream: stream = open( FileName, "r" )
+	reduce TopLevel start[ Stream ]
+}
+else if ( Cmd == 'toplevel-reduce-str' ) {
 	A = argv->pop_head_el()
 	Data: str = A->value
 	reduce TopLevel start[ Data ]
 }
-else if ( Cmd == 'reduce' ) {
-	reduce TopLevel start[ Stream ]
-}
-else if ( Cmd == 'section' ) {
+else if ( Cmd == 'section-reduce-file' ) {
+	Stream: stream = open( FileName, "r" )
 	reduce SectionPass start[ Stream ]
 	if error
 		send stderr "[error]
 }
-else if ( Cmd == 'include' ) {
-	reduce IncludePass start[ Stream ]
+else if ( Cmd == 'section-reduce-str' ) {
+	A = argv->pop_head_el()
+	Data: str = A->value
+	reduce SectionPass start[ Data ]
 	if error
 		send stderr "[error]
 }

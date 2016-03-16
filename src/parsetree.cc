@@ -21,6 +21,7 @@
 
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -123,19 +124,21 @@ Key *prepareHexString( ParseData *pd, const InputLoc &loc, const char *data, lon
 	return dest;
 }
 
-FsmAp *VarDef::walk( ParseData *pd )
+FsmRes VarDef::walk( ParseData *pd )
 {
 	/* We enter into a new name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
 
 	/* Recurse on the expression. */
-	FsmAp *rtnVal = machineDef->walk( pd );
+	FsmRes rtnVal = machineDef->walk( pd );
+	if ( !rtnVal.success() )
+		return rtnVal;
 	
 	/* Do the tranfer of local error actions. */
 	LocalErrDictEl *localErrDictEl = pd->localErrDict.find( name );
 	if ( localErrDictEl != 0 ) {
-		for ( StateList::Iter state = rtnVal->stateList; state.lte(); state++ )
-			rtnVal->transferErrorActions( state, localErrDictEl->value );
+		for ( StateList::Iter state = rtnVal.fsm->stateList; state.lte(); state++ )
+			rtnVal.fsm->transferErrorActions( state, localErrDictEl->value );
 	}
 
 	/* If the expression below is a join operation with multiple expressions
@@ -144,16 +147,18 @@ FsmAp *VarDef::walk( ParseData *pd )
 	if ( machineDef->type == MachineDef::JoinType &&
 			machineDef->join->exprList.length() == 1 )
 	{
-		rtnVal->epsilonOp();
+		rtnVal = FsmAp::epsilonOp( rtnVal.fsm );
+		if ( !rtnVal.success() )
+			return rtnVal;
 	}
 
 	/* We can now unset entry points that are not longer used. */
-	pd->unsetObsoleteEntries( rtnVal );
+	pd->unsetObsoleteEntries( rtnVal.fsm );
 
 	/* If the name of the variable is referenced then add the entry point to
 	 * the graph. */
 	if ( pd->curNameInst->numRefs > 0 )
-		rtnVal->setEntry( pd->curNameInst->id, rtnVal->startState );
+		rtnVal.fsm->setEntry( pd->curNameInst->id, rtnVal.fsm->startState );
 
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );
@@ -437,7 +442,8 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	}
 
 	/* The actions executed on starting to match a token. */
-	graph->isolateStartState();
+	FsmRes res = FsmAp::isolateStartState( graph );
+	graph = res.fsm;
 	graph->startState->toStateActionTable.setAction( pd->initTokStartOrd, pd->initTokStart );
 	graph->startState->fromStateActionTable.setAction( pd->setTokStartOrd, pd->setTokStart );
 	if ( maxItemSetLength > 1 ) {
@@ -635,7 +641,7 @@ void LongestMatch::transferScannerLeavingActions( FsmAp *graph )
 	}
 }
 
-FsmAp *LongestMatch::walk( ParseData *pd )
+FsmRes LongestMatch::walk( ParseData *pd )
 {
 	/* The longest match has it's own name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
@@ -645,7 +651,11 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 	LmPartList::Iter lmi = *longestMatchList; 
 	for ( int i = 0; lmi.lte(); lmi++, i++ ) {
 		/* Create the machine and embed the setting of the longest match id. */
-		parts[i] = lmi->join->walk( pd );
+		FsmRes res = lmi->join->walk( pd );
+		if ( !res.success() )
+			return res;
+
+		parts[i] = res.fsm;
 		parts[i]->longMatchAction( pd->curActionOrd++, lmi );
 	}
 
@@ -658,67 +668,84 @@ FsmAp *LongestMatch::walk( ParseData *pd )
 
 	/* Union machines one and up with machine zero. The grammar dictates that
 	 * there will always be at least one part. */
-	FsmAp *rtnVal = parts[0];
+	FsmRes res( FsmRes::Fsm(), parts[0] );
 	for ( int i = 1; i < longestMatchList->length(); i++ ) {
-		rtnVal->unionOp( parts[i] );
-		afterOpMinimize( rtnVal );
+		res = FsmAp::unionOp( res.fsm, parts[i] );
+		if ( !res.success() )
+			return res;
+
+		afterOpMinimize( res.fsm );
 	}
 
-	runLongestMatch( pd, rtnVal );
+	runLongestMatch( pd, res.fsm );
 
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );
 
 	delete[] parts;
-	return rtnVal;
+	return res;
 }
 
-void NfaUnion::condsDensity( ParseData *pd, StateAp *state, long depth )
+NfaUnion::~NfaUnion()
 {
-	/* Nothing to do if the state is already on the list. */
-	if ( state->stateBits & STB_ONLIST )
-		return;
+	for ( TermVect::Iter term = terms; term.lte(); term++ )
+		delete *term;
+	if ( roundsList != 0 )
+		delete roundsList;
+}
 
-	if ( depth > pd->id->nfaCondsDepth )
-		return;
+void nfaResultWrite( ostream &out, long code, long id, const char *scode )
+{
+	out << code << " " << id << " " << scode << endl;
+}
 
-	/* Doing depth first, put state on the list. */
-	state->stateBits |= STB_ONLIST;
+void nfaCheckResult( ParseData *pd, long code, long id, const char *scode )
+{
+	stringstream out;
+	nfaResultWrite( out, code, id, scode );
+	pd->id->comm = out.str();
+}
 
-	/* Recurse on everything ranges. */
-	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		if ( trans->plain() ) {
-			if ( trans->tdap()->toState != 0 ) {
-				condsDensity( pd, trans->tdap()->toState, depth + 1 );
+void reportAnalysisResult( ParseData *pd, FsmRes &res )
+{
+	if ( res.type == FsmRes::TypeAnalysisOk )
+		nfaCheckResult( pd, 0, 0, "OK" );
+
+	else if ( res.type == FsmRes::TypeTooManyStates )
+		nfaCheckResult( pd, 1, 0, "too-many-states" );
+
+	else if ( res.type == FsmRes::TypeCondCostTooHigh )
+		nfaCheckResult( pd, 20, res.id, "cond-cost" );
+
+	else if ( res.type == FsmRes::TypePriorInteraction )
+		nfaCheckResult( pd, 60, res.id, "prior-interaction" );
+
+	else if ( res.type == FsmRes::TypeRepetitionError )
+		nfaCheckResult( pd, 2, 0, "rep-error" );
+
+	else if ( res.type == FsmRes::TypeBreadthCheck )
+	{
+		BreadthResult *breadth = res.breadth;
+		stringstream out;
+
+		nfaResultWrite( out, 21, 1, "OK" );
+
+		out << std::fixed << std::setprecision(0);
+
+		if ( breadth->start > 0.01 ) {
+			for ( Vector<BreadthCost>::Iter c = breadth->costs; c.lte(); c++ ) {
+				out << "COST " << c->name << " " <<
+						( 1000000.0 * breadth->start ) << " " << 
+						( 1000000.0 * ( c->cost / breadth->start ) ) << endl;
 			}
 		}
-		else {
-			for ( CondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
-				if ( (*csi)->costMark ) {
-					throw CondCostTooHigh( (*csi)->costId );
-				}
-			}
-			
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-				if ( cond->toState != 0 )
-					condsDensity( pd, cond->toState, depth + 1 );
-			}
-		}
-	}
 
-	if ( state->nfaOut != 0 ) {
-		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
-			/* We do not increment depth here since this is an epsilon transition. */
-			condsDensity( pd, n->toState, depth );
-		}
-	}
-
-	for ( ActionTable::Iter a = state->fromStateActionTable; a.lte(); a++ ) {
-		if ( a->value->costMark )
-			throw CondCostTooHigh( a->value->costId );
+		pd->id->comm = out.str();
 	}
 }
 
+
+/* Currently unused. Histogram-based cost analysis much more useful. */
 void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, long depth )
 {
 	/* Nothing to do if the state is already on the list. */
@@ -752,57 +779,233 @@ void NfaUnion::transSpan( ParseData *pd, StateAp *state, long long &density, lon
 	}
 }
 
-bool NfaUnion::strike( ParseData *pd, FsmAp *fsmAp )
+FsmRes NfaUnion::nfaTermCheck( ParseData *pd )
+{
+	TermVect::Iter term = terms;
+
+	/* With nfaTermCheck on we have the possibility of a prior interaction. */
+	pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
+	FsmRes res = (*term)->walk( pd );
+	pd->fsmCtx->stateLimit = -1;
+
+	if ( !res.success() )
+		return res;
+
+	delete res.fsm;
+
+	return FsmRes( FsmRes::AnalysisOk() );
+}
+
+
+FsmRes NfaUnion::condCostFromState( ParseData *pd, FsmAp *fsm, StateAp *state, long depth )
+{
+	/* Nothing to do if the state is already on the list. */
+	if ( state->stateBits & STB_ONLIST )
+		return FsmRes( FsmRes::Fsm(), fsm );
+
+	if ( depth > pd->id->nfaCondsDepth )
+		return FsmRes( FsmRes::Fsm(), fsm );
+
+	/* Doing depth first, put state on the list. */
+	state->stateBits |= STB_ONLIST;
+
+	/* Recurse on everything ranges. */
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 ) {
+				FsmRes res = condCostFromState( pd, fsm, trans->tdap()->toState, depth + 1 );
+				if ( !res.success() )
+					return res;
+			}
+		}
+		else {
+			for ( CondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
+				if ( (*csi)->costMark )
+					return FsmRes( FsmRes::CondCostTooHigh(), (*csi)->costId );
+			}
+			
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 ) {
+					FsmRes res = condCostFromState( pd, fsm, cond->toState, depth + 1 );
+					if ( !res.success() )
+						return res;
+				}
+			}
+		}
+	}
+
+	if ( state->nfaOut != 0 ) {
+		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
+			/* We do not increment depth here since this is an epsilon transition. */
+			FsmRes res = condCostFromState( pd, fsm, n->toState, depth );
+			if ( !res.success() )
+				return res;
+		}
+	}
+
+	for ( ActionTable::Iter a = state->fromStateActionTable; a.lte(); a++ ) {
+		if ( a->value->costMark )
+			return FsmRes( FsmRes::CondCostTooHigh(), a->value->costId );
+	}
+
+	return FsmRes( FsmRes::Fsm(), fsm );
+}
+
+
+/* Returns either success (using supplied fsm, or some error condition. Does
+ * not delete the fsm (under any condition). */
+FsmRes NfaUnion::condCostSearch( ParseData *pd, FsmAp *fsmAp )
 {
 	/* Init on state list flags. */
 	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
 		st->stateBits &= ~STB_ONLIST;
 
-	condsDensity( pd, fsmAp->startState, 1 );
-
-	return true;
+	return condCostFromState( pd, fsmAp, fsmAp->startState, 1 );
 }
 
-void ParseData::nfaTermCheckKleeneZero()
+/* This is the first pass check. It looks for state (limit times 2 ) or
+ * condition cost. We use this to expand generalized repetition to past the nfa
+  union choice point. */
+FsmRes NfaUnion::nfaCondsCheck( ParseData *pd )
 {
-	throw RepetitionError();
+	TermVect::Iter term = terms;
+
+	pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit * 2;
+	FsmRes res = (*term)->walk( pd );
+	pd->fsmCtx->stateLimit = -1;
+
+	if ( !res.success() )
+		return res;
+
+	FsmRes costRes = condCostSearch( pd, res.fsm );
+
+	/* Unlike other funcs, have to delete this regardless. Analysis either
+	 * returns fsm or some error, but does not currently remove it. This needs
+	 * cleanup */
+	delete res.fsm;
+
+	if ( !costRes.success() )
+		return costRes;
+
+	return FsmRes( FsmRes::AnalysisOk() );
 }
 
-void ParseData::nfaTermCheckMinZero()
+
+/*
+ * This algorithm assigns a price to each state visit, then adds that to a
+ * running total. Note that we do not guard against multiple visits to a state,
+ * since we are estimating runtime cost.
+ *
+ * We rely on a character histogram and are looking for a probability of being
+ * in any given state, given that histogram, simple and very effective.
+ */
+void NfaUnion::breadthFromState( ParseData *pd, FsmAp *fsm, StateAp *state,
+		long depth, int maxDepth, double stateScore, double &total )
 {
-	throw RepetitionError();
+	if ( depth > maxDepth )
+		return;
+	
+	/* Recurse on everything ranges. */
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		/* Compute target state score. */
+		double span = 0;
+		for ( int i = trans->lowKey.getVal(); i <= trans->highKey.getVal(); i++ )
+			span += pd->id->histogram[i];
+
+		double targetStateScore = stateScore * ( span );
+
+		/* Add to the level. */
+		total += targetStateScore;
+
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 ) {
+				breadthFromState( pd, fsm, trans->tdap()->toState,
+						depth + 1, maxDepth, targetStateScore, total );
+			}
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 ) {
+					breadthFromState( pd, fsm, cond->toState,
+							depth + 1, maxDepth, targetStateScore, total );
+				}
+			}
+		}
+	}
+
+	if ( state->nfaOut != 0 ) {
+		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
+			/* We do not increment depth here since this is an epsilon transition. */
+			breadthFromState( pd, fsm, n->toState, depth, maxDepth, stateScore, total );
+		}
+	}
 }
 
-void ParseData::nfaTermCheckPlusZero()
+double NfaUnion::breadthFromEntry( ParseData *pd, FsmAp *fsm, StateAp *state )
 {
-	throw RepetitionError();
+	const int maxDepth = 5;
+	double total = 0;
+	breadthFromState( pd, fsm, state, 1, maxDepth, 1.0, total );
+	return total;
 }
 
-void ParseData::nfaTermCheckRepZero()
+/* Always returns the breadth check result. Will not consume the fsm. */
+FsmRes NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 {
-	throw RepetitionError();
+	double start = breadthFromEntry( pd, fsm, fsm->startState );
+
+	BreadthResult *breadth = new BreadthResult( start );
+	
+	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
+		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
+			if ( mel->key == c->entryId ) {
+				double cost = breadthFromEntry( pd, fsm, mel->value );
+
+				breadth->costs.append( BreadthCost( c->name, cost ) );
+			}
+		}
+	}
+
+	return FsmRes( FsmRes::BreadthCheck(), breadth );
 }
 
-void ParseData::nfaTermCheckZeroReps()
+FsmRes NfaUnion::nfaBreadthCheck( ParseData *pd )
 {
-	throw RepetitionError();
+	TermVect::Iter term = terms;
+	
+	/* No need for state limit here since this check is used after all
+	 * others pass. One check only and . */
+	FsmRes res = (*term)->walk( pd );
+	if ( !res.success() )
+		return res;
+
+	FsmRes breadthRes = checkBreadth( pd, res.fsm );
+
+	/* Always delete here. The analysis doesn't do it regardless of the result. */
+	delete res.fsm;
+
+	return breadthRes;
 }
 
-FsmAp *NfaUnion::walk( ParseData *pd )
+
+FsmRes NfaUnion::walk( ParseData *pd )
 {
 	if ( pd->id->nfaTermCheck ) {
-		/* Does not return. */
-		nfaTermCheck( pd );
+		FsmRes res = nfaTermCheck( pd );
+		reportAnalysisResult( pd, res );
+		return FsmRes( FsmRes::Aborted() );
 	}
 
 	if ( pd->id->nfaCondsDepth >= 0 ) {
-		/* Does not return. */
-		nfaCondsCheck( pd );
+		FsmRes res = nfaCondsCheck( pd );
+		reportAnalysisResult( pd, res );
+		return FsmRes( FsmRes::Aborted() );
 	}
 
 	if ( pd->id->nfaBreadthCheck ) {
-		/* Does not return. */
-		nfaBreadthCheck( pd );
+		FsmRes res = nfaBreadthCheck( pd );
+		reportAnalysisResult( pd, res );
+		return FsmRes( FsmRes::Aborted() );
 	}
 
 	if ( pd->id->printStatistics )
@@ -813,7 +1016,8 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	long numTerms = 0, sumPlain = 0, sumMin = 0;
 	FsmAp **machines = new FsmAp*[terms.length()];
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		machines[numTerms] = (*term)->walk( pd );
+		FsmRes res = (*term)->walk( pd );
+		machines[numTerms] = res.fsm;
 
 		sumPlain += machines[numTerms]->stateList.length();
 
@@ -852,7 +1056,8 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 				amount = numTerms - start;
 
 			FsmAp **others = machines + start + 1;
-			machines[start]->nfaUnionOp( others, (amount - 1), r->depth );
+			FsmRes res = FsmAp::nfaUnionOp( machines[start], others, (amount - 1), r->depth );
+			machines[start] = res.fsm;
 
 			start += amount;
 			numGroups++;
@@ -877,170 +1082,7 @@ FsmAp *NfaUnion::walk( ParseData *pd )
 	}
 
 	FsmAp *ret = machines[0];
-	return ret;
-}
-
-NfaUnion::~NfaUnion()
-{
-	
-}
-
-void nfaCheckResult( long code, long id, const char *scode, bool suppressExit = false )
-{
-	cout << code << " " << id << " " << scode << endl;
-	if ( !suppressExit )
-		exit( code );
-}
-
-/* This is the first pass check. It looks for state (limit times 2 ) or
- * condition cost. We use this to expand generalized repetition to past the nfa
-  union choice point. */
-void NfaUnion::nfaCondsCheck( ParseData *pd )
-{
-	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		FsmAp *fsm = 0;
-		try {
-			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit * 2;
-			fsm = (*term)->walk( pd );
-			pd->fsmCtx->stateLimit = -1;
-
-			strike( pd, fsm );
-		}
-		catch ( const TooManyStates & ) {
-			nfaCheckResult( 1, 0, "too-many-states" );
-		}
-		catch ( const CondCostTooHigh &ccth ) {
-			nfaCheckResult( 20, ccth.costId, "cond-cost" );
-		}
-		catch ( const RepetitionError & ) {
-			nfaCheckResult( 2, 0, "rep-error" );
-		}
-	}
-
-	nfaCheckResult( 0, 0, "OK" );
-}
-
-
-void NfaUnion::nfaTermCheck( ParseData *pd )
-{
-	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		try {
-			pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
-			(*term)->walk( pd );
-			pd->fsmCtx->stateLimit = -1;
-		}
-		catch ( const TooManyStates & ) {
-			nfaCheckResult( 1, 0, "too-many-states" );
-		}
-		catch ( const PriorInteraction &pi ) {
-			nfaCheckResult( 60, pi.id, "prior-interaction" );
-		}
-		catch ( const RepetitionError & ) {
-			nfaCheckResult( 2, 0, "rep-error" );
-		}
-	}
-
-	nfaCheckResult( 0, 0, "OK" );
-}
-
-/*
- * This algorithm assigns a price to each state visit, then adds that to a
- * running total. Note that we do not guard against multiple visits to a state,
- * since we are estimating runtime cost.
- *
- * We rely on a character histogram and are looking for a probability of being
- * in any given state, given that histogram, simple and very effective.
- */
-void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
-		long depth, int maxDepth, double stateScore, double &total )
-{
-	if ( depth > maxDepth )
-		return;
-	
-	/* Recurse on everything ranges. */
-	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		/* Compute target state score. */
-		double span = 0;
-		for ( int i = trans->lowKey.getVal(); i <= trans->highKey.getVal(); i++ )
-			span += pd->id->histogram[i];
-
-		double targetStateScore = stateScore * ( span );
-
-		/* Add to the level. */
-		total += targetStateScore;
-
-		if ( trans->plain() ) {
-			if ( trans->tdap()->toState != 0 ) {
-				checkBreadth( pd, fsm, trans->tdap()->toState,
-						depth + 1, maxDepth, targetStateScore, total );
-			}
-		}
-		else {
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-				if ( cond->toState != 0 ) {
-					checkBreadth( pd, fsm, cond->toState,
-							depth + 1, maxDepth, targetStateScore, total );
-				}
-			}
-		}
-	}
-
-	if ( state->nfaOut != 0 ) {
-		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
-			/* We do not increment depth here since this is an epsilon transition. */
-			checkBreadth( pd, fsm, n->toState, depth, maxDepth, stateScore, total );
-		}
-	}
-}
-
-double NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state )
-{
-	const int maxDepth = 5;
-	double total = 0;
-	checkBreadth( pd, fsm, state, 1, maxDepth, 1.0, total );
-	return total;
-}
-
-void NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
-{
-	int exitCode = 21;
-	double total = checkBreadth( pd, fsm, fsm->startState );
-
-	/* Suppress exit with this call. We need to perform the score checks after. */
-	nfaCheckResult( exitCode, 1, "OK", true );
-
-	cout << std::fixed << std::setprecision(0);
-	double start = total;
-	
-	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
-		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
-			if ( mel->key == c->entryId ) {
-				total = checkBreadth( pd, fsm, mel->value );
-
-				if ( start > 0.01 ) {
-					cout << "COST " << c->name << " " <<
-							( 1000000.0 * start ) << " " << 
-							( 1000000.0 * ( total / start ) ) << endl;
-				}
-			}
-		}
-	}
-
-	exit( exitCode );
-}
-
-void NfaUnion::nfaBreadthCheck( ParseData *pd )
-{
-	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
-		FsmAp *fsm = 0;
-
-		/* No need for state limit here since this check is used after all
-		 * others pass. One check only and . */
-		fsm = (*term)->walk( pd );
-		checkBreadth( pd, fsm );
-	}
-
-	nfaCheckResult( 0, 0, "OK" );
+	return FsmRes( FsmRes::Fsm(), ret );
 }
 
 void NfaUnion::makeNameTree( ParseData *pd )
@@ -1055,26 +1097,20 @@ void NfaUnion::resolveNameRefs( ParseData *pd )
 		(*term)->resolveNameRefs( pd );
 }
 
-FsmAp *MachineDef::walk( ParseData *pd )
+FsmRes MachineDef::walk( ParseData *pd )
 {
-	FsmAp *rtnVal = 0;
 	switch ( type ) {
 	case JoinType:
-		rtnVal = join->walk( pd );
-		break;
+		return join->walk( pd );
 	case LongestMatchType:
-		rtnVal = longestMatch->walk( pd );
-		break;
+		return longestMatch->walk( pd );
 	case LengthDefType:
 		/* Towards lengths. */
-		rtnVal = new FsmAp( pd->fsmCtx );
-		rtnVal->lambdaFsm();
-		break;
+		return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( pd->fsmCtx ) );
 	case NfaUnionType:
-		rtnVal = nfaUnion->walk( pd );
-		break;
+		return nfaUnion->walk( pd );
 	}
-	return rtnVal;
+	return FsmRes( FsmRes::Aborted() );
 }
 
 void MachineDef::makeNameTree( ParseData *pd )
@@ -1138,16 +1174,16 @@ Join::Join( Expression *expr )
 }
 
 /* Walk an expression node. */
-FsmAp *Join::walk( ParseData *pd )
+FsmRes Join::walk( ParseData *pd )
 {
-	if ( exprList.length() > 1 )
-		return walkJoin( pd );
-	else
+	if ( exprList.length() == 1 )
 		return exprList.head->walk( pd );
+
+	return walkJoin( pd );
 }
 
 /* There is a list of expressions to join. */
-FsmAp *Join::walkJoin( ParseData *pd )
+FsmRes Join::walkJoin( ParseData *pd )
 {
 	/* We enter into a new name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
@@ -1155,8 +1191,12 @@ FsmAp *Join::walkJoin( ParseData *pd )
 	/* Evaluate the machines. */
 	FsmAp **fsms = new FsmAp*[exprList.length()];
 	ExprList::Iter expr = exprList;
-	for ( int e = 0; e < exprList.length(); e++, expr++ )
-		fsms[e] = expr->walk( pd );
+	for ( int e = 0; e < exprList.length(); e++, expr++ ) {
+		FsmRes res = expr->walk( pd );
+		if ( !res.success() )
+			return res;
+		fsms[e] = res.fsm;
+	}
 	
 	/* Get the start and final names. Final is 
 	 * guaranteed to exist, start is not. */
@@ -1177,17 +1217,18 @@ FsmAp *Join::walkJoin( ParseData *pd )
 		finalId = finalName->id;
 
 	/* Join machines 1 and up onto machine 0. */
-	FsmAp *retFsm = fsms[0];
-	retFsm->joinOp( startId, finalId, fsms+1, exprList.length()-1 );
+	FsmRes res = FsmAp::joinOp( fsms[0], startId, finalId, fsms+1, exprList.length()-1 );
+	if ( !res.success() )
+		return res;
 
 	/* We can now unset entry points that are not longer used. */
-	pd->unsetObsoleteEntries( retFsm );
+	pd->unsetObsoleteEntries( res.fsm );
 
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );
 
 	delete[] fsms;
-	return retFsm;
+	return res;
 }
 
 void Join::makeNameTree( ParseData *pd )
@@ -1267,69 +1308,108 @@ Expression::~Expression()
 }
 
 /* Evaluate a single expression node. */
-FsmAp *Expression::walk( ParseData *pd, bool lastInSeq )
+FsmRes Expression::walk( ParseData *pd, bool lastInSeq )
 {
-	FsmAp *rtnVal = 0;
 	switch ( type ) {
 		case OrType: {
 			/* Evaluate the expression. */
-			rtnVal = expression->walk( pd, false );
+			FsmRes exprFsm = expression->walk( pd, false );
+			if ( !exprFsm.success() )
+				return exprFsm;
+
 			/* Evaluate the term. */
-			FsmAp *rhs = term->walk( pd );
+			FsmRes rhs = term->walk( pd );
+			if ( !rhs.success() )
+				return rhs;
+
 			/* Perform union. */
-			rtnVal->unionOp( rhs );
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::unionOp( exprFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+
+			return res;
 		}
 		case IntersectType: {
 			/* Evaluate the expression. */
-			rtnVal = expression->walk( pd );
+			FsmRes exprFsm = expression->walk( pd );
+			if ( !exprFsm.success() )
+				return exprFsm;
+
 			/* Evaluate the term. */
-			FsmAp *rhs = term->walk( pd );
+			FsmRes rhs = term->walk( pd );
+			if ( !rhs.success() )
+				return rhs;
+
 			/* Perform intersection. */
-			rtnVal->intersectOp( rhs );
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::intersectOp( exprFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res;
 		}
 		case SubtractType: {
 			/* Evaluate the expression. */
-			rtnVal = expression->walk( pd );
+			FsmRes exprFsm = expression->walk( pd );
+			if ( !exprFsm.success() )
+				return exprFsm;
+
 			/* Evaluate the term. */
-			FsmAp *rhs = term->walk( pd );
+			FsmRes rhs = term->walk( pd );
+			if ( !rhs.success() )
+				return rhs;
+
 			/* Perform subtraction. */
-			rtnVal->subtractOp( rhs );
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::subtractOp( exprFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res;
 		}
 		case StrongSubtractType: {
 			/* Evaluate the expression. */
-			rtnVal = expression->walk( pd );
+			FsmRes exprFsm = expression->walk( pd );
+			if ( !exprFsm.success() )
+				return exprFsm;
+
+			FsmAp *leadAnyStar = dotStarFsm( pd );
+			FsmAp *trailAnyStar = dotStarFsm( pd );
 
 			/* Evaluate the term and pad it with any* machines. */
-			FsmAp *rhs = dotStarFsm( pd );
-			FsmAp *termFsm = term->walk( pd );
-			FsmAp *trailAnyStar = dotStarFsm( pd );
-			rhs->concatOp( termFsm );
-			rhs->concatOp( trailAnyStar );
+			FsmRes termFsm = term->walk( pd );
+			if ( !termFsm.success() )
+				return termFsm;
+
+			FsmRes res1 = FsmAp::concatOp( leadAnyStar, termFsm.fsm );
+			if ( !res1.success() )
+				return res1;
+
+			FsmRes res2 = FsmAp::concatOp( res1.fsm, trailAnyStar );
+			if ( !res2.success() )
+				return res2;
 
 			/* Perform subtraction. */
-			rtnVal->subtractOp( rhs );
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res3 = FsmAp::subtractOp( exprFsm.fsm, res2.fsm );
+			if ( !res3.success() )
+				return res3;
+
+			afterOpMinimize( res3.fsm, lastInSeq );
+			return res3;
 		}
 		case TermType: {
 			/* Return result of the term. */
-			rtnVal = term->walk( pd );
-			break;
+			return term->walk( pd );
 		}
 		case BuiltinType: {
-			/* Duplicate the builtin. */
-			rtnVal = makeBuiltin( builtin, pd );
-			break;
+			/* Construct the builtin. */
+			return FsmRes( FsmRes::Fsm(), makeBuiltin( builtin, pd ) );
 		}
 	}
 
-	return rtnVal;
+	return FsmRes( FsmRes::Aborted() );
 }
 
 void Expression::makeNameTree( ParseData *pd )
@@ -1378,89 +1458,123 @@ Term::~Term()
 }
 
 /* Evaluate a term node. */
-FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
+FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 {
-	FsmAp *rtnVal = 0;
 	switch ( type ) {
 		case ConcatType: {
 			/* Evaluate the Term. */
-			rtnVal = term->walk( pd, false );
+			FsmRes termFsm = term->walk( pd, false );
+			if ( !termFsm.success() )
+				return termFsm;
+
 			/* Evaluate the FactorWithRep. */
-			FsmAp *rhs = factorWithAug->walk( pd );
+			FsmRes rhs = factorWithAug->walk( pd );
+			if ( !rhs.success() ) {
+				delete termFsm.fsm;
+				return rhs;
+			}
+
 			/* Perform concatenation. */
-			rtnVal->concatOp( rhs );
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res;
 		}
 		case RightStartType: {
 			/* Evaluate the Term. */
-			rtnVal = term->walk( pd );
+			FsmRes termFsm = term->walk( pd );
+			if ( !termFsm.success() )
+				return termFsm;
 
 			/* Evaluate the FactorWithRep. */
-			FsmAp *rhs = factorWithAug->walk( pd );
+			FsmRes rhs = factorWithAug->walk( pd );
+			if ( !rhs.success() ) {
+				delete termFsm.fsm;
+				return rhs;
+			}
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * lower priority where as the right get the higher start priority. */
 			priorDescs[0].key = pd->nextPriorKey++;
 			priorDescs[0].priority = 0;
-			rtnVal->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+			termFsm.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
 
 			/* The start transitions of the right machine gets the higher
 			 * priority. Use the same unique key. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 1;
-			rhs->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+			rhs.fsm->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
-			rtnVal->concatOp( rhs );
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res;
 		}
 		case RightFinishType: {
 			/* Evaluate the Term. */
-			rtnVal = term->walk( pd );
+			FsmRes termFsm = term->walk( pd );
+			if ( !termFsm.success() )
+				return termFsm;
 
 			/* Evaluate the FactorWithRep. */
-			FsmAp *rhs = factorWithAug->walk( pd );
+			FsmRes rhs = factorWithAug->walk( pd );
+			if ( !rhs.success() ) {
+				delete termFsm.fsm;
+				return rhs;
+			}
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * lower priority where as the finishing transitions to the right
 			 * get the higher priority. */
 			priorDescs[0].key = pd->nextPriorKey++;
 			priorDescs[0].priority = 0;
-			rtnVal->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+			termFsm.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
 
 			/* The finishing transitions of the right machine get the higher
 			 * priority. Use the same unique key. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 1;
-			rhs->finishFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+			rhs.fsm->finishFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 			/* If the right machine's start state is final we need to guard
 			 * against the left machine persisting by moving through the empty
 			 * string. */
-			if ( rhs->startState->isFinState() ) {
-				rhs->startState->outPriorTable.setPrior( 
+			if ( rhs.fsm->startState->isFinState() ) {
+				rhs.fsm->startState->outPriorTable.setPrior( 
 						pd->curPriorOrd++, &priorDescs[1] );
 			}
 
 			/* Perform concatenation. */
-			rtnVal->concatOp( rhs );
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			if ( !res.success() ) 
+				return res;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res;
 		}
 		case LeftType: {
 			/* Evaluate the Term. */
-			rtnVal = term->walk( pd );
+			FsmRes termFsm = term->walk( pd );
+			if ( !termFsm.success() )
+				return termFsm;
 
 			/* Evaluate the FactorWithRep. */
-			FsmAp *rhs = factorWithAug->walk( pd );
+			FsmRes rhs = factorWithAug->walk( pd );
+			if ( !rhs.success() ) {
+				delete termFsm.fsm;
+				return rhs;
+			}
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * higher priority. */
 			priorDescs[0].key = pd->nextPriorKey++;
 			priorDescs[0].priority = 1;
-			rtnVal->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+			termFsm.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
 
 			/* The right machine gets the lower priority. We cannot use
 			 * allTransPrior here in case the start state of the right machine
@@ -1469,19 +1583,21 @@ FsmAp *Term::walk( ParseData *pd, bool lastInSeq )
 			 * startFsmPrior prevents this. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 0;
-			rhs->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+			rhs.fsm->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
-			rtnVal->concatOp( rhs );
-			afterOpMinimize( rtnVal, lastInSeq );
-			break;
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm, lastInSeq );
+			return res;
 		}
 		case FactorWithAugType: {
-			rtnVal = factorWithAug->walk( pd );
-			break;
+			return factorWithAug->walk( pd );
 		}
 	}
-	return rtnVal;
+	return FsmRes( FsmRes::Aborted() );
 }
 
 void Term::makeNameTree( ParseData *pd )
@@ -1716,9 +1832,8 @@ void FactorWithAug::assignConditions( FsmAp *graph )
 	}
 }
 
-
 /* Evaluate a factor with augmentation node. */
-FsmAp *FactorWithAug::walk( ParseData *pd )
+FsmRes FactorWithAug::walk( ParseData *pd )
 {
 	/* Enter into the scopes created for the labels. */
 	NameFrame nameFrame = pd->enterNameScope( false, labels.length() );
@@ -1741,7 +1856,13 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 	}
 
 	/* Evaluate the factor with repetition. */
-	FsmAp *rtnVal = factorWithRep->walk( pd );
+	FsmRes factorTree = factorWithRep->walk( pd );
+	if ( !factorTree.success() ) {
+		delete [] actionOrd;
+		return factorTree;
+	}
+
+	FsmAp *rtnVal = factorTree.fsm;
 
 	/* Compute the remaining action orderings. */
 	for ( int i = 0; i < actions.length(); i++ ) {
@@ -1828,7 +1949,7 @@ FsmAp *FactorWithAug::walk( ParseData *pd )
 		delete[] priorOrd;
 	if ( actionOrd != 0 )
 		delete[] actionOrd;	
-	return rtnVal;
+	return FsmRes( FsmRes::Fsm(), rtnVal );
 }
 
 void FactorWithAug::makeNameTree( ParseData *pd )
@@ -1977,32 +2098,46 @@ void Factor::condCost( Action *action )
 }
 
 /* Evaluate a factor with repetition node. */
-FsmAp *FactorWithRep::walk( ParseData *pd )
+FsmRes FactorWithRep::walk( ParseData *pd )
 {
-	FsmAp *retFsm = 0;
-
 	switch ( type ) {
 	case StarType: {
 		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
-		if ( retFsm->startState->isFinState() ) {
-			pd->nfaTermCheckKleeneZero();
+		FsmRes factorTree = factorWithRep->walk( pd );
+		if ( !factorTree.success() )
+			return factorTree;
+		
+		if ( factorTree.fsm->startState->isFinState() ) {
+			if ( pd->id->inLibRagel ) {
+				delete factorTree.fsm;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
-			retFsm->unsetFinState( retFsm->startState );
+			factorTree.fsm->unsetFinState( factorTree.fsm->startState );
 		}
 
 		/* Shift over the start action orders then do the kleene star. */
-		pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
-		retFsm->starOp( );
-		afterOpMinimize( retFsm );
-		break;
+		pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
+
+		FsmRes res = FsmAp::starOp( factorTree.fsm );
+		if ( !res.success() )
+			return res;
+
+		afterOpMinimize( res.fsm );
+		return res;
 	}
 	case StarStarType: {
 		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
-		if ( retFsm->startState->isFinState() ) {
-			pd->nfaTermCheckKleeneZero();
+		FsmRes factorTree = factorWithRep->walk( pd );
+		if ( !factorTree.success() )
+			return factorTree;
+
+		if ( factorTree.fsm->startState->isFinState() ) {
+			if ( pd->id->inLibRagel ) {
+				delete factorTree.fsm;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 		}
@@ -2012,83 +2147,114 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		 * interfere with any priorities set by the user. */
 		priorDescs[0].key = pd->nextPriorKey++;
 		priorDescs[0].priority = 1;
-		retFsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+		factorTree.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
 
 		/* Leaveing gets priority 0. Use same unique key. */
 		priorDescs[1].key = priorDescs[0].key;
 		priorDescs[1].priority = 0;
-		retFsm->leaveFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+		factorTree.fsm->leaveFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
 
 		/* Shift over the start action orders then do the kleene star. */
-		pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
-		retFsm->starOp( );
-		afterOpMinimize( retFsm );
-		break;
+		pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
+
+		FsmRes res = FsmAp::starOp( factorTree.fsm );
+		if ( !res.success() )
+			return res;
+
+		afterOpMinimize( res.fsm );
+		return res;
 	}
 	case OptionalType: {
 		/* Make the null fsm. */
-		FsmAp *nu = new FsmAp( pd->fsmCtx );
-		nu->lambdaFsm( );
+		FsmAp *nu = FsmAp::lambdaFsm( pd->fsmCtx );
 
 		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
+		FsmRes factorTree = factorWithRep->walk( pd );
+		if ( !factorTree.success() )
+			return factorTree;
 
 		/* Perform the question operator. */
-		retFsm->unionOp( nu );
-		afterOpMinimize( retFsm );
-		break;
+		FsmRes res = FsmAp::unionOp( factorTree.fsm, nu );
+		if ( !res.success() )
+			return res;
+
+		afterOpMinimize( res.fsm );
+		return res;
 	}
 	case PlusType: {
 		/* Evaluate the FactorWithRep. */
-		retFsm = factorWithRep->walk( pd );
-		if ( retFsm->startState->isFinState() ) {
-			pd->nfaTermCheckPlusZero();
+		FsmRes factorTree = factorWithRep->walk( pd );
+		if ( !factorTree.success() )
+			return factorTree;
+
+		if ( factorTree.fsm->startState->isFinState() ) {
+			if ( pd->id->inLibRagel ) {
+				delete factorTree.fsm;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
 			warning(loc) << "applying plus operator to a machine that "
 					"accepts zero length word" << endl;
 		}
 
-		/* Need a duplicated for the star end. */
-		FsmAp *dup = new FsmAp( *retFsm );
+		/* Need a duplicate for the star end. */
+		FsmAp *factorDup = new FsmAp( *factorTree.fsm );
 
 		/* The start func orders need to be shifted before doing the star. */
-		pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
+		pd->curActionOrd += factorDup->shiftStartActionOrder( pd->curActionOrd );
 
 		/* Star the duplicate. */
-		dup->starOp( );
-		afterOpMinimize( dup );
+		FsmRes res1 = FsmAp::starOp( factorDup );
+		if ( !res1.success() )
+			return res1;
 
-		retFsm->concatOp( dup );
-		afterOpMinimize( retFsm );
-		break;
+		afterOpMinimize( res1.fsm );
+
+		FsmRes res2 = FsmAp::concatOp( factorTree.fsm, res1.fsm );
+		if ( !res2.success() )
+			return res2;
+
+		afterOpMinimize( res2.fsm );
+		return res2;
 	}
 	case ExactType: {
 		/* Get an int from the repetition amount. */
 		if ( lowerRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep. 
 			 * This Defeats the purpose so give a warning. */
-			pd->nfaTermCheckZeroReps();
+			if ( pd->id->inLibRagel )
+				return FsmRes( FsmRes::RepetitionError() );
+
 			warning(loc) << "exactly zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->lambdaFsm();
+			return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( pd->fsmCtx ) );
 		}
 		else {
 			/* Evaluate the first FactorWithRep. */
-			retFsm = factorWithRep->walk( pd );
-			if ( retFsm->startState->isFinState() ) {
-				pd->nfaTermCheckRepZero();
+			FsmRes factorTree = factorWithRep->walk( pd );
+			if ( !factorTree.success() )
+				return factorTree;
+
+			if ( factorTree.fsm->startState->isFinState() ) {
+				if ( pd->id->inLibRagel ) {
+					delete factorTree.fsm;
+					return FsmRes( FsmRes::RepetitionError() );
+				}
 				warning(loc) << "applying repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
 
 			/* The start func orders need to be shifted before doing the
 			 * repetition. */
-			pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
+			pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
 
 			/* Do the repetition on the machine. Already guarded against n == 0 */
-			retFsm->repeatOp( lowerRep );
-			afterOpMinimize( retFsm );
+			FsmRes res = FsmAp::repeatOp( factorTree.fsm, lowerRep );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm );
+			return res;
 		}
 		break;
 	}
@@ -2097,65 +2263,96 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 		if ( upperRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep. 
 			 * This Defeats the purpose so give a warning. */
-			pd->nfaTermCheckZeroReps();
+			if ( pd->id->inLibRagel )
+				return FsmRes( FsmRes::RepetitionError() );
+
 			warning(loc) << "max zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->lambdaFsm();
+			return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( pd->fsmCtx ) );
 		}
 		else {
 			/* Evaluate the first FactorWithRep. */
-			retFsm = factorWithRep->walk( pd );
-			if ( retFsm->startState->isFinState() ) {
-				pd->nfaTermCheckRepZero();
+			FsmRes factorTree = factorWithRep->walk( pd );
+			if ( !factorTree.success() )
+				return factorTree;
+
+			if ( factorTree.fsm->startState->isFinState() ) {
+				if ( pd->id->inLibRagel ) {
+					delete factorTree.fsm;
+					return FsmRes( FsmRes::RepetitionError() );
+				}
 				warning(loc) << "applying max repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
 
 			/* The start func orders need to be shifted before doing the 
 			 * repetition. */
-			pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
+			pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
 
 			/* Do the repetition on the machine. Already guarded against n == 0 */
-			retFsm->optionalRepeatOp( upperRep );
-			afterOpMinimize( retFsm );
+			FsmRes res = FsmAp::optionalRepeatOp( factorTree.fsm, upperRep );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm );
+			return res;
 		}
 		break;
 	}
 	case MinType: {
 		/* Evaluate the repeated machine. */
-		retFsm = factorWithRep->walk( pd );
-		if ( retFsm->startState->isFinState() ) {
-			pd->nfaTermCheckMinZero();
+		FsmRes factorTree = factorWithRep->walk( pd );
+		if ( !factorTree.success() )
+			return factorTree;
+
+		if ( factorTree.fsm->startState->isFinState() ) {
+			if ( pd->id->inLibRagel ) {
+				delete factorTree.fsm;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
 			warning(loc) << "applying min repetition to a machine that "
 					"accepts zero length word" << endl;
 		}
 
 		/* The start func orders need to be shifted before doing the repetition
 		 * and the kleene star. */
-		pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
+		pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
 	
 		if ( lowerRep == 0 ) {
 			/* Acts just like a star op on the machine to return. */
-			retFsm->starOp( );
-			afterOpMinimize( retFsm );
+			FsmRes res = FsmAp::starOp( factorTree.fsm );
+			if ( !res.success() )
+				return res;
+
+			afterOpMinimize( res.fsm );
+			return res;
 		}
 		else {
 			/* Take a duplicate for the plus. */
-			FsmAp *dup = new FsmAp( *retFsm );
+			FsmAp *dup = new FsmAp( *factorTree.fsm );
 
 			/* Do repetition on the first half. */
-			retFsm->repeatOp( lowerRep );
-			afterOpMinimize( retFsm );
+			FsmRes res1 = FsmAp::repeatOp( factorTree.fsm, lowerRep );
+			if ( !res1.success() )
+				return res1;
+
+			afterOpMinimize( res1.fsm );
 
 			/* Star the duplicate. */
-			dup->starOp( );
-			afterOpMinimize( dup );
+			FsmRes res2 = FsmAp::starOp( dup );
+			if ( !res2.success() )
+				return res2;
 
-			/* Tak on the kleene star. */
-			retFsm->concatOp( dup );
-			afterOpMinimize( retFsm );
+			afterOpMinimize( res2.fsm );
+
+			/* Tack on the kleene star. */
+			FsmRes res3 = FsmAp::concatOp( res1.fsm, res2.fsm );
+			if ( !res3.success() )
+				return res3;
+
+			afterOpMinimize( res3.fsm );
+			return res3;
 		}
 		break;
 	}
@@ -2165,68 +2362,91 @@ FsmAp *FactorWithRep::walk( ParseData *pd )
 			error(loc) << "invalid range repetition" << endl;
 
 			/* Return null machine as recovery. */
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->lambdaFsm();
+			return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( pd->fsmCtx ) );
 		}
 		else if ( lowerRep == 0 && upperRep == 0 ) {
 			/* No copies. Don't need to evaluate the factorWithRep.  This
 			 * defeats the purpose so give a warning. */
-			pd->nfaTermCheckZeroReps();
+			if ( pd->id->inLibRagel )
+				return FsmRes( FsmRes::RepetitionError() );
+
 			warning(loc) << "zero to zero repetitions results "
 					"in the null machine" << endl;
 
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->lambdaFsm();
+			return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( pd->fsmCtx ) );
 		}
 		else {
 			/* Now need to evaluate the repeated machine. */
-			retFsm = factorWithRep->walk( pd );
-			if ( retFsm->startState->isFinState() ) {
-				pd->nfaTermCheckMinZero();
+			FsmRes factorTree = factorWithRep->walk( pd );
+			if ( !factorTree.success() )
+				return factorTree;
+
+			if ( factorTree.fsm->startState->isFinState() ) {
+				if ( pd->id->inLibRagel ) {
+					delete factorTree.fsm;
+					return FsmRes( FsmRes::RepetitionError() );
+				}
 				warning(loc) << "applying range repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
 
 			/* The start func orders need to be shifted before doing both kinds
 			 * of repetition. */
-			pd->curActionOrd += retFsm->shiftStartActionOrder( pd->curActionOrd );
+			pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
 
 			if ( lowerRep == 0 ) {
 				/* Just doing max repetition. Already guarded against n == 0. */
-				retFsm->optionalRepeatOp( upperRep );
-				afterOpMinimize( retFsm );
+				FsmRes res = FsmAp::optionalRepeatOp( factorTree.fsm, upperRep );
+				if ( !res.success() )
+					return res;
+
+				afterOpMinimize( res.fsm );
+				return res;
 			}
 			else if ( lowerRep == upperRep ) {
 				/* Just doing exact repetition. Already guarded against n == 0. */
-				retFsm->repeatOp( lowerRep );
-				afterOpMinimize( retFsm );
+				FsmRes res = FsmAp::repeatOp( factorTree.fsm, lowerRep );
+				if ( !res.success() )
+					return res;
+
+				afterOpMinimize( res.fsm );
+				return res;
 			}
 			else {
 				/* This is the case that 0 < lowerRep < upperRep. Take a
 				 * duplicate for the optional repeat. */
-				FsmAp *dup = new FsmAp( *retFsm );
+				FsmAp *dup = new FsmAp( *factorTree.fsm );
 
 				/* Do repetition on the first half. */
-				retFsm->repeatOp( lowerRep );
-				afterOpMinimize( retFsm );
+				FsmRes res1 = FsmAp::repeatOp( factorTree.fsm, lowerRep );
+				if ( !res1.success() )
+					return res1;
+
+				afterOpMinimize( res1.fsm );
 
 				/* Do optional repetition on the second half. */
-				dup->optionalRepeatOp( upperRep - lowerRep );
-				afterOpMinimize( dup );
+				FsmRes res2 = FsmAp::optionalRepeatOp( dup, upperRep - lowerRep );
+				if ( !res2.success() )
+					return res2;
+
+				afterOpMinimize( res2.fsm );
 
 				/* Tak on the duplicate machine. */
-				retFsm->concatOp( dup );
-				afterOpMinimize( retFsm );
+				FsmRes res3 = FsmAp::concatOp( res1.fsm, res2.fsm );
+				if ( !res3.success() )
+					return res3;
+
+				afterOpMinimize( res3.fsm );
+				return res3;
 			}
 		}
 		break;
 	}
 	case FactorWithNegType: {
 		/* Evaluate the Factor. Pass it up. */
-		retFsm = factorWithNeg->walk( pd );
-		break;
+		return factorWithNeg->walk( pd );
 	}}
-	return retFsm;
+	return FsmRes( FsmRes::Aborted() );
 }
 
 void FactorWithRep::makeNameTree( ParseData *pd )
@@ -2282,37 +2502,36 @@ FactorWithNeg::~FactorWithNeg()
 }
 
 /* Evaluate a factor with negation node. */
-FsmAp *FactorWithNeg::walk( ParseData *pd )
+FsmRes FactorWithNeg::walk( ParseData *pd )
 {
-	FsmAp *retFsm = 0;
-
 	switch ( type ) {
 	case NegateType: {
 		/* Evaluate the factorWithNeg. */
-		FsmAp *toNegate = factorWithNeg->walk( pd );
+		FsmRes toNegate = factorWithNeg->walk( pd );
 
 		/* Negation is subtract from dot-star. */
-		retFsm = dotStarFsm( pd );
-		retFsm->subtractOp( toNegate );
-		afterOpMinimize( retFsm );
-		break;
+		FsmAp *ds = dotStarFsm( pd );
+		FsmRes res = FsmAp::subtractOp( ds, toNegate.fsm );
+
+		afterOpMinimize( res.fsm );
+		return res;
 	}
 	case CharNegateType: {
 		/* Evaluate the factorWithNeg. */
-		FsmAp *toNegate = factorWithNeg->walk( pd );
+		FsmRes toNegate = factorWithNeg->walk( pd );
 
 		/* CharNegation is subtract from dot. */
-		retFsm = dotFsm( pd );
-		retFsm->subtractOp( toNegate );
-		afterOpMinimize( retFsm );
-		break;
+		FsmAp *ds = dotFsm( pd );
+		FsmRes res = FsmAp::subtractOp( ds, toNegate.fsm );
+
+		afterOpMinimize( res.fsm );
+		return res;
 	}
 	case FactorType: {
 		/* Evaluate the Factor. Pass it up. */
-		retFsm = factor->walk( pd );
-		break;
+		return factor->walk( pd );
 	}}
-	return retFsm;
+	return FsmRes( FsmRes::Aborted() );
 }
 
 void FactorWithNeg::makeNameTree( ParseData *pd )
@@ -2371,7 +2590,7 @@ Factor::~Factor()
 	}
 }
 
-FsmAp *Factor::condPlus( ParseData *pd )
+FsmRes Factor::condPlus( ParseData *pd )
 {
 	Action *ini = action1;
 	Action *inc = action2;
@@ -2384,111 +2603,118 @@ FsmAp *Factor::condPlus( ParseData *pd )
 	if ( max != 0 )
 		condCost( max );
 
-	FsmAp *rtnVal = expression->walk( pd );
+	FsmRes exprTree = expression->walk( pd );
+	if ( !exprTree.success() )
+		return exprTree;
 
-	rtnVal->startFsmAction( 0, inc );
-	afterOpMinimize( rtnVal );
+	exprTree.fsm->startFsmAction( 0, inc );
+	afterOpMinimize( exprTree.fsm );
 
 	if ( max != 0 ) {
-		rtnVal->startFsmCondition( max, true );
-		afterOpMinimize( rtnVal );
+		FsmRes res = exprTree.fsm->startFsmCondition( max, true );
+		if ( !res.success() )
+			return res;
+
+		afterOpMinimize( exprTree.fsm );
 	}
 
 	/* Plus Operation. */
-	{
-		if ( rtnVal->startState->isFinState() ) {
-			pd->nfaTermCheckPlusZero();
-			warning(loc) << "applying plus operator to a machine that "
-					"accepts zero length word" << endl;
+	if ( exprTree.fsm->startState->isFinState() ) {
+		if ( pd->id->inLibRagel ) {
+			delete exprTree.fsm;
+			return FsmRes( FsmRes::RepetitionError() );
 		}
-
-		/* Need a duplicated for the star end. */
-		FsmAp *dup = new FsmAp( *rtnVal );
-
-		/* The start func orders need to be shifted before doing the star. */
-		pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
-
-		applyGuardedPrior2( pd, dup );
-
-		/* Star the duplicate. */
-		dup->starOp( );
-		afterOpMinimize( dup );
-
-		rtnVal->concatOp( dup );
-		afterOpMinimize( rtnVal );
+		warning(loc) << "applying plus operator to a machine that "
+				"accepts zero length word" << endl;
 	}
 
-	rtnVal->leaveFsmCondition( min, true );
+	/* Need a duplicated for the star end. */
+	FsmAp *dup = new FsmAp( *exprTree.fsm );
+
+	/* The start func orders need to be shifted before doing the star. */
+	pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
+
+	applyGuardedPrior2( pd, dup );
+
+	/* Star the duplicate. */
+	FsmRes res1 = FsmAp::starOp( dup );
+	if ( !res1.success() )
+		return res1;
+
+	afterOpMinimize( res1.fsm );
+
+	FsmRes res2 = FsmAp::concatOp( exprTree.fsm, res1.fsm );
+	if ( !res2.success() )
+		return res2;
+
+	afterOpMinimize( res2.fsm );
+
+	/* End plus operation. */
+
+	res2.fsm->leaveFsmCondition( min, true );
 
 	/* Init action. */
-	rtnVal->startFromStateAction( 0,  ini );
+	res2.fsm->startFromStateAction( 0,  ini );
 
 	/* Leading priority guard. */
-	applyGuardedPrior( pd, rtnVal );
+	applyGuardedPrior( pd, res2.fsm );
 
-	return rtnVal;
+	return res2;
 }
 
-FsmAp *Factor::condStar( ParseData *pd )
+FsmRes Factor::condStar( ParseData *pd )
 {
 	Action *min = action3;
 
-	FsmAp *rtnVal = condPlus( pd );
+	FsmRes cp = condPlus( pd );
+	if ( !cp.success() )
+		return cp;
 
-	StateAp *newStart = rtnVal->dupStartState();
-	rtnVal->unsetStartState();
-	rtnVal->setStartState( newStart );
+	StateAp *newStart = cp.fsm->dupStartState();
+	cp.fsm->unsetStartState();
+	cp.fsm->setStartState( newStart );
 
 	/* Now ensure the new start state is a final state. */
-	rtnVal->setFinState( newStart );
-	rtnVal->addOutCondition( newStart, min, true );
+	cp.fsm->setFinState( newStart );
+	cp.fsm->addOutCondition( newStart, min, true );
 
-	return rtnVal;
+	return cp;
 }
 
 /* Evaluate a factor node. */
-FsmAp *Factor::walk( ParseData *pd )
+FsmRes Factor::walk( ParseData *pd )
 {
-	FsmAp *rtnVal = 0;
 	switch ( type ) {
 	case LiteralType:
-		rtnVal = literal->walk( pd );
-		break;
+		return FsmRes( FsmRes::Fsm(), literal->walk( pd ) );
 	case RangeType:
-		rtnVal = range->walk( pd );
-		break;
+		return FsmRes( FsmRes::Fsm(), range->walk( pd ) );
 	case OrExprType:
-		rtnVal = reItem->walk( pd, 0 );
-		break;
+		return reItem->walk( pd, 0 );
 	case RegExprType:
-		rtnVal = regExpr->walk( pd, 0 );
-		break;
+		return FsmRes( FsmRes::Fsm(), regExpr->walk( pd, 0 ) );
 	case ReferenceType:
-		rtnVal = varDef->walk( pd );
-		break;
+		return varDef->walk( pd );
 	case ParenType:
-		rtnVal = join->walk( pd );
-		break;
+		return join->walk( pd );
 	case LongestMatchType:
-		rtnVal = longestMatch->walk( pd );
-		break;
+		return longestMatch->walk( pd );
 	case NfaRep: {
-		rtnVal = expression->walk( pd );
-		rtnVal->nfaRepeatOp( action1, action2, action3,
-				action4, action5, action6, pd->curActionOrd );
-		rtnVal->verifyIntegrity();
-		break;
-	}
-	case CondStar: {
-		rtnVal = condStar( pd );
-		break;
-	}
-	case CondPlus: {
-		rtnVal = condPlus( pd );
-		break;
-	}}
+		FsmRes exprTree = expression->walk( pd );
 
-	return rtnVal;
+		FsmRes res = FsmAp::nfaRepeatOp( exprTree.fsm, action1, action2, action3,
+				action4, action5, action6, pd->curActionOrd );
+
+		res.fsm->verifyIntegrity();
+		return res;
+	}
+	case CondStar:
+		return condStar( pd );
+	case CondPlus:
+		return condPlus( pd );
+	}
+
+	return FsmRes( FsmRes::Aborted() );
 }
 
 void Factor::makeNameTree( ParseData *pd )
@@ -2554,14 +2780,14 @@ FsmAp *Range::walk( ParseData *pd )
 	/* Construct and verify the suitability of the lower end of the range. */
 	FsmAp *lowerFsm = lowerLit->walk( pd );
 	if ( !lowerFsm->checkSingleCharMachine() ) {
-		error(lowerLit->token.loc) << 
+		error(lowerLit->loc) << 
 			"bad range lower end, must be a single character" << endl;
 	}
 
 	/* Construct and verify the upper end. */
 	FsmAp *upperFsm = upperLit->walk( pd );
 	if ( !upperFsm->checkSingleCharMachine() ) {
-		error(upperLit->token.loc) << 
+		error(upperLit->loc) << 
 			"bad range upper end, must be a single character" << endl;
 	}
 
@@ -2574,14 +2800,12 @@ FsmAp *Range::walk( ParseData *pd )
 	/* Validate the range. */
 	if ( pd->fsmCtx->keyOps->gt( lowKey, highKey ) ) {
 		/* Recover by setting upper to lower; */
-		error(lowerLit->token.loc) << "lower end of range is greater then upper end" << endl;
+		error(lowerLit->loc) << "lower end of range is greater then upper end" << endl;
 		highKey = lowKey;
 	}
 
 	/* Return the range now that it is validated. */
-	FsmAp *retFsm = new FsmAp( pd->fsmCtx );
-	retFsm->rangeFsm( lowKey, highKey );
-
+	FsmAp *retFsm = FsmAp::rangeFsm( pd->fsmCtx, lowKey, highKey );
 
 	/* If case independent, then union the portion that covers alphas. */
 	if ( caseIndep ) { 
@@ -2600,9 +2824,9 @@ FsmAp *Range::walk( ParseData *pd )
 
 				/* Add in upper(low) .. upper(high) */
 
-				FsmAp *addFsm = new FsmAp( pd->fsmCtx );
-				addFsm->rangeFsm( toupper(low), toupper(high) );
-				retFsm->unionOp( addFsm );
+				FsmAp *addFsm = FsmAp::rangeFsm( pd->fsmCtx, toupper(low), toupper(high) );
+				FsmRes res = FsmAp::unionOp( retFsm, addFsm );
+				retFsm = res.fsm;
 			}
 		}
 
@@ -2620,9 +2844,9 @@ FsmAp *Range::walk( ParseData *pd )
 					high = highKey.getVal();
 
 				/* Add in lower(low) .. lower(high) */
-				FsmAp *addFsm = new FsmAp( pd->fsmCtx );
-				addFsm->rangeFsm( tolower(low), tolower(high) );
-				retFsm->unionOp( addFsm );
+				FsmAp *addFsm = FsmAp::rangeFsm( pd->fsmCtx, tolower(low), tolower(high) );
+				FsmRes res = FsmAp::unionOp( retFsm, addFsm );
+				retFsm = res.fsm;
 			}
 		}
 	}
@@ -2637,37 +2861,41 @@ FsmAp *Literal::walk( ParseData *pd )
 
 	switch ( type ) {
 	case Number: {
+		/* Make a C string. Maybe put - up front. */
+		Vector<char> num = data;
+		if ( neg )
+			num.insert( 0, '-' );
+		num.append( 0 );
+
 		/* Make the fsm key in int format. */
-		Key fsmKey = makeFsmKeyNum( token.data, token.loc, pd );
+		Key fsmKey = makeFsmKeyNum( num.data, loc, pd );
+
 		/* Make the new machine. */
-		rtnVal = new FsmAp( pd->fsmCtx );
-		rtnVal->concatFsm( fsmKey );
+		rtnVal = FsmAp::concatFsm( pd->fsmCtx, fsmKey );
 		break;
 	}
 	case LitString: {
 		/* Make the array of keys in int format. */
 		long length;
 		bool caseInsensitive;
-		char *data = prepareLitString( token.loc, token.data, token.length, 
+		char *litstr = prepareLitString( loc, data.data, data.length(), 
 				length, caseInsensitive );
 		Key *arr = new Key[length];
-		makeFsmKeyArray( arr, data, length, pd );
+		makeFsmKeyArray( arr, litstr, length, pd );
 
 		/* Make the new machine. */
-		rtnVal = new FsmAp( pd->fsmCtx );
 		if ( caseInsensitive )
-			rtnVal->concatFsmCI( arr, length );
+			rtnVal = FsmAp::concatFsmCI( pd->fsmCtx, arr, length );
 		else
-			rtnVal->concatFsm( arr, length );
-		delete[] data;
+			rtnVal = FsmAp::concatFsm( pd->fsmCtx, arr, length );
+		delete[] litstr;
 		delete[] arr;
 		break;
 	}
 	case HexString: {
 		long length;
-		Key *arr = prepareHexString( pd, token.loc, token.data, token.length, length );
-		rtnVal = new FsmAp( pd->fsmCtx );
-		rtnVal->concatFsm( arr, length );
+		Key *arr = prepareHexString( pd, loc, data.data, data.length(), length );
+		rtnVal = FsmAp::concatFsm( pd->fsmCtx, arr, length );
 		delete[] arr;
 		break;
 	}}
@@ -2699,13 +2927,13 @@ FsmAp *RegExpr::walk( ParseData *pd, RegExpr *rootRegex )
 		case RecurseItem: {
 			/* Walk both items. */
 			rtnVal = regExpr->walk( pd, rootRegex );
-			FsmAp *fsm2 = item->walk( pd, rootRegex );
-			rtnVal->concatOp( fsm2 );
+			FsmRes fsm2 = item->walk( pd, rootRegex );
+			FsmRes res = FsmAp::concatOp( rtnVal, fsm2.fsm );
+			rtnVal = res.fsm;
 			break;
 		}
 		case Empty: {
-			rtnVal = new FsmAp( pd->fsmCtx );
-			rtnVal->lambdaFsm();
+			rtnVal = FsmAp::lambdaFsm( pd->fsmCtx );
 			break;
 		}
 	}
@@ -2727,7 +2955,7 @@ ReItem::~ReItem()
 }
 
 /* Evaluate a regular expression object. */
-FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
+FsmRes ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 {
 	/* The fsm to return, is the alphabet signed? */
 	FsmAp *rtnVal = 0;
@@ -2735,15 +2963,14 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 	switch ( type ) {
 		case Data: {
 			/* Move the data into an integer array and make a concat fsm. */
-			Key *arr = new Key[token.length];
-			makeFsmKeyArray( arr, token.data, token.length, pd );
+			Key *arr = new Key[data.length()];
+			makeFsmKeyArray( arr, data.data, data.length(), pd );
 
 			/* Make the concat fsm. */
-			rtnVal = new FsmAp( pd->fsmCtx );
 			if ( rootRegex != 0 && rootRegex->caseInsensitive )
-				rtnVal->concatFsmCI( arr, token.length );
+				rtnVal = FsmAp::concatFsmCI( pd->fsmCtx, arr, data.length() );
 			else
-				rtnVal->concatFsm( arr, token.length );
+				rtnVal = FsmAp::concatFsm( pd->fsmCtx, arr, data.length() );
 			delete[] arr;
 			break;
 		}
@@ -2755,10 +2982,8 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 		case OrBlock: {
 			/* Get the or block and minmize it. */
 			rtnVal = orBlock->walk( pd, rootRegex );
-			if ( rtnVal == 0 ) {
-				rtnVal = new FsmAp( pd->fsmCtx );
-				rtnVal->lambdaFsm();
-			}
+			if ( rtnVal == 0 )
+				rtnVal = FsmAp::lambdaFsm( pd->fsmCtx );
 			rtnVal->minimizePartition2();
 			break;
 		}
@@ -2769,7 +2994,8 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 
 			/* Make a dot fsm and subtract from it. */
 			rtnVal = dotFsm( pd );
-			rtnVal->subtractOp( fsm );
+			FsmRes res = FsmAp::subtractOp( rtnVal, fsm );
+			rtnVal = res.fsm;
 			rtnVal->minimizePartition2();
 			break;
 		}
@@ -2778,15 +3004,21 @@ FsmAp *ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 	/* If the item is followed by a star, then apply the star op. */
 	if ( star ) {
 		if ( rtnVal->startState->isFinState() ) {
-			pd->nfaTermCheckKleeneZero();
+			if ( pd->id->inLibRagel ) {
+				delete rtnVal;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
+
 			warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 		}
 
-		rtnVal->starOp();
+		FsmRes res = FsmAp::starOp( rtnVal );
+		rtnVal = res.fsm;
 		rtnVal->minimizePartition2();
 	}
-	return rtnVal;
+
+	return FsmRes( FsmRes::Fsm(), rtnVal );
 }
 
 /* Clean up after an or block of a regular expression. */
@@ -2815,7 +3047,8 @@ FsmAp *ReOrBlock::walk( ParseData *pd, RegExpr *rootRegex )
 			if ( fsm1 == 0 )
 				rtnVal = fsm2;
 			else {
-				fsm1->unionOp( fsm2 );
+				FsmRes res = FsmAp::unionOp( fsm1, fsm2 );
+				fsm1 = res.fsm;
 				rtnVal = fsm1;
 			}
 			break;
@@ -2837,19 +3070,16 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 	FsmAp *rtnVal = 0;
 	switch ( type ) {
 	case Data: {
-		/* Make the or machine. */
-		rtnVal = new FsmAp( pd->fsmCtx );
-
 		/* Put the or data into an array of ints. Note that we find unique
 		 * keys. Duplicates are silently ignored. The alternative would be to
 		 * issue warning or an error but since we can't with [a0-9a] or 'a' |
 		 * 'a' don't bother here. */
 		KeySet keySet( keyOps );
-		makeFsmUniqueKeyArray( keySet, token.data, token.length, 
+		makeFsmUniqueKeyArray( keySet, data.data, data.length(), 
 			rootRegex != 0 ? rootRegex->caseInsensitive : false, pd );
 
 		/* Run the or operator. */
-		rtnVal->orFsm( keySet.data, keySet.length() );
+		rtnVal = FsmAp::orFsm( pd->fsmCtx, keySet.data, keySet.length() );
 		break;
 	}
 	case Range: {
@@ -2865,8 +3095,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 		}
 
 		/* Make the range machine. */
-		rtnVal = new FsmAp( pd->fsmCtx );
-		rtnVal->rangeFsm( lowKey, highKey );
+		rtnVal = FsmAp::rangeFsm( pd->fsmCtx, lowKey, highKey );
 
 		if ( rootRegex != 0 && rootRegex->caseInsensitive ) {
 			if ( keyOps->le( lowKey, 'Z' ) && pd->fsmCtx->keyOps->le( 'A', highKey ) ) {
@@ -2876,9 +3105,9 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 				otherLow = keyOps->add( 'a', ( keyOps->sub( otherLow, 'A' ) ) );
 				otherHigh = keyOps->add( 'a', ( keyOps->sub( otherHigh, 'A' ) ) );
 
-				FsmAp *otherRange = new FsmAp( pd->fsmCtx );
-				otherRange->rangeFsm( otherLow, otherHigh );
-				rtnVal->unionOp( otherRange );
+				FsmAp *otherRange = FsmAp::rangeFsm( pd->fsmCtx, otherLow, otherHigh );
+				FsmRes res = FsmAp::unionOp( rtnVal, otherRange );
+				rtnVal = res.fsm;
 				rtnVal->minimizePartition2();
 			}
 			else if ( keyOps->le( lowKey, 'z' ) && keyOps->le( 'a', highKey ) ) {
@@ -2888,9 +3117,9 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 				otherLow = keyOps->add('A' , ( keyOps->sub( otherLow , 'a' ) ));
 				otherHigh = keyOps->add('A' , ( keyOps->sub( otherHigh , 'a' ) ));
 
-				FsmAp *otherRange = new FsmAp( pd->fsmCtx );
-				otherRange->rangeFsm( otherLow, otherHigh );
-				rtnVal->unionOp( otherRange );
+				FsmAp *otherRange = FsmAp::rangeFsm( pd->fsmCtx, otherLow, otherHigh );
+				FsmRes res = FsmAp::unionOp( rtnVal, otherRange );
+				rtnVal = res.fsm;
 				rtnVal->minimizePartition2();
 			}
 		}

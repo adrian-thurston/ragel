@@ -32,6 +32,7 @@
 
 using std::istream;
 using std::ifstream;
+using std::stringstream;
 using std::ostream;
 using std::cout;
 using std::cerr;
@@ -39,6 +40,40 @@ using std::endl;
 using std::ios;
 
 extern colm_sections rlhc_object;
+
+InputData::~InputData()
+{
+	includeDict.empty();
+	inputItems.empty();
+	parseDataList.empty();
+	sectionList.empty();
+
+	for ( Vector<const char**>::Iter fns = streamFileNames; fns.lte(); fns++ ) {
+		const char **ptr = *fns;
+		while ( *ptr != 0 ) {
+			::free( (void*)*ptr );
+			ptr += 1;
+		}
+		free( (void*) *fns );
+	}
+
+	if ( outputFileName != 0 )
+		delete[] outputFileName;
+
+	if ( histogramFn != 0 )
+		::free( (void*)histogramFn );
+
+	if ( histogram != 0 )
+		delete[] histogram;
+
+	for ( ArgsVector::Iter bl = breadthLabels; bl.lte(); bl++ )
+		free( (void*) *bl );
+}
+
+void InputData::abortCompile( int code )
+{
+	throw AbortCompile( code );
+}
 
 /* Invoked by the parser when the root element is opened. */
 void InputData::cdDefaultFileName( const char *inputFile )
@@ -222,7 +257,7 @@ void InputData::openOutput()
 		outFilter->open( outputFileName, ios::out|ios::trunc );
 		if ( !outFilter->is_open() ) {
 			error() << "error opening " << outputFileName << " for writing" << endl;
-			exit(1);
+			abortCompile( 1 );
 		}
 	}
 }
@@ -383,12 +418,12 @@ void InputData::processXML()
 	prepareAllMachines();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
 
 	createOutputStream();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
 
 	/*
 	 * From this point on we should not be reporting any errors.
@@ -405,12 +440,12 @@ void InputData::processDot()
 	prepareSingleMachine();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
 
 	createOutputStream();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
 
 	/*
 	 * From this point on we should not be reporting any errors.
@@ -445,6 +480,9 @@ void InputData::runRlhc()
 	colm_set_debug( program, 0 );
 	colm_run_program( program, 4, argv );
 	int es = program->exit_status;
+
+	streamFileNames.append( colm_extract_fns( program ) );
+
 	colm_delete_program( program );
 
 	if ( !saveTemps )
@@ -453,7 +491,7 @@ void InputData::runRlhc()
 	/* Translation step shouldn't fail, but it can if there is an
 	 * internal error. Pass it up.  */
 	if ( es != 0 )
-		exit( es );
+		abortCompile( es );
 }
 
 void InputData::processCode()
@@ -462,7 +500,7 @@ void InputData::processCode()
 	prepareAllMachines();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
 
 	makeDefaultFileName();
 
@@ -474,12 +512,12 @@ void InputData::processCode()
 	generateReduced();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
 
 	verifyWritesHaveData();
 
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
 
 	/*
 	 * From this point on we should not be reporting any errors.
@@ -491,10 +529,10 @@ void InputData::processCode()
 	runRlhc();
 }
 
-void InputData::checkLastRef( InputItem *ii )
+bool InputData::checkLastRef( InputItem *ii )
 {
 	if ( generateXML || generateDot )
-		return;
+		return true;
 		
 	/*
 	 * 1. Go forward to next last reference.
@@ -511,15 +549,18 @@ void InputData::checkLastRef( InputItem *ii )
 				ii->parser->terminateParser();
 #endif
 
-			pd->prepareMachineGen( 0, hostLang );
+			FsmRes res = pd->prepareMachineGen( 0, hostLang );
+
+			if ( !res.success() )
+				return false;
 
 			if ( gblErrorCount > 0 )
-				exit(1);
+				return false;
 
 			pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
 
 			if ( gblErrorCount > 0 )
-				exit(1);
+				return false;
 		}
 
 		/* Mark all input items referencing the machine as processed. */
@@ -529,16 +570,17 @@ void InputData::checkLastRef( InputItem *ii )
 
 			if ( toMark == ii )
 				break;
+
 			toMark = toMark->next;
 		}
 
-		/* Move forward, flusing input items until we get to an unprocessed
+		/* Move forward, flushing input items until we get to an unprocessed
 		 * input item. */
 		while ( lastFlush != 0 && lastFlush->processed ) {
 			verifyWriteHasData( lastFlush );
 
 			if ( gblErrorCount > 0 )
-				exit(1);
+				return false;
 
 			/* Flush out. */
 			writeOutput( lastFlush );
@@ -548,6 +590,7 @@ void InputData::checkLastRef( InputItem *ii )
 			if ( lastFlush->pd != 0 && lastFlush->section->lastReference == lastFlush ) {
 				if ( lastFlush->pd->instanceList.length() > 0 ) {
 					lastFlush->pd->clear();
+
 #ifdef WITH_RAGEL_KELBT
 					if ( lastFlush->parser != 0 )
 						lastFlush->parser->clear();
@@ -558,6 +601,7 @@ void InputData::checkLastRef( InputItem *ii )
 			lastFlush = lastFlush->next;
 		}
 	}
+	return true;
 }
 
 void InputData::makeFirstInputItem()
@@ -595,8 +639,8 @@ void InputData::makeTranslateOutputFileName()
 {
 	if ( backend == Translated ) {
 		origOutputFileName = outputFileName;
-		genOutputFileName = fileNameFromStem( inputFileName, ".ri" );
-		outputFileName = genOutputFileName.c_str();
+		outputFileName = fileNameFromStem( inputFileName, ".ri" );
+		genOutputFileName = outputFileName;
 	}
 }
 
@@ -606,22 +650,34 @@ void InputData::parseKelbt()
 	/*
 	 * Ragel Parser from ragel 6.
 	 */
+	ifstream *inFileStream;
+	stringstream *inStringStream;
+	istream *inStream;
 
-	/* Open the input file for reading. */
-	assert( inputFileName != 0 );
-	ifstream *inFile = new ifstream( inputFileName );
-	if ( ! inFile->is_open() )
-		error() << "could not open " << inputFileName << " for reading" << endp;
+	if ( inLibRagel ) {
+		/* Open the input file for reading. */
+		assert( inputFileName != 0 );
+		inStringStream = new stringstream( string( input ) );
+		inStream = inStringStream;
+	}
+	else {
+		/* Open the input file for reading. */
+		assert( inputFileName != 0 );
+		inFileStream = new ifstream( inputFileName );
+		if ( ! inFileStream->is_open() )
+			error() << "could not open " << inputFileName << " for reading" << endp;
+		inStream = inFileStream;
+	}
 
 	makeFirstInputItem();
 
-	Scanner scanner( *this, inputFileName, *inFile, 0, 0, 0, false );
+	Scanner scanner( *this, inputFileName, *inStream, 0, 0, 0, false );
 
 	scanner.sectionPass = true;
 	scanner.do_scan();
 
-	inFile->clear();
-	inFile->seekg( 0, std::ios::beg );
+	inStream->clear();
+	inStream->seekg( 0, std::ios::beg );
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
 
@@ -630,11 +686,16 @@ void InputData::parseKelbt()
 
 	/* Finished, final check for errors.. */
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
+	
+	if ( inLibRagel )
+		delete inStringStream;
+	else
+		delete inFileStream;
 }
 
 void InputData::processKelbt()
@@ -691,7 +752,7 @@ void InputData::processColm()
 
 	/* Bail on above error. */
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
 
 	if ( generateXML )
 		processXML();
@@ -703,7 +764,7 @@ void InputData::processColm()
 	assert( gblErrorCount == 0 );
 }
 
-void InputData::parseReduce()
+bool InputData::parseReduce()
 {
 	/*
 	 * Colm-based reduction parser introduced in ragel 7. 
@@ -713,59 +774,88 @@ void InputData::parseReduce()
 	TopLevel *topLevel = new TopLevel( this, sectionPass, hostLang,
 			minimizeLevel, minimizeOpt );
 
-	/* Check input file. */
-	ifstream *inFile = new ifstream( inputFileName );
-	if ( ! inFile->is_open() )
-		error() << "could not open " << inputFileName << " for reading" << endp;
-	delete inFile;
+	if ( ! inLibRagel ) {
+		/* Check input file. File is actually opened by colm code. We don't
+		 * need to perform the check if in libragel since it comes in via a
+		 * string. */
+		if ( input == 0 ) {
+			ifstream *inFile = new ifstream( inputFileName );
+			if ( ! inFile->is_open() )
+				error() << "could not open " << inputFileName << " for reading" << endp;
+			delete inFile;
+		}
+	}
 
 	makeFirstInputItem();
 
-	sectionPass->reduceFile( inputFileName );
+	if ( inLibRagel )
+		sectionPass->reduceStr( inputFileName, input );
+	else
+		sectionPass->reduceFile( inputFileName );
 
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
-	topLevel->reduceFile( inputFileName );
+
+	if ( inLibRagel )
+		topLevel->reduceStr( inputFileName, input );
+	else
+		topLevel->reduceFile( inputFileName );
+
+	bool success = topLevel->success;
+
+	delete topLevel;
+	delete sectionPass;
+
+	return success;
 }
 
-void InputData::processReduce()
+bool InputData::processReduce()
 {
 	if ( generateXML ) {
 		parseReduce();
 		processXML();
+		return true;
 	}
 	else if ( generateDot ) {
 		parseReduce();
 		processDot();
+		return true;
 	}
 	else {
 		makeDefaultFileName();
 		makeTranslateOutputFileName();
 		createOutputStream();
 		openOutput();
-		parseReduce();
-		flushRemaining();
+
+		bool success = parseReduce();
+		if ( success )
+			flushRemaining();
+
 		closeOutput();
-		runRlhc();
+
+		if ( success )
+			runRlhc();
+
+		return success;
 	}
 }
 
-void InputData::process()
+bool InputData::process()
 {
 	switch ( frontend ) {
 		case KelbtBased: {
 #ifdef WITH_RAGEL_KELBT
 			processKelbt();
 #endif
-			break;
+			return true;
 		}
 		case ColmBased: {
 			processColm();
-			break;
+			return true;
 		}
 		case ReduceBased: {
-			processReduce();
-			break;
+			return processReduce();
 		}
 	}
+	return false;
 }

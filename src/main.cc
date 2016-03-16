@@ -68,7 +68,7 @@ using std::ios;
 using std::streamsize;
 
 /* Print a summary of the options. */
-void usage()
+void InputData::usage()
 {
 	cout <<
 "usage: ragel [options] file\n"
@@ -160,18 +160,18 @@ void usage()
 "   --supported-backends    Show supported backends\n"
 	;	
 
-	exit( 0 );
+	abortCompile( 0 );
 }
 
 /* Print version information and exit. */
-void version()
+void InputData::version()
 {
 	cout << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
 			"Copyright (c) 2001-2015 by Adrian Thurston" << endl;
-	exit( 0 );
+	abortCompile( 0 );
 }
 
-void showHostLangNames()
+void InputData::showHostLangNames()
 {
 	for ( int i = 0; i < numHostLangs; i++ ) {
 		if ( i > 0 )
@@ -179,10 +179,10 @@ void showHostLangNames()
 		cout << hostLangs[i]->name;
 	}
 	cout << endl;
-	exit(0);
+	abortCompile( 0 );
 }
 
-void showHostLangArgs()
+void InputData::showHostLangArgs()
 {
 	for ( int i = 0; i < numHostLangs; i++ ) {
 		if ( i > 0 )
@@ -190,10 +190,10 @@ void showHostLangArgs()
 		cout << hostLangs[i]->arg;
 	}
 	cout << endl;
-	exit(0);
+	abortCompile( 0 );
 }
 
-void showFrontends()
+void InputData::showFrontends()
 {
 	cout << "--colm-frontend";
 	cout << " --reduce-frontend";
@@ -201,19 +201,19 @@ void showFrontends()
 	cout << " --kelbt-frontend";
 #endif
 	cout << endl;
-	exit(0);
+	abortCompile( 0 );
 }
 
-void showBackends()
+void InputData::showBackends()
 {
 	cout << "--direct-backend --colm-backend";
 	cout << endl;
-	exit(0);
+	abortCompile( 0 );
 }
 
-void showStyles( InputData *id )
+void InputData::showStyles()
 {
-	switch ( id->hostLang->lang ) {
+	switch ( hostLang->lang ) {
 	case HostLang::C:
 	case HostLang::D:
 	case HostLang::Go:
@@ -239,7 +239,7 @@ void showStyles( InputData *id )
 
 	}
 
-	exit(0);
+	abortCompile( 0 );
 }
 
 /* Error reporting format. */
@@ -308,7 +308,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "xo:dnmleabjkS:M:I:CDEJZRAOKUYPvHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "r:xo:dnmleabjkS:M:I:CDEJZRAOKUYPvHh?-:sT:F:G:LpV", argc, argv );
 
 	bool showStylesOpt = false;
 
@@ -345,8 +345,13 @@ void InputData::parseArgs( int argc, const char **argv )
 					error() << "more than one output file name was given" << endl;
 				else {
 					/* Ok, remember the output file name. */
-					outputFileName = pc.paramArg;
+					outputFileName = new char[strlen(pc.paramArg)+1];
+					strcpy( (char*)outputFileName, pc.paramArg );
 				}
+				break;
+
+			case 'r':
+				commFileName = pc.paramArg;
 				break;
 
 			/* Flag for turning off duplicate action removal. */
@@ -595,7 +600,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				else {
 					error() << "-T" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
-					exit(1);
+					abortCompile( 1 );
 				}
 				break;
 			case 'F': 
@@ -606,7 +611,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				else {
 					error() << "-F" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
-					exit(1);
+					abortCompile( 1 );
 				}
 				break;
 			case 'G': 
@@ -622,7 +627,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				} else {
 					error() << "-G" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
-					exit(1);
+					abortCompile( 1 );
 				}
 				break;
 
@@ -655,8 +660,7 @@ void InputData::parseArgs( int argc, const char **argv )
 	}
 
 	if ( showStylesOpt )
-		showStyles( this );
-
+		showStyles();
 }
 
 bool langSupportsGoto( const HostLang *hostLang )
@@ -728,7 +732,7 @@ void InputData::checkArgs()
 
 	/* Bail on argument processing errors. */
 	if ( gblErrorCount > 0 )
-		exit(1);
+		abortCompile( 1 );
 
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( inputFileName != 0 && outputFileName != 0 && 
@@ -770,10 +774,48 @@ void InputData::checkArgs()
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
 {
+	int code = 0;
+	InputData id;
+	try {
+		id.parseArgs( argc, argv );
+		id.checkArgs();
+
+		if ( !id.process() )
+			id.abortCompile( 1 );
+	}
+	catch ( const AbortCompile &ac ) {
+		code = ac.code;
+
+		if ( id.commFileName == 0 ) {
+			cout << id.comm;
+		}
+		else {
+			ofstream ofs( id.commFileName, std::fstream::app );
+			ofs << id.comm;
+			ofs.close();
+		}
+	}
+	return code;
+}
+
+int libragel_main( char **result, int argc, const char **argv, const char *input )
+{
 	InputData id;
 
-	id.parseArgs( argc, argv );
-	id.checkArgs();
-	id.process();
+	try {
+		id.inLibRagel = true;
+
+		id.parseArgs( argc, argv );
+		id.checkArgs();
+		id.input = input;
+		id.frontend = ReduceBased;
+		id.process();
+
+		*result = strdup( id.comm.c_str() );
+		// cout << "result: " << *result << endl;
+	}
+	catch ( const AbortCompile &ac ) {
+		*result = strdup( "" );
+	}
 	return 0;
 }

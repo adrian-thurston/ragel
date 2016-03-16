@@ -16,12 +16,7 @@ reduction TopLevel
 		}
 
 		SectionDictEl *sdEl = id->sectionDict.find( machine.c_str() );
-		if ( sdEl == 0 ) {
-			Section *section = new Section( strdup(machine.c_str() ) );
-			sdEl = new SectionDictEl( section->sectionName );
-			sdEl->value = section;
-			id->sectionDict.insert( sdEl );
-		}
+		assert( sdEl != 0 );
 
 		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
@@ -63,7 +58,7 @@ reduction TopLevel
 		if ( exportMachine )
 			exportContext.append( true );
 
-		string name( $def_name->tok.data );
+		string name( $def_name->tok.data, $def_name->tok.length );
 
 		/* Main machine must be an instance. */
 		bool isInstance = false;
@@ -95,7 +90,7 @@ reduction TopLevel
 		if ( exportMachine )
 			exportContext.append( true );
 
-		string name( $def_name->tok.data );
+		string name( $def_name->tok.data, $def_name->tok.length );
 
 		MachineDef *machineDef = $lm->machineDef;
 
@@ -114,14 +109,14 @@ reduction TopLevel
 	# 	[word] :Word
 	ragel::def_name
 	{
-		Token tok;
+		RedToken tok;
 		colm_location loc;
 	}
 
 	ragel::def_name :Word
 	{
 		string data( $word->data, $word->length );
-		$$->tok.set( $word );
+		$$->tok.set( $word, @word );
 		$$->loc = *@1;
 
 		/* Make/get the priority key. The name may have already been referenced
@@ -143,7 +138,7 @@ reduction TopLevel
 	ragel::nfa_union :NfaUnion
 	{
 		InputLoc loc = &$def_name->loc;
-		string name( $def_name->tok.data );
+		string name( $def_name->tok.data, $def_name->tok.length );
 
 		$nfa_expr->nfaUnion->roundsList = $nfa_rounds->roundsList;
 
@@ -336,6 +331,7 @@ reduction TopLevel
 	{
 		string fileName = id->inputFileName;
 		string machine = pd->sectionName;
+		bool fileSpecified = false;
 
 		if ( $include_spec->file.data != 0 ) {
 			fileName = string( $include_spec->file.data, $include_spec->file.length );
@@ -346,12 +342,14 @@ reduction TopLevel
 			char *unescaped = prepareLitString( loc, fileName.c_str(), fileName.size(),
 					length, caseInsensitive );
 			fileName = unescaped;
+
+			fileSpecified = true;
 		}
 
 		if ( $include_spec->machine.data != 0 )
 			machine = string( $include_spec->machine.data, $include_spec->machine.length );
 
-		include( @1, fileName, machine );
+		include( @1, fileSpecified, fileName, machine );
 	}
 
 	# def include_spec
@@ -361,30 +359,26 @@ reduction TopLevel
 
 	ragel::include_spec 
 	{
-		Token machine;
-		Token file;
+		RedToken machine;
+		RedToken file;
 	}
 
 	ragel::include_spec :Machine
 	{
-		$$->machine.set( $word );
-		$$->machine.set( @word );
+		$$->machine.set( $word, @word );
 		$$->file.data = 0;
 	}
 
 	ragel::include_spec :File
 	{
-		$$->file.set( $string );
-		$$->file.set( @string );
+		$$->file.set( $string, @string );
 		$$->machine.data = 0;
 	}
 
 	ragel::include_spec :MachineFile
 	{
-		$$->machine.set( $word );
-		$$->machine.set( @word );
-		$$->file.set( $string );
-		$$->file.set( @string );
+		$$->machine.set( $word, @word );
+		$$->file.set( $string, @string );
 	}
 	
 
@@ -670,16 +664,13 @@ reduction TopLevel
 	# |	[word `( opt_action_arg_list `)] :Args
 	ragel::named_action_ref
 	{
-		Token tok;
 		Action *action;
 	}
 
 	ragel::named_action_ref :Plain
 	{
-		$$->tok.set( $word );
-
 		/* Set the name in the actionDict. */
-		string data( $$->tok.data );
+		string data( $word->data, $word->length );
 		Action *action = pd->actionDict.find( data );
 		if ( action != 0 ) {
 			if ( action->paramList != 0 )
@@ -697,10 +688,8 @@ reduction TopLevel
 
 	ragel::named_action_ref :Args
 	{
-		$$->tok.set( $word );
-
 		/* Set the name in the actionDict. */
-		string data( $$->tok.data );
+		string data( $word->data, $word->length );
 		Action *action = pd->actionDict.find( data );
 		if ( action != 0 ) {
 			if ( action->paramList == 0 )
@@ -2001,7 +1990,9 @@ reduction TopLevel
 
 	ragel::factor :AlphabetNum
 	{
-		$$->factor = new Factor( new Literal( $alphabet_num->tok, Literal::Number ) );
+		$$->factor = new Factor( new Literal( $alphabet_num->tok.loc,
+				$alphabet_num->neg, $alphabet_num->tok.data,
+				$alphabet_num->tok.length, Literal::Number ) );
 	}
 
 	ragel::factor :Word
@@ -2030,18 +2021,15 @@ reduction TopLevel
 
 	ragel::factor :String
 	{
-		Token tok;
-		tok.set( $string );
-		tok.set( @string );
-		$$->factor = new Factor( new Literal( tok, Literal::LitString ) );
+		$$->factor = new Factor( new Literal( @string, false,
+				$string->data, $string->length, Literal::LitString ) );
 	}
 
 	ragel::factor :HexString
 	{
-		Token tok;
-		tok.set( $hex_string );
-		tok.set( @hex_string );
-		$$->factor = new Factor( new Literal( tok, Literal::HexString ) ); }
+		$$->factor = new Factor( new Literal( @hex_string, false,
+		$hex_string->data, $hex_string->length, Literal::HexString ) );
+	}
 
 	ragel::factor :Range
 	{
@@ -2169,9 +2157,7 @@ reduction TopLevel
 	{
 		string data( $re_char->data, $re_char->length );
 		char *c = unescape( data.c_str() );
-		Token tok;
-		tok.set( c, strlen( c ) );
-		$$->reItem = new ReItem( @1, tok );
+		$$->reItem = new ReItem( @re_char, c, strlen(c) );
 		delete[] c;
 	}
 
@@ -2195,7 +2181,7 @@ reduction TopLevel
 		{
 			/* Append the right side to right side of the left and toss the
 			 * right side. */
-			$_reg_or_data->reOrBlock->item->token.append( $reg_or_char->reOrItem->token );
+			$_reg_or_data->reOrBlock->item->data.append( $reg_or_char->reOrItem->data );
 			delete $reg_or_char->reOrItem;
 			$$->reOrBlock = $_reg_or_data->reOrBlock;
 		}
@@ -2222,10 +2208,8 @@ reduction TopLevel
 	{
 		// ReOrItem *reOrItem;
 		char *c = unescape( $re_or_char->data, $re_or_char->length );
-		Token tok;
-		tok.set( c, 1 );
+		$$->reOrItem = new ReOrItem( @re_or_char, c, 1 );
 		delete[] c;
-		$$->reOrItem = new ReOrItem( @re_or_char, tok );
 	}
 
 	ragel::reg_or_char :Range
@@ -2234,6 +2218,8 @@ reduction TopLevel
 		char *low = unescape( $Low->data, $Low->length );
 		char *high = unescape( $High->data, $High->length );
 		$$->reOrItem = new ReOrItem( @re_or_dash, low[0], high[0] );
+		delete[] low;
+		delete[] high;
 	}
 
 
@@ -2243,20 +2229,26 @@ reduction TopLevel
 	# |	[hex] :Hex
 	ragel::alphabet_num
 	{
-		Token tok;
+		bool neg;
+		RedToken tok;
 	}
 
 	ragel::alphabet_num :Uint
 	{
-		$$->tok.set( $uint );
-		$$->tok.set( @uint );
+		$$->neg = false;
+		$$->tok.set( $uint, @uint );
 	}
 
 	ragel::alphabet_num :Neg
 	{
-		$$->tok.set( "-", 1 );
-		$$->tok.append( $uint->data, $uint->length );
-		//$$->tok.loc = @uint;
+		$$->neg = true;
+		$$->tok.set( $uint, @1 );
+	}
+
+	ragel::alphabet_num :Hex
+	{
+		$$->neg = false;
+		$$->tok.set( $hex, @hex );
 	}
 
 	# def range_lit
@@ -2271,20 +2263,15 @@ reduction TopLevel
 	{
 		/* Range literals must have only one char. We restrict this in the
 		 * parse tree. */
-		Token tok;
-		tok.set( $string );
-		$$->literal = new Literal( tok, Literal::LitString );
+		$$->literal = new Literal( @string, false,
+				$string->data, $string->length, Literal::LitString );
 	}
 
 	ragel::range_lit :AN
 	{
-		$$->literal = new Literal( $alphabet_num->tok, Literal::Number );
-	}
-
-	ragel::alphabet_num :Hex
-	{
-		$$->tok.set( $hex );
-		$$->tok.set( @hex );
+		$$->literal = new Literal( $alphabet_num->tok.loc,
+				$alphabet_num->neg, $alphabet_num->tok.data,
+				$alphabet_num->tok.length, Literal::Number );
 	}
 
 	# def lm
@@ -2567,7 +2554,12 @@ reduction TopLevel
 		if ( includeDepth == 0 ) {
 			id->curItem = id->curItem->next;
 			id->curItem->pd = pd;
-			id->checkLastRef( id->curItem );
+			bool success = id->checkLastRef( id->curItem );
+			if ( ! success ) {
+				pda_run->fail_parsing = 1;
+				this->success = false;
+			}
+
 			id->curItem = id->curItem->next;
 		}
 	}
@@ -2592,6 +2584,7 @@ reduction SectionPass
 			sdEl = new SectionDictEl( machine );
 			sdEl->value = new Section( machine );
 			id->sectionDict.insert( sdEl );
+			id->sectionList.append( sdEl->value );
 		}
 
 		section = sdEl->value;
@@ -2648,6 +2641,8 @@ reduction IncludePass
 			incItem->start = @1->byte;
 			incItem->end = @3->byte + $3->length;
 			incItem->length = incItem->end - incItem->start;
+
+			//std::cout << "include pass length:" << incItem->length << std::endl;
 
 			incItem->section = section;
 			incItems.append( incItem );

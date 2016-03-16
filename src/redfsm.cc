@@ -448,7 +448,7 @@ void RedFsmAp::sequentialStateIds()
 /* Stable sort the states by final state status. */
 void RedFsmAp::sortStatesByFinal()
 {
-	/* Move forward through the list and throw final states onto the end. */
+	/* Move forward through the list and move final states onto the end. */
 	RedStateAp *state = 0;
 	RedStateAp *next = stateList.head;
 	RedStateAp *last = stateList.tail;

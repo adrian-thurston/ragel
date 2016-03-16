@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2016 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -31,6 +31,8 @@ FsmAp::FsmAp( FsmCtx *ctx )
 :
 	ctx( ctx ),
 
+	priorInteraction(false),
+
 	/* No start state. */
 	startState(0),
 	errState(0),
@@ -46,6 +48,8 @@ FsmAp::FsmAp( FsmCtx *ctx )
 FsmAp::FsmAp( const FsmAp &graph )
 :
 	ctx( graph.ctx ),
+
+	priorInteraction(false),
 
 	/* Lists start empty. Will be filled by copy. */
 	stateList(),
@@ -150,7 +154,18 @@ FsmAp::~FsmAp()
 	/* Delete all the transitions. */
 	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
 		/* Iterate the out transitions, deleting them. */
-		state->outList.empty();
+		for ( TransList::Iter n, t = state->outList; t.lte(); ) {
+			n = t.next();
+			if ( t->plain() )
+				delete t->tdap();
+			else
+				delete t->tcap();
+			t = n;
+		}
+		state->outList.abandon();
+
+		if ( state->nfaOut != 0 )
+			state->nfaOut->empty();
 	}
 
 	/* Delete all the states. */
@@ -613,7 +628,7 @@ void FsmAp::depthFirstOrdering()
 /* Stable sort the states by final state status. */
 void FsmAp::sortStatesByFinal()
 {
-	/* Move forward through the list and throw final states onto the end. */
+	/* Move forward through the list and move final states onto the end. */
 	StateAp *state = 0;
 	StateAp *next = stateList.head;
 	StateAp *last = stateList.tail;

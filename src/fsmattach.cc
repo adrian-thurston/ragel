@@ -262,7 +262,7 @@ void FsmAp::detachState( StateAp *state )
 		/* Detach the transitions from the source state. */
 		detachTrans( fromState, state, trans );
 		fromState->outList.detach( trans );
-		delete trans;
+		delete trans->tdap();
 	}
 
 	/* Detach the in transitions from the inList list of transitions. */
@@ -282,7 +282,7 @@ void FsmAp::detachState( StateAp *state )
 		if ( trans->tcap()->condList.length() == 0 ) {
 			/* Ok to delete the transition. */
 			fromState->outList.detach( trans );
-			delete trans;
+			delete trans->tcap();
 		}
 	}
 
@@ -295,6 +295,7 @@ void FsmAp::detachState( StateAp *state )
 		TransList::Iter next = trans.next();
 		if ( trans->plain() ) {
 			detachTrans( state, trans->tdap()->toState, trans->tdap() );
+			delete trans->tdap();
 		}
 		else {
 			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); ) {
@@ -303,8 +304,9 @@ void FsmAp::detachState( StateAp *state )
 				delete cond;
 				cond = next;
 			}
+			trans->tcap()->condList.abandon();
+			delete trans->tcap();
 		}
-		delete trans;
 		trans = next;
 	}
 
@@ -328,10 +330,14 @@ void FsmAp::detachState( StateAp *state )
 	}
 
 	if ( state->nfaOut != 0 ) {
-		for ( NfaTransList::Iter t = *state->nfaOut; t.lte(); t++ ) {
+		for ( NfaTransList::Iter t = *state->nfaOut; t.lte(); ) {
+			NfaTransList::Iter next = t.next();
 			detachFromNfa( t->fromState, t->toState, t );
 			state->nfaOut->detach( t );
+			delete t;
+			t = next;
 		}
+		state->nfaOut->abandon();
 		delete state->nfaOut;
 		state->nfaOut = 0;
 	}
@@ -547,6 +553,7 @@ CondAp *FsmAp::crossCondTransitions( StateAp *from, TransAp *destParent,
 		/* Src trans has a higher priority than dest, src overwrites dest.
 		 * Detach dest and return a copy of src. */
 		detachTrans( from, destTrans->toState, destTrans );
+		delete destTrans;
 		retTrans = dupCondTrans( from, destParent, srcTrans );
 	}
 	else if ( compareRes > 0 ) {
@@ -615,7 +622,8 @@ void FsmAp::freeEffectiveTrans( TransAp *trans )
 		delete sc;
 		sc = next;
 	}
-	delete trans;
+	trans->tcap()->condList.abandon();
+	delete trans->tcap();
 }
 
 TransDataAp *FsmAp::crossTransitionsBothPlain( StateAp *from,
@@ -630,6 +638,7 @@ TransDataAp *FsmAp::crossTransitionsBothPlain( StateAp *from,
 		/* Src trans has a higher priority than dest, src overwrites dest.
 		 * Detach dest and return a copy of src. */
 		detachTrans( from, destTrans->toState, destTrans );
+		delete destTrans;
 		retTrans = dupTransData( from, srcTrans );
 	}
 	else if ( compareRes > 0 ) {

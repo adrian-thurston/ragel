@@ -204,26 +204,22 @@ struct Token
 	int length;
 	ParserLoc loc;
 
-	void append( const Token &other )
-		{ append( other.data, other.length ); }
+	void set( const char *str, int len, colm_location *cl);
+	void set( colm_data *cd, colm_location *cl);
+	void set( const char *str, int len, const InputLoc &loc );
+	void set( const char *str, int len, const ParserLoc &loc );
 
-	void append( const char *otherData, int otherLen );
-	void set( const char *str, int len );
-	void set( colm_location *cl );
-	void set( colm_data *cd );
+private:
+	void _set( const char *str, int len );
 };
 
 struct RedToken
 {
-	char *data;
+	const char *data;
 	int length;
-	InputLoc loc;
+	ParserLoc loc;
 
-	void append( const char *otherData, int otherLen );
-	void append( const Token &other )
-		{ append( other.data, other.length ); }
-
-	void set( const char *str, int len );
+	void set( colm_data *cd, colm_location *cl);
 };
 
 
@@ -253,7 +249,7 @@ struct VarDef
 	~VarDef();
 
 	/* Parse tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( const InputLoc &loc, ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -325,7 +321,7 @@ struct LongestMatch
 		lmSwitchHandlesError(false) { }
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 	void transferScannerLeavingActions( FsmAp *graph );
@@ -377,7 +373,7 @@ struct MachineDef
 
 	~MachineDef();
 
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 	
@@ -403,8 +399,8 @@ struct Join
 	}
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
-	FsmAp *walkJoin( ParseData *pd );
+	FsmRes walk( ParseData *pd );
+	FsmRes walkJoin( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -445,7 +441,7 @@ struct Expression
 	~Expression();
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd, bool lastInSeq = true );
+	FsmRes walk( ParseData *pd, bool lastInSeq = true );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -466,27 +462,27 @@ typedef Vector<Term*> TermVect;
 struct NfaUnion
 {
 	/* Construct with only a term. */
-	NfaUnion() { }
-
+	NfaUnion() : roundsList(0) { }
 	~NfaUnion();
 
-	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
-	void makeNameTree( ParseData *pd );
-	void resolveNameRefs( ParseData *pd );
-	bool strike( ParseData *pd, FsmAp *fsmAp );
-	void nfaTermCheck( ParseData *pd );
-	void nfaCondsCheck( ParseData *pd );
-	void nfaBreadthCheck( ParseData *pd );
-	void condsDensity( ParseData *pd, StateAp *state, long depth );
+	FsmRes condCostFromState( ParseData *pd, FsmAp *fsm, StateAp *state, long depth );
+	FsmRes condCostSearch( ParseData *pd, FsmAp *fsmAp );
+
 	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
 
-	double checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state );
-	void checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state,
+	void breadthFromState( ParseData *pd, FsmAp *fsm, StateAp *state,
 			long depth, int maxDepth, double stateScore, double &total );
-	void checkBreadth( ParseData *pd, FsmAp *fsm );
-	void checkBreadth( ParseData *pd, FsmAp *fsm, StateAp *state, long depth,
-			double ss, double *scores );
+	double breadthFromEntry( ParseData *pd, FsmAp *fsm, StateAp *state );
+	FsmRes checkBreadth( ParseData *pd, FsmAp *fsm );
+
+	FsmRes nfaTermCheck( ParseData *pd );
+	FsmRes nfaCondsCheck( ParseData *pd );
+	FsmRes nfaBreadthCheck( ParseData *pd );
+
+	/* Tree traversal. */
+	FsmRes walk( ParseData *pd );
+	void makeNameTree( ParseData *pd );
+	void resolveNameRefs( ParseData *pd );
 
 	/* Node data. */
 	TermVect terms;
@@ -527,7 +523,7 @@ struct Term
 	
 	~Term();
 
-	FsmAp *walk( ParseData *pd, bool lastInSeq = true );
+	FsmRes walk( ParseData *pd, bool lastInSeq = true );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -557,7 +553,7 @@ struct FactorWithAug
 	~FactorWithAug();
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -608,7 +604,7 @@ struct FactorWithRep
 	~FactorWithRep();
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -641,7 +637,7 @@ struct FactorWithNeg
 	~FactorWithNeg();
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
@@ -712,13 +708,13 @@ struct Factor
 	~Factor();
 
 	/* Tree traversal. */
-	FsmAp *walk( ParseData *pd );
+	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
-	FsmAp *condPlus( ParseData *pd );
-	FsmAp *condStar( ParseData *pd );
-	FsmAp *noMaxRep( ParseData *pd );
+	FsmRes condPlus( ParseData *pd );
+	FsmRes condStar( ParseData *pd );
+
 	void condCost( Action *action );
 	void applyGuardedPrior( ParseData *pd, FsmAp *rtnVal );
 	void applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal );
@@ -764,12 +760,17 @@ struct Literal
 {
 	enum LiteralType { Number, LitString, HexString };
 
-	Literal( const Token &token, LiteralType type )
-		: token(token), type(type) { }
+	Literal( const InputLoc &loc, bool neg, const char *_data, int len, LiteralType type )
+		: loc(loc), neg(neg), type(type)
+	{
+		data.append( _data, len );
+	}
 
 	FsmAp *walk( ParseData *pd );
 	
-	Token token;
+	InputLoc loc;
+	bool neg;
+	Vector<char> data;
 	LiteralType type;
 };
 
@@ -799,18 +800,24 @@ struct ReItem
 {
 	enum ReItemType { Data, Dot, OrBlock, NegOrBlock };
 	
-	ReItem( const InputLoc &loc, const Token &token ) 
-		: loc(loc), token(token), star(false), type(Data) { }
+	ReItem( const InputLoc &loc, const char *_data, int len ) 
+	:
+		loc(loc), star(false), type(Data)
+	{
+		data.append( _data, len );
+	}
+
 	ReItem( const InputLoc &loc, ReItemType type )
 		: loc(loc), star(false), type(type) { }
+
 	ReItem( const InputLoc &loc, ReOrBlock *orBlock, ReItemType type )
 		: loc(loc), orBlock(orBlock), star(false), type(type) { }
 
 	~ReItem();
-	FsmAp *walk( ParseData *pd, RegExpr *rootRegex );
+	FsmRes walk( ParseData *pd, RegExpr *rootRegex );
 
 	InputLoc loc;
-	Token token;
+	Vector<char> data;
 	ReOrBlock *orBlock;
 	bool star;
 	ReItemType type;
@@ -840,15 +847,20 @@ struct ReOrItem
 {
 	enum ReOrItemType { Data, Range };
 
-	ReOrItem( const InputLoc &loc, const Token &token ) 
-		: loc(loc), token(token), type(Data) {}
+	ReOrItem( const InputLoc &loc, const char *_data, int len ) 
+	:
+		loc(loc), type(Data)
+	{
+		data.append( _data, len );
+	}
+
 	ReOrItem( const InputLoc &loc, char lower, char upper )
 		: loc(loc), lower(lower), upper(upper), type(Range) { }
 
 	FsmAp *walk( ParseData *pd, RegExpr *rootRegex );
 
 	InputLoc loc;
-	Token token;
+	Vector<char> data;
 	char lower;
 	char upper;
 	ReOrItemType type;
@@ -901,6 +913,8 @@ struct InlineItem
 		longestMatchPart(0), wrappedAction(0), condSpace(condSpace),
 		condKeySet(condKeySet), type(type)
 	{} 
+
+	~InlineItem();
 	
 	InputLoc loc;
 	std::string data;
@@ -926,6 +940,12 @@ struct InlineBlock
 {
 	InlineBlock( const InputLoc &loc, InlineList *inlineList )
 		: loc(loc), inlineList(inlineList) {}
+
+	~InlineBlock()
+	{
+		inlineList->empty();
+		delete inlineList;
+	}
 
 	InputLoc loc;
 	InlineList *inlineList;

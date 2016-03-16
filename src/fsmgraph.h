@@ -172,9 +172,12 @@ public:
 		costId(0),
 		paramList(0),
 		argListMap(0),
+		substOf(0),
 		argList(0)
 	{
 	}
+
+	~Action();
 
 	static Action *cons( const InputLoc &loc, Action *substOf,
 			ActionArgList *argList, int condId )
@@ -624,6 +627,11 @@ struct TransCondAp
 		condList()
 	{}
 
+	~TransCondAp()
+	{
+		condList.empty();
+	}
+
 	/* Cond trans list. */
 	CondList condList;
 };
@@ -976,6 +984,11 @@ typedef Vector<long> LongVect;
 struct CondData
 {
 	CondSpaceMap condSpaceMap;
+
+	~CondData()
+	{
+		condSpaceMap.empty();
+	}
 };
 
 /* All FSM operations must be between machines that point to the same context
@@ -1000,6 +1013,12 @@ struct FsmCtx
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
+	}
+
+	~FsmCtx()
+	{
+		delete keyOps;
+		delete condData;
 	}
 
 	KeyOps *keyOps;
@@ -1685,6 +1704,82 @@ typedef BstMapEl< int, StateAp* > EntryMapEl;
 typedef BstMap< int, StateAp* > EntryMap;
 typedef Vector<EntryMapEl> EntryMapBase;
 
+struct BreadthCost
+{
+	BreadthCost( std::string name, double cost )
+		: name(name), cost(cost) {}
+
+	std::string name;
+	double cost;
+};
+
+struct BreadthResult
+{
+	BreadthResult( double start ) : start(start) {}
+
+	double start;
+	Vector<BreadthCost> costs;
+};
+
+/* Result of an operation. */
+struct FsmRes
+{
+	struct Fsm {};
+	struct Aborted {};
+	struct TooManyStates {};
+	struct PriorInteraction {};
+	struct CondCostTooHigh {};
+	struct RepetitionError {};
+	struct BreadthCheck {};
+	struct AnalysisOk {};
+
+	enum Type
+	{
+		TypeFsm,
+		TypeAborted,
+		TypeTooManyStates,
+		TypePriorInteraction,
+		TypeCondCostTooHigh,
+		TypeRepetitionError,
+		TypeBreadthCheck,
+		TypeAnalysisOk,
+	};
+
+	FsmRes( const Fsm &, FsmAp *fsm )
+		: fsm(fsm), type(TypeFsm) {}
+
+	FsmRes( const Aborted & )
+		: fsm(0), type(TypeAborted) {}
+
+	FsmRes( const TooManyStates & )
+		: fsm(0), type(TypeTooManyStates) {}
+
+	FsmRes( const PriorInteraction &, long long guardId )
+		: fsm(0), type(TypePriorInteraction), id(guardId) {}
+
+	FsmRes( const CondCostTooHigh &, long long costId )
+		: fsm(0), type(TypeCondCostTooHigh), id(costId) {}
+
+	FsmRes( const RepetitionError & )
+		: fsm(0), type(TypeRepetitionError) {}
+
+	FsmRes( const BreadthCheck &, BreadthResult *breadth )
+		: fsm(0), type(TypeBreadthCheck), breadth(breadth) {}
+
+	FsmRes( const AnalysisOk & )
+		: fsm(0), type(TypeAnalysisOk) {}
+
+	bool success() { return fsm != 0; }
+
+	FsmAp *fsm;
+	Type type;
+
+	union {
+		long long id;
+		BreadthResult *breadth;
+	};
+};
+
 /* Graph class that implements actions and priorities. */
 struct FsmAp 
 {
@@ -1694,6 +1789,9 @@ struct FsmAp
 	~FsmAp();
 
 	FsmCtx *ctx;
+
+	bool priorInteraction;
+	int guardId;
 
 	/* The list of states. */
 	StateList stateList;
@@ -1759,10 +1857,10 @@ private:
 			const CondSet &set, const CondKeySet &vals );
 
 public:
-	void embedCondition( StateAp *state, const CondSet &set,
+	static FsmRes embedCondition( FsmAp *fsm, StateAp *state, const CondSet &set,
 			const CondKeySet &vals );
 
-	void startFsmCondition( Action *condAction, bool sense );
+	FsmRes startFsmCondition( Action *condAction, bool sense );
 	void allTransCondition( Action *condAction, bool sense );
 	void leaveFsmCondition( Action *condAction, bool sense );
 
@@ -1949,7 +2047,9 @@ public:
 	/* Make all states that are combinations of other states and that
 	 * have not yet had their out transitions filled in. This will 
 	 * empty out stateDict and stFil. */
-	void fillInStates();
+	void cleanAbortedFill();
+	bool overStateLimit();
+	FsmRes fillInStates();
 	void nfaFillInStates();
 
 	/*
@@ -2003,47 +2103,50 @@ public:
 	 * Building basic machines
 	 */
 
-	void concatFsm( Key c );
-	void concatFsm( Key *str, int len );
-	void concatFsmCI( Key *str, int len );
-	void orFsm( Key *set, int len );
-	void rangeFsm( Key low, Key high );
-	void rangeStarFsm( Key low, Key high );
-	void emptyFsm( );
-	void lambdaFsm( );
+	static FsmAp *concatFsm( FsmCtx *ctx, Key c );
+	static FsmAp *concatFsm( FsmCtx *ctx, Key *str, int len );
+	static FsmAp *concatFsmCI( FsmCtx *ctx, Key *str, int len );
+	static FsmAp *orFsm( FsmCtx *ctx, Key *set, int len );
+	static FsmAp *rangeFsm( FsmCtx *ctx, Key low, Key high );
+	static FsmAp *rangeStarFsm( FsmCtx *ctx, Key low, Key high );
+	static FsmAp *emptyFsm( FsmCtx *ctx );
+	static FsmAp *lambdaFsm( FsmCtx *ctx );
 
 	/*
 	 * Fsm operators.
 	 */
 
-	void starOp( );
-	void repeatOp( int times );
-	void optionalRepeatOp( int times );
-	void concatOp( FsmAp *other );
-	void nfaRepeatOp( Action *push, Action *pop, Action *init,
-			Action *stay, Action *repeat, Action *exit, int &curActionOrd );
-	void unionOp( FsmAp *other );
-	void intersectOp( FsmAp *other );
-	void subtractOp( FsmAp *other );
-	void epsilonOp();
-	void joinOp( int startId, int finalId, FsmAp **others, int numOthers );
-	void globOp( FsmAp **others, int numOthers );
-	void deterministicEntry();
+	static FsmRes starOp( FsmAp *fsm );
+	static FsmRes repeatOp( FsmAp *fsm, int times );
+	static FsmRes optionalRepeatOp( FsmAp *fsm, int times );
+	static FsmRes concatOp( FsmAp *fsm, FsmAp *other );
+	static FsmRes unionOp( FsmAp *fsm, FsmAp *other );
+	static FsmRes intersectOp( FsmAp *fsm, FsmAp *other );
+	static FsmRes subtractOp( FsmAp *fsm, FsmAp *other );
+	static FsmRes epsilonOp( FsmAp *fsm );
+	static FsmRes joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers );
 
 	/* Results in an NFA. */
-	void nfaUnionOp( FsmAp **others, int n, int depth );
+	static FsmRes nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth );
+	static FsmRes nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
+			Action *stay, Action *repeat, Action *exit, int &curActionOrd );
+
+	/* Make a new start state that has no entry points. Will not change the
+	 * meaning of the fsm. */
+	static FsmRes isolateStartState( FsmAp *fsm );
 
 	/*
 	 * Operator workers
 	 */
+	void globOp( FsmAp **others, int numOthers );
+	void deterministicEntry();
 
 	/* Determine if there are any entry points into a start state other than
 	 * the start state. */
 	bool isStartStateIsolated();
 
 	/* Make a new start state that has no entry points. Will not change the
-	 * identity of the fsm. */
-	void isolateStartState();
+	 * meaning of the fsm. */
 	StateAp *dupStartState();
 
 	/* Workers for resolving epsilon transitions. */
@@ -2052,8 +2155,8 @@ public:
 	void resolveEpsilonTrans();
 
 	/* Workers for concatenation and union. */
-	void doConcat( FsmAp *other, StateSet *fromStates, bool optional );
-	void doOr( FsmAp *other );
+	FsmRes doConcat( FsmAp *other, StateSet *fromStates, bool optional );
+	FsmRes doUnion( FsmAp *other );
 
 	/*
 	 * Final states

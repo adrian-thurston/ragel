@@ -1,4 +1,6 @@
 #include "flatvar.h"
+#include "parsedata.h"
+#include "inputdata.h"
 
 void FlatVar::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
@@ -15,7 +17,7 @@ void FlatVar::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 void FlatVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	error() << "cannot use fcall in -B mode" << std::endl;
-	exit(1);
+	pd->id->abortCompile( 1 );
 }
 
 void FlatVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -36,7 +38,7 @@ void FlatVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 void FlatVar::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	error() << "cannot use fcall in -B mode" << std::endl;
-	exit(1);
+	pd->id->abortCompile( 1 );
 }
 
 void FlatVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
@@ -59,7 +61,7 @@ void FlatVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bo
 void FlatVar::RET( ostream &ret, bool inFinish )
 {
 	error() << "cannot use fret in -B mode" << std::endl;
-	exit(1);
+	pd->id->abortCompile( 1 );
 }
 
 void FlatVar::NRET( ostream &ret, bool inFinish )
@@ -79,7 +81,7 @@ void FlatVar::NRET( ostream &ret, bool inFinish )
 void FlatVar::BREAK( ostream &ret, int targState, bool csForced )
 {
 	error() << "cannot use fbreak in -B mode" << std::endl;
-	exit(1);
+	pd->id->abortCompile( 1 );
 }
 
 void FlatVar::NBREAK( ostream &ret, int targState, bool csForced )

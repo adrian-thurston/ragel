@@ -112,6 +112,8 @@ struct NameInst
 		loc(loc), parent(parent), name(name), id(id), isLabel(isLabel),
 		isLongestMatch(false), numRefs(0), numUses(0), start(0), final(0) {}
 
+	~NameInst();
+
 	InputLoc loc;
 
 	/* Keep parent pointers in the name tree to retrieve 
@@ -233,9 +235,9 @@ struct ParseData
 	void printNameInst( NameInst *nameInst, int level );
 
 	/* Make the graph from a graph dict node. Does minimization. */
-	FsmAp *makeInstance( GraphDictEl *gdNode );
-	FsmAp *makeSpecific( GraphDictEl *gdNode );
-	FsmAp *makeAll();
+	FsmRes makeInstance( GraphDictEl *gdNode );
+	FsmRes makeSpecific( GraphDictEl *gdNode );
+	FsmRes makeAll();
 
 	/* Checking the contents of actions. */
 	void checkAction( Action *action );
@@ -245,7 +247,7 @@ struct ParseData
 	void analyzeGraph( FsmAp *graph );
 	void makeExports();
 
-	void prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang );
+	FsmRes prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang );
 	void generateXML( ostream &out );
 	void generateReduced( const char *inputFileName, CodeStyle codeStyle,
 			std::ostream &out, const HostLang *hostLang );
@@ -419,7 +421,7 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd );
 Key makeFsmKeyNum( char *str, const InputLoc &loc, ParseData *pd );
 Key makeFsmKeyChar( char c, ParseData *pd );
 void makeFsmKeyArray( Key *result, char *data, int len, ParseData *pd );
-void makeFsmUniqueKeyArray( KeySet &result, char *data, int len, 
+void makeFsmUniqueKeyArray( KeySet &result, const char *data, int len, 
 		bool caseInsensitive, ParseData *pd );
 FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd );
 FsmAp *dotFsm( ParseData *pd );

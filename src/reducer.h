@@ -24,6 +24,7 @@ char *unescape( const char *s, int slen );
 char *unescape( const char *s );
 
 struct SectionPass;
+struct IncludePass;
 
 struct TopLevel
 {
@@ -42,7 +43,9 @@ struct TopLevel
 		
 		/* Should be passed into the load, somehow. */
 		targetMachine(0),
-		searchMachine(0)
+		searchMachine(0),
+		paramList(0),
+		success(true)
 	{
 		exportContext.append( false );
 	}
@@ -65,6 +68,7 @@ struct TopLevel
 	const char *searchMachine;
 
 	ActionParamList *paramList;
+	bool success;
 
 	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,
@@ -78,8 +82,11 @@ struct TopLevel
 	void include( const InputLoc &incLoc, string fileName, string machine );
 
 	void reduceFile( const char *inputFileName );
-	void reduceString( const char *data );
+	void reduceStr( const char *inputFileName, const char *input );
 	void topReduce( const char *inputFileName );
+
+	void loadIncludeData( IncludeRec *el, IncludePass &includePass, const string &fileName );
+	void include( const InputLoc &incLoc, bool fileSpecified, string fileName, string machine );
 };
 
 struct SectionPass
@@ -95,6 +102,7 @@ struct SectionPass
 	Section *section;
 
 	void reduceFile( const char *inputFileName );
+	void reduceStr( const char *inputFileName, const char *input );
 
 	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,
@@ -103,13 +111,15 @@ struct SectionPass
 
 struct IncludePass
 {
-	IncludePass( const string targetMachine )
+	IncludePass( InputData *id, const string targetMachine )
 	:
+		id(id),
 		targetMachine(targetMachine),
 		section(0)
 	{
 	}
 
+	InputData *id;
 	const string targetMachine;
 	string sectionMachine;
 	Section *section;
@@ -117,6 +127,7 @@ struct IncludePass
 	SectionDict sectionDict2;
 
 	void reduceFile( const char *inputFileName, const HostLang *hostLang );
+	void reduceStr( const char *inputFileName, const HostLang *hostLang, const char *input );
 
 	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,

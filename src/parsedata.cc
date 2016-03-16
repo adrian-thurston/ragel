@@ -38,7 +38,7 @@ using namespace std;
 
 const char mainMachine[] = "main";
 
-void Token::set( const char *str, int len )
+void Token::_set( const char *str, int len )
 {
 	length = len;
 	data = new char[len+1];
@@ -46,28 +46,44 @@ void Token::set( const char *str, int len )
 	data[len] = 0;
 }
 
-
-void Token::append( const char *otherData, int otherLen )
+void Token::set( const char *str, int len, colm_location *cl )
 {
-	int newLength = length + otherLen;
-	char *newString = new char[newLength+1];
-	memcpy( newString, data, length );
-	memcpy( newString + length, otherData, otherLen );
-	newString[newLength] = 0;
-	data = newString;
-	length = newLength;
+	_set( str, len );
+
+	if ( cl != 0 ) {
+		loc.fileName = cl->name;
+		loc.line = cl->line;
+		loc.col = cl->column;
+	}
 }
 
-void Token::set( colm_location *cl )
+void Token::set( colm_data *cd, colm_location *cl )
 {
+	set( cd->data, cd->length, cl );
+}
+
+void Token::set( const char *str, int len, const InputLoc &l )
+{
+	_set( str, len );
+
+	loc.fileName = l.fileName;
+	loc.line = l.line;
+	loc.col = l.col;
+}
+
+void Token::set( const char *str, int len, const ParserLoc &l )
+{
+	_set( str, len );
+	loc = l;
+}
+
+void RedToken::set( colm_data *cd, colm_location *cl )
+{
+	data = cd->data;
+	length = cd->length;
 	loc.fileName = cl->name;
 	loc.line = cl->line;
 	loc.col = cl->column;
-}
-
-void Token::set( colm_data *cd )
-{
-	set( cd->data, cd->length );
 }
 
 
@@ -213,13 +229,13 @@ void makeFsmKeyArray( Key *result, char *data, int len, ParseData *pd )
 
 /* Like makeFsmKeyArray except the result has only unique keys. They ordering
  * will be changed. */
-void makeFsmUniqueKeyArray( KeySet &result, char *data, int len, 
+void makeFsmUniqueKeyArray( KeySet &result, const char *data, int len, 
 		bool caseInsensitive, ParseData *pd )
 {
 	/* Use a transitions list for getting unique keys. */
 	if ( pd->fsmCtx->keyOps->isSigned ) {
 		/* Copy from a char star type. */
-		char *src = data;
+		const char *src = data;
 		for ( int si = 0; si < len; si++ ) {
 			Key key( src[si] );
 			result.insert( key );
@@ -233,7 +249,7 @@ void makeFsmUniqueKeyArray( KeySet &result, char *data, int len,
 	}
 	else {
 		/* Copy from an unsigned byte ptr type. */
-		unsigned char *src = (unsigned char*) data;
+		const unsigned char *src = (unsigned char*) data;
 		for ( int si = 0; si < len; si++ ) {
 			Key key( src[si] );
 			result.insert( key );
@@ -249,15 +265,15 @@ void makeFsmUniqueKeyArray( KeySet &result, char *data, int len,
 
 FsmAp *dotFsm( ParseData *pd )
 {
-	FsmAp *retFsm = new FsmAp( pd->fsmCtx );
-	retFsm->rangeFsm( pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
+	FsmAp *retFsm = FsmAp::rangeFsm( pd->fsmCtx,
+			pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
 	return retFsm;
 }
 
 FsmAp *dotStarFsm( ParseData *pd )
 {
-	FsmAp *retFsm = new FsmAp( pd->fsmCtx );
-	retFsm->rangeStarFsm( pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
+	FsmAp *retFsm = FsmAp::rangeStarFsm( pd->fsmCtx,
+			pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
 	return retFsm;
 }
 
@@ -276,138 +292,125 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 	}
 	case BT_Ascii: {
 		/* Ascii characters 0 to 127. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( 0, 127 );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, 0, 127 );
 		break;
 	}
 	case BT_Extend: {
 		/* Ascii extended characters. This is the full byte range. Dependent
 		 * on signed, vs no signed. If the alphabet is one byte then just use
 		 * dot fsm. */
-		if ( isSigned ) {
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->rangeFsm( -128, 127 );
-		}
-		else {
-			retFsm = new FsmAp( pd->fsmCtx );
-			retFsm->rangeFsm( 0, 255 );
-		}
+		if ( isSigned )
+			retFsm = FsmAp::rangeFsm( pd->fsmCtx, -128, 127 );
+		else
+			retFsm = FsmAp::rangeFsm( pd->fsmCtx, 0, 255 );
 		break;
 	}
 	case BT_Alpha: {
 		/* Alpha [A-Za-z]. */
-		FsmAp *upper = new FsmAp( pd->fsmCtx ), *lower = new FsmAp( pd->fsmCtx );
-		upper->rangeFsm( 'A', 'Z' );
-		lower->rangeFsm( 'a', 'z' );
-		upper->unionOp( lower );
+		FsmAp *upper = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'Z' );
+		FsmAp *lower = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'z' );
+		FsmRes res = FsmAp::unionOp( upper, lower );
+		upper = res.fsm;
 		upper->minimizePartition2();
 		retFsm = upper;
 		break;
 	}
 	case BT_Digit: {
 		/* Digits [0-9]. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( '0', '9' );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, '0', '9' );
 		break;
 	}
 	case BT_Alnum: {
 		/* Alpha numerics [0-9A-Za-z]. */
-		FsmAp *digit = new FsmAp( pd->fsmCtx ), *lower = new FsmAp( pd->fsmCtx );
-		FsmAp *upper = new FsmAp( pd->fsmCtx );
-		digit->rangeFsm( '0', '9' );
-		upper->rangeFsm( 'A', 'Z' );
-		lower->rangeFsm( 'a', 'z' );
-		digit->unionOp( upper );
-		digit->unionOp( lower );
+		FsmAp *digit = FsmAp::rangeFsm( pd->fsmCtx, '0', '9' );
+		FsmAp *upper = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'Z' );
+		FsmAp *lower = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'z' );
+		FsmRes res1 = FsmAp::unionOp( digit, upper );
+		digit = res1.fsm;
+		FsmRes res2 = FsmAp::unionOp( digit, lower );
+		digit = res2.fsm;
 		digit->minimizePartition2();
 		retFsm = digit;
 		break;
 	}
 	case BT_Lower: {
 		/* Lower case characters. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( 'a', 'z' );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'z' );
 		break;
 	}
 	case BT_Upper: {
 		/* Upper case characters. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( 'A', 'Z' );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'Z' );
 		break;
 	}
 	case BT_Cntrl: {
 		/* Control characters. */
-		FsmAp *cntrl = new FsmAp( pd->fsmCtx );
-		FsmAp *highChar = new FsmAp( pd->fsmCtx );
-		cntrl->rangeFsm( 0, 31 );
-		highChar->concatFsm( 127 );
-		cntrl->unionOp( highChar );
+		FsmAp *cntrl = FsmAp::rangeFsm( pd->fsmCtx, 0, 31 );
+		FsmAp *highChar = FsmAp::concatFsm( pd->fsmCtx, 127 );
+		FsmRes res = FsmAp::unionOp( cntrl, highChar );
+		cntrl = res.fsm;
 		cntrl->minimizePartition2();
 		retFsm = cntrl;
 		break;
 	}
 	case BT_Graph: {
 		/* Graphical ascii characters [!-~]. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( '!', '~' );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, '!', '~' );
 		break;
 	}
 	case BT_Print: {
 		/* Printable characters. Same as graph except includes space. */
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->rangeFsm( ' ', '~' );
+		retFsm = FsmAp::rangeFsm( pd->fsmCtx, ' ', '~' );
 		break;
 	}
 	case BT_Punct: {
 		/* Punctuation. */
-		FsmAp *range1 = new FsmAp( pd->fsmCtx );
-		FsmAp *range2 = new FsmAp( pd->fsmCtx );
-		FsmAp *range3 = new FsmAp( pd->fsmCtx ); 
-		FsmAp *range4 = new FsmAp( pd->fsmCtx );
-		range1->rangeFsm( '!', '/' );
-		range2->rangeFsm( ':', '@' );
-		range3->rangeFsm( '[', '`' );
-		range4->rangeFsm( '{', '~' );
-		range1->unionOp( range2 );
-		range1->unionOp( range3 );
-		range1->unionOp( range4 );
+		FsmAp *range1 = FsmAp::rangeFsm( pd->fsmCtx, '!', '/' );
+		FsmAp *range2 = FsmAp::rangeFsm( pd->fsmCtx, ':', '@' );
+		FsmAp *range3 = FsmAp::rangeFsm( pd->fsmCtx, '[', '`' );
+		FsmAp *range4 = FsmAp::rangeFsm( pd->fsmCtx, '{', '~' );
+
+		FsmRes res1 = FsmAp::unionOp( range1, range2 );
+		range1 = res1.fsm;
+		FsmRes res2 = FsmAp::unionOp( range1, range3 );
+		range1 = res2.fsm;
+		FsmRes res3 = FsmAp::unionOp( range1, range4 );
+		range1 = res3.fsm;
 		range1->minimizePartition2();
 		retFsm = range1;
 		break;
 	}
 	case BT_Space: {
 		/* Whitespace: [\t\v\f\n\r ]. */
-		FsmAp *cntrl = new FsmAp( pd->fsmCtx );
-		FsmAp *space = new FsmAp( pd->fsmCtx );
-		cntrl->rangeFsm( '\t', '\r' );
-		space->concatFsm( ' ' );
-		cntrl->unionOp( space );
+		FsmAp *cntrl = FsmAp::rangeFsm( pd->fsmCtx, '\t', '\r' );
+		FsmAp *space = FsmAp::concatFsm( pd->fsmCtx, ' ' );
+		FsmRes res = FsmAp::unionOp( cntrl, space );
+		cntrl = res.fsm;
 		cntrl->minimizePartition2();
 		retFsm = cntrl;
 		break;
 	}
 	case BT_Xdigit: {
 		/* Hex digits [0-9A-Fa-f]. */
-		FsmAp *digit = new FsmAp( pd->fsmCtx );
-		FsmAp *upper = new FsmAp( pd->fsmCtx );
-		FsmAp *lower = new FsmAp( pd->fsmCtx );
-		digit->rangeFsm( '0', '9' );
-		upper->rangeFsm( 'A', 'F' );
-		lower->rangeFsm( 'a', 'f' );
-		digit->unionOp( upper );
-		digit->unionOp( lower );
+		FsmAp *digit = FsmAp::rangeFsm( pd->fsmCtx, '0', '9' );
+		FsmAp *upper = FsmAp::rangeFsm( pd->fsmCtx, 'A', 'F' );
+		FsmAp *lower = FsmAp::rangeFsm( pd->fsmCtx, 'a', 'f' );
+
+		FsmRes res1 = FsmAp::unionOp( digit, upper );
+		digit = res1.fsm;
+		FsmRes res2 = FsmAp::unionOp( digit, lower );
+		digit = res2.fsm;
+
 		digit->minimizePartition2();
 		retFsm = digit;
 		break;
 	}
 	case BT_Lambda: {
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->lambdaFsm();
+		retFsm = FsmAp::lambdaFsm( pd->fsmCtx );
 		break;
 	}
 	case BT_Empty: {
-		retFsm = new FsmAp( pd->fsmCtx );
-		retFsm->emptyFsm();
+		retFsm = FsmAp::emptyFsm( pd->fsmCtx );
 		break;
 	}}
 
@@ -427,6 +430,15 @@ bool NameInst::anyRefsRec()
 	}
 
 	return false;
+}
+
+NameInst::~NameInst()
+{
+	/* Recurse on the implicit final state and then all children. */
+	if ( final != 0 )
+		delete final;
+	for ( NameVect::Iter name = childVect; name.lte(); name++ )
+		delete *name;
 }
 
 /*
@@ -474,6 +486,7 @@ ParseData::ParseData( InputData *id, string sectionName,
 	rootName(0),
 	exportsRootName(0),
 	nextEpsilonResolvedLink(0),
+	nameIndex(0),
 	nextLongestMatchId(1),
 	lmRequiresErrorState(false),
 	cgd(0)
@@ -491,6 +504,23 @@ ParseData::ParseData( InputData *id, string sectionName,
 /* Clean up the data collected during a parse. */
 ParseData::~ParseData()
 {
+	graphDict.empty();
+	actionList.empty();
+
+	if ( nameIndex != 0 )
+		delete[] nameIndex;
+
+	if ( rootName != 0 )
+		delete rootName;
+	if ( exportsRootName != 0 )
+		delete exportsRootName;
+
+	delete fsmCtx;
+
+	delete prePushExpr;
+	delete postPopExpr;
+	delete nfaPrePushExpr;
+	delete nfaPostPopExpr;
 }
 
 /* Make a name id in the current name instantiation scope if it is not
@@ -1101,71 +1131,73 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 }
 
 /* Make the graph from a graph dict node. Does minimization and state sorting. */
-FsmAp *ParseData::makeInstance( GraphDictEl *gdNode )
+FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 {
 	if ( id->printStatistics )
 		cout << "compiling\t" << sectionName << endl;
 
 	/* Build the graph from a walk of the parse tree. */
-	FsmAp *graph = gdNode->value->walk( this );
+	FsmRes graph = gdNode->value->walk( this );
+	if ( !graph.success() )
+		return graph;
 
 	/* Resolve any labels that point to multiple states. Any labels that are
 	 * still around are referenced only by gotos and calls and they need to be
 	 * made into deterministic entry points. */
-	graph->deterministicEntry();
+	graph.fsm->deterministicEntry();
 
 	/*
 	 * All state construction is now complete.
 	 */
 
 	/* Transfer actions from the out action tables to eof action tables. */
-	for ( StateSet::Iter state = graph->finStateSet; state.lte(); state++ )
-		graph->transferOutActions( *state );
+	for ( StateSet::Iter state = graph.fsm->finStateSet; state.lte(); state++ )
+		graph.fsm->transferOutActions( *state );
 
 	/* Transfer global error actions. */
-	for ( StateList::Iter state = graph->stateList; state.lte(); state++ )
-		graph->transferErrorActions( state, 0 );
+	for ( StateList::Iter state = graph.fsm->stateList; state.lte(); state++ )
+		graph.fsm->transferErrorActions( state, 0 );
 	
 	if ( id->wantDupsRemoved )
-		removeActionDups( graph );
+		removeActionDups( graph.fsm );
 
 	/* Remove unreachable states. There should be no dead end states. The
 	 * subtract and intersection operators are the only places where they may
 	 * be created and those operators clean them up. */
-	graph->removeUnreachableStates();
+	graph.fsm->removeUnreachableStates();
 
 	/* No more fsm operations are to be done. Action ordering numbers are
 	 * no longer of use and will just hinder minimization. Clear them. */
-	graph->nullActionKeys();
+	graph.fsm->nullActionKeys();
 
 	/* Transition priorities are no longer of use. We can clear them
 	 * because they will just hinder minimization as well. Clear them. */
-	graph->clearAllPriorities();
+	graph.fsm->clearAllPriorities();
 
-	if ( graph->ctx->minimizeOpt != MinimizeNone ) {
+	if ( graph.fsm->ctx->minimizeOpt != MinimizeNone ) {
 		/* Minimize here even if we minimized at every op. Now that function
 		 * keys have been cleared we may get a more minimal fsm. */
-		switch ( graph->ctx->minimizeLevel ) {
+		switch ( graph.fsm->ctx->minimizeLevel ) {
 			#ifdef TO_UPGRADE_CONDS
 			case MinimizeApprox:
-				graph->minimizeApproximate();
+				graph.fsm->minimizeApproximate();
 				break;
 			#endif
 			#ifdef TO_UPGRADE_CONDS
 			case MinimizeStable:
-				graph->minimizeStable();
+				graph.fsm->minimizeStable();
 				break;
 			#endif
 			case MinimizePartition1:
-				graph->minimizePartition1();
+				graph.fsm->minimizePartition1();
 				break;
 			case MinimizePartition2:
-				graph->minimizePartition2();
+				graph.fsm->minimizePartition2();
 				break;
 		}
 	}
 
-	graph->compressTransitions();
+	graph.fsm->compressTransitions();
 
 	return graph;
 }
@@ -1185,7 +1217,7 @@ void ParseData::printNameTree()
 	}
 }
 
-FsmAp *ParseData::makeSpecific( GraphDictEl *gdNode )
+FsmRes ParseData::makeSpecific( GraphDictEl *gdNode )
 {
 	/* Build the name tree and supporting data structures. */
 	makeNameTree( gdNode );
@@ -1207,12 +1239,12 @@ FsmAp *ParseData::makeSpecific( GraphDictEl *gdNode )
 
 	/* Just building the specified graph. */
 	initNameWalk();
-	FsmAp *mainGraph = makeInstance( gdNode );
+	FsmRes mainGraph = makeInstance( gdNode );
 
 	return mainGraph;
 }
 
-FsmAp *ParseData::makeAll()
+FsmRes ParseData::makeAll()
 {
 	/* Build the name tree and supporting data structures. */
 	makeNameTree( 0 );
@@ -1236,14 +1268,19 @@ FsmAp *ParseData::makeAll()
 	/* Make all the instantiations, we know that main exists in this list. */
 	initNameWalk();
 	for ( GraphList::Iter glel = instanceList; glel.lte();  glel++ ) {
-		if ( glel->key == MAIN_MACHINE ) {
-			/* Main graph is always instantiated. */
-			mainGraph = makeInstance( glel );
+		FsmRes res = makeInstance( glel );
+		if ( !res.success() ) {
+			for ( int i = 0; i < numOthers; i++ )
+				delete graphs[i];
+			delete[] graphs;
+			return res;
 		}
-		else {
-			/* Instantiate and store in others array. */
-			graphs[numOthers++] = makeInstance( glel );
-		}
+
+		/* Main graph is always instantiated. */
+		if ( glel->key == MAIN_MACHINE )
+			mainGraph = res.fsm;
+		else
+			graphs[numOthers++] = res.fsm;
 	}
 
 	if ( mainGraph == 0 )
@@ -1255,7 +1292,7 @@ FsmAp *ParseData::makeAll()
 	}
 
 	delete[] graphs;
-	return mainGraph;
+	return FsmRes( FsmRes::Fsm(), mainGraph );
 }
 
 void ParseData::analyzeAction( Action *action, InlineList *inlineList )
@@ -1432,16 +1469,16 @@ void ParseData::makeExports()
 		/* Check if this var def is an export. */
 		if ( gdel->value->isExport ) {
 			/* Build the graph from a walk of the parse tree. */
-			FsmAp *graph = gdel->value->walk( this );
+			FsmRes graph = gdel->value->walk( this );
 
 			/* Build the graph from a walk of the parse tree. */
-			if ( !graph->checkSingleCharMachine() ) {
+			if ( !graph.fsm->checkSingleCharMachine() ) {
 				error(gdel->loc) << "bad export machine, must define "
 						"a single character" << endl;
 			}
 			else {
 				/* Safe to extract the key and declare the export. */
-				Key exportKey = graph->startState->outList.head->lowKey;
+				Key exportKey = graph.fsm->startState->outList.head->lowKey;
 				exportList.append( new Export( gdel->value->name, exportKey ) );
 			}
 		}
@@ -1485,24 +1522,33 @@ void ParseData::createNfaActions( FsmAp *fsm )
 	}
 }
 
-void ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang )
+FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang )
 {
 	initKeyOps( hostLang );
 	makeRootNames();
 	initLongestMatchData();
 
 	/* Make the graph, do minimization. */
-	if ( graphDictEl == 0 )
-		sectionGraph = makeAll();
-	else
-		sectionGraph = makeSpecific( graphDictEl );
+	if ( graphDictEl == 0 ) {
+		FsmRes res = makeAll();
+		if ( !res.success() )
+			return res;
+		sectionGraph = res.fsm;
+	}
+	else {
+		FsmRes res = makeSpecific( graphDictEl );
+		if ( !res.success() )
+			return res;
+		sectionGraph = res.fsm;
+	}
+	
 	
 	/* Compute exports from the export definitions. */
 	makeExports();
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( gblErrorCount > 0 )
-		return;
+		return FsmRes( FsmRes::Aborted() );
 
 	createNfaActions( sectionGraph );
 
@@ -1528,6 +1574,8 @@ void ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hos
 	sectionGraph->depthFirstOrdering();
 	sectionGraph->sortStatesByFinal();
 	sectionGraph->setStateNumbers( 0 );
+
+	return FsmRes( FsmRes::Fsm(), sectionGraph );
 }
 
 void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,

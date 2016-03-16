@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2015 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2016 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -1094,19 +1094,27 @@ nonterm priority_aug
 # Priority change specs.
 priority_aug: 
 	priority_aug_num final {
+		char *data = $1->token.data;
+		if ( $1->pos || $1->neg ) {
+			data = new char[$1->token.length + 2];
+			data[0] = $1->pos ? '+' : '-';
+			memcpy( data + 1, $1->token.data, $1->token.length );
+			data[$1->token.length + 1] = 0;
+		}
+
 		// Convert the priority number to a long. Check for overflow.
 		errno = 0;
-		//std::cerr << "PRIOR AUG: " << $1->token.data << std::endl;
-		long aug = strtol( $1->token.data, 0, 10 );
+		//std::cerr << "PRIOR AUG: " << data << std::endl;
+		long aug = strtol( data, 0, 10 );
 		if ( errno == ERANGE && aug == LONG_MAX ) {
 			/* Priority number too large. Recover by setting the priority to 0. */
-			error($1->token.loc) << "priority number " << $1->token.data << 
+			error($1->token.loc) << "priority number " << data << 
 					" overflows" << endl;
 			$$->priorityNum = 0;
 		}
 		else if ( errno == ERANGE && aug == LONG_MIN ) {
 			/* Priority number too large in the neg. Recover by using 0. */
-			error($1->token.loc) << "priority number " << $1->token.data << 
+			error($1->token.loc) << "priority number " << data << 
 					" underflows" << endl;
 			$$->priorityNum = 0;
 		}
@@ -1114,25 +1122,36 @@ priority_aug:
 			/* No overflow or underflow. */
 			$$->priorityNum = aug;
 		}
+
+		if ( $1->pos || $1->neg )
+			delete[] data;
 	};
 
-nonterm priority_aug_num uses token_type;
+nonterm priority_aug_num
+{
+	bool neg;
+	bool pos;
+	Token token;
+};
+
 
 priority_aug_num:
 	TK_UInt final {
+		$$->pos = false;
+		$$->neg = false;
 		$$->token = *$1;
 	};
 priority_aug_num:
 	'+' TK_UInt final {
-		$$->token.set( "+", 1 );
-		$$->token.loc = $1->loc;
-		$$->token.append( *$2 );
+		$$->pos = true;
+		$$->neg = false;
+		$$->token.set( $2->data, $2->length, $1->loc );
 	};
 priority_aug_num:
 	'-' TK_UInt final {
-		$$->token.set( "-", 1 );
-		$$->token.loc = $1->loc;
-		$$->token.append( *$2 );
+		$$->pos = false;
+		$$->neg = true;
+		$$->token.set( $2->data, $2->length, $1->loc );
 	};
 
 nonterm local_err_name
@@ -1260,12 +1279,14 @@ nonterm factor
 factor: 
 	TK_Literal final {
 		/* Create a new factor node going to a concat literal. */
-		$$->factor = new Factor( new Literal( *$1, Literal::LitString ) );
+		$$->factor = new Factor( new Literal( $1->loc, false, $1->data,
+				$1->length, Literal::LitString ) );
 	};
 factor: 
 	alphabet_num final {
 		/* Create a new factor node going to a literal number. */
-		$$->factor = new Factor( new Literal( $1->token, Literal::Number ) );
+		$$->factor = new Factor( new Literal( $1->token.loc, $1->neg,
+				$1->token.data, $1->token.length, Literal::Number ) );
 	};
 factor:
 	TK_Word final {
@@ -1401,29 +1422,36 @@ nonterm range_lit
 range_lit:
 	TK_Literal final {
 		/* Range literas must have only one char. We restrict this in the parse tree. */
-		$$->literal = new Literal( *$1, Literal::LitString );
+		$$->literal = new Literal( $1->loc, false, $1->data,
+				$1->length, Literal::LitString );
 	};
 range_lit:
 	alphabet_num final {
 		/* Create a new literal number. */
-		$$->literal = new Literal( $1->token, Literal::Number );
+		$$->literal = new Literal( $1->token.loc, $1->neg,
+				$1->token.data, $1->token.length, Literal::Number );
 	};
 
-nonterm alphabet_num uses token_type;
+nonterm alphabet_num 
+{
+	bool neg;
+	Token token;
+};
 
 # Any form of a number that can be used as a basic machine. */
 alphabet_num:
 	TK_UInt final { 
+		$$->neg = false;
 		$$->token = *$1;
 	};
 alphabet_num: 
 	'-' TK_UInt final { 
-		$$->token.set( "-", 1 );
-		$$->token.loc = $1->loc;
-		$$->token.append( *$2 );
+		$$->neg = true;
+		$$->token.set( $2->data, $2->length, $1->loc );
 	};
 alphabet_num: 
 	TK_Hex final { 
+		$$->neg = false;
 		$$->token = *$1;
 	};
 #
@@ -1449,7 +1477,7 @@ regular_expr:
 		{
 			/* Append the right side to the right side of the left and toss the
 			 * right side. */
-			$1->regExpr->item->token.append( $2->reItem->token );
+			$1->regExpr->item->data.append( $2->reItem->data );
 			delete $2->reItem;
 			$$->regExpr = $1->regExpr;
 		}
@@ -1500,7 +1528,7 @@ regular_expr_char:
 	};
 regular_expr_char:
 	RE_Char final {
-		$$->reItem = new ReItem( $1->loc, *$1 );
+		$$->reItem = new ReItem( $1->loc, $1->data, $1->length );
 	};
 
 # The data inside of a [] expression in a regular expression. Accepts any
@@ -1522,7 +1550,7 @@ regular_expr_or_data:
 		{
 			/* Append the right side to right side of the left and toss the
 			 * right side. */
-			$1->reOrBlock->item->token.append( $2->reOrItem->token );
+			$1->reOrBlock->item->data.append( $2->reOrItem->data );
 			delete $2->reOrItem;
 			$$->reOrBlock = $1->reOrBlock;
 		}
@@ -1545,7 +1573,7 @@ nonterm regular_expr_or_char
 
 regular_expr_or_char:
 	RE_Char final {
-		$$->reOrItem = new ReOrItem( $1->loc, *$1 );
+		$$->reOrItem = new ReOrItem( $1->loc, $1->data, $1->length );
 	};
 regular_expr_or_char:
 	RE_Char RE_Dash RE_Char final {
@@ -1902,7 +1930,7 @@ int Parser6::token( InputLoc &loc, int tokId, char *tokstart, int toklen )
 	int res = parseLangEl( tokId, &token );
 	if ( res < 0 ) {
 		parse_error(tokId, token) << "parse error" << endl;
-		exit(1);
+		pd->id->abortCompile( 1 );
 	}
 	return res;
 }
