@@ -12,19 +12,19 @@ rl hex_number
 rl hex_char
 	/ '0x' [0-9a-fA-F]{2}  /
 
-# Optimization for hex chars that appear near to each other. Converts the
-# string of 2-digit hex chars into a single string. The parse tree walker
-# concatenates the chars.
-rl hex_string /
-	hex_char
-	(
-		(
-			[\t\n ]+ |
-			[\t\n ]* '.' [\t\n ]*
-		)
-		hex_char
-	)+
-/
+## Optimization for hex chars that appear near to each other. Converts the
+## string of 2-digit hex chars into a single string. The parse tree walker
+## concatenates the chars.
+#rl hex_string /
+#	hex_char
+#	(
+#		(
+#			[\t\n ]+ |
+#			[\t\n ]* '.' [\t\n ]*
+#		)
+#		hex_char
+#	)+
+#/
 
 rl NL / '\n' /
 
@@ -122,7 +122,7 @@ namespace ragel
 			"'" ( [^'\\] | '\\' any )* "'" 'i'?
 		/
 
-		token hex_string / hex_string /
+		# token hex_string / hex_string /
 
 		token lex_regex_open /'/'/ -ni
 		token lex_sqopen_pos /'['/ -ni
@@ -355,7 +355,7 @@ namespace ragel
 		[alphabet_num] :AlphabetNum
 	|	[word] :Word
 	|	[string] :String
-	|	[hex_string] :HexString
+	#|	[hex_string] :HexString
 	|	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
 	|	[lex_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
 	|	[lex_regex_open regex re_close] :Regex

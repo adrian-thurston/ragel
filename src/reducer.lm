@@ -2025,11 +2025,11 @@ reduction TopLevel
 				$string->data, $string->length, Literal::LitString ) );
 	}
 
-	ragel::factor :HexString
-	{
-		$$->factor = new Factor( new Literal( @hex_string, false,
-		$hex_string->data, $hex_string->length, Literal::HexString ) );
-	}
+	#ragel::factor :HexString
+	#{
+	#	$$->factor = new Factor( new Literal( @hex_string, false,
+	#	$hex_string->data, $hex_string->length, Literal::HexString ) );
+	#}
 
 	ragel::factor :Range
 	{
