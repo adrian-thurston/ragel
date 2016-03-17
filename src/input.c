@@ -815,17 +815,13 @@ static void stream_prepend_data( struct stream_impl *is, const char *data, long 
 	}
 	else {
 		if ( is_source_stream( is ) ) {
-			// message( "sourcing line info\n" );
-
-			/* Steal the location information. */
+			/* Steal the location information. Note that name allocations are
+			 * managed separately from streams and so ptr overwrite transfer is
+			 * safe. */
 			stream_t *s = ((stream_t*)is->queue->tree);
 			is->line = s->impl->line;
 			is->column = s->impl->column;
 			is->byte = s->impl->byte;
-
-			/* Dup the name otherwise we will break stream destructor. */
-			if ( is->name )
-				free(is->name);
 			is->name = strdup(s->impl->name);
 		}
 
