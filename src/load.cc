@@ -1071,7 +1071,7 @@ struct LoadRagel
 
 		if ( pd->actionDict.find( name ) ) {
 			/* Recover by just ignoring the duplicate. */
-			error(loc) << "action \"" << name << "\" already defined" << endl;
+			pd->id->error(loc) << "action \"" << name << "\" already defined" << endl;
 		}
 		else {
 			Action *newAction = loadActionBlock( name, ActionSpec.action_block() );
@@ -1085,7 +1085,7 @@ struct LoadRagel
 
 		if ( pd->prePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error(loc) << "prepush code already defined" << endl;
+			pd->id->error(loc) << "prepush code already defined" << endl;
 		}
 
 		InlineList *inlineList;
@@ -1106,7 +1106,7 @@ struct LoadRagel
 
 		if ( pd->postPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error(loc) << "postpop code already defined" << endl;
+			pd->id->error(loc) << "postpop code already defined" << endl;
 		}
 
 		InlineList *inlineList;
@@ -1127,7 +1127,7 @@ struct LoadRagel
 
 		if ( pd->nfaPrePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error(loc) << "nfaprepush code already defined" << endl;
+			pd->id->error(loc) << "nfaprepush code already defined" << endl;
 		}
 
 		pd->nfaPrePushExpr = loadInlineBlock( PrePushBlock );
@@ -1139,7 +1139,7 @@ struct LoadRagel
 
 		if ( pd->nfaPostPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error(loc) << "nfapostpop code already defined" << endl;
+			pd->id->error(loc) << "nfapostpop code already defined" << endl;
 		}
 
 		pd->nfaPostPopExpr = loadInlineBlock( PostPopBlock );
@@ -1163,7 +1163,7 @@ struct LoadRagel
 		}
 		else {
 			// Recover by ignoring the duplicate.
-			error(loc) << "fsm \"" << name << "\" previously defined" << endl;
+			pd->id->error(loc) << "fsm \"" << name << "\" previously defined" << endl;
 		}
 	}
 
@@ -1329,12 +1329,12 @@ struct LoadRagel
 				GraphDictEl *gdNode = pd->graphDict.find( s );
 				if ( gdNode == 0 ) {
 					/* Recover by returning null as the factor node. */
-					error(loc) << "graph lookup of \"" << s << "\" failed" << endl;
+					pd->id->error(loc) << "graph lookup of \"" << s << "\" failed" << endl;
 					factor = 0;
 				}
 				else if ( gdNode->isInstance ) {
 					/* Recover by retuning null as the factor node. */
-					error(loc) << "references to graph instantiations not allowed "
+					pd->id->error(loc) << "references to graph instantiations not allowed "
 							"in expressions" << endl;
 					factor = 0;
 				}
@@ -1367,7 +1367,7 @@ struct LoadRagel
 				RegExpr *regExp = loadRegex( FactorTree.regex() );
 				bool caseInsensitive = false;
 				string re_close = FactorTree.re_close().text();
-				checkLitOptions( FactorTree.re_close().loc(), re_close.c_str(),
+				checkLitOptions( pd->id, FactorTree.re_close().loc(), re_close.c_str(),
 						re_close.size(), caseInsensitive );
 				if ( caseInsensitive )
 					regExp->caseInsensitive = true;
@@ -1456,7 +1456,7 @@ struct LoadRagel
 		long rep = strtol( FactorRepNum.text().c_str(), 0, 10 );
 		if ( errno == ERANGE && rep == LONG_MAX ) {
 			// Repetition too large. Recover by returing repetition 1. */
-			error(loc) << "repetition number " << FactorRepNum.text() << " overflows" << endl;
+			pd->id->error(loc) << "repetition number " << FactorRepNum.text() << " overflows" << endl;
 			rep = 1;
 		}
 		return rep;
@@ -1544,7 +1544,7 @@ struct LoadRagel
 				Action *action = pd->actionDict.find( s );
 				if ( action == 0 ) {
 					/* Will recover by returning null as the action. */
-					error(loc) << "action lookup of \"" << s << "\" failed" << endl;
+					pd->id->error(loc) << "action lookup of \"" << s << "\" failed" << endl;
 				}
 				return action;
 			}
@@ -1784,13 +1784,13 @@ struct LoadRagel
 		long aug = strtol( data.c_str(), 0, 10 );
 		if ( errno == ERANGE && aug == LONG_MAX ) {
 			/* Priority number too large. Recover by setting the priority to 0. */
-			error(loc) << "priority number " << data << 
+			pd->id->error(loc) << "priority number " << data << 
 					" overflows" << endl;
 			priorityNum = 0;
 		}
 		else if ( errno == ERANGE && aug == LONG_MIN ) {
 			/* Priority number too large in the neg. Recover by using 0. */
-			error(loc) << "priority number " << data << 
+			pd->id->error(loc) << "priority number " << data << 
 					" underflows" << endl;
 			priorityNum = 0;
 		}
@@ -2172,7 +2172,7 @@ struct LoadRagel
 		/* Main machine must be an instance. */
 		bool isInstance = false;
 		if ( name == MAIN_MACHINE ) {
-			warning(loc) << "main machine will be implicitly instantiated" << endl;
+			pd->id->warning(loc) << "main machine will be implicitly instantiated" << endl;
 			isInstance = true;
 		}
 
@@ -2236,13 +2236,13 @@ struct LoadRagel
 		errno = 0;
 		depth = strtol( depthText, 0, 10 );
 		if ( depth == LONG_MAX && errno == ERANGE )
-			error(Spec.Depth().loc()) << "depth " << depthText << " overflows" << endl;
+			pd->id->error(Spec.Depth().loc()) << "depth " << depthText << " overflows" << endl;
 
 		const char *groupText = Spec.Group().text().c_str();
 		errno = 0;
 		groups = strtol( groupText, 0, 10 );
 		if ( depth == LONG_MAX && errno == ERANGE )
-			error(Spec.Group().loc()) << "group " << groupText << " overflows" << endl;
+			pd->id->error(Spec.Group().loc()) << "group " << groupText << " overflows" << endl;
 	}
 
 	NfaRoundVect *loadNfaRoundList( ragel::nfa_round_list RoundList )
@@ -2300,7 +2300,7 @@ struct LoadRagel
 		InlineList *inlineList = loadInlineExpr( ActionExpr );
 		bool wasSet = pd->setVariable( Var.text().c_str(), inlineList );
 		if ( !wasSet )
-			error(loc) << "bad variable name: " << Var.text() << endl;
+			pd->id->error(loc) << "bad variable name: " << Var.text() << endl;
 	}
 
 	void loadGetKey( ragel::action_expr ActionExpr )
@@ -2317,7 +2317,7 @@ struct LoadRagel
 				string one = AlphTypeType.W1().text();
 				if ( ! pd->setAlphType( loc, hostLang, one.c_str() ) ) {
 					// Recover by ignoring the alphtype statement.
-					error(loc) << "\"" << one << 
+					pd->id->error(loc) << "\"" << one << 
 							"\" is not a valid alphabet type" << endl;
 				}
 				break;
@@ -2328,7 +2328,7 @@ struct LoadRagel
 				string two = AlphTypeType.W2().text();
 				if ( ! pd->setAlphType( loc, hostLang, one.c_str(), two.c_str() ) ) {
 					// Recover by ignoring the alphtype statement.
-					error(loc) << "\"" << one << 
+					pd->id->error(loc) << "\"" << one << 
 							"\" is not a valid alphabet type" << endl;
 				}
 				break;
@@ -2356,7 +2356,7 @@ struct LoadRagel
 			InputLoc loc = IncludeSpec.loc();
 			long length;
 			bool caseInsensitive;
-			char *unescaped = prepareLitString( loc, fileName.c_str(), fileName.size(),
+			char *unescaped = prepareLitString( pd->id, loc, fileName.c_str(), fileName.size(),
 					length, caseInsensitive );
 			fileName = unescaped;
 		}
@@ -2429,7 +2429,7 @@ struct LoadRagel
 
 		long length;
 		bool caseInsensitive;
-		char *unescaped = prepareLitString( loc,
+		char *unescaped = prepareLitString( pd->id, loc,
 					fileName.c_str(), fileName.size(),
 					length, caseInsensitive );
 
@@ -2452,7 +2452,7 @@ struct LoadRagel
 		if ( Start == 0 ) {
 			gblErrorCount += 1;
 			InputLoc loc( Error.loc() );
-			error(loc) << fileName << ": parse error: " << Error.text() << std::endl;
+			pd->id->error(loc) << fileName << ": parse error: " << Error.text() << std::endl;
 			return;
 		}
 
@@ -2474,7 +2474,7 @@ struct LoadRagel
 			 * was given, or because we are in an included file and the machine
 			 * name did not match the machine name we were looking for. */
 			if ( includeDepth == 0 ) {
-				error(loc) << "this specification has no name, nor does any previous"
+				pd->id->error(loc) << "this specification has no name, nor does any previous"
 					" specification" << endl;
 			}
 
@@ -2695,7 +2695,7 @@ struct LoadRagel
 		if ( Start == 0 ) {
 			gblErrorCount += 1;
 			InputLoc loc( Error.loc() );
-			error(loc) << inputFileName << ": parse error: " << Error.text() << std::endl;
+			pd->id->error(loc) << inputFileName << ": parse error: " << Error.text() << std::endl;
 			return;
 		}
 

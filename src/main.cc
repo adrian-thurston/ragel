@@ -276,34 +276,34 @@ ostream &operator<<( ostream &out, const InputLoc &loc )
 int gblErrorCount = 0;
 
 /* Print the opening to a warning in the input, then return the error ostream. */
-ostream &warning( const InputLoc &loc )
+ostream &InputData::warning( const InputLoc &loc )
 {
 	std::cerr << loc << ": warning: ";
 	return std::cerr;
 }
 
 /* Print the opening to a program error, then return the error stream. */
-ostream &error()
+ostream &InputData::error()
 {
 	gblErrorCount += 1;
 	std::cerr << PROGNAME ": ";
 	return std::cerr;
 }
 
-ostream &error( const InputLoc &loc )
+ostream &InputData::error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
 	std::cerr << loc << ": ";
 	return std::cerr;
 }
 
-std::ostream &stats()
+std::ostream &InputData::stats()
 {
 	return std::cout;
 }
 
 /* Requested info. */
-std::ostream &info()
+std::ostream &InputData::info()
 {
 	return std::cout;
 }

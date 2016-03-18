@@ -374,6 +374,17 @@ struct InputData
 	bool parseReduce();
 
 	void abortCompile( int code );
+
+	/* Error reporting. */
+	std::ostream &error();
+	std::ostream &error( const InputLoc &loc ); 
+	std::ostream &warning( const InputLoc &loc ); 
+
+	/* Stats reporting. */
+	std::ostream &stats();
+	
+	/* Requested info. */
+	std::ostream &info();
 };
 
 

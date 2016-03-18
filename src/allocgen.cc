@@ -127,20 +127,20 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 			if ( id->backendFeature == GotoFeature )
 				codeGen = new SwitchLoopGoto(args);
 			else
-				error() << "unsupported lang/style combination" << endp;
+				id->error() << "unsupported lang/style combination" << endp;
 			break;
 		case GenSwitchExp:
 			if ( id->backendFeature == GotoFeature )
 				codeGen = new SwitchExpGoto(args);
 			else
-				error() << "unsupported lang/style combination" << endp;
+				id->error() << "unsupported lang/style combination" << endp;
 			break;
 
 		case GenIpGoto:
 			if ( id->backendFeature == GotoFeature )
 				codeGen = new IpGoto(args);
 			else
-				error() << "unsupported lang/style combination" << endp;
+				id->error() << "unsupported lang/style combination" << endp;
 			break;
 		}
 	}

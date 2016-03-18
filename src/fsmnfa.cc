@@ -216,7 +216,7 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 
 
 /* Unions others with fsm. Others are deleted. */
-FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
+FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth, ostream &stats )
 {
 	/* Mark existing NFA states as NFA_REP states, which excludes them from the
 	 * prepare NFA round. We must treat them as final NFA states and not try to
@@ -296,18 +296,18 @@ FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
 	else {
 		/* Merge the start states. */
 		if ( fsm->ctx->printStatistics )
-			stats() << "nfa-fill-round\t0" << endl;
+			stats << "nfa-fill-round\t0" << endl;
 
 		fsm->nfaMergeStates( fsm->startState, startStateSet.data, startStateSet.length() );
 
 		long removed = fsm->removeUnreachableStates();
 		if ( fsm->ctx->printStatistics )
-			stats() << "round-unreach\t" << removed << endl;
+			stats << "round-unreach\t" << removed << endl;
 
 		/* Fill in any new states made from merging. */
 		for ( long i = 1; i < depth; i++ ) {
 			if ( fsm->ctx->printStatistics )
-				stats() << "nfa-fill-round\t" << i << endl;
+				stats << "nfa-fill-round\t" << i << endl;
 
 			if ( fsm->nfaList.length() == 0 )
 				break;
@@ -316,7 +316,7 @@ FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
 
 			long removed = fsm->removeUnreachableStates();
 			if ( fsm->ctx->printStatistics )
-				stats() << "round-unreach\t" << removed << endl;
+				stats << "round-unreach\t" << removed << endl;
 		}
 
 		fsm->finalizeNfaRound();
@@ -332,22 +332,22 @@ FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth )
 		}
 
 		if ( fsm->ctx->printStatistics ) {
-			stats() << "fill-list\t" << count << endl;
-			stats() << "state-dict\t" << fsm->stateDict.length() << endl;
-			stats() << "states\t" << fsm->stateList.length() << endl;
-			stats() << "max-ss\t" << maxStateSetSize << endl;
+			stats << "fill-list\t" << count << endl;
+			stats << "state-dict\t" << fsm->stateDict.length() << endl;
+			stats << "states\t" << fsm->stateList.length() << endl;
+			stats << "max-ss\t" << maxStateSetSize << endl;
 		}
 
 		fsm->removeUnreachableStates();
 
 		if ( fsm->ctx->printStatistics )
-			stats() << "post-unreachable\t" << fsm->stateList.length() << endl;
+			stats << "post-unreachable\t" << fsm->stateList.length() << endl;
 
 		fsm->minimizePartition2();
 
 		if ( fsm->ctx->printStatistics ) {
-			stats() << "post-min\t" << fsm->stateList.length() << std::endl;
-			stats() << std::endl;
+			stats << "post-min\t" << fsm->stateList.length() << std::endl;
+			stats << std::endl;
 		}
 	}
 

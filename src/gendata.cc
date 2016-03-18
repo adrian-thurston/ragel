@@ -1569,7 +1569,7 @@ void CodeGenData::analyzeMachine()
 
 void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 {
-	warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
+	pd->id->warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
 }
 
 void CodeGenData::writeStatement( InputLoc &loc, int nargs,
@@ -1591,8 +1591,8 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 		}
 
 		if ( pd->id->printStatistics ) {
-			stats() << "fsm-name\t" << fsmName << std::endl;
-			stats() << "fsm-states\t" << redFsm->stateList.length() << std::endl;
+			pd->id->stats() << "fsm-name\t" << fsmName << std::endl;
+			pd->id->stats() << "fsm-states\t" << redFsm->stateList.length() << std::endl;
 		}
 
 		writeData();
@@ -1638,7 +1638,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 	}
 	else {
 		/* EMIT An error here. */
-		error(loc) << "unrecognized write command \"" << 
+		pd->id->error(loc) << "unrecognized write command \"" << 
 				args[0] << "\"" << std::endl;
 	}
 }

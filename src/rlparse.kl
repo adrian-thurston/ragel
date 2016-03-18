@@ -91,7 +91,7 @@ pre_push_spec:
 	final {
 		if ( pd->prePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error($2->loc) << "pre_push code already defined" << endl;
+			pd->id->error($2->loc) << "pre_push code already defined" << endl;
 		}
 
 		pd->prePushExpr = new InlineBlock( $2->loc, $3->inlineList );
@@ -103,7 +103,7 @@ post_pop_spec:
 	final {
 		if ( pd->postPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error($2->loc) << "post_pop code already defined" << endl;
+			pd->id->error($2->loc) << "post_pop code already defined" << endl;
 		}
 
 		pd->postPopExpr = new InlineBlock( $2->loc, $3->inlineList );
@@ -114,7 +114,7 @@ nfa_pre_push_spec:
 	final {
 		if ( pd->nfaPrePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error($2->loc) << "nfa_pre_push code already defined" << endl;
+			pd->id->error($2->loc) << "nfa_pre_push code already defined" << endl;
 		}
 
 		pd->nfaPrePushExpr = new InlineBlock( $2->loc, $3->inlineList );
@@ -125,7 +125,7 @@ nfa_post_pop_spec:
 	final {
 		if ( pd->nfaPostPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error($2->loc) << "nfa_post_pop code already defined" << endl;
+			pd->id->error($2->loc) << "nfa_post_pop code already defined" << endl;
 		}
 
 		pd->nfaPostPopExpr = new InlineBlock( $2->loc, $3->inlineList );
@@ -154,7 +154,7 @@ assignment:
 		/* Main machine must be an instance. */
 		bool isInstance = false;
 		if ( strcmp($2->token.data, mainMachine) == 0 ) {
-			warning($2->token.loc) << 
+			pd->id->warning($2->token.loc) << 
 					"main machine will be implicitly instantiated" << endl;
 			isInstance = true;
 		}
@@ -195,11 +195,11 @@ nfa_round_spec:
 		errno = 0;
 		$$->depth = strtol( $1->data, 0, 10 );
 		if ( $$->depth == LONG_MAX && errno == ERANGE )
-			error($1->loc) << "rounds " << $1->data << " overflows" << endl;
+			pd->id->error($1->loc) << "rounds " << $1->data << " overflows" << endl;
 
 		$$->grouping = strtol( $3->data, 0, 10 );
 		if ( $$->grouping == LONG_MAX && errno == ERANGE )
-			error($3->loc) << "grouping " << $3->data << " overflows" << endl;
+			pd->id->error($3->loc) << "grouping " << $3->data << " overflows" << endl;
 	};
 
 nonterm nfa_round_list
@@ -350,7 +350,7 @@ action_spec:
 	final {
 		if ( pd->actionDict.find( $2->data ) ) {
 			/* Recover by just ignoring the duplicate. */
-			error($2->loc) << "action \"" << $2->data << "\" already defined" << endl;
+			pd->id->error($2->loc) << "action \"" << $2->data << "\" already defined" << endl;
 		}
 		else {
 			/* Add the action to the list of actions. */
@@ -374,7 +374,7 @@ alphtype_spec:
 	KW_AlphType TK_Word TK_Word ';' final {
 		if ( ! pd->setAlphType( $1->loc, hostLang, $2->data, $3->data ) ) {
 			// Recover by ignoring the alphtype statement.
-			error($2->loc) << "\"" << $2->data << 
+			pd->id->error($2->loc) << "\"" << $2->data << 
 					" " << $3->data << "\" is not a valid alphabet type" << endl;
 		}
 	};
@@ -383,7 +383,7 @@ alphtype_spec:
 	KW_AlphType TK_Word ';' final {
 		if ( ! pd->setAlphType( $1->loc, hostLang, $2->data ) ) {
 			// Recover by ignoring the alphtype statement.
-			error($2->loc) << "\"" << $2->data << 
+			pd->id->error($2->loc) << "\"" << $2->data << 
 					"\" is not a valid alphabet type" << endl;
 		}
 	};
@@ -413,7 +413,7 @@ variable_spec:
 		/* FIXME: Need to implement the rest of this. */
 		bool wasSet = pd->setVariable( $3->data, $4->inlineList );
 		if ( !wasSet )
-			error($3->loc) << "bad variable name" << endl;
+			pd->id->error($3->loc) << "bad variable name" << endl;
 	};
 
 opt_whitespace: opt_whitespace IL_WhiteSpace;
@@ -1001,7 +1001,7 @@ named_action_ref:
 		}
 		else {
 			/* Will recover by returning null as the action. */
-			error($1->loc) << "action lookup of \"" << $1->data << "\" failed" << endl;
+			pd->id->error($1->loc) << "action lookup of \"" << $1->data << "\" failed" << endl;
 			$$->action = 0;
 		}
 	};
@@ -1025,14 +1025,14 @@ named_action_ref:
 		}
 		else {
 			/* Will recover by returning null as the action. */
-			error($1->loc) << "action lookup of \"" << $1->data << "\" failed" << endl;
+			pd->id->error($1->loc) << "action lookup of \"" << $1->data << "\" failed" << endl;
 			$$->action = 0;
 		}
 	}
 	final {
 		/* Make sure the number of actions line up. */
 		if ( $3->argList->length() != $$->action->paramList->length() ) {
-			error($1->loc) << "wrong number of action "
+			pd->id->error($1->loc) << "wrong number of action "
 				"arguments for \"" << $1->data << "\"" << endl;
 		}
 				
@@ -1105,13 +1105,13 @@ priority_aug:
 		long aug = strtol( data, 0, 10 );
 		if ( errno == ERANGE && aug == LONG_MAX ) {
 			/* Priority number too large. Recover by setting the priority to 0. */
-			error($1->token.loc) << "priority number " << data << 
+			pd->id->error($1->token.loc) << "priority number " << data << 
 					" overflows" << endl;
 			$$->priorityNum = 0;
 		}
 		else if ( errno == ERANGE && aug == LONG_MIN ) {
 			/* Priority number too large in the neg. Recover by using 0. */
-			error($1->token.loc) << "priority number " << data << 
+			pd->id->error($1->token.loc) << "priority number " << data << 
 					" underflows" << endl;
 			$$->priorityNum = 0;
 		}
@@ -1234,7 +1234,7 @@ factor_rep_num:
 		long rep = strtol( $1->data, 0, 10 );
 		if ( errno == ERANGE && rep == LONG_MAX ) {
 			// Repetition too large. Recover by returing repetition 1. */
-			error($1->loc) << "repetition number " << $1->data << " overflows" << endl;
+			pd->id->error($1->loc) << "repetition number " << $1->data << " overflows" << endl;
 			$$->rep = 1;
 		}
 		else {
@@ -1291,12 +1291,12 @@ factor:
 		GraphDictEl *gdNode = pd->graphDict.find( $1->data );
 		if ( gdNode == 0 ) {
 			/* Recover by returning null as the factor node. */
-			error($1->loc) << "graph lookup of \"" << $1->data << "\" failed" << endl;
+			pd->id->error($1->loc) << "graph lookup of \"" << $1->data << "\" failed" << endl;
 			$$->factor = 0;
 		}
 		else if ( gdNode->isInstance ) {
 			/* Recover by retuning null as the factor node. */
-			error($1->loc) << "references to graph instantiations not allowed "
+			pd->id->error($1->loc) << "references to graph instantiations not allowed "
 					"in expressions" << endl;
 			$$->factor = 0;
 		}
@@ -1318,7 +1318,7 @@ factor:
 factor:
 	RE_Slash regular_expr RE_Slash final {
 		bool caseInsensitive = false;
-		checkLitOptions( $3->loc, $3->data, $3->length, caseInsensitive );
+		checkLitOptions( pd->id, $3->loc, $3->data, $3->length, caseInsensitive );
 		if ( caseInsensitive )
 			$2->regExpr->caseInsensitive = true;
 
@@ -1718,7 +1718,7 @@ inline_block_interpret:
 		}
 
 		if ( api.end() )
-			error( $1->loc ) << "invalid parameter reference \"$" << $1->data << "\"" << endl;
+			pd->id->error( $1->loc ) << "invalid parameter reference \"$" << $1->data << "\"" << endl;
 		else {
 			$$->inlineItem->substPos = api.pos();
 		}
@@ -1894,7 +1894,7 @@ void Parser6::tryMachineDef( const InputLoc &loc, char *name,
 	}
 	else {
 		// Recover by ignoring the duplicate.
-		error(loc) << "fsm \"" << name << "\" previously defined" << endl;
+		pd->id->error(loc) << "fsm \"" << name << "\" previously defined" << endl;
 	}
 }
 
@@ -1903,7 +1903,7 @@ ostream &Parser6::parse_error( int tokId, Token &token )
 	/* Maintain the error count. */
 	gblErrorCount += 1;
 
-	ostream &err = error( token.loc );
+	ostream &err = pd->id->error( token.loc );
 
 	err << "at token ";
 	if ( tokId < 128 )

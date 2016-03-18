@@ -37,14 +37,14 @@ ostream &operator<<( ostream &out, const NameRef &nameRef );
 ostream &operator<<( ostream &out, const NameInst &nameInst );
 
 /* Read string literal (and regex) options and return the true end. */
-const char *checkLitOptions( const InputLoc &loc, const char *data, int length, bool &caseInsensitive )
+const char *checkLitOptions( InputData *id, const InputLoc &loc, const char *data, int length, bool &caseInsensitive )
 {
 	const char *end = data + length - 1;
 	while ( *end != '\'' && *end != '\"' && *end != '/' ) {
 		if ( *end == 'i' )
 			caseInsensitive = true;
 		else {
-			error( loc ) << "literal string '" << *end << 
+			id->error( loc ) << "literal string '" << *end << 
 					"' option not supported" << endl;
 		}
 		end -= 1;
@@ -56,14 +56,14 @@ const char *checkLitOptions( const InputLoc &loc, const char *data, int length, 
  * characters with escapes and options interpreted. Also null terminates the
  * string. Though this null termination should not be relied on for
  * interpreting literals in the parser because the string may contain \0 */
-char *prepareLitString( const InputLoc &loc, const char *data, long length, 
+char *prepareLitString( InputData *id, const InputLoc &loc, const char *data, long length, 
 		long &resLen, bool &caseInsensitive )
 {
 	char *resData = new char[length+1];
 	caseInsensitive = false;
 
 	const char *src = data + 1;
-	const char *end = checkLitOptions( loc, data, length, caseInsensitive );
+	const char *end = checkLitOptions( id, loc, data, length, caseInsensitive );
 
 	char *dest = resData;
 	long dlen = 0;
@@ -1009,7 +1009,7 @@ FsmRes NfaUnion::walk( ParseData *pd )
 	}
 
 	if ( pd->id->printStatistics )
-		stats() << "terms\t" << terms.length() << endl;
+		pd->id->stats() << "terms\t" << terms.length() << endl;
 
 	/* Compute the individual expressions. */
 
@@ -1029,15 +1029,15 @@ FsmRes NfaUnion::walk( ParseData *pd )
 	}
 
 	if ( pd->id->printStatistics ) {
-		stats() << "sum-plain\t" << sumPlain << endl;
-		stats() << "sum-minimized\t" << sumMin << endl;
+		pd->id->stats() << "sum-plain\t" << sumPlain << endl;
+		pd->id->stats() << "sum-minimized\t" << sumMin << endl;
 	}
 
 	/* For each round. */
 	for ( NfaRoundVect::Iter r = *roundsList; r.lte(); r++ ) {
 		if ( pd->id->printStatistics ) {
-			stats() << "depth\t" << r->depth << endl;
-			stats() << "grouping\t" << r->groups << endl;
+			pd->id->stats() << "depth\t" << r->depth << endl;
+			pd->id->stats() << "grouping\t" << r->groups << endl;
 		}
 
 		int numGroups = 0;
@@ -1050,7 +1050,7 @@ FsmRes NfaUnion::walk( ParseData *pd )
 				amount = numTerms - start;
 
 			FsmAp **others = machines + start + 1;
-			FsmRes res = FsmAp::nfaUnionOp( machines[start], others, (amount - 1), r->depth );
+			FsmRes res = FsmAp::nfaUnionOp( machines[start], others, (amount - 1), r->depth, pd->id->stats() );
 			machines[start] = res.fsm;
 
 			start += amount;
@@ -1264,8 +1264,8 @@ void Join::resolveNameRefs( ParseData *pd )
 			pd->curNameInst->start = resolved[0];
 			if ( resolved.length() > 1 ) {
 				/* Complain about the multiple references. */
-				error(loc) << "join operation has multiple start labels" << endl;
-				errorStateLabels( resolved );
+				pd->id->error(loc) << "join operation has multiple start labels" << endl;
+				pd->errorStateLabels( resolved );
 			}
 		}
 
@@ -1276,7 +1276,7 @@ void Join::resolveNameRefs( ParseData *pd )
 		}
 		else {
 			/* No start label. */
-			error(loc) << "join operation has no start label" << endl;
+			pd->id->error(loc) << "join operation has no start label" << endl;
 		}
 
 		/* Recurse into all expressions in the list. */
@@ -1997,9 +1997,9 @@ void FactorWithAug::resolveNameRefs( ParseData *pd )
 				resolvedName = resolved[0];
 				if ( resolved.length() > 1 ) {
 					/* Complain about the multiple references. */
-					error(link.loc) << "state reference " << link.target << 
+					pd->id->error(link.loc) << "state reference " << link.target << 
 							" resolves to multiple entry points" << endl;
-					errorStateLabels( resolved );
+					pd->errorStateLabels( resolved );
 				}
 			}
 		}
@@ -2017,7 +2017,7 @@ void FactorWithAug::resolveNameRefs( ParseData *pd )
 		else {
 			/* Complain, no recovery action, the epsilon op will ignore any
 			 * epsilon transitions whose names did not resolve. */
-			error(link.loc) << "could not resolve label " << link.target << endl;
+			pd->id->error(link.loc) << "could not resolve label " << link.target << endl;
 		}
 	}
 
@@ -2106,7 +2106,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				delete factorTree.fsm;
 				return FsmRes( FsmRes::RepetitionError() );
 			}
-			warning(loc) << "applying kleene star to a machine that "
+			pd->id->warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 			factorTree.fsm->unsetFinState( factorTree.fsm->startState );
 		}
@@ -2132,7 +2132,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				delete factorTree.fsm;
 				return FsmRes( FsmRes::RepetitionError() );
 			}
-			warning(loc) << "applying kleene star to a machine that "
+			pd->id->warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 		}
 
@@ -2186,7 +2186,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				delete factorTree.fsm;
 				return FsmRes( FsmRes::RepetitionError() );
 			}
-			warning(loc) << "applying plus operator to a machine that "
+			pd->id->warning(loc) << "applying plus operator to a machine that "
 					"accepts zero length word" << endl;
 		}
 
@@ -2218,7 +2218,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			if ( pd->id->inLibRagel )
 				return FsmRes( FsmRes::RepetitionError() );
 
-			warning(loc) << "exactly zero repetitions results "
+			pd->id->warning(loc) << "exactly zero repetitions results "
 					"in the null machine" << endl;
 
 			return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( pd->fsmCtx ) );
@@ -2234,7 +2234,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 					delete factorTree.fsm;
 					return FsmRes( FsmRes::RepetitionError() );
 				}
-				warning(loc) << "applying repetition to a machine that "
+				pd->id->warning(loc) << "applying repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
 
@@ -2260,7 +2260,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			if ( pd->id->inLibRagel )
 				return FsmRes( FsmRes::RepetitionError() );
 
-			warning(loc) << "max zero repetitions results "
+			pd->id->warning(loc) << "max zero repetitions results "
 					"in the null machine" << endl;
 
 			return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( pd->fsmCtx ) );
@@ -2276,7 +2276,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 					delete factorTree.fsm;
 					return FsmRes( FsmRes::RepetitionError() );
 				}
-				warning(loc) << "applying max repetition to a machine that "
+				pd->id->warning(loc) << "applying max repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
 
@@ -2305,7 +2305,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				delete factorTree.fsm;
 				return FsmRes( FsmRes::RepetitionError() );
 			}
-			warning(loc) << "applying min repetition to a machine that "
+			pd->id->warning(loc) << "applying min repetition to a machine that "
 					"accepts zero length word" << endl;
 		}
 
@@ -2353,7 +2353,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 	case RangeType: {
 		/* Check for bogus range. */
 		if ( upperRep - lowerRep < 0 ) {
-			error(loc) << "invalid range repetition" << endl;
+			pd->id->error(loc) << "invalid range repetition" << endl;
 
 			/* Return null machine as recovery. */
 			return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( pd->fsmCtx ) );
@@ -2364,7 +2364,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			if ( pd->id->inLibRagel )
 				return FsmRes( FsmRes::RepetitionError() );
 
-			warning(loc) << "zero to zero repetitions results "
+			pd->id->warning(loc) << "zero to zero repetitions results "
 					"in the null machine" << endl;
 
 			return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( pd->fsmCtx ) );
@@ -2380,7 +2380,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 					delete factorTree.fsm;
 					return FsmRes( FsmRes::RepetitionError() );
 				}
-				warning(loc) << "applying range repetition to a machine that "
+				pd->id->warning(loc) << "applying range repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
 
@@ -2618,7 +2618,7 @@ FsmRes Factor::condPlus( ParseData *pd )
 			delete exprTree.fsm;
 			return FsmRes( FsmRes::RepetitionError() );
 		}
-		warning(loc) << "applying plus operator to a machine that "
+		pd->id->warning(loc) << "applying plus operator to a machine that "
 				"accepts zero length word" << endl;
 	}
 
@@ -2774,14 +2774,14 @@ FsmAp *Range::walk( ParseData *pd )
 	/* Construct and verify the suitability of the lower end of the range. */
 	FsmAp *lowerFsm = lowerLit->walk( pd );
 	if ( !lowerFsm->checkSingleCharMachine() ) {
-		error(lowerLit->loc) << 
+		pd->id->error(lowerLit->loc) << 
 			"bad range lower end, must be a single character" << endl;
 	}
 
 	/* Construct and verify the upper end. */
 	FsmAp *upperFsm = upperLit->walk( pd );
 	if ( !upperFsm->checkSingleCharMachine() ) {
-		error(upperLit->loc) << 
+		pd->id->error(upperLit->loc) << 
 			"bad range upper end, must be a single character" << endl;
 	}
 
@@ -2794,7 +2794,7 @@ FsmAp *Range::walk( ParseData *pd )
 	/* Validate the range. */
 	if ( pd->fsmCtx->keyOps->gt( lowKey, highKey ) ) {
 		/* Recover by setting upper to lower; */
-		error(lowerLit->loc) << "lower end of range is greater then upper end" << endl;
+		pd->id->error(lowerLit->loc) << "lower end of range is greater then upper end" << endl;
 		highKey = lowKey;
 	}
 
@@ -2872,7 +2872,7 @@ FsmAp *Literal::walk( ParseData *pd )
 		/* Make the array of keys in int format. */
 		long length;
 		bool caseInsensitive;
-		char *litstr = prepareLitString( loc, data.data, data.length(), 
+		char *litstr = prepareLitString( pd->id, loc, data.data, data.length(), 
 				length, caseInsensitive );
 		Key *arr = new Key[length];
 		makeFsmKeyArray( arr, litstr, length, pd );
@@ -3003,7 +3003,7 @@ FsmRes ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 				return FsmRes( FsmRes::RepetitionError() );
 			}
 
-			warning(loc) << "applying kleene star to a machine that "
+			pd->id->warning(loc) << "applying kleene star to a machine that "
 					"accepts zero length word" << endl;
 		}
 
@@ -3084,7 +3084,7 @@ FsmAp *ReOrItem::walk( ParseData *pd, RegExpr *rootRegex )
 		/* Validate the range. */
 		if ( keyOps->gt( lowKey, highKey ) ) {
 			/* Recover by setting upper to lower; */
-			error(loc) << "lower end of range is greater then upper end" << endl;
+			pd->id->error(loc) << "lower end of range is greater then upper end" << endl;
 			highKey = lowKey;
 		}
 

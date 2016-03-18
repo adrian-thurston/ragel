@@ -144,7 +144,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 	unsigned long ul = strtoul( str, 0, 16 );
 
 	if ( errno == ERANGE || ( unusedBits && ul >> (size * 8) ) ) {
-		error(loc) << "literal " << str << " overflows the alphabet type" << endl;
+		pd->id->error(loc) << "literal " << str << " overflows the alphabet type" << endl;
 		ul = 1 << (size * 8);
 	}
 
@@ -166,12 +166,12 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 
 	/* Check for underflow. */
 	if ( ( errno == ERANGE && ll < 0 ) || ll < minVal) {
-		error(loc) << "literal " << str << " underflows the alphabet type" << endl;
+		pd->id->error(loc) << "literal " << str << " underflows the alphabet type" << endl;
 		ll = minVal;
 	}
 	/* Check for overflow. */
 	else if ( ( errno == ERANGE && ll > 0 ) || ll > maxVal ) {
-		error(loc) << "literal " << str << " overflows the alphabet type" << endl;
+		pd->id->error(loc) << "literal " << str << " overflows the alphabet type" << endl;
 		ll = maxVal;
 	}
 
@@ -720,12 +720,12 @@ struct CmpNameInstLoc
 	}
 };
 
-void errorStateLabels( const NameSet &resolved )
+void ParseData::errorStateLabels( const NameSet &resolved )
 {
 	MergeSort<NameInst*, CmpNameInstLoc> mergeSort;
 	mergeSort.sort( resolved.data, resolved.length() );
 	for ( NameSet::Iter res = resolved; res.lte(); res++ )
-		error((*res)->loc) << "  -> " << **res << endl;
+		id->error((*res)->loc) << "  -> " << **res << endl;
 }
 
 
@@ -748,7 +748,7 @@ NameInst *ParseData::resolveStateRef( NameRef *nameRef, InputLoc &loc, Action *a
 				nameInst = resolved[0];
 				if ( resolved.length() > 1 ) {
 					/* Complain about the multiple references. */
-					error(loc) << "state reference " << *nameRef << 
+					id->error(loc) << "state reference " << *nameRef << 
 							" resolves to multiple entry points" << endl;
 					errorStateLabels( resolved );
 				}
@@ -767,7 +767,7 @@ NameInst *ParseData::resolveStateRef( NameRef *nameRef, InputLoc &loc, Action *a
 			nameInst = resolved[0];
 			if ( resolved.length() > 1 ) {
 				/* Complain about the multiple references. */
-				error(loc) << "state reference " << *nameRef << 
+				id->error(loc) << "state reference " << *nameRef << 
 						" resolves to multiple entry points" << endl;
 				errorStateLabels( resolved );
 			}
@@ -776,7 +776,7 @@ NameInst *ParseData::resolveStateRef( NameRef *nameRef, InputLoc &loc, Action *a
 
 	if ( nameInst == 0 ) {
 		/* If not found then complain. */
-		error(loc) << "could not resolve state reference " << *nameRef << endl;
+		id->error(loc) << "could not resolve state reference " << *nameRef << endl;
 	}
 	return nameInst;
 }
@@ -797,7 +797,7 @@ void ParseData::resolveNameRefs( InlineList *inlineList, Action *action )
 					NameInst *search = target->parent;
 					while ( search != 0 ) {
 						if ( search->isLongestMatch ) {
-							error(item->loc) << "cannot enter inside a longest "
+							id->error(item->loc) << "cannot enter inside a longest "
 									"match construction as an entry point" << endl;
 							break;
 						}
@@ -1134,7 +1134,7 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 {
 	if ( id->printStatistics )
-		stats() << "compiling\t" << sectionName << endl;
+		id->stats() << "compiling\t" << sectionName << endl;
 
 	/* Build the graph from a walk of the parse tree. */
 	FsmRes graph = gdNode->value->walk( this );
@@ -1359,7 +1359,7 @@ void ParseData::checkAction( Action *action )
 			NameInst *check = *ar;
 			while ( check != 0 ) {
 				if ( check->isLongestMatch ) {
-					error(action->loc) << "within a scanner, fcall and fncall are permitted"
+					id->error(action->loc) << "within a scanner, fcall and fncall are permitted"
 						" only in pattern actions" << endl;
 					break;
 				}
@@ -1473,7 +1473,7 @@ void ParseData::makeExports()
 
 			/* Build the graph from a walk of the parse tree. */
 			if ( !graph.fsm->checkSingleCharMachine() ) {
-				error(gdel->loc) << "bad export machine, must define "
+				id->error(gdel->loc) << "bad export machine, must define "
 						"a single character" << endl;
 			}
 			else {

@@ -63,7 +63,7 @@ reduction TopLevel
 		/* Main machine must be an instance. */
 		bool isInstance = false;
 		if ( name == MAIN_MACHINE ) {
-			warning(loc) << "main machine will be implicitly instantiated" << endl;
+			pd->id->warning(loc) << "main machine will be implicitly instantiated" << endl;
 			isInstance = true;
 		}
 
@@ -161,7 +161,7 @@ reduction TopLevel
 		string data( $word->data, $word->length );
 		if ( pd->actionDict.find( data ) ) {
 			/* Recover by just ignoring the duplicate. */
-			error(@word) << "action \"" << data << "\" already defined" << endl;
+			pd->id->error(@word) << "action \"" << data << "\" already defined" << endl;
 		}
 		else {
 			/* Add the action to the list of actions. */
@@ -183,7 +183,7 @@ reduction TopLevel
 		string data( $word->data, $word->length );
 		if ( pd->actionDict.find( data ) ) {
 			/* Recover by just ignoring the duplicate. */
-			error(@word) << "action \"" << data << "\" already defined" << endl;
+			pd->id->error(@word) << "action \"" << data << "\" already defined" << endl;
 		}
 		else {
 			/* Add the action to the list of actions. */
@@ -203,7 +203,7 @@ reduction TopLevel
 	{
 		if ( pd->prePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error(@1) << "prepush code already defined" << endl;
+			pd->id->error(@1) << "prepush code already defined" << endl;
 		}
 		pd->prePushExpr = new InlineBlock( @1, $action_block->inlineList );
 
@@ -212,7 +212,7 @@ reduction TopLevel
 	{
 		if ( pd->postPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error(@1) << "postpop code already defined" << endl;
+			pd->id->error(@1) << "postpop code already defined" << endl;
 		}
 		pd->postPopExpr = new InlineBlock( @1, $action_block->inlineList );
 	}
@@ -223,7 +223,7 @@ reduction TopLevel
 	{
 		if ( pd->nfaPrePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error(@1) << "nfa_pre_push code already defined" << endl;
+			pd->id->error(@1) << "nfa_pre_push code already defined" << endl;
 		}
 
 		pd->nfaPrePushExpr = new InlineBlock( @1, $action_block->inlineList );
@@ -235,7 +235,7 @@ reduction TopLevel
 	{
 		if ( pd->nfaPostPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
-			error(@1) << "nfa_post_pop code already defined" << endl;
+			pd->id->error(@1) << "nfa_post_pop code already defined" << endl;
 		}
 
 		pd->nfaPostPopExpr = new InlineBlock( @1, $action_block->inlineList );
@@ -250,7 +250,7 @@ reduction TopLevel
 		bool wasSet = pd->setVariable( data.c_str(),
 				$inline_expr_reparse->inlineList );
 		if ( !wasSet )
-			error(@1) << "bad variable name: " << $variable_name->data << endl;
+			pd->id->error(@1) << "bad variable name: " << $variable_name->data << endl;
 	}
 
 	ragel::statement :Access
@@ -285,7 +285,7 @@ reduction TopLevel
 		string one( $W1->data, $W1->length );
 		if ( ! pd->setAlphType( @W1, hostLang, one.c_str() ) ) {
 			// Recover by ignoring the alphtype statement.
-			error(@W1) << "\"" << one << 
+			pd->id->error(@W1) << "\"" << one << 
 					"\" is not a valid alphabet type" << endl;
 		}
 	}
@@ -296,7 +296,7 @@ reduction TopLevel
 		string two( $W2->data, $W2->length );
 		if ( ! pd->setAlphType( @W1, hostLang, one.c_str(), two.c_str() ) ) {
 			// Recover by ignoring the alphtype statement.
-			error(@W1) << "\"" << one << 
+			pd->id->error(@W1) << "\"" << one << 
 					"\" is not a valid alphabet type" << endl;
 		}
 	}
@@ -316,7 +316,7 @@ reduction TopLevel
 
 		long length;
 		bool caseInsensitive;
-		char *unescaped = prepareLitString( loc,
+		char *unescaped = prepareLitString( pd->id, loc,
 					fileName.c_str(), fileName.size(),
 					length, caseInsensitive );
 
@@ -337,7 +337,7 @@ reduction TopLevel
 			InputLoc loc = $include_spec->file.loc;
 			long length;
 			bool caseInsensitive;
-			char *unescaped = prepareLitString( loc, fileName.c_str(), fileName.size(),
+			char *unescaped = prepareLitString( pd->id, loc, fileName.c_str(), fileName.size(),
 					length, caseInsensitive );
 			fileName = unescaped;
 
@@ -672,14 +672,14 @@ reduction TopLevel
 		Action *action = pd->actionDict.find( data );
 		if ( action != 0 ) {
 			if ( action->paramList != 0 )
-				error(@word) << "expecting no action args for " << data << endp;
+				pd->id->error(@word) << "expecting no action args for " << data << endp;
 
 			/* Pass up the action element */
 			$$->action = action;
 		}
 		else {
 			/* Will recover by returning null as the action. */
-			error(@word) << "action lookup of \"" << data << "\" failed" << endl;
+			pd->id->error(@word) << "action lookup of \"" << data << "\" failed" << endl;
 			$$->action = 0;
 		}
 	}
@@ -691,14 +691,14 @@ reduction TopLevel
 		Action *action = pd->actionDict.find( data );
 		if ( action != 0 ) {
 			if ( action->paramList == 0 )
-				error(@word) << "expecting action args" << endp;
+				pd->id->error(@word) << "expecting action args" << endp;
 
 			/* Pass up the action element */
 			$$->action = action;
 		}
 		else {
 			/* Will recover by returning null as the action. */
-			error(@word) << "action lookup of \"" << data << "\" failed" << endl;
+			pd->id->error(@word) << "action lookup of \"" << data << "\" failed" << endl;
 			$$->action = 0;
 		}
 
@@ -708,7 +708,7 @@ reduction TopLevel
 
 			/* Make sure the number of actions line up. */
 			if ( argList->length() != paramList->length() ) {
-				error(@1) << "wrong number of action "
+				pd->id->error(@1) << "wrong number of action "
 					"arguments for \"" << data << "\"" << endl;
 			}
 					
@@ -1345,7 +1345,7 @@ reduction TopLevel
 		}
 
 		if ( api.end() )
-			error( @1 ) << "invalid parameter reference \"$" << $1->data << "\"" << endl;
+			pd->id->error( @1 ) << "invalid parameter reference \"$" << $1->data << "\"" << endl;
 		else {
 			$$->inlineItem->substPos = api.pos();
 		}
@@ -1885,7 +1885,7 @@ reduction TopLevel
 		long rep = strtol( data.c_str(), 0, 10 );
 		if ( errno == ERANGE && rep == LONG_MAX ) {
 			// Repetition too large. Recover by returing repetition 1. */
-			error(@uint) << "repetition number " << data << " overflows" << endl;
+			pd->id->error(@uint) << "repetition number " << data << " overflows" << endl;
 			$$->rep = 1;
 		}
 		else {
@@ -2002,12 +2002,12 @@ reduction TopLevel
 		GraphDictEl *gdNode = pd->graphDict.find( s );
 		if ( gdNode == 0 ) {
 			/* Recover by returning null as the factor node. */
-			error(loc) << "graph lookup of \"" << s << "\" failed" << endl;
+			pd->id->error(loc) << "graph lookup of \"" << s << "\" failed" << endl;
 			$$->factor = 0;
 		}
 		else if ( gdNode->isInstance ) {
 			/* Recover by retuning null as the factor node. */
-			error(loc) << "references to graph instantiations not allowed "
+			pd->id->error(loc) << "references to graph instantiations not allowed "
 					"in expressions" << endl;
 			$$->factor = 0;
 		}
@@ -2076,7 +2076,7 @@ reduction TopLevel
 	ragel::factor :Regex
 	{
 		bool caseInsensitive = false;
-		checkLitOptions( @re_close, $re_close->data, $re_close->length, caseInsensitive );
+		checkLitOptions( pd->id, @re_close, $re_close->data, $re_close->length, caseInsensitive );
 		if ( caseInsensitive )
 			$2->regExpr->caseInsensitive = true;
 		$$->factor = new Factor( $regex->regExpr );
@@ -2448,11 +2448,11 @@ reduction TopLevel
 		errno = 0;
 		$$->depth = strtol( $Depth->data, 0, 10 );
 		if ( $$->depth == LONG_MAX && errno == ERANGE )
-			error(@Depth) << "rounds " << $Depth->data << " overflows" << endl;
+			pd->id->error(@Depth) << "rounds " << $Depth->data << " overflows" << endl;
 
 		$$->group = strtol( $Group->data, 0, 10 );
 		if ( $$->group == LONG_MAX && errno == ERANGE )
-			error(@Groups) << "group " << $Group->data << " overflows" << endl;
+			pd->id->error(@Groups) << "group " << $Group->data << " overflows" << endl;
 	}
 
 	# def nfa_round_list

@@ -669,7 +669,7 @@ void InputData::parseKelbt()
 
 	makeFirstInputItem();
 
-	Scanner scanner( *this, inputFileName, *inStream, 0, 0, 0, false );
+	Scanner scanner( this, inputFileName, *inStream, 0, 0, 0, false );
 
 	scanner.sectionPass = true;
 	scanner.do_scan();

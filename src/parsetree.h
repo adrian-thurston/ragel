@@ -213,6 +213,7 @@ private:
 	void _set( const char *str, int len );
 };
 
+
 struct RedToken
 {
 	const char *data;
@@ -222,10 +223,6 @@ struct RedToken
 	void set( colm_data *cd, colm_location *cl);
 };
 
-
-const char *checkLitOptions( const InputLoc &loc, const char *data, int length, bool &caseInsensitive );
-char *prepareLitString( const InputLoc &loc, const char *src, long length, 
-			long &resLen, bool &caseInsensitive );
 
 /* Store the value and type of a priority augmentation. */
 struct PriorityAug

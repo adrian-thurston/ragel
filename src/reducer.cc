@@ -63,7 +63,7 @@ void TopLevel::tryMachineDef( InputLoc &loc, std::string name,
 	}
 	else {
 		// Recover by ignoring the duplicate.
-		error(loc) << "fsm \"" << name << "\" previously defined" << endl;
+		pd->id->error(loc) << "fsm \"" << name << "\" previously defined" << endl;
 	}
 }
 	
@@ -76,13 +76,13 @@ long TopLevel::tryLongScan( const InputLoc &loc, const char *data )
 	long aug = strtol( data, 0, 10 );
 	if ( errno == ERANGE && aug == LONG_MAX ) {
 		/* Priority number too large. Recover by setting the priority to 0. */
-		error(loc) << "priority number " << data << 
+		pd->id->error(loc) << "priority number " << data << 
 				" overflows" << endl;
 		priorityNum = 0;
 	}
 	else if ( errno == ERANGE && aug == LONG_MIN ) {
 		/* Priority number too large in the neg. Recover by using 0. */
-		error(loc) << "priority number " << data << 
+		pd->id->error(loc) << "priority number " << data << 
 				" underflows" << endl;
 		priorityNum = 0;
 	}
@@ -118,7 +118,7 @@ void TopLevel::loadIncludeData( IncludeRec *el, IncludePass &includePass, const 
 			f.read( el->data + len, ii->length );
 			size_t read = f.gcount();
 			if ( read != ii->length ) {
-				error(ii->loc) << "unexpected length in read of included file: "
+				pd->id->error(ii->loc) << "unexpected length in read of included file: "
 						"possible change to file" << endp;
 			}
 			len += read;
@@ -153,7 +153,7 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 		}
 
 		if ( includePass.incItems.length() == 0 ) {
-			error(incLoc) << "could not find machine " << machine <<
+			pd->id->error(incLoc) << "could not find machine " << machine <<
 					" in " << fileName << endp;
 		}
 		else {
@@ -203,7 +203,7 @@ void TopLevel::loadImport( std::string fileName )
 	if ( Start == 0 ) {
 		gblErrorCount += 1;
 		InputLoc loc( Error.loc() );
-		error(loc) << fileName << ": parse error: " << Error.text() << std::endl;
+		pd->id->error(loc) << fileName << ": parse error: " << Error.text() << std::endl;
 		return;
 	}
 

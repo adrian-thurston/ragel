@@ -224,8 +224,8 @@ void Scanner::pass()
 
 	/* If no errors and we are at the bottom of the include stack (the
 	 * source file listed on the command line) then write out the data. */
-	if ( includeDepth == 0 && id.machineSpec == 0 && id.machineName == 0 )
-		id.curItem->data.write( ts, te-ts );
+	if ( includeDepth == 0 && id->machineSpec == 0 && id->machineName == 0 )
+		id->curItem->data.write( ts, te-ts );
 }
 
 void Scanner::pass( int token, char *start, char *end )
@@ -260,7 +260,7 @@ bool Scanner::active()
 		return false;
 
 	if ( parser == 0 && ! parserExistsError ) {
-		error(scan_loc()) << "this specification has no name, nor does any previous"
+		id->error(scan_loc()) << "this specification has no name, nor does any previous"
 			" specification" << endl;
 		parserExistsError = true;
 	}
@@ -305,11 +305,11 @@ void Scanner::handleMachine()
 		/* Assign a name to the machine. */
 		char *machine = word;
 
-		SectionDictEl *sdEl = id.sectionDict.find( machine );
+		SectionDictEl *sdEl = id->sectionDict.find( machine );
 		if ( sdEl == 0 ) {
 			sdEl = new SectionDictEl( machine );
 			sdEl->value = new Section( machine );
-			id.sectionDict.insert( sdEl );
+			id->sectionDict.insert( sdEl );
 		}
 
 		section = sdEl->value;
@@ -322,20 +322,20 @@ void Scanner::handleMachine()
 		if ( !importMachines && inclSectionTarg == 0 ) {
 			ignoreSection = false;
 
-			ParserDictEl *pdEl = id.parserDict.find( machine );
+			ParserDictEl *pdEl = id->parserDict.find( machine );
 			if ( pdEl == 0 ) {
 				pdEl = new ParserDictEl( machine );
-				pdEl->value = new Parser6( &id, fileName, machine, sectionLoc,
-						id.hostLang, id.minimizeLevel, id.minimizeOpt );
+				pdEl->value = new Parser6( id, fileName, machine, sectionLoc,
+						id->hostLang, id->minimizeLevel, id->minimizeOpt );
 				pdEl->value->init();
-				id.parserDict.insert( pdEl );
-				id.parserList.append( pdEl->value );
+				id->parserDict.insert( pdEl );
+				id->parserList.append( pdEl->value );
 
 				/* Also into the parse data dict. This is the new style. */
 				ParseDataDictEl *pddEl = new ParseDataDictEl( machine );
 				pddEl->value = pdEl->value->pd;
-				id.parseDataDict.insert( pddEl );
-				id.parseDataList.append( pddEl->value );
+				id->parseDataDict.insert( pddEl );
+				id->parseDataList.append( pddEl->value );
 			}
 
 			parser = pdEl->value;
@@ -381,10 +381,10 @@ void Scanner::handleInclude()
 		long found = 0;
 		ifstream *inFile = tryOpenInclude( includeChecks, found );
 		if ( inFile == 0 ) {
-			error(scan_loc()) << "include: failed to locate file" << endl;
+			id->error(scan_loc()) << "include: failed to locate file" << endl;
 			char **tried = includeChecks;
 			while ( *tried != 0 )
-				error(scan_loc()) << "include: attempted: \"" << *tried++ << '\"' << endl;
+				id->error(scan_loc()) << "include: attempted: \"" << *tried++ << '\"' << endl;
 		}
 		else {
 			/* Don't include anything that's already been included. */
@@ -413,11 +413,11 @@ void Scanner::handleImport()
 		long found = 0;
 		ifstream *inFile = tryOpenInclude( importChecks, found );
 		if ( inFile == 0 ) {
-			error(scan_loc()) << "import: could not open import file " <<
+			id->error(scan_loc()) << "import: could not open import file " <<
 					"for reading" << endl;
 			char **tried = importChecks;
 			while ( *tried != 0 )
-				error(scan_loc()) << "import: attempted: \"" << *tried++ << '\"' << endl;
+				id->error(scan_loc()) << "import: attempted: \"" << *tried++ << '\"' << endl;
 		}
 
 		Scanner scanner( id, importChecks[found], *inFile, parser,
@@ -439,10 +439,10 @@ void Scanner::handleImport()
 	action store_word { word = tokdata; word_len = toklen; }
 	action store_lit { lit = tokdata; lit_len = toklen; }
 
-	action mach_err { error(scan_loc()) << "bad machine statement" << endl; }
-	action incl_err { error(scan_loc()) << "bad include statement" << endl; }
-	action import_err { error(scan_loc()) << "bad import statement" << endl; }
-	action write_err { error(scan_loc()) << "bad write statement" << endl; }
+	action mach_err { id->error(scan_loc()) << "bad machine statement" << endl; }
+	action incl_err { id->error(scan_loc()) << "bad include statement" << endl; }
+	action import_err { id->error(scan_loc()) << "bad import statement" << endl; }
+	action write_err { id->error(scan_loc()) << "bad write statement" << endl; }
 
 	action handle_machine { handleMachine(); }
 	action handle_include { handleInclude(); }
@@ -479,16 +479,16 @@ void Scanner::handleImport()
 			/* Track the last reference. */
 			inputItem->section->lastReference = inputItem;
 
-			id.inputItems.append( inputItem );
+			id->inputItems.append( inputItem );
 		}
 		else {
 			if ( includeDepth == 0 && active() &&
-					id.machineSpec == 0 && id.machineName == 0 )
+					id->machineSpec == 0 && id->machineName == 0 )
 			{
-				id.curItem = id.curItem->next;
-				id.curItem->pd = parser->pd;
-				id.curItem->parser = parser;
-				id.checkLastRef( id.curItem );
+				id->curItem = id->curItem->next;
+				id->curItem->pd = parser->pd;
+				id->curItem->parser = parser;
+				id->checkLastRef( id->curItem );
 			}
 		}
 	}
@@ -498,8 +498,8 @@ void Scanner::handleImport()
 		if ( sectionPass ) {
 		}
 		else {
-			if ( active() && id.machineSpec == 0 && id.machineName == 0 )
-				id.curItem->writeArgs.append( strdup(tokdata) );
+			if ( active() && id->machineSpec == 0 && id->machineName == 0 )
+				id->curItem->writeArgs.append( strdup(tokdata) );
 		}
 	}
 
@@ -508,8 +508,8 @@ void Scanner::handleImport()
 		if ( sectionPass ) {
 		}
 		else {
-			/* if ( active() && id.machineSpec == 0 && id.machineName == 0 )
-			 *	id.curItem->writeArgs.append( 0 ); */
+			/* if ( active() && id->machineSpec == 0 && id->machineName == 0 )
+			 *	id->curItem->writeArgs.append( 0 ); */
 		}
 	}
 
@@ -620,14 +620,14 @@ void Scanner::endSection( )
 		inputItem->loc.fileName = fileName;
 		inputItem->loc.line = line;
 		inputItem->loc.col = column;
-		id.inputItems.append( inputItem );
+		id->inputItems.append( inputItem );
 		if ( section != 0 ) {
 			inputItem->section = section;
 			section->lastReference = inputItem;
 		}
 
 		if ( includeDepth == 0 ) {
-			if ( id.machineSpec == 0 && id.machineName == 0 ) {
+			if ( id->machineSpec == 0 && id->machineName == 0 ) {
 				/* The end section may include a newline on the end, so
 				 * we use the last line, which will count the newline. */
 				InputItem *inputItem = new InputItem;
@@ -635,7 +635,7 @@ void Scanner::endSection( )
 				inputItem->loc.fileName = fileName;
 				inputItem->loc.line = line;
 				inputItem->loc.col = column;
-				id.inputItems.append( inputItem );
+				id->inputItems.append( inputItem );
 			}
 		}
 	}
@@ -649,20 +649,20 @@ void Scanner::endSection( )
 
 			parser->token( loc, TK_EndSection, 0, 0 );
 
-			id.curItem = id.curItem->next;
+			id->curItem = id->curItem->next;
 
 			if ( parser != 0 ) {
-				id.curItem->pd = parser->pd;
-				id.curItem->parser = parser;
+				id->curItem->pd = parser->pd;
+				id->curItem->parser = parser;
 			}
 
-			id.checkLastRef( id.curItem );
+			id->checkLastRef( id->curItem );
 		}
 
 		if ( includeDepth == 0 ) {
-			if ( id.machineSpec == 0 && id.machineName == 0 ) {
-				id.curItem = id.curItem->next;
-				id.checkLastRef( id.curItem );
+			if ( id->machineSpec == 0 && id->machineName == 0 ) {
+				id->curItem = id->curItem->next;
+				id->checkLastRef( id->curItem );
 			}
 		}
 	}
@@ -684,7 +684,7 @@ char **Scanner::makeIncludePathChecks( const char *thisFileName,
 	long nextCheck = 0;
 	long length = 0;
 	bool caseInsensitive = false;
-	char *data = prepareLitString( InputLoc(), fileName, fnlen, 
+	char *data = prepareLitString( id, InputLoc(), fileName, fnlen, 
 			length, caseInsensitive );
 
 	/* Absolute path? */
@@ -693,7 +693,7 @@ char **Scanner::makeIncludePathChecks( const char *thisFileName,
 		checks[nextCheck++] = data;
 	}
 	else {
-		checks = new char*[2 + id.includePaths.length()];
+		checks = new char*[2 + id->includePaths.length()];
 
 		/* Search from the the location of the current file. */
 		const char *lastSlash = strrchr( thisFileName, PATH_SEP );
@@ -710,7 +710,7 @@ char **Scanner::makeIncludePathChecks( const char *thisFileName,
 		}
 
 		/* Search from the include paths given on the command line. */
-		for ( ArgsVector::Iter incp = id.includePaths; incp.lte(); incp++ ) {
+		for ( ArgsVector::Iter incp = id->includePaths; incp.lte(); incp++ ) {
 			long pathLen = strlen( *incp );
 			long checkLen = pathLen + 1 + length;
 			char *check = new char[checkLen+1];
@@ -908,7 +908,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		};
 
 		EOF => {
-			error(scan_loc()) << "unterminated code block" << endl;
+			id->error(scan_loc()) << "unterminated code block" << endl;
 		};
 
 		# Send every other character as a symbol.
@@ -935,7 +935,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		']'	=> { token( RE_SqClose ); fret; };
 
 		EOF => {
-			error(scan_loc()) << "unterminated OR literal" << endl;
+			id->error(scan_loc()) << "unterminated OR literal" << endl;
 		};
 
 		# Characters in an OR expression.
@@ -970,7 +970,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		'[^' => { token( RE_SqOpenNeg ); fcall or_literal; };
 
 		EOF => {
-			error(scan_loc()) << "unterminated regular expression" << endl;
+			id->error(scan_loc()) << "unterminated regular expression" << endl;
 		};
 
 		# Characters in an OR expression.
@@ -984,7 +984,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		';' => { token( ';' ); fgoto parser_def; };
 
 		EOF => {
-			error(scan_loc()) << "unterminated write statement" << endl;
+			id->error(scan_loc()) << "unterminated write statement" << endl;
 		};
 	*|;
 
@@ -1158,7 +1158,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		};
 
 		EOF => {
-			error(scan_loc()) << "unterminated ragel section" << endl;
+			id->error(scan_loc()) << "unterminated ragel section" << endl;
 		};
 
 		any => { token( *ts ); } ;
@@ -1262,8 +1262,8 @@ void Scanner::do_scan()
 		if ( cs == rlscan_error ) {
 			/* Machine failed before finding a token. I'm not yet sure if this
 			 * is reachable. */
-			error(scan_loc()) << "scanner error" << endl;
-			id.abortCompile( 1 );
+			id->error(scan_loc()) << "scanner error" << endl;
+			id->abortCompile( 1 );
 		}
 
 		/* Decide if we need to preserve anything. */

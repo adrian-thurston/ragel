@@ -40,7 +40,7 @@ struct Section;
 
 struct Scanner
 {
-	Scanner( InputData &id, const char *fileName, istream &input,
+	Scanner( InputData *id, const char *fileName, istream &input,
 			Parser6 *inclToParser, char *inclSectionTarg,
 			int includeDepth, bool importMachines )
 	: 
@@ -88,7 +88,7 @@ struct Scanner
 	bool active();
 	InputLoc scan_loc();
 
-	InputData &id;
+	InputData *id;
 	const char *fileName;
 	istream &input;
 	Parser6 *inclToParser;

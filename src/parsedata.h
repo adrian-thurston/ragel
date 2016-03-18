@@ -256,6 +256,8 @@ struct ParseData
 
 	void initKeyOps( const HostLang *hostLang );
 
+	void errorStateLabels( const NameSet &resolved );
+
 	/*
 	 * Data collected during the parse.
 	 */
@@ -427,6 +429,12 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd );
 FsmAp *dotFsm( ParseData *pd );
 FsmAp *dotStarFsm( ParseData *pd );
 
-void errorStateLabels( const NameSet &locations );
+Key *prepareHexString( ParseData *pd, const InputLoc &loc,
+		const char *data, long length, long &resLen );
+char *prepareLitString( InputData *id, const InputLoc &loc, const char *data, long length, 
+		long &resLen, bool &caseInsensitive );
+const char *checkLitOptions( InputData *id, const InputLoc &loc,
+		const char *data, int length, bool &caseInsensitive );
+
 
 #endif

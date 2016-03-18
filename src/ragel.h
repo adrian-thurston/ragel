@@ -84,17 +84,6 @@ InputLoc makeInputLoc( const char *fileName, int line = 0, int col = 0 );
 InputLoc makeInputLoc( const struct colm_location *loc );
 std::ostream &operator<<( std::ostream &out, const InputLoc &loc );
 
-/* Error reporting. */
-std::ostream &error();
-std::ostream &error( const InputLoc &loc ); 
-std::ostream &warning( const InputLoc &loc ); 
-
-/* Stats reporting. */
-std::ostream &stats();
-
-/* Requested info. */
-std::ostream &info();
-
 void xmlEscapeHost( std::ostream &out, const char *data, long len );
 
 /* IO filenames and stream. */
