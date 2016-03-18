@@ -322,8 +322,6 @@ public:
 	void setValueLimits();
 	void assignActionIds();
 
-	ostream &source_warning( const InputLoc &loc );
-	ostream &source_error( const InputLoc &loc );
 	void write_option_error( InputLoc &loc, std::string arg );
 };
 

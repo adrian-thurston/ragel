@@ -1050,17 +1050,3 @@ void CodeGen::writeExports()
 		out << "\n";
 	}
 }
-
-
-ostream &CodeGen::source_warning( const InputLoc &loc )
-{
-	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
-	return cerr;
-}
-
-ostream &CodeGen::source_error( const InputLoc &loc )
-{
-	gblErrorCount += 1;
-	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
-	return cerr;
-}

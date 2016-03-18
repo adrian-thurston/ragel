@@ -1569,7 +1569,7 @@ void CodeGenData::analyzeMachine()
 
 void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 {
-	source_warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
+	warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
 }
 
 void CodeGenData::writeStatement( InputLoc &loc, int nargs,
@@ -1638,22 +1638,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 	}
 	else {
 		/* EMIT An error here. */
-		source_error(loc) << "unrecognized write command \"" << 
+		error(loc) << "unrecognized write command \"" << 
 				args[0] << "\"" << std::endl;
 	}
 }
-
-ostream &CodeGenData::source_warning( const InputLoc &loc )
-{
-	std::cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
-	return std::cerr;
-}
-
-ostream &CodeGenData::source_error( const InputLoc &loc )
-{
-	gblErrorCount += 1;
-	std::cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
-	return std::cerr;
-}
-
-

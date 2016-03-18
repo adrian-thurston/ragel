@@ -902,19 +902,6 @@ void AsmCodeGen::writeExports()
 	}
 }
 
-ostream &AsmCodeGen::source_warning( const InputLoc &loc )
-{
-	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": warning: ";
-	return cerr;
-}
-
-ostream &AsmCodeGen::source_error( const InputLoc &loc )
-{
-	gblErrorCount += 1;
-	cerr << sourceFileName << ":" << loc.line << ":" << loc.col << ": ";
-	return cerr;
-}
-
 string AsmCodeGen::LABEL( const char *type, long i )
 {
 	std::stringstream s;

@@ -154,9 +154,6 @@ protected:
 	string ERROR_STATE();
 	string FIRST_FINAL_STATE();
 
-	ostream &source_warning(const InputLoc &loc);
-	ostream &source_error(const InputLoc &loc);
-
 	unsigned int arrayTypeSize( unsigned long maxVal );
 
 	bool outLabelUsed;
