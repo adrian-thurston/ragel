@@ -1009,7 +1009,7 @@ FsmRes NfaUnion::walk( ParseData *pd )
 	}
 
 	if ( pd->id->printStatistics )
-		cout << "terms\t" << terms.length() << endl;
+		stats() << "terms\t" << terms.length() << endl;
 
 	/* Compute the individual expressions. */
 
@@ -1025,25 +1025,19 @@ FsmRes NfaUnion::walk( ParseData *pd )
 		machines[numTerms]->minimizePartition2();
 		sumMin += machines[numTerms]->stateList.length();
 
-		//std::cout << (float)o * 100.0 / (float)terms.length() <<
-		//	": " << machines[o]->stateList.length() << std::endl;
-
-		//log << "term-state-list\t " <<
-		//		machines[o]->stateList.length() << std::endl;
-
 		numTerms += 1;
 	}
 
 	if ( pd->id->printStatistics ) {
-		cout << "sum-plain\t" << sumPlain << endl;
-		cout << "sum-minimized\t" << sumMin << endl;
+		stats() << "sum-plain\t" << sumPlain << endl;
+		stats() << "sum-minimized\t" << sumMin << endl;
 	}
 
 	/* For each round. */
 	for ( NfaRoundVect::Iter r = *roundsList; r.lte(); r++ ) {
 		if ( pd->id->printStatistics ) {
-			cout << "depth\t" << r->depth << endl;
-			cout << "grouping\t" << r->groups << endl;
+			stats() << "depth\t" << r->depth << endl;
+			stats() << "grouping\t" << r->groups << endl;
 		}
 
 		int numGroups = 0;

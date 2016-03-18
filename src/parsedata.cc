@@ -1134,7 +1134,7 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 {
 	if ( id->printStatistics )
-		cout << "compiling\t" << sectionName << endl;
+		stats() << "compiling\t" << sectionName << endl;
 
 	/* Build the graph from a walk of the parse tree. */
 	FsmRes graph = gdNode->value->walk( this );

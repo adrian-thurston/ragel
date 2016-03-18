@@ -26,7 +26,6 @@
 #include "mergesort.h"
 #include "parsedata.h"
 
-using std::cout;
 using std::endl;
 	
 Action::~Action()
@@ -1287,26 +1286,22 @@ FsmRes FsmAp::fillInStates()
 		nfaList.detach( state );
 
 		if ( priorInteraction ) {
-			// cout << "aborting due to prior interaction" << endl;
 			cleanAbortedFill();
 			return FsmRes( FsmRes::PriorInteraction(), guardId );
 		}
 
 		if ( overStateLimit() ) {
-			// cout << "aborting due to state limit" << endl;
 			cleanAbortedFill();
 			return FsmRes( FsmRes::TooManyStates() );
 		}
 	}
 
 	if ( priorInteraction ) {
-		// cout << "aborting due to prior interaction" << endl;
 		cleanAbortedFill();
 		return FsmRes( FsmRes::PriorInteraction(), guardId );
 	}
 
 	if ( overStateLimit() ) {
-		// cout << "aborting due to state limit" << endl;
 		cleanAbortedFill();
 		return FsmRes( FsmRes::TooManyStates() );
 	}

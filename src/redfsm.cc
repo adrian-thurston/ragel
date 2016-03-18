@@ -775,11 +775,6 @@ void RedFsmAp::characterClass( EquivList &equiv )
 		c->value = el->value;
 	}
 
-	// for ( EquivClass *c = equiv.head; c != 0; c = c->next ) {
-	//	std::cout << c->lowKey.getVal() << " " <<
-	//			c->highKey.getVal() << " -> " << c->value << std::endl;
-	// }
-
 	/* Build the map and emit arrays from the range-based equiv classes. Will
 	 * likely crash if there are no transitions in the FSM. */
 	long long maxSpan = keyOps->span( lowKey, highKey );

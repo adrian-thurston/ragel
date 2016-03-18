@@ -40,7 +40,6 @@ using std::ifstream;
 using std::ostream;
 using std::ios;
 using std::cin;
-using std::cout;
 using std::endl;
 
 TableArray::TableArray( const char *name, CodeGen &codeGen )
@@ -275,7 +274,7 @@ void TableArray::finishGenerate()
 	}
 
 	if ( codeGen.pd->id->printStatistics ) {
-		cout << name << "\t" << values << "\t" <<
+		stats() << name << "\t" << values << "\t" <<
 			size() << "\t" << endl;
 	}
 
@@ -337,7 +336,7 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 void CodeGen::statsSummary()
 {
 	if ( pd->id->printStatistics )
-		cout << "table-data\t\t" << tableData << endl << endl;
+		stats() << "table-data\t\t" << tableData << endl << endl;
 }
 
 unsigned int CodeGen::arrayTypeSize( unsigned long maxVal )

@@ -1591,8 +1591,8 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 		}
 
 		if ( pd->id->printStatistics ) {
-			std::cout << "fsm-name\t" << fsmName << std::endl;
-			std::cout << "fsm-states\t" << redFsm->stateList.length() << std::endl;
+			stats() << "fsm-name\t" << fsmName << std::endl;
+			stats() << "fsm-states\t" << redFsm->stateList.length() << std::endl;
 		}
 
 		writeData();

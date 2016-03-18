@@ -31,7 +31,6 @@ using std::ifstream;
 using std::ostream;
 using std::ios;
 using std::cin;
-using std::cout;
 using std::endl;
 
 /* Override this so that write statement processing is ignored */

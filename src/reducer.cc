@@ -107,7 +107,6 @@ void TopLevel::loadIncludeData( IncludeRec *el, IncludePass &includePass, const 
 
 	if ( id->inLibRagel ) {
 		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
-			//std::cout << "start: " << ii->start << " length: " << ii->length << std::endl;
 			memcpy( el->data + len, id->input + ii->start, ii->length );
 			len += ii->length;
 		}

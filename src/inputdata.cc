@@ -34,7 +34,6 @@ using std::istream;
 using std::ifstream;
 using std::stringstream;
 using std::ostream;
-using std::cout;
 using std::endl;
 using std::ios;
 
@@ -245,8 +244,8 @@ void InputData::createOutputStream()
 		outStream = new ostream( outFilter );
 	}
 	else {
-		/* Writing out ot std out. */
-		outStream = &cout;
+		/* Writing out to std out. */
+		outStream = &std::cout;
 	}
 }
 

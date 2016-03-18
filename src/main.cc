@@ -61,8 +61,6 @@ using std::ostream;
 using std::ifstream;
 using std::ofstream;
 using std::cin;
-using std::cout;
-using std::cerr;
 using std::endl;
 using std::ios;
 using std::streamsize;
@@ -70,7 +68,7 @@ using std::streamsize;
 /* Print a summary of the options. */
 void InputData::usage()
 {
-	cout <<
+	info() <<
 "usage: ragel [options] file\n"
 "general:\n"
 "   -h, -H, -?, --help   Print this usage and exit\n"
@@ -166,48 +164,51 @@ void InputData::usage()
 /* Print version information and exit. */
 void InputData::version()
 {
-	cout << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
+	info() << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
 			"Copyright (c) 2001-2015 by Adrian Thurston" << endl;
 	abortCompile( 0 );
 }
 
 void InputData::showHostLangNames()
 {
+	ostream &out = info();
 	for ( int i = 0; i < numHostLangs; i++ ) {
 		if ( i > 0 )
-			cout << " ";
-		cout << hostLangs[i]->name;
+			out  << " ";
+		out << hostLangs[i]->name;
 	}
-	cout << endl;
+	out << endl;
 	abortCompile( 0 );
 }
 
 void InputData::showHostLangArgs()
 {
+	ostream &out = info();
 	for ( int i = 0; i < numHostLangs; i++ ) {
 		if ( i > 0 )
-			cout << " ";
-		cout << hostLangs[i]->arg;
+			out << " ";
+		out << hostLangs[i]->arg;
 	}
-	cout << endl;
+	out << endl;
 	abortCompile( 0 );
 }
 
 void InputData::showFrontends()
 {
-	cout << "--colm-frontend";
-	cout << " --reduce-frontend";
+	ostream &out = info();
+	out << "--colm-frontend";
+	out << " --reduce-frontend";
 #ifdef WITH_RAGEL_KELBT
-	cout << " --kelbt-frontend";
+	out << " --kelbt-frontend";
 #endif
-	cout << endl;
+	out << endl;
 	abortCompile( 0 );
 }
 
 void InputData::showBackends()
 {
-	cout << "--direct-backend --colm-backend";
-	cout << endl;
+	info() << 
+		"--direct-backend --colm-backend" << endl;
 	abortCompile( 0 );
 }
 
@@ -217,13 +218,13 @@ void InputData::showStyles()
 	case HostLang::C:
 	case HostLang::D:
 	case HostLang::Go:
-		cout << "-T0 -T1 -F0 -F1 -G0 -G1 -G2" << endl;
+		info() << "-T0 -T1 -F0 -F1 -G0 -G1 -G2" << endl;
 		break;
 	case HostLang::CSharp:
-		cout << "-T0 -T1 -F0 -F1 -G0 -G1" << endl;
+		info() << "-T0 -T1 -F0 -F1 -G0 -G1" << endl;
 		break;
 	case HostLang::Asm:
-		cout << "-G2" << endl;
+		info() << "-G2" << endl;
 		break;
 	case HostLang::Java:
 	case HostLang::Ruby:
@@ -231,10 +232,10 @@ void InputData::showStyles()
 	case HostLang::Crack:
 	case HostLang::Rust:
 	case HostLang::Julia:
-		cout << "-T0 -T1 -F0 -F1" << endl;
+		info() << "-T0 -T1 -F0 -F1" << endl;
 		break;
 	case HostLang::JS:
-		cout << "-T0" << endl;
+		info() << "-T0" << endl;
 		break;
 
 	}
@@ -277,23 +278,34 @@ int gblErrorCount = 0;
 /* Print the opening to a warning in the input, then return the error ostream. */
 ostream &warning( const InputLoc &loc )
 {
-	cerr << loc << ": warning: ";
-	return cerr;
+	std::cerr << loc << ": warning: ";
+	return std::cerr;
 }
 
 /* Print the opening to a program error, then return the error stream. */
 ostream &error()
 {
 	gblErrorCount += 1;
-	cerr << PROGNAME ": ";
-	return cerr;
+	std::cerr << PROGNAME ": ";
+	return std::cerr;
 }
 
 ostream &error( const InputLoc &loc )
 {
 	gblErrorCount += 1;
-	cerr << loc << ": ";
-	return cerr;
+	std::cerr << loc << ": ";
+	return std::cerr;
+}
+
+std::ostream &stats()
+{
+	return std::cout;
+}
+
+/* Requested info. */
+std::ostream &info()
+{
+	return std::cout;
 }
 
 void escapeLineDirectivePath( std::ostream &out, char *path )
@@ -771,6 +783,60 @@ void InputData::checkArgs()
 	}
 }
 
+int libragel_main( char **result, int argc, const char **argv, const char *input )
+{
+	InputData id;
+
+	try {
+		id.inLibRagel = true;
+
+		id.parseArgs( argc, argv );
+		id.checkArgs();
+		id.input = input;
+		id.frontend = ReduceBased;
+		id.process();
+
+		*result = strdup( id.comm.c_str() );
+	}
+	catch ( const AbortCompile &ac ) {
+		*result = strdup( "" );
+	}
+	return 0;
+}
+
+/* Library interface. Takes command line and the input file contents. Any input
+ * file included in the command line is ignored. This wrapper simply parses the
+ * args. */
+extern "C"
+int libragel( char **result, char *cmd, const char *input )
+{
+	const int max = 32;
+	int argc = 0;
+	const char *argv[max+1];
+
+	char *s = cmd;
+	while ( 1 ) {
+		char *tok = strtok( s, " " );
+		s = NULL;
+
+		if ( tok == NULL )
+			break;
+
+		argv[argc++] = strdup(tok);
+
+		if ( argc == max )
+			break;
+	}
+	argv[argc] = NULL;
+
+	int es = libragel_main( result, argc, argv, input );
+
+	for ( int i = 0; i < argc; i++ )
+		free( (void*)argv[i] );
+
+	return es;
+}
+
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
 {
@@ -787,7 +853,7 @@ int main( int argc, const char **argv )
 		code = ac.code;
 
 		if ( id.commFileName == 0 ) {
-			cout << id.comm;
+			std::cout << id.comm;
 		}
 		else {
 			ofstream ofs( id.commFileName, std::fstream::app );
@@ -798,24 +864,3 @@ int main( int argc, const char **argv )
 	return code;
 }
 
-int libragel_main( char **result, int argc, const char **argv, const char *input )
-{
-	InputData id;
-
-	try {
-		id.inLibRagel = true;
-
-		id.parseArgs( argc, argv );
-		id.checkArgs();
-		id.input = input;
-		id.frontend = ReduceBased;
-		id.process();
-
-		*result = strdup( id.comm.c_str() );
-		// cout << "result: " << *result << endl;
-	}
-	catch ( const AbortCompile &ac ) {
-		*result = strdup( "" );
-	}
-	return 0;
-}
