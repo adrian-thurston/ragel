@@ -86,7 +86,7 @@ struct Scanner
 	void endSection();
 	void do_scan();
 	bool active();
-	ostream &scan_error();
+	InputLoc scan_loc();
 
 	InputData &id;
 	const char *fileName;

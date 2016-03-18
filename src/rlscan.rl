@@ -261,7 +261,7 @@ bool Scanner::active()
 		return false;
 
 	if ( parser == 0 && ! parserExistsError ) {
-		scan_error() << "this specification has no name, nor does any previous"
+		error(scan_loc()) << "this specification has no name, nor does any previous"
 			" specification" << endl;
 		parserExistsError = true;
 	}
@@ -272,12 +272,9 @@ bool Scanner::active()
 	return true;
 }
 
-ostream &Scanner::scan_error()
+InputLoc Scanner::scan_loc()
 {
-	/* Maintain the error count. */
-	gblErrorCount += 1;
-	cerr << makeInputLoc( fileName, line, column ) << ": ";
-	return cerr;
+	return makeInputLoc( fileName, line, column );
 }
 
 /* An approximate check for duplicate includes. Due to aliasing of files it's
@@ -386,10 +383,10 @@ void Scanner::handleInclude()
 		long found = 0;
 		ifstream *inFile = tryOpenInclude( includeChecks, found );
 		if ( inFile == 0 ) {
-			scan_error() << "include: failed to locate file" << endl;
+			error(scan_loc()) << "include: failed to locate file" << endl;
 			char **tried = includeChecks;
 			while ( *tried != 0 )
-				scan_error() << "include: attempted: \"" << *tried++ << '\"' << endl;
+				error(scan_loc()) << "include: attempted: \"" << *tried++ << '\"' << endl;
 		}
 		else {
 			/* Don't include anything that's already been included. */
@@ -418,11 +415,11 @@ void Scanner::handleImport()
 		long found = 0;
 		ifstream *inFile = tryOpenInclude( importChecks, found );
 		if ( inFile == 0 ) {
-			scan_error() << "import: could not open import file " <<
+			error(scan_loc()) << "import: could not open import file " <<
 					"for reading" << endl;
 			char **tried = importChecks;
 			while ( *tried != 0 )
-				scan_error() << "import: attempted: \"" << *tried++ << '\"' << endl;
+				error(scan_loc()) << "import: attempted: \"" << *tried++ << '\"' << endl;
 		}
 
 		Scanner scanner( id, importChecks[found], *inFile, parser,
@@ -444,10 +441,10 @@ void Scanner::handleImport()
 	action store_word { word = tokdata; word_len = toklen; }
 	action store_lit { lit = tokdata; lit_len = toklen; }
 
-	action mach_err { scan_error() << "bad machine statement" << endl; }
-	action incl_err { scan_error() << "bad include statement" << endl; }
-	action import_err { scan_error() << "bad import statement" << endl; }
-	action write_err { scan_error() << "bad write statement" << endl; }
+	action mach_err { error(scan_loc()) << "bad machine statement" << endl; }
+	action incl_err { error(scan_loc()) << "bad include statement" << endl; }
+	action import_err { error(scan_loc()) << "bad import statement" << endl; }
+	action write_err { error(scan_loc()) << "bad write statement" << endl; }
 
 	action handle_machine { handleMachine(); }
 	action handle_include { handleInclude(); }
@@ -913,7 +910,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		};
 
 		EOF => {
-			scan_error() << "unterminated code block" << endl;
+			error(scan_loc()) << "unterminated code block" << endl;
 		};
 
 		# Send every other character as a symbol.
@@ -940,7 +937,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		']'	=> { token( RE_SqClose ); fret; };
 
 		EOF => {
-			scan_error() << "unterminated OR literal" << endl;
+			error(scan_loc()) << "unterminated OR literal" << endl;
 		};
 
 		# Characters in an OR expression.
@@ -975,7 +972,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		'[^' => { token( RE_SqOpenNeg ); fcall or_literal; };
 
 		EOF => {
-			scan_error() << "unterminated regular expression" << endl;
+			error(scan_loc()) << "unterminated regular expression" << endl;
 		};
 
 		# Characters in an OR expression.
@@ -989,7 +986,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		';' => { token( ';' ); fgoto parser_def; };
 
 		EOF => {
-			scan_error() << "unterminated write statement" << endl;
+			error(scan_loc()) << "unterminated write statement" << endl;
 		};
 	*|;
 
@@ -1163,7 +1160,7 @@ ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
 		};
 
 		EOF => {
-			scan_error() << "unterminated ragel section" << endl;
+			error(scan_loc()) << "unterminated ragel section" << endl;
 		};
 
 		any => { token( *ts ); } ;
@@ -1267,7 +1264,7 @@ void Scanner::do_scan()
 		if ( cs == rlscan_error ) {
 			/* Machine failed before finding a token. I'm not yet sure if this
 			 * is reachable. */
-			scan_error() << "scanner error" << endl;
+			error(scan_loc()) << "scanner error" << endl;
 			id.abortCompile( 1 );
 		}
 
