@@ -23,6 +23,8 @@
 #include "flatexpvar.h"
 #include "redfsm.h"
 #include "gendata.h"
+#include "parsedata.h"
+#include "inputdata.h"
 
 FlatExpVar::FlatExpVar( const CodeGenArgs &args ) 
 :
@@ -82,7 +84,7 @@ void FlatExpVar::genAnalysis()
 	redFsm->makeFlatClass();
 
 	/* If any errors have occured in the input file then don't write anything. */
-	if ( gblErrorCount > 0 )
+	if ( pd->id->errorCount > 0 )
 		return;
 
 	/* Anlayze Machine will find the final action reference counts, among other

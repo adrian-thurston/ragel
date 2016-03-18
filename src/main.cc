@@ -272,9 +272,6 @@ ostream &operator<<( ostream &out, const InputLoc &loc )
 	return out;
 }
 
-/* Total error count. */
-int gblErrorCount = 0;
-
 /* Print the opening to a warning in the input, then return the error ostream. */
 ostream &InputData::warning( const InputLoc &loc )
 {
@@ -285,14 +282,14 @@ ostream &InputData::warning( const InputLoc &loc )
 /* Print the opening to a program error, then return the error stream. */
 ostream &InputData::error()
 {
-	gblErrorCount += 1;
+	errorCount += 1;
 	std::cerr << PROGNAME ": ";
 	return std::cerr;
 }
 
 ostream &InputData::error( const InputLoc &loc )
 {
-	gblErrorCount += 1;
+	errorCount += 1;
 	std::cerr << loc << ": ";
 	return std::cerr;
 }
@@ -743,7 +740,7 @@ void InputData::checkArgs()
 		error() << "no input file given" << endl;
 
 	/* Bail on argument processing errors. */
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 
 	/* Make sure we are not writing to the same file as the input file. */

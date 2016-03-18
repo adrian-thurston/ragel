@@ -104,8 +104,6 @@ typedef DList<GenAction> GenActionList;
 
 typedef unsigned long ulong;
 
-extern int gblErrorCount;
-
 struct CodeGenData;
 struct InputData;
 struct ParseData;

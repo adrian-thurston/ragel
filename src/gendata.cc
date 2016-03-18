@@ -138,9 +138,6 @@ void GenBase::reduceActionTables()
 }
 
 
-/* Total error count. */
-/* int gblErrorCount = 0; */
-
 CodeGenData::CodeGenData( const CodeGenArgs &args )
 :
 	GenBase(args.fsmName, args.machineId, args.pd, args.fsm),

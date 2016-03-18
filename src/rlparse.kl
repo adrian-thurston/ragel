@@ -1900,9 +1900,6 @@ void Parser6::tryMachineDef( const InputLoc &loc, char *name,
 
 ostream &Parser6::parse_error( int tokId, Token &token )
 {
-	/* Maintain the error count. */
-	gblErrorCount += 1;
-
 	ostream &err = pd->id->error( token.loc );
 
 	err << "at token ";

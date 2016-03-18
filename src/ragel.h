@@ -86,8 +86,6 @@ std::ostream &operator<<( std::ostream &out, const InputLoc &loc );
 
 void xmlEscapeHost( std::ostream &out, const char *data, long len );
 
-/* IO filenames and stream. */
-extern int gblErrorCount;
 
 using std::endl;
 

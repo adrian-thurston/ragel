@@ -2450,9 +2450,7 @@ struct LoadRagel
 		_repeat_import ImportList = RagelImport( program );
 
 		if ( Start == 0 ) {
-			gblErrorCount += 1;
-			InputLoc loc( Error.loc() );
-			pd->id->error(loc) << fileName << ": parse error: " << Error.text() << std::endl;
+			pd->id->error(Error.loc()) << fileName << ": parse error: " << Error.text() << std::endl;
 			return;
 		}
 
@@ -2693,9 +2691,7 @@ struct LoadRagel
 		str Error = RagelError( program );
 
 		if ( Start == 0 ) {
-			gblErrorCount += 1;
-			InputLoc loc( Error.loc() );
-			pd->id->error(loc) << inputFileName << ": parse error: " << Error.text() << std::endl;
+			pd->id->error(Error.loc()) << inputFileName << ": parse error: " << Error.text() << std::endl;
 			return;
 		}
 

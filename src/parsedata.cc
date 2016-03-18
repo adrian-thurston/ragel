@@ -1547,7 +1547,7 @@ FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *h
 	makeExports();
 
 	/* If any errors have occured in the input file then don't write anything. */
-	if ( gblErrorCount > 0 )
+	if ( id->errorCount > 0 )
 		return FsmRes( FsmRes::Aborted() );
 
 	createNfaActions( sectionGraph );

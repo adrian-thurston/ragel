@@ -415,12 +415,12 @@ void InputData::processXML()
 	/* Compiles machines. */
 	prepareAllMachines();
 
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 
 	createOutputStream();
 
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 
 	/*
@@ -437,12 +437,12 @@ void InputData::processDot()
 	/* Compiles the DOT machines. */
 	prepareSingleMachine();
 
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 
 	createOutputStream();
 
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 
 	/*
@@ -497,7 +497,7 @@ void InputData::processCode()
 	/* Compiles machines. */
 	prepareAllMachines();
 
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 
 	makeDefaultFileName();
@@ -509,12 +509,12 @@ void InputData::processCode()
 	/* Generates the reduced machine, which we use to write output. */
 	generateReduced();
 
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 
 	verifyWritesHaveData();
 
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 
 	/*
@@ -552,12 +552,12 @@ bool InputData::checkLastRef( InputItem *ii )
 			if ( !res.success() )
 				return false;
 
-			if ( gblErrorCount > 0 )
+			if ( errorCount > 0 )
 				return false;
 
 			pd->generateReduced( inputFileName, codeStyle, *outStream, hostLang );
 
-			if ( gblErrorCount > 0 )
+			if ( errorCount > 0 )
 				return false;
 		}
 
@@ -577,7 +577,7 @@ bool InputData::checkLastRef( InputItem *ii )
 		while ( lastFlush != 0 && lastFlush->processed ) {
 			verifyWriteHasData( lastFlush );
 
-			if ( gblErrorCount > 0 )
+			if ( errorCount > 0 )
 				return false;
 
 			/* Flush out. */
@@ -683,11 +683,11 @@ void InputData::parseKelbt()
 	scanner.do_scan();
 
 	/* Finished, final check for errors.. */
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 
 	/* Bail on above error. */
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 	
 	if ( inLibRagel )
@@ -726,7 +726,7 @@ void InputData::processKelbt()
 		runRlhc();
 	}
 
-	assert( gblErrorCount == 0 );
+	assert( errorCount == 0 );
 }
 #endif
 
@@ -749,7 +749,7 @@ void InputData::processColm()
 	deleteLoadRagel( lr );
 
 	/* Bail on above error. */
-	if ( gblErrorCount > 0 )
+	if ( errorCount > 0 )
 		abortCompile( 1 );
 
 	if ( generateXML )
@@ -759,7 +759,7 @@ void InputData::processColm()
 	else 
 		processCode();
 
-	assert( gblErrorCount == 0 );
+	assert( errorCount == 0 );
 }
 
 bool InputData::parseReduce()

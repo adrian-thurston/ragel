@@ -208,7 +208,8 @@ struct InputData
 		histogramFn(0),
 		histogram(0),
 		input(0),
-		inLibRagel(false)
+		inLibRagel(false),
+		errorCount(0)
 	{}
 
 	~InputData();
@@ -385,6 +386,8 @@ struct InputData
 	
 	/* Requested info. */
 	std::ostream &info();
+
+	int errorCount;
 };
 
 
