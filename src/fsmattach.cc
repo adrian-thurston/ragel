@@ -660,8 +660,6 @@ TransDataAp *FsmAp::crossTransitionsBothPlain( StateAp *from,
 TransAp *FsmAp::crossTransitions( StateAp *from,
 		TransAp *destTrans, TransAp *srcTrans )
 {
-	// cerr << __PRETTY_FUNCTION__ << endl;
-
 	if ( destTrans->plain() && srcTrans->plain() ) {
 		/* Return the transition that resulted from the cross. */
 		return crossTransitionsBothPlain( from,

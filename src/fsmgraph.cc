@@ -1030,29 +1030,6 @@ StateAp *FsmAp::dupStartState()
 	return dup;
 }
 
-#if 0
-void FsmAp::logOutCondTransfer( StateAp *destState )
-{
-	std::cerr << "out cond transfer" << std::endl;
-	CondSpace *condSpace = destState->outCondSpace;
-	for ( CondKeySet::Iter cvi = destState->outCondKeys; cvi.lte(); cvi++ ) {
-
-		std::cerr << " ";
-		for ( CondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-			int condVals = *cvi;
-			bool set = condVals & (1 << csi.pos());
-			if ( !set )
-				std::cerr << "!";
-			(*csi)->actionName( std::cerr );
-			if ( !csi.last() )
-				std::cerr << ", ";
-		}
-
-		std::cerr << std::endl;
-	}
-}
-#endif
-
 /* A state merge which represents the drawing in of leaving transitions.  If
  * there is any out data then we duplicate the source state, transfer the out
  * data, then merge in the state. The new state will be reaped because it will

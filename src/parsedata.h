@@ -203,7 +203,6 @@ struct ParseData
 	void makeNameTree( GraphDictEl *gdNode );
 	void makeExportsNameTree();
 	void fillNameIndex( NameInst *from );
-	void printNameTree();
 	void createNfaActions( FsmAp *fsm );
 
 	/* Increments the usage count on entry names. Names that are no longer
@@ -232,7 +231,8 @@ struct ParseData
 	void removeActionDups( FsmAp *graph );
 
 	/* Dumping the name instantiation tree. */
-	void printNameInst( NameInst *nameInst, int level );
+	void printNameInst( std::ostream &out, NameInst *nameInst, int level );
+	void printNameTree( std::ostream &out );
 
 	/* Make the graph from a graph dict node. Does minimization. */
 	FsmRes makeInstance( GraphDictEl *gdNode );

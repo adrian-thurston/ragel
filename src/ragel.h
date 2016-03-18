@@ -95,6 +95,7 @@ void xmlEscapeHost( std::ostream &out, const char *data, long len );
 extern int gblErrorCount;
 
 std::ostream &error();
+using std::endl;
 
 extern const char mainMachine[];
 

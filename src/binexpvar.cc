@@ -44,8 +44,6 @@ void BinaryExpVar::calcIndexSize()
 //		transOffsets.size() +
 //		transLengths.size();
 //
-//	//std::cerr << "sizes: " << sizeWithInds << " " << sizeWithoutInds << std::endl;
-
 	useIndicies = false;
 }
 

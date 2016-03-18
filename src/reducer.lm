@@ -164,7 +164,6 @@ reduction TopLevel
 			error(@word) << "action \"" << data << "\" already defined" << endl;
 		}
 		else {
-			//std::cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << std::endl;
 			/* Add the action to the list of actions. */
 			Action *newAction = new Action( @1, data, 
 					$action_block->inlineList, pd->nextCondId++ );
@@ -187,7 +186,6 @@ reduction TopLevel
 			error(@word) << "action \"" << data << "\" already defined" << endl;
 		}
 		else {
-			//std::cerr << "NEW ACTION " << $2->data << " " << $4->inlineList << std::endl;
 			/* Add the action to the list of actions. */
 			Action *newAction = new Action( @1, data, 
 					$action_block->inlineList, pd->nextCondId++ );

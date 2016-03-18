@@ -31,7 +31,6 @@ using std::ostream;
 using std::ios;
 using std::cin;
 using std::cout;
-using std::cerr;
 using std::endl;
 
 void GraphvizDotGen::key( Key key )

@@ -35,7 +35,6 @@ using std::ifstream;
 using std::stringstream;
 using std::ostream;
 using std::cout;
-using std::cerr;
 using std::endl;
 using std::ios;
 

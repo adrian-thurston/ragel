@@ -542,7 +542,7 @@ int FsmAp::compareTransDataPtr( TransAp *trans1, TransAp *trans2 )
  * Does not consider from state. Either of the pointers may be null. */
 int FsmAp::compareFullPtr( TransAp *trans1, TransAp *trans2 )
 {
-	std::cerr << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+	/* << "FIXME: " << __PRETTY_FUNCTION__ << std::endl; */
 
 	if ( (trans1 != 0) ^ (trans2 != 0) ) {
 		/* Exactly one of the transitions is set. */
@@ -573,7 +573,7 @@ int FsmAp::compareFullPtr( TransAp *trans1, TransAp *trans2 )
 bool FsmAp::shouldMarkPtr( MarkIndex &markIndex, TransAp *trans1, 
 				TransAp *trans2 )
 {
-	std::cerr << "FIXME: " << __PRETTY_FUNCTION__ << std::endl;
+	/* << "FIXME: " << __PRETTY_FUNCTION__ << std::endl; */
 
 	if ( (trans1 != 0) ^ (trans2 != 0) ) {
 		/* Exactly one of the transitions is set. The initial mark round

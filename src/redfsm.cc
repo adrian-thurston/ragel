@@ -249,13 +249,10 @@ void RedFsmAp::readScores()
 			/* 2. While inside lower, add in score. */
 			while ( chi <= rtel->highKey.getVal() ) {
 				rtel->score += scores[st->id][chi];
-				// std::cerr << "score to " << rtel->score << std::endl;
 				chi++;
 			}
 
 			/* 3. Next range. */
-			// std::cerr << "rtel score " << rtel->lowKey.getVal() << " " <<
-			//		rtel->highKey.getVal() << " " << rtel->score << std::endl;
 			rtel++;
 		}
 	}

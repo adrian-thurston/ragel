@@ -29,7 +29,6 @@
 #include <string.h>
 #include "version.h"
 
-using std::cerr;
 using std::endl;
 
 XMLCodeGen::XMLCodeGen( std::string fsmName, int machineId, ParseData *pd, FsmAp *fsm, std::ostream &out )

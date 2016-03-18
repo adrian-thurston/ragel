@@ -485,8 +485,6 @@ void FsmAp::addOutCondition( StateAp *state, Action *condAction, bool sense )
 				}
 			}
 
-			//std::cerr << "orig: " << origVal << " new: " << newVal << std::endl;
-
 			if ( origVal != newVal )
 				state->outCondKeys[cti] = newVal;
 

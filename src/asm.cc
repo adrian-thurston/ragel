@@ -33,7 +33,6 @@
 using std::ostream;
 using std::ostringstream;
 using std::string;
-using std::cerr;
 using std::endl;
 using std::istream;
 using std::ifstream;
@@ -41,7 +40,6 @@ using std::ostream;
 using std::ios;
 using std::cin;
 using std::cout;
-using std::cerr;
 using std::endl;
 
 extern int numSplitPartitions;

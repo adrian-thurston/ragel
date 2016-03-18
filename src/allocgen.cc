@@ -45,9 +45,6 @@
 #include "ipgoto.h"
 #include "asm.h"
 
-using std::cerr;
-using std::endl;
-
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
@@ -130,20 +127,20 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 			if ( id->backendFeature == GotoFeature )
 				codeGen = new SwitchLoopGoto(args);
 			else
-				std::cerr << "unsupported lang/style combination" << endp;
+				error() << "unsupported lang/style combination" << endp;
 			break;
 		case GenSwitchExp:
 			if ( id->backendFeature == GotoFeature )
 				codeGen = new SwitchExpGoto(args);
 			else
-				std::cerr << "unsupported lang/style combination" << endp;
+				error() << "unsupported lang/style combination" << endp;
 			break;
 
 		case GenIpGoto:
 			if ( id->backendFeature == GotoFeature )
 				codeGen = new IpGoto(args);
 			else
-				std::cerr << "unsupported lang/style combination" << endp;
+				error() << "unsupported lang/style combination" << endp;
 			break;
 		}
 	}

@@ -33,7 +33,6 @@
 using std::ifstream;
 using std::istream;
 using std::ostream;
-using std::cerr;
 using std::endl;
 
 enum InlineBlockType
@@ -296,7 +295,6 @@ void Scanner::updateCol()
 	char *from = lastnl;
 	if ( from == 0 )
 		from = ts;
-	//cerr << "adding " << te - from << " to column" << endl;
 	column += te - from;
 	lastnl = 0;
 }

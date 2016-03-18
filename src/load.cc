@@ -1781,7 +1781,6 @@ struct LoadRagel
 		/* Convert the priority number to a long. Check for overflow. */
 		errno = 0;
 
-		//std::cerr << "PRIOR AUG: " << $1->token.data << std::endl;
 		long aug = strtol( data.c_str(), 0, 10 );
 		if ( errno == ERANGE && aug == LONG_MAX ) {
 			/* Priority number too large. Recover by setting the priority to 0. */

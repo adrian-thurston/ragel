@@ -974,16 +974,16 @@ void ParseData::initKeyOps( const HostLang *hostLang )
 	}
 }
 
-void ParseData::printNameInst( NameInst *nameInst, int level )
+void ParseData::printNameInst( std::ostream &out, NameInst *nameInst, int level )
 {
 	for ( int i = 0; i < level; i++ )
-		cerr << "  ";
-	cerr << (!nameInst->name.empty() ? nameInst->name : "<ANON>") << 
+		out << "  ";
+	out << (!nameInst->name.empty() ? nameInst->name : "<ANON>") << 
 			"  id: " << nameInst->id << 
 			"  refs: " << nameInst->numRefs <<
 			"  uses: " << nameInst->numUses << endl;
 	for ( NameVect::Iter name = nameInst->childVect; name.lte(); name++ )
-		printNameInst( *name, level+1 );
+		printNameInst( out, *name, level+1 );
 }
 
 /* Remove duplicates of unique actions from an action table. */
@@ -1202,18 +1202,18 @@ FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 	return graph;
 }
 
-void ParseData::printNameTree()
+void ParseData::printNameTree( ostream &out )
 {
 	/* Print the name instance map. */
 	for ( NameVect::Iter name = rootName->childVect; name.lte(); name++ )
-		printNameInst( *name, 0 );
+		printNameInst( out, *name, 0 );
 	
-	cerr << "name index:" << endl;
+	out << "name index:" << endl;
 	/* Show that the name index is correct. */
 	for ( int ni = 0; ni < nextNameId; ni++ ) {
-		cerr << ni << ": ";
+		out << ni << ": ";
 		std::string name = nameIndex[ni]->name;
-		cerr << ( !name.empty() ? name : "<ANON>" ) << endl;
+		out << ( !name.empty() ? name : "<ANON>" ) << endl;
 	}
 }
 
