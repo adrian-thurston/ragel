@@ -52,7 +52,7 @@ version.h: Makefile
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
 nodist_libragel_a_SOURCES = $(nodist_ragel_SOURCES)
-libragel_a_SOURCES = $(ragel_SOURCES) lib.cc
+libragel_a_SOURCES = $(ragel_SOURCES)
 libragel_a_CPPFLAGS = -Dmain=main_lib -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 EXTRA_DIST = \

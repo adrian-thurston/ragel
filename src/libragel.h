@@ -7,6 +7,7 @@
 #define EXTERN_C
 #endif
 
-EXTERN_C int libragel( char **result, char **out, char **err, char *cmd, const char *input );
+EXTERN_C 
+int libragel( char **result, char **out, char **err, int argc, const char **argv, const char *input );
 
 #endif

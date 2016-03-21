@@ -783,7 +783,15 @@ void InputData::checkArgs()
 	}
 }
 
-int libragel_main( char **result, char **out, char **err, int argc, const char **argv, const char *input )
+/*
+ * result: analysis output
+ * out: contents of stdout
+ * err: contents of stderr
+ * argc, argv: ragel arguments, input file ignored
+ * input: input file contents
+ */
+extern "C"
+int libragel( char **result, char **out, char **err, int argc, const char **argv, const char *input )
 {
 	InputData id;
 
@@ -795,50 +803,20 @@ int libragel_main( char **result, char **out, char **err, int argc, const char *
 		id.input = input;
 		id.frontend = ReduceBased;
 		id.process();
-
-		*result = strdup( id.comm.c_str() );
 	}
 	catch ( const AbortCompile &ac ) {
 		*result = strdup( "" );
 	}
 
-	*out = strdup( id.libcout.str().c_str() );
-	*err = strdup( id.libcerr.str().c_str() );
+	if ( result != 0 )
+		*result = strdup( id.comm.c_str() );
+	if ( out != 0 )
+		*out = strdup( id.libcout.str().c_str() );
+	if ( err != 0 )
+		*err = strdup( id.libcerr.str().c_str() );
 	return 0;
 }
 
-/* Library interface. Takes command line and the input file contents. Any input
- * file included in the command line is ignored. This wrapper simply parses the
- * args. */
-extern "C"
-int libragel( char **result, char **out, char **err, char *cmd, const char *input )
-{
-	const int max = 32;
-	int argc = 0;
-	const char *argv[max+1];
-
-	char *s = cmd;
-	while ( 1 ) {
-		char *tok = strtok( s, " " );
-		s = NULL;
-
-		if ( tok == NULL )
-			break;
-
-		argv[argc++] = strdup(tok);
-
-		if ( argc == max )
-			break;
-	}
-	argv[argc] = NULL;
-
-	int es = libragel_main( result, out, err, argc, argv, input );
-
-	for ( int i = 0; i < argc; i++ )
-		free( (void*)argv[i] );
-
-	return es;
-}
 
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
