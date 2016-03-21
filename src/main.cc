@@ -275,34 +275,37 @@ ostream &operator<<( ostream &out, const InputLoc &loc )
 /* Print the opening to a warning in the input, then return the error ostream. */
 ostream &InputData::warning( const InputLoc &loc )
 {
-	std::cerr << loc << ": warning: ";
-	return std::cerr;
+	ostream &err = inLibRagel ? libcerr : std::cerr;
+	err << loc << ": warning: ";
+	return err;
 }
 
 /* Print the opening to a program error, then return the error stream. */
 ostream &InputData::error()
 {
 	errorCount += 1;
-	std::cerr << PROGNAME ": ";
-	return std::cerr;
+	ostream &err = inLibRagel ? libcerr : std::cerr;
+	err << PROGNAME ": ";
+	return err;
 }
 
 ostream &InputData::error( const InputLoc &loc )
 {
 	errorCount += 1;
-	std::cerr << loc << ": ";
-	return std::cerr;
+	ostream &err = inLibRagel ? libcerr : std::cerr;
+	err << loc << ": ";
+	return err;
 }
 
 std::ostream &InputData::stats()
 {
-	return std::cout;
+	return inLibRagel ? libcout : std::cout;
 }
 
 /* Requested info. */
 std::ostream &InputData::info()
 {
-	return std::cout;
+	return inLibRagel ? libcout : std::cout;
 }
 
 void escapeLineDirectivePath( std::ostream &out, char *path )
@@ -780,7 +783,7 @@ void InputData::checkArgs()
 	}
 }
 
-int libragel_main( char **result, int argc, const char **argv, const char *input )
+int libragel_main( char **result, char **out, char **err, int argc, const char **argv, const char *input )
 {
 	InputData id;
 
@@ -798,6 +801,9 @@ int libragel_main( char **result, int argc, const char **argv, const char *input
 	catch ( const AbortCompile &ac ) {
 		*result = strdup( "" );
 	}
+
+	*out = strdup( id.libcout.str().c_str() );
+	*err = strdup( id.libcerr.str().c_str() );
 	return 0;
 }
 
@@ -805,7 +811,7 @@ int libragel_main( char **result, int argc, const char **argv, const char *input
  * file included in the command line is ignored. This wrapper simply parses the
  * args. */
 extern "C"
-int libragel( char **result, char *cmd, const char *input )
+int libragel( char **result, char **out, char **err, char *cmd, const char *input )
 {
 	const int max = 32;
 	int argc = 0;
@@ -826,7 +832,7 @@ int libragel( char **result, char *cmd, const char *input )
 	}
 	argv[argc] = NULL;
 
-	int es = libragel_main( result, argc, argv, input );
+	int es = libragel_main( result, out, err, argc, argv, input );
 
 	for ( int i = 0; i < argc; i++ )
 		free( (void*)argv[i] );

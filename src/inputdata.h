@@ -387,6 +387,9 @@ struct InputData
 	/* Requested info. */
 	std::ostream &info();
 
+	std::stringstream libcerr;
+	std::stringstream libcout;
+
 	int errorCount;
 };
 

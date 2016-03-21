@@ -465,7 +465,7 @@ void InputData::runRlhc()
 			hostLang->rlhcArg;
 
 	if ( rlhcShowCmd )
-		std::cout << rlhc << std::endl;
+		info() << rlhc << std::endl;
 
 	const char *argv[5];
 	argv[0] = "rlhc";

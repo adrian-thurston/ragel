@@ -6,8 +6,8 @@ KELBT       = @KELBT@
 RAGEL       = @RAGEL@
 
 bin_PROGRAMS = ragel
-
 lib_LIBRARIES = libragel.a
+include_HEADERS = libragel.h
 
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
