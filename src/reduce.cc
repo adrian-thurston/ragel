@@ -500,7 +500,7 @@ void Compiler::writeCommit()
 			"		vm_push_kid( kid );\n"
 			"\n"
 			"		lel = lel->child;\n"
-			"		kid = kid->tree->child;\n"
+			"		kid = tree_child( prg, kid->tree );\n"
 			"		while ( lel != 0 ) {\n"
 			"			goto recurse;\n"
 			"			resume:\n"

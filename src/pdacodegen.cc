@@ -66,7 +66,7 @@ void escapeLiteralString( std::ostream &out, const char *path )
 void PdaCodeGen::defineRuntime()
 {
 	out << 
-		"extern struct colm_sections colm_program_text;\n"
+		"extern struct colm_sections " << objectName << ";\n"
 		"\n";
 }
 
