@@ -1312,6 +1312,11 @@ void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *
 	pda_run->target_steps = -1;
 	pda_run->reducer = reducer;
 
+	/* An initial commit shift count of -1 means we won't ever back up to zero
+	 * shifts and think parsing cannot continue. */
+	pda_run->shift_count = 0;
+	pda_run->commit_shift_count = -1;
+
 	if ( reducer ) {
 		init_pool_alloc( &pda_run->local_pool, sizeof(parse_tree_t) +
 				prg->rtd->commit_union_sz(reducer) );
@@ -1508,6 +1513,7 @@ again:
 	 */
 
 	if ( pda_run->pda_tables->commit_len[pos] != 0 ) {
+		debug( prg, REALM_PARSE, "commit point\n" );
 		pda_run->commit_shift_count = pda_run->shift_count;
 
 		/* Not in a reverting context and the parser result is not used. */

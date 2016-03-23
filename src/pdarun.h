@@ -317,6 +317,12 @@ struct pda_run
 
 	long steps;
 	long target_steps;
+
+
+	/* The shift count simply tracks the number of shifts that have happend.
+	 * The commit shift count is the shift count when the last commit occurred.
+	 * If we back up to this number of shifts then we decide we cannot proceed.
+	 * The commit shift count is initialized to -1. */
 	long shift_count;
 	long commit_shift_count;
 
