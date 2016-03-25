@@ -790,6 +790,9 @@ bool InputData::parseReduce()
 		sectionPass->reduceStr( inputFileName, input );
 	else
 		sectionPass->reduceFile( inputFileName );
+	
+	if ( errorCount )
+		return false;
 
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
@@ -798,6 +801,9 @@ bool InputData::parseReduce()
 		topLevel->reduceStr( inputFileName, input );
 	else
 		topLevel->reduceFile( inputFileName );
+
+	if ( errorCount )
+		return false;
 
 	bool success = topLevel->success;
 

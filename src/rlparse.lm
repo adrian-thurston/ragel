@@ -100,8 +100,8 @@ Lang = A->value
 if ( Cmd == 'import-file' ) {
 	Stream: stream = open( FileName, "r" )
 	RagelTree = parse start[ Stream ]
-	RagelError = error
 	RagelImport = import( FileName, RagelTree )
+	RagelError = error
 }
 else if ( Cmd == 'parse-file' ) {
 	Stream: stream = open( FileName, "r" )
@@ -111,37 +111,35 @@ else if ( Cmd == 'parse-file' ) {
 else if ( Cmd == 'include-reduce-file' ) {
 	Stream: stream = open( FileName, "r" )
 	reduce IncludePass start[ Stream ]
-	if error
-		send stderr "[error]
+	RagelError = error
 }
 else if ( Cmd == 'include-reduce-str' ) {
 	A = argv->pop_head_el()
 	Data: str = A->value
 	reduce IncludePass start[ Data ]
-	if error
-		send stderr "[error]
+	RagelError = error
 }
 else if ( Cmd == 'toplevel-reduce-file' ) {
 	Stream: stream = open( FileName, "r" )
 	reduce TopLevel start[ Stream ]
+	RagelError = error
 }
 else if ( Cmd == 'toplevel-reduce-str' ) {
 	A = argv->pop_head_el()
 	Data: str = A->value
 	reduce TopLevel start[ Data ]
+	RagelError = error
 }
 else if ( Cmd == 'section-reduce-file' ) {
 	Stream: stream = open( FileName, "r" )
 	reduce SectionPass start[ Stream ]
-	if error
-		send stderr "[error]
+	RagelError = error
 }
 else if ( Cmd == 'section-reduce-str' ) {
 	A = argv->pop_head_el()
 	Data: str = A->value
 	reduce SectionPass start[ Data ]
-	if error
-		send stderr "[error]
+	RagelError = error
 }
 
 include 'reducer.lm'

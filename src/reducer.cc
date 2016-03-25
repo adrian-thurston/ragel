@@ -270,6 +270,11 @@ void TopLevel::reduceFile( const char *inputFileName )
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
+
+	str Error = RagelError( program );
+	if ( Error != 0 )
+		id->error(Error.loc()) << Error.text() << std::endl;
+
 	colm_delete_program( program );
 }
 
@@ -288,6 +293,11 @@ void TopLevel::reduceStr( const char *inputFileName, const char *input )
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 5, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
+
+	str Error = RagelError( program );
+	if ( Error != 0 )
+		id->error(Error.loc()) << "trs: " << Error.text() << std::endl;
+
 	colm_delete_program( program );
 }
 
@@ -306,6 +316,11 @@ void SectionPass::reduceFile( const char *inputFileName )
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
+
+	str Error = RagelError( program );
+	if ( Error != 0 )
+		id->error(Error.loc()) << Error.text() << std::endl;
+
 	colm_delete_program( program );
 }
 
@@ -324,6 +339,11 @@ void SectionPass::reduceStr( const char *inputFileName, const char *input )
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 5, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
+
+	str Error = RagelError( program );
+	if ( Error != 0 )
+		id->error(Error.loc()) << "srs: " << Error.text() << std::endl;
+
 	colm_delete_program( program );
 }
 
@@ -342,6 +362,11 @@ void IncludePass::reduceFile( const char *inputFileName, const HostLang *hostLan
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 4, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
+
+	str Error = RagelError( program );
+	if ( Error != 0 )
+		id->error(Error.loc()) << Error.text() << std::endl;
+
 	colm_delete_program( program );
 }
 
@@ -360,5 +385,10 @@ void IncludePass::reduceStr( const char *inputFileName, const HostLang *hostLang
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 5, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
+
+	str Error = RagelError( program );
+	if ( Error != 0 )
+		id->error(Error.loc()) << Error.text() << std::endl;
+
 	colm_delete_program( program );
 }

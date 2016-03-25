@@ -209,7 +209,8 @@ struct InputData
 		histogram(0),
 		input(0),
 		inLibRagel(false),
-		errorCount(0)
+		errorCount(0),
+		forceLibRagel(false)
 	{}
 
 	~InputData();
@@ -375,6 +376,7 @@ struct InputData
 	bool parseReduce();
 
 	void abortCompile( int code );
+	char *readInput( const char *inputFileName );
 
 	/* Error reporting. */
 	std::ostream &error();
@@ -391,6 +393,7 @@ struct InputData
 	std::stringstream libcout;
 
 	int errorCount;
+	bool forceLibRagel;
 };
 
 

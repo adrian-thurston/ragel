@@ -156,6 +156,7 @@ void InputData::usage()
 "   --supported-host-langs  Show supported host languages by command line arg\n"
 "   --supported-frontends   Show supported frontends\n"
 "   --supported-backends    Show supported backends\n"
+"   --force-libragel        Cause mainline to behave like libragel\n"
 	;	
 
 	abortCompile( 0 );
@@ -595,6 +596,8 @@ void InputData::parseArgs( int argc, const char **argv )
 				}
 				else if ( strcmp( arg, "input-histogram" ) == 0 )
 					histogramFn = strdup(eq);
+				else if ( strcmp( arg, "force-libragel" ) == 0 )
+					forceLibRagel = true;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
@@ -817,6 +820,33 @@ int libragel( char **result, char **out, char **err, int argc, const char **argv
 	return 0;
 }
 
+char *InputData::readInput( const char *inputFileName )
+{
+	struct stat st;
+	int res = stat( inputFileName, &st );
+	if ( res != 0 ) {
+		error() << inputFileName << ": stat failed: " << strerror(errno) << endl;
+		return 0;
+	}
+
+	std::ifstream in( inputFileName );
+	if ( !in.is_open() ) {
+		error() << inputFileName << ": could not open in force-libragel mode";
+		return 0;
+	}
+
+	char *input = new char[st.st_size+1];
+	in.read( input, st.st_size );
+	if ( in.gcount() != st.st_size ) {
+		error() << inputFileName << ": could not read in force-libragel mode";
+		delete[] input;
+		return 0;
+	}
+	input[st.st_size] = 0;
+
+	return input;
+}
+
 
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
@@ -827,12 +857,27 @@ int main( int argc, const char **argv )
 		id.parseArgs( argc, argv );
 		id.checkArgs();
 
-		if ( !id.process() )
-			id.abortCompile( 1 );
+		if ( id.forceLibRagel ) {
+			id.inLibRagel = true;
+			id.input = id.readInput( id.inputFileName );
+			if ( id.input != 0 ) {
+				id.frontend = ReduceBased;
+				if ( !id.process() )
+					id.abortCompile( 1 );
+			}
+
+		}
+		else {
+			if ( !id.process() )
+				id.abortCompile( 1 );
+		}
 	}
 	catch ( const AbortCompile &ac ) {
 		code = ac.code;
 
+	}
+
+	if ( id.comm.size() > 0 ) {
 		if ( id.commFileName == 0 ) {
 			std::cout << id.comm;
 		}
@@ -841,6 +886,13 @@ int main( int argc, const char **argv )
 			ofs << id.comm;
 			ofs.close();
 		}
+	}
+
+	if ( id.forceLibRagel ) {
+		std::cerr << id.libcerr.str();
+		std::cout << id.libcout.str();
+		std::cerr.flush();
+		std::cout.flush();
 	}
 	return code;
 }
