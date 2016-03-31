@@ -1346,3 +1346,69 @@ bool FsmAp::checkSingleCharMachine()
 	return true;
 }
 
+FsmRes FsmAp::condCostFromState( FsmAp *fsm, StateAp *state, long depth )
+{
+	/* Nothing to do if the state is already on the list. */
+	if ( state->stateBits & STB_ONLIST )
+		return FsmRes( FsmRes::Fsm(), fsm );
+
+	if ( depth > fsm->ctx->nfaCondsDepth )
+		return FsmRes( FsmRes::Fsm(), fsm );
+
+	/* Doing depth first, put state on the list. */
+	state->stateBits |= STB_ONLIST;
+
+	/* Recurse on everything ranges. */
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 ) {
+				FsmRes res = condCostFromState( fsm, trans->tdap()->toState, depth + 1 );
+				if ( !res.success() )
+					return res;
+			}
+		}
+		else {
+			for ( CondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
+				if ( (*csi)->costMark )
+					return FsmRes( FsmRes::CondCostTooHigh(), (*csi)->costId );
+			}
+			
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 ) {
+					FsmRes res = condCostFromState( fsm, cond->toState, depth + 1 );
+					if ( !res.success() )
+						return res;
+				}
+			}
+		}
+	}
+
+	if ( state->nfaOut != 0 ) {
+		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
+			/* We do not increment depth here since this is an epsilon transition. */
+			FsmRes res = condCostFromState( fsm, n->toState, depth );
+			if ( !res.success() )
+				return res;
+		}
+	}
+
+	for ( ActionTable::Iter a = state->fromStateActionTable; a.lte(); a++ ) {
+		if ( a->value->costMark )
+			return FsmRes( FsmRes::CondCostTooHigh(), a->value->costId );
+	}
+
+	return FsmRes( FsmRes::Fsm(), fsm );
+}
+
+
+/* Returns either success (using supplied fsm, or some error condition. Does
+ * not delete the fsm (under any condition). */
+FsmRes FsmAp::condCostSearch( FsmAp *fsmAp )
+{
+	/* Init on state list flags. */
+	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
+		st->stateBits &= ~STB_ONLIST;
+
+	return condCostFromState( fsmAp, fsmAp->startState, 1 );
+}
+

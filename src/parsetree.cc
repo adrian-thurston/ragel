@@ -802,72 +802,6 @@ FsmRes NfaUnion::nfaTermCheck( ParseData *pd )
 }
 
 
-FsmRes NfaUnion::condCostFromState( ParseData *pd, FsmAp *fsm, StateAp *state, long depth )
-{
-	/* Nothing to do if the state is already on the list. */
-	if ( state->stateBits & STB_ONLIST )
-		return FsmRes( FsmRes::Fsm(), fsm );
-
-	if ( depth > pd->id->nfaCondsDepth )
-		return FsmRes( FsmRes::Fsm(), fsm );
-
-	/* Doing depth first, put state on the list. */
-	state->stateBits |= STB_ONLIST;
-
-	/* Recurse on everything ranges. */
-	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		if ( trans->plain() ) {
-			if ( trans->tdap()->toState != 0 ) {
-				FsmRes res = condCostFromState( pd, fsm, trans->tdap()->toState, depth + 1 );
-				if ( !res.success() )
-					return res;
-			}
-		}
-		else {
-			for ( CondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
-				if ( (*csi)->costMark )
-					return FsmRes( FsmRes::CondCostTooHigh(), (*csi)->costId );
-			}
-			
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-				if ( cond->toState != 0 ) {
-					FsmRes res = condCostFromState( pd, fsm, cond->toState, depth + 1 );
-					if ( !res.success() )
-						return res;
-				}
-			}
-		}
-	}
-
-	if ( state->nfaOut != 0 ) {
-		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
-			/* We do not increment depth here since this is an epsilon transition. */
-			FsmRes res = condCostFromState( pd, fsm, n->toState, depth );
-			if ( !res.success() )
-				return res;
-		}
-	}
-
-	for ( ActionTable::Iter a = state->fromStateActionTable; a.lte(); a++ ) {
-		if ( a->value->costMark )
-			return FsmRes( FsmRes::CondCostTooHigh(), a->value->costId );
-	}
-
-	return FsmRes( FsmRes::Fsm(), fsm );
-}
-
-
-/* Returns either success (using supplied fsm, or some error condition. Does
- * not delete the fsm (under any condition). */
-FsmRes NfaUnion::condCostSearch( ParseData *pd, FsmAp *fsmAp )
-{
-	/* Init on state list flags. */
-	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
-		st->stateBits &= ~STB_ONLIST;
-
-	return condCostFromState( pd, fsmAp, fsmAp->startState, 1 );
-}
-
 /* This is the first pass check. It looks for state (limit times 2 ) or
  * condition cost. We use this to expand generalized repetition to past the nfa
   union choice point. */
@@ -882,7 +816,8 @@ FsmRes NfaUnion::nfaCondsCheck( ParseData *pd )
 	if ( !res.success() )
 		return res;
 
-	FsmRes costRes = condCostSearch( pd, res.fsm );
+	pd->fsmCtx->nfaCondsDepth = pd->id->nfaCondsDepth;
+	FsmRes costRes = FsmAp::condCostSearch( res.fsm );
 
 	/* Unlike other funcs, have to delete this regardless. Analysis either
 	 * returns fsm or some error, but does not currently remove it. This needs

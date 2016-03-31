@@ -462,9 +462,6 @@ struct NfaUnion
 	NfaUnion() : roundsList(0) { }
 	~NfaUnion();
 
-	FsmRes condCostFromState( ParseData *pd, FsmAp *fsm, StateAp *state, long depth );
-	FsmRes condCostSearch( ParseData *pd, FsmAp *fsmAp );
-
 	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
 
 	void breadthFromState( ParseData *pd, FsmAp *fsm, StateAp *state,

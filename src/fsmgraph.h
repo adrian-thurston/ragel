@@ -1009,7 +1009,9 @@ struct FsmCtx
 
 		nfaTermCheck(nfaTermCheck),
 
-		unionOp(false)
+		unionOp(false),
+
+		nfaCondsDepth(0)
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
@@ -1031,6 +1033,8 @@ struct FsmCtx
 	bool nfaTermCheck;
 
 	bool unionOp;
+	
+	long nfaCondsDepth;
 };
 
 typedef InList<CondAp> CondInList;
@@ -2134,6 +2138,12 @@ public:
 	/* Make a new start state that has no entry points. Will not change the
 	 * meaning of the fsm. */
 	static FsmRes isolateStartState( FsmAp *fsm );
+
+	/*
+	 * Analysis Functions
+	 */
+	static FsmRes condCostFromState( FsmAp *fsm, StateAp *state, long depth );
+	static FsmRes condCostSearch( FsmAp *fsm );
 
 	/*
 	 * Operator workers
