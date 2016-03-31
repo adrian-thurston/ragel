@@ -1979,7 +1979,7 @@ FactorWithRep::~FactorWithRep()
 	}
 }
 
-void Factor::applyGuardedPrior( ParseData *pd, FsmAp *rtnVal )
+void Factor::applyEntryPriorGuard( ParseData *pd, FsmAp *rtnVal )
 {
 	priorDescs[0].key = pd->nextPriorKey;
 	priorDescs[0].priority = 0;
@@ -1999,7 +1999,7 @@ void Factor::applyGuardedPrior( ParseData *pd, FsmAp *rtnVal )
 	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[0] );
 }
 
-void Factor::applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal )
+void Factor::applyRepeatPriorGuard( ParseData *pd, FsmAp *rtnVal )
 {
 	priorDescs[2].key = pd->nextPriorKey;
 	priorDescs[2].priority = 0;
@@ -2539,7 +2539,7 @@ FsmRes Factor::condPlus( ParseData *pd )
 	/* Need a duplicated for the star end. */
 	FsmAp *dup = new FsmAp( *exprTree.fsm );
 
-	applyGuardedPrior2( pd, dup );
+	applyRepeatPriorGuard( pd, dup );
 
 	/* Star the duplicate. */
 	FsmRes res1 = FsmAp::starOp( dup );
@@ -2562,7 +2562,7 @@ FsmRes Factor::condPlus( ParseData *pd )
 	res2.fsm->startFromStateAction( 0,  ini );
 
 	/* Leading priority guard. */
-	applyGuardedPrior( pd, res2.fsm );
+	applyEntryPriorGuard( pd, res2.fsm );
 
 	return res2;
 }

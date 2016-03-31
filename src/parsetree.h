@@ -710,8 +710,8 @@ struct Factor
 	FsmRes condStar( ParseData *pd );
 
 	void condCost( Action *action );
-	void applyGuardedPrior( ParseData *pd, FsmAp *rtnVal );
-	void applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal );
+	void applyEntryPriorGuard( ParseData *pd, FsmAp *rtnVal );
+	void applyRepeatPriorGuard( ParseData *pd, FsmAp *rtnVal );
 
 	InputLoc loc;
 	Literal *literal;
