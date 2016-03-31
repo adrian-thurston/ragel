@@ -1110,9 +1110,11 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 					}
 				}
 				else {
-					for ( ActionTable::Iter ati = trans->tcap()->condList.head->actionTable; ati.lte(); ati++ ) {
-						if ( ati->value->anyCall && trans->tcap()->condList.head->toState != 0 )
-							states.insert( trans->tcap()->condList.head->toState );
+					for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) { 
+						for ( ActionTable::Iter ati = cond->actionTable; ati.lte(); ati++ ) {
+							if ( ati->value->anyCall && cond->toState != 0 )
+								states.insert( cond->toState );
+						}
 					}
 				}
 			}

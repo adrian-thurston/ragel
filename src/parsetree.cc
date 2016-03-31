@@ -381,9 +381,10 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
 			if ( trans->plain() ) {
-				if ( trans->tdap()->lmActionTable.length() > 0 ) {
-					LmActionTableEl *lmAct = trans->tdap()->lmActionTable.data;
-					StateAp *toState = trans->tdap()->toState;
+				TransDataAp *tdap = trans->tdap();
+				if ( tdap->lmActionTable.length() > 0 ) {
+					LmActionTableEl *lmAct = tdap->lmActionTable.data;
+					StateAp *toState = tdap->toState;
 					assert( toState );
 
 					/* Can only optimize this if there are no transitions out.
@@ -402,22 +403,24 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 				}
 			}
 			else {
-				/* FIXME: this needs a loop. */
-				if ( trans->tcap()->condList.head->lmActionTable.length() > 0 ) {
-					LmActionTableEl *lmAct = trans->tcap()->condList.head->lmActionTable.data;
-					StateAp *toState = trans->tcap()->condList.head->toState;
-					assert( toState );
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+					if ( cond->lmActionTable.length() > 0 ) {
 
-					/* Can only optimize this if there are no transitions out.
-					 * Note there can be out transitions going nowhere with
-					 * actions and they too must inhibit this optimization. */
-					if ( toState->outList.length() > 0 ) {
-						/* Fill the item sets. */
-						graph->markReachableFromHereStopFinal( toState );
-						for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
-							if ( ms->stateBits & STB_ISMARKED ) {
-								ms->lmItemSet.insert( lmAct->value );
-								ms->stateBits &= ~ STB_ISMARKED;
+						LmActionTableEl *lmAct = cond->lmActionTable.data;
+						StateAp *toState = cond->toState;
+						assert( toState );
+
+						/* Can only optimize this if there are no transitions out.
+						 * Note there can be out transitions going nowhere with
+						 * actions and they too must inhibit this optimization. */
+						if ( toState->outList.length() > 0 ) {
+							/* Fill the item sets. */
+							graph->markReachableFromHereStopFinal( toState );
+							for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
+								if ( ms->stateBits & STB_ISMARKED ) {
+									ms->lmItemSet.insert( lmAct->value );
+									ms->stateBits &= ~ STB_ISMARKED;
+								}
 							}
 						}
 					}
@@ -467,9 +470,10 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
 		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
 			if ( trans->plain() ) {
-				if ( trans->tdap()->lmActionTable.length() > 0 ) {
-					LmActionTableEl *lmAct = trans->tdap()->lmActionTable.data;
-					StateAp *toState = trans->tdap()->toState;
+				TransDataAp *tdap = trans->tdap();
+				if ( tdap->lmActionTable.length() > 0 ) {
+					LmActionTableEl *lmAct = tdap->lmActionTable.data;
+					StateAp *toState = tdap->toState;
 					assert( toState );
 
 					/* Can only optimize this if there are no transitions out.
@@ -484,7 +488,7 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 						 * actions then it will fail because the out action will
 						 * have been transferred to an error transition, which
 						 * makes the outlist non-empty. */
-						trans->tdap()->actionTable.setAction( lmAct->key, 
+						tdap->actionTable.setAction( lmAct->key, 
 								lmAct->value->actOnLast );
 						restartTrans.append( trans );
 					}
@@ -513,73 +517,74 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 						 * because the error action that matches the token will
 						 * require it. */
 						if ( nonFinalNonEmptyItemSet || maxItemSetLength > 1 )
-							trans->tdap()->actionTable.setAction( pd->setTokEndOrd, pd->setTokEnd );
+							tdap->actionTable.setAction( pd->setTokEndOrd, pd->setTokEnd );
 
 						/* Some states may not know which longest match item to
 						 * execute, must set it. */
 						if ( maxItemSetLength > 1 ) {
 							/* There are transitions out, another match may come. */
-							trans->tdap()->actionTable.setAction( lmAct->key, 
+							tdap->actionTable.setAction( lmAct->key, 
 									lmAct->value->setActId );
 						}
 					}
 				}
 			}
 			else {
-				if ( trans->tcap()->condList.head->lmActionTable.length() > 0 ) {
-					LmActionTableEl *lmAct = trans->tcap()->condList.head->lmActionTable.data;
-					StateAp *toState = trans->tcap()->condList.head->toState;
-					assert( toState );
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+					if ( cond->lmActionTable.length() > 0 ) {
+						LmActionTableEl *lmAct = cond->lmActionTable.data;
+						StateAp *toState = cond->toState;
+						assert( toState );
 
-					/* Can only optimize this if there are no transitions out.
-					 * Note there can be out transitions going nowhere with
-					 * actions and they too must inhibit this optimization. */
-					if ( toState->outList.length() == 0 ) {
-						/* Can execute the immediate action for the longest match
-						 * part. Redirect the action to the start state.
-						 *
-						 * NOTE: When we need to inhibit on_last due to leaving
-						 * actions the above test suffices. If the state has out
-						 * actions then it will fail because the out action will
-						 * have been transferred to an error transition, which
-						 * makes the outlist non-empty. */
-						trans->tcap()->condList.head->actionTable.setAction( lmAct->key, 
-								lmAct->value->actOnLast );
-						restartTrans.append( trans );
-					}
-					else {
-						/* Look for non final states that have a non-empty item
-						 * set. If these are present then we need to record the
-						 * end of the token.  Also Find the highest item set
-						 * length reachable from here (excluding at transtions to
-						 * final states). */
-						bool nonFinalNonEmptyItemSet = false;
-						maxItemSetLength = 0;
-						graph->markReachableFromHereStopFinal( toState );
-						for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
-							if ( ms->stateBits & STB_ISMARKED ) {
-								if ( ms->lmItemSet.length() > 0 && !ms->isFinState() )
-									nonFinalNonEmptyItemSet = true;
-								if ( ms->lmItemSet.length() > maxItemSetLength )
-									maxItemSetLength = ms->lmItemSet.length();
-								ms->stateBits &= ~ STB_ISMARKED;
-							}
+						/* Can only optimize this if there are no transitions out.
+						 * Note there can be out transitions going nowhere with
+						 * actions and they too must inhibit this optimization. */
+						if ( toState->outList.length() == 0 ) {
+							/* Can execute the immediate action for the longest match
+							 * part. Redirect the action to the start state.
+							 *
+							 * NOTE: When we need to inhibit on_last due to leaving
+							 * actions the above test suffices. If the state has out
+							 * actions then it will fail because the out action will
+							 * have been transferred to an error transition, which
+							 * makes the outlist non-empty. */
+							cond->actionTable.setAction( lmAct->key, 
+									lmAct->value->actOnLast );
+							restartTrans.append( trans );
 						}
+						else {
+							/* Look for non final states that have a non-empty item
+							 * set. If these are present then we need to record the
+							 * end of the token.  Also Find the highest item set
+							 * length reachable from here (excluding at transtions to
+							 * final states). */
+							bool nonFinalNonEmptyItemSet = false;
+							maxItemSetLength = 0;
+							graph->markReachableFromHereStopFinal( toState );
+							for ( StateList::Iter ms = graph->stateList; ms.lte(); ms++ ) {
+								if ( ms->stateBits & STB_ISMARKED ) {
+									if ( ms->lmItemSet.length() > 0 && !ms->isFinState() )
+										nonFinalNonEmptyItemSet = true;
+									if ( ms->lmItemSet.length() > maxItemSetLength )
+										maxItemSetLength = ms->lmItemSet.length();
+									ms->stateBits &= ~ STB_ISMARKED;
+								}
+							}
 
-						/* If there are reachable states that are not final and
-						 * have non empty item sets or that have an item set
-						 * length greater than one then we need to set tokend
-						 * because the error action that matches the token will
-						 * require it. */
-						if ( nonFinalNonEmptyItemSet || maxItemSetLength > 1 )
-							trans->tcap()->condList.head->actionTable.setAction( pd->setTokEndOrd, pd->setTokEnd );
+							/* If there are reachable states that are not final and
+							 * have non empty item sets or that have an item set
+							 * length greater than one then we need to set tokend
+							 * because the error action that matches the token will
+							 * require it. */
+							if ( nonFinalNonEmptyItemSet || maxItemSetLength > 1 )
+								cond->actionTable.setAction( pd->setTokEndOrd, pd->setTokEnd );
 
-						/* Some states may not know which longest match item to
-						 * execute, must set it. */
-						if ( maxItemSetLength > 1 ) {
-							/* There are transitions out, another match may come. */
-							trans->tcap()->condList.head->actionTable.setAction( lmAct->key, 
-									lmAct->value->setActId );
+							/* Some states may not know which longest match item to
+							 * execute, must set it. */
+							if ( maxItemSetLength > 1 ) {
+								/* There are transitions out, another match may come. */
+								cond->actionTable.setAction( lmAct->key, lmAct->value->setActId );
+							}
 						}
 					}
 				}
