@@ -612,6 +612,9 @@ void FsmAp::unsetIncompleteFinals()
  * callback invoked. */
 FsmRes FsmAp::starOp( FsmAp *fsm )
 {
+	/* The start func orders need to be shifted before doing the star. */
+	fsm->ctx->curActionOrd += fsm->shiftStartActionOrder( fsm->ctx->curActionOrd );
+
 	/* Turn on misfit accounting to possibly catch the old start state. */
 	fsm->setMisfitAccounting( true );
 
@@ -660,6 +663,10 @@ FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
 	assert( times > 0 );
 
+	/* The start func orders need to be shifted before doing the
+	 * repetition. */
+	fsm->ctx->curActionOrd += fsm->shiftStartActionOrder( fsm->ctx->curActionOrd );
+
 	/* A repeat of one does absolutely nothing. */
 	if ( times == 1 )
 		return FsmRes( FsmRes::Fsm(), fsm );
@@ -687,6 +694,8 @@ FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
 {
 	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
 	assert( times > 0 );
+
+	fsm->ctx->curActionOrd += fsm->shiftStartActionOrder( fsm->ctx->curActionOrd );
 
 	/* A repeat of one optional merely allows zero string. */
 	if ( times == 1 ) {

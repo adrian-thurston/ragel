@@ -2021,8 +2021,6 @@ void Factor::applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal )
 	rtnVal->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[3] );
 	rtnVal->leaveFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[2] );
 
-	/* Shift over the start action orders then do the kleene star. */
-	pd->fsmCtx->curActionOrd += rtnVal->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 }
 
 void Factor::condCost( Action *action )
@@ -2050,9 +2048,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 					"accepts zero length word" << endl;
 			factorTree.fsm->unsetFinState( factorTree.fsm->startState );
 		}
-
-		/* Shift over the start action orders then do the kleene star. */
-		pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 		FsmRes res = FsmAp::starOp( factorTree.fsm );
 		if ( !res.success() )
@@ -2087,9 +2082,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		priorDescs[1].key = priorDescs[0].key;
 		priorDescs[1].priority = 0;
 		factorTree.fsm->leaveFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[1] );
-
-		/* Shift over the start action orders then do the kleene star. */
-		pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 		FsmRes res = FsmAp::starOp( factorTree.fsm );
 		if ( !res.success() )
@@ -2133,9 +2125,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		/* Need a duplicate for the star end. */
 		FsmAp *factorDup = new FsmAp( *factorTree.fsm );
 
-		/* The start func orders need to be shifted before doing the star. */
-		pd->fsmCtx->curActionOrd += factorDup->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
-
 		/* Star the duplicate. */
 		FsmRes res1 = FsmAp::starOp( factorDup );
 		if ( !res1.success() )
@@ -2178,9 +2167,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 						"accepts zero length word" << endl;
 			}
 
-			/* The start func orders need to be shifted before doing the
-			 * repetition. */
-			pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 			/* Do the repetition on the machine. Already guarded against n == 0 */
 			FsmRes res = FsmAp::repeatOp( factorTree.fsm, lowerRep );
@@ -2220,10 +2206,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 						"accepts zero length word" << endl;
 			}
 
-			/* The start func orders need to be shifted before doing the 
-			 * repetition. */
-			pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
-
 			/* Do the repetition on the machine. Already guarded against n == 0 */
 			FsmRes res = FsmAp::optionalRepeatOp( factorTree.fsm, upperRep );
 			if ( !res.success() )
@@ -2248,10 +2230,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			pd->id->warning(loc) << "applying min repetition to a machine that "
 					"accepts zero length word" << endl;
 		}
-
-		/* The start func orders need to be shifted before doing the repetition
-		 * and the kleene star. */
-		pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 	
 		if ( lowerRep == 0 ) {
 			/* Acts just like a star op on the machine to return. */
@@ -2323,10 +2301,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				pd->id->warning(loc) << "applying range repetition to a machine that "
 						"accepts zero length word" << endl;
 			}
-
-			/* The start func orders need to be shifted before doing both kinds
-			 * of repetition. */
-			pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 			if ( lowerRep == 0 ) {
 				/* Just doing max repetition. Already guarded against n == 0. */
@@ -2564,9 +2538,6 @@ FsmRes Factor::condPlus( ParseData *pd )
 
 	/* Need a duplicated for the star end. */
 	FsmAp *dup = new FsmAp( *exprTree.fsm );
-
-	/* The start func orders need to be shifted before doing the star. */
-	pd->fsmCtx->curActionOrd += dup->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 	applyGuardedPrior2( pd, dup );
 
