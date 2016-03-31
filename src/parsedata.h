@@ -330,10 +330,6 @@ struct ParseData
 	int machineId;
 	InputLoc sectionLoc;
 
-	/* Counting the action and priority ordering. */
-	int curActionOrd;
-	int curPriorOrd;
-
 	/* Root of the name tree. One root is for the instantiated machines. The
 	 * other root is for exported definitions. */
 	NameInst *rootName;

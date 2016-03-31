@@ -1011,7 +1011,10 @@ struct FsmCtx
 
 		unionOp(false),
 
-		nfaCondsDepth(0)
+		nfaCondsDepth(0),
+
+		curActionOrd(0),
+		curPriorOrd(0)
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
@@ -1035,6 +1038,10 @@ struct FsmCtx
 	bool unionOp;
 	
 	long nfaCondsDepth;
+
+	/* Counting the action and priority ordering. */
+	int curActionOrd;
+	int curPriorOrd;
 };
 
 typedef InList<CondAp> CondInList;

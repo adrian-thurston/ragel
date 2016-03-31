@@ -597,7 +597,7 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	for ( Vector<TransAp*>::Iter pt = restartTrans; pt.lte(); pt++ )
 		restart( graph, *pt );
 
-	int lmErrActionOrd = pd->curActionOrd++;
+	int lmErrActionOrd = pd->fsmCtx->curActionOrd++;
 
 	/* Embed the error for recognizing a char. */
 	for ( StateList::Iter st = graph->stateList; st.lte(); st++ ) {
@@ -661,7 +661,7 @@ FsmRes LongestMatch::walk( ParseData *pd )
 			return res;
 
 		parts[i] = res.fsm;
-		parts[i]->longMatchAction( pd->curActionOrd++, lmi );
+		parts[i]->longMatchAction( pd->fsmCtx->curActionOrd++, lmi );
 	}
 
 	/* Before we union the patterns we need to deal with leaving actions. They
@@ -1433,13 +1433,13 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			 * lower priority where as the right get the higher start priority. */
 			priorDescs[0].key = pd->nextPriorKey++;
 			priorDescs[0].priority = 0;
-			termFsm.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+			termFsm.fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[0] );
 
 			/* The start transitions of the right machine gets the higher
 			 * priority. Use the same unique key. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 1;
-			rhs.fsm->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+			rhs.fsm->startFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
 			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
@@ -1467,20 +1467,20 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			 * get the higher priority. */
 			priorDescs[0].key = pd->nextPriorKey++;
 			priorDescs[0].priority = 0;
-			termFsm.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+			termFsm.fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[0] );
 
 			/* The finishing transitions of the right machine get the higher
 			 * priority. Use the same unique key. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 1;
-			rhs.fsm->finishFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+			rhs.fsm->finishFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[1] );
 
 			/* If the right machine's start state is final we need to guard
 			 * against the left machine persisting by moving through the empty
 			 * string. */
 			if ( rhs.fsm->startState->isFinState() ) {
 				rhs.fsm->startState->outPriorTable.setPrior( 
-						pd->curPriorOrd++, &priorDescs[1] );
+						pd->fsmCtx->curPriorOrd++, &priorDescs[1] );
 			}
 
 			/* Perform concatenation. */
@@ -1508,7 +1508,7 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			 * higher priority. */
 			priorDescs[0].key = pd->nextPriorKey++;
 			priorDescs[0].priority = 1;
-			termFsm.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+			termFsm.fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[0] );
 
 			/* The right machine gets the lower priority. We cannot use
 			 * allTransPrior here in case the start state of the right machine
@@ -1517,7 +1517,7 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			 * startFsmPrior prevents this. */
 			priorDescs[1].key = priorDescs[0].key;
 			priorDescs[1].priority = 0;
-			rhs.fsm->startFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+			rhs.fsm->startFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
 			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
@@ -1786,7 +1786,7 @@ FsmRes FactorWithAug::walk( ParseData *pd )
 				actions[i].type == at_start_to_state ||
 				actions[i].type == at_start_from_state ||
 				actions[i].type == at_start_eof )
-			actionOrd[i] = pd->curActionOrd++;
+			actionOrd[i] = pd->fsmCtx->curActionOrd++;
 	}
 
 	/* Evaluate the factor with repetition. */
@@ -1806,7 +1806,7 @@ FsmRes FactorWithAug::walk( ParseData *pd )
 				actions[i].type != at_start_to_state &&
 				actions[i].type != at_start_from_state &&
 				actions[i].type != at_start_eof )
-			actionOrd[i] = pd->curActionOrd++;
+			actionOrd[i] = pd->fsmCtx->curActionOrd++;
 	}
 
 	/* Embed conditions. */
@@ -1823,7 +1823,7 @@ FsmRes FactorWithAug::walk( ParseData *pd )
 	
 	/* Walk all priorities, assigning the priority ordering. */
 	for ( int i = 0; i < priorityAugs.length(); i++ )
-		priorOrd[i] = pd->curPriorOrd++;
+		priorOrd[i] = pd->fsmCtx->curPriorOrd++;
 
 	/* If the priority descriptors have not been made, make them now.  Make
 	 * priority descriptors for each priority asignment that will be passed to
@@ -2018,11 +2018,11 @@ void Factor::applyGuardedPrior2( ParseData *pd, FsmAp *rtnVal )
 
 	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[2] );
 	
-	rtnVal->allTransPrior( pd->curPriorOrd++, &priorDescs[3] );
-	rtnVal->leaveFsmPrior( pd->curPriorOrd++, &priorDescs[2] );
+	rtnVal->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[3] );
+	rtnVal->leaveFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[2] );
 
 	/* Shift over the start action orders then do the kleene star. */
-	pd->curActionOrd += rtnVal->shiftStartActionOrder( pd->curActionOrd );
+	pd->fsmCtx->curActionOrd += rtnVal->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 }
 
 void Factor::condCost( Action *action )
@@ -2052,7 +2052,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		}
 
 		/* Shift over the start action orders then do the kleene star. */
-		pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
+		pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 		FsmRes res = FsmAp::starOp( factorTree.fsm );
 		if ( !res.success() )
@@ -2081,15 +2081,15 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		 * interfere with any priorities set by the user. */
 		priorDescs[0].key = pd->nextPriorKey++;
 		priorDescs[0].priority = 1;
-		factorTree.fsm->allTransPrior( pd->curPriorOrd++, &priorDescs[0] );
+		factorTree.fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[0] );
 
 		/* Leaveing gets priority 0. Use same unique key. */
 		priorDescs[1].key = priorDescs[0].key;
 		priorDescs[1].priority = 0;
-		factorTree.fsm->leaveFsmPrior( pd->curPriorOrd++, &priorDescs[1] );
+		factorTree.fsm->leaveFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[1] );
 
 		/* Shift over the start action orders then do the kleene star. */
-		pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
+		pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 		FsmRes res = FsmAp::starOp( factorTree.fsm );
 		if ( !res.success() )
@@ -2134,7 +2134,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		FsmAp *factorDup = new FsmAp( *factorTree.fsm );
 
 		/* The start func orders need to be shifted before doing the star. */
-		pd->curActionOrd += factorDup->shiftStartActionOrder( pd->curActionOrd );
+		pd->fsmCtx->curActionOrd += factorDup->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 		/* Star the duplicate. */
 		FsmRes res1 = FsmAp::starOp( factorDup );
@@ -2180,7 +2180,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 
 			/* The start func orders need to be shifted before doing the
 			 * repetition. */
-			pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
+			pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 			/* Do the repetition on the machine. Already guarded against n == 0 */
 			FsmRes res = FsmAp::repeatOp( factorTree.fsm, lowerRep );
@@ -2222,7 +2222,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 
 			/* The start func orders need to be shifted before doing the 
 			 * repetition. */
-			pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
+			pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 			/* Do the repetition on the machine. Already guarded against n == 0 */
 			FsmRes res = FsmAp::optionalRepeatOp( factorTree.fsm, upperRep );
@@ -2251,7 +2251,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 
 		/* The start func orders need to be shifted before doing the repetition
 		 * and the kleene star. */
-		pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
+		pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 	
 		if ( lowerRep == 0 ) {
 			/* Acts just like a star op on the machine to return. */
@@ -2326,7 +2326,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 
 			/* The start func orders need to be shifted before doing both kinds
 			 * of repetition. */
-			pd->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->curActionOrd );
+			pd->fsmCtx->curActionOrd += factorTree.fsm->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 			if ( lowerRep == 0 ) {
 				/* Just doing max repetition. Already guarded against n == 0. */
@@ -2566,7 +2566,7 @@ FsmRes Factor::condPlus( ParseData *pd )
 	FsmAp *dup = new FsmAp( *exprTree.fsm );
 
 	/* The start func orders need to be shifted before doing the star. */
-	pd->curActionOrd += dup->shiftStartActionOrder( pd->curActionOrd );
+	pd->fsmCtx->curActionOrd += dup->shiftStartActionOrder( pd->fsmCtx->curActionOrd );
 
 	applyGuardedPrior2( pd, dup );
 
@@ -2637,7 +2637,7 @@ FsmRes Factor::walk( ParseData *pd )
 		FsmRes exprTree = expression->walk( pd );
 
 		FsmRes res = FsmAp::nfaRepeatOp( exprTree.fsm, action1, action2, action3,
-				action4, action5, action6, pd->curActionOrd );
+				action4, action5, action6, pd->fsmCtx->curActionOrd );
 
 		res.fsm->verifyIntegrity();
 		return res;

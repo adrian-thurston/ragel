@@ -481,8 +481,6 @@ ParseData::ParseData( InputData *id, string sectionName,
 	sectionName(sectionName),
 	machineId(machineId),
 	sectionLoc(sectionLoc),
-	curActionOrd(0),
-	curPriorOrd(0),
 	rootName(0),
 	exportsRootName(0),
 	nextEpsilonResolvedLink(0),
@@ -1075,10 +1073,10 @@ void ParseData::initLongestMatchData()
 
 		/* The action will also need an ordering: ahead of all user action
 		 * embeddings. */
-		initTokStartOrd = curActionOrd++;
-		initActIdOrd = curActionOrd++;
-		setTokStartOrd = curActionOrd++;
-		setTokEndOrd = curActionOrd++;
+		initTokStartOrd = fsmCtx->curActionOrd++;
+		initActIdOrd = fsmCtx->curActionOrd++;
+		setTokStartOrd = fsmCtx->curActionOrd++;
+		setTokEndOrd = fsmCtx->curActionOrd++;
 	}
 }
 
