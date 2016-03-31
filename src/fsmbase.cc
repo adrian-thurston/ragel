@@ -438,6 +438,17 @@ void FsmAp::markReachableFromHereStopFinal( StateAp *state )
 			}
 		}
 	}
+
+	/* Recurse on all states that compose us. */
+	if ( state->nfaOut != 0 ) {
+		for ( NfaTransList::Iter st = *state->nfaOut; st.lte(); st++ )
+			markReachableFromHereStopFinal( st->toState );
+	}
+
+	if ( state->stateDictEl != 0 ) {
+		for ( StateSet::Iter ss = state->stateDictEl->stateSet; ss.lte(); ss++ )
+			markReachableFromHereStopFinal( *ss );
+	}
 }
 
 /* Mark all states reachable from state. Traverse transitions backwards. Used
