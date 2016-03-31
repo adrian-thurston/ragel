@@ -92,7 +92,7 @@ namespace ragel
 		ignore /'#' any* :> '\n'/
 
 		literal `^ `| `- `, `: `! `? `.
-		literal `( `) `{ `} `* `& `+
+		literal `( `) `{ -ni ni- `} `* `& `+
 
 		literal `-- `:> `:>> `<: `-> `**
 
