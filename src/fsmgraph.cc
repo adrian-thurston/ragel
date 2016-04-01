@@ -1418,3 +1418,128 @@ FsmRes FsmAp::condCostSearch( FsmAp *fsmAp )
 	return condCostFromState( fsmAp, fsmAp->startState, 1 );
 }
 
+void FsmAp::condCost( Action *action, long repId )
+{
+	action->costMark = true;
+	action->costId = repId;
+}
+
+
+void FsmAp::applyEntryPriorGuard( FsmAp *fsm, long repId )
+{
+	PriorDesc *priorDesc0 = fsm->ctx->allocPriorDesc();
+	PriorDesc *priorDesc1 = fsm->ctx->allocPriorDesc();
+
+	priorDesc0->key = fsm->ctx->nextPriorKey;
+	priorDesc0->priority = 0;
+	priorDesc0->guarded = true;
+	priorDesc0->guardId = repId;
+	priorDesc0->other = priorDesc1;
+
+	priorDesc1->key = fsm->ctx->nextPriorKey;
+	priorDesc1->priority = 1;
+	priorDesc1->guarded = true;
+	priorDesc1->guardId = repId;
+	priorDesc1->other = priorDesc0;
+
+	/* Roll over for next allocation. */
+	fsm->ctx->nextPriorKey += 1;
+
+	/* Only need to set the first. Second is referenced using 'other' field. */
+	fsm->startState->guardedInTable.setPrior( 0, priorDesc0 );
+}
+
+void FsmAp::applyRepeatPriorGuard( FsmAp *fsm, long repId )
+{
+	PriorDesc *priorDesc2 = fsm->ctx->allocPriorDesc();
+	PriorDesc *priorDesc3 = fsm->ctx->allocPriorDesc();
+
+	priorDesc2->key = fsm->ctx->nextPriorKey;
+	priorDesc2->priority = 0;
+	priorDesc2->guarded = true;
+	priorDesc2->guardId = repId;
+	priorDesc2->other = priorDesc3;
+
+	priorDesc3->key = fsm->ctx->nextPriorKey;
+	priorDesc3->guarded = true;
+	priorDesc3->priority = 1;
+	priorDesc3->guardId = repId;
+	priorDesc3->other = priorDesc2;
+
+	/* Roll over for next allocation. */
+	fsm->ctx->nextPriorKey += 1;
+
+	/* Only need to set the first. Second is referenced using 'other' field. */
+	fsm->startState->guardedInTable.setPrior( 0, priorDesc2 );
+	
+	fsm->allTransPrior( fsm->ctx->curPriorOrd++, priorDesc3 );
+	fsm->leaveFsmPrior( fsm->ctx->curPriorOrd++, priorDesc2 );
+}
+
+FsmRes FsmAp::condPlus( FsmAp *fsm, long repId, Action *ini, Action *inc, Action *min, Action *max )
+{
+	condCost( ini, repId );
+	condCost( inc, repId );
+	condCost( min, repId );
+	if ( max != 0 )
+		condCost( max, repId );
+
+	fsm->startFsmAction( 0, inc );
+	afterOpMinimize( fsm );
+
+	if ( max != 0 ) {
+		FsmRes res = fsm->startFsmCondition( max, true );
+		if ( !res.success() )
+			return res;
+
+		afterOpMinimize( fsm );
+	}
+
+	/* Need a duplicated for the star end. */
+	FsmAp *dup = new FsmAp( *fsm );
+
+	applyRepeatPriorGuard( dup, repId );
+
+	/* Star the duplicate. */
+	FsmRes res1 = FsmAp::starOp( dup );
+	if ( !res1.success() )
+		return res1;
+
+	afterOpMinimize( res1.fsm );
+
+	FsmRes res2 = FsmAp::concatOp( fsm, res1.fsm );
+	if ( !res2.success() )
+		return res2;
+
+	afterOpMinimize( res2.fsm );
+
+	/* End plus operation. */
+
+	res2.fsm->leaveFsmCondition( min, true );
+
+	/* Init action. */
+	res2.fsm->startFromStateAction( 0,  ini );
+
+	/* Leading priority guard. */
+	applyEntryPriorGuard( res2.fsm, repId );
+
+	return res2;
+}
+
+FsmRes FsmAp::condStar( FsmAp *fsm, long repId, Action *ini, Action *inc, Action *min, Action *max )
+{
+	FsmRes cp = condPlus( fsm, repId, ini, inc, min, max );
+	if ( !cp.success() )
+		return cp;
+
+	StateAp *newStart = cp.fsm->dupStartState();
+	cp.fsm->unsetStartState();
+	cp.fsm->setStartState( newStart );
+
+	/* Now ensure the new start state is a final state. */
+	cp.fsm->setFinState( newStart );
+	cp.fsm->addOutCondition( newStart, min, true );
+
+	return cp;
+}
+

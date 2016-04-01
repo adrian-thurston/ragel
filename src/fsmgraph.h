@@ -1018,7 +1018,9 @@ struct FsmCtx
 		nfaCondsDepth(0),
 
 		curActionOrd(0),
-		curPriorOrd(0)
+		curPriorOrd(0),
+
+		nextPriorKey(0)
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
@@ -1047,6 +1049,8 @@ struct FsmCtx
 	/* Counting the action and priority ordering. */
 	int curActionOrd;
 	int curPriorOrd;
+
+	int nextPriorKey;
 
 	PriorDesc *allocPriorDesc()
 	{
@@ -2156,6 +2160,10 @@ public:
 	static FsmRes nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 			Action *stay, Action *repeat, Action *exit, int &curActionOrd );
 
+
+	static FsmRes condPlus( FsmAp *fsm, long repId, Action *ini, Action *inc, Action *min, Action *max );
+	static FsmRes condStar( FsmAp *fsm, long repId, Action *ini, Action *inc, Action *min, Action *max );
+
 	/* Make a new start state that has no entry points. Will not change the
 	 * meaning of the fsm. */
 	static FsmRes isolateStartState( FsmAp *fsm );
@@ -2188,6 +2196,10 @@ public:
 	/* Workers for concatenation and union. */
 	FsmRes doConcat( FsmAp *other, StateSet *fromStates, bool optional );
 	FsmRes doUnion( FsmAp *other );
+
+	static void condCost( Action *action, long repId );
+	static void applyEntryPriorGuard( FsmAp *fsm, long repId );
+	static void applyRepeatPriorGuard( FsmAp *fsm, long repId );
 
 	/*
 	 * Final states

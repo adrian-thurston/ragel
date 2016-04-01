@@ -1828,8 +1828,8 @@ struct LoadRagel
 				/* Lookup/create the priority key. */
 				PriorDictEl *priorDictEl;
 				if ( pd->priorDict.insert( FactorAug.priority_name().word().text(),
-						pd->nextPriorKey, &priorDictEl ) )
-					pd->nextPriorKey += 1;
+						pd->fsmCtx->nextPriorKey, &priorDictEl ) )
+					pd->fsmCtx->nextPriorKey += 1;
 
 				/* Use the inserted/found priority key. */
 				int priorityName = priorDictEl->value;
@@ -2148,8 +2148,8 @@ struct LoadRagel
 		/* Make/get the priority key. The name may have already been referenced
 		 * and therefore exist. */
 		PriorDictEl *priorDictEl;
-		if ( pd->priorDict.insert( data, pd->nextPriorKey, &priorDictEl ) )
-			pd->nextPriorKey += 1;
+		if ( pd->priorDict.insert( data, pd->fsmCtx->nextPriorKey, &priorDictEl ) )
+			pd->fsmCtx->nextPriorKey += 1;
 		pd->curDefPriorKey = priorDictEl->value;
 
 		/* Make/get the local error key. */

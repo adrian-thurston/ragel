@@ -280,8 +280,8 @@ struct ParseData
 	/* List of actions. Will be pasted into a switch statement. */
 	ActionList actionList;
 
-	/* The id of the next priority name and label. */
-	int nextPriorKey, nextLocalErrKey, nextNameId, nextCondId;
+	/* Various next identifiers. */
+	int nextLocalErrKey, nextNameId, nextCondId;
 	
 	/* The default priority number key for a machine. This is active during
 	 * the parse of the rhs of a machine assignment. */

@@ -1431,7 +1431,7 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * lower priority where as the right get the higher start priority. */
-			priorDescs[0].key = pd->nextPriorKey++;
+			priorDescs[0].key = pd->fsmCtx->nextPriorKey++;
 			priorDescs[0].priority = 0;
 			termFsm.fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[0] );
 
@@ -1465,7 +1465,7 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			/* Set up the priority descriptors. The left machine gets the
 			 * lower priority where as the finishing transitions to the right
 			 * get the higher priority. */
-			priorDescs[0].key = pd->nextPriorKey++;
+			priorDescs[0].key = pd->fsmCtx->nextPriorKey++;
 			priorDescs[0].priority = 0;
 			termFsm.fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[0] );
 
@@ -1506,7 +1506,7 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 
 			/* Set up the priority descriptors. The left machine gets the
 			 * higher priority. */
-			priorDescs[0].key = pd->nextPriorKey++;
+			priorDescs[0].key = pd->fsmCtx->nextPriorKey++;
 			priorDescs[0].priority = 1;
 			termFsm.fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[0] );
 
@@ -1979,62 +1979,6 @@ FactorWithRep::~FactorWithRep()
 	}
 }
 
-void Factor::applyEntryPriorGuard( ParseData *pd, FsmAp *fsm )
-{
-	PriorDesc *priorDesc0 = fsm->ctx->allocPriorDesc();
-	PriorDesc *priorDesc1 = fsm->ctx->allocPriorDesc();
-
-	priorDesc0->key = pd->nextPriorKey;
-	priorDesc0->priority = 0;
-	priorDesc0->guarded = true;
-	priorDesc0->guardId = repId;
-	priorDesc0->other = priorDesc1;
-
-	priorDesc1->key = pd->nextPriorKey;
-	priorDesc1->priority = 1;
-	priorDesc1->guarded = true;
-	priorDesc1->guardId = repId;
-	priorDesc1->other = priorDesc0;
-
-	/* Roll over for next allocation. */
-	pd->nextPriorKey += 1;
-
-	/* Only need to set the first. Second is referenced using 'other' field. */
-	fsm->startState->guardedInTable.setPrior( 0, priorDesc0 );
-}
-
-void Factor::applyRepeatPriorGuard( ParseData *pd, FsmAp *fsm )
-{
-	PriorDesc *priorDesc2 = fsm->ctx->allocPriorDesc();
-	PriorDesc *priorDesc3 = fsm->ctx->allocPriorDesc();
-
-	priorDesc2->key = pd->nextPriorKey;
-	priorDesc2->priority = 0;
-	priorDesc2->guarded = true;
-	priorDesc2->guardId = repId;
-	priorDesc2->other = priorDesc3;
-
-	priorDesc3->key = pd->nextPriorKey;
-	priorDesc3->guarded = true;
-	priorDesc3->priority = 1;
-	priorDesc3->guardId = repId;
-	priorDesc3->other = priorDesc2;
-
-	/* Roll over for next allocation. */
-	pd->nextPriorKey += 1;
-
-	/* Only need to set the first. Second is referenced using 'other' field. */
-	fsm->startState->guardedInTable.setPrior( 0, priorDesc2 );
-	
-	fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, priorDesc3 );
-	fsm->leaveFsmPrior( pd->fsmCtx->curPriorOrd++, priorDesc2 );
-}
-
-void Factor::condCost( Action *action )
-{
-	action->costMark = true;
-	action->costId = repId;
-}
 
 /* Evaluate a factor with repetition node. */
 FsmRes FactorWithRep::walk( ParseData *pd )
@@ -2081,7 +2025,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		/* Set up the prior descs. All gets priority one, whereas leaving gets
 		 * priority zero. Make a unique key so that these priorities don't
 		 * interfere with any priorities set by the user. */
-		priorDescs[0].key = pd->nextPriorKey++;
+		priorDescs[0].key = pd->fsmCtx->nextPriorKey++;
 		priorDescs[0].priority = 1;
 		factorTree.fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[0] );
 
@@ -2505,79 +2449,6 @@ Factor::~Factor()
 	}
 }
 
-FsmRes Factor::condPlus( ParseData *pd, FsmAp *fsm )
-{
-	Action *ini = action1;
-	Action *inc = action2;
-	Action *min = action3;
-	Action *max = action4;
-
-	condCost( ini );
-	condCost( inc );
-	condCost( min );
-	if ( max != 0 )
-		condCost( max );
-
-	fsm->startFsmAction( 0, inc );
-	afterOpMinimize( fsm );
-
-	if ( max != 0 ) {
-		FsmRes res = fsm->startFsmCondition( max, true );
-		if ( !res.success() )
-			return res;
-
-		afterOpMinimize( fsm );
-	}
-
-	/* Need a duplicated for the star end. */
-	FsmAp *dup = new FsmAp( *fsm );
-
-	applyRepeatPriorGuard( pd, dup );
-
-	/* Star the duplicate. */
-	FsmRes res1 = FsmAp::starOp( dup );
-	if ( !res1.success() )
-		return res1;
-
-	afterOpMinimize( res1.fsm );
-
-	FsmRes res2 = FsmAp::concatOp( fsm, res1.fsm );
-	if ( !res2.success() )
-		return res2;
-
-	afterOpMinimize( res2.fsm );
-
-	/* End plus operation. */
-
-	res2.fsm->leaveFsmCondition( min, true );
-
-	/* Init action. */
-	res2.fsm->startFromStateAction( 0,  ini );
-
-	/* Leading priority guard. */
-	applyEntryPriorGuard( pd, res2.fsm );
-
-	return res2;
-}
-
-FsmRes Factor::condStar( ParseData *pd, FsmAp *fsm )
-{
-	Action *min = action3;
-
-	FsmRes cp = condPlus( pd, fsm );
-	if ( !cp.success() )
-		return cp;
-
-	StateAp *newStart = cp.fsm->dupStartState();
-	cp.fsm->unsetStartState();
-	cp.fsm->setStartState( newStart );
-
-	/* Now ensure the new start state is a final state. */
-	cp.fsm->setFinState( newStart );
-	cp.fsm->addOutCondition( newStart, min, true );
-
-	return cp;
-}
 
 /* Evaluate a factor node. */
 FsmRes Factor::walk( ParseData *pd )
@@ -2620,7 +2491,7 @@ FsmRes Factor::walk( ParseData *pd )
 					"accepts zero length word" << endl;
 		}
 
-		return condStar( pd, exprTree.fsm );
+		return FsmAp::condStar( exprTree.fsm, repId, action1, action2, action3, action4 );
 	}
 	case CondPlus: {
 		FsmRes exprTree = expression->walk( pd );
@@ -2636,7 +2507,7 @@ FsmRes Factor::walk( ParseData *pd )
 					"accepts zero length word" << endl;
 		}
 
-		return condPlus( pd, exprTree.fsm );
+		return FsmAp::condPlus( exprTree.fsm, repId, action1, action2, action3, action4 );
 	}}
 
 	return FsmRes( FsmRes::Aborted() );

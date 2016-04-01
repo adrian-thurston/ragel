@@ -453,7 +453,6 @@ ParseData::ParseData( InputData *id, string sectionName,
 :	
 	sectionGraph(0),
 	generatingSectionSubset(false),
-	nextPriorKey(0),
 	/* 0 is reserved for global error actions. */
 	nextLocalErrKey(1),
 	nextNameId(0),

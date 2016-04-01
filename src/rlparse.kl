@@ -272,8 +272,8 @@ machine_name:
 		/* Make/get the priority key. The name may have already been referenced
 		 * and therefore exist. */
 		PriorDictEl *priorDictEl;
-		if ( pd->priorDict.insert( $1->data, pd->nextPriorKey, &priorDictEl ) )
-			pd->nextPriorKey += 1;
+		if ( pd->priorDict.insert( $1->data, pd->fsmCtx->nextPriorKey, &priorDictEl ) )
+			pd->fsmCtx->nextPriorKey += 1;
 		pd->curDefPriorKey = priorDictEl->value;
 
 		/* Make/get the local error key. */
@@ -1077,8 +1077,8 @@ priority_name:
 	TK_Word final {
 		// Lookup/create the priority key.
 		PriorDictEl *priorDictEl;
-		if ( pd->priorDict.insert( $1->data, pd->nextPriorKey, &priorDictEl ) )
-			pd->nextPriorKey += 1;
+		if ( pd->priorDict.insert( $1->data, pd->fsmCtx->nextPriorKey, &priorDictEl ) )
+			pd->fsmCtx->nextPriorKey += 1;
 
 		// Use the inserted/found priority key.
 		$$->priorityName = priorDictEl->value;
