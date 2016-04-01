@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2001-2016 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -397,7 +397,11 @@ struct PriorDesc
 	bool guarded;
 	long long guardId;
 	PriorDesc *other;
+
+	PriorDesc *prev, *next;
 };
+
+typedef DList<PriorDesc> PriorDescList;
 
 /* Element in the arrays of priorities for transitions and arrays. Ordering is
  * unique among instantiations of machines, desc is shared. */
@@ -1024,6 +1028,7 @@ struct FsmCtx
 	{
 		delete keyOps;
 		delete condData;
+		priorDescList.empty();
 	}
 
 	KeyOps *keyOps;
@@ -1042,6 +1047,15 @@ struct FsmCtx
 	/* Counting the action and priority ordering. */
 	int curActionOrd;
 	int curPriorOrd;
+
+	PriorDesc *allocPriorDesc()
+	{
+		PriorDesc *priorDesc = new PriorDesc();
+		priorDescList.append( priorDesc );
+		return priorDesc;
+	}
+
+	PriorDescList priorDescList;
 };
 
 typedef InList<CondAp> CondInList;

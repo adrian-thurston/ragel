@@ -1123,10 +1123,7 @@ void FsmAp::mergeStateProperties( StateAp *destState, StateAp *srcState )
 		destState->errActionTable.setActions( srcState->errActionTable );
 		destState->eofActionTable.setActions( srcState->eofActionTable );
 		destState->guardedInTable.setPriors( srcState->guardedInTable );
-
 	}
-
-
 }
 
 void FsmAp::mergeStateBits( StateAp *destState, StateAp *srcState )

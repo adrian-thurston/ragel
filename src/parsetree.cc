@@ -1979,48 +1979,55 @@ FactorWithRep::~FactorWithRep()
 	}
 }
 
-void Factor::applyEntryPriorGuard( ParseData *pd, FsmAp *rtnVal )
+void Factor::applyEntryPriorGuard( ParseData *pd, FsmAp *fsm )
 {
-	priorDescs[0].key = pd->nextPriorKey;
-	priorDescs[0].priority = 0;
-	priorDescs[0].guarded = true;
-	priorDescs[0].guardId = repId;
-	priorDescs[0].other = &priorDescs[1];
+	PriorDesc *priorDesc0 = fsm->ctx->allocPriorDesc();
+	PriorDesc *priorDesc1 = fsm->ctx->allocPriorDesc();
 
-	priorDescs[1].key = pd->nextPriorKey;
-	priorDescs[1].priority = 1;
-	priorDescs[1].guarded = true;
-	priorDescs[1].guardId = repId;
-	priorDescs[1].other = &priorDescs[0];
+	priorDesc0->key = pd->nextPriorKey;
+	priorDesc0->priority = 0;
+	priorDesc0->guarded = true;
+	priorDesc0->guardId = repId;
+	priorDesc0->other = priorDesc1;
+
+	priorDesc1->key = pd->nextPriorKey;
+	priorDesc1->priority = 1;
+	priorDesc1->guarded = true;
+	priorDesc1->guardId = repId;
+	priorDesc1->other = priorDesc0;
 
 	/* Roll over for next allocation. */
 	pd->nextPriorKey += 1;
 
-	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[0] );
+	/* Only need to set the first. Second is referenced using 'other' field. */
+	fsm->startState->guardedInTable.setPrior( 0, priorDesc0 );
 }
 
-void Factor::applyRepeatPriorGuard( ParseData *pd, FsmAp *rtnVal )
+void Factor::applyRepeatPriorGuard( ParseData *pd, FsmAp *fsm )
 {
-	priorDescs[2].key = pd->nextPriorKey;
-	priorDescs[2].priority = 0;
-	priorDescs[2].guarded = true;
-	priorDescs[2].guardId = repId;
-	priorDescs[2].other = &priorDescs[3];
+	PriorDesc *priorDesc2 = fsm->ctx->allocPriorDesc();
+	PriorDesc *priorDesc3 = fsm->ctx->allocPriorDesc();
 
-	priorDescs[3].key = pd->nextPriorKey;
-	priorDescs[3].guarded = true;
-	priorDescs[3].priority = 1;
-	priorDescs[3].guardId = repId;
-	priorDescs[3].other = &priorDescs[2];
+	priorDesc2->key = pd->nextPriorKey;
+	priorDesc2->priority = 0;
+	priorDesc2->guarded = true;
+	priorDesc2->guardId = repId;
+	priorDesc2->other = priorDesc3;
+
+	priorDesc3->key = pd->nextPriorKey;
+	priorDesc3->guarded = true;
+	priorDesc3->priority = 1;
+	priorDesc3->guardId = repId;
+	priorDesc3->other = priorDesc2;
 
 	/* Roll over for next allocation. */
 	pd->nextPriorKey += 1;
 
-	rtnVal->startState->guardedInTable.setPrior( 0, &priorDescs[2] );
+	/* Only need to set the first. Second is referenced using 'other' field. */
+	fsm->startState->guardedInTable.setPrior( 0, priorDesc2 );
 	
-	rtnVal->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[3] );
-	rtnVal->leaveFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[2] );
-
+	fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, priorDesc3 );
+	fsm->leaveFsmPrior( pd->fsmCtx->curPriorOrd++, priorDesc2 );
 }
 
 void Factor::condCost( Action *action )
