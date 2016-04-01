@@ -2498,7 +2498,7 @@ Factor::~Factor()
 	}
 }
 
-FsmRes Factor::condPlus( ParseData *pd )
+FsmRes Factor::condPlus( ParseData *pd, FsmAp *fsm )
 {
 	Action *ini = action1;
 	Action *inc = action2;
@@ -2511,33 +2511,19 @@ FsmRes Factor::condPlus( ParseData *pd )
 	if ( max != 0 )
 		condCost( max );
 
-	FsmRes exprTree = expression->walk( pd );
-	if ( !exprTree.success() )
-		return exprTree;
-
-	exprTree.fsm->startFsmAction( 0, inc );
-	afterOpMinimize( exprTree.fsm );
+	fsm->startFsmAction( 0, inc );
+	afterOpMinimize( fsm );
 
 	if ( max != 0 ) {
-		FsmRes res = exprTree.fsm->startFsmCondition( max, true );
+		FsmRes res = fsm->startFsmCondition( max, true );
 		if ( !res.success() )
 			return res;
 
-		afterOpMinimize( exprTree.fsm );
-	}
-
-	/* Plus Operation. */
-	if ( exprTree.fsm->startState->isFinState() ) {
-		if ( pd->id->inLibRagel ) {
-			delete exprTree.fsm;
-			return FsmRes( FsmRes::RepetitionError() );
-		}
-		pd->id->warning(loc) << "applying plus operator to a machine that "
-				"accepts zero length word" << endl;
+		afterOpMinimize( fsm );
 	}
 
 	/* Need a duplicated for the star end. */
-	FsmAp *dup = new FsmAp( *exprTree.fsm );
+	FsmAp *dup = new FsmAp( *fsm );
 
 	applyRepeatPriorGuard( pd, dup );
 
@@ -2548,7 +2534,7 @@ FsmRes Factor::condPlus( ParseData *pd )
 
 	afterOpMinimize( res1.fsm );
 
-	FsmRes res2 = FsmAp::concatOp( exprTree.fsm, res1.fsm );
+	FsmRes res2 = FsmAp::concatOp( fsm, res1.fsm );
 	if ( !res2.success() )
 		return res2;
 
@@ -2567,11 +2553,11 @@ FsmRes Factor::condPlus( ParseData *pd )
 	return res2;
 }
 
-FsmRes Factor::condStar( ParseData *pd )
+FsmRes Factor::condStar( ParseData *pd, FsmAp *fsm )
 {
 	Action *min = action3;
 
-	FsmRes cp = condPlus( pd );
+	FsmRes cp = condPlus( pd, fsm );
 	if ( !cp.success() )
 		return cp;
 
@@ -2613,11 +2599,38 @@ FsmRes Factor::walk( ParseData *pd )
 		res.fsm->verifyIntegrity();
 		return res;
 	}
-	case CondStar:
-		return condStar( pd );
-	case CondPlus:
-		return condPlus( pd );
+	case CondStar: {
+		FsmRes exprTree = expression->walk( pd );
+		if ( !exprTree.success() )
+			return exprTree;
+
+		if ( exprTree.fsm->startState->isFinState() ) {
+			if ( pd->id->inLibRagel ) {
+				delete exprTree.fsm;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
+			pd->id->warning(loc) << "applying plus operator to a machine that "
+					"accepts zero length word" << endl;
+		}
+
+		return condStar( pd, exprTree.fsm );
 	}
+	case CondPlus: {
+		FsmRes exprTree = expression->walk( pd );
+		if ( !exprTree.success() )
+			return exprTree;
+
+		if ( exprTree.fsm->startState->isFinState() ) {
+			if ( pd->id->inLibRagel ) {
+				delete exprTree.fsm;
+				return FsmRes( FsmRes::RepetitionError() );
+			}
+			pd->id->warning(loc) << "applying plus operator to a machine that "
+					"accepts zero length word" << endl;
+		}
+
+		return condPlus( pd, exprTree.fsm );
+	}}
 
 	return FsmRes( FsmRes::Aborted() );
 }

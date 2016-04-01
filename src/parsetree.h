@@ -706,8 +706,8 @@ struct Factor
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 
-	FsmRes condPlus( ParseData *pd );
-	FsmRes condStar( ParseData *pd );
+	FsmRes condPlus( ParseData *pd, FsmAp *fsm );
+	FsmRes condStar( ParseData *pd, FsmAp *fsm );
 
 	void condCost( Action *action );
 	void applyEntryPriorGuard( ParseData *pd, FsmAp *rtnVal );
