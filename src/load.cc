@@ -2266,8 +2266,7 @@ struct LoadRagel
 		string name = loadMachineName( NfaUnionTree.def_name().word().text() );
 
 		NfaUnion *nfaUnion = loadNfaExpr( NfaUnionTree.nfa_expr() );
-		nfaUnion->roundsList = new NfaRoundVect;
-		nfaUnion->roundsList->append( NfaRound( /* depth */ 0, 0 ) );
+		nfaUnion->roundsList = loadNfaRoundList( NfaUnionTree.nfa_rounds().nfa_round_list() );
 		MachineDef *machineDef = new MachineDef( nfaUnion );
 
 		/* Generic creation of machine for instantiation and assignment. */
