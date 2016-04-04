@@ -1988,21 +1988,12 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		return res;
 	}
 	case OptionalType: {
-		/* Make the null fsm. */
-		FsmAp *nu = FsmAp::lambdaFsm( pd->fsmCtx );
-
 		/* Evaluate the FactorWithRep. */
 		FsmRes factorTree = factorWithRep->walk( pd );
 		if ( !factorTree.success() )
 			return factorTree;
 
-		/* Perform the question operator. */
-		FsmRes res = FsmAp::unionOp( factorTree.fsm, nu );
-		if ( !res.success() )
-			return res;
-
-		afterOpMinimize( res.fsm );
-		return res;
+		return FsmAp::questionOp( factorTree.fsm );
 	}
 	case PlusType: {
 		/* Evaluate the FactorWithRep. */
@@ -2019,22 +2010,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 					"accepts zero length word" << endl;
 		}
 
-		/* Need a duplicate for the star end. */
-		FsmAp *factorDup = new FsmAp( *factorTree.fsm );
-
-		/* Star the duplicate. */
-		FsmRes res1 = FsmAp::starOp( factorDup );
-		if ( !res1.success() )
-			return res1;
-
-		afterOpMinimize( res1.fsm );
-
-		FsmRes res2 = FsmAp::concatOp( factorTree.fsm, res1.fsm );
-		if ( !res2.success() )
-			return res2;
-
-		afterOpMinimize( res2.fsm );
-		return res2;
+		return FsmAp::plusOp( factorTree.fsm );
 	}
 	case ExactType: {
 		/* Get an int from the repetition amount. */

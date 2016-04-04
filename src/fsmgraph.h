@@ -2145,6 +2145,8 @@ public:
 	 */
 
 	static FsmRes starOp( FsmAp *fsm );
+	static FsmRes plusOp( FsmAp *fsm );
+	static FsmRes questionOp( FsmAp *fsm );
 	static FsmRes repeatOp( FsmAp *fsm, int times );
 	static FsmRes optionalRepeatOp( FsmAp *fsm, int times );
 	static FsmRes concatOp( FsmAp *fsm, FsmAp *other );

@@ -125,8 +125,7 @@ FsmAp *FsmAp::concatFsmCI( FsmCtx *ctx, Key *str, int len )
 
 
 /* Construct a machine that matches one character.  A new machine will be made
- * that has two states with a single transition between the states. IsSigned
- * determines if the integers are to be considered as signed or unsigned ints. */
+ * that has two states with a single transition between the states. */
 FsmAp *FsmAp::concatFsm( FsmCtx *ctx, Key chr )
 {
 	FsmAp *fsm = new FsmAp( ctx );
@@ -655,6 +654,40 @@ FsmRes FsmAp::starOp( FsmAp *fsm )
 	fsm->removeMisfits();
 	fsm->setMisfitAccounting( false );
 
+	return res;
+}
+
+FsmRes FsmAp::plusOp( FsmAp *fsm )
+{
+	/* Need a duplicate for the star end. */
+	FsmAp *factorDup = new FsmAp( *fsm );
+
+	/* Star the duplicate. */
+	FsmRes res1 = FsmAp::starOp( factorDup );
+	if ( !res1.success() )
+		return res1;
+
+	afterOpMinimize( res1.fsm );
+
+	FsmRes res2 = FsmAp::concatOp( fsm, res1.fsm );
+	if ( !res2.success() )
+		return res2;
+
+	afterOpMinimize( res2.fsm );
+	return res2;
+}
+
+FsmRes FsmAp::questionOp( FsmAp *fsm )
+{
+	/* Make the null fsm. */
+	FsmAp *nu = FsmAp::lambdaFsm( fsm->ctx );
+
+	/* Perform the question operator. */
+	FsmRes res = FsmAp::unionOp( fsm, nu );
+	if ( !res.success() )
+		return res;
+
+	afterOpMinimize( res.fsm );
 	return res;
 }
 
@@ -1542,4 +1575,3 @@ FsmRes FsmAp::condStar( FsmAp *fsm, long repId, Action *ini, Action *inc, Action
 
 	return cp;
 }
-
