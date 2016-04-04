@@ -952,71 +952,17 @@ FsmRes NfaUnion::walk( ParseData *pd )
 		pd->id->stats() << "terms\t" << terms.length() << endl;
 
 	/* Compute the individual expressions. */
-
-	long numTerms = 0, sumPlain = 0, sumMin = 0;
+	long numMachines = 0;
 	FsmAp **machines = new FsmAp*[terms.length()];
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
 		FsmRes res = (*term)->walk( pd );
-		machines[numTerms] = res.fsm;
-
-		sumPlain += machines[numTerms]->stateList.length();
-
-		machines[numTerms]->removeUnreachableStates();
-		machines[numTerms]->minimizePartition2();
-		sumMin += machines[numTerms]->stateList.length();
-
-		numTerms += 1;
+		machines[numMachines++] = res.fsm;
 	}
 
-	if ( pd->id->printStatistics ) {
-		pd->id->stats() << "sum-plain\t" << sumPlain << endl;
-		pd->id->stats() << "sum-minimized\t" << sumMin << endl;
-	}
+	std::ostream &stats = pd->id->stats();
+	bool printStatistics = pd->id->printStatistics;
 
-	/* For each round. */
-	for ( NfaRoundVect::Iter r = *roundsList; r.lte(); r++ ) {
-		if ( pd->id->printStatistics ) {
-			pd->id->stats() << "depth\t" << r->depth << endl;
-			pd->id->stats() << "grouping\t" << r->groups << endl;
-		}
-
-		int numGroups = 0;
-		int start = 0;
-		while ( start < numTerms ) {
-			/* If nfa-group-max is zero, don't group, put all terms into a single
-			 * n-depth NFA. */
-			int amount = r->groups == 0 ? numTerms : r->groups;
-			if ( ( start + amount ) > numTerms )
-				amount = numTerms - start;
-
-			FsmAp **others = machines + start + 1;
-			FsmRes res = FsmAp::nfaUnionOp( machines[start], others, (amount - 1), r->depth, pd->id->stats() );
-			machines[start] = res.fsm;
-
-			start += amount;
-			numGroups++;
-		}
-
-		if ( numGroups == 1 )
-			break;
-
-		/* Move the group starts into the groups array. */
-		FsmAp **groups = new FsmAp*[numGroups];
-		int g = 0;
-		start = 0;
-		while ( start < numTerms ) {
-			groups[g] = machines[start];
-			start += r->groups == 0 ? numTerms : r->groups;
-			g++;
-		}
-
-		delete[] machines;
-		machines = groups;
-		numTerms = numGroups;
-	}
-
-	FsmAp *ret = machines[0];
-	return FsmRes( FsmRes::Fsm(), ret );
+	return FsmAp::nfaUnion( *roundsList, machines, numMachines, stats, printStatistics );
 }
 
 void NfaUnion::makeNameTree( ParseData *pd )
@@ -2472,7 +2418,7 @@ FsmRes Factor::walk( ParseData *pd )
 		FsmRes exprTree = expression->walk( pd );
 
 		FsmRes res = FsmAp::nfaRepeatOp( exprTree.fsm, action1, action2, action3,
-				action4, action5, action6, pd->fsmCtx->curActionOrd );
+				action4, action5, action6 );
 
 		res.fsm->verifyIntegrity();
 		return res;

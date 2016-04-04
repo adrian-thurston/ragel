@@ -140,7 +140,7 @@ const int ORD_TEST = 1073741824;
  * trailing characters, where they may interact with other actions that use the
  * same variables. */
 FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
-		Action *stay, Action *repeat, Action *exit, int &curActionOrd )
+		Action *stay, Action *repeat, Action *exit )
 {
 	/*
 	 * First Concat.
@@ -352,4 +352,68 @@ FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth, ostream 
 	}
 
 	return FsmRes( FsmRes::Fsm(), fsm );
+}
+
+FsmRes FsmAp::nfaUnion( const NfaRoundVect &roundsList, FsmAp **machines, int numMachines, std::ostream &stats, bool printStatistics )
+{
+	long sumPlain = 0, sumMin = 0;
+	for ( int i = 0; i < numMachines; i++ ) {
+		sumPlain += machines[i]->stateList.length();
+
+		machines[i]->removeUnreachableStates();
+		machines[i]->minimizePartition2();
+
+		sumMin += machines[i]->stateList.length();
+	}
+
+	if ( printStatistics ) {
+		stats << "sum-plain\t" << sumPlain << endl;
+		stats << "sum-minimized\t" << sumMin << endl;
+	}
+
+	/* For each round. */
+	for ( NfaRoundVect::Iter r = roundsList; r.lte(); r++ ) {
+
+		if ( printStatistics ) {
+			stats << "depth\t" << r->depth << endl;
+			stats << "grouping\t" << r->groups << endl;
+		}
+
+		int numGroups = 0;
+		int start = 0;
+		while ( start < numMachines ) {
+			/* If nfa-group-max is zero, don't group, put all terms into a single
+			 * n-depth NFA. */
+			int amount = r->groups == 0 ? numMachines : r->groups;
+			if ( ( start + amount ) > numMachines )
+				amount = numMachines - start;
+
+			FsmAp **others = machines + start + 1;
+			FsmRes res = FsmAp::nfaUnionOp( machines[start], others, (amount - 1), r->depth, stats );
+			machines[start] = res.fsm;
+
+			start += amount;
+			numGroups++;
+		}
+
+		if ( numGroups == 1 )
+			break;
+
+		/* Move the group starts into the groups array. */
+		FsmAp **groups = new FsmAp*[numGroups];
+		int g = 0;
+		start = 0;
+		while ( start < numMachines ) {
+			groups[g] = machines[start];
+			start += r->groups == 0 ? numMachines : r->groups;
+			g++;
+		}
+
+		delete[] machines;
+		machines = groups;
+		numMachines = numGroups;
+	}
+
+	FsmAp *ret = machines[0];
+	return FsmRes( FsmRes::Fsm(), ret );
 }

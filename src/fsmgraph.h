@@ -83,7 +83,6 @@ struct NfaRound
 
 typedef Vector<NfaRound> NfaRoundVect;
 
-
 struct CondCostTooHigh
 {
 	CondCostTooHigh( long long costId )
@@ -2158,8 +2157,10 @@ public:
 	/* Results in an NFA. */
 	static FsmRes nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth, std::ostream &stats );
 	static FsmRes nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
-			Action *stay, Action *repeat, Action *exit, int &curActionOrd );
+			Action *stay, Action *repeat, Action *exit );
 
+	static FsmRes nfaUnion( const NfaRoundVect &roundsList, FsmAp **machines,
+			int numMachines, std::ostream &stats, bool printStatistics );
 
 	static FsmRes condPlus( FsmAp *fsm, long repId, Action *ini, Action *inc, Action *min, Action *max );
 	static FsmRes condStar( FsmAp *fsm, long repId, Action *ini, Action *inc, Action *min, Action *max );
