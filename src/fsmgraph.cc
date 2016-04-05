@@ -167,6 +167,20 @@ FsmAp *FsmAp::orFsm( FsmCtx *ctx, Key *set, int len )
 	return fsm;
 }
 
+FsmAp *FsmAp::dotFsm( FsmCtx *ctx )
+{
+	FsmAp *retFsm = FsmAp::rangeFsm( ctx,
+			ctx->keyOps->minKey, ctx->keyOps->maxKey );
+	return retFsm;
+}
+
+FsmAp *FsmAp::dotStarFsm( FsmCtx *ctx )
+{
+	FsmAp *retFsm = FsmAp::rangeStarFsm( ctx,
+			ctx->keyOps->minKey, ctx->keyOps->maxKey );
+	return retFsm;
+}
+
 /* Construct a machine that matches a range of characters.  A new machine will
  * be made with two states and a range transition between them. The range will
  * match any characters from low to high inclusive. Low should be less than or

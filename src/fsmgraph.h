@@ -2142,6 +2142,9 @@ public:
 	static FsmAp *rangeStarFsm( FsmCtx *ctx, Key low, Key high );
 	static FsmAp *emptyFsm( FsmCtx *ctx );
 	static FsmAp *lambdaFsm( FsmCtx *ctx );
+	static FsmAp *dotFsm( FsmCtx *ctx );
+	static FsmAp *dotStarFsm( FsmCtx *ctx );
+
 
 	/*
 	 * Fsm operators.

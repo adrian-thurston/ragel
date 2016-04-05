@@ -229,20 +229,6 @@ void makeFsmUniqueKeyArray( KeySet &result, const char *data, int len,
 	}
 }
 
-FsmAp *dotFsm( ParseData *pd )
-{
-	FsmAp *retFsm = FsmAp::rangeFsm( pd->fsmCtx,
-			pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
-	return retFsm;
-}
-
-FsmAp *dotStarFsm( ParseData *pd )
-{
-	FsmAp *retFsm = FsmAp::rangeStarFsm( pd->fsmCtx,
-			pd->fsmCtx->keyOps->minKey, pd->fsmCtx->keyOps->maxKey );
-	return retFsm;
-}
-
 /* Make a builtin type. Depends on the signed nature of the alphabet type. */
 FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 {
@@ -253,7 +239,7 @@ FsmAp *makeBuiltin( BuiltinMachine builtin, ParseData *pd )
 	switch ( builtin ) {
 	case BT_Any: {
 		/* All characters. */
-		retFsm = dotFsm( pd );
+		retFsm = FsmAp::dotFsm( pd->fsmCtx );
 		break;
 	}
 	case BT_Ascii: {

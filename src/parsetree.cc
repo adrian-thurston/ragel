@@ -1249,8 +1249,8 @@ FsmRes Expression::walk( ParseData *pd, bool lastInSeq )
 			if ( !exprFsm.success() )
 				return exprFsm;
 
-			FsmAp *leadAnyStar = dotStarFsm( pd );
-			FsmAp *trailAnyStar = dotStarFsm( pd );
+			FsmAp *leadAnyStar = FsmAp::dotStarFsm( pd->fsmCtx );
+			FsmAp *trailAnyStar = FsmAp::dotStarFsm( pd->fsmCtx );
 
 			/* Evaluate the term and pad it with any* machines. */
 			FsmRes termFsm = term->walk( pd );
@@ -2166,7 +2166,7 @@ FsmRes FactorWithNeg::walk( ParseData *pd )
 		FsmRes toNegate = factorWithNeg->walk( pd );
 
 		/* Negation is subtract from dot-star. */
-		FsmAp *ds = dotStarFsm( pd );
+		FsmAp *ds = FsmAp::dotStarFsm( pd->fsmCtx );
 		FsmRes res = FsmAp::subtractOp( ds, toNegate.fsm );
 
 		return res;
@@ -2176,7 +2176,7 @@ FsmRes FactorWithNeg::walk( ParseData *pd )
 		FsmRes toNegate = factorWithNeg->walk( pd );
 
 		/* CharNegation is subtract from dot. */
-		FsmAp *ds = dotFsm( pd );
+		FsmAp *ds = FsmAp::dotFsm( pd->fsmCtx );
 		FsmRes res = FsmAp::subtractOp( ds, toNegate.fsm );
 
 		return res;
@@ -2567,7 +2567,7 @@ FsmRes ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 		}
 		case Dot: {
 			/* Make the dot fsm. */
-			rtnVal = dotFsm( pd );
+			rtnVal = FsmAp::dotFsm( pd->fsmCtx );
 			break;
 		}
 		case OrBlock: {
@@ -2584,7 +2584,7 @@ FsmRes ReItem::walk( ParseData *pd, RegExpr *rootRegex )
 			fsm->minimizePartition2();
 
 			/* Make a dot fsm and subtract from it. */
-			rtnVal = dotFsm( pd );
+			rtnVal = FsmAp::dotFsm( pd->fsmCtx );
 			FsmRes res = FsmAp::subtractOp( rtnVal, fsm );
 			rtnVal = res.fsm;
 			rtnVal->minimizePartition2();
