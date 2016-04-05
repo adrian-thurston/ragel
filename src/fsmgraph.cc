@@ -689,10 +689,14 @@ FsmRes FsmAp::questionOp( FsmAp *fsm )
 	return res;
 }
 
-FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
+FsmRes FsmAp::exactRepeatOp( FsmAp *fsm, int times )
 {
-	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
-	assert( times > 0 );
+	/* Zero repetitions produces lambda machine. */
+	if ( times == 0 ) {
+		FsmCtx *fsmCtx = fsm->ctx;
+		delete fsm;
+		return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( fsmCtx ) );
+	}
 
 	/* The start func orders need to be shifted before doing the
 	 * repetition. */
@@ -723,10 +727,14 @@ FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 	return res;
 }
 
-FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
+FsmRes FsmAp::maxRepeatOp( FsmAp *fsm, int times )
 {
-	/* Must be 1 and up. 0 produces null machine and requires deleting this. */
-	assert( times > 0 );
+	/* Zero repetitions produces lambda machine. */
+	if ( times == 0 ) {
+		FsmCtx *fsmCtx = fsm->ctx;
+		delete fsm;
+		return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( fsmCtx ) );
+	}
 
 	fsm->ctx->curActionOrd += fsm->shiftStartActionOrder( fsm->ctx->curActionOrd );
 
@@ -779,6 +787,86 @@ FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
 	res.fsm->afterOpMinimize();
 
 	return res;
+}
+
+FsmRes FsmAp::minRepeatOp( FsmAp *fsm, int times )
+{
+	if ( times == 0 ) {
+		/* Acts just like a star op on the machine to return. */
+		FsmRes res = FsmAp::starOp( fsm );
+		if ( !res.success() )
+			return res;
+
+		return res;
+	}
+	else {
+		/* Take a duplicate for the plus. */
+		FsmAp *dup = new FsmAp( *fsm );
+
+		/* Do repetition on the first half. */
+		FsmRes res1 = FsmAp::exactRepeatOp( fsm, times );
+		if ( !res1.success() )
+			return res1;
+
+		/* Star the duplicate. */
+		FsmRes res2 = FsmAp::starOp( dup );
+		if ( !res2.success() )
+			return res2;
+
+		/* Tack on the kleene star. */
+		FsmRes res3 = FsmAp::concatOp( res1.fsm, res2.fsm );
+		if ( !res3.success() )
+			return res3;
+
+		return res3;
+	}
+}
+
+FsmRes FsmAp::rangeRepeatOp( FsmAp *fsm, int lowerRep, int upperRep )
+{
+	if ( lowerRep == 0 && upperRep == 0 ) {
+		FsmCtx *fsmCtx = fsm->ctx;
+		delete fsm;
+		return FsmRes( FsmRes::Fsm(), FsmAp::lambdaFsm( fsmCtx ) );
+	}
+	else if ( lowerRep == 0 ) {
+		/* Just doing max repetition. Already guarded against n == 0. */
+		FsmRes res = FsmAp::maxRepeatOp( fsm, upperRep );
+		if ( !res.success() )
+			return res;
+
+		return res;
+	}
+	else if ( lowerRep == upperRep ) {
+		/* Just doing exact repetition. Already guarded against n == 0. */
+		FsmRes res = FsmAp::exactRepeatOp( fsm, lowerRep );
+		if ( !res.success() )
+			return res;
+
+		return res;
+	}
+	else {
+		/* This is the case that 0 < lowerRep < upperRep. Take a
+		 * duplicate for the optional repeat. */
+		FsmAp *dup = new FsmAp( *fsm );
+
+		/* Do repetition on the first half. */
+		FsmRes res1 = FsmAp::exactRepeatOp( fsm, lowerRep );
+		if ( !res1.success() )
+			return res1;
+
+		/* Do optional repetition on the second half. */
+		FsmRes res2 = FsmAp::maxRepeatOp( dup, upperRep - lowerRep );
+		if ( !res2.success() )
+			return res2;
+
+		/* Tak on the duplicate machine. */
+		FsmRes res3 = FsmAp::concatOp( res1.fsm, res2.fsm );
+		if ( !res3.success() )
+			return res3;
+
+		return res3;
+	}
 }
 
 /* Concatenates other to the end of this machine. Other is deleted.  Any

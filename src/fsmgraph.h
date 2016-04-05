@@ -2150,8 +2150,12 @@ public:
 	static FsmRes starOp( FsmAp *fsm );
 	static FsmRes plusOp( FsmAp *fsm );
 	static FsmRes questionOp( FsmAp *fsm );
-	static FsmRes repeatOp( FsmAp *fsm, int times );
-	static FsmRes optionalRepeatOp( FsmAp *fsm, int times );
+
+	static FsmRes exactRepeatOp( FsmAp *fsm, int times );
+	static FsmRes maxRepeatOp( FsmAp *fsm, int times );
+	static FsmRes minRepeatOp( FsmAp *fsm, int times );
+	static FsmRes rangeRepeatOp( FsmAp *fsm, int lower, int upper );
+
 	static FsmRes concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
 	static FsmRes unionOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
 	static FsmRes intersectOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
