@@ -678,8 +678,6 @@ FsmRes LongestMatch::walk( ParseData *pd )
 		res = FsmAp::unionOp( res.fsm, parts[i] );
 		if ( !res.success() )
 			return res;
-
-		afterOpMinimize( res.fsm );
 	}
 
 	runLongestMatch( pd, res.fsm );
@@ -1203,11 +1201,9 @@ FsmRes Expression::walk( ParseData *pd, bool lastInSeq )
 				return rhs;
 
 			/* Perform union. */
-			FsmRes res = FsmAp::unionOp( exprFsm.fsm, rhs.fsm );
+			FsmRes res = FsmAp::unionOp( exprFsm.fsm, rhs.fsm, lastInSeq );
 			if ( !res.success() )
 				return res;
-
-			afterOpMinimize( res.fsm, lastInSeq );
 
 			return res;
 		}
@@ -1223,11 +1219,10 @@ FsmRes Expression::walk( ParseData *pd, bool lastInSeq )
 				return rhs;
 
 			/* Perform intersection. */
-			FsmRes res = FsmAp::intersectOp( exprFsm.fsm, rhs.fsm );
+			FsmRes res = FsmAp::intersectOp( exprFsm.fsm, rhs.fsm, lastInSeq );
 			if ( !res.success() )
 				return res;
 
-			afterOpMinimize( res.fsm, lastInSeq );
 			return res;
 		}
 		case SubtractType: {
@@ -1242,11 +1237,10 @@ FsmRes Expression::walk( ParseData *pd, bool lastInSeq )
 				return rhs;
 
 			/* Perform subtraction. */
-			FsmRes res = FsmAp::subtractOp( exprFsm.fsm, rhs.fsm );
+			FsmRes res = FsmAp::subtractOp( exprFsm.fsm, rhs.fsm, lastInSeq );
 			if ( !res.success() )
 				return res;
 
-			afterOpMinimize( res.fsm, lastInSeq );
 			return res;
 		}
 		case StrongSubtractType: {
@@ -1272,11 +1266,10 @@ FsmRes Expression::walk( ParseData *pd, bool lastInSeq )
 				return res2;
 
 			/* Perform subtraction. */
-			FsmRes res3 = FsmAp::subtractOp( exprFsm.fsm, res2.fsm );
+			FsmRes res3 = FsmAp::subtractOp( exprFsm.fsm, res2.fsm, lastInSeq );
 			if ( !res3.success() )
 				return res3;
 
-			afterOpMinimize( res3.fsm, lastInSeq );
 			return res3;
 		}
 		case TermType: {
@@ -1355,11 +1348,10 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			}
 
 			/* Perform concatenation. */
-			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm, lastInSeq );
 			if ( !res.success() )
 				return res;
 
-			afterOpMinimize( res.fsm, lastInSeq );
 			return res;
 		}
 		case RightStartType: {
@@ -1388,11 +1380,10 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			rhs.fsm->startFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
-			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm, lastInSeq );
 			if ( !res.success() )
 				return res;
 
-			afterOpMinimize( res.fsm, lastInSeq );
 			return res;
 		}
 		case RightFinishType: {
@@ -1430,11 +1421,10 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			}
 
 			/* Perform concatenation. */
-			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm, lastInSeq );
 			if ( !res.success() ) 
 				return res;
 
-			afterOpMinimize( res.fsm, lastInSeq );
 			return res;
 		}
 		case LeftType: {
@@ -1466,11 +1456,10 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			rhs.fsm->startFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[1] );
 
 			/* Perform concatenation. */
-			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm );
+			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm, lastInSeq );
 			if ( !res.success() )
 				return res;
 
-			afterOpMinimize( res.fsm, lastInSeq );
 			return res;
 		}
 		case FactorWithAugType: {
@@ -1532,7 +1521,6 @@ void FactorWithAug::assignActions( ParseData *pd, FsmAp *graph, int *actionOrd )
 		/* Transition actions. */
 		case at_start:
 			graph->startFsmAction( actionOrd[i], actions[i].action );
-			afterOpMinimize( graph );
 			break;
 		case at_all:
 			graph->allTransAction( actionOrd[i], actions[i].action );
@@ -1547,7 +1535,6 @@ void FactorWithAug::assignActions( ParseData *pd, FsmAp *graph, int *actionOrd )
 		/* Global error actions. */
 		case at_start_gbl_error:
 			graph->startErrorAction( actionOrd[i], actions[i].action, 0 );
-			afterOpMinimize( graph );
 			break;
 		case at_all_gbl_error:
 			graph->allErrorAction( actionOrd[i], actions[i].action, 0 );
@@ -1569,7 +1556,6 @@ void FactorWithAug::assignActions( ParseData *pd, FsmAp *graph, int *actionOrd )
 		case at_start_local_error:
 			graph->startErrorAction( actionOrd[i], actions[i].action,
 					actions[i].localErrKey );
-			afterOpMinimize( graph );
 			break;
 		case at_all_local_error:
 			graph->allErrorAction( actionOrd[i], actions[i].action,
@@ -1595,7 +1581,6 @@ void FactorWithAug::assignActions( ParseData *pd, FsmAp *graph, int *actionOrd )
 		/* EOF actions. */
 		case at_start_eof:
 			graph->startEOFAction( actionOrd[i], actions[i].action );
-			afterOpMinimize( graph );
 			break;
 		case at_all_eof:
 			graph->allEOFAction( actionOrd[i], actions[i].action );
@@ -1616,7 +1601,6 @@ void FactorWithAug::assignActions( ParseData *pd, FsmAp *graph, int *actionOrd )
 		/* To State Actions. */
 		case at_start_to_state:
 			graph->startToStateAction( actionOrd[i], actions[i].action );
-			afterOpMinimize( graph );
 			break;
 		case at_all_to_state:
 			graph->allToStateAction( actionOrd[i], actions[i].action );
@@ -1637,7 +1621,6 @@ void FactorWithAug::assignActions( ParseData *pd, FsmAp *graph, int *actionOrd )
 		/* From State Actions. */
 		case at_start_from_state:
 			graph->startFromStateAction( actionOrd[i], actions[i].action );
-			afterOpMinimize( graph );
 			break;
 		case at_all_from_state:
 			graph->allFromStateAction( actionOrd[i], actions[i].action );
@@ -1670,9 +1653,6 @@ void FactorWithAug::assignPriorities( FsmAp *graph, int *priorOrd )
 		switch ( priorityAugs[i].type ) {
 		case at_start:
 			graph->startFsmPrior( priorOrd[i], &priorDescs[i]);
-			/* Start fsm priorities are a special case that may require
-			 * minimization afterwards. */
-			afterOpMinimize( graph );
 			break;
 		case at_all:
 			graph->allTransPrior( priorOrd[i], &priorDescs[i] );
@@ -1698,7 +1678,6 @@ void FactorWithAug::assignConditions( FsmAp *graph )
 		/* Transition actions. */
 		case at_start:
 			graph->startFsmCondition( conditions[i].action, conditions[i].sense );
-			afterOpMinimize( graph );
 			break;
 		case at_all:
 			graph->allTransCondition( conditions[i].action, conditions[i].sense );
@@ -1950,7 +1929,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		if ( !res.success() )
 			return res;
 
-		afterOpMinimize( res.fsm );
 		return res;
 	}
 	case StarStarType: {
@@ -1984,7 +1962,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		if ( !res.success() )
 			return res;
 
-		afterOpMinimize( res.fsm );
 		return res;
 	}
 	case OptionalType: {
@@ -2046,7 +2023,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			if ( !res.success() )
 				return res;
 
-			afterOpMinimize( res.fsm );
 			return res;
 		}
 		break;
@@ -2084,7 +2060,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			if ( !res.success() )
 				return res;
 
-			afterOpMinimize( res.fsm );
 			return res;
 		}
 		break;
@@ -2110,7 +2085,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			if ( !res.success() )
 				return res;
 
-			afterOpMinimize( res.fsm );
 			return res;
 		}
 		else {
@@ -2122,21 +2096,16 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 			if ( !res1.success() )
 				return res1;
 
-			afterOpMinimize( res1.fsm );
-
 			/* Star the duplicate. */
 			FsmRes res2 = FsmAp::starOp( dup );
 			if ( !res2.success() )
 				return res2;
-
-			afterOpMinimize( res2.fsm );
 
 			/* Tack on the kleene star. */
 			FsmRes res3 = FsmAp::concatOp( res1.fsm, res2.fsm );
 			if ( !res3.success() )
 				return res3;
 
-			afterOpMinimize( res3.fsm );
 			return res3;
 		}
 		break;
@@ -2181,7 +2150,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				if ( !res.success() )
 					return res;
 
-				afterOpMinimize( res.fsm );
 				return res;
 			}
 			else if ( lowerRep == upperRep ) {
@@ -2190,7 +2158,6 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				if ( !res.success() )
 					return res;
 
-				afterOpMinimize( res.fsm );
 				return res;
 			}
 			else {
@@ -2203,21 +2170,16 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 				if ( !res1.success() )
 					return res1;
 
-				afterOpMinimize( res1.fsm );
-
 				/* Do optional repetition on the second half. */
 				FsmRes res2 = FsmAp::optionalRepeatOp( dup, upperRep - lowerRep );
 				if ( !res2.success() )
 					return res2;
-
-				afterOpMinimize( res2.fsm );
 
 				/* Tak on the duplicate machine. */
 				FsmRes res3 = FsmAp::concatOp( res1.fsm, res2.fsm );
 				if ( !res3.success() )
 					return res3;
 
-				afterOpMinimize( res3.fsm );
 				return res3;
 			}
 		}
@@ -2294,7 +2256,6 @@ FsmRes FactorWithNeg::walk( ParseData *pd )
 		FsmAp *ds = dotStarFsm( pd );
 		FsmRes res = FsmAp::subtractOp( ds, toNegate.fsm );
 
-		afterOpMinimize( res.fsm );
 		return res;
 	}
 	case CharNegateType: {
@@ -2305,7 +2266,6 @@ FsmRes FactorWithNeg::walk( ParseData *pd )
 		FsmAp *ds = dotFsm( pd );
 		FsmRes res = FsmAp::subtractOp( ds, toNegate.fsm );
 
-		afterOpMinimize( res.fsm );
 		return res;
 	}
 	case FactorType: {

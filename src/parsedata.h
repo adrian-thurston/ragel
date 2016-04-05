@@ -413,7 +413,6 @@ struct ParseData
 	ParseData *prev, *next;
 };
 
-void afterOpMinimize( FsmAp *fsm, bool lastInSeq = true );
 Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd );
 Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd );
 Key makeFsmKeyNum( char *str, const InputLoc &loc, ParseData *pd );

@@ -654,6 +654,8 @@ FsmRes FsmAp::starOp( FsmAp *fsm )
 	fsm->removeMisfits();
 	fsm->setMisfitAccounting( false );
 
+	fsm->afterOpMinimize();
+
 	return res;
 }
 
@@ -667,13 +669,10 @@ FsmRes FsmAp::plusOp( FsmAp *fsm )
 	if ( !res1.success() )
 		return res1;
 
-	afterOpMinimize( res1.fsm );
-
 	FsmRes res2 = FsmAp::concatOp( fsm, res1.fsm );
 	if ( !res2.success() )
 		return res2;
 
-	afterOpMinimize( res2.fsm );
 	return res2;
 }
 
@@ -687,7 +686,6 @@ FsmRes FsmAp::questionOp( FsmAp *fsm )
 	if ( !res.success() )
 		return res;
 
-	afterOpMinimize( res.fsm );
 	return res;
 }
 
@@ -719,6 +717,8 @@ FsmRes FsmAp::repeatOp( FsmAp *fsm, int times )
 	FsmRes res = fsm->doConcat( copyFrom, 0, false );
 	if ( !res.success())
 		return res;
+
+	res.fsm->afterOpMinimize();
 
 	return res;
 }
@@ -774,14 +774,18 @@ FsmRes FsmAp::optionalRepeatOp( FsmAp *fsm, int times )
 	}
 
 	/* Now use the copyFrom on the end, no bits set, no bits to clear. */
-	return fsm->doConcat( copyFrom, &lastFinSet, true );
+	FsmRes res = fsm->doConcat( copyFrom, &lastFinSet, true );
+
+	res.fsm->afterOpMinimize();
+
+	return res;
 }
 
 /* Concatenates other to the end of this machine. Other is deleted.  Any
  * transitions made leaving this machine and entering into other are notified
  * that they are leaving transitions by having the leavingFromState callback
  * invoked. */
-FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
+FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 {
 	for ( PriorTable::Iter g = other->startState->guardedInTable; g.lte(); g++ ) {
 		fsm->allTransPrior( 0, g->desc );
@@ -797,11 +801,13 @@ FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other )
 		return res;
 	}
 
+	res.fsm->afterOpMinimize( lastInSeq );
+
 	return res;
 }
 
 /* Returns union of fsm and other. Other is deleted. */
-FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
+FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 {
 	assert( fsm->ctx == other->ctx );
 
@@ -826,11 +832,13 @@ FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other )
 	fsm->ctx->unionOp = false;
 	fsm->unsetFinBits( STB_BOTH );
 
+	fsm->afterOpMinimize( lastInSeq );
+
 	return res;
 }
 
 /* Intersects other with this machine. Other is deleted. */
-FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
+FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 {
 	assert( fsm->ctx == other->ctx );
 
@@ -858,11 +866,13 @@ FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other )
 	/* Remove states that have no path to a final state. */
 	fsm->removeDeadEndStates();
 
+	fsm->afterOpMinimize( lastInSeq );
+
 	return res;
 }
 
 /* Set subtracts other machine from this machine. Other is deleted. */
-FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
+FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 {
 	assert( fsm->ctx == other->ctx );
 
@@ -888,6 +898,8 @@ FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other )
 
 	/* Remove states that have no path to a final state. */
 	fsm->removeDeadEndStates();
+
+	fsm->afterOpMinimize( lastInSeq );
 
 	return res;
 }
@@ -1518,14 +1530,11 @@ FsmRes FsmAp::condPlus( FsmAp *fsm, long repId, Action *ini, Action *inc, Action
 		condCost( max, repId );
 
 	fsm->startFsmAction( 0, inc );
-	afterOpMinimize( fsm );
 
 	if ( max != 0 ) {
 		FsmRes res = fsm->startFsmCondition( max, true );
 		if ( !res.success() )
 			return res;
-
-		afterOpMinimize( fsm );
 	}
 
 	/* Need a duplicated for the star end. */
@@ -1538,13 +1547,9 @@ FsmRes FsmAp::condPlus( FsmAp *fsm, long repId, Action *ini, Action *inc, Action
 	if ( !res1.success() )
 		return res1;
 
-	afterOpMinimize( res1.fsm );
-
 	FsmRes res2 = FsmAp::concatOp( fsm, res1.fsm );
 	if ( !res2.success() )
 		return res2;
-
-	afterOpMinimize( res2.fsm );
 
 	/* End plus operation. */
 

@@ -86,40 +86,6 @@ void RedToken::set( colm_data *cd, colm_location *cl )
 	loc.col = cl->column;
 }
 
-
-/* Perform minimization after an operation according 
- * to the command line args. */
-void afterOpMinimize( FsmAp *fsm, bool lastInSeq )
-{
-	/* Switch on the prefered minimization algorithm. */
-	if ( fsm->ctx->minimizeOpt == MinimizeEveryOp || ( fsm->ctx->minimizeOpt == MinimizeMostOps && lastInSeq ) ) {
-		/* First clean up the graph. FsmAp operations may leave these
-		 * lying around. There should be no dead end states. The subtract
-		 * intersection operators are the only places where they may be
-		 * created and those operators clean them up. */
-		fsm->removeUnreachableStates();
-
-		switch ( fsm->ctx->minimizeLevel ) {
-			#ifdef TO_UPGRADE_CONDS
-			case MinimizeApprox:
-				fsm->minimizeApproximate();
-				break;
-			#endif
-			case MinimizePartition1:
-				fsm->minimizePartition1();
-				break;
-			case MinimizePartition2:
-				fsm->minimizePartition2();
-				break;
-			#ifdef TO_UPGRADE_CONDS
-			case MinimizeStable:
-				fsm->minimizeStable();
-				break;
-			#endif
-		}
-	}
-}
-
 /* Count the transitions in the fsm by walking the state list. */
 int countTransitions( FsmAp *fsm )
 {

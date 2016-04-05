@@ -795,3 +795,37 @@ void FsmAp::compressTransitions()
 		}
 	}
 }
+
+/* Perform minimization after an operation according 
+ * to the command line args. */
+void FsmAp::afterOpMinimize( bool lastInSeq )
+{
+	/* Switch on the prefered minimization algorithm. */
+	if ( ctx->minimizeOpt == MinimizeEveryOp || ( ctx->minimizeOpt == MinimizeMostOps && lastInSeq ) ) {
+		/* First clean up the graph. FsmAp operations may leave these
+		 * lying around. There should be no dead end states. The subtract
+		 * intersection operators are the only places where they may be
+		 * created and those operators clean them up. */
+		removeUnreachableStates();
+
+		switch ( ctx->minimizeLevel ) {
+			#ifdef TO_UPGRADE_CONDS
+			case MinimizeApprox:
+				minimizeApproximate();
+				break;
+			#endif
+			case MinimizePartition1:
+				minimizePartition1();
+				break;
+			case MinimizePartition2:
+				minimizePartition2();
+				break;
+			#ifdef TO_UPGRADE_CONDS
+			case MinimizeStable:
+				minimizeStable();
+				break;
+			#endif
+		}
+	}
+}
+

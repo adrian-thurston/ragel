@@ -1884,6 +1884,7 @@ private:
 	void doEmbedCondition( StateAp *state,
 			const CondSet &set, const CondKeySet &vals );
 
+
 public:
 	static FsmRes embedCondition( FsmAp *fsm, StateAp *state, const CondSet &set,
 			const CondKeySet &vals );
@@ -1965,6 +1966,8 @@ public:
 private:
 	/* Can generate staes. */
 	void shadowReadWriteStates();
+
+	void afterOpMinimize( bool lastInSeq = true );
 
 public:
 
@@ -2149,10 +2152,10 @@ public:
 	static FsmRes questionOp( FsmAp *fsm );
 	static FsmRes repeatOp( FsmAp *fsm, int times );
 	static FsmRes optionalRepeatOp( FsmAp *fsm, int times );
-	static FsmRes concatOp( FsmAp *fsm, FsmAp *other );
-	static FsmRes unionOp( FsmAp *fsm, FsmAp *other );
-	static FsmRes intersectOp( FsmAp *fsm, FsmAp *other );
-	static FsmRes subtractOp( FsmAp *fsm, FsmAp *other );
+	static FsmRes concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
+	static FsmRes unionOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
+	static FsmRes intersectOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
+	static FsmRes subtractOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
 	static FsmRes epsilonOp( FsmAp *fsm );
 	static FsmRes joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers );
 

@@ -137,6 +137,10 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 	 * a final start state. */
 	if ( startState->stateBits & STB_ISFINAL )
 		startState->outPriorTable.setPrior( ordering, prior );
+
+	/* Start fsm priorities are a special case that may require
+	 * minimization afterwards. */
+	afterOpMinimize( this );
 }
 
 /* Set the priority of all transitions in a graph. Walks all transition lists
@@ -257,6 +261,8 @@ void FsmAp::startFsmAction( int ordering, Action *action )
 
 		}
 	}
+
+	afterOpMinimize( this );
 }
 
 /* Set functions to execute on all transitions. Walks the out lists of all
@@ -537,6 +543,8 @@ void FsmAp::startErrorAction( int ordering, Action *action, int transferPoint )
 
 	/* Add the actions. */
 	startState->errActionTable.setAction( ordering, action, transferPoint );
+
+	afterOpMinimize( this );
 }
 
 /* Set error actions in all states where there is a transition out. */
@@ -590,6 +598,8 @@ void FsmAp::startEOFAction( int ordering, Action *action )
 
 	/* Add the actions. */
 	startState->eofActionTable.setAction( ordering, action );
+
+	afterOpMinimize( this );
 }
 
 /* Set EOF actions in all states where there is a transition out. */
@@ -643,7 +653,10 @@ void FsmAp::startToStateAction( int ordering, Action *action )
 {
 	/* Make sure the start state has no other entry points. */
 	isolateStartState( this );
+
 	startState->toStateActionTable.setAction( ordering, action );
+
+	afterOpMinimize( this );
 }
 
 /* Set to state actions in all states. */
@@ -696,7 +709,10 @@ void FsmAp::startFromStateAction( int ordering, Action *action )
 {
 	/* Make sure the start state has no other entry points. */
 	isolateStartState( this );
+
 	startState->fromStateActionTable.setAction( ordering, action );
+
+	afterOpMinimize( this );
 }
 
 void FsmAp::allFromStateAction( int ordering, Action *action )
@@ -1095,6 +1111,9 @@ FsmRes FsmAp::startFsmCondition( Action *condAction, bool sense )
 				return res;
 		}
 	}
+
+	afterOpMinimize( this );
+
 	return FsmRes( FsmRes::Fsm(), this );
 }
 
