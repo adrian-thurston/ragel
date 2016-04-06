@@ -274,7 +274,7 @@ ostream &operator<<( ostream &out, const InputLoc &loc )
 }
 
 /* Print the opening to a warning in the input, then return the error ostream. */
-ostream &InputData::warning( const InputLoc &loc )
+ostream &IdBase::warning( const InputLoc &loc )
 {
 	ostream &err = inLibRagel ? libcerr : std::cerr;
 	err << loc << ": warning: ";
@@ -282,7 +282,7 @@ ostream &InputData::warning( const InputLoc &loc )
 }
 
 /* Print the opening to a program error, then return the error stream. */
-ostream &InputData::error()
+ostream &IdBase::error()
 {
 	errorCount += 1;
 	ostream &err = inLibRagel ? libcerr : std::cerr;
@@ -290,7 +290,7 @@ ostream &InputData::error()
 	return err;
 }
 
-ostream &InputData::error( const InputLoc &loc )
+ostream &IdBase::error( const InputLoc &loc )
 {
 	errorCount += 1;
 	ostream &err = inLibRagel ? libcerr : std::cerr;
@@ -298,13 +298,13 @@ ostream &InputData::error( const InputLoc &loc )
 	return err;
 }
 
-std::ostream &InputData::stats()
+std::ostream &IdBase::stats()
 {
 	return inLibRagel ? libcout : std::cout;
 }
 
 /* Requested info. */
-std::ostream &InputData::info()
+std::ostream &IdBase::info()
 {
 	return inLibRagel ? libcout : std::cout;
 }

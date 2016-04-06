@@ -177,9 +177,51 @@ extern const int ORD_RESTORE;
 extern const int ORD_COND;
 extern const int ORD_TEST;
 
+struct PdBase
+{
+	PdBase( std::string sectionName );
+
+	std::string sectionName;
+
+	/* List of actions. Will be pasted into a switch statement. */
+	ActionList actionList;
+
+	ExportList exportList;
+
+	bool generatingSectionSubset;
+	bool lmRequiresErrorState;
+
+	/* Make name ids to name inst pointers. */
+	NameInst **nameIndex;
+
+	/* Element type and get key expression. */
+	InlineList *getKeyExpr;
+	InlineList *accessExpr;
+
+	/* Stack management */
+	InlineBlock *prePushExpr;
+	InlineBlock *postPopExpr;
+
+	/* Nfa stack managment. */
+	InlineBlock *nfaPrePushExpr;
+	InlineBlock *nfaPostPopExpr;
+
+	/* Overriding variables. */
+	InlineList *pExpr;
+	InlineList *peExpr;
+	InlineList *eofExpr;
+	InlineList *csExpr;
+	InlineList *topExpr;
+	InlineList *stackExpr;
+	InlineList *actExpr;
+	InlineList *tokstartExpr;
+	InlineList *tokendExpr;
+	InlineList *dataExpr;
+};
+
 /* Class to collect information about the machine during the 
  * parse of input. */
-struct ParseData
+struct ParseData : public PdBase
 {
 	/* Create a new parse data object. This is done at the beginning of every
 	 * fsm specification. */
@@ -251,8 +293,8 @@ struct ParseData
 	void generateXML( ostream &out );
 	void generateReduced( const char *inputFileName, CodeStyle codeStyle,
 			std::ostream &out, const HostLang *hostLang );
+
 	FsmAp *sectionGraph;
-	bool generatingSectionSubset;
 
 	void initKeyOps( const HostLang *hostLang );
 
@@ -277,9 +319,6 @@ struct ParseData
 	/* Dictionary of named local errors. */
 	LocalErrDict localErrDict;
 
-	/* List of actions. Will be pasted into a switch statement. */
-	ActionList actionList;
-
 	/* Various next identifiers. */
 	int nextLocalErrKey, nextNameId, nextCondId;
 	
@@ -294,30 +333,6 @@ struct ParseData
 	bool alphTypeSet;
 	InputLoc alphTypeLoc;
 
-	/* Element type and get key expression. */
-	InlineList *getKeyExpr;
-	InlineList *accessExpr;
-
-	/* Stack management */
-	InlineBlock *prePushExpr;
-	InlineBlock *postPopExpr;
-
-	/* Nfa stack managment. */
-	InlineBlock *nfaPrePushExpr;
-	InlineBlock *nfaPostPopExpr;
-
-	/* Overriding variables. */
-	InlineList *pExpr;
-	InlineList *peExpr;
-	InlineList *eofExpr;
-	InlineList *csExpr;
-	InlineList *topExpr;
-	InlineList *stackExpr;
-	InlineList *actExpr;
-	InlineList *tokstartExpr;
-	InlineList *tokendExpr;
-	InlineList *dataExpr;
-
 	/* The alphabet range. */
 	char *lowerNum, *upperNum;
 	Key lowKey, highKey;
@@ -326,7 +341,6 @@ struct ParseData
 	InputData *id;
 
 	/* The name of the file the fsm is from, and the spec name. */
-	std::string sectionName;
 	int machineId;
 	InputLoc sectionLoc;
 
@@ -366,12 +380,8 @@ struct ParseData
 
 	void clear();
 
-	/* Make name ids to name inst pointers. */
-	NameInst **nameIndex;
-
 	/* Counter for assigning ids to longest match items. */
 	int nextLongestMatchId;
-	bool lmRequiresErrorState;
 
 	/* List of all longest match parse tree items. */
 	LmList lmList;
@@ -392,7 +402,6 @@ struct ParseData
 
 	FsmCtx *fsmCtx;
 
-	ExportList exportList;
 	LengthDefList lengthDefList;
 
 	CodeGenData *cgd;

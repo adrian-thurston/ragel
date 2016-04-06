@@ -68,7 +68,7 @@ InputData::~InputData()
 		free( (void*) *bl );
 }
 
-void InputData::abortCompile( int code )
+void IdBase::abortCompile( int code )
 {
 	throw AbortCompile( code );
 }

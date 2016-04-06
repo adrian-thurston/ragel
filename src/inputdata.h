@@ -162,7 +162,41 @@ struct IncludeRec
 
 typedef AvlTree<IncludeRec, FnMachine, CmpFnMachine> IncludeDict;
 
+struct IdBase
+{
+	IdBase()
+	:
+		printStatistics(false),
+		errorCount(0),
+		inLibRagel(false),
+		displayPrintables(false)
+	{}
+
+	bool printStatistics;
+
+	/* Error reporting. */
+	std::ostream &error();
+	std::ostream &error( const InputLoc &loc ); 
+	std::ostream &warning( const InputLoc &loc ); 
+
+	/* Stats reporting. */
+	std::ostream &stats();
+	
+	/* Requested info. */
+	std::ostream &info();
+
+	std::stringstream libcerr;
+	std::stringstream libcout;
+
+	int errorCount;
+	bool inLibRagel;
+	void abortCompile( int code );
+	bool displayPrintables;
+};
+
 struct InputData
+:
+	public IdBase
 {
 	InputData()
 	: 
@@ -184,10 +218,8 @@ struct InputData
 		minimizeOpt(MinimizeMostOps),
 		generateXML(false),
 		generateDot(false),
-		printStatistics(false),
 		wantDupsRemoved(true),
 		noLineDirectives(false),
-		displayPrintables(false),
 		stringTables(false),
 		maxTransitions(LONG_MAX),
 		numSplitPartitions(0),
@@ -208,8 +240,6 @@ struct InputData
 		histogramFn(0),
 		histogram(0),
 		input(0),
-		inLibRagel(false),
-		errorCount(0),
 		forceLibRagel(false)
 	{}
 
@@ -274,11 +304,9 @@ struct InputData
 	MinimizeOpt minimizeOpt;
 	bool generateXML;
 	bool generateDot;
-	bool printStatistics;
 
 	bool wantDupsRemoved;
 	bool noLineDirectives;
-	bool displayPrintables;
 	bool stringTables;
 
 	long maxTransitions;
@@ -315,7 +343,6 @@ struct InputData
 	double *histogram;
 
 	const char *input;
-	bool inLibRagel;
 
 	Vector<const char**> streamFileNames;
 
@@ -375,24 +402,8 @@ struct InputData
 	bool process();
 	bool parseReduce();
 
-	void abortCompile( int code );
 	char *readInput( const char *inputFileName );
 
-	/* Error reporting. */
-	std::ostream &error();
-	std::ostream &error( const InputLoc &loc ); 
-	std::ostream &warning( const InputLoc &loc ); 
-
-	/* Stats reporting. */
-	std::ostream &stats();
-	
-	/* Requested info. */
-	std::ostream &info();
-
-	std::stringstream libcerr;
-	std::stringstream libcout;
-
-	int errorCount;
 	bool forceLibRagel;
 };
 

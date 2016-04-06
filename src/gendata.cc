@@ -1097,7 +1097,7 @@ void CodeGenData::finishTransList( int snum )
 			keyOps->increment( fillLowKey );
 
 			/* Create the new range with the error trans and append it. */
-			RedTransEl newTel( fillLowKey, pd->fsmCtx->keyOps->maxKey,
+			RedTransEl newTel( fillLowKey, fsm->ctx->keyOps->maxKey,
 					redFsm->getErrorTrans() );
 			destRange.append( newTel );
 		}

@@ -397,19 +397,13 @@ NameInst::~NameInst()
  * ParseData
  */
 
-/* Initialize the structure that will collect info during the parse of a
- * machine. */
-ParseData::ParseData( InputData *id, string sectionName, 
-		int machineId, const InputLoc &sectionLoc, const HostLang *hostLang,
-		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
-:	
-	sectionGraph(0),
+PdBase::PdBase( std::string sectionName )
+:
+	sectionName(sectionName),
 	generatingSectionSubset(false),
-	/* 0 is reserved for global error actions. */
-	nextLocalErrKey(1),
-	nextNameId(0),
-	nextCondId(0),
-	alphTypeSet(false),
+	lmRequiresErrorState(false),
+	nameIndex(0),
+
 	getKeyExpr(0),
 	accessExpr(0),
 	prePushExpr(0),
@@ -425,19 +419,32 @@ ParseData::ParseData( InputData *id, string sectionName,
 	actExpr(0),
 	tokstartExpr(0),
 	tokendExpr(0),
-	dataExpr(0),
+	dataExpr(0)
+{}	
+
+/* Initialize the structure that will collect info during the parse of a
+ * machine. */
+ParseData::ParseData( InputData *id, string sectionName, 
+		int machineId, const InputLoc &sectionLoc, const HostLang *hostLang,
+		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
+:	
+	PdBase(sectionName),
+
+	sectionGraph(0),
+	/* 0 is reserved for global error actions. */
+	nextLocalErrKey(1),
+	nextNameId(0),
+	nextCondId(0),
+	alphTypeSet(false),
 	lowerNum(0),
 	upperNum(0),
 	id(id),
-	sectionName(sectionName),
 	machineId(machineId),
 	sectionLoc(sectionLoc),
 	rootName(0),
 	exportsRootName(0),
 	nextEpsilonResolvedLink(0),
-	nameIndex(0),
 	nextLongestMatchId(1),
-	lmRequiresErrorState(false),
 	cgd(0)
 {
 	/* Initialize the dictionary of graphs. This is our symbol table. The
