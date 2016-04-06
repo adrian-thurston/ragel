@@ -32,7 +32,7 @@
 class XMLCodeGen : protected GenBase
 {
 public:
-	XMLCodeGen( std::string fsmName, int machineId, ParseData *pd, FsmAp *fsm, std::ostream &out );
+	XMLCodeGen( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm, std::ostream &out );
 
 	void writeXML( );
 

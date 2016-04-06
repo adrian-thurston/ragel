@@ -23,9 +23,7 @@
 #define _FSMGRAPH_H
 
 #include "config.h"
-#include <assert.h>
-#include <iostream>
-#include <string>
+#include "ragel.h"
 #include "common.h"
 #include "vector.h"
 #include "bstset.h"
@@ -39,7 +37,12 @@
 #include "sbsttable.h"
 #include "avlset.h"
 #include "avlmap.h"
-#include "ragel.h"
+
+#include <assert.h>
+#include <iostream>
+#include <sstream>
+#include <string>
+
 
 /* Flags that control merging. */
 #define STB_GRAPH1     0x01
@@ -60,6 +63,8 @@ struct LongestMatchPart;
 struct LengthDef;
 struct CondSpace;
 struct FsmCtx;
+struct InlineBlock;
+struct InlineList;
 
 struct TooManyStates {};
 
@@ -1969,7 +1974,11 @@ private:
 
 	void afterOpMinimize( bool lastInSeq = true );
 
+	void removeDups( ActionTable &table );
+
 public:
+
+	void removeActionDups();
 
 	/*
 	 * Basic attaching and detaching.
@@ -2387,5 +2396,88 @@ template< class Trans > int FsmAp::compareCondDataPtr( Trans *trans1, Trans *tra
 	}
 	return 0;
 }
+
+struct PdBase
+{
+	PdBase( std::string sectionName );
+
+	std::string sectionName;
+
+	/* List of actions. Will be pasted into a switch statement. */
+	ActionList actionList;
+
+	ExportList exportList;
+
+	bool generatingSectionSubset;
+	bool lmRequiresErrorState;
+
+	/* Make name ids to name inst pointers. */
+	NameInst **nameIndex;
+
+	/* Element type and get key expression. */
+	InlineList *getKeyExpr;
+	InlineList *accessExpr;
+
+	/* Stack management */
+	InlineBlock *prePushExpr;
+	InlineBlock *postPopExpr;
+
+	/* Nfa stack managment. */
+	InlineBlock *nfaPrePushExpr;
+	InlineBlock *nfaPostPopExpr;
+
+	/* Overriding variables. */
+	InlineList *pExpr;
+	InlineList *peExpr;
+	InlineList *eofExpr;
+	InlineList *csExpr;
+	InlineList *topExpr;
+	InlineList *stackExpr;
+	InlineList *actExpr;
+	InlineList *tokstartExpr;
+	InlineList *tokendExpr;
+	InlineList *dataExpr;
+};
+
+
+struct IdBase
+{
+	IdBase()
+	:
+		printStatistics(false),
+		errorCount(0),
+		inLibRagel(false),
+		displayPrintables(false),
+		backend(Direct),
+		stringTables(false),
+		backendFeature(GotoFeature)
+	{}
+
+	bool printStatistics;
+
+	/* Error reporting. */
+	std::ostream &error();
+	std::ostream &error( const InputLoc &loc ); 
+	std::ostream &warning( const InputLoc &loc ); 
+
+	/* Stats reporting. */
+	std::ostream &stats();
+	
+	/* Requested info. */
+	std::ostream &info();
+
+	std::stringstream libcerr;
+	std::stringstream libcout;
+
+	int errorCount;
+	bool inLibRagel;
+	void abortCompile( int code );
+	bool displayPrintables;
+
+	RagelBackend backend;
+	bool stringTables;
+	BackendFeature backendFeature;
+};
+
 
 #endif

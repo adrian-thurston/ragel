@@ -942,44 +942,6 @@ void ParseData::printNameInst( std::ostream &out, NameInst *nameInst, int level 
 		printNameInst( out, *name, level+1 );
 }
 
-/* Remove duplicates of unique actions from an action table. */
-void ParseData::removeDups( ActionTable &table )
-{
-	/* Scan through the table looking for unique actions to 
-	 * remove duplicates of. */
-	for ( int i = 0; i < table.length(); i++ ) {
-		/* Remove any duplicates ahead of i. */
-		for ( int r = i+1; r < table.length(); ) {
-			if ( table[r].value == table[i].value )
-				table.vremove(r);
-			else
-				r += 1;
-		}
-	}
-}
-
-/* Remove duplicates from action lists. This operates only on transition and
- * eof action lists and so should be called once all actions have been
- * transfered to their final resting place. */
-void ParseData::removeActionDups( FsmAp *graph )
-{
-	/* Loop all states. */
-	for ( StateList::Iter state = graph->stateList; state.lte(); state++ ) {
-		/* Loop all transitions. */
-		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-			if ( trans->plain() )
-				removeDups( trans->tdap()->actionTable );
-			else {
-				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ )
-					removeDups( cond->actionTable );
-			}
-		}
-		removeDups( state->toStateActionTable );
-		removeDups( state->fromStateActionTable );
-		removeDups( state->eofActionTable );
-	}
-}
-
 Action *ParseData::newAction( const char *name, InlineList *inlineList )
 {
 	InputLoc loc;
@@ -1117,7 +1079,7 @@ FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 		graph.fsm->transferErrorActions( state, 0 );
 	
 	if ( id->wantDupsRemoved )
-		removeActionDups( graph.fsm );
+		graph.fsm->removeActionDups();
 
 	/* Remove unreachable states. There should be no dead end states. The
 	 * subtract and intersection operators are the only places where they may
@@ -1540,7 +1502,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 		std::ostream &out, const HostLang *hostLang )
 {
 	CodeGenArgs args( inputFileName, sectionName, machineId,
-			this, sectionGraph, codeStyle, out );
+			this->id, this, sectionGraph, codeStyle, out );
 
 	/* Write out with it. */
 	cgd = makeCodeGen( hostLang, args );
@@ -1551,7 +1513,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 void ParseData::generateXML( ostream &out )
 {
 	/* Make the generator. */
-	XMLCodeGen codeGen( sectionName, machineId, this, sectionGraph, out );
+	XMLCodeGen codeGen( sectionName, machineId, id, this, sectionGraph, out );
 
 	/* Write out with it. */
 	codeGen.writeXML();

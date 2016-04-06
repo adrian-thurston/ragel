@@ -1682,3 +1682,42 @@ FsmRes FsmAp::condStar( FsmAp *fsm, long repId, Action *ini, Action *inc, Action
 
 	return cp;
 }
+
+/* Remove duplicates of unique actions from an action table. */
+void FsmAp::removeDups( ActionTable &table )
+{
+	/* Scan through the table looking for unique actions to 
+	 * remove duplicates of. */
+	for ( int i = 0; i < table.length(); i++ ) {
+		/* Remove any duplicates ahead of i. */
+		for ( int r = i+1; r < table.length(); ) {
+			if ( table[r].value == table[i].value )
+				table.vremove(r);
+			else
+				r += 1;
+		}
+	}
+}
+
+/* Remove duplicates from action lists. This operates only on transition and
+ * eof action lists and so should be called once all actions have been
+ * transfered to their final resting place. */
+void FsmAp::removeActionDups()
+{
+	/* Loop all states. */
+	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
+		/* Loop all transitions. */
+		for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+			if ( trans->plain() )
+				removeDups( trans->tdap()->actionTable );
+			else {
+				for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ )
+					removeDups( cond->actionTable );
+			}
+		}
+		removeDups( state->toStateActionTable );
+		removeDups( state->fromStateActionTable );
+		removeDups( state->eofActionTable );
+	}
+}
+

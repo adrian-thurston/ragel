@@ -85,15 +85,15 @@ struct NextRedTrans
 
 struct GenBase
 {
-	GenBase( std::string fsmName, int machineId, ParseData *pd, FsmAp *fsm );
+	GenBase( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm );
 
 	void appendTrans( TransListVect &outList, Key lowKey, Key highKey, TransAp *trans );
 	void reduceActionTables();
 
 	std::string fsmName;
 	int machineId;
-	PdBase *pd;
 	IdBase *id;
+	PdBase *pd;
 	FsmAp *fsm;
 	KeyOps *keyOps;
 
@@ -129,12 +129,13 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
 struct CodeGenArgs
 {
 	CodeGenArgs( std::string sourceFileName, std::string fsmName,
-			int machineId, ParseData *pd, FsmAp *fsm, CodeStyle codeStyle,
+			int machineId, IdBase *id, PdBase *pd, FsmAp *fsm, CodeStyle codeStyle,
 			std::ostream &out )
 	:
 		sourceFileName(sourceFileName),
 		fsmName(fsmName),
 		machineId(machineId),
+		id(id),
 		pd(pd),
 		fsm(fsm),
 		codeStyle(codeStyle),
@@ -144,7 +145,8 @@ struct CodeGenArgs
 	std::string sourceFileName;
 	std::string fsmName;
 	int machineId;
-	ParseData *pd;
+	IdBase *id;
+	PdBase *pd;
 	FsmAp *fsm;
 	CodeStyle codeStyle;
 	std::ostream &out;

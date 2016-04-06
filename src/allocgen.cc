@@ -49,7 +49,7 @@
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
 	CodeGenData *codeGen = 0;
-	InputData *id = args.pd->id;
+	IdBase *id = args.id;
 
 	if ( hostLang->lang == HostLang::Asm ) {
 		codeGen = new AsmCodeGen( args );

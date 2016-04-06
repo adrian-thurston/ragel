@@ -382,7 +382,7 @@ void InputData::writeDot( ostream &out )
 	ParseData *pd = dotGenPd;
 
 	CodeGenArgs args( inputFileName, pd->sectionName, pd->machineId,
-			pd, pd->sectionGraph, codeStyle, out );
+			this, pd, pd->sectionGraph, codeStyle, out );
 
 	GraphvizDotGen dotGen( args );
 	dotGen.write();

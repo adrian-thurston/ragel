@@ -328,8 +328,8 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 :
 	CodeGenData( args ),
 	tableData( 0 ),
-	backend( args.pd->id->backend ),
-	stringTables( args.pd->id->stringTables )
+	backend( args.id->backend ),
+	stringTables( args.id->stringTables )
 {
 }
 

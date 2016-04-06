@@ -50,7 +50,7 @@ class GraphvizDotGen : public GenBase
 public:
 	GraphvizDotGen( const CodeGenArgs &args ) 
 	:
-		GenBase( args.fsmName, args.machineId, args.pd, args.fsm ),
+		GenBase( args.fsmName, args.machineId, args.id, args.pd, args.fsm ),
 		out(args.out)
 	{ }
 

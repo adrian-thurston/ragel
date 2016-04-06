@@ -177,48 +177,6 @@ extern const int ORD_RESTORE;
 extern const int ORD_COND;
 extern const int ORD_TEST;
 
-struct PdBase
-{
-	PdBase( std::string sectionName );
-
-	std::string sectionName;
-
-	/* List of actions. Will be pasted into a switch statement. */
-	ActionList actionList;
-
-	ExportList exportList;
-
-	bool generatingSectionSubset;
-	bool lmRequiresErrorState;
-
-	/* Make name ids to name inst pointers. */
-	NameInst **nameIndex;
-
-	/* Element type and get key expression. */
-	InlineList *getKeyExpr;
-	InlineList *accessExpr;
-
-	/* Stack management */
-	InlineBlock *prePushExpr;
-	InlineBlock *postPopExpr;
-
-	/* Nfa stack managment. */
-	InlineBlock *nfaPrePushExpr;
-	InlineBlock *nfaPostPopExpr;
-
-	/* Overriding variables. */
-	InlineList *pExpr;
-	InlineList *peExpr;
-	InlineList *eofExpr;
-	InlineList *csExpr;
-	InlineList *topExpr;
-	InlineList *stackExpr;
-	InlineList *actExpr;
-	InlineList *tokstartExpr;
-	InlineList *tokendExpr;
-	InlineList *dataExpr;
-};
-
 /* Class to collect information about the machine during the 
  * parse of input. */
 struct ParseData : public PdBase
@@ -267,10 +225,6 @@ struct ParseData : public PdBase
 
 	/* Override one of the variables ragel uses. */
 	bool setVariable( const char *var, InlineList *inlineList );
-
-	/* Unique actions. */
-	void removeDups( ActionTable &actionTable );
-	void removeActionDups( FsmAp *graph );
 
 	/* Dumping the name instantiation tree. */
 	void printNameInst( std::ostream &out, NameInst *nameInst, int level );

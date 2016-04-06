@@ -162,38 +162,6 @@ struct IncludeRec
 
 typedef AvlTree<IncludeRec, FnMachine, CmpFnMachine> IncludeDict;
 
-struct IdBase
-{
-	IdBase()
-	:
-		printStatistics(false),
-		errorCount(0),
-		inLibRagel(false),
-		displayPrintables(false)
-	{}
-
-	bool printStatistics;
-
-	/* Error reporting. */
-	std::ostream &error();
-	std::ostream &error( const InputLoc &loc ); 
-	std::ostream &warning( const InputLoc &loc ); 
-
-	/* Stats reporting. */
-	std::ostream &stats();
-	
-	/* Requested info. */
-	std::ostream &info();
-
-	std::stringstream libcerr;
-	std::stringstream libcout;
-
-	int errorCount;
-	bool inLibRagel;
-	void abortCompile( int code );
-	bool displayPrintables;
-};
-
 struct InputData
 :
 	public IdBase
@@ -220,7 +188,6 @@ struct InputData
 		generateDot(false),
 		wantDupsRemoved(true),
 		noLineDirectives(false),
-		stringTables(false),
 		maxTransitions(LONG_MAX),
 		numSplitPartitions(0),
 		rubyImpl(MRI),
@@ -307,7 +274,6 @@ struct InputData
 
 	bool wantDupsRemoved;
 	bool noLineDirectives;
-	bool stringTables;
 
 	long maxTransitions;
 	int numSplitPartitions;
@@ -322,10 +288,8 @@ struct InputData
 	RagelFrontend frontend;
 
 	bool backendSpecified;
-	RagelBackend backend;
 
 	bool featureSpecified;
-	BackendFeature backendFeature;
 
 	bool saveTemps;
 	bool nfaTermCheck;

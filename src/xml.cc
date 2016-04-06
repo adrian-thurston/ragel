@@ -31,9 +31,9 @@
 
 using std::endl;
 
-XMLCodeGen::XMLCodeGen( std::string fsmName, int machineId, ParseData *pd, FsmAp *fsm, std::ostream &out )
+XMLCodeGen::XMLCodeGen( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm, std::ostream &out )
 :
-	GenBase(fsmName, machineId, pd, fsm),
+	GenBase(fsmName, machineId, id, pd, fsm),
 	out(out)
 {
 }
