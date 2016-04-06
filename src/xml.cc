@@ -585,7 +585,7 @@ void XMLCodeGen::writeMachine()
 
 void XMLCodeGen::writeConditions()
 {
-	CondData *condData = pd->fsmCtx->condData;
+	CondData *condData = fsm->ctx->condData;
 	if ( condData->condSpaceMap.length() > 0 ) {
 		long nextCondSpaceId = 0;
 		for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ )

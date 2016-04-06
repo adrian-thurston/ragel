@@ -53,7 +53,7 @@ void IpGoto::genAnalysis()
 	redFsm->moveSelectTransToSingle();
 
 	/* If any errors have occured in the input file then don't write anything. */
-	if ( pd->id->errorCount > 0 )
+	if ( id->errorCount > 0 )
 		return;
 	
 	redFsm->setInTrans();

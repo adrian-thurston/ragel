@@ -84,7 +84,7 @@ void FlatExpVar::genAnalysis()
 	redFsm->makeFlatClass();
 
 	/* If any errors have occured in the input file then don't write anything. */
-	if ( pd->id->errorCount > 0 )
+	if ( id->errorCount > 0 )
 		return;
 
 	/* Anlayze Machine will find the final action reference counts, among other

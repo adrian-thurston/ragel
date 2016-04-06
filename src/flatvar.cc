@@ -16,8 +16,8 @@ void FlatVar::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 
 void FlatVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	pd->id->error() << "cannot use fcall in -B mode" << std::endl;
-	pd->id->abortCompile( 1 );
+	id->error() << "cannot use fcall in -B mode" << std::endl;
+	id->abortCompile( 1 );
 }
 
 void FlatVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -37,8 +37,8 @@ void FlatVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 
 void FlatVar::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	pd->id->error() << "cannot use fcall in -B mode" << std::endl;
-	pd->id->abortCompile( 1 );
+	id->error() << "cannot use fcall in -B mode" << std::endl;
+	id->abortCompile( 1 );
 }
 
 void FlatVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
@@ -60,8 +60,8 @@ void FlatVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bo
 
 void FlatVar::RET( ostream &ret, bool inFinish )
 {
-	pd->id->error() << "cannot use fret in -B mode" << std::endl;
-	pd->id->abortCompile( 1 );
+	id->error() << "cannot use fret in -B mode" << std::endl;
+	id->abortCompile( 1 );
 }
 
 void FlatVar::NRET( ostream &ret, bool inFinish )
@@ -80,8 +80,8 @@ void FlatVar::NRET( ostream &ret, bool inFinish )
 
 void FlatVar::BREAK( ostream &ret, int targState, bool csForced )
 {
-	pd->id->error() << "cannot use fbreak in -B mode" << std::endl;
-	pd->id->abortCompile( 1 );
+	id->error() << "cannot use fbreak in -B mode" << std::endl;
+	id->abortCompile( 1 );
 }
 
 void FlatVar::NBREAK( ostream &ret, int targState, bool csForced )

@@ -32,6 +32,7 @@
 struct TransAp;
 struct FsmAp;
 struct ParseData;
+struct InputData;
 struct GenInlineList;
 struct CodeGenData;
 struct InlineItem;
@@ -90,6 +91,7 @@ struct GenBase
 	std::string fsmName;
 	int machineId;
 	ParseData *pd;
+	InputData *id;
 	FsmAp *fsm;
 	KeyOps *keyOps;
 

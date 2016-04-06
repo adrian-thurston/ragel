@@ -273,8 +273,8 @@ void TableArray::finishGenerate()
 			out << "0 };\n\n";
 	}
 
-	if ( codeGen.pd->id->printStatistics ) {
-		codeGen.pd->id->stats() << name << "\t" << values << "\t" <<
+	if ( codeGen.id->printStatistics ) {
+		codeGen.id->stats() << name << "\t" << values << "\t" <<
 			size() << "\t" << endl;
 	}
 
@@ -335,8 +335,8 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 
 void CodeGen::statsSummary()
 {
-	if ( pd->id->printStatistics )
-		pd->id->stats() << "table-data\t\t" << tableData << endl << endl;
+	if ( id->printStatistics )
+		id->stats() << "table-data\t\t" << tableData << endl << endl;
 }
 
 unsigned int CodeGen::arrayTypeSize( unsigned long maxVal )

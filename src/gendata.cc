@@ -53,6 +53,7 @@ GenBase::GenBase( std::string fsmName, int machineId, ParseData *pd, FsmAp *fsm 
 	fsmName(fsmName),
 	machineId(machineId),
 	pd(pd),
+	id(pd->id),
 	fsm(fsm),
 	keyOps(pd->fsmCtx->keyOps),
 	nextActionTableId(0)
@@ -557,20 +558,20 @@ void CodeGenData::makeActionTableList()
 
 void CodeGenData::makeConditions()
 {
-	if ( pd->fsmCtx->condData->condSpaceMap.length() > 0 ) {
+	if ( fsm->ctx->condData->condSpaceMap.length() > 0 ) {
 		/* Allocate condition space ids. */
 		long nextCondSpaceId = 0;
-		for ( CondSpaceMap::Iter cs = pd->fsmCtx->condData->condSpaceMap; cs.lte(); cs++ )
+		for ( CondSpaceMap::Iter cs = fsm->ctx->condData->condSpaceMap; cs.lte(); cs++ )
 			cs->condSpaceId = nextCondSpaceId++;
 
 		/* Allocate the array of conditions and put them on the list. */
-		long length = pd->fsmCtx->condData->condSpaceMap.length();
+		long length = fsm->ctx->condData->condSpaceMap.length();
 		allCondSpaces = new GenCondSpace[length];
 		for ( long c = 0; c < length; c++ )
 			condSpaceList.append( &allCondSpaces[c] );
 
 		long curCondSpace = 0;
-		for ( CondSpaceMap::Iter cs = pd->fsmCtx->condData->condSpaceMap; cs.lte(); cs++ ) {
+		for ( CondSpaceMap::Iter cs = fsm->ctx->condData->condSpaceMap; cs.lte(); cs++ ) {
 			/* Transfer the id. */
 			allCondSpaces[curCondSpace].condSpaceId = cs->condSpaceId;
 
@@ -581,9 +582,9 @@ void CodeGenData::makeConditions()
 	makeActionList();
 	makeActionTableList();
 
-	if ( pd->fsmCtx->condData->condSpaceMap.length() > 0 ) {
+	if ( fsm->ctx->condData->condSpaceMap.length() > 0 ) {
 		long curCondSpace = 0;
-		for ( CondSpaceMap::Iter cs = pd->fsmCtx->condData->condSpaceMap; cs.lte(); cs++ ) {
+		for ( CondSpaceMap::Iter cs = fsm->ctx->condData->condSpaceMap; cs.lte(); cs++ ) {
 			for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
 				condSpaceItem( curCondSpace, (*csi)->actionId );
 			curCondSpace += 1;
@@ -848,7 +849,7 @@ void CodeGenData::makeMachine()
 void CodeGenData::make( const HostLang *hostLang )
 {
 	/* Alphabet type. */
-	setAlphType( hostLang, pd->fsmCtx->keyOps->alphType->internalName );
+	setAlphType( hostLang, fsm->ctx->keyOps->alphType->internalName );
 	
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {
@@ -963,7 +964,7 @@ void CodeGenData::make( const HostLang *hostLang )
 
 void CodeGenData::createMachine()
 {
-	redFsm = new RedFsmAp( pd->fsmCtx, machineId );
+	redFsm = new RedFsmAp( fsm->ctx, machineId );
 }
 
 void CodeGenData::initActionList( unsigned long length )
@@ -1044,7 +1045,7 @@ void CodeGenData::newTrans( RedStateAp *state, Key lowKey, Key highKey, RedTrans
 			keyOps->decrement( fillHighKey );
 
 			/* Create the filler with the state's error transition. */
-			RedTransEl newTel( pd->fsmCtx->keyOps->minKey, fillHighKey,
+			RedTransEl newTel( fsm->ctx->keyOps->minKey, fillHighKey,
 					redFsm->getErrorTrans() );
 			destRange.append( newTel );
 		}
@@ -1083,14 +1084,14 @@ void CodeGenData::finishTransList( int snum )
 	if ( destRange.length() == 0 ) {
 		/* Fill with the whole alphabet. */
 		/* Add the range on the lower and upper bound. */
-		RedTransEl newTel( pd->fsmCtx->keyOps->minKey,
-				pd->fsmCtx->keyOps->maxKey, redFsm->getErrorTrans() );
+		RedTransEl newTel( fsm->ctx->keyOps->minKey,
+				fsm->ctx->keyOps->maxKey, redFsm->getErrorTrans() );
 		destRange.append( newTel );
 	}
 	else {
 		/* Get the last and check for a gap on the end. */
 		RedTransEl *last = &destRange[destRange.length()-1];
-		if ( keyOps->lt( last->highKey, pd->fsmCtx->keyOps->maxKey ) ) {
+		if ( keyOps->lt( last->highKey, fsm->ctx->keyOps->maxKey ) ) {
 			/* Make the high key. */
 			Key fillLowKey = last->highKey;
 			keyOps->increment( fillLowKey );
@@ -1194,7 +1195,7 @@ void CodeGenData::addStateCond( int snum, Key lowKey, Key highKey, long condNum 
 
 Key CodeGenData::findMaxKey()
 {
-	Key maxKey = pd->fsmCtx->keyOps->maxKey;
+	Key maxKey = fsm->ctx->keyOps->maxKey;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		assert( st->outSingle.length() == 0 );
 		assert( st->defTrans == 0 );
@@ -1428,7 +1429,7 @@ void CodeGenData::setValueLimits()
 
 		/* Max key span. */
 		if ( st->transList != 0 ) {
-			unsigned long long span = pd->fsmCtx->keyOps->span( st->lowKey, st->highKey );
+			unsigned long long span = fsm->ctx->keyOps->span( st->lowKey, st->highKey );
 			if ( span > redFsm->maxSpan )
 				redFsm->maxSpan = span;
 		}
@@ -1436,7 +1437,7 @@ void CodeGenData::setValueLimits()
 		/* Max flat index offset. */
 		if ( ! st.last() ) {
 			if ( st->transList != 0 )
-				redFsm->maxFlatIndexOffset += pd->fsmCtx->keyOps->span( st->lowKey, st->highKey );
+				redFsm->maxFlatIndexOffset += fsm->ctx->keyOps->span( st->lowKey, st->highKey );
 			redFsm->maxFlatIndexOffset += 1;
 		}
 	}
@@ -1566,7 +1567,7 @@ void CodeGenData::analyzeMachine()
 
 void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 {
-	pd->id->warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
+	id->warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
 }
 
 void CodeGenData::writeStatement( InputLoc &loc, int nargs,
@@ -1587,9 +1588,9 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 				write_option_error( loc, args[i] );
 		}
 
-		if ( pd->id->printStatistics ) {
-			pd->id->stats() << "fsm-name\t" << fsmName << std::endl;
-			pd->id->stats() << "fsm-states\t" << redFsm->stateList.length() << std::endl;
+		if ( id->printStatistics ) {
+			id->stats() << "fsm-name\t" << fsmName << std::endl;
+			id->stats() << "fsm-states\t" << redFsm->stateList.length() << std::endl;
 		}
 
 		writeData();
@@ -1635,7 +1636,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 	}
 	else {
 		/* EMIT An error here. */
-		pd->id->error(loc) << "unrecognized write command \"" << 
+		id->error(loc) << "unrecognized write command \"" << 
 				args[0] << "\"" << std::endl;
 	}
 }

@@ -34,7 +34,7 @@ using std::endl;
 
 void GraphvizDotGen::key( Key key )
 {
-	if ( pd->id->displayPrintables && key.isPrintable() ) {
+	if ( id->displayPrintables && key.isPrintable() ) {
 		// Output values as characters, ensuring we escape the quote (") character
 		char cVal = (char) key.getVal();
 		switch ( cVal ) {
