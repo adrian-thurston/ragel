@@ -693,10 +693,10 @@ NameInst *ParseData::resolveStateRef( NameRef *nameRef, InputLoc &loc, Action *a
 	 * search. */
 	if ( nameRef->data[0] != "" ) {
 		/* If the action is referenced, resolve all of them. */
-		if ( action != 0 && action->actionRefs.length() > 0 ) {
+		if ( action != 0 && action->embedRoots.length() > 0 ) {
 			/* Look for the name in all referencing scopes. */
 			NameSet resolved;
-			for ( ActionRefs::Iter actRef = action->actionRefs; actRef.lte(); actRef++ )
+			for ( NameInstVect::Iter actRef = action->embedRoots; actRef.lte(); actRef++ )
 				resolveFrom( resolved, *actRef, nameRef, 0 );
 
 			if ( resolved.length() > 0 ) {
@@ -784,7 +784,7 @@ void ParseData::resolveActionNameRefs()
 {
 	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
 		/* Only care about the actions that are referenced. */
-		if ( act->actionRefs.length() > 0 )
+		if ( act->embedRoots.length() > 0 )
 			resolveNameRefs( act->inlineList, act );
 	}
 }
@@ -950,7 +950,7 @@ Action *ParseData::newAction( const char *name, InlineList *inlineList )
 	loc.fileName = "NONE";
 
 	Action *action = new Action( loc, name, inlineList, nextCondId++ );
-	action->actionRefs.append( rootName );
+	action->embedRoots.append( rootName );
 	actionList.append( action );
 	return action;
 }
@@ -1275,7 +1275,7 @@ void ParseData::checkAction( Action *action )
 	/* Check for actions with calls that are embedded within a longest match
 	 * machine. */
 	if ( !action->isLmAction && action->numRefs() > 0 && action->anyCall ) {
-		for ( ActionRefs::Iter ar = action->actionRefs; ar.lte(); ar++ ) {
+		for ( NameInstVect::Iter ar = action->embedRoots; ar.lte(); ar++ ) {
 			NameInst *check = *ar;
 			while ( check != 0 ) {
 				if ( check->isLongestMatch ) {

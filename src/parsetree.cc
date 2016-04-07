@@ -217,7 +217,7 @@ Action *LongestMatch::newAction( ParseData *pd, const InputLoc &loc,
 		const char *name, InlineList *inlineList )
 {
 	Action *action = new Action( loc, name, inlineList, pd->nextCondId++ );
-	action->actionRefs.append( pd->curNameInst );
+	action->embedRoots.append( pd->curNameInst );
 	pd->actionList.append( action );
 	action->isLmAction = true;
 	return action;
@@ -338,7 +338,7 @@ void LongestMatch::resolveNameRefs( ParseData *pd )
 	for ( LmPartList::Iter lmi = *longestMatchList; lmi.lte(); lmi++ ) {
 		/* Record the reference if the item has an action. */
 		if ( lmi->action != 0 )
-			lmi->action->actionRefs.append( pd->localNameScope );
+			lmi->action->embedRoots.append( pd->localNameScope );
 
 		/* Recurse down the join. */
 		lmi->join->resolveNameRefs( pd );
@@ -1836,7 +1836,7 @@ void FactorWithAug::resolveNameRefs( ParseData *pd )
 
 	/* Note action references. */
 	for ( int i = 0; i < actions.length(); i++ ) 
-		actions[i].action->actionRefs.append( pd->localNameScope );
+		actions[i].action->embedRoots.append( pd->localNameScope );
 
 	/* Recurse first. IMPORTANT: we must do the exact same traversal as when
 	 * the tree is constructed. */

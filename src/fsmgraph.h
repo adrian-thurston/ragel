@@ -124,7 +124,7 @@ typedef SBstMapEl< int, Action* > ActionTableEl;
 /* Nodes in the tree that use this action. */
 struct NameInst;
 struct InlineList;
-typedef Vector<NameInst*> ActionRefs;
+typedef Vector<NameInst*> NameInstVect;
 
 struct ActionParam
 {
@@ -210,8 +210,10 @@ public:
 			out << name;
 	}
 
-	/* Places in the input text that reference the action. */
-	ActionRefs actionRefs;
+	/* Nodes in the name tree where the action is embedded. This serves as the
+	 * root for name searches. Since actions can be used multiple times we use
+	 * a vector. Name resolver deals with contracts. */
+	NameInstVect embedRoots;
 
 	/* Number of references in the final machine. */
 	int numRefs() 
