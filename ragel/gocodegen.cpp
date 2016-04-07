@@ -632,7 +632,7 @@ void GoCodeGen::STATE_IDS()
 
 	out << endl;
 
-	if ( entryPointNames.length() > 0 ) {
+	if ( !noEntry && entryPointNames.length() > 0 ) {
 		for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
 			CONST( "int", DATA_PREFIX() + "en_" + *en ) <<
 					" = " << entryPointIds[en.pos()] << endl;

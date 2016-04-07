@@ -452,6 +452,7 @@ CodeGenData::CodeGenData( ostream &out )
 	noPrefix(false),
 	noFinal(false),
 	noError(false),
+	noEntry(false),
 	noCS(false)
 {}
 
@@ -1079,6 +1080,8 @@ bool CodeGenData::writeStatement( InputLoc &loc, int nargs, char **args )
 				noPrefix = true;
 			else if ( strcmp( args[i], "nofinal" ) == 0 )
 				noFinal = true;
+			else if ( strcmp( args[i], "noentry" ) == 0 )
+				noEntry = true;
 			else
 				write_option_error( loc, args[i] );
 		}

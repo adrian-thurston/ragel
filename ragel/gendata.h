@@ -129,6 +129,7 @@ struct CodeGenData
 	bool noPrefix;
 	bool noFinal;
 	bool noError;
+	bool noEntry;
 	bool noCS;
 
 	void createMachine();
