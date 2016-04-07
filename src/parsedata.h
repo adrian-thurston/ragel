@@ -34,6 +34,7 @@
 #include "vector.h"
 #include "common.h"
 #include "parsetree.h"
+#include "action.h"
 
 
 /* Forwards. */

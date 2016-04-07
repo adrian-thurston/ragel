@@ -150,7 +150,7 @@ struct InlineItem;
 struct InlineList;
 
 /* Reference to a named state. */
-typedef Vector<std::string> NameRef;
+struct NameRef : public Vector<std::string> {};
 typedef Vector<NameRef*> NameRefList;
 typedef Vector<NameInst*> NameTargList;
 
@@ -853,89 +853,5 @@ struct ReOrItem
 	ReOrItemType type;
 };
 
-
-/*
- * Inline code tree
- */
-struct InlineList;
-struct InlineItem
-{
-	enum Type 
-	{
-		Text, Goto, Call, Ncall, Next, GotoExpr, CallExpr, NcallExpr, NextExpr, Ret, Nret,
-		PChar, Char, Hold, Curs, Targs, Entry, Exec, Break, Nbreak,
-		LmSwitch, LmSetActId, LmSetTokEnd, LmOnLast, LmOnNext, LmOnLagBehind,
-		LmInitAct, LmInitTokStart, LmSetTokStart, Stmt, Subst,
-		NfaWrapAction, NfaWrapConds
-	};
-
-	InlineItem( const InputLoc &loc, std::string data, Type type ) : 
-		loc(loc), data(data), nameRef(0), children(0), type(type) { }
-
-	InlineItem( const InputLoc &loc, NameRef *nameRef, Type type ) : 
-		loc(loc), nameRef(nameRef), children(0), type(type) { }
-
-	InlineItem( const InputLoc &loc, LongestMatch *longestMatch, 
-		LongestMatchPart *longestMatchPart, Type type ) : loc(loc),
-		nameRef(0), children(0), longestMatch(longestMatch),
-		longestMatchPart(longestMatchPart), type(type) { } 
-
-	InlineItem( const InputLoc &loc, NameInst *nameTarg, Type type ) : 
-		loc(loc), nameRef(0), nameTarg(nameTarg), children(0),
-		type(type) { }
-
-	InlineItem( const InputLoc &loc, Type type ) : 
-		loc(loc), nameRef(0), children(0), type(type) { }
-
-	InlineItem( const InputLoc &loc, Action *wrappedAction, Type type )
-	:
-		loc(loc), nameRef(0), children(0), longestMatch(0),
-		longestMatchPart(0), wrappedAction(wrappedAction), type(type)
-	{} 
-
-	InlineItem( const InputLoc &loc, CondSpace *condSpace,
-			const CondKeySet &condKeySet, Type type )
-	:
-		loc(loc), nameRef(0), children(0), longestMatch(0),
-		longestMatchPart(0), wrappedAction(0), condSpace(condSpace),
-		condKeySet(condKeySet), type(type)
-	{} 
-
-	~InlineItem();
-	
-	InputLoc loc;
-	std::string data;
-	NameRef *nameRef;
-	NameInst *nameTarg;
-	InlineList *children;
-	LongestMatch *longestMatch;
-	LongestMatchPart *longestMatchPart;
-	long substPos;
-	Action *wrappedAction;
-	CondSpace *condSpace;
-	CondKeySet condKeySet;
-	Type type;
-
-	InlineItem *prev, *next;
-};
-
-/* Normally this would be atypedef, but that would entail including DList from
- * ptreetypes, which should be just typedef forwards. */
-struct InlineList : public DList<InlineItem> { };
-
-struct InlineBlock
-{
-	InlineBlock( const InputLoc &loc, InlineList *inlineList )
-		: loc(loc), inlineList(inlineList) {}
-
-	~InlineBlock()
-	{
-		inlineList->empty();
-		delete inlineList;
-	}
-
-	InputLoc loc;
-	InlineList *inlineList;
-};
 
 #endif

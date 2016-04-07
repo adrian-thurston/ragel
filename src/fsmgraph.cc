@@ -24,7 +24,7 @@
 
 #include "fsmgraph.h"
 #include "mergesort.h"
-#include "parsedata.h"
+#include "action.h"
 
 using std::endl;
 	
