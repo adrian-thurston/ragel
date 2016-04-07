@@ -323,7 +323,7 @@ struct LongestMatch
 	void resolveNameRefs( ParseData *pd );
 	void transferScannerLeavingActions( FsmAp *graph );
 	void runLongestMatch( ParseData *pd, FsmAp *graph );
-	Action *newAction( ParseData *pd, const InputLoc &loc, const char *name, 
+	Action *newLmAction( ParseData *pd, const InputLoc &loc, const char *name, 
 			InlineList *inlineList );
 	void makeActions( ParseData *pd );
 	void findName( ParseData *pd );

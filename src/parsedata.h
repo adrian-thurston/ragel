@@ -340,7 +340,8 @@ struct ParseData : public PdBase
 	/* List of all longest match parse tree items. */
 	LmList lmList;
 
-	Action *newAction( const char *name, InlineList *inlineList );
+	Action *newLmCommonAction( const char *name, InlineList *inlineList );
+	Action *newNfaWrapAction( const char *name, InlineList *inlineList, Action *optWrap );
 
 	Action *initTokStart;
 	int initTokStartOrd;

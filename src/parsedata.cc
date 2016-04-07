@@ -942,7 +942,7 @@ void ParseData::printNameInst( std::ostream &out, NameInst *nameInst, int level 
 		printNameInst( out, *name, level+1 );
 }
 
-Action *ParseData::newAction( const char *name, InlineList *inlineList )
+Action *ParseData::newLmCommonAction( const char *name, InlineList *inlineList )
 {
 	InputLoc loc;
 	loc.line = 1;
@@ -964,7 +964,7 @@ void ParseData::initLongestMatchData()
 		il1->head->children = new InlineList;
 		il1->head->children->append( new InlineItem( InputLoc(),
 				InlineItem::LmInitTokStart ) );
-		initTokStart = newAction( "initts", il1 );
+		initTokStart = newLmCommonAction( "initts", il1 );
 		initTokStart->isLmAction = true;
 
 		/* The initActId action gives act a default value. */
@@ -972,7 +972,7 @@ void ParseData::initLongestMatchData()
 		il4->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
 		il4->head->children = new InlineList;
 		il4->head->children->append( new InlineItem( InputLoc(), InlineItem::LmInitAct ) );
-		initActId = newAction( "initact", il4 );
+		initActId = newLmCommonAction( "initact", il4 );
 		initActId->isLmAction = true;
 
 		/* The setTokStart action sets tokstart. */
@@ -980,7 +980,7 @@ void ParseData::initLongestMatchData()
 		il5->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
 		il5->head->children = new InlineList;
 		il5->head->children->append( new InlineItem( InputLoc(), InlineItem::LmSetTokStart ) );
-		setTokStart = newAction( "ts", il5 );
+		setTokStart = newLmCommonAction( "ts", il5 );
 		setTokStart->isLmAction = true;
 
 		/* The setTokEnd action sets tokend. */
@@ -988,7 +988,7 @@ void ParseData::initLongestMatchData()
 		il3->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
 		il3->head->children = new InlineList;
 		il3->head->children->append( new InlineItem( InputLoc(), InlineItem::LmSetTokEnd ) );
-		setTokEnd = newAction( "te", il3 );
+		setTokEnd = newLmCommonAction( "te", il3 );
 		setTokEnd->isLmAction = true;
 
 		/* The action will also need an ordering: ahead of all user action
@@ -1405,6 +1405,24 @@ void ParseData::makeExports()
 	}
 }
 
+/* This create an action that refs the original embed roots, if the optWrap arg
+ * is supplied. */
+Action *ParseData::newNfaWrapAction( const char *name, InlineList *inlineList, Action *optWrap )
+{
+	InputLoc loc;
+	loc.line = 1;
+	loc.col = 1;
+	loc.fileName = "NONE";
+
+	Action *action = new Action( loc, name, inlineList, nextCondId++ );
+
+	if ( optWrap != 0 )
+		action->embedRoots.append( optWrap->embedRoots );
+
+	actionList.append( action );
+	return action;
+}
+
 void ParseData::createNfaActions( FsmAp *fsm )
 {
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
@@ -1423,7 +1441,7 @@ void ParseData::createNfaActions( FsmAp *fsm )
 					il1->append( new InlineItem( InputLoc(),
 							n->popCondSpace, n->popCondKeys,
 							InlineItem::NfaWrapConds ) );
-					Action *wrap = newAction( "cond_wrap", il1 );
+					Action *wrap = newNfaWrapAction( "cond_wrap", il1, 0 );
 					n->popTest.setAction( ORD_COND, wrap );
 				}
 
@@ -1434,7 +1452,7 @@ void ParseData::createNfaActions( FsmAp *fsm )
 					InlineList *il1 = new InlineList;
 					il1->append( new InlineItem( InputLoc(),
 								ati->value, InlineItem::NfaWrapAction ) );
-					Action *wrap = newAction( "action_wrap", il1 );
+					Action *wrap = newNfaWrapAction( "action_wrap", il1, ati->value );
 					n->popTest.setAction( ati->key, wrap );
 				}
 			}

@@ -213,7 +213,7 @@ InputLoc LongestMatchPart::getLoc()
  *  4. start state of all longest match routines.
  */
 
-Action *LongestMatch::newAction( ParseData *pd, const InputLoc &loc, 
+Action *LongestMatch::newLmAction( ParseData *pd, const InputLoc &loc, 
 		const char *name, InlineList *inlineList )
 {
 	Action *action = new Action( loc, name, inlineList, pd->nextCondId++ );
@@ -236,7 +236,7 @@ void LongestMatch::makeActions( ParseData *pd )
 				InlineItem::LmSetActId ) );
 		char *actName = new char[50];
 		sprintf( actName, "store%i", lmi->longestMatchId );
-		lmi->setActId = newAction( pd, lmi->getLoc(), actName, inlineList );
+		lmi->setActId = newLmAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
 	/* Make actions that execute the user action and restart on the last
@@ -251,7 +251,7 @@ void LongestMatch::makeActions( ParseData *pd )
 				InlineItem::LmOnLast ) );
 		char *actName = new char[50];
 		sprintf( actName, "last%i", lmi->longestMatchId );
-		lmi->actOnLast = newAction( pd, lmi->getLoc(), actName, inlineList );
+		lmi->actOnLast = newLmAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
 	/* Make actions that execute the user action and restart on the next
@@ -267,7 +267,7 @@ void LongestMatch::makeActions( ParseData *pd )
 				InlineItem::LmOnNext ) );
 		char *actName = new char[50];
 		sprintf( actName, "next%i", lmi->longestMatchId );
-		lmi->actOnNext = newAction( pd, lmi->getLoc(), actName, inlineList );
+		lmi->actOnNext = newLmAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
 	/* Make actions that execute the user action and restart at tokend. These
@@ -282,7 +282,7 @@ void LongestMatch::makeActions( ParseData *pd )
 				InlineItem::LmOnLagBehind ) );
 		char *actName = new char[50];
 		sprintf( actName, "lag%i", lmi->longestMatchId );
-		lmi->actLagBehind = newAction( pd, lmi->getLoc(), actName, inlineList );
+		lmi->actLagBehind = newLmAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
 	InputLoc loc;
@@ -293,7 +293,7 @@ void LongestMatch::makeActions( ParseData *pd )
 	/* Create the error action. */
 	InlineList *il6 = new InlineList;
 	il6->append( new InlineItem( loc, this, 0, InlineItem::LmSwitch ) );
-	lmActSelect = newAction( pd, loc, "switch", il6 );
+	lmActSelect = newLmAction( pd, loc, "switch", il6 );
 }
 
 void LongestMatch::findName( ParseData *pd )
