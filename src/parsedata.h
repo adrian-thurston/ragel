@@ -203,7 +203,6 @@ struct ParseData : public PdBase
 	void makeNameTree( GraphDictEl *gdNode );
 	void makeExportsNameTree();
 	void fillNameIndex( NameInst *from );
-	void createNfaActions( FsmAp *fsm );
 
 	/* Increments the usage count on entry names. Names that are no longer
 	 * needed will have their entry points unset. */
@@ -235,12 +234,6 @@ struct ParseData : public PdBase
 	FsmRes makeSpecific( GraphDictEl *gdNode );
 	FsmRes makeAll();
 
-	/* Checking the contents of actions. */
-	void checkAction( Action *action );
-	void checkInlineList( Action *act, InlineList *inlineList );
-
-	void analyzeAction( Action *action, InlineList *inlineList );
-	void analyzeGraph( FsmAp *graph );
 	void makeExports();
 
 	FsmRes prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *hostLang );
@@ -274,7 +267,7 @@ struct ParseData : public PdBase
 	LocalErrDict localErrDict;
 
 	/* Various next identifiers. */
-	int nextLocalErrKey, nextNameId, nextCondId;
+	int nextLocalErrKey, nextNameId;
 	
 	/* The default priority number key for a machine. This is active during
 	 * the parse of the rhs of a machine assignment. */
@@ -341,7 +334,6 @@ struct ParseData : public PdBase
 	LmList lmList;
 
 	Action *newLmCommonAction( const char *name, InlineList *inlineList );
-	Action *newNfaWrapAction( const char *name, InlineList *inlineList, Action *optWrap );
 
 	Action *initTokStart;
 	int initTokStartOrd;
@@ -354,8 +346,6 @@ struct ParseData : public PdBase
 
 	Action *setTokEnd;
 	int setTokEndOrd;
-
-	FsmCtx *fsmCtx;
 
 	LengthDefList lengthDefList;
 
@@ -394,6 +384,5 @@ char *prepareLitString( InputData *id, const InputLoc &loc, const char *data, lo
 		long &resLen, bool &caseInsensitive );
 const char *checkLitOptions( InputData *id, const InputLoc &loc,
 		const char *data, int length, bool &caseInsensitive );
-
 
 #endif

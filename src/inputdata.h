@@ -197,7 +197,6 @@ struct InputData
 		backendSpecified(false),
 		featureSpecified(false),
 		saveTemps(false),
-		nfaTermCheck(0),
 		nfaCondsDepth(-1),
 		transSpanDepth(6),
 		nfaIntermedStateLimit(10000),
@@ -292,7 +291,6 @@ struct InputData
 	bool featureSpecified;
 
 	bool saveTemps;
-	bool nfaTermCheck;
 	long nfaCondsDepth;
 	long transSpanDepth;
 	long nfaIntermedStateLimit;

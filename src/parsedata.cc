@@ -397,8 +397,9 @@ NameInst::~NameInst()
  * ParseData
  */
 
-PdBase::PdBase( std::string sectionName )
+PdBase::PdBase( IdBase *id, std::string sectionName, const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 :
+	id(id),
 	sectionName(sectionName),
 	generatingSectionSubset(false),
 	lmRequiresErrorState(false),
@@ -420,7 +421,10 @@ PdBase::PdBase( std::string sectionName )
 	tokstartExpr(0),
 	tokendExpr(0),
 	dataExpr(0)
-{}	
+{
+	fsmCtx = new FsmCtx( hostLang, minimizeLevel,
+			minimizeOpt, id->printStatistics, id->nfaTermCheck );
+}	
 
 /* Initialize the structure that will collect info during the parse of a
  * machine. */
@@ -428,13 +432,12 @@ ParseData::ParseData( InputData *id, string sectionName,
 		int machineId, const InputLoc &sectionLoc, const HostLang *hostLang,
 		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 :	
-	PdBase(sectionName),
+	PdBase(id, sectionName, hostLang, minimizeLevel, minimizeOpt ),
 
 	sectionGraph(0),
 	/* 0 is reserved for global error actions. */
 	nextLocalErrKey(1),
 	nextNameId(0),
-	nextCondId(0),
 	alphTypeSet(false),
 	lowerNum(0),
 	upperNum(0),
@@ -453,8 +456,6 @@ ParseData::ParseData( InputData *id, string sectionName,
 	 * the builtins. */
 	initGraphDict();
 
-	fsmCtx = new FsmCtx( hostLang, minimizeLevel,
-			minimizeOpt, id->printStatistics, id->nfaTermCheck );
 }
 
 /* Clean up the data collected during a parse. */
@@ -949,7 +950,7 @@ Action *ParseData::newLmCommonAction( const char *name, InlineList *inlineList )
 	loc.col = 1;
 	loc.fileName = "NONE";
 
-	Action *action = new Action( loc, name, inlineList, nextCondId++ );
+	Action *action = new Action( loc, name, inlineList, fsmCtx->nextCondId++ );
 	action->embedRoots.append( rootName );
 	actionList.append( action );
 	return action;
@@ -1215,7 +1216,7 @@ FsmRes ParseData::makeAll()
 	return FsmRes( FsmRes::Fsm(), mainGraph );
 }
 
-void ParseData::analyzeAction( Action *action, InlineList *inlineList )
+void PdBase::analyzeAction( Action *action, InlineList *inlineList )
 {
 	/* FIXME: Actions used as conditions should be very constrained. */
 	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
@@ -1252,7 +1253,7 @@ void ParseData::analyzeAction( Action *action, InlineList *inlineList )
 /* Check actions for bad uses of fsm directives. We don't go inside longest
  * match items in actions created by ragel, since we just want the user
  * actions. */
-void ParseData::checkInlineList( Action *act, InlineList *inlineList )
+void PdBase::checkInlineList( Action *act, InlineList *inlineList )
 {
 	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		/* EOF checks. */
@@ -1270,7 +1271,7 @@ void ParseData::checkInlineList( Action *act, InlineList *inlineList )
 	}
 }
 
-void ParseData::checkAction( Action *action )
+void PdBase::checkAction( Action *action )
 {
 	/* Check for actions with calls that are embedded within a longest match
 	 * machine. */
@@ -1292,7 +1293,7 @@ void ParseData::checkAction( Action *action )
 }
 
 
-void ParseData::analyzeGraph( FsmAp *graph )
+void PdBase::analyzeGraph( FsmAp *graph )
 {
 	for ( ActionList::Iter act = actionList; act.lte(); act++ )
 		analyzeAction( act, act->inlineList );
@@ -1407,14 +1408,14 @@ void ParseData::makeExports()
 
 /* This create an action that refs the original embed roots, if the optWrap arg
  * is supplied. */
-Action *ParseData::newNfaWrapAction( const char *name, InlineList *inlineList, Action *optWrap )
+Action *PdBase::newNfaWrapAction( const char *name, InlineList *inlineList, Action *optWrap )
 {
 	InputLoc loc;
 	loc.line = 1;
 	loc.col = 1;
 	loc.fileName = "NONE";
 
-	Action *action = new Action( loc, name, inlineList, nextCondId++ );
+	Action *action = new Action( loc, name, inlineList, fsmCtx->nextCondId++ );
 
 	if ( optWrap != 0 )
 		action->embedRoots.append( optWrap->embedRoots );
@@ -1423,7 +1424,7 @@ Action *ParseData::newNfaWrapAction( const char *name, InlineList *inlineList, A
 	return action;
 }
 
-void ParseData::createNfaActions( FsmAp *fsm )
+void PdBase::createNfaActions( FsmAp *fsm )
 {
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaOut != 0 ) {

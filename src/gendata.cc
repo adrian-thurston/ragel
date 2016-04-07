@@ -1503,7 +1503,8 @@ void CodeGenData::analyzeMachine()
 	/* Analyze reduced action lists. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		for ( GenActionTable::Iter act = redAct->key; act.lte(); act++ )
-			analyzeActionList( redAct, act->value->inlineList );
+			if ( act->value->inlineList != 0 )
+				analyzeActionList( redAct, act->value->inlineList );
 	}
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {

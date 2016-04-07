@@ -216,7 +216,7 @@ InputLoc LongestMatchPart::getLoc()
 Action *LongestMatch::newLmAction( ParseData *pd, const InputLoc &loc, 
 		const char *name, InlineList *inlineList )
 {
-	Action *action = new Action( loc, name, inlineList, pd->nextCondId++ );
+	Action *action = new Action( loc, name, inlineList, pd->fsmCtx->nextCondId++ );
 	action->embedRoots.append( pd->curNameInst );
 	pd->actionList.append( action );
 	action->isLmAction = true;

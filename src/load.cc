@@ -1054,7 +1054,7 @@ struct LoadRagel
 
 		/* Add the action to the list of actions. */
 		Action *newAction = new Action( loc, name, 
-				inlineList, pd->nextCondId++ );
+				inlineList, pd->fsmCtx->nextCondId++ );
 
 		/* Append to the action list. */
 		pd->actionList.append( newAction );
@@ -1560,7 +1560,7 @@ struct LoadRagel
 					inlineList = loadInlineBlock( ActionRef.action_block().CInlineBlock() );
 
 				/* Create the action, add it to the list and pass up. */
-				Action *action = new Action( loc, std::string(), inlineList, pd->nextCondId++ );
+				Action *action = new Action( loc, std::string(), inlineList, pd->fsmCtx->nextCondId++ );
 				pd->actionList.append( action );
 				return action;
 			}

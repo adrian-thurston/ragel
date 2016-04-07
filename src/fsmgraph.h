@@ -1026,7 +1026,8 @@ struct FsmCtx
 		curActionOrd(0),
 		curPriorOrd(0),
 
-		nextPriorKey(0)
+		nextPriorKey(0),
+		nextCondId(0)
 	{
 		keyOps = new KeyOps(hostLang);
 		condData = new CondData;
@@ -1057,6 +1058,7 @@ struct FsmCtx
 	int curPriorOrd;
 
 	int nextPriorKey;
+	int nextCondId;
 
 	PriorDesc *allocPriorDesc()
 	{
@@ -2399,10 +2401,13 @@ template< class Trans > int FsmAp::compareCondDataPtr( Trans *trans1, Trans *tra
 	return 0;
 }
 
+struct IdBase;
+
 struct PdBase
 {
-	PdBase( std::string sectionName );
+	PdBase( IdBase *id, std::string sectionName, const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOp );
 
+	IdBase *id;
 	std::string sectionName;
 
 	/* List of actions. Will be pasted into a switch statement. */
@@ -2439,6 +2444,18 @@ struct PdBase
 	InlineList *tokstartExpr;
 	InlineList *tokendExpr;
 	InlineList *dataExpr;
+
+	Action *newNfaWrapAction( const char *name, InlineList *inlineList, Action *optWrap );
+	void createNfaActions( FsmAp *fsm );
+
+	/* Checking the contents of actions. */
+	void checkAction( Action *action );
+	void checkInlineList( Action *act, InlineList *inlineList );
+
+	void analyzeAction( Action *action, InlineList *inlineList );
+	void analyzeGraph( FsmAp *graph );
+
+	FsmCtx *fsmCtx;
 };
 
 
@@ -2452,7 +2469,8 @@ struct IdBase
 		displayPrintables(false),
 		backend(Direct),
 		stringTables(false),
-		backendFeature(GotoFeature)
+		backendFeature(GotoFeature),
+		nfaTermCheck(0)
 	{}
 
 	bool printStatistics;
@@ -2479,6 +2497,7 @@ struct IdBase
 	RagelBackend backend;
 	bool stringTables;
 	BackendFeature backendFeature;
+	bool nfaTermCheck;
 };
 
 

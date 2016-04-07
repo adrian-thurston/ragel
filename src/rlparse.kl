@@ -355,7 +355,7 @@ action_spec:
 		else {
 			/* Add the action to the list of actions. */
 			Action *newAction = new Action( $4->loc, $2->data, 
-					$5->inlineList, pd->nextCondId++ );
+					$5->inlineList, pd->fsmCtx->nextCondId++ );
 
 			/* Insert to list and dict. */
 			pd->actionList.append( newAction );
@@ -1042,7 +1042,7 @@ named_action_ref:
 		if ( el == 0 ) {
 			/* Allocate an action representing this specialization. */
 			Action *specAction = Action::cons( $1->loc, $$->action,
-					$3->argList, pd->nextCondId++ );
+					$3->argList, pd->fsmCtx->nextCondId++ );
 			pd->actionList.append( specAction );
 
 			el = $$->action->argListMap->insert( $3->argList, specAction );
@@ -1061,7 +1061,7 @@ action_embed_block:
 	'{' inline_block '}' final {
 		/* Create the action, add it to the list and pass up. */
 		Action *newAction = new Action( $1->loc, std::string(),
-				$2->inlineList, pd->nextCondId++ );
+				$2->inlineList, pd->fsmCtx->nextCondId++ );
 		pd->actionList.append( newAction );
 		$$->action = newAction;
 	};
