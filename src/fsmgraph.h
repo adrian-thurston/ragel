@@ -2456,6 +2456,7 @@ struct PdBase
 	void analyzeGraph( FsmAp *graph );
 
 	void finalizeInstance( FsmAp *graph );
+	void prepareReduction( FsmAp *sectionGraph );
 
 	FsmCtx *fsmCtx;
 };
