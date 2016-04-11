@@ -1481,10 +1481,6 @@ FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *h
 		sectionGraph = res.fsm;
 	}
 	
-	
-	/* Compute exports from the export definitions. */
-	makeExports();
-
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( id->errorCount > 0 )
 		return FsmRes( FsmRes::Aborted() );

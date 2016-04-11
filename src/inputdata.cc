@@ -302,8 +302,12 @@ void InputData::prepareAllMachines()
 {
 	for ( ParseDataDict::Iter pdel = parseDataDict; pdel.lte(); pdel++ ) {
 		ParseData *pd = pdel->value;
-		if ( pd->instanceList.length() > 0 )
+		if ( pd->instanceList.length() > 0 ) {
 			pd->prepareMachineGen( 0, hostLang );
+
+			pd->makeExports();
+		}
+
 	}
 }
 
@@ -549,6 +553,9 @@ bool InputData::checkLastRef( InputItem *ii )
 #endif
 
 			FsmRes res = pd->prepareMachineGen( 0, hostLang );
+
+			/* Compute exports from the export definitions. */
+			pd->makeExports();
 
 			if ( !res.success() )
 				return false;
