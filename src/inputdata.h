@@ -186,7 +186,6 @@ struct InputData
 		minimizeOpt(MinimizeMostOps),
 		generateXML(false),
 		generateDot(false),
-		wantDupsRemoved(true),
 		noLineDirectives(false),
 		maxTransitions(LONG_MAX),
 		numSplitPartitions(0),
@@ -271,7 +270,6 @@ struct InputData
 	bool generateXML;
 	bool generateDot;
 
-	bool wantDupsRemoved;
 	bool noLineDirectives;
 
 	long maxTransitions;

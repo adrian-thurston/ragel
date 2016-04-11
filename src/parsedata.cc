@@ -1062,65 +1062,70 @@ FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 	if ( !graph.success() )
 		return graph;
 
+	finalizeInstance( graph.fsm );
+
+	return graph;
+}
+
+void PdBase::finalizeInstance( FsmAp *graph )
+{
 	/* Resolve any labels that point to multiple states. Any labels that are
 	 * still around are referenced only by gotos and calls and they need to be
 	 * made into deterministic entry points. */
-	graph.fsm->deterministicEntry();
+	graph->deterministicEntry();
 
 	/*
 	 * All state construction is now complete.
 	 */
 
 	/* Transfer actions from the out action tables to eof action tables. */
-	for ( StateSet::Iter state = graph.fsm->finStateSet; state.lte(); state++ )
-		graph.fsm->transferOutActions( *state );
+	for ( StateSet::Iter state = graph->finStateSet; state.lte(); state++ )
+		graph->transferOutActions( *state );
 
 	/* Transfer global error actions. */
-	for ( StateList::Iter state = graph.fsm->stateList; state.lte(); state++ )
-		graph.fsm->transferErrorActions( state, 0 );
+	for ( StateList::Iter state = graph->stateList; state.lte(); state++ )
+		graph->transferErrorActions( state, 0 );
 	
 	if ( id->wantDupsRemoved )
-		graph.fsm->removeActionDups();
+		graph->removeActionDups();
 
 	/* Remove unreachable states. There should be no dead end states. The
 	 * subtract and intersection operators are the only places where they may
 	 * be created and those operators clean them up. */
-	graph.fsm->removeUnreachableStates();
+	graph->removeUnreachableStates();
 
 	/* No more fsm operations are to be done. Action ordering numbers are
 	 * no longer of use and will just hinder minimization. Clear them. */
-	graph.fsm->nullActionKeys();
+	graph->nullActionKeys();
 
 	/* Transition priorities are no longer of use. We can clear them
 	 * because they will just hinder minimization as well. Clear them. */
-	graph.fsm->clearAllPriorities();
+	graph->clearAllPriorities();
 
-	if ( graph.fsm->ctx->minimizeOpt != MinimizeNone ) {
+	if ( graph->ctx->minimizeOpt != MinimizeNone ) {
 		/* Minimize here even if we minimized at every op. Now that function
 		 * keys have been cleared we may get a more minimal fsm. */
-		switch ( graph.fsm->ctx->minimizeLevel ) {
+		switch ( graph->ctx->minimizeLevel ) {
 			#ifdef TO_UPGRADE_CONDS
 			case MinimizeApprox:
-				graph.fsm->minimizeApproximate();
+				graph->minimizeApproximate();
 				break;
 			#endif
 			#ifdef TO_UPGRADE_CONDS
 			case MinimizeStable:
-				graph.fsm->minimizeStable();
+				graph->minimizeStable();
 				break;
 			#endif
 			case MinimizePartition1:
-				graph.fsm->minimizePartition1();
+				graph->minimizePartition1();
 				break;
 			case MinimizePartition2:
-				graph.fsm->minimizePartition2();
+				graph->minimizePartition2();
 				break;
 		}
 	}
 
-	graph.fsm->compressTransitions();
-
-	return graph;
+	graph->compressTransitions();
 }
 
 void ParseData::printNameTree( ostream &out )

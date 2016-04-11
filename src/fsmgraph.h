@@ -2455,6 +2455,8 @@ struct PdBase
 	void analyzeAction( Action *action, InlineList *inlineList );
 	void analyzeGraph( FsmAp *graph );
 
+	void finalizeInstance( FsmAp *graph );
+
 	FsmCtx *fsmCtx;
 };
 
@@ -2470,7 +2472,8 @@ struct IdBase
 		backend(Direct),
 		stringTables(false),
 		backendFeature(GotoFeature),
-		nfaTermCheck(0)
+		nfaTermCheck(0),
+		wantDupsRemoved(true)
 	{}
 
 	bool printStatistics;
@@ -2498,6 +2501,7 @@ struct IdBase
 	bool stringTables;
 	BackendFeature backendFeature;
 	bool nfaTermCheck;
+	bool wantDupsRemoved;
 };
 
 
