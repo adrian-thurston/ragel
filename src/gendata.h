@@ -196,7 +196,6 @@ private:
 	int curState;
 
 public:
-
 	/*
 	 * The interface to the code generator.
 	 */
@@ -327,6 +326,8 @@ public:
 	void assignActionIds();
 
 	void write_option_error( InputLoc &loc, std::string arg );
+
+	bool lineDirectives;
 };
 
 #endif

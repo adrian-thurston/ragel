@@ -259,7 +259,10 @@ protected:
 	string OPEN_HOST_BLOCK( string fileName, int line )
 	{ 
 		if ( backend == Direct ) {
-			return "{\n#line " + STR(line) + " \"" + fileName + "\"\n";
+			if ( lineDirectives )
+				return "{\n#line " + STR(line) + " \"" + fileName + "\"\n";
+			else
+				return "{\n";
 		}
 		else {
 			return "host( \"" + fileName + "\", " + STR(line) + " ) ${";

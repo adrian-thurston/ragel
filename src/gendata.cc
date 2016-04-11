@@ -176,7 +176,8 @@ CodeGenData::CodeGenData( const CodeGenArgs &args )
 	noPrefix(false),
 	noFinal(false),
 	noError(false),
-	noCS(false)
+	noCS(false),
+	lineDirectives(true)
 {
 }
 

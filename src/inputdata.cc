@@ -373,6 +373,7 @@ void InputData::writeOutput( InputItem *ii )
 				case Direct:
 					if ( hostLang->lang == HostLang::C ) {
 						if ( ii->loc.fileName != 0 ) {
+							// if ( lineDirectives )
 							*outStream << "\n#line " << ii->loc.line <<
 									" \"" << ii->loc.fileName << "\"\n";
 						}
