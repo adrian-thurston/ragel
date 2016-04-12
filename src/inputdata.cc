@@ -68,11 +68,6 @@ InputData::~InputData()
 		free( (void*) *bl );
 }
 
-void IdBase::abortCompile( int code )
-{
-	throw AbortCompile( code );
-}
-
 /* Invoked by the parser when the root element is opened. */
 void InputData::cdDefaultFileName( const char *inputFile )
 {
@@ -332,35 +327,6 @@ void InputData::verifyWritesHaveData()
 {
 	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ )
 		verifyWriteHasData( ii );
-}
-
-void translatedHostData( ostream &out, const string &data )
-{
-	const char *p = data.c_str();
-	for ( const char *c = p; *c != 0; ) {
-		if ( c[0] == '}' && ( c[1] == '@' || c[1] == '$' || c[1] == '=' ) ) {
-			out << "@}@" << c[1];
-			c += 2;
-		}
-		else if ( c[0] == '@' ) {
-			out << "@@";
-			c += 1;
-		}
-		// Have some escaping issues that these fix, but they lead to other problems.
-		// Can be reproduced by passing "={}" through ragel and adding --colm-backend
-		// else if ( c[0] == '=' ) {
-		//	out << "@=";
-		//	c += 1;
-		//}
-		// else if ( c[0] == '$' ) {
-		//	out << "@$";
-		//	c += 1;
-		//}
-		else {
-			out << c[0];
-			c += 1;
-		}
-	}
 }
 
 void InputData::writeOutput( InputItem *ii )

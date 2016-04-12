@@ -78,6 +78,9 @@ enum ErrorFormat {
 	ErrorFormatMSVC,
 };
 
+extern ErrorFormat errorFormat;
+
+
 struct colm_location;
 
 InputLoc makeInputLoc( const char *fileName, int line = 0, int col = 0 );

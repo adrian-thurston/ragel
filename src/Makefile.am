@@ -6,28 +6,33 @@ KELBT       = @KELBT@
 RAGEL       = @RAGEL@
 
 bin_PROGRAMS = ragel
-lib_LIBRARIES = libragel.a
+
+# Libragel includes the ragel parsers. Libfsm contains only the FSM
+# construction code and the backend code generators.
+lib_LIBRARIES = libragel.a libfsm.a
+
 include_HEADERS = libragel.h
 
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
-ragel_SOURCES = \
-	buffer.h inputdata.h redfsm.h parsedata.h \
-	parsetree.h action.h rlscan.h common.h \
-	fsmgraph.h pcheck.h gendata.h ragel.h codegen.h reducer.h \
-	binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h binloopvar.h binexpvar.h \
-	flat.h flatloopgoto.h flatexpgoto.h flatvar.h flatloopvar.h flatexpvar.h \
-	goto.h switchloopgoto.h switchexpgoto.h \
+BACKEND_SRC = \
+	buffer.h redfsm.h action.h common.h fsmgraph.h gendata.h ragel.h \
+	codegen.h binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h \
+	binloopvar.h binexpvar.h flat.h flatloopgoto.h flatexpgoto.h flatvar.h \
+	flatloopvar.h flatexpvar.h goto.h switchloopgoto.h switchexpgoto.h \
 	ipgoto.h xml.h dot.h asm.h \
-	\
-	main.cc parsetree.cc parsedata.cc fsmstate.cc fsmbase.cc \
-	fsmattach.cc fsmmin.cc fsmgraph.cc fsmap.cc fsmcond.cc fsmnfa.cc \
-	inputdata.cc common.cc redfsm.cc gendata.cc allocgen.cc \
-	codegen.cc reducer.cc \
-	binary.cc binloopgoto.cc binexpgoto.cc binvar.cc binloopvar.cc binexpvar.cc \
-	flat.cc flatloopgoto.cc flatexpgoto.cc flatvar.cc flatloopvar.cc flatexpvar.cc \
-	goto.cc switchloopgoto.cc switchexpgoto.cc \
-	ipgoto.cc xml.cc dot.cc asm.cc
+	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
+	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \
+	allocgen.cc codegen.cc binary.cc binloopgoto.cc binexpgoto.cc binvar.cc \
+	binloopvar.cc binexpvar.cc flat.cc flatloopgoto.cc flatexpgoto.cc \
+	flatvar.cc flatloopvar.cc flatexpvar.cc goto.cc switchloopgoto.cc \
+	switchexpgoto.cc ipgoto.cc xml.cc dot.cc asm.cc
+
+ragel_SOURCES = \
+	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
+	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc main.cc \
+	$(BACKEND_SRC)
+
 
 if WITH_RAGEL_KELBT
 ragel_SOURCES += rlscan.cc rlparse.cc rlparse.h 
@@ -41,9 +46,6 @@ nodist_ragel_SOURCES += \
 	parse.c if.h if.cc commit.cc \
 	rlhc.c
 
-ragel_SOURCES += \
-	load.cc load.h
-
 ragel_LDADD = $(COLM_LD)
 ragel_DEPENDENCIES = $(COLM_LIBDEP)
 
@@ -54,6 +56,10 @@ version.h: Makefile
 nodist_libragel_a_SOURCES = $(nodist_ragel_SOURCES)
 libragel_a_SOURCES = $(ragel_SOURCES)
 libragel_a_CPPFLAGS = -Dmain=main_lib -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
+
+nodist_libfsm_a_SOURCES = $(nodist_ragel_SOURCES)
+libfsm_a_SOURCES = $(BACKEND_SRC)
+libfsm_a_CPPFLAGS = -I$(top_srcdir)/aapl
 
 EXTRA_DIST = \
 	ragel.lm \

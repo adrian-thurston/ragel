@@ -244,69 +244,10 @@ void InputData::showStyles()
 	abortCompile( 0 );
 }
 
-/* Error reporting format. */
-static ErrorFormat errorFormat = ErrorFormatGNU;
-
 InputLoc makeInputLoc( const char *fileName, int line, int col )
 {
 	InputLoc loc( fileName, line, col );
 	return loc;
-}
-
-ostream &operator<<( ostream &out, const InputLoc &loc )
-{
-	assert( loc.fileName != 0 );
-	switch ( errorFormat ) {
-	case ErrorFormatMSVC:
-		out << loc.fileName << "(" << loc.line;
-		if ( loc.col )
-			out << "," << loc.col;
-		out << ")";
-		break;
-
-	default:
-		out << loc.fileName << ":" << loc.line;
-		if ( loc.col )
-			out << ":" << loc.col;
-		break;
-	}
-	return out;
-}
-
-/* Print the opening to a warning in the input, then return the error ostream. */
-ostream &IdBase::warning( const InputLoc &loc )
-{
-	ostream &err = inLibRagel ? libcerr : std::cerr;
-	err << loc << ": warning: ";
-	return err;
-}
-
-/* Print the opening to a program error, then return the error stream. */
-ostream &IdBase::error()
-{
-	errorCount += 1;
-	ostream &err = inLibRagel ? libcerr : std::cerr;
-	err << PROGNAME ": ";
-	return err;
-}
-
-ostream &IdBase::error( const InputLoc &loc )
-{
-	errorCount += 1;
-	ostream &err = inLibRagel ? libcerr : std::cerr;
-	err << loc << ": ";
-	return err;
-}
-
-std::ostream &IdBase::stats()
-{
-	return inLibRagel ? libcout : std::cout;
-}
-
-/* Requested info. */
-std::ostream &IdBase::info()
-{
-	return inLibRagel ? libcout : std::cout;
 }
 
 void escapeLineDirectivePath( std::ostream &out, char *path )
