@@ -2179,6 +2179,8 @@ public:
 	static FsmRes epsilonOp( FsmAp *fsm );
 	static FsmRes joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int numOthers );
 
+	static FsmRes rightStartConcatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
+
 	/* Results in an NFA. */
 	static FsmRes nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth, std::ostream &stats );
 	static FsmRes nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,

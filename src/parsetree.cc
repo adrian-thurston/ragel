@@ -1367,20 +1367,8 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 				return rhs;
 			}
 
-			/* Set up the priority descriptors. The left machine gets the
-			 * lower priority where as the right get the higher start priority. */
-			priorDescs[0].key = pd->fsmCtx->nextPriorKey++;
-			priorDescs[0].priority = 0;
-			termFsm.fsm->allTransPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[0] );
-
-			/* The start transitions of the right machine gets the higher
-			 * priority. Use the same unique key. */
-			priorDescs[1].key = priorDescs[0].key;
-			priorDescs[1].priority = 1;
-			rhs.fsm->startFsmPrior( pd->fsmCtx->curPriorOrd++, &priorDescs[1] );
-
 			/* Perform concatenation. */
-			FsmRes res = FsmAp::concatOp( termFsm.fsm, rhs.fsm, lastInSeq );
+			FsmRes res = FsmAp::rightStartConcatOp( termFsm.fsm, rhs.fsm, lastInSeq );
 			if ( !res.success() )
 				return res;
 

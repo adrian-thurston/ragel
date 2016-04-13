@@ -908,6 +908,26 @@ FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 	return res;
 }
 
+FsmRes FsmAp::rightStartConcatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
+{
+	PriorDesc *priorDesc0 = fsm->ctx->allocPriorDesc();
+	PriorDesc *priorDesc1 = fsm->ctx->allocPriorDesc();
+
+	/* Set up the priority descriptors. The left machine gets the
+	 * lower priority where as the right get the higher start priority. */
+	priorDesc0->key = fsm->ctx->nextPriorKey++;
+	priorDesc0->priority = 0;
+	fsm->allTransPrior( fsm->ctx->curPriorOrd++, priorDesc0 );
+
+	/* The start transitions of the right machine gets the higher
+	 * priority. Use the same unique key. */
+	priorDesc1->key = priorDesc0->key;
+	priorDesc1->priority = 1;
+	other->startFsmPrior( fsm->ctx->curPriorOrd++, priorDesc1 );
+
+	return concatOp( fsm, other, lastInSeq );
+}
+
 /* Returns union of fsm and other. Other is deleted. */
 FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 {
