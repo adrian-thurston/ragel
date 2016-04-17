@@ -460,7 +460,9 @@ namespace c_gen
 		{
 			send Parser
 				"[Stmt.label_stmt.ident]:
+				"{
 				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
+				"}
 		}
 		case [entry_loop]
 		{
