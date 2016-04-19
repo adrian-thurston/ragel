@@ -2148,10 +2148,12 @@ public:
 	 */
 
 	static FsmAp *concatFsm( FsmCtx *ctx, Key c );
+	static FsmAp *concatFsmCI( FsmCtx *ctx, Key c );
 	static FsmAp *concatFsm( FsmCtx *ctx, Key *str, int len );
 	static FsmAp *concatFsmCI( FsmCtx *ctx, Key *str, int len );
 	static FsmAp *orFsm( FsmCtx *ctx, Key *set, int len );
 	static FsmAp *rangeFsm( FsmCtx *ctx, Key low, Key high );
+	static FsmAp *rangeFsmCI( FsmCtx *ctx, Key low, Key high );
 	static FsmAp *rangeStarFsm( FsmCtx *ctx, Key low, Key high );
 	static FsmAp *emptyFsm( FsmCtx *ctx );
 	static FsmAp *lambdaFsm( FsmCtx *ctx );
