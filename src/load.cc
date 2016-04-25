@@ -2690,7 +2690,7 @@ struct LoadRagel
 		str Error = RagelError( program );
 
 		if ( Start == 0 ) {
-			pd->id->error(Error.loc()) << inputFileName << ": parse error: " << Error.text() << std::endl;
+			id.error(Error.loc()) << Error.text() << std::endl;
 			return;
 		}
 
