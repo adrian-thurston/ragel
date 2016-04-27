@@ -852,6 +852,8 @@ FsmRes FsmAp::maxRepeatOp( FsmAp *fsm, int times )
 
 	/* Now use the copyFrom on the end, no bits set, no bits to clear. */
 	FsmRes res = fsm->doConcat( copyFrom, &lastFinSet, true );
+	if ( !res.success() )
+		return res;
 
 	res.fsm->afterOpMinimize();
 
