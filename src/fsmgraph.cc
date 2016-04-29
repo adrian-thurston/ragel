@@ -695,21 +695,29 @@ FsmRes FsmAp::starOp( FsmAp *fsm )
 	/* Merge the new start state with the old one to isolate it. */
 	fsm->mergeStates( fsm->startState, prevStartState );
 
-	/* Merge the start state into all final states. Except the start state on
-	 * the first pass. If the start state is set final we will be doubling up
-	 * its transitions, which will get transfered to any final states that
-	 * follow it in the final state set. This will be determined by the order
-	 * of items in the final state set. To prevent this we just merge with the
-	 * start on a second pass. */
-	for ( StateSet::Iter st = fsm->finStateSet; st.lte(); st++ ) {
-		if ( *st != fsm->startState )
+	if ( !fsm->startState->isFinState() ) {
+		/* Common case, safe to merge. */
+		for ( StateSet::Iter st = fsm->finStateSet; st.lte(); st++ )
 			fsm->mergeStatesLeaving( *st, fsm->startState );
 	}
+	else {
+		/* Merge the start state into all final states. Except the start state on
+		 * the first pass. If the start state is set final we will be doubling up
+		 * its transitions, which will get transfered to any final states that
+		 * follow it in the final state set. This will be determined by the order
+		 * of items in the final state set. To prevent this we just merge with the
+		 * start on a second pass. */
+		StateSet origFin = fsm->finStateSet;
+		for ( StateSet::Iter st = origFin; st.lte(); st++ ) {
+			if ( *st != fsm->startState )
+				fsm->mergeStatesLeaving( *st, fsm->startState );
+		}
 
-	/* Now it is safe to merge the start state with itself (provided it
-	 * is set final). */
-	if ( fsm->startState->isFinState() )
-		fsm->mergeStatesLeaving( fsm->startState, fsm->startState );
+		/* Now it is safe to merge the start state with itself (provided it
+		 * is set final). */
+		if ( fsm->startState->isFinState() )
+			fsm->mergeStatesLeaving( fsm->startState, fsm->startState );
+	}
 
 	/* Now ensure the new start state is a final state. */
 	fsm->setFinState( fsm->startState );
