@@ -11,13 +11,16 @@ bin_PROGRAMS = ragel
 # construction code and the backend code generators.
 lib_LIBRARIES = libragel.a libfsm.a
 
-include_HEADERS = libragel.h
+include_HEADERS = \
+	libragel.h action.h fsmgraph.h ragel.h common.h \
+	gendata.h redfsm.h
+
+nodist_include_HEADERS = config.h
 
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 BACKEND_SRC = \
-	buffer.h redfsm.h action.h common.h fsmgraph.h gendata.h ragel.h \
-	codegen.h binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h \
+	buffer.h codegen.h binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h \
 	binloopvar.h binexpvar.h flat.h flatloopgoto.h flatexpgoto.h flatvar.h \
 	flatloopvar.h flatexpvar.h goto.h switchloopgoto.h switchexpgoto.h \
 	ipgoto.h xml.h dot.h asm.h \
