@@ -156,15 +156,19 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 
 	newStart->nfaOut = new NfaTransList;
 
-	/* Transition into the repetition. */
-	NfaTrans *trans = new NfaTrans( 1 );
+	NfaTrans *trans;
+	if ( init ) {
+		/* Transition into the repetition. Doesn't make much sense to flip this
+		 * statically false, but provided for consistency of interface. */
+		trans = new NfaTrans( 1 );
 
-	trans->pushTable.setAction( ORD_PUSH, push );
-	trans->restoreTable.setAction( ORD_RESTORE, pop );
-	trans->popTest.setAction( ORD_TEST, init );
+		trans->pushTable.setAction( ORD_PUSH, push );
+		trans->restoreTable.setAction( ORD_RESTORE, pop );
+		trans->popTest.setAction( ORD_TEST, init );
 
-	newStart->nfaOut->append( trans );
-	fsm->attachToNfa( newStart, origStartState, trans );
+		newStart->nfaOut->append( trans );
+		fsm->attachToNfa( newStart, origStartState, trans );
+	}
 
 	StateAp *newFinal = fsm->addState();
 
@@ -176,35 +180,41 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 
 		repl->nfaOut = new NfaTransList;
 
-		/* Transition to original final state. Represents staying. */
-		trans = new NfaTrans( 3 );
+		if ( stay != 0 ) {
+			/* Transition to original final state. Represents staying. */
+			trans = new NfaTrans( 3 );
 
-		trans->pushTable.setAction( ORD_PUSH, push );
-		trans->restoreTable.setAction( ORD_RESTORE, pop );
-		trans->popTest.setAction( ORD_TEST, stay );
+			trans->pushTable.setAction( ORD_PUSH, push );
+			trans->restoreTable.setAction( ORD_RESTORE, pop );
+			trans->popTest.setAction( ORD_TEST, stay );
 
-		repl->nfaOut->append( trans );
-		fsm->attachToNfa( repl, *orig, trans );
+			repl->nfaOut->append( trans );
+			fsm->attachToNfa( repl, *orig, trans );
+		}
 
 		/* Transition back to the start. Represents repeat. */
-		trans = new NfaTrans( 2 );
+		if ( repeat != 0 ) {
+			trans = new NfaTrans( 2 );
 
-		trans->pushTable.setAction( ORD_PUSH, push );
-		trans->restoreTable.setAction( ORD_RESTORE, pop );
-		trans->popTest.setAction( ORD_TEST, repeat );
+			trans->pushTable.setAction( ORD_PUSH, push );
+			trans->restoreTable.setAction( ORD_RESTORE, pop );
+			trans->popTest.setAction( ORD_TEST, repeat );
 
-		repl->nfaOut->append( trans );
-		fsm->attachToNfa( repl, repStartState, trans );
+			repl->nfaOut->append( trans );
+			fsm->attachToNfa( repl, repStartState, trans );
+		}
 
-		/* Transition to thew new final. Represents exiting. */
-		trans = new NfaTrans( 1 );
+		if ( exit != 0 ) {
+			/* Transition to thew new final. Represents exiting. */
+			trans = new NfaTrans( 1 );
 
-		trans->pushTable.setAction( ORD_PUSH, push );
-		trans->restoreTable.setAction( ORD_RESTORE, pop );
-		trans->popTest.setAction( ORD_TEST, exit );
+			trans->pushTable.setAction( ORD_PUSH, push );
+			trans->restoreTable.setAction( ORD_RESTORE, pop );
+			trans->popTest.setAction( ORD_TEST, exit );
 
-		repl->nfaOut->append( trans );
-		fsm->attachToNfa( repl, newFinal, trans );
+			repl->nfaOut->append( trans );
+			fsm->attachToNfa( repl, newFinal, trans );
+		}
 	}
 
 	fsm->unsetStartState();
