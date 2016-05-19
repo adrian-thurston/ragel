@@ -464,9 +464,6 @@ struct NfaUnion
 
 	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
 
-	void breadthFromState( ParseData *pd, FsmAp *fsm, StateAp *state,
-			long depth, int maxDepth, double stateScore, double &total );
-	double breadthFromEntry( ParseData *pd, FsmAp *fsm, StateAp *state );
 	FsmRes checkBreadth( ParseData *pd, FsmAp *fsm );
 
 	FsmRes nfaTermCheck( ParseData *pd );

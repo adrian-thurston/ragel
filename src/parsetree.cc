@@ -828,76 +828,17 @@ FsmRes NfaUnion::nfaCondsCheck( ParseData *pd )
 	return FsmRes( FsmRes::AnalysisOk() );
 }
 
-
-/*
- * This algorithm assigns a price to each state visit, then adds that to a
- * running total. Note that we do not guard against multiple visits to a state,
- * since we are estimating runtime cost.
- *
- * We rely on a character histogram and are looking for a probability of being
- * in any given state, given that histogram, simple and very effective.
- */
-void NfaUnion::breadthFromState( ParseData *pd, FsmAp *fsm, StateAp *state,
-		long depth, int maxDepth, double stateScore, double &total )
-{
-	if ( depth > maxDepth )
-		return;
-	
-	/* Recurse on everything ranges. */
-	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
-		/* Compute target state score. */
-		double span = 0;
-		for ( int i = trans->lowKey.getVal(); i <= trans->highKey.getVal(); i++ )
-			span += pd->id->histogram[i];
-
-		double targetStateScore = stateScore * ( span );
-
-		/* Add to the level. */
-		total += targetStateScore;
-
-		if ( trans->plain() ) {
-			if ( trans->tdap()->toState != 0 ) {
-				breadthFromState( pd, fsm, trans->tdap()->toState,
-						depth + 1, maxDepth, targetStateScore, total );
-			}
-		}
-		else {
-			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
-				if ( cond->toState != 0 ) {
-					breadthFromState( pd, fsm, cond->toState,
-							depth + 1, maxDepth, targetStateScore, total );
-				}
-			}
-		}
-	}
-
-	if ( state->nfaOut != 0 ) {
-		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
-			/* We do not increment depth here since this is an epsilon transition. */
-			breadthFromState( pd, fsm, n->toState, depth, maxDepth, stateScore, total );
-		}
-	}
-}
-
-double NfaUnion::breadthFromEntry( ParseData *pd, FsmAp *fsm, StateAp *state )
-{
-	const int maxDepth = 5;
-	double total = 0;
-	breadthFromState( pd, fsm, state, 1, maxDepth, 1.0, total );
-	return total;
-}
-
 /* Always returns the breadth check result. Will not consume the fsm. */
 FsmRes NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
 {
-	double start = breadthFromEntry( pd, fsm, fsm->startState );
+	double start = FsmAp::breadthFromEntry( pd->id->histogram, fsm, fsm->startState );
 
 	BreadthResult *breadth = new BreadthResult( start );
 	
 	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
 		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
 			if ( mel->key == c->entryId ) {
-				double cost = breadthFromEntry( pd, fsm, mel->value );
+				double cost = FsmAp::breadthFromEntry( pd->id->histogram, fsm, mel->value );
 
 				breadth->costs.append( BreadthCost( c->name, cost ) );
 			}

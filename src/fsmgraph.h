@@ -2203,6 +2203,9 @@ public:
 	 */
 	static FsmRes condCostFromState( FsmAp *fsm, StateAp *state, long depth );
 	static FsmRes condCostSearch( FsmAp *fsm );
+	static double breadthFromEntry( double *histogram, FsmAp *fsm, StateAp *state );
+	static void breadthFromState( double *histogram, FsmAp *fsm, StateAp *state,
+			long depth, int maxDepth, double stateScore, double &total );
 
 	/*
 	 * Operator workers

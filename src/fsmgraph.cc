@@ -1656,6 +1656,64 @@ void FsmAp::condCost( Action *action, long repId )
 	action->costId = repId;
 }
 
+/*
+ * This algorithm assigns a price to each state visit, then adds that to a
+ * running total. Note that we do not guard against multiple visits to a state,
+ * since we are estimating runtime cost.
+ *
+ * We rely on a character histogram and are looking for a probability of being
+ * in any given state, given that histogram, simple and very effective.
+ */
+void FsmAp::breadthFromState( double *histogram, FsmAp *fsm, StateAp *state,
+		long depth, int maxDepth, double stateScore, double &total )
+{
+	if ( depth > maxDepth )
+		return;
+	
+	/* Recurse on everything ranges. */
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		/* Compute target state score. */
+		double span = 0;
+		for ( int i = trans->lowKey.getVal(); i <= trans->highKey.getVal(); i++ )
+			span += histogram[i];
+
+		double targetStateScore = stateScore * ( span );
+
+		/* Add to the level. */
+		total += targetStateScore;
+
+		if ( trans->plain() ) {
+			if ( trans->tdap()->toState != 0 ) {
+				breadthFromState( histogram, fsm, trans->tdap()->toState,
+						depth + 1, maxDepth, targetStateScore, total );
+			}
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				if ( cond->toState != 0 ) {
+					breadthFromState( histogram, fsm, cond->toState,
+							depth + 1, maxDepth, targetStateScore, total );
+				}
+			}
+		}
+	}
+
+	if ( state->nfaOut != 0 ) {
+		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
+			/* We do not increment depth here since this is an epsilon transition. */
+			breadthFromState( histogram, fsm, n->toState, depth, maxDepth, stateScore, total );
+		}
+	}
+}
+
+double FsmAp::breadthFromEntry( double *histogram, FsmAp *fsm, StateAp *state )
+{
+	const int maxDepth = 5;
+	double total = 0;
+	FsmAp::breadthFromState( histogram, fsm, state, 1, maxDepth, 1.0, total );
+	return total;
+}
+
 
 void FsmAp::applyEntryPriorGuard( FsmAp *fsm, long repId )
 {
