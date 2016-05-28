@@ -267,7 +267,7 @@ void FlatLoopGoto::writeExec()
 	if ( condSpaceList.length() == 0 )
 		cond = "_trans";
 
-	out << "} " << LABEL( "_match_cond" ) << " {\n";
+	out << "}\n" << LABEL( "_match_cond" ) << " {\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
@@ -312,7 +312,7 @@ void FlatLoopGoto::writeExec()
 
 	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "} " << LABEL( "_again" ) << " {\n";
+		out << "}\n" << LABEL( "_again" ) << " {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -348,7 +348,7 @@ void FlatLoopGoto::writeExec()
 	}
 
 	if ( testEofUsed )
-		out << "} " << LABEL( "_test_eof" ) << " { {}\n";
+		out << "}\n" << LABEL( "_test_eof" ) << " {\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
@@ -391,10 +391,10 @@ void FlatLoopGoto::writeExec()
 	}
 
 	if ( outLabelUsed )
-		out << "} " << LABEL( "_out" ) << " { {}\n";
+		out << "}\n" << LABEL( "_out" ) << " {\n";
 
 	/* The entry loop. */
-	out << "}}\n";
+	out << "}\n}\n";
 
 	NFA_POP();
 
