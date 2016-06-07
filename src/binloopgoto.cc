@@ -448,7 +448,7 @@ void BinaryLoopGoto::writeExec()
 	}
 	
 	if ( testEofUsed )
-		out << "}\n" << LABEL( "_test_eof" ) << " {\n";
+		out << "}\n" << LABEL( "_test_eof" ) << " { {}\n";
 	
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
@@ -487,7 +487,7 @@ void BinaryLoopGoto::writeExec()
 	}
 
 	if ( outLabelUsed )
-		out << "}\n" << LABEL( "_out" ) << " {\n";
+		out << "}\n" << LABEL( "_out" ) << " { {}\n";
 
 	/* The entry loop. */
 	out << "}\n}\n";
