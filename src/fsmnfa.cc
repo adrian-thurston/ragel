@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2015, 2016 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -135,6 +135,14 @@ const int ORD_RESTORE = -2;
 const int ORD_COND = -1;
 const int ORD_TEST = 1073741824;
 
+void FsmAp::transferOutToNfaTrans( NfaTrans *trans, StateAp *state )
+{
+	trans->popAction.setActions( state->outActionTable );
+	trans->popCondSpace = state->outCondSpace;
+	trans->popCondKeys = state->outCondKeys;
+	trans->priorTable.setPriors( state->outPriorTable );
+}
+
 /* This version contains the init, increment and test in the nfa pop actions.
  * This is a compositional operator since it doesn't leave any actions to
  * trailing characters, where they may interact with other actions that use the
@@ -173,8 +181,8 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 	StateAp *newFinal = fsm->addState();
 
 	for ( StateSet::Iter orig = origFinals; orig.lte(); orig++ ) {
-		fsm->unsetFinState( *orig );
-
+		/* For every final state, we place a new final state in front of it,
+		 * with an NFA transition to the original. This is the "stay" choice. */
 		StateAp *repl = fsm->addState();
 		fsm->moveInwardTrans( repl, *orig );
 
@@ -200,6 +208,8 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 			trans->restoreTable.setAction( ORD_RESTORE, pop );
 			trans->popTest.setAction( ORD_TEST, repeat );
 
+			fsm->transferOutToNfaTrans( trans, *orig );
+
 			repl->nfaOut->append( trans );
 			fsm->attachToNfa( repl, repStartState, trans );
 		}
@@ -212,9 +222,13 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 			trans->restoreTable.setAction( ORD_RESTORE, pop );
 			trans->popTest.setAction( ORD_TEST, exit );
 
+			fsm->transferOutToNfaTrans( trans, *orig );
+
 			repl->nfaOut->append( trans );
 			fsm->attachToNfa( repl, newFinal, trans );
 		}
+
+		fsm->unsetFinState( *orig );
 	}
 
 	fsm->unsetStartState();

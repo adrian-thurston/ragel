@@ -2183,6 +2183,8 @@ public:
 
 	static FsmRes rightStartConcatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
 
+	void transferOutToNfaTrans( NfaTrans *trans, StateAp *state );
+
 	/* Results in an NFA. */
 	static FsmRes nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth, std::ostream &stats );
 	static FsmRes nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
