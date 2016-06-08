@@ -13,7 +13,7 @@ lib_LIBRARIES = libragel.a libfsm.a
 
 include_HEADERS = \
 	libragel.h action.h fsmgraph.h ragel.h common.h \
-	gendata.h redfsm.h
+	gendata.h redfsm.h dot.h
 
 nodist_include_HEADERS = config.h
 
@@ -23,7 +23,7 @@ BACKEND_SRC = \
 	buffer.h codegen.h binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h \
 	binloopvar.h binexpvar.h flat.h flatloopgoto.h flatexpgoto.h flatvar.h \
 	flatloopvar.h flatexpvar.h goto.h switchloopgoto.h switchexpgoto.h \
-	ipgoto.h xml.h dot.h asm.h \
+	ipgoto.h xml.h asm.h \
 	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
 	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \
 	allocgen.cc codegen.cc binary.cc binloopgoto.cc binexpgoto.cc binvar.cc \
