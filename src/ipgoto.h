@@ -81,6 +81,7 @@ protected:
 
 	void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	void NFA_POP_TEST( RedNfaTarg *targ );
+	virtual void NFA_FROM_STATE_ACTION_EXEC();
 
 	void NFA_PUSH( RedStateAp *state );
 

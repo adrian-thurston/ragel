@@ -126,6 +126,7 @@ protected:
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
 	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
+	virtual void NFA_FROM_STATE_ACTION_EXEC() = 0;
 
 	void setTableState( TableArray::State );
 

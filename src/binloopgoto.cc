@@ -287,6 +287,24 @@ void BinaryLoopGoto::writeData()
 	STATE_IDS();
 }
 
+void BinaryLoopGoto::NFA_FROM_STATE_ACTION_EXEC()
+{
+	if ( redFsm->anyFromStateActions() ) {
+		out <<
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[nfa_bp[nfa_len].state]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"	_acts += 1;\n"
+			"	while ( _nacts > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
+			FROM_STATE_ACTION_SWITCH() <<
+			"		}\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
+			"	}\n"
+			"\n";
+	}
+}
+
 void BinaryLoopGoto::writeExec()
 {
 	testEofUsed = false;

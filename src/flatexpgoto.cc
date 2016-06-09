@@ -244,6 +244,17 @@ void FlatExpGoto::writeData()
 	STATE_IDS();
 }
 
+void FlatExpGoto::NFA_FROM_STATE_ACTION_EXEC()
+{
+	if ( redFsm->anyFromStateActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( fromStateActions ) << "[nfa_bp[nfa_len].state] ) {\n";
+			FROM_STATE_ACTION_SWITCH() <<
+			"	}\n"
+			"\n";
+	}
+}
+
 void FlatExpGoto::writeExec()
 {
 	testEofUsed = false;

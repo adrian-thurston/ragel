@@ -498,10 +498,13 @@ void Flat::NFA_POP()
 			;
 
 		if ( redFsm->bAnyNfaPops ) {
+			NFA_FROM_STATE_ACTION_EXEC();
+
 			out << 
 				"		int _pop_test = 1;\n"
 				"		switch ( " << ARR_REF( nfaPopTrans ) <<
 							"[nfa_bp[nfa_len].popTrans] ) {\n";
+
 
 			/* Loop the actions. */
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;

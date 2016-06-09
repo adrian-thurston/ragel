@@ -38,6 +38,13 @@ public:
 	FlatLoopGoto( const CodeGenArgs &args )
 		: Flat(args) {}
 
+	void tableDataPass();
+
+	virtual void genAnalysis();
+	virtual void writeData();
+	virtual void writeExec();
+
+protected:
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
@@ -51,11 +58,7 @@ public:
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 
-	void tableDataPass();
-
-	virtual void genAnalysis();
-	virtual void writeData();
-	virtual void writeExec();
+	virtual void NFA_FROM_STATE_ACTION_EXEC();
 };
 
 namespace C

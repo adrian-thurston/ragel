@@ -105,6 +105,8 @@ void BinaryVar::NFA_POP()
 			;
 
 		if ( redFsm->bAnyNfaPops ) {
+			NFA_FROM_STATE_ACTION_EXEC();
+
 			out << 
 				"		switch ( " << ARR_REF( nfaPopTrans ) <<
 							"[nfa_bp[nfa_len].popTrans] ) {\n";

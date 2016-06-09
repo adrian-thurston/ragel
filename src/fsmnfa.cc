@@ -209,6 +209,7 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 			trans->popTest.setAction( ORD_TEST, repeat );
 
 			fsm->transferOutToNfaTrans( trans, *orig );
+			repl->fromStateActionTable.setActions( (*orig)->fromStateActionTable );
 
 			repl->nfaOut->append( trans );
 			fsm->attachToNfa( repl, repStartState, trans );
@@ -223,6 +224,7 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 			trans->popTest.setAction( ORD_TEST, exit );
 
 			fsm->transferOutToNfaTrans( trans, *orig );
+			repl->fromStateActionTable.setActions( (*orig)->fromStateActionTable );
 
 			repl->nfaOut->append( trans );
 			fsm->attachToNfa( repl, newFinal, trans );
