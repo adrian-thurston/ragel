@@ -429,9 +429,9 @@ void Flat::NFA_PUSH()
 			"		int new_recs = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 						ARR_REF( nfaOffsets ) << "[" << vCS() << "]];\n";
 
-		if ( nfaPrePushExpr != 0 ) {
-			out << OPEN_HOST_BLOCK( nfaPrePushExpr );
-			INLINE_LIST( out, nfaPrePushExpr->inlineList, 0, false, false );
+		if ( red->nfaPrePushExpr != 0 ) {
+			out << OPEN_HOST_BLOCK( red->nfaPrePushExpr );
+			INLINE_LIST( out, red->nfaPrePushExpr->inlineList, 0, false, false );
 			out << CLOSE_HOST_BLOCK();
 		}
 
@@ -529,9 +529,9 @@ void Flat::NFA_POP()
 				"		if ( _pop_test ) {\n"
 				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
 
-			if ( nfaPostPopExpr != 0 ) {
-				out << OPEN_HOST_BLOCK( nfaPostPopExpr );
-				INLINE_LIST( out, nfaPostPopExpr->inlineList, 0, false, false );
+			if ( red->nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
+				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK();
 			}
 
@@ -539,11 +539,11 @@ void Flat::NFA_POP()
 				"			goto _resume;\n"
 				"		}\n";
 
-			if ( nfaPostPopExpr != 0 ) {
+			if ( red->nfaPostPopExpr != 0 ) {
 				out <<
 				"			else {\n"
-				"			" << OPEN_HOST_BLOCK( nfaPostPopExpr );
-				INLINE_LIST( out, nfaPostPopExpr->inlineList, 0, false, false );
+				"			" << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
+				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK() << "\n"
 				"			}\n";
 			}
@@ -552,9 +552,9 @@ void Flat::NFA_POP()
 			out <<
 				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
 
-			if ( nfaPostPopExpr != 0 ) {
-				out << OPEN_HOST_BLOCK( nfaPostPopExpr );
-				INLINE_LIST( out, nfaPostPopExpr->inlineList, 0, false, false );
+			if ( red->nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
+				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK();
 			}
 
@@ -625,7 +625,7 @@ void Flat::LOCATE_TRANS()
 	}
 
 
-	if ( condSpaceList.length() > 0 ) {
+	if ( red->condSpaceList.length() > 0 ) {
 		out <<
 			"	_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 			"\n";
@@ -637,7 +637,7 @@ void Flat::LOCATE_TRANS()
 			"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
 			"\n";
 
-		for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
+		for ( CondSpaceList::Iter csi = red->condSpaceList; csi.lte(); csi++ ) {
 			GenCondSpace *condSpace = csi;
 			if ( condSpace->numTransRefs > 0 ) {
 				out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
@@ -701,9 +701,9 @@ void Flat::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
-	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( prePushExpr );
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -716,9 +716,9 @@ void Flat::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
-	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( prePushExpr );
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -732,9 +732,9 @@ void Flat::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool i
 {
 	ret << OPEN_GEN_BLOCK();
 
-	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( prePushExpr );
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -749,9 +749,9 @@ void Flat::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool 
 {
 	ret << OPEN_GEN_BLOCK();
 
-	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( prePushExpr );
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -766,9 +766,9 @@ void Flat::RET( ostream &ret, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
-	if ( postPopExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( postPopExpr );
-		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
+	if ( red->postPopExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->postPopExpr );
+		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -779,9 +779,9 @@ void Flat::NRET( ostream &ret, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
-	if ( postPopExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( postPopExpr );
-		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
+	if ( red->postPopExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->postPopExpr );
+		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 

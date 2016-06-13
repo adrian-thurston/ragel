@@ -37,7 +37,7 @@ void FlatLoopGoto::tableDataPass()
 	taIndicies();
 	taIndexDefaults();
 	taTransCondSpaces();
-	if ( condSpaceList.length() > 0 )
+	if ( red->condSpaceList.length() > 0 )
 		taTransOffsets();
 	taCondTargs();
 	taCondActions();
@@ -63,13 +63,13 @@ void FlatLoopGoto::genAnalysis()
 	redFsm->makeFlatClass();
 
 	/* If any errors have occured in the input file then don't write anything. */
-	if ( id->errorCount > 0 )
+	if ( red->id->errorCount > 0 )
 		return;
 
 	/* Anlayze Machine will find the final action reference counts, among other
 	 * things. We will use these in reporting the usage of fsm directives in
 	 * action code. */
-	analyzeMachine();
+	red->analyzeMachine();
 
 	setKeyType();
 
@@ -84,7 +84,7 @@ void FlatLoopGoto::genAnalysis()
 std::ostream &FlatLoopGoto::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break */
@@ -100,7 +100,7 @@ std::ostream &FlatLoopGoto::TO_STATE_ACTION_SWITCH()
 std::ostream &FlatLoopGoto::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break */
@@ -116,7 +116,7 @@ std::ostream &FlatLoopGoto::FROM_STATE_ACTION_SWITCH()
 std::ostream &FlatLoopGoto::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break */
@@ -132,7 +132,7 @@ std::ostream &FlatLoopGoto::EOF_ACTION_SWITCH()
 std::ostream &FlatLoopGoto::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break */
@@ -159,7 +159,7 @@ void FlatLoopGoto::writeData()
 	taIndicies();
 	taIndexDefaults();
 	taTransCondSpaces();
-	if ( condSpaceList.length() > 0 )
+	if ( red->condSpaceList.length() > 0 )
 		taTransOffsets();
 	taCondTargs();
 	taCondActions();
@@ -216,7 +216,7 @@ void FlatLoopGoto::writeExec()
 	out << 
 		"	int _trans = 0;\n";
 
-	if ( condSpaceList.length() > 0 ) {
+	if ( red->condSpaceList.length() > 0 ) {
 		out <<
 			"	" << UINT() << " _cond = 0;\n";
 	}
@@ -235,7 +235,7 @@ void FlatLoopGoto::writeExec()
 			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
 	}
 
-	if ( condSpaceList.length() > 0 )
+	if ( red->condSpaceList.length() > 0 )
 		out << "	int _cpc;\n";
 
 	if ( redFsm->anyRegNbreak() )
@@ -282,7 +282,7 @@ void FlatLoopGoto::writeExec()
 	LOCATE_TRANS();
 
 	string cond = "_cond";
-	if ( condSpaceList.length() == 0 )
+	if ( red->condSpaceList.length() == 0 )
 		cond = "_trans";
 
 	out << "}\n" << LABEL( "_match_cond" ) << " {\n";
@@ -378,7 +378,7 @@ void FlatLoopGoto::writeExec()
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
 				"		_trans = " << CAST("int") << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
 
-			if ( condSpaceList.length() > 0 ) {
+			if ( red->condSpaceList.length() > 0 ) {
 				out <<
 					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
 			}

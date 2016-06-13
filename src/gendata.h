@@ -121,6 +121,8 @@ void openHostBlock( char opener, InputData *id, ostream &out, const char *fileNa
 string itoa( int i );
 
 struct CodeGenArgs;
+struct Reducer;
+
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
 
 
@@ -128,10 +130,11 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
 
 struct CodeGenArgs
 {
-	CodeGenArgs( std::string sourceFileName, std::string fsmName,
+	CodeGenArgs( Reducer *red, std::string sourceFileName, std::string fsmName,
 			int machineId, IdBase *id, PdBase *pd, FsmAp *fsm, CodeStyle codeStyle,
 			std::ostream &out )
 	:
+		red(red),
 		sourceFileName(sourceFileName),
 		fsmName(fsmName),
 		machineId(machineId),
@@ -142,6 +145,7 @@ struct CodeGenArgs
 		out(out)
 	{}
 
+	Reducer *red;
 	std::string sourceFileName;
 	std::string fsmName;
 	int machineId;
@@ -152,14 +156,47 @@ struct CodeGenArgs
 	std::ostream &out;
 };
 
-struct CodeGenData : protected GenBase
+struct Reducer
+	: public GenBase
 {
-public:
-	CodeGenData( const CodeGenArgs &args );
-	void make( const HostLang *hostLang );
+	Reducer( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm )
+	:
+		GenBase( fsmName, machineId, id, pd, fsm ),
+		redFsm(0), 
+		allActions(0),
+		allActionTables(0),
+		allConditions(0),
+		allCondSpaces(0),
+		allStates(0),
+		nameIndex(0),
+		startState(-1),
+		errState(-1),
+		getKeyExpr(0),
+		accessExpr(0),
+		prePushExpr(0),
+		postPopExpr(0),
+		nfaPrePushExpr(0),
+		nfaPostPopExpr(0),
+		pExpr(0),
+		peExpr(0),
+		eofExpr(0),
+		csExpr(0),
+		topExpr(0),
+		stackExpr(0),
+		actExpr(0),
+		tokstartExpr(0),
+		tokendExpr(0),
+		dataExpr(0),
+		hasLongestMatch(false)
+	{
+	}
 
-private:
-	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
+protected:
+	/* Collected during parsing. */
+	int curAction;
+	int curActionTable;
+	int curState;
+
 	void makeKey( GenInlineList *outList, Key key );
 	void makeText( GenInlineList *outList, InlineItem *item );
 	void makeLmOnLast( GenInlineList *outList, InlineItem *item );
@@ -174,8 +211,6 @@ private:
 	void makeTargetItem( GenInlineList *outList, NameInst *nameTarg,
 			GenInlineItem::Type type );
 	void makeExecGetTokend( GenInlineList *outList );
-	void makeExports();
-	void makeMachine();
 	void makeActionList();
 	void makeAction( Action *action );
 	void makeActionTableList();
@@ -190,46 +225,68 @@ private:
 	void makeTrans( Key lowKey, Key highKey, TransAp *trans );
 	void newTrans( RedStateAp *state, Key lowKey, Key highKey, RedTransAp *trans );
 
-	/* Collected during parsing. */
-	int curAction;
-	int curActionTable;
-	int curState;
+	void makeSubList( GenInlineList *outList, const InputLoc &loc,
+			InlineList *inlineList, GenInlineItem::Type type );
+
+	void createMachine();
+	void initActionList( unsigned long length );
+	void newAction( int anum, std::string name,
+			const InputLoc &loc, GenInlineList *inlineList );
+	void initActionTableList( unsigned long length );
+	void initStateList( unsigned long length );
+	void setStartState( unsigned long startState );
+	void setErrorState( unsigned long errState );
+	void addEntryPoint( char *name, unsigned long entryState );
+	void setId( int snum, int id );
+	void setFinal( int snum );
+	void initTransList( int snum, unsigned long length );
+
+	void newTrans( int snum, int tnum, Key lowKey, Key highKey,
+			GenCondSpace *gcs, RedTransAp *trans );
+
+	void finishTransList( int snum );
+	void setStateActions( int snum, long toStateAction, 
+			long fromStateAction, long eofAction );
+	void setEofTrans( int snum, long targ, long eofAction );
+	void setForcedErrorState()
+		{ redFsm->forcedErrorState = true; }
+
+	void condSpaceItem( int cnum, long condActionId );
+	void newCondSpace( int cnum, int condSpaceId );
+
+	void initStateCondList( int snum, ulong length );
+	void addStateCond( int snum, Key lowKey, Key highKey, long condNum );
+
+
+	void resolveTargetStates( GenInlineList *inlineList );
+	void resolveTargetStates();
+
+
+	/* Gather various info on the machine. */
+	void analyzeActionList( RedAction *redAct, GenInlineList *inlineList );
+	void analyzeAction( GenAction *act, GenInlineList *inlineList );
+	void actionActionRefs( RedAction *action );
+	void transListActionRefs( RedTransList &list );
+	void transActionRefs( RedTransAp *trans );
+	void findFinalActionRefs();
+
+	void setValueLimits();
+	void assignActionIds();
+
 
 public:
-	/*
-	 * The interface to the code generator.
-	 */
-	virtual void genAnalysis() = 0;
 
-	/* These are invoked by writeStatement and are normally what are used to
-	 * implement the code generators. */
-	virtual void writeData() {};
-	virtual void writeInit() {};
-	virtual void writeExec() {};
-	virtual void writeExports() {};
-	virtual void writeStart() {};
-	virtual void writeFirstFinal() {};
-	virtual void writeError() {};
-
-	/* Show some stats after a write data. */
-	virtual void statsSummary() = 0;
-
-	/* This can also be overridden to modify the processing of write
-	 * statements. */
-	virtual void writeStatement( InputLoc &loc, int nargs,
-			std::string *args, bool generateDot, const HostLang *hostLang );
-
-	/********************/
-
-	virtual ~CodeGenData() {}
+	Key findMaxKey();
+	void makeMachine();
+	void makeExports();
+	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
+	bool setAlphType( const HostLang *hostLang, const char *data );
+	void analyzeMachine();
 
 	/* 
 	 * Collecting the machine.
 	 */
 
-	std::string sourceFileName;
-	std::string fsmName;
-	ostream &out;
 	RedFsmAp *redFsm;
 	GenAction *allActions;
 	RedAction *allActionTables;
@@ -267,6 +324,54 @@ public:
 	bool hasLongestMatch;
 	ExportList exportList;
 	Action *curInlineAction;
+};
+
+struct CodeGenData
+//	: public Reducer
+{
+public:
+	CodeGenData( Reducer *red, const CodeGenArgs &args );
+	void make( const HostLang *hostLang );
+
+private:
+
+public:
+	/*
+	 * The interface to the code generator.
+	 */
+	virtual void genAnalysis() = 0;
+
+	/* These are invoked by writeStatement and are normally what are used to
+	 * implement the code generators. */
+	virtual void writeData() {};
+	virtual void writeInit() {};
+	virtual void writeExec() {};
+	virtual void writeExports() {};
+	virtual void writeStart() {};
+	virtual void writeFirstFinal() {};
+	virtual void writeError() {};
+
+	/* Show some stats after a write data. */
+	virtual void statsSummary() = 0;
+
+	/* This can also be overridden to modify the processing of write
+	 * statements. */
+	virtual void writeStatement( InputLoc &loc, int nargs,
+			std::string *args, bool generateDot, const HostLang *hostLang );
+
+	/********************/
+
+	virtual ~CodeGenData() {}
+
+	Reducer *red;
+
+	KeyOps *keyOps;
+	FsmAp *fsm;
+	RedFsmAp *redFsm;
+
+	std::string sourceFileName;
+	std::string fsmName;
+	ostream &out;
 
 	/* Write options. */
 	bool noEnd;
@@ -274,56 +379,6 @@ public:
 	bool noFinal;
 	bool noError;
 	bool noCS;
-
-	void createMachine();
-	void initActionList( unsigned long length );
-	void newAction( int anum, std::string name,
-			const InputLoc &loc, GenInlineList *inlineList );
-	void initActionTableList( unsigned long length );
-	void initStateList( unsigned long length );
-	void setStartState( unsigned long startState );
-	void setErrorState( unsigned long errState );
-	void addEntryPoint( char *name, unsigned long entryState );
-	void setId( int snum, int id );
-	void setFinal( int snum );
-	void initTransList( int snum, unsigned long length );
-
-	void newTrans( int snum, int tnum, Key lowKey, Key highKey,
-			GenCondSpace *gcs, RedTransAp *trans );
-
-	void finishTransList( int snum );
-	void setStateActions( int snum, long toStateAction, 
-			long fromStateAction, long eofAction );
-	void setEofTrans( int snum, long targ, long eofAction );
-	void setForcedErrorState()
-		{ redFsm->forcedErrorState = true; }
-
-	void condSpaceItem( int cnum, long condActionId );
-	void newCondSpace( int cnum, int condSpaceId );
-
-	void initStateCondList( int snum, ulong length );
-	void addStateCond( int snum, Key lowKey, Key highKey, long condNum );
-
-	bool setAlphType( const HostLang *hostLang, const char *data );
-
-	void resolveTargetStates( GenInlineList *inlineList );
-	Key findMaxKey();
-
-	void makeSubList( GenInlineList *outList, const InputLoc &loc,
-			InlineList *inlineList, GenInlineItem::Type type );
-
-	/* Gather various info on the machine. */
-	void analyzeActionList( RedAction *redAct, GenInlineList *inlineList );
-	void analyzeAction( GenAction *act, GenInlineList *inlineList );
-	void actionActionRefs( RedAction *action );
-	void transListActionRefs( RedTransList &list );
-	void transActionRefs( RedTransAp *trans );
-	void findFinalActionRefs();
-	void analyzeMachine();
-
-	void resolveTargetStates();
-	void setValueLimits();
-	void assignActionIds();
 
 	void write_option_error( InputLoc &loc, std::string arg );
 

@@ -139,39 +139,17 @@ void GenBase::reduceActionTables()
 }
 
 
-CodeGenData::CodeGenData( const CodeGenArgs &args )
+CodeGenData::CodeGenData( Reducer *red, const CodeGenArgs &args )
 :
-	GenBase(args.fsmName, args.machineId, args.id, args.pd, args.fsm),
+	red(red), //Reducer(args.fsmName, args.machineId, args.id, args.pd, args.fsm),
+
+	keyOps(red->keyOps),
+	fsm(red->fsm),
+	redFsm(red->redFsm),
 
 	sourceFileName(args.sourceFileName),
 	fsmName(args.fsmName), 
 	out(args.out),
-	redFsm(0), 
-	allActions(0),
-	allActionTables(0),
-	allConditions(0),
-	allCondSpaces(0),
-	allStates(0),
-	nameIndex(0),
-	startState(-1),
-	errState(-1),
-	getKeyExpr(0),
-	accessExpr(0),
-	prePushExpr(0),
-	postPopExpr(0),
-	nfaPrePushExpr(0),
-	nfaPostPopExpr(0),
-	pExpr(0),
-	peExpr(0),
-	eofExpr(0),
-	csExpr(0),
-	topExpr(0),
-	stackExpr(0),
-	actExpr(0),
-	tokstartExpr(0),
-	tokendExpr(0),
-	dataExpr(0),
-	hasLongestMatch(false),
 	noEnd(false),
 	noPrefix(false),
 	noFinal(false),
@@ -181,7 +159,7 @@ CodeGenData::CodeGenData( const CodeGenArgs &args )
 {
 }
 
-void CodeGenData::makeText( GenInlineList *outList, InlineItem *item )
+void Reducer::makeText( GenInlineList *outList, InlineItem *item )
 {
 	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::Text );
 	inlineItem->data = item->data;
@@ -189,7 +167,7 @@ void CodeGenData::makeText( GenInlineList *outList, InlineItem *item )
 	outList->append( inlineItem );
 }
 
-void CodeGenData::makeTargetItem( GenInlineList *outList, NameInst *nameTarg, 
+void Reducer::makeTargetItem( GenInlineList *outList, NameInst *nameTarg, 
 		GenInlineItem::Type type )
 {
 	long targetState;
@@ -207,7 +185,7 @@ void CodeGenData::makeTargetItem( GenInlineList *outList, NameInst *nameTarg,
 }
 
 
-void CodeGenData::makeSubList( GenInlineList *outList, const InputLoc &loc,
+void Reducer::makeSubList( GenInlineList *outList, const InputLoc &loc,
 		InlineList *inlineList, GenInlineItem::Type type )
 {
 	/* Fill the sub list. */
@@ -221,13 +199,13 @@ void CodeGenData::makeSubList( GenInlineList *outList, const InputLoc &loc,
 }
 
 /* Make a sublist item with a given type. */
-void CodeGenData::makeSubList( GenInlineList *outList, 
+void Reducer::makeSubList( GenInlineList *outList, 
 		InlineList *inlineList, GenInlineItem::Type type )
 {
 	makeSubList( outList, InputLoc(), inlineList, type );
 }
 
-void CodeGenData::makeLmOnLast( GenInlineList *outList, InlineItem *item )
+void Reducer::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 {
 	makeSetTokend( outList, 1 );
 
@@ -238,7 +216,7 @@ void CodeGenData::makeLmOnLast( GenInlineList *outList, InlineItem *item )
 	}
 }
 
-void CodeGenData::makeLmOnNext( GenInlineList *outList, InlineItem *item )
+void Reducer::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 {
 	makeSetTokend( outList, 0 );
 	outList->append( new GenInlineItem( InputLoc(), GenInlineItem::LmHold ) );
@@ -250,7 +228,7 @@ void CodeGenData::makeLmOnNext( GenInlineList *outList, InlineItem *item )
 	}
 }
 
-void CodeGenData::makeExecGetTokend( GenInlineList *outList )
+void Reducer::makeExecGetTokend( GenInlineList *outList )
 {
 	/* Make the Exec item. */
 	GenInlineItem *execItem = new GenInlineItem( InputLoc(), GenInlineItem::LmExec );
@@ -263,7 +241,7 @@ void CodeGenData::makeExecGetTokend( GenInlineList *outList )
 	outList->append( execItem );
 }
 
-void CodeGenData::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
+void Reducer::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 {
 	/* Jump to the tokend. */
 	makeExecGetTokend( outList );
@@ -275,7 +253,7 @@ void CodeGenData::makeLmOnLagBehind( GenInlineList *outList, InlineItem *item )
 	}
 }
 
-void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
+void Reducer::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 {
 	GenInlineItem *lmSwitch = new GenInlineItem( InputLoc(), GenInlineItem::LmSwitch );
 	GenInlineList *lmList = lmSwitch->children = new GenInlineList;
@@ -346,21 +324,21 @@ void CodeGenData::makeLmSwitch( GenInlineList *outList, InlineItem *item )
 	outList->append( lmSwitch );
 }
 
-void CodeGenData::makeSetTokend( GenInlineList *outList, long offset )
+void Reducer::makeSetTokend( GenInlineList *outList, long offset )
 {
 	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSetTokEnd );
 	inlineItem->offset = offset;
 	outList->append( inlineItem );
 }
 
-void CodeGenData::makeSetAct( GenInlineList *outList, long lmId )
+void Reducer::makeSetAct( GenInlineList *outList, long lmId )
 {
 	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSetActId );
 	inlineItem->lmId = lmId;
 	outList->append( inlineItem );
 }
 
-void CodeGenData::makeGenInlineList( GenInlineList *outList, InlineList *inList )
+void Reducer::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 {
 	for ( InlineList::Iter item = *inList; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -486,13 +464,13 @@ void CodeGenData::makeGenInlineList( GenInlineList *outList, InlineList *inList 
 	}
 }
 
-void CodeGenData::makeExports()
+void Reducer::makeExports()
 {
 	for ( ExportList::Iter exp = pd->exportList; exp.lte(); exp++ )
 		exportList.append( new Export( exp->name, exp->key ) );
 }
 
-void CodeGenData::makeAction( Action *action )
+void Reducer::makeAction( Action *action )
 {
 	GenInlineList *genList = new GenInlineList;
 
@@ -504,7 +482,7 @@ void CodeGenData::makeAction( Action *action )
 }
 
 
-void CodeGenData::makeActionList()
+void Reducer::makeActionList()
 {
 	/* Determine which actions to write. */
 	int nextActionId = 0;
@@ -523,7 +501,7 @@ void CodeGenData::makeActionList()
 	}
 }
 
-void CodeGenData::makeActionTableList()
+void Reducer::makeActionTableList()
 {
 	/* Must first order the action tables based on their id. */
 	int numTables = nextActionTableId;
@@ -557,7 +535,7 @@ void CodeGenData::makeActionTableList()
 	delete[] tables;
 }
 
-void CodeGenData::makeConditions()
+void Reducer::makeConditions()
 {
 	if ( fsm->ctx->condData->condSpaceMap.length() > 0 ) {
 		/* Allocate condition space ids. */
@@ -593,7 +571,7 @@ void CodeGenData::makeConditions()
 	}
 }
 
-bool CodeGenData::makeNameInst( std::string &res, NameInst *nameInst )
+bool Reducer::makeNameInst( std::string &res, NameInst *nameInst )
 {
 	bool written = false;
 	if ( nameInst->parent != 0 )
@@ -609,7 +587,7 @@ bool CodeGenData::makeNameInst( std::string &res, NameInst *nameInst )
 	return written;
 }
 
-void CodeGenData::makeEntryPoints()
+void Reducer::makeEntryPoints()
 {
 	/* List of entry points other than start state. */
 	if ( fsm->entryPoints.length() > 0 || pd->lmRequiresErrorState ) {
@@ -627,7 +605,7 @@ void CodeGenData::makeEntryPoints()
 	}
 }
 
-void CodeGenData::makeStateActions( StateAp *state )
+void Reducer::makeStateActions( StateAp *state )
 {
 	RedActionTable *toStateActions = 0;
 	if ( state->toStateActionTable.length() > 0 )
@@ -660,7 +638,7 @@ void CodeGenData::makeStateActions( StateAp *state )
 	}
 }
 
-void CodeGenData::makeEofTrans( StateAp *state )
+void Reducer::makeEofTrans( StateAp *state )
 {
 	RedActionTable *eofActions = 0;
 	if ( state->eofActionTable.length() > 0 )
@@ -678,7 +656,7 @@ void CodeGenData::makeEofTrans( StateAp *state )
 	}
 }
 
-void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
+void Reducer::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 {
 	RedCondEl *outConds;
 	int numConds;
@@ -753,7 +731,7 @@ void CodeGenData::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 	}
 }
 
-void CodeGenData::makeTransList( StateAp *state )
+void Reducer::makeTransList( StateAp *state )
 {
 	TransListVect outList;
 
@@ -774,7 +752,7 @@ void CodeGenData::makeTransList( StateAp *state )
 	finishTransList( curState );
 }
 
-void CodeGenData::makeStateList()
+void Reducer::makeStateList()
 {
 	/* Write the list of states. */
 	long length = fsm->stateList.length();
@@ -825,7 +803,7 @@ void CodeGenData::makeStateList()
 	}
 }
 
-void CodeGenData::makeMachine()
+void Reducer::makeMachine()
 {
 	createMachine();
 
@@ -850,46 +828,46 @@ void CodeGenData::makeMachine()
 void CodeGenData::make( const HostLang *hostLang )
 {
 	/* Alphabet type. */
-	setAlphType( hostLang, fsm->ctx->keyOps->alphType->internalName );
+	red->setAlphType( hostLang, fsm->ctx->keyOps->alphType->internalName );
 	
 	/* Getkey expression. */
-	if ( pd->getKeyExpr != 0 ) {
-		getKeyExpr = new GenInlineList;
-		makeGenInlineList( getKeyExpr, pd->getKeyExpr );
+	if ( red->pd->getKeyExpr != 0 ) {
+		red->getKeyExpr = new GenInlineList;
+		red->makeGenInlineList( red->getKeyExpr, red->pd->getKeyExpr );
 	}
 
 	/* Access expression. */
-	if ( pd->accessExpr != 0 ) {
-		accessExpr = new GenInlineList;
-		makeGenInlineList( accessExpr, pd->accessExpr );
+	if ( red->pd->accessExpr != 0 ) {
+		red->accessExpr = new GenInlineList;
+		red->makeGenInlineList( red->accessExpr, red->pd->accessExpr );
 	}
 
 	/* PrePush expression. */
-	if ( pd->prePushExpr != 0 ) {
+	if ( red->pd->prePushExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		makeGenInlineList( il, pd->prePushExpr->inlineList );
-		prePushExpr = new GenInlineExpr( pd->prePushExpr->loc, il );
+		red->makeGenInlineList( il, red->pd->prePushExpr->inlineList );
+		red->prePushExpr = new GenInlineExpr( red->pd->prePushExpr->loc, il );
 	}
 
 	/* PostPop expression. */
-	if ( pd->postPopExpr != 0 ) {
+	if ( red->pd->postPopExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		makeGenInlineList( il, pd->postPopExpr->inlineList );
-		postPopExpr = new GenInlineExpr( pd->postPopExpr->loc, il );
+		red->makeGenInlineList( il, red->pd->postPopExpr->inlineList );
+		red->postPopExpr = new GenInlineExpr( red->pd->postPopExpr->loc, il );
 	}
 
 	/* PrePush expression. */
-	if ( pd->nfaPrePushExpr != 0 ) {
+	if ( red->pd->nfaPrePushExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		makeGenInlineList( il, pd->nfaPrePushExpr->inlineList );
-		nfaPrePushExpr = new GenInlineExpr( pd->nfaPrePushExpr->loc, il );
+		red->makeGenInlineList( il, red->pd->nfaPrePushExpr->inlineList );
+		red->nfaPrePushExpr = new GenInlineExpr( red->pd->nfaPrePushExpr->loc, il );
 	}
 
 	/* PostPop expression. */
-	if ( pd->nfaPostPopExpr != 0 ) {
+	if ( red->pd->nfaPostPopExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		makeGenInlineList( il, pd->nfaPostPopExpr->inlineList );
-		nfaPostPopExpr = new GenInlineExpr( pd->nfaPostPopExpr->loc, il );
+		red->makeGenInlineList( il, red->pd->nfaPostPopExpr->inlineList );
+		red->nfaPostPopExpr = new GenInlineExpr( red->pd->nfaPostPopExpr->loc, il );
 	}
 
 
@@ -897,85 +875,86 @@ void CodeGenData::make( const HostLang *hostLang )
 	 * Variable expressions.
 	 */
 
-	if ( pd->pExpr != 0 ) {
-		pExpr = new GenInlineList;
-		makeGenInlineList( pExpr, pd->pExpr );
+	if ( red->pd->pExpr != 0 ) {
+		red->pExpr = new GenInlineList;
+		red->makeGenInlineList( red->pExpr, red->pd->pExpr );
 	}
 	
-	if ( pd->peExpr != 0 ) {
-		peExpr = new GenInlineList;
-		makeGenInlineList( peExpr, pd->peExpr );
+	if ( red->pd->peExpr != 0 ) {
+		red->peExpr = new GenInlineList;
+		red->makeGenInlineList( red->peExpr, red->pd->peExpr );
 	}
 
-	if ( pd->eofExpr != 0 ) {
-		eofExpr = new GenInlineList;
-		makeGenInlineList( eofExpr, pd->eofExpr );
+	if ( red->pd->eofExpr != 0 ) {
+		red->eofExpr = new GenInlineList;
+		red->makeGenInlineList( red->eofExpr, red->pd->eofExpr );
 	}
 	
-	if ( pd->csExpr != 0 ) {
-		csExpr = new GenInlineList;
-		makeGenInlineList( csExpr, pd->csExpr );
+	if ( red->pd->csExpr != 0 ) {
+		red->csExpr = new GenInlineList;
+		red->makeGenInlineList( red->csExpr, red->pd->csExpr );
 	}
 	
-	if ( pd->topExpr != 0 ) {
-		topExpr = new GenInlineList;
-		makeGenInlineList( topExpr, pd->topExpr );
+	if ( red->pd->topExpr != 0 ) {
+		red->topExpr = new GenInlineList;
+		red->makeGenInlineList( red->topExpr, red->pd->topExpr );
 	}
 	
-	if ( pd->stackExpr != 0 ) {
-		stackExpr = new GenInlineList;
-		makeGenInlineList( stackExpr, pd->stackExpr );
+	if ( red->pd->stackExpr != 0 ) {
+		red->stackExpr = new GenInlineList;
+		red->makeGenInlineList( red->stackExpr, red->pd->stackExpr );
 	}
 	
-	if ( pd->actExpr != 0 ) {
-		actExpr = new GenInlineList;
-		makeGenInlineList( actExpr, pd->actExpr );
+	if ( red->pd->actExpr != 0 ) {
+		red->actExpr = new GenInlineList;
+		red->makeGenInlineList( red->actExpr, red->pd->actExpr );
 	}
 	
-	if ( pd->tokstartExpr != 0 ) {
-		tokstartExpr = new GenInlineList;
-		makeGenInlineList( tokstartExpr, pd->tokstartExpr );
+	if ( red->pd->tokstartExpr != 0 ) {
+		red->tokstartExpr = new GenInlineList;
+		red->makeGenInlineList( red->tokstartExpr, red->pd->tokstartExpr );
 	}
 	
-	if ( pd->tokendExpr != 0 ) {
-		tokendExpr = new GenInlineList;
-		makeGenInlineList( tokendExpr, pd->tokendExpr );
+	if ( red->pd->tokendExpr != 0 ) {
+		red->tokendExpr = new GenInlineList;
+		red->makeGenInlineList( red->tokendExpr, red->pd->tokendExpr );
 	}
 	
-	if ( pd->dataExpr != 0 ) {
-		dataExpr = new GenInlineList;
-		makeGenInlineList( dataExpr, pd->dataExpr );
+	if ( red->pd->dataExpr != 0 ) {
+		red->dataExpr = new GenInlineList;
+		red->makeGenInlineList( red->dataExpr, red->pd->dataExpr );
 	}
 	
-	makeExports();
-	makeMachine();
+	red->makeExports();
+	red->makeMachine();
+	redFsm = red->redFsm;
 
 	/* Do this before distributing transitions out to singles and defaults
 	 * makes life easier. */
-	redFsm->maxKey = findMaxKey();
+	red->redFsm->maxKey = red->findMaxKey();
 
-	redFsm->assignActionLocs();
+	red->redFsm->assignActionLocs();
 
 	/* Find the first final state (The final state with the lowest id). */
-	redFsm->findFirstFinState();
+	red->redFsm->findFirstFinState();
 
 	/* Code generation anlysis step. */
 	genAnalysis();
 }
 
-void CodeGenData::createMachine()
+void Reducer::createMachine()
 {
 	redFsm = new RedFsmAp( fsm->ctx, machineId );
 }
 
-void CodeGenData::initActionList( unsigned long length )
+void Reducer::initActionList( unsigned long length )
 { 
 	allActions = new GenAction[length];
 	for ( unsigned long a = 0; a < length; a++ )
 		actionList.append( allActions+a );
 }
 
-void CodeGenData::newAction( int anum, std::string name,
+void Reducer::newAction( int anum, std::string name,
 		const InputLoc &loc, GenInlineList *inlineList )
 {
 	allActions[anum].actionId = anum;
@@ -984,12 +963,12 @@ void CodeGenData::newAction( int anum, std::string name,
 	allActions[anum].inlineList = inlineList;
 }
 
-void CodeGenData::initActionTableList( unsigned long length )
+void Reducer::initActionTableList( unsigned long length )
 { 
 	allActionTables = new RedAction[length];
 }
 
-void CodeGenData::initStateList( unsigned long length )
+void Reducer::initStateList( unsigned long length )
 {
 	redFsm->allStates = allStates = new RedStateAp[length];
 	for ( unsigned long s = 0; s < length; s++ )
@@ -1009,29 +988,29 @@ void CodeGenData::initStateList( unsigned long length )
 	redFsm->nextStateId = redFsm->stateList.length();
 }
 
-void CodeGenData::setStartState( unsigned long _startState )
+void Reducer::setStartState( unsigned long _startState )
 {
 	startState = _startState;
 }
 
-void CodeGenData::setErrorState( unsigned long _errState )
+void Reducer::setErrorState( unsigned long _errState )
 {
 	errState = _errState;
 }
 
-void CodeGenData::addEntryPoint( char *name, unsigned long entryState )
+void Reducer::addEntryPoint( char *name, unsigned long entryState )
 {
 	entryPointIds.append( entryState );
 	entryPointNames.append( name );
 }
 
-void CodeGenData::initTransList( int snum, unsigned long length )
+void Reducer::initTransList( int snum, unsigned long length )
 {
 	/* Could preallocate the out range to save time growing it. For now do
 	 * nothing. */
 }
 
-void CodeGenData::newTrans( RedStateAp *state, Key lowKey, Key highKey, RedTransAp *trans )
+void Reducer::newTrans( RedStateAp *state, Key lowKey, Key highKey, RedTransAp *trans )
 {
 	/* Get the current state and range. */
 	RedTransList &destRange = state->outRange;
@@ -1071,7 +1050,7 @@ void CodeGenData::newTrans( RedStateAp *state, Key lowKey, Key highKey, RedTrans
 	destRange.append( RedTransEl( lowKey, highKey, trans ) );
 }
 
-void CodeGenData::finishTransList( int snum )
+void Reducer::finishTransList( int snum )
 {
 	/* Get the current state and range. */
 	RedStateAp *curState = allStates + snum;
@@ -1105,20 +1084,20 @@ void CodeGenData::finishTransList( int snum )
 	}
 }
 
-void CodeGenData::setId( int snum, int id )
+void Reducer::setId( int snum, int id )
 {
 	RedStateAp *curState = allStates + snum;
 	curState->id = id;
 }
 
-void CodeGenData::setFinal( int snum )
+void Reducer::setFinal( int snum )
 {
 	RedStateAp *curState = allStates + snum;
 	curState->isFinal = true;
 }
 
 
-void CodeGenData::setStateActions( int snum, long toStateAction, 
+void Reducer::setStateActions( int snum, long toStateAction, 
 		long fromStateAction, long eofAction )
 {
 	RedStateAp *curState = allStates + snum;
@@ -1130,7 +1109,7 @@ void CodeGenData::setStateActions( int snum, long toStateAction,
 		curState->eofAction = allActionTables + eofAction;
 }
 
-void CodeGenData::setEofTrans( int snum, long eofTarget, long actId )
+void Reducer::setEofTrans( int snum, long eofTarget, long actId )
 {
 	RedStateAp *curState = allStates + snum;
 	RedStateAp *targState = allStates + eofTarget;
@@ -1146,7 +1125,7 @@ void CodeGenData::setEofTrans( int snum, long eofTarget, long actId )
 	curState->eofTrans = trans;
 }
 
-void CodeGenData::resolveTargetStates( GenInlineList *inlineList )
+void Reducer::resolveTargetStates( GenInlineList *inlineList )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
@@ -1164,13 +1143,13 @@ void CodeGenData::resolveTargetStates( GenInlineList *inlineList )
 	}
 }
 
-void CodeGenData::resolveTargetStates()
+void Reducer::resolveTargetStates()
 {
 	for ( GenActionList::Iter a = actionList; a.lte(); a++ )
 		resolveTargetStates( a->inlineList );
 }
 
-bool CodeGenData::setAlphType( const HostLang *hostLang, const char *data )
+bool Reducer::setAlphType( const HostLang *hostLang, const char *data )
 {
 	HostType *alphType = findAlphTypeInternal( hostLang, data );
 	if ( alphType == 0 )
@@ -1179,22 +1158,22 @@ bool CodeGenData::setAlphType( const HostLang *hostLang, const char *data )
 	return true;
 }
 
-void CodeGenData::condSpaceItem( int cnum, long condActionId )
+void Reducer::condSpaceItem( int cnum, long condActionId )
 {
 	GenCondSpace *cond = allCondSpaces + cnum;
 	cond->condSet.append( allActions + condActionId );
 }
 
-void CodeGenData::initStateCondList( int snum, ulong length )
+void Reducer::initStateCondList( int snum, ulong length )
 {
 	/* Could preallocate these, as we could with transitions. */
 }
 
-void CodeGenData::addStateCond( int snum, Key lowKey, Key highKey, long condNum )
+void Reducer::addStateCond( int snum, Key lowKey, Key highKey, long condNum )
 {
 }
 
-Key CodeGenData::findMaxKey()
+Key Reducer::findMaxKey()
 {
 	Key maxKey = fsm->ctx->keyOps->maxKey;
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
@@ -1211,14 +1190,14 @@ Key CodeGenData::findMaxKey()
 	return maxKey;
 }
 
-void CodeGenData::actionActionRefs( RedAction *action )
+void Reducer::actionActionRefs( RedAction *action )
 {
 	action->numTransRefs += 1;
 	for ( GenActionTable::Iter item = action->key; item.lte(); item++ )
 		item->value->numTransRefs += 1;
 }
 
-void CodeGenData::transActionRefs( RedTransAp *trans )
+void Reducer::transActionRefs( RedTransAp *trans )
 {
 	for ( int c = 0; c < trans->numConds(); c++ ) {
 		RedCondPair *cond = trans->outCond(c);
@@ -1230,13 +1209,13 @@ void CodeGenData::transActionRefs( RedTransAp *trans )
 		trans->condSpace->numTransRefs += 1;
 }
 
-void CodeGenData::transListActionRefs( RedTransList &list )
+void Reducer::transListActionRefs( RedTransList &list )
 {
 	for ( RedTransList::Iter rtel = list; rtel.lte(); rtel++ )
 		transActionRefs( rtel->value );
 }
 
-void CodeGenData::findFinalActionRefs()
+void Reducer::findFinalActionRefs()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Rerence count out of single transitions. */
@@ -1293,7 +1272,7 @@ void CodeGenData::findFinalActionRefs()
 	}
 }
 
-void CodeGenData::analyzeAction( GenAction *act, GenInlineList *inlineList )
+void Reducer::analyzeAction( GenAction *act, GenInlineList *inlineList )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		/* Only consider actions that are referenced. */
@@ -1352,7 +1331,7 @@ void CodeGenData::analyzeAction( GenAction *act, GenInlineList *inlineList )
 	}
 }
 
-void CodeGenData::analyzeActionList( RedAction *redAct, GenInlineList *inlineList )
+void Reducer::analyzeActionList( RedAction *redAct, GenInlineList *inlineList )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		/* Any next statements in the action table? */
@@ -1377,7 +1356,7 @@ void CodeGenData::analyzeActionList( RedAction *redAct, GenInlineList *inlineLis
 }
 
 /* Assign ids to referenced actions. */
-void CodeGenData::assignActionIds()
+void Reducer::assignActionIds()
 {
 	int nextActionId = 0;
 	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
@@ -1387,7 +1366,7 @@ void CodeGenData::assignActionIds()
 	}
 }
 
-void CodeGenData::setValueLimits()
+void Reducer::setValueLimits()
 {
 	redFsm->maxSingleLen = 0;
 	redFsm->maxRangeLen = 0;
@@ -1462,10 +1441,8 @@ void CodeGenData::setValueLimits()
 	}
 }
 
-
-
 /* Gather various info on the machine. */
-void CodeGenData::analyzeMachine()
+void Reducer::analyzeMachine()
 {
 	/* Find the true count of action references.  */
 	findFinalActionRefs();
@@ -1569,7 +1546,7 @@ void CodeGenData::analyzeMachine()
 
 void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 {
-	id->warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
+	red->id->warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
 }
 
 void CodeGenData::writeStatement( InputLoc &loc, int nargs,
@@ -1590,9 +1567,9 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 				write_option_error( loc, args[i] );
 		}
 
-		if ( id->printStatistics ) {
-			id->stats() << "fsm-name\t" << fsmName << std::endl;
-			id->stats() << "fsm-states\t" << redFsm->stateList.length() << std::endl;
+		if ( red->id->printStatistics ) {
+			red->id->stats() << "fsm-name\t" << fsmName << std::endl;
+			red->id->stats() << "fsm-states\t" << redFsm->stateList.length() << std::endl;
 		}
 
 		writeData();
@@ -1638,7 +1615,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 	}
 	else {
 		/* EMIT An error here. */
-		id->error(loc) << "unrecognized write command \"" << 
+		red->id->error(loc) << "unrecognized write command \"" << 
 				args[0] << "\"" << std::endl;
 	}
 }

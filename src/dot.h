@@ -29,7 +29,7 @@ class GraphvizDotGenOrig : public CodeGenData
 {
 public:
 	GraphvizDotGenOrig( const CodeGenArgs &args ) 
-			: CodeGenData(args) { }
+			: CodeGenData(args.red, args) { }
 
 	/* Print an fsm to out stream. */
 	void writeTransList( RedStateAp *state );

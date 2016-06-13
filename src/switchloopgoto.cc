@@ -54,13 +54,13 @@ void SwitchLoopGoto::genAnalysis()
 	redFsm->moveSelectTransToSingle();
 
 	/* If any errors have occured in the input file then don't write anything. */
-	if ( id->errorCount > 0 )
+	if ( red->id->errorCount > 0 )
 		return;
 
 	/* Anlayze Machine will find the final action reference counts, among other
 	 * things. We will use these in reporting the usage of fsm directives in
 	 * action code. */
-	analyzeMachine();
+	red->analyzeMachine();
 
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::AnalyzePass );
@@ -95,7 +95,7 @@ void SwitchLoopGoto::writeData()
 std::ostream &SwitchLoopGoto::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -111,7 +111,7 @@ std::ostream &SwitchLoopGoto::ACTION_SWITCH()
 std::ostream &SwitchLoopGoto::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -127,7 +127,7 @@ std::ostream &SwitchLoopGoto::EOF_ACTION_SWITCH()
 std::ostream &SwitchLoopGoto::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
@@ -143,7 +143,7 @@ std::ostream &SwitchLoopGoto::FROM_STATE_ACTION_SWITCH()
 std::ostream &SwitchLoopGoto::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */

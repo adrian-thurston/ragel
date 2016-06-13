@@ -53,13 +53,13 @@ void SwitchExpGoto::genAnalysis()
 	redFsm->moveSelectTransToSingle();
 
 	/* If any errors have occured in the input file then don't write anything. */
-	if ( id->errorCount > 0 )
+	if ( red->id->errorCount > 0 )
 		return;
 	
 	/* Anlayze Machine will find the final action reference counts, among other
 	 * things. We will use these in reporting the usage of fsm directives in
 	 * action code. */
-	analyzeMachine();
+	red->analyzeMachine();
 
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::AnalyzePass );

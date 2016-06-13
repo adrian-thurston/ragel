@@ -53,7 +53,7 @@ void IpGoto::genAnalysis()
 	redFsm->moveSelectTransToSingle();
 
 	/* If any errors have occured in the input file then don't write anything. */
-	if ( id->errorCount > 0 )
+	if ( red->id->errorCount > 0 )
 		return;
 	
 	redFsm->setInTrans();
@@ -61,7 +61,7 @@ void IpGoto::genAnalysis()
 	/* Anlayze Machine will find the final action reference counts, among other
 	 * things. We will use these in reporting the usage of fsm directives in
 	 * action code. */
-	analyzeMachine();
+	red->analyzeMachine();
 
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::AnalyzePass );
@@ -94,9 +94,9 @@ void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
-	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( prePushExpr );
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -109,9 +109,9 @@ void IpGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
-	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( prePushExpr );
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -124,9 +124,9 @@ void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 {
 	ret << OPEN_GEN_BLOCK();
 
-	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( prePushExpr );
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -140,9 +140,9 @@ void IpGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, boo
 {
 	ret << OPEN_GEN_BLOCK();
 
-	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( prePushExpr );
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -157,9 +157,9 @@ void IpGoto::RET( ostream &ret, bool inFinish )
 	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = "
 			<< STACK() << "[" << TOP() << "];";
 
-	if ( postPopExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( postPopExpr );
-		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
+	if ( red->postPopExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->postPopExpr );
+		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -171,9 +171,9 @@ void IpGoto::NRET( ostream &ret, bool inFinish )
 	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = "
 			<< STACK() << "[" << TOP() << "];";
 
-	if ( postPopExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( postPopExpr );
-		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
+	if ( red->postPopExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->postPopExpr );
+		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -446,9 +446,9 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 			"		int new_recs = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 						ARR_REF( nfaOffsets ) << "[" << state->id << "]];\n";
 
-		if ( nfaPrePushExpr != 0 ) {
-			out << OPEN_HOST_BLOCK( nfaPrePushExpr );
-			INLINE_LIST( out, nfaPrePushExpr->inlineList, 0, false, false );
+		if ( red->nfaPrePushExpr != 0 ) {
+			out << OPEN_HOST_BLOCK( red->nfaPrePushExpr );
+			INLINE_LIST( out, red->nfaPrePushExpr->inlineList, 0, false, false );
 			out << CLOSE_HOST_BLOCK();
 		}
 

@@ -273,8 +273,8 @@ void TableArray::finishGenerate()
 			out << "0 };\n\n";
 	}
 
-	if ( codeGen.id->printStatistics ) {
-		codeGen.id->stats() << name << "\t" << values << "\t" <<
+	if ( codeGen.red->id->printStatistics ) {
+		codeGen.red->id->stats() << name << "\t" << values << "\t" <<
 			size() << "\t" << endl;
 	}
 
@@ -326,7 +326,7 @@ void TableArray::finish()
 /* Init code gen with in parameters. */
 CodeGen::CodeGen( const CodeGenArgs &args )
 :
-	CodeGenData( args ),
+	CodeGenData( args.red, args ),
 	tableData( 0 ),
 	backend( args.id->backend ),
 	stringTables( args.id->stringTables )
@@ -335,8 +335,8 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 
 void CodeGen::statsSummary()
 {
-	if ( id->printStatistics )
-		id->stats() << "table-data\t\t" << tableData << endl << endl;
+	if ( red->id->printStatistics )
+		red->id->stats() << "table-data\t\t" << tableData << endl << endl;
 }
 
 unsigned int CodeGen::arrayTypeSize( unsigned long maxVal )
@@ -387,9 +387,9 @@ string CodeGen::START_STATE_ID()
 string CodeGen::ACCESS()
 {
 	ostringstream ret;
-	if ( accessExpr != 0 ) {
+	if ( red->accessExpr != 0 ) {
 		ret << OPEN_HOST_PLAIN();
-		INLINE_LIST( ret, accessExpr, 0, false, false );
+		INLINE_LIST( ret, red->accessExpr, 0, false, false );
 		ret << CLOSE_HOST_PLAIN();
 		ret << ACCESS_OPER();
 	}
@@ -400,11 +400,11 @@ string CodeGen::ACCESS()
 string CodeGen::P()
 { 
 	ostringstream ret;
-	if ( pExpr == 0 )
+	if ( red->pExpr == 0 )
 		ret << "p";
 	else {
 		ret << OPEN_HOST_EXPR();
-		INLINE_LIST( ret, pExpr, 0, false, false );
+		INLINE_LIST( ret, red->pExpr, 0, false, false );
 		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
@@ -413,11 +413,11 @@ string CodeGen::P()
 string CodeGen::PE()
 {
 	ostringstream ret;
-	if ( peExpr == 0 )
+	if ( red->peExpr == 0 )
 		ret << "pe";
 	else {
 		ret << OPEN_HOST_EXPR();
-		INLINE_LIST( ret, peExpr, 0, false, false );
+		INLINE_LIST( ret, red->peExpr, 0, false, false );
 		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
@@ -426,11 +426,11 @@ string CodeGen::PE()
 string CodeGen::vEOF()
 {
 	ostringstream ret;
-	if ( eofExpr == 0 )
+	if ( red->eofExpr == 0 )
 		ret << "eof";
 	else {
 		ret << OPEN_HOST_EXPR();
-		INLINE_LIST( ret, eofExpr, 0, false, false );
+		INLINE_LIST( ret, red->eofExpr, 0, false, false );
 		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
@@ -439,12 +439,12 @@ string CodeGen::vEOF()
 string CodeGen::vCS()
 {
 	ostringstream ret;
-	if ( csExpr == 0 )
+	if ( red->csExpr == 0 )
 		ret << ACCESS() << "cs";
 	else {
 		/* Emit the user supplied method of retrieving the key. */
 		ret << OPEN_HOST_EXPR();
-		INLINE_LIST( ret, csExpr, 0, false, false );
+		INLINE_LIST( ret, red->csExpr, 0, false, false );
 		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
@@ -453,11 +453,11 @@ string CodeGen::vCS()
 string CodeGen::TOP()
 {
 	ostringstream ret;
-	if ( topExpr == 0 )
+	if ( red->topExpr == 0 )
 		ret << ACCESS() + "top";
 	else {
 		ret << OPEN_HOST_EXPR();
-		INLINE_LIST( ret, topExpr, 0, false, false );
+		INLINE_LIST( ret, red->topExpr, 0, false, false );
 		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
@@ -466,11 +466,11 @@ string CodeGen::TOP()
 string CodeGen::STACK()
 {
 	ostringstream ret;
-	if ( stackExpr == 0 )
+	if ( red->stackExpr == 0 )
 		ret << ACCESS() + "stack";
 	else {
 		ret << OPEN_HOST_EXPR();
-		INLINE_LIST( ret, stackExpr, 0, false, false );
+		INLINE_LIST( ret, red->stackExpr, 0, false, false );
 		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
@@ -479,11 +479,11 @@ string CodeGen::STACK()
 string CodeGen::ACT()
 {
 	ostringstream ret;
-	if ( actExpr == 0 )
+	if ( red->actExpr == 0 )
 		ret << ACCESS() + "act";
 	else {
 		ret << OPEN_HOST_EXPR();
-		INLINE_LIST( ret, actExpr, 0, false, false );
+		INLINE_LIST( ret, red->actExpr, 0, false, false );
 		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
@@ -492,11 +492,11 @@ string CodeGen::ACT()
 string CodeGen::TOKSTART()
 {
 	ostringstream ret;
-	if ( tokstartExpr == 0 )
+	if ( red->tokstartExpr == 0 )
 		ret << ACCESS() + "ts";
 	else {
 		ret << OPEN_HOST_EXPR();
-		INLINE_LIST( ret, tokstartExpr, 0, false, false );
+		INLINE_LIST( ret, red->tokstartExpr, 0, false, false );
 		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
@@ -505,11 +505,11 @@ string CodeGen::TOKSTART()
 string CodeGen::TOKEND()
 {
 	ostringstream ret;
-	if ( tokendExpr == 0 )
+	if ( red->tokendExpr == 0 )
 		ret << ACCESS() + "te";
 	else {
 		ret << OPEN_HOST_EXPR();
-		INLINE_LIST( ret, tokendExpr, 0, false, false );
+		INLINE_LIST( ret, red->tokendExpr, 0, false, false );
 		ret << CLOSE_HOST_EXPR();
 	}
 	return ret.str();
@@ -518,10 +518,10 @@ string CodeGen::TOKEND()
 string CodeGen::GET_KEY()
 {
 	ostringstream ret;
-	if ( getKeyExpr != 0 ) { 
+	if ( red->getKeyExpr != 0 ) { 
 		/* Emit the user supplied method of retrieving the key. */
 		ret << OPEN_HOST_EXPR();
-		INLINE_LIST( ret, getKeyExpr, 0, false, false );
+		INLINE_LIST( ret, red->getKeyExpr, 0, false, false );
 		ret << CLOSE_HOST_EXPR();
 	}
 	else {
@@ -954,7 +954,7 @@ void CodeGen::writeInit()
 		out << "\t" << TOP() << " = 0;\n";
 	}
 
-	if ( hasLongestMatch ) {
+	if ( red->hasLongestMatch ) {
 		out << 
 			"	" << TOKSTART() << " = " << NIL() << ";\n"
 			"	" << TOKEND() << " = " << NIL() << ";\n";
@@ -1013,10 +1013,10 @@ void CodeGen::STATE_IDS()
 
 	out << "\n";
 
-	if ( entryPointNames.length() > 0 ) {
-		for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
+	if ( red->entryPointNames.length() > 0 ) {
+		for ( EntryNameVect::Iter en = red->entryPointNames; en.lte(); en++ ) {
 			string name = DATA_PREFIX() + "en_" + *en;
-			VALUE( "int", name, STR( entryPointIds[en.pos()] ) );
+			VALUE( "int", name, STR( red->entryPointIds[en.pos()] ) );
 		}
 		out << "\n";
 	}
@@ -1039,8 +1039,8 @@ void CodeGen::writeError()
 
 void CodeGen::writeExports()
 {
-	if ( exportList.length() > 0 ) {
-		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
+	if ( red->exportList.length() > 0 ) {
+		for ( ExportList::Iter ex = red->exportList; ex.lte(); ex++ ) {
 			out << EXPORT( ALPH_TYPE(), 
 				DATA_PREFIX() + "ex_" + ex->name, KEY(ex->key) ) << "\n";
 		}

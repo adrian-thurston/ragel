@@ -58,7 +58,7 @@ void FlatExpVar::tableDataPass()
 	taIndicies();
 	taIndexDefaults();
 	taTransCondSpaces();
-	if ( condSpaceList.length() > 0 )
+	if ( red->condSpaceList.length() > 0 )
 		taTransOffsets();
 	taCondTargs();
 	taCondActions();
@@ -84,13 +84,13 @@ void FlatExpVar::genAnalysis()
 	redFsm->makeFlatClass();
 
 	/* If any errors have occured in the input file then don't write anything. */
-	if ( id->errorCount > 0 )
+	if ( red->id->errorCount > 0 )
 		return;
 
 	/* Anlayze Machine will find the final action reference counts, among other
 	 * things. We will use these in reporting the usage of fsm directives in
 	 * action code. */
-	analyzeMachine();
+	red->analyzeMachine();
 
 	setKeyType();
 
@@ -251,7 +251,7 @@ void FlatExpVar::writeData()
 	taIndicies();
 	taIndexDefaults();
 	taTransCondSpaces();
-	if ( condSpaceList.length() > 0 )
+	if ( red->condSpaceList.length() > 0 )
 		taTransOffsets();
 	taCondTargs();
 	taCondActions();
@@ -313,7 +313,7 @@ void FlatExpVar::writeExec()
 //		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
 //		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
 
-	if ( condSpaceList.length() > 0 )
+	if ( red->condSpaceList.length() > 0 )
 		out << "	int _cpc;\n";
 
 	out <<
@@ -321,7 +321,7 @@ void FlatExpVar::writeExec()
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
-	if ( condSpaceList.length() > 0 ) {
+	if ( red->condSpaceList.length() > 0 ) {
 		out <<
 			"	" << UINT() << " _cond = 0;\n";
 	}
@@ -363,7 +363,7 @@ void FlatExpVar::writeExec()
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
 					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
 
-				if ( condSpaceList.length() > 0 ) {
+				if ( red->condSpaceList.length() > 0 ) {
 					out << 
 						"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
 				}
@@ -414,7 +414,7 @@ void FlatExpVar::writeExec()
 	LOCATE_TRANS();
 
 	string cond = "_cond";
-	if ( condSpaceList.length() == 0 )
+	if ( red->condSpaceList.length() == 0 )
 		cond = "_trans";
 
 	out << "}\n";

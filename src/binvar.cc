@@ -16,17 +16,17 @@ void BinaryVar::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 
 void BinaryVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	id->error() << "cannot use fcall in -B mode" << std::endl;
-	id->abortCompile( 1 );
+	red->id->error() << "cannot use fcall in -B mode" << std::endl;
+	red->id->abortCompile( 1 );
 }
 
 void BinaryVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
-	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( prePushExpr );
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -37,17 +37,17 @@ void BinaryVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish 
 
 void BinaryVar::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	id->error() << "cannot use fcall in -B mode" << std::endl;
-	id->abortCompile( 1 );
+	red->id->error() << "cannot use fcall in -B mode" << std::endl;
+	red->id->abortCompile( 1 );
 }
 
 void BinaryVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
-	if ( prePushExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( prePushExpr );
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -60,8 +60,8 @@ void BinaryVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 
 void BinaryVar::RET( ostream &ret, bool inFinish )
 {
-	id->error() << "cannot use fcall in -B mode" << std::endl;
-	id->abortCompile( 1 );
+	red->id->error() << "cannot use fcall in -B mode" << std::endl;
+	red->id->abortCompile( 1 );
 }
 
 void BinaryVar::NRET( ostream &ret, bool inFinish )
@@ -69,9 +69,9 @@ void BinaryVar::NRET( ostream &ret, bool inFinish )
 	ret << OPEN_GEN_BLOCK() << TOP() << "-= 1;" << vCS() << " = " <<
 			STACK() << "[" << TOP() << "]; ";
 
-	if ( postPopExpr != 0 ) {
-		ret << OPEN_HOST_BLOCK( postPopExpr );
-		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
+	if ( red->postPopExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->postPopExpr );
+		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
 
@@ -80,8 +80,8 @@ void BinaryVar::NRET( ostream &ret, bool inFinish )
 
 void BinaryVar::BREAK( ostream &ret, int targState, bool csForced )
 {
-	id->error() << "cannot use fbreak in -B mode" << std::endl;
-	id->abortCompile( 1 );
+	red->id->error() << "cannot use fbreak in -B mode" << std::endl;
+	red->id->abortCompile( 1 );
 }
 
 void BinaryVar::NBREAK( ostream &ret, int targState, bool csForced )
@@ -134,9 +134,9 @@ void BinaryVar::NFA_POP()
 				"		if ( _pop_test ) {\n"
 				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
 
-			if ( nfaPostPopExpr != 0 ) {
-				out << OPEN_HOST_BLOCK( nfaPostPopExpr );
-				INLINE_LIST( out, nfaPostPopExpr->inlineList, 0, false, false );
+			if ( red->nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
+				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK();
 			}
 
@@ -146,11 +146,11 @@ void BinaryVar::NFA_POP()
 				"			_nfa_repeat = 0;\n"
 				"		}\n";
 
-			if ( nfaPostPopExpr != 0 ) {
+			if ( red->nfaPostPopExpr != 0 ) {
 				out <<
 				"			else {\n"
-				"			" << OPEN_HOST_BLOCK( nfaPostPopExpr );
-				INLINE_LIST( out, nfaPostPopExpr->inlineList, 0, false, false );
+				"			" << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
+				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK() << "\n"
 //				"				goto _out;\n"
 				"				_nfa_cont = 0;\n"
@@ -171,9 +171,9 @@ void BinaryVar::NFA_POP()
 			out <<
 				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
 
-			if ( nfaPostPopExpr != 0 ) {
-				out << OPEN_HOST_BLOCK( nfaPostPopExpr );
-				INLINE_LIST( out, nfaPostPopExpr->inlineList, 0, false, false );
+			if ( red->nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
+				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK();
 			}
 
@@ -266,12 +266,12 @@ void BinaryVar::LOCATE_COND()
 	out <<
 		"	_cpc = 0;\n";
 
-	if ( condSpaceList.length() > 0 ) {
+	if ( red->condSpaceList.length() > 0 ) {
 		out <<
 			"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
 			"\n";
 
-		for ( CondSpaceList::Iter csi = condSpaceList; csi.lte(); csi++ ) {
+		for ( CondSpaceList::Iter csi = red->condSpaceList; csi.lte(); csi++ ) {
 			GenCondSpace *condSpace = csi;
 			out << "	" << CASE( STR( condSpace->condSpaceId ) ) << " {\n";
 			for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {

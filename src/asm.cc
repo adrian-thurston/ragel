@@ -78,7 +78,7 @@ void asmLineDirective( ostream &out, const char *fileName, int line )
 /* Init code gen with in parameters. */
 AsmCodeGen::AsmCodeGen( const CodeGenArgs &args )
 :
-	CodeGenData( args ),
+	CodeGenData( args.red, args ),
 	nextLmSwitchLabel( 1 ),
 	stackCS( false )
 {
@@ -96,7 +96,7 @@ void AsmCodeGen::genAnalysis()
 	redFsm->makeFlatClass();
 		
 	/* If any errors have occured in the input file then don't write anything. */
-	if ( id->errorCount > 0 )
+	if ( red->id->errorCount > 0 )
 		return;
 	
 	redFsm->setInTrans();
@@ -104,7 +104,7 @@ void AsmCodeGen::genAnalysis()
 	/* Anlayze Machine will find the final action reference counts, among other
 	 * things. We will use these in reporting the usage of fsm directives in
 	 * action code. */
-	analyzeMachine();
+	red->analyzeMachine();
 }
 
 void AsmCodeGen::genLineDirective( ostream &out )
@@ -159,8 +159,8 @@ string AsmCodeGen::START_STATE_ID()
 string AsmCodeGen::ACCESS()
 {
 	ostringstream ret;
-	if ( accessExpr != 0 )
-		INLINE_LIST( ret, accessExpr, 0, false, false );
+	if ( red->accessExpr != 0 )
+		INLINE_LIST( ret, red->accessExpr, 0, false, false );
 	return ret.str();
 }
 
@@ -168,10 +168,10 @@ string AsmCodeGen::ACCESS()
 string AsmCodeGen::P()
 { 
 	ostringstream ret;
-	if ( pExpr == 0 )
+	if ( red->pExpr == 0 )
 		ret << "%r12";
 	else {
-		INLINE_LIST( ret, pExpr, 0, false, false );
+		INLINE_LIST( ret, red->pExpr, 0, false, false );
 	}
 	return ret.str();
 }
@@ -179,10 +179,10 @@ string AsmCodeGen::P()
 string AsmCodeGen::PE()
 {
 	ostringstream ret;
-	if ( peExpr == 0 )
+	if ( red->peExpr == 0 )
 		ret << "%r13";
 	else {
-		INLINE_LIST( ret, peExpr, 0, false, false );
+		INLINE_LIST( ret, red->peExpr, 0, false, false );
 	}
 	return ret.str();
 }
@@ -190,14 +190,14 @@ string AsmCodeGen::PE()
 string AsmCodeGen::vCS()
 {
 	ostringstream ret;
-	if ( csExpr == 0 ) {
+	if ( red->csExpr == 0 ) {
 		if ( stackCS )
 			ret << "-48(%rbp)";
 		else
 			ret << "%r11";
 	}
 	else {
-		INLINE_LIST( ret, csExpr, 0, false, false );
+		INLINE_LIST( ret, red->csExpr, 0, false, false );
 	}
 	return ret.str();
 }
@@ -205,11 +205,11 @@ string AsmCodeGen::vCS()
 string AsmCodeGen::TOP()
 {
 	ostringstream ret;
-	if ( topExpr == 0 )
+	if ( red->topExpr == 0 )
 		ret << "-64(%rbp)";
 	else {
 		ret << "(";
-		INLINE_LIST( ret, topExpr, 0, false, false );
+		INLINE_LIST( ret, red->topExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -233,11 +233,11 @@ string AsmCodeGen::NFA_SZ()
 string AsmCodeGen::STACK()
 {
 	ostringstream ret;
-	if ( stackExpr == 0 )
+	if ( red->stackExpr == 0 )
 		ret << "-56(%rbp)";
 	else {
 		ret << "(";
-		INLINE_LIST( ret, stackExpr, 0, false, false );
+		INLINE_LIST( ret, red->stackExpr, 0, false, false );
 		ret << ")";
 	}
 	return ret.str();
@@ -246,10 +246,10 @@ string AsmCodeGen::STACK()
 string AsmCodeGen::vEOF()
 {
 	ostringstream ret;
-	if ( eofExpr == 0 )
+	if ( red->eofExpr == 0 )
 		ret << "-8(%rbp)";
 	else {
-		INLINE_LIST( ret, eofExpr, 0, false, false );
+		INLINE_LIST( ret, red->eofExpr, 0, false, false );
 	}
 	return ret.str();
 }
@@ -257,10 +257,10 @@ string AsmCodeGen::vEOF()
 string AsmCodeGen::TOKSTART()
 {
 	ostringstream ret;
-	if ( tokstartExpr == 0 )
+	if ( red->tokstartExpr == 0 )
 		ret << "-16(%rbp)";
 	else {
-		INLINE_LIST( ret, tokstartExpr, 0, false, false );
+		INLINE_LIST( ret, red->tokstartExpr, 0, false, false );
 	}
 	return ret.str();
 }
@@ -268,10 +268,10 @@ string AsmCodeGen::TOKSTART()
 string AsmCodeGen::TOKEND()
 {
 	ostringstream ret;
-	if ( tokendExpr == 0 )
+	if ( red->tokendExpr == 0 )
 		ret << "-24(%rbp)";
 	else {
-		INLINE_LIST( ret, tokendExpr, 0, false, false );
+		INLINE_LIST( ret, red->tokendExpr, 0, false, false );
 	}
 	return ret.str();
 }
@@ -279,10 +279,10 @@ string AsmCodeGen::TOKEND()
 string AsmCodeGen::ACT()
 {
 	ostringstream ret;
-	if ( actExpr == 0 )
+	if ( red->actExpr == 0 )
 		ret << "-32(%rbp)";
 	else {
-		INLINE_LIST( ret, actExpr, 0, false, false );
+		INLINE_LIST( ret, red->actExpr, 0, false, false );
 	}
 	return ret.str();
 }
@@ -295,10 +295,10 @@ string AsmCodeGen::NBREAK()
 string AsmCodeGen::GET_KEY()
 {
 	ostringstream ret;
-	if ( getKeyExpr != 0 ) { 
+	if ( red->getKeyExpr != 0 ) { 
 		/* Emit the user supplied method of retrieving the key. */
 		ret << "(";
-		INLINE_LIST( ret, getKeyExpr, 0, false, false );
+		INLINE_LIST( ret, red->getKeyExpr, 0, false, false );
 		ret << ")";
 	}
 	else {
@@ -752,7 +752,7 @@ void AsmCodeGen::writeInit()
 			"	movq	$0, " << TOP() << "\n";
 	}
 
-	if ( hasLongestMatch ) {
+	if ( red->hasLongestMatch ) {
 		out << 
 			"	movq	$0, " << TOKSTART() << "\n"
 			"	movq	$0, " << TOKEND() << "\n"
@@ -801,8 +801,8 @@ void AsmCodeGen::STATE_IDS()
 
 	out << "\n";
 
-	if ( entryPointNames.length() > 0 ) {
-		for ( EntryNameVect::Iter en = entryPointNames; en.lte(); en++ ) {
+	if ( red->entryPointNames.length() > 0 ) {
+		for ( EntryNameVect::Iter en = red->entryPointNames; en.lte(); en++ ) {
 			ostringstream ret;
 			ret << redFsm->startState->id;
 
@@ -892,8 +892,8 @@ string AsmCodeGen::CTRL_FLOW()
 
 void AsmCodeGen::writeExports()
 {
-	if ( exportList.length() > 0 ) {
-		for ( ExportList::Iter ex = exportList; ex.lte(); ex++ ) {
+	if ( red->exportList.length() > 0 ) {
+		for ( ExportList::Iter ex = red->exportList; ex.lte(); ex++ ) {
 			out << "#define " << DATA_PREFIX() << "ex_" << ex->name << " " << 
 					KEY(ex->key) << "\n";
 		}
@@ -904,14 +904,14 @@ void AsmCodeGen::writeExports()
 string AsmCodeGen::LABEL( const char *type, long i )
 {
 	std::stringstream s;
-	s << ".L" << machineId << "_" << type << "_" << i;
+	s << ".L" << red->machineId << "_" << type << "_" << i;
 	return s.str();
 }
 
 string AsmCodeGen::LABEL( const char *name )
 {
 	std::stringstream s;
-	s << ".L" << machineId << "_" << name;
+	s << ".L" << red->machineId << "_" << name;
 	return s.str();
 }
 
@@ -1175,9 +1175,9 @@ void AsmCodeGen::emitCharClassJumpTable( RedStateAp *st, string def )
 void AsmCodeGen::NFA_PUSH( RedStateAp *st )
 {
 	if ( st->nfaTargs != 0 && st->nfaTargs->length() > 0 ) {
-		if ( nfaPrePushExpr != 0 ) {
+		if ( red->nfaPrePushExpr != 0 ) {
 			out << "	movq    $" << st->nfaTargs->length() << ", %rdi\n";
-			INLINE_LIST( out, nfaPrePushExpr->inlineList, 0, false, false );
+			INLINE_LIST( out, red->nfaPrePushExpr->inlineList, 0, false, false );
 		}
 
 		for ( RedNfaTargs::Iter t = *st->nfaTargs; t.lte(); t++ ) {
@@ -1306,8 +1306,8 @@ void AsmCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 
 void AsmCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	if ( prePushExpr != 0 )
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 )
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 
 	ret <<
 		"	movq	" << STACK() << ", %rax\n"
@@ -1321,8 +1321,8 @@ void AsmCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish 
 
 void AsmCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
-	if ( prePushExpr != 0 )
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 )
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 
 	ret <<
 		"\n"
@@ -1349,8 +1349,8 @@ void AsmCodeGen::RET( ostream &ret, bool inFinish )
 		"	movq	%rax, " << vCS() << "\n"
 		"	movq	%rcx, " << TOP() << "\n";
 
-	if ( postPopExpr != 0 )
-		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
+	if ( red->postPopExpr != 0 )
+		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 
 	ret <<
 		"	jmp		" << LABEL("again") << "\n";
@@ -1381,8 +1381,8 @@ void AsmCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 
 void AsmCodeGen::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
-	if ( prePushExpr != 0 )
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 )
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 
 	ret <<
 		"	movq	" << STACK() << ", %rax\n"
@@ -1396,8 +1396,8 @@ void AsmCodeGen::NCALL( ostream &ret, int callDest, int targState, bool inFinish
 void AsmCodeGen::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem,
 		int targState, bool inFinish )
 {
-	if ( prePushExpr != 0 )
-		INLINE_LIST( ret, prePushExpr->inlineList, 0, false, false );
+	if ( red->prePushExpr != 0 )
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
 
 	ret <<
 		"\n"
@@ -1423,8 +1423,8 @@ void AsmCodeGen::NRET( ostream &ret, bool inFinish )
 		"	movq	%rax, " << vCS() << "\n"
 		"	movq	%rcx, " << TOP() << "\n";
 
-	if ( postPopExpr != 0 )
-		INLINE_LIST( ret, postPopExpr->inlineList, 0, false, false );
+	if ( red->postPopExpr != 0 )
+		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 }
 
 void AsmCodeGen::CURS( ostream &ret, bool inFinish )
