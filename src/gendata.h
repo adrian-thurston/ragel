@@ -31,12 +31,10 @@
 /* Forwards. */
 struct TransAp;
 struct FsmAp;
-struct ParseData;
 struct PdBase;
 struct InputData;
 struct IdBase;
 struct GenInlineList;
-struct CodeGenData;
 struct InlineItem;
 
 struct RedActionTable
@@ -83,85 +81,47 @@ struct NextRedTrans
 	}
 };
 
-struct GenBase
+struct RedBase
 {
-	GenBase( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm );
+	RedBase( IdBase *id, PdBase *pd, FsmAp *fsm, std::string fsmName, int machineId )
+	:
+		id(id),
+		pd(pd),
+		fsm(fsm),
+		fsmName(fsmName),
+		machineId(machineId),
+		keyOps(fsm->ctx->keyOps),
+		nextActionTableId(0)
+	{
+	}
 
-	void appendTrans( TransListVect &outList, Key lowKey, Key highKey, TransAp *trans );
-	void reduceActionTables();
-
-	std::string fsmName;
-	int machineId;
 	IdBase *id;
 	PdBase *pd;
 	FsmAp *fsm;
+	std::string fsmName;
+	int machineId;
+
 	KeyOps *keyOps;
 
 	ActionTableMap actionTableMap;
 	int nextActionTableId;
 };
 
-using std::ostream;
-
 struct NameInst;
 typedef DList<GenAction> GenActionList;
 
 typedef unsigned long ulong;
 
-struct CodeGenData;
-struct InputData;
-struct ParseData;
-struct FsmAp;
-
-typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
-typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
-
-void openHostBlock( char opener, InputData *id, ostream &out, const char *fileName, int line );
+void openHostBlock( char opener, InputData *id, std::ostream &out, const char *fileName, int line );
 
 string itoa( int i );
 
-struct CodeGenArgs;
-struct Reducer;
-
-CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
-
-
-/*********************************/
-
-struct CodeGenArgs
-{
-	CodeGenArgs( Reducer *red, std::string sourceFileName, std::string fsmName,
-			int machineId, IdBase *id, PdBase *pd, FsmAp *fsm, CodeStyle codeStyle,
-			std::ostream &out )
-	:
-		red(red),
-		sourceFileName(sourceFileName),
-		fsmName(fsmName),
-		machineId(machineId),
-		id(id),
-		pd(pd),
-		fsm(fsm),
-		codeStyle(codeStyle),
-		out(out)
-	{}
-
-	Reducer *red;
-	std::string sourceFileName;
-	std::string fsmName;
-	int machineId;
-	IdBase *id;
-	PdBase *pd;
-	FsmAp *fsm;
-	CodeStyle codeStyle;
-	std::ostream &out;
-};
-
 struct Reducer
-	: public GenBase
+	: public RedBase
 {
-	Reducer( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm )
+	Reducer( IdBase *id, PdBase *pd, FsmAp *fsm, std::string fsmName, int machineId )
 	:
-		GenBase( fsmName, machineId, id, pd, fsm ),
+		RedBase( id, pd, fsm, fsmName, machineId ),
 		redFsm(0), 
 		allActions(0),
 		allActionTables(0),
@@ -274,6 +234,9 @@ protected:
 	void assignActionIds();
 
 
+	void appendTrans( TransListVect &outList, Key lowKey, Key highKey, TransAp *trans );
+	void reduceActionTables();
+
 public:
 
 	Key findMaxKey();
@@ -282,6 +245,7 @@ public:
 	void makeGenInlineList( GenInlineList *outList, InlineList *inList );
 	bool setAlphType( const HostLang *hostLang, const char *data );
 	void analyzeMachine();
+	void make( const HostLang *hostLang );
 
 	/* 
 	 * Collecting the machine.
@@ -326,16 +290,50 @@ public:
 	Action *curInlineAction;
 };
 
-struct CodeGenData
-//	: public Reducer
+struct CodeGenArgs
 {
-public:
-	CodeGenData( Reducer *red, const CodeGenArgs &args );
-	void make( const HostLang *hostLang );
+	CodeGenArgs( IdBase *id, Reducer *red, int machineId, std::string sourceFileName,
+			std::string fsmName, std::ostream &out, CodeStyle codeStyle )
+	:
+		id(id),
+		red(red),
+		machineId(machineId),
+		sourceFileName(sourceFileName),
+		fsmName(fsmName),
+		out(out),
+		codeStyle(codeStyle),
+		lineDirectives(true)
+	{}
 
-private:
+	IdBase *id;
+	Reducer *red;
+	int machineId;
+	std::string sourceFileName;
+	std::string fsmName;
+	std::ostream &out;
+	CodeStyle codeStyle;
+	bool lineDirectives;
+};
 
-public:
+struct CodeGenData
+{
+	CodeGenData( const CodeGenArgs &args )
+	:
+		red(args.red),
+		redFsm(args.red->redFsm),
+		sourceFileName(args.sourceFileName),
+		fsmName(args.fsmName), 
+		keyOps(red->keyOps),
+		out(args.out),
+		noEnd(false),
+		noPrefix(false),
+		noFinal(false),
+		noError(false),
+		noCS(false),
+		lineDirectives(args.lineDirectives)
+	{
+	}
+
 	/*
 	 * The interface to the code generator.
 	 */
@@ -361,16 +359,23 @@ public:
 
 	/********************/
 
-	virtual ~CodeGenData() {}
+	virtual ~CodeGenData()
+	{
+	}
+
+	void clear()
+	{
+		delete red->redFsm;
+		red->redFsm = 0;
+	}
+
+protected:
 
 	Reducer *red;
-
-	KeyOps *keyOps;
-	FsmAp *fsm;
 	RedFsmAp *redFsm;
-
 	std::string sourceFileName;
 	std::string fsmName;
+	KeyOps *keyOps;
 	ostream &out;
 
 	/* Write options. */
@@ -384,5 +389,11 @@ public:
 
 	bool lineDirectives;
 };
+
+/* Selects and constructs the codegen based on the output options. */
+CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
+
+typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
+typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;
 
 #endif

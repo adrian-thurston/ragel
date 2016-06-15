@@ -29,7 +29,7 @@ class GraphvizDotGenOrig : public CodeGenData
 {
 public:
 	GraphvizDotGenOrig( const CodeGenArgs &args ) 
-			: CodeGenData(args.red, args) { }
+			: CodeGenData(args) { }
 
 	/* Print an fsm to out stream. */
 	void writeTransList( RedStateAp *state );
@@ -45,14 +45,14 @@ private:
 	std::ostream &KEY( Key key );
 };
 
-class GraphvizDotGen : public GenBase
+class GraphvizDotGen : public RedBase
 {
 public:
-	GraphvizDotGen( const CodeGenArgs &args ) 
+	GraphvizDotGen( IdBase *id, PdBase *pd, FsmAp *fsm, std::string fsmName, int machineId, std::ostream &out )
 	:
-		GenBase( args.fsmName, args.machineId, args.id, args.pd, args.fsm ),
-		out(args.out)
-	{ }
+		RedBase(id, pd, fsm, fsmName, machineId),
+		out(out)
+	{}
 
 	bool makeNameInst( std::string &res, NameInst *nameInst );
 	void action( ActionTable *actionTable );

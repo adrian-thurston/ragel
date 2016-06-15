@@ -19,6 +19,9 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
+/*
+ * XML Output not included in 7.0 (yet -- possibly)
+ */
 
 #include "ragel.h"
 #include "xml.h"
@@ -31,9 +34,31 @@
 
 using std::endl;
 
+void InputData::processXML()
+{
+	/* Compiles machines. */
+	prepareAllMachines();
+
+	if ( errorCount > 0 )
+		abortCompile( 1 );
+
+	createOutputStream();
+
+	if ( errorCount > 0 )
+		abortCompile( 1 );
+
+	/*
+	 * From this point on we should not be reporting any errors.
+	 */
+
+	openOutput();
+	writeXML( *outStream );
+	closeOutput();
+}
+
 XMLCodeGen::XMLCodeGen( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm, std::ostream &out )
 :
-	GenBase(fsmName, machineId, id, pd, fsm),
+	RedBase( id, pd, fsm, fsmName, machineId ),
 	out(out)
 {
 }

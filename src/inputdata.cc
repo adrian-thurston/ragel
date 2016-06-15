@@ -381,28 +381,6 @@ void InputData::closeOutput()
 	}
 }
 
-void InputData::processXML()
-{
-	/* Compiles machines. */
-	prepareAllMachines();
-
-	if ( errorCount > 0 )
-		abortCompile( 1 );
-
-	createOutputStream();
-
-	if ( errorCount > 0 )
-		abortCompile( 1 );
-
-	/*
-	 * From this point on we should not be reporting any errors.
-	 */
-
-	openOutput();
-	writeXML( *outStream );
-	closeOutput();
-}
-
 void InputData::processDot()
 {
 	/* Compiles the DOT machines. */
@@ -500,7 +478,7 @@ void InputData::processCode()
 
 bool InputData::checkLastRef( InputItem *ii )
 {
-	if ( generateXML || generateDot )
+	if ( generateDot )
 		return true;
 		
 	/*
@@ -678,13 +656,7 @@ void InputData::processKelbt()
 	 * forward as possible when we encounter the last reference to a machine.
 	 * */
 	
-	if ( generateXML ) {
-		/* When generating XML or dot the inline features are disabled */
-		parseKelbt();
-		terminateAllParsers();
-		processXML();
-	}
-	else if ( generateDot ) {
+	if ( generateDot ) {
 		parseKelbt();
 		terminateAllParsers();
 		processDot();
@@ -726,9 +698,7 @@ void InputData::processColm()
 	if ( errorCount > 0 )
 		abortCompile( 1 );
 
-	if ( generateXML )
-		processXML();
-	else if ( generateDot )
+	if ( generateDot )
 		processDot();
 	else 
 		processCode();
@@ -789,12 +759,7 @@ bool InputData::parseReduce()
 
 bool InputData::processReduce()
 {
-	if ( generateXML ) {
-		parseReduce();
-		processXML();
-		return true;
-	}
-	else if ( generateDot ) {
+	if ( generateDot ) {
 		parseReduce();
 		processDot();
 		return true;

@@ -1216,16 +1216,19 @@ FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *h
 void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 		std::ostream &out, const HostLang *hostLang )
 {
-	Reducer *red = new Reducer( sectionName, machineId, this->id, this, sectionGraph );
-	CodeGenArgs args( red, inputFileName, sectionName, machineId,
-			this->id, this, sectionGraph, codeStyle, out );
+	Reducer *red = new Reducer( this->id, this, sectionGraph, sectionName, machineId );
+	red->make( hostLang );
+
+	CodeGenArgs args( this->id, red, machineId, inputFileName, sectionName, out, codeStyle );
 
 	/* Write out with it. */
 	cgd = makeCodeGen( hostLang, args );
 
-	cgd->make( hostLang );
+	/* Code generation anlysis step. */
+	cgd->genAnalysis();
 }
 
+#if 0
 void ParseData::generateXML( ostream &out )
 {
 	/* Make the generator. */
@@ -1234,11 +1237,11 @@ void ParseData::generateXML( ostream &out )
 	/* Write out with it. */
 	codeGen.writeXML();
 }
+#endif
 
 void ParseData::clear()
 {
-	delete cgd->red->redFsm;
-	cgd->red->redFsm = 0;
+	cgd->clear();
 
 	delete sectionGraph;
 	sectionGraph = 0;

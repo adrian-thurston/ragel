@@ -22,6 +22,8 @@
 #ifndef _XMLCODEGEN_H
 #define _XMLCODEGEN_H
 
+#if 0
+
 #include <iostream>
 #include "avltree.h"
 #include "fsmgraph.h"
@@ -29,7 +31,7 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-class XMLCodeGen : protected GenBase
+class XMLCodeGen : protected RedBase
 {
 public:
 	XMLCodeGen( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm, std::ostream &out );
@@ -71,6 +73,8 @@ private:
 
 	std::ostream &out;
 };
+
+#endif
 
 #endif
 

@@ -78,7 +78,7 @@ void asmLineDirective( ostream &out, const char *fileName, int line )
 /* Init code gen with in parameters. */
 AsmCodeGen::AsmCodeGen( const CodeGenArgs &args )
 :
-	CodeGenData( args.red, args ),
+	CodeGenData( args ),
 	nextLmSwitchLabel( 1 ),
 	stackCS( false )
 {

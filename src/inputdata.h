@@ -184,7 +184,6 @@ struct InputData
 		machineName(0),
 		minimizeLevel(MinimizePartition2),
 		minimizeOpt(MinimizeMostOps),
-		generateXML(false),
 		generateDot(false),
 		noLineDirectives(false),
 		maxTransitions(LONG_MAX),
@@ -243,6 +242,8 @@ struct InputData
 	InputItem *curItem;
 	InputItem *lastFlush;
 
+	const HostLang *hostLang;
+
 	/* Ragel-6 frontend. */
 	ParserDict parserDict;
 	ParserList parserList;
@@ -255,8 +256,6 @@ struct InputData
 	bool isBreadthLabel( const string &label );
 	ArgsVector breadthLabels;
 
-	const HostLang *hostLang;
-
 	/* Target language and output style. */
 	CodeStyle codeStyle;
 
@@ -267,7 +266,6 @@ struct InputData
 
 	MinimizeLevel minimizeLevel;
 	MinimizeOpt minimizeOpt;
-	bool generateXML;
 	bool generateDot;
 
 	bool noLineDirectives;
@@ -335,12 +333,10 @@ struct InputData
 
 	void writeOutput( InputItem *ii );
 	void writeLanguage( std::ostream &out );
-	void writeXML( std::ostream &out );
 
 	bool checkLastRef( InputItem *ii );
 
 	void parseKelbt();
-	void processXML();
 	void processDot();
 	void processCode();
 	void processCodeEarly();

@@ -326,7 +326,7 @@ void TableArray::finish()
 /* Init code gen with in parameters. */
 CodeGen::CodeGen( const CodeGenArgs &args )
 :
-	CodeGenData( args.red, args ),
+	CodeGenData( args ),
 	tableData( 0 ),
 	backend( args.id->backend ),
 	stringTables( args.id->stringTables )

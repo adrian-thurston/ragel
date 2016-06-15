@@ -48,19 +48,7 @@ void openHostBlock( char opener, InputData *id, ostream &out, const char *fileNa
 	out << "\", " << line << " ) " << opener << "{";
 }
 
-GenBase::GenBase( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm )
-:
-	fsmName(fsmName),
-	machineId(machineId),
-	id(id),
-	pd(pd),
-	fsm(fsm),
-	keyOps(fsm->ctx->keyOps),
-	nextActionTableId(0)
-{
-}
-
-void GenBase::appendTrans( TransListVect &outList, Key lowKey, 
+void Reducer::appendTrans( TransListVect &outList, Key lowKey, 
 		Key highKey, TransAp *trans )
 {
 	if ( trans->plain() ) {
@@ -78,7 +66,7 @@ void GenBase::appendTrans( TransListVect &outList, Key lowKey,
 	}
 }
 
-void GenBase::reduceActionTables()
+void Reducer::reduceActionTables()
 {
 	/* Reduce the actions tables to a set. */
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
@@ -138,26 +126,6 @@ void GenBase::reduceActionTables()
 	}
 }
 
-
-CodeGenData::CodeGenData( Reducer *red, const CodeGenArgs &args )
-:
-	red(red), //Reducer(args.fsmName, args.machineId, args.id, args.pd, args.fsm),
-
-	keyOps(red->keyOps),
-	fsm(red->fsm),
-	redFsm(red->redFsm),
-
-	sourceFileName(args.sourceFileName),
-	fsmName(args.fsmName), 
-	out(args.out),
-	noEnd(false),
-	noPrefix(false),
-	noFinal(false),
-	noError(false),
-	noCS(false),
-	lineDirectives(true)
-{
-}
 
 void Reducer::makeText( GenInlineList *outList, InlineItem *item )
 {
@@ -825,49 +793,49 @@ void Reducer::makeMachine()
 	resolveTargetStates();
 }
 
-void CodeGenData::make( const HostLang *hostLang )
+void Reducer::make( const HostLang *hostLang )
 {
 	/* Alphabet type. */
-	red->setAlphType( hostLang, fsm->ctx->keyOps->alphType->internalName );
+	setAlphType( hostLang, fsm->ctx->keyOps->alphType->internalName );
 	
 	/* Getkey expression. */
-	if ( red->pd->getKeyExpr != 0 ) {
-		red->getKeyExpr = new GenInlineList;
-		red->makeGenInlineList( red->getKeyExpr, red->pd->getKeyExpr );
+	if ( pd->getKeyExpr != 0 ) {
+		getKeyExpr = new GenInlineList;
+		makeGenInlineList( getKeyExpr, pd->getKeyExpr );
 	}
 
 	/* Access expression. */
-	if ( red->pd->accessExpr != 0 ) {
-		red->accessExpr = new GenInlineList;
-		red->makeGenInlineList( red->accessExpr, red->pd->accessExpr );
+	if ( pd->accessExpr != 0 ) {
+		accessExpr = new GenInlineList;
+		makeGenInlineList( accessExpr, pd->accessExpr );
 	}
 
 	/* PrePush expression. */
-	if ( red->pd->prePushExpr != 0 ) {
+	if ( pd->prePushExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		red->makeGenInlineList( il, red->pd->prePushExpr->inlineList );
-		red->prePushExpr = new GenInlineExpr( red->pd->prePushExpr->loc, il );
+		makeGenInlineList( il, pd->prePushExpr->inlineList );
+		prePushExpr = new GenInlineExpr( pd->prePushExpr->loc, il );
 	}
 
 	/* PostPop expression. */
-	if ( red->pd->postPopExpr != 0 ) {
+	if ( pd->postPopExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		red->makeGenInlineList( il, red->pd->postPopExpr->inlineList );
-		red->postPopExpr = new GenInlineExpr( red->pd->postPopExpr->loc, il );
+		makeGenInlineList( il, pd->postPopExpr->inlineList );
+		postPopExpr = new GenInlineExpr( pd->postPopExpr->loc, il );
 	}
 
 	/* PrePush expression. */
-	if ( red->pd->nfaPrePushExpr != 0 ) {
+	if ( pd->nfaPrePushExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		red->makeGenInlineList( il, red->pd->nfaPrePushExpr->inlineList );
-		red->nfaPrePushExpr = new GenInlineExpr( red->pd->nfaPrePushExpr->loc, il );
+		makeGenInlineList( il, pd->nfaPrePushExpr->inlineList );
+		nfaPrePushExpr = new GenInlineExpr( pd->nfaPrePushExpr->loc, il );
 	}
 
 	/* PostPop expression. */
-	if ( red->pd->nfaPostPopExpr != 0 ) {
+	if ( pd->nfaPostPopExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		red->makeGenInlineList( il, red->pd->nfaPostPopExpr->inlineList );
-		red->nfaPostPopExpr = new GenInlineExpr( red->pd->nfaPostPopExpr->loc, il );
+		makeGenInlineList( il, pd->nfaPostPopExpr->inlineList );
+		nfaPostPopExpr = new GenInlineExpr( pd->nfaPostPopExpr->loc, il );
 	}
 
 
@@ -875,71 +843,67 @@ void CodeGenData::make( const HostLang *hostLang )
 	 * Variable expressions.
 	 */
 
-	if ( red->pd->pExpr != 0 ) {
-		red->pExpr = new GenInlineList;
-		red->makeGenInlineList( red->pExpr, red->pd->pExpr );
+	if ( pd->pExpr != 0 ) {
+		pExpr = new GenInlineList;
+		makeGenInlineList( pExpr, pd->pExpr );
 	}
 	
-	if ( red->pd->peExpr != 0 ) {
-		red->peExpr = new GenInlineList;
-		red->makeGenInlineList( red->peExpr, red->pd->peExpr );
+	if ( pd->peExpr != 0 ) {
+		peExpr = new GenInlineList;
+		makeGenInlineList( peExpr, pd->peExpr );
 	}
 
-	if ( red->pd->eofExpr != 0 ) {
-		red->eofExpr = new GenInlineList;
-		red->makeGenInlineList( red->eofExpr, red->pd->eofExpr );
+	if ( pd->eofExpr != 0 ) {
+		eofExpr = new GenInlineList;
+		makeGenInlineList( eofExpr, pd->eofExpr );
 	}
 	
-	if ( red->pd->csExpr != 0 ) {
-		red->csExpr = new GenInlineList;
-		red->makeGenInlineList( red->csExpr, red->pd->csExpr );
+	if ( pd->csExpr != 0 ) {
+		csExpr = new GenInlineList;
+		makeGenInlineList( csExpr, pd->csExpr );
 	}
 	
-	if ( red->pd->topExpr != 0 ) {
-		red->topExpr = new GenInlineList;
-		red->makeGenInlineList( red->topExpr, red->pd->topExpr );
+	if ( pd->topExpr != 0 ) {
+		topExpr = new GenInlineList;
+		makeGenInlineList( topExpr, pd->topExpr );
 	}
 	
-	if ( red->pd->stackExpr != 0 ) {
-		red->stackExpr = new GenInlineList;
-		red->makeGenInlineList( red->stackExpr, red->pd->stackExpr );
+	if ( pd->stackExpr != 0 ) {
+		stackExpr = new GenInlineList;
+		makeGenInlineList( stackExpr, pd->stackExpr );
 	}
 	
-	if ( red->pd->actExpr != 0 ) {
-		red->actExpr = new GenInlineList;
-		red->makeGenInlineList( red->actExpr, red->pd->actExpr );
+	if ( pd->actExpr != 0 ) {
+		actExpr = new GenInlineList;
+		makeGenInlineList( actExpr, pd->actExpr );
 	}
 	
-	if ( red->pd->tokstartExpr != 0 ) {
-		red->tokstartExpr = new GenInlineList;
-		red->makeGenInlineList( red->tokstartExpr, red->pd->tokstartExpr );
+	if ( pd->tokstartExpr != 0 ) {
+		tokstartExpr = new GenInlineList;
+		makeGenInlineList( tokstartExpr, pd->tokstartExpr );
 	}
 	
-	if ( red->pd->tokendExpr != 0 ) {
-		red->tokendExpr = new GenInlineList;
-		red->makeGenInlineList( red->tokendExpr, red->pd->tokendExpr );
+	if ( pd->tokendExpr != 0 ) {
+		tokendExpr = new GenInlineList;
+		makeGenInlineList( tokendExpr, pd->tokendExpr );
 	}
 	
-	if ( red->pd->dataExpr != 0 ) {
-		red->dataExpr = new GenInlineList;
-		red->makeGenInlineList( red->dataExpr, red->pd->dataExpr );
+	if ( pd->dataExpr != 0 ) {
+		dataExpr = new GenInlineList;
+		makeGenInlineList( dataExpr, pd->dataExpr );
 	}
 	
-	red->makeExports();
-	red->makeMachine();
-	redFsm = red->redFsm;
+	makeExports();
+	makeMachine();
 
 	/* Do this before distributing transitions out to singles and defaults
 	 * makes life easier. */
-	red->redFsm->maxKey = red->findMaxKey();
+	redFsm->maxKey = findMaxKey();
 
-	red->redFsm->assignActionLocs();
+	redFsm->assignActionLocs();
 
 	/* Find the first final state (The final state with the lowest id). */
-	red->redFsm->findFirstFinState();
-
-	/* Code generation anlysis step. */
-	genAnalysis();
+	redFsm->findFirstFinState();
 }
 
 void Reducer::createMachine()

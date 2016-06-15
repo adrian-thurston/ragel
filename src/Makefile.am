@@ -23,13 +23,13 @@ BACKEND_SRC = \
 	buffer.h codegen.h binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h \
 	binloopvar.h binexpvar.h flat.h flatloopgoto.h flatexpgoto.h flatvar.h \
 	flatloopvar.h flatexpvar.h goto.h switchloopgoto.h switchexpgoto.h \
-	ipgoto.h xml.h asm.h \
+	ipgoto.h asm.h \
 	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
 	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \
 	allocgen.cc codegen.cc binary.cc binloopgoto.cc binexpgoto.cc binvar.cc \
 	binloopvar.cc binexpvar.cc flat.cc flatloopgoto.cc flatexpgoto.cc \
 	flatvar.cc flatloopvar.cc flatexpvar.cc goto.cc switchloopgoto.cc \
-	switchexpgoto.cc ipgoto.cc xml.cc dot.cc asm.cc
+	switchexpgoto.cc ipgoto.cc dot.cc asm.cc
 
 ragel_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \

@@ -90,7 +90,6 @@ void InputData::usage()
 "   -l                   Minimize after most operations (default)\n"
 "   -e                   Minimize after every operation\n"
 "visualization:\n"
-"   -x                   Run the frontend only: emit XML intermediate format\n"
 "   -V                   Generate a dot file for Graphviz\n"
 "   -p                   Display printable characters on labels\n"
 "   -S <spec>            FSM specification to output (for graphviz output)\n"
@@ -262,7 +261,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "r:xo:dnmleabjkS:M:I:CDEJZRAOKUYPvHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "r:o:dnmleabjkS:M:I:CDEJZRAOKUYPvHh?-:sT:F:G:LpV", argc, argv );
 
 	bool showStylesOpt = false;
 
@@ -285,10 +284,6 @@ void InputData::parseArgs( int argc, const char **argv )
 			switch ( pc.parameter ) {
 			case 'V':
 				generateDot = true;
-				break;
-
-			case 'x':
-				generateXML = true;
 				break;
 
 			/* Output. */
@@ -787,7 +782,6 @@ char *InputData::readInput( const char *inputFileName )
 
 	return input;
 }
-
 
 /* Main, process args and call yyparse to start scanning input. */
 int main( int argc, const char **argv )
