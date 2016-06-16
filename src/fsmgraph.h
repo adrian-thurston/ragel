@@ -2415,6 +2415,7 @@ struct IdBase;
 struct PdBase
 {
 	PdBase( IdBase *id, std::string sectionName, const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOp );
+	~PdBase();
 
 	IdBase *id;
 	std::string sectionName;

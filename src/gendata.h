@@ -151,6 +151,52 @@ struct Reducer
 	{
 	}
 
+	~Reducer()
+	{
+		if ( redFsm != 0 )
+			delete redFsm;
+
+		delete[] allActions;
+		delete[] allActionTables;
+		delete[] allConditions;
+		delete[] allCondSpaces;
+
+		actionTableMap.empty();
+
+		if ( getKeyExpr != 0 )
+			delete getKeyExpr;
+		if ( accessExpr != 0 )
+			delete accessExpr;
+		if ( prePushExpr != 0 )
+			delete prePushExpr;
+		if ( postPopExpr != 0 )
+			delete postPopExpr;
+		if ( nfaPrePushExpr != 0 )
+			delete nfaPrePushExpr;
+		if ( nfaPostPopExpr != 0 )
+			delete nfaPostPopExpr;
+		if ( pExpr != 0 )
+			delete pExpr;
+		if ( peExpr != 0 )
+			delete peExpr;
+		if ( eofExpr != 0 )
+			delete eofExpr;
+		if ( csExpr != 0 )
+			delete csExpr;
+		if ( topExpr != 0 )
+			delete topExpr;
+		if ( stackExpr != 0 )
+			delete stackExpr;
+		if ( actExpr != 0 )
+			delete actExpr;
+		if ( tokstartExpr != 0 )
+			delete tokstartExpr;
+		if ( tokendExpr != 0 )
+			delete tokendExpr;
+		if ( dataExpr != 0 )
+			delete dataExpr;
+	}
+
 protected:
 	/* Collected during parsing. */
 	int curAction;
