@@ -319,6 +319,7 @@ void Flat::taCondActions()
 			RedCondPair *cond = fullPairs[k];
 			COND_ACTION( cond );
 		}
+		delete[] fullPairs;
 	}
 	delete[] transPtrs;
 

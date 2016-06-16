@@ -85,16 +85,31 @@ RedFsmAp::RedFsmAp( FsmCtx *fsmCtx, int machineId )
 	bAnyNfaPushes(false),
 	bAnyNfaPops(false),
 	bAnyTransCondRefs(false),
-	bAnyNfaCondRefs(false)
+	bAnyNfaCondRefs(false),
+	nextClass(0),
+	classMap(0)
 {
 }
 
 RedFsmAp::~RedFsmAp()
 {
-	for ( RedStateList::Iter st = stateList; st.lte(); st++ )
+	for ( RedStateList::Iter st = stateList; st.lte(); st++ ) {
 		delete[] st->transList;
+		if ( st->nfaTargs != 0 )
+			delete st->nfaTargs;
+	}
 
 	delete[] allStates;
+	if ( classMap != 0 )
+		delete[] classMap;
+
+	for ( TransApSet::Iter ti = transSet; ti.lte(); ti++ ) {
+		if ( ti->condSpace != 0 )
+			delete[] ti->v.outConds;
+	}
+
+	condSet.empty();
+	transSet.empty();
 }
 
 /* Does the machine have any actions. */
