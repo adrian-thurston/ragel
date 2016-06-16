@@ -1094,6 +1094,10 @@ RedTransAp *RedFsmAp::allocateTrans( GenCondSpace *condSpace,
 		inDict = new RedTransAp( nextTransId++, condSpace, outConds, numConds, errCond );
 		transSet.insert( inDict );
 	}
+	else {
+		/* Need to free the out cond vector. */
+		delete[] outConds;
+	}
 	return inDict;
 }
 

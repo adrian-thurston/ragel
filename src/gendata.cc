@@ -689,11 +689,7 @@ void Reducer::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 			errCond = redFsm->getErrorCond();
 		
 		RedTransAp *trans = redFsm->allocateTrans(
-				condSpace, outConds, numConds, errCond  );
-
-		trans->v.outConds = outConds;
-		trans->v.numConds = numConds;
-		trans->v.errCond = errCond;
+				condSpace, outConds, numConds, errCond );
 
 		newTrans( allStates + curState, lowKey, highKey, trans );
 	}
