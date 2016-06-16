@@ -77,6 +77,8 @@ struct GenInlineItem
 		lmId(0), children(0), offset(0),
 		wrappedAction(0), type(type) { }
 	
+	~GenInlineItem();
+	
 	InputLoc loc;
 	std::string data;
 	int targId;
@@ -100,6 +102,14 @@ struct GenInlineExpr
 {
 	GenInlineExpr( const InputLoc &loc, GenInlineList *inlineList )
 		: loc(loc), inlineList( inlineList ) {}
+	
+	~GenInlineExpr()
+	{
+		if ( inlineList != 0 ) {
+			inlineList->empty();
+			delete inlineList;
+		}
+	}
 
 	InputLoc loc;
 	GenInlineList *inlineList;
@@ -123,6 +133,14 @@ struct GenAction
 		numNfaPopActionRefs(0),
 		numNfaPopTestRefs(0)
 	{
+	}
+
+	~GenAction()
+	{
+		if ( inlineList != 0 ) {
+			inlineList->empty();
+			delete inlineList;
+		}
 	}
 
 	/* Data collected during parse. */

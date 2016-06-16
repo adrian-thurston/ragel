@@ -28,6 +28,14 @@
 
 using std::ostringstream;
 
+GenInlineItem::~GenInlineItem()
+{
+	if ( children != 0 ) {
+		children->empty();
+		delete children;
+	}
+}
+
 string GenAction::nameOrLoc()
 {
 	if ( name.empty() ) {
