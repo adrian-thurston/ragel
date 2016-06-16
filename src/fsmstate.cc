@@ -214,8 +214,10 @@ StateAp::~StateAp()
 	if ( nfaIn != 0 )
 		delete nfaIn;
 
-	if ( nfaOut != 0 )
+	if ( nfaOut != 0 ) {
+		nfaOut->empty();
 		delete nfaOut;
+	}
 }
 
 #ifdef TO_UPGRADE_CONDS

@@ -1367,7 +1367,7 @@ void FsmAp::mergeStateBits( StateAp *destState, StateAp *srcState )
 		setFinState( destState );
 }
 
-void FsmAp::mergeNfaTransions( StateAp *destState, StateAp *srcState )
+void FsmAp::mergeNfaTransitions( StateAp *destState, StateAp *srcState )
 {
 	/* Copy in any NFA transitions. */
 	if ( srcState->nfaOut != 0 ) {
@@ -1428,7 +1428,7 @@ void FsmAp::mergeStates( StateAp *destState, StateAp *srcState, bool leaving )
 	mergeStateBits( destState, srcState );
 
 	/* Draw in the NFA transitions. */
-	mergeNfaTransions( destState, srcState );
+	mergeNfaTransitions( destState, srcState );
 
 	/* Hacked in check for priority interactions, allowing detection of some
 	 * bad situations. */

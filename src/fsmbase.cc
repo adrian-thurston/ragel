@@ -164,8 +164,17 @@ FsmAp::~FsmAp()
 		}
 		state->outList.abandon();
 
-		if ( state->nfaOut != 0 )
+		if ( state->nfaIn != 0 ) {
+			delete state->nfaIn;
+			state->nfaIn = 0;
+		}
+
+		if ( state->nfaOut != 0 ) {
 			state->nfaOut->empty();
+			delete state->nfaOut;
+			state->nfaOut = 0;
+		}
+
 	}
 
 	/* Delete all the states. */

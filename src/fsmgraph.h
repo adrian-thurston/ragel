@@ -2079,7 +2079,7 @@ public:
 	void nfaMergeStates( StateAp *destState, StateAp **srcStates, int numSrc );
 	void mergeOutConds( StateAp *destState, StateAp *srcState, bool leaving = false );
 	void checkPriorInteractions( StateAp *destState, StateAp *srcState );
-	void mergeNfaTransions( StateAp *destState, StateAp *srcState );
+	void mergeNfaTransitions( StateAp *destState, StateAp *srcState );
 	void mergeStateProperties( StateAp *destState, StateAp *srcState );
 	void mergeStatesLeaving( StateAp *destState, StateAp *srcState );
 	void mergeStateBits( StateAp *destState, StateAp *srcState );

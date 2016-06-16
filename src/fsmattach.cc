@@ -324,6 +324,7 @@ void FsmAp::detachState( StateAp *state )
 
 			detachFromNfa( fromState, state, trans );
 			fromState->nfaOut->detach( trans );
+			delete trans;
 		}
 		delete state->nfaIn;
 		state->nfaIn = 0;
