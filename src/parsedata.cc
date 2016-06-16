@@ -444,11 +444,6 @@ ParseData::~ParseData()
 		delete exportsRootName;
 
 	delete fsmCtx;
-
-	delete prePushExpr;
-	delete postPopExpr;
-	delete nfaPrePushExpr;
-	delete nfaPostPopExpr;
 }
 
 /* Make a name id in the current name instantiation scope if it is not
