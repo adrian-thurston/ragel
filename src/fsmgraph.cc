@@ -790,14 +790,19 @@ FsmRes FsmAp::exactRepeatOp( FsmAp *fsm, int times )
 	for ( int i = 1; i < times-1; i++ ) {
 		FsmAp *dup = new FsmAp( *copyFrom );
 		FsmRes res = fsm->doConcat( dup, 0, false );
-		if ( !res.success() )
+		if ( !res.success() ) {
+			delete fsm;
+			delete copyFrom;
 			return res;
+		}
 	}
 
 	/* Now use the copyFrom on the end. */
 	FsmRes res = fsm->doConcat( copyFrom, 0, false );
-	if ( !res.success())
+	if ( !res.success()) {
+		delete fsm;
 		return res;
+	}
 
 	res.fsm->afterOpMinimize();
 
@@ -841,8 +846,11 @@ FsmRes FsmAp::maxRepeatOp( FsmAp *fsm, int times )
 		FsmAp *dup = new FsmAp( *copyFrom );
 		dup->setFinBits( STB_GRAPH2 );
 		FsmRes res = fsm->doConcat( dup, &lastFinSet, true );
-		if ( !res.success() )
+		if ( !res.success() ) {
+			delete fsm;
+			delete copyFrom;
 			return res;
+		}
 
 		/* Clear the last final state set and make the new one by taking only
 		 * the final states that come from graph 2.*/
@@ -860,8 +868,10 @@ FsmRes FsmAp::maxRepeatOp( FsmAp *fsm, int times )
 
 	/* Now use the copyFrom on the end, no bits set, no bits to clear. */
 	FsmRes res = fsm->doConcat( copyFrom, &lastFinSet, true );
-	if ( !res.success() )
+	if ( !res.success() ) {
+		delete fsm;
 		return res;
+	}
 
 	res.fsm->afterOpMinimize();
 
@@ -872,32 +882,28 @@ FsmRes FsmAp::minRepeatOp( FsmAp *fsm, int times )
 {
 	if ( times == 0 ) {
 		/* Acts just like a star op on the machine to return. */
-		FsmRes res = FsmAp::starOp( fsm );
-		if ( !res.success() )
-			return res;
-
-		return res;
+		return FsmAp::starOp( fsm );
 	}
 	else {
 		/* Take a duplicate for the plus. */
 		FsmAp *dup = new FsmAp( *fsm );
 
 		/* Do repetition on the first half. */
-		FsmRes res1 = FsmAp::exactRepeatOp( fsm, times );
-		if ( !res1.success() )
-			return res1;
+		FsmRes exact = FsmAp::exactRepeatOp( fsm, times );
+		if ( !exact.success() ) {
+			delete dup;
+			return exact;
+		}
 
 		/* Star the duplicate. */
-		FsmRes res2 = FsmAp::starOp( dup );
-		if ( !res2.success() )
-			return res2;
+		FsmRes star = FsmAp::starOp( dup );
+		if ( !star.success() ) {
+			delete exact.fsm;
+			return star;
+		}
 
 		/* Tack on the kleene star. */
-		FsmRes res3 = FsmAp::concatOp( res1.fsm, res2.fsm );
-		if ( !res3.success() )
-			return res3;
-
-		return res3;
+		return FsmAp::concatOp( exact.fsm, star.fsm );
 	}
 }
 
@@ -910,19 +916,11 @@ FsmRes FsmAp::rangeRepeatOp( FsmAp *fsm, int lowerRep, int upperRep )
 	}
 	else if ( lowerRep == 0 ) {
 		/* Just doing max repetition. Already guarded against n == 0. */
-		FsmRes res = FsmAp::maxRepeatOp( fsm, upperRep );
-		if ( !res.success() )
-			return res;
-
-		return res;
+		return FsmAp::maxRepeatOp( fsm, upperRep );
 	}
 	else if ( lowerRep == upperRep ) {
 		/* Just doing exact repetition. Already guarded against n == 0. */
-		FsmRes res = FsmAp::exactRepeatOp( fsm, lowerRep );
-		if ( !res.success() )
-			return res;
-
-		return res;
+		return FsmAp::exactRepeatOp( fsm, lowerRep );
 	}
 	else {
 		/* This is the case that 0 < lowerRep < upperRep. Take a
@@ -930,21 +928,21 @@ FsmRes FsmAp::rangeRepeatOp( FsmAp *fsm, int lowerRep, int upperRep )
 		FsmAp *dup = new FsmAp( *fsm );
 
 		/* Do repetition on the first half. */
-		FsmRes res1 = FsmAp::exactRepeatOp( fsm, lowerRep );
-		if ( !res1.success() )
-			return res1;
+		FsmRes exact = FsmAp::exactRepeatOp( fsm, lowerRep );
+		if ( !exact.success() ) {
+			delete dup;
+			return exact;
+		}
 
 		/* Do optional repetition on the second half. */
-		FsmRes res2 = FsmAp::maxRepeatOp( dup, upperRep - lowerRep );
-		if ( !res2.success() )
-			return res2;
+		FsmRes optional = FsmAp::maxRepeatOp( dup, upperRep - lowerRep );
+		if ( !optional.success() ) {
+			delete exact.fsm;
+			return optional;
+		}
 
-		/* Tak on the duplicate machine. */
-		FsmRes res3 = FsmAp::concatOp( res1.fsm, res2.fsm );
-		if ( !res3.success() )
-			return res3;
-
-		return res3;
+		/* Concat two halves. */
+		return FsmAp::concatOp( exact.fsm, optional.fsm );
 	}
 }
 

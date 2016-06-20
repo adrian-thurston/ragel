@@ -174,7 +174,6 @@ FsmAp::~FsmAp()
 			delete state->nfaOut;
 			state->nfaOut = 0;
 		}
-
 	}
 
 	/* Delete all the states. */
