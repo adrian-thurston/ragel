@@ -2091,6 +2091,7 @@ public:
 	/* Make all states that are combinations of other states and that
 	 * have not yet had their out transitions filled in. This will 
 	 * empty out stateDict and stFil. */
+	void cleanAbortedFill( StateAp *state );
 	void cleanAbortedFill();
 	bool overStateLimit();
 	FsmRes fillInStates();

@@ -1441,6 +1441,32 @@ void FsmAp::mergeStateList( StateAp *destState,
 	for ( int s = 0; s < numSrc; s++ )
 		mergeStates( destState, srcStates[s] );
 }
+
+void FsmAp::cleanAbortedFill( StateAp *state )
+{
+	/* Iterate the out transitions, deleting them. */
+	for ( TransList::Iter n, t = state->outList; t.lte(); ) {
+		n = t.next();
+		if ( t->plain() )
+			delete t->tdap();
+		else
+			delete t->tcap();
+		t = n;
+	}
+
+	state->outList.abandon();
+
+	if ( state->nfaIn != 0 ) {
+		delete state->nfaIn;
+		state->nfaIn = 0;
+	}
+
+	if ( state->nfaOut != 0 ) {
+		state->nfaOut->empty();
+		delete state->nfaOut;
+		state->nfaOut = 0;
+	}
+}
 			
 void FsmAp::cleanAbortedFill()
 {
@@ -1464,35 +1490,15 @@ void FsmAp::cleanAbortedFill()
 	stateDict.empty();
 
 	/* Delete all the transitions. */
-	for ( StateList::Iter state = stateList; state.lte(); state++ ) {
-		/* Iterate the out transitions, deleting them. */
-		for ( TransList::Iter n, t = state->outList; t.lte(); ) {
-			n = t.next();
-			if ( t->plain() )
-				delete t->tdap();
-			else
-				delete t->tcap();
-			t = n;
-		}
-		state->outList.abandon();
-	}
+	for ( StateList::Iter state = stateList; state.lte(); state++ )
+		cleanAbortedFill( state );
 
 	/* Delete all the states. */
 	stateList.empty();
 
 	/* Delete all the transitions. */
-	for ( StateList::Iter state = misfitList; state.lte(); state++ ) {
-		/* Iterate the out transitions, deleting them. */
-		for ( TransList::Iter n, t = state->outList; t.lte(); ) {
-			n = t.next();
-			if ( t->plain() )
-				delete t->tdap();
-			else
-				delete t->tcap();
-			t = n;
-		}
-		state->outList.abandon();
-	}
+	for ( StateList::Iter state = misfitList; state.lte(); state++ )
+		cleanAbortedFill( state );
 
 	/* Delete all the states. */
 	misfitList.empty();
