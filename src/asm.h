@@ -85,7 +85,6 @@ protected:
 	void CONDITION( ostream &ret, GenAction *condition );
 	void NFA_CONDITION( ostream &ret, GenAction *condition, bool last );
 	string ALPH_TYPE();
-	string ARRAY_TYPE( unsigned long maxVal );
 
 	bool isAlphTypeSigned();
 
@@ -154,8 +153,6 @@ protected:
 	string ERROR_STATE();
 	string FIRST_FINAL_STATE();
 
-	unsigned int arrayTypeSize( unsigned long maxVal );
-
 	bool outLabelUsed;
 	bool testEofUsed;
 	bool againLabelUsed;
@@ -164,9 +161,6 @@ protected:
 	bool stackCS;
 
 	void genLineDirective( ostream &out );
-
-	/* Return types in HostType form. */
-	HostType *arrayType( unsigned long maxVal );
 
 	void NBREAK( ostream &ret, int targState, bool csForced );
 	void NCALL( ostream &ret, int callDest, int targState, bool inFinish );

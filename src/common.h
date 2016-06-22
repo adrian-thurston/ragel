@@ -251,20 +251,17 @@ HostType *findAlphTypeInternal( const HostLang *hostLang, const char *s1 );
 struct KeyOps
 {
 	/* Default to signed alphabet. */
-	KeyOps( const HostLang *hostLang ) :
+	KeyOps( const HostLang *hostLang )
+	:
 		isSigned(true),
-		alphType(0),
-		hostLang(hostLang)
+		explicitUnsigned(hostLang->explicitUnsigned),
+		alphType(0)
 	{}
 
-	/* Default to signed alphabet. */
-	KeyOps( bool isSigned ) 
-		:isSigned(isSigned) {}
-
 	bool isSigned;
+	bool explicitUnsigned;
 	Key minKey, maxKey;
 	HostType *alphType;
-	const HostLang *hostLang;
 
 	void setAlphType( HostType *alphType )
 	{
@@ -294,25 +291,6 @@ struct KeyOps
 
 	Size alphSize()
 		{ return span( minKey, maxKey ); }
-
-	HostType *typeSubsumes( long long maxVal )
-	{
-		for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-			if ( maxVal <= hostLang->hostTypes[i].maxVal )
-				return hostLang->hostTypes + i;
-		}
-		return 0;
-	}
-
-	HostType *typeSubsumes( bool isSigned, long long maxVal )
-	{
-		for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-			if ( ( ( isSigned && hostLang->hostTypes[i].isSigned ) || !isSigned ) &&
-					maxVal <= hostLang->hostTypes[i].maxVal )
-				return hostLang->hostTypes + i;
-		}
-		return 0;
-	}
 
 	inline bool lt( const Key key1, const Key key2 )
 	{

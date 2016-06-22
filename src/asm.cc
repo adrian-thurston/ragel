@@ -114,34 +114,6 @@ void AsmCodeGen::genLineDirective( ostream &out )
 	asmLineDirective( out, filter->fileName, filter->line + 1 );
 }
 
-unsigned int AsmCodeGen::arrayTypeSize( unsigned long maxVal )
-{
-	long long maxValLL = (long long) maxVal;
-	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
-	assert( arrayType != 0 );
-	return arrayType->size;
-}
-
-string AsmCodeGen::ARRAY_TYPE( unsigned long maxVal )
-{
-	long long maxValLL = (long long) maxVal;
-	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
-	assert( arrayType != 0 );
-
-	string ret = arrayType->data1;
-	if ( arrayType->data2 != 0 ) {
-		ret += " ";
-		ret += arrayType->data2;
-	}
-	return ret;
-}
-
-HostType *AsmCodeGen::arrayType( unsigned long maxVal )
-{
-	long long maxValLL = (long long) maxVal;
-	return keyOps->typeSubsumes( maxValLL );
-}
-
 /* Write out the fsm name. */
 string AsmCodeGen::FSM_NAME()
 {

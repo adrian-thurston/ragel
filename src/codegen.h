@@ -155,7 +155,6 @@ protected:
 	void NFA_CONDITION( ostream &ret, GenAction *condition, bool last );
 	void CONDITION( ostream &ret, GenAction *condition );
 	string ALPH_TYPE();
-	string ARRAY_TYPE( unsigned long maxVal );
 
 	bool isAlphTypeSigned();
 	long long tableData;
@@ -231,8 +230,6 @@ protected:
 	string FIRST_FINAL_STATE();
 
 	string STR( int v );
-
-	unsigned int arrayTypeSize( unsigned long maxVal );
 
 	bool outLabelUsed;
 	bool testEofUsed;

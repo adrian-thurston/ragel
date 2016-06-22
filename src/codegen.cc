@@ -339,27 +339,6 @@ void CodeGen::statsSummary()
 		red->id->stats() << "table-data\t\t" << tableData << endl << endl;
 }
 
-unsigned int CodeGen::arrayTypeSize( unsigned long maxVal )
-{
-	long long maxValLL = (long long) maxVal;
-	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
-	assert( arrayType != 0 );
-	return arrayType->size;
-}
-
-string CodeGen::ARRAY_TYPE( unsigned long maxVal )
-{
-	long long maxValLL = (long long) maxVal;
-	HostType *arrayType = keyOps->typeSubsumes( maxValLL );
-	assert( arrayType != 0 );
-
-	string ret = arrayType->data1;
-	if ( arrayType->data2 != 0 ) {
-		ret += " ";
-		ret += arrayType->data2;
-	}
-	return ret;
-}
 
 string CodeGen::CAST( string type )
 {
@@ -549,7 +528,7 @@ string CodeGen::KEY( Key key )
 		ostringstream ret;
 		if ( keyOps->alphType->isChar )
 			ret << "c(" << (unsigned long) key.getVal() << ")";
-		else if ( keyOps->isSigned || !keyOps->hostLang->explicitUnsigned )
+		else if ( keyOps->isSigned || !keyOps->explicitUnsigned )
 			ret << key.getVal();
 		else
 			ret << (unsigned long) key.getVal() << "u";
@@ -559,7 +538,7 @@ string CodeGen::KEY( Key key )
 		ostringstream ret;
 		if ( keyOps->alphType->isChar )
 			ret << "c(" << (unsigned long) key.getVal() << ")";
-		else if ( keyOps->isSigned || !keyOps->hostLang->explicitUnsigned )
+		else if ( keyOps->isSigned || !keyOps->explicitUnsigned )
 			ret << key.getVal();
 		else
 			ret << "u(" << (unsigned long) key.getVal() << ")";
