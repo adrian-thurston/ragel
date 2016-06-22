@@ -792,7 +792,7 @@ void Reducer::makeMachine()
 void Reducer::make( const HostLang *hostLang )
 {
 	/* Alphabet type. */
-	setAlphType( hostLang, fsm->ctx->keyOps->alphType->internalName );
+	setAlphType( hostLang, pd->alphType->internalName );
 	
 	/* Getkey expression. */
 	if ( pd->getKeyExpr != 0 ) {

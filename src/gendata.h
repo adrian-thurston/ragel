@@ -338,11 +338,12 @@ public:
 
 struct CodeGenArgs
 {
-	CodeGenArgs( IdBase *id, Reducer *red, int machineId, std::string sourceFileName,
+	CodeGenArgs( IdBase *id, Reducer *red, HostType *alphType, int machineId, std::string sourceFileName,
 			std::string fsmName, std::ostream &out, CodeStyle codeStyle )
 	:
 		id(id),
 		red(red),
+		alphType(alphType),
 		machineId(machineId),
 		sourceFileName(sourceFileName),
 		fsmName(fsmName),
@@ -353,6 +354,7 @@ struct CodeGenArgs
 
 	IdBase *id;
 	Reducer *red;
+	HostType *alphType;
 	int machineId;
 	std::string sourceFileName;
 	std::string fsmName;
@@ -370,6 +372,7 @@ struct CodeGenData
 		sourceFileName(args.sourceFileName),
 		fsmName(args.fsmName), 
 		keyOps(red->keyOps),
+		alphType(args.alphType),
 		out(args.out),
 		noEnd(false),
 		noPrefix(false),
@@ -422,6 +425,7 @@ protected:
 	std::string sourceFileName;
 	std::string fsmName;
 	KeyOps *keyOps;
+	HostType *alphType;
 	ostream &out;
 
 	/* Write options. */

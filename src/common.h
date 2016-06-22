@@ -254,18 +254,15 @@ struct KeyOps
 	KeyOps( const HostLang *hostLang )
 	:
 		isSigned(true),
-		explicitUnsigned(hostLang->explicitUnsigned),
-		alphType(0)
+		explicitUnsigned(hostLang->explicitUnsigned)
 	{}
 
 	bool isSigned;
 	bool explicitUnsigned;
 	Key minKey, maxKey;
-	HostType *alphType;
 
 	void setAlphType( HostType *alphType )
 	{
-		this->alphType = alphType;
 		isSigned = alphType->isSigned;
 		if ( isSigned ) {
 			minKey = (long) alphType->minVal;

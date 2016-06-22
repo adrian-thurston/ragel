@@ -2421,6 +2421,8 @@ struct PdBase
 	IdBase *id;
 	std::string sectionName;
 
+	HostType *alphType;
+
 	/* List of actions. Will be pasted into a switch statement. */
 	ActionList actionList;
 

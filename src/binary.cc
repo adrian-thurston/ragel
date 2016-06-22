@@ -59,7 +59,7 @@ Binary::Binary( const CodeGenArgs &args )
 
 void Binary::setKeyType()
 {
-	keys.setType( ALPH_TYPE(), red->keyOps->alphType->size, red->keyOps->alphType->isChar );
+	keys.setType( ALPH_TYPE(), alphType->size, alphType->isChar );
 	keys.isSigned = keyOps->isSigned;
 }
 

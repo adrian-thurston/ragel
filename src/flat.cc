@@ -49,7 +49,7 @@ Flat::Flat( const CodeGenArgs &args )
 
 void Flat::setKeyType()
 {
-	keys.setType( ALPH_TYPE(), keyOps->alphType->size, keyOps->alphType->isChar );
+	keys.setType( ALPH_TYPE(), alphType->size, alphType->isChar );
 	keys.isSigned = keyOps->isSigned;
 }
 

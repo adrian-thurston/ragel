@@ -104,7 +104,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 	 * an error, sets the return val to the upper or lower bound being tested
 	 * against. */
 	errno = 0;
-	unsigned int size = pd->fsmCtx->keyOps->alphType->size;
+	unsigned int size = pd->alphType->size;
 	bool unusedBits = size < sizeof(unsigned long);
 
 	unsigned long ul = strtoul( str, 0, 16 );
@@ -114,7 +114,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 		ul = 1 << (size * 8);
 	}
 
-	if ( unusedBits && pd->fsmCtx->keyOps->alphType->isSigned && ul >> (size * 8 - 1) )
+	if ( unusedBits && pd->alphType->isSigned && ul >> (size * 8 - 1) )
 		ul |= ( -1L >> (size*8) ) << (size*8);
 
 	return Key( (long)ul );
@@ -125,8 +125,8 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 	/* Convert the number to a decimal. First reset errno so we can check
 	 * for overflow or underflow. */
 	errno = 0;
-	long long minVal = pd->fsmCtx->keyOps->alphType->minVal;
-	long long maxVal = pd->fsmCtx->keyOps->alphType->maxVal;
+	long long minVal = pd->alphType->minVal;
+	long long maxVal = pd->alphType->maxVal;
 
 	long long ll = strtoll( str, 0, 10 );
 
@@ -141,7 +141,7 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 		ll = maxVal;
 	}
 
-	if ( pd->fsmCtx->keyOps->alphType->isSigned )
+	if ( pd->alphType->isSigned )
 		return Key( (long)ll );
 	else
 		return Key( (unsigned long)ll );
@@ -889,6 +889,7 @@ void ParseData::initKeyOps( const HostLang *hostLang )
 	/* Signedness and bounds. */
 	HostType *alphType = alphTypeSet ? userAlphType : hostLang->defaultAlphType;
 	fsmCtx->keyOps->setAlphType( alphType );
+	this->alphType = alphType;
 
 	if ( lowerNum != 0 ) {
 		/* If ranges are given then interpret the alphabet type. */
@@ -1214,7 +1215,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 	Reducer *red = new Reducer( this->id, this, sectionGraph, sectionName, machineId );
 	red->make( hostLang );
 
-	CodeGenArgs args( this->id, red, machineId, inputFileName, sectionName, out, codeStyle );
+	CodeGenArgs args( this->id, red, alphType, machineId, inputFileName, sectionName, out, codeStyle );
 
 	/* Write out with it. */
 	cgd = makeCodeGen( hostLang, args );

@@ -526,7 +526,7 @@ string CodeGen::KEY( Key key )
 {
 	if ( backend == Direct ) {
 		ostringstream ret;
-		if ( keyOps->alphType->isChar )
+		if ( alphType->isChar )
 			ret << "c(" << (unsigned long) key.getVal() << ")";
 		else if ( keyOps->isSigned || !keyOps->explicitUnsigned )
 			ret << key.getVal();
@@ -536,7 +536,7 @@ string CodeGen::KEY( Key key )
 	}
 	else {
 		ostringstream ret;
-		if ( keyOps->alphType->isChar )
+		if ( alphType->isChar )
 			ret << "c(" << (unsigned long) key.getVal() << ")";
 		else if ( keyOps->isSigned || !keyOps->explicitUnsigned )
 			ret << key.getVal();
@@ -956,10 +956,10 @@ string CodeGen::DATA_PREFIX()
 /* Emit the alphabet data type. */
 string CodeGen::ALPH_TYPE()
 {
-	string ret = keyOps->alphType->data1;
-	if ( keyOps->alphType->data2 != 0 ) {
+	string ret = alphType->data1;
+	if ( alphType->data2 != 0 ) {
 		ret += " ";
-		ret += + keyOps->alphType->data2;
+		ret += + alphType->data2;
 	}
 	return ret;
 }
