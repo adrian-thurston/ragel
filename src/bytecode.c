@@ -68,7 +68,7 @@ typedef struct colm_struct struct_t;
 		i = (type) w; \
 	} while(0)
 
-	#define read_type_p( type, i, p ) do { \
+	#define read_type_p( Type, i, p ) do { \
 		i = ((Type)  p[0]); \
 		i |= ((Type) p[1]) << 8; \
 		i |= ((Type) p[2]) << 16; \
