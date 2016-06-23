@@ -789,10 +789,10 @@ void Reducer::makeMachine()
 	resolveTargetStates();
 }
 
-void Reducer::make( const HostLang *hostLang )
+void Reducer::make( const HostLang *hostLang, const HostType *alphType )
 {
 	/* Alphabet type. */
-	setAlphType( hostLang, fsmCtx->alphType->internalName );
+	setAlphType( hostLang, alphType->internalName );
 	
 	/* Getkey expression. */
 	if ( fsmCtx->getKeyExpr != 0 ) {

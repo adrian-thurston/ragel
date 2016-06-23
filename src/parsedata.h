@@ -278,6 +278,7 @@ struct ParseData
 	int curDefLocalErrKey;
 
 	/* Alphabet type. */
+	HostType *alphType;
 	HostType *userAlphType;
 	bool alphTypeSet;
 	InputLoc alphTypeLoc;

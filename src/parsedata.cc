@@ -104,7 +104,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 	 * an error, sets the return val to the upper or lower bound being tested
 	 * against. */
 	errno = 0;
-	unsigned int size = pd->fsmCtx->alphType->size;
+	unsigned int size = pd->alphType->size;
 	bool unusedBits = size < sizeof(unsigned long);
 
 	unsigned long ul = strtoul( str, 0, 16 );
@@ -114,7 +114,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 		ul = 1 << (size * 8);
 	}
 
-	if ( unusedBits && pd->fsmCtx->alphType->isSigned && ul >> (size * 8 - 1) )
+	if ( unusedBits && pd->alphType->isSigned && ul >> (size * 8 - 1) )
 		ul |= ( -1L >> (size*8) ) << (size*8);
 
 	return Key( (long)ul );
@@ -125,8 +125,8 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 	/* Convert the number to a decimal. First reset errno so we can check
 	 * for overflow or underflow. */
 	errno = 0;
-	long long minVal = pd->fsmCtx->alphType->minVal;
-	long long maxVal = pd->fsmCtx->alphType->maxVal;
+	long long minVal = pd->alphType->minVal;
+	long long maxVal = pd->alphType->maxVal;
 
 	long long ll = strtoll( str, 0, 10 );
 
@@ -141,7 +141,7 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 		ll = maxVal;
 	}
 
-	if ( pd->fsmCtx->alphType->isSigned )
+	if ( pd->alphType->isSigned )
 		return Key( (long)ll );
 	else
 		return Key( (unsigned long)ll );
@@ -887,9 +887,8 @@ bool ParseData::setVariable( const char *var, InlineList *inlineList )
 void ParseData::initKeyOps( const HostLang *hostLang )
 {
 	/* Signedness and bounds. */
-	HostType *alphType = alphTypeSet ? userAlphType : hostLang->defaultAlphType;
+	alphType = alphTypeSet ? userAlphType : hostLang->defaultAlphType;
 	fsmCtx->keyOps->setAlphType( hostLang, alphType );
-	this->fsmCtx->alphType = alphType;
 
 	if ( lowerNum != 0 ) {
 		/* If ranges are given then interpret the alphabet type. */
@@ -1213,9 +1212,9 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 		std::ostream &out, const HostLang *hostLang )
 {
 	Reducer *red = new Reducer( this->id, fsmCtx, sectionGraph, sectionName, machineId );
-	red->make( hostLang );
+	red->make( hostLang, alphType );
 
-	CodeGenArgs args( this->id, red, fsmCtx->alphType, machineId, inputFileName, sectionName, out, codeStyle );
+	CodeGenArgs args( this->id, red, alphType, machineId, inputFileName, sectionName, out, codeStyle );
 
 	/* Write out with it. */
 	cgd = makeCodeGen( hostLang, args );

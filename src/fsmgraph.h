@@ -1041,8 +1041,6 @@ struct FsmCtx
 
 	FsmGbl *fsmGbl;
 
-	HostType *alphType;
-
 	/* List of actions. Will be pasted into a switch statement. */
 	ActionList actionList;
 
@@ -2434,12 +2432,6 @@ template< class Trans > int FsmAp::compareCondDataPtr( Trans *trans1, Trans *tra
 }
 
 struct FsmGbl;
-
-struct PdBase
-{
-	PdBase( FsmGbl *id, std::string sectionName, const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOp );
-
-};
 
 struct FsmGbl
 {
