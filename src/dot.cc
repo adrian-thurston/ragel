@@ -285,7 +285,7 @@ bool GraphvizDotGen::makeNameInst( std::string &res, NameInst *nameInst )
 void GraphvizDotGen::write( )
 {
 	out << 
-		"digraph " << pd->sectionName << " {\n"
+		"digraph " << fsmCtx->sectionName << " {\n"
 		"	rankdir=LR;\n";
 	
 	/* Define the psuedo states. Transitions will be done after the states
@@ -356,7 +356,7 @@ void GraphvizDotGen::write( )
 		out << "	ENTRY -> " << fsm->startState->alg.stateNum << " [ label = \"IN\" ];\n";
 
 	for ( EntryMap::Iter en = fsm->entryPoints; en.lte(); en++ ) {
-		NameInst *nameInst = pd->nameIndex[en->key];
+		NameInst *nameInst = fsmCtx->nameIndex[en->key];
 		std::string name;
 		makeNameInst( name, nameInst );
 		StateAp *state = en->value;
@@ -382,6 +382,6 @@ void GraphvizDotGen::write( )
 void InputData::writeDot( ostream &out )
 {
 	ParseData *pd = dotGenPd;
-	GraphvizDotGen dotGen( this, pd, pd->sectionGraph, pd->sectionName, pd->machineId, out );
+	GraphvizDotGen dotGen( this, pd->fsmCtx, pd->sectionGraph, pd->fsmCtx->sectionName, pd->machineId, out );
 	dotGen.write();
 }

@@ -1001,44 +1001,15 @@ struct CondData
 	}
 };
 
+struct FsmGbl;
+
 /* All FSM operations must be between machines that point to the same context
  * structure. */
 struct FsmCtx
 {
-	FsmCtx( const HostLang *hostLang, MinimizeLevel minimizeLevel,
-			MinimizeOpt minimizeOpt, bool printStatistics,
-			bool nfaTermCheck )
-	:
-		minimizeLevel(minimizeLevel),
-		minimizeOpt(minimizeOpt),
-
-		/* No limit. */
-		stateLimit(-1),
-
-		printStatistics(printStatistics),
-
-		nfaTermCheck(nfaTermCheck),
-
-		unionOp(false),
-
-		nfaCondsDepth(0),
-
-		curActionOrd(0),
-		curPriorOrd(0),
-
-		nextPriorKey(0),
-		nextCondId(0)
-	{
-		keyOps = new KeyOps(hostLang);
-		condData = new CondData;
-	}
-
-	~FsmCtx()
-	{
-		delete keyOps;
-		delete condData;
-		priorDescList.empty();
-	}
+	FsmCtx( FsmGbl *fsmGbl, std::string sectionName, const HostLang *hostLang,
+			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
+	~FsmCtx();
 
 	KeyOps *keyOps;
 	CondData *condData;
@@ -1068,6 +1039,59 @@ struct FsmCtx
 	}
 
 	PriorDescList priorDescList;
+
+	FsmGbl *fsmGbl;
+	std::string sectionName;
+
+	HostType *alphType;
+
+	/* List of actions. Will be pasted into a switch statement. */
+	ActionList actionList;
+
+	ExportList exportList;
+
+	bool generatingSectionSubset;
+	bool lmRequiresErrorState;
+
+	/* Make name ids to name inst pointers. */
+	NameInst **nameIndex;
+
+	/* Element type and get key expression. */
+	InlineList *getKeyExpr;
+	InlineList *accessExpr;
+
+	/* Stack management */
+	InlineBlock *prePushExpr;
+	InlineBlock *postPopExpr;
+
+	/* Nfa stack managment. */
+	InlineBlock *nfaPrePushExpr;
+	InlineBlock *nfaPostPopExpr;
+
+	/* Overriding variables. */
+	InlineList *pExpr;
+	InlineList *peExpr;
+	InlineList *eofExpr;
+	InlineList *csExpr;
+	InlineList *topExpr;
+	InlineList *stackExpr;
+	InlineList *actExpr;
+	InlineList *tokstartExpr;
+	InlineList *tokendExpr;
+	InlineList *dataExpr;
+
+	Action *newNfaWrapAction( const char *name, InlineList *inlineList, Action *optWrap );
+	void createNfaActions( FsmAp *fsm );
+
+	/* Checking the contents of actions. */
+	void checkAction( Action *action );
+	void checkInlineList( Action *act, InlineList *inlineList );
+
+	void analyzeAction( Action *action, InlineList *inlineList );
+	void analyzeGraph( FsmAp *graph );
+
+	void finalizeInstance( FsmAp *graph );
+	void prepareReduction( FsmAp *sectionGraph );
 };
 
 typedef InList<CondAp> CondInList;
@@ -2411,72 +2435,17 @@ template< class Trans > int FsmAp::compareCondDataPtr( Trans *trans1, Trans *tra
 	return 0;
 }
 
-struct IdBase;
+struct FsmGbl;
 
 struct PdBase
 {
-	PdBase( IdBase *id, std::string sectionName, const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOp );
-	~PdBase();
+	PdBase( FsmGbl *id, std::string sectionName, const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOp );
 
-	IdBase *id;
-	std::string sectionName;
-
-	HostType *alphType;
-
-	/* List of actions. Will be pasted into a switch statement. */
-	ActionList actionList;
-
-	ExportList exportList;
-
-	bool generatingSectionSubset;
-	bool lmRequiresErrorState;
-
-	/* Make name ids to name inst pointers. */
-	NameInst **nameIndex;
-
-	/* Element type and get key expression. */
-	InlineList *getKeyExpr;
-	InlineList *accessExpr;
-
-	/* Stack management */
-	InlineBlock *prePushExpr;
-	InlineBlock *postPopExpr;
-
-	/* Nfa stack managment. */
-	InlineBlock *nfaPrePushExpr;
-	InlineBlock *nfaPostPopExpr;
-
-	/* Overriding variables. */
-	InlineList *pExpr;
-	InlineList *peExpr;
-	InlineList *eofExpr;
-	InlineList *csExpr;
-	InlineList *topExpr;
-	InlineList *stackExpr;
-	InlineList *actExpr;
-	InlineList *tokstartExpr;
-	InlineList *tokendExpr;
-	InlineList *dataExpr;
-
-	Action *newNfaWrapAction( const char *name, InlineList *inlineList, Action *optWrap );
-	void createNfaActions( FsmAp *fsm );
-
-	/* Checking the contents of actions. */
-	void checkAction( Action *action );
-	void checkInlineList( Action *act, InlineList *inlineList );
-
-	void analyzeAction( Action *action, InlineList *inlineList );
-	void analyzeGraph( FsmAp *graph );
-
-	void finalizeInstance( FsmAp *graph );
-	void prepareReduction( FsmAp *sectionGraph );
-
-	FsmCtx *fsmCtx;
 };
 
-struct IdBase
+struct FsmGbl
 {
-	IdBase()
+	FsmGbl()
 	:
 		printStatistics(false),
 		errorCount(0),

@@ -89,46 +89,46 @@ length_spec:
 pre_push_spec:
 	KW_PrePush '{' inline_block '}' 
 	final {
-		if ( pd->prePushExpr != 0 ) {
+		if ( pd->fsmCtx->prePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error($2->loc) << "pre_push code already defined" << endl;
 		}
 
-		pd->prePushExpr = new InlineBlock( $2->loc, $3->inlineList );
+		pd->fsmCtx->prePushExpr = new InlineBlock( $2->loc, $3->inlineList );
 	};
 
 
 post_pop_spec:
 	KW_PostPop '{' inline_block '}' 
 	final {
-		if ( pd->postPopExpr != 0 ) {
+		if ( pd->fsmCtx->postPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error($2->loc) << "post_pop code already defined" << endl;
 		}
 
-		pd->postPopExpr = new InlineBlock( $2->loc, $3->inlineList );
+		pd->fsmCtx->postPopExpr = new InlineBlock( $2->loc, $3->inlineList );
 	};
 
 nfa_pre_push_spec:
 	KW_NfaPrePush '{' inline_block '}' 
 	final {
-		if ( pd->nfaPrePushExpr != 0 ) {
+		if ( pd->fsmCtx->nfaPrePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error($2->loc) << "nfa_pre_push code already defined" << endl;
 		}
 
-		pd->nfaPrePushExpr = new InlineBlock( $2->loc, $3->inlineList );
+		pd->fsmCtx->nfaPrePushExpr = new InlineBlock( $2->loc, $3->inlineList );
 	};
 
 nfa_post_pop_spec:
 	KW_NfaPostPop '{' inline_block '}' 
 	final {
-		if ( pd->nfaPostPopExpr != 0 ) {
+		if ( pd->fsmCtx->nfaPostPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error($2->loc) << "nfa_post_pop code already defined" << endl;
 		}
 
-		pd->nfaPostPopExpr = new InlineBlock( $2->loc, $3->inlineList );
+		pd->fsmCtx->nfaPostPopExpr = new InlineBlock( $2->loc, $3->inlineList );
 	};
 
 export_open: KW_Export 
@@ -358,7 +358,7 @@ action_spec:
 					$5->inlineList, pd->fsmCtx->nextCondId++ );
 
 			/* Insert to list and dict. */
-			pd->actionList.append( newAction );
+			pd->fsmCtx->actionList.append( newAction );
 			pd->actionDict.insert( newAction );
 
 			newAction->paramList = $3->paramList;
@@ -400,12 +400,12 @@ range_spec:
 
 getkey_spec:
 	KW_GetKey inline_expr ';' final {
-		pd->getKeyExpr = $2->inlineList;
+		pd->fsmCtx->getKeyExpr = $2->inlineList;
 	};
 
 access_spec:
 	KW_Access inline_expr ';' final {
-		pd->accessExpr = $2->inlineList;
+		pd->fsmCtx->accessExpr = $2->inlineList;
 	};
 
 variable_spec:
@@ -1043,7 +1043,7 @@ named_action_ref:
 			/* Allocate an action representing this specialization. */
 			Action *specAction = Action::cons( $1->loc, $$->action,
 					$3->argList, pd->fsmCtx->nextCondId++ );
-			pd->actionList.append( specAction );
+			pd->fsmCtx->actionList.append( specAction );
 
 			el = $$->action->argListMap->insert( $3->argList, specAction );
 		}
@@ -1062,7 +1062,7 @@ action_embed_block:
 		/* Create the action, add it to the list and pass up. */
 		Action *newAction = new Action( $1->loc, std::string(),
 				$2->inlineList, pd->fsmCtx->nextCondId++ );
-		pd->actionList.append( newAction );
+		pd->fsmCtx->actionList.append( newAction );
 		$$->action = newAction;
 	};
 

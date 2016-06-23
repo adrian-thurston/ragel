@@ -139,7 +139,7 @@ void Reducer::makeTargetItem( GenInlineList *outList, NameInst *nameTarg,
 		GenInlineItem::Type type )
 {
 	long targetState;
-	if ( pd->generatingSectionSubset )
+	if ( fsmCtx->generatingSectionSubset )
 		targetState = -1;
 	else {
 		EntryMapEl *targ = fsm->entryPoints.find( nameTarg->id );
@@ -434,7 +434,7 @@ void Reducer::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 
 void Reducer::makeExports()
 {
-	for ( ExportList::Iter exp = pd->exportList; exp.lte(); exp++ )
+	for ( ExportList::Iter exp = fsmCtx->exportList; exp.lte(); exp++ )
 		exportList.append( new Export( exp->name, exp->key ) );
 }
 
@@ -454,7 +454,7 @@ void Reducer::makeActionList()
 {
 	/* Determine which actions to write. */
 	int nextActionId = 0;
-	for ( ActionList::Iter act = pd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = fsmCtx->actionList; act.lte(); act++ ) {
 		if ( act->numRefs() > 0 || act->numCondRefs > 0 )
 			act->actionId = nextActionId++;
 	}
@@ -463,7 +463,7 @@ void Reducer::makeActionList()
 	initActionList( nextActionId );
 	curAction = 0;
 
-	for ( ActionList::Iter act = pd->actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = fsmCtx->actionList; act.lte(); act++ ) {
 		if ( act->actionId >= 0 )
 			makeAction( act );
 	}
@@ -558,13 +558,13 @@ bool Reducer::makeNameInst( std::string &res, NameInst *nameInst )
 void Reducer::makeEntryPoints()
 {
 	/* List of entry points other than start state. */
-	if ( fsm->entryPoints.length() > 0 || pd->lmRequiresErrorState ) {
-		if ( pd->lmRequiresErrorState )
+	if ( fsm->entryPoints.length() > 0 || fsmCtx->lmRequiresErrorState ) {
+		if ( fsmCtx->lmRequiresErrorState )
 			setForcedErrorState();
 
 		for ( EntryMap::Iter en = fsm->entryPoints; en.lte(); en++ ) {
 			/* Get the name instantiation from nameIndex. */
-			NameInst *nameInst = pd->nameIndex[en->key];
+			NameInst *nameInst = fsmCtx->nameIndex[en->key];
 			std::string name;
 			makeNameInst( name, nameInst );
 			StateAp *state = en->value;
@@ -792,46 +792,46 @@ void Reducer::makeMachine()
 void Reducer::make( const HostLang *hostLang )
 {
 	/* Alphabet type. */
-	setAlphType( hostLang, pd->alphType->internalName );
+	setAlphType( hostLang, fsmCtx->alphType->internalName );
 	
 	/* Getkey expression. */
-	if ( pd->getKeyExpr != 0 ) {
+	if ( fsmCtx->getKeyExpr != 0 ) {
 		getKeyExpr = new GenInlineList;
-		makeGenInlineList( getKeyExpr, pd->getKeyExpr );
+		makeGenInlineList( getKeyExpr, fsmCtx->getKeyExpr );
 	}
 
 	/* Access expression. */
-	if ( pd->accessExpr != 0 ) {
+	if ( fsmCtx->accessExpr != 0 ) {
 		accessExpr = new GenInlineList;
-		makeGenInlineList( accessExpr, pd->accessExpr );
+		makeGenInlineList( accessExpr, fsmCtx->accessExpr );
 	}
 
 	/* PrePush expression. */
-	if ( pd->prePushExpr != 0 ) {
+	if ( fsmCtx->prePushExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		makeGenInlineList( il, pd->prePushExpr->inlineList );
-		prePushExpr = new GenInlineExpr( pd->prePushExpr->loc, il );
+		makeGenInlineList( il, fsmCtx->prePushExpr->inlineList );
+		prePushExpr = new GenInlineExpr( fsmCtx->prePushExpr->loc, il );
 	}
 
 	/* PostPop expression. */
-	if ( pd->postPopExpr != 0 ) {
+	if ( fsmCtx->postPopExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		makeGenInlineList( il, pd->postPopExpr->inlineList );
-		postPopExpr = new GenInlineExpr( pd->postPopExpr->loc, il );
+		makeGenInlineList( il, fsmCtx->postPopExpr->inlineList );
+		postPopExpr = new GenInlineExpr( fsmCtx->postPopExpr->loc, il );
 	}
 
 	/* PrePush expression. */
-	if ( pd->nfaPrePushExpr != 0 ) {
+	if ( fsmCtx->nfaPrePushExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		makeGenInlineList( il, pd->nfaPrePushExpr->inlineList );
-		nfaPrePushExpr = new GenInlineExpr( pd->nfaPrePushExpr->loc, il );
+		makeGenInlineList( il, fsmCtx->nfaPrePushExpr->inlineList );
+		nfaPrePushExpr = new GenInlineExpr( fsmCtx->nfaPrePushExpr->loc, il );
 	}
 
 	/* PostPop expression. */
-	if ( pd->nfaPostPopExpr != 0 ) {
+	if ( fsmCtx->nfaPostPopExpr != 0 ) {
 		GenInlineList *il = new GenInlineList;
-		makeGenInlineList( il, pd->nfaPostPopExpr->inlineList );
-		nfaPostPopExpr = new GenInlineExpr( pd->nfaPostPopExpr->loc, il );
+		makeGenInlineList( il, fsmCtx->nfaPostPopExpr->inlineList );
+		nfaPostPopExpr = new GenInlineExpr( fsmCtx->nfaPostPopExpr->loc, il );
 	}
 
 
@@ -839,54 +839,54 @@ void Reducer::make( const HostLang *hostLang )
 	 * Variable expressions.
 	 */
 
-	if ( pd->pExpr != 0 ) {
+	if ( fsmCtx->pExpr != 0 ) {
 		pExpr = new GenInlineList;
-		makeGenInlineList( pExpr, pd->pExpr );
+		makeGenInlineList( pExpr, fsmCtx->pExpr );
 	}
 	
-	if ( pd->peExpr != 0 ) {
+	if ( fsmCtx->peExpr != 0 ) {
 		peExpr = new GenInlineList;
-		makeGenInlineList( peExpr, pd->peExpr );
+		makeGenInlineList( peExpr, fsmCtx->peExpr );
 	}
 
-	if ( pd->eofExpr != 0 ) {
+	if ( fsmCtx->eofExpr != 0 ) {
 		eofExpr = new GenInlineList;
-		makeGenInlineList( eofExpr, pd->eofExpr );
+		makeGenInlineList( eofExpr, fsmCtx->eofExpr );
 	}
 	
-	if ( pd->csExpr != 0 ) {
+	if ( fsmCtx->csExpr != 0 ) {
 		csExpr = new GenInlineList;
-		makeGenInlineList( csExpr, pd->csExpr );
+		makeGenInlineList( csExpr, fsmCtx->csExpr );
 	}
 	
-	if ( pd->topExpr != 0 ) {
+	if ( fsmCtx->topExpr != 0 ) {
 		topExpr = new GenInlineList;
-		makeGenInlineList( topExpr, pd->topExpr );
+		makeGenInlineList( topExpr, fsmCtx->topExpr );
 	}
 	
-	if ( pd->stackExpr != 0 ) {
+	if ( fsmCtx->stackExpr != 0 ) {
 		stackExpr = new GenInlineList;
-		makeGenInlineList( stackExpr, pd->stackExpr );
+		makeGenInlineList( stackExpr, fsmCtx->stackExpr );
 	}
 	
-	if ( pd->actExpr != 0 ) {
+	if ( fsmCtx->actExpr != 0 ) {
 		actExpr = new GenInlineList;
-		makeGenInlineList( actExpr, pd->actExpr );
+		makeGenInlineList( actExpr, fsmCtx->actExpr );
 	}
 	
-	if ( pd->tokstartExpr != 0 ) {
+	if ( fsmCtx->tokstartExpr != 0 ) {
 		tokstartExpr = new GenInlineList;
-		makeGenInlineList( tokstartExpr, pd->tokstartExpr );
+		makeGenInlineList( tokstartExpr, fsmCtx->tokstartExpr );
 	}
 	
-	if ( pd->tokendExpr != 0 ) {
+	if ( fsmCtx->tokendExpr != 0 ) {
 		tokendExpr = new GenInlineList;
-		makeGenInlineList( tokendExpr, pd->tokendExpr );
+		makeGenInlineList( tokendExpr, fsmCtx->tokendExpr );
 	}
 	
-	if ( pd->dataExpr != 0 ) {
+	if ( fsmCtx->dataExpr != 0 ) {
 		dataExpr = new GenInlineList;
-		makeGenInlineList( dataExpr, pd->dataExpr );
+		makeGenInlineList( dataExpr, fsmCtx->dataExpr );
 	}
 	
 	makeExports();

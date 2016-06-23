@@ -34,7 +34,7 @@
 class XMLCodeGen : protected RedBase
 {
 public:
-	XMLCodeGen( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm, std::ostream &out );
+	XMLCodeGen( std::string fsmName, int machineId, FsmGbl *id, PdBase *pd, FsmAp *fsm, std::ostream &out );
 
 	void writeXML( );
 

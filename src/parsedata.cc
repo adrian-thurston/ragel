@@ -104,7 +104,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 	 * an error, sets the return val to the upper or lower bound being tested
 	 * against. */
 	errno = 0;
-	unsigned int size = pd->alphType->size;
+	unsigned int size = pd->fsmCtx->alphType->size;
 	bool unusedBits = size < sizeof(unsigned long);
 
 	unsigned long ul = strtoul( str, 0, 16 );
@@ -114,7 +114,7 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 		ul = 1 << (size * 8);
 	}
 
-	if ( unusedBits && pd->alphType->isSigned && ul >> (size * 8 - 1) )
+	if ( unusedBits && pd->fsmCtx->alphType->isSigned && ul >> (size * 8 - 1) )
 		ul |= ( -1L >> (size*8) ) << (size*8);
 
 	return Key( (long)ul );
@@ -125,8 +125,8 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 	/* Convert the number to a decimal. First reset errno so we can check
 	 * for overflow or underflow. */
 	errno = 0;
-	long long minVal = pd->alphType->minVal;
-	long long maxVal = pd->alphType->maxVal;
+	long long minVal = pd->fsmCtx->alphType->minVal;
+	long long maxVal = pd->fsmCtx->alphType->maxVal;
 
 	long long ll = strtoll( str, 0, 10 );
 
@@ -141,7 +141,7 @@ Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 		ll = maxVal;
 	}
 
-	if ( pd->alphType->isSigned )
+	if ( pd->fsmCtx->alphType->isSigned )
 		return Key( (long)ll );
 	else
 		return Key( (unsigned long)ll );
@@ -403,8 +403,6 @@ ParseData::ParseData( InputData *id, string sectionName,
 		int machineId, const InputLoc &sectionLoc, const HostLang *hostLang,
 		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 :	
-	PdBase(id, sectionName, hostLang, minimizeLevel, minimizeOpt ),
-
 	sectionGraph(0),
 	/* 0 is reserved for global error actions. */
 	nextLocalErrKey(1),
@@ -421,22 +419,23 @@ ParseData::ParseData( InputData *id, string sectionName,
 	nextLongestMatchId(1),
 	cgd(0)
 {
+	fsmCtx = new FsmCtx( id, sectionName, hostLang, minimizeLevel, minimizeOpt );
+
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the
 	 * beginning of a machine spec so any assignment operators can reference
 	 * the builtins. */
 	initGraphDict();
-
 }
 
 /* Clean up the data collected during a parse. */
 ParseData::~ParseData()
 {
 	graphDict.empty();
-	actionList.empty();
+	fsmCtx->actionList.empty();
 
-	if ( nameIndex != 0 )
-		delete[] nameIndex;
+	if ( fsmCtx->nameIndex != 0 )
+		delete[] fsmCtx->nameIndex;
 
 	if ( rootName != 0 )
 		delete rootName;
@@ -749,7 +748,7 @@ void ParseData::resolveNameRefs( InlineList *inlineList, Action *action )
 /* Resolve references to labels in actions. */
 void ParseData::resolveActionNameRefs()
 {
-	for ( ActionList::Iter act = actionList; act.lte(); act++ ) {
+	for ( ActionList::Iter act = fsmCtx->actionList; act.lte(); act++ ) {
 		/* Only care about the actions that are referenced. */
 		if ( act->embedRoots.length() > 0 )
 			resolveNameRefs( act->inlineList, act );
@@ -760,7 +759,7 @@ void ParseData::resolveActionNameRefs()
 void ParseData::fillNameIndex( NameInst *from )
 {
 	/* Fill the value for from in the name index. */
-	nameIndex[from->id] = from;
+	fsmCtx->nameIndex[from->id] = from;
 
 	/* Recurse on the implicit final state and then all children. */
 	if ( from->final != 0 )
@@ -795,8 +794,8 @@ void ParseData::makeNameTree( GraphDictEl *dictEl )
 	}
 	
 	/* The number of nodes in the tree can now be given by nextNameId */
-	nameIndex = new NameInst*[nextNameId];
-	memset( nameIndex, 0, sizeof(NameInst*)*nextNameId );
+	fsmCtx->nameIndex = new NameInst*[nextNameId];
+	memset( fsmCtx->nameIndex, 0, sizeof(NameInst*)*nextNameId );
 	fillNameIndex( rootName );
 	fillNameIndex( exportsRootName );
 }
@@ -857,25 +856,25 @@ bool ParseData::setVariable( const char *var, InlineList *inlineList )
 	bool set = true;
 
 	if ( strcmp( var, "p" ) == 0 )
-		pExpr = inlineList;
+		fsmCtx->pExpr = inlineList;
 	else if ( strcmp( var, "pe" ) == 0 )
-		peExpr = inlineList;
+		fsmCtx->peExpr = inlineList;
 	else if ( strcmp( var, "eof" ) == 0 )
-		eofExpr = inlineList;
+		fsmCtx->eofExpr = inlineList;
 	else if ( strcmp( var, "cs" ) == 0 )
-		csExpr = inlineList;
+		fsmCtx->csExpr = inlineList;
 	else if ( strcmp( var, "data" ) == 0 )
-		dataExpr = inlineList;
+		fsmCtx->dataExpr = inlineList;
 	else if ( strcmp( var, "top" ) == 0 )
-		topExpr = inlineList;
+		fsmCtx->topExpr = inlineList;
 	else if ( strcmp( var, "stack" ) == 0 )
-		stackExpr = inlineList;
+		fsmCtx->stackExpr = inlineList;
 	else if ( strcmp( var, "act" ) == 0 )
-		actExpr = inlineList;
+		fsmCtx->actExpr = inlineList;
 	else if ( strcmp( var, "ts" ) == 0 )
-		tokstartExpr = inlineList;
+		fsmCtx->tokstartExpr = inlineList;
 	else if ( strcmp( var, "te" ) == 0 )
-		tokendExpr = inlineList;
+		fsmCtx->tokendExpr = inlineList;
 	else
 		set = false;
 
@@ -889,7 +888,7 @@ void ParseData::initKeyOps( const HostLang *hostLang )
 	/* Signedness and bounds. */
 	HostType *alphType = alphTypeSet ? userAlphType : hostLang->defaultAlphType;
 	fsmCtx->keyOps->setAlphType( alphType );
-	this->alphType = alphType;
+	this->fsmCtx->alphType = alphType;
 
 	if ( lowerNum != 0 ) {
 		/* If ranges are given then interpret the alphabet type. */
@@ -919,7 +918,7 @@ Action *ParseData::newLmCommonAction( const char *name, InlineList *inlineList )
 
 	Action *action = new Action( loc, name, inlineList, fsmCtx->nextCondId++ );
 	action->embedRoots.append( rootName );
-	actionList.append( action );
+	fsmCtx->actionList.append( action );
 	return action;
 }
 
@@ -1022,14 +1021,14 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 {
 	if ( id->printStatistics )
-		id->stats() << "compiling\t" << sectionName << endl;
+		id->stats() << "compiling\t" << fsmCtx->sectionName << endl;
 
 	/* Build the graph from a walk of the parse tree. */
 	FsmRes graph = gdNode->value->walk( this );
 	if ( !graph.success() )
 		return graph;
 
-	finalizeInstance( graph.fsm );
+	fsmCtx->finalizeInstance( graph.fsm );
 
 	return graph;
 }
@@ -1044,7 +1043,7 @@ void ParseData::printNameTree( ostream &out )
 	/* Show that the name index is correct. */
 	for ( int ni = 0; ni < nextNameId; ni++ ) {
 		out << ni << ": ";
-		std::string name = nameIndex[ni]->name;
+		std::string name = fsmCtx->nameIndex[ni]->name;
 		out << ( !name.empty() ? name : "<ANON>" ) << endl;
 	}
 }
@@ -1067,7 +1066,7 @@ FsmRes ParseData::makeSpecific( GraphDictEl *gdNode )
 
 	/* Flag this case so that the XML code generator is aware that we haven't
 	 * looked up name references in actions. It can then avoid segfaulting. */
-	generatingSectionSubset = true;
+	fsmCtx->generatingSectionSubset = true;
 
 	/* Just building the specified graph. */
 	initNameWalk();
@@ -1169,7 +1168,7 @@ void ParseData::makeExports()
 			else {
 				/* Safe to extract the key and declare the export. */
 				Key exportKey = graph.fsm->startState->outList.head->lowKey;
-				exportList.append( new Export( gdel->value->name, exportKey ) );
+				fsmCtx->exportList.append( new Export( gdel->value->name, exportKey ) );
 			}
 		}
 	}
@@ -1199,12 +1198,12 @@ FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *h
 	if ( id->errorCount > 0 )
 		return FsmRes( FsmRes::Aborted() );
 
-	analyzeGraph( sectionGraph );
+	fsmCtx->analyzeGraph( sectionGraph );
 
 	/* Depends on the graph analysis. */
 	setLongestMatchData( sectionGraph );
 
-	prepareReduction( sectionGraph );
+	fsmCtx->prepareReduction( sectionGraph );
 
 	return FsmRes( FsmRes::Fsm(), sectionGraph );
 }
@@ -1212,10 +1211,10 @@ FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *h
 void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 		std::ostream &out, const HostLang *hostLang )
 {
-	Reducer *red = new Reducer( this->id, this, sectionGraph, sectionName, machineId );
+	Reducer *red = new Reducer( this->id, fsmCtx, sectionGraph, fsmCtx->sectionName, machineId );
 	red->make( hostLang );
 
-	CodeGenArgs args( this->id, red, alphType, machineId, inputFileName, sectionName, out, codeStyle );
+	CodeGenArgs args( this->id, red, fsmCtx->alphType, machineId, inputFileName, fsmCtx->sectionName, out, codeStyle );
 
 	/* Write out with it. */
 	cgd = makeCodeGen( hostLang, args );
@@ -1246,5 +1245,5 @@ void ParseData::clear()
 
 	/* Delete all the nodes in the action list. Will cause all the
 	 * string data that represents the actions to be deallocated. */
-	actionList.empty();
+	fsmCtx->actionList.empty();
 }

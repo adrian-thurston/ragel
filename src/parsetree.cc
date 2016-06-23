@@ -218,7 +218,7 @@ Action *LongestMatch::newLmAction( ParseData *pd, const InputLoc &loc,
 {
 	Action *action = new Action( loc, name, inlineList, pd->fsmCtx->nextCondId++ );
 	action->embedRoots.append( pd->curNameInst );
-	pd->actionList.append( action );
+	pd->fsmCtx->actionList.append( action );
 	action->isLmAction = true;
 	return action;
 }
@@ -455,7 +455,7 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 		 * case to handle the error, and the generated machine will require an
 		 * error state. */
 		lmSwitchHandlesError = true;
-		pd->lmRequiresErrorState = true;
+		pd->fsmCtx->lmRequiresErrorState = true;
 		graph->startState->toStateActionTable.setAction( pd->initActIdOrd, pd->initActId );
 	}
 

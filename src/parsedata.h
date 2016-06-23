@@ -180,7 +180,7 @@ extern const int ORD_TEST;
 
 /* Class to collect information about the machine during the 
  * parse of input. */
-struct ParseData : public PdBase
+struct ParseData
 {
 	/* Create a new parse data object. This is done at the beginning of every
 	 * fsm specification. */
@@ -366,6 +366,8 @@ struct ParseData : public PdBase
 	Vector<Cut> cuts;
 
 	ParseData *prev, *next;
+
+	FsmCtx *fsmCtx;
 };
 
 Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd );

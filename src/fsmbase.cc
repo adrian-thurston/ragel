@@ -20,11 +20,103 @@
  */
 
 #include "fsmgraph.h"
+#include "parsedata.h"
 
 #include <string.h>
 #include <assert.h>
 #include <iostream>
 
+FsmCtx::FsmCtx( FsmGbl *fsmGbl, std::string sectionName, const HostLang *hostLang,
+		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
+:
+	minimizeLevel(minimizeLevel),
+	minimizeOpt(minimizeOpt),
+
+	/* No limit. */
+	stateLimit(-1),
+
+	printStatistics(fsmGbl->printStatistics),
+
+	nfaTermCheck(fsmGbl->nfaTermCheck),
+
+	unionOp(false),
+
+	nfaCondsDepth(0),
+
+	curActionOrd(0),
+	curPriorOrd(0),
+
+	nextPriorKey(0),
+	nextCondId(0),
+
+	fsmGbl(fsmGbl),
+	sectionName(sectionName),
+	generatingSectionSubset(false),
+	lmRequiresErrorState(false),
+	nameIndex(0),
+
+	getKeyExpr(0),
+	accessExpr(0),
+	prePushExpr(0),
+	postPopExpr(0),
+	nfaPrePushExpr(0),
+	nfaPostPopExpr(0),
+	pExpr(0),
+	peExpr(0),
+	eofExpr(0),
+	csExpr(0),
+	topExpr(0),
+	stackExpr(0),
+	actExpr(0),
+	tokstartExpr(0),
+	tokendExpr(0),
+	dataExpr(0)
+{
+	keyOps = new KeyOps(hostLang);
+	condData = new CondData;
+}
+
+FsmCtx::~FsmCtx()
+{
+	delete keyOps;
+	delete condData;
+	priorDescList.empty();
+
+	actionList.empty();
+
+	if ( getKeyExpr != 0 )
+		delete getKeyExpr;
+	if ( accessExpr != 0 )
+		delete accessExpr;
+	if ( prePushExpr != 0 )
+		delete prePushExpr;
+	if ( postPopExpr != 0 )
+		delete postPopExpr;
+	if ( nfaPrePushExpr != 0 )
+		delete nfaPrePushExpr;
+	if ( nfaPostPopExpr != 0 )
+		delete nfaPostPopExpr;
+	if ( pExpr != 0 )
+		delete pExpr;
+	if ( peExpr != 0 )
+		delete peExpr;
+	if ( eofExpr != 0 )
+		delete eofExpr;
+	if ( csExpr != 0 )
+		delete csExpr;
+	if ( topExpr != 0 )
+		delete topExpr;
+	if ( stackExpr != 0 )
+		delete stackExpr;
+	if ( actExpr != 0 )
+		delete actExpr;
+	if ( tokstartExpr != 0 )
+		delete tokstartExpr;
+	if ( tokendExpr != 0 )
+		delete tokendExpr;
+	if ( dataExpr != 0 )
+		delete dataExpr;
+}
 
 /* Graph constructor. */
 FsmAp::FsmAp( FsmCtx *ctx )

@@ -48,9 +48,9 @@ private:
 class GraphvizDotGen : public RedBase
 {
 public:
-	GraphvizDotGen( IdBase *id, PdBase *pd, FsmAp *fsm, std::string fsmName, int machineId, std::ostream &out )
+	GraphvizDotGen( FsmGbl *id, FsmCtx *fsmCtx, FsmAp *fsm, std::string fsmName, int machineId, std::ostream &out )
 	:
-		RedBase(id, pd, fsm, fsmName, machineId),
+		RedBase(id, fsmCtx, fsm, fsmName, machineId),
 		out(out)
 	{}
 

@@ -48,7 +48,7 @@
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
-	IdBase *id = args.id;
+	FsmGbl *id = args.id;
 	CodeGenData *codeGen = 0;
 	if ( hostLang->lang == HostLang::Asm ) {
 		codeGen = new AsmCodeGen( args );

@@ -1057,7 +1057,7 @@ struct LoadRagel
 				inlineList, pd->fsmCtx->nextCondId++ );
 
 		/* Append to the action list. */
-		pd->actionList.append( newAction );
+		pd->fsmCtx->actionList.append( newAction );
 
 		return newAction;
 	}
@@ -1083,7 +1083,7 @@ struct LoadRagel
 	{
 		InputLoc loc = PrePushBlock.loc();
 
-		if ( pd->prePushExpr != 0 ) {
+		if ( pd->fsmCtx->prePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error(loc) << "prepush code already defined" << endl;
 		}
@@ -1097,14 +1097,14 @@ struct LoadRagel
 			inlineList = loadInlineBlock( PrePushBlock.CrackInlineBlock() );
 		else
 			inlineList = loadInlineBlock( PrePushBlock.CInlineBlock() );
-		pd->prePushExpr = new InlineBlock( loc, inlineList );
+		pd->fsmCtx->prePushExpr = new InlineBlock( loc, inlineList );
 	}
 
 	void loadPostPop( ragel::action_block PostPopBlock )
 	{
 		InputLoc loc = PostPopBlock.loc();
 
-		if ( pd->postPopExpr != 0 ) {
+		if ( pd->fsmCtx->postPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error(loc) << "postpop code already defined" << endl;
 		}
@@ -1118,31 +1118,31 @@ struct LoadRagel
 			inlineList = loadInlineBlock( PostPopBlock.CrackInlineBlock() );
 		else
 			inlineList = loadInlineBlock( PostPopBlock.CInlineBlock() );
-		pd->postPopExpr = new InlineBlock( loc, inlineList );
+		pd->fsmCtx->postPopExpr = new InlineBlock( loc, inlineList );
 	}
 
 	void loadNfaPrePush( ragel::action_block PrePushBlock )
 	{
 		InputLoc loc = PrePushBlock.loc();
 
-		if ( pd->nfaPrePushExpr != 0 ) {
+		if ( pd->fsmCtx->nfaPrePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error(loc) << "nfaprepush code already defined" << endl;
 		}
 
-		pd->nfaPrePushExpr = loadInlineBlock( PrePushBlock );
+		pd->fsmCtx->nfaPrePushExpr = loadInlineBlock( PrePushBlock );
 	}
 
 	void loadNfaPostPop( ragel::action_block PostPopBlock )
 	{
 		InputLoc loc = PostPopBlock.loc();
 
-		if ( pd->nfaPostPopExpr != 0 ) {
+		if ( pd->fsmCtx->nfaPostPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error(loc) << "nfapostpop code already defined" << endl;
 		}
 
-		pd->nfaPostPopExpr = loadInlineBlock( PostPopBlock );
+		pd->fsmCtx->nfaPostPopExpr = loadInlineBlock( PostPopBlock );
 	}
 
 
@@ -1561,7 +1561,7 @@ struct LoadRagel
 
 				/* Create the action, add it to the list and pass up. */
 				Action *action = new Action( loc, std::string(), inlineList, pd->fsmCtx->nextCondId++ );
-				pd->actionList.append( action );
+				pd->fsmCtx->actionList.append( action );
 				return action;
 			}
 		}
@@ -2278,7 +2278,7 @@ struct LoadRagel
 		InputItem *inputItem = new InputItem;
 		inputItem->type = InputItem::Write;
 		inputItem->loc = Cmd.loc();
-		inputItem->name = pd->sectionName;
+		inputItem->name = pd->fsmCtx->sectionName;
 		inputItem->pd = pd;
 
 		section->lastReference = inputItem;
@@ -2305,7 +2305,7 @@ struct LoadRagel
 	void loadGetKey( ragel::action_expr ActionExpr )
 	{
 		InlineList *inlineList = loadInlineExpr( ActionExpr );
-		pd->getKeyExpr = inlineList;
+		pd->fsmCtx->getKeyExpr = inlineList;
 	}
 
 	void loadAlphType( ragel::alphtype_type AlphTypeType )
@@ -2338,12 +2338,12 @@ struct LoadRagel
 	void loadAccess( ragel::action_expr ActionExpr )
 	{
 		InlineList *inlineList = loadInlineExpr( ActionExpr );
-		pd->accessExpr = inlineList;
+		pd->fsmCtx->accessExpr = inlineList;
 	}
 
 	void loadInclude( ragel::include_spec IncludeSpec )
 	{
-		string machine = pd->sectionName;
+		string machine = pd->fsmCtx->sectionName;
 		string fileName = id.inputFileName;
 
 		if ( IncludeSpec.word() != 0 )
@@ -2360,7 +2360,7 @@ struct LoadRagel
 			fileName = unescaped;
 		}
 
-		string sectionName = pd->sectionName;
+		string sectionName = pd->fsmCtx->sectionName;
 
 		ParseData *savedPd = pd;
 		pd = 0;

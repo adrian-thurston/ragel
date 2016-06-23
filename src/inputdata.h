@@ -164,7 +164,7 @@ typedef AvlTree<IncludeRec, FnMachine, CmpFnMachine> IncludeDict;
 
 struct InputData
 :
-	public IdBase
+	public FsmGbl
 {
 	InputData()
 	: 

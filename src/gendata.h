@@ -33,7 +33,7 @@ struct TransAp;
 struct FsmAp;
 struct PdBase;
 struct InputData;
-struct IdBase;
+struct FsmGbl;
 struct GenInlineList;
 struct InlineItem;
 
@@ -83,10 +83,10 @@ struct NextRedTrans
 
 struct RedBase
 {
-	RedBase( IdBase *id, PdBase *pd, FsmAp *fsm, std::string fsmName, int machineId )
+	RedBase( FsmGbl *id, FsmCtx *fsmCtx, FsmAp *fsm, std::string fsmName, int machineId )
 	:
 		id(id),
-		pd(pd),
+		fsmCtx(fsmCtx),
 		fsm(fsm),
 		fsmName(fsmName),
 		machineId(machineId),
@@ -95,8 +95,8 @@ struct RedBase
 	{
 	}
 
-	IdBase *id;
-	PdBase *pd;
+	FsmGbl *id;
+	FsmCtx *fsmCtx;
 	FsmAp *fsm;
 	std::string fsmName;
 	int machineId;
@@ -119,9 +119,9 @@ string itoa( int i );
 struct Reducer
 	: public RedBase
 {
-	Reducer( IdBase *id, PdBase *pd, FsmAp *fsm, std::string fsmName, int machineId )
+	Reducer( FsmGbl *id, FsmCtx *fsmCtx, FsmAp *fsm, std::string fsmName, int machineId )
 	:
-		RedBase( id, pd, fsm, fsmName, machineId ),
+		RedBase( id, fsmCtx, fsm, fsmName, machineId ),
 		redFsm(0), 
 		allActions(0),
 		allActionTables(0),
@@ -338,7 +338,7 @@ public:
 
 struct CodeGenArgs
 {
-	CodeGenArgs( IdBase *id, Reducer *red, HostType *alphType, int machineId, std::string sourceFileName,
+	CodeGenArgs( FsmGbl *id, Reducer *red, HostType *alphType, int machineId, std::string sourceFileName,
 			std::string fsmName, std::ostream &out, CodeStyle codeStyle )
 	:
 		id(id),
@@ -352,7 +352,7 @@ struct CodeGenArgs
 		lineDirectives(true)
 	{}
 
-	IdBase *id;
+	FsmGbl *id;
 	Reducer *red;
 	HostType *alphType;
 	int machineId;

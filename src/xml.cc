@@ -56,7 +56,7 @@ void InputData::processXML()
 	closeOutput();
 }
 
-XMLCodeGen::XMLCodeGen( std::string fsmName, int machineId, IdBase *id, PdBase *pd, FsmAp *fsm, std::ostream &out )
+XMLCodeGen::XMLCodeGen( std::string fsmName, int machineId, FsmGbl *id, PdBase *pd, FsmAp *fsm, std::ostream &out )
 :
 	RedBase( id, pd, fsm, fsmName, machineId ),
 	out(out)

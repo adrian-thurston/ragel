@@ -169,7 +169,7 @@ reduction TopLevel
 					$action_block->inlineList, pd->fsmCtx->nextCondId++ );
 
 			/* Insert to list and dict. */
-			pd->actionList.append( newAction );
+			pd->fsmCtx->actionList.append( newAction );
 			pd->actionDict.insert( newAction );
 
 			newAction->paramList = $action_params->paramList;
@@ -191,7 +191,7 @@ reduction TopLevel
 					$action_block->inlineList, pd->fsmCtx->nextCondId++ );
 
 			/* Insert to list and dict. */
-			pd->actionList.append( newAction );
+			pd->fsmCtx->actionList.append( newAction );
 			pd->actionDict.insert( newAction );
 		}
 	}
@@ -201,44 +201,44 @@ reduction TopLevel
 	# |	[`postpop action_block] :PostPop commit
 	ragel::statement :PrePush
 	{
-		if ( pd->prePushExpr != 0 ) {
+		if ( pd->fsmCtx->prePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error(@1) << "prepush code already defined" << endl;
 		}
-		pd->prePushExpr = new InlineBlock( @1, $action_block->inlineList );
+		pd->fsmCtx->prePushExpr = new InlineBlock( @1, $action_block->inlineList );
 
 	}
 	ragel::statement :PostPop
 	{
-		if ( pd->postPopExpr != 0 ) {
+		if ( pd->fsmCtx->postPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error(@1) << "postpop code already defined" << endl;
 		}
-		pd->postPopExpr = new InlineBlock( @1, $action_block->inlineList );
+		pd->fsmCtx->postPopExpr = new InlineBlock( @1, $action_block->inlineList );
 	}
 
 	# def statement
 	#   [`nfaprepush action_block] :NfaPrePush commit
 	ragel::statement :NfaPrePush
 	{
-		if ( pd->nfaPrePushExpr != 0 ) {
+		if ( pd->fsmCtx->nfaPrePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error(@1) << "nfa_pre_push code already defined" << endl;
 		}
 
-		pd->nfaPrePushExpr = new InlineBlock( @1, $action_block->inlineList );
+		pd->fsmCtx->nfaPrePushExpr = new InlineBlock( @1, $action_block->inlineList );
 	}
 
 	# def statement
 	#   [`nfapostpop action_block] :NfaPostPop commit
 	ragel::statement :NfaPostPop
 	{
-		if ( pd->nfaPostPopExpr != 0 ) {
+		if ( pd->fsmCtx->nfaPostPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error(@1) << "nfa_post_pop code already defined" << endl;
 		}
 
-		pd->nfaPostPopExpr = new InlineBlock( @1, $action_block->inlineList );
+		pd->fsmCtx->nfaPostPopExpr = new InlineBlock( @1, $action_block->inlineList );
 	}
 
 	# def statement
@@ -255,7 +255,7 @@ reduction TopLevel
 
 	ragel::statement :Access
 	{
-		pd->accessExpr = $inline_expr_reparse->inlineList;
+		pd->fsmCtx->accessExpr = $inline_expr_reparse->inlineList;
 	}
 
 	# def statement
@@ -306,7 +306,7 @@ reduction TopLevel
 	# |	[`import string `;] :Import commit
 	ragel::statement :GetKey
 	{
-		pd->getKeyExpr = $inline_expr_reparse->inlineList;
+		pd->fsmCtx->getKeyExpr = $inline_expr_reparse->inlineList;
 	}
 
 	ragel::statement :Import
@@ -328,7 +328,7 @@ reduction TopLevel
 	ragel::statement :Include
 	{
 		string fileName = id->inputFileName;
-		string machine = pd->sectionName;
+		string machine = pd->fsmCtx->sectionName;
 		bool fileSpecified = false;
 
 		if ( $include_spec->file.data != 0 ) {
@@ -719,7 +719,7 @@ reduction TopLevel
 				/* Allocate an action representing this specialization. */
 				Action *specAction = Action::cons( @1, action,
 						argList, pd->fsmCtx->nextCondId++ );
-				pd->actionList.append( specAction );
+				pd->fsmCtx->actionList.append( specAction );
 
 				el = action->argListMap->insert( argList, specAction );
 			}
@@ -794,7 +794,7 @@ reduction TopLevel
 		/* Create the action, add it to the list and pass up. */
 		Action *newAction = new Action( &$action_block->loc, std::string(),
 				$action_block->inlineList, pd->fsmCtx->nextCondId++ );
-		pd->actionList.append( newAction );
+		pd->fsmCtx->actionList.append( newAction );
 		$$->action = newAction;
 	}
 
@@ -2391,7 +2391,7 @@ reduction TopLevel
 		/* Create the action, add it to the list and pass up. */
 		Action *newAction = new Action( &$action_block->loc, std::string(),
 				$action_block->inlineList, pd->fsmCtx->nextCondId++ );
-		pd->actionList.append( newAction );
+		pd->fsmCtx->actionList.append( newAction );
 		$$->action = newAction;
 	}
 

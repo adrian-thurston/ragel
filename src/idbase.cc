@@ -27,74 +27,7 @@
 /* Error reporting format. */
 ErrorFormat errorFormat = ErrorFormatGNU;
 
-PdBase::PdBase( IdBase *id, std::string sectionName, const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
-:
-	id(id),
-	sectionName(sectionName),
-	generatingSectionSubset(false),
-	lmRequiresErrorState(false),
-	nameIndex(0),
-
-	getKeyExpr(0),
-	accessExpr(0),
-	prePushExpr(0),
-	postPopExpr(0),
-	nfaPrePushExpr(0),
-	nfaPostPopExpr(0),
-	pExpr(0),
-	peExpr(0),
-	eofExpr(0),
-	csExpr(0),
-	topExpr(0),
-	stackExpr(0),
-	actExpr(0),
-	tokstartExpr(0),
-	tokendExpr(0),
-	dataExpr(0)
-{
-	fsmCtx = new FsmCtx( hostLang, minimizeLevel,
-			minimizeOpt, id->printStatistics, id->nfaTermCheck );
-}	
-
-PdBase::~PdBase()
-{
-	actionList.empty();
-
-	if ( getKeyExpr != 0 )
-		delete getKeyExpr;
-	if ( accessExpr != 0 )
-		delete accessExpr;
-	if ( prePushExpr != 0 )
-		delete prePushExpr;
-	if ( postPopExpr != 0 )
-		delete postPopExpr;
-	if ( nfaPrePushExpr != 0 )
-		delete nfaPrePushExpr;
-	if ( nfaPostPopExpr != 0 )
-		delete nfaPostPopExpr;
-	if ( pExpr != 0 )
-		delete pExpr;
-	if ( peExpr != 0 )
-		delete peExpr;
-	if ( eofExpr != 0 )
-		delete eofExpr;
-	if ( csExpr != 0 )
-		delete csExpr;
-	if ( topExpr != 0 )
-		delete topExpr;
-	if ( stackExpr != 0 )
-		delete stackExpr;
-	if ( actExpr != 0 )
-		delete actExpr;
-	if ( tokstartExpr != 0 )
-		delete tokstartExpr;
-	if ( tokendExpr != 0 )
-		delete tokendExpr;
-	if ( dataExpr != 0 )
-		delete dataExpr;
-}
-
-void PdBase::finalizeInstance( FsmAp *graph )
+void FsmCtx::finalizeInstance( FsmAp *graph )
 {
 	/* Resolve any labels that point to multiple states. Any labels that are
 	 * still around are referenced only by gotos and calls and they need to be
@@ -113,7 +46,7 @@ void PdBase::finalizeInstance( FsmAp *graph )
 	for ( StateList::Iter state = graph->stateList; state.lte(); state++ )
 		graph->transferErrorActions( state, 0 );
 	
-	if ( id->wantDupsRemoved )
+	if ( fsmGbl->wantDupsRemoved )
 		graph->removeActionDups();
 
 	/* Remove unreachable states. There should be no dead end states. The
@@ -157,7 +90,7 @@ void PdBase::finalizeInstance( FsmAp *graph )
 	createNfaActions( graph );
 }
 
-void PdBase::analyzeAction( Action *action, InlineList *inlineList )
+void FsmCtx::analyzeAction( Action *action, InlineList *inlineList )
 {
 	/* FIXME: Actions used as conditions should be very constrained. */
 	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
@@ -194,7 +127,7 @@ void PdBase::analyzeAction( Action *action, InlineList *inlineList )
 /* Check actions for bad uses of fsm directives. We don't go inside longest
  * match items in actions created by ragel, since we just want the user
  * actions. */
-void PdBase::checkInlineList( Action *act, InlineList *inlineList )
+void FsmCtx::checkInlineList( Action *act, InlineList *inlineList )
 {
 	for ( InlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		/* EOF checks. */
@@ -212,7 +145,7 @@ void PdBase::checkInlineList( Action *act, InlineList *inlineList )
 	}
 }
 
-void PdBase::checkAction( Action *action )
+void FsmCtx::checkAction( Action *action )
 {
 	/* Check for actions with calls that are embedded within a longest match
 	 * machine. */
@@ -221,7 +154,7 @@ void PdBase::checkAction( Action *action )
 			NameInst *check = *ar;
 			while ( check != 0 ) {
 				if ( check->isLongestMatch ) {
-					id->error(action->loc) << "within a scanner, fcall and fncall are permitted"
+					fsmGbl->error(action->loc) << "within a scanner, fcall and fncall are permitted"
 						" only in pattern actions" << endl;
 					break;
 				}
@@ -233,7 +166,7 @@ void PdBase::checkAction( Action *action )
 	checkInlineList( action, action->inlineList );
 }
 
-void PdBase::analyzeGraph( FsmAp *graph )
+void FsmCtx::analyzeGraph( FsmAp *graph )
 {
 	for ( ActionList::Iter act = actionList; act.lte(); act++ )
 		analyzeAction( act, act->inlineList );
@@ -289,7 +222,7 @@ void PdBase::analyzeGraph( FsmAp *graph )
 
 	/* Can't count on cond references in transitions, since we don't refcount
 	 * the spaces. FIXME: That would be the proper solution. */
-	for ( CondSpaceMap::Iter cs = fsmCtx->condData->condSpaceMap; cs.lte(); cs++ ) {
+	for ( CondSpaceMap::Iter cs = condData->condSpaceMap; cs.lte(); cs++ ) {
 		for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ )
 			(*csi)->numCondRefs += 1;
 	}
@@ -301,14 +234,14 @@ void PdBase::analyzeGraph( FsmAp *graph )
 
 /* This create an action that refs the original embed roots, if the optWrap arg
  * is supplied. */
-Action *PdBase::newNfaWrapAction( const char *name, InlineList *inlineList, Action *optWrap )
+Action *FsmCtx::newNfaWrapAction( const char *name, InlineList *inlineList, Action *optWrap )
 {
 	InputLoc loc;
 	loc.line = 1;
 	loc.col = 1;
 	loc.fileName = "NONE";
 
-	Action *action = new Action( loc, name, inlineList, fsmCtx->nextCondId++ );
+	Action *action = new Action( loc, name, inlineList, nextCondId++ );
 
 	if ( optWrap != 0 )
 		action->embedRoots.append( optWrap->embedRoots );
@@ -317,7 +250,7 @@ Action *PdBase::newNfaWrapAction( const char *name, InlineList *inlineList, Acti
 	return action;
 }
 
-void PdBase::createNfaActions( FsmAp *fsm )
+void FsmCtx::createNfaActions( FsmAp *fsm )
 {
 	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		if ( st->nfaOut != 0 ) {
@@ -354,7 +287,7 @@ void PdBase::createNfaActions( FsmAp *fsm )
 	}
 }
 
-void PdBase::prepareReduction( FsmAp *sectionGraph )
+void FsmCtx::prepareReduction( FsmAp *sectionGraph )
 {
 	/* Decide if an error state is necessary.
 	 *  1. There is an error transition
@@ -406,13 +339,13 @@ void translatedHostData( ostream &out, const std::string &data )
 }
 
 
-void IdBase::abortCompile( int code )
+void FsmGbl::abortCompile( int code )
 {
 	throw AbortCompile( code );
 }
 
 /* Print the opening to a warning in the input, then return the error ostream. */
-ostream &IdBase::warning( const InputLoc &loc )
+ostream &FsmGbl::warning( const InputLoc &loc )
 {
 	ostream &err = inLibRagel ? libcerr : std::cerr;
 	err << loc << ": warning: ";
@@ -420,7 +353,7 @@ ostream &IdBase::warning( const InputLoc &loc )
 }
 
 /* Print the opening to a program error, then return the error stream. */
-ostream &IdBase::error()
+ostream &FsmGbl::error()
 {
 	errorCount += 1;
 	ostream &err = inLibRagel ? libcerr : std::cerr;
@@ -428,7 +361,7 @@ ostream &IdBase::error()
 	return err;
 }
 
-ostream &IdBase::error( const InputLoc &loc )
+ostream &FsmGbl::error( const InputLoc &loc )
 {
 	errorCount += 1;
 	ostream &err = inLibRagel ? libcerr : std::cerr;
@@ -436,13 +369,13 @@ ostream &IdBase::error( const InputLoc &loc )
 	return err;
 }
 
-std::ostream &IdBase::stats()
+std::ostream &FsmGbl::stats()
 {
 	return inLibRagel ? libcout : std::cout;
 }
 
 /* Requested info. */
-std::ostream &IdBase::info()
+std::ostream &FsmGbl::info()
 {
 	return inLibRagel ? libcout : std::cout;
 }
