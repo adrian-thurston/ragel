@@ -420,7 +420,7 @@ ParseData::ParseData( InputData *id, string sectionName,
 	nextLongestMatchId(1),
 	cgd(0)
 {
-	fsmCtx = new FsmCtx( id, minimizeLevel, minimizeOpt );
+	fsmCtx = new FsmCtx( id );
 
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the

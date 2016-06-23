@@ -182,8 +182,6 @@ struct InputData
 		dotGenPd(0),
 		machineSpec(0),
 		machineName(0),
-		minimizeLevel(MinimizePartition2),
-		minimizeOpt(MinimizeMostOps),
 		generateDot(false),
 		noLineDirectives(false),
 		maxTransitions(LONG_MAX),
@@ -264,8 +262,6 @@ struct InputData
 	const char *machineSpec;
 	const char *machineName;
 
-	MinimizeLevel minimizeLevel;
-	MinimizeOpt minimizeOpt;
 	bool generateDot;
 
 	bool noLineDirectives;

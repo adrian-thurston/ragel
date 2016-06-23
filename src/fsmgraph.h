@@ -1001,13 +1001,59 @@ struct CondData
 	}
 };
 
-struct FsmGbl;
+struct FsmGbl
+{
+	FsmGbl()
+	:
+		printStatistics(false),
+		errorCount(0),
+		inLibRagel(false),
+		displayPrintables(false),
+		backend(Direct),
+		stringTables(false),
+		backendFeature(GotoFeature),
+		nfaTermCheck(0),
+		wantDupsRemoved(true),
+		minimizeLevel(MinimizePartition2),
+		minimizeOpt(MinimizeMostOps)
+	{}
 
-/* All FSM operations must be between machines that point to the same context
- * structure. */
+	bool printStatistics;
+
+	/* Error reporting. */
+	std::ostream &error();
+	std::ostream &error( const InputLoc &loc ); 
+	std::ostream &warning( const InputLoc &loc ); 
+
+	/* Stats reporting. */
+	std::ostream &stats();
+	
+	/* Requested info. */
+	std::ostream &info();
+
+	std::stringstream libcerr;
+	std::stringstream libcout;
+
+	int errorCount;
+	bool inLibRagel;
+	void abortCompile( int code );
+	bool displayPrintables;
+
+	RagelBackend backend;
+	bool stringTables;
+	BackendFeature backendFeature;
+	bool nfaTermCheck;
+	bool wantDupsRemoved;
+
+	MinimizeLevel minimizeLevel;
+	MinimizeOpt minimizeOpt;
+};
+
+/* All FSM operations must be between machines that have been created using the
+ * same context object. */
 struct FsmCtx
 {
-	FsmCtx( FsmGbl *fsmGbl, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
+	FsmCtx( FsmGbl *fsmGbl );
 	~FsmCtx();
 
 	KeyOps *keyOps;
@@ -2430,51 +2476,5 @@ template< class Trans > int FsmAp::compareCondDataPtr( Trans *trans1, Trans *tra
 	}
 	return 0;
 }
-
-struct FsmGbl;
-
-struct FsmGbl
-{
-	FsmGbl()
-	:
-		printStatistics(false),
-		errorCount(0),
-		inLibRagel(false),
-		displayPrintables(false),
-		backend(Direct),
-		stringTables(false),
-		backendFeature(GotoFeature),
-		nfaTermCheck(0),
-		wantDupsRemoved(true)
-	{}
-
-	bool printStatistics;
-
-	/* Error reporting. */
-	std::ostream &error();
-	std::ostream &error( const InputLoc &loc ); 
-	std::ostream &warning( const InputLoc &loc ); 
-
-	/* Stats reporting. */
-	std::ostream &stats();
-	
-	/* Requested info. */
-	std::ostream &info();
-
-	std::stringstream libcerr;
-	std::stringstream libcout;
-
-	int errorCount;
-	bool inLibRagel;
-	void abortCompile( int code );
-	bool displayPrintables;
-
-	RagelBackend backend;
-	bool stringTables;
-	BackendFeature backendFeature;
-	bool nfaTermCheck;
-	bool wantDupsRemoved;
-};
-
 
 #endif

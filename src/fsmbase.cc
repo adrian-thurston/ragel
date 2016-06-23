@@ -26,10 +26,10 @@
 #include <assert.h>
 #include <iostream>
 
-FsmCtx::FsmCtx( FsmGbl *fsmGbl, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
+FsmCtx::FsmCtx( FsmGbl *fsmGbl )
 :
-	minimizeLevel(minimizeLevel),
-	minimizeOpt(minimizeOpt),
+	minimizeLevel(fsmGbl->minimizeLevel),
+	minimizeOpt(fsmGbl->minimizeOpt),
 
 	/* No limit. */
 	stateLimit(-1),
