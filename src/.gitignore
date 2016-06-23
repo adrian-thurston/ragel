@@ -7,6 +7,7 @@
 /output
 
 /*.o
+/*.lo
 /Makefile.in
 /Makefile
 /.*.d
@@ -20,6 +21,8 @@
 /.deps
 /libcolmp.a
 /libcolmd.a
+/libcolmp.la
+/libcolmd.la
 /.libs
 /stamp-h1
 /stamp-h2

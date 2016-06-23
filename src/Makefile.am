@@ -18,7 +18,7 @@
 #   along with Colm; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-AM_CPPFLAGS = -I$(top_srcdir)/aapl
+AM_CPPFLAGS = -I$(top_srcdir)/aapl -Iinclude
 
 AUTOMAKE_OPTIONS = subdir-objects
 
@@ -34,15 +34,15 @@ RUNTIME_HDR = \
 	bytecode.h config.h defs.h debug.h pool.h input.h \
 	pdarun.h map.h type.h tree.h struct.h program.h colm.h internal.h
 
-lib_LIBRARIES = libcolmp.a libcolmd.a
+lib_LTLIBRARIES = libcolmp.la libcolmd.la
 
 noinst_LIBRARIES = libprog.a
 
-libcolmp_a_SOURCES = $(RUNTIME_SRC)
-libcolmp_a_CFLAGS = -Iinclude
+libcolmp_la_SOURCES = $(RUNTIME_SRC)
+libcolmp_la_LDFLAGS = -release ${PACKAGE_VERSION}
 
-libcolmd_a_SOURCES = $(RUNTIME_SRC)
-libcolmd_a_CFLAGS = -Iinclude
+libcolmd_la_SOURCES = $(RUNTIME_SRC)
+libcolmd_la_LDFLAGS = -release ${PACKAGE_VERSION}
 
 common_CFLAGS = \
 	-Wall \
@@ -67,7 +67,7 @@ libprog_a_CXXFLAGS = $(common_CFLAGS)
 
 bootstrap0_CXXFLAGS = $(common_CFLAGS) -DCONS_INIT
 bootstrap0_SOURCES = consinit.cc consinit.h main.cc
-bootstrap0_LDADD = libprog.a libcolmd.a
+bootstrap0_LDADD = libprog.a libcolmd.la
 
 bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_INIT
 bootstrap1_CFLAGS = $(common_CFLAGS)
@@ -75,7 +75,7 @@ bootstrap1_SOURCES = \
 	loadinit.h loadinit.cc main.cc
 nodist_bootstrap1_SOURCES = \
 	gen/if1.h gen/if1.cc gen/parse1.c
-bootstrap1_LDADD = libprog.a libcolmd.a
+bootstrap1_LDADD = libprog.a libcolmd.la
 
 colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 colm_CFLAGS = $(common_CFLAGS)
@@ -83,7 +83,7 @@ colm_SOURCES = \
 	loadcolm.h loadcolm.cc main.cc
 nodist_colm_SOURCES = \
 	gen/if2.h gen/if2.cc gen/parse2.c
-colm_LDADD = libprog.a libcolmd.a
+colm_LDADD = libprog.a libcolmd.la
 
 colmincdir = $(includedir)/colm
 
