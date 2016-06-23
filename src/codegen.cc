@@ -191,11 +191,13 @@ void TableArray::stringGenerate( long long value )
 			p = (unsigned char *)&i;
 			n = sizeof(int);
 			break;
+#if SIZEOF_INT != SIZEOF_LONG
 		case sizeof( long ):
 			l = value;
 			p = (unsigned char *)&l;
 			n = sizeof(long);
 			break;
+#endif
 	}
 
 	std::ios_base::fmtflags prevFlags = out.flags( std::ios::hex );

@@ -59,6 +59,9 @@ AC_LANG_CPLUSPLUS
 dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
+AC_CHECK_SIZEOF([int])
+AC_CHECK_SIZEOF([long])
+
 dnl
 dnl Check for ragel.
 dnl
