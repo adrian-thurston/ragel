@@ -1007,7 +1007,7 @@ struct FsmGbl;
  * structure. */
 struct FsmCtx
 {
-	FsmCtx( FsmGbl *fsmGbl, const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
+	FsmCtx( FsmGbl *fsmGbl, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
 	~FsmCtx();
 
 	KeyOps *keyOps;

@@ -251,19 +251,20 @@ HostType *findAlphTypeInternal( const HostLang *hostLang, const char *s1 );
 struct KeyOps
 {
 	/* Default to signed alphabet. */
-	KeyOps( const HostLang *hostLang )
+	KeyOps()
 	:
-		isSigned(true),
-		explicitUnsigned(hostLang->explicitUnsigned)
+		isSigned(true)
 	{}
 
 	bool isSigned;
 	bool explicitUnsigned;
 	Key minKey, maxKey;
 
-	void setAlphType( HostType *alphType )
+	void setAlphType( const HostLang *hostLang, const HostType *alphType )
 	{
 		isSigned = alphType->isSigned;
+		explicitUnsigned = hostLang->explicitUnsigned;
+
 		if ( isSigned ) {
 			minKey = (long) alphType->minVal;
 			maxKey = (long) alphType->maxVal;

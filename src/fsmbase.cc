@@ -26,8 +26,7 @@
 #include <assert.h>
 #include <iostream>
 
-FsmCtx::FsmCtx( FsmGbl *fsmGbl, const HostLang *hostLang,
-		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
+FsmCtx::FsmCtx( FsmGbl *fsmGbl, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 :
 	minimizeLevel(minimizeLevel),
 	minimizeOpt(minimizeOpt),
@@ -71,7 +70,7 @@ FsmCtx::FsmCtx( FsmGbl *fsmGbl, const HostLang *hostLang,
 	tokendExpr(0),
 	dataExpr(0)
 {
-	keyOps = new KeyOps(hostLang);
+	keyOps = new KeyOps;
 	condData = new CondData;
 }
 

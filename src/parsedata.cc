@@ -420,7 +420,7 @@ ParseData::ParseData( InputData *id, string sectionName,
 	nextLongestMatchId(1),
 	cgd(0)
 {
-	fsmCtx = new FsmCtx( id, hostLang, minimizeLevel, minimizeOpt );
+	fsmCtx = new FsmCtx( id, minimizeLevel, minimizeOpt );
 
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the
@@ -888,7 +888,7 @@ void ParseData::initKeyOps( const HostLang *hostLang )
 {
 	/* Signedness and bounds. */
 	HostType *alphType = alphTypeSet ? userAlphType : hostLang->defaultAlphType;
-	fsmCtx->keyOps->setAlphType( alphType );
+	fsmCtx->keyOps->setAlphType( hostLang, alphType );
 	this->fsmCtx->alphType = alphType;
 
 	if ( lowerNum != 0 ) {
