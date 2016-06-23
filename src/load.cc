@@ -2278,7 +2278,7 @@ struct LoadRagel
 		InputItem *inputItem = new InputItem;
 		inputItem->type = InputItem::Write;
 		inputItem->loc = Cmd.loc();
-		inputItem->name = pd->fsmCtx->sectionName;
+		inputItem->name = pd->sectionName;
 		inputItem->pd = pd;
 
 		section->lastReference = inputItem;
@@ -2343,7 +2343,7 @@ struct LoadRagel
 
 	void loadInclude( ragel::include_spec IncludeSpec )
 	{
-		string machine = pd->fsmCtx->sectionName;
+		string machine = pd->sectionName;
 		string fileName = id.inputFileName;
 
 		if ( IncludeSpec.word() != 0 )
@@ -2360,7 +2360,7 @@ struct LoadRagel
 			fileName = unescaped;
 		}
 
-		string sectionName = pd->fsmCtx->sectionName;
+		string sectionName = pd->sectionName;
 
 		ParseData *savedPd = pd;
 		pd = 0;

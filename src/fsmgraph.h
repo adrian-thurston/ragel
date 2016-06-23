@@ -1007,8 +1007,7 @@ struct FsmGbl;
  * structure. */
 struct FsmCtx
 {
-	FsmCtx( FsmGbl *fsmGbl, std::string sectionName, const HostLang *hostLang,
-			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
+	FsmCtx( FsmGbl *fsmGbl, const HostLang *hostLang, MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt );
 	~FsmCtx();
 
 	KeyOps *keyOps;
@@ -1041,7 +1040,6 @@ struct FsmCtx
 	PriorDescList priorDescList;
 
 	FsmGbl *fsmGbl;
-	std::string sectionName;
 
 	HostType *alphType;
 

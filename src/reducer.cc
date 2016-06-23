@@ -132,7 +132,7 @@ void TopLevel::loadIncludeData( IncludeRec *el, IncludePass &includePass, const 
 void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileName, string machine )
 {
 	/* Stash the current section name and pd. */
-	string sectionName = pd->fsmCtx->sectionName;
+	string sectionName = pd->sectionName;
 	ParseData *pd0 = pd;
 
 	IncludeRec *el = id->includeDict.find( FnMachine( fileName, machine ) );

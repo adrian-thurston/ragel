@@ -242,6 +242,7 @@ struct ParseData
 	void generateReduced( const char *inputFileName, CodeStyle codeStyle,
 			std::ostream &out, const HostLang *hostLang );
 
+	std::string sectionName;
 	FsmAp *sectionGraph;
 
 	void initKeyOps( const HostLang *hostLang );

@@ -403,6 +403,7 @@ ParseData::ParseData( InputData *id, string sectionName,
 		int machineId, const InputLoc &sectionLoc, const HostLang *hostLang,
 		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 :	
+	sectionName(sectionName),
 	sectionGraph(0),
 	/* 0 is reserved for global error actions. */
 	nextLocalErrKey(1),
@@ -419,7 +420,7 @@ ParseData::ParseData( InputData *id, string sectionName,
 	nextLongestMatchId(1),
 	cgd(0)
 {
-	fsmCtx = new FsmCtx( id, sectionName, hostLang, minimizeLevel, minimizeOpt );
+	fsmCtx = new FsmCtx( id, hostLang, minimizeLevel, minimizeOpt );
 
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the
@@ -1021,7 +1022,7 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 {
 	if ( id->printStatistics )
-		id->stats() << "compiling\t" << fsmCtx->sectionName << endl;
+		id->stats() << "compiling\t" << sectionName << endl;
 
 	/* Build the graph from a walk of the parse tree. */
 	FsmRes graph = gdNode->value->walk( this );
@@ -1211,10 +1212,10 @@ FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *h
 void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 		std::ostream &out, const HostLang *hostLang )
 {
-	Reducer *red = new Reducer( this->id, fsmCtx, sectionGraph, fsmCtx->sectionName, machineId );
+	Reducer *red = new Reducer( this->id, fsmCtx, sectionGraph, sectionName, machineId );
 	red->make( hostLang );
 
-	CodeGenArgs args( this->id, red, fsmCtx->alphType, machineId, inputFileName, fsmCtx->sectionName, out, codeStyle );
+	CodeGenArgs args( this->id, red, fsmCtx->alphType, machineId, inputFileName, sectionName, out, codeStyle );
 
 	/* Write out with it. */
 	cgd = makeCodeGen( hostLang, args );

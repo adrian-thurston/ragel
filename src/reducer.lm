@@ -328,7 +328,7 @@ reduction TopLevel
 	ragel::statement :Include
 	{
 		string fileName = id->inputFileName;
-		string machine = pd->fsmCtx->sectionName;
+		string machine = pd->sectionName;
 		bool fileSpecified = false;
 
 		if ( $include_spec->file.data != 0 ) {

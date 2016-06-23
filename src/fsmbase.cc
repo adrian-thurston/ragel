@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <iostream>
 
-FsmCtx::FsmCtx( FsmGbl *fsmGbl, std::string sectionName, const HostLang *hostLang,
+FsmCtx::FsmCtx( FsmGbl *fsmGbl, const HostLang *hostLang,
 		MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 :
 	minimizeLevel(minimizeLevel),
@@ -50,7 +50,6 @@ FsmCtx::FsmCtx( FsmGbl *fsmGbl, std::string sectionName, const HostLang *hostLan
 	nextCondId(0),
 
 	fsmGbl(fsmGbl),
-	sectionName(sectionName),
 	generatingSectionSubset(false),
 	lmRequiresErrorState(false),
 	nameIndex(0),
