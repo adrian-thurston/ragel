@@ -97,6 +97,10 @@ RedFsmAp::~RedFsmAp()
 		delete[] st->transList;
 		if ( st->nfaTargs != 0 )
 			delete st->nfaTargs;
+		if ( st->inConds != 0 )
+			delete[] st->inConds;
+		if ( st->inCondTests != 0 )
+			delete[] st->inCondTests;
 	}
 
 	delete[] allStates;

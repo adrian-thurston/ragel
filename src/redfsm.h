@@ -624,7 +624,6 @@ struct RedStateAp
 	RedTransAp *eofTrans;
 	int id;
 
-
 	/* Pointers for the list of states. */
 	RedStateAp *prev, *next;
 
