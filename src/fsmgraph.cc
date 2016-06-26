@@ -724,8 +724,10 @@ FsmRes FsmAp::starOp( FsmAp *fsm )
 
 	/* Fill in any states that were newed up as combinations of others. */
 	FsmRes res = fsm->fillInStates();
-	if ( !res.success() )
+	if ( !res.success() ) {
+		delete fsm;
 		return res;
+	}
 
 	/* Remove the misfits and turn off misfit accounting. */
 	fsm->removeMisfits();
@@ -1007,8 +1009,10 @@ FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 
 	/* Call Worker routine. */
 	FsmRes res = fsm->doUnion( other );
-	if ( !res.success() )
+	if ( !res.success() ) {
+		delete fsm;
 		return res;
+	}
 
 	/* Remove the misfits and turn off misfit accounting. */
 	fsm->removeMisfits();
@@ -1037,8 +1041,10 @@ FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 
 	/* Call worker Or routine. */
 	FsmRes res = fsm->doUnion( other );
-	if ( !res.success() )
+	if ( !res.success() ) {
+		delete fsm;
 		return res;
+	}
 
 	/* Unset any final states that are no longer to 
 	 * be final due to final bits. */
@@ -1070,8 +1076,10 @@ FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 
 	/* Call worker Or routine. */
 	FsmRes res = fsm->doUnion( other );
-	if ( !res.success() )
+	if ( !res.success() ) {
+		delete fsm;
 		return res;
+	}
 
 	/* Unset any final states that are no longer to 
 	 * be final due to final bits. */
@@ -1101,8 +1109,10 @@ FsmRes FsmAp::epsilonOp( FsmAp *fsm )
 
 	/* Epsilons can caused merges which leave behind unreachable states. */
 	FsmRes res = fsm->fillInStates();
-	if ( !res.success() )
+	if ( !res.success() ) {
+		delete fsm;
 		return res;
+	}
 
 	/* Remove the misfits and turn off misfit accounting. */
 	fsm->removeMisfits();
@@ -1213,8 +1223,10 @@ FsmRes FsmAp::joinOp( FsmAp *fsm, int startId, int finalId, FsmAp **others, int 
 
 	/* Fill in any new states made from merging. */
 	FsmRes res = fsm->fillInStates();
-	if ( !res.success() )
+	if ( !res.success() ) {
+		delete fsm;
 		return res;
+	}
 
 	/* Joining can be messy. Instead of having misfit accounting on (which is
 	 * tricky here) do a full cleaning. */
@@ -1792,25 +1804,27 @@ FsmRes FsmAp::condPlus( FsmAp *fsm, long repId, Action *ini, Action *inc, Action
 	applyRepeatPriorGuard( dup, repId );
 
 	/* Star the duplicate. */
-	FsmRes res1 = FsmAp::starOp( dup );
-	if ( !res1.success() )
-		return res1;
+	FsmRes dupStar = FsmAp::starOp( dup );
+	if ( !dupStar.success() ) {
+		delete fsm;
+		return dupStar;
+	}
 
-	FsmRes res2 = FsmAp::concatOp( fsm, res1.fsm );
-	if ( !res2.success() )
-		return res2;
+	FsmRes res = FsmAp::concatOp( fsm, dupStar.fsm );
+	if ( !res.success() )
+		return res;
 
 	/* End plus operation. */
 
-	res2.fsm->leaveFsmCondition( min, true );
+	res.fsm->leaveFsmCondition( min, true );
 
 	/* Init action. */
-	res2.fsm->startFromStateAction( 0,  ini );
+	res.fsm->startFromStateAction( 0,  ini );
 
 	/* Leading priority guard. */
-	applyEntryPriorGuard( res2.fsm, repId );
+	applyEntryPriorGuard( res.fsm, repId );
 
-	return res2;
+	return res;
 }
 
 FsmRes FsmAp::condStar( FsmAp *fsm, long repId, Action *ini, Action *inc, Action *min, Action *max )
