@@ -339,74 +339,7 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 	}
 }
 
-/* Fsm concatentation worker. Supports treating the concatentation as optional,
- * which essentially leaves the final states of machine one as final. */
-FsmRes FsmAp::doConcat( FsmAp *fsm, FsmAp *other, StateSet *fromStates, bool optional )
-{
-	/* For the merging process. */
-	StateSet finStateSetCopy, startStateSet;
-
-	/* Turn on misfit accounting for both graphs. */
-	fsm->setMisfitAccounting( true );
-	other->setMisfitAccounting( true );
-
-	/* Get the other's start state. */
-	StateAp *otherStartState = other->startState;
-
-	/* Unset other's start state before bringing in the entry points. */
-	other->unsetStartState();
-
-	/* Bring in the rest of other's entry points. */
-	fsm->copyInEntryPoints( other );
-	other->entryPoints.empty();
-
-	/* Bring in other's states into our state lists. */
-	fsm->stateList.append( other->stateList );
-	fsm->misfitList.append( other->misfitList );
-
-	/* If from states is not set, then get a copy of our final state set before
-	 * we clobber it and use it instead. */
-	if ( fromStates == 0 ) {
-		finStateSetCopy = fsm->finStateSet;
-		fromStates = &finStateSetCopy;
-	}
-
-	/* Unset all of our final states and get the final states from other. */
-	if ( !optional )
-		fsm->unsetAllFinStates();
-	fsm->finStateSet.insert( other->finStateSet );
-
-	/* Since other's lists are empty, we can delete the fsm without
-	 * affecting any states. */
-	delete other;
-
-	/* Merge our former final states with the start state of other. */
-	for ( int i = 0; i < fromStates->length(); i++ ) {
-		StateAp *state = fromStates->data[i];
-
-		/* Merge the former final state with other's start state. */
-		fsm->mergeStatesLeaving( state, otherStartState );
-
-		/* If the former final state was not reset final then we must clear
-		 * the state's out trans data. If it got reset final then it gets to
-		 * keep its out trans data. This must be done before fillInStates gets
-		 * called to prevent the data from being sourced. */
-		if ( ! state->isFinState() )
-			fsm->clearOutData( state );
-	}
-
-	/* Fill in any new states made from merging. */
-	FsmRes res = fillInStates( fsm );
-	if ( !res.success() )
-		return res;
-
-	/* Remove the misfits and turn off misfit accounting. */
-	fsm->removeMisfits();
-	fsm->setMisfitAccounting( false );
-
-	return res;
-}
-
+/* Union worker used by union, set diff (subtract) and intersection. */
 FsmRes FsmAp::doUnion( FsmAp *fsm, FsmAp *other )
 {
 	/* Build a state set consisting of both start states */
@@ -789,7 +722,7 @@ FsmRes FsmAp::exactRepeatOp( FsmAp *fsm, int times )
 	/* Concatentate duplicates onto the end up until before the last. */
 	for ( int i = 1; i < times-1; i++ ) {
 		FsmAp *dup = new FsmAp( *copyFrom );
-		FsmRes res = doConcat( fsm, dup, 0, false );
+		FsmRes res = concatOp( fsm, dup );
 		if ( !res.success() ) {
 			delete copyFrom;
 			return res;
@@ -797,7 +730,7 @@ FsmRes FsmAp::exactRepeatOp( FsmAp *fsm, int times )
 	}
 
 	/* Now use the copyFrom on the end. */
-	FsmRes res = doConcat( fsm, copyFrom, 0, false );
+	FsmRes res = concatOp( fsm, copyFrom );
 	if ( !res.success())
 		return res;
 
@@ -842,7 +775,7 @@ FsmRes FsmAp::maxRepeatOp( FsmAp *fsm, int times )
 		 * can pick out it's final states after the optional style concat. */
 		FsmAp *dup = new FsmAp( *copyFrom );
 		dup->setFinBits( STB_GRAPH2 );
-		FsmRes res = doConcat( fsm, dup, &lastFinSet, true );
+		FsmRes res = concatOp( fsm, dup, false, &lastFinSet, true );
 		if ( !res.success() ) {
 			delete copyFrom;
 			return res;
@@ -863,7 +796,7 @@ FsmRes FsmAp::maxRepeatOp( FsmAp *fsm, int times )
 	}
 
 	/* Now use the copyFrom on the end, no bits set, no bits to clear. */
-	FsmRes res = doConcat( fsm, copyFrom, &lastFinSet, true );
+	FsmRes res = concatOp( fsm, copyFrom, false, &lastFinSet, true );
 	if ( !res.success() )
 		return res;
 
@@ -943,8 +876,11 @@ FsmRes FsmAp::rangeRepeatOp( FsmAp *fsm, int lowerRep, int upperRep )
 /* Concatenates other to the end of this machine. Other is deleted.  Any
  * transitions made leaving this machine and entering into other are notified
  * that they are leaving transitions by having the leavingFromState callback
- * invoked. */
-FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
+ * invoked. Supports specifying the fromStates (istead of first final state
+ * set). This is useful for a max-repeat schenario, where from states are not
+ * all of first's final states. Also supports treating the concatentation as
+ * optional, which leaves the final states of the first machine as final. */
+FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq, StateSet *fromStates, bool optional )
 {
 	for ( PriorTable::Iter g = other->startState->guardedInTable; g.lte(); g++ ) {
 		fsm->allTransPrior( 0, g->desc );
@@ -954,9 +890,66 @@ FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 	/* Assert same signedness and return graph concatenation op. */
 	assert( fsm->ctx == other->ctx );
 
-	FsmRes res = doConcat( fsm, other, 0, false );
+	/* For the merging process. */
+	StateSet finStateSetCopy, startStateSet;
+
+	/* Turn on misfit accounting for both graphs. */
+	fsm->setMisfitAccounting( true );
+	other->setMisfitAccounting( true );
+
+	/* Get the other's start state. */
+	StateAp *otherStartState = other->startState;
+
+	/* Unset other's start state before bringing in the entry points. */
+	other->unsetStartState();
+
+	/* Bring in the rest of other's entry points. */
+	fsm->copyInEntryPoints( other );
+	other->entryPoints.empty();
+
+	/* Bring in other's states into our state lists. */
+	fsm->stateList.append( other->stateList );
+	fsm->misfitList.append( other->misfitList );
+
+	/* If from states is not set, then get a copy of our final state set before
+	 * we clobber it and use it instead. */
+	if ( fromStates == 0 ) {
+		finStateSetCopy = fsm->finStateSet;
+		fromStates = &finStateSetCopy;
+	}
+
+	/* Unset all of our final states and get the final states from other. */
+	if ( !optional )
+		fsm->unsetAllFinStates();
+	fsm->finStateSet.insert( other->finStateSet );
+
+	/* Since other's lists are empty, we can delete the fsm without
+	 * affecting any states. */
+	delete other;
+
+	/* Merge our former final states with the start state of other. */
+	for ( int i = 0; i < fromStates->length(); i++ ) {
+		StateAp *state = fromStates->data[i];
+
+		/* Merge the former final state with other's start state. */
+		fsm->mergeStatesLeaving( state, otherStartState );
+
+		/* If the former final state was not reset final then we must clear
+		 * the state's out trans data. If it got reset final then it gets to
+		 * keep its out trans data. This must be done before fillInStates gets
+		 * called to prevent the data from being sourced. */
+		if ( ! state->isFinState() )
+			fsm->clearOutData( state );
+	}
+
+	/* Fill in any new states made from merging. */
+	FsmRes res = fillInStates( fsm );
 	if ( !res.success() )
 		return res;
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
 
 	res.fsm->afterOpMinimize( lastInSeq );
 

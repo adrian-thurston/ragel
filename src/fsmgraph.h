@@ -2253,7 +2253,7 @@ public:
 	static FsmRes minRepeatOp( FsmAp *fsm, int times );
 	static FsmRes rangeRepeatOp( FsmAp *fsm, int lower, int upper );
 
-	static FsmRes concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
+	static FsmRes concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true, StateSet *fromStates = 0, bool optional = false );
 	static FsmRes unionOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
 	static FsmRes intersectOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
 	static FsmRes subtractOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
