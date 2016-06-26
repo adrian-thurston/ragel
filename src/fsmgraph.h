@@ -722,6 +722,19 @@ struct NfaTrans
 		popTest(popTable)
 	{}
 
+	NfaTrans( const NfaTrans &other )
+	:
+		fromState(0), toState(0),
+		order(other.order),
+		pushTable(other.pushTable),
+		restoreTable(other.restoreTable),
+		popCondSpace(other.popCondSpace),
+		popCondKeys(other.popCondKeys),
+		popAction(other.popAction),
+		popTest(other.popTest),
+		priorTable(other.priorTable)
+	{}
+
 
 	StateAp *fromState;
 	StateAp *toState;

@@ -194,9 +194,11 @@ StateAp::StateAp(const StateAp &other)
 	/* Dup the nfa trans. */
 	if ( other.nfaOut != 0 ) {
 		nfaOut = new NfaTransList;
-		for ( NfaTransList::Iter n = *other.nfaOut; n.lte(); n++ ) {
-			NfaTrans *t = new NfaTrans( *n );
-			nfaOut->append( t );
+		for ( NfaTransList::Iter trans = *other.nfaOut; trans.lte(); trans++ ) {
+			NfaTrans *newtrans = new NfaTrans( *trans );
+			newtrans->toState = trans->toState;
+
+			nfaOut->append( newtrans );
 		}
 	}
 }

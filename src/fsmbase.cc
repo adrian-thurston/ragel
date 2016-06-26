@@ -202,17 +202,11 @@ FsmAp::FsmAp( const FsmAp &graph )
 			state->eofTarget = state->eofTarget->alg.stateMap;
 
 		if ( state->nfaOut != 0 ) {
-			NfaTransList *nfaOut = new NfaTransList;
-
 			for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
 				StateAp *targ = n->toState->alg.stateMap;
-				NfaTrans *t = new NfaTrans( *n );
-				nfaOut->append( t );
-				attachToNfa( state, targ, t );
+				n->toState = 0;
+				attachToNfa( state, targ, n );
 			}
-
-			delete state->nfaOut;
-			state->nfaOut = nfaOut;
 		}
 	}
 
