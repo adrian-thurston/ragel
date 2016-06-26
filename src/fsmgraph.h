@@ -2173,7 +2173,7 @@ public:
 	void cleanAbortedFill( StateAp *state );
 	void cleanAbortedFill();
 	bool overStateLimit();
-	FsmRes fillInStates();
+	FsmRes fillInStates0();
 	void nfaFillInStates();
 
 	/*
@@ -2309,8 +2309,12 @@ public:
 	void resolveEpsilonTrans();
 
 	/* Workers for concatenation and union. */
-	FsmRes doConcat( FsmAp *other, StateSet *fromStates, bool optional );
-	FsmRes doUnion( FsmAp *other );
+	FsmRes doConcat0( FsmAp *other, StateSet *fromStates, bool optional );
+	FsmRes doUnion0( FsmAp *other );
+
+	static FsmRes fillInStates( FsmAp *fsm );
+	static FsmRes doUnion( FsmAp *fsm, FsmAp *other );
+	static FsmRes doConcat( FsmAp *fsm, FsmAp *other, StateSet *fromStates, bool optional );
 
 	static void condCost( Action *action, long repId );
 	static void applyEntryPriorGuard( FsmAp *fsm, long repId );
