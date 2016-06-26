@@ -5,11 +5,21 @@ COLM_BINDEP = @COLM_BINDEP@
 KELBT       = @KELBT@
 RAGEL       = @RAGEL@
 
+# Libfsm contains only the FSM construction code and the backend code
+# generators. It is useful for building code generators in programs not
+# connected to the ragel language.
+lib_LIBRARIES = libfsm.a
+
+if BUILD_PROGRAM
+
 bin_PROGRAMS = ragel
 
-# Libragel includes the ragel parsers. Libfsm contains only the FSM
-# construction code and the backend code generators.
-lib_LIBRARIES = libragel.a libfsm.a
+# Libragel includes the ragel parsers. It is the programm wrapped up with a
+# libragel call in place of main.
+lib_LIBRARIES += libragel.a
+
+endif
+
 
 include_HEADERS = \
 	libragel.h action.h fsmgraph.h ragel.h common.h \
@@ -19,7 +29,7 @@ nodist_include_HEADERS = config.h
 
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
-BACKEND_SRC = \
+LIBFSM_SRC = \
 	buffer.h codegen.h binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h \
 	binloopvar.h binexpvar.h flat.h flatloopgoto.h flatexpgoto.h flatvar.h \
 	flatloopvar.h flatexpvar.h goto.h switchloopgoto.h switchexpgoto.h \
@@ -34,7 +44,7 @@ BACKEND_SRC = \
 ragel_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
 	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc main.cc \
-	$(BACKEND_SRC)
+	$(LIBFSM_SRC)
 
 
 if WITH_RAGEL_KELBT
@@ -60,8 +70,8 @@ nodist_libragel_a_SOURCES = $(nodist_ragel_SOURCES)
 libragel_a_SOURCES = $(ragel_SOURCES)
 libragel_a_CPPFLAGS = -Dmain=main_lib -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
-nodist_libfsm_a_SOURCES = $(nodist_ragel_SOURCES)
-libfsm_a_SOURCES = $(BACKEND_SRC)
+nodist_libfsm_a_SOURCES = version.h
+libfsm_a_SOURCES = $(LIBFSM_SRC)
 libfsm_a_CPPFLAGS = -I$(top_srcdir)/aapl
 
 EXTRA_DIST = \
