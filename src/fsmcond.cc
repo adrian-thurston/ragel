@@ -402,7 +402,7 @@ FsmRes FsmAp::embedCondition( FsmAp *fsm, StateAp *state, const CondSet &set, co
 	fsm->doEmbedCondition( state, set, vals );
 
 	/* Fill in any states that were newed up as combinations of others. */
-	FsmRes res = fsm->fillInStates0();
+	FsmRes res = fillInStates( fsm );
 	if ( !res.success() )
 		return res;
 

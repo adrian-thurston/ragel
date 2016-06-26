@@ -341,13 +341,13 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 
 /* Fsm concatentation worker. Supports treating the concatentation as optional,
  * which essentially leaves the final states of machine one as final. */
-FsmRes FsmAp::doConcat0( FsmAp *other, StateSet *fromStates, bool optional )
+FsmRes FsmAp::doConcat( FsmAp *fsm, FsmAp *other, StateSet *fromStates, bool optional )
 {
 	/* For the merging process. */
 	StateSet finStateSetCopy, startStateSet;
 
 	/* Turn on misfit accounting for both graphs. */
-	setMisfitAccounting( true );
+	fsm->setMisfitAccounting( true );
 	other->setMisfitAccounting( true );
 
 	/* Get the other's start state. */
@@ -357,24 +357,24 @@ FsmRes FsmAp::doConcat0( FsmAp *other, StateSet *fromStates, bool optional )
 	other->unsetStartState();
 
 	/* Bring in the rest of other's entry points. */
-	copyInEntryPoints( other );
+	fsm->copyInEntryPoints( other );
 	other->entryPoints.empty();
 
 	/* Bring in other's states into our state lists. */
-	stateList.append( other->stateList );
-	misfitList.append( other->misfitList );
+	fsm->stateList.append( other->stateList );
+	fsm->misfitList.append( other->misfitList );
 
 	/* If from states is not set, then get a copy of our final state set before
 	 * we clobber it and use it instead. */
 	if ( fromStates == 0 ) {
-		finStateSetCopy = finStateSet;
+		finStateSetCopy = fsm->finStateSet;
 		fromStates = &finStateSetCopy;
 	}
 
 	/* Unset all of our final states and get the final states from other. */
 	if ( !optional )
-		unsetAllFinStates();
-	finStateSet.insert( other->finStateSet );
+		fsm->unsetAllFinStates();
+	fsm->finStateSet.insert( other->finStateSet );
 
 	/* Since other's lists are empty, we can delete the fsm without
 	 * affecting any states. */
@@ -385,59 +385,50 @@ FsmRes FsmAp::doConcat0( FsmAp *other, StateSet *fromStates, bool optional )
 		StateAp *state = fromStates->data[i];
 
 		/* Merge the former final state with other's start state. */
-		mergeStatesLeaving( state, otherStartState );
+		fsm->mergeStatesLeaving( state, otherStartState );
 
 		/* If the former final state was not reset final then we must clear
 		 * the state's out trans data. If it got reset final then it gets to
 		 * keep its out trans data. This must be done before fillInStates gets
 		 * called to prevent the data from being sourced. */
 		if ( ! state->isFinState() )
-			clearOutData( state );
+			fsm->clearOutData( state );
 	}
 
 	/* Fill in any new states made from merging. */
-	FsmRes res = fillInStates0();
+	FsmRes res = fillInStates( fsm );
 	if ( !res.success() )
 		return res;
 
 	/* Remove the misfits and turn off misfit accounting. */
-	removeMisfits();
-	setMisfitAccounting( false );
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
 
 	return res;
 }
 
-/* Static wrapper simply cleans up FSM struct. */
-FsmRes FsmAp::doConcat( FsmAp *fsm, FsmAp *other, StateSet *fromStates, bool optional )
-{
-	FsmRes res = fsm->doConcat( fsm, other, fromStates, optional );
-	if ( !res.success() )
-		delete fsm;
-	return res;
-}
-
-FsmRes FsmAp::doUnion0( FsmAp *other )
+FsmRes FsmAp::doUnion( FsmAp *fsm, FsmAp *other )
 {
 	/* Build a state set consisting of both start states */
 	StateSet startStateSet;
-	startStateSet.insert( startState );
+	startStateSet.insert( fsm->startState );
 	startStateSet.insert( other->startState );
 
 	/* Both of the original start states loose their start state status. */
-	unsetStartState();
+	fsm->unsetStartState();
 	other->unsetStartState();
 
 	/* Bring in the rest of other's entry points. */
-	copyInEntryPoints( other );
+	fsm->copyInEntryPoints( other );
 	other->entryPoints.empty();
 
 	/* Merge the lists. This will move all the states from other
 	 * into this. No states will be deleted. */
-	stateList.append( other->stateList );
-	misfitList.append( other->misfitList );
+	fsm->stateList.append( other->stateList );
+	fsm->misfitList.append( other->misfitList );
 
 	/* Move the final set data from other into this. */
-	finStateSet.insert(other->finStateSet);
+	fsm->finStateSet.insert(other->finStateSet);
 	other->finStateSet.empty();
 
 	/* Since other's list is empty, we can delete the fsm without
@@ -445,22 +436,13 @@ FsmRes FsmAp::doUnion0( FsmAp *other )
 	delete other;
 
 	/* Create a new start state. */
-	setStartState( addState() );
+	fsm->setStartState( fsm->addState() );
 
 	/* Merge the start states. */
-	mergeStateList( startState, startStateSet.data, startStateSet.length() );
+	fsm->mergeStateList( fsm->startState, startStateSet.data, startStateSet.length() );
 
 	/* Fill in any new states made from merging. */
-	return fillInStates0();
-}
-
-/* Static wrapper simply cleans up FSM struct. */
-FsmRes FsmAp::doUnion( FsmAp *fsm, FsmAp *other )
-{
-	FsmRes res = fsm->doUnion( fsm, other );
-	if ( !res.success() )
-		delete fsm;
-	return res;
+	return fillInStates( fsm );
 }
 
 bool FsmAp::inEptVect( EptVect *eptVect, StateAp *state )
@@ -807,20 +789,17 @@ FsmRes FsmAp::exactRepeatOp( FsmAp *fsm, int times )
 	/* Concatentate duplicates onto the end up until before the last. */
 	for ( int i = 1; i < times-1; i++ ) {
 		FsmAp *dup = new FsmAp( *copyFrom );
-		FsmRes res = fsm->doConcat0( dup, 0, false );
+		FsmRes res = doConcat( fsm, dup, 0, false );
 		if ( !res.success() ) {
-			delete fsm;
 			delete copyFrom;
 			return res;
 		}
 	}
 
 	/* Now use the copyFrom on the end. */
-	FsmRes res = fsm->doConcat0( copyFrom, 0, false );
-	if ( !res.success()) {
-		delete fsm;
+	FsmRes res = doConcat( fsm, copyFrom, 0, false );
+	if ( !res.success())
 		return res;
-	}
 
 	res.fsm->afterOpMinimize();
 
@@ -863,9 +842,8 @@ FsmRes FsmAp::maxRepeatOp( FsmAp *fsm, int times )
 		 * can pick out it's final states after the optional style concat. */
 		FsmAp *dup = new FsmAp( *copyFrom );
 		dup->setFinBits( STB_GRAPH2 );
-		FsmRes res = fsm->doConcat0( dup, &lastFinSet, true );
+		FsmRes res = doConcat( fsm, dup, &lastFinSet, true );
 		if ( !res.success() ) {
-			delete fsm;
 			delete copyFrom;
 			return res;
 		}
@@ -885,11 +863,9 @@ FsmRes FsmAp::maxRepeatOp( FsmAp *fsm, int times )
 	}
 
 	/* Now use the copyFrom on the end, no bits set, no bits to clear. */
-	FsmRes res = fsm->doConcat0( copyFrom, &lastFinSet, true );
-	if ( !res.success() ) {
-		delete fsm;
+	FsmRes res = doConcat( fsm, copyFrom, &lastFinSet, true );
+	if ( !res.success() )
 		return res;
-	}
 
 	res.fsm->afterOpMinimize();
 
@@ -903,7 +879,7 @@ FsmRes FsmAp::minRepeatOp( FsmAp *fsm, int times )
 		return FsmAp::starOp( fsm );
 	}
 	else {
-		/* Take a duplicate for the plus. */
+		/* Take a duplicate for the star below. */
 		FsmAp *dup = new FsmAp( *fsm );
 
 		/* Do repetition on the first half. */
@@ -978,11 +954,9 @@ FsmRes FsmAp::concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 	/* Assert same signedness and return graph concatenation op. */
 	assert( fsm->ctx == other->ctx );
 
-	FsmRes res = fsm->doConcat0( other, 0, false );
-	if ( !res.success() ) {
-		delete fsm;
+	FsmRes res = doConcat( fsm, other, 0, false );
+	if ( !res.success() )
 		return res;
-	}
 
 	res.fsm->afterOpMinimize( lastInSeq );
 
@@ -1024,11 +998,9 @@ FsmRes FsmAp::unionOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 	other->setMisfitAccounting( true );
 
 	/* Call Worker routine. */
-	FsmRes res = fsm->doUnion0( other );
-	if ( !res.success() ) {
-		delete fsm;
+	FsmRes res = doUnion( fsm, other );
+	if ( !res.success() )
 		return res;
-	}
 
 	/* Remove the misfits and turn off misfit accounting. */
 	fsm->removeMisfits();
@@ -1056,11 +1028,9 @@ FsmRes FsmAp::intersectOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 	other->setFinBits( STB_GRAPH2 );
 
 	/* Call worker Or routine. */
-	FsmRes res = fsm->doUnion0( other );
-	if ( !res.success() ) {
-		delete fsm;
+	FsmRes res = doUnion( fsm, other );
+	if ( !res.success() )
 		return res;
-	}
 
 	/* Unset any final states that are no longer to 
 	 * be final due to final bits. */
@@ -1091,11 +1061,9 @@ FsmRes FsmAp::subtractOp( FsmAp *fsm, FsmAp *other, bool lastInSeq )
 	other->setFinBits( STB_GRAPH1 );
 
 	/* Call worker Or routine. */
-	FsmRes res = fsm->doUnion0( other );
-	if ( !res.success() ) {
-		delete fsm;
+	FsmRes res = doUnion( fsm, other );
+	if ( !res.success() )
 		return res;
-	}
 
 	/* Unset any final states that are no longer to 
 	 * be final due to final bits. */
@@ -1536,39 +1504,45 @@ bool FsmAp::overStateLimit()
 	return false;
 }
 
-FsmRes FsmAp::fillInStates0()
+FsmRes FsmAp::fillInStates( FsmAp *fsm )
 {
 	/* Merge any states that are awaiting merging. This will likey cause other
 	 * states to be added to the NFA list. */
-	while ( nfaList.length() > 0 ) {
-		StateAp *state = nfaList.head;
+	while ( fsm->nfaList.length() > 0 ) {
+		StateAp *state = fsm->nfaList.head;
 
 		StateSet *stateSet = &state->stateDictEl->stateSet;
-		mergeStateList( state, stateSet->data, stateSet->length() );
+		fsm->mergeStateList( state, stateSet->data, stateSet->length() );
 
 		for ( StateSet::Iter s = *stateSet; s.lte(); s++ )
-			detachStateDict( state, *s );
+			fsm->detachStateDict( state, *s );
 
-		nfaList.detach( state );
+		fsm->nfaList.detach( state );
 
-		if ( priorInteraction ) {
-			cleanAbortedFill();
+		if ( fsm->priorInteraction ) {
+			fsm->cleanAbortedFill();
+			int guardId = fsm->guardId;
+			delete fsm;
 			return FsmRes( FsmRes::PriorInteraction(), guardId );
 		}
 
-		if ( overStateLimit() ) {
-			cleanAbortedFill();
+		if ( fsm->overStateLimit() ) {
+			fsm->cleanAbortedFill();
+			delete fsm;
 			return FsmRes( FsmRes::TooManyStates() );
 		}
 	}
 
-	if ( priorInteraction ) {
-		cleanAbortedFill();
+	if ( fsm->priorInteraction ) {
+		fsm->cleanAbortedFill();
+		int guardId = fsm->guardId;
+		delete fsm;
 		return FsmRes( FsmRes::PriorInteraction(), guardId );
 	}
 
-	if ( overStateLimit() ) {
-		cleanAbortedFill();
+	if ( fsm->overStateLimit() ) {
+		fsm->cleanAbortedFill();
+		delete fsm;
 		return FsmRes( FsmRes::TooManyStates() );
 	}
 
@@ -1576,24 +1550,14 @@ FsmRes FsmAp::fillInStates0()
 	 * preserve. */
 
 	/* Disassociated state dict elements from states. */
-	for ( StateDict::Iter sdi = stateDict; sdi.lte(); sdi++ )
+	for ( StateDict::Iter sdi = fsm->stateDict; sdi.lte(); sdi++ )
 		sdi->targState->stateDictEl = 0;
 
 	/* Delete all the state dict elements. */
-	stateDict.empty();
+	fsm->stateDict.empty();
 
-	return FsmRes( FsmRes::Fsm(), this );
+	return FsmRes( FsmRes::Fsm(), fsm );
 }
-
-/* Static wrapper simply cleans up FSM struct. */
-FsmRes FsmAp::fillInStates( FsmAp *fsm )
-{
-	FsmRes res = fsm->fillInStates0();
-	if ( !res.success() )
-		delete fsm;
-	return res;
-}
-
 
 /* Check if a machine defines a single character. This is useful in validating
  * ranges and machines to export. */
