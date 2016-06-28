@@ -191,8 +191,10 @@ struct HostType
 	bool isSigned;
 	bool isOrd;
 	bool isChar;
-	long long minVal;
-	long long maxVal;
+	long long sMinVal;
+	long long sMaxVal;
+	unsigned long long uMinVal;
+	unsigned long long uMaxVal;
 	unsigned int size;
 };
 
@@ -266,12 +268,12 @@ struct KeyOps
 		explicitUnsigned = hostLang->explicitUnsigned;
 
 		if ( isSigned ) {
-			minKey = (long) alphType->minVal;
-			maxKey = (long) alphType->maxVal;
+			minKey = (long) alphType->sMinVal;
+			maxKey = (long) alphType->sMaxVal;
 		}
 		else {
-			minKey = (long) (unsigned long) alphType->minVal; 
-			maxKey = (long) (unsigned long) alphType->maxVal;
+			minKey = (long) alphType->uMinVal; 
+			maxKey = (long) alphType->uMaxVal;
 		}
 	}
 

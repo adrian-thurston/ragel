@@ -122,29 +122,50 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd )
 
 Key makeFsmKeyDec( char *str, const InputLoc &loc, ParseData *pd )
 {
-	/* Convert the number to a decimal. First reset errno so we can check
-	 * for overflow or underflow. */
-	errno = 0;
-	long long minVal = pd->alphType->minVal;
-	long long maxVal = pd->alphType->maxVal;
+	if ( pd->alphType->isSigned ) {
+		/* Convert the number to a decimal. First reset errno so we can check
+		 * for overflow or underflow. */
+		errno = 0;
+		long long minVal = pd->alphType->sMinVal;
+		long long maxVal = pd->alphType->sMaxVal;
 
-	long long ll = strtoll( str, 0, 10 );
+		long long ll = strtoll( str, 0, 10 );
 
-	/* Check for underflow. */
-	if ( ( errno == ERANGE && ll < 0 ) || ll < minVal) {
-		pd->id->error(loc) << "literal " << str << " underflows the alphabet type" << endl;
-		ll = minVal;
-	}
-	/* Check for overflow. */
-	else if ( ( errno == ERANGE && ll > 0 ) || ll > maxVal ) {
-		pd->id->error(loc) << "literal " << str << " overflows the alphabet type" << endl;
-		ll = maxVal;
-	}
+		/* Check for underflow. */
+		if ( ( errno == ERANGE && ll < 0 ) || ll < minVal ) {
+			pd->id->error(loc) << "literal " << str << " underflows the alphabet type" << endl;
+			ll = minVal;
+		}
+		/* Check for overflow. */
+		else if ( ( errno == ERANGE && ll > 0 ) || ll > maxVal ) {
+			pd->id->error(loc) << "literal " << str << " overflows the alphabet type" << endl;
+			ll = maxVal;
+		}
 
-	if ( pd->alphType->isSigned )
 		return Key( (long)ll );
-	else
-		return Key( (unsigned long)ll );
+	}
+	else {
+		/* Convert the number to a decimal. First reset errno so we can check
+		 * for overflow or underflow. */
+		errno = 0;
+		unsigned long long minVal = pd->alphType->uMinVal;
+		unsigned long long maxVal = pd->alphType->uMaxVal;
+
+		unsigned long long ull = strtoull( str, 0, 10 );
+
+		/* Check for underflow. */
+		if ( ( errno == ERANGE && ull < 0 ) || ull < minVal ) {
+			pd->id->error(loc) << "literal " << str << " underflows the alphabet type" << endl;
+			ull = minVal;
+		}
+		/* Check for overflow. */
+		else if ( ( errno == ERANGE && ull > 0 ) || ull > maxVal ) {
+			pd->id->error(loc) << "literal " << str << " overflows the alphabet type" << endl;
+			ull = maxVal;
+		}
+
+		return Key( (unsigned long)ull );
+	}
 }
 
 /* Make an fsm key in int format (what the fsm graph uses) from an alphabet
