@@ -123,14 +123,14 @@ if [test "x$build_program" = "xyes"]; then
 				CPPFLAGS="${CPPFLAGS} -I$withval/src/include"
 				LDFLAGS="${LDFLAGS} -L$withval/src"
 				COLM="$withval/src/colm"
-				COLM_LD="$withval/src/libcolmd.a"
+				COLM_LD="$withval/src/.libs/libcolm.a"
 				COLM_LIBDEP="$COLM_LD"
 				COLM_BINDEP="$COLM"
 			else
 				CPPFLAGS="${CPPFLAGS} -I$withval/include"
 				LDFLAGS="${LDFLAGS} -L$withval/lib"
 				COLM="$withval/bin/colm"
-				COLM_LD="-lcolmd"
+				COLM_LD="-lcolm"
 				COLM_LIBDEP=""
 				COLM_BINDEP="$COLM"
 			fi
