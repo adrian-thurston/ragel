@@ -73,6 +73,9 @@ AC_LANG_CPLUSPLUS
 dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
+AC_CHECK_SIZEOF([int])
+AC_CHECK_SIZEOF([long])
+
 if [test "x$build_program" = "xyes"]; then
 	dnl
 	dnl Check for ragel.
