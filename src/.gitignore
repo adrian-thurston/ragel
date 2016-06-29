@@ -19,10 +19,8 @@
 /version.h
 /tags
 /.deps
-/libcolmp.a
-/libcolmd.a
-/libcolmp.la
-/libcolmd.la
+/libcolm.a
+/libcolm.la
 /.libs
 /stamp-h1
 /stamp-h2
