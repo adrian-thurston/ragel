@@ -2238,8 +2238,8 @@ public:
 	static FsmAp *lambdaFsm( FsmCtx *ctx );
 	static FsmAp *dotFsm( FsmCtx *ctx );
 	static FsmAp *dotStarFsm( FsmCtx *ctx );
-
-
+	static FsmAp *notRangeFsm( FsmCtx *ctx, Key low, Key high );
+	
 	/*
 	 * Fsm operators.
 	 */

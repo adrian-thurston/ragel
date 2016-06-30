@@ -208,6 +208,31 @@ FsmAp *FsmAp::rangeFsm( FsmCtx *ctx, Key low, Key high )
 	return fsm;
 }
 
+FsmAp *FsmAp::notRangeFsm( FsmCtx *ctx, Key low, Key high )
+{
+	FsmAp *fsm = new FsmAp( ctx );
+
+	/* Two states first start, second final. */
+	fsm->setStartState( fsm->addState() );
+
+	StateAp *end = fsm->addState();
+	fsm->setFinState( end );
+
+	/* Attach using the range of characters. */
+	if ( ctx->keyOps->lt( ctx->keyOps->minKey, low ) ) {
+		ctx->keyOps->decrement( low );
+		fsm->attachNewTrans( fsm->startState, end, ctx->keyOps->minKey, low );
+	}
+
+	if ( ctx->keyOps->lt( high, ctx->keyOps->maxKey ) ) {
+		ctx->keyOps->increment( high );
+		fsm->attachNewTrans( fsm->startState, end, high, ctx->keyOps->maxKey );
+	}
+
+	return fsm;
+}
+
+
 FsmAp *FsmAp::rangeFsmCI( FsmCtx *ctx, Key lowKey, Key highKey )
 {
 	FsmAp *retFsm = rangeFsm( ctx, lowKey, highKey );
