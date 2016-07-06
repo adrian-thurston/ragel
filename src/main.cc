@@ -440,7 +440,7 @@ void compileOutputInstalled( const char *argv0 )
 		" -o %s"
 		" %s"
 		" -L" PREFIX "/lib"
-		" -lcolmd",
+		" -lcolm",
 		binaryFn, intermedFn );
 	
 	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ ) {
@@ -475,7 +475,7 @@ void compileOutputInSource( const char *argv0 )
 		" -o %s"
 		" %s"
 		" -L%s"
-		" -lcolmd",
+		" -lcolm",
 		location, location,
 		binaryFn, intermedFn, location );
 
