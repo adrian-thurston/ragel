@@ -1336,15 +1336,13 @@ factor:
 		$$->factor = new Factor( new Range( $1->literal, $3->literal, true ) );
 	};
 factor:
-	TK_ColonNfaOpen TK_UInt ',' expression ',' action_embed ','
+	TK_ColonNfaOpen expression ',' action_embed ','
 			action_embed ',' action_embed ',' action_embed ',' action_embed ','
 			action_embed TK_CloseColon
 	final {
-		long long repId = strtoll( $2->data, 0, 10 );
-
 		/* push, pop, ini, stay, repeat, exit */
-		$$->factor = new Factor( $1->loc, repId, $4->expression,
-				$6->action, $8->action, $10->action, $12->action, $14->action, $16->action,
+		$$->factor = new Factor( $1->loc, pd->nextRepId++, $2->expression,
+				$4->action, $6->action, $8->action, $10->action, $12->action, $14->action,
 				Factor::NfaRep );
 	};
 
@@ -1393,14 +1391,12 @@ opt_max_arg:
 	};
 
 factor:
-	colon_cond TK_UInt ',' expression ',' action_embed ','
+	colon_cond expression ',' action_embed ','
 			action_embed ',' action_embed opt_max_arg TK_CloseColon
 	final {
-		long long repId = strtoll( $2->data, 0, 10 );
-
 		/* ini, inc, min, max */
-		$$->factor = new Factor( $1->loc, repId, $4->expression,
-				$6->action, $8->action, $10->action, $11->action, 0, 0,
+		$$->factor = new Factor( $1->loc, pd->nextRepId++, $2->expression,
+				$4->action, $6->action, $8->action, $9->action, 0, 0,
 				$1->type );
 	};
 factor:

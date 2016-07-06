@@ -1387,9 +1387,8 @@ struct LoadRagel
 				break;
 			}
 			case ragel::factor::Nfa: {
-				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
 				Expression *toRepeat = loadExpression( FactorTree.expression() );
-				factor = new Factor( InputLoc(), repId, toRepeat,
+				factor = new Factor( InputLoc(), pd->nextRepId++, toRepeat,
 						loadActionRef( FactorTree.Push() ),
 						loadActionRef( FactorTree.Pop() ),
 						loadActionRef( FactorTree.Init() ),
@@ -1400,11 +1399,10 @@ struct LoadRagel
 				break;
 			}
 			case ragel::factor::Cond: {
-				long repId = strtol( FactorTree.uint().text().c_str(), 0, 10 );
 				Expression *toRepeat = loadExpression( FactorTree.expression() );
 				Action *optMax = loadActionRef( FactorTree.OptMax() );
 				Factor::Type type = loadCondRep( FactorTree.colon_cond() );
-				factor = new Factor( InputLoc(), repId, toRepeat,
+				factor = new Factor( InputLoc(), pd->nextRepId++, toRepeat,
 						loadActionRef( FactorTree.Init() ),
 						loadActionRef( FactorTree.Inc() ),
 						loadActionRef( FactorTree.Min() ),

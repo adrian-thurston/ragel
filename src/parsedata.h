@@ -333,6 +333,8 @@ struct ParseData
 	/* Counter for assigning ids to longest match items. */
 	int nextLongestMatchId;
 
+	int nextRepId;
+
 	/* List of all longest match parse tree items. */
 	LmList lmList;
 

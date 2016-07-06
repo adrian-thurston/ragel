@@ -361,10 +361,10 @@ namespace ragel
 	|	[lex_regex_open regex re_close] :Regex
 	|	[RL1: range_lit `.. RL2: range_lit]   :Range
 	|	[RL1: range_lit `../i RL2: range_lit] :RangeIndep
-	|	[nfastar  `( uint `, expression `,
+	|	[nfastar  `( expression `,
 			Push: action_ref `, Pop: action_ref `, Init: action_ref `, Stay: action_ref `,
 			Repeat: action_ref `, Exit: action_ref `):] :Nfa
-	|	[colon_cond `( uint `, expression `, 
+	|	[colon_cond `( expression `, 
 			Init: action_ref `, Inc: action_ref `, Min: action_ref OptMax: opt_max_arg `):] :Cond
 	|	[`( join `)] :Join
 

@@ -2054,23 +2054,17 @@ reduction TopLevel
 
 	ragel::factor :Nfa
 	{
-		string data( $uint->data, $uint->length );
-		long long repId = strtoll( data.c_str(), 0, 10);
-
-		/* push, pop, ini, stay, repeat, exit */
-		$$->factor = new Factor( @1, repId, $expression->expr,
+		/* push, pop, init, stay, repeat, exit */
+		$$->factor = new Factor( @1, pd->nextRepId++, $expression->expr,
 				$Push->action, $Pop->action, $Init->action, $Stay->action,
 				$Repeat->action, $Exit->action, Factor::NfaRep );
 	}
 
 	ragel::factor :Cond
 	{
-		string data( $uint->data, $uint->length );
-		long long repId = strtoll( data.c_str(), 0, 10);
-		Action *optMax = $OptMax->action;
-
-		$$->factor = new Factor( @2, repId, $expression->expr,
-				$Init->action, $Inc->action, $Min->action, optMax, 0, 0, $1->type );
+		/* init, inc, min, opt-max. */
+		$$->factor = new Factor( @2, pd->nextRepId++, $expression->expr,
+				$Init->action, $Inc->action, $Min->action, $OptMax->action, 0, 0, $1->type );
 	}
 
 	ragel::factor :Regex

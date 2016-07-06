@@ -439,6 +439,7 @@ ParseData::ParseData( InputData *id, string sectionName,
 	exportsRootName(0),
 	nextEpsilonResolvedLink(0),
 	nextLongestMatchId(1),
+	nextRepId(1),
 	cgd(0)
 {
 	fsmCtx = new FsmCtx( id );
