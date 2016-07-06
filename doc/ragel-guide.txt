@@ -3428,12 +3428,9 @@ designed to solve this problem, automatically embedding actions such that a
 zero count is possible.
 
 --------------
-:cond( <id>, <expression>, 
+:cond( <expression>, 
 	<init>, <inc>, <min> [ , <max> ] ):
 --------------
-
-* `id` is a unique integer identifying the expression. This is for automated
-analysis.
 
 * `expression` is the ragel-expression that is to be repeated.
 
@@ -3507,13 +3504,10 @@ captures, the :nfa union operator can backtrack to try an alternate. It before
 backtracking it can restore relevant state, then perform the new capture.
 
 --------------
-:nfa( <id>, <expression>, 
+:nfa( <expression>, 
 	<push>, <pop>,
 	<init>, <stay>, <repeat>, <exit> ):
 --------------
-
-* `id` is a unique integer identifying the expression. This is used primarily
-for automated analysis purposes.
 
 * `expression` is the ragel-expression that is to be repeated.
 
