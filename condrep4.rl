@@ -17,7 +17,7 @@ using std::endl;
 	action max { ({ c < max; }) }
 
 	main :=
-		:condstar( 0, any, init, inc, min, max ): :> '.' 0;
+		:condstar( any, init, inc, min, max ): :> '.' 0;
 
 }%%
 

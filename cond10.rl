@@ -44,8 +44,8 @@ using std::endl;
 
 	R5306833741170350 =
 		( '<'  47  's' 't' 'y' 'l' 'e' '>' '<' 
-			(:condstar( 6, (  ( (:condstar( 4, (  [a-zA-Z0-9_]  ), ini_4, inc_4, min_4, max_4 ): ) 
-			(:condstar( 5, ( ' ' ), ini_5, inc_5, min_5, max_5 ): ) )  ), ini_6, inc_6, min_6, max_6 ): ) )  
+			(:condstar( (  ( (:condstar( (  [a-zA-Z0-9_]  ), ini_4, inc_4, min_4, max_4 ): ) 
+			(:condstar( ( ' ' ), ini_5, inc_5, min_5, max_5 ): ) )  ), ini_6, inc_6, min_6, max_6 ): ) )  
 	:> any @{ match = 1; };
 
 	main := R5306833741170350;
