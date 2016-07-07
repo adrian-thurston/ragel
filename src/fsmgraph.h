@@ -2307,6 +2307,8 @@ public:
 	void epsilonFillEptVectFrom( StateAp *root, StateAp *from, bool parentLeaving );
 	void resolveEpsilonTrans();
 
+	static bool fillAbort( FsmRes &res, FsmAp *fsm );
+
 	static FsmRes fillInStates( FsmAp *fsm );
 
 	/* Workers for concatenation and union. */

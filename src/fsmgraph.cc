@@ -1522,11 +1522,40 @@ bool FsmAp::overStateLimit()
 	return false;
 }
 
+bool FsmAp::fillAbort( FsmRes &res, FsmAp *fsm )
+{
+	if ( fsm->priorInteraction ) {
+		fsm->cleanAbortedFill();
+		int guardId = fsm->guardId;
+		delete fsm;
+		res = FsmRes( FsmRes::PriorInteraction(), guardId );
+		return true;
+	}
+
+	if ( fsm->overStateLimit() ) {
+		fsm->cleanAbortedFill();
+		delete fsm;
+		res = FsmRes( FsmRes::TooManyStates() );
+		return true;
+	}
+
+	return false;
+}
+
 FsmRes FsmAp::fillInStates( FsmAp *fsm )
 {
+	/* Used as return value on success. Filled in with error on abort. */
+	FsmRes res( FsmRes::Fsm(), fsm );
+
 	/* Merge any states that are awaiting merging. This will likey cause other
 	 * states to be added to the NFA list. */
-	while ( fsm->nfaList.length() > 0 ) {
+	while ( true ) {
+		if ( fillAbort( res, fsm ) )
+			return res;
+
+		if ( fsm->nfaList.length() == 0 )
+			break;
+
 		StateAp *state = fsm->nfaList.head;
 
 		StateSet *stateSet = &state->stateDictEl->stateSet;
@@ -1536,32 +1565,6 @@ FsmRes FsmAp::fillInStates( FsmAp *fsm )
 			fsm->detachStateDict( state, *s );
 
 		fsm->nfaList.detach( state );
-
-		if ( fsm->priorInteraction ) {
-			fsm->cleanAbortedFill();
-			int guardId = fsm->guardId;
-			delete fsm;
-			return FsmRes( FsmRes::PriorInteraction(), guardId );
-		}
-
-		if ( fsm->overStateLimit() ) {
-			fsm->cleanAbortedFill();
-			delete fsm;
-			return FsmRes( FsmRes::TooManyStates() );
-		}
-	}
-
-	if ( fsm->priorInteraction ) {
-		fsm->cleanAbortedFill();
-		int guardId = fsm->guardId;
-		delete fsm;
-		return FsmRes( FsmRes::PriorInteraction(), guardId );
-	}
-
-	if ( fsm->overStateLimit() ) {
-		fsm->cleanAbortedFill();
-		delete fsm;
-		return FsmRes( FsmRes::TooManyStates() );
 	}
 
 	/* The NFA list is empty at this point. There are no state sets we need to
@@ -1574,7 +1577,7 @@ FsmRes FsmAp::fillInStates( FsmAp *fsm )
 	/* Delete all the state dict elements. */
 	fsm->stateDict.empty();
 
-	return FsmRes( FsmRes::Fsm(), fsm );
+	return res;
 }
 
 /* Check if a machine defines a single character. This is useful in validating
