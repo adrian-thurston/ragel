@@ -1832,19 +1832,39 @@ FsmRes FsmAp::condPlus( FsmAp *fsm, long repId, Action *ini, Action *inc, Action
 
 FsmRes FsmAp::condStar( FsmAp *fsm, long repId, Action *ini, Action *inc, Action *min, Action *max )
 {
-	FsmRes cp = condPlus( fsm, repId, ini, inc, min, max );
-	if ( !cp.success() )
-		return cp;
+	condCost( ini, repId );
+	condCost( inc, repId );
+	condCost( min, repId );
+	if ( max != 0 )
+		condCost( max, repId );
 
-	StateAp *newStart = cp.fsm->dupStartState();
-	cp.fsm->unsetStartState();
-	cp.fsm->setStartState( newStart );
+	/* Increment. */
+	fsm->startFsmAction( 0, inc );
 
-	/* Now ensure the new start state is a final state. */
-	cp.fsm->setFinState( newStart );
-	cp.fsm->addOutCondition( newStart, min, true );
+	/* Max (optional). */
+	if ( max != 0 ) {
+		FsmRes res = fsm->startFsmCondition( max, true );
+		if ( !res.success() )
+			return res;
+	}
 
-	return cp;
+	applyRepeatPriorGuard( fsm, repId );
+
+	/* Star. */
+	FsmRes res = FsmAp::starOp( fsm );
+	if ( !res.success() )
+		return res;
+
+	/* Restrict leaving. */
+	res.fsm->leaveFsmCondition( min, true );
+
+	/* Init action. */
+	res.fsm->startFromStateAction( 0,  ini );
+
+	/* Leading priority guard. */
+	applyEntryPriorGuard( res.fsm, repId );
+
+	return res;
 }
 
 /* Remove duplicates of unique actions from an action table. */
