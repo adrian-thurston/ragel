@@ -1848,7 +1848,6 @@ struct FsmRes
 	struct PriorInteraction {};
 	struct CondCostTooHigh {};
 	struct RepetitionError {};
-	struct BreadthCheck {};
 	struct AnalysisOk {};
 
 	enum Type
@@ -1859,7 +1858,6 @@ struct FsmRes
 		TypePriorInteraction,
 		TypeCondCostTooHigh,
 		TypeRepetitionError,
-		TypeBreadthCheck,
 		TypeAnalysisOk,
 	};
 
@@ -1881,9 +1879,6 @@ struct FsmRes
 	FsmRes( const RepetitionError & )
 		: fsm(0), type(TypeRepetitionError) {}
 
-	FsmRes( const BreadthCheck &, BreadthResult *breadth )
-		: fsm(0), type(TypeBreadthCheck), breadth(breadth) {}
-
 	FsmRes( const AnalysisOk & )
 		: fsm(0), type(TypeAnalysisOk) {}
 
@@ -1891,11 +1886,7 @@ struct FsmRes
 
 	FsmAp *fsm;
 	Type type;
-
-	union {
-		long long id;
-		BreadthResult *breadth;
-	};
+	long long id;
 };
 
 /* Graph class that implements actions and priorities. */

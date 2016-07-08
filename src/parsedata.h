@@ -232,7 +232,8 @@ struct ParseData
 
 	void analysisResult( long code, long id, const char *scode );
 
-	FsmRes checkBreadth( FsmAp *fsm );
+	void reportBreadthResults( BreadthResult *breadth );
+	BreadthResult *checkBreadth( FsmAp *fsm );
 	void reportAnalysisResult( FsmRes &res );
 
 	/* Make the graph from a graph dict node. Does minimization. */

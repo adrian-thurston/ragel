@@ -1040,7 +1040,7 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 }
 
 /* Always returns the breadth check result. Will not consume the fsm. */
-FsmRes ParseData::checkBreadth( FsmAp *fsm )
+BreadthResult *ParseData::checkBreadth( FsmAp *fsm )
 {
 	double start = FsmAp::breadthFromEntry( id->histogram, fsm, fsm->startState );
 
@@ -1056,8 +1056,7 @@ FsmRes ParseData::checkBreadth( FsmAp *fsm )
 		}
 	}
 
-	delete fsm;
-	return FsmRes( FsmRes::BreadthCheck(), breadth );
+	return breadth;
 }
 
 
@@ -1071,6 +1070,25 @@ void ParseData::analysisResult( long code, long _id, const char *scode )
 	stringstream out;
 	resultWrite( out, code, _id, scode );
 	id->comm = out.str();
+}
+
+void ParseData::reportBreadthResults( BreadthResult *breadth )
+{
+	stringstream out;
+
+	out << std::fixed << std::setprecision(10);
+
+	out << "COST START " <<
+			( breadth->start ) << " " << 
+			( 1 ) << endl;
+
+	for ( Vector<BreadthCost>::Iter c = breadth->costs; c.lte(); c++ ) {
+		out << "COST " << c->name << " " <<
+				( breadth->start ) << " " << 
+				( ( c->cost / breadth->start ) ) << endl;
+	}
+
+	this->id->comm += out.str();
 }
 
 void ParseData::reportAnalysisResult( FsmRes &res )
@@ -1089,26 +1107,6 @@ void ParseData::reportAnalysisResult( FsmRes &res )
 
 	else if ( res.type == FsmRes::TypeRepetitionError )
 		analysisResult( 2, 0, "rep-error" );
-
-	else if ( res.type == FsmRes::TypeBreadthCheck )
-	{
-		BreadthResult *breadth = res.breadth;
-		stringstream out;
-
-		out << std::fixed << std::setprecision(10);
-
-		out << "COST START " <<
-				( breadth->start ) << " " << 
-				( 1 ) << endl;
-
-		for ( Vector<BreadthCost>::Iter c = breadth->costs; c.lte(); c++ ) {
-			out << "COST " << c->name << " " <<
-					( breadth->start ) << " " << 
-					( ( c->cost / breadth->start ) ) << endl;
-		}
-
-		this->id->comm = out.str();
-	}
 }
 
 
@@ -1124,17 +1122,22 @@ FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 	/* Build the graph from a walk of the parse tree. */
 	FsmRes graph = gdNode->value->walk( this );
 
-	fsmCtx->stateLimit = FsmCtx::STATE_UNLIMITED;
+	if ( id->stateLimit > 0 )
+		fsmCtx->stateLimit = FsmCtx::STATE_UNLIMITED;
 
-	if ( id->checkBreadth )
-		graph = checkBreadth( graph.fsm );
+	/* Perform the breadth computation. This does not affect the FSM result. We
+	 * compute and print and move on. Higher up we catch the checkBreadth flag
+	 * and stop output. */
+	if ( graph.success() && id->checkBreadth ) {
+		BreadthResult *breadth = checkBreadth( graph.fsm );
+		reportBreadthResults( breadth );
+	}
 
 	if ( id->condsCheckDepth >= 0 ) {
 		/* Use this to expand generalized repetition to past the nfa union
 		 * choice point. */
 		fsmCtx->condsCheckDepth = id->condsCheckDepth;
 		graph = FsmAp::condCostSearch( graph.fsm );
-
 	}
 
 	if ( !graph.success() ) {
