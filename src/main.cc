@@ -133,7 +133,7 @@ void InputData::usage()
 "                                of the machine (depth D from start state).\n"
 "   --state-limit=L              Report fail if number of states exceeds this\n"
 "                                during compilation.\n"
-"   --nfa-breadth-check=E1,E2,.. Report breadth cost of named entry points by (and\n"
+"   --breadth-check=E1,E2,..     Report breadth cost of named entry points by (and\n"
 "                                start). Reporting starts at NFA union contructs.\n"
 "   --input-histogram=FN         Input char histogram for breadth check. If\n"
 "                                unspecified a flat histogram is used.\n"
@@ -514,7 +514,7 @@ void InputData::parseArgs( int argc, const char **argv )
 					nfaCondsDepth = strtol( eq, 0, 10 );
 				else if ( strcmp( arg, "state-limit" ) == 0 )
 					stateLimit = strtol( eq, 0, 10 );
-				else if ( strcmp( arg, "nfa-breadth-check" ) == 0 ) {
+				else if ( strcmp( arg, "breadth-check" ) == 0 ) {
 					char *ptr = 0;
 					while ( true ) {
 						char *label = strtok_r( eq, ",", &ptr );

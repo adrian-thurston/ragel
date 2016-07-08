@@ -733,14 +733,16 @@ void reportAnalysisResult( ParseData *pd, FsmRes &res )
 
 		nfaResultWrite( out, 21, 1, "OK" );
 
-		out << std::fixed << std::setprecision(0);
+		out << std::fixed << std::setprecision(10);
 
-		if ( breadth->start > 0.01 ) {
-			for ( Vector<BreadthCost>::Iter c = breadth->costs; c.lte(); c++ ) {
-				out << "COST " << c->name << " " <<
-						( 1000000.0 * breadth->start ) << " " << 
-						( 1000000.0 * ( c->cost / breadth->start ) ) << endl;
-			}
+		out << "COST START " <<
+				( breadth->start ) << " " << 
+				( 1 ) << endl;
+
+		for ( Vector<BreadthCost>::Iter c = breadth->costs; c.lte(); c++ ) {
+			out << "COST " << c->name << " " <<
+					( breadth->start ) << " " << 
+					( ( c->cost / breadth->start ) ) << endl;
 		}
 
 		pd->id->comm = out.str();
@@ -829,16 +831,16 @@ FsmRes NfaUnion::nfaCondsCheck( ParseData *pd )
 }
 
 /* Always returns the breadth check result. Will not consume the fsm. */
-FsmRes NfaUnion::checkBreadth( ParseData *pd, FsmAp *fsm )
+FsmRes ParseData::checkBreadth( FsmAp *fsm )
 {
-	double start = FsmAp::breadthFromEntry( pd->id->histogram, fsm, fsm->startState );
+	double start = FsmAp::breadthFromEntry( id->histogram, fsm, fsm->startState );
 
 	BreadthResult *breadth = new BreadthResult( start );
 	
-	for ( Vector<ParseData::Cut>::Iter c = pd->cuts; c.lte(); c++ ) {
+	for ( Vector<ParseData::Cut>::Iter c = cuts; c.lte(); c++ ) {
 		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
 			if ( mel->key == c->entryId ) {
-				double cost = FsmAp::breadthFromEntry( pd->id->histogram, fsm, mel->value );
+				double cost = FsmAp::breadthFromEntry( id->histogram, fsm, mel->value );
 
 				breadth->costs.append( BreadthCost( c->name, cost ) );
 			}
@@ -858,7 +860,7 @@ FsmRes NfaUnion::nfaBreadthCheck( ParseData *pd )
 	if ( !res.success() )
 		return res;
 
-	FsmRes breadthRes = checkBreadth( pd, res.fsm );
+	FsmRes breadthRes = pd->checkBreadth( res.fsm );
 
 	/* Always delete here. The analysis doesn't do it regardless of the result. */
 	delete res.fsm;
@@ -871,12 +873,6 @@ FsmRes NfaUnion::walk( ParseData *pd )
 {
 	if ( pd->id->nfaCondsDepth >= 0 ) {
 		FsmRes res = nfaCondsCheck( pd );
-		reportAnalysisResult( pd, res );
-		return FsmRes( FsmRes::Aborted() );
-	}
-
-	if ( pd->id->nfaBreadthCheck ) {
-		FsmRes res = nfaBreadthCheck( pd );
 		reportAnalysisResult( pd, res );
 		return FsmRes( FsmRes::Aborted() );
 	}

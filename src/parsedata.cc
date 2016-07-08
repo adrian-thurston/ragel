@@ -1060,6 +1060,13 @@ FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 		return graph;
 	}
 
+	if ( id->nfaBreadthCheck ) {
+		FsmRes breadthRes = checkBreadth( graph.fsm );
+		delete graph.fsm;
+		reportAnalysisResult( this, breadthRes );
+		return breadthRes;
+	}
+
 	fsmCtx->finalizeInstance( graph.fsm );
 
 	return graph;

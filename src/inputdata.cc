@@ -1,5 +1,5 @@
 /*
- *  Copyright 2008 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2008-2016 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
