@@ -1025,7 +1025,7 @@ struct FsmGbl
 		backend(Direct),
 		stringTables(false),
 		backendFeature(GotoFeature),
-		nfaTermCheck(0),
+		priorInteraction(0),
 		wantDupsRemoved(true),
 		minimizeLevel(MinimizePartition2),
 		minimizeOpt(MinimizeMostOps)
@@ -1055,7 +1055,7 @@ struct FsmGbl
 	RagelBackend backend;
 	bool stringTables;
 	BackendFeature backendFeature;
-	bool nfaTermCheck;
+	bool priorInteraction;
 	bool wantDupsRemoved;
 
 	MinimizeLevel minimizeLevel;
@@ -1074,9 +1074,11 @@ struct FsmCtx
 	MinimizeLevel minimizeLevel;
 	MinimizeOpt minimizeOpt;
 
+	static const int STATE_UNLIMITED = 0;
+
 	long stateLimit;
 	bool printStatistics;
-	bool nfaTermCheck;
+	bool priorInteraction;
 
 	bool unionOp;
 	

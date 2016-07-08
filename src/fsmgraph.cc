@@ -1318,7 +1318,7 @@ void FsmAp::checkEpsilonRegularInteraction( const PriorTable &t1, const PriorTab
 				if ( pd1->desc->priority < pd2->desc->priority || 
 						pd1->desc->priority > pd2->desc->priority )
 				{
-					if ( ctx->nfaTermCheck && pd1->desc->guarded ) {
+					if ( ctx->priorInteraction && pd1->desc->guarded ) {
 						if ( ! priorInteraction ) {
 							priorInteraction = true;
 							guardId = pd1->desc->guardId;
@@ -1514,7 +1514,7 @@ void FsmAp::cleanAbortedFill()
 
 bool FsmAp::overStateLimit()
 {
-	if ( ctx->stateLimit > 0 ) {
+	if ( ctx->stateLimit > FsmCtx::STATE_UNLIMITED ) {
 		long states = misfitList.length() + stateList.length();
 		if ( states > ctx->stateLimit )
 			return true;

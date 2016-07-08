@@ -32,11 +32,11 @@ FsmCtx::FsmCtx( FsmGbl *fsmGbl )
 	minimizeOpt(fsmGbl->minimizeOpt),
 
 	/* No limit. */
-	stateLimit(-1),
+	stateLimit(STATE_UNLIMITED),
 
 	printStatistics(fsmGbl->printStatistics),
 
-	nfaTermCheck(fsmGbl->nfaTermCheck),
+	priorInteraction(fsmGbl->priorInteraction),
 
 	unionOp(false),
 

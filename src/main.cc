@@ -125,17 +125,14 @@ void InputData::usage()
 "   --integral-tables    Use integers for table data (default)\n"
 "   --string-tables      Encode table data into strings for faster host lang\n"
 "                        compilation\n"
-"NFA analysis (large machines):\n"
+"analysis:\n"
 "   --prior-interaction          Search for condition-based general repetitions\n"
 "                                that will not function properly due to state mod\n"
 "                                overlap and must be NFA reps. \n"
 "   --nfa-conds-depth=D          Search for high-cost conditions inside a prefix\n"
 "                                of the machine (depth D from start state).\n"
-"                                Search is rooted at NFA union contructs.\n"
-"   --nfa-intermed-state-limit=L Report fail if number of states exceeds this\n"
+"   --state-limit=L              Report fail if number of states exceeds this\n"
 "                                during compilation.\n"
-"   --nfa-final-state-limit=L    Report a fail if number states in final machine\n"
-"                                exceeds this.\n"
 "   --nfa-breadth-check=E1,E2,.. Report breadth cost of named entry points by (and\n"
 "                                start). Reporting starts at NFA union contructs.\n"
 "   --input-histogram=FN         Input char histogram for breadth check. If\n"
@@ -512,13 +509,11 @@ void InputData::parseArgs( int argc, const char **argv )
 				else if ( strcmp( arg, "save-temps" ) == 0 )
 					saveTemps = true;
 				else if ( strcmp( arg, "prior-interaction" ) == 0 )
-					nfaTermCheck = true;
+					priorInteraction = true;
 				else if ( strcmp( arg, "nfa-conds-depth" ) == 0 )
 					nfaCondsDepth = strtol( eq, 0, 10 );
-				else if ( strcmp( arg, "nfa-intermed-state-limit" ) == 0 )
-					nfaIntermedStateLimit = strtol( eq, 0, 10 );
-				else if ( strcmp( arg, "nfa-final-state-limit" ) == 0 )
-					nfaFinalStateLimit = strtol( eq, 0, 10 );
+				else if ( strcmp( arg, "state-limit" ) == 0 )
+					stateLimit = strtol( eq, 0, 10 );
 				else if ( strcmp( arg, "nfa-breadth-check" ) == 0 ) {
 					char *ptr = 0;
 					while ( true ) {

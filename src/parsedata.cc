@@ -1046,9 +1046,14 @@ FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 {
 	if ( id->printStatistics )
 		id->stats() << "compiling\t" << sectionName << endl;
+	
+	if ( id->stateLimit > 0 )
+		fsmCtx->stateLimit = id->stateLimit;
 
 	/* Build the graph from a walk of the parse tree. */
 	FsmRes graph = gdNode->value->walk( this );
+
+	fsmCtx->stateLimit = FsmCtx::STATE_UNLIMITED;
 
 	if ( !graph.success() ) {
 		reportAnalysisResult( this, graph );

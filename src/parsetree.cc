@@ -787,9 +787,9 @@ FsmRes NfaUnion::nfaTermCheck( ParseData *pd )
 	TermVect::Iter term = terms;
 
 	/* With nfaTermCheck on we have the possibility of a prior interaction. */
-	pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit;
+	pd->fsmCtx->stateLimit = pd->id->stateLimit;
 	FsmRes res = (*term)->walk( pd );
-	pd->fsmCtx->stateLimit = -1;
+	pd->fsmCtx->stateLimit = FsmCtx::STATE_UNLIMITED;
 
 	if ( !res.success() )
 		return res;
@@ -802,14 +802,14 @@ FsmRes NfaUnion::nfaTermCheck( ParseData *pd )
 
 /* This is the first pass check. It looks for state (limit times 2 ) or
  * condition cost. We use this to expand generalized repetition to past the nfa
-  union choice point. */
+ * union choice point. */
 FsmRes NfaUnion::nfaCondsCheck( ParseData *pd )
 {
 	TermVect::Iter term = terms;
 
-	pd->fsmCtx->stateLimit = pd->id->nfaIntermedStateLimit * 2;
+	pd->fsmCtx->stateLimit = pd->id->stateLimit * 2;
 	FsmRes res = (*term)->walk( pd );
-	pd->fsmCtx->stateLimit = -1;
+	pd->fsmCtx->stateLimit = FsmCtx::STATE_UNLIMITED;
 
 	if ( !res.success() )
 		return res;

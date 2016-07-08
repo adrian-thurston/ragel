@@ -195,8 +195,7 @@ struct InputData
 		saveTemps(false),
 		nfaCondsDepth(-1),
 		transSpanDepth(6),
-		nfaIntermedStateLimit(10000),
-		nfaFinalStateLimit(2000),
+		stateLimit(0),
 		nfaBreadthCheck(0),
 		varBackend(false),
 		histogramFn(0),
@@ -285,8 +284,7 @@ struct InputData
 	bool saveTemps;
 	long nfaCondsDepth;
 	long transSpanDepth;
-	long nfaIntermedStateLimit;
-	long nfaFinalStateLimit;
+	long stateLimit;
 	const char *nfaBreadthCheck;
 
 	bool varBackend;
