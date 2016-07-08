@@ -1848,7 +1848,6 @@ struct FsmRes
 	struct PriorInteraction {};
 	struct CondCostTooHigh {};
 	struct RepetitionError {};
-	struct AnalysisOk {};
 
 	enum Type
 	{
@@ -1858,7 +1857,6 @@ struct FsmRes
 		TypePriorInteraction,
 		TypeCondCostTooHigh,
 		TypeRepetitionError,
-		TypeAnalysisOk,
 	};
 
 	FsmRes( const Fsm &, FsmAp *fsm )
@@ -1878,9 +1876,6 @@ struct FsmRes
 
 	FsmRes( const RepetitionError & )
 		: fsm(0), type(TypeRepetitionError) {}
-
-	FsmRes( const AnalysisOk & )
-		: fsm(0), type(TypeAnalysisOk) {}
 
 	bool success() { return fsm != 0; }
 

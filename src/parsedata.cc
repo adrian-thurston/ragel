@@ -1093,10 +1093,7 @@ void ParseData::reportBreadthResults( BreadthResult *breadth )
 
 void ParseData::reportAnalysisResult( FsmRes &res )
 {
-	if ( res.type == FsmRes::TypeAnalysisOk )
-		analysisResult( 0, 0, "OK" );
-
-	else if ( res.type == FsmRes::TypeTooManyStates )
+	if ( res.type == FsmRes::TypeTooManyStates )
 		analysisResult( 1, 0, "too-many-states" );
 
 	else if ( res.type == FsmRes::TypeCondCostTooHigh )
