@@ -869,12 +869,6 @@ FsmRes NfaUnion::nfaBreadthCheck( ParseData *pd )
 
 FsmRes NfaUnion::walk( ParseData *pd )
 {
-	if ( pd->id->nfaTermCheck ) {
-		FsmRes res = nfaTermCheck( pd );
-		reportAnalysisResult( pd, res );
-		return FsmRes( FsmRes::Aborted() );
-	}
-
 	if ( pd->id->nfaCondsDepth >= 0 ) {
 		FsmRes res = nfaCondsCheck( pd );
 		reportAnalysisResult( pd, res );
@@ -895,6 +889,14 @@ FsmRes NfaUnion::walk( ParseData *pd )
 	FsmAp **machines = new FsmAp*[terms.length()];
 	for ( TermVect::Iter term = terms; term.lte(); term++ ) {
 		FsmRes res = (*term)->walk( pd );
+		if ( !res.success() ) {
+			/* Delete previos. */
+			for ( int m = 0; m < numMachines; )
+				delete machines[m];
+			delete[] machines;
+			return res;
+		}
+
 		machines[numMachines++] = res.fsm;
 	}
 

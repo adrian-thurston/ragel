@@ -126,12 +126,12 @@ void InputData::usage()
 "   --string-tables      Encode table data into strings for faster host lang\n"
 "                        compilation\n"
 "NFA analysis (large machines):\n"
+"   --prior-interaction          Search for condition-based general repetitions\n"
+"                                that will not function properly due to state mod\n"
+"                                overlap and must be NFA reps. \n"
 "   --nfa-conds-depth=D          Search for high-cost conditions inside a prefix\n"
 "                                of the machine (depth D from start state).\n"
 "                                Search is rooted at NFA union contructs.\n"
-"   --nfa-term-check             Search for condition-based general repetitions\n"
-"                                that will not function properly and must be NFA\n"
-"                                reps. Search is rooted at NFA union constructs.\n"
 "   --nfa-intermed-state-limit=L Report fail if number of states exceeds this\n"
 "                                during compilation.\n"
 "   --nfa-final-state-limit=L    Report a fail if number states in final machine\n"
@@ -511,7 +511,7 @@ void InputData::parseArgs( int argc, const char **argv )
 					showStylesOpt = true;
 				else if ( strcmp( arg, "save-temps" ) == 0 )
 					saveTemps = true;
-				else if ( strcmp( arg, "nfa-term-check" ) == 0 )
+				else if ( strcmp( arg, "prior-interaction" ) == 0 )
 					nfaTermCheck = true;
 				else if ( strcmp( arg, "nfa-conds-depth" ) == 0 )
 					nfaCondsDepth = strtol( eq, 0, 10 );

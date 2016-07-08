@@ -1039,6 +1039,8 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 	}
 }
 
+void reportAnalysisResult( ParseData *pd, FsmRes &res );
+
 /* Make the graph from a graph dict node. Does minimization and state sorting. */
 FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 {
@@ -1047,8 +1049,11 @@ FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 
 	/* Build the graph from a walk of the parse tree. */
 	FsmRes graph = gdNode->value->walk( this );
-	if ( !graph.success() )
+
+	if ( !graph.success() ) {
+		reportAnalysisResult( this, graph );
 		return graph;
+	}
 
 	fsmCtx->finalizeInstance( graph.fsm );
 
