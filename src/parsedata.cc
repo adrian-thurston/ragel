@@ -1056,6 +1056,7 @@ FsmRes ParseData::checkBreadth( FsmAp *fsm )
 		}
 	}
 
+	delete fsm;
 	return FsmRes( FsmRes::BreadthCheck(), breadth );
 }
 
@@ -1094,8 +1095,6 @@ void ParseData::reportAnalysisResult( FsmRes &res )
 		BreadthResult *breadth = res.breadth;
 		stringstream out;
 
-		resultWrite( out, 21, 1, "OK" );
-
 		out << std::fixed << std::setprecision(10);
 
 		out << "COST START " <<
@@ -1127,30 +1126,20 @@ FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 
 	fsmCtx->stateLimit = FsmCtx::STATE_UNLIMITED;
 
+	if ( id->checkBreadth )
+		graph = checkBreadth( graph.fsm );
+
+	if ( id->condsCheckDepth >= 0 ) {
+		/* Use this to expand generalized repetition to past the nfa union
+		 * choice point. */
+		fsmCtx->condsCheckDepth = id->condsCheckDepth;
+		graph = FsmAp::condCostSearch( graph.fsm );
+
+	}
+
 	if ( !graph.success() ) {
 		reportAnalysisResult( graph );
 		return graph;
-	}
-
-	if ( id->nfaBreadthCheck ) {
-		FsmRes breadthRes = checkBreadth( graph.fsm );
-		delete graph.fsm;
-		reportAnalysisResult( breadthRes );
-		return breadthRes;
-	}
-
-	if ( id->nfaCondsDepth >= 0 ) {
-		/* Use this to expand generalized repetition to past the nfa union
-		 * choice point. */
-		fsmCtx->nfaCondsDepth = id->nfaCondsDepth;
-		FsmRes costRes = FsmAp::condCostSearch( graph.fsm );
-
-		reportAnalysisResult( costRes );
-
-		/* Unlike other funcs, have to delete this regardless. Analysis either
-		 * returns fsm or some error, but does not currently remove it. This needs
-		 * cleanup */
-		return costRes;
 	}
 
 	fsmCtx->finalizeInstance( graph.fsm );

@@ -193,10 +193,10 @@ struct InputData
 		backendSpecified(false),
 		featureSpecified(false),
 		saveTemps(false),
-		nfaCondsDepth(-1),
+		condsCheckDepth(-1),
 		transSpanDepth(6),
 		stateLimit(0),
-		nfaBreadthCheck(0),
+		checkBreadth(0),
 		varBackend(false),
 		histogramFn(0),
 		histogram(0),
@@ -282,10 +282,10 @@ struct InputData
 	bool featureSpecified;
 
 	bool saveTemps;
-	long nfaCondsDepth;
+	long condsCheckDepth;
 	long transSpanDepth;
 	long stateLimit;
-	const char *nfaBreadthCheck;
+	bool checkBreadth;
 
 	bool varBackend;
 

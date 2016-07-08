@@ -36,11 +36,11 @@ FsmCtx::FsmCtx( FsmGbl *fsmGbl )
 
 	printStatistics(fsmGbl->printStatistics),
 
-	priorInteraction(fsmGbl->priorInteraction),
+	checkPriorInteraction(fsmGbl->checkPriorInteraction),
 
 	unionOp(false),
 
-	nfaCondsDepth(0),
+	condsCheckDepth(0),
 
 	curActionOrd(0),
 	curPriorOrd(0),

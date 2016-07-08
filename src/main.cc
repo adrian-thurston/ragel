@@ -133,8 +133,8 @@ void InputData::usage()
 "                                of the machine (depth D from start state).\n"
 "   --state-limit=L              Report fail if number of states exceeds this\n"
 "                                during compilation.\n"
-"   --breadth-check=E1,E2,..     Report breadth cost of named entry points by (and\n"
-"                                start). Reporting starts at NFA union contructs.\n"
+"   --breadth-check=E1,E2,..     Report breadth cost of named entry points and\n"
+"                                the start state.\n"
 "   --input-histogram=FN         Input char histogram for breadth check. If\n"
 "                                unspecified a flat histogram is used.\n"
 "testing:\n"
@@ -509,9 +509,9 @@ void InputData::parseArgs( int argc, const char **argv )
 				else if ( strcmp( arg, "save-temps" ) == 0 )
 					saveTemps = true;
 				else if ( strcmp( arg, "prior-interaction" ) == 0 )
-					priorInteraction = true;
-				else if ( strcmp( arg, "nfa-conds-depth" ) == 0 )
-					nfaCondsDepth = strtol( eq, 0, 10 );
+					checkPriorInteraction = true;
+				else if ( strcmp( arg, "conds-depth" ) == 0 )
+					condsCheckDepth = strtol( eq, 0, 10 );
 				else if ( strcmp( arg, "state-limit" ) == 0 )
 					stateLimit = strtol( eq, 0, 10 );
 				else if ( strcmp( arg, "breadth-check" ) == 0 ) {
@@ -523,7 +523,7 @@ void InputData::parseArgs( int argc, const char **argv )
 							break;
 						breadthLabels.append( strdup( label ) );
 					}
-					nfaBreadthCheck = (const char*)0x1;
+					checkBreadth = true;
 				}
 				else if ( strcmp( arg, "input-histogram" ) == 0 )
 					histogramFn = strdup(eq);
@@ -709,7 +709,7 @@ void InputData::checkArgs()
 			backendFeature = VarFeature;
 	}
 
-	if ( nfaBreadthCheck != 0 ) {
+	if ( checkBreadth ) {
 		if ( histogramFn != 0 )
 			loadHistogram();
 		else

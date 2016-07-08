@@ -1318,7 +1318,7 @@ void FsmAp::checkEpsilonRegularInteraction( const PriorTable &t1, const PriorTab
 				if ( pd1->desc->priority < pd2->desc->priority || 
 						pd1->desc->priority > pd2->desc->priority )
 				{
-					if ( ctx->priorInteraction && pd1->desc->guarded ) {
+					if ( ctx->checkPriorInteraction && pd1->desc->guarded ) {
 						if ( ! priorInteraction ) {
 							priorInteraction = true;
 							guardId = pd1->desc->guardId;
@@ -1612,7 +1612,7 @@ FsmRes FsmAp::condCostFromState( FsmAp *fsm, StateAp *state, long depth )
 	if ( state->stateBits & STB_ONLIST )
 		return FsmRes( FsmRes::Fsm(), fsm );
 
-	if ( depth > fsm->ctx->nfaCondsDepth )
+	if ( depth > fsm->ctx->condsCheckDepth )
 		return FsmRes( FsmRes::Fsm(), fsm );
 
 	/* Doing depth first, put state on the list. */
@@ -1661,15 +1661,17 @@ FsmRes FsmAp::condCostFromState( FsmAp *fsm, StateAp *state, long depth )
 }
 
 
-/* Returns either success (using supplied fsm, or some error condition. Does
- * not delete the fsm (under any condition). */
-FsmRes FsmAp::condCostSearch( FsmAp *fsmAp )
+/* Returns either success (using supplied fsm), or some error condition. */
+FsmRes FsmAp::condCostSearch( FsmAp *fsm )
 {
 	/* Init on state list flags. */
-	for ( StateList::Iter st = fsmAp->stateList; st.lte(); st++ )
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ )
 		st->stateBits &= ~STB_ONLIST;
 
-	return condCostFromState( fsmAp, fsmAp->startState, 1 );
+	FsmRes res = condCostFromState( fsm, fsm->startState, 1 );
+	if ( !res.success() )
+		delete fsm;
+	return res;
 }
 
 void FsmAp::condCost( Action *action, long repId )
