@@ -1843,27 +1843,24 @@ struct BreadthResult
 struct FsmRes
 {
 	struct Fsm {};
-	struct Aborted {};
 	struct TooManyStates {};
 	struct PriorInteraction {};
 	struct CondCostTooHigh {};
 	struct RepetitionError {};
+	struct InternalError {};
 
 	enum Type
 	{
-		TypeFsm,
-		TypeAborted,
+		TypeFsm = 1,
 		TypeTooManyStates,
 		TypePriorInteraction,
 		TypeCondCostTooHigh,
 		TypeRepetitionError,
+		TypeInternalError,
 	};
 
 	FsmRes( const Fsm &, FsmAp *fsm )
 		: fsm(fsm), type(TypeFsm) {}
-
-	FsmRes( const Aborted & )
-		: fsm(0), type(TypeAborted) {}
 
 	FsmRes( const TooManyStates & )
 		: fsm(0), type(TypeTooManyStates) {}
@@ -1876,6 +1873,9 @@ struct FsmRes
 
 	FsmRes( const RepetitionError & )
 		: fsm(0), type(TypeRepetitionError) {}
+
+	FsmRes( const InternalError & )
+		: fsm(0), type(TypeInternalError) {}
 
 	bool success() { return fsm != 0; }
 

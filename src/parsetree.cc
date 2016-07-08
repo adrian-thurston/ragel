@@ -749,7 +749,7 @@ FsmRes MachineDef::walk( ParseData *pd )
 	case NfaUnionType:
 		return nfaUnion->walk( pd );
 	}
-	return FsmRes( FsmRes::Aborted() );
+	return FsmRes( FsmRes::InternalError() );
 }
 
 void MachineDef::makeNameTree( ParseData *pd )
@@ -1043,7 +1043,7 @@ FsmRes Expression::walk( ParseData *pd, bool lastInSeq )
 		}
 	}
 
-	return FsmRes( FsmRes::Aborted() );
+	return FsmRes( FsmRes::InternalError() );
 }
 
 void Expression::makeNameTree( ParseData *pd )
@@ -1215,7 +1215,7 @@ FsmRes Term::walk( ParseData *pd, bool lastInSeq )
 			return factorWithAug->walk( pd );
 		}
 	}
-	return FsmRes( FsmRes::Aborted() );
+	return FsmRes( FsmRes::InternalError() );
 }
 
 void Term::makeNameTree( ParseData *pd )
@@ -1851,7 +1851,7 @@ FsmRes FactorWithRep::walk( ParseData *pd )
 		/* Evaluate the Factor. Pass it up. */
 		return factorWithNeg->walk( pd );
 	}}
-	return FsmRes( FsmRes::Aborted() );
+	return FsmRes( FsmRes::InternalError() );
 }
 
 void FactorWithRep::makeNameTree( ParseData *pd )
@@ -1934,7 +1934,7 @@ FsmRes FactorWithNeg::walk( ParseData *pd )
 		/* Evaluate the Factor. Pass it up. */
 		return factor->walk( pd );
 	}}
-	return FsmRes( FsmRes::Aborted() );
+	return FsmRes( FsmRes::InternalError() );
 }
 
 void FactorWithNeg::makeNameTree( ParseData *pd )
@@ -2054,7 +2054,7 @@ FsmRes Factor::walk( ParseData *pd )
 		return FsmAp::condPlus( exprTree.fsm, repId, action1, action2, action3, action4 );
 	}}
 
-	return FsmRes( FsmRes::Aborted() );
+	return FsmRes( FsmRes::InternalError() );
 }
 
 void Factor::makeNameTree( ParseData *pd )
