@@ -129,7 +129,7 @@ void InputData::usage()
 "   --prior-interaction          Search for condition-based general repetitions\n"
 "                                that will not function properly due to state mod\n"
 "                                overlap and must be NFA reps. \n"
-"   --nfa-conds-depth=D          Search for high-cost conditions inside a prefix\n"
+"   --conds-depth=D              Search for high-cost conditions inside a prefix\n"
 "                                of the machine (depth D from start state).\n"
 "   --state-limit=L              Report fail if number of states exceeds this\n"
 "                                during compilation.\n"

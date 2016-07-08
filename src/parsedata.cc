@@ -1039,7 +1039,79 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 	}
 }
 
-void reportAnalysisResult( ParseData *pd, FsmRes &res );
+/* Always returns the breadth check result. Will not consume the fsm. */
+FsmRes ParseData::checkBreadth( FsmAp *fsm )
+{
+	double start = FsmAp::breadthFromEntry( id->histogram, fsm, fsm->startState );
+
+	BreadthResult *breadth = new BreadthResult( start );
+	
+	for ( Vector<ParseData::Cut>::Iter c = cuts; c.lte(); c++ ) {
+		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
+			if ( mel->key == c->entryId ) {
+				double cost = FsmAp::breadthFromEntry( id->histogram, fsm, mel->value );
+
+				breadth->costs.append( BreadthCost( c->name, cost ) );
+			}
+		}
+	}
+
+	return FsmRes( FsmRes::BreadthCheck(), breadth );
+}
+
+
+static void resultWrite( ostream &out, long code, long id, const char *scode )
+{
+	out << code << " " << id << " " << scode << endl;
+}
+
+void ParseData::analysisResult( long code, long _id, const char *scode )
+{
+	stringstream out;
+	resultWrite( out, code, _id, scode );
+	id->comm = out.str();
+}
+
+void ParseData::reportAnalysisResult( FsmRes &res )
+{
+	if ( res.type == FsmRes::TypeAnalysisOk )
+		analysisResult( 0, 0, "OK" );
+
+	else if ( res.type == FsmRes::TypeTooManyStates )
+		analysisResult( 1, 0, "too-many-states" );
+
+	else if ( res.type == FsmRes::TypeCondCostTooHigh )
+		analysisResult( 20, res.id, "cond-cost" );
+
+	else if ( res.type == FsmRes::TypePriorInteraction )
+		analysisResult( 60, res.id, "prior-interaction" );
+
+	else if ( res.type == FsmRes::TypeRepetitionError )
+		analysisResult( 2, 0, "rep-error" );
+
+	else if ( res.type == FsmRes::TypeBreadthCheck )
+	{
+		BreadthResult *breadth = res.breadth;
+		stringstream out;
+
+		resultWrite( out, 21, 1, "OK" );
+
+		out << std::fixed << std::setprecision(10);
+
+		out << "COST START " <<
+				( breadth->start ) << " " << 
+				( 1 ) << endl;
+
+		for ( Vector<BreadthCost>::Iter c = breadth->costs; c.lte(); c++ ) {
+			out << "COST " << c->name << " " <<
+					( breadth->start ) << " " << 
+					( ( c->cost / breadth->start ) ) << endl;
+		}
+
+		this->id->comm = out.str();
+	}
+}
+
 
 /* Make the graph from a graph dict node. Does minimization and state sorting. */
 FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
@@ -1056,15 +1128,29 @@ FsmRes ParseData::makeInstance( GraphDictEl *gdNode )
 	fsmCtx->stateLimit = FsmCtx::STATE_UNLIMITED;
 
 	if ( !graph.success() ) {
-		reportAnalysisResult( this, graph );
+		reportAnalysisResult( graph );
 		return graph;
 	}
 
 	if ( id->nfaBreadthCheck ) {
 		FsmRes breadthRes = checkBreadth( graph.fsm );
 		delete graph.fsm;
-		reportAnalysisResult( this, breadthRes );
+		reportAnalysisResult( breadthRes );
 		return breadthRes;
+	}
+
+	if ( id->nfaCondsDepth >= 0 ) {
+		/* Use this to expand generalized repetition to past the nfa union
+		 * choice point. */
+		fsmCtx->nfaCondsDepth = id->nfaCondsDepth;
+		FsmRes costRes = FsmAp::condCostSearch( graph.fsm );
+
+		reportAnalysisResult( costRes );
+
+		/* Unlike other funcs, have to delete this regardless. Analysis either
+		 * returns fsm or some error, but does not currently remove it. This needs
+		 * cleanup */
+		return costRes;
 	}
 
 	fsmCtx->finalizeInstance( graph.fsm );

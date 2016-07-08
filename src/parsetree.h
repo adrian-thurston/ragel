@@ -462,12 +462,6 @@ struct NfaUnion
 	NfaUnion() : roundsList(0) { }
 	~NfaUnion();
 
-	void transSpan( ParseData *pd, StateAp *state, long long &density, long depth );
-
-	FsmRes nfaTermCheck( ParseData *pd );
-	FsmRes nfaCondsCheck( ParseData *pd );
-	FsmRes nfaBreadthCheck( ParseData *pd );
-
 	/* Tree traversal. */
 	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );

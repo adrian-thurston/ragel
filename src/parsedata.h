@@ -230,7 +230,10 @@ struct ParseData
 	void printNameInst( std::ostream &out, NameInst *nameInst, int level );
 	void printNameTree( std::ostream &out );
 
+	void analysisResult( long code, long id, const char *scode );
+
 	FsmRes checkBreadth( FsmAp *fsm );
+	void reportAnalysisResult( FsmRes &res );
 
 	/* Make the graph from a graph dict node. Does minimization. */
 	FsmRes makeInstance( GraphDictEl *gdNode );
