@@ -35,18 +35,6 @@
 
 struct ParamList;
 
-/* This is used for tracking the include files/machine pairs. */
-struct IncludeHistoryItem
-{
-	IncludeHistoryItem( const char *fileName, const char *sectionName )
-		: fileName(fileName), sectionName(sectionName) {}
-
-	const char *fileName;
-	const char *sectionName;
-};
-
-typedef Vector<IncludeHistoryItem> IncludeHistory;
-
 struct TokHead
 {
 	TokHead *next;
@@ -141,7 +129,6 @@ struct Parser6
 	NameRefList nameRefList;
 
 	Vector<bool> exportContext;
-	IncludeHistory includeHistory;
 
 	TokHead *tokHead;
 	ActionParamList *paramList;

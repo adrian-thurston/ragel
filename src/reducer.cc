@@ -28,6 +28,7 @@
 #include <errno.h>
 
 using std::endl;
+using std::ifstream;
 extern colm_sections rlparse_object;
 
 void TopLevel::loadMachineName( string data )

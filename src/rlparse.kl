@@ -41,8 +41,8 @@ Parser6::Parser6( InputData *id, const char *fileName, char *sectionName,
 	pd = new ParseData( id, std::string(sectionName),
 			id->nextMachineId++, sectionLoc, hostLang, minimizeLevel, minimizeOpt );
 	exportContext.append( false );
-	includeHistory.append( IncludeHistoryItem( 
-			fileName, sectionName ) );
+
+	pd->includeHistory.append( IncludeHistoryItem( fileName, sectionName ) );
 }
 
 %%{

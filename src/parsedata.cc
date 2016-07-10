@@ -468,6 +468,116 @@ ParseData::~ParseData()
 	delete fsmCtx;
 }
 
+ifstream *ParseData::tryOpenInclude( char **pathChecks, long &found )
+{
+	char **check = pathChecks;
+	ifstream *inFile = new ifstream;
+	
+	while ( *check != 0 ) {
+		inFile->open( *check );
+		if ( inFile->is_open() ) {
+			found = check - pathChecks;
+			return inFile;
+		}
+
+		/* 
+		 * 03/26/2011 jg:
+		 * Don't rely on sloppy runtime behaviour: reset the state of the stream explicitly.
+		 * If inFile->open() fails, which happens when include dirs are tested, the fail bit
+		 * is set by the runtime library. Currently the VS runtime library opens new files,
+		 * but when it comes to reading it refuses to work.
+		 */
+		inFile->clear();
+
+		check += 1;
+	}
+
+	found = -1;
+	delete inFile;
+	return 0;
+}
+
+bool isAbsolutePath( const char *path )
+{
+#ifdef _WIN32
+	return isalpha( path[0] ) && path[1] == ':' && path[2] == '\\';
+#else
+	return path[0] == '/';
+#endif
+}
+
+#ifdef _WIN32
+#define PATH_SEP '\\'
+#else
+#define PATH_SEP '/'
+#endif
+
+
+char **ParseData::makeIncludePathChecks( const char *thisFileName, 
+		const char *fileName, int fnlen )
+{
+	char **checks = 0;
+	long nextCheck = 0;
+	long length = 0;
+	bool caseInsensitive = false;
+	char *data = prepareLitString( id, InputLoc(), fileName, fnlen, 
+			length, caseInsensitive );
+
+	/* Absolute path? */
+	if ( isAbsolutePath( data ) ) {
+		checks = new char*[2];
+		checks[nextCheck++] = data;
+	}
+	else {
+		checks = new char*[2 + id->includePaths.length()];
+
+		/* Search from the the location of the current file. */
+		const char *lastSlash = strrchr( thisFileName, PATH_SEP );
+		if ( lastSlash == 0 )
+			checks[nextCheck++] = data;
+		else {
+			long givenPathLen = (lastSlash - thisFileName) + 1;
+			long checklen = givenPathLen + length;
+			char *check = new char[checklen+1];
+			memcpy( check, thisFileName, givenPathLen );
+			memcpy( check+givenPathLen, data, length );
+			check[checklen] = 0;
+			checks[nextCheck++] = check;
+		}
+
+		/* Search from the include paths given on the command line. */
+		for ( ArgsVector::Iter incp = id->includePaths; incp.lte(); incp++ ) {
+			long pathLen = strlen( *incp );
+			long checkLen = pathLen + 1 + length;
+			char *check = new char[checkLen+1];
+			memcpy( check, *incp, pathLen );
+			check[pathLen] = PATH_SEP;
+			memcpy( check+pathLen+1, data, length );
+			check[checkLen] = 0;
+			checks[nextCheck++] = check;
+		}
+	}
+
+	checks[nextCheck] = 0;
+	return checks;
+}
+
+
+/* An approximate check for duplicate includes. Due to aliasing of files it's
+ * possible for duplicates to creep in. */
+bool ParseData::duplicateInclude( const char *inclFileName, const char *inclSectionName )
+{
+	for ( IncludeHistory::Iter hi = includeHistory; hi.lte(); hi++ ) {
+		if ( strcmp( hi->fileName, inclFileName ) == 0 &&
+				strcmp( hi->sectionName, inclSectionName ) == 0 )
+		{
+			return true;
+		}
+	}
+	return false;	
+}
+
+
 /* Make a name id in the current name instantiation scope if it is not
  * already there. */
 NameInst *ParseData::addNameInst( const InputLoc &loc, std::string data, bool isLabel )

@@ -41,12 +41,6 @@ enum InlineBlockType
 	SemiTerminated
 };
 
-#ifdef _WIN32
-#define PATH_SEP '\\'
-#else
-#define PATH_SEP '/'
-#endif
-
 char *newTokdata( int toklen )
 {
 	char *tokdata = new char[sizeof(TokHead) + toklen + 1];
@@ -276,20 +270,6 @@ InputLoc Scanner::scan_loc()
 	return makeInputLoc( fileName, line, column );
 }
 
-/* An approximate check for duplicate includes. Due to aliasing of files it's
- * possible for duplicates to creep in. */
-bool Scanner::duplicateInclude( char *inclFileName, char *inclSectionName )
-{
-	for ( IncludeHistory::Iter hi = parser->includeHistory; hi.lte(); hi++ ) {
-		if ( strcmp( hi->fileName, inclFileName ) == 0 &&
-				strcmp( hi->sectionName, inclSectionName ) == 0 )
-		{
-			return true;
-		}
-	}
-	return false;	
-}
-
 void Scanner::updateCol()
 {
 	char *from = lastnl;
@@ -367,7 +347,7 @@ void Scanner::handleInclude()
 			inclSectionName = parser->sectionName;
 
 		if ( lit != 0 )
-			includeChecks = makeIncludePathChecks( fileName, lit, lit_len );
+			includeChecks = parser->pd->makeIncludePathChecks( fileName, lit, lit_len );
 		else {
 			char *test = new char[strlen(fileName)+1];
 			strcpy( test, fileName );
@@ -379,7 +359,7 @@ void Scanner::handleInclude()
 		}
 
 		long found = 0;
-		ifstream *inFile = tryOpenInclude( includeChecks, found );
+		ifstream *inFile = parser->pd->tryOpenInclude( includeChecks, found );
 		if ( inFile == 0 ) {
 			id->error(scan_loc()) << "include: failed to locate file" << endl;
 			char **tried = includeChecks;
@@ -388,8 +368,8 @@ void Scanner::handleInclude()
 		}
 		else {
 			/* Don't include anything that's already been included. */
-			if ( !duplicateInclude( includeChecks[found], inclSectionName ) ) {
-				parser->includeHistory.append( IncludeHistoryItem( 
+			if ( !parser->pd->duplicateInclude( includeChecks[found], inclSectionName ) ) {
+				parser->pd->includeHistory.append( IncludeHistoryItem( 
 						includeChecks[found], inclSectionName ) );
 
 				Scanner scanner( id, includeChecks[found], *inFile, parser,
@@ -407,11 +387,11 @@ void Scanner::handleImport()
 		return;
 
 	if ( active() ) {
-		char **importChecks = makeIncludePathChecks( fileName, lit, lit_len );
+		char **importChecks = parser->pd->makeIncludePathChecks( fileName, lit, lit_len );
 
 		/* Open the input file for reading. */
 		long found = 0;
-		ifstream *inFile = tryOpenInclude( importChecks, found );
+		ifstream *inFile = parser->pd->tryOpenInclude( importChecks, found );
 		if ( inFile == 0 ) {
 			id->error(scan_loc()) << "import: could not open import file " <<
 					"for reading" << endl;
@@ -666,93 +646,6 @@ void Scanner::endSection( )
 			}
 		}
 	}
-}
-
-bool isAbsolutePath( const char *path )
-{
-#ifdef _WIN32
-	return isalpha( path[0] ) && path[1] == ':' && path[2] == '\\';
-#else
-	return path[0] == '/';
-#endif
-}
-
-char **Scanner::makeIncludePathChecks( const char *thisFileName, 
-		const char *fileName, int fnlen )
-{
-	char **checks = 0;
-	long nextCheck = 0;
-	long length = 0;
-	bool caseInsensitive = false;
-	char *data = prepareLitString( id, InputLoc(), fileName, fnlen, 
-			length, caseInsensitive );
-
-	/* Absolute path? */
-	if ( isAbsolutePath( data ) ) {
-		checks = new char*[2];
-		checks[nextCheck++] = data;
-	}
-	else {
-		checks = new char*[2 + id->includePaths.length()];
-
-		/* Search from the the location of the current file. */
-		const char *lastSlash = strrchr( thisFileName, PATH_SEP );
-		if ( lastSlash == 0 )
-			checks[nextCheck++] = data;
-		else {
-			long givenPathLen = (lastSlash - thisFileName) + 1;
-			long checklen = givenPathLen + length;
-			char *check = new char[checklen+1];
-			memcpy( check, thisFileName, givenPathLen );
-			memcpy( check+givenPathLen, data, length );
-			check[checklen] = 0;
-			checks[nextCheck++] = check;
-		}
-
-		/* Search from the include paths given on the command line. */
-		for ( ArgsVector::Iter incp = id->includePaths; incp.lte(); incp++ ) {
-			long pathLen = strlen( *incp );
-			long checkLen = pathLen + 1 + length;
-			char *check = new char[checkLen+1];
-			memcpy( check, *incp, pathLen );
-			check[pathLen] = PATH_SEP;
-			memcpy( check+pathLen+1, data, length );
-			check[checkLen] = 0;
-			checks[nextCheck++] = check;
-		}
-	}
-
-	checks[nextCheck] = 0;
-	return checks;
-}
-
-ifstream *Scanner::tryOpenInclude( char **pathChecks, long &found )
-{
-	char **check = pathChecks;
-	ifstream *inFile = new ifstream;
-	
-	while ( *check != 0 ) {
-		inFile->open( *check );
-		if ( inFile->is_open() ) {
-			found = check - pathChecks;
-			return inFile;
-		}
-
-		/* 
-		 * 03/26/2011 jg:
-		 * Don't rely on sloppy runtime behaviour: reset the state of the stream explicitly.
-		 * If inFile->open() fails, which happens when include dirs are tested, the fail bit
-		 * is set by the runtime library. Currently the VS runtime library opens new files,
-		 * but when it comes to reading it refuses to work.
-		 */
-		inFile->clear();
-
-		check += 1;
-	}
-
-	found = -1;
-	delete inFile;
-	return 0;
 }
 
 %%{

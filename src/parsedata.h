@@ -62,6 +62,17 @@ struct InputItem;
 
 typedef DList<LongestMatch> LmList;
 
+/* This is used for tracking the include files/machine pairs. */
+struct IncludeHistoryItem
+{
+	IncludeHistoryItem( const char *fileName, const char *sectionName )
+		: fileName(fileName), sectionName(sectionName) {}
+
+	const char *fileName;
+	const char *sectionName;
+};
+
+typedef Vector<IncludeHistoryItem> IncludeHistory;
 
 /* Graph dictionary. */
 struct GraphDictEl 
@@ -378,6 +389,13 @@ struct ParseData
 	ParseData *prev, *next;
 
 	FsmCtx *fsmCtx;
+
+	/* Make a list of places to look for an included file. */
+	char **makeIncludePathChecks( const char *curFileName, const char *fileName, int len );
+	std::ifstream *tryOpenInclude( char **pathChecks, long &found );
+	bool duplicateInclude( const char *inclFileName, const char *inclSectionName );
+
+	IncludeHistory includeHistory;
 };
 
 Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd );
