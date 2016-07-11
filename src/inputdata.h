@@ -355,6 +355,9 @@ struct InputData
 	char *readInput( const char *inputFileName );
 
 	bool forceLibRagel;
+
+	const char **makeIncludePathChecks( const char *curFileName, const char *fileName );
+	std::ifstream *tryOpenInclude( const char **pathChecks, long &found );
 };
 
 

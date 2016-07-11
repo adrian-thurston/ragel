@@ -148,9 +148,46 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 			includePass.reduceStr( fileName.c_str(), id->hostLang, id->input );
 		}
 		else {
-			/* Either we are not in the lib, or a file was specifed, use the
-			 * file-based include pass. */
-			includePass.reduceFile( fileName.c_str(), id->hostLang );
+			const char *inclSectionName = machine.c_str();
+			const char **includeChecks = 0;
+
+			/* Implement defaults for the input file and section name. */
+			if ( inclSectionName == 0 )
+				inclSectionName = sectionName.c_str();
+
+			if ( fileSpecified )
+				includeChecks = pd->id->makeIncludePathChecks( curFileName, fileName.c_str() );
+			else {
+				char *test = new char[strlen(curFileName)+1];
+				strcpy( test, curFileName );
+
+				includeChecks = new const char*[2];
+
+				includeChecks[0] = test;
+				includeChecks[1] = 0;
+			}
+
+			long found = 0;
+			ifstream *inFile = pd->id->tryOpenInclude( includeChecks, found );
+			if ( inFile == 0 ) {
+				id->error(incLoc) << "include: failed to locate file" << endl;
+				const char **tried = includeChecks;
+				while ( *tried != 0 )
+					id->error(incLoc) << "include: attempted: \"" << *tried++ << '\"' << endl;
+			}
+			else {
+				delete inFile;
+
+				/* Don't include anything that's already been included. */
+				if ( !pd->duplicateInclude( includeChecks[found], inclSectionName ) ) {
+					pd->includeHistory.append( IncludeHistoryItem( 
+							includeChecks[found], inclSectionName ) );
+
+					/* Either we are not in the lib, or a file was specifed, use the
+					 * file-based include pass. */
+					includePass.reduceFile( includeChecks[found], id->hostLang );
+				}
+			}
 		}
 
 		if ( includePass.incItems.length() == 0 ) {
@@ -266,6 +303,9 @@ void TopLevel::reduceFile( const char *inputFileName )
 	argv[3] = id->hostLang->rlhcArg;
 	argv[4] = 0;
 
+	const char *prevCurFileName = curFileName;
+	curFileName = inputFileName;
+
 	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
@@ -277,6 +317,8 @@ void TopLevel::reduceFile( const char *inputFileName )
 		id->error(Error.loc()) << Error.text() << std::endl;
 
 	colm_delete_program( program );
+
+	curFileName = prevCurFileName;
 }
 
 void TopLevel::reduceStr( const char *inputFileName, const char *input )
@@ -289,6 +331,9 @@ void TopLevel::reduceStr( const char *inputFileName, const char *input )
 	argv[4] = input;
 	argv[5] = 0;
 
+	const char *prevCurFileName = curFileName;
+	curFileName = inputFileName;
+
 	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
@@ -300,6 +345,8 @@ void TopLevel::reduceStr( const char *inputFileName, const char *input )
 		id->error(Error.loc()) << "trs: " << Error.text() << std::endl;
 
 	colm_delete_program( program );
+
+	curFileName = prevCurFileName;
 }
 
 

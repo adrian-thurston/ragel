@@ -391,8 +391,6 @@ struct ParseData
 	FsmCtx *fsmCtx;
 
 	/* Make a list of places to look for an included file. */
-	char **makeIncludePathChecks( const char *curFileName, const char *fileName, int len );
-	std::ifstream *tryOpenInclude( char **pathChecks, long &found );
 	bool duplicateInclude( const char *inclFileName, const char *inclSectionName );
 
 	IncludeHistory includeHistory;

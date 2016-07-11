@@ -480,6 +480,9 @@ bool InputData::checkLastRef( InputItem *ii )
 {
 	if ( generateDot )
 		return true;
+	
+	if ( errorCount > 0 )
+		return false;
 		
 	/*
 	 * 1. Go forward to next last reference.

@@ -340,29 +340,34 @@ void Scanner::handleInclude()
 
 	if ( active() ) {
 		char *inclSectionName = word;
-		char **includeChecks = 0;
+		const char **includeChecks = 0;
 
 		/* Implement defaults for the input file and section name. */
 		if ( inclSectionName == 0 )
 			inclSectionName = parser->sectionName;
 
-		if ( lit != 0 )
-			includeChecks = parser->pd->makeIncludePathChecks( fileName, lit, lit_len );
+		if ( lit != 0 ) {
+			long length = 0;
+			bool caseInsensitive = false;
+			char *data = prepareLitString( id, InputLoc(), lit, lit_len, length, caseInsensitive );
+
+			includeChecks = parser->pd->id->makeIncludePathChecks( fileName, data );
+		}
 		else {
 			char *test = new char[strlen(fileName)+1];
 			strcpy( test, fileName );
 
-			includeChecks = new char*[2];
+			includeChecks = new const char*[2];
 
 			includeChecks[0] = test;
 			includeChecks[1] = 0;
 		}
 
 		long found = 0;
-		ifstream *inFile = parser->pd->tryOpenInclude( includeChecks, found );
+		ifstream *inFile = parser->pd->id->tryOpenInclude( includeChecks, found );
 		if ( inFile == 0 ) {
 			id->error(scan_loc()) << "include: failed to locate file" << endl;
-			char **tried = includeChecks;
+			const char **tried = includeChecks;
 			while ( *tried != 0 )
 				id->error(scan_loc()) << "include: attempted: \"" << *tried++ << '\"' << endl;
 		}
@@ -375,8 +380,9 @@ void Scanner::handleInclude()
 				Scanner scanner( id, includeChecks[found], *inFile, parser,
 						inclSectionName, includeDepth+1, false );
 				scanner.do_scan( );
-				delete inFile;
 			}
+
+			delete inFile;
 		}
 	}
 }
@@ -387,15 +393,19 @@ void Scanner::handleImport()
 		return;
 
 	if ( active() ) {
-		char **importChecks = parser->pd->makeIncludePathChecks( fileName, lit, lit_len );
+		long length = 0;
+		bool caseInsensitive = false;
+		char *data = prepareLitString( id, InputLoc(), lit, lit_len, length, caseInsensitive );
+
+		const char **importChecks = parser->pd->id->makeIncludePathChecks( fileName, data );
 
 		/* Open the input file for reading. */
 		long found = 0;
-		ifstream *inFile = parser->pd->tryOpenInclude( importChecks, found );
+		ifstream *inFile = parser->pd->id->tryOpenInclude( importChecks, found );
 		if ( inFile == 0 ) {
 			id->error(scan_loc()) << "import: could not open import file " <<
 					"for reading" << endl;
-			char **tried = importChecks;
+			const char **tried = importChecks;
 			while ( *tried != 0 )
 				id->error(scan_loc()) << "import: attempted: \"" << *tried++ << '\"' << endl;
 		}

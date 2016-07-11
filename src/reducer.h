@@ -51,6 +51,7 @@ struct TopLevel
 	}
 
 	InputData *id;
+	
 	SectionPass *sectionPass;
 	ParseData *pd;
 	char *machineSpec;
@@ -63,6 +64,8 @@ struct TopLevel
 
 	/* Should this go in the parse data? Probably. */
 	Vector<bool> exportContext;
+
+	const char *curFileName;
 
 	const char *targetMachine;
 	const char *searchMachine;

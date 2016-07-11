@@ -449,6 +449,7 @@ ParseData::ParseData( InputData *id, string sectionName,
 	 * beginning of a machine spec so any assignment operators can reference
 	 * the builtins. */
 	initGraphDict();
+
 }
 
 /* Clean up the data collected during a parse. */
@@ -468,9 +469,9 @@ ParseData::~ParseData()
 	delete fsmCtx;
 }
 
-ifstream *ParseData::tryOpenInclude( char **pathChecks, long &found )
+ifstream *InputData::tryOpenInclude( const char **pathChecks, long &found )
 {
-	char **check = pathChecks;
+	const char **check = pathChecks;
 	ifstream *inFile = new ifstream;
 	
 	while ( *check != 0 ) {
@@ -513,23 +514,19 @@ bool isAbsolutePath( const char *path )
 #endif
 
 
-char **ParseData::makeIncludePathChecks( const char *thisFileName, 
-		const char *fileName, int fnlen )
+const char **InputData::makeIncludePathChecks( const char *thisFileName, const char *data )
 {
-	char **checks = 0;
+	const char **checks = 0;
 	long nextCheck = 0;
-	long length = 0;
-	bool caseInsensitive = false;
-	char *data = prepareLitString( id, InputLoc(), fileName, fnlen, 
-			length, caseInsensitive );
+	int length = strlen(data);
 
 	/* Absolute path? */
 	if ( isAbsolutePath( data ) ) {
-		checks = new char*[2];
+		checks = new const char*[2];
 		checks[nextCheck++] = data;
 	}
 	else {
-		checks = new char*[2 + id->includePaths.length()];
+		checks = new const char*[2 + includePaths.length()];
 
 		/* Search from the the location of the current file. */
 		const char *lastSlash = strrchr( thisFileName, PATH_SEP );
@@ -546,7 +543,7 @@ char **ParseData::makeIncludePathChecks( const char *thisFileName,
 		}
 
 		/* Search from the include paths given on the command line. */
-		for ( ArgsVector::Iter incp = id->includePaths; incp.lte(); incp++ ) {
+		for ( ArgsVector::Iter incp = includePaths; incp.lte(); incp++ ) {
 			long pathLen = strlen( *incp );
 			long checkLen = pathLen + 1 + length;
 			char *check = new char[checkLen+1];

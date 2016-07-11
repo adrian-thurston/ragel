@@ -29,8 +29,10 @@
 #include <colm/colm.h>
 #include <colm/tree.h>
 #include <errno.h>
+#include <fstream>
 
 using std::endl;
+using std::ifstream;
 
 extern colm_sections rlparse_object;
 
@@ -113,6 +115,8 @@ struct LoadRagel
 
 	/* Should this go in the parse data? Probably. */
 	Vector<bool> exportContext;
+
+	const char *curFileName;
 
 	void loadMachineStmt( ragel::word MachineName,
 			const char *targetMachine, const char *searchMachine )
@@ -2343,6 +2347,7 @@ struct LoadRagel
 	{
 		string machine = pd->sectionName;
 		string fileName = id.inputFileName;
+		bool fileSpecified = false;
 
 		if ( IncludeSpec.word() != 0 )
 			machine = IncludeSpec.word().text();
@@ -2356,6 +2361,8 @@ struct LoadRagel
 			char *unescaped = prepareLitString( pd->id, loc, fileName.c_str(), fileName.size(),
 					length, caseInsensitive );
 			fileName = unescaped;
+
+			fileSpecified = true;
 		}
 
 		string sectionName = pd->sectionName;
@@ -2363,7 +2370,47 @@ struct LoadRagel
 		ParseData *savedPd = pd;
 		pd = 0;
 		includeDepth += 1;
-		loadFile( fileName.c_str(), sectionName.c_str(), machine.c_str() );
+
+		/* 
+		 * Search for the file to include. Not caching results here. Loader not
+		 * built for speed.
+		 */
+		const char *inclSectionName = machine.c_str();
+		const char **includeChecks = 0;
+
+		/* Implement defaults for the input file and section name. */
+		if ( inclSectionName == 0 )
+			inclSectionName = sectionName.c_str();
+
+		if ( fileSpecified )
+			includeChecks = id.makeIncludePathChecks( curFileName, fileName.c_str() );
+		else {
+			char *test = new char[strlen(curFileName)+1];
+			strcpy( test, curFileName );
+
+			includeChecks = new const char*[2];
+
+			includeChecks[0] = test;
+			includeChecks[1] = 0;
+		}
+
+		long found = 0;
+		ifstream *inFile = id.tryOpenInclude( includeChecks, found );
+		if ( inFile == 0 ) {
+			id.error(IncludeSpec.loc()) << "include: failed to locate file" << endl;
+			const char **tried = includeChecks;
+			while ( *tried != 0 )
+				id.error(IncludeSpec.loc()) << "include: attempted: \"" << *tried++ << '\"' << endl;
+		}
+		else {
+			delete inFile;
+
+			/* Skipping the include duplicate check. Don't have a parse
+			 * data here.. This code to be removed soon so not refactored
+			 * to support it  */
+			loadFile( includeChecks[found], sectionName.c_str(), machine.c_str() );
+		}
+
 		includeDepth -= 1;
 		pd = savedPd;
 	}
@@ -2679,6 +2726,9 @@ struct LoadRagel
 		argv[3] = id.hostLang->rlhcArg;
 		argv[4] = 0;
 
+		const char *prevCurFileName = curFileName;
+		curFileName = inputFileName;
+
 		colm_program *program = colm_new_program( &rlparse_object );
 		colm_set_debug( program, 0 );
 		colm_run_program( program, 4, argv );
@@ -2697,6 +2747,8 @@ struct LoadRagel
 		id.streamFileNames.append( colm_extract_fns( program ) );
 
 		colm_delete_program( program );
+
+		curFileName = prevCurFileName;
 	}
 
 };
