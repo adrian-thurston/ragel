@@ -71,7 +71,7 @@ struct nfa_bp_rec
 				'hello' %when c2
 			)
 
-			:nfa( 1, ( ' ' ), psh, pop, ini_2, stay_2, repeat_2, exit_2 ):
+			:nfa( ( ' ' ), psh, pop, ini_2, stay_2, repeat_2, exit_2 ):
 
 			'there'
 		)
