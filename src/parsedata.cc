@@ -31,7 +31,6 @@
 #include "mergesort.h"
 #include "version.h"
 #include "inputdata.h"
-#include "xml.h"
 #include <colm/tree.h>
 
 using namespace std;

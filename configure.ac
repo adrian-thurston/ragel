@@ -18,10 +18,10 @@ dnl   You should have received a copy of the GNU General Public License
 dnl   along with Ragel; if not, write to the Free Software
 dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
   
-AC_INIT(ragel, 7.0.0.6)
-PUBDATE="January 2016"
+AC_INIT(ragel, 7.0.0.7)
+PUBDATE="July 2016"
 
-EXPECTED_COLM=0.13.0.3
+EXPECTED_COLM=0.13.0.4
 
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
@@ -161,8 +161,7 @@ if [test "x$build_program" = "xyes"]; then
 
 	INSTALLED_VER=`$COLM -v | sed -n -e '1 { s/^.*version //; s/ .*$//; p; }'`
 	if test "x$INSTALLED_VER" != "x$EXPECTED_COLM"; then
-		AC_ERROR( [check colm: expected version $EXPECTED_COLM,]
-				[ but $INSTALLED_VER is installed] )
+		AC_ERROR( [check colm: expected version $EXPECTED_COLM, but $INSTALLED_VER is installed] )
 	fi
 
 	AC_SUBST(COLM)

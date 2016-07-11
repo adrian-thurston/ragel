@@ -30,8 +30,6 @@
 /*
  * Code generators.
  */
-#include "xml.h"
-
 #include "binloopvar.h"
 #include "binloopgoto.h"
 #include "binexpvar.h"
