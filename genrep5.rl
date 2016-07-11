@@ -64,7 +64,7 @@ struct nfa_bp_rec
 	main :=
 		(
 			'hello' %leaving
-				(:nfa( 2, ( ' ' ), psh, pop, ini_2, stay_2, repeat_2, exit_2):)
+				(:nfa( ( ' ' ), psh, pop, ini_2, stay_2, repeat_2, exit_2):)
 			'there'
 		)
 		:>

@@ -62,7 +62,7 @@ struct nfa_bp_rec
 
 	main :=
 		(
-			( :nfa( 2, ( 'a' ) , 
+			( :nfa( ( 'a' ) , 
 				psh, pop, ini_2, stay_2, repeat_2, exit_2 ): ) {2}
 			eol
 		)
