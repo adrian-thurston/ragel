@@ -8,7 +8,7 @@ RAGEL       = @RAGEL@
 # Libfsm contains only the FSM construction code and the backend code
 # generators. It is useful for building code generators in programs not
 # connected to the ragel language.
-lib_LIBRARIES = libfsm.a
+lib_LTLIBRARIES = libfsm.la
 
 if BUILD_PROGRAM
 
@@ -16,7 +16,7 @@ bin_PROGRAMS = ragel
 
 # Libragel includes the ragel parsers. It is the programm wrapped up with a
 # libragel call in place of main.
-lib_LIBRARIES += libragel.a
+lib_LTLIBRARIES += libragel.la
 
 endif
 
@@ -66,13 +66,13 @@ version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
-nodist_libragel_a_SOURCES = $(nodist_ragel_SOURCES)
-libragel_a_SOURCES = $(ragel_SOURCES)
-libragel_a_CPPFLAGS = -Dmain=main_lib -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
+nodist_libragel_la_SOURCES = $(nodist_ragel_SOURCES)
+libragel_la_SOURCES = $(ragel_SOURCES)
+libragel_la_CPPFLAGS = -Dmain=main_lib -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
-nodist_libfsm_a_SOURCES = version.h
-libfsm_a_SOURCES = $(LIBFSM_SRC)
-libfsm_a_CPPFLAGS = -I$(top_srcdir)/aapl
+nodist_libfsm_la_SOURCES = version.h
+libfsm_la_SOURCES = $(LIBFSM_SRC)
+libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
 
 EXTRA_DIST = \
 	ragel.lm \
@@ -123,10 +123,10 @@ ragel-load.$(OBJEXT): parse.c
 ragel-commit.$(OBJEXT): parse.c
 ragel-reducer.$(OBJEXT): parse.c
 
-libragel_a-if.$(OBJEXT): parse.c
-libragel_a-load.$(OBJEXT): parse.c
-libragel_a-commit.$(OBJEXT): parse.c
-libragel_a-reducer.$(OBJEXT): parse.c
+libragel_la-if.$(OBJEXT): parse.c
+libragel_la-load.$(OBJEXT): parse.c
+libragel_la-commit.$(OBJEXT): parse.c
+libragel_la-reducer.$(OBJEXT): parse.c
 
 RLHC = \
 	rlhc-host.lm \
