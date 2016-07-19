@@ -1152,14 +1152,18 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 /* Always returns the breadth check result. Will not consume the fsm. */
 BreadthResult *ParseData::checkBreadth( FsmAp *fsm )
 {
-	double start = FsmAp::breadthFromEntry( id->histogram, fsm, fsm->startState );
+	double start = 0;
+	int minDepth = 0;
+	FsmAp::breadthFromEntry( start, minDepth, id->histogram, fsm, fsm->startState );
 
 	BreadthResult *breadth = new BreadthResult( start );
 	
 	for ( Vector<ParseData::Cut>::Iter c = cuts; c.lte(); c++ ) {
 		for ( EntryMap::Iter mel = fsm->entryPoints; mel.lte(); mel++ ) {
 			if ( mel->key == c->entryId ) {
-				double cost = FsmAp::breadthFromEntry( id->histogram, fsm, mel->value );
+				double cost = 0;
+				int minDepth = 0;
+				FsmAp::breadthFromEntry( cost, minDepth, id->histogram, fsm, mel->value );
 
 				breadth->costs.append( BreadthCost( c->name, cost ) );
 			}

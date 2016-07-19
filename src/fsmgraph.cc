@@ -1688,14 +1688,15 @@ void FsmAp::condCost( Action *action, long repId )
  * We rely on a character histogram and are looking for a probability of being
  * in any given state, given that histogram, simple and very effective.
  */
-void FsmAp::breadthFromState( double *histogram, FsmAp *fsm, StateAp *state,
-		long depth, int maxDepth, double stateScore, double &total )
+void FsmAp::breadthFromState( double &total, int &minDepth, double *histogram,
+		FsmAp *fsm, StateAp *state, long depth, int maxDepth, double stateScore )
 {
 	if ( depth > maxDepth )
 		return;
 	
 	/* Recurse on everything ranges. */
 	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+
 		/* Compute target state score. */
 		double span = 0;
 		for ( int i = trans->lowKey.getVal(); i <= trans->highKey.getVal(); i++ )
@@ -1708,15 +1709,21 @@ void FsmAp::breadthFromState( double *histogram, FsmAp *fsm, StateAp *state,
 
 		if ( trans->plain() ) {
 			if ( trans->tdap()->toState != 0 ) {
-				breadthFromState( histogram, fsm, trans->tdap()->toState,
-						depth + 1, maxDepth, targetStateScore, total );
+				if ( trans->tdap()->toState->isFinState() && ( minDepth < 0 || depth < minDepth ) )
+					minDepth = depth;
+
+				breadthFromState( total, minDepth, histogram, fsm, trans->tdap()->toState,
+						depth + 1, maxDepth, targetStateScore );
 			}
 		}
 		else {
 			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
 				if ( cond->toState != 0 ) {
-					breadthFromState( histogram, fsm, cond->toState,
-							depth + 1, maxDepth, targetStateScore, total );
+					if ( cond->toState->isFinState() && ( minDepth < 0 || depth < minDepth ) )
+						minDepth = depth;
+
+					breadthFromState( total, minDepth, histogram, fsm, cond->toState,
+							depth + 1, maxDepth, targetStateScore );
 				}
 			}
 		}
@@ -1724,18 +1731,22 @@ void FsmAp::breadthFromState( double *histogram, FsmAp *fsm, StateAp *state,
 
 	if ( state->nfaOut != 0 ) {
 		for ( NfaTransList::Iter n = *state->nfaOut; n.lte(); n++ ) {
+			if ( n->toState->isFinState() && ( minDepth < 0 || depth < minDepth ) )
+				minDepth = depth;
+
 			/* We do not increment depth here since this is an epsilon transition. */
-			breadthFromState( histogram, fsm, n->toState, depth, maxDepth, stateScore, total );
+			breadthFromState( total, minDepth, histogram, fsm, n->toState, depth, maxDepth, stateScore );
 		}
 	}
 }
 
-double FsmAp::breadthFromEntry( double *histogram, FsmAp *fsm, StateAp *state )
+void FsmAp::breadthFromEntry( double &total, int &minDepth, double *histogram, FsmAp *fsm, StateAp *state )
 {
-	const int maxDepth = 5;
-	double total = 0;
-	FsmAp::breadthFromState( histogram, fsm, state, 1, maxDepth, 1.0, total );
-	return total;
+	long depth = 1;
+	int maxDepth = 5;
+	double stateScore = 1.0;
+
+	FsmAp::breadthFromState( total, minDepth, histogram, fsm, state, depth, maxDepth, stateScore );
 }
 
 
