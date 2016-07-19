@@ -111,9 +111,14 @@ typedef AvlMap<std::string, int, CmpString> PriorDict;
 typedef AvlMapEl<std::string, int> LocalErrDictEl;
 typedef AvlMap<std::string, int, CmpString> LocalErrDict;
 
+struct NameMapVal
+{
+	Vector<NameInst*> vals;
+};
+
 /* Tree of instantiated names. */
-typedef BstMapEl<std::string, NameInst*> NameMapEl;
-typedef BstMap<std::string, NameInst*, CmpString> NameMap;
+typedef AvlMapEl<std::string, NameMapVal*> NameMapEl;
+typedef AvlMap<std::string, NameMapVal*, CmpString> NameMap;
 typedef Vector<NameInst*> NameVect;
 typedef BstSet<NameInst*> NameSet;
 

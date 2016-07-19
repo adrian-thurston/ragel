@@ -581,8 +581,12 @@ NameInst *ParseData::addNameInst( const InputLoc &loc, std::string data, bool is
 	/* Create the name instantitaion object and insert it. */
 	NameInst *newNameInst = new NameInst( loc, curNameInst, data, nextNameId++, isLabel );
 	curNameInst->childVect.append( newNameInst );
-	if ( !data.empty() )
-		curNameInst->children.insertMulti( data, newNameInst );
+	if ( !data.empty() ) {
+		NameMapEl *inDict = 0;
+		if ( curNameInst->children.insert( data, &inDict ) )
+			inDict->value = new NameMapVal;
+		inDict->value->vals.append( newNameInst );
+	}
 	return newNameInst;
 }
 
@@ -674,11 +678,11 @@ NameSet ParseData::resolvePart( NameInst *refFrom,
 		NameInst *from = nameQueue.detachFirst();
 
 		/* Look for the name. */
-		NameMapEl *low, *high;
-		if ( from->children.findMulti( data, low, high ) ) {
+		NameMapEl *el = from->children.find( data );
+		if ( el != 0 ) {
 			/* Record all instances of the name. */
-			for ( ; low <= high; low++ )
-				result.insert( low->value );
+			for ( Vector<NameInst*>::Iter low = el->value->vals; low.lte(); low++ )
+				result.insert( *low );
 		}
 
 		/* Name not there, do breadth-first operation of appending all
