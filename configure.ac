@@ -5,7 +5,7 @@ dnl
 AC_INIT(ragel-suite, 1.0.1)
 PUBDATE="November 2014"
 
-EXPECTED_VER=0.13.0.3
+EXPECTED_VER=0.13.0.4
 
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
@@ -104,7 +104,7 @@ AC_SUBST(GOBJC)
 
 AC_CHECK_PROG(JAVAC, javac, javac)
 AC_CHECK_PROG(RUBY, ruby, ruby)
-AC_CHECK_PROG(GMCS, gmcs, gmcs)
+AC_CHECK_PROGS(GMCS, [gmcs mcs])
 AC_CHECK_PROG(GOBIN, go, go)
 AC_CHECK_PROG(OCAML, ocaml, ocaml)
 AC_CHECK_PROG(RUST, rustc, rustc)
