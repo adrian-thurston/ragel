@@ -101,6 +101,10 @@ EXTRA_DIST = \
 
 CLEANFILES = parse.c if.h if.cc commit.cc rlhc.c
 
+if WITH_RAGEL_KELBT
+CLEANFILES += rlscan.cc rlparse.cc rlparse.h 
+endif
+
 RAGEL_LM = \
 	ragel.lm \
 	ragel-c.lm \
