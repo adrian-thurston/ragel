@@ -41,6 +41,7 @@ ERRORS=0
 COLM="@SUBJECT_BIN@"
 CPPFLAGS="@SUBJECT_CPPFLAGS@"
 LDFLAGS="@SUBJECT_LDFLAGS@"
+export LD_LIBRARY_PATH="@SUBJECT_LD_LIBRARY_PATH@"
 
 cd `dirname $0`
 test -d $WORKING || mkdir $WORKING
@@ -204,7 +205,7 @@ function runtests()
 
 			echo_cmd gcc -c $CPPFLAGS $LDFLAGS -o $PARSE.o $PARSE.c
 			echo_cmd g++ -I. $CPPFLAGS $LDFLAGS -o $WORKING/$ROOT \
-					$IF.cc $HOST $PARSE.o -lcolmd
+					$IF.cc $HOST $PARSE.o -lcolm
 
 			if ! check_compilation $?; then
 				continue

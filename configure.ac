@@ -56,10 +56,7 @@ dnl AC_SUBST(BUILD_PARSERS,true)
 
 dnl Checks for programs.
 AC_PROG_CC
-
-dnl Checks for programs.
 AC_PROG_CXX
-
 AC_PROG_LIBTOOL
 
 dnl Set test on c++ compiler.
