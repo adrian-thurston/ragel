@@ -75,8 +75,8 @@ if test "x$INSTALLED_VER" != "x$EXPECTED_VER"; then
 	AC_ERROR( [check colm: expected version $EXPECTED_VER, but $INSTALLED_VER is installed] )
 fi
 
-dnl Check for the D compiler
-AC_CHECK_PROG(GDC, gdc, gdc)
+dnl Check for the D compiler. Disabled for now, need to update D syntax.
+dnl AC_CHECK_PROG(GDC, gdc, gdc)
 
 dnl
 dnl Check for the Objective-C compiler and for required dependencies.
@@ -110,7 +110,9 @@ AC_CHECK_PROGS(GMCS, [gmcs mcs])
 AC_CHECK_PROG(GOBIN, go, go)
 AC_CHECK_PROG(OCAML, ocaml, ocaml)
 AC_CHECK_PROG(RUST, rustc, rustc)
-AC_CHECK_PROG(JULIA, julia, julia)
+
+dnl Julia disabled until sytax updates made.
+dnl AC_CHECK_PROG(JULIA, julia, julia)
 
 AC_ARG_WITH(crack,
 	[AC_HELP_STRING([--with-crack], [location of crack install])],
