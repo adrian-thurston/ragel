@@ -188,7 +188,7 @@ void buf_stmt( BufStmt: indep::buf_stmt )
 	}
 	case [`buf_append `( `) `;] {
 		send Out
-			"	buffer = buffer * CharString(fc);
+			"	buffer = buffer * AbstractString(Char\[fc\]);
 	}
 }
 
@@ -279,11 +279,12 @@ void julia( Output: stream )
 		"
 		"%% write data;
 		"
-		"function m( data::String )
+		"function m( data::AbstractString )
 		"	p = 0
 		"	pe = length(data)
 		"	eof = length(data)
 		"	cs = 0
+		"	buffer = \"\"
 
 	Init: indep::stmt* = RagelTree.Init
 	for Stmt: indep::stmt in Init {

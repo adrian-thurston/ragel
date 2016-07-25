@@ -110,9 +110,7 @@ AC_CHECK_PROGS(GMCS, [gmcs mcs])
 AC_CHECK_PROG(GOBIN, go, go)
 AC_CHECK_PROG(OCAML, ocaml, ocaml)
 AC_CHECK_PROG(RUST, rustc, rustc)
-
-dnl Julia disabled until sytax updates made.
-dnl AC_CHECK_PROG(JULIA, julia, julia)
+AC_CHECK_PROG(JULIA, julia, julia)
 
 AC_ARG_WITH(crack,
 	[AC_HELP_STRING([--with-crack], [location of crack install])],
