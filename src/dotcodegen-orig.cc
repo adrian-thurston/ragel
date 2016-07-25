@@ -34,7 +34,7 @@ using std::cin;
 using std::endl;
 
 /* Override this so that write statement processing is ignored */
-void GraphvizDotGenOrig::writeStatement( InputLoc &, int, std::string * )
+void GraphvizDotGenOrig::writeStatement( InputLoc &, int, std::vector<std::string> & )
 {
 }
 

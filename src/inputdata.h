@@ -25,6 +25,7 @@
 #include "gendata.h"
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 struct ParseData;
 struct Parser6;
@@ -57,7 +58,7 @@ struct InputItem
 	Section *section;
 	ParseData *pd;
 	Parser6 *parser;
-	Vector<std::string> writeArgs;
+	std::vector<std::string> writeArgs;
 
 	InputLoc loc;
 	bool processed;

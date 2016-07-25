@@ -334,8 +334,8 @@ void InputData::writeOutput( InputItem *ii )
 	switch ( ii->type ) {
 		case InputItem::Write: {
 			CodeGenData *cgd = ii->pd->cgd;
-			cgd->writeStatement( ii->loc, ii->writeArgs.length(),
-					ii->writeArgs.data, generateDot, hostLang );
+			cgd->writeStatement( ii->loc, ii->writeArgs.size(),
+					ii->writeArgs, generateDot, hostLang );
 			break;
 		}
 		case InputItem::HostData: {

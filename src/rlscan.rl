@@ -489,7 +489,7 @@ void Scanner::handleImport()
 		}
 		else {
 			if ( active() && id->machineSpec == 0 && id->machineName == 0 )
-				id->curItem->writeArgs.append( strdup(tokdata) );
+				id->curItem->writeArgs.push_back( strdup(tokdata) );
 		}
 	}
 

@@ -2285,10 +2285,10 @@ struct LoadRagel
 
 		section->lastReference = inputItem;
 
-		inputItem->writeArgs.append( Cmd.text() );
+		inputItem->writeArgs.push_back( Cmd.text() );
 
 		while ( !WordList.end() ) {
-			inputItem->writeArgs.append( WordList.value().text() );
+			inputItem->writeArgs.push_back( WordList.value().text() );
 			WordList = WordList.next();
 		}
 

@@ -12,6 +12,8 @@
 #include <assert.h>
 
 #include <iostream>
+#include <vector>
+#include <string>
 
 #include "vector.h"
 #include "inputdata.h"
@@ -60,7 +62,7 @@ struct TopLevel
 	const HostLang *hostLang;
 	MinimizeLevel minimizeLevel;
 	MinimizeOpt minimizeOpt;
-	Vector<std::string> writeArgs;
+	std::vector<std::string> writeArgs;
 
 	/* Should this go in the parse data? Probably. */
 	Vector<bool> exportContext;

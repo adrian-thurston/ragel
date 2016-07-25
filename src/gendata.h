@@ -23,6 +23,8 @@
 #define _GENDATA_H
 
 #include <iostream>
+#include <string>
+#include <vector>
 #include "config.h"
 #include "redfsm.h"
 #include "common.h"
@@ -404,7 +406,7 @@ struct CodeGenData
 	/* This can also be overridden to modify the processing of write
 	 * statements. */
 	virtual void writeStatement( InputLoc &loc, int nargs,
-			std::string *args, bool generateDot, const HostLang *hostLang );
+			std::vector<std::string> &args, bool generateDot, const HostLang *hostLang );
 
 	/********************/
 

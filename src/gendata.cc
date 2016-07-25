@@ -1510,7 +1510,7 @@ void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 }
 
 void CodeGenData::writeStatement( InputLoc &loc, int nargs,
-		std::string *args, bool generateDot, const HostLang *hostLang )
+		std::vector<std::string> &args, bool generateDot, const HostLang *hostLang )
 {
 	/* Start write generation on a fresh line. */
 	out << '\n';

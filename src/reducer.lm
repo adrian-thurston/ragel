@@ -267,8 +267,8 @@ reduction TopLevel
 			InputItem *inputItem = id->curItem;
 
 			string cmd( $Cmd->data, $Cmd->length );
-			inputItem->writeArgs.append( cmd );
-			inputItem->writeArgs.append( writeArgs );
+			inputItem->writeArgs.push_back( cmd );
+			inputItem->writeArgs.insert( inputItem->writeArgs.end(), writeArgs.begin(), writeArgs.end() );
 
 			inputItem->pd = pd;
 		}
@@ -2487,7 +2487,7 @@ reduction TopLevel
 	ragel::write_arg :Word
 	{
 		string arg( $word->data, $word->length );
-		writeArgs.append( arg );
+		writeArgs.push_back( arg );
 	}
 
 	# Pass Through.
