@@ -20,7 +20,6 @@ lib_LTLIBRARIES += libragel.la
 
 endif
 
-
 include_HEADERS = \
 	libragel.h action.h fsmgraph.h ragel.h common.h \
 	gendata.h redfsm.h dot.h
@@ -46,14 +45,12 @@ ragel_SOURCES = \
 	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc main.cc \
 	$(LIBFSM_SRC)
 
+nodist_ragel_SOURCES = version.h
+BUILT_SOURCES = version.h
 
 if WITH_RAGEL_KELBT
-ragel_SOURCES += rlscan.cc rlparse.cc rlparse.h 
+nodist_ragel_SOURCES += rlscan.cc rlparse.cc rlparse.h 
 endif
-
-nodist_ragel_SOURCES = version.h
-
-BUILT_SOURCES = version.h
 
 nodist_ragel_SOURCES += \
 	parse.c if.h if.cc commit.cc \
