@@ -100,6 +100,8 @@ shift $((OPTIND - 1));
 
 ragel="@SUBJECT@"
 
+export LD_LIBRARY_PATH="@LD_LIBRARY_PATH@"
+
 cxx_compiler="@CXX@"
 c_compiler="@CC@"
 objc_compiler="@GOBJC@"

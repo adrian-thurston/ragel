@@ -14,7 +14,6 @@ AC_CONFIG_HEADER(config.h)
 : ${CFLAGS="-Wall -g"}
 : ${CXXFLAGS="-Wall -g"}
 
-
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
@@ -52,11 +51,13 @@ AC_ARG_WITH(colm,
 	[
 		CPPFLAGS="${CPPFLAGS} -I$withval/include"
 		LDFLAGS="${LDFLAGS} -L$withval/lib"
+		LD_LIBRARY_PATH="$withval/lib"
 		COLM="$withval/bin/colm"
 	],
 	[
 		CPPFLAGS="${CPPFLAGS} -I$DEPS/include"
 		LDFLAGS="${LDFLAGS} -L$DEPS/lib"
+		LD_LIBRARY_PATH="$DEPS/lib"
 		COLM="$DEPS/bin/colm"
 	]
 )
@@ -67,6 +68,7 @@ AC_CHECK_FILES(
 	[AC_ERROR([colm is required to build this package])]
 )
 AC_SUBST(COLM)
+AC_SUBST(LD_LIBRARY_PATH)
 
 INSTALLED_VER=`$COLM -v | sed -n -e '1 { s/^.*version //; s/ .*$//; p; }'`
 if test "x$INSTALLED_VER" != "x$EXPECTED_VER"; then
@@ -126,6 +128,7 @@ AC_ARG_WITH(crack,
 
 SED_SUBST=["\
 	-e 's|@SUBJECT@|${SUBJECT}|g' \
+	-e 's|@LD_LIBRARY_PATH@|${LD_LIBRARY_PATH}|g' \
 	-e 's|@CXX@|${CXX}|g' \
 	-e 's|@CC@|${CC}|g' \
 	-e 's|@GOBJC@|${GOBJC}|g' \
