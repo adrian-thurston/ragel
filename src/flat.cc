@@ -604,7 +604,7 @@ void Flat::LOCATE_TRANS()
 		}
 
 		out <<
-			"       int _ic = " << CAST("int") << ARR_REF( charClass ) << "[" << GET_KEY() <<
+			"       int _ic = " << CAST("int") << ARR_REF( charClass ) << "[" << CAST("int") << GET_KEY() <<
 							" - " << lowKey << "];\n"
 			"		if ( _ic <= " << CAST("int") << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
 						"_ic >= " << CAST("int") << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
