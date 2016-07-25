@@ -127,10 +127,15 @@ ragel-load.$(OBJEXT): parse.c
 ragel-commit.$(OBJEXT): parse.c
 ragel-reducer.$(OBJEXT): parse.c
 
-libragel_la-if.$(OBJEXT): parse.c
-libragel_la-load.$(OBJEXT): parse.c
-libragel_la-commit.$(OBJEXT): parse.c
-libragel_la-reducer.$(OBJEXT): parse.c
+# Use a var for the LO extension otherwise automake will think that we are
+# specifying the build rules for the files. This doesn't appear to be a problem
+# for o files.
+LOEXT = lo
+
+libragel_la-if.$(LOEXT): parse.c
+libragel_la-load.$(LOEXT): parse.c
+libragel_la-commit.$(LOEXT): parse.c
+libragel_la-reducer.$(LOEXT): parse.c
 
 RLHC = \
 	rlhc-host.lm \
