@@ -180,7 +180,7 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 
 				/* Don't include anything that's already been included. */
 				if ( !pd->duplicateInclude( includeChecks[found], inclSectionName ) ) {
-					pd->includeHistory.append( IncludeHistoryItem( 
+					pd->includeHistory.push_back( IncludeHistoryItem( 
 							includeChecks[found], inclSectionName ) );
 
 					/* Either we are not in the lib, or a file was specifed, use the

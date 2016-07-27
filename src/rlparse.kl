@@ -42,7 +42,7 @@ Parser6::Parser6( InputData *id, const char *fileName, char *sectionName,
 			id->nextMachineId++, sectionLoc, hostLang, minimizeLevel, minimizeOpt );
 	exportContext.append( false );
 
-	pd->includeHistory.append( IncludeHistoryItem( fileName, sectionName ) );
+	pd->includeHistory.push_back( IncludeHistoryItem( fileName, sectionName ) );
 }
 
 %%{

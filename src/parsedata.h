@@ -25,6 +25,8 @@
 #include <iostream>
 #include <limits.h>
 #include <sstream>
+#include <vector>
+
 #include "avlmap.h"
 #include "bstmap.h"
 #include "vector.h"
@@ -68,11 +70,11 @@ struct IncludeHistoryItem
 	IncludeHistoryItem( const char *fileName, const char *sectionName )
 		: fileName(fileName), sectionName(sectionName) {}
 
-	const char *fileName;
-	const char *sectionName;
+	std::string fileName;
+	std::string sectionName;
 };
 
-typedef Vector<IncludeHistoryItem> IncludeHistory;
+typedef std::vector<IncludeHistoryItem> IncludeHistory;
 
 /* Graph dictionary. */
 struct GraphDictEl 

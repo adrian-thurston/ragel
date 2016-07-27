@@ -374,7 +374,7 @@ void Scanner::handleInclude()
 		else {
 			/* Don't include anything that's already been included. */
 			if ( !parser->pd->duplicateInclude( includeChecks[found], inclSectionName ) ) {
-				parser->pd->includeHistory.append( IncludeHistoryItem( 
+				parser->pd->includeHistory.push_back( IncludeHistoryItem( 
 						includeChecks[found], inclSectionName ) );
 
 				Scanner scanner( id, includeChecks[found], *inFile, parser,

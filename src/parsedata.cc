@@ -563,9 +563,9 @@ const char **InputData::makeIncludePathChecks( const char *thisFileName, const c
  * possible for duplicates to creep in. */
 bool ParseData::duplicateInclude( const char *inclFileName, const char *inclSectionName )
 {
-	for ( IncludeHistory::Iter hi = includeHistory; hi.lte(); hi++ ) {
-		if ( strcmp( hi->fileName, inclFileName ) == 0 &&
-				strcmp( hi->sectionName, inclSectionName ) == 0 )
+	for ( IncludeHistory::iterator hi = includeHistory.begin(); hi != includeHistory.end(); hi++ ) {
+		if ( strcmp( hi->fileName.c_str(), inclFileName ) == 0 &&
+				strcmp( hi->sectionName.c_str(), inclSectionName ) == 0 )
 		{
 			return true;
 		}
