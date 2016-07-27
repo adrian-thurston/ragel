@@ -30,14 +30,14 @@
 /*
  * Code generators.
  */
-#include "binloopvar.h"
-#include "binloopgoto.h"
-#include "binexpvar.h"
-#include "binexpgoto.h"
-#include "flatloopgoto.h"
-#include "flatloopvar.h"
-#include "flatexpgoto.h"
-#include "flatexpvar.h"
+#include "binvarloop.h"
+#include "bingotoloop.h"
+#include "binvarexp.h"
+#include "bingotoexp.h"
+#include "flatgotoloop.h"
+#include "flatvarloop.h"
+#include "flatgotoexp.h"
+#include "flatvarexp.h"
 #include "switchloopgoto.h"
 #include "switchexpgoto.h"
 #include "ipgoto.h"

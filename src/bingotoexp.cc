@@ -20,7 +20,7 @@
  */
 
 #include "ragel.h"
-#include "binexpgoto.h"
+#include "bingotoexp.h"
 #include "redfsm.h"
 #include "gendata.h"
 #include "parsedata.h"

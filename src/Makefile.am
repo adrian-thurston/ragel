@@ -29,15 +29,15 @@ nodist_include_HEADERS = config.h
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 LIBFSM_SRC = \
-	buffer.h codegen.h binary.h bingoto.h binloopgoto.h binexpgoto.h binvar.h \
-	binloopvar.h binexpvar.h flat.h flatloopgoto.h flatexpgoto.h flatvar.h \
-	flatloopvar.h flatexpvar.h goto.h switchloopgoto.h switchexpgoto.h \
+	buffer.h codegen.h binary.h bingoto.h bingotoloop.h bingotoexp.h binvar.h \
+	binvarloop.h binvarexp.h flat.h flatgotoloop.h flatgotoexp.h flatvar.h \
+	flatvarloop.h flatvarexp.h goto.h switchloopgoto.h switchexpgoto.h \
 	ipgoto.h asm.h \
 	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
 	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \
-	allocgen.cc codegen.cc binary.cc binloopgoto.cc binexpgoto.cc binvar.cc \
-	binloopvar.cc binexpvar.cc flat.cc flatloopgoto.cc flatexpgoto.cc \
-	flatvar.cc flatloopvar.cc flatexpvar.cc goto.cc switchloopgoto.cc \
+	allocgen.cc codegen.cc binary.cc bingotoloop.cc bingotoexp.cc binvar.cc \
+	binvarloop.cc binvarexp.cc flat.cc flatgotoloop.cc flatgotoexp.cc \
+	flatvar.cc flatvarloop.cc flatvarexp.cc goto.cc switchloopgoto.cc \
 	switchexpgoto.cc ipgoto.cc dot.cc asm.cc
 
 ragel_SOURCES = \

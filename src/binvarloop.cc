@@ -20,37 +20,39 @@
  */
 
 #include "ragel.h"
-#include "binexpvar.h"
+#include "binvarloop.h"
 #include "redfsm.h"
 #include "gendata.h"
 #include "parsedata.h"
 #include "inputdata.h"
 
-BinaryExpVar::BinaryExpVar( const CodeGenArgs &args ) 
+BinaryLoopVar::BinaryLoopVar( const CodeGenArgs &args )
 :
-	BinaryVar(args)
-{
-}
+	BinaryVar( args )
+{}
 
 /* Determine if we should use indicies or not. */
-void BinaryExpVar::calcIndexSize()
+void BinaryLoopVar::calcIndexSize()
 {
 //	long long sizeWithInds =
 //		indicies.size() +
 //		transCondSpacesWi.size() +
 //		transOffsetsWi.size() +
 //		transLengthsWi.size();
-//
+
 //	long long sizeWithoutInds =
 //		transCondSpaces.size() +
 //		transOffsets.size() +
 //		transLengths.size();
-//
+
+	///* If using indicies reduces the size, use them. */
+	//useIndicies = sizeWithInds < sizeWithoutInds;
 	useIndicies = false;
 }
 
-void BinaryExpVar::tableDataPass()
+void BinaryLoopVar::tableDataPass()
 {
+	taActions();
 	taKeyOffsets();
 	taSingleLens();
 	taRangeLens();
@@ -84,14 +86,14 @@ void BinaryExpVar::tableDataPass()
 	taNfaPopTrans();
 }
 
-void BinaryExpVar::genAnalysis()
+void BinaryLoopVar::genAnalysis()
 {
 	redFsm->sortByStateId();
 
 	/* Choose default transitions and the single transition. */
 	redFsm->chooseDefaultSpan();
 		
-	/* Choose single. */
+	/* Choose the singles. */
 	redFsm->moveSelectTransToSingle();
 
 	/* If any errors have occured in the input file then don't write anything. */
@@ -117,150 +119,113 @@ void BinaryExpVar::genAnalysis()
 }
 
 
-void BinaryExpVar::COND_ACTION( RedCondPair *cond )
+void BinaryLoopVar::COND_ACTION( RedCondPair *cond )
 {
-	int action = 0;
+	int act = 0;
 	if ( cond->action != 0 )
-		action = cond->action->actListId+1;
-	condActions.value( action );
+		act = cond->action->location+1;
+	condActions.value( act );
 }
 
-void BinaryExpVar::TO_STATE_ACTION( RedStateAp *state )
+void BinaryLoopVar::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
-		act = state->toStateAction->actListId+1;
+		act = state->toStateAction->location+1;
 	toStateActions.value( act );
 }
 
-void BinaryExpVar::FROM_STATE_ACTION( RedStateAp *state )
+void BinaryLoopVar::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
-		act = state->fromStateAction->actListId+1;
+		act = state->fromStateAction->location+1;
 	fromStateActions.value( act );
 }
 
-void BinaryExpVar::EOF_ACTION( RedStateAp *state )
+void BinaryLoopVar::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
-		act = state->eofAction->actListId+1;
+		act = state->eofAction->location+1;
 	eofActions.value( act );
 }
 
-void BinaryExpVar::NFA_PUSH_ACTION( RedNfaTarg *targ )
+std::ostream &BinaryLoopVar::TO_STATE_ACTION_SWITCH()
 {
-	int act = 0;
-	if ( targ->push != 0 )
-		act = targ->push->actListId+1;
-	nfaPushActions.value( act );
-}
-
-void BinaryExpVar::NFA_POP_TEST( RedNfaTarg *targ )
-{
-	int act = 0;
-	if ( targ->popTest != 0 )
-		act = targ->popTest->actListId+1;
-	nfaPopTrans.value( act );
-}
-
-/* Write out the function switch. This switch is keyed on the values
- * of the func index. */
-std::ostream &BinaryExpVar::TO_STATE_ACTION_SWITCH()
-{
-	/* Loop the actions. */
-	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		if ( redAct->numToStateRefs > 0 ) {
-			/* Write the entry label. */
-			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
-				ACTION( out, item->value, IlOpts( 0, false, false ) );
-				out << "\n\t";
-			}
-
-			out << CEND() << "}\n";
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numToStateRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
+			ACTION( out, act, IlOpts( 0, false, false ) );
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
 	return out;
 }
 
-/* Write out the function switch. This switch is keyed on the values
- * of the func index. */
-std::ostream &BinaryExpVar::FROM_STATE_ACTION_SWITCH()
+std::ostream &BinaryLoopVar::FROM_STATE_ACTION_SWITCH()
 {
-	/* Loop the actions. */
-	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		if ( redAct->numFromStateRefs > 0 ) {
-			/* Write the entry label. */
-			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
-				ACTION( out, item->value, IlOpts( 0, false, false ) );
-				out << "\n\t";
-			}
-
-			out << CEND() << "}\n";
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numFromStateRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
+			ACTION( out, act, IlOpts( 0, false, false ) );
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
 	return out;
 }
 
-std::ostream &BinaryExpVar::EOF_ACTION_SWITCH()
+std::ostream &BinaryLoopVar::EOF_ACTION_SWITCH()
 {
-	/* Loop the actions. */
-	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		if ( redAct->numEofRefs > 0 ) {
-			/* Write the entry label. */
-			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
-				ACTION( out, item->value, IlOpts( 0, true, false ) );
-				out << "\n\t";
-			}
-
-			out << CEND() << "}\n";
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numEofRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
+			ACTION( out, act, IlOpts( 0, true, false ) );
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
 	return out;
 }
 
-/* Write out the function switch. This switch is keyed on the values
- * of the func index. */
-std::ostream &BinaryExpVar::ACTION_SWITCH()
+
+std::ostream &BinaryLoopVar::ACTION_SWITCH()
 {
-	/* Loop the actions. */
-	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		if ( redAct->numTransRefs > 0 ) {
-			/* Write the entry label. */
-			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
-				ACTION( out, item->value, IlOpts( 0, false, false ) );
-				out << "\n\t";
-			}
-
-			out << CEND() << "}\n";
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numTransRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
+			ACTION( out, act, IlOpts( 0, false, false ) );
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
 	return out;
 }
 
-void BinaryExpVar::writeData()
+
+void BinaryLoopVar::writeData()
 {
+	/* If there are any transtion functions then output the array. If there
+	 * are none, don't bother emitting an empty array that won't be used. */
+	if ( redFsm->anyActions() )
+		taActions();
+
 	taKeyOffsets();
-
 	taKeys();
-
 	taSingleLens();
 	taRangeLens();
 	taIndexOffsets();
@@ -278,6 +243,7 @@ void BinaryExpVar::writeData()
 	}
 
 	taCondKeys();
+
 	taCondTargs();
 	taCondActions();
 
@@ -303,31 +269,55 @@ void BinaryExpVar::writeData()
 	STATE_IDS();
 }
 
-void BinaryExpVar::NFA_FROM_STATE_ACTION_EXEC()
+void BinaryLoopVar::NFA_PUSH_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->push != 0 )
+		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
+}
+
+void BinaryLoopVar::NFA_POP_TEST( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->popTest != 0 )
+		act = targ->popTest->actListId+1;
+	nfaPopTrans.value( act );
+}
+
+void BinaryLoopVar::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	switch ( " << ARR_REF( fromStateActions ) << "[nfa_bp[nfa_len].state] ) {\n";
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[nfa_bp[nfa_len].state]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"	_acts += 1;\n"
+			"	while ( _nacts > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
+			"		}\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
 			"	}\n"
 			"\n";
 	}
 }
 
-void BinaryExpVar::writeExec()
+void BinaryLoopVar::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;
+	matchCondLabelUsed = false;
 
 	if ( redFsm->anyNfaStates() ) {
-		out << 
+		out <<
 			"{\n"
 			"	" << UINT() << " _nfa_cont = 1;\n"
 			"	" << UINT() << " _nfa_repeat = 1;\n"
 			"	while ( _nfa_cont != 0 )\n";
 	}
-
-	out << 
+	
+	out <<
 		"	{\n"
 		"	int _klen;\n";
 
@@ -335,18 +325,23 @@ void BinaryExpVar::writeExec()
 		out << "	int _ps;\n";
 
 	out <<
-		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
-		"	int _cpc;\n"
-		"	" << UINT() << " _trans;\n"
+		"	" << UINT() << " _trans = 0;\n" <<
 		"	" << UINT() << " _cond = 0;\n"
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
-//	if ( redFsm->anyRegNbreak() )
-//		out << "	int _nbreak;\n";
+	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
+			|| redFsm->anyFromStateActions() )
+	{
+		out << 
+			"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
+			"	" << UINT() << " _nacts;\n";
+	}
 
 	out <<
+		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
+		"	int _cpc;\n"
 		"	while ( _cont == 1 ) {\n"
 		"\n";
 
@@ -358,6 +353,7 @@ void BinaryExpVar::writeExec()
 	}
 
 	out << 
+//		"label _resume {\n"
 		"_have = 0;\n";
 
 	if ( !noEnd ) {
@@ -384,8 +380,18 @@ void BinaryExpVar::writeExec()
 
 			if ( redFsm->anyEofActions() ) {
 				out <<
-					"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
+					"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
+					"	" << UINT() << " __nacts;\n"
+					"	__acts = " << OFFSET( ARR_REF( actions ),
+							ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
+					"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << ";\n"
+					"	__acts += 1;\n"
+					"	while ( __nacts > 0 ) {\n"
+					"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
 					EOF_ACTION_SWITCH() <<
+					"		}\n"
+					"		__nacts -= 1;\n"
+					"		__acts += 1;\n"
 					"	}\n";
 			}
 
@@ -409,8 +415,16 @@ void BinaryExpVar::writeExec()
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	switch ( " << ARR_REF( fromStateActions ) << "[" << vCS() << "] ) {\n";
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + 
+					"[" + vCS() + "]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"	_acts += 1;\n"
+			"	while ( _nacts > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
+			"		}\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
 			"	}\n"
 			"\n";
 	}
@@ -437,16 +451,41 @@ void BinaryExpVar::writeExec()
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
+			"	if ( " << ARR_REF( condActions ) << "[_cond] != 0 ) {\n"
+			"		_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[_cond]" ) << ";\n"
+			"		_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"		_acts += 1;\n"
+			"		while ( _nacts > 0 )\n	{\n"
+			"			switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " )\n"
+			"			{\n";
 			ACTION_SWITCH() <<
+			"			}\n"
+			"			_nacts -= 1;\n"
+			"			_acts += 1;\n"
+			"		}\n"
 			"	}\n"
 			"\n";
 	}
 
+//	if ( /*redFsm->anyRegActions() || */ redFsm->anyActionGotos() || 
+//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+//	{
+//		out << "}\n";
+//		out << "label _again {\n";
+//	}
+
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
+			"	_acts = " << OFFSET( ARR_REF( actions ),  ARR_REF( toStateActions ) +
+					"[" + vCS() + "]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"	_acts += 1;\n"
+			"	while ( _nacts > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
+			"		}\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
 			"	}\n"
 			"\n";
 	}
@@ -461,18 +500,16 @@ void BinaryExpVar::writeExec()
 	out << 
 		"	if ( _cont == 1 )\n"
 		"		" << P() << " += 1;\n"
-		"\n";
+		"\n"
+		"}\n";
 
 	out <<
-		/* cont if. */
-		"}}\n";
+		"}\n";
 
-	/* The loop. */
 	out << "}\n";
 
 	NFA_POP();
 
-	/* The execute block. */
 	out << "}\n";
 
 	if ( redFsm->anyNfaStates() )

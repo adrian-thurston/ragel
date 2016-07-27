@@ -20,7 +20,7 @@
  */
 
 #include "ragel.h"
-#include "flatexpvar.h"
+#include "flatvarexp.h"
 #include "redfsm.h"
 #include "gendata.h"
 #include "parsedata.h"
