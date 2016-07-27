@@ -38,8 +38,8 @@
 #include "flatvarloop.h"
 #include "flatgotoexp.h"
 #include "flatvarexp.h"
-#include "switchloopgoto.h"
-#include "switchexpgoto.h"
+#include "gotoloop.h"
+#include "gotoexp.h"
 #include "ipgoto.h"
 #include "asm.h"
 
