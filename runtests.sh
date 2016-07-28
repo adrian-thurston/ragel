@@ -12,6 +12,10 @@
 #
 #   program arguments
 #
+###### COMP ######
+#
+#   compilation arguments
+#
 ###### IN #####
 #
 #   program input
@@ -194,11 +198,13 @@ function runtests()
 			COLM_ADDS="-a $CALL"
 		fi
 
+		COMP=`cat_section COMP 0 $TST`
+
 		if test -f $HOST; then
 			PARSE=$WORKING/$ROOT.parse
 			IF=$WORKING/$ROOT.if
 
-			echo_cmd $COLM -c -o $PARSE.c -e $IF.h -x $IF.cc $LM
+			echo_cmd $COLM $COMP -c -o $PARSE.c -e $IF.h -x $IF.cc $LM
 			if ! check_compilation $?; then
 				continue
 			fi
@@ -212,7 +218,7 @@ function runtests()
 			fi
 		else
 			# Compilation.
-			echo_cmd $COLM $COLM_ADDS $LM &> $LOG 
+			echo_cmd $COLM $COMP $COLM_ADDS $LM &> $LOG 
 			if ! check_compilation $?; then
 				continue
 			fi
