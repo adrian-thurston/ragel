@@ -20,10 +20,10 @@ AC_ARG_WITH(subject,
 		SUBJECT_LD_LIBRARY_PATH="$withval/lib"
 	],
 	[
-		SUBJECT_BIN="../src/colm"
-		SUBJECT_CPPFLAGS="-I../src/include"
-		SUBJECT_LDFLAGS="-L../src/.libs"
-		SUBJECT_LD_LIBRARY_PATH="../src/.libs"
+		SUBJECT_BIN="../colm/src/colm"
+		SUBJECT_CPPFLAGS="-I../colm/src/include"
+		SUBJECT_LDFLAGS="-L../colm/src/.libs"
+		SUBJECT_LD_LIBRARY_PATH="../colm/src/.libs"
 	]
 )
 

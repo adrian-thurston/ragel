@@ -8,3 +8,6 @@
 /config.status
 /configure
 /runtests
+
+/install-sh
+/missing
