@@ -35,6 +35,13 @@ AC_ARG_WITH(subject,
 
 AC_SUBST(SUBJECT)
 
+AC_ARG_WITH(ragel-src,
+	[AC_HELP_STRING([--with-ragel-src], [location of ragel src code])],
+		[RAGEL_SRC="$withval"],
+		[RAGEL_SRC="\${abs_top_builddir}/../ragel/src"] )
+
+AC_SUBST(RAGEL_SRC)
+
 dnl Check for colm.
 if test -z "$EXPECTED_VER"; then
 	AC_ERROR( [check colm: expected version not passed in] )

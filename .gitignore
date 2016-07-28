@@ -22,3 +22,9 @@
 /configure
 /stamp-h1
 
+/compile
+/depcomp
+/install-sh
+/missing
+/test-driver
+

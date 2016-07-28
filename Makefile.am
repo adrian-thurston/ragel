@@ -19,6 +19,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
 COLM = @COLM@
+RAGEL_SRC = @RAGEL_SRC@
 
 TESTS = runtests
 
@@ -54,7 +55,7 @@ CLEANFILES = \
 	*_go.rl *.go *.exe
 
 TRANS_DEPS = \
-	../src/ragel.lm \
+	$(RAGEL_SRC)/ragel.lm \
 	trans-c.lm \
 	trans-asm.lm \
 	trans-d.lm \
@@ -68,7 +69,7 @@ TRANS_DEPS = \
 	trans-crack.lm
 
 trans$(EXEEXT): trans.lm $(TRANS_DEPS)
-	$(COLM) -o $@ $<
+	$(COLM) -I$(RAGEL_SRC) -o $@ $<
 
 runtests: runtests.sh Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
