@@ -767,8 +767,21 @@ struct LoadColm
 		String file = unescape( lit );
 
 		/* Check if we can open the input file for reading. */
-		if ( ! readCheck( file.data ) )
-			error() << "could not open " << file.data << " for reading" << endp;
+		if ( ! readCheck( file.data ) ) {
+
+			bool found = false;
+			for ( ArgsVector::Iter av = includePaths; av.lte(); av++ ) {
+				String path = String( *av ) + "/" + file;
+				if ( readCheck( path.data ) ) {
+					found = true;
+					file = path;
+					break;
+				}
+			}
+
+			if ( !found )
+				error() << "could not open " << file.data << " for reading" << endp;
+		}
 
 		const char *argv[3];
 		argv[0] = "load-include";
