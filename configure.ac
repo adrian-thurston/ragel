@@ -22,8 +22,8 @@ AC_ARG_WITH(subject,
 	[
 		SUBJECT_BIN="../src/colm"
 		SUBJECT_CPPFLAGS="-I../src/include"
-		SUBJECT_LDFLAGS="-L../src"
-		SUBJECT_LD_LIBRARY_PATH="../src"
+		SUBJECT_LDFLAGS="-L../src/.libs"
+		SUBJECT_LD_LIBRARY_PATH="../src/.libs"
 	]
 )
 
