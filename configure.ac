@@ -144,7 +144,7 @@ if [test "x$build_program" = "xyes"]; then
 		],
 		[
 			AC_PATH_PROG( [COLM], [colm] )
-			COLM_LD="-lcolmd"
+			COLM_LD="-lcolm"
 			COLM_LIBDEP=""
 			COLM_BINDEP=""
 		]
