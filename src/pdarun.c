@@ -2120,7 +2120,7 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 			goto skip_send;
 		}
 		else {
-			debug( prg, REALM_PARSE, "sending an a plain old token: %s\n", 
+			debug( prg, REALM_PARSE, "sending a plain old token: %s\n", 
 					prg->rtd->lel_info[pda_run->token_id].name );
 
 			/* Is a plain token. */

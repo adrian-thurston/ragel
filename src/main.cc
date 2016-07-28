@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2012 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2006-2016 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -97,7 +97,8 @@ bool gblLibrary = false;
 long gblActiveRealm = 0;
 
 ArgsVector includePaths;
-ArgsVector additionalCodeFiles;;
+DefineVector defineArgs;
+ArgsVector additionalCodeFiles;
 
 /* Print version information. */
 void version();
@@ -187,6 +188,7 @@ void usage()
 "   -x <file>            write C++ export code to <file>\n"
 "   -m <file>            write C++ commit code to <file>\n"
 "   -a <file>            additional code file to include in output program\n"
+"   -E N=V               set a string value availabe in the program\n"
 	;	
 }
 
@@ -194,7 +196,7 @@ void usage()
 void version()
 {
 	cout << "Colm version " VERSION << " " PUBDATE << endl <<
-			"Copyright (c) 2007-2012 by Adrian D. Thurston" << endl;
+			"Copyright (c) 2007-2016 by Adrian D. Thurston" << endl;
 }
 
 /* Scans a string looking for the file extension. If there is a file
@@ -511,7 +513,7 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "cD:e:x:I:vdlio:S:M:vHh?-:sVa:m:b:", argc, argv );
+	ParamCheck pc( "cD:e:x:I:vdlio:S:M:vHh?-:sVa:m:b:E:", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -595,6 +597,20 @@ void processArgs( int argc, const char **argv )
 				commitCodeFn = pc.parameterArg;
 				break;
 
+			case 'E': {
+				const char *eq = strchr( pc.parameterArg, '=' );
+				if ( eq == 0 )
+					fatal( "-E option argument must contain =" );
+				if ( eq == pc.parameterArg )
+					fatal( "-E variable name is of zero length" );
+
+				defineArgs.append( DefineArg( 
+						String( pc.parameterArg, eq-pc.parameterArg ),
+						String( eq + 1 ) ) );
+
+				break;
+			}
+
 			case 'D':
 #if DEBUG
 				if ( strcmp( pc.parameterArg, "BYTECODE" ) == 0 )
@@ -618,6 +634,7 @@ void processArgs( int argc, const char **argv )
 #else
 				fatal( "-D option specified but debugging messsages not compiled in\n" );
 #endif
+				break;
 				
 			}
 			break;

@@ -430,6 +430,19 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 		}
 	}
 
+	if ( el->isConstVal ) {
+		code.appendHalf( el->constValId );
+
+		if ( el->constValId == IN_CONST_ARG ) {
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( el->constValArg, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.appendWord( mapEl->value );
+		}
+	}
+
 	/* If we are dealing with an iterator then dereference it. */
 	if ( elUT->typeId == TYPE_ITER )
 		elUT = el->typeRef->searchUniqueType;
@@ -2513,7 +2526,8 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 		}
 		case PrintAccum: {
 			code.append( IN_LOAD_GLOBAL_R );
-			code.append( IN_GET_STDOUT );
+			code.append(     IN_GET_CONST );
+			code.appendHalf( IN_CONST_STDOUT );
 			consItemList->evaluateSendStream( pd, code );
 			code.append( IN_POP_TREE );
 			break;

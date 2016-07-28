@@ -1026,6 +1026,7 @@ void Compiler::declareGlobalFields()
 	addStderr();
 	addArgv();
 	addError();
+	addDefineArgs();
 }
 
 void Compiler::addStdin()
@@ -1036,13 +1037,19 @@ void Compiler::addStdin()
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stdin" );
+
 	el->isConst = true;
-	el->inGetR     = IN_GET_STDIN;
-	el->inGetWC    = IN_GET_STDIN;
-	el->inGetWV    = IN_GET_STDIN;
-	el->inGetValR   = IN_GET_STDIN;
-	el->inGetValWC  = IN_GET_STDIN;
-	el->inGetValWV  = IN_GET_STDIN;
+
+	el->inGetR      = IN_GET_CONST;
+	el->inGetWC     = IN_GET_CONST;
+	el->inGetWV     = IN_GET_CONST;
+	el->inGetValR   = IN_GET_CONST;
+	el->inGetValWC  = IN_GET_CONST;
+	el->inGetValWV  = IN_GET_CONST;
+
+	el->isConstVal = true;
+	el->constValId  = IN_CONST_STDIN;
+
 	rootNamespace->rootScope->insertField( el->name, el );
 }
 
@@ -1055,13 +1062,17 @@ void Compiler::addStdout()
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stdout" );
 	el->isConst = true;
-	el->inGetR     = IN_GET_STDOUT;
-	el->inGetWC    = IN_GET_STDOUT;
-	el->inGetWV    = IN_GET_STDOUT;
 
-	el->inGetValR   = IN_GET_STDOUT;
-	el->inGetValWC  = IN_GET_STDOUT;
-	el->inGetValWV  = IN_GET_STDOUT;
+	el->inGetR      = IN_GET_CONST;
+	el->inGetWC     = IN_GET_CONST;
+	el->inGetWV     = IN_GET_CONST;
+	el->inGetValR   = IN_GET_CONST;
+	el->inGetValWC  = IN_GET_CONST;
+	el->inGetValWV  = IN_GET_CONST;
+
+	el->isConstVal = true;
+	el->constValId  = IN_CONST_STDOUT;
+
 	rootNamespace->rootScope->insertField( el->name, el );
 }
 
@@ -1074,13 +1085,17 @@ void Compiler::addStderr()
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "stderr" );
 	el->isConst = true;
-	el->inGetR     = IN_GET_STDERR;
-	el->inGetWC    = IN_GET_STDERR;
-	el->inGetWV    = IN_GET_STDERR;
 
-	el->inGetValR   = IN_GET_STDERR;
-	el->inGetValWC  = IN_GET_STDERR;
-	el->inGetValWV  = IN_GET_STDERR;
+	el->inGetR      = IN_GET_CONST;
+	el->inGetWC     = IN_GET_CONST;
+	el->inGetWV     = IN_GET_CONST;
+	el->inGetValR   = IN_GET_CONST;
+	el->inGetValWC  = IN_GET_CONST;
+	el->inGetValWV  = IN_GET_CONST;
+
+	el->isConstVal = true;
+	el->constValId  = IN_CONST_STDERR;
+
 	rootNamespace->rootScope->insertField( el->name, el );
 }
 
@@ -1115,6 +1130,32 @@ void Compiler::addError()
 	el->inGetWC    = IN_GET_ERROR;
 	el->inGetWV    = IN_GET_ERROR;
 	rootNamespace->rootScope->insertField( el->name, el );
+}
+
+void Compiler::addDefineArgs()
+{
+	for ( DefineVector::Iter d = defineArgs; d.lte(); d++ ) {
+		TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
+
+		/* Create the field and insert it into the map. */
+		ObjectField *el = ObjectField::cons( internal,
+				ObjectField::InbuiltFieldType, typeRef, d->name );
+
+		el->isConst = true;
+
+		el->inGetR      = IN_GET_CONST;
+		el->inGetWC     = IN_GET_CONST;
+		el->inGetWV     = IN_GET_CONST;
+		el->inGetValR   = IN_GET_CONST;
+		el->inGetValWC  = IN_GET_CONST;
+		el->inGetValWV  = IN_GET_CONST;
+
+		el->isConstVal = true;
+		el->constValId = IN_CONST_ARG;
+		el->constValArg = d->value;
+
+		rootNamespace->rootScope->insertField( el->name, el );
+	}
 }
 
 void Compiler::initMapFunctions( GenericType *gen )

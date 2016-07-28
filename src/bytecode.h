@@ -1,5 +1,5 @@
 /*
- *  Copyright 2007-2012 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2007-2016 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Colm.
@@ -9,7 +9,9 @@
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  * 
- *  Colm is distributed in the hope that it will be useful, *  but WITHOUT ANY WARRANTY; without even the implied warranty of *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  Colm is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  * 
  *  You should have received a copy of the GNU General Public License
@@ -291,9 +293,9 @@ typedef unsigned long colm_value_t;
 #define IN_PCR_END_DECK          0xb3
 
 #define IN_OPEN_FILE             0xb4
-#define IN_GET_STDIN             0xb5
-#define IN_GET_STDOUT            0xb6
-#define IN_GET_STDERR            0xb7
+
+#define IN_GET_CONST             0xb5
+
 #define IN_TO_UPPER              0xb9
 #define IN_TO_LOWER              0xba
 
@@ -357,6 +359,15 @@ typedef unsigned long colm_value_t;
 
 #define IN_NEW_STREAM            0x24
 #define IN_GET_COLLECT_STRING    0x68
+
+/*
+ * Const things to get.
+ */
+#define IN_CONST_STDIN           0x10
+#define IN_CONST_STDOUT          0x11
+#define IN_CONST_STDERR          0x12
+#define IN_CONST_ARG             0x13
+
 
 /*
  * IN_FN instructions.

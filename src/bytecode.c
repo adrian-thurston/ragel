@@ -3635,36 +3635,59 @@ again:
 			colm_tree_downref( prg, sp, mode );
 			break;
 		}
-		case IN_GET_STDIN: {
-			debug( prg, REALM_BYTECODE, "IN_GET_STDIN\n" );
+		case IN_GET_CONST: {
+			short constValId;
+			read_half( constValId );
 
-			/* Pop the root object. */
-			vm_pop_tree();
-			if ( prg->stdin_val == 0 )
-				prg->stdin_val = colm_stream_open_fd( prg, "<stdin>", 0 );
+			switch ( constValId ) {
+				case IN_CONST_STDIN: {
+					debug( prg, REALM_BYTECODE, "IN_CONST_STDIN\n" );
 
-			vm_push_stream( prg->stdin_val );
-			break;
-		}
-		case IN_GET_STDOUT: {
-			debug( prg, REALM_BYTECODE, "IN_GET_STDOUT\n" );
+					/* Pop the root object. */
+					vm_pop_tree();
+					if ( prg->stdin_val == 0 )
+						prg->stdin_val = colm_stream_open_fd( prg, "<stdin>", 0 );
 
-			/* Pop the root object. */
-			vm_pop_tree();
-			open_stdout( prg );
+					vm_push_stream( prg->stdin_val );
+					break;
+				}
+				case IN_CONST_STDOUT: {
+					debug( prg, REALM_BYTECODE, "IN_CONST_STDOUT\n" );
 
-			vm_push_stream( prg->stdout_val );
-			break;
-		}
-		case IN_GET_STDERR: {
-			debug( prg, REALM_BYTECODE, "IN_GET_STDERR\n" );
+					/* Pop the root object. */
+					vm_pop_tree();
+					open_stdout( prg );
 
-			/* Pop the root object. */
-			vm_pop_tree();
-			if ( prg->stderr_val == 0 )
-				prg->stderr_val = colm_stream_open_fd( prg, "<stderr>", 2 );
+					vm_push_stream( prg->stdout_val );
+					break;
+				}
+				case IN_CONST_STDERR: {
+					debug( prg, REALM_BYTECODE, "IN_CONST_STDERR\n" );
 
-			vm_push_stream( prg->stderr_val );
+					/* Pop the root object. */
+					vm_pop_tree();
+					if ( prg->stderr_val == 0 )
+						prg->stderr_val = colm_stream_open_fd( prg, "<stderr>", 2 );
+
+					vm_push_stream( prg->stderr_val );
+					break;
+				}
+				case IN_CONST_ARG: {
+					word_t offset;
+					read_word( offset );
+
+					debug( prg, REALM_BYTECODE, "IN_CONST_ARG %d\n", offset );
+
+					/* Pop the root object. */
+					vm_pop_tree();
+
+					head_t *lit = make_literal( prg, offset );
+					tree_t *tree = construct_string( prg, lit );
+					colm_tree_upref( tree );
+					vm_push_tree( tree );
+					break;
+				}
+			}
 			break;
 		}
 		case IN_SYSTEM: {

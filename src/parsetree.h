@@ -2512,6 +2512,7 @@ struct ObjectField
 		isConst(false), 
 		refActive(false),
 		isExport(false),
+		isConstVal(false),
 		useGenericId(false),
 		generic(0),
 		mapKeyField(0),
@@ -2584,9 +2585,16 @@ struct ObjectField
 	NameScope *scope;
 	long offset;
 	bool beenReferenced;
+	/* Declared const. */
 	bool isConst;
 	bool refActive;
 	bool isExport;
+
+	/* Value is a const thing when that retrieved by the runtime. Requires a
+	 * const val id. */
+	bool isConstVal;
+	int constValId;
+	String constValArg;
 
 	bool useGenericId;
 	GenericType *generic;

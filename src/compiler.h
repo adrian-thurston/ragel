@@ -79,6 +79,18 @@ struct IncludeStackItem
 typedef Vector<IncludeStackItem> IncludeStack;
 typedef Vector<const char *> ArgsVector;
 
+struct DefineArg
+{
+	DefineArg( String name, String value )
+		: name(name), value(value) {}
+
+	String name;
+	String value;
+};
+
+typedef Vector<DefineArg> DefineVector;
+
+extern DefineVector defineArgs;
 extern ArgsVector includePaths;
 
 inline long makeReduceCode( long reduction, bool isShiftReduce )
@@ -787,6 +799,7 @@ struct Compiler
 	void addStderr();
 	void addArgv();
 	void addError();
+	void addDefineArgs();
 	int argvOffset();
 	int arg0Offset();
 	void makeDefaultIterators();
