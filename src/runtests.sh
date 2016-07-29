@@ -86,8 +86,6 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZOUKY-:" opt; do
 	esac
 done
 
-
-
 [ -z "$minflags" ]    && minflags="-n -m -l -e"
 [ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$encflags" ]    && encflags="--integral-tables --string-tables"
@@ -98,7 +96,7 @@ done
 
 shift $((OPTIND - 1));
 
-[ -z "$*" ] && set -- *.rl
+[ -z "$*" ] && set -- *.rl *.d
 
 ragel="@SUBJECT@"
 
@@ -504,11 +502,6 @@ function run_translate()
 	root=`basename $test_case`
 	root=${root%.rl};
 
-	if ! [ -f "$test_case" ]; then
-		echo "runtests: not a file: $test_case"; >&2
-		exit 1;
-	fi
-
 	# Check if we should ignore the test case
 	enabled=`sed '/@ENABLED:/s/^.*: *//p;d' $test_case`
     if [ -n "$enabled" ] || [ "$enabled" = true ]; then
@@ -592,6 +585,28 @@ function run_translate()
 	fi
 }
 
+function run_dircase()
+{
+	test_case=$1
+
+	cd $test_case
+	./runtests
+	cd ..
+}
+
+function run_type()
+{
+	test_case=$1
+
+	if [ -f "$test_case" ]; then
+		run_translate $test_case
+	elif [ -d "$test_case" ]; then
+		run_dircase $test_case
+	else
+		echo "runtests: not a file or directory: $test_case"; >&2
+	fi
+}
+
 for test_case; do
-	run_translate $test_case
+	run_type $test_case
 done
