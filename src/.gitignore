@@ -1,0 +1,14 @@
+/Makefile.in
+/Makefile
+
+/runtests
+
+/.deps
+/trans
+/trans.c
+
+/config.h
+/config.h.in
+/config.h.in~
+
+/stamp-h1

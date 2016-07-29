@@ -20,6 +20,8 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
+TRANS=../src/trans
+
 function sig_exit()
 {
 	echo
@@ -572,8 +574,8 @@ function run_translate()
 
 				# Translate to target language and strip off output.
 				targ=${root}_$lang.rl
-				echo "./trans $lang $wk/$targ $test_case ${root}_${lang}"
-				if ! ./trans $lang $wk/$targ $test_case ${root}_${lang}; then
+				echo "$TRANS $lang $wk/$targ $test_case ${root}_${lang}"
+				if ! $TRANS $lang $wk/$targ $test_case ${root}_${lang}; then
 					test_error
 				fi
 
