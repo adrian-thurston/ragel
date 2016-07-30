@@ -20,10 +20,10 @@ AC_ARG_WITH(subject,
 		SUBJECT_LD_LIBRARY_PATH="$withval/lib"
 	],
 	[
-		SUBJECT_BIN="../colm/src/colm"
-		SUBJECT_CPPFLAGS="-I../colm/src/include"
-		SUBJECT_LDFLAGS="-L../colm/src/.libs"
-		SUBJECT_LD_LIBRARY_PATH="../colm/src/.libs"
+		SUBJECT_BIN="\${abs_top_builddir}/../colm/src/colm"
+		SUBJECT_CPPFLAGS="-I\${abs_top_builddir}/../colm/src/include"
+		SUBJECT_LDFLAGS="-L\${abs_top_builddir}/../colm/src/.libs"
+		SUBJECT_LD_LIBRARY_PATH="\${abs_top_builddir}/../colm/src/.libs"
 	]
 )
 
@@ -43,4 +43,5 @@ AC_SUBST(SED_SUBST)
 dnl write output files
 AC_OUTPUT([
 		Makefile
+		src/Makefile
 ])
