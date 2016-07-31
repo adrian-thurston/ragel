@@ -104,7 +104,7 @@ shift $(($OPTIND - 1))
 if [ $# != 0 ]; then
 	TEST_PAT="$*"
 else
-	TEST_PAT='*.lm'
+	TEST_PAT='*.lm *.d'
 fi 
 
 function cat_section
@@ -169,6 +169,13 @@ function section
 function runtests()
 {
 	for TST in $TEST_PAT; do
+		if [ -d $TST ]; then
+			cd $TST;
+			./runtests
+			cd ..
+			continue
+		fi
+
 		ROOT=${TST/.lm}
 		LM=$WORKING/$ROOT.lm
 		ARGS=$WORKING/$ROOT.args
