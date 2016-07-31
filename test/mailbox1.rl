@@ -46,8 +46,8 @@ int _perf_dummy = 0;
 		perf_printf("%s:%s\n", headName.data, headContent.data);
 		
 		/* Clear for the next time we use them. */
-		headName.empty();
-		headContent.empty();
+		headName.clear();
+		headContent.clear();
 	}
 
 	action msgstart{

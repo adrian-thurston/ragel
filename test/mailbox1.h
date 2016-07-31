@@ -3,14 +3,14 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "vector.h"
+#include "buffer.h"
 
 struct MBox
 {
 	int cs;
 
-	Vector<char> headName;
-	Vector<char> headContent;
+	Buffer headName;
+	Buffer headContent;
 
 	// Initialize the machine. Invokes any init statement blocks. Returns 0
 	// if the machine begins in a non-accepting state and 1 if the machine
