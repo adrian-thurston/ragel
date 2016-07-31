@@ -1,8 +1,0 @@
-int f( I: int, Str: str )
-{
-	print( I, ' ', Str, '\n' )
-}
-
-f( 50, 'hello world' )
-##### EXP #####
-50 hello world
