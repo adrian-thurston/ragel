@@ -30,10 +30,24 @@ dnl Which ragel are we testing. Default is the one in parent's source dir.
 dnl
 AC_ARG_WITH(subject,
 	[AC_HELP_STRING([--with-subject], [location of ragel to test])],
-		[SUBJECT="$withval/bin/ragel"],
-		[SUBJECT="\${abs_top_builddir}/../ragel/src/ragel"] )
+	[
+		SUBJECT_BIN="$withval/bin/ragel"
+		SUBJECT_CPPFLAGS="-I$withval/include"
+		SUBJECT_LDFLAGS="-L$withval/lib"
+		SUBJECT_LD_LIBRARY_PATH="$withval/lib"
+	],
+	[
+		SUBJECT_BIN="\${abs_top_builddir}/../ragel/src/ragel"
+		SUBJECT_CPPFLAGS="-I\${abs_top_builddir}/../ragel/src -I\${abs_top_builddir}/../ragel/aapl"
+		SUBJECT_LDFLAGS="-L\${abs_top_builddir}/../ragel/src/.libs"
+		SUBJECT_LD_LIBRARY_PATH="\${abs_top_builddir}/../ragel/src/.libs"
+	]
+)
 
-AC_SUBST(SUBJECT)
+AC_SUBST(SUBJECT_BIN)
+AC_SUBST(SUBJECT_CPPFLAGS)
+AC_SUBST(SUBJECT_LDFLAGS)
+AC_SUBST(SUBJECT_LD_LIBRARY_PATH)
 
 AC_ARG_WITH(ragel-src,
 	[AC_HELP_STRING([--with-ragel-src], [location of ragel src code])],
@@ -134,7 +148,10 @@ AC_ARG_WITH(crack,
 )
 
 SED_SUBST=["\
-	-e 's|@SUBJECT@|${SUBJECT}|g' \
+	-e 's|@SUBJECT_BIN@|${SUBJECT_BIN}|g' \
+	-e 's|@SUBJECT_CPPFLAGS@|${SUBJECT_CPPFLAGS}|g' \
+	-e 's|@SUBJECT_LDFLAGS@|${SUBJECT_LDFLAGS}|g' \
+	-e 's|@SUBJECT_LD_LIBRARY_PATH@|${SUBJECT_LD_LIBRARY_PATH}|g' \
 	-e 's|@LD_LIBRARY_PATH@|${LD_LIBRARY_PATH}|g' \
 	-e 's|@CXX@|${CXX}|g' \
 	-e 's|@CC@|${CC}|g' \

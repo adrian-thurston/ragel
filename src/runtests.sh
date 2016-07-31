@@ -98,7 +98,7 @@ shift $((OPTIND - 1));
 
 [ -z "$*" ] && set -- *.rl *.d
 
-ragel="@SUBJECT@"
+ragel="@SUBJECT_BIN@"
 
 export LD_LIBRARY_PATH="@LD_LIBRARY_PATH@"
 

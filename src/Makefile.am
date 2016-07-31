@@ -23,7 +23,7 @@ RAGEL_SRC = @RAGEL_SRC@
 
 TESTS = runtests
 
-noinst_SCRIPTS = runtests
+noinst_SCRIPTS = runtests subject.mk subject.sh
 noinst_PROGRAMS = trans
 
 EXTRA_DIST = \
@@ -69,4 +69,10 @@ trans$(EXEEXT): trans.lm $(TRANS_DEPS)
 	$(COLM) -I$(RAGEL_SRC) -o $@ $<
 
 runtests: runtests.sh Makefile
+	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
+
+subject.mk: subject.mk.in Makefile
+	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
+
+subject.sh: subject.sh.in Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
