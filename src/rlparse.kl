@@ -619,7 +619,7 @@ nonterm factor_with_label
 factor_with_label: 
 	TK_Word ':' factor_with_label final { 
 		/* Add the label to the list and pass the factor up. */
-		$3->factorWithAug->labels.prepend( Label($1->loc, $1->data) );
+		$3->factorWithAug->labels.insert( $3->factorWithAug->labels.begin(), Label($1->loc, $1->data) );
 		$$->factorWithAug = $3->factorWithAug; 
 	};
 factor_with_label: 

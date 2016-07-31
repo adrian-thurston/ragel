@@ -1444,7 +1444,7 @@ void FactorWithAug::assignConditions( FsmAp *graph )
 FsmRes FactorWithAug::walk( ParseData *pd )
 {
 	/* Enter into the scopes created for the labels. */
-	NameFrame nameFrame = pd->enterNameScope( false, labels.length() );
+	NameFrame nameFrame = pd->enterNameScope( false, labels.size() );
 
 	/* Make the array of function orderings. */
 	int *actionOrd = 0;
@@ -1531,12 +1531,12 @@ FsmRes FactorWithAug::walk( ParseData *pd )
 	}
 
 	/* Set entry points for labels. */
-	if ( labels.length() > 0 ) {
+	if ( labels.size() > 0 ) {
 		/* Pop the names. */
 		pd->resetNameScope( nameFrame );
 
 		/* Make labels that are referenced into entry points. */
-		for ( int i = 0; i < labels.length(); i++ ) {
+		for ( size_t i = 0; i < labels.size(); i++ ) {
 			pd->enterNameScope( false, 1 );
 
 			/* Will always be found. */
@@ -1565,7 +1565,7 @@ void FactorWithAug::makeNameTree( ParseData *pd )
 	/* Add the labels to the tree of instantiated names. Each label
 	 * makes a new scope. */
 	NameInst *prevNameInst = pd->curNameInst;
-	for ( int i = 0; i < labels.length(); i++ ) {
+	for ( size_t i = 0; i < labels.size(); i++ ) {
 		pd->curNameInst = pd->addNameInst( labels[i].loc, labels[i].data, true );
 
 		if ( labels[i].cut )
@@ -1581,7 +1581,7 @@ void FactorWithAug::makeNameTree( ParseData *pd )
 void FactorWithAug::resolveNameRefs( ParseData *pd )
 {
 	/* Enter into the name scope created by any labels. */
-	NameFrame nameFrame = pd->enterNameScope( false, labels.length() );
+	NameFrame nameFrame = pd->enterNameScope( false, labels.size() );
 
 	/* Note action references. */
 	for ( int i = 0; i < actions.length(); i++ ) 
@@ -1635,7 +1635,7 @@ void FactorWithAug::resolveNameRefs( ParseData *pd )
 		}
 	}
 
-	if ( labels.length() > 0 )
+	if ( labels.size() > 0 )
 		pd->popNameScope( nameFrame );
 }
 

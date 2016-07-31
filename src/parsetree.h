@@ -549,7 +549,7 @@ struct FactorWithAug
 	Vector<ParserAction> actions;
 	Vector<PriorityAug> priorityAugs;
 	PriorDesc *priorDescs;
-	Vector<Label> labels;
+	std::vector<Label> labels;
 	Vector<EpsilonLink> epsilonLinks;
 	Vector<ConditionTest> conditions;
 

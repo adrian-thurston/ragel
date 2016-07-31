@@ -1963,7 +1963,7 @@ struct LoadRagel
 				InputLoc loc = FactorLabel.loc();
 				string label = FactorLabel.word().text();
 				factorWithAug = loadFactorLabel( FactorLabel._factor_label() );
-				factorWithAug->labels.prepend( Label(loc, label) );
+				factorWithAug->labels.insert( factorWithAug->labels.begin(), Label(loc, label) );
 				break;
 			}
 			case ragel::factor_label::Ep:

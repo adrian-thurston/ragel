@@ -607,7 +607,7 @@ reduction TopLevel
 		InputLoc loc = @word;
 		string label( $word->data, $word->length );
 
-		$$->fwa->labels.prepend( Label(loc, label) );
+		$$->fwa->labels.insert( $$->fwa->labels.begin(), Label(loc, label) );
 
 		if ( pd->id->isBreadthLabel( label ) )
 			$$->fwa->labels[0].cut = true;
