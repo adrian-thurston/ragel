@@ -104,16 +104,16 @@ export LD_LIBRARY_PATH="@LD_LIBRARY_PATH@"
 
 cxx_compiler="@CXX@"
 c_compiler="@CC@"
-objc_compiler="@GOBJC@"
-d_compiler="@GDC@"
-java_compiler="@JAVAC@"
-ruby_engine="@RUBY@"
-csharp_compiler="@GMCS@"
-go_compiler="@GOBIN@"
-ocaml_compiler="@OCAML@"
-rust_compiler="@RUST@"
-crack_interpreter="@CRACK@"
-julia_interpreter="@JULIA@"
+objc_compiler=
+d_compiler=
+java_compiler=
+ruby_engine=
+csharp_compiler=
+go_compiler=
+ocaml_compiler=
+rust_compiler=
+crack_interpreter=
+julia_interpreter=
 
 #
 # Remove any unsupported host languages.

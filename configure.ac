@@ -96,57 +96,6 @@ if test "x$INSTALLED_VER" != "x$EXPECTED_VER"; then
 	AC_ERROR( [check colm: expected version $EXPECTED_VER, but $INSTALLED_VER is installed] )
 fi
 
-dnl Check for the D compiler. Disabled for now, need to update D syntax.
-dnl AC_CHECK_PROG(GDC, gdc, gdc)
-
-dnl
-dnl Check for the Objective-C compiler and for required dependencies.
-dnl 
-AC_MSG_CHECKING([for the Objective-C compiler])
-cat > conftest.m <<EOF
-#import <Foundation/Foundation.h>
-
-@interface ObjCTest : NSObject
-{
-@public 
-	int i;
-};
-
-@end
-
-int main() { return 0; }
-EOF
-GOBJC=""
-if gcc -x objective-c -I/usr/include/GNUstep conftest.m -o conftest.bin -lobjc -lgnustep-base 2>/dev/null; then
-	GOBJC="gcc -x objective-c"
-	AC_MSG_RESULT([yes])
-else
-	AC_MSG_RESULT([no])
-fi
-AC_SUBST(GOBJC)
-
-AC_CHECK_PROG(JAVAC, javac, javac)
-AC_CHECK_PROG(RUBY, ruby, ruby)
-AC_CHECK_PROGS(GMCS, [gmcs mcs])
-AC_CHECK_PROG(GOBIN, go, go)
-AC_CHECK_PROG(OCAML, ocaml, ocaml)
-AC_CHECK_PROG(RUST, rustc, rustc)
-AC_CHECK_PROG(JULIA, julia, julia)
-
-AC_ARG_WITH(crack,
-	[AC_HELP_STRING([--with-crack], [location of crack install])],
-	[
-		CRACK="$withval/bin/crack"
-		AC_CHECK_FILES(
-			[$CRACK], [],
-			[AC_ERROR([could not find crack binary using --with-crack arg])]
-		)
-	],
-	[
-		AC_PATH_PROG( [CRACK], [crack] )
-	]
-)
-
 SED_SUBST=["\
 	-e 's|@SUBJECT_BIN@|${SUBJECT_BIN}|g' \
 	-e 's|@SUBJECT_CPPFLAGS@|${SUBJECT_CPPFLAGS}|g' \
@@ -155,16 +104,6 @@ SED_SUBST=["\
 	-e 's|@LD_LIBRARY_PATH@|${LD_LIBRARY_PATH}|g' \
 	-e 's|@CXX@|${CXX}|g' \
 	-e 's|@CC@|${CC}|g' \
-	-e 's|@GOBJC@|${GOBJC}|g' \
-	-e 's|@GDC@|${GDC}|g' \
-	-e 's|@JAVAC@|${JAVAC}|g' \
-	-e 's|@RUBY@|${RUBY}|g' \
-	-e 's|@GMCS@|${GMCS}|g' \
-	-e 's|@GOBIN@|${GOBIN}|g' \
-	-e 's|@OCAML@|${OCAML}|g' \
-	-e 's|@RUST@|${RUST}|g' \
-	-e 's|@CRACK@|${CRACK}|g' \
-	-e 's|@JULIA@|${JULIA}|g' \
 "]
 
 AC_SUBST(SED_SUBST)
