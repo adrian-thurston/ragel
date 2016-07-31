@@ -1,8 +1,7 @@
                      Ragel State Machine Compiler -- CREDITS
                      =======================================
 
-
-* Ragel was designed and written by Adrian Thurston <thurston@complang.org>.
+* Ragel was designed and written by Adrian Thurston <thurston@colm.net>.
 
 * Many others have helped out along the way. Feedback, Packaging, and Fixes
   provided by:
@@ -22,18 +21,5 @@
     Graham Miller, Ismael Luceno, Josh Stern, Denis Naumov, Arbor Networks,
     Victor Hugo Borja, Daniel Tang, Justine Tunney, Johannes Pfau, ygrek,
     Victor Khimenko, David James, Anton Ageev, Daniel Salzman, Jungshik Shin,
-    Steven R. Loomis, Ingvar Stepanyan, Kelvin Sherlock
-
-* Ragel 6 Code generators contributed by:
-
-  - Objective-C: Erich Ocean
-  - D: Alan West
-  - Java: Colin Fleming
-  - Ruby: Victor Hugo Borja
-  - C#: Daniel Tang
-  - Go: Justine Tunney
-  - D2: Johannes Pfau
-  - OCaml: ygrek
-
-* Ragel 7 Code generators contributed by:
-  - Javascript: Ingvar Stepanyan
+    Steven R. Loomis, Ingvar Stepanyan, Kelvin Sherlock, Conrad Steenberg,
+    Jan Engelhardt, Kenta Sato
