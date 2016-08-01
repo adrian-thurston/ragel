@@ -1,4 +1,11 @@
 global GblActionParams: bool = false
+global GblSectionPass: bool = false
+
+bool action_params_find( Machine: str, Action: str )
+= cc_action_params_find
+
+bool action_params_insert( Machine: str, Action: str )
+= cc_action_params_insert
 
 rl ident
 	/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -237,13 +244,17 @@ namespace ragel
 	def named_action_ref
 		[word] :Plain
 		{
-			if CurMachine->ActionParams->find( $lhs.word )
-				reject
+			if ! GblSectionPass {
+				if action_params_find( CurMachine->Name, $lhs.word )
+					reject
+			}
 		}
 	|	[word `( opt_action_arg_list `)] :Args
 		{
-			if ! CurMachine->ActionParams->find( $lhs.word )
-				reject
+			if ! GblSectionPass {
+				if ! action_params_find( CurMachine->Name, $lhs.word )
+					reject
+			}
 		}
 
 	def action_ref 
@@ -446,9 +457,12 @@ namespace ragel
 	def action_spec
 		[`action word action_params action_block] :ActionSpecParams commit
 		{
-			# Track that this action has params so we can parse appropriately
-			# when reducing.
-			CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
+			if ! GblSectionPass {
+				# Track that this action has params so we can parse appropriately
+				# when reducing.
+				# CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
+				action_params_insert( CurMachine->Name, $lhs.word )
+			}
 
 			# Reset after parsing the block. 
 			GblActionParams = false

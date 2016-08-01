@@ -26,6 +26,7 @@
 #include <limits.h>
 #include <sstream>
 #include <vector>
+#include <set>
 
 #include "avlmap.h"
 #include "bstmap.h"
@@ -401,6 +402,8 @@ struct ParseData
 	bool duplicateInclude( const char *inclFileName, const char *inclSectionName );
 
 	IncludeHistory includeHistory;
+
+	std::set<std::string> actionParams;
 };
 
 Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd );

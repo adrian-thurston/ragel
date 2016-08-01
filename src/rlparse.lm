@@ -23,7 +23,6 @@ lex
 	token crack_select_section //
 end
 
-
 def start
 	[c_select_section SectionList: c_host::section*]
 |	[ruby_select_section RSectionList: ruby_host::section*]
@@ -97,6 +96,8 @@ FileName: str = A->value
 A = argv->pop_head_el()
 Lang = A->value
 
+GblSectionPass = false
+
 if ( Cmd == 'import-file' ) {
 	Stream: stream = open( FileName, "r" )
 	RagelTree = parse start[ Stream ]
@@ -131,11 +132,15 @@ else if ( Cmd == 'toplevel-reduce-str' ) {
 	RagelError = error
 }
 else if ( Cmd == 'section-reduce-file' ) {
+	GblSectionPass = true
+
 	Stream: stream = open( FileName, "r" )
 	reduce SectionPass start[ Stream ]
 	RagelError = error
 }
 else if ( Cmd == 'section-reduce-str' ) {
+	GblSectionPass = true
+
 	A = argv->pop_head_el()
 	Data: str = A->value
 	reduce SectionPass start[ Data ]
