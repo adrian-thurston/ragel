@@ -6,6 +6,7 @@
 /.deps
 /trans
 /trans.c
+/*.o
 
 /config.h
 /config.h.in

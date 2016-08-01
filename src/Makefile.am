@@ -65,8 +65,11 @@ TRANS_DEPS = \
 	trans-julia.lm \
 	trans-crack.lm
 
-trans$(EXEEXT): trans.lm $(TRANS_DEPS)
-	$(COLM) -I$(RAGEL_SRC) -o $@ $<
+trans_SOURCES = trans.c $(RAGEL_SRC)/actparams.cc main.c
+trans_LDADD = -lcolm
+
+trans.c: trans.lm $(TRANS_DEPS)
+	$(COLM) -c -b trans_object -I$(RAGEL_SRC) -o $@ $<
 
 runtests: runtests.sh Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
