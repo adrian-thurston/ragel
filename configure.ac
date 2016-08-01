@@ -43,5 +43,5 @@ AC_SUBST(SED_SUBST)
 dnl write output files
 AC_OUTPUT([
 		Makefile
-		src/Makefile
+		test/Makefile
 ])
