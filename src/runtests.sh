@@ -90,7 +90,7 @@ done
 [ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$encflags" ]    && encflags="--integral-tables --string-tables"
 [ -z "$langflags" ]   && langflags="-C --asm"
-[ -z "$frontflags" ]  && frontflags="--kelbt-frontend --colm-frontend --reduce-frontend"
+[ -z "$frontflags" ]  && frontflags="--kelbt-frontend --reduce-frontend"
 [ -z "$backflags" ]   && backflags="--direct-backend --colm-backend"
 [ -z "$featflags" ]   && featflags="--var-backend --goto-backend"
 
