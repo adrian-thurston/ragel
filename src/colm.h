@@ -104,6 +104,7 @@ struct colm_tree *colm_run_func( struct colm_program *prg, int frame_id,
 int colm_delete_program( struct colm_program *prg );
 
 /* Set the pointer to the reduce struct used. */
+void *colm_get_reduce_ctx( struct colm_program *prg );
 void colm_set_reduce_ctx( struct colm_program *prg, void *ctx );
 
 const char **colm_extract_fns( struct colm_program *prg );

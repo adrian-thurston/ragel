@@ -231,6 +231,11 @@ static void colm_clear_heap( program_t *prg, tree_t **sp )
 	}
 }
 
+void *colm_get_reduce_ctx( struct colm_program *prg )
+{
+	return prg->red_ctx;
+}
+
 void colm_set_reduce_ctx( struct colm_program *prg, void *ctx )
 {
 	prg->red_ctx = ctx;
