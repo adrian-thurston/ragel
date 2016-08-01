@@ -9,7 +9,7 @@ EXPECTED_VER=0.13.0.4
 
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
-AC_CONFIG_HEADER(src/config.h)
+AC_CONFIG_HEADER(test/config.h)
 
 : ${CFLAGS="-Wall -g"}
 : ${CXXFLAGS="-Wall -g"}
@@ -111,7 +111,7 @@ AC_SUBST(SED_SUBST)
 dnl write output files
 AC_OUTPUT([
 		Makefile
-		src/Makefile
+		test/Makefile
 ])
 
 echo "configuration of ragel complete"
