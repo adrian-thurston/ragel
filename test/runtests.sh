@@ -91,8 +91,8 @@ done
 [ -z "$encflags" ]    && encflags="--integral-tables --string-tables"
 [ -z "$langflags" ]   && langflags="-C --asm"
 [ -z "$frontflags" ]  && frontflags="--kelbt-frontend --reduce-frontend"
-[ -z "$backflags" ]   && backflags="--direct-backend --colm-backend"
-[ -z "$featflags" ]   && featflags="--var-backend --goto-backend"
+[ -z "$backflags" ]   && backflags="--direct-backend"
+[ -z "$featflags" ]   && featflags="--goto-backend"
 
 shift $((OPTIND - 1));
 
